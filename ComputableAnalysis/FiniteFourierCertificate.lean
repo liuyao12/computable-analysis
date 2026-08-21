@@ -105,6 +105,41 @@ def fourPointFourierTransform (x₀ x₁ x₂ x₃ : Rat) (mode : Nat) : QComple
     (QComplex.mul (QComplex.ofRat x₃)
       (QComplex.natPow RotationSeries.imaginaryUnit (mode * 3)))
 
+/-! The transform is linear over the rational sample space.  These laws are
+the finite algebraic core used when a stage computation is decomposed into
+Fourier modes. -/
+
+theorem fourPointFourierTransform_add
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : Rat) (mode : Nat) :
+    fourPointFourierTransform (x₀ + y₀) (x₁ + y₁) (x₂ + y₂) (x₃ + y₃) mode =
+      QComplex.add
+        (fourPointFourierTransform x₀ x₁ x₂ x₃ mode)
+        (fourPointFourierTransform y₀ y₁ y₂ y₃ mode) := by
+  simp [fourPointFourierTransform, QComplex.ofRat, QComplex.mul,
+    QComplex.add]
+  constructor <;> grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
+    Rat.mul_add, Rat.add_mul]
+
+theorem fourPointFourierTransform_scale
+    (r x₀ x₁ x₂ x₃ : Rat) (mode : Nat) :
+    fourPointFourierTransform (r * x₀) (r * x₁) (r * x₂) (r * x₃) mode =
+      QComplex.scaleRat r
+        (fourPointFourierTransform x₀ x₁ x₂ x₃ mode) := by
+  simp [fourPointFourierTransform, QComplex.ofRat, QComplex.mul,
+    QComplex.add, QComplex.scaleRat]
+  constructor <;> grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add]
+
+theorem fourPointFourierTransform_constant_modes (c : Rat) :
+    fourPointFourierTransform c c c c 0 = { re := 4 * c, im := 0 } /\
+    fourPointFourierTransform c c c c 1 = QComplex.zero /\
+    fourPointFourierTransform c c c c 2 = QComplex.zero /\
+    fourPointFourierTransform c c c c 3 = QComplex.zero := by
+  simp [fourPointFourierTransform, QComplex.natPow,
+    RotationSeries.imaginaryUnit, QComplex.ofRat, QComplex.mul,
+    QComplex.add, QComplex.one, QComplex.zero]
+  grind [Rat.add_assoc, Rat.add_comm, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
 theorem fourPointFourierTransform_modes (x₀ x₁ x₂ x₃ : Rat) :
     fourPointFourierTransform x₀ x₁ x₂ x₃ 0 =
         { re := x₀ + x₁ + x₂ + x₃, im := 0 } /\

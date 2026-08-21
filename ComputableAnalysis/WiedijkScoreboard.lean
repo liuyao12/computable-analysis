@@ -462,6 +462,23 @@ theorem wiedijk_item_seventy_six_finite_fourier_certificate
     fourPointFourierTransform_reconstruct x₀ x₁ x₂ x₃,
     fourPointFourierTransform_parseval x₀ x₁ x₂ x₃⟩
 
+theorem wiedijk_item_seventy_six_fourier_linear_foundation
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ r : Rat) (mode : Nat) :
+    fourPointFourierTransform (x₀ + y₀) (x₁ + y₁) (x₂ + y₂) (x₃ + y₃) mode =
+        QComplex.add
+          (fourPointFourierTransform x₀ x₁ x₂ x₃ mode)
+          (fourPointFourierTransform y₀ y₁ y₂ y₃ mode) /\
+    fourPointFourierTransform (r * x₀) (r * x₁) (r * x₂) (r * x₃) mode =
+        QComplex.scaleRat r
+          (fourPointFourierTransform x₀ x₁ x₂ x₃ mode) /\
+    fourPointFourierTransform r r r r 0 = { re := 4 * r, im := 0 } /\
+    fourPointFourierTransform r r r r 1 = QComplex.zero /\
+    fourPointFourierTransform r r r r 2 = QComplex.zero /\
+    fourPointFourierTransform r r r r 3 = QComplex.zero := by
+  exact ⟨fourPointFourierTransform_add x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ mode,
+    fourPointFourierTransform_scale r x₀ x₁ x₂ x₃ mode,
+    fourPointFourierTransform_constant_modes r⟩
+
 /-! Item 9 in its computable form: the circle-area interval algorithm is
 valid, and agrees with the independently constructed rational rectangle
 integral for the Cauchy kernel. -/
