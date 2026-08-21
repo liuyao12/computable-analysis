@@ -569,6 +569,14 @@ theorem wiedijk_item_fifteen_derivative_bound_ftc
     certificate.boundedIntegralRaw.Equiv certificate.endpointRaw := by
   exact certificate.equiv_endpoint
 
+theorem wiedijk_item_fifteen_derivative_bound_ftc_close_at
+    {F dF : RealFunRaw} {a b : Rat}
+    (certificate : DerivativeBoundFTC F dF a b) (eps : QPos) :
+    QInterval.CloseAt
+      (certificate.boundedIntegralInterval eps)
+      (certificate.endpointInterval eps) eps := by
+  exact certificate.closeAt eps
+
 theorem wiedijk_item_fifteen_convexity_ftc
     {F dF : RealFunRaw} {a b : Rat}
     (certificate : ConvexFTCCertificate F dF a b) :
