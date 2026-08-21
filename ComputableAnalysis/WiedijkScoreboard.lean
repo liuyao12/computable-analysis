@@ -5,6 +5,7 @@ import ComputableAnalysis.RationalCircle
 import ComputableAnalysis.FiniteBinomialCertificate
 import ComputableAnalysis.EffectiveFTCPortfolio
 import ComputableAnalysis.FirstYearCalculus
+import ComputableAnalysis.FiniteExponentialTaylor
 import ComputableAnalysis.FiniteDeMoivreExample
 import ComputableAnalysis.FiniteCubeRootBisectionExample
 import ComputableAnalysis.FinitePrimeInfinitude
@@ -1067,6 +1068,17 @@ def wiedijk_item_thirty_five_taylor_centered_secant_bound
       (FinitePolynomial.taylorPrefixShiftAt basepoint coeffs terms) := by
   exact FinitePolynomial.taylorPrefixAtSecantBound
     C basepoint coeffs hC1 terms
+
+theorem wiedijk_item_thirty_five_exponential_taylor_enclosure
+    {C x : Rat} (hC : 0 <= C) (hx : qabs x <= C)
+    (eps : QPos) (extraTerms : Nat) :
+    let center := FinitePolynomial.expTaylorPrefix
+      (FiniteExponentialTaylor.scheduledPrefixDegree C eps) x
+    let later := FinitePolynomial.expTaylorPrefix
+      (FiniteExponentialTaylor.scheduledPrefixDegree C eps + extraTerms) x
+    center - eps.val <= later /\ later <= center + eps.val := by
+  exact FiniteExponentialTaylor.scheduled_expTaylorPrefix_enclosure
+    hC hx eps extraTerms
 
 theorem wiedijk_item_thirty_five_taylor_arctan_remainder
     (x eps : Rat) (n : Nat)
