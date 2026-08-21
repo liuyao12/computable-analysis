@@ -38,6 +38,78 @@ def finiteFourierSynthesisAt
     QComplex.mul (coefficient mode)
       (QComplex.natPow root (mode * k))))
 
+private theorem qcomplexListSum_map_congr
+    {α : Type} (xs : List α) (f g : α → QComplex)
+    (h : ∀ x, x ∈ xs → f x = g x) :
+    qcomplexListSum (xs.map f) = qcomplexListSum (xs.map g) := by
+  induction xs with
+  | nil => rfl
+  | cons x xs ih =>
+      simp only [List.map_cons, qcomplexListSum]
+      rw [h x (by simp), ih]
+      intro y hy
+      exact h y (by simp [hy])
+
+private theorem qcomplex_zero_add (z : QComplex) :
+    QComplex.add QComplex.zero z = z := by
+  cases z
+  simp [QComplex.add, QComplex.zero]
+  constructor <;> grind
+
+private theorem qcomplexListSum_map_zero
+    {α : Type} (xs : List α) (f : α → QComplex)
+    (h : ∀ x, x ∈ xs → f x = QComplex.zero) :
+    qcomplexListSum (xs.map f) = QComplex.zero := by
+  induction xs with
+  | nil => rfl
+  | cons x xs ih =>
+      simp only [List.map_cons, qcomplexListSum]
+      rw [h x (by simp), ih (by
+        intro y hy
+        exact h y (by simp [hy]))]
+      exact qcomplex_zero_add _
+
+private theorem qcomplex_zero_mul (z : QComplex) :
+    QComplex.mul QComplex.zero z = QComplex.zero := by
+  cases z
+  simp [QComplex.mul, QComplex.zero]
+  constructor <;> grind
+
+/-! Synthesis is a finite operation: coefficients outside the advertised
+mode list are irrelevant.  This is the elementary uniqueness principle used
+when a finite Fourier certificate is extended with additional bookkeeping. -/
+theorem finiteFourierSynthesisAt_congr
+    (root : QComplex) (k : Nat) (modes : List Nat)
+    (coefficient₁ coefficient₂ : Nat → QComplex)
+    (hcoeff : ∀ mode, mode ∈ modes → coefficient₁ mode = coefficient₂ mode) :
+    finiteFourierSynthesisAt root k modes coefficient₁ =
+      finiteFourierSynthesisAt root k modes coefficient₂ := by
+  induction modes with
+  | nil => rfl
+  | cons mode modes ih =>
+      simp only [finiteFourierSynthesisAt, List.map_cons, qcomplexListSum]
+      rw [hcoeff mode (by simp)]
+      exact congrArg (QComplex.add
+        (QComplex.mul (coefficient₂ mode)
+          (QComplex.natPow root (mode * k))))
+        (qcomplexListSum_map_congr modes _ _ (by
+          intro mode' hmode'
+          rw [hcoeff mode' (by simp [hmode']) ]))
+
+theorem finiteFourierSynthesisAt_zero_coefficients
+    (root : QComplex) (k : Nat) (modes : List Nat) :
+    finiteFourierSynthesisAt root k modes (fun _ => QComplex.zero) =
+      QComplex.zero := by
+  induction modes with
+  | nil => rfl
+  | cons mode modes ih =>
+      simp only [finiteFourierSynthesisAt, List.map_cons, qcomplexListSum]
+      rw [qcomplexListSum_map_zero modes _ (by
+        intro mode' hmode'
+        exact qcomplex_zero_mul _)]
+      rw [qcomplex_zero_mul]
+      exact qcomplex_zero_add _
+
 structure FiniteFourierOrthogonalityCertificate where
   root : QComplex
   length : Nat
