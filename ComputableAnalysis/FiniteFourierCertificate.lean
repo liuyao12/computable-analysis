@@ -174,6 +174,36 @@ theorem fourPointFourierTransform_reconstruct (x₀ x₁ x₂ x₃ : Rat) :
   grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
     Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
 
+/-! Reconstruction also gives uniqueness: no two rational sample vectors have
+the same four finite Fourier coefficients.  This is the finite analogue of
+uniqueness of Fourier coefficients, proved entirely by rational arithmetic. -/
+theorem fourPointFourierTransform_injective
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : Rat)
+    (h₀ : fourPointFourierTransform x₀ x₁ x₂ x₃ 0 =
+      fourPointFourierTransform y₀ y₁ y₂ y₃ 0)
+    (h₁ : fourPointFourierTransform x₀ x₁ x₂ x₃ 1 =
+      fourPointFourierTransform y₀ y₁ y₂ y₃ 1)
+    (h₂ : fourPointFourierTransform x₀ x₁ x₂ x₃ 2 =
+      fourPointFourierTransform y₀ y₁ y₂ y₃ 2)
+    (h₃ : fourPointFourierTransform x₀ x₁ x₂ x₃ 3 =
+      fourPointFourierTransform y₀ y₁ y₂ y₃ 3) :
+    x₀ = y₀ ∧ x₁ = y₁ ∧ x₂ = y₂ ∧ x₃ = y₃ := by
+  have h₀re := congrArg QComplex.re h₀
+  have h₁re := congrArg QComplex.re h₁
+  have h₁im := congrArg QComplex.im h₁
+  have h₂re := congrArg QComplex.re h₂
+  have h₃im := congrArg QComplex.im h₃
+  rcases fourPointFourierTransform_modes x₀ x₁ x₂ x₃ with
+    ⟨hx₀, hx₁, hx₂, hx₃⟩
+  rcases fourPointFourierTransform_modes y₀ y₁ y₂ y₃ with
+    ⟨hy₀, hy₁, hy₂, hy₃⟩
+  rw [hx₀, hy₀] at h₀re
+  rw [hx₁, hy₁] at h₁re h₁im
+  rw [hx₂, hy₂] at h₂re
+  rw [hx₃, hy₃] at h₃im
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
+
 theorem fourPointFourierTransform_parseval (x₀ x₁ x₂ x₃ : Rat) :
     QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 0) +
         QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 1) +

@@ -532,6 +532,20 @@ theorem wiedijk_item_seventy_six_fourier_conjugate_symmetry
         fourPointFourierTransform x₀ x₁ x₂ x₃ 2 := by
   exact fourPointFourierTransform_conjugate_symmetry x₀ x₁ x₂ x₃
 
+theorem wiedijk_item_seventy_six_fourier_uniqueness
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : Rat)
+    (h₀ : fourPointFourierTransform x₀ x₁ x₂ x₃ 0 =
+      fourPointFourierTransform y₀ y₁ y₂ y₃ 0)
+    (h₁ : fourPointFourierTransform x₀ x₁ x₂ x₃ 1 =
+      fourPointFourierTransform y₀ y₁ y₂ y₃ 1)
+    (h₂ : fourPointFourierTransform x₀ x₁ x₂ x₃ 2 =
+      fourPointFourierTransform y₀ y₁ y₂ y₃ 2)
+    (h₃ : fourPointFourierTransform x₀ x₁ x₂ x₃ 3 =
+      fourPointFourierTransform y₀ y₁ y₂ y₃ 3) :
+    x₀ = y₀ ∧ x₁ = y₁ ∧ x₂ = y₂ ∧ x₃ = y₃ := by
+  exact fourPointFourierTransform_injective
+    x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ h₀ h₁ h₂ h₃
+
 theorem wiedijk_item_seventy_six_fourier_block_phase
     (root : QComplex) (mode : Nat)
     (xs ys : List QComplex) :
