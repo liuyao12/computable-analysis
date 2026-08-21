@@ -177,6 +177,30 @@ theorem finiteFourierSynthesisAt_add
   · intro mode hmode
     rw [hcoefficient mode hmode, QComplex.add_mul_cert]
 
+private theorem qcomplex_scale_mul_left_local
+    (r : Rat) (x y : QComplex) :
+    QComplex.mul (QComplex.scaleRat r x) y =
+      QComplex.scaleRat r (QComplex.mul x y) := by
+  cases x
+  cases y
+  simp [QComplex.scaleRat, QComplex.mul]
+  constructor <;> grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add,
+    Rat.add_mul]
+
+theorem finiteFourierSynthesisAt_scale
+    (root : QComplex) (k : Nat) (modes : List Nat)
+    (r : Rat) (coefficient₀ coefficient : Nat → QComplex)
+    (hcoefficient : ∀ mode, mode ∈ modes →
+      coefficient mode = QComplex.scaleRat r (coefficient₀ mode)) :
+    finiteFourierSynthesisAt root k modes coefficient =
+      QComplex.scaleRat r
+        (finiteFourierSynthesisAt root k modes coefficient₀) := by
+  unfold finiteFourierSynthesisAt
+  rw [qcomplexListSum_map_congr]
+  · rw [qcomplexListSum_map_scale]
+  · intro mode hmode
+    rw [hcoefficient mode hmode, qcomplex_scale_mul_left_local]
+
 /-! The finite sample inner product is linear in the sampled values.  This is
 the algebraic step needed to transport Fourier coefficients through addition;
 it is stated entirely over rational-complex stage data. -/
