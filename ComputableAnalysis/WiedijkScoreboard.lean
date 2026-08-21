@@ -26,6 +26,7 @@ import ComputableAnalysis.Basel
 import ComputableAnalysis.FiniteFourierCertificate
 import ComputableAnalysis.FiniteFourierFoundation
 import ComputableAnalysis.CauchyPi
+import ComputableAnalysis.FinitePrimeReciprocalCertificate
 
 /-!
 # Wiedijk's List scoreboard
@@ -144,11 +145,12 @@ def wiedijkCalculusAnalysisAnchoredEntries : List WiedijkEntry := [
   ⟨77, "Finite sum-of-squares identity"⟩,
   ⟨78, "Rational Cauchy--Schwarz"⟩,
   ⟨79, "Finite intermediate-value bracket"⟩,
+  ⟨81, "Finite prime-reciprocal extension"⟩,
   ⟨76, "Finite Fourier transform certificate"⟩
 ]
 
 theorem wiedijkCalculusAnalysisAnchoredEntries_count :
-    wiedijkCalculusAnalysisAnchoredEntries.length = 14 := by
+    wiedijkCalculusAnalysisAnchoredEntries.length = 15 := by
   native_decide
 
 /-! First completed row: the benchmark statement is exposed directly through
@@ -488,5 +490,15 @@ theorem wiedijk_item_nine_effective_circle_area :
       CauchyPi.rectangleRaw.Equiv piCircleArea := by
   exact ⟨CauchyPi.piCircleArea_valid,
     CauchyPi.rectangleRaw_equiv_piCircleArea⟩
+
+/-! Item 81 in its potential-infinity form: every finite certified list of
+primes can be extended by a new prime, strictly increasing the rational
+reciprocal accumulator.  This is the finite-stage content of divergence. -/
+theorem wiedijk_item_eighty_one_finite_prime_reciprocal_extension
+    (xs : List Nat)
+    (hprime : ∀ p, p ∈ xs → BasicPrime p) :
+    ∃ p, BasicPrime p ∧ p ∉ xs ∧
+      primeReciprocalSum xs < primeReciprocalSum (p :: xs) := by
+  exact exists_prime_reciprocal_extension xs hprime
 
 end ComputableAnalysis
