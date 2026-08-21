@@ -558,6 +558,12 @@ theorem wiedijk_item_seventy_six_fourier_block_phase
           (finiteFourierSum root mode ys)) := by
   exact finiteFourierSum_append_phase root mode xs ys
 
+theorem wiedijk_item_seventy_six_finite_support_fourier_valid
+    (root : QComplex) (mode : Nat) (samples : List QComplex) :
+    (finiteSupportFourierSeries root mode samples).stabilized.Valid := by
+  exact EffectiveFourierSeries.stabilized_valid
+    (finiteSupportFourierSeries root mode samples)
+
 /-! Item 9 in its computable form: the circle-area interval algorithm is
 valid, and agrees with the independently constructed rational rectangle
 integral for the Cauchy kernel. -/
