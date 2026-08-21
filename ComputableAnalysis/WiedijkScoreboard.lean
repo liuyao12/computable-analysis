@@ -1491,6 +1491,29 @@ theorem wiedijk_item_seventy_six_finite_fourier_certificate
     fourPointFourierTransform_reconstruct x₀ x₁ x₂ x₃,
     fourPointFourierTransform_parseval x₀ x₁ x₂ x₃⟩
 
+/-! These two projections are named separately because they are the basic
+finite Fourier lemmas consumed by later approximation arguments. -/
+theorem wiedijk_item_seventy_six_fourier_inverse_reconstruction
+    (x₀ x₁ x₂ x₃ : Rat) :
+    let f₀ := fourPointFourierTransform x₀ x₁ x₂ x₃ 0
+    let f₁ := fourPointFourierTransform x₀ x₁ x₂ x₃ 1
+    let f₂ := fourPointFourierTransform x₀ x₁ x₂ x₃ 2
+    let f₃ := fourPointFourierTransform x₀ x₁ x₂ x₃ 3
+    f₀.re + f₁.re + f₂.re + f₃.re = 4 * x₀ /\
+      f₀.re - f₂.re + f₁.im - f₃.im = 4 * x₁ /\
+      f₀.re - f₁.re + f₂.re - f₃.re = 4 * x₂ /\
+      f₀.re - f₂.re - f₁.im + f₃.im = 4 * x₃ := by
+  exact fourPointFourierTransform_reconstruct x₀ x₁ x₂ x₃
+
+theorem wiedijk_item_seventy_six_fourier_parseval
+    (x₀ x₁ x₂ x₃ : Rat) :
+    QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 0) +
+        QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 1) +
+        QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 2) +
+        QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 3) =
+      4 * (x₀ ^ 2 + x₁ ^ 2 + x₂ ^ 2 + x₃ ^ 2) := by
+  exact fourPointFourierTransform_parseval x₀ x₁ x₂ x₃
+
 theorem wiedijk_item_seventy_six_fourier_mode_period_four (mode : Nat) :
     fourPointFourierSum (mode + 4) = fourPointFourierSum mode := by
   exact fourPointFourierSum_period_four mode
