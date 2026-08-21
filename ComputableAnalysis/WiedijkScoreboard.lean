@@ -30,6 +30,12 @@ import ComputableAnalysis.FiniteFourierGeometric
 import ComputableAnalysis.FiniteComplexQuadraticExample
 import ComputableAnalysis.FiniteDigitDivisibilityInterface
 import ComputableAnalysis.FinitePickCertificate
+import ComputableAnalysis.FiniteInductionExample
+import ComputableAnalysis.FiniteLawOfCosinesExample
+import ComputableAnalysis.FinitePtolemyLength
+import ComputableAnalysis.FiniteCramerExample
+import ComputableAnalysis.FiniteDescartesExamples
+import ComputableAnalysis.FinitePrimeFactorExample
 import ComputableAnalysis.CauchyPi
 import ComputableAnalysis.FinitePrimeReciprocalCertificate
 import ComputableAnalysis.FiniteStirlingInterface
@@ -279,6 +285,57 @@ theorem wiedijk_item_ninety_two_finite_pick_certificates :
         (pickTriangleFourBoundary : Rat) / 2 - 1) := by
   exact ⟨pickTriangle_certificate, pickTriangleTwo_certificate,
     pickTriangleThree_certificate, pickTriangleFour_certificate⟩
+
+/-! The remaining algebraic rows are exposed at their finite certificate
+boundary.  These statements deliberately retain the exact rational data and
+do not silently promote them to a completed Euclidean or real-number theorem. -/
+
+theorem wiedijk_item_seventy_four_induction_certificate (n : Nat) :
+    Series.arithmeticSum n = (n : Rat) * ((n : Rat) - 1) / 2 := by
+  exact induction_arithmeticSum_eq n
+
+theorem wiedijk_item_eighty_finite_prime_factor_certificate :
+    primeFactorizationCertificate360.factors.foldl (fun acc p => acc * p) 1 = 360 /\
+      primeFactorizationCertificate360_alternative.factors.foldl (fun acc p => acc * p) 1 = 360 /\
+      primeFactorizationCertificate360.factors.Perm
+        primeFactorizationCertificate360_alternative.factors := by
+  exact ⟨primeFactorizationCertificate360_product,
+    by native_decide, primeFactorizationCertificate360_factor_order_unique⟩
+
+theorem wiedijk_item_ninety_four_law_of_cosines_certificate :
+    let p : PiCirclePoint := { x := 3 / 5, y := 4 / 5 }
+    let q : PiCirclePoint := { x := -4 / 5, y := 3 / 5 }
+    RationalCircle.Stage.normSq p = 1 /\
+      RationalCircle.Stage.normSq q = 1 /\
+      RationalCircle.Stage.dot p q = 0 /\
+      RationalCircle.Stage.segmentNormSq p q = 2 /\
+      RationalCircle.Stage.segmentNormSq p q =
+        RationalCircle.Stage.normSq p + RationalCircle.Stage.normSq q -
+          2 * RationalCircle.Stage.dot p q := by
+  exact RationalCircle.Stage.finiteLawOfCosines_unit_orthogonal_certificate
+
+theorem wiedijk_item_ninety_five_ptolemy_certificate :
+    (PtolemyLengthCore.pointSegmentLengthRaw
+        FinitePtolemyLength.ptolemyPointA FinitePtolemyLength.ptolemyPointB).Equiv
+        (RealRaw.ofRat (16 / 17)) /\
+      (16 / 17 : Rat) * (14 / 25) + (26 / 85) * (8 / 5) =
+        (6 / 5) * (72 / 85) := by
+  exact ⟨FinitePtolemyLength.finitePtolemyLength_certificate.1,
+    FinitePtolemyLength.finitePtolemyLength_certificate.2.2.2.2.2.2⟩
+
+theorem wiedijk_item_ninety_seven_cramer_certificate :
+    (2 : Rat) * 3 - 1 * 1 = 5 /\
+      (5 * 3 - 1 * 10) / (2 * 3 - 1 * 1) = 1 /\
+      (2 * 10 - 5 * 1) / (2 * 3 - 1 * 1) = 3 /\
+      ((2 : Rat) * 1 + 1 * 3 = 5 /\ 1 * 1 + 3 * 3 = 10) := by
+  exact cramer_2_1_1_3_certificate
+
+theorem wiedijk_item_one_hundred_descartes_certificate :
+    Polynomial.signChangeCountIgnoringZeros Polynomial.twoVariationQuadratic = 2 /\
+      (forall x : Rat, 0 < x ->
+        (Polynomial.eval Polynomial.twoVariationQuadratic x = 0 ↔
+          x = 1 ∨ x = 2)) := by
+  exact Polynomial.twoVariationQuadratic_certificate
 
 theorem wiedijk_item_forty_four_binomial_certificate :
     Series.binomialSum 5 2 1 6 = 243 := by
