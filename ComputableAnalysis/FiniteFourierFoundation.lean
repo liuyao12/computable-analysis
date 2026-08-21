@@ -244,6 +244,38 @@ theorem finiteFourierSum_append_phase
   rw [finiteFourierSum_append]
   rw [finiteFourierSum_phase root mode ys xs.length]
 
+/-! With the rational quarter-turn root, every finite sample list has the
+same four-step mode periodicity as the four-point transform. -/
+theorem finiteFourierSum_quarterTurn_mode_period_four
+    (mode : Nat) (samples : List QComplex) :
+    finiteFourierSum RotationSeries.imaginaryUnit (mode + 4) samples =
+      finiteFourierSum RotationSeries.imaginaryUnit mode samples := by
+  have hshift : forall (n k : Nat),
+      QComplex.natPow RotationSeries.imaginaryUnit (n + 4 * k) =
+        QComplex.natPow RotationSeries.imaginaryUnit n := by
+    intro n k
+    induction k with
+    | zero => simp
+    | succ k ih =>
+        rw [show n + 4 * (k + 1) = (n + 4 * k) + 4 by
+          simp [Nat.mul_succ, Nat.add_assoc],
+          quarterTurn_natPow_period_four, ih]
+  have hphase : forall (j : Nat),
+      QComplex.natPow RotationSeries.imaginaryUnit ((mode + 4) * j) =
+        QComplex.natPow RotationSeries.imaginaryUnit (mode * j) := by
+    intro j
+    simpa [Nat.add_mul] using hshift (mode * j) j
+  have haux : forall (k : Nat) (xs : List QComplex),
+      finiteFourierSumAux RotationSeries.imaginaryUnit (mode + 4) k xs =
+        finiteFourierSumAux RotationSeries.imaginaryUnit mode k xs := by
+    intro k xs
+    induction xs generalizing k with
+    | nil => rfl
+    | cons x xs ih =>
+        simp only [finiteFourierSumAux]
+        rw [hphase k, ih (k + 1)]
+  exact haux 0 samples
+
 theorem finiteFourierSum_aux_one
     (mode k : Nat) (xs : List QComplex) :
     finiteFourierSumAux QComplex.one mode k xs = qcomplexListSum xs := by

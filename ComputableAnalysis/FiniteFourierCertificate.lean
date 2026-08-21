@@ -99,6 +99,14 @@ theorem fourPointFourierSum_four_residue (k : Nat) :
   · simpa [fourPointFourierSum_second_mode] using h2
   · simpa [fourPointFourierSum_third_mode] using h3
 
+theorem quarterTurn_natPow_period_four (n : Nat) :
+    QComplex.natPow RotationSeries.imaginaryUnit (n + 4) =
+      QComplex.natPow RotationSeries.imaginaryUnit n := by
+  have hfour : QComplex.natPow RotationSeries.imaginaryUnit 4 =
+      QComplex.one := by
+    native_decide
+  rw [QComplex.natPow_add, hfour, QComplex.mul_one_cert]
+
 theorem fourPointFourier_orthogonality_certificate :
     fourPointFourierSum 0 = { re := 4, im := 0 } /\
       fourPointFourierSum 1 = QComplex.zero /\

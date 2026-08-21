@@ -575,6 +575,12 @@ theorem wiedijk_item_seventy_six_fourier_block_phase
           (finiteFourierSum root mode ys)) := by
   exact finiteFourierSum_append_phase root mode xs ys
 
+theorem wiedijk_item_seventy_six_finite_list_mode_period_four
+    (mode : Nat) (samples : List QComplex) :
+    finiteFourierSum RotationSeries.imaginaryUnit (mode + 4) samples =
+      finiteFourierSum RotationSeries.imaginaryUnit mode samples := by
+  exact finiteFourierSum_quarterTurn_mode_period_four mode samples
+
 theorem wiedijk_item_seventy_six_finite_support_fourier_valid
     (root : QComplex) (mode : Nat) (samples : List QComplex) :
     (finiteSupportFourierSeries root mode samples).stabilized.Valid := by
