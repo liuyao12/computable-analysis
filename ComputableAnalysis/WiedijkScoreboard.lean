@@ -32,6 +32,7 @@ import ComputableAnalysis.FiniteFourierGeometric
 import ComputableAnalysis.FiniteComplexQuadraticExample
 import ComputableAnalysis.FiniteDigitDivisibilityInterface
 import ComputableAnalysis.FinitePickCertificate
+import ComputableAnalysis.FinitePickInterface
 import ComputableAnalysis.FiniteInductionExample
 import ComputableAnalysis.FiniteLawOfCosinesExample
 import ComputableAnalysis.FinitePtolemyLength
@@ -371,6 +372,27 @@ theorem wiedijk_item_ninety_two_finite_pick_certificates :
         (pickTriangleFourBoundary : Rat) / 2 - 1) := by
   exact ⟨pickTriangle_certificate, pickTriangleTwo_certificate,
     pickTriangleThree_certificate, pickTriangleFour_certificate⟩
+
+theorem wiedijk_item_ninety_two_generic_pick_identity
+    (certificate : FinitePickTriangleCertificate) :
+    certificate.area = (certificate.interior : Rat) +
+      (certificate.boundary : Rat) / 2 - 1 := by
+  exact certificate.identity
+
+theorem wiedijk_item_ninety_two_generic_pick_data
+    (certificate : FinitePickTriangleCertificate) :
+    certificate.area =
+        qabs (RationalCircle.triangleTwiceArea
+          certificate.vertexA.toRat certificate.vertexB.toRat
+          certificate.vertexC.toRat) / 2 /\
+      certificate.boundary =
+        Nat.gcd (Int.natAbs (certificate.vertexB.x - certificate.vertexA.x))
+            (Int.natAbs (certificate.vertexB.y - certificate.vertexA.y)) +
+          Nat.gcd (Int.natAbs (certificate.vertexC.x - certificate.vertexB.x))
+            (Int.natAbs (certificate.vertexC.y - certificate.vertexB.y)) +
+          Nat.gcd (Int.natAbs (certificate.vertexA.x - certificate.vertexC.x))
+            (Int.natAbs (certificate.vertexA.y - certificate.vertexC.y)) := by
+  exact ⟨certificate.area_eq, certificate.boundary_eq⟩
 
 /-! The remaining algebraic rows are exposed at their finite certificate
 boundary.  These statements deliberately retain the exact rational data and
