@@ -1085,6 +1085,12 @@ theorem wiedijk_item_eighty_one_finite_prime_reciprocal_extension
       primeReciprocalSum xs < primeReciprocalSum (p :: xs) := by
   exact exists_prime_reciprocal_extension xs hprime
 
+theorem wiedijk_item_eighty_one_prime_reciprocal_block_additivity
+    (xs ys : List Nat) :
+    primeReciprocalSum (xs ++ ys) =
+      primeReciprocalSum xs + primeReciprocalSum ys := by
+  exact primeReciprocalSum_append xs ys
+
 /-! Item 90 in its finite computable form: the factorial ratio used by
 Stirling is enclosed by an explicit rational interval, with a certified error
 bound.  The unrestricted asymptotic equivalence is intentionally not claimed
