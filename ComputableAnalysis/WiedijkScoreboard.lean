@@ -1,5 +1,6 @@
 import ComputableAnalysis.IrrationalSqrt
 import ComputableAnalysis.SqrtTwoDescent
+import ComputableAnalysis.Polynomial
 import ComputableAnalysis.RationalCircle
 import ComputableAnalysis.FiniteBinomialCertificate
 import ComputableAnalysis.EffectiveFTCPortfolio
@@ -322,6 +323,27 @@ theorem wiedijk_item_eighty_nine_factor_remainder_boundary
     CPoly.eval (factorizedPolynomial roots) z = QComplex.zero ↔
       z ∈ roots := by
   exact factorizedPolynomial_eval_eq_zero_iff_mem
+
+theorem wiedijk_item_eighty_nine_generic_remainder_formula
+    {coeffs : List Rat} {r x : Rat}
+    (certificate : Polynomial.RemainderCertificate coeffs r) :
+    Polynomial.eval coeffs x = certificate.remainder +
+      (x - r) * Polynomial.eval certificate.quotient x := by
+  exact certificate.factor_remainder_at
+
+theorem wiedijk_item_eighty_nine_generic_factor_theorem
+    {coeffs : List Rat} {r x : Rat}
+    (certificate : Polynomial.RemainderCertificate coeffs r)
+    (hroot : Polynomial.eval coeffs r = 0) :
+    Polynomial.eval coeffs x =
+      (x - r) * Polynomial.eval certificate.quotient x := by
+  exact certificate.factor_of_root hroot
+
+theorem wiedijk_item_eighty_nine_remainder_root_iff
+    {coeffs : List Rat} {r : Rat}
+    (certificate : Polynomial.RemainderCertificate coeffs r) :
+    certificate.remainder = 0 ↔ Polynomial.eval coeffs r = 0 := by
+  exact certificate.remainder_eq_zero_iff
 
 /-! Item 92 in its finite lattice boundary: several exact triangles satisfy
 Pick's area identity using shoelace area, gcd edge counts, and natural-number
