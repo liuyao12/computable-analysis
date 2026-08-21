@@ -264,6 +264,27 @@ theorem wiedijk_item_three_denumerability (q : Rat) :
     Exists fun n : Nat => RationalCode.decode (rationalNatCode n) = q := by
   exact rationalNatCode_decode_surjective q
 
+theorem wiedijk_item_three_canonical_code (q : Rat) :
+    rationalNatCode (rationalNatIndex q) = RationalCode.encode q := by
+  exact rationalNatCode_index q
+
+theorem wiedijk_item_three_canonical_index_unique (q : Rat) :
+    ∃ n : Nat, rationalNatCode n = RationalCode.encode q ∧
+      ∀ m : Nat, rationalNatCode m = RationalCode.encode q -> m = n := by
+  obtain ⟨n, hn, huniq⟩ := rationalNatCode_existsUnique_canonical_index q
+  exact ⟨n, hn, huniq⟩
+
+theorem wiedijk_item_three_canonical_decode_index_unique (q : Rat) :
+    ∃ n : Nat,
+      (rationalNatCode n = RationalCode.encode q ∧
+        RationalCode.decode (rationalNatCode n) = q) ∧
+      ∀ m : Nat,
+        (rationalNatCode m = RationalCode.encode q ∧
+          RationalCode.decode (rationalNatCode m) = q) -> m = n := by
+  obtain ⟨n, hn, huniq⟩ :=
+    rationalNatCode_existsUnique_canonical_decode_index q
+  exact ⟨n, hn, huniq⟩
+
 theorem wiedijk_item_four_pythagorean
     (u v : PiCirclePoint) (horth : RationalCircle.Stage.dot u v = 0) :
     RationalCircle.Stage.segmentNormSq RationalCircle.Stage.origin u +
