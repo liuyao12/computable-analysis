@@ -224,6 +224,18 @@ theorem wiedijk_item_four_pythagorean
       RationalCircle.Stage.segmentNormSq u v := by
   exact RationalCircle.Stage.rightTriangle_pythagorean u v horth
 
+/-! Item 27 in its rational-coordinate boundary: the oriented triangle
+determinant has the cyclic and orientation-reversal laws underlying the
+classical angle-sum argument.  No completed angle values are introduced. -/
+theorem wiedijk_item_twenty_seven_oriented_triangle_boundary
+    (p q r : PiCirclePoint) :
+    RationalCircle.triangleTwiceArea p q r =
+        RationalCircle.triangleTwiceArea q r p /\
+      RationalCircle.triangleTwiceArea p q r =
+        -RationalCircle.triangleTwiceArea p r q := by
+  exact ⟨RationalCircle.triangleTwiceArea_cyclic p q r,
+    RationalCircle.triangleTwiceArea_swap_neg p q r⟩
+
 theorem wiedijk_item_forty_four_binomial_certificate :
     Series.binomialSum 5 2 1 6 = 243 := by
   exact binomial_stage5_two_one_value
