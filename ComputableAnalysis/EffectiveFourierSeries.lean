@@ -98,6 +98,43 @@ def finiteSupportFourierSeries
     intro n hn
     exact Rat.le_of_lt eps.property
 
+/-! A finite sample table is the first bridge from the project’s complex
+function layer to its Fourier layer. Each value is rational-complex, while
+the enclosure obligation records that the value is contained in the
+function’s own interval computation on its domain. No integral is hidden in
+this certificate; it is the exact finite input consumed by a Fourier stage. -/
+structure EffectiveFourierSampleCertificate where
+  function : FunctionRaw
+  samples : List (QComplex × QComplex)
+  sample_domain : ∀ p, p ∈ samples -> function.domain p.1
+  sample_value : ∀ p (hp : p ∈ samples),
+    (QBox.point p.2).NestedIn
+      ((function.evalRaw p.1 (sample_domain p hp)).compute 0)
+
+def EffectiveFourierSampleCertificate.values
+    (certificate : EffectiveFourierSampleCertificate) : List QComplex :=
+  certificate.samples.map Prod.snd
+
+def EffectiveFourierSampleCertificate.toSeries
+    (certificate : EffectiveFourierSampleCertificate)
+    (root : QComplex) (mode : Nat) : EffectiveFourierSeries :=
+  finiteSupportFourierSeries root mode certificate.values
+
+theorem EffectiveFourierSampleCertificate.toSeries_valid
+    (certificate : EffectiveFourierSampleCertificate)
+    (root : QComplex) (mode : Nat) :
+    (certificate.toSeries root mode).stabilized.Valid := by
+  exact EffectiveFourierSeries.stabilized_valid
+    (certificate.toSeries root mode)
+
+theorem EffectiveFourierSampleCertificate.sample_interval_witness
+    (certificate : EffectiveFourierSampleCertificate)
+    {p : QComplex × QComplex} (hp : p ∈ certificate.samples) :
+    (QBox.point p.2).NestedIn
+      ((certificate.function.evalRaw p.1
+        (certificate.sample_domain p hp)).compute 0) := by
+  exact certificate.sample_value p hp
+
 /-! A first genuinely infinite instance: the zero-frequency partial sums of
 the geometric coefficient family `1, r, r^2, ...`.  The candidate boxes use
 the exact rational prefix and the exact geometric-series upper endpoint.

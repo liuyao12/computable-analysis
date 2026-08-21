@@ -1826,6 +1826,12 @@ theorem wiedijk_item_seventy_six_effective_fourier_valid
     series.stabilized.Valid := by
   exact series.stabilized_valid
 
+theorem wiedijk_item_seventy_six_finite_function_sample_bridge
+    (certificate : EffectiveFourierSampleCertificate)
+    (root : QComplex) (mode : Nat) :
+    (certificate.toSeries root mode).stabilized.Valid := by
+  exact certificate.toSeries_valid root mode
+
 theorem wiedijk_item_seventy_six_effective_fourier_stage_enclosure
     (series : EffectiveFourierSeries) (n : Nat) :
     (QBox.point
