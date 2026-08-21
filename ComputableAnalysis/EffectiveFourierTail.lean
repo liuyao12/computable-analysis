@@ -87,6 +87,23 @@ theorem EffectiveFourierTailCertificate.toSeries_valid
     certificate.toSeries.stabilized.Valid := by
   exact EffectiveFourierSeries.stabilized_valid certificate.toSeries
 
+/-! A generic tail certificate therefore exposes an actual finite Fourier
+stage as its precision witness.  The witness is the computed rational-
+complex value itself, while the stabilized box supplies the certified error
+bar. -/
+theorem EffectiveFourierTailCertificate.precision_witness
+    (certificate : EffectiveFourierTailCertificate) (eps : QPos) :
+    ∃ N : Nat, ∃ q : QComplex,
+      q = certificate.stage N /\
+      (certificate.toSeries.stabilized.compute N).width <= eps.val /\
+      (certificate.toSeries.stabilized.compute N).height <= eps.val := by
+  obtain ⟨N, q, hq, hwidth, hheight⟩ :=
+    (certificate.toSeries).precision_witness eps
+  refine ⟨N, certificate.stage N, ?_, hwidth, hheight⟩
+  simpa [EffectiveFourierTailCertificate.toSeries,
+    finiteFourierSum_singleton, QComplex.natPow,
+    QComplex.mul_one_cert, QComplex.add, QComplex.zero] using hq
+
 /-! The raw tail hypothesis is also exposed as an explicit coordinate box.
 This is the error-bar statement used by downstream Fourier computations: at
 stage `n`, every later stage lies within the radius attached to stage `k`.

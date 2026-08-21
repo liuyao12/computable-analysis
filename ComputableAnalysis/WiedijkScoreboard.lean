@@ -1960,6 +1960,14 @@ theorem wiedijk_item_seventy_six_fourier_tail_error_box
         certificate.radius k) := by
   exact certificate.future_stage_coordinate_enclosure k n hkn
 
+theorem wiedijk_item_seventy_six_fourier_tail_precision_witness
+    (certificate : EffectiveFourierTailCertificate) (eps : QPos) :
+    ∃ N : Nat, ∃ q : QComplex,
+      q = certificate.stage N /\
+      (certificate.toSeries.stabilized.compute N).width <= eps.val /\
+      (certificate.toSeries.stabilized.compute N).height <= eps.val := by
+  exact certificate.precision_witness eps
+
 theorem wiedijk_item_seventy_six_quarter_turn_generic_tail_valid
     (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
     (hr1 : r < 1) :
