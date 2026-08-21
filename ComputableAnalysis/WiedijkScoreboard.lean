@@ -444,6 +444,20 @@ theorem wiedijk_item_fifteen_derivative_bound_ftc
     certificate.boundedIntegralRaw.Equiv certificate.endpointRaw := by
   exact certificate.equiv_endpoint
 
+theorem wiedijk_item_fifteen_convexity_ftc
+    {F dF : RealFunRaw} {a b : Rat}
+    (certificate : ConvexFTCCertificate F dF a b) :
+    certificate.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      certificate.toDerivativeBoundFTC.endpointRaw := by
+  exact certificate.equiv_endpoint
+
+theorem wiedijk_item_fifteen_concavity_ftc
+    {F dF : RealFunRaw} {a b : Rat}
+    (certificate : ConcaveFTCCertificate F dF a b) :
+    certificate.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      certificate.toDerivativeBoundFTC.endpointRaw := by
+  exact certificate.equiv_endpoint
+
 theorem wiedijk_item_twenty_six_leibniz_series :
     Series.AlternatingRaw.leibnizAlternatingRaw.toRealRaw.Valid := by
   exact Series.AlternatingRaw.leibnizAlternatingRaw_valid
