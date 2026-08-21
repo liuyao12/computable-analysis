@@ -208,7 +208,7 @@ theorem wiedijk_item_two_finite_complex_quadratic_certificate :
 /-! Item 16 in its constructive finite boundary: a bounded rational-root
 search for a monic quintic returns no candidate.  This does not assert the
 classical impossibility theorem or provide a general radicals solver. -/
-theorem wiedijk_item_sixteen_finite_quintic_deflation_certificate :
+theorem wiedijk_item_sixteen_finite_quintic_rational_root_boundary :
     RationalRootSearch.rationalRootSearch
         quinticBoundaryPolynomial quinticBoundaryCandidates = none := by
   exact quinticBoundary_rationalRootSearch_none
