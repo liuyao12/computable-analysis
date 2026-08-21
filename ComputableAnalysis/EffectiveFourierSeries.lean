@@ -1,4 +1,5 @@
 import ComputableAnalysis.FiniteFourierFoundation
+import ComputableAnalysis.FiniteFourierGeometric
 import ComputableAnalysis.Series
 
 /-!
@@ -153,5 +154,115 @@ def geometricFourierZeroModeSeries
     refine ⟨0, ?_⟩
     intro n hn
     exact Rat.le_of_lt eps.property
+
+/-! A nonzero quarter-turn Fourier instance.  Its candidates are the exact
+finite coefficient stages; the stabilization radius is the rational bound
+`2 * r^n`.  The factor two is valid for `r <= 1/2`, while the tail proof
+itself only uses finite rational inequalities. -/
+set_option maxHeartbeats 800000 in
+def quarterTurnGeometricFourierSeries
+    (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
+    (hr1 : r < 1) : EffectiveFourierSeries where
+  root := RotationSeries.imaginaryUnit
+  mode := 1
+  stage := geometricCoefficientStage r
+  candidate := {
+    compute := fun n => QBox.point (quarterTurnGeometricStage r n)
+  }
+  radius := fun n => 2 * r ^ n
+  candidate_stage := by
+    intro n
+    unfold QBox.NestedIn
+    exact ⟨⟨Rat.le_refl, Rat.le_refl⟩, ⟨Rat.le_refl, Rat.le_refl⟩⟩
+  candidate_ordered := by
+    intro n
+    unfold QBox.Ordered QBox.point
+    exact ⟨Rat.le_refl, Rat.le_refl⟩
+  candidate_shrinks := by
+    intro eps
+    refine ⟨0, ?_⟩
+    intro n hn
+    change (QBox.point (quarterTurnGeometricStage r n)).width <= eps.val /\
+      (QBox.point (quarterTurnGeometricStage r n)).height <= eps.val
+    simp only [QBox.point, QBox.width, QBox.height]
+    constructor <;> simpa [Rat.sub_self] using (Rat.le_of_lt eps.property)
+  future_containment := by
+    intro k n hkn
+    obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hkn
+    have hfactor : 1 / (1 - r) <= 2 := by
+      have hden : 0 < 1 - r := by grind
+      apply Rat.le_of_mul_le_mul_right (c := 1 - r)
+      · calc
+          1 / (1 - r) * (1 - r) = 1 := by
+            rw [Rat.div_def, Rat.one_mul,
+              Rat.inv_mul_cancel (1 - r) (Rat.ne_of_gt hden)]
+          _ <= 2 * (1 - r) := by grind
+      · exact hden
+    have htail :=
+      quarterTurnGeometricStage_block_coord_abs_le_inv_one_sub
+        hr0 hr1 k d
+    have hpow : 0 <= r ^ k := Rat.pow_nonneg hr0
+    have hscaled : r ^ k * (1 / (1 - r)) <= 2 * r ^ k := by
+      simpa [Rat.mul_comm] using
+        (Rat.mul_le_mul_of_nonneg_left hfactor hpow)
+    change (QBox.point (quarterTurnGeometricStage r (k + d))).NestedIn
+      (QBox.expand (QBox.point (quarterTurnGeometricStage r k)) (2 * r ^ k))
+    unfold QBox.NestedIn QBox.expand QBox.point
+    simp only [QComplex.le_def]
+    constructor
+    · constructor
+      · have h := htail.1
+        have hlow : -(2 * r ^ k) <=
+            (quarterTurnGeometricStage r (k + d)).re -
+              (quarterTurnGeometricStage r k).re :=
+          Rat.le_trans (Rat.neg_le_neg hscaled)
+            (Rat.le_trans (Rat.neg_le_neg h)
+              (neg_qabs_le_self
+                ((quarterTurnGeometricStage r (k + d)).re -
+                (quarterTurnGeometricStage r k).re)))
+        grind [Rat.sub_eq_add_neg]
+      · have h := htail.2
+        have hlow : -(2 * r ^ k) <=
+            (quarterTurnGeometricStage r (k + d)).im -
+              (quarterTurnGeometricStage r k).im :=
+          Rat.le_trans (Rat.neg_le_neg hscaled)
+            (Rat.le_trans (Rat.neg_le_neg h)
+              (neg_qabs_le_self
+                ((quarterTurnGeometricStage r (k + d)).im -
+                  (quarterTurnGeometricStage r k).im)))
+        grind [Rat.sub_eq_add_neg]
+    · constructor
+      · have h := htail.1
+        have hupp :
+            (quarterTurnGeometricStage r (k + d)).re -
+              (quarterTurnGeometricStage r k).re <= 2 * r ^ k :=
+          Rat.le_trans
+            (self_le_qabs
+              ((quarterTurnGeometricStage r (k + d)).re -
+                (quarterTurnGeometricStage r k).re))
+            (Rat.le_trans h hscaled)
+        grind [Rat.sub_eq_add_neg]
+      · have h := htail.2
+        have hupp :
+            (quarterTurnGeometricStage r (k + d)).im -
+              (quarterTurnGeometricStage r k).im <= 2 * r ^ k :=
+          Rat.le_trans
+            (self_le_qabs
+              ((quarterTurnGeometricStage r (k + d)).im -
+                (quarterTurnGeometricStage r k).im))
+            (Rat.le_trans h hscaled)
+        grind [Rat.sub_eq_add_neg]
+  radius_shrinks := by
+    have hbound : forall n : Nat,
+        2 * r ^ n <= (2 : Rat) / (((n + 1 : Nat) : Rat)) := by
+      intro n
+      have hpow := Series.pow_le_half_pow hr0 hrhalf n
+      have hhalf := Series.half_pow_le_one_div_succ n
+      have hle := Rat.le_trans hpow hhalf
+      exact Rat.le_trans
+        (Rat.mul_le_mul_of_nonneg_left hle (by native_decide)) (by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm])
+    exact shrinksToZero_of_natOverSuccBound hbound
 
 end ComputableAnalysis
