@@ -696,6 +696,53 @@ theorem fourPointComplexFourierTransform_cyclic_convolution
     Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
     Rat.sub_eq_add_neg]
 
+theorem fourPointComplexFourierTransform_cyclic_convolution_energy
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : QComplex) :
+    QComplex.normSq
+          (fourPointComplexFourierTransform
+            (fourPointComplexConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 0) +
+        QComplex.normSq
+          (fourPointComplexFourierTransform
+            (fourPointComplexConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 1) +
+        QComplex.normSq
+          (fourPointComplexFourierTransform
+            (fourPointComplexConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 2) +
+        QComplex.normSq
+          (fourPointComplexFourierTransform
+            (fourPointComplexConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 3) =
+      QComplex.normSq
+          (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0) *
+          QComplex.normSq
+          (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 0) +
+        QComplex.normSq
+          (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 1) *
+          QComplex.normSq
+          (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 1) +
+        QComplex.normSq
+          (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 2) *
+          QComplex.normSq
+          (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 2) +
+        QComplex.normSq
+          (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 3) *
+          QComplex.normSq
+          (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 3) := by
+  rcases fourPointComplexFourierTransform_cyclic_convolution
+      x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ with ⟨h₀, h₁, h₂, h₃⟩
+  rw [h₀, h₁, h₂, h₃, QComplex.normSq_mul, QComplex.normSq_mul,
+    QComplex.normSq_mul, QComplex.normSq_mul]
+
 theorem fourPointComplexFourierTransform_injective
     (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : QComplex)
     (h₀ : fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0 =

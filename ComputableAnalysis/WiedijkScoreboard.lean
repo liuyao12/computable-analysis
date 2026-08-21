@@ -2328,6 +2328,43 @@ theorem wiedijk_item_seventy_six_complex_fourier_convolution
   exact fourPointComplexFourierTransform_cyclic_convolution
     x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃
 
+theorem wiedijk_item_seventy_six_complex_fourier_convolution_energy
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : QComplex) :
+    QComplex.normSq
+          (fourPointComplexFourierTransform
+            (fourPointComplexConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 0) +
+        QComplex.normSq
+          (fourPointComplexFourierTransform
+            (fourPointComplexConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 1) +
+        QComplex.normSq
+          (fourPointComplexFourierTransform
+            (fourPointComplexConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 2) +
+        QComplex.normSq
+          (fourPointComplexFourierTransform
+            (fourPointComplexConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+            (fourPointComplexConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 3) =
+      QComplex.normSq (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0) *
+          QComplex.normSq (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 0) +
+        QComplex.normSq (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 1) *
+          QComplex.normSq (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 1) +
+        QComplex.normSq (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 2) *
+          QComplex.normSq (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 2) +
+        QComplex.normSq (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 3) *
+          QComplex.normSq (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 3) := by
+  exact fourPointComplexFourierTransform_cyclic_convolution_energy
+    x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃
+
 theorem wiedijk_item_seventy_six_complex_fourier_injective
     (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : QComplex)
     (h₀ : fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0 =
