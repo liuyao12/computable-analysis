@@ -305,4 +305,10 @@ theorem wiedijk_item_ninety_one_triangle_inequality (steps : List Rat) :
     qabs (ratListSum steps) <= ratListAbsSum steps := by
   exact RationalCircle.Stage.rationalPolyline_length_ge_straight_segment steps
 
+theorem wiedijk_item_seventy_eight_cauchy_schwarz_2d
+    (a b c d : Rat) :
+    (a * c + b * d) ^ 2 <=
+      (a * a + b * b) * (c * c + d * d) := by
+  exact cauchy_schwarz_2d a c b d
+
 end ComputableAnalysis
