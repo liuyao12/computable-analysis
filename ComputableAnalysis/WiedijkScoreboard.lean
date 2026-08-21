@@ -752,6 +752,29 @@ theorem wiedijk_item_fifteen_cube_endpoint_certificate :
     (Integral.cubeEffectiveFTCData.toDerivativeBoundFTC.endpointRaw).Valid := by
   exact cubeEffectiveFTC_endpointRaw_valid
 
+/-! The computable `sin²` calculus track is exposed separately from the
+unfinished endpoint-value subgoal.  The function and its monotonicity are
+already proved in the raw interval foundation; the final value `1/4` is only
+claimed when an effective primitive certificate supplies it. -/
+theorem wiedijk_item_fifteen_sin_square_function_valid
+    (S : SinPiIntegral.ArctanSinPiConstruction) :
+    (SinPiIntegral.sinPiSquareOnHalf S).Valid := by
+  exact SinPiIntegral.sinPiSquareOnHalf_valid S
+
+theorem wiedijk_item_fifteen_sin_square_monotone
+    (S : SinPiIntegral.ArctanSinPiConstruction)
+    (hsine : NondecreasingOnInterval S.onHalf) :
+    NondecreasingOnInterval
+      (SinPiIntegral.sinPiSquareOnHalfFunctionOnInterval S) := by
+  exact SinPiIntegral.sinPiSquareOnHalf_nondecreasing_of_sine_nondecreasing
+    S hsine
+
+theorem wiedijk_item_fifteen_sin_square_effective_ftc
+    {S : SinPiIntegral.ArctanSinPiConstruction}
+    (D : SinPiIntegral.SinPiSquareEffectiveFTCData S) :
+    D.integralRaw.Equiv D.endpointRaw := by
+  exact D.integral_equiv_endpoint
+
 theorem wiedijk_item_twenty_six_leibniz_series :
     Series.AlternatingRaw.leibnizAlternatingRaw.toRealRaw.Valid := by
   exact Series.AlternatingRaw.leibnizAlternatingRaw_valid
