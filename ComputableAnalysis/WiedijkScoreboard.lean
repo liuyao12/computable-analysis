@@ -453,6 +453,21 @@ theorem wiedijk_item_seventy_seven_sum_of_squares (n : Nat) :
       (n : Rat) * ((n : Rat) - 1) * (2 * (n : Rat) - 1) / 6 := by
   exact Series.squareSum_eq n
 
+/-! The square formula is a checked instance of the more general finite
+power-sum interface.  Its recurrence and block law are the computable core
+of sums of powers; no infinite series or completed real is involved. -/
+theorem wiedijk_item_seventy_seven_generic_power_sum_step
+    (k n : Nat) :
+    Series.powerSum k (n + 1) =
+      Series.powerSum k n + (n : Rat) ^ k := by
+  exact Series.powerSum_succ k n
+
+theorem wiedijk_item_seventy_seven_generic_power_sum_block
+    (k n m : Nat) :
+    Series.powerSum k (n + m) =
+      Series.powerSum k n + Series.powerSumBlock k n m := by
+  exact Series.powerSum_add_block k n m
+
 /-! Item 15 is represented here by the project's effective, certificate-level
 FTC portfolio.  This is deliberately a bundle of proved instances rather
 than the unrestricted classical theorem for every continuous function. -/
