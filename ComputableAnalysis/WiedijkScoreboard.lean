@@ -24,6 +24,7 @@ import ComputableAnalysis.FiniteMonotoneSequenceInterface
 import ComputableAnalysis.FiniteLHopitalCertificate
 import ComputableAnalysis.Basel
 import ComputableAnalysis.FiniteFourierCertificate
+import ComputableAnalysis.CauchyPi
 
 /-!
 # Wiedijk's List scoreboard
@@ -129,6 +130,7 @@ theorem wiedijkCalculusAnalysisEntries_count :
   native_decide
 
 def wiedijkCalculusAnalysisAnchoredEntries : List WiedijkEntry := [
+  ⟨9, "Certified circle-area computation"⟩,
   ⟨15, "Effective fundamental theorem of integral calculus"⟩,
   ⟨21, "Finite Green rectangle certificate"⟩,
   ⟨26, "Certified Leibniz series"⟩,
@@ -145,7 +147,7 @@ def wiedijkCalculusAnalysisAnchoredEntries : List WiedijkEntry := [
 ]
 
 theorem wiedijkCalculusAnalysisAnchoredEntries_count :
-    wiedijkCalculusAnalysisAnchoredEntries.length = 13 := by
+    wiedijkCalculusAnalysisAnchoredEntries.length = 14 := by
   native_decide
 
 /-! First completed row: the benchmark statement is exposed directly through
@@ -459,5 +461,14 @@ theorem wiedijk_item_seventy_six_finite_fourier_certificate
   exact ⟨fourPointFourierTransform_modes x₀ x₁ x₂ x₃,
     fourPointFourierTransform_reconstruct x₀ x₁ x₂ x₃,
     fourPointFourierTransform_parseval x₀ x₁ x₂ x₃⟩
+
+/-! Item 9 in its computable form: the circle-area interval algorithm is
+valid, and agrees with the independently constructed rational rectangle
+integral for the Cauchy kernel. -/
+theorem wiedijk_item_nine_effective_circle_area :
+    piCircleArea.Valid /\
+      CauchyPi.rectangleRaw.Equiv piCircleArea := by
+  exact ⟨CauchyPi.piCircleArea_valid,
+    CauchyPi.rectangleRaw_equiv_piCircleArea⟩
 
 end ComputableAnalysis
