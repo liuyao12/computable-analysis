@@ -140,6 +140,31 @@ theorem geometricPiSquaredOverSixRaw_valid :
     (by native_decide : (0 : Rat) < 4)
     piCircleArea_nonneg_bounded_by_four
 
+theorem geometricPiSquaredOverSixRaw_reaches_of_positive_tolerance
+    (eps : QPos) :
+    ∃ n : Nat,
+      (geometricPiSquaredOverSixRaw.compute n).width <= eps.val := by
+  obtain ⟨N, hN⟩ := geometricPiSquaredOverSixRaw_valid.2.2 eps
+  exact ⟨N, hN N (Nat.le_refl N)⟩
+
+theorem geometricPiSquaredOverSixRaw_precision_midpoint_witness
+    (eps : QPos) :
+    ∃ n : Nat, ∃ q : Rat,
+      (geometricPiSquaredOverSixRaw.compute n).lo <= q /\
+        q <= (geometricPiSquaredOverSixRaw.compute n).hi /\
+        (geometricPiSquaredOverSixRaw.compute n).width <= eps.val := by
+  obtain ⟨N, hN⟩ := geometricPiSquaredOverSixRaw_valid.2.2 eps
+  have hordered : (geometricPiSquaredOverSixRaw.compute N).lo <=
+      (geometricPiSquaredOverSixRaw.compute N).hi := by
+    have hnonneg := geometricPiSquaredOverSixRaw_valid.1 N
+    change 0 <= (geometricPiSquaredOverSixRaw.compute N).hi -
+      (geometricPiSquaredOverSixRaw.compute N).lo at hnonneg
+    grind
+  refine ⟨N, (geometricPiSquaredOverSixRaw.compute N).midpoint, ?_⟩
+  exact ⟨(QInterval.midpoint_mem hordered).1,
+    (QInterval.midpoint_mem hordered).2,
+    hN N (Nat.le_refl N)⟩
+
 /- Put the cursor here to compare with the zeta-side interval above. -/
 #eval! geometricPiSquaredOverSixRaw.decimalAt 12
   5

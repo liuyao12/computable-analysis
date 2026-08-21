@@ -1568,6 +1568,21 @@ theorem wiedijk_item_fourteen_effective_basel_series :
   exact ⟨Basel.baselSeriesRaw_valid,
     Basel.baselSeriesRaw_reaches_of_positive_tolerance⟩
 
+theorem wiedijk_item_fourteen_effective_pi_squared_over_six :
+    Basel.geometricPiSquaredOverSixRaw.Valid /\
+      (forall eps : QPos, ∃ n : Nat,
+        (Basel.geometricPiSquaredOverSixRaw.compute n).width <= eps.val) := by
+  exact ⟨Basel.geometricPiSquaredOverSixRaw_valid,
+    Basel.geometricPiSquaredOverSixRaw_reaches_of_positive_tolerance⟩
+
+theorem wiedijk_item_fourteen_pi_squared_over_six_midpoint_witness
+    (eps : QPos) :
+    ∃ n : Nat, ∃ q : Rat,
+      (Basel.geometricPiSquaredOverSixRaw.compute n).lo <= q /\
+        q <= (Basel.geometricPiSquaredOverSixRaw.compute n).hi /\
+        (Basel.geometricPiSquaredOverSixRaw.compute n).width <= eps.val := by
+  exact Basel.geometricPiSquaredOverSixRaw_precision_midpoint_witness eps
+
 theorem wiedijk_item_fourteen_basel_precision_midpoint_witness
     (eps : QPos) :
     ∃ n : Nat, ∃ q : Rat,
