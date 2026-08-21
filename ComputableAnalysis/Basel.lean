@@ -133,6 +133,17 @@ function theory layer is mature. -/
 def eulerBasel_geometricPi : Prop :=
   EulerBaselStatement piCircleArea
 
+/-! A proof assistant or downstream agent can provide the missing analytic
+argument as a finite certificate: one rational point must lie in each pair
+of stage intervals.  Packaging this separately keeps the target theorem
+small and makes the required evidence discoverable. -/
+structure StagewiseWitnessCertificate : Prop where
+  witness : forall n m : Nat, ∃ q : Rat,
+    (DirichletSeries.zetaTwoRaw.compute n).lo <= q ∧
+      q <= (DirichletSeries.zetaTwoRaw.compute n).hi ∧
+    ((piSquaredOverSixRaw piCircleArea).compute m).lo <= q ∧
+      q <= ((piSquaredOverSixRaw piCircleArea).compute m).hi
+
 /-- The geometric Basel target can be proved by showing that the two valid
 raw algorithms overlap at every pair of finite stages.  This is the native
 computable-real form of the remaining theorem; it does not invoke a
@@ -163,6 +174,11 @@ theorem eulerBasel_geometric_of_stagewise_witness
     DirichletSeries.zetaTwoRaw (piSquaredOverSixRaw piCircleArea) n m).2
   rcases h n m with ⟨q, hzl, hzh, hpl, hph⟩
   constructor <;> grind
+
+theorem eulerBasel_geometric_of_certificate
+    (certificate : StagewiseWitnessCertificate) :
+    eulerBasel_geometricPi := by
+  exact eulerBasel_geometric_of_stagewise_witness certificate.witness
 
 end Basel
 

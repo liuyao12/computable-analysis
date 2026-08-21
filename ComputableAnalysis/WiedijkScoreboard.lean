@@ -1398,6 +1398,11 @@ theorem wiedijk_item_fourteen_basel_of_stagewise_witness
     Basel.eulerBasel_geometricPi := by
   exact Basel.eulerBasel_geometric_of_stagewise_witness h
 
+theorem wiedijk_item_fourteen_basel_of_witness_certificate
+    (certificate : Basel.StagewiseWitnessCertificate) :
+    Basel.eulerBasel_geometricPi := by
+  exact Basel.eulerBasel_geometric_of_certificate certificate
+
 theorem wiedijk_item_fourteen_basel_finite_overlap_certificate :
     (DirichletSeries.zetaTwoInterval 200000).lo <=
         (BaselFiniteComparison.geometricPiSquaredOverSixCompute 12).hi /\
