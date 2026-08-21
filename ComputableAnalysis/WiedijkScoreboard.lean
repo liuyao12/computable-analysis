@@ -2029,6 +2029,12 @@ theorem wiedijk_item_seventy_six_fourier_generic_repeated_block_cancellation
   exact finiteFourierSum_blockRepeat_zero_of_phase_one
     root mode block k hblock hphase
 
+theorem wiedijk_item_seventy_six_fourier_block_certificate_repeated_zero
+    (certificate : FiniteFourierBlockCancellationCertificate) (k : Nat) :
+    finiteFourierSum certificate.root certificate.mode
+        (finiteFourierBlockRepeat certificate.block k) = QComplex.zero := by
+  exact certificate.repeated_zero k
+
 theorem wiedijk_item_seventy_six_finite_list_mode_period_four
     (mode : Nat) (samples : List QComplex) :
     finiteFourierSum RotationSeries.imaginaryUnit (mode + 4) samples =

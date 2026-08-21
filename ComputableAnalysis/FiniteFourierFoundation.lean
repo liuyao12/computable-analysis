@@ -47,6 +47,17 @@ def finiteFourierBlockRepeat (block : List QComplex) : Nat → List QComplex
   | 0 => []
   | k + 1 => block ++ finiteFourierBlockRepeat block k
 
+/-! A reusable certificate for one finite Fourier block.  The cancellation and
+phase facts are explicit inputs; this keeps the interface constructive and
+lets an agent instantiate it with whatever exact root-of-unity computation is
+available. -/
+structure FiniteFourierBlockCancellationCertificate where
+  root : QComplex
+  mode : Nat
+  block : List QComplex
+  block_zero : finiteFourierSum root mode block = QComplex.zero
+  phase_one : QComplex.natPow root (mode * block.length) = QComplex.one
+
 private theorem qcomplex_add_four_rearrange
     (a b c d : QComplex) :
     QComplex.add (QComplex.add a b) (QComplex.add c d) =
@@ -563,5 +574,13 @@ theorem finiteFourierSum_blockRepeat_zero_of_phase_one
       rw [finiteFourierBlockRepeat, finiteFourierSum_append_phase]
       rw [hblock, hphase, ih]
       rw [qcomplex_one_mul, qcomplex_zero_add]
+
+theorem FiniteFourierBlockCancellationCertificate.repeated_zero
+    (certificate : FiniteFourierBlockCancellationCertificate) (k : Nat) :
+    finiteFourierSum certificate.root certificate.mode
+        (finiteFourierBlockRepeat certificate.block k) = QComplex.zero := by
+  exact finiteFourierSum_blockRepeat_zero_of_phase_one
+    certificate.root certificate.mode certificate.block k
+    certificate.block_zero certificate.phase_one
 
 end ComputableAnalysis
