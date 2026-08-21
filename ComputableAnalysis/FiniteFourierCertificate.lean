@@ -82,6 +82,23 @@ theorem fourPointFourierSum_period_four_mul (mode k : Nat) :
         simp [Nat.mul_succ, Nat.add_assoc]]
       rw [fourPointFourierSum_period_four, ih]
 
+theorem fourPointFourierSum_four_residue (k : Nat) :
+    fourPointFourierSum (4 * k) = { re := 4, im := 0 } /\
+      fourPointFourierSum (1 + 4 * k) = QComplex.zero /\
+      fourPointFourierSum (2 + 4 * k) = QComplex.zero /\
+      fourPointFourierSum (3 + 4 * k) = QComplex.zero := by
+  have h0 := fourPointFourierSum_period_four_mul 0 k
+  have h1 := fourPointFourierSum_period_four_mul 1 k
+  have h2 := fourPointFourierSum_period_four_mul 2 k
+  have h3 := fourPointFourierSum_period_four_mul 3 k
+  constructor
+  · simpa [fourPointFourierSum_zero_mode] using h0
+  constructor
+  · simpa [fourPointFourierSum_first_mode] using h1
+  constructor
+  · simpa [fourPointFourierSum_second_mode] using h2
+  · simpa [fourPointFourierSum_third_mode] using h3
+
 theorem fourPointFourier_orthogonality_certificate :
     fourPointFourierSum 0 = { re := 4, im := 0 } /\
       fourPointFourierSum 1 = QComplex.zero /\
