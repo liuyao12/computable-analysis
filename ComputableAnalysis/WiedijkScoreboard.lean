@@ -2,6 +2,7 @@ import ComputableAnalysis.IrrationalSqrt
 import ComputableAnalysis.SqrtTwoDescent
 import ComputableAnalysis.RationalCircle
 import ComputableAnalysis.FiniteBinomialCertificate
+import ComputableAnalysis.EffectiveFTCPortfolio
 
 /-!
 # Wiedijk's List scoreboard
@@ -124,5 +125,11 @@ theorem wiedijk_item_seventy_seven_sum_of_squares (n : Nat) :
     Series.squareSum n =
       (n : Rat) * ((n : Rat) - 1) * (2 * (n : Rat) - 1) / 6 := by
   exact Series.squareSum_eq n
+
+/-! Item 15 is represented here by the project's effective, certificate-level
+FTC portfolio.  This is deliberately a bundle of proved instances rather
+than the unrestricted classical theorem for every continuous function. -/
+theorem wiedijk_item_fifteen_effective_ftc : EffectiveFTCPortfolio := by
+  exact effectiveFTCPortfolio
 
 end ComputableAnalysis
