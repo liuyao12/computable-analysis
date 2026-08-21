@@ -1115,6 +1115,16 @@ theorem wiedijk_item_thirty_four_harmonic_power_lower (k : Nat) :
     (k : Rat) / 2 <= FiniteHarmonic.harmonicSum (2 ^ k) := by
   exact FiniteHarmonic.harmonicSum_two_pow_lower k
 
+/-! The direct computable form of harmonic divergence: a requested finite
+threshold is reached by an explicit finite stage.  No infinite value is
+introduced or treated as attained. -/
+theorem wiedijk_item_thirty_four_harmonic_reaches_every_natural_threshold
+    (target : Nat) :
+    ∃ stage : Nat,
+      (target : Rat) <= FiniteHarmonic.harmonicSum stage := by
+  refine ⟨2 ^ (2 * target), ?_⟩
+  exact FiniteHarmonic.harmonicSum_two_pow_reaches target
+
 theorem wiedijk_item_thirty_eight_arithmetic_geometric_mean
     {a b c d : Rat}
     (ha : 0 <= a) (hb : 0 <= b) (hc : 0 <= c) (hd : 0 <= d) :
