@@ -1,0 +1,87 @@
+import ComputableAnalysis.IrrationalSqrt
+import ComputableAnalysis.SqrtTwoDescent
+
+/-!
+# Wiedijk's List scoreboard
+
+This is the machine-readable companion to the 52 scoped rows in the
+blueprint.  A row records the benchmark number and the project-facing name;
+the theorem itself is proved in its subject module.  The list is deliberately
+not a claim that every unrestricted classical statement has been reproduced:
+each row is the computable or certificate-level target selected by the
+blueprint.
+-/
+
+namespace ComputableAnalysis
+
+structure WiedijkEntry where
+  number : Nat
+  name : String
+deriving Repr, DecidableEq
+
+def wiedijkScopedEntries : List WiedijkEntry := [
+  ⟨1, "Irrationality of sqrt 2"⟩,
+  ⟨2, "Fundamental theorem of algebra"⟩,
+  ⟨3, "Denumerability of the rationals"⟩,
+  ⟨4, "Pythagorean theorem"⟩,
+  ⟨8, "Doubling the cube"⟩,
+  ⟨9, "Area of a circle"⟩,
+  ⟨11, "Infinitude of primes"⟩,
+  ⟨14, "Basel sum"⟩,
+  ⟨15, "Fundamental theorem of integral calculus"⟩,
+  ⟨16, "Abel--Ruffini boundary"⟩,
+  ⟨17, "de Moivre formula"⟩,
+  ⟨21, "Green theorem"⟩,
+  ⟨23, "Pythagorean triples"⟩,
+  ⟨26, "Leibniz series for pi"⟩,
+  ⟨27, "Sum of angles of a triangle"⟩,
+  ⟨34, "Divergence of the harmonic series"⟩,
+  ⟨35, "Taylor theorem"⟩,
+  ⟨37, "Solution of a cubic"⟩,
+  ⟨39, "Pell equation"⟩,
+  ⟨43, "Isoperimetric theorem"⟩,
+  ⟨44, "Binomial theorem"⟩,
+  ⟨46, "General quartic equation"⟩,
+  ⟨49, "Cayley--Hamilton theorem"⟩,
+  ⟨55, "Product of chord segments"⟩,
+  ⟨57, "Heron's formula"⟩,
+  ⟨60, "Bezout identity"⟩,
+  ⟨64, "L'Hopital rule"⟩,
+  ⟨65, "Isosceles triangle theorem"⟩,
+  ⟨66, "Geometric series"⟩,
+  ⟨68, "Arithmetic series"⟩,
+  ⟨69, "Greatest common divisor"⟩,
+  ⟨73, "Monotone sequences"⟩,
+  ⟨74, "Mathematical induction"⟩,
+  ⟨75, "Mean value theorem"⟩,
+  ⟨76, "Fourier series"⟩,
+  ⟨79, "Intermediate value theorem"⟩,
+  ⟨80, "Fundamental theorem of arithmetic"⟩,
+  ⟨81, "Prime reciprocal series"⟩,
+  ⟨89, "Factor and remainder theorems"⟩,
+  ⟨91, "Triangle inequality"⟩,
+  ⟨92, "Pick theorem"⟩,
+  ⟨94, "Law of cosines"⟩,
+  ⟨95, "Ptolemy theorem"⟩,
+  ⟨97, "Cramer's rule"⟩,
+  ⟨98, "Bertrand postulate"⟩,
+  ⟨100, "Descartes rule of signs"⟩,
+  ⟨38, "Arithmetic--geometric mean inequality"⟩,
+  ⟨42, "Reciprocal triangular numbers"⟩,
+  ⟨77, "Sums of powers"⟩,
+  ⟨78, "Cauchy--Schwarz inequality"⟩,
+  ⟨85, "Divisibility by 3"⟩,
+  ⟨90, "Stirling formula"⟩
+]
+
+theorem wiedijkScopedEntries_count : wiedijkScopedEntries.length = 52 := by
+  native_decide
+
+/-! First completed row: the benchmark statement is exposed directly through
+the project's raw-real irrationality predicate, rather than Mathlib's
+completed real-number predicate. -/
+theorem wiedijk_item_one_sqrt_two :
+    RealRaw.Irrational (sqrtRat (2 : Rat) (by native_decide)) := by
+  exact sqrt_two_irrational_via_descent
+
+end ComputableAnalysis
