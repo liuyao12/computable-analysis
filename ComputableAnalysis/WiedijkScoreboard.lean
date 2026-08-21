@@ -940,6 +940,22 @@ theorem wiedijk_item_seventy_three_finite_monotone_sequence
     certificate.sequence a ≤ certificate.sequence b := by
   exact certificate.pair_le hab
 
+theorem wiedijk_item_seventy_three_bounded_monotone_interval
+    (certificate : MonotoneIntervalCertificate)
+    {a b : Nat} (hab : a ≤ b) :
+    certificate.loStage a ≤ certificate.loStage b /\
+      certificate.loStage b ≤ certificate.hiStage b /\
+      certificate.hiStage b ≤ certificate.hiStage a := by
+  exact ⟨MonotoneIntervalCertificate.lower_pair_le certificate hab,
+    certificate.enclosed b,
+    MonotoneIntervalCertificate.upper_pair_ge certificate hab⟩
+
+theorem wiedijk_item_seventy_three_bounded_monotone_precision
+    (certificate : MonotoneIntervalCertificate) (eps : QPos) :
+    ∃ N : Nat, ∀ n, N ≤ n ->
+      certificate.hiStage n - certificate.loStage n <= eps.val := by
+  exact certificate.width_shrinks eps
+
 /-! Item 64 in its computable form: after cancelling a common nonzero linear
 factor, the quotient differs from its base value by an explicit rational
 remainder.  The remainder is the finite convergence certificate; no completed
