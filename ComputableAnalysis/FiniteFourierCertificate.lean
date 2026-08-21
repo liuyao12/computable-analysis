@@ -155,6 +155,75 @@ theorem fourPointFourierTransform_modes (x₀ x₁ x₂ x₃ : Rat) :
   grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
     Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
 
+/-! The four-point cyclic convolution is the finite product operation whose
+Fourier transform is coefficientwise multiplication.  It is stated in
+rational coordinates so that this remains an exact computable identity. -/
+def fourPointConvolution₀
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : Rat) : Rat :=
+  x₀ * y₀ + x₁ * y₃ + x₂ * y₂ + x₃ * y₁
+
+def fourPointConvolution₁
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : Rat) : Rat :=
+  x₀ * y₁ + x₁ * y₀ + x₂ * y₃ + x₃ * y₂
+
+def fourPointConvolution₂
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : Rat) : Rat :=
+  x₀ * y₂ + x₁ * y₁ + x₂ * y₀ + x₃ * y₃
+
+def fourPointConvolution₃
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : Rat) : Rat :=
+  x₀ * y₃ + x₁ * y₂ + x₂ * y₁ + x₃ * y₀
+
+theorem fourPointFourierTransform_cyclic_convolution
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : Rat) :
+    fourPointFourierTransform
+        (fourPointConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 0 =
+      QComplex.mul
+        (fourPointFourierTransform x₀ x₁ x₂ x₃ 0)
+        (fourPointFourierTransform y₀ y₁ y₂ y₃ 0) /\
+    fourPointFourierTransform
+        (fourPointConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 1 =
+      QComplex.mul
+        (fourPointFourierTransform x₀ x₁ x₂ x₃ 1)
+        (fourPointFourierTransform y₀ y₁ y₂ y₃ 1) /\
+    fourPointFourierTransform
+        (fourPointConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 2 =
+      QComplex.mul
+        (fourPointFourierTransform x₀ x₁ x₂ x₃ 2)
+        (fourPointFourierTransform y₀ y₁ y₂ y₃ 2) /\
+    fourPointFourierTransform
+        (fourPointConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 3 =
+      QComplex.mul
+        (fourPointFourierTransform x₀ x₁ x₂ x₃ 3)
+        (fourPointFourierTransform y₀ y₁ y₂ y₃ 3) := by
+  rcases fourPointFourierTransform_modes x₀ x₁ x₂ x₃ with
+    ⟨hx₀, hx₁, hx₂, hx₃⟩
+  rcases fourPointFourierTransform_modes y₀ y₁ y₂ y₃ with
+    ⟨hy₀, hy₁, hy₂, hy₃⟩
+  rcases fourPointFourierTransform_modes
+      (fourPointConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+      (fourPointConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+      (fourPointConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+      (fourPointConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) with
+    ⟨hc₀, hc₁, hc₂, hc₃⟩
+  rw [hc₀, hc₁, hc₂, hc₃, hx₀, hx₁, hx₂, hx₃, hy₀, hy₁, hy₂, hy₃]
+  simp [QComplex.mul, fourPointConvolution₀, fourPointConvolution₁,
+    fourPointConvolution₂, fourPointConvolution₃]
+  constructor <;> grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+    Rat.add_left_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
+
 /-! The four modes also reconstruct the original four samples.  This is the
 finite inverse-transform statement behind the orthogonality certificate. -/
 
