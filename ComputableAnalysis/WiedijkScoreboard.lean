@@ -160,7 +160,7 @@ def wiedijkCalculusAnalysisAnchoredEntries : List WiedijkEntry := [
   ⟨78, "Rational Cauchy--Schwarz"⟩,
   ⟨79, "Finite intermediate-value bracket"⟩,
   ⟨81, "Finite prime-reciprocal extension"⟩,
-  ⟨76, "Finite Fourier transform certificate"⟩,
+  ⟨76, "Effective Fourier finite-stage and tail certificate"⟩,
   ⟨90, "Finite Stirling-ratio certificate"⟩
 ]
 
