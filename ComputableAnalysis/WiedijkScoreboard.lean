@@ -1660,6 +1660,16 @@ theorem wiedijk_item_seventy_five_exact_convex_corner_order
     Dleft.raw.Le Dright.raw := by
   exact leftDerivativeAt_le_rightDerivativeAt Dleft Dright
 
+theorem wiedijk_item_seventy_five_derivative_between_neighboring_secants
+    {F : RealFunRaw} {a b q : Rat}
+    {hF : ExactConvexOn F a b}
+    (Dleft : LeftDerivativeAt hF q)
+    (Dright : RightDerivativeAt hF q)
+    (haq : a < q) (hqb : q < b) :
+    (secantRaw F a q).Le Dleft.raw /\
+      Dright.raw.Le (secantRaw F q b) := by
+  exact derivative_between_neighboring_secants Dleft Dright haq hqb
+
 /-! Item 73 in its computable form: a successor inequality propagates to any
 finite pair of stages.  This is the order content needed by stage algorithms;
 it does not smuggle in a supremum or a completed limit. -/

@@ -251,6 +251,37 @@ theorem leftDerivativeAt_le_rightDerivativeAt
     hF.secant_le_secant hq_left_mem hq_mem hq_mem hright_endpoint_mem
       hleft_lt (Rat.le_refl : q <= q) hright_lt
 
+/-! The derivative enclosure at an interior point is bounded by the two
+neighboring endpoint secants.  This is the direct convex-function form of the
+mean-value mechanism: it uses only the supplied secant certificates and
+rational subtraction, with no attained intermediate point and no completed
+real supremum. -/
+theorem derivative_between_neighboring_secants
+    {F : RealFunRaw} {a b q : Rat}
+    {hF : ExactConvexOn F a b}
+    (Dleft : LeftDerivativeAt hF q)
+    (Dright : RightDerivativeAt hF q)
+    (haq : a < q) (hqb : q < b) :
+    (secantRaw F a q).Le Dleft.raw /\
+      Dright.raw.Le (secantRaw F q b) := by
+  constructor
+  · have hstep : 0 < q - a := by
+      rw [← Rat.lt_iff_sub_pos]
+      exact haq
+    have hleft : a <= q - (q - a) := by grind
+    have hbound := Dleft.isLeftDerivative.upper_bound
+      (q - a) hstep hleft
+    have hendpoint : q - (q - a) = a := by grind
+    simpa [leftSecantRaw, hendpoint] using hbound
+  · have hstep : 0 < b - q := by
+      rw [← Rat.lt_iff_sub_pos]
+      exact hqb
+    have hright : q + (b - q) <= b := by grind
+    have hbound := Dright.isRightDerivative.lower_bound
+      (b - q) hstep hright
+    have hendpoint : q + (b - q) = b := by grind
+    simpa [rightSecantRaw, hendpoint] using hbound
+
 /-- Exact concavity is convexity with the secant order reversed. -/
 structure ExactConcaveOn (F : RealFunRaw) (a b : Rat) where
   domain_on : forall x, inDomainInterval a b x -> F.domain x
