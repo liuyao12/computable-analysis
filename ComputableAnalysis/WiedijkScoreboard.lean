@@ -307,6 +307,21 @@ theorem wiedijk_item_twenty_seven_oriented_triangle_boundary
   exact ⟨RationalCircle.triangleTwiceArea_cyclic p q r,
     RationalCircle.triangleTwiceArea_swap_neg p q r⟩
 
+theorem wiedijk_item_twenty_seven_triangle_shoelace
+    (p q r : PiCirclePoint) :
+    RationalCircle.triangleTwiceArea p q r =
+      p.x * q.y + q.x * r.y + r.x * p.y -
+        (p.y * q.x + q.y * r.x + r.y * p.x) := by
+  exact RationalCircle.triangleTwiceArea_shoelace p q r
+
+theorem wiedijk_item_twenty_seven_quadrilateral_area_additivity
+    (p q r s : PiCirclePoint) :
+    RationalCircle.triangleTwiceArea p q r +
+        RationalCircle.triangleTwiceArea p r s =
+      RationalCircle.triangleTwiceArea p q s +
+        RationalCircle.triangleTwiceArea q r s := by
+  exact RationalCircle.triangleTwiceArea_quadrilateral_diagonal_additivity p q r s
+
 /-! Item 85 in its terminating computable form: divisibility by three is
 decided by the decimal digit sum, with the residue equality exposed. -/
 theorem wiedijk_item_eighty_five_decimal_divisibility (n : Nat) :
