@@ -1992,7 +1992,32 @@ theorem wiedijk_item_seventy_six_fourier_constant_repeated_block_orthogonality
       (finiteFourierSum_quarterTurn_constant_block_mode_one c) hphase1,
     finiteFourierSum_replicate_block_zero_of_phase_one _ _ c k
       (finiteFourierSum_quarterTurn_constant_block_mode_two c) hphase2,
-    finiteFourierSum_replicate_block_zero_of_phase_one _ _ c k
+      finiteFourierSum_replicate_block_zero_of_phase_one _ _ c k
+      (finiteFourierSum_quarterTurn_constant_block_mode_three c) hphase3⟩
+
+theorem wiedijk_item_seventy_six_fourier_constant_offset_invariance
+    (c : QComplex) (k : Nat) (samples : List QComplex) :
+    finiteFourierSum RotationSeries.imaginaryUnit 1
+        (qcomplexListAdd samples (List.replicate (4 * k) c)) =
+        finiteFourierSum RotationSeries.imaginaryUnit 1 samples /\
+      finiteFourierSum RotationSeries.imaginaryUnit 2
+        (qcomplexListAdd samples (List.replicate (4 * k) c)) =
+        finiteFourierSum RotationSeries.imaginaryUnit 2 samples /\
+      finiteFourierSum RotationSeries.imaginaryUnit 3
+        (qcomplexListAdd samples (List.replicate (4 * k) c)) =
+        finiteFourierSum RotationSeries.imaginaryUnit 3 samples := by
+  have hphase1 : QComplex.natPow RotationSeries.imaginaryUnit (1 * 4) =
+      QComplex.one := by native_decide
+  have hphase2 : QComplex.natPow RotationSeries.imaginaryUnit (2 * 4) =
+      QComplex.one := by native_decide
+  have hphase3 : QComplex.natPow RotationSeries.imaginaryUnit (3 * 4) =
+      QComplex.one := by native_decide
+  exact ⟨
+    finiteFourierSum_add_replicate_block_invariant_of_phase_one _ _ c k samples
+      (finiteFourierSum_quarterTurn_constant_block_mode_one c) hphase1,
+    finiteFourierSum_add_replicate_block_invariant_of_phase_one _ _ c k samples
+      (finiteFourierSum_quarterTurn_constant_block_mode_two c) hphase2,
+    finiteFourierSum_add_replicate_block_invariant_of_phase_one _ _ c k samples
       (finiteFourierSum_quarterTurn_constant_block_mode_three c) hphase3⟩
 
 theorem wiedijk_item_seventy_six_finite_list_mode_period_four

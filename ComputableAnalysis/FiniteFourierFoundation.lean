@@ -527,4 +527,19 @@ theorem finiteFourierSum_replicate_block_zero_of_phase_one
       rw [hlength, ih, hperiod k, hrep4, hblock]
       rw [qcomplex_one_mul, qcomplex_zero_add]
 
+/-! Adding a repeated block whose selected Fourier coefficient vanishes does
+not change that coefficient.  This is the finite algebraic form of removing
+an orthogonal component; it is independent of limits and completed reals. -/
+theorem finiteFourierSum_add_replicate_block_invariant_of_phase_one
+    (root : QComplex) (mode : Nat) (c : QComplex) (k : Nat)
+    (xs : List QComplex)
+    (hblock : finiteFourierSum root mode [c, c, c, c] = QComplex.zero)
+    (hphase : QComplex.natPow root (mode * 4) = QComplex.one) :
+    finiteFourierSum root mode
+        (qcomplexListAdd xs (List.replicate (4 * k) c)) =
+      finiteFourierSum root mode xs := by
+  rw [finiteFourierSum_add,
+    finiteFourierSum_replicate_block_zero_of_phase_one root mode c k hblock hphase,
+    qcomplex_add_zero]
+
 end ComputableAnalysis
