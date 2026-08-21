@@ -68,6 +68,15 @@ private theorem qcomplex_zero_add (z : QComplex) :
   simp [QComplex.add, QComplex.zero]
   constructor <;> grind
 
+private theorem qcomplex_add_assoc (a b c : QComplex) :
+    QComplex.add a (QComplex.add b c) =
+      QComplex.add (QComplex.add a b) c := by
+  cases a
+  cases b
+  cases c
+  simp [QComplex.add]
+  constructor <;> grind [Rat.add_assoc]
+
 private theorem qcomplex_scale_mul
     (r : Rat) (x z : QComplex) :
     QComplex.mul (QComplex.scaleRat r x) z =
@@ -127,6 +136,35 @@ theorem finiteFourierSum_add
       QComplex.add (finiteFourierSum root mode xs)
         (finiteFourierSum root mode ys) := by
   exact finiteFourierSum_aux_add root mode 0 xs ys
+
+theorem finiteFourierSum_aux_append
+    (root : QComplex) (mode k : Nat)
+    (xs ys : List QComplex) :
+    finiteFourierSumAux root mode k (xs ++ ys) =
+      QComplex.add
+        (finiteFourierSumAux root mode k xs)
+        (finiteFourierSumAux root mode (k + xs.length) ys) := by
+  induction xs generalizing k with
+  | nil =>
+      simp only [List.nil_append, List.length_nil, Nat.add_zero,
+        finiteFourierSumAux]
+      exact (qcomplex_zero_add _).symm
+  | cons x xs ih =>
+      simp only [List.cons_append, List.length_cons, finiteFourierSumAux]
+      rw [ih (k := k + 1)]
+      have hindex : k + 1 + xs.length = k + (xs.length + 1) := by omega
+      rw [hindex]
+      exact qcomplex_add_assoc _ _ _
+
+theorem finiteFourierSum_append
+    (root : QComplex) (mode : Nat)
+    (xs ys : List QComplex) :
+    finiteFourierSum root mode (xs ++ ys) =
+      QComplex.add
+        (finiteFourierSum root mode xs)
+        (finiteFourierSumAux root mode xs.length ys) := by
+  simpa [finiteFourierSum] using
+    (finiteFourierSum_aux_append root mode 0 xs ys)
 
 theorem finiteFourierSum_aux_scale
     (r : Rat) (root : QComplex) (mode k : Nat)
