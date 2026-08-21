@@ -28,6 +28,7 @@ import ComputableAnalysis.FiniteFourierFoundation
 import ComputableAnalysis.EffectiveFourierSeries
 import ComputableAnalysis.FiniteFourierGeometric
 import ComputableAnalysis.FiniteComplexQuadraticExample
+import ComputableAnalysis.FiniteDigitDivisibilityInterface
 import ComputableAnalysis.CauchyPi
 import ComputableAnalysis.FinitePrimeReciprocalCertificate
 import ComputableAnalysis.FiniteStirlingInterface
@@ -235,6 +236,13 @@ theorem wiedijk_item_twenty_seven_oriented_triangle_boundary
         -RationalCircle.triangleTwiceArea p r q := by
   exact ⟨RationalCircle.triangleTwiceArea_cyclic p q r,
     RationalCircle.triangleTwiceArea_swap_neg p q r⟩
+
+/-! Item 85 in its terminating computable form: divisibility by three is
+decided by the decimal digit sum, with the residue equality exposed. -/
+theorem wiedijk_item_eighty_five_decimal_divisibility (n : Nat) :
+    (3 ∣ n ↔ 3 ∣ decimalDigitSum n) /\
+      decimalDigitSum n % 3 = n % 3 := by
+  exact decimalDigitSum_divisibility_certificate n
 
 theorem wiedijk_item_forty_four_binomial_certificate :
     Series.binomialSum 5 2 1 6 = 243 := by
