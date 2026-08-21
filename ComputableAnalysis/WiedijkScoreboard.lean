@@ -2121,6 +2121,11 @@ theorem wiedijk_item_seventy_six_fourier_block_certificate_repeated_zero
         (finiteFourierBlockRepeat certificate.block k) = QComplex.zero := by
   exact certificate.repeated_zero k
 
+theorem wiedijk_item_seventy_six_fourier_repeated_block_length
+    (block : List QComplex) (k : Nat) :
+    (finiteFourierBlockRepeat block k).length = block.length * k := by
+  exact finiteFourierBlockRepeat_length block k
+
 theorem wiedijk_item_seventy_six_finite_list_mode_period_four
     (mode : Nat) (samples : List QComplex) :
     finiteFourierSum RotationSeries.imaginaryUnit (mode + 4) samples =

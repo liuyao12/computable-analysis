@@ -47,6 +47,13 @@ def finiteFourierBlockRepeat (block : List QComplex) : Nat → List QComplex
   | 0 => []
   | k + 1 => block ++ finiteFourierBlockRepeat block k
 
+theorem finiteFourierBlockRepeat_length (block : List QComplex) (k : Nat) :
+    (finiteFourierBlockRepeat block k).length = block.length * k := by
+  induction k with
+  | zero => simp [finiteFourierBlockRepeat]
+  | succ k ih =>
+      simp [finiteFourierBlockRepeat, ih, Nat.mul_succ]
+
 /-! A reusable certificate for one finite Fourier block.  The cancellation and
 phase facts are explicit inputs; this keeps the interface constructive and
 lets an agent instantiate it with whatever exact root-of-unity computation is
