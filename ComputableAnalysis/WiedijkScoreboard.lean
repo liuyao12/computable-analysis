@@ -2945,7 +2945,7 @@ theorem wiedijk_item_seventy_six_geometric_coefficient_stage_recurrence
           (QComplex.ofRat (r ^ n))) := by
   exact finiteFourierSum_geometricCoefficientStage_succ root mode r n
 
-theorem wiedijk_item_seventy_six_geometric_term_coordinate_bound
+theorem wiedijk_item_seventy_six_bounded_root_geometric_term_coordinate_bound
     {root : QComplex} {mode : Nat} {r : Rat}
     (hr0 : 0 <= r)
     (hroot : ∀ n : Nat,
