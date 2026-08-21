@@ -370,6 +370,19 @@ theorem wiedijk_item_sixteen_exact_candidate_search_none_iff
       ∀ z, z ∈ candidates -> ¬ CPoly.hasExactRoot coeffs z := by
   exact exactRootSearch_none_iff
 
+theorem wiedijk_item_sixteen_exact_candidate_search_sound
+    {coeffs : CPoly.Coeffs} {candidates : List QComplex} {z : QComplex}
+    (hsearch : exactRootSearch coeffs candidates = some z) :
+    CPoly.hasExactRoot coeffs z := by
+  exact exactRootSearch_sound hsearch
+
+theorem wiedijk_item_sixteen_exact_candidate_search_complete
+    {coeffs : CPoly.Coeffs} {candidates : List QComplex}
+    (hexists : Exists fun z => z ∈ candidates /\ CPoly.hasExactRoot coeffs z) :
+    Exists fun z => exactRootSearch coeffs candidates = some z /\
+      CPoly.hasExactRoot coeffs z := by
+  exact exactRootSearch_complete hexists
+
 theorem wiedijk_item_sixteen_factorized_quintic_root_characterization
     (r₁ r₂ r₃ r₄ r₅ z : QComplex) :
     CPoly.hasExactRoot
