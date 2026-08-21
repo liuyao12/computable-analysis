@@ -53,6 +53,7 @@ theorem finiteFourierBlockRepeat_length (block : List QComplex) (k : Nat) :
   | zero => simp [finiteFourierBlockRepeat]
   | succ k ih =>
       simp [finiteFourierBlockRepeat, ih, Nat.mul_succ]
+      omega
 
 /-! A reusable certificate for one finite Fourier block.  The cancellation and
 phase facts are explicit inputs; this keeps the interface constructive and
