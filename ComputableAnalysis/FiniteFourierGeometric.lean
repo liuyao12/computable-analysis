@@ -77,4 +77,32 @@ theorem quarterTurn_geometric_term_coord_abs_le
   · simpa [Rat.mul_one] using
       Rat.mul_le_mul_of_nonneg_left hpower.2 hpow_nonneg
 
+def quarterTurnGeometricStage (r : Rat) (n : Nat) : QComplex :=
+  finiteFourierSum RotationSeries.imaginaryUnit 1
+    (geometricCoefficientStage r n)
+
+theorem quarterTurnGeometricStage_succ (r : Rat) (n : Nat) :
+    quarterTurnGeometricStage r (n + 1) =
+      QComplex.add (quarterTurnGeometricStage r n)
+        (QComplex.mul
+          (QComplex.natPow RotationSeries.imaginaryUnit n)
+          (QComplex.ofRat (r ^ n))) := by
+  simpa [quarterTurnGeometricStage] using
+    (finiteFourierSum_geometricCoefficientStage_succ
+      RotationSeries.imaginaryUnit 1 r n)
+
+theorem quarterTurnGeometricStage_increment_coord_abs_le
+    {r : Rat} (hr0 : 0 <= r) (n : Nat) :
+    qabs ((quarterTurnGeometricStage r (n + 1)).re -
+      (quarterTurnGeometricStage r n).re) <= r ^ n /\
+    qabs ((quarterTurnGeometricStage r (n + 1)).im -
+      (quarterTurnGeometricStage r n).im) <= r ^ n := by
+  rw [quarterTurnGeometricStage_succ]
+  have hterm := quarterTurn_geometric_term_coord_abs_le hr0 n
+  have hcancel (x a : Rat) : x + (-x + a) = a := by
+    rw [← Rat.add_assoc, Rat.add_neg_cancel, Rat.zero_add]
+  simpa [QComplex.add, QComplex.mul, QComplex.ofRat,
+    Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
+    Rat.mul_comm, hcancel] using hterm
+
 end ComputableAnalysis
