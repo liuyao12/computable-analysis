@@ -992,6 +992,24 @@ theorem wiedijk_item_forty_nine_rational_two_by_two_cayley_hamilton
       LinearODE.matrixZero 2 := by
   exact LinearODE.HarmonicOscillator.ratMatrix_twoByTwo_cayley_hamilton A
 
+/-- The arbitrary-dimension computable boundary for Cayley--Hamilton.
+
+The certificate carries the finite monic annihilating polynomial; the
+downstream conclusion is the resulting recurrence for every matrix power.
+This keeps the determinant/characteristic-polynomial construction explicit
+instead of hiding classical algebra in the foundation.
+-/
+theorem wiedijk_item_forty_nine_arbitrary_dimension_power_recurrence
+    {dimension : Nat}
+    (certificate : LinearODE.FiniteCayleyHamiltonCertificate dimension)
+    (steps : Nat) :
+    LinearODE.matrixPow certificate.matrix
+        (steps + certificate.lowerCoefficients.length) =
+      LinearODE.matrixScale (-1)
+        (LinearODE.matrixPolynomialSum certificate.matrix
+          certificate.lowerCoefficients steps) := by
+  exact certificate.power_recurrence steps
+
 theorem wiedijk_item_fifty_five_chord_power_certificate :
     (RationalCircle.horizontalChordPowerSqrtRaw (4 / 5) 1
       (by native_decide) (by native_decide)).Equiv
