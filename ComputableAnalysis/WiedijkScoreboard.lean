@@ -2231,6 +2231,43 @@ theorem wiedijk_item_seventy_six_complex_fourier_period_four
       fourPointComplexFourierTransform x₀ x₁ x₂ x₃ mode := by
   exact fourPointComplexFourierTransform_period_four x₀ x₁ x₂ x₃ mode
 
+theorem wiedijk_item_seventy_six_complex_fourier_convolution
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : QComplex) :
+    fourPointComplexFourierTransform
+        (fourPointComplexConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 0 =
+      QComplex.mul
+        (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0)
+        (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 0) /\
+    fourPointComplexFourierTransform
+        (fourPointComplexConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 1 =
+      QComplex.mul
+        (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 1)
+        (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 1) /\
+    fourPointComplexFourierTransform
+        (fourPointComplexConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 2 =
+      QComplex.mul
+        (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 2)
+        (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 2) /\
+    fourPointComplexFourierTransform
+        (fourPointComplexConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 3 =
+      QComplex.mul
+        (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 3)
+        (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 3) := by
+  exact fourPointComplexFourierTransform_cyclic_convolution
+    x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃
+
 theorem wiedijk_item_seventy_six_qcomplex_energy_conjugation
     (z : QComplex) :
     QComplex.normSq (QComplex.conj z) = QComplex.normSq z := by

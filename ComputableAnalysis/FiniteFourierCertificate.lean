@@ -522,6 +522,89 @@ theorem fourPointComplexFourierTransform_period_four
   unfold fourPointComplexFourierTransform
   rw [hphase 0, hphase 1, hphase 2, hphase 3]
 
+def fourPointComplexConvolution₀
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : QComplex) : QComplex :=
+  QComplex.add
+    (QComplex.add
+      (QComplex.add (QComplex.mul x₀ y₀) (QComplex.mul x₁ y₃))
+      (QComplex.mul x₂ y₂))
+    (QComplex.mul x₃ y₁)
+
+def fourPointComplexConvolution₁
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : QComplex) : QComplex :=
+  QComplex.add
+    (QComplex.add
+      (QComplex.add (QComplex.mul x₀ y₁) (QComplex.mul x₁ y₀))
+      (QComplex.mul x₂ y₃))
+    (QComplex.mul x₃ y₂)
+
+def fourPointComplexConvolution₂
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : QComplex) : QComplex :=
+  QComplex.add
+    (QComplex.add
+      (QComplex.add (QComplex.mul x₀ y₂) (QComplex.mul x₁ y₁))
+      (QComplex.mul x₂ y₀))
+    (QComplex.mul x₃ y₃)
+
+def fourPointComplexConvolution₃
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : QComplex) : QComplex :=
+  QComplex.add
+    (QComplex.add
+      (QComplex.add (QComplex.mul x₀ y₃) (QComplex.mul x₁ y₂))
+      (QComplex.mul x₂ y₁))
+    (QComplex.mul x₃ y₀)
+
+theorem fourPointComplexFourierTransform_cyclic_convolution
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : QComplex) :
+    fourPointComplexFourierTransform
+        (fourPointComplexConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 0 =
+      QComplex.mul
+        (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0)
+        (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 0) /\
+    fourPointComplexFourierTransform
+        (fourPointComplexConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 1 =
+      QComplex.mul
+        (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 1)
+        (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 1) /\
+    fourPointComplexFourierTransform
+        (fourPointComplexConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 2 =
+      QComplex.mul
+        (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 2)
+        (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 2) /\
+    fourPointComplexFourierTransform
+        (fourPointComplexConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointComplexConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 3 =
+      QComplex.mul
+        (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 3)
+        (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 3) := by
+  cases x₀
+  cases x₁
+  cases x₂
+  cases x₃
+  cases y₀
+  cases y₁
+  cases y₂
+  cases y₃
+  simp [fourPointComplexFourierTransform,
+    fourPointComplexConvolution₀, fourPointComplexConvolution₁,
+    fourPointComplexConvolution₂, fourPointComplexConvolution₃,
+    QComplex.natPow, RotationSeries.imaginaryUnit, QComplex.mul,
+    QComplex.add, QComplex.one, QComplex.zero]
+  grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
+    Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+    Rat.sub_eq_add_neg]
+
 /-! Real rational samples have the usual finite conjugate symmetry: the first
 and third modes pair up, while the zero and Nyquist modes are self-conjugate.
 This is stated directly in rational-complex coordinates. -/
