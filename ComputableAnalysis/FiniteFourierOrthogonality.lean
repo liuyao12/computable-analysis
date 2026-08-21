@@ -101,6 +101,30 @@ private theorem qcomplexListSum_map_add
       exact qcomplex_add_four_rearrange_local (f x) (g x)
         (qcomplexListSum (xs.map f)) (qcomplexListSum (xs.map g))
 
+private theorem qcomplex_scale_add_local (r : Rat) (x y : QComplex) :
+    QComplex.scaleRat r (QComplex.add x y) =
+      QComplex.add (QComplex.scaleRat r x) (QComplex.scaleRat r y) := by
+  cases x
+  cases y
+  simp [QComplex.scaleRat, QComplex.add]
+  constructor <;> grind [Rat.mul_add]
+
+private theorem qcomplex_scale_zero_local (r : Rat) :
+    QComplex.scaleRat r QComplex.zero = QComplex.zero := by
+  simp [QComplex.scaleRat, QComplex.zero]
+
+private theorem qcomplexListSum_map_scale
+    {α : Type} (r : Rat) (xs : List α) (f : α → QComplex) :
+    qcomplexListSum (xs.map (fun x => QComplex.scaleRat r (f x))) =
+      QComplex.scaleRat r (qcomplexListSum (xs.map f)) := by
+  induction xs with
+  | nil =>
+      simp only [List.map_nil, qcomplexListSum]
+      exact (qcomplex_scale_zero_local r).symm
+  | cons x xs ih =>
+      simp only [List.map_cons, qcomplexListSum]
+      rw [ih, qcomplex_scale_add_local]
+
 /-! Synthesis is a finite operation: coefficients outside the advertised
 mode list are irrelevant.  This is the elementary uniqueness principle used
 when a finite Fourier certificate is extended with additional bookkeeping. -/
@@ -152,6 +176,31 @@ theorem finiteFourierSampleInnerProduct_add
   · exact qcomplexListSum_map_add (List.range length) _ _
   · intro k hk
     rw [hsample k, QComplex.mul_add_cert]
+
+private theorem qcomplex_mul_scale_local
+    (x y : QComplex) (r : Rat) :
+    QComplex.mul x (QComplex.scaleRat r y) =
+      QComplex.scaleRat r (QComplex.mul x y) := by
+  cases x
+  cases y
+  simp [QComplex.mul, QComplex.scaleRat]
+  constructor <;> grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add,
+    Rat.add_mul]
+
+/-! Scalar multiplication is the second half of the finite coefficient
+linearity law. -/
+theorem finiteFourierSampleInnerProduct_scale
+    (root : QComplex) (length mode : Nat)
+    (r : Rat) (sample₀ sample : Nat → QComplex)
+    (hsample : ∀ k, sample k = QComplex.scaleRat r (sample₀ k)) :
+    finiteFourierSampleInnerProduct root length mode sample =
+      QComplex.scaleRat r
+        (finiteFourierSampleInnerProduct root length mode sample₀) := by
+  unfold finiteFourierSampleInnerProduct
+  rw [qcomplexListSum_map_congr]
+  · rw [qcomplexListSum_map_scale]
+  · intro k hk
+    rw [hsample k, qcomplex_mul_scale_local]
 
 structure FiniteFourierOrthogonalityCertificate where
   root : QComplex
