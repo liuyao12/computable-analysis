@@ -349,6 +349,12 @@ theorem wiedijk_item_ninety_five_ptolemy_certificate :
   exact ⟨FinitePtolemyLength.finitePtolemyLength_certificate.1,
     FinitePtolemyLength.finitePtolemyLength_certificate.2.2.2.2.2.2⟩
 
+theorem wiedijk_item_ninety_five_oriented_chord_numerator
+    (a b c d : Rat) :
+    (c - a) * (d - b) =
+      (b - a) * (d - c) + (c - b) * (d - a) := by
+  exact RationalCircle.ptolemy_oriented_chord_numerator a b c d
+
 theorem wiedijk_item_ninety_seven_cramer_certificate :
     (2 : Rat) * 3 - 1 * 1 = 5 /\
       (5 * 3 - 1 * 10) / (2 * 3 - 1 * 1) = 1 /\
