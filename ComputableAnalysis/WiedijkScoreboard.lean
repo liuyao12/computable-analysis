@@ -2164,6 +2164,31 @@ theorem wiedijk_item_seventy_six_complex_fourier_parseval
         QComplex.normSq x₂ + QComplex.normSq x₃) := by
   exact fourPointComplexFourierTransform_parseval x₀ x₁ x₂ x₃
 
+theorem wiedijk_item_seventy_six_complex_fourier_reconstruction
+    (x₀ x₁ x₂ x₃ : QComplex) :
+    let f₀ := fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0
+    let f₁ := fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 1
+    let f₂ := fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 2
+    let f₃ := fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 3
+    QComplex.add (QComplex.add f₀ f₁) (QComplex.add f₂ f₃) =
+        QComplex.scaleRat 4 x₀ /\
+      QComplex.add
+          (QComplex.add f₀
+            (QComplex.mul (QComplex.scaleRat (-1) RotationSeries.imaginaryUnit) f₁))
+          (QComplex.add (QComplex.scaleRat (-1) f₂)
+            (QComplex.mul RotationSeries.imaginaryUnit f₃)) =
+        QComplex.scaleRat 4 x₁ /\
+      QComplex.add (QComplex.add f₀ (QComplex.scaleRat (-1) f₁))
+          (QComplex.add f₂ (QComplex.scaleRat (-1) f₃)) =
+        QComplex.scaleRat 4 x₂ /\
+      QComplex.add
+          (QComplex.add f₀
+            (QComplex.mul RotationSeries.imaginaryUnit f₁))
+          (QComplex.add (QComplex.scaleRat (-1) f₂)
+            (QComplex.mul (QComplex.scaleRat (-1) RotationSeries.imaginaryUnit) f₃)) =
+        QComplex.scaleRat 4 x₃ := by
+  exact fourPointComplexFourierTransform_reconstruct x₀ x₁ x₂ x₃
+
 theorem wiedijk_item_seventy_six_qcomplex_energy_conjugation
     (z : QComplex) :
     QComplex.normSq (QComplex.conj z) = QComplex.normSq z := by
