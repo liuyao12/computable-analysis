@@ -28,6 +28,7 @@ import ComputableAnalysis.FiniteFourierFoundation
 import ComputableAnalysis.CauchyPi
 import ComputableAnalysis.FinitePrimeReciprocalCertificate
 import ComputableAnalysis.FiniteStirlingInterface
+import ComputableAnalysis.BaselFiniteComparison
 
 /-!
 # Wiedijk's List scoreboard
@@ -153,6 +154,17 @@ def wiedijkCalculusAnalysisAnchoredEntries : List WiedijkEntry := [
 
 theorem wiedijkCalculusAnalysisAnchoredEntries_count :
     wiedijkCalculusAnalysisAnchoredEntries.length = 16 := by
+  native_decide
+
+/-! Finite evidence for rows whose unrestricted analytic statement is still
+open.  These certificates are tracked separately from the anchored theorem
+count because a few checked stages do not establish an all-stage equivalence. -/
+def wiedijkCalculusAnalysisFiniteEvidenceEntries : List WiedijkEntry := [
+  ⟨14, "Finite Basel interval overlap"⟩
+]
+
+theorem wiedijkCalculusAnalysisFiniteEvidenceEntries_count :
+    wiedijkCalculusAnalysisFiniteEvidenceEntries.length = 1 := by
   native_decide
 
 /-! First completed row: the benchmark statement is exposed directly through
@@ -435,6 +447,13 @@ theorem wiedijk_item_fourteen_basel_computable_target :
       DirichletSeries.zetaTwoRaw.AllStagesOverlap
         (Basel.piSquaredOverSixRaw piCircleArea) := by
   exact Basel.eulerBasel_geometric_iff_allStagesOverlap
+
+theorem wiedijk_item_fourteen_basel_finite_overlap_certificate :
+    (DirichletSeries.zetaTwoInterval 200000).lo <=
+        (BaselFiniteComparison.geometricPiSquaredOverSixCompute 12).hi /\
+      (BaselFiniteComparison.geometricPiSquaredOverSixCompute 12).lo <=
+        (DirichletSeries.zetaTwoInterval 200000).hi := by
+  exact BaselFiniteComparison.zetaTwoInterval_overlaps_projectPiSquaredOverSix_200000_12
 
 /-! Item 76 in its finite computable form: rational samples have an exact
 four-mode transform, inverse reconstruction, and Parseval energy identity.
