@@ -1151,6 +1151,17 @@ theorem wiedijk_item_eight_doubling_cube_precision_bracket (eps : QPos) :
     (f := cubeTarget) (I := cubeTargetInitial) 2 (by native_decide)
     (by native_decide) (by native_decide) eps.val.den
 
+theorem wiedijk_item_eight_doubling_cube_tolerance_certificate (eps : QPos) :
+    let J := monotoneTargetBisectionIterate cubeTarget 2 eps.val.den
+      cubeTargetInitial
+    J.lo <= J.hi /\
+      (cubeTarget J.lo <= 2 /\ 2 <= cubeTarget J.hi) /\
+      (J.lo >= cubeTargetInitial.lo /\ J.hi <= cubeTargetInitial.hi) /\
+      J.width <= eps.val := by
+  exact monotoneTargetBisectionIterate_tolerance_certificate
+    (f := cubeTarget) (I := cubeTargetInitial) 2 (by native_decide)
+    (by native_decide) (by native_decide) (by native_decide) eps
+
 theorem wiedijk_item_eleven_prime_unboundedness (bound : Nat) :
     ∃ certificate : PrimeUnboundednessCertificate bound,
       bound < certificate.witness := by
