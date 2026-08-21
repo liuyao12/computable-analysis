@@ -32,6 +32,10 @@ def qcomplexListScale (r : Rat) : List QComplex → List QComplex
   | [] => []
   | x :: xs => QComplex.scaleRat r x :: qcomplexListScale r xs
 
+def qcomplexListConj : List QComplex → List QComplex
+  | [] => []
+  | x :: xs => QComplex.conj x :: qcomplexListConj xs
+
 private theorem qcomplex_add_four_rearrange
     (a b c d : QComplex) :
     QComplex.add (QComplex.add a b) (QComplex.add c d) =
@@ -45,6 +49,11 @@ private theorem qcomplex_add_four_rearrange
 
 private theorem qcomplex_scale_zero (r : Rat) :
     QComplex.scaleRat r QComplex.zero = QComplex.zero := by
+  simp [QComplex.scaleRat, QComplex.zero]
+
+private theorem qcomplex_scale_zero_any (z : QComplex) :
+    QComplex.scaleRat 0 z = QComplex.zero := by
+  cases z
   simp [QComplex.scaleRat, QComplex.zero]
 
 private theorem qcomplex_add_zero (z : QComplex) :
@@ -138,6 +147,30 @@ theorem finiteFourierSum_scale
     finiteFourierSum root mode (qcomplexListScale r xs) =
       QComplex.scaleRat r (finiteFourierSum root mode xs) := by
   exact finiteFourierSum_aux_scale r root mode 0 xs
+
+theorem finiteFourierSum_zero_scale
+    (root : QComplex) (mode : Nat) (xs : List QComplex) :
+    finiteFourierSum root mode (qcomplexListScale 0 xs) =
+      QComplex.zero := by
+  rw [finiteFourierSum_scale]
+  exact qcomplex_scale_zero_any _
+
+theorem finiteFourierSum_aux_conj
+    (root : QComplex) (mode k : Nat) (xs : List QComplex) :
+    QComplex.conj (finiteFourierSumAux root mode k xs) =
+      finiteFourierSumAux (QComplex.conj root) mode k (qcomplexListConj xs) := by
+  induction xs generalizing k with
+  | nil => rfl
+  | cons x xs ih =>
+      simp only [qcomplexListConj, finiteFourierSumAux, QComplex.conj_add,
+        QComplex.conj_mul, QComplex.conj_natPow]
+      rw [ih (k := k + 1)]
+
+theorem finiteFourierSum_conj
+    (root : QComplex) (mode : Nat) (xs : List QComplex) :
+    QComplex.conj (finiteFourierSum root mode xs) =
+      finiteFourierSum (QComplex.conj root) mode (qcomplexListConj xs) := by
+  exact finiteFourierSum_aux_conj root mode 0 xs
 
 theorem finiteFourierSum_singleton
     (root x : QComplex) (mode : Nat) :
