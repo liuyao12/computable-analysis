@@ -511,6 +511,11 @@ theorem wiedijk_item_seventy_six_fourier_mode_period_four (mode : Nat) :
     fourPointFourierSum (mode + 4) = fourPointFourierSum mode := by
   exact fourPointFourierSum_period_four mode
 
+theorem wiedijk_item_seventy_six_fourier_mode_period_four_mul
+    (mode k : Nat) :
+    fourPointFourierSum (mode + 4 * k) = fourPointFourierSum mode := by
+  exact fourPointFourierSum_period_four_mul mode k
+
 theorem wiedijk_item_seventy_six_fourier_linear_foundation
     (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ r : Rat) (mode : Nat) :
     fourPointFourierTransform (x₀ + y₀) (x₁ + y₁) (x₂ + y₂) (x₃ + y₃) mode =

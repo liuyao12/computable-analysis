@@ -73,6 +73,15 @@ theorem fourPointFourierSum_period_four (mode : Nat) :
     simpa [Nat.add_mul] using hshift (mode * 3) 3
   rw [h0, h1, h2, h3]
 
+theorem fourPointFourierSum_period_four_mul (mode k : Nat) :
+    fourPointFourierSum (mode + 4 * k) = fourPointFourierSum mode := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+      rw [show mode + 4 * (k + 1) = (mode + 4 * k) + 4 by
+        simp [Nat.mul_succ, Nat.add_assoc]]
+      rw [fourPointFourierSum_period_four, ih]
+
 theorem fourPointFourier_orthogonality_certificate :
     fourPointFourierSum 0 = { re := 4, im := 0 } /\
       fourPointFourierSum 1 = QComplex.zero /\
