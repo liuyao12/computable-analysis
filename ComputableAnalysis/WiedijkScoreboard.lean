@@ -1261,6 +1261,13 @@ theorem wiedijk_item_forty_three_triangle_isoperimetric_bound
     256 * RationalCircle.heronProduct a b c ≤ (a + b + c) ^ 4 := by
   exact RationalCircle.triangle_isoperimetric_heron_bound h1 h2 h3 h4
 
+theorem wiedijk_item_forty_three_finite_fan_isoperimetric
+    (pieces : List (Prod Rat Rat))
+    (hheight : ∀ piece : Prod Rat Rat, List.Mem piece pieces -> piece.1 <= 1)
+    (hwidth : ∀ piece : Prod Rat Rat, List.Mem piece pieces -> 0 <= piece.2) :
+    Fan.variableArea pieces <= Fan.perimeter (Fan.widths pieces) / 2 := by
+  exact Fan.variableArea_le_half_perimeter pieces hheight hwidth
+
 theorem wiedijk_item_forty_three_rectangle_isoperimetric
     {a b : Rat} :
     16 * rectangleArea a b ≤ rectanglePerimeter a b ^ 2 := by
