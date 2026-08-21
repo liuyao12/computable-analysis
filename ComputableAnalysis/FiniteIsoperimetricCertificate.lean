@@ -1,11 +1,12 @@
 import ComputableAnalysis.Basic
 
 /-!
-# A rational rectangle isoperimetric certificate
+# Rational finite isoperimetric certificates
 
-For rectangles, the isoperimetric inequality is an exact rational consequence
-of the project's AM--GM square bound.  The general inequality for arbitrary
-plane regions remains outside this finite coordinate core.
+For rectangles and finite triangular fans, the isoperimetric inequalities are
+exact rational consequences of the project's AM--GM and order bounds.  The
+general inequality for arbitrary plane regions remains outside this finite
+coordinate core.
 -/
 
 namespace ComputableAnalysis
