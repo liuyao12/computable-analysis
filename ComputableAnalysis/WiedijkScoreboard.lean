@@ -150,6 +150,77 @@ def wiedijkCalculusAnalysisEntries : List WiedijkEntry := [
 theorem wiedijkScopedEntries_count : wiedijkScopedEntries.length = 52 := by
   native_decide
 
+def wiedijkEntryNumbers (entries : List WiedijkEntry) : List Nat :=
+  entries.map WiedijkEntry.number
+
+/-! The project-facing replacement registry.  Names here deliberately say
+what is actually proved: a finite certificate, a raw-real equivalence, or an
+effective substitute.  The benchmark number is retained so progress is
+measured against Wiedijk's list rather than against the older pi scoreboard. -/
+def wiedijkScopedProxyEntries : List WiedijkEntry := [
+  ⟨1, "Infinite-descent irrational square-root certificate"⟩,
+  ⟨2, "Finite complex quadratic root certificate"⟩,
+  ⟨3, "Canonical rational coding"⟩,
+  ⟨4, "Rational-coordinate Pythagorean identity"⟩,
+  ⟨8, "Finite cube-root bisection"⟩,
+  ⟨9, "Certified circle-area computation"⟩,
+  ⟨11, "Finite prime unboundedness witness"⟩,
+  ⟨14, "Effective Basel-series convergence"⟩,
+  ⟨15, "Effective fundamental theorem of integral calculus"⟩,
+  ⟨16, "Finite quintic root boundary"⟩,
+  ⟨17, "Finite de Moivre identity"⟩,
+  ⟨21, "Finite Green rectangle certificate"⟩,
+  ⟨23, "Rational Pythagorean triples"⟩,
+  ⟨26, "Certified Leibniz series"⟩,
+  ⟨27, "Oriented triangle-area boundary"⟩,
+  ⟨34, "Finite harmonic threshold growth"⟩,
+  ⟨35, "Certified Taylor table"⟩,
+  ⟨37, "Finite cubic root witness"⟩,
+  ⟨39, "Finite Pell recurrence"⟩,
+  ⟨43, "Finite isoperimetric bound"⟩,
+  ⟨44, "Finite binomial theorem"⟩,
+  ⟨46, "Finite quartic root certificate"⟩,
+  ⟨49, "Finite Cayley--Hamilton recurrence"⟩,
+  ⟨55, "Finite chord-power identity"⟩,
+  ⟨57, "Rational Heron identity"⟩,
+  ⟨60, "Finite Bezout identity"⟩,
+  ⟨64, "Finite L'Hopital residual certificate"⟩,
+  ⟨65, "Rational isosceles-triangle symmetry"⟩,
+  ⟨66, "Finite geometric series"⟩,
+  ⟨68, "Finite arithmetic series"⟩,
+  ⟨69, "Finite gcd computation"⟩,
+  ⟨73, "Finite monotone-sequence order"⟩,
+  ⟨74, "Finite induction certificate"⟩,
+  ⟨75, "Effective mean-value enclosure"⟩,
+  ⟨76, "Effective finite-stage Fourier certificate"⟩,
+  ⟨79, "Finite intermediate-value bracket"⟩,
+  ⟨80, "Finite unique-factorization certificate"⟩,
+  ⟨81, "Finite prime-reciprocal extension"⟩,
+  ⟨89, "Finite factor-and-remainder theorem"⟩,
+  ⟨91, "Rational polygonal triangle inequality"⟩,
+  ⟨92, "Finite Pick-theorem certificates"⟩,
+  ⟨94, "Rational law of cosines"⟩,
+  ⟨95, "Finite Ptolemy identity"⟩,
+  ⟨97, "Finite Cramer's rule"⟩,
+  ⟨98, "Finite Bertrand certificate"⟩,
+  ⟨100, "Finite Descartes sign bound"⟩,
+  ⟨38, "Rational arithmetic--geometric mean"⟩,
+  ⟨42, "Finite reciprocal-triangular identity"⟩,
+  ⟨77, "Finite sums of powers"⟩,
+  ⟨78, "Rational Cauchy--Schwarz"⟩,
+  ⟨85, "Finite decimal divisibility"⟩,
+  ⟨90, "Finite Stirling-ratio certificate"⟩
+]
+
+theorem wiedijkScopedProxyEntries_count :
+    wiedijkScopedProxyEntries.length = wiedijkScopedEntries.length := by
+  native_decide
+
+theorem wiedijkScopedProxyEntries_cover_numbers :
+    (wiedijkEntryNumbers wiedijkScopedProxyEntries).Perm
+      (wiedijkEntryNumbers wiedijkScopedEntries) := by
+  native_decide
+
 theorem wiedijkCalculusAnalysisEntries_count :
     wiedijkCalculusAnalysisEntries.length = 17 := by
   native_decide
@@ -225,9 +296,6 @@ theorem wiedijkCalculusAnalysisComputableEntries_cover_count :
     wiedijkCalculusAnalysisComputableEntries.length =
       wiedijkCalculusAnalysisEntries.length := by
   native_decide
-
-def wiedijkEntryNumbers (entries : List WiedijkEntry) : List Nat :=
-  entries.map WiedijkEntry.number
 
 /-! The coverage invariant is about benchmark identities, not merely list
 lengths: every calculus/analysis number occurs in the computable proxy, even
