@@ -47,6 +47,7 @@ import ComputableAnalysis.CircumferenceBridge
 import ComputableAnalysis.Differential
 import ComputableAnalysis.FiniteLHopitalCertificate
 import ComputableAnalysis.FiniteFourierFoundation
+import ComputableAnalysis.EffectiveFourierSeries
 import ComputableAnalysis.IntervalQuotient
 import ComputableAnalysis.DirichletSeries
 import ComputableAnalysis.Elementary

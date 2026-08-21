@@ -25,6 +25,7 @@ import ComputableAnalysis.FiniteLHopitalCertificate
 import ComputableAnalysis.Basel
 import ComputableAnalysis.FiniteFourierCertificate
 import ComputableAnalysis.FiniteFourierFoundation
+import ComputableAnalysis.EffectiveFourierSeries
 import ComputableAnalysis.CauchyPi
 import ComputableAnalysis.FinitePrimeReciprocalCertificate
 import ComputableAnalysis.FiniteStirlingInterface
