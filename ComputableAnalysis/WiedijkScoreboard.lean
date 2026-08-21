@@ -1419,6 +1419,10 @@ theorem wiedijk_item_thirty_four_harmonic_reaches_every_natural_threshold
   refine ⟨2 ^ (2 * target), ?_⟩
   exact FiniteHarmonic.harmonicSum_two_pow_reaches target
 
+theorem wiedijk_item_thirty_four_harmonic_unbounded :
+    FiniteHarmonic.Unbounded := by
+  exact FiniteHarmonic.harmonicSum_unbounded
+
 theorem wiedijk_item_thirty_eight_arithmetic_geometric_mean
     {a b c d : Rat}
     (ha : 0 <= a) (hb : 0 <= b) (hc : 0 <= c) (hd : 0 <= d) :

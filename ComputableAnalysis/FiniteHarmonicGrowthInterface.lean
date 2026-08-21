@@ -100,6 +100,17 @@ theorem harmonicSum_two_pow_reaches (target : Nat) :
       grind [Rat.mul_assoc]
     _ <= harmonicSum (2 ^ (2 * target)) := h
 
+/-! Divergence is represented constructively as unbounded finite growth.  This
+is the project-facing replacement for assigning a completed value to the
+harmonic series. -/
+def Unbounded : Prop :=
+  ∀ target : Nat, ∃ stage : Nat,
+    (target : Rat) <= harmonicSum stage
+
+theorem harmonicSum_unbounded : Unbounded := by
+  intro target
+  exact ⟨2 ^ (2 * target), harmonicSum_two_pow_reaches target⟩
+
 structure Certificate where
   target : Nat
   stage : Nat
