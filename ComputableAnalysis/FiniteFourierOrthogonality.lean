@@ -81,6 +81,12 @@ private theorem qcomplex_mul_zero (z : QComplex) :
   simp [QComplex.mul, QComplex.zero]
   constructor <;> grind
 
+private theorem qcomplex_one_mul_local (z : QComplex) :
+    QComplex.mul QComplex.one z = z := by
+  cases z
+  simp [QComplex.mul, QComplex.one]
+  constructor <;> grind
+
 private theorem qcomplex_add_four_rearrange_local
     (a b c d : QComplex) :
     QComplex.add (QComplex.add a b) (QComplex.add c d) =
@@ -266,6 +272,16 @@ theorem finiteFourierSampleInnerProduct_zero
   rw [qcomplexListSum_map_zero]
   intro k hk
   rw [hsample k, qcomplex_mul_zero]
+
+theorem finiteFourierSampleInnerProduct_zero_mode
+    (root : QComplex) (length : Nat) (sample : Nat → QComplex) :
+    finiteFourierSampleInnerProduct root length 0 sample =
+      qcomplexListSum ((List.range length).map sample) := by
+  unfold finiteFourierSampleInnerProduct
+  rw [qcomplexListSum_map_congr]
+  intro k hk
+  simp only [Nat.zero_mul, QComplex.natPow, QComplex.conj_one]
+  exact qcomplex_one_mul_local _
 
 private theorem qcomplex_mul_scale_local
     (x y : QComplex) (r : Rat) :

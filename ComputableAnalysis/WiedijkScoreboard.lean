@@ -2485,6 +2485,12 @@ theorem wiedijk_item_seventy_six_fourier_coefficient_zero
       QComplex.zero := by
   exact finiteFourierSampleInnerProduct_zero root length mode sample hsample
 
+theorem wiedijk_item_seventy_six_fourier_coefficient_zero_mode
+    (root : QComplex) (length : Nat) (sample : Nat → QComplex) :
+    finiteFourierSampleInnerProduct root length 0 sample =
+      qcomplexListSum ((List.range length).map sample) := by
+  exact finiteFourierSampleInnerProduct_zero_mode root length sample
+
 theorem wiedijk_item_seventy_six_fourier_coefficient_scaling
     (root : QComplex) (length mode : Nat)
     (r : Rat) (sample₀ sample : Nat → QComplex)
