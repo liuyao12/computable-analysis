@@ -136,6 +136,20 @@ theorem EffectiveFourierSampleCertificate.sample_interval_witness
         (certificate.sample_domain p hp)).compute 0) := by
   exact certificate.sample_value p hp
 
+def constantFunctionSampleCertificate
+    (c : QComplex) (points : List QComplex) :
+    EffectiveFourierSampleCertificate where
+  function := FunctionRaw.exact (fun _ => c)
+  samples := points.map (fun z => (z, c))
+  sample_domain := by
+    intro p hp
+    trivial
+  sample_value := by
+    intro p hp
+    rcases List.mem_map.1 hp with ⟨z, hz, rfl⟩
+    simp [FunctionRaw.exact, FunctionRaw.evalRaw, QBox.point,
+      QBox.NestedIn]
+
 /-! A coefficient certificate separates the analytic integrand from the
 Fourier bookkeeping.  An eventual Fourier instance supplies an integrand such
 as `f * phase`; this structure only records the computable complex path

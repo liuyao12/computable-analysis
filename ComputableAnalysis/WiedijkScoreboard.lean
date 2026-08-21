@@ -1849,6 +1849,12 @@ theorem wiedijk_item_seventy_six_finite_function_sample_bridge
     (certificate.toSeries root mode).stabilized.Valid := by
   exact certificate.toSeries_valid root mode
 
+theorem wiedijk_item_seventy_six_constant_function_fourier_instance
+    (c : QComplex) (points : List QComplex)
+    (root : QComplex) (mode : Nat) :
+    ((constantFunctionSampleCertificate c points).toSeries root mode).stabilized.Valid := by
+  exact (constantFunctionSampleCertificate c points).toSeries_valid root mode
+
 theorem wiedijk_item_seventy_six_complex_integral_certificate
     {f : ComplexPathIntegral.EntireBoxFunctionRaw}
     {vertices : List QComplex}
