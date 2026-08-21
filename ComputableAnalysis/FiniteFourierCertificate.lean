@@ -450,6 +450,52 @@ theorem fourPointComplexFourierTransform_conjugate_symmetry
     Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
     Rat.sub_eq_add_neg]
 
+theorem fourPointComplexFourierTransform_add
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : QComplex) (mode : Nat) :
+    fourPointComplexFourierTransform
+        (QComplex.add x₀ y₀) (QComplex.add x₁ y₁)
+        (QComplex.add x₂ y₂) (QComplex.add x₃ y₃) mode =
+      QComplex.add
+        (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ mode)
+        (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ mode) := by
+  cases x₀
+  cases x₁
+  cases x₂
+  cases x₃
+  cases y₀
+  cases y₁
+  cases y₂
+  cases y₃
+  simp [fourPointComplexFourierTransform, QComplex.add, QComplex.mul]
+  constructor <;> grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
+    Rat.mul_add, Rat.add_mul]
+
+theorem fourPointComplexFourierTransform_scale
+    (r : Rat) (x₀ x₁ x₂ x₃ : QComplex) (mode : Nat) :
+    fourPointComplexFourierTransform
+        (QComplex.scaleRat r x₀) (QComplex.scaleRat r x₁)
+        (QComplex.scaleRat r x₂) (QComplex.scaleRat r x₃) mode =
+      QComplex.scaleRat r
+        (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ mode) := by
+  have hscale (x z : QComplex) :
+      QComplex.mul (QComplex.scaleRat r x) z =
+        QComplex.scaleRat r (QComplex.mul x z) := by
+    cases x
+    cases z
+    simp [QComplex.mul, QComplex.scaleRat]
+    constructor <;> grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add,
+      Rat.add_mul]
+  have hadd (x y : QComplex) :
+      QComplex.scaleRat r (QComplex.add x y) =
+        QComplex.add (QComplex.scaleRat r x) (QComplex.scaleRat r y) := by
+    cases x
+    cases y
+    simp [QComplex.add, QComplex.scaleRat]
+    constructor <;> grind [Rat.mul_add]
+  unfold fourPointComplexFourierTransform
+  simp only [hscale]
+  simp only [← hadd]
+
 /-! Real rational samples have the usual finite conjugate symmetry: the first
 and third modes pair up, while the zero and Nyquist modes are self-conjugate.
 This is stated directly in rational-complex coordinates. -/

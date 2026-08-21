@@ -2209,6 +2209,22 @@ theorem wiedijk_item_seventy_six_complex_fourier_conjugate_symmetry
           (QComplex.conj x₂) (QComplex.conj x₃) 1 := by
   exact fourPointComplexFourierTransform_conjugate_symmetry x₀ x₁ x₂ x₃
 
+theorem wiedijk_item_seventy_six_complex_fourier_linearity
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : QComplex) (r : Rat) (mode : Nat) :
+    (fourPointComplexFourierTransform
+        (QComplex.add x₀ y₀) (QComplex.add x₁ y₁)
+        (QComplex.add x₂ y₂) (QComplex.add x₃ y₃) mode =
+      QComplex.add
+        (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ mode)
+        (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ mode)) /\
+    (fourPointComplexFourierTransform
+        (QComplex.scaleRat r x₀) (QComplex.scaleRat r x₁)
+        (QComplex.scaleRat r x₂) (QComplex.scaleRat r x₃) mode =
+      QComplex.scaleRat r
+        (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ mode)) := by
+  exact ⟨fourPointComplexFourierTransform_add x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ mode,
+    fourPointComplexFourierTransform_scale r x₀ x₁ x₂ x₃ mode⟩
+
 theorem wiedijk_item_seventy_six_qcomplex_energy_conjugation
     (z : QComplex) :
     QComplex.normSq (QComplex.conj z) = QComplex.normSq z := by
