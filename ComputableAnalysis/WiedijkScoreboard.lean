@@ -547,6 +547,18 @@ theorem wiedijk_item_forty_four_binomial_theorem
     Series.binomialSum n x y (n + 1) = (x + y) ^ n := by
   exact Series.binomialSum_eq_pow n x y
 
+theorem wiedijk_item_forty_four_binomial_pascal_row
+    {n k : Nat} (hk : k <= n) (x y : Rat) :
+    Series.binomialSum (n + 1) x y (k + 1) =
+      x * Series.binomialSum n x y (k + 1) +
+        y * Series.binomialSum n x y k := by
+  exact Series.binomialSum_succ_row hk x y
+
+theorem wiedijk_item_forty_four_binomial_stabilization
+    {n count : Nat} (hcount : n + 1 <= count) (x y : Rat) :
+    Series.binomialSum n x y count = (x + y) ^ n := by
+  exact Series.binomialSum_eq_pow_of_reached hcount x y
+
 theorem wiedijk_item_sixty_bezout (a b : Nat) :
     Exists fun x : Int =>
       Exists fun y : Int =>
