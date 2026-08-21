@@ -2189,6 +2189,26 @@ theorem wiedijk_item_seventy_six_complex_fourier_reconstruction
         QComplex.scaleRat 4 x₃ := by
   exact fourPointComplexFourierTransform_reconstruct x₀ x₁ x₂ x₃
 
+theorem wiedijk_item_seventy_six_complex_fourier_conjugate_symmetry
+    (x₀ x₁ x₂ x₃ : QComplex) :
+    QComplex.conj (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0) =
+        fourPointComplexFourierTransform
+          (QComplex.conj x₀) (QComplex.conj x₁)
+          (QComplex.conj x₂) (QComplex.conj x₃) 0 /\
+      QComplex.conj (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 1) =
+        fourPointComplexFourierTransform
+          (QComplex.conj x₀) (QComplex.conj x₁)
+          (QComplex.conj x₂) (QComplex.conj x₃) 3 /\
+      QComplex.conj (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 2) =
+        fourPointComplexFourierTransform
+          (QComplex.conj x₀) (QComplex.conj x₁)
+          (QComplex.conj x₂) (QComplex.conj x₃) 2 /\
+      QComplex.conj (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 3) =
+        fourPointComplexFourierTransform
+          (QComplex.conj x₀) (QComplex.conj x₁)
+          (QComplex.conj x₂) (QComplex.conj x₃) 1 := by
+  exact fourPointComplexFourierTransform_conjugate_symmetry x₀ x₁ x₂ x₃
+
 theorem wiedijk_item_seventy_six_qcomplex_energy_conjugation
     (z : QComplex) :
     QComplex.normSq (QComplex.conj z) = QComplex.normSq z := by

@@ -421,6 +421,35 @@ theorem fourPointComplexFourierTransform_reconstruct
     Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
     Rat.sub_eq_add_neg]
 
+theorem fourPointComplexFourierTransform_conjugate_symmetry
+    (x₀ x₁ x₂ x₃ : QComplex) :
+    QComplex.conj (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0) =
+        fourPointComplexFourierTransform
+          (QComplex.conj x₀) (QComplex.conj x₁)
+          (QComplex.conj x₂) (QComplex.conj x₃) 0 /\
+      QComplex.conj (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 1) =
+        fourPointComplexFourierTransform
+          (QComplex.conj x₀) (QComplex.conj x₁)
+          (QComplex.conj x₂) (QComplex.conj x₃) 3 /\
+      QComplex.conj (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 2) =
+        fourPointComplexFourierTransform
+          (QComplex.conj x₀) (QComplex.conj x₁)
+          (QComplex.conj x₂) (QComplex.conj x₃) 2 /\
+      QComplex.conj (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 3) =
+        fourPointComplexFourierTransform
+          (QComplex.conj x₀) (QComplex.conj x₁)
+          (QComplex.conj x₂) (QComplex.conj x₃) 1 := by
+  cases x₀
+  cases x₁
+  cases x₂
+  cases x₃
+  simp [fourPointComplexFourierTransform, QComplex.natPow,
+    RotationSeries.imaginaryUnit, QComplex.conj, QComplex.mul,
+    QComplex.add, QComplex.one, QComplex.zero]
+  grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
+    Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+    Rat.sub_eq_add_neg]
+
 /-! Real rational samples have the usual finite conjugate symmetry: the first
 and third modes pair up, while the zero and Nyquist modes are self-conjugate.
 This is stated directly in rational-complex coordinates. -/
