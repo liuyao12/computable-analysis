@@ -177,4 +177,21 @@ theorem quarterTurnGeometricStage_block_coord_abs_le
           _ = r ^ n * Series.geometricSum r (k + 1) := by
             exact hsum.symm
 
+theorem quarterTurnGeometricStage_block_coord_abs_le_inv_one_sub
+    {r : Rat} (hr0 : 0 <= r) (hr1 : r < 1) (n k : Nat) :
+    qabs ((quarterTurnGeometricStage r (n + k)).re -
+      (quarterTurnGeometricStage r n).re) <=
+        r ^ n * (1 / (1 - r)) /\
+    qabs ((quarterTurnGeometricStage r (n + k)).im -
+      (quarterTurnGeometricStage r n).im) <=
+        r ^ n * (1 / (1 - r)) := by
+  have hblock := quarterTurnGeometricStage_block_coord_abs_le hr0 n k
+  have hsum := Series.geometricSum_le_inv_one_sub hr0 hr1 k
+  have hpow : 0 <= r ^ n := Rat.pow_nonneg hr0
+  constructor
+  · exact Rat.le_trans hblock.1
+      (Rat.mul_le_mul_of_nonneg_left hsum hpow)
+  · exact Rat.le_trans hblock.2
+      (Rat.mul_le_mul_of_nonneg_left hsum hpow)
+
 end ComputableAnalysis

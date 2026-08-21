@@ -613,6 +613,16 @@ theorem wiedijk_item_seventy_six_geometric_stage_block_tail_bound
         r ^ n * Series.geometricSum r k := by
   exact quarterTurnGeometricStage_block_coord_abs_le hr0 n k
 
+theorem wiedijk_item_seventy_six_geometric_stage_uniform_tail_bound
+    {r : Rat} (hr0 : 0 <= r) (hr1 : r < 1) (n k : Nat) :
+    qabs ((quarterTurnGeometricStage r (n + k)).re -
+      (quarterTurnGeometricStage r n).re) <=
+        r ^ n * (1 / (1 - r)) /\
+    qabs ((quarterTurnGeometricStage r (n + k)).im -
+      (quarterTurnGeometricStage r n).im) <=
+        r ^ n * (1 / (1 - r)) := by
+  exact quarterTurnGeometricStage_block_coord_abs_le_inv_one_sub hr0 hr1 n k
+
 /-! Item 9 in its computable form: the circle-area interval algorithm is
 valid, and agrees with the independently constructed rational rectangle
 integral for the Cauchy kernel. -/
