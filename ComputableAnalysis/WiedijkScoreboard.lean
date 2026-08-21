@@ -50,6 +50,7 @@ import ComputableAnalysis.FinitePrimeFactorExample
 import ComputableAnalysis.CauchyPi
 import ComputableAnalysis.FinitePrimeReciprocalCertificate
 import ComputableAnalysis.FiniteStirlingInterface
+import ComputableAnalysis.FiniteStirlingStageTwoFiftySix
 import ComputableAnalysis.FiniteFactorialInterface
 import ComputableAnalysis.BaselFiniteComparison
 
@@ -2612,6 +2613,14 @@ theorem wiedijk_item_ninety_finite_stirling_ratio_positive
     {n : Nat} {e root : Rat} (he : 0 < e) (hroot : 0 < root) :
     0 < finiteStirlingRatio n e root := by
   exact finiteStirlingRatio_pos he hroot
+
+theorem wiedijk_item_ninety_finite_stirling_stage_two_fifty_six_enclosure :
+    (1 : Rat) / 2 <=
+        finiteStirlingRatio 256 finiteStirlingEApprox
+          finiteStirlingRootApproxTwoFiftySix /\
+      finiteStirlingRatio 256 finiteStirlingEApprox
+          finiteStirlingRootApproxTwoFiftySix <= 2 := by
+  exact finiteStirlingRatioAtTwoFiftySix_enclosure
 
 theorem wiedijk_item_ninety_finite_stirling_stage_step
     (n : Nat) (e root : Rat) :
