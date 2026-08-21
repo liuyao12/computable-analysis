@@ -582,6 +582,11 @@ theorem wiedijk_item_seventy_six_geometric_coefficient_stage_recurrence
           (QComplex.ofRat (r ^ n))) := by
   exact finiteFourierSum_geometricCoefficientStage_succ root mode r n
 
+theorem wiedijk_item_seventy_six_quarter_turn_power_bound (n : Nat) :
+    qabs ((QComplex.natPow RotationSeries.imaginaryUnit n).re) <= 1 /\
+      qabs ((QComplex.natPow RotationSeries.imaginaryUnit n).im) <= 1 := by
+  exact imaginaryUnit_natPow_coord_abs_le_one n
+
 /-! Item 9 in its computable form: the circle-area interval algorithm is
 valid, and agrees with the independently constructed rational rectangle
 integral for the Cauchy kernel. -/

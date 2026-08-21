@@ -42,4 +42,21 @@ theorem finiteFourierSum_geometricCoefficientStage_zero (root : QComplex)
       QComplex.zero := by
   rfl
 
+/-! The quarter-turn root never amplifies a coordinate: its powers only swap
+coordinates and change signs.  This is the elementary bound used by a
+geometric tail enclosure for a nonzero Fourier mode. -/
+theorem imaginaryUnit_natPow_coord_abs_le_one (n : Nat) :
+    qabs ((QComplex.natPow RotationSeries.imaginaryUnit n).re) <= 1 /\
+      qabs ((QComplex.natPow RotationSeries.imaginaryUnit n).im) <= 1 := by
+  induction n with
+  | zero => native_decide
+  | succ n ih =>
+      rw [QComplex.natPow_succ]
+      cases h : QComplex.natPow RotationSeries.imaginaryUnit n with
+      | mk re im =>
+        simp [h, RotationSeries.imaginaryUnit, QComplex.mul, qabs_neg]
+        exact ⟨by simpa [h, Rat.sub_eq_add_neg, Rat.zero_add, Rat.add_zero,
+            qabs_neg] using ih.2,
+          by simpa [h, Rat.zero_add, Rat.add_zero] using ih.1⟩
+
 end ComputableAnalysis
