@@ -204,6 +204,37 @@ theorem eulerBasel_geometric_of_certificate
     eulerBasel_geometricPi := by
   exact eulerBasel_geometric_of_stagewise_witness certificate.witness
 
+/-! A more algorithm-facing certificate asks only for common witnesses at
+cofinal stages.  The requested precision is recorded explicitly, while the
+nesting laws transport the witness back to any earlier pair of stages.  This
+is the form a future Fourier or contour proof can construct incrementally. -/
+structure PrecisionWitnessCertificate : Prop where
+  witness : forall n m : Nat, forall eps : QPos, ∃ N M : Nat, ∃ q : Rat,
+    n <= N /\ m <= M /\
+    (DirichletSeries.zetaTwoRaw.compute N).lo <= q /\
+    q <= (DirichletSeries.zetaTwoRaw.compute N).hi /\
+    ((piSquaredOverSixRaw piCircleArea).compute M).lo <= q /\
+    q <= ((piSquaredOverSixRaw piCircleArea).compute M).hi /\
+    (DirichletSeries.zetaTwoRaw.compute N).width <= eps.val /\
+    ((piSquaredOverSixRaw piCircleArea).compute M).width <= eps.val
+
+theorem eulerBasel_geometric_of_precision_certificate
+    (certificate : PrecisionWitnessCertificate) :
+    eulerBasel_geometricPi := by
+  apply eulerBasel_geometric_of_stagewise_witness
+  intro n m
+  obtain ⟨N, M, q, hnN, hmM, hzl, hzh, hpl, hph, _, _⟩ :=
+    certificate.witness n m
+      { val := 1, property := by native_decide }
+  have hzeta := DirichletSeries.zetaTwoRaw_validCompute
+  have hpi := geometricPiSquaredOverSixRaw_valid
+  have hznest := hzeta.2.1 n N hnN
+  have hpnest := hpi.2.1 m M hmM
+  exact ⟨q, Rat.le_trans hznest.1 hzl,
+    Rat.le_trans hzh hznest.2.2,
+    Rat.le_trans hpnest.1 hpl,
+    Rat.le_trans hph hpnest.2.2⟩
+
 end Basel
 
 end ComputableAnalysis
