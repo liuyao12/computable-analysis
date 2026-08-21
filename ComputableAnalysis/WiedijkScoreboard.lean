@@ -1747,6 +1747,25 @@ theorem wiedijk_item_eighty_one_prime_reciprocal_block_additivity
       primeReciprocalSum xs + primeReciprocalSum ys := by
   exact primeReciprocalSum_append xs ys
 
+theorem wiedijk_item_eighty_one_prime_reciprocal_exact_prefixes :
+    primeReciprocalSum [2, 3, 5, 7] = 247 / 210 /\
+      primeReciprocalSum [2, 3, 5, 7, 11] = 2927 / 2310 /\
+      primeReciprocalSum [2, 3, 5, 7, 11, 13] = 40361 / 30030 := by
+  exact ⟨primeReciprocalSum_four_primes,
+    primeReciprocalSum_five_primes,
+    primeReciprocalSum_six_primes⟩
+
+theorem wiedijk_item_eighty_one_prime_reciprocal_growth_thresholds :
+    (3 : Rat) / 2 <
+        primeReciprocalSum
+          [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] /\
+      (5 : Rat) / 3 <
+        primeReciprocalSum
+          [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37,
+            41, 43, 47, 53] := by
+  exact ⟨primeReciprocalSum_twelve_primes_gt_three_halves,
+    primeReciprocalSum_sixteen_primes_gt_five_thirds⟩
+
 /-! Item 90 in its finite computable form: the factorial ratio used by
 Stirling is enclosed by an explicit rational interval, with a certified error
 bound.  The unrestricted asymptotic equivalence is intentionally not claimed
