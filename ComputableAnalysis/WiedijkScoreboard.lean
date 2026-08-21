@@ -1488,6 +1488,18 @@ theorem wiedijk_item_nine_circle_area_precision (eps : QPos) :
       (piCircleArea.compute n).width <= eps.val := by
   exact (CauchyPi.piCircleArea_valid).2.2 eps
 
+/-! Item 80 in its constructive finite boundary: every integer greater than one
+has a terminating prime-factor certificate, and the prime membership of such a
+certificate is independent of the certificate chosen. -/
+theorem wiedijk_item_eighty_prime_factor_certificate {n : Nat} (hn : 1 < n) :
+    Nonempty (PrimeFactorCertificate n) := by
+  exact primeFactorCertificate_exists n hn
+
+theorem wiedijk_item_eighty_prime_factor_membership_unique
+    {n : Nat} (c₁ c₂ : PrimeFactorCertificate n) {p : Nat} :
+    p ∈ c₁.factors ↔ p ∈ c₂.factors := by
+  exact PrimeFactorCertificate.factor_mem_iff c₁ c₂
+
 /-! Item 81 in its potential-infinity form: every finite certified list of
 primes can be extended by a new prime, strictly increasing the rational
 reciprocal accumulator.  This is the finite-stage content of divergence. -/
