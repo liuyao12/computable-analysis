@@ -294,4 +294,11 @@ theorem wiedijk_item_thirty_eight_arithmetic_geometric_mean
     a * b * c * d <= ((a + b + c + d) / 4) ^ 4 := by
   exact am_gm_four ha hb hc hd
 
+theorem wiedijk_item_sixty_five_isosceles_equal_legs (h b : Rat) :
+    RationalCircle.Stage.segmentNormSq
+        { x := 0, y := h } { x := b, y := 0 } =
+      RationalCircle.Stage.segmentNormSq
+        { x := 0, y := h } { x := -b, y := 0 } := by
+  exact RationalCircle.Stage.isosceles_equal_legs h b
+
 end ComputableAnalysis
