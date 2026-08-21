@@ -565,6 +565,19 @@ theorem wiedijk_item_forty_nine_cayley_hamilton_certificate :
       LinearODE.matrixZero 2 := by
   exact LinearODE.concreteCayleyMatrix_identity_from_generic
 
+/-! The concrete matrix above is an instance of the reusable rational
+`2 x 2` Cayley--Hamilton law.  This is the project-facing theorem: its
+coefficients are computed directly from the four rational entries. -/
+theorem wiedijk_item_forty_nine_rational_two_by_two_cayley_hamilton
+    (A : LinearODE.RatMatrix 2) :
+    LinearODE.matrixAdd (LinearODE.matrixMul A A)
+        (LinearODE.matrixAdd
+          (LinearODE.matrixScale (-(LinearODE.HarmonicOscillator.ratMatrixTwoTrace A)) A)
+          (LinearODE.matrixScale (LinearODE.HarmonicOscillator.ratMatrixTwoDeterminant A)
+            (LinearODE.matrixIdentity 2))) =
+      LinearODE.matrixZero 2 := by
+  exact LinearODE.HarmonicOscillator.ratMatrix_twoByTwo_cayley_hamilton A
+
 theorem wiedijk_item_fifty_five_chord_power_certificate :
     (RationalCircle.horizontalChordPowerSqrtRaw (4 / 5) 1
       (by native_decide) (by native_decide)).Equiv
