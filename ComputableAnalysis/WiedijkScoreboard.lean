@@ -47,6 +47,7 @@ import ComputableAnalysis.FinitePrimeFactorExample
 import ComputableAnalysis.CauchyPi
 import ComputableAnalysis.FinitePrimeReciprocalCertificate
 import ComputableAnalysis.FiniteStirlingInterface
+import ComputableAnalysis.FiniteFactorialInterface
 import ComputableAnalysis.BaselFiniteComparison
 
 /-!
@@ -2115,5 +2116,11 @@ theorem wiedijk_item_ninety_finite_stirling_ratio_positive
     {n : Nat} {e root : Rat} (he : 0 < e) (hroot : 0 < root) :
     0 < finiteStirlingRatio n e root := by
   exact finiteStirlingRatio_pos he hroot
+
+theorem wiedijk_item_ninety_factorial_successor_certificate
+    (certificate : FiniteFactorialCertificate) :
+    factorialRat (certificate.stage + 1) =
+      ((certificate.stage + 1 : Nat) : Rat) * certificate.value := by
+  exact certificate.succ_step
 
 end ComputableAnalysis
