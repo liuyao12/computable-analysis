@@ -367,6 +367,51 @@ def fourPointComplexFourierTransform
     (QComplex.mul x₃
       (QComplex.natPow RotationSeries.imaginaryUnit (mode * 3)))
 
+theorem fourPointComplexFourierTransform_modes
+    (x₀ x₁ x₂ x₃ : QComplex) :
+    fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0 =
+        QComplex.add (QComplex.add (QComplex.add x₀ x₁) x₂) x₃ /\
+      fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 1 =
+        QComplex.add
+          (QComplex.add x₀
+            (QComplex.mul RotationSeries.imaginaryUnit x₁))
+          (QComplex.add (QComplex.scaleRat (-1) x₂)
+            (QComplex.mul
+              (QComplex.scaleRat (-1) RotationSeries.imaginaryUnit) x₃)) /\
+      fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 2 =
+        QComplex.add
+          (QComplex.add x₀ (QComplex.scaleRat (-1) x₁))
+          (QComplex.add x₂ (QComplex.scaleRat (-1) x₃)) /\
+      fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 3 =
+        QComplex.add
+          (QComplex.add x₀
+            (QComplex.mul (QComplex.scaleRat (-1)
+              RotationSeries.imaginaryUnit) x₁))
+          (QComplex.add (QComplex.scaleRat (-1) x₂)
+            (QComplex.mul RotationSeries.imaginaryUnit x₃)) := by
+  cases x₀
+  cases x₁
+  cases x₂
+  cases x₃
+  simp [fourPointComplexFourierTransform, QComplex.natPow,
+    RotationSeries.imaginaryUnit, QComplex.mul, QComplex.add,
+    QComplex.scaleRat, QComplex.one, QComplex.zero]
+  constructor
+  · congr 1 <;> grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
+      Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+      Rat.sub_eq_add_neg]
+  constructor
+  · congr 1 <;> grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
+      Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+      Rat.sub_eq_add_neg]
+  constructor
+  · congr 1 <;> grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
+      Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+      Rat.sub_eq_add_neg]
+  · congr 1 <;> grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
+      Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+      Rat.sub_eq_add_neg]
+
 theorem fourPointComplexFourierTransform_parseval
     (x₀ x₁ x₂ x₃ : QComplex) :
     QComplex.normSq (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0) +

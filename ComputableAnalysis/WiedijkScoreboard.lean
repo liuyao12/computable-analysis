@@ -2164,6 +2164,30 @@ theorem wiedijk_item_seventy_six_complex_fourier_parseval
         QComplex.normSq x₂ + QComplex.normSq x₃) := by
   exact fourPointComplexFourierTransform_parseval x₀ x₁ x₂ x₃
 
+theorem wiedijk_item_seventy_six_complex_fourier_modes
+    (x₀ x₁ x₂ x₃ : QComplex) :
+    fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0 =
+        QComplex.add (QComplex.add (QComplex.add x₀ x₁) x₂) x₃ /\
+      fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 1 =
+        QComplex.add
+          (QComplex.add x₀
+            (QComplex.mul RotationSeries.imaginaryUnit x₁))
+          (QComplex.add (QComplex.scaleRat (-1) x₂)
+            (QComplex.mul
+              (QComplex.scaleRat (-1) RotationSeries.imaginaryUnit) x₃)) /\
+      fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 2 =
+        QComplex.add
+          (QComplex.add x₀ (QComplex.scaleRat (-1) x₁))
+          (QComplex.add x₂ (QComplex.scaleRat (-1) x₃)) /\
+      fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 3 =
+        QComplex.add
+          (QComplex.add x₀
+            (QComplex.mul (QComplex.scaleRat (-1)
+              RotationSeries.imaginaryUnit) x₁))
+          (QComplex.add (QComplex.scaleRat (-1) x₂)
+            (QComplex.mul RotationSeries.imaginaryUnit x₃)) := by
+  exact fourPointComplexFourierTransform_modes x₀ x₁ x₂ x₃
+
 theorem wiedijk_item_seventy_six_complex_fourier_reconstruction
     (x₀ x₁ x₂ x₃ : QComplex) :
     let f₀ := fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0
