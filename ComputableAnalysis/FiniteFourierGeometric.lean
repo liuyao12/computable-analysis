@@ -59,4 +59,22 @@ theorem imaginaryUnit_natPow_coord_abs_le_one (n : Nat) :
             qabs_neg] using ih.2,
           by simpa [h, Rat.zero_add, Rat.add_zero] using ih.1⟩
 
+theorem quarterTurn_geometric_term_coord_abs_le
+    {r : Rat} (hr0 : 0 <= r) (n : Nat) :
+    qabs ((QComplex.mul (QComplex.ofRat (r ^ n))
+      (QComplex.natPow RotationSeries.imaginaryUnit n)).re) <= r ^ n /\
+      qabs ((QComplex.mul (QComplex.ofRat (r ^ n))
+        (QComplex.natPow RotationSeries.imaginaryUnit n)).im) <= r ^ n := by
+  have hpower := imaginaryUnit_natPow_coord_abs_le_one n
+  have hpow_nonneg : 0 <= r ^ n := Rat.pow_nonneg hr0
+  have hpow_abs : qabs (r ^ n) = r ^ n :=
+    qabs_eq_self_of_nonneg hpow_nonneg
+  simp [QComplex.mul, QComplex.ofRat, hpow_abs, qabs_mul,
+    Rat.sub_eq_add_neg, Rat.zero_add, Rat.add_zero]
+  constructor
+  · simpa [Rat.mul_one] using
+      Rat.mul_le_mul_of_nonneg_left hpower.1 hpow_nonneg
+  · simpa [Rat.mul_one] using
+      Rat.mul_le_mul_of_nonneg_left hpower.2 hpow_nonneg
+
 end ComputableAnalysis

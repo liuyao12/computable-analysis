@@ -587,6 +587,14 @@ theorem wiedijk_item_seventy_six_quarter_turn_power_bound (n : Nat) :
       qabs ((QComplex.natPow RotationSeries.imaginaryUnit n).im) <= 1 := by
   exact imaginaryUnit_natPow_coord_abs_le_one n
 
+theorem wiedijk_item_seventy_six_geometric_term_coordinate_bound
+    {r : Rat} (hr0 : 0 <= r) (n : Nat) :
+    qabs ((QComplex.mul (QComplex.ofRat (r ^ n))
+      (QComplex.natPow RotationSeries.imaginaryUnit n)).re) <= r ^ n /\
+      qabs ((QComplex.mul (QComplex.ofRat (r ^ n))
+        (QComplex.natPow RotationSeries.imaginaryUnit n)).im) <= r ^ n := by
+  exact quarterTurn_geometric_term_coord_abs_le hr0 n
+
 /-! Item 9 in its computable form: the circle-area interval algorithm is
 valid, and agrees with the independently constructed rational rectangle
 integral for the Cauchy kernel. -/
