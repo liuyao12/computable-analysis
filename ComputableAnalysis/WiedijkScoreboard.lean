@@ -800,6 +800,36 @@ theorem wiedijk_item_eight_doubling_cube_stage_twenty_four :
       1 / 16777216 := by
   exact cubeTarget_bisection_stage24_width
 
+theorem wiedijk_item_eight_doubling_cube_multistage_certificate :
+    (cubeTarget (monotoneTargetBisectionIterate cubeTarget 2 4 cubeTargetInitial).lo <= 2 /\
+      2 <= cubeTarget (monotoneTargetBisectionIterate cubeTarget 2 4 cubeTargetInitial).hi /\
+      ((monotoneTargetBisectionIterate cubeTarget 2 4 cubeTargetInitial).width =
+        (1 / 16 : Rat))) /\
+    (cubeTarget (monotoneTargetBisectionIterate cubeTarget 2 8 cubeTargetInitial).lo <= 2 /\
+      2 <= cubeTarget (monotoneTargetBisectionIterate cubeTarget 2 8 cubeTargetInitial).hi /\
+      ((monotoneTargetBisectionIterate cubeTarget 2 8 cubeTargetInitial).width =
+        (1 / 256 : Rat))) /\
+    (cubeTarget (monotoneTargetBisectionIterate cubeTarget 2 16 cubeTargetInitial).lo <= 2 /\
+      2 <= cubeTarget (monotoneTargetBisectionIterate cubeTarget 2 16 cubeTargetInitial).hi /\
+      ((monotoneTargetBisectionIterate cubeTarget 2 16 cubeTargetInitial).width =
+        (1 / 65536 : Rat))) /\
+    (cubeTarget (monotoneTargetBisectionIterate cubeTarget 2 24 cubeTargetInitial).lo <= 2 /\
+      2 <= cubeTarget (monotoneTargetBisectionIterate cubeTarget 2 24 cubeTargetInitial).hi /\
+      ((monotoneTargetBisectionIterate cubeTarget 2 24 cubeTargetInitial).width =
+        (1 / 16777216 : Rat))) := by
+  exact ⟨⟨cubeTarget_bisection_stage4_bracket.1,
+      cubeTarget_bisection_stage4_bracket.2,
+      cubeTarget_bisection_stage4_width⟩,
+    ⟨⟨cubeTarget_bisection_stage8_bracket.1,
+        cubeTarget_bisection_stage8_bracket.2,
+        cubeTarget_bisection_stage8_width⟩,
+      ⟨⟨cubeTarget_bisection_stage16_bracket.1,
+          cubeTarget_bisection_stage16_bracket.2,
+          cubeTarget_bisection_stage16_width⟩,
+        ⟨cubeTarget_bisection_stage24_bracket.1,
+          cubeTarget_bisection_stage24_bracket.2,
+          cubeTarget_bisection_stage24_width⟩⟩⟩⟩
+
 theorem wiedijk_item_eleven_prime_unboundedness (bound : Nat) :
     ∃ certificate : PrimeUnboundednessCertificate bound,
       bound < certificate.witness := by
