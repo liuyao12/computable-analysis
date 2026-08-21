@@ -227,6 +227,15 @@ theorem wiedijk_item_two_finite_complex_quadratic_certificate :
     finiteComplexQuadratic_roots_distinct,
     finiteComplexQuadratic_factorization⟩
 
+/-! The worked polynomial is an instance of the reusable factorized quadratic
+interface.  This is the computable FTA boundary: supplied exact complex roots
+give an executable polynomial and an exact root characterization. -/
+theorem wiedijk_item_two_factorized_quadratic_root_characterization
+    (r s z : QComplex) :
+    CPoly.hasExactRoot
+        (factorizedQuadraticPolynomial r s) z ↔ z = r ∨ z = s := by
+  exact factorizedQuadraticPolynomial_hasExactRoot_iff r s z
+
 /-! Item 16 in its constructive finite boundary: a bounded rational-root
 search for a monic quintic returns no candidate.  This does not assert the
 classical impossibility theorem or provide a general radicals solver. -/
