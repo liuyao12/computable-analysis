@@ -729,6 +729,21 @@ theorem wiedijk_item_thirty_four_harmonic_growth (target : Nat) :
     (target : Rat) <= FiniteHarmonic.harmonicSum (2 ^ (2 * target)) := by
   exact FiniteHarmonic.harmonicSum_two_pow_reaches target
 
+theorem wiedijk_item_thirty_four_harmonic_stage_step (n : Nat) :
+    FiniteHarmonic.harmonicSum (n + 1) =
+      FiniteHarmonic.harmonicSum n + 1 / ((n + 1 : Nat) : Rat) := by
+  exact FiniteHarmonic.harmonicSum_succ n
+
+theorem wiedijk_item_thirty_four_harmonic_doubling_gain
+    (n : Nat) (hn : 0 < n) :
+    FiniteHarmonic.harmonicSum n + 1 / 2 <=
+      FiniteHarmonic.harmonicSum (2 * n) := by
+  exact FiniteHarmonic.harmonicSum_double_lower n hn
+
+theorem wiedijk_item_thirty_four_harmonic_power_lower (k : Nat) :
+    (k : Rat) / 2 <= FiniteHarmonic.harmonicSum (2 ^ k) := by
+  exact FiniteHarmonic.harmonicSum_two_pow_lower k
+
 theorem wiedijk_item_thirty_eight_arithmetic_geometric_mean
     {a b c d : Rat}
     (ha : 0 <= a) (hb : 0 <= b) (hc : 0 <= c) (hd : 0 <= d) :
