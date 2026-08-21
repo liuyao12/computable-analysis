@@ -771,6 +771,11 @@ theorem wiedijk_item_seventy_six_finite_fourier_linearity
     finiteFourierSum_scale r root mode xs,
     (finiteFourierSum_conj root mode xs).symm⟩
 
+theorem wiedijk_item_seventy_six_fourier_zero_mode
+    (root : QComplex) (samples : List QComplex) :
+    finiteFourierSum root 0 samples = qcomplexListSum samples := by
+  exact finiteFourierSum_zero_mode root samples
+
 theorem wiedijk_item_seventy_six_finite_list_mode_period_four
     (mode : Nat) (samples : List QComplex) :
     finiteFourierSum RotationSeries.imaginaryUnit (mode + 4) samples =

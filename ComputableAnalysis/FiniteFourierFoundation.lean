@@ -301,6 +301,23 @@ theorem finiteFourierSum_one
     finiteFourierSum QComplex.one mode xs = qcomplexListSum xs := by
   exact finiteFourierSum_aux_one mode 0 xs
 
+/-! The zero mode is the ordinary finite sum, independently of the chosen
+root.  This is the finite analogue of the zeroth Fourier coefficient and is
+the bridge used when a coefficient family is summed before taking a limit. -/
+theorem finiteFourierSum_zero_mode
+    (root : QComplex) (xs : List QComplex) :
+    finiteFourierSum root 0 xs = qcomplexListSum xs := by
+  have haux : forall k : Nat, forall ys : List QComplex,
+      finiteFourierSumAux root 0 k ys = qcomplexListSum ys := by
+    intro k ys
+    induction ys generalizing k with
+    | nil => rfl
+    | cons y ys ih =>
+        simp only [finiteFourierSumAux, qcomplexListSum]
+        rw [ih (k := k + 1)]
+        simp [QComplex.natPow, QComplex.mul_one_cert]
+  exact haux 0 xs
+
 theorem finiteFourierSum_aux_scale
     (r : Rat) (root : QComplex) (mode k : Nat)
     (xs : List QComplex) :
