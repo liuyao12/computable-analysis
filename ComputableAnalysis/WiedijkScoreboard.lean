@@ -414,6 +414,23 @@ theorem wiedijk_item_twenty_one_green_rectangle_additivity
   exact ⟨greenRectangleBoundary_split_horizontal left middle right bottom top,
     greenRectangleArea_split_horizontal left middle right bottom top⟩
 
+theorem wiedijk_item_twenty_one_green_rectangle_boundary_area
+    (left right bottom top : Rat) :
+    greenRectangleBoundary left right bottom top =
+      greenRectangleArea left right bottom top := by
+  exact greenRectangleBoundary_eq_area left right bottom top
+
+theorem wiedijk_item_twenty_one_green_rectangle_vertical_additivity
+    (left right bottom middle top : Rat) :
+    greenRectangleBoundary left right bottom middle +
+        greenRectangleBoundary left right middle top =
+      greenRectangleBoundary left right bottom top /\
+    greenRectangleArea left right bottom middle +
+        greenRectangleArea left right middle top =
+      greenRectangleArea left right bottom top := by
+  exact ⟨greenRectangleBoundary_split_vertical left right bottom middle top,
+    greenRectangleArea_split_vertical left right bottom middle top⟩
+
 theorem wiedijk_item_one_hundred_descartes_certificate :
     Polynomial.signChangeCountIgnoringZeros Polynomial.twoVariationQuadratic = 2 /\
       (forall x : Rat, 0 < x ->
