@@ -629,6 +629,11 @@ theorem wiedijk_item_twenty_one_green_rectangle_boundary_area
       greenRectangleArea left right bottom top := by
   exact greenRectangleBoundary_eq_area left right bottom top
 
+theorem wiedijk_item_twenty_one_green_rectangle_certificate_sound
+    (certificate : FiniteGreenRectangleCertificate) :
+    certificate.boundary = certificate.area := by
+  exact certificate.boundary_eq_area
+
 theorem wiedijk_item_twenty_one_green_rectangle_vertical_additivity
     (left right bottom middle top : Rat) :
     greenRectangleBoundary left right bottom middle +
