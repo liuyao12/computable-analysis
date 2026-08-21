@@ -10,6 +10,7 @@ import ComputableAnalysis.FinitePrimeInfinitude
 import ComputableAnalysis.FiniteBertrandCertificate
 import ComputableAnalysis.CubicRootWitnessCertificate
 import ComputableAnalysis.FiniteGreenRectangle
+import ComputableAnalysis.FiniteGeometryFormulaInterfaces
 
 /-!
 # Wiedijk's List scoreboard
@@ -211,5 +212,13 @@ theorem wiedijk_item_twenty_one_green_rectangle
     greenRectangleBoundary left right bottom top =
       greenRectangleArea left right bottom top := by
   exact greenRectangleBoundary_eq_area left right bottom top
+
+theorem wiedijk_item_fifty_seven_heron_squared_identity (a b c : Rat) :
+    16 * ((a + b + c) / 2) * ((-a + b + c) / 2) *
+        ((a - b + c) / 2) * ((a + b - c) / 2) =
+      2 * (a * a) * (b * b) + 2 * (a * a) * (c * c) +
+        2 * (b * b) * (c * c) - (a * a) * (a * a) -
+        (b * b) * (b * b) - (c * c) * (c * c) := by
+  exact RationalCircle.heron_squared_identity a b c
 
 end ComputableAnalysis
