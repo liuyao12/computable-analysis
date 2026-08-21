@@ -36,6 +36,7 @@ import ComputableAnalysis.FiniteLawOfCosinesExample
 import ComputableAnalysis.FinitePtolemyLength
 import ComputableAnalysis.FiniteCramerExample
 import ComputableAnalysis.FiniteDescartesExamples
+import ComputableAnalysis.FiniteDescartesInterface
 import ComputableAnalysis.FinitePrimeFactorExample
 import ComputableAnalysis.CauchyPi
 import ComputableAnalysis.FinitePrimeReciprocalCertificate
@@ -315,6 +316,11 @@ theorem wiedijk_item_eighty_finite_prime_factor_certificate :
   exact ⟨primeFactorizationCertificate360_product,
     by native_decide, primeFactorizationCertificate360_factor_order_unique⟩
 
+theorem wiedijk_item_eighty_finite_unique_factorization
+    {n : Nat} (c₁ c₂ : PrimeFactorCertificate n) :
+    c₁.factors.Perm c₂.factors := by
+  exact PrimeFactorCertificate.factor_perm c₁ c₂
+
 theorem wiedijk_item_ninety_four_law_of_cosines_certificate :
     let p : PiCirclePoint := { x := 3 / 5, y := 4 / 5 }
     let q : PiCirclePoint := { x := -4 / 5, y := 3 / 5 }
@@ -349,6 +355,14 @@ theorem wiedijk_item_one_hundred_descartes_certificate :
         (Polynomial.eval Polynomial.twoVariationQuadratic x = 0 ↔
           x = 1 ∨ x = 2)) := by
   exact Polynomial.twoVariationQuadratic_certificate
+
+theorem wiedijk_item_one_hundred_finite_descartes_bound
+    (certificate : Polynomial.FiniteDescartesSignCertificate) :
+    Polynomial.signChangeCountIgnoringZeros certificate.coefficients =
+        certificate.variationCount /\
+      certificate.variationCount + 1 <= certificate.filteredLength := by
+  exact ⟨certificate.variation_eq_count,
+    certificate.variation_bound⟩
 
 theorem wiedijk_item_forty_four_binomial_certificate :
     Series.binomialSum 5 2 1 6 = 243 := by
