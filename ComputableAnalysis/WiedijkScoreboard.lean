@@ -746,6 +746,24 @@ theorem wiedijk_item_sixty_six_geometric_raw_closed_form
       (RealRaw.ofRat (1 / (1 - r))) := by
   exact Series.geometricRaw_equiv_inv_one_sub hr0 hr1
 
+/-! The same geometric-series result is exposed through the abstract `Real`
+layer.  The preferred implementation remains the interval algorithm, while
+the closed form is a second certified representation. -/
+def wiedijk_item_sixty_six_geometric_real
+    {r : Rat} (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
+    (hr1 : r < 1) : Real :=
+  Real.ofRaw (Series.geometricRaw r hr0 hr1)
+    (Series.geometricRaw_valid_of_le_half hr0 hrhalf hr1)
+
+theorem wiedijk_item_sixty_six_geometric_real_closed_form
+    {r : Rat} (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
+    (hr1 : r < 1) :
+    (wiedijk_item_sixty_six_geometric_real hr0 hrhalf hr1).Equiv
+      (Real.ofRat (1 / (1 - r))) := by
+  change (Series.geometricRaw r hr0 hr1).Equiv
+    (RealRaw.ofRat (1 / (1 - r)))
+  exact Series.geometricRaw_equiv_inv_one_sub hr0 hr1
+
 theorem wiedijk_item_sixty_six_geometric_raw_precision
     {r : Rat} (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
     (hr1 : r < 1) (eps : QPos) :
