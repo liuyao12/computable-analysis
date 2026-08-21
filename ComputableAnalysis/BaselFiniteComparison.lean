@@ -25,6 +25,21 @@ def baselCommonInterval : QInterval :=
     (DirichletSeries.zetaTwoInterval 10000)
     (geometricPiSquaredOverSixCompute 8)
 
+/-! Reusable interval interface for the Basel comparison.  The analytic input
+is isolated in `hover`; everything else is rational interval bookkeeping. -/
+theorem finiteBaselCommonInterval_certificate
+    (zeta geometric : QInterval)
+    (hzeta : zeta.lo <= zeta.hi)
+    (hgeometric : geometric.lo <= geometric.hi)
+    (hover : zeta.lo <= geometric.hi /\ geometric.lo <= zeta.hi) :
+    (QInterval.intersection zeta geometric).lo <=
+        (QInterval.intersection zeta geometric).hi /\
+      zeta.ContainsInterval (QInterval.intersection zeta geometric) /\
+      geometric.ContainsInterval (QInterval.intersection zeta geometric) := by
+  refine ⟨QInterval.intersection_ordered_of_overlaps hzeta hgeometric hover,
+    QInterval.intersection_contained_left _ _,
+    QInterval.intersection_contained_right _ _⟩
+
 /-- At finite stages, the zeta and geometric `pi^2 / 6` enclosures overlap. -/
 theorem zetaTwoInterval_overlaps_projectPiSquaredOverSix_10000_8 :
     (DirichletSeries.zetaTwoInterval 10000).lo <=
