@@ -1328,6 +1328,14 @@ theorem wiedijk_item_seventy_three_bounded_monotone_precision
       certificate.hiStage n - certificate.loStage n <= eps.val := by
   exact certificate.width_shrinks eps
 
+theorem wiedijk_item_seventy_three_bounded_monotone_precision_witness
+    (certificate : MonotoneIntervalCertificate) (eps : QPos) :
+    ∃ N : Nat, ∃ q : Rat,
+      certificate.loStage N ≤ q /\
+        q ≤ certificate.hiStage N /\
+        certificate.hiStage N - certificate.loStage N ≤ eps.val := by
+  exact certificate.precision_witness eps
+
 /-! Item 64 in its computable form: after cancelling a common nonzero linear
 factor, the quotient differs from its base value by an explicit rational
 remainder.  The remainder is the finite convergence certificate; no completed

@@ -58,6 +58,24 @@ theorem MonotoneIntervalCertificate.upper_pair_ge
     certificate.hiStage b ≤ certificate.hiStage a := by
   exact antitone_of_succ_ge certificate.upper_succ hab
 
+/-! A finite readout of the bounded monotone computation: at a sufficiently
+late stage, the midpoint is an explicit rational representative whose whole
+stage interval has the requested width. -/
+theorem MonotoneIntervalCertificate.precision_witness
+    (certificate : MonotoneIntervalCertificate) (eps : QPos) :
+    ∃ N : Nat, ∃ q : Rat,
+      certificate.loStage N ≤ q /\
+        q ≤ certificate.hiStage N /\
+        certificate.hiStage N - certificate.loStage N ≤ eps.val := by
+  obtain ⟨N, hN⟩ := certificate.width_shrinks eps
+  refine ⟨N, (certificate.loStage N + certificate.hiStage N) / 2, ?_⟩
+  have hordered := certificate.enclosed N
+  constructor
+  · grind
+  constructor
+  · grind
+  · exact hN N (Nat.le_refl N)
+
 def finiteAscendingSequenceCertificate
     (sequence : Nat → Rat) (stage : Nat)
     (successor_le : ∀ n, sequence n ≤ sequence (n + 1)) :
