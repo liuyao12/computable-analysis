@@ -871,6 +871,16 @@ theorem wiedijk_item_fifteen_derivative_bound_ftc_close_at
       (certificate.endpointInterval eps) eps := by
   exact certificate.closeAt eps
 
+theorem wiedijk_item_fifteen_scheduled_endpoint_equiv_canonical
+    {F dF : RealFunRaw} {a b : Rat}
+    (certificate : DerivativeBoundFTC F dF a b)
+    (hF : F.Valid) (ha : F.domain a) (hb : F.domain b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b)) :
+    certificate.endpointRaw.Equiv
+      (endpointDifferenceRaw F a b hendpoint) := by
+  exact DerivativeBoundFTC.endpointRaw_equiv_endpointDifference
+    certificate hF ha hb hendpoint
+
 /-! The polynomial base case is exposed independently of the packaged FTC
 portfolio.  It is the finite algebraic core: a primitive prefix has an exact
 endpoint recurrence, and its coefficient-shift polynomial has a certified
