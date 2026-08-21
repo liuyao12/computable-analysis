@@ -1431,6 +1431,12 @@ theorem wiedijk_item_forty_three_rectangle_isoperimetric_equality
     16 * rectangleArea a b = rectanglePerimeter a b ^ 2 ↔ a = b := by
   exact rectangle_isoperimetric_eq_iff
 
+theorem wiedijk_item_forty_three_rectangle_isoperimetric_gap
+    {a b : Rat} :
+    rectanglePerimeter a b ^ 2 - 16 * rectangleArea a b =
+      4 * (a - b) ^ 2 := by
+  exact rectangle_isoperimetric_gap
+
 theorem wiedijk_item_thirty_nine_pell_recurrence (stage : Nat) :
     (pellPair stage).1 * (pellPair stage).1 -
         2 * (pellPair stage).2 * (pellPair stage).2 = 1 := by
