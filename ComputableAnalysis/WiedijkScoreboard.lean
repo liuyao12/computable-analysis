@@ -471,6 +471,19 @@ theorem wiedijk_item_sixty_eight_arithmetic_series (n : Nat) :
     Series.arithmeticSum n = (n : Rat) * ((n : Rat) - 1) / 2 := by
   exact Series.arithmeticSum_eq n
 
+theorem wiedijk_item_sixty_eight_arithmetic_progression_sum
+    (a d : Rat) (n : Nat) :
+    Series.arithmeticProgressionSum a d n =
+      (n : Rat) * (2 * a + ((n : Rat) - 1) * d) / 2 := by
+  exact Series.arithmeticProgressionSum_eq a d n
+
+theorem wiedijk_item_sixty_eight_arithmetic_progression_monotone
+    {a d : Rat} (ha : 0 <= a) (hd : 0 <= d)
+    {n m : Nat} (hnm : n <= m) :
+    Series.arithmeticProgressionSum a d n <=
+      Series.arithmeticProgressionSum a d m := by
+  exact Series.arithmeticProgressionSum_le_of_le ha hd hnm
+
 theorem wiedijk_item_seventy_seven_sum_of_squares (n : Nat) :
     Series.squareSum n =
       (n : Rat) * ((n : Rat) - 1) * (2 * (n : Rat) - 1) / 6 := by
