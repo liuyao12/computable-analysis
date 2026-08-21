@@ -1738,6 +1738,15 @@ theorem wiedijk_item_seventy_five_convex_pointwise_derivative_valid
     certificate.raw.Valid := by
   exact certificate.raw_valid
 
+theorem wiedijk_item_seventy_five_convex_derivative_precision
+    {F : RealFunRaw} {a b : Rat}
+    {C : RationalSubinterval a b}
+    {H : CurvatureOnSubinterval F C} {q : Rat}
+    (certificate : ConvexDerivative.Pointwise H q) (eps : QPos) :
+    ∃ N : Nat, ∀ n, N ≤ n ->
+      (certificate.raw.compute n).width <= eps.val := by
+  exact certificate.raw_valid.2.2 eps
+
 theorem wiedijk_item_seventy_five_convex_derivative_order
     {F : RealFunRaw} {a b : Rat}
     {C : RationalSubinterval a b}
