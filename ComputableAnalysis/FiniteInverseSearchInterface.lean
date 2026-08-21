@@ -52,6 +52,77 @@ theorem FiniteInverseSearchCertificate.output_midpoint_witness
   have hmid := QInterval.midpoint_mem hordered
   exact ⟨hbracket.1, hbracket.2, hmid.1, hmid.2⟩
 
+/-! The finite inverse search can also be run at every stage, producing the
+nested interval algorithm used by `RealRaw`.  The only extra hypothesis is
+the harmless normalization that the initial interval has width at most one;
+the bisection width law then supplies the explicit precision modulus. -/
+def FiniteInverseSearchCertificate.toRealRaw
+    (certificate : FiniteInverseSearchCertificate) : RealRaw where
+  compute := fun n =>
+    monotoneTargetBisectionIterate certificate.map certificate.target n
+      certificate.initialInterval
+
+theorem FiniteInverseSearchCertificate.toRealRaw_valid
+    (certificate : FiniteInverseSearchCertificate)
+    (hwidth : certificate.initialInterval.width <= 1) :
+    certificate.toRealRaw.Valid := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro n
+    change 0 <=
+      (monotoneTargetBisectionIterate certificate.map certificate.target n
+        certificate.initialInterval).hi -
+        (monotoneTargetBisectionIterate certificate.map certificate.target n
+          certificate.initialInterval).lo
+    have hordered := monotoneTargetBisectionIterate_ordered
+      (f := certificate.map) certificate.target certificate.ordered n
+    grind
+  · intro n m hnm
+    change
+      (monotoneTargetBisectionIterate certificate.map certificate.target n
+        certificate.initialInterval).lo <=
+          (monotoneTargetBisectionIterate certificate.map certificate.target m
+            certificate.initialInterval).lo /\
+        (monotoneTargetBisectionIterate certificate.map certificate.target m
+          certificate.initialInterval).lo <=
+          (monotoneTargetBisectionIterate certificate.map certificate.target m
+            certificate.initialInterval).hi /\
+        (monotoneTargetBisectionIterate certificate.map certificate.target m
+          certificate.initialInterval).hi <=
+          (monotoneTargetBisectionIterate certificate.map certificate.target n
+            certificate.initialInterval).hi
+    have hlater := monotoneTargetBisectionIterate_later_subinterval
+      (f := certificate.map) certificate.target certificate.ordered hnm
+    have hm := monotoneTargetBisectionIterate_ordered
+      (f := certificate.map) certificate.target certificate.ordered m
+    exact ⟨hlater.1, hm, hlater.2⟩
+  · intro eps
+    refine ⟨eps.val.den, ?_⟩
+    intro n hn
+    have hreach := monotoneTargetBisectionIterate_reaches_of_positive_tolerance
+      (f := certificate.map) (I := certificate.initialInterval)
+      certificate.target hwidth eps
+    have hsub := monotoneTargetBisectionIterate_later_subinterval
+      (f := certificate.map) certificate.target certificate.ordered hn
+    change
+      (monotoneTargetBisectionIterate certificate.map certificate.target n
+        certificate.initialInterval).width <= eps.val
+    have hwidth_mono :
+        (monotoneTargetBisectionIterate certificate.map certificate.target n
+          certificate.initialInterval).width <=
+          (monotoneTargetBisectionIterate certificate.map certificate.target
+            eps.val.den certificate.initialInterval).width := by
+      change
+        (monotoneTargetBisectionIterate certificate.map certificate.target n
+          certificate.initialInterval).hi -
+            (monotoneTargetBisectionIterate certificate.map certificate.target n
+              certificate.initialInterval).lo <=
+          (monotoneTargetBisectionIterate certificate.map certificate.target
+            eps.val.den certificate.initialInterval).hi -
+            (monotoneTargetBisectionIterate certificate.map certificate.target
+              eps.val.den certificate.initialInterval).lo
+      grind [hsub.1, hsub.2]
+    exact Rat.le_trans hwidth_mono hreach
+
 def finiteInverseSearchCertificate
     (map : Rat → Rat) (target : Rat) (initialInterval : QInterval)
     (stage : Nat) (ordered : initialInterval.lo ≤ initialInterval.hi)

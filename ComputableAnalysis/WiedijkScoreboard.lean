@@ -1338,6 +1338,12 @@ theorem wiedijk_item_seventy_nine_effective_bisection_width
       I.width / (2 ^ n : Rat) := by
   exact monotoneTargetBisectionIterate_width target n
 
+theorem wiedijk_item_seventy_nine_bisection_to_real_raw
+    (certificate : FiniteInverseSearchCertificate)
+    (hwidth : certificate.initialInterval.width <= 1) :
+    certificate.toRealRaw.Valid := by
+  exact certificate.toRealRaw_valid hwidth
+
 /-! Item 75 in its computable form: for a nonnegative-coefficient polynomial,
 the secant slope is enclosed by endpoint derivative evaluations.  This is the
 finite certificate that replaces the classical assertion that some attained
