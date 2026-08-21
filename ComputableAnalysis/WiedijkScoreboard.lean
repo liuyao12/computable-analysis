@@ -26,6 +26,7 @@ import ComputableAnalysis.Basel
 import ComputableAnalysis.FiniteFourierCertificate
 import ComputableAnalysis.FiniteFourierFoundation
 import ComputableAnalysis.EffectiveFourierSeries
+import ComputableAnalysis.FiniteFourierGeometric
 import ComputableAnalysis.CauchyPi
 import ComputableAnalysis.FinitePrimeReciprocalCertificate
 import ComputableAnalysis.FiniteStirlingInterface
@@ -570,6 +571,16 @@ theorem wiedijk_item_seventy_six_geometric_tail_fourier_valid
     (geometricFourierZeroModeSeries r hr0 hrhalf hr1).stabilized.Valid := by
   exact EffectiveFourierSeries.stabilized_valid
     (geometricFourierZeroModeSeries r hr0 hrhalf hr1)
+
+theorem wiedijk_item_seventy_six_geometric_coefficient_stage_recurrence
+    (root : QComplex) (mode : Nat) (r : Rat) (n : Nat) :
+    finiteFourierSum root mode (geometricCoefficientStage r (n + 1)) =
+      QComplex.add
+        (finiteFourierSum root mode (geometricCoefficientStage r n))
+        (QComplex.mul
+          (QComplex.natPow root (mode * n))
+          (QComplex.ofRat (r ^ n))) := by
+  exact finiteFourierSum_geometricCoefficientStage_succ root mode r n
 
 /-! Item 9 in its computable form: the circle-area interval algorithm is
 valid, and agrees with the independently constructed rational rectangle
