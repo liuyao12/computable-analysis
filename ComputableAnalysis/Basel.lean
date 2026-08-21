@@ -165,6 +165,14 @@ theorem geometricPiSquaredOverSixRaw_precision_midpoint_witness
     (QInterval.midpoint_mem hordered).2,
     hN N (Nat.le_refl N)⟩
 
+theorem basel_two_sided_precision (eps : QPos) :
+    ∃ n m : Nat,
+      (baselSeriesRaw.compute n).width <= eps.val /\
+      (geometricPiSquaredOverSixRaw.compute m).width <= eps.val := by
+  obtain ⟨n, hn⟩ := baselSeriesRaw_reaches_of_positive_tolerance eps
+  obtain ⟨m, hm⟩ := geometricPiSquaredOverSixRaw_reaches_of_positive_tolerance eps
+  exact ⟨n, m, hn, hm⟩
+
 /- Put the cursor here to compare with the zeta-side interval above. -/
 #eval! geometricPiSquaredOverSixRaw.decimalAt 12
   5

@@ -1748,6 +1748,12 @@ theorem wiedijk_item_fourteen_effective_pi_squared_over_six :
   exact ⟨Basel.geometricPiSquaredOverSixRaw_valid,
     Basel.geometricPiSquaredOverSixRaw_reaches_of_positive_tolerance⟩
 
+theorem wiedijk_item_fourteen_basel_two_sided_precision (eps : QPos) :
+    ∃ n m : Nat,
+      (Basel.baselSeriesRaw.compute n).width <= eps.val /\
+      (Basel.geometricPiSquaredOverSixRaw.compute m).width <= eps.val := by
+  exact Basel.basel_two_sided_precision eps
+
 theorem wiedijk_item_fourteen_pi_squared_over_six_midpoint_witness
     (eps : QPos) :
     ∃ n : Nat, ∃ q : Rat,
