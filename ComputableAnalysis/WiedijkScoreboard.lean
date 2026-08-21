@@ -717,6 +717,21 @@ theorem wiedijk_item_seventy_six_fourier_block_phase
           (finiteFourierSum root mode ys)) := by
   exact finiteFourierSum_append_phase root mode xs ys
 
+theorem wiedijk_item_seventy_six_finite_fourier_linearity
+    (root : QComplex) (mode : Nat) (r : Rat)
+    (xs ys : List QComplex) :
+    finiteFourierSum root mode (qcomplexListAdd xs ys) =
+        QComplex.add (finiteFourierSum root mode xs)
+          (finiteFourierSum root mode ys) /\
+      finiteFourierSum root mode (qcomplexListScale r xs) =
+        QComplex.scaleRat r (finiteFourierSum root mode xs) /\
+      finiteFourierSum (QComplex.conj root) mode (qcomplexListConj xs) =
+        QComplex.conj (finiteFourierSum
+          root mode xs) := by
+  exact ⟨finiteFourierSum_add root mode xs ys,
+    finiteFourierSum_scale r root mode xs,
+    (finiteFourierSum_conj root mode xs).symm⟩
+
 theorem wiedijk_item_seventy_six_finite_list_mode_period_four
     (mode : Nat) (samples : List QComplex) :
     finiteFourierSum RotationSeries.imaginaryUnit (mode + 4) samples =
