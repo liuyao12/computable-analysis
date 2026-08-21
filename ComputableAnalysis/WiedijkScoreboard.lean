@@ -50,6 +50,8 @@ import ComputableAnalysis.FinitePrimeFactorExample
 import ComputableAnalysis.CauchyPi
 import ComputableAnalysis.FinitePrimeReciprocalCertificate
 import ComputableAnalysis.FiniteStirlingInterface
+import ComputableAnalysis.FiniteStirlingStageThirtyTwo
+import ComputableAnalysis.FiniteStirlingStageSixtyFour
 import ComputableAnalysis.FiniteStirlingStageTwoFiftySix
 import ComputableAnalysis.FiniteFactorialInterface
 import ComputableAnalysis.BaselFiniteComparison
@@ -2632,6 +2634,44 @@ theorem wiedijk_item_ninety_finite_stirling_stage_two_fifty_six_enclosure :
       finiteStirlingRatio 256 finiteStirlingEApprox
           finiteStirlingRootApproxTwoFiftySix <= 2 := by
   exact finiteStirlingRatioAtTwoFiftySix_enclosure
+
+theorem wiedijk_item_ninety_finite_stirling_stage_family_enclosures :
+    ((1 : Rat) / 2 <=
+        finiteStirlingRatio 8 finiteStirlingEApprox
+          finiteStirlingRootApproxEight /\
+      finiteStirlingRatio 8 finiteStirlingEApprox
+          finiteStirlingRootApproxEight <= 2) /\
+    ((1 : Rat) / 2 <=
+        finiteStirlingRatio 16 finiteStirlingEApprox
+          finiteStirlingRootApproxSixteen /\
+      finiteStirlingRatio 16 finiteStirlingEApprox
+          finiteStirlingRootApproxSixteen <= 2) /\
+    ((1 : Rat) / 2 <=
+        finiteStirlingRatio 32 finiteStirlingEApprox
+          finiteStirlingRootApproxThirtyTwo /\
+      finiteStirlingRatio 32 finiteStirlingEApprox
+          finiteStirlingRootApproxThirtyTwo <= 2) /\
+    ((1 : Rat) / 2 <=
+        finiteStirlingRatio 64 finiteStirlingEApprox
+          finiteStirlingRootApproxSixtyFour /\
+      finiteStirlingRatio 64 finiteStirlingEApprox
+          finiteStirlingRootApproxSixtyFour <= 2) /\
+    ((1 : Rat) / 2 <=
+        finiteStirlingRatio 128 finiteStirlingEApprox
+          finiteStirlingRootApproxOneTwentyEight /\
+      finiteStirlingRatio 128 finiteStirlingEApprox
+          finiteStirlingRootApproxOneTwentyEight <= 2) /\
+    ((1 : Rat) / 2 <=
+        finiteStirlingRatio 256 finiteStirlingEApprox
+          finiteStirlingRootApproxTwoFiftySix /\
+      finiteStirlingRatio 256 finiteStirlingEApprox
+          finiteStirlingRootApproxTwoFiftySix <= 2) := by
+  exact ⟨finiteStirlingRatioAtEight_enclosure,
+    finiteStirlingRatioAtSixteen_enclosure,
+    finiteStirlingRatioAtThirtyTwo_enclosure,
+    finiteStirlingRatioAtSixtyFour_enclosure,
+    finiteStirlingRatioAtOneTwentyEight_enclosure,
+    finiteStirlingRatioAtTwoFiftySix_enclosure⟩
 
 theorem wiedijk_item_ninety_finite_stirling_stage_step
     (n : Nat) (e root : Rat) :
