@@ -26,6 +26,7 @@ import ComputableAnalysis.Basel
 import ComputableAnalysis.FiniteFourierCertificate
 import ComputableAnalysis.FiniteFourierFoundation
 import ComputableAnalysis.EffectiveFourierSeries
+import ComputableAnalysis.EffectiveFourierTail
 import ComputableAnalysis.FiniteFourierGeometric
 import ComputableAnalysis.FiniteComplexQuadraticExample
 import ComputableAnalysis.FiniteDigitDivisibilityInterface
@@ -756,6 +757,17 @@ theorem wiedijk_item_seventy_six_geometric_tail_fourier_valid
     (geometricFourierZeroModeSeries r hr0 hrhalf hr1).stabilized.Valid := by
   exact EffectiveFourierSeries.stabilized_valid
     (geometricFourierZeroModeSeries r hr0 hrhalf hr1)
+
+theorem wiedijk_item_seventy_six_generic_fourier_tail_bridge
+    (certificate : EffectiveFourierTailCertificate) :
+    certificate.toSeries.stabilized.Valid := by
+  exact certificate.toSeries_valid
+
+theorem wiedijk_item_seventy_six_quarter_turn_generic_tail_valid
+    (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
+    (hr1 : r < 1) :
+    (quarterTurnGeometricTailCertificate r hr0 hrhalf hr1).toSeries.stabilized.Valid := by
+  exact quarterTurnGeometricTailCertificate_valid r hr0 hrhalf hr1
 
 theorem wiedijk_item_seventy_six_geometric_coefficient_stage_recurrence
     (root : QComplex) (mode : Nat) (r : Rat) (n : Nat) :
