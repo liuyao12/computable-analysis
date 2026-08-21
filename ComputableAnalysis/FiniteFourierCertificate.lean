@@ -466,6 +466,52 @@ theorem fourPointComplexFourierTransform_reconstruct
     Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
     Rat.sub_eq_add_neg]
 
+theorem fourPointComplexFourierTransform_normalized_reconstruct
+    (x₀ x₁ x₂ x₃ : QComplex) :
+    let f₀ := fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0
+    let f₁ := fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 1
+    let f₂ := fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 2
+    let f₃ := fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 3
+    QComplex.scaleRat (1 / 4)
+        (QComplex.add (QComplex.add f₀ f₁) (QComplex.add f₂ f₃)) = x₀ /\
+      QComplex.scaleRat (1 / 4)
+          (QComplex.add
+            (QComplex.add f₀
+              (QComplex.mul (QComplex.scaleRat (-1) RotationSeries.imaginaryUnit) f₁))
+            (QComplex.add (QComplex.scaleRat (-1) f₂)
+              (QComplex.mul RotationSeries.imaginaryUnit f₃))) = x₁ /\
+      QComplex.scaleRat (1 / 4)
+          (QComplex.add (QComplex.add f₀ (QComplex.scaleRat (-1) f₁))
+            (QComplex.add f₂ (QComplex.scaleRat (-1) f₃))) = x₂ /\
+      QComplex.scaleRat (1 / 4)
+          (QComplex.add
+            (QComplex.add f₀
+              (QComplex.mul RotationSeries.imaginaryUnit f₁))
+            (QComplex.add (QComplex.scaleRat (-1) f₂)
+              (QComplex.mul (QComplex.scaleRat (-1) RotationSeries.imaginaryUnit) f₃))) = x₃ := by
+  rcases fourPointComplexFourierTransform_reconstruct x₀ x₁ x₂ x₃ with
+    ⟨h₀, h₁, h₂, h₃⟩
+  dsimp
+  constructor
+  · rw [h₀]
+    cases x₀
+    simp [QComplex.scaleRat]
+    constructor <;> grind
+  constructor
+  · rw [h₁]
+    cases x₁
+    simp [QComplex.scaleRat]
+    constructor <;> grind
+  constructor
+  · rw [h₂]
+    cases x₂
+    simp [QComplex.scaleRat]
+    constructor <;> grind
+  · rw [h₃]
+    cases x₃
+    simp [QComplex.scaleRat]
+    constructor <;> grind
+
 theorem fourPointComplexFourierTransform_conjugate_symmetry
     (x₀ x₁ x₂ x₃ : QComplex) :
     QComplex.conj (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0) =

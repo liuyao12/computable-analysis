@@ -2224,6 +2224,31 @@ theorem wiedijk_item_seventy_six_complex_fourier_reconstruction
         QComplex.scaleRat 4 x₃ := by
   exact fourPointComplexFourierTransform_reconstruct x₀ x₁ x₂ x₃
 
+theorem wiedijk_item_seventy_six_complex_fourier_normalized_reconstruction
+    (x₀ x₁ x₂ x₃ : QComplex) :
+    let f₀ := fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0
+    let f₁ := fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 1
+    let f₂ := fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 2
+    let f₃ := fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 3
+    QComplex.scaleRat (1 / 4)
+        (QComplex.add (QComplex.add f₀ f₁) (QComplex.add f₂ f₃)) = x₀ /\
+      QComplex.scaleRat (1 / 4)
+          (QComplex.add
+            (QComplex.add f₀
+              (QComplex.mul (QComplex.scaleRat (-1) RotationSeries.imaginaryUnit) f₁))
+            (QComplex.add (QComplex.scaleRat (-1) f₂)
+              (QComplex.mul RotationSeries.imaginaryUnit f₃))) = x₁ /\
+      QComplex.scaleRat (1 / 4)
+          (QComplex.add (QComplex.add f₀ (QComplex.scaleRat (-1) f₁))
+            (QComplex.add f₂ (QComplex.scaleRat (-1) f₃))) = x₂ /\
+      QComplex.scaleRat (1 / 4)
+          (QComplex.add
+            (QComplex.add f₀
+              (QComplex.mul RotationSeries.imaginaryUnit f₁))
+            (QComplex.add (QComplex.scaleRat (-1) f₂)
+              (QComplex.mul (QComplex.scaleRat (-1) RotationSeries.imaginaryUnit) f₃))) = x₃ := by
+  exact fourPointComplexFourierTransform_normalized_reconstruct x₀ x₁ x₂ x₃
+
 theorem wiedijk_item_seventy_six_complex_fourier_conjugate_symmetry
     (x₀ x₁ x₂ x₃ : QComplex) :
     QComplex.conj (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0) =
