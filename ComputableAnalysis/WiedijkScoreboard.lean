@@ -2020,6 +2020,15 @@ theorem wiedijk_item_seventy_six_fourier_constant_offset_invariance
     finiteFourierSum_add_replicate_block_invariant_of_phase_one _ _ c k samples
       (finiteFourierSum_quarterTurn_constant_block_mode_three c) hphase3⟩
 
+theorem wiedijk_item_seventy_six_fourier_generic_repeated_block_cancellation
+    (root : QComplex) (mode : Nat) (block : List QComplex) (k : Nat)
+    (hblock : finiteFourierSum root mode block = QComplex.zero)
+    (hphase : QComplex.natPow root (mode * block.length) = QComplex.one) :
+    finiteFourierSum root mode (finiteFourierBlockRepeat block k) =
+      QComplex.zero := by
+  exact finiteFourierSum_blockRepeat_zero_of_phase_one
+    root mode block k hblock hphase
+
 theorem wiedijk_item_seventy_six_finite_list_mode_period_four
     (mode : Nat) (samples : List QComplex) :
     finiteFourierSum RotationSeries.imaginaryUnit (mode + 4) samples =

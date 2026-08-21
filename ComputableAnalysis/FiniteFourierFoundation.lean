@@ -40,6 +40,13 @@ def qcomplexListSum : List QComplex → QComplex
   | [] => QComplex.zero
   | x :: xs => QComplex.add x (qcomplexListSum xs)
 
+/-! A finite stream made by repeating one finite block.  The block is kept as
+an explicit list so that its length and its Fourier coefficient remain part of
+the certificate-level interface. -/
+def finiteFourierBlockRepeat (block : List QComplex) : Nat → List QComplex
+  | 0 => []
+  | k + 1 => block ++ finiteFourierBlockRepeat block k
+
 private theorem qcomplex_add_four_rearrange
     (a b c d : QComplex) :
     QComplex.add (QComplex.add a b) (QComplex.add c d) =
@@ -541,5 +548,20 @@ theorem finiteFourierSum_add_replicate_block_invariant_of_phase_one
   rw [finiteFourierSum_add,
     finiteFourierSum_replicate_block_zero_of_phase_one root mode c k hblock hphase,
     qcomplex_add_zero]
+
+/-! General repeated-block cancellation.  The earlier four-point theorem is
+just the concrete quarter-turn instance of this finite algebraic law. -/
+theorem finiteFourierSum_blockRepeat_zero_of_phase_one
+    (root : QComplex) (mode : Nat) (block : List QComplex) (k : Nat)
+    (hblock : finiteFourierSum root mode block = QComplex.zero)
+    (hphase : QComplex.natPow root (mode * block.length) = QComplex.one) :
+    finiteFourierSum root mode (finiteFourierBlockRepeat block k) =
+      QComplex.zero := by
+  induction k with
+  | zero => simp [finiteFourierBlockRepeat, finiteFourierSum_empty, QComplex.zero]
+  | succ k ih =>
+      rw [finiteFourierBlockRepeat, finiteFourierSum_append_phase]
+      rw [hblock, hphase, ih]
+      rw [qcomplex_one_mul, qcomplex_zero_add]
 
 end ComputableAnalysis
