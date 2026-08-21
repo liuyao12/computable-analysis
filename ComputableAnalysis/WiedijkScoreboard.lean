@@ -738,6 +738,28 @@ theorem wiedijk_item_fifteen_curvature_ftc
       certificate.toDerivativeBoundFTC.endpointRaw := by
   exact certificate.equiv_endpoint
 
+/-! A second public FTC foundation: a certified monotone Darboux schedule is
+itself a valid raw integral, with a finite width budget for every stage. -/
+theorem wiedijk_item_fifteen_monotone_darboux_integral_valid
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hmonotone : NondecreasingOnInterval F}
+    {hinterval : F.lower <= F.upper}
+    (schedule : Integral.MonotoneDarbouxSchedule F hregular hmonotone hinterval) :
+    (Integral.monotoneDarbouxScheduleIntegralFor schedule).Valid := by
+  exact Integral.monotoneDarbouxScheduleIntegralFor_valid schedule
+
+theorem wiedijk_item_fifteen_monotone_darboux_width_budget
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hmonotone : NondecreasingOnInterval F}
+    {hinterval : F.lower <= F.upper}
+    (schedule : Integral.MonotoneDarbouxSchedule F hregular hmonotone hinterval)
+    (n : Nat) (eps : Rat)
+    (hbudget : (F.upper - F.lower) *
+        (1 / ((schedule.evalPrecision n + 1 : Nat) : Rat)) <= eps) :
+    ((Integral.monotoneDarbouxScheduleIntegralFor schedule).compute n).width <= eps := by
+  exact Integral.monotoneDarbouxScheduleRaw_width_le_of_tolerance
+    schedule n eps hbudget
+
 theorem wiedijk_item_fifteen_effective_interval_fold_width
     (term : Nat -> QInterval) (xs : List Nat) :
     (effectiveFTCIntervalFold term xs).width =
