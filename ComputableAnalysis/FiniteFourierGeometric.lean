@@ -59,6 +59,14 @@ theorem imaginaryUnit_natPow_coord_abs_le_one (n : Nat) :
             qabs_neg] using ih.2,
           by simpa [h, Rat.zero_add, Rat.add_zero] using ih.1⟩
 
+theorem imaginaryUnit_natPow_period_four (n : Nat) :
+    QComplex.natPow RotationSeries.imaginaryUnit (n + 4) =
+      QComplex.natPow RotationSeries.imaginaryUnit n := by
+  have hfour : QComplex.natPow RotationSeries.imaginaryUnit 4 =
+      QComplex.one := by
+    native_decide
+  rw [QComplex.natPow_add, hfour, QComplex.mul_one_cert]
+
 theorem quarterTurn_geometric_term_coord_abs_le
     {r : Rat} (hr0 : 0 <= r) (n : Nat) :
     qabs ((QComplex.mul (QComplex.ofRat (r ^ n))

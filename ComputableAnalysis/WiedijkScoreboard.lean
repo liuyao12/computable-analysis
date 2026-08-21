@@ -587,6 +587,11 @@ theorem wiedijk_item_seventy_six_quarter_turn_power_bound (n : Nat) :
       qabs ((QComplex.natPow RotationSeries.imaginaryUnit n).im) <= 1 := by
   exact imaginaryUnit_natPow_coord_abs_le_one n
 
+theorem wiedijk_item_seventy_six_quarter_turn_period_four (n : Nat) :
+    QComplex.natPow RotationSeries.imaginaryUnit (n + 4) =
+      QComplex.natPow RotationSeries.imaginaryUnit n := by
+  exact imaginaryUnit_natPow_period_four n
+
 theorem wiedijk_item_seventy_six_geometric_term_coordinate_bound
     {r : Rat} (hr0 : 0 <= r) (n : Nat) :
     qabs ((QComplex.mul (QComplex.ofRat (r ^ n))
