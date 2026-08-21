@@ -3,6 +3,7 @@ import ComputableAnalysis.SqrtTwoDescent
 import ComputableAnalysis.RationalCircle
 import ComputableAnalysis.FiniteBinomialCertificate
 import ComputableAnalysis.EffectiveFTCPortfolio
+import ComputableAnalysis.FirstYearCalculus
 
 /-!
 # Wiedijk's List scoreboard
@@ -131,5 +132,27 @@ FTC portfolio.  This is deliberately a bundle of proved instances rather
 than the unrestricted classical theorem for every continuous function. -/
 theorem wiedijk_item_fifteen_effective_ftc : EffectiveFTCPortfolio := by
   exact effectiveFTCPortfolio
+
+theorem wiedijk_item_twenty_six_leibniz_series :
+    Series.AlternatingRaw.leibnizAlternatingRaw.toRealRaw.Valid := by
+  exact Series.AlternatingRaw.leibnizAlternatingRaw_valid
+
+theorem wiedijk_item_twenty_six_leibniz_stage_width (n : Nat) :
+    (Series.AlternatingRaw.leibnizAlternatingRaw.interval n).width =
+      1 / ((4 * n + 1 : Nat) : Rat) := by
+  exact Series.AlternatingRaw.leibnizAlternatingRaw_width_eq_reciprocal n
+
+theorem wiedijk_item_thirty_five_taylor_table :
+    FirstYearCalculus.PowerSeriesDerivativeEntry.hasCheckedProof
+      FirstYearCalculus.PowerSeriesDerivativeEntry.exp /\
+    FirstYearCalculus.PowerSeriesDerivativeEntry.hasCheckedProof
+      FirstYearCalculus.PowerSeriesDerivativeEntry.sin /\
+    FirstYearCalculus.PowerSeriesDerivativeEntry.hasCheckedProof
+      FirstYearCalculus.PowerSeriesDerivativeEntry.negCos /\
+    FirstYearCalculus.PowerSeriesDerivativeEntry.hasCheckedProof
+      FirstYearCalculus.PowerSeriesDerivativeEntry.sinh /\
+    FirstYearCalculus.PowerSeriesDerivativeEntry.hasCheckedProof
+      FirstYearCalculus.PowerSeriesDerivativeEntry.cosh := by
+  exact FirstYearCalculus.checked_power_series_table
 
 end ComputableAnalysis
