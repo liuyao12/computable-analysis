@@ -7,6 +7,7 @@ import ComputableAnalysis.FirstYearCalculus
 import ComputableAnalysis.FiniteDeMoivreExample
 import ComputableAnalysis.FiniteCubeRootBisectionExample
 import ComputableAnalysis.FinitePrimeInfinitude
+import ComputableAnalysis.FiniteBertrandCertificate
 
 /-!
 # Wiedijk's List scoreboard
@@ -176,5 +177,13 @@ theorem wiedijk_item_eleven_prime_unboundedness (bound : Nat) :
     ∃ certificate : PrimeUnboundednessCertificate bound,
       bound < certificate.witness := by
   exact primeUnboundednessCertificate_exists bound
+
+theorem wiedijk_item_ninety_eight_bertrand_finite_certificate :
+    (∃ p, BasicPrime p ∧ 10 < p ∧ p < 20) /\
+      (∃ p, BasicPrime p ∧ 20 < p ∧ p < 40) /\
+      (∃ p, BasicPrime p ∧ 30 < p ∧ p < 60) /\
+      (∃ p, BasicPrime p ∧ 40 < p ∧ p < 80) /\
+      (∃ p, BasicPrime p ∧ 50 < p ∧ p < 100) := by
+  exact bertrand_finite_certificate
 
 end ComputableAnalysis
