@@ -752,6 +752,26 @@ theorem wiedijk_item_seventy_eight_cauchy_schwarz_2d
       (a * a + b * b) * (c * c + d * d) := by
   exact cauchy_schwarz_2d a c b d
 
+theorem wiedijk_item_seventy_eight_cauchy_schwarz_2d_equality
+    (a b c d : Rat) :
+    (a * b + c * d) ^ 2 =
+        (a * a + c * c) * (b * b + d * d) ↔
+      a * d = b * c := by
+  exact cauchy_schwarz_2d_eq_iff a b c d
+
+theorem wiedijk_item_seventy_eight_cauchy_schwarz_3d
+    (a b c x y z : Rat) :
+    (a * x + b * y + c * z) ^ 2 <=
+      (a * a + b * b + c * c) * (x * x + y * y + z * z) := by
+  exact cauchy_schwarz_3d a b c x y z
+
+theorem wiedijk_item_seventy_eight_cauchy_schwarz_4d
+    (a b c d w x y z : Rat) :
+    (a * w + b * x + c * y + d * z) ^ 2 <=
+      (a * a + b * b + c * c + d * d) *
+        (w * w + x * x + y * y + z * z) := by
+  exact cauchy_schwarz_4d a b c d w x y z
+
 theorem wiedijk_item_seventy_nine_finite_intermediate_value
     (certificate : FiniteInverseSearchCertificate) :
     certificate.map certificate.output.lo ≤ certificate.target /\
