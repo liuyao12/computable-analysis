@@ -2945,6 +2945,19 @@ theorem wiedijk_item_seventy_six_geometric_coefficient_stage_recurrence
           (QComplex.ofRat (r ^ n))) := by
   exact finiteFourierSum_geometricCoefficientStage_succ root mode r n
 
+theorem wiedijk_item_seventy_six_geometric_term_coordinate_bound
+    {root : QComplex} {mode : Nat} {r : Rat}
+    (hr0 : 0 <= r)
+    (hroot : ∀ n : Nat,
+      qabs ((QComplex.natPow root (mode * n)).re) <= 1 /\
+      qabs ((QComplex.natPow root (mode * n)).im) <= 1)
+    (n : Nat) :
+    qabs ((QComplex.mul (QComplex.ofRat (r ^ n))
+      (QComplex.natPow root (mode * n))).re) <= r ^ n /\
+    qabs ((QComplex.mul (QComplex.ofRat (r ^ n))
+      (QComplex.natPow root (mode * n))).im) <= r ^ n := by
+  exact geometricFourierTerm_coord_abs_le_of_power_bound hr0 hroot n
+
 theorem wiedijk_item_seventy_six_quarter_turn_power_bound (n : Nat) :
     qabs ((QComplex.natPow RotationSeries.imaginaryUnit n).re) <= 1 /\
       qabs ((QComplex.natPow RotationSeries.imaginaryUnit n).im) <= 1 := by

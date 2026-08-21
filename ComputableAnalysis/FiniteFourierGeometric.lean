@@ -42,6 +42,35 @@ theorem finiteFourierSum_geometricCoefficientStage_zero (root : QComplex)
       QComplex.zero := by
   rfl
 
+/-! A root-independent geometric term bound.  The quarter-turn instance
+below supplies the power hypothesis automatically, but other computable
+roots can use the same tail interface once their coordinate bounds are
+certified. -/
+theorem geometricFourierTerm_coord_abs_le_of_power_bound
+    {root : QComplex} {mode : Nat} {r : Rat}
+    (hr0 : 0 <= r)
+    (hroot : ∀ n : Nat,
+      qabs ((QComplex.natPow root (mode * n)).re) <= 1 /\
+      qabs ((QComplex.natPow root (mode * n)).im) <= 1)
+    (n : Nat) :
+    qabs ((QComplex.mul (QComplex.ofRat (r ^ n))
+      (QComplex.natPow root (mode * n))).re) <= r ^ n /\
+    qabs ((QComplex.mul (QComplex.ofRat (r ^ n))
+      (QComplex.natPow root (mode * n))).im) <= r ^ n := by
+  have hpow_nonneg : 0 <= r ^ n := Rat.pow_nonneg hr0
+  have hpow_abs : qabs (r ^ n) = r ^ n :=
+    qabs_eq_self_of_nonneg hpow_nonneg
+  cases h : QComplex.natPow root (mode * n) with
+  | mk re im =>
+      have hpower : qabs re <= 1 /\ qabs im <= 1 := by
+        simpa [h] using hroot n
+      simp [h, QComplex.mul, QComplex.ofRat, hpow_abs, qabs_mul,
+        Rat.sub_eq_add_neg, Rat.zero_add, Rat.add_zero]
+      exact ⟨by simpa using
+          (Rat.mul_le_mul_of_nonneg_left hpower.1 hpow_nonneg),
+        by simpa using
+          (Rat.mul_le_mul_of_nonneg_left hpower.2 hpow_nonneg)⟩
+
 /-! The quarter-turn root never amplifies a coordinate: its powers only swap
 coordinates and change signs.  This is the elementary bound used by a
 geometric tail enclosure for a nonzero Fourier mode. -/
