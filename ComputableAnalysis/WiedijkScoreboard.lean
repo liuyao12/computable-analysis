@@ -30,6 +30,7 @@ import ComputableAnalysis.Basel
 import ComputableAnalysis.BaselFiniteStrengthening
 import ComputableAnalysis.FiniteFourierCertificate
 import ComputableAnalysis.FiniteFourierFoundation
+import ComputableAnalysis.FiniteFourierOrthogonality
 import ComputableAnalysis.EffectiveFourierSeries
 import ComputableAnalysis.EffectiveFourierTail
 import ComputableAnalysis.FiniteFourierGeometric
@@ -2315,6 +2316,33 @@ theorem wiedijk_item_seventy_six_fourier_tail_precision_witness
       (certificate.toSeries.stabilized.compute N).width <= eps.val /\
       (certificate.toSeries.stabilized.compute N).height <= eps.val := by
   exact certificate.precision_witness eps
+
+/-! The arbitrary finite Fourier layer begins with a certified mode family.
+The certificate contains only finite rational-complex sums; its diagonal and
+off-diagonal consequences are the orthogonality lemmas used by inversion and
+Parseval at later stages. -/
+theorem wiedijk_item_seventy_six_fourier_mode_vector_length
+    (certificate : FiniteFourierOrthogonalityCertificate) (mode : Nat) :
+    (finiteFourierModeVector certificate.root mode certificate.length).length =
+      certificate.length := by
+  exact certificate.mode_vector_length mode
+
+theorem wiedijk_item_seventy_six_fourier_diagonal_orthogonality
+    (certificate : FiniteFourierOrthogonalityCertificate)
+    {mode : Nat} (hmode : mode ∈ certificate.modes) :
+    finiteFourierModeInnerProduct certificate.root certificate.length mode mode =
+      QComplex.ofRat (certificate.length : Rat) := by
+  exact certificate.diagonal_inner_product hmode
+
+theorem wiedijk_item_seventy_six_fourier_off_diagonal_orthogonality
+    (certificate : FiniteFourierOrthogonalityCertificate)
+    {mode₁ mode₂ : Nat}
+    (h₁ : mode₁ ∈ certificate.modes)
+    (h₂ : mode₂ ∈ certificate.modes)
+    (hne : mode₁ ≠ mode₂) :
+    finiteFourierModeInnerProduct certificate.root certificate.length mode₁ mode₂ =
+      QComplex.zero := by
+  exact certificate.off_diagonal_inner_product h₁ h₂ hne
 
 theorem wiedijk_item_seventy_six_quarter_turn_generic_tail_valid
     (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
