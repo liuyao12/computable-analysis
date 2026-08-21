@@ -167,6 +167,14 @@ theorem wiedijkCalculusAnalysisFiniteEvidenceEntries_count :
     wiedijkCalculusAnalysisFiniteEvidenceEntries.length = 1 := by
   native_decide
 
+def wiedijkCalculusAnalysisComputableSubstitutes : List WiedijkEntry := [
+  ⟨14, "Effective Basel-series convergence"⟩
+]
+
+theorem wiedijkCalculusAnalysisComputableSubstitutes_count :
+    wiedijkCalculusAnalysisComputableSubstitutes.length = 1 := by
+  native_decide
+
 /-! First completed row: the benchmark statement is exposed directly through
 the project's raw-real irrationality predicate, rather than Mathlib's
 completed real-number predicate. -/
@@ -454,6 +462,17 @@ theorem wiedijk_item_fourteen_basel_finite_overlap_certificate :
       (BaselFiniteComparison.geometricPiSquaredOverSixCompute 12).lo <=
         (DirichletSeries.zetaTwoInterval 200000).hi := by
   exact BaselFiniteComparison.zetaTwoInterval_overlaps_projectPiSquaredOverSix_200000_12
+
+/-! The project-native substitute for item 14: the reciprocal-square series is
+a valid raw-real algorithm and can meet every positive rational tolerance.
+This is the completed computable row; the classical identification with
+geometric `pi^2 / 6` remains the separate open target above. -/
+theorem wiedijk_item_fourteen_effective_basel_series :
+    Basel.baselSeriesRaw.Valid /\
+      (forall eps : QPos, ∃ n : Nat,
+        (Basel.baselSeriesRaw.compute n).width <= eps.val) := by
+  exact ⟨Basel.baselSeriesRaw_valid,
+    Basel.baselSeriesRaw_reaches_of_positive_tolerance⟩
 
 /-! Item 76 in its finite computable form: rational samples have an exact
 four-mode transform, inverse reconstruction, and Parseval energy identity.
