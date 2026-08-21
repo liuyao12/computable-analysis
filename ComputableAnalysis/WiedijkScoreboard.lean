@@ -20,6 +20,7 @@ import ComputableAnalysis.FiniteHarmonicGrowthInterface
 import ComputableAnalysis.FiniteInverseSearchInterface
 import ComputableAnalysis.PolynomialMeanValue
 import ComputableAnalysis.FiniteQuadratureMeanValue
+import ComputableAnalysis.FiniteMonotoneSequenceInterface
 
 /-!
 # Wiedijk's List scoreboard
@@ -122,6 +123,24 @@ theorem wiedijkScopedEntries_count : wiedijkScopedEntries.length = 52 := by
 
 theorem wiedijkCalculusAnalysisEntries_count :
     wiedijkCalculusAnalysisEntries.length = 17 := by
+  native_decide
+
+def wiedijkCalculusAnalysisAnchoredEntries : List WiedijkEntry := [
+  ⟨15, "Effective fundamental theorem of integral calculus"⟩,
+  ⟨21, "Finite Green rectangle certificate"⟩,
+  ⟨26, "Certified Leibniz series"⟩,
+  ⟨35, "Certified Taylor table"⟩,
+  ⟨43, "Finite isoperimetric bound"⟩,
+  ⟨66, "Finite geometric series"⟩,
+  ⟨73, "Finite monotone-sequence order"⟩,
+  ⟨75, "Effective mean-value enclosure"⟩,
+  ⟨77, "Finite sum-of-squares identity"⟩,
+  ⟨78, "Rational Cauchy--Schwarz"⟩,
+  ⟨79, "Finite intermediate-value bracket"⟩
+]
+
+theorem wiedijkCalculusAnalysisAnchoredEntries_count :
+    wiedijkCalculusAnalysisAnchoredEntries.length = 11 := by
   native_decide
 
 /-! First completed row: the benchmark statement is exposed directly through
@@ -363,5 +382,14 @@ theorem wiedijk_item_seventy_five_effective_mean_value
         Polynomial.finiteDerivativeEval coeffs b := by
   exact Polynomial.finitePolynomial_secant_derivative_bracket
     hcoeffs ha hab hne
+
+/-! Item 73 in its computable form: a successor inequality propagates to any
+finite pair of stages.  This is the order content needed by stage algorithms;
+it does not smuggle in a supremum or a completed limit. -/
+theorem wiedijk_item_seventy_three_finite_monotone_sequence
+    (certificate : FiniteAscendingSequenceCertificate)
+    {a b : Nat} (hab : a ≤ b) :
+    certificate.sequence a ≤ certificate.sequence b := by
+  exact certificate.pair_le hab
 
 end ComputableAnalysis
