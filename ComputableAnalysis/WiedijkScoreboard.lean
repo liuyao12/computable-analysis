@@ -797,6 +797,12 @@ theorem wiedijk_item_fifteen_sin_square_effective_ftc
     D.integralRaw.Equiv D.endpointRaw := by
   exact D.integral_equiv_endpoint
 
+theorem wiedijk_item_fifteen_sin_square_endpoint_value_closure
+    {S : SinPiIntegral.ArctanSinPiConstruction}
+    (H : SinPiSquareEffectiveFTCEndpointSubgoal S) :
+    H.data.integralRaw.Equiv (RealRaw.ofRat (1 / 4)) := by
+  exact H.integral_value
+
 theorem wiedijk_item_twenty_six_leibniz_series :
     Series.AlternatingRaw.leibnizAlternatingRaw.toRealRaw.Valid := by
   exact Series.AlternatingRaw.leibnizAlternatingRaw_valid
