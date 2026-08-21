@@ -1840,6 +1840,11 @@ theorem wiedijk_item_seventy_six_complex_integral_certificate
     (ComplexPathIntegral.polygonalIntegralRawEntire f vertices).Valid := by
   exact ComplexPathIntegral.polygonalIntegralRawEntire_valid certificate
 
+theorem wiedijk_item_seventy_six_fourier_coefficient_certificate
+    (certificate : EffectiveFourierCoefficientCertificate) :
+    certificate.coefficientRaw.Valid := by
+  exact certificate.coefficient_valid
+
 theorem wiedijk_item_seventy_six_effective_fourier_stage_enclosure
     (series : EffectiveFourierSeries) (n : Nat) :
     (QBox.point

@@ -1,6 +1,7 @@
 import ComputableAnalysis.FiniteFourierFoundation
 import ComputableAnalysis.FiniteFourierGeometric
 import ComputableAnalysis.Series
+import ComputableAnalysis.ComplexPathIntegral
 
 /-!
 # Effective Fourier-stage interface
@@ -134,6 +135,28 @@ theorem EffectiveFourierSampleCertificate.sample_interval_witness
       ((certificate.function.evalRaw p.1
         (certificate.sample_domain p hp)).compute 0) := by
   exact certificate.sample_value p hp
+
+/-! A coefficient certificate separates the analytic integrand from the
+Fourier bookkeeping.  An eventual Fourier instance supplies an integrand such
+as `f * phase`; this structure only records the computable complex path
+integral and its finite validity certificate. -/
+structure EffectiveFourierCoefficientCertificate where
+  frequency : Nat
+  integrand : ComplexPathIntegral.EntireBoxFunctionRaw
+  path : List QComplex
+  integralCertificate :
+    ComplexPathIntegral.PolygonalIntegralCertificate integrand path
+
+def EffectiveFourierCoefficientCertificate.coefficientRaw
+    (certificate : EffectiveFourierCoefficientCertificate) : ComplexRaw :=
+  ComplexPathIntegral.polygonalIntegralRawEntire
+    certificate.integrand certificate.path
+
+theorem EffectiveFourierCoefficientCertificate.coefficient_valid
+    (certificate : EffectiveFourierCoefficientCertificate) :
+    certificate.coefficientRaw.Valid := by
+  exact ComplexPathIntegral.polygonalIntegralRawEntire_valid
+    certificate.integralCertificate
 
 /-! A first genuinely infinite instance: the zero-frequency partial sums of
 the geometric coefficient family `1, r, r^2, ...`.  The candidate boxes use
