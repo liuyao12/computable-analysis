@@ -168,6 +168,18 @@ theorem wiedijkCalculusAnalysisAnchoredEntries_count :
     wiedijkCalculusAnalysisAnchoredEntries.length = 16 := by
   native_decide
 
+/-! The difference between the calculus/analysis proxy and the anchored
+track is deliberately explicit.  Basel remains a target statement about the
+equivalence of two independently valid raw algorithms; its finite overlap and
+effective-series substitute are tracked below, but do not close the identity. -/
+def wiedijkCalculusAnalysisUnresolvedEntries : List WiedijkEntry := [
+  ⟨14, "Basel identity: zeta(2) = pi^2 / 6"⟩
+]
+
+theorem wiedijkCalculusAnalysisUnresolvedEntries_count :
+    wiedijkCalculusAnalysisUnresolvedEntries.length = 1 := by
+  native_decide
+
 /-! Finite evidence for rows whose unrestricted analytic statement is still
 open.  These certificates are tracked separately from the anchored theorem
 count because a few checked stages do not establish an all-stage equivalence. -/
