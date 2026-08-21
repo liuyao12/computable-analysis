@@ -683,6 +683,13 @@ theorem wiedijk_item_forty_six_quartic_root_certificate :
           quarticSplitMinusFour) quarticSplitMinusTwo := by
   exact quartic_split_example_roots
 
+theorem wiedijk_item_forty_six_factorized_quartic_root_characterization
+    (r s t u z : QComplex) :
+    CPoly.hasExactRoot
+        (factorizedQuarticPolynomial r s t u) z ↔
+      z = r ∨ z = s ∨ z = t ∨ z = u := by
+  exact factorizedQuarticPolynomial_hasExactRoot_iff r s t u z
+
 theorem wiedijk_item_twenty_three_pythagorean_triple (m n : Rat) :
     (m * m - n * n) ^ 2 + (2 * m * n) ^ 2 =
       (m * m + n * n) ^ 2 := by
