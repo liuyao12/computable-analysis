@@ -4,6 +4,7 @@ import ComputableAnalysis.RationalCircle
 import ComputableAnalysis.FiniteBinomialCertificate
 import ComputableAnalysis.EffectiveFTCPortfolio
 import ComputableAnalysis.FirstYearCalculus
+import ComputableAnalysis.FiniteDeMoivreExample
 
 /-!
 # Wiedijk's List scoreboard
@@ -154,5 +155,14 @@ theorem wiedijk_item_thirty_five_taylor_table :
     FirstYearCalculus.PowerSeriesDerivativeEntry.hasCheckedProof
       FirstYearCalculus.PowerSeriesDerivativeEntry.cosh := by
   exact FirstYearCalculus.checked_power_series_table
+
+theorem wiedijk_item_seventeen_de_moivre_certificate :
+    RationalCircle.Trigonometry.toQComplex
+        (RationalCircle.Trigonometry.pointPow
+          RationalCircle.Trigonometry.deMoivreThreeFive 2) =
+      QComplex.natPow
+        (RationalCircle.Trigonometry.toQComplex
+          RationalCircle.Trigonometry.deMoivreThreeFive) 2 := by
+  exact RationalCircle.Trigonometry.deMoivreThreeFive_square_complex_bridge
 
 end ComputableAnalysis
