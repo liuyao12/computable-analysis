@@ -288,4 +288,10 @@ theorem wiedijk_item_thirty_four_harmonic_growth (target : Nat) :
     (target : Rat) <= FiniteHarmonic.harmonicSum (2 ^ (2 * target)) := by
   exact FiniteHarmonic.harmonicSum_two_pow_reaches target
 
+theorem wiedijk_item_thirty_eight_arithmetic_geometric_mean
+    {a b c d : Rat}
+    (ha : 0 <= a) (hb : 0 <= b) (hc : 0 <= c) (hd : 0 <= d) :
+    a * b * c * d <= ((a + b + c + d) / 4) ^ 4 := by
+  exact am_gm_four ha hb hc hd
+
 end ComputableAnalysis
