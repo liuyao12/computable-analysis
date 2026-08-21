@@ -1,6 +1,7 @@
 import ComputableAnalysis.IrrationalSqrt
 import ComputableAnalysis.SqrtTwoDescent
 import ComputableAnalysis.RationalCircle
+import ComputableAnalysis.FiniteBinomialCertificate
 
 /-!
 # Wiedijk's List scoreboard
@@ -95,5 +96,19 @@ theorem wiedijk_item_four_pythagorean
         RationalCircle.Stage.segmentNormSq RationalCircle.Stage.origin v =
       RationalCircle.Stage.segmentNormSq u v := by
   exact RationalCircle.Stage.rightTriangle_pythagorean u v horth
+
+theorem wiedijk_item_forty_four_binomial_certificate :
+    Series.binomialSum 5 2 1 6 = 243 := by
+  exact binomial_stage5_two_one_value
+
+theorem wiedijk_item_sixty_bezout (a b : Nat) :
+    Exists fun x : Int =>
+      Exists fun y : Int =>
+        x * (a : Int) + y * (b : Int) = (Nat.gcd a b : Int) := by
+  exact bezout_exists a b
+
+theorem wiedijk_item_sixty_nine_gcd (a b : Nat) :
+    euclideanGcd a b = Nat.gcd a b := by
+  exact euclideanGcd_eq_gcd a b
 
 end ComputableAnalysis
