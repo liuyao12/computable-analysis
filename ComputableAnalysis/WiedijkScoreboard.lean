@@ -1268,6 +1268,12 @@ theorem wiedijk_item_forty_three_finite_fan_isoperimetric
     finiteFanArea pieces <= finiteFanPerimeter pieces / 2 := by
   exact finiteFanArea_le_half_perimeter pieces hheight hwidth
 
+theorem wiedijk_item_forty_three_finite_fan_equality
+    (pieces : List (Prod Rat Rat))
+    (hheight : ∀ piece : Prod Rat Rat, List.Mem piece pieces -> piece.1 = 1) :
+    finiteFanArea pieces = finiteFanPerimeter pieces / 2 := by
+  exact finiteFanArea_eq_half_perimeter_of_unit_heights pieces hheight
+
 theorem wiedijk_item_forty_three_rectangle_isoperimetric
     {a b : Rat} :
     16 * rectangleArea a b ≤ rectanglePerimeter a b ^ 2 := by
