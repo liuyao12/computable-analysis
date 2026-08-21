@@ -603,6 +603,13 @@ theorem wiedijk_item_ninety_eight_bertrand_finite_certificate :
       (∃ p, BasicPrime p ∧ 50 < p ∧ p < 100) := by
   exact bertrand_finite_certificate
 
+theorem wiedijk_item_ninety_eight_prime_search_decision
+    {p : Nat} (hp : 2 <= p) :
+    BasicPrime p ↔ properDivisorSearch p p = none := by
+  rw [basicPrime_iff_no_proper_divisor]
+  exact ⟨fun h => properDivisorSearch_none_iff_no_proper.mpr h.2,
+    fun h => ⟨hp, properDivisorSearch_none_iff_no_proper.mp h⟩⟩
+
 theorem wiedijk_item_thirty_seven_cubic_witness_certificate
     (certificate : FiniteDeflationChain.CubicRootWitnessCertificate)
     (x : QComplex) :
