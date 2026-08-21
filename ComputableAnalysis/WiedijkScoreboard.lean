@@ -650,6 +650,12 @@ theorem wiedijk_item_twenty_one_green_rectangle_vertical_additivity
   exact ⟨greenRectangleBoundary_split_vertical left right bottom middle top,
     greenRectangleArea_split_vertical left right bottom middle top⟩
 
+theorem wiedijk_item_twenty_one_green_triangle_shoelace
+    (p q r : PiCirclePoint) :
+    greenTriangleBoundary p q r =
+      RationalCircle.triangleTwiceArea p q r / 2 := by
+  exact greenTriangleBoundary_eq_half_shoelace p q r
+
 theorem wiedijk_item_one_hundred_descartes_certificate :
     Polynomial.signChangeCountIgnoringZeros Polynomial.twoVariationQuadratic = 2 /\
       (forall x : Rat, 0 < x ->
