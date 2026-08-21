@@ -317,8 +317,6 @@ def arctanScheduledRectangleOnUnit_invertible :
   source_ordered := by native_decide
   monotone := arctanScheduledRectangleOnUnit_monotone
   separation := arctanScheduledRectangleOnUnit_effectiveInverseSeparation
-  orientation := by
-    simp [arctanScheduledRectangleOnUnit_monotone,
-      MonotoneOnInterval.ofNondecreasing]
+  orientation := trivial
 
 end ComputableAnalysis
