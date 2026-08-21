@@ -13,6 +13,7 @@ import ComputableAnalysis.FiniteGreenRectangle
 import ComputableAnalysis.FiniteGeometryFormulaInterfaces
 import ComputableAnalysis.FiniteCayleyHamiltonExample
 import ComputableAnalysis.FiniteChordPowerExample
+import ComputableAnalysis.FiniteTriangleIsoperimetricCertificate
 
 /-!
 # Wiedijk's List scoreboard
@@ -239,5 +240,12 @@ theorem wiedijk_item_fifty_five_chord_power_certificate :
       (by native_decide) (by native_decide)).Equiv
       (RealRaw.ofRat (3 / 5)) := by
   exact RationalCircle.horizontalChordPowerSqrtRaw_equiv_three_fifths
+
+theorem wiedijk_item_forty_three_triangle_isoperimetric_bound
+    {a b c : Rat}
+    (h1 : 0 ≤ a + b + c) (h2 : 0 ≤ -a + b + c)
+    (h3 : 0 ≤ a - b + c) (h4 : 0 ≤ a + b - c) :
+    256 * RationalCircle.heronProduct a b c ≤ (a + b + c) ^ 4 := by
+  exact RationalCircle.triangle_isoperimetric_heron_bound h1 h2 h3 h4
 
 end ComputableAnalysis
