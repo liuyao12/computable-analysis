@@ -796,6 +796,31 @@ theorem wiedijk_item_ninety_one_triangle_inequality (steps : List Rat) :
     qabs (ratListSum steps) <= ratListAbsSum steps := by
   exact RationalCircle.Stage.rationalPolyline_length_ge_straight_segment steps
 
+theorem wiedijk_item_ninety_one_triangle_inequality_append
+    (xs ys : List Rat) :
+    qabs (ratListSum (xs ++ ys)) <=
+      ratListAbsSum xs + ratListAbsSum ys := by
+  simp only [ratListSum_append]
+  calc
+    qabs (ratListSum xs + ratListSum ys) <=
+        qabs (ratListSum xs) + qabs (ratListSum ys) :=
+      qabs_add_le (ratListSum xs) (ratListSum ys)
+    _ <= ratListAbsSum xs + ratListAbsSum ys := by
+      exact rat_add_le_add
+        (qabs_ratListSum_le xs) (qabs_ratListSum_le ys)
+
+theorem wiedijk_item_ninety_one_polygonal_path
+    (segmentLength : PiCirclePoint -> PiCirclePoint -> Rat)
+    (hzero : forall p, segmentLength p p = 0)
+    (htriangle : forall p q r,
+      segmentLength p r <= segmentLength p q + segmentLength q r)
+    (p : PiCirclePoint) (rest : List PiCirclePoint) :
+    segmentLength p
+        (RationalCircle.Stage.polygonalPathEndpoint p rest) <=
+      RationalCircle.Stage.polygonalPathLengthFrom segmentLength p rest := by
+  exact RationalCircle.Stage.polygonalPath_length_ge_endpoint
+    segmentLength hzero htriangle p rest
+
 theorem wiedijk_item_seventy_eight_cauchy_schwarz_2d
     (a b c d : Rat) :
     (a * c + b * d) ^ 2 <=
