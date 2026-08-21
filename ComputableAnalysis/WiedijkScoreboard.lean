@@ -111,4 +111,18 @@ theorem wiedijk_item_sixty_nine_gcd (a b : Nat) :
     euclideanGcd a b = Nat.gcd a b := by
   exact euclideanGcd_eq_gcd a b
 
+theorem wiedijk_item_sixty_six_geometric_series
+    (r : Rat) (hr : r ≠ 1) (n : Nat) :
+    Series.geometricSum r n = (r ^ n - 1) / (r - 1) := by
+  exact Series.geometricSum_eq r hr n
+
+theorem wiedijk_item_sixty_eight_arithmetic_series (n : Nat) :
+    Series.arithmeticSum n = (n : Rat) * ((n : Rat) - 1) / 2 := by
+  exact Series.arithmeticSum_eq n
+
+theorem wiedijk_item_seventy_seven_sum_of_squares (n : Nat) :
+    Series.squareSum n =
+      (n : Rat) * ((n : Rat) - 1) * (2 * (n : Rat) - 1) / 6 := by
+  exact Series.squareSum_eq n
+
 end ComputableAnalysis
