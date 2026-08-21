@@ -18,6 +18,8 @@ import ComputableAnalysis.FinitePellCertificate
 import ComputableAnalysis.FiniteQuarticSplitExample
 import ComputableAnalysis.FiniteHarmonicGrowthInterface
 import ComputableAnalysis.FiniteInverseSearchInterface
+import ComputableAnalysis.PolynomialMeanValue
+import ComputableAnalysis.FiniteQuadratureMeanValue
 
 /-!
 # Wiedijk's List scoreboard
@@ -92,7 +94,34 @@ def wiedijkScopedEntries : List WiedijkEntry := [
   ⟨90, "Stirling formula"⟩
 ]
 
+/-! The smaller track used to measure progress toward the project's actual
+computable calculus.  The remaining rows are useful formalization
+infrastructure, but are not evidence that the calculus foundation is done. -/
+def wiedijkCalculusAnalysisEntries : List WiedijkEntry := [
+  ⟨9, "Area of a circle"⟩,
+  ⟨14, "Basel sum"⟩,
+  ⟨15, "Fundamental theorem of integral calculus"⟩,
+  ⟨21, "Green theorem"⟩,
+  ⟨26, "Leibniz series for pi"⟩,
+  ⟨35, "Taylor theorem"⟩,
+  ⟨43, "Isoperimetric theorem"⟩,
+  ⟨64, "L'Hopital rule"⟩,
+  ⟨66, "Geometric series"⟩,
+  ⟨73, "Monotone sequences"⟩,
+  ⟨75, "Mean value theorem"⟩,
+  ⟨76, "Fourier series"⟩,
+  ⟨77, "Sums of powers"⟩,
+  ⟨78, "Cauchy--Schwarz inequality"⟩,
+  ⟨79, "Intermediate value theorem"⟩,
+  ⟨81, "Prime reciprocal series"⟩,
+  ⟨90, "Stirling formula"⟩
+]
+
 theorem wiedijkScopedEntries_count : wiedijkScopedEntries.length = 52 := by
+  native_decide
+
+theorem wiedijkCalculusAnalysisEntries_count :
+    wiedijkCalculusAnalysisEntries.length = 17 := by
   native_decide
 
 /-! First completed row: the benchmark statement is exposed directly through
@@ -317,5 +346,22 @@ theorem wiedijk_item_seventy_nine_finite_intermediate_value
     certificate.map certificate.output.lo ≤ certificate.target /\
       certificate.target ≤ certificate.map certificate.output.hi := by
   exact certificate.output_bracket
+
+/-! Item 75 in its computable form: for a nonnegative-coefficient polynomial,
+the secant slope is enclosed by endpoint derivative evaluations.  This is the
+finite certificate that replaces the classical assertion that some attained
+real point realizes the slope. -/
+theorem wiedijk_item_seventy_five_effective_mean_value
+    {coeffs : List Rat} {a b : Rat}
+    (hcoeffs : forall c, c ∈ coeffs -> 0 <= c)
+    (ha : 0 <= a) (hab : a <= b) (hne : b - a ≠ 0) :
+    Polynomial.finiteDerivativeEval coeffs a <=
+        ExactFunction.differenceQuotient
+          (fun z => Polynomial.eval coeffs z) a (b - a) /\
+      ExactFunction.differenceQuotient
+          (fun z => Polynomial.eval coeffs z) a (b - a) <=
+        Polynomial.finiteDerivativeEval coeffs b := by
+  exact Polynomial.finitePolynomial_secant_derivative_bracket
+    hcoeffs ha hab hne
 
 end ComputableAnalysis
