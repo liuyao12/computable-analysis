@@ -71,6 +71,64 @@ theorem FiniteInverseSearchCertificate.stage_width
         certificate.initialInterval.width / (2 ^ n : Rat) := by
   exact monotoneTargetBisectionIterate_width certificate.target n
 
+/-! The classical intermediate-value step becomes an explicit error budget when
+the map is monotone and Lipschitz on the initial interval.  The bisection
+midpoint is then a rational representative whose target residual is bounded
+by the Lipschitz constant times the current interval width. -/
+theorem FiniteInverseSearchCertificate.midpoint_residual_le_lipschitz_width
+    (certificate : FiniteInverseSearchCertificate) (L : Rat)
+    (hL : 0 <= L)
+    (hmono : ∀ ⦃x y : Rat⦄, x <= y -> certificate.map x <= certificate.map y)
+    (hlip : ∀ x y : Rat,
+      certificate.initialInterval.lo <= x ->
+      x <= certificate.initialInterval.hi ->
+      certificate.initialInterval.lo <= y ->
+      y <= certificate.initialInterval.hi ->
+      qabs (certificate.map x - certificate.map y) <=
+        L * qabs (x - y)) :
+    qabs (certificate.map certificate.output.midpoint - certificate.target) <=
+      L * certificate.output.width := by
+  let I := certificate.output
+  have hI : I.lo <= I.hi := by
+    dsimp [I]
+    exact monotoneTargetBisectionIterate_ordered
+      certificate.target certificate.ordered certificate.stage
+  have hsub := monotoneTargetBisectionIterate_subinterval
+    (f := certificate.map) certificate.target certificate.ordered certificate.stage
+  have hmid := QInterval.midpoint_mem hI
+  have hbracket := certificate.output_bracket
+  have hmap_lo_mid : certificate.map I.lo <= certificate.map I.midpoint := by
+    apply hmono
+    exact hmid.1
+  have hmap_mid_hi : certificate.map I.midpoint <= certificate.map I.hi := by
+    apply hmono
+    exact hmid.2
+  have hcommon := qabs_sub_le_of_common_bounds
+    hmap_lo_mid hmap_mid_hi hbracket.1 hbracket.2
+  have hIlo_initial : certificate.initialInterval.lo <= I.lo := hsub.1
+  have hIhi_initial : I.hi <= certificate.initialInterval.hi := hsub.2
+  have hIhi_lower : certificate.initialInterval.lo <= I.hi :=
+    Rat.le_trans hIlo_initial hI
+  have hIlo_upper : I.lo <= certificate.initialInterval.hi :=
+    Rat.le_trans hI hIhi_initial
+  have himage_lip := hlip I.hi I.lo
+    hIhi_lower hIhi_initial hIlo_initial hIlo_upper
+  have hhi_lo : 0 <= I.hi - I.lo := by grind
+  have hqabs_width : qabs (I.hi - I.lo) = I.width := by
+    rw [qabs_eq_self_of_nonneg hhi_lo]
+    rfl
+  have himage : certificate.map I.hi - certificate.map I.lo <=
+      L * I.width := by
+    have hmap_order : certificate.map I.lo <= certificate.map I.hi :=
+      hmono (hI)
+    have himage_abs := himage_lip
+    rw [qabs_eq_self_of_nonneg (by grind :
+      0 <= certificate.map I.hi - certificate.map I.lo),
+      hqabs_width] at himage_abs
+    exact himage_abs
+  dsimp [I] at hcommon himage ⊢
+  exact Rat.le_trans hcommon himage
+
 /-! The finite inverse search can also be run at every stage, producing the
 nested interval algorithm used by `RealRaw`.  The only extra hypothesis is
 the harmless normalization that the initial interval has width at most one;

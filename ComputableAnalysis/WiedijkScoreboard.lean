@@ -1549,6 +1549,21 @@ theorem wiedijk_item_seventy_nine_bisection_to_real_raw
     certificate.toRealRaw.Valid := by
   exact certificate.toRealRaw_valid hwidth
 
+theorem wiedijk_item_seventy_nine_midpoint_residual_lipschitz_bound
+    (certificate : FiniteInverseSearchCertificate) (L : Rat)
+    (hL : 0 <= L)
+    (hmono : ∀ ⦃x y : Rat⦄, x <= y -> certificate.map x <= certificate.map y)
+    (hlip : ∀ x y : Rat,
+      certificate.initialInterval.lo <= x ->
+      x <= certificate.initialInterval.hi ->
+      certificate.initialInterval.lo <= y ->
+      y <= certificate.initialInterval.hi ->
+      qabs (certificate.map x - certificate.map y) <=
+        L * qabs (x - y)) :
+    qabs (certificate.map certificate.output.midpoint - certificate.target) <=
+      L * certificate.output.width := by
+  exact certificate.midpoint_residual_le_lipschitz_width L hL hmono hlip
+
 /-! Item 75 in its computable form: for a nonnegative-coefficient polynomial,
 the secant slope is enclosed by endpoint derivative evaluations.  This is the
 finite certificate that replaces the classical assertion that some attained
