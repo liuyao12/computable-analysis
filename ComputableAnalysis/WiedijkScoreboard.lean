@@ -2344,6 +2344,23 @@ theorem wiedijk_item_seventy_six_fourier_off_diagonal_orthogonality
       QComplex.zero := by
   exact certificate.off_diagonal_inner_product h₁ h₂ hne
 
+def wiedijk_item_seventy_six_quarter_turn_orthogonality_certificate :
+    FiniteFourierOrthogonalityCertificate :=
+  quarterTurnFourierOrthogonalityCertificate
+
+theorem wiedijk_item_seventy_six_quarter_turn_mode_orthogonality
+    {mode₁ mode₂ : Nat}
+    (h₁ : mode₁ ∈ quarterTurnFourierOrthogonalityCertificate.modes)
+    (h₂ : mode₂ ∈ quarterTurnFourierOrthogonalityCertificate.modes) :
+    finiteFourierModeInnerProduct
+        quarterTurnFourierOrthogonalityCertificate.root
+        quarterTurnFourierOrthogonalityCertificate.length mode₁ mode₂ =
+      if mode₁ = mode₂ then
+        QComplex.ofRat
+          (quarterTurnFourierOrthogonalityCertificate.length : Rat)
+      else QComplex.zero := by
+  exact quarterTurnFourierOrthogonalityCertificate.inner_product mode₁ mode₂ h₁ h₂
+
 theorem wiedijk_item_seventy_six_quarter_turn_generic_tail_valid
     (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
     (hr1 : r < 1) :

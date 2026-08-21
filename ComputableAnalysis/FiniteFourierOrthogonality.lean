@@ -36,6 +36,27 @@ structure FiniteFourierOrthogonalityCertificate where
           QComplex.ofRat (length : Rat)
         else QComplex.zero
 
+/-! The four-point transform is the first concrete instance of the general
+interface.  Its orthogonality claims are checked by finite reduction of the
+rational-complex arithmetic, rather than imported from a theorem about
+completed complex numbers. -/
+def quarterTurnFourierOrthogonalityCertificate :
+    FiniteFourierOrthogonalityCertificate where
+  root := RotationSeries.imaginaryUnit
+  length := 4
+  positive_length := by omega
+  modes := [0, 1, 2, 3]
+  mode_bounded := by
+    intro mode hmode
+    simp at hmode
+    rcases hmode with rfl | rfl | rfl | rfl <;> omega
+  inner_product := by
+    intro mode₁ mode₂ h₁ h₂
+    simp at h₁ h₂
+    rcases h₁ with rfl | rfl | rfl | rfl <;>
+      rcases h₂ with rfl | rfl | rfl | rfl <;>
+        native_decide
+
 theorem FiniteFourierOrthogonalityCertificate.mode_vector_length
     (certificate : FiniteFourierOrthogonalityCertificate)
     (mode : Nat) :
