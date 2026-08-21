@@ -244,6 +244,23 @@ theorem finiteFourierSum_append_phase
   rw [finiteFourierSum_append]
   rw [finiteFourierSum_phase root mode ys xs.length]
 
+/-! A one-step recurrence for the finite coefficient evaluator.  The tail is
+shifted by one sample, hence it carries the common phase `root^mode`.  This
+is the finite algebraic law used when a computable Fourier stage appends one
+new sample. -/
+theorem finiteFourierSum_cons_phase
+    (root : QComplex) (mode : Nat)
+    (x : QComplex) (xs : List QComplex) :
+    finiteFourierSum root mode (x :: xs) =
+      QComplex.add x
+        (QComplex.mul
+          (QComplex.natPow root mode)
+          (finiteFourierSum root mode xs)) := by
+  rw [show x :: xs = [x] ++ xs by simp, finiteFourierSum_append_phase]
+  simp [finiteFourierSum, finiteFourierSumAux, QComplex.natPow,
+    QComplex.mul_one_cert]
+  rw [qcomplex_add_zero]
+
 /-! With the rational quarter-turn root, every finite sample list has the
 same four-step mode periodicity as the four-point transform. -/
 theorem finiteFourierSum_quarterTurn_mode_period_four

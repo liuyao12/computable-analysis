@@ -858,6 +858,16 @@ theorem wiedijk_item_seventy_six_finite_fourier_linearity
     finiteFourierSum_scale r root mode xs,
     (finiteFourierSum_conj root mode xs).symm⟩
 
+theorem wiedijk_item_seventy_six_finite_fourier_cons_phase
+    (root : QComplex) (mode : Nat)
+    (x : QComplex) (xs : List QComplex) :
+    finiteFourierSum root mode (x :: xs) =
+      QComplex.add x
+        (QComplex.mul
+          (QComplex.natPow root mode)
+          (finiteFourierSum root mode xs)) := by
+  exact finiteFourierSum_cons_phase root mode x xs
+
 theorem wiedijk_item_seventy_six_fourier_zero_mode
     (root : QComplex) (samples : List QComplex) :
     finiteFourierSum root 0 samples = qcomplexListSum samples := by
