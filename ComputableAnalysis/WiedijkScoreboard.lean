@@ -2154,6 +2154,16 @@ theorem wiedijk_item_seventy_six_fourier_parseval
       4 * (x₀ ^ 2 + x₁ ^ 2 + x₂ ^ 2 + x₃ ^ 2) := by
   exact fourPointFourierTransform_parseval x₀ x₁ x₂ x₃
 
+theorem wiedijk_item_seventy_six_complex_fourier_parseval
+    (x₀ x₁ x₂ x₃ : QComplex) :
+    QComplex.normSq (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0) +
+        QComplex.normSq (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 1) +
+        QComplex.normSq (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 2) +
+        QComplex.normSq (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 3) =
+      4 * (QComplex.normSq x₀ + QComplex.normSq x₁ +
+        QComplex.normSq x₂ + QComplex.normSq x₃) := by
+  exact fourPointComplexFourierTransform_parseval x₀ x₁ x₂ x₃
+
 theorem wiedijk_item_seventy_six_qcomplex_energy_conjugation
     (z : QComplex) :
     QComplex.normSq (QComplex.conj z) = QComplex.normSq z := by

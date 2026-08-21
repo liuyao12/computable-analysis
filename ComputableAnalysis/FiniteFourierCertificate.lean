@@ -348,6 +348,44 @@ theorem fourPointFourierTransform_parseval (x₀ x₁ x₂ x₃ : Rat) :
   grind [Rat.pow_succ, Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
     Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
 
+/-! The same four-point transform over arbitrary rational-complex samples.
+This is the first complex-valued Parseval boundary: every operation is still
+finite rational-coordinate arithmetic, but the samples are no longer
+restricted to the real axis. -/
+
+def fourPointComplexFourierTransform
+    (x₀ x₁ x₂ x₃ : QComplex) (mode : Nat) : QComplex :=
+  QComplex.add
+    (QComplex.add
+      (QComplex.add
+        (QComplex.mul x₀
+          (QComplex.natPow RotationSeries.imaginaryUnit (mode * 0)))
+        (QComplex.mul x₁
+          (QComplex.natPow RotationSeries.imaginaryUnit (mode * 1))))
+      (QComplex.mul x₂
+        (QComplex.natPow RotationSeries.imaginaryUnit (mode * 2))))
+    (QComplex.mul x₃
+      (QComplex.natPow RotationSeries.imaginaryUnit (mode * 3)))
+
+theorem fourPointComplexFourierTransform_parseval
+    (x₀ x₁ x₂ x₃ : QComplex) :
+    QComplex.normSq (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0) +
+        QComplex.normSq (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 1) +
+        QComplex.normSq (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 2) +
+        QComplex.normSq (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 3) =
+      4 * (QComplex.normSq x₀ + QComplex.normSq x₁ +
+        QComplex.normSq x₂ + QComplex.normSq x₃) := by
+  cases x₀
+  cases x₁
+  cases x₂
+  cases x₃
+  simp [fourPointComplexFourierTransform, QComplex.natPow,
+    RotationSeries.imaginaryUnit, QComplex.mul, QComplex.add,
+    QComplex.one, QComplex.zero, QComplex.normSq]
+  grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
+    Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+    Rat.sub_eq_add_neg]
+
 /-! Real rational samples have the usual finite conjugate symmetry: the first
 and third modes pair up, while the zero and Nyquist modes are self-conjugate.
 This is stated directly in rational-complex coordinates. -/
