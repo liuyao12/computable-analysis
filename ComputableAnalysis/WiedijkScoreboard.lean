@@ -29,6 +29,7 @@ import ComputableAnalysis.EffectiveFourierSeries
 import ComputableAnalysis.FiniteFourierGeometric
 import ComputableAnalysis.FiniteComplexQuadraticExample
 import ComputableAnalysis.FiniteDigitDivisibilityInterface
+import ComputableAnalysis.FinitePickCertificate
 import ComputableAnalysis.CauchyPi
 import ComputableAnalysis.FinitePrimeReciprocalCertificate
 import ComputableAnalysis.FiniteStirlingInterface
@@ -251,6 +252,33 @@ theorem wiedijk_item_eighty_nine_factor_remainder_boundary
     CPoly.eval (factorizedPolynomial roots) z = QComplex.zero ↔
       z ∈ roots := by
   exact factorizedPolynomial_eval_eq_zero_iff_mem
+
+/-! Item 92 in its finite lattice boundary: several exact triangles satisfy
+Pick's area identity using shoelace area, gcd edge counts, and natural-number
+interior counts. -/
+theorem wiedijk_item_ninety_two_finite_pick_certificates :
+    (pickTriangleArea = 6 /\
+      pickTriangleBoundary = 8 /\
+      pickTriangleInterior = 3 /\
+      pickTriangleArea = (pickTriangleInterior : Rat) +
+        (pickTriangleBoundary : Rat) / 2 - 1) /\
+    (pickTriangleTwoArea = 5 /\
+      pickTriangleTwoBoundary = 8 /\
+      pickTriangleTwoInterior = 2 /\
+      pickTriangleTwoArea = (pickTriangleTwoInterior : Rat) +
+        (pickTriangleTwoBoundary : Rat) / 2 - 1) /\
+    (pickTriangleThreeArea = 15 / 2 /\
+      pickTriangleThreeBoundary = 5 /\
+      pickTriangleThreeInterior = 6 /\
+      pickTriangleThreeArea = (pickTriangleThreeInterior : Rat) +
+        (pickTriangleThreeBoundary : Rat) / 2 - 1) /\
+    (pickTriangleFourArea = 15 /\
+      pickTriangleFourBoundary = 8 /\
+      pickTriangleFourInterior = 12 /\
+      pickTriangleFourArea = (pickTriangleFourInterior : Rat) +
+        (pickTriangleFourBoundary : Rat) / 2 - 1) := by
+  exact ⟨pickTriangle_certificate, pickTriangleTwo_certificate,
+    pickTriangleThree_certificate, pickTriangleFour_certificate⟩
 
 theorem wiedijk_item_forty_four_binomial_certificate :
     Series.binomialSum 5 2 1 6 = 243 := by
