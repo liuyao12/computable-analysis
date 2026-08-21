@@ -1621,6 +1621,22 @@ theorem wiedijk_item_seventy_six_fourier_parseval
       4 * (x₀ ^ 2 + x₁ ^ 2 + x₂ ^ 2 + x₃ ^ 2) := by
   exact fourPointFourierTransform_parseval x₀ x₁ x₂ x₃
 
+/-! The normalized energy form is often the more convenient interface for
+downstream Fourier arguments.  It is still an exact identity in `Rat`; no
+limit or completed real number is introduced. -/
+theorem wiedijk_item_seventy_six_fourier_normalized_parseval
+    (x₀ x₁ x₂ x₃ : Rat) :
+    (1 / 4 : Rat) * (
+        QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 0) +
+          QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 1) +
+          QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 2) +
+          QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 3)) =
+      x₀ ^ 2 + x₁ ^ 2 + x₂ ^ 2 + x₃ ^ 2 := by
+  rw [fourPointFourierTransform_parseval]
+  rw [Rat.div_def]
+  have hfour : (4 : Rat) * (4 : Rat)⁻¹ = 1 := by native_decide
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
 theorem wiedijk_item_seventy_six_fourier_convolution
     (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : Rat) :
     fourPointFourierTransform
