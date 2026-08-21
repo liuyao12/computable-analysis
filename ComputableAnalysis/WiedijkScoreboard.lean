@@ -1230,6 +1230,14 @@ theorem wiedijk_item_seventy_nine_finite_intermediate_value
       certificate.target ≤ certificate.map certificate.output.hi := by
   exact certificate.output_bracket
 
+theorem wiedijk_item_seventy_nine_intermediate_value_midpoint_witness
+    (certificate : FiniteInverseSearchCertificate) :
+    certificate.map certificate.output.lo ≤ certificate.target /\
+      certificate.target ≤ certificate.map certificate.output.hi /\
+      certificate.output.lo ≤ certificate.output.midpoint /\
+      certificate.output.midpoint ≤ certificate.output.hi := by
+  exact certificate.output_midpoint_witness
+
 theorem wiedijk_item_seventy_nine_effective_bisection
     {f : Rat -> Rat} {I : QInterval} (target : Rat)
     (hI : I.lo <= I.hi)

@@ -39,6 +39,19 @@ theorem FiniteInverseSearchCertificate.output_width
         (2 ^ certificate.stage : Rat) := by
   exact monotoneTargetBisectionIterate_width certificate.target certificate.stage
 
+theorem FiniteInverseSearchCertificate.output_midpoint_witness
+    (certificate : FiniteInverseSearchCertificate) :
+    certificate.map certificate.output.lo ≤ certificate.target /\
+      certificate.target ≤ certificate.map certificate.output.hi /\
+      certificate.output.lo ≤ certificate.output.midpoint /\
+      certificate.output.midpoint ≤ certificate.output.hi := by
+  have hbracket := certificate.output_bracket
+  have hordered := monotoneTargetBisectionIterate_ordered
+    (f := certificate.map) (I := certificate.initialInterval)
+    certificate.target certificate.ordered certificate.stage
+  have hmid := QInterval.midpoint_mem hordered
+  exact ⟨hbracket.1, hbracket.2, hmid.1, hmid.2⟩
+
 def finiteInverseSearchCertificate
     (map : Rat → Rat) (target : Rat) (initialInterval : QInterval)
     (stage : Nat) (ordered : initialInterval.lo ≤ initialInterval.hi)
