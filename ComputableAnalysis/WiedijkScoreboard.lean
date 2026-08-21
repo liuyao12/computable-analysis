@@ -574,6 +574,44 @@ theorem wiedijk_item_seventy_seven_generic_power_sum_block
       Series.powerSum k n + Series.powerSumBlock k n m := by
   exact Series.powerSum_add_block k n m
 
+theorem wiedijk_item_seventy_seven_cube_sum_closed_form (n : Nat) :
+    Series.powerSum 3 n =
+      (n : Rat) ^ 2 * ((n : Rat) - 1) ^ 2 / 4 := by
+  exact Series.powerSum_three_closed_form n
+
+theorem wiedijk_item_seventy_seven_fourth_power_sum_closed_form (n : Nat) :
+    Series.powerSum 4 n =
+      (n : Rat) * ((n : Rat) - 1) * (2 * (n : Rat) - 1) *
+        (3 * (n : Rat) ^ 2 - 3 * (n : Rat) - 1) / 30 := by
+  exact Series.powerSum_four_closed_form n
+
+theorem wiedijk_item_seventy_seven_fifth_power_sum_closed_form (n : Nat) :
+    Series.powerSum 5 n =
+      (n : Rat) ^ 2 * ((n : Rat) - 1) ^ 2 *
+        (2 * (n : Rat) ^ 2 - 2 * (n : Rat) - 1) / 12 := by
+  exact Series.powerSum_five_closed_form n
+
+theorem wiedijk_item_seventy_seven_sixth_power_sum_closed_form (n : Nat) :
+    Series.powerSum 6 n =
+      (n : Rat) * ((n : Rat) - 1) * (2 * (n : Rat) - 1) *
+        (3 * (n : Rat) ^ 4 - 6 * (n : Rat) ^ 3 + 3 * (n : Rat) + 1) / 42 := by
+  exact Series.powerSum_six_closed_form n
+
+theorem wiedijk_item_seventy_seven_seventh_power_sum_closed_form (n : Nat) :
+    Series.powerSum 7 n =
+      (n : Rat) ^ 2 * ((n : Rat) - 1) ^ 2 *
+        (3 * (n : Rat) ^ 4 - 6 * (n : Rat) ^ 3 - (n : Rat) ^ 2 +
+          4 * (n : Rat) + 2) / 24 := by
+  exact Series.powerSum_seven_closed_form n
+
+theorem wiedijk_item_seventy_seven_eighth_power_sum_closed_form (n : Nat) :
+    Series.powerSum 8 n =
+      (n : Rat) * ((n : Rat) - 1) * (2 * (n : Rat) - 1) *
+        (5 * (n : Rat) ^ 6 - 15 * (n : Rat) ^ 5 +
+          5 * (n : Rat) ^ 4 + 15 * (n : Rat) ^ 3 -
+          (n : Rat) ^ 2 - 9 * (n : Rat) - 3) / 90 := by
+  exact Series.powerSum_eight_closed_form n
+
 /-! Item 15 is represented here by the project's effective, certificate-level
 FTC portfolio.  This is deliberately a bundle of proved instances rather
 than the unrestricted classical theorem for every continuous function. -/
