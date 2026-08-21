@@ -653,6 +653,17 @@ theorem wiedijk_item_seventy_five_effective_mean_value
   exact Polynomial.finitePolynomial_secant_derivative_bracket
     hcoeffs ha hab hne
 
+theorem wiedijk_item_seventy_five_local_derivative_bound_mvt
+    {F dF : RealFunRaw} {a b : Rat}
+    (cell : RationalSubinterval a b)
+    (bound : DerivativeBoundOnSubinterval dF cell)
+    (certificate : LocalFTCFromDerivativeBound F dF cell bound)
+    (n : Nat) :
+    (cell.scaleBound (bound.bound n)).ContainsInterval
+      (endpointDifferenceInterval F cell.lower cell.upper
+        (certificate.endpointPrecision n)) := by
+  exact certificate.endpoint_contained n
+
 /-! Item 73 in its computable form: a successor inequality propagates to any
 finite pair of stages.  This is the order content needed by stage algorithms;
 it does not smuggle in a supremum or a completed limit. -/
