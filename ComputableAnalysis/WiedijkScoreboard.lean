@@ -244,6 +244,14 @@ theorem wiedijk_item_eighty_five_decimal_divisibility (n : Nat) :
       decimalDigitSum n % 3 = n % 3 := by
   exact decimalDigitSum_divisibility_certificate n
 
+/-! Item 89 in its finite complex form: for a supplied factor list, the
+Horner evaluator vanishes exactly at the listed roots. -/
+theorem wiedijk_item_eighty_nine_factor_remainder_boundary
+  (roots : List QComplex) (z : QComplex) :
+    CPoly.eval (factorizedPolynomial roots) z = QComplex.zero ↔
+      z ∈ roots := by
+  exact factorizedPolynomial_eval_eq_zero_iff_mem
+
 theorem wiedijk_item_forty_four_binomial_certificate :
     Series.binomialSum 5 2 1 6 = 243 := by
   exact binomial_stage5_two_one_value
