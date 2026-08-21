@@ -23,6 +23,21 @@ def finiteFourierModeInnerProduct
       (QComplex.conj (QComplex.natPow root (mode₁ * k)))
       (QComplex.natPow root (mode₂ * k))))
 
+def finiteFourierSampleInnerProduct
+    (root : QComplex) (length mode : Nat)
+    (sample : Nat → QComplex) : QComplex :=
+  qcomplexListSum ((List.range length).map (fun k =>
+    QComplex.mul
+      (QComplex.conj (QComplex.natPow root (mode * k)))
+      (sample k)))
+
+def finiteFourierSynthesisAt
+    (root : QComplex) (k : Nat) (modes : List Nat)
+    (coefficient : Nat → QComplex) : QComplex :=
+  qcomplexListSum (modes.map (fun mode =>
+    QComplex.mul (coefficient mode)
+      (QComplex.natPow root (mode * k))))
+
 structure FiniteFourierOrthogonalityCertificate where
   root : QComplex
   length : Nat
@@ -35,6 +50,43 @@ structure FiniteFourierOrthogonalityCertificate where
         if mode₁ = mode₂ then
           QComplex.ofRat (length : Rat)
         else QComplex.zero
+
+/-! A reconstruction certificate is the finite, executable form of DFT
+inversion.  It keeps the sample function and the coefficient formula visible;
+the final reconstruction equality is an obligation over finitely many sample
+indices. -/
+structure FiniteFourierReconstructionCertificate where
+  orthogonality : FiniteFourierOrthogonalityCertificate
+  sample : Nat → QComplex
+  coefficient : Nat → QComplex
+  coefficient_formula : ∀ mode, mode ∈ orthogonality.modes →
+    coefficient mode =
+      QComplex.scaleRat
+        (1 / (orthogonality.length : Rat))
+        (finiteFourierSampleInnerProduct
+          orthogonality.root orthogonality.length mode sample)
+  reconstruction : ∀ k, k < orthogonality.length →
+    finiteFourierSynthesisAt orthogonality.root k orthogonality.modes coefficient =
+      sample k
+
+theorem FiniteFourierReconstructionCertificate.coefficient_formula_at
+    (certificate : FiniteFourierReconstructionCertificate)
+    {mode : Nat} (hmode : mode ∈ certificate.orthogonality.modes) :
+    certificate.coefficient mode =
+      QComplex.scaleRat
+        (1 / (certificate.orthogonality.length : Rat))
+        (finiteFourierSampleInnerProduct
+          certificate.orthogonality.root certificate.orthogonality.length
+          mode certificate.sample) := by
+  exact certificate.coefficient_formula mode hmode
+
+theorem FiniteFourierReconstructionCertificate.reconstructs
+    (certificate : FiniteFourierReconstructionCertificate)
+    {k : Nat} (hk : k < certificate.orthogonality.length) :
+    finiteFourierSynthesisAt certificate.orthogonality.root k
+        certificate.orthogonality.modes certificate.coefficient =
+      certificate.sample k := by
+  exact certificate.reconstruction k hk
 
 /-! The four-point transform is the first concrete instance of the general
 interface.  Its orthogonality claims are checked by finite reduction of the

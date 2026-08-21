@@ -2361,6 +2361,25 @@ theorem wiedijk_item_seventy_six_quarter_turn_mode_orthogonality
       else QComplex.zero := by
   exact quarterTurnFourierOrthogonalityCertificate.inner_product mode₁ mode₂ h₁ h₂
 
+theorem wiedijk_item_seventy_six_fourier_coefficient_formula
+    (certificate : FiniteFourierReconstructionCertificate)
+    {mode : Nat} (hmode : mode ∈ certificate.orthogonality.modes) :
+    certificate.coefficient mode =
+      QComplex.scaleRat
+        (1 / (certificate.orthogonality.length : Rat))
+        (finiteFourierSampleInnerProduct
+          certificate.orthogonality.root certificate.orthogonality.length
+          mode certificate.sample) := by
+  exact certificate.coefficient_formula_at hmode
+
+theorem wiedijk_item_seventy_six_fourier_finite_reconstruction
+    (certificate : FiniteFourierReconstructionCertificate)
+    {k : Nat} (hk : k < certificate.orthogonality.length) :
+    finiteFourierSynthesisAt certificate.orthogonality.root k
+        certificate.orthogonality.modes certificate.coefficient =
+      certificate.sample k := by
+  exact certificate.reconstructs hk
+
 theorem wiedijk_item_seventy_six_quarter_turn_generic_tail_valid
     (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
     (hr1 : r < 1) :
