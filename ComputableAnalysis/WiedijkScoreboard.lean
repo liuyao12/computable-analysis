@@ -25,6 +25,7 @@ import ComputableAnalysis.FiniteQuadratureMeanValue
 import ComputableAnalysis.FiniteMonotoneSequenceInterface
 import ComputableAnalysis.FiniteLHopitalCertificate
 import ComputableAnalysis.Basel
+import ComputableAnalysis.BaselFiniteStrengthening
 import ComputableAnalysis.FiniteFourierCertificate
 import ComputableAnalysis.FiniteFourierFoundation
 import ComputableAnalysis.EffectiveFourierSeries
@@ -1452,6 +1453,22 @@ theorem wiedijk_item_fourteen_zeta_two_partial_tail_enclosure
       (DirichletSeries.zetaTwoInterval n).hi := by
   exact DirichletSeries.zetaTwoPartial_add_finiteTail_le_interval_hi
     n count hn
+
+/-! These are the finite tail laws behind the effective Basel evaluator.
+They are the computable substitute for the analytic remainder estimate: all
+quantities remain rational and every bound is valid at a named finite stage. -/
+theorem wiedijk_item_fourteen_zeta_two_finite_tail_decomposition
+    (n count : Nat) :
+    DirichletSeries.zetaTwoPartial (n + count) =
+      DirichletSeries.zetaTwoPartial n +
+        DirichletSeries.zetaTwoFiniteTail n count := by
+  exact DirichletSeries.zetaTwoPartial_add_finiteTail_eq n count
+
+theorem wiedijk_item_fourteen_zeta_two_finite_tail_telescoping
+    (n : Nat) (hn : 0 < n) (count : Nat) :
+    DirichletSeries.zetaTwoFiniteTail n count <=
+      DirichletSeries.telescopingTailBound n count := by
+  exact DirichletSeries.zetaTwoFiniteTail_le_telescoping n hn count
 
 theorem wiedijk_item_fourteen_zeta_two_nonempty_tail_strict
     (n count : Nat) (hn : 0 < n) (hcount : 0 < count) :
