@@ -484,6 +484,38 @@ theorem wiedijk_item_sixty_six_geometric_series
     Series.geometricSum r n = (r ^ n - 1) / (r - 1) := by
   exact Series.geometricSum_eq r hr n
 
+theorem wiedijk_item_sixty_six_geometric_tail_identity
+    (r : Rat) (n : Nat) :
+    1 - (1 - r) * Series.geometricSum r n = r ^ n := by
+  exact Series.geometricSum_tail_eq r n
+
+theorem wiedijk_item_sixty_six_geometric_tail_bound
+    {r : Rat} (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
+    (n : Nat) :
+    1 - (1 - r) * Series.geometricSum r n <=
+      1 / ((n + 1 : Nat) : Rat) := by
+  exact Series.geometricSum_tail_le_one_div_succ_of_le_half
+    hr0 hrhalf n
+
+theorem wiedijk_item_sixty_six_geometric_raw_valid
+    {r : Rat} (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
+    (hr1 : r < 1) :
+    (Series.geometricRaw r hr0 hr1).Valid := by
+  exact Series.geometricRaw_valid_of_le_half hr0 hrhalf hr1
+
+theorem wiedijk_item_sixty_six_geometric_raw_closed_form
+    {r : Rat} (hr0 : 0 <= r) (hr1 : r < 1) :
+    (Series.geometricRaw r hr0 hr1).Equiv
+      (RealRaw.ofRat (1 / (1 - r))) := by
+  exact Series.geometricRaw_equiv_inv_one_sub hr0 hr1
+
+theorem wiedijk_item_sixty_six_geometric_raw_precision
+    {r : Rat} (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
+    (hr1 : r < 1) (eps : QPos) :
+    ∃ n : Nat, ((Series.geometricRaw r hr0 hr1).compute n).width <= eps.val := by
+  exact Series.geometricRaw_reaches_of_positive_tolerance
+    hr0 hrhalf hr1 eps
+
 theorem wiedijk_item_sixty_eight_arithmetic_series (n : Nat) :
     Series.arithmeticSum n = (n : Rat) * ((n : Rat) - 1) / 2 := by
   exact Series.arithmeticSum_eq n
