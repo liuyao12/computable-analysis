@@ -378,6 +378,14 @@ private theorem qcomplex_mode_power_one_of_phase_one
       rw [Nat.mul_succ, QComplex.natPow_add, ih, hphase]
       exact QComplex.mul_one_cert _
 
+private theorem replicate_append (c : QComplex) (n m : Nat) :
+    List.replicate (n + m) c = List.replicate n c ++ List.replicate m c := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      simp only [Nat.succ_add, List.replicate_succ, List.cons_append]
+      rw [ih]
+
 theorem finiteFourierSum_replicate_of_phase_one
     (root : QComplex) (mode n : Nat) (c : QComplex)
     (hphase : QComplex.natPow root mode = QComplex.one) :
@@ -486,5 +494,37 @@ theorem finiteFourierSum_quarterTurn_constant_block_mode_three
     QComplex.natPow, QComplex.mul, QComplex.add, QComplex.zero]
   constructor <;> grind [Rat.add_assoc, Rat.add_comm, Rat.mul_add,
     Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+private theorem finiteFourierSum_replicate_block_phase_one
+    (root : QComplex) (mode : Nat)
+    (hphase : QComplex.natPow root (mode * 4) = QComplex.one) :
+    forall k : Nat,
+      QComplex.natPow root (mode * (4 * k)) = QComplex.one := by
+  intro k
+  induction k with
+  | zero => simp [QComplex.natPow]
+  | succ k ih =>
+      rw [Nat.mul_succ, Nat.mul_add, QComplex.natPow_add, ih, hphase]
+      exact QComplex.mul_one_cert _
+
+theorem finiteFourierSum_replicate_block_zero_of_phase_one
+    (root : QComplex) (mode : Nat) (c : QComplex) (k : Nat)
+    (hblock : finiteFourierSum root mode [c, c, c, c] = QComplex.zero)
+    (hphase : QComplex.natPow root (mode * 4) = QComplex.one) :
+    finiteFourierSum root mode (List.replicate (4 * k) c) =
+      QComplex.zero := by
+  have hperiod := finiteFourierSum_replicate_block_phase_one
+    root mode hphase
+  induction k with
+  | zero => simp [finiteFourierSum_empty, QComplex.zero]
+  | succ k ih =>
+      rw [show 4 * (k + 1) = 4 * k + 4 by omega,
+        replicate_append, finiteFourierSum_append_phase]
+      have hlength : (List.replicate (4 * k) c).length = 4 * k := by
+        simp
+      have hrep4 : List.replicate 4 c = [c, c, c, c] := by
+        rfl
+      rw [hlength, ih, hperiod k, hrep4, hblock]
+      rw [qcomplex_one_mul, qcomplex_zero_add]
 
 end ComputableAnalysis
