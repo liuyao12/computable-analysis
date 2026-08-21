@@ -9,6 +9,7 @@ import ComputableAnalysis.FiniteCubeRootBisectionExample
 import ComputableAnalysis.FinitePrimeInfinitude
 import ComputableAnalysis.FiniteBertrandCertificate
 import ComputableAnalysis.CubicRootWitnessCertificate
+import ComputableAnalysis.FiniteGreenRectangle
 
 /-!
 # Wiedijk's List scoreboard
@@ -204,5 +205,11 @@ theorem wiedijk_item_thirty_seven_cubic_witness_certificate
           (FiniteDeflationChain.deflatedCoeffs certificate.coeffs
             [certificate.root1, certificate.root2, certificate.root3]) x) := by
   exact certificate.computable_roots_and_factorization x
+
+theorem wiedijk_item_twenty_one_green_rectangle
+    (left right bottom top : Rat) :
+    greenRectangleBoundary left right bottom top =
+      greenRectangleArea left right bottom top := by
+  exact greenRectangleBoundary_eq_area left right bottom top
 
 end ComputableAnalysis
