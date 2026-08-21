@@ -125,6 +125,17 @@ private theorem qcomplexListSum_map_scale
       simp only [List.map_cons, qcomplexListSum]
       rw [ih, qcomplex_scale_add_local]
 
+private theorem qcomplexListSum_conj_early
+    (xs : List QComplex) :
+    QComplex.conj (qcomplexListSum xs) =
+      qcomplexListSum (xs.map QComplex.conj) := by
+  induction xs with
+  | nil =>
+      simp [qcomplexListSum, QComplex.conj, QComplex.zero]
+  | cons x xs ih =>
+      simp only [qcomplexListSum, List.map_cons, QComplex.conj_add]
+      rw [ih]
+
 /-! Synthesis is a finite operation: coefficients outside the advertised
 mode list are irrelevant.  This is the elementary uniqueness principle used
 when a finite Fourier certificate is extended with additional bookkeeping. -/
@@ -200,6 +211,27 @@ theorem finiteFourierSynthesisAt_scale
   · rw [qcomplexListSum_map_scale]
   · intro mode hmode
     rw [hcoefficient mode hmode, qcomplex_scale_mul_left_local]
+
+theorem finiteFourierSynthesisAt_conj
+    (root : QComplex) (k : Nat) (modes : List Nat)
+    (coefficient₀ coefficient : Nat → QComplex)
+    (hcoefficient : ∀ mode, mode ∈ modes →
+      coefficient mode = QComplex.conj (coefficient₀ mode)) :
+    finiteFourierSynthesisAt (QComplex.conj root) k modes coefficient =
+      QComplex.conj
+        (finiteFourierSynthesisAt root k modes coefficient₀) := by
+  unfold finiteFourierSynthesisAt
+  rw [qcomplexListSum_conj_early]
+  rw [List.map_map]
+  apply qcomplexListSum_map_congr modes
+    (fun mode => QComplex.mul
+      (coefficient mode)
+      (QComplex.natPow (QComplex.conj root) (mode * k)))
+    (fun mode => QComplex.conj (QComplex.mul
+      (coefficient₀ mode)
+      (QComplex.natPow root (mode * k))))
+  intro mode hmode
+  rw [hcoefficient mode hmode, QComplex.conj_mul, QComplex.conj_natPow]
 
 /-! The finite sample inner product is linear in the sampled values.  This is
 the algebraic step needed to transport Fourier coefficients through addition;

@@ -2547,6 +2547,17 @@ theorem wiedijk_item_seventy_six_fourier_synthesis_scaling
   exact finiteFourierSynthesisAt_scale
     root k modes r coefficient₀ coefficient hcoefficient
 
+theorem wiedijk_item_seventy_six_fourier_synthesis_conjugation
+    (root : QComplex) (k : Nat) (modes : List Nat)
+    (coefficient₀ coefficient : Nat → QComplex)
+    (hcoefficient : ∀ mode, mode ∈ modes →
+      coefficient mode = QComplex.conj (coefficient₀ mode)) :
+    finiteFourierSynthesisAt (QComplex.conj root) k modes coefficient =
+      QComplex.conj
+        (finiteFourierSynthesisAt root k modes coefficient₀) := by
+  exact finiteFourierSynthesisAt_conj
+    root k modes coefficient₀ coefficient hcoefficient
+
 theorem wiedijk_item_seventy_six_fourier_zero_coefficient_synthesis
     (root : QComplex) (k : Nat) (modes : List Nat) :
     finiteFourierSynthesisAt root k modes (fun _ => QComplex.zero) =
