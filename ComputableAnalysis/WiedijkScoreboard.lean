@@ -1138,6 +1138,10 @@ theorem wiedijk_item_eleven_prime_unboundedness (bound : Nat) :
       bound < certificate.witness := by
   exact primeUnboundednessCertificate_exists bound
 
+theorem wiedijk_item_eleven_prime_above_any_bound (bound : Nat) :
+    ∃ p, BasicPrime p ∧ bound < p := by
+  exact exists_basicPrime_gt bound
+
 theorem wiedijk_item_ninety_eight_bertrand_finite_certificate :
     (∃ p, BasicPrime p ∧ 10 < p ∧ p < 20) /\
       (∃ p, BasicPrime p ∧ 20 < p ∧ p < 40) /\
