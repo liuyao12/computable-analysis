@@ -583,4 +583,12 @@ theorem FiniteFourierBlockCancellationCertificate.repeated_zero
     certificate.root certificate.mode certificate.block k
     certificate.block_zero certificate.phase_one
 
+theorem FiniteFourierBlockCancellationCertificate.add_repeated_invariant
+    (certificate : FiniteFourierBlockCancellationCertificate)
+    (xs : List QComplex) (k : Nat) :
+    finiteFourierSum certificate.root certificate.mode
+        (qcomplexListAdd xs (finiteFourierBlockRepeat certificate.block k)) =
+      finiteFourierSum certificate.root certificate.mode xs := by
+  rw [finiteFourierSum_add, certificate.repeated_zero k, qcomplex_add_zero]
+
 end ComputableAnalysis
