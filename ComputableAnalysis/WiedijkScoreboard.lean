@@ -447,9 +447,20 @@ theorem wiedijk_item_sixty_bezout (a b : Nat) :
         x * (a : Int) + y * (b : Int) = (Nat.gcd a b : Int) := by
   exact bezout_exists a b
 
+theorem wiedijk_item_sixty_euclidean_bezout (a b : Nat) :
+    Exists fun x : Int =>
+      Exists fun y : Int =>
+        x * (a : Int) + y * (b : Int) = (euclideanGcd a b : Int) := by
+  exact euclideanGcd_bezout_exists a b
+
 theorem wiedijk_item_sixty_nine_gcd (a b : Nat) :
     euclideanGcd a b = Nat.gcd a b := by
   exact euclideanGcd_eq_gcd a b
+
+theorem wiedijk_item_sixty_nine_gcd_divisibility
+    {a b d : Nat} :
+    d ∣ euclideanGcd a b ↔ d ∣ a ∧ d ∣ b := by
+  exact euclideanGcd_dvd_iff
 
 theorem wiedijk_item_sixty_six_geometric_series
     (r : Rat) (hr : r ≠ 1) (n : Nat) :
