@@ -940,6 +940,19 @@ theorem wiedijk_item_fifteen_monotone_darboux_integral_valid
     (Integral.monotoneDarbouxScheduleIntegralFor schedule).Valid := by
   exact Integral.monotoneDarbouxScheduleIntegralFor_valid schedule
 
+theorem wiedijk_item_fifteen_monotone_darboux_precision_witness
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hmonotone : NondecreasingOnInterval F}
+    {hinterval : F.lower <= F.upper}
+    (schedule : Integral.MonotoneDarbouxSchedule F hregular hmonotone hinterval)
+    (eps : QPos) :
+    ∃ n : Nat,
+      ((Integral.monotoneDarbouxScheduleIntegralFor schedule).compute n).width
+        <= eps.val := by
+  obtain ⟨n, hn⟩ :=
+    (Integral.monotoneDarbouxScheduleIntegralFor_valid schedule).2.2 eps
+  exact ⟨n, hn n (Nat.le_refl n)⟩
+
 theorem wiedijk_item_fifteen_monotone_darboux_width_budget
     {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
     {hmonotone : NondecreasingOnInterval F}
