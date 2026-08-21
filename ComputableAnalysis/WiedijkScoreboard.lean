@@ -2640,6 +2640,10 @@ theorem wiedijk_item_eighty_one_prime_reciprocal_extension_chain
       primeReciprocalSum xs <= primeReciprocalSum ys := by
   exact exists_prime_reciprocal_extension_chain xs hprime length
 
+theorem wiedijk_item_eighty_one_prime_reciprocal_potentially_infinite :
+    PotentiallyInfinite := by
+  exact primeReciprocal_potentiallyInfinite
+
 theorem wiedijk_item_eighty_one_prime_reciprocal_block_additivity
     (xs ys : List Nat) :
     primeReciprocalSum (xs ++ ys) =

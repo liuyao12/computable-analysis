@@ -157,4 +157,20 @@ theorem exists_prime_reciprocal_extension_chain (xs : List Nat)
         omega
       · exact Rat.le_trans (Rat.le_of_lt hinc) hle
 
+/-! The constructive prime-reciprocal proxy is potential infinitude: every
+finite certified prime list admits arbitrarily long finite extensions whose
+reciprocal accumulator is no smaller.  This deliberately stops short of a
+classical infinite-series divergence claim. -/
+def PotentiallyInfinite : Prop :=
+  ∀ (xs : List Nat),
+    (∀ p, p ∈ xs → BasicPrime p) →
+    ∀ length : Nat, ∃ ys,
+      ys.length = xs.length + length /\
+      (∀ p, p ∈ ys → BasicPrime p) /\
+      primeReciprocalSum xs <= primeReciprocalSum ys
+
+theorem primeReciprocal_potentiallyInfinite : PotentiallyInfinite := by
+  intro xs hprime length
+  exact exists_prime_reciprocal_extension_chain xs hprime length
+
 end ComputableAnalysis
