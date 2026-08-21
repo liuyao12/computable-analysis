@@ -11,6 +11,7 @@ import ComputableAnalysis.FiniteBertrandCertificate
 import ComputableAnalysis.CubicRootWitnessCertificate
 import ComputableAnalysis.FiniteGreenRectangle
 import ComputableAnalysis.FiniteGeometryFormulaInterfaces
+import ComputableAnalysis.FiniteCayleyHamiltonExample
 
 /-!
 # Wiedijk's List scoreboard
@@ -220,5 +221,16 @@ theorem wiedijk_item_fifty_seven_heron_squared_identity (a b c : Rat) :
         2 * (b * b) * (c * c) - (a * a) * (a * a) -
         (b * b) * (b * b) - (c * c) * (c * c) := by
   exact RationalCircle.heron_squared_identity a b c
+
+theorem wiedijk_item_forty_nine_cayley_hamilton_certificate :
+    LinearODE.matrixAdd (LinearODE.matrixMul LinearODE.concreteCayleyMatrix
+        LinearODE.concreteCayleyMatrix)
+        (LinearODE.matrixAdd
+          (LinearODE.matrixScale (-(LinearODE.HarmonicOscillator.twoByTwoTrace 1 2 0 3))
+            LinearODE.concreteCayleyMatrix)
+          (LinearODE.matrixScale (LinearODE.HarmonicOscillator.twoByTwoDeterminant 1 2 0 3)
+            (LinearODE.matrixIdentity 2))) =
+      LinearODE.matrixZero 2 := by
+  exact LinearODE.concreteCayleyMatrix_identity_from_generic
 
 end ComputableAnalysis
