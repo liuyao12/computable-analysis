@@ -1170,6 +1170,13 @@ theorem wiedijk_item_fourteen_basel_high_common_interval_certificate :
         BaselFiniteComparison.baselHighCommonInterval := by
   exact BaselFiniteComparison.baselHighCommonInterval_certificate
 
+theorem wiedijk_item_fourteen_basel_high_common_interval_width :
+    BaselFiniteComparison.baselHighCommonInterval.width <=
+        (DirichletSeries.zetaTwoInterval 200000).width /\
+      BaselFiniteComparison.baselHighCommonInterval.width <=
+        (BaselFiniteComparison.geometricPiSquaredOverSixCompute 12).width := by
+  exact BaselFiniteComparison.baselHighCommonInterval_width_le
+
 /-! The project-native substitute for item 14: the reciprocal-square series is
 a valid raw-real algorithm and can meet every positive rational tolerance.
 This is the completed computable row; the classical identification with
