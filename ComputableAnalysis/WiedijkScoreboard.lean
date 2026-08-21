@@ -31,6 +31,7 @@ import ComputableAnalysis.FiniteFourierFoundation
 import ComputableAnalysis.EffectiveFourierSeries
 import ComputableAnalysis.EffectiveFourierTail
 import ComputableAnalysis.FiniteFourierGeometric
+import ComputableAnalysis.ComplexPathIntegral
 import ComputableAnalysis.FiniteCauchySchwarzList
 import ComputableAnalysis.FiniteComplexQuadraticExample
 import ComputableAnalysis.FiniteDigitDivisibilityInterface
@@ -1831,6 +1832,13 @@ theorem wiedijk_item_seventy_six_finite_function_sample_bridge
     (root : QComplex) (mode : Nat) :
     (certificate.toSeries root mode).stabilized.Valid := by
   exact certificate.toSeries_valid root mode
+
+theorem wiedijk_item_seventy_six_complex_integral_certificate
+    {f : ComplexPathIntegral.EntireBoxFunctionRaw}
+    {vertices : List QComplex}
+    (certificate : ComplexPathIntegral.PolygonalIntegralCertificate f vertices) :
+    (ComplexPathIntegral.polygonalIntegralRawEntire f vertices).Valid := by
+  exact ComplexPathIntegral.polygonalIntegralRawEntire_valid certificate
 
 theorem wiedijk_item_seventy_six_effective_fourier_stage_enclosure
     (series : EffectiveFourierSeries) (n : Nat) :
