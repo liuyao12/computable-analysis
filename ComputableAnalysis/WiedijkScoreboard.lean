@@ -2058,6 +2058,17 @@ theorem wiedijk_item_fourteen_zeta_two_partial_tail_enclosure
   exact DirichletSeries.zetaTwoPartial_add_finiteTail_le_interval_hi
     n count hn
 
+theorem wiedijk_item_fourteen_zeta_two_partial_target_propagation
+    (target : QInterval) {n m : Nat} {eps : Rat}
+    (heps : 0 < eps) (hbudget : eps.den + 1 <= n) (hnm : n <= m)
+    (htarget : target.ContainsInterval
+      (DirichletSeries.zetaTwoInterval n)) :
+    target.lo <= DirichletSeries.zetaTwoPartial m /\
+      DirichletSeries.zetaTwoPartial m <= target.hi /\
+      (DirichletSeries.zetaTwoInterval m).width <= eps := by
+  exact DirichletSeries.zetaTwoPartial_later_in_target_of_budget
+    target heps hbudget hnm htarget
+
 /-! These are the finite tail laws behind the effective Basel evaluator.
 They are the computable substitute for the analytic remainder estimate: all
 quantities remain rational and every bound is valid at a named finite stage. -/
