@@ -989,4 +989,17 @@ theorem wiedijk_item_ninety_finite_stirling_certificate :
     qabs (finiteStirlingTenCertificate.ratioValue - 1) ≤ 1 / 100 := by
   exact finiteStirlingTenCertificate_unit_error
 
+theorem wiedijk_item_ninety_finite_stirling_interval
+    (certificate : FiniteStirlingRatioCertificate) :
+    certificate.lowerBound ≤ certificate.ratioValue /\
+      certificate.ratioValue ≤ certificate.upperBound := by
+  exact certificate.mem_interval
+
+theorem wiedijk_item_ninety_finite_stirling_error
+    (certificate : FiniteStirlingRatioCertificate)
+    (target : Rat) (hlower : target ≤ certificate.ratioValue)
+    (hupper : certificate.ratioValue ≤ target + 1 / 100) :
+    qabs (certificate.ratioValue - target) ≤ 1 / 100 := by
+  exact certificate.abs_error_le target hlower hupper
+
 end ComputableAnalysis
