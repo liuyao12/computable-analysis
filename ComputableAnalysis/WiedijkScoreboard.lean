@@ -24,6 +24,7 @@ import ComputableAnalysis.FiniteMonotoneSequenceInterface
 import ComputableAnalysis.FiniteLHopitalCertificate
 import ComputableAnalysis.Basel
 import ComputableAnalysis.FiniteFourierCertificate
+import ComputableAnalysis.FiniteFourierFoundation
 import ComputableAnalysis.CauchyPi
 
 /-!
