@@ -1712,6 +1712,23 @@ theorem wiedijk_item_sixty_four_lhopital_exact_ratio
     step numeratorConstant numeratorSlope denominatorConstant denominatorSlope
     hstep hden0 hden hcross
 
+theorem wiedijk_item_sixty_four_quadratic_residual_stage
+    {n : Nat} (hn : 0 < n) :
+    (1 / (n : Rat) *
+        FiniteLHopitalCertificate.affineResidual 2 1 (1 / (n : Rat))) /
+        (1 / (n : Rat) *
+          FiniteLHopitalCertificate.affineResidual 1 0 (1 / (n : Rat))) - 2 =
+      1 / (n : Rat) := by
+  exact FiniteLHopitalCertificate.quadratic_linear_worked_remainder_at_stage hn
+
+theorem wiedijk_item_sixty_four_cubic_residual_stage
+    {n : Nat} (hn : 0 < n) :
+    ((1 / (n : Rat)) * (3 + 3 * (1 / (n : Rat)) +
+        (1 / (n : Rat)) ^ 2)) /
+        ((1 / (n : Rat)) * 1) - 3 =
+      3 / (n : Rat) + (1 / (n : Rat)) ^ 2 := by
+  exact FiniteLHopitalCertificate.cubic_linear_worked_remainder_at_stage hn
+
 /-! Item 14 is already expressed at the right abstraction level in the Basel
 module.  This alias records the remaining proof obligation explicitly: the
 series and the geometric `pi^2 / 6` computation must overlap at every finite
