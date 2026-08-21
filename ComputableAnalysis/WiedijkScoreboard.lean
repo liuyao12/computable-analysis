@@ -1029,6 +1029,20 @@ theorem wiedijk_item_fourteen_zeta_two_width_budget
     (DirichletSeries.zetaTwoInterval n).width <= 1 / (n : Rat) := by
   exact DirichletSeries.zetaTwoInterval_width_le_one_div n hn
 
+theorem wiedijk_item_fourteen_zeta_two_partial_tail_enclosure
+    (n count : Nat) (hn : 0 < n) :
+    DirichletSeries.zetaTwoPartial (n + count) <=
+      (DirichletSeries.zetaTwoInterval n).hi := by
+  exact DirichletSeries.zetaTwoPartial_add_finiteTail_le_interval_hi
+    n count hn
+
+theorem wiedijk_item_fourteen_zeta_two_nonempty_tail_strict
+    (n count : Nat) (hn : 0 < n) (hcount : 0 < count) :
+    DirichletSeries.zetaTwoPartial (n + count) <
+      (DirichletSeries.zetaTwoInterval n).hi := by
+  exact DirichletSeries.zetaTwoPartial_add_nonempty_finiteTail_lt_interval_hi
+    n count hn hcount
+
 /-! Item 76 in its finite computable form: rational samples have an exact
 four-mode transform, inverse reconstruction, and Parseval energy identity.
 The infinite Fourier convergence statement is intentionally not hidden inside
