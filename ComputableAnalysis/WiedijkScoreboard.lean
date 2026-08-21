@@ -1612,6 +1612,25 @@ theorem wiedijk_item_seventy_six_fourier_inverse_reconstruction
       f₀.re - f₂.re - f₁.im + f₃.im = 4 * x₃ := by
   exact fourPointFourierTransform_reconstruct x₀ x₁ x₂ x₃
 
+theorem wiedijk_item_seventy_six_fourier_normalized_inverse
+    (x₀ x₁ x₂ x₃ : Rat) :
+    let f₀ := fourPointFourierTransform x₀ x₁ x₂ x₃ 0
+    let f₁ := fourPointFourierTransform x₀ x₁ x₂ x₃ 1
+    let f₂ := fourPointFourierTransform x₀ x₁ x₂ x₃ 2
+    let f₃ := fourPointFourierTransform x₀ x₁ x₂ x₃ 3
+    (1 / 4 : Rat) * (f₀.re + f₁.re + f₂.re + f₃.re) = x₀ /\
+      (1 / 4 : Rat) * (f₀.re - f₂.re + f₁.im - f₃.im) = x₁ /\
+      (1 / 4 : Rat) * (f₀.re - f₁.re + f₂.re - f₃.re) = x₂ /\
+      (1 / 4 : Rat) * (f₀.re - f₂.re - f₁.im + f₃.im) = x₃ := by
+  dsimp
+  have h := fourPointFourierTransform_reconstruct x₀ x₁ x₂ x₃
+  have hscale (x : Rat) : (1 / 4 : Rat) * (4 * x) = x := by
+    rw [Rat.div_def]
+    have hfour : (4 : Rat) * (4 : Rat)⁻¹ = 1 := by native_decide
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  exact ⟨by rw [h.1, hscale], by rw [h.2.1, hscale],
+    by rw [h.2.2.1, hscale], by rw [h.2.2.2, hscale]⟩
+
 theorem wiedijk_item_seventy_six_fourier_parseval
     (x₀ x₁ x₂ x₃ : Rat) :
     QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 0) +
