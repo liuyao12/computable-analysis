@@ -290,6 +290,10 @@ theorem wiedijk_item_eighty_five_decimal_divisibility (n : Nat) :
       decimalDigitSum n % 3 = n % 3 := by
   exact decimalDigitSum_divisibility_certificate n
 
+theorem wiedijk_item_eighty_five_decimal_digit_sum_mod_nine (n : Nat) :
+    decimalDigitSum n % 9 = n % 9 := by
+  exact decimalDigitSum_mod_nine n
+
 /-! Item 89 in its finite complex form: for a supplied factor list, the
 Horner evaluator vanishes exactly at the listed roots. -/
 theorem wiedijk_item_eighty_nine_factor_remainder_boundary
