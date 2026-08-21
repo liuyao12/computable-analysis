@@ -237,6 +237,39 @@ theorem geometricFourierZeroModeSeries_candidate_contains_limit
   simp [QBox.point, QBox.NestedIn, QComplex.le_def]
   exact Series.geometricSum_le_inv_one_sub hr0 hr1 n
 
+theorem geometricFourierZeroModeSeries_stabilized_equiv_limit
+    (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
+    (hr1 : r < 1) :
+    (geometricFourierZeroModeSeries r hr0 hrhalf hr1).stabilized.Equiv
+      (ComplexRaw.ofQComplex { re := 1 / (1 - r), im := 0 }) := by
+  let F := geometricFourierZeroModeSeries r hr0 hrhalf hr1
+  let q : QComplex := { re := 1 / (1 - r), im := 0 }
+  have hexternal : forall k n, k <= n ->
+      (QBox.point q).NestedIn
+        (QBox.expand (F.candidate.compute k) (F.radius k)) := by
+    intro k n hkn
+    have hbox := geometricFourierZeroModeSeries_candidate_contains_limit
+      r hr0 hrhalf hr1 k
+    have hradius : F.radius k = 0 := by
+      rfl
+    change (QBox.point q).NestedIn
+      (QBox.expand (F.candidate.compute k) (F.radius k))
+    rw [hradius]
+    simpa [F, geometricFourierZeroModeSeries, QBox.expand, q,
+      Rat.sub_eq_add_neg, Rat.add_zero, Rat.zero_add] using hbox
+  apply ComplexRaw.sameStageOverlap_equiv
+  intro n
+  have hcontains := ComplexRaw.cauchyStabilize_contains_external
+    (candidate := F.candidate) (radius := F.radius)
+    (external := fun _ => QBox.point q) hexternal n n (Nat.le_refl n)
+  apply (ComplexRaw.compareAt_overlap_iff
+    F.stabilized (ComplexRaw.ofQComplex q) n n).2
+  change QBox.Overlaps
+    (F.stabilized.compute n) (QBox.point q)
+  unfold QBox.Overlaps
+  exact ⟨⟨hcontains.1.1, hcontains.1.2⟩,
+    ⟨hcontains.2.1, hcontains.2.2⟩⟩
+
 /-! A nonzero quarter-turn Fourier instance.  Its candidates are the exact
 finite coefficient stages; the stabilization radius is the rational bound
 `2 * r^n`.  The factor two is valid for `r <= 1/2`, while the tail proof
