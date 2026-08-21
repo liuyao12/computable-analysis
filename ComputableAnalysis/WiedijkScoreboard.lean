@@ -646,6 +646,14 @@ theorem wiedijk_item_fourteen_basel_finite_overlap_certificate :
         (DirichletSeries.zetaTwoInterval 200000).hi := by
   exact BaselFiniteComparison.zetaTwoInterval_overlaps_projectPiSquaredOverSix_200000_12
 
+theorem wiedijk_item_fourteen_basel_high_midpoint_certificate :
+    let q := BaselFiniteComparison.baselHighCommonInterval.midpoint
+    (DirichletSeries.zetaTwoInterval 200000).lo <= q /\
+      q <= (DirichletSeries.zetaTwoInterval 200000).hi /\
+      (BaselFiniteComparison.geometricPiSquaredOverSixCompute 12).lo <= q /\
+      q <= (BaselFiniteComparison.geometricPiSquaredOverSixCompute 12).hi := by
+  exact BaselFiniteComparison.baselHighCommonInterval_midpoint_certificate
+
 /-! The project-native substitute for item 14: the reciprocal-square series is
 a valid raw-real algorithm and can meet every positive rational tolerance.
 This is the completed computable row; the classical identification with
