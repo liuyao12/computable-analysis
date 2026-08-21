@@ -105,4 +105,76 @@ theorem quarterTurnGeometricStage_increment_coord_abs_le
     Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
     Rat.mul_comm, hcancel] using hterm
 
+theorem quarterTurnGeometricStage_block_coord_abs_le
+    {r : Rat} (hr0 : 0 <= r) (n k : Nat) :
+    qabs ((quarterTurnGeometricStage r (n + k)).re -
+      (quarterTurnGeometricStage r n).re) <=
+        r ^ n * Series.geometricSum r k /\
+    qabs ((quarterTurnGeometricStage r (n + k)).im -
+      (quarterTurnGeometricStage r n).im) <=
+        r ^ n * Series.geometricSum r k := by
+  induction k with
+  | zero =>
+      simp [Series.geometricSum, Rat.sub_eq_add_neg, Rat.add_neg_cancel]
+      native_decide
+  | succ k ih =>
+      have hstep := quarterTurnGeometricStage_increment_coord_abs_le hr0 (n + k)
+      have hpow_add : ∀ a b : Nat, r ^ (a + b) = r ^ a * r ^ b := by
+        intro a b
+        induction b with
+        | zero => simp
+        | succ b ihb =>
+            rw [Nat.add_succ, Rat.pow_succ, ihb, Rat.pow_succ]
+            grind [Rat.mul_assoc, Rat.mul_comm]
+      have hpow : r ^ (n + k) = r ^ n * r ^ k := hpow_add n k
+      have hsum : r ^ n * Series.geometricSum r (k + 1) =
+          r ^ n * Series.geometricSum r k + r ^ (n + k) := by
+        rw [Series.geometricSum_succ, hpow]
+        grind [Rat.mul_add, Rat.mul_assoc]
+      constructor
+      · calc
+          qabs ((quarterTurnGeometricStage r (n + (k + 1))).re -
+            (quarterTurnGeometricStage r n).re) =
+              qabs (((quarterTurnGeometricStage r (n + k)).re -
+                (quarterTurnGeometricStage r n).re) +
+                ((quarterTurnGeometricStage r (n + k + 1)).re -
+                  (quarterTurnGeometricStage r (n + k)).re)) := by
+                    rw [show n + (k + 1) = n + k + 1 by omega]
+                    rw [quarterTurnGeometricStage_succ]
+                    have hcancel (x a : Rat) : x + (-x + a) = a := by
+                      rw [← Rat.add_assoc, Rat.add_neg_cancel, Rat.zero_add]
+                    simp [QComplex.add, Rat.sub_eq_add_neg,
+                      Rat.add_assoc, Rat.add_comm, Rat.add_left_comm, hcancel]
+          _ <= qabs ((quarterTurnGeometricStage r (n + k)).re -
+                (quarterTurnGeometricStage r n).re) +
+              qabs ((quarterTurnGeometricStage r (n + k + 1)).re -
+                (quarterTurnGeometricStage r (n + k)).re) :=
+            qabs_add_le _ _
+          _ <= r ^ n * Series.geometricSum r k + r ^ (n + k) := by
+            exact rat_add_le_add ih.1 hstep.1
+          _ = r ^ n * Series.geometricSum r (k + 1) := by
+            exact hsum.symm
+      · calc
+          qabs ((quarterTurnGeometricStage r (n + (k + 1))).im -
+            (quarterTurnGeometricStage r n).im) =
+              qabs (((quarterTurnGeometricStage r (n + k)).im -
+                (quarterTurnGeometricStage r n).im) +
+                ((quarterTurnGeometricStage r (n + k + 1)).im -
+                  (quarterTurnGeometricStage r (n + k)).im)) := by
+                    rw [show n + (k + 1) = n + k + 1 by omega]
+                    rw [quarterTurnGeometricStage_succ]
+                    have hcancel (x a : Rat) : x + (-x + a) = a := by
+                      rw [← Rat.add_assoc, Rat.add_neg_cancel, Rat.zero_add]
+                    simp [QComplex.add, Rat.sub_eq_add_neg,
+                      Rat.add_assoc, Rat.add_comm, Rat.add_left_comm, hcancel]
+          _ <= qabs ((quarterTurnGeometricStage r (n + k)).im -
+                (quarterTurnGeometricStage r n).im) +
+              qabs ((quarterTurnGeometricStage r (n + k + 1)).im -
+                (quarterTurnGeometricStage r (n + k)).im) :=
+            qabs_add_le _ _
+          _ <= r ^ n * Series.geometricSum r k + r ^ (n + k) := by
+            exact rat_add_le_add ih.2 hstep.2
+          _ = r ^ n * Series.geometricSum r (k + 1) := by
+            exact hsum.symm
+
 end ComputableAnalysis
