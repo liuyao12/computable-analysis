@@ -22,6 +22,7 @@ import ComputableAnalysis.PolynomialMeanValue
 import ComputableAnalysis.FiniteQuadratureMeanValue
 import ComputableAnalysis.FiniteMonotoneSequenceInterface
 import ComputableAnalysis.FiniteLHopitalCertificate
+import ComputableAnalysis.Basel
 
 /-!
 # Wiedijk's List scoreboard
@@ -414,5 +415,16 @@ theorem wiedijk_item_sixty_four_effective_lhopital
   exact FiniteLHopitalCertificate.affine_residual_quotient_certificate
     step numeratorConstant numeratorSlope denominatorConstant denominatorSlope
     hstep hden0 hden
+
+/-! Item 14 is already expressed at the right abstraction level in the Basel
+module.  This alias records the remaining proof obligation explicitly: the
+series and the geometric `pi^2 / 6` computation must overlap at every finite
+stage.  The equivalence of this target with the raw-real statement is proved;
+the overlap theorem itself remains an open analytic row. -/
+theorem wiedijk_item_fourteen_basel_computable_target :
+    Basel.eulerBasel_geometricPi ↔
+      DirichletSeries.zetaTwoRaw.AllStagesOverlap
+        (Basel.piSquaredOverSixRaw piCircleArea) := by
+  exact Basel.eulerBasel_geometric_iff_allStagesOverlap
 
 end ComputableAnalysis
