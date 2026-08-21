@@ -244,6 +244,14 @@ theorem wiedijk_item_sixteen_finite_quintic_rational_root_boundary :
         quinticBoundaryPolynomial quinticBoundaryCandidates = none := by
   exact quinticBoundary_rationalRootSearch_none
 
+/-! The finite Abel--Ruffini boundary uses the general exact candidate search:
+failure means precisely that no supplied exact candidate is a root. -/
+theorem wiedijk_item_sixteen_exact_candidate_search_none_iff
+    {coeffs : CPoly.Coeffs} {candidates : List QComplex} :
+    exactRootSearch coeffs candidates = none ↔
+      ∀ z, z ∈ candidates -> ¬ CPoly.hasExactRoot coeffs z := by
+  exact exactRootSearch_none_iff
+
 theorem wiedijk_item_three_denumerability (q : Rat) :
     Exists fun n : Nat => RationalCode.decode (rationalNatCode n) = q := by
   exact rationalNatCode_decode_surjective q
