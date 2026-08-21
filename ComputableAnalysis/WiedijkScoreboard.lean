@@ -1131,7 +1131,13 @@ theorem wiedijk_item_eight_doubling_cube_multistage_certificate :
           cubeTarget_bisection_stage16_width⟩,
         ⟨cubeTarget_bisection_stage24_bracket.1,
           cubeTarget_bisection_stage24_bracket.2,
-          cubeTarget_bisection_stage24_width⟩⟩⟩⟩
+        cubeTarget_bisection_stage24_width⟩⟩⟩⟩
+
+theorem wiedijk_item_eight_doubling_cube_precision (eps : QPos) :
+    (monotoneTargetBisectionIterate cubeTarget 2 eps.val.den
+      cubeTargetInitial).width <= eps.val := by
+  exact monotoneTargetBisectionIterate_reaches_of_positive_tolerance
+    (f := cubeTarget) (I := cubeTargetInitial) 2 (by native_decide) eps
 
 theorem wiedijk_item_eleven_prime_unboundedness (bound : Nat) :
     ∃ certificate : PrimeUnboundednessCertificate bound,
