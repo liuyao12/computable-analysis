@@ -1080,6 +1080,29 @@ theorem wiedijk_item_thirty_five_exponential_taylor_enclosure
   exact FiniteExponentialTaylor.scheduled_expTaylorPrefix_enclosure
     hC hx eps extraTerms
 
+def wiedijk_item_thirty_five_sine_taylor_derivative_bridge
+    (terms : Nat) (a b C : Rat)
+    (hleft : -C <= a) (hright : b <= C) (hC1 : 1 <= C) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat
+        (FinitePolynomial.taylorPrefix FormalPowerSeries.sinCoeff (terms + 1)) a b)
+      (FunctionOnInterval.exactRat
+        (FinitePolynomial.taylorPrefix FormalPowerSeries.cosCoeff terms) a b) :=
+  FinitePolynomial.sineTaylorPrefix_hasDerivativeOnInterval
+    terms a b C hleft hright hC1
+
+def wiedijk_item_thirty_five_cosine_taylor_derivative_bridge
+    (terms : Nat) (a b C : Rat)
+    (hleft : -C <= a) (hright : b <= C) (hC1 : 1 <= C) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat
+        (FinitePolynomial.taylorPrefix FormalPowerSeries.cosCoeff (terms + 1)) a b)
+      (FunctionOnInterval.exactRat
+        (FinitePolynomial.taylorPrefix
+          (FormalPowerSeries.neg FormalPowerSeries.sinCoeff) terms) a b) :=
+  FinitePolynomial.cosineTaylorPrefix_hasDerivativeOnInterval
+    terms a b C hleft hright hC1
+
 theorem wiedijk_item_thirty_five_taylor_arctan_remainder
     (x eps : Rat) (n : Nat)
     (hbudget : (x * x) ^ (n + 1) <= eps) :
