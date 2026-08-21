@@ -276,6 +276,17 @@ theorem finiteFourierSum_quarterTurn_mode_period_four
         rw [hphase k, ih (k + 1)]
   exact haux 0 samples
 
+theorem finiteFourierSum_quarterTurn_mode_period_four_mul
+    (mode k : Nat) (samples : List QComplex) :
+    finiteFourierSum RotationSeries.imaginaryUnit (mode + 4 * k) samples =
+      finiteFourierSum RotationSeries.imaginaryUnit mode samples := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+      rw [show mode + 4 * (k + 1) = (mode + 4 * k) + 4 by
+        simp [Nat.mul_succ, Nat.add_assoc]]
+      rw [finiteFourierSum_quarterTurn_mode_period_four, ih]
+
 theorem finiteFourierSum_aux_one
     (mode k : Nat) (xs : List QComplex) :
     finiteFourierSumAux QComplex.one mode k xs = qcomplexListSum xs := by
