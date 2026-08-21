@@ -1103,6 +1103,17 @@ def wiedijk_item_thirty_five_cosine_taylor_derivative_bridge
   FinitePolynomial.cosineTaylorPrefix_hasDerivativeOnInterval
     terms a b C hleft hright hC1
 
+def wiedijk_item_thirty_five_exponential_taylor_derivative_bridge
+    (terms : Nat) (a b C : Rat)
+    (hleft : -C <= a) (hright : b <= C) (hC1 : 1 <= C) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat
+        (FinitePolynomial.expTaylorPrefix terms) a b)
+      (FunctionOnInterval.exactRat
+        (FinitePolynomial.expTaylorDerivativePrefix terms) a b) :=
+  FinitePolynomial.expTaylorPrefix_hasDerivativeOnInterval
+    terms a b C hleft hright hC1
+
 theorem wiedijk_item_thirty_five_taylor_arctan_remainder
     (x eps : Rat) (n : Nat)
     (hbudget : (x * x) ^ (n + 1) <= eps) :
