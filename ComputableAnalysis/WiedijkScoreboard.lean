@@ -680,6 +680,31 @@ theorem wiedijk_item_thirty_five_taylor_derivative_rational_scaling
       (FormalPowerSeries.scaleRat r F) (FormalPowerSeries.scaleRat r f) := by
   exact FormalPowerSeries.hasCoefficientShift_scaleRat r hF
 
+def wiedijk_item_thirty_five_finite_taylor_lagrange_bridge
+    (coeffs : FormalPowerSeries.Coeffs) (terms : Nat)
+    (a b C : Rat) (hleft : -C <= a) (hright : b <= C)
+    (hC1 : 1 <= C) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat
+        (FinitePolynomial.taylorPrefix coeffs terms) a b)
+      (FunctionOnInterval.exactRat
+        (FinitePolynomial.taylorPrefixShift coeffs terms) a b) := by
+  exact FinitePolynomial.taylorPrefix_hasDerivativeOnInterval
+    coeffs terms a b C hleft hright hC1
+
+def wiedijk_item_thirty_five_finite_taylor_centered_bridge
+    (basepoint : Rat) (coeffs : FormalPowerSeries.Coeffs)
+    (terms : Nat) (a b C : Rat)
+    (hleft : -C <= a - basepoint) (hright : b - basepoint <= C)
+    (hC1 : 1 <= C) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat
+        (FinitePolynomial.taylorPrefixAt basepoint coeffs terms) a b)
+      (FunctionOnInterval.exactRat
+        (FinitePolynomial.taylorPrefixShiftAt basepoint coeffs terms) a b) := by
+  exact FinitePolynomial.taylorPrefixAt_hasDerivativeOnInterval
+    basepoint coeffs terms a b C hleft hright hC1
+
 theorem wiedijk_item_thirty_five_taylor_arctan_remainder
     (x eps : Rat) (n : Nat)
     (hbudget : (x * x) ^ (n + 1) <= eps) :
