@@ -952,6 +952,19 @@ theorem wiedijk_item_seventy_six_generic_fourier_tail_bridge
     certificate.toSeries.stabilized.Valid := by
   exact certificate.toSeries_valid
 
+theorem wiedijk_item_seventy_six_fourier_tail_error_box
+    (certificate : EffectiveFourierTailCertificate)
+    (k n : Nat) (hkn : k <= n) :
+    (-certificate.radius k <=
+        (certificate.stage n).re - (certificate.stage k).re /\
+      (certificate.stage n).re - (certificate.stage k).re <=
+        certificate.radius k) /\
+    (-certificate.radius k <=
+        (certificate.stage n).im - (certificate.stage k).im /\
+      (certificate.stage n).im - (certificate.stage k).im <=
+        certificate.radius k) := by
+  exact certificate.future_stage_coordinate_enclosure k n hkn
+
 theorem wiedijk_item_seventy_six_quarter_turn_generic_tail_valid
     (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
     (hr1 : r < 1) :

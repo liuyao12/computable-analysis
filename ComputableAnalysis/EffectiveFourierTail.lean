@@ -87,6 +87,32 @@ theorem EffectiveFourierTailCertificate.toSeries_valid
     certificate.toSeries.stabilized.Valid := by
   exact EffectiveFourierSeries.stabilized_valid certificate.toSeries
 
+/-! The raw tail hypothesis is also exposed as an explicit coordinate box.
+This is the error-bar statement used by downstream Fourier computations: at
+stage `n`, every later stage lies within the radius attached to stage `k`.
+It is stated over rationals, before any complex completion is introduced. -/
+theorem EffectiveFourierTailCertificate.future_stage_coordinate_enclosure
+    (certificate : EffectiveFourierTailCertificate)
+    (k n : Nat) (hkn : k <= n) :
+    (-certificate.radius k <=
+        (certificate.stage n).re - (certificate.stage k).re /\
+      (certificate.stage n).re - (certificate.stage k).re <=
+        certificate.radius k) /\
+    (-certificate.radius k <=
+        (certificate.stage n).im - (certificate.stage k).im /\
+      (certificate.stage n).im - (certificate.stage k).im <=
+        certificate.radius k) := by
+  have htail := certificate.future_coordinate_tail k n hkn
+  constructor
+  · exact ⟨by
+      exact Rat.le_trans (Rat.neg_le_neg htail.1)
+        (neg_qabs_le_self _), by
+      exact Rat.le_trans (self_le_qabs _) htail.1⟩
+  · exact ⟨by
+      exact Rat.le_trans (Rat.neg_le_neg htail.2)
+        (neg_qabs_le_self _), by
+      exact Rat.le_trans (self_le_qabs _) htail.2⟩
+
 /-! The geometric quarter-turn family is now an instance of the generic
 tail interface.  The certificate is stated independently of the particular
 `EffectiveFourierSeries` constructor, so other coefficient algorithms can
