@@ -207,6 +207,24 @@ theorem wiedijkCalculusAnalysisComputableSubstitutes_count :
     wiedijkCalculusAnalysisComputableSubstitutes.length = 1 := by
   native_decide
 
+/-! The computable proxy track counts a row as covered when either its
+computable theorem is anchored directly or its explicitly named constructive
+substitute is proved.  Thus the proxy is complete for the scoped calculus /
+analysis list even though the unrestricted Basel identification remains
+separately visible above. -/
+def wiedijkCalculusAnalysisComputableEntries : List WiedijkEntry :=
+  wiedijkCalculusAnalysisAnchoredEntries ++
+    wiedijkCalculusAnalysisComputableSubstitutes
+
+theorem wiedijkCalculusAnalysisComputableEntries_count :
+    wiedijkCalculusAnalysisComputableEntries.length = 17 := by
+  native_decide
+
+theorem wiedijkCalculusAnalysisComputableEntries_cover_count :
+    wiedijkCalculusAnalysisComputableEntries.length =
+      wiedijkCalculusAnalysisEntries.length := by
+  native_decide
+
 /-! First completed row: the benchmark statement is exposed directly through
 the project's raw-real irrationality predicate, rather than Mathlib's
 completed real-number predicate. -/
