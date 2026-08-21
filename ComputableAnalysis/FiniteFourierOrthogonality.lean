@@ -75,6 +75,32 @@ private theorem qcomplex_zero_mul (z : QComplex) :
   simp [QComplex.mul, QComplex.zero]
   constructor <;> grind
 
+private theorem qcomplex_add_four_rearrange_local
+    (a b c d : QComplex) :
+    QComplex.add (QComplex.add a b) (QComplex.add c d) =
+      QComplex.add (QComplex.add a c) (QComplex.add b d) := by
+  cases a
+  cases b
+  cases c
+  cases d
+  simp [QComplex.add]
+  constructor <;> grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+
+private theorem qcomplexListSum_map_add
+    {α : Type} (xs : List α) (f g : α → QComplex) :
+    qcomplexListSum (xs.map (fun x => QComplex.add (f x) (g x))) =
+      QComplex.add (qcomplexListSum (xs.map f))
+        (qcomplexListSum (xs.map g)) := by
+  induction xs with
+  | nil =>
+      simp only [List.map_nil, qcomplexListSum]
+      exact (qcomplex_zero_add QComplex.zero).symm
+  | cons x xs ih =>
+      simp only [List.map_cons, qcomplexListSum]
+      rw [ih]
+      exact qcomplex_add_four_rearrange_local (f x) (g x)
+        (qcomplexListSum (xs.map f)) (qcomplexListSum (xs.map g))
+
 /-! Synthesis is a finite operation: coefficients outside the advertised
 mode list are irrelevant.  This is the elementary uniqueness principle used
 when a finite Fourier certificate is extended with additional bookkeeping. -/
@@ -109,6 +135,23 @@ theorem finiteFourierSynthesisAt_zero_coefficients
         exact qcomplex_zero_mul _)]
       rw [qcomplex_zero_mul]
       exact qcomplex_zero_add _
+
+/-! The finite sample inner product is linear in the sampled values.  This is
+the algebraic step needed to transport Fourier coefficients through addition;
+it is stated entirely over rational-complex stage data. -/
+theorem finiteFourierSampleInnerProduct_add
+    (root : QComplex) (length mode : Nat)
+    (sample₁ sample₂ sample : Nat → QComplex)
+    (hsample : ∀ k, sample k = QComplex.add (sample₁ k) (sample₂ k)) :
+    finiteFourierSampleInnerProduct root length mode sample =
+      QComplex.add
+        (finiteFourierSampleInnerProduct root length mode sample₁)
+        (finiteFourierSampleInnerProduct root length mode sample₂) := by
+  unfold finiteFourierSampleInnerProduct
+  rw [qcomplexListSum_map_congr]
+  · exact qcomplexListSum_map_add (List.range length) _ _
+  · intro k hk
+    rw [hsample k, QComplex.mul_add_cert]
 
 structure FiniteFourierOrthogonalityCertificate where
   root : QComplex

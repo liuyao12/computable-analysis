@@ -2466,6 +2466,17 @@ theorem wiedijk_item_seventy_six_fourier_coefficient_formula
           mode certificate.sample) := by
   exact certificate.coefficient_formula_at hmode
 
+theorem wiedijk_item_seventy_six_fourier_coefficient_additivity
+    (root : QComplex) (length mode : Nat)
+    (sample₁ sample₂ sample : Nat → QComplex)
+    (hsample : ∀ k, sample k = QComplex.add (sample₁ k) (sample₂ k)) :
+    finiteFourierSampleInnerProduct root length mode sample =
+      QComplex.add
+        (finiteFourierSampleInnerProduct root length mode sample₁)
+        (finiteFourierSampleInnerProduct root length mode sample₂) := by
+  exact finiteFourierSampleInnerProduct_add
+    root length mode sample₁ sample₂ sample hsample
+
 theorem wiedijk_item_seventy_six_fourier_finite_reconstruction
     (certificate : FiniteFourierReconstructionCertificate)
     {k : Nat} (hk : k < certificate.orthogonality.length) :
