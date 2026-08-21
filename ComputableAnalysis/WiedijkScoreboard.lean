@@ -1294,6 +1294,13 @@ theorem wiedijk_item_seventy_six_effective_fourier_stage_enclosure
       (series.stabilized.compute n) := by
   exact series.stage_contained n
 
+theorem wiedijk_item_seventy_six_effective_fourier_precision
+    (series : EffectiveFourierSeries) (eps : QPos) :
+    ∃ N : Nat, ∀ n, N <= n ->
+      (series.stabilized.compute n).width <= eps.val /\
+      (series.stabilized.compute n).height <= eps.val := by
+  exact (series.stabilized_valid).2.2 eps
+
 theorem wiedijk_item_seventy_six_fourier_tail_error_box
     (certificate : EffectiveFourierTailCertificate)
     (k n : Nat) (hkn : k <= n) :
