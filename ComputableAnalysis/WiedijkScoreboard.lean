@@ -1410,6 +1410,14 @@ theorem wiedijk_item_ninety_finite_stirling_error
     qabs (certificate.ratioValue - target) ≤ 1 / 100 := by
   exact certificate.abs_error_le target hlower hupper
 
+theorem wiedijk_item_ninety_finite_stirling_error_tolerance
+    (certificate : FiniteStirlingRatioCertificate)
+    (target delta : Rat)
+    (hlower : target ≤ certificate.ratioValue)
+    (hupper : certificate.ratioValue ≤ target + delta) :
+    qabs (certificate.ratioValue - target) ≤ delta := by
+  exact certificate.abs_error_le_of_tolerance target delta hlower hupper
+
 theorem wiedijk_item_ninety_finite_stirling_ratio_positive
     {n : Nat} {e root : Rat} (he : 0 < e) (hroot : 0 < root) :
     0 < finiteStirlingRatio n e root := by

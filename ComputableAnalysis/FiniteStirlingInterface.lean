@@ -46,6 +46,17 @@ theorem FiniteStirlingRatioCertificate.abs_error_le
   rw [qabs_eq_self_of_nonneg hnonneg]
   grind
 
+theorem FiniteStirlingRatioCertificate.abs_error_le_of_tolerance
+    (certificate : FiniteStirlingRatioCertificate)
+    (htarget delta : Rat)
+    (hlower : htarget ≤ certificate.ratioValue)
+    (hupper : certificate.ratioValue ≤ htarget + delta) :
+    qabs (certificate.ratioValue - htarget) ≤ delta := by
+  have hnonneg : 0 ≤ certificate.ratioValue - htarget := by
+    grind
+  rw [qabs_eq_self_of_nonneg hnonneg]
+  grind
+
 def finiteStirlingTenCertificate : FiniteStirlingRatioCertificate where
   index := 10
   eApprox := finiteStirlingEApprox
