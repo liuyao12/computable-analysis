@@ -158,6 +158,23 @@ separately needs its arctangent-backed regularity and endpoint certificate
 before it is identified with \(1/4\).  For the unsquared sine route, the
 remaining certificate is target-directed: each nested-radical sample must be
 matched to a tangent box by a finite bisection trace or half-angle witness.
+
+The tangent-chart value theorem is already public:
+
+\begin{verbatim}
+finite tangent-chart FTC -> tangentChartIntegral = 1/pi
+                         -> public sine half-integral = 1/pi
+\end{verbatim}
+
+The equal-dyadic route is not silently identified with that chart.  Its exact
+remaining obligation is the finite `TangentChartTransport` structure, whose
+fields say that the public dyadic box and the chart box overlap at every
+stage.  A common rational witness is an equivalent, more constructive form.
+
+\lean{ComputableAnalysis.SinPiIntegral.computableSinPiHalfIntegral_equiv_reciprocalPi_of_FTC}
+\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.TangentChartTransport}
+\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_transport}
+\leanok
 The integral and Darboux layers do not require a completed real sine function.
 
 The target-directed inverse search has the same shape as the integral
