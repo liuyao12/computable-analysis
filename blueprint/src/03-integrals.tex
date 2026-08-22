@@ -119,6 +119,22 @@ Monotonicity, convexity, power-series tails, and formula-specific interval
 arithmetic all implement the same interface. Thus the theorem is reusable
 without claiming that every function is integrable.
 
+The formal spine is now exposed as four layers:
+
+\begin{verbatim}
+EffectiveFTC                 -> scheduled Riemann sums vs endpoint box
+EffectiveDerivativeBoundFTC  -> local derivative bounds -> EffectiveFTC
+Convex/concave FTC            -> secant bounds -> derivative-bound certificate
+StaticDyadicEffectiveFTC      -> equal-dyadic specialization
+\end{verbatim}
+
+\lean{ComputableAnalysis.EffectiveFTC}
+\lean{ComputableAnalysis.EffectiveDerivativeBoundFTC}
+\lean{ComputableAnalysis.effectiveDerivativeBoundFTC}
+\lean{ComputableAnalysis.FTC.effectiveFTC_definiteIntegralEqualsEndpoint}
+\lean{ComputableAnalysis.FTC.staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint}
+\leanok
+
 The first non-polynomial instance is already closed: Lean constructs
 `arctanEffectiveFTCData` for the rational kernel \(1/(1+x^2)\) and proves its
 finite rectangle integral equivalent to the endpoint primitive. This is the
@@ -187,6 +203,14 @@ stage.  A common rational witness is an equivalent, more constructive form.
 \lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.tangentChartTransport_of_staticFTC_of_endpoint_equiv}
 \leanok
 The integral and Darboux layers do not require a completed real sine function.
+
+The closed finite instances are linked directly to their certificates:
+
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTCData}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTC_equiv_endpoint}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_endpoint}
+\leanok
 
 The target-directed inverse search has the same shape as the integral
 algorithm.  A cell is bisected, its certified forward image is compared with

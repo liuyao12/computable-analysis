@@ -77,6 +77,18 @@ followed by a tail transport certificate.  The effective FTC in
 Chapter~\ref{ch:integrals} supplies the corresponding endpoint interpretation
 when a series is used as a primitive.
 
+The formal coefficient layer already records the derivative shifts for the
+main complex-valued functions:
+
+\lean{ComputableAnalysis.PowerSeries.atanTaylorCoeff_hasFormalDerivative}
+\lean{ComputableAnalysis.PowerSeries.expCoeff_hasFormalDerivative}
+\lean{ComputableAnalysis.PowerSeries.sinCoeff_hasFormalDerivative}
+\lean{ComputableAnalysis.PowerSeries.cosCoeff_hasFormalDerivative}
+\leanok
+
+These are formal power-series identities.  An analytic theorem additionally
+supplies a finite tail certificate on the chosen rational domain.
+
 For the arctangent route, the alternating tail is explicit and the rational
 anchor is shared with the rectangle computation.  Faster Machin/Newton-style
 series are then compared by overlap rather than declared to be the definition
