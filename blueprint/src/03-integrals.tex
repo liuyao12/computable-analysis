@@ -268,6 +268,36 @@ finite boundary sum -> algebraic identity -> endpoint difference
 Green's rectangle identity, Stieltjes transport, substitution, telescoping, integration by parts,
 and polynomial FTC are instances of this finite pattern.
 
+The algebraic order is deliberate: first prove identities for one finite
+partition, then attach a shrinking certificate.  The Lean interface exposes
+the main transport rules:
+
+\lean{ComputableAnalysis.Integral.integral_equiv_of_plan_and_samples}
+\lean{ComputableAnalysis.Integral.integral_equiv_of_plan_and_sample_overlaps}
+\lean{ComputableAnalysis.finiteIntegrationByParts_onPartition}
+\lean{ComputableAnalysis.finiteIntegrationByParts_withVariation_onPartition}
+\lean{ComputableAnalysis.coordinateIntegrationByParts_onPartition_endpoint_bracket}
+\lean{ComputableAnalysis.RationalPartition.endpointDifferenceSum_contains}
+\lean{ComputableAnalysis.RationalPartition.boundIntegralSum_overlaps_endpointDifference}
+\leanok
+
+Linearity and additivity are stated as certificate contracts:
+
+\begin{verbatim}
+same finite plan + sample transport -> equivalent integrals
+adjacent endpoint boxes -> telescoping endpoint box
+finite partition identity + shrinking widths -> computable integral law
+\end{verbatim}
+
+\lean{ComputableAnalysis.Integral.Linear}
+\lean{ComputableAnalysis.Integral.CompatibleWithScaleRat}
+\lean{ComputableAnalysis.Integral.AdditiveOnAdjacentIntervals}
+\leanok
+
+This is the constructive replacement for silently importing a global vector
+space of integrable functions.  Each concrete family supplies the construction
+and the finite certificates required by the contract.
+
 The sine integral in Chapter~\ref{ch:rational-circle-trigonometry} is the
 first integration target: the circle/arctangent construction supplies the
 values, the rectangle algorithm supplies the area, and this FTC supplies the
