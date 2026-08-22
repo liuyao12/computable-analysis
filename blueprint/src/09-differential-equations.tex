@@ -33,6 +33,18 @@ The finite algebraic core is explicit in Lean:
 These are finite sampled statements.  They become ODE theorems only after an
 effective-FTC provider supplies the coefficient, simplex, and tail bounds.
 
+The forcing term is handled by a literal finite Duhamel sum:
+
+\begin{verbatim}
+initial state -> chronological transition * initial state
+forcing samples -> time-ordered transitions -> finite Duhamel sum
+                                      -> exact sampled trajectory
+\end{verbatim}
+
+\lean{ComputableAnalysis.LinearODE.trajectory_zeroInitial_eq_duhamelSum}
+\lean{ComputableAnalysis.LinearODE.trajectory_eq_transition_add_duhamelSum}
+\leanok
+
 The tail is not an informal limit. If the coefficient bound is $M$ on a
 time interval of length $T$, the omitted degree-$r$ words are charged to
 the finite factorial majorant $(MT)^r/r!$. An executable shift chooses the
@@ -86,6 +98,24 @@ and odd words split into cosine and sine prefixes, connecting the ODE chapter
 back to the circle construction. Scalar $y'=y$ is the first uniqueness
 case; affine forcing then gives variation of constants.
 \label{thm:linear-ode-elementary-function-agreement}
+
+The constant-coefficient and rotation algebra is checked before any analytic
+series theorem:
+
+\lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexTerm_succ}
+\lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexPartial_succ}
+\lean{ComputableAnalysis.LinearODE.RotationSystem.generator_square}
+\lean{ComputableAnalysis.LinearODE.RotationSystem.simplexPartial_even_split}
+\leanok
+
+The analytic convergence input is a rational factorial tail.  It supplies a
+computable stage for every requested error, and the Volterra comparison turns
+that bound into uniqueness for the self-derivative equation:
+
+\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_shifted_le_eps}
+\lean{ComputableAnalysis.LinearODE.SelfDerivativeVolterraComparison.equivalent}
+\lean{ComputableAnalysis.LinearODE.selfDerivativeInitialValueUnique_of_volterra}
+\leanok
 
 \section{Finite complex paths}
 
