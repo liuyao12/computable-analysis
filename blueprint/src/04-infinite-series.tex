@@ -22,6 +22,30 @@ formalized: a stagewise coordinate-tail certificate turns finite transforms
 into a shrinking raw complex algorithm.  The geometric quarter-turn family
 provides a nonzero instance with radius \(2r^n\) for \(0\le r\le 1/2\).
 
+The finite Fourier API is explicit:
+
+\lean{ComputableAnalysis.finiteFourierSum}
+\lean{ComputableAnalysis.fourPointFourierTransform_reconstruct}
+\lean{ComputableAnalysis.fourPointFourierTransform_parseval}
+\lean{ComputableAnalysis.FiniteFourierOrthogonalityCertificate}
+\lean{ComputableAnalysis.FiniteFourierReconstructionCertificate.reconstructs}
+\leanok
+
+The infinite-looking step is only a tail certificate over these finite
+transforms:
+
+\begin{verbatim}
+finite transform -> coordinate tail box -> future-stage containment
+                 -> stabilized complex raw -> requested-width witness
+\end{verbatim}
+
+\lean{ComputableAnalysis.EffectiveFourierTailCertificate}
+\lean{ComputableAnalysis.EffectiveFourierTailCertificate.toSeries_valid}
+\lean{ComputableAnalysis.EffectiveFourierSeries.stabilized_valid}
+\lean{ComputableAnalysis.EffectiveFourierSeries.precision_witness}
+\lean{ComputableAnalysis.quarterTurnGeometricTailCertificate_valid}
+\leanok
+
 \section{Series as computation}
 \label{thm:arithmetic-series-sum}
 \label{thm:finite-geometric-series-interface}
@@ -57,6 +81,17 @@ Termwise differentiation or integration is admitted only after the finite
 coefficient identity and the transported tail bound have both been proved.
 This is the series analogue of the effective FTC: a global identity is a
 chain of finite interval containments.
+
+Concrete scalar series instantiate the same contract. The geometric raw and
+alternating raw examples make the two obligations visible: stage nesting is
+proved from finite partial-sum algebra, while eventual precision is proved
+from a rational tail bound.
+
+\lean{ComputableAnalysis.geometricRaw_valid_of_le_half}
+\lean{ComputableAnalysis.geometricRaw_equiv_inv_one_sub}
+\lean{ComputableAnalysis.AlternatingRaw.toRealRaw_valid}
+\lean{ComputableAnalysis.leibnizAlternatingRaw_valid}
+\leanok
 
 \section{Pi and power series}
 \label{thm:shared-rational-anchor}
