@@ -110,6 +110,41 @@ an interval width $4/2^n$ before any endpoint or FTC identification.
 \lean{ComputableAnalysis.IntegralIdentities.arctanKernelLipschitzIntegral_valid}
 \leanok
 
+\section{Beyond Lipschitz: effective monotone schedules}
+
+The next layer accepts an interval-level modulus rather than one global
+Lipschitz constant. For a nondecreasing evaluator, endpoint boxes on each
+cell give a Darboux range. The finite width estimate is already general:
+
+\begin{verbatim}
+interval regularity + mesh/input budget
+    -> endpoint Darboux boxes
+    -> width <= (b-a)/(requested evaluation stage + 1)
+\end{verbatim}
+
+The public schedule records exactly what a proof must still establish:
+
+\begin{verbatim}
+pieces(n), precision(n)
+    -> mesh budget
+    -> nesting across stages
+    -> widths shrink to zero
+    -> valid computable integral
+\end{verbatim}
+
+\lean{ComputableAnalysis.IntervalRegularOn}
+\lean{ComputableAnalysis.Integral.nondecreasingDarbouxDyadicStage_width_le_of_input_budget}
+\lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule}
+\lean{ComputableAnalysis.Integral.monotoneDarbouxScheduleRaw_valid}
+\lean{ComputableAnalysis.Integral.monotoneDarbouxScheduleConstructionFor}
+\lean{ComputableAnalysis.Integral.monotoneDarbouxScheduleIntegralFor_valid}
+\leanok
+
+This schedule layer is the honest frontier between the present foundation and
+the classical theorem that every continuous function on a closed interval is
+integrable. The missing work is constructive schedule synthesis and its finite
+nesting proof; no completeness axiom is being hidden in that gap.
+
 The geometric certificate is deliberately elementary: a parent point on the
 unit circle with nonnegative coordinates has child coordinates satisfying
 
