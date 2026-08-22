@@ -12,8 +12,8 @@ finite combinatorics from the library.
 \section{Order}
 
 \begin{verbatim}
-foundations -> geometry -> rectangles -> series and pi
-            -> MVT/FTC -> algebraic isolation -> linear ODEs
+foundations -> circle/trigonometry -> integral algorithm -> effective FTC
+            -> power series -> exponential/logarithm -> linear ODEs
 \end{verbatim}
 
 \section{List of 100 Theorem Formalization Challenge}
@@ -24,13 +24,52 @@ statement. The list is a progress scoreboard, not a promise to reproduce the
 unrestricted classical theorem.
 
 The authoritative computable proxy currently contains 52 scoped entries. Its
-Lean registry, including machine-checked coverage of the benchmark numbers,
-is 	exttt{ComputableAnalysis/WiedijkScoreboard.lean}. Each entry records the
+Lean registry, including machine-checked coverage of the benchmark numbers, is
+\texttt{ComputableAnalysis/WiedijkScoreboard.lean}. Each entry records the
 project-native replacement: a finite certificate, a raw-real equivalence, or
 an explicitly named constructive substitute when the unrestricted theorem
 requires classical completeness or another out-of-scope object.
+
+\section{Proof frontier}
+
+The rational circle, dyadic sine values, rectangle sums, effective FTC
+interfaces, polynomial/Taylor secant certificates, power-series tails,
+finite Fourier transforms, logarithm, rotation derivatives, the tangent-square
+FTC instance, the common-prefix exponential FTC instance, and scalar linear
+ODE uniqueness are checked in Lean. The principal unfinished integration step
+is the full dyadic sine/arctangent FTC instantiation. The monotone Darboux
+machinery and the sine modulus are already present; the remaining provider is
+target-directed inverse data that transports each half-angle box to a
+certified tangent witness, or an equivalent dyadic bisection trace. This is a
+finite geometric certificate to add, not a hidden use of completed real
+numbers.
 
 \section{Style}
 
 Use only `realRaw` and `real` when the distinction from standard real numbers
 matters; leave implementation names and proof details to Lean.
+
+\section{How to formalize a new theorem}
+
+Start with the computation, not with a completed function space:
+
+\begin{verbatim}
+domain -> finite evaluator -> rational enclosure -> validity -> equivalence
+
+raw computation A ----\\
+                     overlap at every stage -> abstract real/function result
+raw computation B ----/
+
+derivative/area claim -> cell certificate -> mesh refinement -> endpoint overlap
+\end{verbatim}
+
+For a new real-valued quantity, add one `realRaw` evaluator and prove its
+order, nesting, and shrinking-width obligations.  If another evaluator is
+already available, add one finite overlap edge to it; the abstract `real` or
+function layer can then use the maintained chain of such edges.  For a
+function, keep the evaluator total but attach its rational domain and use the
+domain proof at every call.  For an integral or derivative, expose the finite
+cell estimate and its error budget before stating the limiting-looking
+corollary.  Classical completeness, Lebesgue measure, and unrestricted
+measurability are not implicit fallbacks: if a result needs one of them,
+state a computable proxy or record the bridge as a separate theorem target.

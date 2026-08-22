@@ -1,28 +1,75 @@
 \chapter{Linear Differential Equations}\label{ch:differential-equations}
 
-Approximate a linear ODE by finite matrix words and a certified factorial tail.
+Linear ODEs are the first large consumer of the preceding machinery. We do
+not postulate a completed space of trajectories: a requested precision is met
+by a finite matrix computation together with a rational error certificate.
+
+For $y'(t)=A(t)y(t)+b(t)$, the coefficient and forcing entries are
+interval-certified computations on a common rational domain. The effective FTC
+supplies the simplex integrals; this chapter supplies their finite matrix
+assembly and uniqueness principle.
 
 \section{Construction}
 \label{thm:finite-cramer-interface}
 \label{thm:finite-cayley-hamilton-boundary}
 
 \begin{verbatim}
-initial state -> finite matrix words -> tail bound -> enclosure
+initial state -> sampled matrices -> ordered words -> tail bound -> enclosure
 \end{verbatim}
-Cramer's rule handles finite linear solves. Cayley--Hamilton supplies a
-recurrence when an annihilating polynomial is available.
+The Lean layer defines rational vectors and matrices, executable finite sums,
+chronological products, and the noncommutative Peano--Baker word expansion.
+The order is part of the theorem: later transitions multiply on the left.
+Cramer's rule handles finite solves; Cayley--Hamilton supplies recurrences for
+small fixed dimensions.
+
+The tail is not an informal limit. If the coefficient bound is $M$ on a
+time interval of length $T$, the omitted degree-$r$ words are charged to
+the finite factorial majorant $(MT)^r/r!$. An executable shift chooses the
+first stage below any requested positive rational tolerance.
+
+The construction is therefore a family of finite approximants:
+
+\begin{verbatim}
+P_0(t) = y_0
+P_(r+1)(t) = y_0 + integral_0^t (A(s) P_r(s) + b(s)) ds
+return P_r(t) +/- factorial_tail(M*T,r)
+\end{verbatim}
+
+Every integral in this pseudocode is an effective-FTC certificate on a finite
+simplex or rectangle. The matrix products are finite ordered words; no
+infinite matrix, function space, or completed trajectory is introduced.
 
 \section{Evolution and uniqueness}
 
-Mesh transitions give a finite variation-of-constants construction and a
-finite uniqueness certificate.
+Mesh transitions give a finite variation-of-constants construction:
 \begin{verbatim}
-mesh -> local transitions -> compatible prefixes -> overlap
+mesh -> local transitions -> compatible prefixes -> overlap -> trajectory box
 \end{verbatim}
+
+The equality principle is pointwise overlap of raw intervals.  The scalar
+self-derivative case is already closed by a finite mesh-halving certificate:
+subtract two candidates, repeatedly halve a rational error envelope, and use
+the explicit tolerance schedule to force the error to zero.  For vector
+systems, the Lean certificate is modular: the finite Peano--Baker layer closes
+the argument once the analytic provider has supplied the coefficient bound and
+the iterated error estimate.
+
+For $y'=y$, the error envelope is scalar and the factorial estimate is
+explicit. This gives uniqueness from the same finite data used to construct
+the solution. The vector theorem has the identical shape; its remaining
+provider fields are only matrix-norm bounds, coefficient regularity, and the
+finite simplex tail estimate.
+
+Thus the current foundation proves the algebraic and error-closing core, while
+the remaining theorem for a given ODE is a finite, inspectable obligation:
+regularity of the entries, simplex enclosure, and a compatible tail bound.
 
 \section{Special cases}
 
-For rotations, matrix words split into cosine and sine prefixes.
+For constant generators, matrix words reduce to powers. For rotations, even
+and odd words split into cosine and sine prefixes, connecting the ODE chapter
+back to the circle construction. Scalar $y'=y$ is the first uniqueness
+case; affine forcing then gives variation of constants.
 \label{thm:linear-ode-elementary-function-agreement}
 
 \section{Finite complex paths}
@@ -30,5 +77,8 @@ For rotations, matrix words split into cosine and sine prefixes.
 \begin{verbatim}
 path -> segment increments -> finite sum -> endpoint certificate
 \end{verbatim}
-Polygonal closed paths therefore give finite zero-displacement identities for
-the constant and polynomial differentials covered here.
+Complex-valued functions are supported from the start by pairing rational real
+and imaginary interval computations. Polygonal paths give finite
+zero-displacement identities for the constant and polynomial differentials
+covered here; analytic path-independence enters only after the corresponding
+finite subdivision certificate is supplied.

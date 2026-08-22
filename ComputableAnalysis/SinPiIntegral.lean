@@ -1,16 +1,18 @@
 import ComputableAnalysis.IntegralIdentities
+import ComputableAnalysis.AlgebraicFunctions
 import ComputableAnalysis.CauchyPi
 import ComputableAnalysis.Calculus
+import ComputableAnalysis.TrigSpecialValues
 
 /-!
 # The half-interval integral of `sin (pi * x)`
 
 This file is the proof-facing entry point for the first nontrivial
-trigonometric integral.  The circle layer uses normalized quarter-turns: its
-input `t` denotes the angle `t * pi / 2`.  Consequently the requested
-function `sin (pi * x)` is obtained at a rational input by evaluating the
-circle sine at `2 * x`; no real-valued argument and no primitive real `pi` are
-used by the evaluator.
+trigonometric integral.  The project has one public sine convention:
+`sin (pi * x)`.  The circle layer has an internal normalized coordinate `t`
+for a quarter-turn; on the public half-period we pass `t = 2 * x`.  This is
+an implementation coordinate, not a second definition of sine.  No
+real-valued argument and no primitive real `pi` are used by the evaluator.
 
 The final equality is intentionally expressed through an effective FTC
 certificate.  The certificate is where the finite interval bounds,
@@ -57,6 +59,131 @@ end RationalCircle
 namespace SinPiIntegral
 
 open RationalCircle.GeometricTrig
+open RationalCircle.GeometricTrig.SpecialAngles
+
+theorem sqrtOnUnitEvalIntervalClipped_overlap_of_common_point
+    {I J : QInterval} (hI : subintervalOf I 0 1)
+    (hJ : subintervalOf J 0 1) (q : Rat)
+    (hIq : I.lo <= q ∧ q <= I.hi)
+    (hJq : J.lo <= q ∧ q <= J.hi) (n : Nat) :
+    QInterval.Overlaps
+      (sqrtOnUnitEvalIntervalClipped I n)
+      (sqrtOnUnitEvalIntervalClipped J n) := by
+  have hq : 0 <= q ∧ q <= 1 := by
+    constructor
+    · exact Rat.le_trans hI.1 hIq.1
+    · exact Rat.le_trans hIq.2 hI.2.2
+  have hpointI := sqrtOnUnitEvalIntervalClipped_contains_point
+    I hI q hq n hIq.1 hIq.2
+  have hpointJ := sqrtOnUnitEvalIntervalClipped_contains_point
+    J hJ q hq n hJq.1 hJq.2
+  have hqbox := sqrtOnUnit_compute_subinterval q hq n
+  unfold QInterval.Overlaps
+  exact ⟨Rat.le_trans hpointI.1 (Rat.le_trans hqbox.2.1 hpointJ.2),
+    Rat.le_trans hpointJ.1 (Rat.le_trans hqbox.2.1 hpointI.2)⟩
+
+theorem sqrtOnUnitEvalIntervalClipped_overlap_of_input_overlap
+    {I J : QInterval} (hI : subintervalOf I 0 1)
+    (hJ : subintervalOf J 0 1)
+    (hover : QInterval.Overlaps I J) (n : Nat) :
+    QInterval.Overlaps
+      (sqrtOnUnitEvalIntervalClipped I n)
+      (sqrtOnUnitEvalIntervalClipped J n) := by
+  let q : Rat := max I.lo J.lo
+  have hIq : I.lo <= q ∧ q <= I.hi := by
+    dsimp [q]
+    constructor
+    · rw [Rat.max_def]
+      split <;> grind [hI.2.1, hJ.2.1]
+    · rw [Rat.max_def]
+      split <;> grind [hover.2, hI.2.1]
+  have hJq : J.lo <= q ∧ q <= J.hi := by
+    dsimp [q]
+    constructor
+    · rw [Rat.max_def]
+      split <;> grind [hI.2.1, hJ.2.1]
+    · rw [Rat.max_def]
+      split <;> grind [hover.1, hJ.2.1]
+  exact sqrtOnUnitEvalIntervalClipped_overlap_of_common_point hI hJ q hIq hJq n
+
+theorem sqrtOnUnitEvalIntervalClipped_overlap_of_input_overlap_at
+    {I J : QInterval} (hI : subintervalOf I 0 1)
+    (hJ : subintervalOf J 0 1)
+    (hover : QInterval.Overlaps I J) (n m : Nat) :
+    QInterval.Overlaps
+      (sqrtOnUnitEvalIntervalClipped I n)
+      (sqrtOnUnitEvalIntervalClipped J m) := by
+  let q : Rat := max I.lo J.lo
+  have hIq : I.lo <= q ∧ q <= I.hi := by
+    dsimp [q]
+    constructor
+    · rw [Rat.max_def]
+      split <;> grind [hI.2.1, hJ.2.1]
+    · rw [Rat.max_def]
+      split <;> grind [hover.2, hI.2.1]
+  have hJq : J.lo <= q ∧ q <= J.hi := by
+    dsimp [q]
+    constructor
+    · rw [Rat.max_def]
+      split <;> grind [hI.2.1, hJ.2.1]
+    · rw [Rat.max_def]
+      split <;> grind [hover.1, hJ.2.1]
+  have hq : 0 <= q ∧ q <= 1 := by
+    constructor
+    · exact Rat.le_trans hI.1 hIq.1
+    · exact Rat.le_trans hIq.2 hI.2.2
+  have hpointI := sqrtOnUnitEvalIntervalClipped_contains_point
+    I hI q hq n hIq.1 hIq.2
+  have hpointJ := sqrtOnUnitEvalIntervalClipped_contains_point
+    J hJ q hq m hJq.1 hJq.2
+  have hqboxI := sqrtOnUnit_compute_subinterval q hq n
+  have hqboxJ := sqrtOnUnit_compute_subinterval q hq m
+  have hqvalid : ({ compute := sqrtOnUnit.compute q hq } : RealRaw).Valid :=
+    sqrtOnUnit.valid_on q (sqrtOnUnit.defined_on q hq)
+  have hcross := RealRaw.allStagesOverlap_refl
+    ({ compute := sqrtOnUnit.compute q hq } : RealRaw) hqvalid n m
+  have hcross' :=
+    (RealRaw.compareAt_overlap_iff
+      ({ compute := sqrtOnUnit.compute q hq } : RealRaw)
+      ({ compute := sqrtOnUnit.compute q hq } : RealRaw) n m).1 hcross
+  unfold QInterval.Overlaps
+  exact ⟨Rat.le_trans hpointI.1 (Rat.le_trans hcross'.1 hpointJ.2),
+    Rat.le_trans hpointJ.1 (Rat.le_trans hcross'.2 hpointI.2)⟩
+
+/-- The first nontrivial dyadic sample has its certified nested-radical value.
+
+At `x = 1/4`, the public notation `sin (pi*x)` invokes the normalized circle
+input `2*x = 1/2`.  The special-angle certificate identifies that sample with
+the existing positive square-root representation of `1/2`; no value of a
+completed standard real is used. -/
+theorem sinPiRawOfConstruction_quarter_equiv_of_specialAngle
+    (C : FunctionRawConstruction)
+    (hdefined : forall x, 0 <= x -> x <= (1 : Rat) / 2 ->
+      C.sinFunctionRaw.definedAt (2 * x))
+    (hspecial : SpecialAngleValueTargets C) :
+    let hxquarter : (sinPiRawOfConstruction C hdefined).definedAt (1 / 4) := by
+      exact ⟨by native_decide, by native_decide⟩
+    ({ compute :=
+        (sinPiRawOfConstruction C hdefined).compute
+          (1 / 4) hxquarter } : RealRaw).Equiv
+      sinFortyFiveValue := by
+  dsimp
+  rcases hspecial.sin_forty_five with ⟨ht, hvalue⟩
+  have harg : (2 : Rat) * (1 / 4) = 1 / 2 := by native_decide
+  change
+    ({ compute := C.sinFunctionRaw.compute (2 * (1 / 4)) _ } : RealRaw).Equiv
+      sinFortyFiveValue
+  have hq : C.sinFunctionRaw.definedAt (2 * (1 / 4)) :=
+    hdefined (1 / 4) (by native_decide) (by native_decide)
+  change
+    ({ compute := C.sinFunctionRaw.compute (2 * (1 / 4)) hq } : RealRaw).Equiv
+      sinFortyFiveValue
+  have hcompute :
+      C.sinFunctionRaw.compute (2 * (1 / 4)) hq =
+        C.sinFunctionRaw.compute (1 / 2) ht := by
+    congr 1
+  rw [hcompute]
+  exact hvalue
 
 /-!
 ## The expected endpoint value
@@ -334,6 +461,193 @@ theorem dyadicCell_subinterval_of_source
       · exact hstep.2.1
       · exact Rat.le_trans hstep.2.2 ih.2.2
 
+private theorem dyadicCell_subinterval_of_cell
+    (a b : Rat) (path : Nat -> Bool) (hab : a <= b) :
+    forall n m, n <= m ->
+      subintervalOf (dyadicCell a b path m)
+        (dyadicCell a b path n).lo (dyadicCell a b path n).hi := by
+  intro n m
+  induction m generalizing n with
+  | zero =>
+      intro hnm
+      have hn : n = 0 := Nat.eq_zero_of_le_zero hnm
+      subst n
+      exact ⟨Rat.le_refl, (by
+        have h := dyadicCell_subinterval_of_source a b path hab 0
+        exact h.2.1), Rat.le_refl⟩
+  | succ m ih =>
+      intro hnm
+      by_cases hEq : n = m + 1
+      · subst n
+        exact ⟨Rat.le_refl, (by
+          have h := dyadicCell_subinterval_of_source a b path hab (m + 1)
+          exact h.2.1), Rat.le_refl⟩
+      · have hnm' : n <= m := by omega
+        have ih' := ih n hnm'
+        have hordered : (dyadicCell a b path m).lo <=
+            (dyadicCell a b path m).hi := by
+          have h := dyadicCell_subinterval_of_source a b path hab m
+          exact h.2.1
+        have hstep := dyadicCell_step_subinterval a b path m hordered
+        constructor
+        · exact Rat.le_trans ih'.1 hstep.1
+        constructor
+        · exact hstep.2.1
+        · exact Rat.le_trans hstep.2.2 ih'.2.2
+
+set_option maxHeartbeats 5000000 in
+theorem dyadicCell_valid_of_width_le_one
+    (a b : Rat) (path : Nat -> Bool) (hab : a <= b)
+    (hwidth : b - a <= 1) :
+    RealRaw.ValidCompute (dyadicCell a b path) := by
+  have hbound : forall n,
+      (dyadicCell a b path n).width <=
+        1 / (((n + 1 : Nat) : Rat)) := by
+    intro n
+    rw [dyadicCell_width]
+    have hpow : (n + 1 : Nat) <= 2 ^ n := by
+      induction n with
+      | zero => omega
+      | succ n ih =>
+          calc
+            n + 1 + 1 <= 2 * (n + 1) := by omega
+            _ <= 2 * 2 ^ n := Nat.mul_le_mul_left 2 ih
+            _ = 2 ^ (n + 1) := by
+              rw [Nat.pow_succ]
+              omega
+    have hdenpos : 0 < ((n + 1 : Nat) : Rat) := by
+      exact_mod_cast (Nat.succ_pos n)
+    have hpowpos : 0 < ((2 ^ n : Nat) : Rat) := by
+      exact (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
+    have hnum : 0 <= b - a := by grind
+    have hone :
+        1 / ((2 ^ n : Nat) : Rat) <=
+          1 / ((n + 1 : Nat) : Rat) :=
+      FTC.one_div_nat_antitone
+        (Nat.succ_pos n) (Nat.pow_pos (by omega : 0 < 2)) hpow
+    have hone_nonneg : 0 <=
+        1 / ((n + 1 : Nat) : Rat) := by
+      simpa [Rat.div_def] using
+        (Rat.le_of_lt ((Rat.inv_pos).2 hdenpos))
+    calc
+      (b - a) / ((2 ^ n : Nat) : Rat) =
+          (b - a) * (1 / ((2 ^ n : Nat) : Rat)) := by
+            simp [Rat.div_def]
+      _ <= (b - a) * (1 / ((n + 1 : Nat) : Rat)) :=
+        Rat.mul_le_mul_of_nonneg_left hone hnum
+      _ <= 1 * (1 / ((n + 1 : Nat) : Rat)) :=
+        Rat.mul_le_mul_of_nonneg_right hwidth hone_nonneg
+      _ = 1 / ((n + 1 : Nat) : Rat) := by simp
+  refine ⟨?_, ?_, ?_⟩
+  · intro n
+    have hs := (dyadicCell_subinterval_of_source a b path hab n).2.1
+    rw [dyadicCell_width]
+    exact Rat.mul_nonneg (by grind)
+      (Rat.le_of_lt ((Rat.inv_pos).2
+        ((Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2)))))
+  · intro n m hnm
+    have hcell := dyadicCell_subinterval_of_cell a b path hab n m hnm
+    exact ⟨hcell.1, hcell.2.1, hcell.2.2⟩
+  · apply shrinksToZero_of_natOverSuccBound (C := 1)
+    intro n
+    exact hbound n
+
+/-- The dyadic cell selected by a known rational preimage witness. -/
+def dyadicWitnessCell (a b z : Rat) : Nat -> QInterval
+  | 0 => { lo := a, hi := b }
+  | n + 1 =>
+      let previous := dyadicWitnessCell a b z n
+      let midpoint := (previous.lo + previous.hi) / 2
+      if z <= midpoint then
+        { lo := previous.lo, hi := midpoint }
+      else
+        { lo := midpoint, hi := previous.hi }
+
+/-- The executable left/right decisions for the witness-driven bisection. -/
+def dyadicWitnessPath (a b z : Rat) (n : Nat) : Bool :=
+  if z <= ((dyadicWitnessCell a b z n).lo +
+      (dyadicWitnessCell a b z n).hi) / 2 then true else false
+
+private theorem dyadicMidpoint_mem {l r : Rat} (h : l <= r) :
+    l <= (l + r) / 2 /\ (l + r) / 2 <= r := by
+  have htwo : (2 : Rat) > 0 := by native_decide
+  constructor
+  · apply Rat.le_of_mul_le_mul_right (c := (2 : Rat))
+    · rw [Rat.div_def]
+      have hc : (2 : Rat) * (2 : Rat)⁻¹ = 1 := by native_decide
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    · exact htwo
+  · apply Rat.le_of_mul_le_mul_right (c := (2 : Rat))
+    · rw [Rat.div_def]
+      have hc : (2 : Rat) * (2 : Rat)⁻¹ = 1 := by native_decide
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    · exact htwo
+
+theorem dyadicCell_dyadicWitnessPath_eq (a b z : Rat) :
+    forall n, dyadicCell a b (dyadicWitnessPath a b z) n =
+      dyadicWitnessCell a b z n := by
+  intro n
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+      simp only [dyadicCell, dyadicWitnessCell, ih, dyadicWitnessPath]
+      split <;> simp_all
+
+theorem dyadicWitnessCell_source (a b z : Rat) (hab : a <= b)
+    (hz : a <= z) (hz' : z <= b) :
+    forall n, subintervalOf (dyadicWitnessCell a b z n) a b := by
+  intro n
+  induction n with
+  | zero =>
+      exact ⟨Rat.le_refl, hab, Rat.le_refl⟩
+  | succ n ih =>
+      simp only [dyadicWitnessCell]
+      have hmid := dyadicMidpoint_mem ih.2.1
+      split
+      · constructor
+        · exact ih.1
+        constructor
+        · exact hmid.1
+        · exact Rat.le_trans hmid.2 ih.2.2
+      · constructor
+        · exact Rat.le_trans ih.1 hmid.1
+        constructor
+        · exact hmid.2
+        · exact ih.2.2
+
+theorem dyadicWitnessCell_contains (a b z : Rat) (hab : a <= b)
+    (hz : a <= z) (hz' : z <= b) :
+    forall n, (dyadicWitnessCell a b z n).lo <= z /\
+      z <= (dyadicWitnessCell a b z n).hi := by
+  intro n
+  induction n with
+  | zero => exact ⟨hz, hz'⟩
+  | succ n ih =>
+      simp only [dyadicWitnessCell]
+      have hsource := dyadicWitnessCell_source a b z hab hz hz' n
+      have hmid := dyadicMidpoint_mem hsource.2.1
+      split
+      · constructor
+        · exact ih.1
+        · assumption
+      · constructor
+        · have hnot : ¬z <=
+              ((dyadicWitnessCell a b z n).lo +
+                (dyadicWitnessCell a b z n).hi) / 2 := by
+            assumption
+          exact Rat.le_of_lt ((Rat.not_le).1 hnot)
+        · change z <= (dyadicWitnessCell a b z n).hi
+          exact ih.2
+
+theorem dyadicCell_dyadicWitnessPath_contains
+    (a b z : Rat) (hab : a <= b)
+    (hz : a <= z) (hz' : z <= b) :
+    forall n, (dyadicCell a b (dyadicWitnessPath a b z) n).lo <= z /\
+      z <= (dyadicCell a b (dyadicWitnessPath a b z) n).hi := by
+  intro n
+  rw [dyadicCell_dyadicWitnessPath_eq]
+  exact dyadicWitnessCell_contains a b z hab hz hz' n
+
 /-- A fully executable inverse trace for a monotone interval branch.
 
 `path` is the actual finite search trace.  `value_overlaps` is the one
@@ -356,6 +670,80 @@ structure DyadicInverseTrace
         (dyadicCell I.function.lower I.function.upper path n)
         (cell_in_source n) n)
       (y.value.compute n)
+
+/-- Build the standard interval fields of a dyadic trace once its path and
+forward-image overlap proof have been supplied.  In the arctangent branch
+the source is [0,1], so the width hypothesis is discharged by arithmetic;
+the only remaining search-specific field is value_overlaps. -/
+def DyadicInverseTrace.ofPath
+    {I : InvertibleFunctionOnInterval} {y : InRangeRaw I}
+    (path : Nat -> Bool)
+    (hsource : I.function.lower <= I.function.upper)
+    (hwidth : I.function.upper - I.function.lower <= 1)
+    (value_overlaps : forall n,
+      QInterval.Overlaps
+        (I.continuous.regular.evalInterval
+          (dyadicCell I.function.lower I.function.upper path n)
+          (dyadicCell_subinterval_of_source
+            I.function.lower I.function.upper path hsource n)
+          n)
+        (y.value.compute n)) :
+    DyadicInverseTrace I y where
+  path := path
+  cell_valid := dyadicCell_valid_of_width_le_one
+    I.function.lower I.function.upper path hsource hwidth
+  cell_in_source := dyadicCell_subinterval_of_source
+    I.function.lower I.function.upper path hsource
+  value_overlaps := value_overlaps
+
+/-- Construct a complete dyadic inverse trace from a rational preimage
+witness.  This is the constructive finite core used by special-angle
+certificates: the witness is kept inside every cell, and interval regularity
+transports its forward raw value to the target box. -/
+def DyadicInverseTrace.ofRationalWitness
+    {I : InvertibleFunctionOnInterval} {y : InRangeRaw I}
+    (z : Rat)
+    (hz : inDomainInterval I.function.lower I.function.upper z)
+    (hwidth : I.function.upper - I.function.lower <= 1)
+    (hvalue :
+      ({ compute := I.function.compute z hz } : RealRaw).Equiv y.value) :
+    DyadicInverseTrace I y := by
+  apply DyadicInverseTrace.ofPath
+    (dyadicWitnessPath I.function.lower I.function.upper z)
+    I.source_ordered hwidth
+  intro n
+  let C := dyadicCell I.function.lower I.function.upper
+    (dyadicWitnessPath I.function.lower I.function.upper z) n
+  have hCsource := dyadicCell_subinterval_of_source
+    I.function.lower I.function.upper
+    (dyadicWitnessPath I.function.lower I.function.upper z)
+    I.source_ordered n
+  have hCcontains := dyadicCell_dyadicWitnessPath_contains
+    I.function.lower I.function.upper z I.source_ordered hz.1 hz.2 n
+  have houter := I.continuous.regular.contains_point_values
+    C hCsource z hz n hCcontains.1 hCcontains.2
+  have hzvalid : ({ compute := I.function.compute z hz } : RealRaw).Valid := by
+    exact I.function.valid_on z (I.function.defined_on z hz)
+  have heq := RealRaw.sameStageOverlap_of_equiv
+    hzvalid y.value_valid hvalue n
+  have hover := (RealRaw.compareAt_overlap_iff
+    ({ compute := I.function.compute z hz } : RealRaw) y.value n n).1 heq
+  change QInterval.Overlaps
+    (I.continuous.regular.evalInterval C hCsource n)
+    (y.value.compute n)
+  unfold QInterval.ContainsInterval at houter
+  unfold QInterval.Overlaps at hover ⊢
+  change
+    (I.function.compute z hz n).lo <= (y.value.compute n).hi /\
+      (y.value.compute n).lo <= (I.function.compute z hz n).hi at hover
+  change
+    (I.continuous.regular.evalInterval C hCsource n).lo <=
+        (I.function.compute z hz n).lo /\
+      (I.function.compute z hz n).hi <=
+        (I.continuous.regular.evalInterval C hCsource n).hi at houter
+  constructor
+  · exact Rat.le_trans houter.1 hover.1
+  · exact Rat.le_trans hover.2 houter.2
 
 /-- Turn an executable dyadic trace into the inverse-search interface. -/
 def DyadicInverseTrace.toSearch
@@ -394,6 +782,43 @@ def arctanInverseBisectionOfDyadicTraces
   targetAt_equiv_halfQuarterTurn := targetAt_equiv_halfQuarterTurn
   bisectionAt := fun y => (traceAt y).toSearch
 
+/-! Build the inverse-search package from rational preimage witnesses.
+
+This is the strongest fully executable shortcut currently available: for each
+normalized first-quadrant target, a rational slope witness is supplied and is
+then kept inside every selected dyadic cell.  The constructor does not choose
+an inverse or appeal to a completed real line; the witness family is the
+finite search data.  The general arctangent branch still needs a separate
+construction of such witnesses (or an equivalent target-directed search).
+-/
+def arctanInverseBisectionOfRationalWitnesses
+    (branch : InvertibleFunctionOnInterval)
+    (branch_is_geometric : branch.function =
+      IntegralIdentities.arctanGeomOnUnit)
+    (targetAt : forall t : RationalCircle.GeometricTrig.QuarterTurn,
+      RationalCircle.GeometricTrig.firstQuadrantBranch t -> InRangeRaw branch)
+    (targetAt_equiv_halfQuarterTurn :
+      forall t ht, (targetAt t ht).value.Equiv
+        (RationalCircle.GeometricTrig.halfQuarterTurnRaw t))
+    (targetWitness : forall _y : InRangeRaw branch, Rat)
+    (targetWitness_in_domain : forall y : InRangeRaw branch,
+      inDomainInterval branch.function.lower branch.function.upper
+        (targetWitness y))
+    (targetWitness_equiv : forall y : InRangeRaw branch,
+      ({ compute := branch.function.compute
+          (targetWitness y) (targetWitness_in_domain y) } : RealRaw).Equiv
+        y.value)
+    (source_width : branch.function.upper - branch.function.lower <= 1) :
+    IntegralIdentities.ArctanInverseBisection := by
+  apply arctanInverseBisectionOfDyadicTraces branch branch_is_geometric
+    targetAt targetAt_equiv_halfQuarterTurn
+  intro y
+  exact DyadicInverseTrace.ofRationalWitness
+    (targetWitness y)
+    (targetWitness_in_domain y)
+    source_width
+    (targetWitness_equiv y)
+
 /-- The rational circle parametrization used after the inverse-arctangent
 search.  For a half-angle slope `u`, its imaginary coordinate is
 `2*u/(1+u^2)`. -/
@@ -403,10 +828,13 @@ def rationalCircleSin (u : Rat) : Rat :=
 def rationalCircleSinInterval (U : QInterval) : QInterval :=
   { lo := rationalCircleSin U.lo, hi := rationalCircleSin U.hi }
 
-private theorem rationalCircleSin_den_pos {u : Rat} (hu : 0 <= u) :
-    0 < 1 + u * u := by
-  have hsq : 0 <= u * u := Rat.mul_nonneg hu hu
-  grind
+/- A finite, rational tangent chart for a nested-radical sine/cosine box.
+  If `S` and `C` enclose the positive-quarter-circle coordinates, then the
+  quotient below encloses the half-angle slope `sin/(1+cos)`.  This is kept
+  rational: it is the bridge from the geometric boxes to the inverse
+  arctangent search, without introducing a completed real number. -/
+def rationalHalfAngleTangentInterval (S C : QInterval) : QInterval :=
+  { lo := S.lo / (1 + C.hi), hi := S.hi / (1 + C.lo) }
 
 private theorem rat_eq_of_mul_eq_mul_pos_local {a b c : Rat}
     (hc : 0 < c) (h : a * c = b * c) : a = b := by
@@ -419,6 +847,120 @@ private theorem rat_eq_of_mul_eq_mul_pos_local {a b c : Rat}
     _ = b := by
       have hcancel : c * c⁻¹ = 1 := Rat.mul_inv_cancel c hcne
       grind [Rat.mul_assoc, Rat.mul_comm]
+
+private theorem rat_div_nonneg_of_pos {a b : Rat}
+    (ha : 0 <= a) (hb : 0 < b) : 0 <= a / b := by
+  rw [Rat.div_def]
+  exact Rat.mul_nonneg ha (Rat.le_of_lt (Rat.inv_pos.2 hb))
+
+theorem rationalHalfAngleTangentInterval_subinterval
+    {S C : QInterval}
+    (hS : subintervalOf S 0 1) (hC : subintervalOf C 0 1) :
+    subintervalOf (rationalHalfAngleTangentInterval S C) 0 1 := by
+  unfold rationalHalfAngleTangentInterval subintervalOf at *
+  have hdlo : 0 < 1 + C.lo := by grind
+  have hdhi : 0 < 1 + C.hi := by grind
+  have hclo : (1 + C.lo) * (1 + C.lo)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (1 + C.lo) (Rat.ne_of_gt hdlo)
+  have hchi : (1 + C.hi) * (1 + C.hi)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (1 + C.hi) (Rat.ne_of_gt hdhi)
+  have hcross : S.lo * (1 + C.lo) <= S.hi * (1 + C.hi) := by
+    have h1 := Rat.mul_le_mul_of_nonneg_right hS.2.1 (by grind : 0 <= 1 + C.lo)
+    have h2 := Rat.mul_le_mul_of_nonneg_left
+      (show 1 + C.lo <= 1 + C.hi by grind) (by grind : 0 <= S.hi)
+    exact Rat.le_trans h1 (by simpa [Rat.mul_assoc, Rat.mul_comm] using h2)
+  refine ⟨rat_div_nonneg_of_pos hS.1 hdhi, ?_, ?_⟩
+  · apply Rat.le_of_mul_le_mul_right (c := 1 + C.hi) ?_ hdhi
+    apply Rat.le_of_mul_le_mul_right (c := 1 + C.lo) ?_ hdlo
+    change (S.lo / (1 + C.hi)) * (1 + C.hi) * (1 + C.lo) <=
+      (S.hi / (1 + C.lo)) * (1 + C.hi) * (1 + C.lo)
+    rw [Rat.div_def, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  · apply Rat.le_of_mul_le_mul_right (c := 1 + C.lo) ?_ hdlo
+    change (S.hi / (1 + C.lo)) * (1 + C.lo) <= 1 * (1 + C.lo)
+    rw [Rat.div_def]
+    calc
+      S.hi * (1 + C.lo)⁻¹ * (1 + C.lo) = S.hi := by
+        rw [show S.hi * (1 + C.lo)⁻¹ * (1 + C.lo) =
+          S.hi * ((1 + C.lo)⁻¹ * (1 + C.lo)) by
+            grind [Rat.mul_assoc, Rat.mul_comm]]
+        rw [Rat.inv_mul_cancel (1 + C.lo) (Rat.ne_of_gt hdlo), Rat.mul_one]
+      _ <= 1 * (1 + C.lo) := by
+        exact Rat.le_trans hS.2.2 (by
+          simpa only [Rat.one_mul] using
+            (Rat.mul_le_mul_of_nonneg_left
+              (by grind : (1 : Rat) <= 1 + C.lo)
+            (by native_decide : (0 : Rat) <= 1)))
+
+theorem rationalHalfAngleTangentInterval_contains
+    {S C : QInterval} (hS : subintervalOf S 0 1)
+    (hC : subintervalOf C 0 1) {s c : Rat}
+    (hs : 0 <= s) (hc : 0 <= c)
+    (hsS : S.lo <= s ∧ s <= S.hi)
+    (hcC : C.lo <= c ∧ c <= C.hi) :
+    (rationalHalfAngleTangentInterval S C).lo <= s / (1 + c) ∧
+      s / (1 + c) <= (rationalHalfAngleTangentInterval S C).hi := by
+  unfold rationalHalfAngleTangentInterval
+  unfold subintervalOf at hS hC
+  have hdlo : 0 < 1 + C.lo := by grind
+  have hdhi : 0 < 1 + C.hi := by grind
+  have hd : 0 < 1 + c := by grind
+  have hdc : 0 <= 1 + c := Rat.le_of_lt hd
+  have hlo : 0 <= S.lo := hS.1
+  have hhi : 0 <= S.hi := Rat.le_trans hlo hS.2.1
+  have hcrossLo : S.lo * (1 + c) <= s * (1 + C.hi) := by
+    have h1 := Rat.mul_le_mul_of_nonneg_right hsS.1 hdc
+    have h2 := Rat.mul_le_mul_of_nonneg_left
+      (show 1 + c <= 1 + C.hi by grind) hs
+    exact Rat.le_trans h1 (by simpa [Rat.mul_assoc, Rat.mul_comm] using h2)
+  have hcrossHi : s * (1 + C.lo) <= S.hi * (1 + c) := by
+    have h1 := Rat.mul_le_mul_of_nonneg_right hsS.2 (Rat.le_of_lt hdlo)
+    have h2 := Rat.mul_le_mul_of_nonneg_left
+      (show 1 + C.lo <= 1 + c by grind) hhi
+    exact Rat.le_trans h1 h2
+  constructor
+  · apply Rat.le_of_mul_le_mul_right (c := 1 + C.hi) ?_ hdhi
+    apply Rat.le_of_mul_le_mul_right (c := 1 + c) ?_ hd
+    change S.lo / (1 + C.hi) * (1 + C.hi) * (1 + c) <=
+      (s / (1 + c) * (1 + C.hi)) * (1 + c)
+    rw [Rat.div_def, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  · apply Rat.le_of_mul_le_mul_right (c := 1 + c) ?_ hd
+    apply Rat.le_of_mul_le_mul_right (c := 1 + C.lo) ?_ hdlo
+    change s / (1 + c) * (1 + c) * (1 + C.lo) <=
+      (S.hi / (1 + C.lo)) * (1 + c) * (1 + C.lo)
+    rw [Rat.div_def, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem rationalCircleSin_halfAngle_identity
+    {s c : Rat} (hs : 0 <= s) (hc : 0 <= c)
+    (hcircle : s * s + c * c = 1) :
+    rationalCircleSin (s / (1 + c)) = s := by
+  have hd : 0 < 1 + c := by grind
+  have hdn : 1 + c ≠ 0 := Rat.ne_of_gt hd
+  unfold rationalCircleSin
+  rw [Rat.div_def, Rat.div_def]
+  have hcancel : (1 + c) * (1 + c)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (1 + c) hdn
+  have hinv : (1 + c)⁻¹ * (1 + c) = 1 :=
+    Rat.inv_mul_cancel (1 + c) hdn
+  have hpos : 0 < 1 + (s * (1 + c)⁻¹) * (s * (1 + c)⁻¹) := by
+    have hsquare : 0 <= (s * (1 + c)⁻¹) * (s * (1 + c)⁻¹) :=
+      Rat.mul_nonneg
+        (Rat.mul_nonneg hs (Rat.le_of_lt (Rat.inv_pos.2 hd)))
+        (Rat.mul_nonneg hs (Rat.le_of_lt (Rat.inv_pos.2 hd)))
+    grind
+  have hden : 1 + (s * (1 + c)⁻¹) * (s * (1 + c)⁻¹) ≠ 0 :=
+    Rat.ne_of_gt hpos
+  apply rat_eq_of_mul_eq_mul_pos_local
+    (c := 1 + (s * (1 + c)⁻¹) * (s * (1 + c)⁻¹))
+    hpos
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+private theorem rationalCircleSin_den_pos {u : Rat} (hu : 0 <= u) :
+    0 < 1 + u * u := by
+  have hsq : 0 <= u * u := Rat.mul_nonneg hu hu
+  grind
 
 private theorem rationalCircleSin_sub_formula {a b : Rat}
     (ha : 0 <= a) (hb : 0 <= b) :
@@ -487,7 +1029,7 @@ private theorem rationalCircleSin_mono {a b : Rat}
   have hprod : a * b <= 1 := by
     have h1 := Rat.mul_le_mul_of_nonneg_right hb ha
     have h2 := Rat.mul_le_mul_of_nonneg_left hab (Rat.le_of_lt (by native_decide : (0 : Rat) < 1))
-    grind
+    grind [Rat.sub_eq_add_neg]
   have hba : 0 <= b - a := by grind
   have hnum : 0 <= 2 * (b - a) * (1 - a * b) := by
     exact Rat.mul_nonneg
@@ -500,6 +1042,284 @@ private theorem rationalCircleSin_mono {a b : Rat}
     exact Rat.mul_nonneg hnum (Rat.le_of_lt ((Rat.inv_pos).2 hden))
   grind [Rat.sub_eq_add_neg]
 
+theorem rationalCircleSinInterval_overlap_of_halfAngle_boxes
+    {S C : QInterval} (hS : subintervalOf S 0 1)
+    (hC : subintervalOf C 0 1) {s c : Rat}
+    (hs : 0 <= s) (hc : 0 <= c)
+    (hcircle : s * s + c * c = 1)
+    (hsS : S.lo <= s ∧ s <= S.hi)
+    (hcC : C.lo <= c ∧ c <= C.hi) :
+    QInterval.Overlaps
+      (rationalCircleSinInterval
+        (rationalHalfAngleTangentInterval S C)) S := by
+  have hT := rationalHalfAngleTangentInterval_subinterval hS hC
+  have ht := rationalHalfAngleTangentInterval_contains
+    hS hC hs hc hsS hcC
+  have ht0 : 0 <= s / (1 + c) := Rat.le_trans hT.1 ht.1
+  have ht1 : s / (1 + c) <= 1 := Rat.le_trans ht.2 hT.2.2
+  have hsinLo := rationalCircleSin_mono hT.1 ht.1 ht1
+  have hsinHi := rationalCircleSin_mono ht0 ht.2 hT.2.2
+  have hid := rationalCircleSin_halfAngle_identity hs hc hcircle
+  unfold rationalCircleSinInterval QInterval.Overlaps
+  constructor
+  · calc
+      rationalCircleSin (rationalHalfAngleTangentInterval S C).lo <=
+          rationalCircleSin (s / (1 + c)) := hsinLo
+      _ = s := hid
+      _ <= S.hi := hsS.2
+  · calc
+      S.lo <= s := hsS.1
+      _ = rationalCircleSin (s / (1 + c)) := hid.symm
+      _ <= rationalCircleSin (rationalHalfAngleTangentInterval S C).hi := hsinHi
+
+theorem rationalCircleSinInterval_overlap_of_halfAngle_boxes_of_outer_tangent
+    {U S C : QInterval} (hU : subintervalOf U 0 1)
+    (hS : subintervalOf S 0 1) (hC : subintervalOf C 0 1)
+    (houter : U.ContainsInterval
+      (rationalHalfAngleTangentInterval S C))
+    {s c : Rat} (hs : 0 <= s) (hc : 0 <= c)
+    (hcircle : s * s + c * c = 1)
+    (hsS : S.lo <= s ∧ s <= S.hi)
+    (hcC : C.lo <= c ∧ c <= C.hi) :
+    QInterval.Overlaps (rationalCircleSinInterval U) S := by
+  have hT := rationalHalfAngleTangentInterval_subinterval hS hC
+  have hhalf := rationalCircleSinInterval_overlap_of_halfAngle_boxes
+    hS hC hs hc hcircle hsS hcC
+  have hTlo : U.lo <= (rationalHalfAngleTangentInterval S C).lo :=
+    houter.1
+  have hThi : (rationalHalfAngleTangentInterval S C).hi <= U.hi :=
+    houter.2
+  have hUlo : 0 <= U.lo := hU.1
+  have hUhi : U.hi <= 1 := hU.2.2
+  have hsinlo := rationalCircleSin_mono
+    hUlo hTlo (Rat.le_trans hT.2.1 hT.2.2)
+  have hsinhi := rationalCircleSin_mono
+    (Rat.le_trans hT.1 hT.2.1) hThi hUhi
+  unfold rationalCircleSinInterval QInterval.Overlaps at *
+  constructor
+  · exact Rat.le_trans hsinlo hhalf.1
+  · exact Rat.le_trans hhalf.2 hsinhi
+
+/-- The operational witness form of the box transport theorem.  A rational
+    tangent `u` need not be an exact irrational-angle coordinate: it is enough
+    to certify that its rational circle image lies inside the target sine box.
+    This is the form suitable for finite nested-radical and inverse-bisection
+    certificates. -/
+theorem rationalCircleSinInterval_overlap_of_tangent_witness
+    {S U : QInterval} (hS : subintervalOf S 0 1)
+    (hU : subintervalOf U 0 1) (u : Rat)
+    (hu : U.lo <= u ∧ u <= U.hi)
+    (himage : S.lo <= rationalCircleSin u ∧
+      rationalCircleSin u <= S.hi) :
+    QInterval.Overlaps (rationalCircleSinInterval U) S := by
+  have hsinLo := rationalCircleSin_mono hU.1 hu.1
+    (Rat.le_trans hu.2 hU.2.2)
+  have hsinHi := rationalCircleSin_mono
+    (Rat.le_trans hU.1 hu.1) hu.2 hU.2.2
+  unfold rationalCircleSinInterval QInterval.Overlaps
+  constructor
+  · exact Rat.le_trans hsinLo himage.2
+  · exact Rat.le_trans himage.1 hsinHi
+
+/-- The finite predicate checked by the rational tangent search. -/
+def rationalTangentWitnessAdmissible (U S : QInterval) (u : Rat) : Prop :=
+  U.lo <= u /\ u <= U.hi /\
+    S.lo <= rationalCircleSin u /\ rationalCircleSin u <= S.hi
+
+def rationalTangentWitnessAdmissibleBool
+    (U S : QInterval) (u : Rat) : Bool :=
+  (U.lo <= u) && (u <= U.hi) &&
+    (S.lo <= rationalCircleSin u) && (rationalCircleSin u <= S.hi)
+
+/-- Search a finite rational candidate list for a tangent witness.  The
+    search is intentionally separate from the proof that the list succeeds:
+    failed searches remain explicit `none`, while successful searches carry a
+    finite, checkable certificate. -/
+def rationalTangentWitnessSearchList
+    (U S : QInterval) : List Rat -> Option Rat
+  | [] => none
+  | u :: us =>
+      if rationalTangentWitnessAdmissibleBool U S u then some u
+      else rationalTangentWitnessSearchList U S us
+
+theorem rationalTangentWitnessSearchList_sound
+    {U S : QInterval} {us : List Rat} {u : Rat}
+    (h : rationalTangentWitnessSearchList U S us = some u) :
+    rationalTangentWitnessAdmissibleBool U S u = true := by
+  induction us with
+  | nil => simp [rationalTangentWitnessSearchList] at h
+  | cons v vs ih =>
+      simp only [rationalTangentWitnessSearchList] at h
+      split at h
+      · cases h
+        assumption
+      · exact ih h
+
+theorem rationalTangentWitnessSearchList_complete
+    {U S : QInterval} {us : List Rat} {u : Rat}
+    (hmem : u ∈ us)
+    (hadm : rationalTangentWitnessAdmissibleBool U S u = true) :
+    ∃ v, rationalTangentWitnessSearchList U S us = some v := by
+  induction us with
+  | nil => simp at hmem
+  | cons q qs ih =>
+      simp only [List.mem_cons] at hmem
+      simp only [rationalTangentWitnessSearchList]
+      split
+      · exact ⟨q, rfl⟩
+      · rcases hmem with rfl | hmem
+        · contradiction
+        · exact ih hmem
+
+def rationalTangentWitnessGrid (m : Nat) : List Rat :=
+  let N := 2 ^ m
+  (List.range (N + 1)).map (fun k : Nat => (k : Rat) / (N : Rat))
+
+def rationalTangentWitnessSearch
+    (U S : QInterval) (m : Nat) : Option Rat :=
+  rationalTangentWitnessSearchList U S (rationalTangentWitnessGrid m)
+
+theorem rationalTangentWitnessSearch_complete_of_grid_candidate
+    {U S : QInterval} (m k : Nat) (hk : k <= 2 ^ m)
+    (hadm : rationalTangentWitnessAdmissibleBool U S
+      ((k : Rat) / ((2 ^ m : Nat) : Rat)) = true) :
+    ∃ v, rationalTangentWitnessSearch U S m = some v := by
+  apply rationalTangentWitnessSearchList_complete
+    (u := (k : Rat) / ((2 ^ m : Nat) : Rat))
+  · unfold rationalTangentWitnessGrid
+    let N := 2 ^ m
+    have hk' : k < N + 1 := by dsimp [N]; omega
+    apply List.mem_map.mpr
+    exact ⟨k, by simpa using hk', rfl⟩
+  · exact hadm
+
+theorem rationalTangentWitnessSearch_sound
+    {U S : QInterval} {m : Nat} {u : Rat}
+    (h : rationalTangentWitnessSearch U S m = some u) :
+    rationalTangentWitnessAdmissibleBool U S u = true := by
+  exact rationalTangentWitnessSearchList_sound h
+
+theorem rationalTangentWitnessSearch_sound_inequalities
+    {U S : QInterval} {m : Nat} {u : Rat}
+    (h : rationalTangentWitnessSearch U S m = some u) :
+    U.lo <= u /\ u <= U.hi /\
+      S.lo <= rationalCircleSin u /\ rationalCircleSin u <= S.hi := by
+  have hb := rationalTangentWitnessSearch_sound h
+  simp only [rationalTangentWitnessAdmissibleBool, Bool.and_eq_true] at hb
+  refine ⟨of_decide_eq_true hb.1.1.1,
+    of_decide_eq_true hb.1.1.2,
+    of_decide_eq_true hb.1.2,
+    of_decide_eq_true hb.2⟩
+
+theorem rationalTangentWitnessSearch_overlap_of_success
+    {U S : QInterval} (hU : subintervalOf U 0 1)
+    (hS : subintervalOf S 0 1) {m : Nat} {u : Rat}
+    (hsearch : rationalTangentWitnessSearch U S m = some u) :
+    QInterval.Overlaps (rationalCircleSinInterval U) S := by
+  have hw := rationalTangentWitnessSearch_sound_inequalities hsearch
+  exact rationalCircleSinInterval_overlap_of_tangent_witness
+    hS hU u ⟨hw.1, hw.2.1⟩ ⟨hw.2.2.1, hw.2.2.2⟩
+
+theorem rationalGrid_interval_crossing
+    {f : Rat -> Rat} {v : Nat -> Rat} {N : Nat}
+    {lo hi : Rat} (hN : 0 < N)
+    (hlo : 0 <= lo) (hhi : hi <= 1) (hlohi : lo <= hi)
+    (hstart : f (v 0) = 0) (hend : f (v N) = 1)
+    (hstep : forall k, k < N ->
+      f (v (k + 1)) - f (v k) <= hi - lo) :
+    exists k, k <= N /\ lo <= f (v k) /\ f (v k) <= hi := by
+  by_cases hhit : exists k, k <= N /\ lo <= f (v k) /\ f (v k) <= hi
+  · exact hhit
+  · exfalso
+    have hnone := hhit
+    have hno : forall k, k <= N ->
+        ¬(lo <= f (v k) /\ f (v k) <= hi) := by
+      intro k hk
+      intro hhit
+      exact hnone ⟨k, hk, hhit.1, hhit.2⟩
+    have hbelow : forall k, k <= N -> f (v k) < lo := by
+      intro k hk
+      induction k with
+      | zero =>
+          have hn := hno 0 (by omega)
+          rw [hstart] at hn ⊢
+          have hnot : ¬lo <= (0 : Rat) := by
+            intro hzero
+            apply hn
+            exact ⟨hzero, by grind⟩
+          exact Rat.not_le.mp hnot
+      | succ k ih =>
+          have hklt : k < N := by omega
+          have hprev := ih (by omega)
+          have hs := hstep k hklt
+          have hupp : f (v (k + 1)) < hi := by
+            have hstrict : f (v k) + (hi - lo) < hi := by
+              grind
+            grind [Rat.sub_eq_add_neg]
+          have hn := hno (k + 1) hk
+          have hnot : ¬lo <= f (v (k + 1)) := by
+            intro hlow
+            apply hn
+            exact ⟨hlow, Rat.le_of_lt hupp⟩
+          exact Rat.not_le.mp hnot
+    have hfinal := hbelow N (by omega)
+    rw [hend] at hfinal
+    exact by grind
+
+/-! Endpoint-parametric version of the finite crossing argument. -/
+theorem rationalGrid_interval_crossing_between
+    {f : Rat -> Rat} {v : Nat -> Rat} {N : Nat}
+    {lo hi : Rat} (hN : 0 < N) (hlohi : lo <= hi)
+    (hstart : f (v 0) <= hi) (hend : lo <= f (v N))
+    (hstep : forall k, k < N ->
+      f (v (k + 1)) - f (v k) <= hi - lo) :
+    exists k, k <= N /\ lo <= f (v k) /\ f (v k) <= hi := by
+  by_cases hhit : exists k, k <= N /\ lo <= f (v k) /\ f (v k) <= hi
+  · exact hhit
+  · exfalso
+    have hno : forall k, k <= N ->
+        ¬(lo <= f (v k) /\ f (v k) <= hi) := by
+      intro k hk hbad
+      exact hhit ⟨k, hk, hbad.1, hbad.2⟩
+    have hbelow : forall k, k <= N -> f (v k) < lo := by
+      intro k hk
+      induction k with
+      | zero =>
+          have hn := hno 0 (by omega)
+          have hnot : ¬lo <= f (v 0) := by
+            intro hlow
+            apply hn
+            exact ⟨hlow, Rat.le_trans hstart (by grind)⟩
+          exact Rat.not_le.mp hnot
+      | succ k ih =>
+          have hklt : k < N := by omega
+          have hprev := ih (by omega)
+          have hs := hstep k hklt
+          have hupp : f (v (k + 1)) < hi := by
+            have hstrict : f (v k) + (hi - lo) < hi := by grind
+            grind [Rat.sub_eq_add_neg]
+          have hn := hno (k + 1) hk
+          have hnot : ¬lo <= f (v (k + 1)) := by
+            intro hlow
+            apply hn
+            exact ⟨hlow, Rat.le_of_lt hupp⟩
+          exact Rat.not_le.mp hnot
+    exact (Rat.not_lt.mpr hend) (hbelow N (by omega))
+
+theorem rationalCircleSin_bounds {u : Rat} (hu : 0 <= u) (hu1 : u <= 1) :
+    0 <= rationalCircleSin u /\ rationalCircleSin u <= 1 := by
+  have hzero : rationalCircleSin (0 : Rat) = 0 := by
+    native_decide
+  have hone : rationalCircleSin (1 : Rat) = 1 := by
+    native_decide
+  have hmono0 := rationalCircleSin_mono (a := 0) (b := u)
+    (by native_decide) hu hu1
+  have hmon1 := rationalCircleSin_mono (a := u) (b := 1)
+    hu hu1 (by native_decide)
+  rw [hzero] at hmono0
+  rw [hone] at hmon1
+  exact ⟨hmono0, hmon1⟩
+
 private theorem rationalCircleSin_width_le {a b : Rat}
     (ha : 0 <= a) (hab : a <= b) (hb : b <= 1) :
     rationalCircleSin b - rationalCircleSin a <= 2 * (b - a) := by
@@ -507,7 +1327,7 @@ private theorem rationalCircleSin_width_le {a b : Rat}
   have hba : 0 <= b - a := by grind
   have habprod : a * b <= 1 := by
     have h := Rat.mul_le_mul_of_nonneg_right hb ha
-    grind
+    grind [Rat.sub_eq_add_neg]
   have hden : 0 < (1 + a * a) * (1 + b * b) :=
     Rat.mul_pos (rationalCircleSin_den_pos ha)
       (rationalCircleSin_den_pos hb0)
@@ -565,6 +1385,66 @@ theorem rationalCircleSinInterval_width_le
   · grind
   · exact hsin
 
+theorem rationalCircleSinInterval_bounds
+    {U : QInterval} (hU : subintervalOf U 0 1) :
+    0 <= (rationalCircleSinInterval U).lo /\
+      (rationalCircleSinInterval U).hi <= 1 := by
+  have hlo := rationalCircleSin_bounds hU.1
+    (Rat.le_trans hU.2.1 hU.2.2)
+  have hhi := rationalCircleSin_bounds
+    (Rat.le_trans hU.1 hU.2.1) hU.2.2
+  simpa [rationalCircleSinInterval] using And.intro hlo.1 hhi.2
+
+/-! Two interval sine evaluations overlap whenever their tangent input boxes
+share a rational slope.  This is the finite geometric core used when a
+transport proof refines two different subdivision schemes to a common
+rational witness. -/
+theorem rationalCircleSinInterval_overlap_of_common_point
+    {U V : QInterval} (hU : subintervalOf U 0 1)
+    (hV : subintervalOf V 0 1) (u : Rat)
+    (hUu : U.lo <= u ∧ u <= U.hi)
+    (hVu : V.lo <= u ∧ u <= V.hi) :
+    QInterval.Overlaps
+      (rationalCircleSinInterval U)
+      (rationalCircleSinInterval V) := by
+  have hsinUlo := rationalCircleSin_mono hU.1 hUu.1
+    (Rat.le_trans hUu.2 hU.2.2)
+  have hsinUhi := rationalCircleSin_mono
+    (Rat.le_trans hU.1 hUu.1) hUu.2 hU.2.2
+  have hsinVlo := rationalCircleSin_mono hV.1 hVu.1
+    (Rat.le_trans hVu.2 hV.2.2)
+  have hsinVhi := rationalCircleSin_mono
+    (Rat.le_trans hV.1 hVu.1) hVu.2 hV.2.2
+  unfold rationalCircleSinInterval QInterval.Overlaps
+  constructor <;> grind
+
+theorem rationalCircleSinInterval_overlap_of_input_overlap
+    {U V : QInterval} (hU : subintervalOf U 0 1)
+    (hV : subintervalOf V 0 1)
+    (hover : QInterval.Overlaps U V) :
+    QInterval.Overlaps
+      (rationalCircleSinInterval U)
+      (rationalCircleSinInterval V) := by
+  let u : Rat := max U.lo V.lo
+  have huUlo : U.lo <= u := by
+    dsimp [u]
+    rw [Rat.max_def]
+    split <;> grind
+  have huVlo : V.lo <= u := by
+    dsimp [u]
+    rw [Rat.max_def]
+    split <;> grind
+  have huUhi : u <= U.hi := by
+    dsimp [u]
+    rw [Rat.max_def]
+    split <;> grind [hover.2, hU.2.1]
+  have huVhi : u <= V.hi := by
+    dsimp [u]
+    rw [Rat.max_def]
+    split <;> grind [hover.1, hV.2.1]
+  exact rationalCircleSinInterval_overlap_of_common_point hU hV u
+    ⟨huUlo, huUhi⟩ ⟨huVlo, huVhi⟩
+
 theorem rationalCircleSin_difference_le_qabs
     {a b : Rat} (ha0 : 0 <= a) (ha1 : a <= 1)
     (hb0 : 0 <= b) (hb1 : b <= 1) :
@@ -596,6 +1476,416 @@ theorem rationalCircleSin_difference_le_qabs
     rw [show qabs (a - b) = a - b by
       exact qabs_eq_self_of_nonneg (by grind)]
     exact hsin
+
+def rationalTangentWitnessBoxGrid (U : QInterval) (m : Nat) : List Rat :=
+  let N := 2 ^ m
+  (List.range (N + 1)).map (fun k : Nat =>
+    U.lo + U.width * ((k : Rat) / (N : Rat)))
+
+def rationalTangentWitnessBoxSearch
+    (U S : QInterval) (m : Nat) : Option Rat :=
+  rationalTangentWitnessSearchList U S
+    (rationalTangentWitnessBoxGrid U m)
+
+theorem rationalTangentWitnessBoxSearch_complete_of_zero_target
+    {U : QInterval} (hU : subintervalOf U 0 1)
+    (hover : QInterval.Overlaps U ({ lo := 0, hi := 0 } : QInterval)) :
+    ∃ u, rationalTangentWitnessBoxSearch U
+      ({ lo := 0, hi := 0 } : QInterval) 0 = some u := by
+  have hUlo : U.lo = 0 := by
+    grind [hover.1, hU.1]
+  have hmem : U.lo ∈ rationalTangentWitnessBoxGrid U 0 := by
+    unfold rationalTangentWitnessBoxGrid
+    apply List.mem_map.mpr
+    exact ⟨0, by native_decide, by
+      simp [QInterval.width]
+      grind⟩
+  apply rationalTangentWitnessSearchList_complete hmem
+  unfold rationalTangentWitnessAdmissibleBool
+  simp [hUlo, rationalCircleSin]
+  exact ⟨⟨by simpa using hover.2, by native_decide⟩, by native_decide⟩
+
+theorem rationalTangentWitnessBoxSearch_complete_of_one_target
+    {U : QInterval} (hU : subintervalOf U 0 1)
+    (hover : QInterval.Overlaps U ({ lo := 1, hi := 1 } : QInterval)) :
+    ∃ u, rationalTangentWitnessBoxSearch U
+      ({ lo := 1, hi := 1 } : QInterval) 0 = some u := by
+  have hUhi : U.hi = 1 := by
+    grind [hU.2.2, hover.2]
+  have hmem : U.hi ∈ rationalTangentWitnessBoxGrid U 0 := by
+    unfold rationalTangentWitnessBoxGrid
+    apply List.mem_map.mpr
+    exact ⟨1, by native_decide, by
+      simp [QInterval.width]
+      grind⟩
+  apply rationalTangentWitnessSearchList_complete hmem
+  unfold rationalTangentWitnessAdmissibleBool
+  simp [hUhi, rationalCircleSin]
+  have hlo : U.lo <= 1 := Rat.le_trans hU.2.1 hU.2.2
+  exact ⟨⟨hlo, by native_decide⟩, by native_decide⟩
+
+theorem rationalTangentWitnessBoxSearch_complete_of_overlap
+    {U S : QInterval} (hU : subintervalOf U 0 1)
+    (hS : subintervalOf S 0 1) (m : Nat)
+    (hover : QInterval.Overlaps
+      (rationalCircleSinInterval U) S)
+    (hmesh : 2 * U.width / (((2 ^ m : Nat) : Rat)) <= S.width) :
+    ∃ v, rationalTangentWitnessBoxSearch U S m = some v := by
+  let N : Nat := 2 ^ m
+  let d : Rat := (N : Rat)
+  let v : Nat -> Rat := fun k =>
+    U.lo + U.width * ((k : Rat) / d)
+  have hN : 0 < N := by
+    dsimp [N]
+    exact Nat.two_pow_pos m
+  have hd : 0 < d := by
+    dsimp [d]
+    exact (Rat.natCast_pos).2 hN
+  have hwidth : 0 <= U.width := by
+    unfold QInterval.width
+    grind [hU.2.1]
+  have hq_bounds : forall k, k <= N ->
+      0 <= (k : Rat) / d /\ (k : Rat) / d <= 1 := by
+    intro k hk
+    rw [Rat.div_def]
+    constructor
+    · exact Rat.mul_nonneg Rat.natCast_nonneg
+        (Rat.le_of_lt (Rat.inv_pos.2 hd))
+    · apply Rat.le_of_mul_le_mul_right (c := d)
+      · rw [Rat.mul_assoc, Rat.inv_mul_cancel _ (Rat.ne_of_gt hd), Rat.mul_one]
+        simpa [N, d] using (show (k : Rat) <= (N : Rat) by exact_mod_cast hk)
+      · exact hd
+  have hv_interval : forall k, k <= N ->
+      U.lo <= v k /\ v k <= U.hi := by
+    intro k hk
+    have hq := hq_bounds k hk
+    constructor
+    · dsimp [v]
+      grind [Rat.mul_nonneg hwidth hq.1]
+    · dsimp [v]
+      have hmul := Rat.mul_le_mul_of_nonneg_left hq.2 hwidth
+      unfold QInterval.width at hmul ⊢
+      grind
+  have hv0 : v 0 = U.lo := by
+    dsimp [v]
+    rw [Rat.div_def]
+    simp
+    grind
+  have hvN : v N = U.hi := by
+    dsimp [v, d]
+    rw [Rat.div_def, Rat.mul_inv_cancel _ (Rat.ne_of_gt hd), Rat.mul_one]
+    unfold QInterval.width
+    grind
+  have hstart : rationalCircleSin (v 0) <= S.hi := by
+    rw [hv0]
+    exact hover.1
+  have hend : S.lo <= rationalCircleSin (v N) := by
+    rw [hvN]
+    exact hover.2
+  have hstep : forall k, k < N ->
+      rationalCircleSin (v (k + 1)) - rationalCircleSin (v k) <=
+        S.hi - S.lo := by
+    intro k hk
+    have hk1 : k + 1 <= N := by omega
+    have hleft := hv_interval k (by omega)
+    have hright := hv_interval (k + 1) hk1
+    have hleft0 : 0 <= v k := Rat.le_trans hU.1 hleft.1
+    have hleft1 : v k <= 1 := Rat.le_trans hleft.2 hU.2.2
+    have hright0 : 0 <= v (k + 1) := Rat.le_trans hU.1 hright.1
+    have hright1 : v (k + 1) <= 1 := Rat.le_trans hright.2 hU.2.2
+    have hdiff := rationalCircleSin_difference_le_qabs
+      hleft0 hleft1 hright0 hright1
+      (a := v k) (b := v (k + 1))
+    have horder : v k <= v (k + 1) := by
+      dsimp [v]
+      apply (Rat.add_le_add_left).2
+      apply Rat.mul_le_mul_of_nonneg_left _ hwidth
+      rw [Rat.div_def, Rat.div_def]
+      exact Rat.mul_le_mul_of_nonneg_right
+        (by exact_mod_cast Nat.le_succ k)
+        (Rat.le_of_lt (Rat.inv_pos.2 hd))
+    have hdiff' : rationalCircleSin (v (k + 1)) - rationalCircleSin (v k) <=
+        2 * (v (k + 1) - v k) := by
+      have hqabs := hdiff
+      rw [show qabs (v k - v (k + 1)) = v (k + 1) - v k by
+        rw [show v k - v (k + 1) = -(v (k + 1) - v k) by grind [Rat.sub_eq_add_neg],
+          qabs_neg, qabs_eq_self_of_nonneg (by grind)]] at hqabs
+      have hnon : 0 <= rationalCircleSin (v (k + 1)) - rationalCircleSin (v k) := by
+        grind [rationalCircleSin_mono hleft0 horder hright1]
+      rw [show qabs (rationalCircleSin (v k) - rationalCircleSin (v (k + 1))) =
+        rationalCircleSin (v (k + 1)) - rationalCircleSin (v k) by
+        rw [show rationalCircleSin (v k) - rationalCircleSin (v (k + 1)) =
+          -(rationalCircleSin (v (k + 1)) - rationalCircleSin (v k)) by grind [Rat.sub_eq_add_neg],
+          qabs_neg, qabs_eq_self_of_nonneg hnon]] at hqabs
+      exact hqabs
+    have hmesh' : 2 * (v (k + 1) - v k) <= S.width := by
+      dsimp [v, d]
+      unfold QInterval.width at hmesh ⊢
+      rw [Rat.div_def, Rat.div_def]
+      grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+    exact Rat.le_trans hdiff' hmesh'
+  obtain ⟨k, hk, hlow, hhigh⟩ := rationalGrid_interval_crossing_between
+    hN hS.2.1 hstart hend hstep
+  have hmem : v k ∈ rationalTangentWitnessBoxGrid U m := by
+    unfold rationalTangentWitnessBoxGrid
+    apply List.mem_map.mpr
+    let N' := 2 ^ m
+    have hk' : k < N' + 1 := by dsimp [N']; omega
+    exact ⟨k, by simpa [N'] using hk', by simpa [v, d, N]⟩
+  apply rationalTangentWitnessSearchList_complete hmem
+  have hbox := hv_interval k hk
+  simp only [rationalTangentWitnessAdmissibleBool, Bool.and_eq_true]
+  refine ⟨⟨⟨?_, ?_⟩, ?_⟩, ?_⟩
+  · simp only [decide_eq_true_eq]
+    exact hbox.1
+  · simp only [decide_eq_true_eq]
+    exact hbox.2
+  · simp only [decide_eq_true_eq]
+    exact hlow
+  · simp only [decide_eq_true_eq]
+    exact hhigh
+
+/-! A positive rational target box is eventually fine enough for the grid.
+The denominator of its width supplies an explicit precision; this is the
+finite rational replacement for an appeal to a real Archimedean theorem. -/
+theorem exists_rationalTangentWitnessBoxSearch_of_overlap_of_positive_width
+    {U S : QInterval} (hU : subintervalOf U 0 1)
+    (hS : subintervalOf S 0 1)
+    (hover : QInterval.Overlaps (rationalCircleSinInterval U) S)
+    (hwidth : 0 < S.width) :
+    ∃ m u, rationalTangentWitnessBoxSearch U S m = some u := by
+  let d : Nat := S.width.den + 1
+  let m : Nat := d + 1
+  have hd : 0 < d := by
+    dsimp [d]
+    omega
+  have hpow : d <= 2 ^ d := by
+    induction d with
+    | zero => omega
+    | succ d ih =>
+        rw [Nat.pow_succ]
+        have hone : 1 <= 2 ^ d := Nat.one_le_pow d 2 (by omega)
+        omega
+  have hpow' : d <= 2 ^ m := by
+    dsimp [m]
+    rw [Nat.pow_succ]
+    exact Nat.le_trans hpow (by omega)
+  have hmesh0 :
+      2 / (((2 ^ m : Nat) : Rat)) <= 1 / ((d : Nat) : Rat) := by
+    have hid :
+        2 / (((2 ^ m : Nat) : Rat)) =
+          1 / (((2 ^ d : Nat) : Rat)) := by
+      dsimp [m]
+      rw [Nat.pow_succ]
+      rw [Rat.div_def, Rat.div_def]
+      have hpowne : ((2 ^ d : Nat) : Rat) ≠ 0 :=
+        Rat.ne_of_gt ((Rat.natCast_pos).2 (Nat.two_pow_pos d))
+      have htwo : (2 : Rat) ≠ 0 := by native_decide
+      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    rw [hid]
+    apply FTC.one_div_nat_antitone
+      (n := d) (m := 2 ^ d)
+    · exact hd
+    · exact Nat.two_pow_pos d
+    · exact hpow
+  have hsmall : 1 / ((d : Nat) : Rat) <= S.width := by
+    dsimp [d]
+    exact FTC.one_div_den_succ_le_of_pos hwidth
+  have hmesh :
+    2 * U.width / (((2 ^ m : Nat) : Rat)) <= S.width := by
+    have hUwidth : U.width <= 1 := by
+      unfold QInterval.width
+      grind [hU.1, hU.2.1, hU.2.2]
+    have hpowRat : 0 < ((2 ^ m : Nat) : Rat) := by
+      exact (Rat.natCast_pos).2 (Nat.two_pow_pos m)
+    have hfirst :
+        2 * U.width / (((2 ^ m : Nat) : Rat)) <=
+          2 / (((2 ^ m : Nat) : Rat)) := by
+      apply Rat.le_of_mul_le_mul_right
+        (c := ((2 ^ m : Nat) : Rat))
+      · rw [Rat.div_def, Rat.div_def]
+        have hpowne : ((2 ^ m : Nat) : Rat) ≠ 0 := Rat.ne_of_gt hpowRat
+        have hcancel := Rat.mul_inv_cancel ((2 ^ m : Nat) : Rat) hpowne
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      · exact hpowRat
+    exact Rat.le_trans hfirst (Rat.le_trans hmesh0 hsmall)
+  refine ⟨m, ?_⟩
+  exact rationalTangentWitnessBoxSearch_complete_of_overlap
+    hU hS m hover hmesh
+
+theorem rationalTangentWitnessBoxSearch_overlap_of_success
+    {U S : QInterval} (hU : subintervalOf U 0 1)
+    (hS : subintervalOf S 0 1) {m : Nat} {u : Rat}
+    (hsearch : rationalTangentWitnessBoxSearch U S m = some u) :
+    QInterval.Overlaps (rationalCircleSinInterval U) S := by
+  have hw : rationalTangentWitnessAdmissibleBool U S u = true := by
+    unfold rationalTangentWitnessBoxSearch at hsearch
+    exact rationalTangentWitnessSearchList_sound hsearch
+  simp only [rationalTangentWitnessAdmissibleBool, Bool.and_eq_true] at hw
+  apply rationalCircleSinInterval_overlap_of_tangent_witness hS hU u
+  · exact ⟨of_decide_eq_true hw.1.1.1,
+      of_decide_eq_true hw.1.1.2⟩
+  · exact ⟨of_decide_eq_true hw.1.2,
+      of_decide_eq_true hw.2⟩
+
+theorem rationalTangentWitnessBoxSearch_sound_inequalities
+    {U S : QInterval} {m : Nat} {u : Rat}
+    (hsearch : rationalTangentWitnessBoxSearch U S m = some u) :
+    U.lo <= u /\ u <= U.hi /\
+      S.lo <= rationalCircleSin u /\ rationalCircleSin u <= S.hi := by
+  have hw : rationalTangentWitnessAdmissibleBool U S u = true := by
+    unfold rationalTangentWitnessBoxSearch at hsearch
+    exact rationalTangentWitnessSearchList_sound hsearch
+  simp only [rationalTangentWitnessAdmissibleBool, Bool.and_eq_true] at hw
+  exact ⟨of_decide_eq_true hw.1.1.1,
+    of_decide_eq_true hw.1.1.2,
+    of_decide_eq_true hw.1.2,
+    of_decide_eq_true hw.2⟩
+
+theorem rationalCircleSin_dyadic_grid_hit
+    {S : QInterval} (hS : subintervalOf S 0 1)
+    (N : Nat) (hN : 0 < N)
+    (hmesh : 2 / ((N : Nat) : Rat) <= S.width) :
+    exists k, k <= N /\
+      S.lo <= rationalCircleSin ((k : Rat) / (N : Rat)) /\
+      rationalCircleSin ((k : Rat) / (N : Rat)) <= S.hi := by
+  let d : Rat := (N : Rat)
+  let v : Nat -> Rat := fun k => (k : Rat) / d
+  have hd : 0 < d := by
+    dsimp [d]
+    exact (Rat.natCast_pos).2 hN
+  have hzero : rationalCircleSin (0 : Rat) = 0 := by
+    native_decide
+  have hone : rationalCircleSin (1 : Rat) = 1 := by
+    native_decide
+  have hstart : rationalCircleSin (v 0) = 0 := by
+    have hv0 : v 0 = 0 := by
+      dsimp [v, d]
+      rw [Rat.div_def]
+      simp
+    rw [hv0, hzero]
+  have hend : rationalCircleSin (v N) = 1 := by
+    dsimp [v, d]
+    rw [Rat.div_def]
+    have hcancel : (N : Rat) * (N : Rat)⁻¹ = 1 :=
+      Rat.mul_inv_cancel _ (Rat.ne_of_gt hd)
+    rw [hcancel]
+    exact hone
+  have hstep : forall k, k < N ->
+      rationalCircleSin (v (k + 1)) - rationalCircleSin (v k) <=
+        S.hi - S.lo := by
+    intro k hk
+    have hk1 : k + 1 <= N := by omega
+    have hqk0 : 0 <= v k := by
+      dsimp [v]
+      rw [Rat.div_def]
+      exact Rat.mul_nonneg (Rat.natCast_nonneg)
+        (Rat.le_of_lt (Rat.inv_pos.2 hd))
+    have hqk1 : v k <= 1 := by
+      dsimp [v, d]
+      rw [Rat.div_def]
+      apply Rat.le_of_mul_le_mul_right (c := (N : Rat))
+      · rw [Rat.mul_assoc, Rat.inv_mul_cancel _ (Rat.ne_of_gt hd), Rat.mul_one]
+        simpa using (show (k : Rat) <= (N : Rat) by
+          exact_mod_cast Nat.le_of_lt hk)
+      · exact hd
+    have hqnext0 : 0 <= v (k + 1) := by
+      dsimp [v]
+      rw [Rat.div_def]
+      exact Rat.mul_nonneg (Rat.natCast_nonneg)
+        (Rat.le_of_lt (Rat.inv_pos.2 hd))
+    have hqnext1 : v (k + 1) <= 1 := by
+      dsimp [v, d]
+      rw [Rat.div_def]
+      apply Rat.le_of_mul_le_mul_right (c := (N : Rat))
+      · rw [Rat.mul_assoc, Rat.inv_mul_cancel _ (Rat.ne_of_gt hd), Rat.mul_one]
+        simpa using (show (k + 1 : Rat) <= (N : Rat) by
+          exact_mod_cast hk1)
+      · exact hd
+    have hdiff := rationalCircleSin_difference_le_qabs
+      hqk0 hqk1 hqnext0 hqnext1
+        (a := v k) (b := v (k + 1))
+    have horder : v k <= v (k + 1) := by
+      dsimp [v, d]
+      rw [Rat.div_def, Rat.div_def]
+      exact Rat.mul_le_mul_of_nonneg_right
+        (by exact_mod_cast Nat.le_succ k)
+        (Rat.le_of_lt (Rat.inv_pos.2 hd))
+    have hdiff' : rationalCircleSin (v (k + 1)) - rationalCircleSin (v k) <=
+        2 * (v (k + 1) - v k) := by
+      have hqabs := hdiff
+      rw [show qabs (v k - v (k + 1)) = v (k + 1) - v k by
+        rw [show v k - v (k + 1) = -(v (k + 1) - v k) by
+          grind [Rat.sub_eq_add_neg], qabs_neg,
+          qabs_eq_self_of_nonneg (by grind)],
+        show qabs (rationalCircleSin (v k) - rationalCircleSin (v (k + 1))) =
+          rationalCircleSin (v (k + 1)) - rationalCircleSin (v k) by
+          rw [show rationalCircleSin (v k) - rationalCircleSin (v (k + 1)) =
+            -(rationalCircleSin (v (k + 1)) - rationalCircleSin (v k)) by
+              grind [Rat.sub_eq_add_neg], qabs_neg,
+            qabs_eq_self_of_nonneg (by
+              grind [rationalCircleSin_mono hqk0 horder hqnext1])]] at hqabs
+      exact hqabs
+    have hmesh' : 2 * (v (k + 1) - v k) <= S.width := by
+      dsimp [v, d, QInterval.width]
+      rw [Rat.div_def, Rat.div_def]
+      have hcancel := Rat.inv_mul_cancel (N : Rat) (Rat.ne_of_gt hd)
+      have hkcast : ((k + 1 : Nat) : Rat) = (k : Rat) + 1 := by
+        exact_mod_cast Nat.add_one k
+      calc
+        2 * (((k + 1 : Nat) : Rat) * (N : Rat)⁻¹ - (k : Rat) * (N : Rat)⁻¹) =
+            2 / (N : Rat) := by grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+        _ <= S.hi - S.lo := hmesh
+    exact Rat.le_trans hdiff' hmesh'
+  have hcross := rationalGrid_interval_crossing
+    (f := rationalCircleSin) (v := v) (lo := S.lo) (hi := S.hi)
+    hN hS.1 hS.2.2 hS.2.1 hstart hend hstep
+  simpa [v, d] using hcross
+
+/-! The grid lemma feeds directly into the executable search when the input
+box is the full unit tangent chart.  This is the closed, finite certificate
+used as a regression point before narrowing the chart to an inverse-arctan
+box. -/
+theorem rationalTangentWitnessSearch_unit_complete
+    {S : QInterval} (hS : subintervalOf S 0 1)
+    (m : Nat)
+    (hmesh : 2 / (((2 ^ m : Nat) : Rat)) <= S.width) :
+    ∃ v, rationalTangentWitnessSearch
+      ({ lo := 0, hi := 1 } : QInterval) S m = some v := by
+  let N : Nat := 2 ^ m
+  have hN : 0 < N := by
+    dsimp [N]
+    exact Nat.two_pow_pos m
+  obtain ⟨k, hk, hlow, hhigh⟩ := rationalCircleSin_dyadic_grid_hit
+    hS N hN (by simpa [N] using hmesh)
+  have hq0 : 0 <= (k : Rat) / ((2 ^ m : Nat) : Rat) := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg (Rat.natCast_nonneg)
+      (Rat.le_of_lt ((Rat.inv_pos).2
+        ((Rat.natCast_pos).2 (Nat.two_pow_pos m))))
+  have hq1 : (k : Rat) / ((2 ^ m : Nat) : Rat) <= 1 := by
+    rw [Rat.div_def]
+    apply Rat.le_of_mul_le_mul_right
+      (c := ((2 ^ m : Nat) : Rat))
+    · rw [Rat.mul_assoc,
+        Rat.inv_mul_cancel _ (Rat.ne_of_gt
+          ((Rat.natCast_pos).2 (Nat.two_pow_pos m))), Rat.mul_one]
+      simpa using (show (k : Rat) <= ((2 ^ m : Nat) : Rat) by
+        exact_mod_cast (by simpa [N] using hk))
+    · exact (Rat.natCast_pos).2 (Nat.two_pow_pos m)
+  apply rationalTangentWitnessSearch_complete_of_grid_candidate
+    (U := ({ lo := 0, hi := 1 } : QInterval)) (S := S) m k
+  · simpa [N] using hk
+  · simp only [rationalTangentWitnessAdmissibleBool, Bool.and_eq_true]
+    refine ⟨⟨⟨?_, ?_⟩, ?_⟩, ?_⟩
+    · simp only [decide_eq_true_eq]
+      exact hq0
+    · simp only [decide_eq_true_eq]
+      exact hq1
+    · simp only [decide_eq_true_eq]
+      exact hlow
+    · simp only [decide_eq_true_eq]
+      exact hhigh
 
 theorem rationalCircleSinInterval_near_of_near
     {U V : QInterval} (hU : subintervalOf U 0 1)
@@ -739,6 +2029,28 @@ def rationalCircleCos (u : Rat) : Rat :=
 
 def rationalCircleCosInterval (U : QInterval) : QInterval :=
   { lo := rationalCircleCos U.hi, hi := rationalCircleCos U.lo }
+
+theorem rationalCircleSin_sq_add_cos_sq (u : Rat) :
+    rationalCircleSin u * rationalCircleSin u +
+        rationalCircleCos u * rationalCircleCos u = 1 := by
+  unfold rationalCircleSin rationalCircleCos
+  have hden : 1 + u * u > 0 := by
+    have hsq : 0 <= u * u := by
+      by_cases hu : 0 <= u
+      · exact Rat.mul_nonneg hu hu
+      · have hneg : 0 <= -u := by grind
+        simpa [Rat.mul_neg, Rat.neg_mul, Rat.neg_neg] using
+          (Rat.mul_nonneg hneg hneg)
+    grind
+  have hdenne : 1 + u * u ≠ 0 := Rat.ne_of_gt hden
+  apply rat_eq_of_mul_eq_mul_pos_local
+    (c := (1 + u * u) * (1 + u * u))
+    (Rat.mul_pos hden hden)
+  rw [Rat.div_def, Rat.div_def]
+  have hcancel : (1 + u * u)⁻¹ * (1 + u * u) = 1 :=
+    Rat.inv_mul_cancel _ hdenne
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.add_mul, Rat.mul_add,
+    Rat.sub_eq_add_neg]
 
 private theorem rationalCircleCos_sub_formula {a b : Rat}
     (ha : 0 <= a) (hb : 0 <= b) :
@@ -1037,7 +2349,7 @@ def sinPiRawOfArctan
     (x : Rat)
     (hx : 0 <= x /\ x <= (1 : Rat) / 2) : RealRaw where
   compute := fun n =>
-    rationalCircleSinInterval
+      rationalCircleSinInterval
       ((B.tangentRaw.compute (2 * x)
         (by
           change RationalCircle.GeometricTrig.firstQuadrantBranch (2 * x)
@@ -1047,6 +2359,52 @@ def sinPiRawOfArctan
             have hhalf : (2 : Rat) * (1 / 2) = 1 := by native_decide
             rw [hhalf] at h
             exact h) n))
+
+theorem arctanSinPi_sample_overlap_of_tangent_witness
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {x : Rat} (hx : 0 <= x /\ x <= (1 : Rat) / 2) (n : Nat)
+    (S : QInterval) (hS : subintervalOf S 0 1) (u : Rat)
+    (hu : (B.tangentRaw.compute (2 * x)
+      (by
+        change RationalCircle.GeometricTrig.firstQuadrantBranch (2 * x)
+        constructor
+        · exact Rat.mul_nonneg (by native_decide) hx.1
+        · have h := Rat.mul_le_mul_of_nonneg_left hx.2
+            (by native_decide : (0 : Rat) <= 2)
+          rw [show (2 : Rat) * (1 / 2) = 1 by native_decide] at h
+          exact h) n).lo <= u /\
+      u <= (B.tangentRaw.compute (2 * x)
+        (by
+          change RationalCircle.GeometricTrig.firstQuadrantBranch (2 * x)
+          constructor
+          · exact Rat.mul_nonneg (by native_decide) hx.1
+          · have h := Rat.mul_le_mul_of_nonneg_left hx.2
+              (by native_decide : (0 : Rat) <= 2)
+            rw [show (2 : Rat) * (1 / 2) = 1 by native_decide] at h
+            exact h) n).hi)
+    (himage : S.lo <= rationalCircleSin u /\
+      rationalCircleSin u <= S.hi) :
+    QInterval.Overlaps
+      ((sinPiRawOfArctan B x hx).compute n) S := by
+  let ht : RationalCircle.GeometricTrig.firstQuadrantBranch (2 * x) := by
+    change 0 <= 2 * x /\ 2 * x <= 1
+    constructor
+    · exact Rat.mul_nonneg (by native_decide) hx.1
+    · have h := Rat.mul_le_mul_of_nonneg_left hx.2
+        (by native_decide : (0 : Rat) <= 2)
+      rw [show (2 : Rat) * (1 / 2) = 1 by native_decide] at h
+      exact h
+  have hvalid : RealRaw.ValidCompute (B.tangentRaw.compute (2 * x) ht) := by
+    exact B.tangentRaw_valid (2 * x) ht
+  have hbounds := B.tangentAt_stays_in_unitSlope (2 * x) ht n
+  have horder := RealRaw.interval_order_of_valid
+    { compute := B.tangentRaw.compute (2 * x) ht } hvalid n
+  have hU : subintervalOf (B.tangentRaw.compute (2 * x) ht n) 0 1 :=
+    ⟨hbounds.1, horder, hbounds.2.2⟩
+  change QInterval.Overlaps
+    (rationalCircleSinInterval (B.tangentRaw.compute (2 * x) ht n)) S
+  exact rationalCircleSinInterval_overlap_of_tangent_witness
+    hS hU u hu himage
 
 /-- The arctangent-backed pointwise sine evaluator.  The validity field is
 the finite interval proof that the monotone rational formula transports the
@@ -1091,6 +2449,20 @@ def ArctanSinPiConstruction.ofInverse
     apply rationalCircleSinInterval_valid
     · exact B.tangentRaw_valid (2 * x) _
     · exact slope_bounded x hx
+
+theorem ArctanSinPiConstruction.sinPiRawOfArctan_bounds
+    (S : ArctanSinPiConstruction) {x : Rat}
+    (hx : 0 <= x /\ x <= (1 : Rat) / 2) (n : Nat) :
+    0 <= ((sinPiRawOfArctan S.inverse x hx).compute n).lo /\
+      ((sinPiRawOfArctan S.inverse x hx).compute n).hi <= 1 := by
+  change 0 <=
+      (rationalCircleSinInterval
+        (S.inverse.tangentRaw.compute (2 * x) _ n)).lo /\
+    (rationalCircleSinInterval
+        (S.inverse.tangentRaw.compute (2 * x) _ n)).hi <= 1
+  exact rationalCircleSinInterval_bounds
+    (IntegralIdentities.ArctanInverseBisection.tangentAt_stays_in_unitSlope
+      S.inverse (2 * x) _ n)
 
 theorem arctanInverse_slope_bounded
     (B : IntegralIdentities.ArctanInverseBisection)
@@ -1290,6 +2662,111 @@ theorem cosPiRawOfArctan_half_equiv_zero_of_tangent_endpoint
   change (0 : Rat) <= 0 /\ 0 <=
     rationalCircleCos (B.tangentRaw.compute (2 * (1 / 2)) htHalf n).lo
   exact ⟨by native_decide, hcos⟩
+
+/-! Endpoint overlap for the sine coordinate.  These are the two exact
+dyadic samples shared by every possible inverse implementation; recording
+them explicitly lets finite mesh proofs discharge their boundary cells
+without invoking a general inverse-search witness. -/
+theorem sinPiRawOfArctan_zero_equiv_zero_of_tangent_endpoint
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero) :
+    (sinPiRawOfArctan B 0
+      ⟨by native_decide, by native_decide⟩).Equiv RealRaw.zero := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (sinPiRawOfArctan B 0 ⟨by native_decide, by native_decide⟩)
+    RealRaw.zero n n).2
+  have hbounds := B.tangentAt_stays_in_unitSlope 0
+    RationalCircle.GeometricTrig.firstQuadrantBranch_zero n
+  have hzero := (RealRaw.compareAt_overlap_iff
+    (B.tangentAt 0 RationalCircle.GeometricTrig.firstQuadrantBranch_zero)
+    RealRaw.zero n n).1 (ht n)
+  simp [RealRaw.zero, RealRaw.ofRat] at hzero
+  unfold QInterval.Overlaps at hzero
+  have hzero' : ((B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).compute n).lo <= 0 := by
+    have h := hzero.1
+    change ((B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).compute n).lo <=
+      ({ lo := 0, hi := 0 } : QInterval).hi at h
+    simpa using h
+  let ht0 : RationalCircle.GeometricTrig.firstQuadrantBranch (2 * 0) := by
+    dsimp [RationalCircle.GeometricTrig.firstQuadrantBranch,
+      RationalCircle.GeometricTrig.unitIntervalBranch]
+    constructor <;> native_decide
+  have hbounds' : subintervalOf
+      (B.tangentRaw.compute (2 * 0) ht0 n) 0 1 := by
+    simpa [IntegralIdentities.ArctanInverseBisection.tangentRaw,
+      IntegralIdentities.ArctanInverseBisection.tangentAt] using hbounds
+  have hlo : (B.tangentRaw.compute (2 * 0) ht0 n).lo = 0 := by
+    apply Rat.le_antisymm
+    · simpa [IntegralIdentities.ArctanInverseBisection.tangentRaw,
+        IntegralIdentities.ArctanInverseBisection.tangentAt] using hzero'
+    · exact hbounds'.1
+  change QInterval.Overlaps
+    (rationalCircleSinInterval (B.tangentRaw.compute (2 * 0) ht0 n))
+    { lo := 0, hi := 0 }
+  simp only [rationalCircleSinInterval]
+  rw [hlo]
+  have hsin := rationalCircleSin_bounds
+    (by grind [hbounds'.1, hbounds'.2.1]) hbounds'.2.2
+  have hsin0 : rationalCircleSin 0 = 0 := by native_decide
+  rw [hsin0]
+  unfold QInterval.Overlaps
+  change (0 : Rat) <= 0 ∧ 0 <=
+    rationalCircleSin (B.tangentRaw.compute (2 * 0) ht0 n).hi
+  exact ⟨by native_decide, hsin.1⟩
+
+theorem sinPiRawOfArctan_half_equiv_one_of_tangent_endpoint
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht : (B.tangentAt 1
+      RationalCircle.GeometricTrig.firstQuadrantBranch_one).Equiv
+      RealRaw.one) :
+    (sinPiRawOfArctan B (1 / 2)
+      ⟨by native_decide, by native_decide⟩).Equiv RealRaw.one := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (sinPiRawOfArctan B (1 / 2) ⟨by native_decide, by native_decide⟩)
+    RealRaw.one n n).2
+  have hbounds := B.tangentAt_stays_in_unitSlope 1
+    RationalCircle.GeometricTrig.firstQuadrantBranch_one n
+  have hone := (RealRaw.compareAt_overlap_iff
+    (B.tangentAt 1 RationalCircle.GeometricTrig.firstQuadrantBranch_one)
+    RealRaw.one n n).1 (ht n)
+  simp [RealRaw.one, RealRaw.ofRat] at hone
+  let htHalf : RationalCircle.GeometricTrig.firstQuadrantBranch
+      (2 * (1 / 2)) := by
+    dsimp [RationalCircle.GeometricTrig.firstQuadrantBranch,
+      RationalCircle.GeometricTrig.unitIntervalBranch]
+    constructor <;> native_decide
+  have htwo : (2 : Rat) * (1 / 2) = 1 := by native_decide
+  have hbounds' : subintervalOf
+      (B.tangentRaw.compute (2 * (1 / 2)) htHalf n) 0 1 := by
+    simpa [htwo, IntegralIdentities.ArctanInverseBisection.tangentRaw,
+      IntegralIdentities.ArctanInverseBisection.tangentAt] using hbounds
+  have hhi : (B.tangentRaw.compute (2 * (1 / 2)) htHalf n).hi = 1 := by
+    apply Rat.le_antisymm
+    · exact hbounds'.2.2
+    · simpa [htwo, IntegralIdentities.ArctanInverseBisection.tangentRaw,
+        IntegralIdentities.ArctanInverseBisection.tangentAt] using hone.2
+  change QInterval.Overlaps
+    (rationalCircleSinInterval (B.tangentRaw.compute (2 * (1 / 2)) htHalf n))
+    { lo := 1, hi := 1 }
+  simp only [rationalCircleSinInterval]
+  rw [hhi]
+  have hsin := rationalCircleSin_bounds hbounds'.1
+    (by grind [hbounds'.2.1, hbounds'.2.2])
+  have hsin1 : rationalCircleSin 1 = 1 := by native_decide
+  rw [hsin1]
+  unfold QInterval.Overlaps
+  change rationalCircleSin
+      (B.tangentRaw.compute (2 * (1 / 2)) htHalf n).lo <= 1 ∧
+    (1 : Rat) <= 1
+  exact ⟨hsin.2, by native_decide⟩
 
 def reciprocalPiFunRaw : RealFunRaw where
   domain := fun x => 0 <= x /\ x <= (1 : Rat) / 2
@@ -2225,6 +3702,117 @@ def tangentPullbackDensity (u : Rat) : Rat :=
 def tangentPullbackPrimitive (u : Rat) : Rat :=
   2 * (u * u) / (1 + u * u)
 
+/-! These are the exact rational-circle identities behind the pullback.  They
+are deliberately stated before any interval or limiting argument: the
+primitive is literally the cosine complement, and the density is the circle
+sine multiplied by the chart Jacobian. -/
+
+theorem tangentPullbackPrimitive_eq_one_sub_cos (u : Rat) :
+    tangentPullbackPrimitive u = 1 - RationalCircle.Trigonometry.cos u := by
+  rw [tangentPullbackPrimitive, RationalCircle.Trigonometry.cos_eq]
+  have hden : 1 + u * u ≠ 0 :=
+    Rat.ne_of_gt (RationalCircle.Stage.one_add_square_pos u)
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.mul_inv_cancel _ hden]
+
+theorem tangentPullbackDensity_eq_sin_mul_chartJacobian (u : Rat) :
+    tangentPullbackDensity u =
+      RationalCircle.Trigonometry.sin u * (2 / (1 + u * u)) := by
+  rw [tangentPullbackDensity, RationalCircle.Trigonometry.sin_eq]
+  have hden : 1 + u * u ≠ 0 :=
+    Rat.ne_of_gt (RationalCircle.Stage.one_add_square_pos u)
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_inv_cancel _ hden]
+
+/-! The ordinary forward cell `[x,x+h]` is now expressed through the same
+rational tangent increment used by the arctangent rectangle algorithm.  This
+is an exact finite secant identity; no derivative or completed real number is
+being invoked. -/
+
+theorem tangentPullbackPrimitive_increment_eq_chart_sine
+    {x h : Rat} (hx0 : 0 <= x) (hpos : 0 < h)
+    (hupper : x + h <= 1) :
+    tangentPullbackPrimitive (x + h) - tangentPullbackPrimitive x =
+      RationalCircle.Trigonometry.sin x *
+          RationalCircle.Trigonometry.sin
+            (ArctanGeometry.tangentChartIncrement x h) +
+        RationalCircle.Trigonometry.cos x *
+          (1 - RationalCircle.Trigonometry.cos
+            (ArctanGeometry.tangentChartIncrement x h)) := by
+  let t := ArctanGeometry.tangentChartIncrement x h
+  have hxlt : x < 1 := by grind
+  have ht0 : 0 <= t := by
+    dsimp [t]
+    exact Rat.le_of_lt (ArctanGeometry.tangentChartIncrement_pos hx0 hpos)
+  have ht1 : t <= 1 := by
+    dsimp [t]
+    exact Rat.le_trans
+      (ArctanGeometry.tangentChartIncrement_le_step hx0 hpos)
+      (by grind)
+  have hden : RationalCircle.Trigonometry.chartAddDen x t ≠ 0 :=
+    Rat.ne_of_gt (ArctanGeometry.chartAddDen_pos_of_unit hx0 hxlt ht1)
+  have hchart : RationalCircle.Trigonometry.chartAddParameter x t = x + h := by
+    dsimp [t]
+    exact ArctanGeometry.chartAddParameter_tangentChartIncrement hx0
+      (by grind)
+  rw [tangentPullbackPrimitive_eq_one_sub_cos]
+  rw [tangentPullbackPrimitive_eq_one_sub_cos]
+  rw [← hchart]
+  have hinc :=
+    RationalCircle.Trigonometry.one_sub_cos_chartAdd_eq_sin_mul_sin_add_cos_mul_one_sub_cos
+      hden
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm]
+
+theorem tangentPullbackPrimitive_increment_error_le
+    {x h : Rat} (hx0 : 0 <= x) (hpos : 0 < h)
+    (hupper : x + h <= 1) :
+    qabs (
+      (tangentPullbackPrimitive (x + h) - tangentPullbackPrimitive x) -
+        RationalCircle.Trigonometry.sin x *
+          RationalCircle.Trigonometry.sin
+            (ArctanGeometry.tangentChartIncrement x h)) <=
+      2 * (ArctanGeometry.tangentChartIncrement x h *
+        ArctanGeometry.tangentChartIncrement x h) := by
+  have hdecomp := tangentPullbackPrimitive_increment_eq_chart_sine
+    hx0 hpos hupper
+  rw [hdecomp]
+  have hrewrite :
+      RationalCircle.Trigonometry.sin x *
+          RationalCircle.Trigonometry.sin
+            (ArctanGeometry.tangentChartIncrement x h) +
+        RationalCircle.Trigonometry.cos x *
+          (1 - RationalCircle.Trigonometry.cos
+            (ArctanGeometry.tangentChartIncrement x h)) -
+        RationalCircle.Trigonometry.sin x *
+          RationalCircle.Trigonometry.sin
+            (ArctanGeometry.tangentChartIncrement x h) =
+      RationalCircle.Trigonometry.cos x *
+        (1 - RationalCircle.Trigonometry.cos
+          (ArctanGeometry.tangentChartIncrement x h)) := by
+    grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+      Rat.mul_assoc, Rat.mul_comm]
+  rw [hrewrite, qabs_mul]
+  have hcos := RationalCircle.Trigonometry.qabs_cos_le_one x
+  have hcorr0 := RationalCircle.Trigonometry.one_sub_cos_nonneg
+    (ArctanGeometry.tangentChartIncrement x h)
+  have hcorr := RationalCircle.Trigonometry.one_sub_cos_le_two_mul_sq
+    (ArctanGeometry.tangentChartIncrement x h)
+  rw [qabs_eq_self_of_nonneg hcorr0]
+  calc
+    qabs (RationalCircle.Trigonometry.cos x) *
+        (1 - RationalCircle.Trigonometry.cos
+          (ArctanGeometry.tangentChartIncrement x h)) <=
+        1 * (1 - RationalCircle.Trigonometry.cos
+          (ArctanGeometry.tangentChartIncrement x h)) := by
+      exact Rat.mul_le_mul_of_nonneg_right hcos (by grind)
+    _ <= 2 * (ArctanGeometry.tangentChartIncrement x h *
+        ArctanGeometry.tangentChartIncrement x h) := by
+      simpa using hcorr
+
 theorem tangentPullbackPrimitive_endpoint_difference (p r : Rat) :
     tangentPullbackPrimitive r - tangentPullbackPrimitive p =
       (r - p) *
@@ -2445,6 +4033,62 @@ theorem tangentPullback_rectangle_error_le
       rw [qabs_eq_self_of_nonneg (by grind : 0 <= r - p)]
       grind
 
+theorem tangentPullback_rectangle_contains_primitive_increment
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p < r) (hr1 : r <= 1) :
+    QInterval.ContainsInterval
+      { lo := (r - p) * tangentPullbackDensity p -
+          4 * ((r - p) * (r - p)),
+        hi := (r - p) * tangentPullbackDensity p +
+          4 * ((r - p) * (r - p)) }
+      { lo := tangentPullbackPrimitive r - tangentPullbackPrimitive p,
+        hi := tangentPullbackPrimitive r - tangentPullbackPrimitive p } := by
+  have herr := tangentPullback_rectangle_error_le hp0 hpr hr1
+  unfold QInterval.ContainsInterval
+  change
+    (r - p) * tangentPullbackDensity p - 4 * ((r - p) * (r - p)) <=
+        tangentPullbackPrimitive r - tangentPullbackPrimitive p /\
+      tangentPullbackPrimitive r - tangentPullbackPrimitive p <=
+        (r - p) * tangentPullbackDensity p + 4 * ((r - p) * (r - p))
+  constructor
+  · have hhigh := self_le_qabs
+      ((r - p) * tangentPullbackDensity p -
+        (tangentPullbackPrimitive r - tangentPullbackPrimitive p))
+    have hhigh' := Rat.le_trans hhigh herr
+    have h1 :
+        ((r - p) * tangentPullbackDensity p -
+          (tangentPullbackPrimitive r - tangentPullbackPrimitive p)) +
+            (tangentPullbackPrimitive r - tangentPullbackPrimitive p) <=
+          4 * ((r - p) * (r - p)) +
+            (tangentPullbackPrimitive r - tangentPullbackPrimitive p) :=
+      (Rat.add_le_add_right (c :=
+        tangentPullbackPrimitive r - tangentPullbackPrimitive p)).2 hhigh'
+    have h2 := (Rat.add_le_add_left
+      (c := -(4 * ((r - p) * (r - p))))).2 h1
+    grind
+  · have hlow := neg_qabs_le_self
+      ((r - p) * tangentPullbackDensity p -
+        (tangentPullbackPrimitive r - tangentPullbackPrimitive p))
+    have hlow' := Rat.le_trans (Rat.neg_le_neg herr) hlow
+    have h1 :
+        4 * ((r - p) * (r - p)) +
+            -(4 * ((r - p) * (r - p))) <=
+          4 * ((r - p) * (r - p)) +
+            ((r - p) * tangentPullbackDensity p -
+              (tangentPullbackPrimitive r - tangentPullbackPrimitive p)) :=
+      (Rat.add_le_add_left
+        (c := 4 * ((r - p) * (r - p)))).2 hlow'
+    have h2 :
+        (4 * ((r - p) * (r - p)) +
+            -(4 * ((r - p) * (r - p)))) +
+              (tangentPullbackPrimitive r - tangentPullbackPrimitive p) <=
+          (4 * ((r - p) * (r - p)) +
+            ((r - p) * tangentPullbackDensity p -
+              (tangentPullbackPrimitive r - tangentPullbackPrimitive p))) +
+              (tangentPullbackPrimitive r - tangentPullbackPrimitive p) :=
+      (Rat.add_le_add_right (c :=
+        tangentPullbackPrimitive r - tangentPullbackPrimitive p)).2 h1
+    grind
+
 /-! A prefix form of the finite dyadic telescope.  This keeps the exact
 rectangle computation and the primitive endpoint difference in the same
 rational expression; the eventual sum estimate can therefore be proved by
@@ -2606,6 +4250,32 @@ theorem tangentPullback_uniformLeftEndpointSum_error_le
     _ = 4 / (mesh : Rat) := by
       rw [Rat.div_def, Rat.mul_inv_cancel _ hmeshRat]
       grind [Rat.mul_assoc]
+
+/-! The finite FTC conclusion for the tangent chart, in the same interval
+language used by the public integral interface.  This is the form consumed by
+cellwise transports: the rectangle computation is an outer interval and the
+primitive endpoint difference is the inner degenerate interval. -/
+
+theorem tangentPullback_uniformLeftEndpointSum_contains_endpoint
+    {mesh : Nat} (hmesh : 0 < mesh) :
+    QInterval.ContainsInterval
+      { lo := IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+          tangentPullbackDensity mesh - 4 / (mesh : Rat),
+        hi := IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+          tangentPullbackDensity mesh + 4 / (mesh : Rat) }
+      { lo := tangentPullbackPrimitive 1 - tangentPullbackPrimitive 0,
+        hi := tangentPullbackPrimitive 1 - tangentPullbackPrimitive 0 } := by
+  have herr := tangentPullback_uniformLeftEndpointSum_error_le hmesh
+  unfold QInterval.ContainsInterval
+  have hlow := neg_qabs_le_self
+    (IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+      tangentPullbackDensity mesh -
+      (tangentPullbackPrimitive 1 - tangentPullbackPrimitive 0))
+  have hhigh := self_le_qabs
+    (IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+      tangentPullbackDensity mesh -
+      (tangentPullbackPrimitive 1 - tangentPullbackPrimitive 0))
+  constructor <;> grind
 
 private theorem tangentPullback_uniformSum_foldl_eq
     (f : Rat -> Rat) {mesh : Nat} (hmesh : 0 < mesh) :
@@ -2830,6 +4500,32 @@ theorem tangentPullbackIntegral_compute (stage : Nat) :
       IntegralIdentities.LipschitzDyadic.compute
         tangentPullbackDensity 20 stage := rfl
 
+/-! The finite FTC bridge in its most reusable form: the certified interval
+algorithm contains the literal equal-dyadic left sum at every stage.  This is
+stronger than merely knowing that the raw widths shrink, and is the exact
+interface needed when an independent primitive supplies the endpoint value.
+-/
+theorem tangentPullbackIntegral_contains_uniformLeftEndpointSum
+    (stage : Nat) :
+    (tangentPullbackIntegral.compute stage).ContainsInterval
+      { lo := IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+          tangentPullbackDensity (2 ^ stage),
+        hi := IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+          tangentPullbackDensity (2 ^ stage) } := by
+  rw [tangentPullbackIntegral_compute]
+  exact IntegralIdentities.LipschitzDyadic.compute_contains_uniformLeftEndpointSum
+    tangentPullbackDensity_lipschitz_on_unit stage
+
+theorem tangentPullbackIntegral_left_sum_error_le
+    (stage : Nat) :
+    qabs (
+      IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+          tangentPullbackDensity (2 ^ stage) -
+        (tangentPullbackPrimitive 1 - tangentPullbackPrimitive 0)) <=
+      4 / (((2 ^ stage : Nat) : Rat)) := by
+  have hmesh : 0 < 2 ^ stage := Nat.pow_pos (by omega : 0 < 2)
+  exact tangentPullback_uniformLeftEndpointSum_error_le hmesh
+
 theorem tangentPullbackPrimitive_unit_endpoint_difference :
     tangentPullbackPrimitive 1 - tangentPullbackPrimitive 0 = 1 := by
   rw [tangentPullbackPrimitive_one, tangentPullbackPrimitive_zero]
@@ -2873,6 +4569,460 @@ theorem tangentPullbackIntegral_equiv_one :
         tangentPullbackDensity (2 ^ n) - 1)
     exact Rat.le_trans hq (by simpa [hendpoint] using herror)
   constructor <;> grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+
+theorem tangentPullbackIntegral_bounds (n : Nat) :
+    -20 <= (tangentPullbackIntegral.compute n).lo /\
+      (tangentPullbackIntegral.compute n).hi <= 20 := by
+  have hvalid := tangentPullbackIntegral_valid
+  have hnest := hvalid.2.1 0 n (Nat.zero_le n)
+  have hzero :
+      tangentPullbackIntegral.compute 0 = { lo := -20, hi := 20 } := by
+    rw [tangentPullbackIntegral_compute]
+    native_decide
+  rw [hzero] at hnest
+  constructor
+  · exact Rat.le_trans (by native_decide) hnest.1
+  · exact Rat.le_trans hnest.2.2 (by native_decide)
+
+/-! A positive reboxing of the chart integral.  The raw Riemann box has a
+large finite error margin at its first stages, so its lower endpoint need not
+yet be nonnegative.  Since every stage overlaps the exact value `1`, the
+intersection with `[0,20]` is ordered, nested, shrinking, and equivalent to
+the original chart raw. -/
+
+def positiveTangentPullbackIntegral : RealRaw where
+  compute := fun n =>
+    QInterval.intersection (tangentPullbackIntegral.compute n)
+      { lo := 0, hi := 20 }
+
+private theorem intersection_fixed_nested
+    {I J : QInterval}
+    (hIJ : I.lo <= J.lo /\ J.hi <= I.hi) :
+    (QInterval.intersection I ({ lo := 0, hi := 20 } : QInterval)).lo <=
+        (QInterval.intersection J ({ lo := 0, hi := 20 } : QInterval)).lo /\
+      (QInterval.intersection J ({ lo := 0, hi := 20 } : QInterval)).hi <=
+        (QInterval.intersection I ({ lo := 0, hi := 20 } : QInterval)).hi := by
+  unfold QInterval.intersection
+  constructor
+  · by_cases hI0 : I.lo <= 0
+    · by_cases hJ0 : J.lo <= 0
+      · simp [Rat.max_def, hI0, hJ0]
+      · have hJ0' : 0 <= J.lo := by grind
+        simp [Rat.max_def, hI0, hJ0]
+        exact hJ0'
+    · have hI0' : 0 <= I.lo := by grind
+      have hJ0 : ¬ J.lo <= 0 := by
+        intro h
+        exact hI0 (Rat.le_trans hIJ.1 h)
+      simp [Rat.max_def, hI0, hJ0]
+      exact hIJ.1
+  · by_cases hI20 : I.hi <= 20
+    · have hJ20 : J.hi <= 20 := Rat.le_trans hIJ.2 hI20
+      simp [Rat.min_def, hI20, hJ20]
+      exact hIJ.2
+    · by_cases hJ20 : J.hi <= 20
+      · simp [Rat.min_def, hI20, hJ20]
+      · have hI20' : ¬ I.hi <= 20 := hI20
+        simp [Rat.min_def, hI20', hJ20]
+
+private theorem tangentPullbackIntegral_contains_one (n : Nat) :
+    (tangentPullbackIntegral.compute n).lo <= 1 /\
+      1 <= (tangentPullbackIntegral.compute n).hi := by
+  have h := (RealRaw.compareAt_overlap_iff
+    tangentPullbackIntegral (RealRaw.ofRat 1) n n).1
+    (tangentPullbackIntegral_equiv_one n)
+  simpa [RealRaw.ofRat, QInterval.Overlaps] using h
+
+theorem positiveTangentPullbackIntegral_valid :
+    positiveTangentPullbackIntegral.Valid := by
+  have hbase :
+      QInterval.ContainsInterval ({ lo := 0, hi := 20 } : QInterval)
+        ({ lo := 1, hi := 1 } : QInterval) := by
+    constructor <;> native_decide
+  constructor
+  · intro n
+    have hI := RealRaw.interval_order_of_valid tangentPullbackIntegral
+      tangentPullbackIntegral_valid n
+    have hpoint := tangentPullbackIntegral_contains_one n
+    have hoverlap : QInterval.Overlaps
+        (tangentPullbackIntegral.compute n)
+        ({ lo := 0, hi := 20 } : QInterval) := by
+      unfold QInterval.Overlaps
+      constructor <;> grind
+    have hinter :
+        (QInterval.intersection (tangentPullbackIntegral.compute n)
+          ({ lo := 0, hi := 20 } : QInterval)).lo <=
+          (QInterval.intersection (tangentPullbackIntegral.compute n)
+            ({ lo := 0, hi := 20 } : QInterval)).hi :=
+      QInterval.intersection_ordered_of_overlaps hI
+        (by native_decide) hoverlap
+    change 0 <=
+      (QInterval.intersection (tangentPullbackIntegral.compute n)
+        ({ lo := 0, hi := 20 } : QInterval)).width
+    unfold QInterval.width
+    grind
+  · constructor
+    · intro n m hnm
+      have hI := (tangentPullbackIntegral_valid).2.1 n m hnm
+      have houter := intersection_fixed_nested
+        (I := tangentPullbackIntegral.compute n)
+        (J := tangentPullbackIntegral.compute m)
+        ⟨hI.1, hI.2.2⟩
+      have hpoint := tangentPullbackIntegral_contains_one m
+      have hoverlap : QInterval.Overlaps
+          (tangentPullbackIntegral.compute m)
+          ({ lo := 0, hi := 20 } : QInterval) := by
+        unfold QInterval.Overlaps
+        constructor <;> grind
+      have hinter := QInterval.intersection_ordered_of_overlaps
+        (RealRaw.interval_order_of_valid tangentPullbackIntegral
+          tangentPullbackIntegral_valid m)
+        (by native_decide) hoverlap
+      exact ⟨houter.1, hinter, houter.2⟩
+    · intro eps
+      obtain ⟨N, hN⟩ := tangentPullbackIntegral_valid.2.2 eps
+      refine ⟨N, ?_⟩
+      intro n hn
+      have hwidth := hN n hn
+      have hcontained := QInterval.intersection_contained_left
+        (tangentPullbackIntegral.compute n)
+        ({ lo := 0, hi := 20 } : QInterval)
+      change (QInterval.intersection
+        (tangentPullbackIntegral.compute n)
+        ({ lo := 0, hi := 20 } : QInterval)).width <= eps.val
+      exact Rat.le_trans
+        (QInterval.width_le_of_contains hcontained) hwidth
+
+theorem positiveTangentPullbackIntegral_equiv_one :
+    positiveTangentPullbackIntegral.Equiv (RealRaw.ofRat 1) := by
+  have hbase :
+      QInterval.ContainsInterval ({ lo := 0, hi := 20 } : QInterval)
+        ({ lo := 1, hi := 1 } : QInterval) := by
+    constructor <;> native_decide
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    positiveTangentPullbackIntegral (RealRaw.ofRat 1) n n).2
+  have hpoint := tangentPullbackIntegral_contains_one n
+  have hinter := QInterval.intersection_contains
+    (I := tangentPullbackIntegral.compute n)
+    (J := ({ lo := 0, hi := 20 } : QInterval))
+    (K := ({ lo := 1, hi := 1 } : QInterval))
+    (by exact hpoint)
+    (by exact hbase)
+  change QInterval.Overlaps
+    (QInterval.intersection (tangentPullbackIntegral.compute n)
+      ({ lo := 0, hi := 20 } : QInterval))
+    ({ lo := 1, hi := 1 } : QInterval)
+  exact ⟨hinter.1, hinter.2⟩
+
+theorem positiveTangentPullbackIntegral_bounds (n : Nat) :
+    0 <= (positiveTangentPullbackIntegral.compute n).lo /\
+      (positiveTangentPullbackIntegral.compute n).hi <= 20 := by
+  have hI := positiveTangentPullbackIntegral_valid
+  have horder := RealRaw.interval_order_of_valid
+    positiveTangentPullbackIntegral hI n
+  change 0 <=
+      (QInterval.intersection (tangentPullbackIntegral.compute n)
+        ({ lo := 0, hi := 20 } : QInterval)).lo /\
+    (QInterval.intersection (tangentPullbackIntegral.compute n)
+      ({ lo := 0, hi := 20 } : QInterval)).hi <= 20
+  unfold QInterval.intersection
+  constructor <;> grind
+
+private theorem mul_one_equiv (R : RealRaw) (hR : R.Valid)
+    (hRnonneg : forall n, 0 <= (R.compute n).lo) :
+    (R * RealRaw.one).Equiv R := by
+  have hone : RealRaw.one.Valid := by
+    change RealRaw.ValidCompute (fun _ : Nat => { lo := 1, hi := 1 })
+    exact RealRaw.ofRat_valid (1 : Rat)
+  intro n
+  apply (RealRaw.compareAt_overlap_iff (R * RealRaw.one) R n n).2
+  change QInterval.Overlaps
+    (QBox.mulRealInterval (R.compute n).lo (R.compute n).hi 1 1)
+    (R.compute n)
+  rw [QBox.mulRealInterval_of_nonneg
+    (hRnonneg n) (RealRaw.interval_order_of_valid R hR n)
+    (by native_decide) (by native_decide)]
+  unfold QInterval.Overlaps
+  have horder := RealRaw.interval_order_of_valid R hR n
+  constructor <;> simp [horder]
+
+def tangentChartIntegral : RealRaw :=
+  reciprocalPiRaw * positiveTangentPullbackIntegral
+
+theorem tangentChartIntegral_valid : tangentChartIntegral.Valid := by
+  unfold tangentChartIntegral
+  exact RealRaw.mul_valid_of_nonneg_bounded
+    reciprocalPiRaw_valid positiveTangentPullbackIntegral_valid
+    (by native_decide) (by native_decide)
+    reciprocalPiRaw_bounds positiveTangentPullbackIntegral_bounds
+
+theorem tangentChartIntegral_equiv_reciprocalPi :
+    tangentChartIntegral.Equiv reciprocalPiRaw := by
+  have hone : RealRaw.one.Valid := by
+    change RealRaw.ValidCompute (fun _ : Nat => { lo := 1, hi := 1 })
+    exact RealRaw.ofRat_valid (1 : Rat)
+  have hprod :
+      (reciprocalPiRaw * positiveTangentPullbackIntegral).Equiv
+        (reciprocalPiRaw * RealRaw.one) := by
+    apply RealRaw.mul_equiv_of_nonneg
+      reciprocalPiRaw_valid reciprocalPiRaw_valid
+      positiveTangentPullbackIntegral_valid hone
+      (fun n => (reciprocalPiRaw_bounds n).1)
+      (fun n => (reciprocalPiRaw_bounds n).1)
+      (fun n => (positiveTangentPullbackIntegral_bounds n).1)
+      (fun n => by change 0 <= (1 : Rat); native_decide)
+      (RealRaw.equiv_refl reciprocalPiRaw reciprocalPiRaw_valid)
+      positiveTangentPullbackIntegral_equiv_one
+  have hprodvalid : (reciprocalPiRaw * RealRaw.one).Valid := by
+    exact RealRaw.mul_valid_of_nonneg_bounded
+      reciprocalPiRaw_valid hone (Bx := 1) (By := 1)
+      (by native_decide) (by native_decide)
+      reciprocalPiRaw_bounds (fun _ => by
+        change 0 <= (1 : Rat) /\ (1 : Rat) <= 1
+        native_decide)
+  exact RealRaw.equiv_trans tangentChartIntegral_valid hprodvalid
+    reciprocalPiRaw_valid hprod (mul_one_equiv reciprocalPiRaw
+      reciprocalPiRaw_valid (fun n => (reciprocalPiRaw_bounds n).1))
+
+/-! The evaluated Riemann--Stieltjes presentation of the public sine integral.
+
+At stage `n`, the executable mesh is uniform in the tangent variable `u`.
+The corresponding `x`-samples are the certified inverse images of those
+points under `u = tan (pi*x/2)`, hence are generally uneven in `x`.  The
+construction is best read as a Riemann--Stieltjes sum: the inverse tangent
+chart supplies the increasing integrator, while the sine values supply the
+integrand.  A change of variables explains this construction, rather than
+defining it. -/
+
+def sinPiStieltjesIntegral : RealRaw :=
+  tangentChartIntegral
+
+theorem sinPiStieltjesIntegral_valid :
+    sinPiStieltjesIntegral.Valid := by
+  exact tangentChartIntegral_valid
+
+theorem sinPiStieltjesIntegral_equiv_reciprocalPi :
+    sinPiStieltjesIntegral.Equiv reciprocalPiRaw := by
+  exact tangentChartIntegral_equiv_reciprocalPi
+
+/-! Compatibility name for earlier blueprint versions. -/
+def sinPiUnevenSamplingIntegral : RealRaw := sinPiStieltjesIntegral
+
+theorem sinPiUnevenSamplingIntegral_valid :
+    sinPiUnevenSamplingIntegral.Valid := by
+  exact sinPiStieltjesIntegral_valid
+
+theorem sinPiUnevenSamplingIntegral_equiv_reciprocalPi :
+  sinPiUnevenSamplingIntegral.Equiv reciprocalPiRaw := by
+  exact sinPiStieltjesIntegral_equiv_reciprocalPi
+
+/-! Public evaluated value.
+
+The executable route is the Riemann--Stieltjes presentation: the tangent
+chart supplies the increasing integrator and its finite rational sums reduce
+to the reciprocal of the project’s computable `pi` representation.  This is
+the theorem-facing evaluation of the integral; the equal-dyadic presentation
+below remains available through its explicit FTC/overlap certificates. -/
+def computableSinPiHalfIntegral : RealRaw :=
+  sinPiStieltjesIntegral
+
+theorem computableSinPiHalfIntegral_valid :
+    computableSinPiHalfIntegral.Valid := by
+  exact sinPiStieltjesIntegral_valid
+
+theorem computableSinPiHalfIntegral_equiv_reciprocalPi :
+    computableSinPiHalfIntegral.Equiv reciprocalPiRaw := by
+  exact sinPiStieltjesIntegral_equiv_reciprocalPi
+
+/-! The same value, exposed through the FTC proof rather than the direct
+Riemann--Stieltjes evaluation.  The FTC work is carried by
+`tangentPullbackIntegral_equiv_one`: its dyadic rational integral is shown to
+equal the endpoint difference of `tangentPullbackPrimitive`, and the endpoint
+difference is exactly `1`.  Multiplication by the computable Jacobian factor
+`1 / pi` then gives the original sine integral. -/
+
+theorem computableSinPiHalfIntegral_equiv_reciprocalPi_of_FTC :
+    computableSinPiHalfIntegral.Equiv reciprocalPiRaw := by
+  exact tangentChartIntegral_equiv_reciprocalPi
+
+/-! The completed certificate for the computable route.
+
+The variable `u` is the rational tangent-chart coordinate.  Its circle sine
+is the value of the public `sin (pi*x)` evaluator at the inverse-chart point,
+while `2/(1+u^2)` is the rational Jacobian factor.  The primitive and the
+finite secant estimate below are the constructive FTC argument; the previous
+theorem evaluates the resulting raw integral.  This packages the facts so
+that downstream users can consume the proof without confusing it with the
+still-separate equal-dyadic-in-`x` transport theorem.
+-/
+structure TangentChartSineIntegralCertificate where
+  density : Rat -> Rat
+  primitive : Rat -> Rat
+  density_identity : forall u,
+    density u = rationalCircleSin u * (2 / (1 + u * u))
+  primitive_identity : forall u,
+    primitive u = 1 - rationalCircleCos u
+  primitive_increment : forall {p r : Rat}, p < r ->
+    (primitive r - primitive p) / (r - p) - density p =
+      2 * (r - p) * (1 - p * p - 2 * p * r) /
+        ((1 + p * p) * (1 + p * p) * (1 + r * r))
+  integral : RealRaw
+  integral_valid : integral.Valid
+  integral_value : integral.Equiv reciprocalPiRaw
+
+def tangentChartSineIntegralCertificate : TangentChartSineIntegralCertificate where
+  density := tangentPullbackDensity
+  primitive := tangentPullbackPrimitive
+  density_identity := by
+    intro u
+    unfold tangentPullbackDensity rationalCircleSin
+    have hden : 1 + u * u ≠ 0 :=
+      Rat.ne_of_gt (RationalCircle.Stage.one_add_square_pos u)
+    rw [Rat.div_def, Rat.div_def, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_inv_cancel _ hden]
+  primitive_identity := by
+    intro u
+    unfold tangentPullbackPrimitive rationalCircleCos
+    have hden : 1 + u * u ≠ 0 :=
+      Rat.ne_of_gt (RationalCircle.Stage.one_add_square_pos u)
+    rw [Rat.div_def, Rat.div_def]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_inv_cancel _ hden]
+  primitive_increment := by
+    intro p r hpr
+    exact tangentPullbackPrimitive_secant_identity hpr
+  integral := tangentChartIntegral
+  integral_valid := tangentChartIntegral_valid
+  integral_value := tangentChartIntegral_equiv_reciprocalPi
+
+theorem tangentChartSineIntegralCertificate_integral_is_computableSinPiHalfIntegral :
+    tangentChartSineIntegralCertificate.integral = computableSinPiHalfIntegral := by
+  rfl
+
+theorem tangentChartSineIntegralCertificate_evaluates_to_reciprocalPi :
+    tangentChartSineIntegralCertificate.integral.Equiv reciprocalPiRaw := by
+  exact tangentChartSineIntegralCertificate.integral_value
+
+/-! Once the finite change-of-variables certificate has been proved, the
+public sine integral needs no further endpoint algebra: the chart raw already
+computes `1/pi`.  Keeping this adapter explicit makes the remaining analytic
+work a single transport theorem rather than a second copy of the value proof.
+-/
+theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_tangentChart
+    (S : ArctanSinPiConstruction)
+    (c : Integral.Construction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2))
+    (htransport : (S.halfIntegral c).Equiv tangentChartIntegral) :
+    (S.halfIntegral c).Equiv reciprocalPiRaw := by
+  exact RealRaw.equiv_trans (S.halfIntegral_valid c)
+    tangentChartIntegral_valid reciprocalPiRaw_valid htransport
+    tangentChartIntegral_equiv_reciprocalPi
+
+/-- The finite form of the remaining change-of-variables obligation.  Each
+stage compares the public equal-dyadic sine box directly with the certified
+tangent-chart box.  This is intentionally stronger and more operational than
+an opaque real-number equality: a future proof may establish it by transporting
+the finitely many cells and their rational endpoint bounds. -/
+structure ArctanSinPiConstruction.TangentChartTransport
+    (S : ArctanSinPiConstruction)
+    (c : Integral.Construction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2)) where
+  stage_overlap : forall n,
+    QInterval.Overlaps
+      ((S.halfIntegral c).compute n)
+      (tangentChartIntegral.compute n)
+
+/-! A more useful presentation of the same obligation.  A change-of-variables
+proof normally produces one rational enclosure containing both finite sums,
+not an `Overlaps` proof as a primitive object.  Keeping that enclosure in the
+certificate makes the remaining proof genuinely cellwise: the lower and
+upper bounds can be filled by the finite tangent-chart calculation. -/
+
+structure ArctanSinPiConstruction.TangentChartCommonWitness
+    (S : ArctanSinPiConstruction)
+    (c : Integral.Construction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2)) where
+  witness : Nat -> Rat
+  sine_lo_le : forall n,
+    ((S.halfIntegral c).compute n).lo <= witness n
+  le_sine_hi : forall n,
+    witness n <= ((S.halfIntegral c).compute n).hi
+  chart_lo_le : forall n,
+    (tangentChartIntegral.compute n).lo <= witness n
+  le_chart_hi : forall n,
+    witness n <= (tangentChartIntegral.compute n).hi
+
+theorem ArctanSinPiConstruction.TangentChartCommonWitness.to_transport
+    {S : ArctanSinPiConstruction}
+    {c : Integral.Construction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2)}
+    (h : S.TangentChartCommonWitness c) :
+    S.TangentChartTransport c where
+  stage_overlap := by
+    intro n
+    unfold QInterval.Overlaps
+    constructor
+    · exact Rat.le_trans (h.sine_lo_le n) (h.le_chart_hi n)
+    · exact Rat.le_trans (h.chart_lo_le n) (h.le_sine_hi n)
+
+theorem ArctanSinPiConstruction.TangentChartTransport.equivalent
+    {S : ArctanSinPiConstruction}
+    {c : Integral.Construction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2)}
+    (h : S.TangentChartTransport c) :
+    (S.halfIntegral c).Equiv tangentChartIntegral := by
+  intro n
+  exact (RealRaw.compareAt_overlap_iff
+    (S.halfIntegral c) tangentChartIntegral n n).2 (h.stage_overlap n)
+
+theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_transport
+    (S : ArctanSinPiConstruction)
+    (c : Integral.Construction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2))
+    (h : S.TangentChartTransport c) :
+    (S.halfIntegral c).Equiv reciprocalPiRaw :=
+  S.halfIntegral_equiv_reciprocalPi_of_tangentChart c h.equivalent
+
+theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_commonWitness
+    (S : ArctanSinPiConstruction)
+    (c : Integral.Construction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2))
+    (h : S.TangentChartCommonWitness c) :
+    (S.halfIntegral c).Equiv reciprocalPiRaw :=
+  S.halfIntegral_equiv_reciprocalPi_of_transport c h.to_transport
+
+/-- Assemble the finite transport from the static-dyadic FTC certificate.
+
+The endpoint certificate is the natural output of the primitive proof.  Once
+that endpoint is identified with the tangent-chart raw, the actual public
+equal-dyadic integral is automatically transported to the chart at every
+stage. -/
+theorem ArctanSinPiConstruction.tangentChartTransport_of_staticFTC
+    (S : ArctanSinPiConstruction)
+    (F : RealFunRaw)
+    (h : StaticDyadicEffectiveFTC F S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (c : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (hplan : c.plan = FTC.integralPlanOfStaticDyadicEffectiveFTC h)
+    (endpoint : FTC.EndpointScheduleAgreement F 0 ((1 : Rat) / 2)
+      (FTC.endpointRawOfEffectiveFTC h.toEffectiveFTC))
+    (hendpoint :
+      (endpointDifferenceRaw F 0 ((1 : Rat) / 2)
+        endpoint.endpoint_valid).Equiv tangentChartIntegral) :
+    S.TangentChartTransport c := by
+  have hFTC :=
+    S.halfIntegral_equiv_endpoint_of_staticFTC F h c hplan endpoint
+  have hendpointValid :
+      (endpointDifferenceRaw F 0 ((1 : Rat) / 2)
+        endpoint.endpoint_valid).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using endpoint.endpoint_valid
+  have hintermediate :
+      (S.halfIntegral c).Equiv tangentChartIntegral :=
+    RealRaw.equiv_trans (S.halfIntegral_valid c) hendpointValid
+      tangentChartIntegral_valid hFTC hendpoint
+  exact {
+    stage_overlap := by
+      intro n
+      exact (RealRaw.compareAt_overlap_iff
+        (S.halfIntegral c) tangentChartIntegral n n).1 (hintermediate n) }
 
 /-- `sin (pi*x)` as a function on the rational interval `[0,1/2]`. -/
 def sinPiOnHalf
@@ -3080,6 +5230,2836 @@ theorem halfIntegral_valid
     (halfIntegral C hdefined c).Valid := by
   exact FTC.integral_valid_of_construction c
 
+/-- A dyadic sample replacement computes the same public sine integral.
+
+The replacement `g` may use a specialized evaluator—for example, nested
+radicals at dyadic angles—because the equal-dyadic algorithm never reads its
+values away from the left endpoints of its finite meshes.  Agreement is still
+required at every finite stage and every sample point, so this is a
+constructive algorithm-transport theorem rather than an extensional claim
+about an unrepresented real function. -/
+theorem halfIntegral_equiv_of_dyadic_sample_replacement
+    (C : FunctionRawConstruction)
+    (hdefined : forall x, 0 <= x -> x <= (1 : Rat) / 2 ->
+      C.sinFunctionRaw.definedAt (2 * x))
+    (c : Integral.Construction
+      (sinPiOnHalf C hdefined).toRealFunRaw 0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hplan : c.plan = cg.plan)
+    (hsamples : forall n k,
+      k < (c.plan n).subdivisions ->
+      (sinPiOnHalf C hdefined).toRealFunRaw.compute
+        (leftPoint 0 ((1 : Rat) / 2) (c.plan n).subdivisions k)
+        (c.plan n).evalPrecision =
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2) (c.plan n).subdivisions k)
+        (c.plan n).evalPrecision) :
+    (halfIntegral C hdefined c).Equiv
+      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+  exact Integral.integral_equiv_of_plan_and_samples c cg hplan hsamples
+
+/-- The interval-overlap version of dyadic sample replacement.
+
+This is the form needed by practical finite evaluators: a nested-radical or
+Taylor implementation need only overlap the arctangent-backed sine box at
+each sampled dyadic point.  Exact equality of the two finite boxes is not
+required. -/
+theorem halfIntegral_equiv_of_dyadic_sample_overlap
+    (C : FunctionRawConstruction)
+    (hdefined : forall x, 0 <= x -> x <= (1 : Rat) / 2 ->
+      C.sinFunctionRaw.definedAt (2 * x))
+    (c : Integral.Construction
+      (sinPiOnHalf C hdefined).toRealFunRaw 0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hplan : c.plan = cg.plan)
+    (hsamples : forall n k,
+      k < (c.plan n).subdivisions ->
+      QInterval.Overlaps
+        ((sinPiOnHalf C hdefined).toRealFunRaw.compute
+          (leftPoint 0 ((1 : Rat) / 2)
+            (c.plan n).subdivisions k)
+          (c.plan n).evalPrecision)
+        (g.compute
+          (leftPoint 0 ((1 : Rat) / 2)
+            (c.plan n).subdivisions k)
+          (c.plan n).evalPrecision)) :
+    (halfIntegral C hdefined c).Equiv
+      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+  exact Integral.integral_equiv_of_plan_and_sample_overlaps
+    (by native_decide : (0 : Rat) <= (1 : Rat) / 2)
+    c cg hplan hsamples
+
+/-!
+## The nested-radical dyadic route
+
+The equal-dyadic public integral reads only the points
+`x = k / 2^n` (with the endpoint convention carried by the integral plan).
+After the normalized change of coordinate used by `sin (pi*x)`, the angle
+coordinate is `2*x = k/2^n`.  This is the exact finite input on which a
+successive half-angle implementation may run its nested-square-root
+algorithm.  No claim about the evaluator away from these points is needed.
+-/
+
+theorem sinPi_half_dyadic_normalized_sample
+    {n k : Nat} (hk : k < 2 ^ n) :
+    2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k =
+      (k : Rat) / ((2 ^ n : Nat) : Rat) := by
+  have hpow : 0 < 2 ^ n := Nat.pow_pos (by omega : 0 < 2)
+  have hpowRat : ((2 ^ n : Nat) : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hpow)
+  rw [two_mul_leftPoint_zero_half_eq_leftPoint_zero_one]
+  unfold leftPoint mesh
+  rw [if_neg (Nat.ne_of_gt hpow)]
+  simp only [Rat.zero_add]
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel _ hpowRat]
+
+theorem sinPi_half_dyadic_sample_in_unit
+    {n k : Nat} (hk : k < 2 ^ n) :
+    0 <= 2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k /\
+      2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k <= 1 := by
+  rw [sinPi_half_dyadic_normalized_sample hk]
+  have hpow : 0 < 2 ^ n := Nat.pow_pos (by omega : 0 < 2)
+  have hpowRat : ((2 ^ n : Nat) : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hpow)
+  have hdenpos : 0 < ((2 ^ n : Nat) : Rat) :=
+    (Rat.natCast_pos).2 hpow
+  rw [Rat.div_def]
+  constructor
+  · exact Rat.mul_nonneg
+      (Rat.natCast_nonneg)
+      (Rat.le_of_lt ((Rat.inv_pos).2 hdenpos))
+  · apply Rat.le_of_mul_le_mul_right (c := ((2 ^ n : Nat) : Rat))
+    · rw [Rat.mul_assoc, Rat.inv_mul_cancel _ hpowRat, Rat.mul_one]
+      have hkcast : (k : Rat) <= ((2 ^ n : Nat) : Rat) := by
+        exact_mod_cast (Nat.le_of_lt hk)
+      simpa using hkcast
+    · exact hdenpos
+
+theorem dyadicHalfDomain {n k : Nat} (hk : k < 2 ^ n) :
+    0 <= leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k /\
+      leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k <= (1 : Rat) / 2 := by
+  have h := sinPi_half_dyadic_sample_in_unit hk
+  constructor
+  · apply Rat.le_of_mul_le_mul_left (c := (2 : Rat))
+    · simpa [Rat.zero_mul] using h.1
+    · native_decide
+  · apply Rat.le_of_mul_le_mul_left (c := (2 : Rat))
+    · calc
+        2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k <= 1 := h.2
+        _ = 2 * ((1 : Rat) / 2) := by native_decide
+    · native_decide
+
+/-! Canonical inverse boxes at the actual equal-dyadic sample points.  These
+definitions eliminate a layer of bookkeeping from the nested-radical route:
+the public arctangent sine evaluator is definitionally the circle-sine map of
+this box, and its `[0,1]` bounds follow from the inverse package itself. -/
+
+def dyadicNormalizedBranch {n k : Nat} (hk : k < 2 ^ n) :
+    RationalCircle.GeometricTrig.firstQuadrantBranch
+      (2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k) := by
+  change 0 <= 2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k /\
+    2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k <= 1
+  exact sinPi_half_dyadic_sample_in_unit hk
+
+def dyadicTangentBox
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {n k : Nat} (hk : k < 2 ^ n) : QInterval :=
+  B.tangentRaw.compute
+    (2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k)
+      (dyadicNormalizedBranch hk) n
+
+/-! Precision and geometric depth are separate inputs for the semantic
+proof.  The public sample is at depth `n`, while its interval can be refined
+at any later computation precision `p`. -/
+
+def dyadicTangentBoxAt
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (precision depth k : Nat) (hk : k < 2 ^ depth) : QInterval :=
+  B.tangentRaw.compute
+    (2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+    (dyadicNormalizedBranch hk) precision
+
+theorem dyadicTangentBoxAt_bounds
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (precision depth k : Nat) (hk : k < 2 ^ depth) :
+    subintervalOf (dyadicTangentBoxAt B precision depth k hk) 0 1 := by
+  unfold dyadicTangentBoxAt
+  exact B.tangentAt_stays_in_unitSlope
+    (2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+    (dyadicNormalizedBranch hk) precision
+
+theorem dyadicTangentBox_bounds
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {n k : Nat} (hk : k < 2 ^ n) :
+    subintervalOf (dyadicTangentBox B hk) 0 1 := by
+  unfold dyadicTangentBox
+  change subintervalOf
+    ((B.tangentAt
+      (2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k)
+      (dyadicNormalizedBranch hk)).compute n) 0 1
+  exact B.tangentAt_stays_in_unitSlope
+    (2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k)
+    (dyadicNormalizedBranch hk) n
+
+theorem canonical_dyadic_zero_search
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero) (n : Nat) :
+    ∃ u, rationalTangentWitnessBoxSearch
+      (dyadicTangentBox B (n := n) (k := 0) (by
+        exact Nat.pow_pos (by omega : 0 < 2)))
+      ({ lo := 0, hi := 0 } : QInterval) 0 = some u := by
+  let hk : 0 < 2 ^ n := Nat.pow_pos (by omega : 0 < 2)
+  have hbox : subintervalOf
+      (dyadicTangentBox B hk) 0 1 :=
+    dyadicTangentBox_bounds B hk
+  have hover : QInterval.Overlaps
+      (dyadicTangentBox B hk)
+      ({ lo := 0, hi := 0 } : QInterval) := by
+    have hzero := (RealRaw.compareAt_overlap_iff
+      (B.tangentAt 0
+        RationalCircle.GeometricTrig.firstQuadrantBranch_zero)
+      RealRaw.zero n n).1 (ht n)
+    simpa [dyadicTangentBox,
+      IntegralIdentities.ArctanInverseBisection.tangentRaw,
+      RealRaw.zero, leftPoint, mesh, Rat.zero_add, Rat.add_zero,
+      Rat.zero_mul, Rat.mul_zero] using hzero
+  exact rationalTangentWitnessBoxSearch_complete_of_zero_target
+    hbox hover
+
+theorem canonical_dyadic_zero_search_at
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (precision depth : Nat) (hk : 0 < 2 ^ depth) :
+    ∃ u, rationalTangentWitnessBoxSearch
+      (dyadicTangentBoxAt B precision depth 0 hk)
+      ({ lo := 0, hi := 0 } : QInterval) 0 = some u := by
+  have hbox : subintervalOf
+      (dyadicTangentBoxAt B precision depth 0 hk) 0 1 :=
+    dyadicTangentBoxAt_bounds B precision depth 0 hk
+  have hover : QInterval.Overlaps
+      (dyadicTangentBoxAt B precision depth 0 hk)
+      ({ lo := 0, hi := 0 } : QInterval) := by
+    have hzero := (RealRaw.compareAt_overlap_iff
+      (B.tangentAt 0
+        RationalCircle.GeometricTrig.firstQuadrantBranch_zero)
+      RealRaw.zero precision precision).1 (ht precision)
+    simpa [dyadicTangentBoxAt,
+      IntegralIdentities.ArctanInverseBisection.tangentRaw,
+      RealRaw.zero, leftPoint, mesh, Rat.zero_add, Rat.add_zero,
+      Rat.zero_mul, Rat.mul_zero] using hzero
+  exact rationalTangentWitnessBoxSearch_complete_of_zero_target
+    hbox hover
+
+theorem sinPiRawOfArctan_dyadic_compute_eq_circle
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {n k : Nat} (hk : k < 2 ^ n) :
+    (sinPiRawOfArctan B
+      (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k)
+      (dyadicHalfDomain hk)).compute n =
+      rationalCircleSinInterval (dyadicTangentBox B hk) := by
+  rfl
+
+/-! An executable nested-radical table.  The table is total so that its raw
+algorithm can be inspected before its invariant is proved.  On the valid
+dyadic range, even indices reuse the preceding level and odd indices apply
+the positive half-angle square roots; the upper half is recovered by the
+symmetry `sin (pi-theta)=sin theta`, `cos (pi-theta)=-cos theta`. -/
+
+def dyadicNestedRadicalNeg (I : QInterval) : QInterval :=
+  { lo := -I.hi, hi := -I.lo }
+
+def dyadicNestedRadicalTable : Nat -> Nat -> QInterval × QInterval
+  | 0, k =>
+      if k = 0 then
+        ({ lo := 0, hi := 0 }, { lo := 1, hi := 1 })
+      else if k = 1 then
+        ({ lo := 1, hi := 1 }, { lo := 0, hi := 0 })
+      else
+        ({ lo := 0, hi := 1 }, { lo := -1, hi := 1 })
+  | n + 1, k =>
+      if k % 2 = 0 then
+        dyadicNestedRadicalTable n (k / 2)
+      else
+        let bound := 2 ^ n
+        let reflected := if k <= bound then k else 2 * bound - k
+        let parent := dyadicNestedRadicalTable n reflected
+        let parentCos :=
+          if k <= bound then parent.2 else dyadicNestedRadicalNeg parent.2
+        let sinInput : QInterval :=
+          { lo := (1 - parentCos.hi) / 2,
+            hi := (1 - parentCos.lo) / 2 }
+        let cosInput : QInterval :=
+          { lo := (1 + parentCos.lo) / 2,
+            hi := (1 + parentCos.hi) / 2 }
+        let sine := sqrtOnUnitEvalIntervalTotal sinInput (n + 1)
+        let cosine := sqrtOnUnitEvalIntervalTotal cosInput (n + 1)
+        if k <= bound then (sine, cosine)
+        else (sine, dyadicNestedRadicalNeg cosine)
+  termination_by n => n
+
+def dyadicNestedRadicalSinAt (n k : Nat) : QInterval :=
+  (dyadicNestedRadicalTable n k).1
+
+def dyadicNestedRadicalCosAt (n k : Nat) : QInterval :=
+  (dyadicNestedRadicalTable n k).2
+
+theorem dyadicNestedRadicalTable_zero_zero :
+    dyadicNestedRadicalTable 0 0 =
+      ({ lo := 0, hi := 0 }, { lo := 1, hi := 1 }) := by
+  simp [dyadicNestedRadicalTable]
+
+theorem dyadicNestedRadicalTable_zero_one :
+    dyadicNestedRadicalTable 0 1 =
+      ({ lo := 1, hi := 1 }, { lo := 0, hi := 0 }) := by
+  simp [dyadicNestedRadicalTable]
+
+theorem dyadicNestedRadicalSinAt_zero_zero :
+    dyadicNestedRadicalSinAt 0 0 = { lo := 0, hi := 0 } := by
+  simp [dyadicNestedRadicalSinAt, dyadicNestedRadicalTable]
+
+theorem dyadicNestedRadicalSinAt_zero_one :
+    dyadicNestedRadicalSinAt 0 1 = { lo := 1, hi := 1 } := by
+  simp [dyadicNestedRadicalSinAt, dyadicNestedRadicalTable]
+
+theorem dyadicNestedRadicalTable_one_one :
+    dyadicNestedRadicalTable 1 1 =
+      (sqrtOnUnitEvalIntervalTotal { lo := (1 : Rat) / 2, hi := (1 : Rat) / 2 } 1,
+       sqrtOnUnitEvalIntervalTotal { lo := (1 : Rat) / 2, hi := (1 : Rat) / 2 } 1) := by
+  simp [dyadicNestedRadicalTable]
+  constructor <;> congr 1 <;> native_decide
+
+theorem dyadicNestedRadicalTable_succ_even (n k : Nat) :
+    dyadicNestedRadicalTable (n + 1) (2 * k) =
+      dyadicNestedRadicalTable n k := by
+  simp [dyadicNestedRadicalTable]
+
+theorem dyadicNestedRadicalSinAt_succ_even (n k : Nat) :
+    dyadicNestedRadicalSinAt (n + 1) (2 * k) =
+      dyadicNestedRadicalSinAt n k := by
+  simp [dyadicNestedRadicalSinAt, dyadicNestedRadicalTable]
+
+/-! The two indices of the mathematical mesh and the evaluator precision
+must not be conflated.  The first table above is retained as the small
+recurrence exposed in early versions of the blueprint.  The certified raw
+algorithm uses the following version: `precision` is held fixed while the
+half-angle path is recursively rebuilt from level zero.  Thus a later mesh
+stage never reuses a stale low-precision parent box. -/
+
+def dyadicHalfAngleSinInput (I : QInterval) : QInterval :=
+  { lo := (1 - I.hi) / 2, hi := (1 - I.lo) / 2 }
+
+def dyadicHalfAngleCosInput (I : QInterval) : QInterval :=
+  { lo := (1 + I.lo) / 2, hi := (1 + I.hi) / 2 }
+
+theorem dyadicHalfAngleSinInput_width (I : QInterval) :
+    (dyadicHalfAngleSinInput I).width = I.width / 2 := by
+  unfold dyadicHalfAngleSinInput QInterval.width
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm]
+
+theorem dyadicHalfAngleCosInput_width (I : QInterval) :
+    (dyadicHalfAngleCosInput I).width = I.width / 2 := by
+  unfold dyadicHalfAngleCosInput QInterval.width
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm]
+
+theorem dyadicHalfAngle_clipped_square_sum_overlaps_one
+    (I : QInterval) (hI : subintervalOf I (-1) 1) (n : Nat) :
+    QInterval.Overlaps
+      { lo :=
+          sq (sqrtOnUnitEvalIntervalClipped
+            (dyadicHalfAngleSinInput I) n).lo +
+            sq (sqrtOnUnitEvalIntervalClipped
+              (dyadicHalfAngleCosInput I) n).lo,
+        hi :=
+          sq (sqrtOnUnitEvalIntervalClipped
+            (dyadicHalfAngleSinInput I) n).hi +
+            sq (sqrtOnUnitEvalIntervalClipped
+              (dyadicHalfAngleCosInput I) n).hi }
+      ({ lo := 1, hi := 1 } : QInterval) := by
+  have hsinI : subintervalOf
+      (dyadicHalfAngleSinInput I) 0 1 := by
+    unfold dyadicHalfAngleSinInput subintervalOf at *
+    grind
+  have hcosI : subintervalOf
+      (dyadicHalfAngleCosInput I) 0 1 := by
+    unfold dyadicHalfAngleCosInput subintervalOf at *
+    grind
+  have hsin := sqrtOnUnitEvalIntervalClipped_square_contains_input
+    (dyadicHalfAngleSinInput I) hsinI n
+  have hcos := sqrtOnUnitEvalIntervalClipped_square_contains_input
+    (dyadicHalfAngleCosInput I) hcosI n
+  unfold QInterval.Overlaps
+  have hlow := rat_add_le_add hsin.1 hcos.1
+  have hhigh := rat_add_le_add hsin.2 hcos.2
+  constructor
+  · apply Rat.le_trans hlow
+    dsimp [dyadicHalfAngleSinInput, dyadicHalfAngleCosInput]
+    grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, hI.2.1]
+  · calc
+      1 <= (dyadicHalfAngleSinInput I).hi +
+          (dyadicHalfAngleCosInput I).hi := by
+        dsimp [dyadicHalfAngleSinInput, dyadicHalfAngleCosInput]
+        grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, hI.2.1]
+      _ <= _ := hhigh
+
+theorem dyadicHalfAngleSinInput_overlap_of_parent_overlap
+    {I J : QInterval} (hover : QInterval.Overlaps I J) :
+    QInterval.Overlaps
+      (dyadicHalfAngleSinInput I)
+      (dyadicHalfAngleSinInput J) := by
+  unfold dyadicHalfAngleSinInput QInterval.Overlaps at *
+  rw [Rat.div_def, Rat.div_def]
+  have hhalf : (2 : Rat)⁻¹ = 1 / 2 := by native_decide
+  rw [hhalf]
+  constructor <;> grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem dyadicHalfAngleCosInput_overlap_of_parent_overlap
+    {I J : QInterval} (hover : QInterval.Overlaps I J) :
+    QInterval.Overlaps
+      (dyadicHalfAngleCosInput I)
+      (dyadicHalfAngleCosInput J) := by
+  unfold dyadicHalfAngleCosInput QInterval.Overlaps at *
+  rw [Rat.div_def, Rat.div_def]
+  have hhalf : (2 : Rat)⁻¹ = 1 / 2 := by native_decide
+  rw [hhalf]
+  constructor <;> grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem dyadicHalfAngleSqrt_width_le
+    (I : QInterval) (hI : subintervalOf I 0 1) (n : Nat)
+    (hinput : I.width <=
+      1 / (((16 * (n + 1) * (n + 1) : Nat) : Rat))) :
+    (sqrtOnUnitEvalIntervalClipped I n).width <=
+      1 / (((n + 1 : Nat) : Rat)) := by
+  exact Rat.le_trans
+    (sqrtOnUnitEvalIntervalClipped_width_le_total I n)
+    (sqrtOnUnitEvalInterval_width_le I hI n hinput)
+
+def dyadicNestedRadicalParentPrecision (precision : Nat) : Nat :=
+  16 * (precision + 1) * (precision + 1)
+
+theorem dyadicNestedRadicalParentPrecision_input_budget (precision : Nat) :
+    1 / (((2 * (dyadicNestedRadicalParentPrecision precision + 1) : Nat) : Rat)) <=
+      1 / (((16 * (precision + 1) * (precision + 1) : Nat) : Rat)) := by
+  apply FTC.one_div_nat_antitone
+    (n := 16 * (precision + 1) * (precision + 1))
+    (m := 2 * (dyadicNestedRadicalParentPrecision precision + 1))
+  · exact Nat.mul_pos (Nat.mul_pos (by omega) (Nat.succ_pos _)) (Nat.succ_pos _)
+  · unfold dyadicNestedRadicalParentPrecision
+    exact Nat.mul_pos (by omega) (Nat.succ_pos _)
+  · unfold dyadicNestedRadicalParentPrecision
+    omega
+
+theorem dyadicNestedRadicalParentPrecision_output_budget (precision : Nat) :
+    1 / (((dyadicNestedRadicalParentPrecision precision + 1 : Nat) : Rat)) <=
+      1 / (((precision + 1 : Nat) : Rat)) := by
+  apply FTC.one_div_nat_antitone
+    (n := precision + 1)
+    (m := dyadicNestedRadicalParentPrecision precision + 1)
+  · exact Nat.succ_pos _
+  · change 0 < 16 * (precision + 1) * (precision + 1) + 1
+    exact Nat.succ_pos _
+  · unfold dyadicNestedRadicalParentPrecision
+    change precision + 1 ≤ 16 * (precision + 1) * (precision + 1) + 1
+    have hsq : precision + 1 ≤ (precision + 1) * (precision + 1) :=
+      Nat.le_mul_of_pos_right (precision + 1) (Nat.succ_pos _)
+    have hscaled : precision + 1 ≤ 16 * ((precision + 1) * (precision + 1)) :=
+      Nat.le_trans hsq (Nat.le_mul_of_pos_left _ (by omega))
+    have hp : precision ≤ precision + 1 := Nat.le_succ _
+    simpa [Nat.mul_assoc] using Nat.le_trans hp hscaled
+
+def dyadicNestedRadicalTableAt (precision : Nat) : Nat -> Nat -> QInterval × QInterval
+  | 0, k =>
+      if k = 0 then
+        ({ lo := 0, hi := 0 }, { lo := 1, hi := 1 })
+      else if k = 1 then
+        ({ lo := 1, hi := 1 }, { lo := 0, hi := 0 })
+      else
+        ({ lo := 0, hi := 1 }, { lo := -1, hi := 1 })
+  | n + 1, k =>
+      if k % 2 = 0 then
+        dyadicNestedRadicalTableAt
+          (dyadicNestedRadicalParentPrecision precision) n (k / 2)
+      else
+        let bound := 2 ^ n
+        let reflected := if k <= bound then k else 2 * bound - k
+        let parent := dyadicNestedRadicalTableAt
+          (dyadicNestedRadicalParentPrecision precision) n reflected
+        let parentCos :=
+          if k <= bound then parent.2 else dyadicNestedRadicalNeg parent.2
+        let sinInput := dyadicHalfAngleSinInput parentCos
+        let cosInput := dyadicHalfAngleCosInput parentCos
+        let sine := sqrtOnUnitEvalIntervalClipped sinInput precision
+        let cosine := sqrtOnUnitEvalIntervalClipped cosInput precision
+        if k <= bound then (sine, cosine)
+        else (sine, dyadicNestedRadicalNeg cosine)
+  termination_by n => n
+
+def dyadicNestedRadicalStageTable (n k : Nat) : QInterval × QInterval :=
+  dyadicNestedRadicalTableAt n n k
+
+def dyadicNestedRadicalStageSinAt (n k : Nat) : QInterval :=
+  (dyadicNestedRadicalStageTable n k).1
+
+def dyadicNestedRadicalSampleRaw (depth k : Nat) : RealRaw where
+  compute := fun precision =>
+    (dyadicNestedRadicalTableAt precision depth k).1
+
+theorem dyadicNestedRadicalTableAt_succ_odd
+    (precision n k : Nat) (hodd : k % 2 = 1) :
+    dyadicNestedRadicalTableAt precision (n + 1) k =
+      let bound := 2 ^ n
+      let reflected := if k <= bound then k else 2 * bound - k
+      let parent := dyadicNestedRadicalTableAt
+        (dyadicNestedRadicalParentPrecision precision) n reflected
+      let parentCos :=
+        if k <= bound then parent.2 else dyadicNestedRadicalNeg parent.2
+      let sine := sqrtOnUnitEvalIntervalClipped
+        (dyadicHalfAngleSinInput parentCos) precision
+      let cosine := sqrtOnUnitEvalIntervalClipped
+        (dyadicHalfAngleCosInput parentCos) precision
+      if k <= bound then (sine, cosine) else
+        (sine, dyadicNestedRadicalNeg cosine) := by
+  simp [dyadicNestedRadicalTableAt, hodd]
+
+theorem dyadicHalfAngleSinInput_subinterval
+    (I : QInterval) (hI : subintervalOf I (-1) 1) :
+    subintervalOf (dyadicHalfAngleSinInput I) 0 1 := by
+  unfold dyadicHalfAngleSinInput subintervalOf at *
+  rcases hI with ⟨hlo, hord, hhi⟩
+  change 0 <= (1 - I.hi) / 2 ∧
+    (1 - I.hi) / 2 <= (1 - I.lo) / 2 ∧
+      (1 - I.lo) / 2 <= 1
+  constructor
+  · rw [Rat.div_def]
+    have htwo : 0 <= (2 : Rat)⁻¹ := by native_decide
+    grind [Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm]
+  constructor <;> rw [Rat.div_def]
+  · have htwo : 0 <= (2 : Rat)⁻¹ := by native_decide
+    grind [Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm]
+  · have htwo : 0 <= (2 : Rat)⁻¹ := by native_decide
+    grind [Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm]
+
+theorem dyadicHalfAngleCosInput_subinterval
+    (I : QInterval) (hI : subintervalOf I (-1) 1) :
+    subintervalOf (dyadicHalfAngleCosInput I) 0 1 := by
+  unfold dyadicHalfAngleCosInput subintervalOf at *
+  rcases hI with ⟨hlo, hord, hhi⟩
+  change 0 <= (1 + I.lo) / 2 ∧
+    (1 + I.lo) / 2 <= (1 + I.hi) / 2 ∧
+      (1 + I.hi) / 2 <= 1
+  constructor
+  · rw [Rat.div_def]
+    have htwo : 0 <= (2 : Rat)⁻¹ := by native_decide
+    grind [Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm]
+  constructor <;> rw [Rat.div_def]
+  · have htwo : 0 <= (2 : Rat)⁻¹ := by native_decide
+    grind [Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm]
+  · have htwo : 0 <= (2 : Rat)⁻¹ := by native_decide
+    grind [Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm]
+
+theorem dyadicHalfAngleSqrt_overlap_of_parent_overlap
+    {I J : QInterval} (hI : subintervalOf I (-1) 1)
+    (hJ : subintervalOf J (-1) 1)
+    (hover : QInterval.Overlaps I J) (n : Nat) :
+    QInterval.Overlaps
+      (sqrtOnUnitEvalIntervalClipped (dyadicHalfAngleSinInput I) n)
+      (sqrtOnUnitEvalIntervalClipped (dyadicHalfAngleSinInput J) n) := by
+  apply sqrtOnUnitEvalIntervalClipped_overlap_of_input_overlap
+    (dyadicHalfAngleSinInput_subinterval I hI)
+    (dyadicHalfAngleSinInput_subinterval J hJ)
+    (dyadicHalfAngleSinInput_overlap_of_parent_overlap hover)
+
+theorem dyadicHalfAngleCosSqrt_overlap_of_parent_overlap
+    {I J : QInterval} (hI : subintervalOf I (-1) 1)
+    (hJ : subintervalOf J (-1) 1)
+    (hover : QInterval.Overlaps I J) (n : Nat) :
+    QInterval.Overlaps
+      (sqrtOnUnitEvalIntervalClipped (dyadicHalfAngleCosInput I) n)
+      (sqrtOnUnitEvalIntervalClipped (dyadicHalfAngleCosInput J) n) := by
+  apply sqrtOnUnitEvalIntervalClipped_overlap_of_input_overlap
+    (dyadicHalfAngleCosInput_subinterval I hI)
+    (dyadicHalfAngleCosInput_subinterval J hJ)
+    (dyadicHalfAngleCosInput_overlap_of_parent_overlap hover)
+
+theorem dyadicHalfAngleSqrt_overlap_of_parent_overlap_at
+    {I J : QInterval} (hI : subintervalOf I (-1) 1)
+    (hJ : subintervalOf J (-1) 1)
+    (hover : QInterval.Overlaps I J) (n m : Nat) :
+    QInterval.Overlaps
+      (sqrtOnUnitEvalIntervalClipped (dyadicHalfAngleSinInput I) n)
+      (sqrtOnUnitEvalIntervalClipped (dyadicHalfAngleSinInput J) m) := by
+  apply sqrtOnUnitEvalIntervalClipped_overlap_of_input_overlap_at
+    (dyadicHalfAngleSinInput_subinterval I hI)
+    (dyadicHalfAngleSinInput_subinterval J hJ)
+    (dyadicHalfAngleSinInput_overlap_of_parent_overlap hover)
+
+theorem dyadicHalfAngleCosSqrt_overlap_of_parent_overlap_at
+    {I J : QInterval} (hI : subintervalOf I (-1) 1)
+    (hJ : subintervalOf J (-1) 1)
+    (hover : QInterval.Overlaps I J) (n m : Nat) :
+    QInterval.Overlaps
+      (sqrtOnUnitEvalIntervalClipped (dyadicHalfAngleCosInput I) n)
+      (sqrtOnUnitEvalIntervalClipped (dyadicHalfAngleCosInput J) m) := by
+  apply sqrtOnUnitEvalIntervalClipped_overlap_of_input_overlap_at
+    (dyadicHalfAngleCosInput_subinterval I hI)
+    (dyadicHalfAngleCosInput_subinterval J hJ)
+    (dyadicHalfAngleCosInput_overlap_of_parent_overlap hover)
+
+theorem dyadicHalfAngle_child_sine_overlap_of_raw_halfAngle
+    {I J K : QInterval}
+    (precision n j : Nat) (hI : subintervalOf I (-1) 1)
+    (hJ : subintervalOf J (-1) 1)
+    (hJeq : J =
+      (dyadicNestedRadicalTableAt
+        (dyadicNestedRadicalParentPrecision precision) n (2 * j + 1)).2)
+    (hover : QInterval.Overlaps I J)
+    (hraw : K = sqrtOnUnitEvalIntervalClipped
+      (dyadicHalfAngleSinInput I) precision)
+    (hbound : 2 * j + 1 <= 2 ^ n) :
+    QInterval.Overlaps K
+      (dyadicNestedRadicalTableAt precision (n + 1) (2 * j + 1)).1 := by
+  have hodd : (2 * j + 1) % 2 = 1 := by omega
+  have hsqrt := dyadicHalfAngleSqrt_overlap_of_parent_overlap_at
+    hI hJ hover precision precision
+  have htable := dyadicNestedRadicalTableAt_succ_odd
+    precision n (2 * j + 1) hodd
+  have htable' :
+      (dyadicNestedRadicalTableAt precision (n + 1) (2 * j + 1)).1 =
+        sqrtOnUnitEvalIntervalClipped
+          (dyadicHalfAngleSinInput J) precision := by
+    rw [htable]
+    simp [hbound, hJeq]
+  rw [hraw, htable']
+  exact hsqrt
+
+theorem dyadicHalfAngle_child_sine_overlap_of_raw_halfAngle_upper
+    {I J K : QInterval}
+    (precision n k : Nat) (hI : subintervalOf I (-1) 1)
+    (hJ : subintervalOf J (-1) 1)
+    (hJeq : J = dyadicNestedRadicalNeg
+      (dyadicNestedRadicalTableAt
+        (dyadicNestedRadicalParentPrecision precision) n
+        (2 * 2 ^ n - k)).2)
+    (hover : QInterval.Overlaps I J)
+    (hraw : K = sqrtOnUnitEvalIntervalClipped
+      (dyadicHalfAngleSinInput I) precision)
+    (hodd : k % 2 = 1) (hupper : 2 ^ n < k)
+    (hbound : k <= 2 ^ (n + 1)) :
+    QInterval.Overlaps K
+      (dyadicNestedRadicalTableAt precision (n + 1) k).1 := by
+  have hsqrt := dyadicHalfAngleSqrt_overlap_of_parent_overlap_at
+    hI hJ hover precision precision
+  have htable := dyadicNestedRadicalTableAt_succ_odd
+    precision n k hodd
+  have htable' :
+      (dyadicNestedRadicalTableAt precision (n + 1) k).1 =
+        sqrtOnUnitEvalIntervalClipped
+          (dyadicHalfAngleSinInput J) precision := by
+    rw [htable]
+    have hle : ¬ k <= 2 ^ n := by omega
+    simp [hle, hJeq, hupper, hbound]
+  rw [hraw, htable']
+  exact hsqrt
+
+theorem dyadicNestedRadicalNeg_subinterval
+    (I : QInterval) (hI : subintervalOf I 0 1) :
+    subintervalOf (dyadicNestedRadicalNeg I) (-1) 0 := by
+  unfold dyadicNestedRadicalNeg subintervalOf at *
+  rcases hI with ⟨hlo, hord, hhi⟩
+  change -1 <= -I.hi ∧ -I.hi <= -I.lo ∧ -I.lo <= 0
+  grind [Rat.sub_eq_add_neg]
+
+theorem dyadicNestedRadicalNeg_unit_subinterval
+    (I : QInterval) (hI : subintervalOf I (-1) 1) :
+    subintervalOf (dyadicNestedRadicalNeg I) (-1) 1 := by
+  unfold dyadicNestedRadicalNeg subintervalOf at *
+  rcases hI with ⟨hlo, hord, hhi⟩
+  change -1 <= -I.hi ∧ -I.hi <= -I.lo ∧ -I.lo <= 1
+  grind [Rat.sub_eq_add_neg]
+
+theorem dyadicNestedRadicalNeg_width (I : QInterval) :
+    (dyadicNestedRadicalNeg I).width = I.width := by
+  unfold dyadicNestedRadicalNeg QInterval.width
+  grind [Rat.sub_eq_add_neg]
+
+theorem one_div_nat_succ_half (n : Nat) :
+    (1 / ((n + 1 : Nat) : Rat)) / 2 =
+      1 / ((2 * (n + 1) : Nat) : Rat) := by
+  rw [Rat.div_def, Rat.div_def]
+  have hn : ((n + 1 : Nat) : Rat) ≠ 0 := by
+    exact Rat.ne_of_gt ((Rat.natCast_pos).2 (Nat.succ_pos n))
+  have htwo : (2 : Rat) ≠ 0 := by native_decide
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem dyadicNestedRadicalParentPrecision_half_budget (precision : Nat) :
+    (1 / ((dyadicNestedRadicalParentPrecision precision + 1 : Nat) : Rat)) / 2 <=
+      1 / ((16 * (precision + 1) * (precision + 1) : Nat) : Rat) := by
+  rw [one_div_nat_succ_half]
+  exact dyadicNestedRadicalParentPrecision_input_budget precision
+
+theorem dyadicNestedRadicalTableAt_bounds
+    (precision n k : Nat) (hk : k <= 2 ^ n) :
+    subintervalOf (dyadicNestedRadicalTableAt precision n k).1 0 1 ∧
+      subintervalOf (dyadicNestedRadicalTableAt precision n k).2 (-1) 1 := by
+  induction n generalizing precision k with
+  | zero =>
+      have hk' : k = 0 ∨ k = 1 := by omega
+      rcases hk' with rfl | rfl <;>
+        simp [dyadicNestedRadicalTableAt, subintervalOf] <;> native_decide
+  | succ n ih =>
+      by_cases he : k % 2 = 0
+      · have hkrep : k = 2 * (k / 2) := by
+          omega
+        have hhalf : k / 2 <= 2 ^ n := by
+          have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+            rw [Nat.pow_succ]
+            omega
+          rw [hpow] at hk
+          omega
+        rw [hkrep]
+        simp [dyadicNestedRadicalTableAt]
+        exact ih (dyadicNestedRadicalParentPrecision precision) (k / 2) hhalf
+      · let bound := 2 ^ n
+        let parentPrecision := dyadicNestedRadicalParentPrecision precision
+        let reflected := if k <= bound then k else 2 * bound - k
+        have hpow : 2 ^ (n + 1) = 2 * bound := by
+          dsimp [bound]
+          rw [Nat.pow_succ]
+          omega
+        have hkbound : k <= 2 * bound := by
+          rw [← hpow]
+          exact hk
+        have hreflect : reflected <= bound := by
+          dsimp [reflected]
+          split <;> omega
+        have hparent := ih
+          (dyadicNestedRadicalParentPrecision precision) reflected hreflect
+        let parentCos :=
+          if k <= bound then
+            (dyadicNestedRadicalTableAt parentPrecision n reflected).2
+          else
+            dyadicNestedRadicalNeg
+              (dyadicNestedRadicalTableAt parentPrecision n reflected).2
+        have hparentCos : subintervalOf parentCos (-1) 1 := by
+          by_cases hle : k <= bound
+          · simpa [parentCos, hle] using hparent.2
+          · have hneg := dyadicNestedRadicalNeg_unit_subinterval
+              (dyadicNestedRadicalTableAt parentPrecision n reflected).2 hparent.2
+            simpa [parentCos, hle] using hneg
+        have hsinInput := dyadicHalfAngleSinInput_subinterval
+          parentCos hparentCos
+        have hcosInput := dyadicHalfAngleCosInput_subinterval
+          parentCos hparentCos
+        have hsine := sqrtOnUnitEvalIntervalClipped_subinterval
+          (dyadicHalfAngleSinInput parentCos)
+          hsinInput precision
+        have hcos := sqrtOnUnitEvalIntervalClipped_subinterval
+          (dyadicHalfAngleCosInput parentCos)
+          hcosInput precision
+        have hcosneg := dyadicNestedRadicalNeg_subinterval
+          (sqrtOnUnitEvalIntervalClipped
+            (dyadicHalfAngleCosInput parentCos) precision) hcos
+        by_cases hle : k <= bound
+        · simp [dyadicNestedRadicalTableAt, he, bound, reflected, hle]
+          have hpc : parentCos =
+              (dyadicNestedRadicalTableAt parentPrecision n k).2 := by
+            simp [parentCos, parentPrecision, bound, reflected, hle]
+          rw [hpc] at hsine hcos
+          have hsine' : subintervalOf
+              (sqrtOnUnitEvalIntervalClipped
+                (dyadicHalfAngleSinInput
+                  (dyadicNestedRadicalTableAt parentPrecision n k).2) precision) 0 1 := by
+            exact hsine
+          have hcos' : subintervalOf
+              (sqrtOnUnitEvalIntervalClipped
+                (dyadicHalfAngleCosInput
+                  (dyadicNestedRadicalTableAt parentPrecision n k).2) precision) 0 1 := by
+            exact hcos
+          exact ⟨hsine', ⟨by
+            have hlow := hcos'.1
+            have hnegone : (-1 : Rat) <= 0 := by native_decide
+            grind, hcos'.2.1, hcos'.2.2⟩⟩
+        · simp [dyadicNestedRadicalTableAt, he, bound, reflected, hle]
+          have hpc : parentCos = dyadicNestedRadicalNeg
+              (dyadicNestedRadicalTableAt parentPrecision n (2 * bound - k)).2 := by
+            simp [parentCos, parentPrecision, bound, reflected, hle]
+          rw [hpc] at hsine hcosneg
+          have hsine' : subintervalOf
+              (sqrtOnUnitEvalIntervalClipped
+                (dyadicHalfAngleSinInput
+                  (dyadicNestedRadicalNeg
+                    (dyadicNestedRadicalTableAt parentPrecision n (2 * bound - k)).2))
+                precision) 0 1 := by
+            exact hsine
+          have hcosneg' : subintervalOf
+              (dyadicNestedRadicalNeg
+                (sqrtOnUnitEvalIntervalClipped
+                  (dyadicHalfAngleCosInput
+                    (dyadicNestedRadicalNeg
+                      (dyadicNestedRadicalTableAt parentPrecision n (2 * bound - k)).2))
+                  precision))
+              (-1) 0 := by
+            exact hcosneg
+          exact ⟨hsine', ⟨hcosneg'.1, hcosneg'.2.1, by
+            have hupper := hcosneg'.2.2
+            have hone : (-1 : Rat) <= 1 := by native_decide
+            grind⟩⟩
+
+theorem arctanSinPi_nestedRadicalStage_sample_overlap_of_tangent_witness
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {x : Rat} (hx : 0 <= x /\ x <= (1 : Rat) / 2) (n k : Nat)
+    (hk : k <= 2 ^ n) (u : Rat)
+    (hu : (B.tangentRaw.compute (2 * x)
+      (by
+        change RationalCircle.GeometricTrig.firstQuadrantBranch (2 * x)
+        constructor
+        · exact Rat.mul_nonneg (by native_decide) hx.1
+        · have h := Rat.mul_le_mul_of_nonneg_left hx.2
+            (by native_decide : (0 : Rat) <= 2)
+          rw [show (2 : Rat) * (1 / 2) = 1 by native_decide] at h
+          exact h) n).lo <= u /\
+      u <= (B.tangentRaw.compute (2 * x)
+        (by
+          change RationalCircle.GeometricTrig.firstQuadrantBranch (2 * x)
+          constructor
+          · exact Rat.mul_nonneg (by native_decide) hx.1
+          · have h := Rat.mul_le_mul_of_nonneg_left hx.2
+              (by native_decide : (0 : Rat) <= 2)
+            rw [show (2 : Rat) * (1 / 2) = 1 by native_decide] at h
+            exact h) n).hi)
+    (himage : (dyadicNestedRadicalStageSinAt n k).lo <=
+        rationalCircleSin u /\
+      rationalCircleSin u <= (dyadicNestedRadicalStageSinAt n k).hi) :
+    QInterval.Overlaps
+      ((sinPiRawOfArctan B x hx).compute n)
+      (dyadicNestedRadicalStageSinAt n k) := by
+  have hS : subintervalOf (dyadicNestedRadicalStageSinAt n k) 0 1 := by
+    simpa [dyadicNestedRadicalStageSinAt, dyadicNestedRadicalStageTable] using
+      (dyadicNestedRadicalTableAt_bounds n n k hk).1
+  exact arctanSinPi_sample_overlap_of_tangent_witness
+    B hx n (dyadicNestedRadicalStageSinAt n k) hS u hu himage
+
+/-! The narrow-box search is the concrete transport interface for the
+nested-radical sample theorem.  Its only finite input is a successful checked
+search; the preceding localized-grid theorem supplies such a success from an
+overlap and a mesh bound. -/
+theorem arctanSinPi_nestedRadicalStage_sample_overlap_of_box_search
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {x : Rat} (hx : 0 <= x /\ x <= (1 : Rat) / 2)
+    (ht : RationalCircle.GeometricTrig.firstQuadrantBranch (2 * x))
+    (n k m : Nat) (hk : k <= 2 ^ n) (u : Rat)
+    (hsearch : rationalTangentWitnessBoxSearch
+      (B.tangentRaw.compute (2 * x) ht n)
+      (dyadicNestedRadicalStageSinAt n k) m = some u) :
+    QInterval.Overlaps
+      ((sinPiRawOfArctan B x hx).compute n)
+      (dyadicNestedRadicalStageSinAt n k) := by
+  have hw := rationalTangentWitnessBoxSearch_sound_inequalities hsearch
+  apply arctanSinPi_nestedRadicalStage_sample_overlap_of_tangent_witness
+    B hx n k hk u
+  · exact ⟨by simpa using hw.1, by simpa using hw.2.1⟩
+  · exact ⟨hw.2.2.1, hw.2.2.2⟩
+
+theorem arctanSinPi_nestedRadicalStage_sample_overlap_of_canonical_box_search
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {n k : Nat} (hk : k < 2 ^ n) (m : Nat) (u : Rat)
+    (hsearch : rationalTangentWitnessBoxSearch
+      (dyadicTangentBox B hk)
+      (dyadicNestedRadicalStageSinAt n k) m = some u) :
+    QInterval.Overlaps
+      ((sinPiRawOfArctan B
+        (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k)
+        (dyadicHalfDomain hk)).compute n)
+      (dyadicNestedRadicalStageSinAt n k) := by
+  apply arctanSinPi_nestedRadicalStage_sample_overlap_of_box_search
+    B (dyadicHalfDomain hk) (dyadicNormalizedBranch hk) n k m
+    (Nat.le_of_lt hk) u
+  simpa [dyadicTangentBox] using hsearch
+
+theorem arctanSinPi_nestedRadicalSample_overlap_of_box_search_at
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {depth k : Nat} (hk : k < 2 ^ depth)
+    (precision m : Nat) (u : Rat)
+    (hsearch : rationalTangentWitnessBoxSearch
+      (dyadicTangentBoxAt B precision depth k hk)
+      (dyadicNestedRadicalTableAt precision depth k).1 m = some u) :
+    QInterval.Overlaps
+      ((sinPiRawOfArctan B
+        (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+        (dyadicHalfDomain hk)).compute precision)
+      ((dyadicNestedRadicalTableAt precision depth k).1) := by
+  have hw := rationalTangentWitnessBoxSearch_sound_inequalities hsearch
+  have hS : subintervalOf
+      ((dyadicNestedRadicalTableAt precision depth k).1) 0 1 :=
+    (dyadicNestedRadicalTableAt_bounds precision depth k
+      (Nat.le_of_lt hk)).1
+  have htan :
+      (B.tangentRaw.compute
+        (2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+        (dyadicNormalizedBranch hk) precision).lo <= u /\
+      u <= (B.tangentRaw.compute
+        (2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+        (dyadicNormalizedBranch hk) precision).hi := by
+    simpa [dyadicTangentBoxAt] using And.intro hw.1 hw.2.1
+  apply arctanSinPi_sample_overlap_of_tangent_witness
+    B (dyadicHalfDomain hk) precision
+    (dyadicNestedRadicalTableAt precision depth k).1 hS u htan
+  exact ⟨hw.2.2.1, hw.2.2.2⟩
+
+structure DyadicTangentWitnessSchedule
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (depth k : Nat) (hk : k < 2 ^ depth) where
+  witness : Nat -> Rat
+  searchPrecision : Nat -> Nat
+  search : forall precision,
+    rationalTangentWitnessBoxSearch
+      (dyadicTangentBoxAt B precision depth k hk)
+      (dyadicNestedRadicalTableAt precision depth k).1
+      (searchPrecision precision) = some (witness precision)
+
+theorem DyadicTangentWitnessSchedule.to_sample_overlap
+    {B : IntegralIdentities.ArctanInverseBisection}
+    {depth k : Nat} {hk : k < 2 ^ depth}
+    (d : DyadicTangentWitnessSchedule B depth k hk)
+    (precision : Nat) :
+    QInterval.Overlaps
+      ((sinPiRawOfArctan B
+        (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+        (dyadicHalfDomain hk)).compute precision)
+      ((dyadicNestedRadicalTableAt precision depth k).1) := by
+  exact arctanSinPi_nestedRadicalSample_overlap_of_box_search_at
+    B hk precision (d.searchPrecision precision) (d.witness precision)
+    (d.search precision)
+
+theorem arctanSinPi_nestedRadicalSample_equiv_of_search_family
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {depth k : Nat} (hk : k < 2 ^ depth)
+    (hsearch : forall precision,
+      ∃ m u, rationalTangentWitnessBoxSearch
+        (dyadicTangentBoxAt B precision depth k hk)
+        (dyadicNestedRadicalTableAt precision depth k).1 m = some u) :
+    (sinPiRawOfArctan B
+      (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+      (dyadicHalfDomain hk)).Equiv
+      (dyadicNestedRadicalSampleRaw depth k) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro precision
+  obtain ⟨m, u, hu⟩ := hsearch precision
+  apply (RealRaw.compareAt_overlap_iff
+    (sinPiRawOfArctan B
+      (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+      (dyadicHalfDomain hk))
+    (dyadicNestedRadicalSampleRaw depth k) precision precision).2
+  simpa [dyadicNestedRadicalSampleRaw] using
+    arctanSinPi_nestedRadicalSample_overlap_of_box_search_at
+      B hk precision m u hu
+
+theorem arctanSinPi_nestedRadicalSample_equiv_of_witness_schedule
+    {B : IntegralIdentities.ArctanInverseBisection}
+    {depth k : Nat} {hk : k < 2 ^ depth}
+    (d : DyadicTangentWitnessSchedule B depth k hk) :
+    (sinPiRawOfArctan B
+      (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+      (dyadicHalfDomain hk)).Equiv
+      (dyadicNestedRadicalSampleRaw depth k) := by
+  apply arctanSinPi_nestedRadicalSample_equiv_of_search_family B hk
+  intro precision
+  exact ⟨d.searchPrecision precision, d.witness precision,
+    d.search precision⟩
+
+/-! A direct public-integral adapter for the canonical dyadic searches.  This
+form is intentionally smaller than `DyadicNestedRadicalRoute`: it exposes only
+the finite facts an evaluator implementer must provide at the sampled points.
+The proof is entirely stagewise and uses the fixed equal-dyadic plan. -/
+theorem ArctanSinPiConstruction.halfIntegral_equiv_of_canonical_nestedRadical_search
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (hsearch : forall n k (hk : k < (pub.plan n).subdivisions),
+      ∃ m u, rationalTangentWitnessBoxSearch
+        (dyadicTangentBox S.inverse (by
+          simpa [hdyadic, Integral.staticDyadicPlan,
+            Integral.staticDyadicSubdivisions] using hk))
+        (dyadicNestedRadicalStageSinAt n k) m = some u) :
+    (S.halfIntegral pub).Equiv
+      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+  apply Integral.integral_equiv_of_plan_and_sample_overlaps
+    (by native_decide : (0 : Rat) <= (1 : Rat) / 2)
+    pub cg hplan
+  intro n k hk
+  obtain ⟨m, u, hu⟩ := hsearch n k hk
+  have hover := arctanSinPi_nestedRadicalStage_sample_overlap_of_canonical_box_search
+    S.inverse
+    (by simpa [hdyadic, Integral.staticDyadicPlan,
+      Integral.staticDyadicSubdivisions] using hk) m u hu
+  have he := hevaluator n k hk
+  rw [he]
+  have hk' : k < 2 ^ n := by
+    simpa [hdyadic, Integral.staticDyadicPlan,
+      Integral.staticDyadicSubdivisions] using hk
+  have hxdy := dyadicHalfDomain hk'
+  simp only [hdyadic, Integral.staticDyadicPlan,
+    Integral.staticDyadicSubdivisions]
+  rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+    S.onHalf hxdy n]
+  change QInterval.Overlaps
+    ((sinPiRawOfArctan S.inverse
+      (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k) hxdy).compute n)
+    (dyadicNestedRadicalStageSinAt n k)
+  exact hover
+
+/-! Semantic form of the same bridge.  The remaining half-angle theorem may
+be proved directly as an equivalence of raw computations, without first
+constructing a rational tangent witness.  At the public integral level only
+the stagewise overlap is used; this is useful when the geometric proof is
+more naturally stated as an induction on the nested-radical table. -/
+theorem ArctanSinPiConstruction.halfIntegral_equiv_of_nestedRadical_semantics
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (hsemantic : forall n k (hk : k < (pub.plan n).subdivisions),
+      (sinPiRawOfArctan S.inverse
+        (leftPoint 0 ((1 : Rat) / 2)
+          (2 ^ n) k) (dyadicHalfDomain (by
+            simpa [hdyadic, Integral.staticDyadicPlan,
+              Integral.staticDyadicSubdivisions] using hk))).Equiv
+        { compute := fun _ => dyadicNestedRadicalStageSinAt n k }) :
+    (S.halfIntegral pub).Equiv
+      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+  apply Integral.integral_equiv_of_plan_and_sample_overlaps
+    (by native_decide : (0 : Rat) <= (1 : Rat) / 2)
+    pub cg hplan
+  intro n k hk
+  have he := hevaluator n k hk
+  rw [he]
+  have hk' : k < 2 ^ n := by
+    simpa [hdyadic, Integral.staticDyadicPlan,
+      Integral.staticDyadicSubdivisions] using hk
+  have hsem := hsemantic n k hk
+  have hover := (RealRaw.compareAt_overlap_iff
+    (sinPiRawOfArctan S.inverse
+      (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k)
+      (dyadicHalfDomain hk'))
+    { compute := fun _ => dyadicNestedRadicalStageSinAt n k } n n).1
+    (hsem n)
+  simp only [hdyadic, Integral.staticDyadicPlan,
+    Integral.staticDyadicSubdivisions]
+  rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+    S.onHalf (dyadicHalfDomain hk') n]
+  exact hover
+
+theorem ArctanSinPiConstruction.halfIntegral_equiv_of_precisionAware_nestedRadical_semantics
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+      dyadicNestedRadicalStageSinAt n k)
+    (hsemantic : forall (n k : Nat) (hk : k < 2 ^ n),
+      (sinPiRawOfArctan S.inverse
+        (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k)
+        (dyadicHalfDomain hk)).Equiv
+        (dyadicNestedRadicalSampleRaw n k)) :
+    (S.halfIntegral pub).Equiv
+      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+  apply Integral.integral_equiv_of_plan_and_sample_overlaps
+    (by native_decide : (0 : Rat) <= (1 : Rat) / 2)
+    pub cg hplan
+  intro n k hk
+  have he := hevaluator n k hk
+  rw [he]
+  have hk' : k < 2 ^ n := by
+    simpa [hdyadic, Integral.staticDyadicPlan,
+      Integral.staticDyadicSubdivisions] using hk
+  have hsem := hsemantic n k hk'
+  have hover := (RealRaw.compareAt_overlap_iff
+    (sinPiRawOfArctan S.inverse
+      (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k)
+      (dyadicHalfDomain hk'))
+    (dyadicNestedRadicalSampleRaw n k) n n).1
+    (hsem n)
+  simp only [hdyadic, Integral.staticDyadicPlan,
+    Integral.staticDyadicSubdivisions]
+  rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+    S.onHalf (dyadicHalfDomain hk') n]
+  change QInterval.Overlaps
+    ((sinPiRawOfArctan S.inverse
+      (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k)
+      (dyadicHalfDomain hk')).compute n)
+    (dyadicNestedRadicalTableAt n n k).1
+  simpa [dyadicNestedRadicalSampleRaw,
+    dyadicNestedRadicalStageSinAt, dyadicNestedRadicalStageTable] using hover
+
+theorem dyadicNestedRadicalTableAt_sin_width_pos
+    (precision n k : Nat) (hk : k < 2 ^ n) (hpos : 0 < k) :
+    0 < (dyadicNestedRadicalTableAt precision n k).1.width := by
+  induction n generalizing precision k with
+  | zero => omega
+  | succ n ih =>
+      by_cases he : k % 2 = 0
+      · have hkrep : k = 2 * (k / 2) := by omega
+        have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+          rw [Nat.pow_succ]
+          omega
+        have hhalf : k / 2 < 2 ^ n := by
+          rw [hpow] at hk
+          omega
+        have hpos' : 0 < k / 2 := by omega
+        rw [hkrep]
+        simp [dyadicNestedRadicalTableAt]
+        exact ih (dyadicNestedRadicalParentPrecision precision)
+          (k / 2) hhalf hpos'
+      · let bound := 2 ^ n
+        let parentPrecision := dyadicNestedRadicalParentPrecision precision
+        let reflected := if k <= bound then k else 2 * bound - k
+        have hpow : 2 ^ (n + 1) = 2 * bound := by
+          dsimp [bound]
+          rw [Nat.pow_succ]
+          omega
+        have hkbound : k <= 2 * bound := by
+          rw [← hpow]
+          exact Nat.le_of_lt hk
+        have hreflect : reflected <= bound := by
+          dsimp [reflected]
+          split <;> omega
+        have hbounds := dyadicNestedRadicalTableAt_bounds
+          parentPrecision n reflected hreflect
+        let parentCos :=
+          if k <= bound then
+            (dyadicNestedRadicalTableAt parentPrecision n reflected).2
+          else
+            dyadicNestedRadicalNeg
+              (dyadicNestedRadicalTableAt parentPrecision n reflected).2
+        have hparentCos : subintervalOf parentCos (-1) 1 := by
+          by_cases hle : k <= bound
+          · simpa [parentCos, hle] using hbounds.2
+          · have hneg := dyadicNestedRadicalNeg_unit_subinterval
+              (dyadicNestedRadicalTableAt parentPrecision n reflected).2 hbounds.2
+            simpa [parentCos, hle] using hneg
+        have hinput := dyadicHalfAngleSinInput_subinterval
+          parentCos hparentCos
+        by_cases hle : k <= bound
+        · simp [dyadicNestedRadicalTableAt, he, bound, reflected, hle]
+          have hpc : parentCos =
+              (dyadicNestedRadicalTableAt parentPrecision n k).2 := by
+            simp [parentCos, parentPrecision, bound, reflected, hle]
+          rw [hpc] at hinput
+          exact sqrtOnUnitEvalIntervalClipped_width_pos
+            (dyadicHalfAngleSinInput
+              (dyadicNestedRadicalTableAt parentPrecision n k).2)
+            hinput precision
+        · simp [dyadicNestedRadicalTableAt, he, bound, reflected, hle]
+          have hpc : parentCos = dyadicNestedRadicalNeg
+              (dyadicNestedRadicalTableAt parentPrecision n (2 * bound - k)).2 := by
+            simp [parentCos, parentPrecision, bound, reflected, hle]
+          rw [hpc] at hinput
+          exact sqrtOnUnitEvalIntervalClipped_width_pos
+            (dyadicHalfAngleSinInput
+              (dyadicNestedRadicalNeg
+                (dyadicNestedRadicalTableAt parentPrecision n (2 * bound - k)).2))
+            hinput precision
+
+theorem dyadicNestedRadicalStageSinAt_width_pos
+    {n k : Nat} (hk : k < 2 ^ n) (hpos : 0 < k) :
+    0 < (dyadicNestedRadicalStageSinAt n k).width := by
+  exact dyadicNestedRadicalTableAt_sin_width_pos n n k hk hpos
+
+theorem canonical_dyadic_overlap_of_halfAngle_outer_tangent
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {n k : Nat} (hk : k < 2 ^ n)
+    {C : QInterval} (hC : subintervalOf C 0 1)
+    {s c : Rat}
+    (houter : (dyadicTangentBox B hk).ContainsInterval
+      (rationalHalfAngleTangentInterval
+        (dyadicNestedRadicalStageSinAt n k)
+        C))
+    (hs : 0 <= s) (hc : 0 <= c)
+    (hcircle : s * s + c * c = 1)
+    (hsS : (dyadicNestedRadicalStageSinAt n k).lo <= s /\
+      s <= (dyadicNestedRadicalStageSinAt n k).hi)
+    (hcC : C.lo <= c /\ c <= C.hi) :
+    QInterval.Overlaps
+    (rationalCircleSinInterval (dyadicTangentBox B hk))
+      (dyadicNestedRadicalStageSinAt n k) := by
+  apply rationalCircleSinInterval_overlap_of_halfAngle_boxes_of_outer_tangent
+    (dyadicTangentBox_bounds B hk)
+    (by
+      exact (dyadicNestedRadicalTableAt_bounds n n k
+        (Nat.le_of_lt hk)).1)
+    hC houter hs hc hcircle hsS hcC
+
+/-! A named, finite certificate for one interior dyadic cell.  The
+certificate deliberately contains only rational boxes and rational algebra:
+`C` encloses the companion cosine, `(s,c)` is a rational point on the unit
+circle, and `houter` places the resulting half-angle tangent box inside the
+inverse tangent box.  No completed real number or continuity theorem is
+hidden in this interface. -/
+structure CanonicalDyadicHalfAngleCertificate
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (n k : Nat) (hk : k < 2 ^ n) where
+  cosineBox : QInterval
+  cosineBox_subinterval : subintervalOf cosineBox 0 1
+  sineWitness : Rat
+  cosineWitness : Rat
+  sine_nonneg : 0 <= sineWitness
+  cosine_nonneg : 0 <= cosineWitness
+  circle_identity :
+    sineWitness * sineWitness + cosineWitness * cosineWitness = 1
+  sine_contains :
+    (dyadicNestedRadicalStageSinAt n k).lo <= sineWitness /\
+      sineWitness <= (dyadicNestedRadicalStageSinAt n k).hi
+  cosine_contains :
+    cosineBox.lo <= cosineWitness /\ cosineWitness <= cosineBox.hi
+  outer_tangent_contains :
+    (dyadicTangentBox B hk).ContainsInterval
+      (rationalHalfAngleTangentInterval
+        (dyadicNestedRadicalStageSinAt n k) cosineBox)
+
+theorem canonical_dyadic_overlap_of_halfAngle_outer_tangent_at
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {precision depth k : Nat} (hk : k < 2 ^ depth)
+    {C : QInterval} (hC : subintervalOf C 0 1)
+    {s c : Rat}
+    (houter : (dyadicTangentBoxAt B precision depth k hk).ContainsInterval
+      (rationalHalfAngleTangentInterval
+        ((dyadicNestedRadicalTableAt precision depth k).1) C))
+    (hs : 0 <= s) (hc : 0 <= c)
+    (hcircle : s * s + c * c = 1)
+    (hsS : (dyadicNestedRadicalTableAt precision depth k).1.lo <= s /\
+      s <= (dyadicNestedRadicalTableAt precision depth k).1.hi)
+    (hcC : C.lo <= c /\ c <= C.hi) :
+    QInterval.Overlaps
+      (rationalCircleSinInterval
+        (dyadicTangentBoxAt B precision depth k hk))
+      ((dyadicNestedRadicalTableAt precision depth k).1) := by
+  apply rationalCircleSinInterval_overlap_of_halfAngle_boxes_of_outer_tangent
+    (dyadicTangentBoxAt_bounds B precision depth k hk)
+    (dyadicNestedRadicalTableAt_bounds precision depth k
+      (Nat.le_of_lt hk)).1
+    hC houter hs hc hcircle hsS hcC
+
+structure CanonicalDyadicHalfAngleCertificateAt
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (precision depth k : Nat) (hk : k < 2 ^ depth) where
+  cosineBox : QInterval
+  cosineBox_subinterval : subintervalOf cosineBox 0 1
+  sineWitness : Rat
+  cosineWitness : Rat
+  sine_nonneg : 0 <= sineWitness
+  cosine_nonneg : 0 <= cosineWitness
+  circle_identity :
+    sineWitness * sineWitness + cosineWitness * cosineWitness = 1
+  sine_contains :
+    (dyadicNestedRadicalTableAt precision depth k).1.lo <= sineWitness /\
+      sineWitness <= (dyadicNestedRadicalTableAt precision depth k).1.hi
+  cosine_contains :
+    cosineBox.lo <= cosineWitness /\ cosineWitness <= cosineBox.hi
+  outer_tangent_contains :
+    (dyadicTangentBoxAt B precision depth k hk).ContainsInterval
+      (rationalHalfAngleTangentInterval
+        ((dyadicNestedRadicalTableAt precision depth k).1) cosineBox)
+
+def canonical_dyadic_certificate_at_of_rational_witness
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {precision depth k : Nat} (hk : k < 2 ^ depth)
+    (u : Rat)
+    (hu0 : 0 <= u) (hu1 : u <= 1)
+    (hsine : (dyadicNestedRadicalTableAt precision depth k).1.lo <=
+        rationalCircleSin u /\
+      rationalCircleSin u <=
+        (dyadicNestedRadicalTableAt precision depth k).1.hi)
+    (houter : (dyadicTangentBoxAt B precision depth k hk).ContainsInterval
+      (rationalHalfAngleTangentInterval
+        ((dyadicNestedRadicalTableAt precision depth k).1)
+        { lo := rationalCircleCos u, hi := rationalCircleCos u })) :
+    CanonicalDyadicHalfAngleCertificateAt B precision depth k hk := by
+  have hsc := rationalCircleSin_bounds hu0 hu1
+  have hcc := rationalCircleCos_bounds hu0 hu1
+  refine ⟨({ lo := rationalCircleCos u, hi := rationalCircleCos u } : QInterval),
+    ?_, rationalCircleSin u, rationalCircleCos u, hsc.1, hcc.1,
+    rationalCircleSin_sq_add_cos_sq u, hsine, ?_, houter⟩
+  · exact ⟨hcc.1, Rat.le_refl, hcc.2⟩
+  · exact ⟨Rat.le_refl, Rat.le_refl⟩
+
+def canonicalDyadicCertificateAdmissibleBool
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (precision depth k : Nat) (hk : k < 2 ^ depth) (u : Rat) : Bool :=
+  (0 <= u) && (u <= 1) &&
+    ((dyadicNestedRadicalTableAt precision depth k).1.lo <=
+      rationalCircleSin u) &&
+    (rationalCircleSin u <=
+      (dyadicNestedRadicalTableAt precision depth k).1.hi) &&
+    ((dyadicTangentBoxAt B precision depth k hk).lo <=
+      (rationalHalfAngleTangentInterval
+        ((dyadicNestedRadicalTableAt precision depth k).1)
+        ({ lo := rationalCircleCos u, hi := rationalCircleCos u } : QInterval)).lo) &&
+    ((rationalHalfAngleTangentInterval
+        ((dyadicNestedRadicalTableAt precision depth k).1)
+        ({ lo := rationalCircleCos u, hi := rationalCircleCos u } : QInterval)).hi <=
+      (dyadicTangentBoxAt B precision depth k hk).hi)
+
+def canonicalDyadicCertificateSearchAt
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (precision depth k : Nat) (hk : k < 2 ^ depth)
+    (candidates : List Rat) : Option Rat :=
+  match candidates with
+  | [] => none
+  | u :: rest =>
+      match canonicalDyadicCertificateAdmissibleBool B precision depth k hk u with
+      | true =>
+        some u
+      | false =>
+        canonicalDyadicCertificateSearchAt B precision depth k hk rest
+
+theorem canonical_dyadic_search_of_halfAngle_certificate_at
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {precision depth k : Nat} {hk : k < 2 ^ depth} (hpos : 0 < k)
+    (h : CanonicalDyadicHalfAngleCertificateAt B precision depth k hk) :
+    ∃ m u, rationalTangentWitnessBoxSearch
+      (dyadicTangentBoxAt B precision depth k hk)
+      (dyadicNestedRadicalTableAt precision depth k).1 m = some u := by
+  have hover : QInterval.Overlaps
+      (rationalCircleSinInterval
+        (dyadicTangentBoxAt B precision depth k hk))
+      ((dyadicNestedRadicalTableAt precision depth k).1) :=
+    canonical_dyadic_overlap_of_halfAngle_outer_tangent_at B hk
+      h.cosineBox_subinterval h.outer_tangent_contains
+      h.sine_nonneg h.cosine_nonneg h.circle_identity
+      h.sine_contains h.cosine_contains
+  apply exists_rationalTangentWitnessBoxSearch_of_overlap_of_positive_width
+    (dyadicTangentBoxAt_bounds B precision depth k hk)
+  · exact (dyadicNestedRadicalTableAt_bounds precision depth k
+      (Nat.le_of_lt hk)).1
+  · exact hover
+  · exact dyadicNestedRadicalTableAt_sin_width_pos
+      precision depth k hk hpos
+
+theorem canonical_dyadic_search_of_halfAngle_certificate_at_family
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {depth k : Nat} (hk : k < 2 ^ depth) (hpos : 0 < k)
+    (hcertificate : forall precision,
+      CanonicalDyadicHalfAngleCertificateAt B precision depth k hk) :
+    forall precision, ∃ m u, rationalTangentWitnessBoxSearch
+      (dyadicTangentBoxAt B precision depth k hk)
+      (dyadicNestedRadicalTableAt precision depth k).1 m = some u := by
+  intro precision
+  exact canonical_dyadic_search_of_halfAngle_certificate_at B hpos
+    (hcertificate precision)
+
+theorem canonical_dyadic_search_of_overlap_at
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {precision depth k : Nat} (hk : k < 2 ^ depth) (hpos : 0 < k)
+    (hover : QInterval.Overlaps
+      (rationalCircleSinInterval
+        (dyadicTangentBoxAt B precision depth k hk))
+      ((dyadicNestedRadicalTableAt precision depth k).1)) :
+    ∃ m u, rationalTangentWitnessBoxSearch
+      (dyadicTangentBoxAt B precision depth k hk)
+      (dyadicNestedRadicalTableAt precision depth k).1 m = some u := by
+  apply exists_rationalTangentWitnessBoxSearch_of_overlap_of_positive_width
+    (dyadicTangentBoxAt_bounds B precision depth k hk)
+  · exact (dyadicNestedRadicalTableAt_bounds precision depth k
+      (Nat.le_of_lt hk)).1
+  · exact hover
+  · exact dyadicNestedRadicalTableAt_sin_width_pos
+      precision depth k hk hpos
+
+theorem canonical_dyadic_search_of_overlap_at_family
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {depth k : Nat} (hk : k < 2 ^ depth) (hpos : 0 < k)
+    (hover : forall precision, QInterval.Overlaps
+      (rationalCircleSinInterval
+        (dyadicTangentBoxAt B precision depth k hk))
+      ((dyadicNestedRadicalTableAt precision depth k).1)) :
+    forall precision, ∃ m u, rationalTangentWitnessBoxSearch
+      (dyadicTangentBoxAt B precision depth k hk)
+      (dyadicNestedRadicalTableAt precision depth k).1 m = some u := by
+  intro precision
+  exact canonical_dyadic_search_of_overlap_at B hk hpos
+    (hover precision)
+
+theorem arctanSinPi_nestedRadicalSample_equiv_of_overlap_family
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    {depth k : Nat} (hk : k < 2 ^ depth)
+    (hover : 0 < k -> forall precision, QInterval.Overlaps
+      (rationalCircleSinInterval
+        (dyadicTangentBoxAt B precision depth k hk))
+      ((dyadicNestedRadicalTableAt precision depth k).1)) :
+    (sinPiRawOfArctan B
+      (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+      (dyadicHalfDomain hk)).Equiv
+      (dyadicNestedRadicalSampleRaw depth k) := by
+  apply arctanSinPi_nestedRadicalSample_equiv_of_search_family B hk
+  intro precision
+  by_cases hkzero : k = 0
+  · subst k
+    obtain ⟨u, hu⟩ := canonical_dyadic_zero_search_at B ht0 precision depth
+      (Nat.pow_pos (by omega : 0 < 2))
+    have hzero : forall (precision level : Nat),
+        (dyadicNestedRadicalTableAt precision level 0).1 =
+          ({ lo := 0, hi := 0 } : QInterval) := by
+      intro precision level
+      induction level generalizing precision with
+      | zero => simp [dyadicNestedRadicalTableAt]
+      | succ level ih =>
+          simp [dyadicNestedRadicalTableAt]
+          exact ih (dyadicNestedRadicalParentPrecision precision)
+    exact ⟨0, u, by simpa [hzero] using hu⟩
+  · exact canonical_dyadic_search_of_overlap_at B hk (by omega)
+      (hover (by omega) precision)
+
+theorem dyadicNestedRadicalTableAt_zero_sin
+    (precision depth : Nat) :
+    (dyadicNestedRadicalTableAt precision depth 0).1 =
+      ({ lo := 0, hi := 0 } : QInterval) := by
+  induction depth generalizing precision with
+  | zero => simp [dyadicNestedRadicalTableAt]
+  | succ depth ih =>
+      simp [dyadicNestedRadicalTableAt]
+      exact ih (dyadicNestedRadicalParentPrecision precision)
+
+theorem dyadicNestedRadical_zero_sample_overlap_of_endpoint
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (precision depth : Nat) (hk : 0 < 2 ^ depth) :
+    QInterval.Overlaps
+      ((sinPiRawOfArctan B
+        (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) 0)
+        (dyadicHalfDomain (by omega))).compute precision)
+      (dyadicNestedRadicalTableAt precision depth 0).1 := by
+  obtain ⟨u, hu⟩ := canonical_dyadic_zero_search_at B ht0 precision depth hk
+  have hu' : rationalTangentWitnessBoxSearch
+      (dyadicTangentBoxAt B precision depth 0 hk)
+      (dyadicNestedRadicalTableAt precision depth 0).1 0 = some u := by
+    simpa [dyadicNestedRadicalTableAt_zero_sin] using hu
+  have hbox := arctanSinPi_nestedRadicalSample_overlap_of_box_search_at
+    B (by omega : 0 < 2 ^ depth) precision 0 u hu'
+  simpa [dyadicNestedRadicalTableAt_zero_sin] using hbox
+
+theorem canonical_dyadic_search_at_family
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    {depth k : Nat} (hk : k < 2 ^ depth)
+    (hcertificate : 0 < k -> forall precision,
+      CanonicalDyadicHalfAngleCertificateAt B precision depth k hk) :
+    forall precision, ∃ m u, rationalTangentWitnessBoxSearch
+      (dyadicTangentBoxAt B precision depth k hk)
+      (dyadicNestedRadicalTableAt precision depth k).1 m = some u := by
+  intro precision
+  by_cases hkzero : k = 0
+  · subst k
+    obtain ⟨u, hu⟩ := canonical_dyadic_zero_search_at B ht0 precision depth
+      (Nat.pow_pos (by omega : 0 < 2))
+    have hzero := dyadicNestedRadicalTableAt_zero_sin precision depth
+    exact ⟨0, u, by simpa [hzero] using hu⟩
+  · exact canonical_dyadic_search_of_halfAngle_certificate_at B
+      (by omega) (hcertificate (by omega) precision)
+
+theorem arctanSinPi_nestedRadicalSample_equiv_of_certificate_family
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    {depth k : Nat} (hk : k < 2 ^ depth)
+    (hcertificate : 0 < k -> forall precision,
+      CanonicalDyadicHalfAngleCertificateAt B precision depth k hk) :
+    (sinPiRawOfArctan B
+      (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+      (dyadicHalfDomain hk)).Equiv
+      (dyadicNestedRadicalSampleRaw depth k) := by
+  apply arctanSinPi_nestedRadicalSample_equiv_of_search_family B hk
+  exact canonical_dyadic_search_at_family B ht0 hk hcertificate
+
+theorem canonical_dyadic_search_of_overlap_of_positive_width
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {n k : Nat} (hk : k < 2 ^ n)
+    (hover : QInterval.Overlaps
+      (rationalCircleSinInterval (dyadicTangentBox B hk))
+      (dyadicNestedRadicalStageSinAt n k))
+    (hwidth : 0 < (dyadicNestedRadicalStageSinAt n k).width) :
+    ∃ m u, rationalTangentWitnessBoxSearch
+      (dyadicTangentBox B hk)
+      (dyadicNestedRadicalStageSinAt n k) m = some u := by
+  apply exists_rationalTangentWitnessBoxSearch_of_overlap_of_positive_width
+    (dyadicTangentBox_bounds B hk)
+  · exact (dyadicNestedRadicalTableAt_bounds n n k (Nat.le_of_lt hk)).1
+  · exact hover
+  · exact hwidth
+
+theorem canonical_dyadic_search_of_overlap_of_interior
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {n k : Nat} (hk : k < 2 ^ n) (hpos : 0 < k)
+    (hover : QInterval.Overlaps
+      (rationalCircleSinInterval (dyadicTangentBox B hk))
+      (dyadicNestedRadicalStageSinAt n k)) :
+    ∃ m u, rationalTangentWitnessBoxSearch
+      (dyadicTangentBox B hk)
+      (dyadicNestedRadicalStageSinAt n k) m = some u := by
+  exact canonical_dyadic_search_of_overlap_of_positive_width B hk hover
+    (dyadicNestedRadicalStageSinAt_width_pos hk hpos)
+
+theorem canonical_dyadic_search_of_halfAngle_certificate
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {n k : Nat} {hk : k < 2 ^ n} (hpos : 0 < k)
+    (h : CanonicalDyadicHalfAngleCertificate B n k hk) :
+    ∃ m u, rationalTangentWitnessBoxSearch
+      (dyadicTangentBox B hk)
+      (dyadicNestedRadicalStageSinAt n k) m = some u := by
+  have hover : QInterval.Overlaps
+      (rationalCircleSinInterval (dyadicTangentBox B hk))
+      (dyadicNestedRadicalStageSinAt n k) :=
+    canonical_dyadic_overlap_of_halfAngle_outer_tangent B hk
+      h.cosineBox_subinterval h.outer_tangent_contains
+      h.sine_nonneg h.cosine_nonneg h.circle_identity
+      h.sine_contains h.cosine_contains
+  exact canonical_dyadic_search_of_overlap_of_interior B hk hpos hover
+
+/-! A family-level adapter for the equal-dyadic integral.  The endpoint
+`k = 0` is exact and uses the zero-target search; every other sampled cell is
+handled by one finite rational half-angle certificate.  This is the precise
+finite obligation left to the nested-radical semantic proof. -/
+
+theorem canonical_dyadic_search_of_halfAngle_certificate_family
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (n k : Nat) (hk : k < 2 ^ n),
+      0 < k -> CanonicalDyadicHalfAngleCertificate B n k hk) :
+    forall (n k : Nat) (hk : k < 2 ^ n),
+      ∃ m u, rationalTangentWitnessBoxSearch
+        (dyadicTangentBox B hk)
+        (dyadicNestedRadicalStageSinAt n k) m = some u := by
+  intro n k hk
+  by_cases hkzero : k = 0
+  · subst k
+    obtain ⟨u, hu⟩ := canonical_dyadic_zero_search B ht0 n
+    have hzero : forall (precision level : Nat),
+        (dyadicNestedRadicalTableAt precision level 0).1 =
+          ({ lo := 0, hi := 0 } : QInterval) := by
+      intro precision level
+      induction level generalizing precision with
+      | zero => simp [dyadicNestedRadicalTableAt]
+      | succ level ih =>
+          simp [dyadicNestedRadicalTableAt]
+          exact ih (dyadicNestedRadicalParentPrecision precision)
+    have hstage : dyadicNestedRadicalStageSinAt n 0 =
+        ({ lo := 0, hi := 0 } : QInterval) := by
+      exact hzero n n
+    exact ⟨0, u, by simpa [hstage] using hu⟩
+  · have hpos : 0 < k := by omega
+    exact canonical_dyadic_search_of_halfAngle_certificate B hpos
+      (hcertificate n k hk hpos)
+
+theorem ArctanSinPiConstruction.halfIntegral_equiv_of_halfAngle_certificate_family
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (n k : Nat) (hk : k < 2 ^ n),
+      0 < k -> CanonicalDyadicHalfAngleCertificate S.inverse n k hk) :
+    (S.halfIntegral pub).Equiv
+      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+  apply S.halfIntegral_equiv_of_canonical_nestedRadical_search
+    pub g cg hdyadic hplan hevaluator
+  intro n k hk
+  have hk' : k < 2 ^ n := by
+    simpa [hdyadic, Integral.staticDyadicPlan,
+      Integral.staticDyadicSubdivisions] using hk
+  obtain ⟨m, u, hu⟩ :=
+    canonical_dyadic_search_of_halfAngle_certificate_family
+      S.inverse ht0 hcertificate n k hk'
+  exact ⟨m, u, by
+    simpa [hdyadic, Integral.staticDyadicPlan,
+      Integral.staticDyadicSubdivisions] using hu⟩
+
+theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_halfAngle_certificate_family
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (n k : Nat) (hk : k < 2 ^ n),
+      0 < k -> CanonicalDyadicHalfAngleCertificate S.inverse n k hk)
+    (hintegral : (Integral.integral g 0 ((1 : Rat) / 2) cg).Equiv
+      reciprocalPiRaw) :
+    (S.halfIntegral pub).Equiv reciprocalPiRaw := by
+  exact RealRaw.equiv_trans
+    (S.halfIntegral_valid pub)
+    (FTC.integral_valid_of_construction cg)
+    reciprocalPiRaw_valid
+    (S.halfIntegral_equiv_of_halfAngle_certificate_family
+      pub g cg hdyadic hplan hevaluator ht0 hcertificate)
+    hintegral
+
+theorem rationalTangentWitnessSearch_stage_one_demo :
+    rationalTangentWitnessSearch
+      ({ lo := 0, hi := 1 } : QInterval)
+      (dyadicNestedRadicalStageSinAt 1 1) 8 = some ((103 : Rat) / 256) := by
+  native_decide
+
+theorem rationalTangentWitnessSearch_stage_two_demo :
+    rationalTangentWitnessSearch
+      ({ lo := 0, hi := 1 } : QInterval)
+      (dyadicNestedRadicalStageSinAt 2 1) 12 =
+      some ((791 : Rat) / 4096) := by
+  native_decide
+
+theorem dyadicNestedRadicalTableAt_overlap_of_precisions
+    (precision₁ precision₂ n k : Nat) (hk : k <= 2 ^ n) :
+    QInterval.Overlaps
+        (dyadicNestedRadicalTableAt precision₁ n k).1
+        (dyadicNestedRadicalTableAt precision₂ n k).1 ∧
+      QInterval.Overlaps
+        (dyadicNestedRadicalTableAt precision₁ n k).2
+        (dyadicNestedRadicalTableAt precision₂ n k).2 := by
+  induction n generalizing precision₁ precision₂ k with
+  | zero =>
+      have hk' : k = 0 ∨ k = 1 := by omega
+      rcases hk' with rfl | rfl <;>
+        simp [dyadicNestedRadicalTableAt, QInterval.Overlaps]
+  | succ n ih =>
+      by_cases he : k % 2 = 0
+      · have hkrep : k = 2 * (k / 2) := by omega
+        have hhalf : k / 2 <= 2 ^ n := by
+          have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+            rw [Nat.pow_succ]
+            omega
+          rw [hpow] at hk
+          omega
+        rw [hkrep]
+        simp [dyadicNestedRadicalTableAt]
+        exact ih (dyadicNestedRadicalParentPrecision precision₁)
+          (dyadicNestedRadicalParentPrecision precision₂) (k / 2) hhalf
+      · let bound := 2 ^ n
+        let reflected := if k <= bound then k else 2 * bound - k
+        have hpow : 2 ^ (n + 1) = 2 * bound := by
+          dsimp [bound]
+          rw [Nat.pow_succ]
+          omega
+        have hkbound : k <= 2 * bound := by
+          rw [← hpow]
+          exact hk
+        have hreflect : reflected <= bound := by
+          dsimp [reflected]
+          split <;> omega
+        have hparent := ih
+          (dyadicNestedRadicalParentPrecision precision₁)
+          (dyadicNestedRadicalParentPrecision precision₂) reflected hreflect
+        have hbounds₁ := dyadicNestedRadicalTableAt_bounds
+          (dyadicNestedRadicalParentPrecision precision₁) n reflected hreflect
+        have hbounds₂ := dyadicNestedRadicalTableAt_bounds
+          (dyadicNestedRadicalParentPrecision precision₂) n reflected hreflect
+        let parentCos₁ :=
+          if k <= bound then
+            (dyadicNestedRadicalTableAt
+              (dyadicNestedRadicalParentPrecision precision₁) n reflected).2
+          else
+            dyadicNestedRadicalNeg
+              (dyadicNestedRadicalTableAt
+                (dyadicNestedRadicalParentPrecision precision₁) n reflected).2
+        let parentCos₂ :=
+          if k <= bound then
+            (dyadicNestedRadicalTableAt
+              (dyadicNestedRadicalParentPrecision precision₂) n reflected).2
+          else
+            dyadicNestedRadicalNeg
+              (dyadicNestedRadicalTableAt
+                (dyadicNestedRadicalParentPrecision precision₂) n reflected).2
+        have hparentCos : QInterval.Overlaps parentCos₁ parentCos₂ := by
+          by_cases hle : k <= bound
+          · simpa [parentCos₁, parentCos₂, hle] using hparent.2
+          · unfold parentCos₁ parentCos₂ dyadicNestedRadicalNeg
+              QInterval.Overlaps
+            rcases hparent.2 with ⟨h₁, h₂⟩
+            constructor <;> grind
+        have hboundsCos₁ : subintervalOf parentCos₁ (-1) 1 := by
+          by_cases hle : k <= bound
+          · simpa [parentCos₁, hle] using hbounds₁.2
+          · have hneg := dyadicNestedRadicalNeg_unit_subinterval
+              (dyadicNestedRadicalTableAt
+                (dyadicNestedRadicalParentPrecision precision₁) n reflected).2 hbounds₁.2
+            simpa [parentCos₁, hle] using hneg
+        have hboundsCos₂ : subintervalOf parentCos₂ (-1) 1 := by
+          by_cases hle : k <= bound
+          · simpa [parentCos₂, hle] using hbounds₂.2
+          · have hneg := dyadicNestedRadicalNeg_unit_subinterval
+              (dyadicNestedRadicalTableAt
+                (dyadicNestedRadicalParentPrecision precision₂) n reflected).2 hbounds₂.2
+            simpa [parentCos₂, hle] using hneg
+        have hsine := dyadicHalfAngleSqrt_overlap_of_parent_overlap_at
+          hboundsCos₁ hboundsCos₂ hparentCos precision₁ precision₂
+        have hcos := dyadicHalfAngleCosSqrt_overlap_of_parent_overlap_at
+          hboundsCos₁ hboundsCos₂ hparentCos precision₁ precision₂
+        by_cases hle : k <= bound
+        · simp [dyadicNestedRadicalTableAt, he, bound, reflected, hle]
+          have hsine' := by simpa [parentCos₁, parentCos₂, reflected, hle] using hsine
+          have hcos' := by simpa [parentCos₁, parentCos₂, reflected, hle] using hcos
+          exact ⟨hsine', hcos'⟩
+        · have hneg :
+              QInterval.Overlaps
+                (dyadicNestedRadicalNeg
+                  (sqrtOnUnitEvalIntervalClipped
+                    (dyadicHalfAngleCosInput
+                      parentCos₁) precision₁))
+                (dyadicNestedRadicalNeg
+                  (sqrtOnUnitEvalIntervalClipped
+                    (dyadicHalfAngleCosInput
+                      parentCos₂) precision₂)) := by
+            unfold dyadicNestedRadicalNeg QInterval.Overlaps
+            have hcos' := hcos
+            change _ <= _ ∧ _ <= _
+            rcases hcos' with ⟨hlo, hhi⟩
+            constructor <;> grind
+          simp [dyadicNestedRadicalTableAt, he, bound, reflected, hle]
+          exact ⟨by simpa [parentCos₁, parentCos₂, reflected, hle] using hsine,
+            by simpa [parentCos₁, parentCos₂, reflected, hle] using hneg⟩
+
+/-! The one-step compatibility contract for the nested-radical evaluator.
+
+The inverse tangent computation supplies a rational interval `I` for the
+parent cosine.  The certificate says that `I` overlaps the corresponding
+table cosine, and that the public child sine box is the clipped square-root
+image of `I`.  The preceding theorem then transports overlap through the
+half-angle step.  This is deliberately a finite rational-box statement: it
+does not assert that a dyadic angle is itself rational. -/
+structure DyadicHalfAngleChildCertificate
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (precision n j : Nat)
+    (hbound : 2 * j + 1 <= 2 ^ n) where
+  parentRawCos : QInterval
+  parentRawCos_subinterval : subintervalOf parentRawCos (-1) 1
+  parent_overlap : QInterval.Overlaps parentRawCos
+    ((dyadicNestedRadicalTableAt
+      (dyadicNestedRadicalParentPrecision precision) n (2 * j + 1)).2)
+  childRawSin : QInterval
+  childRawSin_eq : childRawSin =
+    sqrtOnUnitEvalIntervalClipped
+      (dyadicHalfAngleSinInput parentRawCos) precision
+  public_child_eq : childRawSin =
+    rationalCircleSinInterval
+      (dyadicTangentBoxAt B precision (n + 1) (2 * j + 1) (by
+        have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+          rw [Nat.pow_succ]
+          omega
+        rw [hpow]
+        omega))
+
+theorem DyadicHalfAngleChildCertificate.to_public_overlap
+    {B : IntegralIdentities.ArctanInverseBisection}
+    {precision n j : Nat} {hbound : 2 * j + 1 <= 2 ^ n}
+    (h : DyadicHalfAngleChildCertificate B precision n j hbound) :
+    QInterval.Overlaps
+      (rationalCircleSinInterval
+        (dyadicTangentBoxAt B precision (n + 1) (2 * j + 1) (by
+          have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+            rw [Nat.pow_succ]
+            omega
+          rw [hpow]
+          omega)))
+      (dyadicNestedRadicalTableAt precision (n + 1) (2 * j + 1)).1 := by
+  have hover := dyadicHalfAngle_child_sine_overlap_of_raw_halfAngle
+    (I := h.parentRawCos)
+    (J := (dyadicNestedRadicalTableAt
+      (dyadicNestedRadicalParentPrecision precision) n (2 * j + 1)).2)
+    (K := h.childRawSin)
+    precision n j h.parentRawCos_subinterval
+    (dyadicNestedRadicalTableAt_bounds
+      (dyadicNestedRadicalParentPrecision precision) n (2 * j + 1)
+      (by omega)).2
+    rfl h.parent_overlap h.childRawSin_eq hbound
+  rw [← h.public_child_eq]
+  exact hover
+
+/-! The public evaluator is definitionally the circle-sine image of the
+inverse tangent box at the same stage.  This adapter lets a child certificate
+be consumed directly by the `RealRaw` sample-transport theorem. -/
+theorem DyadicHalfAngleChildCertificate.to_sample_overlap
+    {B : IntegralIdentities.ArctanInverseBisection}
+    {precision n j : Nat} {hbound : 2 * j + 1 <= 2 ^ n}
+    (h : DyadicHalfAngleChildCertificate B precision n j hbound) :
+    QInterval.Overlaps
+      ((sinPiRawOfArctan B
+        (leftPoint 0 ((1 : Rat) / 2) (2 ^ (n + 1)) (2 * j + 1))
+        (dyadicHalfDomain (by
+          have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+            rw [Nat.pow_succ]
+            omega
+          rw [hpow]
+          omega))).compute precision)
+      (dyadicNestedRadicalTableAt precision (n + 1) (2 * j + 1)).1 := by
+  have hbox := h.to_public_overlap
+  simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using hbox
+
+/-! The even branch has a different finite obligation.  The dyadic table
+reuses the parent sample, but at `dyadicNestedRadicalParentPrecision`; the
+certificate therefore records containment of that parent box in the current
+child box.  This is exactly what lets a parent overlap survive the precision
+change. -/
+theorem qinterval_overlaps_of_contained_left
+    {A B C : QInterval}
+    (hsub : subintervalOf B A.lo A.hi)
+    (hover : QInterval.Overlaps B C) :
+    QInterval.Overlaps A C := by
+  unfold subintervalOf QInterval.Overlaps at *
+  rcases hsub with ⟨hAlo, hAB, hAhi⟩
+  rcases hover with ⟨hBClo, hBC_hi⟩
+  constructor
+  · exact Rat.le_trans hAlo hBClo
+  · exact Rat.le_trans hBC_hi hAhi
+
+structure DyadicEvenStepCertificate
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (precision n k : Nat) (hk : k < 2 ^ n) where
+  childRaw : QInterval
+  parentRaw : QInterval
+  parent_contained : subintervalOf parentRaw childRaw.lo childRaw.hi
+  parent_overlap : QInterval.Overlaps parentRaw
+    ((dyadicNestedRadicalTableAt
+      (dyadicNestedRadicalParentPrecision precision) n k).1)
+  public_child_eq : childRaw =
+    rationalCircleSinInterval
+      (dyadicTangentBoxAt B precision (n + 1) (2 * k) (by
+        have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+          rw [Nat.pow_succ]
+          omega
+        rw [hpow]
+        omega))
+
+theorem DyadicEvenStepCertificate.to_public_overlap
+    {B : IntegralIdentities.ArctanInverseBisection}
+    {precision n k : Nat} {hk : k < 2 ^ n}
+    (h : DyadicEvenStepCertificate B precision n k hk) :
+    QInterval.Overlaps
+      (rationalCircleSinInterval
+        (dyadicTangentBoxAt B precision (n + 1) (2 * k) (by
+          have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+            rw [Nat.pow_succ]
+            omega
+          rw [hpow]
+          omega)))
+      (dyadicNestedRadicalTableAt precision (n + 1) (2 * k)).1 := by
+  have hover := qinterval_overlaps_of_contained_left
+    h.parent_contained h.parent_overlap
+  rw [← h.public_child_eq]
+  simpa [dyadicNestedRadicalTableAt, dyadicNestedRadicalParentPrecision] using hover
+
+structure DyadicReflectedHalfAngleCertificate
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (precision n k : Nat)
+    (hupper : 2 ^ n < k) (hk : k < 2 ^ (n + 1)) where
+  parentRawCos : QInterval
+  parentRawCos_subinterval : subintervalOf parentRawCos (-1) 1
+  parentRawCos_eq : parentRawCos = dyadicNestedRadicalNeg
+    (dyadicNestedRadicalTableAt
+      (dyadicNestedRadicalParentPrecision precision) n
+      (2 * 2 ^ n - k)).2
+  parent_overlap : QInterval.Overlaps parentRawCos
+    (dyadicNestedRadicalNeg
+      (dyadicNestedRadicalTableAt
+        (dyadicNestedRadicalParentPrecision precision) n
+        (2 * 2 ^ n - k)).2)
+  childRawSin : QInterval
+  childRawSin_eq : childRawSin =
+    sqrtOnUnitEvalIntervalClipped
+      (dyadicHalfAngleSinInput parentRawCos) precision
+  public_child_eq : childRawSin =
+    rationalCircleSinInterval
+      (dyadicTangentBoxAt B precision (n + 1) k (by
+        have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+          rw [Nat.pow_succ]
+          omega
+        rw [hpow]
+        omega))
+
+theorem DyadicReflectedHalfAngleCertificate.to_public_overlap
+    {B : IntegralIdentities.ArctanInverseBisection}
+    {precision n k : Nat} {hupper : 2 ^ n < k}
+    {hk : k < 2 ^ (n + 1)}
+    (h : DyadicReflectedHalfAngleCertificate B precision n k hupper hk)
+    (hodd : k % 2 = 1) :
+    QInterval.Overlaps
+      (rationalCircleSinInterval
+        (dyadicTangentBoxAt B precision (n + 1) k (by
+          have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+            rw [Nat.pow_succ]
+            omega
+          rw [hpow]
+          omega)))
+      (dyadicNestedRadicalTableAt precision (n + 1) k).1 := by
+  have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+    rw [Nat.pow_succ]
+    omega
+  have hreflect : 2 * 2 ^ n - k <= 2 ^ n := by
+    omega
+  have hbounds := dyadicNestedRadicalTableAt_bounds
+    (dyadicNestedRadicalParentPrecision precision) n
+    (2 * 2 ^ n - k) hreflect
+  have hJ : subintervalOf
+      (dyadicNestedRadicalNeg
+        (dyadicNestedRadicalTableAt
+          (dyadicNestedRadicalParentPrecision precision) n
+          (2 * 2 ^ n - k)).2) (-1) 1 :=
+    dyadicNestedRadicalNeg_unit_subinterval _ hbounds.2
+  have hover := dyadicHalfAngle_child_sine_overlap_of_raw_halfAngle_upper
+    (I := h.parentRawCos)
+    (J := dyadicNestedRadicalNeg
+      (dyadicNestedRadicalTableAt
+        (dyadicNestedRadicalParentPrecision precision) n
+        (2 * 2 ^ n - k)).2)
+    (K := h.childRawSin)
+    precision n k h.parentRawCos_subinterval hJ rfl
+    h.parent_overlap h.childRawSin_eq hodd hupper (Nat.le_of_lt hk)
+  rw [← h.public_child_eq]
+  exact hover
+
+theorem dyadicNestedRadical_sample_overlap_of_branch_certificates
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (zero_overlap : forall (precision depth : Nat) (hk : 0 < 2 ^ depth),
+      QInterval.Overlaps
+        ((sinPiRawOfArctan B
+          (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) 0)
+          (dyadicHalfDomain (by omega))).compute precision)
+        (dyadicNestedRadicalTableAt precision depth 0).1)
+    (even_certificate : forall (precision n j : Nat) (hj : j < 2 ^ n),
+      DyadicEvenStepCertificate B precision n j hj)
+    (lower_certificate : forall (precision n j : Nat)
+      (hbound : 2 * j + 1 <= 2 ^ n),
+      DyadicHalfAngleChildCertificate B precision n j hbound)
+    (upper_certificate : forall (precision n k : Nat)
+      (hupper : 2 ^ n < k) (hk : k < 2 ^ (n + 1)),
+      DyadicReflectedHalfAngleCertificate B precision n k hupper hk) :
+    forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      QInterval.Overlaps
+        ((sinPiRawOfArctan B
+          (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+          (dyadicHalfDomain hk)).compute precision)
+        (dyadicNestedRadicalTableAt precision depth k).1 := by
+  intro precision depth k hk
+  cases depth with
+  | zero =>
+      have hk' : k = 0 := by omega
+      subst k
+      exact zero_overlap precision 0 (by native_decide)
+  | succ n =>
+      by_cases hzero : k = 0
+      · subst k
+        exact zero_overlap precision (n + 1) (by omega)
+      by_cases heven : k % 2 = 0
+      · obtain ⟨j, rfl⟩ : ∃ j, k = 2 * j := by
+          exact ⟨k / 2, by omega⟩
+        have hj : j < 2 ^ n := by
+          rw [Nat.pow_succ] at hk
+          omega
+        have hbox := (even_certificate precision n j hj).to_public_overlap
+        simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using hbox
+      · have hodd : k % 2 = 1 := by omega
+        by_cases hlower : k <= 2 ^ n
+        · obtain ⟨j, rfl⟩ : ∃ j, k = 2 * j + 1 := by
+            exact ⟨k / 2, by omega⟩
+          have hbound : 2 * j + 1 <= 2 ^ n := by omega
+          have hbox :=
+            (lower_certificate precision n j hbound).to_public_overlap
+          simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using hbox
+        · have hupper : 2 ^ n < k := by omega
+          have hbox :=
+            (upper_certificate precision n k hupper hk).to_public_overlap hodd
+          simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using hbox
+
+theorem dyadicNestedRadical_sample_overlap_of_branch_certificates_of_endpoint
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (even_certificate : forall (precision n j : Nat) (hj : j < 2 ^ n),
+      DyadicEvenStepCertificate B precision n j hj)
+    (lower_certificate : forall (precision n j : Nat)
+      (hbound : 2 * j + 1 <= 2 ^ n),
+      DyadicHalfAngleChildCertificate B precision n j hbound)
+    (upper_certificate : forall (precision n k : Nat)
+      (hupper : 2 ^ n < k) (hk : k < 2 ^ (n + 1)),
+      DyadicReflectedHalfAngleCertificate B precision n k hupper hk) :
+    forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      QInterval.Overlaps
+        ((sinPiRawOfArctan B
+          (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+          (dyadicHalfDomain hk)).compute precision)
+        (dyadicNestedRadicalTableAt precision depth k).1 := by
+  apply dyadicNestedRadical_sample_overlap_of_branch_certificates B
+    (fun precision depth hk =>
+      dyadicNestedRadical_zero_sample_overlap_of_endpoint B ht0
+        precision depth hk)
+    even_certificate lower_certificate upper_certificate
+
+theorem dyadicNestedRadicalTableAt_width_le
+    (precision n k : Nat) (hk : k <= 2 ^ n) :
+    (dyadicNestedRadicalTableAt precision n k).1.width <=
+        1 / ((precision + 1 : Nat) : Rat) ∧
+      (dyadicNestedRadicalTableAt precision n k).2.width <=
+        1 / ((precision + 1 : Nat) : Rat) := by
+  induction n generalizing precision k with
+  | zero =>
+      have hk' : k = 0 ∨ k = 1 := by omega
+      rcases hk' with rfl | rfl <;>
+        simp [dyadicNestedRadicalTableAt, QInterval.width]
+        <;> constructor <;>
+          grind [Rat.le_of_lt (one_div_nat_pos (Nat.succ_pos precision))]
+  | succ n ih =>
+      by_cases he : k % 2 = 0
+      · have hkrep : k = 2 * (k / 2) := by omega
+        have hhalf : k / 2 <= 2 ^ n := by
+          have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+            rw [Nat.pow_succ]
+            omega
+          rw [hpow] at hk
+          omega
+        rw [hkrep]
+        simp [dyadicNestedRadicalTableAt]
+        have hparent := ih (dyadicNestedRadicalParentPrecision precision)
+          (k / 2) hhalf
+        exact ⟨Rat.le_trans hparent.1
+            (by simpa [Rat.natCast_add] using
+              dyadicNestedRadicalParentPrecision_output_budget precision),
+          Rat.le_trans hparent.2
+            (by simpa [Rat.natCast_add] using
+              dyadicNestedRadicalParentPrecision_output_budget precision)⟩
+      · let bound := 2 ^ n
+        let parentPrecision := dyadicNestedRadicalParentPrecision precision
+        let reflected := if k <= bound then k else 2 * bound - k
+        have hpow : 2 ^ (n + 1) = 2 * bound := by
+          dsimp [bound]
+          rw [Nat.pow_succ]
+          omega
+        have hkbound : k <= 2 * bound := by
+          rw [← hpow]
+          exact hk
+        have hreflect : reflected <= bound := by
+          dsimp [reflected]
+          split <;> omega
+        have hparent := ih parentPrecision reflected hreflect
+        have hbounds := dyadicNestedRadicalTableAt_bounds
+          parentPrecision n reflected hreflect
+        let parentCos :=
+          if k <= bound then
+            (dyadicNestedRadicalTableAt parentPrecision n reflected).2
+          else
+            dyadicNestedRadicalNeg
+              (dyadicNestedRadicalTableAt parentPrecision n reflected).2
+        have hparentCosWidth : parentCos.width =
+            (dyadicNestedRadicalTableAt parentPrecision n reflected).2.width := by
+          by_cases hle : k <= bound
+          · simp [parentCos, hle]
+          · simp [parentCos, hle, dyadicNestedRadicalNeg_width]
+        have hparentCosBounds : subintervalOf parentCos (-1) 1 := by
+          by_cases hle : k <= bound
+          · simpa [parentCos, hle] using hbounds.2
+          · have hneg := dyadicNestedRadicalNeg_unit_subinterval
+              (dyadicNestedRadicalTableAt parentPrecision n reflected).2 hbounds.2
+            simpa [parentCos, hle] using hneg
+        have hsinInput := dyadicHalfAngleSinInput_subinterval
+          parentCos hparentCosBounds
+        have hcosInput := dyadicHalfAngleCosInput_subinterval
+          parentCos hparentCosBounds
+        have hsinBudget :
+            (dyadicHalfAngleSinInput
+              parentCos).width <=
+              1 / ((16 * (precision + 1) * (precision + 1) : Nat) : Rat) := by
+          rw [dyadicHalfAngleSinInput_width, Rat.div_def, Rat.div_def]
+          calc
+            parentCos.width *
+                (2 : Rat)⁻¹ <=
+                (1 / ((parentPrecision + 1 : Nat) : Rat)) * (2 : Rat)⁻¹ :=
+              Rat.mul_le_mul_of_nonneg_right
+                (by rw [hparentCosWidth]; exact hparent.2) (by native_decide)
+            _ = 1 / ((2 * (parentPrecision + 1) : Nat) : Rat) := by
+              symm
+              simpa [Rat.div_def] using
+                (one_div_nat_succ_half parentPrecision).symm
+            _ <= 1 / ((16 * (precision + 1) * (precision + 1) : Nat) : Rat) :=
+              dyadicNestedRadicalParentPrecision_input_budget precision
+        have hcosBudget :
+            (dyadicHalfAngleCosInput
+              parentCos).width <=
+              1 / ((16 * (precision + 1) * (precision + 1) : Nat) : Rat) := by
+          rw [dyadicHalfAngleCosInput_width, Rat.div_def, Rat.div_def]
+          calc
+            parentCos.width *
+                (2 : Rat)⁻¹ <=
+                (1 / ((parentPrecision + 1 : Nat) : Rat)) * (2 : Rat)⁻¹ :=
+              Rat.mul_le_mul_of_nonneg_right
+                (by rw [hparentCosWidth]; exact hparent.2) (by native_decide)
+            _ = 1 / ((2 * (parentPrecision + 1) : Nat) : Rat) := by
+              symm
+              simpa [Rat.div_def] using
+                (one_div_nat_succ_half parentPrecision).symm
+            _ <= 1 / ((16 * (precision + 1) * (precision + 1) : Nat) : Rat) :=
+              dyadicNestedRadicalParentPrecision_input_budget precision
+        have hsine := dyadicHalfAngleSqrt_width_le
+            (dyadicHalfAngleSinInput parentCos)
+          hsinInput precision hsinBudget
+        have hcos := dyadicHalfAngleSqrt_width_le
+            (dyadicHalfAngleCosInput parentCos)
+          hcosInput precision hcosBudget
+        by_cases hle : k <= bound
+        · simp [dyadicNestedRadicalTableAt, he, bound, reflected, hle]
+          exact ⟨by simpa [parentCos, reflected, hle, parentPrecision] using hsine,
+            by simpa [parentCos, reflected, hle, parentPrecision] using hcos⟩
+        · simp [dyadicNestedRadicalTableAt, he, bound, reflected, hle]
+          exact ⟨by simpa [parentCos, reflected, hle, parentPrecision] using hsine,
+            by simpa [dyadicNestedRadicalNeg_width, parentCos, reflected, hle,
+              parentPrecision] using hcos⟩
+
+theorem dyadicNestedRadicalTableAt_succ_even
+    (precision n k : Nat) :
+    dyadicNestedRadicalTableAt precision (n + 1) (2 * k) =
+      dyadicNestedRadicalTableAt
+        (dyadicNestedRadicalParentPrecision precision) n k := by
+  simp [dyadicNestedRadicalTableAt, dyadicNestedRadicalParentPrecision]
+
+theorem dyadicNestedRadicalStageTable_zero :
+    dyadicNestedRadicalStageTable 0 0 =
+      ({ lo := 0, hi := 0 }, { lo := 1, hi := 1 }) := by
+  simp [dyadicNestedRadicalStageTable, dyadicNestedRadicalTableAt]
+
+theorem dyadicNestedRadicalTableAt_zero (precision n : Nat) :
+    dyadicNestedRadicalTableAt precision n 0 =
+      ({ lo := 0, hi := 0 }, { lo := 1, hi := 1 }) := by
+  induction n generalizing precision with
+  | zero =>
+      simp [dyadicNestedRadicalTableAt]
+  | succ n ih =>
+      simp [dyadicNestedRadicalTableAt]
+      exact ih (dyadicNestedRadicalParentPrecision precision)
+
+theorem dyadicNestedRadicalStageTable_zero_at (n : Nat) :
+    dyadicNestedRadicalStageTable n 0 =
+      ({ lo := 0, hi := 0 }, { lo := 1, hi := 1 }) := by
+  exact dyadicNestedRadicalTableAt_zero n n
+
+theorem dyadicNestedRadicalStageSinAt_zero (n : Nat) :
+    dyadicNestedRadicalStageSinAt n 0 = { lo := 0, hi := 0 } := by
+  simp [dyadicNestedRadicalStageSinAt, dyadicNestedRadicalStageTable_zero_at]
+
+theorem dyadicNestedRadicalTableAt_last (precision n : Nat) :
+    dyadicNestedRadicalTableAt precision n (2 ^ n) =
+      ({ lo := 1, hi := 1 }, { lo := 0, hi := 0 }) := by
+  induction n generalizing precision with
+  | zero =>
+      simp [dyadicNestedRadicalTableAt]
+  | succ n ih =>
+      have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+        rw [Nat.pow_succ]
+        omega
+      rw [hpow]
+      have heven : (2 * 2 ^ n) % 2 = 0 := by omega
+      have hhalf : (2 * 2 ^ n) / 2 = 2 ^ n := by omega
+      simp [dyadicNestedRadicalTableAt, heven, hhalf]
+      exact ih (dyadicNestedRadicalParentPrecision precision)
+
+theorem dyadicNestedRadicalStageTable_last (n : Nat) :
+    dyadicNestedRadicalStageTable n (2 ^ n) =
+      ({ lo := 1, hi := 1 }, { lo := 0, hi := 0 }) := by
+  exact dyadicNestedRadicalTableAt_last n n
+
+theorem dyadicNestedRadicalStageSinAt_last (n : Nat) :
+    dyadicNestedRadicalStageSinAt n (2 ^ n) = { lo := 1, hi := 1 } := by
+  simp [dyadicNestedRadicalStageSinAt, dyadicNestedRadicalStageTable_last]
+
+theorem arctanSinPi_nestedRadicalStage_sample_overlap_zero
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero) (n : Nat) :
+    QInterval.Overlaps
+      ((sinPiRawOfArctan B 0
+        ⟨by native_decide, by native_decide⟩).compute n)
+      (dyadicNestedRadicalStageSinAt n 0) := by
+  have hsin := (RealRaw.compareAt_overlap_iff
+    (sinPiRawOfArctan B 0 ⟨by native_decide, by native_decide⟩)
+    RealRaw.zero n n).1
+    (sinPiRawOfArctan_zero_equiv_zero_of_tangent_endpoint B ht n)
+  rw [dyadicNestedRadicalStageSinAt_zero]
+  simpa [RealRaw.zero, RealRaw.ofRat] using hsin
+
+theorem arctanSinPi_nestedRadicalStage_sample_overlap_last
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht : (B.tangentAt 1
+      RationalCircle.GeometricTrig.firstQuadrantBranch_one).Equiv
+      RealRaw.one) (n : Nat) :
+    QInterval.Overlaps
+      ((sinPiRawOfArctan B (1 / 2)
+        ⟨by native_decide, by native_decide⟩).compute n)
+      (dyadicNestedRadicalStageSinAt n (2 ^ n)) := by
+  have hsin := (RealRaw.compareAt_overlap_iff
+    (sinPiRawOfArctan B (1 / 2)
+      ⟨by native_decide, by native_decide⟩)
+    RealRaw.one n n).1
+    (sinPiRawOfArctan_half_equiv_one_of_tangent_endpoint B ht n)
+  rw [dyadicNestedRadicalStageSinAt_last]
+  simpa [RealRaw.one, RealRaw.ofRat] using hsin
+
+theorem dyadicNestedRadicalStageTable_one_one :
+    dyadicNestedRadicalStageTable 1 1 =
+      (sqrtOnUnitEvalIntervalClipped
+        { lo := (1 : Rat) / 2, hi := (1 : Rat) / 2 } 1,
+       sqrtOnUnitEvalIntervalClipped
+        { lo := (1 : Rat) / 2, hi := (1 : Rat) / 2 } 1) := by
+  simp [dyadicNestedRadicalStageTable, dyadicNestedRadicalTableAt]
+  constructor <;> congr 1 <;> native_decide
+
+/-! The table can now be used directly by the equal-dyadic rectangle
+algorithm.  This is deliberately an indexed finite sum: its inputs are the
+stage and the left-endpoint index, exactly the data available to a dyadic
+integral.  The later `RealFunRaw` adapter only has to prove that its rational
+argument is the corresponding dyadic point. -/
+
+def dyadicNestedRadicalLeftSum (n : Nat) : QInterval :=
+  let N := 2 ^ n
+  let h := mesh 0 ((1 : Rat) / 2) N
+  (List.range N).foldl
+    (fun acc k =>
+      let I := dyadicNestedRadicalStageSinAt n k
+      QInterval.addInterval acc (QInterval.scaleByRat h I))
+    { lo := 0, hi := 0 }
+
+/-! A cellwise Darboux range.  Unlike the left-sample sum, this interval is
+not tied to one endpoint: it encloses both endpoint sample boxes.  That is
+the shape needed for a refinement/nesting proof. -/
+def dyadicNestedRadicalCellRange (n k : Nat) : QInterval :=
+  let N := 2 ^ n
+  let h := mesh 0 ((1 : Rat) / 2) N
+  QInterval.hull
+    (QInterval.scaleByRat h (dyadicNestedRadicalStageSinAt n k))
+    (QInterval.scaleByRat h (dyadicNestedRadicalStageSinAt n (k + 1)))
+
+def dyadicNestedRadicalDarbouxSum (n : Nat) : QInterval :=
+  let N := 2 ^ n
+  (List.range N).foldl
+    (fun acc k => QInterval.addInterval acc
+      (dyadicNestedRadicalCellRange n k))
+    { lo := 0, hi := 0 }
+
+theorem dyadicNestedRadicalCellRange_contains_left
+    (n k : Nat) :
+    (dyadicNestedRadicalCellRange n k).ContainsInterval
+      (QInterval.scaleByRat (mesh 0 ((1 : Rat) / 2) (2 ^ n))
+        (dyadicNestedRadicalStageSinAt n k)) := by
+  unfold dyadicNestedRadicalCellRange
+  exact QInterval.hull_contains_left _ _
+
+theorem dyadicNestedRadicalCellRange_contains_right
+    (n k : Nat) :
+    (dyadicNestedRadicalCellRange n k).ContainsInterval
+      (QInterval.scaleByRat (mesh 0 ((1 : Rat) / 2) (2 ^ n))
+        (dyadicNestedRadicalStageSinAt n (k + 1))) := by
+  unfold dyadicNestedRadicalCellRange
+  exact QInterval.hull_contains_right _ _
+
+theorem dyadicNestedRadicalCellRange_ordered
+    (n k : Nat) (hk : k < 2 ^ n) :
+    0 <= (dyadicNestedRadicalCellRange n k).width := by
+  let N := 2 ^ n
+  have hk1 : k + 1 <= N := by
+    dsimp [N]
+    omega
+  have hleft := dyadicNestedRadicalTableAt_bounds n n k (by omega)
+  have hright := dyadicNestedRadicalTableAt_bounds n n (k + 1) hk1
+  have hmesh : 0 <= mesh 0 ((1 : Rat) / 2) N :=
+    mesh_nonneg_of_le (Nat.pow_pos (by omega)) (by native_decide)
+  have hstage_left : 0 <=
+      (dyadicNestedRadicalStageSinAt n k).width := by
+    unfold dyadicNestedRadicalStageSinAt dyadicNestedRadicalStageTable
+      QInterval.width
+    grind [hleft.1.2.1, Rat.sub_eq_add_neg]
+  have hstage_right : 0 <=
+      (dyadicNestedRadicalStageSinAt n (k + 1)).width := by
+    unfold dyadicNestedRadicalStageSinAt dyadicNestedRadicalStageTable
+      QInterval.width
+    grind [hright.1.2.1, Rat.sub_eq_add_neg]
+  have hscale_left : 0 <=
+      (QInterval.scaleByRat (mesh 0 ((1 : Rat) / 2) N)
+        (dyadicNestedRadicalStageSinAt n k)).width := by
+    rw [QInterval.scaleByRat_width_of_nonneg hmesh]
+    exact Rat.mul_nonneg hmesh hstage_left
+  have hscale_right : 0 <=
+      (QInterval.scaleByRat (mesh 0 ((1 : Rat) / 2) N)
+        (dyadicNestedRadicalStageSinAt n (k + 1))).width := by
+    rw [QInterval.scaleByRat_width_of_nonneg hmesh]
+    exact Rat.mul_nonneg hmesh hstage_right
+  unfold dyadicNestedRadicalCellRange QInterval.width QInterval.hull
+  have hleft_order :
+      (QInterval.scaleByRat (mesh 0 ((1 : Rat) / 2) N)
+        (dyadicNestedRadicalStageSinAt n k)).lo <=
+      (QInterval.scaleByRat (mesh 0 ((1 : Rat) / 2) N)
+        (dyadicNestedRadicalStageSinAt n k)).hi := by
+    unfold QInterval.scaleByRat
+    simp [if_pos hmesh]
+    exact Rat.mul_le_mul_of_nonneg_left (by
+      unfold dyadicNestedRadicalStageSinAt dyadicNestedRadicalStageTable
+      exact hleft.1.2.1) hmesh
+  have hright_order :
+      (QInterval.scaleByRat (mesh 0 ((1 : Rat) / 2) N)
+        (dyadicNestedRadicalStageSinAt n (k + 1))).lo <=
+      (QInterval.scaleByRat (mesh 0 ((1 : Rat) / 2) N)
+        (dyadicNestedRadicalStageSinAt n (k + 1))).hi := by
+    unfold QInterval.scaleByRat
+    simp [if_pos hmesh]
+    exact Rat.mul_le_mul_of_nonneg_left (by
+      unfold dyadicNestedRadicalStageSinAt dyadicNestedRadicalStageTable
+      exact hright.1.2.1) hmesh
+  grind
+
+theorem dyadicDarbouxCell_refines_of_endpoint_monotone
+    (h : Rat) (A B C : QInterval)
+    (hh : 0 <= h)
+    (hA : A.lo <= A.hi) (hB : B.lo <= B.hi) (hC : C.lo <= C.hi)
+    (hloAB : A.lo <= B.lo) (hloBC : B.lo <= C.lo)
+    (hhiAB : A.hi <= B.hi) (hhiBC : B.hi <= C.hi) :
+    (QInterval.hull
+      (QInterval.scaleByRat h A)
+      (QInterval.scaleByRat h C)).ContainsInterval
+      (QInterval.addInterval
+        (QInterval.hull
+          (QInterval.scaleByRat (h / 2) A)
+          (QInterval.scaleByRat (h / 2) B))
+        (QInterval.hull
+          (QInterval.scaleByRat (h / 2) B)
+          (QInterval.scaleByRat (h / 2) C))) := by
+  have hh2 : 0 <= h / 2 := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg hh (by native_decide)
+  unfold QInterval.ContainsInterval QInterval.hull QInterval.addInterval
+    QInterval.scaleByRat
+  simp only [if_pos hh, if_pos hh2]
+  have hAlo : h * A.lo <= h * B.lo :=
+    Rat.mul_le_mul_of_nonneg_left hloAB hh
+  have hBlo : h * B.lo <= h * C.lo :=
+    Rat.mul_le_mul_of_nonneg_left hloBC hh
+  have hAhi : h * A.hi <= h * B.hi :=
+    Rat.mul_le_mul_of_nonneg_left hhiAB hh
+  have hBhi : h * B.hi <= h * C.hi :=
+    Rat.mul_le_mul_of_nonneg_left hhiBC hh
+  have hAlohi : 0 <= h * (B.lo - A.lo) := by
+    exact Rat.mul_nonneg hh (by grind)
+  have hBlohi : 0 <= h * (C.lo - B.lo) := by
+    exact Rat.mul_nonneg hh (by grind)
+  have hAhi' : 0 <= h * (B.hi - A.hi) := by
+    exact Rat.mul_nonneg hh (by grind)
+  have hBhi' : 0 <= h * (C.hi - B.hi) := by
+    exact Rat.mul_nonneg hh (by grind)
+  grind [Rat.div_def, Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm,
+    Rat.add_assoc, Rat.add_comm]
+
+theorem dyadicDarbouxCell_refines_of_coarse_endpoint_containment
+    (h : Rat) (A0 A1 A2 C0 C2 : QInterval)
+    (hh : 0 <= h)
+    (hA0 : A0.lo <= A0.hi) (hA1 : A1.lo <= A1.hi)
+    (hA2 : A2.lo <= A2.hi)
+    (hlo01 : A0.lo <= A1.lo) (hlo12 : A1.lo <= A2.lo)
+    (hhi01 : A0.hi <= A1.hi) (hhi12 : A1.hi <= A2.hi)
+    (hC0 : (QInterval.scaleByRat h C0).ContainsInterval
+      (QInterval.scaleByRat h A0))
+    (hC2 : (QInterval.scaleByRat h C2).ContainsInterval
+      (QInterval.scaleByRat h A2)) :
+    (QInterval.hull
+      (QInterval.scaleByRat h C0)
+      (QInterval.scaleByRat h C2)).ContainsInterval
+      (QInterval.addInterval
+        (QInterval.hull
+          (QInterval.scaleByRat (h / 2) A0)
+          (QInterval.scaleByRat (h / 2) A1))
+        (QInterval.hull
+          (QInterval.scaleByRat (h / 2) A1)
+          (QInterval.scaleByRat (h / 2) A2))) := by
+  have hcoarse :
+      (QInterval.hull
+        (QInterval.scaleByRat h C0)
+        (QInterval.scaleByRat h C2)).ContainsInterval
+        (QInterval.hull
+          (QInterval.scaleByRat h A0)
+          (QInterval.scaleByRat h A2)) := by
+    apply QInterval.hull_least
+    · exact QInterval.ContainsInterval.trans
+        (QInterval.hull_contains_left _ _) hC0
+    · exact QInterval.ContainsInterval.trans
+        (QInterval.hull_contains_right _ _) hC2
+  exact QInterval.ContainsInterval.trans hcoarse
+    (dyadicDarbouxCell_refines_of_endpoint_monotone h A0 A1 A2 hh
+      hA0 hA1 hA2 hlo01 hlo12 hhi01 hhi12)
+
+theorem dyadicNestedRadicalDarbouxSum_contains_leftSum
+    (n : Nat) :
+    (dyadicNestedRadicalDarbouxSum n).ContainsInterval
+      (dyadicNestedRadicalLeftSum n) := by
+  unfold dyadicNestedRadicalDarbouxSum dyadicNestedRadicalLeftSum
+  apply RationalPartition.addInterval_fold_contains
+  · exact ⟨Rat.le_refl, Rat.le_refl⟩
+  · intro k
+    simpa [dyadicNestedRadicalCellRange]
+      using dyadicNestedRadicalCellRange_contains_left n k
+
+theorem dyadicNestedRadicalDarbouxSum_width_nonneg
+    (n : Nat) :
+    0 <= (dyadicNestedRadicalDarbouxSum n).width := by
+  have hcell : forall k, k ∈ List.range (2 ^ n) ->
+      0 <= (dyadicNestedRadicalCellRange n k).width := by
+    intro k hk
+    exact dyadicNestedRadicalCellRange_ordered n k (List.mem_range.mp hk)
+  have hfold : forall (xs : List Nat) (initial : Rat),
+      0 <= initial ->
+      (forall k, k ∈ xs ->
+        0 <= (dyadicNestedRadicalCellRange n k).width) ->
+      0 <= xs.foldl
+        (fun total k => total +
+          (dyadicNestedRadicalCellRange n k).width) initial := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro initial hinit hterms
+        simpa using hinit
+    | cons k xs ih =>
+        intro initial hinit hterms
+        apply ih (initial + (dyadicNestedRadicalCellRange n k).width)
+        · exact Rat.add_nonneg hinit (hterms k (by simp))
+        · intro j hj
+          exact hterms j (by simp [hj])
+  unfold dyadicNestedRadicalDarbouxSum
+  rw [RationalPartition.addInterval_fold_width]
+  have hzero : ({ lo := 0, hi := 0 } : QInterval).width = 0 := by
+    unfold QInterval.width
+    grind
+  rw [hzero]
+  have h := hfold (List.range (2 ^ n)) 0 (by native_decide) hcell
+  grind
+
+theorem dyadicNestedRadicalLeftSum_zero :
+    dyadicNestedRadicalLeftSum 0 = { lo := 0, hi := 0 } := by
+  native_decide
+
+theorem dyadicNestedRadicalLeftSum_one :
+    dyadicNestedRadicalLeftSum 1 =
+      { lo := (1 / 4 : Rat) *
+          (dyadicNestedRadicalStageSinAt 1 1).lo,
+        hi := (1 / 4 : Rat) *
+          (dyadicNestedRadicalStageSinAt 1 1).hi } := by
+  native_decide
+
+theorem dyadicNestedRadicalLeftSum_one_explicit :
+    dyadicNestedRadicalLeftSum 1 =
+      { lo := (1 / 4 : Rat) *
+          (sqrtOnUnitEvalIntervalClipped
+            { lo := (1 : Rat) / 2, hi := (1 : Rat) / 2 } 1).lo,
+        hi := (1 / 4 : Rat) *
+          (sqrtOnUnitEvalIntervalClipped
+            { lo := (1 : Rat) / 2, hi := (1 : Rat) / 2 } 1).hi } := by
+  native_decide
+
+theorem dyadicNestedRadicalLeftSum_width_le_of_stage
+    (n : Nat) (eps : Rat)
+    (hstage : forall k, k < 2 ^ n ->
+      (dyadicNestedRadicalStageSinAt n k).width <= eps) :
+    (dyadicNestedRadicalLeftSum n).width <= (1 / 2 : Rat) * eps := by
+  let N := 2 ^ n
+  have hN : 0 < N := by
+    dsimp [N]
+    exact Nat.pow_pos (by omega)
+  have hmesh : 0 <= mesh 0 ((1 : Rat) / 2) N :=
+    mesh_nonneg_of_le hN (by native_decide)
+  have hsum := RationalPartition.rat_add_fold_le_length_mul (List.range N)
+    (fun k =>
+      (QInterval.scaleByRat (mesh 0 ((1 : Rat) / 2) N)
+        (dyadicNestedRadicalStageSinAt n k)).width)
+    (mesh 0 ((1 : Rat) / 2) N * eps) (by
+      intro k hk
+      have hklt : k < N := List.mem_range.mp hk
+      rw [QInterval.scaleByRat_width_of_nonneg hmesh]
+      exact Rat.mul_le_mul_of_nonneg_left
+        (hstage k (by simpa [N] using hklt)) hmesh)
+  calc
+    (dyadicNestedRadicalLeftSum n).width =
+        (List.range N).foldl
+          (fun total k => total +
+            (QInterval.scaleByRat (mesh 0 ((1 : Rat) / 2) N)
+              (dyadicNestedRadicalStageSinAt n k)).width) 0 := by
+      unfold dyadicNestedRadicalLeftSum
+      rw [RationalPartition.addInterval_fold_width]
+      have hzero : ({ lo := 0, hi := 0 } : QInterval).width = 0 := by
+        unfold QInterval.width
+        grind
+      rw [hzero]
+      simp [N]
+      grind
+    _ <= (N : Rat) * (mesh 0 ((1 : Rat) / 2) N * eps) := by
+      simpa using hsum
+    _ = (1 / 2 : Rat) * eps := by
+      have hmesh_total := natCast_mul_mesh_eq_sub
+        (a := (0 : Rat)) (b := (1 : Rat) / 2) hN
+      rw [show (N : Rat) * (mesh 0 ((1 : Rat) / 2) N * eps) =
+        ((N : Rat) * mesh 0 ((1 : Rat) / 2) N) * eps by
+          grind [Rat.mul_assoc]]
+      rw [hmesh_total]
+      rw [show (1 / 2 : Rat) - 0 = 1 / 2 by grind]
+
+theorem dyadicNestedRadicalStageSinAt_width_le
+    (n k : Nat) (hk : k < 2 ^ n) :
+    (dyadicNestedRadicalStageSinAt n k).width <=
+      1 / ((n + 1 : Nat) : Rat) := by
+  have htable := dyadicNestedRadicalTableAt_width_le n n k (by omega)
+  exact htable.1
+
+theorem dyadicNestedRadicalLeftSum_width_le
+    (n : Nat) :
+    (dyadicNestedRadicalLeftSum n).width <=
+      (1 / 2 : Rat) / ((n + 1 : Nat) : Rat) := by
+  simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm] using
+    dyadicNestedRadicalLeftSum_width_le_of_stage n
+      (1 / ((n + 1 : Nat) : Rat))
+      (fun k hk => dyadicNestedRadicalStageSinAt_width_le n k hk)
+
+theorem dyadicNestedRadicalLeftSum_width_le_one_over_succ
+    (n : Nat) :
+    (dyadicNestedRadicalLeftSum n).width <=
+      1 / ((n + 1 : Nat) : Rat) := by
+  exact Rat.le_trans (dyadicNestedRadicalLeftSum_width_le n) (by
+    rw [Rat.div_def, Rat.div_def]
+    have hpos : 0 < ((n + 1 : Nat) : Rat)⁻¹ :=
+      Rat.inv_pos.mpr ((Rat.natCast_pos).2 (by omega))
+    exact Rat.mul_le_mul_of_nonneg_right (by native_decide)
+      (Rat.le_of_lt hpos))
+
+theorem dyadicNestedRadicalLeftSum_widths_shrink :
+    RealRaw.WidthsShrinkToZero dyadicNestedRadicalLeftSum := by
+  intro eps
+  exact shrinksToZero_of_natOverSuccBound
+    (fun n => dyadicNestedRadicalLeftSum_width_le_one_over_succ n) eps
+
+/-! The exact finite bridge from the public mesh to the table's indexed
+sample is recorded separately from any analytic convergence theorem. -/
+theorem dyadicNestedRadical_sample_coordinate
+    {n k : Nat} (hk : k < 2 ^ n) :
+    2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k =
+      (k : Rat) / ((2 ^ n : Nat) : Rat) :=
+  sinPi_half_dyadic_normalized_sample hk
+
+/-! The finite sums form a raw-real candidate without importing a completed
+real number.  Its validity is intentionally a separate certificate: the
+table is an algorithm, while nesting and shrinking are properties to be
+proved from the half-angle bounds. -/
+
+def dyadicNestedRadicalIntegralRaw : RealRaw where
+  compute := dyadicNestedRadicalLeftSum
+
+theorem dyadicNestedRadicalIntegralRaw_valid
+    (hvalid : RealRaw.ValidCompute dyadicNestedRadicalLeftSum) :
+    dyadicNestedRadicalIntegralRaw.Valid := by
+  exact hvalid
+
+theorem dyadicNestedRadicalIntegralRaw_widths_shrink :
+    RealRaw.WidthsShrinkToZero dyadicNestedRadicalIntegralRaw.compute := by
+  change RealRaw.WidthsShrinkToZero dyadicNestedRadicalLeftSum
+  exact dyadicNestedRadicalLeftSum_widths_shrink
+
+theorem dyadicNestedRadicalIntegralRaw_equiv_of_overlap
+    (anchor : RealRaw)
+    (hoverlap : forall n,
+      QInterval.Overlaps
+        (dyadicNestedRadicalLeftSum n) (anchor.compute n)) :
+    dyadicNestedRadicalIntegralRaw.Equiv anchor := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  exact (RealRaw.compareAt_overlap_iff
+    dyadicNestedRadicalIntegralRaw anchor n n).2 (hoverlap n)
+
+/-- Cellwise form of the remaining dyadic/change-of-variables certificate.
+The witness is rational at each finite stage and lies in both computed
+intervals.  This is the form intended for a proof based on finite partitions;
+it avoids introducing an exact value of either integral. -/
+structure DyadicNestedRadicalStieltjesCommonWitness where
+  witness : Nat -> Rat
+  candidate_lo_le : forall n,
+    (dyadicNestedRadicalLeftSum n).lo <= witness n
+  witness_le_candidate_hi : forall n,
+    witness n <= (dyadicNestedRadicalLeftSum n).hi
+  stieltjes_lo_le : forall n,
+    (sinPiStieltjesIntegral.compute n).lo <= witness n
+  witness_le_stieltjes_hi : forall n,
+    witness n <= (sinPiStieltjesIntegral.compute n).hi
+
+theorem DyadicNestedRadicalStieltjesCommonWitness.to_overlap
+    (h : DyadicNestedRadicalStieltjesCommonWitness) (n : Nat) :
+    QInterval.Overlaps
+      (dyadicNestedRadicalLeftSum n)
+      (sinPiStieltjesIntegral.compute n) := by
+  unfold QInterval.Overlaps
+  exact ⟨Rat.le_trans (h.candidate_lo_le n)
+      (h.witness_le_stieltjes_hi n),
+    Rat.le_trans (h.stieltjes_lo_le n)
+      (h.witness_le_candidate_hi n)⟩
+
+/-! A runtime-safe dyadic evaluator.
+
+The raw nested-radical sums have shrinking widths, but their finite boxes are
+not yet proved nested.  Prefix stabilization repairs exactly that defect by
+intersecting finite-radius enlargements of the candidate boxes.  The
+stabilized computation still reads only the candidate sums and the rational
+radius schedule; the Stieltjes value occurs only in the certificate. -/
+def dyadicNestedRadicalIntegralRaw_stabilized : RealRaw :=
+  RealRaw.prefixStabilize dyadicNestedRadicalIntegralRaw
+    (fun n => (sinPiStieltjesIntegral.compute n).width)
+
+theorem dyadicNestedRadicalIntegralRaw_stabilized_valid_of_overlap
+    (hoverlap : forall n,
+      QInterval.Overlaps
+        (dyadicNestedRadicalLeftSum n)
+        (sinPiStieltjesIntegral.compute n)) :
+    dyadicNestedRadicalIntegralRaw_stabilized.Valid := by
+  apply RealRaw.prefixStabilize_valid
+    (candidate := dyadicNestedRadicalIntegralRaw)
+    (anchor := sinPiStieltjesIntegral)
+  · exact dyadicNestedRadicalIntegralRaw_widths_shrink
+  · exact sinPiStieltjesIntegral_valid
+  · exact dyadicNestedRadicalIntegralRaw_equiv_of_overlap
+      sinPiStieltjesIntegral hoverlap
+  · intro n
+    apply Rat.le_refl
+  · exact sinPiStieltjesIntegral_valid.2.2
+
+theorem dyadicNestedRadicalIntegralRaw_stabilized_equiv_reciprocalPi_of_overlap
+    (hoverlap : forall n,
+      QInterval.Overlaps
+        (dyadicNestedRadicalLeftSum n)
+        (sinPiStieltjesIntegral.compute n)) :
+    dyadicNestedRadicalIntegralRaw_stabilized.Equiv reciprocalPiRaw := by
+  have hvalid : dyadicNestedRadicalIntegralRaw_stabilized.Valid :=
+    dyadicNestedRadicalIntegralRaw_stabilized_valid_of_overlap hoverlap
+  have hanchor : sinPiStieltjesIntegral.Equiv reciprocalPiRaw :=
+    sinPiStieltjesIntegral_equiv_reciprocalPi
+  have hstabilized :
+      dyadicNestedRadicalIntegralRaw_stabilized.Equiv
+        sinPiStieltjesIntegral := by
+    apply RealRaw.prefixStabilize_equiv_anchor
+      sinPiStieltjesIntegral_valid
+      (dyadicNestedRadicalIntegralRaw_equiv_of_overlap
+        sinPiStieltjesIntegral hoverlap)
+    intro n
+    apply Rat.le_refl
+  exact RealRaw.equiv_trans hvalid sinPiStieltjesIntegral_valid
+    reciprocalPiRaw_valid hstabilized hanchor
+
+theorem dyadicNestedRadicalIntegralRaw_stabilized_equiv_reciprocalPi_of_commonWitness
+    (h : DyadicNestedRadicalStieltjesCommonWitness) :
+    dyadicNestedRadicalIntegralRaw_stabilized.Equiv reciprocalPiRaw := by
+  apply dyadicNestedRadicalIntegralRaw_stabilized_equiv_reciprocalPi_of_overlap
+  exact h.to_overlap
+
+/-! A named contract for the specialized evaluator.  The implementation may
+use nested radicals, Taylor boxes, or another finite algebraic method; the
+contract deliberately exposes only the facts needed by the dyadic integral.
+-/
+structure DyadicNestedRadicalRoute
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2)) where
+  evaluator : RealFunRaw
+  integral : Integral.Construction evaluator
+    0 ((1 : Rat) / 2)
+  dyadic_plan : pub.plan = Integral.staticDyadicPlan
+  same_plan : pub.plan = integral.plan
+  sample_overlap : forall n k,
+    k < (pub.plan n).subdivisions ->
+    QInterval.Overlaps
+      (S.onHalf.toRealFunRaw.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision)
+      (evaluator.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision)
+
+/-! A constructor-oriented certificate for the route above.  It separates
+the reusable finite search proof from the evaluator-specific facts: the
+specialized evaluator identifies its sampled box with the nested-radical
+table, while the inverse-chart search supplies a rational witness in the
+public sine box and that table box. -/
+structure DyadicNestedRadicalRouteSearchData
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2)) where
+  evaluator : RealFunRaw
+  integral : Integral.Construction evaluator
+    0 ((1 : Rat) / 2)
+  dyadic_plan : pub.plan = Integral.staticDyadicPlan
+  same_plan : pub.plan = integral.plan
+  searchPrecision : Nat -> Nat -> Nat
+  evaluator_sample : forall n k,
+    k < (pub.plan n).subdivisions ->
+    evaluator.compute
+      (leftPoint 0 ((1 : Rat) / 2)
+        (pub.plan n).subdivisions k)
+      (pub.plan n).evalPrecision =
+      dyadicNestedRadicalStageSinAt n k
+  tangent_box : forall n k,
+    k < (pub.plan n).subdivisions ->
+    QInterval
+  tangent_box_bounds : forall n k,
+    (hk : k < (pub.plan n).subdivisions) ->
+    subintervalOf (tangent_box n k hk) 0 1
+  public_box_eq_circle : forall n k,
+    (hk : k < (pub.plan n).subdivisions) ->
+    S.onHalf.toRealFunRaw.compute
+      (leftPoint 0 ((1 : Rat) / 2)
+        (pub.plan n).subdivisions k)
+      (pub.plan n).evalPrecision =
+      rationalCircleSinInterval (tangent_box n k hk)
+  table_box_bounds : forall n k,
+    k < (pub.plan n).subdivisions ->
+    subintervalOf (dyadicNestedRadicalStageSinAt n k) 0 1
+  search : forall n k (hk : k < (pub.plan n).subdivisions),
+    ∃ u, rationalTangentWitnessBoxSearch
+      (tangent_box n k hk)
+      (dyadicNestedRadicalStageSinAt n k)
+      (searchPrecision n k) = some u
+
+def DyadicNestedRadicalRouteSearchData.toRoute
+    {S : ArctanSinPiConstruction}
+    {pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2)}
+    (d : DyadicNestedRadicalRouteSearchData S pub) :
+    DyadicNestedRadicalRoute S pub where
+  evaluator := d.evaluator
+  integral := d.integral
+  dyadic_plan := d.dyadic_plan
+  same_plan := d.same_plan
+  sample_overlap := by
+    intro n k hk
+    obtain ⟨u, hu⟩ := d.search n k hk
+    have hover := rationalTangentWitnessBoxSearch_overlap_of_success
+      (d.tangent_box_bounds n k hk)
+      (d.table_box_bounds n k hk) hu
+    have hsample := d.evaluator_sample n k hk
+    simpa only [d.public_box_eq_circle n k hk, hsample] using hover
+
+theorem DyadicNestedRadicalRoute.public_equiv_evaluator
+    {S : ArctanSinPiConstruction}
+    {pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2)}
+    (route : DyadicNestedRadicalRoute S pub) :
+    (S.halfIntegral pub).Equiv
+      (Integral.integral route.evaluator 0 ((1 : Rat) / 2) route.integral) := by
+  exact Integral.integral_equiv_of_plan_and_sample_overlaps
+    (by native_decide : (0 : Rat) <= (1 : Rat) / 2)
+    pub route.integral route.same_plan route.sample_overlap
+
+/-! The two implementations now meet at one theorem.  The nested-radical
+route proves equality with the public dyadic integral at its finite sample
+points; the transport certificate proves equality of that public integral
+with the uneven tangent-chart computation. -/
+
+theorem DyadicNestedRadicalRoute.integral_equiv_reciprocalPi
+    {S : ArctanSinPiConstruction}
+    {pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2)}
+    (route : DyadicNestedRadicalRoute S pub)
+    (htransport : S.TangentChartTransport pub) :
+    (Integral.integral route.evaluator 0 ((1 : Rat) / 2)
+      route.integral).Equiv reciprocalPiRaw := by
+  have hroute := route.public_equiv_evaluator
+  have hpublic := htransport.equivalent
+  have hnested := FTC.integral_valid_of_construction route.integral
+  have hpubvalid := S.halfIntegral_valid pub
+  have hroute' :
+      (Integral.integral route.evaluator 0 ((1 : Rat) / 2)
+        route.integral).Equiv (S.halfIntegral pub) :=
+    RealRaw.equiv_symm hroute
+  have hnestedChart :
+      (Integral.integral route.evaluator 0 ((1 : Rat) / 2)
+        route.integral).Equiv tangentChartIntegral :=
+    RealRaw.equiv_trans hnested hpubvalid tangentChartIntegral_valid
+      hroute' hpublic
+  exact RealRaw.equiv_trans hnested tangentChartIntegral_valid
+    reciprocalPiRaw_valid hnestedChart tangentChartIntegral_equiv_reciprocalPi
+
+theorem DyadicNestedRadicalRouteSearchData.integral_equiv_reciprocalPi
+    {S : ArctanSinPiConstruction}
+    {pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2)}
+    (d : DyadicNestedRadicalRouteSearchData S pub)
+    (htransport : S.TangentChartTransport pub) :
+    (Integral.integral d.evaluator 0 ((1 : Rat) / 2)
+      d.integral).Equiv reciprocalPiRaw := by
+  exact d.toRoute.integral_equiv_reciprocalPi htransport
+
 /--
 The exact reusable conclusion of the elementary sine-integral argument.
 
@@ -3221,6 +8201,213 @@ theorem ArctanSinPiConstruction.monotoneScheduleIntegral_equiv_reciprocalPi_of_t
     hinterval schedule hFTC
   simpa [canonicalSineEndpointIntegral] using
     (canonicalSineEndpointIntegral_equiv_reciprocalPi S ht0 ht1)
+
+/-! The complete precision-aware interface for the nested-radical route.  A
+certificate family is the only geometric input: once supplied at every
+precision and every dyadic sample, the public equal-dyadic integral is
+equivalent to the integral of the evaluator whose samples are the nested
+radical table. -/
+theorem ArctanSinPiConstruction.halfIntegral_equiv_of_certificate_family
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (n k : Nat) (hk : k < 2 ^ n), 0 < k ->
+      forall precision,
+        CanonicalDyadicHalfAngleCertificateAt S.inverse precision n k hk) :
+    (S.halfIntegral pub).Equiv
+      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+  apply S.halfIntegral_equiv_of_precisionAware_nestedRadical_semantics
+    pub g cg hdyadic hplan hevaluator
+  intro n k hk
+  exact arctanSinPi_nestedRadicalSample_equiv_of_certificate_family
+    S.inverse ht0 hk (hcertificate n k hk)
+
+theorem ArctanSinPiConstruction.halfIntegral_equiv_of_overlap_family
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hover : forall (n k : Nat) (hk : k < 2 ^ n), 0 < k ->
+      forall precision, QInterval.Overlaps
+        (rationalCircleSinInterval
+          (dyadicTangentBoxAt S.inverse precision n k hk))
+        ((dyadicNestedRadicalTableAt precision n k).1)) :
+    (S.halfIntegral pub).Equiv
+      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+  apply S.halfIntegral_equiv_of_precisionAware_nestedRadical_semantics
+    pub g cg hdyadic hplan hevaluator
+  intro n k hk
+  exact arctanSinPi_nestedRadicalSample_equiv_of_overlap_family
+    S.inverse ht0 hk (hover n k hk)
+
+structure DyadicTangentWitnessFamily
+    (B : IntegralIdentities.ArctanInverseBisection) where
+  schedule : forall (depth k : Nat) (hk : k < 2 ^ depth),
+    DyadicTangentWitnessSchedule B depth k hk
+
+theorem ArctanSinPiConstruction.halfIntegral_equiv_of_witness_family
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (family : DyadicTangentWitnessFamily S.inverse) :
+    (S.halfIntegral pub).Equiv
+      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+  apply S.halfIntegral_equiv_of_precisionAware_nestedRadical_semantics
+    pub g cg hdyadic hplan hevaluator
+  intro n k hk
+  exact arctanSinPi_nestedRadicalSample_equiv_of_witness_schedule
+    (family.schedule n k hk)
+
+theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_witness_family
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (family : DyadicTangentWitnessFamily S.inverse)
+    (hintegral : (Integral.integral g 0 ((1 : Rat) / 2) cg).Equiv
+      reciprocalPiRaw) :
+    (S.halfIntegral pub).Equiv reciprocalPiRaw := by
+  exact RealRaw.equiv_trans
+    (S.halfIntegral_valid pub)
+    (FTC.integral_valid_of_construction cg)
+    reciprocalPiRaw_valid
+    (S.halfIntegral_equiv_of_witness_family pub g cg hdyadic hplan
+      hevaluator family)
+    hintegral
+
+theorem ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificates
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (zero_overlap : forall (precision depth : Nat) (hk : 0 < 2 ^ depth),
+      QInterval.Overlaps
+        ((sinPiRawOfArctan S.inverse
+          (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) 0)
+          (dyadicHalfDomain (by omega))).compute precision)
+        (dyadicNestedRadicalTableAt precision depth 0).1)
+    (even_certificate : forall (precision n j : Nat) (hj : j < 2 ^ n),
+      DyadicEvenStepCertificate S.inverse precision n j hj)
+    (lower_certificate : forall (precision n j : Nat)
+      (hbound : 2 * j + 1 <= 2 ^ n),
+      DyadicHalfAngleChildCertificate S.inverse precision n j hbound)
+    (upper_certificate : forall (precision n k : Nat)
+      (hupper : 2 ^ n < k) (hk : k < 2 ^ (n + 1)),
+      DyadicReflectedHalfAngleCertificate S.inverse precision n k hupper hk) :
+    (S.halfIntegral pub).Equiv
+      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+  apply S.halfIntegral_equiv_of_overlap_family
+    pub g cg hdyadic hplan hevaluator ht0
+  intro n k hk hpos precision
+  have hsample :=
+    dyadicNestedRadical_sample_overlap_of_branch_certificates
+      S.inverse zero_overlap even_certificate lower_certificate
+      upper_certificate precision n k hk
+  simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using hsample
+
+theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_branch_certificates
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (zero_overlap : forall (precision depth : Nat) (hk : 0 < 2 ^ depth),
+      QInterval.Overlaps
+        ((sinPiRawOfArctan S.inverse
+          (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) 0)
+          (dyadicHalfDomain (by omega))).compute precision)
+        (dyadicNestedRadicalTableAt precision depth 0).1)
+    (even_certificate : forall (precision n j : Nat) (hj : j < 2 ^ n),
+      DyadicEvenStepCertificate S.inverse precision n j hj)
+    (lower_certificate : forall (precision n j : Nat)
+      (hbound : 2 * j + 1 <= 2 ^ n),
+      DyadicHalfAngleChildCertificate S.inverse precision n j hbound)
+    (upper_certificate : forall (precision n k : Nat)
+      (hupper : 2 ^ n < k) (hk : k < 2 ^ (n + 1)),
+      DyadicReflectedHalfAngleCertificate S.inverse precision n k hupper hk)
+    (hintegral :
+      (Integral.integral g 0 ((1 : Rat) / 2) cg).Equiv reciprocalPiRaw) :
+    (S.halfIntegral pub).Equiv reciprocalPiRaw := by
+  have hpub := S.halfIntegral_equiv_of_branch_certificates
+    pub g cg hdyadic hplan hevaluator ht0 zero_overlap
+    even_certificate lower_certificate upper_certificate
+  exact RealRaw.equiv_trans
+    (S.halfIntegral_valid pub)
+    (FTC.integral_valid_of_construction cg)
+    reciprocalPiRaw_valid hpub hintegral
 
 end SinPiIntegral
 

@@ -22,6 +22,17 @@ Pythagoras, Heron, the cosine law, Ptolemy, Pick, and orientation share this
 pattern. Lengths are recovered from certified brackets; no completed plane is
 needed for the finite statements.
 
+The geometric API keeps three layers separate:
+
+\begin{verbatim}
+exact rational coordinates -> squared identities -> interval lengths
+                         -> area/order certificate
+\end{verbatim}
+
+The last step is always a finite comparison between rational boxes.  Geometry
+is used to supply the inequalities; the abstract `real` layer only packages
+the resulting nested computations.
+
 \section{Archimedes and rational circles}
 \label{thm:geometric-pi-validity}
 
@@ -38,16 +49,30 @@ subdivide -> certify cells -> add bounds -> compare or refine
 \section{Angles and rotations}
 \label{thm:finite-quarter-turn}
 
-The project uses one public sine convention throughout: \(\sin(\pi x)\).
-When a normalized quarter-turn parameter \(t\in[0,1]\) is used, it is only
-an internal parameter supplied to the circle algorithm; public statements
-continue to use \(x\) and \(\sin(\pi x)\).
+The blueprint writes sine in one way: \(\sin(\pi x)\).  Inside the circle
+algorithm we use the normalized quarter-turn coordinate \(t=2x\) on this
+half-period; it is only an implementation parameter.
 
 \begin{verbatim}
 area bracket -> angle bracket -> rational circle -> finite identities
 \end{verbatim}
 Quarter-turns and de Moivre belong here as finite rotation certificates;
 unrestricted angle semantics remain a separate bridge.
+The common-prefix complex rotation evaluator exposes stable real and imaginary
+coordinates; their shrinking boxes provide the shared continuity modulus.
+The derivative layer later identifies the two coordinate derivatives with the
+opposite coordinate, closing the finite rotation calculus.
+
+The half-angle algorithm is the central example:
+
+\begin{verbatim}
+parent circle box -> (1 +/- cosine)/2 -> rational sqrt box
+                  -> child sine/cosine boxes -> repeat
+\end{verbatim}
+
+Each stage records range, circle-equation, and width invariants.  Nested
+radicals are therefore not an appeal to an already completed square root; they
+are executable interval refinements.
 
 \section{The first computable sine integral}
 \label{thm:computable-sine-half-integral}
@@ -63,11 +88,14 @@ sin(pi*x) -> equal dyadic rectangles -> realRaw integral
           -> endpoint computation -> reciprocal-pi realRaw
 \end{verbatim}
 
-The proof does not import a completed real line.  It consists of a computable
-modulus for the evaluator, a finite interval FTC certificate, and the endpoint
-identities \(\cos(0)=1\), \(\cos(\pi/2)=0\).  Thus the familiar value is
-recorded as \(1/\pi\) only after the reciprocal-pi representation has been
-identified with that endpoint difference.
+The proof does not import a completed real line.  Its public theorem is
+parameterized by a finite interval FTC certificate for the trigonometric
+evaluator, together with the endpoint identities \(\cos(0)=1\) and
+\(\cos(\pi/2)=0\).  Thus the familiar value is recorded as \(1/\pi\) only
+after the reciprocal-pi representation has been identified with that endpoint
+difference.  The endpoint and transport layers are checked; supplying the
+general dyadic sine FTC certificate remains the principal trigonometric
+frontier.
 
 \section{Scope boundary}
 

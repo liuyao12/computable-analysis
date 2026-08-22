@@ -49,6 +49,88 @@ theorem toRealFunRaw_valid (F : FunctionOnInterval) :
   rw [RealFunRaw.applyCompute, hcompute]
   exact F.valid_on x (F.defined_on x hx)
 
+/-! Stage-reindex an interval evaluator when a calculus construction needs a
+finer native computation schedule.  The reindexed function is equivalent at
+every rational input because `RealRaw.StageSchedule` is cofinal; this keeps
+the public equal-dyadic algorithm unchanged up to `RealRaw.Equiv`. -/
+
+def stageSchedule (F : FunctionOnInterval) (sigma : RealRaw.StageSchedule) :
+    FunctionOnInterval where
+  raw := {
+    definedAt := F.raw.definedAt
+    compute := fun x hx n => F.raw.compute x hx (sigma.stage n)
+  }
+  lower := F.lower
+  upper := F.upper
+  defined_on := F.defined_on
+  valid_on := by
+    intro x hx
+    let hF : F.raw.definedAt x := hx
+    change RealRaw.ValidCompute (fun n => F.raw.compute x hF (sigma.stage n))
+    exact RealRaw.schedule_valid
+      { compute := fun n => F.raw.compute x hF n } (F.valid_on x hF) sigma
+
+theorem stageSchedule_compute_of_mem
+    (F : FunctionOnInterval) (sigma : RealRaw.StageSchedule)
+    {x : Rat} (hx : inDomainInterval F.lower F.upper x) (n : Nat) :
+    (F.stageSchedule sigma).compute x hx n =
+      F.compute x hx (sigma.stage n) := by
+  rfl
+
+theorem stageSchedule_point_equiv
+    (F : FunctionOnInterval) (sigma : RealRaw.StageSchedule)
+    {x : Rat} (hx : inDomainInterval F.lower F.upper x) :
+    (RealRaw.schedule sigma
+      ({ compute := F.compute x hx } : RealRaw)).Equiv
+      ({ compute := F.compute x hx } : RealRaw) := by
+  exact RealRaw.equiv_symm
+    (RealRaw.schedule_equiv ({ compute := F.compute x hx } : RealRaw)
+      (F.valid_on x (F.defined_on x hx)) sigma)
+
+theorem toRealFunRaw_stageSchedule_sample_overlap
+    (F : FunctionOnInterval) (sigma : RealRaw.StageSchedule)
+    {x : Rat} (hx : inDomainInterval F.lower F.upper x) (n : Nat) :
+    QInterval.Overlaps
+      (F.toRealFunRaw.compute x n)
+      ((F.stageSchedule sigma).toRealFunRaw.compute x n) := by
+  let R : RealRaw := { compute := F.compute x hx }
+  have hR : R.Valid := F.valid_on x (F.defined_on x hx)
+  have hover := (RealRaw.compareAt_overlap_iff R R n (sigma.stage n)).1
+    (RealRaw.allStagesOverlap_refl R hR n (sigma.stage n))
+  rw [toRealFunRaw_compute_of_mem F hx n]
+  rw [toRealFunRaw_compute_of_mem (F.stageSchedule sigma) hx n]
+  exact hover
+
+theorem integral_equiv_of_stageSchedule
+    (F : FunctionOnInterval) (sigma : RealRaw.StageSchedule)
+    (hab : F.lower <= F.upper)
+    (cf : Integral.Construction F.toRealFunRaw F.lower F.upper)
+    (cg : Integral.Construction
+      (F.stageSchedule sigma).toRealFunRaw F.lower F.upper)
+    (hplan : cf.plan = cg.plan) :
+    (Integral.integral F.toRealFunRaw F.lower F.upper cf).Equiv
+      (Integral.integral (F.stageSchedule sigma).toRealFunRaw
+        F.lower F.upper cg) := by
+  apply Integral.integral_equiv_of_plan_and_sample_overlaps hab cf cg hplan
+  intro n k hk
+  have hpieces : 0 < (cf.plan n).subdivisions := by omega
+  have hxleft : F.lower <=
+      leftPoint F.lower F.upper (cf.plan n).subdivisions k := by
+    have hmono := leftPoint_monotone hpieces hab
+      (Nat.zero_le k)
+    simpa [leftPoint_zero] using hmono
+  have hxright :
+      leftPoint F.lower F.upper (cf.plan n).subdivisions k <= F.upper := by
+    have hmono := leftPoint_monotone hpieces hab
+      (Nat.le_of_lt hk)
+    calc
+      leftPoint F.lower F.upper (cf.plan n).subdivisions k <=
+          leftPoint F.lower F.upper (cf.plan n).subdivisions
+            (cf.plan n).subdivisions := hmono
+      _ = F.upper := leftPoint_endpoint hpieces
+  exact toRealFunRaw_stageSchedule_sample_overlap F sigma
+    ⟨hxleft, hxright⟩ (cf.plan n).evalPrecision
+
 /-- Domain-aware endpoint telescoping for an interval-certified primitive. -/
 theorem endpointDifferenceRaw_adjacent_additive
     (F : FunctionOnInterval) {a b c : Rat}
@@ -7199,6 +7281,46 @@ theorem targetAt_halfQuarterTurn_equiv
     (B.targetAt t ht).value.Equiv
       (RationalCircle.GeometricTrig.halfQuarterTurnRaw t) :=
   B.targetAt_equiv_halfQuarterTurn t ht
+
+/-- Differences of inverse targets retain their geometric sector meaning.
+This is the finite angle-increment interface used by the computable sine
+secant estimates; it keeps the angle as a sector-area `RealRaw`, rather than
+introducing an ambient real argument. -/
+theorem targetAt_difference_equiv_halfQuarterTurn_difference
+    (B : ArctanInverseBisection)
+    {s t : RationalCircle.GeometricTrig.QuarterTurn}
+    (hs : RationalCircle.GeometricTrig.firstQuadrantBranch s)
+    (ht : RationalCircle.GeometricTrig.firstQuadrantBranch t) :
+    ((B.targetAt s hs).value - (B.targetAt t ht).value).Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw s -
+        RationalCircle.GeometricTrig.halfQuarterTurnRaw t) := by
+  have hpi : piCircleArea.Valid := by
+    change RealRaw.ValidCompute piCircleArea.compute
+    have hcompute : piCircleArea.compute =
+        ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).compute := by
+      funext n
+      exact (ArctanGeometry.four_arctanGeom_one_compute_eq_piCircleArea_compute n).symm
+    rw [hcompute]
+    exact ArctanGeometry.four_arctanGeom_one_valid
+  have hsvalid :
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw s).Valid := by
+    apply RealRaw.scaleRat_valid_of_nonneg
+    · change 0 <= s / 4
+      rw [Rat.div_def]
+      exact Rat.mul_nonneg hs.1 (by native_decide)
+    · exact hpi
+  have htvalid :
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw t).Valid := by
+    apply RealRaw.scaleRat_valid_of_nonneg
+    · change 0 <= t / 4
+      rw [Rat.div_def]
+      exact Rat.mul_nonneg ht.1 (by native_decide)
+    · exact hpi
+  exact RealRaw.sub_equiv
+    (B.targetAt s hs).value_valid hsvalid
+    (B.targetAt t ht).value_valid htvalid
+    (B.targetAt_halfQuarterTurn_equiv s hs)
+    (B.targetAt_halfQuarterTurn_equiv t ht)
 
 end ArctanInverseBisection
 

@@ -16,6 +16,64 @@ namespace ComputableAnalysis
 
 namespace RationalCircle
 
+/-! ## Positive half-angle geometry
+
+The nested-radical step is the coordinate form of one elementary geometric
+fact.  We keep the fact at the rational-coordinate level so later interval
+proofs can use it as a single certificate instead of repeating the picture as
+separate order calculations. -/
+
+structure PositiveHalfAngleCoordinates (s c ss cc : Rat) : Prop where
+  parent_circle : sq s + sq c = 1
+  parent_nonneg : 0 <= s
+  parent_cos_nonneg : 0 <= c
+  sine_square : sq ss = (1 - c) / 2
+  cosine_square : sq cc = (1 + c) / 2
+  sine_nonneg : 0 <= ss
+  cosine_nonneg : 0 <= cc
+
+theorem PositiveHalfAngleCoordinates.child_circle
+    {s c ss cc : Rat} (h : PositiveHalfAngleCoordinates s c ss cc) :
+    sq ss + sq cc = 1 := by
+  rw [h.sine_square, h.cosine_square]
+  grind [Rat.div_def, Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul]
+
+theorem PositiveHalfAngleCoordinates.child_unit_bounds
+    {s c ss cc : Rat} (h : PositiveHalfAngleCoordinates s c ss cc) :
+    0 <= ss ∧ ss <= 1 ∧ 0 <= cc ∧ cc <= 1 := by
+  have hs_sq_nonneg : 0 <= sq s := by
+    unfold sq
+    by_cases hs : 0 <= s
+    · exact Rat.mul_nonneg hs hs
+    · have hns : 0 <= -s := by grind
+      simpa [Rat.mul_neg, Rat.neg_mul, Rat.neg_neg] using
+        (Rat.mul_nonneg hns hns)
+  have hc_sq_le_one : sq c <= 1 := by
+    rw [← h.parent_circle]
+    grind
+  have hsine_sq_le_one : sq ss <= 1 := by
+    rw [h.sine_square]
+    have hc_lower : -1 <= c := by
+      have hnegc : sq (-c) <= sq (1 : Rat) := by
+        simpa [sq, Rat.neg_mul, Rat.mul_neg, Rat.neg_neg] using hc_sq_le_one
+      have hbound := le_of_sq_le_sq_of_nonneg_right
+        (a := -c) (b := (1 : Rat)) (by native_decide) hnegc
+      grind
+    grind
+  have hcos_sq_le_one : sq cc <= 1 := by
+    rw [h.cosine_square]
+    have hc_le : c <= 1 := by
+      have hbound := le_of_sq_le_sq_of_nonneg_right
+        (a := c) (b := (1 : Rat)) (by native_decide)
+        (by simpa [sq] using hc_sq_le_one)
+      exact hbound
+    grind
+  refine ⟨h.sine_nonneg, ?_, h.cosine_nonneg, ?_⟩
+  · exact le_of_sq_le_sq_of_nonneg_right (by native_decide)
+      (by simpa [sq] using hsine_sq_le_one)
+  · exact le_of_sq_le_sq_of_nonneg_right (by native_decide)
+      (by simpa [sq] using hcos_sq_le_one)
+
 /-! The determinant certificate used for rational triangle orientation and
 area.  It is the finite-coordinate core of the classical angle-sum theorem;
 angle-valued semantics are deliberately kept in the later circle layer. -/
@@ -402,6 +460,155 @@ def segmentNormSq (p q : PiCirclePoint) : Rat :=
   let dx := q.x - p.x
   let dy := q.y - p.y
   dx * dx + dy * dy
+
+/-! A first polygonal-path inequality, stated entirely over `Rat`.
+
+The unsquared statement will later be obtained by applying the project's
+computable square-root intervals.  The squared form is the algebraic core:
+the excess is a sum of squares, so no Euclidean completeness axiom is used.
+-/
+theorem segmentNormSq_two_step_le
+    (p q r : PiCirclePoint) :
+    segmentNormSq p r <=
+      2 * (segmentNormSq p q + segmentNormSq q r) := by
+  unfold segmentNormSq
+  have hsq : forall z : Rat, 0 <= z * z := by
+    intro z
+    by_cases hz : 0 <= z
+    · exact Rat.mul_nonneg hz hz
+    · have hz' : z <= 0 := by grind
+      have hneg : 0 <= -z := by grind
+      have h := Rat.mul_nonneg hneg hneg
+      grind [Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm]
+  have hx : 0 <=
+      ((q.x - p.x) - (r.x - q.x)) *
+        ((q.x - p.x) - (r.x - q.x)) := by
+    exact hsq _
+  have hy : 0 <=
+      ((q.y - p.y) - (r.y - q.y)) *
+        ((q.y - p.y) - (r.y - q.y)) := by
+    exact hsq _
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+/-! The one-dimensional polygonal-length theorem.
+
+`steps` records the signed displacements of a finite sequence of line
+segments.  The direct segment has displacement `ratListSum steps`, while the
+polygonal path has length `ratListAbsSum steps`.  This is the exact finite
+triangle inequality, proved by interval-free rational arithmetic. -/
+def rationalPolylineLength (steps : List Rat) : Rat :=
+  ratListAbsSum steps
+
+def rationalDirectLength (steps : List Rat) : Rat :=
+  qabs (ratListSum steps)
+
+theorem rationalPolyline_length_ge_direct (steps : List Rat) :
+    rationalDirectLength steps <= rationalPolylineLength steps := by
+  exact qabs_ratListSum_le steps
+
+/-! The geometric reading of the preceding algebraic theorem.
+
+For a finite chain of rational line segments, `steps` is the signed
+displacement of each segment.  The left side is the length of the one
+straight segment joining the endpoints; the right side is the length of the
+chain.  Thus the usual polygonal-path inequality is a theorem of rational
+arithmetic in this development, rather than a Euclidean axiom.
+-/
+theorem rationalPolyline_length_ge_straight_segment (steps : List Rat) :
+    qabs (ratListSum steps) <= ratListAbsSum steps := by
+  exact rationalPolyline_length_ge_direct steps
+
+theorem rationalPolyline_length_two_step_ge_direct (u v : Rat) :
+    rationalDirectLength [u, v] <= rationalPolylineLength [u, v] := by
+  exact rationalPolyline_length_ge_direct [u, v]
+
+/-! The same finite argument for actual rational planar vertices.  The local
+triangle inequality is supplied by the selected rational segment-length
+certificate; the global polygonal-path inequality is then derived by
+induction, not postulated as geometry. -/
+def polygonalPathLengthFrom
+    (segmentLength : PiCirclePoint -> PiCirclePoint -> Rat)
+    (p : PiCirclePoint) : List PiCirclePoint -> Rat
+  | [] => 0
+  | q :: rest => segmentLength p q + polygonalPathLengthFrom segmentLength q rest
+
+def polygonalPathEndpoint (p : PiCirclePoint) : List PiCirclePoint -> PiCirclePoint
+  | [] => p
+  | q :: rest => polygonalPathEndpoint q rest
+
+theorem polygonalPath_length_ge_endpoint
+    (segmentLength : PiCirclePoint -> PiCirclePoint -> Rat)
+    (hzero : forall p, segmentLength p p = 0)
+    (htriangle : forall p q r,
+      segmentLength p r <= segmentLength p q + segmentLength q r)
+    (p : PiCirclePoint) (rest : List PiCirclePoint) :
+    segmentLength p (polygonalPathEndpoint p rest) <=
+      polygonalPathLengthFrom segmentLength p rest := by
+  induction rest generalizing p with
+  | nil => simp [polygonalPathEndpoint, polygonalPathLengthFrom, hzero]
+  | cons q rest ih =>
+      rw [polygonalPathEndpoint, polygonalPathLengthFrom]
+      calc
+        segmentLength p (polygonalPathEndpoint q rest) <=
+            segmentLength p q + segmentLength q (polygonalPathEndpoint q rest) :=
+          htriangle p q (polygonalPathEndpoint q rest)
+        _ <= segmentLength p q + polygonalPathLengthFrom segmentLength q rest := by
+          exact (Rat.add_le_add_left).2 (ih q)
+
+/-! A genuine turn makes the inequality strict.  This is the elementary
+one-dimensional model of a polygonal path that doubles back: the two
+segment lengths add, while the direct displacement cancels part of them.
+The result is an order theorem over `Rat`, not an axiom about Euclidean
+space. -/
+theorem rationalPolyline_length_two_step_strict_of_turn
+  {u v : Rat} (hu : u < 0) (hv : 0 < v) :
+    rationalDirectLength [u, v] < rationalPolylineLength [u, v] := by
+  unfold rationalDirectLength rationalPolylineLength ratListSum ratListAbsSum
+  simp only [ratListSum, ratListAbsSum, Rat.add_zero, Rat.zero_add]
+  by_cases hsum : 0 <= u + v
+  · rw [qabs_eq_self_of_nonneg hsum,
+      qabs_eq_neg_of_nonpos (by grind : u <= 0),
+      qabs_eq_self_of_nonneg (by grind : 0 <= v)]
+    grind
+  · have hsum' : u + v <= 0 := by grind
+    rw [qabs_eq_neg_of_nonpos hsum',
+      qabs_eq_neg_of_nonpos (by grind : u <= 0),
+      qabs_eq_self_of_nonneg (by grind : 0 <= v)]
+    grind
+
+theorem rationalPolyline_length_two_step_strict_of_genuine_turn
+  {u v : Rat} (hu : u * v < 0) :
+    rationalDirectLength [u, v] < rationalPolylineLength [u, v] := by
+  by_cases hu0 : u < 0
+  · have hv : 0 < v := by
+      by_cases hv0 : 0 < v
+      · exact hv0
+      · have hvnonpos : v <= 0 := by grind
+        have hprod' : 0 <= (-u) * (-v) :=
+          Rat.mul_nonneg (by grind) (by grind)
+        have hprod : 0 <= u * v := by
+          simpa [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg] using hprod'
+        grind
+    exact rationalPolyline_length_two_step_strict_of_turn hu0 hv
+  · have hu' : 0 < u := by
+      have hunonneg : 0 <= u := by grind
+      by_cases hueq : u = 0
+      · simp [hueq] at hu
+      · grind
+    have hv : v < 0 := by
+      by_cases hv0 : v < 0
+      · exact hv0
+      · have hvnonneg : 0 <= v := by grind
+        have hprod : 0 <= u * v := Rat.mul_nonneg (by grind) hvnonneg
+        grind
+    -- Reverse both segment directions; the preceding turn theorem applies.
+    have h := rationalPolyline_length_two_step_strict_of_turn hv hu'
+    unfold rationalDirectLength rationalPolylineLength ratListSum ratListAbsSum at h ⊢
+    simp only [ratListSum, ratListAbsSum, Rat.add_zero, Rat.zero_add] at h ⊢
+    rw [show u + v = v + u by grind]
+    rw [show qabs u + qabs v = qabs v + qabs u by grind]
+    exact h
 
 theorem rightTriangle_axis_pythagorean (a b : Rat) :
     segmentNormSq origin { x := a, y := 0 } +
@@ -3994,6 +4201,66 @@ theorem cos_eq (u : Rat) :
 theorem sin_eq (u : Rat) :
     sin u = (2 * u) / (1 + u * u) := rfl
 
+theorem one_sub_cos_eq_two_mul_sq_div (u : Rat) :
+    1 - cos u = (2 * (u * u)) / (1 + u * u) := by
+  rw [cos_eq]
+  have hden : 1 + u * u ≠ 0 :=
+    Rat.ne_of_gt (Stage.one_add_square_pos u)
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.mul_inv_cancel _ hden]
+
+theorem one_sub_cos_nonneg (u : Rat) :
+    0 <= 1 - cos u := by
+  rw [one_sub_cos_eq_two_mul_sq_div, Rat.div_def]
+  exact Rat.mul_nonneg
+    (Rat.mul_nonneg (by native_decide)
+      (ComputableAnalysis.rat_square_nonneg_basic u))
+    (Rat.le_of_lt ((Rat.inv_pos).2 (Stage.one_add_square_pos u)))
+
+theorem one_sub_cos_le_two_mul_sq (u : Rat) :
+    1 - cos u <= 2 * (u * u) := by
+  rw [one_sub_cos_eq_two_mul_sq_div, Rat.div_def]
+  let d : Rat := 1 + u * u
+  have hd : 1 <= d := by
+    dsimp [d]
+    grind [ComputableAnalysis.rat_square_nonneg_basic u]
+  have hdinv : d⁻¹ <= 1 := by
+    apply Rat.le_of_mul_le_mul_right (c := d)
+    · rw [Rat.inv_mul_cancel _ (Rat.ne_of_gt (Stage.one_add_square_pos u))]
+      simpa [d] using hd
+    · exact Stage.one_add_square_pos u
+  have hnum : 0 <= 2 * (u * u) := by
+    exact Rat.mul_nonneg (by native_decide)
+      (ComputableAnalysis.rat_square_nonneg_basic u)
+  dsimp [d] at hdinv ⊢
+  calc
+    2 * (u * u) * (1 + u * u)⁻¹ <=
+        2 * (u * u) * 1 :=
+      Rat.mul_le_mul_of_nonneg_left hdinv hnum
+    _ = 2 * (u * u) := by grind
+
+theorem qabs_cos_le_one (u : Rat) :
+    qabs (cos u) <= 1 := by
+  rw [cos_eq]
+  have hden : 0 < 1 + u * u := Stage.one_add_square_pos u
+  have hdenne : 1 + u * u ≠ 0 := Rat.ne_of_gt hden
+  have hsq := ComputableAnalysis.rat_square_nonneg_basic u
+  have hlo : -1 <= (1 - u * u) / (1 + u * u) := by
+    apply Rat.le_of_mul_le_mul_right (c := 1 + u * u)
+    · rw [Rat.div_def]
+      rw [Rat.mul_assoc, Rat.inv_mul_cancel _ hdenne, Rat.mul_one]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul]
+    · exact hden
+  have hhi : (1 - u * u) / (1 + u * u) <= 1 := by
+    apply Rat.le_of_mul_le_mul_right (c := 1 + u * u)
+    · rw [Rat.div_def]
+      rw [Rat.mul_assoc, Rat.inv_mul_cancel _ hdenne, Rat.mul_one]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul]
+    · exact hden
+  exact qabs_le_of_neg_le_le hlo hhi
+
 theorem point_eq (u : Rat) :
     point u = ({ x := cos u, y := sin u } : PiCirclePoint) := by
   rfl
@@ -4150,6 +4417,20 @@ theorem composed_cos_eq (u v : Rat) :
 theorem composed_sin_eq (u v : Rat) :
     composedSin u v = cos u * sin v + sin u * cos v := by
   rfl
+
+/-- Finite cosine-increment decomposition.
+
+This is the rational-circle identity used by the sine FTC route: the change
+in `1 - cos` under a chart increment splits into the linear sine term and a
+quadratic cosine correction.  It is an exact rational equality, before any
+interval enclosure or limiting argument. -/
+theorem one_sub_composedCos_eq_sin_mul_sin_add_cos_mul_one_sub_cos
+    (u v : Rat) :
+    1 - composedCos u v =
+      (1 - cos u) + sin u * sin v + cos u * (1 - cos v) := by
+  rw [composed_cos_eq]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 
 theorem chartAdd_normDen_eq (u v : Rat) :
     chartAddNormDen u v = (1 + u * u) * (1 + v * v) := by
@@ -4380,6 +4661,15 @@ theorem composedCos_eq_cos_chartAdd {u v : Rat}
       composedCos_chartAdd_denominator_cleared u v
     _ = chartAddNormDen u v * cos (chartAddParameter u v) := by
       rw [cos_chartAdd_denominator_cleared hden]
+
+/-! The tangent-addition form is placed after the chart identity so the
+finite secant theorem depends only on the rational circle API. -/
+theorem one_sub_cos_chartAdd_eq_sin_mul_sin_add_cos_mul_one_sub_cos
+    {u v : Rat} (hden : chartAddDen u v ≠ 0) :
+    1 - cos (chartAddParameter u v) =
+      (1 - cos u) + sin u * sin v + cos u * (1 - cos v) := by
+  rw [← composedCos_eq_cos_chartAdd hden]
+  exact one_sub_composedCos_eq_sin_mul_sin_add_cos_mul_one_sub_cos u v
 
 theorem composedSin_eq_sin_chartAdd {u v : Rat}
     (hden : Ne (chartAddDen u v) 0) :

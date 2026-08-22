@@ -50,6 +50,132 @@ theorem exactRat_constant_raw_valid (c a b : Rat) :
 def affineInterval (r c : Rat) (I : QInterval) : QInterval :=
   { lo := r * I.lo + c, hi := r * I.hi + c }
 
+def stableAffine (r c : Rat) : StablePartialRealFunRaw where
+  definedAt := fun _ => True
+  compute := fun x _ => { lo := r * x + c, hi := r * x + c }
+  rate := fun _ => .unknown
+
+def stableAffineFunction (r c a b : Rat) : FunctionOnInterval :=
+  FunctionOnInterval.ofStable (stableAffine r c) a b
+    (fun _ _ => trivial)
+    (fun x _ => RealRaw.ofRat_valid (r * x + c))
+
+def stableAffine_intervalRegularOn_of_unit_slope
+    (r c a b : Rat) (hr0 : 0 <= r) (hr1 : r <= 1) :
+    IntervalRegularOn (stableAffineFunction r c a b) :=
+  IntervalRegularOn.ofStable
+    (stableAffine r c) a b
+    (fun _ _ => trivial)
+    (fun x _ => RealRaw.ofRat_valid (r * x + c))
+    (fun I _hI _n => affineInterval r c I)
+    (fun n => n + 1)
+    (by intro n; omega)
+    (by
+      intro I hI n hsmall
+      have hwidth_nonneg : 0 <= I.width := by
+        unfold QInterval.width
+        grind [Rat.sub_eq_add_neg, hI.2.1]
+      have hscaled_nonneg : 0 <= r * I.width :=
+        Rat.mul_nonneg hr0 hwidth_nonneg
+      have hscaled_le : r * I.width <= I.width := by
+        have hmul := Rat.mul_le_mul_of_nonneg_right hr1 hwidth_nonneg
+        simpa using hmul
+      have hbound : r * I.width <= 1 / ((n + 1 : Nat) : Rat) :=
+        Rat.le_trans hscaled_le hsmall
+      have himage_width : (affineInterval r c I).width = r * I.width := by
+        grind [affineInterval, QInterval.width, Rat.sub_eq_add_neg,
+          Rat.mul_add, Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+      rw [himage_width]
+      constructor
+      · exact hscaled_nonneg
+      · exact hbound)
+    (by
+      intro I hI x hx n hIlo hIhi
+      change QInterval.ContainsInterval (affineInterval r c I)
+        { lo := r * x + c, hi := r * x + c }
+      unfold affineInterval QInterval.ContainsInterval
+      constructor
+      · exact (Rat.add_le_add_right).2
+          (Rat.mul_le_mul_of_nonneg_left hIlo hr0)
+      · exact (Rat.add_le_add_right).2
+          (Rat.mul_le_mul_of_nonneg_left hIhi hr0))
+
+def stableSquare : StablePartialRealFunRaw where
+  definedAt := fun x => 0 <= x ∧ x <= 1
+  compute := fun x _ => { lo := x * x, hi := x * x }
+  rate := fun _ => .unknown
+
+def stableSquareFunction : FunctionOnInterval :=
+  FunctionOnInterval.ofStable stableSquare 0 1
+    (fun _ hx => hx)
+    (fun x _ => RealRaw.ofRat_valid (x * x))
+
+def stableSquareInterval (I : QInterval) : QInterval :=
+  { lo := I.lo * I.lo, hi := I.hi * I.hi }
+
+def stableSquare_intervalRegularOn_unit :
+    IntervalRegularOn stableSquareFunction :=
+  IntervalRegularOn.ofStable stableSquare 0 1
+    (fun _ hx => hx)
+    (fun x _ => RealRaw.ofRat_valid (x * x))
+    (fun I _hI _n => stableSquareInterval I)
+    (fun n => 2 * (n + 1))
+    (by intro n; omega)
+    (by
+      intro I hI n hsmall
+      have hwidth_nonneg : 0 <= I.width := by
+        unfold QInterval.width
+        grind [Rat.sub_eq_add_neg, hI.2.1]
+      have hlo_nonneg : 0 <= I.lo := hI.1
+      have hhi_nonneg : 0 <= I.hi := Rat.le_trans hlo_nonneg hI.2.1
+      have hsum_nonneg : 0 <= I.hi + I.lo :=
+        Rat.add_nonneg hhi_nonneg hlo_nonneg
+      have hsum_le_two : I.hi + I.lo <= 2 := by
+        have hhi_le_one : I.hi <= 1 := hI.2.2
+        have hlo_le_one : I.lo <= 1 := Rat.le_trans hI.2.1 hhi_le_one
+        grind
+      have hwidth : (stableSquareInterval I).width =
+          I.width * (I.hi + I.lo) := by
+        unfold stableSquareInterval QInterval.width
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul]
+      rw [hwidth]
+      constructor
+      · exact Rat.mul_nonneg hwidth_nonneg hsum_nonneg
+      · have hprod : I.width * (I.hi + I.lo) <= I.width * 2 :=
+          Rat.mul_le_mul_of_nonneg_left hsum_le_two hwidth_nonneg
+        have htwo : 2 * I.width <= 1 / ((n + 1 : Nat) : Rat) := by
+          calc
+            2 * I.width <= 2 * (1 / ((2 * (n + 1) : Nat) : Rat)) :=
+              Rat.mul_le_mul_of_nonneg_left hsmall (by native_decide)
+            _ = 1 / ((n + 1 : Nat) : Rat) := by
+              rw [Rat.div_def]
+              have hnrat : ((n + 1 : Nat) : Rat) ≠ 0 :=
+                Rat.ne_of_gt ((Rat.natCast_pos).2 (Nat.succ_pos n))
+              rw [show ((2 * (n + 1) : Nat) : Rat) =
+                (2 : Rat) * ((n + 1 : Nat) : Rat) by
+                  exact_mod_cast (by omega : 2 * (n + 1) = 2 * (n + 1))]
+              rw [Rat.inv_mul_rev]
+              grind [Rat.mul_assoc, Rat.mul_comm,
+                Rat.mul_inv_cancel _ hnrat]
+        calc
+          I.width * (I.hi + I.lo) <= I.width * 2 := hprod
+          _ = 2 * I.width := by rw [Rat.mul_comm]
+          _ <= 1 / ((n + 1 : Nat) : Rat) := htwo)
+    (by
+      intro I hI x hx n hIlo hIhi
+      change QInterval.ContainsInterval (stableSquareInterval I)
+        { lo := x * x, hi := x * x }
+      unfold stableSquareInterval QInterval.ContainsInterval
+      have hlo_nonneg : 0 <= I.lo := hI.1
+      have hhi_nonneg : 0 <= I.hi := Rat.le_trans hlo_nonneg hI.2.1
+      have hxl_nonneg : 0 <= x + I.lo := by grind
+      have hxh_nonneg : 0 <= x + I.hi := by grind
+      constructor
+      · have hmul := Rat.mul_le_mul_of_nonneg_right hIlo hxl_nonneg
+        grind [Rat.mul_add, Rat.add_mul]
+      · have hmul := Rat.mul_le_mul_of_nonneg_right hIhi hxh_nonneg
+        grind [Rat.mul_add, Rat.add_mul])
+
 /-- A rational affine map with slope in `[0,1]` has a computable interval
 modulus, witnessed by the finite schedule `n+1`. -/
 def exactRat_affine_intervalRegularOn_of_unit_slope
@@ -338,6 +464,19 @@ theorem exactRat_square_integral_raw_valid :
       exactRat_square_integral_certificate).Valid := by
   exact Integral.raw_valid _ exactRat_square_integral_certificate
 
+def stableSquare_integral_certificate :
+    Integral.IntervalRegularIntegralCertificate stableSquareFunction where
+  regular := stableSquare_intervalRegularOn_unit
+  construction :=
+    { compute := IntegralIdentities.LipschitzDyadic.compute
+        (fun x : Rat => x * x) 2
+      certificate := IntegralIdentities.LipschitzDyadic.raw_valid
+        exactSquare_lipschitz_on_unit }
+
+theorem stableSquare_integral_raw_valid :
+    (Integral.raw stableSquareFunction stableSquare_integral_certificate).Valid := by
+  exact Integral.raw_valid _ stableSquare_integral_certificate
+
 theorem exactSquare_uniformLeftSum_eq
     {n : Nat} (hn : 0 < n) :
     IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
@@ -537,6 +676,17 @@ theorem exactRat_square_integral_raw_equiv_one_third :
   unfold QInterval.Overlaps
   exact exactSquare_compute_contains_one_third n
 
+theorem stableSquare_integral_raw_equiv_one_third :
+    (Integral.raw stableSquareFunction stableSquare_integral_certificate).Equiv
+      (RealRaw.ofRat (1 / 3)) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+  change QInterval.Overlaps
+    (IntegralIdentities.LipschitzDyadic.compute (fun x : Rat => x * x) 2 n)
+    { lo := 1 / 3, hi := 1 / 3 }
+  unfold QInterval.Overlaps
+  exact exactSquare_compute_contains_one_third n
+
 def exactCubeInterval (I : QInterval) : QInterval :=
   { lo := I.lo ^ 3, hi := I.hi ^ 3 }
 
@@ -635,6 +785,89 @@ def exactRat_cube_intervalRegularOn_unit :
     constructor <;> grind [Rat.pow_succ, Rat.mul_add, Rat.add_mul,
       Rat.sub_eq_add_neg]
 
+def stableCube : StablePartialRealFunRaw where
+  definedAt := fun x => 0 <= x ∧ x <= 1
+  compute := fun x _ => { lo := x ^ 3, hi := x ^ 3 }
+  rate := fun _ => .unknown
+
+def stableCubeFunction : FunctionOnInterval :=
+  FunctionOnInterval.ofStable stableCube 0 1
+    (fun _ hx => hx)
+    (fun x _ => RealRaw.ofRat_valid (x ^ 3))
+
+def stableCube_intervalRegularOn_unit :
+    IntervalRegularOn stableCubeFunction :=
+  IntervalRegularOn.ofStable stableCube 0 1
+    (fun _ hx => hx)
+    (fun x _ => RealRaw.ofRat_valid (x ^ 3))
+    (fun I _hI _n => exactCubeInterval I)
+    (fun n => 3 * (n + 1))
+    (by intro n; omega)
+    (by
+      intro I hI n hsmall
+      have hwidth_nonneg : 0 <= I.width := by
+        unfold QInterval.width
+        grind [Rat.sub_eq_add_neg, hI.2.1]
+      have hlo_nonneg : 0 <= I.lo := hI.1
+      have hhi_nonneg : 0 <= I.hi := Rat.le_trans hlo_nonneg hI.2.1
+      have hwidth : (exactCubeInterval I).width =
+          I.width * (I.hi ^ 2 + I.hi * I.lo + I.lo ^ 2) := by
+        unfold exactCubeInterval QInterval.width
+        grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul]
+      rw [hwidth]
+      constructor
+      · exact Rat.mul_nonneg hwidth_nonneg (by
+          exact Rat.add_nonneg
+            (Rat.add_nonneg (Rat.pow_nonneg hhi_nonneg)
+              (Rat.mul_nonneg hhi_nonneg hlo_nonneg))
+            (Rat.pow_nonneg hlo_nonneg))
+      · have hhi_le_one : I.hi <= 1 := hI.2.2
+        have hlo_le_one : I.lo <= 1 := Rat.le_trans hI.2.1 hhi_le_one
+        have hhi_sq : I.hi ^ 2 <= 1 := by
+          have h := Rat.mul_le_mul_of_nonneg_left hhi_le_one hhi_nonneg
+          exact Rat.le_trans (by simpa [Rat.pow_succ] using h) hhi_le_one
+        have hcross : I.hi * I.lo <= 1 := by
+          exact Rat.le_trans
+            (Rat.mul_le_mul_of_nonneg_right hhi_le_one hlo_nonneg)
+            (by grind)
+        have hlo_sq : I.lo ^ 2 <= 1 := by
+          have h := Rat.mul_le_mul_of_nonneg_left hlo_le_one hlo_nonneg
+          exact Rat.le_trans (by simpa [Rat.pow_succ] using h) hlo_le_one
+        have hsum_le_three :
+            I.hi ^ 2 + I.hi * I.lo + I.lo ^ 2 <= 3 := by grind
+        have hprod := Rat.mul_le_mul_of_nonneg_left hsum_le_three hwidth_nonneg
+        calc
+          I.width * (I.hi ^ 2 + I.hi * I.lo + I.lo ^ 2) <= I.width * 3 := hprod
+          _ = 3 * I.width := by rw [Rat.mul_comm]
+          _ <= 1 / ((n + 1 : Nat) : Rat) :=
+            three_width_le_one_div_succ_of_width_le n hsmall)
+    (by
+      intro I hI x hx n hIlo hIhi
+      change QInterval.ContainsInterval (exactCubeInterval I)
+        { lo := x ^ 3, hi := x ^ 3 }
+      unfold exactCubeInterval QInterval.ContainsInterval
+      have hlo_nonneg : 0 <= I.lo := hI.1
+      have hhi_nonneg : 0 <= I.hi := Rat.le_trans hlo_nonneg hI.2.1
+      have hx_nonneg : 0 <= x := hx.1
+      have hsum_lo : 0 <= x ^ 2 + x * I.lo + I.lo ^ 2 := by
+        exact Rat.add_nonneg
+          (Rat.add_nonneg (Rat.pow_nonneg hx_nonneg)
+            (Rat.mul_nonneg hx_nonneg hlo_nonneg))
+          (Rat.pow_nonneg hlo_nonneg)
+      have hsum_hi : 0 <= I.hi ^ 2 + I.hi * x + x ^ 2 := by
+        exact Rat.add_nonneg
+          (Rat.add_nonneg (Rat.pow_nonneg hhi_nonneg)
+            (Rat.mul_nonneg hhi_nonneg hx_nonneg))
+          (Rat.pow_nonneg hx_nonneg)
+      have hlow : 0 <= (x - I.lo) *
+          (x ^ 2 + x * I.lo + I.lo ^ 2) := by
+        exact Rat.mul_nonneg (by grind) hsum_lo
+      have hhigh : 0 <= (I.hi - x) *
+          (I.hi ^ 2 + I.hi * x + x ^ 2) := by
+        exact Rat.mul_nonneg (by grind) hsum_hi
+      constructor <;> grind [Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+        Rat.sub_eq_add_neg])
+
 def exactCube_lipschitz_on_unit :
     Integral.LipschitzOnUnit (fun x : Rat => x ^ 3) 3 := by
   constructor
@@ -684,6 +917,19 @@ theorem exactRat_cube_integral_raw_valid :
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ 3) 0 1)
       exactRat_cube_integral_certificate).Valid := by
   exact Integral.raw_valid _ exactRat_cube_integral_certificate
+
+def stableCube_integral_certificate :
+    Integral.IntervalRegularIntegralCertificate stableCubeFunction where
+  regular := stableCube_intervalRegularOn_unit
+  construction :=
+    { compute := IntegralIdentities.LipschitzDyadic.compute
+        (fun x : Rat => x ^ 3) 3
+      certificate := IntegralIdentities.LipschitzDyadic.raw_valid
+        exactCube_lipschitz_on_unit }
+
+theorem stableCube_integral_raw_valid :
+    (Integral.raw stableCubeFunction stableCube_integral_certificate).Valid := by
+  exact Integral.raw_valid _ stableCube_integral_certificate
 
 theorem exactCube_uniformLeftSum_eq
     {n : Nat} (hn : 0 < n) :
@@ -880,6 +1126,1682 @@ theorem exactRat_cube_integral_raw_equiv_one_fourth :
     { lo := 1 / 4, hi := 1 / 4 }
   unfold QInterval.Overlaps
   exact exactCube_compute_contains_one_fourth n
+
+theorem stableCube_integral_raw_equiv_one_fourth :
+    (Integral.raw stableCubeFunction stableCube_integral_certificate).Equiv
+      (RealRaw.ofRat (1 / 4)) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+  change QInterval.Overlaps
+    (IntegralIdentities.LipschitzDyadic.compute (fun x : Rat => x ^ 3) 3 n)
+    { lo := 1 / 4, hi := 1 / 4 }
+  unfold QInterval.Overlaps
+  exact exactCube_compute_contains_one_fourth n
+
+/-! ## First end-to-end effective FTC instance
+
+The existing square integral is now also packaged through the generic
+derivative-bound interface.  The derivative box on a cell `[a,b]` is the
+endpoint range `[2*a,2*b]`; its scaled width sums to `2/N` on an `N`-cell
+uniform partition. -/
+
+def squarePrimitiveRaw : RealFunRaw :=
+  RealFunRaw.exact (fun x : Rat => x * x)
+
+def squareDerivativeRaw : RealFunRaw :=
+  RealFunRaw.exact (fun x : Rat => 2 * x)
+
+def squareEffectivePartition (eps : QPos) : Nat :=
+  2 * (eps.val.den + 1)
+
+theorem squareEffectivePartition_pos (eps : QPos) :
+    0 < squareEffectivePartition eps := by
+  unfold squareEffectivePartition
+  omega
+
+def squareEffectivePartitionOf (eps : QPos) : RationalPartition 0 1 :=
+  RationalPartition.uniform 0 1 (squareEffectivePartition eps)
+    (squareEffectivePartition_pos eps) (by native_decide)
+
+def squareEffectiveBound
+    {a b : Rat} (C : RationalSubinterval a b) (_n : Nat) : QInterval :=
+  { lo := 2 * C.lower, hi := 2 * C.upper }
+
+theorem squareEffectiveBound_width
+    {a b : Rat} (C : RationalSubinterval a b) (n : Nat) :
+    (squareEffectiveBound C n).width = 2 * C.width := by
+  unfold squareEffectiveBound RationalSubinterval.width QInterval.width
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul]
+
+theorem squareEffectiveBound_contains_derivative
+    {a b : Rat} (C : RationalSubinterval a b) (n : Nat)
+    {x : Rat} (hx : C.contains x) :
+    QInterval.ContainsInterval (squareEffectiveBound C n)
+      ((squareDerivativeRaw.compute x n)) := by
+  unfold squareEffectiveBound squareDerivativeRaw RealFunRaw.exact
+    QInterval.ContainsInterval
+  exact ⟨Rat.mul_le_mul_of_nonneg_left hx.1
+      (by native_decide : (0 : Rat) ≤ 2),
+    Rat.mul_le_mul_of_nonneg_left hx.2
+      (by native_decide : (0 : Rat) ≤ 2)⟩
+
+def squareEffectiveDerivativeBound (eps : QPos) (k : Nat)
+    (hk : k < (squareEffectivePartitionOf eps).pieces) :
+    DerivativeBoundOnSubinterval squareDerivativeRaw
+      ((squareEffectivePartitionOf eps).cell k hk) := by
+  let C := (squareEffectivePartitionOf eps).cell k hk
+  exact {
+    bound := fun n => squareEffectiveBound C n
+    evalPrecision := fun n => n
+    domain_on := fun x hx => trivial
+    bound_ordered := fun n => by
+      rw [squareEffectiveBound_width]
+      unfold RationalSubinterval.width
+      have hcell : 0 ≤ C.upper - C.lower := by
+        have hordered := C.ordered
+        grind
+      exact Rat.mul_nonneg (by native_decide) hcell
+    contains_values := fun n x hx => by
+      exact squareEffectiveBound_contains_derivative C n hx }
+
+def squareEffectiveFTCData :
+    EffectiveDerivativeBoundFTC squarePrimitiveRaw squareDerivativeRaw 0 1 where
+  primitive_valid := RealFunRaw.exact_valid _
+  primitive_domain_lower := trivial
+  primitive_domain_upper := trivial
+  choosePartition := fun eps =>
+    squareEffectivePartitionOf eps
+  chooseEndpointPrecision := fun _ => 0
+  chooseBoundStage := fun _ => 0
+  derivativeBound := squareEffectiveDerivativeBound
+  domain_at_partition := by
+    intro eps i hi
+    trivial
+  localControl := by
+    intro eps k hk
+    let C := (squareEffectivePartitionOf eps).cell k hk
+    let B := squareEffectiveDerivativeBound eps k hk
+    exact {
+      primitive_domain_lower := trivial
+      primitive_domain_upper := trivial
+      endpointPrecision := fun _ => 0
+      endpoint_contained := by
+        intro n
+        dsimp [C, B, squareEffectiveDerivativeBound]
+        unfold squareEffectiveBound RationalSubinterval.scaleBound
+          endpointDifferenceInterval squarePrimitiveRaw RealFunRaw.exact
+        have hwidth : 0 <= C.width := by
+          unfold RationalSubinterval.width
+          have hordered := C.ordered
+          grind
+        have hwidth' : 0 <=
+            ((squareEffectivePartitionOf eps).cell k hk).width := by
+          dsimp [C] at hwidth
+          exact hwidth
+        simp only [QInterval.scaleByRat, if_pos hwidth']
+        have hordered : C.lower <= C.upper := C.ordered
+        have hlower : 0 <= C.lower := C.lower_mem
+        have hfactor :
+            C.upper * C.upper - C.lower * C.lower =
+              C.width * (C.upper + C.lower) := by
+          unfold RationalSubinterval.width
+          grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+            Rat.mul_assoc, Rat.mul_comm]
+        have hlower0 : 0 <= C.lower := C.lower_mem
+        have hupper0 : 0 <= C.upper := Rat.le_trans hlower0 C.ordered
+        constructor
+        · rw [hfactor]
+          exact Rat.mul_le_mul_of_nonneg_left (by grind) hwidth
+        · rw [hfactor]
+          exact Rat.mul_le_mul_of_nonneg_left (by grind) hwidth }
+  endpointPrecision_agreement := by
+    intro eps k hk n
+    rfl
+  riemann_width := by
+    intro eps
+    let N := squareEffectivePartition eps
+    have hN : 0 < N := by
+      exact squareEffectivePartition_pos eps
+    let P := squareEffectivePartitionOf eps
+    have hbound : forall k (hk : k < N),
+      (squareEffectiveBound
+        ((RationalPartition.uniform 0 1 N hN (by native_decide)).cell k hk) 0).width <=
+          2 * mesh 0 1 N := by
+      intro k hk
+      rw [squareEffectiveBound_width]
+      have hw :
+          ((RationalPartition.uniform 0 1 N hN (by native_decide)).cell k hk).width =
+            mesh 0 1 N :=
+        RationalPartition.uniform_cell_width 0 1 N hN (by native_decide) k hk
+      rw [hw]
+      exact Rat.le_refl
+    have hsum := RationalPartition.uniform_boundIntegralSum_width_le
+      N hN (by native_decide : (0 : Rat) <= 1)
+      (fun k hk => (squareEffectiveDerivativeBound eps k hk).bound 0)
+      (2 * mesh 0 1 N) hbound
+    have hsum_bound :
+        ((squareEffectivePartitionOf eps).boundIntegralSum
+          (fun k hk => (squareEffectiveDerivativeBound eps k hk).bound 0)).width
+          <= 2 * mesh 0 1 N := by
+      change ((RationalPartition.uniform 0 1 N hN (by native_decide)).boundIntegralSum
+          (fun k hk => (squareEffectiveDerivativeBound eps k hk).bound 0)).width
+          <= 2 * mesh 0 1 N
+      have hpart : squareEffectivePartitionOf eps =
+          RationalPartition.uniform 0 1 N hN (by native_decide) := by
+        unfold squareEffectivePartitionOf
+        congr
+      cases hpart
+      exact Rat.le_trans hsum (by grind)
+    have hmesh : mesh 0 1 N = 1 / (N : Rat) := by
+      unfold mesh
+      rw [if_neg (Nat.ne_of_gt hN)]
+      rw [Rat.div_def]
+      grind
+    have hden := FTC.one_div_den_succ_le_of_pos eps.property
+    have hfinal : 2 * mesh 0 1 N <= eps.val := by
+      rw [hmesh]
+      dsimp [N, squareEffectivePartition]
+      have hcancel :
+          (2 : Rat) * (1 / ((2 * (eps.val.den + 1) : Nat) : Rat)) =
+            1 / ((eps.val.den + 1 : Nat) : Rat) := by
+        rw [Rat.div_def, Rat.div_def]
+        rw [Rat.natCast_mul]
+        grind [Rat.mul_assoc, Rat.mul_comm,
+          Rat.mul_inv_cancel]
+      rw [hcancel]
+      exact hden
+    exact Rat.le_trans hsum_bound hfinal
+  endpoint_width := by
+    intro eps
+    simpa [endpointDifferenceInterval, squarePrimitiveRaw, RealFunRaw.exact,
+      QInterval.width, Rat.sub_self] using (Rat.le_of_lt eps.property)
+
+theorem squareEffectiveFTC_equiv_endpoint :
+    squareEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      squareEffectiveFTCData.toDerivativeBoundFTC.endpointRaw := by
+  exact effectiveDerivativeBoundFTC squareEffectiveFTCData
+
+/-! ## Cubic effective FTC instance
+
+This is the first non-linear reuse of the adapter.  On `[a,b] ⊆ [0,1]`, the
+derivative range is `[3*a^2, 3*b^2]`, while
+`b^3-a^3 = (b-a)*(a^2+a*b+b^2)`.  The resulting global budget is `6/N`. -/
+
+def cubePrimitiveRaw : RealFunRaw :=
+  RealFunRaw.exact (fun x : Rat => x * x * x)
+
+def cubeDerivativeRaw : RealFunRaw :=
+  RealFunRaw.exact (fun x : Rat => 3 * x * x)
+
+def cubeEffectivePartition (eps : QPos) : Nat :=
+  6 * (eps.val.den + 1)
+
+theorem cubeEffectivePartition_pos (eps : QPos) :
+    0 < cubeEffectivePartition eps := by
+  unfold cubeEffectivePartition
+  omega
+
+def cubeEffectivePartitionOf (eps : QPos) : RationalPartition 0 1 :=
+  RationalPartition.uniform 0 1 (cubeEffectivePartition eps)
+    (cubeEffectivePartition_pos eps) (by native_decide)
+
+theorem cube_square_range {a b x : Rat}
+    (ha : 0 <= a) (hab : a <= b) (hx : a <= x) (hxb : x <= b) :
+    a * a <= x * x ∧ x * x <= b * b := by
+  have hxa : 0 <= x + a := by grind
+  have hxb' : 0 <= b + x := by grind
+  have hleft : 0 <= (x - a) * (x + a) :=
+    Rat.mul_nonneg (by grind) hxa
+  have hright : 0 <= (b - x) * (b + x) :=
+    Rat.mul_nonneg (by grind) hxb'
+  constructor <;> grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+def cubeEffectiveBound
+    {a b : Rat} (C : RationalSubinterval a b) (_n : Nat) : QInterval :=
+  { lo := 3 * C.lower * C.lower, hi := 3 * C.upper * C.upper }
+
+theorem cubeEffectiveBound_width
+    {a b : Rat} (C : RationalSubinterval a b) (n : Nat) :
+    (cubeEffectiveBound C n).width =
+      3 * C.width * (C.upper + C.lower) := by
+  unfold cubeEffectiveBound RationalSubinterval.width QInterval.width
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+theorem cubeEffectiveBound_contains_derivative
+    {a b : Rat} (C : RationalSubinterval a b) (n : Nat)
+    (ha : 0 <= C.lower) {x : Rat} (hx : C.contains x) :
+    QInterval.ContainsInterval (cubeEffectiveBound C n)
+      (cubeDerivativeRaw.compute x n) := by
+  unfold cubeEffectiveBound cubeDerivativeRaw RealFunRaw.exact
+    QInterval.ContainsInterval
+  have hrange := cube_square_range (a := C.lower) (b := C.upper) (x := x)
+    ha C.ordered hx.1 hx.2
+  constructor <;> grind
+
+def cubeEffectiveDerivativeBound (eps : QPos) (k : Nat)
+    (hk : k < (cubeEffectivePartitionOf eps).pieces) :
+    DerivativeBoundOnSubinterval cubeDerivativeRaw
+      ((cubeEffectivePartitionOf eps).cell k hk) := by
+  let C := (cubeEffectivePartitionOf eps).cell k hk
+  exact {
+    bound := fun n => cubeEffectiveBound C n
+    evalPrecision := fun n => n
+    domain_on := fun x hx => trivial
+    bound_ordered := fun n => by
+      rw [cubeEffectiveBound_width]
+      have hwidth : 0 <= C.width := by
+        unfold RationalSubinterval.width
+        have hordered := C.ordered
+        grind
+      have hsum : 0 <= C.upper + C.lower := by
+        exact Rat.add_nonneg (Rat.le_trans C.lower_mem C.ordered) C.lower_mem
+      exact Rat.mul_nonneg (Rat.mul_nonneg (by native_decide) hwidth) hsum
+    contains_values := fun n x hx => by
+      exact cubeEffectiveBound_contains_derivative C n C.lower_mem hx }
+
+def cubeEffectiveFTCData :
+    EffectiveDerivativeBoundFTC cubePrimitiveRaw cubeDerivativeRaw 0 1 where
+  primitive_valid := RealFunRaw.exact_valid _
+  primitive_domain_lower := trivial
+  primitive_domain_upper := trivial
+  choosePartition := fun eps => cubeEffectivePartitionOf eps
+  chooseEndpointPrecision := fun _ => 0
+  chooseBoundStage := fun _ => 0
+  derivativeBound := cubeEffectiveDerivativeBound
+  domain_at_partition := by
+    intro eps i hi
+    trivial
+  localControl := by
+    intro eps k hk
+    let C := (cubeEffectivePartitionOf eps).cell k hk
+    let B := cubeEffectiveDerivativeBound eps k hk
+    exact {
+      primitive_domain_lower := trivial
+      primitive_domain_upper := trivial
+      endpointPrecision := fun _ => 0
+      endpoint_contained := by
+        intro n
+        dsimp [C, B, cubeEffectiveDerivativeBound]
+        unfold cubeEffectiveBound RationalSubinterval.scaleBound
+          endpointDifferenceInterval cubePrimitiveRaw RealFunRaw.exact
+        have hwidth : 0 <= C.width := by
+          unfold RationalSubinterval.width
+          have hordered := C.ordered
+          grind
+        have hwidth' : 0 <=
+            ((cubeEffectivePartitionOf eps).cell k hk).width := by
+          dsimp [C] at hwidth
+          exact hwidth
+        simp only [QInterval.scaleByRat, if_pos hwidth']
+        have hlower : 0 <= C.lower := C.lower_mem
+        have hordered : C.lower <= C.upper := C.ordered
+        have hfactor :
+            C.upper * C.upper * C.upper - C.lower * C.lower * C.lower =
+              C.width * (C.upper * C.upper + C.upper * C.lower +
+                C.lower * C.lower) := by
+          unfold RationalSubinterval.width
+          grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+            Rat.mul_assoc, Rat.mul_comm]
+        have hleft : 0 <= C.width * (C.upper + 2 * C.lower) :=
+          Rat.mul_nonneg hwidth (by
+            exact Rat.add_nonneg (Rat.le_trans C.lower_mem C.ordered)
+              (Rat.mul_nonneg (by native_decide) C.lower_mem))
+        have hright : 0 <= C.width * (2 * C.upper + C.lower) :=
+          Rat.mul_nonneg hwidth (by
+            exact Rat.add_nonneg
+              (Rat.mul_nonneg (by native_decide)
+                (Rat.le_trans C.lower_mem C.ordered)) C.lower_mem)
+        have hlow : 3 * C.lower * C.lower <=
+            C.upper * C.upper + C.upper * C.lower + C.lower * C.lower := by
+          unfold RationalSubinterval.width at hleft
+          grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+            Rat.mul_assoc, Rat.mul_comm]
+        have hhigh : C.upper * C.upper + C.upper * C.lower +
+            C.lower * C.lower <= 3 * C.upper * C.upper := by
+          unfold RationalSubinterval.width at hright
+          grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+            Rat.mul_assoc, Rat.mul_comm]
+        constructor
+        · rw [hfactor]
+          exact Rat.mul_le_mul_of_nonneg_left hlow hwidth
+        · rw [hfactor]
+          exact Rat.mul_le_mul_of_nonneg_left hhigh hwidth }
+  endpointPrecision_agreement := by
+    intro eps k hk n
+    rfl
+  riemann_width := by
+    intro eps
+    let N := cubeEffectivePartition eps
+    have hN : 0 < N := by exact cubeEffectivePartition_pos eps
+    have hbound : forall k (hk : k < N),
+        (cubeEffectiveBound
+          ((RationalPartition.uniform 0 1 N hN (by native_decide)).cell k hk) 0).width <=
+          6 * mesh 0 1 N := by
+      intro k hk
+      let C := (RationalPartition.uniform 0 1 N hN
+        (by native_decide : (0 : Rat) <= 1)).cell k hk
+      change (cubeEffectiveBound C 0).width <= 6 * mesh 0 1 N
+      rw [cubeEffectiveBound_width]
+      have hw : C.width = mesh 0 1 N := by
+        dsimp [C]
+        exact RationalPartition.uniform_cell_width 0 1 N hN
+          (by native_decide) k hk
+      rw [hw]
+      have hmesh := mesh_nonneg_of_le hN
+        (by native_decide : (0 : Rat) <= 1)
+      have hsum : C.upper + C.lower <= 2 := by
+        have hu := C.upper_mem
+        have hl := C.lower_mem
+        have hord := C.ordered
+        grind
+      calc
+        3 * mesh 0 1 N * (C.upper + C.lower) <=
+            (3 * mesh 0 1 N) * 2 := by
+              exact Rat.mul_le_mul_of_nonneg_left hsum
+                (Rat.mul_nonneg (by native_decide) hmesh)
+        _ = 6 * mesh 0 1 N := by grind
+    have hsum := RationalPartition.uniform_boundIntegralSum_width_le
+      N hN (by native_decide : (0 : Rat) <= 1)
+      (fun k hk => (cubeEffectiveDerivativeBound eps k hk).bound 0)
+      (6 * mesh 0 1 N) hbound
+    have hsum_bound :
+        ((cubeEffectivePartitionOf eps).boundIntegralSum
+          (fun k hk => (cubeEffectiveDerivativeBound eps k hk).bound 0)).width
+          <= 6 * mesh 0 1 N := by
+      change ((RationalPartition.uniform 0 1 N hN (by native_decide)).boundIntegralSum
+          (fun k hk => (cubeEffectiveDerivativeBound eps k hk).bound 0)).width
+          <= 6 * mesh 0 1 N
+      have hpart : cubeEffectivePartitionOf eps =
+          RationalPartition.uniform 0 1 N hN (by native_decide) := by
+        unfold cubeEffectivePartitionOf
+        congr
+      cases hpart
+      exact Rat.le_trans hsum (by grind)
+    have hmesh : mesh 0 1 N = 1 / (N : Rat) := by
+      unfold mesh
+      rw [if_neg (Nat.ne_of_gt hN)]
+      rw [Rat.div_def]
+      grind
+    have hden := FTC.one_div_den_succ_le_of_pos eps.property
+    have hfinal : 6 * mesh 0 1 N <= eps.val := by
+      rw [hmesh]
+      dsimp [N, cubeEffectivePartition]
+      have hcancel :
+          (6 : Rat) * (1 / ((6 * (eps.val.den + 1) : Nat) : Rat)) =
+            1 / ((eps.val.den + 1 : Nat) : Rat) := by
+        rw [Rat.div_def, Rat.div_def, Rat.natCast_mul]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      rw [hcancel]
+      exact hden
+    exact Rat.le_trans hsum_bound hfinal
+  endpoint_width := by
+    intro eps
+    simpa [endpointDifferenceInterval, cubePrimitiveRaw, RealFunRaw.exact,
+      QInterval.width, Rat.sub_self] using (Rat.le_of_lt eps.property)
+
+theorem cubeEffectiveFTC_equiv_endpoint :
+    cubeEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      cubeEffectiveFTCData.toDerivativeBoundFTC.endpointRaw := by
+  exact effectiveDerivativeBoundFTC cubeEffectiveFTCData
+
+/-! ## Quartic effective FTC instance
+
+The quartic is the next polynomial regression.  Its derivative enclosure is
+`[4*a^3,4*b^3]`; on `[0,1]` the enclosure width is at most `12` times the
+cell width, giving an explicit `12/N` schedule. -/
+
+def quarticPrimitiveRaw : RealFunRaw :=
+  RealFunRaw.exact (fun x : Rat => x ^ 4)
+
+def quarticDerivativeRaw : RealFunRaw :=
+  RealFunRaw.exact (fun x : Rat => 4 * x ^ 3)
+
+def quarticEffectivePartition (eps : QPos) : Nat :=
+  12 * (eps.val.den + 1)
+
+theorem quarticEffectivePartition_pos (eps : QPos) :
+    0 < quarticEffectivePartition eps := by
+  unfold quarticEffectivePartition
+  omega
+
+def quarticEffectivePartitionOf (eps : QPos) : RationalPartition 0 1 :=
+  RationalPartition.uniform 0 1 (quarticEffectivePartition eps)
+    (quarticEffectivePartition_pos eps) (by native_decide)
+
+theorem quartic_cube_range {a b x : Rat}
+    (ha : 0 <= a) (hab : a <= b) (hx : a <= x) (hxb : x <= b) :
+    a ^ 3 <= x ^ 3 ∧ x ^ 3 <= b ^ 3 := by
+  have hleft : 0 <= (x - a) * (x ^ 2 + x * a + a ^ 2) := by
+    exact Rat.mul_nonneg (by grind)
+      (Rat.add_nonneg (Rat.add_nonneg (Rat.pow_nonneg (by grind))
+        (Rat.mul_nonneg (by grind) ha)) (Rat.pow_nonneg ha))
+  have hright : 0 <= (b - x) * (b ^ 2 + b * x + x ^ 2) := by
+    exact Rat.mul_nonneg (by grind)
+      (Rat.add_nonneg (Rat.add_nonneg (Rat.pow_nonneg (by grind))
+        (Rat.mul_nonneg (by grind) (by grind))) (Rat.pow_nonneg (by grind)))
+  constructor <;> grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add,
+    Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+def quarticEffectiveBound
+    {a b : Rat} (C : RationalSubinterval a b) (_n : Nat) : QInterval :=
+  { lo := 4 * C.lower ^ 3, hi := 4 * C.upper ^ 3 }
+
+theorem quarticEffectiveBound_width
+    {a b : Rat} (C : RationalSubinterval a b) (n : Nat) :
+    (quarticEffectiveBound C n).width =
+      4 * C.width * (C.upper ^ 2 + C.upper * C.lower + C.lower ^ 2) := by
+  unfold quarticEffectiveBound RationalSubinterval.width QInterval.width
+  grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+theorem quarticEffectiveBound_contains_derivative
+    {a b : Rat} (C : RationalSubinterval a b) (n : Nat)
+    (ha : 0 <= C.lower) {x : Rat} (hx : C.contains x) :
+    QInterval.ContainsInterval (quarticEffectiveBound C n)
+      (quarticDerivativeRaw.compute x n) := by
+  unfold quarticEffectiveBound quarticDerivativeRaw RealFunRaw.exact
+    QInterval.ContainsInterval
+  have hrange := quartic_cube_range (a := C.lower) (b := C.upper) (x := x)
+    ha C.ordered hx.1 hx.2
+  constructor <;> grind
+
+def quarticEffectiveDerivativeBound (eps : QPos) (k : Nat)
+    (hk : k < (quarticEffectivePartitionOf eps).pieces) :
+    DerivativeBoundOnSubinterval quarticDerivativeRaw
+      ((quarticEffectivePartitionOf eps).cell k hk) := by
+  let C := (quarticEffectivePartitionOf eps).cell k hk
+  exact {
+    bound := fun n => quarticEffectiveBound C n
+    evalPrecision := fun n => n
+    domain_on := fun x hx => trivial
+    bound_ordered := fun n => by
+      rw [quarticEffectiveBound_width]
+      have hw : 0 <= C.width := by
+        unfold RationalSubinterval.width
+        have ho := C.ordered
+        grind
+      have hs : 0 <= C.upper ^ 2 + C.upper * C.lower + C.lower ^ 2 := by
+        exact Rat.add_nonneg (Rat.add_nonneg
+          (Rat.pow_nonneg (Rat.le_trans C.lower_mem C.ordered))
+          (Rat.mul_nonneg (Rat.le_trans C.lower_mem C.ordered) C.lower_mem))
+          (Rat.pow_nonneg C.lower_mem)
+      exact Rat.mul_nonneg (Rat.mul_nonneg (by native_decide) hw) hs
+    contains_values := fun n x hx => by
+      exact quarticEffectiveBound_contains_derivative C n C.lower_mem hx }
+
+def quarticEffectiveFTCData :
+    EffectiveDerivativeBoundFTC quarticPrimitiveRaw quarticDerivativeRaw 0 1 where
+  primitive_valid := RealFunRaw.exact_valid _
+  primitive_domain_lower := trivial
+  primitive_domain_upper := trivial
+  choosePartition := fun eps => quarticEffectivePartitionOf eps
+  chooseEndpointPrecision := fun _ => 0
+  chooseBoundStage := fun _ => 0
+  derivativeBound := quarticEffectiveDerivativeBound
+  domain_at_partition := by
+    intro eps i hi
+    trivial
+  localControl := by
+    intro eps k hk
+    let C := (quarticEffectivePartitionOf eps).cell k hk
+    let B := quarticEffectiveDerivativeBound eps k hk
+    exact {
+      primitive_domain_lower := trivial
+      primitive_domain_upper := trivial
+      endpointPrecision := fun _ => 0
+      endpoint_contained := by
+        intro n
+        dsimp [C, B, quarticEffectiveDerivativeBound]
+        unfold quarticEffectiveBound RationalSubinterval.scaleBound
+          endpointDifferenceInterval quarticPrimitiveRaw RealFunRaw.exact
+        have hw : 0 <= C.width := by
+          unfold RationalSubinterval.width
+          have ho := C.ordered
+          grind
+        have hw' : 0 <=
+            ((quarticEffectivePartitionOf eps).cell k hk).width := by
+          dsimp [C] at hw
+          exact hw
+        simp only [QInterval.scaleByRat, if_pos hw']
+        have hfactor :
+            C.upper ^ 4 - C.lower ^ 4 = C.width *
+              (C.upper ^ 3 + C.upper ^ 2 * C.lower +
+                C.upper * C.lower ^ 2 + C.lower ^ 3) := by
+          unfold RationalSubinterval.width
+          grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+            Rat.mul_assoc, Rat.mul_comm]
+        have hlower0 : 0 <= C.lower := C.lower_mem
+        have hupper0 : 0 <= C.upper := Rat.le_trans hlower0 C.ordered
+        have hlow : 4 * C.lower ^ 3 <=
+            C.upper ^ 3 + C.upper ^ 2 * C.lower +
+              C.upper * C.lower ^ 2 + C.lower ^ 3 := by
+          have hp : 0 <= C.width *
+              (C.upper ^ 2 + 2 * C.upper * C.lower + 3 * C.lower ^ 2) := by
+            exact Rat.mul_nonneg hw (by
+              exact Rat.add_nonneg (Rat.add_nonneg
+                (Rat.pow_nonneg hupper0)
+                (Rat.mul_nonneg (Rat.mul_nonneg
+                  (by native_decide : (0 : Rat) <= 2) hupper0) hlower0))
+                (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 3)
+                  (Rat.pow_nonneg hlower0)))
+          unfold RationalSubinterval.width at hp
+          grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+            Rat.mul_assoc, Rat.mul_comm]
+        have hhigh : C.upper ^ 3 + C.upper ^ 2 * C.lower +
+              C.upper * C.lower ^ 2 + C.lower ^ 3 <= 4 * C.upper ^ 3 := by
+          have hp : 0 <= C.width *
+              (3 * C.upper ^ 2 + 2 * C.upper * C.lower + C.lower ^ 2) := by
+            exact Rat.mul_nonneg hw (by
+              exact Rat.add_nonneg (Rat.add_nonneg
+                (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 3)
+                  (Rat.pow_nonneg hupper0))
+                (Rat.mul_nonneg (Rat.mul_nonneg
+                  (by native_decide : (0 : Rat) <= 2) hupper0) hlower0))
+                (Rat.pow_nonneg hlower0))
+          unfold RationalSubinterval.width at hp
+          grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+            Rat.mul_assoc, Rat.mul_comm]
+        constructor
+        · rw [hfactor]
+          exact Rat.mul_le_mul_of_nonneg_left hlow hw
+        · rw [hfactor]
+          exact Rat.mul_le_mul_of_nonneg_left hhigh hw }
+  endpointPrecision_agreement := by
+    intro eps k hk n
+    rfl
+  riemann_width := by
+    intro eps
+    let N := quarticEffectivePartition eps
+    have hN : 0 < N := by exact quarticEffectivePartition_pos eps
+    have hbound : forall k (hk : k < N),
+        (quarticEffectiveBound
+          ((RationalPartition.uniform 0 1 N hN (by native_decide)).cell k hk) 0).width <=
+          12 * mesh 0 1 N := by
+      intro k hk
+      let C := (RationalPartition.uniform 0 1 N hN
+        (by native_decide : (0 : Rat) <= 1)).cell k hk
+      change (quarticEffectiveBound C 0).width <= 12 * mesh 0 1 N
+      rw [quarticEffectiveBound_width]
+      have hw : C.width = mesh 0 1 N := by
+        dsimp [C]
+        exact RationalPartition.uniform_cell_width 0 1 N hN
+          (by native_decide) k hk
+      rw [hw]
+      have hm := mesh_nonneg_of_le hN
+        (by native_decide : (0 : Rat) <= 1)
+      have hs : C.upper ^ 2 + C.upper * C.lower + C.lower ^ 2 <= 3 := by
+        have hu := C.upper_mem
+        have hl := C.lower_mem
+        have ho := C.ordered
+        have hu0 : 0 <= C.upper := Rat.le_trans hl ho
+        have hu2 : C.upper ^ 2 <= 1 := by
+          have h := Rat.mul_le_mul_of_nonneg_left hu hu0
+          calc
+            C.upper ^ 2 = C.upper * C.upper := by grind [Rat.pow_succ]
+            _ <= C.upper * 1 := h
+            _ = C.upper := by simp
+            _ <= 1 := hu
+        have hl2 : C.lower ^ 2 <= 1 := by
+          have h1 := Rat.mul_le_mul_of_nonneg_left ho hl
+          have h2 := Rat.mul_le_mul_of_nonneg_left hu hl
+          calc
+            C.lower ^ 2 = C.lower * C.lower := by grind [Rat.pow_succ]
+            _ <= C.lower * C.upper := h1
+            _ <= C.lower * 1 := h2
+            _ = C.lower := by simp
+            _ <= 1 := Rat.le_trans ho hu
+        have hcross : C.upper * C.lower <= 1 := by
+          exact Rat.le_trans
+            (Rat.mul_le_mul_of_nonneg_left (Rat.le_trans ho hu) hu0) (by grind)
+        grind
+      calc
+        4 * mesh 0 1 N * (C.upper ^ 2 + C.upper * C.lower + C.lower ^ 2) <=
+            (4 * mesh 0 1 N) * 3 := by
+              exact Rat.mul_le_mul_of_nonneg_left hs
+                (Rat.mul_nonneg (by native_decide) hm)
+        _ = 12 * mesh 0 1 N := by grind
+    have hsum := RationalPartition.uniform_boundIntegralSum_width_le
+      N hN (by native_decide : (0 : Rat) <= 1)
+      (fun k hk => (quarticEffectiveDerivativeBound eps k hk).bound 0)
+      (12 * mesh 0 1 N) hbound
+    have hsum_bound :
+        ((quarticEffectivePartitionOf eps).boundIntegralSum
+          (fun k hk => (quarticEffectiveDerivativeBound eps k hk).bound 0)).width
+          <= 12 * mesh 0 1 N := by
+      change ((RationalPartition.uniform 0 1 N hN (by native_decide)).boundIntegralSum
+          (fun k hk => (quarticEffectiveDerivativeBound eps k hk).bound 0)).width
+          <= 12 * mesh 0 1 N
+      have hpart : quarticEffectivePartitionOf eps =
+          RationalPartition.uniform 0 1 N hN (by native_decide) := by
+        unfold quarticEffectivePartitionOf
+        congr
+      cases hpart
+      exact Rat.le_trans hsum (by grind)
+    have hmesh : mesh 0 1 N = 1 / (N : Rat) := by
+      unfold mesh
+      rw [if_neg (Nat.ne_of_gt hN)]
+      rw [Rat.div_def]
+      grind
+    have hden := FTC.one_div_den_succ_le_of_pos eps.property
+    have hfinal : 12 * mesh 0 1 N <= eps.val := by
+      rw [hmesh]
+      dsimp [N, quarticEffectivePartition]
+      have hcancel :
+          (12 : Rat) * (1 / ((12 * (eps.val.den + 1) : Nat) : Rat)) =
+            1 / ((eps.val.den + 1 : Nat) : Rat) := by
+        rw [Rat.div_def, Rat.div_def, Rat.natCast_mul]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      rw [hcancel]
+      exact hden
+    exact Rat.le_trans hsum_bound hfinal
+  endpoint_width := by
+    intro eps
+    simpa [endpointDifferenceInterval, quarticPrimitiveRaw, RealFunRaw.exact,
+      QInterval.width, Rat.sub_self] using (Rat.le_of_lt eps.property)
+
+theorem quarticEffectiveFTC_equiv_endpoint :
+    quarticEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      quarticEffectiveFTCData.toDerivativeBoundFTC.endpointRaw := by
+  exact effectiveDerivativeBoundFTC quarticEffectiveFTCData
+
+/-! ## Correctly scaled integral target: `∫₀¹ x² dx = 1/3`
+
+The preceding polynomial certificates calibrate the derivative/secant
+mechanism using `x^2`, `x^3`, and `x^4` as primitives.  For the actual
+integral target, the primitive is `x^3/3` and the derivative is `x^2`. -/
+
+def squareIntegralPrimitiveRaw : RealFunRaw :=
+  RealFunRaw.exact (fun x : Rat => x ^ 3 / 3)
+
+def squareIntegralDerivativeRaw : RealFunRaw :=
+  RealFunRaw.exact (fun x : Rat => x ^ 2)
+
+def squareIntegralPartitionOf (eps : QPos) : RationalPartition 0 1 :=
+  RationalPartition.uniform 0 1 (2 * (eps.val.den + 1))
+    (by omega) (by native_decide)
+
+def squareIntegralBound
+    {a b : Rat} (C : RationalSubinterval a b) (_n : Nat) : QInterval :=
+  { lo := C.lower ^ 2, hi := C.upper ^ 2 }
+
+theorem squareIntegralBound_width
+    {a b : Rat} (C : RationalSubinterval a b) (n : Nat) :
+    (squareIntegralBound C n).width = C.width * (C.upper + C.lower) := by
+  unfold squareIntegralBound RationalSubinterval.width QInterval.width
+  grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+def squareIntegralDerivativeBound (eps : QPos) (k : Nat)
+    (hk : k < (squareIntegralPartitionOf eps).pieces) :
+    DerivativeBoundOnSubinterval squareIntegralDerivativeRaw
+      ((squareIntegralPartitionOf eps).cell k hk) := by
+  let C := (squareIntegralPartitionOf eps).cell k hk
+  exact {
+    bound := fun n => squareIntegralBound C n
+    evalPrecision := fun n => n
+    domain_on := fun x hx => trivial
+    bound_ordered := fun n => by
+      rw [squareIntegralBound_width]
+      have hw : 0 <= C.width := by
+        unfold RationalSubinterval.width
+        grind [C.ordered]
+      have hs : 0 <= C.upper + C.lower := by
+        exact Rat.add_nonneg (Rat.le_trans C.lower_mem C.ordered) C.lower_mem
+      exact Rat.mul_nonneg hw hs
+    contains_values := fun n x hx => by
+      unfold squareIntegralBound squareIntegralDerivativeRaw RealFunRaw.exact
+        QInterval.ContainsInterval
+      have hrange := cube_square_range C.lower_mem C.ordered hx.1 hx.2
+      simpa [Rat.pow_succ] using hrange }
+
+def squareIntegralEffectiveFTCData :
+    EffectiveDerivativeBoundFTC squareIntegralPrimitiveRaw
+      squareIntegralDerivativeRaw 0 1 where
+  primitive_valid := RealFunRaw.exact_valid _
+  primitive_domain_lower := trivial
+  primitive_domain_upper := trivial
+  choosePartition := fun eps => squareIntegralPartitionOf eps
+  chooseEndpointPrecision := fun _ => 0
+  chooseBoundStage := fun _ => 0
+  derivativeBound := squareIntegralDerivativeBound
+  domain_at_partition := by
+    intro eps i hi
+    trivial
+  localControl := by
+    intro eps k hk
+    let C := (squareIntegralPartitionOf eps).cell k hk
+    let B := squareIntegralDerivativeBound eps k hk
+    exact {
+      primitive_domain_lower := trivial
+      primitive_domain_upper := trivial
+      endpointPrecision := fun _ => 0
+      endpoint_contained := by
+        intro n
+        dsimp [C, B, squareIntegralDerivativeBound]
+        unfold squareIntegralBound RationalSubinterval.scaleBound
+          endpointDifferenceInterval squareIntegralPrimitiveRaw RealFunRaw.exact
+        have hw : 0 <= C.width := by
+          unfold RationalSubinterval.width
+          grind [C.ordered]
+        have hw' : 0 <=
+            ((squareIntegralPartitionOf eps).cell k hk).width := by
+          dsimp [C] at hw
+          exact hw
+        simp only [QInterval.scaleByRat, if_pos hw']
+        have hfactor : C.upper ^ 3 / 3 - C.lower ^ 3 / 3 =
+            C.width * ((C.upper ^ 2 + C.upper * C.lower + C.lower ^ 2) / 3) := by
+          unfold RationalSubinterval.width
+          rw [Rat.div_def, Rat.div_def, Rat.div_def]
+          grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+            Rat.mul_assoc, Rat.mul_comm]
+        have hlower : 0 <= C.lower := C.lower_mem
+        have hupper : 0 <= C.upper := Rat.le_trans hlower C.ordered
+        have hlow : C.lower ^ 2 <=
+            (C.upper ^ 2 + C.upper * C.lower + C.lower ^ 2) / 3 := by
+          have hp : 0 <= C.width * (C.upper + 2 * C.lower) :=
+            Rat.mul_nonneg hw (Rat.add_nonneg hupper
+              (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 2) hlower))
+          unfold RationalSubinterval.width at hp
+          rw [Rat.div_def]
+          grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+            Rat.mul_assoc, Rat.mul_comm]
+        have hhigh :
+            (C.upper ^ 2 + C.upper * C.lower + C.lower ^ 2) / 3 <=
+              C.upper ^ 2 := by
+          have hp : 0 <= C.width * (2 * C.upper + C.lower) :=
+            Rat.mul_nonneg hw (Rat.add_nonneg
+              (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 2) hupper)
+              hlower)
+          unfold RationalSubinterval.width at hp
+          rw [Rat.div_def]
+          grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+            Rat.mul_assoc, Rat.mul_comm]
+        rw [hfactor]
+        constructor
+        · exact Rat.mul_le_mul_of_nonneg_left hlow hw
+        · exact Rat.mul_le_mul_of_nonneg_left hhigh hw }
+  endpointPrecision_agreement := by
+    intro eps k hk n
+    rfl
+  riemann_width := by
+    intro eps
+    let N := 2 * (eps.val.den + 1)
+    have hN : 0 < N := by omega
+    have hbound : forall k (hk : k < N),
+        (squareIntegralBound
+          ((RationalPartition.uniform 0 1 N hN (by native_decide)).cell k hk) 0).width <=
+          2 * mesh 0 1 N := by
+      intro k hk
+      let C := (RationalPartition.uniform 0 1 N hN
+        (by native_decide : (0 : Rat) <= 1)).cell k hk
+      change (squareIntegralBound C 0).width <= 2 * mesh 0 1 N
+      rw [squareIntegralBound_width]
+      have hw : C.width = mesh 0 1 N := by
+        dsimp [C]
+        exact RationalPartition.uniform_cell_width 0 1 N hN
+          (by native_decide) k hk
+      rw [hw]
+      have hm := mesh_nonneg_of_le hN
+        (by native_decide : (0 : Rat) <= 1)
+      have hs : C.upper + C.lower <= 2 := by
+        have hu := C.upper_mem
+        have hl := C.lower_mem
+        have ho := C.ordered
+        grind
+      calc
+        mesh 0 1 N * (C.upper + C.lower) <= mesh 0 1 N * 2 :=
+          Rat.mul_le_mul_of_nonneg_left hs hm
+        _ = 2 * mesh 0 1 N := by grind
+    have hsum := RationalPartition.uniform_boundIntegralSum_width_le
+      N hN (by native_decide : (0 : Rat) <= 1)
+      (fun k hk => (squareIntegralDerivativeBound eps k hk).bound 0)
+      (2 * mesh 0 1 N) hbound
+    have hsum_bound :
+        ((squareIntegralPartitionOf eps).boundIntegralSum
+          (fun k hk => (squareIntegralDerivativeBound eps k hk).bound 0)).width
+          <= 2 * mesh 0 1 N := by
+      change ((RationalPartition.uniform 0 1 N hN (by native_decide)).boundIntegralSum
+          (fun k hk => (squareIntegralDerivativeBound eps k hk).bound 0)).width
+          <= 2 * mesh 0 1 N
+      have hpart : squareIntegralPartitionOf eps =
+          RationalPartition.uniform 0 1 N hN (by native_decide) := by
+        unfold squareIntegralPartitionOf
+        congr
+      cases hpart
+      exact Rat.le_trans hsum (by grind)
+    have hmesh : mesh 0 1 N = 1 / (N : Rat) := by
+      unfold mesh
+      rw [if_neg (Nat.ne_of_gt hN), Rat.div_def]
+      grind
+    have hden := FTC.one_div_den_succ_le_of_pos eps.property
+    have hfinal : 2 * mesh 0 1 N <= eps.val := by
+      rw [hmesh]
+      dsimp [N]
+      have hcancel :
+          (2 : Rat) * (1 / ((2 * (eps.val.den + 1) : Nat) : Rat)) =
+            1 / ((eps.val.den + 1 : Nat) : Rat) := by
+        rw [Rat.div_def, Rat.div_def, Rat.natCast_mul]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      rw [hcancel]
+      exact hden
+    exact Rat.le_trans hsum_bound hfinal
+  endpoint_width := by
+    intro eps
+    simpa [endpointDifferenceInterval, squareIntegralPrimitiveRaw,
+      RealFunRaw.exact, QInterval.width, Rat.sub_self] using
+      (Rat.le_of_lt eps.property)
+
+theorem squareIntegralEffectiveFTC_equiv_endpoint :
+    squareIntegralEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      squareIntegralEffectiveFTCData.toDerivativeBoundFTC.endpointRaw := by
+  exact effectiveDerivativeBoundFTC squareIntegralEffectiveFTCData
+
+/-! ## Correctly scaled cubic integral: `∫₀¹ x³ dx = 1/4` -/
+
+def cubicIntegralPrimitiveRaw : RealFunRaw :=
+  RealFunRaw.exact (fun x : Rat => x ^ 4 / 4)
+
+def cubicIntegralDerivativeRaw : RealFunRaw :=
+  RealFunRaw.exact (fun x : Rat => x ^ 3)
+
+def cubicIntegralPartitionOf (eps : QPos) : RationalPartition 0 1 :=
+  RationalPartition.uniform 0 1 (3 * (eps.val.den + 1))
+    (by omega) (by native_decide)
+
+def cubicIntegralBound
+    {a b : Rat} (C : RationalSubinterval a b) (_n : Nat) : QInterval :=
+  { lo := C.lower ^ 3, hi := C.upper ^ 3 }
+
+theorem cubicIntegralBound_width
+    {a b : Rat} (C : RationalSubinterval a b) (n : Nat) :
+    (cubicIntegralBound C n).width =
+      C.width * (C.upper ^ 2 + C.upper * C.lower + C.lower ^ 2) := by
+  unfold cubicIntegralBound RationalSubinterval.width QInterval.width
+  grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+def cubicIntegralDerivativeBound (eps : QPos) (k : Nat)
+    (hk : k < (cubicIntegralPartitionOf eps).pieces) :
+    DerivativeBoundOnSubinterval cubicIntegralDerivativeRaw
+      ((cubicIntegralPartitionOf eps).cell k hk) := by
+  let C := (cubicIntegralPartitionOf eps).cell k hk
+  exact {
+    bound := fun n => cubicIntegralBound C n
+    evalPrecision := fun n => n
+    domain_on := fun x hx => trivial
+    bound_ordered := fun n => by
+      rw [cubicIntegralBound_width]
+      have hw : 0 <= C.width := by
+        unfold RationalSubinterval.width
+        grind [C.ordered]
+      have hs : 0 <= C.upper ^ 2 + C.upper * C.lower + C.lower ^ 2 := by
+        exact Rat.add_nonneg (Rat.add_nonneg
+          (Rat.pow_nonneg (Rat.le_trans C.lower_mem C.ordered))
+          (Rat.mul_nonneg (Rat.le_trans C.lower_mem C.ordered) C.lower_mem))
+          (Rat.pow_nonneg C.lower_mem)
+      exact Rat.mul_nonneg hw hs
+    contains_values := fun n x hx => by
+      unfold cubicIntegralBound cubicIntegralDerivativeRaw RealFunRaw.exact
+        QInterval.ContainsInterval
+      have hrange := quartic_cube_range C.lower_mem C.ordered hx.1 hx.2
+      simpa [Rat.pow_succ] using hrange }
+
+def cubicIntegralEffectiveFTCData :
+    EffectiveDerivativeBoundFTC cubicIntegralPrimitiveRaw
+      cubicIntegralDerivativeRaw 0 1 where
+  primitive_valid := RealFunRaw.exact_valid _
+  primitive_domain_lower := trivial
+  primitive_domain_upper := trivial
+  choosePartition := fun eps => cubicIntegralPartitionOf eps
+  chooseEndpointPrecision := fun _ => 0
+  chooseBoundStage := fun _ => 0
+  derivativeBound := cubicIntegralDerivativeBound
+  domain_at_partition := by
+    intro eps i hi
+    trivial
+  localControl := by
+    intro eps k hk
+    let C := (cubicIntegralPartitionOf eps).cell k hk
+    let B := cubicIntegralDerivativeBound eps k hk
+    exact {
+      primitive_domain_lower := trivial
+      primitive_domain_upper := trivial
+      endpointPrecision := fun _ => 0
+      endpoint_contained := by
+        intro n
+        dsimp [C, B, cubicIntegralDerivativeBound]
+        unfold cubicIntegralBound RationalSubinterval.scaleBound
+          endpointDifferenceInterval cubicIntegralPrimitiveRaw RealFunRaw.exact
+        have hw : 0 <= C.width := by
+          unfold RationalSubinterval.width
+          grind [C.ordered]
+        have hw' : 0 <=
+            ((cubicIntegralPartitionOf eps).cell k hk).width := by
+          dsimp [C] at hw
+          exact hw
+        simp only [QInterval.scaleByRat, if_pos hw']
+        have hfactor : C.upper ^ 4 / 4 - C.lower ^ 4 / 4 =
+            C.width * ((C.upper ^ 3 + C.upper ^ 2 * C.lower +
+              C.upper * C.lower ^ 2 + C.lower ^ 3) / 4) := by
+          unfold RationalSubinterval.width
+          rw [Rat.div_def, Rat.div_def, Rat.div_def]
+          grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+            Rat.mul_assoc, Rat.mul_comm]
+        have hlower : 0 <= C.lower := C.lower_mem
+        have hupper : 0 <= C.upper := Rat.le_trans hlower C.ordered
+        have hlow : C.lower ^ 3 <=
+            (C.upper ^ 3 + C.upper ^ 2 * C.lower +
+              C.upper * C.lower ^ 2 + C.lower ^ 3) / 4 := by
+          have hp : 0 <= C.width *
+              (C.upper ^ 2 + 2 * C.upper * C.lower + 3 * C.lower ^ 2) :=
+            Rat.mul_nonneg hw (by
+              exact Rat.add_nonneg (Rat.add_nonneg
+                (Rat.pow_nonneg hupper)
+                (Rat.mul_nonneg (Rat.mul_nonneg
+                  (by native_decide : (0 : Rat) <= 2) hupper) hlower))
+                (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 3)
+                  (Rat.pow_nonneg hlower)))
+          unfold RationalSubinterval.width at hp
+          rw [Rat.div_def]
+          grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+            Rat.mul_assoc, Rat.mul_comm]
+        have hhigh :
+            (C.upper ^ 3 + C.upper ^ 2 * C.lower +
+              C.upper * C.lower ^ 2 + C.lower ^ 3) / 4 <= C.upper ^ 3 := by
+          have hp : 0 <= C.width *
+              (3 * C.upper ^ 2 + 2 * C.upper * C.lower + C.lower ^ 2) :=
+            Rat.mul_nonneg hw (by
+              exact Rat.add_nonneg (Rat.add_nonneg
+                (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 3)
+                  (Rat.pow_nonneg hupper))
+                (Rat.mul_nonneg (Rat.mul_nonneg
+                  (by native_decide : (0 : Rat) <= 2) hupper) hlower))
+                (Rat.pow_nonneg hlower))
+          unfold RationalSubinterval.width at hp
+          rw [Rat.div_def]
+          grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+            Rat.mul_assoc, Rat.mul_comm]
+        rw [hfactor]
+        constructor
+        · exact Rat.mul_le_mul_of_nonneg_left hlow hw
+        · exact Rat.mul_le_mul_of_nonneg_left hhigh hw }
+  endpointPrecision_agreement := by
+    intro eps k hk n
+    rfl
+  riemann_width := by
+    intro eps
+    let N := 3 * (eps.val.den + 1)
+    have hN : 0 < N := by omega
+    have hbound : forall k (hk : k < N),
+        (cubicIntegralBound
+          ((RationalPartition.uniform 0 1 N hN (by native_decide)).cell k hk) 0).width <=
+          3 * mesh 0 1 N := by
+      intro k hk
+      let C := (RationalPartition.uniform 0 1 N hN
+        (by native_decide : (0 : Rat) <= 1)).cell k hk
+      change (cubicIntegralBound C 0).width <= 3 * mesh 0 1 N
+      rw [cubicIntegralBound_width]
+      have hw : C.width = mesh 0 1 N := by
+        dsimp [C]
+        exact RationalPartition.uniform_cell_width 0 1 N hN
+          (by native_decide) k hk
+      rw [hw]
+      have hm := mesh_nonneg_of_le hN
+        (by native_decide : (0 : Rat) <= 1)
+      have hs : C.upper ^ 2 + C.upper * C.lower + C.lower ^ 2 <= 3 := by
+        have hu := C.upper_mem
+        have hl := C.lower_mem
+        have ho := C.ordered
+        have hu0 : 0 <= C.upper := Rat.le_trans hl ho
+        have hu2 : C.upper ^ 2 <= 1 := by
+          have h := Rat.mul_le_mul_of_nonneg_left hu hu0
+          calc
+            C.upper ^ 2 = C.upper * C.upper := by grind [Rat.pow_succ]
+            _ <= C.upper * 1 := h
+            _ = C.upper := by simp
+            _ <= 1 := hu
+        have hl2 : C.lower ^ 2 <= 1 := by
+          have h1 := Rat.mul_le_mul_of_nonneg_left ho hl
+          have h2 := Rat.mul_le_mul_of_nonneg_left hu hl
+          calc
+            C.lower ^ 2 = C.lower * C.lower := by grind [Rat.pow_succ]
+            _ <= C.lower * C.upper := h1
+            _ <= C.lower * 1 := h2
+            _ = C.lower := by simp
+            _ <= 1 := Rat.le_trans ho hu
+        have hcross : C.upper * C.lower <= 1 := by
+          have hlow1 : C.lower <= 1 := Rat.le_trans ho hu
+          exact Rat.le_trans
+            (Rat.mul_le_mul_of_nonneg_left hlow1 hu0) (by grind)
+        grind
+      calc
+        mesh 0 1 N * (C.upper ^ 2 + C.upper * C.lower + C.lower ^ 2) <=
+            mesh 0 1 N * 3 := Rat.mul_le_mul_of_nonneg_left hs hm
+        _ = 3 * mesh 0 1 N := by grind
+    have hsum := RationalPartition.uniform_boundIntegralSum_width_le
+      N hN (by native_decide : (0 : Rat) <= 1)
+      (fun k hk => (cubicIntegralDerivativeBound eps k hk).bound 0)
+      (3 * mesh 0 1 N) hbound
+    have hsum_bound :
+        ((cubicIntegralPartitionOf eps).boundIntegralSum
+          (fun k hk => (cubicIntegralDerivativeBound eps k hk).bound 0)).width
+          <= 3 * mesh 0 1 N := by
+      change ((RationalPartition.uniform 0 1 N hN (by native_decide)).boundIntegralSum
+          (fun k hk => (cubicIntegralDerivativeBound eps k hk).bound 0)).width
+          <= 3 * mesh 0 1 N
+      have hpart : cubicIntegralPartitionOf eps =
+          RationalPartition.uniform 0 1 N hN (by native_decide) := by
+        unfold cubicIntegralPartitionOf
+        congr
+      cases hpart
+      exact Rat.le_trans hsum (by grind)
+    have hmesh : mesh 0 1 N = 1 / (N : Rat) := by
+      unfold mesh
+      rw [if_neg (Nat.ne_of_gt hN), Rat.div_def]
+      grind
+    have hden := FTC.one_div_den_succ_le_of_pos eps.property
+    have hfinal : 3 * mesh 0 1 N <= eps.val := by
+      rw [hmesh]
+      dsimp [N]
+      have hcancel :
+          (3 : Rat) * (1 / ((3 * (eps.val.den + 1) : Nat) : Rat)) =
+            1 / ((eps.val.den + 1 : Nat) : Rat) := by
+        rw [Rat.div_def, Rat.div_def, Rat.natCast_mul]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      rw [hcancel]
+      exact hden
+    exact Rat.le_trans hsum_bound hfinal
+  endpoint_width := by
+    intro eps
+    simpa [endpointDifferenceInterval, cubicIntegralPrimitiveRaw,
+      RealFunRaw.exact, QInterval.width, Rat.sub_self] using
+      (Rat.le_of_lt eps.property)
+
+theorem cubicIntegralEffectiveFTC_equiv_endpoint :
+    cubicIntegralEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      cubicIntegralEffectiveFTCData.toDerivativeBoundFTC.endpointRaw := by
+  exact effectiveDerivativeBoundFTC cubicIntegralEffectiveFTCData
+
+/-! A reusable finite power-range lemma for the remaining monomial targets. -/
+
+theorem nonneg_power_range {n : Nat} {a b x : Rat}
+    (ha : 0 <= a) (hab : a <= b) (hx : a <= x) (hxb : x <= b) :
+    a ^ n <= x ^ n ∧ x ^ n <= b ^ n := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      have hxa : 0 <= x := Rat.le_trans ha hx
+      have hba : 0 <= b := Rat.le_trans hxa hxb
+      have hpow : a ^ n <= x ^ n ∧ x ^ n <= b ^ n := ih
+      rw [Rat.pow_succ, Rat.pow_succ, Rat.pow_succ]
+      constructor
+      · calc
+          a ^ n * a <= x ^ n * a :=
+            Rat.mul_le_mul_of_nonneg_right hpow.1 ha
+          _ <= x ^ n * x :=
+            Rat.mul_le_mul_of_nonneg_left hx (Rat.pow_nonneg hxa)
+      · calc
+          x ^ n * x <= b ^ n * x :=
+            Rat.mul_le_mul_of_nonneg_right hpow.2 hxa
+          _ <= b ^ n * b :=
+            Rat.mul_le_mul_of_nonneg_left hxb (Rat.pow_nonneg hba)
+
+/-! ## Correctly scaled quartic integral: `∫₀¹ x⁴ dx = 1/5` -/
+
+def quarticIntegralPrimitiveRaw : RealFunRaw :=
+  RealFunRaw.exact (fun x : Rat => x ^ 5 / 5)
+
+def quarticIntegralDerivativeRaw : RealFunRaw :=
+  RealFunRaw.exact (fun x : Rat => x ^ 4)
+
+def quarticIntegralPartitionOf (eps : QPos) : RationalPartition 0 1 :=
+  RationalPartition.uniform 0 1 (4 * (eps.val.den + 1))
+    (by omega) (by native_decide)
+
+def quarticIntegralBound
+    {a b : Rat} (C : RationalSubinterval a b) (_n : Nat) : QInterval :=
+  { lo := C.lower ^ 4, hi := C.upper ^ 4 }
+
+theorem quarticIntegralBound_width
+    {a b : Rat} (C : RationalSubinterval a b) (n : Nat) :
+    (quarticIntegralBound C n).width = C.width *
+      (C.upper ^ 3 + C.upper ^ 2 * C.lower +
+        C.upper * C.lower ^ 2 + C.lower ^ 3) := by
+  unfold quarticIntegralBound RationalSubinterval.width QInterval.width
+  grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+def quarticIntegralDerivativeBound (eps : QPos) (k : Nat)
+    (hk : k < (quarticIntegralPartitionOf eps).pieces) :
+    DerivativeBoundOnSubinterval quarticIntegralDerivativeRaw
+      ((quarticIntegralPartitionOf eps).cell k hk) := by
+  let C := (quarticIntegralPartitionOf eps).cell k hk
+  exact {
+    bound := fun n => quarticIntegralBound C n
+    evalPrecision := fun n => n
+    domain_on := fun x hx => trivial
+    bound_ordered := fun n => by
+      rw [quarticIntegralBound_width]
+      have hw : 0 <= C.width := by
+        unfold RationalSubinterval.width
+        grind [C.ordered]
+      have h0 : 0 <= C.lower := C.lower_mem
+      have h1 : 0 <= C.upper := Rat.le_trans h0 C.ordered
+      have hs : 0 <= C.upper ^ 3 + C.upper ^ 2 * C.lower +
+          C.upper * C.lower ^ 2 + C.lower ^ 3 := by
+        exact Rat.add_nonneg (Rat.add_nonneg
+          (Rat.add_nonneg (Rat.pow_nonneg h1)
+            (Rat.mul_nonneg (Rat.pow_nonneg h1) h0))
+          (Rat.mul_nonneg h1 (Rat.pow_nonneg h0))) (Rat.pow_nonneg h0)
+      exact Rat.mul_nonneg hw hs
+    contains_values := fun n x hx => by
+      unfold quarticIntegralBound quarticIntegralDerivativeRaw RealFunRaw.exact
+        QInterval.ContainsInterval
+      have hrange := nonneg_power_range (n := 4)
+        C.lower_mem C.ordered hx.1 hx.2
+      simpa using hrange }
+
+def quarticIntegralEffectiveFTCData :
+    EffectiveDerivativeBoundFTC quarticIntegralPrimitiveRaw
+      quarticIntegralDerivativeRaw 0 1 where
+  primitive_valid := RealFunRaw.exact_valid _
+  primitive_domain_lower := trivial
+  primitive_domain_upper := trivial
+  choosePartition := fun eps => quarticIntegralPartitionOf eps
+  chooseEndpointPrecision := fun _ => 0
+  chooseBoundStage := fun _ => 0
+  derivativeBound := quarticIntegralDerivativeBound
+  domain_at_partition := by
+    intro eps i hi
+    trivial
+  localControl := by
+    intro eps k hk
+    let C := (quarticIntegralPartitionOf eps).cell k hk
+    let B := quarticIntegralDerivativeBound eps k hk
+    exact {
+      primitive_domain_lower := trivial
+      primitive_domain_upper := trivial
+      endpointPrecision := fun _ => 0
+      endpoint_contained := by
+        intro n
+        dsimp [C, B, quarticIntegralDerivativeBound]
+        unfold quarticIntegralBound RationalSubinterval.scaleBound
+          endpointDifferenceInterval quarticIntegralPrimitiveRaw RealFunRaw.exact
+        have hw : 0 <= C.width := by
+          unfold RationalSubinterval.width
+          grind [C.ordered]
+        have hw' : 0 <=
+            ((quarticIntegralPartitionOf eps).cell k hk).width := by
+          dsimp [C] at hw
+          exact hw
+        simp only [QInterval.scaleByRat, if_pos hw']
+        have hfactor : C.upper ^ 5 / 5 - C.lower ^ 5 / 5 =
+            C.width * ((C.upper ^ 4 + C.upper ^ 3 * C.lower +
+              C.upper ^ 2 * C.lower ^ 2 + C.upper * C.lower ^ 3 +
+              C.lower ^ 4) / 5) := by
+          unfold RationalSubinterval.width
+          rw [Rat.div_def, Rat.div_def, Rat.div_def]
+          grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+            Rat.mul_assoc, Rat.mul_comm]
+        have h0 : 0 <= C.lower := C.lower_mem
+        have h1 : 0 <= C.upper := Rat.le_trans h0 C.ordered
+        have hlow : C.lower ^ 4 <=
+            (C.upper ^ 4 + C.upper ^ 3 * C.lower +
+              C.upper ^ 2 * C.lower ^ 2 + C.upper * C.lower ^ 3 +
+              C.lower ^ 4) / 5 := by
+          have hp : 0 <= C.width *
+              (C.upper ^ 3 + 2 * C.upper ^ 2 * C.lower +
+                3 * C.upper * C.lower ^ 2 + 4 * C.lower ^ 3) := by
+            exact Rat.mul_nonneg hw (by
+              exact Rat.add_nonneg (Rat.add_nonneg
+                (Rat.add_nonneg (Rat.pow_nonneg h1)
+                  (Rat.mul_nonneg (Rat.mul_nonneg
+                    (by native_decide : (0 : Rat) <= 2)
+                    (Rat.pow_nonneg h1)) h0))
+                (Rat.mul_nonneg (Rat.mul_nonneg
+                  (by native_decide : (0 : Rat) <= 3) h1)
+                  (Rat.pow_nonneg h0)))
+                (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 4)
+                  (Rat.pow_nonneg h0)))
+          unfold RationalSubinterval.width at hp
+          rw [Rat.div_def]
+          grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+            Rat.mul_assoc, Rat.mul_comm]
+        have hhigh :
+            (C.upper ^ 4 + C.upper ^ 3 * C.lower +
+              C.upper ^ 2 * C.lower ^ 2 + C.upper * C.lower ^ 3 +
+              C.lower ^ 4) / 5 <= C.upper ^ 4 := by
+          have hp : 0 <= C.width *
+              (4 * C.upper ^ 3 + 3 * C.upper ^ 2 * C.lower +
+                2 * C.upper * C.lower ^ 2 + C.lower ^ 3) := by
+            exact Rat.mul_nonneg hw (by
+              exact Rat.add_nonneg (Rat.add_nonneg
+                (Rat.add_nonneg (Rat.mul_nonneg
+                  (by native_decide : (0 : Rat) <= 4) (Rat.pow_nonneg h1))
+                  (Rat.mul_nonneg (Rat.mul_nonneg
+                    (by native_decide : (0 : Rat) <= 3)
+                    (Rat.pow_nonneg h1)) h0))
+                (Rat.mul_nonneg (Rat.mul_nonneg
+                  (by native_decide : (0 : Rat) <= 2) h1)
+                  (Rat.pow_nonneg h0))) (Rat.pow_nonneg h0))
+          unfold RationalSubinterval.width at hp
+          rw [Rat.div_def]
+          grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+            Rat.mul_assoc, Rat.mul_comm]
+        rw [hfactor]
+        constructor
+        · exact Rat.mul_le_mul_of_nonneg_left hlow hw
+        · exact Rat.mul_le_mul_of_nonneg_left hhigh hw }
+  endpointPrecision_agreement := by
+    intro eps k hk n
+    rfl
+  riemann_width := by
+    intro eps
+    let N := 4 * (eps.val.den + 1)
+    have hN : 0 < N := by omega
+    have hbound : forall k (hk : k < N),
+        (quarticIntegralBound
+          ((RationalPartition.uniform 0 1 N hN (by native_decide)).cell k hk) 0).width <=
+          4 * mesh 0 1 N := by
+      intro k hk
+      let C := (RationalPartition.uniform 0 1 N hN
+        (by native_decide : (0 : Rat) <= 1)).cell k hk
+      change (quarticIntegralBound C 0).width <= 4 * mesh 0 1 N
+      rw [quarticIntegralBound_width]
+      have hw : C.width = mesh 0 1 N := by
+        dsimp [C]
+        exact RationalPartition.uniform_cell_width 0 1 N hN
+          (by native_decide) k hk
+      rw [hw]
+      have hm := mesh_nonneg_of_le hN
+        (by native_decide : (0 : Rat) <= 1)
+      have hs : C.upper ^ 3 + C.upper ^ 2 * C.lower +
+          C.upper * C.lower ^ 2 + C.lower ^ 3 <= 4 := by
+        have hu := C.upper_mem
+        have hl := C.lower_mem
+        have ho := C.ordered
+        have hu0 : 0 <= C.upper := Rat.le_trans hl ho
+        have hu2 := (nonneg_power_range (n := 2)
+          (a := C.upper) (b := 1) (x := C.upper)
+          hu0 hu (by exact Rat.le_refl) hu).2
+        have hl2 := (nonneg_power_range (n := 2)
+          (a := C.lower) (b := 1) (x := C.lower)
+          hl (Rat.le_trans ho hu) (by exact Rat.le_refl)
+          (Rat.le_trans ho hu)).2
+        have hu3 := (nonneg_power_range (n := 3)
+          (a := C.upper) (b := 1) (x := C.upper)
+          hu0 hu (by exact Rat.le_refl) hu).2
+        have hl3 := (nonneg_power_range (n := 3)
+          (a := C.lower) (b := 1) (x := C.lower)
+          hl (Rat.le_trans ho hu) (by exact Rat.le_refl)
+          (Rat.le_trans ho hu)).2
+        have hterm2 : C.upper ^ 2 * C.lower <= 1 := by
+          calc
+            C.upper ^ 2 * C.lower <= 1 * C.lower :=
+              Rat.mul_le_mul_of_nonneg_right hu2 hl
+            _ = C.lower := by simp
+            _ <= 1 := Rat.le_trans ho hu
+        have hterm3 : C.upper * C.lower ^ 2 <= 1 := by
+          calc
+            C.upper * C.lower ^ 2 <= C.upper * 1 :=
+              Rat.mul_le_mul_of_nonneg_left hl2 hu0
+            _ = C.upper := by simp
+            _ <= 1 := hu
+        grind
+      calc
+        mesh 0 1 N * (C.upper ^ 3 + C.upper ^ 2 * C.lower +
+            C.upper * C.lower ^ 2 + C.lower ^ 3) <= mesh 0 1 N * 4 :=
+          Rat.mul_le_mul_of_nonneg_left hs hm
+        _ = 4 * mesh 0 1 N := by grind
+    have hsum := RationalPartition.uniform_boundIntegralSum_width_le
+      N hN (by native_decide : (0 : Rat) <= 1)
+      (fun k hk => (quarticIntegralDerivativeBound eps k hk).bound 0)
+      (4 * mesh 0 1 N) hbound
+    have hsum_bound :
+        ((quarticIntegralPartitionOf eps).boundIntegralSum
+          (fun k hk => (quarticIntegralDerivativeBound eps k hk).bound 0)).width
+          <= 4 * mesh 0 1 N := by
+      change ((RationalPartition.uniform 0 1 N hN (by native_decide)).boundIntegralSum
+          (fun k hk => (quarticIntegralDerivativeBound eps k hk).bound 0)).width
+          <= 4 * mesh 0 1 N
+      have hpart : quarticIntegralPartitionOf eps =
+          RationalPartition.uniform 0 1 N hN (by native_decide) := by
+        unfold quarticIntegralPartitionOf
+        congr
+      cases hpart
+      exact Rat.le_trans hsum (by grind)
+    have hmesh : mesh 0 1 N = 1 / (N : Rat) := by
+      unfold mesh
+      rw [if_neg (Nat.ne_of_gt hN), Rat.div_def]
+      grind
+    have hden := FTC.one_div_den_succ_le_of_pos eps.property
+    have hfinal : 4 * mesh 0 1 N <= eps.val := by
+      rw [hmesh]
+      dsimp [N]
+      have hcancel :
+          (4 : Rat) * (1 / ((4 * (eps.val.den + 1) : Nat) : Rat)) =
+            1 / ((eps.val.den + 1 : Nat) : Rat) := by
+        rw [Rat.div_def, Rat.div_def, Rat.natCast_mul]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      rw [hcancel]
+      exact hden
+    exact Rat.le_trans hsum_bound hfinal
+  endpoint_width := by
+    intro eps
+    simpa [endpointDifferenceInterval, quarticIntegralPrimitiveRaw,
+      RealFunRaw.exact, QInterval.width, Rat.sub_self] using
+      (Rat.le_of_lt eps.property)
+
+theorem quarticIntegralEffectiveFTC_equiv_endpoint :
+    quarticIntegralEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      quarticIntegralEffectiveFTCData.toDerivativeBoundFTC.endpointRaw := by
+  exact effectiveDerivativeBoundFTC quarticIntegralEffectiveFTCData
+
+theorem quarticIntegralEffectiveFTC_equiv_one_fifth :
+    quarticIntegralEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      (RealRaw.ofRat (1 / 5)) := by
+  let H := quarticIntegralEffectiveFTCData.toDerivativeBoundFTC
+  intro n
+  apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+  have hover := H.overlap (precisionAtStage n)
+  change QInterval.Overlaps
+    (H.boundedIntegralCompute n) { lo := 1 / 5, hi := 1 / 5 }
+  have hzero : (1 / 5 : Rat) - 0 / 5 = 1 / 5 := by grind
+  simpa [H, DerivativeBoundFTC.boundedIntegralCompute,
+    DerivativeBoundFTC.boundedIntegralInterval,
+    DerivativeBoundFTC.endpointInterval, endpointDifferenceInterval,
+    quarticIntegralPrimitiveRaw, RealFunRaw.exact, Rat.pow_succ, hzero] using hover
+
+/-! Exact endpoint anchor for the next monomial target. -/
+
+def fifthIntegralPrimitiveRaw : RealFunRaw :=
+  RealFunRaw.exact (fun x : Rat => x ^ 6 / 6)
+
+theorem fifthIntegralEndpointInterval_eq_one_sixth (n : Nat) :
+    endpointDifferenceInterval fifthIntegralPrimitiveRaw 0 1 n =
+      { lo := 1 / 6, hi := 1 / 6 } := by
+  unfold endpointDifferenceInterval fifthIntegralPrimitiveRaw RealFunRaw.exact
+  simp [Rat.pow_succ]
+  grind
+
+theorem fifthPowerSecantAverage_range {a b : Rat}
+    (ha : 0 <= a) (hab : a <= b) :
+    a ^ 5 <=
+        (b ^ 5 + b ^ 4 * a + b ^ 3 * a ^ 2 +
+          b ^ 2 * a ^ 3 + b * a ^ 4 + a ^ 5) / 6 ∧
+      (b ^ 5 + b ^ 4 * a + b ^ 3 * a ^ 2 +
+          b ^ 2 * a ^ 3 + b * a ^ 4 + a ^ 5) / 6 <= b ^ 5 := by
+  have hb : 0 <= b := Rat.le_trans ha hab
+  have hwidth : 0 <= b - a := by grind
+  have hlow : 0 <= (b - a) *
+      (b ^ 4 + 2 * b ^ 3 * a + 3 * b ^ 2 * a ^ 2 +
+        4 * b * a ^ 3 + 5 * a ^ 4) := by
+    exact Rat.mul_nonneg hwidth (by
+      exact Rat.add_nonneg (Rat.add_nonneg
+        (Rat.add_nonneg (Rat.add_nonneg (Rat.pow_nonneg hb)
+          (Rat.mul_nonneg (Rat.mul_nonneg
+            (by native_decide : (0 : Rat) <= 2) (Rat.pow_nonneg hb)) ha))
+          (Rat.mul_nonneg (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 3)
+            (Rat.pow_nonneg hb)) (Rat.pow_nonneg ha)))
+        (Rat.mul_nonneg (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 4)
+          hb) (Rat.pow_nonneg ha)))
+        (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 5)
+          (Rat.pow_nonneg ha)))
+  have hhigh : 0 <= (b - a) *
+      (5 * b ^ 4 + 4 * b ^ 3 * a + 3 * b ^ 2 * a ^ 2 +
+        2 * b * a ^ 3 + a ^ 4) := by
+    exact Rat.mul_nonneg hwidth (by
+      exact Rat.add_nonneg (Rat.add_nonneg
+        (Rat.add_nonneg (Rat.add_nonneg (Rat.mul_nonneg
+          (by native_decide : (0 : Rat) <= 5) (Rat.pow_nonneg hb))
+          (Rat.mul_nonneg (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 4)
+            (Rat.pow_nonneg hb)) ha))
+          (Rat.mul_nonneg (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 3)
+            (Rat.pow_nonneg hb)) (Rat.pow_nonneg ha)))
+        (Rat.mul_nonneg (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 2)
+          hb) (Rat.pow_nonneg ha))) (Rat.pow_nonneg ha))
+  constructor
+  · rw [Rat.div_def]
+    grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+      Rat.mul_assoc, Rat.mul_comm]
+  · rw [Rat.div_def]
+    grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+      Rat.mul_assoc, Rat.mul_comm]
+
+def fifthIntegralDerivativeRaw : RealFunRaw :=
+  RealFunRaw.exact (fun x : Rat => x ^ 5)
+
+def fifthIntegralPartitionOf (eps : QPos) : RationalPartition 0 1 :=
+  RationalPartition.uniform 0 1 (5 * (eps.val.den + 1))
+    (by omega) (by native_decide)
+
+def fifthIntegralBound
+    {a b : Rat} (C : RationalSubinterval a b) (_n : Nat) : QInterval :=
+  { lo := C.lower ^ 5, hi := C.upper ^ 5 }
+
+theorem fifthIntegralBound_width
+    {a b : Rat} (C : RationalSubinterval a b) (n : Nat) :
+    (fifthIntegralBound C n).width = C.width *
+      (C.upper ^ 4 + C.upper ^ 3 * C.lower + C.upper ^ 2 * C.lower ^ 2 +
+        C.upper * C.lower ^ 3 + C.lower ^ 4) := by
+  unfold fifthIntegralBound RationalSubinterval.width QInterval.width
+  grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+def fifthIntegralDerivativeBound (eps : QPos) (k : Nat)
+    (hk : k < (fifthIntegralPartitionOf eps).pieces) :
+    DerivativeBoundOnSubinterval fifthIntegralDerivativeRaw
+      ((fifthIntegralPartitionOf eps).cell k hk) := by
+  let C := (fifthIntegralPartitionOf eps).cell k hk
+  exact {
+    bound := fun n => fifthIntegralBound C n
+    evalPrecision := fun n => n
+    domain_on := fun x hx => trivial
+    bound_ordered := fun n => by
+      rw [fifthIntegralBound_width]
+      have hw : 0 <= C.width := by
+        unfold RationalSubinterval.width
+        grind [C.ordered]
+      have h0 : 0 <= C.lower := C.lower_mem
+      have h1 : 0 <= C.upper := Rat.le_trans h0 C.ordered
+      have hs : 0 <= C.upper ^ 4 + C.upper ^ 3 * C.lower +
+          C.upper ^ 2 * C.lower ^ 2 + C.upper * C.lower ^ 3 + C.lower ^ 4 := by
+        exact Rat.add_nonneg (Rat.add_nonneg
+          (Rat.add_nonneg (Rat.add_nonneg (Rat.pow_nonneg h1)
+            (Rat.mul_nonneg (Rat.pow_nonneg h1) h0))
+            (Rat.mul_nonneg (Rat.pow_nonneg h1) (Rat.pow_nonneg h0)))
+          (Rat.mul_nonneg h1 (Rat.pow_nonneg h0))) (Rat.pow_nonneg h0)
+      exact Rat.mul_nonneg hw hs
+    contains_values := fun n x hx => by
+      unfold fifthIntegralBound fifthIntegralDerivativeRaw RealFunRaw.exact
+        QInterval.ContainsInterval
+      have hrange := nonneg_power_range (n := 5)
+        C.lower_mem C.ordered hx.1 hx.2
+      simpa using hrange }
+
+def fifthIntegralEffectiveFTCData :
+    EffectiveDerivativeBoundFTC fifthIntegralPrimitiveRaw
+      fifthIntegralDerivativeRaw 0 1 where
+  primitive_valid := RealFunRaw.exact_valid _
+  primitive_domain_lower := trivial
+  primitive_domain_upper := trivial
+  choosePartition := fun eps => fifthIntegralPartitionOf eps
+  chooseEndpointPrecision := fun _ => 0
+  chooseBoundStage := fun _ => 0
+  derivativeBound := fifthIntegralDerivativeBound
+  domain_at_partition := by
+    intro eps i hi
+    trivial
+  localControl := by
+    intro eps k hk
+    let C := (fifthIntegralPartitionOf eps).cell k hk
+    let B := fifthIntegralDerivativeBound eps k hk
+    exact {
+      primitive_domain_lower := trivial
+      primitive_domain_upper := trivial
+      endpointPrecision := fun _ => 0
+      endpoint_contained := by
+        intro n
+        dsimp [C, B, fifthIntegralDerivativeBound]
+        unfold fifthIntegralBound RationalSubinterval.scaleBound
+          endpointDifferenceInterval fifthIntegralPrimitiveRaw RealFunRaw.exact
+        have hw : 0 <= C.width := by
+          unfold RationalSubinterval.width
+          grind [C.ordered]
+        have hw' : 0 <=
+            ((fifthIntegralPartitionOf eps).cell k hk).width := by
+          dsimp [C] at hw
+          exact hw
+        simp only [QInterval.scaleByRat, if_pos hw']
+        have hfactor : C.upper ^ 6 / 6 - C.lower ^ 6 / 6 =
+            C.width * ((C.upper ^ 5 + C.upper ^ 4 * C.lower +
+              C.upper ^ 3 * C.lower ^ 2 + C.upper ^ 2 * C.lower ^ 3 +
+              C.upper * C.lower ^ 4 + C.lower ^ 5) / 6) := by
+          unfold RationalSubinterval.width
+          rw [Rat.div_def, Rat.div_def, Rat.div_def]
+          grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+            Rat.mul_assoc, Rat.mul_comm]
+        have h0 : 0 <= C.lower := C.lower_mem
+        have h1 : 0 <= C.upper := Rat.le_trans h0 C.ordered
+        have havg := fifthPowerSecantAverage_range h0 C.ordered
+        rw [hfactor]
+        constructor
+        · exact Rat.mul_le_mul_of_nonneg_left havg.1 hw
+        · exact Rat.mul_le_mul_of_nonneg_left havg.2 hw }
+  endpointPrecision_agreement := by
+    intro eps k hk n
+    rfl
+  riemann_width := by
+    intro eps
+    let N := 5 * (eps.val.den + 1)
+    have hN : 0 < N := by omega
+    have hbound : forall k (hk : k < N),
+        (fifthIntegralBound
+          ((RationalPartition.uniform 0 1 N hN (by native_decide)).cell k hk) 0).width <=
+          5 * mesh 0 1 N := by
+      intro k hk
+      let C := (RationalPartition.uniform 0 1 N hN
+        (by native_decide : (0 : Rat) <= 1)).cell k hk
+      change (fifthIntegralBound C 0).width <= 5 * mesh 0 1 N
+      rw [fifthIntegralBound_width]
+      have hw : C.width = mesh 0 1 N := by
+        dsimp [C]
+        exact RationalPartition.uniform_cell_width 0 1 N hN
+          (by native_decide) k hk
+      rw [hw]
+      have hm := mesh_nonneg_of_le hN
+        (by native_decide : (0 : Rat) <= 1)
+      have hs : C.upper ^ 4 + C.upper ^ 3 * C.lower +
+          C.upper ^ 2 * C.lower ^ 2 + C.upper * C.lower ^ 3 +
+          C.lower ^ 4 <= 5 := by
+        have hu := C.upper_mem
+        have hl := C.lower_mem
+        have ho := C.ordered
+        have hu0 : 0 <= C.upper := Rat.le_trans hl ho
+        have hu4 := (nonneg_power_range (n := 4)
+          (a := C.upper) (b := 1) (x := C.upper)
+          hu0 hu (by exact Rat.le_refl) hu).2
+        have hl4 := (nonneg_power_range (n := 4)
+          (a := C.lower) (b := 1) (x := C.lower)
+          hl (Rat.le_trans ho hu) (by exact Rat.le_refl)
+          (Rat.le_trans ho hu)).2
+        have hu3 := (nonneg_power_range (n := 3)
+          (a := C.upper) (b := 1) (x := C.upper)
+          hu0 hu (by exact Rat.le_refl) hu).2
+        have hl3 := (nonneg_power_range (n := 3)
+          (a := C.lower) (b := 1) (x := C.lower)
+          hl (Rat.le_trans ho hu) (by exact Rat.le_refl)
+          (Rat.le_trans ho hu)).2
+        have hu2 := (nonneg_power_range (n := 2)
+          (a := C.upper) (b := 1) (x := C.upper)
+          hu0 hu (by exact Rat.le_refl) hu).2
+        have hl2 := (nonneg_power_range (n := 2)
+          (a := C.lower) (b := 1) (x := C.lower)
+          hl (Rat.le_trans ho hu) (by exact Rat.le_refl)
+          (Rat.le_trans ho hu)).2
+        have hterm1 : C.upper ^ 3 * C.lower <= 1 := by
+          calc
+            C.upper ^ 3 * C.lower <= 1 * C.lower :=
+              Rat.mul_le_mul_of_nonneg_right hu3 hl
+            _ = C.lower := by simp
+            _ <= 1 := Rat.le_trans ho hu
+        have hterm2 : C.upper ^ 2 * C.lower ^ 2 <= 1 := by
+          exact Rat.le_trans
+            (Rat.mul_le_mul_of_nonneg_right hu2 (Rat.pow_nonneg hl)) (by grind)
+        have hterm3 : C.upper * C.lower ^ 3 <= 1 := by
+          calc
+            C.upper * C.lower ^ 3 <= C.upper * 1 :=
+              Rat.mul_le_mul_of_nonneg_left hl3 hu0
+            _ = C.upper := by simp
+            _ <= 1 := hu
+        grind
+      calc
+        mesh 0 1 N * (C.upper ^ 4 + C.upper ^ 3 * C.lower +
+            C.upper ^ 2 * C.lower ^ 2 + C.upper * C.lower ^ 3 +
+            C.lower ^ 4) <= mesh 0 1 N * 5 :=
+          Rat.mul_le_mul_of_nonneg_left hs hm
+        _ = 5 * mesh 0 1 N := by grind
+    have hsum := RationalPartition.uniform_boundIntegralSum_width_le
+      N hN (by native_decide : (0 : Rat) <= 1)
+      (fun k hk => (fifthIntegralDerivativeBound eps k hk).bound 0)
+      (5 * mesh 0 1 N) hbound
+    have hsum_bound :
+        ((fifthIntegralPartitionOf eps).boundIntegralSum
+          (fun k hk => (fifthIntegralDerivativeBound eps k hk).bound 0)).width
+          <= 5 * mesh 0 1 N := by
+      change ((RationalPartition.uniform 0 1 N hN (by native_decide)).boundIntegralSum
+          (fun k hk => (fifthIntegralDerivativeBound eps k hk).bound 0)).width
+          <= 5 * mesh 0 1 N
+      have hpart : fifthIntegralPartitionOf eps =
+          RationalPartition.uniform 0 1 N hN (by native_decide) := by
+        unfold fifthIntegralPartitionOf
+        congr
+      cases hpart
+      exact Rat.le_trans hsum (by grind)
+    have hmesh : mesh 0 1 N = 1 / (N : Rat) := by
+      unfold mesh
+      rw [if_neg (Nat.ne_of_gt hN), Rat.div_def]
+      grind
+    have hden := FTC.one_div_den_succ_le_of_pos eps.property
+    have hfinal : 5 * mesh 0 1 N <= eps.val := by
+      rw [hmesh]
+      dsimp [N]
+      have hcancel :
+          (5 : Rat) * (1 / ((5 * (eps.val.den + 1) : Nat) : Rat)) =
+            1 / ((eps.val.den + 1 : Nat) : Rat) := by
+        rw [Rat.div_def, Rat.div_def, Rat.natCast_mul]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      rw [hcancel]
+      exact hden
+    exact Rat.le_trans hsum_bound hfinal
+  endpoint_width := by
+    intro eps
+    simp [fifthIntegralEndpointInterval_eq_one_sixth,
+      endpointDifferenceInterval, fifthIntegralPrimitiveRaw,
+      RealFunRaw.exact, QInterval.width]
+    grind
+
+theorem fifthIntegralEffectiveFTC_equiv_endpoint :
+    fifthIntegralEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      fifthIntegralEffectiveFTCData.toDerivativeBoundFTC.endpointRaw := by
+  exact effectiveDerivativeBoundFTC fifthIntegralEffectiveFTCData
+
+theorem fifthIntegralEffectiveFTC_equiv_one_sixth :
+    fifthIntegralEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      (RealRaw.ofRat (1 / 6)) := by
+  let H := fifthIntegralEffectiveFTCData.toDerivativeBoundFTC
+  intro n
+  apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+  have hover := H.overlap (precisionAtStage n)
+  change QInterval.Overlaps
+    (H.boundedIntegralCompute n) { lo := 1 / 6, hi := 1 / 6 }
+  have hzero : (1 / 6 : Rat) - 0 / 6 = 1 / 6 := by grind
+  simpa [H, DerivativeBoundFTC.boundedIntegralCompute,
+    DerivativeBoundFTC.boundedIntegralInterval,
+    DerivativeBoundFTC.endpointInterval, endpointDifferenceInterval,
+    fifthIntegralPrimitiveRaw, RealFunRaw.exact, Rat.pow_succ, hzero] using hover
 
 end Integral
 

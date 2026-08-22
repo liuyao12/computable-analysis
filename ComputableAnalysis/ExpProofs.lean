@@ -5159,6 +5159,18 @@ theorem expPowerSeriesFunction_valid (x : Rat)
   change RealRaw.ValidCompute ((expPowerSeries x).compute)
   exact expPowerSeries_valid x
 
+/-- Stable façade for the certified rational-input exponential evaluator.
+The algorithm does not depend on a proof that the input is in its domain. -/
+def stableExpPowerSeries : StablePartialRealFunRaw where
+  definedAt := fun _ => True
+  compute := fun x => (expPowerSeries x).compute
+  rate := expPowerSeriesRate
+
+theorem stableExpPowerSeries_valid (x : Rat) :
+    RealRaw.ValidCompute (stableExpPowerSeries.compute x) := by
+  change RealRaw.ValidCompute ((expPowerSeries x).compute)
+  exact expPowerSeries_valid x
+
 /-- Restrict the certified power-series exponential to a rational closed
 interval.  This is the input object for a future proof of `d/dx exp = exp`.
 It currently provides validity and totality, not a derivative certificate. -/

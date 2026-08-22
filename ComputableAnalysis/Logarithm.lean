@@ -43,6 +43,21 @@ private theorem one_div_antitone_of_pos {a b : Rat}
 def oneOverXOneTwoEvalInterval (I : QInterval) : QInterval :=
   { lo := 1 / I.hi, hi := 1 / I.lo }
 
+def stableOneOverXOneTwo : StablePartialRealFunRaw where
+  definedAt := fun x => 1 <= x ∧ x <= 2
+  compute := fun x _ => { lo := 1 / x, hi := 1 / x }
+  rate := fun _ => .unknown
+
+def stableOneOverXOneTwoFunction : FunctionOnInterval :=
+  FunctionOnInterval.ofStable stableOneOverXOneTwo 1 2
+    (fun _ hx => hx)
+    (fun x hx => RealRaw.ofRat_valid (1 / x))
+
+theorem stableOneOverXOneTwo_valid (x : Rat)
+    (hx : stableOneOverXOneTwo.definedAt x) :
+    RealRaw.ValidCompute (stableOneOverXOneTwo.compute x) := by
+  exact RealRaw.ofRat_valid (1 / x)
+
 private theorem oneOverXOneTwoEvalInterval_width
     {I : QInterval} (hI : subintervalOf I 1 2) :
     (oneOverXOneTwoEvalInterval I).width =
@@ -120,6 +135,26 @@ def oneOverXOnOneTwo_intervalRegular :
     constructor
     · exact one_div_antitone_of_pos hxpos hxhi
     · exact one_div_antitone_of_pos (by grind) hxlo
+
+def stableOneOverXOneTwo_intervalRegular :
+    IntervalRegularOn stableOneOverXOneTwoFunction :=
+  IntervalRegularOn.ofStable stableOneOverXOneTwo 1 2
+    (fun _ hx => hx)
+    (fun x hx => stableOneOverXOneTwo_valid x hx)
+    (fun I _hI _n => oneOverXOneTwoEvalInterval I)
+    (fun n => n + 1)
+    (by intro n; omega)
+    (by
+      intro I hI n hwidth
+      exact oneOverXOnOneTwo_intervalRegular.output_width I hI n hwidth)
+    (by
+      intro I hI x hx n hIlo hIhi
+      change 1 / I.hi <= 1 / x ∧ 1 / x <= 1 / I.lo
+      have hIlo_pos : 0 < I.lo := by grind [hI.1]
+      have hx_pos : 0 < x := by grind [hx.1]
+      constructor
+      · exact one_div_antitone_of_pos hx_pos hIhi
+      · exact one_div_antitone_of_pos hIlo_pos hIlo)
 
 /-- The reciprocal kernel `x ↦ 1/x` on `[1,2]` satisfies the project's
 literal epsilon--delta continuity definition. -/

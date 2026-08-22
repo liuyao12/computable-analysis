@@ -1,15 +1,26 @@
-\chapter{Integrals}\label{ch:integrals}
+\chapter{Integrals and the Fundamental Theorem}\label{ch:integrals}
 
-An integral is a program returning nested rational bounds. Lebesgue measure is
-outside scope; the central object is a certified rectangle computation.
+The motivating integral is circle area: crude rectangles produce nested
+rational bounds for the area under the arctangent kernel. An integral is a
+program returning such bounds. Lebesgue measure is outside scope.
 
-We use one public sine convention throughout: \(\sin(\pi x)\).  A normalized
-quarter-turn parameter may occur inside the circle algorithm, but it is not a
-second user-facing definition of sine.
+This chapter is where the Fundamental Theorem of Calculus belongs. It is the
+first general bridge from local change to accumulated area; later chapters
+only instantiate and reuse its certificate interface.
+
+The blueprint writes sine only as \(\sin(\pi x)\).  A normalized quarter-turn
+parameter may occur inside the circle algorithm as an implementation detail.
 
 \section{Rectangle algorithm}
 
-For each cell, certify monotonicity or isolate finitely many turns.
+The question is not how to choose the best subdivision. Every certified
+subdivision is a computation, and the theory relates all of them.
+
+For each cell, certify monotonicity or isolate finitely many turns.  A turn is
+represented by a nested rational bracket; the left, middle, and right boxes
+are then assembled by finite interval addition.  The assembled width is
+proved to shrink.  Only the final comparison with the intended integral is
+function-specific, and is supplied as an explicit completion certificate.
 \begin{verbatim}
 mesh -> cell classification -> lower/upper rectangles -> overlap
 \end{verbatim}
@@ -27,6 +38,161 @@ sample has a stage-dependent value bracket.
 \caption{Value brackets and rectangle bounds.}
 \label{fig:interval-sine-integral-stage}\end{figure}
 
+The dyadic implementation uses the normalized angle \(2x=k/2^n\).  Its
+finite stage is an explicit indexed rectangle sum:
+
+\begin{verbatim}
+for k in range(2^n):
+    (sine, cosine) = nested_radical_table(n, k)
+    add (1/2^(n+1)) * sine to the interval sum
+\end{verbatim}
+
+The finite sum is packaged as a raw candidate. The remaining certificate
+proves that the half-angle boxes enclose the intended values and that the
+resulting sums are nested and shrink. Only after that certificate is supplied
+does the raw candidate become a computable integral.
+
+The implementation keeps mesh level and evaluation precision separate:
+each stage rebuilds its nested-radical paths at the current precision.  This
+prevents an old, coarse parent box from being reused forever at refined
+stages.
+
+Each square-root box is then clipped to its geometric range \([0,1]\).  The
+exact root remains enclosed, while the clipping makes the range invariant
+inductive: lower-half cosine boxes lie in \([0,1]\), reflected boxes in
+\([-1,0]\), and sine boxes in \([0,1]\). Lean proves this finite geometric
+invariant directly.
+
+The geometric certificate is deliberately elementary: a parent point on the
+unit circle with nonnegative coordinates has child coordinates satisfying
+
+\begin{verbatim}
+child_sine^2 = (1 - parent_cosine)/2
+child_cosine^2 = (1 + parent_cosine)/2
+child_sine, child_cosine >= 0
+\end{verbatim}
+
+Lean records this as a finite half-angle certificate. It is the formal
+version of the geometric picture behind the nested radicals. The repository
+currently keeps this layer self-contained rather than importing Mathlib's
+real-number geometry; a future import would be useful only if it supplied the
+same rational/interval statements without pulling in completed reals.
+
+\section{The central bridge: an effective FTC}
+\label{thm:convex-ftc}
+\label{thm:effective-derivative-bound-ftc}
+
+The historical core of calculus is the converse relation between local change
+and accumulated area. Here the FTC is the chapter's central theorem: it is
+proved from finite comparisons, not imported from completeness.
+
+\begin{verbatim}
+derivative bounds -> lower/upper rectangles -> endpoint difference -> overlap
+\end{verbatim}
+
+On each cell, a certified derivative bound controls the difference between
+the rectangle sum and the primitive's endpoint increment.  For monotone or
+convex/concave derivatives, neighboring secants provide the needed bounds;
+finite turning-point certificates extend the construction piecewise.  The
+result is an effective FTC: every requested output precision comes with a
+finite partition and a rational error certificate.
+
+The public contract is general:
+
+\begin{verbatim}
+candidate derivative -> cell bounds -> finite sum -> endpoint overlap
+                                         -> shrinking raw integral
+\end{verbatim}
+
+The certificate does not prescribe how derivative bounds are obtained.
+Monotonicity, convexity, power-series tails, and formula-specific interval
+arithmetic all implement the same interface. Thus the theorem is reusable
+without claiming that every function is integrable.
+
+Chapter~\ref{ch:effective-calculus} packages this theorem for reuse: it does
+not introduce a competing notion of integral or a second foundation.
+
+The classical mean value theorem is the zero-width corollary.  At finite
+precision, \texttt{endpoint\_difference\_overlaps\_bound} records its useful content:
+the scaled derivative range overlaps the endpoint-increment box.  A literal
+intermediate point is not selected; the bracket is refined until the desired
+precision is reached.  We therefore recover MVT only where the function has
+the required effective monotonicity or turning-point certificate.
+
+The checked polynomial ladder now reaches constant, affine, square, cube,
+quartic, and quintic evaluators, with a finite sextic Darboux checkpoint; the
+square case uses the finite bound
+\(v^2-u^2=(v-u)(v+u)\le 2(v-u)\) on \([0,1]\); the cube case uses the
+analogous three-term factorization and modulus \(3(n+1)\).  The corresponding
+finite dyadic integrals are identified with \(1/3,1/4,1/5,1/6\) by overlap
+with rational singleton intervals. The reusable polynomial layer also gives
+finite secant certificates for every normalized monomial and every finite
+Taylor prefix; these are the main inputs for non-polynomial functions.
+
+The first non-polynomial test is a squared sine prefix.  Its finite Taylor
+surrogate is integrated by the same effective FTC and evaluated by a rational
+certificate (the current prefix value is \(6389/161280\)).  The exact
+tangent-chart route is also exposed: its rational derivative certificate
+transports the integral to the quarter-turn anchor \(\pi/4\).  The endpoint
+schedule is made nested by finite prefix stabilization and is now a verified
+raw real.  The integral-side certificate has two parts: validity of the finite
+Riemann-sum raw computation, and a same-stage overlap bridge from that
+computation to the canonical endpoint box.  The tangent-chart proof now
+constructs the public integral raw by anchor-reboxing: finite boxes are
+intersected with the nested endpoint anchor, so validity follows from ordered
+widths, an explicit \(2/(n+1)\) shrink bound, and the overlap theorem.  Lean
+also proves constructively that the chosen endpoint stage is no earlier than
+the public stage: the positive rational stage budget has a denominator large
+enough to dominate the requested stage.  The equal-dyadic \(\sin^2\) route
+separately needs the arctangent-backed regularity and endpoint certificate
+before it is identified with \(1/4\).  For the unsquared sine route, the
+remaining certificate is target-directed: each nested-radical sample must be
+matched to a tangent box by a finite bisection trace or half-angle witness.
+The integral and Darboux layers do not require a completed real sine function.
+
+The target-directed inverse search has the same shape as the integral
+algorithm.  A cell is bisected, its certified forward image is compared with
+the target box, and one Boolean decision is retained:
+
+\begin{verbatim}
+cell := [lo,hi]
+mid  := (lo+hi)/2
+if forward_image([lo,mid]) is below target:
+    cell := [mid,hi]
+else:
+    cell := [lo,mid]
+record target-overlaps-forward-image(cell)
+\end{verbatim}
+
+The trace itself is a rational computation.  Its proof fields are source
+containment, halving width, and the final overlap at every requested stage.
+This is the finite inverse certificate consumed by the nested-radical sine
+integral.
+
+\begin{verbatim}
+sine prefix   -> square prefix -> derivative bounds -> FTC endpoint box
+tangent chart -> rational derivative certificate -> endpoint = quarter-turn
+equal dyadic  -> regularity + endpoint identity -> integral = 1/4
+\end{verbatim}
+
+\section{Riemann--Stieltjes viewpoint}
+
+Uneven samples are finite Riemann--Stieltjes sums: a monotone chart supplies
+the increments of the integrator, while the function supplies the sampled
+values.  For the sine example, use
+\(x(u)=2\arctan(u)/\pi\).  Equal subdivisions in \(u\) therefore produce
+unequal subdivisions in \(x\), computing
+\(\int_0^{1/2}\sin(\pi x)\,dx\) through Stieltjes sums.
+
+\begin{verbatim}
+uniform u-mesh -> inverse-chart x-samples -> Stieltjes rectangles -> overlap
+                         |
+                         +-- substitution theorem (when needed)
+\end{verbatim}
+
+This construction is checked in Lean; its earlier name remains only as a
+compatibility alias.
+
 \section{Finite identities}
 \label{thm:finite-green-rectangle}
 \label{def:integration-by-parts-certificate}
@@ -37,8 +203,13 @@ sample has a stage-dependent value bracket.
 finite boundary sum -> algebraic identity -> endpoint difference
                                       -> certified error budget
 \end{verbatim}
-Green's rectangle identity, substitution, telescoping, integration by parts,
+Green's rectangle identity, Stieltjes transport, substitution, telescoping, integration by parts,
 and polynomial FTC are instances of this finite pattern.
+
+The sine integral in Chapter~\ref{ch:rational-circle-trigonometry} is the
+first integration target: the circle/arctangent construction supplies the
+values, the rectangle algorithm supplies the area, and this FTC supplies the
+endpoint identity once its finite trigonometric certificate is instantiated.
 
 \section{Tails and products}
 

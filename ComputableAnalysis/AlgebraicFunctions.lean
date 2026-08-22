@@ -560,6 +560,52 @@ theorem sqrtRaw_stage_spec (q : Rat) (h : sqrtDomain q) (n : Nat) :
 def SqrtRawSpec (q : Rat) (h : sqrtDomain q) : Prop :=
   SqrtRealRawSpec q (sqrtRaw q h)
 
+theorem sqrt_spec_equiv_of_spec {q : Rat} {x y : RealRaw}
+    (hx : SqrtRealRawSpec q x) (hy : SqrtRealRawSpec q y) :
+    x.Equiv y := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff x y n n).2
+  have hxs := hx.2 n
+  have hys := hy.2 n
+  unfold SqrtIntervalSpec at hxs hys
+  have hxy : (x.compute n).lo <= (y.compute n).hi := by
+    apply (Rat.not_lt).mp
+    intro hnot
+    have hlt : (y.compute n).hi < (x.compute n).lo := by grind
+    have hdiff : 0 < (x.compute n).lo - (y.compute n).hi := by grind
+    have hsum : 0 < (x.compute n).lo + (y.compute n).hi := by
+      grind
+    have hsq_lt : sq (y.compute n).hi < sq (x.compute n).lo := by
+      unfold sq
+      have hprod : 0 <
+          ((x.compute n).lo - (y.compute n).hi) *
+            ((x.compute n).lo + (y.compute n).hi) :=
+        Rat.mul_pos hdiff hsum
+      grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg]
+    have hleft : sq (x.compute n).lo <= sq (y.compute n).hi :=
+      Rat.le_trans hxs.2.2.1 hys.2.2.2
+    grind
+  have hyx : (y.compute n).lo <= (x.compute n).hi := by
+    apply (Rat.not_lt).mp
+    intro hnot
+    have hlt : (x.compute n).hi < (y.compute n).lo := by grind
+    have hdiff : 0 < (y.compute n).lo - (x.compute n).hi := by grind
+    have hsum : 0 < (y.compute n).lo + (x.compute n).hi := by
+      grind
+    have hsq_lt : sq (x.compute n).hi < sq (y.compute n).lo := by
+      unfold sq
+      have hprod : 0 <
+          ((y.compute n).lo - (x.compute n).hi) *
+            ((y.compute n).lo + (x.compute n).hi) :=
+        Rat.mul_pos hdiff hsum
+      grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg]
+    have hleft : sq (y.compute n).lo <= sq (x.compute n).hi :=
+      Rat.le_trans hys.2.2.1 hxs.2.2.2
+    grind
+  change (x.compute n).lo <= (y.compute n).hi /\
+    (y.compute n).lo <= (x.compute n).hi
+  exact ⟨hxy, hyx⟩
+
 def sqrtWidthConstant (q : Rat) : Nat :=
   (sqrtUpperBound q).num.natAbs + 1
 
@@ -743,6 +789,76 @@ theorem sqrtRaw_valid (q : Rat) (h : sqrtDomain q) :
 theorem sqrtRaw_spec (q : Rat) (h : sqrtDomain q) :
     SqrtRawSpec q h :=
   ⟨sqrtRaw_valid q h, sqrtRaw_stage_spec q h⟩
+
+/-! The square-root specification is strong enough to recover the defining
+equation at the raw-real level.  This is the algebraic invariant used by the
+constructive half-angle induction: it compares rational intervals directly,
+without selecting an exact real square root. -/
+theorem sqrtRaw_mul_self_equiv_of_domain (q : Rat) (h : sqrtDomain q) :
+    (sqrtRaw q h * sqrtRaw q h).Equiv (RealRaw.ofRat q) := by
+  intro n
+  have hsvalid := sqrtRaw_valid q h
+  have horder := RealRaw.interval_order_of_valid (sqrtRaw q h) hsvalid n
+  have hspec := sqrtRaw_stage_spec q h n
+  apply (RealRaw.compareAt_overlap_iff
+    (sqrtRaw q h * sqrtRaw q h) (RealRaw.ofRat q) n n).2
+  change QInterval.Overlaps
+    (QBox.mulRealInterval
+      ((sqrtRaw q h).compute n).lo
+      ((sqrtRaw q h).compute n).hi
+      ((sqrtRaw q h).compute n).lo
+      ((sqrtRaw q h).compute n).hi)
+    { lo := q, hi := q }
+  rw [QBox.mulRealInterval_self_of_nonneg hspec.1 horder]
+  unfold QInterval.Overlaps
+  exact ⟨hspec.2.2.1, hspec.2.2.2⟩
+
+theorem ofRat_add_equiv (a b : Rat) :
+    (RealRaw.ofRat a + RealRaw.ofRat b).Equiv
+      (RealRaw.ofRat (a + b)) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (RealRaw.ofRat a + RealRaw.ofRat b)
+    (RealRaw.ofRat (a + b)) n n).2
+  change QInterval.Overlaps
+    { lo := a + b, hi := a + b }
+    { lo := a + b, hi := a + b }
+  exact ⟨by grind, by grind⟩
+
+/-! Raw-real form of the elementary circle identity.  This separates the
+algebraic part of the half-angle proof from the geometric theorem that
+constructs the two square-root representatives. -/
+theorem raw_square_sum_equiv_of_rational_square_sum
+    {s c : RealRaw} {q r : Rat}
+    (hss : (s * s).Valid) (hcc : (c * c).Valid)
+    (hsq : (s * s).Equiv (RealRaw.ofRat q))
+    (hcq : (c * c).Equiv (RealRaw.ofRat r))
+    (hsum : q + r = 1) :
+    (s * s + c * c).Equiv (RealRaw.ofRat 1) := by
+  have hqvalid : (RealRaw.ofRat q).Valid := by
+    unfold RealRaw.ofRat RealRaw.Valid
+    exact RealRaw.ofRat_valid q
+  have hrvalid : (RealRaw.ofRat r).Valid := by
+    unfold RealRaw.ofRat RealRaw.Valid
+    exact RealRaw.ofRat_valid r
+  have honevalid : (RealRaw.ofRat (1 : Rat)).Valid := by
+    unfold RealRaw.ofRat RealRaw.Valid
+    exact RealRaw.ofRat_valid 1
+  have hadd := RealRaw.add_equiv hss
+    hqvalid hcc hrvalid hsq hcq
+  have hrat := ofRat_add_equiv q r
+  rw [hsum] at hrat
+  have hmid : (RealRaw.ofRat q + RealRaw.ofRat r).Valid :=
+    RealRaw.add_valid hqvalid hrvalid
+  exact RealRaw.equiv_trans
+    (RealRaw.add_valid hss hcc)
+    hmid honevalid
+    hadd hrat
+
+theorem sqrtRaw_equiv_of_spec {q : Rat} (h : sqrtDomain q)
+    {x : RealRaw} (hx : SqrtRealRawSpec q x) :
+    (sqrtRaw q h).Equiv x := by
+  exact sqrt_spec_equiv_of_spec (sqrtRaw_spec q h) hx
 
 theorem sqrtCertified_of_domain (q : Rat) (h : sqrtDomain q) :
     sqrtCertified? q := by
@@ -1082,6 +1198,43 @@ theorem sqrtApproxOnUnit_subinterval (q : Rat) (hq : inDomainInterval 0 1 q)
   refine ⟨hcontains.1, hspec.2.1, ?_⟩
   simpa [sqrtUpperBound_eq_one hq.2] using hcontains.2
 
+theorem sqrtRaw_halfAngle_square_sum_equiv_one
+    {q r : Rat}
+    (hq : inDomainInterval 0 1 q)
+    (hr : inDomainInterval 0 1 r)
+    (hsum : q + r = 1) :
+    ((sqrtRaw q (sqrtDomain_of_unit hq) *
+        sqrtRaw q (sqrtDomain_of_unit hq)) +
+      (sqrtRaw r (sqrtDomain_of_unit hr) *
+        sqrtRaw r (sqrtDomain_of_unit hr))).Equiv
+      (RealRaw.ofRat 1) := by
+  have hqvalid : (sqrtRaw q (sqrtDomain_of_unit hq) *
+      sqrtRaw q (sqrtDomain_of_unit hq)).Valid := by
+    apply RealRaw.mulSelf_valid_of_nonneg_bounded
+      (B := (1 : Rat))
+      (sqrtRaw_valid q (sqrtDomain_of_unit hq)) (by native_decide)
+    intro n
+    have hsub := sqrtApproxOnUnit_subinterval q hq n
+    simpa [sqrtRaw] using (show
+      0 <= (sqrtApproxOnDomain q (sqrtDomain_of_unit hq) n).lo /\
+        (sqrtApproxOnDomain q (sqrtDomain_of_unit hq) n).hi <= 1 from
+      ⟨hsub.1, hsub.2.2⟩)
+  have hrvalid : (sqrtRaw r (sqrtDomain_of_unit hr) *
+      sqrtRaw r (sqrtDomain_of_unit hr)).Valid := by
+    apply RealRaw.mulSelf_valid_of_nonneg_bounded
+      (B := (1 : Rat))
+      (sqrtRaw_valid r (sqrtDomain_of_unit hr)) (by native_decide)
+    intro n
+    have hsub := sqrtApproxOnUnit_subinterval r hr n
+    simpa [sqrtRaw] using (show
+      0 <= (sqrtApproxOnDomain r (sqrtDomain_of_unit hr) n).lo /\
+        (sqrtApproxOnDomain r (sqrtDomain_of_unit hr) n).hi <= 1 from
+      ⟨hsub.1, hsub.2.2⟩)
+  apply raw_square_sum_equiv_of_rational_square_sum hqvalid hrvalid
+  · exact sqrtRaw_mul_self_equiv_of_domain q (sqrtDomain_of_unit hq)
+  · exact sqrtRaw_mul_self_equiv_of_domain r (sqrtDomain_of_unit hr)
+  · exact hsum
+
 /-- The existing rational square-root bisection is a concrete inverse search
 for each exact rational target in the unit range of squaring. -/
 def sqrtOnUnitBisectionSearch (q : Rat) (hq : inDomainInterval 0 1 q) :
@@ -1339,6 +1492,205 @@ private theorem sqrtUnitEvalInterval_contains_point
   unfold QInterval.ContainsInterval
   simp [sqrtUnitEvalInterval, A, B, Y, D, hlo, hhi]
 
+/-! Public interface for interval-valued nested-radical algorithms.  The
+implementation above deliberately keeps its scheduling details local; this
+wrapper exposes only the finite enclosure contract needed by other
+constructive algorithms, such as the dyadic sine table. -/
+
+def sqrtOnUnitEvalInterval (I : QInterval)
+    (hI : subintervalOf I 0 1) (n : Nat) : QInterval :=
+  sqrtUnitEvalInterval I hI n
+
+theorem sqrtOnUnitEvalInterval_contains_point
+    (I : QInterval) (hI : subintervalOf I 0 1)
+    (x : Rat) (hx : inDomainInterval 0 1 x)
+    (n : Nat) (hxlo : I.lo <= x) (hxhi : x <= I.hi) :
+    (sqrtOnUnitEvalInterval I hI n).ContainsInterval
+      (sqrtOnUnit.compute x hx n) := by
+  exact sqrtUnitEvalInterval_contains_point I hI x hx n hxlo hxhi
+
+/-- A total executable wrapper for callers that are constructing an
+interval recursively.  The fallback is never used once the caller has proved
+the input interval lies in `[0,1]`; keeping it explicit makes the raw
+algorithm total before that proof is attached. -/
+def sqrtOnUnitEvalIntervalTotal (I : QInterval) (n : Nat) : QInterval :=
+  if hI : 0 <= I.lo ∧ I.lo <= I.hi ∧ I.hi <= 1 then
+    sqrtOnUnitEvalInterval I hI n
+  else
+    { lo := 0, hi := 1 }
+
+theorem sqrtOnUnitEvalIntervalTotal_eq
+    (I : QInterval) (hI : subintervalOf I 0 1) (n : Nat) :
+    sqrtOnUnitEvalIntervalTotal I n = sqrtOnUnitEvalInterval I hI n := by
+  change 0 <= I.lo ∧ I.lo <= I.hi ∧ I.hi <= 1 at hI
+  simp [sqrtOnUnitEvalIntervalTotal, hI]
+
+theorem sqrtOnUnitEvalIntervalTotal_contains_point
+    (I : QInterval) (hI : subintervalOf I 0 1)
+    (x : Rat) (hx : inDomainInterval 0 1 x)
+    (n : Nat) (hxlo : I.lo <= x) (hxhi : x <= I.hi) :
+    (sqrtOnUnitEvalIntervalTotal I n).ContainsInterval
+      (sqrtOnUnit.compute x hx n) := by
+  rw [sqrtOnUnitEvalIntervalTotal_eq I hI n]
+  exact sqrtOnUnitEvalInterval_contains_point I hI x hx n hxlo hxhi
+
+/-! Clipping is harmless for the unit square-root branch: the exact point
+box already lies in `[0,1]`, while clipping removes only error padding that
+falls outside the geometric range. -/
+
+theorem sqrtOnUnit_compute_subinterval
+    (q : Rat) (hq : inDomainInterval 0 1 q) (n : Nat) :
+    subintervalOf (sqrtOnUnit.compute q hq n) 0 1 := by
+  rw [sqrtOnUnit_compute]
+  exact sqrtApproxOnUnit_subinterval q hq
+    (sqrtOnUnitSchedule.stage n)
+
+def sqrtOnUnitEvalIntervalClipped (I : QInterval) (n : Nat) : QInterval :=
+  QInterval.intersection
+    (sqrtOnUnitEvalIntervalTotal I n) { lo := 0, hi := 1 }
+
+theorem sqrtOnUnitEvalIntervalClipped_width_le_total
+    (I : QInterval) (n : Nat) :
+    (sqrtOnUnitEvalIntervalClipped I n).width <=
+      (sqrtOnUnitEvalIntervalTotal I n).width := by
+  apply QInterval.width_le_of_contains
+  unfold sqrtOnUnitEvalIntervalClipped
+  exact QInterval.intersection_contained_left
+    (sqrtOnUnitEvalIntervalTotal I n) { lo := 0, hi := 1 }
+
+theorem sqrtOnUnitEvalIntervalClipped_subinterval
+    (I : QInterval) (hI : subintervalOf I 0 1) (n : Nat) :
+    subintervalOf (sqrtOnUnitEvalIntervalClipped I n) 0 1 := by
+  let hx : inDomainInterval 0 1 I.lo :=
+    ⟨hI.1, Rat.le_trans hI.2.1 hI.2.2⟩
+  have hpoint := sqrtOnUnit_compute_subinterval I.lo hx n
+  have htotal := sqrtOnUnitEvalIntervalTotal_contains_point I hI I.lo hx n
+    Rat.le_refl hI.2.1
+  have hunit : QInterval.ContainsInterval
+      { lo := 0, hi := 1 } (sqrtOnUnit.compute I.lo hx n) :=
+    ⟨hpoint.1, hpoint.2.2⟩
+  have hinter := QInterval.intersection_contains htotal hunit
+  have hunitContained := QInterval.intersection_contained_right
+    (sqrtOnUnitEvalIntervalTotal I n) { lo := 0, hi := 1 }
+  unfold sqrtOnUnitEvalIntervalClipped subintervalOf
+  exact ⟨hunitContained.1,
+    Rat.le_trans hinter.1 (Rat.le_trans hpoint.2.1 hinter.2),
+    hunitContained.2⟩
+
+/-! The scheduled error padding cannot disappear under clipping.  This is
+useful for recursive interval algorithms: every valid unit-branch square-root
+box has a genuinely positive rational width, including at exact endpoint
+inputs. -/
+theorem sqrtOnUnitEvalIntervalClipped_width_pos
+    (I : QInterval) (hI : subintervalOf I 0 1) (n : Nat) :
+    0 < (sqrtOnUnitEvalIntervalClipped I n).width := by
+  change 0 < (QInterval.intersection
+    (sqrtOnUnitEvalIntervalTotal I n) { lo := 0, hi := 1 }).width
+  rw [sqrtOnUnitEvalIntervalTotal_eq I hI n]
+  let hlo : inDomainInterval 0 1 I.lo :=
+    ⟨hI.1, Rat.le_trans hI.2.1 hI.2.2⟩
+  let hhi : inDomainInterval 0 1 I.hi :=
+    ⟨Rat.le_trans hI.1 hI.2.1, hI.2.2⟩
+  let A := sqrtOnUnit.compute I.lo hlo n
+  let B := sqrtOnUnit.compute I.hi hhi n
+  let D := sqrtUnitErrorBudget n
+  have hA := sqrtOnUnit_compute_subinterval I.lo hlo n
+  have hB := sqrtOnUnit_compute_subinterval I.hi hhi n
+  have hAs : SqrtIntervalSpec I.lo A := by
+    dsimp [A]
+    rw [sqrtOnUnit_compute]
+    exact sqrtApproxOnDomain_spec I.lo (sqrtDomain_of_unit hlo)
+      (sqrtOnUnitSchedule.stage n)
+  have hBs : SqrtIntervalSpec I.hi B := by
+    dsimp [B]
+    rw [sqrtOnUnit_compute]
+    exact sqrtApproxOnDomain_spec I.hi (sqrtDomain_of_unit hhi)
+      (sqrtOnUnitSchedule.stage n)
+  have hcross : A.lo <= B.hi := by
+    have hsq : sq A.lo <= I.hi :=
+      Rat.le_trans hAs.2.2.1 hI.2.1
+    exact hBs.le_hi_of_sq_le hsq
+  have hD : 0 < D := by
+    dsimp [D, sqrtUnitErrorBudget]
+    exact one_div_nat_pos (by omega)
+  have hleft : A.lo - D < 1 := by
+    have hAle : A.lo <= 1 := by
+      dsimp [A]
+      exact Rat.le_trans hA.2.1 hA.2.2
+    grind
+  have hright : 0 < B.hi + D := by
+    have hBge : 0 <= B.hi := by
+      dsimp [B]
+      exact Rat.le_trans hB.1 hB.2.1
+    grind
+  unfold sqrtOnUnitEvalInterval sqrtUnitEvalInterval
+  simp only [A, B, D]
+  unfold QInterval.intersection QInterval.width
+  by_cases hlo' : (sqrtOnUnit.compute I.lo hlo n).lo -
+      sqrtUnitErrorBudget n <= 0
+  · simp [Rat.max_def, hlo']
+    by_cases hhi' : (sqrtOnUnit.compute I.hi hhi n).hi +
+        sqrtUnitErrorBudget n <= 1
+    · simp [Rat.min_def, hhi']
+      grind
+    · simp [Rat.min_def, hhi']
+      grind
+  · simp [Rat.max_def, hlo']
+    by_cases hhi' : (sqrtOnUnit.compute I.hi hhi n).hi +
+        sqrtUnitErrorBudget n <= 1
+    · simp [Rat.min_def, hhi']
+      grind
+    · simp [Rat.min_def, hhi']
+      grind
+
+theorem sqrtOnUnitEvalIntervalClipped_contains_point
+    (I : QInterval) (hI : subintervalOf I 0 1)
+    (x : Rat) (hx : inDomainInterval 0 1 x)
+    (n : Nat) (hxlo : I.lo <= x) (hxhi : x <= I.hi) :
+    (sqrtOnUnitEvalIntervalClipped I n).ContainsInterval
+      (sqrtOnUnit.compute x hx n) := by
+  apply QInterval.intersection_contains
+  · exact sqrtOnUnitEvalIntervalTotal_contains_point I hI x hx n hxlo hxhi
+  · have h := sqrtOnUnit_compute_subinterval x hx n
+    exact ⟨h.1, h.2.2⟩
+
+theorem sqrtOnUnitEvalIntervalClipped_square_contains_input
+    (I : QInterval) (hI : subintervalOf I 0 1) (n : Nat) :
+    sq (sqrtOnUnitEvalIntervalClipped I n).lo <= I.lo /\
+      I.hi <= sq (sqrtOnUnitEvalIntervalClipped I n).hi := by
+  let J := sqrtOnUnitEvalIntervalClipped I n
+  have hJ : subintervalOf J 0 1 := by
+    exact sqrtOnUnitEvalIntervalClipped_subinterval I hI n
+  have hlo : inDomainInterval 0 1 I.lo :=
+    ⟨hI.1, Rat.le_trans hI.2.1 hI.2.2⟩
+  have hhi : inDomainInterval 0 1 I.hi :=
+    ⟨Rat.le_trans hI.1 hI.2.1, hI.2.2⟩
+  have hloJ := sqrtOnUnitEvalIntervalClipped_contains_point
+    I hI I.lo hlo n Rat.le_refl hI.2.1
+  have hhiJ := sqrtOnUnitEvalIntervalClipped_contains_point
+    I hI I.hi hhi n hI.2.1 Rat.le_refl
+  have hslo := sqrtApproxOnDomain_spec I.lo
+    (sqrtDomain_of_unit hlo) (sqrtOnUnitSchedule.stage n)
+  have hshi := sqrtApproxOnDomain_spec I.hi
+    (sqrtDomain_of_unit hhi) (sqrtOnUnitSchedule.stage n)
+  have hlo_sq : sq J.lo <= sq
+      (sqrtOnUnit.compute I.lo hlo n).lo := by
+    apply sq_le_sq_of_nonneg_le hJ.1
+    exact hloJ.1
+  have hhi_sq : sq (sqrtOnUnit.compute I.hi hhi n).hi <= sq J.hi := by
+    apply sq_le_sq_of_nonneg_le
+      (by
+        have hp := sqrtOnUnit_compute_subinterval I.hi hhi n
+        have hp0 : 0 <= (sqrtOnUnit.compute I.hi hhi n).hi :=
+          Rat.le_trans hp.1 hp.2.1
+        simpa [sqrtOnUnit_compute] using hp0)
+    exact hhiJ.2
+  constructor
+  · exact Rat.le_trans hlo_sq (by
+      rw [sqrtOnUnit_compute]
+      exact hslo.2.2.1)
+  · exact Rat.le_trans hshi.2.2.2 (Rat.le_trans hhi_sq Rat.le_refl)
+
 private theorem sqrtUnitErrorBudget_pos (n : Nat) :
     0 < sqrtUnitErrorBudget n := by
   unfold sqrtUnitErrorBudget
@@ -1546,6 +1898,21 @@ private theorem sqrtUnitEvalInterval_width_le
         exact sqrtUnit_thirteen_errorBudget_le_target n
   unfold QInterval.width
   simpa [sqrtUnitEvalInterval, A, B, D] using Rat.le_trans htotal htarget
+
+/-- The quantitative width bound for the public interval wrapper.  The
+    quadratic input budget is the computable modulus needed near zero; no
+    ambient real-valued continuity theorem is involved. -/
+theorem sqrtOnUnitEvalInterval_width_le
+    (I : QInterval) (hI : subintervalOf I 0 1) (n : Nat)
+    (hinput : I.width <=
+      1 / (((16 * (n + 1) * (n + 1) : Nat) : Rat))) :
+    (sqrtOnUnitEvalIntervalTotal I n).width <=
+      1 / (((n + 1 : Nat) : Rat)) := by
+  have hinput' : I.width <=
+      1 / ((sqrtUnitInputPrecision n : Nat) : Rat) := by
+    simpa [sqrtUnitInputPrecision] using hinput
+  rw [sqrtOnUnitEvalIntervalTotal_eq I hI n]
+  exact sqrtUnitEvalInterval_width_le I hI n hinput'
 
 /-- Square root is interval-regular on the nonnegative unit interval.  Its
 quadratic input modulus is an entirely finite rational estimate, so the

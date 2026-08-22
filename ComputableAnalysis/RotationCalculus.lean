@@ -70,6 +70,43 @@ def uniformRotationNegSinOnTwo : FunctionOnInterval where
     exact RealRaw.neg_valid (ComplexRaw.imagPart_valid
       (uniformRotationExpRaw_valid x (qabs_le_of_neg_le_le hx'.1 hx'.2)))
 
+def stableUniformRotationCosOnTwo : StablePartialRealFunRaw where
+  definedAt := fun x => (-2 : Rat) <= x ∧ x <= 2
+  compute := fun x n => (ComplexRaw.realPart (uniformRotationExpRaw x)).compute n
+  rate := fun _ => .unknown
+
+def stableUniformRotationSinOnTwo : StablePartialRealFunRaw where
+  definedAt := fun x => (-2 : Rat) <= x ∧ x <= 2
+  compute := fun x n => (ComplexRaw.imagPart (uniformRotationExpRaw x)).compute n
+  rate := fun _ => .unknown
+
+def stableUniformRotationNegSinOnTwo : StablePartialRealFunRaw where
+  definedAt := fun x => (-2 : Rat) <= x ∧ x <= 2
+  compute := fun x n =>
+    (RealRaw.neg (ComplexRaw.imagPart (uniformRotationExpRaw x))).compute n
+  rate := fun _ => .unknown
+
+def stableUniformRotationCosFunction : FunctionOnInterval :=
+  FunctionOnInterval.ofStable stableUniformRotationCosOnTwo (-2) 2
+    (fun _ hx => hx)
+    (fun x hx => by
+      exact ComplexRaw.realPart_valid
+        (uniformRotationExpRaw_valid x (qabs_le_of_neg_le_le hx.1 hx.2)))
+
+def stableUniformRotationSinFunction : FunctionOnInterval :=
+  FunctionOnInterval.ofStable stableUniformRotationSinOnTwo (-2) 2
+    (fun _ hx => hx)
+    (fun x hx => by
+      exact ComplexRaw.imagPart_valid
+        (uniformRotationExpRaw_valid x (qabs_le_of_neg_le_le hx.1 hx.2)))
+
+def stableUniformRotationNegSinFunction : FunctionOnInterval :=
+  FunctionOnInterval.ofStable stableUniformRotationNegSinOnTwo (-2) 2
+    (fun _ hx => hx)
+    (fun x hx => by
+      exact RealRaw.neg_valid (ComplexRaw.imagPart_valid
+        (uniformRotationExpRaw_valid x (qabs_le_of_neg_le_le hx.1 hx.2))))
+
 private theorem qabs_sub_comm (x y : Rat) : qabs (x - y) = qabs (y - x) := by
   have hneg : x - y = -(y - x) := by
     grind [Rat.sub_eq_add_neg]

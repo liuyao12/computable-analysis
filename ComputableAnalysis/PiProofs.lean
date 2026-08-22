@@ -15130,7 +15130,8 @@ theorem piNilakantha_equiv_piCircleArea :
   RealRaw.equiv_trans
     Nilakantha.valid
     leibnizValid
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    (by simpa [piCircleArea, AreaValid, RealRaw.Valid] using
+      AreaLoopValidity.areaValid)
     Nilakantha.equiv_piLeibniz
     (RealRaw.equiv_trans
       leibnizValid
@@ -17505,11 +17506,13 @@ theorem innerQuarterLength_lo_refinesByDoubling_of_adjacentChordLowerRefines
       (innerQuarterLength (2 * stage)).lo := by
   rw [show (innerQuarterLength stage).lo =
       innerChordLowerSumFrom stage stage 0 stage by
-        simpa [innerQuarterLength, innerBoundary] using
+        simpa [innerQuarterLength, innerBoundary, innerBoundaryFrom,
+          piCircleAreaPolygon.innerBoundaryFrom] using
           (innerChordLowerSumFrom_eq_pathLo stage stage stage 0).symm,
     show (innerQuarterLength (2 * stage)).lo =
       innerChordLowerSumFrom (2 * stage) (2 * stage) 0 (2 * stage) by
-        simpa [innerQuarterLength, innerBoundary] using
+        simpa [innerQuarterLength, innerBoundary, innerBoundaryFrom,
+          piCircleAreaPolygon.innerBoundaryFrom] using
           (innerChordLowerSumFrom_eq_pathLo (2 * stage) (2 * stage)
             (2 * stage) 0).symm]
   exact innerChordLowerSumFrom_refinesByDoubling_aux stage hlocal stage 0

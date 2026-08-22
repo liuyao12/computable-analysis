@@ -8,7 +8,6 @@ import ComputableAnalysis.IrrationalSqrt
 import ComputableAnalysis.WiedijkScoreboard
 import ComputableAnalysis.ArctanGeometry
 import ComputableAnalysis.ArctanPresentations
-import ComputableAnalysis.ArctanScheduledRegular
 import ComputableAnalysis.ArctanGeomInverseData
 import ComputableAnalysis.ArctanRectanglePi
 import ComputableAnalysis.CauchyPi

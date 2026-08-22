@@ -1,9 +1,26 @@
-\chapter{Infinite Series}\label{ch:infinite-series}
+\chapter{Power Series and Fourier Analysis}\label{ch:infinite-series}
 
+The second route to the same circle quantity is the arctangent power series.
+It comes after the effective FTC: finite coefficient identities and tail
+bounds can now be interpreted as integrals and primitives when needed.
 An infinite object is represented by a finite prefix and a certified tail.
 \begin{verbatim}
 prefix -> finite identity -> tail bound -> nested enclosure
 \end{verbatim}
+
+\section{Finite Fourier analysis}
+
+Fourier analysis enters first as an exact finite transform on rational-complex
+lists. Root-of-unity and cancellation facts are explicit certificates; no
+infinite function space is assumed.
+\begin{verbatim}
+complex samples -> finite transform -> orthogonality/cancellation -> coefficients
+\end{verbatim}
+The four-point transform, convolution, Parseval-style norm identities, and
+block repetition are checked finite statements.  The next layer is now also
+formalized: a stagewise coordinate-tail certificate turns finite transforms
+into a shrinking raw complex algorithm.  The geometric quarter-turn family
+provides a nonzero instance with radius \(2r^n\) for \(0\le r\le 1/2\).
 
 \section{Series as computation}
 \label{thm:arithmetic-series-sum}
@@ -19,6 +36,28 @@ Geometric, arithmetic, alternating, power-sum, Fourier, and reciprocal-series
 examples use one interface. Divergence is expressed as potential infinity:
 every finite target is eventually reached, with an explicit stage.
 
+The convergence claim is never a completed infinite sum.  It is a pair of
+finite obligations: later prefixes stay inside the earlier enclosure, and a
+chosen tail budget eventually fits inside any requested rational width.
+\begin{verbatim}
+N := choose_tail_budget(eps)
+prefix := sum(term, 0, N)
+return prefix +/- certified_tail(N)
+\end{verbatim}
+
+The reusable series contract is:
+
+\begin{verbatim}
+term evaluator + finite algebra + tail bound
+                  -> valid shrinking realRaw
+                  -> equivalence with another computation
+\end{verbatim}
+
+Termwise differentiation or integration is admitted only after the finite
+coefficient identity and the transported tail bound have both been proved.
+This is the series analogue of the effective FTC: a global identity is a
+chain of finite interval containments.
+
 \section{Pi and power series}
 \label{thm:shared-rational-anchor}
 \label{thm:leibniz-arctan}
@@ -32,6 +71,16 @@ choose route -> compute prefix -> compare enclosures -> refine
 This is the setting for Leibniz's series and the faster power-series routes to
 $\pi$: the historical lesson is methodological, not a claim about Newton's
 private reasoning.
+
+Termwise differentiation and integration are finite coefficient identities
+followed by a tail transport certificate.  The effective FTC in
+Chapter~\ref{ch:integrals} supplies the corresponding endpoint interpretation
+when a series is used as a primitive.
+
+For the arctangent route, the alternating tail is explicit and the rational
+anchor is shared with the rectangle computation.  Faster Machin/Newton-style
+series are then compared by overlap rather than declared to be the definition
+of the same constant.
 
 \section{Basel and factorial growth}
 \label{thm:basel-geometric-overlap}

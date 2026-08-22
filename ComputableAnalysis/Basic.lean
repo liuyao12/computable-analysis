@@ -3797,6 +3797,29 @@ structure PartialRealFunRaw where
     (x : Rat) -> (h : definedAt x) ->
       RealRaw.Rate (compute x h) := fun _ _ => .unknown
 
+/-! A proof-independent evaluator for partial rational-input functions.
+
+`PartialRealFunRaw` deliberately carries a domain proof into `compute`, which
+is useful for ruling out undefined inputs but can make elaboration repeatedly
+normalize proof arguments.  Many certified algorithms do not inspect that
+proof.  This companion structure exposes that stable computation directly and
+converts back to the proof-relevant interface without changing its semantics.
+-/
+structure StablePartialRealFunRaw where
+  definedAt : Rat -> Prop
+  compute : Rat -> Nat -> QInterval
+  rate : (x : Rat) -> RealRaw.Rate (compute x) := fun _ => .unknown
+
+def StablePartialRealFunRaw.toPartial
+    (f : StablePartialRealFunRaw) : PartialRealFunRaw where
+  definedAt := f.definedAt
+  compute := fun x _hx n => f.compute x n
+  rate := fun x _hx => f.rate x
+
+@[simp] theorem StablePartialRealFunRaw.toPartial_compute
+    (f : StablePartialRealFunRaw) (x : Rat) (hx : f.definedAt x) (n : Nat) :
+    f.toPartial.compute x hx n = f.compute x n := rfl
+
 namespace PartialRealFunRaw
 
 def Valid (f : PartialRealFunRaw) : Prop :=

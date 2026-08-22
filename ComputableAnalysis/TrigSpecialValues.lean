@@ -1720,8 +1720,9 @@ def TanSquareValue (T : ArctanInverseConstruction) (t : QuarterTurn)
   Exists fun ht : T.tangentRaw.definedAt t =>
     (rawSquare (T.tangentRaw.evalRaw t ht)).Equiv value
 
-/-- Special values expected of the geometric, normalized-angle sine and cosine
-construction once the angle-to-circle-point algorithm has endpoint,
+/-- Special values expected of the geometric sine and cosine construction.
+The input is the internal normalized quarter-turn coordinate; public
+statements use `sin (pi * x)` and `cos (pi * x)`.  Once the angle-to-circle-point algorithm has endpoint,
 equilateral-triangle, and pentagon-value theorems. -/
 structure SpecialAngleValueTargets (C : FunctionRawConstruction) : Prop where
   cos_zero : CosValue C 0 (RealRaw.ofRat 1)

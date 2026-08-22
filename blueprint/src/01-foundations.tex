@@ -1026,17 +1026,17 @@ The companion theorem \texttt{sqrtTwo\_bisection\_stage4} gives the explicit sta
 enclosure $[11/8,23/16]$ for the target equation $x^2=2$, with width $1/16$.
 Its bracket certificate records the two finite rational comparisons directly.
 At stage eight the same evaluator returns the tighter interval
-([181/128,363/256]), whose width is (1/256); this is another finite
+\([181/128,363/256]\), whose width is \(1/256\); this is another finite
 comparison checkpoint rather than an attained square root.
-At stage twelve the interval is ([181/128,5793/4096]), with width
-(1/4096), giving a still finer finite enclosure.
-At stage sixteen it is ([92681/65536,46341/32768]), with width
-(1/65536), extending the exact finite precision schedule.
-At stage twenty it is ([741455/524288,1482911/1048576]), with width
-(1/1048576), extending the same finite schedule without treating the limit as
+At stage twelve the interval is \([181/128,5793/4096]\), with width
+\(1/4096\), giving a still finer finite enclosure.
+At stage sixteen it is \([92681/65536,46341/32768]\), with width
+\(1/65536\), extending the exact finite precision schedule.
+At stage twenty it is \([741455/524288,1482911/1048576]\), with width
+\(1/1048576\), extending the same finite schedule without treating the limit as
 an attained endpoint.
 At stage twenty-four it is
-([11863283/8388608,23726567/16777216]), with width (1/16777216),
+\([11863283/8388608,23726567/16777216]\), with width \(1/16777216\),
 continuing the exact rational bisection schedule.
 Algebraic numbers are represented by rational isolating intervals.  Lean
 proves this computation's nesting, explicit width schedule, irrationality
@@ -1578,15 +1578,15 @@ real line is part of the definition.
 \lean{ComputableAnalysis.fourthTarget_bisection_stage24}
 \lean{ComputableAnalysis.fourthTarget_bisection_stage24_bracket}
 \lean{ComputableAnalysis.fourthTarget_bisection_stage24_width}
-The cubic target (x^3=2) now has a stage-eight rational trace
-([161/128,323/256]), with width (1/256), and a stage-sixteen trace
-([41285/32768,82571/65536]) with width (1/65536); both have certified
+The cubic target \((x^3=2)\) now has a stage-eight rational trace
+\([161/128,323/256]\), with width \(1/256\), and a stage-sixteen trace
+\([41285/32768,82571/65536]\) with width \(1/65536\); both have certified
 endpoint comparisons.  These are finite inverse-search witnesses, not an
 attained cube root.
-The fourth-power target (x^4=2) now has corresponding stage-eight and
-stage-sixteen traces, with widths (1/256) and (1/65536).  This extends the
+The fourth-power target \((x^4=2)\) now has corresponding stage-eight and
+stage-sixteen traces, with widths \(1/256\) and \(1/65536\).  This extends the
 nonlinear inverse-search ladder without asserting an attained fourth root.
-Both traces now also reach stage 24, with width (1/16777216), and retain
+Both traces now also reach stage 24, with width \(1/16777216\), and retain
 their exact endpoint bracket proofs.
 \lean{ComputableAnalysis.induction_arithmeticSum_eq}
 \lean{ComputableAnalysis.induction_arithmeticSum_stage5}
@@ -1682,8 +1682,8 @@ errors, enclose every point box and have width at most \(1/(n+1)\).  Thus
 General algebraic functions will use isolating boxes, separation, and
 bisection or subdivision to construct selected branches.
 The companion finite cube-root trace applies the same target search to
-(x^3=2) on ([1,2]): stage four returns ([5/4,21/16]), preserves the
-target bracket, and has width (1/16).  This supplies a second nonlinear
+\(x^3=2\) on \([1,2]\): stage four returns \([5/4,21/16]\), preserves the
+target bracket, and has width \(1/16\).  This supplies a second nonlinear
 inverse trace without introducing a completed cube-root value.
 \end{example}
 

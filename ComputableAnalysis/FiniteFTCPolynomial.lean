@@ -73,6 +73,27 @@ theorem sexticDerivativeLeftSum_stage256_le_one :
   rw [sexticDerivativeLeftSum_stage256]
   native_decide
 
+/-! The matching right-endpoint checkpoint for `6*x^5`.  At a fixed finite
+stage, the two sums already form a certified Darboux enclosure of the
+endpoint difference `1` for the primitive `x^6`; no limiting object is used. -/
+
+def sexticDerivativeRightSum (n : Nat) : Rat :=
+  if n = 0 then 0
+  else (6 : Rat) * Series.fifthPowerSum (n + 1) / (n : Rat) ^ 6
+
+theorem sexticDerivativeRightSum_stage8 :
+    sexticDerivativeRightSum 8 = (11583 : Rat) / 8192 := by
+  native_decide
+
+theorem sexticDerivative_stage8_sandwich :
+    sexticDerivativeLeftSum 8 <= (6 : Rat) / 7 /\
+      (6 : Rat) / 7 <= sexticDerivativeRightSum 8 := by
+  constructor
+  · rw [sexticDerivativeLeftSum_stage8]
+    native_decide
+  · rw [sexticDerivativeRightSum_stage8]
+    native_decide
+
 def cubeDerivativeLeftSum (n : Nat) : Rat :=
   if n = 0 then 0
   else (3 : Rat) * Series.squareSum n / (n : Rat) ^ 3

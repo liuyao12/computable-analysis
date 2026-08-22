@@ -3145,6 +3145,25 @@ def toLocalFTC
   endpointPrecision := H.endpointPrecision
   endpoint_contained := H.endpoint_difference_contained
 
+/-- The finite mean-value bracket supplied by a cell certificate.
+
+The scaled derivative range contains the actual endpoint increment, hence the
+two rational boxes overlap.  This is the computable replacement for the
+classical assertion that an attained intermediate derivative value realizes
+the secant slope: no point-selection or completeness principle is needed. -/
+theorem endpoint_difference_overlaps_bound
+    {F dF : RealFunRaw} {a b : Rat}
+    {C : RationalSubinterval a b}
+    (H : CandidateDerivativeCellControl F dF C)
+    (hF : F.Valid) (n : Nat) :
+    QInterval.Overlaps
+      (C.scaleBound (H.bound n))
+      (endpointDifferenceInterval F C.lower C.upper (H.endpointPrecision n)) := by
+  apply QInterval.overlaps_of_contains_right
+    (H.endpoint_difference_contained n)
+  exact endpointDifferenceInterval_width_nonneg hF
+    H.primitive_domain_lower H.primitive_domain_upper _
+
 end CandidateDerivativeCellControl
 
 /-- FTC data based on derivative bounds over short rational cells.
@@ -3449,6 +3468,90 @@ theorem candidateDerivativeFTC
     h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
       h.toDerivativeBoundFTC.endpointRaw :=
   h.equiv_endpoint
+
+/-! A candidate FTC becomes a public endpoint theorem only after its
+scheduled endpoint box has been connected to the canonical endpoint box at
+the same public stage.  This is deliberately a separate certificate: the
+finite derivative argument and the representation-specific endpoint
+transport are different proof obligations. -/
+
+structure CanonicalCandidateDerivativeFTC
+    (F dF : RealFunRaw) (a b : Rat) where
+  candidate : CandidateDerivativeFTC F dF a b
+  integral_valid :
+    candidate.toDerivativeBoundFTC.boundedIntegralRaw.Valid
+  endpoint_valid :
+    RealRaw.ValidCompute (endpointDifferenceCompute F a b)
+  canonical_overlap :
+    forall n,
+      QInterval.Overlaps
+        ((candidate.toDerivativeBoundFTC.boundedIntegralInterval
+          (precisionAtStage n)))
+        (endpointDifferenceInterval F a b n)
+
+theorem CandidateDerivativeFTC.canonical_overlap_of_endpoint_stage_ge
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : CandidateDerivativeFTC F dF a b)
+    (hF : F.Valid) (ha : F.domain a) (hb : F.domain b)
+    (hstage :
+      forall n, n <= h.chooseEndpointPrecision (precisionAtStage n))
+    (n : Nat) :
+    QInterval.Overlaps
+      (h.toDerivativeBoundFTC.boundedIntegralInterval (precisionAtStage n))
+      (endpointDifferenceInterval F a b n) := by
+  let s := h.chooseEndpointPrecision (precisionAtStage n)
+  have hgood := h.overlap (precisionAtStage n)
+  have hA := hF a ha
+  have hB := hF b hb
+  have hAs := hA.2.1 n s (hstage n)
+  have hBs := hB.2.1 n s (hstage n)
+  change (F.compute a n).lo <= (F.compute a s).lo /\
+      (F.compute a s).lo <= (F.compute a s).hi /\
+      (F.compute a s).hi <= (F.compute a n).hi at hAs
+  change (F.compute b n).lo <= (F.compute b s).lo /\
+      (F.compute b s).lo <= (F.compute b s).hi /\
+      (F.compute b s).hi <= (F.compute b n).hi at hBs
+  change QInterval.Overlaps
+    (h.toDerivativeBoundFTC.boundedIntegralInterval (precisionAtStage n))
+    (endpointDifferenceInterval F a b s) at hgood
+  unfold QInterval.Overlaps endpointDifferenceInterval at hgood ⊢
+  constructor
+  · exact Rat.le_trans hgood.1 (by grind)
+  · exact Rat.le_trans (by grind) hgood.2
+
+namespace CanonicalCandidateDerivativeFTC
+
+def integralRaw
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : CanonicalCandidateDerivativeFTC F dF a b) : RealRaw :=
+  h.candidate.toDerivativeBoundFTC.boundedIntegralRaw
+
+def endpointRaw
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : CanonicalCandidateDerivativeFTC F dF a b) : RealRaw :=
+  endpointDifferenceRaw F a b h.endpoint_valid
+
+theorem integral_equiv_endpoint
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : CanonicalCandidateDerivativeFTC F dF a b) :
+    h.integralRaw.Equiv h.endpointRaw := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff h.integralRaw h.endpointRaw n n).2
+  change QInterval.Overlaps
+    (h.candidate.toDerivativeBoundFTC.boundedIntegralInterval
+      (precisionAtStage n))
+    (endpointDifferenceInterval F a b n)
+  exact h.canonical_overlap n
+
+theorem integral_equiv_canonical_endpoint
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : CanonicalCandidateDerivativeFTC F dF a b) :
+    h.integralRaw.Equiv
+      (endpointDifferenceRaw F a b h.endpoint_valid) :=
+  h.integral_equiv_endpoint
+
+end CanonicalCandidateDerivativeFTC
 
 /-- A stage-indexed variant of the finite candidate-derivative FTC.
 
@@ -4204,9 +4307,35 @@ structure FunctionOnInterval where
 
 namespace FunctionOnInterval
 
+/-! Construct an interval function from an evaluator whose computation is
+independent of the proof that the input lies in the interval. -/
+def ofStable
+    (f : StablePartialRealFunRaw)
+    (a b : Rat)
+    (defined_on : forall x, inDomainInterval a b x -> f.definedAt x)
+    (valid_on : forall x, f.definedAt x ->
+      RealRaw.ValidCompute (f.compute x)) : FunctionOnInterval where
+  raw := f.toPartial
+  lower := a
+  upper := b
+  defined_on := defined_on
+  valid_on := by
+    intro x hx
+    change RealRaw.ValidCompute (f.compute x)
+    exact valid_on x hx
+
 def compute (F : FunctionOnInterval) (x : Rat) (hx : inDomainInterval F.lower F.upper x)
     (n : Nat) : QInterval :=
   F.raw.compute x (F.defined_on x hx) n
+
+@[simp] theorem ofStable_compute
+    (f : StablePartialRealFunRaw)
+    (a b : Rat)
+    (defined_on : forall x, inDomainInterval a b x -> f.definedAt x)
+    (valid_on : forall x, f.definedAt x ->
+      RealRaw.ValidCompute (f.compute x))
+    (x : Rat) (hx : inDomainInterval a b x) (n : Nat) :
+    (ofStable f a b defined_on valid_on).compute x hx n = f.compute x n := rfl
 
 /-- A rational-valued formula, viewed as an exact interval function on a
 closed rational interval.
@@ -4550,6 +4679,64 @@ structure IntervalRegularOn (F : FunctionOnInterval) where
         QInterval.ContainsInterval
         (evalInterval I hI n)
         (F.compute x hx n)
+
+/-! Build interval regularity directly from a proof-independent point
+evaluator.  The public `IntervalRegularOn` contract remains unchanged; this
+constructor only removes domain-proof noise from new special-function
+certificates. -/
+def IntervalRegularOn.ofStable
+    (f : StablePartialRealFunRaw)
+    (a b : Rat)
+    (defined_on : forall x, inDomainInterval a b x -> f.definedAt x)
+    (valid_on : forall x, f.definedAt x ->
+      RealRaw.ValidCompute (f.compute x))
+    (evalInterval : (I : QInterval) -> subintervalOf I a b -> Nat -> QInterval)
+    (inputPrecision : Nat -> Nat)
+    (inputPrecision_pos : forall n, 0 < inputPrecision n)
+    (output_width : forall I hI n,
+      I.width <= (1 / ((inputPrecision n) : Rat)) ->
+        0 <= (evalInterval I hI n).width /\
+        (evalInterval I hI n).width <= 1 / ((n + 1 : Nat) : Rat))
+    (contains_point_values : forall I hI x (hx : f.definedAt x) n,
+      I.lo <= x -> x <= I.hi ->
+        QInterval.ContainsInterval (evalInterval I hI n) (f.compute x n)) :
+    IntervalRegularOn
+      (FunctionOnInterval.ofStable f a b defined_on valid_on) where
+  evalInterval := evalInterval
+  inputPrecision := inputPrecision
+  inputPrecision_pos := inputPrecision_pos
+  output_width := output_width
+  contains_point_values := by
+    intro I hI x hx n hIlo hIhi
+    change QInterval.ContainsInterval (evalInterval I hI n) (f.compute x n)
+    exact contains_point_values I hI x (defined_on x hx) n hIlo hIhi
+
+def stableExactRatConstant (c : Rat) : StablePartialRealFunRaw where
+  definedAt := fun _ => True
+  compute := fun _ _ => { lo := c, hi := c }
+  rate := fun _ => .unknown
+
+def stableExactRatConstant_intervalRegularOn (c a b : Rat) :
+    IntervalRegularOn
+      (FunctionOnInterval.ofStable (stableExactRatConstant c) a b
+        (fun _ _ => trivial)
+        (fun _ _ => RealRaw.ofRat_valid c)) :=
+  IntervalRegularOn.ofStable
+    (stableExactRatConstant c) a b
+    (fun _ _ => trivial)
+    (fun _ _ => RealRaw.ofRat_valid c)
+    (fun _ _ _ => { lo := c, hi := c })
+    (fun _ => 1)
+    (by intro n; omega)
+    (by
+      intro I hI n hsmall
+      simp only [QInterval.width, Rat.sub_self]
+      constructor
+      · exact Rat.le_refl
+      · exact Rat.le_of_lt (one_div_nat_pos (by omega)))
+    (by
+      intro I hI x hx n hIlo hIhi
+      exact ⟨Rat.le_refl, Rat.le_refl⟩)
 
 /-- Exact constant functions satisfy the interval-regularity contract with a
 point-valued evaluator.  This is the first concrete bridge from the

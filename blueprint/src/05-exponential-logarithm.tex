@@ -1,13 +1,90 @@
 \chapter{Exponential and Logarithm}\label{ch:exponential-logarithm}
 
+Power series and the effective FTC now provide the two basic tools: evaluate
+finite prefixes with tails, and transport derivative identities to endpoint
+identities. Exponential, logarithm, and their trigonometric connections are
+built from these tools.
+
 \section{Exponential}
 
 \begin{verbatim}
 Taylor prefix -> remainder bound -> rational enclosure -> refine
 \end{verbatim}
 
+The exponential is introduced by its rational Taylor evaluator.  Its algebra
+and differential laws are finite prefix identities plus transported tail
+bounds; no completed real line is needed.
+\begin{verbatim}
+expPrefix(x,N) -> expTailBound(x,N) -> expInterval(x,eps)
+                 -> exp(x+y), derivative, inverse certificates
+\end{verbatim}
+The certified power-series evaluator is exposed independently of domain
+proofs, with geometric tail metadata. The reciprocal kernel is likewise
+exposed on the positive interval \([1,2]\); its interval image is
+\([1/I_{\rm hi},1/I_{\rm lo}]\).
+
+The evaluator contract is uniform across rational inputs:
+
+\begin{verbatim}
+input x -> choose N from the tail budget
+        -> sum x^k/k! for k <= N
+        -> enclose the signed remainder
+        -> return a rational interval
+\end{verbatim}
+
+Algebraic laws are proved by comparing two such finite computations. Identity
+of two expressions is an overlap theorem between their raw intervals, not an
+appeal to an ambient completed field.
+
+On the imaginary axis, the same finite complex exponential prefix supplies
+the rotation coordinates. Their effective derivative laws are checked:
+
+\begin{verbatim}
+exp(i*x) -> (cos(x), sin(x))
+sin' = cos,    cos' = -sin
+\end{verbatim}
+
+This is the computable Euler bridge; no completed complex or real continuum is
+needed.
+
+The finite Taylor-prefix layer also supplies derivative certificates for
+polynomial approximants. Thus the route from power series to calculus is
+explicit:
+\begin{verbatim}
+coefficient shift -> finite derivative -> tail transport -> exp/sin/cos law
+\end{verbatim}
+
+The first fully instantiated non-polynomial case is the common-prefix
+exponential on \([0,1]\): its interval derivative is certified by a finite
+tail budget, and the effective FTC identifies its dyadic integral with the
+endpoint difference. This is the model for adding further special functions;
+each one supplies its own finite derivative and tail certificates.
+
 \section{Logarithm and Euler identity}
 
 Reciprocal bounds and finite composition provide the computable core. The
 completed logarithm bridge is recorded only when its representation is made
 explicit.
+
+On a positive rational interval, logarithm can be represented by a monotone
+inverse-exponential search.  The concrete branch \(\log 2\) is already
+formalized in two equivalent ways: an alternating reciprocal series and a
+dyadic integral of \(1/x\) on \([1,2]\).  Their equivalence is proved by
+finite rational box comparisons and is used in the arctangent/\(\pi\) bridge.
+The remaining transport is specifically the identification of this branch
+with the canonical inverse of the exponential evaluator.
+\begin{verbatim}
+positive target -> monotone inverse search -> log interval
+log/exp overlap -> log identities and Euler rotation law
+\end{verbatim}
+
+The inverse search follows the same pattern as the tangent search in the
+integral chapter: a rational source cell is bisected, the forward exponential
+image is enclosed, and a finite separation certificate selects the next cell.
+Thus logarithm requires no global inverse-function theorem; each positive
+interval branch carries its own source, range, and separation data.
+
+The positive reciprocal evaluator on \([1,2]\), its interval regularity, and
+the finite exp/log transport are checked. General inverse-function laws remain
+certificate interfaces: each new domain supplies monotonicity, separation, and
+a finite bisection schedule.

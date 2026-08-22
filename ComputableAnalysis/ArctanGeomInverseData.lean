@@ -1,4 +1,4 @@
-import ComputableAnalysis.ArctanScheduledRegular
+import ComputableAnalysis.IntegralIdentities
 
 /-!
 # Inverse-search data for the geometric arctangent

@@ -1495,8 +1495,101 @@ def tangentSquareFTCStageBudget (eps : QPos) : QPos :=
       exact Rat.mul_pos (Rat.mul_pos hmesh δ.property)
         ((Rat.inv_pos).2 (by native_decide)) }
 
+theorem tangentSquareFTCStageBudget_le (eps : QPos) :
+    (tangentSquareFTCStageBudget eps).val <= eps.val := by
+  dsimp [tangentSquareFTCStageBudget]
+  let P := tangentSquareFTCPartition eps
+  have hpieces : 0 < P.pieces := P.positive
+  have hmesh : mesh 0 1 P.pieces <= 1 := by
+    unfold mesh
+    rw [if_neg (Nat.ne_of_gt hpieces), Rat.div_def]
+    have hden : (1 : Rat) <= (P.pieces : Rat) := by
+      exact_mod_cast hpieces
+    have hpos : 0 < (P.pieces : Rat) := by
+      exact_mod_cast hpieces
+    apply Rat.le_of_mul_le_mul_right (c := (P.pieces : Rat))
+    · have hc := Rat.inv_mul_cancel _ (Rat.ne_of_gt hpos)
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    · exact hpos
+  have hδ : (tangentSquareFTCPadding eps).val = eps.val / 64 := rfl
+  have hδnonneg : 0 <= (tangentSquareFTCPadding eps).val :=
+    Rat.le_of_lt (tangentSquareFTCPadding eps).property
+  have hprod := Rat.mul_le_mul_of_nonneg_right hmesh hδnonneg
+  dsimp [tangentSquareFTCPadding] at hprod ⊢
+  grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+
+private theorem den_add_one_ge_of_pos_le_inv
+    {q r : Rat} (hq : 0 < q) (hr : 0 < r) (hqr : q <= 1 / r) :
+    r <= ((q.den + 1 : Nat) : Rat) := by
+  let d : Rat := ((q.den + 1 : Nat) : Rat)
+  have hd : 0 < d := by
+    dsimp [d]
+    exact Rat.natCast_pos.mpr (Nat.succ_pos q.den)
+  have hden := FTC.one_div_den_succ_le_of_pos hq
+  have hle : 1 / d <= 1 / r := Rat.le_trans hden hqr
+  have h1 := Rat.mul_le_mul_of_nonneg_left hle (Rat.le_of_lt hd)
+  have h2 := Rat.mul_le_mul_of_nonneg_right h1 (Rat.le_of_lt hr)
+  have hdne : d ≠ 0 := Rat.ne_of_gt hd
+  have hrne : r ≠ 0 := Rat.ne_of_gt hr
+  rw [Rat.div_def, Rat.div_def] at h2
+  simp only [Rat.one_mul] at h2
+  have h2' : r * (d * d⁻¹) ≤ r * (r⁻¹ * d) := by
+    simpa [Rat.mul_assoc, Rat.mul_comm] using h2
+  have hdd : d * d⁻¹ = 1 := Rat.mul_inv_cancel d hdne
+  have hrr : r * r⁻¹ = 1 := Rat.mul_inv_cancel r hrne
+  calc
+    r = r * (d * d⁻¹) := by rw [hdd, Rat.mul_one]
+    _ ≤ r * (r⁻¹ * d) := h2'
+    _ = d := by rw [← Rat.mul_assoc, hrr, Rat.one_mul]
+
 def tangentSquareFTCEndpointStage (eps : QPos) : Nat :=
   256 * ((tangentSquareFTCStageBudget eps).val.den + 1)
+
+theorem tangentSquareEndpointStage_ge (n : Nat) :
+    n <= tangentSquareFTCEndpointStage (precisionAtStage n) := by
+  by_cases hn : n = 0
+  · simp [hn, tangentSquareFTCEndpointStage]
+  · have hnpos : 0 < n := Nat.pos_of_ne_zero hn
+    let eps := precisionAtStage n
+    let η := tangentSquareFTCStageBudget eps
+    have hηpos : 0 < η.val := η.property
+    have hnrpos : 0 < (n : Rat) / 256 := by
+      rw [Rat.div_def]
+      exact Rat.mul_pos (by exact_mod_cast hnpos)
+        ((Rat.inv_pos).2 (by native_decide))
+    have hηle : η.val <= 1 / ((n : Rat) / 256) := by
+      have hle := tangentSquareFTCStageBudget_le eps
+      have hle' : η.val <= 1 / (n : Rat) := by
+        simpa [η, eps, precisionAtStage, hn] using hle
+      have hnR : (n : Rat) ≠ 0 := by exact_mod_cast hn
+      have hn256 : (n : Rat) * (256 : Rat)⁻¹ ≠ 0 := by
+        intro hzero
+        rcases Rat.mul_eq_zero.mp hzero with hzero | hzero
+        · exact hnR hzero
+        · exact (by native_decide : (256 : Rat)⁻¹ ≠ 0) hzero
+      have hstep : 1 / (n : Rat) <= 1 / ((n : Rat) / 256) := by
+        rw [Rat.div_def, Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      exact Rat.le_trans hle' hstep
+    have hden := den_add_one_ge_of_pos_le_inv hηpos hnrpos hηle
+    dsimp [tangentSquareFTCEndpointStage, η]
+    have hscaled := Rat.mul_le_mul_of_nonneg_left hden (by native_decide : (0 : Rat) <= 256)
+    have h256 : (256 : Rat) ≠ 0 := by native_decide
+    have hid : (n : Rat) = 256 * ((n : Rat) / 256) := by
+      rw [Rat.div_def]
+      calc
+        (n : Rat) = (n : Rat) * ((256 : Rat) * (256 : Rat)⁻¹) := by
+          grind [Rat.mul_inv_cancel]
+        _ = 256 * ((n : Rat) * (256 : Rat)⁻¹) := by
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    have hscaled' : (n : Rat) <=
+        256 * ((η.val.den + 1 : Nat) : Rat) := by
+      rw [hid]
+      exact hscaled
+    have hnat : n <= 256 * (η.val.den + 1) := by
+      exact_mod_cast hscaled'
+    change n <= 256 * (η.val.den + 1)
+    exact hnat
 
 theorem tangentSquareFTC_endpoint_width_le (eps : QPos) :
     (endpointDifferenceInterval
@@ -1754,6 +1847,141 @@ theorems identify its endpoint with the geometric quarter-turn anchor. -/
 def tangentSquareEffectiveIntegralRaw : RealRaw :=
   tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.boundedIntegralRaw
 
+theorem tangentSquareEffectiveCandidate_width_nonneg (n : Nat) :
+    0 <= (tangentSquareEffectiveIntegralRaw.compute n).width := by
+  let eps := precisionAtStage n
+  let P := tangentSquareFTCPartition eps
+  let bound : (k : Nat) -> k < P.pieces -> QInterval := fun k hk =>
+    (tangentSquareFTC_cellControl eps hk).bound 0
+  have hmesh : 0 <= mesh 0 1 P.pieces :=
+    mesh_nonneg_of_le P.positive (by native_decide)
+  have hcell : forall k, k ∈ List.range P.pieces ->
+      0 <= (P.boundIntegralTerm bound k).width := by
+    intro k hk
+    have hklt : k < P.pieces := List.mem_range.mp hk
+    have hcellwidth : (P.cell k hklt).width = mesh 0 1 P.pieces := by
+      exact RationalPartition.uniform_cell_width 0 1 P.pieces
+        P.positive (by native_decide) k hklt
+    simp only [RationalPartition.boundIntegralTerm, dif_pos hklt]
+    unfold RationalSubinterval.scaleBound
+    rw [QInterval.scaleByRat_width_of_nonneg]
+    · exact Rat.mul_nonneg
+        (by
+          rw [hcellwidth]
+          exact hmesh)
+        ((tangentSquareFTC_cellControl eps hklt).bound_ordered 0)
+    · dsimp [RationalSubinterval.width]
+      change 0 <= (P.cell k hklt).width
+      rw [hcellwidth]
+      exact hmesh
+  unfold tangentSquareEffectiveIntegralRaw DerivativeBoundFTC.boundedIntegralRaw
+    DerivativeBoundFTC.boundedIntegralCompute DerivativeBoundFTC.boundedIntegralInterval
+  change 0 <= (P.boundIntegralSum bound).width
+  unfold RationalPartition.boundIntegralSum
+  rw [RationalPartition.addInterval_fold_width]
+  have hfold : forall (xs : List Nat) (initial : Rat),
+      0 <= initial ->
+      (forall k, k ∈ xs -> 0 <= (P.boundIntegralTerm bound k).width) ->
+      0 <= xs.foldl
+        (fun total k => total + (P.boundIntegralTerm bound k).width) initial := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro initial hinit hterms
+        simpa using hinit
+    | cons k xs ih =>
+        intro initial hinit hterms
+        apply ih (initial + (P.boundIntegralTerm bound k).width)
+        · exact Rat.add_nonneg hinit (hterms k (by simp))
+        · intro j hj
+          exact hterms j (by simp [hj])
+  have h := hfold (List.range P.pieces) 0 (by native_decide) hcell
+  have hzero : ({lo := 0, hi := 0} : QInterval).width = 0 := by
+    unfold QInterval.width
+    grind
+  grind
+
+private theorem tangentSquareWidthsShrink_of_natOverSuccBound
+    {compute : Nat -> QInterval} {C : Nat}
+    (hbound : forall n,
+      (compute n).width <= (C : Rat) / (((n + 1 : Nat) : Rat))) :
+    RealRaw.WidthsShrinkToZero compute := by
+  intro eps
+  refine ⟨C * (eps.val.den + 1), ?_⟩
+  intro n hn
+  have hmain :
+      (C : Rat) / (((n + 1 : Nat) : Rat)) <=
+        1 / (((eps.val.den + 1 : Nat) : Rat)) := by
+    let A : Rat := ((n + 1 : Nat) : Rat)
+    let B : Rat := ((eps.val.den + 1 : Nat) : Rat)
+    let K : Rat := (C : Rat)
+    have hApos : 0 < A := by
+      dsimp [A]
+      exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+    have hBpos : 0 < B := by
+      dsimp [B]
+      exact (Rat.natCast_pos).2 (Nat.succ_pos eps.val.den)
+    have hAne : A ≠ 0 := Rat.ne_of_gt hApos
+    have hBne : B ≠ 0 := Rat.ne_of_gt hBpos
+    have hABpos : 0 < A * B := Rat.mul_pos hApos hBpos
+    have hscaledRat : K * B <= A := by
+      dsimp [A, B, K]
+      exact_mod_cast (by omega : C * (eps.val.den + 1) <= n + 1)
+    apply Rat.le_of_mul_le_mul_right (c := A * B)
+    · calc
+        (K / A) * (A * B) = K * B := by
+          rw [Rat.div_def]
+          have hcancel : A * A⁻¹ = 1 := Rat.mul_inv_cancel A hAne
+          grind [Rat.mul_assoc, Rat.mul_comm]
+        _ <= A := hscaledRat
+        _ = (1 / B) * (A * B) := by
+          rw [Rat.div_def]
+          have hcancel : B * B⁻¹ = 1 := Rat.mul_inv_cancel B hBne
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    · exact hABpos
+  exact Rat.le_trans (hbound n)
+    (Rat.le_trans hmain
+      (FTC.one_div_den_succ_le_of_pos eps.property))
+
+theorem tangentSquareEffectiveCandidate_width_le_two_over_succ (n : Nat) :
+    (tangentSquareEffectiveIntegralRaw.compute n).width <=
+      (2 : Rat) / (((n + 1 : Nat) : Rat)) := by
+  have hriemann := tangentSquareFTC_riemann_width_le (precisionAtStage n)
+  have hprecision : (precisionAtStage n).val <=
+      (2 : Rat) / (((n + 1 : Nat) : Rat)) := by
+    by_cases hn : n = 0
+    · simp [precisionAtStage, hn]
+      native_decide
+    · have hnpos : 0 < n := Nat.pos_of_ne_zero hn
+      have hnR : (n : Rat) ≠ 0 := by exact_mod_cast hn
+      have hprec_eq : (precisionAtStage n).val = 1 / (n : Rat) := by
+        simp [precisionAtStage, hn]
+      rw [hprec_eq]
+      have hn1 : (n + 1 : Nat) ≠ 0 := by omega
+      have hmulpos : 0 < (n : Rat) * ((n + 1 : Nat) : Rat) :=
+        Rat.mul_pos (by exact_mod_cast hnpos)
+          (by exact_mod_cast (Nat.succ_pos n))
+      apply Rat.le_of_mul_le_mul_right
+        (c := (n : Rat) * ((n + 1 : Nat) : Rat))
+      · calc
+          (1 / (n : Rat)) * ((n : Rat) * ((n + 1 : Nat) : Rat)) =
+              ((n + 1 : Nat) : Rat) := by
+            grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm,
+              Rat.mul_inv_cancel]
+          _ <= 2 * (n : Rat) := by
+            exact_mod_cast (by omega : n + 1 <= 2 * n)
+          _ = (2 / ((n + 1 : Nat) : Rat)) *
+              ((n : Rat) * ((n + 1 : Nat) : Rat)) := by
+            grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm,
+              Rat.mul_inv_cancel]
+      · exact hmulpos
+  exact Rat.le_trans hriemann hprecision
+
+theorem tangentSquareEffectiveCandidate_widths_shrink_to_zero :
+    RealRaw.WidthsShrinkToZero tangentSquareEffectiveIntegralRaw.compute := by
+  apply tangentSquareWidthsShrink_of_natOverSuccBound
+  exact tangentSquareEffectiveCandidate_width_le_two_over_succ
+
 theorem tangentSquareEffectiveIntegralRaw_equiv_endpoint :
     tangentSquareEffectiveIntegralRaw.Equiv
       tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw :=
@@ -1902,6 +2130,231 @@ theorem tangentSquareEffectivePrimitive_endpointDifference_equiv_halfQuarterTurn
     RealRaw.equiv_trans heffValid hsubValid hgeomOne heff hsubToOne
   exact RealRaw.equiv_trans heffValid hgeomOne hquarterValid
     heffToOne honeToQuarter
+
+def tangentSquareEffectiveEndpointAnchor : RealRaw :=
+  endpointDifferenceRaw tangentSquareEffectivePrimitiveOnUnit 0 1
+    tangentSquareEffectivePrimitive_endpointDifference_valid
+
+theorem tangentSquareEffectiveEndpointAnchor_valid :
+    tangentSquareEffectiveEndpointAnchor.Valid := by
+  simpa [tangentSquareEffectiveEndpointAnchor, endpointDifferenceRaw,
+    RealRaw.Valid] using
+    tangentSquareEffectivePrimitive_endpointDifference_valid
+
+theorem tangentSquareEffectiveIntegralRaw_equiv_endpointAnchor :
+    tangentSquareEffectiveIntegralRaw.Equiv
+      tangentSquareEffectiveEndpointAnchor := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    tangentSquareEffectiveIntegralRaw tangentSquareEffectiveEndpointAnchor n n).2
+  change QInterval.Overlaps
+    (tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.boundedIntegralInterval
+      (precisionAtStage n))
+    (endpointDifferenceInterval tangentSquareEffectivePrimitiveOnUnit 0 1 n)
+  exact CandidateDerivativeFTC.canonical_overlap_of_endpoint_stage_ge
+    tangentSquareEffectiveCandidateFTC tangentSquareEffectivePrimitiveOnUnit_valid
+    tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.primitive_domain_lower
+    tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.primitive_domain_upper
+    (by
+      intro m
+      simpa [tangentSquareEffectiveCandidateFTC] using
+        tangentSquareEndpointStage_ge m) n
+
+def tangentSquareEffectiveIntegralReboxed : RealRaw :=
+  RealRaw.anchorRebox tangentSquareEffectiveIntegralRaw
+    tangentSquareEffectiveEndpointAnchor
+
+theorem tangentSquareEffectiveIntegralReboxed_valid :
+    tangentSquareEffectiveIntegralReboxed.Valid := by
+  apply RealRaw.anchorRebox_valid
+    tangentSquareEffectiveCandidate_width_nonneg
+    tangentSquareEffectiveCandidate_widths_shrink_to_zero
+    tangentSquareEffectiveEndpointAnchor_valid
+    tangentSquareEffectiveIntegralRaw_equiv_endpointAnchor
+
+theorem tangentSquareEffectiveIntegralReboxed_equiv_anchor :
+    tangentSquareEffectiveIntegralReboxed.Equiv
+      tangentSquareEffectiveEndpointAnchor := by
+  exact RealRaw.anchorRebox_equiv_anchor
+    tangentSquareEffectiveEndpointAnchor_valid
+
+theorem tangentSquareEffectiveIntegralRaw_equiv_reboxed :
+    tangentSquareEffectiveIntegralRaw.Equiv
+      tangentSquareEffectiveIntegralReboxed := by
+  exact RealRaw.candidate_equiv_anchorRebox
+    tangentSquareEffectiveEndpointAnchor_valid
+    tangentSquareEffectiveIntegralRaw_equiv_endpointAnchor
+
+theorem tangentSquareEffectiveEndpointCandidate_widths_shrink :
+    RealRaw.WidthsShrinkToZero
+      tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw.compute := by
+  intro eps
+  let N : Nat := eps.val.den + 1
+  refine ⟨N, ?_⟩
+  intro n hn
+  have hNpos : 0 < N := by
+    dsimp [N]
+    omega
+  have hnpos : 0 < n := Nat.lt_of_lt_of_le hNpos hn
+  have hnm : eps.val.den + 1 <= n := by
+    simpa [N] using hn
+  have hanti := FTC.one_div_nat_antitone
+    (n := eps.val.den + 1) (m := n)
+    (by omega) (by exact hnpos) hnm
+  have hden := FTC.one_div_den_succ_le_of_pos eps.property
+  have hbound : 1 / (n : Rat) <= eps.val := by
+    exact Rat.le_trans hanti hden
+  have hwidth := tangentSquareFTC_endpoint_width_le
+    (precisionAtStage n)
+  change (endpointDifferenceInterval tangentSquareEffectivePrimitiveOnUnit 0 1
+    (tangentSquareFTCEndpointStage (precisionAtStage n))).width <= eps.val
+  have hprecision :
+      (precisionAtStage n).val = 1 / (n : Rat) := by
+    simp [precisionAtStage, Nat.ne_of_gt hnpos]
+  rw [hprecision] at hwidth
+  exact Rat.le_trans hwidth hbound
+
+def tangentSquareEffectiveEndpointStabilized : RealRaw :=
+  RealRaw.prefixStabilize
+    tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw
+    (fun n => tangentSquareEffectiveEndpointAnchor.compute n |>.width)
+
+theorem tangentSquareEffectiveEndpointStabilized_valid :
+    tangentSquareEffectiveEndpointStabilized.Valid := by
+  apply RealRaw.prefixStabilize_valid
+    tangentSquareEffectiveEndpointCandidate_widths_shrink
+    tangentSquareEffectiveEndpointAnchor_valid
+  · apply DerivativeBoundFTC.endpointRaw_equiv_endpointDifference
+      tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC
+      tangentSquareEffectivePrimitiveOnUnit_valid
+      tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.primitive_domain_lower
+      tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.primitive_domain_upper
+      tangentSquareEffectivePrimitive_endpointDifference_valid
+  · intro n
+    exact Rat.le_refl
+  · intro eps
+    obtain ⟨N, hN⟩ := tangentSquareEffectiveEndpointAnchor_valid.2.2 eps
+    refine ⟨N, hN⟩
+
+theorem tangentSquareEffectiveEndpointStabilized_equiv_anchor :
+    tangentSquareEffectiveEndpointStabilized.Equiv
+      tangentSquareEffectiveEndpointAnchor := by
+  apply RealRaw.prefixStabilize_equiv_anchor
+    tangentSquareEffectiveEndpointAnchor_valid
+  · apply DerivativeBoundFTC.endpointRaw_equiv_endpointDifference
+      tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC
+      tangentSquareEffectivePrimitiveOnUnit_valid
+      tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.primitive_domain_lower
+      tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.primitive_domain_upper
+      tangentSquareEffectivePrimitive_endpointDifference_valid
+  · intro n
+    exact Rat.le_refl
+
+theorem tangentSquareEffectiveEndpointStabilized_equiv_halfQuarterTurn :
+    tangentSquareEffectiveEndpointStabilized.Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
+  have hanchorQuarter :
+      tangentSquareEffectiveEndpointAnchor.Equiv
+        (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
+    simpa [tangentSquareEffectiveEndpointAnchor] using
+      tangentSquareEffectivePrimitive_endpointDifference_equiv_halfQuarterTurn
+  exact RealRaw.equiv_trans
+    tangentSquareEffectiveEndpointStabilized_valid
+    tangentSquareEffectiveEndpointAnchor_valid
+    (by
+      change (RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).Valid
+      exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+        CauchyPi.piCircleArea_valid)
+    tangentSquareEffectiveEndpointStabilized_equiv_anchor hanchorQuarter
+
+/-! The tangent-chart route is now exposed as a complete proof-facing
+certificate interface.  The finite derivative certificate and the endpoint
+anchor are already constructed above; the two validity fields are retained
+explicitly because a scheduled raw computation becomes a public RealRaw
+only after its nesting and shrinking have been proved. -/
+
+structure TangentSquareEffectiveFTCData where
+  integral_valid : tangentSquareEffectiveIntegralReboxed.Valid
+  endpoint_valid :
+    tangentSquareEffectiveEndpointStabilized.Valid
+  integral_equiv_stabilized_endpoint :
+    tangentSquareEffectiveIntegralReboxed.Equiv
+      tangentSquareEffectiveEndpointStabilized
+  endpoint_stage_ge :
+    forall n,
+      n <= tangentSquareEffectiveCandidateFTC.chooseEndpointPrecision
+        (precisionAtStage n)
+
+theorem TangentSquareEffectiveFTCData.canonical_overlap
+    (D : TangentSquareEffectiveFTCData) (n : Nat) :
+    QInterval.Overlaps
+      (tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.boundedIntegralInterval
+        (precisionAtStage n))
+      (endpointDifferenceInterval tangentSquareEffectivePrimitiveOnUnit 0 1 n) :=
+  CandidateDerivativeFTC.canonical_overlap_of_endpoint_stage_ge
+    tangentSquareEffectiveCandidateFTC tangentSquareEffectivePrimitiveOnUnit_valid
+    tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.primitive_domain_lower
+    tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.primitive_domain_upper
+    D.endpoint_stage_ge n
+
+def TangentSquareEffectiveFTCData.integralRaw
+    (_D : TangentSquareEffectiveFTCData) : RealRaw :=
+  tangentSquareEffectiveIntegralReboxed
+
+def TangentSquareEffectiveFTCData.endpointRaw
+    (_D : TangentSquareEffectiveFTCData) : RealRaw :=
+  tangentSquareEffectiveEndpointStabilized
+
+theorem TangentSquareEffectiveFTCData.integral_equiv_endpoint
+    (D : TangentSquareEffectiveFTCData) :
+    D.integralRaw.Equiv D.endpointRaw := by
+  exact D.integral_equiv_stabilized_endpoint
+
+theorem TangentSquareEffectiveFTCData.endpoint_equiv_halfQuarterTurn
+    (D : TangentSquareEffectiveFTCData) :
+    D.endpointRaw.Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
+  let H := tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC
+  have hendpoint :
+      D.endpointRaw.Equiv
+        (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) :=
+    tangentSquareEffectiveEndpointStabilized_equiv_halfQuarterTurn
+  exact hendpoint
+
+theorem TangentSquareEffectiveFTCData.integral_equiv_halfQuarterTurn
+    (D : TangentSquareEffectiveFTCData) :
+    D.integralRaw.Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
+  exact RealRaw.equiv_trans D.integral_valid
+    D.endpoint_valid
+    (by
+      change (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid
+      change (RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).Valid
+      exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+        CauchyPi.piCircleArea_valid)
+    D.integral_equiv_stabilized_endpoint
+    tangentSquareEffectiveEndpointStabilized_equiv_halfQuarterTurn
+
+theorem tangentSquareEffectiveFTCData : TangentSquareEffectiveFTCData where
+  integral_valid := tangentSquareEffectiveIntegralReboxed_valid
+  endpoint_valid := tangentSquareEffectiveEndpointStabilized_valid
+  integral_equiv_stabilized_endpoint := by
+    exact RealRaw.equiv_trans tangentSquareEffectiveIntegralReboxed_valid
+      tangentSquareEffectiveEndpointAnchor_valid
+      tangentSquareEffectiveEndpointStabilized_valid
+      tangentSquareEffectiveIntegralReboxed_equiv_anchor
+      (RealRaw.equiv_symm tangentSquareEffectiveEndpointStabilized_equiv_anchor)
+  endpoint_stage_ge := by
+    intro n
+    simpa [tangentSquareEffectiveCandidateFTC] using
+      tangentSquareEndpointStage_ge n
+
+theorem tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn :
+    tangentSquareEffectiveFTCData.integralRaw.Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) :=
+  TangentSquareEffectiveFTCData.integral_equiv_halfQuarterTurn
+    tangentSquareEffectiveFTCData
 
 theorem tangentSquareEffectivePrimitive_endpoint_contains
     (C : RationalSubinterval 0 1) (δ η : QPos) (N : Nat)

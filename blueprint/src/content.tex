@@ -20,6 +20,19 @@ fundamental theorem of algebra, Archimedes' computation of pi, Euler's
 series arguments, and the elementary functions, but it keeps the proof
 obligations finite and inspectable.
 
+The main calculus route is deliberately ordered as
+
+\begin{verbatim}
+circle and trigonometry -> integral and effective FTC -> power series
+-> exponential/logarithm -> linear ODEs
+\end{verbatim}
+
+The FTC belongs at the beginning of the integral chapter. It is the bridge
+from the geometric area computation to the later derivative identities; it
+is not postponed until after all special functions have been constructed.
+Algebra and the fundamental theorem of algebra are recorded as a parallel
+computable branch, not as a prerequisite for this calculus route.
+
 \section*{\texorpdfstring{\(\pi\)}{Pi} scoreboard}
 \label{sec:pi-scoreboard}
 \lean{ComputableAnalysis.PiProofs.PiIntegrationFamily}
@@ -63,8 +76,8 @@ deferred.
   & Foundations (potential-infinity certificate)\\
 14 & \benchmarklink{ch-infinite-series}{thm:basel-geometric-overlap}{Euler's Basel sum (computable overlap core)}
   & Infinite series (identity deferred)\\
-15 & \benchmarklink{ch-effective-calculus}{thm:convex-ftc}{Fundamental Theorem of Integral Calculus (finite Darboux-sum core)}
-  & Effective calculus (classical identification separate)\\
+15 & \benchmarklink{ch-integrals}{thm:convex-ftc}{Fundamental Theorem of Integral Calculus (finite Darboux-sum core)}
+  & Integrals (classical identification separate)\\
 16 & \benchmarklink{ch-algebra-fta}{thm:finite-deflation-soundness}{Abel--Ruffini theorem (supplied-root deflation boundary)}
   & Algebra and FTA (boundary)\\
 17 & \benchmarklink{ch-rational-circle-trigonometry}{thm:finite-quarter-turn}{de Moivre's formula (finite rotation core)}
@@ -163,6 +176,6 @@ deferred.
 \input{04-infinite-series.tex}
 \input{05-exponential-logarithm.tex}
 \input{06-effective-calculus.tex}
-\input{07-algebra-fta.tex}
 \input{09-differential-equations.tex}
+\input{07-algebra-fta.tex}
 \input{08-roadmap.tex}

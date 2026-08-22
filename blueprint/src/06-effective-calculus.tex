@@ -1,4 +1,34 @@
-\chapter{Fundamental Theorem of Calculus}\label{ch:effective-calculus}
+\chapter{Effective Calculus Interfaces}\label{ch:effective-calculus}
+
+Special-function evaluators should expose a stable computation
+\((x,n)\mapsto [a,b]\). Domain proofs remain available for safety, but they
+are not part of the algorithm. The proof-relevant function interface adapts
+such evaluators without changing the interval semantics. Regularity is stated
+directly for the stable evaluator and transported once to the public API.
+The exact rational constant, affine evaluator, and the nonlinear square and
+cube evaluators on \([0,1]\) are checked instances of this interface; a special
+function adds only its finite range and overlap lemmas.
+The square and cube instances also carry finite dyadic integral certificates,
+so the pointwise modulus is already connected to an actual computable area.
+
+The interface is the reusable calculus API: finite secant bounds feed
+derivative certificates; derivative bounds feed partition boxes; the effective
+FTC turns those boxes into endpoint differences. Monomial and finite
+Taylor-prefix instances are checked independently of any completed
+real-number topology.
+
+The proof order is intentionally finite:
+
+\begin{verbatim}
+input interval -> secant box -> derivative box -> mesh sum
+             -> endpoint-difference box -> requested-width witness
+\end{verbatim}
+
+At no point is a derivative required to be an attained value at an irrational
+point.  A derivative is a raw evaluator together with a modulus and a finite
+containment theorem.  A classical pointwise statement is recovered only when
+the boxes have been shown to shrink and the application needs that stronger
+form.
 
 \section{Secants before completeness}
 \label{thm:finite-quadrature-mean-value}
@@ -9,17 +39,10 @@ structure behind calculus. Here it is first stated as a finite bracket.
 endpoint increment -> derivative bounds -> rational witness interval
 \end{verbatim}
 Monotone derivatives and convex functions give the cleanest first cases.
-
-\section{FTC reconstruction}
-\label{thm:convex-ftc}
-
-The FTC is reconstructed from the same comparison, rather than assumed as a
-black box.
-\begin{verbatim}
-partition -> lower/upper sums -> derivative comparison -> overlap
-\end{verbatim}
-On each cell, endpoint data and certified turns control the rectangle gap.
-Refinement makes the two enclosures meet.
+For a convex function, the secant over a cell lies between the neighboring
+secants.  Thus a finite mesh supplies both the lower and upper derivative
+boxes; refining the mesh is the effective replacement for invoking a least
+upper bound.
 
 \section{Taylor}
 \label{thm:finite-taylor-ftc-prefix}
@@ -29,9 +52,21 @@ finite prefix -> finite identity -> remainder budget -> enclosure
 \end{verbatim}
 Taylor formulas and the arctangent kernel are instances of this FTC-style
 reconstruction.
+The reusable contract is a finite coefficient identity plus a remainder
+budget.  It supports termwise integration whenever the transported tail is
+within the requested rational width:
+
+\begin{verbatim}
+coefficients -> finite derivative identity -> tail enclosure
+            -> integrated prefix -> endpoint comparison
+\end{verbatim}
 
 \section{Finite L'Hôpital}
 \label{thm:finite-lhopital-interface}
 
 Cancel a common factor, expose the finite remainder, and bound it rationally;
 no attained limit is required.
+The resulting theorem is a precision statement: after cancellation, the
+quotient interval lies within the target interval at a computably chosen
+stage.  The usual limit notation is an optional presentation of this family
+of finite witnesses, not a primitive of the foundation.
