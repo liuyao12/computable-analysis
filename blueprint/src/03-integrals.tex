@@ -109,6 +109,16 @@ Monotonicity, convexity, power-series tails, and formula-specific interval
 arithmetic all implement the same interface. Thus the theorem is reusable
 without claiming that every function is integrable.
 
+The first non-polynomial instance is already closed: Lean constructs
+`arctanEffectiveFTCData` for the rational kernel \(1/(1+x^2)\) and proves its
+finite rectangle integral equivalent to the endpoint primitive. This is the
+project's working FTC, not an appeal to a general real-number completeness
+theorem.
+
+\lean{ComputableAnalysis.Integral.arctanEffectiveFTCData}
+\lean{ComputableAnalysis.Integral.arctanEffectiveFTC_equiv_endpoint}
+\leanok
+
 Chapter~\ref{ch:effective-calculus} packages this theorem for reuse: it does
 not introduce a competing notion of integral or a second foundation.
 
@@ -144,7 +154,7 @@ widths, an explicit \(2/(n+1)\) shrink bound, and the overlap theorem.  Lean
 also proves constructively that the chosen endpoint stage is no earlier than
 the public stage: the positive rational stage budget has a denominator large
 enough to dominate the requested stage.  The equal-dyadic \(\sin^2\) route
-separately needs the arctangent-backed regularity and endpoint certificate
+separately needs its arctangent-backed regularity and endpoint certificate
 before it is identified with \(1/4\).  For the unsquared sine route, the
 remaining certificate is target-directed: each nested-radical sample must be
 matched to a tangent box by a finite bisection trace or half-angle witness.
