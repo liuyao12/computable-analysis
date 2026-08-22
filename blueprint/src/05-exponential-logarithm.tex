@@ -47,6 +47,24 @@ sin' = cos,    cos' = -sin
 This is the computable Euler bridge; no completed complex or real continuum is
 needed.
 
+The rotation implementation is itself a checked complex raw computation:
+
+\lean{ComputableAnalysis.RotationSeries.expPartial_imaginary_even_split}
+\lean{ComputableAnalysis.RotationSeries.rotationExpRaw_valid}
+\lean{ComputableAnalysis.RotationSeries.rotationCosRaw_valid}
+\lean{ComputableAnalysis.RotationSeries.rotationSinRaw_valid}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationCenter_input_lipschitz}
+\leanok
+
+The real and imaginary coordinates then acquire interval-level regularity and
+derivative certificates on a rational interval:
+
+\lean{ComputableAnalysis.RotationSeries.uniformRotationSinOnTwo_epsilonDeltaContinuous}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationCosOnTwo_epsilonDeltaContinuous}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationSinOnTwo_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationCosOnTwo_hasDerivativeOnInterval}
+\leanok
+
 The finite Taylor-prefix layer also supplies derivative certificates for
 polynomial approximants. Thus the route from power series to calculus is
 explicit:
@@ -95,3 +113,25 @@ The positive reciprocal evaluator on \([1,2]\), its interval regularity, and
 the finite exp/log transport are checked. General inverse-function laws remain
 certificate interfaces: each new domain supplies monotonicity, separation, and
 a finite bisection schedule.
+
+The concrete \(\log 2\) bridge is already a complete computable comparison:
+
+\begin{verbatim}
+1/x on [1,2] -> dyadic/Stieltjes integral -> logTwoReciprocalIntegral
+alternating or harmonic series -> logTwoSeries
+                         \             /
+                          overlap/equivalence
+\end{verbatim}
+
+\lean{ComputableAnalysis.Logarithm.oneOverXOnOneTwo_intervalRegular}
+\lean{ComputableAnalysis.Logarithm.oneOverXOnOneTwo_epsilonDeltaContinuous}
+\lean{ComputableAnalysis.Logarithm.logTwoReciprocalIntegral_valid}
+\lean{ComputableAnalysis.Logarithm.logTwoSeries_valid}
+\lean{ComputableAnalysis.Logarithm.logTwoSeries_equiv_logTwoReciprocalIntegral}
+\lean{ComputableAnalysis.Logarithm.logTwoSquareMesh_substitution_identity}
+\leanok
+
+The remaining exp/log theorem is representation transport: identify this
+computable branch with the inverse-exponential branch on its stated positive
+domain. That is a finite monotone-search certificate, not an appeal to a
+global inverse-function theorem.
