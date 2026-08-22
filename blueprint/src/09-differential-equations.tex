@@ -22,6 +22,17 @@ The order is part of the theorem: later transitions multiply on the left.
 Cramer's rule handles finite solves; Cayley--Hamilton supplies recurrences for
 small fixed dimensions.
 
+The finite algebraic core is explicit in Lean:
+
+\lean{ComputableAnalysis.LinearODE.solvesRecurrence_eq_trajectory}
+\lean{ComputableAnalysis.LinearODE.trajectory_eq_transition_add_zeroInitial}
+\lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum}
+\lean{ComputableAnalysis.LinearODE.discretePeanoBakerExpansion}
+\leanok
+
+These are finite sampled statements.  They become ODE theorems only after an
+effective-FTC provider supplies the coefficient, simplex, and tail bounds.
+
 The tail is not an informal limit. If the coefficient bound is $M$ on a
 time interval of length $T$, the omitted degree-$r$ words are charged to
 the finite factorial majorant $(MT)^r/r!$. An executable shift chooses the
@@ -59,6 +70,10 @@ explicit. This gives uniqueness from the same finite data used to construct
 the solution. The vector theorem has the identical shape; its remaining
 provider fields are only matrix-norm bounds, coefficient regularity, and the
 finite simplex tail estimate.
+
+The checked finite uniqueness statement is the recurrence theorem above; the
+two-by-two instance is also available as
+\lean{ComputableAnalysis.LinearODE.twoByTwo_solution_unique}.
 
 Thus the current foundation proves the algebraic and error-closing core, while
 the remaining theorem for a given ODE is a finite, inspectable obligation:

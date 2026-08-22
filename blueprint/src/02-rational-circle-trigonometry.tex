@@ -74,28 +74,22 @@ Each stage records range, circle-equation, and width invariants.  Nested
 radicals are therefore not an appeal to an already completed square root; they
 are executable interval refinements.
 
-\section{The first computable sine integral}
-\label{thm:computable-sine-half-integral}
+\section{The input to integration}
 
-The public target is the fixed interval
-\(\int_0^{1/2}\sin(\pi x)\,dx\).  Values at rational inputs are produced
-by the arctangent inverse and the rational circle; the integral is the
-equal-dyadic rectangle algorithm.
+This chapter supplies the function values; Chapter~\ref{ch:integrals} supplies
+the area theorem.  The first target is
+\(\int_0^{1/2}\sin(\pi x)\,dx\), whose samples come from the arctangent
+inverse and the rational circle.  Its equal-dyadic rectangle computation and
+the effective FTC are developed in the next chapter, so the same integral
+interface can be reused for other special functions.
 
 \begin{verbatim}
-sin(pi*x) -> equal dyadic rectangles -> realRaw integral
-          -> finite FTC certificate -> primitive endpoint difference
-          -> endpoint computation -> reciprocal-pi realRaw
+circle geometry -> rational sine/cosine boxes -> function evaluator
+                                          -> integral chapter
 \end{verbatim}
 
-The proof does not import a completed real line.  Its public theorem is
-parameterized by a finite interval FTC certificate for the trigonometric
-evaluator, together with the endpoint identities \(\cos(0)=1\) and
-\(\cos(\pi/2)=0\).  Thus the familiar value is recorded as \(1/\pi\) only
-after the reciprocal-pi representation has been identified with that endpoint
-difference.  The endpoint and transport layers are checked; supplying the
-general dyadic sine FTC certificate remains the principal trigonometric
-frontier.
+The endpoint facts \(\cos(0)=1\) and \(\cos(\pi/2)=0\) are the anchors used
+later to identify the endpoint difference with reciprocal pi.
 
 \section{Scope boundary}
 
