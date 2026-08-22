@@ -9,6 +9,7 @@ import ComputableAnalysis.WiedijkScoreboard
 import ComputableAnalysis.ArctanGeometry
 import ComputableAnalysis.ArctanPresentations
 import ComputableAnalysis.ArctanGeomInverseData
+import ComputableAnalysis.ArctanEffectiveFTC
 import ComputableAnalysis.ArctanRectanglePi
 import ComputableAnalysis.CauchyPi
 import ComputableAnalysis.Basic
