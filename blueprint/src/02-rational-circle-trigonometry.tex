@@ -33,6 +33,13 @@ The last step is always a finite comparison between rational boxes.  Geometry
 is used to supply the inequalities; the abstract `real` layer only packages
 the resulting nested computations.
 
+The basic certificates are available directly in Lean:
+
+\lean{ComputableAnalysis.RationalCircle.PositiveHalfAngleCoordinates.child_circle}
+\lean{ComputableAnalysis.RationalCircle.PositiveHalfAngleCoordinates.child_unit_bounds}
+\lean{ComputableAnalysis.RationalCircle.Stage.point_normSq}
+\lean{ComputableAnalysis.RationalCircle.Stage.rationalPolyline_length_ge_direct}
+
 \section{Archimedes and rational circles}
 \label{thm:geometric-pi-validity}
 
@@ -74,6 +81,13 @@ Each stage records range, circle-equation, and width invariants.  Nested
 radicals are therefore not an appeal to an already completed square root; they
 are executable interval refinements.
 
+The executable table and its refinement laws are exposed as
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.dyadicNestedRadicalTable}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.dyadicNestedRadicalTable_succ_even}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.dyadicNestedRadicalSinAt_succ_even}.
+At a dyadic input, the public coordinate is related to the circle evaluator by
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.sinPiRawOfArctan_dyadic_compute_eq_circle}.
+
 \section{The input to integration}
 
 This chapter supplies the function values; Chapter~\ref{ch:integrals} supplies
@@ -90,6 +104,15 @@ circle geometry -> rational sine/cosine boxes -> function evaluator
 
 The endpoint facts \(\cos(0)=1\) and \(\cos(\pi/2)=0\) are the anchors used
 later to identify the endpoint difference with reciprocal pi.
+
+The inverse-arctangent route is a finite search followed by the rational circle
+map.  The geometric area loop and its rectangle comparison are certified by
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_succ}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_nested}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_valid_on_unit}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_one_compute_eq}.
+This is the bridge used by the integral and FTC chapters; no classical
+real-valued angle function is assumed.
 
 \section{Scope boundary}
 
