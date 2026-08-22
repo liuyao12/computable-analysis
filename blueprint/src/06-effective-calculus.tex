@@ -11,6 +11,30 @@ function adds only its finite range and overlap lemmas.
 The square and cube instances also carry finite dyadic integral certificates,
 so the pointwise modulus is already connected to an actual computable area.
 
+\section{Continuity as a finite certificate}
+
+Continuity is not a predicate on an ambient completed function space.  A
+function exposes either a pointwise modulus or an interval image algorithm:
+
+\begin{verbatim}
+requested output width -> input-width budget -> rational image box
+                                           -> contains every point value
+\end{verbatim}
+
+The interval form is stronger for integration because it gives one box for an
+entire cell.  It implies the rational epsilon--delta form constructively:
+
+\lean{ComputableAnalysis.EffectiveModulusFor}
+\lean{ComputableAnalysis.IntervalRegularOn}
+\lean{ComputableAnalysis.IntervalRegularOn.epsilonDeltaContinuous}
+\lean{ComputableAnalysis.ContinuousFunctionOnInterval}
+\leanok
+
+This implication uses only rational endpoint hulls, interval containment, and
+the requested denominator.  The reverse direction is not automatic: an
+epsilon--delta modulus must still be upgraded to a cell-image evaluator before
+it can drive a Darboux integral.
+
 The interface is the reusable calculus API: finite secant bounds feed
 derivative certificates; derivative bounds feed partition boxes; the effective
 FTC turns those boxes into endpoint differences. Monomial and finite
