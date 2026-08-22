@@ -83,6 +83,7 @@ import ComputableAnalysis.FiniteQuarticQuadraticSplit
 import ComputableAnalysis.FunctionDomains
 import ComputableAnalysis.IntegralIdentities
 import ComputableAnalysis.SinPiIntegral
+import ComputableAnalysis.SinPiTransportAdapter
 import ComputableAnalysis.TangentPullbackEffectiveFTC
 import ComputableAnalysis.SinPiSquareFTC
 import ComputableAnalysis.EffectiveFTCPortfolio
