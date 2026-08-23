@@ -372,6 +372,76 @@ theorem effectiveFTC_equiv_endpoint
   exact (RealRaw.compareAt_overlap_iff
     (riemannRawOfEffectiveFTC h) (endpointRawOfEffectiveFTC h) n n).2 hgood.1
 
+/-! A scheduled FTC need not produce nested boxes at its public stage index.
+The following adapter makes the finite Riemann computation into a valid raw
+real by prefix-stabilizing it against the canonical endpoint difference. -/
+
+theorem effectiveFTC_riemannRaw_equiv_endpointDifference_of_endpointAgreement
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveFTC F dF a b)
+    (hriemann : (riemannRawOfEffectiveFTC h).Valid)
+    (agreement : EndpointScheduleAgreement F a b
+      (endpointRawOfEffectiveFTC h)) :
+    (riemannRawOfEffectiveFTC h).Equiv
+      (endpointDifferenceRaw F a b agreement.endpoint_valid) := by
+  exact RealRaw.equiv_trans hriemann agreement.scheduled_valid
+    (by simpa [endpointDifferenceRaw, RealRaw.Valid] using agreement.endpoint_valid)
+    (effectiveFTC_equiv_endpoint h) agreement.equivalent
+
+def effectiveFTCStabilizedRaw
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveFTC F dF a b)
+    (radius : Nat -> Rat) : RealRaw :=
+  RealRaw.prefixStabilize (riemannRawOfEffectiveFTC h) radius
+
+theorem effectiveFTCStabilizedRaw_valid
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveFTC F dF a b)
+    (hriemann : (riemannRawOfEffectiveFTC h).Valid)
+    (agreement : EndpointScheduleAgreement F a b
+      (endpointRawOfEffectiveFTC h))
+    (radius : Nat -> Rat)
+    (hwidth : RealRaw.WidthsShrinkToZero
+      (riemannRawOfEffectiveFTC h).compute)
+    (hradius : forall n,
+      ((endpointDifferenceRaw F a b agreement.endpoint_valid).compute n).width
+        <= radius n)
+    (hradius_shrinks : ShrinksToZero radius) :
+    (effectiveFTCStabilizedRaw h radius).Valid := by
+  unfold effectiveFTCStabilizedRaw
+  apply RealRaw.prefixStabilize_valid
+    (candidate := riemannRawOfEffectiveFTC h)
+    (anchor := endpointDifferenceRaw F a b agreement.endpoint_valid)
+    (radius := radius)
+  · exact hwidth
+  · simpa [endpointDifferenceRaw, RealRaw.Valid] using agreement.endpoint_valid
+  · exact effectiveFTC_riemannRaw_equiv_endpointDifference_of_endpointAgreement
+      h hriemann agreement
+  · exact hradius
+  · exact hradius_shrinks
+
+theorem effectiveFTCStabilizedRaw_equiv_endpointDifference
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveFTC F dF a b)
+    (hriemann : (riemannRawOfEffectiveFTC h).Valid)
+    (agreement : EndpointScheduleAgreement F a b
+      (endpointRawOfEffectiveFTC h))
+    (radius : Nat -> Rat)
+    (hradius : forall n,
+      ((endpointDifferenceRaw F a b agreement.endpoint_valid).compute n).width
+        <= radius n) :
+    (effectiveFTCStabilizedRaw h radius).Equiv
+      (endpointDifferenceRaw F a b agreement.endpoint_valid) := by
+  unfold effectiveFTCStabilizedRaw
+  apply RealRaw.prefixStabilize_equiv_anchor
+    (candidate := riemannRawOfEffectiveFTC h)
+    (anchor := endpointDifferenceRaw F a b agreement.endpoint_valid)
+    (radius := radius)
+  · simpa [endpointDifferenceRaw, RealRaw.Valid] using agreement.endpoint_valid
+  · exact effectiveFTC_riemannRaw_equiv_endpointDifference_of_endpointAgreement
+      h hriemann agreement
+  · exact hradius
+
 /-- FTC bridge for a chosen integral construction.
 
 If the integral construction uses exactly the Riemann-sum plan supplied by an

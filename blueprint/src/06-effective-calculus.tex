@@ -132,6 +132,9 @@ monotone derivative on cell -> endpoint secants -> derivative interval
 \lean{ComputableAnalysis.ConcaveFTCCertificate.equiv_endpoint}
 \lean{ComputableAnalysis.constructionFor_of_selectedStageCandidateDerivativeFTC}
 \lean{ComputableAnalysis.definiteIdentityFor_of_selectedStageCandidateDerivativeFTC}
+\lean{ComputableAnalysis.FTC.effectiveFTC_riemannRaw_equiv_endpointDifference_of_endpointAgreement}
+\lean{ComputableAnalysis.FTC.effectiveFTCStabilizedRaw_valid}
+\lean{ComputableAnalysis.FTC.effectiveFTCStabilizedRaw_equiv_endpointDifference}
 \leanok
 
 The interface is the reusable calculus API: finite secant bounds feed
@@ -152,6 +155,12 @@ point.  A derivative is a raw evaluator together with a modulus and a finite
 containment theorem.  A classical pointwise statement is recovered only when
 the boxes have been shown to shrink and the application needs that stronger
 form.
+
+When a selected stage schedule is not nested, prefix stabilization is the
+generic repair: it intersects the finite candidate with a finite-radius
+prefix envelope, using the endpoint difference only in the proof.  The
+runtime remains a finite rational computation, while validity and equivalence
+are supplied by width and radius certificates.
 
 \section{Secants before completeness}
 \label{thm:finite-quadrature-mean-value}
