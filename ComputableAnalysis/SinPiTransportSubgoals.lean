@@ -75,6 +75,95 @@ noncomputable def DyadicTangentWitnessFamily.of_canonical_search_family
   exact canonicalDyadicCertificateSearchAt_sound B
     (Classical.choose_spec hit)
 
+/-! Constructors that reduce the two geometric branch obligations to one
+explicit rational interval identity.  The parent box is taken directly from
+the nested-radical table, so its containment and self-overlap are automatic;
+the caller only has to prove that the public circle box is the corresponding
+clipped half-angle square-root box. -/
+
+def DyadicHalfAngleChildCertificate.of_table_parent
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (precision n j : Nat) (hbound : 2 * j + 1 <= 2 ^ n)
+    (hpublic :
+      sqrtOnUnitEvalIntervalClipped
+          (dyadicHalfAngleSinInput
+            (dyadicNestedRadicalTableAt
+              (dyadicNestedRadicalParentPrecision precision) n (2 * j + 1)).2)
+          precision =
+        rationalCircleSinInterval
+          (dyadicTangentBoxAt B precision (n + 1) (2 * j + 1) (by
+            have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+              rw [Nat.pow_succ]
+              omega
+            rw [hpow]
+            omega))) :
+    DyadicHalfAngleChildCertificate B precision n j hbound where
+  parentRawCos :=
+    (dyadicNestedRadicalTableAt
+      (dyadicNestedRadicalParentPrecision precision) n (2 * j + 1)).2
+  parentRawCos_subinterval := by
+    exact (dyadicNestedRadicalTableAt_bounds
+      (dyadicNestedRadicalParentPrecision precision) n (2 * j + 1)
+      (by omega)).2
+  parent_overlap := by
+    have hbounds := dyadicNestedRadicalTableAt_bounds
+      (dyadicNestedRadicalParentPrecision precision) n (2 * j + 1)
+      (by omega)
+    unfold QInterval.Overlaps
+    exact ⟨hbounds.2.2.1, hbounds.2.2.1⟩
+  childRawSin := sqrtOnUnitEvalIntervalClipped
+    (dyadicHalfAngleSinInput
+      (dyadicNestedRadicalTableAt
+        (dyadicNestedRadicalParentPrecision precision) n (2 * j + 1)).2)
+    precision
+  childRawSin_eq := rfl
+  public_child_eq := hpublic
+
+def DyadicReflectedHalfAngleCertificate.of_table_parent
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (precision n k : Nat) (hupper : 2 ^ n < k) (hk : k < 2 ^ (n + 1))
+    (hpublic :
+      sqrtOnUnitEvalIntervalClipped
+          (dyadicHalfAngleSinInput
+            (dyadicNestedRadicalNeg
+              (dyadicNestedRadicalTableAt
+                (dyadicNestedRadicalParentPrecision precision) n
+                (2 * 2 ^ n - k)).2))
+          precision =
+        rationalCircleSinInterval
+          (dyadicTangentBoxAt B precision (n + 1) k (by
+            have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+              rw [Nat.pow_succ]
+              omega
+            rw [hpow]
+            omega))) :
+    DyadicReflectedHalfAngleCertificate B precision n k hupper hk where
+  parentRawCos := dyadicNestedRadicalNeg
+    (dyadicNestedRadicalTableAt
+      (dyadicNestedRadicalParentPrecision precision) n (2 * 2 ^ n - k)).2
+  parentRawCos_subinterval := by
+    exact dyadicNestedRadicalNeg_unit_subinterval _
+      (dyadicNestedRadicalTableAt_bounds
+        (dyadicNestedRadicalParentPrecision precision) n
+        (2 * 2 ^ n - k) (by omega)).2
+  parentRawCos_eq := rfl
+  parent_overlap := by
+    have hbounds := dyadicNestedRadicalNeg_unit_subinterval _
+      (dyadicNestedRadicalTableAt_bounds
+        (dyadicNestedRadicalParentPrecision precision) n
+        (2 * 2 ^ n - k) (by omega)).2
+    unfold QInterval.Overlaps
+    exact ⟨hbounds.2.1, hbounds.2.1⟩
+  childRawSin := sqrtOnUnitEvalIntervalClipped
+    (dyadicHalfAngleSinInput
+      (dyadicNestedRadicalNeg
+        (dyadicNestedRadicalTableAt
+          (dyadicNestedRadicalParentPrecision precision) n
+          (2 * 2 ^ n - k)).2))
+    precision
+  childRawSin_eq := rfl
+  public_child_eq := hpublic
+
 noncomputable def DyadicTangentWitnessFamily.of_overlap_family
     (B : IntegralIdentities.ArctanInverseBisection)
     (ht0 : (B.tangentAt 0

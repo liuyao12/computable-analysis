@@ -398,6 +398,21 @@ The exact even/lower/reflected certificate family remains the geometric
 explanation; the witness-search adapter is the minimal proof obligation for
 closing the numerical integral.
 
+The lower and reflected constructors make the remaining proof obligations
+minimal.  Their parent boxes are taken from the nested table, so only the
+finite identity between the public circle box and the clipped half-angle
+square-root box remains to be supplied:
+
+\begin{verbatim}
+table cosine box -> clipped half-angle sqrt box
+                 = public circle-sine box
+                 -> branch certificate
+\end{verbatim}
+
+\lean{ComputableAnalysis.SinPiIntegral.DyadicHalfAngleChildCertificate.of_table_parent}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicReflectedHalfAngleCertificate.of_table_parent}
+\leanok
+
 The search itself is proof-producing: a successful Boolean hit is converted
 into the complete half-angle certificate consumed by the transport theorem.
 
