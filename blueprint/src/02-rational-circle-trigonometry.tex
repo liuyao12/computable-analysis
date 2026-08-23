@@ -88,6 +88,19 @@ The executable table and its refinement laws are exposed as
 At a dyadic input, the public coordinate is related to the circle evaluator by
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.sinPiRawOfArctan_dyadic_compute_eq_circle}.
 
+The remaining semantic obligation is packaged as one finite certificate
+family.  It supplies the exact endpoint, even-index reuse, lower half-angle,
+and reflected upper-half-angle boxes; the assembly theorem then proves
+stagewise overlap with the arctangent evaluator:
+
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.DyadicNestedRadicalBranchCertificateFamily}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.DyadicNestedRadicalBranchCertificateFamily.sample_overlap}
+\leanok
+
+This is deliberately a proof input, not an implicit completeness argument.
+Once the family is instantiated, the integral transport theorem can consume it
+without knowing how the individual rational witnesses were found.
+
 \section{The input to integration}
 
 This chapter supplies the function values; Chapter~\ref{ch:integrals} supplies

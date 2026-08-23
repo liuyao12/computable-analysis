@@ -7261,6 +7261,38 @@ theorem dyadicNestedRadical_sample_overlap_of_branch_certificates_of_endpoint
         precision depth hk)
     even_certificate lower_certificate upper_certificate
 
+/-! Package the four finite obligations needed by the dyadic transport.  This
+is intentionally a certificate family rather than an existence theorem: the
+caller supplies rational boxes and finite searches, while the theorem below
+assembles them into the stagewise overlap consumed by the integral adapter. -/
+
+structure DyadicNestedRadicalBranchCertificateFamily
+    (B : IntegralIdentities.ArctanInverseBisection) where
+  endpoint_zero :
+    (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero
+  even : forall (precision n j : Nat) (hj : j < 2 ^ n),
+    DyadicEvenStepCertificate B precision n j hj
+  lower : forall (precision n j : Nat)
+      (hbound : 2 * j + 1 <= 2 ^ n),
+    DyadicHalfAngleChildCertificate B precision n j hbound
+  upper : forall (precision n k : Nat)
+      (hupper : 2 ^ n < k) (hk : k < 2 ^ (n + 1)),
+    DyadicReflectedHalfAngleCertificate B precision n k hupper hk
+
+theorem DyadicNestedRadicalBranchCertificateFamily.sample_overlap
+    {B : IntegralIdentities.ArctanInverseBisection}
+    (H : DyadicNestedRadicalBranchCertificateFamily B) :
+    forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      QInterval.Overlaps
+        ((sinPiRawOfArctan B
+          (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+          (dyadicHalfDomain hk)).compute precision)
+        (dyadicNestedRadicalTableAt precision depth k).1 := by
+  exact dyadicNestedRadical_sample_overlap_of_branch_certificates_of_endpoint
+    B H.endpoint_zero H.even H.lower H.upper
+
 theorem dyadicNestedRadicalTableAt_width_le
     (precision n k : Nat) (hk : k <= 2 ^ n) :
     (dyadicNestedRadicalTableAt precision n k).1.width <=
