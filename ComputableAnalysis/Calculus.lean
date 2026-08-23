@@ -5533,6 +5533,94 @@ theorem exactRat_constant_nondecreasing (c a b : Rat) :
   change c <= c
   exact Rat.le_refl
 
+/-! The first fully instantiated Darboux schedule.  The constant function on
+the unit interval is deliberately small: every finite endpoint range is the
+singleton `[1,1]`, so nesting is immediate while the construction still
+passes through the public equal-mesh endpoint-sum algorithm. -/
+
+def unitConstantMonotoneDarbouxSchedule :
+    MonotoneDarbouxSchedule
+      (FunctionOnInterval.exactRat (fun _ => (1 : Rat)) 0 1)
+      (exactRat_constant_intervalRegularOn 1 0 1)
+      (exactRat_constant_nondecreasing 1 0 1)
+      (by native_decide) where
+  pieces := fun _ => 1
+  evalPrecision := fun _ => 0
+  pieces_pos := by
+    intro n
+    native_decide
+  input_budget := by
+    intro n
+    native_decide
+  nested := by
+    intro n m hnm
+    simp [monotoneDarbouxScheduleCompute, nondecreasingDarbouxStage,
+      nondecreasingDarbouxRange, FunctionOnInterval.exactRat,
+      RationalPartition.uniform, RationalPartition.boundIntegralSum,
+      RationalPartition.boundIntegralTerm, RationalSubinterval.scaleBound,
+      QInterval.scaleByRat, RationalPartition.cell, RationalSubinterval.width,
+      QInterval.width, QInterval.addInterval, leftPoint, mesh]
+  widths_shrink := by
+    intro eps
+    refine ⟨0, ?_⟩
+    intro n hn
+    have hcell : (0 : Rat) ≤
+        0 + (0 + 1) * ((1 - 0) / 1) - (0 + 0) := by
+      native_decide
+    have hwidth :
+        (monotoneDarbouxScheduleCompute
+          (FunctionOnInterval.exactRat (fun _ => (1 : Rat)) 0 1)
+          (by native_decide)
+          (fun _ => 1) (fun _ => 0)
+          (by intro k; native_decide) n).width = 0 := by
+      simp [monotoneDarbouxScheduleCompute, nondecreasingDarbouxStage,
+        nondecreasingDarbouxRange, FunctionOnInterval.exactRat,
+        RationalPartition.uniform, RationalPartition.boundIntegralSum,
+        RationalPartition.boundIntegralTerm, RationalSubinterval.scaleBound,
+        QInterval.scaleByRat, RationalPartition.cell, RationalSubinterval.width,
+        QInterval.width, QInterval.addInterval, leftPoint, mesh, hcell,
+        FunctionOnInterval.compute]
+      grind [Rat.div_def, Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm]
+    rw [hwidth]
+    exact Rat.le_of_lt eps.property
+
+theorem unitConstantMonotoneDarbouxSchedule_integral_eq_one :
+    (monotoneDarbouxScheduleIntegralFor
+      unitConstantMonotoneDarbouxSchedule).Equiv (RealRaw.ofRat 1) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (monotoneDarbouxScheduleIntegralFor unitConstantMonotoneDarbouxSchedule)
+    (RealRaw.ofRat 1) n n).2
+  have hcell : (0 : Rat) ≤
+      0 + (0 + 1) * ((1 - 0) / 1) - (0 + 0) := by
+    native_decide
+  have hcompute :
+      (monotoneDarbouxScheduleCompute
+        (FunctionOnInterval.exactRat (fun _ => (1 : Rat)) 0 1)
+        (by native_decide)
+        (fun _ => 1) (fun _ => 0)
+        (by intro k; native_decide) n) = { lo := 1, hi := 1 } := by
+    simp [monotoneDarbouxScheduleCompute, nondecreasingDarbouxStage,
+      nondecreasingDarbouxRange, FunctionOnInterval.exactRat,
+      RationalPartition.uniform, RationalPartition.boundIntegralSum,
+      RationalPartition.boundIntegralTerm, RationalSubinterval.scaleBound,
+      QInterval.scaleByRat, RationalPartition.cell, RationalSubinterval.width,
+      QInterval.width, QInterval.addInterval, leftPoint, mesh, hcell,
+      FunctionOnInterval.compute]
+    grind [Rat.div_def, Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.mul_assoc, Rat.mul_comm]
+  change QInterval.Overlaps
+    (monotoneDarbouxScheduleCompute
+      (FunctionOnInterval.exactRat (fun _ => (1 : Rat)) 0 1)
+      (by native_decide)
+      (fun _ => 1) (fun _ => 0)
+      (by intro k; native_decide) n)
+    { lo := 1, hi := 1 }
+  rw [hcompute]
+  constructor <;> native_decide
+
 theorem exactRat_affine_nondecreasing {r c a b : Rat} (hr : 0 <= r) :
     NondecreasingOnInterval
       (FunctionOnInterval.exactRat (fun x => r * x + c) a b) := by
