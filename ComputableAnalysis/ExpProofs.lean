@@ -4827,6 +4827,39 @@ theorem uniformExpSymmetricCellRange_width (a b : Rat) (n : Nat) :
   rw [intervalAround_width]
   grind
 
+def uniformExpSymmetricFTCPieces (eps : QPos) : Nat :=
+  2 * uniformExpFTCPieces eps
+
+theorem uniformExpSymmetricFTCPieces_pos (eps : QPos) :
+    0 < uniformExpSymmetricFTCPieces eps := by
+  unfold uniformExpSymmetricFTCPieces
+  exact Nat.mul_pos (by native_decide) (uniformExpFTCPieces_pos eps)
+
+def uniformExpSymmetricFTCPartition (eps : QPos) :
+    RationalPartition (-1 : Rat) 1 :=
+  RationalPartition.uniform (-1) 1
+    (uniformExpSymmetricFTCPieces eps)
+    (uniformExpSymmetricFTCPieces_pos eps) (by native_decide)
+
+theorem uniformExpSymmetricFTCPartition_cell_width
+    (eps : QPos) (k : Nat)
+    (hk : k < (uniformExpSymmetricFTCPartition eps).pieces) :
+    ((uniformExpSymmetricFTCPartition eps).cell k hk).width =
+      mesh 0 1 (uniformExpFTCPieces eps) := by
+  have hk' : k < uniformExpSymmetricFTCPieces eps := by
+    exact hk
+  unfold uniformExpSymmetricFTCPartition
+  rw [RationalPartition.uniform_cell_width (-1) 1
+    (uniformExpSymmetricFTCPieces eps)
+    (uniformExpSymmetricFTCPieces_pos eps) (by native_decide) k hk']
+  unfold uniformExpSymmetricFTCPieces mesh
+  rw [if_neg (by
+    exact Nat.ne_of_gt (uniformExpSymmetricFTCPieces_pos eps))]
+  rw [if_neg (by
+    exact Nat.ne_of_gt (uniformExpFTCPieces_pos eps))]
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
 /-- At a common stage, the next finite Taylor prefix differs from the raw-box
 center by exactly one factorial monomial. -/
 theorem qabs_expTaylorPrefix_sub_uniformExpCenter_le (x : Rat)
