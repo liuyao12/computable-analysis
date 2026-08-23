@@ -5825,6 +5825,41 @@ theorem uniformExpOnSymmetricUnit_compute (x : Rat)
     (hx : inDomainInterval (-1 : Rat) 1 x) (n : Nat) :
     uniformExpOnSymmetricUnit.compute x hx n = (uniformExpRaw x).compute n := rfl
 
+/-! The symmetric chart is also exposed at the `RealFunRaw` layer consumed by
+the effective FTC.  Keeping this wrapper separate from `FunctionOnInterval`
+does not add a second exponential: it only records the same evaluator with
+the explicit rational domain needed by endpoint and derivative certificates. -/
+
+def uniformExpOnSymmetricUnitRealFunRaw : RealFunRaw where
+  domain := fun x => (-1 : Rat) <= x /\ x <= 1
+  compute := fun x n => (uniformExpRaw x).compute n
+  rate := fun _ _ => .unknown
+
+theorem uniformExpOnSymmetricUnitRealFunRaw_valid :
+    uniformExpOnSymmetricUnitRealFunRaw.Valid := by
+  intro x hx
+  have hqabs : qabs x <= 1 := qabs_le_of_neg_le_le hx.1 hx.2
+  change (uniformExpRaw x).Valid
+  exact uniformExpRaw_valid x (Rat.le_trans hqabs (by native_decide))
+
+theorem uniformExpOnSymmetricUnitRealFunRaw_compute (x : Rat)
+    (hx : uniformExpOnSymmetricUnitRealFunRaw.domain x) (n : Nat) :
+    uniformExpOnSymmetricUnitRealFunRaw.compute x n =
+      (uniformExpRaw x).compute n := rfl
+
+/-! This is the exact remaining centered-FTC boundary.  Any finite partition
+schedule satisfying `EffectiveDerivativeBoundFTC` immediately yields the
+endpoint equivalence; the theorem does not introduce completeness or a
+classical integral. -/
+
+theorem uniformExpOnSymmetricUnit_effectiveFTC_of_certificate
+    (h : EffectiveDerivativeBoundFTC
+      uniformExpOnSymmetricUnitRealFunRaw
+      uniformExpOnSymmetricUnitRealFunRaw (-1) 1) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      h.toDerivativeBoundFTC.endpointRaw := by
+  exact effectiveDerivativeBoundFTC h
+
 /-- On the centered unit interval the common-prefix representation and the
 selected adaptive exponential are pointwise equivalent. -/
 theorem uniformExpOnSymmetricUnit_equivalent_expPowerSeries :

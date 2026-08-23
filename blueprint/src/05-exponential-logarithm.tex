@@ -102,6 +102,29 @@ centered input -> common-prefix exponential -> two-sided derivative box
 \lean{ComputableAnalysis.uniformExpOnSymmetricUnit_solvesSelfDerivative}
 \leanok
 
+The centered chart now has the explicit function-level interface consumed by
+the effective FTC.  This is a typed boundary rather than a second definition
+of the exponential: it reuses the same evaluator on the rational domain
+$[-1,1]$ and records its validity.
+
+\lean{ComputableAnalysis.uniformExpOnSymmetricUnitRealFunRaw}
+\lean{ComputableAnalysis.uniformExpOnSymmetricUnitRealFunRaw_valid}
+\lean{ComputableAnalysis.uniformExpOnSymmetricUnitRealFunRaw_compute}
+\leanok
+
+The remaining work is the centered two-sided partition schedule.  Once a
+finite derivative-bound certificate is supplied, the generic effective FTC
+immediately identifies the bounded integral with the endpoint difference:
+
+\begin{verbatim}
+centered evaluator + two-sided derivative schedule
+    -> effective FTC certificate
+    -> exp(1) - exp(-1)
+\end{verbatim}
+
+\lean{ComputableAnalysis.uniformExpOnSymmetricUnit_effectiveFTC_of_certificate}
+\leanok
+
 \section{Logarithm and Euler identity}
 
 Reciprocal bounds and finite composition provide the computable core. The
