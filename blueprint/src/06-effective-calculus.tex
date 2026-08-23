@@ -84,6 +84,26 @@ new evaluator -> one existing evaluator -> semantic function
 The preferred evaluator can therefore be changed for efficiency without
 rewriting theorems stated at the abstract function level.
 
+For inverse functions, separation may depend on the actual rational gap
+between two trial inputs.  The general contract therefore has two forms:
+
+\begin{verbatim}
+uniform precision schedule       -> EffectiveInverseSeparation
+gap-dependent precision schedule -> GapAwareInverseSeparation
+                                   -> bisection trace
+\end{verbatim}
+
+The second form is the computable one for flat or rapidly varying functions.
+It does not ask for a limiting inverse value: each bracket carries its own
+finite forward-image separation proof.
+
+\lean{ComputableAnalysis.EffectiveInverseSeparation}
+\lean{ComputableAnalysis.GapAwareInverseSeparation}
+\lean{ComputableAnalysis.InvertibleFunctionOnInterval}
+\lean{ComputableAnalysis.DyadicInverseTrace}
+\lean{ComputableAnalysis.DyadicInverseTrace.toSearch}
+\leanok
+
 The proof-independent function layer exposes the same laws.  Its transitivity
 hypothesis explicitly supplies the middle domain on the intersection of the
 outer domains; this is the correct contract for partial special functions.
