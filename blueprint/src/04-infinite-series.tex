@@ -87,6 +87,14 @@ alternating raw examples make the two obligations visible: stage nesting is
 proved from finite partial-sum algebra, while eventual precision is proved
 from a rational tail bound.
 
+The geometric example packages this tail budget explicitly: a finite prefix,
+an endpoint formula, and a power inequality certify the remaining gap.
+
+\lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate}
+\lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate.gap_le_tolerance}
+\lean{ComputableAnalysis.geometricRaw_reaches_of_positive_tolerance}
+\leanok
+
 \lean{ComputableAnalysis.geometricRaw_valid_of_le_half}
 \lean{ComputableAnalysis.geometricRaw_equiv_inv_one_sub}
 \lean{ComputableAnalysis.AlternatingRaw.toRealRaw_valid}
