@@ -398,6 +398,19 @@ The exact even/lower/reflected certificate family remains the geometric
 explanation; the witness-search adapter is the minimal proof obligation for
 closing the numerical integral.
 
+When interval arithmetic proves only overlap, the exact-box equality can be
+avoided altogether.  The direct branch-overlap adapter accepts the three
+finite even/lower/reflected overlap families and assembles them into the same
+search witness family:
+
+\begin{verbatim}
+even overlap + lower overlap + reflected overlap
+    -> all dyadic sample overlaps -> integral transport
+\end{verbatim}
+
+\lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_branch_overlap_families}
+\leanok
+
 The lower and reflected constructors make the remaining proof obligations
 minimal.  Their parent boxes are taken from the nested table, so only the
 finite identity between the public circle box and the clipped half-angle

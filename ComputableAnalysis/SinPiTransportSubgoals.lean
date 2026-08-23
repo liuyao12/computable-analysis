@@ -164,6 +164,100 @@ def DyadicReflectedHalfAngleCertificate.of_table_parent
   childRawSin_eq := rfl
   public_child_eq := hpublic
 
+noncomputable def DyadicTangentWitnessFamily.of_overlap_family_core
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hover : forall (depth k : Nat) (hk : k < 2 ^ depth), 0 < k ->
+      forall precision, QInterval.Overlaps
+        (rationalCircleSinInterval
+          (dyadicTangentBoxAt B precision depth k hk))
+        ((dyadicNestedRadicalTableAt precision depth k).1)) :
+    DyadicTangentWitnessFamily B := by
+  apply DyadicTangentWitnessFamily.of_search_family B
+  intro depth k hk precision
+  by_cases hzero : k = 0
+  · subst k
+    obtain ⟨u, hu⟩ := canonical_dyadic_zero_search_at B ht0 precision depth hk
+    exact ⟨0, u, by simpa [dyadicNestedRadicalTableAt_zero_sin] using hu⟩
+  · have hpos : 0 < k := by omega
+    exact canonical_dyadic_search_of_overlap_at B hk hpos
+      (hover depth k hk hpos precision)
+
+/-! The direct-overlap variant is weaker than the exact branch certificates.
+It is useful when interval arithmetic proves containment/overlap without
+proving literal equality of the two computed boxes. -/
+
+noncomputable def DyadicTangentWitnessFamily.of_branch_overlap_families
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (even_overlap : forall (precision n j : Nat) (hj : j < 2 ^ n),
+      QInterval.Overlaps
+        (rationalCircleSinInterval
+          (dyadicTangentBoxAt B precision (n + 1) (2 * j)
+            (by
+              have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+                rw [Nat.pow_succ]
+                omega
+              rw [hpow]
+              omega)))
+        ((dyadicNestedRadicalTableAt precision (n + 1) (2 * j)).1))
+    (lower_overlap : forall (precision n j : Nat)
+      (hbound : 2 * j + 1 <= 2 ^ n),
+      QInterval.Overlaps
+        (rationalCircleSinInterval
+          (dyadicTangentBoxAt B precision (n + 1) (2 * j + 1)
+            (by
+              have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+                rw [Nat.pow_succ]
+                omega
+              rw [hpow]
+              omega)))
+        ((dyadicNestedRadicalTableAt precision (n + 1) (2 * j + 1)).1))
+    (upper_overlap : forall (precision n k : Nat)
+      (hupper : 2 ^ n < k) (hk : k < 2 ^ (n + 1)),
+      QInterval.Overlaps
+        (rationalCircleSinInterval
+          (dyadicTangentBoxAt B precision (n + 1) k (by
+            have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+              rw [Nat.pow_succ]
+              omega
+            rw [hpow]
+            omega)))
+        ((dyadicNestedRadicalTableAt precision (n + 1) k).1)) :
+    DyadicTangentWitnessFamily B := by
+  apply DyadicTangentWitnessFamily.of_overlap_family_core B ht0
+  intro depth k hk hpos precision
+  cases depth with
+  | zero => omega
+  | succ n =>
+      by_cases hzero : k = 0
+      · subst k
+        simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using
+          (dyadicNestedRadical_zero_sample_overlap_of_endpoint B ht0
+            precision (n + 1) (by omega))
+      · by_cases heven : k % 2 = 0
+        · obtain ⟨j, rfl⟩ : ∃ j, k = 2 * j := by
+            exact ⟨k / 2, by omega⟩
+          have hj : j < 2 ^ n := by
+            rw [Nat.pow_succ] at hk
+            omega
+          simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using
+            (even_overlap precision n j hj)
+        · have hodd : k % 2 = 1 := by omega
+          by_cases hlower : k <= 2 ^ n
+          · obtain ⟨j, rfl⟩ : ∃ j, k = 2 * j + 1 := by
+              exact ⟨k / 2, by omega⟩
+            have hbound : 2 * j + 1 <= 2 ^ n := by omega
+            simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using
+              (lower_overlap precision n j hbound)
+          · have hupper : 2 ^ n < k := by omega
+            simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using
+              (upper_overlap precision n k hupper hk)
+
 noncomputable def DyadicTangentWitnessFamily.of_overlap_family
     (B : IntegralIdentities.ArctanInverseBisection)
     (ht0 : (B.tangentAt 0
