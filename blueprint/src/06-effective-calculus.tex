@@ -137,6 +137,9 @@ monotone derivative on cell -> endpoint secants -> derivative interval
 \lean{ComputableAnalysis.FTC.effectiveFTC_riemannRaw_equiv_endpointDifference_of_endpointAgreement}
 \lean{ComputableAnalysis.FTC.effectiveFTCStabilizedRaw_valid}
 \lean{ComputableAnalysis.FTC.effectiveFTCStabilizedRaw_equiv_endpointDifference}
+\lean{ComputableAnalysis.effectiveFTCStabilizedConstructionFor}
+\lean{ComputableAnalysis.effectiveFTCStabilizedIntegralFor_valid}
+\lean{ComputableAnalysis.effectiveFTCStabilizedIntegralFor_equiv_endpointDifference}
 \leanok
 
 The interface is the reusable calculus API: finite secant bounds feed
@@ -144,6 +147,12 @@ derivative certificates; derivative bounds feed partition boxes; the effective
 FTC turns those boxes into endpoint differences. Monomial and finite
 Taylor-prefix instances are checked independently of any completed
 real-number topology.
+
+The raw stabilized evaluator is now packaged at the domain-aware integral
+layer.  An application supplies its primitive, integrand, finite endpoint
+agreement, Riemann certificate, and shrinking radius; the resulting public
+integral is a valid `RealRaw` and is equivalent to the primitive's endpoint
+difference.
 
 The proof order is intentionally finite:
 

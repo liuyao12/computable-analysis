@@ -154,6 +154,91 @@ theorem endpointDifferenceRaw_adjacent_additive
 
 end FunctionOnInterval
 
+/-! Public domain-aware packaging for the generic stabilized FTC evaluator.
+The executable integral is the prefix-stabilized Riemann computation; the
+endpoint raw appears only in the finite certificate. -/
+
+def effectiveFTCStabilizedConstructionFor
+    {integrand primitive : FunctionOnInterval}
+    (h : EffectiveFTC primitive.toRealFunRaw integrand.toRealFunRaw
+      integrand.lower integrand.upper)
+    (agreement : FTC.EndpointScheduleAgreement primitive.toRealFunRaw
+      integrand.lower integrand.upper (FTC.endpointRawOfEffectiveFTC h))
+    (radius : Nat -> Rat)
+    (hriemann : (FTC.riemannRawOfEffectiveFTC h).Valid)
+    (hwidth : RealRaw.WidthsShrinkToZero
+      (FTC.riemannRawOfEffectiveFTC h).compute)
+    (hradius : forall n,
+      ((endpointDifferenceRaw primitive.toRealFunRaw integrand.lower
+        integrand.upper agreement.endpoint_valid).compute n).width <= radius n)
+    (hradius_shrinks : ShrinksToZero radius) :
+    Integral.ConstructionFor integrand where
+  compute := (FTC.effectiveFTCStabilizedRaw h radius).compute
+  certificate := by
+    simpa [RealRaw.Valid] using
+      FTC.effectiveFTCStabilizedRaw_valid h hriemann agreement radius hwidth
+        hradius hradius_shrinks
+
+def effectiveFTCStabilizedIntegralFor
+    {integrand primitive : FunctionOnInterval}
+    (h : EffectiveFTC primitive.toRealFunRaw integrand.toRealFunRaw
+      integrand.lower integrand.upper)
+    (agreement : FTC.EndpointScheduleAgreement primitive.toRealFunRaw
+      integrand.lower integrand.upper (FTC.endpointRawOfEffectiveFTC h))
+    (radius : Nat -> Rat)
+    (hriemann : (FTC.riemannRawOfEffectiveFTC h).Valid)
+    (hwidth : RealRaw.WidthsShrinkToZero
+      (FTC.riemannRawOfEffectiveFTC h).compute)
+    (hradius : forall n,
+      ((endpointDifferenceRaw primitive.toRealFunRaw integrand.lower
+        integrand.upper agreement.endpoint_valid).compute n).width <= radius n)
+    (hradius_shrinks : ShrinksToZero radius) : RealRaw :=
+  Integral.integralFor integrand
+    (effectiveFTCStabilizedConstructionFor h agreement radius hriemann hwidth
+      hradius hradius_shrinks)
+
+theorem effectiveFTCStabilizedIntegralFor_valid
+    {integrand primitive : FunctionOnInterval}
+    (h : EffectiveFTC primitive.toRealFunRaw integrand.toRealFunRaw
+      integrand.lower integrand.upper)
+    (agreement : FTC.EndpointScheduleAgreement primitive.toRealFunRaw
+      integrand.lower integrand.upper (FTC.endpointRawOfEffectiveFTC h))
+    (radius : Nat -> Rat)
+    (hriemann : (FTC.riemannRawOfEffectiveFTC h).Valid)
+    (hwidth : RealRaw.WidthsShrinkToZero
+      (FTC.riemannRawOfEffectiveFTC h).compute)
+    (hradius : forall n,
+      ((endpointDifferenceRaw primitive.toRealFunRaw integrand.lower
+        integrand.upper agreement.endpoint_valid).compute n).width <= radius n)
+    (hradius_shrinks : ShrinksToZero radius) :
+    (effectiveFTCStabilizedIntegralFor h agreement radius hriemann hwidth
+      hradius hradius_shrinks).Valid := by
+  exact Integral.integralFor_valid integrand
+    (effectiveFTCStabilizedConstructionFor h agreement radius hriemann hwidth
+      hradius hradius_shrinks)
+
+theorem effectiveFTCStabilizedIntegralFor_equiv_endpointDifference
+    {integrand primitive : FunctionOnInterval}
+    (h : EffectiveFTC primitive.toRealFunRaw integrand.toRealFunRaw
+      integrand.lower integrand.upper)
+    (agreement : FTC.EndpointScheduleAgreement primitive.toRealFunRaw
+      integrand.lower integrand.upper (FTC.endpointRawOfEffectiveFTC h))
+    (radius : Nat -> Rat)
+    (hriemann : (FTC.riemannRawOfEffectiveFTC h).Valid)
+    (hwidth : RealRaw.WidthsShrinkToZero
+      (FTC.riemannRawOfEffectiveFTC h).compute)
+    (hradius : forall n,
+      ((endpointDifferenceRaw primitive.toRealFunRaw integrand.lower
+        integrand.upper agreement.endpoint_valid).compute n).width <= radius n)
+    (hradius_shrinks : ShrinksToZero radius) :
+    (effectiveFTCStabilizedIntegralFor h agreement radius hriemann hwidth
+      hradius hradius_shrinks).Equiv
+      (endpointDifferenceRaw primitive.toRealFunRaw integrand.lower
+        integrand.upper agreement.endpoint_valid) := by
+  change (FTC.effectiveFTCStabilizedRaw h radius).Equiv _
+  exact FTC.effectiveFTCStabilizedRaw_equiv_endpointDifference h hriemann
+    agreement radius hradius
+
 namespace Integral
 
 /-- A definite-integral identity on raw total functions:
