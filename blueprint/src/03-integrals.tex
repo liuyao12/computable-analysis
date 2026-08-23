@@ -6,7 +6,10 @@ program returning such bounds. Lebesgue measure is outside scope.
 
 This chapter is where the Fundamental Theorem of Calculus belongs. It is the
 first general bridge from local change to accumulated area; later chapters
-only instantiate and reuse its certificate interface.
+only instantiate and reuse its certificate interface.  We use a two-stage
+presentation: state the theorem here immediately after the first area
+algorithm, then prove and package its reusable derivative-bound interface in
+Chapter~\ref{ch:effective-calculus}.
 
 The order is intentional:
 
@@ -20,6 +23,25 @@ as the common interface for the remaining chapters.
 
 The blueprint writes sine only as \(\sin(\pi x)\).  A normalized quarter-turn
 parameter may occur inside the circle algorithm as an implementation detail.
+
+\section{FTC as the organizing contract}
+\label{sec:integrals-ftc-contract}
+
+Once the rectangle algorithm has produced a certified area, the next question
+is not another special function.  It is the general finite statement that
+turns a derivative computation into an endpoint difference:
+
+\begin{verbatim}
+derivative bounds -> cell rectangles -> finite telescoping sum
+                  -> endpoint difference within the same rational box
+\end{verbatim}
+
+This is the computable form of the FTC.  The theorem is introduced at this
+point because it explains why integration is useful; its hypotheses are then
+implemented by Lipschitz, monotone, convex, power-series, and turning-point
+certificates.  Chapter~\ref{ch:effective-calculus} contains that reusable
+implementation layer.  Chapters~\ref{ch:infinite-series}--\ref{ch:differential-equations}
+consume the contract rather than reopening the foundations.
 
 \section{Rectangle algorithm}
 

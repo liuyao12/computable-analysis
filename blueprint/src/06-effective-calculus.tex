@@ -1,5 +1,15 @@
 \chapter{Effective Calculus Interfaces}\label{ch:effective-calculus}
 
+This chapter is the proof workshop for the FTC contract stated in
+Chapter~\ref{ch:integrals}.  It supplies the finite certificates that a
+particular evaluator must provide; it is not a second definition of the
+integral.  The resulting dependency is:
+
+\begin{verbatim}
+Chapter 3: what FTC promises     -> Chapter 6: how a function earns it
+                                 -> later chapters: concrete instances
+\end{verbatim}
+
 Special-function evaluators should expose a stable computation
 \((x,n)\mapsto [a,b]\). Domain proofs remain available for safety, but they
 are not part of the algorithm. The proof-relevant function interface adapts
