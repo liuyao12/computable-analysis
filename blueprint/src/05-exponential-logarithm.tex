@@ -87,6 +87,21 @@ The checked instance is:
 \lean{ComputableAnalysis.uniformExpOnUnit_solvesSelfDerivative}
 \leanok
 
+The same evaluator is also checked on the centered chart \([-1,1]\).  This
+is the form needed by local ODE arguments, because a step may move in either
+direction from its current point:
+
+\begin{verbatim}
+centered input -> common-prefix exponential -> two-sided derivative box
+               -> initial value at 0 -> local solution certificate
+\end{verbatim}
+
+\lean{ComputableAnalysis.uniformExpOnSymmetricUnit_equivalent_expPowerSeries}
+\lean{ComputableAnalysis.uniformExpOnSymmetricUnit_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.uniformExpOnSymmetricUnit_zero_equiv_one}
+\lean{ComputableAnalysis.uniformExpOnSymmetricUnit_solvesSelfDerivative}
+\leanok
+
 \section{Logarithm and Euler identity}
 
 Reciprocal bounds and finite composition provide the computable core. The

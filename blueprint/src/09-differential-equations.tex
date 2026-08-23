@@ -99,6 +99,14 @@ the solution. The vector theorem has the identical shape; its remaining
 provider fields are only matrix-norm bounds, coefficient regularity, and the
 finite simplex tail estimate.
 
+The exponential is the first completed analytic provider for this route.  Its
+centered evaluator supplies the two-sided derivative certificate and the exact
+initial value required by the scalar self-derivative interface:
+
+\lean{ComputableAnalysis.uniformExpOnSymmetricUnit_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.uniformExpOnSymmetricUnit_solvesSelfDerivative}
+\leanok
+
 The checked finite uniqueness statement is the recurrence theorem above; the
 two-by-two instance is also available as
 \lean{ComputableAnalysis.LinearODE.twoByTwo_solution_unique}.
