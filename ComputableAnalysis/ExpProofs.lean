@@ -3028,6 +3028,40 @@ def uniformExpTailRadius (n : Nat) : Rat :=
 def uniformExpCenter (x : Rat) (n : Nat) : Rat :=
   powerSeriesCenterAtTerms x (uniformExpTailTerms n)
 
+/-! A symmetric-input bound for the finite center.  Unlike the monotonicity
+lemma below, this uses only a finite absolute-value majorant, so it remains
+available on negative inputs. -/
+
+theorem uniformExpCenter_qabs_le (x : Rat) (hx : qabs x <= 2) (n : Nat) :
+    qabs (uniformExpCenter x n) <=
+      1 + RationalMajorant.factorialTailPartial 2 1
+        (uniformExpTailTerms n - 1) := by
+  have hstart : 1 <= uniformExpTailStart := by
+    unfold uniformExpTailStart
+    native_decide
+  have hterms : uniformExpTailTerms n =
+      (uniformExpTailTerms n - 1) + 1 := by
+    unfold uniformExpTailTerms
+    omega
+  rw [uniformExpCenter, hterms,
+    powerSeriesCenterAtTerms_eq_expTaylorPrefix]
+  unfold FinitePolynomial.expTaylorPrefix
+  have hprefix := FinitePolynomial.qabs_integratedExpTaylorPrefix_le
+    (C := (2 : Rat)) (x := x) (by native_decide) hx
+      (uniformExpTailTerms n - 1)
+  calc
+    qabs (1 +
+        FinitePolynomial.integratedTaylorPrefix
+          FormalPowerSeries.expCoeff (uniformExpTailTerms n - 1) x) <=
+        qabs (1 : Rat) +
+          qabs (FinitePolynomial.integratedTaylorPrefix
+            FormalPowerSeries.expCoeff (uniformExpTailTerms n - 1) x) :=
+      qabs_add_le _ _
+    _ <= 1 + RationalMajorant.factorialTailPartial 2 1
+        (uniformExpTailTerms n - 1) := by
+      rw [qabs_eq_self_of_nonneg (by native_decide)]
+      exact rat_add_le_add (by native_decide) hprefix
+
 theorem uniformExpCenter_mono_on_unit
     (n : Nat) {x y : Rat}
     (hx : 0 <= x) (hy : y <= 1) (hxy : x <= y) :

@@ -966,6 +966,62 @@ theorem qabs_expCoeff_monomial_le_factorialTailTerm
       grind [Rat.mul_assoc, Rat.mul_comm]
     _ = RationalMajorant.factorialTailTerm C n := rfl
 
+/-! A finite absolute-value bound for the exponential primitive prefix.  This
+is intentionally stated for an arbitrary nonnegative rational majorant: it
+is useful on symmetric input boxes, where monotonicity of the prefix is not
+available. -/
+
+theorem qabs_integratedExpTaylorPrefix_le
+    {C x : Rat} (hC : 0 <= C) (hx : qabs x <= C) :
+    forall n,
+      qabs (integratedTaylorPrefix FormalPowerSeries.expCoeff n x) <=
+        RationalMajorant.factorialTailPartial C 1 n
+  | 0 => by
+      simp [integratedTaylorPrefix, RationalMajorant.factorialTailPartial,
+        qabs_eq_self_of_nonneg]
+  | n + 1 => by
+      change qabs
+        (integratedTaylorPrefix FormalPowerSeries.expCoeff n x +
+          FormalPowerSeries.expCoeff n *
+            (x ^ (n + 1) / ((n + 1 : Nat) : Rat))) <=
+        RationalMajorant.factorialTailPartial C 1 n +
+          RationalMajorant.factorialTailTerm C (1 + n)
+      have hrewrite :
+          FormalPowerSeries.expCoeff n *
+              (x ^ (n + 1) / ((n + 1 : Nat) : Rat)) =
+            FormalPowerSeries.expCoeff (n + 1) * x ^ (n + 1) := by
+        unfold FormalPowerSeries.expCoeff
+        rw [Rat.div_def]
+        rw [FormalPowerSeries.factorialRat_succ]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      have hterm :
+          qabs (FormalPowerSeries.expCoeff n *
+            (x ^ (n + 1) / ((n + 1 : Nat) : Rat))) <=
+            RationalMajorant.factorialTailTerm C (n + 1) := by
+        rw [hrewrite]
+        have hmon := qabs_expCoeff_monomial_le_factorialTailTerm
+          (C := C) (x := x) hC hx (n + 1)
+        simpa [RationalMajorant.factorialTailTerm] using hmon
+      change qabs
+        (integratedTaylorPrefix FormalPowerSeries.expCoeff n x +
+          FormalPowerSeries.expCoeff n *
+            (x ^ (n + 1) / ((n + 1 : Nat) : Rat))) <= _
+      calc
+        qabs
+            (integratedTaylorPrefix FormalPowerSeries.expCoeff n x +
+              FormalPowerSeries.expCoeff n *
+                (x ^ (n + 1) / ((n + 1 : Nat) : Rat))) <=
+            qabs (integratedTaylorPrefix FormalPowerSeries.expCoeff n x) +
+              qabs (FormalPowerSeries.expCoeff n *
+                (x ^ (n + 1) / ((n + 1 : Nat) : Rat))) :=
+          qabs_add_le _ _
+        _ <= RationalMajorant.factorialTailPartial C 1 n +
+              RationalMajorant.factorialTailTerm C (1 + n) :=
+          rat_add_le_add (qabs_integratedExpTaylorPrefix_le hC hx n)
+            (by simpa [Nat.add_comm] using hterm)
+        _ = RationalMajorant.factorialTailPartial C 1 (n + 1) := by
+          simp [RationalMajorant.factorialTailPartial]
+
 /-- The accumulated finite secant coefficient for an exponential Taylor
 prefix on `[-2,2]`.  This is a finite rational recurrence: its `n`th step is
 the normalized-monomial secant coefficient weighted by `1/n!`. -/

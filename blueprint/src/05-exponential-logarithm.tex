@@ -107,6 +107,15 @@ the effective FTC.  This is a typed boundary rather than a second definition
 of the exponential: it reuses the same evaluator on the rational domain
 $[-1,1]$ and records its validity.
 
+The symmetric finite bound is obtained without a monotonicity assumption:
+each primitive prefix is bounded by a finite factorial-tail partial sum.  A
+partition may therefore trade computation time for a smaller mesh and still
+remain entirely rational and proof-producing.
+
+\lean{ComputableAnalysis.FinitePolynomial.qabs_integratedExpTaylorPrefix_le}
+\lean{ComputableAnalysis.ExpProofs.uniformExpCenter_qabs_le}
+\leanok
+
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnitRealFunRaw}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnitRealFunRaw_valid}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnitRealFunRaw_compute}
