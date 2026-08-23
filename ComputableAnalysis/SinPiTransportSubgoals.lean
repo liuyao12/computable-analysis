@@ -90,6 +90,28 @@ noncomputable def DyadicTangentWitnessFamily.of_halfAngle_certificate_family
     exact canonical_dyadic_search_of_halfAngle_certificate_at B hpos
       (hcertificate precision depth k hk hpos)
 
+/-! A finite candidate list is the executable interface to the geometric
+certificate.  The soundness theorem for the Boolean search turns a proof that
+each list has a hit into the certificate family above.  Thus the remaining
+analytic obligation can be stated entirely as a family of finite search
+success theorems. -/
+
+noncomputable def DyadicTangentWitnessFamily.of_canonical_search_family
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (candidates : forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      List Rat)
+    (hsearch : forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      ∃ u, canonicalDyadicCertificateSearchAt B precision depth k hk
+        (candidates precision depth k hk) = some u) :
+    DyadicTangentWitnessFamily B := by
+  apply DyadicTangentWitnessFamily.of_halfAngle_certificate_family B ht0
+  intro precision depth k hk hpos
+  obtain ⟨u, hu⟩ := hsearch precision depth k hk
+  exact canonicalDyadicCertificateSearchAt_sound B hu
+
 noncomputable def DyadicTangentWitnessFamily.of_overlap_family
     (B : IntegralIdentities.ArctanInverseBisection)
     (ht0 : (B.tangentAt 0

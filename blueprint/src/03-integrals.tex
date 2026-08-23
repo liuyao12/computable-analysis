@@ -373,8 +373,15 @@ closing the numerical integral.
 The search itself is proof-producing: a successful Boolean hit is converted
 into the complete half-angle certificate consumed by the transport theorem.
 
+The final adapter makes the proof boundary explicit.  One supplies a finite
+candidate list for each dyadic sample and proves that the executable search
+has a hit.  The adapter converts those finite successes into the witness
+family used by the integral theorem; no completeness or unbounded search is
+hidden in the interface.
+
 \lean{ComputableAnalysis.SinPiIntegral.canonicalDyadicCertificateSearchAt}
 \lean{ComputableAnalysis.SinPiIntegral.canonicalDyadicCertificateSearchAt_sound}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_canonical_search_family}
 \leanok
 
 \begin{verbatim}
