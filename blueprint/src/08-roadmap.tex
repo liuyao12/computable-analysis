@@ -37,7 +37,8 @@ effective FTC instance, effective FTC interfaces, interval-regularity to
 epsilon--delta continuity, polynomial/Taylor secant certificates,
 power-series tails, finite Fourier transforms, logarithm, rotation
 derivatives, the tangent-square FTC instance, the common-prefix exponential
-FTC instance, and scalar linear ODE uniqueness are checked in Lean. The
+FTC instance, the centered exponential initial-value certificate, and scalar
+linear ODE uniqueness are checked in Lean. The
 principal unfinished integration step is the dyadic sine FTC transport. The
 monotone Darboux machinery and the sine modulus are already present; the
 remaining provider is target-directed inverse data that transports each
@@ -47,6 +48,13 @@ bisection trace. The reusable assembly theorem is now packaged as a
 instantiate its even, lower-half-angle, and reflected upper-half-angle fields.
 This is a finite geometric certificate to add, not a hidden use of completed
 real numbers.
+
+The same distinction applies to the centered exponential chart.  Its
+two-sided derivative and initial-value certificates are complete, but a full
+effective FTC on `[-1,1]` still needs a partition-level endpoint-width
+certificate.  The unit-interval FTC instance is therefore the current
+completed exponential integration theorem; the centered chart is the current
+completed ODE provider.
 
 For general effective continuity, the remaining schedule problem is explicit:
 choose a mesh and evaluator precision satisfying the interval-modulus budget,
