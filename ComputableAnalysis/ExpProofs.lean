@@ -6239,6 +6239,80 @@ theorem uniformExpOnSymmetricUnitRealFunRaw_valid :
   change (uniformExpRaw x).Valid
   exact uniformExpRaw_valid x (Rat.le_trans hqabs (by native_decide))
 
+theorem uniformExpSymmetricFTC_endpoint_width_le (eps : QPos) :
+    (endpointDifferenceInterval uniformExpOnSymmetricUnitRealFunRaw (-1) 1
+      (uniformExpFTCStage eps)).width <= eps.val := by
+  have h : 0 < mesh 0 1 (uniformExpFTCPieces eps) := by
+    unfold mesh
+    rw [if_neg (Nat.ne_of_gt (uniformExpFTCPieces_pos eps))]
+    rw [show (1 : Rat) - 0 = 1 by grind, Rat.div_def]
+    exact Rat.mul_pos (by native_decide)
+      ((Rat.inv_pos).2 ((Rat.natCast_pos).2
+        (uniformExpFTCPieces_pos eps)))
+  have hh : mesh 0 1 (uniformExpFTCPieces eps) ≠ 0 := Rat.ne_of_gt h
+  have htail := uniformExpTailMagnitude_le_quotientTolerance
+    (mesh 0 1 (uniformExpFTCPieces eps)) hh (uniformExpFTCIndex eps)
+  have htail' : uniformExpTailMagnitude (uniformExpFTCStage eps) <=
+      (precisionAtStage (uniformExpFTCIndex eps)).val *
+        mesh 0 1 (uniformExpFTCPieces eps) / 24 := by
+    rw [uniformExpFTCStage_eq_quotient eps]
+    have hq : qabs (mesh 0 1 (uniformExpFTCPieces eps)) =
+        mesh 0 1 (uniformExpFTCPieces eps) :=
+      qabs_eq_self_of_nonneg (Rat.le_of_lt h)
+    simpa [uniformExpQuotientTailTolerance, hq] using htail
+  have hmesh : mesh 0 1 (uniformExpFTCPieces eps) <= 1 := by
+    have hp := uniformExpFTCPieces_pos eps
+    have hanti := FTC.one_div_nat_antitone (n := 1)
+      (m := uniformExpFTCPieces eps) (by native_decide) hp
+      (Nat.one_le_iff_ne_zero.mpr (Nat.ne_of_gt hp))
+    unfold mesh
+    rw [if_neg (Nat.ne_of_gt hp), show (1 : Rat) - 0 = 1 by grind]
+    calc
+      1 / ((uniformExpFTCPieces eps : Nat) : Rat) <= 1 / (1 : Rat) := hanti
+      _ = 1 := by native_decide
+  have hprec := uniformExpFTCPrecision_le_input eps
+  have hbox : 2 * uniformExpTailRadius (uniformExpFTCStage eps) <=
+      (precisionAtStage (uniformExpFTCIndex eps)).val / 6 := by
+    unfold uniformExpTailRadius
+    have hm := Rat.mul_le_mul_of_nonneg_left htail'
+      (by native_decide : (0 : Rat) <= 4)
+    calc
+      2 * (2 * uniformExpTailMagnitude (uniformExpFTCStage eps)) <=
+          4 * ((precisionAtStage (uniformExpFTCIndex eps)).val *
+            mesh 0 1 (uniformExpFTCPieces eps) / 24) := by grind
+      _ = (precisionAtStage (uniformExpFTCIndex eps)).val *
+            mesh 0 1 (uniformExpFTCPieces eps) / 6 := by
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= (precisionAtStage (uniformExpFTCIndex eps)).val / 6 := by
+        have hp := Rat.le_of_lt
+          (precisionAtStage (uniformExpFTCIndex eps)).property
+        have := Rat.mul_le_mul_of_nonneg_left hmesh hp
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  rw [endpointDifferenceInterval_width]
+  have hsum :
+      (uniformExpBox (-1) (uniformExpFTCStage eps)).width +
+          (uniformExpBox 1 (uniformExpFTCStage eps)).width <=
+        (precisionAtStage (uniformExpFTCIndex eps)).val / 3 := by
+    rw [uniformExpBox_width, uniformExpBox_width]
+    calc
+      2 * uniformExpTailRadius (uniformExpFTCStage eps) +
+          2 * uniformExpTailRadius (uniformExpFTCStage eps) <=
+          (precisionAtStage (uniformExpFTCIndex eps)).val / 6 +
+            (precisionAtStage (uniformExpFTCIndex eps)).val / 6 :=
+        rat_add_le_add hbox hbox
+      _ <= (precisionAtStage (uniformExpFTCIndex eps)).val / 3 := by grind
+  have hactual :
+      (uniformExpOnSymmetricUnitRealFunRaw.compute (-1)
+        (uniformExpFTCStage eps)).width +
+          (uniformExpOnSymmetricUnitRealFunRaw.compute 1
+            (uniformExpFTCStage eps)).width <=
+        (precisionAtStage (uniformExpFTCIndex eps)).val / 3 := by
+    simpa [uniformExpOnSymmetricUnitRealFunRaw, uniformExpRaw_compute] using hsum
+  exact Rat.le_trans hactual (by
+    have heps : 0 <= eps.val := Rat.le_of_lt eps.property
+    rw [show (uniformExpFTCInputPrecision eps).val = eps.val / 5 by rfl] at hprec
+    grind)
+
 theorem uniformExpOnSymmetricUnitRealFunRaw_compute (x : Rat)
     (hx : uniformExpOnSymmetricUnitRealFunRaw.domain x) (n : Nat) :
     uniformExpOnSymmetricUnitRealFunRaw.compute x n =
