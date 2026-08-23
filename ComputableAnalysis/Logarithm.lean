@@ -2778,6 +2778,20 @@ theorem logTwoHi_anti {n m : Nat} (hnm : n <= m) :
   | refl => exact Rat.le_refl
   | step _ ih => exact Rat.le_trans (logTwoHi_anti_succ _) ih
 
+/-! The alternating enclosure has a useful domain invariant: every finite
+stage already lies in the rational unit interval.  This is the positivity and
+boundedness certificate needed when the logarithm branch is later used as a
+domain-aware function, and it does not rely on a completed real value. -/
+
+theorem logTwoLo_nonneg (n : Nat) : 0 <= logTwoLo n := by
+  rw [logTwoLo_eq_harmonicSum_sub]
+  have hmono := harmonicSum_le_of_le (n := n) (m := 2 * n) (by omega)
+  grind [Rat.sub_eq_add_neg]
+
+theorem logTwoHi_le_one (n : Nat) : logTwoHi n <= 1 := by
+  have hanti := logTwoHi_anti (n := 0) (m := n) (by omega)
+  simpa [logTwoHi, logTwoState, logTwoStep] using hanti
+
 theorem logTwoCompute_ordered (n : Nat) :
     (logTwoCompute n).lo <= (logTwoCompute n).hi := by
   have hwidth := logTwo_width_eq n
@@ -2786,6 +2800,10 @@ theorem logTwoCompute_ordered (n : Nat) :
   change logTwoHi n - logTwoLo n = 1 / ((2 * n + 1 : Nat) : Rat) at hwidth
   change logTwoLo n <= logTwoHi n
   grind [Rat.sub_eq_add_neg]
+
+theorem logTwoCompute_subinterval_unit (n : Nat) :
+    subintervalOf (logTwoCompute n) 0 1 := by
+  refine ⟨logTwoLo_nonneg n, logTwoCompute_ordered n, logTwoHi_le_one n⟩
 
 theorem logTwoCompute_nested (n m : Nat) (hnm : n <= m) :
     (logTwoCompute n).lo <= (logTwoCompute m).lo /\
@@ -2845,6 +2863,10 @@ def logTwoSeries : RealRaw where
 
 theorem logTwoSeries_valid : logTwoSeries.Valid :=
   logTwoCompute_valid
+
+theorem logTwoSeries_compute_subinterval_unit (n : Nat) :
+    subintervalOf (logTwoSeries.compute n) 0 1 := by
+  exact logTwoCompute_subinterval_unit n
 
 /-- The displayed rate certificate for the logarithmic series is
 `width(logTwoSeries[n]) <= 1/n` for every positive stage. -/
