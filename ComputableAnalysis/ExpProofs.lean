@@ -5646,6 +5646,32 @@ theorem uniformExpOnUnit_compute (x : Rat)
     (hx : inDomainInterval (0 : Rat) 1 x) (n : Nat) :
     uniformExpOnUnit.compute x hx n = (uniformExpRaw x).compute n := rfl
 
+/-! The exponential exposes the gap-aware certificate directly.  An inverse
+search can therefore choose its factorial stage from the rational bracket
+width, rather than from an unobservable limiting value. -/
+def uniformExpOnUnit_gapAwareSeparation :
+    GapAwareInverseSeparation uniformExpOnUnit where
+  kind := .nondecreasing
+  outputPrecision := fun {x y} hxy n =>
+    uniformExpQuotientPrecision (y - x)
+      (Rat.ne_of_gt ((Rat.lt_iff_sub_pos x y).mp hxy)) n
+  separated := by
+    intro x y hx hy hxy n
+    have hx0 := hx.1
+    have hy1 := hy.2
+    change 0 <= x at hx0
+    change y <= 1 at hy1
+    have hbox := uniformExpOnUnit_box_separated n hx0 hy1 hxy
+    dsimp
+    let p : Nat := uniformExpQuotientPrecision (y - x)
+      (Rat.ne_of_gt ((Rat.lt_iff_sub_pos x y).mp hxy)) n
+    have hcx : uniformExpOnUnit.compute x hx p = uniformExpBox x p := by
+      rfl
+    have hcy : uniformExpOnUnit.compute y hy p = uniformExpBox y p := by
+      rfl
+    rw [hcx, hcy]
+    simpa [p] using hbox
+
 private theorem uniformExpOnUnit_scheduledRegular_width
     (n : Nat) {I : QInterval}
     (hI : subintervalOf I (0 : Rat) 1)

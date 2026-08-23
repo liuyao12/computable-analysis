@@ -6484,6 +6484,26 @@ structure EffectiveInverseSeparation (F : FunctionOnInterval) where
             (F.compute y hy (outputPrecision n)).hi <
               (F.compute x hx (outputPrecision n)).lo
 
+/-! A gap-aware variant of inverse separation.  For many computable
+functions, the precision needed to distinguish `F x` from `F y` depends on
+the actual rational gap `y - x`; this is the natural interface for a search
+algorithm that refines its input bracket while it runs. -/
+structure GapAwareInverseSeparation (F : FunctionOnInterval) where
+  kind : MonotonicityKind
+  outputPrecision : forall {x y : Rat}, x < y -> Nat -> Nat
+  separated :
+    forall x y
+      (hx : inDomainInterval F.lower F.upper x)
+      (hy : inDomainInterval F.lower F.upper y)
+      (hxy : x < y) (n : Nat),
+      match kind with
+      | .nondecreasing =>
+          (F.compute x hx (outputPrecision hxy n)).hi <
+            (F.compute y hy (outputPrecision hxy n)).lo
+      | .nonincreasing =>
+          (F.compute y hy (outputPrecision hxy n)).hi <
+            (F.compute x hx (outputPrecision hxy n)).lo
+
 /-- The input data from which an inverse-function algorithm should be
 constructible. -/
 structure InvertibleFunctionOnInterval where
