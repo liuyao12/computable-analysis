@@ -537,6 +537,25 @@ finite partition identity + shrinking widths -> computable integral law
 \lean{ComputableAnalysis.Integral.AdditiveOnAdjacentIntervals}
 \leanok
 
+The first algebra law is already proved at the raw level.  For rational
+endpoints \(a\le b\le c\), the two finite endpoint boxes telescope:
+
+\begin{verbatim}
+[F(b)-F(a)] + [F(c)-F(b)]  ->  [F(c)-F(a)]
+        finite interval arithmetic, with overlap at every stage
+\end{verbatim}
+
+No limit law is being assumed here.  The definite-integral theorem then
+transports this finite identity through three FTC certificates.  Thus the
+usual additivity statement is available exactly when the three integrals have
+certified endpoint representations.
+
+\lean{ComputableAnalysis.endpointDifferenceRaw_adjacent_additive}
+\lean{ComputableAnalysis.FunctionOnInterval.endpointDifferenceRaw_adjacent_additive}
+\lean{ComputableAnalysis.DefiniteIdentityFor.integral_add_equiv_of_endpoint_additive}
+\lean{ComputableAnalysis.DefiniteIdentityFor.integral_equiv_add_of_endpoint_add}
+\leanok
+
 This is the constructive replacement for silently importing a global vector
 space of integrable functions.  Each concrete family supplies the construction
 and the finite certificates required by the contract.
