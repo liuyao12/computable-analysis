@@ -5509,6 +5509,80 @@ theorem uniformExpOnUnit_compute (x : Rat)
     (hx : inDomainInterval (0 : Rat) 1 x) (n : Nat) :
     uniformExpOnUnit.compute x hx n = (uniformExpRaw x).compute n := rfl
 
+private theorem uniformExpOnUnit_scheduledRegular_width
+    (n : Nat) {I : QInterval}
+    (hI : subintervalOf I (0 : Rat) 1)
+    (hwidth : I.width <=
+      1 / ((200 * (n + 1) : Nat) : Rat)) :
+    (uniformExpCellRange I.lo I.hi
+      (uniformExpCellStage (precisionAtStage (n + 1)))).width <=
+      1 / ((n + 1 : Nat) : Rat) := by
+  rcases hI with ⟨hlo, hord, hhi⟩
+  have hstep : I.hi - I.lo <=
+      (precisionAtStage (n + 1)).val / 200 := by
+    have hprec : (precisionAtStage (n + 1)).val =
+        1 / ((n + 1 : Nat) : Rat) := by
+      simp [precisionAtStage]
+    rw [show I.hi - I.lo = I.width by rfl, hprec]
+    calc
+      I.width <= 1 / ((200 * (n + 1) : Nat) : Rat) := hwidth
+      _ = (1 / ((n + 1 : Nat) : Rat)) / 200 := by
+        rw [Rat.div_def, Rat.div_def]
+        rw [show ((200 * (n + 1) : Nat) : Rat) =
+          (200 : Rat) * ((n + 1 : Nat) : Rat) by
+            exact Rat.natCast_mul 200 (n + 1)]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  have hregular := uniformExpCellRange_width_le_eps
+    (precisionAtStage (n + 1)) hlo hhi hord hstep
+  simpa [precisionAtStage] using hregular
+
+/-! The exponential has an adaptive interval-regularity certificate.  Its
+native point evaluator is retained unchanged; the cell evaluator selects a
+factorial stage from the requested output tolerance. -/
+def uniformExpOnUnit_scheduledIntervalRegular :
+    ScheduledIntervalRegularOn uniformExpOnUnit where
+  evalInterval := fun I _I n =>
+    uniformExpCellRange I.lo I.hi
+      (uniformExpCellStage (precisionAtStage (n + 1)))
+  evalPrecision := fun n =>
+    uniformExpCellStage (precisionAtStage (n + 1))
+  inputPrecision := fun n => 200 * (n + 1)
+  inputPrecision_pos := by
+    intro n
+    omega
+  output_width := by
+    intro I hI n hwidth
+    have h := uniformExpOnUnit_scheduledRegular_width n hI hwidth
+    have htail := uniformExpTailMagnitude_nonneg
+      (uniformExpCellStage (precisionAtStage (n + 1)))
+    have hradius : 0 <= uniformExpTailRadius
+        (uniformExpCellStage (precisionAtStage (n + 1))) := by
+      unfold uniformExpTailRadius
+      exact Rat.mul_nonneg (by native_decide) htail
+    have hmono := uniformExpCenter_mono_on_unit
+      (uniformExpCellStage (precisionAtStage (n + 1)))
+      hI.1 hI.2.2 hI.2.1
+    have hcenter : 0 <=
+        uniformExpCenter I.hi
+          (uniformExpCellStage (precisionAtStage (n + 1))) -
+        uniformExpCenter I.lo
+          (uniformExpCellStage (precisionAtStage (n + 1))) := by
+      grind [Rat.sub_eq_add_neg]
+    exact ⟨by
+      unfold uniformExpCellRange QInterval.width
+      grind [Rat.sub_eq_add_neg], h⟩
+  contains_point_values := by
+    intro I hI x hx n hxlo hxhi
+    change QInterval.ContainsInterval
+      (uniformExpCellRange I.lo I.hi
+        (uniformExpCellStage (precisionAtStage (n + 1))))
+      ((uniformExpRaw x).compute
+        (uniformExpCellStage (precisionAtStage (n + 1))))
+    rw [uniformExpRaw_compute]
+    exact uniformExpBox_contains_cellRange
+      (uniformExpCellStage (precisionAtStage (n + 1)))
+      hI.1 hI.2.2 hxlo hxhi
+
 /-! The generic FTC layer consumes `RealFunRaw`, while the derivative layer
 uses `FunctionOnInterval`.  This adapter exposes the same certified common
 prefix evaluator at the former interface without changing its algorithm. -/

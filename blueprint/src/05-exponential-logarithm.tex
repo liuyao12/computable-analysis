@@ -82,6 +82,7 @@ The checked instance is:
 
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_effectiveFTC}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_scheduledIntervalRegular}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_equivalent_expPowerSeriesOnUnit}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_zero_equiv_one}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_solvesSelfDerivative}
@@ -135,6 +136,14 @@ remain entirely rational and proof-producing.
 \lean{ComputableAnalysis.ExpProofs.uniformExpSymmetricFTCScaledSum_width_le}
 \lean{ComputableAnalysis.ExpProofs.uniformExpSymmetricFTCScaledBound_local_endpoint_contained}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_effectiveFTC}
+\leanok
+
+The interval certificate uses the scheduled interface: the native exponential
+algorithm remains a raw point computation, while each requested cell chooses
+the factorial stage needed for its output width.
+
+\lean{ComputableAnalysis.ScheduledIntervalRegularOn}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_scheduledIntervalRegular}
 \leanok
 
 The centered schedule is complete.  It spends an internal tolerance of

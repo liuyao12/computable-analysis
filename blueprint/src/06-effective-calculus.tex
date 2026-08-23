@@ -37,6 +37,7 @@ entire cell.  It implies the rational epsilon--delta form constructively:
 \lean{ComputableAnalysis.EffectiveModulusFor}
 \lean{ComputableAnalysis.IntervalRegularOn}
 \lean{ComputableAnalysis.IntervalRegularOn.epsilonDeltaContinuous}
+\lean{ComputableAnalysis.ScheduledIntervalRegularOn}
 \lean{ComputableAnalysis.ContinuousFunctionOnInterval}
 \leanok
 
@@ -44,6 +45,11 @@ This implication uses only rational endpoint hulls, interval containment, and
 the requested denominator.  The reverse direction is not automatic: an
 epsilon--delta modulus must still be upgraded to a cell-image evaluator before
 it can drive a Darboux integral.
+
+Adaptive evaluators use `ScheduledIntervalRegularOn`: their cell image and
+point value are evaluated at one explicit stage, which may differ from the
+native stage index.  A separate validity/equivalence proof is still required
+before that representation is installed in the abstract-function chain.
 
 Representations form a local chain: reflexive, symmetric, and transitive
 equivalence edges compose different rational stage schedules without changing

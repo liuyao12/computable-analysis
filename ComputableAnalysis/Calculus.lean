@@ -4680,6 +4680,34 @@ structure IntervalRegularOn (F : FunctionOnInterval) where
         (evalInterval I hI n)
         (F.compute x hx n)
 
+/-! A scheduled variant of interval regularity.
+
+The native computation stage of a `FunctionOnInterval` is part of its raw
+representation and need not be the best stage for an interval enclosure over
+a whole cell.  This contract therefore exposes an explicit `evalPrecision`:
+the interval evaluator and its point-value containment proof use the same
+chosen stage, while the requested output index remains `n`.  It is the
+representation-level interface for adaptive algorithms; it does not assert
+that the schedule is monotone or that it changes the underlying abstract
+function. -/
+structure ScheduledIntervalRegularOn (F : FunctionOnInterval) where
+  evalInterval : (I : QInterval) -> subintervalOf I F.lower F.upper -> Nat -> QInterval
+  evalPrecision : Nat -> Nat
+  inputPrecision : Nat -> Nat
+  inputPrecision_pos : forall n, 0 < inputPrecision n
+  output_width :
+    forall I hI n,
+      I.width <= (1 / ((inputPrecision n) : Rat)) ->
+        0 <= (evalInterval I hI n).width /\
+        (evalInterval I hI n).width <= 1 / ((n + 1 : Nat) : Rat)
+  contains_point_values :
+    forall I hI x hx n,
+      I.lo <= x ->
+      x <= I.hi ->
+        QInterval.ContainsInterval
+        (evalInterval I hI n)
+        (F.compute x hx (evalPrecision n))
+
 /-! Build interval regularity directly from a proof-independent point
 evaluator.  The public `IntervalRegularOn` contract remains unchanged; this
 constructor only removes domain-proof noise from new special-function
