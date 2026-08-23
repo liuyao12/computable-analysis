@@ -423,6 +423,17 @@ The exact even/lower/reflected certificate family remains the geometric
 explanation; the witness-search adapter is the minimal proof obligation for
 closing the numerical integral.
 
+Two concrete searches are already checked as finite sanity tests.  They use
+the grid candidates (103/256) and (791/4096) at successive dyadic stages.
+The reusable soundness theorem converts any successful search into the
+circle-box overlap required by the transport step:
+
+\lean{ComputableAnalysis.SinPiIntegral.rationalTangentWitnessSearch_stage_one_demo}
+\lean{ComputableAnalysis.SinPiIntegral.rationalTangentWitnessSearch_stage_two_demo}
+\lean{ComputableAnalysis.SinPiIntegral.rationalTangentWitnessSearch_overlap_of_success}
+\lean{ComputableAnalysis.SinPiIntegral.rationalTangentWitnessBoxSearch_overlap_of_success}
+\leanok
+
 When interval arithmetic proves only overlap, the exact-box equality can be
 avoided altogether.  The direct branch-overlap adapter accepts the three
 finite even/lower/reflected overlap families and assembles them into the same
