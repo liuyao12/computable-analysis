@@ -227,6 +227,23 @@ intermediate point is not selected; the bracket is refined until the desired
 precision is reached.  We therefore recover MVT only where the function has
 the required effective monotonicity or turning-point certificate.
 
+The local-to-global proof is a finite telescoping argument:
+
+\begin{verbatim}
+cell derivative range -> cell width * range contains endpoint increment
+all cells              -> finite sum contains F(b)-F(a)
+width budget           -> effective FTC bracket
+\end{verbatim}
+
+These are separate reusable contracts, so a new function need only supply its
+cell certificate and error budget:
+
+\lean{ComputableAnalysis.CandidateDerivativeCellControl.endpoint_difference_overlaps_bound}
+\lean{ComputableAnalysis.RationalPartition.boundIntegralSum_contains_endpointDifference}
+\lean{ComputableAnalysis.RationalPartition.boundIntegralSum_overlaps_endpointDifference}
+\lean{ComputableAnalysis.DerivativeBoundFTC}
+\leanok
+
 The checked polynomial ladder now reaches constant, affine, square, cube,
 quartic, and quintic evaluators, with a finite sextic Darboux checkpoint; the
 square case uses the finite bound
