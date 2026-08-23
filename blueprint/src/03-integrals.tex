@@ -70,6 +70,32 @@ sample has a stage-dependent value bracket.
 \caption{Value brackets and rectangle bounds.}
 \label{fig:interval-sine-integral-stage}\end{figure}
 
+\section{Monotone pieces and finitely many turns}
+
+The usable generalization is piecewise, not an unrestricted measurable
+function.  A monotone cell uses its endpoint range as the Darboux bracket;
+finitely many turning points split a function into such cells.  The same
+rectangle computation then adds the cell brackets.
+
+\begin{verbatim}
+finite breakpoints -> monotone cells -> endpoint ranges
+                  -> add cell brackets -> one integral raw
+\end{verbatim}
+
+The Lean layer separates the geometric classification from the computation:
+the monotone schedule supplies the dyadic ranges, while a piecewise-monotone
+certificate supplies the finite assembly.  This is the route used for
+functions such as \(\sin(\pi x)\): classify each cell as increasing,
+decreasing, or containing one certified turn, then refine only the local
+boxes needed by that classification.
+
+\lean{ComputableAnalysis.MonotoneOnInterval}
+\lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule}
+\lean{ComputableAnalysis.Integral.monotoneDarbouxScheduleRaw_valid}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneConstructionFor}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_valid}
+\leanok
+
 The dyadic implementation uses the normalized angle \(2x=k/2^n\).  Its
 finite stage is an explicit indexed rectangle sum:
 

@@ -76,6 +76,22 @@ outer domains; this is the correct contract for partial special functions.
 \lean{ComputableAnalysis.RealFunRaw.equivalent_trans}
 \leanok
 
+The curvature route is exposed as a finite method rather than as a classical
+second-derivative theorem.  A cell carries monotone derivative data; endpoint
+secants then furnish the derivative bracket used by the FTC certificate.
+
+\begin{verbatim}
+monotone derivative on cell -> endpoint secants -> derivative interval
+                            -> local endpoint bound -> effective FTC
+\end{verbatim}
+
+\lean{ComputableAnalysis.MonotoneDerivativeBoundMethod}
+\lean{ComputableAnalysis.MonotoneDerivativeBoundMethod.toDerivativeBound}
+\lean{ComputableAnalysis.CurvatureFTCCertificate}
+\lean{ComputableAnalysis.CurvatureFTCCertificate.toDerivativeBoundFTC}
+\lean{ComputableAnalysis.ConvexFTCCertificate.equiv_endpoint}
+\leanok
+
 The interface is the reusable calculus API: finite secant bounds feed
 derivative certificates; derivative bounds feed partition boxes; the effective
 FTC turns those boxes into endpoint differences. Monomial and finite
