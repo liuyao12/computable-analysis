@@ -35,10 +35,22 @@ the resulting nested computations.
 
 The basic certificates are available directly in Lean:
 
+Coordinate identities and signed area:
+
+\lean{ComputableAnalysis.RationalCircle.pythagoreanTriple_identity}
+\lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_shoelace}
+\lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_quadrilateral_diagonal_additivity}
+\lean{ComputableAnalysis.RationalCircle.heron_squared_identity}
+
+The path inequality is proved for finite rational chains.  In particular, a
+broken line is no shorter than its direct chord, and a genuine turn makes the
+inequality strict:
+
 \lean{ComputableAnalysis.RationalCircle.PositiveHalfAngleCoordinates.child_circle}
 \lean{ComputableAnalysis.RationalCircle.PositiveHalfAngleCoordinates.child_unit_bounds}
 \lean{ComputableAnalysis.RationalCircle.Stage.point_normSq}
 \lean{ComputableAnalysis.RationalCircle.Stage.rationalPolyline_length_ge_direct}
+\lean{ComputableAnalysis.RationalCircle.Stage.rationalPolyline_length_two_step_strict_of_genuine_turn}
 
 \section{Archimedes and rational circles}
 \label{thm:geometric-pi-validity}
