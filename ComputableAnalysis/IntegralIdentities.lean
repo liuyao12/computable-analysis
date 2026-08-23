@@ -1386,6 +1386,68 @@ def definiteIdentityFor_of_derivativeBoundFTC_stageSchedule
     (FTC.endpointScheduleAgreement_of_derivativeBoundFTC_stageSchedule
       h hendpoint sigma hsigma)
 
+/-! The selected-stage FTC interface is the direct form used by evaluators
+whose derivative and endpoint boxes are deliberately computed at one common
+finite stage.  Keep this bridge separate from the derivative-bound wrapper:
+the selected-stage certificate already contains the finite telescope and
+should be consumable without an artificial re-packaging step. -/
+
+def constructionFor_of_selectedStageCandidateDerivativeFTC
+    {integrand primitive : FunctionOnInterval}
+    (h : SelectedStageCandidateDerivativeFTC
+      primitive.toRealFunRaw integrand.toRealFunRaw
+      integrand.lower integrand.upper)
+    (hvalid : h.boundedIntegralRaw.Valid) :
+    Integral.ConstructionFor integrand where
+  compute := h.boundedIntegralCompute
+  certificate := by
+    simpa [RealRaw.Valid, SelectedStageCandidateDerivativeFTC.boundedIntegralRaw] using hvalid
+
+theorem integralFor_selectedStageCandidateDerivativeFTC_compute_eq
+    {integrand primitive : FunctionOnInterval}
+    (h : SelectedStageCandidateDerivativeFTC
+      primitive.toRealFunRaw integrand.toRealFunRaw
+      integrand.lower integrand.upper)
+    (hvalid : h.boundedIntegralRaw.Valid) :
+    (Integral.integralFor integrand
+      (constructionFor_of_selectedStageCandidateDerivativeFTC h hvalid)).compute =
+        h.boundedIntegralCompute := rfl
+
+def definiteIdentityFor_of_selectedStageCandidateDerivativeFTC
+    {integrand primitive : FunctionOnInterval}
+    (same_lower : primitive.lower = integrand.lower)
+    (same_upper : primitive.upper = integrand.upper)
+    (h : SelectedStageCandidateDerivativeFTC
+      primitive.toRealFunRaw integrand.toRealFunRaw
+      integrand.lower integrand.upper)
+    (hbounded : h.boundedIntegralRaw.Valid)
+    (hscheduledEndpoint : h.endpointRaw.Valid)
+    (hendpoint :
+      RealRaw.ValidCompute
+        (endpointDifferenceCompute
+          primitive.toRealFunRaw integrand.lower integrand.upper))
+    (hendpoint_equiv :
+      h.endpointRaw.Equiv
+        (endpointDifferenceRaw
+          primitive.toRealFunRaw integrand.lower integrand.upper hendpoint)) :
+    DefiniteIdentityFor integrand primitive where
+  same_lower := same_lower
+  same_upper := same_upper
+  construction := constructionFor_of_selectedStageCandidateDerivativeFTC h hbounded
+  endpoint_valid := hendpoint
+  equivalent := by
+    have hbridge :
+        (Integral.integralFor integrand
+          (constructionFor_of_selectedStageCandidateDerivativeFTC h hbounded)).Equiv
+            h.endpointRaw := by
+      simpa [Integral.integralFor,
+        constructionFor_of_selectedStageCandidateDerivativeFTC,
+        SelectedStageCandidateDerivativeFTC.boundedIntegralRaw] using h.equiv_endpoint
+    exact RealRaw.equiv_trans
+      (Integral.integralFor_valid integrand
+        (constructionFor_of_selectedStageCandidateDerivativeFTC h hbounded))
+      hscheduledEndpoint hendpoint hbridge hendpoint_equiv
+
 /-- Candidate-derivative specialization of
 `constructionFor_of_derivativeBoundFTC`. -/
 def constructionFor_of_candidateDerivativeFTC
