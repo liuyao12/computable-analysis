@@ -124,6 +124,16 @@ The checked finite uniqueness statement is the recurrence theorem above; the
 two-by-two instance is also available as
 \lean{ComputableAnalysis.LinearODE.twoByTwo_solution_unique}.
 
+The direct scalar uniqueness route is also exposed independently of the
+matrix expansion. Its only analytic input is a finite mesh-contraction
+certificate; the conclusion is pointwise interval-overlap equivalence of the
+two candidate trajectories.
+
+\lean{ComputableAnalysis.ScalarODE.DirectMeshHalvingCertificate.error_eq_zero}
+\lean{ComputableAnalysis.ScalarODE.SelfDerivativeDirectMeshComparison.equivalent}
+\lean{ComputableAnalysis.ScalarODE.selfDerivativeInitialValueUnique_of_directMesh}
+\leanok
+
 Thus the current foundation proves the algebraic and error-closing core, while
 the remaining theorem for a given ODE is a finite, inspectable obligation:
 regularity of the entries, simplex enclosure, and a compatible tail bound.
