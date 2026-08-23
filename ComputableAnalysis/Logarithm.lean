@@ -2788,6 +2788,35 @@ theorem logTwoLo_nonneg (n : Nat) : 0 <= logTwoLo n := by
   have hmono := harmonicSum_le_of_le (n := n) (m := 2 * n) (by omega)
   grind [Rat.sub_eq_add_neg]
 
+theorem logTwoLo_pos {n : Nat} (hn : 0 < n) : 0 < logTwoLo n := by
+  obtain ⟨k, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (Nat.ne_of_gt hn)
+  rw [logTwoLo_succ]
+  have hprev : 0 <= logTwoLo k := logTwoLo_nonneg k
+  let a : Rat := ((2 * k + 1 : Nat) : Rat)
+  let b : Rat := ((2 * k + 2 : Nat) : Rat)
+  have ha : 0 < a := by
+    exact (Rat.natCast_pos).2 (by omega)
+  have hb : 0 < b := by
+    exact (Rat.natCast_pos).2 (by omega)
+  have hab : a < b := by
+    dsimp [a, b]
+    exact_mod_cast (by omega : 2 * k + 1 < 2 * k + 2)
+  have hfrac : 1 / b < 1 / a := by
+    rw [Rat.div_lt_iff hb]
+    rw [Rat.div_def]
+    simp only [Rat.one_mul]
+    have hane : a ≠ 0 := Rat.ne_of_gt ha
+    have hinvpos : 0 < a⁻¹ := (Rat.inv_pos).2 ha
+    have hmul := Rat.mul_lt_mul_of_pos_left hab hinvpos
+    calc
+      1 = a⁻¹ * a := by
+        rw [Rat.mul_comm, Rat.mul_inv_cancel a hane]
+      _ < a⁻¹ * b := hmul
+  have hfrac' : 1 / ((2 * k + 2 : Nat) : Rat) <
+      1 / ((2 * k + 1 : Nat) : Rat) := by
+    simpa [a, b] using hfrac
+  grind [Rat.sub_eq_add_neg]
+
 theorem logTwoHi_le_one (n : Nat) : logTwoHi n <= 1 := by
   have hanti := logTwoHi_anti (n := 0) (m := n) (by omega)
   simpa [logTwoHi, logTwoState, logTwoStep] using hanti
