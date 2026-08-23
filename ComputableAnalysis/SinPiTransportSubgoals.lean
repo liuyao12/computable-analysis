@@ -305,6 +305,18 @@ noncomputable def DyadicTangentWitnessFamily.of_branch_certificate_families
     precision depth k hk
   simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using hover
 
+/-! The packaged certificate family is the proof-facing representation; this
+adapter turns it into the executable witness family consumed by the public
+integral transport theorem.  It adds one representation edge without
+introducing pairwise equalities between all evaluators. -/
+
+noncomputable def DyadicNestedRadicalBranchCertificateFamily.toWitnessFamily
+    {B : IntegralIdentities.ArctanInverseBisection}
+    (H : DyadicNestedRadicalBranchCertificateFamily B) :
+    DyadicTangentWitnessFamily B :=
+  DyadicTangentWitnessFamily.of_branch_certificate_families
+    B H.endpoint_zero H.even H.lower H.upper
+
 end SinPiIntegral
 
 end ComputableAnalysis
