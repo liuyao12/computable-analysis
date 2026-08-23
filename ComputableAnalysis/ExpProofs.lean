@@ -3137,6 +3137,63 @@ theorem uniformExpCenter_mono_on_unit
   exact FinitePolynomial.expTaylorPrefix_mono_on_unit
     (uniformExpTailTerms n - 1) hx hy hxy
 
+/-! The finite exponential center does not become flatter than the identity
+on the unit interval.  This is the quantitative separation fact needed by
+the inverse algorithm; it is proved from the positive finite prefix, before
+any limiting or completeness argument is invoked. -/
+set_option maxHeartbeats 1200000 in
+theorem uniformExpCenter_difference_ge_input
+    (n : Nat) {x y : Rat}
+    (hx : 0 <= x) (hy : y <= 1) (hxy : x <= y) :
+    y - x <= uniformExpCenter y n - uniformExpCenter x n := by
+  have hterms : uniformExpTailTerms n =
+      (uniformExpTailTerms n - 1) + 1 := by
+    have hstart : 1 <= uniformExpTailStart := by
+      unfold uniformExpTailStart
+      native_decide
+    unfold uniformExpTailTerms
+    omega
+  have hback : uniformExpTailTerms n - 1 + 1 - 1 =
+      uniformExpTailTerms n - 1 := by omega
+  have hcenter_x :
+      uniformExpCenter x n =
+        FinitePolynomial.expTaylorPrefix
+          (uniformExpTailTerms n - 1) x := by
+    unfold uniformExpCenter
+    rw [hterms, powerSeriesCenterAtTerms_eq_expTaylorPrefix, hback]
+  have hcenter_y :
+      uniformExpCenter y n =
+        FinitePolynomial.expTaylorPrefix
+          (uniformExpTailTerms n - 1) y := by
+    unfold uniformExpCenter
+    rw [hterms, powerSeriesCenterAtTerms_eq_expTaylorPrefix, hback]
+  have hcoeff : forall k, 0 <= FormalPowerSeries.expCoeff k := by
+    intro k
+    unfold FormalPowerSeries.expCoeff
+    rw [Rat.div_def, Rat.one_mul]
+    exact Rat.le_of_lt ((Rat.inv_pos).2
+      (RationalMajorant.factorialRat_pos k))
+  have hzero : 1 <= FormalPowerSeries.expCoeff 0 := by
+    unfold FormalPowerSeries.expCoeff
+    native_decide
+  have hterms_two : 1 <= uniformExpTailTerms n - 1 := by
+    have hstart : 2 <= uniformExpTailStart := by
+      unfold uniformExpTailStart
+      native_decide
+    unfold uniformExpTailTerms
+    omega
+  have hprefix_index : uniformExpTailTerms n - 1 =
+      (uniformExpTailTerms n - 1 - 1) + 1 := by omega
+  rw [hcenter_x, hcenter_y]
+  have hprefix :=
+    FinitePolynomial.integratedTaylorPrefix_succ_difference_ge
+      (coeffs := FormalPowerSeries.expCoeff)
+      (hcoeff := hcoeff) (hzero := hzero)
+      (n := uniformExpTailTerms n - 1 - 1) hx hy hxy
+  unfold FinitePolynomial.expTaylorPrefix
+  rw [hprefix_index]
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+
 private theorem uniformExpCenter_one_le_three (n : Nat) :
     uniformExpCenter 1 n <= (3 : Rat) := by
   change ePowerSeriesCenterAtTerms (uniformExpTailTerms n) <= (3 : Rat)
@@ -3572,6 +3629,86 @@ theorem uniformExpTailMagnitude_le_quotientTolerance
   have htail := uniformExpTailMagnitude_le_geometric stage
   have hshift := RationalMajorant.halfDecayShift_spec hbound eps
   exact Rat.le_trans htail hshift
+
+/-! A quotient-selected stage makes the two endpoint boxes disjoint.  This is
+the operational form of strict monotonicity used by a computable inverse
+search: the stage depends only on the rational gap and the requested output
+precision. -/
+theorem uniformExpOnUnit_box_separated
+    (n : Nat) {x y : Rat}
+    (hx : 0 <= x) (hy : y <= 1) (hxy : x < y) :
+    (uniformExpBox x
+      (uniformExpQuotientPrecision (y - x)
+        (Rat.ne_of_gt ((Rat.lt_iff_sub_pos x y).mp hxy)) n)).hi <
+      (uniformExpBox y
+        (uniformExpQuotientPrecision (y - x)
+          (Rat.ne_of_gt ((Rat.lt_iff_sub_pos x y).mp hxy)) n)).lo := by
+  let h : Rat := y - x
+  have hpos : 0 < h := by
+    dsimp [h]
+    exact (Rat.lt_iff_sub_pos x y).mp hxy
+  have hh : h ≠ 0 := Rat.ne_of_gt hpos
+  let stage : Nat := uniformExpQuotientPrecision h hh n
+  have htail := uniformExpTailMagnitude_le_quotientTolerance h hh n
+  have hqabs : qabs h = h := qabs_eq_self_of_nonneg (Rat.le_of_lt hpos)
+  have htail' :
+      uniformExpTailMagnitude stage <=
+        (precisionAtStage n).val * h / 24 := by
+    simpa [stage, uniformExpQuotientTailTolerance, hqabs] using htail
+  have hp : 0 <= (precisionAtStage n).val :=
+    Rat.le_of_lt (precisionAtStage n).property
+  have hpone : (precisionAtStage n).val <= 1 := by
+    by_cases hn : n = 0
+    · simp [precisionAtStage, hn]
+    · rw [precisionAtStage, dif_neg hn]
+      change 1 / (n : Rat) <= 1
+      have h := FTC.one_div_nat_antitone (n := 1) (m := n)
+        (by native_decide) (Nat.pos_of_ne_zero hn)
+        (Nat.one_le_iff_ne_zero.mpr hn)
+      have h' : 1 / (n : Rat) <= 1 / (1 : Rat) := h
+      calc
+        1 / (n : Rat) <= 1 / (1 : Rat) := h'
+        _ = 1 := by native_decide
+  have htail4 : 4 * uniformExpTailMagnitude stage <= h / 6 := by
+    have hscaled := Rat.mul_le_mul_of_nonneg_left htail'
+      (by native_decide : (0 : Rat) <= 4)
+    have hph := Rat.mul_le_mul_of_nonneg_right hpone
+      (Rat.le_of_lt hpos)
+    calc
+      4 * uniformExpTailMagnitude stage <=
+          4 * ((precisionAtStage n).val * h / 24) := hscaled
+      _ = ((precisionAtStage n).val * h) / 6 := by
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= h / 6 := by
+        have := Rat.mul_le_mul_of_nonneg_left hph hp
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  have hcenter := uniformExpCenter_difference_ge_input
+    stage hx hy (Rat.le_of_lt hxy)
+  have hstrict : h / 6 < h := by
+    have := hpos
+    grind
+  have hrad : 2 * uniformExpTailRadius stage <= h / 6 := by
+    unfold uniformExpTailRadius
+    calc
+      2 * (2 * uniformExpTailMagnitude stage) =
+          4 * uniformExpTailMagnitude stage := by grind
+      _ <= h / 6 := htail4
+  have hdiff : 2 * uniformExpTailRadius stage <
+      uniformExpCenter y stage - uniformExpCenter x stage :=
+    by grind
+  have hdiff' :
+      2 * uniformExpTailRadius
+          (uniformExpQuotientPrecision (y - x)
+            (Rat.ne_of_gt ((Rat.lt_iff_sub_pos x y).mp hxy)) n) <
+        uniformExpCenter y
+            (uniformExpQuotientPrecision (y - x)
+              (Rat.ne_of_gt ((Rat.lt_iff_sub_pos x y).mp hxy)) n) -
+          uniformExpCenter x
+            (uniformExpQuotientPrecision (y - x)
+              (Rat.ne_of_gt ((Rat.lt_iff_sub_pos x y).mp hxy)) n) := by
+    simpa [stage, h] using hdiff
+  unfold uniformExpBox intervalAround
+  grind [Rat.sub_eq_add_neg]
 
 /-- The dyadic step schedule for the eventual two-sided self-derivative
 certificate.  The coefficient `68` reserves half of the requested precision

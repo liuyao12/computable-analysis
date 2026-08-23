@@ -608,6 +608,82 @@ theorem integratedTaylorPrefix_mono_on_unit
         simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm] using hscaled
       exact rat_add_le_add ih hterm
 
+/-! A positive finite Taylor primitive contains its linear term.  This is a
+finite substitute for the usual statement that a function with derivative at
+least one is strictly increasing. -/
+theorem integratedTaylorPrefix_succ_difference_ge
+    (coeffs : Nat -> Rat) (hcoeff : forall n, 0 <= coeffs n)
+    (hzero : 1 <= coeffs 0) (n : Nat) {x y : Rat}
+    (hx : 0 <= x) (hy : y <= 1) (hxy : x <= y) :
+    y - x <=
+      integratedTaylorPrefix coeffs (n + 1) y -
+        integratedTaylorPrefix coeffs (n + 1) x := by
+  induction n with
+  | zero =>
+      have hdiff :
+          integratedTaylorPrefix coeffs (0 + 1) y -
+              integratedTaylorPrefix coeffs (0 + 1) x =
+            coeffs 0 * (y - x) := by
+        simp [integratedTaylorPrefix, Rat.pow_succ, Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      rw [hdiff]
+      have hnonneg : 0 <= y - x := by grind
+      have hmul := Rat.mul_le_mul_of_nonneg_right hzero hnonneg
+      grind
+  | succ n ih =>
+      have hpow : x ^ (n + 2) <= y ^ (n + 2) := by
+        have hpow_all : ∀ m : Nat, x ^ m <= y ^ m := by
+          intro m
+          induction m with
+          | zero => simp
+          | succ m ihm =>
+              have hleft : x ^ m * x <= y ^ m * x :=
+                Rat.mul_le_mul_of_nonneg_right ihm hx
+              have hright : y ^ m * x <= y ^ m * y :=
+                Rat.mul_le_mul_of_nonneg_left hxy (Rat.pow_nonneg (by
+                  exact Rat.le_trans hx hxy))
+              calc
+                x ^ (m + 1) = x ^ m * x := by rw [Rat.pow_succ]
+                _ <= y ^ m * x := hleft
+                _ <= y ^ m * y := hright
+                _ = y ^ (m + 1) := by rw [Rat.pow_succ]
+        exact hpow_all (n + 2)
+      have hden : 0 <= 1 / ((n + 2 : Nat) : Rat) := by
+        exact Rat.le_of_lt (one_div_nat_pos (by omega))
+      have hpowdiv :
+          x ^ (n + 2) / ((n + 2 : Nat) : Rat) <=
+            y ^ (n + 2) / ((n + 2 : Nat) : Rat) := by
+        rw [Rat.div_def, Rat.div_def]
+        have hmul := Rat.mul_le_mul_of_nonneg_right hpow hden
+        simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm] using hmul
+      have hterm :
+          coeffs (n + 1) *
+              (y ^ (n + 2) / ((n + 2 : Nat) : Rat) -
+                x ^ (n + 2) / ((n + 2 : Nat) : Rat)) >= 0 := by
+        have hdiff : 0 <=
+            y ^ (n + 2) / ((n + 2 : Nat) : Rat) -
+              x ^ (n + 2) / ((n + 2 : Nat) : Rat) := by grind
+        exact Rat.mul_nonneg (hcoeff (n + 1)) hdiff
+      have hdecomp :
+          integratedTaylorPrefix coeffs (n + 2) y -
+              integratedTaylorPrefix coeffs (n + 2) x =
+            (integratedTaylorPrefix coeffs (n + 1) y -
+              integratedTaylorPrefix coeffs (n + 1) x) +
+              coeffs (n + 1) *
+                (y ^ (n + 2) / ((n + 2 : Nat) : Rat) -
+                  x ^ (n + 2) / ((n + 2 : Nat) : Rat)) := by
+        simp only [integratedTaylorPrefix]
+        grind [Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm]
+      rw [hdecomp]
+      simpa [Nat.add_assoc] using (Rat.le_trans ih (by grind :
+        integratedTaylorPrefix coeffs (n + 1) y -
+            integratedTaylorPrefix coeffs (n + 1) x <=
+          integratedTaylorPrefix coeffs (n + 1) y -
+            integratedTaylorPrefix coeffs (n + 1) x +
+              coeffs (n + 1) *
+                (y ^ (n + 2) / ((n + 2 : Nat) : Rat) -
+                  x ^ (n + 2) / ((n + 2 : Nat) : Rat))))
+
 /-- The finite endpoint contribution of the next integrated Taylor monomial.
 
 This is the exact rational FTC recurrence for a finite polynomial primitive:
