@@ -4860,6 +4860,15 @@ theorem uniformExpSymmetricFTCPartition_cell_width
   rw [Rat.div_def, Rat.div_def]
   grind [Rat.mul_assoc, Rat.mul_comm]
 
+theorem uniformExpSymmetricFTCPartition_cell_endpoints
+    (eps : QPos) (k : Nat)
+    (hk : k < (uniformExpSymmetricFTCPartition eps).pieces) :
+    ((uniformExpSymmetricFTCPartition eps).cell k hk).lower =
+        leftPoint (-1) 1 (uniformExpSymmetricFTCPieces eps) k ∧
+      ((uniformExpSymmetricFTCPartition eps).cell k hk).upper =
+        leftPoint (-1) 1 (uniformExpSymmetricFTCPieces eps) (k + 1) := by
+  constructor <;> rfl
+
 /-- At a common stage, the next finite Taylor prefix differs from the raw-box
 center by exactly one factorial monomial. -/
 theorem qabs_expTaylorPrefix_sub_uniformExpCenter_le (x : Rat)
