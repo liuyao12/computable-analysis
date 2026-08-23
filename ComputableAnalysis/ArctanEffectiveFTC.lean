@@ -797,6 +797,162 @@ theorem arctanEffectiveFTC_equiv_endpoint :
       arctanEffectiveFTCData.toDerivativeBoundFTC.endpointRaw :=
   effectiveDerivativeBoundFTC arctanEffectiveFTCData
 
+/-! The selected partition is chosen from the requested precision and is not
+itself a nested stage schedule.  Prefix stabilization turns the finite FTC
+candidate into a valid raw real while retaining the same endpoint value. -/
+
+theorem arctanEffectiveFTC_boundedIntegral_widthsShrink :
+    RealRaw.WidthsShrinkToZero
+      arctanEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.compute := by
+  intro eps
+  refine ⟨eps.val.den + 1, ?_⟩
+  intro n hn
+  have hnpos : 0 < n := by omega
+  have hprec : (precisionAtStage n).val <= eps.val := by
+    have hden : 0 < (eps.val.den + 1 : Nat) := by omega
+    have hanti := FTC.one_div_nat_antitone
+      (n := eps.val.den + 1) (m := n)
+      (by exact hden) hnpos hn
+    have hbase := FTC.one_div_den_succ_le_of_pos eps.property
+    calc
+      (precisionAtStage n).val = 1 / (n : Rat) := by
+        simp [precisionAtStage, Nat.ne_of_gt hnpos]
+      _ <= 1 / (((eps.val.den + 1 : Nat) : Rat)) := hanti
+      _ <= eps.val := hbase
+  change
+    (DerivativeBoundFTC.boundedIntegralInterval
+      arctanEffectiveFTCData.toDerivativeBoundFTC
+      (precisionAtStage n)).width <= eps.val
+  exact Rat.le_trans
+    (arctanEffectiveFTCData.toDerivativeBoundFTC.riemann_width
+      (precisionAtStage n)) hprec
+
+def arctanEffectiveFTCEndpointValid :
+    RealRaw.ValidCompute
+      (endpointDifferenceCompute arctanPrimitiveRaw 0 1) :=
+  endpointDifference_valid_of_fun_valid arctanPrimitiveRaw_valid
+    (by exact ⟨by native_decide, by native_decide⟩)
+    (by exact ⟨by native_decide, by native_decide⟩)
+
+theorem arctanEffectiveFTC_boundedIntegral_equiv_endpointDifference :
+    arctanEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      (endpointDifferenceRaw arctanPrimitiveRaw 0 1
+        arctanEffectiveFTCEndpointValid) := by
+  let h := arctanEffectiveFTCData.toDerivativeBoundFTC
+  have hcanonical := DerivativeBoundFTC.endpointRaw_equiv_endpointDifference
+    h arctanPrimitiveRaw_valid
+    (by exact ⟨by native_decide, by native_decide⟩)
+    (by exact ⟨by native_decide, by native_decide⟩)
+    arctanEffectiveFTCEndpointValid
+  intro n
+  let eps := precisionAtStage n
+  let s := h.chooseEndpointPrecision eps
+  have hcontains :
+      ((h.choosePartition eps).boundIntegralSum
+          (fun k hk =>
+            (h.derivativeBound eps k hk).bound (h.chooseBoundStage eps))).ContainsInterval
+      (endpointDifferenceInterval arctanPrimitiveRaw 0 1 s) := by
+    apply RationalPartition.boundIntegralSum_contains_endpointDifference
+      (P := h.choosePartition eps) (F := arctanPrimitiveRaw) (prec := s)
+      arctanPrimitiveRaw_valid
+    · intro i hi
+      have hp := (h.choosePartition eps).point_in_bounds hi
+      exact hp
+    · intro k hk
+      have hlocal := (h.localControl eps k hk).endpoint_contained
+        (h.chooseBoundStage eps)
+      have hagree := arctanEffectiveFTCData.endpointPrecision_agreement
+        eps k hk (h.chooseBoundStage eps)
+      have hagree' :
+          (h.localControl eps k hk).endpointPrecision
+              (h.chooseBoundStage eps) = s := by
+        simpa [h, s, EffectiveDerivativeBoundFTC.toDerivativeBoundFTC] using hagree
+      rw [hagree'] at hlocal
+      simpa [RationalPartition.cell, s] using
+        hlocal
+  have hover2 := (RealRaw.compareAt_overlap_iff h.endpointRaw
+      (endpointDifferenceRaw arctanPrimitiveRaw 0 1
+        arctanEffectiveFTCEndpointValid) n n).1
+      (hcanonical n)
+  apply (RealRaw.compareAt_overlap_iff h.boundedIntegralRaw
+    (endpointDifferenceRaw arctanPrimitiveRaw 0 1
+      arctanEffectiveFTCEndpointValid) n n).2
+  change QInterval.Overlaps
+    ((h.choosePartition eps).boundIntegralSum
+      (fun k hk => (h.derivativeBound eps k hk).bound (h.chooseBoundStage eps)))
+    (endpointDifferenceCompute arctanPrimitiveRaw 0 1 n)
+  change QInterval.Overlaps
+    ((h.choosePartition eps).boundIntegralSum
+      (fun k hk => (h.derivativeBound eps k hk).bound (h.chooseBoundStage eps)))
+    (endpointDifferenceInterval arctanPrimitiveRaw 0 1 n)
+  exact ⟨Rat.le_trans hcontains.1 hover2.1,
+    Rat.le_trans hover2.2 hcontains.2⟩
+
+def arctanEffectiveFTCStabilized : RealRaw :=
+  RealRaw.prefixStabilize
+    arctanEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw
+    (fun n =>
+      (endpointDifferenceRaw arctanPrimitiveRaw 0 1
+        arctanEffectiveFTCEndpointValid).compute n |>.width)
+
+theorem arctanEffectiveFTCStabilized_valid :
+    arctanEffectiveFTCStabilized.Valid := by
+  unfold arctanEffectiveFTCStabilized
+  apply RealRaw.prefixStabilize_valid
+    (candidate := arctanEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw)
+    (anchor := endpointDifferenceRaw arctanPrimitiveRaw 0 1
+      arctanEffectiveFTCEndpointValid)
+    (radius := fun n =>
+      (endpointDifferenceRaw arctanPrimitiveRaw 0 1
+        arctanEffectiveFTCEndpointValid).compute n |>.width)
+  · exact arctanEffectiveFTC_boundedIntegral_widthsShrink
+  · simpa [endpointDifferenceRaw, RealRaw.Valid] using
+      arctanEffectiveFTCEndpointValid
+  · exact arctanEffectiveFTC_boundedIntegral_equiv_endpointDifference
+  · intro n
+    exact Rat.le_refl
+  · intro eps
+    obtain ⟨N, hN⟩ := arctanEffectiveFTCEndpointValid.2.2 eps
+    exact ⟨N, fun n hn => hN n hn⟩
+
+theorem arctanEffectiveFTCStabilized_equiv_endpointDifference :
+    arctanEffectiveFTCStabilized.Equiv
+      (endpointDifferenceRaw arctanPrimitiveRaw 0 1
+        arctanEffectiveFTCEndpointValid) := by
+  unfold arctanEffectiveFTCStabilized
+  apply RealRaw.prefixStabilize_equiv_anchor
+    (candidate := arctanEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw)
+    (anchor := endpointDifferenceRaw arctanPrimitiveRaw 0 1
+      arctanEffectiveFTCEndpointValid)
+    (radius := fun n =>
+      (endpointDifferenceRaw arctanPrimitiveRaw 0 1
+        arctanEffectiveFTCEndpointValid).compute n |>.width)
+  · simpa [endpointDifferenceRaw, RealRaw.Valid] using
+      arctanEffectiveFTCEndpointValid
+  · exact arctanEffectiveFTC_boundedIntegral_equiv_endpointDifference
+  · intro n
+    exact Rat.le_refl
+
+def arctanEffectiveFTCStabilizedConstruction :
+    Integral.ConstructionFor
+      (FunctionOnInterval.exactRat
+        (fun x : Rat => 1 / (1 + x * x)) 0 1) where
+  compute := arctanEffectiveFTCStabilized.compute
+  certificate := by
+    simpa [RealRaw.Valid] using arctanEffectiveFTCStabilized_valid
+
+theorem arctanEffectiveFTCStabilizedIntegral_equiv_endpointDifference :
+    (Integral.integralFor
+      (FunctionOnInterval.exactRat
+        (fun x : Rat => 1 / (1 + x * x)) 0 1)
+      arctanEffectiveFTCStabilizedConstruction).Equiv
+      (endpointDifferenceRaw arctanPrimitiveRaw 0 1
+        arctanEffectiveFTCEndpointValid) := by
+  change arctanEffectiveFTCStabilized.Equiv
+    (endpointDifferenceRaw arctanPrimitiveRaw 0 1
+      arctanEffectiveFTCEndpointValid)
+  exact arctanEffectiveFTCStabilized_equiv_endpointDifference
+
 def arctanKernelDerivativeBound (eps : QPos) (k : Nat)
     (hk : k < (RationalPartition.uniform 0 1 (eps.val.den + 1)
       (by omega) (by native_decide)).pieces) :
