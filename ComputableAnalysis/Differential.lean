@@ -1299,6 +1299,54 @@ def FunctionOnInterval.Equivalent (f g : FunctionOnInterval) : Prop :=
     (PartialRealFunRaw.apply f.raw f.valid_on x (f.defined_on x hxF)).Equiv
       (PartialRealFunRaw.apply g.raw g.valid_on x (g.defined_on x hxG))
 
+namespace FunctionOnInterval
+
+/-! Equivalence edges form the local representation graph for a function.
+These laws are proved at the `realRaw` level, so a chain of different native
+stage schedules can be composed without selecting a completed function. -/
+
+theorem equivalent_refl (f : FunctionOnInterval) :
+    Equivalent f f := by
+  refine ⟨rfl, rfl, ?_⟩
+  intro x hxF hxG
+  exact RealRaw.equiv_refl
+    (PartialRealFunRaw.apply f.raw f.valid_on x (f.defined_on x hxF))
+    (f.valid_on x (f.defined_on x hxF))
+
+theorem equivalent_symm {f g : FunctionOnInterval}
+    (h : Equivalent f g) : Equivalent g f := by
+  refine ⟨h.1.symm, h.2.1.symm, ?_⟩
+  intro x hxG hxF
+  have hfg := h.2.2 x hxF hxG
+  exact RealRaw.equiv_symm hfg
+
+theorem equivalent_trans {f g h : FunctionOnInterval}
+    (hfg : Equivalent f g) (hgh : Equivalent g h) :
+    Equivalent f h := by
+  refine ⟨hfg.1.trans hgh.1, hfg.2.1.trans hgh.2.1, ?_⟩
+  intro x hxF hxH
+  have hxG : inDomainInterval g.lower g.upper x := by
+    simpa [← hfg.1, ← hfg.2.1] using hxF
+  have hFvalid :
+      (PartialRealFunRaw.apply f.raw f.valid_on x
+        (f.defined_on x hxF)).Valid := by
+    change RealRaw.ValidCompute (f.raw.compute x (f.defined_on x hxF))
+    exact f.valid_on x (f.defined_on x hxF)
+  have hGvalid :
+      (PartialRealFunRaw.apply g.raw g.valid_on x
+        (g.defined_on x hxG)).Valid := by
+    change RealRaw.ValidCompute (g.raw.compute x (g.defined_on x hxG))
+    exact g.valid_on x (g.defined_on x hxG)
+  have hHvalid :
+      (PartialRealFunRaw.apply h.raw h.valid_on x
+        (h.defined_on x hxH)).Valid := by
+    change RealRaw.ValidCompute (h.raw.compute x (h.defined_on x hxH))
+    exact h.valid_on x (h.defined_on x hxH)
+  exact RealRaw.equiv_trans hFvalid hGvalid hHvalid
+    (hfg.2.2 x hxF hxG) (hgh.2.2 x hxG hxH)
+
+end FunctionOnInterval
+
 /-- Effective derivative on a rational interval.
 
 For every requested output precision, small enough rational steps make the

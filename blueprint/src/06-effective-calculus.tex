@@ -45,6 +45,15 @@ the requested denominator.  The reverse direction is not automatic: an
 epsilon--delta modulus must still be upgraded to a cell-image evaluator before
 it can drive a Darboux integral.
 
+Representations form a local chain: reflexive, symmetric, and transitive
+equivalence edges compose different rational stage schedules without changing
+the represented function.
+
+\lean{ComputableAnalysis.FunctionOnInterval.equivalent_refl}
+\lean{ComputableAnalysis.FunctionOnInterval.equivalent_symm}
+\lean{ComputableAnalysis.FunctionOnInterval.equivalent_trans}
+\leanok
+
 The interface is the reusable calculus API: finite secant bounds feed
 derivative certificates; derivative bounds feed partition boxes; the effective
 FTC turns those boxes into endpoint differences. Monomial and finite
