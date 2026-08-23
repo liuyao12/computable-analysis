@@ -1773,6 +1773,15 @@ structure EffectiveFTCExact (F dF : Rat -> Rat) (a b : Rat) where
   chooseN : QPos -> Nat
   good : forall eps, ftcErrorExact F dF a b (chooseN eps) <= eps.val
 
+/-! The exact constant rectangle sum is the finite algebra behind the first
+end-to-end FTC instance.  No refinement or real-number completion is needed:
+one positive cell already has the exact width-times-height value. -/
+theorem riemannLeftExact_constant_one (c a b : Rat) :
+    riemannLeftExact (fun _ => c) a b 1 = (b - a) * c := by
+  unfold riemannLeftExact mesh leftPoint
+  simp
+  grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
 def inDomainInterval (a b x : Rat) : Prop :=
   a <= x /\ x <= b
 

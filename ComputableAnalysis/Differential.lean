@@ -116,6 +116,26 @@ def affineDerivative (m c : Rat) :
     simp
     exact Rat.le_of_lt eps.property
 
+/-! First complete FTC instance.  The derivative of an affine rational
+function is constant, so the one-cell rectangle computation is already exact.
+This is the finite prototype for later polynomial and special-function FTC
+certificates. -/
+def affineFTCExact (m c a b : Rat) :
+    EffectiveFTCExact (affine m c) (constant m) a b where
+  derivative := affineDerivative m c
+  chooseN := fun _ => 1
+  good := by
+    intro eps
+    unfold ftcErrorExact
+    change qabs
+      (riemannLeftExact (fun _ => m) a b 1 -
+        (affine m c b - affine m c a)) <= eps.val
+    rw [riemannLeftExact_constant_one]
+    unfold affine
+    simp [qabs]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_assoc, Rat.add_comm,
+      Rat.mul_assoc, Rat.mul_comm]
+
 theorem affine_derivative_effective (m c : Rat) :
     Nonempty (EffectiveDerivativeExact (affine m c) (constant m)) :=
   ⟨affineDerivative m c⟩

@@ -21,6 +21,15 @@ function adds only its finite range and overlap lemmas.
 The square and cube instances also carry finite dyadic integral certificates,
 so the pointwise modulus is already connected to an actual computable area.
 
+The first complete end-to-end FTC witness is affine: its finite-difference
+derivative is exactly constant, and a single rectangle computes the integral
+exactly.  This is the base case for the later polynomial and special-function
+certificates.
+
+\lean{ComputableAnalysis.riemannLeftExact_constant_one}
+\lean{ComputableAnalysis.ExactFunction.affineFTCExact}
+\leanok
+
 \section{Continuity as a finite certificate}
 
 Continuity is not a predicate on an ambient completed function space.  A
