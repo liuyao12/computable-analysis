@@ -66,6 +66,16 @@ new evaluator -> one existing evaluator -> semantic function
 The preferred evaluator can therefore be changed for efficiency without
 rewriting theorems stated at the abstract function level.
 
+The proof-independent function layer exposes the same laws.  Its transitivity
+hypothesis explicitly supplies the middle domain on the intersection of the
+outer domains; this is the correct contract for partial special functions.
+
+\lean{ComputableAnalysis.RealFunRaw.equivalentWith_refl}
+\lean{ComputableAnalysis.RealFunRaw.equivalentWith_symm}
+\lean{ComputableAnalysis.RealFunRaw.equivalentWith_trans}
+\lean{ComputableAnalysis.RealFunRaw.equivalent_trans}
+\leanok
+
 The interface is the reusable calculus API: finite secant bounds feed
 derivative certificates; derivative bounds feed partition boxes; the effective
 FTC turns those boxes into endpoint differences. Monomial and finite

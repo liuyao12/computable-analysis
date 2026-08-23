@@ -24,6 +24,67 @@ def RealFunRaw.Equivalent (f g : RealFunRaw) : Prop :=
   Exists fun hf : f.Valid => Exists fun hg : g.Valid =>
     f.EquivalentWith g hf hg
 
+namespace RealFunRaw
+
+/-! The same representation-graph laws are available for the stable
+`x,n ↦ QInterval` function layer.  Transitivity explicitly asks that the
+middle evaluator be defined wherever the two outer evaluators are defined;
+unlike `FunctionOnInterval`, arbitrary `RealFunRaw`s need not share a domain. -/
+
+theorem equivalentWith_refl (f : RealFunRaw) (hf : f.Valid) :
+    f.EquivalentWith f hf hf := by
+  intro x hfx hfx'
+  exact RealRaw.equiv_refl (f.apply hf x hfx) (hf x hfx)
+
+theorem equivalentWith_symm
+    {f g : RealFunRaw} {hf : f.Valid} {hg : g.Valid}
+    (h : f.EquivalentWith g hf hg) :
+    g.EquivalentWith f hg hf := by
+  intro x hgx hfx
+  exact RealRaw.equiv_symm (h x hfx hgx)
+
+theorem equivalentWith_trans
+    {f g h : RealFunRaw}
+    {hf : f.Valid} {hg : g.Valid} {hh : h.Valid}
+    (hdom : forall x, f.domain x -> h.domain x -> g.domain x)
+    (hfg : f.EquivalentWith g hf hg)
+    (hgh : g.EquivalentWith h hg hh) :
+    f.EquivalentWith h hf hh := by
+  intro x hfx hhx
+  have hgx := hdom x hfx hhx
+  have hFvalid : (f.apply hf x hfx).Valid := by
+    change RealRaw.ValidCompute (f.applyCompute x)
+    exact hf x hfx
+  have hGvalid : (g.apply hg x hgx).Valid := by
+    change RealRaw.ValidCompute (g.applyCompute x)
+    exact hg x hgx
+  have hHvalid : (h.apply hh x hhx).Valid := by
+    change RealRaw.ValidCompute (h.applyCompute x)
+    exact hh x hhx
+  exact RealRaw.equiv_trans hFvalid hGvalid hHvalid
+    (hfg x hfx hgx) (hgh x hgx hhx)
+
+theorem equivalent_refl {f : RealFunRaw} (hf : f.Valid) :
+    f.Equivalent f :=
+  ⟨hf, ⟨hf, equivalentWith_refl f hf⟩⟩
+
+theorem equivalent_symm {f g : RealFunRaw}
+    (h : f.Equivalent g) : g.Equivalent f := by
+  rcases h with ⟨hf, hg, hfg⟩
+  exact ⟨hg, ⟨hf, equivalentWith_symm hfg⟩⟩
+
+theorem equivalent_trans {f g h : RealFunRaw}
+    (hdom : forall x, f.domain x -> h.domain x -> g.domain x)
+    (hfg : f.Equivalent g) (hgh : g.Equivalent h) :
+    f.Equivalent h := by
+  rcases hfg with ⟨hf, hg, hfg⟩
+  rcases hgh with ⟨hg', hh, hgh⟩
+  have hproof : hg = hg' := Subsingleton.elim _ _
+  cases hproof
+  exact ⟨hf, ⟨hh, equivalentWith_trans hdom hfg hgh⟩⟩
+
+end RealFunRaw
+
 def derivativeCheckExact (f g : Rat -> Rat) (x h tolerance : Rat) : Bool :=
   if h = 0 then
     false
