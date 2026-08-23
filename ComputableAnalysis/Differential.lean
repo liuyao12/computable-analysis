@@ -93,6 +93,32 @@ def derivativeCheckExact (f g : Rat -> Rat) (x h tolerance : Rat) : Bool :=
 
 namespace ExactFunction
 
+private theorem one_div_den_succ_le_of_pos {q : Rat} (hq : 0 < q) :
+    1 / (((q.den + 1 : Nat) : Rat)) <= q := by
+  let d : Rat := ((q.den + 1 : Nat) : Rat)
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact (Rat.natCast_pos).2 (Nat.succ_pos q.den)
+  have hnumpos : 0 < q.num := rat_num_pos_of_pos hq
+  have hnumgeInt : (1 : Int) <= q.num := by omega
+  have hnumge : (1 : Rat) <= (q.num : Rat) := by
+    exact_mod_cast hnumgeInt
+  have hqd : q * d = (q.num : Rat) + q := by
+    dsimp [d]
+    have hden := rat_den_mul_self q
+    grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm]
+  have hqd_ge_one : 1 <= q * d := by
+    rw [hqd]
+    grind [Rat.le_of_lt hq]
+  apply Rat.le_of_mul_le_mul_right (c := d)
+  · calc
+      (1 / d) * d = 1 := by
+        rw [Rat.div_def]
+        have hdne : d ≠ 0 := Rat.ne_of_gt hdpos
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= q * d := hqd_ge_one
+  · exact hdpos
+
 def affine (m c : Rat) (x : Rat) : Rat := m * x + c
 def constant (m : Rat) (_x : Rat) : Rat := m
 def square (x : Rat) : Rat := x * x
@@ -161,6 +187,44 @@ def squareDerivative : EffectiveDerivativeExact square doubleId where
 theorem square_derivative_effective :
     Nonempty (EffectiveDerivativeExact square doubleId) :=
   ⟨squareDerivative⟩
+
+/-! A first nonlinear FTC instance.  On `[0,1]`, the left rectangles for
+`2*x` miss the exact area under the square primitive by precisely `1/n`.
+Choosing the denominator of the requested rational precision therefore gives
+an explicit finite certificate of the integral, with no completeness axiom. -/
+def squareFTCExactUnit :
+    EffectiveFTCExact square doubleId 0 1 where
+  derivative := squareDerivative
+  chooseN := fun eps => eps.val.den + 1
+  good := by
+    intro eps
+    let n : Nat := eps.val.den + 1
+    have hn : 0 < n := by
+      dsimp [n]
+      omega
+    unfold ftcErrorExact
+    change qabs
+      (riemannLeftExact (fun x => 2 * x) 0 1 n -
+        (square 1 - square 0)) <= eps.val
+    rw [riemannLeftExact_doubleId_of_pos hn]
+    unfold square
+    have hcalc :
+        (1 ^ 2 - 0 ^ 2 - (1 - 0) ^ 2 / (n : Rat) -
+          (1 * 1 - 0 * 0)) = -(1 / (n : Rat)) := by
+      grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.div_def,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    rw [hcalc]
+    have hposinv : 0 < 1 / (n : Rat) := by
+      simpa [Rat.div_def] using
+        ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hn))
+    have hneg : -(1 / (n : Rat)) < 0 := by grind
+    have habs : qabs (-(1 / (n : Rat))) = 1 / (n : Rat) := by
+      unfold qabs
+      rw [if_pos hneg]
+      grind
+    rw [habs]
+    dsimp [n]
+    exact one_div_den_succ_le_of_pos eps.property
 
 /-- The exact rational difference quotient used by the finite product
 identities below. -/

@@ -1782,6 +1782,55 @@ theorem riemannLeftExact_constant_one (c a b : Rat) :
   simp
   grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
+/-! A finite arithmetic lemma for affine rectangle heights.  It is the only
+summation fact needed for the first nonlinear FTC example; the index sum is
+proved by induction over `List.range`, not by invoking an infinite series. -/
+private theorem foldl_affine_range (h a d : Rat) (n : Nat) :
+    (List.range n : List Nat).foldl
+      (fun acc (k : Nat) => acc + h * (a + (k : Rat) * d)) 0 =
+      (n : Rat) * h * a +
+        h * d * (((n : Rat) * ((n : Rat) - 1)) / 2) := by
+  induction n with
+  | zero => simp <;> grind [Rat.div_def]
+  | succ n ih =>
+      rw [List.range_succ, List.foldl_append]
+      simp only [List.foldl_cons, List.foldl_nil]
+      rw [ih]
+      simp only [Rat.natCast_add]
+      grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
+        Rat.mul_assoc, Rat.mul_comm]
+
+theorem riemannLeftExact_doubleId_of_pos {a b : Rat} {n : Nat}
+    (hn : 0 < n) :
+    riemannLeftExact (fun x => 2 * x) a b n =
+      (b ^ 2 - a ^ 2) - (b - a) ^ 2 / (n : Rat) := by
+  let h : Rat := mesh a b n
+  have hmesh : h = (b - a) / (n : Rat) := by
+    dsimp [h, mesh]
+    rw [if_neg (Nat.ne_of_gt hn)]
+  have hfold := foldl_affine_range h (2 * a) (2 * h) n
+  unfold riemannLeftExact
+  dsimp
+  simp only [mesh, if_neg (Nat.ne_of_gt hn)]
+  rw [← hmesh]
+  unfold leftPoint
+  change (List.range n).foldl
+      (fun acc (k : Nat) => acc + h * (2 * (a + (k : Rat) * h))) 0 = _
+  have hrewrite :
+      (fun acc (k : Nat) => acc + h * (2 * (a + (k : Rat) * h))) =
+        (fun acc (k : Nat) => acc + h * ((2 * a) + (k : Rat) * (2 * h))) := by
+    funext acc k
+    grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+  rw [hrewrite, hfold]
+  have htotal := natCast_mul_mesh_eq_sub (a := a) (b := b) hn
+  have htotal' : (n : Rat) * h = b - a := by
+    simpa [h] using htotal
+  change (n : Rat) * h * (2 * a) +
+      h * (2 * h) * ((n : Rat) * ((n : Rat) - 1) / 2) = _
+  grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.div_def,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.mul_add, Rat.add_mul]
+
 def inDomainInterval (a b x : Rat) : Prop :=
   a <= x /\ x <= b
 
