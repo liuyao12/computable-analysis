@@ -80,11 +80,11 @@ each one supplies its own finite derivative and tail certificates.
 
 The checked instance is:
 
-\lean{ComputableAnalysis.uniformExpOnUnit_effectiveFTC}
-\lean{ComputableAnalysis.uniformExpOnUnit_hasDerivativeOnInterval}
-\lean{ComputableAnalysis.uniformExpOnUnit_equivalent_expPowerSeriesOnUnit}
-\lean{ComputableAnalysis.uniformExpOnUnit_zero_equiv_one}
-\lean{ComputableAnalysis.uniformExpOnUnit_solvesSelfDerivative}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_effectiveFTC}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_equivalent_expPowerSeriesOnUnit}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_zero_equiv_one}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_solvesSelfDerivative}
 \leanok
 
 The same evaluator is also checked on the centered chart \([-1,1]\).  This
@@ -96,10 +96,10 @@ centered input -> common-prefix exponential -> two-sided derivative box
                -> initial value at 0 -> local solution certificate
 \end{verbatim}
 
-\lean{ComputableAnalysis.uniformExpOnSymmetricUnit_equivalent_expPowerSeries}
-\lean{ComputableAnalysis.uniformExpOnSymmetricUnit_hasDerivativeOnInterval}
-\lean{ComputableAnalysis.uniformExpOnSymmetricUnit_zero_equiv_one}
-\lean{ComputableAnalysis.uniformExpOnSymmetricUnit_solvesSelfDerivative}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_equivalent_expPowerSeries}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_zero_equiv_one}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_solvesSelfDerivative}
 \leanok
 
 The centered chart now has the explicit function-level interface consumed by
@@ -107,9 +107,9 @@ the effective FTC.  This is a typed boundary rather than a second definition
 of the exponential: it reuses the same evaluator on the rational domain
 $[-1,1]$ and records its validity.
 
-\lean{ComputableAnalysis.uniformExpOnSymmetricUnitRealFunRaw}
-\lean{ComputableAnalysis.uniformExpOnSymmetricUnitRealFunRaw_valid}
-\lean{ComputableAnalysis.uniformExpOnSymmetricUnitRealFunRaw_compute}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnitRealFunRaw}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnitRealFunRaw_valid}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnitRealFunRaw_compute}
 \leanok
 
 The remaining work is the centered two-sided partition schedule.  Once a
@@ -122,7 +122,7 @@ centered evaluator + two-sided derivative schedule
     -> exp(1) - exp(-1)
 \end{verbatim}
 
-\lean{ComputableAnalysis.uniformExpOnSymmetricUnit_effectiveFTC_of_certificate}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_effectiveFTC_of_certificate}
 \leanok
 
 \section{Logarithm and Euler identity}

@@ -103,8 +103,8 @@ The exponential is the first nearly complete analytic provider for this route.
 Its centered evaluator supplies the two-sided local derivative record and the
 exact initial value required by the scalar self-derivative interface:
 
-\lean{ComputableAnalysis.uniformExpOnSymmetricUnit_hasDerivativeOnInterval}
-\lean{ComputableAnalysis.uniformExpOnSymmetricUnit_solvesSelfDerivative}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_solvesSelfDerivative}
 \leanok
 
 At the `RealFunRaw`/effective-FTC boundary, the same evaluator is exposed on
@@ -112,9 +112,9 @@ $[-1,1]$ and proved valid.  The remaining field is explicit: provide the
 two-sided finite partition schedule whose derivative boxes have the required
 width.  No completeness principle is hidden behind this interface.
 
-\lean{ComputableAnalysis.uniformExpOnSymmetricUnitRealFunRaw}
-\lean{ComputableAnalysis.uniformExpOnSymmetricUnitRealFunRaw_valid}
-\lean{ComputableAnalysis.uniformExpOnSymmetricUnit_effectiveFTC_of_certificate}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnitRealFunRaw}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnitRealFunRaw_valid}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_effectiveFTC_of_certificate}
 \leanok
 
 Thus the centered exponential is a checked local ODE provider, while its
