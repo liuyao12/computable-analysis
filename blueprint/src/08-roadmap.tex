@@ -47,9 +47,19 @@ bisection trace. The reusable assembly theorem is now packaged as a
 `DyadicNestedRadicalBranchCertificateFamily`; the remaining work is to
 instantiate its lower-half-angle and reflected upper-half-angle fields; the
 even field now has a checked constructor from a successful finite witness
-search. 
+search.  The proof-producing Boolean search and its family adapter are also
+checked: a finite candidate list plus a proof of search success yields the
+canonical certificate family consumed by the integral theorem.  The two
+remaining geometric fields are therefore the only missing inputs in the
+branch route.
 This is a finite geometric certificate to add, not a hidden use of completed
 real numbers.
+
+\lean{ComputableAnalysis.SinPiIntegral.DyadicHalfAngleChildCertificate}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicReflectedHalfAngleCertificate}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_branch_certificate_families}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_canonical_search_family}
+\leanok
 
 The same distinction applies to the centered exponential chart.  Its
 two-sided derivative and initial-value certificates are complete, but a full
