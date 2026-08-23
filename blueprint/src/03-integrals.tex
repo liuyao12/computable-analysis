@@ -338,6 +338,15 @@ remaining obligation is the finite `TangentChartTransport` structure, whose
 fields say that the public dyadic box and the chart box overlap at every
 stage.  A common rational witness is an equivalent, more constructive form.
 
+The squared-sine route is a useful intermediate application: squaring the
+same certified samples gives a monotone Darboux integral, and the FTC/value
+transport identifies it with \\(1/4\\) once the endpoint certificate is supplied.
+
+\lean{ComputableAnalysis.SinPiSquareFTC.sinPiSquareMonotoneIntegral}
+\lean{ComputableAnalysis.SinPiSquareFTC.sinPiSquareMonotoneIntegral_valid}
+\lean{ComputableAnalysis.SinPiSquareFTC.sinPiSquareMonotoneIntegral_equiv_value}
+\leanok
+
 \lean{ComputableAnalysis.SinPiIntegral.computableSinPiHalfIntegral_equiv_reciprocalPi_of_FTC}
 \lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.TangentChartTransport}
 \lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_transport}
@@ -471,6 +480,12 @@ uniform u-mesh -> inverse-chart x-samples -> Stieltjes rectangles -> overlap
 
 This construction is checked in Lean; its earlier name remains only as a
 compatibility alias.
+
+\lean{ComputableAnalysis.SinPiIntegral.sinPiStieltjesIntegral}
+\lean{ComputableAnalysis.SinPiIntegral.sinPiStieltjesIntegral_valid}
+\lean{ComputableAnalysis.SinPiIntegral.sinPiStieltjesIntegral_equiv_reciprocalPi}
+\lean{ComputableAnalysis.SinPiIntegral.sinPiUnevenSamplingIntegral}
+\leanok
 
 \section{Finite identities}
 \label{thm:finite-green-rectangle}
