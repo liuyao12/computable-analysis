@@ -92,6 +92,20 @@ coefficient identity and the transported tail bound have both been proved.
 This is the series analogue of the effective FTC: a global identity is a
 chain of finite interval containments.
 
+At the coefficient level, integration is a concrete constructor: prescribe the
+constant term and divide the (n)-th derivative coefficient by (n+1).  The
+formal derivative then recovers the input stream exactly.  This is the finite
+algebraic core of termwise FTC; convergence and interval tails are separate
+obligations.
+
+\lean{ComputableAnalysis.FormalPowerSeries.coeffsFromDerivativeAtZero}
+\lean{ComputableAnalysis.FormalPowerSeries.coeffsFromDerivativeAtZero_hasFormalDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.derivative_add}
+\lean{ComputableAnalysis.FormalPowerSeries.derivative_scaleRat}
+\lean{ComputableAnalysis.FormalPowerSeries.HasFormalDerivative.add}
+\lean{ComputableAnalysis.FormalPowerSeries.HasFormalDerivative.scaleRat}
+\leanok
+
 Concrete scalar series instantiate the same contract. The geometric raw and
 alternating raw examples make the two obligations visible: stage nesting is
 proved from finite partial-sum algebra, while eventual precision is proved
