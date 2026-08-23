@@ -192,13 +192,31 @@ interval branch carries its own source, range, and separation data.
 
 The separation certificate is explicit for the unit exponential: positive
 finite Taylor coefficients give the linear lower bound
-(y-xle operatorname{expCenter}(y)-operatorname{expCenter}(x)), and a
-gap-dependent factorial stage makes the endpoint boxes disjoint.
+\[
+  y-x \le \operatorname{expCenter}(y)-\operatorname{expCenter}(x),
+\]
+and a gap-dependent factorial stage makes the endpoint boxes disjoint.
 
 \lean{ComputableAnalysis.ExpProofs.uniformExpCenter_difference_ge_input}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_nondecreasing}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_box_separated}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_gapAwareSeparation}
+\leanok
+
+The inverse layer is deliberately branch-local.  An invertible computation
+must carry its source interval, monotonicity orientation, separation schedule,
+and certified target range; an inverse evaluator then returns a rational source
+box whose forward image overlaps the target box.  This is the constructive
+replacement for saying that a continuous monotone function has an inverse.
+
+\lean{ComputableAnalysis.EffectiveInverseSeparation}
+\lean{ComputableAnalysis.GapAwareInverseSeparation}
+\lean{ComputableAnalysis.InvertibleFunctionOnInterval}
+\lean{ComputableAnalysis.InRangeRaw}
+\lean{ComputableAnalysis.InverseRaw}
+\lean{ComputableAnalysis.InverseRaw.apply_value_overlaps_target}
+\lean{ComputableAnalysis.InverseBisectionSearch}
+\lean{ComputableAnalysis.inverse_function_from_bisection_search}
 \leanok
 
 The positive reciprocal evaluator on \([1,2]\), its interval regularity, and
