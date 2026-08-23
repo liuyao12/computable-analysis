@@ -7201,7 +7201,12 @@ interval-regularity and effective-separation proofs for `arctanGeomOnUnit`.
 -/
 structure ArctanInverseBisection where
   branch : InvertibleFunctionOnInterval
-  branch_is_geometric : branch.function = arctanGeomOnUnit
+  /-- The inverse branch may use a different stage schedule from the
+  geometric arctangent.  Pointwise `FunctionOnInterval.Equivalent` is the
+  intended link: the abstract branch stores the representation actually used
+  by bisection, while the geometric raw remains the semantic anchor. -/
+  branch_is_geometric :
+    FunctionOnInterval.Equivalent branch.function arctanGeomOnUnit
   targetAt : forall t : RationalCircle.GeometricTrig.QuarterTurn,
     RationalCircle.GeometricTrig.firstQuadrantBranch t -> InRangeRaw branch
   targetAt_equiv_halfQuarterTurn :
@@ -7251,13 +7256,17 @@ theorem tangentAt_stays_in_source (B : ArctanInverseBisection)
   (B.inverseRaw).apply_stays_in_source (B.targetAt t ht)
 
 /-- The first-quadrant inverse output lies in the actual unit slope interval,
-because its forward branch is certified equal to `arctanGeomOnUnit`. -/
+because its forward branch is certified equivalent to `arctanGeomOnUnit`. -/
 theorem tangentAt_stays_in_unitSlope (B : ArctanInverseBisection)
     (t : RationalCircle.GeometricTrig.QuarterTurn)
     (ht : RationalCircle.GeometricTrig.firstQuadrantBranch t) :
     forall n, subintervalOf ((B.tangentAt t ht).compute n) 0 1 := by
-  simpa [B.branch_is_geometric, arctanGeomOnUnit] using
-    B.tangentAt_stays_in_source t ht
+  have hsource := B.tangentAt_stays_in_source t ht
+  have hlo : B.branch.function.lower = arctanGeomOnUnit.lower :=
+    B.branch_is_geometric.1
+  have hhi : B.branch.function.upper = arctanGeomOnUnit.upper :=
+    B.branch_is_geometric.2.1
+  simpa [arctanGeomOnUnit, hlo, hhi] using hsource
 
 /-- The forward interval evaluator overlaps the certified target box at each
 stage.  Together with `targetAt_equiv_halfQuarterTurn`, this is the computable

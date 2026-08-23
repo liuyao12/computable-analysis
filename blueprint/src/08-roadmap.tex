@@ -70,6 +70,11 @@ raw computation A ----\\
                      overlap at every stage -> abstract real/function result
 raw computation B ----/
 
+For inverse functions, the same rule applies to the forward branch: use the
+representation whose finite schedule is convenient for search, and attach a
+pointwise equivalence edge to the semantic evaluator.  This is the intended
+way to maintain the project's chain of interchangeable computations.
+
 derivative/area claim -> cell certificate -> mesh refinement -> endpoint overlap
 \end{verbatim}
 

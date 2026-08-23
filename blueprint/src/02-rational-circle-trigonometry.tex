@@ -127,6 +127,12 @@ map.  The geometric area loop and its rectangle comparison are certified by
 This is the bridge used by the integral and FTC chapters; no classical
 real-valued angle function is assumed.
 
+The bisection branch need not use the geometric evaluator's native stage
+schedule.  A faster or more regular scheduled evaluator is admissible when
+its point values are proved equivalent to the geometric `realRaw`; the
+abstract inverse package records that equivalence rather than requiring
+definitional equality.
+
 \section{Scope boundary}
 
 Arbitrary discontinuities and non-effective measure are outside scope.

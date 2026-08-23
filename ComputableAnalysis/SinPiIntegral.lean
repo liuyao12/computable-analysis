@@ -766,8 +766,9 @@ executable dyadic trace.  This is the exact assembly point for the
 arctangent-defined sine construction: no choice of an inverse is taken. -/
 def arctanInverseBisectionOfDyadicTraces
     (branch : InvertibleFunctionOnInterval)
-    (branch_is_geometric : branch.function =
-      IntegralIdentities.arctanGeomOnUnit)
+    (branch_is_geometric :
+      FunctionOnInterval.Equivalent branch.function
+        IntegralIdentities.arctanGeomOnUnit)
     (targetAt : forall t : RationalCircle.GeometricTrig.QuarterTurn,
       RationalCircle.GeometricTrig.firstQuadrantBranch t -> InRangeRaw branch)
     (targetAt_equiv_halfQuarterTurn :
@@ -793,8 +794,9 @@ construction of such witnesses (or an equivalent target-directed search).
 -/
 def arctanInverseBisectionOfRationalWitnesses
     (branch : InvertibleFunctionOnInterval)
-    (branch_is_geometric : branch.function =
-      IntegralIdentities.arctanGeomOnUnit)
+    (branch_is_geometric :
+      FunctionOnInterval.Equivalent branch.function
+        IntegralIdentities.arctanGeomOnUnit)
     (targetAt : forall t : RationalCircle.GeometricTrig.QuarterTurn,
       RationalCircle.GeometricTrig.firstQuadrantBranch t -> InRangeRaw branch)
     (targetAt_equiv_halfQuarterTurn :
