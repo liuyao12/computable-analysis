@@ -2868,6 +2868,21 @@ theorem logTwoSeries_compute_subinterval_unit (n : Nat) :
     subintervalOf (logTwoSeries.compute n) 0 1 := by
   exact logTwoCompute_subinterval_unit n
 
+/-! The finite right-Riemann core has the sharp unit-interval range even
+though the surrounding Lipschitz--Darboux box may be wider at coarse stages.
+Keeping this distinction explicit prevents an outer error margin from being
+mistaken for a property of the represented logarithm value. -/
+
+theorem logTwoRightRiemann_nonnegative (n : Nat) :
+    0 <= logTwoRightRiemann n := by
+  rw [← logTwoLo_eq_logTwoRightRiemann]
+  exact logTwoLo_nonneg n
+
+theorem logTwoRightRiemann_le_one (n : Nat) :
+    logTwoRightRiemann n <= 1 := by
+  rw [← logTwoLo_eq_logTwoRightRiemann]
+  exact Rat.le_trans (logTwoCompute_ordered n) (logTwoHi_le_one n)
+
 /-- The displayed rate certificate for the logarithmic series is
 `width(logTwoSeries[n]) <= 1/n` for every positive stage. -/
 theorem logTwoSeries_width_le_one_div (n : Nat) (hn : 0 < n) :
