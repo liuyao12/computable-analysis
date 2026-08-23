@@ -66,6 +66,25 @@ time interval of length $T$, the omitted degree-$r$ words are charged to
 the finite factorial majorant $(MT)^r/r!$. An executable shift chooses the
 first stage below any requested positive rational tolerance.
 
+The reusable uniqueness certificate is equally finite.  A candidate error is
+required to satisfy, for every iteration count (q),
+
+\[
+  0\le e(x)\le B\,\frac{(MT)^{N+q}}{(N+q)!}.
+\]
+
+The computable factorial-tail shift makes the right side smaller than any
+positive rational tolerance; therefore the error is exactly zero.  This is
+the pointwise replacement for taking a supremum norm in a completed function
+space.
+
+\lean{ComputableAnalysis.LinearODE.ZeroInitialVolterraIterationBound}
+\lean{ComputableAnalysis.LinearODE.zeroInitialVolterra_iteration_le_eps}
+\lean{ComputableAnalysis.LinearODE.zeroInitialVolterraIterationBound_eq_zero}
+\lean{ComputableAnalysis.LinearODE.SelfDerivativeVolterraComparison}
+\lean{ComputableAnalysis.LinearODE.SelfDerivativeVolterraComparison.equivalent}
+\leanok
+
 The construction is therefore a family of finite approximants:
 
 \begin{verbatim}
