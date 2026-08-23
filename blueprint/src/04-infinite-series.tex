@@ -46,6 +46,16 @@ finite transform -> coordinate tail box -> future-stage containment
 \lean{ComputableAnalysis.quarterTurnGeometricTailCertificate_valid}
 \leanok
 
+The first genuinely nonzero infinite-looking example is the quarter-turn
+geometric Fourier family.  Its public object is still assembled from finite
+coefficient stages: the radius (2r^n) controls every future stage, and the
+factorial or trigonometric interpretation is not needed to define the raw
+complex value.
+
+\lean{ComputableAnalysis.quarterTurnGeometricFourierSeries}
+\lean{ComputableAnalysis.quarterTurnGeometricFourierSeries_future_stage_enclosure}
+\leanok
+
 \section{Series as computation}
 \label{thm:arithmetic-series-sum}
 \label{thm:finite-geometric-series-interface}
