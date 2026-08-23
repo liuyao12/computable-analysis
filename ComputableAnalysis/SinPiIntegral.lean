@@ -7098,6 +7098,79 @@ structure DyadicEvenStepCertificate
         rw [hpow]
         omega))
 
+/-- Construct the even branch from one successful finite tangent-witness
+search.  The parent and child names in the certificate refer to the
+half-angle proof interface; for an even index the nested-radical table is the
+parent table at a different precision, while the public circle box itself is
+the same child box.  The search supplies exactly the required overlap, so no
+unstated continuity or completed-real argument is used. -/
+def DyadicEvenStepCertificate.ofWitnessSearch
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (precision n k : Nat) (hk : k < 2 ^ n) (m : Nat)
+    (hsearch : ∃ u,
+      rationalTangentWitnessBoxSearch
+        (dyadicTangentBoxAt B precision (n + 1) (2 * k) (by
+          have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+            rw [Nat.pow_succ]
+            omega
+          rw [hpow]
+          omega))
+        (dyadicNestedRadicalTableAt
+          (dyadicNestedRadicalParentPrecision precision) n k).1 m = some u) :
+    DyadicEvenStepCertificate B precision n k hk where
+  childRaw := rationalCircleSinInterval
+    (dyadicTangentBoxAt B precision (n + 1) (2 * k) (by
+      have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+        rw [Nat.pow_succ]
+        omega
+      rw [hpow]
+      omega))
+  parentRaw := rationalCircleSinInterval
+    (dyadicTangentBoxAt B precision (n + 1) (2 * k) (by
+      have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+        rw [Nat.pow_succ]
+        omega
+      rw [hpow]
+      omega))
+  parent_contained := by
+    have hU := dyadicTangentBoxAt_bounds B precision (n + 1) (2 * k) (by
+      have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+        rw [Nat.pow_succ]
+        omega
+      rw [hpow]
+      omega)
+    have hwidth := rationalCircleSinInterval_width_le hU
+    unfold subintervalOf
+    constructor
+    · exact Rat.le_refl
+    constructor
+    · apply (Rat.le_iff_sub_nonneg _ _).2
+      simpa [rationalCircleSinInterval, QInterval.width] using hwidth.1
+    · exact Rat.le_refl
+  parent_overlap := by
+    let U := dyadicTangentBoxAt B precision (n + 1) (2 * k) (by
+      have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+        rw [Nat.pow_succ]
+        omega
+      rw [hpow]
+      omega)
+    have hU : subintervalOf U 0 1 := by
+      exact dyadicTangentBoxAt_bounds B precision (n + 1) (2 * k) (by
+        have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+          rw [Nat.pow_succ]
+          omega
+        rw [hpow]
+        omega)
+    have hS : subintervalOf
+        (dyadicNestedRadicalTableAt
+          (dyadicNestedRadicalParentPrecision precision) n k).1 0 1 :=
+      (dyadicNestedRadicalTableAt_bounds
+        (dyadicNestedRadicalParentPrecision precision) n k (by omega)).1
+    obtain ⟨u, hu⟩ := hsearch
+    simpa [U] using
+      (rationalTangentWitnessBoxSearch_overlap_of_success hU hS hu)
+  public_child_eq := by rfl
+
 theorem DyadicEvenStepCertificate.to_public_overlap
     {B : IntegralIdentities.ArctanInverseBisection}
     {precision n k : Nat} {hk : k < 2 ^ n}

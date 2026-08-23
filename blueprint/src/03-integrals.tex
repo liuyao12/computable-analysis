@@ -342,6 +342,14 @@ containment, halving width, and the final overlap at every requested stage.
 This is the finite inverse certificate consumed by the nested-radical sine
 integral.
 
+The even nested-radical branch is now packaged directly from a successful
+finite tangent-witness search.  It reuses the public circle box, proves its
+ordering, and transports the search overlap to the parent table precision:
+
+\lean{ComputableAnalysis.SinPiIntegral.DyadicEvenStepCertificate.ofWitnessSearch}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicEvenStepCertificate.to_public_overlap}
+\leanok
+
 \begin{verbatim}
 sine prefix   -> square prefix -> derivative bounds -> FTC endpoint box
 tangent chart -> rational derivative certificate -> endpoint = quarter-turn
