@@ -6551,6 +6551,36 @@ def canonicalDyadicCertificateSearchAt
       | false =>
         canonicalDyadicCertificateSearchAt B precision depth k hk rest
 
+noncomputable def canonicalDyadicCertificateSearchAt_sound
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {precision depth k : Nat} {hk : k < 2 ^ depth}
+    {candidates : List Rat} {u : Rat}
+    (hsearch : canonicalDyadicCertificateSearchAt
+      B precision depth k hk candidates = some u) :
+    CanonicalDyadicHalfAngleCertificateAt B precision depth k hk := by
+  induction candidates with
+  | nil =>
+      simp [canonicalDyadicCertificateSearchAt] at hsearch
+  | cons v rest ih =>
+      by_cases hadm :
+          canonicalDyadicCertificateAdmissibleBool B precision depth k hk v = true
+      · have huv : v = u := by
+          simpa [canonicalDyadicCertificateSearchAt, hadm] using hsearch
+        subst u
+        simp only [canonicalDyadicCertificateAdmissibleBool,
+          Bool.and_eq_true] at hadm
+        apply canonical_dyadic_certificate_at_of_rational_witness
+          B hk v
+        · exact of_decide_eq_true hadm.1.1.1.1.1
+        · exact of_decide_eq_true hadm.1.1.1.1.2
+        · exact ⟨of_decide_eq_true hadm.1.1.1.2,
+            of_decide_eq_true hadm.1.1.2⟩
+        · unfold QInterval.ContainsInterval
+          exact ⟨of_decide_eq_true hadm.1.2,
+            of_decide_eq_true hadm.2⟩
+      · apply ih
+        simpa [canonicalDyadicCertificateSearchAt, hadm] using hsearch
+
 theorem canonical_dyadic_search_of_halfAngle_certificate_at
     (B : IntegralIdentities.ArctanInverseBisection)
     {precision depth k : Nat} {hk : k < 2 ^ depth} (hpos : 0 < k)
