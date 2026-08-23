@@ -3062,6 +3062,54 @@ theorem uniformExpCenter_qabs_le (x : Rat) (hx : qabs x <= 2) (n : Nat) :
       rw [qabs_eq_self_of_nonneg (by native_decide)]
       exact rat_add_le_add (by native_decide) hprefix
 
+theorem uniformExpCenter_qabs_le_nine (x : Rat) (hx : qabs x <= 2)
+    (n : Nat) : qabs (uniformExpCenter x n) <= 9 := by
+  have hbound := uniformExpCenter_qabs_le x hx n
+  have hstart : 1 <= uniformExpTailStart := by
+    unfold uniformExpTailStart
+    native_decide
+  have hterms : uniformExpTailTerms n =
+      (uniformExpTailTerms n - 1) + 1 := by
+    unfold uniformExpTailTerms
+    omega
+  have hsplit := RationalMajorant.factorialTailPartial_add
+    (2 : Rat) 0 1 (uniformExpTailTerms n - 1)
+  have hsplit' :
+      RationalMajorant.factorialTailPartial 2 0
+          (uniformExpTailTerms n) =
+        RationalMajorant.factorialTailPartial 2 0 1 +
+          RationalMajorant.factorialTailPartial 2 1
+            (uniformExpTailTerms n - 1) := by
+    rw [hterms]
+    simpa [Nat.add_comm] using hsplit
+  have hpartial :
+      RationalMajorant.factorialTailPartial 2 1
+        (uniformExpTailTerms n - 1) <= 8 := by
+    have hzero : RationalMajorant.factorialTailPartial 2 0 1 = 1 := by
+      native_decide
+    have htotal :
+        RationalMajorant.factorialTailPartial 2 0
+            (uniformExpTailTerms n) <= 8 := by
+      exact RationalMajorant.factorialTailPartial_two_le_eight _
+    have hnonneg : forall k,
+        0 <= RationalMajorant.factorialTailPartial 2 1 k := by
+      intro k
+      induction k with
+      | zero => simp [RationalMajorant.factorialTailPartial]
+      | succ k ih =>
+          rw [RationalMajorant.factorialTailPartial]
+          exact Rat.add_nonneg ih
+            (RationalMajorant.factorialTailTerm_nonneg (by native_decide) _)
+    rw [hsplit', hzero] at htotal
+    grind [hnonneg (uniformExpTailTerms n - 1)]
+  calc
+    qabs (uniformExpCenter x n) <=
+        1 + RationalMajorant.factorialTailPartial 2 1
+          (uniformExpTailTerms n - 1) := hbound
+    _ <= 1 + 8 := by
+      grind
+    _ = 9 := by native_decide
+
 theorem uniformExpCenter_mono_on_unit
     (n : Nat) {x y : Rat}
     (hx : 0 <= x) (hy : y <= 1) (hxy : x <= y) :
@@ -3848,6 +3896,80 @@ theorem uniformExpCenter_secant_error_le
     _ <= qabs h * 34 + 2 * uniformExpTailMagnitude n / qabs h :=
       rat_add_le_add hfinite htailQuotient
 
+/-! A symmetric-cell range estimate.  The endpoint centers need not be
+monotone: the absolute secant certificate and the finite global center bound
+already give a shrinking interval over every short rational cell. -/
+
+theorem uniformExpCenter_difference_qabs_le
+    {a b : Rat} (n : Nat)
+    (ha : qabs a <= 2) (hb : qabs b <= 2) (hab : a < b) :
+    qabs (uniformExpCenter b n - uniformExpCenter a n) <=
+      9 * (b - a) + 34 * (b - a) ^ 2 +
+        2 * uniformExpTailMagnitude n := by
+  let h : Rat := b - a
+  have hpos : 0 < h := by
+    dsimp [h]
+    exact (Rat.lt_iff_sub_pos a b).mp hab
+  have hh : h ≠ 0 := Rat.ne_of_gt hpos
+  have hab_eq : a + h = b := by
+    dsimp [h]
+    grind
+  have hb' : qabs (a + h) <= 2 := by
+    rw [hab_eq]
+    exact hb
+  have hsec := uniformExpCenter_secant_error_le
+    (x := a) (h := h) hh ha hb' n
+  have hqabs : qabs h = h :=
+    qabs_eq_self_of_nonneg (Rat.le_of_lt hpos)
+  have hsec' :
+      qabs ((uniformExpCenter b n - uniformExpCenter a n) / h -
+        uniformExpCenter a n) <=
+        h * 34 + 2 * uniformExpTailMagnitude n / h := by
+    rw [hab_eq] at hsec
+    simpa [hqabs] using hsec
+  have hquot :
+      qabs ((uniformExpCenter b n - uniformExpCenter a n) / h) <=
+        9 + h * 34 + 2 * uniformExpTailMagnitude n / h := by
+    have hsplit :
+        (uniformExpCenter b n - uniformExpCenter a n) / h =
+          uniformExpCenter a n +
+            ((uniformExpCenter b n - uniformExpCenter a n) / h -
+              uniformExpCenter a n) := by
+      grind [Rat.div_def, Rat.mul_assoc, Rat.sub_eq_add_neg]
+    rw [hsplit]
+    calc
+      qabs (uniformExpCenter a n +
+          ((uniformExpCenter b n - uniformExpCenter a n) / h -
+            uniformExpCenter a n)) <=
+          qabs (uniformExpCenter a n) +
+            qabs ((uniformExpCenter b n - uniformExpCenter a n) / h -
+              uniformExpCenter a n) := qabs_add_le _ _
+      _ <= 9 + (h * 34 +
+          2 * uniformExpTailMagnitude n / h) := by
+        exact rat_add_le_add
+          (uniformExpCenter_qabs_le_nine a ha n) hsec'
+      _ = 9 + h * 34 +
+          2 * uniformExpTailMagnitude n / h := by grind
+  have hdiff :
+      qabs (uniformExpCenter b n - uniformExpCenter a n) =
+        h * qabs ((uniformExpCenter b n - uniformExpCenter a n) / h) := by
+    have hdiv := qabs_div_eq_div_qabs
+      (uniformExpCenter b n - uniformExpCenter a n) h hh
+    rw [hdiv, hqabs, Rat.div_def]
+    have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+    grind [Rat.mul_assoc]
+  rw [hdiff]
+  have hnonneg : 0 <= h := Rat.le_of_lt hpos
+  have hmul := Rat.mul_le_mul_of_nonneg_left hquot hnonneg
+  calc
+    h * qabs ((uniformExpCenter b n - uniformExpCenter a n) / h) <=
+        h * (9 + h * 34 + 2 * uniformExpTailMagnitude n / h) := hmul
+    _ = 9 * (b - a) + 34 * (b - a) ^ 2 +
+        2 * uniformExpTailMagnitude n := by
+      dsimp [h]
+      have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+      grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+
 theorem uniformExpCenter_difference_le
     {a b : Rat} (n : Nat)
     (ha : 0 <= a) (hb : b <= 1) (hab : a < b) :
@@ -4595,6 +4717,115 @@ def uniformExpRaw (x : Rat) : RealRaw where
 
 theorem uniformExpRaw_compute (x : Rat) (n : Nat) :
     (uniformExpRaw x).compute n = uniformExpBox x n := rfl
+
+def uniformExpSymmetricCellRadius (a b : Rat) (n : Nat) : Rat :=
+  9 * (b - a) + 34 * (b - a) ^ 2 +
+    2 * uniformExpTailMagnitude n + uniformExpTailRadius n
+
+def uniformExpSymmetricCellRange (a b : Rat) (n : Nat) : QInterval :=
+  intervalAround (uniformExpCenter a n)
+    (uniformExpSymmetricCellRadius a b n)
+
+theorem uniformExpSymmetricCellRange_contains
+    {a b x : Rat} (n : Nat)
+    (ha : -1 <= a) (hb : b <= 1) (hab : a < b)
+    (hax : a <= x) (hxb : x <= b) :
+    (uniformExpSymmetricCellRange a b n).ContainsInterval
+      ((uniformExpRaw x).compute n) := by
+  have hqa : qabs a <= 2 := by
+    unfold qabs
+    by_cases hneg : a < 0
+    · rw [if_pos hneg]
+      grind
+    · rw [if_neg hneg]
+      exact Rat.le_trans (Rat.le_trans hax hxb)
+        (Rat.le_trans hb (by native_decide))
+  have hqx : qabs x <= 2 := by
+    unfold qabs
+    by_cases hneg : x < 0
+    · rw [if_pos hneg]
+      grind
+    · rw [if_neg hneg]
+      exact Rat.le_trans hxb (Rat.le_trans hb (by native_decide))
+  have hxa : 0 <= x - a := by grind
+  have hba : 0 <= b - a := by grind
+  have hvar :
+      qabs (uniformExpCenter x n - uniformExpCenter a n) <=
+        9 * (b - a) + 34 * (b - a) ^ 2 +
+          2 * uniformExpTailMagnitude n := by
+    by_cases hxeq : x = a
+    · subst hxeq
+      have hp : 0 <= (b - x) ^ 2 := Rat.pow_nonneg hba
+      have hlin : 0 <= 9 * (b - x) :=
+        Rat.mul_nonneg (by native_decide) hba
+      have htail : 0 <= 2 * uniformExpTailMagnitude n :=
+        Rat.mul_nonneg (by native_decide)
+          (uniformExpTailMagnitude_nonneg n)
+      have hR : 0 <= 9 * (b - x) + 34 * (b - x) ^ 2 +
+          2 * uniformExpTailMagnitude n := by
+        grind
+      have hzero : qabs (uniformExpCenter x n - uniformExpCenter x n) = 0 := by
+        rw [Rat.sub_self]
+        native_decide
+      rw [hzero]
+      exact hR
+    · have haxlt : a < x := (Rat.lt_iff_le_and_ne).2 ⟨hax, by grind⟩
+      have hsmall := uniformExpCenter_difference_qabs_le n hqa hqx haxlt
+      have hsq : (x - a) ^ 2 <= (b - a) ^ 2 := by
+        have hsq1 := Rat.mul_le_mul_of_nonneg_right
+          (show x - a <= b - a by grind) hxa
+        have hsq2 := Rat.mul_le_mul_of_nonneg_left
+          (show x - a <= b - a by grind) hba
+        calc
+          (x - a) ^ 2 = (x - a) * (x - a) := by
+            rw [show 2 = 1 + 1 by omega, Rat.pow_succ, Rat.pow_succ]
+            simp
+          _ <= (b - a) * (x - a) := hsq1
+          _ <= (b - a) * (b - a) := hsq2
+          _ = (b - a) ^ 2 := by
+            rw [show 2 = 1 + 1 by omega, Rat.pow_succ, Rat.pow_succ]
+            simp
+      have hlin := Rat.mul_le_mul_of_nonneg_left
+        (show x - a <= b - a by grind) (by native_decide : (0 : Rat) <= 9)
+      have hquad := Rat.mul_le_mul_of_nonneg_left hsq
+        (by native_decide : (0 : Rat) <= 34)
+      calc
+        qabs (uniformExpCenter x n - uniformExpCenter a n) <=
+            9 * (x - a) + 34 * (x - a) ^ 2 +
+              2 * uniformExpTailMagnitude n := hsmall
+        _ <= 9 * (b - a) + 34 * (b - a) ^ 2 +
+              2 * uniformExpTailMagnitude n := by
+          exact rat_add_le_add (rat_add_le_add hlin hquad)
+            Rat.le_refl
+  rw [uniformExpRaw_compute]
+  unfold uniformExpSymmetricCellRange uniformExpSymmetricCellRadius
+  unfold uniformExpBox intervalAround QInterval.ContainsInterval
+  have htail : 0 <= uniformExpTailRadius n := by
+    unfold uniformExpTailRadius
+    exact Rat.mul_nonneg (by native_decide)
+      (uniformExpTailMagnitude_nonneg n)
+  have hlo0 : uniformExpCenter a n - uniformExpCenter x n <=
+      qabs (uniformExpCenter x n - uniformExpCenter a n) := by
+    calc
+      uniformExpCenter a n - uniformExpCenter x n =
+          -(uniformExpCenter x n - uniformExpCenter a n) := by grind
+      _ <= qabs (-(uniformExpCenter x n - uniformExpCenter a n)) :=
+        self_le_qabs _
+      _ = qabs (uniformExpCenter x n - uniformExpCenter a n) := qabs_neg _
+  have hhi0 : uniformExpCenter x n - uniformExpCenter a n <=
+      qabs (uniformExpCenter x n - uniformExpCenter a n) :=
+    self_le_qabs _
+  have hlo := Rat.le_trans hlo0 hvar
+  have hhi := Rat.le_trans hhi0 hvar
+  grind
+
+theorem uniformExpSymmetricCellRange_width (a b : Rat) (n : Nat) :
+    (uniformExpSymmetricCellRange a b n).width =
+      2 * (9 * (b - a) + 34 * (b - a) ^ 2 +
+        2 * uniformExpTailMagnitude n + uniformExpTailRadius n) := by
+  unfold uniformExpSymmetricCellRange uniformExpSymmetricCellRadius
+  rw [intervalAround_width]
+  grind
 
 /-- At a common stage, the next finite Taylor prefix differs from the raw-box
 center by exactly one factorial monomial. -/
