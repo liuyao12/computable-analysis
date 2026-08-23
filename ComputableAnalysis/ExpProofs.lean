@@ -5646,6 +5646,36 @@ theorem uniformExpOnUnit_compute (x : Rat)
     (hx : inDomainInterval (0 : Rat) 1 x) (n : Nat) :
     uniformExpOnUnit.compute x hx n = (uniformExpRaw x).compute n := rfl
 
+/-! The common-prefix exponential also carries the weak monotonicity needed
+by its inverse search.  The finite center is monotone on `[0,1]`, and both
+endpoint boxes use the same symmetric tail radius, so the interval order is
+preserved at every stage. -/
+def uniformExpOnUnit_nondecreasing :
+    NondecreasingOnInterval uniformExpOnUnit := by
+  intro x y hx hy hxy n
+  have hx' : 0 <= x := by
+    have h := hx.1
+    change 0 <= x at h
+    exact h
+  have hy' : y <= 1 := by
+    have h := hy.2
+    change y <= 1 at h
+    exact h
+  have hxy' : x <= y := hxy
+  have hcenter := uniformExpCenter_mono_on_unit n hx' hy' hxy'
+  have hcomputeX : uniformExpOnUnit.compute x hx n = uniformExpBox x n := by
+    rfl
+  have hcomputeY : uniformExpOnUnit.compute y hy n = uniformExpBox y n := by
+    rfl
+  rw [hcomputeX, hcomputeY]
+  unfold uniformExpBox intervalAround
+  have htail : 0 <= uniformExpTailMagnitude n :=
+    uniformExpTailMagnitude_nonneg n
+  have hradius : 0 <= uniformExpTailRadius n := by
+    unfold uniformExpTailRadius
+    exact Rat.mul_nonneg (by native_decide) htail
+  exact by grind [Rat.sub_eq_add_neg]
+
 /-! The exponential exposes the gap-aware certificate directly.  An inverse
 search can therefore choose its factorial stage from the rational bracket
 width, rather than from an unobservable limiting value. -/
