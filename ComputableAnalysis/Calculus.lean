@@ -1831,6 +1831,54 @@ theorem riemannLeftExact_doubleId_of_pos {a b : Rat} {n : Nat}
     Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
     Rat.mul_add, Rat.add_mul]
 
+/-! The next polynomial case uses the finite sum of squares.  This is kept as
+an explicit induction over `List.range`: it is a finite certificate used by
+the cubic FTC instance, not an appeal to an infinite series. -/
+private theorem foldl_square_range (h : Rat) (n : Nat) :
+    (List.range n : List Nat).foldl
+      (fun acc (k : Nat) => acc + h * (k : Rat) ^ 2) 0 =
+      h * (((n : Rat) * ((n : Rat) - 1) *
+        (2 * (n : Rat) - 1)) / 6) := by
+  induction n with
+  | zero =>
+      simp
+      grind [Rat.sub_eq_add_neg, Rat.div_def]
+  | succ n ih =>
+      rw [List.range_succ, List.foldl_append]
+      simp only [List.foldl_cons, List.foldl_nil]
+      rw [ih]
+      simp only [Rat.natCast_add]
+      grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+        Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.pow_succ,
+        Rat.div_def]
+
+theorem riemannLeftExact_threeSquare_unit_of_pos {n : Nat} (hn : 0 < n) :
+    riemannLeftExact (fun x => 3 * x ^ 2) 0 1 n =
+      3 * (1 / (n : Rat)) ^ 3 *
+        (((n : Rat) * ((n : Rat) - 1) *
+          (2 * (n : Rat) - 1)) / 6) := by
+  let h : Rat := mesh 0 1 n
+  have hmesh' : mesh 0 1 n = 1 / (n : Rat) := by
+    dsimp [mesh]
+    rw [if_neg (Nat.ne_of_gt hn)]
+    grind [Rat.sub_eq_add_neg]
+  have hmesh : h = 1 / (n : Rat) := by
+    dsimp [h]
+    exact hmesh'
+  unfold riemannLeftExact
+  dsimp
+  unfold leftPoint
+  rw [hmesh', ← hmesh]
+  simp only [Rat.zero_add]
+  change (List.range n).foldl
+      (fun acc (k : Nat) => acc + h * (3 * ((k : Rat) * h) ^ 2)) 0 = _
+  have hrewrite :
+      (fun acc (k : Nat) => acc + h * (3 * ((k : Rat) * h) ^ 2)) =
+        (fun acc (k : Nat) => acc + (3 * h ^ 3) * (k : Rat) ^ 2) := by
+    funext acc k
+    grind [Rat.pow_succ, Rat.mul_assoc, Rat.mul_comm]
+  rw [hrewrite, foldl_square_range]
+
 def inDomainInterval (a b x : Rat) : Prop :=
   a <= x /\ x <= b
 

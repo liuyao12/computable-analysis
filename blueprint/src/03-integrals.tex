@@ -308,6 +308,15 @@ with rational singleton intervals. The reusable polynomial layer also gives
 finite secant certificates for every normalized monomial and every finite
 Taylor prefix; these are the main inputs for non-polynomial functions.
 
+For the cubic case the first rectangle identity is explicit:
+\(\sum_{k<n}3(k/n)^2(1/n)\) is evaluated by a finite sum-of-squares
+induction.  The interval-regular layer then supplies the domain-restricted
+effective FTC certificate used for the complete \(x^3\) instance.
+
+\lean{ComputableAnalysis.riemannLeftExact_threeSquare_unit_of_pos}
+\lean{ComputableAnalysis.Integral.cubicIntegralEffectiveFTC_equiv_one_fourth}
+\leanok
+
 The first non-polynomial test is a squared sine prefix.  Its finite Taylor
 surrogate is integrated by the same effective FTC and evaluated by a rational
 certificate (the current prefix value is \(6389/161280\)).  The exact
