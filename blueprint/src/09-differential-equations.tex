@@ -9,6 +9,22 @@ interval-certified computations on a common rational domain. The effective FTC
 supplies the simplex integrals; this chapter supplies their finite matrix
 assembly and uniqueness principle.
 
+The analytic hand-off is the same one used by every earlier chapter:
+
+\begin{verbatim}
+coefficient/forcing evaluator -> cell or simplex bounds
+                              -> effective FTC endpoint certificate
+                              -> finite transition and Duhamel boxes
+\end{verbatim}
+
+The reusable contract is exposed here so an ODE instance can be added without
+introducing a new notion of integration:
+
+\lean{ComputableAnalysis.EffectiveFTC}
+\lean{ComputableAnalysis.FTC.effectiveFTC_definiteIntegralEqualsEndpoint}
+\lean{ComputableAnalysis.EffectiveDerivativeBoundFTC}
+\leanok
+
 \section{Construction}
 \label{thm:finite-cramer-interface}
 \label{thm:finite-cayley-hamilton-boundary}
