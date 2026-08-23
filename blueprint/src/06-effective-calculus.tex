@@ -54,6 +54,18 @@ the represented function.
 \lean{ComputableAnalysis.FunctionOnInterval.equivalent_trans}
 \leanok
 
+The registry is maintained as a spanning tree, not as a table of every
+pairwise comparison.  To add a new evaluator, prove validity and one edge to
+an existing representation:
+
+\begin{verbatim}
+new evaluator -> one existing evaluator -> semantic function
+              (finite overlap edge)    (existing chain)
+\end{verbatim}
+
+The preferred evaluator can therefore be changed for efficiency without
+rewriting theorems stated at the abstract function level.
+
 The interface is the reusable calculus API: finite secant bounds feed
 derivative certificates; derivative bounds feed partition boxes; the effective
 FTC turns those boxes into endpoint differences. Monomial and finite
