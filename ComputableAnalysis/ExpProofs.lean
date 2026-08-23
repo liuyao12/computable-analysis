@@ -5555,6 +5555,105 @@ theorem uniformExpFTCStage_eq_quotient (eps : QPos) :
           (uniformExpFTCPieces_pos eps))))
   simp [uniformExpFTCStage, uniformExpSelfDerivativeEvalPrecision, hne]
 
+theorem uniformExpSymmetricCellRange_width_le_eps (eps : QPos) (k : Nat)
+    (hk : k < (uniformExpSymmetricFTCPartition eps).pieces) :
+    (uniformExpSymmetricCellRange
+      ((uniformExpSymmetricFTCPartition eps).cell k hk).lower
+      ((uniformExpSymmetricFTCPartition eps).cell k hk).upper
+      (uniformExpFTCStage eps)).width <= eps.val := by
+  let C := (uniformExpSymmetricFTCPartition eps).cell k hk
+  let p : Rat := mesh 0 1 (uniformExpFTCPieces eps)
+  have hp : 0 < p := by
+    dsimp [p]
+    unfold mesh
+    rw [if_neg (Nat.ne_of_gt (uniformExpFTCPieces_pos eps))]
+    exact Rat.mul_pos (by native_decide)
+      ((Rat.inv_pos).2 ((Rat.natCast_pos).2
+        (uniformExpFTCPieces_pos eps)))
+  have hpone : p <= 1 := by
+    have hP := uniformExpFTCPieces_pos eps
+    have hanti := FTC.one_div_nat_antitone
+      (n := 1) (m := uniformExpFTCPieces eps)
+      (by native_decide) hP
+      (Nat.one_le_iff_ne_zero.mpr (Nat.ne_of_gt hP))
+    dsimp [p]
+    unfold mesh
+    rw [if_neg (Nat.ne_of_gt (uniformExpFTCPieces_pos eps))]
+    rw [show (1 : Rat) - 0 = 1 by grind]
+    calc
+      1 / ((uniformExpFTCPieces eps : Nat) : Rat) <= 1 / (1 : Rat) := hanti
+      _ = 1 := by native_decide
+  have hprec := uniformExpFTCPrecision_le_input eps
+  have hmesh := uniformExpFTCPieces_mesh_le eps
+  have hne : p ≠ 0 := Rat.ne_of_gt hp
+  have htail := uniformExpTailMagnitude_le_quotientTolerance
+    p hne (uniformExpFTCIndex eps)
+  have htail' :
+      uniformExpTailMagnitude (uniformExpFTCStage eps) <=
+        (precisionAtStage (uniformExpFTCIndex eps)).val * p / 24 := by
+    rw [uniformExpFTCStage_eq_quotient eps]
+    have hpabs : qabs p = p := qabs_eq_self_of_nonneg (Rat.le_of_lt hp)
+    simpa [uniformExpQuotientTailTolerance, hpabs, p] using htail
+  have hcell : C.width = p := by
+    dsimp [C]
+    exact uniformExpSymmetricFTCPartition_cell_width eps k hk
+  rw [uniformExpSymmetricCellRange_width]
+  change 2 * (9 * C.width + 34 * C.width ^ 2 +
+      2 * uniformExpTailMagnitude (uniformExpFTCStage eps) +
+      uniformExpTailRadius (uniformExpFTCStage eps)) <= eps.val
+  rw [hcell]
+  unfold uniformExpTailRadius
+  have heps : 0 <= eps.val := Rat.le_of_lt eps.property
+  calc
+    2 * (9 * p + 34 * p ^ 2 +
+        2 * uniformExpTailMagnitude (uniformExpFTCStage eps) +
+        2 * uniformExpTailMagnitude (uniformExpFTCStage eps)) <=
+        18 * p + 68 * p +
+          8 * ((precisionAtStage (uniformExpFTCIndex eps)).val * p / 24) := by
+      have hsq : p ^ 2 <= p := by
+        have hsq' := Rat.mul_le_mul_of_nonneg_left hpone
+          (Rat.le_of_lt hp)
+        calc
+          p ^ 2 = p * p := by
+            rw [show 2 = 1 + 1 by omega, Rat.pow_succ]
+            simp
+          _ <= p * 1 := hsq'
+          _ = p := by simp
+      have htailmul := Rat.mul_le_mul_of_nonneg_left htail'
+        (by native_decide : (0 : Rat) <= 8)
+      grind
+    _ <= eps.val := by
+      have hpmesh : p <= (precisionAtStage (uniformExpFTCIndex eps)).val / 200 := by
+        simpa [p] using hmesh
+      have hinput : (uniformExpFTCInputPrecision eps).val = eps.val / 5 := rfl
+      rw [hinput] at hprec
+      let q : Rat := (precisionAtStage (uniformExpFTCIndex eps)).val
+      have hqpos : 0 < q := by
+        dsimp [q]
+        exact (precisionAtStage (uniformExpFTCIndex eps)).property
+      have h1 : 18 * p <= 18 * (q / 200) := by
+        exact Rat.mul_le_mul_of_nonneg_left hpmesh (by native_decide)
+      have h2 : 68 * p <= 68 * (q / 200) := by
+        exact Rat.mul_le_mul_of_nonneg_left hpmesh (by native_decide)
+      have hqp : q * p <= q := by
+        dsimp [q]
+        have hqnonneg := Rat.le_of_lt
+          (precisionAtStage (uniformExpFTCIndex eps)).property
+        simpa using Rat.mul_le_mul_of_nonneg_left hpone hqnonneg
+      have h3 : 8 * (q * p / 24) <= q / 3 := by
+        grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+      have hsum := rat_add_le_add (rat_add_le_add h1 h2) h3
+      have hqeps : q <= eps.val / 5 := by
+        dsimp [q]
+        exact hprec
+      change 18 * p + 68 * p + 8 * (q * p / 24) <= eps.val
+      have hsum' : 18 * p + 68 * p + 8 * (q * p / 24) <=
+          18 * (q / 200) + 68 * (q / 200) + q / 3 := by
+        exact hsum
+      have hqeps' := Rat.mul_le_mul_of_nonneg_left hqeps
+        (by native_decide : (0 : Rat) <= (18 / 200 : Rat) + 68 / 200 + 1 / 3)
+      grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+
 theorem uniformExpFTC_endpoint_width_le (eps : QPos) :
     (endpointDifferenceInterval uniformExpOnUnitRealFunRaw 0 1
       (uniformExpFTCStage eps)).width <= eps.val := by

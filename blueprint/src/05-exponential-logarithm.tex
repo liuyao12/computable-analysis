@@ -124,11 +124,14 @@ remain entirely rational and proof-producing.
 \lean{ComputableAnalysis.ExpProofs.uniformExpSymmetricFTCPieces}
 \lean{ComputableAnalysis.ExpProofs.uniformExpSymmetricFTCPartition}
 \lean{ComputableAnalysis.ExpProofs.uniformExpSymmetricFTCPartition_cell_width}
+\lean{ComputableAnalysis.ExpProofs.uniformExpSymmetricCellRange_width_le_eps}
 \leanok
 
-The remaining work is the centered two-sided partition schedule.  Once a
-finite derivative-bound certificate is supplied, the generic effective FTC
-immediately identifies the bounded integral with the endpoint difference:
+The centered schedule now has the required mesh estimate: every cell's
+two-sided derivative enclosure is no wider than the requested tolerance.
+The remaining certificate fields are endpoint containment and the final
+telescoping assembly.  Once those are supplied, the generic effective FTC
+identifies the bounded integral with the endpoint difference:
 
 \begin{verbatim}
 centered evaluator + two-sided derivative schedule
