@@ -7102,6 +7102,118 @@ theorem uniformExpOnSymmetricUnit_effectiveFTC :
   exact selectedStageCandidateDerivativeFTCIndexed
     uniformExpOnSymmetricUnit_selectedStageFTCIndexed
 
+/-! The centered selected-stage schedule is not required to be nested.  Its
+finite FTC sum is therefore stabilized against the canonical endpoint
+difference, giving the public integral representative used by the ODE layer. -/
+
+def uniformExpOnSymmetricUnit_endpointDifferenceValid :
+    RealRaw.ValidCompute
+      (endpointDifferenceCompute uniformExpOnSymmetricUnitRealFunRaw (-1) 1) :=
+  endpointDifference_valid_of_fun_valid uniformExpOnSymmetricUnitRealFunRaw_valid
+    (by exact ⟨by native_decide, by native_decide⟩)
+    (by exact ⟨by native_decide, by native_decide⟩)
+
+set_option maxHeartbeats 1000000 in
+theorem selectedStageCandidateDerivativeFTC_boundedIntegral_widthsShrink
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : SelectedStageCandidateDerivativeFTC F dF a b) :
+    RealRaw.WidthsShrinkToZero h.boundedIntegralRaw.compute := by
+  intro eps
+  refine ⟨eps.val.den + 1, ?_⟩
+  intro n hn
+  have hnpos : 0 < n := by omega
+  have hprec : (precisionAtStage n).val <= eps.val := by
+    have hden : 0 < (eps.val.den + 1 : Nat) := by omega
+    have hanti := FTC.one_div_nat_antitone
+      (n := eps.val.den + 1) (m := n)
+      (by exact hden) hnpos hn
+    have hbase := FTC.one_div_den_succ_le_of_pos eps.property
+    calc
+      (precisionAtStage n).val = 1 / (n : Rat) := by
+        simp [precisionAtStage, Nat.ne_of_gt hnpos]
+      _ <= 1 / (((eps.val.den + 1 : Nat) : Rat)) := hanti
+      _ <= eps.val := hbase
+  change
+    (SelectedStageCandidateDerivativeFTC.boundedIntegralInterval
+      h (precisionAtStage n)).width <= eps.val
+  exact Rat.le_trans
+    (h.riemann_width (precisionAtStage n)) hprec
+
+theorem uniformExpOnSymmetricUnit_boundedIntegral_widthsShrink :
+    RealRaw.WidthsShrinkToZero
+      uniformExpOnSymmetricUnit_selectedStageFTCIndexed.toSelected.boundedIntegralRaw.compute := by
+  exact selectedStageCandidateDerivativeFTC_boundedIntegral_widthsShrink
+    uniformExpOnSymmetricUnit_selectedStageFTCIndexed.toSelected
+
+def uniformExpOnSymmetricUnitStabilized : RealRaw :=
+  RealRaw.prefixStabilize
+    uniformExpOnSymmetricUnit_selectedStageFTCIndexed.toSelected.boundedIntegralRaw
+    (fun n =>
+      (endpointDifferenceRaw uniformExpOnSymmetricUnitRealFunRaw (-1) 1
+        uniformExpOnSymmetricUnit_endpointDifferenceValid).compute n |>.width)
+
+theorem uniformExpOnSymmetricUnit_boundedIntegral_equiv_endpointDifference :
+    uniformExpOnSymmetricUnit_selectedStageFTCIndexed.toSelected.boundedIntegralRaw.Equiv
+      (endpointDifferenceRaw uniformExpOnSymmetricUnitRealFunRaw (-1) 1
+        uniformExpOnSymmetricUnit_endpointDifferenceValid) := by
+  exact TwoStageCandidateDerivativeFTC.boundedIntegralRaw_equiv_endpointDifference
+    uniformExpOnSymmetricUnit_selectedStageFTCIndexed.toSelected.toTwoStage
+    uniformExpOnSymmetricUnit_endpointDifferenceValid
+
+theorem uniformExpOnSymmetricUnitStabilized_valid :
+    uniformExpOnSymmetricUnitStabilized.Valid := by
+  unfold uniformExpOnSymmetricUnitStabilized
+  apply RealRaw.prefixStabilize_valid
+    (candidate := uniformExpOnSymmetricUnit_selectedStageFTCIndexed.toSelected.boundedIntegralRaw)
+    (anchor := endpointDifferenceRaw uniformExpOnSymmetricUnitRealFunRaw (-1) 1
+      uniformExpOnSymmetricUnit_endpointDifferenceValid)
+    (radius := fun n =>
+      (endpointDifferenceRaw uniformExpOnSymmetricUnitRealFunRaw (-1) 1
+        uniformExpOnSymmetricUnit_endpointDifferenceValid).compute n |>.width)
+  · exact uniformExpOnSymmetricUnit_boundedIntegral_widthsShrink
+  · simpa [endpointDifferenceRaw, RealRaw.Valid] using
+      uniformExpOnSymmetricUnit_endpointDifferenceValid
+  · exact uniformExpOnSymmetricUnit_boundedIntegral_equiv_endpointDifference
+  · intro n
+    exact Rat.le_refl
+  · intro eps
+    obtain ⟨N, hN⟩ := uniformExpOnSymmetricUnit_endpointDifferenceValid.2.2 eps
+    exact ⟨N, fun n hn => hN n hn⟩
+
+theorem uniformExpOnSymmetricUnitStabilized_equiv_endpointDifference :
+    uniformExpOnSymmetricUnitStabilized.Equiv
+      (endpointDifferenceRaw uniformExpOnSymmetricUnitRealFunRaw (-1) 1
+        uniformExpOnSymmetricUnit_endpointDifferenceValid) := by
+  unfold uniformExpOnSymmetricUnitStabilized
+  apply RealRaw.prefixStabilize_equiv_anchor
+    (candidate := uniformExpOnSymmetricUnit_selectedStageFTCIndexed.toSelected.boundedIntegralRaw)
+    (anchor := endpointDifferenceRaw uniformExpOnSymmetricUnitRealFunRaw (-1) 1
+      uniformExpOnSymmetricUnit_endpointDifferenceValid)
+    (radius := fun n =>
+      (endpointDifferenceRaw uniformExpOnSymmetricUnitRealFunRaw (-1) 1
+        uniformExpOnSymmetricUnit_endpointDifferenceValid).compute n |>.width)
+  · simpa [endpointDifferenceRaw, RealRaw.Valid] using
+      uniformExpOnSymmetricUnit_endpointDifferenceValid
+  · exact uniformExpOnSymmetricUnit_boundedIntegral_equiv_endpointDifference
+  · intro n
+    exact Rat.le_refl
+
+def uniformExpOnSymmetricUnitStabilizedConstruction :
+    Integral.ConstructionFor uniformExpOnSymmetricUnit where
+  compute := uniformExpOnSymmetricUnitStabilized.compute
+  certificate := by
+    simpa [RealRaw.Valid] using uniformExpOnSymmetricUnitStabilized_valid
+
+theorem uniformExpOnSymmetricUnitStabilizedIntegral_equiv_endpointDifference :
+    (Integral.integralFor uniformExpOnSymmetricUnit
+      uniformExpOnSymmetricUnitStabilizedConstruction).Equiv
+      (endpointDifferenceRaw uniformExpOnSymmetricUnitRealFunRaw (-1) 1
+        uniformExpOnSymmetricUnit_endpointDifferenceValid) := by
+  change uniformExpOnSymmetricUnitStabilized.Equiv
+    (endpointDifferenceRaw uniformExpOnSymmetricUnitRealFunRaw (-1) 1
+      uniformExpOnSymmetricUnit_endpointDifferenceValid)
+  exact uniformExpOnSymmetricUnitStabilized_equiv_endpointDifference
+
 /-- The centered exponential chart has the exact initial value one at zero. -/
 theorem uniformExpOnSymmetricUnit_zero_equiv_one :
     (PartialRealFunRaw.apply uniformExpOnSymmetricUnit.raw
