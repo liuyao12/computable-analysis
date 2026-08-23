@@ -6556,6 +6556,26 @@ def uniformExpOnUnit_solvesSelfDerivative :
   initial_value_equiv := by
     exact uniformExpOnUnit_zero_equiv_one
 
+/-! Once a finite uniqueness provider is supplied, the exponential certificate
+immediately identifies the common-prefix evaluator with every other certified
+solution having the same rational initial point and raw initial value.  The
+provider is intentionally an argument: no classical ODE existence or
+completeness principle is smuggled into this assembly theorem. -/
+
+theorem uniformExpOnUnit_equivalent_of_selfDerivative_unique
+    (hunique : SelfDerivativeInitialValueUnique)
+    (f : FunctionOnInterval)
+    (hf : SolvesSelfDerivativeOnInterval f)
+    (hinitial : hf.initial = 0)
+    (hvalue : hf.initial_value.Equiv (RealRaw.ofRat 1)) :
+    FunctionOnInterval.Equivalent uniformExpOnUnit f := by
+  let he := uniformExpOnUnit_solvesSelfDerivative
+  apply hunique uniformExpOnUnit f he hf
+  · change (0 : Rat) = hf.initial
+    exact hinitial.symm
+  · change (RealRaw.ofRat 1).Equiv hf.initial_value
+    exact RealRaw.equiv_symm hvalue
+
 /-- The same common-prefix evaluator, now exposed on the centered interval
 `[-1, 1]`.  This is the natural local chart for analytic identities that need
 both positive and negative rational inputs. -/
