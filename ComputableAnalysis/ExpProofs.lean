@@ -6631,6 +6631,210 @@ theorem uniformExpSymmetricCell_endpoint_contained_of_step
   rw [hacompute, hbcompute]
   simpa [h, uniformExpRaw_compute, QInterval.subInterval] using hcombined
 
+def uniformExpSymmetricFTCInternalTolerance (eps : QPos) : QPos :=
+  ⟨eps.val / 4, by
+    rw [Rat.div_def]
+    exact Rat.mul_pos eps.property
+      ((Rat.inv_pos).2 (by native_decide))⟩
+
+def uniformExpSymmetricFTCScaledBound (eps : QPos) (k : Nat) : QInterval :=
+  QInterval.expand
+    (uniformExpSymmetricCellRange
+      (leftPoint (-1) 1
+        (uniformExpSymmetricFTCPieces (uniformExpSymmetricFTCInternalTolerance eps)) k)
+      (leftPoint (-1) 1
+        (uniformExpSymmetricFTCPieces (uniformExpSymmetricFTCInternalTolerance eps))
+        (k + 1))
+      (uniformExpFTCStage (uniformExpSymmetricFTCInternalTolerance eps)))
+    (2 * (precisionAtStage
+      (uniformExpFTCIndex (uniformExpSymmetricFTCInternalTolerance eps))).val)
+
+theorem uniformExpSymmetricFTCScaledBound_width_le (eps : QPos) (k : Nat)
+    (hk : k < (uniformExpSymmetricFTCPartition
+      (uniformExpSymmetricFTCInternalTolerance eps)).pieces) :
+    (uniformExpSymmetricFTCScaledBound eps k).width <= eps.val / 2 := by
+  let e := uniformExpSymmetricFTCInternalTolerance eps
+  unfold uniformExpSymmetricFTCScaledBound
+  rw [QInterval.expand_width]
+  have hraw := uniformExpSymmetricCellRange_width_le_half_eps e k hk
+  have hend := uniformExpSymmetricFTCPartition_cell_endpoints e k hk
+  rw [hend.1, hend.2] at hraw
+  have hprec := uniformExpFTCPrecision_le_input e
+  have hinput : (uniformExpFTCInputPrecision e).val = e.val / 5 := rfl
+  rw [hinput] at hprec
+  have hq : (precisionAtStage (uniformExpFTCIndex e)).val <= eps.val / 20 := by
+    dsimp [e, uniformExpSymmetricFTCInternalTolerance] at hprec ⊢
+    grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+  have hqnonneg : 0 <=
+      2 * (precisionAtStage (uniformExpFTCIndex e)).val :=
+    Rat.mul_nonneg (by native_decide)
+      (Rat.le_of_lt (precisionAtStage (uniformExpFTCIndex e)).property)
+  have heps : 0 <= eps.val := Rat.le_of_lt eps.property
+  have he : e.val = eps.val / 4 := by
+    rfl
+  have hraw' :
+      (uniformExpSymmetricCellRange
+        (leftPoint (-1) 1 (uniformExpSymmetricFTCPieces e) k)
+        (leftPoint (-1) 1 (uniformExpSymmetricFTCPieces e) (k + 1))
+        (uniformExpFTCStage e)).width <= eps.val / 8 := by
+    rw [he] at hraw
+    grind [Rat.div_def]
+  have hq' : 2 * (2 * (precisionAtStage (uniformExpFTCIndex e)).val) <=
+      eps.val / 5 := by
+    grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+  have hmain :
+      (uniformExpSymmetricCellRange
+        (leftPoint (-1) 1 (uniformExpSymmetricFTCPieces e) k)
+        (leftPoint (-1) 1 (uniformExpSymmetricFTCPieces e) (k + 1))
+        (uniformExpFTCStage e)).width +
+        2 * (2 * (precisionAtStage (uniformExpFTCIndex e)).val) <= eps.val / 2 := by
+    calc
+      _ <= eps.val / 8 + eps.val / 5 := rat_add_le_add hraw' hq'
+      _ <= eps.val / 2 := by grind [Rat.div_def]
+  simpa [e] using hmain
+
+theorem uniformExpSymmetricFTCScaledBound_contains
+    (eps : QPos) (k : Nat)
+    (hk : k < (uniformExpSymmetricFTCPartition
+      (uniformExpSymmetricFTCInternalTolerance eps)).pieces)
+    (x : Rat)
+    (hx : ((uniformExpSymmetricFTCPartition
+      (uniformExpSymmetricFTCInternalTolerance eps)).cell k hk).contains x) :
+    QInterval.ContainsInterval (uniformExpSymmetricFTCScaledBound eps k)
+      ((uniformExpRaw x).compute
+        (uniformExpFTCStage (uniformExpSymmetricFTCInternalTolerance eps))) := by
+  let e := uniformExpSymmetricFTCInternalTolerance eps
+  have hraw := uniformExpSymmetricFTCIndexedBound_contains_raw e k hk x hx
+  unfold uniformExpSymmetricFTCScaledBound
+  unfold uniformExpSymmetricFTCIndexedBound at hraw
+  dsimp [e] at hraw ⊢
+  unfold QInterval.ContainsInterval QInterval.expand at *
+  grind
+
+theorem uniformExpSymmetricFTCScaledSum_width_le (eps : QPos) :
+    ((uniformExpSymmetricFTCPartition
+      (uniformExpSymmetricFTCInternalTolerance eps)).boundIntegralSum
+      (fun k _ => uniformExpSymmetricFTCScaledBound eps k)).width <= eps.val := by
+  let e := uniformExpSymmetricFTCInternalTolerance eps
+  have hsum := RationalPartition.uniform_boundIntegralSum_width_le_indexed
+    (a := (-1 : Rat)) (b := 1) (uniformExpSymmetricFTCPieces e)
+    (uniformExpSymmetricFTCPieces_pos e) (by native_decide)
+    (fun k => uniformExpSymmetricFTCScaledBound eps k) (eps.val / 2) (by
+      intro k hk
+      exact uniformExpSymmetricFTCScaledBound_width_le eps k hk)
+  change ((RationalPartition.uniform (-1) 1
+    (uniformExpSymmetricFTCPieces e)
+    (uniformExpSymmetricFTCPieces_pos e) (by native_decide)).boundIntegralSum
+    (fun k _ => uniformExpSymmetricFTCScaledBound eps k)).width <= eps.val
+  exact Rat.le_trans hsum (by
+    have heps : 0 <= eps.val := Rat.le_of_lt eps.property
+    grind [Rat.div_def])
+
+theorem uniformExpSymmetricFTCScaledBound_local_endpoint_contained
+    (eps : QPos) (k : Nat)
+    (hk : k < (uniformExpSymmetricFTCPartition
+      (uniformExpSymmetricFTCInternalTolerance eps)).pieces) :
+    QInterval.ContainsInterval
+      (((uniformExpSymmetricFTCPartition
+        (uniformExpSymmetricFTCInternalTolerance eps)).cell k hk).scaleBound
+        (uniformExpSymmetricFTCScaledBound eps k))
+      (endpointDifferenceInterval uniformExpOnSymmetricUnitRealFunRaw
+        ((uniformExpSymmetricFTCPartition
+          (uniformExpSymmetricFTCInternalTolerance eps)).cell k hk).lower
+        ((uniformExpSymmetricFTCPartition
+          (uniformExpSymmetricFTCInternalTolerance eps)).cell k hk).upper
+        (uniformExpFTCStage (uniformExpSymmetricFTCInternalTolerance eps))) := by
+  let e := uniformExpSymmetricFTCInternalTolerance eps
+  let C := (uniformExpSymmetricFTCPartition e).cell k hk
+  have hpos : 0 < C.width := by
+    rw [show C.width = mesh 0 1 (uniformExpFTCPieces e) by
+      dsimp [C]
+      exact uniformExpSymmetricFTCPartition_cell_width e k hk]
+    unfold mesh
+    rw [if_neg (Nat.ne_of_gt (uniformExpFTCPieces_pos e))]
+    rw [show (1 : Rat) - 0 = 1 by grind, Rat.div_def]
+    exact Rat.mul_pos (by native_decide)
+      ((Rat.inv_pos).2 ((Rat.natCast_pos).2 (uniformExpFTCPieces_pos e)))
+  have hab : C.lower < C.upper := by
+    apply (Rat.lt_iff_sub_pos _ _).mpr
+    simpa [RationalSubinterval.width] using hpos
+  have hsmall : qabs (C.upper - C.lower) <=
+      1 / ((uniformExpOnSymmetricUnit_hasDerivativeOnInterval.stepPrecision
+        (uniformExpFTCIndex e) : Nat) : Rat) := by
+    rw [qabs_eq_self_of_nonneg
+      (Rat.le_of_lt ((Rat.lt_iff_sub_pos _ _).mp hab))]
+    change C.width <= 1 /
+      ((uniformExpOnSymmetricUnit_hasDerivativeOnInterval.stepPrecision
+        (uniformExpFTCIndex e) : Nat) : Rat)
+    rw [show C.width = mesh 0 1 (uniformExpFTCPieces e) by
+      dsimp [C]
+      exact uniformExpSymmetricFTCPartition_cell_width e k hk]
+    exact uniformExpFTCPieces_step_le e
+  have hlocal := uniformExpSymmetricCell_endpoint_contained_of_step
+    (n := uniformExpFTCIndex e) C.lower_mem C.upper_mem hab hsmall
+  have hstage : uniformExpSelfDerivativeEvalPrecision (C.upper - C.lower)
+      (uniformExpFTCIndex e) = uniformExpFTCStage e := by
+    have heq : C.upper - C.lower = mesh 0 1 (uniformExpFTCPieces e) := by
+      dsimp [C, RationalSubinterval.width]
+      exact uniformExpSymmetricFTCPartition_cell_width e k hk
+    rw [heq, uniformExpSelfDerivativeEvalPrecision_eq_quotient]
+    rw [uniformExpFTCStage_eq_quotient e]
+  unfold uniformExpSymmetricFTCScaledBound
+  change QInterval.ContainsInterval
+    (C.scaleBound
+      (QInterval.expand (uniformExpSymmetricCellRange C.lower C.upper
+        (uniformExpFTCStage e))
+        (2 * (precisionAtStage (uniformExpFTCIndex e)).val)))
+    (endpointDifferenceInterval uniformExpOnSymmetricUnitRealFunRaw
+      C.lower C.upper (uniformExpFTCStage e))
+  unfold RationalSubinterval.scaleBound RationalSubinterval.width
+  rw [← hstage]
+  exact hlocal
+
+def uniformExpOnSymmetricUnit_selectedStageFTCIndexed :
+    SelectedStageCandidateDerivativeFTCIndexed
+      uniformExpOnSymmetricUnitRealFunRaw uniformExpOnSymmetricUnitRealFunRaw (-1) 1 where
+  primitive_valid := uniformExpOnSymmetricUnitRealFunRaw_valid
+  choosePartition := fun eps =>
+    uniformExpSymmetricFTCPartition (uniformExpSymmetricFTCInternalTolerance eps)
+  chooseStage := fun eps =>
+    uniformExpFTCStage (uniformExpSymmetricFTCInternalTolerance eps)
+  derivativeBound := uniformExpSymmetricFTCScaledBound
+  primitive_domain_on := by
+    intro eps i hi
+    exact (uniformExpSymmetricFTCPartition
+      (uniformExpSymmetricFTCInternalTolerance eps)).point_in_bounds hi
+  candidate_domain_on := by
+    intro eps k hk x hx
+    exact RationalSubinterval.contains_inDomain
+      ((uniformExpSymmetricFTCPartition
+        (uniformExpSymmetricFTCInternalTolerance eps)).cell k hk) hx
+  candidate_contained := by
+    intro eps k hk x hx
+    change QInterval.ContainsInterval (uniformExpSymmetricFTCScaledBound eps k)
+      ((uniformExpRaw x).compute
+        (uniformExpFTCStage (uniformExpSymmetricFTCInternalTolerance eps)))
+    exact uniformExpSymmetricFTCScaledBound_contains eps k hk x hx
+  local_endpoint_contained := by
+    intro eps k hk
+    exact uniformExpSymmetricFTCScaledBound_local_endpoint_contained eps k hk
+  riemann_width := uniformExpSymmetricFTCScaledSum_width_le
+  endpoint_width := by
+    intro eps
+    let e := uniformExpSymmetricFTCInternalTolerance eps
+    have hendpoint := uniformExpSymmetricFTC_endpoint_width_le e
+    have he : e.val <= eps.val := by
+      dsimp [e, uniformExpSymmetricFTCInternalTolerance]
+      have heps : 0 <= eps.val := Rat.le_of_lt eps.property
+      grind [Rat.div_def]
+    exact Rat.le_trans hendpoint he
+
+theorem uniformExpOnSymmetricUnit_effectiveFTC :
+    (uniformExpOnSymmetricUnit_selectedStageFTCIndexed.toSelected.boundedIntegralRaw).Equiv
+      uniformExpOnSymmetricUnit_selectedStageFTCIndexed.toSelected.endpointRaw := by
+  exact selectedStageCandidateDerivativeFTCIndexed
+    uniformExpOnSymmetricUnit_selectedStageFTCIndexed
+
 /-- The centered exponential chart has the exact initial value one at zero. -/
 theorem uniformExpOnSymmetricUnit_zero_equiv_one :
     (PartialRealFunRaw.apply uniformExpOnSymmetricUnit.raw

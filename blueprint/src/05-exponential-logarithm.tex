@@ -130,13 +130,19 @@ remain entirely rational and proof-producing.
 \lean{ComputableAnalysis.ExpProofs.uniformExpSymmetricFTCIndexedBound_width_le}
 \lean{ComputableAnalysis.ExpProofs.uniformExpSymmetricFTCIndexedSum_width_le}
 \lean{ComputableAnalysis.ExpProofs.uniformExpSymmetricCell_endpoint_contained_of_step}
+\lean{ComputableAnalysis.ExpProofs.uniformExpSymmetricFTCInternalTolerance}
+\lean{ComputableAnalysis.ExpProofs.uniformExpSymmetricFTCScaledBound_width_le}
+\lean{ComputableAnalysis.ExpProofs.uniformExpSymmetricFTCScaledSum_width_le}
+\lean{ComputableAnalysis.ExpProofs.uniformExpSymmetricFTCScaledBound_local_endpoint_contained}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_effectiveFTC}
 \leanok
 
-The centered schedule now has the required mesh estimate: every cell's
-two-sided derivative enclosure is no wider than the requested tolerance.
-The remaining certificate fields are endpoint containment and the final
-telescoping assembly.  Once those are supplied, the generic effective FTC
-identifies the bounded integral with the endpoint difference:
+The centered schedule is complete.  It spends an internal tolerance of
+$\varepsilon/4$, so the expanded two-sided derivative boxes fit within
+$\varepsilon/2$ on each cell; the factor of two from the interval length is
+then absorbed by the finite bound-integral sum.  Local endpoint transport and
+the final finite telescope identify the dyadic integral with the endpoint
+difference:
 
 \begin{verbatim}
 centered evaluator + two-sided derivative schedule
@@ -144,7 +150,7 @@ centered evaluator + two-sided derivative schedule
     -> exp(1) - exp(-1)
 \end{verbatim}
 
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_effectiveFTC_of_certificate}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_effectiveFTC}
 \leanok
 
 \section{Logarithm and Euler identity}
