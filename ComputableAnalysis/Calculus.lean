@@ -287,6 +287,45 @@ theorem riemannLeftInterval_overlap_of_samples
     { lo := 0, hi := 0 } { lo := 0, hi := 0 } (by
       simp [QInterval.Overlaps])
 
+/-- Right-endpoint rectangle sums have the same exact sample-transport law.
+The proof is again only a finite fold induction; no relation between left and
+right limits is assumed. -/
+theorem riemannRightInterval_congr_of_samples
+    (g h : RealFunRaw) (a b : Rat) (subdivisions prec : Nat)
+    (hpoint : forall k, k < subdivisions ->
+      g.compute (rightPoint a b subdivisions k) prec =
+        h.compute (rightPoint a b subdivisions k) prec) :
+    riemannRightInterval g a b subdivisions prec =
+      riemannRightInterval h a b subdivisions prec := by
+  unfold riemannRightInterval
+  have hfold : forall (xs : List Nat),
+      (forall k, k ∈ xs -> k < subdivisions) ->
+      forall (acc : QInterval),
+      (xs.foldl
+        (fun acc k =>
+          let I := g.compute (rightPoint a b subdivisions k) prec
+          { lo := acc.lo + mesh a b subdivisions * I.lo,
+            hi := acc.hi + mesh a b subdivisions * I.hi }) acc) =
+      (xs.foldl
+        (fun acc k =>
+          let I := h.compute (rightPoint a b subdivisions k) prec
+          { lo := acc.lo + mesh a b subdivisions * I.lo,
+            hi := acc.hi + mesh a b subdivisions * I.hi }) acc) := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro _hmem
+        intro acc
+        rfl
+    | cons k ks ih =>
+        intro hmem
+        intro acc
+        dsimp
+        rw [hpoint k (hmem k (by simp))]
+        exact ih (fun j hj => hmem j (by simp [hj])) _
+  exact hfold (List.range subdivisions)
+    (by intro k hk; exact List.mem_range.mp hk) { lo := 0, hi := 0 }
+
 /-- The finite left-endpoint sum for the product contribution
 `f\,\Delta g`.  This is the rational rectangle area swept when the second
 side of a rectangle changes while the first is held at its left endpoint. -/
