@@ -7397,6 +7397,44 @@ theorem uniformExpOnUnitStabilizedIntegral_equiv_powerSeries_endpoint_subtractio
   exact RealRaw.equiv_trans hintegral huniformSub hseriesSub
     hintegralSub hsubEq
 
+/-! The endpoint subtraction can be normalized at the public raw level.  This
+is the user-facing unit exponential FTC statement: the rectangle integral of
+the certified exponential evaluator is `exp(1) - 1`, where both terms are
+still computable interval representations. -/
+
+theorem uniformExpOnUnitStabilizedIntegral_equiv_powerSeries_one_sub_one :
+    (Integral.integralFor uniformExpOnUnit
+      uniformExpOnUnitStabilizedConstruction).Equiv
+      ((expPowerSeries (1 : Rat)) - RealRaw.ofRat 1) := by
+  have hseriesOne : (expPowerSeries (1 : Rat)).Valid :=
+    expPowerSeries_valid (1 : Rat)
+  have hseriesZero : (expPowerSeries (0 : Rat)).Valid :=
+    expPowerSeries_valid (0 : Rat)
+  have hone : (RealRaw.ofRat (1 : Rat)).Valid :=
+    RealRaw.ofRat_valid (1 : Rat)
+  have hsubEq :
+      ((expPowerSeries (1 : Rat)) - (expPowerSeries (0 : Rat))).Equiv
+        ((expPowerSeries (1 : Rat)) - RealRaw.ofRat 1) := by
+    apply RealRaw.sub_equiv
+    · exact hseriesOne
+    · exact hseriesOne
+    · exact hseriesZero
+    · exact hone
+    · exact RealRaw.equiv_refl _ hseriesOne
+    · exact expPowerSeries_zero_equiv_one
+  have hsubValid :
+      ((expPowerSeries (1 : Rat)) - (expPowerSeries (0 : Rat))).Valid :=
+    RealRaw.sub_valid hseriesOne hseriesZero
+  have hnormalizedValid :
+      ((expPowerSeries (1 : Rat)) - RealRaw.ofRat 1).Valid :=
+    RealRaw.sub_valid hseriesOne hone
+  exact RealRaw.equiv_trans
+    (Integral.integralFor_valid uniformExpOnUnit
+      uniformExpOnUnitStabilizedConstruction)
+    hsubValid hnormalizedValid
+    uniformExpOnUnitStabilizedIntegral_equiv_powerSeries_endpoint_subtraction
+    hsubEq
+
 /-! The endpoint-difference spelling can be transported to the ordinary
 subtraction of the two certified exponential endpoint evaluations.  This is
 the first user-facing non-polynomial integral identity in the ODE route:

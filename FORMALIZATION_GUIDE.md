@@ -463,6 +463,14 @@ model for later special functions: define an executable primitive, prove a
 finite derivative-bound certificate, stabilize the rectangle evaluator, and
 then connect its endpoint value to a geometric or series representation.
 
+The same public normalization is available for the unit exponential:
+`uniformExpOnUnitStabilizedIntegral_equiv_powerSeries_one_sub_one` identifies
+the effective rectangle integral with the factorial-series value at `1`
+minus the exact rational value `1`.  The proof first uses FTC to obtain the
+endpoint subtraction, then transports the zero endpoint through the proved
+series equivalence; it does not silently identify `exp` with a classical real
+number.
+
 The series implementation is connected to this finite algebra without making
 an analytic derivative claim. `ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_monomial`
 proves that the literal loop's next rational term is `x^N / N!`, while
