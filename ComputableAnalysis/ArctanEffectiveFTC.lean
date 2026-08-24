@@ -839,11 +839,9 @@ theorem arctanEffectiveFTC_boundedIntegral_equiv_endpointDifference :
       (endpointDifferenceRaw arctanPrimitiveRaw 0 1
         arctanEffectiveFTCEndpointValid) := by
   let h := arctanEffectiveFTCData.toDerivativeBoundFTC
-  have hcanonical := DerivativeBoundFTC.endpointRaw_equiv_endpointDifference
-    h arctanPrimitiveRaw_valid
-    (by exact ⟨by native_decide, by native_decide⟩)
-    (by exact ⟨by native_decide, by native_decide⟩)
-    arctanEffectiveFTCEndpointValid
+  have hcanonical :=
+    EffectiveDerivativeBoundFTC.endpointRaw_equiv_endpointDifference
+      arctanEffectiveFTCData arctanEffectiveFTCEndpointValid
   intro n
   let eps := precisionAtStage n
   let s := h.chooseEndpointPrecision eps
