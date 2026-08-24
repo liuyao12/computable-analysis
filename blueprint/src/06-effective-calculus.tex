@@ -273,6 +273,28 @@ real-number object.
 \lean{ComputableAnalysis.Integral.finiteQuadrature_average_between_bounds}
 \leanok
 
+\subsection{A cubic checkpoint}
+
+The cubic makes the distinction visible. On $[0,1]$, the secant slope of
+$x^3$ is $1$, while the normalized derivative target is $1/3$. The latter
+need not have a rational square root, so the project records a bisection
+interval for the intermediate point. On $[2,11]$, by contrast, the witness
+$t=7$ is rational and the classical-looking identity is checked directly:
+
+\begin{verbatim}
+secant(x^3; 2,11) = 147 = 3 * 7^2
+2 < 7 < 11
+\end{verbatim}
+
+Thus the same interface supports both outcomes: a finite witness when one is
+available, and a shrinking rational search box when it is not.
+
+\lean{ComputableAnalysis.cubicUnitNormalizedDerivativeAverage_in_unit}
+\lean{ComputableAnalysis.cubicUnit_mvt_bisection_search}
+\lean{ComputableAnalysis.cubic_mvt_unit_interval_certificate}
+\lean{ComputableAnalysis.cubic_mvt_rational_witness_interval}
+\leanok
+
 \section{Taylor}
 \label{thm:finite-taylor-ftc-prefix}
 
