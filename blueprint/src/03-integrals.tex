@@ -213,7 +213,14 @@ are retained so the same constructions can be inserted into a piecewise plan.
 \lean{ComputableAnalysis.exactRat_affine_nondecreasing}
 \lean{ComputableAnalysis.affineMonotoneIntegralFor_eq_ofRat}
 \lean{ComputableAnalysis.affineMonotoneIntegralFor_of_nonpos_eq_ofRat}
+\lean{ComputableAnalysis.affineMonotoneIntegralFor_adjacent_additive}
 \leanok
+
+The affine case already closes adjacent-interval additivity with no limiting
+argument: the endpoint formula on $[a,c]$ is rationally equal to the sum of
+the formulas on $[a,b]$ and $[b,c]$. This is the first nonconstant instance
+of the general additivity contract; later piecewise constructions must supply
+the corresponding finite assembly and endpoint-equivalence certificate.
 
 \section{Beyond Lipschitz: effective monotone schedules}
 

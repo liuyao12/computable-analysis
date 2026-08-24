@@ -6666,6 +6666,41 @@ theorem exists_affineMonotoneConstructionFor_of_nonpos
       (FunctionOnInterval.exactRat (fun x => r * x + c) a b) := by
   exact ⟨affineMonotoneConstructionFor_of_nonpos hr⟩
 
+/-! The first nonconstant adjacent-interval additivity theorem.  The affine
+construction is an exact rational endpoint formula, so the proof is finite
+ring algebra followed by raw-interval overlap. -/
+
+theorem affineMonotoneIntegralFor_adjacent_additive
+    {r c a b d : Rat} (hr : 0 <= r) :
+    (monotoneIntegralFor
+      (FunctionOnInterval.exactRat (fun x => r * x + c) a d)
+      (affineMonotoneConstructionFor (r := r) (c := c) (a := a) (b := d) hr)).Equiv
+      { compute := RealRaw.addCompute
+          (monotoneIntegralFor
+            (FunctionOnInterval.exactRat (fun x => r * x + c) a b)
+            (affineMonotoneConstructionFor (r := r) (c := c) (a := a) (b := b) hr))
+          (monotoneIntegralFor
+            (FunctionOnInterval.exactRat (fun x => r * x + c) b d)
+            (affineMonotoneConstructionFor (r := r) (c := c) (a := b) (b := d) hr)) } := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+  change QInterval.Overlaps
+    ((monotoneIntegralFor
+      (FunctionOnInterval.exactRat (fun x => r * x + c) a d)
+      (affineMonotoneConstructionFor (r := r) (c := c) (a := a) (b := d) hr)).compute n)
+    (RealRaw.addCompute
+      (monotoneIntegralFor
+        (FunctionOnInterval.exactRat (fun x => r * x + c) a b)
+        (affineMonotoneConstructionFor (r := r) (c := c) (a := a) (b := b) hr))
+      (monotoneIntegralFor
+        (FunctionOnInterval.exactRat (fun x => r * x + c) b d)
+        (affineMonotoneConstructionFor (r := r) (c := c) (a := b) (b := d) hr)) n)
+  simp [monotoneIntegralFor, integralFor, affineMonotoneConstructionFor,
+    RealRaw.ofRat, RealRaw.addCompute, QInterval.Overlaps]
+  constructor <;> grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
 theorem affineMonotoneIntegralFor_eq_ofRat {r c a b : Rat} (hr : 0 <= r) :
     monotoneIntegralFor
       (FunctionOnInterval.exactRat (fun x => r * x + c) a b)
