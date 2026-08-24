@@ -192,6 +192,25 @@ main complex-valued functions:
 \lean{ComputableAnalysis.PowerSeries.neg_cosCoeff_hasFormalDerivative}
 \leanok
 
+The first worked trigonometric prefix closes this loop.  The finite sine
+prefix is a rational polynomial: its coefficient shift supplies the cosine
+derivative, and its effective FTC certificate evaluates the corresponding
+finite area.  This is a finite model of the later sine argument; the tail of
+the full sine evaluator is deliberately kept as a separate enclosure.
+
+\begin{verbatim}
+sine prefix -> cosine prefix -> secant bound -> FTC endpoint box
+                                              -> rational value
+\end{verbatim}
+
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixOne_eq_identity}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixOneIntegralRaw_equiv_one_eighth}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTCData}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTC_equiv_endpoint}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_endpoint}
+\leanok
+
 The same separation is used when a finite-prefix or partition schedule is not
 nested on its own: a valid anchor and a rational width budget are used only in
 the proof to prefix-stabilize the runtime boxes.  The stabilized computation

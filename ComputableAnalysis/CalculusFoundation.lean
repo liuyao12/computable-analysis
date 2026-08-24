@@ -15,6 +15,7 @@ import ComputableAnalysis.EffectiveFTCPortfolio
 import ComputableAnalysis.MonotonicityConvexity
 import ComputableAnalysis.PowerSeries
 import ComputableAnalysis.FiniteTaylorFTCInterface
+import ComputableAnalysis.FiniteExponentialTaylor
 import ComputableAnalysis.Series
 import ComputableAnalysis.FirstYearCalculus
 import ComputableAnalysis.FiniteFourierFoundation

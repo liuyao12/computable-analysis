@@ -17,6 +17,18 @@ coefficient/forcing evaluator -> cell or simplex bounds
                               -> finite transition and Duhamel boxes
 \end{verbatim}
 
+The finite box part is now dimension-independent.  A separable coefficient
+product can be assembled as a weighted nested rational sum and factored into
+one finite sum per coordinate.  This supplies the rectangular component of a
+multiple integral; chronological ordering and simplex restrictions remain
+explicit additional data, rather than being hidden inside a Fubini or measure
+theorem.
+
+\lean{ComputableAnalysis.finiteProductIntegralNestedSum}
+\lean{ComputableAnalysis.finiteProductIntegralSum}
+\lean{ComputableAnalysis.finiteProductIntegralNestedSum_factorized}
+\leanok
+
 The reusable contract is exposed here so an ODE instance can be added without
 introducing a new notion of integration:
 
@@ -189,7 +201,22 @@ case; affine forcing then gives variation of constants.
 The constant-coefficient and rotation algebra is checked before any analytic
 series theorem:
 
+For a constant generator, the ordered-simplex volume is built recursively:
+
+\begin{verbatim}
+V(0,T) := 1
+V(r+1,T) := T/(r+1) * V(r,T)
+V(r,T)  = T^r/r!
+\end{verbatim}
+
+This is a finite rational identity.  It explains the factorial coefficient in
+the Peano--Baker terms before any infinite series or completed function space
+is introduced.
+
 \lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexTerm_succ}
+\lean{ComputableAnalysis.LinearODE.orderedSimplexVolume}
+\lean{ComputableAnalysis.LinearODE.orderedSimplexVolume_eq_closed}
+\lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexTerm_eq_orderedSimplexVolume}
 \lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexPartial_succ}
 \lean{ComputableAnalysis.LinearODE.RotationSystem.generator_square}
 \lean{ComputableAnalysis.LinearODE.RotationSystem.simplexPartial_even_split}

@@ -113,10 +113,13 @@ Start with the smallest target module rather than importing
 | Finite arithmetic, geometric, and power sums | `ComputableAnalysis.Series` | `Series.arithmeticSum_eq`, `Series.geometricSum_eq`, `Series.powerSum`, and the low-degree closed forms |
 | Finite Basel-series certificates | `ComputableAnalysis.DirichletSeries` | `zetaTwoPartial_nonneg`, `zetaTwoFiniteTail_le_telescoping`, `zetaTwoInterval_nested`, and `zetaTwoRaw_validCompute` |
 | Formal power series and rational tail bounds | `ComputableAnalysis.PowerSeries` | `FormalPowerSeries`, `RationalMajorant` |
+| Finite term-by-term FTC for Taylor prefixes | `ComputableAnalysis.FiniteTaylorFTCInterface` | `FinitePolynomial.finiteTaylorFTC_step`, `FinitePolynomial.finiteTaylorFTC_prefix` |
+| Finite exponential tail certificates | `ComputableAnalysis.FiniteExponentialTaylor` | `FiniteExponentialTaylor.scheduled_expTaylorPrefix_remainder_le`, `FiniteExponentialTaylor.scheduled_expTaylorPrefix_enclosure` |
 | Current first-year derivative ledger | `ComputableAnalysis.FirstYearCalculus` | `checked_power_series_table`, `RealElementary` |
 | Positive powers, exponential/log interfaces | `ComputableAnalysis.ElementaryFunctions` | `exp.PositiveRealRaw`, `exp.RationalPowerExtension`, `exp.ExponentialFunction` |
 | Direct scalar ODE uniqueness | `ComputableAnalysis.ScalarODEUniqueness` | `ScalarODE.DirectMeshHalvingCertificate`, `SelfDerivativeDirectMeshComparison` |
 | Discrete linear ODE / Peano--Baker core | `ComputableAnalysis.PeanoBaker` | `LinearODE.DiscreteLinearSystem`, `chronologicalProduct`, `peanoBakerDiscreteSum` |
+| Finite ordered-simplex volumes | `ComputableAnalysis.PeanoBaker` | `orderedSimplexVolume`, `orderedSimplexVolume_eq_closed`, `constantPeanoBakerSimplexTerm_eq_orderedSimplexVolume` |
 | Certified complex rotation series | `ComputableAnalysis.RotationSeries` | `rotationExpRaw`, `rotationCosRaw`, `rotationSinRaw`, and their validity/rate theorems |
 | Bounded rotation continuity | `ComputableAnalysis.RotationCalculus` | `uniformRotationCosOnTwo`, `uniformRotationSinOnTwo`, and their epsilon--delta theorems |
 | Common-prefix rotation IVP candidate | `ComputableAnalysis.RotationInitialValues` | `uniformRotationCosOnTwo_zero_equiv_one`, `uniformRotationSinOnTwo_zero_equiv_zero`, `uniformRotationNegSinOnTwo_equiv_neg_sin`, `uniformRotationOnTwo_rotationInitialCertificate` |
@@ -325,16 +328,27 @@ There are also genuine full interval derivative certificates on `[0,1]` for:
   (`d(x A_rect)/dx = A_rect + x/(1+x^2)`).
 
 `FunctionOnInterval.scaleRat` and
-`HasDerivativeOnInterval.scaleRat_two` are the first reusable scalar rule:
-they multiply the finite quotient and its derivative boxes by two while
-requesting the explicit finer stage `2*(n+1)`.  The sector-area module applies
-that rule to the rectangle arctangent.  Its `angleOnUnit` has derivative
+`HasDerivativeOnInterval.scaleRat_of_nonneg` now give the reusable scalar
+rule for every nonnegative rational factor.  The caller supplies an internal
+stage and proves `r * precision(internal) <= precision(output)`; the special
+case `HasDerivativeOnInterval.scaleRat_two` packages the standard
+`2*(n+1)` schedule.  The sector-area module applies that rule to the rectangle
+arctangent.  Its `angleOnUnit` has derivative
 `speedOnUnit`, whose exact rational value is
 `RationalCircle.Stage.sectorAreaSpeed t = 2/(1+t^2)`;
 `angleAt_equiv_two_arctanGeom` supplies the pointwise bridge to the geometric
 angle representation.  The same module now proves the quantitative finite
 gap `x + 1/(n+1) <= y -> Theta_x.hi < Theta_y.lo` at stage `64*(n+1)`,
 and packages it as `angleOnUnit_effectiveInverseSeparation`.
+
+Negation is also closed at the interval level:
+`FunctionOnInterval.neg` reverses endpoint boxes without changing their
+width, and `HasDerivativeOnInterval.neg` proves the corresponding
+`D(-f) = -Df` rule at the same evaluator stages.
+`FunctionOnInterval.sub` is defined as addition with negation, and
+`HasDerivativeOnInterval.subOfCommonSchedule` supplies the corresponding
+finite subtraction rule.  These operations are now available for residuals,
+endpoint differences, and linear combinations in later chapters.
 `angleOnUnitRegular` is the cofinally accelerated presentation whose
 stage `n` uses that rectangle stage; its
 `angleOnUnitRegular_intervalRegular` endpoint-image evaluator and
@@ -389,6 +403,12 @@ assumptions are `-C <= lower - a` and `upper - a <= C`, and
 `FinitePolynomial.taylorPrefixShiftAt_at_basepoint` proves that the certified
 derivative at `a` is again `c 1`.  Thus the coefficient interpretation is
 translation-invariant without invoking an ambient real line.
+For the finite integral identity itself, import
+`ComputableAnalysis.FiniteTaylorFTCInterface`: use
+`FinitePolynomial.finiteTaylorFTC_step` for one added monomial and
+`FinitePolynomial.finiteTaylorFTC_prefix` for the complete finite prefix.
+These are rational endpoint identities; the tail certificate and the raw
+real representation remain separate obligations.
 At the quantitative level, `FinitePolynomial.SecantDerivativeBound.add`,
 `scaleRat`, and `mul` compose finite derivative certificates.  The product
 constructor asks for rational bounds for each factor and its proposed
@@ -533,6 +553,27 @@ formula through `left_integral_equiv_endpoint_sub_right` (and its symmetric
 companion).  An LLM must still construct the two integrals and the common
 mesh/corner certificate for its particular functions; that is deliberately
 not inferred from a formal product rule alone.
+
+### Same-chart interval addition
+
+`FunctionOnInterval.add F G hlower hupper` is the public interval-level
+addition operation.  The equal lower and upper endpoints are explicit because
+the two rational charts must describe the same domain.  Its evaluator uses
+`QInterval.addInterval`, and `FunctionOnInterval.add_compute` exposes that
+stagewise computation.  The validity proof is inherited from
+`RealRaw.add_valid`; continuity, derivative certificates, and FTC data remain
+separate obligations.
+
+The finite derivative algebra is now exposed as well:
+`QInterval.differenceQuotient_addInterval` distributes the interval quotient
+over addition, and `intervalNearAtPrecision_addInterval` combines two
+near-certificates when the internal precision pays the doubled error budget.
+These are the ingredients for the next generic `HasDerivativeOnInterval`
+closure theorem; they do not use completeness or a limiting real-number
+argument.  That closure theorem is now available as
+`HasDerivativeOnInterval.addOfCommonSchedule`.  It requires explicit domain
+alignment and equality of the two certificates' stage schedules, then chooses
+an internal precision schedule satisfying the doubled-budget inequality.
 
 ### Increasing pieces: start with the literal finite stage
 

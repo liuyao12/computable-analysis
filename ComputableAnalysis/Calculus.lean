@@ -1255,6 +1255,63 @@ theorem addInterval_width (I J : QInterval) :
   unfold addInterval QInterval.width
   grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
 
+end QInterval
+
+/-- Adding two finite enclosure comparisons adds their error budgets.  The
+precision hypothesis is explicit so callers can choose a finer internal stage
+without invoking a limit or completeness principle. -/
+theorem intervalNearAtPrecision_addInterval
+    {I J K L : QInterval} {m n : Nat}
+    (hIJ : intervalNearAtPrecision I J m)
+    (hKL : intervalNearAtPrecision K L m)
+    (hprecision : 2 * (precisionAtStage m).val <=
+      (precisionAtStage n).val) :
+    intervalNearAtPrecision (QInterval.addInterval I K)
+      (QInterval.addInterval J L) n := by
+  unfold intervalNearAtPrecision QInterval.NearAt at hIJ hKL ⊢
+  rcases hIJ with ⟨hIleft, hIright, hIwidth, hJwidth⟩
+  rcases hKL with ⟨hKleft, hKright, hKwidth, hLwidth⟩
+  unfold QInterval.addInterval
+  constructor
+  · calc
+      I.lo + K.lo <= (J.hi + (precisionAtStage m).val) +
+          (L.hi + (precisionAtStage m).val) := by grind
+      _ = J.hi + L.hi +
+          2 * (precisionAtStage m).val := by
+        grind [Rat.add_assoc, Rat.add_comm]
+      _ <= J.hi + L.hi + (precisionAtStage n).val := by
+        exact (Rat.add_le_add_left).2 hprecision
+  constructor
+  · calc
+      J.lo + L.lo <= (I.hi + (precisionAtStage m).val) +
+          (K.hi + (precisionAtStage m).val) := by grind
+      _ = I.hi + K.hi +
+          2 * (precisionAtStage m).val := by
+        grind [Rat.add_assoc, Rat.add_comm]
+      _ <= I.hi + K.hi + (precisionAtStage n).val := by
+        exact (Rat.add_le_add_left).2 hprecision
+  constructor
+  · change I.hi + K.hi - (I.lo + K.lo) <=
+      (precisionAtStage n).val
+    calc
+      I.hi + K.hi - (I.lo + K.lo) = I.width + K.width := by
+        unfold QInterval.width
+        grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+      _ <= 2 * (precisionAtStage m).val := by
+        grind
+      _ <= (precisionAtStage n).val := hprecision
+  · change J.hi + L.hi - (J.lo + L.lo) <=
+      (precisionAtStage n).val
+    calc
+      J.hi + L.hi - (J.lo + L.lo) = J.width + L.width := by
+        unfold QInterval.width
+        grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+      _ <= 2 * (precisionAtStage m).val := by
+        grind
+      _ <= (precisionAtStage n).val := hprecision
+
+namespace QInterval
+
 def scaleByRat (r : Rat) (I : QInterval) : QInterval :=
   if 0 <= r then
     { lo := r * I.lo, hi := r * I.hi }
@@ -5269,6 +5326,73 @@ def exactRat (f : Rat -> Rat) (a b : Rat) : FunctionOnInterval where
 theorem exactRat_compute (f : Rat -> Rat) (a b x : Rat)
     (hx : inDomainInterval a b x) (n : Nat) :
     (exactRat f a b).compute x hx n = { lo := f x, hi := f x } :=
+  rfl
+
+/-! Pointwise addition on a common rational interval.
+
+This is the interval-level counterpart of `RealFunRaw.add`.  The domain
+agreement is explicit because interval functions carry their rational chart;
+the validity proof is inherited from the additive closure of `RealRaw`. -/
+def add
+    (F G : FunctionOnInterval)
+    (same_lower : F.lower = G.lower)
+    (same_upper : F.upper = G.upper) : FunctionOnInterval where
+  raw :=
+    { definedAt := fun x =>
+        inDomainInterval F.lower F.upper x /\
+          F.raw.definedAt x /\ G.raw.definedAt x
+      compute := fun x hx n =>
+        QInterval.addInterval
+          (F.raw.compute x hx.2.1 n)
+          (G.raw.compute x hx.2.2 n) }
+  lower := F.lower
+  upper := F.upper
+  defined_on := by
+    intro x hx
+    refine ⟨hx, F.defined_on x hx, G.defined_on x ?_⟩
+    constructor
+    · rw [← same_lower]
+      exact hx.1
+    · rw [← same_upper]
+      exact hx.2
+  valid_on := by
+    intro x hx
+    let hxF : inDomainInterval F.lower F.upper x := hx.1
+    let hxG : inDomainInterval G.lower G.upper x := by
+      constructor
+      · rw [← same_lower]
+        exact hxF.1
+      · rw [← same_upper]
+        exact hxF.2
+    let X : RealRaw := { compute := F.raw.compute x hx.2.1 }
+    let Y : RealRaw := { compute := G.raw.compute x hx.2.2 }
+    have hX : X.Valid := by
+      simpa [X, RealRaw.Valid] using F.valid_on x hx.2.1
+    have hY : Y.Valid := by
+      simpa [Y, RealRaw.Valid] using G.valid_on x hx.2.2
+    have hsum := RealRaw.add_valid hX hY
+    change RealRaw.ValidCompute
+      (fun n => QInterval.addInterval
+        (F.raw.compute x hx.2.1 n)
+        (G.raw.compute x hx.2.2 n))
+    change RealRaw.ValidCompute (RealRaw.addCompute X Y) at hsum
+    exact hsum
+
+@[simp] theorem add_compute
+    (F G : FunctionOnInterval)
+    (same_lower : F.lower = G.lower)
+    (same_upper : F.upper = G.upper)
+    (x : Rat) (hx : inDomainInterval F.lower F.upper x) (n : Nat) :
+    (add F G same_lower same_upper).compute x
+      (by simpa [add] using
+        (show inDomainInterval F.lower F.upper x from hx)) n =
+      QInterval.addInterval (F.compute x hx n)
+        (G.compute x (by
+          constructor
+          · rw [← same_lower]
+            exact hx.1
+          · rw [← same_upper]
+            exact hx.2) n) := by
   rfl
 
 /-- The pointwise interval product of two functions on the same rational

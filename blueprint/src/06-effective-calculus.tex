@@ -103,6 +103,15 @@ to exponential and trigonometric evaluators.
 
 \section{Continuity as a finite certificate}
 
+The public interval-function layer supports same-chart addition.  This is the
+first algebraic closure needed before proving derivative and FTC closure
+rules: evaluator boxes add stage by stage, while every analytic property is
+still supplied by its own finite certificate.
+
+\lean{ComputableAnalysis.FunctionOnInterval.add}
+\lean{ComputableAnalysis.FunctionOnInterval.add_compute}
+\leanok
+
 Continuity is not a predicate on an ambient completed function space.  A
 function exposes either a pointwise modulus or an interval image algorithm:
 
@@ -113,6 +122,30 @@ requested output width -> input-width budget -> rational image box
 
 The interval form is stronger for integration because it gives one box for an
 entire cell.  It implies the rational epsilon--delta form constructively:
+
+For addition, the finite-difference algebra is explicit:
+
+\begin{verbatim}
+(F+G)(x+h)-(F+G)(x)
+  = (F(x+h)-F(x)) + (G(x+h)-G(x))
+\end{verbatim}
+
+Interval quotients obey the same identity.  If two quotient boxes are near
+their derivative boxes at an internal stage, their sum is near the summed
+derivative box at the requested stage after paying the doubled error budget.
+This is the constructive replacement for silently invoking a derivative
+closure theorem over completed real-valued functions.
+
+\lean{ComputableAnalysis.QInterval.differenceQuotient_addInterval}
+\lean{ComputableAnalysis.intervalNearAtPrecision_addInterval}
+\lean{ComputableAnalysis.HasDerivativeOnInterval.addOfCommonSchedule}
+\lean{ComputableAnalysis.intervalNearAtPrecision_scaleRat_of_nonneg}
+\lean{ComputableAnalysis.HasDerivativeOnInterval.scaleRat_of_nonneg}
+\lean{ComputableAnalysis.FunctionOnInterval.neg}
+\lean{ComputableAnalysis.HasDerivativeOnInterval.neg}
+\lean{ComputableAnalysis.FunctionOnInterval.sub}
+\lean{ComputableAnalysis.HasDerivativeOnInterval.subOfCommonSchedule}
+\leanok
 
 \lean{ComputableAnalysis.EffectiveModulusFor}
 \lean{ComputableAnalysis.IntervalRegularOn}

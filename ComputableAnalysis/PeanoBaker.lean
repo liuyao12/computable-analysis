@@ -1634,9 +1634,34 @@ end HarmonicOscillator
 The scalar factor `T^r/r!` is the exact rational volume of the ordered
 simplex of duration `T`; the matrix factor keeps the chronological order
 visible.  This is a finite term, not yet an infinite matrix series. -/
+def orderedSimplexVolume (T : Rat) : Nat -> Rat
+  | 0 => 1
+  | degree + 1 =>
+      T / ((degree + 1 : Nat) : Rat) * orderedSimplexVolume T degree
+
+theorem orderedSimplexVolume_eq_closed (T : Rat) (degree : Nat) :
+    orderedSimplexVolume T degree = T ^ degree / factorialRat degree := by
+  induction degree with
+  | zero =>
+      unfold orderedSimplexVolume factorialRat factorial
+      rw [Rat.pow_zero]
+      native_decide
+  | succ degree ih =>
+      rw [orderedSimplexVolume, ih, Rat.pow_succ,
+        FormalPowerSeries.factorialRat_succ]
+      rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.inv_mul_rev]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
 def constantPeanoBakerSimplexTerm {dimension : Nat}
     (A : RatMatrix dimension) (T : Rat) (degree : Nat) : RatMatrix dimension :=
   matrixScale (T ^ degree / factorialRat degree) (matrixPow A degree)
+
+theorem constantPeanoBakerSimplexTerm_eq_orderedSimplexVolume
+    {dimension : Nat} (A : RatMatrix dimension) (T : Rat) (degree : Nat) :
+    constantPeanoBakerSimplexTerm A T degree =
+      matrixScale (orderedSimplexVolume T degree) (matrixPow A degree) := by
+  rw [orderedSimplexVolume_eq_closed]
+  rfl
 
 /-- A finite constant-coefficient Peano--Baker polynomial, assembled in
 increasing degree order from its explicit ordered-simplex terms. -/

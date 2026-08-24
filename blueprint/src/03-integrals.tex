@@ -272,6 +272,21 @@ not assert that an arbitrary integrand has an integral.
 \lean{ComputableAnalysis.Integral.finiteRawSum_append_equiv}
 \leanok
 
+Finite rectangular products use the same assembly law in any fixed number
+of dimensions.  The nested sum is finite and rational; induction factors a
+separable integrand into one finite sum per coordinate.  This is the algebraic
+core needed by box integrals, Gaussian products, and the finite simplex sums
+used later for ODEs.  It is not a measure-theoretic Fubini theorem.
+
+\lean{ComputableAnalysis.finiteProductNestedSum}
+\lean{ComputableAnalysis.finiteProductSum}
+\lean{ComputableAnalysis.finiteProductNestedSum_factorized}
+\lean{ComputableAnalysis.finiteProductIntegralNestedSum}
+\lean{ComputableAnalysis.finiteProductIntegralSum}
+\lean{ComputableAnalysis.finiteProductIntegralNestedSum_factorized}
+\lean{ComputableAnalysis.finiteProductIntegralNestedSum_two_factor}
+\leanok
+
 \section{Functions that turn finitely many times}
 
 The next usable class is not “all continuous functions.” It is a function
@@ -397,6 +412,24 @@ StaticDyadicEffectiveFTC      -> equal-dyadic specialization
 \lean{ComputableAnalysis.effectiveDerivativeBoundFTC}
 \lean{ComputableAnalysis.FTC.effectiveFTC_definiteIntegralEqualsEndpoint}
 \lean{ComputableAnalysis.FTC.staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint}
+\leanok
+
+The interval-level function interface is closed under addition on a common
+rational chart.  This is the algebraic operation used when primitives or
+integrands are assembled from separately certified pieces; validity is proved
+directly from `RealRaw` addition, while continuity and FTC data remain
+separate certificates.
+
+\begin{verbatim}
+F, G on [a,b] -> F + G on [a,b]
+             -> valid interval boxes at every stage
+             -> derivative/integral certificates supplied separately
+\end{verbatim}
+
+\lean{ComputableAnalysis.FunctionOnInterval.add}
+\lean{ComputableAnalysis.FunctionOnInterval.add_compute}
+\lean{ComputableAnalysis.QInterval.differenceQuotient_addInterval}
+\lean{ComputableAnalysis.intervalNearAtPrecision_addInterval}
 \leanok
 
 The first non-polynomial instance is already closed: Lean constructs
@@ -754,7 +787,7 @@ termwise integration of finite power series.
 \leanok
 
 The tangent-chart substitution is also finite.  For a chart cell
-(p\mapsto r), compute the two endpoint Jacobian ratios, fold the lower and
+\((p\mapsto r)\), compute the two endpoint Jacobian ratios, fold the lower and
 upper rectangle contributions, and retain the enclosure relation:
 
 \begin{verbatim}

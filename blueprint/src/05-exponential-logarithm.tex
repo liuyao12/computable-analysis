@@ -32,6 +32,20 @@ input x -> choose N from the tail budget
         -> return a rational interval
 \end{verbatim}
 
+The tail argument is itself finite.  After choosing the first omitted degree,
+every later finite Taylor prefix is enclosed by the same rational factorial
+majorant.  This is the project’s potential-infinity replacement for asserting
+that a sequence has converged in a completed real line.
+
+\lean{ComputableAnalysis.FiniteExponentialTaylor.remainderPartial}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.remainderPartial_eq_expTaylorPrefix_sub}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.remainderPartial_abs_le_factorialTailPartial}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.scheduledTailStart}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.scheduledPrefixDegree}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.scheduled_expTaylorPrefix_remainder_le}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.scheduled_expTaylorPrefix_enclosure}
+\leanok
+
 Algebraic laws are proved by comparing two such finite computations. Identity
 of two expressions is an overlap theorem between their raw intervals, not an
 appeal to an ambient completed field.
