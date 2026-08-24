@@ -538,8 +538,17 @@ compatibility alias.
 \lean{ComputableAnalysis.SinPiIntegral.sinPiStieltjesIntegral}
 \lean{ComputableAnalysis.SinPiIntegral.sinPiStieltjesIntegral_valid}
 \lean{ComputableAnalysis.SinPiIntegral.sinPiStieltjesIntegral_equiv_reciprocalPi}
+\lean{ComputableAnalysis.SinPiIntegral.computableSinPiHalfIntegral}
+\lean{ComputableAnalysis.SinPiIntegral.computableSinPiHalfIntegral_valid}
+\lean{ComputableAnalysis.SinPiIntegral.computableSinPiHalfIntegral_equiv_reciprocalPi}
+\lean{ComputableAnalysis.SinPiIntegral.computableSinPiHalfIntegral_equiv_reciprocalPi_of_FTC}
 \lean{ComputableAnalysis.SinPiIntegral.sinPiUnevenSamplingIntegral}
 \leanok
+
+This is the first completed end-to-end sine integral in the project.  It uses
+uneven samples in the original (x)-coordinate, but uniform subdivisions in
+the rational tangent coordinate (u); the equal-dyadic version remains a
+separate, stronger transport theorem.
 
 \section{Finite identities}
 \label{thm:finite-green-rectangle}
