@@ -142,6 +142,16 @@ theorem absOnUnit_piecewise_integral_valid :
     (generalIntegralFor absOnUnit absOnUnit_piecewise).Valid :=
   generalIntegralFor_valid absOnUnit absOnUnit_piecewise
 
+theorem absOnUnit_piecewise_integral_two_equiv :
+    (generalIntegralFor absOnUnit absOnUnit_piecewise).Equiv
+      (piecewiseMonotoneCellIntegral absOnUnit absOnUnit_piecewise
+        0 (by native_decide) +
+        piecewiseMonotoneCellIntegral absOnUnit absOnUnit_piecewise
+        1 (by native_decide)) := by
+  simpa [generalIntegralFor] using
+    (piecewiseMonotoneIntegralFor_two_equiv
+      absOnUnit absOnUnit_piecewise (by native_decide))
+
 theorem absOnUnit_piecewise_integral_equiv_one :
     (generalIntegralFor absOnUnit absOnUnit_piecewise).Equiv
       (RealRaw.ofRat 1) := by
