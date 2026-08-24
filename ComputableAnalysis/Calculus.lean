@@ -1343,6 +1343,25 @@ def subInterval (I J : QInterval) : QInterval :=
 def divByRat (I : QInterval) (h : Rat) : QInterval :=
   scaleByRat (1 / h) I
 
+/-! Division is only used as an interval operation when its rational
+denominator is known positive.  Keeping that hypothesis explicit prevents a
+secant or average enclosure from silently reversing its endpoints. -/
+theorem divByRat_contains_of_pos {h : Rat} (hh : 0 < h)
+    {outer inner : QInterval} (hcontains : outer.ContainsInterval inner) :
+    (divByRat outer h).ContainsInterval (divByRat inner h) := by
+  have hinv : 0 < (1 / h) := by
+    simpa [Rat.div_def] using (Rat.inv_pos.mpr hh)
+  apply scaleByRat_contains_of_nonneg
+  · exact Rat.le_of_lt hinv
+  · exact hcontains
+
+theorem divByRat_width_of_pos {h : Rat} (hh : 0 < h) (I : QInterval) :
+    (divByRat I h).width = (1 / h) * I.width := by
+  have hinv : 0 < (1 / h) := by
+    simpa [Rat.div_def] using (Rat.inv_pos.mpr hh)
+  apply scaleByRat_width_of_nonneg
+  exact Rat.le_of_lt hinv
+
 /-- Interval enclosure of `(Fy - Fx) / dx`.  For a secant slope, `dx` will be
 the rational difference `y - x`; the caller carries the proof that `x < y`. -/
 def slopeBetween (Fy Fx : QInterval) (dx : Rat) : QInterval :=

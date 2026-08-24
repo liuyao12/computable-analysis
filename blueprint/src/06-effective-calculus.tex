@@ -161,6 +161,18 @@ depend on an implicit ordered-real scalar operation.
 \lean{ComputableAnalysis.HasDerivativeOnInterval.subOfCommonSchedule}
 \leanok
 
+Secant and average boxes use the same interval arithmetic.  Division is
+exposed only with a positive rational denominator, so the orientation of the
+box is certified rather than inferred from an ambient ordered field:
+
+\begin{verbatim}
+endpoint box --(divide by b-a > 0)--> secant/average box
+\end{verbatim}
+
+\lean{ComputableAnalysis.QInterval.divByRat_contains_of_pos}
+\lean{ComputableAnalysis.QInterval.divByRat_width_of_pos}
+\leanok
+
 Affine reparametrization has the corresponding finite chain rule.  For a
 nonzero slope the inner step is transported exactly; the zero-slope case is
 also included because a constant affine map has zero finite difference
