@@ -241,7 +241,56 @@ theorem compute_widths_shrink (A : FinitePiecewiseStageAssembly) :
     RealRaw.WidthsShrinkToZero A.compute :=
   finiteStageSum_widths_shrink A.stages
 
+/-! The generic multi-turn boundary.  A client supplies one stage box for
+each monotone piece and each unresolved turning gap; the assembly itself is
+then a valid shrinking candidate.  Identifying it with the intended integral
+is kept as an explicit anchor certificate below. -/
+
+def raw (A : FinitePiecewiseStageAssembly) : RealRaw where
+  compute := A.compute
+
+theorem raw_widths_shrink (A : FinitePiecewiseStageAssembly) :
+    RealRaw.WidthsShrinkToZero A.raw.compute :=
+  A.compute_widths_shrink
+
 end FinitePiecewiseStageAssembly
+
+/-- A finite-turn integral completion.  The assembly contains the literal
+stagewise sum of all certified monotone pieces and unresolved turning gaps.
+The anchor is the function-specific endpoint representative; no universal
+integrability theorem is hidden in this structure. -/
+structure MultiTurnIntegralCompletion
+    (assembly : FinitePiecewiseStageAssembly) where
+  anchor : RealRaw
+  anchor_valid : anchor.Valid
+  assembly_equiv_anchor : assembly.raw.Equiv anchor
+  radius : Nat -> Rat
+  anchor_width_le_radius : forall n, (anchor.compute n).width <= radius n
+  radius_shrinks : ShrinksToZero radius
+
+namespace MultiTurnIntegralCompletion
+
+def stabilizedRaw
+    {assembly : FinitePiecewiseStageAssembly}
+    (completion : MultiTurnIntegralCompletion assembly) : RealRaw :=
+  RealRaw.prefixStabilize assembly.raw completion.radius
+
+theorem stabilizedRaw_valid
+    {assembly : FinitePiecewiseStageAssembly}
+    (completion : MultiTurnIntegralCompletion assembly) :
+    completion.stabilizedRaw.Valid :=
+  RealRaw.prefixStabilize_valid assembly.raw_widths_shrink
+    completion.anchor_valid completion.assembly_equiv_anchor
+    completion.anchor_width_le_radius completion.radius_shrinks
+
+theorem stabilizedRaw_equiv_anchor
+    {assembly : FinitePiecewiseStageAssembly}
+    (completion : MultiTurnIntegralCompletion assembly) :
+    completion.stabilizedRaw.Equiv completion.anchor :=
+  RealRaw.prefixStabilize_equiv_anchor completion.anchor_valid
+    completion.assembly_equiv_anchor completion.anchor_width_le_radius
+
+end MultiTurnIntegralCompletion
 
 /-- Bound the integral over the unresolved turning-point bracket by its
 rational length times any interval enclosing the integrand there. -/
