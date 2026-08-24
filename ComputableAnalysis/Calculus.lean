@@ -1371,6 +1371,17 @@ theorem subInterval_width (I J : QInterval) :
   unfold subInterval QInterval.width
   grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
 
+/-- Rational scaling commutes with interval subtraction, including the
+negative-scale endpoint reversal. -/
+theorem scaleByRat_subInterval (r : Rat) (I J : QInterval) :
+    scaleByRat r (subInterval I J) =
+      subInterval (scaleByRat r I) (scaleByRat r J) := by
+  by_cases hr : 0 <= r
+  · simp [scaleByRat, subInterval, hr]
+    constructor <;> grind [Rat.sub_eq_add_neg, Rat.mul_add]
+  · simp [scaleByRat, subInterval, hr]
+    constructor <;> grind [Rat.sub_eq_add_neg, Rat.mul_add]
+
 /-- Subtraction propagates interval containment with the endpoint reversal
 required for the subtracted box. -/
 theorem subInterval_contains
