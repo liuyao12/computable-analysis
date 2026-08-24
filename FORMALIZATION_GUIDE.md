@@ -104,6 +104,7 @@ Start with the smallest target module rather than importing
 | Certified imaginary-axis input | `ComputableAnalysis.ComplexAffine` | `ComplexRaw.mulI`, `ComplexRaw.imaginaryAxis`, and exact rational complex-scalar actions |
 | Rational function with a certified domain | `ComputableAnalysis.FunctionDomains` | `RatFun`, `RatFun.polynomialOnInterval`, `RatFun.polynomialOnInterval_compute_eq`, `RatFun.eval?_eq_some_of_defined`, `RatFun.eval?_eq_none_of_undefined`, `RatFun.oneOverX_defined_of_ne_zero`, `RatFun.oneOverXOnPositiveInterval`, `RatFun.oneOverXOnNegativeInterval`, `RatFun.DenominatorApartOnInterval`, `RatFun.onRegularInterval` |
 | Interval functions, continuity, and integral certificates | `ComputableAnalysis.Calculus` | `FunctionOnInterval`, `IntervalRegularOn`, `Integral.nondecreasingDarbouxDyadicStage`, `Integral.ConstructionFor` |
+| Focused calculus foundation | `ComputableAnalysis.CalculusFoundation` | The dependency-checked entry point for circle, integrals/FTC, series, exp/log, Fourier, ODE, finite multiple-integral, and finite complex-path layers |
 | Finite monotone decomposition with non-rational turns | `ComputableAnalysis.TurningPointIntegral` | `Integral.TurningPointBracket`, `Integral.TurningBracketIntegralCandidate`, `Integral.MultiTurnIntegralCompletion` |
 | Rational finite-difference derivatives | `ComputableAnalysis.Differential` | `HasDerivativeOnInterval`, `HasForwardDerivativeAt` |
 | Sector-area time | `ComputableAnalysis.SectorAreaReparametrization` | `angleOnUnit`, `angleOnUnit_hasDerivative`, `angleOnUnitRegular_intervalRegular`, `angleOnUnitRegular_invertible`, `angleAt_equiv_two_arctanGeom` |
@@ -122,6 +123,8 @@ Start with the smallest target module rather than importing
 | Represented-angle rotation lift | `ComputableAnalysis.RotationLift` | `RotationLift.HalfPiInput`, `rotation`, and its finite Cauchy certificate |
 | Algebraic branches and square roots | `ComputableAnalysis.AlgebraicFunctions` | source header and the unit-interval square-root examples |
 | Complex interval polynomial checks | `ComputableAnalysis.ComplexInterval` | `QBox.evalPoly`, `IsApproxRootAt` |
+| Finite complex path calculus | `ComputableAnalysis.ComplexPathIntegral`, `ComputableAnalysis.FiniteComplexPathCertificate` | `polygonalIntegralRawEntire_valid`, closed constant/polynomial differential exactness, and rational polygonal paths |
+| Finite multiple integrals and n-balls | `ComputableAnalysis.FiniteNBallVolume`, `ComputableAnalysis.FiniteGaussianIntegral` | `finiteProductSum2D_factorized`, Gaussian Taylor-prefix/tail ladders, and `nBallVolumeModel_recurrence` |
 | Finite FTA root certificates | `ComputableAnalysis.FTA` | `monicLinear_has_computable_root`, `rationalLinear_has_computable_root`, and the rational quadratic discriminant witnesses |
 
 For the mathematical status and intended dependency order, use
