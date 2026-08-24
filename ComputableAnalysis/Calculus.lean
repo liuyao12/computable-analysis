@@ -1354,6 +1354,102 @@ theorem riemannTrapezoidInterval_eq_half_add_left_right
   rw [hzero, hscalezero] at h
   simpa [stepL, stepR, stepT] using h
 
+/-! Independent endpoint evaluators may be transported through the trapezoid
+schedule by overlap alone.  This is the interval-valued counterpart of the
+finite identity above and is the form used by nested-radical or Taylor
+providers. -/
+theorem riemannTrapezoidInterval_overlap_of_samples
+    (g h : RealFunRaw) (a b : Rat) (hab : a <= b)
+    (subdivisions prec : Nat)
+    (hleft : forall k, k < subdivisions ->
+      QInterval.Overlaps
+        (g.compute (leftPoint a b subdivisions k) prec)
+        (h.compute (leftPoint a b subdivisions k) prec))
+    (hright : forall k, k < subdivisions ->
+      QInterval.Overlaps
+        (g.compute (rightPoint a b subdivisions k) prec)
+        (h.compute (rightPoint a b subdivisions k) prec)) :
+    QInterval.Overlaps
+      (riemannTrapezoidInterval g a b subdivisions prec)
+      (riemannTrapezoidInterval h a b subdivisions prec) := by
+  unfold riemannTrapezoidInterval
+  have hmesh : 0 <= mesh a b subdivisions := by
+    by_cases hn : 0 < subdivisions
+    · exact mesh_nonneg_of_le hn hab
+    · have hz : subdivisions = 0 := by omega
+      simp [mesh, hz]
+  have hhalf : 0 <= mesh a b subdivisions / 2 := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg hmesh (by native_decide)
+  have hfold : forall (xs : List Nat),
+      (forall k, k ∈ xs -> k < subdivisions) ->
+      forall (accG accH : QInterval), QInterval.Overlaps accG accH ->
+      QInterval.Overlaps
+        (xs.foldl
+          (fun acc k =>
+            let L := g.compute (leftPoint a b subdivisions k) prec
+            let R := g.compute (rightPoint a b subdivisions k) prec
+            { lo := acc.lo + (mesh a b subdivisions / 2) * (L.lo + R.lo),
+              hi := acc.hi + (mesh a b subdivisions / 2) * (L.hi + R.hi) })
+          accG)
+        (xs.foldl
+          (fun acc k =>
+            let L := h.compute (leftPoint a b subdivisions k) prec
+            let R := h.compute (rightPoint a b subdivisions k) prec
+            { lo := acc.lo + (mesh a b subdivisions / 2) * (L.lo + R.lo),
+              hi := acc.hi + (mesh a b subdivisions / 2) * (L.hi + R.hi) })
+          accH) := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro _ accG accH hover
+        exact hover
+    | cons k ks ih =>
+        intro hmem
+        have hk : k < subdivisions := hmem k (by simp)
+        have hks : forall j, j ∈ ks -> j < subdivisions := by
+          intro j hj
+          exact hmem j (by simp [hj])
+        intro accG accH hover
+        have hL := hleft k hk
+        have hR := hright k hk
+        have hstep : QInterval.Overlaps
+            { lo := accG.lo + (mesh a b subdivisions / 2) *
+                ((g.compute (leftPoint a b subdivisions k) prec).lo +
+                  (g.compute (rightPoint a b subdivisions k) prec).lo),
+              hi := accG.hi + (mesh a b subdivisions / 2) *
+                ((g.compute (leftPoint a b subdivisions k) prec).hi +
+                  (g.compute (rightPoint a b subdivisions k) prec).hi) }
+            { lo := accH.lo + (mesh a b subdivisions / 2) *
+                ((h.compute (leftPoint a b subdivisions k) prec).lo +
+                  (h.compute (rightPoint a b subdivisions k) prec).lo),
+              hi := accH.hi + (mesh a b subdivisions / 2) *
+                ((h.compute (leftPoint a b subdivisions k) prec).hi +
+                  (h.compute (rightPoint a b subdivisions k) prec).hi) } := by
+          unfold QInterval.Overlaps at hover hL hR ⊢
+          constructor
+          · have hsum :
+                (g.compute (leftPoint a b subdivisions k) prec).lo +
+                    (g.compute (rightPoint a b subdivisions k) prec).lo <=
+                  (h.compute (leftPoint a b subdivisions k) prec).hi +
+                    (h.compute (rightPoint a b subdivisions k) prec).hi := by
+              grind
+            have hscaled := Rat.mul_le_mul_of_nonneg_left hsum hhalf
+            grind
+          · have hsum :
+                (h.compute (leftPoint a b subdivisions k) prec).lo +
+                    (h.compute (rightPoint a b subdivisions k) prec).lo <=
+                  (g.compute (leftPoint a b subdivisions k) prec).hi +
+                    (g.compute (rightPoint a b subdivisions k) prec).hi := by
+              grind
+            have hscaled := Rat.mul_le_mul_of_nonneg_left hsum hhalf
+            grind
+        simpa using ih hks _ _ hstep
+  exact hfold (List.range subdivisions)
+    (by intro k hk; exact List.mem_range.mp hk)
+    { lo := 0, hi := 0 } { lo := 0, hi := 0 } (by
+      simp [QInterval.Overlaps])
+
 /-! The finite right-endpoint fold has the same pointwise-addition law as the
 left-endpoint fold. -/
 
