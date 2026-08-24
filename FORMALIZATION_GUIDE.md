@@ -414,7 +414,12 @@ At the quantitative level, `FinitePolynomial.SecantDerivativeBound.add`,
 constructor asks for rational bounds for each factor and its proposed
 derivative on the local box; its explicit coefficient includes the finite
 secant corner term.  Supply those majorants rather than invoking an
-unqualified product-rule limit.
+unqualified product-rule limit.  `FinitePolynomial.SecantDerivativeBound.mulToHasDerivativeOnInterval`
+now hands that product certificate directly to the interval derivative
+interface, producing the exact rational product chart and the derivative
+chart \(f g' + g f'\).  This is the project’s bounded, finite version of the
+product rule; no completeness or unbounded limiting theorem is hidden in the
+wrapper.
 `FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval` then closes
 this construction under every finite rational coefficient prefix. Its
 quantitative `SecantDerivativeBound` is the explicit Taylor-remainder bridge:
@@ -799,6 +804,7 @@ open ComputableAnalysis
 #check FinitePolynomial.sineTaylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.cosineTaylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.SecantDerivativeBound.mul
+#check FinitePolynomial.SecantDerivativeBound.mulToHasDerivativeOnInterval
 #check FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval
 #check ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero

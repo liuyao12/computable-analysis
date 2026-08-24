@@ -147,6 +147,18 @@ closure theorem over completed real-valued functions.
 \lean{ComputableAnalysis.HasDerivativeOnInterval.subOfCommonSchedule}
 \leanok
 
+The same finite mechanism now closes multiplication when rational majorants
+are supplied for both factors and both proposed derivatives.  The certificate
+contains the explicit corner term coming from the product finite difference;
+the wrapper below exposes it as an interval derivative certificate for the
+exact rational product chart.  Thus the product rule is available here as a
+bounded computational theorem, while the unrestricted textbook version is
+not smuggled in through completeness of the reals.
+
+\lean{ComputableAnalysis.FinitePolynomial.SecantDerivativeBound.mul}
+\lean{ComputableAnalysis.FinitePolynomial.SecantDerivativeBound.mulToHasDerivativeOnInterval}
+\leanok
+
 \lean{ComputableAnalysis.EffectiveModulusFor}
 \lean{ComputableAnalysis.IntervalRegularOn}
 \lean{ComputableAnalysis.IntervalRegularOn.epsilonDeltaContinuous}

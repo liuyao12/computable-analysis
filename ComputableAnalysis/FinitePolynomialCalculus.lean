@@ -398,6 +398,32 @@ def toHasDerivativeOnInterval {C : Rat} {f df : Rat -> Rat}
       grind [Rat.sub_eq_add_neg]
     constructor <;> grind [Rat.sub_eq_add_neg]
 
+/- A product certificate can be handed directly to the interval derivative
+interface.  The hypotheses are deliberately explicit: the finite product
+estimate needs rational majorants for both factors and both proposed
+derivatives, and the resulting interval chart is the exact rational product
+chart rather than an unproved real-valued multiplication. -/
+def SecantDerivativeBound.mulToHasDerivativeOnInterval
+    {C : Rat} {f df g dg : Rat -> Rat}
+    (F : SecantDerivativeBound C f df)
+    (G : SecantDerivativeBound C g dg)
+    (fMajorant dfMajorant gMajorant dgMajorant : Rat)
+    (hfMajorant : forall x, qabs x <= C -> qabs (f x) <= fMajorant)
+    (hdfMajorant : forall x, qabs x <= C -> qabs (df x) <= dfMajorant)
+    (hgMajorant : forall x, qabs x <= C -> qabs (g x) <= gMajorant)
+    (hdgMajorant : forall x, qabs x <= C -> qabs (dg x) <= dgMajorant)
+    (hC0 : 0 <= C) (hf0 : 0 <= fMajorant) (hdf0 : 0 <= dfMajorant)
+    (hg0 : 0 <= gMajorant) (hdg0 : 0 <= dgMajorant)
+    (a b : Rat) (hleft : -C <= a) (hright : b <= C) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat (fun x => f x * g x) a b)
+      (FunctionOnInterval.exactRat
+        (fun x => f x * dg x + g x * df x) a b) :=
+  SecantDerivativeBound.toHasDerivativeOnInterval
+    (SecantDerivativeBound.mul F G fMajorant dfMajorant gMajorant dgMajorant
+      hfMajorant hdfMajorant hgMajorant hdgMajorant hC0 hf0 hdf0 hg0 hdg0)
+    a b hleft hright
+
 end SecantDerivativeBound
 
 namespace CenteredSecantDerivativeBound
