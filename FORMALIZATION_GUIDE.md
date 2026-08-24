@@ -455,6 +455,14 @@ quantitative `SecantDerivativeBound` is the explicit Taylor-remainder bridge:
 only after that bound is supplied does a linear coefficient become an
 interval derivative.
 
+The first non-polynomial FTC is exposed in
+`ComputableAnalysis.ArctanEffectiveFTC`: the stabilized rectangle integral
+of `1 / (1 + x^2)` is equivalent to the geometric arctangent at `1` via
+`arctanEffectiveFTCStabilizedIntegral_equiv_arctanGeom_one`. This is the
+model for later special functions: define an executable primitive, prove a
+finite derivative-bound certificate, stabilize the rectangle evaluator, and
+then connect its endpoint value to a geometric or series representation.
+
 The series implementation is connected to this finite algebra without making
 an analytic derivative claim. `ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_monomial`
 proves that the literal loop's next rational term is `x^N / N!`, while

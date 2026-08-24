@@ -1,5 +1,6 @@
 import ComputableAnalysis.RationalCircle
 import ComputableAnalysis.Calculus
+import ComputableAnalysis.ArctanEffectiveFTC
 import ComputableAnalysis.IntegralIdentities
 import ComputableAnalysis.TurningPointIntegral
 import ComputableAnalysis.AbsIntegral
