@@ -175,6 +175,14 @@ endpoint box --(divide by b-a > 0)--> secant/average box
 \lean{ComputableAnalysis.QInterval.slopeBetween_contains_of_pos}
 \leanok
 
+The raw secant algorithm is itself stage-coherent: if both endpoint boxes are
+refined from stage (n) to stage (m), the positive-step secant box at (m)
+is contained in the box at (n).  This is the finite refinement law that lets
+later derivative certificates compare schedules without invoking a limit.
+
+\lean{ComputableAnalysis.secantSlopeIntervalOfRealFun_contains_later}
+\leanok
+
 Affine reparametrization has the corresponding finite chain rule.  For a
 nonzero slope the inner step is transported exactly; the zero-slope case is
 also included because a constant affine map has zero finite difference

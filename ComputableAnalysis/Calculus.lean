@@ -5070,6 +5070,25 @@ def secantSlopeIntervalOfRealFun
     (F : RealFunRaw) (x y : Rat) (prec : Nat) : QInterval :=
   QInterval.slopeBetween (F.compute y prec) (F.compute x prec) (y - x)
 
+/-- Later endpoint stages produce a nested secant enclosure.  This is the
+stage-coherence theorem for the finite secant algorithm; it uses only the
+endpoint nesting supplied by `RealFunRaw.Valid`. -/
+theorem secantSlopeIntervalOfRealFun_contains_later
+    {F : RealFunRaw} (hF : F.Valid)
+    {x y : Rat} (hx : F.domain x) (hy : F.domain y) (hxy : x < y)
+    {n m : Nat} (hnm : n <= m) :
+    QInterval.ContainsInterval
+      (secantSlopeIntervalOfRealFun F x y n)
+      (secantSlopeIntervalOfRealFun F x y m) := by
+  have hxn := (hF x hx).2.1 n m hnm
+  have hyn := (hF y hy).2.1 n m hnm
+  have hstep : 0 < y - x := by
+    rw [← Rat.lt_iff_sub_pos]
+    exact hxy
+  apply QInterval.slopeBetween_contains_of_pos hstep
+  · exact ⟨hyn.1, hyn.2.2⟩
+  · exact ⟨hxn.1, hxn.2.2⟩
+
 /-- Rational secant-slope formulation of convexity/concavity on a short cell.
 
 This is a helper certificate for producing derivative bounds.  The FTC layer
