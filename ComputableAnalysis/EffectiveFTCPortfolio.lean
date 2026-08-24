@@ -936,6 +936,15 @@ theorem tangentSquareLeftSum_stage_two_quarter_certificate :
         (1 / 4 : Rat) + (64 : Rat) / (((2 ^ 2 : Nat) : Rat))) := by
   native_decide
 
+theorem tangentSquareLeftSum_stage_three_quarter_certificate :
+    ((1 / 4 : Rat) - (64 : Rat) / (((2 ^ 3 : Nat) : Rat)) <=
+        IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+          SinPiIntegral.tangentSquareDensity (2 ^ 3)) ∧
+      (IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+          SinPiIntegral.tangentSquareDensity (2 ^ 3) <=
+        (1 / 4 : Rat) + (64 : Rat) / (((2 ^ 3 : Nat) : Rat))) := by
+  native_decide
+
 structure TangentSquareLeftSumQuarterCertificate where
   lower_sum :
     forall n,

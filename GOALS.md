@@ -89,7 +89,9 @@ That bridge is now represented by the checked
    numbers.  The first two nontrivial finite left sums are checked directly by
    `tangentSquareLeftSum_stage_one_quarter_certificate` and
    `tangentSquareLeftSum_stage_two_quarter_certificate`; these are regression
-   anchors for the eventual uniform estimate.  The reusable finite fold
+   anchors for the eventual uniform estimate.  Stage three is now checked as
+   `tangentSquareLeftSum_stage_three_quarter_certificate`, extending the
+   finite evidence without claiming the all-stage bound.  The reusable finite fold
    `rat_list_sum_pair_error` now assembles cellwise endpoint/left-sample
    errors into a global rational bound, leaving only the concrete tangent
    square cell inequalities to be supplied.  The first such local inequality
