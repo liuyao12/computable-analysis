@@ -272,12 +272,20 @@ The first non-polynomial instance is already closed: Lean constructs
 `arctanEffectiveFTCData` for the rational kernel \(1/(1+x^2)\) and proves its
 finite rectangle integral equivalent to the endpoint primitive. This is the
 project's working FTC, not an appeal to a general real-number completeness
-theorem.
+theorem.  The Lipschitz--Darboux version now closes the entire value chain:
+\[
+\text{rational rectangles}
+\;\longrightarrow\;
+\arctan(1)
+\;\longrightarrow\;
+\frac{\pi}{4}.
+\]
 
 \lean{ComputableAnalysis.IntegralIdentities.arctanKernelLipschitzIntegral}
 \lean{ComputableAnalysis.IntegralIdentities.arctanKernelLipschitzIntegral_valid}
 \lean{ComputableAnalysis.IntegralIdentities.arctanKernelLipschitzIntegral_equiv_rectangleForAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.arctanKernelLipschitzIntegral_equiv_arctanGeom_one}
+\lean{ComputableAnalysis.IntegralIdentities.arctanKernelLipschitzIntegral_equiv_halfQuarterTurn}
 \lean{ComputableAnalysis.ArctanGeometry.arctanGeom_one_valid}
 \leanok
 

@@ -16648,6 +16648,29 @@ theorem arctanKernelLipschitzIntegral_equiv_arctanGeom_one :
     arctanKernelLipschitzIntegral_equiv_rectangleForAtOne
     arctanIntegralRectangleForAtOne_equiv_arctanGeom_one
 
+theorem arctanKernelLipschitzIntegral_equiv_halfQuarterTurn :
+    arctanKernelLipschitzIntegral.Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
+  have hpi : piCircleArea.Valid := by
+    change RealRaw.ValidCompute piCircleArea.compute
+    have hcompute : piCircleArea.compute =
+        ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).compute := by
+      funext n
+      exact (ArctanGeometry.four_arctanGeom_one_compute_eq_piCircleArea_compute n).symm
+    rw [hcompute]
+    exact ArctanGeometry.four_arctanGeom_one_valid
+  have hquarter :
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid := by
+    change (RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).Valid
+    exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+      hpi
+  exact RealRaw.equiv_trans
+    arctanKernelLipschitzIntegral_valid
+    ArctanGeometry.arctanGeom_one_valid
+    hquarter
+    arctanKernelLipschitzIntegral_equiv_arctanGeom_one
+    ArctanGeometry.arctanGeom_one_equiv_piCircleArea_quarter
+
 /-!
 ## Finite tangent-chart substitution certificates
 
