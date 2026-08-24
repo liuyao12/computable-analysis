@@ -5843,6 +5843,18 @@ inductive FiniteRawListLe : List RealRaw -> List RealRaw -> Prop where
   | cons {x y : RealRaw} {xs ys : List RealRaw} :
       x.Le y -> FiniteRawListLe xs ys -> FiniteRawListLe (x :: xs) (y :: ys)
 
+theorem FiniteRawListLe.refl {xs : List RealRaw}
+    (hvalid : forall x, x ∈ xs -> x.Valid) :
+    FiniteRawListLe xs xs := by
+  induction xs with
+  | nil => exact .nil
+  | cons x xs ih =>
+      apply FiniteRawListLe.cons
+      · exact RealRaw.le_refl x (hvalid x (by simp))
+      · apply ih
+        intro y hy
+        exact hvalid y (by simp [hy])
+
 theorem finiteRawSum_le_of_forall₂
     {xs ys : List RealRaw}
     (hxy : FiniteRawListLe xs ys) :
