@@ -1368,6 +1368,22 @@ theorem riemannTrapezoidInterval_width_eq_half_add_left_right
     (by native_decide : (0 : Rat) <= 1 / 2)]
   rw [QInterval.addInterval_width]
 
+/-! A shared tolerance for the two endpoint schedules is inherited by the
+trapezoid schedule. -/
+theorem riemannTrapezoidInterval_width_le_of_left_right_width_le
+    (g : RealFunRaw) (a b : Rat) (subdivisions prec : Nat) (eps : Rat)
+    (hleft : (riemannLeftInterval g a b subdivisions prec).width <= eps)
+    (hright : (riemannRightInterval g a b subdivisions prec).width <= eps) :
+    (riemannTrapezoidInterval g a b subdivisions prec).width <= eps := by
+  rw [riemannTrapezoidInterval_width_eq_half_add_left_right]
+  have hsum :
+      (riemannLeftInterval g a b subdivisions prec).width +
+          (riemannRightInterval g a b subdivisions prec).width <= eps + eps := by
+    grind
+  have hscaled := Rat.mul_le_mul_of_nonneg_left hsum
+    (by native_decide : (0 : Rat) <= 1 / 2)
+  grind
+
 /-! Independent endpoint evaluators may be transported through the trapezoid
 schedule by overlap alone.  This is the interval-valued counterpart of the
 finite identity above and is the form used by nested-radical or Taylor
