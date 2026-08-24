@@ -1340,6 +1340,12 @@ theorem scaleByRat_width_of_nonneg {r : Rat} (hr : 0 <= r) (I : QInterval) :
 def subInterval (I J : QInterval) : QInterval :=
   { lo := I.lo - J.hi, hi := I.hi - J.lo }
 
+/-- The width of an interval difference is the sum of the operand widths. -/
+theorem subInterval_width (I J : QInterval) :
+    (subInterval I J).width = I.width + J.width := by
+  unfold subInterval QInterval.width
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+
 /-- Subtraction propagates interval containment with the endpoint reversal
 required for the subtracted box. -/
 theorem subInterval_contains
@@ -1388,6 +1394,16 @@ theorem slopeBetween_contains_of_pos {dx : Rat} (hdx : 0 < dx)
       (slopeBetween innerY innerX dx) := by
   unfold slopeBetween
   exact divByRat_contains_of_pos hdx (subInterval_contains hy hx)
+
+/-- A positive-step secant width is the endpoint-box width divided by the
+step.  This exposes the finite error budget before any derivative theorem is
+applied. -/
+theorem slopeBetween_width_of_pos {dx : Rat} (hdx : 0 < dx)
+    (Fy Fx : QInterval) :
+    (slopeBetween Fy Fx dx).width =
+      (1 / dx) * (Fy.width + Fx.width) := by
+  unfold slopeBetween
+  rw [divByRat_width_of_pos hdx, subInterval_width]
 
 end QInterval
 
