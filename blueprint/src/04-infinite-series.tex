@@ -21,6 +21,18 @@ each row is a finite shift identity, before any completed function is named:
 \lean{ComputableAnalysis.FirstYearCalculus.PowerSeriesDerivativeEntry.cosh}
 \leanok
 
+Term-by-term integration is introduced at the same finite level.  For a
+finite coefficient prefix, integrating means adding one rational monomial at
+a time; the endpoint difference is exactly the corresponding finite sum.
+This is the algebraic series-to-FTC bridge used later by exponential,
+trigonometric, and Fourier prefixes.  It is not an interchange theorem for an
+infinite series: the tail and the passage to a raw real are separate
+certificates.
+
+\lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_step}
+\lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_prefix}
+\leanok
+
 \section{Finite Fourier analysis}
 
 Fourier analysis enters first as an exact finite transform on rational-complex
