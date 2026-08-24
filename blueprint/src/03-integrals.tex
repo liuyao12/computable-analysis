@@ -133,6 +133,16 @@ functions such as \(\sin(\pi x)\): classify each cell as increasing,
 decreasing, or containing one certified turn, then refine only the local
 boxes needed by that classification.
 
+There is one essential distinction.  Piecewise monotonicity describes the
+integrand and makes its area computable; it does not by itself say that the
+area equals the endpoint difference of that same function.  The FTC
+certificate supplies a (possibly separately represented) primitive.  For
+example, \(\lvert x\rvert\) on \([-1,1]\) is the first two-piece area
+example, while \(x\lvert x\rvert/2\) is the corresponding primitive for an
+endpoint identity.  This is why the general FTC interface is stated after
+the rectangle assembly, and why each special function must provide its own
+primitive/evaluator equivalence.
+
 \lean{ComputableAnalysis.MonotoneOnInterval}
 \lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule}
 \lean{ComputableAnalysis.Integral.monotoneDarbouxScheduleRaw_valid}
