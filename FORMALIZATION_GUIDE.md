@@ -709,8 +709,11 @@ already a shrinking rational-box algorithm.  The first three finite anchors
 `dyadicNestedRadicalLeftSum_one_overlaps_stieltjes` and
 `dyadicNestedRadicalLeftSum_two_overlaps_stieltjes` check its first three
 depths against the independent Stieltjes evaluator.  The unresolved obligation is
-the all-depth half-angle branch transport, represented by the certificate
-family in `SinPiIntegral.lean`.
+the all-depth half-angle certificate family in `SinPiIntegral.lean`. Once those
+canonical rational boxes are supplied, the direct adapter
+`dyadicNestedRadical_sample_overlap_of_canonical_halfAngle_certificate_family`
+assembles the parity cases without requiring equality between the public
+circle evaluator and the nested-radical evaluator.
 
 One useful fully scoped exception is the unit arctangent triangle route in
 `Logarithm.lean`.  Its public name is `arctan.integral.triangle` (implemented

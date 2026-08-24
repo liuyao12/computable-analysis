@@ -53,15 +53,15 @@ Riemann--Stieltjes route. The
 monotone Darboux machinery and the sine modulus are already present; the
 remaining provider is target-directed inverse data that transports each
 half-angle box to a certified tangent witness, or an equivalent dyadic
-bisection trace. The reusable assembly theorem is now packaged as a
-`DyadicNestedRadicalBranchCertificateFamily`; the remaining work is to
-instantiate its lower-half-angle and reflected upper-half-angle fields; the
-even field now has a checked constructor from a successful finite witness
-search.  The proof-producing Boolean search and its family adapter are also
-checked: a finite candidate list plus a proof of search success yields the
-canonical certificate family consumed by the integral theorem.  The two
-remaining geometric fields are therefore the only missing inputs in the
-branch route.
+bisection trace.  The parity assembly itself is now packaged in the direct
+overlap adapter
+\texttt{dyadicNestedRadical\_sample\_overlap\_of\_canonical\_halfAngle\_certificate\_family}:
+once the canonical rational half-angle certificates are supplied, it proves
+all dyadic sample overlaps without asserting evaluator equality.  The older
+`DyadicNestedRadicalBranchCertificateFamily` remains available for the
+stronger equality-shaped route.  The missing input is therefore the genuine
+all-depth geometric certificate family, not the parity induction or a hidden
+completed-real argument.
 This is a finite geometric certificate to add, not a hidden use of completed
 real numbers.
 

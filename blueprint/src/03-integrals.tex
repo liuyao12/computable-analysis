@@ -707,20 +707,22 @@ even overlap + lower overlap + reflected overlap
 \lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_branch_overlap_families}
 \lean{ComputableAnalysis.SinPiTransportSubgoals.lower_overlap_of_canonical_halfAngle_certificate}
 \lean{ComputableAnalysis.SinPiTransportSubgoals.upper_overlap_of_canonical_halfAngle_certificate}
+\lean{ComputableAnalysis.SinPiTransportSubgoals.dyadicNestedRadical_sample_overlap_of_direct_branch_overlaps}
+\lean{ComputableAnalysis.SinPiTransportSubgoals.dyadicNestedRadical_sample_overlap_of_canonical_halfAngle_certificate_family}
 \lean{ComputableAnalysis.SinPiTransportSubgoals.DyadicTangentWitnessFamily.of_canonical_halfAngle_families}
 \lean{ComputableAnalysis.SinPiTransportSubgoals.ArctanSinPiConstruction.halfIntegral_equiv_of_canonical_halfAngle_families}
 \lean{ComputableAnalysis.SinPiTransportSubgoals.ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_canonical_halfAngle_families}
 \leanok
 
 The lower and reflected constructors make the remaining proof obligations
-minimal.  Their parent boxes are taken from the nested table, so only the
-finite identity between the public circle box and the clipped half-angle
-square-root box remains to be supplied:
+minimal.  Their parent boxes are taken from the nested table.  The canonical
+half-angle route now consumes the weaker statement it actually proves—public
+circle-box overlap—without requiring literal equality with the clipped
+square-root evaluator:
 
 \begin{verbatim}
-table cosine box -> clipped half-angle sqrt box
-                 = public circle-sine box
-                 -> branch certificate
+table cosine box -> half-angle geometry -> public/table overlap
+                 -> direct branch-overlap adapter
 \end{verbatim}
 
 \lean{ComputableAnalysis.SinPiIntegral.DyadicHalfAngleChildCertificate.of_table_parent}
