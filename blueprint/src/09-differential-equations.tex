@@ -140,13 +140,16 @@ telescope.  No completeness principle is hidden behind this construction.
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnitStabilized_valid}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnitStabilizedIntegral_equiv_endpointDifference}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnitStabilizedIntegral_equiv_exp_endpoint_subtraction}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnitStabilizedIntegral_equiv_powerSeries_endpoint_subtraction}
 \leanok
 
 Thus the centered exponential is a checked local ODE provider and its
 integral identification is already a finite, executable theorem.
 In ordinary notation, the new representation edge reads
 \(\int_{-1}^{1}\exp(x)\,dx=\exp(1)-\exp(-1)\); every term is still a
-certified `RealRaw` computation.
+certified `RealRaw` computation.  A second edge transports the same result
+to the canonical factorial power-series evaluator, so later ODE identities
+do not depend on the preferred exponential implementation.
 
 The checked finite uniqueness statement is the recurrence theorem above; the
 two-by-two instance is also available as

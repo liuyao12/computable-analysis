@@ -7279,6 +7279,59 @@ theorem uniformExpOnSymmetricUnitStabilizedIntegral_equiv_exp_endpoint_subtracti
   exact RealRaw.equiv_trans hintegral hendpoint hsub
     uniformExpOnSymmetricUnitStabilizedIntegral_equiv_endpointDifference hdiff
 
+/-! The same identity can be transported to the canonical factorial-series
+representation.  This is the representation-chain step needed by later ODE
+and logarithm arguments: the integral theorem is independent of which
+certified exponential evaluator is preferred. -/
+theorem uniformExpOnSymmetricUnitStabilizedIntegral_equiv_powerSeries_endpoint_subtraction :
+    (Integral.integralFor uniformExpOnSymmetricUnit
+      uniformExpOnSymmetricUnitStabilizedConstruction).Equiv
+      ((expPowerSeries (1 : Rat)) - (expPowerSeries (-1 : Rat))) := by
+  let hF := uniformExpOnSymmetricUnitRealFunRaw_valid
+  have hminus : uniformExpOnSymmetricUnitRealFunRaw.domain (-1 : Rat) := by
+    constructor <;> native_decide
+  have hplus : uniformExpOnSymmetricUnitRealFunRaw.domain (1 : Rat) := by
+    constructor <;> native_decide
+  have huniformPlus :
+      (uniformExpOnSymmetricUnitRealFunRaw.apply hF (1 : Rat) hplus).Valid := by
+    simpa [RealRaw.Valid, RealFunRaw.apply, RealFunRaw.applyCompute] using
+      hF (1 : Rat) hplus
+  have huniformMinus :
+      (uniformExpOnSymmetricUnitRealFunRaw.apply hF (-1 : Rat) hminus).Valid := by
+    simpa [RealRaw.Valid, RealFunRaw.apply, RealFunRaw.applyCompute] using
+      hF (-1 : Rat) hminus
+  have hseriesPlus : (expPowerSeries (1 : Rat)).Valid :=
+    expPowerSeries_valid (1 : Rat)
+  have hseriesMinus : (expPowerSeries (-1 : Rat)).Valid :=
+    expPowerSeries_valid (-1 : Rat)
+  have hplusEq :
+      (uniformExpOnSymmetricUnitRealFunRaw.apply hF (1 : Rat) hplus).Equiv
+        (expPowerSeries (1 : Rat)) := by
+    change (uniformExpRaw (1 : Rat)).Equiv (expPowerSeries (1 : Rat))
+    exact uniformExpRaw_equiv_expPowerSeries 1 (by native_decide)
+  have hminusEq :
+      (uniformExpOnSymmetricUnitRealFunRaw.apply hF (-1 : Rat) hminus).Equiv
+        (expPowerSeries (-1 : Rat)) := by
+    change (uniformExpRaw (-1 : Rat)).Equiv (expPowerSeries (-1 : Rat))
+    exact uniformExpRaw_equiv_expPowerSeries (-1) (by native_decide)
+  have hsubEq :
+      ((uniformExpOnSymmetricUnitRealFunRaw.apply hF (1 : Rat) hplus) -
+        (uniformExpOnSymmetricUnitRealFunRaw.apply hF (-1 : Rat) hminus)).Equiv
+        ((expPowerSeries (1 : Rat)) - (expPowerSeries (-1 : Rat))) :=
+    RealRaw.sub_equiv huniformPlus hseriesPlus huniformMinus hseriesMinus
+      hplusEq hminusEq
+  have hintegralSub :=
+    uniformExpOnSymmetricUnitStabilizedIntegral_equiv_exp_endpoint_subtraction
+  have hintegral :
+      (Integral.integralFor uniformExpOnSymmetricUnit
+        uniformExpOnSymmetricUnitStabilizedConstruction).Valid :=
+    Integral.integralFor_valid uniformExpOnSymmetricUnit
+      uniformExpOnSymmetricUnitStabilizedConstruction
+  have huniformSub := RealRaw.sub_valid huniformPlus huniformMinus
+  have hseriesSub := RealRaw.sub_valid hseriesPlus hseriesMinus
+  exact RealRaw.equiv_trans hintegral huniformSub hseriesSub
+    hintegralSub hsubEq
+
 /-- The centered exponential chart has the exact initial value one at zero. -/
 theorem uniformExpOnSymmetricUnit_zero_equiv_one :
     (PartialRealFunRaw.apply uniformExpOnSymmetricUnit.raw
