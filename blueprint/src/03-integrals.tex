@@ -540,6 +540,15 @@ closed value is backed by its own rational power-sum identity.
 \lean{ComputableAnalysis.fifthPrimitiveEndpointDifference_adjacent_additive}
 \leanok
 
+The square evaluator also has an independent interval-regular route on
+$[-1,1]$: the factorization $s^2-t^2=(s-t)(s+t)$ gives the rational
+Lipschitz bound $2$.  This is useful when the same polynomial is treated as
+a non-monotone integrand rather than by its closed primitive formula.
+
+\lean{ComputableAnalysis.exactSquare_lipschitz_on_minusOne_one}
+\lean{ComputableAnalysis.exactRat_square_intervalRegularOn_minusOne_one}
+\leanok
+
 For the cubic case the first rectangle identity is explicit:
 \(\sum_{k<n}3(k/n)^2(1/n)\) is evaluated by a finite sum-of-squares
 induction.  The interval-regular layer then supplies the domain-restricted

@@ -450,6 +450,35 @@ def exactSquare_lipschitz_on_unit :
       (qabs_nonneg (t - s))
     simpa [Rat.mul_comm] using hbound
 
+def exactSquare_lipschitz_on_minusOne_one :
+    Integral.LipschitzOnIntervalNat (fun x : Rat => x * x) (-1) 1 2 := by
+  refine ⟨by native_decide, ?_⟩
+  intro s t hs hsb ht htb
+  have hsabs : qabs s <= 1 :=
+    qabs_le_of_neg_le_le (by grind) (by grind)
+  have htabs : qabs t <= 1 :=
+    qabs_le_of_neg_le_le (by grind) (by grind)
+  have hsum : qabs (s + t) <= 2 := by
+    calc
+      qabs (s + t) <= qabs s + qabs t := qabs_add_le s t
+      _ <= 1 + 1 := rat_add_le_add hsabs htabs
+      _ = 2 := by native_decide
+  have hfactor : s * s - t * t = (s - t) * (s + t) := by
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul]
+  rw [hfactor, qabs_mul]
+  have hst : qabs (s - t) = qabs (t - s) := by
+    rw [show s - t = -(t - s) by grind [Rat.sub_eq_add_neg], qabs_neg]
+  rw [hst]
+  have hbound := Rat.mul_le_mul_of_nonneg_left hsum
+    (qabs_nonneg (t - s))
+  simpa [Rat.mul_comm] using hbound
+
+def exactRat_square_intervalRegularOn_minusOne_one :
+    IntervalRegularOn
+      (FunctionOnInterval.exactRat (fun x : Rat => x * x) (-1) 1) :=
+  IntervalRegularOn.of_lipschitzOnIntervalNat (fun x : Rat => x * x)
+    (-1) 1 2 exactSquare_lipschitz_on_minusOne_one
+
 def exactRat_square_integral_certificate :
     Integral.IntervalRegularIntegralCertificate
       (FunctionOnInterval.exactRat (fun x : Rat => x * x) 0 1) where
