@@ -1583,6 +1583,37 @@ structure HasDerivativeOnInterval (f df : FunctionOnInterval) where
           (df.compute x hdx (evalPrecision x h n))
           n
 
+/-! A local FTC bridge for one positive rational cell.  The derivative
+certificate controls the finite secant quotient; scaling that quotient back
+by the cell width produces an enclosure of the endpoint difference.  The
+explicit expansion pays twice the requested stage tolerance, so this is a
+finite statement about rational interval computations rather than a limit
+argument. -/
+theorem HasDerivativeOnInterval.endpointDifference_contains_of_pos
+    {f df : FunctionOnInterval}
+    (D : HasDerivativeOnInterval f df)
+    {x h : Rat} {n : Nat}
+    (hx : inDomainInterval f.lower f.upper x)
+    (hxh : inDomainInterval f.lower f.upper (x + h))
+    (hdx : inDomainInterval df.lower df.upper x)
+    (hpos : 0 < h)
+    (hsmall : qabs h <=
+      (1 / ((D.stepPrecision n : Nat) : Rat))) :
+    (QInterval.scaleByRat h
+      (QInterval.expand
+        (df.compute x hdx (D.evalPrecision x h n))
+        (2 * (precisionAtStage n).val))).ContainsInterval
+      (QInterval.subInterval
+        (f.compute (x + h) hxh (D.evalPrecision x h n))
+        (f.compute x hx (D.evalPrecision x h n))) := by
+  have hnear := D.close x h n hx hxh hdx (Rat.ne_of_gt hpos) hsmall
+  change (QInterval.differenceQuotient
+      (f.compute (x + h) hxh (D.evalPrecision x h n))
+      (f.compute x hx (D.evalPrecision x h n)) h).NearAt
+      (df.compute x hdx (D.evalPrecision x h n)) (precisionAtStage n) at hnear
+  exact QInterval.scaleByRat_expand_contains_subInterval_of_differenceQuotient_near
+    hpos hnear
+
 /-! Closure under addition is stated for certificates using a common stage
 schedule.  This is intentional: an evaluator's stage parameter is an
 algorithmic resource, so combining two implementations must say how their

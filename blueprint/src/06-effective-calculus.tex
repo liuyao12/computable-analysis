@@ -159,6 +159,15 @@ not smuggled in through completeness of the reals.
 \lean{ComputableAnalysis.FinitePolynomial.SecantDerivativeBound.mulToHasDerivativeOnInterval}
 \leanok
 
+The local hand-off from differentiation to integration is also finite.  On a
+positive rational cell whose width satisfies the derivative step budget, the
+secant certificate scales back to an endpoint-difference enclosure.  The
+derivative box is expanded by twice the requested precision; this is the
+explicit error budget later consumed by a partition-level FTC certificate.
+
+\lean{ComputableAnalysis.HasDerivativeOnInterval.endpointDifference_contains_of_pos}
+\leanok
+
 \lean{ComputableAnalysis.EffectiveModulusFor}
 \lean{ComputableAnalysis.IntervalRegularOn}
 \lean{ComputableAnalysis.IntervalRegularOn.epsilonDeltaContinuous}

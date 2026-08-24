@@ -420,6 +420,12 @@ interface, producing the exact rational product chart and the derivative
 chart \(f g' + g f'\).  This is the project’s bounded, finite version of the
 product rule; no completeness or unbounded limiting theorem is hidden in the
 wrapper.
+The local FTC hand-off is explicit as well:
+`HasDerivativeOnInterval.endpointDifference_contains_of_pos` takes one
+positive rational cell whose width satisfies the derivative certificate's
+step budget and encloses its endpoint difference by the cell width times the
+derivative box, widened by twice the requested precision.  This is the exact
+finite bridge consumed by partition-level FTC certificates.
 `FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval` then closes
 this construction under every finite rational coefficient prefix. Its
 quantitative `SecantDerivativeBound` is the explicit Taylor-remainder bridge:
@@ -805,6 +811,7 @@ open ComputableAnalysis
 #check FinitePolynomial.cosineTaylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.SecantDerivativeBound.mul
 #check FinitePolynomial.SecantDerivativeBound.mulToHasDerivativeOnInterval
+#check HasDerivativeOnInterval.endpointDifference_contains_of_pos
 #check FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval
 #check ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero
