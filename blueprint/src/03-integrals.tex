@@ -294,6 +294,17 @@ not assert that an arbitrary integrand has an integral.
 \lean{ComputableAnalysis.Integral.finiteRawSum_append_equiv}
 \leanok
 
+For a piecewise-monotone certificate, the cell indices form a finite
+`Fin`-indexed list.  Every cell is valid, hence its finite raw sum is valid
+before any theorem identifies the sum with an endpoint difference.  The
+two-cell theorem above is the first concrete assembly instance; the same
+list is the input for arbitrary finite-turn constructions.
+
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneCellList}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneCellList_valid}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneCellList_finiteRawSum_valid}
+\leanok
+
 Finite rectangular products use the same assembly law in any fixed number
 of dimensions.  The nested sum is finite and rational; induction factors a
 separable integrand into one finite sum per coordinate.  This is the algebraic

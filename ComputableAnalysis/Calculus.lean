@@ -7468,11 +7468,30 @@ def piecewiseMonotoneCellIntegral (F : FunctionOnInterval)
     (k : Nat) (hk : k < c.pieces) : RealRaw :=
   monotoneIntegralFor _ (c.construction k hk)
 
+/-! The finite cell list carries the index proof in `Fin`, so later assembly
+lemmas do not need to reconstruct `k < c.pieces` by hand. -/
+def piecewiseMonotoneCellList (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) : List RealRaw :=
+  (List.finRange c.pieces).map (fun k =>
+    piecewiseMonotoneCellIntegral F c k.1 k.2)
+
 theorem piecewiseMonotoneCellIntegral_valid (F : FunctionOnInterval)
     (c : PiecewiseMonotoneConstructionFor F)
     (k : Nat) (hk : k < c.pieces) :
-    (piecewiseMonotoneCellIntegral F c k hk).Valid :=
+  (piecewiseMonotoneCellIntegral F c k hk).Valid :=
   monotoneIntegralFor_valid _ (c.construction k hk)
+
+theorem piecewiseMonotoneCellList_valid (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) :
+    forall x, x ∈ piecewiseMonotoneCellList F c -> x.Valid := by
+  intro x hx
+  rcases List.mem_map.1 hx with ⟨k, _hk, rfl⟩
+  exact piecewiseMonotoneCellIntegral_valid F c k.1 k.2
+
+theorem piecewiseMonotoneCellList_finiteRawSum_valid
+    (F : FunctionOnInterval) (c : PiecewiseMonotoneConstructionFor F) :
+    (finiteRawSum (piecewiseMonotoneCellList F c)).Valid :=
+  finiteRawSum_valid _ (piecewiseMonotoneCellList_valid F c)
 
 /-- Sum the monotone-piece integrals over the finite rational partition. -/
 def piecewiseMonotoneIntegralFor (F : FunctionOnInterval)
