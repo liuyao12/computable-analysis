@@ -431,6 +431,12 @@ For the finite quadrature itself,
 left-rectangle sum for `x^n` with a scaled `Series.powerSum`. This keeps the
 value-identification problem in finite rational arithmetic; convergence or
 endpoint overlap is a separate theorem obligation.
+The right-endpoint counterpart is
+`Integral.uniformRightEndpointSum_pow_eq_scaled_powerSumBlock`, and for a
+positive exponent
+`Integral.uniformRightEndpointSum_pow_sub_left_eq_scaled_last_power` gives
+the exact left/right rectangle gap. This is the finite shrinking certificate
+used before identifying the common endpoint value.
 For a prefix containing a linear term,
 `FinitePolynomial.taylorPrefixShift_at_zero` identifies that certified
 derivative polynomial at zero with the original coefficient `c 1`.

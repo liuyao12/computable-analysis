@@ -588,6 +588,20 @@ limit: it is exactly the scaled finite power sum
 \lean{ComputableAnalysis.Integral.uniformLeftEndpointSum_pow_eq_scaled_powerSum}
 \leanok
 
+The right-endpoint computation has the matching shifted power-sum form.  For
+$n>0$, the two finite sums differ by exactly the final rectangle:
+
+\[
+  R_N(x^k)-L_N(x^k)=\left(\frac1N\right)^{k+1}N^k.
+\]
+
+Thus for every positive exponent the Darboux gap is an explicit shrinking
+rational quantity, before any appeal to a completed number system.
+
+\lean{ComputableAnalysis.Integral.uniformRightEndpointSum_pow_eq_scaled_powerSumBlock}
+\lean{ComputableAnalysis.Integral.uniformRightEndpointSum_pow_sub_left_eq_scaled_last_power}
+\leanok
+
 For the cubic case the first rectangle identity is explicit:
 \(\sum_{k<n}3(k/n)^2(1/n)\) is evaluated by a finite sum-of-squares
 induction.  The interval-regular layer then supplies the domain-restricted

@@ -1098,6 +1098,77 @@ theorem uniformLeftEndpointSum_pow_eq_scaled_powerSum
   rw [hrewrite]
   exact foldl_scaled_power_range (1 / (n : Rat)) k n
 
+private theorem foldl_scaled_shifted_power_range (h : Rat) (k n : Nat) :
+    (List.range n : List Nat).foldl
+      (fun acc (j : Nat) =>
+        acc + h * (((Nat.succ j : Nat) : Rat) * h) ^ k) 0 =
+      h ^ (k + 1) * Series.powerSumBlock k 1 n := by
+  have hpow : forall (m j : Nat), ((m : Rat) * h) ^ j =
+      (m : Rat) ^ j * h ^ j := by
+    intro m j
+    induction j with
+    | zero => rw [Rat.pow_zero, Rat.pow_zero, Rat.pow_zero]; native_decide
+    | succ j ih =>
+        rw [Rat.pow_succ, Rat.pow_succ, Rat.pow_succ, ih]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  induction n with
+  | zero => simp [Series.powerSumBlock]
+  | succ n ih =>
+      rw [List.range_succ, List.foldl_append]
+      simp only [List.foldl_cons, List.foldl_nil]
+      rw [ih, Series.powerSumBlock_succ]
+      rw [hpow (n + 1) k]
+      simp only [Rat.natCast_add]
+      grind [Rat.pow_succ, Rat.mul_assoc, Rat.mul_comm]
+
+theorem uniformRightEndpointSum_pow_eq_scaled_powerSumBlock
+    (k n : Nat) :
+    _root_.ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformRightEndpointSum
+        (fun x : Rat => x ^ k) n =
+      (1 / (n : Rat)) ^ (k + 1) * Series.powerSumBlock k 1 n := by
+  unfold _root_.ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformRightEndpointSum
+  have harg (j : Nat) :
+      (Nat.succ j : Rat) / (n : Rat) =
+        (Nat.succ j : Rat) * (1 / (n : Rat)) := by
+    rw [Rat.div_def, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hrewrite :
+      (fun acc (j : Nat) =>
+        acc + (1 / (n : Rat)) *
+          (((Nat.succ j : Nat) : Rat) / (n : Rat)) ^ k) =
+      (fun acc (j : Nat) =>
+        acc + (1 / (n : Rat)) *
+          ((((Nat.succ j : Nat) : Rat) * (1 / (n : Rat))) ^ k)) := by
+    funext acc j
+    rw [harg]
+  rw [hrewrite]
+  exact foldl_scaled_shifted_power_range (1 / (n : Rat)) k n
+
+theorem uniformRightEndpointSum_pow_sub_left_eq_scaled_last_power
+    {k n : Nat} (hk : 0 < k) :
+    _root_.ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformRightEndpointSum
+        (fun x : Rat => x ^ k) n -
+      _root_.ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+        (fun x : Rat => x ^ k) n =
+      (1 / (n : Rat)) ^ (k + 1) * (n : Rat) ^ k := by
+  rw [uniformRightEndpointSum_pow_eq_scaled_powerSumBlock,
+    uniformLeftEndpointSum_pow_eq_scaled_powerSum]
+  have hblock : Series.powerSumBlock k 1 n =
+      Series.powerSum k n + (n : Rat) ^ k := by
+    induction n with
+    | zero =>
+        have hzero : (0 : Rat) ^ k = 0 := by
+          induction k with
+          | zero => omega
+          | succ k => rw [Rat.pow_succ]; simp
+        simp [Series.powerSumBlock, Series.powerSum, hzero] <;> native_decide
+    | succ n ih =>
+        rw [Series.powerSumBlock_succ, Series.powerSum_succ, ih]
+        simp only [Rat.natCast_add]
+        grind [Rat.pow_succ, Rat.add_assoc, Rat.add_comm]
+  rw [hblock]
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm, Rat.mul_add]
+
 def exactRat_cube_integral_certificate :
     Integral.IntervalRegularIntegralCertificate
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ 3) 0 1) where
