@@ -411,6 +411,105 @@ noncomputable def DyadicTangentWitnessFamily.of_canonical_halfAngle_families
     exact upper_overlap_of_canonical_halfAngle_certificate B precision n k
       hupper hk (upper_certificate precision n k hupper hk)
 
+/-! The theorem-facing form of the canonical route.  Once the evaluator
+identifies its sampled values with the nested-radical stages, the branch
+certificates can be supplied directly; users do not need to manually unpack
+the intermediate witness family. -/
+
+theorem ArctanSinPiConstruction.halfIntegral_equiv_of_canonical_halfAngle_families
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (even_certificate : forall (precision n j : Nat) (hj : j < 2 ^ n),
+      CanonicalDyadicHalfAngleCertificateAt S.inverse precision (n + 1) (2 * j)
+        (by
+          have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+            rw [Nat.pow_succ]
+            omega
+          rw [hpow]
+          omega))
+    (lower_certificate : forall (precision n j : Nat)
+      (hbound : 2 * j + 1 <= 2 ^ n),
+      CanonicalDyadicHalfAngleCertificateAt S.inverse precision (n + 1)
+        (2 * j + 1) (by
+          have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+            rw [Nat.pow_succ]
+            omega
+          rw [hpow]
+          omega))
+    (upper_certificate : forall (precision n k : Nat)
+      (hupper : 2 ^ n < k) (hk : k < 2 ^ (n + 1)),
+      CanonicalDyadicHalfAngleCertificateAt S.inverse precision (n + 1) k hk) :
+    (S.halfIntegral pub).Equiv
+      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+  exact S.halfIntegral_equiv_of_witness_family
+    pub g cg hdyadic hplan hevaluator
+    (DyadicTangentWitnessFamily.of_canonical_halfAngle_families
+      S.inverse ht0 even_certificate lower_certificate upper_certificate)
+
+theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_canonical_halfAngle_families
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (even_certificate : forall (precision n j : Nat) (hj : j < 2 ^ n),
+      CanonicalDyadicHalfAngleCertificateAt S.inverse precision (n + 1) (2 * j)
+        (by
+          have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+            rw [Nat.pow_succ]
+            omega
+          rw [hpow]
+          omega))
+    (lower_certificate : forall (precision n j : Nat)
+      (hbound : 2 * j + 1 <= 2 ^ n),
+      CanonicalDyadicHalfAngleCertificateAt S.inverse precision (n + 1)
+        (2 * j + 1) (by
+          have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+            rw [Nat.pow_succ]
+            omega
+          rw [hpow]
+          omega))
+    (upper_certificate : forall (precision n k : Nat)
+      (hupper : 2 ^ n < k) (hk : k < 2 ^ (n + 1)),
+      CanonicalDyadicHalfAngleCertificateAt S.inverse precision (n + 1) k hk)
+    (hintegral :
+      (Integral.integral g 0 ((1 : Rat) / 2) cg).Equiv reciprocalPiRaw) :
+    (S.halfIntegral pub).Equiv reciprocalPiRaw := by
+  have hpub := S.halfIntegral_equiv_of_canonical_halfAngle_families
+    pub g cg hdyadic hplan hevaluator ht0 even_certificate
+    lower_certificate upper_certificate
+  exact RealRaw.equiv_trans
+    (S.halfIntegral_valid pub)
+    (FTC.integral_valid_of_construction cg)
+    reciprocalPiRaw_valid hpub hintegral
+
 noncomputable def DyadicTangentWitnessFamily.of_branch_certificate_families
     (B : IntegralIdentities.ArctanInverseBisection)
     (ht0 : (B.tangentAt 0

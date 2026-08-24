@@ -353,7 +353,10 @@ from monomial brackets structurally.
    formalized.  The canonical overlap assembly is also packaged by
    `DyadicTangentWitnessFamily.of_canonical_halfAngle_families`; it now takes
    canonical certificates for all three nonzero parity branches, with the zero
-   endpoint supplied by the exact endpoint theorem.
+   endpoint supplied by the exact endpoint theorem.  The theorem-facing
+   closures are `ArctanSinPiConstruction.halfIntegral_equiv_of_canonical_halfAngle_families`
+   and its reciprocal-π corollary, so this route now reaches the public
+   equal-dyadic integral without exposing the intermediate witness schedule.
 
    Each certificate has a `to_public_overlap` theorem already; the remaining
    proofs are finite interval inequalities and circle identities, not a new
