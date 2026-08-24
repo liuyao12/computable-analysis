@@ -1052,6 +1052,52 @@ theorem monomialPrimitiveEndpointDifference_adjacent_additive
   apply endpointDifferenceRaw_adjacent_additive
     (RealFunRaw.exact_valid _) trivial trivial trivial
 
+/-! A uniform left-rectangle sum for a monomial is exactly a scaled finite
+power sum.  This is the finite computation underneath the eventual value
+theorem; no convergence statement is used here. -/
+
+private theorem foldl_scaled_power_range (h : Rat) (k n : Nat) :
+    (List.range n : List Nat).foldl
+      (fun acc (j : Nat) => acc + h * (((j : Rat) * h) ^ k)) 0 =
+      h ^ (k + 1) * Series.powerSum k n := by
+  have hpow : forall (m j : Nat), ((m : Rat) * h) ^ j =
+      (m : Rat) ^ j * h ^ j := by
+    intro m j
+    induction j with
+    | zero => rw [Rat.pow_zero, Rat.pow_zero, Rat.pow_zero]; native_decide
+    | succ j ih =>
+        rw [Rat.pow_succ, Rat.pow_succ, Rat.pow_succ, ih]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  induction n with
+  | zero => simp [Series.powerSum_zero]
+  | succ n ih =>
+      rw [List.range_succ, List.foldl_append]
+      simp only [List.foldl_cons, List.foldl_nil]
+      rw [ih, Series.powerSum_succ]
+      rw [hpow n k]
+      grind [Rat.pow_succ, Rat.mul_assoc, Rat.mul_comm]
+
+theorem uniformLeftEndpointSum_pow_eq_scaled_powerSum
+    (k n : Nat) :
+    _root_.ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+        (fun x : Rat => x ^ k) n =
+      (1 / (n : Rat)) ^ (k + 1) * Series.powerSum k n := by
+  unfold _root_.ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+  have harg (j : Nat) :
+      (j : Rat) / (n : Rat) = (j : Rat) * (1 / (n : Rat)) := by
+    rw [Rat.div_def, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hrewrite :
+      (fun acc (j : Nat) =>
+        acc + (1 / (n : Rat)) * (((j : Rat) / (n : Rat)) ^ k)) =
+      (fun acc (j : Nat) =>
+        acc + (1 / (n : Rat)) *
+          (((j : Rat) * (1 / (n : Rat))) ^ k)) := by
+    funext acc j
+    rw [harg]
+  rw [hrewrite]
+  exact foldl_scaled_power_range (1 / (n : Rat)) k n
+
 def exactRat_cube_integral_certificate :
     Integral.IntervalRegularIntegralCertificate
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ 3) 0 1) where

@@ -577,6 +577,17 @@ backbone that a partition-level FTC certificate assembles.
 \lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference_adjacent_additive}
 \leanok
 
+At a finite mesh, the left rectangle sum for $x^n$ is not an abstract
+limit: it is exactly the scaled finite power sum
+
+\[
+  \sum_{j<N}\frac1N\left(\frac jN\right)^n
+  = \left(\frac1N\right)^{n+1}\sum_{j<N}j^n.
+\]
+
+\lean{ComputableAnalysis.Integral.uniformLeftEndpointSum_pow_eq_scaled_powerSum}
+\leanok
+
 For the cubic case the first rectangle identity is explicit:
 \(\sum_{k<n}3(k/n)^2(1/n)\) is evaluated by a finite sum-of-squares
 induction.  The interval-regular layer then supplies the domain-restricted

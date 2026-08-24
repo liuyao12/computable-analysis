@@ -426,6 +426,11 @@ The matching primitive algebra is exposed by
 `Integral.monomialPrimitiveEndpointDifference_adjacent_additive`; these
 objects telescope over rational partitions before any limiting integral
 argument is introduced.
+For the finite quadrature itself,
+`Integral.uniformLeftEndpointSum_pow_eq_scaled_powerSum` identifies the
+left-rectangle sum for `x^n` with a scaled `Series.powerSum`. This keeps the
+value-identification problem in finite rational arithmetic; convergence or
+endpoint overlap is a separate theorem obligation.
 For a prefix containing a linear term,
 `FinitePolynomial.taylorPrefixShift_at_zero` identifies that certified
 derivative polynomial at zero with the original coefficient `c 1`.
