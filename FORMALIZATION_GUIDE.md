@@ -448,6 +448,10 @@ The exponent-zero regression
 `Integral.exactRat_zero_integral_raw_equiv_one` confirms that the generic
 certificate specializes to the exact constant integral without unfolding the
 private Darboux folds.
+
+The exponent-one regression
+`Integral.exactRat_one_integral_raw_equiv_half` checks the first nonconstant
+case through the public affine left/right sum formulas.
 The same rational power induction supplies
 `Integral.exactRat_pow_nondecreasing_on_unit` and a compatible
 `Integral.exactRat_pow_monotoneConstructionFor`, so the monomial can be fed

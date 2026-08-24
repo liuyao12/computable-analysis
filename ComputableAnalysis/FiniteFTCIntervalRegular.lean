@@ -1115,6 +1115,76 @@ theorem exactRat_zero_integral_raw_equiv_one :
   rw [hsum] at hcontains
   exact hcontains
 
+theorem exactRat_one_integral_raw_equiv_half :
+    (Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ 1) 0 1)
+      (exactRat_pow_integral_certificate 1)).Equiv
+      (RealRaw.ofRat (1 / 2)) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro stage
+  apply (RealRaw.compareAt_overlap_iff _ _ stage stage).2
+  unfold Integral.raw Integral.integralFor exactRat_pow_integral_certificate
+  change QInterval.Overlaps
+    (IntegralIdentities.LipschitzDyadic.compute (fun x : Rat => x ^ 1) 1 stage)
+    { lo := 1 / 2, hi := 1 / 2 }
+  have hn : 0 < 2 ^ stage := Nat.pow_pos (by omega : 0 < 2)
+  have hleft :=
+    IntegralIdentities.LipschitzDyadic.compute_contains_leftEndpointSum
+      (f := fun x : Rat => x) (L := 1)
+      (IntegralIdentities.affineIdentity_lipschitz_on_unit) stage
+  have hright :=
+    IntegralIdentities.LipschitzDyadic.compute_contains_rightEndpointSum
+      (f := fun x : Rat => x) (L := 1)
+      (IntegralIdentities.affineIdentity_lipschitz_on_unit) stage
+  have hleftTransport :=
+    IntegralIdentities.LipschitzDyadic.dyadicLeftEndpointSum_eq_uniform
+      (fun x : Rat => x) stage
+  have hrightTransport :=
+    IntegralIdentities.LipschitzDyadic.dyadicRightEndpointSum_eq_uniform
+      (fun x : Rat => x) stage
+  have hleftValue :=
+    IntegralIdentities.affineIdentity_uniformLeftEndpointSum_eq hn
+  have hrightValue :=
+    IntegralIdentities.affineIdentity_uniformRightEndpointSum_eq hn
+  have hleft_le :
+      IntegralIdentities.LipschitzDyadic.leftEndpointSum (fun x : Rat => x)
+          (ArctanGeometry.arctanAreaLoopState 1 stage).intervals <= 1 / 2 := by
+    rw [hleftTransport, hleftValue]
+    have hpow : (0 : Rat) < (2 ^ stage : Nat) := by
+      exact_mod_cast hn
+    have hden : (0 : Rat) < 2 * (2 ^ stage : Nat) := by
+      grind
+    have hden0 : (2 * (2 ^ stage : Nat) : Rat) ≠ 0 := Rat.ne_of_gt hden
+    have hinv : (0 : Rat) < ((2 * (2 ^ stage : Nat) : Rat))⁻¹ :=
+      (Rat.inv_pos).2 hden
+    rw [Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+      Rat.mul_inv_cancel _ hden0]
+  have hright_ge :
+      1 / 2 <=
+        IntegralIdentities.LipschitzDyadic.rightEndpointSum (fun x : Rat => x)
+          (ArctanGeometry.arctanAreaLoopState 1 stage).intervals := by
+    rw [hrightTransport, hrightValue]
+    have hpow : (0 : Rat) < (2 ^ stage : Nat) := by
+      exact_mod_cast hn
+    have hden : (0 : Rat) < 2 * (2 ^ stage : Nat) := by
+      grind
+    have hden0 : (2 * (2 ^ stage : Nat) : Rat) ≠ 0 := Rat.ne_of_gt hden
+    have hinv : (0 : Rat) < ((2 * (2 ^ stage : Nat) : Rat))⁻¹ :=
+      (Rat.inv_pos).2 hden
+    rw [Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+      Rat.mul_inv_cancel _ hden0]
+  have hcompute :
+      IntegralIdentities.LipschitzDyadic.compute (fun x : Rat => x ^ 1) 1 stage =
+        IntegralIdentities.LipschitzDyadic.compute (fun x : Rat => x) 1 stage := by
+    congr 1
+    funext x
+    rw [Rat.pow_one]
+  rw [hcompute]
+  unfold QInterval.Overlaps
+  exact ⟨Rat.le_trans hleft.1 hleft_le, Rat.le_trans hright_ge hright.2⟩
+
 theorem exactRat_pow_integral_raw_valid (n : Nat) :
     (Integral.raw
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1)
