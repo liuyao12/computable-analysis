@@ -6,16 +6,17 @@ program returning such bounds. Lebesgue measure is outside scope.
 
 This chapter is where the Fundamental Theorem of Calculus belongs. It is the
 first general bridge from local change to accumulated area; later chapters
-only instantiate and reuse its certificate interface.  We use a two-stage
-presentation: state the theorem here immediately after the first area
-algorithm, then prove and package its reusable derivative-bound interface in
-Chapter~\ref{ch:effective-calculus}.
+only instantiate and reuse its certificate interface. We state the contract
+here immediately after the first area algorithm. The next chapter packages
+the derivative-bound, convexity, monotonicity, and tail certificates that
+make the contract effective.
 
 The order is intentional:
 
 \begin{verbatim}
-circle/arctan example -> rectangle integral -> effective FTC
-                      -> power series and exp/log instances -> ODEs
+circle/arctan example -> rectangle integral -> FTC contract
+                      -> effective certificates -> power series
+                      -> exp/log -> linear ODEs
 \end{verbatim}
 
 FTC is introduced immediately after the first computable integral, then used

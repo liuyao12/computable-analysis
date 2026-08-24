@@ -23,19 +23,20 @@ obligations finite and inspectable.
 The main calculus route is deliberately ordered as
 
 \begin{verbatim}
-circle and trigonometry -> integral and effective FTC -> power series
+circle and trigonometry -> integral -> effective FTC -> power series
 -> exponential/logarithm -> linear ODEs
 \end{verbatim}
 
 The FTC belongs at the beginning of the integral chapter. It is the bridge
 from the geometric area computation to the later derivative identities; it
 is not postponed until after all special functions have been constructed.
-The presentation has two layers: Chapter~\ref{ch:integrals} states the
-finite endpoint--area contract as soon as the first rectangle integral is
-defined, while Chapter~\ref{ch:effective-calculus} develops the reusable
-derivative, convexity, monotonicity, and tail certificates that discharge its
-hypotheses.  This keeps the historical idea visible without pretending that
-every continuous function is automatically integrable in the foundation.
+The presentation has two consecutive layers: Chapter~\ref{ch:integrals}
+states the finite endpoint--area contract as soon as the first rectangle
+integral is defined, and the next chapter develops the reusable derivative,
+convexity, monotonicity, and tail certificates that discharge its hypotheses.
+Only then do power series and special functions consume the contract. This
+keeps the historical idea visible without pretending that every continuous
+function is automatically integrable in the foundation.
 Algebra and the fundamental theorem of algebra are recorded as a parallel
 computable branch, not as a prerequisite for this calculus route.
 
@@ -179,9 +180,9 @@ deferred.
 \input{01-foundations.tex}
 \input{02-rational-circle-trigonometry.tex}
 \input{03-integrals.tex}
+\input{06-effective-calculus.tex}
 \input{04-infinite-series.tex}
 \input{05-exponential-logarithm.tex}
 \input{09-differential-equations.tex}
-\input{06-effective-calculus.tex}
 \input{07-algebra-fta.tex}
 \input{08-roadmap.tex}
