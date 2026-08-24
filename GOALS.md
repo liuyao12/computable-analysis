@@ -109,6 +109,12 @@ That bridge is now represented by the checked
    making the remaining convergence estimate an explicit rational inequality.
    The dyadic tangent-square raw now exports the exact width law
    `tangentSquareIntegral_width`: `128 / 2^n`.
+   The reusable theorem `finite_sum_close_of_raw_equiv_of_margin` now performs
+   the generic interval-arithmetic step after a correctly scaled raw integral
+   has been identified with its target: a finite sum inherits a
+   width-minus-margin error bound.  It is intentionally not specialized to
+   the provisional `1/4` tangent-square placeholder; the unscaled tangent
+   chart represents the quarter-turn, so normalization must be supplied first.
    **Normalization correction:** `tangentSquareIntegral` is the unscaled
    tangent-chart integral, whose endpoint is the quarter-turn raw
    `halfQuarterTurnRaw 1` (the computable analogue of `pi/4`).  The value

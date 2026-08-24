@@ -954,6 +954,38 @@ theorem tangentSquareLeftSum_stage_four_quarter_certificate :
         (1 / 4 : Rat) + (64 : Rat) / (((2 ^ 4 : Nat) : Rat))) := by
   native_decide
 
+/-! A reusable value-transfer lemma for Lipschitz rectangle sums.  If a raw
+integral computation is already known to represent the rational value `q`,
+and its stage interval contains a finite sum with a symmetric margin, then
+the sum inherits the value up to the interval width minus that margin.  This
+is the finite interval analogue of reading a Riemann sum from an integral
+enclosure; it does not use a completed real or an attained limit. -/
+theorem finite_sum_close_of_raw_equiv_of_margin
+    {I : RealRaw} {q : Rat} {sum margin radius : Nat -> Rat}
+    (hvalue : I.Equiv (RealRaw.ofRat q))
+    (hmargin : forall n, 0 <= margin n)
+    (hradius : forall n, 0 <= radius n)
+    (hmargin_radius : forall n, margin n <= radius n)
+    (hsum : forall n,
+      (I.compute n).lo <= sum n - margin n /\
+        sum n + margin n <= (I.compute n).hi)
+    (hwidth : forall n, (I.compute n).width <= radius n) :
+    forall n,
+      q - radius n + margin n <= sum n /\
+        sum n <= q + radius n - margin n := by
+  intro n
+  have hover := (RealRaw.compareAt_overlap_iff I (RealRaw.ofRat q) n n).1
+    (hvalue n)
+  change QInterval.Overlaps (I.compute n) ({lo := q, hi := q} : QInterval) at hover
+  unfold QInterval.Overlaps at hover
+  have hwidth' := hwidth n
+  unfold QInterval.width at hwidth'
+  have hsum' := hsum n
+  have hmargin' := hmargin n
+  have hradius' := hradius n
+  have hmargin_radius' := hmargin_radius n
+  constructor <;> grind
+
 structure TangentSquareLeftSumQuarterCertificate where
   lower_sum :
     forall n,

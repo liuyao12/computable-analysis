@@ -447,6 +447,15 @@ The squared-sine route is a useful intermediate application: squaring the
 same certified samples gives a monotone Darboux integral, and the FTC/value
 transport identifies it with \(1/4\) once the endpoint certificate is supplied.
 
+The reusable interval-transfer step is now generic: after the correctly
+scaled raw integral is identified with its target, combine its stage width
+with the finite rectangle margin.  The scaling must come first: the unscaled
+tangent-chart integral represents the quarter-turn, while the normalized
+squared-sine integral represents \(1/4\).
+
+\lean{ComputableAnalysis.finite_sum_close_of_raw_equiv_of_margin}
+\leanok
+
 \lean{ComputableAnalysis.SinPiIntegral.sinPiSquareMonotoneIntegral}
 \lean{ComputableAnalysis.SinPiIntegral.sinPiSquareMonotoneIntegral_valid}
 \lean{ComputableAnalysis.SinPiIntegral.sinPiSquareMonotoneIntegral_equiv_value}
