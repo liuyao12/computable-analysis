@@ -1147,6 +1147,59 @@ def slopeBetween (Fy Fx : QInterval) (dx : Rat) : QInterval :=
 
 end QInterval
 
+/-! The finite rectangle fold respects pointwise addition.  This is the
+algebraic core of integral linearity; validity and representation transport
+remain separate certificate obligations. -/
+
+theorem riemannLeftInterval_add
+    (f g : RealFunRaw) (a b : Rat) (subdivisions prec : Nat) :
+    riemannLeftInterval (RealFunRaw.add f g) a b subdivisions prec =
+      QInterval.addInterval
+        (riemannLeftInterval f a b subdivisions prec)
+        (riemannLeftInterval g a b subdivisions prec) := by
+  unfold riemannLeftInterval
+  let stepF : QInterval -> Nat -> QInterval := fun acc k =>
+    let I := f.compute (leftPoint a b subdivisions k) prec
+    { lo := acc.lo + mesh a b subdivisions * I.lo,
+      hi := acc.hi + mesh a b subdivisions * I.hi }
+  let stepG : QInterval -> Nat -> QInterval := fun acc k =>
+    let I := g.compute (leftPoint a b subdivisions k) prec
+    { lo := acc.lo + mesh a b subdivisions * I.lo,
+      hi := acc.hi + mesh a b subdivisions * I.hi }
+  let stepH : QInterval -> Nat -> QInterval := fun acc k =>
+    let I := (RealFunRaw.add f g).compute
+      (leftPoint a b subdivisions k) prec
+    { lo := acc.lo + mesh a b subdivisions * I.lo,
+      hi := acc.hi + mesh a b subdivisions * I.hi }
+  have hstep : forall k (AF AG : QInterval),
+      stepH (QInterval.addInterval AF AG) k =
+        QInterval.addInterval (stepF AF k) (stepG AG k) := by
+    intro k AF AG
+    dsimp [stepF, stepG, stepH, RealFunRaw.add,
+      QInterval.addInterval]
+    grind [Rat.add_assoc, Rat.add_comm, Rat.mul_add, Rat.add_mul]
+  have hfold : forall (xs : List Nat) (AF AG : QInterval),
+      xs.foldl stepH (QInterval.addInterval AF AG) =
+        QInterval.addInterval (xs.foldl stepF AF) (xs.foldl stepG AG) := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro AF AG
+        rfl
+    | cons k ks ih =>
+        intro AF AG
+        simp only [List.foldl]
+        rw [hstep k AF AG]
+        exact ih (stepF AF k) (stepG AG k)
+  have hzero : QInterval.addInterval { lo := 0, hi := 0 } { lo := 0, hi := 0 } =
+      { lo := 0, hi := 0 } := by
+    simp [QInterval.addInterval]
+    grind
+  have h := hfold (List.range subdivisions)
+    { lo := 0, hi := 0 } { lo := 0, hi := 0 }
+  rw [hzero] at h
+  simpa [stepF, stepG, stepH] using h
+
 theorem QInterval.scaleByRat_add_mul_of_nonneg
     {r h : Rat} (hr : 0 <= r) (A I : QInterval) :
     QInterval.scaleByRat r

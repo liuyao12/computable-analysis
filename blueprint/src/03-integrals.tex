@@ -43,6 +43,14 @@ certificates.  Chapter~\ref{ch:effective-calculus} contains that reusable
 implementation layer.  Chapters~\ref{ch:infinite-series}--\ref{ch:differential-equations}
 consume the contract rather than reopening the foundations.
 
+The first algebraic law is already finite: the rectangle fold for a pointwise
+sum is the interval sum of the two rectangle folds.  No limiting argument is
+needed here; convergence and representation transport are separate
+certificates.
+
+\lean{ComputableAnalysis.riemannLeftInterval_add}
+\leanok
+
 \section{Rectangle algorithm}
 
 The question is not how to choose the best subdivision. Every certified
