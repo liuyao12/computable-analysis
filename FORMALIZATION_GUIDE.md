@@ -704,10 +704,11 @@ the legacy `SingleTurnIntegralCompletion`).  It does not turn every bounded
 or continuous interval function into an integral.
 
 For the equal-dyadic nested-radical sine route, the candidate integral is
-already a shrinking rational-box algorithm.  The finite anchors
+already a shrinking rational-box algorithm.  The first three finite anchors
 `dyadicNestedRadicalLeftSum_zero_overlaps_stieltjes` and
-`dyadicNestedRadicalLeftSum_one_overlaps_stieltjes` check its first two depths
-against the independent Stieltjes evaluator.  The unresolved obligation is
+`dyadicNestedRadicalLeftSum_one_overlaps_stieltjes` and
+`dyadicNestedRadicalLeftSum_two_overlaps_stieltjes` check its first three
+depths against the independent Stieltjes evaluator.  The unresolved obligation is
 the all-depth half-angle branch transport, represented by the certificate
 family in `SinPiIntegral.lean`.
 

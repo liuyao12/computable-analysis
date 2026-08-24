@@ -7881,6 +7881,13 @@ theorem dyadicNestedRadicalLeftSum_one_overlaps_stieltjes :
   unfold QInterval.Overlaps
   constructor <;> native_decide
 
+theorem dyadicNestedRadicalLeftSum_two_overlaps_stieltjes :
+    QInterval.Overlaps
+      (dyadicNestedRadicalLeftSum 2)
+      (sinPiStieltjesIntegral.compute 2) := by
+  unfold QInterval.Overlaps
+  constructor <;> native_decide
+
 theorem dyadicNestedRadicalLeftSum_width_le_of_stage
     (n : Nat) (eps : Rat)
     (hstage : forall k, k < 2 ^ n ->
