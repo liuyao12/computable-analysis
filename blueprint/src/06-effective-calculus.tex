@@ -279,6 +279,15 @@ FTC turns those boxes into endpoint differences. Monomial and finite
 Taylor-prefix instances are checked independently of any completed
 real-number topology.
 
+The normalized monomial certificate can be scaled by its denominator for every
+natural exponent.  This gives the finite power rule
+$d(x^{n+1})/dx=(n+1)x^n$ on a bounded rational chart; the cubic below is its
+first named nonlinear checkpoint.
+
+\lean{ComputableAnalysis.FinitePolynomial.monomialSecantDerivativeBound}
+\lean{ComputableAnalysis.FinitePolynomial.monomial_hasDerivativeOnInterval}
+\leanok
+
 As a concrete polynomial checkpoint, the normalized $x^3/3$ certificate is
 rationally scaled to obtain $x^3$ with derivative $3x^2$.  The cubic
 therefore enters the FTC ladder through the same finite secant machinery as

@@ -558,6 +558,54 @@ def normalizedMonomial_hasDerivativeOnInterval
     using (normalizedMonomialSecantBound C n hC1).toHasDerivativeOnInterval
       a b hleft hright
 
+/-! Scaling the normalized monomial by its denominator exposes the general
+power rule.  The only new algebra is cancellation of the positive rational
+`n + 1`; all error control remains the normalized finite secant certificate. -/
+def monomialSecantDerivativeBound (C : Rat) (n : Nat) (hC1 : 1 <= C) :
+    SecantDerivativeBound C
+      (fun x => x ^ (n + 1))
+      (fun x => ((n + 1 : Nat) : Rat) * x ^ n) := by
+  let k : Rat := ((n + 1 : Nat) : Rat)
+  let H := SecantDerivativeBound.scaleRat k
+    (normalizedMonomialSecantBound C n hC1)
+  have hk : k ≠ 0 := by
+    dsimp [k]
+    exact Rat.ne_of_gt (by
+      exact (Rat.natCast_pos).2 (Nat.succ_pos n))
+  refine {
+    errorCoefficient := H.errorCoefficient
+    errorCoefficient_nonneg := H.errorCoefficient_nonneg
+    error_bound := ?_ }
+  intro x h hh hx hxh
+  have hbound := H.error_bound x h hh hx hxh
+  change qabs
+      ((k * ((x + h) ^ (n + 1) / k) -
+        k * (x ^ (n + 1) / k)) / h - k * x ^ n) <=
+      qabs h * H.errorCoefficient at hbound
+  have hcancel (z : Rat) : k * (z / k) = z := by
+    rw [Rat.div_def]
+    calc
+      k * (z * k⁻¹) = k * (k⁻¹ * z) := by rw [Rat.mul_comm z]
+      _ = (k * k⁻¹) * z := by rw [Rat.mul_assoc]
+      _ = z := by rw [Rat.mul_inv_cancel k hk, Rat.one_mul]
+  have hrewrite :
+      (k * ((x + h) ^ (n + 1) / k) -
+        k * (x ^ (n + 1) / k)) / h - k * x ^ n =
+      ((x + h) ^ (n + 1) - x ^ (n + 1)) / h - k * x ^ n := by
+    rw [hcancel ((x + h) ^ (n + 1)), hcancel (x ^ (n + 1))]
+  rw [hrewrite] at hbound
+  exact hbound
+
+def monomial_hasDerivativeOnInterval
+    (a b C : Rat) (n : Nat)
+    (hleft : -C <= a) (hright : b <= C) (hC1 : 1 <= C) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat (fun x => x ^ (n + 1)) a b)
+      (FunctionOnInterval.exactRat
+        (fun x => ((n + 1 : Nat) : Rat) * x ^ n) a b) :=
+  (monomialSecantDerivativeBound C n hC1).toHasDerivativeOnInterval
+    a b hleft hright
+
 /-! The cubic is obtained from the normalized degree-two monomial by a
 rational scalar.  This keeps its finite secant error and dyadic schedule in
 the reusable monomial certificate instead of introducing a second hand-made
