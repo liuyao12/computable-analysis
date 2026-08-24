@@ -836,6 +836,24 @@ the main examples.
 finite boxes -> product bounds -> tail certificate -> nested enclosure
 \end{verbatim}
 
+The two-dimensional product layer is literal finite algebra: sampled
+rectangle values are folded over two rational lists, and separable products
+factor into the product of their one-dimensional folds. The Gaussian layer
+then integrates even exponential Taylor prefixes on a bounded interval and
+keeps the improper tail as a separate finite upper-bound ladder. The
+$n$-ball layer records the familiar recurrence as a rational coefficient
+model, with the chosen `RealRaw` approximation to $pi$ supplied later.
+None of these statements introduces Lebesgue measure or an attained infinite
+domain.
+
+\lean{ComputableAnalysis.finiteProductSum2D_factorized}
+\lean{ComputableAnalysis.finiteProductIntegralSum2D_factorized}
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_eight}
+\lean{ComputableAnalysis.gaussianTailBoxUpper_stage_twenty_ladder}
+\lean{ComputableAnalysis.nBallVolumeModel_recurrence}
+\lean{ComputableAnalysis.nBallVolumeModel_scale}
+\leanok
+
 \section{Interface}
 
 \begin{verbatim}

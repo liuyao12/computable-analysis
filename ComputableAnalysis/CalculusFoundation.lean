@@ -23,6 +23,8 @@ import ComputableAnalysis.ExpProofs
 import ComputableAnalysis.Logarithm
 import ComputableAnalysis.ScalarODEUniqueness
 import ComputableAnalysis.PeanoBaker
+import ComputableAnalysis.FiniteNBallVolume
+import ComputableAnalysis.FiniteGaussianIntegral
 
 /-!
 # Computable calculus foundation
