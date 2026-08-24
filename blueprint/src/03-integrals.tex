@@ -200,6 +200,13 @@ silently identified with the Lipschitz case.
 The arctangent kernel is the first named instance: its bound $L=2$ gives
 an interval width $4/2^n$ before any endpoint or FTC identification.
 
+This constructor is currently specialized to the unit chart $[0,1]$.
+That is intentional: the finite Lipschitz proof is complete there, while a
+general rational chart still needs an explicit rescaling or arbitrary-cell
+image-box lemma.  Until that lemma is formalized, a non-unit function must
+provide its own construction or use the monotone schedule below; no automatic
+change of interval is being smuggled in.
+
 \lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquare_lipschitz_on_unit}
 \lean{ComputableAnalysis.IntegralIdentities.arctanKernelLipschitzIntegral_valid}
 \leanok
