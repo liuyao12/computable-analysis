@@ -558,6 +558,38 @@ def normalizedMonomial_hasDerivativeOnInterval
     using (normalizedMonomialSecantBound C n hC1).toHasDerivativeOnInterval
       a b hleft hright
 
+/-! The local FTC consequence of the normalized power rule.  This is the
+application-facing form: on one positive rational cell, the derivative box
+scaled by the cell width contains the finite endpoint increment.  It is the
+piece that a partition-level effective FTC assembles across cells. -/
+theorem normalizedMonomial_endpointDifference_contains_of_pos
+    (a b C : Rat) (n : Nat)
+    (hleft : -C <= a) (hright : b <= C) (hC1 : 1 <= C)
+    {x h : Rat} {stage : Nat}
+    (hx : inDomainInterval a b x)
+    (hxh : inDomainInterval a b (x + h))
+    (hpos : 0 < h)
+    (hsmall : qabs h <=
+      (1 / ((
+        (normalizedMonomial_hasDerivativeOnInterval a b C n hleft hright hC1).stepPrecision
+          stage : Nat) : Rat))) :
+    (QInterval.scaleByRat h
+      (QInterval.expand
+        ((monomialOnInterval a b n).compute x hx
+          ((normalizedMonomial_hasDerivativeOnInterval a b C n hleft hright hC1).evalPrecision
+            x h stage))
+        (2 * (precisionAtStage stage).val))).ContainsInterval
+      (QInterval.subInterval
+        ((normalizedMonomialOnInterval a b n).compute (x + h) hxh
+          ((normalizedMonomial_hasDerivativeOnInterval a b C n hleft hright hC1).evalPrecision
+            x h stage))
+        ((normalizedMonomialOnInterval a b n).compute x hx
+          ((normalizedMonomial_hasDerivativeOnInterval a b C n hleft hright hC1).evalPrecision
+            x h stage))) := by
+  exact HasDerivativeOnInterval.endpointDifference_contains_of_pos
+    (normalizedMonomial_hasDerivativeOnInterval a b C n hleft hright hC1)
+    hx hxh hx hpos hsmall
+
 /-! Scaling the normalized monomial by its denominator exposes the general
 power rule.  The only new algebra is cancellation of the positive rational
 `n + 1`; all error control remains the normalized finite secant certificate. -/
