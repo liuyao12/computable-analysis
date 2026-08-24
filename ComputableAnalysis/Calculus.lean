@@ -1354,6 +1354,20 @@ theorem riemannTrapezoidInterval_eq_half_add_left_right
   rw [hzero, hscalezero] at h
   simpa [stepL, stepR, stepT] using h
 
+/-- The trapezoid enclosure width is exactly the averaged width of its left
+and right endpoint enclosures.  This is the finite error-budget law used when
+the two endpoint evaluators have different precision schedules. -/
+theorem riemannTrapezoidInterval_width_eq_half_add_left_right
+    (g : RealFunRaw) (a b : Rat) (subdivisions prec : Nat) :
+    (riemannTrapezoidInterval g a b subdivisions prec).width =
+      (1 / 2) *
+        ((riemannLeftInterval g a b subdivisions prec).width +
+          (riemannRightInterval g a b subdivisions prec).width) := by
+  rw [riemannTrapezoidInterval_eq_half_add_left_right]
+  rw [QInterval.scaleByRat_width_of_nonneg
+    (by native_decide : (0 : Rat) <= 1 / 2)]
+  rw [QInterval.addInterval_width]
+
 /-! Independent endpoint evaluators may be transported through the trapezoid
 schedule by overlap alone.  This is the interval-valued counterpart of the
 finite identity above and is the form used by nested-radical or Taylor
