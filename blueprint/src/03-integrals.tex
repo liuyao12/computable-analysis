@@ -375,6 +375,18 @@ transport identifies it with \(1/4\) once the endpoint certificate is supplied.
 \lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.tangentChartTransport_of_staticFTC_of_endpoint_equiv}
 \lean{ComputableAnalysis.SinPiTransportSubgoals.DyadicNestedRadicalBranchCertificateFamily.toWitnessFamily}
 \leanok
+
+The preferred finite bridge is a rational witness search, rather than equality
+of the two interval implementations.  A rational unit-circle point is placed
+inside the nested-radical sine and cosine boxes, and its half-angle tangent
+box is placed inside the inverse-tangent box.  The circle identity then proves
+the required sine-box overlap:
+
+\lean{ComputableAnalysis.SinPiIntegral.CanonicalDyadicHalfAngleCertificateAt}
+\lean{ComputableAnalysis.SinPiIntegral.canonical_dyadic_overlap_of_halfAngle_outer_tangent_at}
+\lean{ComputableAnalysis.SinPiIntegral.canonical_dyadic_certificate_at_of_rational_witness}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_canonical_search_family}
+\leanok
 The integral and Darboux layers do not require a completed real sine function.
 
 The closed finite instances are linked directly to their certificates:
