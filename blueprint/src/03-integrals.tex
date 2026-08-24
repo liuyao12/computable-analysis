@@ -327,6 +327,9 @@ To connect those cells to an FTC conclusion, the construction must supply a
 per-cell endpoint certificate.  The next theorem transports the assembled
 integral to the finite sum of those endpoint differences; the separate
 adjacent-endpoint theorem then performs the telescoping step.
+The composition theorem makes the remaining finite transport certificate
+explicit: once the endpoint list is shown to be an adjacent-difference list,
+the generic raw telescoping theorem closes the endpoint identity.
 
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneCellList}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneCellList_length}
@@ -339,6 +342,7 @@ adjacent-endpoint theorem then performs the telescoping step.
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_equiv_endpointDifferenceList}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneTotalEndpointDifference}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneTotalEndpointDifference_valid}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_telescope}
 \leanok
 
 Finite rectangular products use the same assembly law in any fixed number

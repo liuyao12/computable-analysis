@@ -8011,6 +8011,62 @@ theorem piecewiseMonotoneTotalEndpointDifference_valid
   simpa [piecewiseMonotoneTotalEndpointDifference, x, y, hx, hy] using
     RealRaw.sub_valid hvalidy hvalidx
 
+/-! Compose the piecewise cell certificate with the domain-independent raw
+telescoping theorem.  The explicit list-transport hypothesis is the finite
+geometric bookkeeping still required to identify the interval's endpoint
+evaluators with adjacent entries; the theorem itself contains no completeness
+or limiting argument. -/
+theorem piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_telescope
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F)
+    (h : PiecewiseMonotoneEndpointFTCFor F c)
+    {first : RealRaw} {rest : List RealRaw}
+    (hvalues : forall x, x ∈ first :: rest -> x.Valid)
+    (htransport :
+      FiniteRawListEquiv
+        (piecewiseMonotoneEndpointDifferenceList F c)
+        (rawAdjacentDifferenceList (first :: rest)))
+    (htotal : (rawLast first rest - first).Equiv
+      (piecewiseMonotoneTotalEndpointDifference F c)) :
+    (piecewiseMonotoneIntegralFor F c).Equiv
+      (piecewiseMonotoneTotalEndpointDifference F c) := by
+  have hendpoint : forall x,
+      x ∈ piecewiseMonotoneEndpointDifferenceList F c -> x.Valid := by
+    intro x hx
+    rcases List.mem_map.1 hx with ⟨k, hk, rfl⟩
+    have hk' : k < c.pieces := List.mem_range.1 hk
+    simp [piecewiseMonotoneEndpointDifferenceList, hk']
+    exact piecewiseMonotoneEndpointDifference_valid F c k hk'
+  have hadjacent : forall x,
+      x ∈ rawAdjacentDifferenceList (first :: rest) -> x.Valid :=
+    rawAdjacentDifferenceList_valid hvalues
+  have hsum_endpoint := finiteRawSum_valid
+    (piecewiseMonotoneEndpointDifferenceList F c) hendpoint
+  have hsum_adjacent := finiteRawSum_valid
+    (rawAdjacentDifferenceList (first :: rest)) hadjacent
+  have htransport_sum := finiteRawSum_equiv_of_forall
+    htransport hendpoint hadjacent
+  have htel := finiteRawSum_rawAdjacentDifferenceList_equiv_last_sub_first
+    hvalues
+  have hlast : (rawLast first rest).Valid := rawLast_valid hvalues
+  have hfirst : first.Valid := hvalues first (by simp)
+  have hsub : (rawLast first rest - first).Valid :=
+    RealRaw.sub_valid hlast hfirst
+  have htotal_valid := piecewiseMonotoneTotalEndpointDifference_valid F c
+  have hcell := piecewiseMonotoneIntegralFor_equiv_endpointDifferenceList F c h
+  have hintegral := piecewiseMonotoneIntegralFor_valid F c
+  have hintegral_adjacent :
+      (piecewiseMonotoneIntegralFor F c).Equiv
+        (finiteRawSum (rawAdjacentDifferenceList (first :: rest))) :=
+    RealRaw.equiv_trans hintegral hsum_endpoint hsum_adjacent hcell
+      htransport_sum
+  have hadjacent_total :
+      (finiteRawSum (rawAdjacentDifferenceList (first :: rest))).Equiv
+        (piecewiseMonotoneTotalEndpointDifference F c) :=
+    RealRaw.equiv_trans hsum_adjacent hsub htotal_valid htel htotal
+  exact RealRaw.equiv_trans hintegral hsum_adjacent htotal_valid
+    hintegral_adjacent hadjacent_total
+
 /-- A one-piece promotion from a monotone construction computes the same raw
 integral as the original monotone construction. -/
 theorem piecewiseMonotoneIntegralFor_ofMonotone_equiv
