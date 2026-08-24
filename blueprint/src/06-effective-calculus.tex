@@ -27,11 +27,15 @@ boxes of width \(2/2^n\); this is the model for integrating functions whose
 values are not captured by one exact rectangle.  It is deliberately kept
 separate from the affine FTC evaluator so that later special functions can
 reuse the rectangle construction without first acquiring a symbolic
-primitive.
+primitive.  The complete example identifies the resulting raw integral:
+\(\int_0^1 x\,dx=1/2\).
 
 \lean{ComputableAnalysis.IntegralIdentities.affineIdentity_lipschitz_on_unit}
 \lean{ComputableAnalysis.IntegralIdentities.affineIdentityLipschitzConstruction}
 \lean{ComputableAnalysis.IntegralIdentities.affineIdentityLipschitzConstruction_valid}
+\lean{ComputableAnalysis.IntegralIdentities.affineIdentity_uniformLeftEndpointSum_eq}
+\lean{ComputableAnalysis.IntegralIdentities.affineIdentity_uniformRightEndpointSum_eq}
+\lean{ComputableAnalysis.IntegralIdentities.affineIdentityLipschitz_integral_equiv_half}
 \lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.lipschitzCells_refine}
 \lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.compute_nested}
 \lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.compute_width}

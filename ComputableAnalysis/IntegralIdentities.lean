@@ -16445,6 +16445,114 @@ theorem affineIdentityLipschitzConstruction_valid :
       affineIdentityLipschitzConstruction).Valid := by
   exact Integral.integralFor_valid _ _
 
+theorem affineIdentity_uniformLeftEndpointSum_eq
+    {n : Nat} (hn : 0 < n) :
+    LipschitzDyadic.uniformLeftEndpointSum
+        (fun x : Rat => x) n =
+      ((n : Rat) - 1) / (2 * (n : Rat)) := by
+  have hnrat : (n : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hn)
+  have haux : forall k : Nat,
+      (List.range k).foldl
+          (fun total (j : Nat) =>
+            total + (1 / (n : Rat)) *
+              ((j : Rat) / (n : Rat))) 0 =
+        ((k : Rat) * ((k : Rat) - 1)) / (2 * (n : Rat) ^ 2) := by
+    intro k
+    induction k with
+    | zero =>
+        simp [Rat.div_def]
+    | succ k ih =>
+        rw [List.range_succ, List.foldl_append]
+        simp [List.foldl]
+        rw [ih]
+        grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_add,
+          Rat.add_mul, Rat.pow_succ]
+  unfold LipschitzDyadic.uniformLeftEndpointSum
+  rw [haux n]
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+    Rat.pow_succ, Rat.mul_inv_cancel]
+
+theorem affineIdentity_uniformRightEndpointSum_eq
+    {n : Nat} (hn : 0 < n) :
+    LipschitzDyadic.uniformRightEndpointSum
+        (fun x : Rat => x) n =
+      ((n : Rat) + 1) / (2 * (n : Rat)) := by
+  have hnrat : (n : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hn)
+  have haux : forall k : Nat,
+      (List.range k).foldl
+          (fun total (j : Nat) =>
+            total + (1 / (n : Rat)) *
+              (((Nat.succ j : Nat) : Rat) / (n : Rat))) 0 =
+        ((k : Rat) * ((k : Rat) + 1)) / (2 * (n : Rat) ^ 2) := by
+    intro k
+    induction k with
+    | zero =>
+        simp [Rat.div_def]
+    | succ k ih =>
+        rw [List.range_succ, List.foldl_append]
+        simp [List.foldl]
+        have ih' :
+            (List.range k).foldl
+                (fun total (j : Nat) =>
+                  total + (1 / (n : Rat)) *
+                    (((j : Rat) + 1) / (n : Rat))) 0 =
+              ((k : Rat) * ((k : Rat) + 1)) / (2 * (n : Rat) ^ 2) := by
+          simpa [Nat.succ_eq_add_one, Rat.natCast_add] using ih
+        rw [ih']
+        grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_add,
+          Rat.add_mul, Rat.pow_succ]
+  unfold LipschitzDyadic.uniformRightEndpointSum
+  rw [haux n]
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+    Rat.pow_succ, Rat.mul_inv_cancel]
+
+theorem affineIdentityLipschitz_integral_equiv_half :
+    (Integral.integralFor
+      (FunctionOnInterval.exactRat (fun x : Rat => x) 0 1)
+      affineIdentityLipschitzConstruction).Equiv
+      (RealRaw.ofRat (1 / 2)) := by
+  intro stage
+  apply (RealRaw.compareAt_overlap_iff _ _ stage stage).2
+  change QInterval.Overlaps
+    (LipschitzDyadic.compute (fun x : Rat => x) 1 stage)
+    { lo := 1 / 2, hi := 1 / 2 }
+  unfold QInterval.Overlaps
+  let n : Nat := 2 ^ stage
+  have hn : 0 < n := by
+    dsimp [n]
+    exact Nat.pow_pos (by omega : 0 < 2)
+  have hl := LipschitzDyadic.compute_contains_uniformLeftEndpointSum
+    affineIdentity_lipschitz_on_unit stage
+  have hr := LipschitzDyadic.compute_contains_uniformRightEndpointSum
+    affineIdentity_lipschitz_on_unit stage
+  rw [show 2 ^ stage = n by rfl,
+    affineIdentity_uniformLeftEndpointSum_eq hn] at hl
+  rw [show 2 ^ stage = n by rfl,
+    affineIdentity_uniformRightEndpointSum_eq hn] at hr
+  constructor
+  · exact Rat.le_trans hl.1 (by
+      apply Rat.le_of_mul_le_mul_right (c := 2 * (n : Rat))
+      · rw [Rat.div_def]
+        have hpos : 0 < 2 * (n : Rat) :=
+          Rat.mul_pos (by native_decide) ((Rat.natCast_pos).2 hn)
+        have hmul := Rat.mul_le_mul_of_nonneg_right
+          (show (n : Rat) - 1 <= (n : Rat) by grind) (Rat.le_of_lt hpos)
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add]
+      · exact Rat.mul_pos (by native_decide) ((Rat.natCast_pos).2 hn))
+  · exact Rat.le_trans (by
+      apply Rat.le_of_mul_le_mul_right (c := 2 * (n : Rat))
+      · rw [Rat.div_def]
+        have hpos : 0 < 2 * (n : Rat) :=
+          Rat.mul_pos (by native_decide) ((Rat.natCast_pos).2 hn)
+        have hmul := Rat.mul_le_mul_of_nonneg_right
+          (show (n : Rat) <= (n : Rat) + 1 by grind) (Rat.le_of_lt hpos)
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add]
+      · exact Rat.mul_pos (by native_decide) ((Rat.natCast_pos).2 hn)) hr.2
+
 def arctanKernelLipschitzConstruction :
     Integral.ConstructionFor
       (FunctionOnInterval.exactRat
