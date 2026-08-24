@@ -147,7 +147,7 @@ Lebesgue measure, or another noncomputable object, we record a scoped
 constructive replacement with the hypotheses and conclusion visibly
 restricted. The replacement counts only under that scoped name; it must not
 be presented as a proof of the unrestricted classical statement. Routine
-Routine finite lemmas are reused from the available foundation.
+finite lemmas are reused from the available foundation.
 
 ### Benchmark routing
 
