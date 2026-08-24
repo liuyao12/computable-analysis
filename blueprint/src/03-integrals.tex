@@ -241,6 +241,31 @@ the classical theorem that every continuous function on a closed interval is
 integrable. The missing work is constructive schedule synthesis and its finite
 nesting proof; no completeness axiom is being hidden in that gap.
 
+\section{First complete finite-turn example}
+
+The absolute value is the smallest non-monotone test case. On $[-1,0]$ it is
+the affine function $-x$; on $[0,1]$ it is the affine function $x$. The two
+exact rational cell integrals are therefore each $1/2$, and the piecewise
+assembly proves
+
+\[
+  \int_{-1}^{1} |x|\,dx = 1.
+\]
+
+This is a complete proof through the public general-integral interface: one
+rational evaluator, one rational turn, two monotonicity certificates, and a
+finite sum identified with a rational anchor. Later examples with irrational
+turning points use the same interface; only the turn bracket and middle range
+box become nontrivial.
+
+\lean{ComputableAnalysis.Integral.absOnUnit}
+\lean{ComputableAnalysis.Integral.absOnUnit_left}
+\lean{ComputableAnalysis.Integral.absOnUnit_right}
+\lean{ComputableAnalysis.Integral.absOnUnit_piecewise}
+\lean{ComputableAnalysis.Integral.absOnUnit_piecewise_integral_valid}
+\lean{ComputableAnalysis.Integral.absOnUnit_piecewise_integral_equiv_one}
+\leanok
+
 The geometric certificate is deliberately elementary: a parent point on the
 unit circle with nonnegative coordinates has child coordinates satisfying
 

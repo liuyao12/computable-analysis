@@ -218,4 +218,5 @@ import ComputableAnalysis.SqrtTwoDescent
 import ComputableAnalysis.Taylor
 import ComputableAnalysis.TrigSpecialValues
 import ComputableAnalysis.TurningPointIntegral
+import ComputableAnalysis.AbsIntegral
 import ComputableAnalysis.GaussSeventeen
