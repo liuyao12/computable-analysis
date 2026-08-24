@@ -7345,6 +7345,58 @@ theorem uniformExpOnUnitStabilizedIntegral_equiv_exp_endpoint_subtraction :
   exact RealRaw.equiv_trans hintegral hendpoint hsub
     uniformExpOnUnitStabilizedIntegral_equiv_endpointDifference hdiff
 
+/-! The one-sided endpoint subtraction is also independent of the evaluator:
+the common-prefix endpoints can be replaced by the canonical factorial
+series endpoints through the maintained equivalence chain. -/
+theorem uniformExpOnUnitStabilizedIntegral_equiv_powerSeries_endpoint_subtraction :
+    (Integral.integralFor uniformExpOnUnit
+      uniformExpOnUnitStabilizedConstruction).Equiv
+      ((expPowerSeries (1 : Rat)) - (expPowerSeries (0 : Rat))) := by
+  let hF := uniformExpOnUnitRealFunRaw_valid
+  have hzero : uniformExpOnUnitRealFunRaw.domain (0 : Rat) := by
+    constructor <;> native_decide
+  have hone : uniformExpOnUnitRealFunRaw.domain (1 : Rat) := by
+    constructor <;> native_decide
+  have huniformOne :
+      (uniformExpOnUnitRealFunRaw.apply hF (1 : Rat) hone).Valid := by
+    simpa [RealRaw.Valid, RealFunRaw.apply, RealFunRaw.applyCompute] using
+      hF (1 : Rat) hone
+  have huniformZero :
+      (uniformExpOnUnitRealFunRaw.apply hF (0 : Rat) hzero).Valid := by
+    simpa [RealRaw.Valid, RealFunRaw.apply, RealFunRaw.applyCompute] using
+      hF (0 : Rat) hzero
+  have hseriesOne : (expPowerSeries (1 : Rat)).Valid :=
+    expPowerSeries_valid (1 : Rat)
+  have hseriesZero : (expPowerSeries (0 : Rat)).Valid :=
+    expPowerSeries_valid (0 : Rat)
+  have honeEq :
+      (uniformExpOnUnitRealFunRaw.apply hF (1 : Rat) hone).Equiv
+        (expPowerSeries (1 : Rat)) := by
+    change (uniformExpRaw (1 : Rat)).Equiv (expPowerSeries (1 : Rat))
+    exact uniformExpRaw_equiv_expPowerSeries 1 (by native_decide)
+  have hzeroEq :
+      (uniformExpOnUnitRealFunRaw.apply hF (0 : Rat) hzero).Equiv
+        (expPowerSeries (0 : Rat)) := by
+    change (uniformExpRaw (0 : Rat)).Equiv (expPowerSeries (0 : Rat))
+    exact uniformExpRaw_equiv_expPowerSeries 0 (by native_decide)
+  have hsubEq :
+      ((uniformExpOnUnitRealFunRaw.apply hF (1 : Rat) hone) -
+        (uniformExpOnUnitRealFunRaw.apply hF (0 : Rat) hzero)).Equiv
+        ((expPowerSeries (1 : Rat)) - (expPowerSeries (0 : Rat))) :=
+    RealRaw.sub_equiv huniformOne hseriesOne huniformZero hseriesZero
+      honeEq hzeroEq
+  have hintegralSub :=
+    uniformExpOnUnitStabilizedIntegral_equiv_exp_endpoint_subtraction
+  have hintegral :
+      (Integral.integralFor uniformExpOnUnit
+        uniformExpOnUnitStabilizedConstruction).Valid :=
+    Integral.integralFor_valid uniformExpOnUnit
+      uniformExpOnUnitStabilizedConstruction
+  have huniformSub := RealRaw.sub_valid huniformOne huniformZero
+  have hseriesSub := RealRaw.sub_valid hseriesOne hseriesZero
+  exact RealRaw.equiv_trans hintegral huniformSub hseriesSub
+    hintegralSub hsubEq
+
 /-! The endpoint-difference spelling can be transported to the ordinary
 subtraction of the two certified exponential endpoint evaluations.  This is
 the first user-facing non-polynomial integral identity in the ODE route:
