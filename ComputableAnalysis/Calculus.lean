@@ -1340,6 +1340,17 @@ theorem scaleByRat_width_of_nonneg {r : Rat} (hr : 0 <= r) (I : QInterval) :
 def subInterval (I J : QInterval) : QInterval :=
   { lo := I.lo - J.hi, hi := I.hi - J.lo }
 
+/-- Subtraction propagates interval containment with the endpoint reversal
+required for the subtracted box. -/
+theorem subInterval_contains
+    {outerLeft outerRight innerLeft innerRight : QInterval}
+    (hleft : outerLeft.ContainsInterval innerLeft)
+    (hright : outerRight.ContainsInterval innerRight) :
+    (subInterval outerLeft outerRight).ContainsInterval
+      (subInterval innerLeft innerRight) := by
+  unfold subInterval QInterval.ContainsInterval at *
+  constructor <;> grind
+
 def divByRat (I : QInterval) (h : Rat) : QInterval :=
   scaleByRat (1 / h) I
 
@@ -1366,6 +1377,17 @@ theorem divByRat_width_of_pos {h : Rat} (hh : 0 < h) (I : QInterval) :
 the rational difference `y - x`; the caller carries the proof that `x < y`. -/
 def slopeBetween (Fy Fx : QInterval) (dx : Rat) : QInterval :=
   divByRat (subInterval Fy Fx) dx
+
+/-! A positive-step secant is the composition of interval subtraction and
+positive rational division. -/
+theorem slopeBetween_contains_of_pos {dx : Rat} (hdx : 0 < dx)
+    {outerY outerX innerY innerX : QInterval}
+    (hy : outerY.ContainsInterval innerY)
+    (hx : outerX.ContainsInterval innerX) :
+    (slopeBetween outerY outerX dx).ContainsInterval
+      (slopeBetween innerY innerX dx) := by
+  unfold slopeBetween
+  exact divByRat_contains_of_pos hdx (subInterval_contains hy hx)
 
 end QInterval
 
