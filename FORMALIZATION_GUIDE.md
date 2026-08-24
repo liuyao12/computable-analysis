@@ -444,6 +444,10 @@ The resulting constructive integral object is available for every monomial
 through `Integral.exactRat_pow_integral_certificate`, with validity proved by
 `Integral.exactRat_pow_integral_raw_valid`. This is intentionally separate
 from a theorem identifying the object with the closed form `1 / (n + 1)`.
+The exponent-zero regression
+`Integral.exactRat_zero_integral_raw_equiv_one` confirms that the generic
+certificate specializes to the exact constant integral without unfolding the
+private Darboux folds.
 The same rational power induction supplies
 `Integral.exactRat_pow_nondecreasing_on_unit` and a compatible
 `Integral.exactRat_pow_monotoneConstructionFor`, so the monomial can be fed

@@ -1052,6 +1052,69 @@ def exactRat_pow_integral_certificate (n : Nat) :
   construction := IntegralIdentities.LipschitzDyadic.construction
     (fun x : Rat => x ^ n) n (exactPow_lipschitz_on_unit n)
 
+private theorem uniformLeftEndpointSum_const_one_of_pos {n : Nat}
+    (hn : 0 < n) :
+    IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+        (fun _ : Rat => 1) n = 1 := by
+  have hnrat : (n : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hn)
+  have haux : forall k : Nat,
+      (List.range k).foldl
+          (fun total (j : Nat) =>
+            total + (1 / (n : Rat)) * (1 : Rat)) 0 =
+        (k : Rat) / (n : Rat) := by
+    intro k
+    induction k with
+    | zero => simp [Rat.div_def]
+    | succ k ih =>
+        rw [List.range_succ, List.foldl_append]
+        simp only [List.foldl_cons, List.foldl_nil]
+        rw [ih]
+        simp [Rat.div_def, Rat.natCast_add]
+        grind [Rat.add_mul, Rat.mul_comm]
+  unfold IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+  rw [haux n]
+  rw [Rat.div_def, Rat.mul_inv_cancel _ hnrat]
+
+theorem exactRat_zero_integral_raw_equiv_one :
+    (Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ 0) 0 1)
+      (exactRat_pow_integral_certificate 0)).Equiv
+      (RealRaw.ofRat 1) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro stage
+  apply (RealRaw.compareAt_overlap_iff _ _ stage stage).2
+  have hconst : Integral.LipschitzOnUnit (fun _ : Rat => 1) 0 := by
+    refine ⟨by native_decide, ?_⟩
+    intro s t hs hsb ht htb
+    simp <;> native_decide
+  have hcontains :=
+    IntegralIdentities.LipschitzDyadic.compute_contains_leftEndpointSum
+      (f := fun _ : Rat => 1) (L := 0) hconst stage
+  have huniform :=
+    IntegralIdentities.LipschitzDyadic.dyadicLeftEndpointSum_eq_uniform
+      (fun _ : Rat => 1) stage
+  have hn : 0 < 2 ^ stage := Nat.pow_pos (by omega : 0 < 2)
+  have hsum :
+      IntegralIdentities.LipschitzDyadic.leftEndpointSum (fun _ : Rat => 1)
+          (ArctanGeometry.arctanAreaLoopState 1 stage).intervals = 1 := by
+    rw [huniform]
+    exact uniformLeftEndpointSum_const_one_of_pos hn
+  unfold Integral.raw Integral.integralFor exactRat_pow_integral_certificate
+  change QInterval.Overlaps
+    (IntegralIdentities.LipschitzDyadic.compute (fun x : Rat => x ^ 0) 0 stage)
+    { lo := 1, hi := 1 }
+  have hcompute :
+      IntegralIdentities.LipschitzDyadic.compute (fun x : Rat => x ^ 0) 0 stage =
+        IntegralIdentities.LipschitzDyadic.compute (fun _ : Rat => 1) 0 stage := by
+    congr 1
+    funext x
+    simp
+  rw [hcompute]
+  unfold QInterval.Overlaps
+  rw [hsum] at hcontains
+  exact hcontains
+
 theorem exactRat_pow_integral_raw_valid (n : Nat) :
     (Integral.raw
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1)
