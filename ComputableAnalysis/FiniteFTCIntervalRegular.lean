@@ -1058,6 +1058,33 @@ theorem exactRat_pow_integral_raw_valid (n : Nat) :
       (exactRat_pow_integral_certificate n)).Valid := by
   exact Integral.raw_valid _ (exactRat_pow_integral_certificate n)
 
+theorem exactRat_pow_nondecreasing_on_unit (n : Nat) :
+    NondecreasingOnInterval
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1) := by
+  intro x y hx hy hxy _stage
+  change 0 <= x ∧ x <= 1 at hx
+  change 0 <= y ∧ y <= 1 at hy
+  change x ^ n <= y ^ n
+  have hpow : forall j : Nat, x ^ j <= y ^ j := by
+    intro j
+    induction j with
+    | zero => rw [Rat.pow_zero, Rat.pow_zero]; native_decide
+    | succ j ih =>
+        rw [Rat.pow_succ, Rat.pow_succ]
+        calc
+          x ^ j * x <= y ^ j * x :=
+            Rat.mul_le_mul_of_nonneg_right ih hx.1
+          _ <= y ^ j * y :=
+            Rat.mul_le_mul_of_nonneg_left hxy (Rat.pow_nonneg hy.1)
+  exact hpow n
+
+def exactRat_pow_monotoneConstructionFor (n : Nat) :
+    MonotoneConstructionFor
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1) where
+  monotone := MonotoneOnInterval.ofNondecreasing
+    (exactRat_pow_nondecreasing_on_unit n)
+  construction := (exactRat_pow_integral_certificate n).construction
+
 /-! The normalized monomial primitive is also available as one generic
 endpoint-difference object.  Its adjacent-interval law is purely finite
 subtraction, so it does not depend on an integral construction or on a

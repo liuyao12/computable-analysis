@@ -444,6 +444,10 @@ The resulting constructive integral object is available for every monomial
 through `Integral.exactRat_pow_integral_certificate`, with validity proved by
 `Integral.exactRat_pow_integral_raw_valid`. This is intentionally separate
 from a theorem identifying the object with the closed form `1 / (n + 1)`.
+The same rational power induction supplies
+`Integral.exactRat_pow_nondecreasing_on_unit` and a compatible
+`Integral.exactRat_pow_monotoneConstructionFor`, so the monomial can be fed
+through either the Lipschitz dyadic or monotone Darboux interface.
 For a prefix containing a linear term,
 `FinitePolynomial.taylorPrefixShift_at_zero` identifies that certified
 derivative polynomial at zero with the original coefficient `c 1`.
