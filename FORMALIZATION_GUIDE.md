@@ -348,6 +348,12 @@ while a negative scalar is reduced to nonnegative scaling followed by
 endpoint negation.  This makes linear combinations sign-complete without
 silently assuming an ordered completed field.
 
+`HasDerivativeOnInterval.linearCombinationOfCommonSchedule` packages the
+next composition step: after the two signed-scalar certificates have been
+constructed, it adds them on a common chart and pays the doubled internal
+precision budget.  Its explicit schedule equalities are the intended input
+for linear ODE residuals and finite Taylor coefficient combinations.
+
 Negation is also closed at the interval level:
 `FunctionOnInterval.neg` reverses endpoint boxes without changing their
 width, and `HasDerivativeOnInterval.neg` proves the corresponding
@@ -820,6 +826,7 @@ open ComputableAnalysis
 #check FinitePolynomial.SecantDerivativeBound.mulToHasDerivativeOnInterval
 #check HasDerivativeOnInterval.endpointDifference_contains_of_pos
 #check HasDerivativeOnInterval.scaleRat
+#check HasDerivativeOnInterval.linearCombinationOfCommonSchedule
 #check FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval
 #check ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero

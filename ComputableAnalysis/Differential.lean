@@ -2220,6 +2220,41 @@ def HasDerivativeOnInterval.subOfCommonSchedule
     (HasDerivativeOnInterval.addOfCommonSchedule hf (HasDerivativeOnInterval.neg hg)
       hfgLower hfgUpper hdfgLower hdfgUpper hstep heval inner hprecision)
 
+/-! A named linear-combination wrapper for the two primitive closures.  The
+scaled certificates are supplied explicitly so their sign splits and stage
+schedules remain visible; this theorem only performs the common-chart
+addition and its finite doubled-error budget. -/
+def HasDerivativeOnInterval.linearCombinationOfCommonSchedule
+    {r s : Rat} {f g df dg : FunctionOnInterval}
+    (hf : HasDerivativeOnInterval
+      (FunctionOnInterval.scaleRat r f)
+      (FunctionOnInterval.scaleRat r df))
+    (hg : HasDerivativeOnInterval
+      (FunctionOnInterval.scaleRat s g)
+      (FunctionOnInterval.scaleRat s dg))
+    (hfgLower : (FunctionOnInterval.scaleRat r f).lower =
+      (FunctionOnInterval.scaleRat s g).lower)
+    (hfgUpper : (FunctionOnInterval.scaleRat r f).upper =
+      (FunctionOnInterval.scaleRat s g).upper)
+    (hdfgLower : (FunctionOnInterval.scaleRat r df).lower =
+      (FunctionOnInterval.scaleRat s dg).lower)
+    (hdfgUpper : (FunctionOnInterval.scaleRat r df).upper =
+      (FunctionOnInterval.scaleRat s dg).upper)
+    (hstep : hf.stepPrecision = hg.stepPrecision)
+    (heval : hf.evalPrecision = hg.evalPrecision)
+    (inner : Nat -> Nat)
+    (hprecision : forall n,
+      2 * (precisionAtStage (inner n)).val <= (precisionAtStage n).val) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.add
+        (FunctionOnInterval.scaleRat r f)
+        (FunctionOnInterval.scaleRat s g) hfgLower hfgUpper)
+      (FunctionOnInterval.add
+        (FunctionOnInterval.scaleRat r df)
+        (FunctionOnInterval.scaleRat s dg) hdfgLower hdfgUpper) :=
+  HasDerivativeOnInterval.addOfCommonSchedule hf hg
+    hfgLower hfgUpper hdfgLower hdfgUpper hstep heval inner hprecision
+
 /-- A function solving `f' = f` on an interval with a specified initial value.
 
 This is the constructive uniqueness route for comparing exponential
