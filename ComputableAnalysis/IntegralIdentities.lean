@@ -16418,6 +16418,33 @@ def construction (f : Rat -> Rat) (L : Nat)
 
 end LipschitzDyadic
 
+/-- The identity function is the simplest nonconstant instance of the
+finite Lipschitz--Darboux integral.  This witness is intentionally separate
+from the exact affine FTC evaluator: it exercises the same rectangle
+construction that will be used for less algebraically transparent
+integrands. -/
+def affineIdentity_lipschitz_on_unit :
+    Integral.LipschitzOnUnit (fun x : Rat => x) 1 := by
+  constructor
+  · native_decide
+  · intro s t hs hs1 ht ht1
+    rw [show s - t = -(t - s) by grind [Rat.sub_eq_add_neg], qabs_neg]
+    simpa using (le_refl (qabs (t - s)))
+
+/-- A concrete nonconstant raw integral produced by the generic
+Lipschitz--Darboux constructor. -/
+def affineIdentityLipschitzConstruction :
+    Integral.ConstructionFor
+      (FunctionOnInterval.exactRat (fun x : Rat => x) 0 1) :=
+  LipschitzDyadic.construction (fun x : Rat => x) 1
+    affineIdentity_lipschitz_on_unit
+
+theorem affineIdentityLipschitzConstruction_valid :
+    (Integral.integralFor
+      (FunctionOnInterval.exactRat (fun x : Rat => x) 0 1)
+      affineIdentityLipschitzConstruction).Valid := by
+  exact Integral.integralFor_valid _ _
+
 def arctanKernelLipschitzConstruction :
     Integral.ConstructionFor
       (FunctionOnInterval.exactRat
