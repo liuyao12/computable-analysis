@@ -207,6 +207,13 @@ image-box lemma.  Until that lemma is formalized, a non-unit function must
 provide its own construction or use the monotone schedule below; no automatic
 change of interval is being smuggled in.
 
+The same certificate now feeds the FTC layer directly: a unit-interval
+Lipschitz evaluator can be promoted to the interval-image regularity contract
+used by the general effective FTC statements.
+
+\lean{ComputableAnalysis.IntervalRegularOn.of_lipschitzOnUnit}
+\leanok
+
 \lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquare_lipschitz_on_unit}
 \lean{ComputableAnalysis.IntegralIdentities.arctanKernelLipschitzIntegral_valid}
 \leanok
