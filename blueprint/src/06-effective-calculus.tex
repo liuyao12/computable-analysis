@@ -89,9 +89,16 @@ separate overlap steps.
 The cubic uses the same contract with primitive $x^4/4$ and closes at
 $1/4$; the proof changes only the finite power-range bound.
 
+The same finite schedule is already checked for the quartic and fifth
+monomial targets, closing at $1/5$ and $1/6$.  Together these examples give a
+small regression family for the derivative-bound FTC before the project moves
+to exponential and trigonometric evaluators.
+
 \lean{ComputableAnalysis.Integral.squareIntegralEffectiveFTC_endpoint_equiv_one_third}
 \lean{ComputableAnalysis.Integral.squareIntegralEffectiveFTC_integral_equiv_one_third}
 \lean{ComputableAnalysis.Integral.cubicIntegralEffectiveFTC_integral_equiv_one_fourth}
+\lean{ComputableAnalysis.Integral.quarticIntegralEffectiveFTC_equiv_one_fifth}
+\lean{ComputableAnalysis.Integral.fifthIntegralEffectiveFTC_equiv_one_sixth}
 \leanok
 
 \section{Continuity as a finite certificate}
