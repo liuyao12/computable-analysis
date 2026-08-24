@@ -612,6 +612,45 @@ def reciprocalOnOneTwo_hasDerivativeOnInterval :
   CenteredSecantDerivativeBound.toHasDerivativeOnInterval
     reciprocalCenteredSecantBound 1 2 (by native_decide) (by native_decide)
 
+/-! Transport the same certificate through the rational translation
+`x ↦ x + 1`.  This is the coordinate used by the logarithm integral on
+`[0,1]`. -/
+def logTwoKernelCenteredSecantBound :
+    CenteredSecantDerivativeBound (1 / 2) (1 / 2)
+      (fun x => 1 / (1 + x)) (fun x => -(1 / (1 + x) ^ 2)) := by
+  refine {
+    errorCoefficient := reciprocalCenteredSecantBound.errorCoefficient
+    errorCoefficient_nonneg := reciprocalCenteredSecantBound.errorCoefficient_nonneg
+    error_bound := ?_ }
+  intro x h hh hx hxh
+  have hx' : qabs ((x + 1) - 3 / 2) <= (1 / 2 : Rat) := by
+    have heq : (x + 1) - 3 / 2 = x - 1 / 2 := by
+      grind [Rat.sub_eq_add_neg]
+    rw [heq]
+    exact hx
+  have hxh' : qabs ((x + h + 1) - 3 / 2) <= (1 / 2 : Rat) := by
+    have heq : (x + h + 1) - 3 / 2 = x + h - 1 / 2 := by
+      grind [Rat.sub_eq_add_neg]
+    rw [heq]
+    exact hxh
+  have hbound := reciprocalCenteredSecantBound.error_bound
+    (x + 1) h hh hx' (by
+      have heq : (x + 1 + h) - 3 / 2 = (x + h + 1) - 3 / 2 := by
+        grind [Rat.sub_eq_add_neg]
+      rw [heq]
+      exact hxh')
+  simpa [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
+    Rat.pow_succ, reciprocalCenteredSecantBound] using hbound
+
+/-- The translated reciprocal kernel has a two-sided finite-difference
+derivative certificate on the unit interval. -/
+def logTwoKernel_hasDerivativeOnInterval :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat (fun x => 1 / (1 + x)) 0 1)
+      (FunctionOnInterval.exactRat (fun x => -(1 / (1 + x) ^ 2)) 0 1) :=
+  CenteredSecantDerivativeBound.toHasDerivativeOnInterval
+    logTwoKernelCenteredSecantBound 0 1 (by native_decide) (by native_decide)
+
 end CenteredSecantDerivativeBound
 
 /-- The monomial secant estimate as reusable quantitative data. -/
