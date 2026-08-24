@@ -7475,6 +7475,20 @@ def piecewiseMonotoneCellList (F : FunctionOnInterval)
   (List.finRange c.pieces).map (fun k =>
     piecewiseMonotoneCellIntegral F c k.1 k.2)
 
+theorem piecewiseMonotoneCellList_length (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) :
+    (piecewiseMonotoneCellList F c).length = c.pieces := by
+  simp [piecewiseMonotoneCellList]
+
+theorem piecewiseMonotoneCellList_ne_nil (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) :
+    piecewiseMonotoneCellList F c ≠ [] := by
+  intro hnil
+  have hlength := congrArg List.length hnil
+  simp [piecewiseMonotoneCellList] at hlength
+  have hp := c.positive
+  omega
+
 theorem piecewiseMonotoneCellIntegral_valid (F : FunctionOnInterval)
     (c : PiecewiseMonotoneConstructionFor F)
     (k : Nat) (hk : k < c.pieces) :
