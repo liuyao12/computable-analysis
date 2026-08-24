@@ -1481,6 +1481,52 @@ theorem riemannLeftInterval_scale_of_neg
   rw [hzero] at h
   simpa [stepF, stepR] using h
 
+/-! Nonnegative rational scaling commutes with the right-endpoint rectangle
+fold as well. -/
+theorem riemannRightInterval_scale_of_nonneg
+    {r : Rat} (hr : 0 <= r) (f : RealFunRaw) (a b : Rat)
+    (subdivisions prec : Nat) :
+    riemannRightInterval (RealFunRaw.scaleRat r f) a b subdivisions prec =
+      QInterval.scaleByRat r
+        (riemannRightInterval f a b subdivisions prec) := by
+  unfold riemannRightInterval
+  let stepF : QInterval -> Nat -> QInterval := fun acc k =>
+    let I := f.compute (rightPoint a b subdivisions k) prec
+    { lo := acc.lo + mesh a b subdivisions * I.lo,
+      hi := acc.hi + mesh a b subdivisions * I.hi }
+  let stepR : QInterval -> Nat -> QInterval := fun acc k =>
+    let I := (RealFunRaw.scaleRat r f).compute
+      (rightPoint a b subdivisions k) prec
+    { lo := acc.lo + mesh a b subdivisions * I.lo,
+      hi := acc.hi + mesh a b subdivisions * I.hi }
+  have hstep : forall k (A : QInterval),
+      stepR (QInterval.scaleByRat r A) k =
+        QInterval.scaleByRat r (stepF A k) := by
+    intro k A
+    dsimp [stepF, stepR, RealFunRaw.scaleRat,
+      QInterval.scaleByRat]
+    simp only [if_pos hr]
+    grind [Rat.mul_assoc, Rat.mul_add, Rat.add_mul]
+  have hfold : forall (xs : List Nat) (A : QInterval),
+      xs.foldl stepR (QInterval.scaleByRat r A) =
+        QInterval.scaleByRat r (xs.foldl stepF A) := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro A
+        rfl
+    | cons k ks ih =>
+        intro A
+        simp only [List.foldl]
+        rw [hstep k A]
+        exact ih (stepF A k)
+  have hzero : QInterval.scaleByRat r { lo := 0, hi := 0 } =
+      { lo := 0, hi := 0 } := by
+    simp [QInterval.scaleByRat]
+  have h := hfold (List.range subdivisions) { lo := 0, hi := 0 }
+  rw [hzero] at h
+  simpa [stepF, stepR] using h
+
 theorem QInterval.scaleByRat_add_mul_of_nonneg
     {r h : Rat} (hr : 0 <= r) (A I : QInterval) :
     QInterval.scaleByRat r
