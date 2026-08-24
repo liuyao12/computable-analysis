@@ -2687,6 +2687,23 @@ theorem riemannLeftExact_affine_closed
       Rat.add_assoc, Rat.add_comm]
   rw [hrewrite, foldl_affine_range]
 
+/-! After normalizing a positive mesh, the affine rectangle error is an
+explicit rational term.  Thus the affine FTC does not need a completeness
+argument: the error budget is visible at every finite stage. -/
+theorem riemannLeftExact_affine_error_of_pos
+    {r c a b : Rat} {n : Nat} (hn : 0 < n) :
+    riemannLeftExact (fun x => r * x + c) a b n =
+      (b - a) * (r * (a + b) / 2 + c) -
+        r * (b - a) ^ 2 / (2 * (n : Rat)) := by
+  rw [riemannLeftExact_affine_closed]
+  have htotal := natCast_mul_mesh_eq_sub (a := a) (b := b) hn
+  have hmesh : (n : Rat) * mesh a b n = b - a := htotal
+  have hnrat : (n : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hn)
+  grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_inv_cancel]
+
 theorem riemannLeftExact_doubleId_of_pos {a b : Rat} {n : Nat}
     (hn : 0 < n) :
     riemannLeftExact (fun x => 2 * x) a b n =

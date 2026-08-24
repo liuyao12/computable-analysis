@@ -555,6 +555,9 @@ general theorem about completed real integrals.
 The companion `ComputableAnalysis.riemannLeftExact_affine_closed` gives the
 closed rational value of every finite affine fold, including stage zero, and
 is useful for regression tests and error estimates.
+For a positive stage, `ComputableAnalysis.riemannLeftExact_affine_error_of_pos`
+normalizes that formula to the exact integral value plus an explicit
+`1 / n` rectangle error.
 
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`.
