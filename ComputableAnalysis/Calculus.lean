@@ -5835,6 +5835,29 @@ theorem finiteRawSum_append_equiv
         htransport
         (RealRaw.equiv_symm hassoc)
 
+/-! Finite raw sums preserve the exact interval order supplied cell by cell.
+This is the algebraic core of lower/upper rectangle comparison; it does not
+require a limiting argument or a completed-real order. -/
+inductive FiniteRawListLe : List RealRaw -> List RealRaw -> Prop where
+  | nil : FiniteRawListLe [] []
+  | cons {x y : RealRaw} {xs ys : List RealRaw} :
+      x.Le y -> FiniteRawListLe xs ys -> FiniteRawListLe (x :: xs) (y :: ys)
+
+theorem finiteRawSum_le_of_forall₂
+    {xs ys : List RealRaw}
+    (hxy : FiniteRawListLe xs ys) :
+    (finiteRawSum xs).Le (finiteRawSum ys) := by
+  induction hxy with
+  | nil =>
+      change RealRaw.zero.Le RealRaw.zero
+      exact RealRaw.le_refl RealRaw.zero (by
+        change RealRaw.ValidCompute (fun _ : Nat => { lo := 0, hi := 0 })
+        exact RealRaw.ofRat_valid 0)
+  | cons hhead htail ih =>
+      change (RealRaw.add _ (finiteRawSum _)).Le
+        (RealRaw.add _ (finiteRawSum _))
+      exact RealRaw.le_add_le_add hhead ih
+
 end Integral
 
 namespace TwoStageCandidateDerivativeFTC

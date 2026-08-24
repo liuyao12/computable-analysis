@@ -292,7 +292,14 @@ not assert that an arbitrary integrand has an integral.
 \lean{ComputableAnalysis.Integral.finiteRawSum}
 \lean{ComputableAnalysis.Integral.finiteRawSum_valid}
 \lean{ComputableAnalysis.Integral.finiteRawSum_append_equiv}
+\lean{ComputableAnalysis.Integral.FiniteRawListLe}
+\lean{ComputableAnalysis.Integral.finiteRawSum_le_of_forall₂}
 \leanok
+
+The same finite sum is order-preserving: a pairwise lower enclosure remains
+below the corresponding upper enclosure after assembly.  This is the finite
+order core used by Darboux and derivative-bound certificates; it is not the
+classical theorem that an arbitrary integral operator preserves order.
 
 For a piecewise-monotone certificate, the cell indices form a finite
 `Fin`-indexed list.  Every cell is valid, hence its finite raw sum is valid
