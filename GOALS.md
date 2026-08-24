@@ -332,7 +332,11 @@ from monomial brackets structurally.
 
    - **even child:** construct `DyadicEvenStepCertificate`, proving that the
      parent nested-radical sine box survives the precision change and is
-     contained in the even child box;
+     contained in the even child box.  The finite search-facing half is now
+     packaged by `DyadicEvenStepCertificate.of_overlap`: for positive cells,
+     a direct public/table overlap yields a successful rational witness and
+     hence the full even certificate; the exact zero cell remains the
+     separate endpoint branch;
    - **lower odd child:** construct `DyadicHalfAngleChildCertificate`, with a
      rational cosine parent box, the clipped half-angle square-root sine box,
      and the outer tangent containment;

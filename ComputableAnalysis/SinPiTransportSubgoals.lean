@@ -4,6 +4,43 @@ namespace ComputableAnalysis
 
 namespace SinPiIntegral
 
+/-! An overlap-facing constructor for the even branch.  This is the natural
+finite interface when the geometric proof establishes the public/table
+overlap directly rather than exposing the successful grid witness. -/
+
+noncomputable def DyadicEvenStepCertificate.of_overlap
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (precision n k : Nat) (hk : k < 2 ^ n) (hpos : 0 < k)
+    (hover : QInterval.Overlaps
+      (rationalCircleSinInterval
+        (dyadicTangentBoxAt B precision (n + 1) (2 * k) (by
+          have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+            rw [Nat.pow_succ]
+            omega
+          rw [hpow]
+          omega)))
+      ((dyadicNestedRadicalTableAt
+        (dyadicNestedRadicalParentPrecision precision) n k).1)) :
+    DyadicEvenStepCertificate B precision n k hk := by
+  classical
+  let hex :=
+    exists_rationalTangentWitnessBoxSearch_of_overlap_of_positive_width
+      (dyadicTangentBoxAt_bounds B precision (n + 1) (2 * k) (by
+        have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+          rw [Nat.pow_succ]
+          omega
+        rw [hpow]
+        omega))
+      (dyadicNestedRadicalTableAt_bounds
+        (dyadicNestedRadicalParentPrecision precision) n k (by omega)).1
+      hover
+      (dyadicNestedRadicalTableAt_sin_width_pos
+        (dyadicNestedRadicalParentPrecision precision) n k (by omega) hpos)
+  let m := Classical.choose hex
+  let u := Classical.choose (Classical.choose_spec hex)
+  exact DyadicEvenStepCertificate.ofWitnessSearch B precision n k hk m
+    ⟨u, Classical.choose_spec (Classical.choose_spec hex)⟩
+
 /-! Packaging lemma for the final search-family assembly.  The search itself
 is executable; this proof-level constructor only packages the already-proved
 existence of a successful finite search at every requested precision. -/
