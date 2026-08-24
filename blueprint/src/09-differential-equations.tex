@@ -214,3 +214,15 @@ and imaginary interval computations. Polygonal paths give finite
 zero-displacement identities for the constant and polynomial differentials
 covered here; analytic path-independence enters only after the corresponding
 finite subdivision certificate is supplied.
+
+The public complex layer is therefore small but complete at its finite core:
+boxes enclose rational-complex values, polygonal left sums are assembled at a
+requested evaluator stage, and closed-path exactness is proved for constant
+and polynomial differentials. This is the complex counterpart of the real
+FTC contract, with path subdivision replacing interval subdivision.
+
+\lean{ComputableAnalysis.ComplexPathIntegral.polygonalIntegralRawEntire_valid}
+\lean{ComputableAnalysis.ComplexPathIntegral.finiteConstantDifferentialExactness_closed}
+\lean{ComputableAnalysis.ComplexPathIntegral.finitePolynomialDifferentialExactness_closed}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.toQComplex_pointMul}
+\leanok

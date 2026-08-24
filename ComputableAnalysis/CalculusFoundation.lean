@@ -25,6 +25,9 @@ import ComputableAnalysis.ScalarODEUniqueness
 import ComputableAnalysis.PeanoBaker
 import ComputableAnalysis.FiniteNBallVolume
 import ComputableAnalysis.FiniteGaussianIntegral
+import ComputableAnalysis.ComplexCircleBridge
+import ComputableAnalysis.ComplexPathIntegral
+import ComputableAnalysis.FiniteComplexPathCertificate
 
 /-!
 # Computable calculus foundation
