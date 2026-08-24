@@ -536,7 +536,10 @@ all dyadic samples             -> integral equivalence
 
 The exact even/lower/reflected certificate family remains the geometric
 explanation; the witness-search adapter is the minimal proof obligation for
-closing the numerical integral.
+closing the numerical integral.  The weaker but directly usable route is now
+explicit: canonical rational unit-circle certificates discharge both
+odd-branch overlap fields without asserting equality between the square-root
+and circle interval evaluators.
 
 The unrestricted unit tangent chart is already complete: a finite dyadic grid
 hits every positive-width sine target, and the Boolean witness search returns
@@ -569,6 +572,9 @@ even overlap + lower overlap + reflected overlap
 \end{verbatim}
 
 \lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_branch_overlap_families}
+\lean{ComputableAnalysis.SinPiTransportSubgoals.lower_overlap_of_canonical_halfAngle_certificate}
+\lean{ComputableAnalysis.SinPiTransportSubgoals.upper_overlap_of_canonical_halfAngle_certificate}
+\lean{ComputableAnalysis.SinPiTransportSubgoals.DyadicTangentWitnessFamily.of_canonical_halfAngle_families}
 \leanok
 
 The lower and reflected constructors make the remaining proof obligations

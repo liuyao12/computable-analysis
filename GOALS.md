@@ -339,15 +339,19 @@ from monomial brackets structurally.
      separate endpoint branch;
    - **lower odd child:** construct `DyadicHalfAngleChildCertificate`, with a
      rational cosine parent box, the clipped half-angle square-root sine box,
-     and the outer tangent containment;
+     and the outer tangent containment.  When literal box equality is not
+     available, `lower_overlap_of_canonical_halfAngle_certificate` supplies
+     the weaker overlap theorem consumed by the direct branch assembler;
    - **upper odd child:** construct
      `DyadicReflectedHalfAngleCertificate` by reflection around the unit
-     circle, preserving the same rational interval containment;
+     circle, preserving the same rational interval containment.  The direct
+     overlap alternative is `upper_overlap_of_canonical_halfAngle_certificate`;
    - **assembly:** feed the three certificate families into
    `dyadicNestedRadical_sample_overlap_of_branch_certificates`, then into
    `DyadicTangentWitnessFamily.of_overlap_family`; the combined adapter
    `DyadicTangentWitnessFamily.of_branch_certificate_families` is now
-   formalized.
+   formalized.  The canonical overlap assembly is also packaged by
+   `DyadicTangentWitnessFamily.of_canonical_halfAngle_families`.
 
    Each certificate has a `to_public_overlap` theorem already; the remaining
    proofs are finite interval inequalities and circle identities, not a new
