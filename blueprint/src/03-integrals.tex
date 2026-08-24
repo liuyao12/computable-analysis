@@ -56,6 +56,19 @@ The trapezoid schedule is the finite midpoint of those two presentations:
 average the two endpoint boxes cell by cell.  Its identity with half the sum
 of the left and right folds is proved before any limiting argument.
 
+\begin{verbatim}
+left  := fold (mesh * value at x_k)
+right := fold (mesh * value at x_(k+1))
+trap  := half (left + right)
+
+left.width <= eps and right.width <= eps -> trap.width <= eps
+sample overlap at both endpoints -> trap overlap
+\end{verbatim}
+
+These are identities between finite rational computations.  A theorem that
+the three schedules converge to the same abstract integral is admitted only
+after a separate nesting, shrinking, and evaluator-equivalence certificate.
+
 \lean{ComputableAnalysis.riemannLeftInterval_add}
 \lean{ComputableAnalysis.riemannRightInterval}
 \lean{ComputableAnalysis.riemannRightInterval_add}
