@@ -290,6 +290,11 @@ The equality is overlap-equivalence of interval algorithms. It is the exact
 finite statement used by adjacent-interval and multi-turn proofs; it does
 not assert that an arbitrary integrand has an integral.
 
+The telescoping algebra is independent of interval domains: for any nonempty
+list of valid raw endpoint values, the finite sum of adjacent differences is
+equivalent to the last value minus the first.  Domain-specific FTC proofs
+only need to transport their endpoint evaluators into this list theorem.
+
 \lean{ComputableAnalysis.Integral.finiteRawSum}
 \lean{ComputableAnalysis.Integral.finiteRawSum_valid}
 \lean{ComputableAnalysis.Integral.finiteRawSum_append_equiv}
@@ -300,6 +305,10 @@ not assert that an arbitrary integrand has an integral.
 \lean{ComputableAnalysis.Integral.FiniteRawListEquiv.symm}
 \lean{ComputableAnalysis.Integral.finiteRawSum_equiv_of_forall}
 \lean{ComputableAnalysis.Integral.finiteRawSum_le_of_forall₂}
+\lean{ComputableAnalysis.Integral.rawLast}
+\lean{ComputableAnalysis.Integral.rawAdjacentDifferenceList}
+\lean{ComputableAnalysis.Integral.rawAdjacentDifferenceList_valid}
+\lean{ComputableAnalysis.Integral.finiteRawSum_rawAdjacentDifferenceList_equiv_last_sub_first}
 \leanok
 
 The same finite sum is order-preserving: a pairwise lower enclosure remains

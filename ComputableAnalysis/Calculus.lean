@@ -5923,6 +5923,92 @@ theorem finiteRawSum_le_of_forall₂
         (RealRaw.add _ (finiteRawSum _))
       exact RealRaw.le_add_le_add hhead ih
 
+/-! Pure finite telescoping for raw endpoint values.  This theorem is kept
+independent of interval domains and partition bookkeeping; callers transport
+their adjacent endpoint evaluators into this list algebra first. -/
+def rawLast (x : RealRaw) : List RealRaw -> RealRaw
+  | [] => x
+  | y :: ys => rawLast y ys
+
+def rawAdjacentDifferenceList : List RealRaw -> List RealRaw
+  | [] => []
+  | x :: [] => [x - x]
+  | x :: y :: ys => (y - x) :: rawAdjacentDifferenceList (y :: ys)
+
+theorem rawLast_valid {x : RealRaw} {xs : List RealRaw}
+    (hvalid : forall y, y ∈ x :: xs -> y.Valid) :
+    (rawLast x xs).Valid := by
+  induction xs generalizing x with
+  | nil => exact hvalid x (by simp)
+  | cons y ys ih =>
+      apply ih
+      intro z hz
+      exact hvalid z (by simp [hz])
+
+theorem rawAdjacentDifferenceList_valid {xs : List RealRaw}
+    (hvalid : forall x, x ∈ xs -> x.Valid) :
+    forall y, y ∈ rawAdjacentDifferenceList xs -> y.Valid := by
+  induction xs with
+  | nil =>
+      intro y hy
+      simp [rawAdjacentDifferenceList] at hy
+  | cons x xs ih =>
+      cases xs with
+      | nil =>
+          intro y hy
+          simp only [rawAdjacentDifferenceList, List.mem_singleton] at hy
+          subst y
+          exact RealRaw.sub_valid
+            (hvalid x (by simp)) (hvalid x (by simp))
+      | cons z zs =>
+          intro y hy
+          simp only [rawAdjacentDifferenceList, List.mem_cons] at hy
+          rcases hy with rfl | hy
+          · exact RealRaw.sub_valid
+              (hvalid z (by simp)) (hvalid x (by simp))
+          · exact ih (fun w hw => hvalid w (by simp [hw])) y hy
+
+theorem finiteRawSum_rawAdjacentDifferenceList_equiv_last_sub_first
+    {x : RealRaw} {xs : List RealRaw}
+    (hvalid : forall y, y ∈ x :: xs -> y.Valid) :
+    (finiteRawSum (rawAdjacentDifferenceList (x :: xs))).Equiv
+      (rawLast x xs - x) := by
+  induction xs generalizing x with
+  | nil =>
+      have hx : x.Valid := hvalid x (by simp)
+      have hdiff : (x - x).Valid := RealRaw.sub_valid hx hx
+      simpa [rawAdjacentDifferenceList, rawLast, finiteRawSum] using
+        (RealRaw.add_zero_equiv hdiff)
+  | cons y ys ih =>
+      have hx : x.Valid := hvalid x (by simp)
+      have hy : y.Valid := hvalid y (by simp)
+      have htail : forall z, z ∈ y :: ys -> z.Valid := by
+        intro z hz
+        exact hvalid z (by simp [hz])
+      have hleft :
+          (finiteRawSum (rawAdjacentDifferenceList (y :: ys))).Valid :=
+        finiteRawSum_valid _
+          (rawAdjacentDifferenceList_valid htail)
+      have hhead : (y - x).Valid := RealRaw.sub_valid hy hx
+      have hprev := ih htail
+      have hlast : (rawLast y ys).Valid := rawLast_valid htail
+      have hmiddle :
+          ((y - x) + (rawLast y ys - y)).Valid :=
+        RealRaw.add_valid hhead (RealRaw.sub_valid hlast hy)
+      have htarget : (rawLast y ys - x).Valid :=
+        RealRaw.sub_valid hlast hx
+      have hadd :
+          ((y - x) + finiteRawSum
+            (rawAdjacentDifferenceList (y :: ys))).Equiv
+            ((y - x) + (rawLast y ys - y)) := by
+        exact RealRaw.add_equiv hhead hhead hleft
+          (RealRaw.sub_valid hlast hy)
+          (RealRaw.equiv_refl _ hhead) hprev
+      have htel := RealRaw.sub_add_sub_cancel_middle_equiv hx hy hlast
+      simpa [rawAdjacentDifferenceList, finiteRawSum, rawLast] using
+        (RealRaw.equiv_trans
+          (RealRaw.add_valid hhead hleft) hmiddle htarget hadd htel)
+
 end Integral
 
 namespace TwoStageCandidateDerivativeFTC
