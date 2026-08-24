@@ -1527,6 +1527,54 @@ theorem riemannRightInterval_scale_of_nonneg
   rw [hzero] at h
   simpa [stepF, stepR] using h
 
+/-! Negative right-endpoint scaling reverses interval endpoints.  As on the
+left, an ordered interval and positive subdivision count make the mesh
+nonnegative, which is the only extra hypothesis needed. -/
+theorem riemannRightInterval_scale_of_neg
+    {r : Rat} (hr : r < 0) (f : RealFunRaw) (a b : Rat)
+    (hab : a <= b) (subdivisions prec : Nat) (hn : 0 < subdivisions) :
+    riemannRightInterval (RealFunRaw.scaleRat r f) a b subdivisions prec =
+      QInterval.scaleByRat r
+        (riemannRightInterval f a b subdivisions prec) := by
+  unfold riemannRightInterval
+  have hmesh : 0 <= mesh a b subdivisions := mesh_nonneg_of_le hn hab
+  let stepF : QInterval -> Nat -> QInterval := fun acc k =>
+    let I := f.compute (rightPoint a b subdivisions k) prec
+    { lo := acc.lo + mesh a b subdivisions * I.lo,
+      hi := acc.hi + mesh a b subdivisions * I.hi }
+  let stepR : QInterval -> Nat -> QInterval := fun acc k =>
+    let I := (RealFunRaw.scaleRat r f).compute
+      (rightPoint a b subdivisions k) prec
+    { lo := acc.lo + mesh a b subdivisions * I.lo,
+      hi := acc.hi + mesh a b subdivisions * I.hi }
+  have hstep : forall k (A : QInterval),
+      stepR (QInterval.scaleByRat r A) k =
+        QInterval.scaleByRat r (stepF A k) := by
+    intro k A
+    dsimp [stepF, stepR, RealFunRaw.scaleRat,
+      QInterval.scaleByRat]
+    simp only [if_neg (by grind : ¬ 0 <= r)]
+    grind [Rat.mul_assoc, Rat.mul_add, Rat.add_mul, Rat.mul_comm]
+  have hfold : forall (xs : List Nat) (A : QInterval),
+      xs.foldl stepR (QInterval.scaleByRat r A) =
+        QInterval.scaleByRat r (xs.foldl stepF A) := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro A
+        rfl
+    | cons k ks ih =>
+        intro A
+        simp only [List.foldl]
+        rw [hstep k A]
+        exact ih (stepF A k)
+  have hzero : QInterval.scaleByRat r { lo := 0, hi := 0 } =
+      { lo := 0, hi := 0 } := by
+    simp [QInterval.scaleByRat]
+  have h := hfold (List.range subdivisions) { lo := 0, hi := 0 }
+  rw [hzero] at h
+  simpa [stepF, stepR] using h
+
 theorem QInterval.scaleByRat_add_mul_of_nonneg
     {r h : Rat} (hr : 0 <= r) (A I : QInterval) :
     QInterval.scaleByRat r
