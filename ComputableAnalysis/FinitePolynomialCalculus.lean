@@ -702,6 +702,42 @@ theorem integratedTaylorPrefix_endpointDifference_succ
   simp only [integratedTaylorPrefix]
   grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
 
+/-! The folded form is the public finite termwise-integration theorem.  The
+recurrence above is convenient for induction; this sum is the form consumed
+by power-series and quadrature code. -/
+
+def finiteMonomialIntegralSum (coeffs : Nat -> Rat) (terms : Nat)
+    (a b : Rat) : Rat :=
+  match terms with
+  | 0 => 0
+  | n + 1 =>
+      finiteMonomialIntegralSum coeffs n a b +
+        coeffs n *
+          (b ^ (n + 1) / ((n + 1 : Nat) : Rat) -
+            a ^ (n + 1) / ((n + 1 : Nat) : Rat))
+
+theorem integratedTaylorPrefix_endpointDifference_eq_finiteMonomialIntegralSum
+    (coeffs : Nat -> Rat) (terms : Nat) (a b : Rat) :
+    integratedTaylorPrefix coeffs terms b -
+        integratedTaylorPrefix coeffs terms a =
+      finiteMonomialIntegralSum coeffs terms a b := by
+  induction terms with
+  | zero =>
+      simp [integratedTaylorPrefix, finiteMonomialIntegralSum]
+      grind [Rat.sub_eq_add_neg]
+  | succ n ih =>
+      rw [integratedTaylorPrefix_endpointDifference_succ,
+        finiteMonomialIntegralSum, ih]
+
+theorem finiteMonomialIntegralSum_succ
+    (coeffs : Nat -> Rat) (terms : Nat) (a b : Rat) :
+    finiteMonomialIntegralSum coeffs (terms + 1) a b =
+      finiteMonomialIntegralSum coeffs terms a b +
+        coeffs terms *
+          (b ^ (terms + 1) / ((terms + 1 : Nat) : Rat) -
+            a ^ (terms + 1) / ((terms + 1 : Nat) : Rat)) := by
+  rfl
+
 /-- The corresponding finite derivative prefix `sum_{k<n} c_k x^k`. -/
 def taylorDerivativePrefix (coeffs : Nat -> Rat) : Nat -> Rat -> Rat
   | 0 => fun _x => 0

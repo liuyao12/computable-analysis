@@ -160,9 +160,15 @@ when a series is used as a primitive.
 The finite integration identity is already closed before any tail argument:
 extending an integrated Taylor prefix adds one explicit endpoint monomial, and
 folding those increments gives the complete finite prefix formula.
+Thus the phrase ``integrate term by term'' has a literal rational meaning here:
+the endpoint difference of the finite primitive is exactly the finite sum of
+the integrated monomials.  Only the later tail comparison is potentially
+infinite-looking.
 
 \lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_step}
 \lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_prefix}
+\lean{ComputableAnalysis.FinitePolynomial.integratedTaylorPrefix_endpointDifference_eq_finiteMonomialIntegralSum}
+\lean{ComputableAnalysis.FinitePolynomial.finiteMonomialIntegralSum_succ}
 \leanok
 
 The formal coefficient layer already records the derivative shifts for the
