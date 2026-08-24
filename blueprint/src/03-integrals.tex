@@ -201,6 +201,38 @@ pieces(n), precision(n)
 \lean{ComputableAnalysis.Integral.monotoneDarbouxScheduleIntegralFor_valid}
 \leanok
 
+\section{Functions that turn finitely many times}
+
+The next usable class is not “all continuous functions.” It is a function
+whose interval is split into finitely many monotone pieces, with each
+non-rational turning point represented by a shrinking rational bracket. At
+stage \(n\), integrate the certified left and right monotone pieces and put a
+range enclosure over the unresolved middle bracket:
+
+\begin{verbatim}
+turn bracket -> left monotone box + middle range box + right monotone box
+             -> finite rational sum -> shrinking integral candidate
+\end{verbatim}
+
+The middle contribution needs only a bound on the function range. Its width
+is therefore bounded by the range bound times the turn-bracket width; no value at
+the turn is required. This is the constructive form of the practical rule
+used for \(\sin(\pi x)/x\): classify each cell as increasing, decreasing, or
+containing one of finitely many certified turns, and refine only the latter.
+
+\lean{ComputableAnalysis.Integral.TurningPointBracket}
+\lean{ComputableAnalysis.Integral.TurningPointBracket.widths_shrink}
+\lean{ComputableAnalysis.Integral.TurningBracketIntegralCandidate}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.compute_widths_shrink}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.stabilizedRaw_valid}
+\leanok
+
+The last declaration is deliberately a completion certificate, not a
+universal theorem. It says that a particular three-part candidate overlaps
+its chosen endpoint representative. A future multi-turn constructor will
+repeat this finite pattern and sum the pieces; it will not introduce Lebesgue
+measure or a completed-real compactness argument.
+
 This schedule layer is the honest frontier between the present foundation and
 the classical theorem that every continuous function on a closed interval is
 integrable. The missing work is constructive schedule synthesis and its finite

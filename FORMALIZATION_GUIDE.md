@@ -27,6 +27,9 @@ representations. The following general constructions remain active targets:
 - construction of an integral from every interval-regular function;
 - general FTC, substitution, and automatic construction of bounded
   piecewise integration-by-parts certificates;
+- a general multi-turn integral operator (the one-turn shrinking-bracket
+  assembly is checked, but its endpoint identification remains
+  function-specific);
 - analytic certificates for the selected `exp`, `log`, `sin`, and `cos` raw
   functions, including `exp' = exp`;
 - continuous matrix Peano--Baker and constructive linear
