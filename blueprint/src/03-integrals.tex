@@ -446,6 +446,15 @@ The exact even/lower/reflected certificate family remains the geometric
 explanation; the witness-search adapter is the minimal proof obligation for
 closing the numerical integral.
 
+The unrestricted unit tangent chart is already complete: a finite dyadic grid
+hits every positive-width sine target, and the Boolean witness search returns
+that hit.  The remaining difficulty is only restricting the search to the
+smaller inverse-arctangent box at each dyadic sample.
+
+\lean{ComputableAnalysis.SinPiIntegral.rationalCircleSin_dyadic_grid_hit}
+\lean{ComputableAnalysis.SinPiIntegral.rationalTangentWitnessSearch_unit_complete}
+\leanok
+
 Two concrete searches are already checked as finite sanity tests.  They use
 the grid candidates (103/256) and (791/4096) at successive dyadic stages.
 The reusable soundness theorem converts any successful search into the
