@@ -7549,12 +7549,15 @@ def piecewiseMonotoneCellIntegral (F : FunctionOnInterval)
     (k : Nat) (hk : k < c.pieces) : RealRaw :=
   monotoneIntegralFor _ (c.construction k hk)
 
-/-! The finite cell list carries the index proof in `Fin`, so later assembly
-lemmas do not need to reconstruct `k < c.pieces` by hand. -/
+/-! The finite cell list follows the same `List.range` order as the public
+fold.  Each entry still carries its cell-index proof locally, while the list
+shape remains directly compatible with finite fold algebra. -/
 def piecewiseMonotoneCellList (F : FunctionOnInterval)
     (c : PiecewiseMonotoneConstructionFor F) : List RealRaw :=
-  (List.finRange c.pieces).map (fun k =>
-    piecewiseMonotoneCellIntegral F c k.1 k.2)
+  (List.range c.pieces).map (fun k =>
+    if hk : k < c.pieces then
+      piecewiseMonotoneCellIntegral F c k hk
+    else RealRaw.zero)
 
 theorem piecewiseMonotoneCellList_length (F : FunctionOnInterval)
     (c : PiecewiseMonotoneConstructionFor F) :
@@ -7581,7 +7584,9 @@ theorem piecewiseMonotoneCellList_valid (F : FunctionOnInterval)
     forall x, x ∈ piecewiseMonotoneCellList F c -> x.Valid := by
   intro x hx
   rcases List.mem_map.1 hx with ⟨k, _hk, rfl⟩
-  exact piecewiseMonotoneCellIntegral_valid F c k.1 k.2
+  have hk : k < c.pieces := List.mem_range.1 _hk
+  simp [hk]
+  exact piecewiseMonotoneCellIntegral_valid F c k hk
 
 theorem piecewiseMonotoneCellList_finiteRawSum_valid
     (F : FunctionOnInterval) (c : PiecewiseMonotoneConstructionFor F) :
@@ -7592,11 +7597,10 @@ theorem piecewiseMonotoneCellList_finiteRawSum_valid
 def piecewiseMonotoneIntegralFor (F : FunctionOnInterval)
     (c : PiecewiseMonotoneConstructionFor F) : RealRaw :=
   (List.range c.pieces).foldl
-    (fun acc k =>
+    (fun acc k => acc +
       if hk : k < c.pieces then
-        acc + piecewiseMonotoneCellIntegral F c k hk
-      else
-        acc)
+        piecewiseMonotoneCellIntegral F c k hk
+      else RealRaw.zero)
     (RealRaw.ofRat 0)
 
 theorem piecewiseMonotoneIntegralFor_valid (F : FunctionOnInterval)
@@ -7604,10 +7608,9 @@ theorem piecewiseMonotoneIntegralFor_valid (F : FunctionOnInterval)
     (piecewiseMonotoneIntegralFor F c).Valid := by
   let step : RealRaw -> Nat -> RealRaw :=
     fun acc k =>
-      if hk : k < c.pieces then
-        acc + piecewiseMonotoneCellIntegral F c k hk
-      else
-        acc
+      acc + if hk : k < c.pieces then
+        piecewiseMonotoneCellIntegral F c k hk
+      else RealRaw.zero
   have hstep : forall acc k, acc.Valid -> (step acc k).Valid := by
     intro acc k hacc
     by_cases hk : k < c.pieces
@@ -7615,6 +7618,9 @@ theorem piecewiseMonotoneIntegralFor_valid (F : FunctionOnInterval)
       exact RealRaw.add_valid hacc
         (piecewiseMonotoneCellIntegral_valid F c k hk)
     · simp [step, hk, hacc]
+      exact RealRaw.add_valid hacc (by
+        change (RealRaw.zero).Valid
+        exact RealRaw.ofRat_valid 0)
   have hfold :
       forall (xs : List Nat) (acc : RealRaw),
         acc.Valid -> (xs.foldl step acc).Valid := by
@@ -7677,6 +7683,103 @@ theorem piecewiseMonotoneIntegralFor_two_equiv
   have hrange : List.range 2 = [0, 1] := by native_decide
   rw [hrange]
   simpa [RealRaw.zero, RealRaw.ofRat] using hfold
+
+/-! The arbitrary finite version of the two-cell assembly law.  The public
+piecewise fold and the canonical finite raw sum differ only by parenthesizing
+addition; the proof is a finite induction and introduces no limiting object. -/
+theorem piecewiseMonotoneIntegralFor_equiv_finiteRawSum
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) :
+    (piecewiseMonotoneIntegralFor F c).Equiv
+      (finiteRawSum (piecewiseMonotoneCellList F c)) := by
+  let cell : Nat -> RealRaw := fun k =>
+    if hk : k < c.pieces then
+      piecewiseMonotoneCellIntegral F c k hk
+    else RealRaw.zero
+  let step : RealRaw -> Nat -> RealRaw := fun acc k => acc + cell k
+  have hcell : forall k, k < c.pieces -> (cell k).Valid := by
+    intro k hk
+    simp [cell, hk]
+    exact piecewiseMonotoneCellIntegral_valid F c k hk
+  have hzero : (RealRaw.zero).Valid := by
+    change RealRaw.ValidCompute (fun _ : Nat => { lo := 0, hi := 0 })
+    exact RealRaw.ofRat_valid 0
+  have hsum_valid : forall (xs : List RealRaw),
+      (forall x, x ∈ xs -> x.Valid) -> (finiteRawSum xs).Valid :=
+    finiteRawSum_valid
+  have hstep_valid : forall (xs : List Nat) (acc : RealRaw),
+      acc.Valid -> (xs.foldl step acc).Valid := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro acc hacc
+        simpa using hacc
+    | cons k ks ih =>
+        intro acc hacc
+        apply ih
+        exact RealRaw.add_valid hacc (by
+          by_cases hk : k < c.pieces
+          · exact hcell k hk
+          · simp [cell, hk]
+            exact hzero)
+  have hfold : forall (xs : List Nat),
+      (forall k, k ∈ xs -> k < c.pieces) ->
+      forall (acc : RealRaw), acc.Valid ->
+        (xs.foldl step acc).Equiv
+          (acc + finiteRawSum (xs.map cell)) := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro _ acc hacc
+        simpa [finiteRawSum] using
+          (RealRaw.equiv_symm (RealRaw.add_zero_equiv hacc))
+    | cons k ks ih =>
+        intro hxs acc hacc
+        have hk : k < c.pieces := hxs k (by simp)
+        have htail : forall j, j ∈ ks -> j < c.pieces := by
+          intro j hj
+          exact hxs j (by simp [hj])
+        have hck : (cell k).Valid := hcell k hk
+        have hacc' : (acc + cell k).Valid := RealRaw.add_valid hacc hck
+        have htailSum : (finiteRawSum (ks.map cell)).Valid := by
+          apply hsum_valid
+          intro x hx
+          rcases List.mem_map.1 hx with ⟨j, hj, rfl⟩
+          exact hcell j (htail j hj)
+        have hih := ih htail (acc + cell k) hacc'
+        have hassoc := RealRaw.add_assoc_equiv acc (cell k)
+          (finiteRawSum (ks.map cell)) hacc hck htailSum
+        have hleft :
+            (ks.foldl step (acc + cell k)).Valid :=
+          hstep_valid ks (acc + cell k) hacc'
+        have hright :
+            (acc + (cell k + finiteRawSum (ks.map cell))).Valid :=
+          RealRaw.add_valid hacc (RealRaw.add_valid hck htailSum)
+        simpa [List.foldl, step, finiteRawSum] using
+          (RealRaw.equiv_trans hleft
+            (RealRaw.add_valid hacc' htailSum) hright hih hassoc)
+  have hresult := hfold (List.range c.pieces)
+    (by
+      intro k hk
+      exact List.mem_range.1 hk)
+    RealRaw.zero hzero
+  have hleft :
+      ((List.range c.pieces).foldl step RealRaw.zero).Valid :=
+    hstep_valid (List.range c.pieces) RealRaw.zero hzero
+  have hsum :
+      (finiteRawSum ((List.range c.pieces).map cell)).Valid := by
+    apply hsum_valid
+    intro x hx
+    rcases List.mem_map.1 hx with ⟨k, hk, rfl⟩
+    exact hcell k (List.mem_range.1 hk)
+  have hclean :
+      ((List.range c.pieces).foldl step RealRaw.zero).Equiv
+        (finiteRawSum ((List.range c.pieces).map cell)) := by
+    exact RealRaw.equiv_trans hleft
+      (RealRaw.add_valid hzero hsum) hsum hresult
+      (RealRaw.zero_add_equiv hsum)
+  simpa [piecewiseMonotoneIntegralFor, piecewiseMonotoneCellList,
+    cell, step, RealRaw.zero] using hclean
 
 /-- A one-piece promotion from a monotone construction computes the same raw
 integral as the original monotone construction. -/

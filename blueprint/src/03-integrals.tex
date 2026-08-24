@@ -139,6 +139,7 @@ boxes needed by that classification.
 \lean{ComputableAnalysis.Integral.PiecewiseMonotoneConstructionFor}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_valid}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_two_equiv}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_equiv_finiteRawSum}
 \lean{ComputableAnalysis.Integral.constructionFor_of_curvatureFTC}
 \lean{ComputableAnalysis.Integral.definiteIdentityFor_of_curvatureFTC}
 \leanok
@@ -306,10 +307,11 @@ order core used by Darboux and derivative-bound certificates; it is not the
 classical theorem that an arbitrary integral operator preserves order.
 
 For a piecewise-monotone certificate, the cell indices form a finite
-`Fin`-indexed list.  Every cell is valid, hence its finite raw sum is valid
+range-indexed list.  Every cell is valid, hence its finite raw sum is valid
 before any theorem identifies the sum with an endpoint difference.  The
-two-cell theorem above is the first concrete assembly instance; the same
-list is the input for arbitrary finite-turn constructions.
+two-cell theorem is the first concrete assembly instance; the general
+finite-sum equivalence now identifies the public fold with the same canonical
+sum for any finite number of turns.
 
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneCellList}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneCellList_length}
