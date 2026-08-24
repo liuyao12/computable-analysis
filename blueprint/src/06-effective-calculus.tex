@@ -256,6 +256,23 @@ secants.  Thus a finite mesh supplies both the lower and upper derivative
 boxes; refining the mesh is the effective replacement for invoking a least
 upper bound.
 
+The first formal mean-value statement is deliberately about the average, not
+an existential point:
+
+\begin{verbatim}
+positive quadrature + lower <= f(x) <= upper
+    -> lower <= (integral / (b-a)) <= upper
+\end{verbatim}
+
+This is the computable core of the classical claim that some derivative or
+function value realizes an average.  If a later application can provide a
+finite inverse or witness search, it may refine the bracket to an attained
+point; the foundation does not assume such a point exists as an available
+real-number object.
+
+\lean{ComputableAnalysis.Integral.finiteQuadrature_average_between_bounds}
+\leanok
+
 \section{Taylor}
 \label{thm:finite-taylor-ftc-prefix}
 
