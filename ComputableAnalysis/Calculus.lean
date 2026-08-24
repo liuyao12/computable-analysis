@@ -1480,6 +1480,47 @@ theorem riemannTrapezoidInterval_overlap_of_samples
     { lo := 0, hi := 0 } { lo := 0, hi := 0 } (by
       simp [QInterval.Overlaps])
 
+/-! Exact equality of both endpoint samples gives exact equality of the
+trapezoid folds. -/
+theorem riemannTrapezoidInterval_congr_of_samples
+    (g h : RealFunRaw) (a b : Rat) (subdivisions prec : Nat)
+    (hleft : forall k, k < subdivisions ->
+      g.compute (leftPoint a b subdivisions k) prec =
+        h.compute (leftPoint a b subdivisions k) prec)
+    (hright : forall k, k < subdivisions ->
+      g.compute (rightPoint a b subdivisions k) prec =
+        h.compute (rightPoint a b subdivisions k) prec) :
+    riemannTrapezoidInterval g a b subdivisions prec =
+      riemannTrapezoidInterval h a b subdivisions prec := by
+  unfold riemannTrapezoidInterval
+  have hfold : forall (xs : List Nat),
+      (forall k, k ∈ xs -> k < subdivisions) ->
+      forall (acc : QInterval),
+      (xs.foldl
+        (fun acc k =>
+          let L := g.compute (leftPoint a b subdivisions k) prec
+          let R := g.compute (rightPoint a b subdivisions k) prec
+          { lo := acc.lo + (mesh a b subdivisions / 2) * (L.lo + R.lo),
+            hi := acc.hi + (mesh a b subdivisions / 2) * (L.hi + R.hi) }) acc) =
+      (xs.foldl
+        (fun acc k =>
+          let L := h.compute (leftPoint a b subdivisions k) prec
+          let R := h.compute (rightPoint a b subdivisions k) prec
+          { lo := acc.lo + (mesh a b subdivisions / 2) * (L.lo + R.lo),
+            hi := acc.hi + (mesh a b subdivisions / 2) * (L.hi + R.hi) }) acc) := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro _hmem acc
+        rfl
+    | cons k ks ih =>
+        intro hmem acc
+        dsimp
+        rw [hleft k (hmem k (by simp)), hright k (hmem k (by simp))]
+        exact ih (fun j hj => hmem j (by simp [hj])) _
+  exact hfold (List.range subdivisions)
+    (by intro k hk; exact List.mem_range.mp hk) { lo := 0, hi := 0 }
+
 /-! The finite right-endpoint fold has the same pointwise-addition law as the
 left-endpoint fold. -/
 
