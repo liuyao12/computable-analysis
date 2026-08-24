@@ -663,6 +663,17 @@ uneven samples in the original (x)-coordinate, but uniform subdivisions in
 the rational tangent coordinate (u); the equal-dyadic version remains a
 separate, stronger transport theorem.
 
+The finite algebra is shared by both presentations.  Stieltjes sums are
+linear in the sampled function, and the proof is induction over the finite
+mesh.  This is the interface later used for affine changes of variable and
+termwise integration of finite power series.
+
+\lean{ComputableAnalysis.leftStieltjesSum_add_left}
+\lean{ComputableAnalysis.leftStieltjesSum_add_right}
+\lean{ComputableAnalysis.rightStieltjesSum_add_left}
+\lean{ComputableAnalysis.rightStieltjesSum_add_right}
+\leanok
+
 \section{Finite identities}
 \label{thm:finite-green-rectangle}
 \label{def:integration-by-parts-certificate}

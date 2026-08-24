@@ -295,6 +295,54 @@ def quadraticVariationSum (f g : Nat -> Rat) : Nat -> Rat
   | n + 1 => quadraticVariationSum f g n +
       (f (n + 1) - f n) * (g (n + 1) - g n)
 
+/-! The finite linearity laws for Stieltjes sums.  These expose the algebra
+used by substitution and termwise integration without introducing a limiting
+integral or a completed real. -/
+
+theorem leftStieltjesSum_add_left (f h g : Nat -> Rat) (n : Nat) :
+    leftStieltjesSum (fun i => f i + h i) g n =
+      leftStieltjesSum f g n + leftStieltjesSum h g n := by
+  induction n with
+  | zero =>
+      change 0 = 0 + 0
+      exact (Rat.add_zero 0).symm
+  | succ n ih =>
+      rw [leftStieltjesSum, leftStieltjesSum, leftStieltjesSum, ih]
+      grind [Rat.add_mul, Rat.add_assoc, Rat.add_comm]
+
+theorem leftStieltjesSum_add_right (f g h : Nat -> Rat) (n : Nat) :
+    leftStieltjesSum f (fun i => g i + h i) n =
+      leftStieltjesSum f g n + leftStieltjesSum f h n := by
+  induction n with
+  | zero =>
+      change 0 = 0 + 0
+      exact (Rat.add_zero 0).symm
+  | succ n ih =>
+      rw [leftStieltjesSum, leftStieltjesSum, leftStieltjesSum, ih]
+      grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc, Rat.add_comm]
+
+theorem rightStieltjesSum_add_left (f h g : Nat -> Rat) (n : Nat) :
+    rightStieltjesSum (fun i => f i + h i) g n =
+      rightStieltjesSum f g n + rightStieltjesSum h g n := by
+  induction n with
+  | zero =>
+      change 0 = 0 + 0
+      exact (Rat.add_zero 0).symm
+  | succ n ih =>
+      rw [rightStieltjesSum, rightStieltjesSum, rightStieltjesSum, ih]
+      grind [Rat.add_mul, Rat.add_assoc, Rat.add_comm]
+
+theorem rightStieltjesSum_add_right (f g h : Nat -> Rat) (n : Nat) :
+    rightStieltjesSum f (fun i => g i + h i) n =
+      rightStieltjesSum f g n + rightStieltjesSum f h n := by
+  induction n with
+  | zero =>
+      change 0 = 0 + 0
+      exact (Rat.add_zero 0).symm
+  | succ n ih =>
+      rw [rightStieltjesSum, rightStieltjesSum, rightStieltjesSum, ih]
+      grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc, Rat.add_comm]
+
 /-- One cell of the geometric integration-by-parts decomposition: the two
 oriented strips exactly make up the change in the endpoint-product rectangle. -/
 theorem productIncrement_decomposition
