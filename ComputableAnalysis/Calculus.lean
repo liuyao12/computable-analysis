@@ -5869,6 +5869,22 @@ def ScheduledIntervalRegularOn.toIntervalRegularOn_of_requested_stage
   output_width := h.output_width
   contains_point_values := requested_stage_contains
 
+/-- The common non-adaptive specialization of the scheduled contract.
+
+When the interval evaluator reads the same computation stage requested by the
+ordinary contract, its existing point-containment field is already the
+requested-stage certificate.  This is deliberately a separate adapter from
+`toIntervalRegularOn_of_requested_stage`: adaptive evaluators still need an
+explicit transport theorem for their requested stages. -/
+def ScheduledIntervalRegularOn.toIntervalRegularOn_of_identity_schedule
+    {F : FunctionOnInterval} (h : ScheduledIntervalRegularOn F)
+    (hschedule : forall n, h.evalPrecision n = n) :
+    IntervalRegularOn F :=
+  h.toIntervalRegularOn_of_requested_stage (by
+    intro I hI x hx n hIlo hIhi
+    simpa [hschedule n] using
+      h.contains_point_values I hI x hx n hIlo hIhi)
+
 /-! Build interval regularity directly from a proof-independent point
 evaluator.  The public `IntervalRegularOn` contract remains unchanged; this
 constructor only removes domain-proof noise from new special-function

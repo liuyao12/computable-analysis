@@ -204,6 +204,7 @@ explicit error budget later consumed by a partition-level FTC certificate.
 \lean{ComputableAnalysis.IntervalRegularOn.epsilonDeltaContinuous}
 \lean{ComputableAnalysis.ScheduledIntervalRegularOn}
 \lean{ComputableAnalysis.ScheduledIntervalRegularOn.toIntervalRegularOn_of_requested_stage}
+\lean{ComputableAnalysis.ScheduledIntervalRegularOn.toIntervalRegularOn_of_identity_schedule}
 \lean{ComputableAnalysis.ScheduledIntervalRegularOn.epsilonDeltaContinuous}
 \lean{ComputableAnalysis.ContinuousFunctionOnInterval}
 \lean{ComputableAnalysis.Integral.unitConstantMonotoneDarbouxSchedule}
@@ -222,6 +223,11 @@ before that representation is installed in the abstract-function chain.  The
 explicit adapter above requires the missing requested-stage containment
 certificate; monotonicity of raw boxes alone is insufficient because later
 boxes may be wider.
+
+For the ordinary identity schedule, the
+\texttt{toIntervalRegularOn\_of\_identity\_schedule} adapter discharges this bookkeeping
+from the scheduled contract itself.  Adaptive schedules still require an
+explicit transport certificate.
 
 Representations form a local chain: reflexive, symmetric, and transitive
 equivalence edges compose different rational stage schedules without changing
