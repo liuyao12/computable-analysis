@@ -437,6 +437,9 @@ positive exponent
 `Integral.uniformRightEndpointSum_pow_sub_left_eq_scaled_last_power` gives
 the exact left/right rectangle gap. This is the finite shrinking certificate
 used before identifying the common endpoint value.
+With positive mesh count it normalizes further to exactly `1 / n` via
+`Integral.uniformRightEndpointSum_pow_sub_left_eq_inv_of_pos`, making the
+precision schedule immediate.
 For a prefix containing a linear term,
 `FinitePolynomial.taylorPrefixShift_at_zero` identifies that certified
 derivative polynomial at zero with the original coefficient `c 1`.

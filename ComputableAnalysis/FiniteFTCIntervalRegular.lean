@@ -1169,6 +1169,30 @@ theorem uniformRightEndpointSum_pow_sub_left_eq_scaled_last_power
   rw [hblock]
   grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm, Rat.mul_add]
 
+theorem uniformRightEndpointSum_pow_sub_left_eq_inv_of_pos
+    {k n : Nat} (hk : 0 < k) (hn : 0 < n) :
+    _root_.ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformRightEndpointSum
+        (fun x : Rat => x ^ k) n -
+      _root_.ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+        (fun x : Rat => x ^ k) n =
+      1 / (n : Rat) := by
+  rw [uniformRightEndpointSum_pow_sub_left_eq_scaled_last_power hk]
+  have hnrat : (n : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hn)
+  have hcancel : forall j : Nat,
+      (1 / (n : Rat)) ^ j * (n : Rat) ^ j = 1 := by
+    intro j
+    induction j with
+    | zero => rw [Rat.pow_zero, Rat.pow_zero]; native_decide
+    | succ j ih =>
+        rw [Rat.pow_succ, Rat.pow_succ]
+        rw [Rat.div_def]
+        have hmul : (n : Rat)⁻¹ * (n : Rat) = 1 :=
+          Rat.inv_mul_cancel (n : Rat) hnrat
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  rw [Rat.pow_succ]
+  grind [Rat.mul_assoc, Rat.mul_comm, hcancel k]
+
 def exactRat_cube_integral_certificate :
     Integral.IntervalRegularIntegralCertificate
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ 3) 0 1) where
