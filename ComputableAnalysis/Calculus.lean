@@ -343,6 +343,50 @@ theorem rightStieltjesSum_add_right (f g h : Nat -> Rat) (n : Nat) :
       rw [rightStieltjesSum, rightStieltjesSum, rightStieltjesSum, ih]
       grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc, Rat.add_comm]
 
+theorem leftStieltjesSum_scale_left (c : Rat) (f g : Nat -> Rat) (n : Nat) :
+    leftStieltjesSum (fun i => c * f i) g n =
+      c * leftStieltjesSum f g n := by
+  induction n with
+  | zero =>
+      change 0 = c * 0
+      simp
+  | succ n ih =>
+      rw [leftStieltjesSum, ih]
+      calc
+        c * leftStieltjesSum f g n +
+              (c * f n) * (g (n + 1) - g n) =
+            c * leftStieltjesSum f g n +
+              c * (f n * (g (n + 1) - g n)) := by
+                rw [Rat.mul_assoc]
+        _ = c * (leftStieltjesSum f g n +
+              f n * (g (n + 1) - g n)) := by
+                rw [Rat.mul_add]
+
+theorem rightStieltjesSum_scale_left (c : Rat) (f g : Nat -> Rat) (n : Nat) :
+    rightStieltjesSum (fun i => c * f i) g n =
+      c * rightStieltjesSum f g n := by
+  induction n with
+  | zero =>
+      change 0 = c * 0
+      simp
+  | succ n ih =>
+      rw [rightStieltjesSum, ih]
+      have hstep :
+          c * f (n + 1) - c * f n =
+            c * (f (n + 1) - f n) := by
+        simp only [Rat.sub_eq_add_neg, Rat.mul_add, Rat.mul_neg]
+      rw [hstep]
+      calc
+        c * rightStieltjesSum f g n +
+              g (n + 1) * (c * (f (n + 1) - f n)) =
+            c * rightStieltjesSum f g n +
+              c * (g (n + 1) * (f (n + 1) - f n)) := by
+                congr 1
+                grind [Rat.mul_assoc, Rat.mul_comm]
+        _ = c * (rightStieltjesSum f g n +
+              g (n + 1) * (f (n + 1) - f n)) := by
+                rw [Rat.mul_add]
+
 /-- One cell of the geometric integration-by-parts decomposition: the two
 oriented strips exactly make up the change in the endpoint-product rectangle. -/
 theorem productIncrement_decomposition
