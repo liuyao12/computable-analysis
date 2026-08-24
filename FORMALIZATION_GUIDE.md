@@ -452,6 +452,14 @@ private Darboux folds.
 The exponent-one regression
 `Integral.exactRat_one_integral_raw_equiv_half` checks the first nonconstant
 case through the public affine left/right sum formulas.
+
+The quadratic regression is already complete as well:
+`Integral.exactRat_square_integral_raw_equiv_one_third` proves the generic
+finite dyadic box contains `1 / 3`, using the finite sum-of-squares identity.
+The cubic, quartic, and fifth-degree values are exposed by
+`Integral.exactRat_cube_integral_raw_equiv_one_fourth`,
+`Integral.quarticIntegralEffectiveFTC_equiv_one_fifth`, and
+`Integral.fifthIntegralEffectiveFTC_equiv_one_sixth` respectively.
 The same rational power induction supplies
 `Integral.exactRat_pow_nondecreasing_on_unit` and a compatible
 `Integral.exactRat_pow_monotoneConstructionFor`, so the monomial can be fed

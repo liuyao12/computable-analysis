@@ -614,10 +614,28 @@ it with the closed value $1/(n+1)$ is a separate endpoint theorem.
 \lean{ComputableAnalysis.Integral.exactRat_pow_integral_raw_valid}
 \lean{ComputableAnalysis.Integral.exactRat_zero_integral_raw_equiv_one}
 \lean{ComputableAnalysis.Integral.exactRat_one_integral_raw_equiv_half}
+\lean{ComputableAnalysis.Integral.exactRat_square_integral_raw_equiv_one_third}
 \lean{ComputableAnalysis.Integral.exactRat_pow_nondecreasing_on_unit}
 \lean{ComputableAnalysis.Integral.exactRat_pow_monotoneConstructionFor}
 \lean{ComputableAnalysis.Integral.exactRat_pow_monotoneIntegralFor_valid}
 \lean{ComputableAnalysis.Integral.exactRat_pow_monotoneIntegralFor_eq_dyadicRaw}
+\leanok
+
+The first three monomials are now closed-value regressions of the same
+computable integral interface:
+
+\[
+  \int_0^1 1\,dx=1,\qquad
+  \int_0^1 x\,dx=\frac12,\qquad
+  \int_0^1 x^2\,dx=\frac13.
+\]
+
+The quadratic proof is still finite at every stage: the endpoint sums are
+reduced to the finite sum of squares, and the two resulting rational bounds
+contain $1/3$.  No completeness or completed-real limit is introduced.
+
+\lean{ComputableAnalysis.Integral.exactRat_square_integral_raw_valid}
+\lean{ComputableAnalysis.Integral.exactSquare_compute_contains_one_third}
 \leanok
 
 For the cubic case the first rectangle identity is explicit:
@@ -626,7 +644,22 @@ induction.  The interval-regular layer then supplies the domain-restricted
 effective FTC certificate used for the complete \(x^3\) instance.
 
 \lean{ComputableAnalysis.riemannLeftExact_threeSquare_unit_of_pos}
+\lean{ComputableAnalysis.Integral.exactRat_cube_integral_raw_equiv_one_fourth}
 \lean{ComputableAnalysis.Integral.cubicIntegralEffectiveFTC_equiv_one_fourth}
+\leanok
+
+The same endpoint-difference certificate has also been instantiated for the
+next two polynomial primitives.  These are useful regression tests for the
+effective FTC layer, rather than separate foundations:
+
+\[
+  \int_0^1 x^3\,dx=\frac14,\qquad
+  \int_0^1 x^4\,dx=\frac15,\qquad
+  \int_0^1 x^5\,dx=\frac16.
+\]
+
+\lean{ComputableAnalysis.Integral.quarticIntegralEffectiveFTC_equiv_one_fifth}
+\lean{ComputableAnalysis.Integral.fifthIntegralEffectiveFTC_equiv_one_sixth}
 \leanok
 
 The first non-polynomial test is a squared sine prefix.  Its finite Taylor
