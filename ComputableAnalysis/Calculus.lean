@@ -7898,6 +7898,33 @@ theorem piecewiseMonotoneIntegralFor_equiv_endpointDifferenceList
   simpa [piecewiseMonotoneCellList, piecewiseMonotoneEndpointDifferenceList,
     cell, endpoint] using hresult
 
+def piecewiseMonotoneTotalEndpointDifference
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) : RealRaw :=
+  F.raw.evalRaw (c.point c.pieces)
+      (F.defined_on (c.point c.pieces)
+        (c.point_mem c.pieces (Nat.le_refl _))) -
+    F.raw.evalRaw (c.point 0)
+      (F.defined_on (c.point 0)
+        (c.point_mem 0 (Nat.zero_le _)))
+
+theorem piecewiseMonotoneTotalEndpointDifference_valid
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) :
+    (piecewiseMonotoneTotalEndpointDifference F c).Valid := by
+  let hx := c.point_mem 0 (Nat.zero_le _)
+  let hy := c.point_mem c.pieces (Nat.le_refl _)
+  let x := F.raw.evalRaw (c.point 0) (F.defined_on (c.point 0) hx)
+  let y := F.raw.evalRaw (c.point c.pieces) (F.defined_on (c.point c.pieces) hy)
+  have hvalidx : x.Valid := by
+    simpa [x, RealRaw.Valid, PartialRealFunRaw.evalRaw] using
+      F.valid_on (c.point 0) (F.defined_on (c.point 0) hx)
+  have hvalidy : y.Valid := by
+    simpa [y, RealRaw.Valid, PartialRealFunRaw.evalRaw] using
+      F.valid_on (c.point c.pieces) (F.defined_on (c.point c.pieces) hy)
+  simpa [piecewiseMonotoneTotalEndpointDifference, x, y, hx, hy] using
+    RealRaw.sub_valid hvalidy hvalidx
+
 /-- A one-piece promotion from a monotone construction computes the same raw
 integral as the original monotone construction. -/
 theorem piecewiseMonotoneIntegralFor_ofMonotone_equiv
