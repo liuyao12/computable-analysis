@@ -32,6 +32,18 @@ theorem absRat_eq_self_of_nonneg {x : Rat} (hx : 0 <= x) :
 def absOnUnit : FunctionOnInterval :=
   FunctionOnInterval.exactRat absRat (-1) 1
 
+theorem absRat_lipschitzOnIntervalNat :
+    LipschitzOnIntervalNat absRat (-1) 1 1 := by
+  refine ⟨by native_decide, ?_⟩
+  intro s t hs hsb ht htb
+  by_cases hsneg : s < 0 <;> by_cases htneg : t < 0
+  all_goals simp [absRat, qabs, hsneg, htneg]
+  all_goals grind
+
+def absOnUnit_intervalRegular : IntervalRegularOn absOnUnit :=
+  IntervalRegularOn.of_lipschitzOnIntervalNat absRat (-1) 1 1
+    absRat_lipschitzOnIntervalNat
+
 def absPartitionPoint : Nat -> Rat
   | 0 => -1
   | 1 => 0
