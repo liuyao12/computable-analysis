@@ -86,7 +86,16 @@ The checked instance is:
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_equivalent_expPowerSeriesOnUnit}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_zero_equiv_one}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_solvesSelfDerivative}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitStabilized_valid}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitStabilizedIntegral_equiv_endpointDifference}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitStabilizedIntegral_equiv_exp_endpoint_subtraction}
 \leanok
+
+The selected-stage unit computation is stabilized against its endpoint
+difference, yielding the ordinary first example
+\(\int_0^1\exp(x)\,dx=\exp(1)-\exp(0)\).  The endpoint subtraction is
+again an equivalence between rational interval algorithms, not an appeal to
+completed-real equality.
 
 The same evaluator is also checked on the centered chart \([-1,1]\).  This
 is the form needed by local ODE arguments, because a step may move in either

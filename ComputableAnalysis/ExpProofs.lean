@@ -7234,6 +7234,117 @@ theorem uniformExpOnSymmetricUnitStabilizedIntegral_equiv_endpointDifference :
       uniformExpOnSymmetricUnit_endpointDifferenceValid)
   exact uniformExpOnSymmetricUnitStabilized_equiv_endpointDifference
 
+/-! The one-sided unit chart can now be stabilized against its canonical
+endpoint difference.  This is the standard \\([0,1]\\) effective-FTC
+instance, while the centered chart below is the local ODE instance. -/
+def uniformExpOnUnit_endpointDifferenceValid :
+    RealRaw.ValidCompute
+      (endpointDifferenceCompute uniformExpOnUnitRealFunRaw 0 1) :=
+  endpointDifference_valid_of_fun_valid uniformExpOnUnitRealFunRaw_valid
+    (by exact ⟨by native_decide, by native_decide⟩)
+    (by exact ⟨by native_decide, by native_decide⟩)
+
+def uniformExpOnUnitStabilized : RealRaw :=
+  RealRaw.prefixStabilize
+    uniformExpOnUnit_selectedStageFTCIndexed.toSelected.boundedIntegralRaw
+    (fun n =>
+      (endpointDifferenceRaw uniformExpOnUnitRealFunRaw 0 1
+        uniformExpOnUnit_endpointDifferenceValid).compute n |>.width)
+
+theorem uniformExpOnUnitStabilized_valid :
+    uniformExpOnUnitStabilized.Valid := by
+  unfold uniformExpOnUnitStabilized
+  apply RealRaw.prefixStabilize_valid
+    (candidate := uniformExpOnUnit_selectedStageFTCIndexed.toSelected.boundedIntegralRaw)
+    (anchor := endpointDifferenceRaw uniformExpOnUnitRealFunRaw 0 1
+      uniformExpOnUnit_endpointDifferenceValid)
+    (radius := fun n =>
+      (endpointDifferenceRaw uniformExpOnUnitRealFunRaw 0 1
+        uniformExpOnUnit_endpointDifferenceValid).compute n |>.width)
+  · exact selectedStageCandidateDerivativeFTC_boundedIntegral_widthsShrink
+      uniformExpOnUnit_selectedStageFTCIndexed.toSelected
+  · simpa [endpointDifferenceRaw, RealRaw.Valid] using
+      uniformExpOnUnit_endpointDifferenceValid
+  · exact TwoStageCandidateDerivativeFTC.boundedIntegralRaw_equiv_endpointDifference
+      uniformExpOnUnit_selectedStageFTCIndexed.toSelected.toTwoStage
+      uniformExpOnUnit_endpointDifferenceValid
+  · intro n
+    exact Rat.le_refl
+  · intro eps
+    obtain ⟨N, hN⟩ := uniformExpOnUnit_endpointDifferenceValid.2.2 eps
+    exact ⟨N, fun n hn => hN n hn⟩
+
+theorem uniformExpOnUnitStabilized_equiv_endpointDifference :
+    uniformExpOnUnitStabilized.Equiv
+      (endpointDifferenceRaw uniformExpOnUnitRealFunRaw 0 1
+        uniformExpOnUnit_endpointDifferenceValid) := by
+  unfold uniformExpOnUnitStabilized
+  apply RealRaw.prefixStabilize_equiv_anchor
+    (candidate := uniformExpOnUnit_selectedStageFTCIndexed.toSelected.boundedIntegralRaw)
+    (anchor := endpointDifferenceRaw uniformExpOnUnitRealFunRaw 0 1
+      uniformExpOnUnit_endpointDifferenceValid)
+    (radius := fun n =>
+      (endpointDifferenceRaw uniformExpOnUnitRealFunRaw 0 1
+        uniformExpOnUnit_endpointDifferenceValid).compute n |>.width)
+  · simpa [endpointDifferenceRaw, RealRaw.Valid] using
+      uniformExpOnUnit_endpointDifferenceValid
+  · exact TwoStageCandidateDerivativeFTC.boundedIntegralRaw_equiv_endpointDifference
+      uniformExpOnUnit_selectedStageFTCIndexed.toSelected.toTwoStage
+      uniformExpOnUnit_endpointDifferenceValid
+  · intro n
+    exact Rat.le_refl
+
+def uniformExpOnUnitStabilizedConstruction :
+    Integral.ConstructionFor uniformExpOnUnit where
+  compute := uniformExpOnUnitStabilized.compute
+  certificate := by
+    simpa [RealRaw.Valid] using uniformExpOnUnitStabilized_valid
+
+theorem uniformExpOnUnitStabilizedIntegral_equiv_endpointDifference :
+    (Integral.integralFor uniformExpOnUnit
+      uniformExpOnUnitStabilizedConstruction).Equiv
+      (endpointDifferenceRaw uniformExpOnUnitRealFunRaw 0 1
+        uniformExpOnUnit_endpointDifferenceValid) := by
+  change uniformExpOnUnitStabilized.Equiv
+    (endpointDifferenceRaw uniformExpOnUnitRealFunRaw 0 1
+      uniformExpOnUnit_endpointDifferenceValid)
+  exact uniformExpOnUnitStabilized_equiv_endpointDifference
+
+theorem uniformExpOnUnitStabilizedIntegral_equiv_exp_endpoint_subtraction :
+    (Integral.integralFor uniformExpOnUnit
+      uniformExpOnUnitStabilizedConstruction).Equiv
+      ((uniformExpOnUnitRealFunRaw.apply uniformExpOnUnitRealFunRaw_valid
+          (1 : Rat) (by constructor <;> native_decide)) -
+        (uniformExpOnUnitRealFunRaw.apply uniformExpOnUnitRealFunRaw_valid
+          (0 : Rat) (by constructor <;> native_decide))) := by
+  let hF := uniformExpOnUnitRealFunRaw_valid
+  have hzero : uniformExpOnUnitRealFunRaw.domain (0 : Rat) := by
+    constructor <;> native_decide
+  have hone : uniformExpOnUnitRealFunRaw.domain (1 : Rat) := by
+    constructor <;> native_decide
+  have hdiff := endpointDifferenceRaw_equiv_sub_apply
+    hF hzero hone uniformExpOnUnit_endpointDifferenceValid
+  have hintegral :
+      (Integral.integralFor uniformExpOnUnit
+        uniformExpOnUnitStabilizedConstruction).Valid :=
+    Integral.integralFor_valid uniformExpOnUnit
+      uniformExpOnUnitStabilizedConstruction
+  have hendpoint :
+      (endpointDifferenceRaw uniformExpOnUnitRealFunRaw 0 1
+        uniformExpOnUnit_endpointDifferenceValid).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using
+      uniformExpOnUnit_endpointDifferenceValid
+  have hsub :
+      ((uniformExpOnUnitRealFunRaw.apply hF (1 : Rat) hone) -
+        (uniformExpOnUnitRealFunRaw.apply hF (0 : Rat) hzero)).Valid :=
+    RealRaw.sub_valid
+      (by simpa [RealRaw.Valid, RealFunRaw.apply, RealFunRaw.applyCompute] using
+        hF (1 : Rat) hone)
+      (by simpa [RealRaw.Valid, RealFunRaw.apply, RealFunRaw.applyCompute] using
+        hF (0 : Rat) hzero)
+  exact RealRaw.equiv_trans hintegral hendpoint hsub
+    uniformExpOnUnitStabilizedIntegral_equiv_endpointDifference hdiff
+
 /-! The endpoint-difference spelling can be transported to the ordinary
 subtraction of the two certified exponential endpoint evaluations.  This is
 the first user-facing non-polynomial integral identity in the ODE route:

@@ -143,6 +143,14 @@ telescope.  No completeness principle is hidden behind this construction.
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnitStabilizedIntegral_equiv_powerSeries_endpoint_subtraction}
 \leanok
 
+The one-sided unit chart is also stabilized and identifies its integral with
+the endpoint difference \(\exp(1)-\exp(0)\), providing the elementary scalar
+ODE example before the centered local chart is used.
+
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitStabilized_valid}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitStabilizedIntegral_equiv_endpointDifference}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitStabilizedIntegral_equiv_exp_endpoint_subtraction}
+
 Thus the centered exponential is a checked local ODE provider and its
 integral identification is already a finite, executable theorem.
 In ordinary notation, the new representation edge reads
