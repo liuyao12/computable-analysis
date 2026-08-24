@@ -312,6 +312,14 @@ monotone derivative on cell -> endpoint secants -> derivative interval
 \lean{ComputableAnalysis.effectiveFTCStabilizedIntegralFor_equiv_endpointDifference}
 \leanok
 
+The effective FTC certificate also exposes endpoint representation transport
+explicitly.  Its scheduled endpoint evaluator is not silently identified
+with the canonical endpoint-difference evaluator: the primitive's own nested
+rational intervals supply that separate equivalence edge.
+
+\lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.endpointRaw_equiv_endpointDifference}
+\leanok
+
 The interface is the reusable calculus API: finite secant bounds feed
 derivative certificates; derivative bounds feed partition boxes; the effective
 FTC turns those boxes into endpoint differences. Monomial and finite

@@ -4403,6 +4403,22 @@ theorem effectiveDerivativeBoundFTC
       h.toDerivativeBoundFTC.endpointRaw :=
   h.toDerivativeBoundFTC.equiv_endpoint
 
+/-- The scheduled endpoint evaluator supplied by an effective FTC certificate
+agrees with the canonical endpoint-difference evaluator of its primitive.
+This is the representation-transport half of the public FTC interface: the
+finite derivative certificate proves the scheduled evaluator correct, while
+the primitive's own nested interval semantics transport it to the canonical
+endpoint computation. -/
+theorem EffectiveDerivativeBoundFTC.endpointRaw_equiv_endpointDifference
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveDerivativeBoundFTC F dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b)) :
+    h.toDerivativeBoundFTC.endpointRaw.Equiv
+      (endpointDifferenceRaw F a b hendpoint) := by
+  exact DerivativeBoundFTC.endpointRaw_equiv_endpointDifference
+    h.toDerivativeBoundFTC h.primitive_valid
+      h.primitive_domain_lower h.primitive_domain_upper hendpoint
+
 /-- Global finite certificate for the "candidate derivative versus computed
 secants" strategy.
 
