@@ -326,6 +326,85 @@ theorem riemannRightInterval_congr_of_samples
   exact hfold (List.range subdivisions)
     (by intro k hk; exact List.mem_range.mp hk) { lo := 0, hi := 0 }
 
+/-- Overlapping right-endpoint sample boxes propagate to overlapping right
+rectangle sums.  The ordered-interval hypothesis is used only to preserve
+overlap under multiplication by the mesh width. -/
+theorem riemannRightInterval_overlap_of_samples
+    (g h : RealFunRaw) (a b : Rat) (hab : a <= b)
+    (subdivisions prec : Nat)
+    (hpoint : forall k, k < subdivisions ->
+      QInterval.Overlaps
+        (g.compute (rightPoint a b subdivisions k) prec)
+        (h.compute (rightPoint a b subdivisions k) prec)) :
+    QInterval.Overlaps
+      (riemannRightInterval g a b subdivisions prec)
+      (riemannRightInterval h a b subdivisions prec) := by
+  unfold riemannRightInterval
+  have hmesh : 0 <= mesh a b subdivisions := by
+    by_cases hn : 0 < subdivisions
+    · exact mesh_nonneg_of_le hn hab
+    · have hz : subdivisions = 0 := by omega
+      simp [mesh, hz]
+  have hfold : forall (xs : List Nat),
+      (forall k, k ∈ xs -> k < subdivisions) ->
+      forall (accG accH : QInterval), QInterval.Overlaps accG accH ->
+      QInterval.Overlaps
+        (xs.foldl
+          (fun acc k =>
+            let I := g.compute (rightPoint a b subdivisions k) prec
+            { lo := acc.lo + mesh a b subdivisions * I.lo,
+              hi := acc.hi + mesh a b subdivisions * I.hi })
+          accG)
+        (xs.foldl
+          (fun acc k =>
+            let I := h.compute (rightPoint a b subdivisions k) prec
+            { lo := acc.lo + mesh a b subdivisions * I.lo,
+              hi := acc.hi + mesh a b subdivisions * I.hi })
+          accH) := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro _ accG accH hover
+        exact hover
+    | cons k ks ih =>
+        intro hmem
+        have hk : k < subdivisions := hmem k (by simp)
+        have hks : forall j, j ∈ ks -> j < subdivisions := by
+          intro j hj
+          exact hmem j (by simp [hj])
+        intro accG accH hover
+        have hsample := hpoint k hk
+        have hstep : QInterval.Overlaps
+            { lo := accG.lo + mesh a b subdivisions *
+                (g.compute (rightPoint a b subdivisions k) prec).lo,
+              hi := accG.hi + mesh a b subdivisions *
+                (g.compute (rightPoint a b subdivisions k) prec).hi }
+            { lo := accH.lo + mesh a b subdivisions *
+                (h.compute (rightPoint a b subdivisions k) prec).lo,
+              hi := accH.hi + mesh a b subdivisions *
+                (h.compute (rightPoint a b subdivisions k) prec).hi } := by
+          unfold QInterval.Overlaps at hover hsample ⊢
+          constructor
+          · have hscaled :
+              mesh a b subdivisions *
+                  (g.compute (rightPoint a b subdivisions k) prec).lo <=
+                mesh a b subdivisions *
+                  (h.compute (rightPoint a b subdivisions k) prec).hi :=
+            Rat.mul_le_mul_of_nonneg_left hsample.1 hmesh
+            grind
+          · have hscaled :
+              mesh a b subdivisions *
+                  (h.compute (rightPoint a b subdivisions k) prec).lo <=
+                mesh a b subdivisions *
+                  (g.compute (rightPoint a b subdivisions k) prec).hi :=
+            Rat.mul_le_mul_of_nonneg_left hsample.2 hmesh
+            grind
+        simpa using ih hks _ _ hstep
+  exact hfold (List.range subdivisions)
+    (by intro k hk; exact List.mem_range.mp hk)
+    { lo := 0, hi := 0 } { lo := 0, hi := 0 } (by
+      simp [QInterval.Overlaps])
+
 /-- The finite left-endpoint sum for the product contribution
 `f\,\Delta g`.  This is the rational rectangle area swept when the second
 side of a rectangle changes while the first is held at its left endpoint. -/
