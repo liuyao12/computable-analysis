@@ -5885,6 +5885,20 @@ def ScheduledIntervalRegularOn.toIntervalRegularOn_of_identity_schedule
     simpa [hschedule n] using
       h.contains_point_values I hI x hx n hIlo hIhi)
 
+/-- Repackage an ordinary interval-regular evaluator as a scheduled evaluator
+with the identity stage schedule.  This is the canonical bridge for existing
+pointwise proofs when a downstream construction expects the explicit schedule
+field. -/
+def IntervalRegularOn.toScheduledIntervalRegularOn_identity
+    {F : FunctionOnInterval} (h : IntervalRegularOn F) :
+    ScheduledIntervalRegularOn F where
+  evalInterval := h.evalInterval
+  evalPrecision := fun n => n
+  inputPrecision := h.inputPrecision
+  inputPrecision_pos := h.inputPrecision_pos
+  output_width := h.output_width
+  contains_point_values := h.contains_point_values
+
 /-! Build interval regularity directly from a proof-independent point
 evaluator.  The public `IntervalRegularOn` contract remains unchanged; this
 constructor only removes domain-proof noise from new special-function

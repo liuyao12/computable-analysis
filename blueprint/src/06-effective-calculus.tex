@@ -205,6 +205,7 @@ explicit error budget later consumed by a partition-level FTC certificate.
 \lean{ComputableAnalysis.ScheduledIntervalRegularOn}
 \lean{ComputableAnalysis.ScheduledIntervalRegularOn.toIntervalRegularOn_of_requested_stage}
 \lean{ComputableAnalysis.ScheduledIntervalRegularOn.toIntervalRegularOn_of_identity_schedule}
+\lean{ComputableAnalysis.IntervalRegularOn.toScheduledIntervalRegularOn_identity}
 \lean{ComputableAnalysis.ScheduledIntervalRegularOn.epsilonDeltaContinuous}
 \lean{ComputableAnalysis.ContinuousFunctionOnInterval}
 \lean{ComputableAnalysis.Integral.unitConstantMonotoneDarbouxSchedule}
@@ -228,6 +229,9 @@ For the ordinary identity schedule, the
 \texttt{toIntervalRegularOn\_of\_identity\_schedule} adapter discharges this bookkeeping
 from the scheduled contract itself.  Adaptive schedules still require an
 explicit transport certificate.
+
+Conversely, an existing ordinary proof can be exposed to a schedule-aware
+consumer through \texttt{IntervalRegularOn.toScheduledIntervalRegularOn\_identity}.
 
 Representations form a local chain: reflexive, symmetric, and transitive
 equivalence edges compose different rational stage schedules without changing
