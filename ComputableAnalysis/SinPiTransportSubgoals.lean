@@ -364,26 +364,23 @@ the even, lower-odd, and reflected-upper-odd certificates are supplied, the
 existing overlap assembly gives precisely the overlap family consumed above.
 This leaves no hidden classical continuity premise in the transport step. -/
 
-/-! A canonical-witness variant of the overlap assembly.  It keeps the
-even branch as a direct overlap input, while the two odd branches are supplied
-by the rational unit-circle certificates above. -/
+/-! A canonical-witness variant of the overlap assembly.  All three parity
+branches are supplied by rational unit-circle certificates; the zero endpoint
+is still handled separately by the exact endpoint law. -/
 
 noncomputable def DyadicTangentWitnessFamily.of_canonical_halfAngle_families
     (B : IntegralIdentities.ArctanInverseBisection)
     (ht0 : (B.tangentAt 0
       RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
       RealRaw.zero)
-    (even_overlap : forall (precision n j : Nat) (hj : j < 2 ^ n),
-      QInterval.Overlaps
-        (rationalCircleSinInterval
-          (dyadicTangentBoxAt B precision (n + 1) (2 * j)
-            (by
-              have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
-                rw [Nat.pow_succ]
-                omega
-              rw [hpow]
-              omega)))
-        ((dyadicNestedRadicalTableAt precision (n + 1) (2 * j)).1))
+    (even_certificate : forall (precision n j : Nat) (hj : j < 2 ^ n),
+      CanonicalDyadicHalfAngleCertificateAt B precision (n + 1) (2 * j)
+        (by
+          have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+            rw [Nat.pow_succ]
+            omega
+          rw [hpow]
+          omega))
     (lower_certificate : forall (precision n j : Nat)
       (hbound : 2 * j + 1 <= 2 ^ n),
       CanonicalDyadicHalfAngleCertificateAt B precision (n + 1)
@@ -398,7 +395,15 @@ noncomputable def DyadicTangentWitnessFamily.of_canonical_halfAngle_families
       CanonicalDyadicHalfAngleCertificateAt B precision (n + 1) k hk) :
     DyadicTangentWitnessFamily B := by
   apply DyadicTangentWitnessFamily.of_branch_overlap_families B ht0
-    even_overlap
+  · intro precision n j hj
+    exact canonical_dyadic_overlap_of_halfAngle_outer_tangent_at B _
+      (even_certificate precision n j hj).cosineBox_subinterval
+      (even_certificate precision n j hj).outer_tangent_contains
+      (even_certificate precision n j hj).sine_nonneg
+      (even_certificate precision n j hj).cosine_nonneg
+      (even_certificate precision n j hj).circle_identity
+      (even_certificate precision n j hj).sine_contains
+      (even_certificate precision n j hj).cosine_contains
   · intro precision n j hbound
     exact lower_overlap_of_canonical_halfAngle_certificate B precision n j
       hbound (lower_certificate precision n j hbound)

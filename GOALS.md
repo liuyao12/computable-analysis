@@ -351,7 +351,9 @@ from monomial brackets structurally.
    `DyadicTangentWitnessFamily.of_overlap_family`; the combined adapter
    `DyadicTangentWitnessFamily.of_branch_certificate_families` is now
    formalized.  The canonical overlap assembly is also packaged by
-   `DyadicTangentWitnessFamily.of_canonical_halfAngle_families`.
+   `DyadicTangentWitnessFamily.of_canonical_halfAngle_families`; it now takes
+   canonical certificates for all three nonzero parity branches, with the zero
+   endpoint supplied by the exact endpoint theorem.
 
    Each certificate has a `to_public_overlap` theorem already; the remaining
    proofs are finite interval inequalities and circle identities, not a new
