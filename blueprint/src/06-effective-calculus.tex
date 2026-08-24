@@ -59,6 +59,25 @@ certificates.
 \lean{ComputableAnalysis.Integral.cubicIntegralEffectiveFTC_equiv_one_fourth}
 \leanok
 
+The polynomial ladder is now visible at the public monotone-integral level.
+On $[0,1]$, factorization proves that $x^2$, $x^3$, and $x^4$ are
+nondecreasing; their finite rectangle certificates identify the integrals
+with $1/3$, $1/4$, and $1/5$.  These are not appeals to an all-polynomials
+integration theorem: each evaluator carries its own rational construction and
+overlap proof.  They provide the first reusable test family for the effective
+FTC before special functions enter.
+
+\lean{ComputableAnalysis.Integral.exactRat_square_nondecreasing}
+\lean{ComputableAnalysis.Integral.exactRat_square_monotone_integral_valid}
+\lean{ComputableAnalysis.Integral.exactRat_square_monotone_integral_eq_one_third}
+\lean{ComputableAnalysis.Integral.exactRat_cube_nondecreasing}
+\lean{ComputableAnalysis.Integral.exactRat_cube_monotone_integral_valid}
+\lean{ComputableAnalysis.Integral.exactRat_cube_monotone_integral_eq_one_fourth}
+\lean{ComputableAnalysis.Integral.exactRat_quartic_nondecreasing}
+\lean{ComputableAnalysis.Integral.exactRat_quartic_monotone_integral_valid}
+\lean{ComputableAnalysis.Integral.exactRat_quartic_monotone_integral_eq_one_fifth}
+\leanok
+
 \section{Continuity as a finite certificate}
 
 Continuity is not a predicate on an ambient completed function space.  A
