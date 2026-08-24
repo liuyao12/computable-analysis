@@ -933,6 +933,68 @@ def exactCube_lipschitz_on_unit :
           rw [show s - t = -(t - s) by grind [Rat.sub_eq_add_neg], qabs_neg]]
         grind [Rat.mul_comm]
 
+def exactCube_lipschitz_on_minusOne_one :
+    Integral.LipschitzOnIntervalNat (fun x : Rat => x ^ 3) (-1) 1 3 := by
+  refine ⟨by native_decide, ?_⟩
+  intro s t hs hsb ht htb
+  have hsabs : qabs s <= 1 :=
+    qabs_le_of_neg_le_le (by grind) (by grind)
+  have htabs : qabs t <= 1 :=
+    qabs_le_of_neg_le_le (by grind) (by grind)
+  have hs2 : qabs (s ^ 2) <= 1 := by
+    rw [RationalMajorant.qabs_pow_eq_pow_qabs]
+    calc
+      qabs s ^ 2 = qabs s * qabs s := by simpa [Rat.pow_succ]
+      _ <= 1 * qabs s :=
+        Rat.mul_le_mul_of_nonneg_right hsabs (qabs_nonneg s)
+      _ <= 1 * 1 :=
+        Rat.mul_le_mul_of_nonneg_left hsabs (by native_decide)
+      _ = 1 := by native_decide
+  have ht2 : qabs (t ^ 2) <= 1 := by
+    rw [RationalMajorant.qabs_pow_eq_pow_qabs]
+    calc
+      qabs t ^ 2 = qabs t * qabs t := by simpa [Rat.pow_succ]
+      _ <= 1 * qabs t :=
+        Rat.mul_le_mul_of_nonneg_right htabs (qabs_nonneg t)
+      _ <= 1 * 1 :=
+        Rat.mul_le_mul_of_nonneg_left htabs (by native_decide)
+      _ = 1 := by native_decide
+  have hst : qabs (s * t) <= 1 := by
+    rw [qabs_mul]
+    calc
+      qabs s * qabs t <= 1 * qabs t :=
+        Rat.mul_le_mul_of_nonneg_right hsabs (qabs_nonneg t)
+      _ <= 1 * 1 :=
+        Rat.mul_le_mul_of_nonneg_left htabs (by native_decide)
+      _ = 1 := by native_decide
+  have hsum : qabs (s ^ 2 + s * t + t ^ 2) <= 3 := by
+    calc
+      qabs (s ^ 2 + s * t + t ^ 2) <=
+          qabs (s ^ 2 + s * t) + qabs (t ^ 2) :=
+        qabs_add_le (s ^ 2 + s * t) (t ^ 2)
+      _ <= (qabs (s ^ 2) + qabs (s * t)) + qabs (t ^ 2) := by
+        grind [qabs_add_le]
+      _ <= (1 + 1) + 1 := by grind
+      _ = 3 := by native_decide
+  have hfactor : s ^ 3 - t ^ 3 =
+      (s - t) * (s ^ 2 + s * t + t ^ 2) := by
+    grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul]
+  rw [hfactor, qabs_mul]
+  calc
+    qabs (s - t) * qabs (s ^ 2 + s * t + t ^ 2) <=
+        qabs (s - t) * 3 :=
+      Rat.mul_le_mul_of_nonneg_left hsum (qabs_nonneg _)
+    _ = 3 * qabs (t - s) := by
+      rw [show qabs (s - t) = qabs (t - s) by
+        rw [show s - t = -(t - s) by grind [Rat.sub_eq_add_neg], qabs_neg]]
+      grind [Rat.mul_comm]
+
+def exactRat_cube_intervalRegularOn_minusOne_one :
+    IntervalRegularOn
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ 3) (-1) 1) :=
+  IntervalRegularOn.of_lipschitzOnIntervalNat (fun x : Rat => x ^ 3)
+    (-1) 1 3 exactCube_lipschitz_on_minusOne_one
+
 def exactRat_cube_integral_certificate :
     Integral.IntervalRegularIntegralCertificate
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ 3) 0 1) where

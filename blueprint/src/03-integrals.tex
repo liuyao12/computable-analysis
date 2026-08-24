@@ -549,6 +549,14 @@ a non-monotone integrand rather than by its closed primitive formula.
 \lean{ComputableAnalysis.exactRat_square_intervalRegularOn_minusOne_one}
 \leanok
 
+The same route now covers the cubic evaluator on $[-1,1]$: the finite
+factorization $s^3-t^3=(s-t)(s^2+st+t^2)$ and the bound
+$|s^2+st+t^2|\le 3$ give a rational Lipschitz certificate.
+
+\lean{ComputableAnalysis.exactCube_lipschitz_on_minusOne_one}
+\lean{ComputableAnalysis.exactRat_cube_intervalRegularOn_minusOne_one}
+\leanok
+
 For the cubic case the first rectangle identity is explicit:
 \(\sum_{k<n}3(k/n)^2(1/n)\) is evaluated by a finite sum-of-squares
 induction.  The interval-regular layer then supplies the domain-restricted
