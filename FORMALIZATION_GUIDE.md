@@ -1243,6 +1243,17 @@ the stabilized finite Stieltjes sums for the same substitution, then proves
 equivalent to `pi.squareSubstitution` and area pi.  It is an executable
 algorithmic witness in the primary pi registry, not a ninth coverage bridge.
 
+For the equal-dyadic sine route, the finite candidate sum now has an explicit
+ordered-interval theorem:
+`SinPiIntegral.dyadicNestedRadicalLeftSum_width_nonneg`. If a geometric or
+Stieltjes argument supplies stagewise interval overlap, package it as
+`SinPiIntegral.DyadicNestedRadicalStieltjesCommonWitness.of_overlap`; the
+constructor chooses the larger rational lower endpoint as the witness.
+Conversely, `DyadicNestedRadicalStieltjesCommonWitness.to_overlap` recovers
+the overlap used by stabilization. This changes only the shape of finite
+evidence; it does not assert that an exact intermediate real value has been
+attained.
+
 The future canonical-logarithm π formula has one explicit entry point:
 `PiProofs.CanonicalLogTwoCertificate`. Supply a valid raw value at two and
 a proof that it agrees with `Logarithm.logTwoReciprocalIntegral`; then

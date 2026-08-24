@@ -7940,6 +7940,70 @@ theorem dyadicNestedRadicalLeftSum_widths_shrink :
   exact shrinksToZero_of_natOverSuccBound
     (fun n => dyadicNestedRadicalLeftSum_width_le_one_over_succ n) eps
 
+theorem dyadicNestedRadicalLeftSum_width_nonneg (n : Nat) :
+    0 <= (dyadicNestedRadicalLeftSum n).width := by
+  let N := 2 ^ n
+  have hN : 0 < N := by
+    dsimp [N]
+    exact Nat.pow_pos (by omega)
+  have hmesh : 0 <= mesh 0 ((1 : Rat) / 2) N :=
+    mesh_nonneg_of_le hN (by native_decide)
+  have hterm : forall k, k ∈ List.range N ->
+      0 <= (QInterval.scaleByRat
+        (mesh 0 ((1 : Rat) / 2) N)
+        (dyadicNestedRadicalStageSinAt n k)).width := by
+    intro k hk
+    have hklt : k < N := List.mem_range.mp hk
+    rw [QInterval.scaleByRat_width_of_nonneg hmesh]
+    exact Rat.mul_nonneg hmesh
+      (by
+        have hbounds := dyadicNestedRadicalTableAt_bounds n n k
+          (Nat.le_of_lt (by simpa [N] using hklt))
+        have horder := hbounds.1.2.1
+        have hdiff :
+            0 <= (dyadicNestedRadicalTableAt n n k).1.hi -
+              (dyadicNestedRadicalTableAt n n k).1.lo := by
+          grind
+        simpa [dyadicNestedRadicalStageSinAt,
+          dyadicNestedRadicalStageTable, QInterval.width] using hdiff)
+  unfold dyadicNestedRadicalLeftSum
+  rw [RationalPartition.addInterval_fold_width]
+  have hfold : forall (xs : List Nat) (initial : Rat),
+      0 <= initial ->
+      (forall k, k ∈ xs ->
+        0 <= (QInterval.scaleByRat
+          (mesh 0 ((1 : Rat) / 2) N)
+          (dyadicNestedRadicalStageSinAt n k)).width) ->
+      0 <= xs.foldl
+        (fun total k => total +
+          (QInterval.scaleByRat
+            (mesh 0 ((1 : Rat) / 2) N)
+            (dyadicNestedRadicalStageSinAt n k)).width) initial := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro initial hinit _
+        simpa using hinit
+    | cons k xs ih =>
+        intro initial hinit hterms
+        apply ih (initial +
+          (QInterval.scaleByRat
+            (mesh 0 ((1 : Rat) / 2) N)
+            (dyadicNestedRadicalStageSinAt n k)).width)
+        · exact Rat.add_nonneg hinit (hterms k (by simp))
+        · intro j hj
+          exact hterms j (by simp [hj])
+  have h := hfold (List.range N) 0 (by native_decide) hterm
+  change 0 <= (0 - 0) +
+    List.foldl
+      (fun total k => total +
+        (QInterval.scaleByRat
+          (mesh 0 ((1 : Rat) / 2) N)
+          (dyadicNestedRadicalStageSinAt n k)).width)
+      0 (List.range N)
+  rw [show (0 : Rat) - 0 = 0 by native_decide, Rat.zero_add]
+  exact h
+
 /-! The exact finite bridge from the public mesh to the table's indexed
 sample is recorded separately from any analytic convergence theorem. -/
 theorem dyadicNestedRadical_sample_coordinate
@@ -7991,6 +8055,56 @@ structure DyadicNestedRadicalStieltjesCommonWitness where
     (sinPiStieltjesIntegral.compute n).lo <= witness n
   witness_le_stieltjes_hi : forall n,
     witness n <= (sinPiStieltjesIntegral.compute n).hi
+
+/-! Overlap and a rational common witness are the same finite fact for these
+intervals.  This constructor chooses the larger lower endpoint.  It is
+useful because geometric proofs naturally establish overlap, while the
+stabilization interface consumes an explicit witness. -/
+def DyadicNestedRadicalStieltjesCommonWitness.of_overlap
+    (hoverlap : forall n,
+      QInterval.Overlaps
+        (dyadicNestedRadicalLeftSum n)
+        (sinPiStieltjesIntegral.compute n)) :
+    DyadicNestedRadicalStieltjesCommonWitness where
+  witness := fun n => max
+    (dyadicNestedRadicalLeftSum n).lo
+    (sinPiStieltjesIntegral.compute n).lo
+  candidate_lo_le := by
+    intro n
+    rw [Rat.max_def]
+    split <;> grind
+  witness_le_candidate_hi := by
+    intro n
+    have hover := hoverlap n
+    unfold QInterval.Overlaps at hover
+    have hleft :
+        (dyadicNestedRadicalLeftSum n).lo <=
+          (dyadicNestedRadicalLeftSum n).hi := by
+      have hwidth := dyadicNestedRadicalLeftSum_width_nonneg n
+      change 0 <=
+        (dyadicNestedRadicalLeftSum n).hi -
+          (dyadicNestedRadicalLeftSum n).lo at hwidth
+      grind
+    rw [Rat.max_def]
+    split <;> grind
+  stieltjes_lo_le := by
+    intro n
+    rw [Rat.max_def]
+    split <;> grind
+  witness_le_stieltjes_hi := by
+    intro n
+    have hover := hoverlap n
+    unfold QInterval.Overlaps at hover
+    have hright :
+        (sinPiStieltjesIntegral.compute n).lo <=
+          (sinPiStieltjesIntegral.compute n).hi := by
+      have hwidth := sinPiStieltjesIntegral_valid.1 n
+      change 0 <=
+        (sinPiStieltjesIntegral.compute n).hi -
+          (sinPiStieltjesIntegral.compute n).lo at hwidth
+      grind
+    rw [Rat.max_def]
+    split <;> grind
 
 theorem DyadicNestedRadicalStieltjesCommonWitness.to_overlap
     (h : DyadicNestedRadicalStieltjesCommonWitness) (n : Nat) :
