@@ -160,6 +160,17 @@ an interval width $4/2^n$ before any endpoint or FTC identification.
 \lean{ComputableAnalysis.IntegralIdentities.arctanKernelLipschitzIntegral_valid}
 \leanok
 
+The finite base cases are explicit as well.  Constants and affine functions
+are integrated by rational endpoint formulas; their monotonicity certificates
+are retained so the same constructions can be inserted into a piecewise plan.
+
+\lean{ComputableAnalysis.exactRat_constant_nondecreasing}
+\lean{ComputableAnalysis.constantMonotoneIntegralFor_eq_ofRat}
+\lean{ComputableAnalysis.exactRat_affine_nondecreasing}
+\lean{ComputableAnalysis.affineMonotoneIntegralFor_eq_ofRat}
+\lean{ComputableAnalysis.affineMonotoneIntegralFor_of_nonpos_eq_ofRat}
+\leanok
+
 \section{Beyond Lipschitz: effective monotone schedules}
 
 The next layer accepts an interval-level modulus rather than one global
