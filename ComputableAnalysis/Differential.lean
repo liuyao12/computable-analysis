@@ -1246,6 +1246,35 @@ theorem differenceQuotient_neg (A B : QInterval) (h : Rat) :
     grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
       Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
 
+/-! Negative scalar multiplication is reduced to the already-certified
+nonnegative case plus endpoint negation.  Keeping this identity explicit
+prevents a sign-sensitive interval multiplication from being hidden in a
+later derivative proof. -/
+theorem scaleRat_neg_eq_neg_scaleRat_neg {r : Rat} (hr : r < 0)
+    (I : QInterval) :
+    scaleRat r I = neg (scaleRat (-r) I) := by
+  have hr0pos : 0 < -r := by
+    simpa using (Rat.neg_lt_neg hr)
+  have hr0 : 0 <= -r := Rat.le_of_lt hr0pos
+  unfold scaleRat neg
+  rw [if_neg (Rat.not_le.mpr hr),
+    if_pos hr0]
+  cases I
+  dsimp
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+    Rat.mul_comm, Rat.add_comm, Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
+
+theorem differenceQuotient_scaleRat_of_neg {r : Rat} (hr : r < 0)
+    (A B : QInterval) (h : Rat) :
+    differenceQuotient (scaleRat r A) (scaleRat r B) h =
+      scaleRat r (differenceQuotient A B h) := by
+  rw [scaleRat_neg_eq_neg_scaleRat_neg hr A,
+    scaleRat_neg_eq_neg_scaleRat_neg hr B,
+    differenceQuotient_neg]
+  rw [differenceQuotient_scaleRat_of_nonneg (by grind : 0 <= -r)]
+  exact (scaleRat_neg_eq_neg_scaleRat_neg hr
+    (differenceQuotient A B h)).symm
+
 /-- Dividing the difference of two exact singleton boxes gives the exact
 rational difference quotient.  The sign split in interval division is harmless
 here because both endpoints coincide. -/
@@ -2091,6 +2120,63 @@ def HasDerivativeOnInterval.scaleRat_of_nonneg
       hbase (hprecision n)
     simpa only [FunctionOnInterval.scaleRat_compute,
       QInterval.differenceQuotient_scaleRat_of_nonneg hr] using hscaled
+
+/-! Full rational scalar closure.  Nonnegative scalars use interval scaling
+directly; negative scalars use the proved sign decomposition and the negation
+closure.  In both cases the caller supplies the finite precision budget
+`|r| * eps_inner <= eps`. -/
+def HasDerivativeOnInterval.scaleRat
+    {r : Rat}
+    {f df : FunctionOnInterval}
+    (D : HasDerivativeOnInterval f df)
+    (inner : Nat -> Nat)
+    (hprecision : forall n,
+      qabs r * (precisionAtStage (inner n)).val <=
+        (precisionAtStage n).val) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.scaleRat r f)
+      (FunctionOnInterval.scaleRat r df) := by
+  by_cases hr : 0 <= r
+  · exact D.scaleRat_of_nonneg hr inner (by
+      intro n
+      simpa [qabs_eq_self_of_nonneg hr] using hprecision n)
+  · have hrneg : r < 0 := Rat.not_le.mp hr
+    have hnonneg : 0 <= -r := by
+      have hpos : 0 < -r := by
+        simpa using (Rat.neg_lt_neg hrneg)
+      exact Rat.le_of_lt hpos
+    have hprecision' : forall n,
+        (-r) * (precisionAtStage (inner n)).val <=
+          (precisionAtStage n).val := by
+      have hrq : qabs r = -r :=
+        qabs_eq_neg_of_nonpos (Rat.le_of_lt hrneg)
+      intro n
+      simpa [hrq] using hprecision n
+    refine
+      { same_lower := D.same_lower
+        same_upper := D.same_upper
+        stepPrecision := fun n => D.stepPrecision (inner n)
+        evalPrecision := fun x h n => D.evalPrecision x h (inner n)
+        close := ?_ }
+    intro x h n hx hxh hdx hh hsmall
+    change inDomainInterval f.lower f.upper x at hx
+    change inDomainInterval f.lower f.upper (x + h) at hxh
+    change inDomainInterval df.lower df.upper x at hdx
+    have hbase := D.close x h (inner n) hx hxh hdx hh hsmall
+    have hscaled := intervalNearAtPrecision_scaleRat_of_nonneg hnonneg
+      hbase (hprecision' n)
+    have hneg := intervalNearAtPrecision_neg hscaled
+    have hsecant :=
+      (QInterval.scaleRat_neg_eq_neg_scaleRat_neg hrneg
+        (QInterval.differenceQuotient
+          (f.compute (x + h) hxh (D.evalPrecision x h (inner n)))
+          (f.compute x hx (D.evalPrecision x h (inner n))) h)).symm
+    have hderivative :=
+      (QInterval.scaleRat_neg_eq_neg_scaleRat_neg hrneg
+        (df.compute x hdx (D.evalPrecision x h (inner n)))).symm
+    simpa only [FunctionOnInterval.scaleRat_compute,
+      QInterval.differenceQuotient_scaleRat_of_neg hrneg, hsecant,
+      hderivative] using hneg
 
 /-! Negation needs no finer stage: it reverses both interval endpoints but
 does not enlarge widths or the finite nearness budget. -/

@@ -136,11 +136,18 @@ derivative box at the requested stage after paying the doubled error budget.
 This is the constructive replacement for silently invoking a derivative
 closure theorem over completed real-valued functions.
 
+Scalar multiplication is sign-complete at the same level.  A rational factor
+uses an explicit budget \(|r|\,\varepsilon_{\mathrm{inner}}\leq
+\varepsilon_{\mathrm{out}}\); negative factors are reduced to a nonnegative
+factor followed by interval negation.  Thus finite linear combinations do not
+depend on an implicit ordered-real scalar operation.
+
 \lean{ComputableAnalysis.QInterval.differenceQuotient_addInterval}
 \lean{ComputableAnalysis.intervalNearAtPrecision_addInterval}
 \lean{ComputableAnalysis.HasDerivativeOnInterval.addOfCommonSchedule}
 \lean{ComputableAnalysis.intervalNearAtPrecision_scaleRat_of_nonneg}
 \lean{ComputableAnalysis.HasDerivativeOnInterval.scaleRat_of_nonneg}
+\lean{ComputableAnalysis.HasDerivativeOnInterval.scaleRat}
 \lean{ComputableAnalysis.FunctionOnInterval.neg}
 \lean{ComputableAnalysis.HasDerivativeOnInterval.neg}
 \lean{ComputableAnalysis.FunctionOnInterval.sub}

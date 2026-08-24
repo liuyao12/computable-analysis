@@ -341,6 +341,13 @@ angle representation.  The same module now proves the quantitative finite
 gap `x + 1/(n+1) <= y -> Theta_x.hi < Theta_y.lo` at stage `64*(n+1)`,
 and packages it as `angleOnUnit_effectiveInverseSeparation`.
 
+The unrestricted rational scalar rule is now also available as
+`HasDerivativeOnInterval.scaleRat`.  Its budget uses `qabs r`, and the proof
+splits the sign explicitly: nonnegative scaling uses interval multiplication,
+while a negative scalar is reduced to nonnegative scaling followed by
+endpoint negation.  This makes linear combinations sign-complete without
+silently assuming an ordered completed field.
+
 Negation is also closed at the interval level:
 `FunctionOnInterval.neg` reverses endpoint boxes without changing their
 width, and `HasDerivativeOnInterval.neg` proves the corresponding
@@ -812,6 +819,7 @@ open ComputableAnalysis
 #check FinitePolynomial.SecantDerivativeBound.mul
 #check FinitePolynomial.SecantDerivativeBound.mulToHasDerivativeOnInterval
 #check HasDerivativeOnInterval.endpointDifference_contains_of_pos
+#check HasDerivativeOnInterval.scaleRat
 #check FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval
 #check ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero
