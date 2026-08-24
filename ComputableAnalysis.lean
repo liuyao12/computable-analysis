@@ -21,6 +21,7 @@ import ComputableAnalysis.BaselFiniteComparison
 import ComputableAnalysis.BaselTargetContainment
 import ComputableAnalysis.FinitePrimeReciprocalCertificate
 import ComputableAnalysis.Calculus
+import ComputableAnalysis.CalculusFoundation
 import ComputableAnalysis.FiniteQuadratureMeanValue
 import ComputableAnalysis.FiniteTaylorFTCInterface
 import ComputableAnalysis.ComplexAffine

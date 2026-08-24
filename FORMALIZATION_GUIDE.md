@@ -17,6 +17,11 @@ just an API map, start with the public
 Its integral reference documents the per-function constructions, including a
 shrinking rational bracket around a non-rational turning point.
 
+For the focused calculus route, import
+`ComputableAnalysis.CalculusFoundation`. It collects the circle, integral and
+effective-FTC, power-series, exponential/logarithm, Fourier, and ODE layers
+without importing the full benchmark catalogue.
+
 ## Read this first
 
 The current strong point is checking specified rational and complex interval
