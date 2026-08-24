@@ -282,6 +282,18 @@ For example, `1 / (x^2 - 2)` must not be treated as regular on `[1,2]`.
 7. **Only then expose a friendly formula.**  The familiar formula is the
    public theorem; the raw implementations and bounds are its proof data.
 
+For an effective FTC proof, do not force all computations to use one stage.
+`TwoStageCandidateDerivativeFTC` allows the derivative evaluator and the
+primitive endpoint evaluator to choose independent stages. The derivative
+stage builds the cell bounds; the endpoint stage supplies the common-stage
+finite telescope. The public closure theorem is
+`ComputableAnalysis.twoStageCandidateDerivativeFTC`, while
+`TwoStageCandidateDerivativeFTC.boundedIntegralRaw_equiv_endpointDifference`
+transports the resulting raw integral to the canonical endpoint difference.
+This separation is useful for nested-radical or other staged special-function
+evaluators whose pointwise and endpoint computations have different natural
+schedules.
+
 Use `rg` to discover nearby examples before inventing a new interface:
 
 ```bash

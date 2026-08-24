@@ -302,6 +302,11 @@ monotone derivative on cell -> endpoint secants -> derivative interval
 \lean{ComputableAnalysis.curvatureFTC}
 \lean{ComputableAnalysis.ConvexFTCCertificate.equiv_endpoint}
 \lean{ComputableAnalysis.ConcaveFTCCertificate.equiv_endpoint}
+\lean{ComputableAnalysis.TwoStageCandidateDerivativeFTC}
+\lean{ComputableAnalysis.TwoStageCandidateDerivativeFTC.overlap}
+\lean{ComputableAnalysis.TwoStageCandidateDerivativeFTC.closeAt}
+\lean{ComputableAnalysis.TwoStageCandidateDerivativeFTC.equiv_endpoint}
+\lean{ComputableAnalysis.twoStageCandidateDerivativeFTC}
 \lean{ComputableAnalysis.constructionFor_of_selectedStageCandidateDerivativeFTC}
 \lean{ComputableAnalysis.definiteIdentityFor_of_selectedStageCandidateDerivativeFTC}
 \lean{ComputableAnalysis.FTC.effectiveFTC_riemannRaw_equiv_endpointDifference_of_endpointAgreement}
@@ -316,6 +321,21 @@ The effective FTC certificate also exposes endpoint representation transport
 explicitly.  Its scheduled endpoint evaluator is not silently identified
 with the canonical endpoint-difference evaluator: the primitive's own nested
 rational intervals supply that separate equivalence edge.
+
+The two-stage variant makes the scheduling separation explicit.  The derivative
+boxes may be computed at a stage chosen for the candidate function, while the
+primitive endpoint boxes may be computed at a different stage chosen for the
+finite telescope:
+
+\begin{verbatim}
+derivative stage -> cell derivative boxes -> weighted finite sum
+endpoint stage   -> primitive endpoint boxes -> telescope comparison
+                 -> overlap at the requested outer precision
+\end{verbatim}
+
+This is a proof interface, not an efficiency promise.  A special-function
+implementation may choose whichever certified schedule is convenient; the
+theorem only requires that both schedules close the same rational error budget.
 
 \lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.endpointRaw_equiv_endpointDifference}
 \leanok
