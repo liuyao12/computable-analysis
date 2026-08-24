@@ -78,6 +78,18 @@ FTC before special functions enter.
 \lean{ComputableAnalysis.Integral.exactRat_quartic_monotone_integral_eq_one_fifth}
 \leanok
 
+The square now also closes the full derivative-bound route.  The primitive
+$x^3/3$ and derivative $x^2$ are represented by rational interval evaluators;
+the effective FTC identifies the bounded rectangle computation with the
+endpoint difference, and the endpoint computation is reduced to $1/3$ by
+finite rational arithmetic.  This is the model theorem for the later
+special-function instances: the FTC and the value identification are two
+separate overlap steps.
+
+\lean{ComputableAnalysis.Integral.squareIntegralEffectiveFTC_endpoint_equiv_one_third}
+\lean{ComputableAnalysis.Integral.squareIntegralEffectiveFTC_integral_equiv_one_third}
+\leanok
+
 \section{Continuity as a finite certificate}
 
 Continuity is not a predicate on an ambient completed function space.  A

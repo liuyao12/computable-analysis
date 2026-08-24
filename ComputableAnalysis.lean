@@ -30,6 +30,7 @@ import ComputableAnalysis.ComplexInterval
 import ComputableAnalysis.ComplexPathIntegral
 import ComputableAnalysis.FiniteComplexPathCertificate
 import ComputableAnalysis.FiniteFTCIntervalRegular
+import ComputableAnalysis.PolynomialFTCValues
 import ComputableAnalysis.FiniteMonotoneSquareIntegral
 import ComputableAnalysis.FinitePiecewiseRectangles
 import ComputableAnalysis.FiniteFTCQuintic
