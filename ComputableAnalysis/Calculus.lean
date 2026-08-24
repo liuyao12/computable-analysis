@@ -148,6 +148,20 @@ def riemannLeftInterval (g : RealFunRaw) (a b : Rat) (n : Nat) (prec : Nat) : QI
     (fun acc k => let I := g.compute (leftPoint a b n k) prec; { lo := acc.lo + h * I.lo, hi := acc.hi + h * I.hi })
     { lo := 0, hi := 0 }
 
+/-! Right-endpoint rectangles use the same rational mesh and interval
+arithmetic, changing only the sampled point from `k` to `k + 1`.  Keeping
+this as a separate finite construction makes the choice of Riemann convention
+visible without appealing to a limiting equivalence. -/
+
+def rightPoint (a b : Rat) (n k : Nat) : Rat :=
+  leftPoint a b n (k + 1)
+
+def riemannRightInterval (g : RealFunRaw) (a b : Rat) (n : Nat) (prec : Nat) : QInterval :=
+  let h := mesh a b n
+  (List.range n).foldl
+    (fun acc k => let I := g.compute (rightPoint a b n k) prec; { lo := acc.lo + h * I.lo, hi := acc.hi + h * I.hi })
+    { lo := 0, hi := 0 }
+
 /-- The finite rectangle sum is insensitive to how an evaluator behaves away
 from its sample points.  This is the bridge used by the computable sine
 integral: a specialized nested-radical evaluator only needs to agree with
@@ -1146,6 +1160,58 @@ def slopeBetween (Fy Fx : QInterval) (dx : Rat) : QInterval :=
   divByRat (subInterval Fy Fx) dx
 
 end QInterval
+
+/-! The finite right-endpoint fold has the same pointwise-addition law as the
+left-endpoint fold. -/
+
+theorem riemannRightInterval_add
+    (f g : RealFunRaw) (a b : Rat) (subdivisions prec : Nat) :
+    riemannRightInterval (RealFunRaw.add f g) a b subdivisions prec =
+      QInterval.addInterval
+        (riemannRightInterval f a b subdivisions prec)
+        (riemannRightInterval g a b subdivisions prec) := by
+  unfold riemannRightInterval
+  let stepF : QInterval -> Nat -> QInterval := fun acc k =>
+    let I := f.compute (rightPoint a b subdivisions k) prec
+    { lo := acc.lo + mesh a b subdivisions * I.lo,
+      hi := acc.hi + mesh a b subdivisions * I.hi }
+  let stepG : QInterval -> Nat -> QInterval := fun acc k =>
+    let I := g.compute (rightPoint a b subdivisions k) prec
+    { lo := acc.lo + mesh a b subdivisions * I.lo,
+      hi := acc.hi + mesh a b subdivisions * I.hi }
+  let stepH : QInterval -> Nat -> QInterval := fun acc k =>
+    let I := (RealFunRaw.add f g).compute
+      (rightPoint a b subdivisions k) prec
+    { lo := acc.lo + mesh a b subdivisions * I.lo,
+      hi := acc.hi + mesh a b subdivisions * I.hi }
+  have hstep : forall k (AF AG : QInterval),
+      stepH (QInterval.addInterval AF AG) k =
+        QInterval.addInterval (stepF AF k) (stepG AG k) := by
+    intro k AF AG
+    dsimp [stepF, stepG, stepH, RealFunRaw.add,
+      QInterval.addInterval]
+    grind [Rat.add_assoc, Rat.add_comm, Rat.mul_add, Rat.add_mul]
+  have hfold : forall (xs : List Nat) (AF AG : QInterval),
+      xs.foldl stepH (QInterval.addInterval AF AG) =
+        QInterval.addInterval (xs.foldl stepF AF) (xs.foldl stepG AG) := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro AF AG
+        rfl
+    | cons k ks ih =>
+        intro AF AG
+        simp only [List.foldl]
+        rw [hstep k AF AG]
+        exact ih (stepF AF k) (stepG AG k)
+  have hzero : QInterval.addInterval { lo := 0, hi := 0 } { lo := 0, hi := 0 } =
+      { lo := 0, hi := 0 } := by
+    simp [QInterval.addInterval]
+    grind
+  have h := hfold (List.range subdivisions)
+    { lo := 0, hi := 0 } { lo := 0, hi := 0 }
+  rw [hzero] at h
+  simpa [stepF, stepG, stepH] using h
 
 /-! The finite rectangle fold respects pointwise addition.  This is the
 algebraic core of integral linearity; validity and representation transport

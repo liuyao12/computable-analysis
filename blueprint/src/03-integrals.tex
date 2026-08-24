@@ -48,7 +48,13 @@ sum is the interval sum of the two rectangle folds.  No limiting argument is
 needed here; convergence and representation transport are separate
 certificates.
 
+Left-endpoint rectangles are the default implementation, but the same finite
+algebra applies to right-endpoint rectangles.  The convention is therefore a
+choice of sample schedule, not a change of foundation.
+
 \lean{ComputableAnalysis.riemannLeftInterval_add}
+\lean{ComputableAnalysis.riemannRightInterval}
+\lean{ComputableAnalysis.riemannRightInterval_add}
 \lean{ComputableAnalysis.riemannLeftInterval_scale_of_nonneg}
 \lean{ComputableAnalysis.riemannLeftInterval_scale_of_neg}
 \leanok
