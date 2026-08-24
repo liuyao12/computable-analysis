@@ -5827,6 +5827,20 @@ def Integral.LipschitzOnIntervalNat (f : Rat -> Rat) (a b : Rat) (L : Nat) : Pro
     a <= s -> s <= b -> a <= t -> t <= b ->
       qabs (f s - f t) <= (L : Rat) * qabs (t - s)
 
+/-- Restrict a unit-chart Lipschitz certificate to any ordered rational
+subinterval.  This is the finite transport used when one global estimate is
+reused on the cells of a piecewise or turning-point integral. -/
+theorem Integral.LipschitzOnIntervalNat.of_unit_subinterval
+    (f : Rat -> Rat) (L : Nat) {a b : Rat}
+    (ha : 0 <= a) (hab : a <= b) (hb : b <= 1)
+    (hunit : Integral.LipschitzOnUnit f (L : Rat)) :
+    Integral.LipschitzOnIntervalNat f a b L := by
+  refine ⟨hab, ?_⟩
+  intro s t hs hsb ht htb
+  exact hunit.2 s t
+    (Rat.le_trans ha hs) (Rat.le_trans hsb hb)
+    (Rat.le_trans ha ht) (Rat.le_trans htb hb)
+
 def IntervalRegularOn.of_lipschitzOnIntervalNat
     (f : Rat -> Rat) (a b : Rat) (L : Nat)
     (hlip : Integral.LipschitzOnIntervalNat f a b L) :
