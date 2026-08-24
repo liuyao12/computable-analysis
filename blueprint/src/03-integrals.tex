@@ -721,6 +721,26 @@ termwise integration of finite power series.
 \lean{ComputableAnalysis.rightStieltjesSum_scale_right}
 \leanok
 
+The tangent-chart substitution is also finite.  For a chart cell
+(p\mapsto r), compute the two endpoint Jacobian ratios, fold the lower and
+upper rectangle contributions, and retain the enclosure relation:
+
+\begin{verbatim}
+source cells -> chart cells
+             -> lower/upper endpoint Jacobian folds
+             -> transported bracket contains source bracket
+\end{verbatim}
+
+This is the certificate used by the arctangent and sine constructions.  It
+does not assert a general substitution theorem for arbitrary limiting
+integrals; the mesh, denominator positivity, and endpoint enclosure remain
+explicit inputs.
+
+\lean{ComputableAnalysis.IntegralIdentities.chartAddLowerTransportSum}
+\lean{ComputableAnalysis.IntegralIdentities.chartAddUpperTransportSum}
+\lean{ComputableAnalysis.IntegralIdentities.chartAddPartition_transport_certificate}
+\leanok
+
 \section{Finite identities}
 \label{thm:finite-green-rectangle}
 \label{def:integration-by-parts-certificate}
