@@ -526,6 +526,92 @@ def toHasDerivativeOnInterval {basepoint C : Rat} {f df : Rat -> Rat}
       grind [Rat.sub_eq_add_neg]
     constructor <;> grind [Rat.sub_eq_add_neg]
 
+/-! The reciprocal kernel is the first non-polynomial derivative certificate
+needed by the logarithm chapter.  It is centered at `3/2` with radius `1/2`,
+so every admissible rational point and step endpoint lies in `[1,2]`. -/
+def reciprocalCenteredSecantBound :
+    CenteredSecantDerivativeBound (3 / 2) (1 / 2)
+      (fun x => 1 / x) (fun x => -(1 / x ^ 2)) := by
+  refine {
+    errorCoefficient := 1
+    errorCoefficient_nonneg := by native_decide
+    error_bound := ?_ }
+  intro x h hh hx hxh
+  have hxlo : (1 : Rat) <= x := by
+    have hq := neg_qabs_le_self (x - 3 / 2)
+    exact (by grind : (1 : Rat) <= x)
+  have hxhi : x <= 2 := by
+    have hq := self_le_qabs (x - 3 / 2)
+    exact (by grind : x <= (2 : Rat))
+  have hxhlo : (1 : Rat) <= x + h := by
+    have hq := neg_qabs_le_self (x + h - 3 / 2)
+    exact (by grind : (1 : Rat) <= x + h)
+  have hxhhi : x + h <= 2 := by
+    have hq := self_le_qabs (x + h - 3 / 2)
+    exact (by grind : x + h <= (2 : Rat))
+  have hxpos : 0 < x := by grind
+  have hxhpos : 0 < x + h := by grind
+  have hxne : x ≠ 0 := Rat.ne_of_gt hxpos
+  have hxhne : x + h ≠ 0 := Rat.ne_of_gt hxhpos
+  have hdenpos : 0 < x ^ 2 * (x + h) := by
+    exact Rat.mul_pos (Rat.pow_pos hxpos) hxhpos
+  have hdenone : (1 : Rat) <= x ^ 2 * (x + h) := by
+    have hxsq : (1 : Rat) <= x ^ 2 := by
+      rw [show x ^ 2 = x * x by simp [Rat.pow_succ]]
+      calc
+        (1 : Rat) = 1 * 1 := by native_decide
+        _ <= x * 1 := Rat.mul_le_mul_of_nonneg_right hxlo (by native_decide)
+        _ <= x * x := Rat.mul_le_mul_of_nonneg_left hxlo (by grind)
+    calc
+      (1 : Rat) = 1 * 1 := by native_decide
+      _ <= 1 * (x + h) := by
+        exact Rat.mul_le_mul_of_nonneg_left hxhlo (by native_decide)
+      _ <= x ^ 2 * (x + h) := by
+        exact Rat.mul_le_mul_of_nonneg_right hxsq (Rat.le_of_lt hxhpos)
+  have hinv_nonneg : 0 <= (x ^ 2 * (x + h))⁻¹ :=
+    Rat.le_of_lt ((Rat.inv_pos).2 hdenpos)
+  have hinv_le_one : (x ^ 2 * (x + h))⁻¹ <= 1 := by
+    apply Rat.le_of_mul_le_mul_right (c := x ^ 2 * (x + h))
+    · calc
+        (x ^ 2 * (x + h))⁻¹ * (x ^ 2 * (x + h)) = 1 :=
+          Rat.inv_mul_cancel _ (Rat.ne_of_gt hdenpos)
+        _ <= 1 * (x ^ 2 * (x + h)) := by
+          simpa using hdenone
+    · exact hdenpos
+  have hrewrite :
+      ((1 / (x + h) - 1 / x) / h - -(1 / x ^ 2)) =
+        h * (x ^ 2 * (x + h))⁻¹ := by
+    rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def,
+      Rat.inv_mul_rev]
+    have hxinv : x * x⁻¹ = 1 := Rat.mul_inv_cancel x hxne
+    have hxinv' : x⁻¹ * x = 1 := Rat.inv_mul_cancel x hxne
+    have hxh_inv : (x + h) * (x + h)⁻¹ = 1 :=
+      Rat.mul_inv_cancel (x + h) hxhne
+    have hxh_inv' : (x + h)⁻¹ * (x + h) = 1 :=
+      Rat.inv_mul_cancel (x + h) hxhne
+    have h_inv : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+    have h_inv' : h⁻¹ * h = 1 := Rat.inv_mul_cancel h hh
+    have hx2rewrite : (x ^ 2)⁻¹ = x⁻¹ * x⁻¹ := by
+      simp [Rat.pow_succ, Rat.inv_mul_rev]
+    rw [hx2rewrite]
+    simp only [Rat.one_mul]
+    grind [Rat.mul_inv_cancel, Rat.inv_mul_cancel,
+      Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+      Rat.sub_eq_add_neg]
+  rw [hrewrite, qabs_mul, qabs_eq_self_of_nonneg hinv_nonneg]
+  have hmul : qabs h * (x ^ 2 * (x + h))⁻¹ <= qabs h * 1 :=
+    Rat.mul_le_mul_of_nonneg_left hinv_le_one (qabs_nonneg h)
+  simpa only [Rat.mul_one] using hmul
+
+/-- The reciprocal kernel has a two-sided finite-difference derivative
+certificate on the logarithm chart `[1,2]`. -/
+def reciprocalOnOneTwo_hasDerivativeOnInterval :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat (fun x => 1 / x) 1 2)
+      (FunctionOnInterval.exactRat (fun x => -(1 / x ^ 2)) 1 2) :=
+  CenteredSecantDerivativeBound.toHasDerivativeOnInterval
+    reciprocalCenteredSecantBound 1 2 (by native_decide) (by native_decide)
+
 end CenteredSecantDerivativeBound
 
 /-- The monomial secant estimate as reusable quantitative data. -/

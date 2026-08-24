@@ -250,6 +250,19 @@ the finite exp/log transport are checked. General inverse-function laws remain
 certificate interfaces: each new domain supplies monotonicity, separation, and
 a finite bisection schedule.
 
+The logarithm-side derivative is also a finite certificate. On the safe chart
+\([1,2]\), the reciprocal secant quotient satisfies
+\[
+  (1/(x+h)-1/x)/h = -1/x^2 + O(|h|),
+\]
+with an explicit rational error bound. This is the local derivative input for
+the FTC interpretation of the logarithm integral; no denominator-zero case or
+completed real limit is admitted.
+
+\lean{ComputableAnalysis.CenteredSecantDerivativeBound.reciprocalCenteredSecantBound}
+\lean{ComputableAnalysis.CenteredSecantDerivativeBound.reciprocalOnOneTwo_hasDerivativeOnInterval}
+\leanok
+
 The concrete \(\log 2\) bridge is already a complete computable comparison:
 
 \begin{verbatim}
