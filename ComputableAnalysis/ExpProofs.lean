@@ -7234,6 +7234,51 @@ theorem uniformExpOnSymmetricUnitStabilizedIntegral_equiv_endpointDifference :
       uniformExpOnSymmetricUnit_endpointDifferenceValid)
   exact uniformExpOnSymmetricUnitStabilized_equiv_endpointDifference
 
+/-! The endpoint-difference spelling can be transported to the ordinary
+subtraction of the two certified exponential endpoint evaluations.  This is
+the first user-facing non-polynomial integral identity in the ODE route:
+the integral is still a `RealRaw`, and the familiar notation is only a proved
+representation edge. -/
+theorem uniformExpOnSymmetricUnitStabilizedIntegral_equiv_exp_endpoint_subtraction :
+    (Integral.integralFor uniformExpOnSymmetricUnit
+      uniformExpOnSymmetricUnitStabilizedConstruction).Equiv
+      ((uniformExpOnSymmetricUnitRealFunRaw.apply
+          uniformExpOnSymmetricUnitRealFunRaw_valid (1 : Rat)
+          (by constructor <;> native_decide)) -
+        (uniformExpOnSymmetricUnitRealFunRaw.apply
+          uniformExpOnSymmetricUnitRealFunRaw_valid (-1 : Rat)
+          (by constructor <;> native_decide))) := by
+  let hF := uniformExpOnSymmetricUnitRealFunRaw_valid
+  have hminus : uniformExpOnSymmetricUnitRealFunRaw.domain (-1 : Rat) := by
+    constructor <;> native_decide
+  have hplus : uniformExpOnSymmetricUnitRealFunRaw.domain (1 : Rat) := by
+    constructor <;> native_decide
+  have hendpoint :=
+    uniformExpOnSymmetricUnit_endpointDifferenceValid
+  have hdiff := endpointDifferenceRaw_equiv_sub_apply
+    hF hminus hplus hendpoint
+  have hintegral :
+      (Integral.integralFor uniformExpOnSymmetricUnit
+        uniformExpOnSymmetricUnitStabilizedConstruction).Valid :=
+    Integral.integralFor_valid uniformExpOnSymmetricUnit
+      uniformExpOnSymmetricUnitStabilizedConstruction
+  have hendpoint :
+      (endpointDifferenceRaw uniformExpOnSymmetricUnitRealFunRaw (-1) 1
+        hendpoint).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using hendpoint
+  have hsub :
+      ((uniformExpOnSymmetricUnitRealFunRaw.apply hF (1 : Rat) hplus) -
+        (uniformExpOnSymmetricUnitRealFunRaw.apply hF (-1 : Rat) hminus)).Valid :=
+    RealRaw.sub_valid
+      (by
+        simpa [RealRaw.Valid, RealFunRaw.apply, RealFunRaw.applyCompute] using
+          hF (1 : Rat) hplus)
+      (by
+        simpa [RealRaw.Valid, RealFunRaw.apply, RealFunRaw.applyCompute] using
+          hF (-1 : Rat) hminus)
+  exact RealRaw.equiv_trans hintegral hendpoint hsub
+    uniformExpOnSymmetricUnitStabilizedIntegral_equiv_endpointDifference hdiff
+
 /-- The centered exponential chart has the exact initial value one at zero. -/
 theorem uniformExpOnSymmetricUnit_zero_equiv_one :
     (PartialRealFunRaw.apply uniformExpOnSymmetricUnit.raw
