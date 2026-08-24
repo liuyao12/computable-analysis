@@ -7788,6 +7788,116 @@ theorem piecewiseMonotoneIntegralFor_equiv_finiteRawSum
   simpa [piecewiseMonotoneIntegralFor, piecewiseMonotoneCellList,
     cell, step, RealRaw.zero] using hclean
 
+/-! A cell endpoint difference is the raw subtraction of the two endpoint
+evaluators.  Its validity follows directly from the interval function's
+pointwise validity; no global real-valued function or completeness principle
+is involved. -/
+def piecewiseMonotoneEndpointDifference
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F)
+    (k : Nat) (hk : k < c.pieces) : RealRaw :=
+  (F.raw.evalRaw (c.point (k + 1))
+      (F.defined_on (c.point (k + 1))
+        (c.point_mem (k + 1) (Nat.succ_le_of_lt hk))) -
+    F.raw.evalRaw (c.point k)
+      (F.defined_on (c.point k)
+        (c.point_mem k (Nat.le_of_lt hk))))
+
+theorem piecewiseMonotoneEndpointDifference_valid
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F)
+    (k : Nat) (hk : k < c.pieces) :
+    (piecewiseMonotoneEndpointDifference F c k hk).Valid := by
+  let hx := c.point_mem k (Nat.le_of_lt hk)
+  let hy := c.point_mem (k + 1) (Nat.succ_le_of_lt hk)
+  let x := F.raw.evalRaw (c.point k) (F.defined_on (c.point k) hx)
+  let y := F.raw.evalRaw (c.point (k + 1)) (F.defined_on (c.point (k + 1)) hy)
+  have hvalidx : x.Valid := by
+    simpa [x, RealRaw.Valid, PartialRealFunRaw.evalRaw] using
+      F.valid_on (c.point k) (F.defined_on (c.point k) hx)
+  have hvalidy : y.Valid := by
+    simpa [y, RealRaw.Valid, PartialRealFunRaw.evalRaw] using
+      F.valid_on (c.point (k + 1)) (F.defined_on (c.point (k + 1)) hy)
+  simpa [piecewiseMonotoneEndpointDifference, x, y, hx, hy] using
+    RealRaw.sub_valid hvalidy hvalidx
+
+def piecewiseMonotoneEndpointDifferenceList
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) : List RealRaw :=
+  (List.range c.pieces).map (fun k =>
+    if hk : k < c.pieces then
+      piecewiseMonotoneEndpointDifference F c k hk
+    else RealRaw.zero)
+
+structure PiecewiseMonotoneEndpointFTCFor
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) where
+  cell_endpoint_equiv :
+    forall k (hk : k < c.pieces),
+      (piecewiseMonotoneCellIntegral F c k hk).Equiv
+        (piecewiseMonotoneEndpointDifference F c k hk)
+
+theorem piecewiseMonotoneIntegralFor_equiv_endpointDifferenceList
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F)
+    (h : PiecewiseMonotoneEndpointFTCFor F c) :
+    (piecewiseMonotoneIntegralFor F c).Equiv
+      (finiteRawSum (piecewiseMonotoneEndpointDifferenceList F c)) := by
+  let cell : Nat -> RealRaw := fun k =>
+    if hk : k < c.pieces then
+      piecewiseMonotoneCellIntegral F c k hk
+    else RealRaw.zero
+  let endpoint : Nat -> RealRaw := fun k =>
+    if hk : k < c.pieces then
+      piecewiseMonotoneEndpointDifference F c k hk
+    else RealRaw.zero
+  have hlist_aux : forall (xs : List Nat),
+      (forall k, k ∈ xs -> k < c.pieces) ->
+      FiniteRawListEquiv (xs.map cell) (xs.map endpoint) := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro _
+        exact .nil
+    | cons k ks ih =>
+        intro hxs
+        have hk : k < c.pieces := hxs k (by simp)
+        have htail : forall j, j ∈ ks -> j < c.pieces := by
+          intro j hj
+          exact hxs j (by simp [hj])
+        apply FiniteRawListEquiv.cons
+        · simp [cell, endpoint, hk]
+          exact h.cell_endpoint_equiv k hk
+        · exact ih htail
+  have hlist := hlist_aux (List.range c.pieces)
+    (by
+      intro k hk
+      exact List.mem_range.1 hk)
+  have hcell : forall x, x ∈ (List.range c.pieces).map cell -> x.Valid := by
+    intro x hx
+    rcases List.mem_map.1 hx with ⟨k, hk, rfl⟩
+    simp [cell, List.mem_range.1 hk]
+    exact piecewiseMonotoneCellIntegral_valid F c k (List.mem_range.1 hk)
+  have hendpoint : forall x,
+      x ∈ (List.range c.pieces).map endpoint -> x.Valid := by
+    intro x hx
+    rcases List.mem_map.1 hx with ⟨k, hk, rfl⟩
+    simp [endpoint, List.mem_range.1 hk]
+    exact piecewiseMonotoneEndpointDifference_valid F c k (List.mem_range.1 hk)
+  have hsum := finiteRawSum_equiv_of_forall hlist hcell hendpoint
+  have hintegral := piecewiseMonotoneIntegralFor_equiv_finiteRawSum F c
+  have hleft : (piecewiseMonotoneIntegralFor F c).Valid :=
+    piecewiseMonotoneIntegralFor_valid F c
+  have hmiddle :
+      (finiteRawSum ((List.range c.pieces).map cell)).Valid :=
+    finiteRawSum_valid _ hcell
+  have hright :
+      (finiteRawSum ((List.range c.pieces).map endpoint)).Valid :=
+    finiteRawSum_valid _ hendpoint
+  have hresult := RealRaw.equiv_trans hleft hmiddle hright hintegral hsum
+  simpa [piecewiseMonotoneCellList, piecewiseMonotoneEndpointDifferenceList,
+    cell, endpoint] using hresult
+
 /-- A one-piece promotion from a monotone construction computes the same raw
 integral as the original monotone construction. -/
 theorem piecewiseMonotoneIntegralFor_ofMonotone_equiv
