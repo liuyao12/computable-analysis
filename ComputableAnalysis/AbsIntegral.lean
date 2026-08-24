@@ -1,4 +1,4 @@
-import ComputableAnalysis.TurningPointIntegral
+import ComputableAnalysis.PrimitivePiecewiseFTC
 
 /-!
 # A first completed finite-turn integral
@@ -137,6 +137,21 @@ def absOnUnit_piecewise : PiecewiseMonotoneConstructionFor absOnUnit where
       cases k with
       | zero => simpa [absPartitionPoint] using absOnUnit_right
       | succ k => exfalso; omega
+
+/-! A primitive for the absolute-value integrand. -/
+def absPrimitiveRat (x : Rat) : Rat :=
+  if x < 0 then -(x * x) / 2 else (x * x) / 2
+
+def absPrimitiveOnUnit : FunctionOnInterval :=
+  FunctionOnInterval.exactRat absPrimitiveRat (-1) 1
+
+def absPrimitivePointMem :
+    forall i, i <= absOnUnit_piecewise.pieces ->
+      inDomainInterval absPrimitiveOnUnit.lower absPrimitiveOnUnit.upper
+        (absOnUnit_piecewise.point i) := by
+  intro i hi
+  change inDomainInterval (-1) 1 (absOnUnit_piecewise.point i)
+  exact absOnUnit_piecewise.point_mem i hi
 
 theorem absOnUnit_piecewise_integral_valid :
     (generalIntegralFor absOnUnit absOnUnit_piecewise).Valid :=

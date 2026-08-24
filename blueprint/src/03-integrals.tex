@@ -143,6 +143,13 @@ endpoint identity.  This is why the general FTC interface is stated after
 the rectangle assembly, and why each special function must provide its own
 primitive/evaluator equivalence.
 
+The public primitive-specific interface now makes this distinction explicit:
+it transports the cell integrals through a primitive endpoint list and then
+uses the same finite telescope as the single-function interface.  The
+absolute-value construction supplies the first area-side test case; its
+endpoint arithmetic is recorded as a separate certificate target rather than
+being hidden in the rectangle constructor.
+
 \lean{ComputableAnalysis.MonotoneOnInterval}
 \lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule}
 \lean{ComputableAnalysis.Integral.monotoneDarbouxScheduleRaw_valid}
@@ -150,6 +157,10 @@ primitive/evaluator equivalence.
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_valid}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_two_equiv}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_equiv_finiteRawSum}
+\lean{ComputableAnalysis.Integral.piecewisePrimitiveEndpointDifference}
+\lean{ComputableAnalysis.Integral.piecewisePrimitiveEndpointDifferenceList}
+\lean{ComputableAnalysis.Integral.piecewisePrimitiveTotalEndpointDifference}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_equiv_totalPrimitiveEndpointDifference_of_telescope}
 \lean{ComputableAnalysis.Integral.constructionFor_of_curvatureFTC}
 \lean{ComputableAnalysis.Integral.definiteIdentityFor_of_curvatureFTC}
 \leanok

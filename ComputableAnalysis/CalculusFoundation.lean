@@ -4,6 +4,7 @@ import ComputableAnalysis.ArctanEffectiveFTC
 import ComputableAnalysis.IntegralIdentities
 import ComputableAnalysis.TurningPointIntegral
 import ComputableAnalysis.AbsIntegral
+import ComputableAnalysis.PrimitivePiecewiseFTC
 import ComputableAnalysis.FiniteFTCIntervalRegular
 import ComputableAnalysis.FiniteSinePrefixFTC
 import ComputableAnalysis.PolynomialFTCValues
