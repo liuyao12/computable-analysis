@@ -551,6 +551,14 @@ The equal-dyadic route is not silently identified with that chart.  Its exact
 remaining obligation is the finite `TangentChartTransport` structure, whose
 fields say that the public dyadic box and the chart box overlap at every
 stage.  A common rational witness is an equivalent, more constructive form.
+The first two depths are nevertheless concrete Lean-certified anchors:
+
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalLeftSum_zero_overlaps_stieltjes}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalLeftSum_one_overlaps_stieltjes}
+\leanok
+
+These finite checks seed the eventual geometric induction; they are not being
+promoted to an all-stage convergence claim.
 
 The squared-sine route is a useful intermediate application: squaring the
 same certified samples gives a monotone Darboux integral, and the FTC/value

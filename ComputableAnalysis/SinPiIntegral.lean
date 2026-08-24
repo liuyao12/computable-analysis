@@ -7861,6 +7861,26 @@ theorem dyadicNestedRadicalLeftSum_one_explicit :
             { lo := (1 : Rat) / 2, hi := (1 : Rat) / 2 } 1).hi } := by
   native_decide
 
+/-! Concrete sanity checks for the still-parametric transport certificate.  At
+the first two dyadic depths, the candidate sum and the independent
+Riemann--Stieltjes evaluator already have a mechanically checkable common
+interval.  These are finite anchors for the eventual all-stage geometric
+induction; they do not replace that induction. -/
+
+theorem dyadicNestedRadicalLeftSum_zero_overlaps_stieltjes :
+    QInterval.Overlaps
+      (dyadicNestedRadicalLeftSum 0)
+      (sinPiStieltjesIntegral.compute 0) := by
+  unfold QInterval.Overlaps
+  constructor <;> native_decide
+
+theorem dyadicNestedRadicalLeftSum_one_overlaps_stieltjes :
+    QInterval.Overlaps
+      (dyadicNestedRadicalLeftSum 1)
+      (sinPiStieltjesIntegral.compute 1) := by
+  unfold QInterval.Overlaps
+  constructor <;> native_decide
+
 theorem dyadicNestedRadicalLeftSum_width_le_of_stage
     (n : Nat) (eps : Rat)
     (hstage : forall k, k < 2 ^ n ->
