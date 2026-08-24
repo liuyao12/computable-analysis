@@ -668,6 +668,20 @@ theorem dyadicNestedRadical_sample_overlap_of_canonical_halfAngle_certificate_fa
     exact upper_overlap_of_canonical_halfAngle_certificate B precision n k
       hupper hk (hcertificate precision (n + 1) k hk (by omega))
 
+noncomputable def DyadicTangentWitnessFamily.of_canonical_halfAngle_certificate_family
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      0 < k -> CanonicalDyadicHalfAngleCertificateAt B precision depth k hk) :
+    DyadicTangentWitnessFamily B := by
+  apply DyadicTangentWitnessFamily.of_overlap_family B ht0
+  intro depth k hk hpos precision
+  have h := dyadicNestedRadical_sample_overlap_of_canonical_halfAngle_certificate_family
+    B ht0 hcertificate precision depth k hk
+  simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using h
+
 end SinPiIntegral
 
 end ComputableAnalysis
