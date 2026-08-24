@@ -52,11 +52,17 @@ Left-endpoint rectangles are the default implementation, but the same finite
 algebra applies to right-endpoint rectangles.  The convention is therefore a
 choice of sample schedule, not a change of foundation.
 
+The trapezoid schedule is the finite midpoint of those two presentations:
+average the two endpoint boxes cell by cell.  Its identity with half the sum
+of the left and right folds is proved before any limiting argument.
+
 \lean{ComputableAnalysis.riemannLeftInterval_add}
 \lean{ComputableAnalysis.riemannRightInterval}
 \lean{ComputableAnalysis.riemannRightInterval_add}
 \lean{ComputableAnalysis.riemannRightInterval_congr_of_samples}
 \lean{ComputableAnalysis.riemannRightInterval_overlap_of_samples}
+\lean{ComputableAnalysis.riemannTrapezoidInterval}
+\lean{ComputableAnalysis.riemannTrapezoidInterval_eq_half_add_left_right}
 \lean{ComputableAnalysis.riemannLeftInterval_scale_of_nonneg}
 \lean{ComputableAnalysis.riemannLeftInterval_scale_of_neg}
 \lean{ComputableAnalysis.riemannRightInterval_scale_of_nonneg}

@@ -162,6 +162,20 @@ def riemannRightInterval (g : RealFunRaw) (a b : Rat) (n : Nat) (prec : Nat) : Q
     (fun acc k => let I := g.compute (rightPoint a b n k) prec; { lo := acc.lo + h * I.lo, hi := acc.hi + h * I.hi })
     { lo := 0, hi := 0 }
 
+/-! The finite trapezoid schedule averages the two endpoint boxes on each
+cell.  It is a third presentation of the same rational rectangle data; no
+limit or completeness principle is part of its definition. -/
+
+def riemannTrapezoidInterval (g : RealFunRaw) (a b : Rat) (n : Nat) (prec : Nat) : QInterval :=
+  let h := mesh a b n
+  (List.range n).foldl
+    (fun acc k =>
+      let L := g.compute (leftPoint a b n k) prec
+      let R := g.compute (rightPoint a b n k) prec
+      { lo := acc.lo + (h / 2) * (L.lo + R.lo),
+        hi := acc.hi + (h / 2) * (L.hi + R.hi) })
+    { lo := 0, hi := 0 }
+
 /-- The finite rectangle sum is insensitive to how an evaluator behaves away
 from its sample points.  This is the bridge used by the computable sine
 integral: a specialized nested-radical evaluator only needs to agree with
@@ -1278,6 +1292,67 @@ def slopeBetween (Fy Fx : QInterval) (dx : Rat) : QInterval :=
   divByRat (subInterval Fy Fx) dx
 
 end QInterval
+
+/-! The finite trapezoid fold is exactly one half of the sum of the left and
+right endpoint folds.  This is a syntactic rational identity between finite
+computations, not an assertion that the three limiting integrals exist. -/
+theorem riemannTrapezoidInterval_eq_half_add_left_right
+    (g : RealFunRaw) (a b : Rat) (subdivisions prec : Nat) :
+    riemannTrapezoidInterval g a b subdivisions prec =
+      QInterval.scaleByRat (1 / 2)
+        (QInterval.addInterval
+          (riemannLeftInterval g a b subdivisions prec)
+          (riemannRightInterval g a b subdivisions prec)) := by
+  unfold riemannTrapezoidInterval riemannLeftInterval riemannRightInterval
+  let stepL : QInterval -> Nat -> QInterval := fun acc k =>
+    let I := g.compute (leftPoint a b subdivisions k) prec
+    { lo := acc.lo + mesh a b subdivisions * I.lo,
+      hi := acc.hi + mesh a b subdivisions * I.hi }
+  let stepR : QInterval -> Nat -> QInterval := fun acc k =>
+    let I := g.compute (rightPoint a b subdivisions k) prec
+    { lo := acc.lo + mesh a b subdivisions * I.lo,
+      hi := acc.hi + mesh a b subdivisions * I.hi }
+  let stepT : QInterval -> Nat -> QInterval := fun acc k =>
+    let L := g.compute (leftPoint a b subdivisions k) prec
+    let R := g.compute (rightPoint a b subdivisions k) prec
+    { lo := acc.lo + (mesh a b subdivisions / 2) * (L.lo + R.lo),
+      hi := acc.hi + (mesh a b subdivisions / 2) * (L.hi + R.hi) }
+  have hstep : forall k (AL AR : QInterval),
+      stepT (QInterval.scaleByRat (1 / 2) (QInterval.addInterval AL AR)) k =
+        QInterval.scaleByRat (1 / 2)
+          (QInterval.addInterval (stepL AL k) (stepR AR k)) := by
+    intro k AL AR
+    dsimp [stepL, stepR, stepT, QInterval.scaleByRat,
+      QInterval.addInterval]
+    simp only [if_pos (by native_decide : (0 : Rat) <= 1 / 2)]
+    grind [Rat.mul_assoc, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+      Rat.add_comm, Rat.add_left_comm]
+  have hfold : forall (xs : List Nat) (AL AR : QInterval),
+      xs.foldl stepT (QInterval.scaleByRat (1 / 2)
+        (QInterval.addInterval AL AR)) =
+        QInterval.scaleByRat (1 / 2)
+          (QInterval.addInterval (xs.foldl stepL AL) (xs.foldl stepR AR)) := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro AL AR
+        rfl
+    | cons k ks ih =>
+        intro AL AR
+        simp only [List.foldl]
+        rw [hstep k AL AR]
+        exact ih (stepL AL k) (stepR AR k)
+  have hzero : QInterval.addInterval { lo := 0, hi := 0 } { lo := 0, hi := 0 } =
+      { lo := 0, hi := 0 } := by
+    simp [QInterval.addInterval]
+    grind
+  have hscalezero : QInterval.scaleByRat (1 / 2) { lo := 0, hi := 0 } =
+      { lo := 0, hi := 0 } := by
+    simp [QInterval.scaleByRat]
+  have h := hfold (List.range subdivisions)
+    { lo := 0, hi := 0 } { lo := 0, hi := 0 }
+  rw [hzero, hscalezero] at h
+  simpa [stepL, stepR, stepT] using h
 
 /-! The finite right-endpoint fold has the same pointwise-addition law as the
 left-endpoint fold. -/
