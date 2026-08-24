@@ -603,6 +603,17 @@ rational quantity, before any appeal to a completed number system.
 \lean{ComputableAnalysis.Integral.uniformRightEndpointSum_pow_sub_left_eq_inv_of_pos}
 \leanok
 
+This finite certificate now feeds the integral constructor for every
+monomial on $[0,1]$.  The project therefore distinguishes two claims:
+the dyadic integral is already a valid computable object, while identifying
+it with the closed value $1/(n+1)$ is a separate endpoint theorem.
+
+\lean{ComputableAnalysis.Integral.exactPow_lipschitz_on_unit}
+\lean{ComputableAnalysis.Integral.exactRat_pow_intervalRegularOn_unit}
+\lean{ComputableAnalysis.Integral.exactRat_pow_integral_certificate}
+\lean{ComputableAnalysis.Integral.exactRat_pow_integral_raw_valid}
+\leanok
+
 For the cubic case the first rectangle identity is explicit:
 \(\sum_{k<n}3(k/n)^2(1/n)\) is evaluated by a finite sum-of-squares
 induction.  The interval-regular layer then supplies the domain-restricted

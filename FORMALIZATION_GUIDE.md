@@ -440,6 +440,10 @@ used before identifying the common endpoint value.
 With positive mesh count it normalizes further to exactly `1 / n` via
 `Integral.uniformRightEndpointSum_pow_sub_left_eq_inv_of_pos`, making the
 precision schedule immediate.
+The resulting constructive integral object is available for every monomial
+through `Integral.exactRat_pow_integral_certificate`, with validity proved by
+`Integral.exactRat_pow_integral_raw_valid`. This is intentionally separate
+from a theorem identifying the object with the closed form `1 / (n + 1)`.
 For a prefix containing a linear term,
 `FinitePolynomial.taylorPrefixShift_at_zero` identifies that certified
 derivative polynomial at zero with the original coefficient `c 1`.

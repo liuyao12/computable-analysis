@@ -1029,6 +1029,35 @@ def exactRat_pow_intervalRegularOn_minusOne_one (n : Nat) :
   IntervalRegularOn.of_lipschitzOnIntervalNat (fun x : Rat => x ^ n)
     (-1) 1 n (exactPow_lipschitz_on_minusOne_one n)
 
+def exactPow_lipschitz_on_unit (n : Nat) :
+    Integral.LipschitzOnUnit (fun x : Rat => x ^ n) (n : Rat) := by
+  refine ⟨by exact_mod_cast Nat.zero_le n, ?_⟩
+  intro s t hs hsb ht htb
+  exact (exactPow_lipschitz_on_minusOne_one n).2 s t
+    (by grind) (by grind) (by grind) (by grind)
+
+def exactRat_pow_intervalRegularOn_unit (n : Nat) :
+    IntervalRegularOn
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1) :=
+  IntervalRegularOn.of_lipschitzOnIntervalNat (fun x : Rat => x ^ n)
+    0 1 n
+    (Integral.LipschitzOnIntervalNat.of_unit_subinterval
+      (fun x : Rat => x ^ n) n (by native_decide) (by native_decide)
+      (by native_decide) (exactPow_lipschitz_on_unit n))
+
+def exactRat_pow_integral_certificate (n : Nat) :
+    Integral.IntervalRegularIntegralCertificate
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1) where
+  regular := exactRat_pow_intervalRegularOn_unit n
+  construction := IntegralIdentities.LipschitzDyadic.construction
+    (fun x : Rat => x ^ n) n (exactPow_lipschitz_on_unit n)
+
+theorem exactRat_pow_integral_raw_valid (n : Nat) :
+    (Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1)
+      (exactRat_pow_integral_certificate n)).Valid := by
+  exact Integral.raw_valid _ (exactRat_pow_integral_certificate n)
+
 /-! The normalized monomial primitive is also available as one generic
 endpoint-difference object.  Its adjacent-interval law is purely finite
 subtraction, so it does not depend on an integral construction or on a
