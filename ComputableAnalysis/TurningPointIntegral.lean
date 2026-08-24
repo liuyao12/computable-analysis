@@ -523,6 +523,20 @@ theorem finiteStageAssembly_compute {F : FunctionOnInterval}
     hleft, hmiddle, hright]
   congr <;> grind [Rat.add_assoc, Rat.add_comm]
 
+theorem finiteStageAssembly_raw_equiv {F : FunctionOnInterval}
+    (C : SingleTurnIntegralCandidate F) :
+    C.finiteStageAssembly.raw.Equiv C.raw := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    C.finiteStageAssembly.raw C.raw n n).2
+  change QInterval.Overlaps
+    (C.finiteStageAssembly.compute n) (C.compute n)
+  rw [C.finiteStageAssembly_compute n]
+  have h := C.compute_width_nonneg n
+  change 0 <= (C.compute n).hi - (C.compute n).lo at h
+  exact ⟨by grind [Rat.sub_eq_add_neg], by
+    grind [Rat.sub_eq_add_neg]⟩
+
 /-- The data's fixed absolute-value certificate gives a stagewise, centred
 bound on the unresolved middle contribution.  This is the estimate a concrete
 integral-comparison proof uses to make the bracketed turning region harmless. -/
@@ -594,6 +608,26 @@ abbrev TurningBracketIntegralCompletion {F : FunctionOnInterval}
   SingleTurnIntegralCompletion C
 
 namespace SingleTurnIntegralCompletion
+
+def toMultiTurn
+    {F : FunctionOnInterval}
+    {C : SingleTurnIntegralCandidate F}
+    (completion : SingleTurnIntegralCompletion C) :
+    MultiTurnIntegralCompletion C.finiteStageAssembly where
+  anchor := completion.anchor
+  anchor_valid := completion.anchor_valid
+  assembly_equiv_anchor := by
+    intro n
+    apply (RealRaw.compareAt_overlap_iff
+      C.finiteStageAssembly.raw completion.anchor n n).2
+    change QInterval.Overlaps
+      (C.finiteStageAssembly.compute n) (completion.anchor.compute n)
+    rw [C.finiteStageAssembly_compute n]
+    exact (RealRaw.compareAt_overlap_iff
+      C.raw completion.anchor n n).1 (completion.candidate_equiv_anchor n)
+  radius := completion.radius
+  anchor_width_le_radius := completion.anchor_width_le_radius
+  radius_shrinks := completion.radius_shrinks
 
 def stabilizedRaw {F : FunctionOnInterval}
     {C : SingleTurnIntegralCandidate F}
