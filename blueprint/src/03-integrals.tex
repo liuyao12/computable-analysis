@@ -245,6 +245,24 @@ pieces(n), precision(n)
 \lean{ComputableAnalysis.Integral.monotoneDarbouxScheduleIntegralFor_valid}
 \leanok
 
+Finite piece assembly has its own reusable algebra layer. A list of valid
+raw representatives can be concatenated before any endpoint theorem is
+proved:
+
+\begin{verbatim}
+finiteRawSum (pieces ++ more)
+    == finiteRawSum pieces + finiteRawSum more
+\end{verbatim}
+
+The equality is overlap-equivalence of interval algorithms. It is the exact
+finite statement used by adjacent-interval and multi-turn proofs; it does
+not assert that an arbitrary integrand has an integral.
+
+\lean{ComputableAnalysis.Integral.finiteRawSum}
+\lean{ComputableAnalysis.Integral.finiteRawSum_valid}
+\lean{ComputableAnalysis.Integral.finiteRawSum_append_equiv}
+\leanok
+
 \section{Functions that turn finitely many times}
 
 The next usable class is not “all continuous functions.” It is a function

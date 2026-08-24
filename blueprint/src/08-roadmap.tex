@@ -44,7 +44,9 @@ epsilon--delta continuity, polynomial/Taylor secant certificates,
 power-series tails, finite Fourier transforms, logarithm, rotation
 derivatives, the tangent-square FTC instance, the common-prefix exponential
 FTC instance, the centered exponential initial-value certificate, and scalar
-linear ODE uniqueness are checked in Lean. The
+linear ODE uniqueness are checked in Lean. The finite raw-sum algebra used to
+concatenate certified pieces is also checked, so adjacent-interval and
+multi-turn proofs have an explicit assembly layer. The
 principal unfinished representation step is the equal-dyadic sine FTC
 transport; the integral itself is already complete through the tangent-chart
 Riemann--Stieltjes route. The

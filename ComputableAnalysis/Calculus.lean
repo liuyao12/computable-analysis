@@ -5426,6 +5426,69 @@ theorem integralFor_valid (F : FunctionOnInterval)
     (integralFor F c).Valid :=
   c.certificate
 
+/-! Finite sums of raw representatives are the algebraic core of piecewise
+integral assembly.  Keeping this operation explicit lets an adjacent
+interval or multi-turn proof concatenate certified pieces before it proves
+anything about a limiting schedule. -/
+
+def finiteRawSum : List RealRaw -> RealRaw
+  | [] => RealRaw.zero
+  | x :: xs => x + finiteRawSum xs
+
+theorem finiteRawSum_valid :
+    ∀ xs : List RealRaw, (∀ x ∈ xs, x.Valid) -> (finiteRawSum xs).Valid
+  | [], _ => by
+      change (RealRaw.ofRat 0).Valid
+      exact RealRaw.ofRat_valid 0
+  | x :: xs, hxs => by
+      have hx : x.Valid := hxs x (by simp)
+      have htail : ∀ y ∈ xs, y.Valid := by
+        intro y hy
+        exact hxs y (by simp [hy])
+      simpa [finiteRawSum] using
+        RealRaw.add_valid hx (finiteRawSum_valid xs htail)
+
+theorem finiteRawSum_append_equiv
+    (xs ys : List RealRaw)
+    (hxs : ∀ x ∈ xs, x.Valid)
+    (hys : ∀ y ∈ ys, y.Valid) :
+    (finiteRawSum (xs ++ ys)).Equiv
+      (finiteRawSum xs + finiteRawSum ys) := by
+  induction xs with
+  | nil =>
+      simpa [finiteRawSum] using
+        (RealRaw.equiv_symm
+          (RealRaw.zero_add_equiv (finiteRawSum_valid ys hys)))
+  | cons x xs ih =>
+      have hx : x.Valid := hxs x (by simp)
+      have htail : ∀ z ∈ xs, z.Valid := by
+        intro z hz
+        exact hxs z (by simp [hz])
+      have hsum : (finiteRawSum (xs ++ ys)).Valid :=
+        finiteRawSum_valid (xs ++ ys) (by
+          intro z hz
+          simp only [List.mem_append] at hz
+          exact hz.elim (fun hz' => hxs z (by simp [hz']))
+            (fun hz' => hys z hz'))
+      have hleft : (finiteRawSum xs).Valid := finiteRawSum_valid xs htail
+      have hright : (finiteRawSum ys).Valid := finiteRawSum_valid ys hys
+      have hih := ih htail
+      have hadd : (finiteRawSum xs + finiteRawSum ys).Valid :=
+        RealRaw.add_valid hleft hright
+      have hassoc := RealRaw.add_assoc_equiv x
+        (finiteRawSum xs) (finiteRawSum ys) hx hleft hright
+      have htransport :
+          (x + finiteRawSum (xs ++ ys)).Equiv
+            (x + (finiteRawSum xs + finiteRawSum ys)) := by
+        exact RealRaw.add_equiv
+          hx hx hsum hadd (RealRaw.equiv_refl x hx) hih
+      apply RealRaw.equiv_trans
+        (RealRaw.add_valid hx hsum)
+        (RealRaw.add_valid hx hadd)
+        (RealRaw.add_valid (RealRaw.add_valid hx hleft) hright)
+        htransport
+        (RealRaw.equiv_symm hassoc)
+
 end Integral
 
 namespace TwoStageCandidateDerivativeFTC
