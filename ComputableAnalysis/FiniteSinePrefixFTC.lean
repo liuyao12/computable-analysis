@@ -459,6 +459,22 @@ theorem sineTaylorPrefixThreeEffectiveFTC_equiv_endpoint :
       sineTaylorPrefixThreeEffectiveFTCData.toDerivativeBoundFTC.endpointRaw := by
   exact effectiveDerivativeBoundFTC sineTaylorPrefixThreeEffectiveFTCData
 
+def sineTaylorPrefixThreeEffectiveFTCEndpointValid :
+    RealRaw.ValidCompute
+      (endpointDifferenceCompute sineTaylorPrefixThreePrimitiveRaw 0
+        ((1 : Rat) / 2)) :=
+  endpointDifference_valid_of_fun_valid
+    (RealFunRaw.exact_valid _) trivial trivial
+
+theorem sineTaylorPrefixThreeEffectiveFTC_boundedIntegral_equiv_endpointDifference :
+    sineTaylorPrefixThreeEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      (endpointDifferenceRaw sineTaylorPrefixThreePrimitiveRaw 0
+        ((1 : Rat) / 2)
+        sineTaylorPrefixThreeEffectiveFTCEndpointValid) := by
+  exact EffectiveDerivativeBoundFTC.boundedIntegralRaw_equiv_endpointDifference
+    sineTaylorPrefixThreeEffectiveFTCData
+    sineTaylorPrefixThreeEffectiveFTCEndpointValid
+
 theorem sineTaylorPrefixThreeEffectiveFTC_equiv_fortySeven_over_threeEightFour :
     sineTaylorPrefixThreeEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
       (RealRaw.ofRat (47 / 384)) := by

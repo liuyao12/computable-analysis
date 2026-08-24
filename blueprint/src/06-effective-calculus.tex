@@ -332,6 +332,18 @@ than duplicating that representation argument locally.
 \lean{ComputableAnalysis.Integral.arctanEffectiveFTCStabilized_equiv_endpointDifference}
 \leanok
 
+The same contract is now instantiated by a finite sine Taylor prefix on
+$[0,1/2]$.  Its primitive and derivative are rational polynomials, but the
+evaluator is already a genuine trigonometric-prefix client: the finite FTC
+box is transported to the canonical primitive endpoint difference by the
+generic theorem above.
+
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTCData}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTC_equiv_endpoint}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTC_boundedIntegral_equiv_endpointDifference}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTC_equiv_fortySeven_over_threeEightFour}
+\leanok
+
 The interface is the reusable calculus API: finite secant bounds feed
 derivative certificates; derivative bounds feed partition boxes; the effective
 FTC turns those boxes into endpoint differences. Monomial and finite

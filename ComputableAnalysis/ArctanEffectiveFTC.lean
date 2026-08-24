@@ -838,53 +838,8 @@ theorem arctanEffectiveFTC_boundedIntegral_equiv_endpointDifference :
     arctanEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
       (endpointDifferenceRaw arctanPrimitiveRaw 0 1
         arctanEffectiveFTCEndpointValid) := by
-  let h := arctanEffectiveFTCData.toDerivativeBoundFTC
-  have hcanonical :=
-    EffectiveDerivativeBoundFTC.endpointRaw_equiv_endpointDifference
-      arctanEffectiveFTCData arctanEffectiveFTCEndpointValid
-  intro n
-  let eps := precisionAtStage n
-  let s := h.chooseEndpointPrecision eps
-  have hcontains :
-      ((h.choosePartition eps).boundIntegralSum
-          (fun k hk =>
-            (h.derivativeBound eps k hk).bound (h.chooseBoundStage eps))).ContainsInterval
-      (endpointDifferenceInterval arctanPrimitiveRaw 0 1 s) := by
-    apply RationalPartition.boundIntegralSum_contains_endpointDifference
-      (P := h.choosePartition eps) (F := arctanPrimitiveRaw) (prec := s)
-      arctanPrimitiveRaw_valid
-    · intro i hi
-      have hp := (h.choosePartition eps).point_in_bounds hi
-      exact hp
-    · intro k hk
-      have hlocal := (h.localControl eps k hk).endpoint_contained
-        (h.chooseBoundStage eps)
-      have hagree := arctanEffectiveFTCData.endpointPrecision_agreement
-        eps k hk (h.chooseBoundStage eps)
-      have hagree' :
-          (h.localControl eps k hk).endpointPrecision
-              (h.chooseBoundStage eps) = s := by
-        simpa [h, s, EffectiveDerivativeBoundFTC.toDerivativeBoundFTC] using hagree
-      rw [hagree'] at hlocal
-      simpa [RationalPartition.cell, s] using
-        hlocal
-  have hover2 := (RealRaw.compareAt_overlap_iff h.endpointRaw
-      (endpointDifferenceRaw arctanPrimitiveRaw 0 1
-        arctanEffectiveFTCEndpointValid) n n).1
-      (hcanonical n)
-  apply (RealRaw.compareAt_overlap_iff h.boundedIntegralRaw
-    (endpointDifferenceRaw arctanPrimitiveRaw 0 1
-      arctanEffectiveFTCEndpointValid) n n).2
-  change QInterval.Overlaps
-    ((h.choosePartition eps).boundIntegralSum
-      (fun k hk => (h.derivativeBound eps k hk).bound (h.chooseBoundStage eps)))
-    (endpointDifferenceCompute arctanPrimitiveRaw 0 1 n)
-  change QInterval.Overlaps
-    ((h.choosePartition eps).boundIntegralSum
-      (fun k hk => (h.derivativeBound eps k hk).bound (h.chooseBoundStage eps)))
-    (endpointDifferenceInterval arctanPrimitiveRaw 0 1 n)
-  exact ⟨Rat.le_trans hcontains.1 hover2.1,
-    Rat.le_trans hover2.2 hcontains.2⟩
+  exact EffectiveDerivativeBoundFTC.boundedIntegralRaw_equiv_endpointDifference
+    arctanEffectiveFTCData arctanEffectiveFTCEndpointValid
 
 def arctanEffectiveFTCStabilized : RealRaw :=
   RealRaw.prefixStabilize

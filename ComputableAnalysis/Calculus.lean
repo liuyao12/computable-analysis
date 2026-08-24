@@ -4419,6 +4419,59 @@ theorem EffectiveDerivativeBoundFTC.endpointRaw_equiv_endpointDifference
     h.toDerivativeBoundFTC h.primitive_valid
       h.primitive_domain_lower h.primitive_domain_upper hendpoint
 
+/-- The complete effective FTC transport: the bounded finite Riemann raw is
+equivalent to the canonical endpoint-difference raw.  The proof is finite at
+each public stage.  The selected endpoint stage is used only to obtain a
+telescope inside the bounded sum, then primitive interval nesting transports
+that telescope to the requested canonical stage. -/
+theorem EffectiveDerivativeBoundFTC.boundedIntegralRaw_equiv_endpointDifference
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveDerivativeBoundFTC F dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b)) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      (endpointDifferenceRaw F a b hendpoint) := by
+  let H := h.toDerivativeBoundFTC
+  have hcanonical := h.endpointRaw_equiv_endpointDifference hendpoint
+  intro n
+  let eps := precisionAtStage n
+  let s := H.chooseEndpointPrecision eps
+  have hcontains :
+      QInterval.ContainsInterval
+        ((H.choosePartition eps).boundIntegralSum
+          (fun k hk => (H.derivativeBound eps k hk).bound
+            (H.chooseBoundStage eps)))
+        (endpointDifferenceInterval F a b s) := by
+    apply RationalPartition.boundIntegralSum_contains_endpointDifference
+      (P := H.choosePartition eps) (F := F) (prec := s) h.primitive_valid
+    · intro i hi
+      exact h.domain_at_partition eps i hi
+    · intro k hk
+      have hlocal := (H.localControl eps k hk).endpoint_contained
+        (H.chooseBoundStage eps)
+      have hagree := h.endpointPrecision_agreement
+        eps k hk (H.chooseBoundStage eps)
+      have hagree' :
+          (H.localControl eps k hk).endpointPrecision
+              (H.chooseBoundStage eps) = s := by
+        simpa [H, s, EffectiveDerivativeBoundFTC.toDerivativeBoundFTC] using hagree
+      rw [hagree'] at hlocal
+      simpa [RationalPartition.cell, s] using hlocal
+  have hover2 := (RealRaw.compareAt_overlap_iff H.endpointRaw
+      (endpointDifferenceRaw F a b hendpoint) n n).1
+      (hcanonical n)
+  apply (RealRaw.compareAt_overlap_iff H.boundedIntegralRaw
+    (endpointDifferenceRaw F a b hendpoint) n n).2
+  change QInterval.Overlaps
+    ((H.choosePartition eps).boundIntegralSum
+      (fun k hk => (H.derivativeBound eps k hk).bound (H.chooseBoundStage eps)))
+    (endpointDifferenceCompute F a b n)
+  change QInterval.Overlaps
+    ((H.choosePartition eps).boundIntegralSum
+      (fun k hk => (H.derivativeBound eps k hk).bound (H.chooseBoundStage eps)))
+    (endpointDifferenceInterval F a b n)
+  exact ⟨Rat.le_trans hcontains.1 hover2.1,
+    Rat.le_trans hover2.2 hcontains.2⟩
+
 /-- Global finite certificate for the "candidate derivative versus computed
 secants" strategy.
 
