@@ -80,6 +80,21 @@ theorem squareIntegralEffectiveFTC_integral_equiv_one_third :
     endpointDifferenceInterval, squareIntegralPrimitiveRaw, RealFunRaw.exact]
     using hFTC'
 
+theorem cubicIntegralEffectiveFTC_integral_equiv_one_fourth :
+    cubicIntegralEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      (RealRaw.ofRat (1 / 4)) := by
+  let H := cubicIntegralEffectiveFTCData.toDerivativeBoundFTC
+  intro n
+  apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+  have hover := H.overlap (precisionAtStage n)
+  change QInterval.Overlaps (H.boundedIntegralCompute n)
+    { lo := 1 / 4, hi := 1 / 4 }
+  have hzero : (1 / 4 : Rat) - 0 / 4 = 1 / 4 := by grind
+  simpa [H, DerivativeBoundFTC.boundedIntegralCompute,
+    DerivativeBoundFTC.boundedIntegralInterval,
+    DerivativeBoundFTC.endpointInterval, endpointDifferenceInterval,
+    cubicIntegralPrimitiveRaw, RealFunRaw.exact, Rat.pow_succ, hzero] using hover
+
 end Integral
 
 end ComputableAnalysis
