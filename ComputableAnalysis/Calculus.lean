@@ -5873,6 +5873,13 @@ theorem FiniteRawListEquiv.refl {xs : List RealRaw}
         intro y hy
         exact hvalid y (by simp [hy])
 
+theorem FiniteRawListEquiv.symm
+    {xs ys : List RealRaw} :
+    FiniteRawListEquiv xs ys -> FiniteRawListEquiv ys xs
+  | .nil => .nil
+  | .cons hhead htail =>
+      .cons (RealRaw.equiv_symm hhead) (FiniteRawListEquiv.symm htail)
+
 theorem finiteRawSum_equiv_of_forall
     {xs ys : List RealRaw}
     (hxy : FiniteRawListEquiv xs ys)
