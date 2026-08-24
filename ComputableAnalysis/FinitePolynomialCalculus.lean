@@ -1039,6 +1039,39 @@ def integratedTaylorPrefix_hasDerivativeOnInterval
   (integratedTaylorPrefixSecantBound C coeffs hC1 n).toHasDerivativeOnInterval
     a b hleft hright
 
+/-! The finite Taylor primitive now exposes the same cell-level FTC contract
+as the normalized monomial.  This is the direct termwise-integration API:
+the derivative-prefix box, scaled by a positive cell width, contains the
+primitive's finite endpoint increment. -/
+theorem integratedTaylorPrefix_endpointDifference_contains_of_pos
+    (coeffs : Nat -> Rat) (n : Nat) (a b C : Rat)
+    (hleft : -C <= a) (hright : b <= C) (hC1 : 1 <= C)
+    {x h : Rat} {stage : Nat}
+    (hx : inDomainInterval a b x)
+    (hxh : inDomainInterval a b (x + h))
+    (hpos : 0 < h)
+    (hsmall : qabs h <=
+      (1 / ((
+        (integratedTaylorPrefix_hasDerivativeOnInterval
+          coeffs n a b C hleft hright hC1).stepPrecision stage : Nat) : Rat))) :
+    let D := integratedTaylorPrefix_hasDerivativeOnInterval
+      coeffs n a b C hleft hright hC1
+    (QInterval.scaleByRat h
+      (QInterval.expand
+        ((FunctionOnInterval.exactRat (taylorDerivativePrefix coeffs n) a b).compute
+          x hx (D.evalPrecision x h stage))
+        (2 * (precisionAtStage stage).val))).ContainsInterval
+      (QInterval.subInterval
+        ((FunctionOnInterval.exactRat (integratedTaylorPrefix coeffs n) a b).compute
+          (x + h) hxh (D.evalPrecision x h stage))
+        ((FunctionOnInterval.exactRat (integratedTaylorPrefix coeffs n) a b).compute
+          x hx (D.evalPrecision x h stage))) := by
+  let D := integratedTaylorPrefix_hasDerivativeOnInterval
+    coeffs n a b C hleft hright hC1
+  dsimp only
+  exact HasDerivativeOnInterval.endpointDifference_contains_of_pos
+    D hx hxh hx hpos hsmall
+
 /-- Every finite Taylor prefix carries the explicit secant bound supplied by
 its coefficient shift.  This is the reusable Taylor--Lagrange bridge for a
 finite polynomial: the analytic-looking derivative claim is justified by a
