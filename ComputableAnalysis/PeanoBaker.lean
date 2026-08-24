@@ -36,6 +36,10 @@ def matrixIdentity (dimension : Nat) : RatMatrix dimension :=
 def vectorAdd {dimension : Nat} (x y : RatVector dimension) : RatVector dimension :=
   fun i => x i + y i
 
+def vectorScale {dimension : Nat} (r : Rat) (x : RatVector dimension) :
+    RatVector dimension :=
+  fun i => r * x i
+
 def matrixAdd {dimension : Nat} (A B : RatMatrix dimension) : RatMatrix dimension :=
   fun i j => A i j + B i j
 
@@ -249,6 +253,18 @@ theorem matrixApply_vectorAdd {dimension : Nat}
     _ = finiteSum (fun j => A i j * x j) +
         finiteSum (fun j => A i j * y j) :=
       finiteSum_add _ _
+
+theorem matrixApply_vectorScale {dimension : Nat}
+    (A : RatMatrix dimension) (r : Rat) (x : RatVector dimension) :
+    matrixApply A (vectorScale r x) =
+      vectorScale r (matrixApply A x) := by
+  funext i
+  unfold matrixApply vectorScale
+  rw [show (fun j => A i j * (r * x j)) =
+      (fun j => r * (A i j * x j)) by
+        funext j
+        grind [Rat.mul_assoc, Rat.mul_comm]]
+  exact (finiteSum_mul_left r (fun j => A i j * x j)).symm
 
 /-- The identity matrix acts as the identity on a finite rational vector. -/
 theorem matrixApply_identity {dimension : Nat} (x : RatVector dimension) :
@@ -533,6 +549,18 @@ theorem homogeneousTrajectory_vectorAdd
         homogeneousTrajectory_succ,
         homogeneousTrajectory_vectorAdd system x y n,
         matrixApply_vectorAdd]
+
+theorem homogeneousTrajectory_vectorScale
+    (system : DiscreteLinearSystem dimension)
+    (r : Rat) (x : RatVector dimension) :
+    forall n,
+      system.homogeneousTrajectory (vectorScale r x) n =
+        vectorScale r (system.homogeneousTrajectory x n)
+  | 0 => rfl
+  | n + 1 => by
+      rw [homogeneousTrajectory_succ, homogeneousTrajectory_succ,
+        homogeneousTrajectory_vectorScale system r x n,
+        matrixApply_vectorScale]
 
 /-- A candidate solution of the sampled inhomogeneous recurrence.  Stating the
 recurrence separately from the recursive evaluator makes finite uniqueness a
@@ -1239,10 +1267,6 @@ theorem threeByThree_cayley_hamilton
         threeByThreeMatrix_22] <;>
       grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
         Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
-
-def vectorScale {dimension : Nat} (r : Rat) (x : RatVector dimension) :
-    RatVector dimension :=
-  fun i => r * x i
 
 /-- The generator with rows `(0, 1)` and `(-omega^2, 0)`. -/
 def generator (omega : Rat) : RatMatrix 2 :=
