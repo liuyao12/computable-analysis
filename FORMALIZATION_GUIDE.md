@@ -416,6 +416,10 @@ formal coefficient stream as a finite rational Taylor polynomial and derives
 its interval derivative from `FormalPowerSeries.coefficientShift`. This is
 the intended hand-off from Chapter 4's algebra to Chapter 6's derivative
 certificates; no infinite-series tail is differentiated at this point.
+For interval regularity itself, `Integral.exactPow_lipschitz_on_minusOne_one`
+and `Integral.exactRat_pow_intervalRegularOn_minusOne_one` expose the
+parametric monomial certificate on `[-1,1]`: the rational power-difference
+recurrence gives the natural Lipschitz bound `n`, including `n = 0`.
 For a prefix containing a linear term,
 `FinitePolynomial.taylorPrefixShift_at_zero` identifies that certified
 derivative polynomial at zero with the original coefficient `c 1`.

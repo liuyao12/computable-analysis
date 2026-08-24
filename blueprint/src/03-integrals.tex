@@ -557,6 +557,16 @@ $|s^2+st+t^2|\le 3$ give a rational Lipschitz certificate.
 \lean{ComputableAnalysis.exactRat_cube_intervalRegularOn_minusOne_one}
 \leanok
 
+More generally, the finite power-difference recurrence gives one reusable
+certificate for every monomial: on $[-1,1]$, $x^n$ is Lipschitz with the
+natural rational bound $n$, including the constant case $n=0$.  This is the
+parametric form used when a finite Taylor prefix is supplied to the FTC
+layer.
+
+\lean{ComputableAnalysis.Integral.exactPow_lipschitz_on_minusOne_one}
+\lean{ComputableAnalysis.Integral.exactRat_pow_intervalRegularOn_minusOne_one}
+\leanok
+
 For the cubic case the first rectangle identity is explicit:
 \(\sum_{k<n}3(k/n)^2(1/n)\) is evaluated by a finite sum-of-squares
 induction.  The interval-regular layer then supplies the domain-restricted

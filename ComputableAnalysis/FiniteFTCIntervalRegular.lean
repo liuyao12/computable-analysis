@@ -995,6 +995,40 @@ def exactRat_cube_intervalRegularOn_minusOne_one :
   IntervalRegularOn.of_lipschitzOnIntervalNat (fun x : Rat => x ^ 3)
     (-1) 1 3 exactCube_lipschitz_on_minusOne_one
 
+/-! The cubic certificate is the first visible member of a uniform monomial
+family.  On `[-1,1]`, the finite power-difference estimate gives the natural
+Lipschitz constant `n` for `x^n`, including the constant case `n = 0`. -/
+
+def exactPow_lipschitz_on_minusOne_one (n : Nat) :
+    Integral.LipschitzOnIntervalNat (fun x : Rat => x ^ n) (-1) 1 n := by
+  refine ⟨by native_decide, ?_⟩
+  intro s t hs hsb ht htb
+  have hsabs : qabs s <= 1 :=
+    qabs_le_of_neg_le_le (by grind) (by grind)
+  have htabs : qabs t <= 1 :=
+    qabs_le_of_neg_le_le (by grind) (by grind)
+  have hone : (1 : Rat) ^ n = 1 := by
+    induction n with
+    | zero => rw [Rat.pow_zero]
+    | succ n ih => rw [Rat.pow_succ, ih]; native_decide
+  have hpow := RationalMajorant.qabs_pow_sub_le_lipschitz
+    (x := s) (y := t) (B := (1 : Rat))
+    (by native_decide) (by native_decide) hsabs htabs n
+  calc
+    qabs (s ^ n - t ^ n) <=
+        qabs (s - t) * (n : Rat) * (1 : Rat) ^ n := hpow
+    _ = (n : Rat) * qabs (t - s) := by
+      rw [show qabs (s - t) = qabs (t - s) by
+        rw [show s - t = -(t - s) by grind [Rat.sub_eq_add_neg], qabs_neg]]
+      rw [hone]
+      grind [Rat.mul_comm, Rat.mul_assoc]
+
+def exactRat_pow_intervalRegularOn_minusOne_one (n : Nat) :
+    IntervalRegularOn
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) (-1) 1) :=
+  IntervalRegularOn.of_lipschitzOnIntervalNat (fun x : Rat => x ^ n)
+    (-1) 1 n (exactPow_lipschitz_on_minusOne_one n)
+
 def exactRat_cube_integral_certificate :
     Integral.IntervalRegularIntegralCertificate
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ 3) 0 1) where
