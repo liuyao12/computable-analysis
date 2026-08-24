@@ -401,6 +401,12 @@ proves an explicit `|h|` error bound for the literal quotient of
 bound as a full two-sided interval derivative certificate with an explicit
 dyadic half-decay step schedule.  It is also the right finite algebra for the
 termwise factorial-series bounds needed by exponential.
+The cubic specialization is now exposed as
+`FinitePolynomial.cubeSecantDerivativeBound` and
+`FinitePolynomial.cube_hasDerivativeOnInterval`: rationally scaling the
+normalized (x^3/3) certificate yields the exact finite derivative
+\(d(x^3)/dx=3x^2\) on any supplied bounded rational interval.  This is a
+complete polynomial FTC input, not an appeal to a classical derivative limit.
 `FinitePolynomial.taylorPrefix_hasDerivativeOnInterval` materializes any
 formal coefficient stream as a finite rational Taylor polynomial and derives
 its interval derivative from `FormalPowerSeries.coefficientShift`. This is
@@ -818,6 +824,8 @@ open ComputableAnalysis
 #check FinitePolynomial.taylorPrefixShiftAt_at_basepoint
 #check FinitePolynomial.taylorPrefix_succ
 #check FinitePolynomial.taylorPrefixShift_succ_eq_of_coefficientShift
+#check FinitePolynomial.cubeSecantDerivativeBound
+#check FinitePolynomial.cube_hasDerivativeOnInterval
 #check FinitePolynomial.taylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.taylorPrefixAt_hasDerivativeOnInterval
 #check FinitePolynomial.sineTaylorPrefix_hasDerivativeOnInterval

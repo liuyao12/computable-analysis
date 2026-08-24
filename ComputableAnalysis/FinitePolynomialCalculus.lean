@@ -558,6 +558,47 @@ def normalizedMonomial_hasDerivativeOnInterval
     using (normalizedMonomialSecantBound C n hC1).toHasDerivativeOnInterval
       a b hleft hright
 
+/-! The cubic is obtained from the normalized degree-two monomial by a
+rational scalar.  This keeps its finite secant error and dyadic schedule in
+the reusable monomial certificate instead of introducing a second hand-made
+limit argument. -/
+def cubeSecantDerivativeBound (C : Rat) (hC1 : 1 <= C) :
+    SecantDerivativeBound C
+      (fun x => x ^ 3)
+      (fun x => 3 * x ^ 2) := by
+  let H := SecantDerivativeBound.scaleRat 3
+    (normalizedMonomialSecantBound C 2 hC1)
+  refine {
+    errorCoefficient := H.errorCoefficient
+    errorCoefficient_nonneg := H.errorCoefficient_nonneg
+    error_bound := ?_ }
+  intro x h hh hx hxh
+  have hbound := H.error_bound x h hh hx hxh
+  have hthree : (3 : Rat) * (3 : Rat)⁻¹ = 1 := by native_decide
+  simp only [Nat.reduceAdd] at hbound
+  change qabs
+      ((3 * ((x + h) ^ 3 / (3 : Rat)) -
+        3 * (x ^ 3 / (3 : Rat))) / h - 3 * x ^ 2) <=
+      qabs h * H.errorCoefficient at hbound
+  have hrewrite :
+      ((3 * ((x + h) ^ 3 / (3 : Rat)) -
+          3 * (x ^ 3 / (3 : Rat))) / h - 3 * x ^ 2) =
+        (((x + h) ^ 3 - x ^ 3) / h - 3 * x ^ 2) := by
+    rw [Rat.div_def, Rat.div_def, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add,
+      Rat.add_mul, Rat.sub_eq_add_neg]
+  rw [hrewrite] at hbound
+  exact hbound
+
+def cube_hasDerivativeOnInterval
+    (a b C : Rat) (hleft : -C <= a) (hright : b <= C)
+    (hC1 : 1 <= C) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat (fun x => x ^ 3) a b)
+      (FunctionOnInterval.exactRat (fun x => 3 * x ^ 2) a b) :=
+  (cubeSecantDerivativeBound C hC1).toHasDerivativeOnInterval
+    a b hleft hright
+
 /-- The degree-two Taylor prefix of exponential has the expected derivative
 on every rational interval inside a bounded symmetric box.  This is the first
 nontrivial finite Taylor polynomial assembled through the quantitative linear
