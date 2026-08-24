@@ -682,6 +682,33 @@ noncomputable def DyadicTangentWitnessFamily.of_canonical_halfAngle_certificate_
     B ht0 hcertificate precision depth k hk
   simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using h
 
+theorem ArctanSinPiConstruction.halfIntegral_equiv_of_canonical_halfAngle_certificate_family
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      0 < k -> CanonicalDyadicHalfAngleCertificateAt S.inverse precision depth k hk) :
+    (S.halfIntegral pub).Equiv
+      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+  exact S.halfIntegral_equiv_of_witness_family
+    pub g cg hdyadic hplan hevaluator
+    (DyadicTangentWitnessFamily.of_canonical_halfAngle_certificate_family
+      S.inverse ht0 hcertificate)
+
 end SinPiIntegral
 
 end ComputableAnalysis
