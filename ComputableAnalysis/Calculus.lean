@@ -2663,6 +2663,30 @@ private theorem foldl_affine_range (h a d : Rat) (n : Nat) :
       grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
         Rat.mul_assoc, Rat.mul_comm]
 
+/-! Every finite affine rectangle sum has a closed rational form.  Keeping the
+mesh explicit makes this theorem valid even at stage zero; the positive-stage
+normalization `n * mesh = b - a` can be applied separately when an integral
+error bound is needed. -/
+theorem riemannLeftExact_affine_closed
+    (r c a b : Rat) (n : Nat) :
+    riemannLeftExact (fun x => r * x + c) a b n =
+      (n : Rat) * mesh a b n * (r * a + c) +
+        mesh a b n * (r * mesh a b n) *
+          (((n : Rat) * ((n : Rat) - 1)) / 2) := by
+  unfold riemannLeftExact
+  dsimp
+  unfold leftPoint
+  have hrewrite :
+      (fun acc (k : Nat) =>
+          acc + mesh a b n * (r * (a + (k : Rat) * mesh a b n) + c)) =
+        (fun acc (k : Nat) =>
+          acc + mesh a b n *
+            ((r * a + c) + (k : Rat) * (r * mesh a b n))) := by
+    funext acc k
+    grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm,
+      Rat.add_assoc, Rat.add_comm]
+  rw [hrewrite, foldl_affine_range]
+
 theorem riemannLeftExact_doubleId_of_pos {a b : Rat} {n : Nat}
     (hn : 0 < n) :
     riemannLeftExact (fun x => 2 * x) a b n =

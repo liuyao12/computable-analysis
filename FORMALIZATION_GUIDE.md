@@ -552,6 +552,9 @@ positive affine change of variable through the finite left-rectangle fold.
 This is the substitution algebra that an effective FTC certificate can later
 carry to the nested interval level; it is deliberately not stated as a
 general theorem about completed real integrals.
+The companion `ComputableAnalysis.riemannLeftExact_affine_closed` gives the
+closed rational value of every finite affine fold, including stage zero, and
+is useful for regression tests and error estimates.
 
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`.

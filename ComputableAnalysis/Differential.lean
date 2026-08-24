@@ -357,12 +357,13 @@ theorem differenceQuotient_affine_comp_of_step
     grind
   · exact differenceQuotient_affine_comp f hm hh
 
-/-! A positive affine reparametrization transports the finite left-rectangle
-sum exactly.  This is the computational core of substitution: it is an
-identity of rational folds, before any shrinking or abstract integral is
-introduced. -/
+/-! An affine reparametrization transports the finite left-rectangle sum
+exactly.  This is the computational core of substitution: it is an identity
+of rational folds, before any shrinking or abstract integral is introduced.
+The identity is total in the slope; positivity is needed only later when the
+affine map is required to preserve orientation. -/
 theorem riemannLeftExact_affine_substitution
-    (g : Rat -> Rat) {m c a b : Rat} (hm : 0 < m) (n : Nat) :
+    (g : Rat -> Rat) {m c a b : Rat} (n : Nat) :
     riemannLeftExact (fun x => m * g (affine m c x)) a b n =
       riemannLeftExact g (affine m c a) (affine m c b) n := by
   have hmesh : ∀ q : Nat,
