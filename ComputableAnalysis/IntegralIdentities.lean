@@ -16638,6 +16638,16 @@ theorem arctanKernelLipschitzIntegral_equiv_rectangleForAtOne :
     (ArctanGeometry.arctanIntegralRectangleComputeAtOne stage)
   exact arctanKernelLipschitz_compute_overlaps_rectangle stage
 
+theorem arctanKernelLipschitzIntegral_equiv_arctanGeom_one :
+    arctanKernelLipschitzIntegral.Equiv
+      (ArctanGeometry.arctanGeom (1 : Rat)) := by
+  exact RealRaw.equiv_trans
+    arctanKernelLipschitzIntegral_valid
+    arctanIntegralRectangleForAtOne_valid
+    (ArctanGeometry.arctanGeom_one_valid)
+    arctanKernelLipschitzIntegral_equiv_rectangleForAtOne
+    arctanIntegralRectangleForAtOne_equiv_arctanGeom_one
+
 /-!
 ## Finite tangent-chart substitution certificates
 
