@@ -1330,6 +1330,20 @@ theorem scaleByRat_contains_of_nonneg {r : Rat} (hr : 0 <= r)
   · exact Rat.mul_le_mul_of_nonneg_left hcontains.1 hr
   · exact Rat.mul_le_mul_of_nonneg_left hcontains.2 hr
 
+/-- Arbitrary rational scaling preserves interval containment; for a negative
+scale the endpoint order is reversed by `scaleByRat`. -/
+theorem scaleByRat_contains {r : Rat}
+    {outer inner : QInterval} (hcontains : outer.ContainsInterval inner) :
+    (scaleByRat r outer).ContainsInterval (scaleByRat r inner) := by
+  by_cases hr : 0 <= r
+  · exact scaleByRat_contains_of_nonneg hr hcontains
+  · have hrneg : r < 0 := Rat.not_le.mp hr
+    unfold scaleByRat QInterval.ContainsInterval
+    simp only [if_neg hr]
+    constructor
+    · exact rat_mul_le_mul_of_nonpos_left hcontains.2 (Rat.le_of_lt hrneg)
+    · exact rat_mul_le_mul_of_nonpos_left hcontains.1 (Rat.le_of_lt hrneg)
+
 /-- Positive rational scaling multiplies enclosure width by the scale. -/
 theorem scaleByRat_width_of_nonneg {r : Rat} (hr : 0 <= r) (I : QInterval) :
     (scaleByRat r I).width = r * I.width := by
