@@ -5848,6 +5848,27 @@ structure ScheduledIntervalRegularOn (F : FunctionOnInterval) where
         (evalInterval I hI n)
         (F.compute x hx (evalPrecision n))
 
+/-! The scheduled and ordinary contracts are intentionally not identified by
+stage monotonicity alone: a requested-stage box may be wider than the
+adaptive-stage box.  This adapter records the exact additional certificate
+needed to expose the scheduled evaluator through `IntervalRegularOn`. -/
+
+def ScheduledIntervalRegularOn.toIntervalRegularOn_of_requested_stage
+    {F : FunctionOnInterval} (h : ScheduledIntervalRegularOn F)
+    (requested_stage_contains :
+      forall I hI x hx n,
+        I.lo <= x ->
+        x <= I.hi ->
+          QInterval.ContainsInterval
+            (h.evalInterval I hI n)
+            (F.compute x hx n)) :
+    IntervalRegularOn F where
+  evalInterval := h.evalInterval
+  inputPrecision := h.inputPrecision
+  inputPrecision_pos := h.inputPrecision_pos
+  output_width := h.output_width
+  contains_point_values := requested_stage_contains
+
 /-! Build interval regularity directly from a proof-independent point
 evaluator.  The public `IntervalRegularOn` contract remains unchanged; this
 constructor only removes domain-proof noise from new special-function

@@ -203,6 +203,7 @@ explicit error budget later consumed by a partition-level FTC certificate.
 \lean{ComputableAnalysis.IntervalRegularOn}
 \lean{ComputableAnalysis.IntervalRegularOn.epsilonDeltaContinuous}
 \lean{ComputableAnalysis.ScheduledIntervalRegularOn}
+\lean{ComputableAnalysis.ScheduledIntervalRegularOn.toIntervalRegularOn_of_requested_stage}
 \lean{ComputableAnalysis.ScheduledIntervalRegularOn.epsilonDeltaContinuous}
 \lean{ComputableAnalysis.ContinuousFunctionOnInterval}
 \lean{ComputableAnalysis.Integral.unitConstantMonotoneDarbouxSchedule}
@@ -217,7 +218,10 @@ it can drive a Darboux integral.
 Adaptive evaluators use `ScheduledIntervalRegularOn`: their cell image and
 point value are evaluated at one explicit stage, which may differ from the
 native stage index.  A separate validity/equivalence proof is still required
-before that representation is installed in the abstract-function chain.
+before that representation is installed in the abstract-function chain.  The
+explicit adapter above requires the missing requested-stage containment
+certificate; monotonicity of raw boxes alone is insufficient because later
+boxes may be wider.
 
 Representations form a local chain: reflexive, symmetric, and transitive
 equivalence edges compose different rational stage schedules without changing
