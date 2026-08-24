@@ -5861,6 +5861,18 @@ inductive FiniteRawListEquiv : List RealRaw -> List RealRaw -> Prop where
       x.Equiv y -> FiniteRawListEquiv xs ys ->
         FiniteRawListEquiv (x :: xs) (y :: ys)
 
+theorem FiniteRawListEquiv.refl {xs : List RealRaw}
+    (hvalid : forall x, x ∈ xs -> x.Valid) :
+    FiniteRawListEquiv xs xs := by
+  induction xs with
+  | nil => exact .nil
+  | cons x xs ih =>
+      apply FiniteRawListEquiv.cons
+      · exact RealRaw.equiv_refl x (hvalid x (by simp))
+      · apply ih
+        intro y hy
+        exact hvalid y (by simp [hy])
+
 theorem finiteRawSum_equiv_of_forall
     {xs ys : List RealRaw}
     (hxy : FiniteRawListEquiv xs ys)
