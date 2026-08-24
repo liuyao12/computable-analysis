@@ -197,6 +197,48 @@ theorem ftcErrorExact_square_doubleId_of_pos
   · rw [if_pos (by grind : -((b - a) ^ 2 / (n : Rat)) < 0)]
     grind
 
+/-! The cubic rung has the same status, but its finite left-rectangle error
+has the next explicit polynomial numerator.  This is still a rational
+identity; no assertion about an infinite sum is involved. -/
+theorem ftcErrorExact_cube_threeSquare_unit_of_pos
+    {n : Nat} (hn : 0 < n) :
+    ftcErrorExact cube (fun x => 3 * x ^ 2) 0 1 n =
+      (3 * (n : Rat) - 1) / (2 * (n : Rat) ^ 2) := by
+  unfold ftcErrorExact cube
+  rw [riemannLeftExact_threeSquare_unit_of_pos hn]
+  have hN : (n : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hn)
+  have hformula :
+      3 * (1 / (n : Rat)) ^ 3 *
+          (((n : Rat) * ((n : Rat) - 1) *
+            (2 * (n : Rat) - 1)) / 6) -
+        (1 ^ 3 - 0 ^ 3) =
+        -((3 * (n : Rat) - 1) / (2 * (n : Rat) ^ 2)) := by
+    grind [Rat.div_def, Rat.pow_succ, Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+      Rat.mul_inv_cancel]
+  rw [hformula]
+  have hnum : 0 <= 3 * (n : Rat) - 1 := by
+    have hnone : (1 : Rat) <= (n : Rat) := by
+      exact_mod_cast (Nat.one_le_iff_ne_zero.mpr (Nat.ne_of_gt hn))
+    grind
+  have hdenpos : 0 < 2 * (n : Rat) ^ 2 := by
+    have hsq : 0 < (n : Rat) ^ 2 := by
+      rw [show (n : Rat) ^ 2 = (n : Rat) * (n : Rat) by
+        grind [Rat.pow_succ]]
+      exact Rat.mul_pos ((Rat.natCast_pos).2 hn)
+        ((Rat.natCast_pos).2 hn)
+    exact Rat.mul_pos (by native_decide) hsq
+  have hterm : 0 <= (3 * (n : Rat) - 1) / (2 * (n : Rat) ^ 2) := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg hnum (Rat.le_of_lt ((Rat.inv_pos).2 hdenpos))
+  unfold qabs
+  by_cases hzero : (3 * (n : Rat) - 1) / (2 * (n : Rat) ^ 2) = 0
+  · simp [hzero]
+  · rw [if_pos (by grind :
+      -((3 * (n : Rat) - 1) / (2 * (n : Rat) ^ 2)) < 0)]
+    grind
+
 theorem affine_derivative_effective (m c : Rat) :
     Nonempty (EffectiveDerivativeExact (affine m c) (constant m)) :=
   ⟨affineDerivative m c⟩
