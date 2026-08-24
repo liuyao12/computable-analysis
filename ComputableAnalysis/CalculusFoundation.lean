@@ -15,6 +15,7 @@ import ComputableAnalysis.EffectiveFTCPortfolio
 import ComputableAnalysis.MonotonicityConvexity
 import ComputableAnalysis.PowerSeries
 import ComputableAnalysis.Series
+import ComputableAnalysis.FirstYearCalculus
 import ComputableAnalysis.FiniteFourierFoundation
 import ComputableAnalysis.EffectiveFourierSeries
 import ComputableAnalysis.EffectiveFourierTail
