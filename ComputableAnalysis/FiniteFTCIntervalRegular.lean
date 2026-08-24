@@ -1085,6 +1085,21 @@ def exactRat_pow_monotoneConstructionFor (n : Nat) :
     (exactRat_pow_nondecreasing_on_unit n)
   construction := (exactRat_pow_integral_certificate n).construction
 
+theorem exactRat_pow_monotoneIntegralFor_valid (n : Nat) :
+    (monotoneIntegralFor
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1)
+      (exactRat_pow_monotoneConstructionFor n)).Valid := by
+  exact monotoneIntegralFor_valid _ _
+
+theorem exactRat_pow_monotoneIntegralFor_eq_dyadicRaw (n : Nat) :
+    monotoneIntegralFor
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1)
+      (exactRat_pow_monotoneConstructionFor n) =
+    Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1)
+      (exactRat_pow_integral_certificate n) := by
+  rfl
+
 /-! The normalized monomial primitive is also available as one generic
 endpoint-difference object.  Its adjacent-interval law is purely finite
 subtraction, so it does not depend on an integral construction or on a

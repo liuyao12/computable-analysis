@@ -448,6 +448,9 @@ The same rational power induction supplies
 `Integral.exactRat_pow_nondecreasing_on_unit` and a compatible
 `Integral.exactRat_pow_monotoneConstructionFor`, so the monomial can be fed
 through either the Lipschitz dyadic or monotone Darboux interface.
+`Integral.exactRat_pow_monotoneIntegralFor_valid` proves the monotone wrapper
+valid, while `Integral.exactRat_pow_monotoneIntegralFor_eq_dyadicRaw` records
+that both wrappers are literally the same underlying interval computation.
 For a prefix containing a linear term,
 `FinitePolynomial.taylorPrefixShift_at_zero` identifies that certified
 derivative polynomial at zero with the original coefficient `c 1`.
