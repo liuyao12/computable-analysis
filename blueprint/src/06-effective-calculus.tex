@@ -302,6 +302,10 @@ The curvature route is exposed as a finite method rather than as a classical
 second-derivative theorem.  A cell carries monotone derivative data; endpoint
 secants then furnish the derivative bracket used by the FTC certificate.
 
+At the raw-representation level, a secant needs only two endpoint validity
+certificates and a positive rational separation.  Convexity is used later for
+ordering secants, not for proving that the secant algorithm itself is valid.
+
 \begin{verbatim}
 monotone derivative on cell -> endpoint secants -> derivative interval
                             -> local endpoint bound -> effective FTC
@@ -309,6 +313,8 @@ monotone derivative on cell -> endpoint secants -> derivative interval
 
 \lean{ComputableAnalysis.MonotoneDerivativeBoundMethod}
 \lean{ComputableAnalysis.MonotoneDerivativeBoundMethod.toDerivativeBound}
+\lean{ComputableAnalysis.secantRaw_valid_of_valid}
+\lean{ComputableAnalysis.ExactConvexOn.secantRaw_valid}
 \lean{ComputableAnalysis.CurvatureOnSubinterval}
 \lean{ComputableAnalysis.DerivativeBoundFromCurvature.toDerivativeBound}
 \lean{ComputableAnalysis.CurvatureFTCCertificate}
