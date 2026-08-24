@@ -5855,6 +5855,40 @@ theorem FiniteRawListLe.refl {xs : List RealRaw}
         intro y hy
         exact hvalid y (by simp [hy])
 
+inductive FiniteRawListEquiv : List RealRaw -> List RealRaw -> Prop where
+  | nil : FiniteRawListEquiv [] []
+  | cons {x y : RealRaw} {xs ys : List RealRaw} :
+      x.Equiv y -> FiniteRawListEquiv xs ys ->
+        FiniteRawListEquiv (x :: xs) (y :: ys)
+
+theorem finiteRawSum_equiv_of_forall
+    {xs ys : List RealRaw}
+    (hxy : FiniteRawListEquiv xs ys)
+    (hxs : forall x, x ∈ xs -> x.Valid)
+    (hys : forall y, y ∈ ys -> y.Valid) :
+    (finiteRawSum xs).Equiv (finiteRawSum ys) := by
+  induction hxy with
+  | nil =>
+      exact RealRaw.equiv_refl RealRaw.zero (by
+        change RealRaw.ValidCompute (fun _ : Nat => { lo := 0, hi := 0 })
+        exact RealRaw.ofRat_valid 0)
+  | @cons x y xs ys hhead htail ih =>
+      have hx : x.Valid := hxs x (by simp)
+      have hy : y.Valid := hys y (by simp)
+      have hxs' : forall z, z ∈ xs -> z.Valid := by
+        intro z hz
+        exact hxs z (by simp [hz])
+      have hys' : forall z, z ∈ ys -> z.Valid := by
+        intro z hz
+        exact hys z (by simp [hz])
+      have hleft : (finiteRawSum xs).Valid :=
+        finiteRawSum_valid xs hxs'
+      have hright : (finiteRawSum ys).Valid :=
+        finiteRawSum_valid ys hys'
+      have htail' := ih hxs' hys'
+      simpa [finiteRawSum] using
+        (RealRaw.add_equiv hx hy hleft hright hhead htail')
+
 theorem finiteRawSum_le_of_forall₂
     {xs ys : List RealRaw}
     (hxy : FiniteRawListLe xs ys) :
