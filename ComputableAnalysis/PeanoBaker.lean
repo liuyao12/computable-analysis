@@ -517,6 +517,23 @@ theorem homogeneousTrajectory_succ (system : DiscreteLinearSystem dimension)
     system.homogeneousTrajectory initial (n + 1) =
       matrixApply (system.step n) (system.homogeneousTrajectory initial n) := rfl
 
+/-! The finite homogeneous trajectory already has the linearity expected of
+the solution operator.  This is an induction over sampled matrix updates, not
+an appeal to a completed vector-valued function space. -/
+theorem homogeneousTrajectory_vectorAdd
+    (system : DiscreteLinearSystem dimension)
+    (x y : RatVector dimension) :
+    forall n,
+      system.homogeneousTrajectory (vectorAdd x y) n =
+        vectorAdd (system.homogeneousTrajectory x n)
+          (system.homogeneousTrajectory y n)
+  | 0 => rfl
+  | n + 1 => by
+      rw [homogeneousTrajectory_succ, homogeneousTrajectory_succ,
+        homogeneousTrajectory_succ,
+        homogeneousTrajectory_vectorAdd system x y n,
+        matrixApply_vectorAdd]
+
 /-- A candidate solution of the sampled inhomogeneous recurrence.  Stating the
 recurrence separately from the recursive evaluator makes finite uniqueness a
 checked theorem rather than a property of one chosen implementation. -/
