@@ -332,7 +332,15 @@ analogous three-term factorization and modulus \(3(n+1)\).  The corresponding
 finite dyadic integrals are identified with \(1/3,1/4,1/5,1/6\) by overlap
 with rational singleton intervals. The reusable polynomial layer also gives
 finite secant certificates for every normalized monomial and every finite
-Taylor prefix; these are the main inputs for non-polynomial functions.
+Taylor prefix; these are the main inputs for non-polynomial functions.  Thus
+the foundation separates the uniform theorem from its finite value algebra:
+the derivative/FTC certificate is degree-independent, while each claimed
+closed value is backed by its own rational power-sum identity.
+
+\lean{ComputableAnalysis.FinitePolynomial.normalizedMonomialSecantBound}
+\lean{ComputableAnalysis.FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefix_hasDerivativeOnInterval}
+\leanok
 
 For the cubic case the first rectangle identity is explicit:
 \(\sum_{k<n}3(k/n)^2(1/n)\) is evaluated by a finite sum-of-squares
