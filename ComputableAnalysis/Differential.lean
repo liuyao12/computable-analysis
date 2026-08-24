@@ -343,6 +343,20 @@ theorem differenceQuotient_affine_comp
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
     Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 
+/-! The zero-slope case is not an analytic exception: the affine inner map is
+constant, so its finite difference quotient is exactly zero.  Including it
+gives one total finite chain-rule identity, while the nonzero-slope theorem
+above remains the useful transport form for inverse-coordinate arguments. -/
+theorem differenceQuotient_affine_comp_of_step
+    (f : Rat -> Rat) {m c x h : Rat} (hh : h ≠ 0) :
+    differenceQuotient (fun z => f (affine m c z)) x h =
+      m * differenceQuotient f (affine m c x) (m * h) := by
+  by_cases hm : m = 0
+  · subst m
+    simp [differenceQuotient, affine, Rat.div_def]
+    grind
+  · exact differenceQuotient_affine_comp f hm hh
+
 /- A positive affine change of endpoint coordinates transports a finite
 secant bracket.  The source bracket is stated at rational endpoints `a,b`,
 while `hxa` and `hyb` identify those endpoints with the translated/scaled

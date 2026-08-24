@@ -539,6 +539,13 @@ facts as `uniformRotationOnTwo_rotationInitialCertificate`. This is the
 checked rotation IVP candidate, still short of its geometric identification or
 a continuous vector uniqueness theorem.
 
+Affine reparametrization is available as a total finite chain-rule identity:
+`ExactFunction.differenceQuotient_affine_comp_of_step` includes the constant
+inner-map case, while `ExactFunction.secant_bracket_affine_endpoint_transport`
+handles positive endpoint transport. Use these rational identities as the
+starting point for substitution and angle-chart proofs; they do not require a
+limit or a completed real function.
+
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`.
 `FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval` now proves its

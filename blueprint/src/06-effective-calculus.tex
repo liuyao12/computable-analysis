@@ -156,6 +156,23 @@ depend on an implicit ordered-real scalar operation.
 \lean{ComputableAnalysis.HasDerivativeOnInterval.subOfCommonSchedule}
 \leanok
 
+Affine reparametrization has the corresponding finite chain rule.  For a
+nonzero slope the inner step is transported exactly; the zero-slope case is
+also included because a constant affine map has zero finite difference
+quotient.  This is the rational core used by substitutions and normalized
+angle charts:
+
+\begin{verbatim}
+f(m(x+h)+c)-f(mx+c)     m * (f(y+m h)-f(y))
+--------------------  =  --------------------
+          h                         m h
+\end{verbatim}
+
+\lean{ComputableAnalysis.ExactFunction.differenceQuotient_affine_comp}
+\lean{ComputableAnalysis.ExactFunction.differenceQuotient_affine_comp_of_step}
+\lean{ComputableAnalysis.ExactFunction.secant_bracket_affine_endpoint_transport}
+\leanok
+
 The same finite mechanism now closes multiplication when rational majorants
 are supplied for both factors and both proposed derivatives.  The certificate
 contains the explicit corner term coming from the product finite difference;
