@@ -54,7 +54,16 @@ The finite Fourier API is explicit:
 \lean{ComputableAnalysis.fourPointFourierTransform_parseval}
 \lean{ComputableAnalysis.FiniteFourierOrthogonalityCertificate}
 \lean{ComputableAnalysis.FiniteFourierReconstructionCertificate.reconstructs}
+\lean{ComputableAnalysis.finiteFourierSum_blockRepeat_zero_of_phase_one}
+\lean{ComputableAnalysis.FiniteFourierBlockCancellationCertificate.repeated_zero}
+\lean{ComputableAnalysis.FiniteFourierBlockCancellationCertificate.add_repeated_invariant}
 \leanok
+
+The cancellation theorem is the finite algebra behind periodic Fourier
+orthogonality: a block whose selected coefficient is zero may be repeated or
+adjoined without changing that coefficient.  The only phase requirement is
+the rational-complex identity that one full block contributes phase one.
+No integral, limit, or real-number completion enters this step.
 
 The infinite-looking step is only a tail certificate over these finite
 transforms:
@@ -69,6 +78,8 @@ finite transform -> coordinate tail box -> future-stage containment
 \lean{ComputableAnalysis.EffectiveFourierSeries.stabilized_valid}
 \lean{ComputableAnalysis.EffectiveFourierSeries.precision_witness}
 \lean{ComputableAnalysis.quarterTurnGeometricTailCertificate_valid}
+\lean{ComputableAnalysis.EffectiveFourierSampleCertificate.toSeries_valid}
+\lean{ComputableAnalysis.EffectiveFourierSampleCertificate.sample_interval_witness}
 \leanok
 
 The first genuinely nonzero infinite-looking example is the quarter-turn
