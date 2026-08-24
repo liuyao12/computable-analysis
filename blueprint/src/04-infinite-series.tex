@@ -198,6 +198,28 @@ anchor is shared with the rectangle computation.  Faster Machin/Newton-style
 series are then compared by overlap rather than declared to be the definition
 of the same constant.
 
+The first complete comparison is already available at the circle anchor
+$x=1$:
+
+\begin{verbatim}
+Leibniz alternating prefix
+        == arctan(1) power-series prefix
+        == arctan(1) evaluator
+        -> width <= 1/(4*n+1)
+\end{verbatim}
+
+The first two equalities are stagewise finite identities, so their equivalence
+does not depend on a completed sum. The final line is the executable
+potential-infinity budget: choose a natural stage from the requested positive
+rational tolerance. Identifying this common anchor with the rectangle
+computation of $\pi/4$ is a separate geometric certificate.
+
+\lean{ComputableAnalysis.PiProofs.leibnizSeries_equiv_arctan_one}
+\lean{ComputableAnalysis.PiProofs.leibnizSeries_equiv_arctanSeries_one}
+\lean{ComputableAnalysis.Series.leibnizAlternatingRaw_width_eq_reciprocal}
+\lean{ComputableAnalysis.Series.leibnizAlternatingRaw_reaches_of_positive_tolerance}
+\leanok
+
 \section{Basel and factorial growth}
 \label{thm:basel-geometric-overlap}
 
