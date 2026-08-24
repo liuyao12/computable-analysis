@@ -162,6 +162,41 @@ def affineFTCExact (m c a b : Rat) :
     grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_assoc, Rat.add_comm,
       Rat.mul_assoc, Rat.mul_comm]
 
+/-! The first nonlinear finite FTC error is the nonnegative missing strip.
+This form is convenient for choosing a stage from a rational error budget:
+the analytic-looking estimate has become the explicit square of the cell
+width divided by the number of cells. -/
+theorem ftcErrorExact_square_doubleId_of_pos
+    {a b : Rat} (hab : a <= b) {n : Nat} (hn : 0 < n) :
+    ftcErrorExact square doubleId a b n =
+      (b - a) ^ 2 / (n : Rat) := by
+  unfold ftcErrorExact doubleId square
+  rw [riemannLeftExact_doubleId_of_pos hn]
+  have hwidth : 0 <= (b - a) ^ 2 := by
+    have hpow : (b - a) ^ 2 = (b - a) * (b - a) := by
+      grind [Rat.pow_succ]
+    rw [hpow]
+    by_cases h : 0 <= b - a
+    · exact Rat.mul_nonneg h h
+    · have hneg : 0 <= -(b - a) := by grind
+      have hsq := Rat.mul_nonneg hneg hneg
+      simpa [Rat.mul_neg, Rat.neg_mul, Rat.neg_neg] using hsq
+  have hden : 0 < (n : Rat) := (Rat.natCast_pos).2 hn
+  have hterm : 0 <= (b - a) ^ 2 / (n : Rat) := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg hwidth
+      (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+  have hdiff :
+      ((b ^ 2 - a ^ 2) - (b - a) ^ 2 / (n : Rat)) -
+        (b * b - a * a) = -((b - a) ^ 2 / (n : Rat)) := by
+    grind [Rat.sub_eq_add_neg, Rat.pow_succ]
+  rw [hdiff]
+  unfold qabs
+  by_cases hzero : (b - a) ^ 2 / (n : Rat) = 0
+  · simp [hzero]
+  · rw [if_pos (by grind : -((b - a) ^ 2 / (n : Rat)) < 0)]
+    grind
+
 theorem affine_derivative_effective (m c : Rat) :
     Nonempty (EffectiveDerivativeExact (affine m c) (constant m)) :=
   ⟨affineDerivative m c⟩

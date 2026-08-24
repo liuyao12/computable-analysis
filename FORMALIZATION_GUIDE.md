@@ -558,6 +558,10 @@ is useful for regression tests and error estimates.
 For a positive stage, `ComputableAnalysis.riemannLeftExact_affine_error_of_pos`
 normalizes that formula to the exact integral value plus an explicit
 `1 / n` rectangle error.
+The nonlinear calibration theorem
+`ComputableAnalysis.ExactFunction.ftcErrorExact_square_doubleId_of_pos`
+packages the same idea for the primitive `x^2`: its finite FTC error is
+exactly `(b-a)^2/n`.
 
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`.
