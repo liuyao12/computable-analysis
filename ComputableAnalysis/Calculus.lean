@@ -7516,6 +7516,54 @@ theorem piecewiseMonotoneIntegralFor_valid (F : FunctionOnInterval)
     hfold (List.range c.pieces) (RealRaw.ofRat 0) (by
     simpa [RealRaw.Valid, RealRaw.ofRat] using RealRaw.ofRat_valid 0)
 
+/-! The two-cell case is the first reusable finite assembly law.  It exposes
+the piecewise fold as the sum of its two certified cell integrals, up to the
+interval-representative equivalence. -/
+theorem piecewiseMonotoneIntegralFor_two_equiv
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F)
+    (hpieces : c.pieces = 2) :
+    (piecewiseMonotoneIntegralFor F c).Equiv
+      (piecewiseMonotoneCellIntegral F c 0 (by omega) +
+        piecewiseMonotoneCellIntegral F c 1 (by omega)) := by
+  have h0 : (piecewiseMonotoneCellIntegral F c 0 (by omega)).Valid :=
+    piecewiseMonotoneCellIntegral_valid F c 0 (by omega)
+  have h1 : (piecewiseMonotoneCellIntegral F c 1 (by omega)).Valid :=
+    piecewiseMonotoneCellIntegral_valid F c 1 (by omega)
+  have hzero : (RealRaw.zero).Valid := by
+    change RealRaw.ValidCompute (fun _ : Nat => { lo := 0, hi := 0 })
+    exact RealRaw.ofRat_valid 0
+  have hsum :
+      (piecewiseMonotoneCellIntegral F c 0 (by omega) +
+        piecewiseMonotoneCellIntegral F c 1 (by omega)).Valid :=
+    RealRaw.add_valid h0 h1
+  have hleft :
+      ((RealRaw.zero + piecewiseMonotoneCellIntegral F c 0 (by omega)) +
+        piecewiseMonotoneCellIntegral F c 1 (by omega)).Valid :=
+    RealRaw.add_valid (RealRaw.add_valid hzero h0) h1
+  have hmid :
+      (RealRaw.zero +
+        (piecewiseMonotoneCellIntegral F c 0 (by omega) +
+          piecewiseMonotoneCellIntegral F c 1 (by omega))).Valid :=
+    RealRaw.add_valid hzero hsum
+  have hassoc := RealRaw.add_assoc_equiv
+    RealRaw.zero
+    (piecewiseMonotoneCellIntegral F c 0 (by omega))
+    (piecewiseMonotoneCellIntegral F c 1 (by omega))
+    hzero h0 h1
+  have hzeroadd := RealRaw.zero_add_equiv hsum
+  have hfold :
+      ((RealRaw.zero + piecewiseMonotoneCellIntegral F c 0 (by omega)) +
+          piecewiseMonotoneCellIntegral F c 1 (by omega)).Equiv
+        (piecewiseMonotoneCellIntegral F c 0 (by omega) +
+          piecewiseMonotoneCellIntegral F c 1 (by omega)) := by
+    exact RealRaw.equiv_trans hleft hmid hsum hassoc hzeroadd
+  unfold piecewiseMonotoneIntegralFor
+  simp only [hpieces]
+  have hrange : List.range 2 = [0, 1] := by native_decide
+  rw [hrange]
+  simpa [RealRaw.zero, RealRaw.ofRat] using hfold
+
 /-- A one-piece promotion from a monotone construction computes the same raw
 integral as the original monotone construction. -/
 theorem piecewiseMonotoneIntegralFor_ofMonotone_equiv
