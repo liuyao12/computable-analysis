@@ -2024,6 +2024,19 @@ def cubicIntegralPrimitiveRaw : RealFunRaw :=
 def cubicIntegralDerivativeRaw : RealFunRaw :=
   RealFunRaw.exact (fun x : Rat => x ^ 3)
 
+noncomputable def cubicPrimitiveEndpointDifference (a b : Rat) : RealRaw :=
+  endpointDifferenceRaw cubicIntegralPrimitiveRaw a b
+    (endpointDifference_valid_of_fun_valid (RealFunRaw.exact_valid _) trivial trivial)
+
+theorem cubicPrimitiveEndpointDifference_adjacent_additive
+    (a b c : Rat) :
+    (cubicPrimitiveEndpointDifference a b +
+      cubicPrimitiveEndpointDifference b c).Equiv
+      (cubicPrimitiveEndpointDifference a c) := by
+  unfold cubicPrimitiveEndpointDifference
+  apply endpointDifferenceRaw_adjacent_additive
+    (RealFunRaw.exact_valid _) trivial trivial trivial
+
 def cubicIntegralPartitionOf (eps : QPos) : RationalPartition 0 1 :=
   RationalPartition.uniform 0 1 (3 * (eps.val.den + 1))
     (by omega) (by native_decide)
@@ -2273,6 +2286,19 @@ def quarticIntegralPrimitiveRaw : RealFunRaw :=
 
 def quarticIntegralDerivativeRaw : RealFunRaw :=
   RealFunRaw.exact (fun x : Rat => x ^ 4)
+
+noncomputable def quarticPrimitiveEndpointDifference (a b : Rat) : RealRaw :=
+  endpointDifferenceRaw quarticIntegralPrimitiveRaw a b
+    (endpointDifference_valid_of_fun_valid (RealFunRaw.exact_valid _) trivial trivial)
+
+theorem quarticPrimitiveEndpointDifference_adjacent_additive
+    (a b c : Rat) :
+    (quarticPrimitiveEndpointDifference a b +
+      quarticPrimitiveEndpointDifference b c).Equiv
+      (quarticPrimitiveEndpointDifference a c) := by
+  unfold quarticPrimitiveEndpointDifference
+  apply endpointDifferenceRaw_adjacent_additive
+    (RealFunRaw.exact_valid _) trivial trivial trivial
 
 def quarticIntegralPartitionOf (eps : QPos) : RationalPartition 0 1 :=
   RationalPartition.uniform 0 1 (4 * (eps.val.den + 1))
@@ -2536,6 +2562,19 @@ theorem quarticIntegralEffectiveFTC_equiv_one_fifth :
 
 def fifthIntegralPrimitiveRaw : RealFunRaw :=
   RealFunRaw.exact (fun x : Rat => x ^ 6 / 6)
+
+noncomputable def fifthPrimitiveEndpointDifference (a b : Rat) : RealRaw :=
+  endpointDifferenceRaw fifthIntegralPrimitiveRaw a b
+    (endpointDifference_valid_of_fun_valid (RealFunRaw.exact_valid _) trivial trivial)
+
+theorem fifthPrimitiveEndpointDifference_adjacent_additive
+    (a b c : Rat) :
+    (fifthPrimitiveEndpointDifference a b +
+      fifthPrimitiveEndpointDifference b c).Equiv
+      (fifthPrimitiveEndpointDifference a c) := by
+  unfold fifthPrimitiveEndpointDifference
+  apply endpointDifferenceRaw_adjacent_additive
+    (RealFunRaw.exact_valid _) trivial trivial trivial
 
 theorem fifthIntegralEndpointInterval_eq_one_sixth (n : Nat) :
     endpointDifferenceInterval fifthIntegralPrimitiveRaw 0 1 n =
