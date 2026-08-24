@@ -4599,11 +4599,11 @@ namespace Integral
 /-- Project-facing integral construction for a partial function on a whole
 rational interval.
 
-The detailed Riemann-sum construction still needs to be proved.  This shape is
-only the first domain gate: `FunctionOnInterval` supplies pointwise rational
-evaluation, while the intended integral-existence theorem should consume
-`IntervalRegularOn` to exclude hidden singularities inside rational
-subintervals. -/
+The interface is intentionally proof-relevant: a concrete construction must
+supply its own finite computation and `RealRaw.ValidCompute` certificate.
+Concrete Lipschitz--Darboux and monotone constructions live in the integral
+identity modules; this structure does not assert a universal integrability
+theorem for every interval-regular function. -/
 structure ConstructionFor (F : FunctionOnInterval) where
   compute : Nat -> QInterval
   certificate : RealRaw.ValidCompute compute
