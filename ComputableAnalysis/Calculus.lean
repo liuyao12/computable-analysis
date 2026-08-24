@@ -1337,6 +1337,17 @@ theorem scaleByRat_width_of_nonneg {r : Rat} (hr : 0 <= r) (I : QInterval) :
   rw [if_pos hr]
   grind [Rat.sub_eq_add_neg, Rat.mul_add]
 
+/-- Sign-complete width law for rational interval scaling. -/
+theorem scaleByRat_width (r : Rat) (I : QInterval) :
+    (scaleByRat r I).width = qabs r * I.width := by
+  by_cases hr : 0 <= r
+  · simpa [qabs_eq_self_of_nonneg hr] using scaleByRat_width_of_nonneg hr I
+  · have hrneg : r < 0 := Rat.not_le.mp hr
+    unfold scaleByRat QInterval.width
+    rw [if_neg hr]
+    rw [qabs_eq_neg_of_nonpos (Rat.le_of_lt hrneg)]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul]
+
 def subInterval (I J : QInterval) : QInterval :=
   { lo := I.lo - J.hi, hi := I.hi - J.lo }
 
