@@ -1818,6 +1818,24 @@ def squareIntegralPrimitiveRaw : RealFunRaw :=
 def squareIntegralDerivativeRaw : RealFunRaw :=
   RealFunRaw.exact (fun x : Rat => x ^ 2)
 
+/-! The square primitive exposes the adjacent-interval endpoint law on an
+arbitrary rational triple.  This is the polynomial counterpart of the affine
+law in `Calculus.lean`; the effective-FTC value theorem below specializes it
+to the unit interval. -/
+
+noncomputable def squarePrimitiveEndpointDifference (a b : Rat) : RealRaw :=
+  endpointDifferenceRaw squareIntegralPrimitiveRaw a b
+    (endpointDifference_valid_of_fun_valid (RealFunRaw.exact_valid _) trivial trivial)
+
+theorem squarePrimitiveEndpointDifference_adjacent_additive
+    (a b c : Rat) :
+    (squarePrimitiveEndpointDifference a b +
+      squarePrimitiveEndpointDifference b c).Equiv
+      (squarePrimitiveEndpointDifference a c) := by
+  unfold squarePrimitiveEndpointDifference
+  apply endpointDifferenceRaw_adjacent_additive
+    (RealFunRaw.exact_valid _) trivial trivial trivial
+
 def squareIntegralPartitionOf (eps : QPos) : RationalPartition 0 1 :=
   RationalPartition.uniform 0 1 (2 * (eps.val.den + 1))
     (by omega) (by native_decide)
