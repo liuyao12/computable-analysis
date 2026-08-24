@@ -567,6 +567,16 @@ layer.
 \lean{ComputableAnalysis.Integral.exactRat_pow_intervalRegularOn_minusOne_one}
 \leanok
 
+The corresponding normalized primitive is exposed once, rather than
+duplicated for each degree.  Its endpoint differences telescope across
+adjacent rational intervals by finite subtraction; this is the algebraic
+backbone that a partition-level FTC certificate assembles.
+
+\lean{ComputableAnalysis.Integral.monomialPrimitiveRaw}
+\lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference}
+\lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference_adjacent_additive}
+\leanok
+
 For the cubic case the first rectangle identity is explicit:
 \(\sum_{k<n}3(k/n)^2(1/n)\) is evaluated by a finite sum-of-squares
 induction.  The interval-regular layer then supplies the domain-restricted

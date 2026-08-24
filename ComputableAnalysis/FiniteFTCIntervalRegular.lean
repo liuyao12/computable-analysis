@@ -1029,6 +1029,29 @@ def exactRat_pow_intervalRegularOn_minusOne_one (n : Nat) :
   IntervalRegularOn.of_lipschitzOnIntervalNat (fun x : Rat => x ^ n)
     (-1) 1 n (exactPow_lipschitz_on_minusOne_one n)
 
+/-! The normalized monomial primitive is also available as one generic
+endpoint-difference object.  Its adjacent-interval law is purely finite
+subtraction, so it does not depend on an integral construction or on a
+completed real line. -/
+
+def monomialPrimitiveRaw (n : Nat) : RealFunRaw :=
+  RealFunRaw.exact
+    (fun x : Rat => x ^ (n + 1) / ((n + 1 : Nat) : Rat))
+
+noncomputable def monomialPrimitiveEndpointDifference
+    (n : Nat) (a b : Rat) : RealRaw :=
+  endpointDifferenceRaw (monomialPrimitiveRaw n) a b
+    (endpointDifference_valid_of_fun_valid (RealFunRaw.exact_valid _) trivial trivial)
+
+theorem monomialPrimitiveEndpointDifference_adjacent_additive
+    (n : Nat) (a b c : Rat) :
+    (monomialPrimitiveEndpointDifference n a b +
+      monomialPrimitiveEndpointDifference n b c).Equiv
+      (monomialPrimitiveEndpointDifference n a c) := by
+  unfold monomialPrimitiveEndpointDifference
+  apply endpointDifferenceRaw_adjacent_additive
+    (RealFunRaw.exact_valid _) trivial trivial trivial
+
 def exactRat_cube_integral_certificate :
     Integral.IntervalRegularIntegralCertificate
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ 3) 0 1) where

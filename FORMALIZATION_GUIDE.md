@@ -420,6 +420,12 @@ For interval regularity itself, `Integral.exactPow_lipschitz_on_minusOne_one`
 and `Integral.exactRat_pow_intervalRegularOn_minusOne_one` expose the
 parametric monomial certificate on `[-1,1]`: the rational power-difference
 recurrence gives the natural Lipschitz bound `n`, including `n = 0`.
+The matching primitive algebra is exposed by
+`Integral.monomialPrimitiveRaw`,
+`Integral.monomialPrimitiveEndpointDifference`, and
+`Integral.monomialPrimitiveEndpointDifference_adjacent_additive`; these
+objects telescope over rational partitions before any limiting integral
+argument is introduced.
 For a prefix containing a linear term,
 `FinitePolynomial.taylorPrefixShift_at_zero` identifies that certified
 derivative polynomial at zero with the original coefficient `c 1`.
