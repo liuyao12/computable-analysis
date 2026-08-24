@@ -546,6 +546,13 @@ handles positive endpoint transport. Use these rational identities as the
 starting point for substitution and angle-chart proofs; they do not require a
 limit or a completed real function.
 
+The matching integral-side identity is
+`ComputableAnalysis.riemannLeftExact_affine_substitution`. It transports a
+positive affine change of variable through the finite left-rectangle fold.
+This is the substitution algebra that an effective FTC certificate can later
+carry to the nested interval level; it is deliberately not stated as a
+general theorem about completed real integrals.
+
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`.
 `FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval` now proves its

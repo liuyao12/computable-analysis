@@ -357,6 +357,66 @@ theorem differenceQuotient_affine_comp_of_step
     grind
   · exact differenceQuotient_affine_comp f hm hh
 
+/-! A positive affine reparametrization transports the finite left-rectangle
+sum exactly.  This is the computational core of substitution: it is an
+identity of rational folds, before any shrinking or abstract integral is
+introduced. -/
+theorem riemannLeftExact_affine_substitution
+    (g : Rat -> Rat) {m c a b : Rat} (hm : 0 < m) (n : Nat) :
+    riemannLeftExact (fun x => m * g (affine m c x)) a b n =
+      riemannLeftExact g (affine m c a) (affine m c b) n := by
+  have hmesh : ∀ q : Nat,
+      mesh (affine m c a) (affine m c b) q = m * mesh a b q := by
+    intro q
+    by_cases hq : q = 0
+    · simp [mesh, hq]
+    · have hqr : (q : Rat) ≠ 0 := by
+        exact Rat.ne_of_gt ((Rat.natCast_pos).2 (Nat.pos_of_ne_zero hq))
+      unfold mesh affine
+      rw [if_neg hq, if_neg hq, Rat.div_def, Rat.div_def]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+        Rat.mul_comm, Rat.mul_inv_cancel]
+  have hpoint : ∀ (q k : Nat),
+      leftPoint (affine m c a) (affine m c b) q k =
+        affine m c (leftPoint a b q k) := by
+    intro q k
+    unfold leftPoint
+    rw [hmesh q]
+    unfold affine
+    grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+  have hsum : ∀ q : Nat,
+      (List.range q).foldl
+          (fun acc k => acc + mesh a b q * (m * g (affine m c (leftPoint a b q k)))) 0 =
+        (List.range q).foldl
+          (fun acc k => acc + mesh (affine m c a) (affine m c b) q *
+            g (leftPoint (affine m c a) (affine m c b) q k)) 0 := by
+    intro q
+    have hfold : ∀ (xs : List Nat),
+        (∀ k, k ∈ xs ->
+          mesh a b q * (m * g (affine m c (leftPoint a b q k))) =
+            mesh (affine m c a) (affine m c b) q *
+              g (leftPoint (affine m c a) (affine m c b) q k)) ->
+        ∀ acc : Rat,
+          (xs.foldl
+            (fun acc k => acc + mesh a b q *
+              (m * g (affine m c (leftPoint a b q k)))) acc) =
+          (xs.foldl
+            (fun acc k => acc + mesh (affine m c a) (affine m c b) q *
+              g (leftPoint (affine m c a) (affine m c b) q k)) acc) := by
+      intro xs
+      induction xs with
+      | nil => intro _h acc; rfl
+      | cons k ks ih =>
+          intro hxs acc
+          dsimp
+          rw [hxs k (by simp)]
+          exact ih (fun j hj => hxs j (by simp [hj])) _
+    apply hfold (List.range q)
+    intro k hk
+    rw [hmesh q, hpoint q k]
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  simpa [riemannLeftExact] using hsum n
+
 /- A positive affine change of endpoint coordinates transports a finite
 secant bracket.  The source bracket is stated at rational endpoints `a,b`,
 while `hxa` and `hyb` identify those endpoints with the translated/scaled
