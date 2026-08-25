@@ -17,6 +17,7 @@ import ComputableAnalysis.SinPiSquareFTC
 import ComputableAnalysis.TangentPullbackEffectiveFTC
 import ComputableAnalysis.StableRotationDerivative
 import ComputableAnalysis.EffectiveFTCPortfolio
+import ComputableAnalysis.FiniteLHopitalCertificate
 import ComputableAnalysis.MonotonicityConvexity
 import ComputableAnalysis.PowerSeries
 import ComputableAnalysis.FiniteTaylorFTCInterface
