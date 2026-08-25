@@ -2793,6 +2793,55 @@ structure DyadicNestedRadicalSquareTangentCommonWitness where
   witness_le_tangent_hi : forall n,
     witness n <= (tangentSquareIntegral.compute n).hi
 
+/- A stagewise overlap is equivalently packaged by choosing the larger lower
+endpoint.  Keeping this constructor next to the four inequalities makes the
+square route match the public sine transport API. -/
+def DyadicNestedRadicalSquareTangentCommonWitness.of_overlap
+    (hoverlap : forall n,
+      QInterval.Overlaps
+        (dyadicNestedRadicalSquareLeftSum n)
+        (tangentSquareIntegral.compute n)) :
+    DyadicNestedRadicalSquareTangentCommonWitness where
+  witness := fun n => max
+    (dyadicNestedRadicalSquareLeftSum n).lo
+    (tangentSquareIntegral.compute n).lo
+  candidate_lo_le := by
+    intro n
+    rw [Rat.max_def]
+    split <;> grind
+  witness_le_candidate_hi := by
+    intro n
+    have hover := hoverlap n
+    unfold QInterval.Overlaps at hover
+    have hleft :
+        (dyadicNestedRadicalSquareLeftSum n).lo <=
+          (dyadicNestedRadicalSquareLeftSum n).hi := by
+      have hwidth := dyadicNestedRadicalSquareLeftSum_ordered n
+      change 0 <=
+        (dyadicNestedRadicalSquareLeftSum n).hi -
+          (dyadicNestedRadicalSquareLeftSum n).lo at hwidth
+      grind
+    rw [Rat.max_def]
+    split <;> grind
+  tangent_lo_le := by
+    intro n
+    rw [Rat.max_def]
+    split <;> grind
+  witness_le_tangent_hi := by
+    intro n
+    have hover := hoverlap n
+    unfold QInterval.Overlaps at hover
+    have hright :
+        (tangentSquareIntegral.compute n).lo <=
+          (tangentSquareIntegral.compute n).hi := by
+      have hwidth := tangentSquareIntegral_valid.1 n
+      change 0 <=
+        (tangentSquareIntegral.compute n).hi -
+          (tangentSquareIntegral.compute n).lo at hwidth
+      grind
+    rw [Rat.max_def]
+    split <;> grind
+
 theorem DyadicNestedRadicalSquareTangentCommonWitness.to_overlap
     (h : DyadicNestedRadicalSquareTangentCommonWitness) (n : Nat) :
     QInterval.Overlaps
@@ -2866,6 +2915,14 @@ theorem dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_value_of_anchor
     (dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_tangentSquareIntegral
       hover)
     hvalue
+
+theorem DyadicNestedRadicalSquareTangentCommonWitness.stabilized_equiv_value
+    (h : DyadicNestedRadicalSquareTangentCommonWitness)
+    (hvalue : tangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4))) :
+    (dyadicNestedRadicalSquareIntegralRaw_stabilized
+      tangentSquareIntegral).Equiv (RealRaw.ofRat (1 / 4)) := by
+  exact dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_value_of_anchor
+    h.to_equiv hvalue
 
 /- The finite rational-circle identity used by the future primitive proof.
    Keeping this as an algebraic theorem makes the intended `sin²` route

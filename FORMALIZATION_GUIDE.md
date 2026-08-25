@@ -1459,6 +1459,13 @@ bookkeeping is discharged by
 nested-radical or other specialized sine evaluator; do not formalize a second
 global sine function merely to obtain the integral.
 
+For the squared-sine route, use
+`DyadicNestedRadicalSquareTangentCommonWitness.of_overlap` to package the
+stagewise candidate/anchor overlap. Its `stabilized_equiv_value` theorem
+transports the stabilized candidate to `1/4` once the tangent-square anchor
+has been identified. The remaining obligation is therefore the finite overlap
+family itself, not witness construction or prefix stabilization.
+
 The future canonical-logarithm π formula has one explicit entry point:
 `PiProofs.CanonicalLogTwoCertificate`. Supply a valid raw value at two and
 a proof that it agrees with `Logarithm.logTwoReciprocalIntegral`; then
