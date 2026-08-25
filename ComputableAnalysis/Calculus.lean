@@ -9025,9 +9025,61 @@ def GapAwareInvertibleFunctionOnInterval.EndpointRangeContains
   | .nonincreasing =>
       (I.function.compute I.function.upper
         ⟨I.source_ordered, Rat.le_refl⟩ n).lo <= Y.lo /\
-        Y.hi <=
+      Y.hi <=
           (I.function.compute I.function.lower
             ⟨Rat.le_refl, I.source_ordered⟩ n).hi
+
+/-! A sound interval-level midpoint decision kernel.
+
+The kernel only discards a half when the computed image box is wholly on one
+side of the target box.  If the boxes overlap, it retains the parent interval
+instead of making an unjustified classical choice.  Thus every returned
+interval is a rational subinterval of the parent; progress in a full inverse
+algorithm must be supplied by a separate gap-aware precision certificate. -/
+def gapAwareTargetBisectionStep
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) :
+    QInterval :=
+  let V := F.regular.evalInterval I hI n
+  if V.hi < Y.lo then
+    { lo := I.midpoint, hi := I.hi }
+  else if Y.hi < V.lo then
+    { lo := I.lo, hi := I.midpoint }
+  else
+    I
+
+theorem gapAwareTargetBisectionStep_ordered
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) :
+    (gapAwareTargetBisectionStep F Y I hI n).lo <=
+      (gapAwareTargetBisectionStep F Y I hI n).hi := by
+  have hm := QInterval.midpoint_mem hI.2.1
+  by_cases hbelow :
+      (F.regular.evalInterval I hI n).hi < Y.lo
+  · simp [gapAwareTargetBisectionStep, hbelow]
+    exact hm.2
+  · by_cases habove :
+        Y.hi < (F.regular.evalInterval I hI n).lo
+    · simp [gapAwareTargetBisectionStep, hbelow, habove]
+      exact hm.1
+    · simp [gapAwareTargetBisectionStep, hbelow, habove]
+      exact hI.2.1
+
+theorem gapAwareTargetBisectionStep_subinterval
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) :
+    subintervalOf (gapAwareTargetBisectionStep F Y I hI n) I.lo I.hi := by
+  have hm := QInterval.midpoint_mem hI.2.1
+  by_cases hbelow :
+      (F.regular.evalInterval I hI n).hi < Y.lo
+  · simp [gapAwareTargetBisectionStep, hbelow]
+    exact ⟨hm.1, hm.2, Rat.le_refl⟩
+  · by_cases habove :
+        Y.hi < (F.regular.evalInterval I hI n).lo
+    · simp [gapAwareTargetBisectionStep, hbelow, habove]
+      exact ⟨Rat.le_refl, hm.1, hm.2⟩
+    · simp [gapAwareTargetBisectionStep, hbelow, habove]
+      exact ⟨Rat.le_refl, hI.2.1, Rat.le_refl⟩
 
 structure GapAwareInRangeRaw
     (I : GapAwareInvertibleFunctionOnInterval) where

@@ -254,6 +254,9 @@ warm exp stage -> interval regularity -> monotone boxes
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_continuous}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_gapAwareInvertible}
 \lean{ComputableAnalysis.GapAwareInvertibleFunctionOnInterval}
+\lean{ComputableAnalysis.gapAwareTargetBisectionStep}
+\lean{ComputableAnalysis.gapAwareTargetBisectionStep_ordered}
+\lean{ComputableAnalysis.gapAwareTargetBisectionStep_subinterval}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_one_target}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_one_search}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_one_preimage_equiv_zero}
@@ -290,6 +293,10 @@ must carry its source interval, monotonicity orientation, separation schedule,
 and certified target range; an inverse evaluator then returns a rational source
 box whose forward image overlaps the target box.  This is the constructive
 replacement for saying that a continuous monotone function has an inverse.
+The midpoint kernel is conservative: it discards a half only when its whole
+computed image box lies strictly below or above the target box; an ambiguous
+overlap retains the parent interval.  Any claimed progress theorem must
+therefore provide the missing precision/separation certificate explicitly.
 
 \lean{ComputableAnalysis.EffectiveInverseSeparation}
 \lean{ComputableAnalysis.GapAwareInverseSeparation}

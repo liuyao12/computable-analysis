@@ -954,6 +954,13 @@ inverse evaluator.
 finite bridge: the corresponding interval-valued exponential cell range
 still overlaps the target interval.
 
+The reusable `gapAwareTargetBisectionStep` is deliberately conservative. It
+keeps a rational parent interval whenever the computed image box overlaps the
+target box, and discards a half only after strict finite separation. Its
+orderedness and subinterval theorems are proved in `Calculus.lean`. The
+remaining adaptive inverse obligation is therefore explicit: its precision
+schedule must eventually resolve ambiguous midpoint cases.
+
 For a direct scalar uniqueness proof, make one finite short-block sweep an
 instance of `ScalarODE.ShortBlockMeshSweep`: telescope the cell estimates to
 `next <= length * previous + residual`, choose `length <= 1/4`, and spend at
