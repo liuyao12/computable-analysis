@@ -263,6 +263,7 @@ are retained so the same constructions can be inserted into a piecewise plan.
 \lean{ComputableAnalysis.affineMonotoneIntegralFor_of_nonpos_eq_ofRat}
 \lean{ComputableAnalysis.affineMonotoneIntegralFor_adjacent_additive}
 \lean{ComputableAnalysis.affineMonotoneIntegralFor_of_nonpos_adjacent_additive}
+\lean{ComputableAnalysis.Integral.exactRat_affine_signed_unitSlope_raw_equiv_ofRat}
 \leanok
 
 The affine case already closes adjacent-interval additivity with no limiting
@@ -271,6 +272,12 @@ the formulas on $[a,b]$ and $[b,c]$. This is the first nonconstant instance
 of the general additivity contract, for both increasing and decreasing
 affine functions; later piecewise constructions must supply the corresponding
 finite assembly and endpoint-equivalence certificate.
+
+The signed affine certificate makes the decreasing case explicit: interval
+endpoints reverse in the cell image, while the represented integral still
+transports to the same rational endpoint formula. This is the representative
+pattern reused for decreasing pieces; separate copies for every affine slope
+are unnecessary.
 
 \section{Beyond Lipschitz: effective monotone schedules}
 
