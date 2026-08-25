@@ -531,7 +531,7 @@ theorem NormalizedTangentSquareCommonWitness.to_equiv
   unfold QInterval.Overlaps
   exact ⟨Rat.le_trans (H.candidate_lo_le n)
       (H.witness_le_normalized_hi n),
-    Rat.le_trans (H.normalized_lo_le n)
+      Rat.le_trans (H.normalized_lo_le n)
       (H.witness_le_candidate_hi n)⟩
 
 /-! A signed product cannot use the nonnegative-product shortcut at coarse
@@ -569,6 +569,47 @@ theorem normalizedTangentSquareProduct_ordered (n : Nat) :
     (d := (SinPiIntegral.tangentSquareIntegral.compute n).hi) hrecip htangent
   unfold QInterval.width
   grind
+
+/- Overlap and a rational common witness are interchangeable at this layer.
+   The constructor chooses the larger lower endpoint; all upper-endpoint
+   obligations follow from the two interval-order certificates. -/
+def NormalizedTangentSquareCommonWitness.of_overlap
+    (hoverlap : forall n,
+      QInterval.Overlaps
+        (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n)
+        (normalizedTangentSquareIntegral.compute n)) :
+    NormalizedTangentSquareCommonWitness where
+  witness := fun n => max
+    (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).lo
+    (normalizedTangentSquareIntegral.compute n).lo
+  candidate_lo_le := by
+    intro n
+    rw [Rat.max_def]
+    split <;> grind
+  witness_le_candidate_hi := by
+    intro n
+    have hover := hoverlap n
+    unfold QInterval.Overlaps at hover
+    have horder := SinPiIntegral.dyadicNestedRadicalSquareLeftSum_ordered n
+    change 0 <=
+      (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).hi -
+        (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).lo at horder
+    rw [Rat.max_def]
+    split <;> grind
+  normalized_lo_le := by
+    intro n
+    rw [Rat.max_def]
+    split <;> grind
+  witness_le_normalized_hi := by
+    intro n
+    have hover := hoverlap n
+    unfold QInterval.Overlaps at hover
+    have horder := normalizedTangentSquareProduct_ordered n
+    change 0 <=
+      (normalizedTangentSquareIntegral.compute n).hi -
+        (normalizedTangentSquareIntegral.compute n).lo at horder
+    rw [Rat.max_def]
+    split <;> grind
 
 theorem normalizedTangentSquareProduct_nested (n m : Nat) (hnm : n <= m) :
     (normalizedTangentSquareIntegral.compute n).lo <=
