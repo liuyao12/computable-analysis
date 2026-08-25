@@ -178,4 +178,16 @@ semantic anchor for the circle construction.
 
 \section{Scope boundary}
 
-Arbitrary discontinuities and non-effective measure are outside scope.
+Arbitrary discontinuities and non-effective measure are outside scope.  The
+starting dense domain need not always be the rationals themselves: a natural
+computational chart may use a rational parametrization, a dyadic mesh, or a
+finite algebraic extension.  What matters is that the evaluator is defined on
+its declared dense input chart and that overlapping charts carry explicit
+equivalence certificates.  The circle uses rational coordinates and the
+half-angle table; it does not pretend that every function is naturally
+presented by a rational formula.
+
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.dyadicNestedRadicalTable}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.sinPiRawOfArctan}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalTableAt_overlap_of_precisions}
+\leanok
