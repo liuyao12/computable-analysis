@@ -1625,6 +1625,13 @@ theorem ratProduct_nonneg (f : Nat -> Rat) (hf : forall n, 0 <= f n) :
       rw [ratProduct]
       exact Rat.mul_nonneg (ratProduct_nonneg f hf n) (hf n)
 
+theorem ratProduct_const_eq_pow (c : Rat) :
+    forall n, ratProduct (fun _ => c) n = c ^ n
+  | 0 => by
+      rw [ratProduct, Rat.pow_zero]
+  | n + 1 => by
+      rw [ratProduct, ratProduct_const_eq_pow c n, Rat.pow_succ]
+
 theorem chronologicalProduct_rowAbsSum_le {dimension : Nat}
     (B : Nat -> RatMatrix dimension) (bound : Nat -> Rat)
     (hbound : forall n i,
@@ -1670,6 +1677,19 @@ theorem chronologicalProduct_rowAbsSum_le {dimension : Nat}
             (ratProduct_nonneg bound hbound_nonneg steps)
         _ = ratProduct bound (steps + 1) := by
           rw [ratProduct]
+
+theorem chronologicalProduct_rowAbsSum_le_pow {dimension : Nat}
+    (B : Nat -> RatMatrix dimension) (c : Rat)
+    (hbound : forall n i,
+      matrixRowAbsSum (matrixAdd (matrixIdentity dimension) (B n)) i <= c)
+    (hc : 0 <= c) :
+    forall steps i,
+      matrixRowAbsSum (chronologicalProduct B steps) i <= c ^ steps := by
+  intro steps i
+  have hgeneral := chronologicalProduct_rowAbsSum_le B (fun _ => c)
+    (fun n j => hbound n j) (fun _ => hc) steps i
+  rw [ratProduct_const_eq_pow c steps] at hgeneral
+  exact hgeneral
 
 /-- The general sampled transition specializes exactly to the
 Peano--Baker chronological product for Euler increments. -/
