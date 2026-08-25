@@ -16046,6 +16046,24 @@ theorem compute_contains_uniformLeftEndpointSum {f : Rat -> Rat} {L : Nat}
   rw [dyadicLeftEndpointSum_eq_uniform] at h
   exact h
 
+/-- Two certified Lipschitz constants for the same rational evaluator produce
+overlapping Darboux boxes at every stage.  The common finite left rectangle
+sum is the witness; no canonical Lipschitz constant is selected. -/
+theorem compute_overlap_of_lipschitz_bounds
+    {f : Rat -> Rat} {L M : Nat}
+    (hL : Integral.LipschitzOnUnit f (L : Rat))
+    (hM : Integral.LipschitzOnUnit f (M : Rat)) (stage : Nat) :
+    QInterval.Overlaps (compute f L stage) (compute f M stage) := by
+  have hleftL := compute_contains_uniformLeftEndpointSum hL stage
+  have hleftM := compute_contains_uniformLeftEndpointSum hM stage
+  unfold QInterval.ContainsInterval at hleftL hleftM
+  unfold QInterval.Overlaps
+  exact ⟨Rat.le_trans hleftL.1 hleftM.2,
+    Rat.le_trans hleftM.1 hleftL.2⟩
+
+/-- Consequently, the two Lipschitz--Darboux raw representations are
+equivalent whenever both constants are valid certificates for the same
+evaluator. -/
 private theorem cells_refine {f : Rat -> Rat} {L : Nat} {p r : Rat}
     (hlip : Integral.LipschitzOnUnit f (L : Rat))
     (hp0 : 0 <= p) (hpr : p <= r) (hr1 : r <= 1) :
@@ -16407,6 +16425,19 @@ theorem raw_valid {f : Rat -> Rat} {L : Nat}
     (raw f L).Valid := by
   change RealRaw.ValidCompute (compute f L)
   exact ⟨compute_ordered, compute_nested hlip, compute_widthsShrink L⟩
+
+/-/ Consequently, the two Lipschitz--Darboux raw representations are
+equivalent whenever both constants are valid certificates for the same
+evaluator. -/
+theorem raw_equiv_of_lipschitz_bounds
+    {f : Rat -> Rat} {L M : Nat}
+    (hL : Integral.LipschitzOnUnit f (L : Rat))
+    (hM : Integral.LipschitzOnUnit f (M : Rat)) :
+    (raw f L).Equiv (raw f M) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro stage
+  exact (RealRaw.compareAt_overlap_iff (raw f L) (raw f M) stage stage).2
+    (compute_overlap_of_lipschitz_bounds hL hM stage)
 
 /-- Package the finite Lipschitz--Darboux algorithm as a construction for the
 exact rational kernel that its rectangles evaluate. -/

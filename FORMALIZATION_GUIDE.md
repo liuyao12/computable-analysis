@@ -743,6 +743,11 @@ transport their certified bounded product with
 stays explicit, while the same rational majorants provide the validity
 certificates for the new product chart.
 
+For a Lipschitz--Darboux integral, do not treat the Lipschitz constant as a
+canonical choice. If two natural bounds are available, use
+`LipschitzDyadic.raw_equiv_of_lipschitz_bounds`; its witness is the common
+finite left rectangle sum.
+
 The finite derivative algebra is now exposed as well:
 `QInterval.differenceQuotient_addInterval` distributes the interval quotient
 over addition, and `intervalNearAtPrecision_addInterval` combines two
