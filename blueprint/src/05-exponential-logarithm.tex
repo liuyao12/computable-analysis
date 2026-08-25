@@ -470,6 +470,31 @@ alternating or harmonic series -> logTwoSeries
 \lean{ComputableAnalysis.Logarithm.logTwoSquareMesh_substitution_identity}
 \leanok
 
+The Euler connection is recorded as a representation chain, not as a new
+primitive constant:
+
+\begin{verbatim}
+log integral branch -> inverse branch -> exponential branch
+                  -> complex rotation at a rational chart
+                  -> real/imaginary endpoint identity
+\end{verbatim}
+
+The logarithm-defined exponential and the integral-defined logarithm are
+therefore compared through explicit raw equivalences. The chain can transport
+an identity such as the real Euler value without identifying the underlying
+algorithms definitionally. This is the same spanning-tree principle used for
+realRaw and complexRaw computations elsewhere in the project.
+
+\lean{ComputableAnalysis.exp.eFromLogIntegralBranchRaw}
+\lean{ComputableAnalysis.exp.realEuler}
+\lean{ComputableAnalysis.exp.expFromLogIntegral}
+\lean{ComputableAnalysis.exp.logFromIntegral}
+\lean{ComputableAnalysis.Logarithm.logTwoSquarePullbackIntegral_valid}
+\lean{ComputableAnalysis.Logarithm.logTwoSquarePullbackIntegral_compute_eq}
+\lean{ComputableAnalysis.Logarithm.logTwoSquarePullbackIntegral_equiv_reciprocalIntegral}
+\lean{ComputableAnalysis.Logarithm.arctanStripIntegrals_add_equiv_arctanKernelIntegral}
+\leanok
+
 The remaining exp/log theorem is representation transport: identify this
 computable branch with the inverse-exponential branch on its stated positive
 domain. That is a finite monotone-search certificate, not an appeal to a
