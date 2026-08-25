@@ -3526,14 +3526,19 @@ theorem dyadicNestedRadicalStageSinAt_subinterval
   simpa [dyadicNestedRadicalStageSinAt, dyadicNestedRadicalStageTable] using
     (dyadicNestedRadicalTableAt_bounds n n k (Nat.le_of_lt hk)).1
 
+theorem dyadicNestedRadicalStageCosAt_subinterval
+    (n k : Nat) (hk : k < 2 ^ n) :
+    subintervalOf (dyadicNestedRadicalStageTable n k).2 (-1) 1 := by
+  simpa [dyadicNestedRadicalStageTable] using
+    (dyadicNestedRadicalTableAt_bounds n n k (Nat.le_of_lt hk)).2
+
 theorem dyadicNestedRadicalStage_square_complement_overlap_of_search_family
     (U : Nat → Nat → QInterval)
     (hsearch : ∀ (n k : Nat) (hk : k < 2 ^ n),
       ∃ m u, rationalTangentSquareWitnessSearch (U n k)
         (dyadicNestedRadicalStageSinAt n k)
         (dyadicNestedRadicalStageTable n k).2 m = some u)
-    (hC : ∀ (n k : Nat) (hk : k < 2 ^ n),
-      subintervalOf (dyadicNestedRadicalStageTable n k).2 (-1) 1) :
+    :
     ∀ (n k : Nat) (hk : k < 2 ^ n),
       QInterval.Overlaps
         (rationalSquareInterval (dyadicNestedRadicalStageSinAt n k))
@@ -3542,7 +3547,8 @@ theorem dyadicNestedRadicalStage_square_complement_overlap_of_search_family
   intro n k hk
   obtain ⟨m, u, hmu⟩ := hsearch n k hk
   exact signed_square_overlap_of_rationalTangentSquareWitnessSearch hmu
-    (dyadicNestedRadicalStageSinAt_subinterval n k hk) (hC n k hk)
+    (dyadicNestedRadicalStageSinAt_subinterval n k hk)
+    (dyadicNestedRadicalStageCosAt_subinterval n k hk)
 
 /-! A concrete square-aware search checkpoint.  At the first nonzero dyadic
 sample, the same rational witness used by the sine search also certifies the

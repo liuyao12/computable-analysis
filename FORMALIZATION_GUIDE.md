@@ -1668,7 +1668,8 @@ Its signed counterpart,
 natural cosine range `[-1,1]` and uses the signed square enclosure below.
 Its family-level form,
 `dyadicNestedRadicalStage_square_complement_overlap_of_search_family`, reduces
-the transport to a uniform search-success theorem plus the cosine-box bound;
+the transport to a uniform search-success theorem plus the automatically
+proved cosine-box bound `dyadicNestedRadicalStageCosAt_subinterval`;
 the sine-box bound is now discharged uniformly by
 `dyadicNestedRadicalStageSinAt_subinterval`.  The cosine condition is kept
 explicit because the full half-interval includes negative cosine values, so a
