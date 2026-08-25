@@ -337,6 +337,11 @@ requested evaluator stage, and closed-path exactness is proved for constant
 and polynomial differentials. This is the complex counterpart of the real
 FTC contract, with path subdivision replacing interval subdivision.
 
+This chapter follows a representative-coverage rule: one certified example
+of a computational pattern is enough. Routine functions are transported by
+algebra or split into pieces and integrated piecewise; the blueprint does not
+enumerate every syntactic variant.
+
 \lean{ComputableAnalysis.ComplexPathIntegral.polygonalIntegralRawEntire_valid}
 \lean{ComputableAnalysis.ComplexPathIntegral.finiteConstantDifferentialExactness_closed}
 \lean{ComputableAnalysis.ComplexPathIntegral.finitePolynomialDifferentialExactness_closed}

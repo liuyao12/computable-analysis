@@ -202,6 +202,14 @@ Most mistakes come from conflating these layers.
 
 ### Functions: complex first, concrete first, abstract only when useful
 
+The library is representative, not encyclopedic.  Formalize one complete
+example for each genuinely different computational pattern; routine variants
+should be obtained by algebraic transport, restriction, or composition.  A
+piecewise function such as `|x|` is handled by splitting its domain into the
+corresponding pieces and reusing the existing integral certificate.  This
+keeps the blueprint focused on reusable proof contracts rather than a catalog
+of near-duplicate functions.
+
 Use `FunctionRaw` for one concrete complex computation:
 
 ```text
