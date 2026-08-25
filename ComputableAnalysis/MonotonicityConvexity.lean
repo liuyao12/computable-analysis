@@ -611,6 +611,23 @@ def ConcaveOn (f : Rat -> Rat) (a b : Rat) : Prop :=
     a <= x -> x < y -> y < z -> z <= b ->
       secantSlope f y z <= secantSlope f x y
 
+/-! The square is the first concrete curvature witness.  Its secant slope
+reduces to `x + y`, so convexity is a finite rational inequality rather than
+an appeal to a second derivative or to completed real numbers. -/
+theorem square_secantSlope_eq_add {x y : Rat} (hxy : x < y) :
+    secantSlope square x y = x + y := by
+  unfold secantSlope square
+  rw [Rat.div_def]
+  have hcancel : (y - x) * (y - x)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (y - x) (Rat.ne_of_gt (by grind))
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem square_convexOn (a b : Rat) : ConvexOn square a b := by
+  intro x y z _hax hxy hyz _hzb
+  rw [square_secantSlope_eq_add hxy, square_secantSlope_eq_add hyz]
+  grind
+
 structure SecantSlopeBracketOn (f : Rat -> Rat) (u v : Rat) where
   lower : Rat
   upper : Rat

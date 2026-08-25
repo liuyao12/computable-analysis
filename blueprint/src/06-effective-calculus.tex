@@ -431,6 +431,14 @@ At the raw-representation level, a secant needs only two endpoint validity
 certificates and a positive rational separation.  Convexity is used later for
 ordering secants, not for proving that the secant algorithm itself is valid.
 
+The square is the representative concrete curvature example.  Its rational
+secant is exactly (x+y), so three ordered rational inputs immediately give
+(operatorname{sec}(x,y)leqoperatorname{sec}(y,z)).  This is the complete
+finite proof of convexity needed by the example; no second derivative,
+supremum, or completed real number is introduced.  Other polynomial powers
+reuse the same finite-factorization pattern only when an application actually
+needs them.
+
 \begin{verbatim}
 monotone derivative on cell -> endpoint secants -> derivative interval
                             -> local endpoint bound -> effective FTC
@@ -440,6 +448,8 @@ monotone derivative on cell -> endpoint secants -> derivative interval
 \lean{ComputableAnalysis.MonotoneDerivativeBoundMethod.toDerivativeBound}
 \lean{ComputableAnalysis.secantRaw_valid_of_valid}
 \lean{ComputableAnalysis.ExactConvexOn.secantRaw_valid}
+\lean{ComputableAnalysis.ExactFunction.square_secantSlope_eq_add}
+\lean{ComputableAnalysis.ExactFunction.square_convexOn}
 \lean{ComputableAnalysis.CurvatureOnSubinterval}
 \lean{ComputableAnalysis.DerivativeBoundFromCurvature.toDerivativeBound}
 \lean{ComputableAnalysis.CurvatureFTCCertificate}

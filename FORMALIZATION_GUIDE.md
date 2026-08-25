@@ -389,6 +389,15 @@ handled by finitely many interval integrals and a finite assembly theorem.
 The absolute-value example in `PrimitivePiecewiseFTC` is the reference
 pattern: two affine cell computations, followed by one finite telescope.
 
+For curvature, the square is the reference instance.  Use
+`ExactFunction.square_secantSlope_eq_add` to reduce its secant to a rational
+sum, and `ExactFunction.square_convexOn` to obtain convexity on any rational
+interval.  This is the preferred template for a new curvature-driven FTC
+example: prove one finite secant identity for the evaluator, then feed it into
+the existing curvature/derivative-bound contracts.  Do not duplicate the
+theorem for every polynomial power unless its application needs a genuinely
+different certificate.
+
 For an effective FTC proof, do not force all computations to use one stage.
 `TwoStageCandidateDerivativeFTC` allows the derivative evaluator and the
 primitive endpoint evaluator to choose independent stages. The derivative
