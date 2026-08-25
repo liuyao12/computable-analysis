@@ -1663,6 +1663,11 @@ When evaluator precision must follow a separate schedule, use
 `GapAwareScheduledInverseBisectionPlan` and
 `gapAwareScheduledInverseBisectionPlan_has_search`; the scheduled adapter
 preserves the same explicit `RealRaw.ValidCompute` obligations.
+When the precision must inspect the current bracket, use
+`gapAwareTargetBisectionAdaptiveIterate` and
+`gapAwareTargetBisectionAdaptiveDecision`.  This is the natural interface for
+the exponential gap modulus; the exact width theorem remains conditional only
+on the supplied finite decision certificates.
 This leaves function-specific mathematics in the certificate and keeps the
 routine `RealRaw`/inverse construction shared.
 
