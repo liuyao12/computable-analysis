@@ -1102,6 +1102,15 @@ theorem unitMeshPath_square_left_bounds {n : Nat} (hn : 0 < n) :
   rw [unitMeshPath_endpoint hn, unitMeshPath_zero] at h
   constructor <;> grind [h.1, h.2]
 
+theorem unitMeshPath_square_left_sum_exact {n : Nat} (hn : 0 < n) :
+    2 * leftStieltjesSum (unitMeshPath n) (unitMeshPath n) n =
+      1 - 1 / (n : Rat) := by
+  have h := finiteSquareStieltjes_chain
+    (unitMeshPath n) n
+  rw [unitMeshPath_endpoint hn, unitMeshPath_zero,
+    unitMeshPath_quadraticVariation hn] at h
+  grind
+
 /-- A fully explicit epsilon schedule for the unit-mesh corner correction.
 Choosing `n = eps.den + 1` makes the rational correction at most `eps`. -/
 theorem unitMeshPath_quadraticVariation_le_epsilon (eps : QPos) :
