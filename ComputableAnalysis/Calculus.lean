@@ -9193,6 +9193,50 @@ theorem gapAwareTargetBisectionIterate_width_le
       have hprev : P.1.width <= I.width := ih
       exact Rat.le_trans hstep hprev
 
+/-! A fixed-precision variant is useful for executable traces: the evaluator
+precision is held constant while the source bracket is refined.  This is
+distinct from the stage-indexed iterator above, whose precision may grow with
+the requested output stage. -/
+def gapAwareTargetBisectionFixedIterateWithProof
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat) :
+    Nat -> {J : QInterval // subintervalOf J F.function.lower F.function.upper}
+  | 0 => ⟨I, hI⟩
+  | n + 1 =>
+      let P := gapAwareTargetBisectionFixedIterateWithProof F Y I hI precision n
+      let J := gapAwareTargetBisectionStep F Y P.1 P.2 precision
+      have hstep := gapAwareTargetBisectionStep_subinterval F Y P.1 P.2 precision
+      ⟨J, ⟨Rat.le_trans P.2.1 hstep.1, hstep.2.1,
+        Rat.le_trans hstep.2.2 P.2.2.2⟩⟩
+
+def gapAwareTargetBisectionFixedIterate
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision n : Nat) : QInterval :=
+  (gapAwareTargetBisectionFixedIterateWithProof F Y I hI precision n).1
+
+theorem gapAwareTargetBisectionFixedIterate_subinterval
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision n : Nat) :
+    subintervalOf (gapAwareTargetBisectionFixedIterate F Y I hI precision n)
+      F.function.lower F.function.upper :=
+  (gapAwareTargetBisectionFixedIterateWithProof F Y I hI precision n).2
+
+theorem gapAwareTargetBisectionFixedIterate_width_le
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision n : Nat) :
+    (gapAwareTargetBisectionFixedIterate F Y I hI precision n).width <= I.width := by
+  induction n with
+  | zero => exact Rat.le_refl
+  | succ n ih =>
+      let P := gapAwareTargetBisectionFixedIterateWithProof
+        F Y I hI precision n
+      have hstep := gapAwareTargetBisectionStep_width_le F Y P.1 P.2 precision
+      exact Rat.le_trans hstep ih
+
 structure GapAwareInRangeRaw
     (I : GapAwareInvertibleFunctionOnInterval) where
   value : RealRaw

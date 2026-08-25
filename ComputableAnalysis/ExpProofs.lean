@@ -6204,6 +6204,15 @@ theorem uniformExpOnUnitWarm_three_halves_third_step :
       ({ lo := 3 / 8, hi := 1 / 2 } : QInterval) := by
   native_decide
 
+theorem uniformExpOnUnitWarm_three_halves_fixed_precision_trace :
+    gapAwareTargetBisectionFixedIterate
+      uniformExpOnUnitWarm_continuous
+      ({ lo := 3 / 2, hi := 3 / 2 } : QInterval)
+      ({ lo := 0, hi := 1 } : QInterval)
+      ⟨by native_decide, by native_decide, by native_decide⟩ 4 3 =
+      ({ lo := 3 / 8, hi := 1 / 2 } : QInterval) := by
+  native_decide
+
 private theorem uniformExpOnUnit_scheduledRegular_width
     (n : Nat) {I : QInterval}
     (hI : subintervalOf I (0 : Rat) 1)
