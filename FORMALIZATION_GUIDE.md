@@ -250,6 +250,13 @@ corresponding pieces and reusing the existing integral certificate.  This
 keeps the blueprint focused on reusable proof contracts rather than a catalog
 of near-duplicate functions.
 
+The same rule applies to notation and normalization: `sin (pi * x)` and a
+rescaled presentation such as `sin (pi / 2 * t)` are one computational pattern
+when a rational change of variable transports the domain and certificate.
+Choose the representation that makes the current proof easiest, and record
+the transport; do not create a second special-function theory for the change
+of coordinates.
+
 Use `FunctionRaw` for one concrete complex computation:
 
 ```text
