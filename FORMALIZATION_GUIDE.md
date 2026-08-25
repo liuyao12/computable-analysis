@@ -729,6 +729,14 @@ stagewise computation.  The validity proof is inherited from
 `RealRaw.add_valid`; continuity, derivative certificates, and FTC data remain
 separate obligations.
 
+For products, use `FunctionOnInterval.mulOfNonnegBounded`.  It requires a
+pointwise rational majorant for each nonnegative factor, which is the finite
+condition needed to keep interval multiplication nested and shrinking.  Its
+companion `mulOfNonnegBounded_compute` exposes the stagewise `QBox` product;
+this is the preferred entry point for a subsequent derivative or FTC
+certificate.  Signed or unbounded products remain separate targets rather
+than being silently inferred from an ambient real multiplication operation.
+
 The finite derivative algebra is now exposed as well:
 `QInterval.differenceQuotient_addInterval` distributes the interval quotient
 over addition, and `intervalNearAtPrecision_addInterval` combines two

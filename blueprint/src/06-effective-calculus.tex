@@ -247,6 +247,17 @@ not smuggled in through completeness of the reals.
 \lean{ComputableAnalysis.FinitePolynomial.SecantDerivativeBound.mulToHasDerivativeOnInterval}
 \leanok
 
+At the function level, the same product is exposed as a realRaw operation
+when both factors have explicit nonnegative rational majorants.  The validity
+theorem and its computation equation are separate: the former proves that the
+product boxes form a shrinking representation, while the latter lets later
+derivative and FTC certificates inspect the exact finite box used at a sample
+point.
+
+\lean{ComputableAnalysis.FunctionOnInterval.mulOfNonnegBounded}
+\lean{ComputableAnalysis.FunctionOnInterval.mulOfNonnegBounded_compute}
+\leanok
+
 The local hand-off from differentiation to integration is also finite.  On a
 positive rational cell whose width satisfies the derivative step budget, the
 secant certificate scales back to an endpoint-difference enclosure.  The

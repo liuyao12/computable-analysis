@@ -5827,6 +5827,33 @@ def mulOfNonnegBounded
     change RealRaw.ValidCompute (RealRaw.mulCompute X Y)
     exact hproduct
 
+@[simp] theorem mulOfNonnegBounded_compute
+    (F G : FunctionOnInterval)
+    (same_lower : F.lower = G.lower) (same_upper : F.upper = G.upper)
+    (Fbounds : forall x (hx : inDomainInterval F.lower F.upper x),
+      Exists fun B : Rat => 0 < B /\ forall n,
+        0 <= (F.compute x hx n).lo /\ (F.compute x hx n).hi <= B)
+    (Gbounds : forall x (hx : inDomainInterval G.lower G.upper x),
+      Exists fun B : Rat => 0 < B /\ forall n,
+        0 <= (G.compute x hx n).lo /\ (G.compute x hx n).hi <= B)
+    (x : Rat) (hx : inDomainInterval F.lower F.upper x) (n : Nat) :
+    (mulOfNonnegBounded F G same_lower same_upper Fbounds Gbounds).compute x hx n =
+      QBox.mulRealInterval
+        (F.compute x hx n).lo (F.compute x hx n).hi
+        (G.compute x (by
+          constructor
+          · rw [← same_lower]
+            exact hx.1
+          · rw [← same_upper]
+            exact hx.2) n).lo
+        (G.compute x (by
+          constructor
+          · rw [← same_lower]
+            exact hx.1
+          · rw [← same_upper]
+            exact hx.2) n).hi := by
+  rfl
+
 def secantSlopeInterval (F : FunctionOnInterval)
     (x y : Rat)
     (hx : inDomainInterval F.lower F.upper x)
