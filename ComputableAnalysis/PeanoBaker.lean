@@ -2617,6 +2617,26 @@ theorem chronologicalProduct_constant_square_zero
     funext i j
     simp [matrixScale, matrixZero]
 
+/-! With a uniform mesh, the square-zero flow is already exact at every
+positive finite mesh size.  This is the finite ODE analogue of the fact that
+the exponential truncates after its linear term; no mesh limit is involved. -/
+theorem chronologicalProduct_constant_square_zero_uniform_step
+    {dimension : Nat} (A : RatMatrix dimension) (T : Rat) (steps : Nat)
+    (hsteps : 0 < steps) (hAA : matrixMul A A = matrixZero dimension) :
+    chronologicalProduct
+        (fun _ => matrixScale (T / ((steps : Nat) : Rat)) A) steps =
+      matrixAdd (matrixIdentity dimension) (matrixScale T A) := by
+  rw [chronologicalProduct_constant_square_zero A
+    (T / ((steps : Nat) : Rat)) hAA steps]
+  have hs : ((steps : Nat) : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hsteps)
+  have hscale : ((steps : Nat) : Rat) *
+      (T / ((steps : Nat) : Rat)) = T := by
+    rw [Rat.div_def]
+    have hcancel := Rat.mul_inv_cancel ((steps : Nat) : Rat) hs
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  rw [hscale]
+
 @[simp] theorem orderedIndexWords_zero : orderedIndexWords 0 = [[]] := rfl
 
 @[simp] theorem orderedIndexWords_one : orderedIndexWords 1 = [[], [0]] := rfl

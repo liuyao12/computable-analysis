@@ -1723,6 +1723,10 @@ uniqueness, chronological transition product, and a discrete Duhamel formula.
 product.  `LinearODE.peanoBakerFactorialTailShift` turns a nonnegative
 rational norm-length bound and requested rational error into an executable
 factorial-tail shift.
+For a square-zero constant generator, the finite uniform-mesh transition is
+already exact: `chronologicalProduct_constant_square_zero_uniform_step` proves
+the result is `I + T A` for every positive finite mesh size.  This is a useful
+terminating ODE representative before any convergence theorem is invoked.
 
 The finite rotation core exposes two matching exact prefix identities:
 `RotationSystem.simplexPartial_even_split` gives
