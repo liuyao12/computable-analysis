@@ -118,6 +118,27 @@ theorem MonotoneIntervalCertificate.toReal_preferred_compute
       { lo := certificate.loStage n, hi := certificate.hiStage n } := by
   rfl
 
+def dyadicApproachIntervalCertificate : MonotoneIntervalCertificate where
+  loStage := dyadicApproach
+  hiStage := fun _ => 1
+  lower_succ := dyadicApproach_succ_le
+  upper_succ := by
+    intro n
+    exact Rat.le_refl
+  enclosed := by
+    intro n
+    exact dyadicApproach_le_one n
+  width_shrinks := by
+    intro eps
+    obtain ⟨N, hN⟩ := dyadicApproach_error_shrinks eps
+    refine ⟨N, ?_⟩
+    intro n hn
+    simpa [dyadicApproach_error] using hN n hn
+
+theorem dyadicApproachIntervalCertificate_valid :
+    dyadicApproachIntervalCertificate.toRealRaw.Valid := by
+  exact dyadicApproachIntervalCertificate.toRealRaw_valid
+
 def finiteAscendingSequenceCertificate
     (sequence : Nat → Rat) (stage : Nat)
     (successor_le : ∀ n, sequence n ≤ sequence (n + 1)) :
