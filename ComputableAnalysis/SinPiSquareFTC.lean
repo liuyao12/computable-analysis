@@ -3199,6 +3199,27 @@ structure DyadicSquareCircleOverlapFamily
       (rationalCircleSinInterval (dyadicTangentBox S.inverse hk))
       (dyadicNestedRadicalStageSinAt n k)
 
+def DyadicSquareCircleOverlapFamily.of_halfAngle_certificate_family
+    (S : ArctanSinPiConstruction)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (n k : Nat) (hk : k < 2 ^ n),
+      0 < k -> CanonicalDyadicHalfAngleCertificate S.inverse n k hk) :
+    DyadicSquareCircleOverlapFamily S where
+  endpoint_zero := ht0
+  positive_overlap := by
+    intro n k hk hpos
+    exact canonical_dyadic_overlap_of_halfAngle_outer_tangent
+      S.inverse hk
+      (hcertificate n k hk hpos).cosineBox_subinterval
+      (hcertificate n k hk hpos).outer_tangent_contains
+      (hcertificate n k hk hpos).sine_nonneg
+      (hcertificate n k hk hpos).cosine_nonneg
+      (hcertificate n k hk hpos).circle_identity
+      (hcertificate n k hk hpos).sine_contains
+      (hcertificate n k hk hpos).cosine_contains
+
 theorem DyadicSquareCircleOverlapFamily.to_square_sum_overlap
     {S : ArctanSinPiConstruction}
     (certificate : DyadicSquareCircleOverlapFamily S) :

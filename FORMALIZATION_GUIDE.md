@@ -877,6 +877,9 @@ the zero endpoint separately.
 The named structure
 `SinPiSquareFTC.DyadicSquareCircleOverlapFamily` packages those two fields,
 and `to_square_sum_overlap` is the downstream entry point.
+Its constructor
+`DyadicSquareCircleOverlapFamily.of_halfAngle_certificate_family` translates
+the existing canonical half-angle certificate family into this interface.
 The theorem-facing shortcut is
 `ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_canonical_certificate_family`.
 

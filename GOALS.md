@@ -553,6 +553,9 @@ from monomial brackets structurally.
    The named structure `DyadicSquareCircleOverlapFamily` now packages this
    endpoint-plus-positive-sample data, with `to_square_sum_overlap` exposing
    the resulting full dyadic-sum overlap.
+   Its constructor `DyadicSquareCircleOverlapFamily.of_halfAngle_certificate_family`
+   now transports the existing canonical half-angle certificate fields into
+   the named structure directly.
 
    The square equal-dyadic candidate is now explicit as
    `dyadicNestedRadicalSquareLeftSum`, with raw wrapper
