@@ -859,6 +859,12 @@ equivalence and positive-sample, all-precision certificate family convert via
 schedule consumed by the public integral theorem. This separates the
 geometric existence proof from the evaluator and makes the remaining theorem
 explicit rather than hidden in a large argument.
+The lower-level theorem
+`SinPiTransportSubgoals.exists_dyadic_tangent_witness_search_of_overlap_family`
+now exposes the finite boundary precisely: once an all-depth overlap family
+is proved, positive nested-radical width automatically yields a successful
+rational search at every precision.  No density or completeness principle is
+smuggled into the search step.
 
 The square analogue follows the same pattern. Use
 `SinPiSquareFTC.dyadicPublicSquareLeftSum_overlap_of_sample_overlaps` for the
