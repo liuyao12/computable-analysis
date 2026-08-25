@@ -69,6 +69,64 @@ structure GapAwareInverseBisectionPlan
         n)
       (y.value.compute n)
 
+/-! A constructor for the usual case where the output is exactly the fixed
+midpoint iterator.  The branch-specific proof is consequently reduced to the
+four genuinely mathematical obligations: decisions, nesting, width, and
+forward-image overlap. -/
+def gapAwareInverseBisectionPlanOfFixedIterate
+    {I : GapAwareInvertibleFunctionOnInterval}
+    {y : GapAwareInRangeRaw I}
+    (precision steps : Nat → Nat)
+    (hdecisions : ∀ n k, k < steps n →
+      gapAwareTargetBisectionFixedDecision I.continuous
+        (y.value.compute n) (gapAwareSourceInterval I)
+        (gapAwareSourceInterval_subinterval I) (precision n) k)
+    (hnested : ∀ n m, n ≤ m →
+      (gapAwareTargetBisectionFixedIterate I.continuous
+        (y.value.compute n) (gapAwareSourceInterval I)
+        (gapAwareSourceInterval_subinterval I) (precision n) (steps n)).lo ≤
+      (gapAwareTargetBisectionFixedIterate I.continuous
+        (y.value.compute m) (gapAwareSourceInterval I)
+        (gapAwareSourceInterval_subinterval I) (precision m) (steps m)).lo ∧
+      (gapAwareTargetBisectionFixedIterate I.continuous
+        (y.value.compute m) (gapAwareSourceInterval I)
+        (gapAwareSourceInterval_subinterval I) (precision m) (steps m)).hi ≤
+      (gapAwareTargetBisectionFixedIterate I.continuous
+        (y.value.compute n) (gapAwareSourceInterval I)
+        (gapAwareSourceInterval_subinterval I) (precision n) (steps n)).hi)
+    (hwidth : ∀ n,
+      (gapAwareTargetBisectionFixedIterate I.continuous
+        (y.value.compute n) (gapAwareSourceInterval I)
+        (gapAwareSourceInterval_subinterval I) (precision n) (steps n)).width ≤
+        1 / ((n + 1 : Nat) : Rat))
+    (hoverlaps : ∀ n,
+      QInterval.Overlaps
+        (I.continuous.regular.evalInterval
+          (gapAwareTargetBisectionFixedIterate I.continuous
+            (y.value.compute n) (gapAwareSourceInterval I)
+            (gapAwareSourceInterval_subinterval I) (precision n) (steps n))
+          (gapAwareTargetBisectionFixedIterate_subinterval I.continuous
+            (y.value.compute n) (gapAwareSourceInterval I)
+            (gapAwareSourceInterval_subinterval I) (precision n) (steps n))
+          n)
+        (y.value.compute n)) :
+    GapAwareInverseBisectionPlan I y where
+  precision := precision
+  steps := steps
+  output := fun n => gapAwareTargetBisectionFixedIterate I.continuous
+    (y.value.compute n) (gapAwareSourceInterval I)
+    (gapAwareSourceInterval_subinterval I) (precision n) (steps n)
+  output_eq := fun _ => rfl
+  decisions := hdecisions
+  output_ordered := by
+    intro n
+    exact (gapAwareTargetBisectionFixedIterate_subinterval I.continuous
+      (y.value.compute n) (gapAwareSourceInterval I)
+      (gapAwareSourceInterval_subinterval I) (precision n) (steps n)).2.1
+  output_nested := hnested
+  output_width_le := hwidth
+  value_overlaps := hoverlaps
+
 theorem GapAwareInverseBisectionPlan.valid_output
     {I : GapAwareInvertibleFunctionOnInterval}
     {y : GapAwareInRangeRaw I}

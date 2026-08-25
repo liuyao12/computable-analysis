@@ -1646,6 +1646,9 @@ the forward-image overlap certificate.  The theorem
 from those elementary fields.  `gapAwareInverseBisectionPlanToSearch`
 converts that plan to the common `GapAwareInverseBisectionSearch` interface,
 and `gapAwareInverseBisectionPlan_has_search` assembles a whole branch.
+When the output is the standard fixed midpoint iterator, use
+`gapAwareInverseBisectionPlanOfFixedIterate` so its dependent interval proofs
+are inferred once by the shared constructor.
 This leaves function-specific mathematics in the certificate and keeps the
 routine `RealRaw`/inverse construction shared.
 
