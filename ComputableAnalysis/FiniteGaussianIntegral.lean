@@ -22,6 +22,26 @@ theorem gaussianEvenIntegralPrefix_zero (radius : Rat) :
     gaussianEvenIntegralPrefix 0 radius = 0 := by
   rfl
 
+/- The finite Gaussian prefix is integrated term by term.  This recurrence is
+   the algebraic interface used by any later tail certificate; it does not
+   assert an improper integral or invoke a completed real number. -/
+theorem gaussianEvenIntegralPrefix_succ (terms : Nat) (radius : Rat) :
+    gaussianEvenIntegralPrefix (terms + 1) radius =
+      gaussianEvenIntegralPrefix terms radius +
+        2 * FormalPowerSeries.expCoeff terms * (-1 : Rat) ^ terms *
+          radius ^ (2 * terms + 1) / ((2 * terms + 1 : Nat) : Rat) := by
+  unfold gaussianEvenIntegralPrefix
+  rw [List.range_succ]
+  simp only [List.foldl_append, List.foldl_cons, List.foldl_nil]
+
+theorem gaussianEvenIntegralPrefix_term_difference (terms : Nat) (radius : Rat) :
+    gaussianEvenIntegralPrefix (terms + 1) radius -
+        gaussianEvenIntegralPrefix terms radius =
+      2 * FormalPowerSeries.expCoeff terms * (-1 : Rat) ^ terms *
+        radius ^ (2 * terms + 1) / ((2 * terms + 1 : Nat) : Rat) := by
+  rw [gaussianEvenIntegralPrefix_succ]
+  grind
+
 theorem gaussianEvenIntegralPrefix_stage_four :
     gaussianEvenIntegralPrefix 4 1 = 52 / 35 := by
   native_decide

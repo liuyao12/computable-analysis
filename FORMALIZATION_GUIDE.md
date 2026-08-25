@@ -131,6 +131,12 @@ Start with the smallest target module rather than importing
 | Finite multiple integrals and n-balls | `ComputableAnalysis.FiniteNBallVolume`, `ComputableAnalysis.FiniteGaussianIntegral` | `finiteProductSum2D_factorized`, `finiteProductIntegralSum2D_weighted_stage`, Gaussian Taylor-prefix/tail ladders, and `nBallVolumeModel_recurrence` |
 | Finite FTA root certificates | `ComputableAnalysis.FTA` | `monicLinear_has_computable_root`, `rationalLinear_has_computable_root`, and the rational quadratic discriminant witnesses |
 
+The Gaussian prefix now exposes the reusable finite termwise-integration
+contract through `gaussianEvenIntegralPrefix_succ` and
+`gaussianEvenIntegralPrefix_term_difference`.  These identities concern only
+finite Taylor sums; an improper Gaussian integral still requires a separate
+tail certificate.
+
 For the mathematical status and intended dependency order, use
 [GOALS.md](GOALS.md).  For a readable, declaration-linked account, use the
 [blueprint](blueprint/README.md).  The derivative table is in
