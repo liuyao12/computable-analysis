@@ -41,10 +41,12 @@ The rational circle, dyadic sine values, left/right/trapezoid rectangle sums
 and their finite transport and width budgets, the completed
 Riemann--Stieltjes sine integral, the arctangent effective FTC instance, effective FTC interfaces, interval-regularity to
 epsilon--delta continuity, polynomial/Taylor secant certificates,
-power-series tails, finite Fourier transforms, logarithm, rotation
-derivatives, the tangent-square FTC instance, the common-prefix exponential
-FTC instance, the centered exponential initial-value certificate, and scalar
-linear ODE uniqueness are checked in Lean. The finite raw-sum algebra used to
+power-series tails, finite Fourier transforms, finite Gaussian prefixes,
+separable finite product sums, the rational \(n\)-ball recurrence, logarithm,
+rotation derivatives, the finite L'Hôpital remainder pattern, the tangent-square
+FTC instance, the common-prefix exponential FTC instance, the centered
+exponential initial-value certificate, and scalar linear ODE uniqueness are
+checked in Lean. The finite raw-sum algebra used to
 concatenate certified pieces is also checked, so adjacent-interval and
 multi-turn proofs have an explicit assembly layer. The
 first non-monotone endpoint identity is now also checked: the two affine cells
@@ -132,13 +134,16 @@ and generic multi-turn stage assembly &
 endpoint identification for multi-turn candidates, all-stage equal-dyadic sine,
 and normalized \(\sin^2\) transports \\
 Power series/Fourier &
-finite transforms, coefficient identities, tails, and finite termwise FTC &
+finite transforms, coefficient identities, tails, finite termwise FTC,
+bounded Gaussian prefixes, separable product sums, and the rational \(n\)-ball
+recurrence &
 general infinite Fourier-space constructions \\
 Exponential/logarithm &
 computable exponential, \(\log 2\), local inverse and FTC certificates &
 representation transport for a fully general inverse branch \\
 Effective calculus &
-finite secant, derivative-bound, curvature, and stabilization contracts &
+finite secant, derivative-bound, curvature, stabilization, and finite
+L'Hôpital remainder contracts &
 automatic schedule synthesis for arbitrary interval-regular functions \\
 Algebraic roots/FTA &
 rational-polynomial root witnesses, complex interval residuals, and supplied-root
