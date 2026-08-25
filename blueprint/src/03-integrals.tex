@@ -615,6 +615,17 @@ intermediate point is not selected; the bracket is refined until the desired
 precision is reached.  We therefore recover MVT only where the function has
 the required effective monotonicity or turning-point certificate.
 
+The finite rational form is already explicit for one cell: the average
+endpoint increment divided by the cell width overlaps the certified range of
+the integrand.  This is the project’s constructive replacement for asserting
+that an attained real point \(t\in(a,b)\) exists:
+
+\lean{ComputableAnalysis.ExactCellOrderPreservation.integral_average_between_bounds}
+\lean{ComputableAnalysis.ExactCellOrderPreservation.integral_average_overlaps_bounds}
+\lean{ComputableAnalysis.Polynomial.finitePolynomial_secant_derivative_bracket}
+\lean{ComputableAnalysis.Polynomial.finitePolynomial_secant_qabs_error_le_derivative_gap}
+\leanok
+
 The local-to-global proof is a finite telescoping argument:
 
 \begin{verbatim}
