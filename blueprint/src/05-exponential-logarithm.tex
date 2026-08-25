@@ -476,6 +476,17 @@ alternating or harmonic series -> logTwoSeries
 \lean{ComputableAnalysis.Logarithm.logTwoSquareMesh_substitution_identity}
 \leanok
 
+This is the chapter's complete logarithmic FTC example.  The integrand is
+defined on the rational chart, its rectangle boxes form a valid shrinking
+\texttt{realRaw}, and the alternating series is proved equivalent by a
+finite mesh comparison.  The result is therefore usable by later proofs
+without introducing a classical logarithm or an ambient real function space.
+The general statement “the derivative of the logarithm is \(1/x\) on every
+positive interval” is intentionally a separate provider target: it requires
+branch transport and a schedule for arbitrary rational endpoints.  The local
+secant certificate above is the reusable cell theorem, not an implicit claim
+that the universal FTC has already been proved.
+
 The Euler connection is recorded as a representation chain, not as a new
 primitive constant:
 
