@@ -47,6 +47,9 @@ FTC instance, the centered exponential initial-value certificate, and scalar
 linear ODE uniqueness are checked in Lean. The finite raw-sum algebra used to
 concatenate certified pieces is also checked, so adjacent-interval and
 multi-turn proofs have an explicit assembly layer. The
+first non-monotone endpoint identity is now also checked: the two affine cells
+for \(\lvert x\rvert\) on \([-1,1]\) are transported through the separate
+primitive \(x\lvert x\rvert/2\) to the value (1). The
 principal unfinished representation step is the equal-dyadic sine FTC
 transport; the integral itself is already complete through the tangent-chart
 Riemann--Stieltjes route. The
@@ -114,7 +117,8 @@ rational geometry, nested-radical dyadic values, finite rotations &
 remaining branch witnesses for unrestricted dyadic inverse transport \\
 Integrals/FTC &
 rectangle, Lipschitz--Darboux, polynomial, arctangent, Stieltjes sine, finite
-quadrature mean-value brackets, and generic multi-turn stage assembly &
+quadrature mean-value brackets, the completed two-cell absolute-value FTC,
+and generic multi-turn stage assembly &
 endpoint identification for multi-turn candidates, all-stage equal-dyadic sine,
 and normalized \(\sin^2\) transports \\
 Power series/Fourier &

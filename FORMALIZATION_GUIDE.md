@@ -685,6 +685,11 @@ derivative alone:
    `Integral.DefiniteIdentity` when its global raw-function interface fits);
 5. derive the displayed endpoint formula from that package.
 
+For a piecewise-monotone integrand, use the separate-primitive API in
+`ComputableAnalysis.PrimitivePiecewiseFTC`: the cell areas belong to `F`,
+while the endpoint list is evaluated from the proposed primitive `P`.
+`Integral.absOnUnit_piecewise_primitiveFTC` is the reference two-cell example.
+
 `FTC.EffectiveFTC` and `FTC.effectiveFTC_definiteIntegralEqualsEndpoint`
 describe one checked endpoint-bridge route.  The generic bridge from an
 arbitrary `HasDerivativeOnInterval` to that FTC certificate is not yet
