@@ -673,3 +673,37 @@ calculus foundations.
 This is the project's finite L'Hôpital pattern. It supports a requested
 precision after factor cancellation; it does not claim a universal theorem
 about arbitrary functions or introduce an attained limit.
+
+\section{Application recipe}
+
+Every new calculus theorem should expose the following finite chain before
+stating its limiting-looking conclusion:
+
+\begin{verbatim}
+domain chart -> raw evaluator -> interval regularity
+            -> requested-stage transport (if adaptive)
+            -> cell derivative or range certificate
+            -> finite partition sum -> shrinking endpoint box
+            -> raw equivalence / abstract theorem
+\end{verbatim}
+
+The stopping rule is equally important. A Lipschitz or interval-regularity
+proof certifies the local evaluator; it does not by itself certify an
+integral. A derivative bound, curvature certificate, or finite piecewise
+assembly must supply the endpoint comparison consumed by the effective FTC.
+If two implementations use different schedules, add one overlap edge at the
+raw level. If a function is split into finitely many pieces, prove one
+representative cell and telescope the finite list; do not duplicate a global
+theorem for each syntactic variant.
+
+This is the practical boundary of the alternative foundation: all analytic
+content is either a finite enclosure, a shrinking schedule, or an explicit
+equivalence edge. Classical completeness is not a hidden default when one of
+those inputs is absent.
+
+\lean{ComputableAnalysis.IntervalRegularOn}
+\lean{ComputableAnalysis.DerivativeBoundFTC}
+\lean{ComputableAnalysis.CurvatureFTCCertificate}
+\lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly}
+\lean{ComputableAnalysis.FTC.effectiveFTC_equiv_endpoint}
+\leanok
