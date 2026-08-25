@@ -380,6 +380,59 @@ theorem differenceQuotient_scale_error_le
   rw [differenceQuotient_scale c f hh, hdecomp, qabs_mul]
   exact Rat.le_refl
 
+/-! A synchronized addition constructor for exact derivative certificates.
+Each summand is evaluated at half the requested error, while the caller keeps
+the inner step schedule and both radius comparisons explicit. -/
+def halfQPos (eps : QPos) : QPos :=
+  ⟨eps.val / 2, by
+    have htwo : (0 : Rat) < 2 := by native_decide
+    rw [Rat.div_def]
+    exact Rat.mul_pos eps.property ((Rat.inv_pos).2 htwo)⟩
+
+def EffectiveDerivativeExact.add
+    {f df g dg : Rat -> Rat}
+    (Df : EffectiveDerivativeExact f df)
+    (Dg : EffectiveDerivativeExact g dg)
+    (inner : QPos -> QPos)
+    (hprecision : forall eps, 2 * (inner eps).val <= eps.val)
+    (hradius : forall eps,
+      (inner eps).val <= (Df.stepRadius (halfQPos eps)).val /\
+      (inner eps).val <= (Dg.stepRadius (halfQPos eps)).val) :
+    EffectiveDerivativeExact (fun x => f x + g x)
+      (fun x => df x + dg x) where
+  stepRadius := inner
+  good := by
+    intro x h eps hh hhle
+    let half : QPos := halfQPos eps
+    have hDf := Df.good x h half hh
+      (Rat.le_trans hhle (hradius eps).1)
+    have hDg := Dg.good x h half hh
+      (Rat.le_trans hhle (hradius eps).2)
+    have hDf' : qabs (differenceQuotient f x h - df x) <= half.val := by
+      simpa [differenceQuotient] using hDf
+    have hDg' : qabs (differenceQuotient g x h - dg x) <= half.val := by
+      simpa [differenceQuotient] using hDg
+    calc
+      qabs (differenceQuotient (fun z => f z + g z) x h -
+          (df x + dg x)) <=
+        qabs (differenceQuotient f x h - df x) +
+          qabs (differenceQuotient g x h - dg x) :=
+        differenceQuotient_add_error_le f df g dg x h (Rat.ne_of_gt hh)
+      _ <= half.val + half.val := by
+        calc
+          qabs (differenceQuotient f x h - df x) +
+              qabs (differenceQuotient g x h - dg x) <=
+            half.val + qabs (differenceQuotient g x h - dg x) :=
+            (Rat.add_le_add_right (c :=
+              qabs (differenceQuotient g x h - dg x))).2 hDf'
+          _ <= half.val + half.val :=
+            (Rat.add_le_add_left (c := half.val)).2 hDg'
+      _ <= eps.val := by
+        change eps.val * (2 : Rat)⁻¹ + eps.val * (2 : Rat)⁻¹ <= eps.val
+        have htwo : (2 : Rat)⁻¹ + (2 : Rat)⁻¹ = 1 := by native_decide
+        rw [← Rat.mul_add, htwo, Rat.mul_one]
+        exact Rat.le_refl
+
 /- A finite L'Hopital-style cancellation certificate: away from the common
 zero `a`, the quotient of the factored numerator and denominator is the
 derivative ratio at `a`, namely `2 * a / 1`, plus its exact linear remainder.
