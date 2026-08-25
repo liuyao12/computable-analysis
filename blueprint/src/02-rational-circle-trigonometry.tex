@@ -166,6 +166,16 @@ its point values are proved equivalent to the geometric `realRaw`; the
 abstract inverse package records that equivalence rather than requiring
 definitional equality.
 
+The scheduled rectangle branch now supplies the full inverse-ready data:
+\lean{ComputableAnalysis.arctanScheduledRectangleOnUnit_intervalRegular}
+\lean{ComputableAnalysis.arctanScheduledRectangleOnUnit_nondecreasing}
+\lean{ComputableAnalysis.arctanScheduledRectangleOnUnit_effectiveInverseSeparation}
+\lean{ComputableAnalysis.arctanScheduledRectangleOnUnit_invertible}
+\lean{ComputableAnalysis.arctanScheduledRectangleOnUnit_equivalent_geometric_branch}
+The last edge is the representation-chain link: inverse search may use the
+regular scheduled evaluator while the geometric arctangent remains the
+semantic anchor for the circle construction.
+
 \section{Scope boundary}
 
 Arbitrary discontinuities and non-effective measure are outside scope.

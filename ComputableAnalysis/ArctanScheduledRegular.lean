@@ -482,4 +482,18 @@ def arctanScheduledRectangleOnUnit_invertible :
   separation := arctanScheduledRectangleOnUnit_effectiveInverseSeparation
   orientation := trivial
 
+/-! The scheduled evaluator is an alternative representation of the same
+geometric arctangent branch.  This edge is what lets inverse-search data use
+the precision-friendly scheduled evaluator while the trigonometry chapter
+continues to name the geometric raw as its semantic anchor. -/
+theorem arctanScheduledRectangleOnUnit_equivalent_geometric_branch :
+    FunctionOnInterval.Equivalent arctanScheduledRectangleOnUnit
+      IntegralIdentities.arctanGeomOnUnit := by
+  refine ⟨rfl, rfl, ?_⟩
+  intro x hxScheduled hxGeometric
+  change (arctanScheduledRectangleRaw x).Equiv
+    (ArctanGeometry.arctanGeom x)
+  exact arctanScheduledRectangleRaw_equiv_arctanGeom
+    hxScheduled.1 hxScheduled.2
+
 end ComputableAnalysis

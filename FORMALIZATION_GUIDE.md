@@ -981,6 +981,14 @@ The warm exponential example supplies the first three decision certificates
 for target `3/2`, and derives the `1/8` width result through that generic
 theorem rather than through a separate arithmetic trace.
 
+The arctangent branch has the same representation split. The scheduled
+rectangle evaluator in `ArctanScheduledRegular.lean` now exposes interval
+regularity, monotonicity, effective separation, and an
+`InvertibleFunctionOnInterval` package. Its
+`arctanScheduledRectangleOnUnit_equivalent_geometric_branch` theorem connects
+that precision-friendly evaluator to the geometric arctangent used by the
+circle chapter.
+
 For a direct scalar uniqueness proof, make one finite short-block sweep an
 instance of `ScalarODE.ShortBlockMeshSweep`: telescope the cell estimates to
 `next <= length * previous + residual`, choose `length <= 1/4`, and spend at
