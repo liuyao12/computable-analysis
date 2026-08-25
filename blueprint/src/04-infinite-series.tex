@@ -394,6 +394,11 @@ separate pointwise domination and tail certificate. The same interface also
 makes the usual separability argument transparent: a finite rectangular sum
 of a product factors into the product of its one-dimensional sums.
 
+The arbitrary-dimensional weighted form is the reusable finite
+multiple-integral theorem: each cell contributes a rational width times its
+factor value, and the nested rectangular sum factors without invoking Fubini,
+measure, or a completed real space.
+
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix}
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_four}
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_six}
@@ -404,6 +409,8 @@ of a product factors into the product of its one-dimensional sums.
 \lean{ComputableAnalysis.gaussianProductModel_split}
 \lean{ComputableAnalysis.finiteProductSum2D_factorized}
 \lean{ComputableAnalysis.finiteProductIntegralSum2D_factorized}
+\lean{ComputableAnalysis.finiteProductIntegralNestedSum_factorized}
+\lean{ComputableAnalysis.finiteProductIntegralNestedSum_two_factor}
 \leanok
 
 The n-ball is handled by the same finite recurrence, not by importing a

@@ -125,6 +125,7 @@ Start with the smallest target module rather than importing
 | Integrals and effective FTC data | `ComputableAnalysis.IntegralFoundation` | Rectangle, piecewise, polynomial, arctangent, Stieltjes, and effective-FTC certificates |
 | Effective-calculus proof contracts | `ComputableAnalysis.EffectiveCalculusFoundation` | Secant, derivative-bound, curvature, stabilization, inverse-search, and L'Hôpital interfaces |
 | Power series and finite Fourier data | `ComputableAnalysis.SeriesFoundation` | Rational tails, finite termwise FTC, Fourier transforms, Gaussian prefixes, and the finite (n)-ball recurrence |
+| Finite separable multiple integrals | `ComputableAnalysis.FiniteNBallVolume` | `finiteProductIntegralNestedSum_factorized`, weighted rectangular sums, and the finite n-ball recurrence |
 | Exponential and logarithm | `ComputableAnalysis.ExponentialLogarithmFoundation` | Taylor prefixes, tail bounds, rotation coordinates, and gap-aware inverse search |
 | Linear differential equations | `ComputableAnalysis.DifferentialEquationsFoundation` | Scalar uniqueness, finite Peano--Baker algebra, rotation bridges, and finite ODE providers |
 | Certified complex multiplication | `ComputableAnalysis.ComplexMultiplication` | `ComplexRaw.mul_valid`, `ComplexRaw.mul_equiv`, and the finite `QBox` bounds |
