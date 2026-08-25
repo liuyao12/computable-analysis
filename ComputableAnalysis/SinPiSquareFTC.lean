@@ -2553,6 +2553,107 @@ def dyadicNestedRadicalSquareLeftSum (n : Nat) : QInterval :=
           (rationalSquareInterval (dyadicNestedRadicalStageSinAt n k))))
     { lo := 0, hi := 0 }
 
+/- The same finite rectangle sum, using the public sine-square evaluator at
+each dyadic sample.  The transport theorem below is deliberately stated at
+the interval level: a specialized table only has to overlap these samples. -/
+def dyadicPublicSquareLeftSum
+    (S : ArctanSinPiConstruction) (n : Nat) : QInterval :=
+  let N := 2 ^ n
+  let h := mesh 0 ((1 : Rat) / 2) N
+  (List.range N).foldl
+    (fun acc k =>
+      QInterval.addInterval acc
+        (QInterval.scaleByRat h
+          ((sinPiSquareOnHalf S).compute
+            (leftPoint 0 ((1 : Rat) / 2) N k) n)))
+    { lo := 0, hi := 0 }
+
+/- A finite family of overlapping square-sample boxes gives overlapping
+rectangle sums.  This is the reusable finite part of the square route; no
+limit, completeness principle, or equality of the two evaluators is used. -/
+theorem dyadicPublicSquareLeftSum_overlap_of_sample_overlaps
+    (S : ArctanSinPiConstruction) (n : Nat)
+    (hsamples : forall k, k < 2 ^ n ->
+      QInterval.Overlaps
+        ((sinPiSquareOnHalf S).compute
+          (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k) n)
+        (rationalSquareInterval
+          (dyadicNestedRadicalStageSinAt n k))) :
+    QInterval.Overlaps
+      (dyadicPublicSquareLeftSum S n)
+      (dyadicNestedRadicalSquareLeftSum n) := by
+  unfold dyadicPublicSquareLeftSum dyadicNestedRadicalSquareLeftSum
+  have hmesh : 0 <= mesh 0 ((1 : Rat) / 2) (2 ^ n) := by
+    exact mesh_nonneg_of_le (Nat.pow_pos (by omega)) (by native_decide)
+  have hfold : forall (xs : List Nat),
+      (forall k, k ∈ xs -> k < 2 ^ n) ->
+      forall (accG accH : QInterval), QInterval.Overlaps accG accH ->
+      QInterval.Overlaps
+        (xs.foldl
+          (fun acc k =>
+            QInterval.addInterval acc
+              (QInterval.scaleByRat
+                (mesh 0 ((1 : Rat) / 2) (2 ^ n))
+                ((sinPiSquareOnHalf S).compute
+                  (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k) n))) accG)
+        (xs.foldl
+          (fun acc k =>
+            QInterval.addInterval acc
+              (QInterval.scaleByRat
+                (mesh 0 ((1 : Rat) / 2) (2 ^ n))
+                (rationalSquareInterval
+                  (dyadicNestedRadicalStageSinAt n k)))) accH) := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro _ accG accH hover
+        exact hover
+    | cons k ks ih =>
+        intro hmem
+        have hk : k < 2 ^ n := hmem k (by simp)
+        have hks : forall j, j ∈ ks -> j < 2 ^ n := by
+          intro j hj
+          exact hmem j (by simp [hj])
+        intro accG accH hover
+        have hsample := hsamples k hk
+        have hstep : QInterval.Overlaps
+            (QInterval.addInterval accG
+              (QInterval.scaleByRat
+                (mesh 0 ((1 : Rat) / 2) (2 ^ n))
+                ((sinPiSquareOnHalf S).compute
+                  (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k) n)))
+            (QInterval.addInterval accH
+              (QInterval.scaleByRat
+                (mesh 0 ((1 : Rat) / 2) (2 ^ n))
+                (rationalSquareInterval
+                  (dyadicNestedRadicalStageSinAt n k)))) := by
+          unfold QInterval.addInterval QInterval.scaleByRat
+          unfold QInterval.Overlaps at hover hsample ⊢
+          constructor
+          · have hscaled :
+                mesh 0 ((1 : Rat) / 2) (2 ^ n) *
+                    ((sinPiSquareOnHalf S).compute
+                      (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k) n).lo <=
+                mesh 0 ((1 : Rat) / 2) (2 ^ n) *
+                    (rationalSquareInterval
+                      (dyadicNestedRadicalStageSinAt n k)).hi :=
+              Rat.mul_le_mul_of_nonneg_left hsample.1 hmesh
+            grind
+          · have hscaled :
+                mesh 0 ((1 : Rat) / 2) (2 ^ n) *
+                    (rationalSquareInterval
+                      (dyadicNestedRadicalStageSinAt n k)).lo <=
+                mesh 0 ((1 : Rat) / 2) (2 ^ n) *
+                    ((sinPiSquareOnHalf S).compute
+                      (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k) n).hi :=
+              Rat.mul_le_mul_of_nonneg_left hsample.2 hmesh
+            grind
+        simpa using ih hks _ _ hstep
+  exact hfold (List.range (2 ^ n))
+    (by intro k hk; exact List.mem_range.mp hk)
+    { lo := 0, hi := 0 } { lo := 0, hi := 0 } (by
+      simp [QInterval.Overlaps])
+
 theorem dyadicNestedRadicalSquareStage_width_le
     (n k : Nat) (hk : k < 2 ^ n) :
     (rationalSquareInterval (dyadicNestedRadicalStageSinAt n k)).width <=

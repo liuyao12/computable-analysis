@@ -820,6 +820,19 @@ The squared-sine route is a useful intermediate application: squaring the
 same certified samples gives a monotone Darboux integral, and the FTC/value
 transport identifies it with \(1/4\) once the endpoint certificate is supplied.
 
+Only one representative per computational pattern is needed.  For the
+square route, finite transport from sample boxes to the complete equal-dyadic
+sum is formalized once and reused:
+
+\lean{ComputableAnalysis.SinPiSquareFTC.dyadicPublicSquareLeftSum}
+\lean{ComputableAnalysis.SinPiSquareFTC.dyadicPublicSquareLeftSum_overlap_of_sample_overlaps}
+\leanok
+
+The remaining work is local: provide one finite certificate for each dyadic
+sine sample.  Piecewise functions such as \(|x|\) are handled by splitting
+the domain into their monotone pieces, rather than duplicating routine
+variants.
+
 The reusable interval-transfer step is now generic: after the correctly
 scaled raw integral is identified with its target, combine its stage width
 with the finite rectangle margin.  The scaling must come first: the unscaled

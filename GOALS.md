@@ -660,8 +660,13 @@ from monomial brackets structurally.
    `DyadicNestedRadicalSquareTangentCommonWitness.of_overlap` now packages
    any stagewise overlap by choosing the larger lower endpoint, and
    `stabilized_equiv_value` carries the resulting witness directly to `1/4`.
-   The only remaining square-specific obligation is therefore the finite
-   overlap family itself.
+   The finite part of the transport is now closed generically by
+   `dyadicPublicSquareLeftSum` and
+   `dyadicPublicSquareLeftSum_overlap_of_sample_overlaps`: stagewise overlap
+   of each public square sample with its specialized table box propagates
+   through the complete weighted dyadic fold.  The only remaining
+   square-specific obligation is therefore the local per-sample certificate
+   family; analogous routine functions need not be formalized again.
 
 The first six items are reusable infrastructure and regression coverage; items
 7--9 are the sine applications.  A later general theorem may package the same
