@@ -688,6 +688,22 @@ theorem finiteSquareStieltjes_chain (f : Nat -> Rat) (n : Nat) :
         grind [Rat.add_comm, Rat.mul_comm]] at h
   exact h
 
+/-! The chain rule immediately gives a finite error bracket for the
+left-endpoint square sum.  This is the form used by an effective integral:
+the quadratic variation is not discarded, but carried as the explicit error
+budget `eps`. -/
+
+theorem finiteSquareStieltjes_left_bounds
+    (f : Nat -> Rat) (n : Nat) (eps : Rat)
+    (hvariation : 0 <= quadraticVariationSum f f n)
+    (hvariation_le : quadraticVariationSum f f n <= eps) :
+    f n * f n - f 0 * f 0 - eps <=
+        2 * leftStieltjesSum f f n /\
+      2 * leftStieltjesSum f f n <=
+        f n * f n - f 0 * f 0 := by
+  have hchain := finiteSquareStieltjes_chain f n
+  constructor <;> grind
+
 theorem rightStieltjesSum_eq_left_swap_add_quadraticVariation
     (f g : Nat -> Rat) (n : Nat) :
     rightStieltjesSum f g n =
