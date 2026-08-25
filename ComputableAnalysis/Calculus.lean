@@ -1178,6 +1178,13 @@ theorem unitMeshSquareIntegralRaw_equiv_one :
     Rat.le_of_lt (one_div_nat_pos (Nat.succ_pos n))
   constructor <;> grind [Rat.sub_eq_add_neg]
 
+theorem unitMeshSquareIntegralRaw_lower_eq_left_sum (n : Nat) :
+    (unitMeshSquareIntegralRaw.compute n).lo =
+      2 * leftStieltjesSum (unitMeshPath (n + 1))
+        (unitMeshPath (n + 1)) (n + 1) := by
+  rw [unitMeshPath_square_left_sum_exact (Nat.succ_pos n)]
+  rfl
+
 /-- A fully explicit epsilon schedule for the unit-mesh corner correction.
 Choosing `n = eps.den + 1` makes the rational correction at most `eps`. -/
 theorem unitMeshPath_quadraticVariation_le_epsilon (eps : QPos) :
