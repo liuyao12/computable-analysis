@@ -188,17 +188,26 @@ the endpoint difference of the finite primitive is exactly the finite sum of
 the integrated monomials.  Only the later tail comparison is potentially
 infinite-looking.
 
+The derivative side is closed at the same finite level. The derivative prefix
+of the integrated coefficient stream is literally the truncated target
+prefix, provided the coefficient-shift certificate is supplied. This is the
+finite algebraic core of termwise FTC; no infinite derivative or interchange
+theorem is being smuggled in.
+
 \lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_step}
 \lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_prefix}
 \lean{ComputableAnalysis.FinitePolynomial.integratedTaylorPrefix_endpointDifference_eq_finiteMonomialIntegralSum}
 \lean{ComputableAnalysis.FinitePolynomial.finiteMonomialIntegralSum_succ}
 \lean{ComputableAnalysis.FinitePolynomial.integratedTaylorPrefix_endpointDifference_contains_of_pos}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefix_eq_taylorDerivativePrefix}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefixShift_succ_eq_of_coefficientShift}
 \leanok
 
 The formal coefficient layer already records the derivative shifts for the
 main complex-valued functions:
 
 \lean{ComputableAnalysis.PowerSeries.atanTaylorCoeff_hasFormalDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative}
 \lean{ComputableAnalysis.PowerSeries.expCoeff_hasFormalDerivative}
 \lean{ComputableAnalysis.PowerSeries.sinCoeff_hasFormalDerivative}
 \lean{ComputableAnalysis.PowerSeries.neg_cosCoeff_hasFormalDerivative}
