@@ -9081,6 +9081,60 @@ theorem gapAwareTargetBisectionStep_subinterval
     · simp [gapAwareTargetBisectionStep, hbelow, habove]
       exact ⟨Rat.le_refl, hI.2.1, Rat.le_refl⟩
 
+theorem gapAwareTargetBisectionStep_width_le
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) :
+    (gapAwareTargetBisectionStep F Y I hI n).width <= I.width := by
+  have hm := QInterval.midpoint_mem hI.2.1
+  by_cases hbelow :
+      (F.regular.evalInterval I hI n).hi < Y.lo
+  · simp [gapAwareTargetBisectionStep, hbelow, QInterval.width]
+    grind [Rat.sub_eq_add_neg]
+  · by_cases habove :
+        Y.hi < (F.regular.evalInterval I hI n).lo
+    · simp [gapAwareTargetBisectionStep, hbelow, habove, QInterval.width]
+      grind [Rat.sub_eq_add_neg]
+    · simp [gapAwareTargetBisectionStep, hbelow, habove]
+
+/-! Proof-carrying finite iteration of the conservative kernel.  The subtype
+stores the domain certificate at every stage, so later clients never need to
+reconstruct that a midpoint refinement stayed inside the original branch. -/
+def gapAwareTargetBisectionIterateWithProof
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) :
+    Nat -> {J : QInterval // subintervalOf J F.function.lower F.function.upper}
+  | 0 => ⟨I, hI⟩
+  | n + 1 =>
+      let P := gapAwareTargetBisectionIterateWithProof F Y I hI n
+      let J := gapAwareTargetBisectionStep F Y P.1 P.2 n
+      have hstep := gapAwareTargetBisectionStep_subinterval F Y P.1 P.2 n
+      ⟨J, ⟨Rat.le_trans P.2.1 hstep.1, hstep.2.1,
+        Rat.le_trans hstep.2.2 P.2.2.2⟩⟩
+
+def gapAwareTargetBisectionIterate
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) : QInterval :=
+  (gapAwareTargetBisectionIterateWithProof F Y I hI n).1
+
+theorem gapAwareTargetBisectionIterate_subinterval
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) :
+    subintervalOf (gapAwareTargetBisectionIterate F Y I hI n)
+      F.function.lower F.function.upper :=
+  (gapAwareTargetBisectionIterateWithProof F Y I hI n).2
+
+theorem gapAwareTargetBisectionIterate_width_le
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) :
+    (gapAwareTargetBisectionIterate F Y I hI n).width <= I.width := by
+  induction n with
+  | zero => exact Rat.le_refl
+  | succ n ih =>
+      let P := gapAwareTargetBisectionIterateWithProof F Y I hI n
+      have hstep := gapAwareTargetBisectionStep_width_le F Y P.1 P.2 n
+      have hprev : P.1.width <= I.width := ih
+      exact Rat.le_trans hstep hprev
+
 structure GapAwareInRangeRaw
     (I : GapAwareInvertibleFunctionOnInterval) where
   value : RealRaw

@@ -960,6 +960,11 @@ target box, and discards a half only after strict finite separation. Its
 orderedness and subinterval theorems are proved in `Calculus.lean`. The
 remaining adaptive inverse obligation is therefore explicit: its precision
 schedule must eventually resolve ambiguous midpoint cases.
+The proof-carrying iterators `gapAwareTargetBisectionIterateWithProof` and
+`gapAwareTargetBisectionIterate` now package this finite schedule layer; every
+stage remains in the original branch and has width no larger than the initial
+interval. They intentionally do not claim geometric shrinkage when a midpoint
+remains unresolved.
 
 For a direct scalar uniqueness proof, make one finite short-block sweep an
 instance of `ScalarODE.ShortBlockMeshSweep`: telescope the cell estimates to
