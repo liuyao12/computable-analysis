@@ -1659,6 +1659,10 @@ first nonzero dyadic sample, and
 sine-square / one-minus-cosine-square overlap.  This is deliberately one
 representative finite cell; the remaining work is the uniform witness family,
 not a repetition of the same calculation for every cell.
+The reusable bridge is
+`square_overlap_of_rationalTangentSquareWitnessSearch`: once a search result
+and the two unit-interval box bounds are available, it supplies the circle
+identity and square/complement overlap automatically.
 
 ## Completion and trust checklist
 
