@@ -1382,6 +1382,26 @@ structure NestedRadicalSquareQuarterBoundsSubgoal where
     (1 / 4 : Rat) <=
       (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).hi
 
+/- The corrected anchor-side version uses the normalized tangent product.
+   This is separate from the historical provisional structure above, whose
+   unscaled tangent chart has quarter-turn value rather than `1/4`. -/
+structure NormalizedTangentSquareQuarterBoundsSubgoal where
+  lower_contains : forall n,
+    (normalizedTangentSquareIntegral.compute n).lo <= (1 / 4 : Rat)
+  upper_contains : forall n,
+    (1 / 4 : Rat) <= (normalizedTangentSquareIntegral.compute n).hi
+
+def NestedRadicalSquareQuarterBoundsSubgoal.toNormalizedCommonWitness
+    (H : NestedRadicalSquareQuarterBoundsSubgoal)
+    (N : NormalizedTangentSquareQuarterBoundsSubgoal) :
+    NormalizedTangentSquareCommonWitness := by
+  refine {
+    witness := fun _ => (1 / 4 : Rat)
+    candidate_lo_le := H.lower_contains
+    witness_le_candidate_hi := H.upper_contains
+    normalized_lo_le := N.lower_contains
+    witness_le_normalized_hi := N.upper_contains }
+
 def NestedRadicalSquareQuarterBoundsSubgoal.toCommonWitness
     (H : NestedRadicalSquareQuarterBoundsSubgoal)
     (T : TangentSquareIntegralValueSubgoal) :
