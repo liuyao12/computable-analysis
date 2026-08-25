@@ -16,6 +16,34 @@ are its stages. -/
 def secantRaw (F : RealFunRaw) (x y : Rat) : RealRaw where
   compute := fun n => secantSlopeIntervalOfRealFun F x y n
 
+/-- A positive rationally separated secant of a valid raw function is itself
+valid.  This is the representation-level fact used by both convexity and
+derivative certificates; it does not depend on the convexity hypothesis. -/
+theorem secantRaw_valid_of_valid
+    {F : RealFunRaw} {x y : Rat}
+    (hx : RealRaw.ValidCompute (F.applyCompute x))
+    (hy : RealRaw.ValidCompute (F.applyCompute y)) (hxy : x < y) :
+    (secantRaw F x y).Valid := by
+  let X : RealRaw := { compute := F.compute x }
+  let Y : RealRaw := { compute := F.compute y }
+  have hX : X.Valid := by
+    simpa [X, RealRaw.Valid, RealFunRaw.applyCompute] using hx
+  have hY : Y.Valid := by
+    simpa [Y, RealRaw.Valid, RealFunRaw.applyCompute] using hy
+  have hden_pos : 0 < y - x := by
+    rw [← Rat.lt_iff_sub_pos]
+    exact hxy
+  have hscale_nonneg : 0 <= 1 / (y - x) := by
+    rw [Rat.div_def, Rat.one_mul]
+    exact Rat.le_of_lt ((Rat.inv_pos).2 hden_pos)
+  have hscale :
+      (RealRaw.scaleRat (1 / (y - x)) (Y - X)).Valid :=
+    RealRaw.scaleRat_valid_of_nonneg hscale_nonneg
+      (RealRaw.sub_valid hY hX)
+  change RealRaw.ValidCompute
+    (RealRaw.scaleRatCompute (1 / (y - x)) (Y - X))
+  exact hscale
+
 /-- Exact convexity on rational points of a rational interval.
 
 Unlike `CurvatureOnSubinterval`, this is not an effective finite-stage
@@ -56,25 +84,8 @@ theorem secantRaw_valid
     (hy : inDomainInterval a b y)
     (hxy : x < y) :
     (secantRaw F x y).Valid := by
-  let X : RealRaw := { compute := F.applyCompute x }
-  let Y : RealRaw := { compute := F.applyCompute y }
-  have hX : X.Valid := by
-    simpa [X, RealRaw.Valid] using hF.valid_on x hx
-  have hY : Y.Valid := by
-    simpa [Y, RealRaw.Valid] using hF.valid_on y hy
-  have hden_pos : 0 < y - x := by
-    rw [←Rat.lt_iff_sub_pos]
-    exact hxy
-  have hscale_nonneg : 0 <= 1 / (y - x) := by
-    rw [Rat.div_def, Rat.one_mul]
-    exact Rat.le_of_lt ((Rat.inv_pos).2 hden_pos)
-  have hscale :
-      (RealRaw.scaleRat (1 / (y - x)) (Y - X)).Valid :=
-    RealRaw.scaleRat_valid_of_nonneg hscale_nonneg
-      (RealRaw.sub_valid hY hX)
-  change RealRaw.ValidCompute
-    (RealRaw.scaleRatCompute (1 / (y - x)) (Y - X))
-  exact hscale
+  exact secantRaw_valid_of_valid
+    (hF.valid_on x hx) (hF.valid_on y hy) hxy
 
 end ExactConvexOn
 

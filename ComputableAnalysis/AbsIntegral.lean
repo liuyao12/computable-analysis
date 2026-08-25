@@ -1,4 +1,4 @@
-import ComputableAnalysis.TurningPointIntegral
+import ComputableAnalysis.PrimitivePiecewiseFTC
 
 /-!
 # A first completed finite-turn integral
@@ -31,6 +31,18 @@ theorem absRat_eq_self_of_nonneg {x : Rat} (hx : 0 <= x) :
 
 def absOnUnit : FunctionOnInterval :=
   FunctionOnInterval.exactRat absRat (-1) 1
+
+theorem absRat_lipschitzOnIntervalNat :
+    LipschitzOnIntervalNat absRat (-1) 1 1 := by
+  refine ⟨by native_decide, ?_⟩
+  intro s t hs hsb ht htb
+  by_cases hsneg : s < 0 <;> by_cases htneg : t < 0
+  all_goals simp [absRat, qabs, hsneg, htneg]
+  all_goals grind
+
+def absOnUnit_intervalRegular : IntervalRegularOn absOnUnit :=
+  IntervalRegularOn.of_lipschitzOnIntervalNat absRat (-1) 1 1
+    absRat_lipschitzOnIntervalNat
 
 def absPartitionPoint : Nat -> Rat
   | 0 => -1
@@ -126,9 +138,276 @@ def absOnUnit_piecewise : PiecewiseMonotoneConstructionFor absOnUnit where
       | zero => simpa [absPartitionPoint] using absOnUnit_right
       | succ k => exfalso; omega
 
+/-! A primitive for the absolute-value integrand. -/
+def absPrimitiveRat (x : Rat) : Rat :=
+  if x < 0 then -(x * x) / 2 else (x * x) / 2
+
+def absPrimitiveOnUnit : FunctionOnInterval :=
+  FunctionOnInterval.exactRat absPrimitiveRat (-1) 1
+
+def absPrimitivePointMem :
+    forall i, i <= absOnUnit_piecewise.pieces ->
+      inDomainInterval absPrimitiveOnUnit.lower absPrimitiveOnUnit.upper
+        (absOnUnit_piecewise.point i) := by
+  intro i hi
+  change inDomainInterval (-1) 1 (absOnUnit_piecewise.point i)
+  exact absOnUnit_piecewise.point_mem i hi
+
+theorem absOnUnit_piecewise_cell_primitiveFTC :
+    forall k (hk : k < absOnUnit_piecewise.pieces),
+      (piecewiseMonotoneCellIntegral absOnUnit absOnUnit_piecewise k hk).Equiv
+        (piecewisePrimitiveEndpointDifference absPrimitiveOnUnit absOnUnit
+          absOnUnit_piecewise absPrimitivePointMem k hk) := by
+  intro k hk
+  have hneg : inDomainInterval (-1 : Rat) 1 (-1) := by
+    constructor <;> native_decide
+  have hzero : inDomainInterval (-1 : Rat) 1 0 := by
+    constructor <;> native_decide
+  have hpos : inDomainInterval (-1 : Rat) 1 1 := by
+    constructor <;> native_decide
+  have hnegP : inDomainInterval absPrimitiveOnUnit.lower
+      absPrimitiveOnUnit.upper (-1) := by
+    change inDomainInterval (-1) 1 (-1)
+    exact hneg
+  have hzeroP : inDomainInterval absPrimitiveOnUnit.lower
+      absPrimitiveOnUnit.upper 0 := by
+    change inDomainInterval (-1) 1 0
+    exact hzero
+  have hposP : inDomainInterval absPrimitiveOnUnit.lower
+      absPrimitiveOnUnit.upper 1 := by
+    change inDomainInterval (-1) 1 1
+    exact hpos
+  have heval : forall (x : Rat) (hx : inDomainInterval (-1 : Rat) 1 x),
+      (absPrimitiveOnUnit.raw.evalRaw x
+        (absPrimitiveOnUnit.defined_on x hx)).Equiv
+        (RealRaw.ofRat (absPrimitiveRat x)) := by
+    intro x hx
+    simpa [absPrimitiveOnUnit] using
+      (exactRat_evalRaw_equiv absPrimitiveRat (-1) 1 x hx)
+  cases k with
+  | zero =>
+      have hcell :
+          piecewiseMonotoneCellIntegral absOnUnit absOnUnit_piecewise 0 hk =
+            RealRaw.ofRat (1 / 2) := by rfl
+      rw [hcell]
+      have hleft := heval (-1) hneg
+      have hright := heval 0 hzero
+      have hleftValid :
+          (absPrimitiveOnUnit.raw.evalRaw (-1)
+            (absPrimitiveOnUnit.defined_on (-1) hnegP)).Valid := by
+        simpa [RealRaw.Valid, PartialRealFunRaw.evalRaw] using
+          absPrimitiveOnUnit.valid_on (-1)
+            (absPrimitiveOnUnit.defined_on (-1) hnegP)
+      have hrightValid :
+          (absPrimitiveOnUnit.raw.evalRaw 0
+            (absPrimitiveOnUnit.defined_on 0 hzeroP)).Valid := by
+        simpa [RealRaw.Valid, PartialRealFunRaw.evalRaw] using
+            absPrimitiveOnUnit.valid_on 0
+              (absPrimitiveOnUnit.defined_on 0 hzeroP)
+      have hzeroRat : (RealRaw.ofRat (absPrimitiveRat 0)).Valid := by
+        change RealRaw.ValidCompute _
+        exact RealRaw.ofRat_valid _
+      have hnegRat : (RealRaw.ofRat (absPrimitiveRat (-1))).Valid := by
+        change RealRaw.ValidCompute _
+        exact RealRaw.ofRat_valid _
+      have hhalf : (RealRaw.ofRat (1 / 2)).Valid := by
+        change RealRaw.ValidCompute _
+        exact RealRaw.ofRat_valid _
+      have hsub := RealRaw.sub_equiv hrightValid
+        hzeroRat hleftValid hnegRat hright hleft
+      have harith := ofRat_sub_ofRat_equiv
+        (absPrimitiveRat 0) (absPrimitiveRat (-1))
+      have harith' :
+          (RealRaw.ofRat (absPrimitiveRat 0) -
+            RealRaw.ofRat (absPrimitiveRat (-1))).Equiv
+            (RealRaw.ofRat (1 / 2)) := by
+        have hdiff : absPrimitiveRat 0 - absPrimitiveRat (-1) = (1 / 2 : Rat) := by
+          native_decide
+        rw [hdiff] at harith
+        exact harith
+      have hresult := RealRaw.equiv_trans
+        (RealRaw.sub_valid hrightValid hleftValid)
+        (RealRaw.sub_valid hzeroRat hnegRat)
+        hhalf hsub harith'
+      simpa [piecewisePrimitiveEndpointDifference, absPrimitiveOnUnit,
+        absPartitionPoint, absOnUnit_piecewise, absPrimitiveRat] using
+        RealRaw.equiv_symm hresult
+  | succ k =>
+      cases k with
+      | zero =>
+          have hcell :
+              piecewiseMonotoneCellIntegral absOnUnit absOnUnit_piecewise 1 hk =
+                RealRaw.ofRat (1 / 2) := by rfl
+          rw [hcell]
+          have hleft := heval 0 hzero
+          have hright := heval 1 hpos
+          have hleftValid :
+              (absPrimitiveOnUnit.raw.evalRaw 0
+                (absPrimitiveOnUnit.defined_on 0 hzeroP)).Valid := by
+            simpa [RealRaw.Valid, PartialRealFunRaw.evalRaw] using
+              absPrimitiveOnUnit.valid_on 0
+                (absPrimitiveOnUnit.defined_on 0 hzeroP)
+          have hrightValid :
+              (absPrimitiveOnUnit.raw.evalRaw 1
+                (absPrimitiveOnUnit.defined_on 1 hposP)).Valid := by
+            simpa [RealRaw.Valid, PartialRealFunRaw.evalRaw] using
+              absPrimitiveOnUnit.valid_on 1
+                (absPrimitiveOnUnit.defined_on 1 hposP)
+          have honeRat : (RealRaw.ofRat (absPrimitiveRat 1)).Valid := by
+            change RealRaw.ValidCompute _
+            exact RealRaw.ofRat_valid _
+          have hzeroRat : (RealRaw.ofRat (absPrimitiveRat 0)).Valid := by
+            change RealRaw.ValidCompute _
+            exact RealRaw.ofRat_valid _
+          have hhalf : (RealRaw.ofRat (1 / 2)).Valid := by
+            change RealRaw.ValidCompute _
+            exact RealRaw.ofRat_valid _
+          have hsub := RealRaw.sub_equiv hrightValid
+            honeRat hleftValid hzeroRat hright hleft
+          have harith := ofRat_sub_ofRat_equiv
+            (absPrimitiveRat 1) (absPrimitiveRat 0)
+          have harith' :
+              (RealRaw.ofRat (absPrimitiveRat 1) -
+                RealRaw.ofRat (absPrimitiveRat 0)).Equiv
+                (RealRaw.ofRat (1 / 2)) := by
+            have hdiff : absPrimitiveRat 1 - absPrimitiveRat 0 = (1 / 2 : Rat) := by
+              native_decide
+            rw [hdiff] at harith
+            exact harith
+          have hresult := RealRaw.equiv_trans
+            (RealRaw.sub_valid hrightValid hleftValid)
+            (RealRaw.sub_valid honeRat hzeroRat)
+            hhalf hsub harith'
+          simpa [piecewisePrimitiveEndpointDifference, absPrimitiveOnUnit,
+            absPartitionPoint, absOnUnit_piecewise, absPrimitiveRat] using
+            RealRaw.equiv_symm hresult
+      | succ k =>
+          simp [absOnUnit_piecewise] at hk
+          omega
+
+theorem absOnUnit_piecewise_primitiveFTC :
+    (generalIntegralFor absOnUnit absOnUnit_piecewise).Equiv
+      (RealRaw.ofRat 1) := by
+  have hneg : inDomainInterval (-1 : Rat) 1 (-1) := by
+    constructor <;> native_decide
+  have hpos : inDomainInterval (-1 : Rat) 1 1 := by
+    constructor <;> native_decide
+  let v0 := absPrimitiveOnUnit.raw.evalRaw (-1)
+    (absPrimitiveOnUnit.defined_on (-1) (by
+      change inDomainInterval (-1) 1 (-1)
+      constructor <;> native_decide))
+  let v1 := absPrimitiveOnUnit.raw.evalRaw 0
+    (absPrimitiveOnUnit.defined_on 0 (by
+      change inDomainInterval (-1) 1 0
+      constructor <;> native_decide))
+  let v2 := absPrimitiveOnUnit.raw.evalRaw 1
+    (absPrimitiveOnUnit.defined_on 1 (by
+      change inDomainInterval (-1) 1 1
+      constructor <;> native_decide))
+  have hv0 : v0.Valid := by
+    simpa [v0, RealRaw.Valid, PartialRealFunRaw.evalRaw] using
+      absPrimitiveOnUnit.valid_on (-1) (by trivial)
+  have hv1 : v1.Valid := by
+    simpa [v1, RealRaw.Valid, PartialRealFunRaw.evalRaw] using
+      absPrimitiveOnUnit.valid_on 0 (by trivial)
+  have hv2 : v2.Valid := by
+    simpa [v2, RealRaw.Valid, PartialRealFunRaw.evalRaw] using
+      absPrimitiveOnUnit.valid_on 1 (by trivial)
+  have hvalues : forall x, x ∈ v0 :: [v1, v2] -> x.Valid := by
+    intro x hx
+    simp only [List.mem_cons, List.mem_singleton] at hx
+    rcases hx with rfl | hx
+    · exact hv0
+    rcases hx with rfl | hx
+    · exact hv1
+    rcases hx with rfl | hx
+    · exact hv2
+    simp at hx
+  have htransport :
+      FiniteRawListEquiv
+        (piecewisePrimitiveEndpointDifferenceList absPrimitiveOnUnit absOnUnit
+          absOnUnit_piecewise absPrimitivePointMem)
+    (rawAdjacentDifferenceList (v0 :: [v1, v2])) := by
+    change FiniteRawListEquiv
+      [piecewisePrimitiveEndpointDifference absPrimitiveOnUnit absOnUnit
+          absOnUnit_piecewise absPrimitivePointMem 0 (by native_decide),
+       piecewisePrimitiveEndpointDifference absPrimitiveOnUnit absOnUnit
+          absOnUnit_piecewise absPrimitivePointMem 1 (by native_decide)]
+      [v1 - v0, v2 - v1]
+    apply FiniteRawListEquiv.cons
+    · simpa [piecewisePrimitiveEndpointDifference, absOnUnit_piecewise,
+        absPartitionPoint, v0, v1, v2] using
+        (RealRaw.equiv_refl (v1 - v0) (RealRaw.sub_valid hv1 hv0))
+    · apply FiniteRawListEquiv.cons
+      · simpa [piecewisePrimitiveEndpointDifference, absOnUnit_piecewise,
+          absPartitionPoint, v0, v1, v2] using
+          (RealRaw.equiv_refl (v2 - v1) (RealRaw.sub_valid hv2 hv1))
+      · exact .nil
+  have htotal :
+      (rawLast v0 [v1, v2] - v0).Equiv
+        (piecewisePrimitiveTotalEndpointDifference absPrimitiveOnUnit absOnUnit
+          absOnUnit_piecewise absPrimitivePointMem) := by
+    simpa [rawLast, piecewisePrimitiveTotalEndpointDifference, v0, v1, v2,
+      absOnUnit_piecewise, absPartitionPoint] using
+      (RealRaw.equiv_refl (v2 - v0) (RealRaw.sub_valid hv2 hv0))
+  have hpiece :=
+    piecewiseMonotoneIntegralFor_equiv_totalPrimitiveEndpointDifference_of_telescope
+      absPrimitiveOnUnit absOnUnit absOnUnit_piecewise absPrimitivePointMem
+      absOnUnit_piecewise_cell_primitiveFTC hvalues htransport htotal
+  have hnegEval : v0.Equiv (RealRaw.ofRat (absPrimitiveRat (-1))) := by
+    simpa [v0, absPrimitiveOnUnit] using
+      (exactRat_evalRaw_equiv absPrimitiveRat (-1) 1 (-1) hneg)
+  have hposEval : v2.Equiv (RealRaw.ofRat (absPrimitiveRat 1)) := by
+    simpa [v2, absPrimitiveOnUnit] using
+      (exactRat_evalRaw_equiv absPrimitiveRat (-1) 1 1 hpos)
+  have hnegRat : (RealRaw.ofRat (absPrimitiveRat (-1))).Valid := by
+    change RealRaw.ValidCompute _
+    exact RealRaw.ofRat_valid _
+  have hposRat : (RealRaw.ofRat (absPrimitiveRat 1)).Valid := by
+    change RealRaw.ValidCompute _
+    exact RealRaw.ofRat_valid _
+  have hone : (RealRaw.ofRat 1).Valid := by
+    change RealRaw.ValidCompute _
+    exact RealRaw.ofRat_valid _
+  have hsubTotal := RealRaw.sub_equiv hv2 hposRat hv0 hnegRat hposEval hnegEval
+  have harithTotal := ofRat_sub_ofRat_equiv
+    (absPrimitiveRat 1) (absPrimitiveRat (-1))
+  have hdiffTotal :
+      absPrimitiveRat 1 - absPrimitiveRat (-1) = (1 : Rat) := by
+    native_decide
+  rw [hdiffTotal] at harithTotal
+  have htotalOne := RealRaw.equiv_trans
+    (RealRaw.sub_valid hv2 hv0)
+    (RealRaw.sub_valid hposRat hnegRat) hone hsubTotal harithTotal
+  have hpiece' :
+      (generalIntegralFor absOnUnit absOnUnit_piecewise).Equiv
+        (piecewisePrimitiveTotalEndpointDifference absPrimitiveOnUnit absOnUnit
+          absOnUnit_piecewise absPrimitivePointMem) := by
+    simpa [generalIntegralFor] using hpiece
+  have htotalOne' :
+      (piecewisePrimitiveTotalEndpointDifference absPrimitiveOnUnit absOnUnit
+        absOnUnit_piecewise absPrimitivePointMem).Equiv (RealRaw.ofRat 1) := by
+    simpa [piecewisePrimitiveTotalEndpointDifference, absPrimitiveOnUnit,
+      absOnUnit_piecewise, absPartitionPoint, v0, v1, v2] using htotalOne
+  exact RealRaw.equiv_trans
+    (generalIntegralFor_valid absOnUnit absOnUnit_piecewise)
+    (piecewisePrimitiveTotalEndpointDifference_valid absPrimitiveOnUnit absOnUnit
+      absOnUnit_piecewise absPrimitivePointMem)
+    hone hpiece' htotalOne'
+
 theorem absOnUnit_piecewise_integral_valid :
     (generalIntegralFor absOnUnit absOnUnit_piecewise).Valid :=
   generalIntegralFor_valid absOnUnit absOnUnit_piecewise
+
+theorem absOnUnit_piecewise_integral_two_equiv :
+    (generalIntegralFor absOnUnit absOnUnit_piecewise).Equiv
+      (piecewiseMonotoneCellIntegral absOnUnit absOnUnit_piecewise
+        0 (by native_decide) +
+        piecewiseMonotoneCellIntegral absOnUnit absOnUnit_piecewise
+        1 (by native_decide)) := by
+  simpa [generalIntegralFor] using
+    (piecewiseMonotoneIntegralFor_two_equiv
+      absOnUnit absOnUnit_piecewise (by native_decide))
 
 theorem absOnUnit_piecewise_integral_equiv_one :
     (generalIntegralFor absOnUnit absOnUnit_piecewise).Equiv

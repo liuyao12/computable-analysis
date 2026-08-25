@@ -674,6 +674,36 @@ theorem finiteIntegrationByParts_withVariation
             grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
               Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 
+/-! The square case is the finite chain rule.  It is the form used by
+substitution and by energy estimates: the endpoint change of `f^2` is the
+left-endpoint sum for `2 f df`, plus the explicitly visible quadratic
+variation.  No limiting integral or completed real is involved. -/
+
+theorem finiteSquareStieltjes_chain (f : Nat -> Rat) (n : Nat) :
+    2 * leftStieltjesSum f f n + quadraticVariationSum f f n =
+      f n * f n - f 0 * f 0 := by
+  have h := finiteIntegrationByParts_withVariation f f n
+  rw [show leftStieltjesSum f f n + leftStieltjesSum f f n =
+      2 * leftStieltjesSum f f n by
+        grind [Rat.add_comm, Rat.mul_comm]] at h
+  exact h
+
+/-! The chain rule immediately gives a finite error bracket for the
+left-endpoint square sum.  This is the form used by an effective integral:
+the quadratic variation is not discarded, but carried as the explicit error
+budget `eps`. -/
+
+theorem finiteSquareStieltjes_left_bounds
+    (f : Nat -> Rat) (n : Nat) (eps : Rat)
+    (hvariation : 0 <= quadraticVariationSum f f n)
+    (hvariation_le : quadraticVariationSum f f n <= eps) :
+    f n * f n - f 0 * f 0 - eps <=
+        2 * leftStieltjesSum f f n /\
+      2 * leftStieltjesSum f f n <=
+        f n * f n - f 0 * f 0 := by
+  have hchain := finiteSquareStieltjes_chain f n
+  constructor <;> grind
+
 theorem rightStieltjesSum_eq_left_swap_add_quadraticVariation
     (f g : Nat -> Rat) (n : Nat) :
     rightStieltjesSum f g n =
@@ -1043,6 +1073,118 @@ theorem unitMeshPath_quadraticVariation {n : Nat} (hn : 0 < n) :
   have hnat : (n : Rat) ≠ 0 := Rat.ne_of_gt ((Rat.natCast_pos).2 hn)
   grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
+/-! The square-chain bracket becomes a concrete unit-mesh estimate.  This is
+the finite rational computation behind the elementary certificate
+`integral of 2x on [0,1] = 1`; its error is exactly the quadratic variation
+`1/n`. -/
+
+theorem unitMeshPath_square_left_bounds {n : Nat} (hn : 0 < n) :
+    1 - 1 / (n : Rat) <=
+        2 * leftStieltjesSum (unitMeshPath n) (unitMeshPath n) n /\
+      2 * leftStieltjesSum (unitMeshPath n) (unitMeshPath n) n <= 1 := by
+  have hvariation :
+      0 <= quadraticVariationSum (unitMeshPath n) (unitMeshPath n) n := by
+    exact quadraticVariationSum_nonneg_of_step_nonnegative
+      (unitMeshPath n) (unitMeshPath n)
+      (fun i => by
+        rw [unitMeshPath_step, Rat.div_def, Rat.one_mul]
+        exact Rat.le_of_lt ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hn)))
+      (fun i => by
+        rw [unitMeshPath_step, Rat.div_def, Rat.one_mul]
+        exact Rat.le_of_lt ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hn))) n
+  have hvariation_le :
+      quadraticVariationSum (unitMeshPath n) (unitMeshPath n) n <=
+        1 / (n : Rat) := by
+    rw [unitMeshPath_quadraticVariation hn]
+    exact Rat.le_refl
+  have h := finiteSquareStieltjes_left_bounds
+    (unitMeshPath n) n (1 / (n : Rat)) hvariation hvariation_le
+  rw [unitMeshPath_endpoint hn, unitMeshPath_zero] at h
+  constructor <;> grind [h.1, h.2]
+
+theorem unitMeshPath_square_left_sum_exact {n : Nat} (hn : 0 < n) :
+    2 * leftStieltjesSum (unitMeshPath n) (unitMeshPath n) n =
+      1 - 1 / (n : Rat) := by
+  have h := finiteSquareStieltjes_chain
+    (unitMeshPath n) n
+  rw [unitMeshPath_endpoint hn, unitMeshPath_zero,
+    unitMeshPath_quadraticVariation hn] at h
+  grind
+
+/-! The finite square calculation can itself be exposed as a raw real.  At
+stage `n`, use the certified lower bound from the `(n+1)`-cell computation and
+the exact upper bound.  This is a concrete example of turning a finite
+rectangle proof into a shrinking rational-interval algorithm. -/
+
+def unitMeshSquareIntegralRaw : RealRaw where
+  compute n :=
+    { lo := 1 - 1 / (((n + 1 : Nat) : Rat)), hi := 1 }
+
+private theorem one_div_nat_antitone_succ {n m : Nat} (hnm : n <= m) :
+    1 / (((m + 1 : Nat) : Rat)) <=
+      1 / (((n + 1 : Nat) : Rat)) := by
+  have hnpos : 0 < (n + 1 : Nat) := Nat.succ_pos n
+  have hmpos : 0 < (m + 1 : Nat) := Nat.succ_pos m
+  apply Rat.le_of_mul_le_mul_right
+    (c := ((n + 1 : Nat) : Rat) * ((m + 1 : Nat) : Rat))
+  · calc
+      (1 / (((m + 1 : Nat) : Rat))) *
+          (((n + 1 : Nat) : Rat) * ((m + 1 : Nat) : Rat)) =
+          ((n + 1 : Nat) : Rat) := by
+        have hmne : ((m + 1 : Nat) : Rat) ≠ 0 :=
+          Rat.ne_of_gt ((Rat.natCast_pos).2 hmpos)
+        grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= ((m + 1 : Nat) : Rat) := by exact_mod_cast (Nat.succ_le_succ hnm)
+      _ = (1 / (((n + 1 : Nat) : Rat))) *
+          (((n + 1 : Nat) : Rat) * ((m + 1 : Nat) : Rat)) := by
+        have hnne : ((n + 1 : Nat) : Rat) ≠ 0 :=
+          Rat.ne_of_gt ((Rat.natCast_pos).2 hnpos)
+        grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  · exact Rat.mul_pos ((Rat.natCast_pos).2 hnpos)
+      ((Rat.natCast_pos).2 hmpos)
+
+theorem unitMeshSquareIntegralRaw_valid : unitMeshSquareIntegralRaw.Valid := by
+  unfold unitMeshSquareIntegralRaw RealRaw.Valid RealRaw.ValidCompute
+  constructor
+  · intro n
+    unfold QInterval.width
+    have hpos : 0 < (1 / (((n + 1 : Nat) : Rat)) : Rat) :=
+      one_div_nat_pos (Nat.succ_pos n)
+    grind [Rat.sub_eq_add_neg]
+  constructor
+  · intro n m hnm
+    have hnpos : 0 < (n + 1 : Nat) := Nat.succ_pos n
+    have hmpos : 0 < (m + 1 : Nat) := Nat.succ_pos m
+    have hrecip := one_div_nat_antitone_succ hnm
+    have hmrecip : 0 <= (1 / (((m + 1 : Nat) : Rat)) : Rat) :=
+      Rat.le_of_lt (one_div_nat_pos hmpos)
+    constructor
+    · grind [Rat.sub_eq_add_neg]
+    constructor <;> grind [Rat.sub_eq_add_neg]
+  · apply shrinksToZero_of_natOverSuccBound (C := 1)
+    intro n
+    unfold QInterval.width
+    grind [Rat.sub_eq_add_neg]
+
+theorem unitMeshSquareIntegralRaw_equiv_one :
+    unitMeshSquareIntegralRaw.Equiv (RealRaw.ofRat 1) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    unitMeshSquareIntegralRaw (RealRaw.ofRat 1) n n).2
+  rw [RealRaw.ofRat_compute]
+  unfold unitMeshSquareIntegralRaw QInterval.Overlaps
+  have hpos : 0 <= (1 / (((n + 1 : Nat) : Rat)) : Rat) :=
+    Rat.le_of_lt (one_div_nat_pos (Nat.succ_pos n))
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+theorem unitMeshSquareIntegralRaw_lower_eq_left_sum (n : Nat) :
+    (unitMeshSquareIntegralRaw.compute n).lo =
+      2 * leftStieltjesSum (unitMeshPath (n + 1))
+        (unitMeshPath (n + 1)) (n + 1) := by
+  rw [unitMeshPath_square_left_sum_exact (Nat.succ_pos n)]
+  rfl
+
 /-- A fully explicit epsilon schedule for the unit-mesh corner correction.
 Choosing `n = eps.den + 1` makes the rational correction at most `eps`. -/
 theorem unitMeshPath_quadraticVariation_le_epsilon (eps : QPos) :
@@ -1255,6 +1397,63 @@ theorem addInterval_width (I J : QInterval) :
   unfold addInterval QInterval.width
   grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
 
+end QInterval
+
+/-- Adding two finite enclosure comparisons adds their error budgets.  The
+precision hypothesis is explicit so callers can choose a finer internal stage
+without invoking a limit or completeness principle. -/
+theorem intervalNearAtPrecision_addInterval
+    {I J K L : QInterval} {m n : Nat}
+    (hIJ : intervalNearAtPrecision I J m)
+    (hKL : intervalNearAtPrecision K L m)
+    (hprecision : 2 * (precisionAtStage m).val <=
+      (precisionAtStage n).val) :
+    intervalNearAtPrecision (QInterval.addInterval I K)
+      (QInterval.addInterval J L) n := by
+  unfold intervalNearAtPrecision QInterval.NearAt at hIJ hKL ⊢
+  rcases hIJ with ⟨hIleft, hIright, hIwidth, hJwidth⟩
+  rcases hKL with ⟨hKleft, hKright, hKwidth, hLwidth⟩
+  unfold QInterval.addInterval
+  constructor
+  · calc
+      I.lo + K.lo <= (J.hi + (precisionAtStage m).val) +
+          (L.hi + (precisionAtStage m).val) := by grind
+      _ = J.hi + L.hi +
+          2 * (precisionAtStage m).val := by
+        grind [Rat.add_assoc, Rat.add_comm]
+      _ <= J.hi + L.hi + (precisionAtStage n).val := by
+        exact (Rat.add_le_add_left).2 hprecision
+  constructor
+  · calc
+      J.lo + L.lo <= (I.hi + (precisionAtStage m).val) +
+          (K.hi + (precisionAtStage m).val) := by grind
+      _ = I.hi + K.hi +
+          2 * (precisionAtStage m).val := by
+        grind [Rat.add_assoc, Rat.add_comm]
+      _ <= I.hi + K.hi + (precisionAtStage n).val := by
+        exact (Rat.add_le_add_left).2 hprecision
+  constructor
+  · change I.hi + K.hi - (I.lo + K.lo) <=
+      (precisionAtStage n).val
+    calc
+      I.hi + K.hi - (I.lo + K.lo) = I.width + K.width := by
+        unfold QInterval.width
+        grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+      _ <= 2 * (precisionAtStage m).val := by
+        grind
+      _ <= (precisionAtStage n).val := hprecision
+  · change J.hi + L.hi - (J.lo + L.lo) <=
+      (precisionAtStage n).val
+    calc
+      J.hi + L.hi - (J.lo + L.lo) = J.width + L.width := by
+        unfold QInterval.width
+        grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+      _ <= 2 * (precisionAtStage m).val := by
+        grind
+      _ <= (precisionAtStage n).val := hprecision
+
+namespace QInterval
+
 def scaleByRat (r : Rat) (I : QInterval) : QInterval :=
   if 0 <= r then
     { lo := r * I.lo, hi := r * I.hi }
@@ -1273,6 +1472,20 @@ theorem scaleByRat_contains_of_nonneg {r : Rat} (hr : 0 <= r)
   · exact Rat.mul_le_mul_of_nonneg_left hcontains.1 hr
   · exact Rat.mul_le_mul_of_nonneg_left hcontains.2 hr
 
+/-- Arbitrary rational scaling preserves interval containment; for a negative
+scale the endpoint order is reversed by `scaleByRat`. -/
+theorem scaleByRat_contains {r : Rat}
+    {outer inner : QInterval} (hcontains : outer.ContainsInterval inner) :
+    (scaleByRat r outer).ContainsInterval (scaleByRat r inner) := by
+  by_cases hr : 0 <= r
+  · exact scaleByRat_contains_of_nonneg hr hcontains
+  · have hrneg : r < 0 := Rat.not_le.mp hr
+    unfold scaleByRat QInterval.ContainsInterval
+    simp only [if_neg hr]
+    constructor
+    · exact rat_mul_le_mul_of_nonpos_left hcontains.2 (Rat.le_of_lt hrneg)
+    · exact rat_mul_le_mul_of_nonpos_left hcontains.1 (Rat.le_of_lt hrneg)
+
 /-- Positive rational scaling multiplies enclosure width by the scale. -/
 theorem scaleByRat_width_of_nonneg {r : Rat} (hr : 0 <= r) (I : QInterval) :
     (scaleByRat r I).width = r * I.width := by
@@ -1280,16 +1493,95 @@ theorem scaleByRat_width_of_nonneg {r : Rat} (hr : 0 <= r) (I : QInterval) :
   rw [if_pos hr]
   grind [Rat.sub_eq_add_neg, Rat.mul_add]
 
+/-- Sign-complete width law for rational interval scaling. -/
+theorem scaleByRat_width (r : Rat) (I : QInterval) :
+    (scaleByRat r I).width = qabs r * I.width := by
+  by_cases hr : 0 <= r
+  · simpa [qabs_eq_self_of_nonneg hr] using scaleByRat_width_of_nonneg hr I
+  · have hrneg : r < 0 := Rat.not_le.mp hr
+    unfold scaleByRat QInterval.width
+    rw [if_neg hr]
+    rw [qabs_eq_neg_of_nonpos (Rat.le_of_lt hrneg)]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul]
+
 def subInterval (I J : QInterval) : QInterval :=
   { lo := I.lo - J.hi, hi := I.hi - J.lo }
 
+/-- The width of an interval difference is the sum of the operand widths. -/
+theorem subInterval_width (I J : QInterval) :
+    (subInterval I J).width = I.width + J.width := by
+  unfold subInterval QInterval.width
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+
+/-- Rational scaling commutes with interval subtraction, including the
+negative-scale endpoint reversal. -/
+theorem scaleByRat_subInterval (r : Rat) (I J : QInterval) :
+    scaleByRat r (subInterval I J) =
+      subInterval (scaleByRat r I) (scaleByRat r J) := by
+  by_cases hr : 0 <= r
+  · simp [scaleByRat, subInterval, hr]
+    constructor <;> grind [Rat.sub_eq_add_neg, Rat.mul_add]
+  · simp [scaleByRat, subInterval, hr]
+    constructor <;> grind [Rat.sub_eq_add_neg, Rat.mul_add]
+
+/-- Subtraction propagates interval containment with the endpoint reversal
+required for the subtracted box. -/
+theorem subInterval_contains
+    {outerLeft outerRight innerLeft innerRight : QInterval}
+    (hleft : outerLeft.ContainsInterval innerLeft)
+    (hright : outerRight.ContainsInterval innerRight) :
+    (subInterval outerLeft outerRight).ContainsInterval
+      (subInterval innerLeft innerRight) := by
+  unfold subInterval QInterval.ContainsInterval at *
+  constructor <;> grind
+
 def divByRat (I : QInterval) (h : Rat) : QInterval :=
   scaleByRat (1 / h) I
+
+/-! Division is only used as an interval operation when its rational
+denominator is known positive.  Keeping that hypothesis explicit prevents a
+secant or average enclosure from silently reversing its endpoints. -/
+theorem divByRat_contains_of_pos {h : Rat} (hh : 0 < h)
+    {outer inner : QInterval} (hcontains : outer.ContainsInterval inner) :
+    (divByRat outer h).ContainsInterval (divByRat inner h) := by
+  have hinv : 0 < (1 / h) := by
+    simpa [Rat.div_def] using (Rat.inv_pos.mpr hh)
+  apply scaleByRat_contains_of_nonneg
+  · exact Rat.le_of_lt hinv
+  · exact hcontains
+
+theorem divByRat_width_of_pos {h : Rat} (hh : 0 < h) (I : QInterval) :
+    (divByRat I h).width = (1 / h) * I.width := by
+  have hinv : 0 < (1 / h) := by
+    simpa [Rat.div_def] using (Rat.inv_pos.mpr hh)
+  apply scaleByRat_width_of_nonneg
+  exact Rat.le_of_lt hinv
 
 /-- Interval enclosure of `(Fy - Fx) / dx`.  For a secant slope, `dx` will be
 the rational difference `y - x`; the caller carries the proof that `x < y`. -/
 def slopeBetween (Fy Fx : QInterval) (dx : Rat) : QInterval :=
   divByRat (subInterval Fy Fx) dx
+
+/-! A positive-step secant is the composition of interval subtraction and
+positive rational division. -/
+theorem slopeBetween_contains_of_pos {dx : Rat} (hdx : 0 < dx)
+    {outerY outerX innerY innerX : QInterval}
+    (hy : outerY.ContainsInterval innerY)
+    (hx : outerX.ContainsInterval innerX) :
+    (slopeBetween outerY outerX dx).ContainsInterval
+      (slopeBetween innerY innerX dx) := by
+  unfold slopeBetween
+  exact divByRat_contains_of_pos hdx (subInterval_contains hy hx)
+
+/-- A positive-step secant width is the endpoint-box width divided by the
+step.  This exposes the finite error budget before any derivative theorem is
+applied. -/
+theorem slopeBetween_width_of_pos {dx : Rat} (hdx : 0 < dx)
+    (Fy Fx : QInterval) :
+    (slopeBetween Fy Fx dx).width =
+      (1 / dx) * (Fy.width + Fx.width) := by
+  unfold slopeBetween
+  rw [divByRat_width_of_pos hdx, subInterval_width]
 
 end QInterval
 
@@ -2605,6 +2897,47 @@ private theorem foldl_affine_range (h a d : Rat) (n : Nat) :
       simp only [Rat.natCast_add]
       grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
         Rat.mul_assoc, Rat.mul_comm]
+
+/-! Every finite affine rectangle sum has a closed rational form.  Keeping the
+mesh explicit makes this theorem valid even at stage zero; the positive-stage
+normalization `n * mesh = b - a` can be applied separately when an integral
+error bound is needed. -/
+theorem riemannLeftExact_affine_closed
+    (r c a b : Rat) (n : Nat) :
+    riemannLeftExact (fun x => r * x + c) a b n =
+      (n : Rat) * mesh a b n * (r * a + c) +
+        mesh a b n * (r * mesh a b n) *
+          (((n : Rat) * ((n : Rat) - 1)) / 2) := by
+  unfold riemannLeftExact
+  dsimp
+  unfold leftPoint
+  have hrewrite :
+      (fun acc (k : Nat) =>
+          acc + mesh a b n * (r * (a + (k : Rat) * mesh a b n) + c)) =
+        (fun acc (k : Nat) =>
+          acc + mesh a b n *
+            ((r * a + c) + (k : Rat) * (r * mesh a b n))) := by
+    funext acc k
+    grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm,
+      Rat.add_assoc, Rat.add_comm]
+  rw [hrewrite, foldl_affine_range]
+
+/-! After normalizing a positive mesh, the affine rectangle error is an
+explicit rational term.  Thus the affine FTC does not need a completeness
+argument: the error budget is visible at every finite stage. -/
+theorem riemannLeftExact_affine_error_of_pos
+    {r c a b : Rat} {n : Nat} (hn : 0 < n) :
+    riemannLeftExact (fun x => r * x + c) a b n =
+      (b - a) * (r * (a + b) / 2 + c) -
+        r * (b - a) ^ 2 / (2 * (n : Rat)) := by
+  rw [riemannLeftExact_affine_closed]
+  have htotal := natCast_mul_mesh_eq_sub (a := a) (b := b) hn
+  have hmesh : (n : Rat) * mesh a b n = b - a := htotal
+  have hnrat : (n : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hn)
+  grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_inv_cancel]
 
 theorem riemannLeftExact_doubleId_of_pos {a b : Rat} {n : Nat}
     (hn : 0 < n) :
@@ -4305,6 +4638,75 @@ theorem effectiveDerivativeBoundFTC
       h.toDerivativeBoundFTC.endpointRaw :=
   h.toDerivativeBoundFTC.equiv_endpoint
 
+/-- The scheduled endpoint evaluator supplied by an effective FTC certificate
+agrees with the canonical endpoint-difference evaluator of its primitive.
+This is the representation-transport half of the public FTC interface: the
+finite derivative certificate proves the scheduled evaluator correct, while
+the primitive's own nested interval semantics transport it to the canonical
+endpoint computation. -/
+theorem EffectiveDerivativeBoundFTC.endpointRaw_equiv_endpointDifference
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveDerivativeBoundFTC F dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b)) :
+    h.toDerivativeBoundFTC.endpointRaw.Equiv
+      (endpointDifferenceRaw F a b hendpoint) := by
+  exact DerivativeBoundFTC.endpointRaw_equiv_endpointDifference
+    h.toDerivativeBoundFTC h.primitive_valid
+      h.primitive_domain_lower h.primitive_domain_upper hendpoint
+
+/-- The complete effective FTC transport: the bounded finite Riemann raw is
+equivalent to the canonical endpoint-difference raw.  The proof is finite at
+each public stage.  The selected endpoint stage is used only to obtain a
+telescope inside the bounded sum, then primitive interval nesting transports
+that telescope to the requested canonical stage. -/
+theorem EffectiveDerivativeBoundFTC.boundedIntegralRaw_equiv_endpointDifference
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveDerivativeBoundFTC F dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b)) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      (endpointDifferenceRaw F a b hendpoint) := by
+  let H := h.toDerivativeBoundFTC
+  have hcanonical := h.endpointRaw_equiv_endpointDifference hendpoint
+  intro n
+  let eps := precisionAtStage n
+  let s := H.chooseEndpointPrecision eps
+  have hcontains :
+      QInterval.ContainsInterval
+        ((H.choosePartition eps).boundIntegralSum
+          (fun k hk => (H.derivativeBound eps k hk).bound
+            (H.chooseBoundStage eps)))
+        (endpointDifferenceInterval F a b s) := by
+    apply RationalPartition.boundIntegralSum_contains_endpointDifference
+      (P := H.choosePartition eps) (F := F) (prec := s) h.primitive_valid
+    · intro i hi
+      exact h.domain_at_partition eps i hi
+    · intro k hk
+      have hlocal := (H.localControl eps k hk).endpoint_contained
+        (H.chooseBoundStage eps)
+      have hagree := h.endpointPrecision_agreement
+        eps k hk (H.chooseBoundStage eps)
+      have hagree' :
+          (H.localControl eps k hk).endpointPrecision
+              (H.chooseBoundStage eps) = s := by
+        simpa [H, s, EffectiveDerivativeBoundFTC.toDerivativeBoundFTC] using hagree
+      rw [hagree'] at hlocal
+      simpa [RationalPartition.cell, s] using hlocal
+  have hover2 := (RealRaw.compareAt_overlap_iff H.endpointRaw
+      (endpointDifferenceRaw F a b hendpoint) n n).1
+      (hcanonical n)
+  apply (RealRaw.compareAt_overlap_iff H.boundedIntegralRaw
+    (endpointDifferenceRaw F a b hendpoint) n n).2
+  change QInterval.Overlaps
+    ((H.choosePartition eps).boundIntegralSum
+      (fun k hk => (H.derivativeBound eps k hk).bound (H.chooseBoundStage eps)))
+    (endpointDifferenceCompute F a b n)
+  change QInterval.Overlaps
+    ((H.choosePartition eps).boundIntegralSum
+      (fun k hk => (H.derivativeBound eps k hk).bound (H.chooseBoundStage eps)))
+    (endpointDifferenceInterval F a b n)
+  exact ⟨Rat.le_trans hcontains.1 hover2.1,
+    Rat.le_trans hover2.2 hcontains.2⟩
+
 /-- Global finite certificate for the "candidate derivative versus computed
 secants" strategy.
 
@@ -4862,6 +5264,25 @@ def secantSlopeIntervalOfRealFun
     (F : RealFunRaw) (x y : Rat) (prec : Nat) : QInterval :=
   QInterval.slopeBetween (F.compute y prec) (F.compute x prec) (y - x)
 
+/-- Later endpoint stages produce a nested secant enclosure.  This is the
+stage-coherence theorem for the finite secant algorithm; it uses only the
+endpoint nesting supplied by `RealFunRaw.Valid`. -/
+theorem secantSlopeIntervalOfRealFun_contains_later
+    {F : RealFunRaw} (hF : F.Valid)
+    {x y : Rat} (hx : F.domain x) (hy : F.domain y) (hxy : x < y)
+    {n m : Nat} (hnm : n <= m) :
+    QInterval.ContainsInterval
+      (secantSlopeIntervalOfRealFun F x y n)
+      (secantSlopeIntervalOfRealFun F x y m) := by
+  have hxn := (hF x hx).2.1 n m hnm
+  have hyn := (hF y hy).2.1 n m hnm
+  have hstep : 0 < y - x := by
+    rw [← Rat.lt_iff_sub_pos]
+    exact hxy
+  apply QInterval.slopeBetween_contains_of_pos hstep
+  · exact ⟨hyn.1, hyn.2.2⟩
+  · exact ⟨hxn.1, hxn.2.2⟩
+
 /-- Rational secant-slope formulation of convexity/concavity on a short cell.
 
 This is a helper certificate for producing derivative bounds.  The FTC layer
@@ -5271,6 +5692,73 @@ theorem exactRat_compute (f : Rat -> Rat) (a b x : Rat)
     (exactRat f a b).compute x hx n = { lo := f x, hi := f x } :=
   rfl
 
+/-! Pointwise addition on a common rational interval.
+
+This is the interval-level counterpart of `RealFunRaw.add`.  The domain
+agreement is explicit because interval functions carry their rational chart;
+the validity proof is inherited from the additive closure of `RealRaw`. -/
+def add
+    (F G : FunctionOnInterval)
+    (same_lower : F.lower = G.lower)
+    (same_upper : F.upper = G.upper) : FunctionOnInterval where
+  raw :=
+    { definedAt := fun x =>
+        inDomainInterval F.lower F.upper x /\
+          F.raw.definedAt x /\ G.raw.definedAt x
+      compute := fun x hx n =>
+        QInterval.addInterval
+          (F.raw.compute x hx.2.1 n)
+          (G.raw.compute x hx.2.2 n) }
+  lower := F.lower
+  upper := F.upper
+  defined_on := by
+    intro x hx
+    refine ⟨hx, F.defined_on x hx, G.defined_on x ?_⟩
+    constructor
+    · rw [← same_lower]
+      exact hx.1
+    · rw [← same_upper]
+      exact hx.2
+  valid_on := by
+    intro x hx
+    let hxF : inDomainInterval F.lower F.upper x := hx.1
+    let hxG : inDomainInterval G.lower G.upper x := by
+      constructor
+      · rw [← same_lower]
+        exact hxF.1
+      · rw [← same_upper]
+        exact hxF.2
+    let X : RealRaw := { compute := F.raw.compute x hx.2.1 }
+    let Y : RealRaw := { compute := G.raw.compute x hx.2.2 }
+    have hX : X.Valid := by
+      simpa [X, RealRaw.Valid] using F.valid_on x hx.2.1
+    have hY : Y.Valid := by
+      simpa [Y, RealRaw.Valid] using G.valid_on x hx.2.2
+    have hsum := RealRaw.add_valid hX hY
+    change RealRaw.ValidCompute
+      (fun n => QInterval.addInterval
+        (F.raw.compute x hx.2.1 n)
+        (G.raw.compute x hx.2.2 n))
+    change RealRaw.ValidCompute (RealRaw.addCompute X Y) at hsum
+    exact hsum
+
+@[simp] theorem add_compute
+    (F G : FunctionOnInterval)
+    (same_lower : F.lower = G.lower)
+    (same_upper : F.upper = G.upper)
+    (x : Rat) (hx : inDomainInterval F.lower F.upper x) (n : Nat) :
+    (add F G same_lower same_upper).compute x
+      (by simpa [add] using
+        (show inDomainInterval F.lower F.upper x from hx)) n =
+      QInterval.addInterval (F.compute x hx n)
+        (G.compute x (by
+          constructor
+          · rw [← same_lower]
+            exact hx.1
+          · rw [← same_upper]
+            exact hx.2) n) := by
+  rfl
+
 /-- The pointwise interval product of two functions on the same rational
 interval, under explicit nonnegative rational bounds for both factors.
 
@@ -5489,6 +5977,198 @@ theorem finiteRawSum_append_equiv
         htransport
         (RealRaw.equiv_symm hassoc)
 
+/-! Finite raw sums preserve the exact interval order supplied cell by cell.
+This is the algebraic core of lower/upper rectangle comparison; it does not
+require a limiting argument or a completed-real order. -/
+inductive FiniteRawListLe : List RealRaw -> List RealRaw -> Prop where
+  | nil : FiniteRawListLe [] []
+  | cons {x y : RealRaw} {xs ys : List RealRaw} :
+      x.Le y -> FiniteRawListLe xs ys -> FiniteRawListLe (x :: xs) (y :: ys)
+
+theorem FiniteRawListLe.refl {xs : List RealRaw}
+    (hvalid : forall x, x ∈ xs -> x.Valid) :
+    FiniteRawListLe xs xs := by
+  induction xs with
+  | nil => exact .nil
+  | cons x xs ih =>
+      apply FiniteRawListLe.cons
+      · exact RealRaw.le_refl x (hvalid x (by simp))
+      · apply ih
+        intro y hy
+        exact hvalid y (by simp [hy])
+
+inductive FiniteRawListEquiv : List RealRaw -> List RealRaw -> Prop where
+  | nil : FiniteRawListEquiv [] []
+  | cons {x y : RealRaw} {xs ys : List RealRaw} :
+      x.Equiv y -> FiniteRawListEquiv xs ys ->
+        FiniteRawListEquiv (x :: xs) (y :: ys)
+
+theorem FiniteRawListEquiv.refl {xs : List RealRaw}
+    (hvalid : forall x, x ∈ xs -> x.Valid) :
+    FiniteRawListEquiv xs xs := by
+  induction xs with
+  | nil => exact .nil
+  | cons x xs ih =>
+      apply FiniteRawListEquiv.cons
+      · exact RealRaw.equiv_refl x (hvalid x (by simp))
+      · apply ih
+        intro y hy
+        exact hvalid y (by simp [hy])
+
+theorem FiniteRawListEquiv.symm
+    {xs ys : List RealRaw} :
+    FiniteRawListEquiv xs ys -> FiniteRawListEquiv ys xs
+  | .nil => .nil
+  | .cons hhead htail =>
+      .cons (RealRaw.equiv_symm hhead) (FiniteRawListEquiv.symm htail)
+
+theorem finiteRawSum_equiv_of_forall
+    {xs ys : List RealRaw}
+    (hxy : FiniteRawListEquiv xs ys)
+    (hxs : forall x, x ∈ xs -> x.Valid)
+    (hys : forall y, y ∈ ys -> y.Valid) :
+    (finiteRawSum xs).Equiv (finiteRawSum ys) := by
+  induction hxy with
+  | nil =>
+      exact RealRaw.equiv_refl RealRaw.zero (by
+        change RealRaw.ValidCompute (fun _ : Nat => { lo := 0, hi := 0 })
+        exact RealRaw.ofRat_valid 0)
+  | @cons x y xs ys hhead htail ih =>
+      have hx : x.Valid := hxs x (by simp)
+      have hy : y.Valid := hys y (by simp)
+      have hxs' : forall z, z ∈ xs -> z.Valid := by
+        intro z hz
+        exact hxs z (by simp [hz])
+      have hys' : forall z, z ∈ ys -> z.Valid := by
+        intro z hz
+        exact hys z (by simp [hz])
+      have hleft : (finiteRawSum xs).Valid :=
+        finiteRawSum_valid xs hxs'
+      have hright : (finiteRawSum ys).Valid :=
+        finiteRawSum_valid ys hys'
+      have htail' := ih hxs' hys'
+      simpa [finiteRawSum] using
+        (RealRaw.add_equiv hx hy hleft hright hhead htail')
+
+theorem finiteRawSum_le_of_forall₂
+    {xs ys : List RealRaw}
+    (hxy : FiniteRawListLe xs ys) :
+    (finiteRawSum xs).Le (finiteRawSum ys) := by
+  induction hxy with
+  | nil =>
+      change RealRaw.zero.Le RealRaw.zero
+      exact RealRaw.le_refl RealRaw.zero (by
+        change RealRaw.ValidCompute (fun _ : Nat => { lo := 0, hi := 0 })
+        exact RealRaw.ofRat_valid 0)
+  | cons hhead htail ih =>
+      change (RealRaw.add _ (finiteRawSum _)).Le
+        (RealRaw.add _ (finiteRawSum _))
+      exact RealRaw.le_add_le_add hhead ih
+
+/-! Pure finite telescoping for raw endpoint values.  This theorem is kept
+independent of interval domains and partition bookkeeping; callers transport
+their adjacent endpoint evaluators into this list algebra first. -/
+def rawLast (x : RealRaw) : List RealRaw -> RealRaw
+  | [] => x
+  | y :: ys => rawLast y ys
+
+def rawAdjacentDifferenceList : List RealRaw -> List RealRaw
+  | [] => []
+  | x :: [] => []
+  | x :: y :: ys => (y - x) :: rawAdjacentDifferenceList (y :: ys)
+
+theorem rawAdjacentDifferenceList_length (xs : List RealRaw) :
+    (rawAdjacentDifferenceList xs).length = xs.length - 1 := by
+  induction xs with
+  | nil => simp [rawAdjacentDifferenceList]
+  | cons x xs ih =>
+      cases xs with
+      | nil => simp [rawAdjacentDifferenceList]
+      | cons y ys =>
+          simp only [rawAdjacentDifferenceList, List.length_cons]
+          simp only [List.length_cons] at ih
+          omega
+
+theorem RealRaw.sub_self_equiv_zero {x : RealRaw} (hx : x.Valid) :
+    (x - x).Equiv RealRaw.zero := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  have ho := RealRaw.interval_order_of_valid x hx n
+  apply (RealRaw.compareAt_overlap_iff (x - x) RealRaw.zero n n).2
+  change QInterval.Overlaps (RealRaw.subCompute x x n) (RealRaw.zero.compute n)
+  unfold RealRaw.subCompute RealRaw.zero RealRaw.ofRat QInterval.Overlaps
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+theorem rawLast_valid {x : RealRaw} {xs : List RealRaw}
+    (hvalid : forall y, y ∈ x :: xs -> y.Valid) :
+    (rawLast x xs).Valid := by
+  induction xs generalizing x with
+  | nil => exact hvalid x (by simp)
+  | cons y ys ih =>
+      apply ih
+      intro z hz
+      exact hvalid z (by simp [hz])
+
+theorem rawAdjacentDifferenceList_valid {xs : List RealRaw}
+    (hvalid : forall x, x ∈ xs -> x.Valid) :
+    forall y, y ∈ rawAdjacentDifferenceList xs -> y.Valid := by
+  induction xs with
+  | nil =>
+      intro y hy
+      simp [rawAdjacentDifferenceList] at hy
+  | cons x xs ih =>
+      cases xs with
+      | nil =>
+          intro y hy
+          simp [rawAdjacentDifferenceList] at hy
+      | cons z zs =>
+          intro y hy
+          simp only [rawAdjacentDifferenceList, List.mem_cons] at hy
+          rcases hy with rfl | hy
+          · exact RealRaw.sub_valid
+              (hvalid z (by simp)) (hvalid x (by simp))
+          · exact ih (fun w hw => hvalid w (by simp [hw])) y hy
+
+theorem finiteRawSum_rawAdjacentDifferenceList_equiv_last_sub_first
+    {x : RealRaw} {xs : List RealRaw}
+    (hvalid : forall y, y ∈ x :: xs -> y.Valid) :
+    (finiteRawSum (rawAdjacentDifferenceList (x :: xs))).Equiv
+      (rawLast x xs - x) := by
+  induction xs generalizing x with
+  | nil =>
+      have hx : x.Valid := hvalid x (by simp)
+      simpa [rawAdjacentDifferenceList, rawLast, finiteRawSum] using
+        (RealRaw.equiv_symm (RealRaw.sub_self_equiv_zero hx))
+  | cons y ys ih =>
+      have hx : x.Valid := hvalid x (by simp)
+      have hy : y.Valid := hvalid y (by simp)
+      have htail : forall z, z ∈ y :: ys -> z.Valid := by
+        intro z hz
+        exact hvalid z (by simp [hz])
+      have hleft :
+          (finiteRawSum (rawAdjacentDifferenceList (y :: ys))).Valid :=
+        finiteRawSum_valid _
+          (rawAdjacentDifferenceList_valid htail)
+      have hhead : (y - x).Valid := RealRaw.sub_valid hy hx
+      have hprev := ih htail
+      have hlast : (rawLast y ys).Valid := rawLast_valid htail
+      have hmiddle :
+          ((y - x) + (rawLast y ys - y)).Valid :=
+        RealRaw.add_valid hhead (RealRaw.sub_valid hlast hy)
+      have htarget : (rawLast y ys - x).Valid :=
+        RealRaw.sub_valid hlast hx
+      have hadd :
+          ((y - x) + finiteRawSum
+            (rawAdjacentDifferenceList (y :: ys))).Equiv
+            ((y - x) + (rawLast y ys - y)) := by
+        exact RealRaw.add_equiv hhead hhead hleft
+          (RealRaw.sub_valid hlast hy)
+          (RealRaw.equiv_refl _ hhead) hprev
+      have htel := RealRaw.sub_add_sub_cancel_middle_equiv hx hy hlast
+      simpa [rawAdjacentDifferenceList, finiteRawSum, rawLast] using
+        (RealRaw.equiv_trans
+          (RealRaw.add_valid hhead hleft) hmiddle htarget hadd htel)
+
 end Integral
 
 namespace TwoStageCandidateDerivativeFTC
@@ -5655,6 +6335,221 @@ structure IntervalRegularOn (F : FunctionOnInterval) where
         (evalInterval I hI n)
         (F.compute x hx n)
 
+/-! A natural-number Lipschitz certificate on an arbitrary ordered rational chart. -/
+def Integral.LipschitzOnIntervalNat (f : Rat -> Rat) (a b : Rat) (L : Nat) : Prop :=
+  a <= b /\
+  forall s t : Rat,
+    a <= s -> s <= b -> a <= t -> t <= b ->
+      qabs (f s - f t) <= (L : Rat) * qabs (t - s)
+
+/-- Restrict a unit-chart Lipschitz certificate to any ordered rational
+subinterval.  This is the finite transport used when one global estimate is
+reused on the cells of a piecewise or turning-point integral. -/
+theorem Integral.LipschitzOnIntervalNat.of_unit_subinterval
+    (f : Rat -> Rat) (L : Nat) {a b : Rat}
+    (ha : 0 <= a) (hab : a <= b) (hb : b <= 1)
+    (hunit : Integral.LipschitzOnUnit f (L : Rat)) :
+    Integral.LipschitzOnIntervalNat f a b L := by
+  refine ⟨hab, ?_⟩
+  intro s t hs hsb ht htb
+  exact hunit.2 s t
+    (Rat.le_trans ha hs) (Rat.le_trans hsb hb)
+    (Rat.le_trans ha ht) (Rat.le_trans htb hb)
+
+def IntervalRegularOn.of_lipschitzOnIntervalNat
+    (f : Rat -> Rat) (a b : Rat) (L : Nat)
+    (hlip : Integral.LipschitzOnIntervalNat f a b L) :
+    IntervalRegularOn (FunctionOnInterval.exactRat f a b) where
+  evalInterval := fun I _I _n =>
+    { lo := f I.lo - (L : Rat) * I.width
+      hi := f I.lo + (L : Rat) * I.width }
+  inputPrecision := fun n => (2 * L + 1) * (n + 1)
+  inputPrecision_pos := by
+    intro n
+    exact Nat.mul_pos (by omega) (Nat.succ_pos n)
+  output_width := by
+    intro I hI n hsmall
+    have hL0 : 0 <= (L : Rat) := by exact_mod_cast Nat.zero_le L
+    have hwidth : 0 <= I.width := by
+      unfold QInterval.width
+      grind [hI.2.1]
+    have hscaled :
+        (2 * (L : Rat)) * I.width <=
+          (2 * (L : Rat)) /
+            (((2 * L + 1) * (n + 1) : Nat) : Rat) := by
+      have hscaled0 := Rat.mul_le_mul_of_nonneg_left hsmall
+        (Rat.mul_nonneg (by native_decide : (0 : Rat) ≤ 2) hL0)
+      simpa [Rat.div_def, Rat.mul_assoc] using hscaled0
+    have hden :
+        (2 * (L : Rat)) /
+            (((2 * L + 1) * (n + 1) : Nat) : Rat) <=
+          1 / (((n + 1 : Nat) : Rat)) := by
+      have hnpos : 0 < ((n + 1 : Nat) : Rat) :=
+        (Rat.natCast_pos).2 (Nat.succ_pos n)
+      have hfactor : 0 < (((2 * L + 1) * (n + 1) : Nat) : Rat) := by
+        exact_mod_cast (Nat.mul_pos (by omega) (Nat.succ_pos n))
+      apply Rat.le_of_mul_le_mul_right
+        (c := (((2 * L + 1) * (n + 1) : Nat) : Rat) *
+          ((n + 1 : Nat) : Rat))
+      · rw [Rat.div_def, Rat.div_def]
+        rw [show (((2 * L + 1) * (n + 1) : Nat) : Rat) =
+          (2 * (L : Rat) + 1) * ((n + 1 : Nat) : Rat) by
+            rw [Rat.natCast_mul, Rat.natCast_add, Rat.natCast_mul,
+              Rat.natCast_add]
+            grind]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      · exact Rat.mul_pos hfactor hnpos
+    constructor
+    · change 0 <=
+        (f I.lo + (L : Rat) * I.width) -
+          (f I.lo - (L : Rat) * I.width)
+      have hnonneg : 0 <= (2 * (L : Rat)) * I.width :=
+        Rat.mul_nonneg (Rat.mul_nonneg (by native_decide) hL0) hwidth
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul]
+    · change
+        (f I.lo + (L : Rat) * I.width) -
+            (f I.lo - (L : Rat) * I.width) <=
+          1 / (((n + 1 : Nat) : Rat))
+      have hwidth_eq :
+          (f I.lo + (L : Rat) * I.width) -
+              (f I.lo - (L : Rat) * I.width) =
+            (2 * (L : Rat)) * I.width := by
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+          Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+      rw [hwidth_eq]
+      exact Rat.le_trans hscaled hden
+  contains_point_values := by
+    intro I hI x hx n hxlo hxhi
+    have hIlo : a <= I.lo := hI.1
+    have hIhi : I.hi <= b := hI.2.2
+    have hxlip := hlip.2 I.lo x hIlo (Rat.le_trans hI.2.1 hIhi)
+      (Rat.le_trans hIlo hxlo) (Rat.le_trans hxhi hIhi)
+    have hdiff : qabs (x - I.lo) = x - I.lo := by
+      rw [qabs_eq_self_of_nonneg]
+      grind [Rat.sub_eq_add_neg]
+    have hwithin : x - I.lo <= I.width := by
+      unfold QInterval.width
+      grind [Rat.sub_eq_add_neg]
+    have hscaled := Rat.mul_le_mul_of_nonneg_left hwithin
+      (by exact_mod_cast Nat.zero_le L : (0 : Rat) <= (L : Rat))
+    have hforward : f I.lo - f x <= (L : Rat) * (x - I.lo) := by
+      calc
+        f I.lo - f x <= qabs (f I.lo - f x) := self_le_qabs _
+        _ <= (L : Rat) * (x - I.lo) := by simpa [hdiff] using hxlip
+    have hreverse : f x - f I.lo <= (L : Rat) * (x - I.lo) := by
+      calc
+        f x - f I.lo = -(f I.lo - f x) := by
+          grind [Rat.sub_eq_add_neg]
+        _ <= qabs (f I.lo - f x) := by
+          simpa [qabs_neg] using (self_le_qabs (-(f I.lo - f x)))
+        _ <= (L : Rat) * (x - I.lo) := by simpa [hdiff] using hxlip
+    have hlow : f I.lo - (L : Rat) * I.width <= f x := by
+      grind [Rat.sub_eq_add_neg]
+    have hupp : f x <= f I.lo + (L : Rat) * I.width := by
+      grind [Rat.sub_eq_add_neg]
+    change QInterval.ContainsInterval
+      { lo := f I.lo - (L : Rat) * I.width,
+        hi := f I.lo + (L : Rat) * I.width }
+      { lo := f x, hi := f x }
+    exact ⟨hlow, hupp⟩
+/-- Turn a rational Lipschitz certificate on the unit chart into the
+interval-image certificate consumed by the FTC layer. -/
+def IntervalRegularOn.of_lipschitzOnUnit
+    (f : Rat -> Rat) (L : Nat)
+    (hlip : Integral.LipschitzOnUnit f (L : Rat)) :
+    IntervalRegularOn (FunctionOnInterval.exactRat f 0 1) where
+  evalInterval := fun I _I _n =>
+    { lo := f I.lo - (L : Rat) * I.width
+      hi := f I.lo + (L : Rat) * I.width }
+  inputPrecision := fun n => (2 * L + 1) * (n + 1)
+  inputPrecision_pos := by
+    intro n
+    exact Nat.mul_pos (by omega) (Nat.succ_pos n)
+  output_width := by
+    intro I hI n hsmall
+    have hL0 : 0 <= (L : Rat) := by exact_mod_cast Nat.zero_le L
+    have hwidth : 0 <= I.width := by
+      unfold QInterval.width
+      grind [hI.2.1]
+    have hscaled :
+        (2 * (L : Rat)) * I.width <=
+          (2 * (L : Rat)) /
+            (((2 * L + 1) * (n + 1) : Nat) : Rat) := by
+      have hscaled0 := Rat.mul_le_mul_of_nonneg_left hsmall
+        (Rat.mul_nonneg (by native_decide : (0 : Rat) ≤ 2) hL0)
+      simpa [Rat.div_def, Rat.mul_assoc] using hscaled0
+    have hden :
+        (2 * (L : Rat)) /
+            (((2 * L + 1) * (n + 1) : Nat) : Rat) <=
+          1 / (((n + 1 : Nat) : Rat)) := by
+      have hnpos : 0 < ((n + 1 : Nat) : Rat) :=
+        (Rat.natCast_pos).2 (Nat.succ_pos n)
+      have hfactor : 0 < (((2 * L + 1) * (n + 1) : Nat) : Rat) := by
+        exact_mod_cast (Nat.mul_pos (by omega) (Nat.succ_pos n))
+      apply Rat.le_of_mul_le_mul_right
+        (c := (((2 * L + 1) * (n + 1) : Nat) : Rat) *
+          ((n + 1 : Nat) : Rat))
+      · rw [Rat.div_def, Rat.div_def]
+        rw [show (((2 * L + 1) * (n + 1) : Nat) : Rat) =
+          (2 * (L : Rat) + 1) * ((n + 1 : Nat) : Rat) by
+            rw [Rat.natCast_mul, Rat.natCast_add, Rat.natCast_mul,
+              Rat.natCast_add]
+            grind]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      · exact Rat.mul_pos hfactor hnpos
+    constructor
+    · change 0 <=
+        (f I.lo + (L : Rat) * I.width) -
+          (f I.lo - (L : Rat) * I.width)
+      have hnonneg : 0 <= (2 * (L : Rat)) * I.width :=
+        Rat.mul_nonneg (Rat.mul_nonneg (by native_decide) hL0) hwidth
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul]
+    · change
+        (f I.lo + (L : Rat) * I.width) -
+            (f I.lo - (L : Rat) * I.width) <=
+          1 / (((n + 1 : Nat) : Rat))
+      have hwidth_eq :
+          (f I.lo + (L : Rat) * I.width) -
+              (f I.lo - (L : Rat) * I.width) =
+            (2 * (L : Rat)) * I.width := by
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+          Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+      rw [hwidth_eq]
+      exact Rat.le_trans hscaled hden
+  contains_point_values := by
+    intro I hI x hx n hxlo hxhi
+    have hIlo : 0 <= I.lo := hI.1
+    have hIhi : I.hi <= 1 := hI.2.2
+    have hxlip := hlip.2 I.lo x hIlo (Rat.le_trans hI.2.1 hIhi)
+      (Rat.le_trans hIlo hxlo) (Rat.le_trans hxhi hIhi)
+    have hdiff : qabs (x - I.lo) = x - I.lo := by
+      rw [qabs_eq_self_of_nonneg]
+      grind [Rat.sub_eq_add_neg]
+    have hwithin : x - I.lo <= I.width := by
+      unfold QInterval.width
+      grind [Rat.sub_eq_add_neg]
+    have hscaled := Rat.mul_le_mul_of_nonneg_left hwithin
+      (by exact_mod_cast Nat.zero_le L : (0 : Rat) <= (L : Rat))
+    have hforward : f I.lo - f x <= (L : Rat) * (x - I.lo) := by
+      calc
+        f I.lo - f x <= qabs (f I.lo - f x) := self_le_qabs _
+        _ <= (L : Rat) * (x - I.lo) := by simpa [hdiff] using hxlip
+    have hreverse : f x - f I.lo <= (L : Rat) * (x - I.lo) := by
+      calc
+        f x - f I.lo = -(f I.lo - f x) := by
+          grind [Rat.sub_eq_add_neg]
+        _ <= qabs (f I.lo - f x) := by
+          simpa [qabs_neg] using (self_le_qabs (-(f I.lo - f x)))
+        _ <= (L : Rat) * (x - I.lo) := by simpa [hdiff] using hxlip
+    have hlow : f I.lo - (L : Rat) * I.width <= f x := by
+      grind [Rat.sub_eq_add_neg]
+    have hupp : f x <= f I.lo + (L : Rat) * I.width := by
+      grind [Rat.sub_eq_add_neg]
+    change QInterval.ContainsInterval
+      { lo := f I.lo - (L : Rat) * I.width,
+        hi := f I.lo + (L : Rat) * I.width }
+      { lo := f x, hi := f x }
+    exact ⟨hlow, hupp⟩
 /-! A scheduled variant of interval regularity.
 
 The native computation stage of a `FunctionOnInterval` is part of its raw
@@ -5682,6 +6577,57 @@ structure ScheduledIntervalRegularOn (F : FunctionOnInterval) where
         QInterval.ContainsInterval
         (evalInterval I hI n)
         (F.compute x hx (evalPrecision n))
+
+/-! The scheduled and ordinary contracts are intentionally not identified by
+stage monotonicity alone: a requested-stage box may be wider than the
+adaptive-stage box.  This adapter records the exact additional certificate
+needed to expose the scheduled evaluator through `IntervalRegularOn`. -/
+
+def ScheduledIntervalRegularOn.toIntervalRegularOn_of_requested_stage
+    {F : FunctionOnInterval} (h : ScheduledIntervalRegularOn F)
+    (requested_stage_contains :
+      forall I hI x hx n,
+        I.lo <= x ->
+        x <= I.hi ->
+          QInterval.ContainsInterval
+            (h.evalInterval I hI n)
+            (F.compute x hx n)) :
+    IntervalRegularOn F where
+  evalInterval := h.evalInterval
+  inputPrecision := h.inputPrecision
+  inputPrecision_pos := h.inputPrecision_pos
+  output_width := h.output_width
+  contains_point_values := requested_stage_contains
+
+/-- The common non-adaptive specialization of the scheduled contract.
+
+When the interval evaluator reads the same computation stage requested by the
+ordinary contract, its existing point-containment field is already the
+requested-stage certificate.  This is deliberately a separate adapter from
+`toIntervalRegularOn_of_requested_stage`: adaptive evaluators still need an
+explicit transport theorem for their requested stages. -/
+def ScheduledIntervalRegularOn.toIntervalRegularOn_of_identity_schedule
+    {F : FunctionOnInterval} (h : ScheduledIntervalRegularOn F)
+    (hschedule : forall n, h.evalPrecision n = n) :
+    IntervalRegularOn F :=
+  h.toIntervalRegularOn_of_requested_stage (by
+    intro I hI x hx n hIlo hIhi
+    simpa [hschedule n] using
+      h.contains_point_values I hI x hx n hIlo hIhi)
+
+/-- Repackage an ordinary interval-regular evaluator as a scheduled evaluator
+with the identity stage schedule.  This is the canonical bridge for existing
+pointwise proofs when a downstream construction expects the explicit schedule
+field. -/
+def IntervalRegularOn.toScheduledIntervalRegularOn_identity
+    {F : FunctionOnInterval} (h : IntervalRegularOn F) :
+    ScheduledIntervalRegularOn F where
+  evalInterval := h.evalInterval
+  evalPrecision := fun n => n
+  inputPrecision := h.inputPrecision
+  inputPrecision_pos := h.inputPrecision_pos
+  output_width := h.output_width
+  contains_point_values := h.contains_point_values
 
 /-! Build interval regularity directly from a proof-independent point
 evaluator.  The public `IntervalRegularOn` contract remains unchanged; this
@@ -6746,6 +7692,18 @@ theorem affineMonotoneIntegralFor_eq_ofRat {r c a b : Rat} (hr : 0 <= r) :
       RealRaw.ofRat ((b - a) * (r * (a + b) / 2 + c)) := by
   rfl
 
+theorem unitMeshSquareIntegralRaw_equiv_affineMonotoneIntegral :
+    unitMeshSquareIntegralRaw.Equiv
+      (monotoneIntegralFor
+        (FunctionOnInterval.exactRat (fun x : Rat => 2 * x + 0) 0 1)
+        (affineMonotoneConstructionFor
+          (r := 2) (c := 0) (a := 0) (b := 1) (by native_decide))) := by
+  rw [affineMonotoneIntegralFor_eq_ofRat]
+  · have hone :
+        ((1 : Rat) - 0) * (2 * (0 + 1) / 2 + 0) = 1 := by native_decide
+    rw [hone]
+    exact unitMeshSquareIntegralRaw_equiv_one
+
 theorem affineMonotoneIntegralFor_of_nonpos_eq_ofRat
     {r c a b : Rat} (hr : r <= 0) :
     monotoneIntegralFor
@@ -6856,21 +7814,58 @@ def piecewiseMonotoneCellIntegral (F : FunctionOnInterval)
     (k : Nat) (hk : k < c.pieces) : RealRaw :=
   monotoneIntegralFor _ (c.construction k hk)
 
+/-! The finite cell list follows the same `List.range` order as the public
+fold.  Each entry still carries its cell-index proof locally, while the list
+shape remains directly compatible with finite fold algebra. -/
+def piecewiseMonotoneCellList (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) : List RealRaw :=
+  (List.range c.pieces).map (fun k =>
+    if hk : k < c.pieces then
+      piecewiseMonotoneCellIntegral F c k hk
+    else RealRaw.zero)
+
+theorem piecewiseMonotoneCellList_length (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) :
+    (piecewiseMonotoneCellList F c).length = c.pieces := by
+  simp [piecewiseMonotoneCellList]
+
+theorem piecewiseMonotoneCellList_ne_nil (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) :
+    piecewiseMonotoneCellList F c ≠ [] := by
+  intro hnil
+  have hlength := congrArg List.length hnil
+  simp [piecewiseMonotoneCellList] at hlength
+  have hp := c.positive
+  omega
+
 theorem piecewiseMonotoneCellIntegral_valid (F : FunctionOnInterval)
     (c : PiecewiseMonotoneConstructionFor F)
     (k : Nat) (hk : k < c.pieces) :
-    (piecewiseMonotoneCellIntegral F c k hk).Valid :=
+  (piecewiseMonotoneCellIntegral F c k hk).Valid :=
   monotoneIntegralFor_valid _ (c.construction k hk)
+
+theorem piecewiseMonotoneCellList_valid (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) :
+    forall x, x ∈ piecewiseMonotoneCellList F c -> x.Valid := by
+  intro x hx
+  rcases List.mem_map.1 hx with ⟨k, _hk, rfl⟩
+  have hk : k < c.pieces := List.mem_range.1 _hk
+  simp [hk]
+  exact piecewiseMonotoneCellIntegral_valid F c k hk
+
+theorem piecewiseMonotoneCellList_finiteRawSum_valid
+    (F : FunctionOnInterval) (c : PiecewiseMonotoneConstructionFor F) :
+    (finiteRawSum (piecewiseMonotoneCellList F c)).Valid :=
+  finiteRawSum_valid _ (piecewiseMonotoneCellList_valid F c)
 
 /-- Sum the monotone-piece integrals over the finite rational partition. -/
 def piecewiseMonotoneIntegralFor (F : FunctionOnInterval)
     (c : PiecewiseMonotoneConstructionFor F) : RealRaw :=
   (List.range c.pieces).foldl
-    (fun acc k =>
+    (fun acc k => acc +
       if hk : k < c.pieces then
-        acc + piecewiseMonotoneCellIntegral F c k hk
-      else
-        acc)
+        piecewiseMonotoneCellIntegral F c k hk
+      else RealRaw.zero)
     (RealRaw.ofRat 0)
 
 theorem piecewiseMonotoneIntegralFor_valid (F : FunctionOnInterval)
@@ -6878,10 +7873,9 @@ theorem piecewiseMonotoneIntegralFor_valid (F : FunctionOnInterval)
     (piecewiseMonotoneIntegralFor F c).Valid := by
   let step : RealRaw -> Nat -> RealRaw :=
     fun acc k =>
-      if hk : k < c.pieces then
-        acc + piecewiseMonotoneCellIntegral F c k hk
-      else
-        acc
+      acc + if hk : k < c.pieces then
+        piecewiseMonotoneCellIntegral F c k hk
+      else RealRaw.zero
   have hstep : forall acc k, acc.Valid -> (step acc k).Valid := by
     intro acc k hacc
     by_cases hk : k < c.pieces
@@ -6889,6 +7883,9 @@ theorem piecewiseMonotoneIntegralFor_valid (F : FunctionOnInterval)
       exact RealRaw.add_valid hacc
         (piecewiseMonotoneCellIntegral_valid F c k hk)
     · simp [step, hk, hacc]
+      exact RealRaw.add_valid hacc (by
+        change (RealRaw.zero).Valid
+        exact RealRaw.ofRat_valid 0)
   have hfold :
       forall (xs : List Nat) (acc : RealRaw),
         acc.Valid -> (xs.foldl step acc).Valid := by
@@ -6903,6 +7900,350 @@ theorem piecewiseMonotoneIntegralFor_valid (F : FunctionOnInterval)
   simpa [piecewiseMonotoneIntegralFor, step] using
     hfold (List.range c.pieces) (RealRaw.ofRat 0) (by
     simpa [RealRaw.Valid, RealRaw.ofRat] using RealRaw.ofRat_valid 0)
+
+/-! The two-cell case is the first reusable finite assembly law.  It exposes
+the piecewise fold as the sum of its two certified cell integrals, up to the
+interval-representative equivalence. -/
+theorem piecewiseMonotoneIntegralFor_two_equiv
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F)
+    (hpieces : c.pieces = 2) :
+    (piecewiseMonotoneIntegralFor F c).Equiv
+      (piecewiseMonotoneCellIntegral F c 0 (by omega) +
+        piecewiseMonotoneCellIntegral F c 1 (by omega)) := by
+  have h0 : (piecewiseMonotoneCellIntegral F c 0 (by omega)).Valid :=
+    piecewiseMonotoneCellIntegral_valid F c 0 (by omega)
+  have h1 : (piecewiseMonotoneCellIntegral F c 1 (by omega)).Valid :=
+    piecewiseMonotoneCellIntegral_valid F c 1 (by omega)
+  have hzero : (RealRaw.zero).Valid := by
+    change RealRaw.ValidCompute (fun _ : Nat => { lo := 0, hi := 0 })
+    exact RealRaw.ofRat_valid 0
+  have hsum :
+      (piecewiseMonotoneCellIntegral F c 0 (by omega) +
+        piecewiseMonotoneCellIntegral F c 1 (by omega)).Valid :=
+    RealRaw.add_valid h0 h1
+  have hleft :
+      ((RealRaw.zero + piecewiseMonotoneCellIntegral F c 0 (by omega)) +
+        piecewiseMonotoneCellIntegral F c 1 (by omega)).Valid :=
+    RealRaw.add_valid (RealRaw.add_valid hzero h0) h1
+  have hmid :
+      (RealRaw.zero +
+        (piecewiseMonotoneCellIntegral F c 0 (by omega) +
+          piecewiseMonotoneCellIntegral F c 1 (by omega))).Valid :=
+    RealRaw.add_valid hzero hsum
+  have hassoc := RealRaw.add_assoc_equiv
+    RealRaw.zero
+    (piecewiseMonotoneCellIntegral F c 0 (by omega))
+    (piecewiseMonotoneCellIntegral F c 1 (by omega))
+    hzero h0 h1
+  have hzeroadd := RealRaw.zero_add_equiv hsum
+  have hfold :
+      ((RealRaw.zero + piecewiseMonotoneCellIntegral F c 0 (by omega)) +
+          piecewiseMonotoneCellIntegral F c 1 (by omega)).Equiv
+        (piecewiseMonotoneCellIntegral F c 0 (by omega) +
+          piecewiseMonotoneCellIntegral F c 1 (by omega)) := by
+    exact RealRaw.equiv_trans hleft hmid hsum hassoc hzeroadd
+  unfold piecewiseMonotoneIntegralFor
+  simp only [hpieces]
+  have hrange : List.range 2 = [0, 1] := by native_decide
+  rw [hrange]
+  simpa [RealRaw.zero, RealRaw.ofRat] using hfold
+
+/-! The arbitrary finite version of the two-cell assembly law.  The public
+piecewise fold and the canonical finite raw sum differ only by parenthesizing
+addition; the proof is a finite induction and introduces no limiting object. -/
+theorem piecewiseMonotoneIntegralFor_equiv_finiteRawSum
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) :
+    (piecewiseMonotoneIntegralFor F c).Equiv
+      (finiteRawSum (piecewiseMonotoneCellList F c)) := by
+  let cell : Nat -> RealRaw := fun k =>
+    if hk : k < c.pieces then
+      piecewiseMonotoneCellIntegral F c k hk
+    else RealRaw.zero
+  let step : RealRaw -> Nat -> RealRaw := fun acc k => acc + cell k
+  have hcell : forall k, k < c.pieces -> (cell k).Valid := by
+    intro k hk
+    simp [cell, hk]
+    exact piecewiseMonotoneCellIntegral_valid F c k hk
+  have hzero : (RealRaw.zero).Valid := by
+    change RealRaw.ValidCompute (fun _ : Nat => { lo := 0, hi := 0 })
+    exact RealRaw.ofRat_valid 0
+  have hsum_valid : forall (xs : List RealRaw),
+      (forall x, x ∈ xs -> x.Valid) -> (finiteRawSum xs).Valid :=
+    finiteRawSum_valid
+  have hstep_valid : forall (xs : List Nat) (acc : RealRaw),
+      acc.Valid -> (xs.foldl step acc).Valid := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro acc hacc
+        simpa using hacc
+    | cons k ks ih =>
+        intro acc hacc
+        apply ih
+        exact RealRaw.add_valid hacc (by
+          by_cases hk : k < c.pieces
+          · exact hcell k hk
+          · simp [cell, hk]
+            exact hzero)
+  have hfold : forall (xs : List Nat),
+      (forall k, k ∈ xs -> k < c.pieces) ->
+      forall (acc : RealRaw), acc.Valid ->
+        (xs.foldl step acc).Equiv
+          (acc + finiteRawSum (xs.map cell)) := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro _ acc hacc
+        simpa [finiteRawSum] using
+          (RealRaw.equiv_symm (RealRaw.add_zero_equiv hacc))
+    | cons k ks ih =>
+        intro hxs acc hacc
+        have hk : k < c.pieces := hxs k (by simp)
+        have htail : forall j, j ∈ ks -> j < c.pieces := by
+          intro j hj
+          exact hxs j (by simp [hj])
+        have hck : (cell k).Valid := hcell k hk
+        have hacc' : (acc + cell k).Valid := RealRaw.add_valid hacc hck
+        have htailSum : (finiteRawSum (ks.map cell)).Valid := by
+          apply hsum_valid
+          intro x hx
+          rcases List.mem_map.1 hx with ⟨j, hj, rfl⟩
+          exact hcell j (htail j hj)
+        have hih := ih htail (acc + cell k) hacc'
+        have hassoc := RealRaw.add_assoc_equiv acc (cell k)
+          (finiteRawSum (ks.map cell)) hacc hck htailSum
+        have hleft :
+            (ks.foldl step (acc + cell k)).Valid :=
+          hstep_valid ks (acc + cell k) hacc'
+        have hright :
+            (acc + (cell k + finiteRawSum (ks.map cell))).Valid :=
+          RealRaw.add_valid hacc (RealRaw.add_valid hck htailSum)
+        simpa [List.foldl, step, finiteRawSum] using
+          (RealRaw.equiv_trans hleft
+            (RealRaw.add_valid hacc' htailSum) hright hih hassoc)
+  have hresult := hfold (List.range c.pieces)
+    (by
+      intro k hk
+      exact List.mem_range.1 hk)
+    RealRaw.zero hzero
+  have hleft :
+      ((List.range c.pieces).foldl step RealRaw.zero).Valid :=
+    hstep_valid (List.range c.pieces) RealRaw.zero hzero
+  have hsum :
+      (finiteRawSum ((List.range c.pieces).map cell)).Valid := by
+    apply hsum_valid
+    intro x hx
+    rcases List.mem_map.1 hx with ⟨k, hk, rfl⟩
+    exact hcell k (List.mem_range.1 hk)
+  have hclean :
+      ((List.range c.pieces).foldl step RealRaw.zero).Equiv
+        (finiteRawSum ((List.range c.pieces).map cell)) := by
+    exact RealRaw.equiv_trans hleft
+      (RealRaw.add_valid hzero hsum) hsum hresult
+      (RealRaw.zero_add_equiv hsum)
+  simpa [piecewiseMonotoneIntegralFor, piecewiseMonotoneCellList,
+    cell, step, RealRaw.zero] using hclean
+
+/-! A cell endpoint difference is the raw subtraction of the two endpoint
+evaluators.  Its validity follows directly from the interval function's
+pointwise validity; no global real-valued function or completeness principle
+is involved. -/
+def piecewiseMonotoneEndpointDifference
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F)
+    (k : Nat) (hk : k < c.pieces) : RealRaw :=
+  (F.raw.evalRaw (c.point (k + 1))
+      (F.defined_on (c.point (k + 1))
+        (c.point_mem (k + 1) (Nat.succ_le_of_lt hk))) -
+    F.raw.evalRaw (c.point k)
+      (F.defined_on (c.point k)
+        (c.point_mem k (Nat.le_of_lt hk))))
+
+theorem piecewiseMonotoneEndpointDifference_valid
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F)
+    (k : Nat) (hk : k < c.pieces) :
+    (piecewiseMonotoneEndpointDifference F c k hk).Valid := by
+  let hx := c.point_mem k (Nat.le_of_lt hk)
+  let hy := c.point_mem (k + 1) (Nat.succ_le_of_lt hk)
+  let x := F.raw.evalRaw (c.point k) (F.defined_on (c.point k) hx)
+  let y := F.raw.evalRaw (c.point (k + 1)) (F.defined_on (c.point (k + 1)) hy)
+  have hvalidx : x.Valid := by
+    simpa [x, RealRaw.Valid, PartialRealFunRaw.evalRaw] using
+      F.valid_on (c.point k) (F.defined_on (c.point k) hx)
+  have hvalidy : y.Valid := by
+    simpa [y, RealRaw.Valid, PartialRealFunRaw.evalRaw] using
+      F.valid_on (c.point (k + 1)) (F.defined_on (c.point (k + 1)) hy)
+  simpa [piecewiseMonotoneEndpointDifference, x, y, hx, hy] using
+    RealRaw.sub_valid hvalidy hvalidx
+
+def piecewiseMonotoneEndpointDifferenceList
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) : List RealRaw :=
+  (List.range c.pieces).map (fun k =>
+    if hk : k < c.pieces then
+      piecewiseMonotoneEndpointDifference F c k hk
+    else RealRaw.zero)
+
+theorem piecewiseMonotoneEndpointDifferenceList_length
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) :
+    (piecewiseMonotoneEndpointDifferenceList F c).length = c.pieces := by
+  simp [piecewiseMonotoneEndpointDifferenceList]
+
+structure PiecewiseMonotoneEndpointFTCFor
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) where
+  cell_endpoint_equiv :
+    forall k (hk : k < c.pieces),
+      (piecewiseMonotoneCellIntegral F c k hk).Equiv
+        (piecewiseMonotoneEndpointDifference F c k hk)
+
+theorem piecewiseMonotoneIntegralFor_equiv_endpointDifferenceList
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F)
+    (h : PiecewiseMonotoneEndpointFTCFor F c) :
+    (piecewiseMonotoneIntegralFor F c).Equiv
+      (finiteRawSum (piecewiseMonotoneEndpointDifferenceList F c)) := by
+  let cell : Nat -> RealRaw := fun k =>
+    if hk : k < c.pieces then
+      piecewiseMonotoneCellIntegral F c k hk
+    else RealRaw.zero
+  let endpoint : Nat -> RealRaw := fun k =>
+    if hk : k < c.pieces then
+      piecewiseMonotoneEndpointDifference F c k hk
+    else RealRaw.zero
+  have hlist_aux : forall (xs : List Nat),
+      (forall k, k ∈ xs -> k < c.pieces) ->
+      FiniteRawListEquiv (xs.map cell) (xs.map endpoint) := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro _
+        exact .nil
+    | cons k ks ih =>
+        intro hxs
+        have hk : k < c.pieces := hxs k (by simp)
+        have htail : forall j, j ∈ ks -> j < c.pieces := by
+          intro j hj
+          exact hxs j (by simp [hj])
+        apply FiniteRawListEquiv.cons
+        · simp [cell, endpoint, hk]
+          exact h.cell_endpoint_equiv k hk
+        · exact ih htail
+  have hlist := hlist_aux (List.range c.pieces)
+    (by
+      intro k hk
+      exact List.mem_range.1 hk)
+  have hcell : forall x, x ∈ (List.range c.pieces).map cell -> x.Valid := by
+    intro x hx
+    rcases List.mem_map.1 hx with ⟨k, hk, rfl⟩
+    simp [cell, List.mem_range.1 hk]
+    exact piecewiseMonotoneCellIntegral_valid F c k (List.mem_range.1 hk)
+  have hendpoint : forall x,
+      x ∈ (List.range c.pieces).map endpoint -> x.Valid := by
+    intro x hx
+    rcases List.mem_map.1 hx with ⟨k, hk, rfl⟩
+    simp [endpoint, List.mem_range.1 hk]
+    exact piecewiseMonotoneEndpointDifference_valid F c k (List.mem_range.1 hk)
+  have hsum := finiteRawSum_equiv_of_forall hlist hcell hendpoint
+  have hintegral := piecewiseMonotoneIntegralFor_equiv_finiteRawSum F c
+  have hleft : (piecewiseMonotoneIntegralFor F c).Valid :=
+    piecewiseMonotoneIntegralFor_valid F c
+  have hmiddle :
+      (finiteRawSum ((List.range c.pieces).map cell)).Valid :=
+    finiteRawSum_valid _ hcell
+  have hright :
+      (finiteRawSum ((List.range c.pieces).map endpoint)).Valid :=
+    finiteRawSum_valid _ hendpoint
+  have hresult := RealRaw.equiv_trans hleft hmiddle hright hintegral hsum
+  simpa [piecewiseMonotoneCellList, piecewiseMonotoneEndpointDifferenceList,
+    cell, endpoint] using hresult
+
+def piecewiseMonotoneTotalEndpointDifference
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) : RealRaw :=
+  F.raw.evalRaw (c.point c.pieces)
+      (F.defined_on (c.point c.pieces)
+        (c.point_mem c.pieces (Nat.le_refl _))) -
+    F.raw.evalRaw (c.point 0)
+      (F.defined_on (c.point 0)
+        (c.point_mem 0 (Nat.zero_le _)))
+
+theorem piecewiseMonotoneTotalEndpointDifference_valid
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) :
+    (piecewiseMonotoneTotalEndpointDifference F c).Valid := by
+  let hx := c.point_mem 0 (Nat.zero_le _)
+  let hy := c.point_mem c.pieces (Nat.le_refl _)
+  let x := F.raw.evalRaw (c.point 0) (F.defined_on (c.point 0) hx)
+  let y := F.raw.evalRaw (c.point c.pieces) (F.defined_on (c.point c.pieces) hy)
+  have hvalidx : x.Valid := by
+    simpa [x, RealRaw.Valid, PartialRealFunRaw.evalRaw] using
+      F.valid_on (c.point 0) (F.defined_on (c.point 0) hx)
+  have hvalidy : y.Valid := by
+    simpa [y, RealRaw.Valid, PartialRealFunRaw.evalRaw] using
+      F.valid_on (c.point c.pieces) (F.defined_on (c.point c.pieces) hy)
+  simpa [piecewiseMonotoneTotalEndpointDifference, x, y, hx, hy] using
+    RealRaw.sub_valid hvalidy hvalidx
+
+/-! Compose the piecewise cell certificate with the domain-independent raw
+telescoping theorem.  The explicit list-transport hypothesis is the finite
+geometric bookkeeping still required to identify the interval's endpoint
+evaluators with adjacent entries; the theorem itself contains no completeness
+or limiting argument. -/
+theorem piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_telescope
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F)
+    (h : PiecewiseMonotoneEndpointFTCFor F c)
+    {first : RealRaw} {rest : List RealRaw}
+    (hvalues : forall x, x ∈ first :: rest -> x.Valid)
+    (htransport :
+      FiniteRawListEquiv
+        (piecewiseMonotoneEndpointDifferenceList F c)
+        (rawAdjacentDifferenceList (first :: rest)))
+    (htotal : (rawLast first rest - first).Equiv
+      (piecewiseMonotoneTotalEndpointDifference F c)) :
+    (piecewiseMonotoneIntegralFor F c).Equiv
+      (piecewiseMonotoneTotalEndpointDifference F c) := by
+  have hendpoint : forall x,
+      x ∈ piecewiseMonotoneEndpointDifferenceList F c -> x.Valid := by
+    intro x hx
+    rcases List.mem_map.1 hx with ⟨k, hk, rfl⟩
+    have hk' : k < c.pieces := List.mem_range.1 hk
+    simp [piecewiseMonotoneEndpointDifferenceList, hk']
+    exact piecewiseMonotoneEndpointDifference_valid F c k hk'
+  have hadjacent : forall x,
+      x ∈ rawAdjacentDifferenceList (first :: rest) -> x.Valid :=
+    rawAdjacentDifferenceList_valid hvalues
+  have hsum_endpoint := finiteRawSum_valid
+    (piecewiseMonotoneEndpointDifferenceList F c) hendpoint
+  have hsum_adjacent := finiteRawSum_valid
+    (rawAdjacentDifferenceList (first :: rest)) hadjacent
+  have htransport_sum := finiteRawSum_equiv_of_forall
+    htransport hendpoint hadjacent
+  have htel := finiteRawSum_rawAdjacentDifferenceList_equiv_last_sub_first
+    hvalues
+  have hlast : (rawLast first rest).Valid := rawLast_valid hvalues
+  have hfirst : first.Valid := hvalues first (by simp)
+  have hsub : (rawLast first rest - first).Valid :=
+    RealRaw.sub_valid hlast hfirst
+  have htotal_valid := piecewiseMonotoneTotalEndpointDifference_valid F c
+  have hcell := piecewiseMonotoneIntegralFor_equiv_endpointDifferenceList F c h
+  have hintegral := piecewiseMonotoneIntegralFor_valid F c
+  have hintegral_adjacent :
+      (piecewiseMonotoneIntegralFor F c).Equiv
+        (finiteRawSum (rawAdjacentDifferenceList (first :: rest))) :=
+    RealRaw.equiv_trans hintegral hsum_endpoint hsum_adjacent hcell
+      htransport_sum
+  have hadjacent_total :
+      (finiteRawSum (rawAdjacentDifferenceList (first :: rest))).Equiv
+        (piecewiseMonotoneTotalEndpointDifference F c) :=
+    RealRaw.equiv_trans hsum_adjacent hsub htotal_valid htel htotal
+  exact RealRaw.equiv_trans hintegral hsum_adjacent htotal_valid
+    hintegral_adjacent hadjacent_total
 
 /-- A one-piece promotion from a monotone construction computes the same raw
 integral as the original monotone construction. -/

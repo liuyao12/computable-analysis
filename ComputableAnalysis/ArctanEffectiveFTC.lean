@@ -838,55 +838,8 @@ theorem arctanEffectiveFTC_boundedIntegral_equiv_endpointDifference :
     arctanEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
       (endpointDifferenceRaw arctanPrimitiveRaw 0 1
         arctanEffectiveFTCEndpointValid) := by
-  let h := arctanEffectiveFTCData.toDerivativeBoundFTC
-  have hcanonical := DerivativeBoundFTC.endpointRaw_equiv_endpointDifference
-    h arctanPrimitiveRaw_valid
-    (by exact ⟨by native_decide, by native_decide⟩)
-    (by exact ⟨by native_decide, by native_decide⟩)
-    arctanEffectiveFTCEndpointValid
-  intro n
-  let eps := precisionAtStage n
-  let s := h.chooseEndpointPrecision eps
-  have hcontains :
-      ((h.choosePartition eps).boundIntegralSum
-          (fun k hk =>
-            (h.derivativeBound eps k hk).bound (h.chooseBoundStage eps))).ContainsInterval
-      (endpointDifferenceInterval arctanPrimitiveRaw 0 1 s) := by
-    apply RationalPartition.boundIntegralSum_contains_endpointDifference
-      (P := h.choosePartition eps) (F := arctanPrimitiveRaw) (prec := s)
-      arctanPrimitiveRaw_valid
-    · intro i hi
-      have hp := (h.choosePartition eps).point_in_bounds hi
-      exact hp
-    · intro k hk
-      have hlocal := (h.localControl eps k hk).endpoint_contained
-        (h.chooseBoundStage eps)
-      have hagree := arctanEffectiveFTCData.endpointPrecision_agreement
-        eps k hk (h.chooseBoundStage eps)
-      have hagree' :
-          (h.localControl eps k hk).endpointPrecision
-              (h.chooseBoundStage eps) = s := by
-        simpa [h, s, EffectiveDerivativeBoundFTC.toDerivativeBoundFTC] using hagree
-      rw [hagree'] at hlocal
-      simpa [RationalPartition.cell, s] using
-        hlocal
-  have hover2 := (RealRaw.compareAt_overlap_iff h.endpointRaw
-      (endpointDifferenceRaw arctanPrimitiveRaw 0 1
-        arctanEffectiveFTCEndpointValid) n n).1
-      (hcanonical n)
-  apply (RealRaw.compareAt_overlap_iff h.boundedIntegralRaw
-    (endpointDifferenceRaw arctanPrimitiveRaw 0 1
-      arctanEffectiveFTCEndpointValid) n n).2
-  change QInterval.Overlaps
-    ((h.choosePartition eps).boundIntegralSum
-      (fun k hk => (h.derivativeBound eps k hk).bound (h.chooseBoundStage eps)))
-    (endpointDifferenceCompute arctanPrimitiveRaw 0 1 n)
-  change QInterval.Overlaps
-    ((h.choosePartition eps).boundIntegralSum
-      (fun k hk => (h.derivativeBound eps k hk).bound (h.chooseBoundStage eps)))
-    (endpointDifferenceInterval arctanPrimitiveRaw 0 1 n)
-  exact ⟨Rat.le_trans hcontains.1 hover2.1,
-    Rat.le_trans hover2.2 hcontains.2⟩
+  exact EffectiveDerivativeBoundFTC.boundedIntegralRaw_equiv_endpointDifference
+    arctanEffectiveFTCData arctanEffectiveFTCEndpointValid
 
 def arctanEffectiveFTCStabilized : RealRaw :=
   RealRaw.prefixStabilize
@@ -952,6 +905,120 @@ theorem arctanEffectiveFTCStabilizedIntegral_equiv_endpointDifference :
     (endpointDifferenceRaw arctanPrimitiveRaw 0 1
       arctanEffectiveFTCEndpointValid)
   exact arctanEffectiveFTCStabilized_equiv_endpointDifference
+
+/-! The effective certificate is now connected to the geometric arctangent
+primitive already used by the circle chapter.  This is the public
+non-polynomial FTC conclusion: the rectangle integral of the rational kernel
+is the quarter-turn angle, without introducing a standard real number. -/
+
+theorem arctanEffectiveFTCStabilizedIntegral_equiv_arctanGeom_one :
+    (Integral.integralFor
+      (FunctionOnInterval.exactRat
+        (fun x : Rat => 1 / (1 + x * x)) 0 1)
+      arctanEffectiveFTCStabilizedConstruction).Equiv
+      (ArctanGeometry.arctanGeom (1 : Rat)) := by
+  have hprimitive : arctanPrimitiveRaw.Valid := arctanPrimitiveRaw_valid
+  have hzero : arctanPrimitiveRaw.domain (0 : Rat) := by
+    exact ⟨by native_decide, by native_decide⟩
+  have hone : arctanPrimitiveRaw.domain (1 : Rat) := by
+    exact ⟨by native_decide, by native_decide⟩
+  have hendpoint :
+      (endpointDifferenceRaw arctanPrimitiveRaw 0 1
+        arctanEffectiveFTCEndpointValid).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using
+      arctanEffectiveFTCEndpointValid
+  have hsubPrimitive :
+      (endpointDifferenceRaw arctanPrimitiveRaw 0 1
+        arctanEffectiveFTCEndpointValid).Equiv
+        ((arctanPrimitiveRaw.apply hprimitive (1 : Rat) hone) -
+          (arctanPrimitiveRaw.apply hprimitive (0 : Rat) hzero)) :=
+    endpointDifferenceRaw_equiv_sub_apply hprimitive hzero hone
+      arctanEffectiveFTCEndpointValid
+  have hrectOne :
+      (arctanPrimitiveRaw.apply hprimitive (1 : Rat) hone).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat)) := by
+    change (ArctanGeometry.arctanIntegralRectangleRaw (1 : Rat)).Equiv _
+    exact ArctanGeometry.arctanIntegralRectangleRaw_equiv_arctanGeom
+      (by native_decide)
+  have hrectZero :
+      (arctanPrimitiveRaw.apply hprimitive (0 : Rat) hzero).Equiv
+        (ArctanGeometry.arctanGeom (0 : Rat)) := by
+    change (ArctanGeometry.arctanIntegralRectangleRaw (0 : Rat)).Equiv _
+    exact ArctanGeometry.arctanIntegralRectangleRaw_equiv_arctanGeom
+      (by native_decide)
+  have hsubGeom :
+      ((arctanPrimitiveRaw.apply hprimitive (1 : Rat) hone) -
+          (arctanPrimitiveRaw.apply hprimitive (0 : Rat) hzero)).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat) -
+          ArctanGeometry.arctanGeom (0 : Rat)) := by
+    apply RealRaw.sub_equiv
+    · simpa [RealFunRaw.apply, RealFunRaw.applyCompute, RealRaw.Valid] using
+        hprimitive (1 : Rat) hone
+    · exact (ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (1 : Rat)) (by native_decide) (by native_decide))
+    · simpa [RealFunRaw.apply, RealFunRaw.applyCompute, RealRaw.Valid] using
+        hprimitive (0 : Rat) hzero
+    · exact (ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (0 : Rat)) (by native_decide) (by native_decide))
+    · exact hrectOne
+    · exact hrectZero
+  have hzeroGeom :
+      (ArctanGeometry.arctanGeom (1 : Rat) -
+        ArctanGeometry.arctanGeom (0 : Rat)).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat)) := by
+    rw [ArctanGeometry.arctanGeom_zero]
+    apply RealRaw.sameStageOverlap_equiv
+    intro n
+    apply (RealRaw.compareAt_overlap_iff
+      (ArctanGeometry.arctanGeom (1 : Rat) - RealRaw.ofRat 0)
+      (ArctanGeometry.arctanGeom (1 : Rat)) n n).2
+    change QInterval.Overlaps
+      { lo := ((ArctanGeometry.arctanGeom (1 : Rat)).compute n).lo - 0,
+        hi := ((ArctanGeometry.arctanGeom (1 : Rat)).compute n).hi - 0 }
+      ((ArctanGeometry.arctanGeom (1 : Rat)).compute n)
+    have horder := RealRaw.interval_order_of_valid
+      (ArctanGeometry.arctanGeom (1 : Rat))
+      (ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (1 : Rat)) (by native_decide) (by native_decide)) n
+    constructor <;> grind [Rat.sub_eq_add_neg]
+  have hI :
+      (Integral.integralFor
+        (FunctionOnInterval.exactRat
+          (fun x : Rat => 1 / (1 + x * x)) 0 1)
+        arctanEffectiveFTCStabilizedConstruction).Valid := by
+    change arctanEffectiveFTCStabilized.Valid
+    exact arctanEffectiveFTCStabilized_valid
+  have hsubValid :
+      ((arctanPrimitiveRaw.apply hprimitive (1 : Rat) hone) -
+          (arctanPrimitiveRaw.apply hprimitive (0 : Rat) hzero)).Valid := by
+    apply RealRaw.sub_valid
+    · simpa [RealFunRaw.apply, RealFunRaw.applyCompute, RealRaw.Valid] using
+        hprimitive (1 : Rat) hone
+    · simpa [RealFunRaw.apply, RealFunRaw.applyCompute, RealRaw.Valid] using
+        hprimitive (0 : Rat) hzero
+  have hgeomSubValid :
+      (ArctanGeometry.arctanGeom (1 : Rat) -
+        ArctanGeometry.arctanGeom (0 : Rat)).Valid :=
+    RealRaw.sub_valid
+      (ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (1 : Rat)) (by native_decide) (by native_decide))
+      (ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (0 : Rat)) (by native_decide) (by native_decide))
+  have hgeomOneValid :=
+    ArctanGeometry.arctanGeom_valid_on_unit
+      (x := (1 : Rat)) (by native_decide) (by native_decide)
+  have hIToSub :
+      (Integral.integralFor
+        (FunctionOnInterval.exactRat
+          (fun x : Rat => 1 / (1 + x * x)) 0 1)
+        arctanEffectiveFTCStabilizedConstruction).Equiv
+        ((arctanPrimitiveRaw.apply hprimitive (1 : Rat) hone) -
+          (arctanPrimitiveRaw.apply hprimitive (0 : Rat) hzero)) :=
+    RealRaw.equiv_trans hI hendpoint hsubValid
+      arctanEffectiveFTCStabilizedIntegral_equiv_endpointDifference
+      hsubPrimitive
+  exact RealRaw.equiv_trans hI hsubValid hgeomOneValid hIToSub
+    (RealRaw.equiv_trans hsubValid hgeomSubValid hgeomOneValid hsubGeom hzeroGeom)
 
 def arctanKernelDerivativeBound (eps : QPos) (k : Nat)
     (hk : k < (RationalPartition.uniform 0 1 (eps.val.den + 1)

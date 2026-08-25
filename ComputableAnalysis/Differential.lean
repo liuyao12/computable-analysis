@@ -162,6 +162,83 @@ def affineFTCExact (m c a b : Rat) :
     grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_assoc, Rat.add_comm,
       Rat.mul_assoc, Rat.mul_comm]
 
+/-! The first nonlinear finite FTC error is the nonnegative missing strip.
+This form is convenient for choosing a stage from a rational error budget:
+the analytic-looking estimate has become the explicit square of the cell
+width divided by the number of cells. -/
+theorem ftcErrorExact_square_doubleId_of_pos
+    {a b : Rat} (hab : a <= b) {n : Nat} (hn : 0 < n) :
+    ftcErrorExact square doubleId a b n =
+      (b - a) ^ 2 / (n : Rat) := by
+  unfold ftcErrorExact doubleId square
+  rw [riemannLeftExact_doubleId_of_pos hn]
+  have hwidth : 0 <= (b - a) ^ 2 := by
+    have hpow : (b - a) ^ 2 = (b - a) * (b - a) := by
+      grind [Rat.pow_succ]
+    rw [hpow]
+    by_cases h : 0 <= b - a
+    · exact Rat.mul_nonneg h h
+    · have hneg : 0 <= -(b - a) := by grind
+      have hsq := Rat.mul_nonneg hneg hneg
+      simpa [Rat.mul_neg, Rat.neg_mul, Rat.neg_neg] using hsq
+  have hden : 0 < (n : Rat) := (Rat.natCast_pos).2 hn
+  have hterm : 0 <= (b - a) ^ 2 / (n : Rat) := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg hwidth
+      (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+  have hdiff :
+      ((b ^ 2 - a ^ 2) - (b - a) ^ 2 / (n : Rat)) -
+        (b * b - a * a) = -((b - a) ^ 2 / (n : Rat)) := by
+    grind [Rat.sub_eq_add_neg, Rat.pow_succ]
+  rw [hdiff]
+  unfold qabs
+  by_cases hzero : (b - a) ^ 2 / (n : Rat) = 0
+  · simp [hzero]
+  · rw [if_pos (by grind : -((b - a) ^ 2 / (n : Rat)) < 0)]
+    grind
+
+/-! The cubic rung has the same status, but its finite left-rectangle error
+has the next explicit polynomial numerator.  This is still a rational
+identity; no assertion about an infinite sum is involved. -/
+theorem ftcErrorExact_cube_threeSquare_unit_of_pos
+    {n : Nat} (hn : 0 < n) :
+    ftcErrorExact cube (fun x => 3 * x ^ 2) 0 1 n =
+      (3 * (n : Rat) - 1) / (2 * (n : Rat) ^ 2) := by
+  unfold ftcErrorExact cube
+  rw [riemannLeftExact_threeSquare_unit_of_pos hn]
+  have hN : (n : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hn)
+  have hformula :
+      3 * (1 / (n : Rat)) ^ 3 *
+          (((n : Rat) * ((n : Rat) - 1) *
+            (2 * (n : Rat) - 1)) / 6) -
+        (1 ^ 3 - 0 ^ 3) =
+        -((3 * (n : Rat) - 1) / (2 * (n : Rat) ^ 2)) := by
+    grind [Rat.div_def, Rat.pow_succ, Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+      Rat.mul_inv_cancel]
+  rw [hformula]
+  have hnum : 0 <= 3 * (n : Rat) - 1 := by
+    have hnone : (1 : Rat) <= (n : Rat) := by
+      exact_mod_cast (Nat.one_le_iff_ne_zero.mpr (Nat.ne_of_gt hn))
+    grind
+  have hdenpos : 0 < 2 * (n : Rat) ^ 2 := by
+    have hsq : 0 < (n : Rat) ^ 2 := by
+      rw [show (n : Rat) ^ 2 = (n : Rat) * (n : Rat) by
+        grind [Rat.pow_succ]]
+      exact Rat.mul_pos ((Rat.natCast_pos).2 hn)
+        ((Rat.natCast_pos).2 hn)
+    exact Rat.mul_pos (by native_decide) hsq
+  have hterm : 0 <= (3 * (n : Rat) - 1) / (2 * (n : Rat) ^ 2) := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg hnum (Rat.le_of_lt ((Rat.inv_pos).2 hdenpos))
+  unfold qabs
+  by_cases hzero : (3 * (n : Rat) - 1) / (2 * (n : Rat) ^ 2) = 0
+  · simp [hzero]
+  · rw [if_pos (by grind :
+      -((3 * (n : Rat) - 1) / (2 * (n : Rat) ^ 2)) < 0)]
+    grind
+
 theorem affine_derivative_effective (m c : Rat) :
     Nonempty (EffectiveDerivativeExact (affine m c) (constant m)) :=
   ⟨affineDerivative m c⟩
@@ -342,6 +419,81 @@ theorem differenceQuotient_affine_comp
     Rat.mul_inv_cancel (m * h) hmh
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
     Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-! The zero-slope case is not an analytic exception: the affine inner map is
+constant, so its finite difference quotient is exactly zero.  Including it
+gives one total finite chain-rule identity, while the nonzero-slope theorem
+above remains the useful transport form for inverse-coordinate arguments. -/
+theorem differenceQuotient_affine_comp_of_step
+    (f : Rat -> Rat) {m c x h : Rat} (hh : h ≠ 0) :
+    differenceQuotient (fun z => f (affine m c z)) x h =
+      m * differenceQuotient f (affine m c x) (m * h) := by
+  by_cases hm : m = 0
+  · subst m
+    simp [differenceQuotient, affine, Rat.div_def]
+    grind
+  · exact differenceQuotient_affine_comp f hm hh
+
+/-! An affine reparametrization transports the finite left-rectangle sum
+exactly.  This is the computational core of substitution: it is an identity
+of rational folds, before any shrinking or abstract integral is introduced.
+The identity is total in the slope; positivity is needed only later when the
+affine map is required to preserve orientation. -/
+theorem riemannLeftExact_affine_substitution
+    (g : Rat -> Rat) {m c a b : Rat} (n : Nat) :
+    riemannLeftExact (fun x => m * g (affine m c x)) a b n =
+      riemannLeftExact g (affine m c a) (affine m c b) n := by
+  have hmesh : ∀ q : Nat,
+      mesh (affine m c a) (affine m c b) q = m * mesh a b q := by
+    intro q
+    by_cases hq : q = 0
+    · simp [mesh, hq]
+    · have hqr : (q : Rat) ≠ 0 := by
+        exact Rat.ne_of_gt ((Rat.natCast_pos).2 (Nat.pos_of_ne_zero hq))
+      unfold mesh affine
+      rw [if_neg hq, if_neg hq, Rat.div_def, Rat.div_def]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+        Rat.mul_comm, Rat.mul_inv_cancel]
+  have hpoint : ∀ (q k : Nat),
+      leftPoint (affine m c a) (affine m c b) q k =
+        affine m c (leftPoint a b q k) := by
+    intro q k
+    unfold leftPoint
+    rw [hmesh q]
+    unfold affine
+    grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+  have hsum : ∀ q : Nat,
+      (List.range q).foldl
+          (fun acc k => acc + mesh a b q * (m * g (affine m c (leftPoint a b q k)))) 0 =
+        (List.range q).foldl
+          (fun acc k => acc + mesh (affine m c a) (affine m c b) q *
+            g (leftPoint (affine m c a) (affine m c b) q k)) 0 := by
+    intro q
+    have hfold : ∀ (xs : List Nat),
+        (∀ k, k ∈ xs ->
+          mesh a b q * (m * g (affine m c (leftPoint a b q k))) =
+            mesh (affine m c a) (affine m c b) q *
+              g (leftPoint (affine m c a) (affine m c b) q k)) ->
+        ∀ acc : Rat,
+          (xs.foldl
+            (fun acc k => acc + mesh a b q *
+              (m * g (affine m c (leftPoint a b q k)))) acc) =
+          (xs.foldl
+            (fun acc k => acc + mesh (affine m c a) (affine m c b) q *
+              g (leftPoint (affine m c a) (affine m c b) q k)) acc) := by
+      intro xs
+      induction xs with
+      | nil => intro _h acc; rfl
+      | cons k ks ih =>
+          intro hxs acc
+          dsimp
+          rw [hxs k (by simp)]
+          exact ih (fun j hj => hxs j (by simp [hj])) _
+    apply hfold (List.range q)
+    intro k hk
+    rw [hmesh q, hpoint q k]
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  simpa [riemannLeftExact] using hsum n
 
 /- A positive affine change of endpoint coordinates transports a finite
 secant bracket.  The source bracket is stated at rational endpoints `a,b`,
@@ -1151,6 +1303,33 @@ def divRat (I : QInterval) (h : Rat) : QInterval :=
 def differenceQuotient (fxh fx : QInterval) (h : Rat) : QInterval :=
   divRat (sub fxh fx) h
 
+/-! Finite difference quotients distribute over interval addition.  This is
+the interval counterpart of the exact rational identity above; the proof is
+just endpoint arithmetic, with the sign split belonging to interval division.
+No limiting argument is involved. -/
+theorem differenceQuotient_addInterval
+    (A B C D : QInterval) (h : Rat) :
+    differenceQuotient (addInterval A B) (addInterval C D) h =
+      addInterval (differenceQuotient A C h)
+        (differenceQuotient B D h) := by
+  by_cases hinv : 0 <= 1 / h
+  · cases A
+    cases B
+    cases C
+    cases D
+    simp [differenceQuotient, divRat, sub, addInterval, scaleRat,
+      Rat.div_def, hinv]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+  · cases A
+    cases B
+    cases C
+    cases D
+    simp [differenceQuotient, divRat, sub, addInterval, scaleRat,
+      Rat.div_def, hinv]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+
 /-- Subtracting interval enclosures adds their widths exactly. -/
 theorem sub_width (I J : QInterval) :
     (sub I J).width = I.width + J.width := by
@@ -1183,6 +1362,70 @@ theorem scaleRat_contains_of_nonneg {r : Rat} (hr : 0 <= r)
   constructor
   · exact Rat.mul_le_mul_of_nonneg_left hcontains.1 hr
   · exact Rat.mul_le_mul_of_nonneg_left hcontains.2 hr
+
+theorem differenceQuotient_scaleRat_of_nonneg {r : Rat} (hr : 0 <= r)
+    (A B : QInterval) (h : Rat) :
+    differenceQuotient (scaleRat r A) (scaleRat r B) h =
+      scaleRat r (differenceQuotient A B h) := by
+  by_cases hinv : 0 <= 1 / h
+  · cases A
+    cases B
+    simp [differenceQuotient, divRat, sub, scaleRat, Rat.div_def,
+      if_pos hr, hinv]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+  · cases A
+    cases B
+    simp [differenceQuotient, divRat, sub, scaleRat, Rat.div_def,
+      if_pos hr, hinv]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+
+theorem differenceQuotient_neg (A B : QInterval) (h : Rat) :
+    differenceQuotient (neg A) (neg B) h =
+      neg (differenceQuotient A B h) := by
+  by_cases hinv : 0 <= 1 / h
+  · cases A
+    cases B
+    simp [differenceQuotient, divRat, sub, neg, scaleRat,
+      Rat.div_def, hinv]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+  · cases A
+    cases B
+    simp [differenceQuotient, divRat, sub, neg, scaleRat,
+      Rat.div_def, hinv]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+
+/-! Negative scalar multiplication is reduced to the already-certified
+nonnegative case plus endpoint negation.  Keeping this identity explicit
+prevents a sign-sensitive interval multiplication from being hidden in a
+later derivative proof. -/
+theorem scaleRat_neg_eq_neg_scaleRat_neg {r : Rat} (hr : r < 0)
+    (I : QInterval) :
+    scaleRat r I = neg (scaleRat (-r) I) := by
+  have hr0pos : 0 < -r := by
+    simpa using (Rat.neg_lt_neg hr)
+  have hr0 : 0 <= -r := Rat.le_of_lt hr0pos
+  unfold scaleRat neg
+  rw [if_neg (Rat.not_le.mpr hr),
+    if_pos hr0]
+  cases I
+  dsimp
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+    Rat.mul_comm, Rat.add_comm, Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
+
+theorem differenceQuotient_scaleRat_of_neg {r : Rat} (hr : r < 0)
+    (A B : QInterval) (h : Rat) :
+    differenceQuotient (scaleRat r A) (scaleRat r B) h =
+      scaleRat r (differenceQuotient A B h) := by
+  rw [scaleRat_neg_eq_neg_scaleRat_neg hr A,
+    scaleRat_neg_eq_neg_scaleRat_neg hr B,
+    differenceQuotient_neg]
+  rw [differenceQuotient_scaleRat_of_nonneg (by grind : 0 <= -r)]
+  exact (scaleRat_neg_eq_neg_scaleRat_neg hr
+    (differenceQuotient A B h)).symm
 
 /-- Dividing the difference of two exact singleton boxes gives the exact
 rational difference quotient.  The sign split in interval division is harmless
@@ -1521,6 +1764,117 @@ structure HasDerivativeOnInterval (f df : FunctionOnInterval) where
           (df.compute x hdx (evalPrecision x h n))
           n
 
+/-! A local FTC bridge for one positive rational cell.  The derivative
+certificate controls the finite secant quotient; scaling that quotient back
+by the cell width produces an enclosure of the endpoint difference.  The
+explicit expansion pays twice the requested stage tolerance, so this is a
+finite statement about rational interval computations rather than a limit
+argument. -/
+theorem HasDerivativeOnInterval.endpointDifference_contains_of_pos
+    {f df : FunctionOnInterval}
+    (D : HasDerivativeOnInterval f df)
+    {x h : Rat} {n : Nat}
+    (hx : inDomainInterval f.lower f.upper x)
+    (hxh : inDomainInterval f.lower f.upper (x + h))
+    (hdx : inDomainInterval df.lower df.upper x)
+    (hpos : 0 < h)
+    (hsmall : qabs h <=
+      (1 / ((D.stepPrecision n : Nat) : Rat))) :
+    (QInterval.scaleByRat h
+      (QInterval.expand
+        (df.compute x hdx (D.evalPrecision x h n))
+        (2 * (precisionAtStage n).val))).ContainsInterval
+      (QInterval.subInterval
+        (f.compute (x + h) hxh (D.evalPrecision x h n))
+        (f.compute x hx (D.evalPrecision x h n))) := by
+  have hnear := D.close x h n hx hxh hdx (Rat.ne_of_gt hpos) hsmall
+  change (QInterval.differenceQuotient
+      (f.compute (x + h) hxh (D.evalPrecision x h n))
+      (f.compute x hx (D.evalPrecision x h n)) h).NearAt
+      (df.compute x hdx (D.evalPrecision x h n)) (precisionAtStage n) at hnear
+  exact QInterval.scaleByRat_expand_contains_subInterval_of_differenceQuotient_near
+    hpos hnear
+
+/-! Closure under addition is stated for certificates using a common stage
+schedule.  This is intentional: an evaluator's stage parameter is an
+algorithmic resource, so combining two implementations must say how their
+stages are synchronized.  The inner stage may be chosen finer than the
+requested output stage to pay for the two summands' error budgets. -/
+def HasDerivativeOnInterval.addOfCommonSchedule
+    {f g df dg : FunctionOnInterval}
+    (hf : HasDerivativeOnInterval f df)
+    (hg : HasDerivativeOnInterval g dg)
+    (hfgLower : f.lower = g.lower)
+    (hfgUpper : f.upper = g.upper)
+    (hdfgLower : df.lower = dg.lower)
+    (hdfgUpper : df.upper = dg.upper)
+    (hstep : hf.stepPrecision = hg.stepPrecision)
+    (heval : hf.evalPrecision = hg.evalPrecision)
+    (inner : Nat -> Nat)
+    (hprecision : forall n,
+      2 * (precisionAtStage (inner n)).val <= (precisionAtStage n).val) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.add f g hfgLower hfgUpper)
+      (FunctionOnInterval.add df dg hdfgLower hdfgUpper) where
+  same_lower := by
+    calc
+      (FunctionOnInterval.add df dg hdfgLower hdfgUpper).lower = df.lower := rfl
+      _ = f.lower := hf.same_lower
+      _ = (FunctionOnInterval.add f g hfgLower hfgUpper).lower := rfl
+  same_upper := by
+    calc
+      (FunctionOnInterval.add df dg hdfgLower hdfgUpper).upper = df.upper := rfl
+      _ = f.upper := hf.same_upper
+      _ = (FunctionOnInterval.add f g hfgLower hfgUpper).upper := rfl
+  stepPrecision := fun n => hf.stepPrecision (inner n)
+  evalPrecision := fun x h n => hf.evalPrecision x h (inner n)
+  close := by
+    intro x h n hx hxh hdx hh hsmall
+    have hxg : inDomainInterval g.lower g.upper x := by
+      constructor
+      · rw [← hfgLower]
+        exact hx.1
+      · rw [← hfgUpper]
+        exact hx.2
+    have hxhg : inDomainInterval g.lower g.upper (x + h) := by
+      constructor
+      · rw [← hfgLower]
+        exact hxh.1
+      · rw [← hfgUpper]
+        exact hxh.2
+    have hdxg : inDomainInterval dg.lower dg.upper x := by
+      constructor
+      · rw [← hdfgLower]
+        exact hdx.1
+      · rw [← hdfgUpper]
+        exact hdx.2
+    have hsmallG : qabs h <=
+        (1 / ((hg.stepPrecision (inner n) : Nat) : Rat)) := by
+      simpa [hstep] using hsmall
+    have hcloseF := hf.close x h (inner n) hx hxh hdx hh hsmall
+    have hcloseG₀ := hg.close x h (inner n) hxg hxhg hdxg hh hsmallG
+    have hcloseG : intervalNearAtPrecision
+        (QInterval.differenceQuotient
+          (g.compute (x + h) hxhg (hf.evalPrecision x h (inner n)))
+          (g.compute x hxg (hf.evalPrecision x h (inner n))) h)
+        (dg.compute x hdxg (hf.evalPrecision x h (inner n))) (inner n) := by
+      simpa [heval] using hcloseG₀
+    have hcombined := intervalNearAtPrecision_addInterval
+      hcloseF hcloseG (hprecision n)
+    change intervalNearAtPrecision
+      (QInterval.differenceQuotient
+        (QInterval.addInterval
+          (f.compute (x + h) hxh (hf.evalPrecision x h (inner n)))
+          (g.compute (x + h) hxhg (hf.evalPrecision x h (inner n))))
+        (QInterval.addInterval
+          (f.compute x hx (hf.evalPrecision x h (inner n)))
+          (g.compute x hxg (hf.evalPrecision x h (inner n)))) h)
+      (QInterval.addInterval
+        (df.compute x hdx (hf.evalPrecision x h (inner n)))
+        (dg.compute x hdxg (hf.evalPrecision x h (inner n)))) n
+    rw [QInterval.differenceQuotient_addInterval]
+    exact hcombined
+
 /-- A pointwise forward finite-difference derivative certificate.
 
 This deliberately records only positive rational steps from one specified
@@ -1549,6 +1903,38 @@ later non-exact certificates may divide a box by that step. -/
           n
 
 namespace FunctionOnInterval
+
+/-! Pointwise negation preserves the rational chart and validity of interval
+values. -/
+def neg (F : FunctionOnInterval) : FunctionOnInterval where
+  raw :=
+    { definedAt := F.raw.definedAt
+      compute := fun x hx n => QInterval.neg (F.raw.compute x hx n) }
+  lower := F.lower
+  upper := F.upper
+  defined_on := F.defined_on
+  valid_on := by
+    intro x hx
+    let X : RealRaw := { compute := F.raw.compute x hx }
+    have hX : X.Valid := by
+      change RealRaw.ValidCompute X.compute
+      exact F.valid_on x hx
+    change RealRaw.ValidCompute (RealRaw.negCompute X)
+    exact RealRaw.negCompute_valid hX
+
+@[simp] theorem neg_compute (F : FunctionOnInterval)
+    (x : Rat) (hx : inDomainInterval F.lower F.upper x) (n : Nat) :
+    (neg F).compute x hx n = QInterval.neg (F.compute x hx n) := by
+  rfl
+
+/-! Subtraction is exposed as addition with pointwise negation.  Keeping this
+definition factored lets all validity and derivative closure proofs reuse the
+two primitive finite interval operations. -/
+def sub
+    (F G : FunctionOnInterval)
+    (same_lower : F.lower = G.lower)
+    (same_upper : F.upper = G.upper) : FunctionOnInterval :=
+  add F (neg G) same_lower same_upper
 
 /-- Rationally scale every interval value of an interval-domain function.
 The domain is deliberately unchanged: scalar multiplication is a pointwise
@@ -1688,6 +2074,69 @@ theorem differenceQuotient_scaleRat_two (A B : QInterval) (h : Rat) :
 
 end QInterval
 
+/-! A nonnegative rational scaling transports a finite near-certificate when
+the internal error is multiplied into the requested output budget. -/
+theorem intervalNearAtPrecision_scaleRat_of_nonneg
+    {r : Rat} (hr : 0 <= r)
+    {I J : QInterval} {m n : Nat}
+    (hnear : intervalNearAtPrecision I J m)
+    (hprecision : r * (precisionAtStage m).val <=
+      (precisionAtStage n).val) :
+    intervalNearAtPrecision (QInterval.scaleRat r I)
+      (QInterval.scaleRat r J) n := by
+  unfold intervalNearAtPrecision QInterval.NearAt at hnear ⊢
+  rcases hnear with ⟨hleft, hright, hwidthI, hwidthJ⟩
+  unfold QInterval.scaleRat
+  simp only [if_pos hr]
+  constructor
+  · calc
+      r * I.lo <= r * (J.hi + (precisionAtStage m).val) :=
+        Rat.mul_le_mul_of_nonneg_left hleft hr
+      _ = r * J.hi + r * (precisionAtStage m).val := by
+        rw [Rat.mul_add]
+      _ <= r * J.hi + (precisionAtStage n).val := by
+        exact (Rat.add_le_add_left).2 hprecision
+  constructor
+  · calc
+      r * J.lo <= r * (I.hi + (precisionAtStage m).val) :=
+        Rat.mul_le_mul_of_nonneg_left hright hr
+      _ = r * I.hi + r * (precisionAtStage m).val := by
+        rw [Rat.mul_add]
+      _ <= r * I.hi + (precisionAtStage n).val := by
+        exact (Rat.add_le_add_left).2 hprecision
+  constructor
+  · change r * I.hi - r * I.lo <= (precisionAtStage n).val
+    calc
+      r * I.hi - r * I.lo = r * I.width := by
+        unfold QInterval.width
+        grind [Rat.sub_eq_add_neg, Rat.mul_add]
+      _ <= r * (precisionAtStage m).val :=
+        Rat.mul_le_mul_of_nonneg_left hwidthI hr
+      _ <= (precisionAtStage n).val := hprecision
+  · change r * J.hi - r * J.lo <= (precisionAtStage n).val
+    calc
+      r * J.hi - r * J.lo = r * J.width := by
+        unfold QInterval.width
+        grind [Rat.sub_eq_add_neg, Rat.mul_add]
+      _ <= r * (precisionAtStage m).val :=
+        Rat.mul_le_mul_of_nonneg_left hwidthJ hr
+      _ <= (precisionAtStage n).val := hprecision
+
+theorem intervalNearAtPrecision_neg
+    {I J : QInterval} {n : Nat}
+    (hnear : intervalNearAtPrecision I J n) :
+    intervalNearAtPrecision (QInterval.neg I) (QInterval.neg J) n := by
+  unfold intervalNearAtPrecision QInterval.NearAt at hnear ⊢
+  rcases hnear with ⟨hleft, hright, hwidthI, hwidthJ⟩
+  unfold QInterval.neg QInterval.width
+  constructor
+  · grind [Rat.sub_eq_add_neg]
+  constructor
+  · grind [Rat.sub_eq_add_neg]
+  constructor
+  · simpa [QInterval.width, Rat.sub_eq_add_neg, Rat.add_comm] using hwidthI
+  · simpa [QInterval.width, Rat.sub_eq_add_neg, Rat.add_comm] using hwidthJ
+
 /-- If two interval boxes are close at a sufficiently finer precision, then
 doubling both boxes remains close at the requested precision.  This is the
 finite error-budget step behind the scalar-multiple derivative rule. -/
@@ -1795,6 +2244,168 @@ def HasDerivativeOnInterval.scaleRat_two
       (precisionAtStage_scaleRat_two n)
     simpa only [FunctionOnInterval.scaleRat_compute,
       QInterval.differenceQuotient_scaleRat_two] using hscaled
+
+/-! General nonnegative rational scalar closure.  The caller supplies the
+internal stage schedule and its finite error-budget proof; this keeps the
+computational cost visible instead of baking in a convergence-rate theorem. -/
+def HasDerivativeOnInterval.scaleRat_of_nonneg
+    {r : Rat} (hr : 0 <= r)
+    {f df : FunctionOnInterval}
+    (D : HasDerivativeOnInterval f df)
+    (inner : Nat -> Nat)
+    (hprecision : forall n,
+      r * (precisionAtStage (inner n)).val <= (precisionAtStage n).val) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.scaleRat r f)
+      (FunctionOnInterval.scaleRat r df) where
+  same_lower := D.same_lower
+  same_upper := D.same_upper
+  stepPrecision := fun n => D.stepPrecision (inner n)
+  evalPrecision := fun x h n => D.evalPrecision x h (inner n)
+  close := by
+    intro x h n hx hxh hdx hh hsmall
+    change inDomainInterval f.lower f.upper x at hx
+    change inDomainInterval f.lower f.upper (x + h) at hxh
+    change inDomainInterval df.lower df.upper x at hdx
+    have hbase := D.close x h (inner n) hx hxh hdx hh hsmall
+    have hscaled := intervalNearAtPrecision_scaleRat_of_nonneg hr
+      hbase (hprecision n)
+    simpa only [FunctionOnInterval.scaleRat_compute,
+      QInterval.differenceQuotient_scaleRat_of_nonneg hr] using hscaled
+
+/-! Full rational scalar closure.  Nonnegative scalars use interval scaling
+directly; negative scalars use the proved sign decomposition and the negation
+closure.  In both cases the caller supplies the finite precision budget
+`|r| * eps_inner <= eps`. -/
+def HasDerivativeOnInterval.scaleRat
+    {r : Rat}
+    {f df : FunctionOnInterval}
+    (D : HasDerivativeOnInterval f df)
+    (inner : Nat -> Nat)
+    (hprecision : forall n,
+      qabs r * (precisionAtStage (inner n)).val <=
+        (precisionAtStage n).val) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.scaleRat r f)
+      (FunctionOnInterval.scaleRat r df) := by
+  by_cases hr : 0 <= r
+  · exact D.scaleRat_of_nonneg hr inner (by
+      intro n
+      simpa [qabs_eq_self_of_nonneg hr] using hprecision n)
+  · have hrneg : r < 0 := Rat.not_le.mp hr
+    have hnonneg : 0 <= -r := by
+      have hpos : 0 < -r := by
+        simpa using (Rat.neg_lt_neg hrneg)
+      exact Rat.le_of_lt hpos
+    have hprecision' : forall n,
+        (-r) * (precisionAtStage (inner n)).val <=
+          (precisionAtStage n).val := by
+      have hrq : qabs r = -r :=
+        qabs_eq_neg_of_nonpos (Rat.le_of_lt hrneg)
+      intro n
+      simpa [hrq] using hprecision n
+    refine
+      { same_lower := D.same_lower
+        same_upper := D.same_upper
+        stepPrecision := fun n => D.stepPrecision (inner n)
+        evalPrecision := fun x h n => D.evalPrecision x h (inner n)
+        close := ?_ }
+    intro x h n hx hxh hdx hh hsmall
+    change inDomainInterval f.lower f.upper x at hx
+    change inDomainInterval f.lower f.upper (x + h) at hxh
+    change inDomainInterval df.lower df.upper x at hdx
+    have hbase := D.close x h (inner n) hx hxh hdx hh hsmall
+    have hscaled := intervalNearAtPrecision_scaleRat_of_nonneg hnonneg
+      hbase (hprecision' n)
+    have hneg := intervalNearAtPrecision_neg hscaled
+    have hsecant :=
+      (QInterval.scaleRat_neg_eq_neg_scaleRat_neg hrneg
+        (QInterval.differenceQuotient
+          (f.compute (x + h) hxh (D.evalPrecision x h (inner n)))
+          (f.compute x hx (D.evalPrecision x h (inner n))) h)).symm
+    have hderivative :=
+      (QInterval.scaleRat_neg_eq_neg_scaleRat_neg hrneg
+        (df.compute x hdx (D.evalPrecision x h (inner n)))).symm
+    simpa only [FunctionOnInterval.scaleRat_compute,
+      QInterval.differenceQuotient_scaleRat_of_neg hrneg, hsecant,
+      hderivative] using hneg
+
+/-! Negation needs no finer stage: it reverses both interval endpoints but
+does not enlarge widths or the finite nearness budget. -/
+def HasDerivativeOnInterval.neg
+    {f df : FunctionOnInterval}
+    (D : HasDerivativeOnInterval f df) :
+    HasDerivativeOnInterval (FunctionOnInterval.neg f)
+      (FunctionOnInterval.neg df) where
+  same_lower := D.same_lower
+  same_upper := D.same_upper
+  stepPrecision := D.stepPrecision
+  evalPrecision := D.evalPrecision
+  close := by
+    intro x h n hx hxh hdx hh hsmall
+    change inDomainInterval f.lower f.upper x at hx
+    change inDomainInterval f.lower f.upper (x + h) at hxh
+    change inDomainInterval df.lower df.upper x at hdx
+    have hbase := D.close x h n hx hxh hdx hh hsmall
+    have hneg := intervalNearAtPrecision_neg hbase
+    simpa only [FunctionOnInterval.neg_compute,
+      QInterval.differenceQuotient_neg] using hneg
+
+def HasDerivativeOnInterval.subOfCommonSchedule
+    {f g df dg : FunctionOnInterval}
+    (hf : HasDerivativeOnInterval f df)
+    (hg : HasDerivativeOnInterval g dg)
+    (hfgLower : f.lower = g.lower)
+    (hfgUpper : f.upper = g.upper)
+    (hdfgLower : df.lower = dg.lower)
+    (hdfgUpper : df.upper = dg.upper)
+    (hstep : hf.stepPrecision = hg.stepPrecision)
+    (heval : hf.evalPrecision = hg.evalPrecision)
+    (inner : Nat -> Nat)
+    (hprecision : forall n,
+      2 * (precisionAtStage (inner n)).val <= (precisionAtStage n).val) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.sub f g hfgLower hfgUpper)
+      (FunctionOnInterval.add df (FunctionOnInterval.neg dg)
+        hdfgLower hdfgUpper) := by
+  simpa [FunctionOnInterval.sub] using
+    (HasDerivativeOnInterval.addOfCommonSchedule hf (HasDerivativeOnInterval.neg hg)
+      hfgLower hfgUpper hdfgLower hdfgUpper hstep heval inner hprecision)
+
+/-! A named linear-combination wrapper for the two primitive closures.  The
+scaled certificates are supplied explicitly so their sign splits and stage
+schedules remain visible; this theorem only performs the common-chart
+addition and its finite doubled-error budget. -/
+def HasDerivativeOnInterval.linearCombinationOfCommonSchedule
+    {r s : Rat} {f g df dg : FunctionOnInterval}
+    (hf : HasDerivativeOnInterval
+      (FunctionOnInterval.scaleRat r f)
+      (FunctionOnInterval.scaleRat r df))
+    (hg : HasDerivativeOnInterval
+      (FunctionOnInterval.scaleRat s g)
+      (FunctionOnInterval.scaleRat s dg))
+    (hfgLower : (FunctionOnInterval.scaleRat r f).lower =
+      (FunctionOnInterval.scaleRat s g).lower)
+    (hfgUpper : (FunctionOnInterval.scaleRat r f).upper =
+      (FunctionOnInterval.scaleRat s g).upper)
+    (hdfgLower : (FunctionOnInterval.scaleRat r df).lower =
+      (FunctionOnInterval.scaleRat s dg).lower)
+    (hdfgUpper : (FunctionOnInterval.scaleRat r df).upper =
+      (FunctionOnInterval.scaleRat s dg).upper)
+    (hstep : hf.stepPrecision = hg.stepPrecision)
+    (heval : hf.evalPrecision = hg.evalPrecision)
+    (inner : Nat -> Nat)
+    (hprecision : forall n,
+      2 * (precisionAtStage (inner n)).val <= (precisionAtStage n).val) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.add
+        (FunctionOnInterval.scaleRat r f)
+        (FunctionOnInterval.scaleRat s g) hfgLower hfgUpper)
+      (FunctionOnInterval.add
+        (FunctionOnInterval.scaleRat r df)
+        (FunctionOnInterval.scaleRat s dg) hdfgLower hdfgUpper) :=
+  HasDerivativeOnInterval.addOfCommonSchedule hf hg
+    hfgLower hfgUpper hdfgLower hdfgUpper hstep heval inner hprecision
 
 /-- A function solving `f' = f` on an interval with a specified initial value.
 

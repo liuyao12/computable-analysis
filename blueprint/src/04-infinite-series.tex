@@ -54,7 +54,16 @@ The finite Fourier API is explicit:
 \lean{ComputableAnalysis.fourPointFourierTransform_parseval}
 \lean{ComputableAnalysis.FiniteFourierOrthogonalityCertificate}
 \lean{ComputableAnalysis.FiniteFourierReconstructionCertificate.reconstructs}
+\lean{ComputableAnalysis.finiteFourierSum_blockRepeat_zero_of_phase_one}
+\lean{ComputableAnalysis.FiniteFourierBlockCancellationCertificate.repeated_zero}
+\lean{ComputableAnalysis.FiniteFourierBlockCancellationCertificate.add_repeated_invariant}
 \leanok
+
+The cancellation theorem is the finite algebra behind periodic Fourier
+orthogonality: a block whose selected coefficient is zero may be repeated or
+adjoined without changing that coefficient.  The only phase requirement is
+the rational-complex identity that one full block contributes phase one.
+No integral, limit, or real-number completion enters this step.
 
 The infinite-looking step is only a tail certificate over these finite
 transforms:
@@ -69,6 +78,8 @@ finite transform -> coordinate tail box -> future-stage containment
 \lean{ComputableAnalysis.EffectiveFourierSeries.stabilized_valid}
 \lean{ComputableAnalysis.EffectiveFourierSeries.precision_witness}
 \lean{ComputableAnalysis.quarterTurnGeometricTailCertificate_valid}
+\lean{ComputableAnalysis.EffectiveFourierSampleCertificate.toSeries_valid}
+\lean{ComputableAnalysis.EffectiveFourierSampleCertificate.sample_interval_witness}
 \leanok
 
 The first genuinely nonzero infinite-looking example is the quarter-turn
@@ -181,6 +192,7 @@ infinite-looking.
 \lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_prefix}
 \lean{ComputableAnalysis.FinitePolynomial.integratedTaylorPrefix_endpointDifference_eq_finiteMonomialIntegralSum}
 \lean{ComputableAnalysis.FinitePolynomial.finiteMonomialIntegralSum_succ}
+\lean{ComputableAnalysis.FinitePolynomial.integratedTaylorPrefix_endpointDifference_contains_of_pos}
 \leanok
 
 The formal coefficient layer already records the derivative shifts for the
@@ -190,6 +202,27 @@ main complex-valued functions:
 \lean{ComputableAnalysis.PowerSeries.expCoeff_hasFormalDerivative}
 \lean{ComputableAnalysis.PowerSeries.sinCoeff_hasFormalDerivative}
 \lean{ComputableAnalysis.PowerSeries.neg_cosCoeff_hasFormalDerivative}
+\leanok
+
+The first worked trigonometric prefix closes this loop.  The finite sine
+prefix is a rational polynomial: its coefficient shift supplies the cosine
+derivative, and its effective FTC certificate evaluates the corresponding
+finite area.  This is a finite model of the later sine argument; the tail of
+the full sine evaluator is deliberately kept as a separate enclosure.
+
+\begin{verbatim}
+sine prefix -> cosine prefix -> secant bound -> FTC endpoint box
+                                              -> rational value
+\end{verbatim}
+
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixOne_eq_identity}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixOneIntegralRaw_equiv_one_eighth}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTCData}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTC_equiv_endpoint}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTC_equiv_fortySeven_over_threeEightFour}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_endpoint}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_value}
 \leanok
 
 The same separation is used when a finite-prefix or partition schedule is not

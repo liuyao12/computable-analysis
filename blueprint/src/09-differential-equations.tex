@@ -17,6 +17,18 @@ coefficient/forcing evaluator -> cell or simplex bounds
                               -> finite transition and Duhamel boxes
 \end{verbatim}
 
+The finite box part is now dimension-independent.  A separable coefficient
+product can be assembled as a weighted nested rational sum and factored into
+one finite sum per coordinate.  This supplies the rectangular component of a
+multiple integral; chronological ordering and simplex restrictions remain
+explicit additional data, rather than being hidden inside a Fubini or measure
+theorem.
+
+\lean{ComputableAnalysis.finiteProductIntegralNestedSum}
+\lean{ComputableAnalysis.finiteProductIntegralSum}
+\lean{ComputableAnalysis.finiteProductIntegralNestedSum_factorized}
+\leanok
+
 The reusable contract is exposed here so an ODE instance can be added without
 introducing a new notion of integration:
 
@@ -41,13 +53,88 @@ small fixed dimensions.
 The finite algebraic core is explicit in Lean:
 
 \lean{ComputableAnalysis.LinearODE.solvesRecurrence_eq_trajectory}
+\lean{ComputableAnalysis.LinearODE.finiteSum_qabs_mul_le}
+\lean{ComputableAnalysis.LinearODE.finiteSum_le}
+\lean{ComputableAnalysis.LinearODE.matrixApply_qabs_le}
+\lean{ComputableAnalysis.LinearODE.matrixMul_qabs_le}
+\lean{ComputableAnalysis.LinearODE.matrixRowAbsSum}
+\lean{ComputableAnalysis.LinearODE.matrixRowAbsSum_identity}
+\lean{ComputableAnalysis.LinearODE.matrixRowAbsSum_matrixScale}
+\lean{ComputableAnalysis.LinearODE.matrixRowAbsSum_matrixAdd_le}
+\lean{ComputableAnalysis.LinearODE.matrixRowAbsSum_affineStep_le}
+\lean{ComputableAnalysis.LinearODE.matrixMul_rowAbsSum_le}
+\lean{ComputableAnalysis.LinearODE.finiteSum_mul_le_of_nonneg}
+\lean{ComputableAnalysis.LinearODE.finiteSum_mul_le_of_le_left}
+\lean{ComputableAnalysis.LinearODE.vectorAbsSum}
+\lean{ComputableAnalysis.LinearODE.matrixColumnAbsSum}
+\lean{ComputableAnalysis.LinearODE.matrixColumnAbsSum_identity}
+\lean{ComputableAnalysis.LinearODE.matrixColumnAbsSum_matrixScale}
+\lean{ComputableAnalysis.LinearODE.matrixColumnAbsSum_matrixAdd_le}
+\lean{ComputableAnalysis.LinearODE.matrixColumnAbsSum_affineStep_le}
+\lean{ComputableAnalysis.LinearODE.matrixApply_vectorAbsSum_le}
+\lean{ComputableAnalysis.LinearODE.matrixApply_vectorAbsSum_le_of_column_bound}
+\lean{ComputableAnalysis.LinearODE.matrixMul_columnAbsSum_le}
+\lean{ComputableAnalysis.LinearODE.matrixMul_columnAbsSum_le_of_column_bound}
+\lean{ComputableAnalysis.LinearODE.ratProduct}
+\lean{ComputableAnalysis.LinearODE.ratProduct_nonneg}
+\lean{ComputableAnalysis.LinearODE.ratProduct_const_eq_pow}
+\lean{ComputableAnalysis.LinearODE.chronologicalProduct_rowAbsSum_le}
+\lean{ComputableAnalysis.LinearODE.chronologicalProduct_rowAbsSum_le_pow}
+\lean{ComputableAnalysis.LinearODE.chronologicalProduct_columnAbsSum_le_pow}
+\lean{ComputableAnalysis.LinearODE.chronologicalProduct_stateAbsSum_le}
+\lean{ComputableAnalysis.LinearODE.solvesHomogeneousRecurrence_eq_homogeneousTrajectory}
+\lean{ComputableAnalysis.LinearODE.solvesHomogeneousRecurrence_zero}
+\lean{ComputableAnalysis.LinearODE.homogeneousTrajectory_eq_chronologicalStepProduct}
+\lean{ComputableAnalysis.LinearODE.homogeneousTrajectory_vectorAdd}
+\lean{ComputableAnalysis.LinearODE.homogeneousTrajectory_vectorScale}
+\lean{ComputableAnalysis.LinearODE.matrixApply_matrixAdd}
+\lean{ComputableAnalysis.LinearODE.matrixApply_matrixScale}
 \lean{ComputableAnalysis.LinearODE.trajectory_eq_transition_add_zeroInitial}
 \lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum}
 \lean{ComputableAnalysis.LinearODE.discretePeanoBakerExpansion}
 \leanok
 
+These uniqueness results are exact finite induction statements: two sampled
+trajectories with the same initial state and the same rational update rule
+agree at every finite index.  The chronological product is therefore not an
+assumed evolution operator; it is a proved finite normal form for the ordered
+matrix actions.
+
 These are finite sampled statements.  They become ODE theorems only after an
 effective-FTC provider supplies the coefficient, simplex, and tail bounds.
+
+The absolute-value estimate is the first finite norm substitute in this
+chapter.  It bounds each matrix-action coordinate by a rational sum of entry
+and state magnitudes.  A later provider may add a row-sum or maximum-entry
+bound, but it no longer needs to import a completed normed matrix space merely
+to justify the local estimate.  The multiplication version makes the estimate
+composable: every chronological word inherits a finite entrywise bound by
+repeatedly applying the same certificate.  The row-absolute sum packages this
+calculation into a weighted finite norm surrogate, with an explicit
+matrix-product inequality.  It is the interface a later factorial-tail proof
+can use for sampled transition products.  Scaling multiplies the row bound by
+the scalar's rational absolute value, and addition is controlled by the sum of
+row bounds.  Thus the same certificate also follows affine Euler updates of
+the form \(I+B_k\).
+
+The finite transition-growth theorem now iterates this estimate.  If the
+row-sum of step \(I+B_k\) is bounded by \(c_k\), then every row of the first
+\(N\) chronological product is bounded by the rational product
+\(\prod_{k<N} c_k\).  This is a finite induction, and supplies the growth
+factor separately from the factorial tail.
+For a uniform bound \(c_k=c\), this becomes the compact estimate \(c^N\),
+which is the constant-coefficient growth factor used by the elementary
+exponential and rotation providers.
+
+The complementary state estimate is column-based: the total absolute size of
+the transformed vector is bounded by the column-weighted finite sum, and by
+\(c\) times the previous vector size when every column sum is at most \(c\).
+This is still only a finite rational calculation, but it is now suitable for
+tracking forcing terms and state errors.
+Consequently, a chronological transition with column bound \(c\) transports
+any rational state with total absolute size \(V\) into a state of size at most
+\(c^N V\) after \(N\) steps.  This is the finite stability estimate that the
+continuous provider must eventually refine with discretization and tail error.
 
 The forcing term is handled by a literal finite Duhamel sum:
 
@@ -189,11 +276,40 @@ case; affine forcing then gives variation of constants.
 The constant-coefficient and rotation algebra is checked before any analytic
 series theorem:
 
+For a constant generator, the ordered-simplex volume is built recursively:
+
+\begin{verbatim}
+V(0,T) := 1
+V(r+1,T) := T/(r+1) * V(r,T)
+V(r,T)  = T^r/r!
+\end{verbatim}
+
+This is a finite rational identity.  It explains the factorial coefficient in
+the Peano--Baker terms before any infinite series or completed function space
+is introduced.
+
 \lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexTerm_succ}
+\lean{ComputableAnalysis.LinearODE.orderedSimplexVolume}
+\lean{ComputableAnalysis.LinearODE.orderedSimplexVolume_eq_closed}
+\lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexTerm_eq_orderedSimplexVolume}
 \lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexPartial_succ}
+\lean{ComputableAnalysis.LinearODE.RotationSystem.generator_rowAbsSum}
+\lean{ComputableAnalysis.LinearODE.RotationSystem.affineGenerator_rowAbsSum_le}
+\lean{ComputableAnalysis.LinearODE.RotationSystem.rotationChronologicalProduct_rowAbsSum_le}
+\lean{ComputableAnalysis.LinearODE.RotationSystem.generator_columnAbsSum}
+\lean{ComputableAnalysis.LinearODE.RotationSystem.affineGenerator_columnAbsSum_le}
+\lean{ComputableAnalysis.LinearODE.RotationSystem.rotationChronologicalProduct_columnAbsSum_le}
+\lean{ComputableAnalysis.LinearODE.RotationSystem.rotationChronologicalProduct_stateAbsSum_le}
 \lean{ComputableAnalysis.LinearODE.RotationSystem.generator_square}
 \lean{ComputableAnalysis.LinearODE.RotationSystem.simplexPartial_even_split}
+\lean{ComputableAnalysis.LinearODE.RotationSystem.simplexPartial_odd_split}
 \leanok
+
+For the quarter-turn generator, each row has absolute sum \(1\); a scaled
+Euler step therefore has row bound \(1+|h|\), and \(N\) such steps have bound
+\((1+|h|)^N\).  This is a concrete growth certificate for the rotation family,
+not yet the analytic assertion that the discrete product equals the continuous
+rotation.
 
 The analytic convergence input is a rational factorial tail.  It supplies a
 computable stage for every requested error, and the Volterra comparison turns

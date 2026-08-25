@@ -1,6 +1,7 @@
 import ComputableAnalysis.FTC
 import ComputableAnalysis.FunctionDomains
 import ComputableAnalysis.IntegralIdentities
+import ComputableAnalysis.FinitePolynomialCalculus
 
 /-!
 # A certified logarithmic-series value
@@ -409,6 +410,35 @@ the constructive candidate for `∫_1^2 dx/x`, under the affine substitution
 `x = 1 + t`. -/
 def logTwoKernel (t : Rat) : Rat :=
   1 / (1 + t)
+
+/-! The translated reciprocal derivative certificate is also exposed in the
+same local FTC form used by the partition machinery. -/
+theorem logTwoKernel_endpointDifference_contains_of_pos
+    {x h : Rat} {stage : Nat}
+    (hx : inDomainInterval (0 : Rat) 1 x)
+    (hxh : inDomainInterval (0 : Rat) 1 (x + h))
+    (hpos : 0 < h)
+    (hsmall : qabs h <=
+      (1 / ((
+        _root_.ComputableAnalysis.FinitePolynomial.CenteredSecantDerivativeBound.logTwoKernel_hasDerivativeOnInterval.stepPrecision
+          stage : Nat) : Rat))) :
+    (QInterval.scaleByRat h
+      (QInterval.expand
+        ((FunctionOnInterval.exactRat
+          (fun t => -(1 / (1 + t) ^ 2)) 0 1).compute x hx
+          (_root_.ComputableAnalysis.FinitePolynomial.CenteredSecantDerivativeBound.logTwoKernel_hasDerivativeOnInterval.evalPrecision
+            x h stage))
+        (2 * (precisionAtStage stage).val))).ContainsInterval
+      (QInterval.subInterval
+        ((FunctionOnInterval.exactRat logTwoKernel 0 1).compute (x + h) hxh
+          (_root_.ComputableAnalysis.FinitePolynomial.CenteredSecantDerivativeBound.logTwoKernel_hasDerivativeOnInterval.evalPrecision
+            x h stage))
+        ((FunctionOnInterval.exactRat logTwoKernel 0 1).compute x hx
+          (_root_.ComputableAnalysis.FinitePolynomial.CenteredSecantDerivativeBound.logTwoKernel_hasDerivativeOnInterval.evalPrecision
+            x h stage))) := by
+  exact HasDerivativeOnInterval.endpointDifference_contains_of_pos
+    _root_.ComputableAnalysis.FinitePolynomial.CenteredSecantDerivativeBound.logTwoKernel_hasDerivativeOnInterval
+    hx hxh hx hpos hsmall
 
 /-! The affine substitution `x = 1 + t` is recorded before any raw-real
 interpretation: it is an exact rational identity on the positive interval. -/

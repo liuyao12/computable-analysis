@@ -90,6 +90,25 @@ private theorem foldl_add_map_mul_right (xs : List Rat) (b : Rat)
       rw [ih]
       grind [Rat.add_mul, Rat.add_assoc, Rat.mul_assoc]
 
+private theorem foldl_add_map_mul_right_general {α : Type}
+    (xs : List α) (b : Rat) (f : α -> Rat) :
+    (xs.map (fun x => f x * b)).foldl (fun acc value => acc + value) 0 =
+      (xs.map f).foldl (fun acc value => acc + value) 0 * b := by
+  induction xs with
+  | nil =>
+      simp
+  | cons x xs ih =>
+      simp only [List.map_cons, List.foldl]
+      simp only [Rat.zero_add]
+      rw [foldl_add_initial]
+      have hright :
+          (xs.map f).foldl (fun acc value => acc + value) (f x) =
+            f x + (xs.map f).foldl (fun acc value => acc + value) 0 := by
+        simpa only [id] using
+          (foldl_add_initial (xs.map f) (fun z => z) (f x))
+      rw [hright, ih]
+      grind [Rat.add_mul, Rat.add_assoc, Rat.mul_assoc]
+
 theorem finiteProductSum2D_factorized (xs ys : List Rat) (f g : Rat -> Rat) :
     finiteProductSum2D xs ys f g =
       (xs.map f).foldl (fun acc value => acc + value) 0 *
@@ -120,6 +139,93 @@ theorem finiteProductSum2D_factorized (xs ys : List Rat) (f g : Rat -> Rat) :
       rw [hright]
       grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc, Rat.mul_assoc]
 
+/-! The same finite algebra in arbitrary dimension.  A list of sample lists
+and a list of one-variable factors describes a separable rectangular sum. -/
+
+def finiteProductNestedSum : List (List Rat) -> List (Rat -> Rat) -> Rat
+  | [], [] => 1
+  | samples :: restSamples, factor :: restFactors =>
+      (samples.map (fun x =>
+        factor x * finiteProductNestedSum restSamples restFactors)).foldl
+        (fun acc value => acc + value) 0
+  | _, _ => 0
+
+def finiteProductSum : List (List Rat) -> List (Rat -> Rat) -> Rat
+  | [], [] => 1
+  | samples :: restSamples, factor :: restFactors =>
+      (samples.map factor).foldl (fun acc value => acc + value) 0 *
+        finiteProductSum restSamples restFactors
+  | _, _ => 0
+
+theorem finiteProductNestedSum_factorized
+    (samples : List (List Rat)) (factors : List (Rat -> Rat)) :
+    finiteProductNestedSum samples factors =
+      finiteProductSum samples factors := by
+  induction samples generalizing factors with
+  | nil =>
+      cases factors <;> rfl
+  | cons sample rest ih =>
+      cases factors with
+      | nil => rfl
+      | cons factor restFactors =>
+          simp only [finiteProductNestedSum, finiteProductSum]
+          induction sample with
+          | nil => simp
+          | cons x xs ihx =>
+              simp only [List.map_cons, List.foldl]
+              rw [foldl_add_initial]
+              rw [ihx]
+              have htail := ih restFactors
+              rw [htail]
+              have hright :
+                  (xs.map factor).foldl (fun acc value => acc + value)
+                      (factor x) =
+                    factor x +
+                      (xs.map factor).foldl
+                        (fun acc value => acc + value) 0 := by
+                simpa only [id] using
+                  (foldl_add_initial (xs.map factor) (fun z => z)
+                    (factor x))
+              simp only [Rat.zero_add]
+              rw [hright]
+              grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc, Rat.mul_assoc]
+
+def finiteProductIntegralNestedSum :
+    List (List (Rat × Rat)) -> List (Rat -> Rat) -> Rat
+  | [], [] => 1
+  | cells :: restCells, factor :: restFactors =>
+      (cells.map (fun cell =>
+        cell.2 * factor cell.1 *
+          finiteProductIntegralNestedSum restCells restFactors)).foldl
+        (fun acc value => acc + value) 0
+  | _, _ => 0
+
+def finiteProductIntegralSum :
+    List (List (Rat × Rat)) -> List (Rat -> Rat) -> Rat
+  | [], [] => 1
+  | cells :: restCells, factor :: restFactors =>
+      (cells.map (fun cell => cell.2 * factor cell.1)).foldl
+          (fun acc value => acc + value) 0 *
+        finiteProductIntegralSum restCells restFactors
+  | _, _ => 0
+
+theorem finiteProductIntegralNestedSum_factorized
+    (samples : List (List (Rat × Rat))) (factors : List (Rat -> Rat)) :
+    finiteProductIntegralNestedSum samples factors =
+      finiteProductIntegralSum samples factors := by
+  induction samples generalizing factors with
+  | nil =>
+      cases factors <;> rfl
+  | cons cells rest ih =>
+      cases factors with
+      | nil => rfl
+      | cons factor restFactors =>
+          simp only [finiteProductIntegralNestedSum, finiteProductIntegralSum]
+          rw [foldl_add_map_mul_right_general cells
+            (finiteProductIntegralNestedSum rest restFactors)
+            (fun cell => cell.2 * factor cell.1)]
+          rw [ih]
+
 /-! The weighted form is the rectangle-integral interface: each sample carries
 its rational cell width.  It is definitionally a separable product sum, so the
 factorization theorem above supplies the algebraic multiple-integral law. -/
@@ -143,6 +249,14 @@ theorem finiteProductIntegralSum2D_factorized
       (xs.map (fun cell => cell.2 * f cell.1))
       (ys.map (fun cell => cell.2 * g cell.1))
       (fun value => value) (fun value => value))
+
+theorem finiteProductIntegralNestedSum_two_factor
+    (xs ys : List (Rat × Rat)) (f g : Rat -> Rat) :
+    finiteProductIntegralNestedSum [xs, ys] [f, g] =
+      finiteProductIntegralSum2D xs ys f g := by
+  rw [finiteProductIntegralNestedSum_factorized]
+  rw [finiteProductIntegralSum2D_factorized]
+  simp [finiteProductIntegralSum]
 
 def gaussianProductModel (n : Nat) (oneDimensionalGaussian : Rat) : Rat :=
   oneDimensionalGaussian ^ n

@@ -113,10 +113,13 @@ Start with the smallest target module rather than importing
 | Finite arithmetic, geometric, and power sums | `ComputableAnalysis.Series` | `Series.arithmeticSum_eq`, `Series.geometricSum_eq`, `Series.powerSum`, and the low-degree closed forms |
 | Finite Basel-series certificates | `ComputableAnalysis.DirichletSeries` | `zetaTwoPartial_nonneg`, `zetaTwoFiniteTail_le_telescoping`, `zetaTwoInterval_nested`, and `zetaTwoRaw_validCompute` |
 | Formal power series and rational tail bounds | `ComputableAnalysis.PowerSeries` | `FormalPowerSeries`, `RationalMajorant` |
+| Finite term-by-term FTC for Taylor prefixes | `ComputableAnalysis.FiniteTaylorFTCInterface` | `FinitePolynomial.finiteTaylorFTC_step`, `FinitePolynomial.finiteTaylorFTC_prefix` |
+| Finite exponential tail certificates | `ComputableAnalysis.FiniteExponentialTaylor` | `FiniteExponentialTaylor.scheduled_expTaylorPrefix_remainder_le`, `FiniteExponentialTaylor.scheduled_expTaylorPrefix_enclosure` |
 | Current first-year derivative ledger | `ComputableAnalysis.FirstYearCalculus` | `checked_power_series_table`, `RealElementary` |
 | Positive powers, exponential/log interfaces | `ComputableAnalysis.ElementaryFunctions` | `exp.PositiveRealRaw`, `exp.RationalPowerExtension`, `exp.ExponentialFunction` |
 | Direct scalar ODE uniqueness | `ComputableAnalysis.ScalarODEUniqueness` | `ScalarODE.DirectMeshHalvingCertificate`, `SelfDerivativeDirectMeshComparison` |
 | Discrete linear ODE / Peano--Baker core | `ComputableAnalysis.PeanoBaker` | `LinearODE.DiscreteLinearSystem`, `chronologicalProduct`, `peanoBakerDiscreteSum` |
+| Finite ordered-simplex volumes | `ComputableAnalysis.PeanoBaker` | `orderedSimplexVolume`, `orderedSimplexVolume_eq_closed`, `constantPeanoBakerSimplexTerm_eq_orderedSimplexVolume` |
 | Certified complex rotation series | `ComputableAnalysis.RotationSeries` | `rotationExpRaw`, `rotationCosRaw`, `rotationSinRaw`, and their validity/rate theorems |
 | Bounded rotation continuity | `ComputableAnalysis.RotationCalculus` | `uniformRotationCosOnTwo`, `uniformRotationSinOnTwo`, and their epsilon--delta theorems |
 | Common-prefix rotation IVP candidate | `ComputableAnalysis.RotationInitialValues` | `uniformRotationCosOnTwo_zero_equiv_one`, `uniformRotationSinOnTwo_zero_equiv_zero`, `uniformRotationNegSinOnTwo_equiv_neg_sin`, `uniformRotationOnTwo_rotationInitialCertificate` |
@@ -279,6 +282,18 @@ For example, `1 / (x^2 - 2)` must not be treated as regular on `[1,2]`.
 7. **Only then expose a friendly formula.**  The familiar formula is the
    public theorem; the raw implementations and bounds are its proof data.
 
+For an effective FTC proof, do not force all computations to use one stage.
+`TwoStageCandidateDerivativeFTC` allows the derivative evaluator and the
+primitive endpoint evaluator to choose independent stages. The derivative
+stage builds the cell bounds; the endpoint stage supplies the common-stage
+finite telescope. The public closure theorem is
+`ComputableAnalysis.twoStageCandidateDerivativeFTC`, while
+`TwoStageCandidateDerivativeFTC.boundedIntegralRaw_equiv_endpointDifference`
+transports the resulting raw integral to the canonical endpoint difference.
+This separation is useful for nested-radical or other staged special-function
+evaluators whose pointwise and endpoint computations have different natural
+schedules.
+
 Use `rg` to discover nearby examples before inventing a new interface:
 
 ```bash
@@ -325,16 +340,40 @@ There are also genuine full interval derivative certificates on `[0,1]` for:
   (`d(x A_rect)/dx = A_rect + x/(1+x^2)`).
 
 `FunctionOnInterval.scaleRat` and
-`HasDerivativeOnInterval.scaleRat_two` are the first reusable scalar rule:
-they multiply the finite quotient and its derivative boxes by two while
-requesting the explicit finer stage `2*(n+1)`.  The sector-area module applies
-that rule to the rectangle arctangent.  Its `angleOnUnit` has derivative
+`HasDerivativeOnInterval.scaleRat_of_nonneg` now give the reusable scalar
+rule for every nonnegative rational factor.  The caller supplies an internal
+stage and proves `r * precision(internal) <= precision(output)`; the special
+case `HasDerivativeOnInterval.scaleRat_two` packages the standard
+`2*(n+1)` schedule.  The sector-area module applies that rule to the rectangle
+arctangent.  Its `angleOnUnit` has derivative
 `speedOnUnit`, whose exact rational value is
 `RationalCircle.Stage.sectorAreaSpeed t = 2/(1+t^2)`;
 `angleAt_equiv_two_arctanGeom` supplies the pointwise bridge to the geometric
 angle representation.  The same module now proves the quantitative finite
 gap `x + 1/(n+1) <= y -> Theta_x.hi < Theta_y.lo` at stage `64*(n+1)`,
 and packages it as `angleOnUnit_effectiveInverseSeparation`.
+
+The unrestricted rational scalar rule is now also available as
+`HasDerivativeOnInterval.scaleRat`.  Its budget uses `qabs r`, and the proof
+splits the sign explicitly: nonnegative scaling uses interval multiplication,
+while a negative scalar is reduced to nonnegative scaling followed by
+endpoint negation.  This makes linear combinations sign-complete without
+silently assuming an ordered completed field.
+
+`HasDerivativeOnInterval.linearCombinationOfCommonSchedule` packages the
+next composition step: after the two signed-scalar certificates have been
+constructed, it adds them on a common chart and pays the doubled internal
+precision budget.  Its explicit schedule equalities are the intended input
+for linear ODE residuals and finite Taylor coefficient combinations.
+
+Negation is also closed at the interval level:
+`FunctionOnInterval.neg` reverses endpoint boxes without changing their
+width, and `HasDerivativeOnInterval.neg` proves the corresponding
+`D(-f) = -Df` rule at the same evaluator stages.
+`FunctionOnInterval.sub` is defined as addition with negation, and
+`HasDerivativeOnInterval.subOfCommonSchedule` supplies the corresponding
+finite subtraction rule.  These operations are now available for residuals,
+endpoint differences, and linear combinations in later chapters.
 `angleOnUnitRegular` is the cofinally accelerated presentation whose
 stage `n` uses that rectangle stage; its
 `angleOnUnitRegular_intervalRegular` endpoint-image evaluator and
@@ -374,11 +413,72 @@ proves an explicit `|h|` error bound for the literal quotient of
 bound as a full two-sided interval derivative certificate with an explicit
 dyadic half-decay step schedule.  It is also the right finite algebra for the
 termwise factorial-series bounds needed by exponential.
+`FinitePolynomial.monomialSecantDerivativeBound` and
+`FinitePolynomial.monomial_hasDerivativeOnInterval` now scale that certificate
+by (n+1), giving the general finite power rule
+`d(x^(n+1))/dx = (n+1)x^n` on every supplied bounded rational chart.
+The cubic specialization is now exposed as
+`FinitePolynomial.cubeSecantDerivativeBound` and
+`FinitePolynomial.cube_hasDerivativeOnInterval`: rationally scaling the
+normalized `x^3/3` certificate yields the exact finite derivative
+`d(x^3)/dx = 3x^2` on any supplied bounded rational interval.  This is a
+complete polynomial FTC input, not an appeal to a classical derivative limit.
 `FinitePolynomial.taylorPrefix_hasDerivativeOnInterval` materializes any
 formal coefficient stream as a finite rational Taylor polynomial and derives
 its interval derivative from `FormalPowerSeries.coefficientShift`. This is
 the intended hand-off from Chapter 4's algebra to Chapter 6's derivative
 certificates; no infinite-series tail is differentiated at this point.
+For interval regularity itself, `Integral.exactPow_lipschitz_on_minusOne_one`
+and `Integral.exactRat_pow_intervalRegularOn_minusOne_one` expose the
+parametric monomial certificate on `[-1,1]`: the rational power-difference
+recurrence gives the natural Lipschitz bound `n`, including `n = 0`.
+The matching primitive algebra is exposed by
+`Integral.monomialPrimitiveRaw`,
+`Integral.monomialPrimitiveEndpointDifference`, and
+`Integral.monomialPrimitiveEndpointDifference_adjacent_additive`; these
+objects telescope over rational partitions before any limiting integral
+argument is introduced.
+For the finite quadrature itself,
+`Integral.uniformLeftEndpointSum_pow_eq_scaled_powerSum` identifies the
+left-rectangle sum for `x^n` with a scaled `Series.powerSum`. This keeps the
+value-identification problem in finite rational arithmetic; convergence or
+endpoint overlap is a separate theorem obligation.
+The right-endpoint counterpart is
+`Integral.uniformRightEndpointSum_pow_eq_scaled_powerSumBlock`, and for a
+positive exponent
+`Integral.uniformRightEndpointSum_pow_sub_left_eq_scaled_last_power` gives
+the exact left/right rectangle gap. This is the finite shrinking certificate
+used before identifying the common endpoint value.
+With positive mesh count it normalizes further to exactly `1 / n` via
+`Integral.uniformRightEndpointSum_pow_sub_left_eq_inv_of_pos`, making the
+precision schedule immediate.
+The resulting constructive integral object is available for every monomial
+through `Integral.exactRat_pow_integral_certificate`, with validity proved by
+`Integral.exactRat_pow_integral_raw_valid`. This is intentionally separate
+from a theorem identifying the object with the closed form `1 / (n + 1)`.
+The exponent-zero regression
+`Integral.exactRat_zero_integral_raw_equiv_one` confirms that the generic
+certificate specializes to the exact constant integral without unfolding the
+private Darboux folds.
+
+The exponent-one regression
+`Integral.exactRat_one_integral_raw_equiv_half` checks the first nonconstant
+case through the public affine left/right sum formulas.
+
+The quadratic regression is already complete as well:
+`Integral.exactRat_square_integral_raw_equiv_one_third` proves the generic
+finite dyadic box contains `1 / 3`, using the finite sum-of-squares identity.
+The cubic, quartic, and fifth-degree values are exposed by
+`Integral.exactRat_cube_integral_raw_equiv_one_fourth`,
+`Integral.quarticIntegralEffectiveFTC_equiv_one_fifth`, and
+`Integral.fifthIntegralEffectiveFTC_equiv_one_sixth` respectively.
+The same rational power induction supplies
+`Integral.exactRat_pow_nondecreasing_on_unit` and a compatible
+`Integral.exactRat_pow_monotoneConstructionFor`, so the monomial can be fed
+through either the Lipschitz dyadic or monotone Darboux interface.
+`Integral.exactRat_pow_monotoneIntegralFor_valid` proves the monotone wrapper
+valid, while `Integral.exactRat_pow_monotoneIntegralFor_eq_dyadicRaw` records
+that both wrappers are literally the same underlying interval computation.
 For a prefix containing a linear term,
 `FinitePolynomial.taylorPrefixShift_at_zero` identifies that certified
 derivative polynomial at zero with the original coefficient `c 1`.
@@ -389,17 +489,50 @@ assumptions are `-C <= lower - a` and `upper - a <= C`, and
 `FinitePolynomial.taylorPrefixShiftAt_at_basepoint` proves that the certified
 derivative at `a` is again `c 1`.  Thus the coefficient interpretation is
 translation-invariant without invoking an ambient real line.
+For the finite integral identity itself, import
+`ComputableAnalysis.FiniteTaylorFTCInterface`: use
+`FinitePolynomial.finiteTaylorFTC_step` for one added monomial and
+`FinitePolynomial.finiteTaylorFTC_prefix` for the complete finite prefix.
+These are rational endpoint identities; the tail certificate and the raw
+real representation remain separate obligations.
 At the quantitative level, `FinitePolynomial.SecantDerivativeBound.add`,
 `scaleRat`, and `mul` compose finite derivative certificates.  The product
 constructor asks for rational bounds for each factor and its proposed
 derivative on the local box; its explicit coefficient includes the finite
 secant corner term.  Supply those majorants rather than invoking an
-unqualified product-rule limit.
+unqualified product-rule limit.  `FinitePolynomial.SecantDerivativeBound.mulToHasDerivativeOnInterval`
+now hands that product certificate directly to the interval derivative
+interface, producing the exact rational product chart and the derivative
+chart \(f g' + g f'\).  This is the project’s bounded, finite version of the
+product rule; no completeness or unbounded limiting theorem is hidden in the
+wrapper.
+The local FTC hand-off is explicit as well:
+`HasDerivativeOnInterval.endpointDifference_contains_of_pos` takes one
+positive rational cell whose width satisfies the derivative certificate's
+step budget and encloses its endpoint difference by the cell width times the
+derivative box, widened by twice the requested precision.  This is the exact
+finite bridge consumed by partition-level FTC certificates.
 `FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval` then closes
 this construction under every finite rational coefficient prefix. Its
 quantitative `SecantDerivativeBound` is the explicit Taylor-remainder bridge:
 only after that bound is supplied does a linear coefficient become an
 interval derivative.
+
+The first non-polynomial FTC is exposed in
+`ComputableAnalysis.ArctanEffectiveFTC`: the stabilized rectangle integral
+of `1 / (1 + x^2)` is equivalent to the geometric arctangent at `1` via
+`arctanEffectiveFTCStabilizedIntegral_equiv_arctanGeom_one`. This is the
+model for later special functions: define an executable primitive, prove a
+finite derivative-bound certificate, stabilize the rectangle evaluator, and
+then connect its endpoint value to a geometric or series representation.
+
+The same public normalization is available for the unit exponential:
+`uniformExpOnUnitStabilizedIntegral_equiv_powerSeries_one_sub_one` identifies
+the effective rectangle integral with the factorial-series value at `1`
+minus the exact rational value `1`.  The proof first uses FTC to obtain the
+endpoint subtraction, then transports the zero endpoint through the proved
+series equivalence; it does not silently identify `exp` with a classical real
+number.
 
 The series implementation is connected to this finite algebra without making
 an analytic derivative claim. `ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_monomial`
@@ -485,6 +618,34 @@ facts as `uniformRotationOnTwo_rotationInitialCertificate`. This is the
 checked rotation IVP candidate, still short of its geometric identification or
 a continuous vector uniqueness theorem.
 
+Affine reparametrization is available as a total finite chain-rule identity:
+`ExactFunction.differenceQuotient_affine_comp_of_step` includes the constant
+inner-map case, while `ExactFunction.secant_bracket_affine_endpoint_transport`
+handles positive endpoint transport. Use these rational identities as the
+starting point for substitution and angle-chart proofs; they do not require a
+limit or a completed real function.
+
+The matching integral-side identity is
+`ComputableAnalysis.riemannLeftExact_affine_substitution`. It transports a
+positive affine change of variable through the finite left-rectangle fold.
+This is the substitution algebra that an effective FTC certificate can later
+carry to the nested interval level; it is deliberately not stated as a
+general theorem about completed real integrals.
+The companion `ComputableAnalysis.riemannLeftExact_affine_closed` gives the
+closed rational value of every finite affine fold, including stage zero, and
+is useful for regression tests and error estimates.
+For a positive stage, `ComputableAnalysis.riemannLeftExact_affine_error_of_pos`
+normalizes that formula to the exact integral value plus an explicit
+`1 / n` rectangle error.
+The nonlinear calibration theorem
+`ComputableAnalysis.ExactFunction.ftcErrorExact_square_doubleId_of_pos`
+packages the same idea for the primitive `x^2`: its finite FTC error is
+exactly `(b-a)^2/n`.
+The cubic calibration
+`ComputableAnalysis.ExactFunction.ftcErrorExact_cube_threeSquare_unit_of_pos`
+exposes the corresponding unit-interval error
+`(3*n - 1)/(2*n^2)`.
+
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`.
 `FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval` now proves its
@@ -524,6 +685,11 @@ derivative alone:
    `Integral.DefiniteIdentity` when its global raw-function interface fits);
 5. derive the displayed endpoint formula from that package.
 
+For a piecewise-monotone integrand, use the separate-primitive API in
+`ComputableAnalysis.PrimitivePiecewiseFTC`: the cell areas belong to `F`,
+while the endpoint list is evaluated from the proposed primitive `P`.
+`Integral.absOnUnit_piecewise_primitiveFTC` is the reference two-cell example.
+
 `FTC.EffectiveFTC` and `FTC.effectiveFTC_definiteIntegralEqualsEndpoint`
 describe one checked endpoint-bridge route.  The generic bridge from an
 arbitrary `HasDerivativeOnInterval` to that FTC certificate is not yet
@@ -533,6 +699,27 @@ formula through `left_integral_equiv_endpoint_sub_right` (and its symmetric
 companion).  An LLM must still construct the two integrals and the common
 mesh/corner certificate for its particular functions; that is deliberately
 not inferred from a formal product rule alone.
+
+### Same-chart interval addition
+
+`FunctionOnInterval.add F G hlower hupper` is the public interval-level
+addition operation.  The equal lower and upper endpoints are explicit because
+the two rational charts must describe the same domain.  Its evaluator uses
+`QInterval.addInterval`, and `FunctionOnInterval.add_compute` exposes that
+stagewise computation.  The validity proof is inherited from
+`RealRaw.add_valid`; continuity, derivative certificates, and FTC data remain
+separate obligations.
+
+The finite derivative algebra is now exposed as well:
+`QInterval.differenceQuotient_addInterval` distributes the interval quotient
+over addition, and `intervalNearAtPrecision_addInterval` combines two
+near-certificates when the internal precision pays the doubled error budget.
+These are the ingredients for the next generic `HasDerivativeOnInterval`
+closure theorem; they do not use completeness or a limiting real-number
+argument.  That closure theorem is now available as
+`HasDerivativeOnInterval.addOfCommonSchedule`.  It requires explicit domain
+alignment and equality of the two certificates' stage schedules, then chooses
+an internal precision schedule satisfying the doubled-budget inequality.
 
 ### Increasing pieces: start with the literal finite stage
 
@@ -583,6 +770,18 @@ enclose the function's intended integral representative.  The current
 one-bracket API calls this `TurningBracketIntegralCompletion` (implemented by
 the legacy `SingleTurnIntegralCompletion`).  It does not turn every bounded
 or continuous interval function into an integral.
+
+For the equal-dyadic nested-radical sine route, the candidate integral is
+already a shrinking rational-box algorithm.  The first three finite anchors
+`dyadicNestedRadicalLeftSum_zero_overlaps_stieltjes` and
+`dyadicNestedRadicalLeftSum_one_overlaps_stieltjes` and
+`dyadicNestedRadicalLeftSum_two_overlaps_stieltjes` check its first three
+depths against the independent Stieltjes evaluator.  The unresolved obligation is
+the all-depth half-angle certificate family in `SinPiIntegral.lean`. Once those
+canonical rational boxes are supplied, the direct adapter
+`dyadicNestedRadical_sample_overlap_of_canonical_halfAngle_certificate_family`
+assembles the parity cases without requiring equality between the public
+circle evaluator and the nested-radical evaluator.
 
 One useful fully scoped exception is the unit arctangent triangle route in
 `Logarithm.lean`.  Its public name is `arctan.integral.triangle` (implemented
@@ -753,11 +952,19 @@ open ComputableAnalysis
 #check FinitePolynomial.taylorPrefixShiftAt_at_basepoint
 #check FinitePolynomial.taylorPrefix_succ
 #check FinitePolynomial.taylorPrefixShift_succ_eq_of_coefficientShift
+#check FinitePolynomial.monomialSecantDerivativeBound
+#check FinitePolynomial.monomial_hasDerivativeOnInterval
+#check FinitePolynomial.cubeSecantDerivativeBound
+#check FinitePolynomial.cube_hasDerivativeOnInterval
 #check FinitePolynomial.taylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.taylorPrefixAt_hasDerivativeOnInterval
 #check FinitePolynomial.sineTaylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.cosineTaylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.SecantDerivativeBound.mul
+#check FinitePolynomial.SecantDerivativeBound.mulToHasDerivativeOnInterval
+#check HasDerivativeOnInterval.endpointDifference_contains_of_pos
+#check HasDerivativeOnInterval.scaleRat
+#check HasDerivativeOnInterval.linearCombinationOfCommonSchedule
 #check FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval
 #check ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero
@@ -1159,6 +1366,17 @@ It is likewise not a general substitution theorem.
 the stabilized finite Stieltjes sums for the same substitution, then proves
 equivalent to `pi.squareSubstitution` and area pi.  It is an executable
 algorithmic witness in the primary pi registry, not a ninth coverage bridge.
+
+For the equal-dyadic sine route, the finite candidate sum now has an explicit
+ordered-interval theorem:
+`SinPiIntegral.dyadicNestedRadicalLeftSum_width_nonneg`. If a geometric or
+Stieltjes argument supplies stagewise interval overlap, package it as
+`SinPiIntegral.DyadicNestedRadicalStieltjesCommonWitness.of_overlap`; the
+constructor chooses the larger rational lower endpoint as the witness.
+Conversely, `DyadicNestedRadicalStieltjesCommonWitness.to_overlap` recovers
+the overlap used by stabilization. This changes only the shape of finite
+evidence; it does not assert that an exact intermediate real value has been
+attained.
 
 The future canonical-logarithm π formula has one explicit entry point:
 `PiProofs.CanonicalLogTwoCertificate`. Supply a valid raw value at two and

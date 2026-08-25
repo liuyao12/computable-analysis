@@ -1,13 +1,14 @@
-\chapter{Effective Calculus: FTC Proof Tools}\label{ch:effective-calculus}
+\chapter{The FTC Bridge: Effective Calculus}\label{ch:effective-calculus}
 
-This chapter is the proof workshop for the FTC contract stated in
+This chapter is the proof layer for the FTC contract stated in
 Chapter~\ref{ch:integrals}.  It supplies the finite certificates that a
-particular evaluator must provide; it is not a second calculus chapter and
-does not define a competing integral.  The resulting dependency is:
+particular evaluator must provide; it is not a second integral theory and
+does not define a competing integral.  In the printed book it sits directly
+between Integrals and Power Series.  The resulting dependency is:
 
 \begin{verbatim}
-circle/arctan -> integral + FTC contract -> this workshop: how a function earns it
-                                           -> power series, exp/log, and ODEs
+circle/arctan -> integral + FTC contract -> FTC bridge: how a function earns it
+                                           -> power series -> exp/log -> ODEs
 \end{verbatim}
 
 Special-function evaluators should expose a stable computation
@@ -48,9 +49,14 @@ exactly.  This is the base case for the later polynomial and special-function
 certificates.
 
 \lean{ComputableAnalysis.riemannLeftExact_constant_one}
+\lean{ComputableAnalysis.riemannLeftExact_affine_closed}
+\lean{ComputableAnalysis.riemannLeftExact_affine_error_of_pos}
 \lean{ComputableAnalysis.ExactFunction.affineFTCExact}
+\lean{ComputableAnalysis.ExactFunction.ftcErrorExact_square_doubleId_of_pos}
+\lean{ComputableAnalysis.ExactFunction.ftcErrorExact_cube_threeSquare_unit_of_pos}
 \lean{ComputableAnalysis.riemannLeftExact_doubleId_of_pos}
 \lean{ComputableAnalysis.riemannLeftExact_threeSquare_unit_of_pos}
+\lean{ComputableAnalysis.riemannLeftExact_affine_substitution}
 \lean{ComputableAnalysis.ExactFunction.squareFTCExactUnit}
 \lean{ComputableAnalysis.Integral.cubeEffectiveFTCData}
 \lean{ComputableAnalysis.Integral.cubeEffectiveFTC_equiv_endpoint}
@@ -103,6 +109,15 @@ to exponential and trigonometric evaluators.
 
 \section{Continuity as a finite certificate}
 
+The public interval-function layer supports same-chart addition.  This is the
+first algebraic closure needed before proving derivative and FTC closure
+rules: evaluator boxes add stage by stage, while every analytic property is
+still supplied by its own finite certificate.
+
+\lean{ComputableAnalysis.FunctionOnInterval.add}
+\lean{ComputableAnalysis.FunctionOnInterval.add_compute}
+\leanok
+
 Continuity is not a predicate on an ambient completed function space.  A
 function exposes either a pointwise modulus or an interval image algorithm:
 
@@ -114,10 +129,110 @@ requested output width -> input-width budget -> rational image box
 The interval form is stronger for integration because it gives one box for an
 entire cell.  It implies the rational epsilon--delta form constructively:
 
+For addition, the finite-difference algebra is explicit:
+
+\begin{verbatim}
+(F+G)(x+h)-(F+G)(x)
+  = (F(x+h)-F(x)) + (G(x+h)-G(x))
+\end{verbatim}
+
+Interval quotients obey the same identity.  If two quotient boxes are near
+their derivative boxes at an internal stage, their sum is near the summed
+derivative box at the requested stage after paying the doubled error budget.
+This is the constructive replacement for silently invoking a derivative
+closure theorem over completed real-valued functions.
+
+Scalar multiplication is sign-complete at the same level.  A rational factor
+uses an explicit budget \(|r|\,\varepsilon_{\mathrm{inner}}\leq
+\varepsilon_{\mathrm{out}}\); negative factors are reduced to a nonnegative
+factor followed by interval negation.  Thus finite linear combinations do not
+depend on an implicit ordered-real scalar operation.
+
+\lean{ComputableAnalysis.QInterval.differenceQuotient_addInterval}
+\lean{ComputableAnalysis.intervalNearAtPrecision_addInterval}
+\lean{ComputableAnalysis.HasDerivativeOnInterval.addOfCommonSchedule}
+\lean{ComputableAnalysis.intervalNearAtPrecision_scaleRat_of_nonneg}
+\lean{ComputableAnalysis.HasDerivativeOnInterval.scaleRat_of_nonneg}
+\lean{ComputableAnalysis.HasDerivativeOnInterval.scaleRat}
+\lean{ComputableAnalysis.HasDerivativeOnInterval.linearCombinationOfCommonSchedule}
+\lean{ComputableAnalysis.FunctionOnInterval.neg}
+\lean{ComputableAnalysis.HasDerivativeOnInterval.neg}
+\lean{ComputableAnalysis.FunctionOnInterval.sub}
+\lean{ComputableAnalysis.HasDerivativeOnInterval.subOfCommonSchedule}
+\leanok
+
+Secant and average boxes use the same interval arithmetic.  Division is
+exposed only with a positive rational denominator, so the orientation of the
+box is certified rather than inferred from an ambient ordered field:
+
+\begin{verbatim}
+endpoint box --(divide by b-a > 0)--> secant/average box
+\end{verbatim}
+
+\lean{ComputableAnalysis.QInterval.divByRat_contains_of_pos}
+\lean{ComputableAnalysis.QInterval.divByRat_width_of_pos}
+\lean{ComputableAnalysis.QInterval.subInterval_contains}
+\lean{ComputableAnalysis.QInterval.slopeBetween_contains_of_pos}
+\lean{ComputableAnalysis.QInterval.scaleByRat_contains}
+\lean{ComputableAnalysis.QInterval.scaleByRat_width}
+\lean{ComputableAnalysis.QInterval.scaleByRat_subInterval}
+\lean{ComputableAnalysis.QInterval.subInterval_width}
+\lean{ComputableAnalysis.QInterval.slopeBetween_width_of_pos}
+\leanok
+
+The raw secant algorithm is itself stage-coherent: if both endpoint boxes are
+refined from stage (n) to stage (m), the positive-step secant box at (m)
+is contained in the box at (n).  This is the finite refinement law that lets
+later derivative certificates compare schedules without invoking a limit.
+
+\lean{ComputableAnalysis.secantSlopeIntervalOfRealFun_contains_later}
+\leanok
+
+Affine reparametrization has the corresponding finite chain rule.  For a
+nonzero slope the inner step is transported exactly; the zero-slope case is
+also included because a constant affine map has zero finite difference
+quotient.  This is the rational core used by substitutions and normalized
+angle charts:
+
+\begin{verbatim}
+f(m(x+h)+c)-f(mx+c)     m * (f(y+m h)-f(y))
+--------------------  =  --------------------
+          h                         m h
+\end{verbatim}
+
+\lean{ComputableAnalysis.ExactFunction.differenceQuotient_affine_comp}
+\lean{ComputableAnalysis.ExactFunction.differenceQuotient_affine_comp_of_step}
+\lean{ComputableAnalysis.ExactFunction.secant_bracket_affine_endpoint_transport}
+\leanok
+
+The same finite mechanism now closes multiplication when rational majorants
+are supplied for both factors and both proposed derivatives.  The certificate
+contains the explicit corner term coming from the product finite difference;
+the wrapper below exposes it as an interval derivative certificate for the
+exact rational product chart.  Thus the product rule is available here as a
+bounded computational theorem, while the unrestricted textbook version is
+not smuggled in through completeness of the reals.
+
+\lean{ComputableAnalysis.FinitePolynomial.SecantDerivativeBound.mul}
+\lean{ComputableAnalysis.FinitePolynomial.SecantDerivativeBound.mulToHasDerivativeOnInterval}
+\leanok
+
+The local hand-off from differentiation to integration is also finite.  On a
+positive rational cell whose width satisfies the derivative step budget, the
+secant certificate scales back to an endpoint-difference enclosure.  The
+derivative box is expanded by twice the requested precision; this is the
+explicit error budget later consumed by a partition-level FTC certificate.
+
+\lean{ComputableAnalysis.HasDerivativeOnInterval.endpointDifference_contains_of_pos}
+\leanok
+
 \lean{ComputableAnalysis.EffectiveModulusFor}
 \lean{ComputableAnalysis.IntervalRegularOn}
 \lean{ComputableAnalysis.IntervalRegularOn.epsilonDeltaContinuous}
 \lean{ComputableAnalysis.ScheduledIntervalRegularOn}
+\lean{ComputableAnalysis.ScheduledIntervalRegularOn.toIntervalRegularOn_of_requested_stage}
+\lean{ComputableAnalysis.ScheduledIntervalRegularOn.toIntervalRegularOn_of_identity_schedule}
+\lean{ComputableAnalysis.IntervalRegularOn.toScheduledIntervalRegularOn_identity}
 \lean{ComputableAnalysis.ScheduledIntervalRegularOn.epsilonDeltaContinuous}
 \lean{ComputableAnalysis.ContinuousFunctionOnInterval}
 \lean{ComputableAnalysis.Integral.unitConstantMonotoneDarbouxSchedule}
@@ -132,7 +247,18 @@ it can drive a Darboux integral.
 Adaptive evaluators use `ScheduledIntervalRegularOn`: their cell image and
 point value are evaluated at one explicit stage, which may differ from the
 native stage index.  A separate validity/equivalence proof is still required
-before that representation is installed in the abstract-function chain.
+before that representation is installed in the abstract-function chain.  The
+explicit adapter above requires the missing requested-stage containment
+certificate; monotonicity of raw boxes alone is insufficient because later
+boxes may be wider.
+
+For the ordinary identity schedule, the
+\texttt{toIntervalRegularOn\_of\_identity\_schedule} adapter discharges this bookkeeping
+from the scheduled contract itself.  Adaptive schedules still require an
+explicit transport certificate.
+
+Conversely, an existing ordinary proof can be exposed to a schedule-aware
+consumer through \texttt{IntervalRegularOn.toScheduledIntervalRegularOn\_identity}.
 
 Representations form a local chain: reflexive, symmetric, and transitive
 equivalence edges compose different rational stage schedules without changing
@@ -189,6 +315,10 @@ The curvature route is exposed as a finite method rather than as a classical
 second-derivative theorem.  A cell carries monotone derivative data; endpoint
 secants then furnish the derivative bracket used by the FTC certificate.
 
+At the raw-representation level, a secant needs only two endpoint validity
+certificates and a positive rational separation.  Convexity is used later for
+ordering secants, not for proving that the secant algorithm itself is valid.
+
 \begin{verbatim}
 monotone derivative on cell -> endpoint secants -> derivative interval
                             -> local endpoint bound -> effective FTC
@@ -196,11 +326,20 @@ monotone derivative on cell -> endpoint secants -> derivative interval
 
 \lean{ComputableAnalysis.MonotoneDerivativeBoundMethod}
 \lean{ComputableAnalysis.MonotoneDerivativeBoundMethod.toDerivativeBound}
+\lean{ComputableAnalysis.secantRaw_valid_of_valid}
+\lean{ComputableAnalysis.ExactConvexOn.secantRaw_valid}
+\lean{ComputableAnalysis.CurvatureOnSubinterval}
+\lean{ComputableAnalysis.DerivativeBoundFromCurvature.toDerivativeBound}
 \lean{ComputableAnalysis.CurvatureFTCCertificate}
 \lean{ComputableAnalysis.CurvatureFTCCertificate.toDerivativeBoundFTC}
 \lean{ComputableAnalysis.curvatureFTC}
 \lean{ComputableAnalysis.ConvexFTCCertificate.equiv_endpoint}
 \lean{ComputableAnalysis.ConcaveFTCCertificate.equiv_endpoint}
+\lean{ComputableAnalysis.TwoStageCandidateDerivativeFTC}
+\lean{ComputableAnalysis.TwoStageCandidateDerivativeFTC.overlap}
+\lean{ComputableAnalysis.TwoStageCandidateDerivativeFTC.closeAt}
+\lean{ComputableAnalysis.TwoStageCandidateDerivativeFTC.equiv_endpoint}
+\lean{ComputableAnalysis.twoStageCandidateDerivativeFTC}
 \lean{ComputableAnalysis.constructionFor_of_selectedStageCandidateDerivativeFTC}
 \lean{ComputableAnalysis.definiteIdentityFor_of_selectedStageCandidateDerivativeFTC}
 \lean{ComputableAnalysis.FTC.effectiveFTC_riemannRaw_equiv_endpointDifference_of_endpointAgreement}
@@ -211,11 +350,88 @@ monotone derivative on cell -> endpoint secants -> derivative interval
 \lean{ComputableAnalysis.effectiveFTCStabilizedIntegralFor_equiv_endpointDifference}
 \leanok
 
+The effective FTC certificate also exposes endpoint representation transport
+explicitly.  Its scheduled endpoint evaluator is not silently identified
+with the canonical endpoint-difference evaluator: the primitive's own nested
+rational intervals supply that separate equivalence edge.
+
+The two-stage variant makes the scheduling separation explicit.  The derivative
+boxes may be computed at a stage chosen for the candidate function, while the
+primitive endpoint boxes may be computed at a different stage chosen for the
+finite telescope:
+
+\begin{verbatim}
+derivative stage -> cell derivative boxes -> weighted finite sum
+endpoint stage   -> primitive endpoint boxes -> telescope comparison
+                 -> overlap at the requested outer precision
+\end{verbatim}
+
+This is a proof interface, not an efficiency promise.  A special-function
+implementation may choose whichever certified schedule is convenient; the
+theorem only requires that both schedules close the same rational error budget.
+
+\lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.endpointRaw_equiv_endpointDifference}
+\leanok
+
+The arctangent certificate is a complete non-polynomial client of this API.
+Its derivative enclosure is obtained from the rational kernel
+$1/(1+x^2)$, while the endpoint evaluator is the integral-defined arctangent
+primitive.  The proof now calls the generic endpoint transport theorem rather
+than duplicating that representation argument locally.
+
+\lean{ComputableAnalysis.Integral.arctanEffectiveFTC_equiv_endpoint}
+\lean{ComputableAnalysis.Integral.arctanEffectiveFTC_boundedIntegral_equiv_endpointDifference}
+\lean{ComputableAnalysis.Integral.arctanEffectiveFTCStabilized_valid}
+\lean{ComputableAnalysis.Integral.arctanEffectiveFTCStabilized_equiv_endpointDifference}
+\leanok
+
+The same contract is now instantiated by a finite sine Taylor prefix on
+$[0,1/2]$.  Its primitive and derivative are rational polynomials, but the
+evaluator is already a genuine trigonometric-prefix client: the finite FTC
+box is transported to the canonical primitive endpoint difference by the
+generic theorem above.
+
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTCData}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTC_equiv_endpoint}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTC_boundedIntegral_equiv_endpointDifference}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTC_equiv_fortySeven_over_threeEightFour}
+\leanok
+
+Squaring the finite prefix reuses the same FTC transport with a product
+derivative certificate.  Its endpoint primitive is still a finite rational
+polynomial, so this is a fully formalized precursor to the later
+trigonometric-square integral rather than an appeal to a completed sine.
+
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_endpoint}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_boundedIntegral_equiv_endpointDifference}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_value}
+\leanok
+
 The interface is the reusable calculus API: finite secant bounds feed
 derivative certificates; derivative bounds feed partition boxes; the effective
 FTC turns those boxes into endpoint differences. Monomial and finite
 Taylor-prefix instances are checked independently of any completed
 real-number topology.
+
+The normalized monomial certificate can be scaled by its denominator for every
+natural exponent.  This gives the finite power rule
+$d(x^{n+1})/dx=(n+1)x^n$ on a bounded rational chart; the cubic below is its
+first named nonlinear checkpoint.
+
+\lean{ComputableAnalysis.FinitePolynomial.monomialSecantDerivativeBound}
+\lean{ComputableAnalysis.FinitePolynomial.monomial_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.normalizedMonomial_endpointDifference_contains_of_pos}
+\leanok
+
+As a concrete polynomial checkpoint, the normalized $x^3/3$ certificate is
+rationally scaled to obtain $x^3$ with derivative $3x^2$.  The cubic
+therefore enters the FTC ladder through the same finite secant machinery as
+the general monomial family.
+
+\lean{ComputableAnalysis.FinitePolynomial.cubeSecantDerivativeBound}
+\lean{ComputableAnalysis.FinitePolynomial.cube_hasDerivativeOnInterval}
+\leanok
 
 The raw stabilized evaluator is now packaged at the domain-aware integral
 layer.  An application supplies its primitive, integrand, finite endpoint

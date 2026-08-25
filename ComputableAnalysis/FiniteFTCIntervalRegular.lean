@@ -450,6 +450,35 @@ def exactSquare_lipschitz_on_unit :
       (qabs_nonneg (t - s))
     simpa [Rat.mul_comm] using hbound
 
+def exactSquare_lipschitz_on_minusOne_one :
+    Integral.LipschitzOnIntervalNat (fun x : Rat => x * x) (-1) 1 2 := by
+  refine ⟨by native_decide, ?_⟩
+  intro s t hs hsb ht htb
+  have hsabs : qabs s <= 1 :=
+    qabs_le_of_neg_le_le (by grind) (by grind)
+  have htabs : qabs t <= 1 :=
+    qabs_le_of_neg_le_le (by grind) (by grind)
+  have hsum : qabs (s + t) <= 2 := by
+    calc
+      qabs (s + t) <= qabs s + qabs t := qabs_add_le s t
+      _ <= 1 + 1 := rat_add_le_add hsabs htabs
+      _ = 2 := by native_decide
+  have hfactor : s * s - t * t = (s - t) * (s + t) := by
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul]
+  rw [hfactor, qabs_mul]
+  have hst : qabs (s - t) = qabs (t - s) := by
+    rw [show s - t = -(t - s) by grind [Rat.sub_eq_add_neg], qabs_neg]
+  rw [hst]
+  have hbound := Rat.mul_le_mul_of_nonneg_left hsum
+    (qabs_nonneg (t - s))
+  simpa [Rat.mul_comm] using hbound
+
+def exactRat_square_intervalRegularOn_minusOne_one :
+    IntervalRegularOn
+      (FunctionOnInterval.exactRat (fun x : Rat => x * x) (-1) 1) :=
+  IntervalRegularOn.of_lipschitzOnIntervalNat (fun x : Rat => x * x)
+    (-1) 1 2 exactSquare_lipschitz_on_minusOne_one
+
 def exactRat_square_integral_certificate :
     Integral.IntervalRegularIntegralCertificate
       (FunctionOnInterval.exactRat (fun x : Rat => x * x) 0 1) where
@@ -903,6 +932,470 @@ def exactCube_lipschitz_on_unit :
         rw [show qabs (s - t) = qabs (t - s) by
           rw [show s - t = -(t - s) by grind [Rat.sub_eq_add_neg], qabs_neg]]
         grind [Rat.mul_comm]
+
+def exactCube_lipschitz_on_minusOne_one :
+    Integral.LipschitzOnIntervalNat (fun x : Rat => x ^ 3) (-1) 1 3 := by
+  refine ⟨by native_decide, ?_⟩
+  intro s t hs hsb ht htb
+  have hsabs : qabs s <= 1 :=
+    qabs_le_of_neg_le_le (by grind) (by grind)
+  have htabs : qabs t <= 1 :=
+    qabs_le_of_neg_le_le (by grind) (by grind)
+  have hs2 : qabs (s ^ 2) <= 1 := by
+    rw [RationalMajorant.qabs_pow_eq_pow_qabs]
+    calc
+      qabs s ^ 2 = qabs s * qabs s := by simpa [Rat.pow_succ]
+      _ <= 1 * qabs s :=
+        Rat.mul_le_mul_of_nonneg_right hsabs (qabs_nonneg s)
+      _ <= 1 * 1 :=
+        Rat.mul_le_mul_of_nonneg_left hsabs (by native_decide)
+      _ = 1 := by native_decide
+  have ht2 : qabs (t ^ 2) <= 1 := by
+    rw [RationalMajorant.qabs_pow_eq_pow_qabs]
+    calc
+      qabs t ^ 2 = qabs t * qabs t := by simpa [Rat.pow_succ]
+      _ <= 1 * qabs t :=
+        Rat.mul_le_mul_of_nonneg_right htabs (qabs_nonneg t)
+      _ <= 1 * 1 :=
+        Rat.mul_le_mul_of_nonneg_left htabs (by native_decide)
+      _ = 1 := by native_decide
+  have hst : qabs (s * t) <= 1 := by
+    rw [qabs_mul]
+    calc
+      qabs s * qabs t <= 1 * qabs t :=
+        Rat.mul_le_mul_of_nonneg_right hsabs (qabs_nonneg t)
+      _ <= 1 * 1 :=
+        Rat.mul_le_mul_of_nonneg_left htabs (by native_decide)
+      _ = 1 := by native_decide
+  have hsum : qabs (s ^ 2 + s * t + t ^ 2) <= 3 := by
+    calc
+      qabs (s ^ 2 + s * t + t ^ 2) <=
+          qabs (s ^ 2 + s * t) + qabs (t ^ 2) :=
+        qabs_add_le (s ^ 2 + s * t) (t ^ 2)
+      _ <= (qabs (s ^ 2) + qabs (s * t)) + qabs (t ^ 2) := by
+        grind [qabs_add_le]
+      _ <= (1 + 1) + 1 := by grind
+      _ = 3 := by native_decide
+  have hfactor : s ^ 3 - t ^ 3 =
+      (s - t) * (s ^ 2 + s * t + t ^ 2) := by
+    grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul]
+  rw [hfactor, qabs_mul]
+  calc
+    qabs (s - t) * qabs (s ^ 2 + s * t + t ^ 2) <=
+        qabs (s - t) * 3 :=
+      Rat.mul_le_mul_of_nonneg_left hsum (qabs_nonneg _)
+    _ = 3 * qabs (t - s) := by
+      rw [show qabs (s - t) = qabs (t - s) by
+        rw [show s - t = -(t - s) by grind [Rat.sub_eq_add_neg], qabs_neg]]
+      grind [Rat.mul_comm]
+
+def exactRat_cube_intervalRegularOn_minusOne_one :
+    IntervalRegularOn
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ 3) (-1) 1) :=
+  IntervalRegularOn.of_lipschitzOnIntervalNat (fun x : Rat => x ^ 3)
+    (-1) 1 3 exactCube_lipschitz_on_minusOne_one
+
+/-! The cubic certificate is the first visible member of a uniform monomial
+family.  On `[-1,1]`, the finite power-difference estimate gives the natural
+Lipschitz constant `n` for `x^n`, including the constant case `n = 0`. -/
+
+def exactPow_lipschitz_on_minusOne_one (n : Nat) :
+    Integral.LipschitzOnIntervalNat (fun x : Rat => x ^ n) (-1) 1 n := by
+  refine ⟨by native_decide, ?_⟩
+  intro s t hs hsb ht htb
+  have hsabs : qabs s <= 1 :=
+    qabs_le_of_neg_le_le (by grind) (by grind)
+  have htabs : qabs t <= 1 :=
+    qabs_le_of_neg_le_le (by grind) (by grind)
+  have hone : (1 : Rat) ^ n = 1 := by
+    induction n with
+    | zero => rw [Rat.pow_zero]
+    | succ n ih => rw [Rat.pow_succ, ih]; native_decide
+  have hpow := RationalMajorant.qabs_pow_sub_le_lipschitz
+    (x := s) (y := t) (B := (1 : Rat))
+    (by native_decide) (by native_decide) hsabs htabs n
+  calc
+    qabs (s ^ n - t ^ n) <=
+        qabs (s - t) * (n : Rat) * (1 : Rat) ^ n := hpow
+    _ = (n : Rat) * qabs (t - s) := by
+      rw [show qabs (s - t) = qabs (t - s) by
+        rw [show s - t = -(t - s) by grind [Rat.sub_eq_add_neg], qabs_neg]]
+      rw [hone]
+      grind [Rat.mul_comm, Rat.mul_assoc]
+
+def exactRat_pow_intervalRegularOn_minusOne_one (n : Nat) :
+    IntervalRegularOn
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) (-1) 1) :=
+  IntervalRegularOn.of_lipschitzOnIntervalNat (fun x : Rat => x ^ n)
+    (-1) 1 n (exactPow_lipschitz_on_minusOne_one n)
+
+def exactPow_lipschitz_on_unit (n : Nat) :
+    Integral.LipschitzOnUnit (fun x : Rat => x ^ n) (n : Rat) := by
+  refine ⟨by exact_mod_cast Nat.zero_le n, ?_⟩
+  intro s t hs hsb ht htb
+  exact (exactPow_lipschitz_on_minusOne_one n).2 s t
+    (by grind) (by grind) (by grind) (by grind)
+
+def exactRat_pow_intervalRegularOn_unit (n : Nat) :
+    IntervalRegularOn
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1) :=
+  IntervalRegularOn.of_lipschitzOnIntervalNat (fun x : Rat => x ^ n)
+    0 1 n
+    (Integral.LipschitzOnIntervalNat.of_unit_subinterval
+      (fun x : Rat => x ^ n) n (by native_decide) (by native_decide)
+      (by native_decide) (exactPow_lipschitz_on_unit n))
+
+def exactRat_pow_integral_certificate (n : Nat) :
+    Integral.IntervalRegularIntegralCertificate
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1) where
+  regular := exactRat_pow_intervalRegularOn_unit n
+  construction := IntegralIdentities.LipschitzDyadic.construction
+    (fun x : Rat => x ^ n) n (exactPow_lipschitz_on_unit n)
+
+private theorem uniformLeftEndpointSum_const_one_of_pos {n : Nat}
+    (hn : 0 < n) :
+    IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+        (fun _ : Rat => 1) n = 1 := by
+  have hnrat : (n : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hn)
+  have haux : forall k : Nat,
+      (List.range k).foldl
+          (fun total (j : Nat) =>
+            total + (1 / (n : Rat)) * (1 : Rat)) 0 =
+        (k : Rat) / (n : Rat) := by
+    intro k
+    induction k with
+    | zero => simp [Rat.div_def]
+    | succ k ih =>
+        rw [List.range_succ, List.foldl_append]
+        simp only [List.foldl_cons, List.foldl_nil]
+        rw [ih]
+        simp [Rat.div_def, Rat.natCast_add]
+        grind [Rat.add_mul, Rat.mul_comm]
+  unfold IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+  rw [haux n]
+  rw [Rat.div_def, Rat.mul_inv_cancel _ hnrat]
+
+theorem exactRat_zero_integral_raw_equiv_one :
+    (Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ 0) 0 1)
+      (exactRat_pow_integral_certificate 0)).Equiv
+      (RealRaw.ofRat 1) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro stage
+  apply (RealRaw.compareAt_overlap_iff _ _ stage stage).2
+  have hconst : Integral.LipschitzOnUnit (fun _ : Rat => 1) 0 := by
+    refine ⟨by native_decide, ?_⟩
+    intro s t hs hsb ht htb
+    simp <;> native_decide
+  have hcontains :=
+    IntegralIdentities.LipschitzDyadic.compute_contains_leftEndpointSum
+      (f := fun _ : Rat => 1) (L := 0) hconst stage
+  have huniform :=
+    IntegralIdentities.LipschitzDyadic.dyadicLeftEndpointSum_eq_uniform
+      (fun _ : Rat => 1) stage
+  have hn : 0 < 2 ^ stage := Nat.pow_pos (by omega : 0 < 2)
+  have hsum :
+      IntegralIdentities.LipschitzDyadic.leftEndpointSum (fun _ : Rat => 1)
+          (ArctanGeometry.arctanAreaLoopState 1 stage).intervals = 1 := by
+    rw [huniform]
+    exact uniformLeftEndpointSum_const_one_of_pos hn
+  unfold Integral.raw Integral.integralFor exactRat_pow_integral_certificate
+  change QInterval.Overlaps
+    (IntegralIdentities.LipschitzDyadic.compute (fun x : Rat => x ^ 0) 0 stage)
+    { lo := 1, hi := 1 }
+  have hcompute :
+      IntegralIdentities.LipschitzDyadic.compute (fun x : Rat => x ^ 0) 0 stage =
+        IntegralIdentities.LipschitzDyadic.compute (fun _ : Rat => 1) 0 stage := by
+    congr 1
+    funext x
+    simp
+  rw [hcompute]
+  unfold QInterval.Overlaps
+  rw [hsum] at hcontains
+  exact hcontains
+
+theorem exactRat_one_integral_raw_equiv_half :
+    (Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ 1) 0 1)
+      (exactRat_pow_integral_certificate 1)).Equiv
+      (RealRaw.ofRat (1 / 2)) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro stage
+  apply (RealRaw.compareAt_overlap_iff _ _ stage stage).2
+  unfold Integral.raw Integral.integralFor exactRat_pow_integral_certificate
+  change QInterval.Overlaps
+    (IntegralIdentities.LipschitzDyadic.compute (fun x : Rat => x ^ 1) 1 stage)
+    { lo := 1 / 2, hi := 1 / 2 }
+  have hn : 0 < 2 ^ stage := Nat.pow_pos (by omega : 0 < 2)
+  have hleft :=
+    IntegralIdentities.LipschitzDyadic.compute_contains_leftEndpointSum
+      (f := fun x : Rat => x) (L := 1)
+      (IntegralIdentities.affineIdentity_lipschitz_on_unit) stage
+  have hright :=
+    IntegralIdentities.LipschitzDyadic.compute_contains_rightEndpointSum
+      (f := fun x : Rat => x) (L := 1)
+      (IntegralIdentities.affineIdentity_lipschitz_on_unit) stage
+  have hleftTransport :=
+    IntegralIdentities.LipschitzDyadic.dyadicLeftEndpointSum_eq_uniform
+      (fun x : Rat => x) stage
+  have hrightTransport :=
+    IntegralIdentities.LipschitzDyadic.dyadicRightEndpointSum_eq_uniform
+      (fun x : Rat => x) stage
+  have hleftValue :=
+    IntegralIdentities.affineIdentity_uniformLeftEndpointSum_eq hn
+  have hrightValue :=
+    IntegralIdentities.affineIdentity_uniformRightEndpointSum_eq hn
+  have hleft_le :
+      IntegralIdentities.LipschitzDyadic.leftEndpointSum (fun x : Rat => x)
+          (ArctanGeometry.arctanAreaLoopState 1 stage).intervals <= 1 / 2 := by
+    rw [hleftTransport, hleftValue]
+    have hpow : (0 : Rat) < (2 ^ stage : Nat) := by
+      exact_mod_cast hn
+    have hden : (0 : Rat) < 2 * (2 ^ stage : Nat) := by
+      grind
+    have hden0 : (2 * (2 ^ stage : Nat) : Rat) ≠ 0 := Rat.ne_of_gt hden
+    have hinv : (0 : Rat) < ((2 * (2 ^ stage : Nat) : Rat))⁻¹ :=
+      (Rat.inv_pos).2 hden
+    rw [Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+      Rat.mul_inv_cancel _ hden0]
+  have hright_ge :
+      1 / 2 <=
+        IntegralIdentities.LipschitzDyadic.rightEndpointSum (fun x : Rat => x)
+          (ArctanGeometry.arctanAreaLoopState 1 stage).intervals := by
+    rw [hrightTransport, hrightValue]
+    have hpow : (0 : Rat) < (2 ^ stage : Nat) := by
+      exact_mod_cast hn
+    have hden : (0 : Rat) < 2 * (2 ^ stage : Nat) := by
+      grind
+    have hden0 : (2 * (2 ^ stage : Nat) : Rat) ≠ 0 := Rat.ne_of_gt hden
+    have hinv : (0 : Rat) < ((2 * (2 ^ stage : Nat) : Rat))⁻¹ :=
+      (Rat.inv_pos).2 hden
+    rw [Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+      Rat.mul_inv_cancel _ hden0]
+  have hcompute :
+      IntegralIdentities.LipschitzDyadic.compute (fun x : Rat => x ^ 1) 1 stage =
+        IntegralIdentities.LipschitzDyadic.compute (fun x : Rat => x) 1 stage := by
+    congr 1
+    funext x
+    rw [Rat.pow_one]
+  rw [hcompute]
+  unfold QInterval.Overlaps
+  exact ⟨Rat.le_trans hleft.1 hleft_le, Rat.le_trans hright_ge hright.2⟩
+
+theorem exactRat_pow_integral_raw_valid (n : Nat) :
+    (Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1)
+      (exactRat_pow_integral_certificate n)).Valid := by
+  exact Integral.raw_valid _ (exactRat_pow_integral_certificate n)
+
+theorem exactRat_pow_nondecreasing_on_unit (n : Nat) :
+    NondecreasingOnInterval
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1) := by
+  intro x y hx hy hxy _stage
+  change 0 <= x ∧ x <= 1 at hx
+  change 0 <= y ∧ y <= 1 at hy
+  change x ^ n <= y ^ n
+  have hpow : forall j : Nat, x ^ j <= y ^ j := by
+    intro j
+    induction j with
+    | zero => rw [Rat.pow_zero, Rat.pow_zero]; native_decide
+    | succ j ih =>
+        rw [Rat.pow_succ, Rat.pow_succ]
+        calc
+          x ^ j * x <= y ^ j * x :=
+            Rat.mul_le_mul_of_nonneg_right ih hx.1
+          _ <= y ^ j * y :=
+            Rat.mul_le_mul_of_nonneg_left hxy (Rat.pow_nonneg hy.1)
+  exact hpow n
+
+def exactRat_pow_monotoneConstructionFor (n : Nat) :
+    MonotoneConstructionFor
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1) where
+  monotone := MonotoneOnInterval.ofNondecreasing
+    (exactRat_pow_nondecreasing_on_unit n)
+  construction := (exactRat_pow_integral_certificate n).construction
+
+theorem exactRat_pow_monotoneIntegralFor_valid (n : Nat) :
+    (monotoneIntegralFor
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1)
+      (exactRat_pow_monotoneConstructionFor n)).Valid := by
+  exact monotoneIntegralFor_valid _ _
+
+theorem exactRat_pow_monotoneIntegralFor_eq_dyadicRaw (n : Nat) :
+    monotoneIntegralFor
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1)
+      (exactRat_pow_monotoneConstructionFor n) =
+    Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1)
+      (exactRat_pow_integral_certificate n) := by
+  rfl
+
+/-! The normalized monomial primitive is also available as one generic
+endpoint-difference object.  Its adjacent-interval law is purely finite
+subtraction, so it does not depend on an integral construction or on a
+completed real line. -/
+
+def monomialPrimitiveRaw (n : Nat) : RealFunRaw :=
+  RealFunRaw.exact
+    (fun x : Rat => x ^ (n + 1) / ((n + 1 : Nat) : Rat))
+
+noncomputable def monomialPrimitiveEndpointDifference
+    (n : Nat) (a b : Rat) : RealRaw :=
+  endpointDifferenceRaw (monomialPrimitiveRaw n) a b
+    (endpointDifference_valid_of_fun_valid (RealFunRaw.exact_valid _) trivial trivial)
+
+theorem monomialPrimitiveEndpointDifference_adjacent_additive
+    (n : Nat) (a b c : Rat) :
+    (monomialPrimitiveEndpointDifference n a b +
+      monomialPrimitiveEndpointDifference n b c).Equiv
+      (monomialPrimitiveEndpointDifference n a c) := by
+  unfold monomialPrimitiveEndpointDifference
+  apply endpointDifferenceRaw_adjacent_additive
+    (RealFunRaw.exact_valid _) trivial trivial trivial
+
+/-! A uniform left-rectangle sum for a monomial is exactly a scaled finite
+power sum.  This is the finite computation underneath the eventual value
+theorem; no convergence statement is used here. -/
+
+private theorem foldl_scaled_power_range (h : Rat) (k n : Nat) :
+    (List.range n : List Nat).foldl
+      (fun acc (j : Nat) => acc + h * (((j : Rat) * h) ^ k)) 0 =
+      h ^ (k + 1) * Series.powerSum k n := by
+  have hpow : forall (m j : Nat), ((m : Rat) * h) ^ j =
+      (m : Rat) ^ j * h ^ j := by
+    intro m j
+    induction j with
+    | zero => rw [Rat.pow_zero, Rat.pow_zero, Rat.pow_zero]; native_decide
+    | succ j ih =>
+        rw [Rat.pow_succ, Rat.pow_succ, Rat.pow_succ, ih]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  induction n with
+  | zero => simp [Series.powerSum_zero]
+  | succ n ih =>
+      rw [List.range_succ, List.foldl_append]
+      simp only [List.foldl_cons, List.foldl_nil]
+      rw [ih, Series.powerSum_succ]
+      rw [hpow n k]
+      grind [Rat.pow_succ, Rat.mul_assoc, Rat.mul_comm]
+
+theorem uniformLeftEndpointSum_pow_eq_scaled_powerSum
+    (k n : Nat) :
+    _root_.ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+        (fun x : Rat => x ^ k) n =
+      (1 / (n : Rat)) ^ (k + 1) * Series.powerSum k n := by
+  unfold _root_.ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+  have harg (j : Nat) :
+      (j : Rat) / (n : Rat) = (j : Rat) * (1 / (n : Rat)) := by
+    rw [Rat.div_def, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hrewrite :
+      (fun acc (j : Nat) =>
+        acc + (1 / (n : Rat)) * (((j : Rat) / (n : Rat)) ^ k)) =
+      (fun acc (j : Nat) =>
+        acc + (1 / (n : Rat)) *
+          (((j : Rat) * (1 / (n : Rat))) ^ k)) := by
+    funext acc j
+    rw [harg]
+  rw [hrewrite]
+  exact foldl_scaled_power_range (1 / (n : Rat)) k n
+
+private theorem foldl_scaled_shifted_power_range (h : Rat) (k n : Nat) :
+    (List.range n : List Nat).foldl
+      (fun acc (j : Nat) =>
+        acc + h * (((Nat.succ j : Nat) : Rat) * h) ^ k) 0 =
+      h ^ (k + 1) * Series.powerSumBlock k 1 n := by
+  have hpow : forall (m j : Nat), ((m : Rat) * h) ^ j =
+      (m : Rat) ^ j * h ^ j := by
+    intro m j
+    induction j with
+    | zero => rw [Rat.pow_zero, Rat.pow_zero, Rat.pow_zero]; native_decide
+    | succ j ih =>
+        rw [Rat.pow_succ, Rat.pow_succ, Rat.pow_succ, ih]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  induction n with
+  | zero => simp [Series.powerSumBlock]
+  | succ n ih =>
+      rw [List.range_succ, List.foldl_append]
+      simp only [List.foldl_cons, List.foldl_nil]
+      rw [ih, Series.powerSumBlock_succ]
+      rw [hpow (n + 1) k]
+      simp only [Rat.natCast_add]
+      grind [Rat.pow_succ, Rat.mul_assoc, Rat.mul_comm]
+
+theorem uniformRightEndpointSum_pow_eq_scaled_powerSumBlock
+    (k n : Nat) :
+    _root_.ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformRightEndpointSum
+        (fun x : Rat => x ^ k) n =
+      (1 / (n : Rat)) ^ (k + 1) * Series.powerSumBlock k 1 n := by
+  unfold _root_.ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformRightEndpointSum
+  have harg (j : Nat) :
+      (Nat.succ j : Rat) / (n : Rat) =
+        (Nat.succ j : Rat) * (1 / (n : Rat)) := by
+    rw [Rat.div_def, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hrewrite :
+      (fun acc (j : Nat) =>
+        acc + (1 / (n : Rat)) *
+          (((Nat.succ j : Nat) : Rat) / (n : Rat)) ^ k) =
+      (fun acc (j : Nat) =>
+        acc + (1 / (n : Rat)) *
+          ((((Nat.succ j : Nat) : Rat) * (1 / (n : Rat))) ^ k)) := by
+    funext acc j
+    rw [harg]
+  rw [hrewrite]
+  exact foldl_scaled_shifted_power_range (1 / (n : Rat)) k n
+
+theorem uniformRightEndpointSum_pow_sub_left_eq_scaled_last_power
+    {k n : Nat} (hk : 0 < k) :
+    _root_.ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformRightEndpointSum
+        (fun x : Rat => x ^ k) n -
+      _root_.ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+        (fun x : Rat => x ^ k) n =
+      (1 / (n : Rat)) ^ (k + 1) * (n : Rat) ^ k := by
+  rw [uniformRightEndpointSum_pow_eq_scaled_powerSumBlock,
+    uniformLeftEndpointSum_pow_eq_scaled_powerSum]
+  have hblock : Series.powerSumBlock k 1 n =
+      Series.powerSum k n + (n : Rat) ^ k := by
+    induction n with
+    | zero =>
+        have hzero : (0 : Rat) ^ k = 0 := by
+          induction k with
+          | zero => omega
+          | succ k => rw [Rat.pow_succ]; simp
+        simp [Series.powerSumBlock, Series.powerSum, hzero] <;> native_decide
+    | succ n ih =>
+        rw [Series.powerSumBlock_succ, Series.powerSum_succ, ih]
+        simp only [Rat.natCast_add]
+        grind [Rat.pow_succ, Rat.add_assoc, Rat.add_comm]
+  rw [hblock]
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm, Rat.mul_add]
+
+theorem uniformRightEndpointSum_pow_sub_left_eq_inv_of_pos
+    {k n : Nat} (hk : 0 < k) (hn : 0 < n) :
+    _root_.ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformRightEndpointSum
+        (fun x : Rat => x ^ k) n -
+      _root_.ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+        (fun x : Rat => x ^ k) n =
+      1 / (n : Rat) := by
+  rw [uniformRightEndpointSum_pow_sub_left_eq_scaled_last_power hk]
+  have hnrat : (n : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hn)
+  have hcancel : forall j : Nat,
+      (1 / (n : Rat)) ^ j * (n : Rat) ^ j = 1 := by
+    intro j
+    induction j with
+    | zero => rw [Rat.pow_zero, Rat.pow_zero]; native_decide
+    | succ j ih =>
+        rw [Rat.pow_succ, Rat.pow_succ]
+        rw [Rat.div_def]
+        have hmul : (n : Rat)⁻¹ * (n : Rat) = 1 :=
+          Rat.inv_mul_cancel (n : Rat) hnrat
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  rw [Rat.pow_succ]
+  grind [Rat.mul_assoc, Rat.mul_comm, hcancel k]
 
 def exactRat_cube_integral_certificate :
     Integral.IntervalRegularIntegralCertificate

@@ -398,6 +398,32 @@ def toHasDerivativeOnInterval {C : Rat} {f df : Rat -> Rat}
       grind [Rat.sub_eq_add_neg]
     constructor <;> grind [Rat.sub_eq_add_neg]
 
+/- A product certificate can be handed directly to the interval derivative
+interface.  The hypotheses are deliberately explicit: the finite product
+estimate needs rational majorants for both factors and both proposed
+derivatives, and the resulting interval chart is the exact rational product
+chart rather than an unproved real-valued multiplication. -/
+def SecantDerivativeBound.mulToHasDerivativeOnInterval
+    {C : Rat} {f df g dg : Rat -> Rat}
+    (F : SecantDerivativeBound C f df)
+    (G : SecantDerivativeBound C g dg)
+    (fMajorant dfMajorant gMajorant dgMajorant : Rat)
+    (hfMajorant : forall x, qabs x <= C -> qabs (f x) <= fMajorant)
+    (hdfMajorant : forall x, qabs x <= C -> qabs (df x) <= dfMajorant)
+    (hgMajorant : forall x, qabs x <= C -> qabs (g x) <= gMajorant)
+    (hdgMajorant : forall x, qabs x <= C -> qabs (dg x) <= dgMajorant)
+    (hC0 : 0 <= C) (hf0 : 0 <= fMajorant) (hdf0 : 0 <= dfMajorant)
+    (hg0 : 0 <= gMajorant) (hdg0 : 0 <= dgMajorant)
+    (a b : Rat) (hleft : -C <= a) (hright : b <= C) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat (fun x => f x * g x) a b)
+      (FunctionOnInterval.exactRat
+        (fun x => f x * dg x + g x * df x) a b) :=
+  SecantDerivativeBound.toHasDerivativeOnInterval
+    (SecantDerivativeBound.mul F G fMajorant dfMajorant gMajorant dgMajorant
+      hfMajorant hdfMajorant hgMajorant hdgMajorant hC0 hf0 hdf0 hg0 hdg0)
+    a b hleft hright
+
 end SecantDerivativeBound
 
 namespace CenteredSecantDerivativeBound
@@ -500,6 +526,131 @@ def toHasDerivativeOnInterval {basepoint C : Rat} {f df : Rat -> Rat}
       grind [Rat.sub_eq_add_neg]
     constructor <;> grind [Rat.sub_eq_add_neg]
 
+/-! The reciprocal kernel is the first non-polynomial derivative certificate
+needed by the logarithm chapter.  It is centered at `3/2` with radius `1/2`,
+so every admissible rational point and step endpoint lies in `[1,2]`. -/
+def reciprocalCenteredSecantBound :
+    CenteredSecantDerivativeBound (3 / 2) (1 / 2)
+      (fun x => 1 / x) (fun x => -(1 / x ^ 2)) := by
+  refine {
+    errorCoefficient := 1
+    errorCoefficient_nonneg := by native_decide
+    error_bound := ?_ }
+  intro x h hh hx hxh
+  have hxlo : (1 : Rat) <= x := by
+    have hq := neg_qabs_le_self (x - 3 / 2)
+    exact (by grind : (1 : Rat) <= x)
+  have hxhi : x <= 2 := by
+    have hq := self_le_qabs (x - 3 / 2)
+    exact (by grind : x <= (2 : Rat))
+  have hxhlo : (1 : Rat) <= x + h := by
+    have hq := neg_qabs_le_self (x + h - 3 / 2)
+    exact (by grind : (1 : Rat) <= x + h)
+  have hxhhi : x + h <= 2 := by
+    have hq := self_le_qabs (x + h - 3 / 2)
+    exact (by grind : x + h <= (2 : Rat))
+  have hxpos : 0 < x := by grind
+  have hxhpos : 0 < x + h := by grind
+  have hxne : x ≠ 0 := Rat.ne_of_gt hxpos
+  have hxhne : x + h ≠ 0 := Rat.ne_of_gt hxhpos
+  have hdenpos : 0 < x ^ 2 * (x + h) := by
+    exact Rat.mul_pos (Rat.pow_pos hxpos) hxhpos
+  have hdenone : (1 : Rat) <= x ^ 2 * (x + h) := by
+    have hxsq : (1 : Rat) <= x ^ 2 := by
+      rw [show x ^ 2 = x * x by simp [Rat.pow_succ]]
+      calc
+        (1 : Rat) = 1 * 1 := by native_decide
+        _ <= x * 1 := Rat.mul_le_mul_of_nonneg_right hxlo (by native_decide)
+        _ <= x * x := Rat.mul_le_mul_of_nonneg_left hxlo (by grind)
+    calc
+      (1 : Rat) = 1 * 1 := by native_decide
+      _ <= 1 * (x + h) := by
+        exact Rat.mul_le_mul_of_nonneg_left hxhlo (by native_decide)
+      _ <= x ^ 2 * (x + h) := by
+        exact Rat.mul_le_mul_of_nonneg_right hxsq (Rat.le_of_lt hxhpos)
+  have hinv_nonneg : 0 <= (x ^ 2 * (x + h))⁻¹ :=
+    Rat.le_of_lt ((Rat.inv_pos).2 hdenpos)
+  have hinv_le_one : (x ^ 2 * (x + h))⁻¹ <= 1 := by
+    apply Rat.le_of_mul_le_mul_right (c := x ^ 2 * (x + h))
+    · calc
+        (x ^ 2 * (x + h))⁻¹ * (x ^ 2 * (x + h)) = 1 :=
+          Rat.inv_mul_cancel _ (Rat.ne_of_gt hdenpos)
+        _ <= 1 * (x ^ 2 * (x + h)) := by
+          simpa using hdenone
+    · exact hdenpos
+  have hrewrite :
+      ((1 / (x + h) - 1 / x) / h - -(1 / x ^ 2)) =
+        h * (x ^ 2 * (x + h))⁻¹ := by
+    rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def,
+      Rat.inv_mul_rev]
+    have hxinv : x * x⁻¹ = 1 := Rat.mul_inv_cancel x hxne
+    have hxinv' : x⁻¹ * x = 1 := Rat.inv_mul_cancel x hxne
+    have hxh_inv : (x + h) * (x + h)⁻¹ = 1 :=
+      Rat.mul_inv_cancel (x + h) hxhne
+    have hxh_inv' : (x + h)⁻¹ * (x + h) = 1 :=
+      Rat.inv_mul_cancel (x + h) hxhne
+    have h_inv : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+    have h_inv' : h⁻¹ * h = 1 := Rat.inv_mul_cancel h hh
+    have hx2rewrite : (x ^ 2)⁻¹ = x⁻¹ * x⁻¹ := by
+      simp [Rat.pow_succ, Rat.inv_mul_rev]
+    rw [hx2rewrite]
+    simp only [Rat.one_mul]
+    grind [Rat.mul_inv_cancel, Rat.inv_mul_cancel,
+      Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+      Rat.sub_eq_add_neg]
+  rw [hrewrite, qabs_mul, qabs_eq_self_of_nonneg hinv_nonneg]
+  have hmul : qabs h * (x ^ 2 * (x + h))⁻¹ <= qabs h * 1 :=
+    Rat.mul_le_mul_of_nonneg_left hinv_le_one (qabs_nonneg h)
+  simpa only [Rat.mul_one] using hmul
+
+/-- The reciprocal kernel has a two-sided finite-difference derivative
+certificate on the logarithm chart `[1,2]`. -/
+def reciprocalOnOneTwo_hasDerivativeOnInterval :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat (fun x => 1 / x) 1 2)
+      (FunctionOnInterval.exactRat (fun x => -(1 / x ^ 2)) 1 2) :=
+  CenteredSecantDerivativeBound.toHasDerivativeOnInterval
+    reciprocalCenteredSecantBound 1 2 (by native_decide) (by native_decide)
+
+/-! Transport the same certificate through the rational translation
+`x ↦ x + 1`.  This is the coordinate used by the logarithm integral on
+`[0,1]`. -/
+def logTwoKernelCenteredSecantBound :
+    CenteredSecantDerivativeBound (1 / 2) (1 / 2)
+      (fun x => 1 / (1 + x)) (fun x => -(1 / (1 + x) ^ 2)) := by
+  refine {
+    errorCoefficient := reciprocalCenteredSecantBound.errorCoefficient
+    errorCoefficient_nonneg := reciprocalCenteredSecantBound.errorCoefficient_nonneg
+    error_bound := ?_ }
+  intro x h hh hx hxh
+  have hx' : qabs ((x + 1) - 3 / 2) <= (1 / 2 : Rat) := by
+    have heq : (x + 1) - 3 / 2 = x - 1 / 2 := by
+      grind [Rat.sub_eq_add_neg]
+    rw [heq]
+    exact hx
+  have hxh' : qabs ((x + h + 1) - 3 / 2) <= (1 / 2 : Rat) := by
+    have heq : (x + h + 1) - 3 / 2 = x + h - 1 / 2 := by
+      grind [Rat.sub_eq_add_neg]
+    rw [heq]
+    exact hxh
+  have hbound := reciprocalCenteredSecantBound.error_bound
+    (x + 1) h hh hx' (by
+      have heq : (x + 1 + h) - 3 / 2 = (x + h + 1) - 3 / 2 := by
+        grind [Rat.sub_eq_add_neg]
+      rw [heq]
+      exact hxh')
+  simpa [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
+    Rat.pow_succ, reciprocalCenteredSecantBound] using hbound
+
+/-- The translated reciprocal kernel has a two-sided finite-difference
+derivative certificate on the unit interval. -/
+def logTwoKernel_hasDerivativeOnInterval :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat (fun x => 1 / (1 + x)) 0 1)
+      (FunctionOnInterval.exactRat (fun x => -(1 / (1 + x) ^ 2)) 0 1) :=
+  CenteredSecantDerivativeBound.toHasDerivativeOnInterval
+    logTwoKernelCenteredSecantBound 0 1 (by native_decide) (by native_decide)
+
 end CenteredSecantDerivativeBound
 
 /-- The monomial secant estimate as reusable quantitative data. -/
@@ -531,6 +682,127 @@ def normalizedMonomial_hasDerivativeOnInterval
     normalizedMonomialStepPrecision, SecantDerivativeBound.stepPrecision]
     using (normalizedMonomialSecantBound C n hC1).toHasDerivativeOnInterval
       a b hleft hright
+
+/-! The local FTC consequence of the normalized power rule.  This is the
+application-facing form: on one positive rational cell, the derivative box
+scaled by the cell width contains the finite endpoint increment.  It is the
+piece that a partition-level effective FTC assembles across cells. -/
+theorem normalizedMonomial_endpointDifference_contains_of_pos
+    (a b C : Rat) (n : Nat)
+    (hleft : -C <= a) (hright : b <= C) (hC1 : 1 <= C)
+    {x h : Rat} {stage : Nat}
+    (hx : inDomainInterval a b x)
+    (hxh : inDomainInterval a b (x + h))
+    (hpos : 0 < h)
+    (hsmall : qabs h <=
+      (1 / ((
+        (normalizedMonomial_hasDerivativeOnInterval a b C n hleft hright hC1).stepPrecision
+          stage : Nat) : Rat))) :
+    (QInterval.scaleByRat h
+      (QInterval.expand
+        ((monomialOnInterval a b n).compute x hx
+          ((normalizedMonomial_hasDerivativeOnInterval a b C n hleft hright hC1).evalPrecision
+            x h stage))
+        (2 * (precisionAtStage stage).val))).ContainsInterval
+      (QInterval.subInterval
+        ((normalizedMonomialOnInterval a b n).compute (x + h) hxh
+          ((normalizedMonomial_hasDerivativeOnInterval a b C n hleft hright hC1).evalPrecision
+            x h stage))
+        ((normalizedMonomialOnInterval a b n).compute x hx
+          ((normalizedMonomial_hasDerivativeOnInterval a b C n hleft hright hC1).evalPrecision
+            x h stage))) := by
+  exact HasDerivativeOnInterval.endpointDifference_contains_of_pos
+    (normalizedMonomial_hasDerivativeOnInterval a b C n hleft hright hC1)
+    hx hxh hx hpos hsmall
+
+/-! Scaling the normalized monomial by its denominator exposes the general
+power rule.  The only new algebra is cancellation of the positive rational
+`n + 1`; all error control remains the normalized finite secant certificate. -/
+def monomialSecantDerivativeBound (C : Rat) (n : Nat) (hC1 : 1 <= C) :
+    SecantDerivativeBound C
+      (fun x => x ^ (n + 1))
+      (fun x => ((n + 1 : Nat) : Rat) * x ^ n) := by
+  let k : Rat := ((n + 1 : Nat) : Rat)
+  let H := SecantDerivativeBound.scaleRat k
+    (normalizedMonomialSecantBound C n hC1)
+  have hk : k ≠ 0 := by
+    dsimp [k]
+    exact Rat.ne_of_gt (by
+      exact (Rat.natCast_pos).2 (Nat.succ_pos n))
+  refine {
+    errorCoefficient := H.errorCoefficient
+    errorCoefficient_nonneg := H.errorCoefficient_nonneg
+    error_bound := ?_ }
+  intro x h hh hx hxh
+  have hbound := H.error_bound x h hh hx hxh
+  change qabs
+      ((k * ((x + h) ^ (n + 1) / k) -
+        k * (x ^ (n + 1) / k)) / h - k * x ^ n) <=
+      qabs h * H.errorCoefficient at hbound
+  have hcancel (z : Rat) : k * (z / k) = z := by
+    rw [Rat.div_def]
+    calc
+      k * (z * k⁻¹) = k * (k⁻¹ * z) := by rw [Rat.mul_comm z]
+      _ = (k * k⁻¹) * z := by rw [Rat.mul_assoc]
+      _ = z := by rw [Rat.mul_inv_cancel k hk, Rat.one_mul]
+  have hrewrite :
+      (k * ((x + h) ^ (n + 1) / k) -
+        k * (x ^ (n + 1) / k)) / h - k * x ^ n =
+      ((x + h) ^ (n + 1) - x ^ (n + 1)) / h - k * x ^ n := by
+    rw [hcancel ((x + h) ^ (n + 1)), hcancel (x ^ (n + 1))]
+  rw [hrewrite] at hbound
+  exact hbound
+
+def monomial_hasDerivativeOnInterval
+    (a b C : Rat) (n : Nat)
+    (hleft : -C <= a) (hright : b <= C) (hC1 : 1 <= C) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat (fun x => x ^ (n + 1)) a b)
+      (FunctionOnInterval.exactRat
+        (fun x => ((n + 1 : Nat) : Rat) * x ^ n) a b) :=
+  (monomialSecantDerivativeBound C n hC1).toHasDerivativeOnInterval
+    a b hleft hright
+
+/-! The cubic is obtained from the normalized degree-two monomial by a
+rational scalar.  This keeps its finite secant error and dyadic schedule in
+the reusable monomial certificate instead of introducing a second hand-made
+limit argument. -/
+def cubeSecantDerivativeBound (C : Rat) (hC1 : 1 <= C) :
+    SecantDerivativeBound C
+      (fun x => x ^ 3)
+      (fun x => 3 * x ^ 2) := by
+  let H := SecantDerivativeBound.scaleRat 3
+    (normalizedMonomialSecantBound C 2 hC1)
+  refine {
+    errorCoefficient := H.errorCoefficient
+    errorCoefficient_nonneg := H.errorCoefficient_nonneg
+    error_bound := ?_ }
+  intro x h hh hx hxh
+  have hbound := H.error_bound x h hh hx hxh
+  have hthree : (3 : Rat) * (3 : Rat)⁻¹ = 1 := by native_decide
+  simp only [Nat.reduceAdd] at hbound
+  change qabs
+      ((3 * ((x + h) ^ 3 / (3 : Rat)) -
+        3 * (x ^ 3 / (3 : Rat))) / h - 3 * x ^ 2) <=
+      qabs h * H.errorCoefficient at hbound
+  have hrewrite :
+      ((3 * ((x + h) ^ 3 / (3 : Rat)) -
+          3 * (x ^ 3 / (3 : Rat))) / h - 3 * x ^ 2) =
+        (((x + h) ^ 3 - x ^ 3) / h - 3 * x ^ 2) := by
+    rw [Rat.div_def, Rat.div_def, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add,
+      Rat.add_mul, Rat.sub_eq_add_neg]
+  rw [hrewrite] at hbound
+  exact hbound
+
+def cube_hasDerivativeOnInterval
+    (a b C : Rat) (hleft : -C <= a) (hright : b <= C)
+    (hC1 : 1 <= C) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat (fun x => x ^ 3) a b)
+      (FunctionOnInterval.exactRat (fun x => 3 * x ^ 2) a b) :=
+  (cubeSecantDerivativeBound C hC1).toHasDerivativeOnInterval
+    a b hleft hright
 
 /-- The degree-two Taylor prefix of exponential has the expected derivative
 on every rational interval inside a bounded symmetric box.  This is the first
@@ -891,6 +1163,39 @@ def integratedTaylorPrefix_hasDerivativeOnInterval
       (FunctionOnInterval.exactRat (taylorDerivativePrefix coeffs n) a b) :=
   (integratedTaylorPrefixSecantBound C coeffs hC1 n).toHasDerivativeOnInterval
     a b hleft hright
+
+/-! The finite Taylor primitive now exposes the same cell-level FTC contract
+as the normalized monomial.  This is the direct termwise-integration API:
+the derivative-prefix box, scaled by a positive cell width, contains the
+primitive's finite endpoint increment. -/
+theorem integratedTaylorPrefix_endpointDifference_contains_of_pos
+    (coeffs : Nat -> Rat) (n : Nat) (a b C : Rat)
+    (hleft : -C <= a) (hright : b <= C) (hC1 : 1 <= C)
+    {x h : Rat} {stage : Nat}
+    (hx : inDomainInterval a b x)
+    (hxh : inDomainInterval a b (x + h))
+    (hpos : 0 < h)
+    (hsmall : qabs h <=
+      (1 / ((
+        (integratedTaylorPrefix_hasDerivativeOnInterval
+          coeffs n a b C hleft hright hC1).stepPrecision stage : Nat) : Rat))) :
+    let D := integratedTaylorPrefix_hasDerivativeOnInterval
+      coeffs n a b C hleft hright hC1
+    (QInterval.scaleByRat h
+      (QInterval.expand
+        ((FunctionOnInterval.exactRat (taylorDerivativePrefix coeffs n) a b).compute
+          x hx (D.evalPrecision x h stage))
+        (2 * (precisionAtStage stage).val))).ContainsInterval
+      (QInterval.subInterval
+        ((FunctionOnInterval.exactRat (integratedTaylorPrefix coeffs n) a b).compute
+          (x + h) hxh (D.evalPrecision x h stage))
+        ((FunctionOnInterval.exactRat (integratedTaylorPrefix coeffs n) a b).compute
+          x hx (D.evalPrecision x h stage))) := by
+  let D := integratedTaylorPrefix_hasDerivativeOnInterval
+    coeffs n a b C hleft hright hC1
+  dsimp only
+  exact HasDerivativeOnInterval.endpointDifference_contains_of_pos
+    D hx hxh hx hpos hsmall
 
 /-- Every finite Taylor prefix carries the explicit secant bound supplied by
 its coefficient shift.  This is the reusable Taylor--Lagrange bridge for a

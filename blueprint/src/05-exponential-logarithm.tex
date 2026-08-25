@@ -32,6 +32,20 @@ input x -> choose N from the tail budget
         -> return a rational interval
 \end{verbatim}
 
+The tail argument is itself finite.  After choosing the first omitted degree,
+every later finite Taylor prefix is enclosed by the same rational factorial
+majorant.  This is the project’s potential-infinity replacement for asserting
+that a sequence has converged in a completed real line.
+
+\lean{ComputableAnalysis.FiniteExponentialTaylor.remainderPartial}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.remainderPartial_eq_expTaylorPrefix_sub}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.remainderPartial_abs_le_factorialTailPartial}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.scheduledTailStart}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.scheduledPrefixDegree}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.scheduled_expTaylorPrefix_remainder_le}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.scheduled_expTaylorPrefix_enclosure}
+\leanok
+
 Algebraic laws are proved by comparing two such finite computations. Identity
 of two expressions is an overlap theorem between their raw intervals, not an
 appeal to an ambient completed field.
@@ -90,11 +104,12 @@ The checked instance is:
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitStabilizedIntegral_equiv_endpointDifference}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitStabilizedIntegral_equiv_exp_endpoint_subtraction}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitStabilizedIntegral_equiv_powerSeries_endpoint_subtraction}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitStabilizedIntegral_equiv_powerSeries_one_sub_one}
 \leanok
 
 The selected-stage unit computation is stabilized against its endpoint
 difference, yielding the ordinary first example
-\(\int_0^1\exp(x)\,dx=\exp(1)-\exp(0)\).  The endpoint subtraction is
+\(\int_0^1\exp(x)\,dx=\exp(1)-1\).  The endpoint subtraction is
 again an equivalence between rational interval algorithms, not an appeal to
 completed-real equality.
 
@@ -235,6 +250,22 @@ The positive reciprocal evaluator on \([1,2]\), its interval regularity, and
 the finite exp/log transport are checked. General inverse-function laws remain
 certificate interfaces: each new domain supplies monotonicity, separation, and
 a finite bisection schedule.
+
+The logarithm-side derivative is also a finite certificate. On the safe chart
+\([1,2]\), the reciprocal secant quotient satisfies
+\[
+  (1/(x+h)-1/x)/h = -1/x^2 + O(|h|),
+\]
+with an explicit rational error bound. This is the local derivative input for
+the FTC interpretation of the logarithm integral; no denominator-zero case or
+completed real limit is admitted.
+
+\lean{ComputableAnalysis.FinitePolynomial.CenteredSecantDerivativeBound.reciprocalCenteredSecantBound}
+\lean{ComputableAnalysis.FinitePolynomial.CenteredSecantDerivativeBound.reciprocalOnOneTwo_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.CenteredSecantDerivativeBound.logTwoKernelCenteredSecantBound}
+\lean{ComputableAnalysis.FinitePolynomial.CenteredSecantDerivativeBound.logTwoKernel_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.Logarithm.logTwoKernel_endpointDifference_contains_of_pos}
+\leanok
 
 The concrete \(\log 2\) bridge is already a complete computable comparison:
 

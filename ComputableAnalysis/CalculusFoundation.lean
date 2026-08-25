@@ -1,11 +1,14 @@
 import ComputableAnalysis.RationalCircle
 import ComputableAnalysis.Calculus
+import ComputableAnalysis.ArctanEffectiveFTC
 import ComputableAnalysis.IntegralIdentities
 import ComputableAnalysis.TurningPointIntegral
 import ComputableAnalysis.AbsIntegral
+import ComputableAnalysis.PrimitivePiecewiseFTC
 import ComputableAnalysis.FiniteFTCIntervalRegular
 import ComputableAnalysis.FiniteSinePrefixFTC
 import ComputableAnalysis.PolynomialFTCValues
+import ComputableAnalysis.FiniteFTCPolynomial
 import ComputableAnalysis.SinPiIntegral
 import ComputableAnalysis.SinPiTransportSubgoals
 import ComputableAnalysis.SinPiTransportAdapter
@@ -15,6 +18,7 @@ import ComputableAnalysis.EffectiveFTCPortfolio
 import ComputableAnalysis.MonotonicityConvexity
 import ComputableAnalysis.PowerSeries
 import ComputableAnalysis.FiniteTaylorFTCInterface
+import ComputableAnalysis.FiniteExponentialTaylor
 import ComputableAnalysis.Series
 import ComputableAnalysis.FirstYearCalculus
 import ComputableAnalysis.FiniteFourierFoundation

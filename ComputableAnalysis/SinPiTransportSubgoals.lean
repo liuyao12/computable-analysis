@@ -543,6 +543,203 @@ noncomputable def DyadicNestedRadicalBranchCertificateFamily.toWitnessFamily
   DyadicTangentWitnessFamily.of_branch_certificate_families
     B H.endpoint_zero H.even H.lower H.upper
 
+/-! The equality-shaped child certificates are useful when two interval
+implementations are definitionally synchronized, but the geometric proof
+only needs overlap.  This direct adapter keeps that weaker contract and
+avoids asking the half-angle argument to prove an unnecessary evaluator
+equality. -/
+
+theorem dyadicNestedRadical_sample_overlap_of_direct_branch_overlaps
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (zero_overlap : forall (precision depth : Nat) (hk : 0 < 2 ^ depth),
+      QInterval.Overlaps
+        ((sinPiRawOfArctan B
+          (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) 0)
+          (dyadicHalfDomain (by omega))).compute precision)
+        (dyadicNestedRadicalTableAt precision depth 0).1)
+    (even_overlap : forall (precision n j : Nat) (hj : j < 2 ^ n),
+      QInterval.Overlaps
+        (rationalCircleSinInterval
+          (dyadicTangentBoxAt B precision (n + 1) (2 * j)
+            (by
+              have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+                rw [Nat.pow_succ]
+                omega
+              rw [hpow]
+              omega)))
+        (dyadicNestedRadicalTableAt precision (n + 1) (2 * j)).1)
+    (lower_overlap : forall (precision n j : Nat)
+      (hbound : 2 * j + 1 <= 2 ^ n),
+      QInterval.Overlaps
+        (rationalCircleSinInterval
+          (dyadicTangentBoxAt B precision (n + 1) (2 * j + 1)
+            (by
+              have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+                rw [Nat.pow_succ]
+                omega
+              rw [hpow]
+              omega)))
+        (dyadicNestedRadicalTableAt precision (n + 1) (2 * j + 1)).1)
+    (upper_overlap : forall (precision n k : Nat)
+      (hupper : 2 ^ n < k) (hk : k < 2 ^ (n + 1)),
+      QInterval.Overlaps
+        (rationalCircleSinInterval
+          (dyadicTangentBoxAt B precision (n + 1) k
+            (by
+              have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+                rw [Nat.pow_succ]
+                omega
+              rw [hpow]
+              omega)))
+        (dyadicNestedRadicalTableAt precision (n + 1) k).1) :
+    forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      QInterval.Overlaps
+        ((sinPiRawOfArctan B
+          (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+          (dyadicHalfDomain hk)).compute precision)
+        (dyadicNestedRadicalTableAt precision depth k).1 := by
+  intro precision depth k hk
+  cases depth with
+  | zero =>
+      have hk' : k = 0 := by omega
+      subst k
+      exact zero_overlap precision 0 (by native_decide)
+  | succ n =>
+      by_cases hzero : k = 0
+      · subst k
+        exact zero_overlap precision (n + 1) (by omega)
+      by_cases heven : k % 2 = 0
+      · obtain ⟨j, rfl⟩ : ∃ j, k = 2 * j := by
+          exact ⟨k / 2, by omega⟩
+        have hj : j < 2 ^ n := by
+          rw [Nat.pow_succ] at hk
+          omega
+        have hbox := even_overlap precision n j hj
+        simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using hbox
+      · have hodd : k % 2 = 1 := by omega
+        by_cases hlower : k <= 2 ^ n
+        · obtain ⟨j, rfl⟩ : ∃ j, k = 2 * j + 1 := by
+            exact ⟨k / 2, by omega⟩
+          have hbound : 2 * j + 1 <= 2 ^ n := by omega
+          have hbox := lower_overlap precision n j hbound
+          simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using hbox
+        · have hupper : 2 ^ n < k := by omega
+          have hbox := upper_overlap precision n k hupper hk
+          simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using hbox
+
+theorem dyadicNestedRadical_sample_overlap_of_canonical_halfAngle_certificate_family
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      0 < k -> CanonicalDyadicHalfAngleCertificateAt B precision depth k hk) :
+    forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      QInterval.Overlaps
+        ((sinPiRawOfArctan B
+          (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+          (dyadicHalfDomain hk)).compute precision)
+        (dyadicNestedRadicalTableAt precision depth k).1 := by
+  apply dyadicNestedRadical_sample_overlap_of_direct_branch_overlaps B
+  · intro precision depth hk
+    exact dyadicNestedRadical_zero_sample_overlap_of_endpoint B ht0
+      precision depth hk
+  · intro precision n j hj
+    by_cases hj0 : j = 0
+    · subst j
+      have hzero := dyadicNestedRadical_zero_sample_overlap_of_endpoint B ht0
+        precision (n + 1) (by omega)
+      simpa [sinPiRawOfArctan, dyadicTangentBoxAt,
+        dyadicNestedRadicalTableAt_zero_sin] using hzero
+    have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+      rw [Nat.pow_succ]
+      omega
+    have hk2 : 2 * j < 2 ^ (n + 1) := by
+      rw [hpow]
+      omega
+    have h := hcertificate precision (n + 1) (2 * j) hk2 (by omega)
+    exact canonical_dyadic_overlap_of_halfAngle_outer_tangent_at B hk2
+      h.cosineBox_subinterval h.outer_tangent_contains h.sine_nonneg h.cosine_nonneg
+      h.circle_identity h.sine_contains h.cosine_contains
+  · intro precision n j hbound
+    exact lower_overlap_of_canonical_halfAngle_certificate B precision n j
+      hbound (hcertificate precision (n + 1) (2 * j + 1) (by omega) (by omega))
+  · intro precision n k hupper hk
+    exact upper_overlap_of_canonical_halfAngle_certificate B precision n k
+      hupper hk (hcertificate precision (n + 1) k hk (by omega))
+
+noncomputable def DyadicTangentWitnessFamily.of_canonical_halfAngle_certificate_family
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      0 < k -> CanonicalDyadicHalfAngleCertificateAt B precision depth k hk) :
+    DyadicTangentWitnessFamily B := by
+  apply DyadicTangentWitnessFamily.of_overlap_family B ht0
+  intro depth k hk hpos precision
+  have h := dyadicNestedRadical_sample_overlap_of_canonical_halfAngle_certificate_family
+    B ht0 hcertificate precision depth k hk
+  simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using h
+
+theorem ArctanSinPiConstruction.halfIntegral_equiv_of_canonical_halfAngle_certificate_family
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      0 < k -> CanonicalDyadicHalfAngleCertificateAt S.inverse precision depth k hk) :
+    (S.halfIntegral pub).Equiv
+      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+  exact S.halfIntegral_equiv_of_witness_family
+    pub g cg hdyadic hplan hevaluator
+    (DyadicTangentWitnessFamily.of_canonical_halfAngle_certificate_family
+      S.inverse ht0 hcertificate)
+
+theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_canonical_halfAngle_certificate_family
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      0 < k -> CanonicalDyadicHalfAngleCertificateAt S.inverse precision depth k hk)
+    (hintegral : (Integral.integral g 0 ((1 : Rat) / 2) cg).Equiv
+      reciprocalPiRaw) :
+    (S.halfIntegral pub).Equiv reciprocalPiRaw := by
+  have htransport :=
+    S.halfIntegral_equiv_of_canonical_halfAngle_certificate_family
+      pub g cg hdyadic hplan hevaluator ht0 hcertificate
+  exact RealRaw.equiv_trans
+    (S.halfIntegral_valid pub)
+    (FTC.integral_valid_of_construction cg)
+    reciprocalPiRaw_valid htransport hintegral
+
 end SinPiIntegral
 
 end ComputableAnalysis

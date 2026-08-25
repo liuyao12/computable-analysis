@@ -103,6 +103,33 @@ theorem piCircleArea_compute_lo_ge_two (n : Nat) :
   rw [ArctanGeometry.arctanAreaLoopState_lo_eq_geometricLowerSum] at hbase
   grind
 
+theorem piCircleArea_compute_hi_le_four (n : Nat) :
+    (piCircleArea.compute n).hi <= 4 := by
+  have hnest := CauchyPi.piCircleArea_valid.2.1 0 n (Nat.zero_le n)
+  have hzero : (piCircleArea.compute 0).hi <= (4 : Rat) := by
+    native_decide
+  exact Rat.le_trans hnest.2.2 hzero
+
+theorem halfQuarterTurnRaw_bounds (n : Nat) :
+    0 <= ((RationalCircle.GeometricTrig.halfQuarterTurnRaw
+      (1 : Rat)).compute n).lo /\
+      ((RationalCircle.GeometricTrig.halfQuarterTurnRaw
+        (1 : Rat)).compute n).hi <= 1 := by
+  change 0 <= ((RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).compute n).lo /\
+    ((RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).compute n).hi <= 1
+  unfold RealRaw.scaleRat RealRaw.scaleRatCompute
+  simp only [if_pos (by native_decide : (0 : Rat) <= (1 : Rat) / 4)]
+  constructor
+  · exact Rat.mul_nonneg (by native_decide)
+      (Rat.le_trans (by native_decide) (piCircleArea_compute_lo_ge_two n))
+  · have h := Rat.mul_le_mul_of_nonneg_left
+      (piCircleArea_compute_hi_le_four n)
+      (by native_decide : (0 : Rat) <= 1 / 4)
+    calc
+      (1 / 4 : Rat) * (piCircleArea.compute n).hi <=
+          (1 / 4 : Rat) * 4 := h
+      _ = 1 := by native_decide
+
 set_option maxHeartbeats 1000000 in
 theorem reciprocalPi_quarterTurn_equiv_quarter :
     (SinPiIntegral.reciprocalPiRaw *
@@ -504,7 +531,7 @@ theorem NormalizedTangentSquareCommonWitness.to_equiv
   unfold QInterval.Overlaps
   exact ⟨Rat.le_trans (H.candidate_lo_le n)
       (H.witness_le_normalized_hi n),
-    Rat.le_trans (H.normalized_lo_le n)
+      Rat.le_trans (H.normalized_lo_le n)
       (H.witness_le_candidate_hi n)⟩
 
 /-! A signed product cannot use the nonnegative-product shortcut at coarse
@@ -542,6 +569,47 @@ theorem normalizedTangentSquareProduct_ordered (n : Nat) :
     (d := (SinPiIntegral.tangentSquareIntegral.compute n).hi) hrecip htangent
   unfold QInterval.width
   grind
+
+/- Overlap and a rational common witness are interchangeable at this layer.
+   The constructor chooses the larger lower endpoint; all upper-endpoint
+   obligations follow from the two interval-order certificates. -/
+def NormalizedTangentSquareCommonWitness.of_overlap
+    (hoverlap : forall n,
+      QInterval.Overlaps
+        (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n)
+        (normalizedTangentSquareIntegral.compute n)) :
+    NormalizedTangentSquareCommonWitness where
+  witness := fun n => max
+    (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).lo
+    (normalizedTangentSquareIntegral.compute n).lo
+  candidate_lo_le := by
+    intro n
+    rw [Rat.max_def]
+    split <;> grind
+  witness_le_candidate_hi := by
+    intro n
+    have hover := hoverlap n
+    unfold QInterval.Overlaps at hover
+    have horder := SinPiIntegral.dyadicNestedRadicalSquareLeftSum_ordered n
+    change 0 <=
+      (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).hi -
+        (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).lo at horder
+    rw [Rat.max_def]
+    split <;> grind
+  normalized_lo_le := by
+    intro n
+    rw [Rat.max_def]
+    split <;> grind
+  witness_le_normalized_hi := by
+    intro n
+    have hover := hoverlap n
+    unfold QInterval.Overlaps at hover
+    have horder := normalizedTangentSquareProduct_ordered n
+    change 0 <=
+      (normalizedTangentSquareIntegral.compute n).hi -
+        (normalizedTangentSquareIntegral.compute n).lo at horder
+    rw [Rat.max_def]
+    split <;> grind
 
 theorem normalizedTangentSquareProduct_nested (n m : Nat) (hnm : n <= m) :
     (normalizedTangentSquareIntegral.compute n).lo <=
@@ -717,6 +785,18 @@ theorem normalizedTangentSquareProduct_valid :
 theorem normalizedTangentSquareIntegral_valid :
     normalizedTangentSquareIntegral.Valid := by
   exact normalizedTangentSquareProduct_valid.valid
+
+theorem normalizedTangentSquareAnchor_valid :
+    (SinPiIntegral.reciprocalPiRaw *
+      RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid := by
+  exact RealRaw.mul_valid_of_nonneg_bounded
+    SinPiIntegral.reciprocalPiRaw_valid
+    (by
+      change (RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).Valid
+      exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+        CauchyPi.piCircleArea_valid)
+    (by native_decide) (by native_decide)
+    SinPiIntegral.reciprocalPiRaw_bounds halfQuarterTurnRaw_bounds
 
 theorem normalizedTangentSquare_stage_zero_overlap :
     QInterval.Overlaps
@@ -1136,6 +1216,54 @@ theorem tangentSquareIntegral_equiv_halfQuarterTurn_of_common_witness
     H.tangent_integral_valid H.endpoint_valid H.quarter_valid
     hanchor_endpoint H.endpoint_equiv_quarter
 
+theorem normalizedTangentSquare_chart_transport_of_common_witness
+    (effective_integral_valid :
+      SinPiIntegral.tangentSquareEffectiveIntegralRaw.Valid)
+    (endpoint_valid :
+      SinPiIntegral.tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw.Valid)
+    (common : TangentSquareFTCIntegralCommonWitness)
+    (endpoint_equiv_quarter :
+      SinPiIntegral.tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw.Equiv
+        (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))) :
+    SignedRawProductEquivalenceSubgoal
+      SinPiIntegral.reciprocalPiRaw SinPiIntegral.reciprocalPiRaw
+      SinPiIntegral.tangentSquareIntegral
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
+  have htangent :
+      SinPiIntegral.tangentSquareIntegral.Equiv
+        (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) :=
+    tangentSquareIntegral_equiv_halfQuarterTurn_of_common_witness
+      effective_integral_valid endpoint_valid common endpoint_equiv_quarter
+  have hquarter :
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid := by
+    change (RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).Valid
+    exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+      CauchyPi.piCircleArea_valid
+  apply SignedRawProductEquivalenceSubgoal.of_factor_equiv
+    normalizedTangentSquareIntegral_valid normalizedTangentSquareAnchor_valid
+    SinPiIntegral.reciprocalPiRaw_valid SinPiIntegral.reciprocalPiRaw_valid
+    SinPiIntegral.tangentSquareIntegral_valid hquarter
+  · exact RealRaw.equiv_refl _ SinPiIntegral.reciprocalPiRaw_valid
+  · exact htangent
+
+def NormalizedTangentSquareTransportSubgoal.of_witnesses
+    (common : NormalizedTangentSquareCommonWitness)
+    (effective_integral_valid :
+      SinPiIntegral.tangentSquareEffectiveIntegralRaw.Valid)
+    (endpoint_valid :
+      SinPiIntegral.tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw.Valid)
+    (tangent_common : TangentSquareFTCIntegralCommonWitness)
+    (endpoint_equiv_quarter :
+      SinPiIntegral.tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw.Equiv
+        (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))) :
+    NormalizedTangentSquareTransportSubgoal := by
+  exact {
+    commonWitness := common
+    normalized_validity := normalizedTangentSquareProduct_valid
+    normalized_anchor_valid := normalizedTangentSquareAnchor_valid
+    chart_transport := normalizedTangentSquare_chart_transport_of_common_witness
+      effective_integral_valid endpoint_valid tangent_common endpoint_equiv_quarter }
+
 theorem TangentSquareQuarterTurnValueSubgoal.effective_equiv_endpoint
     (H : TangentSquareQuarterTurnValueSubgoal) :
     SinPiIntegral.tangentSquareEffectiveIntegralRaw.Equiv
@@ -1217,6 +1345,32 @@ theorem NestedRadicalSquareIntegralConstructionSubgoal.public_equiv_evaluator
     (by native_decide : (0 : Rat) <= (1 : Rat) / 2)
     H.publicConstruction H.integral H.same_plan H.sample_overlap
 
+def NestedRadicalSquareIntegralConstructionSubgoal.normalized_commonWitness_of_integral_equiv
+    {S : SinPiIntegral.ArctanSinPiConstruction}
+    (H : NestedRadicalSquareIntegralConstructionSubgoal S)
+    (hcompute : forall n,
+      (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).compute n =
+        SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw.compute n)
+    (hvalue :
+      (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).Equiv
+        normalizedTangentSquareIntegral) :
+    NormalizedTangentSquareCommonWitness := by
+  apply NormalizedTangentSquareCommonWitness.of_overlap
+  intro n
+  have hevaluator :
+      (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).Valid := by
+    exact FTC.integral_valid_of_construction H.integral
+  have heq := RealRaw.sameStageOverlap_of_equiv
+    hevaluator normalizedTangentSquareIntegral_valid hvalue n
+  have hbox := (RealRaw.compareAt_overlap_iff
+    (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral)
+    normalizedTangentSquareIntegral n n).1 heq
+  change QInterval.Overlaps
+    ((Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).compute n)
+    (normalizedTangentSquareIntegral.compute n) at hbox
+  rw [hcompute n] at hbox
+  exact hbox
+
 /- The next constructor makes the remaining `sin²` obligation concrete.  The
    evaluator is required only to return the squared nested-radical box at the
    public plan's sample points; the canonical half-angle certificates then
@@ -1294,6 +1448,55 @@ structure NestedRadicalSquareQuarterBoundsSubgoal where
   upper_contains : forall n,
     (1 / 4 : Rat) <=
       (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).hi
+
+/- The corrected anchor-side version uses the normalized tangent product.
+   This is separate from the historical provisional structure above, whose
+   unscaled tangent chart has quarter-turn value rather than `1/4`. -/
+structure NormalizedTangentSquareQuarterBoundsSubgoal where
+  lower_contains : forall n,
+    (normalizedTangentSquareIntegral.compute n).lo <= (1 / 4 : Rat)
+  upper_contains : forall n,
+    (1 / 4 : Rat) <= (normalizedTangentSquareIntegral.compute n).hi
+
+def NormalizedTangentSquareQuarterBoundsSubgoal.of_value
+    (hvalue : normalizedTangentSquareIntegral.Equiv
+      (RealRaw.ofRat (1 / 4))) :
+    NormalizedTangentSquareQuarterBoundsSubgoal := by
+  have hpointvalid : (RealRaw.ofRat (1 / 4)).Valid := by
+    change RealRaw.ValidCompute (fun _ : Nat => { lo := 1 / 4, hi := 1 / 4 })
+    exact RealRaw.ofRat_valid (1 / 4)
+  refine { lower_contains := ?_, upper_contains := ?_ }
+  · intro n
+    have hover := (RealRaw.compareAt_overlap_iff
+      normalizedTangentSquareIntegral (RealRaw.ofRat (1 / 4)) n n).1
+      (RealRaw.sameStageOverlap_of_equiv
+        normalizedTangentSquareIntegral_valid
+        hpointvalid hvalue n)
+    change QInterval.Overlaps
+      (normalizedTangentSquareIntegral.compute n)
+      ((RealRaw.ofRat (1 / 4)).compute n) at hover
+    exact hover.1
+  · intro n
+    have hover := (RealRaw.compareAt_overlap_iff
+      normalizedTangentSquareIntegral (RealRaw.ofRat (1 / 4)) n n).1
+      (RealRaw.sameStageOverlap_of_equiv
+        normalizedTangentSquareIntegral_valid
+        hpointvalid hvalue n)
+    change QInterval.Overlaps
+      (normalizedTangentSquareIntegral.compute n)
+      ((RealRaw.ofRat (1 / 4)).compute n) at hover
+    exact hover.2
+
+def NestedRadicalSquareQuarterBoundsSubgoal.toNormalizedCommonWitness
+    (H : NestedRadicalSquareQuarterBoundsSubgoal)
+    (N : NormalizedTangentSquareQuarterBoundsSubgoal) :
+    NormalizedTangentSquareCommonWitness := by
+  refine {
+    witness := fun _ => (1 / 4 : Rat)
+    candidate_lo_le := H.lower_contains
+    witness_le_candidate_hi := H.upper_contains
+    normalized_lo_le := N.lower_contains
+    witness_le_normalized_hi := N.upper_contains }
 
 def NestedRadicalSquareQuarterBoundsSubgoal.toCommonWitness
     (H : NestedRadicalSquareQuarterBoundsSubgoal)

@@ -47,23 +47,34 @@ FTC instance, the centered exponential initial-value certificate, and scalar
 linear ODE uniqueness are checked in Lean. The finite raw-sum algebra used to
 concatenate certified pieces is also checked, so adjacent-interval and
 multi-turn proofs have an explicit assembly layer. The
+first non-monotone endpoint identity is now also checked: the two affine cells
+for \(\lvert x\rvert\) on \([-1,1]\) are transported through the separate
+primitive \(x\lvert x\rvert/2\) to the value (1). The
 principal unfinished representation step is the equal-dyadic sine FTC
 transport; the integral itself is already complete through the tangent-chart
 Riemann--Stieltjes route. The
 monotone Darboux machinery and the sine modulus are already present; the
 remaining provider is target-directed inverse data that transports each
 half-angle box to a certified tangent witness, or an equivalent dyadic
-bisection trace. The reusable assembly theorem is now packaged as a
-`DyadicNestedRadicalBranchCertificateFamily`; the remaining work is to
-instantiate its lower-half-angle and reflected upper-half-angle fields; the
-even field now has a checked constructor from a successful finite witness
-search.  The proof-producing Boolean search and its family adapter are also
-checked: a finite candidate list plus a proof of search success yields the
-canonical certificate family consumed by the integral theorem.  The two
-remaining geometric fields are therefore the only missing inputs in the
-branch route.
+bisection trace.  The parity assembly itself is now packaged in the direct
+overlap adapter
+\texttt{dyadicNestedRadical\_sample\_overlap\_of\_canonical\_halfAngle\_certificate\_family}:
+once the canonical rational half-angle certificates are supplied, it proves
+all dyadic sample overlaps without asserting evaluator equality.  The older
+`DyadicNestedRadicalBranchCertificateFamily` remains available for the
+stronger equality-shaped route.  The missing input is therefore the genuine
+all-depth geometric certificate family, not the parity induction or a hidden
+completed-real argument.
 This is a finite geometric certificate to add, not a hidden use of completed
 real numbers.
+
+The candidate side is already executable and shrinking: the first three finite
+depths have explicit overlap checks against the independent Stieltjes
+evaluator.  These anchors are recorded by
+\texttt{dyadicNestedRadicalLeftSum\_zero\_overlaps\_stieltjes} and
+\texttt{dyadicNestedRadicalLeftSum\_one\_overlaps\_stieltjes} and
+\texttt{dyadicNestedRadicalLeftSum\_two\_overlaps\_stieltjes}; the remaining theorem is
+the uniform branch transport, not the existence of the candidate algorithm.
 
 The same accounting applies to the squared-sine experiment.  The tangent
 chart itself has a completed effective FTC with natural endpoint \(\pi/4\).
@@ -106,7 +117,8 @@ rational geometry, nested-radical dyadic values, finite rotations &
 remaining branch witnesses for unrestricted dyadic inverse transport \\
 Integrals/FTC &
 rectangle, Lipschitz--Darboux, polynomial, arctangent, Stieltjes sine, finite
-quadrature mean-value brackets, and generic multi-turn stage assembly &
+quadrature mean-value brackets, the completed two-cell absolute-value FTC,
+and generic multi-turn stage assembly &
 endpoint identification for multi-turn candidates, all-stage equal-dyadic sine,
 and normalized \(\sin^2\) transports \\
 Power series/Fourier &

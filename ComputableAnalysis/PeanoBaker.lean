@@ -36,6 +36,10 @@ def matrixIdentity (dimension : Nat) : RatMatrix dimension :=
 def vectorAdd {dimension : Nat} (x y : RatVector dimension) : RatVector dimension :=
   fun i => x i + y i
 
+def vectorScale {dimension : Nat} (r : Rat) (x : RatVector dimension) :
+    RatVector dimension :=
+  fun i => r * x i
+
 def matrixAdd {dimension : Nat} (A B : RatMatrix dimension) : RatMatrix dimension :=
   fun i j => A i j + B i j
 
@@ -68,6 +72,15 @@ theorem finiteSum_add {dimension : Nat} (f g : Fin dimension -> Rat) :
       simp [finiteSum, ih]
       grind [Rat.add_assoc, Rat.add_comm]
 
+theorem finiteSum_le {dimension : Nat} {f g : Fin dimension -> Rat}
+    (h : forall i, f i <= g i) : finiteSum f <= finiteSum g := by
+  induction dimension with
+  | zero =>
+      simp [finiteSum]
+  | succ dimension ih =>
+      simp only [finiteSum]
+      exact rat_add_le_add (h 0) (ih (fun i => h i.succ))
+
 theorem finiteSum_mul_left {dimension : Nat} (a : Rat) (f : Fin dimension -> Rat) :
     a * finiteSum f = finiteSum (fun i => a * f i) := by
   induction dimension with
@@ -83,6 +96,29 @@ theorem finiteSum_mul_right {dimension : Nat} (a : Rat) (f : Fin dimension -> Ra
       simp [finiteSum]
   | succ dimension ih =>
       simp [finiteSum, ih, Rat.add_mul]
+
+theorem finiteSum_mul_le_of_nonneg {dimension : Nat}
+    (f g : Fin dimension -> Rat) (c : Rat)
+    (hf : forall i, 0 <= f i) (hg : forall i, g i <= c) :
+    finiteSum (fun i => f i * g i) <= c * finiteSum f := by
+  calc
+    finiteSum (fun i => f i * g i) <=
+        finiteSum (fun i => f i * c) := by
+      exact finiteSum_le (fun i =>
+        Rat.mul_le_mul_of_nonneg_left (hg i) (hf i))
+    _ = finiteSum f * c := (finiteSum_mul_right c f).symm
+    _ = c * finiteSum f := Rat.mul_comm _ _
+
+theorem finiteSum_mul_le_of_le_left {dimension : Nat}
+    (f g : Fin dimension -> Rat) (c : Rat)
+    (hf : forall i, f i <= c) (hg : forall i, 0 <= g i) :
+    finiteSum (fun i => f i * g i) <= c * finiteSum g := by
+  calc
+    finiteSum (fun i => f i * g i) <=
+        finiteSum (fun i => c * g i) := by
+      exact finiteSum_le (fun i =>
+        Rat.mul_le_mul_of_nonneg_right (hf i) (hg i))
+    _ = c * finiteSum g := (finiteSum_mul_left c g).symm
 
 /-- Finite rational sums may be enumerated in either order.  This is the
 local Fubini calculation used to prove associativity of the project-local
@@ -215,6 +251,242 @@ def matrixApply {dimension : Nat} (A : RatMatrix dimension) (x : RatVector dimen
     RatVector dimension :=
   fun i => finiteSum (fun j => A i j * x j)
 
+/-! Absolute-value estimates are kept at the finite-sum level.  They are the
+entrywise substitute for importing a normed matrix space: every bound below
+is an executable rational traversal of a finite index type. -/
+theorem finiteSum_qabs_mul_le {dimension : Nat} (f g : Fin dimension -> Rat) :
+    qabs (finiteSum (fun i => f i * g i)) <=
+      finiteSum (fun i => qabs (f i) * qabs (g i)) := by
+  induction dimension with
+  | zero =>
+      simp [finiteSum, qabs]
+  | succ dimension ih =>
+      simp only [finiteSum]
+      calc
+        qabs (f 0 * g 0 + finiteSum (fun i : Fin dimension =>
+          f i.succ * g i.succ)) <=
+            qabs (f 0 * g 0) +
+              qabs (finiteSum (fun i : Fin dimension =>
+                f i.succ * g i.succ)) := qabs_add_le _ _
+        _ <= qabs (f 0) * qabs (g 0) +
+              finiteSum (fun i : Fin dimension =>
+                qabs (f i.succ) * qabs (g i.succ)) := by
+          apply rat_add_le_add
+          · rw [qabs_mul]
+            exact Rat.le_refl
+          · exact ih (fun i => f i.succ) (fun i => g i.succ)
+
+theorem matrixApply_qabs_le {dimension : Nat}
+    (A : RatMatrix dimension) (x : RatVector dimension) (i : Fin dimension) :
+    qabs (matrixApply A x i) <=
+      finiteSum (fun j => qabs (A i j) * qabs (x j)) := by
+  unfold matrixApply
+  exact finiteSum_qabs_mul_le (fun j => A i j) x
+
+theorem matrixMul_qabs_le {dimension : Nat}
+    (A B : RatMatrix dimension) (i j : Fin dimension) :
+    qabs (matrixMul A B i j) <=
+      finiteSum (fun k => qabs (A i k) * qabs (B k j)) := by
+  unfold matrixMul
+  exact finiteSum_qabs_mul_le (fun k => A i k) (fun k => B k j)
+
+def matrixRowAbsSum {dimension : Nat} (A : RatMatrix dimension) (i : Fin dimension) : Rat :=
+  finiteSum (fun j => qabs (A i j))
+
+def vectorAbsSum {dimension : Nat} (x : RatVector dimension) : Rat :=
+  finiteSum (fun i => qabs (x i))
+
+def matrixColumnAbsSum {dimension : Nat} (A : RatMatrix dimension) (j : Fin dimension) : Rat :=
+  finiteSum (fun i => qabs (A i j))
+
+theorem matrixColumnAbsSum_identity {dimension : Nat} (j : Fin dimension) :
+    matrixColumnAbsSum (matrixIdentity dimension) j = 1 := by
+  unfold matrixColumnAbsSum matrixIdentity
+  rw [show (fun i => qabs (if i = j then 1 else 0)) =
+      (fun i => if i = j then 1 else 0) by
+        funext i
+        by_cases h : i = j
+        · rw [if_pos h]
+          native_decide
+        · rw [if_neg h]
+          native_decide]
+  change finiteSum (fun i => if i = j then (1 : Rat) else 0) =
+    (fun _ => (1 : Rat)) j
+  exact finiteSum_ite_eq j (fun _ => (1 : Rat))
+
+theorem matrixColumnAbsSum_matrixScale {dimension : Nat}
+    (r : Rat) (A : RatMatrix dimension) (j : Fin dimension) :
+    matrixColumnAbsSum (matrixScale r A) j =
+      qabs r * matrixColumnAbsSum A j := by
+  unfold matrixColumnAbsSum matrixScale
+  rw [show (fun i => qabs (r * A i j)) =
+      (fun i => qabs r * qabs (A i j)) by
+        funext i
+        exact qabs_mul r (A i j)]
+  exact (finiteSum_mul_left (qabs r) (fun i => qabs (A i j))).symm
+
+theorem matrixColumnAbsSum_matrixAdd_le {dimension : Nat}
+    (A B : RatMatrix dimension) (j : Fin dimension) :
+    matrixColumnAbsSum (matrixAdd A B) j <=
+      matrixColumnAbsSum A j + matrixColumnAbsSum B j := by
+  unfold matrixColumnAbsSum matrixAdd
+  calc
+    finiteSum (fun i => qabs (A i j + B i j)) <=
+        finiteSum (fun i => qabs (A i j) + qabs (B i j)) := by
+      exact finiteSum_le (fun i => qabs_add_le _ _)
+    _ = finiteSum (fun i => qabs (A i j)) +
+        finiteSum (fun i => qabs (B i j)) := finiteSum_add _ _
+
+theorem matrixColumnAbsSum_affineStep_le {dimension : Nat}
+    (B : RatMatrix dimension) (j : Fin dimension) :
+    matrixColumnAbsSum (matrixAdd (matrixIdentity dimension) B) j <=
+      1 + matrixColumnAbsSum B j := by
+  have h := matrixColumnAbsSum_matrixAdd_le (matrixIdentity dimension) B j
+  rw [matrixColumnAbsSum_identity] at h
+  exact h
+
+theorem matrixApply_vectorAbsSum_le {dimension : Nat}
+    (A : RatMatrix dimension) (x : RatVector dimension) :
+    vectorAbsSum (matrixApply A x) <=
+      finiteSum (fun j => matrixColumnAbsSum A j * qabs (x j)) := by
+  unfold vectorAbsSum
+  calc
+    finiteSum (fun i => qabs (matrixApply A x i)) <=
+        finiteSum (fun i => finiteSum (fun j =>
+          qabs (A i j) * qabs (x j))) := by
+      exact finiteSum_le (fun i => matrixApply_qabs_le A x i)
+    _ = finiteSum (fun j => finiteSum (fun i =>
+          qabs (A i j) * qabs (x j))) := by
+      exact finiteSum_swap dimension dimension
+        (fun i j => qabs (A i j) * qabs (x j))
+    _ = finiteSum (fun j => matrixColumnAbsSum A j * qabs (x j)) := by
+      congr 1
+      funext j
+      unfold matrixColumnAbsSum
+      exact (finiteSum_mul_right (qabs (x j))
+        (fun i => qabs (A i j))).symm
+
+theorem matrixApply_vectorAbsSum_le_of_column_bound {dimension : Nat}
+    (A : RatMatrix dimension) (x : RatVector dimension) (c : Rat)
+    (hcolumn : forall j, matrixColumnAbsSum A j <= c) :
+    vectorAbsSum (matrixApply A x) <= c * vectorAbsSum x := by
+  calc
+    vectorAbsSum (matrixApply A x) <=
+        finiteSum (fun j => matrixColumnAbsSum A j * qabs (x j)) :=
+      matrixApply_vectorAbsSum_le A x
+    _ <= c * finiteSum (fun j => qabs (x j)) :=
+      finiteSum_mul_le_of_le_left
+        (fun j => matrixColumnAbsSum A j) (fun j => qabs (x j)) c
+        hcolumn (fun j => qabs_nonneg _)
+    _ = c * vectorAbsSum x := rfl
+
+theorem matrixMul_columnAbsSum_le {dimension : Nat}
+    (A B : RatMatrix dimension) (j : Fin dimension) :
+    matrixColumnAbsSum (matrixMul A B) j <=
+      finiteSum (fun k => matrixColumnAbsSum A k * qabs (B k j)) := by
+  unfold matrixColumnAbsSum
+  calc
+    finiteSum (fun i => qabs (matrixMul A B i j)) <=
+        finiteSum (fun i => finiteSum (fun k =>
+          qabs (A i k) * qabs (B k j))) := by
+      exact finiteSum_le (fun i => matrixMul_qabs_le A B i j)
+    _ = finiteSum (fun k => finiteSum (fun i =>
+          qabs (A i k) * qabs (B k j))) := by
+      exact finiteSum_swap dimension dimension
+        (fun i k => qabs (A i k) * qabs (B k j))
+    _ = finiteSum (fun k => matrixColumnAbsSum A k * qabs (B k j)) := by
+      congr 1
+      funext k
+      unfold matrixColumnAbsSum
+      exact (finiteSum_mul_right (qabs (B k j))
+        (fun i => qabs (A i k))).symm
+
+theorem matrixMul_columnAbsSum_le_of_column_bound {dimension : Nat}
+    (A B : RatMatrix dimension) (c : Rat)
+    (hcolumn : forall k, matrixColumnAbsSum A k <= c) (j : Fin dimension) :
+    matrixColumnAbsSum (matrixMul A B) j <=
+      c * matrixColumnAbsSum B j := by
+  calc
+    matrixColumnAbsSum (matrixMul A B) j <=
+        finiteSum (fun k => matrixColumnAbsSum A k * qabs (B k j)) :=
+      matrixMul_columnAbsSum_le A B j
+    _ <= c * finiteSum (fun k => qabs (B k j)) :=
+      finiteSum_mul_le_of_le_left
+        (fun k => matrixColumnAbsSum A k) (fun k => qabs (B k j)) c
+        hcolumn (fun k => qabs_nonneg _)
+    _ = c * matrixColumnAbsSum B j := rfl
+
+theorem matrixRowAbsSum_identity {dimension : Nat} (i : Fin dimension) :
+    matrixRowAbsSum (matrixIdentity dimension) i = 1 := by
+  unfold matrixRowAbsSum matrixIdentity
+  rw [show (fun j => qabs (if i = j then 1 else 0)) =
+      (fun j => if j = i then 1 else 0) by
+        funext j
+        by_cases h : i = j
+        · rw [if_pos h, if_pos h.symm]
+          native_decide
+        · have h' : ¬ j = i := by
+            intro hji
+            exact h hji.symm
+          rw [if_neg h, if_neg h']
+          native_decide
+      ]
+  change finiteSum (fun j => if j = i then (1 : Rat) else 0) =
+    (fun _ => (1 : Rat)) i
+  exact finiteSum_ite_eq i (fun _ => (1 : Rat))
+
+theorem matrixRowAbsSum_matrixScale {dimension : Nat}
+    (r : Rat) (A : RatMatrix dimension) (i : Fin dimension) :
+    matrixRowAbsSum (matrixScale r A) i =
+      qabs r * matrixRowAbsSum A i := by
+  unfold matrixRowAbsSum matrixScale
+  rw [show (fun j => qabs (r * A i j)) =
+      (fun j => qabs r * qabs (A i j)) by
+        funext j
+        exact qabs_mul r (A i j)]
+  exact (finiteSum_mul_left (qabs r) (fun j => qabs (A i j))).symm
+
+theorem matrixRowAbsSum_matrixAdd_le {dimension : Nat}
+    (A B : RatMatrix dimension) (i : Fin dimension) :
+    matrixRowAbsSum (matrixAdd A B) i <=
+      matrixRowAbsSum A i + matrixRowAbsSum B i := by
+  unfold matrixRowAbsSum matrixAdd
+  calc
+    finiteSum (fun j => qabs (A i j + B i j)) <=
+        finiteSum (fun j => qabs (A i j) + qabs (B i j)) := by
+      exact finiteSum_le (fun j => qabs_add_le _ _)
+    _ = finiteSum (fun j => qabs (A i j)) +
+        finiteSum (fun j => qabs (B i j)) := finiteSum_add _ _
+
+theorem matrixRowAbsSum_affineStep_le {dimension : Nat}
+    (B : RatMatrix dimension) (i : Fin dimension) :
+    matrixRowAbsSum (matrixAdd (matrixIdentity dimension) B) i <=
+      1 + matrixRowAbsSum B i := by
+  have h := matrixRowAbsSum_matrixAdd_le (matrixIdentity dimension) B i
+  rw [matrixRowAbsSum_identity] at h
+  exact h
+
+theorem matrixMul_rowAbsSum_le {dimension : Nat}
+    (A B : RatMatrix dimension) (i : Fin dimension) :
+    matrixRowAbsSum (matrixMul A B) i <=
+      finiteSum (fun k => qabs (A i k) * matrixRowAbsSum B k) := by
+  calc
+    matrixRowAbsSum (matrixMul A B) i =
+        finiteSum (fun j => qabs (matrixMul A B i j)) := rfl
+    _ <= finiteSum (fun j =>
+        finiteSum (fun k => qabs (A i k) * qabs (B k j))) := by
+      exact finiteSum_le (fun j => matrixMul_qabs_le A B i j)
+    _ = finiteSum (fun k =>
+        finiteSum (fun j => qabs (A i k) * qabs (B k j))) := by
+      exact finiteSum_swap dimension dimension
+        (fun j k => qabs (A i k) * qabs (B k j))
+    _ = finiteSum (fun k => qabs (A i k) * matrixRowAbsSum B k) := by
+      congr 1
+      funext k
+      unfold matrixRowAbsSum
+      exact (finiteSum_mul_left (qabs (A i k))
+        (fun j => qabs (B k j))).symm
+
 theorem vectorAdd_zero_right {dimension : Nat} (x : RatVector dimension) :
     vectorAdd x (vectorZero dimension) = x := by
   funext i
@@ -249,6 +521,42 @@ theorem matrixApply_vectorAdd {dimension : Nat}
     _ = finiteSum (fun j => A i j * x j) +
         finiteSum (fun j => A i j * y j) :=
       finiteSum_add _ _
+
+theorem matrixApply_vectorScale {dimension : Nat}
+    (A : RatMatrix dimension) (r : Rat) (x : RatVector dimension) :
+    matrixApply A (vectorScale r x) =
+      vectorScale r (matrixApply A x) := by
+  funext i
+  unfold matrixApply vectorScale
+  rw [show (fun j => A i j * (r * x j)) =
+      (fun j => r * (A i j * x j)) by
+        funext j
+        grind [Rat.mul_assoc, Rat.mul_comm]]
+  exact (finiteSum_mul_left r (fun j => A i j * x j)).symm
+
+theorem matrixApply_matrixAdd {dimension : Nat}
+    (A B : RatMatrix dimension) (x : RatVector dimension) :
+    matrixApply (matrixAdd A B) x =
+      vectorAdd (matrixApply A x) (matrixApply B x) := by
+  funext i
+  unfold matrixApply matrixAdd vectorAdd
+  rw [show (fun j => (A i j + B i j) * x j) =
+      (fun j => A i j * x j + B i j * x j) by
+        funext j
+        exact Rat.add_mul _ _ _]
+  exact finiteSum_add _ _
+
+theorem matrixApply_matrixScale {dimension : Nat}
+    (A : RatMatrix dimension) (r : Rat) (x : RatVector dimension) :
+    matrixApply (matrixScale r A) x =
+      vectorScale r (matrixApply A x) := by
+  funext i
+  unfold matrixApply matrixScale vectorScale
+  rw [show (fun j => (r * A i j) * x j) =
+      (fun j => r * (A i j * x j)) by
+        funext j
+        exact Rat.mul_assoc _ _ _]
+  exact (finiteSum_mul_left r (fun j => A i j * x j)).symm
 
 /-- The identity matrix acts as the identity on a finite rational vector. -/
 theorem matrixApply_identity {dimension : Nat} (x : RatVector dimension) :
@@ -516,6 +824,35 @@ theorem homogeneousTrajectory_succ (system : DiscreteLinearSystem dimension)
     (initial : RatVector dimension) (n : Nat) :
     system.homogeneousTrajectory initial (n + 1) =
       matrixApply (system.step n) (system.homogeneousTrajectory initial n) := rfl
+
+/-! The finite homogeneous trajectory already has the linearity expected of
+the solution operator.  This is an induction over sampled matrix updates, not
+an appeal to a completed vector-valued function space. -/
+theorem homogeneousTrajectory_vectorAdd
+    (system : DiscreteLinearSystem dimension)
+    (x y : RatVector dimension) :
+    forall n,
+      system.homogeneousTrajectory (vectorAdd x y) n =
+        vectorAdd (system.homogeneousTrajectory x n)
+          (system.homogeneousTrajectory y n)
+  | 0 => rfl
+  | n + 1 => by
+      rw [homogeneousTrajectory_succ, homogeneousTrajectory_succ,
+        homogeneousTrajectory_succ,
+        homogeneousTrajectory_vectorAdd system x y n,
+        matrixApply_vectorAdd]
+
+theorem homogeneousTrajectory_vectorScale
+    (system : DiscreteLinearSystem dimension)
+    (r : Rat) (x : RatVector dimension) :
+    forall n,
+      system.homogeneousTrajectory (vectorScale r x) n =
+        vectorScale r (system.homogeneousTrajectory x n)
+  | 0 => rfl
+  | n + 1 => by
+      rw [homogeneousTrajectory_succ, homogeneousTrajectory_succ,
+        homogeneousTrajectory_vectorScale system r x n,
+        matrixApply_vectorScale]
 
 /-- A candidate solution of the sampled inhomogeneous recurrence.  Stating the
 recurrence separately from the recursive evaluator makes finite uniqueness a
@@ -1223,10 +1560,6 @@ theorem threeByThree_cayley_hamilton
       grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
         Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
 
-def vectorScale {dimension : Nat} (r : Rat) (x : RatVector dimension) :
-    RatVector dimension :=
-  fun i => r * x i
-
 /-- The generator with rows `(0, 1)` and `(-omega^2, 0)`. -/
 def generator (omega : Rat) : RatMatrix 2 :=
   fun i =>
@@ -1412,6 +1745,127 @@ def chronologicalProduct {dimension : Nat} (B : Nat -> RatMatrix dimension) : Na
   | 0 => matrixIdentity dimension
   | n + 1 => matrixMul (matrixAdd (matrixIdentity dimension) (B n))
       (chronologicalProduct B n)
+
+theorem chronologicalProduct_columnAbsSum_le_pow {dimension : Nat}
+    (B : Nat -> RatMatrix dimension) (c : Rat)
+    (hbound : forall n j,
+      matrixColumnAbsSum (matrixAdd (matrixIdentity dimension) (B n)) j <= c)
+    (hc : 0 <= c) :
+    forall steps j,
+      matrixColumnAbsSum (chronologicalProduct B steps) j <= c ^ steps
+  | 0, j => by
+      rw [chronologicalProduct, matrixColumnAbsSum_identity, Rat.pow_zero]
+      native_decide
+  | steps + 1, j => by
+      rw [chronologicalProduct]
+      have hmul := matrixMul_columnAbsSum_le_of_column_bound
+        (matrixAdd (matrixIdentity dimension) (B steps))
+        (chronologicalProduct B steps) c
+        (fun k => hbound steps k) j
+      have hprevious :
+          matrixColumnAbsSum (chronologicalProduct B steps) j <= c ^ steps :=
+        chronologicalProduct_columnAbsSum_le_pow B c hbound hc steps j
+      calc
+        matrixColumnAbsSum (matrixMul
+            (matrixAdd (matrixIdentity dimension) (B steps))
+            (chronologicalProduct B steps)) j <=
+            c * matrixColumnAbsSum (chronologicalProduct B steps) j := hmul
+        _ <= c * c ^ steps :=
+          Rat.mul_le_mul_of_nonneg_left hprevious hc
+        _ = c ^ (steps + 1) := by
+          rw [Rat.pow_succ]
+          exact Rat.mul_comm _ _
+
+theorem chronologicalProduct_stateAbsSum_le {dimension : Nat}
+    (B : Nat -> RatMatrix dimension) (c : Rat)
+    (hbound : forall n j,
+      matrixColumnAbsSum (matrixAdd (matrixIdentity dimension) (B n)) j <= c)
+    (hc : 0 <= c) (steps : Nat) (x : RatVector dimension) :
+    vectorAbsSum (matrixApply (chronologicalProduct B steps) x) <=
+      c ^ steps * vectorAbsSum x := by
+  apply matrixApply_vectorAbsSum_le_of_column_bound
+    (chronologicalProduct B steps) x (c ^ steps)
+  intro j
+  exact chronologicalProduct_columnAbsSum_le_pow B c hbound hc steps j
+
+def ratProduct (f : Nat -> Rat) : Nat -> Rat
+  | 0 => 1
+  | n + 1 => ratProduct f n * f n
+
+theorem ratProduct_nonneg (f : Nat -> Rat) (hf : forall n, 0 <= f n) :
+    forall n, 0 <= ratProduct f n
+  | 0 => by
+      change (0 : Rat) <= 1
+      native_decide
+  | n + 1 => by
+      rw [ratProduct]
+      exact Rat.mul_nonneg (ratProduct_nonneg f hf n) (hf n)
+
+theorem ratProduct_const_eq_pow (c : Rat) :
+    forall n, ratProduct (fun _ => c) n = c ^ n
+  | 0 => by
+      rw [ratProduct, Rat.pow_zero]
+  | n + 1 => by
+      rw [ratProduct, ratProduct_const_eq_pow c n, Rat.pow_succ]
+
+theorem chronologicalProduct_rowAbsSum_le {dimension : Nat}
+    (B : Nat -> RatMatrix dimension) (bound : Nat -> Rat)
+    (hbound : forall n i,
+      matrixRowAbsSum (matrixAdd (matrixIdentity dimension) (B n)) i <= bound n)
+    (hbound_nonneg : forall n, 0 <= bound n) :
+    forall steps i,
+      matrixRowAbsSum (chronologicalProduct B steps) i <= ratProduct bound steps
+  | 0, i => by
+      rw [chronologicalProduct, matrixRowAbsSum_identity, ratProduct]
+      native_decide
+  | steps + 1, i => by
+      rw [chronologicalProduct]
+      have hmul := matrixMul_rowAbsSum_le
+        (matrixAdd (matrixIdentity dimension) (B steps))
+        (chronologicalProduct B steps) i
+      have hprevious : forall k,
+          matrixRowAbsSum (chronologicalProduct B steps) k <=
+            ratProduct bound steps :=
+        fun k => chronologicalProduct_rowAbsSum_le B bound hbound
+          hbound_nonneg steps k
+      have hweighted := finiteSum_mul_le_of_nonneg
+        (fun k => qabs ((matrixAdd (matrixIdentity dimension) (B steps)) i k))
+        (fun k => matrixRowAbsSum (chronologicalProduct B steps) k)
+        (ratProduct bound steps)
+        (fun k => qabs_nonneg _)
+        hprevious
+      calc
+        matrixRowAbsSum (matrixMul
+            (matrixAdd (matrixIdentity dimension) (B steps))
+            (chronologicalProduct B steps)) i <=
+            finiteSum (fun k =>
+              qabs ((matrixAdd (matrixIdentity dimension) (B steps)) i k) *
+                matrixRowAbsSum (chronologicalProduct B steps) k) :=
+          hmul
+        _ <= ratProduct bound steps *
+              finiteSum (fun k =>
+                qabs ((matrixAdd (matrixIdentity dimension) (B steps)) i k)) :=
+          hweighted
+        _ = ratProduct bound steps *
+            matrixRowAbsSum (matrixAdd (matrixIdentity dimension) (B steps)) i := rfl
+        _ <= ratProduct bound steps * bound steps := by
+          exact Rat.mul_le_mul_of_nonneg_left (hbound steps i)
+            (ratProduct_nonneg bound hbound_nonneg steps)
+        _ = ratProduct bound (steps + 1) := by
+          rw [ratProduct]
+
+theorem chronologicalProduct_rowAbsSum_le_pow {dimension : Nat}
+    (B : Nat -> RatMatrix dimension) (c : Rat)
+    (hbound : forall n i,
+      matrixRowAbsSum (matrixAdd (matrixIdentity dimension) (B n)) i <= c)
+    (hc : 0 <= c) :
+    forall steps i,
+      matrixRowAbsSum (chronologicalProduct B steps) i <= c ^ steps := by
+  intro steps i
+  have hgeneral := chronologicalProduct_rowAbsSum_le B (fun _ => c)
+    (fun n j => hbound n j) (fun _ => hc) steps i
+  rw [ratProduct_const_eq_pow c steps] at hgeneral
+  exact hgeneral
 
 /-- The general sampled transition specializes exactly to the
 Peano--Baker chronological product for Euler increments. -/
@@ -1634,9 +2088,34 @@ end HarmonicOscillator
 The scalar factor `T^r/r!` is the exact rational volume of the ordered
 simplex of duration `T`; the matrix factor keeps the chronological order
 visible.  This is a finite term, not yet an infinite matrix series. -/
+def orderedSimplexVolume (T : Rat) : Nat -> Rat
+  | 0 => 1
+  | degree + 1 =>
+      T / ((degree + 1 : Nat) : Rat) * orderedSimplexVolume T degree
+
+theorem orderedSimplexVolume_eq_closed (T : Rat) (degree : Nat) :
+    orderedSimplexVolume T degree = T ^ degree / factorialRat degree := by
+  induction degree with
+  | zero =>
+      unfold orderedSimplexVolume factorialRat factorial
+      rw [Rat.pow_zero]
+      native_decide
+  | succ degree ih =>
+      rw [orderedSimplexVolume, ih, Rat.pow_succ,
+        FormalPowerSeries.factorialRat_succ]
+      rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.inv_mul_rev]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
 def constantPeanoBakerSimplexTerm {dimension : Nat}
     (A : RatMatrix dimension) (T : Rat) (degree : Nat) : RatMatrix dimension :=
   matrixScale (T ^ degree / factorialRat degree) (matrixPow A degree)
+
+theorem constantPeanoBakerSimplexTerm_eq_orderedSimplexVolume
+    {dimension : Nat} (A : RatMatrix dimension) (T : Rat) (degree : Nat) :
+    constantPeanoBakerSimplexTerm A T degree =
+      matrixScale (orderedSimplexVolume T degree) (matrixPow A degree) := by
+  rw [orderedSimplexVolume_eq_closed]
+  rfl
 
 /-- A finite constant-coefficient Peano--Baker polynomial, assembled in
 increasing degree order from its explicit ordered-simplex terms. -/
@@ -1696,6 +2175,78 @@ def generator : RatMatrix 2 :=
       (fun j => Fin.cases 0 (fun _ => -1) j)
       (fun _ j => Fin.cases 1 (fun _ => 0) j)
       i
+
+theorem generator_rowAbsSum (i : Fin 2) :
+    matrixRowAbsSum generator i = 1 := by
+  refine Fin.cases ?_ ?_ i
+  · native_decide
+  · intro j
+    refine Fin.cases ?_ ?_ j
+    · native_decide
+    · intro k
+      exact Fin.elim0 k
+
+theorem affineGenerator_rowAbsSum_le (step : Rat) (i : Fin 2) :
+    matrixRowAbsSum
+        (matrixAdd (matrixIdentity 2) (matrixScale step generator)) i <=
+      1 + qabs step := by
+  have h := matrixRowAbsSum_affineStep_le (matrixScale step generator) i
+  rw [matrixRowAbsSum_matrixScale, generator_rowAbsSum] at h
+  simpa using h
+
+theorem generator_columnAbsSum (j : Fin 2) :
+    matrixColumnAbsSum generator j = 1 := by
+  refine Fin.cases ?_ ?_ j
+  · native_decide
+  · intro i
+    refine Fin.cases ?_ ?_ i
+    · native_decide
+    · intro k
+      exact Fin.elim0 k
+
+theorem affineGenerator_columnAbsSum_le (step : Rat) (j : Fin 2) :
+    matrixColumnAbsSum
+        (matrixAdd (matrixIdentity 2) (matrixScale step generator)) j <=
+      1 + qabs step := by
+  have h := matrixColumnAbsSum_affineStep_le (matrixScale step generator) j
+  rw [matrixColumnAbsSum_matrixScale, generator_columnAbsSum] at h
+  simpa using h
+
+theorem rotationChronologicalProduct_rowAbsSum_le (step : Rat) :
+    forall steps i,
+      matrixRowAbsSum
+          (chronologicalProduct (fun _ => matrixScale step generator) steps) i <=
+        (1 + qabs step) ^ steps := by
+  intro steps i
+  apply chronologicalProduct_rowAbsSum_le_pow
+    (fun _ => matrixScale step generator) (1 + qabs step)
+  · intro n j
+    exact affineGenerator_rowAbsSum_le step j
+  · exact Rat.add_nonneg (by native_decide) (qabs_nonneg step)
+
+theorem rotationChronologicalProduct_columnAbsSum_le (step : Rat) :
+    forall steps j,
+      matrixColumnAbsSum
+          (chronologicalProduct (fun _ => matrixScale step generator) steps) j <=
+        (1 + qabs step) ^ steps := by
+  intro steps j
+  apply chronologicalProduct_columnAbsSum_le_pow
+    (fun _ => matrixScale step generator) (1 + qabs step)
+  · intro n i
+    exact affineGenerator_columnAbsSum_le step i
+  · exact Rat.add_nonneg (by native_decide) (qabs_nonneg step)
+
+theorem rotationChronologicalProduct_stateAbsSum_le (step : Rat)
+    (steps : Nat) (x : RatVector 2) :
+    vectorAbsSum
+        (matrixApply
+          (chronologicalProduct (fun _ => matrixScale step generator) steps) x) <=
+      (1 + qabs step) ^ steps * vectorAbsSum x := by
+  apply chronologicalProduct_stateAbsSum_le
+    (fun _ => matrixScale step generator) (1 + qabs step)
+  · intro n j
+    exact affineGenerator_columnAbsSum_le step j
+  · exact Rat.add_nonneg (by native_decide) (qabs_nonneg step)
 
 /-- Squaring the rotation generator is minus the identity.  This is a closed
 finite rational matrix calculation. -/
@@ -1807,6 +2358,28 @@ theorem simplexPartial_even_split (T : Rat) (n : Nat) :
       rw [simplexTerm_even, simplexTerm_odd, matrixAdd_group_even_odd]
       rw [matrixAdd_scale_same, matrixAdd_scale_same]
       rfl
+
+/-! The neighboring odd prefix is the same finite parity decomposition with
+one additional even (cosine) coefficient.  Exposing both parities keeps the
+finite ODE algebra aligned with the truncation index used by the power-series
+and rotation evaluators. -/
+theorem simplexPartial_odd_split (T : Rat) (n : Nat) :
+    constantPeanoBakerSimplexPartial generator T (2 * n + 1) =
+      matrixAdd
+        (matrixScale (cosinePrefix T (n + 1)) (matrixIdentity 2))
+        (matrixScale (sinePrefix T n) generator) := by
+  rw [show 2 * n + 1 = (2 * n) + 1 by omega]
+  rw [constantPeanoBakerSimplexPartial_succ]
+  rw [simplexPartial_even_split, simplexTerm_even]
+  have hcomm (A B : RatMatrix 2) : matrixAdd A B = matrixAdd B A := by
+    funext i j
+    unfold matrixAdd
+    exact Rat.add_comm _ _
+  rw [matrixAdd_assoc, hcomm
+    (matrixScale (sinePrefix T n) generator)
+    (matrixScale (T ^ (2 * n) / factorialRat (2 * n) * ((-1 : Rat) ^ n))
+      (matrixIdentity 2)), ← matrixAdd_assoc, matrixAdd_scale_same]
+  rfl
 
 end RotationSystem
 
