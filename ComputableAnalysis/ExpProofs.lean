@@ -6485,6 +6485,35 @@ theorem uniformExpOnUnitWarm_oneThird_target_stage_dominates
       uniformExpOnUnitWarm_oneThird_target.rangePrecision n := by
   exact uniformExpRationalTargetStage_dominates hm
 
+theorem uniformExpOnUnitWarm_unit_subinterval :
+    subintervalOf ({ lo := 0, hi := 1 } : QInterval)
+      uniformExpOnUnitWarm_continuous.function.lower
+      uniformExpOnUnitWarm_continuous.function.upper := by
+  change (0 : Rat) ≤ 0 ∧ 0 ≤ 1 ∧ 1 ≤ 1
+  native_decide
+
+theorem uniformExpOnUnitWarm_oneThird_adaptive_equals_scheduled
+    (n k : Nat) :
+    gapAwareTargetBisectionAdaptiveIterate
+        uniformExpOnUnitWarm_continuous
+        (uniformExpOnUnitWarm_oneThird_target.value.compute n)
+        ({ lo := 0, hi := 1 } : QInterval)
+        uniformExpOnUnitWarm_unit_subinterval
+        (fun j _ => uniformExpOnUnitWarm_oneThird_target.rangePrecision j)
+        k =
+      gapAwareTargetBisectionScheduledIterate
+        uniformExpOnUnitWarm_continuous
+        (uniformExpOnUnitWarm_oneThird_target.value.compute n)
+        ({ lo := 0, hi := 1 } : QInterval)
+        uniformExpOnUnitWarm_unit_subinterval
+        uniformExpOnUnitWarm_oneThird_target.rangePrecision k := by
+  exact gapAwareTargetBisectionAdaptiveIterate_eq_scheduled
+    uniformExpOnUnitWarm_continuous
+    (uniformExpOnUnitWarm_oneThird_target.value.compute n)
+    ({ lo := 0, hi := 1 } : QInterval)
+    uniformExpOnUnitWarm_unit_subinterval
+    uniformExpOnUnitWarm_oneThird_target.rangePrecision k
+
 def uniformExpOnUnitWarm_forward_search (r : Rat)
     (hr : inDomainInterval uniformExpOnUnitWarm.lower
       uniformExpOnUnitWarm.upper r) :

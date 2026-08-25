@@ -9154,6 +9154,17 @@ theorem gapAwareTargetBisectionStep_width_eq_half_of_decided
     simpa [QInterval.width, QInterval.midpoint] using
       Integral.midpoint_left_width I.lo I.hi
 
+theorem gapAwareTargetBisectionStep_congr
+    (F : ContinuousFunctionOnInterval) (Y : QInterval)
+    {I J : QInterval}
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (hJ : subintervalOf J F.function.lower F.function.upper)
+    (hIJ : I = J) (n : Nat) :
+    gapAwareTargetBisectionStep F Y I hI n =
+      gapAwareTargetBisectionStep F Y J hJ n := by
+  subst J
+  rfl
+
 /-! Proof-carrying finite iteration of the conservative kernel.  The subtype
 stores the domain certificate at every stage, so later clients never need to
 reconstruct that a midpoint refinement stayed inside the original branch. -/
@@ -9367,6 +9378,34 @@ def gapAwareTargetBisectionAdaptiveIterate
     (hI : subintervalOf I F.function.lower F.function.upper)
     (precision : Nat -> QInterval -> Nat) (n : Nat) : QInterval :=
   (gapAwareTargetBisectionAdaptiveIterateWithProof F Y I hI precision n).1
+
+/-! If the adaptive precision choice ignores the current bracket, the adaptive
+iterator is exactly the scheduled iterator.  This is the bridge used by
+concrete inverse branches: a target-specific stage schedule can be proved
+once, then supplied to the fully bracket-aware interface without duplicating
+the bisection argument. -/
+theorem gapAwareTargetBisectionAdaptiveIterate_eq_scheduled
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat -> Nat) (n : Nat) :
+    gapAwareTargetBisectionAdaptiveIterate F Y I hI
+        (fun k _ => precision k) n =
+      gapAwareTargetBisectionScheduledIterate F Y I hI precision n := by
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+      simp only [gapAwareTargetBisectionAdaptiveIterate,
+        gapAwareTargetBisectionAdaptiveIterateWithProof,
+        gapAwareTargetBisectionScheduledIterate,
+        gapAwareTargetBisectionScheduledIterateWithProof]
+      have hP :
+          (gapAwareTargetBisectionAdaptiveIterateWithProof F Y I hI
+            (fun k _ => precision k) n).1 =
+            (gapAwareTargetBisectionScheduledIterateWithProof F Y I hI
+              precision n).1 := by
+        simpa [gapAwareTargetBisectionAdaptiveIterate,
+          gapAwareTargetBisectionScheduledIterate] using ih
+      exact gapAwareTargetBisectionStep_congr F Y _ _ hP (precision n)
 
 theorem gapAwareTargetBisectionAdaptiveIterate_subinterval
     (F : ContinuousFunctionOnInterval) (Y I : QInterval)

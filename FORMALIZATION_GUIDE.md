@@ -1702,6 +1702,11 @@ When the precision must inspect the current bracket, use
 `gapAwareTargetBisectionAdaptiveDecision`.  This is the natural interface for
 the exponential gap modulus; the exact width theorem remains conditional only
 on the supplied finite decision certificates.
+If the chosen precision ignores the bracket, the adapter theorem
+`gapAwareTargetBisectionAdaptiveIterate_eq_scheduled` identifies this adaptive
+run with the scheduled run exactly.  The concrete
+`uniformExpOnUnitWarm_oneThird_adaptive_equals_scheduled` theorem records this
+connection for the certified `1/3` exponential target.
 This leaves function-specific mathematics in the certificate and keeps the
 routine `RealRaw`/inverse construction shared.
 
