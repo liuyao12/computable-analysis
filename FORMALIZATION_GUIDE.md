@@ -119,7 +119,7 @@ Start with the smallest target module rather than importing
 | Current first-year derivative ledger | `ComputableAnalysis.FirstYearCalculus` | `checked_power_series_table`, `RealElementary` |
 | Positive powers, exponential/log interfaces | `ComputableAnalysis.ElementaryFunctions` | `exp.PositiveRealRaw`, `exp.RationalPowerExtension`, `exp.ExponentialFunction` |
 | Direct scalar ODE uniqueness | `ComputableAnalysis.ScalarODEUniqueness` | `ScalarODE.DirectMeshHalvingCertificate`, `SelfDerivativeDirectMeshComparison` |
-| Discrete linear ODE / Peano--Baker core | `ComputableAnalysis.PeanoBaker` | `LinearODE.DiscreteLinearSystem`, `chronologicalProduct`, `peanoBakerDiscreteSum`, and the exact square-zero transitions `constantPeanoBakerSimplexPartial_add_two_eq_identity_add_scale_of_mul_self_eq_zero`, `chronologicalProduct_constant_square_zero` |
+| Discrete linear ODE / Peano--Baker core | `ComputableAnalysis.PeanoBaker` | `LinearODE.DiscreteLinearSystem`, `chronologicalProduct`, `peanoBakerDiscreteSum`, the exact square-zero transitions `constantPeanoBakerSimplexPartial_add_two_eq_identity_add_scale_of_mul_self_eq_zero`, `chronologicalProduct_constant_square_zero`, and the reusable `PeanoBakerFactorialRemainderCertificate` |
 | Finite ordered-simplex volumes | `ComputableAnalysis.PeanoBaker` | `orderedSimplexVolume`, `orderedSimplexVolume_eq_closed`, `constantPeanoBakerSimplexTerm_eq_orderedSimplexVolume` |
 | Certified complex rotation series | `ComputableAnalysis.RotationSeries` | `rotationExpRaw`, `rotationCosRaw`, `rotationSinRaw`, and their validity/rate theorems |
 | Bounded rotation continuity | `ComputableAnalysis.RotationCalculus` | `uniformRotationCosOnTwo`, `uniformRotationSinOnTwo`, and their epsilon--delta theorems |

@@ -2747,6 +2747,24 @@ theorem peanoBakerFactorialTail_shifted_le_eps {M T : Rat}
   exact RationalMajorant.factorialTailPartial_shifted_le_eps
     (Rat.mul_nonneg hM hT) eps terms
 
+/- A downstream matrix-transition construction should consume the tail bound
+   as data, not reconstruct the shift arithmetic at every call site. -/
+structure PeanoBakerFactorialRemainderCertificate
+    (M T : Rat) (eps : QPos) where
+  start : Nat
+  tail_le_eps : forall terms,
+    peanoBakerFactorialTail M T start terms <= eps.val
+
+def peanoBakerFactorialRemainderCertificate
+    {M T : Rat} (hM : 0 <= M) (hT : 0 <= T) (eps : QPos) :
+    PeanoBakerFactorialRemainderCertificate M T eps := by
+  refine {
+    start := RationalMajorant.factorialTailStart (M * T) +
+      peanoBakerFactorialTailShift M T eps
+    tail_le_eps := ?_ }
+  intro terms
+  exact peanoBakerFactorialTail_shifted_le_eps hM hT eps terms
+
 /-- The computable iteration count used in the zero-initial Volterra
 uniqueness argument.  The factor B is a rational enclosure bound for a
 candidate difference, while the remaining factor is the usual Peano--Baker
