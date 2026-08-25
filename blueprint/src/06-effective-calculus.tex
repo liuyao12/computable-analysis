@@ -584,6 +584,21 @@ secants.  Thus a finite mesh supplies both the lower and upper derivative
 boxes; refining the mesh is the effective replacement for invoking a least
 upper bound.
 
+The first reusable convex certificate is already checked for rational-input
+functions.  If (l<u<x<y<v<r), the two outer secants bracket the interior
+secant, and the bracket is packaged for direct consumption by a finite FTC or
+witness search:
+
+\lean{ComputableAnalysis.IntervalFunction.convex_outer_secants_bound_inner_secants}
+\lean{ComputableAnalysis.IntervalFunction.convexOuterSecantBracket}
+\leanok
+
+The interval-valued raw interface deliberately records only a weak
+stagewise order, because overlapping boxes do not compose as a transitive
+order.  A general raw convexity theorem therefore needs an additional strong
+containment or common-witness certificate; the exact rational theorem above is
+the admitted representative rather than an unproved universal upgrade.
+
 The first formal mean-value statement is deliberately about the average, not
 an existential point:
 
