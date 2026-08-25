@@ -8545,6 +8545,35 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_of_certificate_family
   exact arctanSinPi_nestedRadicalSample_equiv_of_certificate_family
     S.inverse ht0 hk (hcertificate n k hk)
 
+/- The precision-first form is convenient for geometric constructions that
+   refine evaluator boxes before choosing the native stage. -/
+theorem ArctanSinPiConstruction.halfIntegral_equiv_of_precision_first_certificate_family
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (precision n k : Nat) (hk : k < 2 ^ n),
+      0 < k -> CanonicalDyadicHalfAngleCertificateAt S.inverse precision n k hk) :
+    (S.halfIntegral pub).Equiv
+      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+  apply S.halfIntegral_equiv_of_certificate_family
+    pub g cg hdyadic hplan hevaluator ht0
+  intro n k hk hpos precision
+  exact hcertificate precision n k hk hpos
+
 theorem ArctanSinPiConstruction.halfIntegral_equiv_of_overlap_family
     (S : ArctanSinPiConstruction)
     (pub : Integral.Construction S.onHalf.toRealFunRaw

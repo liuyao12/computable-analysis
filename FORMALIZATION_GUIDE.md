@@ -923,6 +923,9 @@ native precision and then
 This is only an index bridge: it adds no completeness or limiting argument.
 The theorem-facing shortcut is
 `ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_canonical_certificate_family`.
+For proofs that organize data as `precision -> depth -> sample`, the direct
+transport entry point is
+`ArctanSinPiConstruction.halfIntegral_equiv_of_precision_first_certificate_family`.
 
 One useful fully scoped exception is the unit arctangent triangle route in
 `Logarithm.lean`.  Its public name is `arctan.integral.triangle` (implemented
