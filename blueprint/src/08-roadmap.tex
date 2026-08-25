@@ -65,6 +65,13 @@ all dyadic sample overlaps without asserting evaluator equality.  The older
 stronger equality-shaped route.  The missing input is therefore the genuine
 all-depth geometric certificate family, not the parity induction or a hidden
 completed-real argument.
+The precision-indexed certificate interface is now connected to the public
+stage-indexed interface by
+\lean{ComputableAnalysis.canonical_dyadic_halfAngle_certificate_of_native_precision}
+and
+\lean{ComputableAnalysis.canonical_dyadic_halfAngle_certificate_family_of_precision_family};
+the packaged overlap family can be built with
+\lean{ComputableAnalysis.DyadicSquareCircleOverlapFamily.of_precision_halfAngle_certificate_family}.
 This is a finite geometric certificate to add, not a hidden use of completed
 real numbers.
 
@@ -83,6 +90,9 @@ Jacobian contributes a reciprocal-\(\pi\) factor, and the equal-dyadic
 nested-radical boxes must overlap that normalized product at every stage.
 The repository currently checks the product validity and the first finite
 overlaps; the all-stage common-witness family is the remaining theorem.
+The normalized product overlap is explicitly checked at dyadic stages 0, 1,
+and 2; these are regression anchors, not a substitute for the all-stage
+certificate.
 
 \lean{ComputableAnalysis.SinPiIntegral.DyadicHalfAngleChildCertificate}
 \lean{ComputableAnalysis.SinPiIntegral.DyadicReflectedHalfAngleCertificate}
@@ -90,12 +100,12 @@ overlaps; the all-stage common-witness family is the remaining theorem.
 \lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_canonical_search_family}
 \leanok
 
-The same distinction applies to the centered exponential chart.  Its
-two-sided derivative and initial-value certificates are complete, but a full
-effective FTC on `[-1,1]` still needs a partition-level endpoint-width
-certificate.  The unit-interval FTC instance is therefore the current
-completed exponential integration theorem; the centered chart is the current
-completed ODE provider.
+The centered exponential chart has now crossed that boundary as well:
+`uniformExpOnSymmetricUnit_effectiveFTC` supplies the partition-level endpoint
+certificate on `[-1,1]`, and the stabilized integral is transported to the
+endpoint difference.  It is therefore both a completed exponential FTC
+instance and the local ODE provider; the remaining exponential frontier is
+representation transport for a fully general inverse branch.
 
 For general effective continuity, the remaining schedule problem is explicit:
 choose a mesh and evaluator precision satisfying the interval-modulus budget,
@@ -130,8 +140,14 @@ representation transport for a fully general inverse branch \\
 Effective calculus &
 finite secant, derivative-bound, curvature, and stabilization contracts &
 automatic schedule synthesis for arbitrary interval-regular functions \\
+Algebraic roots/FTA &
+rational-polynomial root witnesses, complex interval residuals, and supplied-root
+synthetic deflation &
+elimination/resultant certificates for closure under algebraic operations and
+general root isolation \\
 Linear ODEs &
-finite Peano--Baker algebra, scalar uniqueness, centered exponential provider &
+finite Peano--Baker algebra, scalar uniqueness contract, centered exponential
+provider &
 general vector analytic provider and its tail certificate \\
 \end{tabular}
 \end{center}
@@ -164,6 +180,18 @@ way to maintain the project's chain of interchangeable computations.
 
 derivative/area claim -> cell certificate -> mesh refinement -> endpoint overlap
 \end{verbatim}
+
+For adaptive evaluators, keep the native computation schedule visible.  The
+scheduled interval-regularity contract can be consumed directly when a
+requested-stage containment proof is available; an identity schedule is the
+ordinary special case.  This prevents stage changes from being mistaken for
+definitional equality of computations.
+
+\lean{ComputableAnalysis.ScheduledIntervalRegularOn}
+\lean{ComputableAnalysis.ScheduledIntervalRegularOn.toIntervalRegularOn_of_requested_stage}
+\lean{ComputableAnalysis.ScheduledIntervalRegularOn.toIntervalRegularOn_of_identity_schedule}
+\lean{ComputableAnalysis.IntervalRegularOn.toScheduledIntervalRegularOn_identity}
+\leanok
 
 For a new real-valued quantity, add one `realRaw` evaluator and prove its
 order, nesting, and shrinking-width obligations.  If another evaluator is

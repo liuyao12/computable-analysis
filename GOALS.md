@@ -113,18 +113,18 @@ That bridge is now represented by the checked
    the generic interval-arithmetic step after a correctly scaled raw integral
    has been identified with its target: a finite sum inherits a
    width-minus-margin error bound.  It is intentionally not specialized to
-   the provisional `1/4` tangent-square placeholder; the unscaled tangent
-   chart represents the quarter-turn, so normalization must be supplied first.
+   the unscaled tangent chart: that chart represents the quarter-turn, so the
+   normalized product must be used for the target integral.
    **Normalization correction:** `tangentSquareIntegral` is the unscaled
    tangent-chart integral, whose endpoint is the quarter-turn raw
    `halfQuarterTurnRaw 1` (the computable analogue of `pi/4`).  The value
    `1/4` belongs to the normalized product
    `reciprocalPiRaw * tangentSquareIntegral`, matching
-   `integral_0^(1/2) sin(pi*x)^2 dx`.  The existing rational-`1/4` contract is
-   therefore only a provisional placeholder until this scaling is formalized.
-   The corrected contract is now `NormalizedTangentSquareValueSubgoal`, whose
-   `value` theorem requires the normalized raw validity, transport to the
-   quarter-turn anchor, and the reciprocal-π quarter-scale identity.
+   `integral_0^(1/2) sin(pi*x)^2 dx`.  The reciprocal-π quarter-scale identity
+   is now formalized by `reciprocalPi_quarterTurn_equiv_quarter`.  The remaining
+   contract is `NormalizedTangentSquareValueSubgoal`, whose `value` theorem
+   requires the normalized raw validity and transport to the quarter-turn
+   anchor.
 
 The rational arithmetic layer now exposes `rat_mul_le_mul_of_nonneg`, the
 product-order lemma needed when a cell estimate multiplies two nonnegative
@@ -536,6 +536,27 @@ from monomial brackets structurally.
    certificate must establish the squared equal-dyadic integral’s ordering,
    nesting, and shrinking, then connect it to the tangent primitive.
 
+   The assembly step is now also explicit:
+   `dyadicPublicSquareLeftSum_overlap_of_canonical_search_family` turns one
+   finite search witness for every dyadic sample into overlap of the complete
+   public and nested-radical square sums.  This removes the finite-fold work
+   from the remaining proof; only the per-sample search family remains.
+   The theorem
+   `dyadicPublicSquareLeftSum_overlap_of_halfAngle_certificate_family` now
+   consumes the existing canonical half-angle certificate family directly,
+   including the exact zero endpoint.
+   The geometric reduction
+   `dyadicPublicSquareLeftSum_overlap_of_rational_circle_overlap_family`
+   makes the remaining positive-sample obligation even more explicit: prove
+   rational-circle image overlap, while the endpoint is handled by exact
+   zero-target search.
+   The named structure `DyadicSquareCircleOverlapFamily` now packages this
+   endpoint-plus-positive-sample data, with `to_square_sum_overlap` exposing
+   the resulting full dyadic-sum overlap.
+   Its constructor `DyadicSquareCircleOverlapFamily.of_halfAngle_certificate_family`
+   now transports the existing canonical half-angle certificate fields into
+   the named structure directly.
+
    The square equal-dyadic candidate is now explicit as
    `dyadicNestedRadicalSquareLeftSum`, with raw wrapper
    `dyadicNestedRadicalSquareIntegralRaw`.  Its finite boxes satisfy
@@ -656,7 +677,17 @@ from monomial brackets structurally.
    the sine route: `DyadicNestedRadicalSquareTangentCommonWitness` has four
    rational inequalities, `to_overlap` turns them into stagewise interval
    overlap, and `to_equiv` transports the complete square raw integral to
-   `tangentSquareIntegral`.
+   `tangentSquareIntegral`.  The constructor
+   `DyadicNestedRadicalSquareTangentCommonWitness.of_overlap` now packages
+   any stagewise overlap by choosing the larger lower endpoint, and
+   `stabilized_equiv_value` carries the resulting witness directly to `1/4`.
+   The finite part of the transport is now closed generically by
+   `dyadicPublicSquareLeftSum` and
+   `dyadicPublicSquareLeftSum_overlap_of_sample_overlaps`: stagewise overlap
+   of each public square sample with its specialized table box propagates
+   through the complete weighted dyadic fold.  The only remaining
+   square-specific obligation is therefore the local per-sample certificate
+   family; analogous routine functions need not be formalized again.
 
 The first six items are reusable infrastructure and regression coverage; items
 7--9 are the sine applications.  A later general theorem may package the same
@@ -1057,9 +1088,9 @@ arbitrary finite sample lists; the concrete sample-grid calculation is only a
 regression witness, not a standalone finite-sum milestone.  This is the
 rectangular algebra needed before attaching cell widths and error schedules to
 a genuine multiple-integral construction.  Its weighted companion
-`finiteProductIntegralSum2D` attaches rational cell widths and
-`finiteProductIntegralSum2D_factorized` proves the corresponding weighted
-rectangle factorization.  The module also records the exact finite product law for (n) independent
+   `finiteProductIntegralSum2D` attaches rational cell widths and
+   `finiteProductIntegralSum2D_factorized` proves the corresponding weighted
+   rectangle factorization.  The module also records the exact finite product law for (n) independent
 one-dimensional Gaussian approximants and the rational coefficient recurrence
 for the (n)-ball volume model.  The one-dimensional Gaussian integral, its
 square-to-π bridge, radial shell estimates, and unbounded tails remain explicit

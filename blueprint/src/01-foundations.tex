@@ -641,6 +641,26 @@ Thus, to prove \(x\sim y\), it is enough to choose schedules
 easier to show.
 \end{proposition}
 
+\begin{proposition}[Bounded monotone computation]
+\label{prop:monotone-interval-computation}
+\lean{ComputableAnalysis.MonotoneIntervalCertificate}
+\lean{ComputableAnalysis.MonotoneIntervalCertificate.precision_witness}
+\lean{ComputableAnalysis.MonotoneIntervalCertificate.toRealRaw_valid}
+\lean{ComputableAnalysis.MonotoneIntervalCertificate.toReal}
+\lean{ComputableAnalysis.MonotoneIntervalCertificate.toReal_preferred_compute}
+\lean{ComputableAnalysis.dyadicApproachIntervalCertificate}
+\lean{ComputableAnalysis.dyadicApproachIntervalCertificate_valid}
+\lean{ComputableAnalysis.geometricSumIntervalCertificate}
+\lean{ComputableAnalysis.geometricSumIntervalCertificate_valid}
+\uses{def:raw-real}
+A bounded monotone process is represented by rational lower and upper
+endpoints.  The lower endpoint is certified to rise, the upper endpoint to
+fall, and a supplied rational width modulus gives every requested precision.
+The resulting `RealRaw` is constructed directly from these endpoint pairs.
+This is the project-native replacement for invoking a supremum or a
+completeness theorem.
+\end{proposition}
+
 \begin{definition}[Certified real handles]\label{def:reals-quotient}
 \lean{ComputableAnalysis.Real}
 \uses{def:raw-real,def:raw-equiv}
@@ -664,6 +684,11 @@ For functions, the same distinction is kept at the appropriate level: a
 special function.  Their certificates assert agreement only on common domain
 points.  We do not first classify the function as continuous or analytic; we
 formalize the domain and properties needed by the application.
+When two certified views share a rational input, the preferred view supplies
+the spanning comparison:
+\lean{ComputableAnalysis.PartialRealFunction.Representation.equiv_on_common_domain}
+This is a domain-aware transport theorem, not an assertion that unrelated
+partial functions agree outside their certified overlap.
 \end{definition}
 
 \begin{proposition}[Raw arithmetic respects representations]\label{thm:raw-reals-field}
@@ -1343,6 +1368,13 @@ The current Lean-facing complex type stores a preferred certified complex-box
 algorithm and a finite spanning registry of certified implementation edges.
 As for \code{Real}, this is a computation-oriented representation layer rather
 than a quotient construction.
+\lean{ComputableAnalysis.Complex.withAlternativeFrom}
+\lean{ComputableAnalysis.Complex.withAlternativeFromImplementation}
+When a new algorithm is proved equivalent to an existing non-preferred
+implementation, either constructor composes that single local edge with the
+existing path to the preferred node.  Thus the registry need only be a finite
+spanning tree; users do not have to prove pairwise equivalence of all
+implementations.
 \end{definition}
 
 \begin{proposition}[Complex raw arithmetic is representation-aware]\label{thm:complex-field}
@@ -1404,6 +1436,12 @@ representation has its own validity proof and a certificate
 not a claim that either representation belongs to a preselected classical
 function space.  Real-axis functions and one-sided Fourier views are derived
 restrictions of this complex layer when an application needs them.
+\lean{ComputableAnalysis.ComplexFunction.withAlternativeFrom}
+\lean{ComputableAnalysis.ComplexFunction.withAlternativeFromImplementation}
+These constructors add a new representation through an existing one.  They
+require explicit domain coverage for the intermediate representation and then
+compose the local overlap equivalence, so the registry may be a finite
+spanning tree rather than a collection of pairwise proofs.
 \end{definition}
 
 \begin{definition}[Real-input and real-valued functions]\label{def:real-fun-raw}

@@ -121,5 +121,20 @@ theorem exactDisplacement_eq_zero
 
 end FiniteClosedPolynomialPathCertificate
 
+/- A concrete representative for the complex polynomial FTC: the differential
+`z dz` has zero exact displacement around the positively oriented rational unit
+square.  The certificate stores only the finite vertex list and coefficient;
+the endpoint cancellation is inherited from the generic polynomial theorem. -/
+def unitSquareZDifferentialCertificate :
+    FiniteClosedPolynomialPathCertificate where
+  coefficients := [QComplex.one]
+  start := ComplexPathIntegral.zero
+  vertices := [ComplexPathIntegral.one,
+    ComplexPathIntegral.onePlusI, ComplexPathIntegral.I]
+
+theorem unitSquareZDifferentialCertificate_exactDisplacement_zero :
+    unitSquareZDifferentialCertificate.exactDisplacement = QComplex.zero := by
+  exact unitSquareZDifferentialCertificate.exactDisplacement_eq_zero
+
 end ComplexPathIntegral
 end ComputableAnalysis

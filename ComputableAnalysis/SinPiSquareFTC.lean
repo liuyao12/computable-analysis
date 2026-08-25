@@ -2541,6 +2541,104 @@ def rationalSquareInterval (I : QInterval) : QInterval :=
 def rationalOneMinusSquareInterval (I : QInterval) : QInterval :=
   { lo := 1 - I.hi * I.hi, hi := 1 - I.lo * I.lo }
 
+/-! Signed interval squares.  The earlier `rationalSquareInterval` is the
+nonnegative specialization used by the sine boxes.  Cosine crosses zero on
+the full half-period, so its square enclosure must split at zero. -/
+def rationalSquareIntervalSigned (I : QInterval) : QInterval :=
+  if 0 <= I.lo then
+    { lo := I.lo * I.lo, hi := I.hi * I.hi }
+  else if 0 <= I.hi then
+    { lo := 0, hi := max (I.lo * I.lo) (I.hi * I.hi) }
+  else
+    { lo := I.hi * I.hi, hi := I.lo * I.lo }
+
+def rationalOneMinusSquareIntervalSigned (I : QInterval) : QInterval :=
+  { lo := 1 - (rationalSquareIntervalSigned I).hi,
+    hi := 1 - (rationalSquareIntervalSigned I).lo }
+
+theorem rationalSquareIntervalSigned_contains
+    {I : QInterval} {q : Rat}
+    (hI : I.lo <= I.hi) (hq : I.lo <= q ∧ q <= I.hi) :
+    (rationalSquareIntervalSigned I).lo <= q * q ∧
+      q * q <= (rationalSquareIntervalSigned I).hi := by
+  have hsquare_mono {a b : Rat} (ha : 0 <= a) (hab : a <= b) :
+      a * a <= b * b := by
+    have hb : 0 <= b := Rat.le_trans ha hab
+    exact Rat.le_trans
+      (Rat.mul_le_mul_of_nonneg_left hab ha)
+      (Rat.mul_le_mul_of_nonneg_right hab hb)
+  by_cases hlo : 0 <= I.lo
+  · simp [rationalSquareIntervalSigned, hlo]
+    have hq0 : 0 <= q := Rat.le_trans hlo hq.1
+    constructor
+    · have h := Rat.mul_le_mul_of_nonneg_right hq.1
+        (Rat.add_nonneg hq0 hlo)
+      grind [Rat.mul_add, Rat.add_mul]
+    · have h := Rat.mul_le_mul_of_nonneg_right hq.2
+        (Rat.add_nonneg hq0 (Rat.le_trans hlo hI))
+      grind [Rat.mul_add, Rat.add_mul]
+  · by_cases hhi : 0 <= I.hi
+    · simp [rationalSquareIntervalSigned, hlo, hhi]
+      have hqlo : I.lo <= q := hq.1
+      have hqhi : q <= I.hi := hq.2
+      by_cases hq0 : 0 <= q
+      · constructor
+        · exact Rat.mul_nonneg hq0 hq0
+        · have h1 := Rat.mul_le_mul_of_nonneg_left hqhi hq0
+          have h2 := Rat.mul_le_mul_of_nonneg_right hqhi hhi
+          have hsq : q * q <= I.hi * I.hi := by
+            exact Rat.le_trans h1 (by simpa [Rat.mul_comm] using h2)
+          rw [Rat.max_def]
+          split <;> grind
+      · have hqneg : q < 0 := Rat.not_le.mp hq0
+        constructor
+        · have h := hsquare_mono (by grind : 0 <= -q) (by grind : -q <= -q)
+          grind [Rat.mul_add, Rat.add_mul]
+        · have hsq : q * q <= I.lo * I.lo := by
+            have h := hsquare_mono (by grind : 0 <= -q)
+              (by grind : -q <= -I.lo)
+            grind [Rat.mul_add, Rat.add_mul]
+          rw [Rat.max_def]
+          split <;> grind
+    · simp [rationalSquareIntervalSigned, hlo, hhi]
+      have hq0 : q < 0 := by grind [Rat.not_le.mp hhi]
+      constructor
+      · have h := hsquare_mono (by grind : 0 <= -I.hi)
+          (by grind : -I.hi <= -q)
+        grind [Rat.mul_add, Rat.add_mul]
+      · have h := hsquare_mono (by grind : 0 <= -q)
+          (by grind : -q <= -I.lo)
+        grind [Rat.mul_add, Rat.add_mul]
+
+theorem rationalSquareInterval_overlap_oneMinusSquareInterval_of_circle_signed
+    {S C : QInterval} {s c : Rat}
+    (hS : subintervalOf S 0 1)
+    (hC : subintervalOf C (-1) 1)
+    (hs : S.lo <= s ∧ s <= S.hi)
+    (hc : C.lo <= c ∧ c <= C.hi)
+    (hcircle : s * s + c * c = 1) :
+    QInterval.Overlaps (rationalSquareInterval S)
+      (rationalOneMinusSquareIntervalSigned C) := by
+  have hsquare := rationalSquareIntervalSigned_contains hC.2.1 hc
+  have hsquareS : S.lo * S.lo <= s * s ∧
+      s * s <= S.hi * S.hi := by
+    have h := rationalSquareIntervalSigned_contains hS.2.1 hs
+    simpa [rationalSquareIntervalSigned, hS.1] using h
+  unfold rationalOneMinusSquareIntervalSigned QInterval.Overlaps
+  change S.lo * S.lo <=
+      1 - (rationalSquareIntervalSigned C).lo ∧
+    1 - (rationalSquareIntervalSigned C).hi <= S.hi * S.hi
+  constructor
+  · calc
+      S.lo * S.lo <= s * s := hsquareS.1
+      _ = 1 - c * c := by grind
+      _ <= 1 - (rationalSquareIntervalSigned C).lo := by grind [hsquare.2]
+  · calc
+      1 - (rationalSquareIntervalSigned C).hi <= 1 - c * c := by
+        grind [hsquare.1]
+      _ = s * s := by grind
+      _ <= S.hi * S.hi := hsquareS.2
+
 /- The raw equal-dyadic square candidate.  Its validity/nesting certificate
 is intentionally separate: this definition is only the finite algorithm. -/
 def dyadicNestedRadicalSquareLeftSum (n : Nat) : QInterval :=
@@ -2552,6 +2650,107 @@ def dyadicNestedRadicalSquareLeftSum (n : Nat) : QInterval :=
         (QInterval.scaleByRat h
           (rationalSquareInterval (dyadicNestedRadicalStageSinAt n k))))
     { lo := 0, hi := 0 }
+
+/- The same finite rectangle sum, using the public sine-square evaluator at
+each dyadic sample.  The transport theorem below is deliberately stated at
+the interval level: a specialized table only has to overlap these samples. -/
+def dyadicPublicSquareLeftSum
+    (S : ArctanSinPiConstruction) (n : Nat) : QInterval :=
+  let N := 2 ^ n
+  let h := mesh 0 ((1 : Rat) / 2) N
+  (List.range N).foldl
+    (fun acc k =>
+      QInterval.addInterval acc
+        (QInterval.scaleByRat h
+          ((sinPiSquareOnHalf S).compute
+            (leftPoint 0 ((1 : Rat) / 2) N k) n)))
+    { lo := 0, hi := 0 }
+
+/- A finite family of overlapping square-sample boxes gives overlapping
+rectangle sums.  This is the reusable finite part of the square route; no
+limit, completeness principle, or equality of the two evaluators is used. -/
+theorem dyadicPublicSquareLeftSum_overlap_of_sample_overlaps
+    (S : ArctanSinPiConstruction) (n : Nat)
+    (hsamples : forall k, k < 2 ^ n ->
+      QInterval.Overlaps
+        ((sinPiSquareOnHalf S).compute
+          (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k) n)
+        (rationalSquareInterval
+          (dyadicNestedRadicalStageSinAt n k))) :
+    QInterval.Overlaps
+      (dyadicPublicSquareLeftSum S n)
+      (dyadicNestedRadicalSquareLeftSum n) := by
+  unfold dyadicPublicSquareLeftSum dyadicNestedRadicalSquareLeftSum
+  have hmesh : 0 <= mesh 0 ((1 : Rat) / 2) (2 ^ n) := by
+    exact mesh_nonneg_of_le (Nat.pow_pos (by omega)) (by native_decide)
+  have hfold : forall (xs : List Nat),
+      (forall k, k ∈ xs -> k < 2 ^ n) ->
+      forall (accG accH : QInterval), QInterval.Overlaps accG accH ->
+      QInterval.Overlaps
+        (xs.foldl
+          (fun acc k =>
+            QInterval.addInterval acc
+              (QInterval.scaleByRat
+                (mesh 0 ((1 : Rat) / 2) (2 ^ n))
+                ((sinPiSquareOnHalf S).compute
+                  (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k) n))) accG)
+        (xs.foldl
+          (fun acc k =>
+            QInterval.addInterval acc
+              (QInterval.scaleByRat
+                (mesh 0 ((1 : Rat) / 2) (2 ^ n))
+                (rationalSquareInterval
+                  (dyadicNestedRadicalStageSinAt n k)))) accH) := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro _ accG accH hover
+        exact hover
+    | cons k ks ih =>
+        intro hmem
+        have hk : k < 2 ^ n := hmem k (by simp)
+        have hks : forall j, j ∈ ks -> j < 2 ^ n := by
+          intro j hj
+          exact hmem j (by simp [hj])
+        intro accG accH hover
+        have hsample := hsamples k hk
+        have hstep : QInterval.Overlaps
+            (QInterval.addInterval accG
+              (QInterval.scaleByRat
+                (mesh 0 ((1 : Rat) / 2) (2 ^ n))
+                ((sinPiSquareOnHalf S).compute
+                  (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k) n)))
+            (QInterval.addInterval accH
+              (QInterval.scaleByRat
+                (mesh 0 ((1 : Rat) / 2) (2 ^ n))
+                (rationalSquareInterval
+                  (dyadicNestedRadicalStageSinAt n k)))) := by
+          unfold QInterval.addInterval QInterval.scaleByRat
+          unfold QInterval.Overlaps at hover hsample ⊢
+          constructor
+          · have hscaled :
+                mesh 0 ((1 : Rat) / 2) (2 ^ n) *
+                    ((sinPiSquareOnHalf S).compute
+                      (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k) n).lo <=
+                mesh 0 ((1 : Rat) / 2) (2 ^ n) *
+                    (rationalSquareInterval
+                      (dyadicNestedRadicalStageSinAt n k)).hi :=
+              Rat.mul_le_mul_of_nonneg_left hsample.1 hmesh
+            grind
+          · have hscaled :
+                mesh 0 ((1 : Rat) / 2) (2 ^ n) *
+                    (rationalSquareInterval
+                      (dyadicNestedRadicalStageSinAt n k)).lo <=
+                mesh 0 ((1 : Rat) / 2) (2 ^ n) *
+                    ((sinPiSquareOnHalf S).compute
+                      (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k) n).hi :=
+              Rat.mul_le_mul_of_nonneg_left hsample.2 hmesh
+            grind
+        simpa using ih hks _ _ hstep
+  exact hfold (List.range (2 ^ n))
+    (by intro k hk; exact List.mem_range.mp hk)
+    { lo := 0, hi := 0 } { lo := 0, hi := 0 } (by
+      simp [QInterval.Overlaps])
 
 theorem dyadicNestedRadicalSquareStage_width_le
     (n k : Nat) (hk : k < 2 ^ n) :
@@ -2699,10 +2898,11 @@ theorem dyadicNestedRadicalSquareLeftSum_ordered
   simpa only [Rat.zero_add] using
     hfold (List.range (2 ^ n)) 0 (by native_decide) hcell
 
-theorem dyadicNestedRadicalSquareLeftSum_width_le
-    (n : Nat) :
-    (dyadicNestedRadicalSquareLeftSum n).width <=
-      1 / ((n + 1 : Nat) : Rat) := by
+theorem dyadicNestedRadicalSquareLeftSum_width_le_of_stage
+    (n : Nat) (eps : Rat)
+    (hstage : forall k, k < 2 ^ n ->
+      (rationalSquareInterval (dyadicNestedRadicalStageSinAt n k)).width <= eps) :
+    (dyadicNestedRadicalSquareLeftSum n).width <= (1 / 2 : Rat) * eps := by
   let N := 2 ^ n
   have hN : 0 < N := by
     dsimp [N]
@@ -2713,14 +2913,12 @@ theorem dyadicNestedRadicalSquareLeftSum_width_le
     (fun k =>
       (QInterval.scaleByRat (mesh 0 ((1 : Rat) / 2) N)
         (rationalSquareInterval (dyadicNestedRadicalStageSinAt n k))).width)
-    (mesh 0 ((1 : Rat) / 2) N *
-      (2 / ((n + 1 : Nat) : Rat))) (by
+    (mesh 0 ((1 : Rat) / 2) N * eps) (by
       intro k hk
       have hklt : k < N := List.mem_range.mp hk
       rw [QInterval.scaleByRat_width_of_nonneg hmesh]
       exact Rat.mul_le_mul_of_nonneg_left
-        (dyadicNestedRadicalSquareStage_width_le n k
-          (by simpa [N] using hklt)) hmesh)
+        (hstage k (by simpa [N] using hklt)) hmesh)
   calc
     (dyadicNestedRadicalSquareLeftSum n).width =
         (List.range N).foldl
@@ -2736,22 +2934,27 @@ theorem dyadicNestedRadicalSquareLeftSum_width_le
       rw [hzero]
       simp [N]
       grind
-    _ <= (N : Rat) * (mesh 0 ((1 : Rat) / 2) N *
-      (2 / ((n + 1 : Nat) : Rat))) := by simpa using hsum
-    _ = 1 / ((n + 1 : Nat) : Rat) := by
+    _ <= (N : Rat) * (mesh 0 ((1 : Rat) / 2) N * eps) := by
+      simpa using hsum
+    _ = (1 / 2 : Rat) * eps := by
       have hmesh_total := natCast_mul_mesh_eq_sub
         (a := (0 : Rat)) (b := (1 : Rat) / 2) hN
-      rw [show (N : Rat) *
-          (mesh 0 ((1 : Rat) / 2) N *
-            (2 / ((n + 1 : Nat) : Rat))) =
-          ((N : Rat) * mesh 0 ((1 : Rat) / 2) N) *
-            (2 / ((n + 1 : Nat) : Rat)) by
+      rw [show (N : Rat) * (mesh 0 ((1 : Rat) / 2) N * eps) =
+        ((N : Rat) * mesh 0 ((1 : Rat) / 2) N) * eps by
           grind [Rat.mul_assoc]]
       rw [hmesh_total]
-      have hden : ((n + 1 : Nat) : Rat) ≠ 0 := by
-        exact_mod_cast (Nat.succ_ne_zero n)
-      rw [Rat.div_def, Rat.div_def, Rat.div_def]
-      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel _ hden]
+      rw [show (1 / 2 : Rat) - 0 = 1 / 2 by grind]
+
+theorem dyadicNestedRadicalSquareLeftSum_width_le
+    (n : Nat) :
+    (dyadicNestedRadicalSquareLeftSum n).width <=
+      1 / ((n + 1 : Nat) : Rat) := by
+  have h := dyadicNestedRadicalSquareLeftSum_width_le_of_stage n
+    (2 / ((n + 1 : Nat) : Rat))
+    (fun k hk => dyadicNestedRadicalSquareStage_width_le n k hk)
+  have htwo : (2 : Rat) * (2 : Rat)⁻¹ = 1 :=
+    Rat.mul_inv_cancel 2 (by native_decide)
+  simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, htwo] using h
 
 def dyadicNestedRadicalSquareIntegralRaw : RealRaw where
   compute := dyadicNestedRadicalSquareLeftSum
@@ -2788,6 +2991,55 @@ structure DyadicNestedRadicalSquareTangentCommonWitness where
     (tangentSquareIntegral.compute n).lo <= witness n
   witness_le_tangent_hi : forall n,
     witness n <= (tangentSquareIntegral.compute n).hi
+
+/- A stagewise overlap is equivalently packaged by choosing the larger lower
+endpoint.  Keeping this constructor next to the four inequalities makes the
+square route match the public sine transport API. -/
+def DyadicNestedRadicalSquareTangentCommonWitness.of_overlap
+    (hoverlap : forall n,
+      QInterval.Overlaps
+        (dyadicNestedRadicalSquareLeftSum n)
+        (tangentSquareIntegral.compute n)) :
+    DyadicNestedRadicalSquareTangentCommonWitness where
+  witness := fun n => max
+    (dyadicNestedRadicalSquareLeftSum n).lo
+    (tangentSquareIntegral.compute n).lo
+  candidate_lo_le := by
+    intro n
+    rw [Rat.max_def]
+    split <;> grind
+  witness_le_candidate_hi := by
+    intro n
+    have hover := hoverlap n
+    unfold QInterval.Overlaps at hover
+    have hleft :
+        (dyadicNestedRadicalSquareLeftSum n).lo <=
+          (dyadicNestedRadicalSquareLeftSum n).hi := by
+      have hwidth := dyadicNestedRadicalSquareLeftSum_ordered n
+      change 0 <=
+        (dyadicNestedRadicalSquareLeftSum n).hi -
+          (dyadicNestedRadicalSquareLeftSum n).lo at hwidth
+      grind
+    rw [Rat.max_def]
+    split <;> grind
+  tangent_lo_le := by
+    intro n
+    rw [Rat.max_def]
+    split <;> grind
+  witness_le_tangent_hi := by
+    intro n
+    have hover := hoverlap n
+    unfold QInterval.Overlaps at hover
+    have hright :
+        (tangentSquareIntegral.compute n).lo <=
+          (tangentSquareIntegral.compute n).hi := by
+      have hwidth := tangentSquareIntegral_valid.1 n
+      change 0 <=
+        (tangentSquareIntegral.compute n).hi -
+          (tangentSquareIntegral.compute n).lo at hwidth
+      grind
+    rw [Rat.max_def]
+    split <;> grind
 
 theorem DyadicNestedRadicalSquareTangentCommonWitness.to_overlap
     (h : DyadicNestedRadicalSquareTangentCommonWitness) (n : Nat) :
@@ -2862,6 +3114,14 @@ theorem dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_value_of_anchor
     (dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_tangentSquareIntegral
       hover)
     hvalue
+
+theorem DyadicNestedRadicalSquareTangentCommonWitness.stabilized_equiv_value
+    (h : DyadicNestedRadicalSquareTangentCommonWitness)
+    (hvalue : tangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4))) :
+    (dyadicNestedRadicalSquareIntegralRaw_stabilized
+      tangentSquareIntegral).Equiv (RealRaw.ofRat (1 / 4)) := by
+  exact dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_value_of_anchor
+    h.to_equiv hvalue
 
 /- The finite rational-circle identity used by the future primitive proof.
    Keeping this as an algebraic theorem makes the intended `sin²` route
@@ -2969,6 +3229,157 @@ theorem sinPiSquare_nestedRadicalStage_sample_overlap_of_canonical_box_search
       exact (dyadicNestedRadicalTableAt_bounds n n k
         (Nat.le_of_lt hk)).1)
     (by simpa [sinPiSquareOnHalf, sinPiOnHalfRaw] using hsin)
+
+/- A successful finite tangent-box search at every dyadic sample is enough to
+assemble the entire square-sum overlap.  The search family remains explicit:
+each member supplies its own finite search depth and rational witness. -/
+theorem dyadicPublicSquareLeftSum_overlap_of_canonical_search_family
+    (S : ArctanSinPiConstruction)
+    (hsearch : forall (n k : Nat) (hk : k < 2 ^ n),
+      ∃ m u,
+        rationalTangentWitnessBoxSearch
+          (dyadicTangentBox S.inverse hk)
+          (dyadicNestedRadicalStageSinAt n k) m = some u) :
+    forall n,
+      QInterval.Overlaps
+        (dyadicPublicSquareLeftSum S n)
+        (dyadicNestedRadicalSquareLeftSum n) := by
+  intro n
+  apply dyadicPublicSquareLeftSum_overlap_of_sample_overlaps S n
+  intro k hk
+  obtain ⟨m, u, hmu⟩ := hsearch n k hk
+  exact sinPiSquare_nestedRadicalStage_sample_overlap_of_canonical_box_search
+    S hk m u hmu
+
+/- The geometric form of the remaining obligation.  At positive samples it
+asks only for overlap of the rational-circle sine image with the nested
+radical box; the zero sample is discharged by the exact endpoint search. -/
+theorem dyadicPublicSquareLeftSum_overlap_of_rational_circle_overlap_family
+    (S : ArctanSinPiConstruction)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hover : forall (n k : Nat) (hk : k < 2 ^ n),
+      0 < k ->
+      QInterval.Overlaps
+        (rationalCircleSinInterval (dyadicTangentBox S.inverse hk))
+        (dyadicNestedRadicalStageSinAt n k)) :
+    forall n,
+      QInterval.Overlaps
+        (dyadicPublicSquareLeftSum S n)
+        (dyadicNestedRadicalSquareLeftSum n) := by
+  apply dyadicPublicSquareLeftSum_overlap_of_canonical_search_family S
+  intro n k hk
+  by_cases hkzero : k = 0
+  · subst k
+    obtain ⟨u, hu⟩ := canonical_dyadic_zero_search S.inverse ht0 n
+    have hzero : dyadicNestedRadicalStageSinAt n 0 =
+        ({ lo := 0, hi := 0 } : QInterval) := by
+      change (dyadicNestedRadicalTableAt n n 0).1 = _
+      exact dyadicNestedRadicalTableAt_zero_sin n n
+    exact ⟨0, u, by simpa [hzero] using hu⟩
+  · exact canonical_dyadic_search_of_overlap_of_interior S.inverse hk
+      (by omega) (hover n k hk (by omega))
+
+/- Named proof data for the remaining geometric step.  Keeping the family as
+a structure makes the positive-sample obligation easy to instantiate and
+prevents downstream developments from depending on the internal theorem
+argument order. -/
+structure DyadicSquareCircleOverlapFamily
+    (S : ArctanSinPiConstruction) where
+  endpoint_zero :
+    (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero
+  positive_overlap : forall (n k : Nat) (hk : k < 2 ^ n),
+    0 < k ->
+    QInterval.Overlaps
+      (rationalCircleSinInterval (dyadicTangentBox S.inverse hk))
+      (dyadicNestedRadicalStageSinAt n k)
+
+def DyadicSquareCircleOverlapFamily.of_halfAngle_certificate_family
+    (S : ArctanSinPiConstruction)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (n k : Nat) (hk : k < 2 ^ n),
+      0 < k -> CanonicalDyadicHalfAngleCertificate S.inverse n k hk) :
+    DyadicSquareCircleOverlapFamily S where
+  endpoint_zero := ht0
+  positive_overlap := by
+    intro n k hk hpos
+    exact canonical_dyadic_overlap_of_halfAngle_outer_tangent
+      S.inverse hk
+      (hcertificate n k hk hpos).cosineBox_subinterval
+      (hcertificate n k hk hpos).outer_tangent_contains
+      (hcertificate n k hk hpos).sine_nonneg
+      (hcertificate n k hk hpos).cosine_nonneg
+      (hcertificate n k hk hpos).circle_identity
+      (hcertificate n k hk hpos).sine_contains
+      (hcertificate n k hk hpos).cosine_contains
+
+/- Precision-aware geometric proofs naturally produce certificates for every
+   evaluator precision.  The native-precision bridge in `SinPiIntegral`
+   packages that family into the stage-indexed form used by this module. -/
+def DyadicSquareCircleOverlapFamily.of_precision_halfAngle_certificate_family
+    (S : ArctanSinPiConstruction)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (precision n k : Nat) (hk : k < 2 ^ n),
+      0 < k -> CanonicalDyadicHalfAngleCertificateAt S.inverse precision n k hk) :
+    DyadicSquareCircleOverlapFamily S := by
+  exact DyadicSquareCircleOverlapFamily.of_halfAngle_certificate_family S ht0
+    (canonical_dyadic_halfAngle_certificate_family_of_precision_family
+      S.inverse hcertificate)
+
+theorem DyadicSquareCircleOverlapFamily.of_branch_certificate_family
+    (S : ArctanSinPiConstruction)
+    (family : DyadicNestedRadicalBranchCertificateFamily S.inverse) :
+    DyadicSquareCircleOverlapFamily S := by
+  exact {
+    endpoint_zero := family.endpoint_zero
+    positive_overlap := by
+      intro n k hk hpos
+      exact family.rational_circle_overlap n n k hk
+  }
+
+theorem DyadicSquareCircleOverlapFamily.to_square_sum_overlap
+    {S : ArctanSinPiConstruction}
+    (certificate : DyadicSquareCircleOverlapFamily S) :
+    forall n,
+      QInterval.Overlaps
+        (dyadicPublicSquareLeftSum S n)
+        (dyadicNestedRadicalSquareLeftSum n) := by
+  exact dyadicPublicSquareLeftSum_overlap_of_rational_circle_overlap_family
+    S certificate.endpoint_zero certificate.positive_overlap
+
+/- The intended geometric interface: the existing canonical half-angle
+certificate family is enough to drive the square-sum transport. -/
+theorem dyadicPublicSquareLeftSum_overlap_of_halfAngle_certificate_family
+    (S : ArctanSinPiConstruction)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (n k : Nat) (hk : k < 2 ^ n),
+      0 < k -> CanonicalDyadicHalfAngleCertificate S.inverse n k hk) :
+    forall n,
+      QInterval.Overlaps
+        (dyadicPublicSquareLeftSum S n)
+        (dyadicNestedRadicalSquareLeftSum n) := by
+  apply dyadicPublicSquareLeftSum_overlap_of_canonical_search_family S
+  intro n k hk
+  exact canonical_dyadic_search_of_halfAngle_certificate_family
+    S.inverse ht0 hcertificate n k hk
+
+theorem dyadicPublicSquareLeftSum_overlap_of_branch_certificate_family
+    (S : ArctanSinPiConstruction)
+    (family : DyadicNestedRadicalBranchCertificateFamily S.inverse) :
+    forall n,
+      QInterval.Overlaps
+        (dyadicPublicSquareLeftSum S n)
+        (dyadicNestedRadicalSquareLeftSum n) := by
+  exact (DyadicSquareCircleOverlapFamily.of_branch_certificate_family S family).to_square_sum_overlap
 
 theorem square_sample_overlap_of_sine_sample_overlap
     {I J : QInterval}
@@ -3115,6 +3526,93 @@ theorem rationalTangentSquareWitnessSearch_sound
     of_decide_eq_true hb.1.1.2,
     of_decide_eq_true hb.1.2,
     of_decide_eq_true hb.2⟩
+
+theorem square_overlap_of_rationalTangentSquareWitnessSearch
+    {U S C : QInterval} {m : Nat} {u : Rat}
+    (hsearch : rationalTangentSquareWitnessSearch U S C m = some u)
+    (hS : subintervalOf S 0 1)
+    (hC : subintervalOf C 0 1) :
+    QInterval.Overlaps (rationalSquareInterval S)
+      (rationalOneMinusSquareInterval C) := by
+  have hs := rationalTangentSquareWitnessSearch_sound hsearch
+  apply rationalSquareInterval_overlap_oneMinusSquareInterval_of_circle
+    hS hC
+  · exact ⟨hs.2.2.1, hs.2.2.2.1⟩
+  · exact ⟨hs.2.2.2.2.1, hs.2.2.2.2.2⟩
+  · exact rationalCircleSin_sq_add_cos_sq _
+
+theorem signed_square_overlap_of_rationalTangentSquareWitnessSearch
+    {U S C : QInterval} {m : Nat} {u : Rat}
+    (hsearch : rationalTangentSquareWitnessSearch U S C m = some u)
+    (hS : subintervalOf S 0 1)
+    (hC : subintervalOf C (-1) 1) :
+    QInterval.Overlaps (rationalSquareInterval S)
+      (rationalOneMinusSquareIntervalSigned C) := by
+  have hs := rationalTangentSquareWitnessSearch_sound hsearch
+  apply rationalSquareInterval_overlap_oneMinusSquareInterval_of_circle_signed
+    hS hC
+  · exact ⟨hs.2.2.1, hs.2.2.2.1⟩
+  · exact ⟨hs.2.2.2.2.1, hs.2.2.2.2.2⟩
+  · exact rationalCircleSin_sq_add_cos_sq _
+
+theorem dyadicNestedRadicalStageSinAt_subinterval
+    (n k : Nat) (hk : k < 2 ^ n) :
+    subintervalOf (dyadicNestedRadicalStageSinAt n k) 0 1 := by
+  simpa [dyadicNestedRadicalStageSinAt, dyadicNestedRadicalStageTable] using
+    (dyadicNestedRadicalTableAt_bounds n n k (Nat.le_of_lt hk)).1
+
+theorem dyadicNestedRadicalStageCosAt_subinterval
+    (n k : Nat) (hk : k < 2 ^ n) :
+    subintervalOf (dyadicNestedRadicalStageTable n k).2 (-1) 1 := by
+  simpa [dyadicNestedRadicalStageTable] using
+    (dyadicNestedRadicalTableAt_bounds n n k (Nat.le_of_lt hk)).2
+
+theorem dyadicNestedRadicalStage_square_complement_overlap_of_search_family
+    (U : Nat → Nat → QInterval)
+    (hsearch : ∀ (n k : Nat) (hk : k < 2 ^ n),
+      ∃ m u, rationalTangentSquareWitnessSearch (U n k)
+        (dyadicNestedRadicalStageSinAt n k)
+        (dyadicNestedRadicalStageTable n k).2 m = some u)
+    :
+    ∀ (n k : Nat) (hk : k < 2 ^ n),
+      QInterval.Overlaps
+        (rationalSquareInterval (dyadicNestedRadicalStageSinAt n k))
+        (rationalOneMinusSquareIntervalSigned
+          (dyadicNestedRadicalStageTable n k).2) := by
+  intro n k hk
+  obtain ⟨m, u, hmu⟩ := hsearch n k hk
+  exact signed_square_overlap_of_rationalTangentSquareWitnessSearch hmu
+    (dyadicNestedRadicalStageSinAt_subinterval n k hk)
+    (dyadicNestedRadicalStageCosAt_subinterval n k hk)
+
+/-! A concrete square-aware search checkpoint.  At the first nonzero dyadic
+sample, the same rational witness used by the sine search also certifies the
+cosine enclosure, so the square/complement transport can be checked directly.
+This is a regression anchor for the later uniform witness family. -/
+theorem rationalTangentSquareWitnessSearch_stage_one_demo :
+    rationalTangentSquareWitnessSearch
+      ({ lo := 0, hi := 1 } : QInterval)
+      (dyadicNestedRadicalStageSinAt 1 1)
+      (dyadicNestedRadicalStageTable 1 1).2 8 = some ((103 : Rat) / 256) := by
+  native_decide
+
+theorem dyadicNestedRadicalStage_one_square_complement_overlap :
+    QInterval.Overlaps
+      (rationalSquareInterval (dyadicNestedRadicalStageSinAt 1 1))
+      (rationalOneMinusSquareInterval
+        (dyadicNestedRadicalStageTable 1 1).2) := by
+  have hsearch := rationalTangentSquareWitnessSearch_stage_one_demo
+  have hS : subintervalOf (dyadicNestedRadicalStageSinAt 1 1) 0 1 := by
+    unfold subintervalOf
+    constructor
+    · native_decide
+    constructor <;> native_decide
+  have hC : subintervalOf (dyadicNestedRadicalStageTable 1 1).2 0 1 := by
+    unfold subintervalOf
+    constructor
+    · native_decide
+    constructor <;> native_decide
+  exact square_overlap_of_rationalTangentSquareWitnessSearch hsearch hS hC
 
 theorem CanonicalDyadicHalfAngleCertificateAt.to_square_complement_overlap
     {B : IntegralIdentities.ArctanInverseBisection}

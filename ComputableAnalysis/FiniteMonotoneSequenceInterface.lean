@@ -1,4 +1,5 @@
 import ComputableAnalysis.FiniteMonotoneSequenceExample
+import ComputableAnalysis.Series
 
 /-!
 # Reusable finite monotone-sequence interface
@@ -105,6 +106,65 @@ theorem MonotoneIntervalCertificate.toRealRaw_valid
     intro n hn
     change certificate.hiStage n - certificate.loStage n ≤ eps.val
     exact hN n hn
+
+/- The abstract handle is only a certified wrapper around the finite endpoint
+   computation.  No new existence principle is introduced at this boundary. -/
+def MonotoneIntervalCertificate.toReal
+    (certificate : MonotoneIntervalCertificate) : Real :=
+  Real.ofRaw certificate.toRealRaw certificate.toRealRaw_valid
+
+theorem MonotoneIntervalCertificate.toReal_preferred_compute
+    (certificate : MonotoneIntervalCertificate) (n : Nat) :
+    certificate.toReal.compute n =
+      { lo := certificate.loStage n, hi := certificate.hiStage n } := by
+  rfl
+
+def dyadicApproachIntervalCertificate : MonotoneIntervalCertificate where
+  loStage := dyadicApproach
+  hiStage := fun _ => 1
+  lower_succ := dyadicApproach_succ_le
+  upper_succ := by
+    intro n
+    exact Rat.le_refl
+  enclosed := by
+    intro n
+    exact dyadicApproach_le_one n
+  width_shrinks := by
+    intro eps
+    obtain ⟨N, hN⟩ := dyadicApproach_error_shrinks eps
+    refine ⟨N, ?_⟩
+    intro n hn
+    simpa [dyadicApproach_error] using hN n hn
+
+theorem dyadicApproachIntervalCertificate_valid :
+    dyadicApproachIntervalCertificate.toRealRaw.Valid := by
+  exact dyadicApproachIntervalCertificate.toRealRaw_valid
+
+def geometricSumIntervalCertificate
+    (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
+    (hr1 : r < 1) : MonotoneIntervalCertificate where
+  loStage := Series.geometricSum r
+  hiStage := fun _ => 1 / (1 - r)
+  lower_succ := Series.geometricSum_le_succ hr0
+  upper_succ := by
+    intro n
+    exact Rat.le_refl
+  enclosed := by
+    intro n
+    exact Series.geometricSum_le_inv_one_sub hr0 hr1 n
+  width_shrinks := by
+    intro eps
+    obtain ⟨N, hN⟩ :=
+      (Series.geometricRaw_valid_of_le_half hr0 hrhalf hr1).2.2 eps
+    refine ⟨N, ?_⟩
+    intro n hn
+    exact hN n hn
+
+theorem geometricSumIntervalCertificate_valid
+    (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
+    (hr1 : r < 1) :
+    (geometricSumIntervalCertificate r hr0 hrhalf hr1).toRealRaw.Valid := by
+  exact (geometricSumIntervalCertificate r hr0 hrhalf hr1).toRealRaw_valid
 
 def finiteAscendingSequenceCertificate
     (sequence : Nat → Rat) (stage : Nat)

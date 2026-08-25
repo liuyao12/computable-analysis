@@ -20,6 +20,47 @@ This replaces radical formulas by finite search. Cubic and quartic examples
 illustrate isolation, factor/remainder certificates, and Descartes-style sign
 counts.
 
+The Lean interface separates the finite computation from the algebraic claim:
+
+\begin{verbatim}
+ rational coefficients -> complex interval evaluator -> residual box
+                                              -> root witness
+ supplied root list -> synthetic division -> factored remainder
+ \end{verbatim}
+
+The rational-polynomial layer supplies nonzero annihilators for exact rational
+and rational-complex values:
+
+\lean{ComputableAnalysis.RatPoly.linearRoot_nonzero}
+\lean{ComputableAnalysis.RatPoly.linearRoot_exact_root}
+\lean{ComputableAnalysis.RatPoly.qcomplexRoot_nonzero}
+\lean{ComputableAnalysis.RatPoly.qcomplexRoot_exact_root}
+\lean{ComputableAnalysis.AlgebraicComplex.exactRoot_is_computable}
+\leanok
+
+An algebraic complex value is therefore a certified complex computation plus a
+rational-polynomial witness.  Addition, negation, and multiplication of the
+raw boxes are computationally valid; the annihilator for a sum or product is
+kept as an explicit elimination obligation rather than obtained from an
+ambient algebraic closure theorem:
+
+\lean{ComputableAnalysis.AlgebraicComplex.add_annihilator_exists}
+\lean{ComputableAnalysis.AlgebraicComplex.neg_annihilator_exists}
+\lean{ComputableAnalysis.AlgebraicComplex.mul_annihilator_exists}
+\lean{ComputableAnalysis.AlgebraicComplex.mulRaw_valid}
+\leanok
+
+For supplied roots, synthetic division is iterated over a finite list.  The
+factorization theorem and the distinct-root transport theorem are the useful
+finite replacements for saying that a polynomial splits over a completed
+complex field:
+
+\lean{ComputableAnalysis.FiniteDeflationChain.IsDeflationChain}
+\lean{ComputableAnalysis.FiniteDeflationChain.deflatedCoeffs_length}
+\lean{ComputableAnalysis.FiniteDeflationChain.exactRoot_of_exactRoot_of_ne}
+\lean{ComputableAnalysis.FiniteDeflationChain.horner_factorization}
+\leanok
+
 \section{Boundary}
 
 The supplied-root quintic certificate is a boundary result: it peels known

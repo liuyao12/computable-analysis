@@ -2159,6 +2159,50 @@ theorem constantPeanoBakerSimplexPartial_succ {dimension : Nat}
       (constantPeanoBakerSimplexPartial A T terms)
       (constantPeanoBakerSimplexTerm A T terms) := rfl
 
+/-! A square-zero constant generator is the first exact terminating ODE
+case.  Its ordered-simplex expansion has no terms of degree two or higher,
+so the finite transition is already the closed form `I + T A`. -/
+theorem matrixPow_add_two_eq_zero_of_mul_self_eq_zero
+    {dimension : Nat} (A : RatMatrix dimension)
+    (hAA : matrixMul A A = matrixZero dimension) :
+    forall n, matrixPow A (n + 2) = matrixZero dimension
+  | 0 => by
+      simp only [Nat.zero_add, matrixPow]
+      rw [matrixMul_identity_right, hAA]
+  | n + 1 => by
+      rw [show n + 1 + 2 = (n + 2) + 1 by omega, matrixPow,
+        matrixPow_add_two_eq_zero_of_mul_self_eq_zero A hAA n,
+        matrixMul_zero_right]
+
+theorem constantPeanoBakerSimplexPartial_add_two_eq_identity_add_scale_of_mul_self_eq_zero
+    {dimension : Nat} (A : RatMatrix dimension) (T : Rat)
+    (hAA : matrixMul A A = matrixZero dimension) :
+    forall terms,
+      constantPeanoBakerSimplexPartial A T (terms + 2) =
+        matrixAdd (matrixIdentity dimension) (matrixScale T A)
+  | 0 => by
+      simp [constantPeanoBakerSimplexPartial,
+        constantPeanoBakerSimplexTerm, matrixPow,
+        matrixMul_identity_right, factorialRat, factorial]
+      have hone : (1 : Rat) / 1 = 1 := by native_decide
+      have hT : T / 1 = T := by
+        have hinv : (1 : Rat)⁻¹ = 1 :=
+          Rat.inv_eq_of_mul_eq_one (by native_decide)
+        rw [Rat.div_def, hinv, Rat.mul_one]
+      rw [hone, hT, matrixAdd_zero_left, matrixScale_one]
+  | terms + 1 => by
+      rw [constantPeanoBakerSimplexPartial_succ,
+        constantPeanoBakerSimplexPartial_add_two_eq_identity_add_scale_of_mul_self_eq_zero
+          A T hAA terms]
+      have hpow := matrixPow_add_two_eq_zero_of_mul_self_eq_zero A hAA terms
+      have hterm : constantPeanoBakerSimplexTerm A T (terms + 2) =
+          matrixZero dimension := by
+        unfold constantPeanoBakerSimplexTerm
+        rw [hpow]
+        funext i j
+        simp [matrixScale, matrixZero]
+      rw [hterm, matrixAdd_zero_right]
+
 /-! ## Finite rotation-series core
 
 The continuous rotation system is a later analytic construction.  Its
@@ -2543,6 +2587,56 @@ theorem peanoBakerDiscreteSum_pairwiseProductZero {dimension : Nat}
   rw [← discretePeanoBakerExpansion]
   exact chronologicalProduct_pairwiseProductZero B hzero steps
 
+/-! A constant square-zero increment is the discrete analogue of the exact
+constant nilpotent flow above.  The finite sum keeps the mesh count and step
+size visible, rather than hiding them in a limiting exponential. -/
+theorem matrixSequenceSum_constant_scale {dimension : Nat}
+    (A : RatMatrix dimension) (step : Rat) (steps : Nat) :
+    matrixSequenceSum (fun _ => matrixScale step A) steps =
+      matrixScale ((steps : Rat) * step) A := by
+  induction steps with
+  | zero =>
+      funext i j
+      simp [matrixSequenceSum, matrixScale, matrixZero]
+  | succ steps ih =>
+      rw [matrixSequenceSum_succ, ih, matrixAdd_scale_same]
+      congr 1
+      push_cast
+      grind [Rat.add_mul]
+
+theorem chronologicalProduct_constant_square_zero
+    {dimension : Nat} (A : RatMatrix dimension) (step : Rat)
+    (hAA : matrixMul A A = matrixZero dimension) (steps : Nat) :
+    chronologicalProduct (fun _ => matrixScale step A) steps =
+      matrixAdd (matrixIdentity dimension)
+        (matrixScale ((steps : Rat) * step) A) := by
+  rw [chronologicalProduct_pairwiseProductZero]
+  · rw [matrixSequenceSum_constant_scale]
+  · intro i j
+    rw [matrixMul_matrixScale_left, matrixMul_matrixScale_right, hAA]
+    funext i j
+    simp [matrixScale, matrixZero]
+
+/-! With a uniform mesh, the square-zero flow is already exact at every
+positive finite mesh size.  This is the finite ODE analogue of the fact that
+the exponential truncates after its linear term; no mesh limit is involved. -/
+theorem chronologicalProduct_constant_square_zero_uniform_step
+    {dimension : Nat} (A : RatMatrix dimension) (T : Rat) (steps : Nat)
+    (hsteps : 0 < steps) (hAA : matrixMul A A = matrixZero dimension) :
+    chronologicalProduct
+        (fun _ => matrixScale (T / ((steps : Nat) : Rat)) A) steps =
+      matrixAdd (matrixIdentity dimension) (matrixScale T A) := by
+  rw [chronologicalProduct_constant_square_zero A
+    (T / ((steps : Nat) : Rat)) hAA steps]
+  have hs : ((steps : Nat) : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hsteps)
+  have hscale : ((steps : Nat) : Rat) *
+      (T / ((steps : Nat) : Rat)) = T := by
+    rw [Rat.div_def]
+    have hcancel := Rat.mul_inv_cancel ((steps : Nat) : Rat) hs
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  rw [hscale]
+
 @[simp] theorem orderedIndexWords_zero : orderedIndexWords 0 = [[]] := rfl
 
 @[simp] theorem orderedIndexWords_one : orderedIndexWords 1 = [[], [0]] := rfl
@@ -2652,6 +2746,56 @@ theorem peanoBakerFactorialTail_shifted_le_eps {M T : Rat}
   unfold peanoBakerFactorialTail peanoBakerFactorialTailShift
   exact RationalMajorant.factorialTailPartial_shifted_le_eps
     (Rat.mul_nonneg hM hT) eps terms
+
+/- A downstream matrix-transition construction should consume the tail bound
+   as data, not reconstruct the shift arithmetic at every call site. -/
+structure PeanoBakerFactorialRemainderCertificate
+    (M T : Rat) (eps : QPos) where
+  start : Nat
+  tail_le_eps : forall terms,
+    peanoBakerFactorialTail M T start terms <= eps.val
+
+def peanoBakerFactorialRemainderCertificate
+    {M T : Rat} (hM : 0 <= M) (hT : 0 <= T) (eps : QPos) :
+    PeanoBakerFactorialRemainderCertificate M T eps := by
+  refine {
+    start := RationalMajorant.factorialTailStart (M * T) +
+      peanoBakerFactorialTailShift M T eps
+    tail_le_eps := ?_ }
+  intro terms
+  exact peanoBakerFactorialTail_shifted_le_eps hM hT eps terms
+
+theorem peanoBakerFactorialTail_nonneg
+    {M T : Rat} (hM : 0 <= M) (hT : 0 <= T)
+    (start terms : Nat) :
+    0 <= peanoBakerFactorialTail M T start terms := by
+  unfold peanoBakerFactorialTail
+  induction terms with
+  | zero =>
+      simp [RationalMajorant.factorialTailPartial]
+  | succ terms ih =>
+      rw [RationalMajorant.factorialTailPartial]
+      exact Rat.add_nonneg ih
+        (RationalMajorant.factorialTailTerm_nonneg
+          (Rat.mul_nonneg hM hT) (start + terms))
+
+def PeanoBakerFactorialRemainderCertificate.interval
+    {M T : Rat} {eps : QPos}
+    (certificate : PeanoBakerFactorialRemainderCertificate M T eps)
+    (terms : Nat) : QInterval :=
+  { lo := 0
+    hi := peanoBakerFactorialTail M T certificate.start terms }
+
+theorem PeanoBakerFactorialRemainderCertificate.tail_mem_interval
+    {M T : Rat} {eps : QPos}
+    (certificate : PeanoBakerFactorialRemainderCertificate M T eps)
+    (hM : 0 <= M) (hT : 0 <= T) (terms : Nat) :
+    (PeanoBakerFactorialRemainderCertificate.interval certificate terms).lo <=
+        peanoBakerFactorialTail M T certificate.start terms /\
+      peanoBakerFactorialTail M T certificate.start terms <=
+        (PeanoBakerFactorialRemainderCertificate.interval certificate terms).hi := by
+  exact ⟨peanoBakerFactorialTail_nonneg hM hT certificate.start terms,
+    Rat.le_refl⟩
 
 /-- The computable iteration count used in the zero-initial Volterra
 uniqueness argument.  The factor B is a rational enclosure bound for a

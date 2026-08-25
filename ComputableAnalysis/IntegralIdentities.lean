@@ -16046,6 +16046,24 @@ theorem compute_contains_uniformLeftEndpointSum {f : Rat -> Rat} {L : Nat}
   rw [dyadicLeftEndpointSum_eq_uniform] at h
   exact h
 
+/-- Two certified Lipschitz constants for the same rational evaluator produce
+overlapping Darboux boxes at every stage.  The common finite left rectangle
+sum is the witness; no canonical Lipschitz constant is selected. -/
+theorem compute_overlap_of_lipschitz_bounds
+    {f : Rat -> Rat} {L M : Nat}
+    (hL : Integral.LipschitzOnUnit f (L : Rat))
+    (hM : Integral.LipschitzOnUnit f (M : Rat)) (stage : Nat) :
+    QInterval.Overlaps (compute f L stage) (compute f M stage) := by
+  have hleftL := compute_contains_uniformLeftEndpointSum hL stage
+  have hleftM := compute_contains_uniformLeftEndpointSum hM stage
+  unfold QInterval.ContainsInterval at hleftL hleftM
+  unfold QInterval.Overlaps
+  exact ⟨Rat.le_trans hleftL.1 hleftM.2,
+    Rat.le_trans hleftM.1 hleftL.2⟩
+
+/-- Consequently, the two Lipschitz--Darboux raw representations are
+equivalent whenever both constants are valid certificates for the same
+evaluator. -/
 private theorem cells_refine {f : Rat -> Rat} {L : Nat} {p r : Rat}
     (hlip : Integral.LipschitzOnUnit f (L : Rat))
     (hp0 : 0 <= p) (hpr : p <= r) (hr1 : r <= 1) :
@@ -16407,6 +16425,76 @@ theorem raw_valid {f : Rat -> Rat} {L : Nat}
     (raw f L).Valid := by
   change RealRaw.ValidCompute (compute f L)
   exact ⟨compute_ordered, compute_nested hlip, compute_widthsShrink L⟩
+
+/-/ Consequently, the two Lipschitz--Darboux raw representations are
+equivalent whenever both constants are valid certificates for the same
+evaluator. -/
+theorem raw_equiv_of_lipschitz_bounds
+    {f : Rat -> Rat} {L M : Nat}
+    (hL : Integral.LipschitzOnUnit f (L : Rat))
+    (hM : Integral.LipschitzOnUnit f (M : Rat)) :
+    (raw f L).Equiv (raw f M) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro stage
+  exact (RealRaw.compareAt_overlap_iff (raw f L) (raw f M) stage stage).2
+    (compute_overlap_of_lipschitz_bounds hL hM stage)
+
+/-- The finite Lipschitz--Darboux sum is compatible with pointwise addition:
+the box for `f + g` with bound `L + M` is the interval sum of the two
+component boxes. -/
+theorem raw_add_equiv
+    (f g : Rat -> Rat) (L M : Nat) :
+    (raw (fun x => f x + g x) (L + M)).Equiv
+      (raw f L + raw g M) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro stage
+  apply (RealRaw.compareAt_overlap_iff
+    (raw (fun x => f x + g x) (L + M)) (raw f L + raw g M) stage stage).2
+  change QInterval.Overlaps
+    (compute (fun x => f x + g x) (L + M) stage)
+    (QInterval.addInterval (compute f L stage) (compute g M stage))
+  rw [compute_add]
+  unfold QInterval.Overlaps
+  have hf := compute_ordered (f := f) (L := L) stage
+  have hg := compute_ordered (f := g) (L := M) stage
+  have hf' : (compute f L stage).lo <= (compute f L stage).hi := by
+    unfold QInterval.width at hf
+    grind [Rat.sub_eq_add_neg]
+  have hg' : (compute g M stage).lo <= (compute g M stage).hi := by
+    unfold QInterval.width at hg
+    grind [Rat.sub_eq_add_neg]
+  change
+    (compute f L stage).lo + (compute g M stage).lo <=
+        (compute f L stage).hi + (compute g M stage).hi /\
+      (compute f L stage).lo + (compute g M stage).lo <=
+        (compute f L stage).hi + (compute g M stage).hi
+  constructor
+  · grind [Rat.add_assoc, Rat.add_comm]
+  · grind [Rat.add_assoc, Rat.add_comm]
+
+/-- Nonnegative rational scaling is compatible with the Lipschitz--Darboux
+raw representation. The natural bound scales with the same factor. -/
+theorem raw_natScale_equiv
+    (f : Rat -> Rat) (L scale : Nat) :
+    (raw (fun x => (scale : Rat) * f x) (scale * L)).Equiv
+      (RealRaw.scaleRat (scale : Rat) (raw f L)) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro stage
+  apply (RealRaw.compareAt_overlap_iff
+    (raw (fun x => (scale : Rat) * f x) (scale * L))
+    (RealRaw.scaleRat (scale : Rat) (raw f L)) stage stage).2
+  change QInterval.Overlaps
+    (compute (fun x => (scale : Rat) * f x) (scale * L) stage)
+    (RealRaw.scaleRatCompute (scale : Rat) (raw f L) stage)
+  rw [compute_natScale]
+  simp only [raw, RealRaw.scaleRatCompute, if_pos Rat.natCast_nonneg]
+  unfold QInterval.Overlaps
+  have h := compute_ordered (f := f) (L := L) stage
+  unfold QInterval.width at h
+  have hscaled := Rat.mul_le_mul_of_nonneg_left
+    (show (compute f L stage).lo <= (compute f L stage).hi by
+      grind [Rat.sub_eq_add_neg]) (Rat.natCast_nonneg : 0 <= (scale : Rat))
+  exact ⟨hscaled, hscaled⟩
 
 /-- Package the finite Lipschitz--Darboux algorithm as a construction for the
 exact rational kernel that its rectangles evaluate. -/

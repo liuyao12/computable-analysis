@@ -6499,6 +6499,37 @@ structure CanonicalDyadicHalfAngleCertificateAt
       (rationalHalfAngleTangentInterval
         ((dyadicNestedRadicalTableAt precision depth k).1) cosineBox)
 
+/- At the native precision `n`, the precision-aware evaluator is exactly the
+   public stage evaluator.  This small bridge keeps the geometric proof
+   parameterized by precision while exposing the certificate shape consumed
+   by the equal-dyadic integral. -/
+def canonical_dyadic_halfAngle_certificate_of_native_precision
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {n k : Nat} {hk : k < 2 ^ n}
+    (h : CanonicalDyadicHalfAngleCertificateAt B n n k hk) :
+    CanonicalDyadicHalfAngleCertificate B n k hk := by
+  exact {
+    cosineBox := h.cosineBox
+    cosineBox_subinterval := h.cosineBox_subinterval
+    sineWitness := h.sineWitness
+    cosineWitness := h.cosineWitness
+    sine_nonneg := h.sine_nonneg
+    cosine_nonneg := h.cosine_nonneg
+    circle_identity := h.circle_identity
+    sine_contains := h.sine_contains
+    cosine_contains := h.cosine_contains
+    outer_tangent_contains := h.outer_tangent_contains }
+
+def canonical_dyadic_halfAngle_certificate_family_of_precision_family
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (hcertificate : forall (precision n k : Nat) (hk : k < 2 ^ n),
+      0 < k -> CanonicalDyadicHalfAngleCertificateAt B precision n k hk) :
+    forall (n k : Nat) (hk : k < 2 ^ n),
+      0 < k -> CanonicalDyadicHalfAngleCertificate B n k hk := by
+  intro n k hk hpos
+  exact canonical_dyadic_halfAngle_certificate_of_native_precision B
+    (hcertificate n n k hk hpos)
+
 def canonical_dyadic_certificate_at_of_rational_witness
     (B : IntegralIdentities.ArctanInverseBisection)
     {precision depth k : Nat} (hk : k < 2 ^ depth)
@@ -7397,6 +7428,18 @@ theorem DyadicNestedRadicalBranchCertificateFamily.sample_overlap
         (dyadicNestedRadicalTableAt precision depth k).1 := by
   exact dyadicNestedRadical_sample_overlap_of_branch_certificates_of_endpoint
     B H.endpoint_zero H.even H.lower H.upper
+
+theorem DyadicNestedRadicalBranchCertificateFamily.rational_circle_overlap
+    {B : IntegralIdentities.ArctanInverseBisection}
+    (H : DyadicNestedRadicalBranchCertificateFamily B) :
+    forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      QInterval.Overlaps
+        (rationalCircleSinInterval
+          (dyadicTangentBoxAt B precision depth k hk))
+        (dyadicNestedRadicalTableAt precision depth k).1 := by
+  intro precision depth k hk
+  have h := H.sample_overlap precision depth k hk
+  simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using h
 
 theorem dyadicNestedRadicalTableAt_width_le
     (precision n k : Nat) (hk : k <= 2 ^ n) :
@@ -8514,6 +8557,35 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_of_certificate_family
   exact arctanSinPi_nestedRadicalSample_equiv_of_certificate_family
     S.inverse ht0 hk (hcertificate n k hk)
 
+/- The precision-first form is convenient for geometric constructions that
+   refine evaluator boxes before choosing the native stage. -/
+theorem ArctanSinPiConstruction.halfIntegral_equiv_of_precision_first_certificate_family
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (precision n k : Nat) (hk : k < 2 ^ n),
+      0 < k -> CanonicalDyadicHalfAngleCertificateAt S.inverse precision n k hk) :
+    (S.halfIntegral pub).Equiv
+      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+  apply S.halfIntegral_equiv_of_certificate_family
+    pub g cg hdyadic hplan hevaluator ht0
+  intro n k hk hpos precision
+  exact hcertificate precision n k hk hpos
+
 theorem ArctanSinPiConstruction.halfIntegral_equiv_of_overlap_family
     (S : ArctanSinPiConstruction)
     (pub : Integral.Construction S.onHalf.toRealFunRaw
@@ -8545,10 +8617,104 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_of_overlap_family
   exact arctanSinPi_nestedRadicalSample_equiv_of_overlap_family
     S.inverse ht0 hk (hover n k hk)
 
+theorem ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificate_family
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (family : DyadicNestedRadicalBranchCertificateFamily S.inverse) :
+    (S.halfIntegral pub).Equiv
+      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+  apply S.halfIntegral_equiv_of_overlap_family
+    pub g cg hdyadic hplan hevaluator family.endpoint_zero
+  intro n k hk hpos precision
+  exact family.rational_circle_overlap precision n k hk
+
+theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_branch_certificate_family
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (family : DyadicNestedRadicalBranchCertificateFamily S.inverse)
+    (hintegral :
+      (Integral.integral g 0 ((1 : Rat) / 2) cg).Equiv reciprocalPiRaw) :
+    (S.halfIntegral pub).Equiv reciprocalPiRaw := by
+  exact RealRaw.equiv_trans
+    (S.halfIntegral_valid pub)
+    (FTC.integral_valid_of_construction cg)
+    reciprocalPiRaw_valid
+    (S.halfIntegral_equiv_of_branch_certificate_family
+      pub g cg hdyadic hplan hevaluator family)
+    hintegral
+
 structure DyadicTangentWitnessFamily
     (B : IntegralIdentities.ArctanInverseBisection) where
   schedule : forall (depth k : Nat) (hk : k < 2 ^ depth),
     DyadicTangentWitnessSchedule B depth k hk
+
+/-! A named package for the geometric part of the equal-dyadic proof.
+
+The zero sample is handled by the exact endpoint equivalence; every positive
+dyadic sample is supplied with a rational half-angle certificate at every
+evaluator precision.  The conversion below is intentionally noncomputable:
+the certificate proves that a finite search succeeds, while the executable
+search itself remains the evaluator-facing object. -/
+structure DyadicCanonicalCertificateFamily
+    (B : IntegralIdentities.ArctanInverseBisection) where
+  zero_equiv : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero
+  interior : forall (depth k : Nat) (hk : k < 2 ^ depth), 0 < k ->
+    forall precision,
+      CanonicalDyadicHalfAngleCertificateAt B precision depth k hk
+
+noncomputable def DyadicCanonicalCertificateFamily.toWitnessFamily
+    {B : IntegralIdentities.ArctanInverseBisection}
+    (C : DyadicCanonicalCertificateFamily B) :
+    DyadicTangentWitnessFamily B where
+  schedule := fun depth k hk => by
+    by_cases hkzero : k = 0
+    · subst k
+      let hsearch := fun precision =>
+        canonical_dyadic_zero_search_at B C.zero_equiv precision depth
+          (Nat.pow_pos (by omega : 0 < 2))
+      exact {
+        witness := fun precision => Classical.choose (hsearch precision)
+        searchPrecision := fun _ => 0
+        search := by
+          intro precision
+          simpa [dyadicNestedRadicalTableAt_zero_sin] using
+            Classical.choose_spec (hsearch precision) }
+    · let hsearch := fun precision =>
+        canonical_dyadic_search_at_family B C.zero_equiv hk
+          (fun hpos => C.interior depth k hk hpos) precision
+      exact {
+        witness := fun precision =>
+          Classical.choose (Classical.choose_spec (hsearch precision))
+        searchPrecision := fun precision => Classical.choose (hsearch precision)
+        search := by
+          intro precision
+          exact Classical.choose_spec (Classical.choose_spec (hsearch precision)) }
 
 theorem ArctanSinPiConstruction.halfIntegral_equiv_of_witness_family
     (S : ArctanSinPiConstruction)
@@ -8600,6 +8766,32 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_witness_famil
     (S.halfIntegral_equiv_of_witness_family pub g cg hdyadic hplan
       hevaluator family)
     hintegral
+
+/-! The named certificate-family entry point is the preferred theorem-facing
+API. It hides only the noncomputable choice of a successful finite search;
+the geometric certificates and the independent integral equivalence remain
+explicit inputs. -/
+theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_canonical_certificate_family
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (family : DyadicCanonicalCertificateFamily S.inverse)
+    (hintegral :
+      (Integral.integral g 0 ((1 : Rat) / 2) cg).Equiv reciprocalPiRaw) :
+    (S.halfIntegral pub).Equiv reciprocalPiRaw := by
+  exact S.halfIntegral_equiv_reciprocalPi_of_witness_family
+    pub g cg hdyadic hplan hevaluator family.toWitnessFamily hintegral
 
 theorem ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificates
     (S : ArctanSinPiConstruction)

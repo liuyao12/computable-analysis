@@ -1733,6 +1733,71 @@ theorem equivalent_trans {f g h : FunctionOnInterval}
   exact RealRaw.equiv_trans hFvalid hGvalid hHvalid
     (hfg.2.2 x hxF hxG) (hgh.2.2 x hxG hxH)
 
+/-! Product evaluation transports along the local representation graph. -/
+theorem equivalent_mulOfNonnegBounded
+    (F F' G G' : FunctionOnInterval)
+    (hFF' : Equivalent F F') (hGG' : Equivalent G G')
+    (same_lower_FG : F.lower = G.lower) (same_upper_FG : F.upper = G.upper)
+    (same_lower_F'G' : F'.lower = G'.lower) (same_upper_F'G' : F'.upper = G'.upper)
+    (Fbounds : forall x (hx : inDomainInterval F.lower F.upper x),
+      Exists fun B : Rat => 0 < B /\ forall n,
+        0 <= (F.compute x hx n).lo /\ (F.compute x hx n).hi <= B)
+    (Gbounds : forall x (hx : inDomainInterval G.lower G.upper x),
+      Exists fun B : Rat => 0 < B /\ forall n,
+        0 <= (G.compute x hx n).lo /\ (G.compute x hx n).hi <= B)
+    (F'bounds : forall x (hx : inDomainInterval F'.lower F'.upper x),
+      Exists fun B : Rat => 0 < B /\ forall n,
+        0 <= (F'.compute x hx n).lo /\ (F'.compute x hx n).hi <= B)
+    (G'bounds : forall x (hx : inDomainInterval G'.lower G'.upper x),
+      Exists fun B : Rat => 0 < B /\ forall n,
+        0 <= (G'.compute x hx n).lo /\ (G'.compute x hx n).hi <= B) :
+    Equivalent
+      (mulOfNonnegBounded F G same_lower_FG same_upper_FG Fbounds Gbounds)
+      (mulOfNonnegBounded F' G' same_lower_F'G' same_upper_F'G' F'bounds G'bounds) := by
+  refine ⟨hFF'.1, hFF'.2.1, ?_⟩
+  intro x hx hx'
+  let hxG : inDomainInterval G.lower G.upper x :=
+    ⟨by rw [← same_lower_FG]; exact hx.1, by rw [← same_upper_FG]; exact hx.2⟩
+  let hxG' : inDomainInterval G'.lower G'.upper x :=
+    ⟨by rw [← same_lower_F'G']; exact hx'.1, by rw [← same_upper_F'G']; exact hx'.2⟩
+  have hnonneg : forall (H : FunctionOnInterval)
+      (bounds : forall y (hy : inDomainInterval H.lower H.upper y),
+        Exists fun B : Rat => 0 < B /\ forall n,
+          0 <= (H.compute y hy n).lo /\ (H.compute y hy n).hi <= B)
+      (y : Rat) (hy : inDomainInterval H.lower H.upper y) n,
+      0 <= (H.raw.compute y (H.defined_on y hy) n).lo := by
+    intro H bounds y hy n
+    rcases bounds y hy with ⟨B, hB, h⟩
+    exact (h n).1
+  have hXF : (PartialRealFunRaw.apply F.raw F.valid_on x
+      (F.defined_on x hx)).Valid := by
+    change RealRaw.ValidCompute (F.raw.compute x (F.defined_on x hx))
+    exact F.valid_on x (F.defined_on x hx)
+  have hXG : (PartialRealFunRaw.apply G.raw G.valid_on x
+      (G.defined_on x hxG)).Valid := by
+    change RealRaw.ValidCompute (G.raw.compute x (G.defined_on x hxG))
+    exact G.valid_on x (G.defined_on x hxG)
+  have hXF' : (PartialRealFunRaw.apply F'.raw F'.valid_on x
+      (F'.defined_on x hx')).Valid := by
+    change RealRaw.ValidCompute (F'.raw.compute x (F'.defined_on x hx'))
+    exact F'.valid_on x (F'.defined_on x hx')
+  have hXG' : (PartialRealFunRaw.apply G'.raw G'.valid_on x
+      (G'.defined_on x hxG')).Valid := by
+    change RealRaw.ValidCompute (G'.raw.compute x (G'.defined_on x hxG'))
+    exact G'.valid_on x (G'.defined_on x hxG')
+  have h := RealRaw.mul_equiv_of_nonneg
+    hXF hXF' hXG hXG'
+    (hnonneg F Fbounds x hx) (hnonneg F' F'bounds x hx')
+    (hnonneg G Gbounds x hxG) (hnonneg G' G'bounds x hxG')
+    (hFF'.2.2 x hx hx') (hGG'.2.2 x hxG hxG')
+  change (RealRaw.mul
+      (PartialRealFunRaw.apply F.raw F.valid_on x (F.defined_on x hx))
+      (PartialRealFunRaw.apply G.raw G.valid_on x (G.defined_on x hxG))).Equiv
+    (RealRaw.mul
+      (PartialRealFunRaw.apply F'.raw F'.valid_on x (F'.defined_on x hx'))
+      (PartialRealFunRaw.apply G'.raw G'.valid_on x (G'.defined_on x hxG')))
+  exact h
+
 end FunctionOnInterval
 
 /-- Effective derivative on a rational interval.

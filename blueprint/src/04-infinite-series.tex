@@ -10,6 +10,12 @@ An infinite object is represented by a finite prefix and a certified tail.
 prefix -> finite identity -> tail bound -> nested enclosure
 \end{verbatim}
 
+This chapter also follows the representative rule: formalize one evaluator
+for each genuinely new series or transform pattern.  Sign changes, rational
+scalings, routine algebra, and finite piecewise assembly are transported from
+those representatives; the blueprint does not repeat the same proof for
+every syntactic variant.
+
 The elementary derivative table is recorded at the coefficient level first;
 each row is a finite shift identity, before any completed function is named:
 
@@ -57,6 +63,8 @@ The finite Fourier API is explicit:
 \lean{ComputableAnalysis.finiteFourierSum_blockRepeat_zero_of_phase_one}
 \lean{ComputableAnalysis.FiniteFourierBlockCancellationCertificate.repeated_zero}
 \lean{ComputableAnalysis.FiniteFourierBlockCancellationCertificate.add_repeated_invariant}
+\lean{ComputableAnalysis.quarterTurnConstantBlockCancellationCertificate}
+\lean{ComputableAnalysis.quarterTurnConstantBlockCancellationCertificate_repeated_zero}
 \leanok
 
 The cancellation theorem is the finite algebra behind periodic Fourier
@@ -75,8 +83,13 @@ finite transform -> coordinate tail box -> future-stage containment
 
 \lean{ComputableAnalysis.EffectiveFourierTailCertificate}
 \lean{ComputableAnalysis.EffectiveFourierTailCertificate.toSeries_valid}
+\lean{ComputableAnalysis.EffectiveFourierTailCertificate.stageBox}
+\lean{ComputableAnalysis.EffectiveFourierTailCertificate.future_stage_in_stageBox}
+\lean{ComputableAnalysis.EffectiveFourierTailCertificate.stageBox_width}
+\lean{ComputableAnalysis.EffectiveFourierTailCertificate.stageBox_height}
 \lean{ComputableAnalysis.EffectiveFourierSeries.stabilized_valid}
 \lean{ComputableAnalysis.EffectiveFourierSeries.precision_witness}
+\lean{ComputableAnalysis.finiteSupportFourierSeries_stabilized_equiv}
 \lean{ComputableAnalysis.quarterTurnGeometricTailCertificate_valid}
 \lean{ComputableAnalysis.EffectiveFourierSampleCertificate.toSeries_valid}
 \lean{ComputableAnalysis.EffectiveFourierSampleCertificate.sample_interval_witness}
@@ -91,6 +104,12 @@ complex value.
 \lean{ComputableAnalysis.quarterTurnGeometricFourierSeries}
 \lean{ComputableAnalysis.quarterTurnGeometricFourierSeries_future_stage_enclosure}
 \leanok
+
+Finite support is deliberately treated as a degenerate but useful case: the
+stabilized raw complex value is equivalent to the exact rational-complex
+transform already computed by the finite stage.  This is the hand-off used by
+applications that have a finite sample table and do not need a convergence
+argument.
 
 \section{Series as computation}
 \label{thm:arithmetic-series-sum}
@@ -188,17 +207,56 @@ the endpoint difference of the finite primitive is exactly the finite sum of
 the integrated monomials.  Only the later tail comparison is potentially
 infinite-looking.
 
+The derivative side is closed at the same finite level. The derivative prefix
+of the integrated coefficient stream is literally the truncated target
+prefix, provided the coefficient-shift certificate is supplied. This is the
+finite algebraic core of termwise FTC; no infinite derivative or interchange
+theorem is being smuggled in.
+
 \lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_step}
 \lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_prefix}
 \lean{ComputableAnalysis.FinitePolynomial.integratedTaylorPrefix_endpointDifference_eq_finiteMonomialIntegralSum}
 \lean{ComputableAnalysis.FinitePolynomial.finiteMonomialIntegralSum_succ}
 \lean{ComputableAnalysis.FinitePolynomial.integratedTaylorPrefix_endpointDifference_contains_of_pos}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefix_eq_taylorDerivativePrefix}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefixShift_succ_eq_of_coefficientShift}
+\leanok
+
+The same finite-prefix contract appears in the Gaussian example.  The even
+Taylor integral is enclosed by a rational tail interval; its width is exposed
+before any improper full-line argument is attempted.
+
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_interval}
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_interval_contains}
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_interval_width}
+\leanok
+
+The sine case is one representative non-polynomial client of this finite
+termwise rule.  Integrating the finite sine prefix produces a cosine
+complement exactly:
+
+\[
+  \sum_{k<n} c_k\frac{x^{k+1}}{k+1}
+    = 1-\operatorname{cosPrefix}_{n+1}(x).
+\]
+
+The identity is rational algebra at every stage.  A tail certificate is added
+only when this finite primitive is connected to the nested interval evaluator;
+the blueprint does not repeat the construction for every rescaled sine chart.
+
+\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_cosine_complement}
+\lean{ComputableAnalysis.FiniteSineIntegral.halfPeriodSineRaw_contains_halfAnglePrefix}
+\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_stage_four}
+\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_stage_six}
+\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_stage_eight}
+\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_stage_ten}
 \leanok
 
 The formal coefficient layer already records the derivative shifts for the
 main complex-valued functions:
 
 \lean{ComputableAnalysis.PowerSeries.atanTaylorCoeff_hasFormalDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative}
 \lean{ComputableAnalysis.PowerSeries.expCoeff_hasFormalDerivative}
 \lean{ComputableAnalysis.PowerSeries.sinCoeff_hasFormalDerivative}
 \lean{ComputableAnalysis.PowerSeries.neg_cosCoeff_hasFormalDerivative}
