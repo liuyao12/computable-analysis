@@ -328,6 +328,42 @@ theorem differenceQuotient_scale (c : Rat) (f : Rat -> Rat) {x h : Rat}
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
     Rat.mul_comm]
 
+/-! The finite addition error is the sum of the two finite derivative errors.
+This is the algebraic step consumed by a later synchronized precision
+schedule; no limiting argument is hidden in the statement. -/
+theorem differenceQuotient_add_error_le
+    (f df g dg : Rat -> Rat) (x h : Rat) (hh : h ≠ 0) :
+    qabs (differenceQuotient (fun z => f z + g z) x h -
+      (df x + dg x)) <=
+      qabs (differenceQuotient f x h - df x) +
+        qabs (differenceQuotient g x h - dg x) := by
+  have hdecomp :
+      (differenceQuotient f x h + differenceQuotient g x h) -
+          (df x + dg x) =
+        (differenceQuotient f x h - df x) +
+          (differenceQuotient g x h - dg x) := by
+    let A := differenceQuotient f x h
+    let B := differenceQuotient g x h
+    let C := df x
+    let D := dg x
+    change (A + B) - (C + D) = (A - C) + (B - D)
+    rw [Rat.sub_eq_add_neg, Rat.sub_eq_add_neg, Rat.sub_eq_add_neg,
+      Rat.neg_add]
+    calc
+      A + B + (-C + -D) = A + (B + (-C + -D)) := by
+        rw [Rat.add_assoc]
+      _ = A + ((-C + B) + -D) := by
+        congr 1
+        rw [← Rat.add_assoc, Rat.add_comm B (-C)]
+      _ = (A + -C) + (B + -D) := by
+        rw [Rat.add_assoc (-C) B (-D)]
+        rw [← Rat.add_assoc A (-C) (B + -D)]
+  change qabs
+    (differenceQuotient (fun z => f z + g z) x h -
+      (df x + dg x)) <= _
+  rw [differenceQuotient_add f g hh, hdecomp]
+  exact qabs_add_le _ _
+
 /- A finite L'Hopital-style cancellation certificate: away from the common
 zero `a`, the quotient of the factored numerator and denominator is the
 derivative ratio at `a`, namely `2 * a / 1`, plus its exact linear remainder.
