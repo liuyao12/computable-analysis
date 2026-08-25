@@ -3408,6 +3408,26 @@ theorem square_overlap_of_rationalTangentSquareWitnessSearch
   · exact ⟨hs.2.2.2.2.1, hs.2.2.2.2.2⟩
   · exact rationalCircleSin_sq_add_cos_sq _
 
+theorem dyadicNestedRadicalStage_square_complement_overlap_of_search_family
+    (U : Nat → Nat → QInterval)
+    (hsearch : ∀ (n k : Nat) (hk : k < 2 ^ n),
+      ∃ m u, rationalTangentSquareWitnessSearch (U n k)
+        (dyadicNestedRadicalStageSinAt n k)
+        (dyadicNestedRadicalStageTable n k).2 m = some u)
+    (hS : ∀ (n k : Nat) (hk : k < 2 ^ n),
+      subintervalOf (dyadicNestedRadicalStageSinAt n k) 0 1)
+    (hC : ∀ (n k : Nat) (hk : k < 2 ^ n),
+      subintervalOf (dyadicNestedRadicalStageTable n k).2 0 1) :
+    ∀ (n k : Nat) (hk : k < 2 ^ n),
+      QInterval.Overlaps
+        (rationalSquareInterval (dyadicNestedRadicalStageSinAt n k))
+        (rationalOneMinusSquareInterval
+          (dyadicNestedRadicalStageTable n k).2) := by
+  intro n k hk
+  obtain ⟨m, u, hmu⟩ := hsearch n k hk
+  exact square_overlap_of_rationalTangentSquareWitnessSearch hmu
+    (hS n k hk) (hC n k hk)
+
 /-! A concrete square-aware search checkpoint.  At the first nonzero dyadic
 sample, the same rational witness used by the sine search also certifies the
 cosine enclosure, so the square/complement transport can be checked directly.
