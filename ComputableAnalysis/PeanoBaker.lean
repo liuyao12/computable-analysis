@@ -2236,6 +2236,18 @@ theorem rotationChronologicalProduct_columnAbsSum_le (step : Rat) :
     exact affineGenerator_columnAbsSum_le step i
   · exact Rat.add_nonneg (by native_decide) (qabs_nonneg step)
 
+theorem rotationChronologicalProduct_stateAbsSum_le (step : Rat)
+    (steps : Nat) (x : RatVector 2) :
+    vectorAbsSum
+        (matrixApply
+          (chronologicalProduct (fun _ => matrixScale step generator) steps) x) <=
+      (1 + qabs step) ^ steps * vectorAbsSum x := by
+  apply chronologicalProduct_stateAbsSum_le
+    (fun _ => matrixScale step generator) (1 + qabs step)
+  · intro n j
+    exact affineGenerator_columnAbsSum_le step j
+  · exact Rat.add_nonneg (by native_decide) (qabs_nonneg step)
+
 /-- Squaring the rotation generator is minus the identity.  This is a closed
 finite rational matrix calculation. -/
 theorem generator_square :
