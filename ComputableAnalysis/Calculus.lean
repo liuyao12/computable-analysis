@@ -1073,6 +1073,35 @@ theorem unitMeshPath_quadraticVariation {n : Nat} (hn : 0 < n) :
   have hnat : (n : Rat) ≠ 0 := Rat.ne_of_gt ((Rat.natCast_pos).2 hn)
   grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
+/-! The square-chain bracket becomes a concrete unit-mesh estimate.  This is
+the finite rational computation behind the elementary certificate
+`integral of 2x on [0,1] = 1`; its error is exactly the quadratic variation
+`1/n`. -/
+
+theorem unitMeshPath_square_left_bounds {n : Nat} (hn : 0 < n) :
+    1 - 1 / (n : Rat) <=
+        2 * leftStieltjesSum (unitMeshPath n) (unitMeshPath n) n /\
+      2 * leftStieltjesSum (unitMeshPath n) (unitMeshPath n) n <= 1 := by
+  have hvariation :
+      0 <= quadraticVariationSum (unitMeshPath n) (unitMeshPath n) n := by
+    exact quadraticVariationSum_nonneg_of_step_nonnegative
+      (unitMeshPath n) (unitMeshPath n)
+      (fun i => by
+        rw [unitMeshPath_step, Rat.div_def, Rat.one_mul]
+        exact Rat.le_of_lt ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hn)))
+      (fun i => by
+        rw [unitMeshPath_step, Rat.div_def, Rat.one_mul]
+        exact Rat.le_of_lt ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hn))) n
+  have hvariation_le :
+      quadraticVariationSum (unitMeshPath n) (unitMeshPath n) n <=
+        1 / (n : Rat) := by
+    rw [unitMeshPath_quadraticVariation hn]
+    exact Rat.le_refl
+  have h := finiteSquareStieltjes_left_bounds
+    (unitMeshPath n) n (1 / (n : Rat)) hvariation hvariation_le
+  rw [unitMeshPath_endpoint hn, unitMeshPath_zero] at h
+  constructor <;> grind [h.1, h.2]
+
 /-- A fully explicit epsilon schedule for the unit-mesh corner correction.
 Choosing `n = eps.den + 1` makes the rational correction at most `eps`. -/
 theorem unitMeshPath_quadraticVariation_le_epsilon (eps : QPos) :
