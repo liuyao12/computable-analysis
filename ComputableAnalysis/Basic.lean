@@ -4872,6 +4872,49 @@ def withAlternative (f : ComplexFunction) (raw : FunctionRaw)
   implementations :=
     { raw := raw, valid := hvalid, agrees := h } :: f.implementations
 
+/- Add a function implementation through an existing representation.  The
+   explicit coverage hypothesis is essential: agreement on varying partial
+   domains cannot be composed unless the intermediate representation is
+   defined at the new/preferred common inputs. -/
+def withAlternativeFrom (f : ComplexFunction) (parent : Representation f)
+    (raw : FunctionRaw) (hvalid : raw.Valid)
+    (hcover : forall z, raw.domain z -> f.preferred.domain z -> parent.raw.domain z)
+    (h : forall z (hr : raw.domain z) (hf : f.preferred.domain z)
+      (hp : parent.raw.domain z),
+      (raw.evalRaw z hr).Equiv (parent.raw.evalRaw z hp)) : ComplexFunction where
+  preferred := f.preferred
+  valid := f.valid
+  implementations :=
+    { raw := raw
+      valid := hvalid
+      agrees := by
+        intro z hf hr
+        let hp := hcover z hr hf
+        exact ComplexRaw.equiv_trans (f.valid z hf) (parent.valid z hp)
+          (hvalid z hr)
+          (ComplexRaw.equiv_symm (parent.agrees z hp hf))
+          (ComplexRaw.equiv_symm (h z hr hf hp)) } :: f.implementations
+
+def withAlternativeFromImplementation (f : ComplexFunction)
+    (parent : ComplexFunctionImplementation f.preferred)
+    (raw : FunctionRaw) (hvalid : raw.Valid)
+    (hcover : forall z, raw.domain z -> f.preferred.domain z -> parent.raw.domain z)
+    (h : forall z (hr : raw.domain z) (hf : f.preferred.domain z)
+      (hp : parent.raw.domain z),
+      (raw.evalRaw z hr).Equiv (parent.raw.evalRaw z hp)) : ComplexFunction where
+  preferred := f.preferred
+  valid := f.valid
+  implementations :=
+    { raw := raw
+      valid := hvalid
+      agrees := by
+        intro z hf hr
+        let hp := hcover z hr hf
+        exact ComplexRaw.equiv_trans (f.valid z hf) (parent.valid z hp)
+          (hvalid z hr)
+          (parent.agrees z hf hp) (ComplexRaw.equiv_symm (h z hr hf hp)) } ::
+      f.implementations
+
 end ComplexFunction
 
 structure ComplexCert where

@@ -244,6 +244,14 @@ stores the composed edge to the preferred node, so the source proof remains a
 single local equivalence edge while the registry remains a finite spanning
 tree.
 
+For `ComplexFunction`, use `ComplexFunction.withAlternativeFrom` or
+`ComplexFunction.withAlternativeFromImplementation` when the new algorithm is
+proved equivalent to an existing representation.  Supply the explicit domain
+coverage hypothesis for the intermediate representation; the constructor then
+composes the local equivalence edge with the existing path to the preferred
+function.  This keeps partial domains honest while allowing a genuine
+spanning-tree registry.
+
 For partial real functions, the preferred representation can serve as the
 spanning node for two alternative views.  When the source domain is known to
 lie in the preferred domain, use
