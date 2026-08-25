@@ -79,8 +79,21 @@ Quarter-turns and de Moivre belong here as finite rotation certificates;
 unrestricted angle semantics remain a separate bridge.
 The common-prefix complex rotation evaluator exposes stable real and imaginary
 coordinates; their shrinking boxes provide the shared continuity modulus.
-The derivative layer later identifies the two coordinate derivatives with the
-opposite coordinate, closing the finite rotation calculus.
+The derivative layer identifies the two coordinate derivatives with the
+opposite coordinate, closing the finite rotation calculus at the public stable
+evaluator level:
+
+\begin{verbatim}
+complex-prefix quotient -> coordinate quotient -> target coordinate box
+sin derivative = cos       cos derivative = -sin
+\end{verbatim}
+
+The proof is a transport of finite interval certificates, not an appeal to a
+completed real-valued sine function.
+
+\lean{ComputableAnalysis.RotationSeries.stableUniformRotationSinFunction_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.RotationSeries.stableUniformRotationCosFunction_hasDerivativeOnInterval}
+\leanok
 
 The half-angle algorithm is the central example:
 
