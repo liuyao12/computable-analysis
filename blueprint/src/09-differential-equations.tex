@@ -108,6 +108,21 @@ matrix actions.
 These are finite sampled statements.  They become ODE theorems only after an
 effective-FTC provider supplies the coefficient, simplex, and tail bounds.
 
+The uniqueness interface keeps that hand-off explicit.  A candidate exposes a
+finite derivative certificate, a rational initial point, and an initial raw
+value; uniqueness then asks only for equivalence of two such representations.
+It does not quantify over an ambient space of continuous trajectories:
+
+\begin{verbatim}
+candidate -> finite derivative certificate + initial raw value
+         -> mesh/tail comparison -> pointwise raw equivalence
+\end{verbatim}
+
+\lean{ComputableAnalysis.SolvesSelfDerivativeOnInterval}
+\lean{ComputableAnalysis.SolvesSelfDerivativeOnInterval.derivative_self}
+\lean{ComputableAnalysis.SelfDerivativeInitialValueUnique}
+\leanok
+
 The absolute-value estimate is the first finite norm substitute in this
 chapter.  It bounds each matrix-action coordinate by a rational sum of entry
 and state magnitudes.  A later provider may add a row-sum or maximum-entry
