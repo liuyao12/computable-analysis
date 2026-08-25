@@ -1,4 +1,4 @@
-import ComputableAnalysis.Calculus
+import ComputableAnalysis.FTC
 
 /-!
 # Proof-carrying gap-aware inverse search
@@ -46,8 +46,14 @@ structure GapAwareInverseBisectionPlan
       (gapAwareSourceInterval I)
       (gapAwareSourceInterval_subinterval I)
       (precision n) k
+  /-- Every scheduled output is ordered. -/
+  output_ordered : ∀ n, (output n).lo ≤ (output n).hi
   /-- The scheduled outputs form one nested interval computation. -/
-  valid_output : RealRaw.ValidCompute output
+  output_nested : ∀ n m, n ≤ m →
+    (output n).lo ≤ (output m).lo ∧ (output m).hi ≤ (output n).hi
+  /-- A concrete modulus for the output width. -/
+  output_width_le : ∀ n,
+    (output n).width ≤ 1 / ((n + 1 : Nat) : Rat)
   /-- Each output interval still contains a value compatible with the target. -/
   value_overlaps : ∀ n,
     QInterval.Overlaps
@@ -62,6 +68,32 @@ structure GapAwareInverseBisectionPlan
             (precision n) (steps n))
         n)
       (y.value.compute n)
+
+theorem GapAwareInverseBisectionPlan.valid_output
+    {I : GapAwareInvertibleFunctionOnInterval}
+    {y : GapAwareInRangeRaw I}
+    (plan : GapAwareInverseBisectionPlan I y) :
+    RealRaw.ValidCompute plan.output := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro n
+    change 0 ≤ (plan.output n).hi - (plan.output n).lo
+    grind [plan.output_ordered n]
+  · intro n m hnm
+    exact ⟨(plan.output_nested n m hnm).1,
+      plan.output_ordered m, (plan.output_nested n m hnm).2⟩
+  · intro eps
+    refine ⟨eps.val.den, ?_⟩
+    intro n hn
+    have hanti :
+        1 / (((n + 1 : Nat) : Rat)) ≤
+          1 / (((eps.val.den + 1 : Nat) : Rat)) := by
+      apply FTC.one_div_nat_antitone
+      · exact Nat.succ_pos eps.val.den
+      · exact Nat.succ_pos n
+      · omega
+    exact Rat.le_trans (plan.output_width_le n)
+      (Rat.le_trans hanti
+        (FTC.one_div_den_succ_le_of_pos eps.property))
 
 /-! The dependent record above refers to its output function in its fields. -/
 set_option autoImplicit false in

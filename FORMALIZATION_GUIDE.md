@@ -1640,8 +1640,10 @@ existence as separate proof obligations.
 
 Do not create a new inverse record for every special function.  A branch with
 gap-dependent separation should provide a `GapAwareInverseBisectionPlan`: its
-finite midpoint decisions, the nested valid output schedule, and the
-forward-image overlap certificate.  `gapAwareInverseBisectionPlanToSearch`
+finite midpoint decisions, ordered/nested outputs with a width modulus, and
+the forward-image overlap certificate.  The theorem
+`GapAwareInverseBisectionPlan.valid_output` derives the full `RealRaw` validity
+from those elementary fields.  `gapAwareInverseBisectionPlanToSearch`
 converts that plan to the common `GapAwareInverseBisectionSearch` interface,
 and `gapAwareInverseBisectionPlan_has_search` assembles a whole branch.
 This leaves function-specific mathematics in the certificate and keeps the

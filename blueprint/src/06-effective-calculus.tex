@@ -352,10 +352,14 @@ proof-carrying plan in
 supplies its finite midpoint decisions, a nested valid output schedule, and
 the forward-image overlap certificate.  The adapter then produces the common
 \texttt{GapAwareInverseBisectionSearch} data and hence a raw inverse.
+The plan does not ask the branch to restate `RealRaw.ValidCompute`: ordering,
+nesting, and the explicit (1/(n+1)) width modulus are assembled into that
+validity theorem once and for all.
 
 \lean{ComputableAnalysis.gapAwareSourceInterval}
 \lean{ComputableAnalysis.gapAwareSourceInterval\_subinterval}
 \lean{ComputableAnalysis.GapAwareInverseBisectionPlan}
+\lean{ComputableAnalysis.GapAwareInverseBisectionPlan.valid_output}
 \lean{ComputableAnalysis.gapAwareInverseBisectionPlanToSearch}
 \lean{ComputableAnalysis.gapAwareInverseBisectionPlan\_has\_search}
 \leanok
