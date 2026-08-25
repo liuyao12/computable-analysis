@@ -364,6 +364,22 @@ theorem differenceQuotient_add_error_le
   rw [differenceQuotient_add f g hh, hdecomp]
   exact qabs_add_le _ _
 
+/-! Rational scaling propagates a finite derivative error by the absolute
+scale.  This is the companion law used to assemble linear combinations. -/
+theorem differenceQuotient_scale_error_le
+    (c : Rat) (f df : Rat -> Rat) (x h : Rat) (hh : h ≠ 0) :
+    qabs (differenceQuotient (fun z => c * f z) x h - c * df x) <=
+      qabs c * qabs (differenceQuotient f x h - df x) := by
+  have hdecomp :
+      c * differenceQuotient f x h - c * df x =
+        c * (differenceQuotient f x h - df x) := by
+    grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+      Rat.mul_assoc, Rat.mul_comm]
+  change qabs
+    (differenceQuotient (fun z => c * f z) x h - c * df x) <= _
+  rw [differenceQuotient_scale c f hh, hdecomp, qabs_mul]
+  exact Rat.le_refl
+
 /- A finite L'Hopital-style cancellation certificate: away from the common
 zero `a`, the quotient of the factored numerator and denominator is the
 derivative ratio at `a`, namely `2 * a / 1`, plus its exact linear remainder.
