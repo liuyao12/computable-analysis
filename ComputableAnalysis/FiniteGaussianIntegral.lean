@@ -91,6 +91,43 @@ theorem gaussianEvenIntegralPrefix_remainder_abs_le
         (qabs_add_le _ _)
         (rat_add_le_add ih Rat.le_refl)
 
+/- Package the finite Gaussian prefix together with its explicit rational tail
+   allowance.  This is the interval-valued object consumed by later bounded
+   or improper Gaussian constructions; no infinite integral is asserted here. -/
+def gaussianEvenIntegralPrefix_interval
+    (radius : Rat) (start terms : Nat) : QInterval :=
+  { lo := gaussianEvenIntegralPrefix start radius -
+      gaussianEvenIntegralTailMajorant radius start terms,
+    hi := gaussianEvenIntegralPrefix start radius +
+      gaussianEvenIntegralTailMajorant radius start terms }
+
+theorem gaussianEvenIntegralPrefix_interval_contains
+    (radius : Rat) (start terms : Nat) :
+    (gaussianEvenIntegralPrefix_interval radius start terms).lo <=
+        gaussianEvenIntegralPrefix (start + terms) radius /\
+      gaussianEvenIntegralPrefix (start + terms) radius <=
+        (gaussianEvenIntegralPrefix_interval radius start terms).hi := by
+  have h := gaussianEvenIntegralPrefix_remainder_abs_le radius start terms
+  unfold gaussianEvenIntegralPrefix_interval
+  constructor
+  · have hneg := neg_qabs_le_self
+      (gaussianEvenIntegralPrefix (start + terms) radius -
+        gaussianEvenIntegralPrefix start radius)
+    have hlow := Rat.le_trans (Rat.neg_le_neg h) hneg
+    grind [Rat.sub_eq_add_neg]
+  · have hupper := self_le_qabs
+      (gaussianEvenIntegralPrefix (start + terms) radius -
+        gaussianEvenIntegralPrefix start radius)
+    have hupp := Rat.le_trans hupper h
+    grind [Rat.sub_eq_add_neg]
+
+theorem gaussianEvenIntegralPrefix_interval_width
+    (radius : Rat) (start terms : Nat) :
+    (gaussianEvenIntegralPrefix_interval radius start terms).width =
+      2 * gaussianEvenIntegralTailMajorant radius start terms := by
+  unfold gaussianEvenIntegralPrefix_interval QInterval.width
+  grind [Rat.sub_eq_add_neg]
+
 theorem gaussianEvenIntegralPrefix_stage_four :
     gaussianEvenIntegralPrefix 4 1 = 52 / 35 := by
   native_decide

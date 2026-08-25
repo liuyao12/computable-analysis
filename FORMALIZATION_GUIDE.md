@@ -136,8 +136,11 @@ contract through `gaussianEvenIntegralPrefix_succ` and
 `gaussianEvenIntegralPrefix_term_difference`.  The named term and finite tail
 majorant add a direct remainder contract through
 `gaussianEvenIntegralPrefix_remainder_abs_le`.  These identities concern only
-finite Taylor sums; an improper Gaussian integral still requires a separate
-tail certificate.
+finite Taylor sums; the remainder is now packaged as the interval
+`gaussianEvenIntegralPrefix_interval`, with exact containment and width
+theorems `gaussianEvenIntegralPrefix_interval_contains` and
+`gaussianEvenIntegralPrefix_interval_width`.  An improper Gaussian integral
+still requires a separate tail certificate.
 
 For the mathematical status and intended dependency order, use
 [GOALS.md](GOALS.md).  For a readable, declaration-linked account, use the
