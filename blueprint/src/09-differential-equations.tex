@@ -357,6 +357,36 @@ Thus the current foundation proves the algebraic and error-closing core, while
 the remaining theorem for a given ODE is a finite, inspectable obligation:
 regularity of the entries, simplex enclosure, and a compatible tail bound.
 
+\section{Vector ODE admission checklist}
+
+A concrete vector system is ready for the foundation when its provider can
+fill these fields:
+
+\begin{verbatim}
+coefficient/forcing boxes on each cell
+    -> ordered word products and row/column bounds
+    -> finite simplex or Duhamel enclosure
+    -> factorial tail with a requested-stage shift
+    -> initial-value transport and raw overlap
+\end{verbatim}
+
+The matrix layer does not require a preferred norm or a completed vector
+space. Row and column absolute sums are finite rational surrogates; the
+provider may choose whichever orientation gives the tighter certificate. The
+same contract handles homogeneous and forced systems, because the forcing is
+added through the finite Duhamel sum. A new system therefore contributes
+coefficient and tail certificates, not a second ODE foundation.
+
+\lean{ComputableAnalysis.LinearODE.orderedIndexWords}
+\lean{ComputableAnalysis.LinearODE.discretePeanoBakerExpansion}
+\lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum}
+\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail}
+\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_shifted_le_eps}
+\lean{ComputableAnalysis.LinearODE.ZeroInitialVolterraIterationBound}
+\lean{ComputableAnalysis.LinearODE.zeroInitialVolterraIterationBound_eq_zero}
+\lean{ComputableAnalysis.LinearODE.SelfDerivativeVolterraComparison.equivalent}
+\leanok
+
 \section{Special cases}
 
 For constant generators, matrix words reduce to powers. For rotations, even
