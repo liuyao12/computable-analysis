@@ -9237,6 +9237,56 @@ theorem gapAwareTargetBisectionFixedIterate_width_le
       have hstep := gapAwareTargetBisectionStep_width_le F Y P.1 P.2 precision
       exact Rat.le_trans hstep ih
 
+def gapAwareTargetBisectionFixedDecision
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision n : Nat) : Prop :=
+  let P := gapAwareTargetBisectionFixedIterateWithProof
+    F Y I hI precision n
+  (F.regular.evalInterval
+      { lo := P.1.midpoint, hi := P.1.midpoint }
+      ⟨Rat.le_trans P.2.1 (QInterval.midpoint_mem P.2.2.1).1,
+        Rat.le_refl,
+        Rat.le_trans (QInterval.midpoint_mem P.2.2.1).2 P.2.2.2⟩ precision).hi < Y.lo \/
+    Y.hi <
+      (F.regular.evalInterval
+        { lo := P.1.midpoint, hi := P.1.midpoint }
+        ⟨Rat.le_trans P.2.1 (QInterval.midpoint_mem P.2.2.1).1,
+          Rat.le_refl,
+          Rat.le_trans (QInterval.midpoint_mem P.2.2.1).2 P.2.2.2⟩ precision).lo
+
+theorem gapAwareTargetBisectionFixedIterate_width_eq_div_pow_of_decided
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision n : Nat)
+    (hdecided : forall k,
+      gapAwareTargetBisectionFixedDecision F Y I hI precision k) :
+    (gapAwareTargetBisectionFixedIterate F Y I hI precision n).width =
+      I.width / (2 ^ n : Rat) := by
+  induction n with
+  | zero =>
+      simp [gapAwareTargetBisectionFixedIterate,
+        gapAwareTargetBisectionFixedIterateWithProof, QInterval.width,
+        Rat.div_def]
+      have hone : (1 : Rat)⁻¹ = 1 := by
+        have h := Rat.mul_inv_cancel (1 : Rat) (by native_decide)
+        simpa using h
+      rw [hone, Rat.mul_one]
+  | succ n ih =>
+      let P := gapAwareTargetBisectionFixedIterateWithProof
+        F Y I hI precision n
+      have hstep := gapAwareTargetBisectionStep_width_eq_half_of_decided
+        F Y P.1 P.2 precision (hdecided n)
+      have hprev : P.1.width = I.width / (2 ^ n : Rat) := by
+        change (gapAwareTargetBisectionFixedIterate F Y I hI precision n).width =
+          I.width / (2 ^ n : Rat)
+        exact ih
+      change (gapAwareTargetBisectionStep F Y P.1 P.2 precision).width =
+        I.width / (2 ^ (n + 1) : Rat)
+      rw [hstep, hprev, Rat.pow_succ]
+      rw [Rat.div_def, Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
 structure GapAwareInRangeRaw
     (I : GapAwareInvertibleFunctionOnInterval) where
   value : RealRaw

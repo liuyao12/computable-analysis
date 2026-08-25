@@ -973,6 +973,10 @@ The fixed-precision iterator
 `gapAwareTargetBisectionFixedIterateWithProof` packages this same recursion;
 the theorem `uniformExpOnUnitWarm_three_halves_fixed_precision_trace` checks
 that three iterations at precision `4` produce `[3/8,1/2]` directly.
+`gapAwareTargetBisectionFixedDecision` and
+`gapAwareTargetBisectionFixedIterate_width_eq_div_pow_of_decided` formalize
+the progress boundary: strict midpoint separation at every stage yields the
+exact width law `initial_width / 2^n`.
 
 For a direct scalar uniqueness proof, make one finite short-block sweep an
 instance of `ScalarODE.ShortBlockMeshSweep`: telescope the cell estimates to
