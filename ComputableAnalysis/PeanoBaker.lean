@@ -314,6 +314,37 @@ theorem matrixColumnAbsSum_identity {dimension : Nat} (j : Fin dimension) :
     (fun _ => (1 : Rat)) j
   exact finiteSum_ite_eq j (fun _ => (1 : Rat))
 
+theorem matrixColumnAbsSum_matrixScale {dimension : Nat}
+    (r : Rat) (A : RatMatrix dimension) (j : Fin dimension) :
+    matrixColumnAbsSum (matrixScale r A) j =
+      qabs r * matrixColumnAbsSum A j := by
+  unfold matrixColumnAbsSum matrixScale
+  rw [show (fun i => qabs (r * A i j)) =
+      (fun i => qabs r * qabs (A i j)) by
+        funext i
+        exact qabs_mul r (A i j)]
+  exact (finiteSum_mul_left (qabs r) (fun i => qabs (A i j))).symm
+
+theorem matrixColumnAbsSum_matrixAdd_le {dimension : Nat}
+    (A B : RatMatrix dimension) (j : Fin dimension) :
+    matrixColumnAbsSum (matrixAdd A B) j <=
+      matrixColumnAbsSum A j + matrixColumnAbsSum B j := by
+  unfold matrixColumnAbsSum matrixAdd
+  calc
+    finiteSum (fun i => qabs (A i j + B i j)) <=
+        finiteSum (fun i => qabs (A i j) + qabs (B i j)) := by
+      exact finiteSum_le (fun i => qabs_add_le _ _)
+    _ = finiteSum (fun i => qabs (A i j)) +
+        finiteSum (fun i => qabs (B i j)) := finiteSum_add _ _
+
+theorem matrixColumnAbsSum_affineStep_le {dimension : Nat}
+    (B : RatMatrix dimension) (j : Fin dimension) :
+    matrixColumnAbsSum (matrixAdd (matrixIdentity dimension) B) j <=
+      1 + matrixColumnAbsSum B j := by
+  have h := matrixColumnAbsSum_matrixAdd_le (matrixIdentity dimension) B j
+  rw [matrixColumnAbsSum_identity] at h
+  exact h
+
 theorem matrixApply_vectorAbsSum_le {dimension : Nat}
     (A : RatMatrix dimension) (x : RatVector dimension) :
     vectorAbsSum (matrixApply A x) <=
@@ -2151,6 +2182,24 @@ theorem affineGenerator_rowAbsSum_le (step : Rat) (i : Fin 2) :
   rw [matrixRowAbsSum_matrixScale, generator_rowAbsSum] at h
   simpa using h
 
+theorem generator_columnAbsSum (j : Fin 2) :
+    matrixColumnAbsSum generator j = 1 := by
+  refine Fin.cases ?_ ?_ j
+  · native_decide
+  · intro i
+    refine Fin.cases ?_ ?_ i
+    · native_decide
+    · intro k
+      exact Fin.elim0 k
+
+theorem affineGenerator_columnAbsSum_le (step : Rat) (j : Fin 2) :
+    matrixColumnAbsSum
+        (matrixAdd (matrixIdentity 2) (matrixScale step generator)) j <=
+      1 + qabs step := by
+  have h := matrixColumnAbsSum_affineStep_le (matrixScale step generator) j
+  rw [matrixColumnAbsSum_matrixScale, generator_columnAbsSum] at h
+  simpa using h
+
 theorem rotationChronologicalProduct_rowAbsSum_le (step : Rat) :
     forall steps i,
       matrixRowAbsSum
@@ -2161,6 +2210,18 @@ theorem rotationChronologicalProduct_rowAbsSum_le (step : Rat) :
     (fun _ => matrixScale step generator) (1 + qabs step)
   · intro n j
     exact affineGenerator_rowAbsSum_le step j
+  · exact Rat.add_nonneg (by native_decide) (qabs_nonneg step)
+
+theorem rotationChronologicalProduct_columnAbsSum_le (step : Rat) :
+    forall steps j,
+      matrixColumnAbsSum
+          (chronologicalProduct (fun _ => matrixScale step generator) steps) j <=
+        (1 + qabs step) ^ steps := by
+  intro steps j
+  apply chronologicalProduct_columnAbsSum_le_pow
+    (fun _ => matrixScale step generator) (1 + qabs step)
+  · intro n i
+    exact affineGenerator_columnAbsSum_le step i
   · exact Rat.add_nonneg (by native_decide) (qabs_nonneg step)
 
 /-- Squaring the rotation generator is minus the identity.  This is a closed
