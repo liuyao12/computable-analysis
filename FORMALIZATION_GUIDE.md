@@ -337,6 +337,13 @@ This separation is useful for nested-radical or other staged special-function
 evaluators whose pointwise and endpoint computations have different natural
 schedules.
 
+For finite Fourier work, make cancellation a certificate with explicit
+rational-complex fields rather than an implicit root-of-unity assumption.
+`FiniteFourierBlockCancellationCertificate` is the reusable interface; the
+ready-made `quarterTurnConstantBlockCancellationCertificate` is the reference
+instance, and its repeated-block theorem can be used directly in later finite
+stage constructions.
+
 Use `rg` to discover nearby examples before inventing a new interface:
 
 ```bash
