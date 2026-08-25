@@ -1205,6 +1205,24 @@ theorem normalizedTangentSquare_chart_transport_of_common_witness
   · exact RealRaw.equiv_refl _ SinPiIntegral.reciprocalPiRaw_valid
   · exact htangent
 
+def NormalizedTangentSquareTransportSubgoal.of_witnesses
+    (common : NormalizedTangentSquareCommonWitness)
+    (effective_integral_valid :
+      SinPiIntegral.tangentSquareEffectiveIntegralRaw.Valid)
+    (endpoint_valid :
+      SinPiIntegral.tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw.Valid)
+    (tangent_common : TangentSquareFTCIntegralCommonWitness)
+    (endpoint_equiv_quarter :
+      SinPiIntegral.tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw.Equiv
+        (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))) :
+    NormalizedTangentSquareTransportSubgoal := by
+  exact {
+    commonWitness := common
+    normalized_validity := normalizedTangentSquareProduct_valid
+    normalized_anchor_valid := normalizedTangentSquareAnchor_valid
+    chart_transport := normalizedTangentSquare_chart_transport_of_common_witness
+      effective_integral_valid endpoint_valid tangent_common endpoint_equiv_quarter }
+
 theorem TangentSquareQuarterTurnValueSubgoal.effective_equiv_endpoint
     (H : TangentSquareQuarterTurnValueSubgoal) :
     SinPiIntegral.tangentSquareEffectiveIntegralRaw.Equiv
