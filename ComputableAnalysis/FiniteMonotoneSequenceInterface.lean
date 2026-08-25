@@ -106,6 +106,18 @@ theorem MonotoneIntervalCertificate.toRealRaw_valid
     change certificate.hiStage n - certificate.loStage n ≤ eps.val
     exact hN n hn
 
+/- The abstract handle is only a certified wrapper around the finite endpoint
+   computation.  No new existence principle is introduced at this boundary. -/
+def MonotoneIntervalCertificate.toReal
+    (certificate : MonotoneIntervalCertificate) : Real :=
+  Real.ofRaw certificate.toRealRaw certificate.toRealRaw_valid
+
+theorem MonotoneIntervalCertificate.toReal_preferred_compute
+    (certificate : MonotoneIntervalCertificate) (n : Nat) :
+    certificate.toReal.compute n =
+      { lo := certificate.loStage n, hi := certificate.hiStage n } := by
+  rfl
+
 def finiteAscendingSequenceCertificate
     (sequence : Nat → Rat) (stage : Nat)
     (successor_le : ∀ n, sequence n ≤ sequence (n + 1)) :
