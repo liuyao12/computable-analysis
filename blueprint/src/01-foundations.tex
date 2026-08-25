@@ -1447,6 +1447,18 @@ These constructors add a new representation through an existing one.  They
 require explicit domain coverage for the intermediate representation and then
 compose the local overlap equivalence, so the registry may be a finite
 spanning tree rather than a collection of pairwise proofs.
+
+The library is intentionally representative rather than encyclopedic.  We
+formalize one complete example for each genuinely different computational
+pattern, and obtain routine variants by algebraic transport, restriction, or
+composition.  Thus a new trigonometric, exponential, or special-function
+implementation should contribute its domain, stage algorithm, validity
+certificate, and one edge to the existing equivalence tree; it need not
+duplicate an already formalized evaluator merely because its notation differs.
+For a piecewise function such as \(\lvert x\rvert\), the integral is treated
+as the corresponding finite collection of interval integrals, split at the
+break point.  This records the real computational reason for the result
+without introducing a general discontinuous-function theory.
 \end{definition}
 
 \begin{definition}[Real-input and real-valued functions]\label{def:real-fun-raw}
