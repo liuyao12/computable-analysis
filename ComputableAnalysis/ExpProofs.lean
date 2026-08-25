@@ -7108,6 +7108,147 @@ theorem dyadicCell_right_endpoint_ne_oneThird (n k : Nat) :
     (dyadicCell n k).hi ≠ (1 : Rat) / 3 := by
   exact dyadicRat_ne_oneThird n (k + 1)
 
+theorem dyadicCell_nested_of_strict_contains
+    {r : Rat} {n m k l : Nat} (hnm : n ≤ m)
+    (hk : k < 2 ^ n) (hl : l < 2 ^ m)
+    (hkn : (dyadicCell n k).lo < r)
+    (hkp : r < (dyadicCell n k).hi)
+    (hln : (dyadicCell m l).lo < r)
+    (hlp : r < (dyadicCell m l).hi) :
+    (dyadicCell n k).lo ≤ (dyadicCell m l).lo ∧
+      (dyadicCell m l).hi ≤ (dyadicCell n k).hi := by
+  let d := m - n
+  have hnm' : n + d = m := by
+    dsimp [d]
+    omega
+  have hpow : 2 ^ m = 2 ^ n * 2 ^ d := by
+    rw [← hnm', Nat.pow_add]
+  have hpowR : ((2 ^ m : Nat) : Rat) =
+      ((2 ^ n : Nat) : Rat) * ((2 ^ d : Nat) : Rat) := by
+    exact_mod_cast hpow
+  have hA : (0 : Rat) < ((2 ^ n : Nat) : Rat) :=
+    Rat.natCast_pos.mpr (Nat.pow_pos (by decide))
+  have hB : (0 : Rat) < ((2 ^ m : Nat) : Rat) :=
+    Rat.natCast_pos.mpr (Nat.pow_pos (by decide))
+  have hD : (0 : Rat) < ((2 ^ d : Nat) : Rat) :=
+    Rat.natCast_pos.mpr (Nat.pow_pos (by decide))
+  have hkn' : (k : Rat) / ((2 ^ n : Nat) : Rat) < r := by
+    simpa [dyadicCell] using hkn
+  have hkp' : r < ((k + 1 : Nat) : Rat) / ((2 ^ n : Nat) : Rat) := by
+    simpa [dyadicCell] using hkp
+  have hln' : (l : Rat) / ((2 ^ m : Nat) : Rat) < r := by
+    simpa [dyadicCell] using hln
+  have hlp' : r < ((l + 1 : Nat) : Rat) / ((2 ^ m : Nat) : Rat) := by
+    simpa [dyadicCell] using hlp
+  have hfirst : (k : Rat) / ((2 ^ n : Nat) : Rat) <
+      ((l + 1 : Nat) : Rat) / ((2 ^ m : Nat) : Rat) :=
+    by
+      rw [Rat.lt_iff_sub_pos] at hkn' hlp' ⊢
+      grind [Rat.sub_eq_add_neg]
+  have hsecond : (l : Rat) / ((2 ^ m : Nat) : Rat) <
+      ((k + 1 : Nat) : Rat) / ((2 ^ n : Nat) : Rat) :=
+    by
+      rw [Rat.lt_iff_sub_pos] at hln' hkp' ⊢
+      grind [Rat.sub_eq_add_neg]
+  have hfirst' : (k : Rat) * ((2 ^ d : Nat) : Rat) <
+      ((l + 1 : Nat) : Rat) := by
+    rw [Rat.div_def, Rat.div_def] at hfirst
+    have hmul := Rat.mul_lt_mul_of_pos_right hfirst
+      (Rat.mul_pos hA hD)
+    have hAc : ((2 ^ n : Nat) : Rat) ≠ 0 := Rat.ne_of_gt hA
+    have hAinv := Rat.inv_mul_cancel ((2 ^ n : Nat) : Rat) hAc
+    have hleftEq : (k : Rat) * ((2 ^ d : Nat) : Rat) =
+        ((k : Rat) * ((2 ^ n : Nat) : Rat)⁻¹) *
+          (((2 ^ n : Nat) : Rat) * ((2 ^ d : Nat) : Rat)) := by
+      calc
+        _ = (k : Rat) * (1 : Rat) * ((2 ^ d : Nat) : Rat) := by rw [Rat.mul_one]
+        _ = (k : Rat) * (((2 ^ n : Nat) : Rat)⁻¹ *
+              ((2 ^ n : Nat) : Rat)) * ((2 ^ d : Nat) : Rat) := by
+                rw [Rat.inv_mul_cancel _ hAc]
+        _ = _ := by grind [Rat.mul_assoc, Rat.mul_comm]
+    have hrightEq :
+        (((l + 1 : Nat) : Rat) * ((2 ^ m : Nat) : Rat)⁻¹) *
+            (((2 ^ n : Nat) : Rat) * ((2 ^ d : Nat) : Rat)) =
+          ((l + 1 : Nat) : Rat) := by
+      rw [← hpowR]
+      calc
+        _ = ((l + 1 : Nat) : Rat) *
+              (((2 ^ m : Nat) : Rat)⁻¹ * ((2 ^ m : Nat) : Rat)) := by
+                grind [Rat.mul_assoc, Rat.mul_comm]
+        _ = _ := by rw [Rat.inv_mul_cancel _ (Rat.ne_of_gt hB), Rat.mul_one]
+    rw [← hleftEq, hrightEq] at hmul
+    exact hmul
+  have hsecond' : (l : Rat) <
+      ((k + 1 : Nat) : Rat) * ((2 ^ d : Nat) : Rat) := by
+    rw [Rat.div_def, Rat.div_def] at hsecond
+    have hmul := Rat.mul_lt_mul_of_pos_right hsecond
+      (Rat.mul_pos hA hD)
+    have hAc : ((2 ^ n : Nat) : Rat) ≠ 0 := Rat.ne_of_gt hA
+    have hAinv := Rat.inv_mul_cancel ((2 ^ n : Nat) : Rat) hAc
+    have hleftEq : (l : Rat) =
+        ((l : Rat) * ((2 ^ m : Nat) : Rat)⁻¹) *
+          (((2 ^ n : Nat) : Rat) * ((2 ^ d : Nat) : Rat)) := by
+      rw [← hpowR]
+      calc
+        _ = (l : Rat) * (1 : Rat) := by rw [Rat.mul_one]
+        _ = (l : Rat) * (((2 ^ m : Nat) : Rat)⁻¹ *
+              ((2 ^ m : Nat) : Rat)) := by
+                rw [Rat.inv_mul_cancel _ (Rat.ne_of_gt hB)]
+        _ = _ := by grind [Rat.mul_assoc, Rat.mul_comm]
+    have hrightEq :
+        (((k + 1 : Nat) : Rat) * ((2 ^ n : Nat) : Rat)⁻¹) *
+            (((2 ^ n : Nat) : Rat) * ((2 ^ d : Nat) : Rat)) =
+          ((k + 1 : Nat) : Rat) * ((2 ^ d : Nat) : Rat) := by
+      calc
+        _ = ((k + 1 : Nat) : Rat) *
+              (((2 ^ n : Nat) : Rat)⁻¹ * ((2 ^ n : Nat) : Rat)) *
+                ((2 ^ d : Nat) : Rat) := by
+                  grind [Rat.mul_assoc, Rat.mul_comm]
+        _ = _ := by rw [Rat.inv_mul_cancel _ hAc, Rat.mul_one]
+    rw [← hleftEq, hrightEq] at hmul
+    exact hmul
+  have hfirstNat : k * 2 ^ d < l + 1 := by
+    exact_mod_cast hfirst'
+  have hsecondNat : l < (k + 1) * 2 ^ d := by
+    exact_mod_cast hsecond'
+  have hleft : k * 2 ^ d ≤ l := by omega
+  have hright : l + 1 ≤ (k + 1) * 2 ^ d := by omega
+  constructor
+  · unfold dyadicCell
+    rw [hpow]
+    let A : Rat := (2 ^ n : Nat)
+    let D : Rat := (2 ^ d : Nat)
+    have hAne : A ≠ 0 := Rat.ne_of_gt hA
+    have hDpos : 0 < D := Rat.natCast_pos.mpr (Nat.pow_pos (by decide))
+    have hDne : D ≠ 0 := Rat.ne_of_gt hDpos
+    have hleftRat : (k : Rat) * D ≤ (l : Rat) := by
+      dsimp [D]
+      exact_mod_cast hleft
+    apply Rat.le_of_mul_le_mul_right (c := A * D)
+    · rw [Rat.div_def, Rat.div_def]
+      dsimp [A, D] at hleftRat ⊢
+      have hAc := Rat.inv_mul_cancel A hAne
+      have hDc := Rat.inv_mul_cancel D hDne
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    · exact Rat.mul_pos hA hDpos
+  · unfold dyadicCell
+    rw [hpow]
+    let A : Rat := (2 ^ n : Nat)
+    let D : Rat := (2 ^ d : Nat)
+    have hAne : A ≠ 0 := Rat.ne_of_gt hA
+    have hDpos : 0 < D := Rat.natCast_pos.mpr (Nat.pow_pos (by decide))
+    have hDne : D ≠ 0 := Rat.ne_of_gt hDpos
+    have hrightRat : ((l + 1 : Nat) : Rat) ≤ (k + 1 : Rat) * D := by
+      dsimp [D]
+      exact_mod_cast hright
+    apply Rat.le_of_mul_le_mul_right (c := A * D)
+    · rw [Rat.div_def, Rat.div_def]
+      dsimp [A, D] at hrightRat ⊢
+      have hAc := Rat.inv_mul_cancel A hAne
+      have hDc := Rat.inv_mul_cancel D hDne
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    · exact Rat.mul_pos hA hDpos
+
 theorem uniformExpOnUnitWarm_oneThird_target_stage_dominates
     {n : Nat} {m : Rat}
     (hm : m ∈ dyadicMidpointGridUpTo n) :
@@ -7425,6 +7566,129 @@ theorem uniformExpOnUnitWarm_unit_subinterval :
       uniformExpOnUnitWarm_continuous.function.upper := by
   change (0 : Rat) ≤ 0 ∧ 0 ≤ 1 ∧ 1 ≤ 1
   native_decide
+
+def uniformExpOnUnitWarm_oneThird_bisection_compute (n : Nat) : QInterval :=
+  gapAwareTargetBisectionScheduledIterate
+    uniformExpOnUnitWarm_continuous
+    (uniformExpOnUnitWarm_oneThird_target.value.compute n)
+    ({ lo := 0, hi := 1 } : QInterval)
+    uniformExpOnUnitWarm_unit_subinterval
+    (fun j => uniformExpOnUnitWarm_oneThird_target.rangePrecision j) n
+
+theorem uniformExpOnUnitWarm_oneThird_bisection_compute_valid_ordered_nested
+    (n m : Nat) (hnm : n ≤ m) :
+    (uniformExpOnUnitWarm_oneThird_bisection_compute n).lo ≤
+        (uniformExpOnUnitWarm_oneThird_bisection_compute m).lo /\
+      (uniformExpOnUnitWarm_oneThird_bisection_compute m).lo ≤
+        (uniformExpOnUnitWarm_oneThird_bisection_compute m).hi /\
+      (uniformExpOnUnitWarm_oneThird_bisection_compute m).hi ≤
+        (uniformExpOnUnitWarm_oneThird_bisection_compute n).hi := by
+  obtain ⟨k, hk, hkn⟩ :=
+    uniformExpOnUnitWarm_oneThird_scheduled_iterate_dyadicCell
+      (uniformExpOnUnitWarm_unit_subinterval := uniformExpOnUnitWarm_unit_subinterval)
+      n n (by omega)
+  obtain ⟨l, hl, hlm⟩ :=
+    uniformExpOnUnitWarm_oneThird_scheduled_iterate_dyadicCell
+      (uniformExpOnUnitWarm_unit_subinterval := uniformExpOnUnitWarm_unit_subinterval)
+      m m (by omega)
+  have hmemn := gapAwareTargetBisectionScheduledIterate_mem_of_oriented
+    uniformExpOnUnitWarm_continuous
+    (uniformExpOnUnitWarm_oneThird_target.value.compute n)
+    ({ lo := 0, hi := 1 } : QInterval)
+    uniformExpOnUnitWarm_unit_subinterval
+    (fun j => uniformExpOnUnitWarm_oneThird_target.rangePrecision j)
+    (by constructor <;> native_decide) n
+    (uniformExpOnUnitWarm_oneThird_scheduled_oriented n)
+  have hmemm := gapAwareTargetBisectionScheduledIterate_mem_of_oriented
+    uniformExpOnUnitWarm_continuous
+    (uniformExpOnUnitWarm_oneThird_target.value.compute m)
+    ({ lo := 0, hi := 1 } : QInterval)
+    uniformExpOnUnitWarm_unit_subinterval
+    (fun j => uniformExpOnUnitWarm_oneThird_target.rangePrecision j)
+    (by constructor <;> native_decide) m
+    (uniformExpOnUnitWarm_oneThird_scheduled_oriented m)
+  have hknlo : (dyadicCell n k).lo < (1 : Rat) / 3 := by
+    exact Rat.lt_of_le_of_ne (by simpa [hkn] using hmemn.1)
+      (dyadicCell_left_endpoint_ne_oneThird n k)
+  have hknhi : (1 : Rat) / 3 < (dyadicCell n k).hi := by
+    exact Rat.lt_of_le_of_ne (by simpa [hkn] using hmemn.2)
+      (Ne.symm (dyadicCell_right_endpoint_ne_oneThird n k))
+  have hlmlo : (dyadicCell m l).lo < (1 : Rat) / 3 := by
+    exact Rat.lt_of_le_of_ne (by simpa [hlm] using hmemm.1)
+      (dyadicCell_left_endpoint_ne_oneThird m l)
+  have hlmhi : (1 : Rat) / 3 < (dyadicCell m l).hi := by
+    exact Rat.lt_of_le_of_ne (by simpa [hlm] using hmemm.2)
+      (Ne.symm (dyadicCell_right_endpoint_ne_oneThird m l))
+  have hnest := dyadicCell_nested_of_strict_contains hnm hk hl hknlo hknhi hlmlo hlmhi
+  have hcell_ordered : (dyadicCell m l).lo ≤ (dyadicCell m l).hi :=
+    (dyadicCell_subinterval m l hl).2.1
+  simpa [uniformExpOnUnitWarm_oneThird_bisection_compute, hkn, hlm] using
+    (show (dyadicCell n k).lo ≤ (dyadicCell m l).lo ∧
+        (dyadicCell m l).lo ≤ (dyadicCell m l).hi ∧
+        (dyadicCell m l).hi ≤ (dyadicCell n k).hi from
+      ⟨hnest.1, hcell_ordered, hnest.2⟩)
+
+theorem uniformExpOnUnitWarm_oneThird_bisection_compute_valid :
+    RealRaw.ValidCompute uniformExpOnUnitWarm_oneThird_bisection_compute := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro n
+    obtain ⟨k, hk, hcell⟩ :=
+      uniformExpOnUnitWarm_oneThird_scheduled_iterate_dyadicCell
+        (uniformExpOnUnitWarm_unit_subinterval := uniformExpOnUnitWarm_unit_subinterval)
+        n n (by omega)
+    change 0 ≤
+      (gapAwareTargetBisectionScheduledIterate
+        uniformExpOnUnitWarm_continuous
+        (uniformExpOnUnitWarm_oneThird_target.value.compute n)
+        ({ lo := 0, hi := 1 } : QInterval)
+        uniformExpOnUnitWarm_unit_subinterval
+        (fun j => uniformExpOnUnitWarm_oneThird_target.rangePrecision j) n).width
+    rw [hcell]
+    unfold QInterval.width
+    have hcell' : 0 ≤ (dyadicCell n k).hi - (dyadicCell n k).lo :=
+      (Rat.le_iff_sub_nonneg (dyadicCell n k).lo (dyadicCell n k).hi).1
+      ((dyadicCell_subinterval n k hk).2.1)
+    exact hcell'
+  · intro n m hnm
+    exact uniformExpOnUnitWarm_oneThird_bisection_compute_valid_ordered_nested n m hnm
+  · intro eps
+    refine ⟨eps.val.den + 1, ?_⟩
+    intro n hn
+    have hwidth :=
+      uniformExpOnUnitWarm_oneThird_scheduled_iterate_width
+        (uniformExpOnUnitWarm_unit_subinterval := uniformExpOnUnitWarm_unit_subinterval)
+        n n (by omega)
+    have hpowN : eps.val.den + 1 ≤ 2 ^ (eps.val.den + 1) :=
+      nat_le_two_pow (eps.val.den + 1)
+    have hpow : 2 ^ (eps.val.den + 1) ≤ 2 ^ n := by
+      exact Nat.pow_le_pow_right (by omega) hn
+    have hN := FTC.one_div_nat_antitone
+      (Nat.succ_pos eps.val.den)
+      (Nat.pow_pos (by omega : 0 < (2 : Nat))) hpowN
+    have hn' := FTC.one_div_nat_antitone
+      (Nat.pow_pos (by omega : 0 < (2 : Nat)))
+      (Nat.pow_pos (by omega : 0 < (2 : Nat))) hpow
+    have heps := FTC.one_div_den_succ_le_of_pos eps.property
+    change
+      (gapAwareTargetBisectionScheduledIterate
+        uniformExpOnUnitWarm_continuous
+        (uniformExpOnUnitWarm_oneThird_target.value.compute n)
+        ({ lo := 0, hi := 1 } : QInterval)
+        uniformExpOnUnitWarm_unit_subinterval
+        (fun j => uniformExpOnUnitWarm_oneThird_target.rangePrecision j) n).width
+        ≤ eps.val
+    rw [hwidth]
+    have hn'' : 1 / (2 ^ n : Rat) ≤
+        1 / (((2 ^ (eps.val.den + 1) : Nat) : Rat)) := by
+      simpa [Rat.natCast_pow] using hn'
+    exact Rat.le_trans hn'' (Rat.le_trans hN heps)
+
+def uniformExpOnUnitWarm_oneThird_bisection_raw : RealRaw where
+  compute := uniformExpOnUnitWarm_oneThird_bisection_compute
+
+theorem uniformExpOnUnitWarm_oneThird_bisection_raw_valid :
+    uniformExpOnUnitWarm_oneThird_bisection_raw.Valid := by
+  exact uniformExpOnUnitWarm_oneThird_bisection_compute_valid
 
 theorem uniformExpOnUnitWarm_oneThird_adaptive_equals_scheduled
     (n k : Nat) :

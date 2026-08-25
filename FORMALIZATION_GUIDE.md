@@ -1037,7 +1037,13 @@ The reusable calculus lemmas
 `gapAwareTargetBisectionScheduledIterate_mem_of_oriented` and
 `...scheduled_iterate_nested` separate source containment from target-specific
 certificates and record the fixed-target nesting law.  The one-third oriented
-certificate is the bridge to the remaining target-varying inverse wrapper.
+certificate is the bridge to the target-varying inverse wrapper.  The new
+`dyadicCell_nested_of_strict_contains` lemma supplies the missing bridge: two
+strict dyadic cells containing 1/3 are nested even when their target boxes
+come from different stages.  Thus
+`uniformExpOnUnitWarm_oneThird_bisection_compute_valid` packages the actual
+stage-dependent bisection computation as a `RealRaw.ValidCompute`, with exact
+geometric width `1 / 2^n` and no completeness axiom.
 
 Formalization scope is by mechanism, not by exhaustive enumeration.  One
 representative function is enough when another function uses the same certified
