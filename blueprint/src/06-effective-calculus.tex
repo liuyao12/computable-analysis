@@ -302,8 +302,8 @@ point value are evaluated at one explicit stage, which may differ from the
 native stage index.  A separate validity/equivalence proof is still required
 before that representation is installed in the abstract-function chain.  The
 explicit adapter above requires the missing requested-stage containment
-certificate; monotonicity of raw boxes alone is insufficient because later
-boxes may be wider.
+certificate; nesting of raw boxes alone is insufficient because a later,
+narrower box need not contain the earlier requested-stage box.
 
 For the ordinary identity schedule, the
 \texttt{toIntervalRegularOn\_of\_identity\_schedule} adapter discharges this bookkeeping
