@@ -6886,6 +6886,46 @@ def uniformExpOnUnitWarm_oneThird_target :
       have htail := uniformExpTailMagnitude_nonneg (s + 4)
       grind [Rat.sub_eq_add_neg]
 
+/-! The concrete one-third target uses the same certificates without hiding
+the rational source behind a generic parameter. -/
+theorem uniformExpOnUnitWarm_dyadicCell_strict_below_oneThird
+    {n k : Nat} (q : Nat) (hk : k < 2 ^ n)
+    (hmr : (dyadicCell n k).midpoint < (1 : Rat) / 3)
+    (hq : uniformExpQuotientPrecision ((1 : Rat) / 3 -
+        (dyadicCell n k).midpoint)
+      (Rat.ne_of_gt ((Rat.lt_iff_sub_pos (dyadicCell n k).midpoint
+        ((1 : Rat) / 3)).mp hmr)) n ≤ q) :
+    gapAwareTargetBisectionStrictDecision uniformExpOnUnitWarm_continuous
+      ((uniformExpOnUnitWarm_forward_target ((1 : Rat) / 3)
+        ⟨by native_decide, by native_decide⟩).value.compute q)
+      (dyadicCell n k) (dyadicCell_subinterval n k hk) q := by
+  exact uniformExpOnUnitWarm_dyadicCell_strict_below_forward_target
+    q hk (by native_decide) (by native_decide) hmr hq
+
+theorem uniformExpOnUnitWarm_dyadicCell_strict_above_oneThird
+    {n k : Nat} (q : Nat) (hk : k < 2 ^ n)
+    (hmr : (1 : Rat) / 3 < (dyadicCell n k).midpoint)
+    (hq : uniformExpQuotientPrecision ((dyadicCell n k).midpoint -
+        (1 : Rat) / 3)
+      (Rat.ne_of_gt ((Rat.lt_iff_sub_pos ((1 : Rat) / 3)
+        (dyadicCell n k).midpoint).mp hmr)) n ≤ q) :
+    gapAwareTargetBisectionStrictDecision uniformExpOnUnitWarm_continuous
+      ((uniformExpOnUnitWarm_forward_target ((1 : Rat) / 3)
+        ⟨by native_decide, by native_decide⟩).value.compute q)
+      (dyadicCell n k) (dyadicCell_subinterval n k hk) q := by
+  exact uniformExpOnUnitWarm_dyadicCell_strict_above_forward_target_auto
+    (r := (1 : Rat) / 3) q hk
+      (show (0 : Rat) ≤ (1 : Rat) / 3 by native_decide)
+      (show (1 : Rat) / 3 ≤ 1 by native_decide) hmr hq
+
+theorem uniformExpOnUnitWarm_oneThird_target_compute_eq_forward
+    (q : Nat) :
+    uniformExpOnUnitWarm_oneThird_target.value.compute q =
+      (uniformExpOnUnitWarm_forward_target ((1 : Rat) / 3)
+        ⟨by native_decide, by native_decide⟩).value.compute
+        (uniformExpOnUnitWarm_oneThird_target.rangePrecision q) := by
+  rfl
+
 theorem uniformExpOnUnitWarm_oneThird_target_stage_dominates
     {n : Nat} {m : Rat}
     (hm : m ∈ dyadicMidpointGridUpTo n) :

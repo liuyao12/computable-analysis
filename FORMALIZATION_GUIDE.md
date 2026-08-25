@@ -1015,6 +1015,11 @@ branch.  Its companion
 failed below-test follows automatically from the two ordered finite boxes;
 `...strict_above_forward_target_auto` packages that contradiction into the
 same target-facing certificate without an extra hypothesis.
+The concrete wrappers `uniformExpOnUnitWarm_dyadicCell_strict_below_oneThird`
+and `...strict_above_oneThird` instantiate these certificates at the rational
+source (1/3).  The theorem
+`uniformExpOnUnitWarm_oneThird_target_compute_eq_forward` identifies the
+published scheduled target with the same forward box at its selected stage.
 
 Formalization scope is by mechanism, not by exhaustive enumeration.  One
 representative function is enough when another function uses the same certified
