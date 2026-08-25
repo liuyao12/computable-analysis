@@ -166,3 +166,26 @@ an assertion that an irrational complex coordinate has been attained.
 
 The supplied-root quintic certificate is a boundary result: it peels known
 factors, but is not a general quintic solver.
+
+For the worked polynomial with supplied roots (-2,-1,0,1,2), the chain
+records the coefficients, transports each remaining root through the next
+synthetic quotient, and ends with a constant deflated polynomial:
+
+\begin{verbatim}
+five supplied roots -> five finite quotient steps
+                   -> Horner factorization
+                   -> exact product identity
+\end{verbatim}
+
+This is the algebraic analogue of choosing a known computational branch. It
+is useful downstream when a factor is already certified by geometry or an
+earlier inverse search; it does not manufacture the roots. The general FTA
+and general quintic solver remain outside the current constructive boundary.
+
+\lean{ComputableAnalysis.quintic_boundary_polynomial_coeffs}
+\lean{ComputableAnalysis.quintic_boundary_eval_at_two}
+\lean{ComputableAnalysis.quintic_boundary_deflation_chain}
+\lean{ComputableAnalysis.quintic_boundary_deflated_coeffs}
+\lean{ComputableAnalysis.quintic_boundary_horner_factorization}
+\lean{ComputableAnalysis.quintic_boundary_exact_factorization}
+\leanok
