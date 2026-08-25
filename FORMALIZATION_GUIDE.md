@@ -1030,6 +1030,9 @@ the elementary odd/even obstruction to an ambiguous midpoint.
 The companion `uniformExpOnUnitWarm_oneThird_scheduled_iterate_width` reduces
 the convergence claim to the explicit rational identity
 `width = 1 / 2^n`, with no appeal to completeness.
+The endpoint lemmas `dyadicCell_left_endpoint_ne_oneThird` and
+`dyadicCell_right_endpoint_ne_oneThird` make the (1/3) containment strict;
+their proof is the finite divisibility fact that (3\nmid 2^n).
 The reusable calculus lemmas
 `gapAwareTargetBisectionScheduledIterate_mem_of_oriented` and
 `...scheduled_iterate_nested` separate source containment from target-specific

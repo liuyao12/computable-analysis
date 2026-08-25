@@ -7068,6 +7068,46 @@ private theorem nat_le_two_pow (n : Nat) : n ≤ 2 ^ n := by
       have hp : 1 ≤ 2 ^ n := Nat.one_le_pow n 2 (by omega)
       omega
 
+private theorem two_pow_mod_three_ne_zero (n : Nat) :
+    (2 ^ n) % 3 ≠ 0 := by
+  induction n with
+  | zero => native_decide
+  | succ n ih =>
+      rw [Nat.pow_succ, Nat.mul_mod]
+      have hlt : (2 ^ n) % 3 < 3 := Nat.mod_lt _ (by omega)
+      have hcases : (2 ^ n) % 3 = 1 \/ (2 ^ n) % 3 = 2 := by omega
+      rcases hcases with h | h <;> simp [h]
+
+private theorem dyadicRat_ne_oneThird (n a : Nat) :
+    ((a : Rat) / ((2 ^ n : Nat) : Rat)) ≠ (1 : Rat) / 3 := by
+  intro h
+  rw [Rat.div_def, Rat.div_def] at h
+  have hpow : ((2 ^ n : Nat) : Rat) ≠ 0 := by
+    exact Rat.ne_of_gt (Rat.natCast_pos.mpr (Nat.pow_pos (by decide)))
+  have hthree : (3 : Rat) ≠ 0 := by native_decide
+  have hmul := congrArg
+    (fun z : Rat => z * ((2 ^ n : Nat) : Rat) * 3) h
+  have hpow_cancel := Rat.mul_inv_cancel ((2 ^ n : Nat) : Rat) hpow
+  have hthree_cancel := Rat.mul_inv_cancel (3 : Rat) hthree
+  have heq :
+      (3 : Rat) * (a : Rat) = ((2 ^ n : Nat) : Rat) := by
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have heqNat : 3 * a = 2 ^ n := by
+    exact_mod_cast heq
+  have hdiv : 3 ∣ 2 ^ n := by
+    refine ⟨a, ?_⟩
+    omega
+  have hmod := Nat.mod_eq_zero_of_dvd hdiv
+  exact (two_pow_mod_three_ne_zero n) hmod
+
+theorem dyadicCell_left_endpoint_ne_oneThird (n k : Nat) :
+    (dyadicCell n k).lo ≠ (1 : Rat) / 3 := by
+  exact dyadicRat_ne_oneThird n k
+
+theorem dyadicCell_right_endpoint_ne_oneThird (n k : Nat) :
+    (dyadicCell n k).hi ≠ (1 : Rat) / 3 := by
+  exact dyadicRat_ne_oneThird n (k + 1)
+
 theorem uniformExpOnUnitWarm_oneThird_target_stage_dominates
     {n : Nat} {m : Rat}
     (hm : m ∈ dyadicMidpointGridUpTo n) :
