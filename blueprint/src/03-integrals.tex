@@ -742,6 +742,12 @@ monomial on $[0,1]$.  The project therefore distinguishes two claims:
 the dyadic integral is already a valid computable object, while identifying
 it with the closed value $1/(n+1)$ is a separate endpoint theorem.
 
+This is also a scope rule: the parametric monomial evaluator is the one
+representative formalization for the whole routine family.  New proof effort
+is spent on a closed-value identity only when a later application needs that
+degree or when it exposes genuinely new finite algebra; otherwise the
+existing raw integral and transport lemmas are reused.
+
 \lean{ComputableAnalysis.Integral.exactPow_lipschitz_on_unit}
 \lean{ComputableAnalysis.Integral.exactRat_pow_intervalRegularOn_unit}
 \lean{ComputableAnalysis.Integral.exactRat_pow_integral_certificate}
