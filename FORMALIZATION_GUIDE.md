@@ -927,10 +927,11 @@ The inverse-search side now has a concrete warm-stage façade as well:
 evaluator, `uniformExpOnUnitWarm_intervalRegular` proves its ordinary
 interval-width contract, and `uniformExpOnUnitWarm_gapAwareSeparation`
 supplies monotone gap-dependent output precision. This is a rational
-certificate, not a placeholder for a completed inverse. The remaining bridge
-is to adapt this gap-aware schedule to the older fixed-gap
-`InvertibleFunctionOnInterval` contract, or generalize that contract to accept
-gap-aware separation.
+certificate, not a placeholder for a completed inverse. The completed branch
+package is `uniformExpOnUnitWarm_gapAwareInvertible`, using the parallel
+`GapAwareInvertibleFunctionOnInterval` contract. The older
+`InvertibleFunctionOnInterval` remains the right interface for genuinely
+uniform separation schedules.
 
 For a direct scalar uniqueness proof, make one finite short-block sweep an
 instance of `ScalarODE.ShortBlockMeshSweep`: telescope the cell estimates to

@@ -8991,6 +8991,28 @@ def function (I : InvertibleFunctionOnInterval) : FunctionOnInterval :=
 
 end InvertibleFunctionOnInterval
 
+/-! A branch contract for functions whose effective separation depends on the
+actual rational input gap. This is the natural interface for exponential,
+logarithm, and other functions whose inverse search becomes more precise as
+the bracket narrows. It intentionally sits beside the older fixed-gap
+contract, so existing inverse certificates remain source-compatible. -/
+structure GapAwareInvertibleFunctionOnInterval where
+  continuous : ContinuousFunctionOnInterval
+  source_ordered : continuous.function.lower <= continuous.function.upper
+  monotone : MonotoneOnInterval continuous.function
+  separation : GapAwareInverseSeparation continuous.function
+  orientation :
+    match separation.kind with
+    | .nondecreasing => monotone.increasing
+    | .nonincreasing => ¬ monotone.increasing
+
+namespace GapAwareInvertibleFunctionOnInterval
+
+def function (I : GapAwareInvertibleFunctionOnInterval) : FunctionOnInterval :=
+  I.continuous.function
+
+end GapAwareInvertibleFunctionOnInterval
+
 /-- The endpoint-value box at the lower end of an invertible interval branch. -/
 def InvertibleFunctionOnInterval.lowerValueBox
     (I : InvertibleFunctionOnInterval) (n : Nat) : QInterval :=

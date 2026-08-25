@@ -5930,6 +5930,20 @@ def uniformExpOnUnitWarm_gapAwareSeparation :
     have hsep' := (Rat.lt_iff_sub_pos _ _).mp hsep
     grind [Rat.sub_eq_add_neg]
 
+def uniformExpOnUnitWarm_continuous :
+    ContinuousFunctionOnInterval where
+  function := uniformExpOnUnitWarm
+  regular := uniformExpOnUnitWarm_intervalRegular
+
+def uniformExpOnUnitWarm_gapAwareInvertible :
+    GapAwareInvertibleFunctionOnInterval where
+  continuous := uniformExpOnUnitWarm_continuous
+  source_ordered := by native_decide
+  monotone := MonotoneOnInterval.ofNondecreasing
+    uniformExpOnUnitWarm_nondecreasing
+  separation := uniformExpOnUnitWarm_gapAwareSeparation
+  orientation := trivial
+
 private theorem uniformExpOnUnit_scheduledRegular_width
     (n : Nat) {I : QInterval}
     (hI : subintervalOf I (0 : Rat) 1)

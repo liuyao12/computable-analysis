@@ -251,14 +251,15 @@ warm exp stage -> interval regularity -> monotone boxes
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_intervalRegular}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_nondecreasing}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_gapAwareSeparation}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_continuous}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_gapAwareInvertible}
+\lean{ComputableAnalysis.GapAwareInvertibleFunctionOnInterval}
 \leanok
 
-This closes the analytic data for a branch-local search. The remaining
-bookkeeping is intentional: the current `InvertibleFunctionOnInterval`
-contract uses a fixed input-gap schedule, whereas the exponential certificate
-uses the sharper gap-dependent schedule. A small adapter (or a gap-aware
-inverse-branch contract) must connect these two interfaces before claiming a
-global inverse logarithm.
+This closes the analytic data for a branch-local gap-aware inverse search. The
+older fixed-gap `InvertibleFunctionOnInterval` contract remains available for
+algorithms whose separation modulus is uniform; the exponential branch now
+uses the more faithful `GapAwareInvertibleFunctionOnInterval` contract.
 
 The inverse layer is deliberately branch-local.  An invertible computation
 must carry its source interval, monotonicity orientation, separation schedule,
