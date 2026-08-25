@@ -932,6 +932,9 @@ Its packaged integral transport is
 `ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificate_family`.
 The endpoint-value composition is
 `ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_branch_certificate_family`.
+The same branch family now feeds the squared-sine fold through
+`dyadicPublicSquareLeftSum_overlap_of_branch_certificate_family`; this reuses
+the sine overlap proof rather than duplicating geometric witness work.
 For proofs that organize data as `precision -> depth -> sample`, the direct
 transport entry point is
 `ArctanSinPiConstruction.halfIntegral_equiv_of_precision_first_certificate_family`.
