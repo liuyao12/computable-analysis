@@ -90,12 +90,12 @@ overlaps; the all-stage common-witness family is the remaining theorem.
 \lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_canonical_search_family}
 \leanok
 
-The same distinction applies to the centered exponential chart.  Its
-two-sided derivative and initial-value certificates are complete, but a full
-effective FTC on `[-1,1]` still needs a partition-level endpoint-width
-certificate.  The unit-interval FTC instance is therefore the current
-completed exponential integration theorem; the centered chart is the current
-completed ODE provider.
+The centered exponential chart has now crossed that boundary as well:
+`uniformExpOnSymmetricUnit_effectiveFTC` supplies the partition-level endpoint
+certificate on `[-1,1]`, and the stabilized integral is transported to the
+endpoint difference.  It is therefore both a completed exponential FTC
+instance and the local ODE provider; the remaining exponential frontier is
+representation transport for a fully general inverse branch.
 
 For general effective continuity, the remaining schedule problem is explicit:
 choose a mesh and evaluator precision satisfying the interval-modulus budget,
