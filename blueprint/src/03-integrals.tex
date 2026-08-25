@@ -940,6 +940,8 @@ all dyadic samples             -> integral equivalence
 \lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily}
 \lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_of_canonical_nestedRadical_search}
 \lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_of_witness_family}
+\lean{ComputableAnalysis.SinPiIntegral.halfIntegral_equiv_of_dyadic_sample_overlap}
+\lean{ComputableAnalysis.SinPiIntegral.sinPi_half_dyadic_normalized_sample}
 \leanok
 
 The exact even/lower/reflected certificate family remains the geometric
@@ -968,6 +970,20 @@ circle-box overlap required by the transport step:
 \lean{ComputableAnalysis.SinPiIntegral.rationalTangentWitnessSearch_overlap_of_success}
 \lean{ComputableAnalysis.SinPiIntegral.rationalTangentWitnessBoxSearch_overlap_of_success}
 \leanok
+
+The interface deliberately separates the integration theorem from the
+special-function implementation:
+
+\begin{verbatim}
+dyadic coordinate 2*x = k/2^n
+       -> nested-radical or other sample box
+       -> overlap with the public sine box
+       -> equal-dyadic integral equivalence
+\end{verbatim}
+
+Thus the proof of the integral does not need a theorem that all points of the
+interval have nested-radical values.  It only needs the finite boxes actually
+read by the fixed quadrature algorithm.
 
 When interval arithmetic proves only overlap, the exact-box equality can be
 avoided altogether.  The direct branch-overlap adapter accepts the three

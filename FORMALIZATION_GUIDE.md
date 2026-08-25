@@ -1450,6 +1450,15 @@ the overlap used by stabilization. This changes only the shape of finite
 evidence; it does not assert that an exact intermediate real value has been
 attained.
 
+The public equal-dyadic transport contract is
+`SinPiIntegral.halfIntegral_equiv_of_dyadic_sample_overlap`. It requires the
+same fixed plan and one overlap proof for every finite sample. The coordinate
+bookkeeping is discharged by
+`SinPiIntegral.sinPi_half_dyadic_normalized_sample`, which turns the sample
+`2*x` into `k / 2^n`. This is the preferred interface for adding one
+nested-radical or other specialized sine evaluator; do not formalize a second
+global sine function merely to obtain the integral.
+
 The future canonical-logarithm π formula has one explicit entry point:
 `PiProofs.CanonicalLogTwoCertificate`. Supply a valid raw value at two and
 a proof that it agrees with `Logarithm.logTwoReciprocalIntegral`; then
