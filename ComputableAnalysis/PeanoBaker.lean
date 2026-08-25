@@ -1776,6 +1776,18 @@ theorem chronologicalProduct_columnAbsSum_le_pow {dimension : Nat}
           rw [Rat.pow_succ]
           exact Rat.mul_comm _ _
 
+theorem chronologicalProduct_stateAbsSum_le {dimension : Nat}
+    (B : Nat -> RatMatrix dimension) (c : Rat)
+    (hbound : forall n j,
+      matrixColumnAbsSum (matrixAdd (matrixIdentity dimension) (B n)) j <= c)
+    (hc : 0 <= c) (steps : Nat) (x : RatVector dimension) :
+    vectorAbsSum (matrixApply (chronologicalProduct B steps) x) <=
+      c ^ steps * vectorAbsSum x := by
+  apply matrixApply_vectorAbsSum_le_of_column_bound
+    (chronologicalProduct B steps) x (c ^ steps)
+  intro j
+  exact chronologicalProduct_columnAbsSum_le_pow B c hbound hc steps j
+
 def ratProduct (f : Nat -> Rat) : Nat -> Rat
   | 0 => 1
   | n + 1 => ratProduct f n * f n
