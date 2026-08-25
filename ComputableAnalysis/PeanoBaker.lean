@@ -219,6 +219,38 @@ def matrixApply {dimension : Nat} (A : RatMatrix dimension) (x : RatVector dimen
     RatVector dimension :=
   fun i => finiteSum (fun j => A i j * x j)
 
+/-! Absolute-value estimates are kept at the finite-sum level.  They are the
+entrywise substitute for importing a normed matrix space: every bound below
+is an executable rational traversal of a finite index type. -/
+theorem finiteSum_qabs_mul_le {dimension : Nat} (f g : Fin dimension -> Rat) :
+    qabs (finiteSum (fun i => f i * g i)) <=
+      finiteSum (fun i => qabs (f i) * qabs (g i)) := by
+  induction dimension with
+  | zero =>
+      simp [finiteSum, qabs]
+  | succ dimension ih =>
+      simp only [finiteSum]
+      calc
+        qabs (f 0 * g 0 + finiteSum (fun i : Fin dimension =>
+          f i.succ * g i.succ)) <=
+            qabs (f 0 * g 0) +
+              qabs (finiteSum (fun i : Fin dimension =>
+                f i.succ * g i.succ)) := qabs_add_le _ _
+        _ <= qabs (f 0) * qabs (g 0) +
+              finiteSum (fun i : Fin dimension =>
+                qabs (f i.succ) * qabs (g i.succ)) := by
+          apply rat_add_le_add
+          · rw [qabs_mul]
+            exact Rat.le_refl
+          · exact ih (fun i => f i.succ) (fun i => g i.succ)
+
+theorem matrixApply_qabs_le {dimension : Nat}
+    (A : RatMatrix dimension) (x : RatVector dimension) (i : Fin dimension) :
+    qabs (matrixApply A x i) <=
+      finiteSum (fun j => qabs (A i j) * qabs (x j)) := by
+  unfold matrixApply
+  exact finiteSum_qabs_mul_le (fun j => A i j) x
+
 theorem vectorAdd_zero_right {dimension : Nat} (x : RatVector dimension) :
     vectorAdd x (vectorZero dimension) = x := by
   funext i
