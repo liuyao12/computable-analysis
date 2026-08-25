@@ -656,7 +656,12 @@ from monomial brackets structurally.
    the sine route: `DyadicNestedRadicalSquareTangentCommonWitness` has four
    rational inequalities, `to_overlap` turns them into stagewise interval
    overlap, and `to_equiv` transports the complete square raw integral to
-   `tangentSquareIntegral`.
+   `tangentSquareIntegral`.  The constructor
+   `DyadicNestedRadicalSquareTangentCommonWitness.of_overlap` now packages
+   any stagewise overlap by choosing the larger lower endpoint, and
+   `stabilized_equiv_value` carries the resulting witness directly to `1/4`.
+   The only remaining square-specific obligation is therefore the finite
+   overlap family itself.
 
 The first six items are reusable infrastructure and regression coverage; items
 7--9 are the sine applications.  A later general theorem may package the same
