@@ -1027,6 +1027,9 @@ Finally, `uniformExpOnUnitWarm_oneThird_scheduled_iterate_dyadicCell` proves
 by finite induction that every scheduled bisection iterate up to the target
 stage is a canonical dyadic cell; `dyadicCell_midpoint_ne_oneThird` supplies
 the elementary odd/even obstruction to an ambiguous midpoint.
+The companion `uniformExpOnUnitWarm_oneThird_scheduled_iterate_width` reduces
+the convergence claim to the explicit rational identity
+`width = 1 / 2^n`, with no appeal to completeness.
 
 Formalization scope is by mechanism, not by exhaustive enumeration.  One
 representative function is enough when another function uses the same certified

@@ -7051,6 +7051,15 @@ theorem dyadicCell_midpoint_ne_oneThird (n k : Nat) (hk : k < 2 ^ n) :
     omega
   omega
 
+theorem dyadicCell_width (n k : Nat) :
+    (dyadicCell n k).width = 1 / (2 ^ n : Rat) := by
+  unfold dyadicCell QInterval.width
+  rw [Rat.div_def, Rat.div_def]
+  have hpow : ((2 ^ n : Nat) : Rat) ≠ 0 := by
+    exact Rat.ne_of_gt (Rat.natCast_pos.mpr (Nat.pow_pos (by decide)))
+  have hcancel := Rat.mul_inv_cancel ((2 ^ n : Nat) : Rat) hpow
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
 theorem uniformExpOnUnitWarm_oneThird_target_stage_dominates
     {n : Nat} {m : Rat}
     (hm : m ∈ dyadicMidpointGridUpTo n) :
@@ -7172,6 +7181,19 @@ theorem uniformExpOnUnitWarm_oneThird_scheduled_iterate_dyadicCell
               gapAwareTargetBisectionStep_of_above _ _ _ _ _ hnotbelow' habove
             _ = { lo := (dyadicCell n k).lo, hi := (dyadicCell n k).midpoint } := by rw [hPk']
             _ = dyadicCell (n + 1) (2 * k) := dyadicCell_left_child n k
+
+theorem uniformExpOnUnitWarm_oneThird_scheduled_iterate_width
+    (q n : Nat) (hnq : n ≤ q) :
+    (gapAwareTargetBisectionScheduledIterate
+      uniformExpOnUnitWarm_continuous
+      (uniformExpOnUnitWarm_oneThird_target.value.compute q)
+      ({ lo := 0, hi := 1 } : QInterval)
+      uniformExpOnUnitWarm_unit_subinterval
+      (fun j => uniformExpOnUnitWarm_oneThird_target.rangePrecision j) n).width =
+      1 / (2 ^ n : Rat) := by
+  obtain ⟨k, hk, hcell⟩ :=
+    uniformExpOnUnitWarm_oneThird_scheduled_iterate_dyadicCell q n hnq
+  rw [hcell, dyadicCell_width]
 
 theorem uniformExpOnUnitWarm_unit_subinterval :
     subintervalOf ({ lo := 0, hi := 1 } : QInterval)
