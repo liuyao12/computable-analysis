@@ -6471,6 +6471,35 @@ theorem dyadicCell_right_child (n k : Nat) :
   have htwo_cancel := Rat.mul_inv_cancel (2 : Rat) htwo
   congr 1 <;> grind [Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc]
 
+theorem gapAwareTargetBisectionStep_dyadicCell_of_below
+    (F : ContinuousFunctionOnInterval) (Y : QInterval)
+    {n k : Nat} {hI : subintervalOf (dyadicCell n k)
+        F.function.lower F.function.upper} (p : Nat)
+    (hbelow :
+      (gapAwareTargetBisectionMidpointRange F (dyadicCell n k) hI p).hi <
+        Y.lo) :
+    gapAwareTargetBisectionStep F Y (dyadicCell n k) hI p =
+      dyadicCell (n + 1) (2 * k + 1) := by
+  rw [gapAwareTargetBisectionStep_of_below F Y (dyadicCell n k) hI p
+    hbelow]
+  exact dyadicCell_right_child n k
+
+theorem gapAwareTargetBisectionStep_dyadicCell_of_above
+    (F : ContinuousFunctionOnInterval) (Y : QInterval)
+    {n k : Nat} {hI : subintervalOf (dyadicCell n k)
+        F.function.lower F.function.upper} (p : Nat)
+    (hnotbelow :
+      ¬(gapAwareTargetBisectionMidpointRange F (dyadicCell n k) hI p).hi <
+        Y.lo)
+    (habove :
+      Y.hi <
+        (gapAwareTargetBisectionMidpointRange F (dyadicCell n k) hI p).lo) :
+    gapAwareTargetBisectionStep F Y (dyadicCell n k) hI p =
+      dyadicCell (n + 1) (2 * k) := by
+  rw [gapAwareTargetBisectionStep_of_above F Y (dyadicCell n k) hI p
+    hnotbelow habove]
+  exact dyadicCell_left_child n k
+
 def uniformExpRationalTargetStage (r : Rat) : Nat → Nat
   | 0 => max 0 (uniformExpGapPrecisionMax r 0
       (dyadicMidpointGridUpTo 0))

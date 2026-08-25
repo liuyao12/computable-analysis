@@ -988,6 +988,10 @@ dyadic subinterval, `dyadicCell_left_child` and
 `dyadicCell_subinterval` certifies that the cell stays in `[0,1]`; finally,
 `dyadicCell_midpoint_mem_grid_upTo` proves that every canonical-cell midpoint
 is among the finitely listed target demands.
+The two transport lemmas
+`gapAwareTargetBisectionStep_dyadicCell_of_below` and
+`gapAwareTargetBisectionStep_dyadicCell_of_above` now turn a strict midpoint
+decision into the exact next dyadic cell, including its new index.
 
 Formalization scope is by mechanism, not by exhaustive enumeration.  One
 representative function is enough when another function uses the same certified
@@ -1015,6 +1019,12 @@ without a convergence-rate assumption; when a supplied decision schedule
 proves every midpoint strict,
 `gapAwareTargetBisectionScheduledIterate_width_eq_div_pow_of_decided`
 recovers the exact geometric width law.
+The midpoint image is named explicitly by
+`gapAwareTargetBisectionMidpointRange`; the branch lemmas
+`gapAwareTargetBisectionStep_of_below` and
+`gapAwareTargetBisectionStep_of_above` expose the two strict decisions as
+equalities with the corresponding child interval.  These are the interfaces
+used to transport dyadic-cell invariants through bisection.
 The warm exponential branch now includes three executable target-`3/2`
 midpoint regressions. At precision stage `4` they produce
 `[0,1/2]`, `[1/4,1/2]`, and `[3/8,1/2]` in succession, all by finite rational
