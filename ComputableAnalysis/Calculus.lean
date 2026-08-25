@@ -9105,6 +9105,13 @@ theorem gapAwareTargetBisectionStep_of_above
     simpa [gapAwareTargetBisectionMidpointRange] using habove
   simp [gapAwareTargetBisectionStep, hnotbelow', habove']
 
+def gapAwareTargetBisectionStrictDecision
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) : Prop :=
+  (gapAwareTargetBisectionMidpointRange F I hI n).hi < Y.lo \/
+    (¬(gapAwareTargetBisectionMidpointRange F I hI n).hi < Y.lo /\
+      Y.hi < (gapAwareTargetBisectionMidpointRange F I hI n).lo)
+
 theorem gapAwareTargetBisectionStep_ordered
     (F : ContinuousFunctionOnInterval) (Y I : QInterval)
     (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) :

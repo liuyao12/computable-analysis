@@ -6500,6 +6500,68 @@ theorem gapAwareTargetBisectionStep_dyadicCell_of_above
     hnotbelow habove]
   exact dyadicCell_left_child n k
 
+theorem gapAwareTargetBisectionScheduledIterate_dyadicCell
+    (F : ContinuousFunctionOnInterval) (Y : QInterval)
+    (precision : Nat -> Nat)
+    (hI0 : subintervalOf (dyadicCell 0 0)
+      F.function.lower F.function.upper) (n : Nat)
+    (hdecided : forall j, j < n ->
+      gapAwareTargetBisectionStrictDecision F Y
+        (gapAwareTargetBisectionScheduledIterate F Y
+          (dyadicCell 0 0) hI0 precision j)
+        (gapAwareTargetBisectionScheduledIterate_subinterval F Y
+          (dyadicCell 0 0) hI0 precision j)
+        (precision j)) :
+    exists k, k < 2 ^ n /\
+      gapAwareTargetBisectionScheduledIterate F Y
+        (dyadicCell 0 0) hI0 precision n =
+        dyadicCell n k := by
+  induction n with
+  | zero =>
+      refine ⟨0, by native_decide, ?_⟩
+      rfl
+  | succ n ih =>
+      let P := gapAwareTargetBisectionScheduledIterateWithProof F Y
+        (dyadicCell 0 0) hI0 precision n
+      have hprev := ih (fun j hj => hdecided j (by omega))
+      rcases hprev with ⟨k, hk, hPk⟩
+      have hPk' : P.1 = dyadicCell n k := by
+        simpa [P, gapAwareTargetBisectionScheduledIterate] using hPk
+      have hstrict := hdecided n (by omega)
+      change gapAwareTargetBisectionStrictDecision F Y P.1 P.2
+        (precision n) at hstrict
+      rcases hstrict with hbelow | ⟨hnotbelow, habove⟩
+      · refine ⟨2 * k + 1, ?_, ?_⟩
+        · have hpow : 2 ^ (n + 1) = 2 ^ n * 2 := by omega
+          rw [hpow]
+          omega
+        · change gapAwareTargetBisectionStep F Y P.1 P.2
+            (precision n) = dyadicCell (n + 1) (2 * k + 1)
+          calc
+            gapAwareTargetBisectionStep F Y P.1 P.2 (precision n) =
+                { lo := P.1.midpoint, hi := P.1.hi } :=
+              gapAwareTargetBisectionStep_of_below F Y P.1 P.2
+                (precision n) hbelow
+            _ = { lo := (dyadicCell n k).midpoint, hi := (dyadicCell n k).hi } := by
+              rw [hPk']
+            _ = dyadicCell (n + 1) (2 * k + 1) :=
+              dyadicCell_right_child n k
+      · refine ⟨2 * k, ?_, ?_⟩
+        · have hpow : 2 ^ (n + 1) = 2 ^ n * 2 := by omega
+          rw [hpow]
+          omega
+        · change gapAwareTargetBisectionStep F Y P.1 P.2
+            (precision n) = dyadicCell (n + 1) (2 * k)
+          calc
+            gapAwareTargetBisectionStep F Y P.1 P.2 (precision n) =
+                { lo := P.1.lo, hi := P.1.midpoint } :=
+              gapAwareTargetBisectionStep_of_above F Y P.1 P.2
+                (precision n) hnotbelow habove
+            _ = { lo := (dyadicCell n k).lo, hi := (dyadicCell n k).midpoint } := by
+              rw [hPk']
+            _ = dyadicCell (n + 1) (2 * k) :=
+              dyadicCell_left_child n k
+
 def uniformExpRationalTargetStage (r : Rat) : Nat → Nat
   | 0 => max 0 (uniformExpGapPrecisionMax r 0
       (dyadicMidpointGridUpTo 0))

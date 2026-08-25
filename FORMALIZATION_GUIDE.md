@@ -992,6 +992,11 @@ The two transport lemmas
 `gapAwareTargetBisectionStep_dyadicCell_of_below` and
 `gapAwareTargetBisectionStep_dyadicCell_of_above` now turn a strict midpoint
 decision into the exact next dyadic cell, including its new index.
+The predicate `gapAwareTargetBisectionStrictDecision` records both the strict
+side test and, for the upper-side branch, the fact that the lower-side test
+failed.  Under these finite certificates,
+`gapAwareTargetBisectionScheduledIterate_dyadicCell` inductively proves that
+the entire scheduled iterate is a canonical dyadic cell at every stage.
 
 Formalization scope is by mechanism, not by exhaustive enumeration.  One
 representative function is enough when another function uses the same certified
