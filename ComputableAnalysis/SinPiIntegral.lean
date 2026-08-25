@@ -6499,6 +6499,37 @@ structure CanonicalDyadicHalfAngleCertificateAt
       (rationalHalfAngleTangentInterval
         ((dyadicNestedRadicalTableAt precision depth k).1) cosineBox)
 
+/- At the native precision `n`, the precision-aware evaluator is exactly the
+   public stage evaluator.  This small bridge keeps the geometric proof
+   parameterized by precision while exposing the certificate shape consumed
+   by the equal-dyadic integral. -/
+def canonical_dyadic_halfAngle_certificate_of_native_precision
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {n k : Nat} {hk : k < 2 ^ n}
+    (h : CanonicalDyadicHalfAngleCertificateAt B n n k hk) :
+    CanonicalDyadicHalfAngleCertificate B n k hk := by
+  exact {
+    cosineBox := h.cosineBox
+    cosineBox_subinterval := h.cosineBox_subinterval
+    sineWitness := h.sineWitness
+    cosineWitness := h.cosineWitness
+    sine_nonneg := h.sine_nonneg
+    cosine_nonneg := h.cosine_nonneg
+    circle_identity := h.circle_identity
+    sine_contains := h.sine_contains
+    cosine_contains := h.cosine_contains
+    outer_tangent_contains := h.outer_tangent_contains }
+
+def canonical_dyadic_halfAngle_certificate_family_of_precision_family
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (hcertificate : forall (precision n k : Nat) (hk : k < 2 ^ n),
+      0 < k -> CanonicalDyadicHalfAngleCertificateAt B precision n k hk) :
+    forall (n k : Nat) (hk : k < 2 ^ n),
+      0 < k -> CanonicalDyadicHalfAngleCertificate B n k hk := by
+  intro n k hk hpos
+  exact canonical_dyadic_halfAngle_certificate_of_native_precision B
+    (hcertificate n n k hk hpos)
+
 def canonical_dyadic_certificate_at_of_rational_witness
     (B : IntegralIdentities.ArctanInverseBisection)
     {precision depth k : Nat} (hk : k < 2 ^ depth)

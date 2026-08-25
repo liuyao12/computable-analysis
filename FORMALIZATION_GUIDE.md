@@ -916,6 +916,11 @@ and `to_square_sum_overlap` is the downstream entry point.
 Its constructor
 `DyadicSquareCircleOverlapFamily.of_halfAngle_certificate_family` translates
 the existing canonical half-angle certificate family into this interface.
+When a geometric proof is naturally indexed by evaluator precision, use
+`canonical_dyadic_halfAngle_certificate_family_of_precision_family` to select
+native precision and then
+`DyadicSquareCircleOverlapFamily.of_precision_halfAngle_certificate_family`.
+This is only an index bridge: it adds no completeness or limiting argument.
 The theorem-facing shortcut is
 `ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_canonical_certificate_family`.
 

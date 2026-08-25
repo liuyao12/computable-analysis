@@ -3318,6 +3318,21 @@ def DyadicSquareCircleOverlapFamily.of_halfAngle_certificate_family
       (hcertificate n k hk hpos).sine_contains
       (hcertificate n k hk hpos).cosine_contains
 
+/- Precision-aware geometric proofs naturally produce certificates for every
+   evaluator precision.  The native-precision bridge in `SinPiIntegral`
+   packages that family into the stage-indexed form used by this module. -/
+def DyadicSquareCircleOverlapFamily.of_precision_halfAngle_certificate_family
+    (S : ArctanSinPiConstruction)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (precision n k : Nat) (hk : k < 2 ^ n),
+      0 < k -> CanonicalDyadicHalfAngleCertificateAt S.inverse precision n k hk) :
+    DyadicSquareCircleOverlapFamily S := by
+  exact DyadicSquareCircleOverlapFamily.of_halfAngle_certificate_family S ht0
+    (canonical_dyadic_halfAngle_certificate_family_of_precision_family
+      S.inverse hcertificate)
+
 theorem DyadicSquareCircleOverlapFamily.to_square_sum_overlap
     {S : ArctanSinPiConstruction}
     (certificate : DyadicSquareCircleOverlapFamily S) :
