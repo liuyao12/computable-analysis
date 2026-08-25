@@ -997,6 +997,10 @@ side test and, for the upper-side branch, the fact that the lower-side test
 failed.  Under these finite certificates,
 `gapAwareTargetBisectionScheduledIterate_dyadicCell` inductively proves that
 the entire scheduled iterate is a canonical dyadic cell at every stage.
+The companion theorem
+`gapAwareTargetBisectionScheduledIterate_width_eq_div_pow_of_strictly_decided`
+converts the same strict certificates into the exact width law
+`I.width / 2^n`.
 
 Formalization scope is by mechanism, not by exhaustive enumeration.  One
 representative function is enough when another function uses the same certified

@@ -9413,6 +9413,30 @@ theorem gapAwareTargetBisectionScheduledIterate_width_eq_div_pow_of_decided
       rw [Rat.div_def, Rat.div_def]
       grind [Rat.mul_assoc, Rat.mul_comm]
 
+theorem gapAwareTargetBisectionScheduledIterate_width_eq_div_pow_of_strictly_decided
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat -> Nat) (n : Nat)
+    (hdecided : forall k, k < n ->
+      gapAwareTargetBisectionStrictDecision F Y
+        (gapAwareTargetBisectionScheduledIterate F Y I hI precision k)
+        (gapAwareTargetBisectionScheduledIterate_subinterval F Y I hI precision k)
+        (precision k)) :
+    (gapAwareTargetBisectionScheduledIterate F Y I hI precision n).width =
+      I.width / (2 ^ n : Rat) := by
+  apply gapAwareTargetBisectionScheduledIterate_width_eq_div_pow_of_decided
+  intro k hk
+  have h := hdecided k hk
+  let P := gapAwareTargetBisectionScheduledIterateWithProof F Y I hI
+    precision k
+  change gapAwareTargetBisectionStrictDecision F Y P.1 P.2
+    (precision k) at h
+  rcases h with hbelow | ⟨_, habove⟩
+  · left
+    simpa [gapAwareTargetBisectionMidpointRange] using hbelow
+  · right
+    simpa [gapAwareTargetBisectionMidpointRange] using habove
+
 /-! The fully gap-aware form may choose precision from the current bracket as
 well as the step index.  This is the form needed when a separation modulus is
 computed from the actual midpoint gap. -/
