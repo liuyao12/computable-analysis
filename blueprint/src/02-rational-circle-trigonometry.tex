@@ -93,6 +93,14 @@ Each stage records range, circle-equation, and width invariants.  Nested
 radicals are therefore not an appeal to an already completed square root; they
 are executable interval refinements.
 
+The table is also representation-stable: changing the requested internal
+precision produces overlapping sine and cosine boxes.  Thus a later proof may
+switch evaluator precision without introducing a new notion of angle or
+assuming extensional equality of interval algorithms.
+
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalTableAt_overlap_of_precisions}
+\leanok
+
 The executable table and its refinement laws are exposed as
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.dyadicNestedRadicalTable}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.dyadicNestedRadicalTable_succ_even}
