@@ -9471,6 +9471,83 @@ theorem gapAwareTargetBisectionScheduledIterate_width_eq_div_pow_of_strictly_dec
   · right
     simpa [gapAwareTargetBisectionMidpointRange] using habove
 
+theorem gapAwareTargetBisectionScheduledIterate_mem_of_oriented
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat -> Nat) {r : Rat} (hrI : I.lo <= r /\ r <= I.hi)
+    (n : Nat)
+    (horiented : forall j, j < n ->
+      let P := gapAwareTargetBisectionScheduledIterateWithProof
+        F Y I hI precision j
+      ((P.1.midpoint < r /\
+          (gapAwareTargetBisectionMidpointRange F P.1 P.2
+            (precision j)).hi < Y.lo) \/
+        (r < P.1.midpoint /\
+          ¬(gapAwareTargetBisectionMidpointRange F P.1 P.2
+            (precision j)).hi < Y.lo /\
+          Y.hi < (gapAwareTargetBisectionMidpointRange F P.1 P.2
+            (precision j)).lo))) :
+    (gapAwareTargetBisectionScheduledIterate F Y I hI precision n).lo <= r /\
+      r <= (gapAwareTargetBisectionScheduledIterate F Y I hI precision n).hi := by
+  induction n with
+  | zero =>
+      simpa [gapAwareTargetBisectionScheduledIterate,
+        gapAwareTargetBisectionScheduledIterateWithProof] using hrI
+  | succ n ih =>
+      let P := gapAwareTargetBisectionScheduledIterateWithProof
+        F Y I hI precision n
+      have hprev := ih (fun j hj => horiented j (by omega))
+      have hdir := horiented n (by omega)
+      change
+        ((P.1.midpoint < r /\
+            (gapAwareTargetBisectionMidpointRange F P.1 P.2
+              (precision n)).hi < Y.lo) \/
+          (r < P.1.midpoint /\
+            ¬(gapAwareTargetBisectionMidpointRange F P.1 P.2
+              (precision n)).hi < Y.lo /\
+            Y.hi < (gapAwareTargetBisectionMidpointRange F P.1 P.2
+              (precision n)).lo)) at hdir
+      change
+        (gapAwareTargetBisectionStep F Y P.1 P.2 (precision n)).lo <= r /\
+          r <= (gapAwareTargetBisectionStep F Y P.1 P.2
+            (precision n)).hi
+      rcases hdir with ⟨hmr, hbelow⟩ | ⟨hrm, hnotbelow, habove⟩
+      · rw [gapAwareTargetBisectionStep_of_below F Y P.1 P.2
+          (precision n) hbelow]
+        exact ⟨Rat.le_of_lt hmr, hprev.2⟩
+      · rw [gapAwareTargetBisectionStep_of_above F Y P.1 P.2
+          (precision n) hnotbelow habove]
+        exact ⟨hprev.1, Rat.le_of_lt hrm⟩
+
+theorem gapAwareTargetBisectionScheduledIterate_nested
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat -> Nat) {n m : Nat} (hnm : n ≤ m) :
+    (gapAwareTargetBisectionScheduledIterate F Y I hI precision n).lo ≤
+        (gapAwareTargetBisectionScheduledIterate F Y I hI precision m).lo /\
+      (gapAwareTargetBisectionScheduledIterate F Y I hI precision m).lo ≤
+        (gapAwareTargetBisectionScheduledIterate F Y I hI precision m).hi /\
+      (gapAwareTargetBisectionScheduledIterate F Y I hI precision m).hi ≤
+        (gapAwareTargetBisectionScheduledIterate F Y I hI precision n).hi := by
+  induction hnm with
+  | refl =>
+      have hsub := gapAwareTargetBisectionScheduledIterate_subinterval
+        F Y I hI precision n
+      exact ⟨Rat.le_refl, hsub.2.1, Rat.le_refl⟩
+  | @step m hnm ih =>
+      have hprev := ih
+      have hstep := gapAwareTargetBisectionStep_subinterval F Y
+        (gapAwareTargetBisectionScheduledIterate F Y I hI precision m)
+        (gapAwareTargetBisectionScheduledIterate_subinterval F Y I hI precision m)
+        (precision m)
+      have hcurrent := gapAwareTargetBisectionScheduledIterate_subinterval
+        F Y I hI precision m
+      have hJ := gapAwareTargetBisectionScheduledIterate_subinterval
+        F Y I hI precision (m + 1)
+      exact ⟨Rat.le_trans hprev.1 hstep.1,
+        hJ.2.1,
+        Rat.le_trans hstep.2.2 hprev.2.2⟩
+
 /-! The fully gap-aware form may choose precision from the current bracket as
 well as the step index.  This is the form needed when a separation modulus is
 computed from the actual midpoint gap. -/

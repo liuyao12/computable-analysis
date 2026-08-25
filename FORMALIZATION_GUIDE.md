@@ -1030,6 +1030,11 @@ the elementary odd/even obstruction to an ambiguous midpoint.
 The companion `uniformExpOnUnitWarm_oneThird_scheduled_iterate_width` reduces
 the convergence claim to the explicit rational identity
 `width = 1 / 2^n`, with no appeal to completeness.
+The reusable calculus lemmas
+`gapAwareTargetBisectionScheduledIterate_mem_of_oriented` and
+`...scheduled_iterate_nested` separate source containment from target-specific
+certificates and record the fixed-target nesting law.  The one-third oriented
+certificate is the bridge to the remaining target-varying inverse wrapper.
 
 Formalization scope is by mechanism, not by exhaustive enumeration.  One
 representative function is enough when another function uses the same certified
