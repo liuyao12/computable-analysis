@@ -926,6 +926,8 @@ native precision and then
 This is only an index bridge: it adds no completeness or limiting argument.
 The theorem-facing shortcut is
 `ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_canonical_certificate_family`.
+The branch-certificate route exposes the same result in rational-circle box
+form through `DyadicNestedRadicalBranchCertificateFamily.rational_circle_overlap`.
 For proofs that organize data as `precision -> depth -> sample`, the direct
 transport entry point is
 `ArctanSinPiConstruction.halfIntegral_equiv_of_precision_first_certificate_family`.

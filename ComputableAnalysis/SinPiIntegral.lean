@@ -7429,6 +7429,18 @@ theorem DyadicNestedRadicalBranchCertificateFamily.sample_overlap
   exact dyadicNestedRadical_sample_overlap_of_branch_certificates_of_endpoint
     B H.endpoint_zero H.even H.lower H.upper
 
+theorem DyadicNestedRadicalBranchCertificateFamily.rational_circle_overlap
+    {B : IntegralIdentities.ArctanInverseBisection}
+    (H : DyadicNestedRadicalBranchCertificateFamily B) :
+    forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      QInterval.Overlaps
+        (rationalCircleSinInterval
+          (dyadicTangentBoxAt B precision depth k hk))
+        (dyadicNestedRadicalTableAt precision depth k).1 := by
+  intro precision depth k hk
+  have h := H.sample_overlap precision depth k hk
+  simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using h
+
 theorem dyadicNestedRadicalTableAt_width_le
     (precision n k : Nat) (hk : k <= 2 ^ n) :
     (dyadicNestedRadicalTableAt precision n k).1.width <=
