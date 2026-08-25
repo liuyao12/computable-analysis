@@ -483,7 +483,17 @@ implementation may choose whichever certified schedule is convenient; the
 theorem only requires that both schedules close the same rational error budget.
 
 \lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.endpointRaw_equiv_endpointDifference}
+\lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.boundedIntegralRaw_equiv_endpointDifference}
+\lean{ComputableAnalysis.effectiveDerivativeBoundFTC}
 \leanok
+
+These two theorems are the general computable FTC closure: once a function
+supplies finite derivative bounds, local endpoint containments, a shrinking
+width budget, and endpoint-stage agreement, its bounded Riemann computation is
+proved equivalent to the primitive endpoint difference.  No completeness or
+universal continuous-function integrability theorem is used.  The remaining
+work for a new function is therefore provider-specific finite data, not a new
+FTC foundation.
 
 The arctangent certificate is a complete non-polynomial client of this API.
 Its derivative enclosure is obtained from the rational kernel
