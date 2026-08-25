@@ -8321,6 +8321,29 @@ theorem generalIntegralFor_valid (F : FunctionOnInterval)
     (generalIntegralFor F c).Valid :=
   piecewiseMonotoneIntegralFor_valid F c
 
+/-! The general finite-piece integral is also available through the common
+`ConstructionFor` interface.  This is only a representation bridge: the
+finite monotone partition and all cell certificates remain explicit inputs. -/
+def generalConstructionFor (F : FunctionOnInterval)
+    (c : GeneralConstructionFor F) : Integral.ConstructionFor F where
+  compute := (generalIntegralFor F c).compute
+  certificate := generalIntegralFor_valid F c
+
+theorem generalConstructionFor_compute_eq (F : FunctionOnInterval)
+    (c : GeneralConstructionFor F) :
+    (generalConstructionFor F c).compute = (generalIntegralFor F c).compute := rfl
+
+theorem integralFor_generalConstructionFor_valid (F : FunctionOnInterval)
+    (c : GeneralConstructionFor F) :
+    (Integral.integralFor F (generalConstructionFor F c)).Valid :=
+  Integral.integralFor_valid F (generalConstructionFor F c)
+
+theorem integralFor_generalConstructionFor_equiv (F : FunctionOnInterval)
+    (c : GeneralConstructionFor F) :
+    (Integral.integralFor F (generalConstructionFor F c)).Equiv
+      (generalIntegralFor F c) := by
+  exact RealRaw.equiv_refl _ (generalIntegralFor_valid F c)
+
 /-- The public general-integral alias agrees with the original monotone
 construction on a one-piece partition. -/
 theorem generalIntegralFor_ofMonotone_equiv
