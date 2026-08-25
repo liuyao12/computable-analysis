@@ -1030,6 +1030,18 @@ linear in the sampled function, and the proof is induction over the finite
 mesh.  This is the interface later used for affine changes of variable and
 termwise integration of finite power series.
 
+The square specialization is the finite chain rule.  For every rational
+sample path, the endpoint change of $f^2$ is the left sum for $2f\,df$
+plus the explicitly recorded quadratic variation:
+
+\[
+  2\sum_i f_i\,\Delta f_i+\sum_i(\Delta f_i)^2
+    = f_n^2-f_0^2.
+\]
+
+\lean{ComputableAnalysis.finiteSquareStieltjes_chain}
+\leanok
+
 The affine change-of-variable identity is already exact at this finite level.
 Scaling the sampled function by the affine slope transports the left-rectangle
 fold to the affine image interval:

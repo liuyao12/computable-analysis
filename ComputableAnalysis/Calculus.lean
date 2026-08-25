@@ -674,6 +674,20 @@ theorem finiteIntegrationByParts_withVariation
             grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
               Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 
+/-! The square case is the finite chain rule.  It is the form used by
+substitution and by energy estimates: the endpoint change of `f^2` is the
+left-endpoint sum for `2 f df`, plus the explicitly visible quadratic
+variation.  No limiting integral or completed real is involved. -/
+
+theorem finiteSquareStieltjes_chain (f : Nat -> Rat) (n : Nat) :
+    2 * leftStieltjesSum f f n + quadraticVariationSum f f n =
+      f n * f n - f 0 * f 0 := by
+  have h := finiteIntegrationByParts_withVariation f f n
+  rw [show leftStieltjesSum f f n + leftStieltjesSum f f n =
+      2 * leftStieltjesSum f f n by
+        grind [Rat.add_comm, Rat.mul_comm]] at h
+  exact h
+
 theorem rightStieltjesSum_eq_left_swap_add_quadraticVariation
     (f g : Nat -> Rat) (n : Nat) :
     rightStieltjesSum f g n =
