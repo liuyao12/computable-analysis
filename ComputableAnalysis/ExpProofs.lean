@@ -6071,6 +6071,77 @@ def uniformExpOnUnitWarm_forward_target (r : Rat)
       have htail := uniformExpTailMagnitude_nonneg (n + 4)
       grind [Rat.sub_eq_add_neg]
 
+/-! Gap separation can be consumed directly by the adaptive bisection kernel.
+These lemmas compare a midpoint with a rational forward target; the only
+additional arithmetic obligation is that the selected evaluator stage refines
+the target box stage. -/
+theorem uniformExpOnUnitWarm_midpoint_below_forward_target
+    {m r : Rat} (n : Nat)
+    (hm : 0 <= m) (hr : r <= 1) (hmr : m < r)
+    :
+    (uniformExpOnUnitWarm.compute m
+      ⟨by change 0 ≤ m; exact hm, by change m ≤ 1; grind⟩
+      (uniformExpQuotientPrecision (r - m)
+        (Rat.ne_of_gt ((Rat.lt_iff_sub_pos m r).mp hmr)) n)).hi <
+      ((uniformExpOnUnitWarm_forward_target r
+        ⟨by change 0 ≤ r; grind, by change r ≤ 1; exact hr⟩).value.compute
+        (uniformExpQuotientPrecision (r - m)
+          (Rat.ne_of_gt ((Rat.lt_iff_sub_pos m r).mp hmr)) n)).lo := by
+  let h : Rat := r - m
+  let hh : h ≠ 0 := Rat.ne_of_gt (by
+    dsimp [h]
+    exact (Rat.lt_iff_sub_pos m r).mp hmr)
+  let p : Nat := uniformExpQuotientPrecision h hh n
+  have hsep := uniformExpOnUnitWarm_gapAwareSeparation.separated
+    m r ⟨by change 0 ≤ m; exact hm, by change m ≤ 1; grind⟩
+      ⟨by change 0 ≤ r; grind, by change r ≤ 1; exact hr⟩ hmr n
+  change (uniformExpOnUnitWarm.compute m
+      ⟨by change 0 ≤ m; exact hm, by change m ≤ 1; grind⟩ p).hi <
+    (uniformExpOnUnitWarm.compute r
+      ⟨by change 0 ≤ r; grind, by change r ≤ 1; exact hr⟩ p).lo at hsep
+  change ((uniformExpRaw m).compute (p + 4)).hi <
+    ((uniformExpRaw r).compute (p + 4)).lo at hsep
+  rw [uniformExpRaw_compute, uniformExpRaw_compute] at hsep
+  change (uniformExpBox m (p + 4)).hi <
+    (uniformExpBox r (p + 4)).lo at hsep
+  change ((uniformExpRaw m).compute (p + 4)).hi <
+    ((uniformExpRaw r).compute (p + 4)).lo
+  rw [uniformExpRaw_compute, uniformExpRaw_compute]
+  exact hsep
+
+theorem uniformExpOnUnitWarm_midpoint_above_forward_target
+    {m r : Rat} (n : Nat)
+    (hm : 0 <= r) (hr : m <= 1) (hrm : r < m)
+    :
+    ((uniformExpOnUnitWarm_forward_target r ⟨hm, by change r ≤ 1; grind⟩).value.compute
+      (uniformExpQuotientPrecision (m - r)
+        (Rat.ne_of_gt ((Rat.lt_iff_sub_pos r m).mp hrm)) n)).hi <
+      (uniformExpOnUnitWarm.compute m
+        ⟨by change 0 ≤ m; grind, by change m ≤ 1; exact hr⟩
+        (uniformExpQuotientPrecision (m - r)
+          (Rat.ne_of_gt ((Rat.lt_iff_sub_pos r m).mp hrm)) n)).lo := by
+  let h : Rat := m - r
+  let hh : h ≠ 0 := Rat.ne_of_gt (by
+    dsimp [h]
+    exact (Rat.lt_iff_sub_pos r m).mp hrm)
+  let p : Nat := uniformExpQuotientPrecision h hh n
+  have hsep := uniformExpOnUnitWarm_gapAwareSeparation.separated
+    r m ⟨by change 0 ≤ r; exact hm, by change r ≤ 1; grind⟩
+      ⟨by change 0 ≤ m; grind, by change m ≤ 1; exact hr⟩ hrm n
+  change (uniformExpOnUnitWarm.compute r
+      ⟨by change 0 ≤ r; exact hm, by change r ≤ 1; grind⟩ p).hi <
+    (uniformExpOnUnitWarm.compute m
+      ⟨by change 0 ≤ m; grind, by change m ≤ 1; exact hr⟩ p).lo at hsep
+  change ((uniformExpRaw r).compute (p + 4)).hi <
+    ((uniformExpRaw m).compute (p + 4)).lo at hsep
+  rw [uniformExpRaw_compute, uniformExpRaw_compute] at hsep
+  change (uniformExpBox r (p + 4)).hi <
+    (uniformExpBox m (p + 4)).lo at hsep
+  change ((uniformExpRaw r).compute (p + 4)).hi <
+    ((uniformExpRaw m).compute (p + 4)).lo
+  rw [uniformExpRaw_compute, uniformExpRaw_compute]
+  exact hsep
+
 def uniformExpOnUnitWarm_forward_search (r : Rat)
     (hr : inDomainInterval uniformExpOnUnitWarm.lower
       uniformExpOnUnitWarm.upper r) :

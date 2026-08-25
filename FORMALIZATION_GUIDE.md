@@ -956,6 +956,13 @@ interval computation; `uniformExpCenter_threeHalves_inverse_valid` and
 `uniformExpCenter_threeHalves_output_forward_overlap` proves the important
 finite bridge: the corresponding interval-valued exponential cell range
 still overlaps the target interval.
+The synchronized decision lemmas
+`uniformExpOnUnitWarm_midpoint_below_forward_target` and
+`uniformExpOnUnitWarm_midpoint_above_forward_target` consume the gap-aware
+separation certificate at the same computed target stage.  They are the
+analytic kernel for the adaptive iterator; the remaining work is to prove that
+the cell-range evaluator used by the bisection kernel inherits these point-box
+separations under the chosen schedule.
 
 The reusable `gapAwareTargetBisectionStep` is deliberately conservative. It
 keeps a rational parent interval whenever the computed image box overlaps the
