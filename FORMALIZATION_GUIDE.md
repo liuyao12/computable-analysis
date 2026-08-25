@@ -282,6 +282,17 @@ For example, `1 / (x^2 - 2)` must not be treated as regular on `[1,2]`.
 7. **Only then expose a friendly formula.**  The familiar formula is the
    public theorem; the raw implementations and bounds are its proof data.
 
+### Do not multiply routine cases
+
+Formalize one representative for a reusable process, then reuse its generic
+closure lemmas.  Do not create separate theorem families merely because a
+routine example changes sign, uses a scalar multiple, or swaps equivalent
+coordinates; add a new declaration only when the domain, computation, or
+certificate is genuinely different.  In particular, a piecewise function is
+handled by finitely many interval integrals and a finite assembly theorem.
+The absolute-value example in `PrimitivePiecewiseFTC` is the reference
+pattern: two affine cell computations, followed by one finite telescope.
+
 For an effective FTC proof, do not force all computations to use one stage.
 `TwoStageCandidateDerivativeFTC` allows the derivative evaluator and the
 primitive endpoint evaluator to choose independent stages. The derivative
