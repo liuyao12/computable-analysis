@@ -173,6 +173,23 @@ forcing samples -> time-ordered transitions -> finite Duhamel sum
 \lean{ComputableAnalysis.LinearODE.trajectory_eq_transition_add_duhamelSum}
 \leanok
 
+The motivating forced oscillator is now connected to this abstract algebra.
+Its two-dimensional Euler provider proves the velocity update and, after
+eliminating velocity, the exact finite second-difference equation
+
+\[
+ q_{n+2}-2q_{n+1}+q_n
+ =-h^2\omega^2q_n+h^2r_n.
+\]
+
+This is a discrete theorem over rational states, not a claim that the mesh
+has converged to a continuous trajectory.
+
+\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.trajectory_position_succ}
+\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.trajectory_velocity_succ}
+\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.trajectory_position_secondDifference}
+\leanok
+
 The first concrete trajectory bridge is the constant square-zero case. If
 (A^2=0), every constant Euler increment (hA) is pairwise product-zero, so
 after (N) equal steps the transition is exactly
