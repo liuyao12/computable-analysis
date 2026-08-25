@@ -266,6 +266,30 @@ theorem matrixApply_vectorScale {dimension : Nat}
         grind [Rat.mul_assoc, Rat.mul_comm]]
   exact (finiteSum_mul_left r (fun j => A i j * x j)).symm
 
+theorem matrixApply_matrixAdd {dimension : Nat}
+    (A B : RatMatrix dimension) (x : RatVector dimension) :
+    matrixApply (matrixAdd A B) x =
+      vectorAdd (matrixApply A x) (matrixApply B x) := by
+  funext i
+  unfold matrixApply matrixAdd vectorAdd
+  rw [show (fun j => (A i j + B i j) * x j) =
+      (fun j => A i j * x j + B i j * x j) by
+        funext j
+        exact Rat.add_mul _ _ _]
+  exact finiteSum_add _ _
+
+theorem matrixApply_matrixScale {dimension : Nat}
+    (A : RatMatrix dimension) (r : Rat) (x : RatVector dimension) :
+    matrixApply (matrixScale r A) x =
+      vectorScale r (matrixApply A x) := by
+  funext i
+  unfold matrixApply matrixScale vectorScale
+  rw [show (fun j => (r * A i j) * x j) =
+      (fun j => r * (A i j * x j)) by
+        funext j
+        exact Rat.mul_assoc _ _ _]
+  exact (finiteSum_mul_left r (fun j => A i j * x j)).symm
+
 /-- The identity matrix acts as the identity on a finite rational vector. -/
 theorem matrixApply_identity {dimension : Nat} (x : RatVector dimension) :
     matrixApply (matrixIdentity dimension) x = x := by
