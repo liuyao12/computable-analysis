@@ -270,6 +270,25 @@ theorem matrixMul_qabs_le {dimension : Nat}
 def matrixRowAbsSum {dimension : Nat} (A : RatMatrix dimension) (i : Fin dimension) : Rat :=
   finiteSum (fun j => qabs (A i j))
 
+theorem matrixRowAbsSum_identity {dimension : Nat} (i : Fin dimension) :
+    matrixRowAbsSum (matrixIdentity dimension) i = 1 := by
+  unfold matrixRowAbsSum matrixIdentity
+  rw [show (fun j => qabs (if i = j then 1 else 0)) =
+      (fun j => if j = i then 1 else 0) by
+        funext j
+        by_cases h : i = j
+        · rw [if_pos h, if_pos h.symm]
+          native_decide
+        · have h' : ¬ j = i := by
+            intro hji
+            exact h hji.symm
+          rw [if_neg h, if_neg h']
+          native_decide
+      ]
+  change finiteSum (fun j => if j = i then (1 : Rat) else 0) =
+    (fun _ => (1 : Rat)) i
+  exact finiteSum_ite_eq i (fun _ => (1 : Rat))
+
 theorem matrixRowAbsSum_matrixScale {dimension : Nat}
     (r : Rat) (A : RatMatrix dimension) (i : Fin dimension) :
     matrixRowAbsSum (matrixScale r A) i =
@@ -292,6 +311,14 @@ theorem matrixRowAbsSum_matrixAdd_le {dimension : Nat}
       exact finiteSum_le (fun j => qabs_add_le _ _)
     _ = finiteSum (fun j => qabs (A i j)) +
         finiteSum (fun j => qabs (B i j)) := finiteSum_add _ _
+
+theorem matrixRowAbsSum_affineStep_le {dimension : Nat}
+    (B : RatMatrix dimension) (i : Fin dimension) :
+    matrixRowAbsSum (matrixAdd (matrixIdentity dimension) B) i <=
+      1 + matrixRowAbsSum B i := by
+  have h := matrixRowAbsSum_matrixAdd_le (matrixIdentity dimension) B i
+  rw [matrixRowAbsSum_identity] at h
+  exact h
 
 theorem matrixMul_rowAbsSum_le {dimension : Nat}
     (A B : RatMatrix dimension) (i : Fin dimension) :
