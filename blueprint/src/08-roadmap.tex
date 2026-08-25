@@ -181,6 +181,18 @@ way to maintain the project's chain of interchangeable computations.
 derivative/area claim -> cell certificate -> mesh refinement -> endpoint overlap
 \end{verbatim}
 
+For adaptive evaluators, keep the native computation schedule visible.  The
+scheduled interval-regularity contract can be consumed directly when a
+requested-stage containment proof is available; an identity schedule is the
+ordinary special case.  This prevents stage changes from being mistaken for
+definitional equality of computations.
+
+\lean{ComputableAnalysis.ScheduledIntervalRegularOn}
+\lean{ComputableAnalysis.ScheduledIntervalRegularOn.toIntervalRegularOn_of_requested_stage}
+\lean{ComputableAnalysis.ScheduledIntervalRegularOn.toIntervalRegularOn_of_identity_schedule}
+\lean{ComputableAnalysis.IntervalRegularOn.toScheduledIntervalRegularOn_identity}
+\leanok
+
 For a new real-valued quantity, add one `realRaw` evaluator and prove its
 order, nesting, and shrinking-width obligations.  If another evaluator is
 already available, add one finite overlap edge to it; the abstract `real` or
