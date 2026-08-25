@@ -1199,6 +1199,52 @@ theorem product_differenceQuotient_right
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
     Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 
+/-! The affine-product instance makes the finite product rule executable.  The
+remainder is not discarded: it is the explicit corner term `m*p*h`, which a
+caller must drive below its requested rational budget. -/
+def affineProduct (m c p d : Rat) (x : Rat) : Rat :=
+  affine m c x * affine p d x
+
+def affineProductDerivative (m c p d : Rat) (x : Rat) : Rat :=
+  affine m c x * p + affine p d x * m
+
+theorem affineProduct_differenceQuotient
+    (m c p d x h : Rat) (hh : h ≠ 0) :
+    differenceQuotient (affineProduct m c p d) x h =
+      affineProductDerivative m c p d x + m * p * h := by
+  unfold differenceQuotient affineProduct affineProductDerivative affine
+  rw [Rat.div_def]
+  have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+def affineProduct_derivative_effective
+    (m c p d : Rat) (radius : QPos -> QPos)
+    (hbudget : forall eps,
+      qabs (m * p) * (radius eps).val <= eps.val) :
+    EffectiveDerivativeExact
+      (affineProduct m c p d)
+      (affineProductDerivative m c p d) where
+  stepRadius := radius
+  good := by
+    intro x h eps hhpos hhle
+    have hnonneg : 0 <= h := Rat.le_of_lt hhpos
+    have hqabs : qabs h = h := qabs_eq_self_of_nonneg hnonneg
+    have hrem : qabs (m * p * h) <= eps.val := by
+      rw [qabs_mul, qabs_mul, hqabs]
+      calc
+        qabs m * qabs p * h = qabs (m * p) * h := by
+          rw [qabs_mul]
+        _ <= qabs (m * p) * (radius eps).val := by
+          exact Rat.mul_le_mul_of_nonneg_left hhle (qabs_nonneg _)
+        _ <= eps.val := hbudget eps
+    change qabs
+      (differenceQuotient (affineProduct m c p d) x h -
+        affineProductDerivative m c p d x) <= eps.val
+    rw [affineProduct_differenceQuotient m c p d x h (Rat.ne_of_gt hhpos)]
+    simpa [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
+      Rat.add_neg_cancel, Rat.add_zero] using hrem
+
 /-- The equivalent finite-difference product decomposition with both main
 terms evaluated at the left endpoint.  The last term is the explicit corner
 remainder which a constructive product-derivative proof must bound. -/

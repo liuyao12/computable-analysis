@@ -40,7 +40,9 @@ The current strong point is checking specified rational and complex interval
 arguments, finite linear systems, and certified special-function
 representations. The following general constructions remain active targets:
 
-- product, chain, and quotient rules for arbitrary interval evaluators;
+- product, chain, and quotient rules for arbitrary interval evaluators (the
+  affine-product finite certificate is now checked; the general interval
+  closure remains an active target);
 - construction of an integral from every interval-regular function;
 - general FTC, substitution, and automatic construction of bounded
   piecewise integration-by-parts certificates;

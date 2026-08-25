@@ -574,6 +574,29 @@ containment theorem.  A classical pointwise statement is recovered only when
 the boxes have been shown to shrink and the application needs that stronger
 form.
 
+The product rule follows the same finite pattern.  For affine factors, the
+finite difference quotient is exactly
+
+\[
+ (uv)(x+h)-(uv)(x)\over h
+ = u(x)p+v(x)m+mph,
+\]
+
+where $u(x)=mx+c$ and $v(x)=px+d$.  The corner term $mph$ is retained as an
+explicit error budget; a supplied step-radius schedule turns it into an
+effective derivative certificate.
+
+\lean{ComputableAnalysis.ExactFunction.affineProduct}
+\lean{ComputableAnalysis.ExactFunction.affineProductDerivative}
+\lean{ComputableAnalysis.ExactFunction.affineProduct_differenceQuotient}
+\lean{ComputableAnalysis.ExactFunction.affineProduct_derivative_effective}
+\leanok
+
+This is the representative product instance.  General products still require
+bounded interval multiplication and a synchronized schedule for the two
+factor errors; routine scalar, sign, and affine variants are transported from
+this finite certificate.
+
 When a selected stage schedule is not nested, prefix stabilization is the
 generic repair: it intersects the finite candidate with a finite-radius
 prefix envelope, using the endpoint difference only in the proof.  The
