@@ -6298,6 +6298,52 @@ theorem uniformExpOnUnitWarm_cellRange_midpoint_above_forward_target_at_stage
     (uniformExpBox m (p + 4)).lo
   grind [uniformExpCellRange]
 
+theorem uniformExpOnUnitWarm_cellRange_midpoint_below_forward_target_at_scheduled_stage
+    {m r : Rat} (n q : Nat)
+    (hm : 0 <= m) (hr : r <= 1) (hmr : m < r)
+    (hq : uniformExpQuotientPrecision (r - m)
+      (Rat.ne_of_gt ((Rat.lt_iff_sub_pos m r).mp hmr)) n ≤ q) :
+    (uniformExpOnUnitWarm_intervalRegular.evalInterval
+      { lo := m, hi := m }
+      ⟨by change 0 <= m; exact hm, by exact Rat.le_refl, by change m <= 1; grind⟩ q).hi <
+      ((uniformExpOnUnitWarm_forward_target r
+        ⟨by change 0 <= r; grind, by change r <= 1; exact hr⟩).value.compute q).lo := by
+  let p := uniformExpQuotientPrecision (r - m)
+    (Rat.ne_of_gt ((Rat.lt_iff_sub_pos m r).mp hmr)) n
+  have hbase := uniformExpOnUnitWarm_cellRange_midpoint_below_forward_target_at_stage
+    n q hm hr hmr hq
+  have hnest := uniformExpBox_nested m (by
+    rw [qabs_eq_self_of_nonneg hm]
+    exact by grind) (p + 4) (q + 4) (by omega)
+  change (uniformExpBox m (q + 4)).hi <
+      (uniformExpBox r (q + 4)).lo
+  change (uniformExpBox m (p + 4)).hi <
+      (uniformExpBox r (q + 4)).lo at hbase
+  grind [Rat.sub_eq_add_neg]
+
+theorem uniformExpOnUnitWarm_cellRange_midpoint_above_forward_target_at_scheduled_stage
+    {m r : Rat} (n q : Nat)
+    (hm : 0 <= r) (hr : m <= 1) (hrm : r < m)
+    (hq : uniformExpQuotientPrecision (m - r)
+      (Rat.ne_of_gt ((Rat.lt_iff_sub_pos r m).mp hrm)) n ≤ q) :
+    ((uniformExpOnUnitWarm_forward_target r
+        ⟨hm, by change r <= 1; grind⟩).value.compute q).hi <
+      (uniformExpOnUnitWarm_intervalRegular.evalInterval
+        { lo := m, hi := m }
+        ⟨by change 0 <= m; grind, by exact Rat.le_refl, by change m <= 1; exact hr⟩ q).lo := by
+  let p := uniformExpQuotientPrecision (m - r)
+    (Rat.ne_of_gt ((Rat.lt_iff_sub_pos r m).mp hrm)) n
+  have hbase := uniformExpOnUnitWarm_cellRange_midpoint_above_forward_target_at_stage
+    n q hm hr hrm hq
+  have hnest := uniformExpBox_nested m (by
+    rw [qabs_eq_self_of_nonneg (by grind : (0 : Rat) <= m)]
+    exact by grind) (p + 4) (q + 4) (by omega)
+  change (uniformExpBox r (q + 4)).hi <
+      (uniformExpBox m (q + 4)).lo
+  change (uniformExpBox r (q + 4)).hi <
+      (uniformExpBox m (p + 4)).lo at hbase
+  grind [Rat.sub_eq_add_neg]
+
 /-! Finite maximum bookkeeping for a target-stage schedule.  A bisection
 stage has only finitely many possible midpoint gaps, so its required
 gap-dependent precisions can be joined by this explicit natural-number max. -/
@@ -6499,6 +6545,34 @@ theorem gapAwareTargetBisectionStep_dyadicCell_of_above
   rw [gapAwareTargetBisectionStep_of_above F Y (dyadicCell n k) hI p
     hnotbelow habove]
   exact dyadicCell_left_child n k
+
+theorem uniformExpOnUnitWarm_dyadicCell_strict_below_forward_target
+    {n k : Nat} (q : Nat) {r : Rat}
+    (hk : k < 2 ^ n) (hr0 : 0 <= r) (hr1 : r <= 1)
+    (hmr : (dyadicCell n k).midpoint < r)
+    (hq : uniformExpQuotientPrecision (r - (dyadicCell n k).midpoint)
+      (Rat.ne_of_gt ((Rat.lt_iff_sub_pos (dyadicCell n k).midpoint r).mp hmr)) n ≤ q) :
+    gapAwareTargetBisectionStrictDecision uniformExpOnUnitWarm_continuous
+      ((uniformExpOnUnitWarm_forward_target r ⟨hr0, hr1⟩).value.compute q)
+      (dyadicCell n k) (dyadicCell_subinterval n k hk) q := by
+  left
+  change (uniformExpOnUnitWarm_intervalRegular.evalInterval
+      { lo := (dyadicCell n k).midpoint, hi := (dyadicCell n k).midpoint }
+      (by
+        exact ⟨by
+          exact Rat.le_trans (dyadicCell_subinterval n k hk).1
+            (QInterval.midpoint_mem (dyadicCell_subinterval n k hk).2.1).1,
+          Rat.le_refl,
+          by
+            exact Rat.le_trans (QInterval.midpoint_mem
+              (dyadicCell_subinterval n k hk).2.1).2
+              (dyadicCell_subinterval n k hk).2.2⟩) q).hi <
+    ((uniformExpRaw r).compute (q + 4)).lo
+  exact uniformExpOnUnitWarm_cellRange_midpoint_below_forward_target_at_scheduled_stage
+    n q (by
+      have hcell := dyadicCell_subinterval n k hk
+      exact Rat.le_trans hcell.1
+        (QInterval.midpoint_mem hcell.2.1).1) hr1 hmr hq
 
 theorem gapAwareTargetBisectionScheduledIterate_dyadicCell
     (F : ContinuousFunctionOnInterval) (Y : QInterval)

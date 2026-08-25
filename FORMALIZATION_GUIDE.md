@@ -1001,6 +1001,14 @@ The companion theorem
 `gapAwareTargetBisectionScheduledIterate_width_eq_div_pow_of_strictly_decided`
 converts the same strict certificates into the exact width law
 `I.width / 2^n`.
+For the exponential evaluator, the scheduled-stage transport lemmas
+`uniformExpOnUnitWarm_cellRange_midpoint_below_forward_target_at_scheduled_stage`
+and its `above` counterpart carry a strict separation certificate from the
+minimal gap-dependent precision to the larger target schedule, using nested
+finite boxes.
+The first target-facing cell certificate,
+`uniformExpOnUnitWarm_dyadicCell_strict_below_forward_target`, applies this
+transport to a dyadic cell whose midpoint lies below the rational source.
 
 Formalization scope is by mechanism, not by exhaustive enumeration.  One
 representative function is enough when another function uses the same certified
