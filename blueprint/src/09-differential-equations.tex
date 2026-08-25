@@ -63,6 +63,10 @@ The finite algebraic core is explicit in Lean:
 \lean{ComputableAnalysis.LinearODE.matrixRowAbsSum_matrixAdd_le}
 \lean{ComputableAnalysis.LinearODE.matrixRowAbsSum_affineStep_le}
 \lean{ComputableAnalysis.LinearODE.matrixMul_rowAbsSum_le}
+\lean{ComputableAnalysis.LinearODE.finiteSum_mul_le_of_nonneg}
+\lean{ComputableAnalysis.LinearODE.ratProduct}
+\lean{ComputableAnalysis.LinearODE.ratProduct_nonneg}
+\lean{ComputableAnalysis.LinearODE.chronologicalProduct_rowAbsSum_le}
 \lean{ComputableAnalysis.LinearODE.solvesHomogeneousRecurrence_eq_homogeneousTrajectory}
 \lean{ComputableAnalysis.LinearODE.solvesHomogeneousRecurrence_zero}
 \lean{ComputableAnalysis.LinearODE.homogeneousTrajectory_eq_chronologicalStepProduct}
@@ -97,6 +101,12 @@ can use for sampled transition products.  Scaling multiplies the row bound by
 the scalar's rational absolute value, and addition is controlled by the sum of
 row bounds.  Thus the same certificate also follows affine Euler updates of
 the form \(I+B_k\).
+
+The finite transition-growth theorem now iterates this estimate.  If the
+row-sum of step \(I+B_k\) is bounded by \(c_k\), then every row of the first
+\(N\) chronological product is bounded by the rational product
+\(\prod_{k<N} c_k\).  This is a finite induction, and supplies the growth
+factor separately from the factorial tail.
 
 The forcing term is handled by a literal finite Duhamel sum:
 

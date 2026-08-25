@@ -97,6 +97,18 @@ theorem finiteSum_mul_right {dimension : Nat} (a : Rat) (f : Fin dimension -> Ra
   | succ dimension ih =>
       simp [finiteSum, ih, Rat.add_mul]
 
+theorem finiteSum_mul_le_of_nonneg {dimension : Nat}
+    (f g : Fin dimension -> Rat) (c : Rat)
+    (hf : forall i, 0 <= f i) (hg : forall i, g i <= c) :
+    finiteSum (fun i => f i * g i) <= c * finiteSum f := by
+  calc
+    finiteSum (fun i => f i * g i) <=
+        finiteSum (fun i => f i * c) := by
+      exact finiteSum_le (fun i =>
+        Rat.mul_le_mul_of_nonneg_left (hg i) (hf i))
+    _ = finiteSum f * c := (finiteSum_mul_right c f).symm
+    _ = c * finiteSum f := Rat.mul_comm _ _
+
 /-- Finite rational sums may be enumerated in either order.  This is the
 local Fubini calculation used to prove associativity of the project-local
 matrix product; it is only a double traversal of finite index types. -/
@@ -1599,6 +1611,65 @@ def chronologicalProduct {dimension : Nat} (B : Nat -> RatMatrix dimension) : Na
   | 0 => matrixIdentity dimension
   | n + 1 => matrixMul (matrixAdd (matrixIdentity dimension) (B n))
       (chronologicalProduct B n)
+
+def ratProduct (f : Nat -> Rat) : Nat -> Rat
+  | 0 => 1
+  | n + 1 => ratProduct f n * f n
+
+theorem ratProduct_nonneg (f : Nat -> Rat) (hf : forall n, 0 <= f n) :
+    forall n, 0 <= ratProduct f n
+  | 0 => by
+      change (0 : Rat) <= 1
+      native_decide
+  | n + 1 => by
+      rw [ratProduct]
+      exact Rat.mul_nonneg (ratProduct_nonneg f hf n) (hf n)
+
+theorem chronologicalProduct_rowAbsSum_le {dimension : Nat}
+    (B : Nat -> RatMatrix dimension) (bound : Nat -> Rat)
+    (hbound : forall n i,
+      matrixRowAbsSum (matrixAdd (matrixIdentity dimension) (B n)) i <= bound n)
+    (hbound_nonneg : forall n, 0 <= bound n) :
+    forall steps i,
+      matrixRowAbsSum (chronologicalProduct B steps) i <= ratProduct bound steps
+  | 0, i => by
+      rw [chronologicalProduct, matrixRowAbsSum_identity, ratProduct]
+      native_decide
+  | steps + 1, i => by
+      rw [chronologicalProduct]
+      have hmul := matrixMul_rowAbsSum_le
+        (matrixAdd (matrixIdentity dimension) (B steps))
+        (chronologicalProduct B steps) i
+      have hprevious : forall k,
+          matrixRowAbsSum (chronologicalProduct B steps) k <=
+            ratProduct bound steps :=
+        fun k => chronologicalProduct_rowAbsSum_le B bound hbound
+          hbound_nonneg steps k
+      have hweighted := finiteSum_mul_le_of_nonneg
+        (fun k => qabs ((matrixAdd (matrixIdentity dimension) (B steps)) i k))
+        (fun k => matrixRowAbsSum (chronologicalProduct B steps) k)
+        (ratProduct bound steps)
+        (fun k => qabs_nonneg _)
+        hprevious
+      calc
+        matrixRowAbsSum (matrixMul
+            (matrixAdd (matrixIdentity dimension) (B steps))
+            (chronologicalProduct B steps)) i <=
+            finiteSum (fun k =>
+              qabs ((matrixAdd (matrixIdentity dimension) (B steps)) i k) *
+                matrixRowAbsSum (chronologicalProduct B steps) k) :=
+          hmul
+        _ <= ratProduct bound steps *
+              finiteSum (fun k =>
+                qabs ((matrixAdd (matrixIdentity dimension) (B steps)) i k)) :=
+          hweighted
+        _ = ratProduct bound steps *
+            matrixRowAbsSum (matrixAdd (matrixIdentity dimension) (B steps)) i := rfl
+        _ <= ratProduct bound steps * bound steps := by
+          exact Rat.mul_le_mul_of_nonneg_left (hbound steps i)
+            (ratProduct_nonneg bound hbound_nonneg steps)
+        _ = ratProduct bound (steps + 1) := by
+          rw [ratProduct]
 
 /-- The general sampled transition specializes exactly to the
 Peano--Baker chronological product for Euler increments. -/
