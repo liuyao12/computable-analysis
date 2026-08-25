@@ -113,18 +113,18 @@ That bridge is now represented by the checked
    the generic interval-arithmetic step after a correctly scaled raw integral
    has been identified with its target: a finite sum inherits a
    width-minus-margin error bound.  It is intentionally not specialized to
-   the provisional `1/4` tangent-square placeholder; the unscaled tangent
-   chart represents the quarter-turn, so normalization must be supplied first.
+   the unscaled tangent chart: that chart represents the quarter-turn, so the
+   normalized product must be used for the target integral.
    **Normalization correction:** `tangentSquareIntegral` is the unscaled
    tangent-chart integral, whose endpoint is the quarter-turn raw
    `halfQuarterTurnRaw 1` (the computable analogue of `pi/4`).  The value
    `1/4` belongs to the normalized product
    `reciprocalPiRaw * tangentSquareIntegral`, matching
-   `integral_0^(1/2) sin(pi*x)^2 dx`.  The existing rational-`1/4` contract is
-   therefore only a provisional placeholder until this scaling is formalized.
-   The corrected contract is now `NormalizedTangentSquareValueSubgoal`, whose
-   `value` theorem requires the normalized raw validity, transport to the
-   quarter-turn anchor, and the reciprocal-π quarter-scale identity.
+   `integral_0^(1/2) sin(pi*x)^2 dx`.  The reciprocal-π quarter-scale identity
+   is now formalized by `reciprocalPi_quarterTurn_equiv_quarter`.  The remaining
+   contract is `NormalizedTangentSquareValueSubgoal`, whose `value` theorem
+   requires the normalized raw validity and transport to the quarter-turn
+   anchor.
 
 The rational arithmetic layer now exposes `rat_mul_le_mul_of_nonneg`, the
 product-order lemma needed when a cell estimate multiplies two nonnegative

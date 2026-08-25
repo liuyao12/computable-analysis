@@ -107,6 +107,26 @@ to exponential and trigonometric evaluators.
 \lean{ComputableAnalysis.Integral.fifthIntegralEffectiveFTC_equiv_one_sixth}
 \leanok
 
+\section{A normalized trigonometric bridge}
+
+The tangent chart is a useful representative computation, but it is not yet
+the original variable.  Its square integral has the quarter-turn value
+\(\pi/4\).  Returning to \(\sin(\pi x)^2\) contributes the Jacobian
+\(1/\pi\), so the target is represented by the product
+\[
+  (1/\pi)\,(\pi/4)=1/4.
+\]
+This is a finite interval identity between raw computations: the reciprocal
+\(\pi\) evaluator and the rational-circle quarter-turn evaluator overlap at
+every stage after multiplication.  The remaining sine-square theorem is
+therefore a representation-transport certificate, not a new real-number
+existence argument.
+
+\lean{ComputableAnalysis.EffectiveFTCPortfolio.halfQuarterTurnRaw_bounds}
+\lean{ComputableAnalysis.EffectiveFTCPortfolio.reciprocalPi_quarterTurn_equiv_quarter}
+\lean{ComputableAnalysis.EffectiveFTCPortfolio.NormalizedTangentSquareTransportSubgoal.value}
+\leanok
+
 \section{Continuity as a finite certificate}
 
 The public interval-function layer supports same-chart addition.  This is the
