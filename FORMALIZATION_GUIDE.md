@@ -373,6 +373,9 @@ complex raw object is equivalent to the exact rational-complex finite
 transform, so a finite sample table does not need a second convergence proof.
 Reserve `EffectiveFourierSeries` tail certificates for genuinely unbounded
 coefficient families.
+Such a certificate exposes `EffectiveFourierTailCertificate.stageBox` and
+`future_stage_in_stageBox`, a single rational-complex enclosure for every
+future stage.
 
 Use `rg` to discover nearby examples before inventing a new interface:
 
