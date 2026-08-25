@@ -3915,6 +3915,26 @@ def implementationRepresentation {f : PartialRealFunction}
   valid := impl.valid
   agrees := implementation_agrees_preferred impl
 
+/-! Two certified views of one abstract partial function can be compared on
+their common domain once that domain is known to lie inside the preferred
+domain.  This is the function-level analogue of `Real.Representation.equiv`:
+the preferred evaluator is the spanning node in the representation chain. -/
+theorem Representation.equiv_on_common_domain
+    {f : PartialRealFunction} (source target : Representation f)
+    (hsource : forall x, source.raw.definedAt x -> f.preferred.definedAt x)
+    {x : Rat} (hxs : source.raw.definedAt x)
+    (hxt : target.raw.definedAt x) :
+    (source.raw.evalRaw x hxs).Equiv (target.raw.evalRaw x hxt) := by
+  have hxp : f.preferred.definedAt x := hsource x hxs
+  have hs : (source.raw.evalRaw x hxs).Valid := by
+    simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using source.valid x hxs
+  have hp : (f.preferred.evalRaw x hxp).Valid := by
+    simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using f.valid x hxp
+  have ht : (target.raw.evalRaw x hxt).Valid := by
+    simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using target.valid x hxt
+  exact RealRaw.equiv_trans hs hp ht (source.agrees x hxs hxp)
+    (RealRaw.equiv_symm (target.agrees x hxt hxp))
+
 def withAlternative (f : PartialRealFunction) (raw : PartialRealFunRaw)
     (hvalid : raw.Valid)
     (h : f.preferred.AgreeOnOverlap raw) : PartialRealFunction where

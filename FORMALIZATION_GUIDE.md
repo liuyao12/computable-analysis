@@ -228,6 +228,14 @@ the intermediate domain must cover the relevant intersection; otherwise prove
 the new common-domain agreement directly.  This prevents an invalid appeal to
 transitivity across changing domains.
 
+For partial real functions, the preferred representation can serve as the
+spanning node for two alternative views.  When the source domain is known to
+lie in the preferred domain, use
+`PartialRealFunction.Representation.equiv_on_common_domain` to compare it with
+any target representation at a shared rational input.  The theorem transports
+through the preferred evaluator and keeps domain hypotheses explicit; it does
+not pretend that two representations agree outside their common domain.
+
 Recommended pattern:
 
 ```lean
