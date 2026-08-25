@@ -128,7 +128,7 @@ Start with the smallest target module rather than importing
 | Algebraic branches and square roots | `ComputableAnalysis.AlgebraicFunctions` | source header and the unit-interval square-root examples |
 | Complex interval polynomial checks | `ComputableAnalysis.ComplexInterval` | `QBox.evalPoly`, `IsApproxRootAt` |
 | Finite complex path calculus | `ComputableAnalysis.ComplexPathIntegral`, `ComputableAnalysis.FiniteComplexPathCertificate` | `polygonalIntegralRawEntire_valid`, closed constant/polynomial differential exactness, and rational polygonal paths |
-| Finite multiple integrals and n-balls | `ComputableAnalysis.FiniteNBallVolume`, `ComputableAnalysis.FiniteGaussianIntegral` | `finiteProductSum2D_factorized`, `finiteProductIntegralSum2D_weighted_stage`, Gaussian Taylor-prefix/tail ladders, and `nBallVolumeModel_recurrence` |
+| Finite multiple integrals and n-balls | `ComputableAnalysis.FiniteNBallVolume`, `ComputableAnalysis.FiniteGaussianIntegral` | `finiteProductSum2D_factorized`, `finiteProductIntegralSum2D_weighted_stage`, Gaussian Taylor-prefix/tail ladders, and `nBallVolumeModel_recurrence`/`nBallVolumeModel_nonneg` |
 | Finite FTA root certificates | `ComputableAnalysis.FTA` | `monicLinear_has_computable_root`, `rationalLinear_has_computable_root`, and the rational quadratic discriminant witnesses |
 
 The Gaussian prefix now exposes the reusable finite termwise-integration
