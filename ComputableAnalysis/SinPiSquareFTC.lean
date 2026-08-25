@@ -3333,6 +3333,17 @@ def DyadicSquareCircleOverlapFamily.of_precision_halfAngle_certificate_family
     (canonical_dyadic_halfAngle_certificate_family_of_precision_family
       S.inverse hcertificate)
 
+theorem DyadicSquareCircleOverlapFamily.of_branch_certificate_family
+    (S : ArctanSinPiConstruction)
+    (family : DyadicNestedRadicalBranchCertificateFamily S.inverse) :
+    DyadicSquareCircleOverlapFamily S := by
+  exact {
+    endpoint_zero := family.endpoint_zero
+    positive_overlap := by
+      intro n k hk hpos
+      exact family.rational_circle_overlap n n k hk
+  }
+
 theorem DyadicSquareCircleOverlapFamily.to_square_sum_overlap
     {S : ArctanSinPiConstruction}
     (certificate : DyadicSquareCircleOverlapFamily S) :
@@ -3368,25 +3379,7 @@ theorem dyadicPublicSquareLeftSum_overlap_of_branch_certificate_family
       QInterval.Overlaps
         (dyadicPublicSquareLeftSum S n)
         (dyadicNestedRadicalSquareLeftSum n) := by
-  intro n
-  apply dyadicPublicSquareLeftSum_overlap_of_sample_overlaps S n
-  intro k hk
-  have hsin : QInterval.Overlaps
-      ((sinPiRawOfArctan S.inverse
-        (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k)
-        (dyadicHalfDomain hk)).compute n)
-      (dyadicNestedRadicalStageSinAt n k) := by
-    have hbox := family.rational_circle_overlap n n k hk
-    simpa [sinPiRawOfArctan, dyadicTangentBoxAt,
-      dyadicNestedRadicalStageSinAt, dyadicNestedRadicalStageTable] using hbox
-  exact sinPiSquare_sample_overlap_of_sine_and_table_overlap S
-    (dyadicHalfDomain hk) n
-    (by
-      change subintervalOf
-        (dyadicNestedRadicalTableAt n n k).1 0 1
-      exact (dyadicNestedRadicalTableAt_bounds n n k
-        (Nat.le_of_lt hk)).1)
-    hsin
+  exact (DyadicSquareCircleOverlapFamily.of_branch_certificate_family S family).to_square_sum_overlap
 
 theorem square_sample_overlap_of_sine_sample_overlap
     {I J : QInterval}

@@ -923,6 +923,9 @@ When a geometric proof is naturally indexed by evaluator precision, use
 `canonical_dyadic_halfAngle_certificate_family_of_precision_family` to select
 native precision and then
 `DyadicSquareCircleOverlapFamily.of_precision_halfAngle_certificate_family`.
+The shared branch family feeds the same interface directly through
+`DyadicSquareCircleOverlapFamily.of_branch_certificate_family`, so the square
+transport reuses the sine sample proof rather than duplicating it.
 This is only an index bridge: it adds no completeness or limiting argument.
 The theorem-facing shortcut is
 `ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_canonical_certificate_family`.
