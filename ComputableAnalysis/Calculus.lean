@@ -7692,6 +7692,18 @@ theorem affineMonotoneIntegralFor_eq_ofRat {r c a b : Rat} (hr : 0 <= r) :
       RealRaw.ofRat ((b - a) * (r * (a + b) / 2 + c)) := by
   rfl
 
+theorem unitMeshSquareIntegralRaw_equiv_affineMonotoneIntegral :
+    unitMeshSquareIntegralRaw.Equiv
+      (monotoneIntegralFor
+        (FunctionOnInterval.exactRat (fun x : Rat => 2 * x + 0) 0 1)
+        (affineMonotoneConstructionFor
+          (r := 2) (c := 0) (a := 0) (b := 1) (by native_decide))) := by
+  rw [affineMonotoneIntegralFor_eq_ofRat]
+  · have hone :
+        ((1 : Rat) - 0) * (2 * (0 + 1) / 2 + 0) = 1 := by native_decide
+    rw [hone]
+    exact unitMeshSquareIntegralRaw_equiv_one
+
 theorem affineMonotoneIntegralFor_of_nonpos_eq_ofRat
     {r c a b : Rat} (hr : r <= 0) :
     monotoneIntegralFor
