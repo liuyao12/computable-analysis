@@ -1010,8 +1010,11 @@ The first target-facing cell certificate,
 `uniformExpOnUnitWarm_dyadicCell_strict_below_forward_target`, applies this
 transport to a dyadic cell whose midpoint lies below the rational source.
 The symmetric `...strict_above_forward_target` theorem handles the other
-branch, with the failed below-test recorded explicitly as part of the finite
-certificate.
+branch.  Its companion
+`uniformExpOnUnitWarm_dyadicCell_below_test_false_of_above` proves that the
+failed below-test follows automatically from the two ordered finite boxes;
+`...strict_above_forward_target_auto` packages that contradiction into the
+same target-facing certificate without an extra hypothesis.
 
 Formalization scope is by mechanism, not by exhaustive enumeration.  One
 representative function is enough when another function uses the same certified
