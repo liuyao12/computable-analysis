@@ -6353,6 +6353,79 @@ theorem uniformExpGapPrecisionMax_dominates
   apply finiteNatMax_mem
   exact List.mem_map.mpr ⟨m, hm, rfl⟩
 
+def dyadicMidpointGrid (n : Nat) : List Rat :=
+  (List.range (2 ^ n)).map (fun k =>
+    ((2 * k + 1 : Nat) : Rat) / ((2 ^ (n + 1) : Nat) : Rat))
+
+def dyadicMidpointGridUpTo : Nat → List Rat
+  | 0 => dyadicMidpointGrid 0
+  | n + 1 => dyadicMidpointGridUpTo n ++ dyadicMidpointGrid (n + 1)
+
+def uniformExpRationalTargetStage (r : Rat) : Nat → Nat
+  | 0 => max 0 (uniformExpGapPrecisionMax r 0
+      (dyadicMidpointGridUpTo 0))
+  | n + 1 => max (n + 1)
+      (max (uniformExpRationalTargetStage r n)
+        (uniformExpGapPrecisionMax r (n + 1)
+          (dyadicMidpointGridUpTo (n + 1))))
+
+theorem uniformExpRationalTargetStage_ge (r : Rat) (n : Nat) :
+    n ≤ uniformExpRationalTargetStage r n := by
+  cases n with
+  | zero => exact Nat.zero_le _
+  | succ n =>
+      exact Nat.le_max_left _ _
+
+theorem uniformExpRationalTargetStage_mono (r : Rat) :
+    ∀ ⦃n m : Nat⦄, n ≤ m →
+      uniformExpRationalTargetStage r n ≤
+        uniformExpRationalTargetStage r m := by
+  intro n m hnm
+  induction hnm with
+  | refl => exact Nat.le_refl _
+  | @step m h ih =>
+      have hmiddle := Nat.le_max_left
+        (uniformExpRationalTargetStage r m)
+        (uniformExpGapPrecisionMax r (m + 1)
+          (dyadicMidpointGridUpTo (m + 1)))
+      have hright := Nat.le_max_right (m + 1)
+        (max (uniformExpRationalTargetStage r m)
+          (uniformExpGapPrecisionMax r (m + 1)
+            (dyadicMidpointGridUpTo (m + 1))))
+      exact Nat.le_trans ih (Nat.le_trans hmiddle hright)
+
+theorem uniformExpRationalTargetStage_dominates
+    {r : Rat} {n : Nat} {m : Rat}
+    (hm : m ∈ dyadicMidpointGridUpTo n) :
+    uniformExpGapPrecisionAt r m n ≤
+      uniformExpRationalTargetStage r n := by
+  cases n with
+  | zero =>
+      exact Nat.le_trans
+        (uniformExpGapPrecisionMax_dominates hm)
+        (Nat.le_max_right _ _)
+  | succ n =>
+      have hinner := Nat.le_max_right
+        (uniformExpRationalTargetStage r n)
+        (uniformExpGapPrecisionMax r (n + 1)
+          (dyadicMidpointGridUpTo (n + 1)))
+      have houter := Nat.le_max_right (n + 1)
+        (max (uniformExpRationalTargetStage r n)
+          (uniformExpGapPrecisionMax r (n + 1)
+            (dyadicMidpointGridUpTo (n + 1))))
+      exact Nat.le_trans
+        (uniformExpGapPrecisionMax_dominates hm)
+        (Nat.le_trans hinner houter)
+
+def uniformExpRationalTargetStageSchedule (r : Rat) :
+    RealRaw.StageSchedule where
+  stage := uniformExpRationalTargetStage r
+  monotone := uniformExpRationalTargetStage_mono r
+  cofinal := by
+    intro target
+    refine ⟨target, ?_⟩
+    exact uniformExpRationalTargetStage_ge r target
+
 def uniformExpOnUnitWarm_forward_search (r : Rat)
     (hr : inDomainInterval uniformExpOnUnitWarm.lower
       uniformExpOnUnitWarm.upper r) :

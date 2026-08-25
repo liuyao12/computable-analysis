@@ -975,6 +975,10 @@ The finite schedule bookkeeping is exposed by `finiteNatMax`,
 `uniformExpGapPrecisionMax_dominates` proves that every listed midpoint demand
 is covered by the computable maximum.  This is the finite construction to use
 when assembling a target-specific schedule.
+The concrete grid constructors `dyadicMidpointGrid` and
+`dyadicMidpointGridUpTo`, together with `uniformExpRationalTargetStage`,
+produce a monotone, cofinal target-stage schedule that dominates every
+listed dyadic midpoint demand.
 
 The reusable `gapAwareTargetBisectionStep` is deliberately conservative. It
 keeps a rational parent interval whenever the computed image box overlaps the
