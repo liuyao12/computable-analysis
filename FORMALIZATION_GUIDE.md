@@ -943,6 +943,13 @@ forward value and the returned source interval is degenerate at that point.
 This is a regression family, not yet the general target-driven bisection
 algorithm; that algorithm must make certified midpoint decisions using the
 gap-aware separation schedule.
+As a finite target-driven kernel, `uniformExpCenter_threeHalves_map` and
+`uniformExpCenter_threeHalves_certificate` run exact rational midpoint
+decisions for target `3/2`; `uniformExpCenter_threeHalves_finite_bisection`
+proves the retained bracket and width `2^-k`. The remaining lift is to use
+the requested stage and target interval together with the gap-aware precision
+schedule, so this finite certificate is not being misrepresented as the full
+inverse evaluator.
 
 For a direct scalar uniqueness proof, make one finite short-block sweep an
 instance of `ScalarODE.ShortBlockMeshSweep`: telescope the cell estimates to

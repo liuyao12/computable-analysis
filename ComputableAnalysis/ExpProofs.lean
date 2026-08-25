@@ -2,6 +2,7 @@ import ComputableAnalysis.Exp
 import ComputableAnalysis.FTC
 import ComputableAnalysis.ElementaryFunctions
 import ComputableAnalysis.FinitePolynomialCalculus
+import ComputableAnalysis.FiniteInverseSearchInterface
 
 /-!
 # Proof targets for the exponential algorithms
@@ -6111,6 +6112,46 @@ theorem uniformExpOnUnitWarm_forward_preimage_equiv
   rw [RealRaw.ofRat_compute]
   change QInterval.Overlaps { lo := r, hi := r } { lo := r, hi := r }
   constructor <;> exact Rat.le_refl
+
+/-! A first genuinely target-driven inverse regression.  Here the target is
+the rational value `3/2`, so the finite center itself can be used as the
+decision map.  The certificate is deliberately finite: it records the
+initial endpoint bracket and a requested number of exact rational midpoint
+decisions, while the general raw inverse still requires the gap-aware stage
+schedule above. -/
+def uniformExpCenter_threeHalves_map : Rat -> Rat :=
+  fun x => uniformExpCenter x 8
+
+def uniformExpCenter_threeHalves_certificate (k : Nat) :
+    FiniteInverseSearchCertificate where
+  map := uniformExpCenter_threeHalves_map
+  target := 3 / 2
+  initialInterval := { lo := 0, hi := 1 }
+  stage := k
+  ordered := by native_decide
+  lower_bracket := by
+    change uniformExpCenter 0 8 <= 3 / 2
+    rw [uniformExpCenter_zero]
+    native_decide
+  upper_bracket := by
+    change 3 / 2 <= uniformExpCenter 1 8
+    native_decide
+
+theorem uniformExpCenter_threeHalves_finite_bisection
+    (k : Nat) :
+    let C := uniformExpCenter_threeHalves_certificate k
+    C.map C.output.lo <= C.target /\
+      C.target <= C.map C.output.hi /\
+      C.output.width = 1 / (2 ^ k : Rat) := by
+  intro C
+  refine ⟨C.output_bracket.1, C.output_bracket.2, ?_⟩
+  calc
+    C.output.width = C.initialInterval.width / (2 ^ C.stage : Rat) :=
+      C.output_width
+    _ = 1 / (2 ^ k : Rat) := by
+      change (1 - 0) / (2 ^ k : Rat) = 1 / (2 ^ k : Rat)
+      have h : (1 : Rat) - 0 = 1 := by native_decide
+      rw [h]
 
 private theorem uniformExpOnUnit_scheduledRegular_width
     (n : Nat) {I : QInterval}
