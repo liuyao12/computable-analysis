@@ -148,7 +148,7 @@ it transports the cell integrals through a primitive endpoint list and then
 uses the same finite telescope as the single-function interface.  The
 absolute-value construction now supplies the first completed finite-turn FTC
 case: the two cell areas add to (1), and the primitive
-(P(x)=xlvert xvert/2) transports that sum to (P(1)-P(-1)=1).
+\(P(x)=x\lvert x\rvert/2\) transports that sum to \(P(1)-P(-1)=1\).
 
 \lean{ComputableAnalysis.MonotoneOnInterval}
 \lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule}
@@ -841,8 +841,12 @@ The closed finite instances are linked directly to their certificates:
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixOneIntegralRaw_equiv_one_eighth}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTCData}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTC_equiv_endpoint}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTC_boundedIntegral_equiv_endpointDifference}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTC_equiv_fortySeven_over_threeEightFour}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_endpoint}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_boundedIntegral_equiv_endpointDifference}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_value}
 \leanok
 
 The target-directed inverse search has the same shape as the integral
