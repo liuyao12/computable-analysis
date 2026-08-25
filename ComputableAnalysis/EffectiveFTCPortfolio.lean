@@ -1345,6 +1345,32 @@ theorem NestedRadicalSquareIntegralConstructionSubgoal.public_equiv_evaluator
     (by native_decide : (0 : Rat) <= (1 : Rat) / 2)
     H.publicConstruction H.integral H.same_plan H.sample_overlap
 
+def NestedRadicalSquareIntegralConstructionSubgoal.normalized_commonWitness_of_integral_equiv
+    {S : SinPiIntegral.ArctanSinPiConstruction}
+    (H : NestedRadicalSquareIntegralConstructionSubgoal S)
+    (hcompute : forall n,
+      (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).compute n =
+        SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw.compute n)
+    (hvalue :
+      (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).Equiv
+        normalizedTangentSquareIntegral) :
+    NormalizedTangentSquareCommonWitness := by
+  apply NormalizedTangentSquareCommonWitness.of_overlap
+  intro n
+  have hevaluator :
+      (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).Valid := by
+    exact FTC.integral_valid_of_construction H.integral
+  have heq := RealRaw.sameStageOverlap_of_equiv
+    hevaluator normalizedTangentSquareIntegral_valid hvalue n
+  have hbox := (RealRaw.compareAt_overlap_iff
+    (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral)
+    normalizedTangentSquareIntegral n n).1 heq
+  change QInterval.Overlaps
+    ((Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).compute n)
+    (normalizedTangentSquareIntegral.compute n) at hbox
+  rw [hcompute n] at hbox
+  exact hbox
+
 /- The next constructor makes the remaining `sin²` obligation concrete.  The
    evaluator is required only to return the squared nested-radical box at the
    public plan's sample points; the canonical half-angle certificates then
