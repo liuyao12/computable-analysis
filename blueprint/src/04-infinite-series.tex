@@ -136,6 +136,32 @@ interface. Pointwise convergence, termwise integration, or an L2-style
 claim is a further theorem only after its own finite norm or tail certificate
 has been supplied.
 
+\subsection{A computable (L^2)-style boundary}
+
+The project can expose an (L^2)-style object without introducing measurable
+functions.  A usable instance consists of finite complex coefficient lists,
+their rational energy
+
+\[
+  E_N=\sum_{|k|\le N}|c_k|^2,
+\]
+
+and a certificate that the omitted energy is at most a requested rational
+tail.  Equality and approximation are then comparisons of finite rational
+energy boxes.  The intended workflow is
+
+\begin{verbatim}
+coefficient prefix -> finite energy -> tail-energy certificate
+                  -> requested-norm enclosure -> overlap transport
+\end{verbatim}
+
+This is a constructive proxy for the parts of (L^2) theory used by an
+application.  It does not assert that every measurable function has a
+Fourier expansion, nor does it identify coefficient energy with a Lebesgue
+integral.  Parseval for a finite transform is already available; the next
+theorem for this boundary is a supplied tail-energy certificate for one
+representative Fourier family.
+
 \lean{ComputableAnalysis.EffectiveFourierTailCertificate.future_stage_coordinate_enclosure}
 \lean{ComputableAnalysis.EffectiveFourierTailCertificate.stageBox}
 \lean{ComputableAnalysis.EffectiveFourierTailCertificate.future_stage_in_stageBox}
