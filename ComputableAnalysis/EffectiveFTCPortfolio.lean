@@ -103,6 +103,33 @@ theorem piCircleArea_compute_lo_ge_two (n : Nat) :
   rw [ArctanGeometry.arctanAreaLoopState_lo_eq_geometricLowerSum] at hbase
   grind
 
+theorem piCircleArea_compute_hi_le_four (n : Nat) :
+    (piCircleArea.compute n).hi <= 4 := by
+  have hnest := CauchyPi.piCircleArea_valid.2.1 0 n (Nat.zero_le n)
+  have hzero : (piCircleArea.compute 0).hi <= (4 : Rat) := by
+    native_decide
+  exact Rat.le_trans hnest.2.2 hzero
+
+theorem halfQuarterTurnRaw_bounds (n : Nat) :
+    0 <= ((RationalCircle.GeometricTrig.halfQuarterTurnRaw
+      (1 : Rat)).compute n).lo /\
+      ((RationalCircle.GeometricTrig.halfQuarterTurnRaw
+        (1 : Rat)).compute n).hi <= 1 := by
+  change 0 <= ((RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).compute n).lo /\
+    ((RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).compute n).hi <= 1
+  unfold RealRaw.scaleRat RealRaw.scaleRatCompute
+  simp only [if_pos (by native_decide : (0 : Rat) <= (1 : Rat) / 4)]
+  constructor
+  · exact Rat.mul_nonneg (by native_decide)
+      (Rat.le_trans (by native_decide) (piCircleArea_compute_lo_ge_two n))
+  · have h := Rat.mul_le_mul_of_nonneg_left
+      (piCircleArea_compute_hi_le_four n)
+      (by native_decide : (0 : Rat) <= 1 / 4)
+    calc
+      (1 / 4 : Rat) * (piCircleArea.compute n).hi <=
+          (1 / 4 : Rat) * 4 := h
+      _ = 1 := by native_decide
+
 set_option maxHeartbeats 1000000 in
 theorem reciprocalPi_quarterTurn_equiv_quarter :
     (SinPiIntegral.reciprocalPiRaw *
@@ -718,6 +745,18 @@ theorem normalizedTangentSquareIntegral_valid :
     normalizedTangentSquareIntegral.Valid := by
   exact normalizedTangentSquareProduct_valid.valid
 
+theorem normalizedTangentSquareAnchor_valid :
+    (SinPiIntegral.reciprocalPiRaw *
+      RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid := by
+  exact RealRaw.mul_valid_of_nonneg_bounded
+    SinPiIntegral.reciprocalPiRaw_valid
+    (by
+      change (RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).Valid
+      exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+        CauchyPi.piCircleArea_valid)
+    (by native_decide) (by native_decide)
+    SinPiIntegral.reciprocalPiRaw_bounds halfQuarterTurnRaw_bounds
+
 theorem normalizedTangentSquare_stage_zero_overlap :
     QInterval.Overlaps
       (SinPiIntegral.dyadicNestedRadicalSquareLeftSum 0)
@@ -1135,6 +1174,36 @@ theorem tangentSquareIntegral_equiv_halfQuarterTurn_of_common_witness
   exact RealRaw.equiv_trans
     H.tangent_integral_valid H.endpoint_valid H.quarter_valid
     hanchor_endpoint H.endpoint_equiv_quarter
+
+theorem normalizedTangentSquare_chart_transport_of_common_witness
+    (effective_integral_valid :
+      SinPiIntegral.tangentSquareEffectiveIntegralRaw.Valid)
+    (endpoint_valid :
+      SinPiIntegral.tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw.Valid)
+    (common : TangentSquareFTCIntegralCommonWitness)
+    (endpoint_equiv_quarter :
+      SinPiIntegral.tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw.Equiv
+        (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))) :
+    SignedRawProductEquivalenceSubgoal
+      SinPiIntegral.reciprocalPiRaw SinPiIntegral.reciprocalPiRaw
+      SinPiIntegral.tangentSquareIntegral
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
+  have htangent :
+      SinPiIntegral.tangentSquareIntegral.Equiv
+        (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) :=
+    tangentSquareIntegral_equiv_halfQuarterTurn_of_common_witness
+      effective_integral_valid endpoint_valid common endpoint_equiv_quarter
+  have hquarter :
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid := by
+    change (RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).Valid
+    exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+      CauchyPi.piCircleArea_valid
+  apply SignedRawProductEquivalenceSubgoal.of_factor_equiv
+    normalizedTangentSquareIntegral_valid normalizedTangentSquareAnchor_valid
+    SinPiIntegral.reciprocalPiRaw_valid SinPiIntegral.reciprocalPiRaw_valid
+    SinPiIntegral.tangentSquareIntegral_valid hquarter
+  · exact RealRaw.equiv_refl _ SinPiIntegral.reciprocalPiRaw_valid
+  · exact htangent
 
 theorem TangentSquareQuarterTurnValueSubgoal.effective_equiv_endpoint
     (H : TangentSquareQuarterTurnValueSubgoal) :
