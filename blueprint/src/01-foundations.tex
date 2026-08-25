@@ -1348,6 +1348,13 @@ The current Lean-facing complex type stores a preferred certified complex-box
 algorithm and a finite spanning registry of certified implementation edges.
 As for \code{Real}, this is a computation-oriented representation layer rather
 than a quotient construction.
+\lean{ComputableAnalysis.Complex.withAlternativeFrom}
+\lean{ComputableAnalysis.Complex.withAlternativeFromImplementation}
+When a new algorithm is proved equivalent to an existing non-preferred
+implementation, either constructor composes that single local edge with the
+existing path to the preferred node.  Thus the registry need only be a finite
+spanning tree; users do not have to prove pairwise equivalence of all
+implementations.
 \end{definition}
 
 \begin{proposition}[Complex raw arithmetic is representation-aware]\label{thm:complex-field}

@@ -237,6 +237,13 @@ the intermediate domain must cover the relevant intersection; otherwise prove
 the new common-domain agreement directly.  This prevents an invalid appeal to
 transitivity across changing domains.
 
+For complex numbers themselves, use `Complex.withAlternativeFrom` or
+`Complex.withAlternativeFromImplementation` when the new algorithm is proved
+equivalent to an existing non-preferred implementation.  The constructor
+stores the composed edge to the preferred node, so the source proof remains a
+single local equivalence edge while the registry remains a finite spanning
+tree.
+
 For partial real functions, the preferred representation can serve as the
 spanning node for two alternative views.  When the source domain is known to
 lie in the preferred domain, use

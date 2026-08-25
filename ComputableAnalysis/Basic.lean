@@ -4957,6 +4957,29 @@ def alternativeRepresentation {z : Complex} (rep : ComplexCert)
   cert := rep
   agrees := z.coherent h
 
+/- Add a new complex implementation through any already certified
+   representation.  The stored edge is composed with that representation's
+   path back to the preferred node, so callers only need to prove one local
+   equivalence edge rather than compare every implementation pairwise. -/
+def withAlternativeFrom (z : Complex) (parent : Representation z)
+    (rep : ComplexCert) (h : rep.raw.Equiv parent.cert.raw) : Complex where
+  preferred := z.preferred
+  implementations :=
+    { cert := rep
+      equivalent := ComplexRaw.equiv_trans z.preferred.valid parent.cert.valid
+        rep.valid (ComplexRaw.equiv_symm parent.agrees) (ComplexRaw.equiv_symm h) } ::
+      z.implementations
+
+def withAlternativeFromImplementation (z : Complex)
+    (parent : ComplexImplementation z.preferred.raw)
+    (rep : ComplexCert) (h : rep.raw.Equiv parent.cert.raw) : Complex where
+  preferred := z.preferred
+  implementations :=
+    { cert := rep
+      equivalent := ComplexRaw.equiv_trans z.preferred.valid parent.cert.valid
+        rep.valid parent.equivalent (ComplexRaw.equiv_symm h) } ::
+      z.implementations
+
 def computeUsing {z : Complex} (rep : Representation z) (n : Nat) : QBox :=
   rep.cert.raw.compute n
 
