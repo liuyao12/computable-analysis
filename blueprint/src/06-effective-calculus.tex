@@ -645,3 +645,31 @@ The resulting theorem is a precision statement: after cancellation, the
 quotient interval lies within the target interval at a computably chosen
 stage.  The usual limit notation is an optional presentation of this family
 of finite witnesses, not a primitive of the foundation.
+
+The reusable certificate is small:
+
+\begin{verbatim}
+common factor -> exact cancellation -> affine residual
+              -> cross-product remainder -> choose stage from error budget
+\end{verbatim}
+
+For the model quotient ((x^2-1)/(x-1)), with (x=1+h), the residual is
+exactly (2+h). The error is therefore the rational stage parameter itself.
+The cubic, quartic, and quintic cases have the same shape: a finite polynomial
+remainder in (h), followed by a rational bound. One worked degree is enough;
+the other degrees are instances of the same certificate rather than separate
+calculus foundations.
+
+\lean{ComputableAnalysis.FiniteLHopitalCertificate.Certificate}
+\lean{ComputableAnalysis.FiniteLHopitalCertificate.Certificate.common_factor_cancel}
+\lean{ComputableAnalysis.FiniteLHopitalCertificate.Certificate.residual_remainder_identity}
+\lean{ComputableAnalysis.FiniteLHopitalCertificate.affine_residual_quotient_certificate}
+\lean{ComputableAnalysis.FiniteLHopitalCertificate.affine_residual_quotient_eq_base_of_cross_product_eq_zero}
+\lean{ComputableAnalysis.FiniteLHopitalCertificate.quadratic_linear_worked_remainder}
+\lean{ComputableAnalysis.FiniteLHopitalCertificate.quadratic_linear_worked_remainder_at_stage}
+\lean{ComputableAnalysis.FiniteLHopitalCertificate.cubic_linear_worked_remainder_at_stage_error_le_four_div}
+\leanok
+
+This is the project's finite L'Hôpital pattern. It supports a requested
+precision after factor cancellation; it does not claim a universal theorem
+about arbitrary functions or introduce an attained limit.
