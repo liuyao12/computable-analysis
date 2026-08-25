@@ -1,4 +1,5 @@
 import ComputableAnalysis.IntegralFoundation
+import ComputableAnalysis.EffectiveCalculusFoundation
 import ComputableAnalysis.PowerSeries
 import ComputableAnalysis.FiniteTaylorFTCInterface
 import ComputableAnalysis.FiniteSineIntegral
