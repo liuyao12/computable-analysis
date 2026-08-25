@@ -27,7 +27,12 @@ theorem.
 \lean{ComputableAnalysis.finiteProductIntegralNestedSum}
 \lean{ComputableAnalysis.finiteProductIntegralSum}
 \lean{ComputableAnalysis.finiteProductIntegralNestedSum_factorized}
+\lean{ComputableAnalysis.finiteProductIntegralSum2D_weighted_stage}
 \leanok
+
+The weighted stage is a concrete rectangular multiple-integral example: cell
+widths are part of the rational data, and the result is computed exactly
+before any potential refinement or tail argument is introduced.
 
 The reusable contract is exposed here so an ODE instance can be added without
 introducing a new notion of integration:

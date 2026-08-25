@@ -242,13 +242,23 @@ theorem finiteProductIntegralSum2D_factorized
     finiteProductIntegralSum2D xs ys f g =
       (xs.map (fun cell => cell.2 * f cell.1)).foldl
           (fun acc value => acc + value) 0 *
-        (ys.map (fun cell => cell.2 * g cell.1)).foldl
+      (ys.map (fun cell => cell.2 * g cell.1)).foldl
           (fun acc value => acc + value) 0 := by
   simpa [finiteProductIntegralSum2D, Function.comp_def] using
     (finiteProductSum2D_factorized
       (xs.map (fun cell => cell.2 * f cell.1))
       (ys.map (fun cell => cell.2 * g cell.1))
       (fun value => value) (fun value => value))
+
+/- A concrete weighted rectangular computation.  The two sample lists carry
+cell widths, so this is a finite two-dimensional integral cell sum rather than
+an unweighted Cartesian product. -/
+theorem finiteProductIntegralSum2D_weighted_stage :
+    finiteProductIntegralSum2D
+      [(0, 1 / 2), (1, 1 / 2)]
+      [(0, 1), (1, 1)]
+      (fun x => x + 1) (fun y => 2 - y) = 9 / 2 := by
+  native_decide
 
 theorem finiteProductIntegralNestedSum_two_factor
     (xs ys : List (Rat × Rat)) (f g : Rat -> Rat) :

@@ -1088,9 +1088,9 @@ arbitrary finite sample lists; the concrete sample-grid calculation is only a
 regression witness, not a standalone finite-sum milestone.  This is the
 rectangular algebra needed before attaching cell widths and error schedules to
 a genuine multiple-integral construction.  Its weighted companion
-`finiteProductIntegralSum2D` attaches rational cell widths and
-`finiteProductIntegralSum2D_factorized` proves the corresponding weighted
-rectangle factorization.  The module also records the exact finite product law for (n) independent
+   `finiteProductIntegralSum2D` attaches rational cell widths and
+   `finiteProductIntegralSum2D_factorized` proves the corresponding weighted
+   rectangle factorization.  The module also records the exact finite product law for (n) independent
 one-dimensional Gaussian approximants and the rational coefficient recurrence
 for the (n)-ball volume model.  The one-dimensional Gaussian integral, its
 square-to-π bridge, radial shell estimates, and unbounded tails remain explicit
