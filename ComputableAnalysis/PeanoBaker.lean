@@ -72,6 +72,15 @@ theorem finiteSum_add {dimension : Nat} (f g : Fin dimension -> Rat) :
       simp [finiteSum, ih]
       grind [Rat.add_assoc, Rat.add_comm]
 
+theorem finiteSum_le {dimension : Nat} {f g : Fin dimension -> Rat}
+    (h : forall i, f i <= g i) : finiteSum f <= finiteSum g := by
+  induction dimension with
+  | zero =>
+      simp [finiteSum]
+  | succ dimension ih =>
+      simp only [finiteSum]
+      exact rat_add_le_add (h 0) (ih (fun i => h i.succ))
+
 theorem finiteSum_mul_left {dimension : Nat} (a : Rat) (f : Fin dimension -> Rat) :
     a * finiteSum f = finiteSum (fun i => a * f i) := by
   induction dimension with
@@ -257,6 +266,30 @@ theorem matrixMul_qabs_le {dimension : Nat}
       finiteSum (fun k => qabs (A i k) * qabs (B k j)) := by
   unfold matrixMul
   exact finiteSum_qabs_mul_le (fun k => A i k) (fun k => B k j)
+
+def matrixRowAbsSum {dimension : Nat} (A : RatMatrix dimension) (i : Fin dimension) : Rat :=
+  finiteSum (fun j => qabs (A i j))
+
+theorem matrixMul_rowAbsSum_le {dimension : Nat}
+    (A B : RatMatrix dimension) (i : Fin dimension) :
+    matrixRowAbsSum (matrixMul A B) i <=
+      finiteSum (fun k => qabs (A i k) * matrixRowAbsSum B k) := by
+  calc
+    matrixRowAbsSum (matrixMul A B) i =
+        finiteSum (fun j => qabs (matrixMul A B i j)) := rfl
+    _ <= finiteSum (fun j =>
+        finiteSum (fun k => qabs (A i k) * qabs (B k j))) := by
+      exact finiteSum_le (fun j => matrixMul_qabs_le A B i j)
+    _ = finiteSum (fun k =>
+        finiteSum (fun j => qabs (A i k) * qabs (B k j))) := by
+      exact finiteSum_swap dimension dimension
+        (fun j k => qabs (A i k) * qabs (B k j))
+    _ = finiteSum (fun k => qabs (A i k) * matrixRowAbsSum B k) := by
+      congr 1
+      funext k
+      unfold matrixRowAbsSum
+      exact (finiteSum_mul_left (qabs (A i k))
+        (fun j => qabs (B k j))).symm
 
 theorem vectorAdd_zero_right {dimension : Nat} (x : RatVector dimension) :
     vectorAdd x (vectorZero dimension) = x := by

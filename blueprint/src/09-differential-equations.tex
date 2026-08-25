@@ -54,8 +54,11 @@ The finite algebraic core is explicit in Lean:
 
 \lean{ComputableAnalysis.LinearODE.solvesRecurrence_eq_trajectory}
 \lean{ComputableAnalysis.LinearODE.finiteSum_qabs_mul_le}
+\lean{ComputableAnalysis.LinearODE.finiteSum_le}
 \lean{ComputableAnalysis.LinearODE.matrixApply_qabs_le}
 \lean{ComputableAnalysis.LinearODE.matrixMul_qabs_le}
+\lean{ComputableAnalysis.LinearODE.matrixRowAbsSum}
+\lean{ComputableAnalysis.LinearODE.matrixMul_rowAbsSum_le}
 \lean{ComputableAnalysis.LinearODE.solvesHomogeneousRecurrence_eq_homogeneousTrajectory}
 \lean{ComputableAnalysis.LinearODE.solvesHomogeneousRecurrence_zero}
 \lean{ComputableAnalysis.LinearODE.homogeneousTrajectory_eq_chronologicalStepProduct}
@@ -83,7 +86,10 @@ and state magnitudes.  A later provider may add a row-sum or maximum-entry
 bound, but it no longer needs to import a completed normed matrix space merely
 to justify the local estimate.  The multiplication version makes the estimate
 composable: every chronological word inherits a finite entrywise bound by
-repeatedly applying the same certificate.
+repeatedly applying the same certificate.  The row-absolute sum packages this
+calculation into a weighted finite norm surrogate, with an explicit
+matrix-product inequality.  It is the interface a later factorial-tail proof
+can use for sampled transition products.
 
 The forcing term is handled by a literal finite Duhamel sum:
 
