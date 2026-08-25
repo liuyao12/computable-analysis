@@ -1458,6 +1458,35 @@ structure NormalizedTangentSquareQuarterBoundsSubgoal where
   upper_contains : forall n,
     (1 / 4 : Rat) <= (normalizedTangentSquareIntegral.compute n).hi
 
+def NormalizedTangentSquareQuarterBoundsSubgoal.of_value
+    (hvalue : normalizedTangentSquareIntegral.Equiv
+      (RealRaw.ofRat (1 / 4))) :
+    NormalizedTangentSquareQuarterBoundsSubgoal := by
+  have hpointvalid : (RealRaw.ofRat (1 / 4)).Valid := by
+    change RealRaw.ValidCompute (fun _ : Nat => { lo := 1 / 4, hi := 1 / 4 })
+    exact RealRaw.ofRat_valid (1 / 4)
+  refine { lower_contains := ?_, upper_contains := ?_ }
+  · intro n
+    have hover := (RealRaw.compareAt_overlap_iff
+      normalizedTangentSquareIntegral (RealRaw.ofRat (1 / 4)) n n).1
+      (RealRaw.sameStageOverlap_of_equiv
+        normalizedTangentSquareIntegral_valid
+        hpointvalid hvalue n)
+    change QInterval.Overlaps
+      (normalizedTangentSquareIntegral.compute n)
+      ((RealRaw.ofRat (1 / 4)).compute n) at hover
+    exact hover.1
+  · intro n
+    have hover := (RealRaw.compareAt_overlap_iff
+      normalizedTangentSquareIntegral (RealRaw.ofRat (1 / 4)) n n).1
+      (RealRaw.sameStageOverlap_of_equiv
+        normalizedTangentSquareIntegral_valid
+        hpointvalid hvalue n)
+    change QInterval.Overlaps
+      (normalizedTangentSquareIntegral.compute n)
+      ((RealRaw.ofRat (1 / 4)).compute n) at hover
+    exact hover.2
+
 def NestedRadicalSquareQuarterBoundsSubgoal.toNormalizedCommonWitness
     (H : NestedRadicalSquareQuarterBoundsSubgoal)
     (N : NormalizedTangentSquareQuarterBoundsSubgoal) :
