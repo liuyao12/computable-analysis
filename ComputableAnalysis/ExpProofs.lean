@@ -6020,6 +6020,98 @@ theorem uniformExpOnUnitWarm_one_preimage_equiv_zero :
   unfold QInterval.Overlaps
   constructor <;> native_decide
 
+/-! A whole family of exact inverse regressions.  The target is the warm-stage
+forward computation at a rational source point `r`; the inverse search can
+then return the degenerate interval `{r,r}`.  This is the branch-local
+computable analogue of the elementary identity `log (exp r) = r`, without
+introducing a completed real or pretending that a general target search has
+already been implemented. -/
+def uniformExpOnUnitWarm_forward_target (r : Rat)
+    (hr : inDomainInterval uniformExpOnUnitWarm.lower
+      uniformExpOnUnitWarm.upper r) :
+    GapAwareInRangeRaw uniformExpOnUnitWarm_gapAwareInvertible where
+  value := RealRaw.schedule
+    ({ stage := fun n => n + 4
+       monotone := by intro i j hij; omega
+       cofinal := by intro target; exact ⟨target, by omega⟩ }
+      : RealRaw.StageSchedule)
+    (uniformExpRaw r)
+  value_valid := by
+    let sigma : RealRaw.StageSchedule :=
+      { stage := fun n => n + 4
+        monotone := by intro i j hij; omega
+        cofinal := by intro target; exact ⟨target, by omega⟩ }
+    change (RealRaw.schedule sigma (uniformExpRaw r)).Valid
+    apply RealRaw.schedule_valid
+    exact uniformExpRaw_valid r (by
+      have hqabs : qabs r <= 2 := by
+        rw [qabs_eq_self_of_nonneg hr.1]
+        exact Rat.le_trans hr.2 (by native_decide)
+      exact hqabs)
+  rangePrecision := fun n => n
+  in_range := by
+    intro n
+    change ((uniformExpRaw 0).compute (n + 4)).lo <=
+      ((uniformExpRaw r).compute (n + 4)).lo /\
+      ((uniformExpRaw r).compute (n + 4)).hi <=
+      ((uniformExpRaw 1).compute (n + 4)).hi
+    rw [uniformExpRaw_compute, uniformExpRaw_compute,
+      uniformExpRaw_compute]
+    unfold uniformExpBox intervalAround
+    constructor
+    · rw [uniformExpCenter_zero]
+      have hcenter := uniformExpCenter_mono_on_unit (n + 4)
+        (x := 0) (y := r) (by native_decide) hr.2 hr.1
+      rw [uniformExpCenter_zero] at hcenter
+      have htail := uniformExpTailMagnitude_nonneg (n + 4)
+      grind [Rat.sub_eq_add_neg]
+    · have hcenter := uniformExpCenter_mono_on_unit (n + 4)
+        (x := r) (y := 1) hr.1 (by native_decide) hr.2
+      have htail := uniformExpTailMagnitude_nonneg (n + 4)
+      grind [Rat.sub_eq_add_neg]
+
+def uniformExpOnUnitWarm_forward_search (r : Rat)
+    (hr : inDomainInterval uniformExpOnUnitWarm.lower
+      uniformExpOnUnitWarm.upper r) :
+    GapAwareInverseBisectionSearch
+      uniformExpOnUnitWarm_gapAwareInvertible
+      (uniformExpOnUnitWarm_forward_target r hr) where
+  compute_preimage := fun _ => { lo := r, hi := r }
+  valid_preimage := by
+    change RealRaw.ValidCompute (fun _ : Nat => { lo := r, hi := r })
+    exact RealRaw.ofRat_valid r
+  preimage_subinterval := by
+    intro n
+    exact ⟨hr.1, Rat.le_refl, hr.2⟩
+  value_overlaps := by
+    intro n
+    change QInterval.Overlaps
+      (uniformExpOnUnitWarm_intervalRegular.evalInterval
+        { lo := r, hi := r } ⟨hr.1, Rat.le_refl, hr.2⟩ n)
+      ((uniformExpRaw r).compute (n + 4))
+    unfold uniformExpOnUnitWarm_intervalRegular
+    rw [uniformExpRaw_compute]
+    change QInterval.Overlaps
+      (uniformExpCellRange r r (n + 4))
+      (uniformExpBox r (n + 4))
+    unfold uniformExpCellRange
+    unfold uniformExpBox intervalAround
+    have htail := uniformExpTailMagnitude_nonneg (n + 4)
+    unfold uniformExpTailRadius at htail ⊢
+    constructor <;> grind [Rat.sub_eq_add_neg]
+
+theorem uniformExpOnUnitWarm_forward_preimage_equiv
+    (r : Rat) (hr : inDomainInterval uniformExpOnUnitWarm.lower
+      uniformExpOnUnitWarm.upper r) :
+    ({ compute := (uniformExpOnUnitWarm_forward_search r hr).compute_preimage }
+      : RealRaw).Equiv (RealRaw.ofRat r) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+  rw [RealRaw.ofRat_compute]
+  change QInterval.Overlaps { lo := r, hi := r } { lo := r, hi := r }
+  constructor <;> exact Rat.le_refl
+
 private theorem uniformExpOnUnit_scheduledRegular_width
     (n : Nat) {I : QInterval}
     (hI : subintervalOf I (0 : Rat) 1)

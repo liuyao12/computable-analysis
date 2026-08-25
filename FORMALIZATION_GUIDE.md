@@ -935,7 +935,14 @@ uniform separation schedules. The first concrete target package is
 `uniformExpOnUnitWarm_one_target`; its exact preimage search is
 `uniformExpOnUnitWarm_one_search`, and
 `uniformExpOnUnitWarm_one_preimage_equiv_zero` is the finite branch regression
-for `log 1 = 0`.
+for `log 1 = 0`.  The parameterized family
+`uniformExpOnUnitWarm_forward_target` and
+`uniformExpOnUnitWarm_forward_search` proves the same exact inverse contract
+for every rational source point in `[0,1]`: the target is the computed warm
+forward value and the returned source interval is degenerate at that point.
+This is a regression family, not yet the general target-driven bisection
+algorithm; that algorithm must make certified midpoint decisions using the
+gap-aware separation schedule.
 
 For a direct scalar uniqueness proof, make one finite short-block sweep an
 instance of `ScalarODE.ShortBlockMeshSweep`: telescope the cell estimates to

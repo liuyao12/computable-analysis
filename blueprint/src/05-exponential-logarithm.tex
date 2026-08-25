@@ -257,6 +257,9 @@ warm exp stage -> interval regularity -> monotone boxes
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_one_target}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_one_search}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_one_preimage_equiv_zero}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_forward_target}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_forward_search}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_forward_preimage_equiv}
 \leanok
 
 This closes the analytic data for a branch-local gap-aware inverse search. The
@@ -265,6 +268,11 @@ algorithms whose separation modulus is uniform; the exponential branch now
 uses the more faithful `GapAwareInvertibleFunctionOnInterval` contract.
 The exact target-one regression search returns the rational preimage (0),
 which is the computable branch statement (log 1=0).
+More generally, every rational source point in the branch supplies a
+forward-computed target and an exact inverse regression: the target is the
+warm-stage computation of (exp r), and the returned source box is (r,r).
+This validates the inverse contract on a family of targets while leaving the
+decision-driven bisection algorithm as the next construction.
 
 The inverse layer is deliberately branch-local.  An invertible computation
 must carry its source interval, monotonicity orientation, separation schedule,
