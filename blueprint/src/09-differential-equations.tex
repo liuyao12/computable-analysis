@@ -55,6 +55,7 @@ The finite algebraic core is explicit in Lean:
 \lean{ComputableAnalysis.LinearODE.solvesRecurrence_eq_trajectory}
 \lean{ComputableAnalysis.LinearODE.finiteSum_qabs_mul_le}
 \lean{ComputableAnalysis.LinearODE.matrixApply_qabs_le}
+\lean{ComputableAnalysis.LinearODE.matrixMul_qabs_le}
 \lean{ComputableAnalysis.LinearODE.solvesHomogeneousRecurrence_eq_homogeneousTrajectory}
 \lean{ComputableAnalysis.LinearODE.solvesHomogeneousRecurrence_zero}
 \lean{ComputableAnalysis.LinearODE.homogeneousTrajectory_eq_chronologicalStepProduct}
@@ -80,7 +81,9 @@ The absolute-value estimate is the first finite norm substitute in this
 chapter.  It bounds each matrix-action coordinate by a rational sum of entry
 and state magnitudes.  A later provider may add a row-sum or maximum-entry
 bound, but it no longer needs to import a completed normed matrix space merely
-to justify the local estimate.
+to justify the local estimate.  The multiplication version makes the estimate
+composable: every chronological word inherits a finite entrywise bound by
+repeatedly applying the same certificate.
 
 The forcing term is handled by a literal finite Duhamel sum:
 

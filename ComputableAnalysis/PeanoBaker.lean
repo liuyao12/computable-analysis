@@ -251,6 +251,13 @@ theorem matrixApply_qabs_le {dimension : Nat}
   unfold matrixApply
   exact finiteSum_qabs_mul_le (fun j => A i j) x
 
+theorem matrixMul_qabs_le {dimension : Nat}
+    (A B : RatMatrix dimension) (i j : Fin dimension) :
+    qabs (matrixMul A B i j) <=
+      finiteSum (fun k => qabs (A i k) * qabs (B k j)) := by
+  unfold matrixMul
+  exact finiteSum_qabs_mul_le (fun k => A i k) (fun k => B k j)
+
 theorem vectorAdd_zero_right {dimension : Nat} (x : RatVector dimension) :
     vectorAdd x (vectorZero dimension) = x := by
   funext i
