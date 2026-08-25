@@ -1044,6 +1044,10 @@ come from different stages.  Thus
 `uniformExpOnUnitWarm_oneThird_bisection_compute_valid` packages the actual
 stage-dependent bisection computation as a `RealRaw.ValidCompute`, with exact
 geometric width `1 / 2^n` and no completeness axiom.
+The companion `...compute_subinterval` and `...value_overlaps` lemmas verify
+the interval evaluator against the target box at every requested stage; the
+resulting `...oneThird_bisection_search` is a complete concrete
+`GapAwareInverseBisectionSearch` certificate.
 
 Formalization scope is by mechanism, not by exhaustive enumeration.  One
 representative function is enough when another function uses the same certified

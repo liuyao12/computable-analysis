@@ -7690,6 +7690,116 @@ theorem uniformExpOnUnitWarm_oneThird_bisection_raw_valid :
     uniformExpOnUnitWarm_oneThird_bisection_raw.Valid := by
   exact uniformExpOnUnitWarm_oneThird_bisection_compute_valid
 
+theorem uniformExpOnUnitWarm_oneThird_bisection_compute_subinterval (n : Nat) :
+    subintervalOf (uniformExpOnUnitWarm_oneThird_bisection_compute n)
+      uniformExpOnUnitWarm_continuous.function.lower
+      uniformExpOnUnitWarm_continuous.function.upper := by
+  exact (gapAwareTargetBisectionScheduledIterateWithProof
+    uniformExpOnUnitWarm_continuous
+    (uniformExpOnUnitWarm_oneThird_target.value.compute n)
+    ({ lo := 0, hi := 1 } : QInterval)
+    uniformExpOnUnitWarm_unit_subinterval
+    (fun j => uniformExpOnUnitWarm_oneThird_target.rangePrecision j) n).2
+
+theorem uniformExpOnUnitWarm_oneThird_bisection_value_overlaps (n : Nat) :
+    QInterval.Overlaps
+      (uniformExpOnUnitWarm_intervalRegular.evalInterval
+        (uniformExpOnUnitWarm_oneThird_bisection_compute n)
+        (uniformExpOnUnitWarm_oneThird_bisection_compute_subinterval n) n)
+      (uniformExpOnUnitWarm_oneThird_target.value.compute n) := by
+  obtain ⟨k, hk, hcell⟩ :=
+    uniformExpOnUnitWarm_oneThird_scheduled_iterate_dyadicCell
+      (uniformExpOnUnitWarm_unit_subinterval := uniformExpOnUnitWarm_unit_subinterval)
+      n n (by omega)
+  have hmem := gapAwareTargetBisectionScheduledIterate_mem_of_oriented
+    uniformExpOnUnitWarm_continuous
+    (uniformExpOnUnitWarm_oneThird_target.value.compute n)
+    ({ lo := 0, hi := 1 } : QInterval)
+    uniformExpOnUnitWarm_unit_subinterval
+    (fun j => uniformExpOnUnitWarm_oneThird_target.rangePrecision j)
+    (by constructor <;> native_decide) n
+    (uniformExpOnUnitWarm_oneThird_scheduled_oriented n)
+  have hcell_lo : (dyadicCell n k).lo ≤ (1 : Rat) / 3 := by
+    simpa [hcell] using hmem.1
+  have hcell_hi : (1 : Rat) / 3 ≤ (dyadicCell n k).hi := by
+    simpa [hcell] using hmem.2
+  have hcontains := uniformExpOnUnitWarm_intervalRegular.contains_point_values
+    (dyadicCell n k) (dyadicCell_subinterval n k hk) ((1 : Rat) / 3)
+    (by constructor <;> native_decide) n hcell_lo hcell_hi
+  have htarget_stage : n ≤
+      uniformExpRationalTargetStage ((1 : Rat) / 3) n :=
+    uniformExpRationalTargetStage_ge ((1 : Rat) / 3) n
+  have hrawnest := (uniformExpRaw_valid ((1 : Rat) / 3) (by native_decide)).2.1
+    (n + 4)
+    (uniformExpRationalTargetStage ((1 : Rat) / 3) n + 4)
+    (by omega)
+  have htarget_nested :
+      (uniformExpOnUnitWarm.compute ((1 : Rat) / 3)
+        ⟨by native_decide, by native_decide⟩ n).lo ≤
+        (uniformExpOnUnitWarm_oneThird_target.value.compute n).lo /\
+      (uniformExpOnUnitWarm_oneThird_target.value.compute n).hi ≤
+        (uniformExpOnUnitWarm.compute ((1 : Rat) / 3)
+          ⟨by native_decide, by native_decide⟩ n).hi := by
+    change ((uniformExpRaw ((1 : Rat) / 3)).compute (n + 4)).lo ≤ _ /\
+      _ ≤ ((uniformExpRaw ((1 : Rat) / 3)).compute (n + 4)).hi
+    change ((uniformExpRaw ((1 : Rat) / 3)).compute (n + 4)).lo ≤
+        ((uniformExpRaw ((1 : Rat) / 3)).compute
+          (uniformExpRationalTargetStage ((1 : Rat) / 3) n + 4)).lo /\
+      ((uniformExpRaw ((1 : Rat) / 3)).compute
+          (uniformExpRationalTargetStage ((1 : Rat) / 3) n + 4)).hi ≤
+        ((uniformExpRaw ((1 : Rat) / 3)).compute (n + 4)).hi
+    exact ⟨hrawnest.1, hrawnest.2.2⟩
+  have hcontains' :
+      QInterval.ContainsInterval
+        (uniformExpOnUnitWarm_intervalRegular.evalInterval
+          (uniformExpOnUnitWarm_oneThird_bisection_compute n)
+          (uniformExpOnUnitWarm_oneThird_bisection_compute_subinterval n) n)
+        (uniformExpOnUnitWarm.compute ((1 : Rat) / 3)
+          ⟨by native_decide, by native_decide⟩ n) := by
+    have hscheduled_sub := (gapAwareTargetBisectionScheduledIterateWithProof
+      uniformExpOnUnitWarm_continuous
+      (uniformExpOnUnitWarm_oneThird_target.value.compute n)
+      ({ lo := 0, hi := 1 } : QInterval)
+      uniformExpOnUnitWarm_unit_subinterval
+      (fun j => uniformExpOnUnitWarm_oneThird_target.rangePrecision j) n).2
+    have hcontains_scheduled :
+        QInterval.ContainsInterval
+          (uniformExpOnUnitWarm_intervalRegular.evalInterval
+            (gapAwareTargetBisectionScheduledIterate
+              uniformExpOnUnitWarm_continuous
+              (uniformExpOnUnitWarm_oneThird_target.value.compute n)
+              ({ lo := 0, hi := 1 } : QInterval)
+              uniformExpOnUnitWarm_unit_subinterval
+              (fun j => uniformExpOnUnitWarm_oneThird_target.rangePrecision j) n)
+            hscheduled_sub n)
+          (uniformExpOnUnitWarm.compute ((1 : Rat) / 3)
+            ⟨by native_decide, by native_decide⟩ n) := by
+      simpa only [hcell] using hcontains
+    simpa only [uniformExpOnUnitWarm_oneThird_bisection_compute] using
+      hcontains_scheduled
+  have htarget_ordered :
+      (uniformExpOnUnitWarm_oneThird_target.value.compute n).lo ≤
+        (uniformExpOnUnitWarm_oneThird_target.value.compute n).hi := by
+    have hw := (uniformExpOnUnitWarm_oneThird_target.value_valid).1 n
+    change 0 ≤
+      (uniformExpOnUnitWarm_oneThird_target.value.compute n).hi -
+        (uniformExpOnUnitWarm_oneThird_target.value.compute n).lo at hw
+    exact (Rat.le_iff_sub_nonneg _ _).2 hw
+  unfold QInterval.Overlaps
+  exact ⟨Rat.le_trans hcontains'.1
+      (Rat.le_trans htarget_nested.1 htarget_ordered),
+    Rat.le_trans (Rat.le_trans htarget_ordered htarget_nested.2)
+      hcontains'.2⟩
+
+def uniformExpOnUnitWarm_oneThird_bisection_search :
+    GapAwareInverseBisectionSearch
+      uniformExpOnUnitWarm_gapAwareInvertible
+      uniformExpOnUnitWarm_oneThird_target where
+  compute_preimage := uniformExpOnUnitWarm_oneThird_bisection_compute
+  valid_preimage := uniformExpOnUnitWarm_oneThird_bisection_compute_valid
+  preimage_subinterval := uniformExpOnUnitWarm_oneThird_bisection_compute_subinterval
+  value_overlaps := uniformExpOnUnitWarm_oneThird_bisection_value_overlaps
+
 theorem uniformExpOnUnitWarm_oneThird_adaptive_equals_scheduled
     (n k : Nat) :
     gapAwareTargetBisectionAdaptiveIterate
