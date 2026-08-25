@@ -978,7 +978,18 @@ when assembling a target-specific schedule.
 The concrete grid constructors `dyadicMidpointGrid` and
 `dyadicMidpointGridUpTo`, together with `uniformExpRationalTargetStage`,
 produce a monotone, cofinal target-stage schedule that dominates every
-listed dyadic midpoint demand.
+listed dyadic midpoint demand.  `uniformExpOnUnitWarm_oneThird_target`
+instantiates that schedule as a valid forward target for the representative
+source value `1/3`; its explicit dominance certificate is
+`uniformExpOnUnitWarm_oneThird_target_stage_dominates`.
+
+Formalization scope is by mechanism, not by exhaustive enumeration.  One
+representative function is enough when another function uses the same certified
+evaluator, interval nesting, subdivision, or piecewise argument.  Routine
+variants should reuse the existing theorem; a function with finitely many
+pieces, such as `|x|`, should be handled by splitting the integral into the
+corresponding subintegrals.  Add a new formalization only when it introduces a
+new computational or proof mechanism.
 
 The reusable `gapAwareTargetBisectionStep` is deliberately conservative. It
 keeps a rational parent interval whenever the computed image box overlaps the

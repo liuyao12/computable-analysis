@@ -6426,6 +6426,65 @@ def uniformExpRationalTargetStageSchedule (r : Rat) :
     refine ⟨target, ?_⟩
     exact uniformExpRationalTargetStage_ge r target
 
+def uniformExpOnUnitWarm_oneThird_target :
+  GapAwareInRangeRaw uniformExpOnUnitWarm_gapAwareInvertible where
+  value := RealRaw.schedule
+    ({ stage := fun n => uniformExpRationalTargetStage ((1 : Rat) / 3) n + 4
+       monotone := by intro i j hij; exact Nat.add_le_add_right (uniformExpRationalTargetStage_mono ((1 : Rat) / 3) hij) 4
+       cofinal := by
+         intro target
+         refine ⟨target, ?_⟩
+         have h := uniformExpRationalTargetStage_ge ((1 : Rat) / 3) target
+         omega }
+      : RealRaw.StageSchedule)
+    (uniformExpRaw ((1 : Rat) / 3))
+  value_valid := by
+    apply RealRaw.schedule_valid
+    have hqabs : qabs ((1 : Rat) / 3) <= 2 := by native_decide
+    exact uniformExpRaw_valid ((1 : Rat) / 3) hqabs
+  rangePrecision := uniformExpRationalTargetStage ((1 : Rat) / 3)
+  in_range := by
+    intro n
+    let s := uniformExpRationalTargetStage ((1 : Rat) / 3) n
+    have h0 : inDomainInterval uniformExpOnUnitWarm.lower
+        uniformExpOnUnitWarm.upper 0 := by
+      change 0 <= (0 : Rat) /\ (0 : Rat) <= 1
+      native_decide
+    have h1 : inDomainInterval uniformExpOnUnitWarm.lower
+        uniformExpOnUnitWarm.upper 1 := by
+      change 0 <= (1 : Rat) /\ (1 : Rat) <= 1
+      native_decide
+    simp [GapAwareInvertibleFunctionOnInterval.EndpointRangeContains,
+      GapAwareInvertibleFunctionOnInterval.function,
+      uniformExpOnUnitWarm_gapAwareInvertible,
+      uniformExpOnUnitWarm_continuous,
+      uniformExpOnUnitWarm_gapAwareSeparation]
+    dsimp [RealRaw.schedule, FunctionOnInterval.compute,
+      uniformExpOnUnitWarm]
+    rw [uniformExpRaw_compute, uniformExpRaw_compute,
+      uniformExpRaw_compute]
+    unfold uniformExpBox intervalAround
+    constructor
+    · rw [uniformExpCenter_zero]
+      have hcenter := uniformExpCenter_mono_on_unit (s + 4)
+        (x := 0) (y := (1 : Rat) / 3)
+        (by native_decide) (by native_decide) (by native_decide)
+      rw [uniformExpCenter_zero] at hcenter
+      have htail := uniformExpTailMagnitude_nonneg (s + 4)
+      grind [Rat.sub_eq_add_neg]
+    · have hcenter := uniformExpCenter_mono_on_unit (s + 4)
+        (x := (1 : Rat) / 3) (y := 1)
+        (by native_decide) (by native_decide) (by native_decide)
+      have htail := uniformExpTailMagnitude_nonneg (s + 4)
+      grind [Rat.sub_eq_add_neg]
+
+theorem uniformExpOnUnitWarm_oneThird_target_stage_dominates
+    {n : Nat} {m : Rat}
+    (hm : m ∈ dyadicMidpointGridUpTo n) :
+    uniformExpGapPrecisionAt ((1 : Rat) / 3) m n ≤
+      uniformExpOnUnitWarm_oneThird_target.rangePrecision n := by
+  exact uniformExpRationalTargetStage_dominates hm
+
 def uniformExpOnUnitWarm_forward_search (r : Rat)
     (hr : inDomainInterval uniformExpOnUnitWarm.lower
       uniformExpOnUnitWarm.upper r) :
