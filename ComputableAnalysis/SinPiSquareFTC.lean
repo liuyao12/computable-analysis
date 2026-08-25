@@ -359,6 +359,38 @@ theorem tangentSquareIntegral_compute (stage : Nat) :
       IntegralIdentities.LipschitzDyadic.compute
         tangentSquareDensity 64 stage := rfl
 
+theorem piCircleArea_bounds_for_square (n : Nat) :
+    2 <= (piCircleArea.compute n).lo /\
+      (piCircleArea.compute n).hi <= 4 := by
+  have hnest := CauchyPi.piCircleArea_valid.2.1 0 n (Nat.zero_le n)
+  have hpi0 : (piCircleArea.compute 0).lo = 2 := by
+    simp [piCircleArea_compute_zero]
+  have hpi1 : (piCircleArea.compute 0).hi = 4 := by
+    simp [piCircleArea_compute_zero]
+  constructor
+  · simpa [hpi0] using hnest.1
+  · simpa [hpi1] using hnest.2.2
+
+/-! The tangent chart integrates the unnormalized square to `pi/4`.  The
+equal-dyadic `sin(pi*x)^2` integral has the additional change-of-variable
+factor `1/pi`; the following theorem is the finite interval normalization
+identity used by that route. -/
+
+theorem halfQuarterTurnRaw_one_bounds (n : Nat) :
+    0 <= ((RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).compute n).lo /\
+      ((RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).compute n).hi <= 1 := by
+  have hpi := piCircleArea_bounds_for_square n
+  have hscale : (0 : Rat) <= (1 : Rat) / 4 := by native_decide
+  have hpiorder := RealRaw.interval_order_of_valid piCircleArea
+    CauchyPi.piCircleArea_valid n
+  simp [RationalCircle.GeometricTrig.halfQuarterTurnRaw,
+    RealRaw.scaleRat, RealRaw.scaleRatCompute, hscale]
+  constructor
+  · have hpiLo0 : 0 <= (piCircleArea.compute n).lo := by grind [hpi.1]
+    exact Rat.mul_nonneg (by native_decide) hpiLo0
+  · have h := Rat.mul_le_mul_of_nonneg_left hpi.2 (by native_decide : (0 : Rat) <= 1 / 4)
+    grind
+
 theorem tangentSquareDensity_eq_circleSin_sq_mul_chartJacobian (u : Rat) :
     tangentSquareDensity u =
       RationalCircle.Trigonometry.sin u *
