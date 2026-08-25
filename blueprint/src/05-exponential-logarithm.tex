@@ -244,12 +244,21 @@ replacement for saying that a continuous monotone function has an inverse.
 \lean{ComputableAnalysis.InverseRaw.apply_value_overlaps_target}
 \lean{ComputableAnalysis.InverseBisectionSearch}
 \lean{ComputableAnalysis.inverse_function_from_bisection_search}
+\lean{ComputableAnalysis.identityFunctionOnUnitRegular}
+\lean{ComputableAnalysis.identityInvertibleOnUnit}
+\lean{ComputableAnalysis.identityInverseBisectionSearch}
+\lean{ComputableAnalysis.identityInverseRaw_apply_eq_target}
 \leanok
 
 The positive reciprocal evaluator on \([1,2]\), its interval regularity, and
 the finite exp/log transport are checked. General inverse-function laws remain
 certificate interfaces: each new domain supplies monotonicity, separation, and
 a finite bisection schedule.
+
+The identity branch is the complete regression case: its inverse search reuses
+the target interval, and every range, source, and forward-overlap obligation
+is checked directly. Nonlinear branches should provide the same fields, with
+only the search algorithm changing.
 
 The logarithm-side derivative is also a finite certificate. On the safe chart
 \([1,2]\), the reciprocal secant quotient satisfies
