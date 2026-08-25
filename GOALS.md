@@ -536,6 +536,16 @@ from monomial brackets structurally.
    certificate must establish the squared equal-dyadic integral’s ordering,
    nesting, and shrinking, then connect it to the tangent primitive.
 
+   The assembly step is now also explicit:
+   `dyadicPublicSquareLeftSum_overlap_of_canonical_search_family` turns one
+   finite search witness for every dyadic sample into overlap of the complete
+   public and nested-radical square sums.  This removes the finite-fold work
+   from the remaining proof; only the per-sample search family remains.
+   The theorem
+   `dyadicPublicSquareLeftSum_overlap_of_halfAngle_certificate_family` now
+   consumes the existing canonical half-angle certificate family directly,
+   including the exact zero endpoint.
+
    The square equal-dyadic candidate is now explicit as
    `dyadicNestedRadicalSquareLeftSum`, with raw wrapper
    `dyadicNestedRadicalSquareIntegralRaw`.  Its finite boxes satisfy

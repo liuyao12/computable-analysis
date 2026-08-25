@@ -852,6 +852,17 @@ equivalence and positive-sample, all-precision certificate family convert via
 schedule consumed by the public integral theorem. This separates the
 geometric existence proof from the evaluator and makes the remaining theorem
 explicit rather than hidden in a large argument.
+
+The square analogue follows the same pattern. Use
+`SinPiSquareFTC.dyadicPublicSquareLeftSum_overlap_of_sample_overlaps` for the
+finite weighted-fold transport, and
+`SinPiSquareFTC.dyadicPublicSquareLeftSum_overlap_of_canonical_search_family`
+when each dyadic sample has a successful finite tangent-box search. This keeps
+the global theorem generic and leaves only the genuinely new work—the local
+search certificate at each sample.
+The higher-level theorem
+`SinPiSquareFTC.dyadicPublicSquareLeftSum_overlap_of_halfAngle_certificate_family`
+connects this directly to the existing canonical half-angle certificate API.
 The theorem-facing shortcut is
 `ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_canonical_certificate_family`.
 

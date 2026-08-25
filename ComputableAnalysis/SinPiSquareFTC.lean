@@ -3132,6 +3132,45 @@ theorem sinPiSquare_nestedRadicalStage_sample_overlap_of_canonical_box_search
         (Nat.le_of_lt hk)).1)
     (by simpa [sinPiSquareOnHalf, sinPiOnHalfRaw] using hsin)
 
+/- A successful finite tangent-box search at every dyadic sample is enough to
+assemble the entire square-sum overlap.  The search family remains explicit:
+each member supplies its own finite search depth and rational witness. -/
+theorem dyadicPublicSquareLeftSum_overlap_of_canonical_search_family
+    (S : ArctanSinPiConstruction)
+    (hsearch : forall (n k : Nat) (hk : k < 2 ^ n),
+      ∃ m u,
+        rationalTangentWitnessBoxSearch
+          (dyadicTangentBox S.inverse hk)
+          (dyadicNestedRadicalStageSinAt n k) m = some u) :
+    forall n,
+      QInterval.Overlaps
+        (dyadicPublicSquareLeftSum S n)
+        (dyadicNestedRadicalSquareLeftSum n) := by
+  intro n
+  apply dyadicPublicSquareLeftSum_overlap_of_sample_overlaps S n
+  intro k hk
+  obtain ⟨m, u, hmu⟩ := hsearch n k hk
+  exact sinPiSquare_nestedRadicalStage_sample_overlap_of_canonical_box_search
+    S hk m u hmu
+
+/- The intended geometric interface: the existing canonical half-angle
+certificate family is enough to drive the square-sum transport. -/
+theorem dyadicPublicSquareLeftSum_overlap_of_halfAngle_certificate_family
+    (S : ArctanSinPiConstruction)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (n k : Nat) (hk : k < 2 ^ n),
+      0 < k -> CanonicalDyadicHalfAngleCertificate S.inverse n k hk) :
+    forall n,
+      QInterval.Overlaps
+        (dyadicPublicSquareLeftSum S n)
+        (dyadicNestedRadicalSquareLeftSum n) := by
+  apply dyadicPublicSquareLeftSum_overlap_of_canonical_search_family S
+  intro n k hk
+  exact canonical_dyadic_search_of_halfAngle_certificate_family
+    S.inverse ht0 hcertificate n k hk
+
 theorem square_sample_overlap_of_sine_sample_overlap
     {I J : QInterval}
     (hI : subintervalOf I 0 1)
