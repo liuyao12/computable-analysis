@@ -1652,6 +1652,14 @@ are inferred once by the shared constructor.
 This leaves function-specific mathematics in the certificate and keeps the
 routine `RealRaw`/inverse construction shared.
 
+The squared-sine transport has one executable square-aware witness checkpoint:
+`rationalTangentSquareWitnessSearch_stage_one_demo` finds `103/256` at the
+first nonzero dyadic sample, and
+`dyadicNestedRadicalStage_one_square_complement_overlap` proves the resulting
+sine-square / one-minus-cosine-square overlap.  This is deliberately one
+representative finite cell; the remaining work is the uniform witness family,
+not a repetition of the same calculation for every cell.
+
 ## Completion and trust checklist
 
 Before presenting a result as established, check all of the following:

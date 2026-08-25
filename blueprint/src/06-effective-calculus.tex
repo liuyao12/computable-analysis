@@ -365,6 +365,15 @@ validity theorem once and for all.
 \lean{ComputableAnalysis.gapAwareInverseBisectionPlan\_has\_search}
 \leanok
 
+The square transport has one executable positive-cell checkpoint.  At the
+first nonzero dyadic sample, the square-aware rational search finds
+(u=103/256), and the circle identity turns its sine and cosine containment
+into overlap of the sine-square and complementary-square intervals:
+
+\lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_stage_one_demo}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalStage_one_square_complement_overlap}
+\leanok
+
 The proof-independent function layer exposes the same laws.  Its transitivity
 hypothesis explicitly supplies the middle domain on the intersection of the
 outer domains; this is the correct contract for partial special functions.

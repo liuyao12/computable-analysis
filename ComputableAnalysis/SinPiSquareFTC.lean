@@ -3394,6 +3394,40 @@ theorem rationalTangentSquareWitnessSearch_sound
     of_decide_eq_true hb.1.2,
     of_decide_eq_true hb.2⟩
 
+/-! A concrete square-aware search checkpoint.  At the first nonzero dyadic
+sample, the same rational witness used by the sine search also certifies the
+cosine enclosure, so the square/complement transport can be checked directly.
+This is a regression anchor for the later uniform witness family. -/
+theorem rationalTangentSquareWitnessSearch_stage_one_demo :
+    rationalTangentSquareWitnessSearch
+      ({ lo := 0, hi := 1 } : QInterval)
+      (dyadicNestedRadicalStageSinAt 1 1)
+      (dyadicNestedRadicalStageTable 1 1).2 8 = some ((103 : Rat) / 256) := by
+  native_decide
+
+theorem dyadicNestedRadicalStage_one_square_complement_overlap :
+    QInterval.Overlaps
+      (rationalSquareInterval (dyadicNestedRadicalStageSinAt 1 1))
+      (rationalOneMinusSquareInterval
+        (dyadicNestedRadicalStageTable 1 1).2) := by
+  have hsearch := rationalTangentSquareWitnessSearch_stage_one_demo
+  have hs := rationalTangentSquareWitnessSearch_sound hsearch
+  have hS : subintervalOf (dyadicNestedRadicalStageSinAt 1 1) 0 1 := by
+    unfold subintervalOf
+    constructor
+    · native_decide
+    constructor <;> native_decide
+  have hC : subintervalOf (dyadicNestedRadicalStageTable 1 1).2 0 1 := by
+    unfold subintervalOf
+    constructor
+    · native_decide
+    constructor <;> native_decide
+  apply rationalSquareInterval_overlap_oneMinusSquareInterval_of_circle
+    hS hC
+  · exact ⟨hs.2.2.1, hs.2.2.2.1⟩
+  · exact ⟨hs.2.2.2.2.1, hs.2.2.2.2.2⟩
+  · exact rationalCircleSin_sq_add_cos_sq _
+
 theorem CanonicalDyadicHalfAngleCertificateAt.to_square_complement_overlap
     {B : IntegralIdentities.ArctanInverseBisection}
     {precision depth k : Nat} {hk : k < 2 ^ depth}
