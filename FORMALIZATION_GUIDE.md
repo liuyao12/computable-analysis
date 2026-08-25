@@ -863,6 +863,10 @@ search certificate at each sample.
 The higher-level theorem
 `SinPiSquareFTC.dyadicPublicSquareLeftSum_overlap_of_halfAngle_certificate_family`
 connects this directly to the existing canonical half-angle certificate API.
+An even more geometric entry point is
+`SinPiSquareFTC.dyadicPublicSquareLeftSum_overlap_of_rational_circle_overlap_family`:
+it reduces the positive samples to rational-circle image overlap and handles
+the zero endpoint separately.
 The theorem-facing shortcut is
 `ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_canonical_certificate_family`.
 

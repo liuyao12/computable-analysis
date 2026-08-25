@@ -545,6 +545,11 @@ from monomial brackets structurally.
    `dyadicPublicSquareLeftSum_overlap_of_halfAngle_certificate_family` now
    consumes the existing canonical half-angle certificate family directly,
    including the exact zero endpoint.
+   The geometric reduction
+   `dyadicPublicSquareLeftSum_overlap_of_rational_circle_overlap_family`
+   makes the remaining positive-sample obligation even more explicit: prove
+   rational-circle image overlap, while the endpoint is handled by exact
+   zero-target search.
 
    The square equal-dyadic candidate is now explicit as
    `dyadicNestedRadicalSquareLeftSum`, with raw wrapper

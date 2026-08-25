@@ -3153,6 +3153,36 @@ theorem dyadicPublicSquareLeftSum_overlap_of_canonical_search_family
   exact sinPiSquare_nestedRadicalStage_sample_overlap_of_canonical_box_search
     S hk m u hmu
 
+/- The geometric form of the remaining obligation.  At positive samples it
+asks only for overlap of the rational-circle sine image with the nested
+radical box; the zero sample is discharged by the exact endpoint search. -/
+theorem dyadicPublicSquareLeftSum_overlap_of_rational_circle_overlap_family
+    (S : ArctanSinPiConstruction)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hover : forall (n k : Nat) (hk : k < 2 ^ n),
+      0 < k ->
+      QInterval.Overlaps
+        (rationalCircleSinInterval (dyadicTangentBox S.inverse hk))
+        (dyadicNestedRadicalStageSinAt n k)) :
+    forall n,
+      QInterval.Overlaps
+        (dyadicPublicSquareLeftSum S n)
+        (dyadicNestedRadicalSquareLeftSum n) := by
+  apply dyadicPublicSquareLeftSum_overlap_of_canonical_search_family S
+  intro n k hk
+  by_cases hkzero : k = 0
+  · subst k
+    obtain ⟨u, hu⟩ := canonical_dyadic_zero_search S.inverse ht0 n
+    have hzero : dyadicNestedRadicalStageSinAt n 0 =
+        ({ lo := 0, hi := 0 } : QInterval) := by
+      change (dyadicNestedRadicalTableAt n n 0).1 = _
+      exact dyadicNestedRadicalTableAt_zero_sin n n
+    exact ⟨0, u, by simpa [hzero] using hu⟩
+  · exact canonical_dyadic_search_of_overlap_of_interior S.inverse hk
+      (by omega) (hover n k hk (by omega))
+
 /- The intended geometric interface: the existing canonical half-angle
 certificate family is enough to drive the square-sum transport. -/
 theorem dyadicPublicSquareLeftSum_overlap_of_halfAngle_certificate_family
