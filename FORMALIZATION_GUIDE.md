@@ -977,6 +977,9 @@ that three iterations at precision `4` produce `[3/8,1/2]` directly.
 `gapAwareTargetBisectionFixedIterate_width_eq_div_pow_of_decided` formalize
 the progress boundary: strict midpoint separation at every stage yields the
 exact width law `initial_width / 2^n`.
+The warm exponential example supplies the first three decision certificates
+for target `3/2`, and derives the `1/8` width result through that generic
+theorem rather than through a separate arithmetic trace.
 
 For a direct scalar uniqueness proof, make one finite short-block sweep an
 instance of `ScalarODE.ShortBlockMeshSweep`: telescope the cell estimates to

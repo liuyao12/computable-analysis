@@ -6213,6 +6213,56 @@ theorem uniformExpOnUnitWarm_three_halves_fixed_precision_trace :
       ({ lo := 3 / 8, hi := 1 / 2 } : QInterval) := by
   native_decide
 
+theorem uniformExpOnUnitWarm_three_halves_decision_zero :
+    gapAwareTargetBisectionFixedDecision
+      uniformExpOnUnitWarm_continuous
+      ({ lo := 3 / 2, hi := 3 / 2 } : QInterval)
+      ({ lo := 0, hi := 1 } : QInterval)
+      ⟨by native_decide, by native_decide, by native_decide⟩ 4 0 := by
+  unfold gapAwareTargetBisectionFixedDecision
+  native_decide
+
+theorem uniformExpOnUnitWarm_three_halves_decision_one :
+    gapAwareTargetBisectionFixedDecision
+      uniformExpOnUnitWarm_continuous
+      ({ lo := 3 / 2, hi := 3 / 2 } : QInterval)
+      ({ lo := 0, hi := 1 } : QInterval)
+      ⟨by native_decide, by native_decide, by native_decide⟩ 4 1 := by
+  unfold gapAwareTargetBisectionFixedDecision
+  native_decide
+
+theorem uniformExpOnUnitWarm_three_halves_decision_two :
+    gapAwareTargetBisectionFixedDecision
+      uniformExpOnUnitWarm_continuous
+      ({ lo := 3 / 2, hi := 3 / 2 } : QInterval)
+      ({ lo := 0, hi := 1 } : QInterval)
+      ⟨by native_decide, by native_decide, by native_decide⟩ 4 2 := by
+  unfold gapAwareTargetBisectionFixedDecision
+  native_decide
+
+theorem uniformExpOnUnitWarm_three_halves_width_from_decisions :
+    (gapAwareTargetBisectionFixedIterate
+      uniformExpOnUnitWarm_continuous
+      ({ lo := 3 / 2, hi := 3 / 2 } : QInterval)
+      ({ lo := 0, hi := 1 } : QInterval)
+      ⟨by native_decide, by native_decide, by native_decide⟩ 4 3).width =
+      1 / 8 := by
+  have h := gapAwareTargetBisectionFixedIterate_width_eq_div_pow_of_decided
+    uniformExpOnUnitWarm_continuous
+    ({ lo := 3 / 2, hi := 3 / 2 } : QInterval)
+    ({ lo := 0, hi := 1 } : QInterval)
+    ⟨by native_decide, by native_decide, by native_decide⟩ 4 3
+    (by
+      intro k hk
+      have hk' : k = 0 ∨ k = 1 ∨ k = 2 := by omega
+      rcases hk' with rfl | rfl | rfl
+      · exact uniformExpOnUnitWarm_three_halves_decision_zero
+      · exact uniformExpOnUnitWarm_three_halves_decision_one
+      · exact uniformExpOnUnitWarm_three_halves_decision_two)
+  calc
+    _ = ({ lo := 0, hi := 1 } : QInterval).width / (2 ^ 3 : Rat) := h
+    _ = 1 / 8 := by native_decide
+
 private theorem uniformExpOnUnit_scheduledRegular_width
     (n : Nat) {I : QInterval}
     (hI : subintervalOf I (0 : Rat) 1)

@@ -9259,7 +9259,7 @@ theorem gapAwareTargetBisectionFixedIterate_width_eq_div_pow_of_decided
     (F : ContinuousFunctionOnInterval) (Y I : QInterval)
     (hI : subintervalOf I F.function.lower F.function.upper)
     (precision n : Nat)
-    (hdecided : forall k,
+    (hdecided : forall k, k < n ->
       gapAwareTargetBisectionFixedDecision F Y I hI precision k) :
     (gapAwareTargetBisectionFixedIterate F Y I hI precision n).width =
       I.width / (2 ^ n : Rat) := by
@@ -9276,11 +9276,13 @@ theorem gapAwareTargetBisectionFixedIterate_width_eq_div_pow_of_decided
       let P := gapAwareTargetBisectionFixedIterateWithProof
         F Y I hI precision n
       have hstep := gapAwareTargetBisectionStep_width_eq_half_of_decided
-        F Y P.1 P.2 precision (hdecided n)
+        F Y P.1 P.2 precision (hdecided n (by omega))
       have hprev : P.1.width = I.width / (2 ^ n : Rat) := by
         change (gapAwareTargetBisectionFixedIterate F Y I hI precision n).width =
           I.width / (2 ^ n : Rat)
-        exact ih
+        apply ih
+        intro k hk
+        exact hdecided k (by omega)
       change (gapAwareTargetBisectionStep F Y P.1 P.2 precision).width =
         I.width / (2 ^ (n + 1) : Rat)
       rw [hstep, hprev, Rat.pow_succ]
