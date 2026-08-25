@@ -109,6 +109,17 @@ theorem finiteSum_mul_le_of_nonneg {dimension : Nat}
     _ = finiteSum f * c := (finiteSum_mul_right c f).symm
     _ = c * finiteSum f := Rat.mul_comm _ _
 
+theorem finiteSum_mul_le_of_le_left {dimension : Nat}
+    (f g : Fin dimension -> Rat) (c : Rat)
+    (hf : forall i, f i <= c) (hg : forall i, 0 <= g i) :
+    finiteSum (fun i => f i * g i) <= c * finiteSum g := by
+  calc
+    finiteSum (fun i => f i * g i) <=
+        finiteSum (fun i => c * g i) := by
+      exact finiteSum_le (fun i =>
+        Rat.mul_le_mul_of_nonneg_right (hf i) (hg i))
+    _ = c * finiteSum g := (finiteSum_mul_left c g).symm
+
 /-- Finite rational sums may be enumerated in either order.  This is the
 local Fubini calculation used to prove associativity of the project-local
 matrix product; it is only a double traversal of finite index types. -/
@@ -281,6 +292,47 @@ theorem matrixMul_qabs_le {dimension : Nat}
 
 def matrixRowAbsSum {dimension : Nat} (A : RatMatrix dimension) (i : Fin dimension) : Rat :=
   finiteSum (fun j => qabs (A i j))
+
+def vectorAbsSum {dimension : Nat} (x : RatVector dimension) : Rat :=
+  finiteSum (fun i => qabs (x i))
+
+def matrixColumnAbsSum {dimension : Nat} (A : RatMatrix dimension) (j : Fin dimension) : Rat :=
+  finiteSum (fun i => qabs (A i j))
+
+theorem matrixApply_vectorAbsSum_le {dimension : Nat}
+    (A : RatMatrix dimension) (x : RatVector dimension) :
+    vectorAbsSum (matrixApply A x) <=
+      finiteSum (fun j => matrixColumnAbsSum A j * qabs (x j)) := by
+  unfold vectorAbsSum
+  calc
+    finiteSum (fun i => qabs (matrixApply A x i)) <=
+        finiteSum (fun i => finiteSum (fun j =>
+          qabs (A i j) * qabs (x j))) := by
+      exact finiteSum_le (fun i => matrixApply_qabs_le A x i)
+    _ = finiteSum (fun j => finiteSum (fun i =>
+          qabs (A i j) * qabs (x j))) := by
+      exact finiteSum_swap dimension dimension
+        (fun i j => qabs (A i j) * qabs (x j))
+    _ = finiteSum (fun j => matrixColumnAbsSum A j * qabs (x j)) := by
+      congr 1
+      funext j
+      unfold matrixColumnAbsSum
+      exact (finiteSum_mul_right (qabs (x j))
+        (fun i => qabs (A i j))).symm
+
+theorem matrixApply_vectorAbsSum_le_of_column_bound {dimension : Nat}
+    (A : RatMatrix dimension) (x : RatVector dimension) (c : Rat)
+    (hcolumn : forall j, matrixColumnAbsSum A j <= c) :
+    vectorAbsSum (matrixApply A x) <= c * vectorAbsSum x := by
+  calc
+    vectorAbsSum (matrixApply A x) <=
+        finiteSum (fun j => matrixColumnAbsSum A j * qabs (x j)) :=
+      matrixApply_vectorAbsSum_le A x
+    _ <= c * finiteSum (fun j => qabs (x j)) :=
+      finiteSum_mul_le_of_le_left
+        (fun j => matrixColumnAbsSum A j) (fun j => qabs (x j)) c
+        hcolumn (fun j => qabs_nonneg _)
+    _ = c * vectorAbsSum x := rfl
 
 theorem matrixRowAbsSum_identity {dimension : Nat} (i : Fin dimension) :
     matrixRowAbsSum (matrixIdentity dimension) i = 1 := by
