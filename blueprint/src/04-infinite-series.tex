@@ -79,6 +79,7 @@ finite transform -> coordinate tail box -> future-stage containment
 \lean{ComputableAnalysis.EffectiveFourierTailCertificate.toSeries_valid}
 \lean{ComputableAnalysis.EffectiveFourierSeries.stabilized_valid}
 \lean{ComputableAnalysis.EffectiveFourierSeries.precision_witness}
+\lean{ComputableAnalysis.finiteSupportFourierSeries_stabilized_equiv}
 \lean{ComputableAnalysis.quarterTurnGeometricTailCertificate_valid}
 \lean{ComputableAnalysis.EffectiveFourierSampleCertificate.toSeries_valid}
 \lean{ComputableAnalysis.EffectiveFourierSampleCertificate.sample_interval_witness}
@@ -93,6 +94,12 @@ complex value.
 \lean{ComputableAnalysis.quarterTurnGeometricFourierSeries}
 \lean{ComputableAnalysis.quarterTurnGeometricFourierSeries_future_stage_enclosure}
 \leanok
+
+Finite support is deliberately treated as a degenerate but useful case: the
+stabilized raw complex value is equivalent to the exact rational-complex
+transform already computed by the finite stage.  This is the hand-off used by
+applications that have a finite sample table and do not need a convergence
+argument.
 
 \section{Series as computation}
 \label{thm:arithmetic-series-sum}

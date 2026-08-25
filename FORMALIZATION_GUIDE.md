@@ -344,6 +344,13 @@ ready-made `quarterTurnConstantBlockCancellationCertificate` is the reference
 instance, and its repeated-block theorem can be used directly in later finite
 stage constructions.
 
+When a Fourier computation has finite support, use
+`finiteSupportFourierSeries_stabilized_equiv`. It proves that the stabilized
+complex raw object is equivalent to the exact rational-complex finite
+transform, so a finite sample table does not need a second convergence proof.
+Reserve `EffectiveFourierSeries` tail certificates for genuinely unbounded
+coefficient families.
+
 Use `rg` to discover nearby examples before inventing a new interface:
 
 ```bash

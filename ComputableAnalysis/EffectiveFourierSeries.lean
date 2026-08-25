@@ -99,6 +99,25 @@ def finiteSupportFourierSeries
     intro n hn
     exact Rat.le_of_lt eps.property
 
+theorem finiteSupportFourierSeries_stabilized_equiv
+    (root : QComplex) (mode : Nat) (samples : List QComplex) :
+    (finiteSupportFourierSeries root mode samples).stabilized.Equiv
+      (ComplexRaw.ofQComplex (finiteFourierSum root mode samples)) := by
+  let F := finiteSupportFourierSeries root mode samples
+  let q : QComplex := finiteFourierSum root mode samples
+  intro n
+  apply (ComplexRaw.compareAt_overlap_iff
+    F.stabilized (ComplexRaw.ofQComplex q) n n).2
+  have hcontains := ComplexRaw.cauchyStabilize_contains_current
+    (candidate := F.candidate) (radius := F.radius)
+    F.future_containment n
+  change QBox.Overlaps (F.stabilized.compute n) (QBox.point q)
+  change QBox.Overlaps (F.stabilized.compute n)
+    (QBox.point (finiteFourierSum root mode samples))
+  unfold QBox.Overlaps
+  exact ⟨⟨hcontains.1.1, hcontains.1.2⟩,
+    ⟨hcontains.2.1, hcontains.2.2⟩⟩
+
 /-! A finite sample table is the first bridge from the project’s complex
 function layer to its Fourier layer. Each value is rational-complex, while
 the enclosure obligation records that the value is contained in the
