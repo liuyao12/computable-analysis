@@ -6361,6 +6361,84 @@ def dyadicMidpointGridUpTo : Nat → List Rat
   | 0 => dyadicMidpointGrid 0
   | n + 1 => dyadicMidpointGridUpTo n ++ dyadicMidpointGrid (n + 1)
 
+theorem dyadicMidpointGrid_mem (n k : Nat) (hk : k < 2 ^ n) :
+    ((2 * k + 1 : Nat) : Rat) / ((2 ^ (n + 1) : Nat) : Rat) ∈
+      dyadicMidpointGrid n := by
+  unfold dyadicMidpointGrid
+  apply List.mem_map.mpr
+  exact ⟨k, List.mem_range.mpr hk, rfl⟩
+
+theorem dyadicMidpointGrid_mem_upTo (n k : Nat) (hk : k < 2 ^ n) :
+    ((2 * k + 1 : Nat) : Rat) / ((2 ^ (n + 1) : Nat) : Rat) ∈
+      dyadicMidpointGridUpTo n := by
+  induction n with
+  | zero =>
+      exact dyadicMidpointGrid_mem 0 k hk
+  | succ n ih =>
+      rw [dyadicMidpointGridUpTo]
+      apply List.mem_append_right
+      exact dyadicMidpointGrid_mem (n + 1) k hk
+
+theorem dyadicInterval_midpoint_eq_grid (n k : Nat) :
+    ({ lo := (k : Rat) / ((2 ^ n : Nat) : Rat),
+       hi := ((k + 1 : Nat) : Rat) / ((2 ^ n : Nat) : Rat) } : QInterval).midpoint =
+      ((2 * k + 1 : Nat) : Rat) / ((2 ^ (n + 1) : Nat) : Rat) := by
+  unfold QInterval.midpoint
+  rw [show (2 ^ (n + 1) : Nat) = 2 ^ n * 2 by omega]
+  push_cast
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  have hpow : ((2 ^ n : Nat) : Rat) ≠ 0 := by
+    exact Rat.ne_of_gt (Rat.natCast_pos.mpr (Nat.pow_pos (by decide)))
+  have htwo : (2 : Rat) ≠ 0 := by native_decide
+  have hpow_cancel := Rat.mul_inv_cancel ((2 ^ n : Nat) : Rat) hpow
+  have htwo_cancel := Rat.mul_inv_cancel (2 : Rat) htwo
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc]
+
+def dyadicCell (n k : Nat) : QInterval where
+  lo := (k : Rat) / ((2 ^ n : Nat) : Rat)
+  hi := ((k + 1 : Nat) : Rat) / ((2 ^ n : Nat) : Rat)
+
+theorem dyadicCell_midpoint_mem_grid_upTo
+    (n k : Nat) (hk : k < 2 ^ n) :
+    (dyadicCell n k).midpoint ∈ dyadicMidpointGridUpTo n := by
+  rw [show dyadicCell n k =
+      ({ lo := (k : Rat) / ((2 ^ n : Nat) : Rat),
+         hi := ((k + 1 : Nat) : Rat) / ((2 ^ n : Nat) : Rat) } : QInterval) by rfl]
+  rw [dyadicInterval_midpoint_eq_grid]
+  exact dyadicMidpointGrid_mem_upTo n k hk
+
+theorem dyadicCell_left_child (n k : Nat) :
+    ({ lo := (dyadicCell n k).lo,
+       hi := (dyadicCell n k).midpoint } : QInterval) =
+      dyadicCell (n + 1) (2 * k) := by
+  unfold dyadicCell
+  rw [QInterval.midpoint]
+  push_cast
+  rw [show (2 : Rat) ^ (n + 1) = (2 : Rat) ^ n * 2 by rw [Rat.pow_succ]]
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  have hpow : ((2 ^ n : Nat) : Rat) ≠ 0 := by
+    exact Rat.ne_of_gt (Rat.natCast_pos.mpr (Nat.pow_pos (by decide)))
+  have htwo : (2 : Rat) ≠ 0 := by native_decide
+  have hpow_cancel := Rat.mul_inv_cancel ((2 ^ n : Nat) : Rat) hpow
+  have htwo_cancel := Rat.mul_inv_cancel (2 : Rat) htwo
+  congr 1 <;> grind [Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc]
+
+theorem dyadicCell_right_child (n k : Nat) :
+    ({ lo := (dyadicCell n k).midpoint,
+       hi := (dyadicCell n k).hi } : QInterval) =
+      dyadicCell (n + 1) (2 * k + 1) := by
+  unfold dyadicCell
+  rw [QInterval.midpoint]
+  push_cast
+  rw [show (2 : Rat) ^ (n + 1) = (2 : Rat) ^ n * 2 by rw [Rat.pow_succ]]
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  have hpow : ((2 ^ n : Nat) : Rat) ≠ 0 := by
+    exact Rat.ne_of_gt (Rat.natCast_pos.mpr (Nat.pow_pos (by decide)))
+  have htwo : (2 : Rat) ≠ 0 := by native_decide
+  have hpow_cancel := Rat.mul_inv_cancel ((2 ^ n : Nat) : Rat) hpow
+  have htwo_cancel := Rat.mul_inv_cancel (2 : Rat) htwo
+  congr 1 <;> grind [Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc]
+
 def uniformExpRationalTargetStage (r : Rat) : Nat → Nat
   | 0 => max 0 (uniformExpGapPrecisionMax r 0
       (dyadicMidpointGridUpTo 0))

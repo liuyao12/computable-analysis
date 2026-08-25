@@ -982,6 +982,11 @@ listed dyadic midpoint demand.  `uniformExpOnUnitWarm_oneThird_target`
 instantiates that schedule as a valid forward target for the representative
 source value `1/3`; its explicit dominance certificate is
 `uniformExpOnUnitWarm_oneThird_target_stage_dominates`.
+The arithmetic bridge is now explicit: `dyadicCell` describes a standard
+dyadic subinterval, `dyadicCell_left_child` and
+`dyadicCell_right_child` identify its two children, and
+`dyadicCell_midpoint_mem_grid_upTo` proves that every canonical-cell midpoint
+is among the finitely listed target demands.
 
 Formalization scope is by mechanism, not by exhaustive enumeration.  One
 representative function is enough when another function uses the same certified
