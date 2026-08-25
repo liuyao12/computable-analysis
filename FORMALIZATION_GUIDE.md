@@ -133,7 +133,9 @@ Start with the smallest target module rather than importing
 
 The Gaussian prefix now exposes the reusable finite termwise-integration
 contract through `gaussianEvenIntegralPrefix_succ` and
-`gaussianEvenIntegralPrefix_term_difference`.  These identities concern only
+`gaussianEvenIntegralPrefix_term_difference`.  The named term and finite tail
+majorant add a direct remainder contract through
+`gaussianEvenIntegralPrefix_remainder_abs_le`.  These identities concern only
 finite Taylor sums; an improper Gaussian integral still requires a separate
 tail certificate.
 

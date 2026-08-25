@@ -42,6 +42,55 @@ theorem gaussianEvenIntegralPrefix_term_difference (terms : Nat) (radius : Rat) 
   rw [gaussianEvenIntegralPrefix_succ]
   grind
 
+def gaussianEvenIntegralTerm (k : Nat) (radius : Rat) : Rat :=
+  2 * FormalPowerSeries.expCoeff k * (-1 : Rat) ^ k *
+    radius ^ (2 * k + 1) / ((2 * k + 1 : Nat) : Rat)
+
+def gaussianEvenIntegralTailMajorant (radius : Rat) (start : Nat) : Nat → Rat
+  | 0 => 0
+  | terms + 1 =>
+      gaussianEvenIntegralTailMajorant radius start terms +
+        qabs (gaussianEvenIntegralTerm (start + terms) radius)
+
+theorem gaussianEvenIntegralPrefix_succ_eq_term (terms : Nat) (radius : Rat) :
+    gaussianEvenIntegralPrefix (terms + 1) radius =
+      gaussianEvenIntegralPrefix terms radius +
+        gaussianEvenIntegralTerm terms radius := by
+  rw [gaussianEvenIntegralPrefix_succ]
+  rfl
+
+theorem gaussianEvenIntegralPrefix_remainder_abs_le
+    (radius : Rat) (start terms : Nat) :
+    qabs (gaussianEvenIntegralPrefix (start + terms) radius -
+      gaussianEvenIntegralPrefix start radius) <=
+      gaussianEvenIntegralTailMajorant radius start terms := by
+  induction terms with
+  | zero =>
+      simp only [gaussianEvenIntegralTailMajorant, Nat.zero_eq, Nat.add_zero,
+        Rat.sub_self]
+      exact Rat.le_refl
+  | succ terms ih =>
+      rw [gaussianEvenIntegralTailMajorant]
+      have hstep :
+          gaussianEvenIntegralPrefix (start + (terms + 1)) radius =
+            gaussianEvenIntegralPrefix (start + terms) radius +
+              gaussianEvenIntegralTerm (start + terms) radius := by
+        have hindex : start + (terms + 1) = (start + terms) + 1 := by omega
+        rw [hindex, gaussianEvenIntegralPrefix_succ_eq_term]
+      rw [hstep]
+      have hrewrite :
+          gaussianEvenIntegralPrefix (start + terms) radius +
+              gaussianEvenIntegralTerm (start + terms) radius -
+            gaussianEvenIntegralPrefix start radius =
+            (gaussianEvenIntegralPrefix (start + terms) radius -
+              gaussianEvenIntegralPrefix start radius) +
+              gaussianEvenIntegralTerm (start + terms) radius := by
+        grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+      rw [hrewrite]
+      exact Rat.le_trans
+        (qabs_add_le _ _)
+        (rat_add_le_add ih Rat.le_refl)
+
 theorem gaussianEvenIntegralPrefix_stage_four :
     gaussianEvenIntegralPrefix 4 1 = 52 / 35 := by
   native_decide
