@@ -1043,9 +1043,21 @@ plus the explicitly recorded quadratic variation:
 \lean{ComputableAnalysis.finiteSquareStieltjes_left_bounds}
 \lean{ComputableAnalysis.unitMeshPath_square_left_bounds}
 \lean{ComputableAnalysis.unitMeshPath_square_left_sum_exact}
+\lean{ComputableAnalysis.unitMeshSquareIntegralRaw_valid}
+\lean{ComputableAnalysis.unitMeshSquareIntegralRaw_equiv_one}
 \lean{ComputableAnalysis.quadraticVariationSum_nonneg_of_step_nonnegative}
 \lean{ComputableAnalysis.quadraticVariationSum_le_stepBound_mul_endpointDifference}
 \lean{ComputableAnalysis.quadraticVariationSum_le_endpointVariationProduct_of_step_nonnegative}
+\leanok
+
+The same certificate is also an exposed raw-real computation: stage $n$
+returns the rational interval $[1-1/(n+1),1]$.  Its validity is proved by
+finite nesting plus the denominator-based epsilon schedule, and its value is
+identified with the rational point $1$ by stagewise overlap.  This is the
+model pattern for turning a finite integral estimate into a computable real.
+
+\lean{ComputableAnalysis.unitMeshSquareIntegralRaw}
+
 \leanok
 
 The affine change-of-variable identity is already exact at this finite level.

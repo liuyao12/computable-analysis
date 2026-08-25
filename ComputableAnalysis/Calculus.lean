@@ -1111,6 +1111,73 @@ theorem unitMeshPath_square_left_sum_exact {n : Nat} (hn : 0 < n) :
     unitMeshPath_quadraticVariation hn] at h
   grind
 
+/-! The finite square calculation can itself be exposed as a raw real.  At
+stage `n`, use the certified lower bound from the `(n+1)`-cell computation and
+the exact upper bound.  This is a concrete example of turning a finite
+rectangle proof into a shrinking rational-interval algorithm. -/
+
+def unitMeshSquareIntegralRaw : RealRaw where
+  compute n :=
+    { lo := 1 - 1 / (((n + 1 : Nat) : Rat)), hi := 1 }
+
+private theorem one_div_nat_antitone_succ {n m : Nat} (hnm : n <= m) :
+    1 / (((m + 1 : Nat) : Rat)) <=
+      1 / (((n + 1 : Nat) : Rat)) := by
+  have hnpos : 0 < (n + 1 : Nat) := Nat.succ_pos n
+  have hmpos : 0 < (m + 1 : Nat) := Nat.succ_pos m
+  apply Rat.le_of_mul_le_mul_right
+    (c := ((n + 1 : Nat) : Rat) * ((m + 1 : Nat) : Rat))
+  · calc
+      (1 / (((m + 1 : Nat) : Rat))) *
+          (((n + 1 : Nat) : Rat) * ((m + 1 : Nat) : Rat)) =
+          ((n + 1 : Nat) : Rat) := by
+        have hmne : ((m + 1 : Nat) : Rat) ≠ 0 :=
+          Rat.ne_of_gt ((Rat.natCast_pos).2 hmpos)
+        grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= ((m + 1 : Nat) : Rat) := by exact_mod_cast (Nat.succ_le_succ hnm)
+      _ = (1 / (((n + 1 : Nat) : Rat))) *
+          (((n + 1 : Nat) : Rat) * ((m + 1 : Nat) : Rat)) := by
+        have hnne : ((n + 1 : Nat) : Rat) ≠ 0 :=
+          Rat.ne_of_gt ((Rat.natCast_pos).2 hnpos)
+        grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  · exact Rat.mul_pos ((Rat.natCast_pos).2 hnpos)
+      ((Rat.natCast_pos).2 hmpos)
+
+theorem unitMeshSquareIntegralRaw_valid : unitMeshSquareIntegralRaw.Valid := by
+  unfold unitMeshSquareIntegralRaw RealRaw.Valid RealRaw.ValidCompute
+  constructor
+  · intro n
+    unfold QInterval.width
+    have hpos : 0 < (1 / (((n + 1 : Nat) : Rat)) : Rat) :=
+      one_div_nat_pos (Nat.succ_pos n)
+    grind [Rat.sub_eq_add_neg]
+  constructor
+  · intro n m hnm
+    have hnpos : 0 < (n + 1 : Nat) := Nat.succ_pos n
+    have hmpos : 0 < (m + 1 : Nat) := Nat.succ_pos m
+    have hrecip := one_div_nat_antitone_succ hnm
+    have hmrecip : 0 <= (1 / (((m + 1 : Nat) : Rat)) : Rat) :=
+      Rat.le_of_lt (one_div_nat_pos hmpos)
+    constructor
+    · grind [Rat.sub_eq_add_neg]
+    constructor <;> grind [Rat.sub_eq_add_neg]
+  · apply shrinksToZero_of_natOverSuccBound (C := 1)
+    intro n
+    unfold QInterval.width
+    grind [Rat.sub_eq_add_neg]
+
+theorem unitMeshSquareIntegralRaw_equiv_one :
+    unitMeshSquareIntegralRaw.Equiv (RealRaw.ofRat 1) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    unitMeshSquareIntegralRaw (RealRaw.ofRat 1) n n).2
+  rw [RealRaw.ofRat_compute]
+  unfold unitMeshSquareIntegralRaw QInterval.Overlaps
+  have hpos : 0 <= (1 / (((n + 1 : Nat) : Rat)) : Rat) :=
+    Rat.le_of_lt (one_div_nat_pos (Nat.succ_pos n))
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
 /-- A fully explicit epsilon schedule for the unit-mesh corner correction.
 Choosing `n = eps.den + 1` makes the rational correction at most `eps`. -/
 theorem unitMeshPath_quadraticVariation_le_epsilon (eps : QPos) :
