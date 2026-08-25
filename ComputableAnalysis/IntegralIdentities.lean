@@ -16472,6 +16472,30 @@ theorem raw_add_equiv
   · grind [Rat.add_assoc, Rat.add_comm]
   · grind [Rat.add_assoc, Rat.add_comm]
 
+/-- Nonnegative rational scaling is compatible with the Lipschitz--Darboux
+raw representation. The natural bound scales with the same factor. -/
+theorem raw_natScale_equiv
+    (f : Rat -> Rat) (L scale : Nat) :
+    (raw (fun x => (scale : Rat) * f x) (scale * L)).Equiv
+      (RealRaw.scaleRat (scale : Rat) (raw f L)) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro stage
+  apply (RealRaw.compareAt_overlap_iff
+    (raw (fun x => (scale : Rat) * f x) (scale * L))
+    (RealRaw.scaleRat (scale : Rat) (raw f L)) stage stage).2
+  change QInterval.Overlaps
+    (compute (fun x => (scale : Rat) * f x) (scale * L) stage)
+    (RealRaw.scaleRatCompute (scale : Rat) (raw f L) stage)
+  rw [compute_natScale]
+  simp only [raw, RealRaw.scaleRatCompute, if_pos Rat.natCast_nonneg]
+  unfold QInterval.Overlaps
+  have h := compute_ordered (f := f) (L := L) stage
+  unfold QInterval.width at h
+  have hscaled := Rat.mul_le_mul_of_nonneg_left
+    (show (compute f L stage).lo <= (compute f L stage).hi by
+      grind [Rat.sub_eq_add_neg]) (Rat.natCast_nonneg : 0 <= (scale : Rat))
+  exact ⟨hscaled, hscaled⟩
+
 /-- Package the finite Lipschitz--Darboux algorithm as a construction for the
 exact rational kernel that its rectangles evaluate. -/
 def construction (f : Rat -> Rat) (L : Nat)
