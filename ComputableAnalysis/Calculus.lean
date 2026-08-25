@@ -9031,16 +9031,21 @@ def GapAwareInvertibleFunctionOnInterval.EndpointRangeContains
 
 /-! A sound interval-level midpoint decision kernel.
 
-The kernel only discards a half when the computed image box is wholly on one
-side of the target box.  If the boxes overlap, it retains the parent interval
-instead of making an unjustified classical choice.  Thus every returned
-interval is a rational subinterval of the parent; progress in a full inverse
-algorithm must be supplied by a separate gap-aware precision certificate. -/
+The kernel evaluates the degenerate rational midpoint interval.  It only
+discards a half when that midpoint image box is wholly on one side of the
+target box.  If the boxes overlap, it retains the parent interval instead of
+making an unjustified classical choice.  Thus every returned interval is a
+rational subinterval of the parent; progress in a full inverse algorithm must
+be supplied by a separate gap-aware precision certificate. -/
 def gapAwareTargetBisectionStep
     (F : ContinuousFunctionOnInterval) (Y I : QInterval)
     (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) :
     QInterval :=
-  let V := F.regular.evalInterval I hI n
+  let V := F.regular.evalInterval
+    { lo := I.midpoint, hi := I.midpoint }
+    ⟨Rat.le_trans hI.1 (QInterval.midpoint_mem hI.2.1).1,
+      Rat.le_refl,
+      Rat.le_trans (QInterval.midpoint_mem hI.2.1).2 hI.2.2⟩ n
   if V.hi < Y.lo then
     { lo := I.midpoint, hi := I.hi }
   else if Y.hi < V.lo then
@@ -9055,11 +9060,17 @@ theorem gapAwareTargetBisectionStep_ordered
       (gapAwareTargetBisectionStep F Y I hI n).hi := by
   have hm := QInterval.midpoint_mem hI.2.1
   by_cases hbelow :
-      (F.regular.evalInterval I hI n).hi < Y.lo
+      (F.regular.evalInterval
+        { lo := I.midpoint, hi := I.midpoint }
+        ⟨Rat.le_trans hI.1 hm.1, Rat.le_refl,
+          Rat.le_trans hm.2 hI.2.2⟩ n).hi < Y.lo
   · simp [gapAwareTargetBisectionStep, hbelow]
     exact hm.2
   · by_cases habove :
-        Y.hi < (F.regular.evalInterval I hI n).lo
+        Y.hi < (F.regular.evalInterval
+          { lo := I.midpoint, hi := I.midpoint }
+          ⟨Rat.le_trans hI.1 hm.1, Rat.le_refl,
+            Rat.le_trans hm.2 hI.2.2⟩ n).lo
     · simp [gapAwareTargetBisectionStep, hbelow, habove]
       exact hm.1
     · simp [gapAwareTargetBisectionStep, hbelow, habove]
@@ -9071,11 +9082,17 @@ theorem gapAwareTargetBisectionStep_subinterval
     subintervalOf (gapAwareTargetBisectionStep F Y I hI n) I.lo I.hi := by
   have hm := QInterval.midpoint_mem hI.2.1
   by_cases hbelow :
-      (F.regular.evalInterval I hI n).hi < Y.lo
+      (F.regular.evalInterval
+        { lo := I.midpoint, hi := I.midpoint }
+        ⟨Rat.le_trans hI.1 hm.1, Rat.le_refl,
+          Rat.le_trans hm.2 hI.2.2⟩ n).hi < Y.lo
   · simp [gapAwareTargetBisectionStep, hbelow]
     exact ⟨hm.1, hm.2, Rat.le_refl⟩
   · by_cases habove :
-        Y.hi < (F.regular.evalInterval I hI n).lo
+        Y.hi < (F.regular.evalInterval
+          { lo := I.midpoint, hi := I.midpoint }
+          ⟨Rat.le_trans hI.1 hm.1, Rat.le_refl,
+            Rat.le_trans hm.2 hI.2.2⟩ n).lo
     · simp [gapAwareTargetBisectionStep, hbelow, habove]
       exact ⟨Rat.le_refl, hm.1, hm.2⟩
     · simp [gapAwareTargetBisectionStep, hbelow, habove]
@@ -9087,14 +9104,55 @@ theorem gapAwareTargetBisectionStep_width_le
     (gapAwareTargetBisectionStep F Y I hI n).width <= I.width := by
   have hm := QInterval.midpoint_mem hI.2.1
   by_cases hbelow :
-      (F.regular.evalInterval I hI n).hi < Y.lo
+      (F.regular.evalInterval
+        { lo := I.midpoint, hi := I.midpoint }
+        ⟨Rat.le_trans hI.1 hm.1, Rat.le_refl,
+          Rat.le_trans hm.2 hI.2.2⟩ n).hi < Y.lo
   · simp [gapAwareTargetBisectionStep, hbelow, QInterval.width]
     grind [Rat.sub_eq_add_neg]
   · by_cases habove :
-        Y.hi < (F.regular.evalInterval I hI n).lo
+        Y.hi < (F.regular.evalInterval
+          { lo := I.midpoint, hi := I.midpoint }
+          ⟨Rat.le_trans hI.1 hm.1, Rat.le_refl,
+            Rat.le_trans hm.2 hI.2.2⟩ n).lo
     · simp [gapAwareTargetBisectionStep, hbelow, habove, QInterval.width]
       grind [Rat.sub_eq_add_neg]
     · simp [gapAwareTargetBisectionStep, hbelow, habove]
+
+theorem gapAwareTargetBisectionStep_width_eq_half_of_decided
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat)
+    (hdecided :
+      (F.regular.evalInterval
+        { lo := I.midpoint, hi := I.midpoint }
+        ⟨Rat.le_trans hI.1 (QInterval.midpoint_mem hI.2.1).1,
+          Rat.le_refl,
+          Rat.le_trans (QInterval.midpoint_mem hI.2.1).2 hI.2.2⟩ n).hi < Y.lo \/
+        Y.hi < (F.regular.evalInterval
+          { lo := I.midpoint, hi := I.midpoint }
+          ⟨Rat.le_trans hI.1 (QInterval.midpoint_mem hI.2.1).1,
+            Rat.le_refl,
+            Rat.le_trans (QInterval.midpoint_mem hI.2.1).2 hI.2.2⟩ n).lo) :
+    (gapAwareTargetBisectionStep F Y I hI n).width = I.width / 2 := by
+  have hm := QInterval.midpoint_mem hI.2.1
+  by_cases hbelow :
+      (F.regular.evalInterval
+        { lo := I.midpoint, hi := I.midpoint }
+        ⟨Rat.le_trans hI.1 hm.1, Rat.le_refl,
+          Rat.le_trans hm.2 hI.2.2⟩ n).hi < Y.lo
+  · simp only [gapAwareTargetBisectionStep, hbelow, if_pos]
+    simpa [QInterval.width, QInterval.midpoint] using
+      Integral.midpoint_right_width I.lo I.hi
+  · have habove : Y.hi < (F.regular.evalInterval
+        { lo := I.midpoint, hi := I.midpoint }
+        ⟨Rat.le_trans hI.1 hm.1, Rat.le_refl,
+          Rat.le_trans hm.2 hI.2.2⟩ n).lo := by
+      rcases hdecided with h | h
+      · exact False.elim (hbelow h)
+      · exact h
+    simp only [gapAwareTargetBisectionStep, hbelow, habove]
+    simpa [QInterval.width, QInterval.midpoint] using
+      Integral.midpoint_left_width I.lo I.hi
 
 /-! Proof-carrying finite iteration of the conservative kernel.  The subtype
 stores the domain certificate at every stage, so later clients never need to

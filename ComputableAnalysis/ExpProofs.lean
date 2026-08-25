@@ -6169,6 +6169,41 @@ theorem uniformExpCenter_threeHalves_output_forward_overlap
   unfold uniformExpTailRadius at htail ⊢
   constructor <;> grind [Rat.sub_eq_add_neg]
 
+/-! The first adaptive decision is already concrete on the warm exponential
+branch: at the midpoint `1/2`, the finite interval image lies strictly above
+the target `3/2`. -/
+theorem uniformExpOnUnitWarm_three_halves_midpoint_above :
+    (3 / 2 : Rat) <
+      (uniformExpCellRange (1 / 2) (1 / 2) 8).lo := by
+  native_decide
+
+theorem uniformExpOnUnitWarm_three_halves_first_step :
+    gapAwareTargetBisectionStep
+      uniformExpOnUnitWarm_continuous
+      ({ lo := 3 / 2, hi := 3 / 2 } : QInterval)
+      ({ lo := 0, hi := 1 } : QInterval)
+      ⟨by native_decide, by native_decide, by native_decide⟩ 4 =
+      ({ lo := 0, hi := 1 / 2 } : QInterval) := by
+  native_decide
+
+theorem uniformExpOnUnitWarm_three_halves_second_step :
+    gapAwareTargetBisectionStep
+      uniformExpOnUnitWarm_continuous
+      ({ lo := 3 / 2, hi := 3 / 2 } : QInterval)
+      ({ lo := 0, hi := 1 / 2 } : QInterval)
+      ⟨by native_decide, by native_decide, by native_decide⟩ 4 =
+      ({ lo := 1 / 4, hi := 1 / 2 } : QInterval) := by
+  native_decide
+
+theorem uniformExpOnUnitWarm_three_halves_third_step :
+    gapAwareTargetBisectionStep
+      uniformExpOnUnitWarm_continuous
+      ({ lo := 3 / 2, hi := 3 / 2 } : QInterval)
+      ({ lo := 1 / 4, hi := 1 / 2 } : QInterval)
+      ⟨by native_decide, by native_decide, by native_decide⟩ 4 =
+      ({ lo := 3 / 8, hi := 1 / 2 } : QInterval) := by
+  native_decide
+
 private theorem uniformExpOnUnit_scheduledRegular_width
     (n : Nat) {I : QInterval}
     (hI : subintervalOf I (0 : Rat) 1)

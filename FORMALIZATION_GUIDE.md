@@ -965,6 +965,10 @@ The proof-carrying iterators `gapAwareTargetBisectionIterateWithProof` and
 stage remains in the original branch and has width no larger than the initial
 interval. They intentionally do not claim geometric shrinkage when a midpoint
 remains unresolved.
+The warm exponential branch now includes three executable target-`3/2`
+midpoint regressions. At precision stage `4` they produce
+`[0,1/2]`, `[1/4,1/2]`, and `[3/8,1/2]` in succession, all by finite rational
+interval decisions.
 
 For a direct scalar uniqueness proof, make one finite short-block sweep an
 instance of `ScalarODE.ShortBlockMeshSweep`: telescope the cell estimates to
