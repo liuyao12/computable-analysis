@@ -299,6 +299,21 @@ def vectorAbsSum {dimension : Nat} (x : RatVector dimension) : Rat :=
 def matrixColumnAbsSum {dimension : Nat} (A : RatMatrix dimension) (j : Fin dimension) : Rat :=
   finiteSum (fun i => qabs (A i j))
 
+theorem matrixColumnAbsSum_identity {dimension : Nat} (j : Fin dimension) :
+    matrixColumnAbsSum (matrixIdentity dimension) j = 1 := by
+  unfold matrixColumnAbsSum matrixIdentity
+  rw [show (fun i => qabs (if i = j then 1 else 0)) =
+      (fun i => if i = j then 1 else 0) by
+        funext i
+        by_cases h : i = j
+        · rw [if_pos h]
+          native_decide
+        · rw [if_neg h]
+          native_decide]
+  change finiteSum (fun i => if i = j then (1 : Rat) else 0) =
+    (fun _ => (1 : Rat)) j
+  exact finiteSum_ite_eq j (fun _ => (1 : Rat))
+
 theorem matrixApply_vectorAbsSum_le {dimension : Nat}
     (A : RatMatrix dimension) (x : RatVector dimension) :
     vectorAbsSum (matrixApply A x) <=
@@ -333,6 +348,42 @@ theorem matrixApply_vectorAbsSum_le_of_column_bound {dimension : Nat}
         (fun j => matrixColumnAbsSum A j) (fun j => qabs (x j)) c
         hcolumn (fun j => qabs_nonneg _)
     _ = c * vectorAbsSum x := rfl
+
+theorem matrixMul_columnAbsSum_le {dimension : Nat}
+    (A B : RatMatrix dimension) (j : Fin dimension) :
+    matrixColumnAbsSum (matrixMul A B) j <=
+      finiteSum (fun k => matrixColumnAbsSum A k * qabs (B k j)) := by
+  unfold matrixColumnAbsSum
+  calc
+    finiteSum (fun i => qabs (matrixMul A B i j)) <=
+        finiteSum (fun i => finiteSum (fun k =>
+          qabs (A i k) * qabs (B k j))) := by
+      exact finiteSum_le (fun i => matrixMul_qabs_le A B i j)
+    _ = finiteSum (fun k => finiteSum (fun i =>
+          qabs (A i k) * qabs (B k j))) := by
+      exact finiteSum_swap dimension dimension
+        (fun i k => qabs (A i k) * qabs (B k j))
+    _ = finiteSum (fun k => matrixColumnAbsSum A k * qabs (B k j)) := by
+      congr 1
+      funext k
+      unfold matrixColumnAbsSum
+      exact (finiteSum_mul_right (qabs (B k j))
+        (fun i => qabs (A i k))).symm
+
+theorem matrixMul_columnAbsSum_le_of_column_bound {dimension : Nat}
+    (A B : RatMatrix dimension) (c : Rat)
+    (hcolumn : forall k, matrixColumnAbsSum A k <= c) (j : Fin dimension) :
+    matrixColumnAbsSum (matrixMul A B) j <=
+      c * matrixColumnAbsSum B j := by
+  calc
+    matrixColumnAbsSum (matrixMul A B) j <=
+        finiteSum (fun k => matrixColumnAbsSum A k * qabs (B k j)) :=
+      matrixMul_columnAbsSum_le A B j
+    _ <= c * finiteSum (fun k => qabs (B k j)) :=
+      finiteSum_mul_le_of_le_left
+        (fun k => matrixColumnAbsSum A k) (fun k => qabs (B k j)) c
+        hcolumn (fun k => qabs_nonneg _)
+    _ = c * matrixColumnAbsSum B j := rfl
 
 theorem matrixRowAbsSum_identity {dimension : Nat} (i : Fin dimension) :
     matrixRowAbsSum (matrixIdentity dimension) i = 1 := by
@@ -1663,6 +1714,36 @@ def chronologicalProduct {dimension : Nat} (B : Nat -> RatMatrix dimension) : Na
   | 0 => matrixIdentity dimension
   | n + 1 => matrixMul (matrixAdd (matrixIdentity dimension) (B n))
       (chronologicalProduct B n)
+
+theorem chronologicalProduct_columnAbsSum_le_pow {dimension : Nat}
+    (B : Nat -> RatMatrix dimension) (c : Rat)
+    (hbound : forall n j,
+      matrixColumnAbsSum (matrixAdd (matrixIdentity dimension) (B n)) j <= c)
+    (hc : 0 <= c) :
+    forall steps j,
+      matrixColumnAbsSum (chronologicalProduct B steps) j <= c ^ steps
+  | 0, j => by
+      rw [chronologicalProduct, matrixColumnAbsSum_identity, Rat.pow_zero]
+      native_decide
+  | steps + 1, j => by
+      rw [chronologicalProduct]
+      have hmul := matrixMul_columnAbsSum_le_of_column_bound
+        (matrixAdd (matrixIdentity dimension) (B steps))
+        (chronologicalProduct B steps) c
+        (fun k => hbound steps k) j
+      have hprevious :
+          matrixColumnAbsSum (chronologicalProduct B steps) j <= c ^ steps :=
+        chronologicalProduct_columnAbsSum_le_pow B c hbound hc steps j
+      calc
+        matrixColumnAbsSum (matrixMul
+            (matrixAdd (matrixIdentity dimension) (B steps))
+            (chronologicalProduct B steps)) j <=
+            c * matrixColumnAbsSum (chronologicalProduct B steps) j := hmul
+        _ <= c * c ^ steps :=
+          Rat.mul_le_mul_of_nonneg_left hprevious hc
+        _ = c ^ (steps + 1) := by
+          rw [Rat.pow_succ]
+          exact Rat.mul_comm _ _
 
 def ratProduct (f : Nat -> Rat) : Nat -> Rat
   | 0 => 1
