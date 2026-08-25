@@ -6153,6 +6153,22 @@ theorem uniformExpCenter_threeHalves_finite_bisection
       have h : (1 : Rat) - 0 = 1 := by native_decide
       rw [h]
 
+theorem uniformExpCenter_threeHalves_output_forward_overlap
+    (k : Nat) :
+    let C := uniformExpCenter_threeHalves_certificate k
+    QInterval.Overlaps
+      (uniformExpCellRange C.output.lo C.output.hi 8)
+      ({ lo := 3 / 2, hi := 3 / 2 } : QInterval) := by
+  intro C
+  have hbrlo := C.output_bracket.1
+  have hbrhi := C.output_bracket.2
+  change uniformExpCenter C.output.lo 8 <= 3 / 2 at hbrlo
+  change 3 / 2 <= uniformExpCenter C.output.hi 8 at hbrhi
+  unfold uniformExpCellRange QInterval.Overlaps
+  have htail := uniformExpTailMagnitude_nonneg 8
+  unfold uniformExpTailRadius at htail ⊢
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
 private theorem uniformExpOnUnit_scheduledRegular_width
     (n : Nat) {I : QInterval}
     (hI : subintervalOf I (0 : Rat) 1)

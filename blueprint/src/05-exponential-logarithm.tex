@@ -263,6 +263,7 @@ warm exp stage -> interval regularity -> monotone boxes
 \lean{ComputableAnalysis.ExpProofs.uniformExpCenter_threeHalves_map}
 \lean{ComputableAnalysis.ExpProofs.uniformExpCenter_threeHalves_certificate}
 \lean{ComputableAnalysis.ExpProofs.uniformExpCenter_threeHalves_finite_bisection}
+\lean{ComputableAnalysis.ExpProofs.uniformExpCenter_threeHalves_output_forward_overlap}
 \leanok
 
 This closes the analytic data for a branch-local gap-aware inverse search. The
@@ -281,6 +282,8 @@ against a finite exponential center by exact midpoint decisions.  The
 resulting certificate exposes both the preserved endpoint bracket and the
 literal width (2^{-k}); it is the finite kernel to be lifted to the
 gap-aware, stage-indexed target algorithm.
+The forward-overlap theorem makes the bridge explicit: the interval-valued
+exponential cell range at the same finite center stage still overlaps (3/2).
 
 The inverse layer is deliberately branch-local.  An invertible computation
 must carry its source interval, monotonicity orientation, separation schedule,
