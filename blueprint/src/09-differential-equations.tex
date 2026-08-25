@@ -297,6 +297,62 @@ two candidate trajectories.
 \lean{ComputableAnalysis.ScalarODE.selfDerivativeInitialValueUnique_of_directMesh}
 \leanok
 
+\section{The scalar theorem in its smallest constructive form}
+
+The scalar equation is the model for the whole chapter.  Two candidate
+representations are compared only through a rational error envelope:
+
+\begin{verbatim}
+initial values agree
+        |
+finite derivative boxes -> short mesh block -> error shrinks by 1/2
+        |
+repeat the block finitely many times for any requested precision
+        |
+every stage contains zero error -> raw interval equivalence
+\end{verbatim}
+
+The halving step is the effective substitute for saying that a continuous
+error has supremum zero.  Its data are finite: a previous and next rational
+bound, a verified contraction inequality, and a finite schedule of such
+blocks.  The result is pointwise equivalence of the two raw functions, not an
+equality of elements of a completed trajectory space.
+
+\lean{ComputableAnalysis.ScalarODE.ShortBlockMeshSweep}
+\lean{ComputableAnalysis.ScalarODE.ShortBlockMeshSweep.next_le_half}
+\lean{ComputableAnalysis.ScalarODE.DirectMeshHalvingCertificate}
+\lean{ComputableAnalysis.ScalarODE.DirectMeshHalvingCertificate.ofShortBlockSweeps}
+\lean{ComputableAnalysis.ScalarODE.DirectMeshHalvingCertificate.error_eq_zero}
+\lean{ComputableAnalysis.ScalarODE.SelfDerivativeDirectMeshComparison}
+\lean{ComputableAnalysis.ScalarODE.SelfDerivativeDirectMeshComparison.equivalent}
+\leanok
+
+This is the chapter's reusable uniqueness theorem.  A new scalar ODE provider
+need only supply the local derivative enclosure and the short-block
+contraction; it should not reprove the halving or raw-equivalence machinery.
+For a vector system, the analogous scalar bound is replaced by row/column
+absolute sums and a factorial tail.
+
+\section{What remains before a general linear ODE theorem}
+
+The finite Peano--Baker layer already supplies the algebraic skeleton:
+
+\begin{verbatim}
+coefficient boxes -> ordered matrix words -> finite transition
+                 -> Duhamel sum -> factorial remainder interval
+\end{verbatim}
+
+The missing universal theorem is not matrix algebra.  It is the provider that
+turns a particular coefficient evaluator into compatible simplex boxes and a
+tail budget.  Keeping that input explicit prevents the usual compactness and
+completeness argument from reappearing under the name ``continuous solution''.
+
+\lean{ComputableAnalysis.LinearODE.ZeroInitialVolterraIterationBound}
+\lean{ComputableAnalysis.LinearODE.SelfDerivativeVolterraComparison}
+\lean{ComputableAnalysis.LinearODE.SelfDerivativeVolterraComparison.equivalent}
+\lean{ComputableAnalysis.LinearODE.selfDerivativeInitialValueUnique_of_volterra}
+\leanok
+
 Thus the current foundation proves the algebraic and error-closing core, while
 the remaining theorem for a given ODE is a finite, inspectable obligation:
 regularity of the entries, simplex enclosure, and a compatible tail bound.
