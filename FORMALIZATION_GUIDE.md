@@ -1048,6 +1048,9 @@ The companion `...compute_subinterval` and `...value_overlaps` lemmas verify
 the interval evaluator against the target box at every requested stage; the
 resulting `...oneThird_bisection_search` is a complete concrete
 `GapAwareInverseBisectionSearch` certificate.
+The public `FiniteGapAwareInverseSearch` module supplies the reusable
+plan-to-search adapters, so later inverse branches need only provide their
+finite decisions, nesting, width, and overlap certificates.
 
 Formalization scope is by mechanism, not by exhaustive enumeration.  One
 representative function is enough when another function uses the same certified

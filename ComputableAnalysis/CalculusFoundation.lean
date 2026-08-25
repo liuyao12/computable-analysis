@@ -28,6 +28,7 @@ import ComputableAnalysis.FiniteFourierFoundation
 import ComputableAnalysis.EffectiveFourierSeries
 import ComputableAnalysis.EffectiveFourierTail
 import ComputableAnalysis.ExpProofs
+import ComputableAnalysis.FiniteGapAwareInverseSearch
 import ComputableAnalysis.Logarithm
 import ComputableAnalysis.ScalarODEUniqueness
 import ComputableAnalysis.PeanoBaker
