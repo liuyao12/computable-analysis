@@ -203,6 +203,27 @@ theorem is being smuggled in.
 \lean{ComputableAnalysis.FinitePolynomial.taylorPrefixShift_succ_eq_of_coefficientShift}
 \leanok
 
+The sine case is one representative non-polynomial client of this finite
+termwise rule.  Integrating the finite sine prefix produces a cosine
+complement exactly:
+
+\[
+  \sum_{k<n} c_k\frac{x^{k+1}}{k+1}
+    = 1-\operatorname{cosPrefix}_{n+1}(x).
+\]
+
+The identity is rational algebra at every stage.  A tail certificate is added
+only when this finite primitive is connected to the nested interval evaluator;
+the blueprint does not repeat the construction for every rescaled sine chart.
+
+\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_cosine_complement}
+\lean{ComputableAnalysis.FiniteSineIntegral.halfPeriodSineRaw_contains_halfAnglePrefix}
+\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_stage_four}
+\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_stage_six}
+\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_stage_eight}
+\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_stage_ten}
+\leanok
+
 The formal coefficient layer already records the derivative shifts for the
 main complex-valued functions:
 

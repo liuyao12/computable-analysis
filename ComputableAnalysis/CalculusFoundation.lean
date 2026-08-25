@@ -20,6 +20,7 @@ import ComputableAnalysis.EffectiveFTCPortfolio
 import ComputableAnalysis.MonotonicityConvexity
 import ComputableAnalysis.PowerSeries
 import ComputableAnalysis.FiniteTaylorFTCInterface
+import ComputableAnalysis.FiniteSineIntegral
 import ComputableAnalysis.FiniteExponentialTaylor
 import ComputableAnalysis.Series
 import ComputableAnalysis.FirstYearCalculus

@@ -114,6 +114,7 @@ Start with the smallest target module rather than importing
 | Finite Basel-series certificates | `ComputableAnalysis.DirichletSeries` | `zetaTwoPartial_nonneg`, `zetaTwoFiniteTail_le_telescoping`, `zetaTwoInterval_nested`, and `zetaTwoRaw_validCompute` |
 | Formal power series and rational tail bounds | `ComputableAnalysis.PowerSeries` | `FormalPowerSeries`, `RationalMajorant` |
 | Finite term-by-term FTC for Taylor prefixes | `ComputableAnalysis.FiniteTaylorFTCInterface` | `FinitePolynomial.finiteTaylorFTC_step`, `FinitePolynomial.finiteTaylorFTC_prefix` |
+| Finite sine primitive and half-period bridge | `ComputableAnalysis.FiniteSineIntegral` | `FiniteSineIntegral.halfAnglePrefix_cosine_complement`, `halfPeriodSineRaw_contains_halfAnglePrefix`, and the checked stage-four/six/eight/ten rational prefixes |
 | Finite exponential tail certificates | `ComputableAnalysis.FiniteExponentialTaylor` | `FiniteExponentialTaylor.scheduled_expTaylorPrefix_remainder_le`, `FiniteExponentialTaylor.scheduled_expTaylorPrefix_enclosure` |
 | Current first-year derivative ledger | `ComputableAnalysis.FirstYearCalculus` | `checked_power_series_table`, `RealElementary` |
 | Positive powers, exponential/log interfaces | `ComputableAnalysis.ElementaryFunctions` | `exp.PositiveRealRaw`, `exp.RationalPowerExtension`, `exp.ExponentialFunction` |
