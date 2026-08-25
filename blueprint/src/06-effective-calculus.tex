@@ -597,6 +597,15 @@ bounded interval multiplication and a synchronized schedule for the two
 factor errors; routine scalar, sign, and affine variants are transported from
 this finite certificate.
 
+The finite algebra used before choosing a radius is reusable on its own:
+
+\lean{ComputableAnalysis.ExactFunction.differenceQuotient_add}
+\lean{ComputableAnalysis.ExactFunction.differenceQuotient_scale}
+\lean{ComputableAnalysis.ExactFunction.product_differenceQuotient_right}
+\lean{ComputableAnalysis.ExactFunction.product_differenceQuotient_corner}
+\lean{ComputableAnalysis.ExactFunction.product_differenceQuotient_error_le_qabs}
+\leanok
+
 When a selected stage schedule is not nested, prefix stabilization is the
 generic repair: it intersects the finite candidate with a finite-radius
 prefix envelope, using the endpoint difference only in the proof.  The
