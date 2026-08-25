@@ -144,6 +144,18 @@ depth while a neighborhood of zero is excluded. This is a genuine shrinking
 complex `realRaw`-style computation: it records boxes and residual tests, not
 an assertion that an irrational complex coordinate has been attained.
 
+The reusable subdivision layer is independent of the quadratic example.  It
+splits any ordered rational complex box into four rational children, proves
+that the children cover the parent, filters them by polynomial-image overlap
+with zero, and carries a supplied root through every finite depth:
+
+\lean{ComputableAnalysis.FiniteFTASubdivision.dyadicChildren_cover}
+\lean{ComputableAnalysis.FiniteFTASubdivision.root_mem_survivingChildren}
+\lean{ComputableAnalysis.FiniteFTASubdivision.root_mem_survivingSubdivide}
+\lean{ComputableAnalysis.FiniteFTASubdivision.survivingSubdivide_nestedIn_parent}
+\lean{ComputableAnalysis.FiniteFTASubdivision.survivingSubdivide_width_height_exact}
+\leanok
+
 \lean{ComputableAnalysis.finiteFTAZeroNeighborhood}
 \lean{ComputableAnalysis.finiteFTAZeroNeighborhood_ordered}
 \lean{ComputableAnalysis.finiteFTAZeroNeighborhood_exclusion}
