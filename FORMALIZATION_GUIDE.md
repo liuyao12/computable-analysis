@@ -396,7 +396,10 @@ interval.  This is the preferred template for a new curvature-driven FTC
 example: prove one finite secant identity for the evaluator, then feed it into
 the existing curvature/derivative-bound contracts.  Do not duplicate the
 theorem for every polynomial power unless its application needs a genuinely
-different certificate.
+different certificate.  The raw bridge is
+`square_secantSlopeInterval_eq` followed by
+`squareRaw_curvatureOnSubinterval`; its exact singleton interval is already a
+valid finite-stage curvature enclosure.
 
 For an effective FTC proof, do not force all computations to use one stage.
 `TwoStageCandidateDerivativeFTC` allows the derivative evaluator and the

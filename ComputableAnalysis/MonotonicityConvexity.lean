@@ -628,6 +628,42 @@ theorem square_convexOn (a b : Rat) : ConvexOn square a b := by
   rw [square_secantSlope_eq_add hxy, square_secantSlope_eq_add hyz]
   grind
 
+theorem square_secantSlopeInterval_eq
+    {x y : Rat} (hxy : x < y) (n : Nat) :
+    secantSlopeIntervalOfRealFun (RealFunRaw.exact square) x y n =
+      { lo := x + y, hi := x + y } := by
+  unfold secantSlopeIntervalOfRealFun RealFunRaw.exact
+  simp only [QInterval.slopeBetween, QInterval.divByRat,
+    QInterval.subInterval, QInterval.scaleByRat]
+  have hpos : 0 < y - x := by grind
+  have hinv : 0 <= 1 / (y - x) := by
+    simpa [Rat.div_def] using
+      (Rat.le_of_lt (Rat.inv_pos.mpr hpos) : 0 <= (y - x)⁻¹)
+  have hquot :
+      1 / (y - x) * (square y - square x) = x + y := by
+    rw [Rat.div_def]
+    have hcancel : (y - x) * (y - x)⁻¹ = 1 :=
+      Rat.mul_inv_cancel (y - x) (Rat.ne_of_gt hpos)
+    unfold square
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  simp [hinv, hquot]
+
+def squareRaw_curvatureOnSubinterval {a b : Rat}
+    (C : RationalSubinterval a b) :
+    CurvatureOnSubinterval (RealFunRaw.exact square) C := by
+  refine
+    { kind := CurvatureKind.convex
+      evalPrecision := fun _ => 0
+      domain_on := ?_
+      secant_slope_order := ?_ }
+  · intro x hx
+    trivial
+  · intro n w x y z hw hx hy hz hwx hxy hyz
+    rw [square_secantSlopeInterval_eq hwx, square_secantSlopeInterval_eq hyz]
+    unfold QInterval.WeakLe
+    grind
+
 structure SecantSlopeBracketOn (f : Rat -> Rat) (u v : Rat) where
   lower : Rat
   upper : Rat
