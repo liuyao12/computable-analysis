@@ -649,6 +649,29 @@ theorem stabilizedRaw_equiv_anchor {F : FunctionOnInterval}
   RealRaw.prefixStabilize_equiv_anchor completion.anchor_valid
     completion.candidate_equiv_anchor completion.anchor_width_le_radius
 
+/-- Expose a completed finite-turn computation through the standard
+`ConstructionFor` interface.  The construction reads the stabilized raw
+algorithm, while its validity is inherited from the explicit finite-turn
+completion certificate.  No universal piecewise-integrability theorem is
+introduced here: the function-specific anchor remains part of the input. -/
+def constructionFor {F : FunctionOnInterval}
+    {C : SingleTurnIntegralCandidate F}
+    (completion : SingleTurnIntegralCompletion C) :
+    Integral.ConstructionFor F where
+  compute := completion.stabilizedRaw.compute
+  certificate := completion.stabilizedRaw_valid
+
+theorem constructionFor_compute_eq {F : FunctionOnInterval}
+    {C : SingleTurnIntegralCandidate F}
+    (completion : SingleTurnIntegralCompletion C) :
+    completion.constructionFor.compute = completion.stabilizedRaw.compute := rfl
+
+theorem integralFor_valid {F : FunctionOnInterval}
+    {C : SingleTurnIntegralCandidate F}
+    (completion : SingleTurnIntegralCompletion C) :
+    (Integral.integralFor F completion.constructionFor).Valid :=
+  Integral.integralFor_valid F completion.constructionFor
+
 end SingleTurnIntegralCompletion
 
 end Integral
