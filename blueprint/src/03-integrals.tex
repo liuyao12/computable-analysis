@@ -726,12 +726,15 @@ effective FTC certificate used for the complete \(x^3\) instance.
 \lean{ComputableAnalysis.Integral.cubicIntegralEffectiveFTC_equiv_one_fourth}
 \lean{ComputableAnalysis.FiniteFTC.cubeDerivativeIntegralRaw_valid}
 \lean{ComputableAnalysis.FiniteFTC.cubeDerivativeIntegralRaw_equiv_one}
+\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeDarboux_sums_mem_raw_succ}
 \leanok
 
 The finite polynomial ledger also exposes an independent raw bracket for the
 same value.  At stage $n$ it returns a symmetric rational enclosure around
 the endpoint difference $1$, with width $O(1/(n+1))$; the bound comes from
 the explicit left/right sums for $3x^2$, not from a completeness axiom.
+The containment theorem makes that connection literal: each stage box contains
+the matching left and right finite sums.
 
 The same endpoint-difference certificate has also been instantiated for the
 next two polynomial primitives.  These are useful regression tests for the

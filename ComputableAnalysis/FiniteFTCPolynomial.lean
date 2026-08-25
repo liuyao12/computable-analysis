@@ -288,6 +288,40 @@ theorem cubeDerivativeIntegralRaw_equiv_one :
       ((Rat.inv_pos).2 ((Rat.natCast_pos).2 (Nat.succ_pos n))))
   constructor <;> grind [Rat.sub_eq_add_neg]
 
+theorem cubeDerivativeDarboux_sums_mem_raw_succ (n : Nat) :
+    (cubeDerivativeIntegralRaw.compute n).lo <=
+        cubeDerivativeLeftSum (n + 1) /\
+      cubeDerivativeRightSum (n + 1) <=
+        (cubeDerivativeIntegralRaw.compute n).hi := by
+  have hn : 0 < n + 1 := Nat.succ_pos n
+  have hleft := cubeDerivativeLeftSum_error_le_three_halves_div hn
+  have hscale :
+      3 / (2 * ((n + 1 : Nat) : Rat)) <=
+        6 / (((n + 1 : Nat) : Rat)) := by
+    have hnat : 0 < ((n + 1 : Nat) : Rat) :=
+      (Rat.natCast_pos).2 hn
+    have hden : 0 < 2 * ((n + 1 : Nat) : Rat) :=
+      Rat.mul_pos (by native_decide) hnat
+    apply Rat.le_of_mul_le_mul_right (c := 2 * ((n + 1 : Nat) : Rat))
+    · rw [Rat.div_def, Rat.div_def]
+      have hne : ((n + 1 : Nat) : Rat) ≠ 0 := Rat.ne_of_gt hnat
+      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+        Rat.mul_inv_cancel]
+    · exact hden
+  have hscaleRight :
+      3 / (((n + 1 : Nat) : Rat)) <=
+        6 / (((n + 1 : Nat) : Rat)) := by
+    rw [Rat.div_def, Rat.div_def]
+    exact Rat.mul_le_mul_of_nonneg_right (by native_decide)
+      (Rat.le_of_lt ((Rat.inv_pos).2
+        ((Rat.natCast_pos).2 hn)))
+  have hgap := cubeDerivativeLeftSum_rightSum_gap_le_three_div hn
+  have hleft_le := cubeDerivativeLeftSum_le_one_le_rightSum hn
+  rw [cubeDerivativeIntegralRaw]
+  constructor
+  · grind [Rat.sub_eq_add_neg]
+  · grind [Rat.sub_eq_add_neg]
+
 end FiniteFTC
 
 end ComputableAnalysis
