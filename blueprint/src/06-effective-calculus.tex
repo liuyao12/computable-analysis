@@ -22,6 +22,14 @@ function adds only its finite range and overlap lemmas.
 The square and cube instances also carry finite dyadic integral certificates,
 so the pointwise modulus is already connected to an actual computable area.
 
+Coverage is by computational pattern, not by a catalogue of familiar names:
+one certified representative is formalized for each new evaluator or proof
+mechanism.  Rational scalar multiples, sign changes, routine compositions,
+and piecewise variants reuse those certificates; a broken function such as
+\(|x|\) is assembled from its finitely many interval pieces.  The remaining
+detail belongs in Lean, where each new instance must expose its own domain and
+stage schedule.
+
 The same foundation also has a genuinely nonconstant Lipschitz--Darboux
 route.  For the identity function, midpoint refinement gives nested rational
 boxes of width \(2/2^n\); this is the model for integrating functions whose
