@@ -290,6 +290,21 @@ For example, `1 / (x^2 - 2)` must not be treated as regular on `[1,2]`.
 7. **Only then expose a friendly formula.**  The familiar formula is the
    public theorem; the raw implementations and bounds are its proof data.
 
+### Constructive inverse branches
+
+For a computable inverse, package a branch-local
+`InvertibleFunctionOnInterval`: source interval, interval regularity, weak
+monotonicity, and an `EffectiveInverseSeparation` schedule. A target is an
+`InRangeRaw`, carrying both its raw validity and endpoint-range evidence.
+Then provide `InverseBisectionSearch` data for each target and assemble it with
+`inverseRawOfSearch`.
+
+The complete identity provider in `ComputableAnalysis.IdentityInverse` is the
+minimal template. Its preimage computation reuses the target box, but still
+proves every source-subinterval and forward-overlap field. Nonlinear branches
+must replace only that search computation; they must not replace the range or
+separation obligations with a classical inverse-function theorem.
+
 ### Do not multiply routine cases
 
 Formalize one representative for a reusable process, then reuse its generic
