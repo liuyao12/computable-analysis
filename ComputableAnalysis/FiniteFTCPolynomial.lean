@@ -215,6 +215,79 @@ theorem cubeDerivativeLeftSum_rightSum_gap_le_three_div
   grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
     Rat.pow_succ, Rat.mul_inv_cancel]
 
+/-! The finite cubic bracket can be exposed as a raw real.  The deliberately
+loose symmetric box makes the validity proof depend only on the explicit
+`O(1/n)` error budget, not on a monotonicity theorem for the two sums. -/
+
+def cubeDerivativeIntegralRaw : RealRaw where
+  compute n :=
+    { lo := 1 - 6 / (((n + 1 : Nat) : Rat)),
+      hi := 1 + 6 / (((n + 1 : Nat) : Rat)) }
+
+private theorem one_div_nat_antitone_succ {n m : Nat} (hnm : n <= m) :
+    1 / (((m + 1 : Nat) : Rat)) <=
+      1 / (((n + 1 : Nat) : Rat)) := by
+  have hnpos : 0 < (n + 1 : Nat) := Nat.succ_pos n
+  have hmpos : 0 < (m + 1 : Nat) := Nat.succ_pos m
+  apply Rat.le_of_mul_le_mul_right
+    (c := ((n + 1 : Nat) : Rat) * ((m + 1 : Nat) : Rat))
+  · calc
+      (1 / (((m + 1 : Nat) : Rat))) *
+          (((n + 1 : Nat) : Rat) * ((m + 1 : Nat) : Rat)) =
+          ((n + 1 : Nat) : Rat) := by
+        have hmne : ((m + 1 : Nat) : Rat) ≠ 0 :=
+          Rat.ne_of_gt ((Rat.natCast_pos).2 hmpos)
+        grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= ((m + 1 : Nat) : Rat) := by exact_mod_cast (Nat.succ_le_succ hnm)
+      _ = (1 / (((n + 1 : Nat) : Rat))) *
+          (((n + 1 : Nat) : Rat) * ((m + 1 : Nat) : Rat)) := by
+        have hnne : ((n + 1 : Nat) : Rat) ≠ 0 :=
+          Rat.ne_of_gt ((Rat.natCast_pos).2 hnpos)
+        grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  · exact Rat.mul_pos ((Rat.natCast_pos).2 hnpos)
+      ((Rat.natCast_pos).2 hmpos)
+
+theorem cubeDerivativeIntegralRaw_valid : cubeDerivativeIntegralRaw.Valid := by
+  unfold cubeDerivativeIntegralRaw RealRaw.Valid RealRaw.ValidCompute
+  constructor
+  · intro n
+    unfold QInterval.width
+    have hpos : 0 <= (6 / (((n + 1 : Nat) : Rat)) : Rat) := by
+      rw [Rat.div_def]
+      exact Rat.le_of_lt (Rat.mul_pos (by native_decide)
+        ((Rat.inv_pos).2 ((Rat.natCast_pos).2 (Nat.succ_pos n))))
+    grind [Rat.sub_eq_add_neg]
+  constructor
+  · intro n m hnm
+    have hrecip := one_div_nat_antitone_succ hnm
+    have hnonneg : 0 <= (6 / (((m + 1 : Nat) : Rat)) : Rat) := by
+      rw [Rat.div_def]
+      exact Rat.le_of_lt (Rat.mul_pos (by native_decide)
+        ((Rat.inv_pos).2 ((Rat.natCast_pos).2 (Nat.succ_pos m))))
+    constructor
+    · grind [Rat.sub_eq_add_neg]
+    constructor
+    · grind [Rat.sub_eq_add_neg]
+    · grind [Rat.sub_eq_add_neg]
+  · apply shrinksToZero_of_natOverSuccBound (C := 12)
+    intro n
+    unfold QInterval.width
+    grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_assoc]
+
+theorem cubeDerivativeIntegralRaw_equiv_one :
+    cubeDerivativeIntegralRaw.Equiv (RealRaw.ofRat 1) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    cubeDerivativeIntegralRaw (RealRaw.ofRat 1) n n).2
+  rw [RealRaw.ofRat_compute]
+  unfold cubeDerivativeIntegralRaw QInterval.Overlaps
+  have hnonneg : 0 <= (6 / (((n + 1 : Nat) : Rat)) : Rat) := by
+    rw [Rat.div_def]
+    exact Rat.le_of_lt (Rat.mul_pos (by native_decide)
+      ((Rat.inv_pos).2 ((Rat.natCast_pos).2 (Nat.succ_pos n))))
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
 end FiniteFTC
 
 end ComputableAnalysis

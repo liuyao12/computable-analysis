@@ -8,6 +8,7 @@ import ComputableAnalysis.PrimitivePiecewiseFTC
 import ComputableAnalysis.FiniteFTCIntervalRegular
 import ComputableAnalysis.FiniteSinePrefixFTC
 import ComputableAnalysis.PolynomialFTCValues
+import ComputableAnalysis.FiniteFTCPolynomial
 import ComputableAnalysis.SinPiIntegral
 import ComputableAnalysis.SinPiTransportSubgoals
 import ComputableAnalysis.SinPiTransportAdapter
