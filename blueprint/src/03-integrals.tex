@@ -1,5 +1,12 @@
 \chapter{Integrals and the Fundamental Theorem}\label{ch:integrals}
 
+The scoped Lean entry point for this chapter is
+\texttt{ComputableAnalysis.IntegralFoundation}.  It exposes the finite
+rectangle, piecewise, polynomial, arctangent, Stieltjes, and effective-FTC
+certificates.  Routine variants are transported from these representatives;
+the blueprint does not require a separate formalization for every similar
+function.
+
 The motivating integral is circle area: crude rectangles produce nested
 rational bounds for the area under the arctangent kernel. An integral is a
 program returning such bounds. Lebesgue measure is outside scope.
