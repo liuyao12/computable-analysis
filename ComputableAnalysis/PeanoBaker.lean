@@ -1874,6 +1874,28 @@ theorem simplexPartial_even_split (T : Rat) (n : Nat) :
       rw [matrixAdd_scale_same, matrixAdd_scale_same]
       rfl
 
+/-! The neighboring odd prefix is the same finite parity decomposition with
+one additional even (cosine) coefficient.  Exposing both parities keeps the
+finite ODE algebra aligned with the truncation index used by the power-series
+and rotation evaluators. -/
+theorem simplexPartial_odd_split (T : Rat) (n : Nat) :
+    constantPeanoBakerSimplexPartial generator T (2 * n + 1) =
+      matrixAdd
+        (matrixScale (cosinePrefix T (n + 1)) (matrixIdentity 2))
+        (matrixScale (sinePrefix T n) generator) := by
+  rw [show 2 * n + 1 = (2 * n) + 1 by omega]
+  rw [constantPeanoBakerSimplexPartial_succ]
+  rw [simplexPartial_even_split, simplexTerm_even]
+  have hcomm (A B : RatMatrix 2) : matrixAdd A B = matrixAdd B A := by
+    funext i j
+    unfold matrixAdd
+    exact Rat.add_comm _ _
+  rw [matrixAdd_assoc, hcomm
+    (matrixScale (sinePrefix T n) generator)
+    (matrixScale (T ^ (2 * n) / factorialRat (2 * n) * ((-1 : Rat) ^ n))
+      (matrixIdentity 2)), ← matrixAdd_assoc, matrixAdd_scale_same]
+  rfl
+
 end RotationSystem
 
 /-- The finite sum of a sampled matrix family over the first `steps` times. -/
