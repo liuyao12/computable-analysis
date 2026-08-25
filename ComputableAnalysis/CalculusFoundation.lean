@@ -21,6 +21,7 @@ import ComputableAnalysis.MonotonicityConvexity
 import ComputableAnalysis.PowerSeries
 import ComputableAnalysis.FiniteTaylorFTCInterface
 import ComputableAnalysis.FiniteSineIntegral
+import ComputableAnalysis.FiniteMonotoneSequenceInterface
 import ComputableAnalysis.FiniteExponentialTaylor
 import ComputableAnalysis.Series
 import ComputableAnalysis.FirstYearCalculus

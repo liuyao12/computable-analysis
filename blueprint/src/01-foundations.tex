@@ -641,6 +641,20 @@ Thus, to prove \(x\sim y\), it is enough to choose schedules
 easier to show.
 \end{proposition}
 
+\begin{proposition}[Bounded monotone computation]
+\label{prop:monotone-interval-computation}
+\lean{ComputableAnalysis.MonotoneIntervalCertificate}
+\lean{ComputableAnalysis.MonotoneIntervalCertificate.precision_witness}
+\lean{ComputableAnalysis.MonotoneIntervalCertificate.toRealRaw_valid}
+\uses{def:raw-real}
+A bounded monotone process is represented by rational lower and upper
+endpoints.  The lower endpoint is certified to rise, the upper endpoint to
+fall, and a supplied rational width modulus gives every requested precision.
+The resulting `RealRaw` is constructed directly from these endpoint pairs.
+This is the project-native replacement for invoking a supremum or a
+completeness theorem.
+\end{proposition}
+
 \begin{definition}[Certified real handles]\label{def:reals-quotient}
 \lean{ComputableAnalysis.Real}
 \uses{def:raw-real,def:raw-equiv}
