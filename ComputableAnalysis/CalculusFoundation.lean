@@ -26,6 +26,7 @@ import ComputableAnalysis.FiniteExponentialTaylor
 import ComputableAnalysis.Series
 import ComputableAnalysis.FirstYearCalculus
 import ComputableAnalysis.FiniteFourierFoundation
+import ComputableAnalysis.FiniteFourierOrthogonality
 import ComputableAnalysis.EffectiveFourierSeries
 import ComputableAnalysis.EffectiveFourierTail
 import ComputableAnalysis.ExpProofs
