@@ -2765,6 +2765,38 @@ def peanoBakerFactorialRemainderCertificate
   intro terms
   exact peanoBakerFactorialTail_shifted_le_eps hM hT eps terms
 
+theorem peanoBakerFactorialTail_nonneg
+    {M T : Rat} (hM : 0 <= M) (hT : 0 <= T)
+    (start terms : Nat) :
+    0 <= peanoBakerFactorialTail M T start terms := by
+  unfold peanoBakerFactorialTail
+  induction terms with
+  | zero =>
+      simp [RationalMajorant.factorialTailPartial]
+  | succ terms ih =>
+      rw [RationalMajorant.factorialTailPartial]
+      exact Rat.add_nonneg ih
+        (RationalMajorant.factorialTailTerm_nonneg
+          (Rat.mul_nonneg hM hT) (start + terms))
+
+def PeanoBakerFactorialRemainderCertificate.interval
+    {M T : Rat} {eps : QPos}
+    (certificate : PeanoBakerFactorialRemainderCertificate M T eps)
+    (terms : Nat) : QInterval :=
+  { lo := 0
+    hi := peanoBakerFactorialTail M T certificate.start terms }
+
+theorem PeanoBakerFactorialRemainderCertificate.tail_mem_interval
+    {M T : Rat} {eps : QPos}
+    (certificate : PeanoBakerFactorialRemainderCertificate M T eps)
+    (hM : 0 <= M) (hT : 0 <= T) (terms : Nat) :
+    (PeanoBakerFactorialRemainderCertificate.interval certificate terms).lo <=
+        peanoBakerFactorialTail M T certificate.start terms /\
+      peanoBakerFactorialTail M T certificate.start terms <=
+        (PeanoBakerFactorialRemainderCertificate.interval certificate terms).hi := by
+  exact ⟨peanoBakerFactorialTail_nonneg hM hT certificate.start terms,
+    Rat.le_refl⟩
+
 /-- The computable iteration count used in the zero-initial Volterra
 uniqueness argument.  The factor B is a rational enclosure bound for a
 candidate difference, while the remaining factor is the usual Peano--Baker
