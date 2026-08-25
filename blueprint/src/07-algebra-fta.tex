@@ -61,6 +61,71 @@ complex field:
 \lean{ComputableAnalysis.FiniteDeflationChain.horner_factorization}
 \leanok
 
+\section{The finite meaning of ``find a root''}
+
+The project does not begin with an abstract complex plane and then invoke the
+fundamental theorem of algebra.  It begins with a finite search contract:
+
+\begin{verbatim}
+  candidate box -> polynomial interval image
+                  -> reject / subdivide / retain
+                  -> residual certificate
+\end{verbatim}
+
+For a real interval, sign information and Descartes counts are finite
+exclusion data.  For a complex box, the same role is played by a rational
+complex residual bound.  A root is therefore a retained box plus a proof that
+every requested stage remains compatible with the polynomial evaluation; the
+box need not contain an attained irrational point.
+
+The checked examples give the two useful scales of this interface.  The
+quadratic certificate identifies the two supplied complex roots and excludes
+the wrong candidate region:
+
+\lean{ComputableAnalysis.finiteFTAQuadratic_upper_root}
+\lean{ComputableAnalysis.finiteFTAQuadratic_lower_root}
+\lean{ComputableAnalysis.finiteFTAQuadratic_roots_are_distinct}
+\lean{ComputableAnalysis.finiteFTAQuadratic_root_search_upper}
+\lean{ComputableAnalysis.finiteFTAQuadratic_root_search_skips_nonroot}
+\lean{ComputableAnalysis.finiteFTAQuadratic_zero_is_excluded}
+\leanok
+
+The real-root side uses the same pattern without pretending that a sign-count
+is a global existence theorem.  The quadratic, cubic, quartic, quintic,
+sextic, and septic examples record polynomial evaluation, variation count,
+and the resulting positive-root predicate as separate rational certificates:
+
+\lean{ComputableAnalysis.FiniteDescartesExamples.twoVariationQuadratic_certificate}
+\lean{ComputableAnalysis.FiniteDescartesExamples.threeVariationCubic_certificate}
+\lean{ComputableAnalysis.FiniteDescartesExamples.fourVariationQuartic_certificate}
+\lean{ComputableAnalysis.FiniteDescartesExamples.fiveVariationQuintic_certificate}
+\lean{ComputableAnalysis.FiniteDescartesExamples.sixVariationSextic_certificate}
+\lean{ComputableAnalysis.FiniteDescartesExamples.sevenVariationSeptic_certificate}
+\leanok
+
+Thus the computable replacement for a general FTA theorem is deliberately
+layered: root isolation, root exclusion, and supplied-root deflation are
+closed finite mechanisms; unrestricted complex root existence and a complete
+root-isolation algorithm remain explicit frontier theorems.
+
+\section{A worked deflation trace}
+
+For the polynomial
+\( (X-1)(X-2)(X-3) \), the supplied roots are not an oracle hidden in a
+factorization theorem.  The finite chain checks one root at a time, records
+the quotient length, and verifies the final Horner identity:
+
+\lean{ComputableAnalysis.FiniteDeflationExample.cubic_root_one}
+\lean{ComputableAnalysis.FiniteDeflationExample.cubic_deflation_chain}
+\lean{ComputableAnalysis.FiniteDeflationExample.cubic_deflated_coeffs}
+\lean{ComputableAnalysis.FiniteDeflationExample.cubic_horner_factorization}
+\leanok
+
+This is the intended algebraic interface for later calculus applications:
+when a special function or ODE introduces a known algebraic factor, the
+formalization supplies that factor and receives a certified residual.  It does
+not need to duplicate a universal algebraic-closure development.
+
 \section{Boundary}
 
 The supplied-root quintic certificate is a boundary result: it peels known
