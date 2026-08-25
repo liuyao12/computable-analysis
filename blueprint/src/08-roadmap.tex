@@ -14,6 +14,14 @@ Include a result when it yields a rational certificate, a shrinking `realRaw`,
 a valid `real`, or an overlap between independent computations. Reuse routine
 finite combinatorics from the library.
 
+Use one representative for each computational pattern. A scalar multiple,
+sign change, or routine composition is a transport of an existing certificate,
+not a new chapter theorem. If a function is naturally piecewise, split the
+domain into its finitely many pieces and assemble the separate integrals. For
+example, $|x|$ on $[-1,1]$ is two affine-cell integrals joined by a finite
+sum. The foundation should formalize the assembly rule once and spend new
+proof effort on genuinely new evaluators, estimates, or equivalence edges.
+
 \section{Order}
 
 \begin{verbatim}
