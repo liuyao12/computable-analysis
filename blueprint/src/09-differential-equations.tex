@@ -357,6 +357,32 @@ Thus the current foundation proves the algebraic and error-closing core, while
 the remaining theorem for a given ODE is a finite, inspectable obligation:
 regularity of the entries, simplex enclosure, and a compatible tail bound.
 
+\section{Concrete rotation candidate}
+
+The rational circle supplies a complete variable-coefficient example before
+any constant-coefficient exponential is identified.  Its rational chart
+\[
+p(t)=\left(\frac{1-t^2}{1+t^2},\frac{2t}{1+t^2}\right),\qquad 0\leq t\leq1,
+\]
+starts at $1$, ends at $i$, and satisfies
+\[
+p'(t)=\frac{2i}{1+t^2}\,p(t).
+\]
+All three statements are rational identities plus interval derivative
+certificates.  The resulting structure is a genuine complex initial-value
+candidate: it records the derivative, the rotation equation, and exact
+initial and terminal boxes.  It does not identify $t=1$ with the
+constant-coefficient angle $\pi/2$; that is a separate reparametrization and
+uniqueness bridge.
+
+\lean{ComputableAnalysis.GeometricRotationODE.GeometricRotationSystemCertificate}
+\lean{ComputableAnalysis.GeometricRotationODE.pointOnUnit_geometricRotationSystemCertificate}
+\lean{ComputableAnalysis.GeometricRotationODE.point_hasComplexDerivativeOnUnit}
+\lean{ComputableAnalysis.GeometricRotationODE.pointDerivativeOnUnit_equiv_pointAngularVelocityOnUnit}
+\lean{ComputableAnalysis.RotationPeanoBakerBridge.rotationCenter_eq_constantPeanoBakerPartial}
+\lean{ComputableAnalysis.RotationPeanoBakerBridge.rotationCenter_eq_expPartial}
+\leanok
+
 \section{Vector ODE admission checklist}
 
 A concrete vector system is ready for the foundation when its provider can
