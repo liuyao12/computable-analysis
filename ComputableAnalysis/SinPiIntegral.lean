@@ -8645,6 +8645,32 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_witness_famil
       hevaluator family)
     hintegral
 
+/-! The named certificate-family entry point is the preferred theorem-facing
+API. It hides only the noncomputable choice of a successful finite search;
+the geometric certificates and the independent integral equivalence remain
+explicit inputs. -/
+theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_canonical_certificate_family
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (family : DyadicCanonicalCertificateFamily S.inverse)
+    (hintegral :
+      (Integral.integral g 0 ((1 : Rat) / 2) cg).Equiv reciprocalPiRaw) :
+    (S.halfIntegral pub).Equiv reciprocalPiRaw := by
+  exact S.halfIntegral_equiv_reciprocalPi_of_witness_family
+    pub g cg hdyadic hplan hevaluator family.toWitnessFamily hintegral
+
 theorem ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificates
     (S : ArctanSinPiConstruction)
     (pub : Integral.Construction S.onHalf.toRealFunRaw

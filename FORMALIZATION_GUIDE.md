@@ -851,6 +851,8 @@ equivalence and positive-sample, all-precision certificate family convert via
 schedule consumed by the public integral theorem. This separates the
 geometric existence proof from the evaluator and makes the remaining theorem
 explicit rather than hidden in a large argument.
+The theorem-facing shortcut is
+`ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_canonical_certificate_family`.
 
 One useful fully scoped exception is the unit arctangent triangle route in
 `Logarithm.lean`.  Its public name is `arctan.integral.triangle` (implemented
