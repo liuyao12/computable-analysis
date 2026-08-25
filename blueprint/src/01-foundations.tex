@@ -1787,3 +1787,35 @@ Classical compactness, uniform continuity, and existence of suprema are not
 used as black boxes.  The project records the finite data that those theorems
 usually hide: interval images, rates, nesting, and enclosure proofs.
 \end{remark}
+
+\section{Agent-facing formalization checklist}
+
+For a new theorem, use this order:
+
+\begin{verbatim}
+1. declare the rational or dense computational chart
+2. define one raw evaluator and its stage computation
+3. prove ordered boxes, validity, nesting, and shrinking width
+4. package the result as realRaw or complexRaw
+5. add one overlap edge to an existing representation
+6. state calculus claims through finite cell certificates
+\end{verbatim}
+
+The abstract layer should contain the certified handle and its spanning
+equivalence path; it should not force every implementation to compare with
+every other implementation. For functions, also record the domain at every
+evaluation. For complex functions, repeat the same discipline coordinatewise
+and use rational-complex boxes. If a proof needs a stronger classical theorem,
+replace it by the narrowest finite certificate that the application uses and
+label the unrestricted bridge as a separate frontier.
+
+\lean{ComputableAnalysis.RealRaw}
+\lean{ComputableAnalysis.RealRaw.Equiv}
+\lean{ComputableAnalysis.RealRaw.equiv_trans}
+\lean{ComputableAnalysis.RealRaw.prefixStabilize_valid}
+\lean{ComputableAnalysis.RealRaw.StageSchedule}
+\lean{ComputableAnalysis.RealRaw.equiv_of_schedule_equiv}
+\lean{ComputableAnalysis.ComplexRaw}
+\lean{ComputableAnalysis.ComplexRaw.mul_equiv}
+\lean{ComputableAnalysis.FunctionRaw}
+\leanok
