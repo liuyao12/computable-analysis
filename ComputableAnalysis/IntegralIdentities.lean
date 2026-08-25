@@ -16439,6 +16439,39 @@ theorem raw_equiv_of_lipschitz_bounds
   exact (RealRaw.compareAt_overlap_iff (raw f L) (raw f M) stage stage).2
     (compute_overlap_of_lipschitz_bounds hL hM stage)
 
+/-- The finite Lipschitz--Darboux sum is compatible with pointwise addition:
+the box for `f + g` with bound `L + M` is the interval sum of the two
+component boxes. -/
+theorem raw_add_equiv
+    (f g : Rat -> Rat) (L M : Nat) :
+    (raw (fun x => f x + g x) (L + M)).Equiv
+      (raw f L + raw g M) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro stage
+  apply (RealRaw.compareAt_overlap_iff
+    (raw (fun x => f x + g x) (L + M)) (raw f L + raw g M) stage stage).2
+  change QInterval.Overlaps
+    (compute (fun x => f x + g x) (L + M) stage)
+    (QInterval.addInterval (compute f L stage) (compute g M stage))
+  rw [compute_add]
+  unfold QInterval.Overlaps
+  have hf := compute_ordered (f := f) (L := L) stage
+  have hg := compute_ordered (f := g) (L := M) stage
+  have hf' : (compute f L stage).lo <= (compute f L stage).hi := by
+    unfold QInterval.width at hf
+    grind [Rat.sub_eq_add_neg]
+  have hg' : (compute g M stage).lo <= (compute g M stage).hi := by
+    unfold QInterval.width at hg
+    grind [Rat.sub_eq_add_neg]
+  change
+    (compute f L stage).lo + (compute g M stage).lo <=
+        (compute f L stage).hi + (compute g M stage).hi /\
+      (compute f L stage).lo + (compute g M stage).lo <=
+        (compute f L stage).hi + (compute g M stage).hi
+  constructor
+  · grind [Rat.add_assoc, Rat.add_comm]
+  · grind [Rat.add_assoc, Rat.add_comm]
+
 /-- Package the finite Lipschitz--Darboux algorithm as a construction for the
 exact rational kernel that its rectangles evaluate. -/
 def construction (f : Rat -> Rat) (L : Nat)

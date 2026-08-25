@@ -224,6 +224,8 @@ silently identified with the Lipschitz case.
 \lean{ComputableAnalysis.LipschitzDyadic.construction}
 \lean{ComputableAnalysis.LipschitzDyadic.compute_overlap_of_lipschitz_bounds}
 \lean{ComputableAnalysis.LipschitzDyadic.raw_equiv_of_lipschitz_bounds}
+\lean{ComputableAnalysis.LipschitzDyadic.compute_add}
+\lean{ComputableAnalysis.LipschitzDyadic.raw_add_equiv}
 \leanok
 
 The arctangent kernel is the first named instance: its bound $L=2$ gives
@@ -241,6 +243,11 @@ used by the general effective FTC statements.
 The Lipschitz constant is implementation data, not part of the represented
 function. If two certified constants are available, their Darboux boxes share
 the same finite rectangle sum and therefore define equivalent `realRaw`s.
+
+Addition is likewise finite: the box for a sum with bound (L+M) is the
+interval sum of the component boxes. The raw equivalence theorem exposes this
+as the project’s linearity bridge; no linearity axiom for an abstract integral
+is assumed.
 
 \lean{ComputableAnalysis.IntervalRegularOn.of_lipschitzOnUnit}
 \leanok
