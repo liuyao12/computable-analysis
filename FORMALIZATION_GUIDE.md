@@ -1665,8 +1665,11 @@ and the two unit-interval box bounds are available, it supplies the circle
 identity and square/complement overlap automatically.
 Its family-level form,
 `dyadicNestedRadicalStage_square_complement_overlap_of_search_family`, reduces
-the full dyadic transport to a uniform search-success theorem plus the two
-box-bound families.
+the transport to a uniform search-success theorem plus the cosine-box bound;
+the sine-box bound is now discharged uniformly by
+`dyadicNestedRadicalStageSinAt_subinterval`.  The cosine condition is kept
+explicit because the full half-interval includes negative cosine values, so a
+nonnegative-only square interval must not be applied there silently.
 
 ## Completion and trust checklist
 
