@@ -3183,6 +3183,32 @@ theorem dyadicPublicSquareLeftSum_overlap_of_rational_circle_overlap_family
   · exact canonical_dyadic_search_of_overlap_of_interior S.inverse hk
       (by omega) (hover n k hk (by omega))
 
+/- Named proof data for the remaining geometric step.  Keeping the family as
+a structure makes the positive-sample obligation easy to instantiate and
+prevents downstream developments from depending on the internal theorem
+argument order. -/
+structure DyadicSquareCircleOverlapFamily
+    (S : ArctanSinPiConstruction) where
+  endpoint_zero :
+    (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero
+  positive_overlap : forall (n k : Nat) (hk : k < 2 ^ n),
+    0 < k ->
+    QInterval.Overlaps
+      (rationalCircleSinInterval (dyadicTangentBox S.inverse hk))
+      (dyadicNestedRadicalStageSinAt n k)
+
+theorem DyadicSquareCircleOverlapFamily.to_square_sum_overlap
+    {S : ArctanSinPiConstruction}
+    (certificate : DyadicSquareCircleOverlapFamily S) :
+    forall n,
+      QInterval.Overlaps
+        (dyadicPublicSquareLeftSum S n)
+        (dyadicNestedRadicalSquareLeftSum n) := by
+  exact dyadicPublicSquareLeftSum_overlap_of_rational_circle_overlap_family
+    S certificate.endpoint_zero certificate.positive_overlap
+
 /- The intended geometric interface: the existing canonical half-angle
 certificate family is enough to drive the square-sum transport. -/
 theorem dyadicPublicSquareLeftSum_overlap_of_halfAngle_certificate_family

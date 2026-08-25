@@ -874,6 +874,9 @@ An even more geometric entry point is
 `SinPiSquareFTC.dyadicPublicSquareLeftSum_overlap_of_rational_circle_overlap_family`:
 it reduces the positive samples to rational-circle image overlap and handles
 the zero endpoint separately.
+The named structure
+`SinPiSquareFTC.DyadicSquareCircleOverlapFamily` packages those two fields,
+and `to_square_sum_overlap` is the downstream entry point.
 The theorem-facing shortcut is
 `ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_canonical_certificate_family`.
 

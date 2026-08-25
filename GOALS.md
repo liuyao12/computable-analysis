@@ -550,6 +550,9 @@ from monomial brackets structurally.
    makes the remaining positive-sample obligation even more explicit: prove
    rational-circle image overlap, while the endpoint is handled by exact
    zero-target search.
+   The named structure `DyadicSquareCircleOverlapFamily` now packages this
+   endpoint-plus-positive-sample data, with `to_square_sum_overlap` exposing
+   the resulting full dyadic-sum overlap.
 
    The square equal-dyadic candidate is now explicit as
    `dyadicNestedRadicalSquareLeftSum`, with raw wrapper
