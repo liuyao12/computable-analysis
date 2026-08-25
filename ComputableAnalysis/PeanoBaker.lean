@@ -2000,6 +2000,36 @@ def generator : RatMatrix 2 :=
       (fun _ j => Fin.cases 1 (fun _ => 0) j)
       i
 
+theorem generator_rowAbsSum (i : Fin 2) :
+    matrixRowAbsSum generator i = 1 := by
+  refine Fin.cases ?_ ?_ i
+  · native_decide
+  · intro j
+    refine Fin.cases ?_ ?_ j
+    · native_decide
+    · intro k
+      exact Fin.elim0 k
+
+theorem affineGenerator_rowAbsSum_le (step : Rat) (i : Fin 2) :
+    matrixRowAbsSum
+        (matrixAdd (matrixIdentity 2) (matrixScale step generator)) i <=
+      1 + qabs step := by
+  have h := matrixRowAbsSum_affineStep_le (matrixScale step generator) i
+  rw [matrixRowAbsSum_matrixScale, generator_rowAbsSum] at h
+  simpa using h
+
+theorem rotationChronologicalProduct_rowAbsSum_le (step : Rat) :
+    forall steps i,
+      matrixRowAbsSum
+          (chronologicalProduct (fun _ => matrixScale step generator) steps) i <=
+        (1 + qabs step) ^ steps := by
+  intro steps i
+  apply chronologicalProduct_rowAbsSum_le_pow
+    (fun _ => matrixScale step generator) (1 + qabs step)
+  · intro n j
+    exact affineGenerator_rowAbsSum_le step j
+  · exact Rat.add_nonneg (by native_decide) (qabs_nonneg step)
+
 /-- Squaring the rotation generator is minus the identity.  This is a closed
 finite rational matrix calculation. -/
 theorem generator_square :

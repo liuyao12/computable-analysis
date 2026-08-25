@@ -270,10 +270,19 @@ is introduced.
 \lean{ComputableAnalysis.LinearODE.orderedSimplexVolume_eq_closed}
 \lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexTerm_eq_orderedSimplexVolume}
 \lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexPartial_succ}
+\lean{ComputableAnalysis.LinearODE.RotationSystem.generator_rowAbsSum}
+\lean{ComputableAnalysis.LinearODE.RotationSystem.affineGenerator_rowAbsSum_le}
+\lean{ComputableAnalysis.LinearODE.RotationSystem.rotationChronologicalProduct_rowAbsSum_le}
 \lean{ComputableAnalysis.LinearODE.RotationSystem.generator_square}
 \lean{ComputableAnalysis.LinearODE.RotationSystem.simplexPartial_even_split}
 \lean{ComputableAnalysis.LinearODE.RotationSystem.simplexPartial_odd_split}
 \leanok
+
+For the quarter-turn generator, each row has absolute sum \(1\); a scaled
+Euler step therefore has row bound \(1+|h|\), and \(N\) such steps have bound
+\((1+|h|)^N\).  This is a concrete growth certificate for the rotation family,
+not yet the analytic assertion that the discrete product equals the continuous
+rotation.
 
 The analytic convergence input is a rational factorial tail.  It supplies a
 computable stage for every requested error, and the Volterra comparison turns
