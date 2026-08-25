@@ -146,9 +146,9 @@ primitive/evaluator equivalence.
 The public primitive-specific interface now makes this distinction explicit:
 it transports the cell integrals through a primitive endpoint list and then
 uses the same finite telescope as the single-function interface.  The
-absolute-value construction supplies the first area-side test case; its
-endpoint arithmetic is recorded as a separate certificate target rather than
-being hidden in the rectangle constructor.
+absolute-value construction now supplies the first completed finite-turn FTC
+case: the two cell areas add to (1), and the primitive
+(P(x)=xlvert xvert/2) transports that sum to (P(1)-P(-1)=1).
 
 \lean{ComputableAnalysis.MonotoneOnInterval}
 \lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule}
@@ -161,6 +161,8 @@ being hidden in the rectangle constructor.
 \lean{ComputableAnalysis.Integral.piecewisePrimitiveEndpointDifferenceList}
 \lean{ComputableAnalysis.Integral.piecewisePrimitiveTotalEndpointDifference}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_equiv_totalPrimitiveEndpointDifference_of_telescope}
+\lean{ComputableAnalysis.Integral.absOnUnit_piecewise_cell_primitiveFTC}
+\lean{ComputableAnalysis.Integral.absOnUnit_piecewise_primitiveFTC}
 \lean{ComputableAnalysis.Integral.constructionFor_of_curvatureFTC}
 \lean{ComputableAnalysis.Integral.definiteIdentityFor_of_curvatureFTC}
 \leanok

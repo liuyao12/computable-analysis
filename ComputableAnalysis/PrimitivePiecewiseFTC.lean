@@ -11,6 +11,33 @@ for examples such as `|x|`, whose primitive is `x * |x| / 2`.
 namespace ComputableAnalysis
 namespace Integral
 
+theorem exactRat_evalRaw_equiv (f : Rat -> Rat) (a b x : Rat)
+    (hx : inDomainInterval a b x) :
+    ((FunctionOnInterval.exactRat f a b).raw.evalRaw x
+      ((FunctionOnInterval.exactRat f a b).defined_on x hx)).Equiv
+      (RealRaw.ofRat (f x)) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    ((FunctionOnInterval.exactRat f a b).raw.evalRaw x
+      ((FunctionOnInterval.exactRat f a b).defined_on x hx))
+    (RealRaw.ofRat (f x)) n n).2
+  change QInterval.Overlaps
+    { lo := f x, hi := f x } { lo := f x, hi := f x }
+  exact ⟨Rat.le_refl, Rat.le_refl⟩
+
+theorem ofRat_sub_ofRat_equiv (p q : Rat) :
+    (RealRaw.ofRat p - RealRaw.ofRat q).Equiv
+      (RealRaw.ofRat (p - q)) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (RealRaw.ofRat p - RealRaw.ofRat q)
+    (RealRaw.ofRat (p - q)) n n).2
+  change QInterval.Overlaps
+    { lo := p - q, hi := p - q } { lo := p - q, hi := p - q }
+  exact ⟨Rat.le_refl, Rat.le_refl⟩
+
 def piecewisePrimitiveEndpointDifference
     (P : FunctionOnInterval)
     (F : FunctionOnInterval)

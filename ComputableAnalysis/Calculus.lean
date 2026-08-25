@@ -5932,8 +5932,18 @@ def rawLast (x : RealRaw) : List RealRaw -> RealRaw
 
 def rawAdjacentDifferenceList : List RealRaw -> List RealRaw
   | [] => []
-  | x :: [] => [x - x]
+  | x :: [] => []
   | x :: y :: ys => (y - x) :: rawAdjacentDifferenceList (y :: ys)
+
+theorem RealRaw.sub_self_equiv_zero {x : RealRaw} (hx : x.Valid) :
+    (x - x).Equiv RealRaw.zero := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  have ho := RealRaw.interval_order_of_valid x hx n
+  apply (RealRaw.compareAt_overlap_iff (x - x) RealRaw.zero n n).2
+  change QInterval.Overlaps (RealRaw.subCompute x x n) (RealRaw.zero.compute n)
+  unfold RealRaw.subCompute RealRaw.zero RealRaw.ofRat QInterval.Overlaps
+  constructor <;> grind [Rat.sub_eq_add_neg]
 
 theorem rawLast_valid {x : RealRaw} {xs : List RealRaw}
     (hvalid : forall y, y ∈ x :: xs -> y.Valid) :
@@ -5956,10 +5966,7 @@ theorem rawAdjacentDifferenceList_valid {xs : List RealRaw}
       cases xs with
       | nil =>
           intro y hy
-          simp only [rawAdjacentDifferenceList, List.mem_singleton] at hy
-          subst y
-          exact RealRaw.sub_valid
-            (hvalid x (by simp)) (hvalid x (by simp))
+          simp [rawAdjacentDifferenceList] at hy
       | cons z zs =>
           intro y hy
           simp only [rawAdjacentDifferenceList, List.mem_cons] at hy
@@ -5976,9 +5983,8 @@ theorem finiteRawSum_rawAdjacentDifferenceList_equiv_last_sub_first
   induction xs generalizing x with
   | nil =>
       have hx : x.Valid := hvalid x (by simp)
-      have hdiff : (x - x).Valid := RealRaw.sub_valid hx hx
       simpa [rawAdjacentDifferenceList, rawLast, finiteRawSum] using
-        (RealRaw.add_zero_equiv hdiff)
+        (RealRaw.equiv_symm (RealRaw.sub_self_equiv_zero hx))
   | cons y ys ih =>
       have hx : x.Valid := hvalid x (by simp)
       have hy : y.Valid := hvalid y (by simp)
