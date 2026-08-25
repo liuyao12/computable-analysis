@@ -1,4 +1,5 @@
 import ComputableAnalysis.FiniteMonotoneSequenceExample
+import ComputableAnalysis.Series
 
 /-!
 # Reusable finite monotone-sequence interface
@@ -138,6 +139,32 @@ def dyadicApproachIntervalCertificate : MonotoneIntervalCertificate where
 theorem dyadicApproachIntervalCertificate_valid :
     dyadicApproachIntervalCertificate.toRealRaw.Valid := by
   exact dyadicApproachIntervalCertificate.toRealRaw_valid
+
+def geometricSumIntervalCertificate
+    (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
+    (hr1 : r < 1) : MonotoneIntervalCertificate where
+  loStage := Series.geometricSum r
+  hiStage := fun _ => 1 / (1 - r)
+  lower_succ := Series.geometricSum_le_succ hr0
+  upper_succ := by
+    intro n
+    exact Rat.le_refl
+  enclosed := by
+    intro n
+    exact Series.geometricSum_le_inv_one_sub hr0 hr1 n
+  width_shrinks := by
+    intro eps
+    obtain ⟨N, hN⟩ :=
+      (Series.geometricRaw_valid_of_le_half hr0 hrhalf hr1).2.2 eps
+    refine ⟨N, ?_⟩
+    intro n hn
+    exact hN n hn
+
+theorem geometricSumIntervalCertificate_valid
+    (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
+    (hr1 : r < 1) :
+    (geometricSumIntervalCertificate r hr0 hrhalf hr1).toRealRaw.Valid := by
+  exact (geometricSumIntervalCertificate r hr0 hrhalf hr1).toRealRaw_valid
 
 def finiteAscendingSequenceCertificate
     (sequence : Nat → Rat) (stage : Nat)
