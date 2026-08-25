@@ -105,6 +105,44 @@ complex value.
 \lean{ComputableAnalysis.quarterTurnGeometricFourierSeries_future_stage_enclosure}
 \leanok
 
+\section{The computable Fourier-series contract}
+
+The project’s Fourier object is not a function space completed by an
+orthogonality theorem. It is a finite coefficient stage with a coordinate tail
+certificate:
+
+\begin{verbatim}
+sample table / coefficient stage -> rational-complex transform
+                                -> coordinate tail radius
+                                -> future-stage containment
+                                -> precision witness
+\end{verbatim}
+
+The tail radius is the essential analytic input. It must be nonnegative,
+shrink to zero, and contain every later real and imaginary coordinate at the
+earlier stage’s budget. Once those fields are supplied, the generic
+stabilizer produces a valid complex raw computation. A finite-support series
+is the zero-tail regression case; a geometric quarter-turn series is the
+first genuinely infinite-looking case.
+
+This gives a precise admission rule for Fourier applications. A coefficient
+formula may be new, but it must end in the same finite transform plus tail
+interface. Pointwise convergence, termwise integration, or an L2-style
+claim is a further theorem only after its own finite norm or tail certificate
+has been supplied.
+
+\lean{ComputableAnalysis.EffectiveFourierTailCertificate.future_stage_coordinate_enclosure}
+\lean{ComputableAnalysis.EffectiveFourierTailCertificate.stageBox}
+\lean{ComputableAnalysis.EffectiveFourierTailCertificate.future_stage_in_stageBox}
+\lean{ComputableAnalysis.EffectiveFourierTailCertificate.precision_witness}
+\lean{ComputableAnalysis.EffectiveFourierSeries.stabilized_valid}
+\lean{ComputableAnalysis.EffectiveFourierSeries.stage_contained}
+\lean{ComputableAnalysis.EffectiveFourierSeries.precision_witness}
+\lean{ComputableAnalysis.finiteSupportFourierSeries_stabilized_equiv}
+\lean{ComputableAnalysis.EffectiveFourierSampleCertificate.toSeries_valid}
+\lean{ComputableAnalysis.EffectiveFourierSampleCertificate.sample_interval_witness}
+\leanok
+
 Finite support is deliberately treated as a degenerate but useful case: the
 stabilized raw complex value is equivalent to the exact rational-complex
 transform already computed by the finite stage.  This is the hand-off used by
