@@ -359,38 +359,6 @@ theorem tangentSquareIntegral_compute (stage : Nat) :
       IntegralIdentities.LipschitzDyadic.compute
         tangentSquareDensity 64 stage := rfl
 
-theorem piCircleArea_bounds_for_square (n : Nat) :
-    2 <= (piCircleArea.compute n).lo /\
-      (piCircleArea.compute n).hi <= 4 := by
-  have hnest := CauchyPi.piCircleArea_valid.2.1 0 n (Nat.zero_le n)
-  have hpi0 : (piCircleArea.compute 0).lo = 2 := by
-    simp [piCircleArea_compute_zero]
-  have hpi1 : (piCircleArea.compute 0).hi = 4 := by
-    simp [piCircleArea_compute_zero]
-  constructor
-  · simpa [hpi0] using hnest.1
-  · simpa [hpi1] using hnest.2.2
-
-/-! The tangent chart integrates the unnormalized square to `pi/4`.  The
-equal-dyadic `sin(pi*x)^2` integral has the additional change-of-variable
-factor `1/pi`; the following theorem is the finite interval normalization
-identity used by that route. -/
-
-theorem halfQuarterTurnRaw_one_bounds (n : Nat) :
-    0 <= ((RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).compute n).lo /\
-      ((RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).compute n).hi <= 1 := by
-  have hpi := piCircleArea_bounds_for_square n
-  have hscale : (0 : Rat) <= (1 : Rat) / 4 := by native_decide
-  have hpiorder := RealRaw.interval_order_of_valid piCircleArea
-    CauchyPi.piCircleArea_valid n
-  simp [RationalCircle.GeometricTrig.halfQuarterTurnRaw,
-    RealRaw.scaleRat, RealRaw.scaleRatCompute, hscale]
-  constructor
-  · have hpiLo0 : 0 <= (piCircleArea.compute n).lo := by grind [hpi.1]
-    exact Rat.mul_nonneg (by native_decide) hpiLo0
-  · have h := Rat.mul_le_mul_of_nonneg_left hpi.2 (by native_decide : (0 : Rat) <= 1 / 4)
-    grind
-
 theorem tangentSquareDensity_eq_circleSin_sq_mul_chartJacobian (u : Rat) :
     tangentSquareDensity u =
       RationalCircle.Trigonometry.sin u *
@@ -2731,10 +2699,11 @@ theorem dyadicNestedRadicalSquareLeftSum_ordered
   simpa only [Rat.zero_add] using
     hfold (List.range (2 ^ n)) 0 (by native_decide) hcell
 
-theorem dyadicNestedRadicalSquareLeftSum_width_le
-    (n : Nat) :
-    (dyadicNestedRadicalSquareLeftSum n).width <=
-      1 / ((n + 1 : Nat) : Rat) := by
+theorem dyadicNestedRadicalSquareLeftSum_width_le_of_stage
+    (n : Nat) (eps : Rat)
+    (hstage : forall k, k < 2 ^ n ->
+      (rationalSquareInterval (dyadicNestedRadicalStageSinAt n k)).width <= eps) :
+    (dyadicNestedRadicalSquareLeftSum n).width <= (1 / 2 : Rat) * eps := by
   let N := 2 ^ n
   have hN : 0 < N := by
     dsimp [N]
@@ -2745,14 +2714,12 @@ theorem dyadicNestedRadicalSquareLeftSum_width_le
     (fun k =>
       (QInterval.scaleByRat (mesh 0 ((1 : Rat) / 2) N)
         (rationalSquareInterval (dyadicNestedRadicalStageSinAt n k))).width)
-    (mesh 0 ((1 : Rat) / 2) N *
-      (2 / ((n + 1 : Nat) : Rat))) (by
+    (mesh 0 ((1 : Rat) / 2) N * eps) (by
       intro k hk
       have hklt : k < N := List.mem_range.mp hk
       rw [QInterval.scaleByRat_width_of_nonneg hmesh]
       exact Rat.mul_le_mul_of_nonneg_left
-        (dyadicNestedRadicalSquareStage_width_le n k
-          (by simpa [N] using hklt)) hmesh)
+        (hstage k (by simpa [N] using hklt)) hmesh)
   calc
     (dyadicNestedRadicalSquareLeftSum n).width =
         (List.range N).foldl
@@ -2768,22 +2735,27 @@ theorem dyadicNestedRadicalSquareLeftSum_width_le
       rw [hzero]
       simp [N]
       grind
-    _ <= (N : Rat) * (mesh 0 ((1 : Rat) / 2) N *
-      (2 / ((n + 1 : Nat) : Rat))) := by simpa using hsum
-    _ = 1 / ((n + 1 : Nat) : Rat) := by
+    _ <= (N : Rat) * (mesh 0 ((1 : Rat) / 2) N * eps) := by
+      simpa using hsum
+    _ = (1 / 2 : Rat) * eps := by
       have hmesh_total := natCast_mul_mesh_eq_sub
         (a := (0 : Rat)) (b := (1 : Rat) / 2) hN
-      rw [show (N : Rat) *
-          (mesh 0 ((1 : Rat) / 2) N *
-            (2 / ((n + 1 : Nat) : Rat))) =
-          ((N : Rat) * mesh 0 ((1 : Rat) / 2) N) *
-            (2 / ((n + 1 : Nat) : Rat)) by
+      rw [show (N : Rat) * (mesh 0 ((1 : Rat) / 2) N * eps) =
+        ((N : Rat) * mesh 0 ((1 : Rat) / 2) N) * eps by
           grind [Rat.mul_assoc]]
       rw [hmesh_total]
-      have hden : ((n + 1 : Nat) : Rat) ≠ 0 := by
-        exact_mod_cast (Nat.succ_ne_zero n)
-      rw [Rat.div_def, Rat.div_def, Rat.div_def]
-      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel _ hden]
+      rw [show (1 / 2 : Rat) - 0 = 1 / 2 by grind]
+
+theorem dyadicNestedRadicalSquareLeftSum_width_le
+    (n : Nat) :
+    (dyadicNestedRadicalSquareLeftSum n).width <=
+      1 / ((n + 1 : Nat) : Rat) := by
+  have h := dyadicNestedRadicalSquareLeftSum_width_le_of_stage n
+    (2 / ((n + 1 : Nat) : Rat))
+    (fun k hk => dyadicNestedRadicalSquareStage_width_le n k hk)
+  have htwo : (2 : Rat) * (2 : Rat)⁻¹ = 1 :=
+    Rat.mul_inv_cancel 2 (by native_decide)
+  simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, htwo] using h
 
 def dyadicNestedRadicalSquareIntegralRaw : RealRaw where
   compute := dyadicNestedRadicalSquareLeftSum
