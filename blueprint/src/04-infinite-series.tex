@@ -148,7 +148,7 @@ This is the series analogue of the effective FTC: a global identity is a
 chain of finite interval containments.
 
 At the coefficient level, integration is a concrete constructor: prescribe the
-constant term and divide the (n)-th derivative coefficient by (n+1).  The
+constant term and divide the n-th derivative coefficient by (n+1). The
 formal derivative then recovers the input stream exactly.  This is the finite
 algebraic core of termwise FTC; convergence and interval tails are separate
 obligations.
@@ -363,7 +363,7 @@ of a product factors into the product of its one-dimensional sums.
 \lean{ComputableAnalysis.finiteProductIntegralSum2D_factorized}
 \leanok
 
-The (n)-ball is handled by the same finite recurrence, not by importing a
+The n-ball is handled by the same finite recurrence, not by importing a
 measure space:
 
 \begin{verbatim}
@@ -373,7 +373,7 @@ piApprox, r, n -> rational volume model -> refine piApprox
 \end{verbatim}
 
 Here `piApprox` is an input computation, so the model is useful at every
-stage even when the value of (pi) has not been named as a completed real.
+stage even when the value of pi has not been named as a completed real.
 The recurrence, scaling law, nonnegativity, and concrete dimensions are
 finite rational theorems. It is a representative for a whole family of
 volume calculations; we do not duplicate a proof for every dimension.
@@ -388,8 +388,36 @@ volume calculations; we do not duplicate a proof for every dimension.
 \lean{ComputableAnalysis.nBallVolumeModel_stage_thirteen}
 \leanok
 
-Thus the Gaussian and (n)-ball entries are in scope as finite, separable,
+Thus the Gaussian and n-ball entries are in scope as finite, separable,
 precision-refinable computations. A full Gaussian identity or a general
 multiple-integral theorem is admitted only after its evaluator supplies the
 corresponding finite tail and transport certificates; the name of a classical
 integral does not provide those certificates for free.
+
+The next finite layer is a tail ladder. At selected rational points, the
+exponential evaluator itself certifies the Gaussian bound
+exp(-x^2) <= 1/x^2. Summing those certified boxes gives a rational budget
+for a finite collection of tail cells:
+
+\begin{verbatim}
+point x -> exp(-x^2) interval -> compare with 1/x^2
+       -> add finitely many tail cells -> rational upper budget
+\end{verbatim}
+
+This is the correct entry point for an improper Gaussian argument. To close a
+full-line theorem one still needs a uniform rule that covers every later cell
+and proves the remaining budget can be made arbitrarily small. The finite
+ladder is evidence for that provider, not a disguised appeal to Lebesgue
+measure or to an attained point at infinity.
+
+\lean{ComputableAnalysis.gaussianTailPointLadder_stage_twenty}
+\lean{ComputableAnalysis.gaussianTailBoxUpper}
+\lean{ComputableAnalysis.gaussianTailBoxUpper_stage_twenty_ladder}
+\lean{ComputableAnalysis.gaussianTailBoxUpper_stage_twenty_ladder_four}
+\lean{ComputableAnalysis.gaussianTailBoxUpper_stage_twenty_ladder_eight}
+\lean{ComputableAnalysis.gaussianTailBoxUpper_stage_twenty_three_point_sum}
+\lean{ComputableAnalysis.gaussianTailBoxUpper_stage_twenty_four_point_sum}
+\lean{ComputableAnalysis.gaussianTailBoxUpper_stage_twenty_eight_point_sum}
+\lean{ComputableAnalysis.gaussianTailBoxUpper_stage_two_hundred_nine_ten_ladder}
+\lean{ComputableAnalysis.gaussianTailBoxUpper_stage_two_hundred_nine_ten_sum}
+\leanok
