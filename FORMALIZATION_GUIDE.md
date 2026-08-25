@@ -963,6 +963,10 @@ separation certificate at the same computed target stage.  They are the
 analytic kernel for the adaptive iterator; the remaining work is to prove that
 the cell-range evaluator used by the bisection kernel inherits these point-box
 separations under the chosen schedule.
+That transfer is now proved for degenerate midpoint cells by
+`uniformExpOnUnitWarm_cellRange_midpoint_below_forward_target` and
+`uniformExpOnUnitWarm_cellRange_midpoint_above_forward_target`: the public
+cell-range evaluator reduces to the same finite box when its endpoints agree.
 
 The reusable `gapAwareTargetBisectionStep` is deliberately conservative. It
 keeps a rational parent interval whenever the computed image box overlaps the
