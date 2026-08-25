@@ -922,6 +922,16 @@ uses the checked direct finite-mesh halving closure below, not a
 Peano--Baker or Picard argument; the remaining scalar task is to derive its
 finite cell estimates from arbitrary derivative certificates.
 
+The inverse-search side now has a concrete warm-stage façade as well:
+`ExpProofs.uniformExpOnUnitWarm` is a four-term-shifted common-prefix
+evaluator, `uniformExpOnUnitWarm_intervalRegular` proves its ordinary
+interval-width contract, and `uniformExpOnUnitWarm_gapAwareSeparation`
+supplies monotone gap-dependent output precision. This is a rational
+certificate, not a placeholder for a completed inverse. The remaining bridge
+is to adapt this gap-aware schedule to the older fixed-gap
+`InvertibleFunctionOnInterval` contract, or generalize that contract to accept
+gap-aware separation.
+
 For a direct scalar uniqueness proof, make one finite short-block sweep an
 instance of `ScalarODE.ShortBlockMeshSweep`: telescope the cell estimates to
 `next <= length * previous + residual`, choose `length <= 1/4`, and spend at

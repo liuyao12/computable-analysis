@@ -236,6 +236,30 @@ and a gap-dependent factorial stage makes the endpoint boxes disjoint.
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_gapAwareSeparation}
 \leanok
 
+The common-prefix evaluator now also has an ordinary public inverse-search
+façade. Four finite warm-up terms are reserved so that the requested stage
+itself supplies the interval-width budget:
+
+\begin{verbatim}
+warm exp stage -> interval regularity -> monotone boxes
+               -> gap-aware separation -> finite inverse search
+\end{verbatim}
+
+\lean{ComputableAnalysis.ExpProofs.uniformExpTailMagnitude_le_reciprocalHundred_shifted}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_compute}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_intervalRegular}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_nondecreasing}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_gapAwareSeparation}
+\leanok
+
+This closes the analytic data for a branch-local search. The remaining
+bookkeeping is intentional: the current `InvertibleFunctionOnInterval`
+contract uses a fixed input-gap schedule, whereas the exponential certificate
+uses the sharper gap-dependent schedule. A small adapter (or a gap-aware
+inverse-branch contract) must connect these two interfaces before claiming a
+global inverse logarithm.
+
 The inverse layer is deliberately branch-local.  An invertible computation
 must carry its source interval, monotonicity orientation, separation schedule,
 and certified target range; an inverse evaluator then returns a rational source

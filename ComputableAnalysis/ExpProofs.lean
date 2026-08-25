@@ -3412,6 +3412,51 @@ theorem uniformExpBox_width (x : Rat) (n : Nat) :
   rw [intervalAround_width]
   grind [Rat.mul_assoc]
 
+/-! A deliberately loose reciprocal tail budget after a fixed finite warm-up.
+It is useful when an ordinary interval-regular adapter must read a public
+stage itself, rather than the sharper adaptive stage used by the FTC
+evaluator. -/
+theorem uniformExpTailMagnitude_le_reciprocalHundred_shifted (n : Nat) :
+    uniformExpTailMagnitude (n + 4) <=
+      1 / (100 * ((n + 1 : Nat) : Rat)) := by
+  induction n with
+  | zero => native_decide
+  | succ n ih =>
+      have hnext := uniformExpTailMagnitude_next_le_half (n + 4)
+      have hscaled := Rat.mul_le_mul_of_nonneg_right ih
+        (by native_decide : (0 : Rat) <= 1 / 2)
+      have hA : (0 : Rat) < 100 * ((n + 1 : Nat) : Rat) := by
+        exact Rat.mul_pos (by native_decide)
+          ((Rat.natCast_pos).2 (Nat.succ_pos n))
+      have hB : (0 : Rat) < 100 * ((n + 2 : Nat) : Rat) := by
+        exact Rat.mul_pos (by native_decide)
+          ((Rat.natCast_pos).2 (by omega))
+      have hhalf :
+          (1 / (100 * ((n + 1 : Nat) : Rat))) * (1 / 2) <=
+            1 / (100 * ((n + 2 : Nat) : Rat)) := by
+        apply Rat.le_of_mul_le_mul_right (c :=
+          2 * (100 * ((n + 1 : Nat) : Rat)) *
+            (100 * ((n + 2 : Nat) : Rat)))
+        · rw [Rat.div_def, Rat.div_def, Rat.div_def]
+          have hAne : (100 * ((n + 1 : Nat) : Rat)) ≠ 0 :=
+            Rat.ne_of_gt hA
+          have hBne : (100 * ((n + 2 : Nat) : Rat)) ≠ 0 :=
+            Rat.ne_of_gt hB
+          have htwo : (2 : Rat) ≠ 0 := by native_decide
+          have hAcancel := Rat.mul_inv_cancel
+            (100 * ((n + 1 : Nat) : Rat)) hAne
+          have hBcancel := Rat.mul_inv_cancel
+            (100 * ((n + 2 : Nat) : Rat)) hBne
+          have htwocancel := Rat.mul_inv_cancel (2 : Rat) htwo
+          grind [Rat.mul_assoc, Rat.mul_comm]
+        · exact Rat.mul_pos (Rat.mul_pos (by native_decide : (0 : Rat) < 2) hA) hB
+      calc
+        uniformExpTailMagnitude (n + 1 + 4) <=
+            uniformExpTailMagnitude (n + 4) * ((1 : Rat) / 2) := by
+          simpa [Nat.add_assoc] using hnext
+        _ <= (1 / (100 * ((n + 1 : Nat) : Rat))) * (1 / 2) := hscaled
+        _ <= 1 / (100 * ((n + 2 : Nat) : Rat)) := hhalf
+
 private theorem uniformExpBox_ordered (x : Rat) (n : Nat) :
     0 <= (uniformExpBox x n).width := by
   rw [uniformExpBox_width]
@@ -5701,6 +5746,189 @@ def uniformExpOnUnit_gapAwareSeparation :
       rfl
     rw [hcx, hcy]
     simpa [p] using hbox
+
+/-! A public warm-stage façade for inverse search.  It is the same common
+factorial computation as `uniformExpOnUnit`, with four finite tail terms
+reserved in every requested stage. -/
+def uniformExpOnUnitWarm : FunctionOnInterval where
+  raw :=
+    { definedAt := fun x => (0 : Rat) <= x /\ x <= 1
+      compute := fun x _ n => (uniformExpRaw x).compute (n + 4) }
+  lower := 0
+  upper := 1
+  defined_on := fun _ hx => hx
+  valid_on := by
+    intro x hx
+    have hqabs : qabs x <= 2 := by
+      rw [qabs_eq_self_of_nonneg hx.1]
+      exact Rat.le_trans hx.2 (by native_decide)
+    let sigma : RealRaw.StageSchedule :=
+      { stage := fun n => n + 4
+        monotone := by intro i j hij; omega
+        cofinal := by intro target; exact ⟨target, by omega⟩ }
+    have hvalid := RealRaw.schedule_valid (uniformExpRaw x)
+      (uniformExpRaw_valid x hqabs) sigma
+    change RealRaw.Valid (RealRaw.schedule sigma (uniformExpRaw x))
+    exact hvalid
+
+theorem uniformExpOnUnitWarm_compute (x : Rat)
+    (hx : inDomainInterval (0 : Rat) 1 x) (n : Nat) :
+    uniformExpOnUnitWarm.compute x hx n =
+      (uniformExpRaw x).compute (n + 4) := rfl
+
+def uniformExpOnUnitWarm_intervalRegular :
+    IntervalRegularOn uniformExpOnUnitWarm := by
+  refine
+    { evalInterval := fun I _ n =>
+        uniformExpCellRange I.lo I.hi (n + 4)
+      inputPrecision := fun n => 1000 * (n + 1)
+      inputPrecision_pos := by
+        intro n
+        omega
+      output_width := ?_
+      contains_point_values := ?_ }
+  · intro I hI n hwidth
+    rcases hI with ⟨hlo, hord, hhi⟩
+    have hnonneg : 0 <= I.hi - I.lo := by grind
+    have hstep : I.hi - I.lo <=
+        1 / ((1000 * (n + 1) : Nat) : Rat) := by
+      simpa [QInterval.width] using hwidth
+    have hdenpos : 0 < 1000 * (n + 1) := by omega
+    have hdenone : 1 <= 1000 * (n + 1) := by omega
+    have hleone : I.hi - I.lo <= 1 := by
+      have hanti := FTC.one_div_nat_antitone (n := 1)
+        (m := 1000 * (n + 1)) (by omega) hdenpos hdenone
+      exact Rat.le_trans hstep (by
+        simpa only [show ((1 : Nat) : Rat) = 1 by native_decide,
+          show (1 : Rat) / 1 = 1 by native_decide] using hanti)
+    have hsq : (I.hi - I.lo) ^ 2 <= I.hi - I.lo := by
+      rw [show (I.hi - I.lo) ^ 2 =
+        (I.hi - I.lo) * (I.hi - I.lo) by simp [Rat.pow_succ]]
+      simpa using Rat.mul_le_mul_of_nonneg_left hleone hnonneg
+    have hcenter :
+        3 * (I.hi - I.lo) + 34 * (I.hi - I.lo) ^ 2 <=
+          37 / ((1000 * (n + 1) : Nat) : Rat) := by
+      have hlinear :
+          3 * (I.hi - I.lo) + 34 * (I.hi - I.lo) ^ 2 <=
+            37 * (I.hi - I.lo) := by
+        have hsq' := Rat.mul_le_mul_of_nonneg_left hsq
+          (by native_decide : (0 : Rat) <= 34)
+        grind
+      have hscaled := Rat.mul_le_mul_of_nonneg_left hstep
+        (by native_decide : (0 : Rat) <= 37)
+      calc
+        3 * (I.hi - I.lo) + 34 * (I.hi - I.lo) ^ 2 <=
+            37 * (I.hi - I.lo) := hlinear
+        _ <= 37 * (1 / ((1000 * (n + 1) : Nat) : Rat)) := hscaled
+        _ = 37 / ((1000 * (n + 1) : Nat) : Rat) := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    have hrange := uniformExpCellRange_width_le (n + 4) hlo hhi hord
+    have htail := uniformExpTailMagnitude_le_reciprocalHundred_shifted n
+    have htail' :
+        6 * uniformExpTailMagnitude (n + 4) <=
+          6 / (100 * ((n + 1 : Nat) : Rat)) :=
+      by simpa [Rat.div_def] using
+        Rat.mul_le_mul_of_nonneg_left htail (by native_decide)
+    have hresult :
+        37 / ((1000 * (n + 1) : Nat) : Rat) +
+            6 / (100 * ((n + 1 : Nat) : Rat)) <=
+          1 / ((n + 1 : Nat) : Rat) := by
+      simp only [Rat.natCast_mul]
+      let N : Rat := ((n + 1 : Nat) : Rat)
+      change 37 / ((1000 : Rat) * N) +
+          6 / ((100 : Rat) * N) <= 1 / N
+      have hn : (0 : Rat) < ((n + 1 : Nat) : Rat) :=
+        (Rat.natCast_pos).2 (by omega)
+      have hne : ((n + 1 : Nat) : Rat) ≠ 0 := Rat.ne_of_gt hn
+      have h1000 : (1000 : Rat) ≠ 0 := by native_decide
+      have h100 : (100 : Rat) ≠ 0 := by native_decide
+      have hNcancel := Rat.mul_inv_cancel N (by simpa [N] using hne)
+      have h1000cancel := Rat.mul_inv_cancel (1000 : Rat) h1000
+      have h100cancel := Rat.mul_inv_cancel (100 : Rat) h100
+      apply Rat.le_of_mul_le_mul_right (c :=
+        (1000 : Rat) * 100 * N)
+      · rw [Rat.div_def, Rat.div_def, Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      · exact Rat.mul_pos (Rat.mul_pos (by native_decide) (by native_decide))
+          (by simpa [N] using hn)
+    have hmono := uniformExpCenter_mono_on_unit (n + 4)
+      hlo hhi hord
+    have htailnonneg := uniformExpTailMagnitude_nonneg (n + 4)
+    constructor
+    · unfold uniformExpCellRange QInterval.width
+      unfold uniformExpTailRadius
+      have hdiff : 0 <= uniformExpCenter I.hi (n + 4) -
+          uniformExpCenter I.lo (n + 4) := by
+        grind [Rat.sub_eq_add_neg]
+      have htail4 : 0 <= 4 * uniformExpTailMagnitude (n + 4) := by
+        exact Rat.mul_nonneg (by native_decide) htailnonneg
+      dsimp
+      grind [Rat.sub_eq_add_neg]
+    · calc
+        (uniformExpCellRange I.lo I.hi (n + 4)).width <=
+            3 * (I.hi - I.lo) + 34 * (I.hi - I.lo) ^ 2 +
+              6 * uniformExpTailMagnitude (n + 4) := hrange
+        _ <= 37 / ((1000 * (n + 1) : Nat) : Rat) +
+              6 / (100 * ((n + 1 : Nat) : Rat)) :=
+          rat_add_le_add hcenter htail'
+        _ <= 1 / ((n + 1 : Nat) : Rat) := hresult
+  · intro I hI x hx n hIlo hIhi
+    change QInterval.ContainsInterval
+      (uniformExpCellRange I.lo I.hi (n + 4))
+      ((uniformExpRaw x).compute (n + 4))
+    rw [uniformExpRaw_compute]
+    exact uniformExpBox_contains_cellRange (n + 4)
+      hI.1 hI.2.2 hIlo hIhi
+
+def uniformExpOnUnitWarm_nondecreasing :
+    NondecreasingOnInterval uniformExpOnUnitWarm := by
+  intro x y hx hy hxy n
+  change 0 <= x /\ x <= 1 at hx
+  change 0 <= y /\ y <= 1 at hy
+  change ((uniformExpRaw x).compute (n + 4)).lo <=
+    ((uniformExpRaw y).compute (n + 4)).hi
+  rw [uniformExpRaw_compute, uniformExpRaw_compute]
+  change (uniformExpBox x (n + 4)).lo <=
+    (uniformExpBox y (n + 4)).hi
+  unfold uniformExpBox intervalAround
+  have hcenter : uniformExpCenter x (n + 4) <=
+      uniformExpCenter y (n + 4) :=
+    uniformExpCenter_mono_on_unit (n + 4) hx.1 hy.2 hxy
+  have htail := uniformExpTailMagnitude_nonneg (n + 4)
+  have hdiff : 0 <= uniformExpCenter y (n + 4) -
+      uniformExpCenter x (n + 4) := by
+    grind [Rat.sub_eq_add_neg]
+  change uniformExpCenter x (n + 4) -
+      2 * uniformExpTailMagnitude (n + 4) <=
+    uniformExpCenter y (n + 4) +
+      2 * uniformExpTailMagnitude (n + 4)
+  grind [Rat.sub_eq_add_neg]
+
+def uniformExpOnUnitWarm_gapAwareSeparation :
+    GapAwareInverseSeparation uniformExpOnUnitWarm where
+  kind := .nondecreasing
+  outputPrecision := fun {x y} hxy n =>
+    uniformExpQuotientPrecision (y - x)
+      (Rat.ne_of_gt ((Rat.lt_iff_sub_pos x y).mp hxy)) n
+  separated := by
+    intro x y hx hy hxy n
+    change 0 <= x /\ x <= 1 at hx
+    change 0 <= y /\ y <= 1 at hy
+    let p := uniformExpQuotientPrecision (y - x)
+      (Rat.ne_of_gt ((Rat.lt_iff_sub_pos x y).mp hxy)) n
+    have hsep := uniformExpOnUnit_box_separated n hx.1 hy.2 hxy
+    have hnx := uniformExpBox_nested x (by
+      rw [qabs_eq_self_of_nonneg hx.1]
+      exact Rat.le_trans hx.2 (by native_decide)) p (p + 4) (by omega)
+    have hny := uniformExpBox_nested y (by
+      rw [qabs_eq_self_of_nonneg hy.1]
+      exact Rat.le_trans hy.2 (by native_decide)) p (p + 4) (by omega)
+    change (uniformExpBox x (p + 4)).hi <
+      (uniformExpBox y (p + 4)).lo
+    apply (Rat.lt_iff_sub_pos _ _).mpr
+    have hsep' := (Rat.lt_iff_sub_pos _ _).mp hsep
+    grind [Rat.sub_eq_add_neg]
 
 private theorem uniformExpOnUnit_scheduledRegular_width
     (n : Nat) {I : QInterval}
