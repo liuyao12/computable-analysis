@@ -41,6 +41,14 @@ representations. The following general constructions remain active targets:
   Picard--Lindelöf; and
 - numerical-error, PDE, units, and broad complex-domain infrastructure.
 
+The integral boundary is intentional. `IntervalRegularOn` supplies finite
+interval images, point containment, and a shrinking local modulus; it does not
+by itself supply the cross-stage nesting required by `RealRaw.ValidCompute`.
+An integral formalization must therefore add an explicit schedule certificate
+(for example, `MonotoneDarbouxSchedule`) or a function-specific finite
+assembly. This is the computable replacement for silently invoking compactness
+or completeness of the classical real line.
+
 A declaration may be a useful interface, a target `Prop`, or a fully proved
 theorem.  The guide calls out that distinction.  A named `def` or `structure`
 is never evidence that its intended mathematical theorem has been proved.
