@@ -8640,6 +8640,33 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificate_family
   intro n k hk hpos precision
   exact family.rational_circle_overlap precision n k hk
 
+theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_branch_certificate_family
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (family : DyadicNestedRadicalBranchCertificateFamily S.inverse)
+    (hintegral :
+      (Integral.integral g 0 ((1 : Rat) / 2) cg).Equiv reciprocalPiRaw) :
+    (S.halfIntegral pub).Equiv reciprocalPiRaw := by
+  exact RealRaw.equiv_trans
+    (S.halfIntegral_valid pub)
+    (FTC.integral_valid_of_construction cg)
+    reciprocalPiRaw_valid
+    (S.halfIntegral_equiv_of_branch_certificate_family
+      pub g cg hdyadic hplan hevaluator family)
+    hintegral
+
 structure DyadicTangentWitnessFamily
     (B : IntegralIdentities.ArctanInverseBisection) where
   schedule : forall (depth k : Nat) (hk : k < 2 ^ depth),

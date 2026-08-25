@@ -930,6 +930,8 @@ The branch-certificate route exposes the same result in rational-circle box
 form through `DyadicNestedRadicalBranchCertificateFamily.rational_circle_overlap`.
 Its packaged integral transport is
 `ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificate_family`.
+The endpoint-value composition is
+`ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_branch_certificate_family`.
 For proofs that organize data as `precision -> depth -> sample`, the direct
 transport entry point is
 `ArctanSinPiConstruction.halfIntegral_equiv_of_precision_first_certificate_family`.
