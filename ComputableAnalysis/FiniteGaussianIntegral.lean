@@ -75,6 +75,12 @@ def reciprocalSquareTailPartial (cutoff : Rat) : Nat -> Rat
       reciprocalSquareTailPartial cutoff terms +
         1 / (cutoff + (terms + 1 : Nat)) ^ 2
 
+theorem reciprocalSquareTailPartial_succ (cutoff : Rat) (terms : Nat) :
+    reciprocalSquareTailPartial cutoff (terms + 1) =
+      reciprocalSquareTailPartial cutoff terms +
+        1 / (cutoff + (terms + 1 : Nat)) ^ 2 := by
+  rfl
+
 theorem reciprocalSquareTailPartial_stage_four :
     reciprocalSquareTailPartial 1 4 = 1669 / 3600 := by
   native_decide
