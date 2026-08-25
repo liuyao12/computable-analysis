@@ -2587,6 +2587,36 @@ theorem peanoBakerDiscreteSum_pairwiseProductZero {dimension : Nat}
   rw [← discretePeanoBakerExpansion]
   exact chronologicalProduct_pairwiseProductZero B hzero steps
 
+/-! A constant square-zero increment is the discrete analogue of the exact
+constant nilpotent flow above.  The finite sum keeps the mesh count and step
+size visible, rather than hiding them in a limiting exponential. -/
+theorem matrixSequenceSum_constant_scale {dimension : Nat}
+    (A : RatMatrix dimension) (step : Rat) (steps : Nat) :
+    matrixSequenceSum (fun _ => matrixScale step A) steps =
+      matrixScale ((steps : Rat) * step) A := by
+  induction steps with
+  | zero =>
+      funext i j
+      simp [matrixSequenceSum, matrixScale, matrixZero]
+  | succ steps ih =>
+      rw [matrixSequenceSum_succ, ih, matrixAdd_scale_same]
+      congr 1
+      push_cast
+      grind [Rat.add_mul]
+
+theorem chronologicalProduct_constant_square_zero
+    {dimension : Nat} (A : RatMatrix dimension) (step : Rat)
+    (hAA : matrixMul A A = matrixZero dimension) (steps : Nat) :
+    chronologicalProduct (fun _ => matrixScale step A) steps =
+      matrixAdd (matrixIdentity dimension)
+        (matrixScale ((steps : Rat) * step) A) := by
+  rw [chronologicalProduct_pairwiseProductZero]
+  · rw [matrixSequenceSum_constant_scale]
+  · intro i j
+    rw [matrixMul_matrixScale_left, matrixMul_matrixScale_right, hAA]
+    funext i j
+    simp [matrixScale, matrixZero]
+
 @[simp] theorem orderedIndexWords_zero : orderedIndexWords 0 = [[]] := rfl
 
 @[simp] theorem orderedIndexWords_one : orderedIndexWords 1 = [[], [0]] := rfl

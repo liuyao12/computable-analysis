@@ -148,6 +148,19 @@ forcing samples -> time-ordered transitions -> finite Duhamel sum
 \lean{ComputableAnalysis.LinearODE.trajectory_eq_transition_add_duhamelSum}
 \leanok
 
+The first concrete trajectory bridge is the constant square-zero case. If
+(A^2=0), every constant Euler increment (hA) is pairwise product-zero, so
+after (N) equal steps the transition is exactly
+[
+  (I+hA)^N = I+(Nh)A.
+]
+This is not an approximation theorem: it is a finite rational identity and a
+useful test case for triangular and affine systems.
+
+\lean{ComputableAnalysis.LinearODE.matrixSequenceSum_constant_scale}
+\lean{ComputableAnalysis.LinearODE.chronologicalProduct_constant_square_zero}
+\leanok
+
 The tail is not an informal limit. If the coefficient bound is $M$ on a
 time interval of length $T$, the omitted degree-$r$ words are charged to
 the finite factorial majorant $(MT)^r/r!$. An executable shift chooses the
