@@ -8550,6 +8550,50 @@ structure DyadicTangentWitnessFamily
   schedule : forall (depth k : Nat) (hk : k < 2 ^ depth),
     DyadicTangentWitnessSchedule B depth k hk
 
+/-! A named package for the geometric part of the equal-dyadic proof.
+
+The zero sample is handled by the exact endpoint equivalence; every positive
+dyadic sample is supplied with a rational half-angle certificate at every
+evaluator precision.  The conversion below is intentionally noncomputable:
+the certificate proves that a finite search succeeds, while the executable
+search itself remains the evaluator-facing object. -/
+structure DyadicCanonicalCertificateFamily
+    (B : IntegralIdentities.ArctanInverseBisection) where
+  zero_equiv : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero
+  interior : forall (depth k : Nat) (hk : k < 2 ^ depth), 0 < k ->
+    forall precision,
+      CanonicalDyadicHalfAngleCertificateAt B precision depth k hk
+
+noncomputable def DyadicCanonicalCertificateFamily.toWitnessFamily
+    {B : IntegralIdentities.ArctanInverseBisection}
+    (C : DyadicCanonicalCertificateFamily B) :
+    DyadicTangentWitnessFamily B where
+  schedule := fun depth k hk => by
+    by_cases hkzero : k = 0
+    · subst k
+      let hsearch := fun precision =>
+        canonical_dyadic_zero_search_at B C.zero_equiv precision depth
+          (Nat.pow_pos (by omega : 0 < 2))
+      exact {
+        witness := fun precision => Classical.choose (hsearch precision)
+        searchPrecision := fun _ => 0
+        search := by
+          intro precision
+          simpa [dyadicNestedRadicalTableAt_zero_sin] using
+            Classical.choose_spec (hsearch precision) }
+    · let hsearch := fun precision =>
+        canonical_dyadic_search_at_family B C.zero_equiv hk
+          (fun hpos => C.interior depth k hk hpos) precision
+      exact {
+        witness := fun precision =>
+          Classical.choose (Classical.choose_spec (hsearch precision))
+        searchPrecision := fun precision => Classical.choose (hsearch precision)
+        search := by
+          intro precision
+          exact Classical.choose_spec (Classical.choose_spec (hsearch precision)) }
+
 theorem ArctanSinPiConstruction.halfIntegral_equiv_of_witness_family
     (S : ArctanSinPiConstruction)
     (pub : Integral.Construction S.onHalf.toRealFunRaw

@@ -844,6 +844,14 @@ canonical rational boxes are supplied, the direct adapter
 assembles the parity cases without requiring equality between the public
 circle evaluator and the nested-radical evaluator.
 
+The proof obligation is packaged as
+`SinPiIntegral.DyadicCanonicalCertificateFamily`: its zero endpoint
+equivalence and positive-sample, all-precision certificate family convert via
+`DyadicCanonicalCertificateFamily.toWitnessFamily` into the executable search
+schedule consumed by the public integral theorem. This separates the
+geometric existence proof from the evaluator and makes the remaining theorem
+explicit rather than hidden in a large argument.
+
 One useful fully scoped exception is the unit arctangent triangle route in
 `Logarithm.lean`.  Its public name is `arctan.integral.triangle` (implemented
 by `Logarithm.arctanIntegralTriangle`), a certified monotone construction for
