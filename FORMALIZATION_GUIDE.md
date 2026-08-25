@@ -1663,6 +1663,9 @@ The reusable bridge is
 `square_overlap_of_rationalTangentSquareWitnessSearch`: once a search result
 and the two unit-interval box bounds are available, it supplies the circle
 identity and square/complement overlap automatically.
+Its signed counterpart,
+`signed_square_overlap_of_rationalTangentSquareWitnessSearch`, accepts the
+natural cosine range `[-1,1]` and uses the signed square enclosure below.
 Its family-level form,
 `dyadicNestedRadicalStage_square_complement_overlap_of_search_family`, reduces
 the transport to a uniform search-success theorem plus the cosine-box bound;
@@ -1670,6 +1673,12 @@ the sine-box bound is now discharged uniformly by
 `dyadicNestedRadicalStageSinAt_subinterval`.  The cosine condition is kept
 explicit because the full half-interval includes negative cosine values, so a
 nonnegative-only square interval must not be applied there silently.
+The signed enclosure handles that crossing directly:
+`rationalSquareIntervalSigned` and `rationalOneMinusSquareIntervalSigned`
+split at zero, while `rationalSquareIntervalSigned_contains` and
+`rationalSquareInterval_overlap_oneMinusSquareInterval_of_circle_signed`
+provide the reusable proof bridge.  This is one signed representative, not a
+new theorem family for every sign pattern.
 
 ## Completion and trust checklist
 

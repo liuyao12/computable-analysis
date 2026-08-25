@@ -2541,6 +2541,104 @@ def rationalSquareInterval (I : QInterval) : QInterval :=
 def rationalOneMinusSquareInterval (I : QInterval) : QInterval :=
   { lo := 1 - I.hi * I.hi, hi := 1 - I.lo * I.lo }
 
+/-! Signed interval squares.  The earlier `rationalSquareInterval` is the
+nonnegative specialization used by the sine boxes.  Cosine crosses zero on
+the full half-period, so its square enclosure must split at zero. -/
+def rationalSquareIntervalSigned (I : QInterval) : QInterval :=
+  if 0 <= I.lo then
+    { lo := I.lo * I.lo, hi := I.hi * I.hi }
+  else if 0 <= I.hi then
+    { lo := 0, hi := max (I.lo * I.lo) (I.hi * I.hi) }
+  else
+    { lo := I.hi * I.hi, hi := I.lo * I.lo }
+
+def rationalOneMinusSquareIntervalSigned (I : QInterval) : QInterval :=
+  { lo := 1 - (rationalSquareIntervalSigned I).hi,
+    hi := 1 - (rationalSquareIntervalSigned I).lo }
+
+theorem rationalSquareIntervalSigned_contains
+    {I : QInterval} {q : Rat}
+    (hI : I.lo <= I.hi) (hq : I.lo <= q ∧ q <= I.hi) :
+    (rationalSquareIntervalSigned I).lo <= q * q ∧
+      q * q <= (rationalSquareIntervalSigned I).hi := by
+  have hsquare_mono {a b : Rat} (ha : 0 <= a) (hab : a <= b) :
+      a * a <= b * b := by
+    have hb : 0 <= b := Rat.le_trans ha hab
+    exact Rat.le_trans
+      (Rat.mul_le_mul_of_nonneg_left hab ha)
+      (Rat.mul_le_mul_of_nonneg_right hab hb)
+  by_cases hlo : 0 <= I.lo
+  · simp [rationalSquareIntervalSigned, hlo]
+    have hq0 : 0 <= q := Rat.le_trans hlo hq.1
+    constructor
+    · have h := Rat.mul_le_mul_of_nonneg_right hq.1
+        (Rat.add_nonneg hq0 hlo)
+      grind [Rat.mul_add, Rat.add_mul]
+    · have h := Rat.mul_le_mul_of_nonneg_right hq.2
+        (Rat.add_nonneg hq0 (Rat.le_trans hlo hI))
+      grind [Rat.mul_add, Rat.add_mul]
+  · by_cases hhi : 0 <= I.hi
+    · simp [rationalSquareIntervalSigned, hlo, hhi]
+      have hqlo : I.lo <= q := hq.1
+      have hqhi : q <= I.hi := hq.2
+      by_cases hq0 : 0 <= q
+      · constructor
+        · exact Rat.mul_nonneg hq0 hq0
+        · have h1 := Rat.mul_le_mul_of_nonneg_left hqhi hq0
+          have h2 := Rat.mul_le_mul_of_nonneg_right hqhi hhi
+          have hsq : q * q <= I.hi * I.hi := by
+            exact Rat.le_trans h1 (by simpa [Rat.mul_comm] using h2)
+          rw [Rat.max_def]
+          split <;> grind
+      · have hqneg : q < 0 := Rat.not_le.mp hq0
+        constructor
+        · have h := hsquare_mono (by grind : 0 <= -q) (by grind : -q <= -q)
+          grind [Rat.mul_add, Rat.add_mul]
+        · have hsq : q * q <= I.lo * I.lo := by
+            have h := hsquare_mono (by grind : 0 <= -q)
+              (by grind : -q <= -I.lo)
+            grind [Rat.mul_add, Rat.add_mul]
+          rw [Rat.max_def]
+          split <;> grind
+    · simp [rationalSquareIntervalSigned, hlo, hhi]
+      have hq0 : q < 0 := by grind [Rat.not_le.mp hhi]
+      constructor
+      · have h := hsquare_mono (by grind : 0 <= -I.hi)
+          (by grind : -I.hi <= -q)
+        grind [Rat.mul_add, Rat.add_mul]
+      · have h := hsquare_mono (by grind : 0 <= -q)
+          (by grind : -q <= -I.lo)
+        grind [Rat.mul_add, Rat.add_mul]
+
+theorem rationalSquareInterval_overlap_oneMinusSquareInterval_of_circle_signed
+    {S C : QInterval} {s c : Rat}
+    (hS : subintervalOf S 0 1)
+    (hC : subintervalOf C (-1) 1)
+    (hs : S.lo <= s ∧ s <= S.hi)
+    (hc : C.lo <= c ∧ c <= C.hi)
+    (hcircle : s * s + c * c = 1) :
+    QInterval.Overlaps (rationalSquareInterval S)
+      (rationalOneMinusSquareIntervalSigned C) := by
+  have hsquare := rationalSquareIntervalSigned_contains hC.2.1 hc
+  have hsquareS : S.lo * S.lo <= s * s ∧
+      s * s <= S.hi * S.hi := by
+    have h := rationalSquareIntervalSigned_contains hS.2.1 hs
+    simpa [rationalSquareIntervalSigned, hS.1] using h
+  unfold rationalOneMinusSquareIntervalSigned QInterval.Overlaps
+  change S.lo * S.lo <=
+      1 - (rationalSquareIntervalSigned C).lo ∧
+    1 - (rationalSquareIntervalSigned C).hi <= S.hi * S.hi
+  constructor
+  · calc
+      S.lo * S.lo <= s * s := hsquareS.1
+      _ = 1 - c * c := by grind
+      _ <= 1 - (rationalSquareIntervalSigned C).lo := by grind [hsquare.2]
+  · calc
+      1 - (rationalSquareIntervalSigned C).hi <= 1 - c * c := by
+        grind [hsquare.1]
+      _ = s * s := by grind
+      _ <= S.hi * S.hi := hsquareS.2
+
 /- The raw equal-dyadic square candidate.  Its validity/nesting certificate
 is intentionally separate: this definition is only the finite algorithm. -/
 def dyadicNestedRadicalSquareLeftSum (n : Nat) : QInterval :=
@@ -3408,6 +3506,20 @@ theorem square_overlap_of_rationalTangentSquareWitnessSearch
   · exact ⟨hs.2.2.2.2.1, hs.2.2.2.2.2⟩
   · exact rationalCircleSin_sq_add_cos_sq _
 
+theorem signed_square_overlap_of_rationalTangentSquareWitnessSearch
+    {U S C : QInterval} {m : Nat} {u : Rat}
+    (hsearch : rationalTangentSquareWitnessSearch U S C m = some u)
+    (hS : subintervalOf S 0 1)
+    (hC : subintervalOf C (-1) 1) :
+    QInterval.Overlaps (rationalSquareInterval S)
+      (rationalOneMinusSquareIntervalSigned C) := by
+  have hs := rationalTangentSquareWitnessSearch_sound hsearch
+  apply rationalSquareInterval_overlap_oneMinusSquareInterval_of_circle_signed
+    hS hC
+  · exact ⟨hs.2.2.1, hs.2.2.2.1⟩
+  · exact ⟨hs.2.2.2.2.1, hs.2.2.2.2.2⟩
+  · exact rationalCircleSin_sq_add_cos_sq _
+
 theorem dyadicNestedRadicalStageSinAt_subinterval
     (n k : Nat) (hk : k < 2 ^ n) :
     subintervalOf (dyadicNestedRadicalStageSinAt n k) 0 1 := by
@@ -3421,15 +3533,15 @@ theorem dyadicNestedRadicalStage_square_complement_overlap_of_search_family
         (dyadicNestedRadicalStageSinAt n k)
         (dyadicNestedRadicalStageTable n k).2 m = some u)
     (hC : ∀ (n k : Nat) (hk : k < 2 ^ n),
-      subintervalOf (dyadicNestedRadicalStageTable n k).2 0 1) :
+      subintervalOf (dyadicNestedRadicalStageTable n k).2 (-1) 1) :
     ∀ (n k : Nat) (hk : k < 2 ^ n),
       QInterval.Overlaps
         (rationalSquareInterval (dyadicNestedRadicalStageSinAt n k))
-        (rationalOneMinusSquareInterval
+        (rationalOneMinusSquareIntervalSigned
           (dyadicNestedRadicalStageTable n k).2) := by
   intro n k hk
   obtain ⟨m, u, hmu⟩ := hsearch n k hk
-  exact square_overlap_of_rationalTangentSquareWitnessSearch hmu
+  exact signed_square_overlap_of_rationalTangentSquareWitnessSearch hmu
     (dyadicNestedRadicalStageSinAt_subinterval n k hk) (hC n k hk)
 
 /-! A concrete square-aware search checkpoint.  At the first nonzero dyadic
