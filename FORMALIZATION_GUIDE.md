@@ -949,7 +949,10 @@ decisions for target `3/2`; `uniformExpCenter_threeHalves_finite_bisection`
 proves the retained bracket and width `2^-k`. The remaining lift is to use
 the requested stage and target interval together with the gap-aware precision
 schedule, so this finite certificate is not being misrepresented as the full
-inverse evaluator.
+inverse evaluator.  The generic `FiniteInverseSearchCertificate.toRealRawFamily`
+bridge now turns the finite certificate into a valid stage-indexed nested
+interval computation; `uniformExpCenter_threeHalves_inverse_valid` and
+`uniformExpCenter_threeHalves_inverse_stage_bracket` instantiate that bridge.
 `uniformExpCenter_threeHalves_output_forward_overlap` proves the important
 finite bridge: the corresponding interval-valued exponential cell range
 still overlaps the target interval.

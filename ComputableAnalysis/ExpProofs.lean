@@ -6153,6 +6153,25 @@ theorem uniformExpCenter_threeHalves_finite_bisection
       have h : (1 : Rat) - 0 = 1 := by native_decide
       rw [h]
 
+/-! The finite trace now has a genuine stage-indexed inverse computation.  It
+uses the same rational center map at every stage; the certificate supplies the
+endpoint bracket, and the generic constructor supplies nesting and the
+explicit width modulus. -/
+def uniformExpCenter_threeHalves_inverse : RealRaw :=
+  (uniformExpCenter_threeHalves_certificate 0).toRealRawFamily
+
+theorem uniformExpCenter_threeHalves_inverse_valid :
+    uniformExpCenter_threeHalves_inverse.Valid := by
+  exact FiniteInverseSearchCertificate.toRealRawFamily_valid
+    (uniformExpCenter_threeHalves_certificate 0) (by native_decide)
+
+theorem uniformExpCenter_threeHalves_inverse_stage_bracket (n : Nat) :
+    uniformExpCenter_threeHalves_map
+        (uniformExpCenter_threeHalves_inverse.compute n).lo <= 3 / 2 /\
+      3 / 2 <= uniformExpCenter_threeHalves_map
+        (uniformExpCenter_threeHalves_inverse.compute n).hi := by
+  exact (uniformExpCenter_threeHalves_certificate 0).stage_bracket n
+
 theorem uniformExpCenter_threeHalves_output_forward_overlap
     (k : Nat) :
     let C := uniformExpCenter_threeHalves_certificate k
