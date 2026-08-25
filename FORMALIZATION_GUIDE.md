@@ -933,6 +933,10 @@ The branch-certificate route exposes the same result in rational-circle box
 form through `DyadicNestedRadicalBranchCertificateFamily.rational_circle_overlap`.
 Its packaged integral transport is
 `ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificate_family`.
+For the squared-sine construction, use
+`NestedRadicalSquareIntegralConstructionSubgoal.of_branch_certificate_family`:
+it reuses that same family at the evaluator precision and produces the
+standard equal-plan sample-overlap contract.
 The endpoint-value composition is
 `ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_branch_certificate_family`.
 The same branch family now feeds the squared-sine fold through
