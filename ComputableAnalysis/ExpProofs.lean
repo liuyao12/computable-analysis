@@ -5944,6 +5944,82 @@ def uniformExpOnUnitWarm_gapAwareInvertible :
   separation := uniformExpOnUnitWarm_gapAwareSeparation
   orientation := trivial
 
+/-! The first concrete target for the gap-aware inverse branch is the exact
+rational value `1`. Its preimage is the exact rational point `0`; this is the
+smallest regression case for the future logarithm evaluator. -/
+def uniformExpOnUnitWarm_one_target :
+    GapAwareInRangeRaw uniformExpOnUnitWarm_gapAwareInvertible where
+  value := RealRaw.ofRat 1
+  value_valid := RealRaw.ofRat_valid 1
+  rangePrecision := fun n => n
+  in_range := by
+    intro n
+    have h0 : inDomainInterval uniformExpOnUnitWarm.lower
+        uniformExpOnUnitWarm.upper 0 := by
+      change 0 <= (0 : Rat) /\ (0 : Rat) <= 1
+      native_decide
+    have h1 : inDomainInterval uniformExpOnUnitWarm.lower
+        uniformExpOnUnitWarm.upper 1 := by
+      change 0 <= (1 : Rat) /\ (1 : Rat) <= 1
+      native_decide
+    change (uniformExpOnUnitWarm.compute 0
+      h0 n).lo <= 1 /\
+      1 <= (uniformExpOnUnitWarm.compute 1
+        h1 n).hi
+    change ((uniformExpRaw 0).compute (n + 4)).lo <= 1 /\
+      1 <= ((uniformExpRaw 1).compute (n + 4)).hi
+    rw [uniformExpRaw_compute, uniformExpRaw_compute]
+    unfold uniformExpBox intervalAround
+    unfold uniformExpTailRadius
+    constructor
+    · rw [uniformExpCenter_zero]
+      have htail := uniformExpTailMagnitude_nonneg (n + 4)
+      grind [Rat.sub_eq_add_neg]
+    · have hcenter := uniformExpCenter_mono_on_unit (n + 4)
+        (x := 0) (y := 1) (by native_decide) (by native_decide)
+          (by native_decide)
+      rw [uniformExpCenter_zero] at hcenter
+      have htail := uniformExpTailMagnitude_nonneg (n + 4)
+      grind [Rat.sub_eq_add_neg]
+
+def uniformExpOnUnitWarm_one_search :
+    GapAwareInverseBisectionSearch
+      uniformExpOnUnitWarm_gapAwareInvertible
+      uniformExpOnUnitWarm_one_target where
+  compute_preimage := fun _ => { lo := 0, hi := 0 }
+  valid_preimage := by
+    change RealRaw.ValidCompute (fun _ : Nat => { lo := 0, hi := 0 })
+    exact RealRaw.ofRat_valid 0
+  preimage_subinterval := by
+    intro n
+    exact ⟨by native_decide, by native_decide, by native_decide⟩
+  value_overlaps := by
+    intro n
+    change QInterval.Overlaps
+      (uniformExpOnUnitWarm_intervalRegular.evalInterval
+        { lo := 0, hi := 0 } ⟨by native_decide, by native_decide, by native_decide⟩ n)
+      ((RealRaw.ofRat 1).compute n)
+    unfold uniformExpOnUnitWarm_intervalRegular
+    rw [RealRaw.ofRat_compute]
+    change QInterval.Overlaps
+      (uniformExpCellRange 0 0 (n + 4)) { lo := 1, hi := 1 }
+    unfold uniformExpCellRange
+    rw [uniformExpCenter_zero]
+    unfold uniformExpTailRadius QInterval.Overlaps
+    have htail := uniformExpTailMagnitude_nonneg (n + 4)
+    constructor <;> grind [Rat.sub_eq_add_neg]
+
+theorem uniformExpOnUnitWarm_one_preimage_equiv_zero :
+    ({ compute := uniformExpOnUnitWarm_one_search.compute_preimage } : RealRaw).Equiv
+      (RealRaw.ofRat 0) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+  rw [RealRaw.ofRat_compute]
+  change QInterval.Overlaps { lo := 0, hi := 0 } { lo := 0, hi := 0 }
+  unfold QInterval.Overlaps
+  constructor <;> native_decide
+
 private theorem uniformExpOnUnit_scheduledRegular_width
     (n : Nat) {I : QInterval}
     (hI : subintervalOf I (0 : Rat) 1)

@@ -9013,6 +9013,81 @@ def function (I : GapAwareInvertibleFunctionOnInterval) : FunctionOnInterval :=
 
 end GapAwareInvertibleFunctionOnInterval
 
+def GapAwareInvertibleFunctionOnInterval.EndpointRangeContains
+    (I : GapAwareInvertibleFunctionOnInterval) (n : Nat) (Y : QInterval) : Prop :=
+  match I.separation.kind with
+  | .nondecreasing =>
+      (I.function.compute I.function.lower
+        ⟨Rat.le_refl, I.source_ordered⟩ n).lo <= Y.lo /\
+        Y.hi <=
+          (I.function.compute I.function.upper
+            ⟨I.source_ordered, Rat.le_refl⟩ n).hi
+  | .nonincreasing =>
+      (I.function.compute I.function.upper
+        ⟨I.source_ordered, Rat.le_refl⟩ n).lo <= Y.lo /\
+        Y.hi <=
+          (I.function.compute I.function.lower
+            ⟨Rat.le_refl, I.source_ordered⟩ n).hi
+
+structure GapAwareInRangeRaw
+    (I : GapAwareInvertibleFunctionOnInterval) where
+  value : RealRaw
+  value_valid : value.Valid
+  rangePrecision : Nat -> Nat
+  in_range : forall n,
+    I.EndpointRangeContains (rangePrecision n) (value.compute n)
+
+structure GapAwareInverseBisectionSearch
+    (I : GapAwareInvertibleFunctionOnInterval)
+    (y : GapAwareInRangeRaw I) where
+  compute_preimage : Nat -> QInterval
+  valid_preimage : RealRaw.ValidCompute compute_preimage
+  preimage_subinterval :
+    forall n, subintervalOf (compute_preimage n)
+      I.function.lower I.function.upper
+  value_overlaps :
+    forall n,
+      QInterval.Overlaps
+        (I.continuous.regular.evalInterval
+          (compute_preimage n)
+          (preimage_subinterval n)
+          n)
+        (y.value.compute n)
+
+structure GapAwareInverseRaw
+    (I : GapAwareInvertibleFunctionOnInterval) where
+  compute_preimage : GapAwareInRangeRaw I -> Nat -> QInterval
+  valid_preimage : forall y, RealRaw.ValidCompute (compute_preimage y)
+  preimage_subinterval : forall y n,
+    subintervalOf (compute_preimage y n)
+      I.function.lower I.function.upper
+  value_overlaps : forall y n,
+    QInterval.Overlaps
+      (I.continuous.regular.evalInterval
+        (compute_preimage y n)
+        (preimage_subinterval y n) n)
+      (y.value.compute n)
+
+def gapAwareInverseRawOfSearch
+    {I : GapAwareInvertibleFunctionOnInterval}
+    (search : forall y : GapAwareInRangeRaw I,
+      GapAwareInverseBisectionSearch I y) : GapAwareInverseRaw I where
+  compute_preimage := fun y => (search y).compute_preimage
+  valid_preimage := fun y => (search y).valid_preimage
+  preimage_subinterval := fun y => (search y).preimage_subinterval
+  value_overlaps := fun y => (search y).value_overlaps
+
+def GapAwareHasBisectionSearch
+    (I : GapAwareInvertibleFunctionOnInterval) :=
+  forall y : GapAwareInRangeRaw I,
+    GapAwareInverseBisectionSearch I y
+
+theorem gapAwareInverseRaw_of_search
+    {I : GapAwareInvertibleFunctionOnInterval}
+    (hsearch : GapAwareHasBisectionSearch I) :
+    Nonempty (GapAwareInverseRaw I) :=
+  ⟨gapAwareInverseRawOfSearch hsearch⟩
+
 /-- The endpoint-value box at the lower end of an invertible interval branch. -/
 def InvertibleFunctionOnInterval.lowerValueBox
     (I : InvertibleFunctionOnInterval) (n : Nat) : QInterval :=

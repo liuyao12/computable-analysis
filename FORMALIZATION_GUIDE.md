@@ -931,7 +931,11 @@ certificate, not a placeholder for a completed inverse. The completed branch
 package is `uniformExpOnUnitWarm_gapAwareInvertible`, using the parallel
 `GapAwareInvertibleFunctionOnInterval` contract. The older
 `InvertibleFunctionOnInterval` remains the right interface for genuinely
-uniform separation schedules.
+uniform separation schedules. The first concrete target package is
+`uniformExpOnUnitWarm_one_target`; its exact preimage search is
+`uniformExpOnUnitWarm_one_search`, and
+`uniformExpOnUnitWarm_one_preimage_equiv_zero` is the finite branch regression
+for `log 1 = 0`.
 
 For a direct scalar uniqueness proof, make one finite short-block sweep an
 instance of `ScalarODE.ShortBlockMeshSweep`: telescope the cell estimates to
