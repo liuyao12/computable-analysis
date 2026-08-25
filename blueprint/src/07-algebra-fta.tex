@@ -126,6 +126,42 @@ when a special function or ODE introduces a known algebraic factor, the
 formalization supplies that factor and receives a certified residual.  It does
 not need to duplicate a universal algebraic-closure development.
 
+\section{Complex boxes as a finite search}
+
+The complex version makes the stage parameter visible. Start with a rational
+rectangle, subdivide it into finitely many children, and retain only children
+whose polynomial image is still compatible with zero:
+
+\begin{verbatim}
+initial QBox -> finite subdivision at depth d
+             -> reject root-free boxes
+             -> retain boxes containing supplied roots
+             -> width = initial width / 2^d
+\end{verbatim}
+
+For the quadratic model, the upper and lower roots survive every displayed
+depth while a neighborhood of zero is excluded. This is a genuine shrinking
+complex `realRaw`-style computation: it records boxes and residual tests, not
+an assertion that an irrational complex coordinate has been attained.
+
+\lean{ComputableAnalysis.finiteFTAZeroNeighborhood}
+\lean{ComputableAnalysis.finiteFTAZeroNeighborhood_ordered}
+\lean{ComputableAnalysis.finiteFTAZeroNeighborhood_exclusion}
+\lean{ComputableAnalysis.finiteFTAZeroNeighborhood_is_root_free}
+\lean{ComputableAnalysis.finiteFTARootSearchDomain}
+\lean{ComputableAnalysis.finiteFTARootSearchDomain_ordered}
+\lean{ComputableAnalysis.finiteFTAUpperRoot_survives_depth_two}
+\lean{ComputableAnalysis.finiteFTALowerRoot_survives_depth_two}
+\lean{ComputableAnalysis.finiteFTAUpperRoot_survives_depth_three}
+\lean{ComputableAnalysis.finiteFTALowerRoot_survives_depth_three}
+\lean{ComputableAnalysis.finiteFTAUpperRoot_survives_depth_four}
+\lean{ComputableAnalysis.finiteFTALowerRoot_survives_depth_four}
+\lean{ComputableAnalysis.finiteFTAUpperRoot_survives_depth_five}
+\lean{ComputableAnalysis.finiteFTALowerRoot_survives_depth_five}
+\lean{ComputableAnalysis.finiteFTAUpperRoot_survives_depth_six}
+\lean{ComputableAnalysis.finiteFTALowerRoot_survives_depth_six}
+\leanok
+
 \section{Boundary}
 
 The supplied-root quintic certificate is a boundary result: it peels known
