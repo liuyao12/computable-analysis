@@ -332,5 +332,64 @@ used by Stirling-type and Gaussian estimates.
 \begin{verbatim}
 algorithm A -> interval A       algorithm B -> interval B
                          \        /
-                          overlap
+                         overlap
 \end{verbatim}
+
+The computable version stops at the finite certificate that the application
+actually uses. For a Gaussian, that certificate is an even Taylor prefix on
+a bounded interval, together with a rational allowance for the omitted terms:
+
+\begin{verbatim}
+exp(-x^2) prefix -> integrate each monomial on [-R,R]
+                 -> finite prefix +/- explicit tail majorant
+                 -> interval for every later finite prefix
+\end{verbatim}
+
+This proves bounded, finite-stage Gaussian estimates. It does not silently
+assert an improper integral over the whole line; that next step requires a
+separate pointwise domination and tail certificate. The same interface also
+makes the usual separability argument transparent: a finite rectangular sum
+of a product factors into the product of its one-dimensional sums.
+
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix}
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_four}
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_six}
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_eight}
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_six_minus_four}
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_four_nonnegative}
+\lean{ComputableAnalysis.gaussianProductModel}
+\lean{ComputableAnalysis.gaussianProductModel_split}
+\lean{ComputableAnalysis.finiteProductSum2D_factorized}
+\lean{ComputableAnalysis.finiteProductIntegralSum2D_factorized}
+\leanok
+
+The (n)-ball is handled by the same finite recurrence, not by importing a
+measure space:
+
+\begin{verbatim}
+V_0(r) = 1                 V_1(r) = 2r
+V_{n+2}(r) = 2*pi*r^2/(n+2) * V_n(r)
+piApprox, r, n -> rational volume model -> refine piApprox
+\end{verbatim}
+
+Here `piApprox` is an input computation, so the model is useful at every
+stage even when the value of (pi) has not been named as a completed real.
+The recurrence, scaling law, nonnegativity, and concrete dimensions are
+finite rational theorems. It is a representative for a whole family of
+volume calculations; we do not duplicate a proof for every dimension.
+
+\lean{ComputableAnalysis.nBallCoeff}
+\lean{ComputableAnalysis.nBallVolumeModel}
+\lean{ComputableAnalysis.nBallVolumeModel_recurrence}
+\lean{ComputableAnalysis.nBallVolumeModel_scale}
+\lean{ComputableAnalysis.nBallVolumeModel_stage_six}
+\lean{ComputableAnalysis.nBallVolumeModel_stage_seven}
+\lean{ComputableAnalysis.nBallVolumeModel_stage_ten}
+\lean{ComputableAnalysis.nBallVolumeModel_stage_thirteen}
+\leanok
+
+Thus the Gaussian and (n)-ball entries are in scope as finite, separable,
+precision-refinable computations. A full Gaussian identity or a general
+multiple-integral theorem is admitted only after its evaluator supplies the
+corresponding finite tail and transport certificates; the name of a classical
+integral does not provide those certificates for free.
