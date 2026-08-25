@@ -6298,6 +6298,61 @@ theorem uniformExpOnUnitWarm_cellRange_midpoint_above_forward_target_at_stage
     (uniformExpBox m (p + 4)).lo
   grind [uniformExpCellRange]
 
+/-! Finite maximum bookkeeping for a target-stage schedule.  A bisection
+stage has only finitely many possible midpoint gaps, so its required
+gap-dependent precisions can be joined by this explicit natural-number max. -/
+def finiteNatMax : List Nat → Nat
+  | [] => 0
+  | x :: xs => max x (finiteNatMax xs)
+
+theorem finiteNatMax_mem {xs : List Nat} {x : Nat}
+    (hx : x ∈ xs) : x ≤ finiteNatMax xs := by
+  induction xs with
+  | nil => simp at hx
+  | cons y ys ih =>
+      simp only [List.mem_cons] at hx
+      rcases hx with rfl | hx
+      · exact Nat.le_max_left _ _
+      · exact Nat.le_trans (ih hx) (Nat.le_max_right _ _)
+
+def uniformExpGapPrecisionAt (r m : Rat) (n : Nat) : Nat :=
+  if h : r = m then 0
+  else if hlt : r < m then
+    uniformExpQuotientPrecision (m - r)
+      (Rat.ne_of_gt ((Rat.lt_iff_sub_pos r m).mp hlt)) n
+  else
+    uniformExpQuotientPrecision (r - m)
+      (Rat.ne_of_gt ((Rat.lt_iff_sub_pos m r).mp (by grind))) n
+
+theorem uniformExpGapPrecisionAt_of_below
+    {r m : Rat} (n : Nat) (hrm : r < m) :
+    uniformExpGapPrecisionAt r m n =
+      uniformExpQuotientPrecision (m - r)
+        (Rat.ne_of_gt ((Rat.lt_iff_sub_pos r m).mp hrm)) n := by
+  have hne : r ≠ m := by grind
+  rw [uniformExpGapPrecisionAt, dif_neg hne, dif_pos hrm]
+
+theorem uniformExpGapPrecisionAt_of_above
+    {r m : Rat} (n : Nat) (hmr : m < r) :
+    uniformExpGapPrecisionAt r m n =
+      uniformExpQuotientPrecision (r - m)
+        (Rat.ne_of_gt ((Rat.lt_iff_sub_pos m r).mp hmr)) n := by
+  have hne : r ≠ m := by grind
+  have hnot : ¬ r < m := by grind
+  rw [uniformExpGapPrecisionAt, dif_neg hne, dif_neg hnot]
+
+def uniformExpGapPrecisionMax
+    (r : Rat) (n : Nat) (midpoints : List Rat) : Nat :=
+  finiteNatMax (midpoints.map (fun m => uniformExpGapPrecisionAt r m n))
+
+theorem uniformExpGapPrecisionMax_dominates
+    {r : Rat} {n : Nat} {midpoints : List Rat} {m : Rat}
+    (hm : m ∈ midpoints) :
+    uniformExpGapPrecisionAt r m n ≤
+      uniformExpGapPrecisionMax r n midpoints := by
+  apply finiteNatMax_mem
+  exact List.mem_map.mpr ⟨m, hm, rfl⟩
+
 def uniformExpOnUnitWarm_forward_search (r : Rat)
     (hr : inDomainInterval uniformExpOnUnitWarm.lower
       uniformExpOnUnitWarm.upper r) :

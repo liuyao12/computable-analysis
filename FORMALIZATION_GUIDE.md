@@ -970,6 +970,11 @@ cell-range evaluator reduces to the same finite box when its endpoints agree.
 Their `_at_stage` variants prove the schedule rule explicitly: any target box
 stage dominating the gap-dependent midpoint stage preserves the strict side
 decision by nested interval containment.
+The finite schedule bookkeeping is exposed by `finiteNatMax`,
+`uniformExpGapPrecisionAt`, and `uniformExpGapPrecisionMax`; the theorem
+`uniformExpGapPrecisionMax_dominates` proves that every listed midpoint demand
+is covered by the computable maximum.  This is the finite construction to use
+when assembling a target-specific schedule.
 
 The reusable `gapAwareTargetBisectionStep` is deliberately conservative. It
 keeps a rational parent interval whenever the computed image box overlaps the
