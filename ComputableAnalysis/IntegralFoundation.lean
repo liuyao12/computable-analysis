@@ -1,4 +1,4 @@
-import ComputableAnalysis.RationalCircle
+import ComputableAnalysis.CircleFoundation
 import ComputableAnalysis.Calculus
 import ComputableAnalysis.IdentityInverse
 import ComputableAnalysis.ArctanEffectiveFTC
