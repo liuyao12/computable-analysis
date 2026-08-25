@@ -5935,6 +5935,18 @@ def rawAdjacentDifferenceList : List RealRaw -> List RealRaw
   | x :: [] => []
   | x :: y :: ys => (y - x) :: rawAdjacentDifferenceList (y :: ys)
 
+theorem rawAdjacentDifferenceList_length (xs : List RealRaw) :
+    (rawAdjacentDifferenceList xs).length = xs.length - 1 := by
+  induction xs with
+  | nil => simp [rawAdjacentDifferenceList]
+  | cons x xs ih =>
+      cases xs with
+      | nil => simp [rawAdjacentDifferenceList]
+      | cons y ys =>
+          simp only [rawAdjacentDifferenceList, List.length_cons]
+          simp only [List.length_cons] at ih
+          omega
+
 theorem RealRaw.sub_self_equiv_zero {x : RealRaw} (hx : x.Valid) :
     (x - x).Equiv RealRaw.zero := by
   apply RealRaw.sameStageOverlap_equiv
@@ -7920,6 +7932,12 @@ def piecewiseMonotoneEndpointDifferenceList
     if hk : k < c.pieces then
       piecewiseMonotoneEndpointDifference F c k hk
     else RealRaw.zero)
+
+theorem piecewiseMonotoneEndpointDifferenceList_length
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) :
+    (piecewiseMonotoneEndpointDifferenceList F c).length = c.pieces := by
+  simp [piecewiseMonotoneEndpointDifferenceList]
 
 structure PiecewiseMonotoneEndpointFTCFor
     (F : FunctionOnInterval)

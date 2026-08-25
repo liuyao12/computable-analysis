@@ -80,6 +80,14 @@ def piecewisePrimitiveEndpointDifferenceList
       piecewisePrimitiveEndpointDifference P F c hP k hk
     else RealRaw.zero)
 
+theorem piecewisePrimitiveEndpointDifferenceList_length
+    (P F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F)
+    (hP : forall i, i <= c.pieces ->
+      inDomainInterval P.lower P.upper (c.point i)) :
+    (piecewisePrimitiveEndpointDifferenceList P F c hP).length = c.pieces := by
+  simp [piecewisePrimitiveEndpointDifferenceList]
+
 def piecewisePrimitiveTotalEndpointDifference
     (P F : FunctionOnInterval)
     (c : PiecewiseMonotoneConstructionFor F)
