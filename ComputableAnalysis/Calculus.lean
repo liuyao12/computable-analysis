@@ -8522,6 +8522,25 @@ theorem ExactCellOrderPreservation.integral_average_between_bounds
   · simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm,
       hcancel, hcancel'] using hupp'
 
+/-! The finite MVT-shaped conclusion: the cell average is represented by a
+rational point interval lying inside the certified derivative range.  This
+records the classical "some intermediate value" idea as overlap of rational
+boxes, without selecting an attained real point. -/
+theorem ExactCellOrderPreservation.integral_average_overlaps_bounds
+    {eval : Rat -> Rat} {integralBetween : Rat -> Rat -> Rat}
+    {a b : Rat} (h : ExactCellOrderPreservation eval integralBetween a b)
+    {p r lower upper : Rat}
+    (hap : a <= p) (hpr : p < r) (hrb : r <= b)
+    (hlower : forall {x : Rat}, p <= x -> x <= r -> lower <= eval x)
+    (hupper : forall {x : Rat}, p <= x -> x <= r -> eval x <= upper) :
+    QInterval.Overlaps
+      ({ lo := lower, hi := upper } : QInterval)
+      ({ lo := integralBetween p r / (r - p),
+          hi := integralBetween p r / (r - p) } : QInterval) := by
+  have havg := h.integral_average_between_bounds
+    hap hpr hrb hlower hupper
+  exact ⟨havg.1, havg.2⟩
+
 /-- Exact rational-cell order preservation for a constant integrand.
 
 This is the base case for finite polynomial integral certificates: the exact
