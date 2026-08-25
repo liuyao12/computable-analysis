@@ -934,6 +934,10 @@ finite telescoping identity, and `toShortBlockMeshSweep` turns the total
 length/residual budgets into the contraction certificate. The open analytic
 work is therefore exactly to derive those finite increment bounds from
 `HasDerivativeOnInterval`, at the chosen mesh precision.
+The arithmetic template
+`ScalarODE.ShortBlockMeshSweep.canonical` and its theorem
+`canonical_next_le_half` provide the exact quarter-plus-quarter budget that a
+concrete derivative certificate must reproduce.
 
 The literal power-series computation itself is now fully certified at every
 rational input: `ExpProofs.expPowerSeries_valid x` proves the raw boxes for
