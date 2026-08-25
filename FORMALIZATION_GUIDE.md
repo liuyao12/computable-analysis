@@ -968,6 +968,13 @@ The proof-carrying iterators `gapAwareTargetBisectionIterateWithProof` and
 stage remains in the original branch and has width no larger than the initial
 interval. They intentionally do not claim geometric shrinkage when a midpoint
 remains unresolved.
+The scheduled iterators `gapAwareTargetBisectionScheduledIterateWithProof`
+and `gapAwareTargetBisectionScheduledIterate` make evaluator precision an
+explicit independent schedule. Their subinterval and width theorems hold
+without a convergence-rate assumption; when a supplied decision schedule
+proves every midpoint strict,
+`gapAwareTargetBisectionScheduledIterate_width_eq_div_pow_of_decided`
+recovers the exact geometric width law.
 The warm exponential branch now includes three executable target-`3/2`
 midpoint regressions. At precision stage `4` they produce
 `[0,1/2]`, `[1/4,1/2]`, and `[3/8,1/2]` in succession, all by finite rational
