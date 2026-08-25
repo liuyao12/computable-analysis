@@ -158,9 +158,18 @@ coefficient prefix -> finite energy -> tail-energy certificate
 This is a constructive proxy for the parts of (L^2) theory used by an
 application.  It does not assert that every measurable function has a
 Fourier expansion, nor does it identify coefficient energy with a Lebesgue
-integral.  Parseval for a finite transform is already available; the next
-theorem for this boundary is a supplied tail-energy certificate for one
-representative Fourier family.
+integral.  Parseval for a finite transform is already available.  The
+following certificate packages the same idea for one finite coefficient
+prefix and a rational bound on the omitted energy:
+
+\lean{ComputableAnalysis.qcomplexEnergy}
+\lean{ComputableAnalysis.qcomplexEnergy_append}
+\lean{ComputableAnalysis.qcomplexEnergy_nonneg}
+\lean{ComputableAnalysis.FiniteFourierEnergyTailCertificate}
+\lean{ComputableAnalysis.FiniteFourierEnergyTailCertificate.energyInterval}
+\lean{ComputableAnalysis.FiniteFourierEnergyTailCertificate.energyInterval_ordered}
+\lean{ComputableAnalysis.FiniteFourierEnergyTailCertificate.energyInterval_contains_total}
+\leanok
 
 \lean{ComputableAnalysis.EffectiveFourierTailCertificate.future_stage_coordinate_enclosure}
 \lean{ComputableAnalysis.EffectiveFourierTailCertificate.stageBox}

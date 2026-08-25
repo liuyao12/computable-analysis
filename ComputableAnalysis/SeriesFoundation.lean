@@ -6,6 +6,7 @@ import ComputableAnalysis.FinitePolynomialCalculus
 import ComputableAnalysis.FiniteSineIntegral
 import ComputableAnalysis.FiniteFourierFoundation
 import ComputableAnalysis.FiniteFourierOrthogonality
+import ComputableAnalysis.FiniteFourierEnergy
 import ComputableAnalysis.EffectiveFourierSeries
 import ComputableAnalysis.EffectiveFourierTail
 import ComputableAnalysis.FiniteNBallVolume
