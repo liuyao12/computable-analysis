@@ -4,6 +4,11 @@ Linear ODEs are the first large consumer of the preceding machinery. We do
 not postulate a completed space of trajectories: a requested precision is met
 by a finite matrix computation together with a rational error certificate.
 
+The scoped Lean entry point is
+\texttt{ComputableAnalysis.DifferentialEquationsFoundation}.  It collects the
+finite derivative, uniqueness, Peano--Baker, and rotation interfaces without
+importing the benchmark catalogue or a completed trajectory space.
+
 For $y'(t)=A(t)y(t)+b(t)$, the coefficient and forcing entries are
 interval-certified computations on a common rational domain. The effective FTC
 supplies the simplex integrals; this chapter supplies their finite matrix
