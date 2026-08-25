@@ -22,6 +22,112 @@ theorem gaussianEvenIntegralPrefix_zero (radius : Rat) :
     gaussianEvenIntegralPrefix 0 radius = 0 := by
   rfl
 
+/- The finite Gaussian prefix is integrated term by term.  This recurrence is
+   the algebraic interface used by any later tail certificate; it does not
+   assert an improper integral or invoke a completed real number. -/
+theorem gaussianEvenIntegralPrefix_succ (terms : Nat) (radius : Rat) :
+    gaussianEvenIntegralPrefix (terms + 1) radius =
+      gaussianEvenIntegralPrefix terms radius +
+        2 * FormalPowerSeries.expCoeff terms * (-1 : Rat) ^ terms *
+          radius ^ (2 * terms + 1) / ((2 * terms + 1 : Nat) : Rat) := by
+  unfold gaussianEvenIntegralPrefix
+  rw [List.range_succ]
+  simp only [List.foldl_append, List.foldl_cons, List.foldl_nil]
+
+theorem gaussianEvenIntegralPrefix_term_difference (terms : Nat) (radius : Rat) :
+    gaussianEvenIntegralPrefix (terms + 1) radius -
+        gaussianEvenIntegralPrefix terms radius =
+      2 * FormalPowerSeries.expCoeff terms * (-1 : Rat) ^ terms *
+        radius ^ (2 * terms + 1) / ((2 * terms + 1 : Nat) : Rat) := by
+  rw [gaussianEvenIntegralPrefix_succ]
+  grind
+
+def gaussianEvenIntegralTerm (k : Nat) (radius : Rat) : Rat :=
+  2 * FormalPowerSeries.expCoeff k * (-1 : Rat) ^ k *
+    radius ^ (2 * k + 1) / ((2 * k + 1 : Nat) : Rat)
+
+def gaussianEvenIntegralTailMajorant (radius : Rat) (start : Nat) : Nat → Rat
+  | 0 => 0
+  | terms + 1 =>
+      gaussianEvenIntegralTailMajorant radius start terms +
+        qabs (gaussianEvenIntegralTerm (start + terms) radius)
+
+theorem gaussianEvenIntegralPrefix_succ_eq_term (terms : Nat) (radius : Rat) :
+    gaussianEvenIntegralPrefix (terms + 1) radius =
+      gaussianEvenIntegralPrefix terms radius +
+        gaussianEvenIntegralTerm terms radius := by
+  rw [gaussianEvenIntegralPrefix_succ]
+  rfl
+
+theorem gaussianEvenIntegralPrefix_remainder_abs_le
+    (radius : Rat) (start terms : Nat) :
+    qabs (gaussianEvenIntegralPrefix (start + terms) radius -
+      gaussianEvenIntegralPrefix start radius) <=
+      gaussianEvenIntegralTailMajorant radius start terms := by
+  induction terms with
+  | zero =>
+      simp only [gaussianEvenIntegralTailMajorant, Nat.zero_eq, Nat.add_zero,
+        Rat.sub_self]
+      exact Rat.le_refl
+  | succ terms ih =>
+      rw [gaussianEvenIntegralTailMajorant]
+      have hstep :
+          gaussianEvenIntegralPrefix (start + (terms + 1)) radius =
+            gaussianEvenIntegralPrefix (start + terms) radius +
+              gaussianEvenIntegralTerm (start + terms) radius := by
+        have hindex : start + (terms + 1) = (start + terms) + 1 := by omega
+        rw [hindex, gaussianEvenIntegralPrefix_succ_eq_term]
+      rw [hstep]
+      have hrewrite :
+          gaussianEvenIntegralPrefix (start + terms) radius +
+              gaussianEvenIntegralTerm (start + terms) radius -
+            gaussianEvenIntegralPrefix start radius =
+            (gaussianEvenIntegralPrefix (start + terms) radius -
+              gaussianEvenIntegralPrefix start radius) +
+              gaussianEvenIntegralTerm (start + terms) radius := by
+        grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+      rw [hrewrite]
+      exact Rat.le_trans
+        (qabs_add_le _ _)
+        (rat_add_le_add ih Rat.le_refl)
+
+/- Package the finite Gaussian prefix together with its explicit rational tail
+   allowance.  This is the interval-valued object consumed by later bounded
+   or improper Gaussian constructions; no infinite integral is asserted here. -/
+def gaussianEvenIntegralPrefix_interval
+    (radius : Rat) (start terms : Nat) : QInterval :=
+  { lo := gaussianEvenIntegralPrefix start radius -
+      gaussianEvenIntegralTailMajorant radius start terms,
+    hi := gaussianEvenIntegralPrefix start radius +
+      gaussianEvenIntegralTailMajorant radius start terms }
+
+theorem gaussianEvenIntegralPrefix_interval_contains
+    (radius : Rat) (start terms : Nat) :
+    (gaussianEvenIntegralPrefix_interval radius start terms).lo <=
+        gaussianEvenIntegralPrefix (start + terms) radius /\
+      gaussianEvenIntegralPrefix (start + terms) radius <=
+        (gaussianEvenIntegralPrefix_interval radius start terms).hi := by
+  have h := gaussianEvenIntegralPrefix_remainder_abs_le radius start terms
+  unfold gaussianEvenIntegralPrefix_interval
+  constructor
+  · have hneg := neg_qabs_le_self
+      (gaussianEvenIntegralPrefix (start + terms) radius -
+        gaussianEvenIntegralPrefix start radius)
+    have hlow := Rat.le_trans (Rat.neg_le_neg h) hneg
+    grind [Rat.sub_eq_add_neg]
+  · have hupper := self_le_qabs
+      (gaussianEvenIntegralPrefix (start + terms) radius -
+        gaussianEvenIntegralPrefix start radius)
+    have hupp := Rat.le_trans hupper h
+    grind [Rat.sub_eq_add_neg]
+
+theorem gaussianEvenIntegralPrefix_interval_width
+    (radius : Rat) (start terms : Nat) :
+    (gaussianEvenIntegralPrefix_interval radius start terms).width =
+      2 * gaussianEvenIntegralTailMajorant radius start terms := by
+  unfold gaussianEvenIntegralPrefix_interval QInterval.width
+  grind [Rat.sub_eq_add_neg]
+
 theorem gaussianEvenIntegralPrefix_stage_four :
     gaussianEvenIntegralPrefix 4 1 = 52 / 35 := by
   native_decide
@@ -54,6 +160,12 @@ def reciprocalSquareTailPartial (cutoff : Rat) : Nat -> Rat
   | terms + 1 =>
       reciprocalSquareTailPartial cutoff terms +
         1 / (cutoff + (terms + 1 : Nat)) ^ 2
+
+theorem reciprocalSquareTailPartial_succ (cutoff : Rat) (terms : Nat) :
+    reciprocalSquareTailPartial cutoff (terms + 1) =
+      reciprocalSquareTailPartial cutoff terms +
+        1 / (cutoff + (terms + 1 : Nat)) ^ 2 := by
+  rfl
 
 theorem reciprocalSquareTailPartial_stage_four :
     reciprocalSquareTailPartial 1 4 = 1669 / 3600 := by

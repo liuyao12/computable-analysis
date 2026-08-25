@@ -244,6 +244,24 @@ def DyadicReflectedHalfAngleCertificate.of_table_parent
   childRawSin_eq := rfl
   public_child_eq := hpublic
 
+theorem exists_dyadic_tangent_witness_search_of_overlap_family
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (hover : forall (depth k : Nat) (hk : k < 2 ^ depth), 0 < k ->
+      forall precision, QInterval.Overlaps
+        (rationalCircleSinInterval
+          (dyadicTangentBoxAt B precision depth k hk))
+        ((dyadicNestedRadicalTableAt precision depth k).1)) :
+    forall (depth k : Nat) (hk : k < 2 ^ depth), 0 < k ->
+      forall precision, ∃ m u, rationalTangentWitnessBoxSearch
+        (dyadicTangentBoxAt B precision depth k hk)
+        (dyadicNestedRadicalTableAt precision depth k).1 m = some u := by
+  intro depth k hk hpos precision
+  apply exists_rationalTangentWitnessBoxSearch_of_overlap_of_positive_width
+    (dyadicTangentBoxAt_bounds B precision depth k hk)
+    (dyadicNestedRadicalTableAt_bounds precision depth k (by omega)).1
+    (hover depth k hk hpos precision)
+  exact dyadicNestedRadicalTableAt_sin_width_pos precision depth k hk hpos
+
 noncomputable def DyadicTangentWitnessFamily.of_overlap_family_core
     (B : IntegralIdentities.ArctanInverseBisection)
     (ht0 : (B.tangentAt 0

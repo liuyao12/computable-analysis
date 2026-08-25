@@ -22,6 +22,14 @@ function adds only its finite range and overlap lemmas.
 The square and cube instances also carry finite dyadic integral certificates,
 so the pointwise modulus is already connected to an actual computable area.
 
+Coverage is by computational pattern, not by a catalogue of familiar names:
+one certified representative is formalized for each new evaluator or proof
+mechanism.  Rational scalar multiples, sign changes, routine compositions,
+and piecewise variants reuse those certificates; a broken function such as
+\(|x|\) is assembled from its finitely many interval pieces.  The remaining
+detail belongs in Lean, where each new instance must expose its own domain and
+stage schedule.
+
 The same foundation also has a genuinely nonconstant Lipschitz--Darboux
 route.  For the identity function, midpoint refinement gives nested rational
 boxes of width \(2/2^n\); this is the model for integrating functions whose
@@ -105,6 +113,36 @@ to exponential and trigonometric evaluators.
 \lean{ComputableAnalysis.Integral.cubicIntegralEffectiveFTC_integral_equiv_one_fourth}
 \lean{ComputableAnalysis.Integral.quarticIntegralEffectiveFTC_equiv_one_fifth}
 \lean{ComputableAnalysis.Integral.fifthIntegralEffectiveFTC_equiv_one_sixth}
+\leanok
+
+\section{A normalized trigonometric bridge}
+
+The tangent chart is a useful representative computation, but it is not yet
+the original variable.  Its square integral has the quarter-turn value
+\(\pi/4\).  Returning to \(\sin(\pi x)^2\) contributes the Jacobian
+\(1/\pi\), so the target is represented by the product
+\[
+  (1/\pi)\,(\pi/4)=1/4.
+\]
+This is a finite interval identity between raw computations: the reciprocal
+\(\pi\) evaluator and the rational-circle quarter-turn evaluator overlap at
+every stage after multiplication.  The remaining sine-square theorem is
+therefore a representation-transport certificate, not a new real-number
+existence argument.
+
+The search step is already complete at the finite level.  Given an overlap of
+the rational-circle sine image with a positive-width nested-radical box, a
+finite rational grid search returns a tangent witness; its soundness theorem
+then transports the sample box.  What remains is the geometric induction that
+supplies those overlaps for every dyadic cell.  A failed finite search remains
+visible rather than being treated as an oracle.
+
+\lean{ComputableAnalysis.EffectiveFTCPortfolio.halfQuarterTurnRaw_bounds}
+\lean{ComputableAnalysis.EffectiveFTCPortfolio.reciprocalPi_quarterTurn_equiv_quarter}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSquareLeftSum_width_le_of_stage}
+\lean{ComputableAnalysis.SinPiIntegral.exists_rationalTangentWitnessBoxSearch_of_overlap_of_positive_width}
+\lean{ComputableAnalysis.SinPiIntegral.rationalTangentWitnessBoxSearch_overlap_of_success}
+\lean{ComputableAnalysis.EffectiveFTCPortfolio.NormalizedTangentSquareTransportSubgoal.value}
 \leanok
 
 \section{Continuity as a finite certificate}
@@ -217,6 +255,21 @@ not smuggled in through completeness of the reals.
 \lean{ComputableAnalysis.FinitePolynomial.SecantDerivativeBound.mulToHasDerivativeOnInterval}
 \leanok
 
+At the function level, the same product is exposed as a realRaw operation
+when both factors have explicit nonnegative rational majorants.  The validity
+theorem and its computation equation are separate: the former proves that the
+product boxes form a shrinking representation, while the latter lets later
+derivative and FTC certificates inspect the exact finite box used at a sample
+point.
+
+\lean{ComputableAnalysis.FunctionOnInterval.mulOfNonnegBounded}
+\lean{ComputableAnalysis.FunctionOnInterval.mulOfNonnegBounded_compute}
+Equivalent factor charts transport through the same construction via
+\lean{ComputableAnalysis.FunctionOnInterval.equivalent_mulOfNonnegBounded}.
+The equivalence edge remains explicit; the existing rational majorants are
+reused as the finite validity certificates.
+\leanok
+
 The local hand-off from differentiation to integration is also finite.  On a
 positive rational cell whose width satisfies the derivative step budget, the
 secant certificate scales back to an endpoint-difference enclosure.  The
@@ -299,6 +352,60 @@ finite forward-image separation proof.
 \lean{ComputableAnalysis.InvertibleFunctionOnInterval}
 \lean{ComputableAnalysis.DyadicInverseTrace}
 \lean{ComputableAnalysis.DyadicInverseTrace.toSearch}
+\leanok
+
+Concrete branches should not repeat the inverse-record plumbing.  The
+proof-carrying plan in
+\texttt{FiniteGapAwareInverseSearch.lean} is the reusable adapter: a branch
+supplies its finite midpoint decisions, a nested valid output schedule, and
+the forward-image overlap certificate.  The adapter then produces the common
+\texttt{GapAwareInverseBisectionSearch} data and hence a raw inverse.
+The plan does not ask the branch to restate `RealRaw.ValidCompute`: ordering,
+nesting, and the explicit (1/(n+1)) width modulus are assembled into that
+validity theorem once and for all.
+
+\lean{ComputableAnalysis.gapAwareSourceInterval}
+\lean{ComputableAnalysis.gapAwareSourceInterval\_subinterval}
+\lean{ComputableAnalysis.GapAwareInverseBisectionPlan}
+\lean{ComputableAnalysis.GapAwareInverseBisectionPlan.valid_output}
+\lean{ComputableAnalysis.gapAwareInverseBisectionPlanOfFixedIterate}
+\lean{ComputableAnalysis.gapAwareInverseBisectionPlanToSearch}
+\lean{ComputableAnalysis.gapAwareInverseBisectionPlan\_has\_search}
+\lean{ComputableAnalysis.GapAwareScheduledInverseBisectionPlan}
+\lean{ComputableAnalysis.GapAwareScheduledInverseBisectionPlan.valid_output}
+\lean{ComputableAnalysis.gapAwareScheduledInverseBisectionPlanOfScheduledIterate}
+\lean{ComputableAnalysis.gapAwareScheduledInverseBisectionPlanToSearch}
+\lean{ComputableAnalysis.gapAwareScheduledInverseBisectionPlan_has_search}
+\lean{ComputableAnalysis.gapAwareTargetBisectionScheduledIterateWithProof}
+\lean{ComputableAnalysis.gapAwareTargetBisectionScheduledIterate}
+\lean{ComputableAnalysis.gapAwareTargetBisectionScheduledIterate_subinterval}
+\lean{ComputableAnalysis.gapAwareTargetBisectionScheduledIterate_width_le}
+\lean{ComputableAnalysis.gapAwareTargetBisectionScheduledDecision}
+\lean{ComputableAnalysis.gapAwareTargetBisectionScheduledIterate_width_eq_div_pow_of_decided}
+\lean{ComputableAnalysis.gapAwareTargetBisectionAdaptiveIterateWithProof}
+\lean{ComputableAnalysis.gapAwareTargetBisectionAdaptiveIterate}
+\lean{ComputableAnalysis.gapAwareTargetBisectionAdaptiveIterate_subinterval}
+\lean{ComputableAnalysis.gapAwareTargetBisectionAdaptiveIterate_width_le}
+\lean{ComputableAnalysis.gapAwareTargetBisectionAdaptiveDecision}
+\lean{ComputableAnalysis.gapAwareTargetBisectionAdaptiveIterate_width_eq_div_pow_of_decided}
+\leanok
+
+The square transport has one executable positive-cell checkpoint.  At the
+first nonzero dyadic sample, the square-aware rational search finds
+(u=103/256), and the circle identity turns its sine and cosine containment
+into overlap of the sine-square and complementary-square intervals:
+
+\lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_stage_one_demo}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalStage_one_square_complement_overlap}
+\lean{ComputableAnalysis.SinPiIntegral.square_overlap_of_rationalTangentSquareWitnessSearch}
+\lean{ComputableAnalysis.SinPiIntegral.signed_square_overlap_of_rationalTangentSquareWitnessSearch}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalStage_square_complement_overlap_of_search_family}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalStageSinAt_subinterval}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalStageCosAt_subinterval}
+\lean{ComputableAnalysis.SinPiIntegral.rationalSquareIntervalSigned}
+\lean{ComputableAnalysis.SinPiIntegral.rationalOneMinusSquareIntervalSigned}
+\lean{ComputableAnalysis.SinPiIntegral.rationalSquareIntervalSigned_contains}
+\lean{ComputableAnalysis.SinPiIntegral.rationalSquareInterval_overlap_oneMinusSquareInterval_of_circle_signed}
 \leanok
 
 The proof-independent function layer exposes the same laws.  Its transitivity
@@ -487,6 +594,7 @@ point; the foundation does not assume such a point exists as an available
 real-number object.
 
 \lean{ComputableAnalysis.Integral.finiteQuadrature_average_between_bounds}
+\lean{ComputableAnalysis.ExactCellOrderPreservation.integral_average_overlaps_bounds}
 \leanok
 
 \subsection{A cubic checkpoint}

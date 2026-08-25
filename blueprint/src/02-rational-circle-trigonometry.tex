@@ -79,8 +79,21 @@ Quarter-turns and de Moivre belong here as finite rotation certificates;
 unrestricted angle semantics remain a separate bridge.
 The common-prefix complex rotation evaluator exposes stable real and imaginary
 coordinates; their shrinking boxes provide the shared continuity modulus.
-The derivative layer later identifies the two coordinate derivatives with the
-opposite coordinate, closing the finite rotation calculus.
+The derivative layer identifies the two coordinate derivatives with the
+opposite coordinate, closing the finite rotation calculus at the public stable
+evaluator level:
+
+\begin{verbatim}
+complex-prefix quotient -> coordinate quotient -> target coordinate box
+sin derivative = cos       cos derivative = -sin
+\end{verbatim}
+
+The proof is a transport of finite interval certificates, not an appeal to a
+completed real-valued sine function.
+
+\lean{ComputableAnalysis.RotationSeries.stableUniformRotationSinFunction_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.RotationSeries.stableUniformRotationCosFunction_hasDerivativeOnInterval}
+\leanok
 
 The half-angle algorithm is the central example:
 
@@ -153,6 +166,28 @@ its point values are proved equivalent to the geometric `realRaw`; the
 abstract inverse package records that equivalence rather than requiring
 definitional equality.
 
+The scheduled rectangle branch now supplies the full inverse-ready data:
+\lean{ComputableAnalysis.arctanScheduledRectangleOnUnit_intervalRegular}
+\lean{ComputableAnalysis.arctanScheduledRectangleOnUnit_nondecreasing}
+\lean{ComputableAnalysis.arctanScheduledRectangleOnUnit_effectiveInverseSeparation}
+\lean{ComputableAnalysis.arctanScheduledRectangleOnUnit_invertible}
+\lean{ComputableAnalysis.arctanScheduledRectangleOnUnit_equivalent_geometric_branch}
+The last edge is the representation-chain link: inverse search may use the
+regular scheduled evaluator while the geometric arctangent remains the
+semantic anchor for the circle construction.
+
 \section{Scope boundary}
 
-Arbitrary discontinuities and non-effective measure are outside scope.
+Arbitrary discontinuities and non-effective measure are outside scope.  The
+starting dense domain need not always be the rationals themselves: a natural
+computational chart may use a rational parametrization, a dyadic mesh, or a
+finite algebraic extension.  What matters is that the evaluator is defined on
+its declared dense input chart and that overlapping charts carry explicit
+equivalence certificates.  The circle uses rational coordinates and the
+half-angle table; it does not pretend that every function is naturally
+presented by a rational formula.
+
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.dyadicNestedRadicalTable}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.sinPiRawOfArctan}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalTableAt_overlap_of_precisions}
+\leanok

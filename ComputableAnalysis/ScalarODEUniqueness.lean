@@ -133,6 +133,25 @@ structure ShortBlockMeshSweep (previous next : Rat) where
 
 namespace ShortBlockMeshSweep
 
+/- The canonical arithmetic sweep used as a template by concrete ODE
+certificates.  It realizes the two quarter-budget contributions exactly; no
+derivative semantics are claimed by this definition. -/
+def canonical (previous : Rat) (hprevious : 0 <= previous) :
+    ShortBlockMeshSweep previous (previous / 2) where
+  blockLength := 1 / 4
+  residual := previous / 4
+  previous_nonneg := hprevious
+  blockLength_nonneg := by native_decide
+  block_short := by native_decide
+  residual_nonneg := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg hprevious
+      (by native_decide : (0 : Rat) <= (4 : Rat)⁻¹)
+  residual_small := Rat.le_refl
+  next_le_mesh_bound := by
+    rw [Rat.div_def]
+    grind [Rat.add_mul, Rat.mul_comm]
+
 /-- One finite short-block mesh sweep halves its rational envelope. -/
 theorem next_le_half {previous next : Rat}
     (sweep : ShortBlockMeshSweep previous next) :
@@ -154,6 +173,10 @@ theorem next_le_half {previous next : Rat}
               grind [Rat.add_mul]
         _ = (1 / 2 : Rat) * previous := by rw [hquarters]
         _ = previous * (1 / 2 : Rat) := by grind [Rat.mul_comm]
+
+theorem canonical_next_le_half (previous : Rat) (hprevious : 0 <= previous) :
+    previous / 2 <= previous * ((1 : Rat) / 2) := by
+  exact next_le_half (canonical previous hprevious)
 
 end ShortBlockMeshSweep
 

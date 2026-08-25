@@ -343,6 +343,17 @@ theorem exactRat_affine_signed_unitSlope_raw_valid
       (exactRat_affine_signed_unitSlope r c a b hrneg hrpos)).Valid := by
   exact raw_valid _ (exactRat_affine_signed_unitSlope r c a b hrneg hrpos)
 
+/-- The decreasing affine branch has the same endpoint-value interface as the
+increasing branch.  The sign only changes the finite rectangle ordering; the
+raw value remains the rational endpoint formula. -/
+theorem exactRat_affine_signed_unitSlope_raw_equiv_ofRat
+    (r c a b : Rat) (hrneg : -1 <= r) (hrpos : r <= 1) :
+    (raw (FunctionOnInterval.exactRat (fun x => r * x + c) a b)
+      (exactRat_affine_signed_unitSlope r c a b hrneg hrpos)).Equiv
+      (RealRaw.ofRat ((b - a) * (r * (a + b) / 2 + c))) := by
+  rw [exactRat_affine_signed_unitSlope_raw_eq_ofRat r c a b hrneg hrpos]
+  exact RealRaw.equiv_refl _ (RealRaw.ofRat_valid _)
+
 def exactSquareInterval (I : QInterval) : QInterval :=
   { lo := I.lo * I.lo, hi := I.hi * I.hi }
 

@@ -178,6 +178,23 @@ theorem coeffsFromDerivativeAtZero_hasFormalDerivative (F0 : Rat) (dF : Coeffs) 
   dsimp [derivative, coefficientShift, coeffsFromDerivativeAtZero]
   exact mul_div_cancel_left (natCast_succ_ne_zero n)
 
+/-- A formal primitive is uniquely determined by its constant coefficient and
+its coefficient-wise derivative.  This is the coefficient-level analogue of
+recovering a primitive from one initial value; it is finite rational algebra,
+not an appeal to a completed function space. -/
+theorem coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative
+    {F dF : Coeffs} (hF : HasFormalDerivative F dF) :
+    coeffsFromDerivativeAtZero (F 0) dF = F := by
+  unfold HasFormalDerivative derivative coefficientShift at hF
+  funext n
+  cases n with
+  | zero => rfl
+  | succ n =>
+      dsimp [coeffsFromDerivativeAtZero]
+      rw [← congrFun hF n, Rat.div_def]
+      have hne : (((n + 1 : Nat) : Rat)) ≠ 0 := natCast_succ_ne_zero n
+      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel _ hne]
+
 theorem derivative_neg (c : Coeffs) :
     derivative (neg c) = neg (derivative c) := by
   funext n

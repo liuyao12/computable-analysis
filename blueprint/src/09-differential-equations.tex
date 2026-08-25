@@ -27,7 +27,12 @@ theorem.
 \lean{ComputableAnalysis.finiteProductIntegralNestedSum}
 \lean{ComputableAnalysis.finiteProductIntegralSum}
 \lean{ComputableAnalysis.finiteProductIntegralNestedSum_factorized}
+\lean{ComputableAnalysis.finiteProductIntegralSum2D_weighted_stage}
 \leanok
+
+The weighted stage is a concrete rectangular multiple-integral example: cell
+widths are part of the rational data, and the result is computed exactly
+before any potential refinement or tail argument is introduced.
 
 The reusable contract is exposed here so an ODE instance can be added without
 introducing a new notion of integration:
@@ -103,6 +108,21 @@ matrix actions.
 These are finite sampled statements.  They become ODE theorems only after an
 effective-FTC provider supplies the coefficient, simplex, and tail bounds.
 
+The uniqueness interface keeps that hand-off explicit.  A candidate exposes a
+finite derivative certificate, a rational initial point, and an initial raw
+value; uniqueness then asks only for equivalence of two such representations.
+It does not quantify over an ambient space of continuous trajectories:
+
+\begin{verbatim}
+candidate -> finite derivative certificate + initial raw value
+         -> mesh/tail comparison -> pointwise raw equivalence
+\end{verbatim}
+
+\lean{ComputableAnalysis.SolvesSelfDerivativeOnInterval}
+\lean{ComputableAnalysis.SolvesSelfDerivativeOnInterval.derivative_self}
+\lean{ComputableAnalysis.SelfDerivativeInitialValueUnique}
+\leanok
+
 The absolute-value estimate is the first finite norm substitute in this
 chapter.  It bounds each matrix-action coordinate by a rational sum of entry
 and state magnitudes.  A later provider may add a row-sum or maximum-entry
@@ -146,6 +166,20 @@ forcing samples -> time-ordered transitions -> finite Duhamel sum
 
 \lean{ComputableAnalysis.LinearODE.trajectory_zeroInitial_eq_duhamelSum}
 \lean{ComputableAnalysis.LinearODE.trajectory_eq_transition_add_duhamelSum}
+\leanok
+
+The first concrete trajectory bridge is the constant square-zero case. If
+(A^2=0), every constant Euler increment (hA) is pairwise product-zero, so
+after (N) equal steps the transition is exactly
+[
+  (I+hA)^N = I+(Nh)A.
+]
+This is not an approximation theorem: it is a finite rational identity and a
+useful test case for triangular and affine systems.
+
+\lean{ComputableAnalysis.LinearODE.matrixSequenceSum_constant_scale}
+\lean{ComputableAnalysis.LinearODE.chronologicalProduct_constant_square_zero}
+\lean{ComputableAnalysis.LinearODE.chronologicalProduct_constant_square_zero_uniform_step}
 \leanok
 
 The tail is not an informal limit. If the coefficient bound is $M$ on a
@@ -257,6 +291,8 @@ certificate; the conclusion is pointwise interval-overlap equivalence of the
 two candidate trajectories.
 
 \lean{ComputableAnalysis.ScalarODE.DirectMeshHalvingCertificate.error_eq_zero}
+\lean{ComputableAnalysis.ScalarODE.ShortBlockMeshSweep.canonical}
+\lean{ComputableAnalysis.ScalarODE.ShortBlockMeshSweep.canonical_next_le_half}
 \lean{ComputableAnalysis.ScalarODE.SelfDerivativeDirectMeshComparison.equivalent}
 \lean{ComputableAnalysis.ScalarODE.selfDerivativeInitialValueUnique_of_directMesh}
 \leanok
@@ -293,6 +329,8 @@ is introduced.
 \lean{ComputableAnalysis.LinearODE.orderedSimplexVolume_eq_closed}
 \lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexTerm_eq_orderedSimplexVolume}
 \lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexPartial_succ}
+\lean{ComputableAnalysis.LinearODE.matrixPow_add_two_eq_zero_of_mul_self_eq_zero}
+\lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexPartial_add_two_eq_identity_add_scale_of_mul_self_eq_zero}
 \lean{ComputableAnalysis.LinearODE.RotationSystem.generator_rowAbsSum}
 \lean{ComputableAnalysis.LinearODE.RotationSystem.affineGenerator_rowAbsSum_le}
 \lean{ComputableAnalysis.LinearODE.RotationSystem.rotationChronologicalProduct_rowAbsSum_le}
@@ -316,6 +354,11 @@ computable stage for every requested error, and the Volterra comparison turns
 that bound into uniqueness for the self-derivative equation:
 
 \lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_shifted_le_eps}
+\lean{ComputableAnalysis.LinearODE.PeanoBakerFactorialRemainderCertificate}
+\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialRemainderCertificate}
+\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_nonneg}
+\lean{ComputableAnalysis.LinearODE.PeanoBakerFactorialRemainderCertificate.interval}
+\lean{ComputableAnalysis.LinearODE.PeanoBakerFactorialRemainderCertificate.tail_mem_interval}
 \lean{ComputableAnalysis.LinearODE.SelfDerivativeVolterraComparison.equivalent}
 \lean{ComputableAnalysis.LinearODE.selfDerivativeInitialValueUnique_of_volterra}
 \leanok
@@ -337,8 +380,15 @@ requested evaluator stage, and closed-path exactness is proved for constant
 and polynomial differentials. This is the complex counterpart of the real
 FTC contract, with path subdivision replacing interval subdivision.
 
+This chapter follows a representative-coverage rule: one certified example
+of a computational pattern is enough. Routine functions are transported by
+algebra or split into pieces and integrated piecewise; the blueprint does not
+enumerate every syntactic variant.
+
 \lean{ComputableAnalysis.ComplexPathIntegral.polygonalIntegralRawEntire_valid}
 \lean{ComputableAnalysis.ComplexPathIntegral.finiteConstantDifferentialExactness_closed}
 \lean{ComputableAnalysis.ComplexPathIntegral.finitePolynomialDifferentialExactness_closed}
+\lean{ComputableAnalysis.unitSquareZDifferentialCertificate}
+\lean{ComputableAnalysis.unitSquareZDifferentialCertificate_exactDisplacement_zero}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.toQComplex_pointMul}
 \leanok

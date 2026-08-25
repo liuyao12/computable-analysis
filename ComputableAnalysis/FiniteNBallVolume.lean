@@ -250,6 +250,16 @@ theorem finiteProductIntegralSum2D_factorized
       (ys.map (fun cell => cell.2 * g cell.1))
       (fun value => value) (fun value => value))
 
+/- A concrete weighted rectangular computation.  The two sample lists carry
+cell widths, so this is a finite two-dimensional integral cell sum rather than
+an unweighted Cartesian product. -/
+theorem finiteProductIntegralSum2D_weighted_stage :
+    finiteProductIntegralSum2D
+      [(0, 1 / 2), (1, 1 / 2)]
+      [(0, 1), (1, 1)]
+      (fun x => x + 1) (fun y => 2 - y) = 9 / 2 := by
+  native_decide
+
 theorem finiteProductIntegralNestedSum_two_factor
     (xs ys : List (Rat × Rat)) (f g : Rat -> Rat) :
     finiteProductIntegralNestedSum [xs, ys] [f, g] =
@@ -413,6 +423,58 @@ theorem nBallVolumeModel_scale (n : Nat) (piApprox radius scale : Rat) :
         grind [Rat.mul_assoc, Rat.mul_comm]
   rw [hpow]
   grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem nBallCoeff_nonneg : ∀ n, 0 <= nBallCoeff n := by
+  have heven : ∀ k, 0 <= nBallCoeff (2 * k) := by
+    intro k
+    induction k with
+    | zero =>
+        native_decide
+    | succ k ih =>
+        have hindex : 2 * (k + 1) = 2 * k + 2 := by omega
+        rw [hindex, nBallCoeff_succ_two]
+        have hden : 0 < ((2 * k : Nat) : Rat) + 2 := by
+          have hk : 0 <= (k : Rat) := Rat.natCast_nonneg
+          grind
+        have hfactor : 0 <= (2 : Rat) / ((2 * k : Nat) + 2) := by
+          rw [Rat.div_def]
+          exact Rat.mul_nonneg (by native_decide)
+            (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+        exact Rat.mul_nonneg hfactor ih
+  have hodd : ∀ k, 0 <= nBallCoeff (2 * k + 1) := by
+    intro k
+    induction k with
+    | zero =>
+        native_decide
+    | succ k ih =>
+        have hindex : 2 * (k + 1) + 1 = (2 * k + 1) + 2 := by omega
+        rw [hindex, nBallCoeff_succ_two]
+        have hden : 0 < ((2 * k + 1 : Nat) : Rat) + 2 := by
+          have hk : 0 <= (k : Rat) := Rat.natCast_nonneg
+          grind
+        have hfactor : 0 <= (2 : Rat) / ((2 * k + 1 : Nat) + 2) := by
+          rw [Rat.div_def]
+          exact Rat.mul_nonneg (by native_decide)
+            (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+        exact Rat.mul_nonneg hfactor ih
+  intro n
+  by_cases he : n % 2 = 0
+  · have hindex : n = 2 * (n / 2) := by omega
+    rw [hindex]
+    exact heven _
+  · have hindex : n = 2 * (n / 2) + 1 := by omega
+    rw [hindex]
+    exact hodd _
+
+theorem nBallVolumeModel_nonneg
+    (n : Nat) {piApprox radius : Rat}
+    (hpi : 0 <= piApprox) (hradius : 0 <= radius) :
+    0 <= nBallVolumeModel n piApprox radius := by
+  unfold nBallVolumeModel
+  exact Rat.mul_nonneg
+    (Rat.mul_nonneg (nBallCoeff_nonneg n)
+      (Rat.pow_nonneg hpi))
+    (Rat.pow_nonneg hradius)
 
 theorem nBallVolumeModel_stage_six :
     nBallVolumeModel 6 (355 / 113) 1 = 44738875 / 8657382 := by

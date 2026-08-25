@@ -5827,6 +5827,33 @@ def mulOfNonnegBounded
     change RealRaw.ValidCompute (RealRaw.mulCompute X Y)
     exact hproduct
 
+@[simp] theorem mulOfNonnegBounded_compute
+    (F G : FunctionOnInterval)
+    (same_lower : F.lower = G.lower) (same_upper : F.upper = G.upper)
+    (Fbounds : forall x (hx : inDomainInterval F.lower F.upper x),
+      Exists fun B : Rat => 0 < B /\ forall n,
+        0 <= (F.compute x hx n).lo /\ (F.compute x hx n).hi <= B)
+    (Gbounds : forall x (hx : inDomainInterval G.lower G.upper x),
+      Exists fun B : Rat => 0 < B /\ forall n,
+        0 <= (G.compute x hx n).lo /\ (G.compute x hx n).hi <= B)
+    (x : Rat) (hx : inDomainInterval F.lower F.upper x) (n : Nat) :
+    (mulOfNonnegBounded F G same_lower same_upper Fbounds Gbounds).compute x hx n =
+      QBox.mulRealInterval
+        (F.compute x hx n).lo (F.compute x hx n).hi
+        (G.compute x (by
+          constructor
+          · rw [← same_lower]
+            exact hx.1
+          · rw [← same_upper]
+            exact hx.2) n).lo
+        (G.compute x (by
+          constructor
+          · rw [← same_lower]
+            exact hx.1
+          · rw [← same_upper]
+            exact hx.2) n).hi := by
+  rfl
+
 def secantSlopeInterval (F : FunctionOnInterval)
     (x y : Rat)
     (hx : inDomainInterval F.lower F.upper x)
@@ -8294,6 +8321,29 @@ theorem generalIntegralFor_valid (F : FunctionOnInterval)
     (generalIntegralFor F c).Valid :=
   piecewiseMonotoneIntegralFor_valid F c
 
+/-! The general finite-piece integral is also available through the common
+`ConstructionFor` interface.  This is only a representation bridge: the
+finite monotone partition and all cell certificates remain explicit inputs. -/
+def generalConstructionFor (F : FunctionOnInterval)
+    (c : GeneralConstructionFor F) : Integral.ConstructionFor F where
+  compute := (generalIntegralFor F c).compute
+  certificate := generalIntegralFor_valid F c
+
+theorem generalConstructionFor_compute_eq (F : FunctionOnInterval)
+    (c : GeneralConstructionFor F) :
+    (generalConstructionFor F c).compute = (generalIntegralFor F c).compute := rfl
+
+theorem integralFor_generalConstructionFor_valid (F : FunctionOnInterval)
+    (c : GeneralConstructionFor F) :
+    (Integral.integralFor F (generalConstructionFor F c)).Valid :=
+  Integral.integralFor_valid F (generalConstructionFor F c)
+
+theorem integralFor_generalConstructionFor_equiv (F : FunctionOnInterval)
+    (c : GeneralConstructionFor F) :
+    (Integral.integralFor F (generalConstructionFor F c)).Equiv
+      (generalIntegralFor F c) := by
+  exact RealRaw.equiv_refl _ (generalIntegralFor_valid F c)
+
 /-- The public general-integral alias agrees with the original monotone
 construction on a one-piece partition. -/
 theorem generalIntegralFor_ofMonotone_equiv
@@ -8521,6 +8571,25 @@ theorem ExactCellOrderPreservation.integral_average_between_bounds
       hcancel, hcancel'] using hlow'
   · simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm,
       hcancel, hcancel'] using hupp'
+
+/-! The finite MVT-shaped conclusion: the cell average is represented by a
+rational point interval lying inside the certified derivative range.  This
+records the classical "some intermediate value" idea as overlap of rational
+boxes, without selecting an attained real point. -/
+theorem ExactCellOrderPreservation.integral_average_overlaps_bounds
+    {eval : Rat -> Rat} {integralBetween : Rat -> Rat -> Rat}
+    {a b : Rat} (h : ExactCellOrderPreservation eval integralBetween a b)
+    {p r lower upper : Rat}
+    (hap : a <= p) (hpr : p < r) (hrb : r <= b)
+    (hlower : forall {x : Rat}, p <= x -> x <= r -> lower <= eval x)
+    (hupper : forall {x : Rat}, p <= x -> x <= r -> eval x <= upper) :
+    QInterval.Overlaps
+      ({ lo := lower, hi := upper } : QInterval)
+      ({ lo := integralBetween p r / (r - p),
+          hi := integralBetween p r / (r - p) } : QInterval) := by
+  have havg := h.integral_average_between_bounds
+    hap hpr hrb hlower hupper
+  exact ⟨havg.1, havg.2⟩
 
 /-- Exact rational-cell order preservation for a constant integrand.
 
@@ -8944,6 +9013,809 @@ def function (I : InvertibleFunctionOnInterval) : FunctionOnInterval :=
   I.continuous.function
 
 end InvertibleFunctionOnInterval
+
+/-! A branch contract for functions whose effective separation depends on the
+actual rational input gap. This is the natural interface for exponential,
+logarithm, and other functions whose inverse search becomes more precise as
+the bracket narrows. It intentionally sits beside the older fixed-gap
+contract, so existing inverse certificates remain source-compatible. -/
+structure GapAwareInvertibleFunctionOnInterval where
+  continuous : ContinuousFunctionOnInterval
+  source_ordered : continuous.function.lower <= continuous.function.upper
+  monotone : MonotoneOnInterval continuous.function
+  separation : GapAwareInverseSeparation continuous.function
+  orientation :
+    match separation.kind with
+    | .nondecreasing => monotone.increasing
+    | .nonincreasing => ¬ monotone.increasing
+
+namespace GapAwareInvertibleFunctionOnInterval
+
+def function (I : GapAwareInvertibleFunctionOnInterval) : FunctionOnInterval :=
+  I.continuous.function
+
+end GapAwareInvertibleFunctionOnInterval
+
+def GapAwareInvertibleFunctionOnInterval.EndpointRangeContains
+    (I : GapAwareInvertibleFunctionOnInterval) (n : Nat) (Y : QInterval) : Prop :=
+  match I.separation.kind with
+  | .nondecreasing =>
+      (I.function.compute I.function.lower
+        ⟨Rat.le_refl, I.source_ordered⟩ n).lo <= Y.lo /\
+        Y.hi <=
+          (I.function.compute I.function.upper
+            ⟨I.source_ordered, Rat.le_refl⟩ n).hi
+  | .nonincreasing =>
+      (I.function.compute I.function.upper
+        ⟨I.source_ordered, Rat.le_refl⟩ n).lo <= Y.lo /\
+      Y.hi <=
+          (I.function.compute I.function.lower
+            ⟨Rat.le_refl, I.source_ordered⟩ n).hi
+
+/-! The certified interval image of a rational midpoint, and a sound
+interval-level midpoint decision kernel.
+
+The kernel evaluates the degenerate rational midpoint interval.  It only
+discards a half when that midpoint image box is wholly on one side of the
+target box.  If the boxes overlap, it retains the parent interval instead of
+making an unjustified classical choice.  Thus every returned interval is a
+rational subinterval of the parent; progress in a full inverse algorithm must
+be supplied by a separate gap-aware precision certificate. -/
+def gapAwareTargetBisectionMidpointRange
+    (F : ContinuousFunctionOnInterval) (I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) :
+    QInterval :=
+  F.regular.evalInterval
+    { lo := I.midpoint, hi := I.midpoint }
+    ⟨Rat.le_trans hI.1 (QInterval.midpoint_mem hI.2.1).1,
+      Rat.le_refl,
+      Rat.le_trans (QInterval.midpoint_mem hI.2.1).2 hI.2.2⟩ n
+
+theorem gapAwareTargetBisectionMidpointRange_ordered
+    (F : ContinuousFunctionOnInterval) (I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) :
+    (gapAwareTargetBisectionMidpointRange F I hI n).lo <=
+      (gapAwareTargetBisectionMidpointRange F I hI n).hi := by
+  let M : QInterval := { lo := I.midpoint, hi := I.midpoint }
+  have hM : subintervalOf M F.function.lower F.function.upper := by
+    exact ⟨Rat.le_trans hI.1 (QInterval.midpoint_mem hI.2.1).1,
+      Rat.le_refl,
+      Rat.le_trans (QInterval.midpoint_mem hI.2.1).2 hI.2.2⟩
+  have hwidth : M.width <=
+      1 / ((F.regular.inputPrecision n : Nat) : Rat) := by
+    unfold M QInterval.width
+    have hp := F.regular.inputPrecision_pos n
+    have hden : (0 : Rat) <= (F.regular.inputPrecision n : Nat) := by
+      exact Rat.natCast_nonneg
+    have hpRat : (0 : Rat) < (F.regular.inputPrecision n : Nat) :=
+      (Rat.natCast_pos).2 hp
+    have hinv : (0 : Rat) <= ((F.regular.inputPrecision n : Nat) : Rat)⁻¹ :=
+      Rat.le_of_lt ((Rat.inv_pos).2 hpRat)
+    have hright : (0 : Rat) <=
+        1 / ((F.regular.inputPrecision n : Nat) : Rat) := by
+      rw [Rat.div_def]
+      exact Rat.mul_nonneg (by native_decide) hinv
+    rw [Rat.sub_self]
+    exact hright
+  have hnonneg := (F.regular.output_width M hM n hwidth).1
+  change 0 <=
+    (F.regular.evalInterval M hM n).hi -
+      (F.regular.evalInterval M hM n).lo at hnonneg
+  change (F.regular.evalInterval M hM n).lo <=
+    (F.regular.evalInterval M hM n).hi
+  exact (Rat.le_iff_sub_nonneg _ _).2 hnonneg
+
+def gapAwareTargetBisectionStep
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) :
+    QInterval :=
+  let V := F.regular.evalInterval
+    { lo := I.midpoint, hi := I.midpoint }
+    ⟨Rat.le_trans hI.1 (QInterval.midpoint_mem hI.2.1).1,
+      Rat.le_refl,
+      Rat.le_trans (QInterval.midpoint_mem hI.2.1).2 hI.2.2⟩ n
+  if V.hi < Y.lo then
+    { lo := I.midpoint, hi := I.hi }
+  else if Y.hi < V.lo then
+    { lo := I.lo, hi := I.midpoint }
+  else
+    I
+
+theorem gapAwareTargetBisectionStep_of_below
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat)
+    (hbelow :
+      (gapAwareTargetBisectionMidpointRange F I hI n).hi < Y.lo) :
+    gapAwareTargetBisectionStep F Y I hI n =
+      { lo := I.midpoint, hi := I.hi } := by
+  have hbelow' :
+      (F.regular.evalInterval
+        { lo := I.midpoint, hi := I.midpoint }
+        ⟨Rat.le_trans hI.1 (QInterval.midpoint_mem hI.2.1).1,
+          Rat.le_refl,
+          Rat.le_trans (QInterval.midpoint_mem hI.2.1).2 hI.2.2⟩ n).hi < Y.lo := by
+    simpa [gapAwareTargetBisectionMidpointRange] using hbelow
+  simp [gapAwareTargetBisectionStep, hbelow']
+
+theorem gapAwareTargetBisectionStep_of_above
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat)
+    (hnotbelow :
+      ¬(gapAwareTargetBisectionMidpointRange F I hI n).hi < Y.lo)
+    (habove :
+      Y.hi < (gapAwareTargetBisectionMidpointRange F I hI n).lo) :
+    gapAwareTargetBisectionStep F Y I hI n =
+      { lo := I.lo, hi := I.midpoint } := by
+  have hnotbelow' :
+      ¬(F.regular.evalInterval
+        { lo := I.midpoint, hi := I.midpoint }
+        ⟨Rat.le_trans hI.1 (QInterval.midpoint_mem hI.2.1).1,
+          Rat.le_refl,
+          Rat.le_trans (QInterval.midpoint_mem hI.2.1).2 hI.2.2⟩ n).hi < Y.lo := by
+    simpa [gapAwareTargetBisectionMidpointRange] using hnotbelow
+  have habove' :
+      Y.hi < (F.regular.evalInterval
+        { lo := I.midpoint, hi := I.midpoint }
+        ⟨Rat.le_trans hI.1 (QInterval.midpoint_mem hI.2.1).1,
+          Rat.le_refl,
+          Rat.le_trans (QInterval.midpoint_mem hI.2.1).2 hI.2.2⟩ n).lo := by
+    simpa [gapAwareTargetBisectionMidpointRange] using habove
+  simp [gapAwareTargetBisectionStep, hnotbelow', habove']
+
+def gapAwareTargetBisectionStrictDecision
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) : Prop :=
+  (gapAwareTargetBisectionMidpointRange F I hI n).hi < Y.lo \/
+    (¬(gapAwareTargetBisectionMidpointRange F I hI n).hi < Y.lo /\
+      Y.hi < (gapAwareTargetBisectionMidpointRange F I hI n).lo)
+
+theorem gapAwareTargetBisectionStep_ordered
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) :
+    (gapAwareTargetBisectionStep F Y I hI n).lo <=
+      (gapAwareTargetBisectionStep F Y I hI n).hi := by
+  have hm := QInterval.midpoint_mem hI.2.1
+  by_cases hbelow :
+      (F.regular.evalInterval
+        { lo := I.midpoint, hi := I.midpoint }
+        ⟨Rat.le_trans hI.1 hm.1, Rat.le_refl,
+          Rat.le_trans hm.2 hI.2.2⟩ n).hi < Y.lo
+  · simp [gapAwareTargetBisectionStep, hbelow]
+    exact hm.2
+  · by_cases habove :
+        Y.hi < (F.regular.evalInterval
+          { lo := I.midpoint, hi := I.midpoint }
+          ⟨Rat.le_trans hI.1 hm.1, Rat.le_refl,
+            Rat.le_trans hm.2 hI.2.2⟩ n).lo
+    · simp [gapAwareTargetBisectionStep, hbelow, habove]
+      exact hm.1
+    · simp [gapAwareTargetBisectionStep, hbelow, habove]
+      exact hI.2.1
+
+theorem gapAwareTargetBisectionStep_subinterval
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) :
+    subintervalOf (gapAwareTargetBisectionStep F Y I hI n) I.lo I.hi := by
+  have hm := QInterval.midpoint_mem hI.2.1
+  by_cases hbelow :
+      (F.regular.evalInterval
+        { lo := I.midpoint, hi := I.midpoint }
+        ⟨Rat.le_trans hI.1 hm.1, Rat.le_refl,
+          Rat.le_trans hm.2 hI.2.2⟩ n).hi < Y.lo
+  · simp [gapAwareTargetBisectionStep, hbelow]
+    exact ⟨hm.1, hm.2, Rat.le_refl⟩
+  · by_cases habove :
+        Y.hi < (F.regular.evalInterval
+          { lo := I.midpoint, hi := I.midpoint }
+          ⟨Rat.le_trans hI.1 hm.1, Rat.le_refl,
+            Rat.le_trans hm.2 hI.2.2⟩ n).lo
+    · simp [gapAwareTargetBisectionStep, hbelow, habove]
+      exact ⟨Rat.le_refl, hm.1, hm.2⟩
+    · simp [gapAwareTargetBisectionStep, hbelow, habove]
+      exact ⟨Rat.le_refl, hI.2.1, Rat.le_refl⟩
+
+theorem gapAwareTargetBisectionStep_width_le
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) :
+    (gapAwareTargetBisectionStep F Y I hI n).width <= I.width := by
+  have hm := QInterval.midpoint_mem hI.2.1
+  by_cases hbelow :
+      (F.regular.evalInterval
+        { lo := I.midpoint, hi := I.midpoint }
+        ⟨Rat.le_trans hI.1 hm.1, Rat.le_refl,
+          Rat.le_trans hm.2 hI.2.2⟩ n).hi < Y.lo
+  · simp [gapAwareTargetBisectionStep, hbelow, QInterval.width]
+    grind [Rat.sub_eq_add_neg]
+  · by_cases habove :
+        Y.hi < (F.regular.evalInterval
+          { lo := I.midpoint, hi := I.midpoint }
+          ⟨Rat.le_trans hI.1 hm.1, Rat.le_refl,
+            Rat.le_trans hm.2 hI.2.2⟩ n).lo
+    · simp [gapAwareTargetBisectionStep, hbelow, habove, QInterval.width]
+      grind [Rat.sub_eq_add_neg]
+    · simp [gapAwareTargetBisectionStep, hbelow, habove]
+
+theorem gapAwareTargetBisectionStep_width_eq_half_of_decided
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat)
+    (hdecided :
+      (F.regular.evalInterval
+        { lo := I.midpoint, hi := I.midpoint }
+        ⟨Rat.le_trans hI.1 (QInterval.midpoint_mem hI.2.1).1,
+          Rat.le_refl,
+          Rat.le_trans (QInterval.midpoint_mem hI.2.1).2 hI.2.2⟩ n).hi < Y.lo \/
+        Y.hi < (F.regular.evalInterval
+          { lo := I.midpoint, hi := I.midpoint }
+          ⟨Rat.le_trans hI.1 (QInterval.midpoint_mem hI.2.1).1,
+            Rat.le_refl,
+            Rat.le_trans (QInterval.midpoint_mem hI.2.1).2 hI.2.2⟩ n).lo) :
+    (gapAwareTargetBisectionStep F Y I hI n).width = I.width / 2 := by
+  have hm := QInterval.midpoint_mem hI.2.1
+  by_cases hbelow :
+      (F.regular.evalInterval
+        { lo := I.midpoint, hi := I.midpoint }
+        ⟨Rat.le_trans hI.1 hm.1, Rat.le_refl,
+          Rat.le_trans hm.2 hI.2.2⟩ n).hi < Y.lo
+  · simp only [gapAwareTargetBisectionStep, hbelow, if_pos]
+    simpa [QInterval.width, QInterval.midpoint] using
+      Integral.midpoint_right_width I.lo I.hi
+  · have habove : Y.hi < (F.regular.evalInterval
+        { lo := I.midpoint, hi := I.midpoint }
+        ⟨Rat.le_trans hI.1 hm.1, Rat.le_refl,
+          Rat.le_trans hm.2 hI.2.2⟩ n).lo := by
+      rcases hdecided with h | h
+      · exact False.elim (hbelow h)
+      · exact h
+    simp only [gapAwareTargetBisectionStep, hbelow, habove]
+    simpa [QInterval.width, QInterval.midpoint] using
+      Integral.midpoint_left_width I.lo I.hi
+
+theorem gapAwareTargetBisectionStep_congr
+    (F : ContinuousFunctionOnInterval) (Y : QInterval)
+    {I J : QInterval}
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (hJ : subintervalOf J F.function.lower F.function.upper)
+    (hIJ : I = J) (n : Nat) :
+    gapAwareTargetBisectionStep F Y I hI n =
+      gapAwareTargetBisectionStep F Y J hJ n := by
+  subst J
+  rfl
+
+/-! Proof-carrying finite iteration of the conservative kernel.  The subtype
+stores the domain certificate at every stage, so later clients never need to
+reconstruct that a midpoint refinement stayed inside the original branch. -/
+def gapAwareTargetBisectionIterateWithProof
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) :
+    Nat -> {J : QInterval // subintervalOf J F.function.lower F.function.upper}
+  | 0 => ⟨I, hI⟩
+  | n + 1 =>
+      let P := gapAwareTargetBisectionIterateWithProof F Y I hI n
+      let J := gapAwareTargetBisectionStep F Y P.1 P.2 n
+      have hstep := gapAwareTargetBisectionStep_subinterval F Y P.1 P.2 n
+      ⟨J, ⟨Rat.le_trans P.2.1 hstep.1, hstep.2.1,
+        Rat.le_trans hstep.2.2 P.2.2.2⟩⟩
+
+def gapAwareTargetBisectionIterate
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) : QInterval :=
+  (gapAwareTargetBisectionIterateWithProof F Y I hI n).1
+
+theorem gapAwareTargetBisectionIterate_subinterval
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) :
+    subintervalOf (gapAwareTargetBisectionIterate F Y I hI n)
+      F.function.lower F.function.upper :=
+  (gapAwareTargetBisectionIterateWithProof F Y I hI n).2
+
+theorem gapAwareTargetBisectionIterate_width_le
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) :
+    (gapAwareTargetBisectionIterate F Y I hI n).width <= I.width := by
+  induction n with
+  | zero => exact Rat.le_refl
+  | succ n ih =>
+      let P := gapAwareTargetBisectionIterateWithProof F Y I hI n
+      have hstep := gapAwareTargetBisectionStep_width_le F Y P.1 P.2 n
+      have hprev : P.1.width <= I.width := ih
+      exact Rat.le_trans hstep hprev
+
+/-! A fixed-precision variant is useful for executable traces: the evaluator
+precision is held constant while the source bracket is refined.  This is
+distinct from the stage-indexed iterator above, whose precision may grow with
+the requested output stage. -/
+def gapAwareTargetBisectionFixedIterateWithProof
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat) :
+    Nat -> {J : QInterval // subintervalOf J F.function.lower F.function.upper}
+  | 0 => ⟨I, hI⟩
+  | n + 1 =>
+      let P := gapAwareTargetBisectionFixedIterateWithProof F Y I hI precision n
+      let J := gapAwareTargetBisectionStep F Y P.1 P.2 precision
+      have hstep := gapAwareTargetBisectionStep_subinterval F Y P.1 P.2 precision
+      ⟨J, ⟨Rat.le_trans P.2.1 hstep.1, hstep.2.1,
+        Rat.le_trans hstep.2.2 P.2.2.2⟩⟩
+
+def gapAwareTargetBisectionFixedIterate
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision n : Nat) : QInterval :=
+  (gapAwareTargetBisectionFixedIterateWithProof F Y I hI precision n).1
+
+theorem gapAwareTargetBisectionFixedIterate_subinterval
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision n : Nat) :
+    subintervalOf (gapAwareTargetBisectionFixedIterate F Y I hI precision n)
+      F.function.lower F.function.upper :=
+  (gapAwareTargetBisectionFixedIterateWithProof F Y I hI precision n).2
+
+theorem gapAwareTargetBisectionFixedIterate_width_le
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision n : Nat) :
+    (gapAwareTargetBisectionFixedIterate F Y I hI precision n).width <= I.width := by
+  induction n with
+  | zero => exact Rat.le_refl
+  | succ n ih =>
+      let P := gapAwareTargetBisectionFixedIterateWithProof
+        F Y I hI precision n
+      have hstep := gapAwareTargetBisectionStep_width_le F Y P.1 P.2 precision
+      exact Rat.le_trans hstep ih
+
+/-! A scheduled variant separates the evaluator precision from the number of
+midpoint steps.  This is essential for computable inverse branches whose
+separation budget grows at a different rate than the requested bracket depth.
+The fixed-precision iterator above is retained as its constant-schedule case. -/
+def gapAwareTargetBisectionScheduledIterateWithProof
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat -> Nat) :
+    Nat -> {J : QInterval // subintervalOf J F.function.lower F.function.upper}
+  | 0 => ⟨I, hI⟩
+  | n + 1 =>
+      let P := gapAwareTargetBisectionScheduledIterateWithProof
+        F Y I hI precision n
+      let J := gapAwareTargetBisectionStep F Y P.1 P.2 (precision n)
+      have hstep := gapAwareTargetBisectionStep_subinterval F Y P.1 P.2
+        (precision n)
+      ⟨J, ⟨Rat.le_trans P.2.1 hstep.1, hstep.2.1,
+        Rat.le_trans hstep.2.2 P.2.2.2⟩⟩
+
+def gapAwareTargetBisectionScheduledIterate
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat -> Nat) (n : Nat) : QInterval :=
+  (gapAwareTargetBisectionScheduledIterateWithProof F Y I hI precision n).1
+
+theorem gapAwareTargetBisectionScheduledIterate_subinterval
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat -> Nat) (n : Nat) :
+    subintervalOf (gapAwareTargetBisectionScheduledIterate F Y I hI precision n)
+      F.function.lower F.function.upper :=
+  (gapAwareTargetBisectionScheduledIterateWithProof F Y I hI precision n).2
+
+theorem gapAwareTargetBisectionScheduledIterate_width_le
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat -> Nat) (n : Nat) :
+    (gapAwareTargetBisectionScheduledIterate F Y I hI precision n).width <=
+      I.width := by
+  induction n with
+  | zero => exact Rat.le_refl
+  | succ n ih =>
+      let P := gapAwareTargetBisectionScheduledIterateWithProof
+        F Y I hI precision n
+      have hstep := gapAwareTargetBisectionStep_width_le F Y P.1 P.2
+        (precision n)
+      exact Rat.le_trans hstep ih
+
+def gapAwareTargetBisectionScheduledDecision
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat -> Nat) (n : Nat) : Prop :=
+  let P := gapAwareTargetBisectionScheduledIterateWithProof
+    F Y I hI precision n
+  (F.regular.evalInterval
+      { lo := P.1.midpoint, hi := P.1.midpoint }
+      ⟨Rat.le_trans P.2.1 (QInterval.midpoint_mem P.2.2.1).1,
+        Rat.le_refl,
+        Rat.le_trans (QInterval.midpoint_mem P.2.2.1).2 P.2.2.2⟩
+      (precision n)).hi < Y.lo \/
+    Y.hi <
+      (F.regular.evalInterval
+        { lo := P.1.midpoint, hi := P.1.midpoint }
+        ⟨Rat.le_trans P.2.1 (QInterval.midpoint_mem P.2.2.1).1,
+          Rat.le_refl,
+          Rat.le_trans (QInterval.midpoint_mem P.2.2.1).2 P.2.2.2⟩
+        (precision n)).lo
+
+theorem gapAwareTargetBisectionScheduledIterate_width_eq_div_pow_of_decided
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat -> Nat) (n : Nat)
+    (hdecided : forall k, k < n ->
+      gapAwareTargetBisectionScheduledDecision F Y I hI precision k) :
+    (gapAwareTargetBisectionScheduledIterate F Y I hI precision n).width =
+      I.width / (2 ^ n : Rat) := by
+  induction n with
+  | zero =>
+      simp [gapAwareTargetBisectionScheduledIterate,
+        gapAwareTargetBisectionScheduledIterateWithProof, QInterval.width,
+        Rat.div_def]
+      have hone : (1 : Rat)⁻¹ = 1 := by
+        have h := Rat.mul_inv_cancel (1 : Rat) (by native_decide)
+        simpa using h
+      rw [hone, Rat.mul_one]
+  | succ n ih =>
+      let P := gapAwareTargetBisectionScheduledIterateWithProof
+        F Y I hI precision n
+      have hstep := gapAwareTargetBisectionStep_width_eq_half_of_decided
+        F Y P.1 P.2 (precision n) (by
+          simpa [gapAwareTargetBisectionScheduledDecision, P] using
+            hdecided n (by omega))
+      have hprev : P.1.width = I.width / (2 ^ n : Rat) := by
+        change
+          (gapAwareTargetBisectionScheduledIterate F Y I hI precision n).width =
+            I.width / (2 ^ n : Rat)
+        apply ih
+        intro k hk
+        exact hdecided k (by omega)
+      change
+        (gapAwareTargetBisectionStep F Y P.1 P.2 (precision n)).width =
+          I.width / (2 ^ (n + 1) : Rat)
+      rw [hstep, hprev, Rat.pow_succ]
+      rw [Rat.div_def, Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem gapAwareTargetBisectionScheduledIterate_width_eq_div_pow_of_strictly_decided
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat -> Nat) (n : Nat)
+    (hdecided : forall k, k < n ->
+      gapAwareTargetBisectionStrictDecision F Y
+        (gapAwareTargetBisectionScheduledIterate F Y I hI precision k)
+        (gapAwareTargetBisectionScheduledIterate_subinterval F Y I hI precision k)
+        (precision k)) :
+    (gapAwareTargetBisectionScheduledIterate F Y I hI precision n).width =
+      I.width / (2 ^ n : Rat) := by
+  apply gapAwareTargetBisectionScheduledIterate_width_eq_div_pow_of_decided
+  intro k hk
+  have h := hdecided k hk
+  let P := gapAwareTargetBisectionScheduledIterateWithProof F Y I hI
+    precision k
+  change gapAwareTargetBisectionStrictDecision F Y P.1 P.2
+    (precision k) at h
+  rcases h with hbelow | ⟨_, habove⟩
+  · left
+    simpa [gapAwareTargetBisectionMidpointRange] using hbelow
+  · right
+    simpa [gapAwareTargetBisectionMidpointRange] using habove
+
+theorem gapAwareTargetBisectionScheduledIterate_mem_of_oriented
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat -> Nat) {r : Rat} (hrI : I.lo <= r /\ r <= I.hi)
+    (n : Nat)
+    (horiented : forall j, j < n ->
+      let P := gapAwareTargetBisectionScheduledIterateWithProof
+        F Y I hI precision j
+      ((P.1.midpoint < r /\
+          (gapAwareTargetBisectionMidpointRange F P.1 P.2
+            (precision j)).hi < Y.lo) \/
+        (r < P.1.midpoint /\
+          ¬(gapAwareTargetBisectionMidpointRange F P.1 P.2
+            (precision j)).hi < Y.lo /\
+          Y.hi < (gapAwareTargetBisectionMidpointRange F P.1 P.2
+            (precision j)).lo))) :
+    (gapAwareTargetBisectionScheduledIterate F Y I hI precision n).lo <= r /\
+      r <= (gapAwareTargetBisectionScheduledIterate F Y I hI precision n).hi := by
+  induction n with
+  | zero =>
+      simpa [gapAwareTargetBisectionScheduledIterate,
+        gapAwareTargetBisectionScheduledIterateWithProof] using hrI
+  | succ n ih =>
+      let P := gapAwareTargetBisectionScheduledIterateWithProof
+        F Y I hI precision n
+      have hprev := ih (fun j hj => horiented j (by omega))
+      have hdir := horiented n (by omega)
+      change
+        ((P.1.midpoint < r /\
+            (gapAwareTargetBisectionMidpointRange F P.1 P.2
+              (precision n)).hi < Y.lo) \/
+          (r < P.1.midpoint /\
+            ¬(gapAwareTargetBisectionMidpointRange F P.1 P.2
+              (precision n)).hi < Y.lo /\
+            Y.hi < (gapAwareTargetBisectionMidpointRange F P.1 P.2
+              (precision n)).lo)) at hdir
+      change
+        (gapAwareTargetBisectionStep F Y P.1 P.2 (precision n)).lo <= r /\
+          r <= (gapAwareTargetBisectionStep F Y P.1 P.2
+            (precision n)).hi
+      rcases hdir with ⟨hmr, hbelow⟩ | ⟨hrm, hnotbelow, habove⟩
+      · rw [gapAwareTargetBisectionStep_of_below F Y P.1 P.2
+          (precision n) hbelow]
+        exact ⟨Rat.le_of_lt hmr, hprev.2⟩
+      · rw [gapAwareTargetBisectionStep_of_above F Y P.1 P.2
+          (precision n) hnotbelow habove]
+        exact ⟨hprev.1, Rat.le_of_lt hrm⟩
+
+theorem gapAwareTargetBisectionScheduledIterate_nested
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat -> Nat) {n m : Nat} (hnm : n ≤ m) :
+    (gapAwareTargetBisectionScheduledIterate F Y I hI precision n).lo ≤
+        (gapAwareTargetBisectionScheduledIterate F Y I hI precision m).lo /\
+      (gapAwareTargetBisectionScheduledIterate F Y I hI precision m).lo ≤
+        (gapAwareTargetBisectionScheduledIterate F Y I hI precision m).hi /\
+      (gapAwareTargetBisectionScheduledIterate F Y I hI precision m).hi ≤
+        (gapAwareTargetBisectionScheduledIterate F Y I hI precision n).hi := by
+  induction hnm with
+  | refl =>
+      have hsub := gapAwareTargetBisectionScheduledIterate_subinterval
+        F Y I hI precision n
+      exact ⟨Rat.le_refl, hsub.2.1, Rat.le_refl⟩
+  | @step m hnm ih =>
+      have hprev := ih
+      have hstep := gapAwareTargetBisectionStep_subinterval F Y
+        (gapAwareTargetBisectionScheduledIterate F Y I hI precision m)
+        (gapAwareTargetBisectionScheduledIterate_subinterval F Y I hI precision m)
+        (precision m)
+      have hcurrent := gapAwareTargetBisectionScheduledIterate_subinterval
+        F Y I hI precision m
+      have hJ := gapAwareTargetBisectionScheduledIterate_subinterval
+        F Y I hI precision (m + 1)
+      exact ⟨Rat.le_trans hprev.1 hstep.1,
+        hJ.2.1,
+        Rat.le_trans hstep.2.2 hprev.2.2⟩
+
+/-! The fully gap-aware form may choose precision from the current bracket as
+well as the step index.  This is the form needed when a separation modulus is
+computed from the actual midpoint gap. -/
+def gapAwareTargetBisectionAdaptiveIterateWithProof
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat -> QInterval -> Nat) :
+    Nat -> {J : QInterval // subintervalOf J F.function.lower F.function.upper}
+  | 0 => ⟨I, hI⟩
+  | n + 1 =>
+      let P := gapAwareTargetBisectionAdaptiveIterateWithProof
+        F Y I hI precision n
+      let J := gapAwareTargetBisectionStep F Y P.1 P.2
+        (precision n P.1)
+      have hstep := gapAwareTargetBisectionStep_subinterval F Y P.1 P.2
+        (precision n P.1)
+      ⟨J, ⟨Rat.le_trans P.2.1 hstep.1, hstep.2.1,
+        Rat.le_trans hstep.2.2 P.2.2.2⟩⟩
+
+def gapAwareTargetBisectionAdaptiveIterate
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat -> QInterval -> Nat) (n : Nat) : QInterval :=
+  (gapAwareTargetBisectionAdaptiveIterateWithProof F Y I hI precision n).1
+
+/-! If the adaptive precision choice ignores the current bracket, the adaptive
+iterator is exactly the scheduled iterator.  This is the bridge used by
+concrete inverse branches: a target-specific stage schedule can be proved
+once, then supplied to the fully bracket-aware interface without duplicating
+the bisection argument. -/
+theorem gapAwareTargetBisectionAdaptiveIterate_eq_scheduled
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat -> Nat) (n : Nat) :
+    gapAwareTargetBisectionAdaptiveIterate F Y I hI
+        (fun k _ => precision k) n =
+      gapAwareTargetBisectionScheduledIterate F Y I hI precision n := by
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+      simp only [gapAwareTargetBisectionAdaptiveIterate,
+        gapAwareTargetBisectionAdaptiveIterateWithProof,
+        gapAwareTargetBisectionScheduledIterate,
+        gapAwareTargetBisectionScheduledIterateWithProof]
+      have hP :
+          (gapAwareTargetBisectionAdaptiveIterateWithProof F Y I hI
+            (fun k _ => precision k) n).1 =
+            (gapAwareTargetBisectionScheduledIterateWithProof F Y I hI
+              precision n).1 := by
+        simpa [gapAwareTargetBisectionAdaptiveIterate,
+          gapAwareTargetBisectionScheduledIterate] using ih
+      exact gapAwareTargetBisectionStep_congr F Y _ _ hP (precision n)
+
+theorem gapAwareTargetBisectionAdaptiveIterate_subinterval
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat -> QInterval -> Nat) (n : Nat) :
+    subintervalOf (gapAwareTargetBisectionAdaptiveIterate F Y I hI precision n)
+      F.function.lower F.function.upper :=
+  (gapAwareTargetBisectionAdaptiveIterateWithProof F Y I hI precision n).2
+
+theorem gapAwareTargetBisectionAdaptiveIterate_width_le
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat -> QInterval -> Nat) (n : Nat) :
+    (gapAwareTargetBisectionAdaptiveIterate F Y I hI precision n).width <=
+      I.width := by
+  induction n with
+  | zero => exact Rat.le_refl
+  | succ n ih =>
+      let P := gapAwareTargetBisectionAdaptiveIterateWithProof
+        F Y I hI precision n
+      have hstep := gapAwareTargetBisectionStep_width_le F Y P.1 P.2
+        (precision n P.1)
+      exact Rat.le_trans hstep ih
+
+def gapAwareTargetBisectionAdaptiveDecision
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat -> QInterval -> Nat) (n : Nat) : Prop :=
+  let P := gapAwareTargetBisectionAdaptiveIterateWithProof
+    F Y I hI precision n
+  (F.regular.evalInterval
+      { lo := P.1.midpoint, hi := P.1.midpoint }
+      ⟨Rat.le_trans P.2.1 (QInterval.midpoint_mem P.2.2.1).1,
+        Rat.le_refl,
+        Rat.le_trans (QInterval.midpoint_mem P.2.2.1).2 P.2.2.2⟩
+      (precision n P.1)).hi < Y.lo \/
+    Y.hi <
+      (F.regular.evalInterval
+        { lo := P.1.midpoint, hi := P.1.midpoint }
+        ⟨Rat.le_trans P.2.1 (QInterval.midpoint_mem P.2.2.1).1,
+          Rat.le_refl,
+          Rat.le_trans (QInterval.midpoint_mem P.2.2.1).2 P.2.2.2⟩
+        (precision n P.1)).lo
+
+theorem gapAwareTargetBisectionAdaptiveIterate_width_eq_div_pow_of_decided
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat -> QInterval -> Nat) (n : Nat)
+    (hdecided : forall k, k < n ->
+      gapAwareTargetBisectionAdaptiveDecision F Y I hI precision k) :
+    (gapAwareTargetBisectionAdaptiveIterate F Y I hI precision n).width =
+      I.width / (2 ^ n : Rat) := by
+  induction n with
+  | zero =>
+      simp [gapAwareTargetBisectionAdaptiveIterate,
+        gapAwareTargetBisectionAdaptiveIterateWithProof, QInterval.width,
+        Rat.div_def]
+      have hone : (1 : Rat)⁻¹ = 1 := by
+        have h := Rat.mul_inv_cancel (1 : Rat) (by native_decide)
+        simpa using h
+      rw [hone, Rat.mul_one]
+  | succ n ih =>
+      let P := gapAwareTargetBisectionAdaptiveIterateWithProof
+        F Y I hI precision n
+      have hstep := gapAwareTargetBisectionStep_width_eq_half_of_decided
+        F Y P.1 P.2 (precision n P.1) (by
+          simpa [gapAwareTargetBisectionAdaptiveDecision, P] using
+            hdecided n (by omega))
+      have hprev : P.1.width = I.width / (2 ^ n : Rat) := by
+        change
+          (gapAwareTargetBisectionAdaptiveIterate F Y I hI precision n).width =
+            I.width / (2 ^ n : Rat)
+        apply ih
+        intro k hk
+        exact hdecided k (by omega)
+      change
+        (gapAwareTargetBisectionStep F Y P.1 P.2
+          (precision n P.1)).width =
+          I.width / (2 ^ (n + 1) : Rat)
+      rw [hstep, hprev, Rat.pow_succ]
+      rw [Rat.div_def, Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+def gapAwareTargetBisectionFixedDecision
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision n : Nat) : Prop :=
+  let P := gapAwareTargetBisectionFixedIterateWithProof
+    F Y I hI precision n
+  (F.regular.evalInterval
+      { lo := P.1.midpoint, hi := P.1.midpoint }
+      ⟨Rat.le_trans P.2.1 (QInterval.midpoint_mem P.2.2.1).1,
+        Rat.le_refl,
+        Rat.le_trans (QInterval.midpoint_mem P.2.2.1).2 P.2.2.2⟩ precision).hi < Y.lo \/
+    Y.hi <
+      (F.regular.evalInterval
+        { lo := P.1.midpoint, hi := P.1.midpoint }
+        ⟨Rat.le_trans P.2.1 (QInterval.midpoint_mem P.2.2.1).1,
+          Rat.le_refl,
+          Rat.le_trans (QInterval.midpoint_mem P.2.2.1).2 P.2.2.2⟩ precision).lo
+
+theorem gapAwareTargetBisectionFixedIterate_width_eq_div_pow_of_decided
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision n : Nat)
+    (hdecided : forall k, k < n ->
+      gapAwareTargetBisectionFixedDecision F Y I hI precision k) :
+    (gapAwareTargetBisectionFixedIterate F Y I hI precision n).width =
+      I.width / (2 ^ n : Rat) := by
+  induction n with
+  | zero =>
+      simp [gapAwareTargetBisectionFixedIterate,
+        gapAwareTargetBisectionFixedIterateWithProof, QInterval.width,
+        Rat.div_def]
+      have hone : (1 : Rat)⁻¹ = 1 := by
+        have h := Rat.mul_inv_cancel (1 : Rat) (by native_decide)
+        simpa using h
+      rw [hone, Rat.mul_one]
+  | succ n ih =>
+      let P := gapAwareTargetBisectionFixedIterateWithProof
+        F Y I hI precision n
+      have hstep := gapAwareTargetBisectionStep_width_eq_half_of_decided
+        F Y P.1 P.2 precision (hdecided n (by omega))
+      have hprev : P.1.width = I.width / (2 ^ n : Rat) := by
+        change (gapAwareTargetBisectionFixedIterate F Y I hI precision n).width =
+          I.width / (2 ^ n : Rat)
+        apply ih
+        intro k hk
+        exact hdecided k (by omega)
+      change (gapAwareTargetBisectionStep F Y P.1 P.2 precision).width =
+        I.width / (2 ^ (n + 1) : Rat)
+      rw [hstep, hprev, Rat.pow_succ]
+      rw [Rat.div_def, Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+structure GapAwareInRangeRaw
+    (I : GapAwareInvertibleFunctionOnInterval) where
+  value : RealRaw
+  value_valid : value.Valid
+  rangePrecision : Nat -> Nat
+  in_range : forall n,
+    I.EndpointRangeContains (rangePrecision n) (value.compute n)
+
+structure GapAwareInverseBisectionSearch
+    (I : GapAwareInvertibleFunctionOnInterval)
+    (y : GapAwareInRangeRaw I) where
+  compute_preimage : Nat -> QInterval
+  valid_preimage : RealRaw.ValidCompute compute_preimage
+  preimage_subinterval :
+    forall n, subintervalOf (compute_preimage n)
+      I.function.lower I.function.upper
+  value_overlaps :
+    forall n,
+      QInterval.Overlaps
+        (I.continuous.regular.evalInterval
+          (compute_preimage n)
+          (preimage_subinterval n)
+          n)
+        (y.value.compute n)
+
+structure GapAwareInverseRaw
+    (I : GapAwareInvertibleFunctionOnInterval) where
+  compute_preimage : GapAwareInRangeRaw I -> Nat -> QInterval
+  valid_preimage : forall y, RealRaw.ValidCompute (compute_preimage y)
+  preimage_subinterval : forall y n,
+    subintervalOf (compute_preimage y n)
+      I.function.lower I.function.upper
+  value_overlaps : forall y n,
+    QInterval.Overlaps
+      (I.continuous.regular.evalInterval
+        (compute_preimage y n)
+        (preimage_subinterval y n) n)
+      (y.value.compute n)
+
+def gapAwareInverseRawOfSearch
+    {I : GapAwareInvertibleFunctionOnInterval}
+    (search : forall y : GapAwareInRangeRaw I,
+      GapAwareInverseBisectionSearch I y) : GapAwareInverseRaw I where
+  compute_preimage := fun y => (search y).compute_preimage
+  valid_preimage := fun y => (search y).valid_preimage
+  preimage_subinterval := fun y => (search y).preimage_subinterval
+  value_overlaps := fun y => (search y).value_overlaps
+
+def GapAwareHasBisectionSearch
+    (I : GapAwareInvertibleFunctionOnInterval) :=
+  forall y : GapAwareInRangeRaw I,
+    GapAwareInverseBisectionSearch I y
+
+theorem gapAwareInverseRaw_of_search
+    {I : GapAwareInvertibleFunctionOnInterval}
+    (hsearch : GapAwareHasBisectionSearch I) :
+    Nonempty (GapAwareInverseRaw I) :=
+  ⟨gapAwareInverseRawOfSearch hsearch⟩
 
 /-- The endpoint-value box at the lower end of an invertible interval branch. -/
 def InvertibleFunctionOnInterval.lowerValueBox

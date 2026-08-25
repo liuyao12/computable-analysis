@@ -521,6 +521,20 @@ theorem finiteFourierSum_quarterTurn_constant_block_mode_three
   constructor <;> grind [Rat.add_assoc, Rat.add_comm, Rat.mul_add,
     Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
 
+/- A ready-to-use certificate for the basic quarter-turn cancellation block.
+The phase and cancellation fields are both finite rational-complex facts, so
+an agent can pass this certificate directly to the generic repeated-block
+theorems. -/
+def quarterTurnConstantBlockCancellationCertificate (c : QComplex) :
+    FiniteFourierBlockCancellationCertificate where
+  root := RotationSeries.imaginaryUnit
+  mode := 1
+  block := [c, c, c, c]
+  block_zero := finiteFourierSum_quarterTurn_constant_block_mode_one c
+  phase_one := by
+    change QComplex.natPow RotationSeries.imaginaryUnit 4 = QComplex.one
+    native_decide
+
 private theorem finiteFourierSum_replicate_block_phase_one
     (root : QComplex) (mode : Nat)
     (hphase : QComplex.natPow root (mode * 4) = QComplex.one) :
@@ -590,6 +604,12 @@ theorem FiniteFourierBlockCancellationCertificate.repeated_zero
   exact finiteFourierSum_blockRepeat_zero_of_phase_one
     certificate.root certificate.mode certificate.block k
     certificate.block_zero certificate.phase_one
+
+theorem quarterTurnConstantBlockCancellationCertificate_repeated_zero
+    (c : QComplex) (k : Nat) :
+    finiteFourierSum RotationSeries.imaginaryUnit 1
+        (finiteFourierBlockRepeat [c, c, c, c] k) = QComplex.zero := by
+  exact (quarterTurnConstantBlockCancellationCertificate c).repeated_zero k
 
 theorem FiniteFourierBlockCancellationCertificate.add_repeated_invariant
     (certificate : FiniteFourierBlockCancellationCertificate)

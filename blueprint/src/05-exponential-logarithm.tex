@@ -5,6 +5,12 @@ finite prefixes with tails, and transport derivative identities to endpoint
 identities. Exponential, logarithm, and their trigonometric connections are
 built from these tools.
 
+This chapter is organized by computational pattern, not by a catalogue of
+names. One representative is formalized for each new algorithm; scalar
+multiples, sign changes, and routine compositions are transported from it.
+Piecewise functions are finite assemblies of their interval pieces, so a
+function such as $|x|$ does not require a second general integration theory.
+
 \section{Exponential}
 
 \begin{verbatim}
@@ -230,26 +236,201 @@ and a gap-dependent factorial stage makes the endpoint boxes disjoint.
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_gapAwareSeparation}
 \leanok
 
+The common-prefix evaluator now also has an ordinary public inverse-search
+façade. Four finite warm-up terms are reserved so that the requested stage
+itself supplies the interval-width budget:
+
+\begin{verbatim}
+warm exp stage -> interval regularity -> monotone boxes
+               -> gap-aware separation -> finite inverse search
+\end{verbatim}
+
+\lean{ComputableAnalysis.ExpProofs.uniformExpTailMagnitude_le_reciprocalHundred_shifted}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_compute}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_intervalRegular}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_nondecreasing}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_gapAwareSeparation}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_continuous}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_gapAwareInvertible}
+\lean{ComputableAnalysis.GapAwareInvertibleFunctionOnInterval}
+\lean{ComputableAnalysis.gapAwareTargetBisectionMidpointRange}
+\lean{ComputableAnalysis.gapAwareTargetBisectionMidpointRange_ordered}
+\lean{ComputableAnalysis.gapAwareTargetBisectionStep}
+\lean{ComputableAnalysis.gapAwareTargetBisectionStep_of_below}
+\lean{ComputableAnalysis.gapAwareTargetBisectionStep_of_above}
+\lean{ComputableAnalysis.gapAwareTargetBisectionStrictDecision}
+\lean{ComputableAnalysis.gapAwareTargetBisectionStep_ordered}
+\lean{ComputableAnalysis.gapAwareTargetBisectionStep_subinterval}
+\lean{ComputableAnalysis.gapAwareTargetBisectionStep_width_le}
+\lean{ComputableAnalysis.gapAwareTargetBisectionStep_congr}
+\lean{ComputableAnalysis.gapAwareTargetBisectionIterateWithProof}
+\lean{ComputableAnalysis.gapAwareTargetBisectionIterate}
+\lean{ComputableAnalysis.gapAwareTargetBisectionIterate_subinterval}
+\lean{ComputableAnalysis.gapAwareTargetBisectionIterate_width_le}
+\lean{ComputableAnalysis.gapAwareTargetBisectionFixedIterateWithProof}
+\lean{ComputableAnalysis.gapAwareTargetBisectionFixedIterate}
+\lean{ComputableAnalysis.gapAwareTargetBisectionFixedIterate_subinterval}
+\lean{ComputableAnalysis.gapAwareTargetBisectionFixedIterate_width_le}
+\lean{ComputableAnalysis.gapAwareTargetBisectionAdaptiveIterate}
+\lean{ComputableAnalysis.gapAwareTargetBisectionAdaptiveIterate_eq_scheduled}
+\lean{ComputableAnalysis.gapAwareTargetBisectionFixedDecision}
+\lean{ComputableAnalysis.gapAwareTargetBisectionFixedIterate_width_eq_div_pow_of_decided}
+\lean{ComputableAnalysis.gapAwareTargetBisectionScheduledIterate_width_eq_div_pow_of_strictly_decided}
+\lean{ComputableAnalysis.gapAwareTargetBisectionScheduledIterate_mem_of_oriented}
+\lean{ComputableAnalysis.gapAwareTargetBisectionScheduledIterate_nested}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_one_target}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_one_search}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_one_preimage_equiv_zero}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_forward_target}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_forward_search}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_forward_preimage_equiv}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_midpoint_below_forward_target}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_midpoint_above_forward_target}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_cellRange_midpoint_below_forward_target}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_cellRange_midpoint_above_forward_target}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_cellRange_midpoint_below_forward_target_at_stage}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_cellRange_midpoint_above_forward_target_at_stage}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_cellRange_midpoint_below_forward_target_at_scheduled_stage}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_cellRange_midpoint_above_forward_target_at_scheduled_stage}
+\lean{ComputableAnalysis.ExpProofs.finiteNatMax}
+\lean{ComputableAnalysis.ExpProofs.finiteNatMax_mem}
+\lean{ComputableAnalysis.ExpProofs.uniformExpGapPrecisionAt}
+\lean{ComputableAnalysis.ExpProofs.uniformExpGapPrecisionAt_of_below}
+\lean{ComputableAnalysis.ExpProofs.uniformExpGapPrecisionAt_of_above}
+\lean{ComputableAnalysis.ExpProofs.uniformExpGapPrecisionMax}
+\lean{ComputableAnalysis.ExpProofs.uniformExpGapPrecisionMax_dominates}
+\lean{ComputableAnalysis.ExpProofs.dyadicMidpointGrid}
+\lean{ComputableAnalysis.ExpProofs.dyadicMidpointGridUpTo}
+\lean{ComputableAnalysis.ExpProofs.dyadicMidpointGrid_mem}
+\lean{ComputableAnalysis.ExpProofs.dyadicMidpointGrid_mem_upTo}
+\lean{ComputableAnalysis.ExpProofs.dyadicInterval_midpoint_eq_grid}
+\lean{ComputableAnalysis.ExpProofs.dyadicCell}
+\lean{ComputableAnalysis.ExpProofs.dyadicCell_subinterval}
+\lean{ComputableAnalysis.ExpProofs.dyadicCell_midpoint_mem_grid_upTo}
+\lean{ComputableAnalysis.ExpProofs.dyadicCell_left_child}
+\lean{ComputableAnalysis.ExpProofs.dyadicCell_right_child}
+\lean{ComputableAnalysis.ExpProofs.gapAwareTargetBisectionStep_dyadicCell_of_below}
+\lean{ComputableAnalysis.ExpProofs.gapAwareTargetBisectionStep_dyadicCell_of_above}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_dyadicCell_strict_below_forward_target}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_dyadicCell_strict_above_forward_target}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_dyadicCell_below_test_false_of_above}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_dyadicCell_strict_above_forward_target_auto}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_dyadicCell_strict_below_oneThird}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_dyadicCell_strict_above_oneThird}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_oneThird_target_compute_eq_forward}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_oneThird_target_strict_below_at_stage}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_oneThird_target_strict_above_at_stage}
+\lean{ComputableAnalysis.ExpProofs.dyadicCell_midpoint_ne_oneThird}
+\lean{ComputableAnalysis.ExpProofs.dyadicCell_width}
+\lean{ComputableAnalysis.ExpProofs.dyadicCell_left_endpoint_ne_oneThird}
+\lean{ComputableAnalysis.ExpProofs.dyadicCell_right_endpoint_ne_oneThird}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_oneThird_scheduled_iterate_dyadicCell}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_oneThird_scheduled_iterate_width}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_oneThird_scheduled_oriented}
+\lean{ComputableAnalysis.ExpProofs.dyadicCell_nested_of_strict_contains}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_oneThird_bisection_compute}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_oneThird_bisection_compute_valid_ordered_nested}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_oneThird_bisection_compute_valid}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_oneThird_bisection_raw}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_oneThird_bisection_raw_valid}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_oneThird_bisection_compute_subinterval}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_oneThird_bisection_value_overlaps}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_oneThird_bisection_search}
+\lean{ComputableAnalysis.ExpProofs.gapAwareTargetBisectionScheduledIterate_dyadicCell}
+\lean{ComputableAnalysis.ExpProofs.uniformExpRationalTargetStage}
+\lean{ComputableAnalysis.ExpProofs.uniformExpRationalTargetStage_ge}
+\lean{ComputableAnalysis.ExpProofs.uniformExpRationalTargetStage_mono}
+\lean{ComputableAnalysis.ExpProofs.uniformExpRationalTargetStage_dominates}
+\lean{ComputableAnalysis.ExpProofs.uniformExpRationalTargetStageSchedule}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_oneThird_target}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_oneThird_target_stage_dominates}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_unit_subinterval}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_oneThird_adaptive_equals_scheduled}
+\lean{ComputableAnalysis.ExpProofs.uniformExpCenter_threeHalves_map}
+\lean{ComputableAnalysis.ExpProofs.uniformExpCenter_threeHalves_certificate}
+\lean{ComputableAnalysis.ExpProofs.uniformExpCenter_threeHalves_finite_bisection}
+\lean{ComputableAnalysis.FiniteInverseSearchCertificate.toRealRawFamily}
+\lean{ComputableAnalysis.FiniteInverseSearchCertificate.toRealRawFamily_valid}
+\lean{ComputableAnalysis.ExpProofs.uniformExpCenter_threeHalves_inverse}
+\lean{ComputableAnalysis.ExpProofs.uniformExpCenter_threeHalves_inverse_valid}
+\lean{ComputableAnalysis.ExpProofs.uniformExpCenter_threeHalves_inverse_stage_bracket}
+\lean{ComputableAnalysis.ExpProofs.uniformExpCenter_threeHalves_output_forward_overlap}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_three_halves_midpoint_above}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_three_halves_first_step}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_three_halves_second_step}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_three_halves_third_step}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_three_halves_decision_zero}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_three_halves_decision_one}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_three_halves_decision_two}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_three_halves_width_from_decisions}
+\leanok
+
+This closes the analytic data for a branch-local gap-aware inverse search. The
+older fixed-gap `InvertibleFunctionOnInterval` contract remains available for
+algorithms whose separation modulus is uniform; the exponential branch now
+uses the more faithful `GapAwareInvertibleFunctionOnInterval` contract.
+The exact target-one regression search returns the rational preimage (0),
+which is the computable branch statement (log 1=0).
+More generally, every rational source point in the branch supplies a
+forward-computed target and an exact inverse regression: the target is the
+warm-stage computation of (exp r), and the returned source box is (r,r).
+This validates the inverse contract on a family of targets while leaving the
+decision-driven bisection algorithm as the next construction.
+As an intermediate target-driven test, the rational target (3/2) is searched
+against a finite exponential center by exact midpoint decisions.  The
+resulting certificate exposes both the preserved endpoint bracket and the
+literal width (2^{-k}); it is the finite kernel to be lifted to the
+gap-aware, stage-indexed target algorithm.
+The forward-overlap theorem makes the bridge explicit: the interval-valued
+exponential cell range at the same finite center stage still overlaps (3/2).
+On the actual warm exponential branch, the first three midpoint decisions for
+the target (3/2) are also checked explicitly, producing the brackets
+([0,1/2]), ([1/4,1/2]), and ([3/8,1/2]).
+The same trace is generated by the fixed-precision proof-carrying iterator.
+When every midpoint decision is certified strict, the generic theorem gives
+the exact geometric width law (initial width)/(2^n).  The analytic content is
+therefore isolated in the finite separation certificates.
+For the warm exponential target (3/2), those certificates are now supplied
+for stages 0, 1, and 2, yielding width 1/8 by the generic theorem.
+
 The inverse layer is deliberately branch-local.  An invertible computation
 must carry its source interval, monotonicity orientation, separation schedule,
 and certified target range; an inverse evaluator then returns a rational source
 box whose forward image overlaps the target box.  This is the constructive
 replacement for saying that a continuous monotone function has an inverse.
+The midpoint kernel is conservative: it discards a half only when its whole
+computed image box lies strictly below or above the target box; an ambiguous
+overlap retains the parent interval.  Any claimed progress theorem must
+therefore provide the missing precision/separation certificate explicitly.
 
 \lean{ComputableAnalysis.EffectiveInverseSeparation}
 \lean{ComputableAnalysis.GapAwareInverseSeparation}
+\lean{ComputableAnalysis.GapAwareInverseBisectionPlan}
+\lean{ComputableAnalysis.GapAwareScheduledInverseBisectionPlan}
+\lean{ComputableAnalysis.GapAwareScheduledInverseBisectionPlan.valid_output}
+\lean{ComputableAnalysis.gapAwareScheduledInverseBisectionPlanToSearch}
 \lean{ComputableAnalysis.InvertibleFunctionOnInterval}
 \lean{ComputableAnalysis.InRangeRaw}
 \lean{ComputableAnalysis.InverseRaw}
 \lean{ComputableAnalysis.InverseRaw.apply_value_overlaps_target}
 \lean{ComputableAnalysis.InverseBisectionSearch}
 \lean{ComputableAnalysis.inverse_function_from_bisection_search}
+\lean{ComputableAnalysis.identityFunctionOnUnitRegular}
+\lean{ComputableAnalysis.identityInvertibleOnUnit}
+\lean{ComputableAnalysis.identityInverseBisectionSearch}
+\lean{ComputableAnalysis.identityInverseRaw_apply_eq_target}
 \leanok
 
 The positive reciprocal evaluator on \([1,2]\), its interval regularity, and
 the finite exp/log transport are checked. General inverse-function laws remain
 certificate interfaces: each new domain supplies monotonicity, separation, and
 a finite bisection schedule.
+
+The identity branch is the complete regression case: its inverse search reuses
+the target interval, and every range, source, and forward-overlap obligation
+is checked directly. Nonlinear branches should provide the same fields, with
+only the search algorithm changing.
 
 The logarithm-side derivative is also a finite certificate. On the safe chart
 \([1,2]\), the reciprocal secant quotient satisfies
@@ -300,4 +481,8 @@ representations must overlap pointwise on every positive rational input.
 \lean{ComputableAnalysis.Elementary.LogFromIntegralInv}
 \lean{ComputableAnalysis.Elementary.LogFromMonotoneExp}
 \lean{ComputableAnalysis.Elementary.LogIntegralAgreesWithInverseExp}
+\lean{ComputableAnalysis.exp.PowerSeriesLogIntegralInverseComparison}
+\lean{ComputableAnalysis.exp.powerSeries_equiv_logIntegralInverse_on_interval}
+\lean{ComputableAnalysis.exp.powerSeries_equiv_logIntegralInverse_on_interval_of_directMesh}
+\lean{ComputableAnalysis.exp.powerSeries_equiv_logIntegralInverse_on_interval_of_volterra}
 \leanok

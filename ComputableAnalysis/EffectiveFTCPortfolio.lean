@@ -1418,6 +1418,60 @@ def NestedRadicalSquareIntegralConstructionSubgoal.of_canonical_search
   simpa [hdyadic, Integral.staticDyadicPlan,
     Integral.staticDyadicSubdivisions] using hover
 
+/- The shared branch certificate family is an equivalent, more direct input
+   for the same construction boundary.  It supplies the sine-box overlap at
+   the evaluator's requested precision, so no second search family is needed. -/
+def NestedRadicalSquareIntegralConstructionSubgoal.of_branch_certificate_family
+    (S : SinPiIntegral.ArctanSinPiConstruction)
+    (publicConstruction : Integral.Construction
+      (SinPiIntegral.sinPiSquareOnHalf S) 0 ((1 : Rat) / 2))
+    (evaluator : RealFunRaw)
+    (integral : Integral.Construction evaluator 0 ((1 : Rat) / 2))
+    (hdyadic : publicConstruction.plan = Integral.staticDyadicPlan)
+    (hplan : publicConstruction.plan = integral.plan)
+    (hevaluator : forall n k,
+      k < (publicConstruction.plan n).subdivisions ->
+      evaluator.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (publicConstruction.plan n).subdivisions k)
+        (publicConstruction.plan n).evalPrecision =
+        SinPiIntegral.rationalSquareInterval
+          (SinPiIntegral.dyadicNestedRadicalStageSinAt n k))
+    (family : SinPiIntegral.DyadicNestedRadicalBranchCertificateFamily
+      S.inverse) :
+    NestedRadicalSquareIntegralConstructionSubgoal S := by
+  refine {
+    publicConstruction := publicConstruction
+    evaluator := evaluator
+    integral := integral
+    same_plan := hplan
+    sample_overlap := ?_ }
+  intro n k hk
+  have hk' : k < 2 ^ n := by
+    simpa [hdyadic, Integral.staticDyadicPlan,
+      Integral.staticDyadicSubdivisions] using hk
+  have hsin := family.sample_overlap n n k hk'
+  have hover := SinPiIntegral.sinPiSquare_sample_overlap_of_sine_and_table_overlap
+    S (SinPiIntegral.dyadicHalfDomain hk')
+    n
+    (by
+      change subintervalOf
+        (SinPiIntegral.dyadicNestedRadicalTableAt
+          n n k).1 0 1
+      exact (SinPiIntegral.dyadicNestedRadicalTableAt_bounds
+        n n k
+        (Nat.le_of_lt hk')).1)
+    (by
+      simpa [hdyadic, Integral.staticDyadicPlan,
+        Integral.staticDyadicSubdivisions] using hsin)
+  have he := hevaluator n k hk
+  rw [he]
+  have hstage : SinPiIntegral.dyadicNestedRadicalStageSinAt n k =
+      (SinPiIntegral.dyadicNestedRadicalTableAt n n k).1 := rfl
+  rw [hstage]
+  simpa [hdyadic, Integral.staticDyadicPlan,
+    Integral.staticDyadicSubdivisions] using hover
+
 /- The square-sum width estimate and orderedness are already proved.  This
    isolates the one missing raw-real property: cross-stage nesting of the
    finite dyadic square sums. -/

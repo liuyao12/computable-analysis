@@ -3915,6 +3915,26 @@ def implementationRepresentation {f : PartialRealFunction}
   valid := impl.valid
   agrees := implementation_agrees_preferred impl
 
+/-! Two certified views of one abstract partial function can be compared on
+their common domain once that domain is known to lie inside the preferred
+domain.  This is the function-level analogue of `Real.Representation.equiv`:
+the preferred evaluator is the spanning node in the representation chain. -/
+theorem Representation.equiv_on_common_domain
+    {f : PartialRealFunction} (source target : Representation f)
+    (hsource : forall x, source.raw.definedAt x -> f.preferred.definedAt x)
+    {x : Rat} (hxs : source.raw.definedAt x)
+    (hxt : target.raw.definedAt x) :
+    (source.raw.evalRaw x hxs).Equiv (target.raw.evalRaw x hxt) := by
+  have hxp : f.preferred.definedAt x := hsource x hxs
+  have hs : (source.raw.evalRaw x hxs).Valid := by
+    simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using source.valid x hxs
+  have hp : (f.preferred.evalRaw x hxp).Valid := by
+    simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using f.valid x hxp
+  have ht : (target.raw.evalRaw x hxt).Valid := by
+    simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using target.valid x hxt
+  exact RealRaw.equiv_trans hs hp ht (source.agrees x hxs hxp)
+    (RealRaw.equiv_symm (target.agrees x hxt hxp))
+
 def withAlternative (f : PartialRealFunction) (raw : PartialRealFunRaw)
     (hvalid : raw.Valid)
     (h : f.preferred.AgreeOnOverlap raw) : PartialRealFunction where
@@ -4852,6 +4872,49 @@ def withAlternative (f : ComplexFunction) (raw : FunctionRaw)
   implementations :=
     { raw := raw, valid := hvalid, agrees := h } :: f.implementations
 
+/- Add a function implementation through an existing representation.  The
+   explicit coverage hypothesis is essential: agreement on varying partial
+   domains cannot be composed unless the intermediate representation is
+   defined at the new/preferred common inputs. -/
+def withAlternativeFrom (f : ComplexFunction) (parent : Representation f)
+    (raw : FunctionRaw) (hvalid : raw.Valid)
+    (hcover : forall z, raw.domain z -> f.preferred.domain z -> parent.raw.domain z)
+    (h : forall z (hr : raw.domain z) (hf : f.preferred.domain z)
+      (hp : parent.raw.domain z),
+      (raw.evalRaw z hr).Equiv (parent.raw.evalRaw z hp)) : ComplexFunction where
+  preferred := f.preferred
+  valid := f.valid
+  implementations :=
+    { raw := raw
+      valid := hvalid
+      agrees := by
+        intro z hf hr
+        let hp := hcover z hr hf
+        exact ComplexRaw.equiv_trans (f.valid z hf) (parent.valid z hp)
+          (hvalid z hr)
+          (ComplexRaw.equiv_symm (parent.agrees z hp hf))
+          (ComplexRaw.equiv_symm (h z hr hf hp)) } :: f.implementations
+
+def withAlternativeFromImplementation (f : ComplexFunction)
+    (parent : ComplexFunctionImplementation f.preferred)
+    (raw : FunctionRaw) (hvalid : raw.Valid)
+    (hcover : forall z, raw.domain z -> f.preferred.domain z -> parent.raw.domain z)
+    (h : forall z (hr : raw.domain z) (hf : f.preferred.domain z)
+      (hp : parent.raw.domain z),
+      (raw.evalRaw z hr).Equiv (parent.raw.evalRaw z hp)) : ComplexFunction where
+  preferred := f.preferred
+  valid := f.valid
+  implementations :=
+    { raw := raw
+      valid := hvalid
+      agrees := by
+        intro z hf hr
+        let hp := hcover z hr hf
+        exact ComplexRaw.equiv_trans (f.valid z hf) (parent.valid z hp)
+          (hvalid z hr)
+          (parent.agrees z hf hp) (ComplexRaw.equiv_symm (h z hr hf hp)) } ::
+      f.implementations
+
 end ComplexFunction
 
 structure ComplexCert where
@@ -4936,6 +4999,29 @@ def alternativeRepresentation {z : Complex} (rep : ComplexCert)
     (h : rep ∈ z.alternatives) : Representation z where
   cert := rep
   agrees := z.coherent h
+
+/- Add a new complex implementation through any already certified
+   representation.  The stored edge is composed with that representation's
+   path back to the preferred node, so callers only need to prove one local
+   equivalence edge rather than compare every implementation pairwise. -/
+def withAlternativeFrom (z : Complex) (parent : Representation z)
+    (rep : ComplexCert) (h : rep.raw.Equiv parent.cert.raw) : Complex where
+  preferred := z.preferred
+  implementations :=
+    { cert := rep
+      equivalent := ComplexRaw.equiv_trans z.preferred.valid parent.cert.valid
+        rep.valid (ComplexRaw.equiv_symm parent.agrees) (ComplexRaw.equiv_symm h) } ::
+      z.implementations
+
+def withAlternativeFromImplementation (z : Complex)
+    (parent : ComplexImplementation z.preferred.raw)
+    (rep : ComplexCert) (h : rep.raw.Equiv parent.cert.raw) : Complex where
+  preferred := z.preferred
+  implementations :=
+    { cert := rep
+      equivalent := ComplexRaw.equiv_trans z.preferred.valid parent.cert.valid
+        rep.valid parent.equivalent (ComplexRaw.equiv_symm h) } ::
+      z.implementations
 
 def computeUsing {z : Complex} (rep : Representation z) (n : Nat) : QBox :=
   rep.cert.raw.compute n
