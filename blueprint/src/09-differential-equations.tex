@@ -369,6 +369,18 @@ turns a particular coefficient evaluator into compatible simplex boxes and a
 tail budget.  Keeping that input explicit prevents the usual compactness and
 completeness argument from reappearing under the name ``continuous solution''.
 
+The provider boundary is represented directly by the existing finite types:
+the coefficient and forcing entries share a rational interval, regularity is
+requested componentwise, and the tail is packaged by an explicit requested-
+precision certificate.  The simplex-box constructor remains the
+function-specific input between these two layers.
+
+\lean{ComputableAnalysis.LinearODE.IntervalLinearSystem}
+\lean{ComputableAnalysis.LinearODE.IntervalLinearSystem.CoefficientsRegular}
+\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialRemainderCertificate}
+\lean{ComputableAnalysis.LinearODE.PeanoBakerFactorialRemainderCertificate.tail_le_eps}
+\leanok
+
 \lean{ComputableAnalysis.LinearODE.ZeroInitialVolterraIterationBound}
 \lean{ComputableAnalysis.LinearODE.SelfDerivativeVolterraComparison}
 \lean{ComputableAnalysis.LinearODE.SelfDerivativeVolterraComparison.equivalent}
