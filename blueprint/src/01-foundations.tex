@@ -664,6 +664,11 @@ For functions, the same distinction is kept at the appropriate level: a
 special function.  Their certificates assert agreement only on common domain
 points.  We do not first classify the function as continuous or analytic; we
 formalize the domain and properties needed by the application.
+When two certified views share a rational input, the preferred view supplies
+the spanning comparison:
+\lean{ComputableAnalysis.PartialRealFunction.Representation.equiv_on_common_domain}
+This is a domain-aware transport theorem, not an assertion that unrelated
+partial functions agree outside their certified overlap.
 \end{definition}
 
 \begin{proposition}[Raw arithmetic respects representations]\label{thm:raw-reals-field}
