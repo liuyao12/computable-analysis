@@ -1177,10 +1177,12 @@ The warm exponential example supplies the first three decision certificates
 for target `3/2`, and derives the `1/8` width result through that generic
 theorem rather than through a separate arithmetic trace.
 
-The arctangent branch has the same representation split. The scheduled
-rectangle evaluator in `ArctanScheduledRegular.lean` now exposes interval
-regularity, monotonicity, effective separation, and an
-`InvertibleFunctionOnInterval` package. Its
+The arctangent branch has the same representation split. The lightweight
+scheduled rectangle core in `ArctanScheduledCore.lean` exposes the staged raw
+evaluator, its width budget, validity, and equivalence to the geometric
+arctangent without importing inverse-search regularity. The heavier
+`ArctanScheduledRegular.lean` layer adds interval regularity, monotonicity,
+effective separation, and an `InvertibleFunctionOnInterval` package. Its
 `arctanScheduledRectangleOnUnit_equivalent_geometric_branch` theorem connects
 that precision-friendly evaluator to the geometric arctangent used by the
 circle chapter.

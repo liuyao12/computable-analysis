@@ -2,6 +2,7 @@ import ComputableAnalysis.RationalCircle
 import ComputableAnalysis.Calculus
 import ComputableAnalysis.IdentityInverse
 import ComputableAnalysis.ArctanEffectiveFTC
+import ComputableAnalysis.ArctanScheduledCore
 import ComputableAnalysis.IntegralIdentities
 import ComputableAnalysis.TurningPointIntegral
 import ComputableAnalysis.AbsIntegral
