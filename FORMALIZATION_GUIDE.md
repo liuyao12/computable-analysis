@@ -927,6 +927,8 @@ The shared branch family feeds the same interface directly through
 `DyadicSquareCircleOverlapFamily.of_branch_certificate_family`, so the square
 transport reuses the sine sample proof rather than duplicating it.
 This is only an index bridge: it adds no completeness or limiting argument.
+The normalized square product currently has explicit regression overlaps at
+stages 0, 1, and 2; the uniform all-stage witness remains the proof boundary.
 The theorem-facing shortcut is
 `ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_canonical_certificate_family`.
 The branch-certificate route exposes the same result in rational-circle box
