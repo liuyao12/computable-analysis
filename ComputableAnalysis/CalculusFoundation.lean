@@ -33,6 +33,8 @@ import ComputableAnalysis.FiniteGapAwareInverseSearch
 import ComputableAnalysis.Logarithm
 import ComputableAnalysis.ScalarODEUniqueness
 import ComputableAnalysis.PeanoBaker
+import ComputableAnalysis.GeometricRotationODE
+import ComputableAnalysis.RotationPeanoBakerBridge
 import ComputableAnalysis.FiniteNBallVolume
 import ComputableAnalysis.FiniteGaussianIntegral
 import ComputableAnalysis.ComplexCircleBridge
