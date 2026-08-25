@@ -6398,6 +6398,38 @@ def dyadicCell (n k : Nat) : QInterval where
   lo := (k : Rat) / ((2 ^ n : Nat) : Rat)
   hi := ((k + 1 : Nat) : Rat) / ((2 ^ n : Nat) : Rat)
 
+theorem dyadicCell_subinterval (n k : Nat) (hk : k < 2 ^ n) :
+    subintervalOf (dyadicCell n k) (0 : Rat) 1 := by
+  unfold subintervalOf dyadicCell
+  have hpow : (0 : Rat) < ((2 ^ n : Nat) : Rat) :=
+    Rat.natCast_pos.mpr (Nat.pow_pos (by decide))
+  have hpowne : ((2 ^ n : Nat) : Rat) ≠ 0 := Rat.ne_of_gt hpow
+  have hk0 : (0 : Rat) ≤ (k : Rat) := Rat.natCast_nonneg
+  have hk1 : (k : Rat) + 1 ≤ ((2 ^ n : Nat) : Rat) := by
+    exact_mod_cast (Nat.succ_le_of_lt hk)
+  constructor
+  · rw [Rat.div_def]
+    exact Rat.mul_nonneg hk0 (Rat.le_of_lt (Rat.inv_pos.mpr hpow))
+  constructor
+  · rw [Rat.div_def, Rat.div_def]
+    exact Rat.mul_le_mul_of_nonneg_right (by exact_mod_cast (Nat.le_succ k))
+      (Rat.le_of_lt (Rat.inv_pos.mpr hpow))
+  · apply Rat.le_of_mul_le_mul_right
+      (c := ((2 ^ n : Nat) : Rat))
+    · rw [Rat.div_def]
+      have hcancel := Rat.mul_inv_cancel ((2 ^ n : Nat) : Rat) hpowne
+      have hcancel' := Rat.inv_mul_cancel ((2 ^ n : Nat) : Rat) hpowne
+      calc
+        ((k + 1 : Nat) : Rat) * ((2 ^ n : Nat) : Rat)⁻¹ *
+            ((2 ^ n : Nat) : Rat) =
+            ((k + 1 : Nat) : Rat) *
+              (((2 ^ n : Nat) : Rat)⁻¹ * ((2 ^ n : Nat) : Rat)) := by
+                rw [Rat.mul_assoc]
+        _ = ((k + 1 : Nat) : Rat) := by rw [hcancel', Rat.mul_one]
+        _ <= 1 * ((2 ^ n : Nat) : Rat) := by
+          simpa [Rat.one_mul] using hk1
+    · exact hpow
+
 theorem dyadicCell_midpoint_mem_grid_upTo
     (n k : Nat) (hk : k < 2 ^ n) :
     (dyadicCell n k).midpoint ∈ dyadicMidpointGridUpTo n := by

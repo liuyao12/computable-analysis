@@ -985,6 +985,7 @@ source value `1/3`; its explicit dominance certificate is
 The arithmetic bridge is now explicit: `dyadicCell` describes a standard
 dyadic subinterval, `dyadicCell_left_child` and
 `dyadicCell_right_child` identify its two children, and
+`dyadicCell_subinterval` certifies that the cell stays in `[0,1]`; finally,
 `dyadicCell_midpoint_mem_grid_upTo` proves that every canonical-cell midpoint
 is among the finitely listed target demands.
 
