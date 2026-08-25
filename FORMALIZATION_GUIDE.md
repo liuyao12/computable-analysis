@@ -375,7 +375,8 @@ Reserve `EffectiveFourierSeries` tail certificates for genuinely unbounded
 coefficient families.
 Such a certificate exposes `EffectiveFourierTailCertificate.stageBox` and
 `future_stage_in_stageBox`, a single rational-complex enclosure for every
-future stage.
+future stage.  Its exact coordinate budgets are exposed by
+`stageBox_width` and `stageBox_height`, both equal to `2 * radius k`.
 
 Use `rg` to discover nearby examples before inventing a new interface:
 

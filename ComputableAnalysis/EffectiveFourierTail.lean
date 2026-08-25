@@ -141,6 +141,23 @@ theorem EffectiveFourierTailCertificate.future_stage_in_stageBox
       (certificate.stageBox k) := by
   exact (certificate.toSeries).future_containment k n hkn
 
+/- The stage box exposes the exact coordinate error budget used by downstream
+   Fourier and integral estimates.  This is the quantitative half of the
+   abstract containment theorem above. -/
+theorem EffectiveFourierTailCertificate.stageBox_width
+    (certificate : EffectiveFourierTailCertificate) (k : Nat) :
+    (certificate.stageBox k).width = 2 * certificate.radius k := by
+  unfold EffectiveFourierTailCertificate.stageBox QBox.expand QBox.point
+    QBox.width
+  grind
+
+theorem EffectiveFourierTailCertificate.stageBox_height
+    (certificate : EffectiveFourierTailCertificate) (k : Nat) :
+    (certificate.stageBox k).height = 2 * certificate.radius k := by
+  unfold EffectiveFourierTailCertificate.stageBox QBox.expand QBox.point
+    QBox.height
+  grind
+
 /-! The geometric quarter-turn family is now an instance of the generic
 tail interface.  The certificate is stated independently of the particular
 `EffectiveFourierSeries` constructor, so other coefficient algorithms can
