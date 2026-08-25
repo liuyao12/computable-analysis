@@ -20,7 +20,19 @@ shrinking rational bracket around a non-rational turning point.
 For the focused calculus route, import
 `ComputableAnalysis.CalculusFoundation`. It collects the circle, integral and
 effective-FTC, power-series, exponential/logarithm, Fourier, and ODE layers
-without importing the full benchmark catalogue.
+without importing the full benchmark catalogue. For a smaller dependency,
+use the chapter entry points in this order:
+
+```text
+FunctionFoundation -> CircleFoundation -> IntegralFoundation
+                   -> EffectiveCalculusFoundation
+                   -> SeriesFoundation -> ExponentialLogarithmFoundation
+                   -> DifferentialEquationsFoundation
+```
+
+These are routing modules, not claims that every imported interface is a
+completed general theorem. Start with the smallest one that contains the
+certificate you need.
 
 ## Read this first
 
@@ -108,11 +120,18 @@ Start with the smallest target module rather than importing
 | Need | Import | Start with |
 | --- | --- | --- |
 | Rational interval arithmetic and raw reals | `ComputableAnalysis.Basic` | `QInterval`, `RealRaw`, `RealRaw.Valid`, `RealRaw.Equiv` |
+| Rational-domain complex functions and representations | `ComputableAnalysis.FunctionFoundation` | `FunctionRaw`, `PartialRealFunRaw`, `ComplexFunction`, domains, and representation transport |
+| Rational circle and trigonometry | `ComputableAnalysis.CircleFoundation` | Rational geometry, arctangent/circle area, finite rotations, and stable complex coordinates |
+| Integrals and effective FTC data | `ComputableAnalysis.IntegralFoundation` | Rectangle, piecewise, polynomial, arctangent, Stieltjes, and effective-FTC certificates |
+| Effective-calculus proof contracts | `ComputableAnalysis.EffectiveCalculusFoundation` | Secant, derivative-bound, curvature, stabilization, inverse-search, and L'Hôpital interfaces |
+| Power series and finite Fourier data | `ComputableAnalysis.SeriesFoundation` | Rational tails, finite termwise FTC, Fourier transforms, Gaussian prefixes, and the finite (n)-ball recurrence |
+| Exponential and logarithm | `ComputableAnalysis.ExponentialLogarithmFoundation` | Taylor prefixes, tail bounds, rotation coordinates, and gap-aware inverse search |
+| Linear differential equations | `ComputableAnalysis.DifferentialEquationsFoundation` | Scalar uniqueness, finite Peano--Baker algebra, rotation bridges, and finite ODE providers |
 | Certified complex multiplication | `ComputableAnalysis.ComplexMultiplication` | `ComplexRaw.mul_valid`, `ComplexRaw.mul_equiv`, and the finite `QBox` bounds |
 | Certified imaginary-axis input | `ComputableAnalysis.ComplexAffine` | `ComplexRaw.mulI`, `ComplexRaw.imaginaryAxis`, and exact rational complex-scalar actions |
 | Rational function with a certified domain | `ComputableAnalysis.FunctionDomains` | `RatFun`, `RatFun.polynomialOnInterval`, `RatFun.polynomialOnInterval_compute_eq`, `RatFun.eval?_eq_some_of_defined`, `RatFun.eval?_eq_none_of_undefined`, `RatFun.oneOverX_defined_of_ne_zero`, `RatFun.oneOverXOnPositiveInterval`, `RatFun.oneOverXOnNegativeInterval`, `RatFun.DenominatorApartOnInterval`, `RatFun.onRegularInterval` |
 | Interval functions, continuity, and integral certificates | `ComputableAnalysis.Calculus` | `FunctionOnInterval`, `IntervalRegularOn`, `Integral.nondecreasingDarbouxDyadicStage`, `Integral.generalConstructionFor`, `Integral.ConstructionFor` |
-| Focused calculus foundation | `ComputableAnalysis.CalculusFoundation` | The dependency-checked entry point for circle, integrals/FTC, series, exp/log, Fourier, ODE, finite multiple-integral, and finite complex-path layers |
+| Focused calculus foundation | `ComputableAnalysis.CalculusFoundation` | The dependency-checked umbrella entry point for all scoped calculus layers, finite multiple-integral, and finite complex-path layers |
 | Finite monotone decomposition with non-rational turns | `ComputableAnalysis.TurningPointIntegral` | `Integral.TurningPointBracket`, `Integral.TurningBracketIntegralCandidate`, `Integral.MultiTurnIntegralCompletion`, `Integral.SingleTurnIntegralCompletion.constructionFor` |
 | Rational finite-difference derivatives | `ComputableAnalysis.Differential` | `HasDerivativeOnInterval`, `HasForwardDerivativeAt` |
 | Sector-area time | `ComputableAnalysis.SectorAreaReparametrization` | `angleOnUnit`, `angleOnUnit_hasDerivative`, `angleOnUnitRegular_intervalRegular`, `angleOnUnitRegular_invertible`, `angleAt_equiv_two_arctanGeom` |
