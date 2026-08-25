@@ -737,6 +737,12 @@ this is the preferred entry point for a subsequent derivative or FTC
 certificate.  Signed or unbounded products remain separate targets rather
 than being silently inferred from an ambient real multiplication operation.
 
+When two factor charts are connected by `FunctionOnInterval.Equivalent`,
+transport their certified bounded product with
+`FunctionOnInterval.equivalent_mulOfNonnegBounded`. The representation graph
+stays explicit, while the same rational majorants provide the validity
+certificates for the new product chart.
+
 The finite derivative algebra is now exposed as well:
 `QInterval.differenceQuotient_addInterval` distributes the interval quotient
 over addition, and `intervalNearAtPrecision_addInterval` combines two
