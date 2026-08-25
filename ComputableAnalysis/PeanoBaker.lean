@@ -2159,6 +2159,50 @@ theorem constantPeanoBakerSimplexPartial_succ {dimension : Nat}
       (constantPeanoBakerSimplexPartial A T terms)
       (constantPeanoBakerSimplexTerm A T terms) := rfl
 
+/-! A square-zero constant generator is the first exact terminating ODE
+case.  Its ordered-simplex expansion has no terms of degree two or higher,
+so the finite transition is already the closed form `I + T A`. -/
+theorem matrixPow_add_two_eq_zero_of_mul_self_eq_zero
+    {dimension : Nat} (A : RatMatrix dimension)
+    (hAA : matrixMul A A = matrixZero dimension) :
+    forall n, matrixPow A (n + 2) = matrixZero dimension
+  | 0 => by
+      simp only [Nat.zero_add, matrixPow]
+      rw [matrixMul_identity_right, hAA]
+  | n + 1 => by
+      rw [show n + 1 + 2 = (n + 2) + 1 by omega, matrixPow,
+        matrixPow_add_two_eq_zero_of_mul_self_eq_zero A hAA n,
+        matrixMul_zero_right]
+
+theorem constantPeanoBakerSimplexPartial_add_two_eq_identity_add_scale_of_mul_self_eq_zero
+    {dimension : Nat} (A : RatMatrix dimension) (T : Rat)
+    (hAA : matrixMul A A = matrixZero dimension) :
+    forall terms,
+      constantPeanoBakerSimplexPartial A T (terms + 2) =
+        matrixAdd (matrixIdentity dimension) (matrixScale T A)
+  | 0 => by
+      simp [constantPeanoBakerSimplexPartial,
+        constantPeanoBakerSimplexTerm, matrixPow,
+        matrixMul_identity_right, factorialRat, factorial]
+      have hone : (1 : Rat) / 1 = 1 := by native_decide
+      have hT : T / 1 = T := by
+        have hinv : (1 : Rat)⁻¹ = 1 :=
+          Rat.inv_eq_of_mul_eq_one (by native_decide)
+        rw [Rat.div_def, hinv, Rat.mul_one]
+      rw [hone, hT, matrixAdd_zero_left, matrixScale_one]
+  | terms + 1 => by
+      rw [constantPeanoBakerSimplexPartial_succ,
+        constantPeanoBakerSimplexPartial_add_two_eq_identity_add_scale_of_mul_self_eq_zero
+          A T hAA terms]
+      have hpow := matrixPow_add_two_eq_zero_of_mul_self_eq_zero A hAA terms
+      have hterm : constantPeanoBakerSimplexTerm A T (terms + 2) =
+          matrixZero dimension := by
+        unfold constantPeanoBakerSimplexTerm
+        rw [hpow]
+        funext i j
+        simp [matrixScale, matrixZero]
+      rw [hterm, matrixAdd_zero_right]
+
 /-! ## Finite rotation-series core
 
 The continuous rotation system is a later analytic construction.  Its
