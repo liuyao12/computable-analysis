@@ -1281,6 +1281,38 @@ This is the constructive replacement for silently importing a global vector
 space of integrable functions.  Each concrete family supplies the construction
 and the finite certificates required by the contract.
 
+\section{Complex polygonal integrals}
+
+The same finite viewpoint applies to complex-valued functions. A path is a
+finite list of rational-complex vertices; integration is a finite sum over its
+segments:
+
+\begin{verbatim}
+vertices -> segment increments -> complex differential sum
+         -> endpoint primitive difference
+closed path -> exact displacement = 0
+\end{verbatim}
+
+Constant and polynomial differentials are the first representatives. Their
+closed-path exactness is an algebraic identity over rational complex boxes,
+not a theorem about a completed complex plane. The polygonal integral itself
+is already a `ComplexRaw` computation; a later analytic path theorem may add
+uniform refinement and overlap certificates for a larger class of functions.
+
+\lean{ComputableAnalysis.ComplexPathIntegral.EntireBoxFunctionRaw}
+\lean{ComputableAnalysis.ComplexPathIntegral.polygonalDisplacementTo}
+\lean{ComputableAnalysis.ComplexPathIntegral.polygonalDisplacementTo_closed}
+\lean{ComputableAnalysis.ComplexPathIntegral.polygonalConstantDifferentialDisplacement}
+\lean{ComputableAnalysis.ComplexPathIntegral.polygonalConstantDifferentialDisplacement_closed}
+\lean{ComputableAnalysis.ComplexPathIntegral.finiteConstantDifferentialExactness_closed}
+\lean{ComputableAnalysis.ComplexPathIntegral.finitePolynomialDifferentialExactness_closed}
+\lean{ComputableAnalysis.ComplexPathIntegral.FiniteClosedPolygonalPathCertificate}
+\lean{ComputableAnalysis.ComplexPathIntegral.FiniteClosedPolygonalPathCertificate.exactDisplacement_eq_zero}
+\lean{ComputableAnalysis.ComplexPathIntegral.FiniteClosedPolynomialPathCertificate}
+\lean{ComputableAnalysis.ComplexPathIntegral.FiniteClosedPolynomialPathCertificate.exactDisplacement_eq_zero}
+\lean{ComputableAnalysis.ComplexPathIntegral.polygonalIntegralRawEntire_valid}
+\leanok
+
 The sine integral in Chapter~\ref{ch:rational-circle-trigonometry} is the
 first integration target: the circle/arctangent construction supplies the
 values, the rectangle algorithm supplies the area, and this FTC supplies the
