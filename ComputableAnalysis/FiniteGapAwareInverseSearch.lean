@@ -127,10 +127,130 @@ def gapAwareInverseBisectionPlanOfFixedIterate
   output_width_le := hwidth
   value_overlaps := hoverlaps
 
+/-! The scheduled analogue keeps evaluator precision independent from the
+number of midpoint steps.  This is the adapter used by branches whose gap
+separation budget is not linear in the requested output stage. -/
+structure GapAwareScheduledInverseBisectionPlan
+    (I : GapAwareInvertibleFunctionOnInterval)
+    (y : GapAwareInRangeRaw I) where
+  precision : Nat → Nat
+  steps : Nat → Nat
+  output : Nat → QInterval
+  output_eq : ∀ n, output n =
+    gapAwareTargetBisectionScheduledIterate I.continuous
+      (y.value.compute n)
+      (gapAwareSourceInterval I)
+      (gapAwareSourceInterval_subinterval I)
+      precision (steps n)
+  decisions : ∀ n k, k < steps n →
+    gapAwareTargetBisectionScheduledDecision I.continuous
+      (y.value.compute n)
+      (gapAwareSourceInterval I)
+      (gapAwareSourceInterval_subinterval I)
+      precision k
+  output_ordered : ∀ n, (output n).lo ≤ (output n).hi
+  output_nested : ∀ n m, n ≤ m →
+    (output n).lo ≤ (output m).lo ∧
+      (output m).hi ≤ (output n).hi
+  output_width_le : ∀ n,
+    (output n).width ≤ 1 / ((n + 1 : Nat) : Rat)
+  value_overlaps : ∀ n,
+    QInterval.Overlaps
+      (I.continuous.regular.evalInterval
+        (output n)
+        (by
+          rw [output_eq n]
+          exact gapAwareTargetBisectionScheduledIterate_subinterval
+            I.continuous (y.value.compute n)
+            (gapAwareSourceInterval I)
+            (gapAwareSourceInterval_subinterval I)
+            precision (steps n))
+        n)
+      (y.value.compute n)
+
+def gapAwareScheduledInverseBisectionPlanOfScheduledIterate
+    {I : GapAwareInvertibleFunctionOnInterval}
+    {y : GapAwareInRangeRaw I}
+    (precision steps : Nat → Nat)
+    (hdecisions : ∀ n k, k < steps n →
+      gapAwareTargetBisectionScheduledDecision I.continuous
+        (y.value.compute n) (gapAwareSourceInterval I)
+        (gapAwareSourceInterval_subinterval I) precision k)
+    (hnested : ∀ n m, n ≤ m →
+      (gapAwareTargetBisectionScheduledIterate I.continuous
+        (y.value.compute n) (gapAwareSourceInterval I)
+        (gapAwareSourceInterval_subinterval I) precision (steps n)).lo ≤
+      (gapAwareTargetBisectionScheduledIterate I.continuous
+        (y.value.compute m) (gapAwareSourceInterval I)
+        (gapAwareSourceInterval_subinterval I) precision (steps m)).lo ∧
+      (gapAwareTargetBisectionScheduledIterate I.continuous
+        (y.value.compute m) (gapAwareSourceInterval I)
+        (gapAwareSourceInterval_subinterval I) precision (steps m)).hi ≤
+      (gapAwareTargetBisectionScheduledIterate I.continuous
+        (y.value.compute n) (gapAwareSourceInterval I)
+        (gapAwareSourceInterval_subinterval I) precision (steps n)).hi)
+    (hwidth : ∀ n,
+      (gapAwareTargetBisectionScheduledIterate I.continuous
+        (y.value.compute n) (gapAwareSourceInterval I)
+        (gapAwareSourceInterval_subinterval I) precision (steps n)).width ≤
+        1 / ((n + 1 : Nat) : Rat))
+    (hoverlaps : ∀ n,
+      QInterval.Overlaps
+        (I.continuous.regular.evalInterval
+          (gapAwareTargetBisectionScheduledIterate I.continuous
+            (y.value.compute n) (gapAwareSourceInterval I)
+            (gapAwareSourceInterval_subinterval I) precision (steps n))
+          (gapAwareTargetBisectionScheduledIterate_subinterval
+            I.continuous (y.value.compute n) (gapAwareSourceInterval I)
+            (gapAwareSourceInterval_subinterval I) precision (steps n)) n)
+        (y.value.compute n)) :
+    GapAwareScheduledInverseBisectionPlan I y where
+  precision := precision
+  steps := steps
+  output := fun n => gapAwareTargetBisectionScheduledIterate I.continuous
+    (y.value.compute n) (gapAwareSourceInterval I)
+    (gapAwareSourceInterval_subinterval I) precision (steps n)
+  output_eq := fun _ => rfl
+  decisions := hdecisions
+  output_ordered := by
+    intro n
+    exact (gapAwareTargetBisectionScheduledIterate_subinterval I.continuous
+      (y.value.compute n) (gapAwareSourceInterval I)
+      (gapAwareSourceInterval_subinterval I) precision (steps n)).2.1
+  output_nested := hnested
+  output_width_le := hwidth
+  value_overlaps := hoverlaps
+
 theorem GapAwareInverseBisectionPlan.valid_output
     {I : GapAwareInvertibleFunctionOnInterval}
     {y : GapAwareInRangeRaw I}
     (plan : GapAwareInverseBisectionPlan I y) :
+    RealRaw.ValidCompute plan.output := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro n
+    change 0 ≤ (plan.output n).hi - (plan.output n).lo
+    grind [plan.output_ordered n]
+  · intro n m hnm
+    exact ⟨(plan.output_nested n m hnm).1,
+      plan.output_ordered m, (plan.output_nested n m hnm).2⟩
+  · intro eps
+    refine ⟨eps.val.den, ?_⟩
+    intro n hn
+    have hanti :
+        1 / (((n + 1 : Nat) : Rat)) ≤
+          1 / (((eps.val.den + 1 : Nat) : Rat)) := by
+      apply FTC.one_div_nat_antitone
+      · exact Nat.succ_pos eps.val.den
+      · exact Nat.succ_pos n
+      · omega
+    exact Rat.le_trans (plan.output_width_le n)
+      (Rat.le_trans hanti
+        (FTC.one_div_den_succ_le_of_pos eps.property))
+
+theorem GapAwareScheduledInverseBisectionPlan.valid_output
+    {I : GapAwareInvertibleFunctionOnInterval}
+    {y : GapAwareInRangeRaw I}
+    (plan : GapAwareScheduledInverseBisectionPlan I y) :
     RealRaw.ValidCompute plan.output := by
   refine ⟨?_, ?_, ?_⟩
   · intro n
@@ -172,6 +292,23 @@ def gapAwareInverseBisectionPlanToSearch
       (plan.precision n) (plan.steps n)
   value_overlaps := plan.value_overlaps
 
+def gapAwareScheduledInverseBisectionPlanToSearch
+    {I : GapAwareInvertibleFunctionOnInterval}
+    {y : GapAwareInRangeRaw I}
+    (plan : GapAwareScheduledInverseBisectionPlan I y) :
+    GapAwareInverseBisectionSearch I y where
+  compute_preimage := plan.output
+  valid_preimage := plan.valid_output
+  preimage_subinterval := by
+    intro n
+    rw [plan.output_eq n]
+    exact gapAwareTargetBisectionScheduledIterate_subinterval
+      I.continuous (y.value.compute n)
+      (gapAwareSourceInterval I)
+      (gapAwareSourceInterval_subinterval I)
+      plan.precision (plan.steps n)
+  value_overlaps := plan.value_overlaps
+
 def gapAwareInverseBisectionPlan_has_search
     {I : GapAwareInvertibleFunctionOnInterval}
     (hplan : ∀ y : GapAwareInRangeRaw I,
@@ -179,5 +316,13 @@ def gapAwareInverseBisectionPlan_has_search
     GapAwareHasBisectionSearch I := by
   intro y
   exact gapAwareInverseBisectionPlanToSearch (hplan y)
+
+def gapAwareScheduledInverseBisectionPlan_has_search
+    {I : GapAwareInvertibleFunctionOnInterval}
+    (hplan : ∀ y : GapAwareInRangeRaw I,
+      GapAwareScheduledInverseBisectionPlan I y) :
+    GapAwareHasBisectionSearch I := by
+  intro y
+  exact gapAwareScheduledInverseBisectionPlanToSearch (hplan y)
 
 end ComputableAnalysis

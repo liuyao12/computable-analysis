@@ -1659,6 +1659,10 @@ and `gapAwareInverseBisectionPlan_has_search` assembles a whole branch.
 When the output is the standard fixed midpoint iterator, use
 `gapAwareInverseBisectionPlanOfFixedIterate` so its dependent interval proofs
 are inferred once by the shared constructor.
+When evaluator precision must follow a separate schedule, use
+`GapAwareScheduledInverseBisectionPlan` and
+`gapAwareScheduledInverseBisectionPlan_has_search`; the scheduled adapter
+preserves the same explicit `RealRaw.ValidCompute` obligations.
 This leaves function-specific mathematics in the certificate and keeps the
 routine `RealRaw`/inverse construction shared.
 
