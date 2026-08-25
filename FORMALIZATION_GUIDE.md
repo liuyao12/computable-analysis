@@ -864,6 +864,10 @@ argument.  That closure theorem is now available as
 `HasDerivativeOnInterval.addOfCommonSchedule`.  It requires explicit domain
 alignment and equality of the two certificates' stage schedules, then chooses
 an internal precision schedule satisfying the doubled-budget inequality.
+At the exact rational level, the same transport is available through
+`ExactFunction.EffectiveDerivativeExact.add` and
+`ExactFunction.EffectiveDerivativeExact.scale`; their inner schedules and
+error/radius budgets remain explicit inputs.
 
 ### Increasing pieces: start with the literal finite stage
 

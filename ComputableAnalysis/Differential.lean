@@ -433,6 +433,32 @@ def EffectiveDerivativeExact.add
         rw [← Rat.mul_add, htwo, Rat.mul_one]
         exact Rat.le_refl
 
+/-! Rational scaling closure with an explicit inner error budget. -/
+def EffectiveDerivativeExact.scale
+    (c : Rat) {f df : Rat -> Rat}
+    (D : EffectiveDerivativeExact f df)
+    (inner : QPos -> QPos)
+    (hbudget : forall eps, qabs c * (inner eps).val <= eps.val)
+    (hradius : forall eps,
+      (inner eps).val <= (D.stepRadius (inner eps)).val) :
+    EffectiveDerivativeExact (fun x => c * f x)
+      (fun x => c * df x) where
+  stepRadius := inner
+  good := by
+    intro x h eps hh hhle
+    have hD := D.good x h (inner eps) hh
+      (Rat.le_trans hhle (hradius eps))
+    have hD' : qabs (differenceQuotient f x h - df x) <=
+        (inner eps).val := by
+      simpa [differenceQuotient] using hD
+    calc
+      qabs (differenceQuotient (fun z => c * f z) x h - c * df x) <=
+          qabs c * qabs (differenceQuotient f x h - df x) :=
+        differenceQuotient_scale_error_le c f df x h (Rat.ne_of_gt hh)
+      _ <= qabs c * (inner eps).val :=
+        Rat.mul_le_mul_of_nonneg_left hD' (qabs_nonneg _)
+      _ <= eps.val := hbudget eps
+
 /- A finite L'Hopital-style cancellation certificate: away from the common
 zero `a`, the quotient of the factored numerator and denominator is the
 derivative ratio at `a`, namely `2 * a / 1`, plus its exact linear remainder.
