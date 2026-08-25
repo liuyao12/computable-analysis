@@ -1434,6 +1434,28 @@ theorem product_differenceQuotient_error_le_qabs
               qabs (differenceQuotient v x h) := by
       rw [qabs_mul, qabs_mul, qabs_mul, qabs_mul]
 
+/-! Product closure from a supplied finite corner budget.  The budget is the
+computable obligation: it accounts for factor-value errors, factor secant
+errors, and the quadratic corner remainder. -/
+def EffectiveDerivativeExact.mulOfBudget
+    (u du v dv : Rat -> Rat)
+    (inner : QPos -> QPos)
+    (hbudget : forall eps x h,
+      0 < h -> h <= (inner eps).val ->
+      qabs (u x) * qabs (differenceQuotient v x h - dv x) +
+        qabs (v x) * qabs (differenceQuotient u x h - du x) +
+          qabs h * qabs (differenceQuotient u x h) *
+            qabs (differenceQuotient v x h) <= eps.val) :
+    EffectiveDerivativeExact (fun x => u x * v x)
+      (fun x => u x * dv x + v x * du x) where
+  stepRadius := inner
+  good := by
+    intro x h eps hh hhle
+    exact Rat.le_trans
+      (product_differenceQuotient_error_le_qabs u du v dv x h
+        (Rat.ne_of_gt hh))
+      (hbudget eps x h hh hhle)
+
 /-- The nonnegative-step form of the two-sided product-error estimate.  This
 is convenient for forward mesh arguments, while the absolute-step theorem
 above is the form used by the interval derivative interface. -/

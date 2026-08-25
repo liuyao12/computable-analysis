@@ -868,6 +868,9 @@ At the exact rational level, the same transport is available through
 `ExactFunction.EffectiveDerivativeExact.add` and
 `ExactFunction.EffectiveDerivativeExact.scale`; their inner schedules and
 error/radius budgets remain explicit inputs.
+Products use `ExactFunction.EffectiveDerivativeExact.mulOfBudget`, whose
+explicit obligation includes the quadratic finite corner term; it is a
+certificate constructor, not an automatic theorem for arbitrary limits.
 
 ### Increasing pieces: start with the literal finite stage
 
