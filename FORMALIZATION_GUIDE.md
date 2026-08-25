@@ -967,6 +967,9 @@ That transfer is now proved for degenerate midpoint cells by
 `uniformExpOnUnitWarm_cellRange_midpoint_below_forward_target` and
 `uniformExpOnUnitWarm_cellRange_midpoint_above_forward_target`: the public
 cell-range evaluator reduces to the same finite box when its endpoints agree.
+Their `_at_stage` variants prove the schedule rule explicitly: any target box
+stage dominating the gap-dependent midpoint stage preserves the strict side
+decision by nested interval containment.
 
 The reusable `gapAwareTargetBisectionStep` is deliberately conservative. It
 keeps a rational parent interval whenever the computed image box overlaps the

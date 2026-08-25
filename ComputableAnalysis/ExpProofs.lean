@@ -6226,6 +6226,78 @@ theorem uniformExpOnUnitWarm_cellRange_midpoint_above_forward_target
         (Rat.ne_of_gt ((Rat.lt_iff_sub_pos r m).mp hrm)) n + 4)).lo
   exact hpoint
 
+theorem uniformExpOnUnitWarm_cellRange_midpoint_below_forward_target_at_stage
+    {m r : Rat} (n q : Nat)
+    (hm : 0 <= m) (hr : r <= 1) (hmr : m < r)
+    (hq : uniformExpQuotientPrecision (r - m)
+      (Rat.ne_of_gt ((Rat.lt_iff_sub_pos m r).mp hmr)) n ≤ q) :
+    (uniformExpOnUnitWarm_intervalRegular.evalInterval
+      { lo := m, hi := m }
+      ⟨by change 0 ≤ m; exact hm, by exact Rat.le_refl, by change m ≤ 1; grind⟩
+      (uniformExpQuotientPrecision (r - m)
+        (Rat.ne_of_gt ((Rat.lt_iff_sub_pos m r).mp hmr)) n)).hi <
+      ((uniformExpOnUnitWarm_forward_target r
+        ⟨by change 0 ≤ r; grind, by change r ≤ 1; exact hr⟩).value.compute q).lo := by
+  let p := uniformExpQuotientPrecision (r - m)
+    (Rat.ne_of_gt ((Rat.lt_iff_sub_pos m r).mp hmr)) n
+  have hsep := uniformExpOnUnitWarm_gapAwareSeparation.separated
+    m r ⟨by change 0 ≤ m; exact hm, by change m ≤ 1; grind⟩
+      ⟨by change 0 ≤ r; grind, by change r ≤ 1; exact hr⟩ hmr n
+  change (uniformExpOnUnitWarm.compute m
+      ⟨by change 0 ≤ m; exact hm, by change m ≤ 1; grind⟩ p).hi <
+    (uniformExpOnUnitWarm.compute r
+      ⟨by change 0 ≤ r; grind, by change r ≤ 1; exact hr⟩ p).lo at hsep
+  change ((uniformExpRaw m).compute (p + 4)).hi <
+    ((uniformExpRaw r).compute (p + 4)).lo at hsep
+  rw [uniformExpRaw_compute, uniformExpRaw_compute] at hsep
+  change (uniformExpBox m (p + 4)).hi <
+    (uniformExpBox r (p + 4)).lo at hsep
+  have hnest := uniformExpBox_nested r (by
+    rw [qabs_eq_self_of_nonneg (by grind)]
+    exact by grind) (p + 4) (q + 4) (by omega)
+  change (uniformExpCellRange m m (p + 4)).hi <
+    ((uniformExpRaw r).compute (q + 4)).lo
+  rw [uniformExpRaw_compute]
+  change (uniformExpBox m (p + 4)).hi <
+    (uniformExpBox r (q + 4)).lo
+  grind [uniformExpCellRange]
+
+theorem uniformExpOnUnitWarm_cellRange_midpoint_above_forward_target_at_stage
+    {m r : Rat} (n q : Nat)
+    (hm : 0 <= r) (hr : m <= 1) (hrm : r < m)
+    (hq : uniformExpQuotientPrecision (m - r)
+      (Rat.ne_of_gt ((Rat.lt_iff_sub_pos r m).mp hrm)) n ≤ q) :
+    ((uniformExpOnUnitWarm_forward_target r
+        ⟨hm, by change r ≤ 1; grind⟩).value.compute q).hi <
+      (uniformExpOnUnitWarm_intervalRegular.evalInterval
+        { lo := m, hi := m }
+        ⟨by change 0 ≤ m; grind, by exact Rat.le_refl, by change m ≤ 1; exact hr⟩
+        (uniformExpQuotientPrecision (m - r)
+          (Rat.ne_of_gt ((Rat.lt_iff_sub_pos r m).mp hrm)) n)).lo := by
+  let p := uniformExpQuotientPrecision (m - r)
+    (Rat.ne_of_gt ((Rat.lt_iff_sub_pos r m).mp hrm)) n
+  have hsep := uniformExpOnUnitWarm_gapAwareSeparation.separated
+    r m ⟨by change 0 ≤ r; exact hm, by change r ≤ 1; grind⟩
+      ⟨by change 0 ≤ m; grind, by change m ≤ 1; exact hr⟩ hrm n
+  change (uniformExpOnUnitWarm.compute r
+      ⟨by change 0 ≤ r; exact hm, by change r ≤ 1; grind⟩ p).hi <
+    (uniformExpOnUnitWarm.compute m
+      ⟨by change 0 ≤ m; grind, by change m ≤ 1; exact hr⟩ p).lo at hsep
+  change ((uniformExpRaw r).compute (p + 4)).hi <
+    ((uniformExpRaw m).compute (p + 4)).lo at hsep
+  rw [uniformExpRaw_compute, uniformExpRaw_compute] at hsep
+  change (uniformExpBox r (p + 4)).hi <
+    (uniformExpBox m (p + 4)).lo at hsep
+  have hnest := uniformExpBox_nested r (by
+    rw [qabs_eq_self_of_nonneg (by grind)]
+    exact by grind) (p + 4) (q + 4) (by omega)
+  change ((uniformExpRaw r).compute (q + 4)).hi <
+    (uniformExpCellRange m m (p + 4)).lo
+  rw [uniformExpRaw_compute]
+  change (uniformExpBox r (q + 4)).hi <
+    (uniformExpBox m (p + 4)).lo
+  grind [uniformExpCellRange]
+
 def uniformExpOnUnitWarm_forward_search (r : Rat)
     (hr : inDomainInterval uniformExpOnUnitWarm.lower
       uniformExpOnUnitWarm.upper r) :
