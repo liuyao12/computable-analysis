@@ -346,6 +346,20 @@ finite forward-image separation proof.
 \lean{ComputableAnalysis.DyadicInverseTrace.toSearch}
 \leanok
 
+Concrete branches should not repeat the inverse-record plumbing.  The
+proof-carrying plan in 
+\texttt{FiniteGapAwareInverseSearch.lean} is the reusable adapter: a branch
+supplies its finite midpoint decisions, a nested valid output schedule, and
+the forward-image overlap certificate.  The adapter then produces the common
+\texttt{GapAwareInverseBisectionSearch} data and hence a raw inverse.
+
+\lean{ComputableAnalysis.gapAwareSourceInterval}
+\lean{ComputableAnalysis.gapAwareSourceInterval\_subinterval}
+\lean{ComputableAnalysis.GapAwareInverseBisectionPlan}
+\lean{ComputableAnalysis.gapAwareInverseBisectionPlanToSearch}
+\lean{ComputableAnalysis.gapAwareInverseBisectionPlan\_has\_search}
+\leanok
+
 The proof-independent function layer exposes the same laws.  Its transitivity
 hypothesis explicitly supplies the middle domain on the intersection of the
 outer domains; this is the correct contract for partial special functions.

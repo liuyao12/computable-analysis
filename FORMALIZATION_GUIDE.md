@@ -1636,6 +1636,17 @@ It is not yet a theorem that a continuous ODE has a solution represented by a
 Peano--Baker interval series.  Keep discretization error and continuous
 existence as separate proof obligations.
 
+## Reusing inverse-search plumbing
+
+Do not create a new inverse record for every special function.  A branch with
+gap-dependent separation should provide a `GapAwareInverseBisectionPlan`: its
+finite midpoint decisions, the nested valid output schedule, and the
+forward-image overlap certificate.  `gapAwareInverseBisectionPlanToSearch`
+converts that plan to the common `GapAwareInverseBisectionSearch` interface,
+and `gapAwareInverseBisectionPlan_has_search` assembles a whole branch.
+This leaves function-specific mathematics in the certificate and keeps the
+routine `RealRaw`/inverse construction shared.
+
 ## Completion and trust checklist
 
 Before presenting a result as established, check all of the following:
