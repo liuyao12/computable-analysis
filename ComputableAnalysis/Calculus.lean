@@ -9048,6 +9048,40 @@ def gapAwareTargetBisectionMidpointRange
       Rat.le_refl,
       Rat.le_trans (QInterval.midpoint_mem hI.2.1).2 hI.2.2⟩ n
 
+theorem gapAwareTargetBisectionMidpointRange_ordered
+    (F : ContinuousFunctionOnInterval) (I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) :
+    (gapAwareTargetBisectionMidpointRange F I hI n).lo <=
+      (gapAwareTargetBisectionMidpointRange F I hI n).hi := by
+  let M : QInterval := { lo := I.midpoint, hi := I.midpoint }
+  have hM : subintervalOf M F.function.lower F.function.upper := by
+    exact ⟨Rat.le_trans hI.1 (QInterval.midpoint_mem hI.2.1).1,
+      Rat.le_refl,
+      Rat.le_trans (QInterval.midpoint_mem hI.2.1).2 hI.2.2⟩
+  have hwidth : M.width <=
+      1 / ((F.regular.inputPrecision n : Nat) : Rat) := by
+    unfold M QInterval.width
+    have hp := F.regular.inputPrecision_pos n
+    have hden : (0 : Rat) <= (F.regular.inputPrecision n : Nat) := by
+      exact Rat.natCast_nonneg
+    have hpRat : (0 : Rat) < (F.regular.inputPrecision n : Nat) :=
+      (Rat.natCast_pos).2 hp
+    have hinv : (0 : Rat) <= ((F.regular.inputPrecision n : Nat) : Rat)⁻¹ :=
+      Rat.le_of_lt ((Rat.inv_pos).2 hpRat)
+    have hright : (0 : Rat) <=
+        1 / ((F.regular.inputPrecision n : Nat) : Rat) := by
+      rw [Rat.div_def]
+      exact Rat.mul_nonneg (by native_decide) hinv
+    rw [Rat.sub_self]
+    exact hright
+  have hnonneg := (F.regular.output_width M hM n hwidth).1
+  change 0 <=
+    (F.regular.evalInterval M hM n).hi -
+      (F.regular.evalInterval M hM n).lo at hnonneg
+  change (F.regular.evalInterval M hM n).lo <=
+    (F.regular.evalInterval M hM n).hi
+  exact (Rat.le_iff_sub_nonneg _ _).2 hnonneg
+
 def gapAwareTargetBisectionStep
     (F : ContinuousFunctionOnInterval) (Y I : QInterval)
     (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) :

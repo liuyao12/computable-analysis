@@ -1020,6 +1020,13 @@ and `...strict_above_oneThird` instantiate these certificates at the rational
 source (1/3).  The theorem
 `uniformExpOnUnitWarm_oneThird_target_compute_eq_forward` identifies the
 published scheduled target with the same forward box at its selected stage.
+The stage-transport certificates
+`uniformExpOnUnitWarm_oneThird_target_strict_below_at_stage` and
+`...strict_above_at_stage` carry those decisions to a finer target box.
+Finally, `uniformExpOnUnitWarm_oneThird_scheduled_iterate_dyadicCell` proves
+by finite induction that every scheduled bisection iterate up to the target
+stage is a canonical dyadic cell; `dyadicCell_midpoint_ne_oneThird` supplies
+the elementary odd/even obstruction to an ambiguous midpoint.
 
 Formalization scope is by mechanism, not by exhaustive enumeration.  One
 representative function is enough when another function uses the same certified

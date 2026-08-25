@@ -6926,12 +6926,252 @@ theorem uniformExpOnUnitWarm_oneThird_target_compute_eq_forward
         (uniformExpOnUnitWarm_oneThird_target.rangePrecision q) := by
   rfl
 
+theorem uniformExpOnUnitWarm_oneThird_target_strict_below_at_stage
+    {n k : Nat} (p s : Nat) (hk : k < 2 ^ n)
+    (hmr : (dyadicCell n k).midpoint < (1 : Rat) / 3)
+    (hq : uniformExpQuotientPrecision ((1 : Rat) / 3 -
+        (dyadicCell n k).midpoint)
+      (Rat.ne_of_gt ((Rat.lt_iff_sub_pos (dyadicCell n k).midpoint
+        ((1 : Rat) / 3)).mp hmr)) n ≤ p)
+    (hps : p ≤ s) :
+    gapAwareTargetBisectionStrictDecision uniformExpOnUnitWarm_continuous
+      ((uniformExpOnUnitWarm_forward_target ((1 : Rat) / 3)
+        ⟨by native_decide, by native_decide⟩).value.compute s)
+      (dyadicCell n k) (dyadicCell_subinterval n k hk) p := by
+  have hbase :=
+    uniformExpOnUnitWarm_cellRange_midpoint_below_forward_target_at_scheduled_stage
+      n p (by
+        have hcell := dyadicCell_subinterval n k hk
+        exact Rat.le_trans hcell.1
+          (QInterval.midpoint_mem hcell.2.1).1)
+      (by native_decide) hmr hq
+  have hnest :=
+    (uniformExpOnUnitWarm_forward_target ((1 : Rat) / 3)
+      ⟨by native_decide, by native_decide⟩).value_valid.2.1 p s hps
+  change (gapAwareTargetBisectionMidpointRange uniformExpOnUnitWarm_continuous
+      (dyadicCell n k) (dyadicCell_subinterval n k hk) p).hi <
+      ((uniformExpOnUnitWarm_forward_target ((1 : Rat) / 3)
+        ⟨by native_decide, by native_decide⟩).value.compute s).lo ∨
+    (¬(gapAwareTargetBisectionMidpointRange uniformExpOnUnitWarm_continuous
+      (dyadicCell n k) (dyadicCell_subinterval n k hk) p).hi <
+      ((uniformExpOnUnitWarm_forward_target ((1 : Rat) / 3)
+        ⟨by native_decide, by native_decide⟩).value.compute s).lo ∧
+      ((uniformExpOnUnitWarm_forward_target ((1 : Rat) / 3)
+        ⟨by native_decide, by native_decide⟩).value.compute s).hi <
+      (gapAwareTargetBisectionMidpointRange uniformExpOnUnitWarm_continuous
+        (dyadicCell n k) (dyadicCell_subinterval n k hk) p).lo)
+  left
+  change (gapAwareTargetBisectionMidpointRange uniformExpOnUnitWarm_continuous
+      (dyadicCell n k) (dyadicCell_subinterval n k hk) p).hi <
+      ((uniformExpOnUnitWarm_forward_target ((1 : Rat) / 3)
+        ⟨by native_decide, by native_decide⟩).value.compute p).lo at hbase
+  grind [Rat.lt_iff_sub_pos, Rat.sub_eq_add_neg]
+
+theorem uniformExpOnUnitWarm_oneThird_target_strict_above_at_stage
+    {n k : Nat} (p s : Nat) (hk : k < 2 ^ n)
+    (hmr : (1 : Rat) / 3 < (dyadicCell n k).midpoint)
+    (hq : uniformExpQuotientPrecision ((dyadicCell n k).midpoint -
+        (1 : Rat) / 3)
+      (Rat.ne_of_gt ((Rat.lt_iff_sub_pos ((1 : Rat) / 3)
+        (dyadicCell n k).midpoint).mp hmr)) n ≤ p)
+    (hps : p ≤ s) :
+    gapAwareTargetBisectionStrictDecision uniformExpOnUnitWarm_continuous
+      ((uniformExpOnUnitWarm_forward_target ((1 : Rat) / 3)
+        ⟨by native_decide, by native_decide⟩).value.compute s)
+      (dyadicCell n k) (dyadicCell_subinterval n k hk) p := by
+  have hbase :=
+    uniformExpOnUnitWarm_cellRange_midpoint_above_forward_target_at_scheduled_stage
+      n p (by native_decide)
+      (by
+        have hcell := dyadicCell_subinterval n k hk
+        exact Rat.le_trans (QInterval.midpoint_mem hcell.2.1).2 hcell.2.2)
+      hmr hq
+  have hnest :=
+    (uniformExpOnUnitWarm_forward_target ((1 : Rat) / 3)
+      ⟨by native_decide, by native_decide⟩).value_valid.2.1 p s hps
+  have htarget :=
+    (uniformExpOnUnitWarm_forward_target ((1 : Rat) / 3)
+      ⟨by native_decide, by native_decide⟩).value_valid.1 s
+  have hmid := gapAwareTargetBisectionMidpointRange_ordered
+    uniformExpOnUnitWarm_continuous (dyadicCell n k)
+      (dyadicCell_subinterval n k hk) p
+  right
+  constructor
+  · intro hbad
+    have htarget' :
+        ((uniformExpOnUnitWarm_forward_target ((1 : Rat) / 3)
+          ⟨by native_decide, by native_decide⟩).value.compute s).lo ≤
+        ((uniformExpOnUnitWarm_forward_target ((1 : Rat) / 3)
+          ⟨by native_decide, by native_decide⟩).value.compute s).hi := by
+      change 0 <=
+        ((uniformExpOnUnitWarm_forward_target ((1 : Rat) / 3)
+          ⟨by native_decide, by native_decide⟩).value.compute s).hi -
+        ((uniformExpOnUnitWarm_forward_target ((1 : Rat) / 3)
+          ⟨by native_decide, by native_decide⟩).value.compute s).lo at htarget
+      exact (Rat.le_iff_sub_nonneg _ _).2 htarget
+    change ((uniformExpOnUnitWarm_forward_target ((1 : Rat) / 3)
+      ⟨by native_decide, by native_decide⟩).value.compute p).hi <
+      (gapAwareTargetBisectionMidpointRange uniformExpOnUnitWarm_continuous
+        (dyadicCell n k) (dyadicCell_subinterval n k hk) p).lo at hbase
+    grind [Rat.lt_iff_sub_pos, Rat.sub_eq_add_neg]
+  · change
+      ((uniformExpOnUnitWarm_forward_target ((1 : Rat) / 3)
+        ⟨by native_decide, by native_decide⟩).value.compute s).hi <
+      (gapAwareTargetBisectionMidpointRange uniformExpOnUnitWarm_continuous
+        (dyadicCell n k) (dyadicCell_subinterval n k hk) p).lo
+    change ((uniformExpOnUnitWarm_forward_target ((1 : Rat) / 3)
+      ⟨by native_decide, by native_decide⟩).value.compute p).hi <
+      (gapAwareTargetBisectionMidpointRange uniformExpOnUnitWarm_continuous
+        (dyadicCell n k) (dyadicCell_subinterval n k hk) p).lo at hbase
+    grind [Rat.lt_iff_sub_pos, Rat.sub_eq_add_neg]
+
+theorem dyadicCell_midpoint_ne_oneThird (n k : Nat) (hk : k < 2 ^ n) :
+    (dyadicCell n k).midpoint ≠ (1 : Rat) / 3 := by
+  intro h
+  unfold dyadicCell QInterval.midpoint at h
+  rw [Rat.div_def, Rat.div_def] at h
+  have hpow : ((2 ^ (n + 1) : Nat) : Rat) ≠ 0 := by
+    exact Rat.ne_of_gt (Rat.natCast_pos.mpr (Nat.pow_pos (by decide)))
+  have hthree : (3 : Rat) ≠ 0 := by native_decide
+  have hmul := congrArg
+    (fun z : Rat => z * ((2 ^ (n + 1) : Nat) : Rat) * 3) h
+  have hpow_cancel := Rat.mul_inv_cancel
+    ((2 ^ (n + 1) : Nat) : Rat) hpow
+  have hthree_cancel := Rat.mul_inv_cancel (3 : Rat) hthree
+  have heq :
+      (3 : Rat) * ((2 * k + 1 : Nat) : Rat) =
+        ((2 ^ (n + 1) : Nat) : Rat) := by
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have heqNat : 3 * (2 * k + 1) = 2 ^ (n + 1) := by
+    exact_mod_cast heq
+  have hleftOdd : (3 * (2 * k + 1)) % 2 = 1 := by omega
+  have hrightEven : (2 ^ (n + 1)) % 2 = 0 := by
+    have hpowNat : 2 ^ (n + 1) = 2 * 2 ^ n := by omega
+    rw [hpowNat]
+    omega
+  omega
+
 theorem uniformExpOnUnitWarm_oneThird_target_stage_dominates
     {n : Nat} {m : Rat}
     (hm : m ∈ dyadicMidpointGridUpTo n) :
     uniformExpGapPrecisionAt ((1 : Rat) / 3) m n ≤
       uniformExpOnUnitWarm_oneThird_target.rangePrecision n := by
   exact uniformExpRationalTargetStage_dominates hm
+
+theorem uniformExpOnUnitWarm_oneThird_scheduled_iterate_dyadicCell
+    (q n : Nat) (hnq : n ≤ q) :
+    exists k, k < 2 ^ n /\
+      gapAwareTargetBisectionScheduledIterate
+        uniformExpOnUnitWarm_continuous
+        (uniformExpOnUnitWarm_oneThird_target.value.compute q)
+        ({ lo := 0, hi := 1 } : QInterval)
+        uniformExpOnUnitWarm_unit_subinterval
+        (fun j => uniformExpOnUnitWarm_oneThird_target.rangePrecision j) n =
+      dyadicCell n k := by
+  induction n with
+  | zero =>
+      refine ⟨0, by native_decide, ?_⟩
+      change ({ lo := 0, hi := 1 } : QInterval) = dyadicCell 0 0
+      unfold dyadicCell
+      native_decide
+  | succ n ih =>
+      have hnq' : n ≤ q := by omega
+      have hprev := ih hnq'
+      rcases hprev with ⟨k, hk, hPk⟩
+      let P := gapAwareTargetBisectionScheduledIterateWithProof
+        uniformExpOnUnitWarm_continuous
+        (uniformExpOnUnitWarm_oneThird_target.value.compute q)
+        ({ lo := 0, hi := 1 } : QInterval)
+        uniformExpOnUnitWarm_unit_subinterval
+        (fun j => uniformExpOnUnitWarm_oneThird_target.rangePrecision j) n
+      have hPk' : P.1 = dyadicCell n k := by
+        simpa [P, gapAwareTargetBisectionScheduledIterate] using hPk
+      have hgrid : (dyadicCell n k).midpoint ∈ dyadicMidpointGridUpTo n :=
+        dyadicCell_midpoint_mem_grid_upTo n k hk
+      have hdom := uniformExpOnUnitWarm_oneThird_target_stage_dominates hgrid
+      have hps :
+          uniformExpOnUnitWarm_oneThird_target.rangePrecision n ≤
+            uniformExpOnUnitWarm_oneThird_target.rangePrecision q := by
+        exact uniformExpRationalTargetStage_mono ((1 : Rat) / 3) hnq'
+      have hstrict :
+          gapAwareTargetBisectionStrictDecision uniformExpOnUnitWarm_continuous
+            (uniformExpOnUnitWarm_oneThird_target.value.compute q)
+            P.1 P.2 (uniformExpOnUnitWarm_oneThird_target.rangePrecision n) := by
+        by_cases hmr : (dyadicCell n k).midpoint < (1 : Rat) / 3
+        · have hqprec : uniformExpQuotientPrecision ((1 : Rat) / 3 -
+              (dyadicCell n k).midpoint)
+              (Rat.ne_of_gt ((Rat.lt_iff_sub_pos (dyadicCell n k).midpoint
+                ((1 : Rat) / 3)).mp hmr)) n ≤
+              uniformExpOnUnitWarm_oneThird_target.rangePrecision n := by
+            rw [← uniformExpGapPrecisionAt_of_above n hmr]
+            exact hdom
+          have hcell := uniformExpOnUnitWarm_oneThird_target_strict_below_at_stage
+            (p := uniformExpOnUnitWarm_oneThird_target.rangePrecision n)
+            (s := uniformExpOnUnitWarm_oneThird_target.rangePrecision q)
+            hk hmr hqprec hps
+          change gapAwareTargetBisectionStrictDecision
+            uniformExpOnUnitWarm_continuous
+            (uniformExpOnUnitWarm_oneThird_target.value.compute q) P.1 P.2
+            (uniformExpOnUnitWarm_oneThird_target.rangePrecision n)
+          rw [uniformExpOnUnitWarm_oneThird_target_compute_eq_forward q]
+          simpa [P, hPk'] using hcell
+        · have hlt : (1 : Rat) / 3 < (dyadicCell n k).midpoint := by
+            have htotal :
+                (1 : Rat) / 3 ≤ (dyadicCell n k).midpoint ∨
+                  (dyadicCell n k).midpoint ≤ (1 : Rat) / 3 := Rat.le_total
+            rcases htotal with h | h
+            · exact Rat.lt_of_le_of_ne h
+                (Ne.symm (dyadicCell_midpoint_ne_oneThird n k hk))
+            · exact False.elim (hmr
+                (Rat.lt_of_le_of_ne h (dyadicCell_midpoint_ne_oneThird n k hk)))
+          have hqprec : uniformExpQuotientPrecision ((dyadicCell n k).midpoint -
+              (1 : Rat) / 3)
+              (Rat.ne_of_gt ((Rat.lt_iff_sub_pos ((1 : Rat) / 3)
+                (dyadicCell n k).midpoint).mp hlt)) n ≤
+              uniformExpOnUnitWarm_oneThird_target.rangePrecision n := by
+            rw [← uniformExpGapPrecisionAt_of_below n hlt]
+            exact hdom
+          have hcell := uniformExpOnUnitWarm_oneThird_target_strict_above_at_stage
+            (p := uniformExpOnUnitWarm_oneThird_target.rangePrecision n)
+            (s := uniformExpOnUnitWarm_oneThird_target.rangePrecision q)
+            hk hlt hqprec hps
+          change gapAwareTargetBisectionStrictDecision
+            uniformExpOnUnitWarm_continuous
+            (uniformExpOnUnitWarm_oneThird_target.value.compute q) P.1 P.2
+            (uniformExpOnUnitWarm_oneThird_target.rangePrecision n)
+          rw [uniformExpOnUnitWarm_oneThird_target_compute_eq_forward q]
+          simpa [P, hPk'] using hcell
+      change gapAwareTargetBisectionStrictDecision
+        uniformExpOnUnitWarm_continuous
+        (uniformExpOnUnitWarm_oneThird_target.value.compute q) P.1 P.2
+        (uniformExpOnUnitWarm_oneThird_target.rangePrecision n) at hstrict
+      rcases hstrict with hbelow | ⟨hnotbelow', habove⟩
+      · refine ⟨2 * k + 1, ?_, ?_⟩
+        · have hpow : 2 ^ (n + 1) = 2 ^ n * 2 := by omega
+          rw [hpow]
+          omega
+        · change gapAwareTargetBisectionStep uniformExpOnUnitWarm_continuous
+            (uniformExpOnUnitWarm_oneThird_target.value.compute q) P.1 P.2
+            (uniformExpOnUnitWarm_oneThird_target.rangePrecision n) =
+            dyadicCell (n + 1) (2 * k + 1)
+          calc
+            _ = { lo := P.1.midpoint, hi := P.1.hi } :=
+              gapAwareTargetBisectionStep_of_below _ _ _ _ _ hbelow
+            _ = { lo := (dyadicCell n k).midpoint, hi := (dyadicCell n k).hi } := by rw [hPk']
+            _ = dyadicCell (n + 1) (2 * k + 1) := dyadicCell_right_child n k
+      · refine ⟨2 * k, ?_, ?_⟩
+        · have hpow : 2 ^ (n + 1) = 2 ^ n * 2 := by omega
+          rw [hpow]
+          omega
+        · change gapAwareTargetBisectionStep uniformExpOnUnitWarm_continuous
+            (uniformExpOnUnitWarm_oneThird_target.value.compute q) P.1 P.2
+            (uniformExpOnUnitWarm_oneThird_target.rangePrecision n) =
+            dyadicCell (n + 1) (2 * k)
+          calc
+            _ = { lo := P.1.lo, hi := P.1.midpoint } :=
+              gapAwareTargetBisectionStep_of_above _ _ _ _ _ hnotbelow' habove
+            _ = { lo := (dyadicCell n k).lo, hi := (dyadicCell n k).midpoint } := by rw [hPk']
+            _ = dyadicCell (n + 1) (2 * k) := dyadicCell_left_child n k
 
 theorem uniformExpOnUnitWarm_unit_subinterval :
     subintervalOf ({ lo := 0, hi := 1 } : QInterval)
