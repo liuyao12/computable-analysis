@@ -1196,6 +1196,11 @@ resulting `...oneThird_bisection_search` is a complete concrete
 The public `FiniteGapAwareInverseSearch` module supplies the reusable
 plan-to-search adapters, so later inverse branches need only provide their
 finite decisions, nesting, width, and overlap certificates.
+If a branch already exposes a fixed-gap `EffectiveInverseSeparation`, use
+`EffectiveInverseSeparation.toGapAware` with a provider-specific reindexing
+schedule and prove the single rational gap inequality required by that
+schedule.  This transports the separation certificate without introducing a
+classical inverse or a completed real.
 
 Formalization scope is by mechanism, not by exhaustive enumeration.  One
 representative function is enough when another function uses the same certified

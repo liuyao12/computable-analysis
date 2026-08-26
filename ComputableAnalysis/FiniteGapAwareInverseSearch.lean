@@ -13,6 +13,25 @@ routine `RealRaw` and inverse-record plumbing.
 
 namespace ComputableAnalysis
 
+/-! A fixed-gap separation certificate already contains the output precision
+needed by the gap-aware interface.  The only extra datum is the provider's
+explicit schedule translating a strict rational input gap into the fixed
+input threshold expected by that certificate.  Keeping this translation as a
+parameter makes the adapter reusable without baking in a particular
+denominator strategy or invoking density/completeness. -/
+
+def EffectiveInverseSeparation.toGapAware
+    {F : FunctionOnInterval} (S : EffectiveInverseSeparation F)
+    (stage : forall {x y : Rat}, x < y -> Nat -> Nat)
+    (hinput : forall {x y : Rat} (hxy : x < y) (n : Nat),
+      x + 1 / ((S.inputPrecision (stage hxy n) : Nat) : Rat) <= y) :
+    GapAwareInverseSeparation F where
+  kind := S.kind
+  outputPrecision := fun {_x _y} hxy n => S.outputPrecision (stage hxy n)
+  separated := by
+    intro x y hx hy hxy n
+    exact S.separated x y hx hy (stage hxy n) (hinput hxy n)
+
 def gapAwareSourceInterval
     (I : GapAwareInvertibleFunctionOnInterval) : QInterval :=
   { lo := I.function.lower, hi := I.function.upper }

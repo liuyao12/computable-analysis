@@ -369,6 +369,7 @@ finite forward-image separation proof.
 
 \lean{ComputableAnalysis.EffectiveInverseSeparation}
 \lean{ComputableAnalysis.GapAwareInverseSeparation}
+\lean{ComputableAnalysis.EffectiveInverseSeparation.toGapAware}
 \lean{ComputableAnalysis.InvertibleFunctionOnInterval}
 \lean{ComputableAnalysis.DyadicInverseTrace}
 \lean{ComputableAnalysis.DyadicInverseTrace.toSearch}
@@ -380,6 +381,10 @@ proof-carrying plan in
 supplies its finite midpoint decisions, a nested valid output schedule, and
 the forward-image overlap certificate.  The adapter then produces the common
 \texttt{GapAwareInverseBisectionSearch} data and hence a raw inverse.
+When a branch already has a fixed-gap separation certificate, the
+\texttt{EffectiveInverseSeparation.toGapAware} adapter transports it to the
+gap-aware form once the branch supplies an explicit reindexing schedule whose
+input precision is below the actual rational gap.
 The plan does not ask the branch to restate `RealRaw.ValidCompute`: ordering,
 nesting, and the explicit (1/(n+1)) width modulus are assembled into that
 validity theorem once and for all.
