@@ -1081,6 +1081,12 @@ un-stabilized candidate need not itself be nested.
 Once the tangent anchor has its quarter-value certificate, the companion
 `DyadicPublicSquareTangentTransportWitness.stabilized_equiv_value` theorem
 passes that value through the public prefix-stabilized computation.
+The two calculus routes can now be compared directly:
+`SinPiSquareEffectiveFTCData.integral_equiv_public_stabilized` transports an
+effective-FTC integral representation to the stabilized public square
+representation, provided both routes carry their explicit quarter-value
+certificates.  This is representation transport, not a new completeness
+axiom.
 The named structure
 `SinPiSquareFTC.DyadicSquareCircleOverlapFamily` packages those two fields,
 and `to_square_sum_overlap` is the downstream entry point.

@@ -586,6 +586,9 @@ interval-valued composition still requires a separate box-level contract.
    With the sine regularity certificate, `stabilized_valid` now proves the
    usable public computation is valid after prefix stabilization, so raw
    candidate nesting is no longer required for the public route.
+   `SinPiSquareEffectiveFTCData.integral_equiv_public_stabilized` now joins
+   the effective-FTC and stabilized-dyadic representations whenever both
+   carry their explicit quarter-value certificates.
 
    The public square-sum orderedness theorem
    `dyadicPublicSquareLeftSum_ordered` is now proved from pointwise square

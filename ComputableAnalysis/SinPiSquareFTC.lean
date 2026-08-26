@@ -4826,6 +4826,29 @@ theorem SinPiSquareEffectiveFTCData.endpoint_equiv_of_value
     D.integral_valid D.endpoint_valid (RealRaw.ofRat_valid _)
     D.integral_equiv_endpoint hvalue
 
+theorem SinPiSquareEffectiveFTCData.integral_equiv_public_stabilized
+    {S : ArctanSinPiConstruction}
+    (D : SinPiSquareEffectiveFTCData S)
+    (hsine : IntervalRegularOn S.onHalf)
+    (hvalue : D.endpointRaw.Equiv (RealRaw.ofRat (1 / 4)))
+    (hshared : DyadicPublicSquareTangentSharedWitness S)
+    (hanchor_value : tangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4))) :
+    D.integralRaw.Equiv
+      (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral) := by
+  have hD : D.integralRaw.Valid := D.integral_valid
+  have hq : (RealRaw.ofRat (1 / 4)).Valid := RealRaw.ofRat_valid _
+  have hpublic :
+      (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral).Valid :=
+    DyadicPublicSquareTangentSharedWitness.stabilized_valid hshared hsine
+  exact RealRaw.equiv_trans (x := D.integralRaw)
+    (y := RealRaw.ofRat (1 / 4))
+    (z := dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral)
+    hD hq hpublic
+    (D.endpoint_equiv_of_value hvalue)
+    (RealRaw.equiv_symm
+      (DyadicPublicSquareTangentSharedWitness.stabilized_equiv_value
+        hshared hsine hanchor_value))
+
 end SinPiIntegral
 
 end ComputableAnalysis

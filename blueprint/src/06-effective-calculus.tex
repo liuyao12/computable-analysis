@@ -737,6 +737,11 @@ prefix-stabilized evaluator.
 Its validity corollary
 \lean{ComputableAnalysis.DyadicPublicSquareTangentSharedWitness.stabilized_valid}
 shows that the un-stabilized public candidate itself need not be nested.
+The effective-FTC representation and the stabilized public representation are
+connected by
+\lean{ComputableAnalysis.SinPiSquareEffectiveFTCData.integral_equiv_public_stabilized}.
+It requires explicit value certificates for both routes; the transport itself
+uses only validity and equivalence of `RealRaw` representations.
 \leanok
 
 The direct certificate need not assert containment.  The weaker interface
