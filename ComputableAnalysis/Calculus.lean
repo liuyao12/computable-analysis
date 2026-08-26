@@ -9263,6 +9263,14 @@ def nondecreasingDarbouxStage (F : FunctionOnInterval)
   P.boundIntegralSum
     (fun k hk => nondecreasingDarbouxRange F P k hk prec)
 
+theorem exactRat_nondecreasingDarbouxStage_stage_independent
+    (f : Rat -> Rat) (a b : Rat) (P : RationalPartition a b) (n m : Nat) :
+    nondecreasingDarbouxStage
+      (FunctionOnInterval.exactRat f a b) P n =
+      nondecreasingDarbouxStage
+        (FunctionOnInterval.exactRat f a b) P m := by
+  rfl
+
 /-! Evaluator refinement is automatically coherent when the partition is held
 fixed.  The endpoint boxes at a later precision are contained in the earlier
 boxes, and positive cell-width scaling plus the finite-sum containment lemma
