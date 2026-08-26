@@ -151,6 +151,13 @@ theorem gaussianEvenIntegralPrefix_stage_twelve :
       15114962544323 / 10119492583200 := by
   native_decide
 
+theorem gaussianEvenIntegralPrefix_stage_twelve_minus_ten :
+    gaussianEvenIntegralPrefix 12 1 - gaussianEvenIntegralPrefix 10 1 =
+      29 / 1204988400 := by
+  rw [gaussianEvenIntegralPrefix_stage_twelve,
+    gaussianEvenIntegralPrefix_stage_ten]
+  native_decide
+
 theorem gaussianEvenIntegralPrefix_stage_six_minus_four :
     gaussianEvenIntegralPrefix 6 1 - gaussianEvenIntegralPrefix 4 1 =
       23 / 2970 := by
