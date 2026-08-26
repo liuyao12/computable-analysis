@@ -141,6 +141,9 @@ The interval-valued Darboux sum uses this identity directly:
 The blockwise containment rule then compares complete fine and coarse sums:
 \lean{ComputableAnalysis.addInterval_fold_contains_of_mem}
 \lean{ComputableAnalysis.RationalPartition.Refines.boundIntegralSum_contains_of_blockwise}
+The weaker overlap rule is available separately:
+\lean{ComputableAnalysis.addInterval_fold_overlaps_of_mem}
+\lean{ComputableAnalysis.RationalPartition.Refines.boundIntegralSum_overlaps_of_blockwise}
 The remaining whole-sum argument is a finite reindexing of these located
 cells, followed by the single-cell weighted interval inequality.
 This gives the computable mean-value/area principle for the functions covered

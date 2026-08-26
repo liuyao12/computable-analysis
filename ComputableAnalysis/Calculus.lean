@@ -4119,24 +4119,6 @@ theorem Refines.foldl_indexBlocks_eq_foldl_range
 block.  The summand remains the total `boundIntegralTerm`, so out-of-range
 indices stay harmlessly degenerate and no dependent proof transport is hidden
 in the reindexing step. -/
-theorem Refines.boundIntegralSum_eq_indexBlockFold
-    {a b : Rat} {fine coarse : RationalPartition a b}
-    (R : Refines fine coarse)
-    (bound : (k : Nat) -> k < fine.pieces -> QInterval) :
-    fine.boundIntegralSum bound =
-      (List.range coarse.pieces).foldl
-        (fun acc i =>
-          (R.indexBlock i).foldl
-            (fun acc j => QInterval.addInterval acc
-              (fine.boundIntegralTerm bound j)) acc)
-        { lo := 0, hi := 0 } := by
-  unfold boundIntegralSum
-  symm
-  exact R.foldl_indexBlocks_eq_foldl_range
-    (fun acc q => QInterval.addInterval acc q)
-    { lo := 0, hi := 0 }
-    (fun j => fine.boundIntegralTerm bound j)
-
 /-- Every genuine cell of an explicit uniform partition has exactly its
 rational mesh width. -/
 theorem uniform_cell_width (a b : Rat) (pieces : Nat)
@@ -4412,6 +4394,40 @@ theorem addInterval_fold_contains_of_mem (xs : List Nat)
       intro j hj
       exact hterm j (List.mem_cons_of_mem k hj)
 
+/-! Membership-aware overlap transport for a finite interval fold.  Like the
+containment variant above, it permits a total step function while requiring
+width and overlap certificates only for indices actually traversed. -/
+theorem addInterval_fold_overlaps_of_mem (xs : List Nat)
+    (outer inner : Nat -> QInterval) {outerInit innerInit : QInterval}
+    (houter : forall k, k ∈ xs -> 0 <= (outer k).width)
+    (hinner : forall k, k ∈ xs -> 0 <= (inner k).width)
+    (hinit : 0 <= outerInit.width) (hinit' : 0 <= innerInit.width)
+    (hover : QInterval.Overlaps outerInit innerInit)
+    (hterm : forall k, k ∈ xs -> QInterval.Overlaps (outer k) (inner k)) :
+    QInterval.Overlaps
+      (xs.foldl (fun acc k => QInterval.addInterval acc (outer k)) outerInit)
+      (xs.foldl (fun acc k => QInterval.addInterval acc (inner k)) innerInit) := by
+  induction xs generalizing outerInit innerInit with
+  | nil =>
+      exact hover
+  | cons k xs ih =>
+      have hkouter := houter k (by simp)
+      have hkinner := hinner k (by simp)
+      have hstep := QInterval.addInterval_overlaps_of_nonneg
+        hinit hkouter hinit' hkinner hover (hterm k (by simp))
+      have houternext : 0 <=
+          (QInterval.addInterval outerInit (outer k)).width := by
+        rw [QInterval.addInterval_width]
+        exact Rat.add_nonneg hinit hkouter
+      have hinnernext : 0 <=
+          (QInterval.addInterval innerInit (inner k)).width := by
+        rw [QInterval.addInterval_width]
+        exact Rat.add_nonneg hinit' hkinner
+      simpa [List.foldl] using ih
+        (fun j hj => houter j (List.mem_cons_of_mem k hj))
+        (fun j hj => hinner j (List.mem_cons_of_mem k hj))
+        houternext hinnernext hstep
+
 /-- Moving a rational initial value outside a finite addition fold. -/
 theorem rat_add_fold_initial (xs : List Nat) (term : Nat -> Rat)
     (initial : Rat) :
@@ -4480,6 +4496,28 @@ def boundIntegralSum {a b : Rat} (P : RationalPartition a b)
     (fun acc k => QInterval.addInterval acc (P.boundIntegralTerm bound k))
     { lo := 0, hi := 0 }
 
+/-! A fine partition's interval sum can be traversed coarse block by coarse
+block.  The summand remains the total `boundIntegralTerm`, so out-of-range
+indices stay harmlessly degenerate and no dependent proof transport is hidden
+in the reindexing step. -/
+theorem Refines.boundIntegralSum_eq_indexBlockFold
+    {a b : Rat} {fine coarse : RationalPartition a b}
+    (R : Refines fine coarse)
+    (bound : (k : Nat) -> k < fine.pieces -> QInterval) :
+    fine.boundIntegralSum bound =
+      (List.range coarse.pieces).foldl
+        (fun acc i =>
+          (R.indexBlock i).foldl
+            (fun acc j => QInterval.addInterval acc
+              (fine.boundIntegralTerm bound j)) acc)
+        { lo := 0, hi := 0 } := by
+  unfold boundIntegralSum
+  symm
+  exact R.foldl_indexBlocks_eq_foldl_range
+    (fun acc q => QInterval.addInterval acc q)
+    { lo := 0, hi := 0 }
+    (fun j => fine.boundIntegralTerm bound j)
+
 /-- Blockwise refinement comparison for complete interval-valued Darboux sums.
 It is enough to prove one containment certificate for each coarse cell and the
 finite fold then transports all fine-cell contributions at once. -/
@@ -4509,6 +4547,53 @@ theorem Refines.boundIntegralSum_contains_of_blockwise
     (QInterval.containsInterval_refl _)
   intro i hi
   exact hblock i (List.mem_range.mp hi)
+
+/-- Blockwise overlap comparison for complete interval-valued Darboux sums.
+This is the weak-order counterpart of
+`boundIntegralSum_contains_of_blockwise`; it is the appropriate theorem when
+the endpoint data certify overlap but not coordinatewise containment. -/
+theorem Refines.boundIntegralSum_overlaps_of_blockwise
+    {a b : Rat} {fine coarse : RationalPartition a b}
+    (R : Refines fine coarse)
+    (coarseBound : (k : Nat) -> k < coarse.pieces -> QInterval)
+    (fineBound : (k : Nat) -> k < fine.pieces -> QInterval)
+    (hcoarse : forall i (hi : i < coarse.pieces),
+      0 <= (coarse.boundIntegralTerm coarseBound i).width)
+    (hblock : forall i (hi : i < coarse.pieces),
+      0 <=
+        ((R.indexBlock i).foldl
+          (fun acc j => QInterval.addInterval acc
+            (fine.boundIntegralTerm fineBound j))
+          { lo := 0, hi := 0 }).width)
+    (hoverlap : forall i (hi : i < coarse.pieces),
+      QInterval.Overlaps
+        (coarse.boundIntegralTerm coarseBound i)
+        ((R.indexBlock i).foldl
+          (fun acc j => QInterval.addInterval acc
+            (fine.boundIntegralTerm fineBound j))
+          { lo := 0, hi := 0 })) :
+    QInterval.Overlaps
+      (coarse.boundIntegralSum coarseBound)
+      (fine.boundIntegralSum fineBound) := by
+  rw [R.boundIntegralSum_eq_indexBlockFold]
+  unfold boundIntegralSum
+  apply addInterval_fold_overlaps_of_mem
+    (List.range coarse.pieces)
+    (coarse.boundIntegralTerm coarseBound)
+    (fun i =>
+      (R.indexBlock i).foldl
+        (fun acc j => QInterval.addInterval acc
+          (fine.boundIntegralTerm fineBound j))
+        { lo := 0, hi := 0 })
+  · intro i hi
+    exact hcoarse i (List.mem_range.mp hi)
+  · intro i hi
+    exact hblock i (List.mem_range.mp hi)
+  · native_decide
+  · native_decide
+  · simp [QInterval.Overlaps]
+  · intro i hi
+    exact hoverlap i (List.mem_range.mp hi)
 
 /-! A partition sum of ordered term intervals is itself ordered.  This small
 finite lemma is useful whenever a general interval-regular integral compares
