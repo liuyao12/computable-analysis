@@ -806,6 +806,24 @@ F, G on [a,b] -> F + G on [a,b]
 \lean{ComputableAnalysis.intervalNearAtPrecision_addInterval}
 \leanok
 
+The finite product-rule estimate is also used end to end.  On the positive
+unit branch, the factor (x\arctan(x)) is integrated by a two-stage
+certificate: factor boxes and the endpoint secant are computed at separate
+finite stages, their bounded derivative sum is stabilized by explicit
+overlap, and the result is transported to the independent arctangent
+rectangle evaluator.  This is a concrete product FTC, not merely a local
+quotient identity.
+
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageFTC}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageFTC_equiv_endpoint}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageRaw_widthsShrink}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageStabilizedRaw_valid}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageStabilizedRaw_equiv_rectangleAtOne}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral_valid}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral_equiv_arctanGeom_one}
+\leanok
+
 The first non-polynomial instance is already closed: Lean constructs
 `arctanEffectiveFTCData` for the rational kernel \(1/(1+x^2)\) and proves its
 finite rectangle integral equivalent to the endpoint primitive. This is the

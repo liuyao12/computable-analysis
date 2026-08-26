@@ -58,6 +58,9 @@ exponential initial-value certificate, and scalar linear ODE uniqueness are
 checked in Lean. The finite raw-sum algebra used to
 concatenate certified pieces is also checked, so adjacent-interval and
 multi-turn proofs have an explicit assembly layer. The
+two-stage product FTC for the positive (x\arctan(x)) branch is also checked:
+its stabilized bounded derivative sum is transported to an independent
+arctangent rectangle evaluator. The
 first non-monotone endpoint identity is now also checked: the two affine cells
 for \(\lvert x\rvert\) on \([-1,1]\) are transported through the separate
 primitive \(x\lvert x\rvert/2\) to the value (1). The
@@ -171,7 +174,7 @@ Integrals/FTC &
 rectangle, Lipschitz--Darboux, polynomial, arctangent, Stieltjes sine, finite
 quadrature mean-value brackets, the completed two-cell absolute-value FTC,
 generic multi-turn stage assembly, increasing and decreasing Darboux stages,
-and endpoint-ordered monotone dyadic
+the two-stage product FTC, and endpoint-ordered monotone dyadic
 schedules with arbitrary monotone computational budgets &
 endpoint identification for multi-turn candidates, all-stage equal-dyadic sine,
 and normalized \(\sin^2\) transports \\
