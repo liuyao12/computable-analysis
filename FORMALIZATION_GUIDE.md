@@ -1672,6 +1672,9 @@ open ComputableAnalysis
 #check QInterval.inv_ordered_of_pos
 #check QInterval.inv_width_eq_width_div_product_of_pos
 #check QInterval.inv_nested_of_pos
+#check RealRaw.positiveInvCompute
+#check RealRaw.positiveInv_compute_ordered
+#check RealRaw.positiveInv_compute_nested
 ```
 
 These reciprocal lemmas are deliberately finite: they apply after an interval

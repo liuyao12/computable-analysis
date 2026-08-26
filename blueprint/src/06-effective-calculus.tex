@@ -427,6 +427,16 @@ containment under interval refinement:
 \lean{ComputableAnalysis.QInterval.inv_nested_of_pos}
 \leanok
 
+The corresponding positive raw reciprocal schedule is explicit: use a broad
+prefix before the certified separation stage, then invert each later interval.
+Its stage order and nesting are already checked; the remaining width theorem
+is the final obligation before exposing it as a valid raw real.
+
+\lean{ComputableAnalysis.RealRaw.positiveInvCompute}
+\lean{ComputableAnalysis.RealRaw.positiveInv_compute_ordered}
+\lean{ComputableAnalysis.RealRaw.positiveInv_compute_nested}
+\leanok
+
 This is not yet a raw reciprocal theorem.  Its raw construction must provide
 a stage at which the input is separated from zero, stabilize the earlier
 prefix, and then use this finite branch; the negative branch is transported

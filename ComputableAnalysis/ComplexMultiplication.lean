@@ -680,6 +680,25 @@ theorem inv_of_pos {I : QInterval} (hpos : 0 < I.lo) :
     I.inv = { lo := 1 / I.hi, hi := 1 / I.lo } := by
   simp [QInterval.inv, hpos]
 
+theorem one_div_le_one_div_of_pos {a b : Rat}
+    (ha : 0 < a) (hab : a <= b) : 1 / b <= 1 / a := by
+  rw [Rat.div_def, Rat.div_def]
+  simp only [Rat.one_mul]
+  have hb : 0 < b := by grind
+  have hprod : 0 < a * b := Rat.mul_pos ha hb
+  apply Rat.le_of_mul_le_mul_right (c := a * b)
+  · have ha0 : a ≠ 0 := Rat.ne_of_gt ha
+    have hb0 : b ≠ 0 := Rat.ne_of_gt hb
+    calc
+      b⁻¹ * (a * b) = a := by
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel,
+          Rat.inv_mul_cancel]
+      _ <= b := hab
+      _ = a⁻¹ * (a * b) := by
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel,
+          Rat.inv_mul_cancel]
+  · exact hprod
+
 theorem inv_ordered_of_pos {I : QInterval}
     (hpos : 0 < I.lo) (hI : I.lo <= I.hi) :
     I.inv.lo <= I.inv.hi := by
@@ -762,6 +781,70 @@ theorem inv_nested_of_pos {I J : QInterval}
 end QInterval
 
 namespace RealRaw
+
+def positiveInvCompute (x : RealRaw) (N : Nat) : Nat -> QInterval :=
+  fun n =>
+    if n < N then
+      { lo := 0, hi := 1 / (x.compute N).lo }
+    else
+      QInterval.inv (x.compute n)
+
+def positiveInv (x : RealRaw) (N : Nat) : RealRaw where
+  compute := positiveInvCompute x N
+
+theorem positiveInv_compute_ordered {x : RealRaw} {N n : Nat}
+    (hx : x.Valid) (hpos : 0 < (x.compute N).lo) :
+    ((positiveInv x N).compute n).lo <=
+      ((positiveInv x N).compute n).hi := by
+  by_cases hn : n < N
+  · simp [positiveInv, positiveInvCompute, hn]
+    change 0 <= 1 / (x.compute N).lo
+    rw [Rat.div_def]
+    exact Rat.le_of_lt (Rat.mul_pos (by native_decide) ((Rat.inv_pos).2 hpos))
+  · simp [positiveInv, positiveInvCompute, hn]
+    change (QInterval.inv (x.compute n)).lo <=
+      (QInterval.inv (x.compute n)).hi
+    apply QInterval.inv_ordered_of_pos
+    · have hNn := hx.2.1 N n (by omega)
+      grind
+    · exact interval_order_of_valid x hx n
+
+theorem positiveInv_compute_nested {x : RealRaw} {N n m : Nat}
+    (hx : x.Valid) (hpos : 0 < (x.compute N).lo) (hnm : n <= m) :
+    QInterval.ContainsInterval ((positiveInv x N).compute n)
+      ((positiveInv x N).compute m) := by
+  by_cases hn : n < N
+  · by_cases hm : m < N
+    · simp [positiveInv, positiveInvCompute, hn, hm]
+      change 0 <= 0 /\ 1 / (x.compute N).lo <= 1 / (x.compute N).lo
+      exact ⟨Rat.le_refl, Rat.le_refl⟩
+    · simp [positiveInv, positiveInvCompute, hn, hm]
+      change 0 <= (QInterval.inv (x.compute m)).lo /\
+        (QInterval.inv (x.compute m)).hi <= 1 / (x.compute N).lo
+      have hNm : N <= m := by omega
+      have hN := hx.2.1 N m hNm
+      have hmpos : 0 < (x.compute m).lo := by grind
+      have hmh : 0 < (x.compute m).hi := by grind
+      rw [QInterval.inv_of_pos hmpos]
+      change 0 <= 1 / (x.compute m).hi /\
+        1 / (x.compute m).lo <= 1 / (x.compute N).lo
+      constructor
+      · rw [Rat.div_def]
+        exact Rat.le_of_lt (Rat.mul_pos (by native_decide) ((Rat.inv_pos).2 hmh))
+      · apply QInterval.one_div_le_one_div_of_pos
+          hpos hN.1
+  · have hNn : N <= n := by omega
+    have hNm : N <= m := by omega
+    have hNn' := hx.2.1 N n hNn
+    have hNm' := hx.2.1 N m hNm
+    have hnpos : 0 < (x.compute n).lo := by grind
+    have hmp : 0 < (x.compute m).lo := by grind
+    have hm : ¬m < N := by omega
+    simp [positiveInv, positiveInvCompute, hn, hm]
+    apply QInterval.inv_nested_of_pos hnpos hmp
+    · exact (hx.2.1 n m hnm).1
+    · exact interval_order_of_valid x hx m
+    · exact (hx.2.1 n m hnm).2.2
 
 private theorem qabs_le_of_interval_bounds {a b x B : Rat}
     (ha : qabs a <= B) (hb : qabs b <= B)
