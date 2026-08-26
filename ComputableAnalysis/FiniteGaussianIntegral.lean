@@ -140,6 +140,17 @@ theorem gaussianEvenIntegralPrefix_stage_eight :
     gaussianEvenIntegralPrefix 8 1 = 1009219 / 675675 := by
   native_decide
 
+/-! Higher exact checkpoints keep the bounded Gaussian computation auditable
+as the factorial prefix is extended. -/
+theorem gaussianEvenIntegralPrefix_stage_ten :
+    gaussianEvenIntegralPrefix 10 1 = 31293917807 / 20951330400 := by
+  native_decide
+
+theorem gaussianEvenIntegralPrefix_stage_twelve :
+    gaussianEvenIntegralPrefix 12 1 =
+      15114962544323 / 10119492583200 := by
+  native_decide
+
 theorem gaussianEvenIntegralPrefix_stage_six_minus_four :
     gaussianEvenIntegralPrefix 6 1 - gaussianEvenIntegralPrefix 4 1 =
       23 / 2970 := by
