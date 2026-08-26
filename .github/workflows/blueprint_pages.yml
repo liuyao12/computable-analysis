@@ -2,6 +2,8 @@ name: Build blueprint pages
 
 on:
   push:
+    branches:
+      - main
     paths:
       - "blueprint/**"
       - ".github/workflows/blueprint_pages.yml"
@@ -17,7 +19,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
