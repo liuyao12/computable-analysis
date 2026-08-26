@@ -84,6 +84,10 @@ That bridge is now represented by the checked
    incorrectly assigned `1/4` to that unscaled chart; its contradiction is now
    proved by `TangentSquareIntegralValueSubgoal.impossible` at stage eight.
    The normalized product route is the valid path to `1/4`.
+   The composition step is now packaged by
+   `NormalizedTangentSquareValueSubgoal.of_quarter_turn`: once the valid
+   quarter-turn certificate is supplied, reciprocal-π product transport is
+   automatic.
    The separate algorithm-compatibility obligation is represented by
    `TangentSquareFTCIntegralCompatibilitySubgoal`: stagewise overlap between
    the effective FTC bounded-sum raw and the independent dyadic anchor.

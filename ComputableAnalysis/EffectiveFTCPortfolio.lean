@@ -1297,6 +1297,28 @@ theorem TangentSquareQuarterTurnValueSubgoal.value
     H.tangent_integral_valid H.endpoint_valid H.quarter_valid
     hanchor_endpoint H.endpoint_equiv_quarter
 
+/-! Once the unscaled chart has been identified with the quarter-turn raw,
+the normalized `1/4` anchor follows by the certified reciprocal-pi product
+equivalence.  This is the direct composition theorem for the corrected route;
+it does not ask for a second value certificate for the unscaled chart. -/
+def NormalizedTangentSquareValueSubgoal.of_quarter_turn
+    (H : TangentSquareQuarterTurnValueSubgoal) :
+    NormalizedTangentSquareValueSubgoal where
+  normalized_valid := normalizedTangentSquareIntegral_valid
+  anchor_valid := normalizedTangentSquareAnchor_valid
+  chart_transport := by
+    change (SinPiIntegral.reciprocalPiRaw *
+      SinPiIntegral.tangentSquareIntegral).Equiv
+      (SinPiIntegral.reciprocalPiRaw *
+        RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))
+    apply SignedRawProductEquivalenceSubgoal.equiv
+    apply SignedRawProductEquivalenceSubgoal.of_factor_equiv
+      normalizedTangentSquareIntegral_valid normalizedTangentSquareAnchor_valid
+      SinPiIntegral.reciprocalPiRaw_valid SinPiIntegral.reciprocalPiRaw_valid
+      H.tangent_integral_valid H.quarter_valid
+    · exact RealRaw.equiv_refl _ SinPiIntegral.reciprocalPiRaw_valid
+    · exact H.value
+
 theorem TangentSquareIntegralValueSubgoal.value
     (H : TangentSquareIntegralValueSubgoal) :
     SinPiIntegral.tangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4)) := by
