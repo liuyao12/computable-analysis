@@ -3860,6 +3860,56 @@ theorem RationalTangentSquareWitnessCandidateFamily.signed_square_overlap
   obtain ⟨v, hv⟩ := h.search_exists n
   exact signed_square_overlap_of_rationalTangentSquareWitnessSearch hv hS hC
 
+/-! The integral-facing form allows all three rational boxes to vary with the
+requested stage.  This is the schedule used by an eventual equal-dyadic
+transport; the preceding fixed-box family remains convenient for local
+regression examples. -/
+structure RationalTangentSquareWitnessSchedule where
+  tangentBox : Nat -> QInterval
+  sineBox : Nat -> QInterval
+  cosineBox : Nat -> QInterval
+  gridDepth : Nat -> Nat
+  gridIndex : Nat -> Nat
+  gridIndex_le : forall n, gridIndex n <= 2 ^ gridDepth n
+  admissible : forall n,
+    rationalTangentSquareWitnessAdmissibleBool (tangentBox n)
+      (sineBox n) (cosineBox n)
+      ((tangentBox n).lo + (tangentBox n).width *
+        ((gridIndex n : Rat) / ((2 ^ gridDepth n : Nat) : Rat))) = true
+
+theorem RationalTangentSquareWitnessSchedule.search_exists
+    (h : RationalTangentSquareWitnessSchedule) :
+    forall n, ∃ v, rationalTangentSquareWitnessSearch (h.tangentBox n)
+      (h.sineBox n) (h.cosineBox n) (h.gridDepth n) = some v := by
+  intro n
+  exact rationalTangentSquareWitnessSearch_complete_of_grid_candidate
+    (U := h.tangentBox n) (S := h.sineBox n) (C := h.cosineBox n)
+    (h.gridDepth n) (h.gridIndex n) (h.gridIndex_le n) (h.admissible n)
+
+theorem RationalTangentSquareWitnessSchedule.square_overlap
+    (h : RationalTangentSquareWitnessSchedule)
+    (hS : forall n, subintervalOf (h.sineBox n) 0 1)
+    (hC : forall n, subintervalOf (h.cosineBox n) 0 1) :
+    forall n, QInterval.Overlaps
+      (rationalSquareInterval (h.sineBox n))
+      (rationalOneMinusSquareInterval (h.cosineBox n)) := by
+  intro n
+  obtain ⟨v, hv⟩ := h.search_exists n
+  exact square_overlap_of_rationalTangentSquareWitnessSearch hv
+    (hS n) (hC n)
+
+theorem RationalTangentSquareWitnessSchedule.signed_square_overlap
+    (h : RationalTangentSquareWitnessSchedule)
+    (hS : forall n, subintervalOf (h.sineBox n) 0 1)
+    (hC : forall n, subintervalOf (h.cosineBox n) (-1) 1) :
+    forall n, QInterval.Overlaps
+      (rationalSquareInterval (h.sineBox n))
+      (rationalOneMinusSquareIntervalSigned (h.cosineBox n)) := by
+  intro n
+  obtain ⟨v, hv⟩ := h.search_exists n
+  exact signed_square_overlap_of_rationalTangentSquareWitnessSearch hv
+    (hS n) (hC n)
+
 theorem dyadicNestedRadicalStageSinAt_subinterval
     (n k : Nat) (hk : k < 2 ^ n) :
     subintervalOf (dyadicNestedRadicalStageSinAt n k) 0 1 := by
