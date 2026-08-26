@@ -355,6 +355,72 @@ theorem exactRat_affine_signed_unitSlope_raw_equiv_ofRat
   rw [exactRat_affine_signed_unitSlope_raw_eq_ofRat r c a b hrneg hrpos]
   exact RealRaw.equiv_refl _ (RealRaw.ofRat_valid _)
 
+/-! The interval evaluator itself does not need the artificial unit-slope
+restriction.  A rational slope has a finite natural Lipschitz majorant, so
+the same interval-regular contract applies on every ordered rational chart. -/
+def affineSlopeBound (r : Rat) : Nat := r.num.natAbs + 1
+
+private theorem rat_le_affineSlopeBound (r : Rat) :
+    r <= (affineSlopeBound r : Rat) := by
+  unfold affineSlopeBound
+  by_cases hr : 0 < r
+  · have hdenpos : 0 < ((r.den : Nat) : Rat) := by
+      exact (Rat.natCast_pos).2 (Nat.pos_of_ne_zero r.den_nz)
+    apply Rat.le_of_mul_le_mul_right (c := ((r.den : Nat) : Rat))
+    · rw [Rat.mul_comm r ((r.den : Nat) : Rat), rat_den_mul_self]
+      have hnumpos : 0 < r.num := rat_num_pos_of_pos hr
+      have hnum_nonneg : 0 <= r.num := Int.le_of_lt hnumpos
+      have hcast : (((r.num.natAbs : Nat) : Rat)) = (r.num : Rat) := by
+        exact_mod_cast (Int.natAbs_of_nonneg hnum_nonneg)
+      calc
+        (r.num : Rat) = ((r.num.natAbs : Nat) : Rat) := by rw [hcast]
+        _ <= (((r.num.natAbs + 1 : Nat) : Rat)) := by
+          exact_mod_cast (Nat.le_succ r.num.natAbs)
+        _ <= (((r.num.natAbs + 1 : Nat) : Rat)) *
+            ((r.den : Nat) : Rat) := by
+          exact_mod_cast (Nat.le_mul_of_pos_right (r.num.natAbs + 1)
+            (Nat.pos_of_ne_zero r.den_nz))
+    · exact hdenpos
+  · have hrnonpos : r <= 0 := by grind
+    exact Rat.le_trans hrnonpos (Rat.natCast_nonneg)
+
+private theorem qabs_le_affineSlopeBound (r : Rat) :
+    qabs r <= (affineSlopeBound r : Rat) := by
+  unfold affineSlopeBound qabs
+  by_cases hr : r < 0
+  · simp [hr]
+    have h := rat_le_affineSlopeBound (-r)
+    have hnum : (-r).num.natAbs = r.num.natAbs := by
+      cases r
+      simp
+    simpa [affineSlopeBound, hnum] using h
+  · simp [hr]
+    simpa [affineSlopeBound] using rat_le_affineSlopeBound r
+
+theorem exactRat_affine_lipschitz
+    (r c a b : Rat) (hab : a <= b) :
+    Integral.LipschitzOnIntervalNat
+      (fun x => r * x + c) a b (affineSlopeBound r) := by
+  refine ⟨hab, ?_⟩
+  intro s t hsa hsb hta htb
+  have hfactor :
+      (r * s + c) - (r * t + c) = r * (s - t) := by
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul]
+  rw [hfactor, qabs_mul]
+  have hst : qabs (s - t) = qabs (t - s) := by
+    rw [show s - t = -(t - s) by grind [Rat.sub_eq_add_neg], qabs_neg]
+  rw [hst]
+  exact Rat.mul_le_mul_of_nonneg_right
+    (qabs_le_affineSlopeBound r) (qabs_nonneg _)
+
+def exactRat_affine_intervalRegularOn
+    (r c a b : Rat) (hab : a <= b) :
+    IntervalRegularOn
+      (FunctionOnInterval.exactRat (fun x => r * x + c) a b) :=
+  IntervalRegularOn.of_lipschitzOnIntervalNat
+    (fun x => r * x + c) a b (affineSlopeBound r)
+    (exactRat_affine_lipschitz r c a b hab)
+
 def exactSquareInterval (I : QInterval) : QInterval :=
   { lo := I.lo * I.lo, hi := I.hi * I.hi }
 
