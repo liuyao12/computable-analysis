@@ -8321,6 +8321,16 @@ def IntervalRegularOn.EvalIntervalsNested
       (hregular.evalInterval I hI n).ContainsInterval
         (hregular.evalInterval I hI m)
 
+theorem IntervalRegularOn.EvalIntervalsNested.of_stageIndependent
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    (hindependent : forall (I : QInterval)
+      (hI : subintervalOf I F.lower F.upper) (n m : Nat),
+      hregular.evalInterval I hI n = hregular.evalInterval I hI m) :
+    IntervalRegularOn.EvalIntervalsNested hregular := by
+  intro I hI n m hnm
+  rw [hindependent I hI n m]
+  exact QInterval.containsInterval_refl _
+
 theorem intervalRegularDarbouxStage_contains_of_evalIntervalsNested
     (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
     (hstage : IntervalRegularOn.EvalIntervalsNested hregular)

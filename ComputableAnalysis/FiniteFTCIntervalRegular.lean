@@ -423,10 +423,10 @@ def exactRat_affine_intervalRegularOn
 
 theorem exactRat_affine_evalIntervalsNested
     (r c a b : Rat) (hab : a <= b) :
-    IntervalRegularOn.EvalIntervalsNested
+      IntervalRegularOn.EvalIntervalsNested
       (exactRat_affine_intervalRegularOn r c a b hab) := by
-  intro I hI n m hnm
-  exact QInterval.containsInterval_refl _
+  exact IntervalRegularOn.EvalIntervalsNested.of_stageIndependent _
+    (by intro I hI n m; rfl)
 
 theorem exactRat_affine_darbouxStage_nested
     (r c a b : Rat) (hab : a <= b)
