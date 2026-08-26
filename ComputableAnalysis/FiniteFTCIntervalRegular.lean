@@ -1235,6 +1235,24 @@ def exactRat_pow_intervalRegularOn_unit (n : Nat) :
       (fun x : Rat => x ^ n) n (by native_decide) (by native_decide)
       (by native_decide) (exactPow_lipschitz_on_unit n))
 
+theorem exactRat_pow_evalIntervalsNested_unit (n : Nat) :
+    IntervalRegularOn.EvalIntervalsNested
+      (exactRat_pow_intervalRegularOn_unit n) := by
+  exact IntervalRegularOn.EvalIntervalsNested.of_stageIndependent _
+    (by intro I hI n m; rfl)
+
+theorem exactRat_pow_darbouxStage_nested_unit
+    (power : Nat) (P : RationalPartition 0 1) {n m : Nat} (hnm : n <= m) :
+    (Integral.intervalRegularDarbouxStage
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ power) 0 1)
+      (exactRat_pow_intervalRegularOn_unit power) P n).ContainsInterval
+      (Integral.intervalRegularDarbouxStage
+        (FunctionOnInterval.exactRat (fun x : Rat => x ^ power) 0 1)
+        (exactRat_pow_intervalRegularOn_unit power) P m) := by
+  exact Integral.intervalRegularDarbouxStage_contains_of_evalIntervalsNested
+    _ (exactRat_pow_intervalRegularOn_unit power)
+    (exactRat_pow_evalIntervalsNested_unit power) P hnm
+
 def exactRat_pow_integral_certificate (n : Nat) :
     Integral.IntervalRegularIntegralCertificate
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1) where
