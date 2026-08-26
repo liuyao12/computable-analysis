@@ -8491,6 +8491,68 @@ def nondecreasingDarbouxStage (F : FunctionOnInterval)
   P.boundIntegralSum
     (fun k hk => nondecreasingDarbouxRange F P k hk prec)
 
+/-! One complete uniform refinement step for the strong monotone certificate.
+The proof is deliberately phrased through the generic blockwise transport
+theorem: the only analytic input is the three-point split inequality, while
+the remaining work is finite index arithmetic. -/
+theorem endpointOrderedNondecreasingDarbouxStage_contains_uniform_double
+    (F : FunctionOnInterval)
+    (hF : EndpointOrderedNondecreasingOnInterval F)
+    (pieces : Nat) (hpieces : 0 < pieces) (hab : F.lower <= F.upper)
+    (prec : Nat) :
+    QInterval.ContainsInterval
+      (nondecreasingDarbouxStage F
+        (RationalPartition.uniform F.lower F.upper pieces hpieces hab) prec)
+      (nondecreasingDarbouxStage F
+        (RationalPartition.uniform F.lower F.upper (pieces * 2)
+          (Nat.mul_pos hpieces (by norm_num)) hab) prec) := by
+  let coarse := RationalPartition.uniform F.lower F.upper pieces hpieces hab
+  let fine := RationalPartition.uniform F.lower F.upper (pieces * 2)
+    (Nat.mul_pos hpieces (by norm_num)) hab
+  let R : RationalPartition.Refines fine coarse :=
+    RationalPartition.uniformRefinesRightCertificate F.lower F.upper pieces 2
+      hpieces (by norm_num) hab
+  apply R.boundIntegralSum_contains_of_blockwise
+  intro i hi
+  have hindex : R.index i = i * 2 := by
+    rfl
+  have hindex_next : R.index (i + 1) = (i + 1) * 2 := by
+    rfl
+  have hblock : R.indexBlock i = [i * 2, i * 2 + 1] := by
+    simp [RationalPartition.Refines.indexBlock, hindex, hindex_next]
+    omega
+  rw [hblock]
+  simp only [List.foldl_cons, List.foldl_nil]
+  have hi0 : i * 2 < fine.pieces :=
+    R.indexBlock_mem_fine hi (by simp [hblock])
+  have hi1 : i * 2 + 1 < fine.pieces :=
+    R.indexBlock_mem_fine hi (by simp [hblock])
+  have hcoarse := endpointOrderedNondecreasing_splitScaledEndpointRange_contains
+    F hF (coarse.point i) (fine.point (i * 2 + 1))
+      (coarse.point (i + 1))
+      (by
+        exact (coarse.cell i hi).contains_inDomain
+          (by simp [RationalSubinterval.contains]))
+      (by
+        exact (fine.cell (i * 2 + 1) hi1).contains_inDomain
+          (by simp [RationalSubinterval.contains]))
+      (by
+        exact (coarse.cell (i + 1) (Nat.succ_le_of_lt hi)).contains_inDomain
+          (by simp [RationalSubinterval.contains]))
+      (by
+        simpa [coarse, fine, RationalPartition.uniform, leftPoint]
+          using (fine.monotone (i * 2) (i * 2 + 1) (by omega)
+            (by omega)))
+      (by
+        simpa [coarse, fine, RationalPartition.uniform, leftPoint]
+          using (fine.monotone (i * 2 + 1) ((i + 1) * 2) (by omega)
+            (by omega)))
+      prec
+  simpa [coarse, fine, R, RationalPartition.boundIntegralTerm,
+    RationalSubinterval.scaleBound, nondecreasingDarbouxRange,
+    RationalSubinterval.width, RationalPartition.uniform_cell_width,
+    RationalPartition.uniform, leftPoint, Nat.mul_add, Nat.add_mul] using hcoarse
+
 /-! Evaluator refinement is automatically coherent when the partition is held
 fixed.  The endpoint boxes at a later precision are contained in the earlier
 boxes, and positive cell-width scaling plus the finite-sum containment lemma
