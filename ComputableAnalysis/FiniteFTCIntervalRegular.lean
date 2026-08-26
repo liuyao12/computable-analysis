@@ -1056,6 +1056,14 @@ def exactRat_pow_intervalRegularOn_unit (n : Nat) :
       (fun x : Rat => x ^ n) n (by native_decide) (by native_decide)
       (by native_decide) (exactPow_lipschitz_on_unit n))
 
+theorem exactRat_pow_nondecreasingDarbouxStage_stage_independent
+    (power : Nat) (P : RationalPartition 0 1) (n m : Nat) :
+    Integral.nondecreasingDarbouxStage
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ power) 0 1) P n =
+      Integral.nondecreasingDarbouxStage
+        (FunctionOnInterval.exactRat (fun x : Rat => x ^ power) 0 1) P m := by
+  rfl
+
 def exactRat_pow_integral_certificate (n : Nat) :
     Integral.IntervalRegularIntegralCertificate
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1) where

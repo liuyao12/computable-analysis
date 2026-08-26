@@ -106,13 +106,17 @@ $1/4$; the proof changes only the finite power-range bound.
 The same finite schedule is already checked for the quartic and fifth
 monomial targets, closing at $1/5$ and $1/6$.  Together these examples give a
 small regression family for the derivative-bound FTC before the project moves
-to exponential and trigonometric evaluators.
+to exponential and trigonometric evaluators.  For exact rational monomials,
+the finite Darboux bracket is independent of the requested evaluator stage;
+the stage parameter becomes substantive only for interval-valued special
+function computations.
 
 \lean{ComputableAnalysis.Integral.squareIntegralEffectiveFTC_endpoint_equiv_one_third}
 \lean{ComputableAnalysis.Integral.squareIntegralEffectiveFTC_integral_equiv_one_third}
 \lean{ComputableAnalysis.Integral.cubicIntegralEffectiveFTC_integral_equiv_one_fourth}
 \lean{ComputableAnalysis.Integral.quarticIntegralEffectiveFTC_equiv_one_fifth}
 \lean{ComputableAnalysis.Integral.fifthIntegralEffectiveFTC_equiv_one_sixth}
+\lean{ComputableAnalysis.exactRat_pow_nondecreasingDarbouxStage_stage_independent}
 \leanok
 
 \section{A normalized trigonometric bridge}
