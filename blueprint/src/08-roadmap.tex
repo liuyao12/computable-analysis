@@ -92,6 +92,11 @@ evaluator.  These anchors are recorded by
 \texttt{dyadicNestedRadicalLeftSum\_one\_overlaps\_stieltjes} and
 \texttt{dyadicNestedRadicalLeftSum\_two\_overlaps\_stieltjes}; the remaining theorem is
 the uniform branch transport, not the existence of the candidate algorithm.
+The finite-search side is now complete as an interface: an explicit admissible
+rational witness in a candidate list yields a certified search hit, and
+\texttt{DyadicTangentWitnessFamily.of\_canonical\_candidate\_family} packages
+such families directly.  What remains is the geometric proof that supplies
+those admissible witnesses uniformly at every depth and precision.
 
 The same accounting applies to the squared-sine experiment.  The tangent
 chart itself has a completed effective FTC with natural endpoint \(\pi/4\).
