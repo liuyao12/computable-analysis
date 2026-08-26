@@ -958,6 +958,10 @@ rational cells.
 The resulting finite algorithm is packaged as
 `dyadicPublicSquareIntegralRaw`, with
 `dyadicPublicSquareIntegralRaw_widths_shrink` proving its width modulus. Its
+finite orderedness companion `dyadicPublicSquareLeftSum_ordered` follows
+directly from valid square samples and the nonnegative mesh.  Thus the
+remaining raw-validity obligation is specifically cross-stage nesting, not
+pointwise interval ordering.
 `RealRaw.Valid` and equivalence remain separate witness obligations; the
 construction deliberately does not infer cross-stage nesting from shrinking
 alone.

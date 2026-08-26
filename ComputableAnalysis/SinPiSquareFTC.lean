@@ -2801,6 +2801,110 @@ theorem dyadicPublicSquareLeftSum_width_le_of_stage
       rw [hmesh_total]
       rw [show (1 / 2 : Rat) - 0 = 1 / 2 by grind]
 
+theorem sinPiSquareOnHalf_valid (S : ArctanSinPiConstruction) :
+    (sinPiSquareOnHalf S).Valid := by
+  have hvalid : (sinPiOnHalfRaw S).Valid := by
+    intro x hx
+    change RealRaw.ValidCompute
+      (fun n => if h : 0 <= x /\ x <= (1 : Rat) / 2 then
+        (sinPiRawOfArctan S.inverse x h).compute n else { lo := 0, hi := 0 })
+    split
+    · exact S.sin_valid x hx
+    · rename_i hfalse
+      exact False.elim (hfalse hx)
+  apply RealFunRaw.mul_valid_of_nonneg_bounded
+    hvalid hvalid
+  · intro x hx
+    refine ⟨1, by native_decide, ?_⟩
+    intro n
+    change 0 <= (if h : 0 <= x /\ x <= (1 : Rat) / 2 then
+      (sinPiRawOfArctan S.inverse x h).compute n else { lo := 0, hi := 0 }).lo /\
+      (if h : 0 <= x /\ x <= (1 : Rat) / 2 then
+        (sinPiRawOfArctan S.inverse x h).compute n else { lo := 0, hi := 0 }).hi <= 1
+    split
+    · exact S.sinPiRawOfArctan_bounds hx n
+    · rename_i hfalse
+      exact False.elim (hfalse hx)
+  · intro x hx
+    refine ⟨1, by native_decide, ?_⟩
+    intro n
+    change 0 <= (if h : 0 <= x /\ x <= (1 : Rat) / 2 then
+      (sinPiRawOfArctan S.inverse x h).compute n else { lo := 0, hi := 0 }).lo /\
+      (if h : 0 <= x /\ x <= (1 : Rat) / 2 then
+        (sinPiRawOfArctan S.inverse x h).compute n else { lo := 0, hi := 0 }).hi <= 1
+    split
+    · exact S.sinPiRawOfArctan_bounds hx n
+    · rename_i hfalse
+      exact False.elim (hfalse hx)
+
+theorem dyadicPublicSquareLeftSum_ordered
+    (S : ArctanSinPiConstruction) (n : Nat) :
+    0 <= (dyadicPublicSquareLeftSum S n).width := by
+  let N := 2 ^ n
+  have hN : 0 < N := by
+    dsimp [N]
+    exact Nat.pow_pos (by omega)
+  have hmesh : 0 <= mesh 0 ((1 : Rat) / 2) N :=
+    mesh_nonneg_of_le hN (by native_decide)
+  have hcell : forall k, k ∈ List.range N ->
+      0 <= (QInterval.scaleByRat
+        (mesh 0 ((1 : Rat) / 2) N)
+        ((sinPiSquareOnHalf S).compute
+          (leftPoint 0 ((1 : Rat) / 2) N k) n)).width := by
+    intro k hk
+    have hklt : k < N := List.mem_range.mp hk
+    have hleft := leftPoint_monotone hN (by native_decide :
+      (0 : Rat) <= (1 : Rat) / 2) (Nat.zero_le k)
+    have hright :
+        leftPoint 0 ((1 : Rat) / 2) N k <=
+          leftPoint 0 ((1 : Rat) / 2) N N :=
+      leftPoint_monotone hN (by native_decide)
+        (Nat.le_of_lt hklt)
+    let x := leftPoint 0 ((1 : Rat) / 2) N k
+    have hx : 0 <= x /\ x <= (1 : Rat) / 2 := by
+      exact ⟨by simpa [x, N, leftPoint_zero] using hleft,
+        by simpa [x, N, leftPoint_endpoint hN] using hright⟩
+    have hsamplevalid := sinPiSquareOnHalf_valid S x ⟨hx, hx⟩
+    rw [QInterval.scaleByRat_width_of_nonneg hmesh]
+    exact Rat.mul_nonneg hmesh
+      (hsamplevalid.1 n)
+  unfold dyadicPublicSquareLeftSum
+  rw [RationalPartition.addInterval_fold_width]
+  have hzero : ({ lo := 0, hi := 0 } : QInterval).width = 0 := by
+    unfold QInterval.width
+    grind
+  rw [hzero]
+  have hfold : forall (xs : List Nat) (initial : Rat),
+      0 <= initial ->
+      (forall k, k ∈ xs ->
+        0 <= (QInterval.scaleByRat
+          (mesh 0 ((1 : Rat) / 2) N)
+          ((sinPiSquareOnHalf S).compute
+            (leftPoint 0 ((1 : Rat) / 2) N k) n)).width) ->
+      0 <= xs.foldl
+        (fun total k => total +
+          (QInterval.scaleByRat
+            (mesh 0 ((1 : Rat) / 2) N)
+            ((sinPiSquareOnHalf S).compute
+              (leftPoint 0 ((1 : Rat) / 2) N k) n)).width) initial := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro initial hinit hterms
+        simpa using hinit
+    | cons k xs ih =>
+        intro initial hinit hterms
+        apply ih (initial +
+          (QInterval.scaleByRat
+            (mesh 0 ((1 : Rat) / 2) N)
+            ((sinPiSquareOnHalf S).compute
+              (leftPoint 0 ((1 : Rat) / 2) N k) n)).width)
+        · exact Rat.add_nonneg hinit (hterms k (by simp))
+        · intro j hj
+          exact hterms j (by simp [hj])
+  simpa only [Rat.zero_add] using
+    hfold (List.range N) 0 (by native_decide) hcell
+
 theorem dyadicNestedRadicalSquareStage_width_le
     (n k : Nat) (hk : k < 2 ^ n) :
     (rationalSquareInterval (dyadicNestedRadicalStageSinAt n k)).width <=
@@ -3823,42 +3927,6 @@ theorem dyadicNestedRadicalStage_square_complement_overlap
         (dyadicNestedRadicalStageCosAt n k)) := by
   exact rationalSquareInterval_overlap_oneMinusSquareInterval_of_circle
     hS hC hs hc hcircle
-
-theorem sinPiSquareOnHalf_valid (S : ArctanSinPiConstruction) :
-    (sinPiSquareOnHalf S).Valid := by
-  have hvalid : (sinPiOnHalfRaw S).Valid := by
-    intro x hx
-    change RealRaw.ValidCompute
-      (fun n => if h : 0 <= x /\ x <= (1 : Rat) / 2 then
-        (sinPiRawOfArctan S.inverse x h).compute n else { lo := 0, hi := 0 })
-    split
-    · exact S.sin_valid x hx
-    · rename_i hfalse
-      exact False.elim (hfalse hx)
-  apply RealFunRaw.mul_valid_of_nonneg_bounded
-    hvalid hvalid
-  · intro x hx
-    refine ⟨1, by native_decide, ?_⟩
-    intro n
-    change 0 <= (if h : 0 <= x /\ x <= (1 : Rat) / 2 then
-      (sinPiRawOfArctan S.inverse x h).compute n else { lo := 0, hi := 0 }).lo /\
-      (if h : 0 <= x /\ x <= (1 : Rat) / 2 then
-        (sinPiRawOfArctan S.inverse x h).compute n else { lo := 0, hi := 0 }).hi <= 1
-    split
-    · exact S.sinPiRawOfArctan_bounds hx n
-    · rename_i hfalse
-      exact False.elim (hfalse hx)
-  · intro x hx
-    refine ⟨1, by native_decide, ?_⟩
-    intro n
-    change 0 <= (if h : 0 <= x /\ x <= (1 : Rat) / 2 then
-      (sinPiRawOfArctan S.inverse x h).compute n else { lo := 0, hi := 0 }).lo /\
-      (if h : 0 <= x /\ x <= (1 : Rat) / 2 then
-        (sinPiRawOfArctan S.inverse x h).compute n else { lo := 0, hi := 0 }).hi <= 1
-    split
-    · exact S.sinPiRawOfArctan_bounds hx n
-    · rename_i hfalse
-      exact False.elim (hfalse hx)
 
 /-! The square evaluator inherits an explicit finite modulus from the raw-real
 product estimate.  This is the quantitative input for synchronizing the

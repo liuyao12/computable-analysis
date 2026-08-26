@@ -584,6 +584,11 @@ interval-valued composition still requires a separate box-level contract.
    transitivity assumption while allowing public and nested boxes to differ
    in either direction.
 
+   The public square-sum orderedness theorem
+   `dyadicPublicSquareLeftSum_ordered` is now proved from pointwise square
+   validity and mesh nonnegativity.  This separates local interval ordering
+   from the genuinely unresolved cross-stage nesting certificate.
+
    The square equal-dyadic candidate is now explicit as
    `dyadicNestedRadicalSquareLeftSum`, with raw wrapper
    `dyadicNestedRadicalSquareIntegralRaw`.  Its finite boxes satisfy
