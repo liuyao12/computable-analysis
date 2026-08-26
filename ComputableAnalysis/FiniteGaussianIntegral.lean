@@ -252,6 +252,25 @@ theorem reciprocalSquareTailPartial_succ (cutoff : Rat) (terms : Nat) :
         1 / (cutoff + (terms + 1 : Nat)) ^ 2 := by
   rfl
 
+theorem reciprocalSquareTailPartial_nonneg
+    (cutoff : Rat) (hcutoff : 0 <= cutoff) :
+    forall terms, 0 <= reciprocalSquareTailPartial cutoff terms := by
+  intro terms
+  induction terms with
+  | zero =>
+      exact Rat.le_refl
+  | succ terms ih =>
+      rw [reciprocalSquareTailPartial_succ]
+      apply Rat.add_nonneg ih
+      have hden : 0 < cutoff + (terms + 1 : Nat) := by
+        have hnat : 0 < (terms + 1 : Nat) := by omega
+        have hcast : 0 < ((terms + 1 : Nat) : Rat) :=
+          (Rat.natCast_pos).2 hnat
+        grind
+      rw [Rat.div_def]
+      exact Rat.mul_nonneg (by native_decide)
+        (Rat.le_of_lt ((Rat.inv_pos).2 (Rat.pow_pos hden)))
+
 theorem reciprocalSquareTailPartial_stage_four :
     reciprocalSquareTailPartial 1 4 = 1669 / 3600 := by
   native_decide
