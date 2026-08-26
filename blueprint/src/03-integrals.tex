@@ -251,6 +251,10 @@ stages:
 Finite composition gives decreasing-stage containment across arbitrary dyadic
 levels at fixed evaluator precision:
 \lean{ComputableAnalysis.Integral.endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_stage}
+Evaluator precision may also increase with the stage; the two refinements
+compose into one nested decreasing schedule:
+\lean{ComputableAnalysis.Integral.nonincreasingDarbouxStage_contains_of_precision}
+\lean{ComputableAnalysis.endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_stage_of_precision_mono}
 \lean{ComputableAnalysis.QInterval.splitScaledEndpointRange_contains}
 The decreasing orientation uses the mirrored finite inequality:
 \lean{ComputableAnalysis.QInterval.splitScaledEndpointRange_contains_decreasing}

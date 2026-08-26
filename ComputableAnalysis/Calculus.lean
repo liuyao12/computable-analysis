@@ -8696,6 +8696,44 @@ theorem nonincreasingDarbouxStage_width_le_of_uniform_input_budget
   simpa [RationalPartition.uniform_cell_width F.lower F.upper pieces hpieces hab k hk]
     using hsmall
 
+/-! Evaluator refinement is coherent for decreasing Darboux stages as well:
+the reversed endpoint order simply exchanges the lower and upper output
+certificates. -/
+theorem nonincreasingDarbouxStage_contains_of_precision
+    (F : FunctionOnInterval)
+    (P : RationalPartition F.lower F.upper)
+    (p q : Nat) (hpq : p <= q) :
+    QInterval.ContainsInterval
+      (nonincreasingDarbouxStage F P p)
+      (nonincreasingDarbouxStage F P q) := by
+  have hterm : forall k (hk : k < P.pieces),
+      QInterval.ContainsInterval
+        (nonincreasingDarbouxRange F P k hk p)
+        (nonincreasingDarbouxRange F P k hk q) := by
+    intro k hk
+    let C := P.cell k hk
+    have hlower : inDomainInterval F.lower F.upper C.lower :=
+      And.intro C.lower_mem (Rat.le_trans C.ordered C.upper_mem)
+    have hupper : inDomainInterval F.lower F.upper C.upper :=
+      And.intro (Rat.le_trans C.lower_mem C.ordered) C.upper_mem
+    have hleft := (F.valid_on C.upper
+      (F.defined_on C.upper hupper)).2.1 p q hpq
+    have hright := (F.valid_on C.lower
+      (F.defined_on C.lower hlower)).2.1 p q hpq
+    change (F.compute C.upper hupper p).lo <=
+        (F.compute C.upper hupper q).lo /\
+      (F.compute C.lower hlower q).hi <=
+        (F.compute C.lower hlower p).hi
+    exact ⟨hleft.1, hright.2.2⟩
+  unfold nonincreasingDarbouxStage
+  apply P.boundIntegralSum_contains_of_termwise
+  intro k hk
+  simp only [RationalPartition.boundIntegralTerm, dif_pos hk]
+  apply QInterval.scaleByRat_contains_of_nonneg
+  · unfold RationalSubinterval.width
+    exact (Rat.le_iff_sub_nonneg _ _).2 (P.cell k hk).ordered
+  · exact hterm k hk
+
 /-! One uniform refinement step for a coordinatewise nonincreasing evaluator.
 The proof is the decreasing counterpart of the increasing blockwise transport;
 the only analytic input is the mirrored three-point split certificate. -/
@@ -8794,6 +8832,37 @@ theorem endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_stage
       · have hn : n = m + 1 := by omega
         subst n
         exact QInterval.containsInterval_refl _
+
+theorem endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_stage_of_precision_mono
+    (F : FunctionOnInterval)
+    (hF : EndpointOrderedNonincreasingOnInterval F)
+    (hinterval : F.lower <= F.upper)
+    (evalPrecision : Nat -> Nat)
+    (hprecision : forall {n m}, n <= m -> evalPrecision n <= evalPrecision m)
+    {n m : Nat} (hnm : n <= m) :
+    QInterval.ContainsInterval
+      (nonincreasingDarbouxDyadicStage F hinterval evalPrecision n)
+      (nonincreasingDarbouxDyadicStage F hinterval evalPrecision m) := by
+  have hprecision_stage := nonincreasingDarbouxStage_contains_of_precision F
+    (RationalPartition.uniform F.lower F.upper (2 ^ n)
+      (by positivity) hinterval)
+    (evalPrecision n) (evalPrecision m) (hprecision hnm)
+  have hmesh := endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_stage
+    F hF hinterval (evalPrecision m) hnm
+  have hcombined :
+      QInterval.ContainsInterval
+        (nonincreasingDarbouxDyadicStage F hinterval evalPrecision n)
+        (nonincreasingDarbouxDyadicStage F hinterval
+          (fun _ => evalPrecision m) n) := by
+    simpa [nonincreasingDarbouxDyadicStage] using hprecision_stage
+  have hmesh' :
+      QInterval.ContainsInterval
+        (nonincreasingDarbouxDyadicStage F hinterval
+          (fun _ => evalPrecision m) n)
+        (nonincreasingDarbouxDyadicStage F hinterval
+          (fun _ => evalPrecision m) m) := by
+    simpa [nonincreasingDarbouxDyadicStage] using hmesh
+  exact hcombined.trans hmesh'
 
 /-! With the stronger coordinatewise certificate, the endpoint range upgrades
 from overlap to genuine containment.  This is the exact point at which the
