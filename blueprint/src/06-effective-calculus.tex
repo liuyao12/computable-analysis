@@ -318,12 +318,18 @@ not smuggled in through completeness of the reals.
 \lean{ComputableAnalysis.FinitePolynomial.SecantDerivativeBound.mulToHasDerivativeOnInterval}
 \leanok
 
-At the function level, the same product is exposed as a realRaw operation
-when both factors have explicit nonnegative rational majorants.  The validity
-theorem and its computation equation are separate: the former proves that the
-product boxes form a shrinking representation, while the latter lets later
-derivative and FTC certificates inspect the exact finite box used at a sample
-point.
+At the raw-real level, the literal four-corner product is valid for arbitrary
+signed inputs.  Later stages remain inside the finite stage-zero intervals, so
+a rational bound gives a shrinking product width.  The validity theorem and
+the computation equation are separate: later derivative and FTC certificates
+can inspect the exact finite box used at a sample point.  This is the general
+signed product pattern; the nonnegative function-level instance below remains
+the representative chart for interval-valued calculus.
+
+\lean{ComputableAnalysis.RealRaw.mul_compute_ordered}
+\lean{ComputableAnalysis.RealRaw.mul_compute_nested}
+\lean{ComputableAnalysis.RealRaw.mul_valid}
+\leanok
 
 \lean{ComputableAnalysis.FunctionOnInterval.mulOfNonnegBounded}
 \lean{ComputableAnalysis.FunctionOnInterval.mulOfNonnegBounded_compute}
@@ -673,18 +679,20 @@ effective derivative certificate.
 \lean{ComputableAnalysis.ExactFunction.affineProduct_derivative_effective}
 \leanok
 
-This is the representative product instance.  General products still require
-bounded interval multiplication and a synchronized schedule for the two
-factor evaluators; the finite certificate keeps those obligations explicit.
-The interval product evaluator now has the corresponding finite modulus: if
-the two nonnegative factor boxes are bounded by (B_F) and (B_G), then
+This is the representative function-level product instance.  General function
+products still require bounded interval multiplication and a synchronized
+schedule for the two factor evaluators; the finite certificate keeps those
+obligations explicit.  If the two nonnegative factor boxes are bounded by
+(B_F) and (B_G), then
 
 \begin{verbatim}
 width(F*G) <= B_F * width(G) + B_G * width(F)
 \end{verbatim}
 
 This is the box-level estimate needed to synchronize product stages.  It is a
-finite rational inequality, not yet a general interval product-rule theorem.
+finite rational inequality; the raw-real theorem above supplies the signed
+closure, while function-level derivative certificates still state their own
+range hypotheses.
 
 \lean{ComputableAnalysis.FunctionOnInterval.mulOfNonnegBounded_compute_width_le}
 \leanok

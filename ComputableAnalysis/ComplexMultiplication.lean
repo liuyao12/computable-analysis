@@ -674,6 +674,172 @@ theorem mul_nested {A B A' B' : QBox}
 
 end QBox
 
+namespace RealRaw
+
+private theorem qabs_le_of_interval_bounds {a b x B : Rat}
+    (ha : qabs a <= B) (hb : qabs b <= B)
+    (hax : a <= x) (hxb : x <= b) : qabs x <= B := by
+  apply qabs_le_of_neg_le_le
+  · calc
+      -B <= -qabs a := Rat.neg_le_neg ha
+      _ <= a := neg_qabs_le_self a
+      _ <= x := hax
+  · calc
+      x <= b := hxb
+      _ <= qabs b := self_le_qabs b
+      _ <= B := hb
+
+theorem mul_compute_ordered {x y : RealRaw}
+    (hx : x.Valid) (hy : y.Valid) (n : Nat) :
+    ((mul x y).compute n).lo <= ((mul x y).compute n).hi := by
+  change (QBox.mulRealInterval
+      (x.compute n).lo (x.compute n).hi
+      (y.compute n).lo (y.compute n).hi).lo <=
+    (QBox.mulRealInterval
+      (x.compute n).lo (x.compute n).hi
+      (y.compute n).lo (y.compute n).hi).hi
+  exact QBox.mulRealInterval_ordered
+    (interval_order_of_valid x hx n)
+    (interval_order_of_valid y hy n)
+
+theorem mul_compute_nested {x y : RealRaw}
+    (hx : x.Valid) (hy : y.Valid) {n m : Nat} (hnm : n <= m) :
+    QInterval.ContainsInterval ((mul x y).compute n) ((mul x y).compute m) := by
+  change QInterval.ContainsInterval
+    (QBox.mulRealInterval
+      (x.compute n).lo (x.compute n).hi
+      (y.compute n).lo (y.compute n).hi)
+    (QBox.mulRealInterval
+      (x.compute m).lo (x.compute m).hi
+      (y.compute m).lo (y.compute m).hi)
+  exact QBox.mulRealInterval_nested
+    (hx.2.1 n m hnm).1
+    (interval_order_of_valid x hx m)
+    (hx.2.1 n m hnm).2.2
+    (hy.2.1 n m hnm).1
+    (interval_order_of_valid y hy m)
+    (hy.2.1 n m hnm).2.2
+
+theorem mul_valid_of_widthsShrink {x y : RealRaw}
+    (hx : x.Valid) (hy : y.Valid)
+    (hshrink : RealRaw.WidthsShrinkToZero (mul x y).compute) :
+    (mul x y).Valid := by
+  constructor
+  · intro n
+    change 0 <= ((mul x y).compute n).hi - ((mul x y).compute n).lo
+    exact by grind [mul_compute_ordered hx hy n]
+  · constructor
+    · intro n m hnm
+      have hnest := mul_compute_nested hx hy hnm
+      exact ⟨hnest.1, ⟨mul_compute_ordered hx hy m, hnest.2⟩⟩
+    · exact hshrink
+
+/-- Arbitrary signed valid raw reals are closed under the literal four-corner
+product.  The proof uses only rational interval arithmetic: later stages are
+anchored inside the finite stage-zero intervals, and the product width is
+controlled by the resulting finite rational bound. -/
+theorem mul_valid {x y : RealRaw}
+    (hx : x.Valid) (hy : y.Valid) :
+    (mul x y).Valid := by
+  apply mul_valid_of_widthsShrink hx hy
+  intro eps
+  let Bx : Rat := 1 + qabs (x.compute 0).lo + qabs (x.compute 0).hi
+  let By : Rat := 1 + qabs (y.compute 0).lo + qabs (y.compute 0).hi
+  let B : Rat := Bx + By
+  have hBxpos : 0 < Bx := by
+    dsimp [Bx]
+    have h0 : 0 <= qabs (x.compute 0).lo := qabs_nonneg _
+    have h1 : 0 <= qabs (x.compute 0).hi := qabs_nonneg _
+    grind
+  have hBypos : 0 < By := by
+    dsimp [By]
+    have h0 : 0 <= qabs (y.compute 0).lo := qabs_nonneg _
+    have h1 : 0 <= qabs (y.compute 0).hi := qabs_nonneg _
+    grind
+  have hBpos : 0 < B := by
+    dsimp [B]
+    grind
+  have hdenpos : 0 < (4 : Rat) * B := Rat.mul_pos (by native_decide) hBpos
+  let delta : QPos := ⟨eps.val / ((4 : Rat) * B), by
+    rw [Rat.div_def]
+    exact Rat.mul_pos eps.property ((Rat.inv_pos).2 hdenpos)⟩
+  obtain ⟨Nx, hNx⟩ := hx.2.2 delta
+  obtain ⟨Ny, hNy⟩ := hy.2.2 delta
+  refine ⟨Nat.max Nx Ny, ?_⟩
+  intro n hn
+  have hnx : Nx <= n := Nat.le_trans (Nat.le_max_left _ _) hn
+  have hny : Ny <= n := Nat.le_trans (Nat.le_max_right _ _) hn
+  have hxsmall := hNx n hnx
+  have hysmall := hNy n hny
+  have hx0 := hx.2.1 0 n (Nat.zero_le n)
+  have hy0 := hy.2.1 0 n (Nat.zero_le n)
+  have hxlo0 : qabs (x.compute 0).lo <= Bx := by
+    dsimp [Bx]
+    grind [qabs_nonneg (x.compute 0).lo, qabs_nonneg (x.compute 0).hi]
+  have hxhi0 : qabs (x.compute 0).hi <= Bx := by
+    dsimp [Bx]
+    grind [qabs_nonneg (x.compute 0).lo, qabs_nonneg (x.compute 0).hi]
+  have hylo0 : qabs (y.compute 0).lo <= By := by
+    dsimp [By]
+    grind [qabs_nonneg (y.compute 0).lo, qabs_nonneg (y.compute 0).hi]
+  have hyhi0 : qabs (y.compute 0).hi <= By := by
+    dsimp [By]
+    grind [qabs_nonneg (y.compute 0).lo, qabs_nonneg (y.compute 0).hi]
+  have hxlob : qabs (x.compute n).lo <= Bx := by
+    apply qabs_le_of_interval_bounds
+    · exact hxlo0
+    · exact hxhi0
+    · exact hx0.1
+    · exact Rat.le_trans (interval_order_of_valid x hx n) hx0.2.2
+  have hxhib : qabs (x.compute n).hi <= Bx := by
+    apply qabs_le_of_interval_bounds
+    · exact hxlo0
+    · exact hxhi0
+    · exact Rat.le_trans hx0.1 (interval_order_of_valid x hx n)
+    · exact hx0.2.2
+  have hylob : qabs (y.compute n).lo <= By := by
+    apply qabs_le_of_interval_bounds
+    · exact hylo0
+    · exact hyhi0
+    · exact hy0.1
+    · exact Rat.le_trans (interval_order_of_valid y hy n) hy0.2.2
+  have hyhib : qabs (y.compute n).hi <= By := by
+    apply qabs_le_of_interval_bounds
+    · exact hylo0
+    · exact hyhi0
+    · exact Rat.le_trans hy0.1 (interval_order_of_valid y hy n)
+    · exact hy0.2.2
+  have hBxle : Bx <= B := by
+    dsimp [B]
+    grind
+  have hByle : By <= B := by
+    dsimp [B]
+    grind
+  have hwidth := QBox.mulRealInterval_width_le_of_abs_bounded
+    (interval_order_of_valid x hx n)
+    (interval_order_of_valid y hy n)
+    (Rat.le_trans hxlob hBxle)
+    (Rat.le_trans hylob hByle)
+    (Rat.le_trans hyhib hByle)
+  have hsum :
+      (x.compute n).width + (y.compute n).width <= 2 * delta.val := by
+    grind
+  have hscaled :
+      2 * B * ((x.compute n).width + (y.compute n).width) <= eps.val := by
+    calc
+      2 * B * ((x.compute n).width + (y.compute n).width) <=
+          2 * B * (2 * delta.val) :=
+        Rat.mul_le_mul_of_nonneg_left hsum (by
+          exact Rat.le_of_lt (Rat.mul_pos (by native_decide) hBpos))
+      _ = eps.val := by
+        dsimp [delta]
+        rw [Rat.div_def]
+        have hne : (4 : Rat) * B ≠ 0 := Rat.ne_of_gt hdenpos
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  exact Rat.le_trans hwidth hscaled
+
+end RealRaw
+
 namespace ComplexRaw
 
 /-- The literal product of two valid complex raw stages is an ordered box.
