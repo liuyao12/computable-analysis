@@ -1557,6 +1557,21 @@ theorem divByRat_width_of_pos {h : Rat} (hh : 0 < h) (I : QInterval) :
   apply scaleByRat_width_of_nonneg
   exact Rat.le_of_lt hinv
 
+/-- Positive rational division preserves interval overlap.  This is the
+computable normalization step from an endpoint increment to its average
+slope; the positivity hypothesis keeps the endpoint order explicit. -/
+theorem divByRat_overlaps_of_pos {h : Rat} (hh : 0 < h)
+    {I J : QInterval} (hover : I.Overlaps J) :
+    (divByRat I h).Overlaps (divByRat J h) := by
+  have hinv : 0 <= (1 / h) := by
+    simpa [Rat.div_def] using
+      (Rat.le_of_lt (Rat.inv_pos.mpr hh) : 0 <= h⁻¹)
+  unfold divByRat scaleByRat QInterval.Overlaps at *
+  simp only [if_pos hinv] at *
+  exact ⟨by
+    exact Rat.mul_le_mul_of_nonneg_left hover.1 hinv,
+    by exact Rat.mul_le_mul_of_nonneg_left hover.2 hinv⟩
+
 /-- Interval enclosure of `(Fy - Fx) / dx`.  For a secant slope, `dx` will be
 the rational difference `y - x`; the caller carries the proof that `x < y`. -/
 def slopeBetween (Fy Fx : QInterval) (dx : Rat) : QInterval :=
@@ -4408,6 +4423,42 @@ theorem endpoint_difference_overlaps_bound
     (H.endpoint_difference_contained n)
   exact endpointDifferenceInterval_width_nonneg hF
     H.primitive_domain_lower H.primitive_domain_upper _
+
+/-- The normalized finite Mean Value bracket for one certified cell.  After
+dividing the endpoint increment by the positive cell width, the resulting
+average-slope box overlaps the derivative range itself.  This is the
+project-native MVT conclusion: it records the intermediate value information
+without selecting an attained point or invoking completeness. -/
+theorem endpoint_average_overlaps_bound
+    {F dF : RealFunRaw} {a b : Rat}
+    {C : RationalSubinterval a b}
+    (H : CandidateDerivativeCellControl F dF C)
+    (hF : F.Valid) (hwidth : 0 < C.width) (n : Nat) :
+    QInterval.Overlaps
+      (H.bound n)
+      (QInterval.divByRat
+        (endpointDifferenceInterval F C.lower C.upper (H.endpointPrecision n))
+        C.width) := by
+  have hscaled := endpoint_difference_overlaps_bound H hF n
+  have hdiv := QInterval.divByRat_overlaps_of_pos hwidth hscaled
+  have hcancel :
+      QInterval.divByRat (C.scaleBound (H.bound n)) C.width = H.bound n := by
+    have hnon : 0 <= C.width := Rat.le_of_lt hwidth
+    have hinv : 0 <= C.width⁻¹ := Rat.le_of_lt (Rat.inv_pos.mpr hwidth)
+    have hdivnon : 0 <= 1 / C.width := by
+      simpa [Rat.div_def] using hinv
+    have hmul : C.width⁻¹ * C.width = 1 :=
+      Rat.inv_mul_cancel C.width (Rat.ne_of_gt hwidth)
+    have hmul' : C.width * C.width⁻¹ = 1 :=
+      Rat.mul_inv_cancel C.width (Rat.ne_of_gt hwidth)
+    cases hB : H.bound n with
+    | mk blo bhi =>
+        simp [QInterval.divByRat, RationalSubinterval.scaleBound,
+          QInterval.scaleByRat, hB, hnon, hinv, hdivnon, hmul, hmul',
+          Rat.div_def,
+          Rat.mul_assoc, Rat.mul_comm]
+  rw [hcancel] at hdiv
+  exact hdiv
 
 end CandidateDerivativeCellControl
 

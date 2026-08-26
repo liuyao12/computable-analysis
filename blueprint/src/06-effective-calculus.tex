@@ -825,8 +825,14 @@ finite inverse or witness search, it may refine the bracket to an attained
 point; the foundation does not assume such a point exists as an available
 real-number object.
 
+For a derivative certificate, the same statement is normalized directly at
+the cell level: divide the endpoint-increment box by the positive cell width,
+and it overlaps the derivative-range box.  This is the effective MVT used by
+the FTC bridge.
+
 \lean{ComputableAnalysis.Integral.finiteQuadrature_average_between_bounds}
 \lean{ComputableAnalysis.ExactCellOrderPreservation.integral_average_overlaps_bounds}
+\lean{ComputableAnalysis.CandidateDerivativeCellControl.endpoint_average_overlaps_bound}
 \leanok
 
 \subsection{A cubic checkpoint}
