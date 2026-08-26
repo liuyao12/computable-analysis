@@ -928,6 +928,58 @@ theorem positiveInv_valid {x : RealRaw} {N : Nat}
       simp [positiveInv, positiveInvCompute, Nat.not_lt_of_ge hnN]
       exact Rat.le_trans hinv hquot
 
+theorem positiveInv_mul_self_equiv_one {x : RealRaw} {N : Nat}
+    (hx : x.Valid) (hpos : 0 < (x.compute N).lo) :
+    (mul x (positiveInv x N)).Equiv one := by
+  intro n
+  apply (compareAt_overlap_iff (mul x (positiveInv x N)) one n n).2
+  change QInterval.Overlaps
+    (QBox.mulRealInterval
+      (x.compute n).lo (x.compute n).hi
+      ((positiveInv x N).compute n).lo
+      ((positiveInv x N).compute n).hi)
+    ({ lo := 1, hi := 1 } : QInterval)
+  unfold QInterval.Overlaps
+  by_cases hn : n < N
+  · have hnn := hx.2.1 n N (by omega)
+    simp [positiveInv, positiveInvCompute, hn]
+    have ha_mem : (x.compute n).lo <= (x.compute N).lo /\
+        (x.compute N).lo <= (x.compute n).hi :=
+      ⟨hnn.1, Rat.le_trans (interval_order_of_valid x hx N) hnn.2.2⟩
+    have hrec_mem : (0 : Rat) <= 1 / (x.compute N).lo /\
+        1 / (x.compute N).lo <= 1 / (x.compute N).lo := by
+      constructor
+      · rw [Rat.div_def]
+        exact Rat.le_of_lt (Rat.mul_pos (by native_decide)
+          ((Rat.inv_pos).2 hpos))
+      · exact Rat.le_refl
+    have hprod := QBox.mulRealInterval_contains
+      ha_mem.1 ha_mem.2 hrec_mem.1 hrec_mem.2
+    have hprod_eq : (x.compute N).lo * (1 / (x.compute N).lo) = 1 := by
+      rw [Rat.div_def]
+      simp only [Rat.one_mul]
+      exact Rat.mul_inv_cancel _ (Rat.ne_of_gt hpos)
+    rw [hprod_eq] at hprod
+    exact ⟨hprod.1, hprod.2⟩
+  · have hNn : N <= n := by omega
+    have hNn' := hx.2.1 N n hNn
+    have hposn : 0 < (x.compute n).lo := by grind
+    simp [positiveInv, positiveInvCompute, hn]
+    rw [QInterval.inv_of_pos hposn]
+    have hrec_order := QInterval.inv_ordered_of_pos hposn
+      (interval_order_of_valid x hx n)
+    have hprod := QBox.mulRealInterval_contains
+      (Rat.le_refl) (interval_order_of_valid x hx n)
+      (QInterval.one_div_le_one_div_of_pos hposn
+        (interval_order_of_valid x hx n))
+      (Rat.le_refl)
+    have hprod_eq : (x.compute n).lo * (1 / (x.compute n).lo) = 1 := by
+      rw [Rat.div_def]
+      simp only [Rat.one_mul]
+      exact Rat.mul_inv_cancel _ (Rat.ne_of_gt hposn)
+    rw [hprod_eq] at hprod
+    exact ⟨hprod.1, hprod.2⟩
+
 def negativeInv (x : RealRaw) (N : Nat) : RealRaw :=
   -(positiveInv (-x) N)
 

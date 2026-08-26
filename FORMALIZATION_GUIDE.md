@@ -1676,6 +1676,7 @@ open ComputableAnalysis
 #check RealRaw.positiveInv_compute_ordered
 #check RealRaw.positiveInv_compute_nested
 #check RealRaw.positiveInv_valid
+#check RealRaw.positiveInv_mul_self_equiv_one
 #check RealRaw.negativeInv
 #check RealRaw.negativeInv_valid
 #check RealRaw.divByPositive
