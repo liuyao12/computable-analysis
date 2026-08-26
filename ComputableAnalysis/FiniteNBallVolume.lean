@@ -650,6 +650,29 @@ theorem nBallVolumeModelInterval_ordered
     hpi_lo_nonneg hpi hradius_lo_nonneg hradius
   exact Rat.le_trans hcontains.1 hcontains.2
 
+theorem nBallVolumeModelInterval_nested
+    (n : Nat) (outerPi outerRadius innerPi innerRadius : QInterval)
+    (hpi_outer_nonneg : 0 <= outerPi.lo)
+    (hpi_nested : outerPi.lo <= innerPi.lo /\ innerPi.hi <= outerPi.hi)
+    (hpi_inner_ordered : innerPi.lo <= innerPi.hi)
+    (hradius_outer_nonneg : 0 <= outerRadius.lo)
+    (hradius_nested : outerRadius.lo <= innerRadius.lo /\
+      innerRadius.hi <= outerRadius.hi)
+    (hradius_inner_ordered : innerRadius.lo <= innerRadius.hi) :
+    (nBallVolumeModelInterval n outerPi outerRadius).ContainsInterval
+      (nBallVolumeModelInterval n innerPi innerRadius) := by
+  unfold nBallVolumeModelInterval QInterval.ContainsInterval
+  constructor
+  · exact nBallVolumeModel_mono n hpi_outer_nonneg hpi_nested.1
+      hradius_outer_nonneg hradius_nested.1
+  · exact nBallVolumeModel_mono n
+      (Rat.le_trans (Rat.le_trans hpi_outer_nonneg hpi_nested.1)
+        hpi_inner_ordered)
+      hpi_nested.2
+      (Rat.le_trans (Rat.le_trans hradius_outer_nonneg hradius_nested.1)
+        hradius_inner_ordered)
+      hradius_nested.2
+
 theorem nBallVolumeModel_stage_six :
     nBallVolumeModel 6 (355 / 113) 1 = 44738875 / 8657382 := by
   native_decide
