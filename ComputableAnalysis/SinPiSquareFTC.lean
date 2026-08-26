@@ -3910,6 +3910,49 @@ theorem RationalTangentSquareWitnessSchedule.signed_square_overlap
   exact signed_square_overlap_of_rationalTangentSquareWitnessSearch hv
     (hS n) (hC n)
 
+/-! The equal-dyadic integral needs the same finite contract cell by cell.
+This family therefore indexes the three boxes and the finite grid choice by
+`(n,k)`, with the proof `hk : k < 2^n` retained as ordinary domain data. -/
+structure RationalTangentSquareWitnessCellFamily where
+  tangentBox : (n k : Nat) -> k < 2 ^ n -> QInterval
+  sineBox : (n k : Nat) -> k < 2 ^ n -> QInterval
+  cosineBox : (n k : Nat) -> k < 2 ^ n -> QInterval
+  gridDepth : (n k : Nat) -> k < 2 ^ n -> Nat
+  gridIndex : (n k : Nat) -> k < 2 ^ n -> Nat
+  gridIndex_le : forall (n k : Nat) (hk : k < 2 ^ n),
+    gridIndex n k hk <= 2 ^ gridDepth n k hk
+  admissible : forall (n k : Nat) (hk : k < 2 ^ n),
+    rationalTangentSquareWitnessAdmissibleBool
+      (tangentBox n k hk) (sineBox n k hk) (cosineBox n k hk)
+      ((tangentBox n k hk).lo + (tangentBox n k hk).width *
+        ((gridIndex n k hk : Rat) /
+          ((2 ^ gridDepth n k hk : Nat) : Rat))) = true
+  sine_subinterval : forall (n k : Nat) (hk : k < 2 ^ n),
+    subintervalOf (sineBox n k hk) 0 1
+  cosine_subinterval : forall (n k : Nat) (hk : k < 2 ^ n),
+    subintervalOf (cosineBox n k hk) (-1) 1
+
+theorem RationalTangentSquareWitnessCellFamily.search_exists
+    (h : RationalTangentSquareWitnessCellFamily) (n k : Nat)
+    (hk : k < 2 ^ n) :
+    ∃ v, rationalTangentSquareWitnessSearch (h.tangentBox n k hk)
+      (h.sineBox n k hk) (h.cosineBox n k hk)
+      (h.gridDepth n k hk) = some v := by
+  exact rationalTangentSquareWitnessSearch_complete_of_grid_candidate
+    (U := h.tangentBox n k hk) (S := h.sineBox n k hk)
+    (C := h.cosineBox n k hk) (h.gridDepth n k hk)
+    (h.gridIndex n k hk) (h.gridIndex_le n k hk)
+    (h.admissible n k hk)
+
+theorem RationalTangentSquareWitnessCellFamily.square_overlap
+    (h : RationalTangentSquareWitnessCellFamily) (n k : Nat)
+    (hk : k < 2 ^ n) :
+    QInterval.Overlaps (rationalSquareInterval (h.sineBox n k hk))
+      (rationalOneMinusSquareIntervalSigned (h.cosineBox n k hk)) := by
+  obtain ⟨v, hv⟩ := h.search_exists n k hk
+  exact signed_square_overlap_of_rationalTangentSquareWitnessSearch hv
+    (h.sine_subinterval n k hk) (h.cosine_subinterval n k hk)
+
 theorem dyadicNestedRadicalStageSinAt_subinterval
     (n k : Nat) (hk : k < 2 ^ n) :
     subintervalOf (dyadicNestedRadicalStageSinAt n k) 0 1 := by

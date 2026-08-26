@@ -98,6 +98,12 @@ rational witness in a candidate list yields a certified search hit, and
 such families directly.  What remains is the geometric proof that supplies
 those admissible witnesses uniformly at every depth and precision.
 
+For the squared-sine route, the same interface is now cell-indexed:
+\texttt{RationalTangentSquareWitnessCellFamily} records the tangent, sine, and
+cosine boxes together with a finite grid choice for every dyadic cell, and its
+search/overlap adapters feed the square transport directly.  The geometric
+construction of this family remains the substantive open step.
+
 The same accounting applies to the squared-sine experiment.  The tangent
 chart itself has a completed effective FTC with natural endpoint \(\pi/4\).
 The intended \(\sin^2\) integral is a different, normalized object: the
