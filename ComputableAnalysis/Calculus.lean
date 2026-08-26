@@ -7578,6 +7578,35 @@ theorem nondecreasingDarbouxRange_width_nonneg
     (F.compute C.lower hlower prec).lo
   grind [Rat.sub_eq_add_neg]
 
+/-! The endpoint range is a genuine Darboux bracket at the project's weak
+interval-order level: monotonicity makes it overlap every certified point
+computation in the cell.  Full interval containment would require a stronger
+endpoint-order contract and is intentionally not claimed here. -/
+theorem nondecreasingDarbouxRange_overlaps_point_value
+    (F : FunctionOnInterval) (hF : NondecreasingOnInterval F)
+    (P : RationalPartition F.lower F.upper)
+    (k : Nat) (hk : k < P.pieces) (x : Rat)
+    (hx : inDomainInterval F.lower F.upper x)
+    (hlo : (P.cell k hk).lower <= x)
+    (hhi : x <= (P.cell k hk).upper) (prec : Nat) :
+    QInterval.Overlaps
+      (nondecreasingDarbouxRange F P k hk prec)
+      (F.compute x hx prec) := by
+  let C := P.cell k hk
+  have hlower : inDomainInterval F.lower F.upper C.lower :=
+    And.intro C.lower_mem (Rat.le_trans C.ordered C.upper_mem)
+  have hupper : inDomainInterval F.lower F.upper C.upper :=
+    And.intro (Rat.le_trans C.lower_mem C.ordered) C.upper_mem
+  have hleft := hF C.lower x hlower hx hlo prec
+  have hright := hF x C.upper hx hupper hhi prec
+  change (F.compute C.lower hlower prec).lo <=
+      (F.compute x hx prec).hi /\
+    (F.compute x hx prec).lo <=
+      (F.compute C.upper hupper prec).hi
+  constructor
+  · exact hleft
+  · exact hright
+
 /-! Interval regularity supplies a common image box for both endpoints of a
 cell.  Consequently the endpoint range used by the finite Darboux sum has
 the same output-width budget. -/
