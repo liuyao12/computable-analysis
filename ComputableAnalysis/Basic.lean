@@ -5862,6 +5862,49 @@ theorem mul_valid_of_nonneg_bounded {x y : RealRaw}
           have hne : (2 : Rat) * B ≠ 0 := Rat.ne_of_gt htwoB
           grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
+/-! The same finite estimate used to prove product validity is exposed
+publicly.  This is the quantitative modulus needed by higher-level interval
+function and effective-FTC constructors. -/
+theorem mul_width_le_of_nonneg_bounded {x y : RealRaw}
+    (hx : x.Valid) (hy : y.Valid)
+    {Bx By : Rat}
+    (hxbounds : forall n,
+      0 <= (x.compute n).lo /\ (x.compute n).hi <= Bx)
+    (hybounds : forall n,
+      0 <= (y.compute n).lo /\ (y.compute n).hi <= By) (n : Nat) :
+    ((x * y).compute n).width <=
+      Bx * (y.compute n).width + By * (x.compute n).width := by
+  have hxnonneg : forall k, 0 <= (x.compute k).lo := fun k =>
+    (hxbounds k).1
+  have hynonneg : forall k, 0 <= (y.compute k).lo := fun k =>
+    (hybounds k).1
+  have hcompute := mul_compute_of_nonneg hx hy hxnonneg hynonneg n
+  rw [hcompute]
+  unfold QInterval.width
+  have horderx := RealRaw.interval_order_of_valid x hx n
+  have hordery := RealRaw.interval_order_of_valid y hy n
+  have hxhi0 : 0 <= (x.compute n).hi := by grind
+  have hyleft :
+      (x.compute n).lo * ((y.compute n).hi - (y.compute n).lo) <=
+        Bx * ((y.compute n).hi - (y.compute n).lo) := by
+    apply Rat.mul_le_mul_of_nonneg_right (by grind)
+    grind [Rat.sub_eq_add_neg]
+  have hyright :
+      (y.compute n).hi * ((x.compute n).hi - (x.compute n).lo) <=
+        By * ((x.compute n).hi - (x.compute n).lo) := by
+    apply Rat.mul_le_mul_of_nonneg_right (by grind)
+    grind [Rat.sub_eq_add_neg]
+  calc
+    (x.compute n).hi * (y.compute n).hi -
+        (x.compute n).lo * (y.compute n).lo =
+      (x.compute n).lo * ((y.compute n).hi - (y.compute n).lo) +
+        (y.compute n).hi * ((x.compute n).hi - (x.compute n).lo) := by
+          grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+            Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    _ <= Bx * ((y.compute n).hi - (y.compute n).lo) +
+          By * ((x.compute n).hi - (x.compute n).lo) :=
+      rat_add_le_add hyleft hyright
+
 theorem le_mul_le_mul_of_nonneg
     {x y z w : RealRaw}
     (hx : x.Valid) (hy : y.Valid) (hz : z.Valid) (hw : w.Valid)

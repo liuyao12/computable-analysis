@@ -688,6 +688,11 @@ finite rational inequality, not yet a general interval product-rule theorem.
 \lean{ComputableAnalysis.FunctionOnInterval.mulOfNonnegBounded_compute_width_le}
 \leanok
 
+The same estimate is exposed at the raw-real layer, where it can be reused
+without rebuilding a function-on-interval wrapper:
+\lean{ComputableAnalysis.RealRaw.mul_width_le_of_nonneg_bounded}
+\leanok
+
 The reusable bound-facing corollary makes the bookkeeping explicit: supplied
 rational bounds for the two factor values, their two secants, and their local
 errors reduce the product proof to one visible sum of two linear errors and

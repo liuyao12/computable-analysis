@@ -936,6 +936,9 @@ finite product modulus
 `width(FG) <= BF * width(G) + BG * width(F)` under nonnegative pointwise
 bounds.  This is the box-level input needed by a future interval product-rule
 constructor; it does not itself assert a derivative or a limiting product.
+The corresponding raw-real theorem is
+`RealRaw.mul_width_le_of_nonneg_bounded`; use it when the factor boxes have
+already been packaged as `RealRaw` values.
 
 ### Increasing pieces: start with the literal finite stage
 
