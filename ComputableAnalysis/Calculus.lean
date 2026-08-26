@@ -3334,6 +3334,24 @@ def uniformCommonRefinement (a b : Rat) (m n : Nat)
         intro j _hj
         exact uniform_refines_left hm hn hab }
 
+/-- Full refinement certificate for the `m`-piece uniform grid inside its
+`m*n`-piece common refinement. -/
+def uniformRefinesRightCertificate {a b : Rat} (m n : Nat)
+    (hm : 0 < m) (hn : 0 < n) (hab : a <= b) :
+    Refines
+      (uniform a b (m * n) (Nat.mul_pos hm hn) hab)
+      (uniform a b m hm hab) :=
+  (uniformCommonRefinement a b m n hm hn hab).refines_left
+
+/-- Full refinement certificate for the `n`-piece uniform grid inside its
+`m*n`-piece common refinement. -/
+def uniformRefinesLeftCertificate {a b : Rat} (m n : Nat)
+    (hm : 0 < m) (hn : 0 < n) (hab : a <= b) :
+    Refines
+      (uniform a b (m * n) (Nat.mul_pos hm hn) hab)
+      (uniform a b n hn hab) :=
+  (uniformCommonRefinement a b m n hm hn hab).refines_right
+
 /-- Insert one rational breakpoint after cell index `k`.  The new list keeps
 all old points in order, placing `x` between `point k` and `point (k+1)`.
 Repeated use of this finite operation is the constructive route from explicit

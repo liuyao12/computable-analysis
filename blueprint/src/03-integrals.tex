@@ -146,6 +146,10 @@ The blockwise containment rule then compares complete fine and coarse sums:
 The weaker overlap rule is available separately:
 \lean{ComputableAnalysis.addInterval_fold_overlaps_of_mem}
 \lean{ComputableAnalysis.RationalPartition.Refines.boundIntegralSum_overlaps_of_blockwise}
+Uniform grids also expose full refinement certificates, not only pointwise
+breakpoint equalities:
+\lean{ComputableAnalysis.RationalPartition.uniformRefinesRightCertificate}
+\lean{ComputableAnalysis.RationalPartition.uniformRefinesLeftCertificate}
 The remaining whole-sum argument is a finite reindexing of these located
 cells, followed by the single-cell weighted interval inequality.
 This gives the computable mean-value/area principle for the functions covered
