@@ -1002,6 +1002,10 @@ the explicit `(b-a)/(prec+1)` width bound once the mesh is below the input
 modulus.  This is a general finite quadrature candidate, not yet a universal
 integrability theorem: cross-stage nesting remains a separate certificate
 obligation before constructing a `RealRaw` integral.
+The companion
+`Integral.intervalRegularDarbouxStage_width_nonneg_of_uniform_input_budget`
+discharges the sign of the finite interval width from the same mesh condition;
+callers should not repeat this routine cell-fold proof.
 
 When those coherence facts are available, package them in
 `Integral.IntervalRegularDarbouxSchedule`. Its orderedness, nesting, and
@@ -1016,9 +1020,10 @@ The routine mesh obligation can be discharged by
 natural upper bound for the rational interval length; the corresponding
 `intervalRegularAutomaticPieces_pos` theorem supplies positivity.
 `IntervalRegularDarbouxSchedule.ofAutomaticPieces` packages this automatic
-choice directly, leaving only the substantive stage coherence proofs to the
-caller. Use `intervalRegularDarbouxScheduleIntegralFor` and its `_valid`
-theorem as the public raw integral endpoint.
+choice directly, deriving width nonnegativity as well and leaving only the
+substantive stage coherence proofs to the caller. Use
+`intervalRegularDarbouxScheduleIntegralFor` and its `_valid` theorem as the
+public raw integral endpoint.
 
 For a nondecreasing `FunctionOnInterval F`,
 `Integral.nondecreasingDarbouxRange F P k hk prec` is the endpoint box for

@@ -7189,6 +7189,81 @@ theorem intervalRegularDarbouxStage_width_le_of_uniform_input_budget
   simpa [RationalPartition.uniform_cell_width F.lower F.upper pieces hpieces hab k hk]
     using hsmall
 
+theorem intervalRegularDarbouxStage_width_nonneg_of_uniform_input_budget
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (pieces : Nat) (hpieces : 0 < pieces) (hab : F.lower <= F.upper)
+    (prec : Nat)
+    (hsmall : mesh F.lower F.upper pieces <=
+      1 / ((hregular.inputPrecision prec : Nat) : Rat)) :
+    0 <= (intervalRegularDarbouxStage F hregular
+      (RationalPartition.uniform F.lower F.upper pieces hpieces hab) prec).width := by
+  let P := RationalPartition.uniform F.lower F.upper pieces hpieces hab
+  change 0 <= (P.boundIntegralSum
+    (fun k hk => intervalRegularDarbouxRange F hregular P k hk prec)).width
+  unfold RationalPartition.boundIntegralSum
+  rw [RationalPartition.addInterval_fold_width]
+  have hterm : forall k, k ∈ List.range pieces ->
+      0 <= (P.boundIntegralTerm
+        (fun j hj => intervalRegularDarbouxRange F hregular P j hj prec) k).width := by
+    intro k hk
+    have hklt : k < pieces := List.mem_range.mp hk
+    have hkP : k < P.pieces := by
+      change k < pieces
+      exact hklt
+    simp only [RationalPartition.boundIntegralTerm, dif_pos hkP]
+    rw [RationalSubinterval.scaleBound,
+      QInterval.scaleByRat_width_of_nonneg]
+    · apply Rat.mul_nonneg
+      · unfold RationalSubinterval.width
+        change 0 <= (P.cell k hkP).upper - (P.cell k hkP).lower
+        exact (Rat.le_iff_sub_nonneg _ _).1 (P.cell k hkP).ordered
+      · let C := P.cell k hkP
+        let I : QInterval := { lo := C.lower, hi := C.upper }
+        have hI : subintervalOf I F.lower F.upper := by
+          exact ⟨C.lower_mem, C.ordered, C.upper_mem⟩
+        have houtput := hregular.output_width I hI prec (by
+          change C.width <= _
+          rw [show C.width = mesh F.lower F.upper pieces by
+            simpa [C, P] using
+              RationalPartition.uniform_cell_width F.lower F.upper pieces hpieces hab k hklt]
+          exact hsmall)
+        simpa [intervalRegularDarbouxRange, I] using houtput.1
+    · unfold RationalSubinterval.width
+      change 0 <= (P.cell k hkP).upper - (P.cell k hkP).lower
+      exact (Rat.le_iff_sub_nonneg _ _).1 (P.cell k hkP).ordered
+  have fold_nonneg : forall xs : List Nat, forall initial : Rat,
+      (forall k, k ∈ xs ->
+        0 <= (P.boundIntegralTerm
+          (fun j hj => intervalRegularDarbouxRange F hregular P j hj prec) k).width) ->
+      0 <= initial ->
+      0 <= xs.foldl (fun total k => total +
+        (P.boundIntegralTerm
+          (fun j hj => intervalRegularDarbouxRange F hregular P j hj prec) k).width) initial := by
+    intro xs initial
+    induction xs generalizing initial with
+    | nil =>
+      intro _hterms hinit
+      simpa using hinit
+    | cons k xs ih =>
+      intro hterms hinit
+      have hk := hterms k (by simp)
+      have hrest := ih (initial +
+        (P.boundIntegralTerm
+          (fun j hj => intervalRegularDarbouxRange F hregular P j hj prec) k).width)
+        (fun j hj => hterms j (by simp [hj]))
+        (Rat.add_nonneg hinit hk)
+      exact hrest
+  have hsum := fold_nonneg (List.range pieces) 0 hterm (by native_decide)
+  have hzero : ({ lo := 0, hi := 0 } : QInterval).width = 0 := by
+    unfold QInterval.width
+    grind
+  rw [hzero]
+  change 0 <= 0 + (List.range pieces).foldl
+    (fun total k => total +
+      (P.boundIntegralTerm
+        (fun j hj => intervalRegularDarbouxRange F hregular P j hj prec) k).width) 0
+  simpa only [Rat.zero_add] using hsum
+
 /-- The finite endpoint range used by a nondecreasing Darboux cell.
 
 For a rational cell `[p,r]`, the lower endpoint is evaluated at `p` and the
@@ -7517,13 +7592,6 @@ def IntervalRegularDarbouxSchedule.ofAutomaticPieces
     {hinterval : F.lower <= F.upper} (lengthBound : Nat)
     (hLength : F.upper - F.lower <= (lengthBound : Rat))
     (evalPrecision : Nat -> Nat)
-    (width_nonneg : forall n,
-      0 <= (intervalRegularDarbouxScheduleCompute F hinterval hregular
-        (fun n => intervalRegularAutomaticPieces hregular lengthBound
-          evalPrecision n)
-        evalPrecision
-        (fun n => intervalRegularAutomaticPieces_pos hregular lengthBound
-          evalPrecision n) n).width)
     (nested : forall n m, n <= m ->
       (intervalRegularDarbouxScheduleCompute F hinterval hregular
         (fun n => intervalRegularAutomaticPieces hregular lengthBound
@@ -7566,7 +7634,14 @@ def IntervalRegularDarbouxSchedule.ofAutomaticPieces
     intro n
     exact intervalRegularAutomaticPieces_input_budget hregular hinterval
       lengthBound hLength evalPrecision n
-  width_nonneg := width_nonneg
+  width_nonneg := by
+    intro n
+    exact intervalRegularDarbouxStage_width_nonneg_of_uniform_input_budget F hregular
+      (intervalRegularAutomaticPieces hregular lengthBound evalPrecision n)
+      (intervalRegularAutomaticPieces_pos hregular lengthBound evalPrecision n)
+      hinterval (evalPrecision n)
+      (intervalRegularAutomaticPieces_input_budget hregular hinterval
+        lengthBound hLength evalPrecision n)
   nested := nested
   widths_shrink := widths_shrink
 
