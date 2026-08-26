@@ -1259,6 +1259,9 @@ inverse evaluator.  The generic `FiniteInverseSearchCertificate.toRealRawFamily`
 bridge now turns the finite certificate into a valid stage-indexed nested
 interval computation; `uniformExpCenter_threeHalves_inverse_valid` and
 `uniformExpCenter_threeHalves_inverse_stage_bracket` instantiate that bridge.
+`toRealRawFamily` is an alias of the representative `toRealRaw` computation,
+so inverse-search clients do not carry two copies of the same bisection
+implementation or validity proof.
 `uniformExpCenter_threeHalves_output_forward_overlap` proves the important
 finite bridge: the corresponding interval-valued exponential cell range
 still overlaps the target interval.

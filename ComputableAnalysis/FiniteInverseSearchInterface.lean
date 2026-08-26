@@ -201,62 +201,20 @@ theorem FiniteInverseSearchCertificate.toRealRaw_valid
     exact Rat.le_trans hwidth_mono hreach
 
 /-! The same finite certificate also generates the full stage-indexed
-interval computation.  This is the reusable bridge from a rational bisection
-trace to the project's `RealRaw`: no completed real or choice of a limiting
-point is introduced. -/
+interval computation.  This is an alias of `toRealRaw`, not a second
+implementation: the bisection trace is the representative computation used
+at every stage.  No completed real or choice of a limiting point is
+introduced. -/
 def FiniteInverseSearchCertificate.toRealRawFamily
-    (certificate : FiniteInverseSearchCertificate) : RealRaw where
-  compute := fun n =>
-    monotoneTargetBisectionIterate certificate.map certificate.target n
-      certificate.initialInterval
+    (certificate : FiniteInverseSearchCertificate) : RealRaw :=
+  certificate.toRealRaw
 
 theorem FiniteInverseSearchCertificate.toRealRawFamily_valid
     (certificate : FiniteInverseSearchCertificate)
     (hwidth : certificate.initialInterval.width <= 1) :
     certificate.toRealRawFamily.Valid := by
-  refine ⟨?_, ?_, ?_⟩
-  · intro n
-    change 0 <=
-      (monotoneTargetBisectionIterate certificate.map certificate.target n
-        certificate.initialInterval).hi -
-        (monotoneTargetBisectionIterate certificate.map certificate.target n
-          certificate.initialInterval).lo
-    have hordered := monotoneTargetBisectionIterate_ordered
-      (f := certificate.map) certificate.target certificate.ordered n
-    grind
-  · intro n m hnm
-    have hlater := monotoneTargetBisectionIterate_later_subinterval
-      (f := certificate.map) certificate.target certificate.ordered hnm
-    have hm := monotoneTargetBisectionIterate_ordered
-      (f := certificate.map) certificate.target certificate.ordered m
-    exact ⟨hlater.1, hm, hlater.2⟩
-  · intro eps
-    refine ⟨eps.val.den, ?_⟩
-    intro n hn
-    have hreach := monotoneTargetBisectionIterate_reaches_of_positive_tolerance
-      (f := certificate.map) (I := certificate.initialInterval)
-      certificate.target hwidth eps
-    have hsub := monotoneTargetBisectionIterate_later_subinterval
-      (f := certificate.map) certificate.target certificate.ordered hn
-    change
-      (monotoneTargetBisectionIterate certificate.map certificate.target n
-        certificate.initialInterval).width <= eps.val
-    have hwidth_mono :
-        (monotoneTargetBisectionIterate certificate.map certificate.target n
-          certificate.initialInterval).width <=
-        (monotoneTargetBisectionIterate certificate.map certificate.target
-          eps.val.den certificate.initialInterval).width := by
-      change
-        (monotoneTargetBisectionIterate certificate.map certificate.target n
-          certificate.initialInterval).hi -
-            (monotoneTargetBisectionIterate certificate.map certificate.target n
-              certificate.initialInterval).lo <=
-          (monotoneTargetBisectionIterate certificate.map certificate.target
-            eps.val.den certificate.initialInterval).hi -
-            (monotoneTargetBisectionIterate certificate.map certificate.target
-              eps.val.den certificate.initialInterval).lo
-      grind [hsub.1, hsub.2]
-    exact Rat.le_trans hwidth_mono hreach
+  simpa [FiniteInverseSearchCertificate.toRealRawFamily] using
+    certificate.toRealRaw_valid hwidth
 
 def finiteInverseSearchCertificate
     (map : Rat → Rat) (target : Rat) (initialInterval : QInterval)
