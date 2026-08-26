@@ -5532,8 +5532,13 @@ by one for every nonempty input.
   Riemann-sum convergence under `IntervalRegularOn`.
   `Integral.IntervalRegularIntegralCertificate` now names the honest bridge
   boundary: it stores both interval regularity and a separate valid integral
-  construction.  Its exact constant instance is checked, while the general
-  regularity-to-integrability construction remains an explicit future theorem.
+  construction.  The general finite bridge is now explicit through
+  `Integral.intervalRegularDarbouxRange` and
+  `Integral.intervalRegularDarbouxStage`; a supplied
+  `Integral.IntervalRegularDarbouxSchedule` packages orderedness, cross-stage
+  nesting, and shrinking widths into a valid `RealRaw` and
+  `Integral.ConstructionFor`.  Automatic synthesis of those coherence
+  certificates from regularity alone remains future work.
 - Next FTA extensions: complex-coefficient linear polynomials using certified
   complex division away from zero, arbitrary quadratics via a computable
   discriminant square root, then
