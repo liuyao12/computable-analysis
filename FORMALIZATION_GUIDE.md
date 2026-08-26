@@ -1683,6 +1683,7 @@ open ComputableAnalysis
 #check RealRaw.negativeInv_mul_self_equiv_one
 #check RealRaw.divByPositive
 #check RealRaw.divByPositive_valid
+#check RealRaw.divByPositive_equiv_of_stages
 #check RealRaw.divByNegative
 #check RealRaw.divByNegative_valid
 ```
@@ -1702,6 +1703,10 @@ Division is then a certified product: choose a stage where the denominator is
 strictly positive or strictly negative, construct its corresponding reciprocal,
 and multiply.  The quotient constructor does not accept a denominator that may
 cross zero.
+
+Changing the positive separation stage is harmless: the quotient-stage theorem
+transports the two products through the reciprocal equivalence and the product
+equivalence theorem.
 
 ```lean
 import ComputableAnalysis.ComplexMultiplication

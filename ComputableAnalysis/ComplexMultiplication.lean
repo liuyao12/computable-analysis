@@ -1366,6 +1366,18 @@ theorem divByPositive_valid {x y : RealRaw} {N : Nat}
   unfold divByPositive
   exact mul_valid hx (positiveInv_valid hy hpos)
 
+theorem divByPositive_equiv_of_stages {x y : RealRaw} {N M : Nat}
+    (hx : x.Valid) (hy : y.Valid)
+    (hNpos : 0 < (y.compute N).lo)
+    (hMpos : 0 < (y.compute M).lo) :
+    (divByPositive x y N).Equiv (divByPositive x y M) := by
+  unfold divByPositive
+  apply mul_equiv hx hx
+    (positiveInv_valid hy hNpos)
+    (positiveInv_valid hy hMpos)
+    (equiv_refl _ hx)
+  exact positiveInv_equiv_of_stages hy hNpos hMpos
+
 theorem divByNegative_valid {x y : RealRaw} {N : Nat}
     (hx : x.Valid) (hy : y.Valid) (hneg : (y.compute N).hi < 0) :
     (divByNegative x y N).Valid := by
