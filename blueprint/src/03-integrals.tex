@@ -404,6 +404,11 @@ list of valid raw endpoint values, the finite sum of adjacent differences is
 equivalent to the last value minus the first.  Domain-specific FTC proofs
 only need to transport their endpoint evaluators into this list theorem.
 
+The corresponding finite transport is generic: prove one equivalence for each
+member of an indexed list, then map that proof across the list.  This is the
+single closure used by piecewise primitives and other finite decompositions;
+routine changes of formula do not require another induction.
+
 \lean{ComputableAnalysis.Integral.finiteRawSum}
 \lean{ComputableAnalysis.Integral.finiteRawSum_valid}
 \lean{ComputableAnalysis.Integral.finiteRawSum_append_equiv}
@@ -412,6 +417,7 @@ only need to transport their endpoint evaluators into this list theorem.
 \lean{ComputableAnalysis.Integral.FiniteRawListEquiv}
 \lean{ComputableAnalysis.Integral.FiniteRawListEquiv.refl}
 \lean{ComputableAnalysis.Integral.FiniteRawListEquiv.symm}
+\lean{ComputableAnalysis.Integral.finiteRawListEquiv_map_of_forall}
 \lean{ComputableAnalysis.Integral.finiteRawSum_equiv_of_forall}
 \lean{ComputableAnalysis.Integral.finiteRawSum_le_of_forall₂}
 \lean{ComputableAnalysis.Integral.rawLast}

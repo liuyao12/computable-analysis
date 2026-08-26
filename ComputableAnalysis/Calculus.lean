@@ -6186,6 +6186,22 @@ theorem FiniteRawListEquiv.symm
   | .cons hhead htail =>
       .cons (RealRaw.equiv_symm hhead) (FiniteRawListEquiv.symm htail)
 
+/-! Finite transport for a single indexed family.  This is the reusable
+piecewise-calculus closure: once each corresponding cell computation has an
+equivalence proof, the whole finite list needs no second bespoke induction. -/
+theorem finiteRawListEquiv_map_of_forall
+    {α : Type} {xs : List α} {f g : α -> RealRaw}
+    (h : forall x, x ∈ xs -> (f x).Equiv (g x)) :
+    FiniteRawListEquiv (xs.map f) (xs.map g) := by
+  induction xs with
+  | nil => exact .nil
+  | cons x xs ih =>
+      apply FiniteRawListEquiv.cons
+      · exact h x (by simp)
+      · apply ih
+        intro y hy
+        exact h y (by simp [hy])
+
 theorem finiteRawSum_equiv_of_forall
     {xs ys : List RealRaw}
     (hxy : FiniteRawListEquiv xs ys)

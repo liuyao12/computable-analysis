@@ -414,6 +414,10 @@ certificate is genuinely different.  In particular, a piecewise function is
 handled by finitely many interval integrals and a finite assembly theorem.
 The absolute-value example in `PrimitivePiecewiseFTC` is the reference
 pattern: two affine cell computations, followed by one finite telescope.
+For the list-level transport itself, use
+`Integral.finiteRawListEquiv_map_of_forall`; it lifts corresponding cell
+equivalences across a finite indexed list and keeps the assembly proof
+independent of the particular function formula.
 
 For curvature, the square is the reference instance.  Use
 `ExactFunction.square_secantSlope_eq_add` to reduce its secant to a rational

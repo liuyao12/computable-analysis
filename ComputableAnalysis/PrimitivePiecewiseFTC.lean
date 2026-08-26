@@ -147,24 +147,14 @@ theorem piecewiseMonotoneIntegralFor_equiv_totalPrimitiveEndpointDifference_of_t
     if hk : k < c.pieces then
       piecewisePrimitiveEndpointDifference P F c hP k hk
     else RealRaw.zero
-  have hlist_aux : forall (xs : List Nat),
-      (forall k, k ∈ xs -> k < c.pieces) ->
-      FiniteRawListEquiv (xs.map cell) (xs.map endpoint) := by
-    intro xs
-    induction xs with
-    | nil => intro _; exact .nil
-    | cons k ks ih =>
-        intro hxs
-        have hk : k < c.pieces := hxs k (by simp)
-        have htail : forall j, j ∈ ks -> j < c.pieces := by
-          intro j hj
-          exact hxs j (by simp [hj])
-        apply FiniteRawListEquiv.cons
-        · simp [cell, endpoint, hk]
-          exact hcell k hk
-        · exact ih htail
-  have hlist := hlist_aux (List.range c.pieces)
-    (by intro k hk; exact List.mem_range.1 hk)
+  have hlist : FiniteRawListEquiv
+      ((List.range c.pieces).map cell)
+      ((List.range c.pieces).map endpoint) := by
+    apply finiteRawListEquiv_map_of_forall
+    intro k hk
+    have hk' : k < c.pieces := List.mem_range.1 hk
+    simp [cell, endpoint, hk']
+    exact hcell k hk'
   have hendpoint : forall x,
       x ∈ piecewisePrimitiveEndpointDifferenceList P F c hP -> x.Valid := by
     intro x hx
