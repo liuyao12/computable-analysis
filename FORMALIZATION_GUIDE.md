@@ -251,6 +251,13 @@ standard shortcut: two valid algorithms that are each equivalent to the same
 valid anchor are equivalent to one another.  The anchor is proof-side data;
 the runtime continues to evaluate the chosen algorithm directly.
 
+The function-level analogue is
+`RealFunRaw.equivalentWith_of_common_anchor`.  It applies the same rule
+pointwise on the overlap of two partial domains, requiring only that the anchor
+be defined at those shared inputs.  This is the preferred way to connect
+independently implemented special-function computations without duplicating
+their evaluation procedures.
+
 ### Functions: complex first, concrete first, abstract only when useful
 
 The library is representative, not encyclopedic.  Formalize one complete

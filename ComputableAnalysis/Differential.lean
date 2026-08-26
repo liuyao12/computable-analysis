@@ -64,6 +64,30 @@ theorem equivalentWith_trans
   exact RealRaw.equiv_trans hFvalid hGvalid hHvalid
     (hfg x hfx hgx) (hgh x hgx hhx)
 
+/-! The common-anchor rule at the function level.  The anchor may be defined
+on a different domain; only the common inputs being compared must be covered.
+This is the domain-aware version of `RealRaw.equiv_of_common_anchor`. -/
+theorem equivalentWith_of_common_anchor
+    {f g anchor : RealFunRaw}
+    {hf : f.Valid} {hg : g.Valid} {ha : anchor.Valid}
+    (hdom : forall x, f.domain x -> g.domain x -> anchor.domain x)
+    (hfa : f.EquivalentWith anchor hf ha)
+    (hga : g.EquivalentWith anchor hg ha) :
+    f.EquivalentWith g hf hg := by
+  intro x hfx hgx
+  have hax := hdom x hfx hgx
+  have hFvalid : (f.apply hf x hfx).Valid := by
+    change RealRaw.ValidCompute (f.applyCompute x)
+    exact hf x hfx
+  have hGvalid : (g.apply hg x hgx).Valid := by
+    change RealRaw.ValidCompute (g.applyCompute x)
+    exact hg x hgx
+  have hAvalid : (anchor.apply ha x hax).Valid := by
+    change RealRaw.ValidCompute (anchor.applyCompute x)
+    exact ha x hax
+  exact RealRaw.equiv_of_common_anchor hFvalid hGvalid hAvalid
+    (hfa x hfx hax) (hga x hgx hax)
+
 theorem equivalent_refl {f : RealFunRaw} (hf : f.Valid) :
     f.Equivalent f :=
   ⟨hf, ⟨hf, equivalentWith_refl f hf⟩⟩
