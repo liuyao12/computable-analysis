@@ -502,8 +502,11 @@ containing one of finitely many certified turns, and refine only the latter.
 
 The last declaration is deliberately a completion certificate, not a
 universal theorem. It says that a particular three-part candidate overlaps
-its chosen endpoint representative. A future multi-turn constructor will
-repeat this finite pattern and sum the pieces; it will not introduce Lebesgue
+its chosen endpoint representative. The reusable
+`FinitePiecewiseStageAssembly` and `MultiTurnIntegralCompletion` structures
+already sum any supplied finite list of monotone-piece and turning-gap boxes;
+the remaining work for a new function is to supply its piece classification,
+shrinking budgets, and anchor equivalence. This does not introduce Lebesgue
 measure or a completed-real compactness argument.
 
 This schedule layer is the honest frontier between the present foundation and
