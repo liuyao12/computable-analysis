@@ -3363,6 +3363,27 @@ def dyadicRefinesNextCertificate (a b : Rat) (n : Nat) (hab : a <= b) :
     (uniformRefinesRightCertificate a b (2 ^ n) 2
       (by positivity) (by norm_num) hab)
 
+/-- Arbitrary later-to-earlier dyadic stages compose into one explicit finite
+refinement certificate. -/
+theorem dyadicRefinesCertificate (a b : Rat) {n m : Nat}
+    (hnm : n <= m) (hab : a <= b) :
+    Refines
+      (uniform a b (2 ^ m) (by positivity) hab)
+      (uniform a b (2 ^ n) (by positivity) hab) := by
+  induction m generalizing n with
+  | zero =>
+      have hn : n = 0 := by omega
+      subst n
+      exact Refines.refl _
+  | succ m ih =>
+      by_cases hnm' : n <= m
+      · have hprev := ih hnm' hab
+        have hnext := dyadicRefinesNextCertificate a b m hab
+        exact hnext.trans hprev
+      · have hn : n = m + 1 := by omega
+        subst n
+        exact dyadicRefinesNextCertificate a b m hab
+
 /-- Insert one rational breakpoint after cell index `k`.  The new list keeps
 all old points in order, placing `x` between `point k` and `point (k+1)`.
 Repeated use of this finite operation is the constructive route from explicit
