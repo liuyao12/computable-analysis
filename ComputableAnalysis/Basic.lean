@@ -3965,6 +3965,21 @@ theorem Representation.equiv_on_common_domain
   exact RealRaw.equiv_trans hs hp ht (source.agrees x hxs hxp)
     (RealRaw.equiv_symm (target.agrees x hxt hxp))
 
+/-- Directly expose the stagewise output-box overlap on a common rational
+input.  This is the function-level analogue of scalar representation
+transport and is the normal hand-off for pointwise calculus proofs. -/
+theorem Representation.overlapsAt_on_common_domain
+    {f : PartialRealFunction} (source target : Representation f)
+    (hsource : forall x, source.raw.definedAt x -> f.preferred.definedAt x)
+    {x : Rat} (hxs : source.raw.definedAt x)
+    (hxt : target.raw.definedAt x) (stage : Nat) :
+    QInterval.Overlaps
+      (source.raw.compute x hxs stage) (target.raw.compute x hxt stage) := by
+  have heq := Representation.equiv_on_common_domain source target hsource hxs hxt
+  exact (RealRaw.compareAt_overlap_iff
+    (source.raw.evalRaw x hxs) (target.raw.evalRaw x hxt) stage stage).1
+    (heq stage)
+
 def withAlternative (f : PartialRealFunction) (raw : PartialRealFunRaw)
     (hvalid : raw.Valid)
     (h : f.preferred.AgreeOnOverlap raw) : PartialRealFunction where
