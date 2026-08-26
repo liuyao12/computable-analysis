@@ -774,6 +774,13 @@ the step `m*h` into the outer derivative certificate.  Negative slopes are
 not silently accepted: the forward-only derivative contract needs a separate
 orientation-reversing or two-sided wrapper.
 
+When the outer derivative certificate is already packaged as
+`EffectiveFTCExact`, use
+`ExactFunction.EffectiveFTCExact.affineCompOfPositiveSlope`.  It reuses the
+same finite rectangle substitution identity, so the FTC error bound is
+transported at each chosen mesh rather than inferred from a completed
+integral.
+
 The matching integral-side identity is
 `ComputableAnalysis.riemannLeftExact_affine_substitution`. It transports a
 positive affine change of variable through the finite left-rectangle fold.

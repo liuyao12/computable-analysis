@@ -674,6 +674,31 @@ theorem riemannLeftExact_affine_substitution
     grind [Rat.mul_assoc, Rat.mul_comm]
   simpa [riemannLeftExact] using hsum n
 
+/-! The finite FTC certificate transports along the same positive affine map.
+The rectangle identity is exact at each finite mesh, so the only analytic
+obligation is the derivative schedule already supplied above. -/
+def EffectiveFTCExact.affineCompOfPositiveSlope
+    {F dF : Rat -> Rat} {a b m c : Rat}
+    (D : EffectiveFTCExact F dF (affine m c a) (affine m c b))
+    (hm : 0 < m)
+    (inner : QPos -> QPos)
+    (hbudget : forall eps, qabs m * (inner eps).val <= eps.val)
+    (hradius : forall eps,
+      m * (inner eps).val <= (D.derivative.stepRadius (inner eps)).val) :
+    EffectiveFTCExact
+      (fun x => F (affine m c x))
+      (fun x => m * dF (affine m c x)) a b where
+  derivative :=
+    ExactFunction.EffectiveDerivativeExact.affineCompOfPositiveSlope
+      D.derivative m c hm inner hbudget hradius
+  chooseN := D.chooseN
+  good := by
+    intro eps
+    have hD := D.good eps
+    unfold ftcErrorExact at hD ⊢
+    rw [riemannLeftExact_affine_substitution]
+    exact hD
+
 /- A positive affine change of endpoint coordinates transports a finite
 secant bracket.  The source bracket is stated at rational endpoints `a,b`,
 while `hxa` and `hyb` identify those endpoints with the translated/scaled
