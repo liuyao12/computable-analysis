@@ -8029,6 +8029,16 @@ theorem dyadicNestedRadicalLeftSum_three_overlaps_stieltjes :
   unfold QInterval.Overlaps
   constructor <;> native_decide
 
+/-! The next depth is another executable regression anchor.  As above, its
+finite calculation is evidence for the transport route, not an implicit
+limit or a substitute for the uniform geometric proof. -/
+theorem dyadicNestedRadicalLeftSum_four_overlaps_stieltjes :
+    QInterval.Overlaps
+      (dyadicNestedRadicalLeftSum 4)
+      (sinPiStieltjesIntegral.compute 4) := by
+  unfold QInterval.Overlaps
+  constructor <;> native_decide
+
 theorem dyadicNestedRadicalLeftSum_width_le_of_stage
     (n : Nat) (eps : Rat)
     (hstage : forall k, k < 2 ^ n ->

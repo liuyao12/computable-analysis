@@ -2,7 +2,7 @@ import ComputableAnalysis.Basic
 
 namespace ComputableAnalysis
 
-set_option maxHeartbeats 1000000
+set_option maxHeartbeats 100000000
 
 def mesh (a b : Rat) (n : Nat) : Rat := if n = 0 then 0 else (b - a) / n
 def leftPoint (a b : Rat) (n k : Nat) : Rat := a + (k : Rat) * mesh a b n
@@ -8871,6 +8871,9 @@ theorem endpointOrderedNonincreasingDarbouxStage_contains_uniform_double
   simp only [List.foldl_cons, List.foldl_nil]
   have hi0 : i * 2 < fine.pieces :=
     R.indexBlock_mem_fine hi (by simp [hblock])
+  have hi0' : i * 2 < pieces * 2 := by
+    change i * 2 < pieces * 2 at hi0
+    exact hi0
   have hi1 : i * 2 + 1 < fine.pieces :=
     R.indexBlock_mem_fine hi (by simp [hblock])
   have hi1' : i * 2 + 1 < pieces * 2 := by
@@ -8891,6 +8894,14 @@ theorem endpointOrderedNonincreasingDarbouxStage_contains_uniform_double
     simpa [Nat.mul_add, Nat.add_mul] using
       (RationalPartition.uniform_refines_right (a := F.lower) (b := F.upper)
         (m := pieces) (n := 2) (i := i + 1) hpieces (by omega) hab)
+  have hleft0 : leftPoint F.lower F.upper (pieces * 2) (i * 2) =
+      leftPoint F.lower F.upper pieces i := by
+    exact leftPoint_refine_mul_right hpieces (by omega)
+  have hleft2 : leftPoint F.lower F.upper (pieces * 2) (i * 2 + 1 + 1) =
+      leftPoint F.lower F.upper pieces (i + 1) := by
+    simpa [Nat.mul_add, Nat.add_mul] using
+      (leftPoint_refine_mul_right (a := F.lower) (b := F.upper)
+        (m := pieces) (n := 2) (i := i + 1) hpieces (by omega))
   have hi' : i < pieces := by
     change i < pieces at hi
     exact hi
@@ -8932,14 +8943,13 @@ theorem endpointOrderedNonincreasingDarbouxStage_contains_uniform_double
           _ = coarse.point (i + 1) :=
             R.point_eq (i + 1) (Nat.succ_le_of_lt hi))
       prec
-  simp only [RationalPartition.boundIntegralTerm, dif_pos hi, dif_pos hi0,
-    dif_pos hi1, RationalSubinterval.scaleBound, RationalSubinterval.width,
-    RationalPartition.cell, nonincreasingDarbouxRange,
-    QInterval.zero_addInterval]
-  simpa [coarse, fine, RationalPartition.uniform, hpoint0, hpoint2,
-    hp0, hp2, hp2', mesh, leftPoint, Rat.div_def, Rat.mul_assoc,
-    Rat.mul_comm, Rat.inv_mul_rev, QInterval.ContainsInterval,
-    QInterval.scaleByRat] using hcoarse
+  simpa [coarse, fine, R, RationalPartition.boundIntegralTerm,
+    RationalSubinterval.scaleBound, RationalPartition.cell,
+    nonincreasingDarbouxRange,
+    RationalSubinterval.width, RationalPartition.uniform_cell_width,
+    RationalPartition.uniform, Nat.mul_add, Nat.add_mul,
+    dif_pos hi', dif_pos hi0', dif_pos hi1', hleft0, hleft2,
+    QInterval.zero_addInterval] using hcoarse
 
 def nonincreasingDarbouxDyadicStage (F : FunctionOnInterval)
     (hinterval : F.lower <= F.upper) (evalPrecision : Nat -> Nat)
@@ -9284,6 +9294,9 @@ theorem endpointOrderedNondecreasingDarbouxStage_contains_uniform_double
   simp only [List.foldl_cons, List.foldl_nil]
   have hi0 : i * 2 < fine.pieces :=
     R.indexBlock_mem_fine hi (by simp [hblock])
+  have hi0' : i * 2 < pieces * 2 := by
+    change i * 2 < pieces * 2 at hi0
+    exact hi0
   have hi1 : i * 2 + 1 < fine.pieces :=
     R.indexBlock_mem_fine hi (by simp [hblock])
   have hi1' : i * 2 + 1 < pieces * 2 := by
@@ -9304,6 +9317,14 @@ theorem endpointOrderedNondecreasingDarbouxStage_contains_uniform_double
     simpa [Nat.mul_add, Nat.add_mul] using
       (RationalPartition.uniform_refines_right (a := F.lower) (b := F.upper)
         (m := pieces) (n := 2) (i := i + 1) hpieces (by omega) hab)
+  have hleft0 : leftPoint F.lower F.upper (pieces * 2) (i * 2) =
+      leftPoint F.lower F.upper pieces i := by
+    exact leftPoint_refine_mul_right hpieces (by omega)
+  have hleft2 : leftPoint F.lower F.upper (pieces * 2) (i * 2 + 1 + 1) =
+      leftPoint F.lower F.upper pieces (i + 1) := by
+    simpa [Nat.mul_add, Nat.add_mul] using
+      (leftPoint_refine_mul_right (a := F.lower) (b := F.upper)
+        (m := pieces) (n := 2) (i := i + 1) hpieces (by omega))
   have hi' : i < pieces := by
     change i < pieces at hi
     exact hi
@@ -9344,14 +9365,13 @@ theorem endpointOrderedNondecreasingDarbouxStage_contains_uniform_double
           _ = coarse.point (i + 1) :=
             R.point_eq (i + 1) (Nat.succ_le_of_lt hi))
       prec
-  simp only [RationalPartition.boundIntegralTerm, dif_pos hi, dif_pos hi0,
-    dif_pos hi1, RationalSubinterval.scaleBound, RationalSubinterval.width,
-    RationalPartition.cell, nondecreasingDarbouxRange,
-    QInterval.zero_addInterval]
-  simpa [coarse, fine, RationalPartition.uniform, hpoint0, hpoint2,
-    hp0, hp2, hp2', mesh, leftPoint, Rat.div_def, Rat.mul_assoc,
-    Rat.mul_comm, Rat.inv_mul_rev, QInterval.ContainsInterval,
-    QInterval.scaleByRat] using hcoarse
+  simpa [coarse, fine, R, RationalPartition.boundIntegralTerm,
+    RationalSubinterval.scaleBound, RationalPartition.cell,
+    nondecreasingDarbouxRange,
+    RationalSubinterval.width, RationalPartition.uniform_cell_width,
+    RationalPartition.uniform, Nat.mul_add, Nat.add_mul,
+    dif_pos hi', dif_pos hi0', dif_pos hi1', hleft0, hleft2,
+    QInterval.zero_addInterval] using hcoarse
 
 /-! The static dyadic instance of the monotone Darboux stage. -/
 def nondecreasingDarbouxDyadicStage (F : FunctionOnInterval)
@@ -9414,8 +9434,8 @@ theorem endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage_of_prec
   have hprecision_stage := nondecreasingDarbouxStage_contains_of_precision F
     (RationalPartition.uniform F.lower F.upper (2 ^ n)
       (Nat.pow_pos (by omega : 0 < 2)) hinterval)
-    (evalPrecision (stages n)) (evalPrecision (stages m))
-      (hprecision (hstage hnm))
+    (evalPrecision n) (evalPrecision m)
+      (hprecision hnm)
   have hmesh := endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage
     F hF hinterval (evalPrecision m) hnm
   have hcombined :
