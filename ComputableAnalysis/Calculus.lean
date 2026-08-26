@@ -1572,6 +1572,23 @@ theorem divByRat_overlaps_of_pos {h : Rat} (hh : 0 < h)
     exact Rat.mul_le_mul_of_nonneg_left hover.1 hinv,
     by exact Rat.mul_le_mul_of_nonneg_left hover.2 hinv⟩
 
+/-- Dividing a positively scaled interval by the same positive rational
+recovers the original interval.  This is the finite cancellation law used to
+turn a scaled derivative range into a normalized average-slope range. -/
+theorem divByRat_scaleByRat_self_of_pos {h : Rat} (hh : 0 < h)
+    (I : QInterval) :
+    divByRat (scaleByRat h I) h = I := by
+  have hnon : 0 <= h := Rat.le_of_lt hh
+  have hinv : 0 <= h⁻¹ := Rat.le_of_lt (Rat.inv_pos.mpr hh)
+  have hdivnon : 0 <= 1 / h := by
+    simpa [Rat.div_def] using hinv
+  have hmul : h * h⁻¹ = 1 := Rat.mul_inv_cancel h (Rat.ne_of_gt hh)
+  cases I with
+  | mk lo hi =>
+      simp only [divByRat, Rat.div_def, Rat.one_mul, scaleByRat,
+        if_pos hnon, if_pos hdivnon]
+      congr 1 <;> grind [Rat.mul_assoc, Rat.mul_comm]
+
 /-- Interval enclosure of `(Fy - Fx) / dx`.  For a secant slope, `dx` will be
 the rational difference `y - x`; the caller carries the proof that `x < y`. -/
 def slopeBetween (Fy Fx : QInterval) (dx : Rat) : QInterval :=
@@ -4443,20 +4460,7 @@ theorem endpoint_average_overlaps_bound
   have hdiv := QInterval.divByRat_overlaps_of_pos hwidth hscaled
   have hcancel :
       QInterval.divByRat (C.scaleBound (H.bound n)) C.width = H.bound n := by
-    have hnon : 0 <= C.width := Rat.le_of_lt hwidth
-    have hinv : 0 <= C.width⁻¹ := Rat.le_of_lt (Rat.inv_pos.mpr hwidth)
-    have hdivnon : 0 <= 1 / C.width := by
-      simpa [Rat.div_def] using hinv
-    have hmul : C.width⁻¹ * C.width = 1 :=
-      Rat.inv_mul_cancel C.width (Rat.ne_of_gt hwidth)
-    have hmul' : C.width * C.width⁻¹ = 1 :=
-      Rat.mul_inv_cancel C.width (Rat.ne_of_gt hwidth)
-    cases hB : H.bound n with
-    | mk blo bhi =>
-        simp [QInterval.divByRat, RationalSubinterval.scaleBound,
-          QInterval.scaleByRat, hB, hnon, hinv, hdivnon, hmul, hmul',
-          Rat.div_def,
-          Rat.mul_assoc, Rat.mul_comm]
+    exact QInterval.divByRat_scaleByRat_self_of_pos hwidth (H.bound n)
   rw [hcancel] at hdiv
   exact hdiv
 
