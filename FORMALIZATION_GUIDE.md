@@ -1015,6 +1015,9 @@ The routine mesh obligation can be discharged by
 `Integral.intervalRegularAutomaticPieces_input_budget` after supplying a
 natural upper bound for the rational interval length; the corresponding
 `intervalRegularAutomaticPieces_pos` theorem supplies positivity.
+`IntervalRegularDarbouxSchedule.ofAutomaticPieces` packages this automatic
+choice directly, leaving only the substantive stage coherence proofs to the
+caller.
 
 For a nondecreasing `FunctionOnInterval F`,
 `Integral.nondecreasingDarbouxRange F P k hk prec` is the endpoint box for
