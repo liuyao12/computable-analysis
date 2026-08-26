@@ -83,8 +83,7 @@ compact audit from the repository root:
 ```bash
 rg -n '^import\s+(Mathlib|Mathlib\.|Std\.|Batteries\.)' ComputableAnalysis
 rg -n '\b(sorry|admit)\b' ComputableAnalysis
-lake build ComputableAnalysis
-lake env lean -o .lake/build/lib/lean/ComputableAnalysis.olean ComputableAnalysis.lean
+lake build computableanalysis
 lake env .lake/packages/checkdecls/.lake/build/bin/checkdecls blueprint/lean_decls
 ```
 
