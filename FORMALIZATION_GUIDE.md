@@ -790,6 +790,10 @@ For a rational coefficient, use
 scaling certificate and transports the finite endpoint error by `qabs c`, with
 the inner schedule and budget supplied explicitly.  This is the representative
 linear-combination rule; routine coefficient variants should not be duplicated.
+When the source certificate's own stage selector is sufficient, the shorter
+`ExactFunction.EffectiveFTCExact.scale` closure reuses it automatically; only
+the inner precision schedule, derivative radius bound, and scaled error budget
+remain as inputs.
 
 The matching integral-side identity is
 `ComputableAnalysis.ExactFunction.riemannLeftExact_affine_substitution`. It transports a

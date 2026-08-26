@@ -818,6 +818,24 @@ def EffectiveFTCExact.scaleOfSchedule
         Rat.mul_le_mul_of_nonneg_left herror' (qabs_nonneg _)
       _ <= eps.val := hbudget eps
 
+/-! Direct closure under rational scaling.  Unlike the provider-facing
+`scaleOfSchedule` constructor above, this version reuses the source FTC
+certificate's own endpoint-stage selector, so the caller supplies only the
+inner precision schedule and its derivative/error budgets. -/
+def EffectiveFTCExact.scale
+    (c : Rat)
+    {F dF : Rat -> Rat} {a b : Rat}
+    (D : EffectiveFTCExact F dF a b)
+    (inner : QPos -> QPos)
+    (hbudget : forall eps,
+      qabs c * (inner eps).val <= eps.val)
+    (hradius : forall eps,
+      (inner eps).val <= (D.derivative.stepRadius (inner eps)).val) :
+    EffectiveFTCExact (fun x => c * F x) (fun x => c * dF x) a b :=
+  EffectiveFTCExact.scaleOfSchedule c D inner hbudget hradius
+    (fun eps => D.chooseN (inner eps))
+    (fun eps => D.good (inner eps))
+
 /-! The finite FTC certificate transports along the same positive affine map.
 The rectangle identity is exact at each finite mesh, so the only analytic
 obligation is the derivative schedule already supplied above. -/
