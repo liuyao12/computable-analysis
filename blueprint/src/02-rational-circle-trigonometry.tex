@@ -127,6 +127,22 @@ The executable table and its refinement laws are exposed as
 At a dyadic input, the public coordinate is related to the circle evaluator by
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.sinPiRawOfArctan_dyadic_compute_eq_circle}.
 
+The finite trigonometric table also carries the identities needed by later
+integration proofs: refinement preserves a sample, every sample lies on the
+unit circle, and the two endpoint coordinates are exact.  These are rational
+stage statements, so they remain available before any completed angle is
+introduced.
+
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_point_refineIndex}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_cos_refineIndex}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_sin_refineIndex}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_cos_sq_add_sin_sq}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_cos_zero}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_sin_zero}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_cos_last}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_sin_last}
+\leanok
+
 The remaining semantic obligation is packaged as one finite certificate
 family.  It supplies the exact endpoint, even-index reuse, lower half-angle,
 and reflected upper-half-angle boxes; the assembly theorem then proves
@@ -188,6 +204,19 @@ raw equivalence, not the full inverse-search package:
 \lean{ComputableAnalysis.arctanScheduledCoreRaw_valid}
 \lean{ComputableAnalysis.arctanScheduledCoreRaw_width_le}
 \lean{ComputableAnalysis.arctanScheduledCoreRaw_equiv_arctanGeom}
+
+The function-facing circle coordinates are exposed separately from the
+construction record.  Their validity is a raw-computation statement; it does
+not assert that a single closed formula covers every possible angle chart.
+
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.cosFunctionRawOfPoint}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.sinFunctionRawOfPoint}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.cosFunctionRawOfPoint_compute_eq}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.sinFunctionRawOfPoint_compute_eq}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.FunctionRawConstruction}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.FunctionRawConstruction.cosFunctionRaw}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.FunctionRawConstruction.sinFunctionRaw}
+\leanok
 
 \section{Scope boundary}
 
