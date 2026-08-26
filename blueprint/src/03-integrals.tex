@@ -113,6 +113,9 @@ consecutive embedded coarse breakpoints:
 The strict index form records the finite block of fine cells belonging to a
 coarse cell:
 \lean{ComputableAnalysis.RationalPartition.Refines.index_in_coarse_block}
+The combined form supplies the valid fine-cell witness and its containment in
+one step:
+\lean{ComputableAnalysis.RationalPartition.Refines.cell_contained_in_coarse_of_index_block}
 The remaining whole-sum argument is a finite reindexing of these located
 cells, followed by the single-cell weighted interval inequality.
 This gives the computable mean-value/area principle for the functions covered

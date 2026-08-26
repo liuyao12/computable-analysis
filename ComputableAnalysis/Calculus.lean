@@ -3916,6 +3916,22 @@ theorem Refines.index_in_coarse_block {a b : Rat}
   have hi' : i + 1 <= coarse.pieces := Nat.succ_le_of_lt hi
   exact Nat.lt_of_lt_of_le hright (R.index_le hi')
 
+/-- A fine cell whose left breakpoint lies in a coarse block is contained in
+that block whenever its right breakpoint is still before the next embedded
+coarse breakpoint.  This packages the index bookkeeping and the geometric
+containment fact into the form used by finite Darboux reindexing. -/
+theorem Refines.cell_contained_in_coarse_of_index_block {a b : Rat}
+    {fine coarse : RationalPartition a b} (R : Refines fine coarse)
+    {i j : Nat} (hi : i < coarse.pieces)
+    (hleft : R.index i <= j)
+    (hright : j < R.index (i + 1)) :
+    (coarse.cell i hi).lower <= (fine.cell j (R.index_in_coarse_block hi hleft hright)).lower /\
+      (fine.cell j (R.index_in_coarse_block hi hleft hright)).upper <=
+        (coarse.cell i hi).upper := by
+  exact R.cell_contained_in_coarse hi
+    (R.index_in_coarse_block hi hleft hright) hleft
+    (Nat.succ_le_of_lt hright)
+
 /-- Every genuine cell of an explicit uniform partition has exactly its
 rational mesh width. -/
 theorem uniform_cell_width (a b : Rat) (pieces : Nat)
