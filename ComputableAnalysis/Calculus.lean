@@ -7412,6 +7412,102 @@ theorem nondecreasingDarbouxDyadicStage_width_le_of_input_budget_and_tolerance
       F hregular hinterval evalPrecision n hsmall)
     hbudget
 
+/-! A schedule-level bridge for arbitrary interval-regular Darboux sums.  The
+finite width theorem above is useful only once its stages are assembled into
+a valid raw computation.  This structure records precisely the remaining
+finite data: the mesh/input-precision budget, stage orderedness, stage
+nesting, and the potential-infinity width witness.  No completed integral or
+completeness principle is hidden in the package. -/
+
+def intervalRegularDarbouxScheduleCompute
+    (F : FunctionOnInterval) (hinterval : F.lower <= F.upper)
+    (hregular : IntervalRegularOn F)
+    (pieces evalPrecision : Nat -> Nat)
+    (hpieces : forall n, 0 < pieces n) (n : Nat) : QInterval :=
+  intervalRegularDarbouxStage F hregular
+    (RationalPartition.uniform F.lower F.upper (pieces n)
+      (hpieces n) hinterval)
+    (evalPrecision n)
+
+structure IntervalRegularDarbouxSchedule
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (hinterval : F.lower <= F.upper) where
+  pieces : Nat -> Nat
+  evalPrecision : Nat -> Nat
+  pieces_pos : forall n, 0 < pieces n
+  input_budget : forall n,
+    mesh F.lower F.upper (pieces n) <=
+      1 / ((hregular.inputPrecision (evalPrecision n) : Nat) : Rat)
+  width_nonneg : forall n,
+    0 <= (intervalRegularDarbouxScheduleCompute F hinterval hregular
+      pieces evalPrecision pieces_pos n).width
+  nested : forall n m, n <= m ->
+    (intervalRegularDarbouxScheduleCompute F hinterval hregular
+      pieces evalPrecision pieces_pos n).lo <=
+    (intervalRegularDarbouxScheduleCompute F hinterval hregular
+      pieces evalPrecision pieces_pos m).lo /\
+    (intervalRegularDarbouxScheduleCompute F hinterval hregular
+      pieces evalPrecision pieces_pos m).hi <=
+    (intervalRegularDarbouxScheduleCompute F hinterval hregular
+      pieces evalPrecision pieces_pos n).hi
+  widths_shrink : RealRaw.WidthsShrinkToZero
+    (intervalRegularDarbouxScheduleCompute F hinterval hregular
+      pieces evalPrecision pieces_pos)
+
+def intervalRegularDarbouxScheduleRaw
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hinterval : F.lower <= F.upper}
+    (s : IntervalRegularDarbouxSchedule F hregular hinterval) : RealRaw :=
+  { compute := intervalRegularDarbouxScheduleCompute F hinterval hregular
+      s.pieces s.evalPrecision s.pieces_pos
+    rate := .unknown }
+
+theorem intervalRegularDarbouxScheduleRaw_valid
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hinterval : F.lower <= F.upper}
+    (s : IntervalRegularDarbouxSchedule F hregular hinterval) :
+    (intervalRegularDarbouxScheduleRaw s).Valid := by
+  change RealRaw.ValidCompute
+    (intervalRegularDarbouxScheduleCompute F hinterval hregular
+      s.pieces s.evalPrecision s.pieces_pos)
+  refine ⟨s.width_nonneg, ?_, s.widths_shrink⟩
+  intro n m hnm
+  rcases s.nested n m hnm with ⟨hlo, hhi⟩
+  refine ⟨hlo, ?_⟩
+  constructor
+  · have hm := s.width_nonneg m
+    change 0 <=
+      (intervalRegularDarbouxScheduleCompute F hinterval hregular
+        s.pieces s.evalPrecision s.pieces_pos m).hi -
+      (intervalRegularDarbouxScheduleCompute F hinterval hregular
+        s.pieces s.evalPrecision s.pieces_pos m).lo at hm
+    grind [Rat.sub_eq_add_neg]
+  · exact hhi
+
+theorem intervalRegularDarbouxScheduleRaw_width_le_of_tolerance
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hinterval : F.lower <= F.upper}
+    (s : IntervalRegularDarbouxSchedule F hregular hinterval)
+    (n : Nat) (eps : Rat)
+    (hbudget : (F.upper - F.lower) *
+        (1 / ((s.evalPrecision n + 1 : Nat) : Rat)) <= eps) :
+    ((intervalRegularDarbouxScheduleRaw s).compute n).width <= eps := by
+  change (intervalRegularDarbouxScheduleCompute F hinterval hregular
+    s.pieces s.evalPrecision s.pieces_pos n).width <= eps
+  exact Rat.le_trans
+    (intervalRegularDarbouxStage_width_le_of_uniform_input_budget
+      F hregular (s.pieces n) (s.pieces_pos n) hinterval
+      (s.evalPrecision n) (s.input_budget n))
+    hbudget
+
+def intervalRegularDarbouxScheduleConstructionFor
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hinterval : F.lower <= F.upper}
+    (s : IntervalRegularDarbouxSchedule F hregular hinterval) :
+    Integral.ConstructionFor F where
+  compute := (intervalRegularDarbouxScheduleRaw s).compute
+  certificate := intervalRegularDarbouxScheduleRaw_valid s
+
 /-! A schedule-level bridge for the monotone Darboux algorithm.  The
 finite width theorem above is useful only once its stages are assembled into
 a valid raw computation.  This structure records precisely the remaining

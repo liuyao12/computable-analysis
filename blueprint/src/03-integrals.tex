@@ -242,6 +242,19 @@ is promoted to a `realRaw` integral.
 \lean{ComputableAnalysis.Integral.intervalRegularDarbouxStage_width_le_of_uniform_input_budget}
 \leanok
 
+To publish such candidates as an actual `realRaw`, the schedule-level
+certificate records the remaining finite facts explicitly: ordered stages,
+cross-stage nesting, and shrinking widths.  Once supplied, it constructs the
+ordinary domain-aware integral interface.  This is the computable analogue of
+the classical existence step, with the coherence proof visible at the API
+boundary.
+
+\lean{ComputableAnalysis.Integral.intervalRegularDarbouxSchedule}
+\lean{ComputableAnalysis.Integral.intervalRegularDarbouxScheduleRaw_valid}
+\lean{ComputableAnalysis.Integral.intervalRegularDarbouxScheduleRaw_width_le_of_tolerance}
+\lean{ComputableAnalysis.Integral.intervalRegularDarbouxScheduleConstructionFor}
+\leanok
+
 \lean{ComputableAnalysis.Integral.LipschitzOnUnit}
 \lean{ComputableAnalysis.LipschitzDyadic.compute}
 \lean{ComputableAnalysis.LipschitzDyadic.compute_width}

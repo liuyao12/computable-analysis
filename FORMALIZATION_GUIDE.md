@@ -1003,6 +1003,15 @@ modulus.  This is a general finite quadrature candidate, not yet a universal
 integrability theorem: cross-stage nesting remains a separate certificate
 obligation before constructing a `RealRaw` integral.
 
+When those coherence facts are available, package them in
+`Integral.IntervalRegularDarbouxSchedule`. Its orderedness, nesting, and
+shrinking-width fields are exactly the remaining proof obligations;
+`Integral.intervalRegularDarbouxScheduleRaw_valid` proves the resulting raw
+value valid, and
+`Integral.intervalRegularDarbouxScheduleConstructionFor` exposes it through
+the ordinary integral interface. This is the preferred route for a new
+non-monotone function with an explicit finite schedule.
+
 For a nondecreasing `FunctionOnInterval F`,
 `Integral.nondecreasingDarbouxRange F P k hk prec` is the endpoint box for
 the `k`th rational cell of `P`, and
