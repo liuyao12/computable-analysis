@@ -132,6 +132,8 @@ Each coarse block is represented by an executable ordered fine-index list:
 \lean{ComputableAnalysis.RationalPartition.Refines.indexBlock}
 Its list membership is exactly the corresponding half-open index inequality:
 \lean{ComputableAnalysis.RationalPartition.Refines.mem_indexBlock_iff}
+Every emitted member is certified as a genuine fine-cell index:
+\lean{ComputableAnalysis.RationalPartition.Refines.indexBlock_mem_fine}
 Flattening all such blocks recovers the complete fine partition range:
 \lean{ComputableAnalysis.RationalPartition.Refines.indexBlocks_flatMap_eq_range}
 The corresponding fold identity transports interval additions and other finite

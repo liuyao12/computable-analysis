@@ -4087,6 +4087,14 @@ theorem Refines.mem_indexBlock_iff {a b : Rat}
     R.index_mono _ _ (Nat.le_succ i)
   omega
 
+/-- A member emitted by a valid coarse block is a genuine fine-cell index. -/
+theorem Refines.indexBlock_mem_fine {a b : Rat}
+    {fine coarse : RationalPartition a b} (R : Refines fine coarse)
+    {i j : Nat} (hi : i < coarse.pieces) (hj : j ∈ R.indexBlock i) :
+    j < fine.pieces := by
+  rcases (R.mem_indexBlock_iff).mp hj with ⟨hleft, hright⟩
+  exact R.index_in_coarse_block hi hleft hright
+
 /-! Flattening all coarse index blocks recovers the complete fine-cell range.
 This is the finite reindexing identity underlying refined Darboux sums. -/
 theorem Refines.indexBlocks_flatMap_eq_range {a b : Rat}
