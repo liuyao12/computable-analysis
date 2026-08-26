@@ -191,6 +191,32 @@ theorem gaussianTaylorProductIntegralSum_stage_four_unit_square :
       34225 / 16384 := by
   native_decide
 
+/-! The same construction in three coordinates uses the general nested
+rectangle sum.  The factorization is finite algebra, so it is available before
+any limiting or measure-theoretic argument. -/
+def gaussianTaylorProductIntegralNestedSum3D (terms : Nat)
+    (xs ys zs : List (Rat × Rat)) : Rat :=
+  finiteProductIntegralNestedSum
+    [xs, ys, zs]
+    [gaussianTaylorPointPrefix terms,
+      gaussianTaylorPointPrefix terms,
+      gaussianTaylorPointPrefix terms]
+
+theorem gaussianTaylorProductIntegralNestedSum3D_factorized
+    (terms : Nat) (xs ys zs : List (Rat × Rat)) :
+    gaussianTaylorProductIntegralNestedSum3D terms xs ys zs =
+      (xs.map (fun cell => cell.2 * gaussianTaylorPointPrefix terms cell.1)).foldl
+          (fun acc value => acc + value) 0 *
+        (ys.map (fun cell => cell.2 * gaussianTaylorPointPrefix terms cell.1)).foldl
+          (fun acc value => acc + value) 0 *
+        (zs.map (fun cell => cell.2 * gaussianTaylorPointPrefix terms cell.1)).foldl
+          (fun acc value => acc + value) 0 := by
+  unfold gaussianTaylorProductIntegralNestedSum3D
+  rw [finiteProductIntegralNestedSum_factorized]
+  rw [finiteProductIntegralSum_eq_factorProduct]
+  simp only [finiteProductIntegralFactorProduct, Rat.mul_one]
+  grind [Rat.mul_assoc]
+
 theorem gaussianEvenIntegralPrefix_stage_six_minus_four :
     gaussianEvenIntegralPrefix 6 1 - gaussianEvenIntegralPrefix 4 1 =
       23 / 2970 := by

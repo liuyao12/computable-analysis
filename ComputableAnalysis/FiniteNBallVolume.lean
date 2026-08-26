@@ -209,6 +209,33 @@ def finiteProductIntegralSum :
         finiteProductIntegralSum restCells restFactors
   | _, _ => 0
 
+/-! Public recursive presentation of a separable finite integral.  Exposing
+the factor product lets downstream applications state the arbitrary-
+dimensional factorization without unfolding the implementation. -/
+def finiteProductIntegralFactorProduct :
+    List (List (Rat × Rat)) -> List (Rat -> Rat) -> Rat
+  | [], [] => 1
+  | cells :: restCells, factor :: restFactors =>
+      (cells.map (fun cell => cell.2 * factor cell.1)).foldl
+          (fun acc value => acc + value) 0 *
+        finiteProductIntegralFactorProduct restCells restFactors
+  | _, _ => 0
+
+theorem finiteProductIntegralSum_eq_factorProduct
+    (samples : List (List (Rat × Rat))) (factors : List (Rat -> Rat)) :
+    finiteProductIntegralSum samples factors =
+      finiteProductIntegralFactorProduct samples factors := by
+  induction samples generalizing factors with
+  | nil =>
+      cases factors <;> rfl
+  | cons cells rest ih =>
+      cases factors with
+      | nil => rfl
+      | cons factor restFactors =>
+          simp only [finiteProductIntegralSum,
+            finiteProductIntegralFactorProduct]
+          rw [ih]
+
 theorem finiteProductIntegralNestedSum_factorized
     (samples : List (List (Rat × Rat))) (factors : List (Rat -> Rat)) :
     finiteProductIntegralNestedSum samples factors =
