@@ -1141,6 +1141,10 @@ An even more geometric entry point is
 it reduces the positive samples to rational-circle image overlap and handles
 the zero endpoint separately.
 
+Once the tangent anchor has its quarter-value certificate, the companion
+`SinPiSquareFTC.DyadicNestedRadicalSquareTangentCommonWitness.stabilized_equiv_value`
+theorem passes that value through the public prefix-stabilized computation.
+
 The public-to-anchor step is intentionally stronger than chaining overlaps.
 `SinPiSquareFTC.DyadicPublicSquareTangentTransportWitness` asks for a
 stagewise containment of the nested square table inside the public square
