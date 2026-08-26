@@ -4058,6 +4058,17 @@ def Refines.indexBlock {a b : Rat} {fine coarse : RationalPartition a b}
     (R : Refines fine coarse) (i : Nat) : List Nat :=
   List.range' (R.index i) (R.index (i + 1) - R.index i) 1
 
+/-- Exact membership characterization for a refinement block. -/
+theorem Refines.mem_indexBlock_iff {a b : Rat}
+    {fine coarse : RationalPartition a b} (R : Refines fine coarse)
+    {i j : Nat} :
+    j ∈ R.indexBlock i ↔ R.index i ≤ j ∧ j < R.index (i + 1) := by
+  unfold Refines.indexBlock
+  rw [List.mem_range'_1]
+  have hindex : R.index i ≤ R.index (i + 1) :=
+    R.index_mono _ _ (Nat.le_succ i)
+  omega
+
 /-! Flattening all coarse index blocks recovers the complete fine-cell range.
 This is the finite reindexing identity underlying refined Darboux sums. -/
 theorem Refines.indexBlocks_flatMap_eq_range {a b : Rat}
