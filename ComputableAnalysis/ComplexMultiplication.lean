@@ -699,6 +699,15 @@ theorem one_div_le_one_div_of_pos {a b : Rat}
           Rat.inv_mul_cancel]
   · exact hprod
 
+theorem inv_overlaps_of_pos {I J : QInterval}
+    (hIpos : 0 < I.lo) (hJpos : 0 < J.lo)
+    (hIJ : I.Overlaps J) : I.inv.Overlaps J.inv := by
+  rw [inv_of_pos hIpos, inv_of_pos hJpos]
+  unfold QInterval.Overlaps at hIJ ⊢
+  constructor
+  · exact one_div_le_one_div_of_pos hJpos hIJ.2
+  · exact one_div_le_one_div_of_pos hIpos hIJ.1
+
 theorem inv_ordered_of_pos {I : QInterval}
     (hpos : 0 < I.lo) (hI : I.lo <= I.hi) :
     I.inv.lo <= I.inv.hi := by
@@ -1015,6 +1024,49 @@ theorem positiveInv_equiv_of_stages {x : RealRaw} {N M : Nat}
       exact QInterval.one_div_le_one_div_of_pos hnpos
         (interval_order_of_valid x hx n)
 
+theorem positiveInv_equiv_of_input {x y : RealRaw} {N : Nat}
+    (hx : x.Valid) (hy : y.Valid) (hxy : x.Equiv y)
+    (hXpos : 0 < (x.compute N).lo)
+    (hYpos : 0 < (y.compute N).lo) :
+    (positiveInv x N).Equiv (positiveInv y N) := by
+  intro n
+  apply (compareAt_overlap_iff (positiveInv x N) (positiveInv y N) n n).2
+  change QInterval.Overlaps
+    ((positiveInv x N).compute n) ((positiveInv y N).compute n)
+  by_cases hn : n < N
+  · simp [positiveInv, positiveInvCompute, hn, QInterval.Overlaps]
+    constructor
+    · rw [Rat.div_def]
+      exact Rat.le_of_lt (Rat.mul_pos (by native_decide)
+        ((Rat.inv_pos).2 hYpos))
+    · rw [Rat.div_def]
+      exact Rat.le_of_lt (Rat.mul_pos (by native_decide)
+        ((Rat.inv_pos).2 hXpos))
+  · have hNn : N <= n := by omega
+    have hXn := hx.2.1 N n hNn
+    have hYn := hy.2.1 N n hNn
+    have hXnpos : 0 < (x.compute n).lo := by
+      apply (Rat.lt_iff_le_and_ne).2
+      constructor
+      · exact Rat.le_trans (Rat.le_of_lt hXpos) hXn.1
+      · intro hz
+        have hzero : (x.compute N).lo = 0 :=
+          Rat.le_antisymm (by simpa [hz] using hXn.1)
+            (Rat.le_of_lt hXpos)
+        exact (Rat.ne_of_gt hXpos) hzero
+    have hYnpos : 0 < (y.compute n).lo := by
+      apply (Rat.lt_iff_le_and_ne).2
+      constructor
+      · exact Rat.le_trans (Rat.le_of_lt hYpos) hYn.1
+      · intro hz
+        have hzero : (y.compute N).lo = 0 :=
+          Rat.le_antisymm (by simpa [hz] using hYn.1)
+            (Rat.le_of_lt hYpos)
+        exact (Rat.ne_of_gt hYpos) hzero
+    simp [positiveInv, positiveInvCompute, hn, QInterval.Overlaps]
+    exact QInterval.inv_overlaps_of_pos hXnpos hYnpos
+      ((compareAt_overlap_iff x y n n).1 (hxy n))
+
 theorem positiveInv_mul_self_equiv_one {x : RealRaw} {N : Nat}
     (hx : x.Valid) (hpos : 0 < (x.compute N).lo) :
     (mul x (positiveInv x N)).Equiv one := by
@@ -1131,6 +1183,20 @@ theorem negativeInv_equiv_of_stages {x : RealRaw} {N M : Nat}
   · change 0 < -(x.compute N).hi
     grind
   · change 0 < -(x.compute M).hi
+    grind
+
+theorem negativeInv_equiv_of_input {x y : RealRaw} {N : Nat}
+    (hx : x.Valid) (hy : y.Valid) (hxy : x.Equiv y)
+    (hXneg : (x.compute N).hi < 0)
+    (hYneg : (y.compute N).hi < 0) :
+    (negativeInv x N).Equiv (negativeInv y N) := by
+  unfold negativeInv
+  apply neg_equiv
+  apply positiveInv_equiv_of_input (neg_valid hx) (neg_valid hy)
+    (neg_equiv hxy)
+  · change 0 < -(x.compute N).hi
+    grind
+  · change 0 < -(y.compute N).hi
     grind
 
 private theorem qabs_le_of_interval_bounds {a b x B : Rat}
@@ -1391,6 +1457,20 @@ theorem divByPositive_equiv_of_stages {x y : RealRaw} {N M : Nat}
     (equiv_refl _ hx)
   exact positiveInv_equiv_of_stages hy hNpos hMpos
 
+theorem divByPositive_equiv_of_inputs
+    {x x' y y' : RealRaw} {N : Nat}
+    (hx : x.Valid) (hx' : x'.Valid) (hy : y.Valid) (hy' : y'.Valid)
+    (hxx' : x.Equiv x') (hyy' : y.Equiv y')
+    (hYpos : 0 < (y.compute N).lo)
+    (hY'pos : 0 < (y'.compute N).lo) :
+    (divByPositive x y N).Equiv (divByPositive x' y' N) := by
+  unfold divByPositive
+  apply mul_equiv hx hx'
+    (positiveInv_valid hy hYpos)
+    (positiveInv_valid hy' hY'pos)
+    hxx'
+  exact positiveInv_equiv_of_input hy hy' hyy' hYpos hY'pos
+
 theorem divByNegative_valid {x y : RealRaw} {N : Nat}
     (hx : x.Valid) (hy : y.Valid) (hneg : (y.compute N).hi < 0) :
     (divByNegative x y N).Valid := by
@@ -1408,6 +1488,20 @@ theorem divByNegative_equiv_of_stages {x y : RealRaw} {N M : Nat}
     (negativeInv_valid hy hMneg)
     (equiv_refl _ hx)
   exact negativeInv_equiv_of_stages hy hNneg hMneg
+
+theorem divByNegative_equiv_of_inputs
+    {x x' y y' : RealRaw} {N : Nat}
+    (hx : x.Valid) (hx' : x'.Valid) (hy : y.Valid) (hy' : y'.Valid)
+    (hxx' : x.Equiv x') (hyy' : y.Equiv y')
+    (hYneg : (y.compute N).hi < 0)
+    (hY'neg : (y'.compute N).hi < 0) :
+    (divByNegative x y N).Equiv (divByNegative x' y' N) := by
+  unfold divByNegative
+  apply mul_equiv hx hx'
+    (negativeInv_valid hy hYneg)
+    (negativeInv_valid hy' hY'neg)
+    hxx'
+  exact negativeInv_equiv_of_input hy hy' hyy' hYneg hY'neg
 
 theorem negativeInv_mul_self_equiv_one {x : RealRaw} {N : Nat}
     (hx : x.Valid) (hneg : (x.compute N).hi < 0) :

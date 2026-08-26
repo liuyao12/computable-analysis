@@ -1677,17 +1677,21 @@ open ComputableAnalysis
 #check RealRaw.positiveInv_compute_nested
 #check RealRaw.positiveInv_valid
 #check RealRaw.positiveInv_equiv_of_stages
+#check RealRaw.positiveInv_equiv_of_input
 #check RealRaw.positiveInv_mul_self_equiv_one
 #check RealRaw.negativeInv
 #check RealRaw.negativeInv_valid
 #check RealRaw.negativeInv_equiv_of_stages
+#check RealRaw.negativeInv_equiv_of_input
 #check RealRaw.negativeInv_mul_self_equiv_one
 #check RealRaw.divByPositive
 #check RealRaw.divByPositive_valid
 #check RealRaw.divByPositive_equiv_of_stages
+#check RealRaw.divByPositive_equiv_of_inputs
 #check RealRaw.divByNegative
 #check RealRaw.divByNegative_valid
 #check RealRaw.divByNegative_equiv_of_stages
+#check RealRaw.divByNegative_equiv_of_inputs
 ```
 
 These reciprocal lemmas are deliberately finite: they apply after an interval

@@ -437,17 +437,21 @@ as a valid raw real.
 \lean{ComputableAnalysis.RealRaw.positiveInv_compute_nested}
 \lean{ComputableAnalysis.RealRaw.positiveInv_valid}
 \lean{ComputableAnalysis.RealRaw.positiveInv_equiv_of_stages}
+\lean{ComputableAnalysis.RealRaw.positiveInv_equiv_of_input}
 \lean{ComputableAnalysis.RealRaw.positiveInv_mul_self_equiv_one}
 \lean{ComputableAnalysis.RealRaw.negativeInv}
 \lean{ComputableAnalysis.RealRaw.negativeInv_valid}
 \lean{ComputableAnalysis.RealRaw.negativeInv_equiv_of_stages}
+\lean{ComputableAnalysis.RealRaw.negativeInv_equiv_of_input}
 \lean{ComputableAnalysis.RealRaw.negativeInv_mul_self_equiv_one}
 \lean{ComputableAnalysis.RealRaw.divByPositive}
 \lean{ComputableAnalysis.RealRaw.divByPositive_valid}
 \lean{ComputableAnalysis.RealRaw.divByPositive_equiv_of_stages}
+\lean{ComputableAnalysis.RealRaw.divByPositive_equiv_of_inputs}
 \lean{ComputableAnalysis.RealRaw.divByNegative}
 \lean{ComputableAnalysis.RealRaw.divByNegative_valid}
 \lean{ComputableAnalysis.RealRaw.divByNegative_equiv_of_stages}
+\lean{ComputableAnalysis.RealRaw.divByNegative_equiv_of_inputs}
 \leanok
 
 Changing the certified separation stage does not create a new disconnected
@@ -458,6 +462,8 @@ The positive quotient is likewise independent, up to raw-real equivalence, of
 which certified separation stage supplies its denominator reciprocal.
 The negative quotient has the same property, transported through the sign
 representation.
+The corresponding input-transport lemmas show that equivalent numerator and
+denominator implementations produce equivalent quotients on either branch.
 
 The construction still requires a stage at which the input is separated from
 zero; the negative branch is transported by sign.  No completed-real inverse
