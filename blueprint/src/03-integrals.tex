@@ -938,6 +938,17 @@ sine sample.  Piecewise functions such as \(|x|\) are handled by splitting
 the domain into their monotone pieces, rather than duplicating routine
 variants.
 
+The fixed-sample candidate already has a shrinking width schedule.  Its
+cross-stage nesting is kept separate: after a semantic overlap with an
+independent valid anchor, prefix stabilization makes the sample a valid raw
+algorithm using only candidate boxes at runtime.
+
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSampleRaw_widths_shrink}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSampleRaw_stabilized}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSampleRaw_stabilized_valid_of_equiv}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSampleRaw_stabilized_equiv_anchor_of_equiv}
+\leanok
+
 The reusable interval-transfer step is now generic: after the correctly
 scaled raw integral is identified with its target, combine its stage width
 with the finite rectangle margin.  The scaling must come first: the unscaled

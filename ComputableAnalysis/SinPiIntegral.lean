@@ -7584,6 +7584,49 @@ theorem dyadicNestedRadicalTableAt_width_le
             by simpa [dyadicNestedRadicalNeg_width, parentCos, reflected, hle,
               parentPrecision] using hcos⟩
 
+/-! A fixed dyadic sample already has a shrinking width schedule.  Its
+cross-stage nesting is a separate semantic question, so this theorem records
+only the part that can be proved from the finite square-root recurrence. -/
+theorem dyadicNestedRadicalSampleRaw_widths_shrink
+    {depth k : Nat} (hk : k < 2 ^ depth) :
+    RealRaw.WidthsShrinkToZero
+      (dyadicNestedRadicalSampleRaw depth k).compute := by
+  intro eps
+  exact shrinksToZero_of_natOverSuccBound (C := 1) (fun precision => by
+    simpa [dyadicNestedRadicalSampleRaw] using
+      (dyadicNestedRadicalTableAt_width_le precision depth k
+        (Nat.le_of_lt hk)).1) eps
+
+/-! Prefix stabilization turns that shrinking sample candidate into a valid
+public raw once an independent semantic anchor and stagewise overlap have
+been proved.  The anchor is proof-side data only; the stabilized evaluator
+uses the candidate boxes and the rational anchor-width schedule. -/
+def dyadicNestedRadicalSampleRaw_stabilized
+    (anchor : RealRaw) (depth k : Nat) : RealRaw :=
+  RealRaw.prefixStabilize (dyadicNestedRadicalSampleRaw depth k)
+    (fun n => (anchor.compute n).width)
+
+theorem dyadicNestedRadicalSampleRaw_stabilized_valid_of_equiv
+    {anchor : RealRaw} {depth k : Nat} (hk : k < 2 ^ depth)
+    (hanchor : anchor.Valid)
+    (hover : (dyadicNestedRadicalSampleRaw depth k).Equiv anchor) :
+    (dyadicNestedRadicalSampleRaw_stabilized anchor depth k).Valid := by
+  apply RealRaw.prefixStabilize_valid
+    (dyadicNestedRadicalSampleRaw_widths_shrink hk)
+    hanchor hover
+  · intro n
+    exact Rat.le_refl
+  · exact hanchor.2.2
+
+theorem dyadicNestedRadicalSampleRaw_stabilized_equiv_anchor_of_equiv
+    {anchor : RealRaw} {depth k : Nat} (hk : k < 2 ^ depth)
+    (hanchor : anchor.Valid)
+    (hover : (dyadicNestedRadicalSampleRaw depth k).Equiv anchor) :
+    (dyadicNestedRadicalSampleRaw_stabilized anchor depth k).Equiv anchor := by
+  apply RealRaw.prefixStabilize_equiv_anchor hanchor hover
+  intro n
+  exact Rat.le_refl
+
 theorem dyadicNestedRadicalTableAt_succ_even
     (precision n k : Nat) :
     dyadicNestedRadicalTableAt precision (n + 1) (2 * k) =

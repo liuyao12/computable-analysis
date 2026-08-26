@@ -1111,6 +1111,11 @@ equivalence and positive-sample, all-precision certificate family convert via
 schedule consumed by the public integral theorem. This separates the
 geometric existence proof from the evaluator and makes the remaining theorem
 explicit rather than hidden in a large argument.
+The candidate side now also exposes
+`dyadicNestedRadicalSampleRaw_widths_shrink` and
+`dyadicNestedRadicalSampleRaw_stabilized`: once the semantic overlap for one
+sample is proved, prefix stabilization supplies a valid public raw without
+silently assuming that the raw nested-radical boxes are cross-stage nested.
 The lower-level theorem
 `SinPiTransportSubgoals.exists_dyadic_tangent_witness_search_of_overlap_family`
 now exposes the finite boundary precisely: once an all-depth overlap family
