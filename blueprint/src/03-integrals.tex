@@ -1128,10 +1128,11 @@ sum is formalized once and reused:
 \lean{ComputableAnalysis.SinPiSquareFTC.DyadicSquareCircleOverlapFamily.to_square_sum_overlap}
 \leanok
 
-The remaining work is local: provide one finite certificate for each dyadic
-sine sample.  Piecewise functions such as \(|x|\) are handled by splitting
-the domain into their monotone pieces, rather than duplicating routine
-variants.
+The remaining work is geometric rather than integral construction: provide
+one finite certificate for each dyadic sine sample, uniformly in depth and
+precision.  The integral assembly and piecewise rule are already reusable;
+functions such as \(|x|\) are handled by splitting the domain into their
+finitely many monotone pieces, rather than duplicating routine variants.
 
 The fixed-sample candidate already has a shrinking width schedule.  Its
 cross-stage nesting is kept separate: after a semantic overlap with an
