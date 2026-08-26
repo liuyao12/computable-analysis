@@ -310,6 +310,43 @@ theorem finiteProductIntegralSum2D_nonneg
       rcases List.mem_map.mp hvalue with ⟨cell, hcell, hvalue⟩
       simpa [hvalue] using hy cell hcell
 
+/-! The same positivity argument scales to any finite number of separable
+coordinates.  The hypotheses expose exactly the finite certificate needed by
+the rectangular computation: cell widths are nonnegative and each sampled
+factor is nonnegative. -/
+theorem finiteProductIntegralNestedSum_nonneg
+    (samples : List (List (Rat × Rat))) (factors : List (Rat -> Rat))
+    (hwidth : forall cells, cells ∈ samples ->
+      forall cell, cell ∈ cells -> 0 <= cell.2)
+    (hfactor : forall factor, factor ∈ factors ->
+      forall x, 0 <= factor x) :
+    0 <= finiteProductIntegralNestedSum samples factors := by
+  induction samples generalizing factors with
+  | nil =>
+      cases factors <;> simp [finiteProductIntegralNestedSum] <;> native_decide
+  | cons cells rest ih =>
+      cases factors with
+      | nil =>
+          simp [finiteProductIntegralNestedSum]
+      | cons factor restFactors =>
+          simp only [finiteProductIntegralNestedSum]
+          apply foldl_add_nonneg
+          · exact Rat.le_refl
+          · intro value hvalue
+            rcases List.mem_map.mp hvalue with ⟨cell, hcell, rfl⟩
+            exact Rat.mul_nonneg
+              (Rat.mul_nonneg
+                (hwidth cells (by simp) cell hcell)
+                (hfactor factor (by simp) cell.1))
+              (ih
+                  (factors := restFactors)
+                  (by
+                    intro cells' hcells' cell' hcell'
+                    exact hwidth cells' (by simp [hcells']) cell' hcell')
+                  (by
+                    intro factor' hfactor' x
+                    exact hfactor factor' (by simp [hfactor']) x))
+
 /- A concrete weighted rectangular computation.  The two sample lists carry
 cell widths, so this is a finite two-dimensional integral cell sum rather than
 an unweighted Cartesian product. -/
