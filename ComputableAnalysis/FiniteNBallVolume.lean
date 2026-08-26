@@ -277,6 +277,39 @@ theorem finiteProductIntegralSum2D_factorized
       (ys.map (fun cell => cell.2 * g cell.1))
       (fun value => value) (fun value => value))
 
+private theorem foldl_add_nonneg {α : Type} (xs : List α)
+    (term : α -> Rat) (initial : Rat) (hinitial : 0 <= initial)
+    (hterm : forall x, x ∈ xs -> 0 <= term x) :
+    0 <= xs.foldl (fun acc value => acc + term value) initial := by
+  induction xs generalizing initial with
+  | nil =>
+      simpa using hinitial
+  | cons x xs ih =>
+      apply ih (initial := initial + term x)
+      · exact Rat.add_nonneg hinitial (hterm x (by simp))
+      · intro y hy
+        exact hterm y (by simp [hy])
+
+/-! Finite order preservation for a separable weighted rectangle sum.  This is
+the positive-integrand fact used by later Gaussian and volume certificates. -/
+theorem finiteProductIntegralSum2D_nonneg
+    (xs ys : List (Rat × Rat)) (f g : Rat -> Rat)
+    (hx : forall cell, cell ∈ xs -> 0 <= cell.2 * f cell.1)
+    (hy : forall cell, cell ∈ ys -> 0 <= cell.2 * g cell.1) :
+    0 <= finiteProductIntegralSum2D xs ys f g := by
+  rw [finiteProductIntegralSum2D_factorized]
+  apply Rat.mul_nonneg
+  · apply foldl_add_nonneg
+    · exact Rat.le_refl
+    · intro value hvalue
+      rcases List.mem_map.mp hvalue with ⟨cell, hcell, hvalue⟩
+      simpa [hvalue] using hx cell hcell
+  · apply foldl_add_nonneg
+    · exact Rat.le_refl
+    · intro value hvalue
+      rcases List.mem_map.mp hvalue with ⟨cell, hcell, hvalue⟩
+      simpa [hvalue] using hy cell hcell
+
 /- A concrete weighted rectangular computation.  The two sample lists carry
 cell widths, so this is a finite two-dimensional integral cell sum rather than
 an unweighted Cartesian product. -/
