@@ -138,6 +138,9 @@ accumulations directly:
 \lean{ComputableAnalysis.RationalPartition.Refines.foldl_indexBlocks_eq_foldl_range}
 The interval-valued Darboux sum uses this identity directly:
 \lean{ComputableAnalysis.RationalPartition.Refines.boundIntegralSum_eq_indexBlockFold}
+The blockwise containment rule then compares complete fine and coarse sums:
+\lean{ComputableAnalysis.addInterval_fold_contains_of_mem}
+\lean{ComputableAnalysis.RationalPartition.Refines.boundIntegralSum_contains_of_blockwise}
 The remaining whole-sum argument is a finite reindexing of these located
 cells, followed by the single-cell weighted interval inequality.
 This gives the computable mean-value/area principle for the functions covered

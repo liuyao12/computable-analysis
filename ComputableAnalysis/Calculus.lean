@@ -4392,6 +4392,26 @@ theorem addInterval_fold_contains (xs : List Nat)
       exact ih
         (QInterval.addInterval_contains hinit (hterm k))
 
+/-! The membership-aware variant is the form needed for finite partition
+folds: a total step function may have special behavior outside the traversed
+range, so the containment hypothesis is required only for actual list
+members. -/
+theorem addInterval_fold_contains_of_mem (xs : List Nat)
+    (outer inner : Nat -> QInterval) {outerInit innerInit : QInterval}
+    (hinit : outerInit.ContainsInterval innerInit)
+    (hterm : forall k, k ∈ xs -> (outer k).ContainsInterval (inner k)) :
+    ((xs.foldl (fun acc k => QInterval.addInterval acc (outer k)) outerInit)
+      ).ContainsInterval
+      (xs.foldl (fun acc k => QInterval.addInterval acc (inner k)) innerInit) := by
+  induction xs generalizing outerInit innerInit with
+  | nil =>
+      exact hinit
+  | cons k xs ih =>
+      apply ih
+        (QInterval.addInterval_contains hinit (hterm k (by simp)))
+      intro j hj
+      exact hterm j (List.mem_cons_of_mem k hj)
+
 /-- Moving a rational initial value outside a finite addition fold. -/
 theorem rat_add_fold_initial (xs : List Nat) (term : Nat -> Rat)
     (initial : Rat) :
@@ -4459,6 +4479,36 @@ def boundIntegralSum {a b : Rat} (P : RationalPartition a b)
   (List.range P.pieces).foldl
     (fun acc k => QInterval.addInterval acc (P.boundIntegralTerm bound k))
     { lo := 0, hi := 0 }
+
+/-- Blockwise refinement comparison for complete interval-valued Darboux sums.
+It is enough to prove one containment certificate for each coarse cell and the
+finite fold then transports all fine-cell contributions at once. -/
+theorem Refines.boundIntegralSum_contains_of_blockwise
+    {a b : Rat} {fine coarse : RationalPartition a b}
+    (R : Refines fine coarse)
+    (coarseBound : (k : Nat) -> k < coarse.pieces -> QInterval)
+    (fineBound : (k : Nat) -> k < fine.pieces -> QInterval)
+    (hblock : forall i (hi : i < coarse.pieces),
+      (coarse.boundIntegralTerm coarseBound i).ContainsInterval
+        ((R.indexBlock i).foldl
+          (fun acc j => QInterval.addInterval acc
+            (fine.boundIntegralTerm fineBound j))
+          { lo := 0, hi := 0 })) :
+    (coarse.boundIntegralSum coarseBound).ContainsInterval
+      (fine.boundIntegralSum fineBound) := by
+  rw [R.boundIntegralSum_eq_indexBlockFold]
+  unfold boundIntegralSum
+  apply addInterval_fold_contains_of_mem
+    (List.range coarse.pieces)
+    (coarse.boundIntegralTerm coarseBound)
+    (fun i =>
+      (R.indexBlock i).foldl
+        (fun acc j => QInterval.addInterval acc
+          (fine.boundIntegralTerm fineBound j))
+        { lo := 0, hi := 0 })
+    (QInterval.containsInterval_refl _)
+  intro i hi
+  exact hblock i (List.mem_range.mp hi)
 
 /-! A partition sum of ordered term intervals is itself ordered.  This small
 finite lemma is useful whenever a general interval-regular integral compares
