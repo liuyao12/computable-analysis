@@ -2033,6 +2033,12 @@ the overlap used by stabilization. This changes only the shape of finite
 evidence; it does not assert that an exact intermediate real value has been
 attained.
 
+For a concrete finite candidate list, use
+`SinPiIntegral.canonicalDyadicCertificateSearchAt_some_of_mem_of_admissible`:
+an admissible rational witness in the list certifies that the executable
+search returns a hit. The remaining all-stage theorem is therefore geometric
+witness existence, not search correctness.
+
 The public equal-dyadic transport contract is
 `SinPiIntegral.halfIntegral_equiv_of_dyadic_sample_overlap`. It requires the
 same fixed plan and one overlap proof for every finite sample. The coordinate

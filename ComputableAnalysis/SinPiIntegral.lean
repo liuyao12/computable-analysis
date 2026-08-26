@@ -6612,6 +6612,31 @@ noncomputable def canonicalDyadicCertificateSearchAt_sound
       · apply ih
         simpa [canonicalDyadicCertificateSearchAt, hadm] using hsearch
 
+theorem canonicalDyadicCertificateSearchAt_some_of_mem_of_admissible
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {precision depth k : Nat} {hk : k < 2 ^ depth}
+    {candidates : List Rat} {u : Rat}
+    (hmem : u ∈ candidates)
+    (hadm : canonicalDyadicCertificateAdmissibleBool
+      B precision depth k hk u = true) :
+    ∃ v, canonicalDyadicCertificateSearchAt B precision depth k hk candidates =
+      some v := by
+  revert u
+  induction candidates with
+  | nil =>
+      intro u hmem
+      simp at hmem
+  | cons v rest ih =>
+      intro u hmem hadm
+      simp only [List.mem_cons] at hmem
+      rcases hmem with rfl | hmem
+      · exact ⟨u, by simp [canonicalDyadicCertificateSearchAt, hadm]⟩
+      · by_cases hv : canonicalDyadicCertificateAdmissibleBool
+            B precision depth k hk v = true
+        · exact ⟨v, by simp [canonicalDyadicCertificateSearchAt, hv]⟩
+        · obtain ⟨w, hw⟩ := ih hmem hadm
+          exact ⟨w, by simpa [canonicalDyadicCertificateSearchAt, hv] using hw⟩
+
 theorem canonical_dyadic_search_of_halfAngle_certificate_at
     (B : IntegralIdentities.ArctanInverseBisection)
     {precision depth k : Nat} {hk : k < 2 ^ depth} (hpos : 0 < k)
