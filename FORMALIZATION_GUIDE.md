@@ -1075,6 +1075,9 @@ The weaker and more natural direct interface is
 `SinPiSquareFTC.DyadicPublicSquareTangentSharedWitness`: one rational witness
 is required to lie in all three stage intervals.  It yields the same public
 equivalence and stabilized-value theorem without requiring containment.
+With sine regularity, `DyadicPublicSquareTangentSharedWitness.stabilized_valid`
+also exposes the stabilized public computation as a valid `RealRaw`; the
+un-stabilized candidate need not itself be nested.
 Once the tangent anchor has its quarter-value certificate, the companion
 `DyadicPublicSquareTangentTransportWitness.stabilized_equiv_value` theorem
 passes that value through the public prefix-stabilized computation.

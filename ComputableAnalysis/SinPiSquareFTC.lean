@@ -4157,6 +4157,14 @@ theorem DyadicPublicSquareTangentSharedWitness.stabilized_equiv_value
   exact dyadicPublicSquareIntegralRaw_stabilized_equiv_value_of_anchor
     S hsine tangentSquareIntegral_valid h.to_public_equiv hvalue
 
+theorem DyadicPublicSquareTangentSharedWitness.stabilized_valid
+    {S : ArctanSinPiConstruction}
+    (h : DyadicPublicSquareTangentSharedWitness S)
+    (hsine : IntervalRegularOn S.onHalf) :
+    (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral).Valid := by
+  exact dyadicPublicSquareIntegralRaw_stabilized_valid_of_overlap
+    S hsine tangentSquareIntegral_valid h.to_public_equiv
+
 def sinPiSquareOnHalfFunctionOnInterval
     (S : ArctanSinPiConstruction) : FunctionOnInterval where
   raw := {

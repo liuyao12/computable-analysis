@@ -583,6 +583,9 @@ interval-valued composition still requires a separate box-level contract.
    witness in all three intervals at each stage and therefore avoids any
    transitivity assumption while allowing public and nested boxes to differ
    in either direction.
+   With the sine regularity certificate, `stabilized_valid` now proves the
+   usable public computation is valid after prefix stabilization, so raw
+   candidate nesting is no longer required for the public route.
 
    The public square-sum orderedness theorem
    `dyadicPublicSquareLeftSum_ordered` is now proved from pointwise square
