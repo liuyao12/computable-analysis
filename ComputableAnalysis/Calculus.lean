@@ -3904,6 +3904,18 @@ theorem Refines.cell_contained_in_coarse {a b : Rat}
     fine.point (j + 1) <= coarse.point (i + 1)
   exact ⟨hlower.1, hupper.2⟩
 
+/-! The strict form records which fine cells lie in the block of a given
+coarse cell.  It is the indexing companion to `cell_contained_in_coarse`. -/
+
+theorem Refines.index_in_coarse_block {a b : Rat}
+    {fine coarse : RationalPartition a b} (R : Refines fine coarse)
+    {i j : Nat} (hi : i < coarse.pieces)
+    (hleft : R.index i <= j)
+    (hright : j < R.index (i + 1)) :
+    j < fine.pieces := by
+  have hi' : i + 1 <= coarse.pieces := Nat.succ_le_of_lt hi
+  exact Nat.lt_of_lt_of_le hright (R.index_le hi')
+
 /-- Every genuine cell of an explicit uniform partition has exactly its
 rational mesh width. -/
 theorem uniform_cell_width (a b : Rat) (pieces : Nat)
