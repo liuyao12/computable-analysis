@@ -587,6 +587,24 @@ def exactRat_square_intervalRegularOn_unit :
     · have hmul := Rat.mul_le_mul_of_nonneg_right hIhi hxh_nonneg
       grind [Rat.mul_add, Rat.add_mul]
 
+theorem exactRat_square_evalIntervalsNested_unit :
+    IntervalRegularOn.EvalIntervalsNested
+      exactRat_square_intervalRegularOn_unit := by
+  exact IntervalRegularOn.EvalIntervalsNested.of_stageIndependent _
+    (by intro I hI n m; rfl)
+
+theorem exactRat_square_darbouxStage_nested_unit
+    (P : RationalPartition 0 1) {n m : Nat} (hnm : n <= m) :
+    (Integral.intervalRegularDarbouxStage
+      (FunctionOnInterval.exactRat (fun x => x * x) 0 1)
+      exactRat_square_intervalRegularOn_unit P n).ContainsInterval
+      (Integral.intervalRegularDarbouxStage
+        (FunctionOnInterval.exactRat (fun x => x * x) 0 1)
+        exactRat_square_intervalRegularOn_unit P m) := by
+  exact Integral.intervalRegularDarbouxStage_contains_of_evalIntervalsNested
+    _ exactRat_square_intervalRegularOn_unit
+    exactRat_square_evalIntervalsNested_unit P hnm
+
 def exactSquare_lipschitz_on_unit :
     Integral.LipschitzOnUnit (fun x : Rat => x * x) 2 := by
   constructor
@@ -967,6 +985,24 @@ def exactRat_cube_intervalRegularOn_unit :
       exact Rat.mul_nonneg (by grind) hsum_hi
     constructor <;> grind [Rat.pow_succ, Rat.mul_add, Rat.add_mul,
       Rat.sub_eq_add_neg]
+
+theorem exactRat_cube_evalIntervalsNested_unit :
+    IntervalRegularOn.EvalIntervalsNested
+      exactRat_cube_intervalRegularOn_unit := by
+  exact IntervalRegularOn.EvalIntervalsNested.of_stageIndependent _
+    (by intro I hI n m; rfl)
+
+theorem exactRat_cube_darbouxStage_nested_unit
+    (P : RationalPartition 0 1) {n m : Nat} (hnm : n <= m) :
+    (Integral.intervalRegularDarbouxStage
+      (FunctionOnInterval.exactRat (fun x => x ^ 3) 0 1)
+      exactRat_cube_intervalRegularOn_unit P n).ContainsInterval
+      (Integral.intervalRegularDarbouxStage
+        (FunctionOnInterval.exactRat (fun x => x ^ 3) 0 1)
+        exactRat_cube_intervalRegularOn_unit P m) := by
+  exact Integral.intervalRegularDarbouxStage_contains_of_evalIntervalsNested
+    _ exactRat_cube_intervalRegularOn_unit
+    exactRat_cube_evalIntervalsNested_unit P hnm
 
 def stableCube : StablePartialRealFunRaw where
   definedAt := fun x => 0 <= x ∧ x <= 1
