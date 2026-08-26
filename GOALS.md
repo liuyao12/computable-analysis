@@ -141,6 +141,13 @@ The differential layer also exposes exact rational composition rules
 `differenceQuotient_add` and `differenceQuotient_scale`, so the squared-prefix
 secant bracket and its conservative shrinking cell enclosure are assembled
 from monomial brackets structurally.
+The general forward chain-rule factorization is now also checked:
+`ExactFunction.differenceQuotient_comp_factorization` and
+`ExactFunction.differenceQuotient_comp_error_le` expose the inner increment and
+weighted error terms, while
+`ExactFunction.EffectiveDerivativeExact.compOfBudget` packages the radius and
+budget obligations.  This closes the exact rational composition interface;
+interval-valued composition still requires a separate box-level contract.
 
 ### Auditable concrete-rung matrix
 
