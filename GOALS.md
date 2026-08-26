@@ -578,6 +578,11 @@ interval-valued composition still requires a separate box-level contract.
    `stabilized_equiv_value` theorem carries the tangent quarter-value through
    the public prefix stabilizer.  This is a certificate interface, not a claim
    that containment follows from the weaker public/nested overlap theorem.
+   The preferred direct formulation is now
+   `DyadicPublicSquareTangentSharedWitness`, which supplies one rational
+   witness in all three intervals at each stage and therefore avoids any
+   transitivity assumption while allowing public and nested boxes to differ
+   in either direction.
 
    The square equal-dyadic candidate is now explicit as
    `dyadicNestedRadicalSquareLeftSum`, with raw wrapper

@@ -1067,6 +1067,10 @@ table, together with the nested-table/tangent common witness.  Its
 public candidate to the tangent anchor using only rational interval
 inequalities.  This is the remaining geometric certificate for the public
 sin² integral; no transitivity of overlap is assumed.
+The weaker and more natural direct interface is
+`SinPiSquareFTC.DyadicPublicSquareTangentSharedWitness`: one rational witness
+is required to lie in all three stage intervals.  It yields the same public
+equivalence and stabilized-value theorem without requiring containment.
 Once the tangent anchor has its quarter-value certificate, the companion
 `DyadicPublicSquareTangentTransportWitness.stabilized_equiv_value` theorem
 passes that value through the public prefix-stabilized computation.

@@ -733,6 +733,16 @@ then transports the tangent quarter-value certificate through the public
 prefix-stabilized evaluator.
 \leanok
 
+The direct certificate need not assert containment.  The weaker interface
+\lean{ComputableAnalysis.DyadicPublicSquareTangentSharedWitness}
+uses one rational witness in the public, nested, and tangent intervals at
+each stage; its
+\lean{ComputableAnalysis.DyadicPublicSquareTangentSharedWitness.to_public_equiv}
+and
+\lean{ComputableAnalysis.DyadicPublicSquareTangentSharedWitness.stabilized_equiv_value}
+theorems provide the same transport without composing overlap relations.
+\leanok
+
 The reusable bound-facing corollary makes the bookkeeping explicit: supplied
 rational bounds for the two factor values, their two secants, and their local
 errors reduce the product proof to one visible sum of two linear errors and

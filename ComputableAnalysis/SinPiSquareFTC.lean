@@ -3126,6 +3126,46 @@ structure DyadicPublicSquareTangentCommonWitness
   witness_le_tangent_hi : forall n,
     witness n <= (tangentSquareIntegral.compute n).hi
 
+/- A shared witness is the weakest direct three-way certificate used by the
+public route: one rational point lies in the public, nested, and tangent
+intervals at every stage.  It avoids assuming that either overlap relation
+can be composed transitively. -/
+structure DyadicPublicSquareTangentSharedWitness
+    (S : ArctanSinPiConstruction) where
+  witness : Nat -> Rat
+  public_lo_le : forall n,
+    (dyadicPublicSquareLeftSum S n).lo <= witness n
+  witness_le_public_hi : forall n,
+    witness n <= (dyadicPublicSquareLeftSum S n).hi
+  nested_lo_le : forall n,
+    (dyadicNestedRadicalSquareLeftSum n).lo <= witness n
+  witness_le_nested_hi : forall n,
+    witness n <= (dyadicNestedRadicalSquareLeftSum n).hi
+  tangent_lo_le : forall n,
+    (tangentSquareIntegral.compute n).lo <= witness n
+  witness_le_tangent_hi : forall n,
+    witness n <= (tangentSquareIntegral.compute n).hi
+
+def DyadicPublicSquareTangentSharedWitness.to_public_common_witness
+    {S : ArctanSinPiConstruction}
+    (h : DyadicPublicSquareTangentSharedWitness S) :
+    DyadicPublicSquareTangentCommonWitness S where
+  witness := h.witness
+  candidate_lo_le := h.public_lo_le
+  witness_le_candidate_hi := h.witness_le_public_hi
+  tangent_lo_le := h.tangent_lo_le
+  witness_le_tangent_hi := h.witness_le_tangent_hi
+
+def DyadicPublicSquareTangentSharedWitness.to_nested_common_witness
+    {S : ArctanSinPiConstruction}
+    (h : DyadicPublicSquareTangentSharedWitness S) :
+    DyadicNestedRadicalSquareTangentCommonWitness where
+  witness := h.witness
+  candidate_lo_le := h.nested_lo_le
+  witness_le_candidate_hi := h.witness_le_nested_hi
+  tangent_lo_le := h.tangent_lo_le
+  witness_le_tangent_hi := h.witness_le_tangent_hi
+
 structure DyadicPublicSquareTangentTransportWitness
     (S : ArctanSinPiConstruction) where
   nested_tangent : DyadicNestedRadicalSquareTangentCommonWitness
@@ -3967,6 +4007,16 @@ theorem DyadicPublicSquareTangentTransportWitness.to_public_equiv
     (dyadicPublicSquareIntegralRaw S) tangentSquareIntegral n n).2
     (h.to_public_overlap n)
 
+theorem DyadicPublicSquareTangentSharedWitness.to_public_equiv
+    {S : ArctanSinPiConstruction}
+    (h : DyadicPublicSquareTangentSharedWitness S) :
+    (dyadicPublicSquareIntegralRaw S).Equiv tangentSquareIntegral := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  exact (RealRaw.compareAt_overlap_iff
+    (dyadicPublicSquareIntegralRaw S) tangentSquareIntegral n n).2
+    (h.to_public_common_witness.to_overlap n)
+
 theorem dyadicPublicSquareIntegralRaw_widths_shrink
     (S : ArctanSinPiConstruction)
     (hsine : IntervalRegularOn S.onHalf) :
@@ -4022,6 +4072,16 @@ theorem dyadicPublicSquareIntegralRaw_stabilized_equiv_value_of_anchor
 theorem DyadicPublicSquareTangentTransportWitness.stabilized_equiv_value
     {S : ArctanSinPiConstruction}
     (h : DyadicPublicSquareTangentTransportWitness S)
+    (hsine : IntervalRegularOn S.onHalf)
+    (hvalue : tangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4))) :
+    (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral).Equiv
+      (RealRaw.ofRat (1 / 4)) := by
+  exact dyadicPublicSquareIntegralRaw_stabilized_equiv_value_of_anchor
+    S hsine tangentSquareIntegral_valid h.to_public_equiv hvalue
+
+theorem DyadicPublicSquareTangentSharedWitness.stabilized_equiv_value
+    {S : ArctanSinPiConstruction}
+    (h : DyadicPublicSquareTangentSharedWitness S)
     (hsine : IntervalRegularOn S.onHalf)
     (hvalue : tangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4))) :
     (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral).Equiv
