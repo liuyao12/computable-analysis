@@ -217,6 +217,14 @@ theorem gaussianTaylorProductIntegralNestedSum3D_factorized
   simp only [finiteProductIntegralFactorProduct, Rat.mul_one]
   grind [Rat.mul_assoc]
 
+theorem gaussianTaylorProductIntegralNestedSum3D_stage_four_unit_cube :
+    gaussianTaylorProductIntegralNestedSum3D 4
+      [(-1, 1 / 2), (-1 / 2, 1 / 2), (0, 1 / 2), (1 / 2, 1 / 2)]
+      [(-1, 1 / 2), (-1 / 2, 1 / 2), (0, 1 / 2), (1 / 2, 1 / 2)]
+      [(-1, 1 / 2), (-1 / 2, 1 / 2), (0, 1 / 2), (1 / 2, 1 / 2)] =
+      6331625 / 2097152 := by
+  native_decide
+
 theorem gaussianEvenIntegralPrefix_stage_six_minus_four :
     gaussianEvenIntegralPrefix 6 1 - gaussianEvenIntegralPrefix 4 1 =
       23 / 2970 := by
