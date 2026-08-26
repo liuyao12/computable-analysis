@@ -113,6 +113,8 @@ consecutive embedded coarse breakpoints:
 The strict index form records the finite block of fine cells belonging to a
 coarse cell:
 \lean{ComputableAnalysis.RationalPartition.Refines.index_in_coarse_block}
+Every genuine fine cell is covered by one of those finite coarse blocks:
+\lean{ComputableAnalysis.RationalPartition.Refines.exists_index_block_of_fine_cell}
 The combined form supplies the valid fine-cell witness and its containment in
 one step:
 \lean{ComputableAnalysis.RationalPartition.Refines.cell_contained_in_coarse_of_index_block}

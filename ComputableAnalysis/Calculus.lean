@@ -3916,6 +3916,28 @@ theorem Refines.index_in_coarse_block {a b : Rat}
   have hi' : i + 1 <= coarse.pieces := Nat.succ_le_of_lt hi
   exact Nat.lt_of_lt_of_le hright (R.index_le hi')
 
+/-- Every genuine fine cell belongs to a coarse block.  The proof is a finite
+induction along the coarse breakpoint list: either the fine index is still
+after the current breakpoint, or the current coarse cell captures it. -/
+theorem Refines.exists_index_block_of_fine_cell {a b : Rat}
+    {fine coarse : RationalPartition a b} (R : Refines fine coarse)
+    {j : Nat} (hj : j < fine.pieces) :
+    ∃ i, i < coarse.pieces ∧ R.index i ≤ j ∧ j < R.index (i + 1) := by
+  have aux : ∀ n, j < R.index n →
+      ∃ i, i < n ∧ R.index i ≤ j ∧ j < R.index (i + 1) := by
+    intro n
+    induction n with
+    | zero =>
+        intro h
+        simpa [R.index_zero] using h
+    | succ n ih =>
+        intro h
+        by_cases hprev : j < R.index n
+        · rcases ih hprev with ⟨i, hi, hleft, hright⟩
+          exact ⟨i, Nat.lt_trans hi (Nat.lt_succ_self n), hleft, hright⟩
+        · exact ⟨n, Nat.lt_succ_self n, Nat.le_of_not_gt hprev, h⟩
+  exact aux coarse.pieces (by simpa [R.index_last] using hj)
+
 /-- A fine cell whose left breakpoint lies in a coarse block is contained in
 that block whenever its right breakpoint is still before the next embedded
 coarse breakpoint.  This packages the index bookkeeping and the geometric
