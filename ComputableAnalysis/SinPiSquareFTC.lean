@@ -3708,6 +3708,54 @@ theorem sinPiSquareOnHalf_valid (S : ArctanSinPiConstruction) :
     · rename_i hfalse
       exact False.elim (hfalse hx)
 
+/-! The square evaluator inherits an explicit finite modulus from the raw-real
+product estimate.  This is the quantitative input for synchronizing the
+square samples with the nested-radical sine boxes. -/
+theorem sinPiSquareOnHalf_compute_width_le
+    (S : ArctanSinPiConstruction) {x : Rat}
+    (hx : 0 <= x /\ x <= (1 : Rat) / 2) (n : Nat) :
+    ((sinPiSquareOnHalf S).compute x n).width <=
+      2 * ((sinPiOnHalfRaw S).compute x n).width := by
+  have hvalid : (sinPiOnHalfRaw S).Valid := by
+    intro y hy
+    change RealRaw.ValidCompute
+      (fun k => if h : 0 <= y /\ y <= (1 : Rat) / 2 then
+        (sinPiRawOfArctan S.inverse y h).compute k else { lo := 0, hi := 0 })
+    split
+    · exact S.sin_valid y hy
+    · rename_i hfalse
+      exact False.elim (hfalse hy)
+  let X : RealRaw := { compute := (sinPiOnHalfRaw S).compute x }
+  have hX : X.Valid := by
+    simpa [X, RealRaw.Valid, RealFunRaw.applyCompute] using hvalid x hx
+  have hbound : forall k,
+      0 <= (X.compute k).lo /\ (X.compute k).hi <= 1 := by
+    intro k
+    change 0 <= ((sinPiOnHalfRaw S).compute x k).lo /\
+      ((sinPiOnHalfRaw S).compute x k).hi <= 1
+    simpa [sinPiOnHalfRaw, hx] using S.sinPiRawOfArctan_bounds hx k
+  have h := RealRaw.mul_width_le_of_nonneg_bounded
+    hX hX (Bx := 1) (By := 1) hbound hbound n
+  change (QBox.mulRealInterval
+      ((sinPiOnHalfRaw S).compute x n).lo
+      ((sinPiOnHalfRaw S).compute x n).hi
+      ((sinPiOnHalfRaw S).compute x n).lo
+      ((sinPiOnHalfRaw S).compute x n).hi).width <=
+    1 * ((sinPiOnHalfRaw S).compute x n).width +
+      1 * ((sinPiOnHalfRaw S).compute x n).width at h
+  change (QBox.mulRealInterval
+      ((sinPiOnHalfRaw S).compute x n).lo
+      ((sinPiOnHalfRaw S).compute x n).hi
+      ((sinPiOnHalfRaw S).compute x n).lo
+      ((sinPiOnHalfRaw S).compute x n).hi).width <=
+    2 * ((sinPiOnHalfRaw S).compute x n).width
+  calc
+    _ <= 1 * ((sinPiOnHalfRaw S).compute x n).width +
+        1 * ((sinPiOnHalfRaw S).compute x n).width := h
+    _ = 2 * ((sinPiOnHalfRaw S).compute x n).width := by
+      have htwo : (2 : Rat) = 1 + 1 := by native_decide
+      rw [htwo, Rat.add_mul]
+
 def sinPiSquareOnHalfFunctionOnInterval
     (S : ArctanSinPiConstruction) : FunctionOnInterval where
   raw := {

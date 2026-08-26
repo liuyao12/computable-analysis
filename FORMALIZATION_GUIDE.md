@@ -939,6 +939,9 @@ constructor; it does not itself assert a derivative or a limiting product.
 The corresponding raw-real theorem is
 `RealRaw.mul_width_le_of_nonneg_bounded`; use it when the factor boxes have
 already been packaged as `RealRaw` values.
+The concrete `sin(pi*x)^2` evaluator uses this interface through
+`sinPiSquareOnHalf_compute_width_le`, giving the specialized bound
+`width(sin^2) <= 2 * width(sin)` on `[0, 1/2]`.
 
 ### Increasing pieces: start with the literal finite stage
 
