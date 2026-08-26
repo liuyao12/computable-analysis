@@ -1021,7 +1021,9 @@ natural upper bound for the rational interval length; the corresponding
 `intervalRegularAutomaticPieces_pos` theorem supplies positivity.
 `IntervalRegularDarbouxSchedule.ofAutomaticPieces` packages this automatic
 choice directly, deriving width nonnegativity as well and leaving only the
-substantive stage coherence proofs to the caller. Use
+explicit precision-budget and substantive stage-coherence proofs to the
+caller. `intervalRegularDarbouxSchedule_widths_shrink_of_budget` turns the
+precision budget into the required eventual-width certificate. Use
 `intervalRegularDarbouxScheduleIntegralFor` and its `_valid` theorem as the
 public raw integral endpoint.
 
