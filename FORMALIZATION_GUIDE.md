@@ -1035,6 +1035,11 @@ certificate.
 `intervalRegularDarbouxScheduleIntegralFor` and its `_valid` theorem as the
 public raw integral endpoint.
 
+If a single global unit-chart Lipschitz estimate is being reused on a piece,
+use `IntervalRegularOn.of_lipschitzOnUnitSubinterval`. It transports the
+estimate and constructs the cell evaluator in one step, so a piecewise proof
+does not duplicate the interval enclosure or its precision budget.
+
 For a nondecreasing `FunctionOnInterval F`,
 `Integral.nondecreasingDarbouxRange F P k hk prec` is the endpoint box for
 the `k`th rational cell of `P`, and

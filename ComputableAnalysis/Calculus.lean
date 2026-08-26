@@ -6714,6 +6714,18 @@ def IntervalRegularOn.of_lipschitzOnUnit
         hi := f I.lo + (L : Rat) * I.width }
       { lo := f x, hi := f x }
     exact ⟨hlow, hupp⟩
+/-! A single reusable bridge from a unit-chart Lipschitz estimate to the
+interval-regular evaluator on one of its rational subintervals.  This keeps
+piecewise constructions cellwise while reusing the global estimate; callers
+do not need to rebuild the interval enclosure or its precision budget. -/
+def IntervalRegularOn.of_lipschitzOnUnitSubinterval
+    (f : Rat -> Rat) (L : Nat) {a b : Rat}
+    (ha : 0 <= a) (hab : a <= b) (hb : b <= 1)
+    (hunit : Integral.LipschitzOnUnit f (L : Rat)) :
+    IntervalRegularOn (FunctionOnInterval.exactRat f a b) :=
+  IntervalRegularOn.of_lipschitzOnIntervalNat f a b L
+    (Integral.LipschitzOnIntervalNat.of_unit_subinterval f L ha hab hb hunit)
+
 /-! A scheduled variant of interval regularity.
 
 The native computation stage of a `FunctionOnInterval` is part of its raw
