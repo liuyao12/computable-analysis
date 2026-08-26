@@ -1514,7 +1514,7 @@ budget, while the quadratic corner term stays visible. -/
 theorem product_differenceQuotient_error_le_qabs_of_bounds
     (u du v dv : Rat -> Rat) (x h : Rat) (hh : h ≠ 0)
     (U V DU DV eu ev : Rat)
-    (hU : 0 <= U) (hV : 0 <= V) (hDU : 0 <= DU) (hDV : 0 <= DV)
+    (hU : 0 <= U) (hV : 0 <= V) (hDU : 0 <= DU)
     (hu : qabs (u x) <= U) (hv : qabs (v x) <= V)
     (hev : qabs (differenceQuotient v x h - dv x) <= ev)
     (heu : qabs (differenceQuotient u x h - du x) <= eu)
