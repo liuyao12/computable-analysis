@@ -181,6 +181,16 @@ theorem gaussianTaylorProductIntegralSum_factorized
     (gaussianTaylorPointPrefix terms)
     (gaussianTaylorPointPrefix terms)
 
+/-! A concrete four-cell-per-axis computation over `[-1,1]^2`.  The value is
+the exact rational output of the finite evaluator, not the value of an
+improper Gaussian integral. -/
+theorem gaussianTaylorProductIntegralSum_stage_four_unit_square :
+    gaussianTaylorProductIntegralSum 4
+      [(-1, 1 / 2), (-1 / 2, 1 / 2), (0, 1 / 2), (1 / 2, 1 / 2)]
+      [(-1, 1 / 2), (-1 / 2, 1 / 2), (0, 1 / 2), (1 / 2, 1 / 2)] =
+      34225 / 16384 := by
+  native_decide
+
 theorem gaussianEvenIntegralPrefix_stage_six_minus_four :
     gaussianEvenIntegralPrefix 6 1 - gaussianEvenIntegralPrefix 4 1 =
       23 / 2970 := by
