@@ -4160,6 +4160,48 @@ def boundIntegralSum {a b : Rat} (P : RationalPartition a b)
     (fun acc k => QInterval.addInterval acc (P.boundIntegralTerm bound k))
     { lo := 0, hi := 0 }
 
+/-! A partition sum of ordered term intervals is itself ordered.  This small
+finite lemma is useful whenever a general interval-regular integral compares
+its Darboux stage with a separately computed sample sum. -/
+theorem boundIntegralSum_width_nonneg_of_termwise {a b : Rat}
+    (P : RationalPartition a b)
+    (bound : (k : Nat) -> k < P.pieces -> QInterval)
+    (hterm : forall k (hk : k < P.pieces),
+      0 <= (P.boundIntegralTerm bound k).width) :
+    0 <= (P.boundIntegralSum bound).width := by
+  unfold boundIntegralSum
+  rw [addInterval_fold_width]
+  have hsum : 0 <= (List.range P.pieces).foldl
+      (fun total k => total + (P.boundIntegralTerm bound k).width) 0 := by
+    have hfold : forall (xs : List Nat) (initial : Rat),
+        (forall k, k ∈ xs ->
+          0 <= (P.boundIntegralTerm bound k).width) ->
+        0 <= initial ->
+        0 <= xs.foldl
+          (fun total k => total + (P.boundIntegralTerm bound k).width) initial := by
+      intro xs
+      induction xs with
+      | nil =>
+          intro initial _ hinit
+          simpa using hinit
+      | cons k xs ih =>
+          intro initial hterms hinit
+          have hk := hterms k (by simp)
+          have hrest := ih (initial +
+            (P.boundIntegralTerm bound k).width)
+            (fun j hj => hterms j (by simp [hj]))
+            (Rat.add_nonneg hinit hk)
+          simpa [List.foldl, Rat.zero_add] using hrest
+    have h := hfold (List.range P.pieces) 0 (by
+      intro k hk
+      exact hterm k (List.mem_range.mp hk)) (by native_decide)
+    exact h
+  have hzero : ({ lo := 0, hi := 0 } : QInterval).width = 0 := by
+    unfold QInterval.width
+    grind
+  rw [hzero]
+  simpa only [Rat.zero_add] using hsum
+
 /-! Termwise enclosure is preserved by the complete finite partition fold. -/
 theorem boundIntegralSum_contains_of_termwise {a b : Rat}
     (P : RationalPartition a b)
