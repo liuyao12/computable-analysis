@@ -7848,6 +7848,43 @@ theorem nondecreasingDarbouxStage_overlaps_of_cellwise
       grind
     · exact hsample k hk
 
+/-! The canonical left-endpoint instance of the preceding transport theorem.
+It is the finite monotone-Darboux comparison normally used in an effective
+integral: the endpoint-range stage overlaps the stage formed from the same
+partition's left samples, at the same evaluator precision. -/
+theorem nondecreasingDarbouxStage_overlaps_leftEndpointSamples
+    (F : FunctionOnInterval) (hF : NondecreasingOnInterval F)
+    (P : RationalPartition F.lower F.upper) (prec : Nat) :
+    QInterval.Overlaps
+      (nondecreasingDarbouxStage F P prec)
+      (P.boundIntegralSum
+        (fun k hk => F.compute (P.point k)
+          (And.intro (P.cell k hk).lower_mem
+            (Rat.le_trans (P.cell k hk).ordered
+              (P.cell k hk).upper_mem)) prec)) := by
+  let hx : forall k, k < P.pieces ->
+      inDomainInterval F.lower F.upper (P.point k) := fun k hk =>
+    And.intro (P.cell k hk).lower_mem
+      (Rat.le_trans (P.cell k hk).ordered (P.cell k hk).upper_mem)
+  let sample : (k : Nat) -> k < P.pieces -> QInterval := fun k hk =>
+    F.compute (P.point k) (hx k hk) prec
+  have hsample : forall k (hk : k < P.pieces),
+      QInterval.Overlaps
+        (nondecreasingDarbouxRange F P k hk prec)
+        (sample k hk) := by
+    intro k hk
+    have hpoint := nondecreasingDarbouxRange_overlaps_point_value
+      F hF P k hk (P.point k) (hx k hk)
+      (by exact Rat.le_refl) (by exact (P.cell k hk).ordered) prec
+    exact hpoint
+  have hsample_width : forall k (hk : k < P.pieces),
+      0 <= (sample k hk).width := by
+    intro k hk
+    exact (F.valid_on (P.point k) (F.defined_on (P.point k) (hx k hk))).1 prec
+  have hstage := nondecreasingDarbouxStage_overlaps_of_cellwise
+    F hF P prec sample hsample hsample_width
+  simpa [sample, hx] using hstage
+
 /-- The static dyadic instance of `nondecreasingDarbouxStage` used by the
 chapter's increasing-function pseudocode.  The nondecreasing proof is not an
 input to this executable calculation; it is consumed by the later orderedness
