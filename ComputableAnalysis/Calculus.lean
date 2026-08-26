@@ -3985,6 +3985,21 @@ theorem Refines.index_blocks_disjoint_of_order {a b : Rat}
     R.index_mono _ _ hik
   omega
 
+/-- A fine-cell index cannot belong to two distinct coarse blocks.  Combined
+with `exists_index_block_of_fine_cell`, this gives the unique finite
+reindexing assignment, including when some partition cells are degenerate. -/
+theorem Refines.index_block_unique {a b : Rat}
+    {fine coarse : RationalPartition a b} (R : Refines fine coarse)
+    {i k j : Nat} (hne : i ≠ k)
+    (hleft : R.index i <= j) (hright : j < R.index (i + 1))
+    (hkleft : R.index k <= j) (hkright : j < R.index (k + 1)) :
+    False := by
+  have hcases : i + 1 <= k ∨ k + 1 <= i := by
+    omega
+  rcases hcases with hik | hki
+  · exact R.index_blocks_disjoint_of_order hik hleft hright hkleft hkright
+  · exact R.index_blocks_disjoint_of_order hki hkleft hkright hleft hright
+
 /-- Every genuine cell of an explicit uniform partition has exactly its
 rational mesh width. -/
 theorem uniform_cell_width (a b : Rat) (pieces : Nat)

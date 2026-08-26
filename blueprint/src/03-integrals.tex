@@ -122,6 +122,8 @@ The resulting coverage statement exposes the geometric fact directly:
 \lean{ComputableAnalysis.RationalPartition.Refines.exists_coarse_cell_containing_fine_cell}
 Separated coarse blocks are disjoint under the same half-open convention:
 \lean{ComputableAnalysis.RationalPartition.Refines.index_blocks_disjoint_of_order}
+Therefore the coarse block assigned to a fine cell is unique:
+\lean{ComputableAnalysis.RationalPartition.Refines.index_block_unique}
 The remaining whole-sum argument is a finite reindexing of these located
 cells, followed by the single-cell weighted interval inequality.
 This gives the computable mean-value/area principle for the functions covered
