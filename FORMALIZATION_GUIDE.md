@@ -961,6 +961,12 @@ The resulting finite algorithm is packaged as
 `RealRaw.Valid` and equivalence remain separate witness obligations; the
 construction deliberately does not infer cross-stage nesting from shrinking
 alone.
+The companion stabilization interface is
+`dyadicPublicSquareIntegralRaw_stabilized`: supplying sine regularity, anchor
+validity, and the public-candidate/anchor equivalence yields validity and
+value transport through
+`dyadicPublicSquareIntegralRaw_stabilized_valid_of_overlap` and
+`dyadicPublicSquareIntegralRaw_stabilized_equiv_value_of_anchor`.
 
 ### Increasing pieces: start with the literal finite stage
 

@@ -3903,6 +3903,49 @@ theorem dyadicPublicSquareIntegralRaw_widths_shrink
   exact shrinksToZero_of_natOverSuccBound
     (fun n => dyadicPublicSquareLeftSum_width_le_of_sine_regular S hsine n)
 
+def dyadicPublicSquareIntegralRaw_stabilized
+    (S : ArctanSinPiConstruction) (anchor : RealRaw) : RealRaw :=
+  RealRaw.prefixStabilize (dyadicPublicSquareIntegralRaw S)
+    (fun n => (anchor.compute n).width)
+
+theorem dyadicPublicSquareIntegralRaw_stabilized_valid_of_overlap
+    (S : ArctanSinPiConstruction)
+    (hsine : IntervalRegularOn S.onHalf)
+    {anchor : RealRaw} (hanchor : anchor.Valid)
+    (hover : (dyadicPublicSquareIntegralRaw S).Equiv anchor) :
+    (dyadicPublicSquareIntegralRaw_stabilized S anchor).Valid := by
+  apply RealRaw.prefixStabilize_valid
+    (dyadicPublicSquareIntegralRaw_widths_shrink S hsine)
+    hanchor hover
+  · intro n
+    exact Rat.le_refl
+  · exact hanchor.2.2
+
+theorem dyadicPublicSquareIntegralRaw_stabilized_equiv_anchor_of_overlap
+    (S : ArctanSinPiConstruction)
+    {anchor : RealRaw} (hanchor : anchor.Valid)
+    (hover : (dyadicPublicSquareIntegralRaw S).Equiv anchor) :
+    (dyadicPublicSquareIntegralRaw_stabilized S anchor).Equiv anchor := by
+  apply RealRaw.prefixStabilize_equiv_anchor hanchor hover
+  intro n
+  exact Rat.le_refl
+
+theorem dyadicPublicSquareIntegralRaw_stabilized_equiv_value_of_anchor
+    (S : ArctanSinPiConstruction)
+    (hsine : IntervalRegularOn S.onHalf)
+    {anchor : RealRaw} (hanchor : anchor.Valid)
+    (hover : (dyadicPublicSquareIntegralRaw S).Equiv anchor)
+    (hvalue : anchor.Equiv (RealRaw.ofRat (1 / 4))) :
+    (dyadicPublicSquareIntegralRaw_stabilized S anchor).Equiv
+      (RealRaw.ofRat (1 / 4)) := by
+  exact RealRaw.equiv_trans
+    (dyadicPublicSquareIntegralRaw_stabilized_valid_of_overlap
+      S hsine hanchor hover)
+    hanchor (RealRaw.ofRat_valid _)
+    (dyadicPublicSquareIntegralRaw_stabilized_equiv_anchor_of_overlap
+      S hanchor hover)
+    hvalue
+
 def sinPiSquareOnHalfFunctionOnInterval
     (S : ArctanSinPiConstruction) : FunctionOnInterval where
   raw := {
