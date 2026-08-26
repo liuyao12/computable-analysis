@@ -7616,6 +7616,35 @@ theorem intervalRegularDarbouxSchedule_widths_shrink_of_budget
         lengthBound hLength evalPrecision n))
     (hN n hn)
 
+theorem intervalRegularDarbouxSchedule_linear_precision_budget
+    {F : FunctionOnInterval} {hinterval : F.lower <= F.upper}
+    (lengthBound : Nat)
+    (hLength : F.upper - F.lower <= (lengthBound : Rat)) :
+    forall eps : QPos, Exists fun N : Nat =>
+      forall n : Nat, N <= n ->
+        (F.upper - F.lower) *
+          (1 / ((n + 1 : Nat) : Rat)) <= eps.val := by
+  have hbound : forall n : Nat,
+      (F.upper - F.lower) *
+          (1 / ((n + 1 : Nat) : Rat)) <=
+        (lengthBound : Rat) / ((n + 1 : Nat) : Rat) := by
+    intro n
+    have hdenpos : 0 < ((n + 1 : Nat) : Rat) := by
+      exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+    have hden : 0 <= 1 / ((n + 1 : Nat) : Rat) := by
+      simpa [Rat.div_def] using
+        (Rat.le_of_lt ((Rat.inv_pos).2 hdenpos))
+    have hmul := Rat.mul_le_mul_of_nonneg_right hLength hden
+    simpa [Rat.div_def] using hmul
+  have hshrink : ShrinksToZero
+      (fun n : Nat =>
+        (F.upper - F.lower) *
+          (1 / ((n + 1 : Nat) : Rat))) := by
+    apply shrinksToZero_of_natOverSuccBound (C := lengthBound)
+    intro n
+    exact hbound n
+  exact hshrink
+
 def IntervalRegularDarbouxSchedule.ofAutomaticPieces
     {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
     {hinterval : F.lower <= F.upper} (lengthBound : Nat)
@@ -7672,6 +7701,34 @@ def IntervalRegularDarbouxSchedule.ofAutomaticPieces
   nested := nested
   widths_shrink := intervalRegularDarbouxSchedule_widths_shrink_of_budget
     hregular lengthBound hLength evalPrecision hbudget
+
+def IntervalRegularDarbouxSchedule.ofAutomaticLinearPrecision
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    {hinterval : F.lower <= F.upper} (lengthBound : Nat)
+    (hLength : F.upper - F.lower <= (lengthBound : Rat))
+    (nested : forall n m, n <= m ->
+      (intervalRegularDarbouxScheduleCompute F hinterval hregular
+        (fun n => intervalRegularAutomaticPieces hregular lengthBound (fun k => k) n)
+        (fun n => n)
+        (fun n => intervalRegularAutomaticPieces_pos hregular lengthBound (fun k => k) n) n).lo <=
+      (intervalRegularDarbouxScheduleCompute F hinterval hregular
+        (fun n => intervalRegularAutomaticPieces hregular lengthBound (fun k => k) n)
+        (fun n => n)
+        (fun n => intervalRegularAutomaticPieces_pos hregular lengthBound (fun k => k) n) m).lo /\
+      (intervalRegularDarbouxScheduleCompute F hinterval hregular
+        (fun n => intervalRegularAutomaticPieces hregular lengthBound (fun k => k) n)
+        (fun n => n)
+        (fun n => intervalRegularAutomaticPieces_pos hregular lengthBound (fun k => k) n) m).hi <=
+      (intervalRegularDarbouxScheduleCompute F hinterval hregular
+        (fun n => intervalRegularAutomaticPieces hregular lengthBound (fun k => k) n)
+        (fun n => n)
+        (fun n => intervalRegularAutomaticPieces_pos hregular lengthBound (fun k => k) n) n).hi) :
+    IntervalRegularDarbouxSchedule F hregular hinterval := by
+  exact IntervalRegularDarbouxSchedule.ofAutomaticPieces hregular lengthBound
+    hLength (fun n => n)
+    (intervalRegularDarbouxSchedule_linear_precision_budget
+      (hinterval := hinterval) lengthBound hLength)
+    nested
 
 def intervalRegularDarbouxScheduleRaw
     {F : FunctionOnInterval} {hregular : IntervalRegularOn F}

@@ -1024,6 +1024,9 @@ choice directly, deriving width nonnegativity as well and leaving only the
 explicit precision-budget and substantive stage-coherence proofs to the
 caller. `intervalRegularDarbouxSchedule_widths_shrink_of_budget` turns the
 precision budget into the required eventual-width certificate. Use
+`IntervalRegularDarbouxSchedule.ofAutomaticLinearPrecision` when the natural
+stage choice is `evalPrecision n = n`; it leaves only the cross-stage nesting
+certificate.
 `intervalRegularDarbouxScheduleIntegralFor` and its `_valid` theorem as the
 public raw integral endpoint.
 
