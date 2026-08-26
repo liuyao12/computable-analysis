@@ -3107,6 +3107,69 @@ theorem DyadicNestedRadicalSquareTangentCommonWitness.to_equiv
   exact dyadicNestedRadicalSquareIntegralRaw_equiv_of_overlap
     tangentSquareIntegral h.to_overlap
 
+/-! A direct public-to-anchor transport certificate.  Stagewise overlap is
+not transitive, so the public sine-square table cannot obtain an equivalence
+to the tangent anchor merely by passing through the nested table.  What is
+needed is the stronger, and very concrete, containment certificate below:
+each nested interval must lie inside its public counterpart.  The common
+witness for the nested route then becomes a common witness for the public
+route without introducing any real-number argument. -/
+structure DyadicPublicSquareTangentCommonWitness
+    (S : ArctanSinPiConstruction) where
+  witness : Nat -> Rat
+  candidate_lo_le : forall n,
+    (dyadicPublicSquareLeftSum S n).lo <= witness n
+  witness_le_candidate_hi : forall n,
+    witness n <= (dyadicPublicSquareLeftSum S n).hi
+  tangent_lo_le : forall n,
+    (tangentSquareIntegral.compute n).lo <= witness n
+  witness_le_tangent_hi : forall n,
+    witness n <= (tangentSquareIntegral.compute n).hi
+
+structure DyadicPublicSquareTangentTransportWitness
+    (S : ArctanSinPiConstruction) where
+  nested_tangent : DyadicNestedRadicalSquareTangentCommonWitness
+  public_contains_nested : forall n,
+    (dyadicPublicSquareLeftSum S n).ContainsInterval
+      (dyadicNestedRadicalSquareLeftSum n)
+
+def DyadicPublicSquareTangentTransportWitness.to_public_common_witness
+    {S : ArctanSinPiConstruction}
+    (h : DyadicPublicSquareTangentTransportWitness S) :
+    DyadicPublicSquareTangentCommonWitness S where
+  witness := h.nested_tangent.witness
+  candidate_lo_le := by
+    intro n
+    exact Rat.le_trans (h.public_contains_nested n).1
+      (h.nested_tangent.candidate_lo_le n)
+  witness_le_candidate_hi := by
+    intro n
+    exact Rat.le_trans (h.nested_tangent.witness_le_candidate_hi n)
+      (h.public_contains_nested n).2
+  tangent_lo_le := h.nested_tangent.tangent_lo_le
+  witness_le_tangent_hi := h.nested_tangent.witness_le_tangent_hi
+
+theorem DyadicPublicSquareTangentCommonWitness.to_overlap
+    {S : ArctanSinPiConstruction}
+    (h : DyadicPublicSquareTangentCommonWitness S) (n : Nat) :
+    QInterval.Overlaps
+      (dyadicPublicSquareLeftSum S n)
+      (tangentSquareIntegral.compute n) := by
+  unfold QInterval.Overlaps
+  exact ⟨Rat.le_trans (h.candidate_lo_le n)
+      (h.witness_le_tangent_hi n),
+    Rat.le_trans (h.tangent_lo_le n)
+      (h.witness_le_candidate_hi n)⟩
+
+theorem DyadicPublicSquareTangentTransportWitness.to_public_overlap
+    {S : ArctanSinPiConstruction}
+    (h : DyadicPublicSquareTangentTransportWitness S) :
+    forall n, QInterval.Overlaps
+      (dyadicPublicSquareLeftSum S n)
+      (tangentSquareIntegral.compute n) := by
+  intro n
+  exact h.to_public_common_witness.to_overlap n
+
 /- Prefix stabilization is the direct-only implementation of the missing
 cross-stage nesting proof.  The anchor is a proof-side object; the stabilized
 evaluator itself reads only the square candidate and the rational widths. -/
@@ -3893,6 +3956,16 @@ cross-stage nesting obligation explicit. -/
 def dyadicPublicSquareIntegralRaw
     (S : ArctanSinPiConstruction) : RealRaw where
   compute := dyadicPublicSquareLeftSum S
+
+theorem DyadicPublicSquareTangentTransportWitness.to_public_equiv
+    {S : ArctanSinPiConstruction}
+    (h : DyadicPublicSquareTangentTransportWitness S) :
+    (dyadicPublicSquareIntegralRaw S).Equiv tangentSquareIntegral := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  exact (RealRaw.compareAt_overlap_iff
+    (dyadicPublicSquareIntegralRaw S) tangentSquareIntegral n n).2
+    (h.to_public_overlap n)
 
 theorem dyadicPublicSquareIntegralRaw_widths_shrink
     (S : ArctanSinPiConstruction)

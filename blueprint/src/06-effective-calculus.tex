@@ -717,6 +717,18 @@ The explicit stabilization bridge is
 \lean{ComputableAnalysis.dyadicPublicSquareIntegralRaw_stabilized_equiv_value_of_anchor}
 \leanok
 
+The public candidate must be connected to an anchor directly: overlap through
+the nested table is not transitive.  The transport certificate
+\lean{ComputableAnalysis.DyadicPublicSquareTangentTransportWitness}
+packages containment of every nested square-sum interval in its public
+counterpart together with the nested/tangent common witness.  Its
+\lean{ComputableAnalysis.DyadicPublicSquareTangentTransportWitness.to_public_overlap}
+and
+\lean{ComputableAnalysis.DyadicPublicSquareTangentTransportWitness.to_public_equiv}
+theorems turn that finite rational certificate into the direct public-anchor
+overlap and raw-real equivalence needed by stabilization.
+\leanok
+
 The reusable bound-facing corollary makes the bookkeeping explicit: supplied
 rational bounds for the two factor values, their two secants, and their local
 errors reduce the product proof to one visible sum of two linear errors and

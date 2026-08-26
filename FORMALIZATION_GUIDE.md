@@ -1058,6 +1058,15 @@ An even more geometric entry point is
 `SinPiSquareFTC.dyadicPublicSquareLeftSum_overlap_of_rational_circle_overlap_family`:
 it reduces the positive samples to rational-circle image overlap and handles
 the zero endpoint separately.
+
+The public-to-anchor step is intentionally stronger than chaining overlaps.
+`SinPiSquareFTC.DyadicPublicSquareTangentTransportWitness` asks for a
+stagewise containment of the nested square table inside the public square
+table, together with the nested-table/tangent common witness.  Its
+`to_public_overlap` and `to_public_equiv` theorems then transport the direct
+public candidate to the tangent anchor using only rational interval
+inequalities.  This is the remaining geometric certificate for the public
+sin² integral; no transitivity of overlap is assumed.
 The named structure
 `SinPiSquareFTC.DyadicSquareCircleOverlapFamily` packages those two fields,
 and `to_square_sum_overlap` is the downstream entry point.
