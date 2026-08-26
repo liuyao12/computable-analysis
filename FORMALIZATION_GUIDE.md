@@ -1678,6 +1678,10 @@ open ComputableAnalysis
 #check RealRaw.positiveInv_valid
 #check RealRaw.negativeInv
 #check RealRaw.negativeInv_valid
+#check RealRaw.divByPositive
+#check RealRaw.divByPositive_valid
+#check RealRaw.divByNegative
+#check RealRaw.divByNegative_valid
 ```
 
 These reciprocal lemmas are deliberately finite: they apply after an interval
@@ -1686,6 +1690,11 @@ the resulting separated branch as a shrinking raw real, and
 `RealRaw.negativeInv_valid` transports it through negation.  The unrestricted
 `HasComputableInv` interface is not used as a substitute for either explicit
 branch.
+
+Division is then a certified product: choose a stage where the denominator is
+strictly positive or strictly negative, construct its corresponding reciprocal,
+and multiply.  The quotient constructor does not accept a denominator that may
+cross zero.
 
 ```lean
 import ComputableAnalysis.ComplexMultiplication

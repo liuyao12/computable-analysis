@@ -1174,6 +1174,24 @@ theorem mul_equiv {x x' y y' : RealRaw}
   have hprod' := QBox.mulRealInterval_contains hxp'.1 hxp'.2 hyp'.1 hyp'.2
   exact ⟨Rat.le_trans hprod.1 hprod'.2, Rat.le_trans hprod'.1 hprod.2⟩
 
+def divByPositive (x y : RealRaw) (N : Nat) : RealRaw :=
+  mul x (positiveInv y N)
+
+def divByNegative (x y : RealRaw) (N : Nat) : RealRaw :=
+  mul x (negativeInv y N)
+
+theorem divByPositive_valid {x y : RealRaw} {N : Nat}
+    (hx : x.Valid) (hy : y.Valid) (hpos : 0 < (y.compute N).lo) :
+    (divByPositive x y N).Valid := by
+  unfold divByPositive
+  exact mul_valid hx (positiveInv_valid hy hpos)
+
+theorem divByNegative_valid {x y : RealRaw} {N : Nat}
+    (hx : x.Valid) (hy : y.Valid) (hneg : (y.compute N).hi < 0) :
+    (divByNegative x y N).Valid := by
+  unfold divByNegative
+  exact mul_valid hx (negativeInv_valid hy hneg)
+
 end RealRaw
 
 namespace ComplexRaw
