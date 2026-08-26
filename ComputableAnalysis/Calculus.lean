@@ -8226,6 +8226,87 @@ theorem monotoneDarbouxScheduleRaw_width_le_of_tolerance
       (s.evalPrecision n) (s.input_budget n))
     hbudget
 
+/-! The monotone schedule has the same automatic width witness as the general
+interval-regular schedule.  Monotonicity supplies the endpoint Darboux range;
+the remaining estimate is only the mesh/input budget. -/
+theorem monotoneDarbouxSchedule_widths_shrink_of_budget
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    {hmonotone : NondecreasingOnInterval F}
+    {hinterval : F.lower <= F.upper} (lengthBound : Nat)
+    (hLength : F.upper - F.lower <= (lengthBound : Rat))
+    (evalPrecision : Nat -> Nat)
+    (hbudget : forall eps : QPos, Exists fun N : Nat =>
+      forall n : Nat, N <= n ->
+        (F.upper - F.lower) *
+          (1 / ((evalPrecision n + 1 : Nat) : Rat)) <= eps.val) :
+    RealRaw.WidthsShrinkToZero
+      (monotoneDarbouxScheduleCompute F hinterval
+        (fun n => intervalRegularAutomaticPieces hregular lengthBound
+          evalPrecision n)
+        evalPrecision
+        (fun n => intervalRegularAutomaticPieces_pos hregular lengthBound
+          evalPrecision n)) := by
+  intro eps
+  rcases hbudget eps with ⟨N, hN⟩
+  refine ⟨N, ?_⟩
+  intro n hn
+  exact Rat.le_trans
+    (nondecreasingDarbouxStage_width_le_of_uniform_input_budget F hregular
+      (intervalRegularAutomaticPieces hregular lengthBound evalPrecision n)
+      (intervalRegularAutomaticPieces_pos hregular lengthBound evalPrecision n)
+      hinterval (evalPrecision n)
+      (intervalRegularAutomaticPieces_input_budget hregular hinterval
+        lengthBound hLength evalPrecision n))
+    (hN n hn)
+
+theorem monotoneDarbouxSchedule_linear_precision_budget
+    {F : FunctionOnInterval} {hinterval : F.lower <= F.upper}
+    (lengthBound : Nat)
+    (hLength : F.upper - F.lower <= (lengthBound : Rat)) :
+    forall eps : QPos, Exists fun N : Nat =>
+      forall n : Nat, N <= n ->
+        (F.upper - F.lower) *
+          (1 / ((n + 1 : Nat) : Rat)) <= eps.val :=
+  intervalRegularDarbouxSchedule_linear_precision_budget
+    (hinterval := hinterval) lengthBound hLength
+
+def MonotoneDarbouxSchedule.ofAutomaticLinearPrecision
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    {hmonotone : NondecreasingOnInterval F}
+    {hinterval : F.lower <= F.upper} (lengthBound : Nat)
+    (hLength : F.upper - F.lower <= (lengthBound : Rat))
+    (nested : forall n m, n <= m ->
+      (monotoneDarbouxScheduleCompute F hinterval
+        (fun n => intervalRegularAutomaticPieces hregular lengthBound (fun k => k) n)
+        (fun n => n)
+        (fun n => intervalRegularAutomaticPieces_pos hregular lengthBound (fun k => k) n) n).lo <=
+      (monotoneDarbouxScheduleCompute F hinterval
+        (fun n => intervalRegularAutomaticPieces hregular lengthBound (fun k => k) n)
+        (fun n => n)
+        (fun n => intervalRegularAutomaticPieces_pos hregular lengthBound (fun k => k) n) m).lo /\
+      (monotoneDarbouxScheduleCompute F hinterval
+        (fun n => intervalRegularAutomaticPieces hregular lengthBound (fun k => k) n)
+        (fun n => n)
+        (fun n => intervalRegularAutomaticPieces_pos hregular lengthBound (fun k => k) n) m).hi <=
+      (monotoneDarbouxScheduleCompute F hinterval
+        (fun n => intervalRegularAutomaticPieces hregular lengthBound (fun k => k) n)
+        (fun n => n)
+        (fun n => intervalRegularAutomaticPieces_pos hregular lengthBound (fun k => k) n) n).hi) :
+    MonotoneDarbouxSchedule F hregular hmonotone hinterval where
+  pieces := fun n => intervalRegularAutomaticPieces hregular lengthBound (fun k => k) n
+  evalPrecision := fun n => n
+  pieces_pos := fun n => intervalRegularAutomaticPieces_pos hregular lengthBound (fun k => k) n
+  input_budget := by
+    intro n
+    exact intervalRegularAutomaticPieces_input_budget hregular hinterval
+      lengthBound hLength (fun k => k) n
+  nested := nested
+  widths_shrink := monotoneDarbouxSchedule_widths_shrink_of_budget
+    (hregular := hregular) (hmonotone := hmonotone)
+    (hinterval := hinterval) lengthBound hLength (fun n => n)
+    (monotoneDarbouxSchedule_linear_precision_budget
+      (hinterval := hinterval) lengthBound hLength)
+
 /-- Convert a certified monotone Darboux schedule into the public integral
 construction interface.  The executable computation is exactly the schedule's
 equal-mesh endpoint sum; the schedule validity theorem supplies the
