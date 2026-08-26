@@ -4139,6 +4139,25 @@ def boundIntegralSum {a b : Rat} (P : RationalPartition a b)
     (fun acc k => QInterval.addInterval acc (P.boundIntegralTerm bound k))
     { lo := 0, hi := 0 }
 
+/-! Termwise enclosure is preserved by the complete finite partition fold. -/
+theorem boundIntegralSum_contains_of_termwise {a b : Rat}
+    (P : RationalPartition a b)
+    (outer inner : (k : Nat) -> k < P.pieces -> QInterval)
+    (hterm : forall k (hk : k < P.pieces),
+      (P.boundIntegralTerm outer k).ContainsInterval
+        (P.boundIntegralTerm inner k)) :
+    (P.boundIntegralSum outer).ContainsInterval
+      (P.boundIntegralSum inner) := by
+  unfold boundIntegralSum
+  apply addInterval_fold_contains (List.range P.pieces)
+    (P.boundIntegralTerm outer) (P.boundIntegralTerm inner)
+    (QInterval.containsInterval_refl _)
+  intro k
+  by_cases hk : k < P.pieces
+  · exact hterm k hk
+  · simpa [boundIntegralTerm, hk] using
+      (QInterval.containsInterval_refl ({ lo := 0, hi := 0 } : QInterval))
+
 /-- The finite sum of computed endpoint differences over the cells of a
 rational partition, all evaluated at one common stage. -/
 def endpointDifferenceSum {a b : Rat} (P : RationalPartition a b)
