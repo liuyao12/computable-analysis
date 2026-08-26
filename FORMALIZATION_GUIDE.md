@@ -955,6 +955,12 @@ When the sine evaluator is supplied with `IntervalRegularOn`,
 `dyadicPublicSquareLeftSum_width_le_of_sine_regular` derives the uniform
 bound `width <= 1/(n+1)` by applying the interval contract to degenerate
 rational cells.
+The resulting finite algorithm is packaged as
+`dyadicPublicSquareIntegralRaw`, with
+`dyadicPublicSquareIntegralRaw_widths_shrink` proving its width modulus. Its
+`RealRaw.Valid` and equivalence remain separate witness obligations; the
+construction deliberately does not infer cross-stage nesting from shrinking
+alone.
 
 ### Increasing pieces: start with the literal finite stage
 

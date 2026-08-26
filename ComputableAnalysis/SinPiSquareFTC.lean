@@ -3888,6 +3888,21 @@ theorem dyadicPublicSquareLeftSum_width_le_of_sine_regular
     1 / ((n + 1 : Nat) : Rat) at hsinewidth
   simpa [x, sinPiOnHalfRaw, ArctanSinPiConstruction.onHalf, hx] using hsinewidth
 
+/-! Package the public finite sums as a raw candidate while keeping the
+cross-stage nesting obligation explicit. -/
+def dyadicPublicSquareIntegralRaw
+    (S : ArctanSinPiConstruction) : RealRaw where
+  compute := dyadicPublicSquareLeftSum S
+
+theorem dyadicPublicSquareIntegralRaw_widths_shrink
+    (S : ArctanSinPiConstruction)
+    (hsine : IntervalRegularOn S.onHalf) :
+    RealRaw.WidthsShrinkToZero
+      (dyadicPublicSquareIntegralRaw S).compute := by
+  change RealRaw.WidthsShrinkToZero (dyadicPublicSquareLeftSum S)
+  exact shrinksToZero_of_natOverSuccBound
+    (fun n => dyadicPublicSquareLeftSum_width_le_of_sine_regular S hsine n)
+
 def sinPiSquareOnHalfFunctionOnInterval
     (S : ArctanSinPiConstruction) : FunctionOnInterval where
   raw := {
