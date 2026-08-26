@@ -87,7 +87,10 @@ That bridge is now represented by the checked
    The composition step is now packaged by
    `NormalizedTangentSquareValueSubgoal.of_quarter_turn`: once the valid
    quarter-turn certificate is supplied, reciprocal-π product transport is
-   automatic.
+   automatic.  The provider-facing
+   `NormalizedTangentSquareValueSubgoal.of_common_witness` now assembles that
+   quarter-turn certificate directly from the finite witness and endpoint
+   equivalence.
    The separate algorithm-compatibility obligation is represented by
    `TangentSquareFTCIntegralCompatibilitySubgoal`: stagewise overlap between
    the effective FTC bounded-sum raw and the independent dyadic anchor.

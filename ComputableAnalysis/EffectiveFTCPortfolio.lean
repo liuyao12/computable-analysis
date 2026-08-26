@@ -1319,6 +1319,23 @@ def NormalizedTangentSquareValueSubgoal.of_quarter_turn
     · exact RealRaw.equiv_refl _ SinPiIntegral.reciprocalPiRaw_valid
     · exact H.value
 
+/-! Provider-facing form of the same composition.  The finite common-witness
+and endpoint certificates are the only application-specific inputs; the
+quarter-turn and reciprocal-pi transport is assembled by the foundation. -/
+def NormalizedTangentSquareValueSubgoal.of_common_witness
+    (effective_integral_valid :
+      SinPiIntegral.tangentSquareEffectiveIntegralRaw.Valid)
+    (endpoint_valid :
+      SinPiIntegral.tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw.Valid)
+    (common : TangentSquareFTCIntegralCommonWitness)
+    (endpoint_equiv_quarter :
+      SinPiIntegral.tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw.Equiv
+        (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))) :
+    NormalizedTangentSquareValueSubgoal :=
+  NormalizedTangentSquareValueSubgoal.of_quarter_turn
+    (TangentSquareQuarterTurnValueSubgoal.of_common_witness
+      effective_integral_valid endpoint_valid common endpoint_equiv_quarter)
+
 theorem TangentSquareIntegralValueSubgoal.value
     (H : TangentSquareIntegralValueSubgoal) :
     SinPiIntegral.tangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4)) := by

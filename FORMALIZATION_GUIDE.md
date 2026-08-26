@@ -1857,7 +1857,9 @@ obsolete unscaled quarter-value contract is explicitly refuted by
 therefore the normalized finite overlap family itself, not witness construction
 or prefix stabilization. Once the quarter-turn certificate is assembled,
 `NormalizedTangentSquareValueSubgoal.of_quarter_turn` performs the product
-transport automatically.
+transport automatically. The provider-facing shortcut
+`NormalizedTangentSquareValueSubgoal.of_common_witness` assembles the
+quarter-turn certificate from the finite common-witness and endpoint inputs.
 
 The future canonical-logarithm π formula has one explicit entry point:
 `PiProofs.CanonicalLogTwoCertificate`. Supply a valid raw value at two and
