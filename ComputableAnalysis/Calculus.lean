@@ -8634,6 +8634,46 @@ theorem endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage_of_prec
     simpa [nondecreasingDarbouxDyadicStage] using hprecision_stage
   exact hcombined.trans hmesh
 
+/-! The same argument works for an arbitrary monotone exponent schedule.  This
+is the form needed when an evaluator's input budget grows faster than the
+identity stage: the mesh may use `2 ^ (stages n)` cells while the proof still
+uses only finite dyadic refinement and evaluator nesting. -/
+theorem endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_scheduled_stage
+    (F : FunctionOnInterval)
+    (hF : EndpointOrderedNondecreasingOnInterval F)
+    (hinterval : F.lower <= F.upper)
+    (stages evalPrecision : Nat -> Nat)
+    (hstage : forall {n m : Nat}, n <= m -> stages n <= stages m)
+    (hprecision : forall {n m : Nat}, n <= m ->
+      evalPrecision n <= evalPrecision m)
+    {n m : Nat} (hnm : n <= m) :
+    QInterval.ContainsInterval
+      (nondecreasingDarbouxDyadicStage F hinterval
+        (fun k => evalPrecision k) (stages n))
+      (nondecreasingDarbouxDyadicStage F hinterval
+        (fun k => evalPrecision k) (stages m)) := by
+  have hprecision_stage := nondecreasingDarbouxStage_contains_of_precision F
+    (RationalPartition.uniform F.lower F.upper (2 ^ stages n)
+      (by positivity) hinterval)
+    (evalPrecision n) (evalPrecision m) (hprecision hnm)
+  have hmesh := endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage
+    F hF hinterval (evalPrecision m) (hstage hnm)
+  have hcombined :
+      QInterval.ContainsInterval
+        (nondecreasingDarbouxDyadicStage F hinterval
+          (fun k => evalPrecision k) (stages n))
+        (nondecreasingDarbouxDyadicStage F hinterval
+          (fun _ => evalPrecision m) (stages n)) := by
+    simpa [nondecreasingDarbouxDyadicStage] using hprecision_stage
+  have hmesh' :
+      QInterval.ContainsInterval
+        (nondecreasingDarbouxDyadicStage F hinterval
+          (fun _ => evalPrecision m) (stages n))
+        (nondecreasingDarbouxDyadicStage F hinterval
+          (fun _ => evalPrecision m) (stages m)) := by
+    simpa [nondecreasingDarbouxDyadicStage] using hmesh
+  exact hcombined.trans hmesh'
+
 /-! Evaluator refinement is automatically coherent when the partition is held
 fixed.  The endpoint boxes at a later precision are contained in the earlier
 boxes, and positive cell-width scaling plus the finite-sum containment lemma

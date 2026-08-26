@@ -237,6 +237,9 @@ evaluation precision:
 When evaluator precision is itself monotone, the same containment holds for
 the complete scheduled stages:
 \lean{ComputableAnalysis.endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage_of_precision_mono}
+The mesh exponent may itself be an arbitrary monotone schedule, allowing the
+algorithm to spend extra work where the evaluator requires it:
+\lean{ComputableAnalysis.endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_scheduled_stage}
 The result packages directly into a public dyadic monotone-integral schedule;
 the mesh budget and width-shrink witness remain explicit inputs:
 \lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule.ofDyadicEndpointOrdered}
