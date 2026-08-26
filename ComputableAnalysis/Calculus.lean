@@ -8263,6 +8263,22 @@ theorem monotoneDarbouxScheduleIntegralFor_valid
     (monotoneDarbouxScheduleIntegralFor s).Valid :=
   Integral.integralFor_valid F (monotoneDarbouxScheduleConstructionFor s)
 
+/-! Expose the monotone schedule's finite width budget at the public integral
+interface.  The monotonicity proof controls the cell ranges; this theorem
+simply makes the resulting error contract available to downstream FTC users.
+-/
+theorem monotoneDarbouxScheduleIntegralFor_width_le_of_tolerance
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hmonotone : NondecreasingOnInterval F}
+    {hinterval : F.lower <= F.upper}
+    (s : MonotoneDarbouxSchedule F hregular hmonotone hinterval)
+    (n : Nat) (eps : Rat)
+    (hbudget : (F.upper - F.lower) *
+        (1 / ((s.evalPrecision n + 1 : Nat) : Rat)) <= eps) :
+    ((monotoneDarbouxScheduleIntegralFor s).compute n).width <= eps := by
+  change ((monotoneDarbouxScheduleRaw s).compute n).width <= eps
+  exact monotoneDarbouxScheduleRaw_width_le_of_tolerance s n eps hbudget
+
 /-- The first-class integral object for monotone interval functions.
 
 The intended construction is by lower and upper endpoint sums on a static
