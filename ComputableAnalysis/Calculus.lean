@@ -6587,6 +6587,46 @@ theorem IntervalRegularOn.evalIntervals_overlap_of_common_point_at
   · exact Rat.le_trans hleft.1 (Rat.le_trans hpoint'.1 hright.2)
   · exact Rat.le_trans hright.1 (Rat.le_trans hpoint'.2 hleft.2)
 
+/-! The same transport works when the two certified images come from
+different cells.  This is the form used at shared partition endpoints. -/
+theorem IntervalRegularOn.evalIntervals_overlap_of_common_point_at_intervals
+    {F : FunctionOnInterval}
+    (left right : IntervalRegularOn F)
+    (I J : QInterval)
+    (hI : subintervalOf I F.lower F.upper)
+    (hJ : subintervalOf J F.lower F.upper)
+    (x : Rat) (hx : inDomainInterval F.lower F.upper x)
+    (hIlo : I.lo <= x) (hIhi : x <= I.hi)
+    (hJlo : J.lo <= x) (hJhi : x <= J.hi)
+    (leftStage rightStage : Nat) :
+    QInterval.Overlaps
+      (left.evalInterval I hI leftStage)
+      (right.evalInterval J hJ rightStage) := by
+  have hleft := left.contains_point_values I hI x hx leftStage hIlo hIhi
+  have hright := right.contains_point_values J hJ x hx rightStage hJlo hJhi
+  change (left.evalInterval I hI leftStage).lo <=
+      (F.compute x hx leftStage).lo /\
+    (F.compute x hx leftStage).hi <=
+      (left.evalInterval I hI leftStage).hi at hleft
+  change (right.evalInterval J hJ rightStage).lo <=
+      (F.compute x hx rightStage).lo /\
+    (F.compute x hx rightStage).hi <=
+      (right.evalInterval J hJ rightStage).hi at hright
+  have hraw : RealRaw.Valid (F.raw.evalRaw x (F.defined_on x hx)) := by
+    change RealRaw.ValidCompute (F.raw.compute x (F.defined_on x hx))
+    exact F.valid_on x (F.defined_on x hx)
+  have hpoint := RealRaw.allStagesOverlap_refl
+    (F.raw.evalRaw x (F.defined_on x hx)) hraw leftStage rightStage
+  have hpoint' : QInterval.Overlaps
+      (F.compute x hx leftStage) (F.compute x hx rightStage) := by
+    exact (RealRaw.compareAt_overlap_iff
+      (F.raw.evalRaw x (F.defined_on x hx))
+      (F.raw.evalRaw x (F.defined_on x hx)) leftStage rightStage).1 hpoint
+  unfold QInterval.Overlaps at hpoint' ⊢
+  constructor
+  · exact Rat.le_trans hleft.1 (Rat.le_trans hpoint'.1 hright.2)
+  · exact Rat.le_trans hright.1 (Rat.le_trans hpoint'.2 hleft.2)
+
 /-! A natural-number Lipschitz certificate on an arbitrary ordered rational chart. -/
 def Integral.LipschitzOnIntervalNat (f : Rat -> Rat) (a b : Rat) (L : Nat) : Prop :=
   a <= b /\
