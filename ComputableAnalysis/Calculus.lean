@@ -8553,6 +8553,41 @@ theorem endpointOrderedNondecreasingDarbouxStage_contains_uniform_double
     RationalSubinterval.width, RationalPartition.uniform_cell_width,
     RationalPartition.uniform, leftPoint, Nat.mul_add, Nat.add_mul] using hcoarse
 
+/-! Arbitrary dyadic stages follow by finite composition of the preceding
+doubling certificate.  The evaluator precision is held fixed here; a
+precision schedule is handled separately by the evaluator-nesting fields of a
+public raw-real construction. -/
+theorem endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage
+    (F : FunctionOnInterval)
+    (hF : EndpointOrderedNondecreasingOnInterval F)
+    (hinterval : F.lower <= F.upper) (prec : Nat)
+    {n m : Nat} (hnm : n <= m) :
+    QInterval.ContainsInterval
+      (nondecreasingDarbouxDyadicStage F hinterval (fun _ => prec) n)
+      (nondecreasingDarbouxDyadicStage F hinterval (fun _ => prec) m) := by
+  induction m generalizing n with
+  | zero =>
+      have hn : n = 0 := by omega
+      subst n
+      exact QInterval.containsInterval_refl _
+  | succ m ih =>
+      by_cases hnm' : n <= m
+      · have hprev := ih hnm'
+        have hstep := endpointOrderedNondecreasingDarbouxStage_contains_uniform_double
+          F hF (2 ^ m) (by positivity) hinterval prec
+        have hstep' :
+            QInterval.ContainsInterval
+              (nondecreasingDarbouxDyadicStage F hinterval
+                (fun _ => prec) m)
+              (nondecreasingDarbouxDyadicStage F hinterval
+                (fun _ => prec) (m + 1)) := by
+          simpa [nondecreasingDarbouxDyadicStage, Nat.pow_succ, Nat.mul_comm]
+            using hstep
+        exact hprev.trans hstep'
+      · have hn : n = m + 1 := by omega
+        subst n
+        exact QInterval.containsInterval_refl _
+
 /-! Evaluator refinement is automatically coherent when the partition is held
 fixed.  The endpoint boxes at a later precision are contained in the earlier
 boxes, and positive cell-width scaling plus the finite-sum containment lemma
