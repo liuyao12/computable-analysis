@@ -375,11 +375,18 @@ This works without monotonicity.  It is intentionally only a finite
 quadrature candidate: cross-stage nesting still has to be supplied before it
 is promoted to a `realRaw` integral.
 
+The first reusable part of that coherence proof is now factored out: if the
+interval images nest at later evaluator stages, the weighted Darboux sum nests
+on every fixed partition.  Refinement across changing partitions remains an
+explicit additional certificate.
+
 \lean{ComputableAnalysis.Integral.intervalRegularDarbouxRange}
 \lean{ComputableAnalysis.Integral.nondecreasingDarbouxRange_overlaps_point_value}
 \lean{ComputableAnalysis.Integral.endpointOrderedNondecreasingDarbouxRange_contains_point_value}
 \lean{ComputableAnalysis.Integral.intervalRegularDarbouxRange_width_le}
 \lean{ComputableAnalysis.Integral.intervalRegularDarbouxStage}
+\lean{ComputableAnalysis.IntervalRegularOn.EvalIntervalsNested}
+\lean{ComputableAnalysis.Integral.intervalRegularDarbouxStage_contains_of_evalIntervalsNested}
 \lean{ComputableAnalysis.RationalPartition.boundIntegralSum_width_nonneg_of_termwise}
 \lean{ComputableAnalysis.Integral.intervalRegularDarbouxRange_contains_point_value}
 \lean{ComputableAnalysis.RationalPartition.boundIntegralSum_overlaps_of_termwise}

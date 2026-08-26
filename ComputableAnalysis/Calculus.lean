@@ -8310,6 +8310,40 @@ def intervalRegularDarbouxStage
   P.boundIntegralSum
     (fun k hk => intervalRegularDarbouxRange F hregular P k hk prec)
 
+/-! Same-partition refinement is a separate finite contract.  It is weaker
+than the changing-partition refinement needed for a universal integral, but it
+is exactly the reusable step for an evaluator whose interval images are
+certified to nest as its output stage increases. -/
+def IntervalRegularOn.EvalIntervalsNested
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F) : Prop :=
+  forall (I : QInterval) (hI : subintervalOf I F.lower F.upper)
+    (n m : Nat), n <= m ->
+      (hregular.evalInterval I hI n).ContainsInterval
+        (hregular.evalInterval I hI m)
+
+theorem intervalRegularDarbouxStage_contains_of_evalIntervalsNested
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (hstage : IntervalRegularOn.EvalIntervalsNested hregular)
+    (P : RationalPartition F.lower F.upper)
+    {n m : Nat} (hnm : n <= m) :
+    (intervalRegularDarbouxStage F hregular P n).ContainsInterval
+      (intervalRegularDarbouxStage F hregular P m) := by
+  unfold intervalRegularDarbouxStage
+  apply P.boundIntegralSum_contains_of_termwise
+  intro k hk
+  let C := P.cell k hk
+  let I : QInterval := { lo := C.lower, hi := C.upper }
+  have hI : subintervalOf I F.lower F.upper := by
+    exact ⟨C.lower_mem, C.ordered, C.upper_mem⟩
+  have hbox := hstage I hI n m hnm
+  have hwidth : 0 <= C.width := by
+    unfold RationalSubinterval.width
+    grind [C.ordered]
+  have hscaled := QInterval.scaleByRat_contains_of_nonneg hwidth hbox
+  simp only [RationalPartition.boundIntegralTerm, dif_pos hk]
+  simpa [intervalRegularDarbouxRange, I, C,
+    RationalSubinterval.scaleBound, hI] using hscaled
+
 /-- The general Darboux stage encloses any finite cellwise choice of sample
 intervals.  This is the partition-level form of cell-image soundness used by
 quadrature rules and by changes of evaluator. -/
