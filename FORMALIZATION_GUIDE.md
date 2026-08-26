@@ -2048,6 +2048,10 @@ bookkeeping is discharged by
 nested-radical or other specialized sine evaluator; do not formalize a second
 global sine function merely to obtain the integral.
 
+When the geometric proof supplies explicit rational witnesses, package them
+with `DyadicTangentWitnessFamily.of_canonical_candidate_family`; it derives the
+finite search-hit obligations from list membership and admissibility.
+
 For the squared-sine route, use
 `DyadicNestedRadicalSquareTangentCommonWitness.of_overlap` to package the
 stagewise candidate/anchor overlap. Its `stabilized_equiv_value` theorem

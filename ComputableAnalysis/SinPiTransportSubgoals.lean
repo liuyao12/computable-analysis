@@ -155,6 +155,26 @@ noncomputable def DyadicTangentWitnessFamily.of_canonical_search_family
   exact canonicalDyadicCertificateSearchAt_sound B
     (Classical.choose_spec hit)
 
+noncomputable def DyadicTangentWitnessFamily.of_canonical_candidate_family
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (candidates : forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      List Rat)
+    (witness : forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      Rat)
+    (hmem : forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      witness precision depth k hk ∈ candidates precision depth k hk)
+    (hadm : forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      canonicalDyadicCertificateAdmissibleBool B precision depth k hk
+        (witness precision depth k hk) = true) :
+    DyadicTangentWitnessFamily B := by
+  apply DyadicTangentWitnessFamily.of_canonical_search_family B ht0 candidates
+  intro precision depth k hk
+  exact canonicalDyadicCertificateSearchAt_some_of_mem_of_admissible
+    B (hmem precision depth k hk) (hadm precision depth k hk)
+
 /-! Constructors that reduce the two geometric branch obligations to one
 explicit rational interval identity.  The parent box is taken directly from
 the nested-radical table, so its containment and self-overlap are automatic;
