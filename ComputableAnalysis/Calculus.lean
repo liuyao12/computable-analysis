@@ -7574,6 +7574,36 @@ theorem intervalRegularDarbouxStage_overlaps_of_cellwise
       F hregular P prec sample hsample)
   exact hsample_width
 
+/-! The aggregate-width premise above is automatic when each supplied sample
+box is ordered.  Cell widths are nonnegative, so positive scaling preserves
+that order and the finite partition-width lemma supplies the sum certificate. -/
+theorem intervalRegularDarbouxStage_overlaps_of_cellwise_ordered_samples
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (P : RationalPartition F.lower F.upper) (prec : Nat)
+    (sample : (k : Nat) -> k < P.pieces -> QInterval)
+    (hsample : forall k (hk : k < P.pieces),
+      (intervalRegularDarbouxRange F hregular P k hk prec).ContainsInterval
+        (sample k hk))
+    (hsample_width : forall k (hk : k < P.pieces),
+      0 <= (sample k hk).width) :
+    QInterval.Overlaps
+      (intervalRegularDarbouxStage F hregular P prec)
+      (P.boundIntegralSum sample) := by
+  apply intervalRegularDarbouxStage_overlaps_of_cellwise
+    F hregular P prec sample hsample
+  apply P.boundIntegralSum_width_nonneg_of_termwise
+  intro k hk
+  simp only [RationalPartition.boundIntegralTerm, dif_pos hk]
+  rw [RationalSubinterval.scaleBound,
+    QInterval.scaleByRat_width_of_nonneg]
+  · exact Rat.mul_nonneg (by
+      unfold RationalSubinterval.width
+      have hcell := (P.cell k hk).ordered
+      grind) (hsample_width k hk)
+  · unfold RationalSubinterval.width
+    have hcell := (P.cell k hk).ordered
+    grind
+
 theorem intervalRegularDarbouxStage_width_le_of_uniform_input_budget
     (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
     (pieces : Nat) (hpieces : 0 < pieces) (hab : F.lower <= F.upper)
