@@ -542,6 +542,15 @@ cross-stage nesting and shrinking certificate, or assemble finitely many
 already-certified pieces. Routine function variants do not require new
 formalizations when they reuse that same certificate pattern.
 
+There is a deliberate distinction here. The project’s weak monotonicity
+predicate compares the lower endpoint of one value box with the upper endpoint
+of the next, so it proves overlap of an endpoint range with every point value.
+It does not compare lower endpoints with lower endpoints or upper endpoints
+with upper endpoints. Therefore it cannot, by itself, prove that a finer
+Darboux stage is nested inside a coarser one. An automatic schedule must add
+that stronger endpoint-order certificate (or use a common validated anchor);
+the missing proof is mathematical data, not a tactic or completeness axiom.
+
 \section{First complete finite-turn example}
 
 The absolute value is the smallest non-monotone test case. On $[-1,0]$ it is
