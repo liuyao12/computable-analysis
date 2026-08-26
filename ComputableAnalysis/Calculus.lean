@@ -5854,6 +5854,88 @@ def mulOfNonnegBounded
             exact hx.2) n).hi := by
   rfl
 
+/-! A finite product modulus for the nonnegative interval evaluator.  The
+factor bounds are pointwise rational data, so this theorem is useful even
+when no global compactness or uniform bound is available. -/
+theorem mulOfNonnegBounded_compute_width_le
+    (F G : FunctionOnInterval)
+    (same_lower : F.lower = G.lower) (same_upper : F.upper = G.upper)
+    (Fbounds : forall x (hx : inDomainInterval F.lower F.upper x),
+      Exists fun B : Rat => 0 < B /\
+        forall n, 0 <= (F.compute x hx n).lo /\
+          (F.compute x hx n).hi <= B)
+    (Gbounds : forall x (hx : inDomainInterval G.lower G.upper x),
+      Exists fun B : Rat => 0 < B /\
+        forall n, 0 <= (G.compute x hx n).lo /\
+          (G.compute x hx n).hi <= B)
+    (x : Rat) (hx : inDomainInterval F.lower F.upper x) (n : Nat)
+    {BF BG : Rat}
+    (hFB : 0 < BF /\ forall k,
+      0 <= (F.compute x hx k).lo /\ (F.compute x hx k).hi <= BF)
+    (hGB : 0 < BG /\ forall k,
+      0 <= (G.compute x (by
+        constructor
+        · rw [← same_lower]
+          exact hx.1
+        · rw [← same_upper]
+          exact hx.2) k).lo /\
+        (G.compute x (by
+          constructor
+          · rw [← same_lower]
+            exact hx.1
+          · rw [← same_upper]
+            exact hx.2) k).hi <= BG) :
+    ((mulOfNonnegBounded F G same_lower same_upper Fbounds Gbounds).compute
+      x hx n).width <=
+      BF * (G.compute x (by
+        constructor
+        · rw [← same_lower]
+          exact hx.1
+        · rw [← same_upper]
+          exact hx.2) n).width +
+        BG * (F.compute x hx n).width := by
+  let hxG : inDomainInterval G.lower G.upper x := by
+    constructor
+    · rw [← same_lower]
+      exact hx.1
+    · rw [← same_upper]
+      exact hx.2
+  have hF := hFB.2 n
+  have hG := hGB.2 n
+  have hForder : (F.compute x hx n).lo <=
+      (F.compute x hx n).hi := by
+    have hwidth := (F.valid_on x (F.defined_on x hx)).1 n
+    change 0 <= (F.compute x hx n).hi -
+      (F.compute x hx n).lo at hwidth
+    grind
+  have hGorder : (G.compute x hxG n).lo <=
+      (G.compute x hxG n).hi := by
+    have hwidth := (G.valid_on x (G.defined_on x hxG)).1 n
+    change 0 <= (G.compute x hxG n).hi -
+      (G.compute x hxG n).lo at hwidth
+    grind
+  change (QBox.mulRealInterval
+      (F.compute x hx n).lo (F.compute x hx n).hi
+      (G.compute x hxG n).lo (G.compute x hxG n).hi).width <= _
+  rw [QBox.mulRealInterval_of_nonneg hF.1 hForder hG.1 hGorder]
+  unfold QInterval.width
+  have hleft :
+      (F.compute x hx n).lo * (G.compute x hxG n).width <=
+        BF * (G.compute x hxG n).width := by
+    apply Rat.mul_le_mul_of_nonneg_right (by grind)
+    change 0 <= (G.compute x hxG n).hi -
+      (G.compute x hxG n).lo
+    exact (G.valid_on x (G.defined_on x hxG)).1 n
+  have hright :
+      (G.compute x hxG n).hi * (F.compute x hx n).width <=
+        BG * (F.compute x hx n).width := by
+    apply Rat.mul_le_mul_of_nonneg_right hG.2
+    change 0 <= (F.compute x hx n).hi -
+      (F.compute x hx n).lo
+    exact (F.valid_on x (F.defined_on x hx)).1 n
+  grind [QInterval.width, Rat.sub_eq_add_neg, Rat.mul_add,
+    Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
 def secantSlopeInterval (F : FunctionOnInterval)
     (x y : Rat)
     (hx : inDomainInterval F.lower F.upper x)

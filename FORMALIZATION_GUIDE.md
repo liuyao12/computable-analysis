@@ -930,6 +930,12 @@ certificate constructor, not an automatic theorem for arbitrary limits.
 When factor and secant magnitudes are already available as rational bounds,
 use `product_differenceQuotient_error_le_qabs_of_bounds` to reduce the local
 obligation to the two factor-error terms plus the explicit corner budget.
+At the interval-evaluator level,
+`FunctionOnInterval.mulOfNonnegBounded_compute_width_le` now supplies the
+finite product modulus
+`width(FG) <= BF * width(G) + BG * width(F)` under nonnegative pointwise
+bounds.  This is the box-level input needed by a future interval product-rule
+constructor; it does not itself assert a derivative or a limiting product.
 
 ### Increasing pieces: start with the literal finite stage
 

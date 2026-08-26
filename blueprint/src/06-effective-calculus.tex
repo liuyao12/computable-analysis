@@ -675,6 +675,19 @@ effective derivative certificate.
 This is the representative product instance.  General products still require
 bounded interval multiplication and a synchronized schedule for the two
 factor evaluators; the finite certificate keeps those obligations explicit.
+The interval product evaluator now has the corresponding finite modulus: if
+the two nonnegative factor boxes are bounded by (B_F) and (B_G), then
+
+\begin{verbatim}
+width(F*G) <= B_F * width(G) + B_G * width(F)
+\end{verbatim}
+
+This is the box-level estimate needed to synchronize product stages.  It is a
+finite rational inequality, not yet a general interval product-rule theorem.
+
+\lean{ComputableAnalysis.FunctionOnInterval.mulOfNonnegBounded_compute_width_le}
+\leanok
+
 The reusable bound-facing corollary makes the bookkeeping explicit: supplied
 rational bounds for the two factor values, their two secants, and their local
 errors reduce the product proof to one visible sum of two linear errors and
