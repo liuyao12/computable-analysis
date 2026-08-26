@@ -451,6 +451,14 @@ theorem exactRat_affine_integral_raw_valid
       (exactRat_affine_integral_certificate r c a b hab)).Valid := by
   exact raw_valid _ (exactRat_affine_integral_certificate r c a b hab)
 
+theorem exactRat_affine_integral_raw_equiv_ofRat
+    (r c a b : Rat) (hab : a <= b) :
+    (raw (FunctionOnInterval.exactRat (fun x => r * x + c) a b)
+      (exactRat_affine_integral_certificate r c a b hab)).Equiv
+      (RealRaw.ofRat ((b - a) * (r * (a + b) / 2 + c))) := by
+  rw [exactRat_affine_integral_raw_eq_ofRat r c a b hab]
+  exact RealRaw.equiv_refl _ (RealRaw.ofRat_valid _)
+
 def exactSquareInterval (I : QInterval) : QInterval :=
   { lo := I.lo * I.lo, hi := I.hi * I.hi }
 
