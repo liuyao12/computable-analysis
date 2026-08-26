@@ -1676,6 +1676,7 @@ open ComputableAnalysis
 #check RealRaw.positiveInv_compute_ordered
 #check RealRaw.positiveInv_compute_nested
 #check RealRaw.positiveInv_valid
+#check RealRaw.positiveInv_equiv_of_stages
 #check RealRaw.positiveInv_mul_self_equiv_one
 #check RealRaw.negativeInv
 #check RealRaw.negativeInv_valid
@@ -1692,6 +1693,10 @@ the resulting separated branch as a shrinking raw real, and
 `RealRaw.negativeInv_valid` transports it through negation.  The unrestricted
 `HasComputableInv` interface is not used as a substitute for either explicit
 branch.
+
+The representation graph remains connected when the certified separation stage
+changes: `RealRaw.positiveInv_equiv_of_stages` supplies the equivalence edge
+between any two positive reciprocal schedules.
 
 Division is then a certified product: choose a stage where the denominator is
 strictly positive or strictly negative, construct its corresponding reciprocal,

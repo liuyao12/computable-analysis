@@ -928,6 +928,93 @@ theorem positiveInv_valid {x : RealRaw} {N : Nat}
       simp [positiveInv, positiveInvCompute, Nat.not_lt_of_ge hnN]
       exact Rat.le_trans hinv hquot
 
+theorem positiveInv_equiv_of_stages {x : RealRaw} {N M : Nat}
+    (hx : x.Valid) (hNpos : 0 < (x.compute N).lo)
+    (hMpos : 0 < (x.compute M).lo) :
+    (positiveInv x N).Equiv (positiveInv x M) := by
+  intro n
+  apply (compareAt_overlap_iff (positiveInv x N) (positiveInv x M) n n).2
+  change QInterval.Overlaps
+    ((positiveInv x N).compute n) ((positiveInv x M).compute n)
+  by_cases hnN : n < N
+  · by_cases hnM : n < M
+    · simp [positiveInv, positiveInvCompute, hnN, hnM,
+        QInterval.Overlaps]
+      constructor
+      · exact (by
+          rw [Rat.div_def]
+          exact Rat.le_of_lt (Rat.mul_pos (by native_decide)
+            ((Rat.inv_pos).2 hMpos)))
+      · exact (by
+          rw [Rat.div_def]
+          exact Rat.le_of_lt (Rat.mul_pos (by native_decide)
+            ((Rat.inv_pos).2 hNpos)))
+    · have hMn : M <= n := by omega
+      have hMn' := hx.2.1 M n hMn
+      have hnpos : 0 < (x.compute n).lo := by
+        apply (Rat.lt_iff_le_and_ne).2
+        constructor
+        · exact Rat.le_trans (Rat.le_of_lt hMpos) hMn'.1
+        · intro hz
+          have hmzero : (x.compute M).lo = 0 :=
+            Rat.le_antisymm (by simpa [hz] using hMn'.1)
+              (Rat.le_of_lt hMpos)
+          exact (Rat.ne_of_gt hMpos) hmzero
+      simp [positiveInv, positiveInvCompute, hnN, hnM,
+        QInterval.Overlaps]
+      rw [QInterval.inv_of_pos hnpos]
+      change 0 ≤ 1 / (x.compute n).lo ∧
+        1 / (x.compute n).hi ≤ 1 / (x.compute N).lo
+      constructor
+      · rw [Rat.div_def]
+        exact Rat.le_of_lt (Rat.mul_pos (by native_decide)
+          ((Rat.inv_pos).2 hnpos))
+      · have hnN' := hx.2.1 n N (by omega)
+        exact QInterval.one_div_le_one_div_of_pos hNpos
+          (Rat.le_trans (interval_order_of_valid x hx N) hnN'.2.2)
+  · have hNn : N <= n := by omega
+    by_cases hnM : n < M
+    · have hNn' := hx.2.1 N n hNn
+      have hnpos : 0 < (x.compute n).lo := by
+        have hNn' := hx.2.1 N n hNn
+        apply (Rat.lt_iff_le_and_ne).2
+        constructor
+        · exact Rat.le_trans (Rat.le_of_lt hNpos) hNn'.1
+        · intro hz
+          have hnzero : (x.compute N).lo = 0 :=
+            Rat.le_antisymm (by simpa [hz] using hNn'.1)
+              (Rat.le_of_lt hNpos)
+          exact (Rat.ne_of_gt hNpos) hnzero
+      simp [positiveInv, positiveInvCompute, hnN, hnM,
+        QInterval.Overlaps]
+      rw [QInterval.inv_of_pos hnpos]
+      change 1 / (x.compute n).hi ≤ 1 / (x.compute M).lo ∧
+        0 ≤ 1 / (x.compute n).lo
+      constructor
+      · have hnM' := hx.2.1 n M (by omega)
+        exact QInterval.one_div_le_one_div_of_pos hMpos
+          (Rat.le_trans (interval_order_of_valid x hx M) hnM'.2.2)
+      · rw [Rat.div_def]
+        exact Rat.le_of_lt (Rat.mul_pos (by native_decide)
+          ((Rat.inv_pos).2 hnpos))
+    · have hMn : M <= n := by omega
+      have hnpos : 0 < (x.compute n).lo := by
+        have hNn' := hx.2.1 N n hNn
+        apply (Rat.lt_iff_le_and_ne).2
+        constructor
+        · exact Rat.le_trans (Rat.le_of_lt hNpos) hNn'.1
+        · intro hz
+          have hnzero : (x.compute N).lo = 0 :=
+            Rat.le_antisymm (by simpa [hz] using hNn'.1)
+              (Rat.le_of_lt hNpos)
+          exact (Rat.ne_of_gt hNpos) hnzero
+      simp [positiveInv, positiveInvCompute, hnN, hnM,
+        QInterval.Overlaps]
+      rw [QInterval.inv_of_pos hnpos]
+      change 1 / (x.compute n).hi ≤ 1 / (x.compute n).lo
+      exact QInterval.one_div_le_one_div_of_pos hnpos
+        (interval_order_of_valid x hx n)
+
 theorem positiveInv_mul_self_equiv_one {x : RealRaw} {N : Nat}
     (hx : x.Valid) (hpos : 0 < (x.compute N).lo) :
     (mul x (positiveInv x N)).Equiv one := by
