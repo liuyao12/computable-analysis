@@ -7797,6 +7797,57 @@ def nondecreasingDarbouxStage (F : FunctionOnInterval)
   P.boundIntegralSum
     (fun k hk => nondecreasingDarbouxRange F P k hk prec)
 
+/-! A monotone endpoint range need only overlap a chosen sample box.  After
+positive cell-width scaling, the overlap survives the complete finite sum.
+This is the precise partition-level transport needed for changing evaluator
+implementations without appealing to a completed real or to a supremum. -/
+theorem nondecreasingDarbouxStage_overlaps_of_cellwise
+    (F : FunctionOnInterval) (hF : NondecreasingOnInterval F)
+    (P : RationalPartition F.lower F.upper) (prec : Nat)
+    (sample : (k : Nat) -> k < P.pieces -> QInterval)
+    (hsample : forall k (hk : k < P.pieces),
+      QInterval.Overlaps
+        (nondecreasingDarbouxRange F P k hk prec)
+        (sample k hk))
+    (hsample_width : forall k (hk : k < P.pieces),
+      0 <= (sample k hk).width) :
+    QInterval.Overlaps
+      (nondecreasingDarbouxStage F P prec)
+      (P.boundIntegralSum sample) := by
+  unfold nondecreasingDarbouxStage
+  apply RationalPartition.boundIntegralSum_overlaps_of_termwise
+  · intro k hk
+    simp only [RationalPartition.boundIntegralTerm, dif_pos hk]
+    rw [RationalSubinterval.scaleBound,
+      QInterval.scaleByRat_width_of_nonneg]
+    · exact Rat.mul_nonneg (by
+        unfold RationalSubinterval.width
+        have hcell := (P.cell k hk).ordered
+        grind)
+        (nondecreasingDarbouxRange_width_nonneg F hF P k hk prec)
+    · unfold RationalSubinterval.width
+      have hcell := (P.cell k hk).ordered
+      grind
+  · intro k hk
+    simp only [RationalPartition.boundIntegralTerm, dif_pos hk]
+    rw [RationalSubinterval.scaleBound,
+      QInterval.scaleByRat_width_of_nonneg]
+    · exact Rat.mul_nonneg (by
+        unfold RationalSubinterval.width
+        have hcell := (P.cell k hk).ordered
+        grind) (hsample_width k hk)
+    · unfold RationalSubinterval.width
+      have hcell := (P.cell k hk).ordered
+      grind
+  · intro k hk
+    simp only [RationalPartition.boundIntegralTerm, dif_pos hk]
+    unfold RationalSubinterval.scaleBound
+    apply QInterval.scaleByRat_overlaps_of_nonneg
+    · unfold RationalSubinterval.width
+      have hcell := (P.cell k hk).ordered
+      grind
+    · exact hsample k hk
+
 /-- The static dyadic instance of `nondecreasingDarbouxStage` used by the
 chapter's increasing-function pseudocode.  The nondecreasing proof is not an
 input to this executable calculation; it is consumed by the later orderedness
