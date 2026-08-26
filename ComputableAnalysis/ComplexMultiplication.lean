@@ -739,6 +739,43 @@ theorem inv_width_eq_width_div_product_of_pos {I : QInterval}
       Rat.inv_mul_cancel]
   exact hline
 
+theorem inv_width_le_width_div_sq_of_lower_bound {I : QInterval} {a : Rat}
+    (ha : 0 < a) (haI : a <= I.lo) (hI : I.lo <= I.hi) :
+    I.inv.width <= I.width / (a * a) := by
+  have hpos : 0 < I.lo := by grind
+  have hhi : 0 < I.hi := by grind
+  have hlohi : 0 < I.lo * I.hi := Rat.mul_pos hpos hhi
+  have haa : 0 < a * a := Rat.mul_pos ha ha
+  have hwidth : 0 <= I.width := by
+    unfold QInterval.width
+    grind
+  rw [inv_width_eq_width_div_product_of_pos hpos hI]
+  rw [Rat.div_def, Rat.div_def]
+  apply Rat.le_of_mul_le_mul_right
+    (c := (I.lo * I.hi) * (a * a))
+  · have hlo0 : I.lo ≠ 0 := Rat.ne_of_gt hpos
+    have hhi0 : I.hi ≠ 0 := Rat.ne_of_gt hhi
+    have ha0 : a ≠ 0 := Rat.ne_of_gt ha
+    calc
+      I.width * (I.lo * I.hi)⁻¹ * ((I.lo * I.hi) * (a * a)) =
+          I.width * (a * a) := by
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel,
+          Rat.inv_mul_cancel]
+      _ <= I.width * (I.lo * I.hi) := by
+        have hsq : a * a <= I.lo * I.hi := by
+          have hleft := Rat.mul_le_mul_of_nonneg_right haI
+            (Rat.le_of_lt ha)
+          have hright := Rat.mul_le_mul_of_nonneg_left
+            (Rat.le_trans haI hI) (Rat.le_of_lt hpos)
+          exact Rat.le_trans hleft hright
+        exact Rat.mul_le_mul_of_nonneg_left
+          hsq
+          hwidth
+      _ = I.width * (a * a)⁻¹ * ((I.lo * I.hi) * (a * a)) := by
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel,
+          Rat.inv_mul_cancel]
+  · exact Rat.mul_pos hlohi haa
+
 theorem inv_nested_of_pos {I J : QInterval}
     (hIpos : 0 < I.lo) (hJpos : 0 < J.lo)
     (hIJ : I.lo <= J.lo) (hJord : J.lo <= J.hi)
@@ -845,6 +882,51 @@ theorem positiveInv_compute_nested {x : RealRaw} {N n m : Nat}
     · exact (hx.2.1 n m hnm).1
     · exact interval_order_of_valid x hx m
     · exact (hx.2.1 n m hnm).2.2
+
+theorem positiveInv_valid {x : RealRaw} {N : Nat}
+    (hx : x.Valid) (hpos : 0 < (x.compute N).lo) :
+    (positiveInv x N).Valid := by
+  constructor
+  · intro n
+    unfold QInterval.width
+    have ho := positiveInv_compute_ordered hx hpos (n := n)
+    grind
+  · constructor
+    · intro n m hnm
+      have hnest := positiveInv_compute_nested hx hpos hnm
+      exact ⟨hnest.1, ⟨positiveInv_compute_ordered hx hpos, hnest.2⟩⟩
+    · intro eps
+      let a : Rat := (x.compute N).lo
+      let delta : QPos := ⟨eps.val * (a * a), by
+        dsimp [a]
+        exact Rat.mul_pos eps.property
+          (Rat.mul_pos hpos hpos)⟩
+      obtain ⟨Nx, hNx⟩ := hx.2.2 delta
+      refine ⟨Nat.max N Nx, ?_⟩
+      intro n hn
+      have hnN : N <= n := Nat.le_trans (Nat.le_max_left _ _) hn
+      have hnx : Nx <= n := Nat.le_trans (Nat.le_max_right _ _) hn
+      have hsmall := hNx n hnx
+      have hNn := hx.2.1 N n hnN
+      have hposn : 0 < (x.compute n).lo := by
+        grind [hNn.1]
+      have hinv := QInterval.inv_width_le_width_div_sq_of_lower_bound
+        hpos (by simpa [a] using hNn.1) (interval_order_of_valid x hx n)
+      have hquot : (x.compute n).width / (a * a) <= eps.val := by
+        rw [Rat.div_def]
+        apply Rat.le_of_mul_le_mul_right (c := a * a)
+        · have haa0 : a * a ≠ 0 := Rat.ne_of_gt (Rat.mul_pos hpos hpos)
+          calc
+            (x.compute n).width * (a * a)⁻¹ * (a * a) =
+                (x.compute n).width := by
+              grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel,
+                Rat.inv_mul_cancel]
+            _ <= eps.val * (a * a) := by
+              dsimp [delta] at hsmall
+              exact hsmall
+        · exact Rat.mul_pos hpos hpos
+      simp [positiveInv, positiveInvCompute, Nat.not_lt_of_ge hnN]
+      exact Rat.le_trans hinv hquot
 
 private theorem qabs_le_of_interval_bounds {a b x B : Rat}
     (ha : qabs a <= B) (hb : qabs b <= B)
