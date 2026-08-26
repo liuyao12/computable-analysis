@@ -7635,6 +7635,41 @@ theorem intervalRegularDarbouxStage_overlaps_of_cellwise_ordered_samples
     have hcell := (P.cell k hk).ordered
     grind
 
+/-! Canonical left-endpoint sampling for the general interval-regular stage.
+The image range contains each left sample by interval regularity, and the
+sample-sum width is discharged automatically from the evaluator certificates. -/
+theorem intervalRegularDarbouxStage_overlaps_leftEndpointSamples
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (P : RationalPartition F.lower F.upper) (prec : Nat) :
+    QInterval.Overlaps
+      (intervalRegularDarbouxStage F hregular P prec)
+      (P.boundIntegralSum
+        (fun k hk => F.compute (P.point k)
+          (And.intro (P.cell k hk).lower_mem
+            (Rat.le_trans (P.cell k hk).ordered
+              (P.cell k hk).upper_mem)) prec)) := by
+  let hx : forall k, k < P.pieces ->
+      inDomainInterval F.lower F.upper (P.point k) := fun k hk =>
+    And.intro (P.cell k hk).lower_mem
+      (Rat.le_trans (P.cell k hk).ordered (P.cell k hk).upper_mem)
+  let sample : (k : Nat) -> k < P.pieces -> QInterval := fun k hk =>
+    F.compute (P.point k) (hx k hk) prec
+  have hsample : forall k (hk : k < P.pieces),
+      (intervalRegularDarbouxRange F hregular P k hk prec).ContainsInterval
+        (sample k hk) := by
+    intro k hk
+    have hpoint := intervalRegularDarbouxRange_contains_point_value
+      F hregular P k hk (P.point k)
+      (by exact Rat.le_refl) (by exact (P.cell k hk).ordered) prec
+    exact hpoint
+  have hsample_width : forall k (hk : k < P.pieces),
+      0 <= (sample k hk).width := by
+    intro k hk
+    exact (F.valid_on (P.point k) (F.defined_on (P.point k) (hx k hk))).1 prec
+  have hstage := intervalRegularDarbouxStage_overlaps_of_cellwise_ordered_samples
+    F hregular P prec sample hsample hsample_width
+  simpa [sample, hx] using hstage
+
 theorem intervalRegularDarbouxStage_width_le_of_uniform_input_budget
     (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
     (pieces : Nat) (hpieces : 0 < pieces) (hab : F.lower <= F.upper)
