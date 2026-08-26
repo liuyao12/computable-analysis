@@ -1,6 +1,7 @@
 import ComputableAnalysis.Calculus
 import ComputableAnalysis.IntegralIdentities
 import ComputableAnalysis.Series
+import ComputableAnalysis.MonotonicityConvexity
 
 /-!
 # Interval-regular integral certificates
@@ -1820,10 +1821,95 @@ def squareEffectiveFTCData :
     simpa [endpointDifferenceInterval, squarePrimitiveRaw, RealFunRaw.exact,
       QInterval.width, Rat.sub_self] using (Rat.le_of_lt eps.property)
 
+theorem squareEffectiveFTCData_derivativeBound_bound
+    (eps : QPos) (k : Nat) (hk : k < (squareEffectiveFTCData.choosePartition eps).pieces)
+    (n : Nat) :
+    (squareEffectiveFTCData.derivativeBound eps k hk).bound n =
+      squareEffectiveBound ((squareEffectiveFTCData.choosePartition eps).cell k hk) n := by
+  rfl
+
 theorem squareEffectiveFTC_equiv_endpoint :
     squareEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
       squareEffectiveFTCData.toDerivativeBoundFTC.endpointRaw := by
   exact effectiveDerivativeBoundFTC squareEffectiveFTCData
+
+/-! The same square certificate can be viewed through the curvature-facing FTC
+interface.  The finite partition and endpoint budgets are unchanged; only the
+provenance of each derivative bound is made explicit. -/
+def squareCurvatureFTCData :
+    CurvatureFTCCertificate squarePrimitiveRaw squareDerivativeRaw 0 1 where
+  primitive_domain_lower := trivial
+  primitive_domain_upper := trivial
+  choosePartition := squareEffectiveFTCData.choosePartition
+  chooseEndpointPrecision := squareEffectiveFTCData.chooseEndpointPrecision
+  chooseBoundStage := squareEffectiveFTCData.chooseBoundStage
+  curvatureBound := by
+    intro eps k hk
+    exact ExactFunction.squareRaw_derivativeBoundFromCurvature
+      ((squareEffectiveFTCData.choosePartition eps).cell k hk)
+  localControl := by
+    intro eps k hk
+    let H := squareEffectiveFTCData.localControl eps k hk
+    exact {
+      primitive_domain_lower := H.primitive_domain_lower
+      primitive_domain_upper := H.primitive_domain_upper
+      endpointPrecision := H.endpointPrecision
+      endpoint_contained := by
+        intro n
+        have h := H.endpoint_contained n
+        simpa [ExactFunction.squareRaw_derivativeBoundFromCurvature,
+          ExactFunction.squareRaw_derivativeBoundFromCurvature_bound,
+          ExactFunction.squareRaw_monotoneDerivativeBoundMethod,
+          DerivativeBoundFromCurvature.toDerivativeBound,
+          MonotoneDerivativeBoundMethod.toDerivativeBound,
+          endpointDerivativeBound, squareEffectiveDerivativeBound,
+          squareEffectiveFTCData_derivativeBound_bound, squareEffectiveBound,
+          squareDerivativeRaw, RealFunRaw.exact,
+          ExactFunction.doubleId] using h }
+  riemann_width := by
+    intro eps
+    simpa [ExactFunction.squareRaw_derivativeBoundFromCurvature,
+      ExactFunction.squareRaw_derivativeBoundFromCurvature_bound,
+      ExactFunction.squareRaw_monotoneDerivativeBoundMethod,
+      DerivativeBoundFromCurvature.toDerivativeBound,
+      MonotoneDerivativeBoundMethod.toDerivativeBound,
+      endpointDerivativeBound, squareEffectiveDerivativeBound,
+      squareEffectiveFTCData_derivativeBound_bound, squareEffectiveBound,
+      squareDerivativeRaw, RealFunRaw.exact,
+      ExactFunction.doubleId] using
+      (squareEffectiveFTCData.riemann_width eps)
+  endpoint_width := by
+    intro eps
+    exact squareEffectiveFTCData.endpoint_width eps
+  overlap := by
+    intro eps
+    apply RationalPartition.boundIntegralSum_overlaps_endpointDifference
+      (squareEffectiveFTCData.choosePartition eps) squarePrimitiveRaw
+      (squareEffectiveFTCData.chooseEndpointPrecision eps)
+      (RealFunRaw.exact_valid _) (fun i hi => trivial)
+      (fun k hk =>
+        (ExactFunction.squareRaw_derivativeBoundFromCurvature
+          ((squareEffectiveFTCData.choosePartition eps).cell k hk)).toDerivativeBound.bound
+            (squareEffectiveFTCData.chooseBoundStage eps))
+    intro k hk
+    have hlocal := (squareEffectiveFTCData.localControl eps k hk).endpoint_contained 0
+    have hp := squareEffectiveFTCData.endpointPrecision_agreement eps k hk 0
+    rw [hp] at hlocal
+    simpa [ExactFunction.squareRaw_derivativeBoundFromCurvature,
+      ExactFunction.squareRaw_derivativeBoundFromCurvature_bound,
+      ExactFunction.squareRaw_monotoneDerivativeBoundMethod,
+      DerivativeBoundFromCurvature.toDerivativeBound,
+      MonotoneDerivativeBoundMethod.toDerivativeBound,
+      endpointDerivativeBound, squareEffectiveDerivativeBound,
+      squareEffectiveFTCData_derivativeBound_bound, squareEffectiveBound,
+      squareDerivativeRaw, RealFunRaw.exact,
+      ExactFunction.doubleId,
+      RationalPartition.cell, RationalSubinterval.scaleBound] using hlocal
+
+theorem squareCurvatureFTC_equiv_endpoint :
+    squareCurvatureFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      squareCurvatureFTCData.toDerivativeBoundFTC.endpointRaw := by
+  exact squareCurvatureFTCData.equiv_endpoint
 
 /-! ## Cubic effective FTC instance
 

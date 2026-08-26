@@ -398,8 +398,13 @@ the existing curvature/derivative-bound contracts.  Do not duplicate the
 theorem for every polynomial power unless its application needs a genuinely
 different certificate.  The raw bridge is
 `square_secantSlopeInterval_eq` followed by
-`squareRaw_curvatureOnSubinterval`; its exact singleton interval is already a
-valid finite-stage curvature enclosure.
+`ExactFunction.squareRaw_curvatureOnSubinterval`; its exact singleton interval is already a
+valid finite-stage curvature enclosure.  Pair it with
+`ExactFunction.squareRaw_monotoneDerivativeBoundMethod` (the endpoint range of
+`2*x`) and `ExactFunction.squareRaw_derivativeBoundFromCurvature` to obtain the
+derivative-bound input expected by the FTC layer.  The complete square
+certificate is `squareCurvatureFTCData`, with endpoint equivalence proved by
+`squareCurvatureFTC_equiv_endpoint`.
 
 For an effective FTC proof, do not force all computations to use one stage.
 `TwoStageCandidateDerivativeFTC` allows the derivative evaluator and the

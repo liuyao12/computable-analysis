@@ -654,15 +654,56 @@ def squareRaw_curvatureOnSubinterval {a b : Rat}
     CurvatureOnSubinterval (RealFunRaw.exact square) C := by
   refine
     { kind := CurvatureKind.convex
-      evalPrecision := fun _ => 0
+      evalPrecision := fun n => n
       domain_on := ?_
       secant_slope_order := ?_ }
   · intro x hx
     trivial
   · intro n w x y z hw hx hy hz hwx hxy hyz
+    change QInterval.WeakLe
+      (secantSlopeIntervalOfRealFun (RealFunRaw.exact square) w x n)
+      (secantSlopeIntervalOfRealFun (RealFunRaw.exact square) y z n)
     rw [square_secantSlopeInterval_eq hwx, square_secantSlopeInterval_eq hyz]
     unfold QInterval.WeakLe
     grind
+
+/-! The matching derivative method uses the endpoint range of `2*x`.  This is
+the finite monotone-derivative certificate consumed by the curvature FTC
+layer; it is intentionally separate from the exact convexity proof above. -/
+def squareRaw_monotoneDerivativeBoundMethod {a b : Rat}
+    (C : RationalSubinterval a b) :
+    MonotoneDerivativeBoundMethod (RealFunRaw.exact doubleId) C := by
+  refine
+    { kind := MonotonicityKind.nondecreasing
+      evalPrecision := fun n => n
+      domain_on := ?_
+      endpoint_bound_ordered := ?_
+      endpoint_contains_values := ?_ }
+  · intro x hx
+    trivial
+  · intro n
+    unfold endpointDerivativeBound RealFunRaw.exact doubleId
+    unfold QInterval.width
+    grind [C.ordered]
+  · intro n x hx
+    unfold endpointDerivativeBound RealFunRaw.exact doubleId
+    unfold QInterval.ContainsInterval
+    exact ⟨Rat.mul_le_mul_of_nonneg_left hx.1 (by native_decide),
+      Rat.mul_le_mul_of_nonneg_left hx.2 (by native_decide)⟩
+
+def squareRaw_derivativeBoundFromCurvature {a b : Rat}
+    (C : RationalSubinterval a b) :
+    DerivativeBoundFromCurvature
+      (RealFunRaw.exact square) (RealFunRaw.exact doubleId) C :=
+  { curvature := squareRaw_curvatureOnSubinterval C
+    monotoneDerivative := squareRaw_monotoneDerivativeBoundMethod C
+    compatible := rfl }
+
+theorem squareRaw_derivativeBoundFromCurvature_bound
+    {a b : Rat} (C : RationalSubinterval a b) (n : Nat) :
+    (squareRaw_derivativeBoundFromCurvature C).toDerivativeBound.bound n =
+      { lo := 2 * C.lower, hi := 2 * C.upper } := by
+  rfl
 
 structure SecantSlopeBracketOn (f : Rat -> Rat) (u v : Rat) where
   lower : Rat
