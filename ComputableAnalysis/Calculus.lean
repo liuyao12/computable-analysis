@@ -6515,6 +6515,40 @@ structure IntervalRegularOn (F : FunctionOnInterval) where
         (evalInterval I hI n)
         (F.compute x hx n)
 
+/-- Two interval-image certificates for the same function cannot disagree at
+a shared rational sample: both output boxes contain the same point-value
+box.  This is the basic representation-switching lemma for adaptive
+interval evaluators. -/
+theorem IntervalRegularOn.evalIntervals_overlap_of_common_point
+    {F : FunctionOnInterval}
+    (left right : IntervalRegularOn F)
+    (I : QInterval) (hI : subintervalOf I F.lower F.upper)
+    (x : Rat) (hx : inDomainInterval F.lower F.upper x)
+    (hlo : I.lo <= x) (hhi : x <= I.hi) (stage : Nat) :
+    QInterval.Overlaps
+      (left.evalInterval I hI stage) (right.evalInterval I hI stage) := by
+  have hleft := left.contains_point_values I hI x hx stage hlo hhi
+  have hright := right.contains_point_values I hI x hx stage hlo hhi
+  change (left.evalInterval I hI stage).lo <=
+      (F.compute x hx stage).lo /\
+    (F.compute x hx stage).hi <=
+      (left.evalInterval I hI stage).hi at hleft
+  change (right.evalInterval I hI stage).lo <=
+      (F.compute x hx stage).lo /\
+    (F.compute x hx stage).hi <=
+      (right.evalInterval I hI stage).hi at hright
+  have hvalue : (F.compute x hx stage).lo <=
+      (F.compute x hx stage).hi := by
+    have hvalid := F.valid_on x (F.defined_on x hx)
+    have hwidth := hvalid.1 stage
+    change 0 <= (F.compute x hx stage).hi -
+      (F.compute x hx stage).lo at hwidth
+    exact (Rat.le_iff_sub_nonneg _ _).2 hwidth
+  unfold QInterval.Overlaps
+  constructor
+  · exact Rat.le_trans hleft.1 (Rat.le_trans hvalue hright.2)
+  · exact Rat.le_trans hright.1 (Rat.le_trans hvalue hleft.2)
+
 /-! A natural-number Lipschitz certificate on an arbitrary ordered rational chart. -/
 def Integral.LipschitzOnIntervalNat (f : Rat -> Rat) (a b : Rat) (L : Nat) : Prop :=
   a <= b /\
