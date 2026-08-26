@@ -4115,6 +4115,28 @@ theorem Refines.foldl_indexBlocks_eq_foldl_range
         (fun acc j => step acc (value j)) initial := by
   rw [R.indexBlocks_flatMap_eq_range]
 
+/-- A fine partition's interval sum can be traversed coarse block by coarse
+block.  The summand remains the total `boundIntegralTerm`, so out-of-range
+indices stay harmlessly degenerate and no dependent proof transport is hidden
+in the reindexing step. -/
+theorem Refines.boundIntegralSum_eq_indexBlockFold
+    {a b : Rat} {fine coarse : RationalPartition a b}
+    (R : Refines fine coarse)
+    (bound : (k : Nat) -> k < fine.pieces -> QInterval) :
+    fine.boundIntegralSum bound =
+      (List.range coarse.pieces).foldl
+        (fun acc i =>
+          (R.indexBlock i).foldl
+            (fun acc j => QInterval.addInterval acc
+              (fine.boundIntegralTerm bound j)) acc)
+        { lo := 0, hi := 0 } := by
+  unfold boundIntegralSum
+  symm
+  exact R.foldl_indexBlocks_eq_foldl_range
+    (fun acc q => QInterval.addInterval acc q)
+    { lo := 0, hi := 0 }
+    (fun j => fine.boundIntegralTerm bound j)
+
 /-- Every genuine cell of an explicit uniform partition has exactly its
 rational mesh width. -/
 theorem uniform_cell_width (a b : Rat) (pieces : Nat)
