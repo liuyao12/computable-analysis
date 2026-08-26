@@ -576,8 +576,11 @@ are \emph{equivalent} if they overlap at every stage, i.e.,
 \lean{ComputableAnalysis.RealRaw.equiv_refl}
 \lean{ComputableAnalysis.RealRaw.equiv_symm}
 \lean{ComputableAnalysis.RealRaw.equiv_trans}
+\lean{ComputableAnalysis.RealRaw.equiv_of_common_anchor}
 \uses{def:raw-real,def:raw-equiv}
-Equivalence of real numbers is an equivalence relation.
+Equivalence of real numbers is an equivalence relation.  The common-anchor
+form packages the representation-chain pattern used throughout calculus:
+two valid algorithms may be compared through one valid proof-side anchor.
 \end{proposition}
 
 \begin{proposition}[Raw-real order compatibility]

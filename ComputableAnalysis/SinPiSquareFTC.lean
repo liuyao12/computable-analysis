@@ -4840,14 +4840,10 @@ theorem SinPiSquareEffectiveFTCData.integral_equiv_public_stabilized
   have hpublic :
       (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral).Valid :=
     DyadicPublicSquareTangentSharedWitness.stabilized_valid hshared hsine
-  exact RealRaw.equiv_trans (x := D.integralRaw)
-    (y := RealRaw.ofRat (1 / 4))
-    (z := dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral)
-    hD hq hpublic
+  exact RealRaw.equiv_of_common_anchor hD hpublic hq
     (D.endpoint_equiv_of_value hvalue)
-    (RealRaw.equiv_symm
-      (DyadicPublicSquareTangentSharedWitness.stabilized_equiv_value
-        hshared hsine hanchor_value))
+    (DyadicPublicSquareTangentSharedWitness.stabilized_equiv_value
+      hshared hsine hanchor_value)
 
 end SinPiIntegral
 

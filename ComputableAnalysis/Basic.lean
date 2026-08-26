@@ -3462,6 +3462,17 @@ theorem equiv_trans {x y z : RealRaw}
       (sameStageOverlap_of_equiv hz hy (equiv_symm hyz))
       (sameStageOverlap_of_equiv hy hx (equiv_symm hxy)) n
 
+/-- Two valid interval algorithms are equivalent when each is equivalent to
+the same valid anchor.  This is the basic representation-management rule:
+the anchor is proof data only, and neither evaluator is required to be the
+runtime implementation of the other. -/
+theorem equiv_of_common_anchor {x y anchor : RealRaw}
+    (hx : x.Valid) (hy : y.Valid) (hanchor : anchor.Valid)
+    (hxanchor : x.Equiv anchor) (hyanchor : y.Equiv anchor) :
+    x.Equiv y := by
+  exact equiv_trans hx hanchor hy
+    hxanchor (equiv_symm hyanchor)
+
 theorem equiv_of_schedule_equiv {x y : RealRaw}
     (hx : x.Valid) (hy : y.Valid)
     (sigma tau : StageSchedule) :

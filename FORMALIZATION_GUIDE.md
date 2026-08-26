@@ -246,6 +246,11 @@ Most mistakes come from conflating these layers.
 | `PartialRealFunction` | An abstract real-axis view when needed | A replacement for the complex function foundation |
 | `FunctionOnInterval` | A partial function certified at every rational point of `[a,b]` | Continuity, interval regularity, differentiability, or integrability |
 
+For representation management, `RealRaw.equiv_of_common_anchor` is the
+standard shortcut: two valid algorithms that are each equivalent to the same
+valid anchor are equivalent to one another.  The anchor is proof-side data;
+the runtime continues to evaluate the chosen algorithm directly.
+
 ### Functions: complex first, concrete first, abstract only when useful
 
 The library is representative, not encyclopedic.  Formalize one complete
