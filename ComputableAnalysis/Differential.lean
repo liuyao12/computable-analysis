@@ -674,6 +674,85 @@ theorem riemannLeftExact_affine_substitution
     grind [Rat.mul_assoc, Rat.mul_comm]
   simpa [riemannLeftExact] using hsum n
 
+/-! Finite left-rectangle sums distribute over addition.  This is the small
+algebraic fact needed to assemble exact FTC certificates on a common stage
+schedule; it is independent of any limiting argument. -/
+theorem riemannLeftExact_add
+    (f g : Rat -> Rat) (a b : Rat) (n : Nat) :
+    riemannLeftExact (fun x => f x + g x) a b n =
+      riemannLeftExact f a b n + riemannLeftExact g a b n := by
+  unfold riemannLeftExact
+  have hfold : forall (xs : List Nat) (w : Rat) (p : Nat -> Rat)
+      (accF accG : Rat),
+      (xs.foldl
+        (fun acc k => acc + w * (f (p k) + g (p k))) (accF + accG)) =
+      xs.foldl (fun acc k => acc + w * f (p k)) accF +
+        xs.foldl (fun acc k => acc + w * g (p k)) accG := by
+    intro xs
+    induction xs with
+    | nil => intro w p accF accG; simp
+    | cons k ks ih =>
+        intro w p accF accG
+        simp only [List.foldl_cons]
+        have h := ih w p
+          (accF + w * f (p k)) (accG + w * g (p k))
+        simpa [Rat.mul_add, Rat.add_assoc, Rat.add_comm,
+          Rat.add_left_comm] using h
+  simpa [Rat.zero_add] using hfold (List.range n) (mesh a b n)
+    (fun k => leftPoint a b n k) 0 0
+
+/-! A common-schedule addition closure for exact FTC certificates.  The
+derivative schedules are combined by the existing half-budget derivative
+constructor; the two endpoint errors are supplied at the same finite stage
+and then added by the rational triangle inequality. -/
+def EffectiveFTCExact.addOfCommonSchedule
+    {F dF G dG : Rat -> Rat} {a b : Rat}
+    (DF : EffectiveFTCExact F dF a b)
+    (DG : EffectiveFTCExact G dG a b)
+    (inner : QPos -> QPos)
+    (hprecision : forall eps, 2 * (inner eps).val <= eps.val)
+    (hradius : forall eps,
+      (inner eps).val <= (DF.derivative.stepRadius (halfQPos eps)).val /\
+      (inner eps).val <= (DG.derivative.stepRadius (halfQPos eps)).val)
+    (chooseN : QPos -> Nat)
+    (hF : forall eps,
+      ftcErrorExact F dF a b (chooseN eps) <= (halfQPos eps).val)
+    (hG : forall eps,
+      ftcErrorExact G dG a b (chooseN eps) <= (halfQPos eps).val) :
+    EffectiveFTCExact (fun x => F x + G x)
+      (fun x => dF x + dG x) a b where
+  derivative := ExactFunction.EffectiveDerivativeExact.add
+    DF.derivative DG.derivative inner hprecision hradius
+  chooseN := chooseN
+  good := by
+    intro eps
+    have hF' := hF eps
+    have hG' := hG eps
+    unfold ftcErrorExact at hF' hG' ⊢
+    rw [riemannLeftExact_add]
+    have hdecomp :
+        (riemannLeftExact dF a b (chooseN eps) +
+            riemannLeftExact dG a b (chooseN eps)) -
+          ((F b + G b) - (F a + G a)) =
+        (riemannLeftExact dF a b (chooseN eps) - (F b - F a)) +
+          (riemannLeftExact dG a b (chooseN eps) - (G b - G a)) := by
+      grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+        Rat.add_left_comm]
+    rw [hdecomp]
+    calc
+      qabs ((riemannLeftExact dF a b (chooseN eps) - (F b - F a)) +
+          (riemannLeftExact dG a b (chooseN eps) - (G b - G a))) <=
+        qabs (riemannLeftExact dF a b (chooseN eps) - (F b - F a)) +
+          qabs (riemannLeftExact dG a b (chooseN eps) - (G b - G a)) :=
+        qabs_add_le _ _
+      _ <= (halfQPos eps).val + (halfQPos eps).val :=
+        rat_add_le_add hF' hG'
+      _ <= eps.val := by
+        change eps.val * (2 : Rat)⁻¹ + eps.val * (2 : Rat)⁻¹ <= eps.val
+        have htwo : (2 : Rat)⁻¹ + (2 : Rat)⁻¹ = 1 := by native_decide
+        rw [← Rat.mul_add, htwo, Rat.mul_one]
+        exact Rat.le_refl
+
 /-! The finite FTC certificate transports along the same positive affine map.
 The rectangle identity is exact at each finite mesh, so the only analytic
 obligation is the derivative schedule already supplied above. -/

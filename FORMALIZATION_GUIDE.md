@@ -780,6 +780,11 @@ When the outer derivative certificate is already packaged as
 same finite rectangle substitution identity, so the FTC error bound is
 transported at each chosen mesh rather than inferred from a completed
 integral.
+For sums of certified primitives, use
+`ExactFunction.EffectiveFTCExact.addOfCommonSchedule`.  It requires one
+shared finite stage schedule and half-budget endpoint certificates; the
+finite identity `riemannLeftExact_add` then supplies the exact algebraic
+transport.
 
 The matching integral-side identity is
 `ComputableAnalysis.riemannLeftExact_affine_substitution`. It transports a

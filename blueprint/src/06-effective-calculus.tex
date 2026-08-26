@@ -61,6 +61,16 @@ derivative is exactly constant, and a single rectangle computes the integral
 exactly.  This is the base case for the later polynomial and special-function
 certificates.
 
+Exact FTC certificates also have a common-schedule addition closure.  The
+finite left-rectangle fold distributes over addition, while the two endpoint
+errors are paid from half-budgets.  Thus linear combinations can be assembled
+from existing certificates without a new completeness argument or a second
+integral construction.
+
+\lean{ComputableAnalysis.riemannLeftExact_add}
+\lean{ComputableAnalysis.ExactFunction.EffectiveFTCExact.addOfCommonSchedule}
+\leanok
+
 \lean{ComputableAnalysis.riemannLeftExact_constant_one}
 \lean{ComputableAnalysis.riemannLeftExact_affine_closed}
 \lean{ComputableAnalysis.riemannLeftExact_affine_error_of_pos}
