@@ -6412,6 +6412,19 @@ theorem exactRat_endpointOrderedNondecreasing
     intro x y hx hy hxy n
     simpa [exactRat_compute] using hmono x y hx hy hxy
 
+theorem exactRat_endpointOrderedNonincreasing
+    (f : Rat -> Rat) (a b : Rat)
+    (hmono : forall x y,
+      inDomainInterval a b x -> inDomainInterval a b y ->
+      x <= y -> f y <= f x) :
+    EndpointOrderedNonincreasingOnInterval (exactRat f a b) where
+  lower_mono := by
+    intro x y hx hy hxy n
+    simpa [exactRat_compute] using hmono x y hx hy hxy
+  upper_mono := by
+    intro x y hx hy hxy n
+    simpa [exactRat_compute] using hmono x y hx hy hxy
+
 /-! Pointwise addition on a common rational interval.
 
 This is the interval-level counterpart of `RealFunRaw.add`.  The domain
@@ -7932,6 +7945,34 @@ theorem toNondecreasing {F : FunctionOnInterval}
 
 end EndpointOrderedNondecreasingOnInterval
 
+/-! The decreasing counterpart keeps the endpoint coordinates in the order
+needed by interval arithmetic. -/
+structure EndpointOrderedNonincreasingOnInterval
+    (F : FunctionOnInterval) : Prop where
+  lower_mono : forall x y
+    (hx : inDomainInterval F.lower F.upper x)
+    (hy : inDomainInterval F.lower F.upper y),
+    x <= y -> forall n,
+      (F.compute y hy n).lo <= (F.compute x hx n).lo
+  upper_mono : forall x y
+    (hx : inDomainInterval F.lower F.upper x)
+    (hy : inDomainInterval F.lower F.upper y),
+    x <= y -> forall n,
+      (F.compute y hy n).hi <= (F.compute x hx n).hi
+
+namespace EndpointOrderedNonincreasingOnInterval
+
+theorem toNonincreasing {F : FunctionOnInterval}
+    (h : EndpointOrderedNonincreasingOnInterval F) :
+    NonincreasingOnInterval F := by
+  intro x y hx hy hxy n
+  have hlo := h.lower_mono x y hx hy hxy n
+  have hxordered := (F.valid_on x (F.defined_on x hx)).1 n
+  change 0 <= (F.compute x hx n).hi - (F.compute x hx n).lo at hxordered
+  grind [Rat.sub_eq_add_neg]
+
+end EndpointOrderedNonincreasingOnInterval
+
 /-! A single refinement step for the monotone Darboux construction.  The
 coarse endpoint range contains the sum of the two ranges obtained by inserting
 one rational breakpoint.  This is the local finite inequality from which
@@ -8373,6 +8414,55 @@ theorem nondecreasingDarbouxRange_overlaps_point_value
   constructor
   · exact hleft
   · exact hright
+
+/-! The mirrored endpoint range for a nonincreasing cell evaluates the right
+endpoint for the lower coordinate and the left endpoint for the upper
+coordinate. -/
+def nonincreasingDarbouxRange (F : FunctionOnInterval)
+    (P : RationalPartition F.lower F.upper)
+    (k : Nat) (hk : k < P.pieces) (prec : Nat) : QInterval :=
+  let C := P.cell k hk
+  { lo := (F.compute C.upper
+      (And.intro (Rat.le_trans C.lower_mem C.ordered) C.upper_mem) prec).lo
+    hi := (F.compute C.lower
+      (And.intro C.lower_mem (Rat.le_trans C.ordered C.upper_mem)) prec).hi }
+
+theorem nonincreasingDarbouxRange_width_nonneg
+    (F : FunctionOnInterval) (hF : NonincreasingOnInterval F)
+    (P : RationalPartition F.lower F.upper)
+    (k : Nat) (hk : k < P.pieces) (prec : Nat) :
+    0 <= (nonincreasingDarbouxRange F P k hk prec).width := by
+  let C := P.cell k hk
+  have hlower : inDomainInterval F.lower F.upper C.lower :=
+    And.intro C.lower_mem (Rat.le_trans C.ordered C.upper_mem)
+  have hupper : inDomainInterval F.lower F.upper C.upper :=
+    And.intro (Rat.le_trans C.lower_mem C.ordered) C.upper_mem
+  have horder := hF C.lower C.upper hlower hupper C.ordered prec
+  change 0 <= (F.compute C.lower hlower prec).hi -
+    (F.compute C.upper hupper prec).lo
+  grind [Rat.sub_eq_add_neg]
+
+theorem nonincreasingDarbouxRange_overlaps_point_value
+    (F : FunctionOnInterval) (hF : NonincreasingOnInterval F)
+    (P : RationalPartition F.lower F.upper)
+    (k : Nat) (hk : k < P.pieces) (x : Rat)
+    (hx : inDomainInterval F.lower F.upper x)
+    (hlo : (P.cell k hk).lower <= x)
+    (hhi : x <= (P.cell k hk).upper) (prec : Nat) :
+    QInterval.Overlaps
+      (nonincreasingDarbouxRange F P k hk prec)
+      (F.compute x hx prec) := by
+  let C := P.cell k hk
+  have hlower : inDomainInterval F.lower F.upper C.lower :=
+    And.intro C.lower_mem (Rat.le_trans C.ordered C.upper_mem)
+  have hupper : inDomainInterval F.lower F.upper C.upper :=
+    And.intro (Rat.le_trans C.lower_mem C.ordered) C.upper_mem
+  have hleft := hF x C.lower hx hlower hlo prec
+  have hright := hF C.upper x hupper hx hhi prec
+  change (F.compute C.upper hupper prec).lo <=
+      (F.compute x hx prec).hi /\
+    (F.compute x hx prec).lo <= (F.compute C.lower hlower prec).hi
+  exact ⟨hright, hleft⟩
 
 /-! With the stronger coordinatewise certificate, the endpoint range upgrades
 from overlap to genuine containment.  This is the exact point at which the

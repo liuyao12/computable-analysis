@@ -227,6 +227,13 @@ case: the two cell areas add to (1), and the primitive
 Exact rational evaluators obtain this stronger contract directly from a
 rational monotonicity proof:
 \lean{ComputableAnalysis.FunctionOnInterval.exactRat_endpointOrderedNondecreasing}
+The decreasing case has the mirrored endpoint-order contract and Darboux cell
+range:
+\lean{ComputableAnalysis.EndpointOrderedNonincreasingOnInterval}
+\lean{ComputableAnalysis.EndpointOrderedNonincreasingOnInterval.toNonincreasing}
+\lean{ComputableAnalysis.FunctionOnInterval.exactRat_endpointOrderedNonincreasing}
+\lean{ComputableAnalysis.Integral.nonincreasingDarbouxRange_width_nonneg}
+\lean{ComputableAnalysis.Integral.nonincreasingDarbouxRange_overlaps_point_value}
 \lean{ComputableAnalysis.QInterval.splitScaledEndpointRange_contains}
 The local inequality is now assembled into a complete two-stage uniform
 mesh comparison for the stronger endpoint-order certificate:
