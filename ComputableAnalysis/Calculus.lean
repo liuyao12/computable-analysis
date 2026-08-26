@@ -8442,6 +8442,43 @@ theorem nonincreasingDarbouxRange_width_nonneg
     (F.compute C.upper hupper prec).lo
   grind [Rat.sub_eq_add_neg]
 
+theorem nonincreasingDarbouxRange_width_le_of_intervalRegular
+    (F : FunctionOnInterval)
+    (hregular : IntervalRegularOn F)
+    (P : RationalPartition F.lower F.upper)
+    (k : Nat) (hk : k < P.pieces) (prec : Nat)
+    (hsmall : (P.cell k hk).width <=
+      1 / ((hregular.inputPrecision prec : Nat) : Rat)) :
+    (nonincreasingDarbouxRange F P k hk prec).width <=
+      1 / ((prec + 1 : Nat) : Rat) := by
+  let C := P.cell k hk
+  have hlower : inDomainInterval F.lower F.upper C.lower :=
+    And.intro C.lower_mem (Rat.le_trans C.ordered C.upper_mem)
+  have hupper : inDomainInterval F.lower F.upper C.upper :=
+    And.intro (Rat.le_trans C.lower_mem C.ordered) C.upper_mem
+  let I : QInterval := { lo := C.lower, hi := C.upper }
+  have hI : subintervalOf I F.lower F.upper := by
+    exact ⟨C.lower_mem, C.ordered, C.upper_mem⟩
+  have houtput := hregular.output_width I hI prec (by
+    change C.width <= _
+    exact hsmall)
+  have hlower_value := hregular.contains_point_values I hI C.lower hlower
+    prec (by simp [I]) (by simpa [I] using C.ordered)
+  have hupper_value := hregular.contains_point_values I hI C.upper hupper
+    prec (by simpa [I] using C.ordered) (by simp [I])
+  change (F.compute C.lower hlower prec).hi -
+      (F.compute C.upper hupper prec).lo <=
+    1 / ((prec + 1 : Nat) : Rat)
+  have himage : (hregular.evalInterval I hI prec).width <=
+      1 / ((prec + 1 : Nat) : Rat) := houtput.2
+  have hupper_bound :
+      (F.compute C.lower hlower prec).hi <=
+        (hregular.evalInterval I hI prec).hi := hlower_value.2
+  have hlower_bound :
+      (hregular.evalInterval I hI prec).lo <=
+        (F.compute C.upper hupper prec).lo := hupper_value.1
+  grind [QInterval.width, Rat.sub_eq_add_neg]
+
 theorem nonincreasingDarbouxRange_overlaps_point_value
     (F : FunctionOnInterval) (hF : NonincreasingOnInterval F)
     (P : RationalPartition F.lower F.upper)
@@ -8546,8 +8583,30 @@ theorem nonincreasingDarbouxStage_overlaps_rightEndpointSamples
     apply QInterval.scaleByRat_overlaps_of_nonneg
     · unfold RationalSubinterval.width
       exact (Rat.le_iff_sub_nonneg _ _).2 (P.cell k hk).ordered
-    · exact hsample k hk
+  · exact hsample k hk
   · simpa [sample, hx]
+
+theorem nonincreasingDarbouxStage_width_le_of_uniform_input_budget
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (pieces : Nat) (hpieces : 0 < pieces) (hab : F.lower <= F.upper)
+    (prec : Nat)
+    (hsmall : mesh F.lower F.upper pieces <=
+      1 / ((hregular.inputPrecision prec : Nat) : Rat)) :
+    (nonincreasingDarbouxStage F
+      (RationalPartition.uniform F.lower F.upper pieces hpieces hab) prec).width <=
+      (F.upper - F.lower) * (1 / ((prec + 1 : Nat) : Rat)) := by
+  unfold nonincreasingDarbouxStage
+  apply RationalPartition.uniform_boundIntegralSum_width_le
+    pieces hpieces hab
+    (fun k hk => nonincreasingDarbouxRange F
+      (RationalPartition.uniform F.lower F.upper pieces hpieces hab) k hk prec)
+    (1 / ((prec + 1 : Nat) : Rat))
+  intro k hk
+  apply nonincreasingDarbouxRange_width_le_of_intervalRegular
+    F hregular (RationalPartition.uniform F.lower F.upper pieces hpieces hab)
+    k hk prec
+  simpa [RationalPartition.uniform_cell_width F.lower F.upper pieces hpieces hab k hk]
+    using hsmall
 
 /-! With the stronger coordinatewise certificate, the endpoint range upgrades
 from overlap to genuine containment.  This is the exact point at which the

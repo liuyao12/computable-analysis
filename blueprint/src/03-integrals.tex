@@ -238,6 +238,10 @@ The cell result lifts to a complete decreasing partition stage, sampled at
 right endpoints:
 \lean{ComputableAnalysis.Integral.nonincreasingDarbouxStage_width_nonneg}
 \lean{ComputableAnalysis.Integral.nonincreasingDarbouxStage_overlaps_rightEndpointSamples}
+Interval regularity supplies the matching shrinking-width estimate for that
+decreasing stage:
+\lean{ComputableAnalysis.Integral.nonincreasingDarbouxRange_width_le_of_intervalRegular}
+\lean{ComputableAnalysis.Integral.nonincreasingDarbouxStage_width_le_of_uniform_input_budget}
 \lean{ComputableAnalysis.QInterval.splitScaledEndpointRange_contains}
 The local inequality is now assembled into a complete two-stage uniform
 mesh comparison for the stronger endpoint-order certificate:
