@@ -1669,6 +1669,7 @@ open ComputableAnalysis
 #check RealRaw.mul_valid
 #check RealRaw.mul_equiv
 #check QInterval.inv_of_pos
+#check QInterval.inv_overlaps_of_pos
 #check QInterval.inv_ordered_of_pos
 #check QInterval.inv_width_eq_width_div_product_of_pos
 #check QInterval.inv_nested_of_pos
