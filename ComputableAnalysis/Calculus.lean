@@ -7962,6 +7962,46 @@ def nondecreasingDarbouxStage (F : FunctionOnInterval)
   P.boundIntegralSum
     (fun k hk => nondecreasingDarbouxRange F P k hk prec)
 
+/-! Evaluator refinement is automatically coherent when the partition is held
+fixed.  The endpoint boxes at a later precision are contained in the earlier
+boxes, and positive cell-width scaling plus the finite-sum containment lemma
+lift this to the complete Darboux stage. -/
+theorem nondecreasingDarbouxStage_contains_of_precision
+    (F : FunctionOnInterval)
+    (P : RationalPartition F.lower F.upper)
+    (p q : Nat) (hpq : p <= q) :
+    QInterval.ContainsInterval
+      (nondecreasingDarbouxStage F P p)
+      (nondecreasingDarbouxStage F P q) := by
+  have hterm : forall k (hk : k < P.pieces),
+      QInterval.ContainsInterval
+        (nondecreasingDarbouxRange F P k hk p)
+        (nondecreasingDarbouxRange F P k hk q) := by
+    intro k hk
+    let C := P.cell k hk
+    have hlower : inDomainInterval F.lower F.upper C.lower :=
+      And.intro C.lower_mem (Rat.le_trans C.ordered C.upper_mem)
+    have hupper : inDomainInterval F.lower F.upper C.upper :=
+      And.intro (Rat.le_trans C.lower_mem C.ordered) C.upper_mem
+    have hleft := (F.valid_on C.lower
+      (F.defined_on C.lower hlower)).2.1 p q hpq
+    have hright := (F.valid_on C.upper
+      (F.defined_on C.upper hupper)).2.1 p q hpq
+    change (F.compute C.lower hlower p).lo <=
+        (F.compute C.lower hlower q).lo /\
+      (F.compute C.upper hupper q).hi <=
+        (F.compute C.upper hupper p).hi
+    exact ⟨hleft.1, hright.2.2⟩
+  unfold nondecreasingDarbouxStage
+  apply P.boundIntegralSum_contains_of_termwise
+  intro k hk
+  simp only [RationalPartition.boundIntegralTerm, dif_pos hk]
+  apply QInterval.scaleByRat_contains_of_nonneg
+  · unfold RationalSubinterval.width
+    have hcell := (P.cell k hk).ordered
+    grind
+  · exact hterm k hk
+
 /-! The cellwise containment lifts through the positive cell-width scaling and
 the finite partition sum.  This is the strong-order counterpart of the weak
 left-endpoint overlap theorem. -/
