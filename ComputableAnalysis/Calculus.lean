@@ -8113,6 +8113,20 @@ theorem intervalRegularDarbouxScheduleIntegralFor_valid
     (intervalRegularDarbouxScheduleIntegralFor s).Valid :=
   Integral.integralFor_valid F (intervalRegularDarbouxScheduleConstructionFor s)
 
+/-! The public integral constructor preserves the schedule's finite width
+budget.  This is the general consumer-facing form; specialized schedules can
+instantiate it with their own tolerance estimate. -/
+theorem intervalRegularDarbouxScheduleIntegralFor_width_le_of_tolerance
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hinterval : F.lower <= F.upper}
+    (s : IntervalRegularDarbouxSchedule F hregular hinterval)
+    (n : Nat) (eps : Rat)
+    (hbudget : (F.upper - F.lower) *
+        (1 / ((s.evalPrecision n + 1 : Nat) : Rat)) <= eps) :
+    ((intervalRegularDarbouxScheduleIntegralFor s).compute n).width <= eps := by
+  change ((intervalRegularDarbouxScheduleRaw s).compute n).width <= eps
+  exact intervalRegularDarbouxScheduleRaw_width_le_of_tolerance s n eps hbudget
+
 /-! A schedule-level bridge for the monotone Darboux algorithm.  The
 finite width theorem above is useful only once its stages are assembled into
 a valid raw computation.  This structure records precisely the remaining
