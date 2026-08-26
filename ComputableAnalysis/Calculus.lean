@@ -3972,6 +3972,19 @@ theorem Refines.exists_coarse_cell_containing_fine_cell {a b : Rat}
     hi hleft hright
   exact ⟨i, hi, hcontained.1, hcontained.2⟩
 
+/-- Index blocks for separated coarse cells are disjoint.  The half-open
+index convention is important here: adjacent blocks may meet at an embedded
+breakpoint, but no fine cell index belongs to both. -/
+theorem Refines.index_blocks_disjoint_of_order {a b : Rat}
+    {fine coarse : RationalPartition a b} (R : Refines fine coarse)
+    {i k j : Nat} (hik : i + 1 <= k)
+    (hleft : R.index i <= j) (hright : j < R.index (i + 1))
+    (hkleft : R.index k <= j) (hkright : j < R.index (k + 1)) :
+    False := by
+  have hmid : R.index (i + 1) <= R.index k :=
+    R.index_mono _ _ hik
+  omega
+
 /-- Every genuine cell of an explicit uniform partition has exactly its
 rational mesh width. -/
 theorem uniform_cell_width (a b : Rat) (pieces : Nat)
