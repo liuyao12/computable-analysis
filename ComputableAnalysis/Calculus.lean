@@ -8057,6 +8057,41 @@ theorem intervalRegularDarbouxScheduleRaw_width_le_of_tolerance
       (s.evalPrecision n) (s.input_budget n))
     hbudget
 
+/-! The linear schedule exposes its actual finite error budget directly.  This
+is the estimate a later endpoint or FTC certificate can consume without
+reconstructing the schedule fields. -/
+theorem intervalRegularDarbouxScheduleRaw_linear_width_le
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    {hinterval : F.lower <= F.upper} (lengthBound : Nat)
+    (hLength : F.upper - F.lower <= (lengthBound : Rat))
+    (nested : forall n m, n <= m ->
+      (intervalRegularDarbouxScheduleCompute F hinterval hregular
+        (fun n => intervalRegularAutomaticPieces hregular lengthBound (fun k => k) n)
+        (fun n => n)
+        (fun n => intervalRegularAutomaticPieces_pos hregular lengthBound (fun k => k) n) n).lo <=
+      (intervalRegularDarbouxScheduleCompute F hinterval hregular
+        (fun n => intervalRegularAutomaticPieces hregular lengthBound (fun k => k) n)
+        (fun n => n)
+        (fun n => intervalRegularAutomaticPieces_pos hregular lengthBound (fun k => k) n) m).lo /\
+      (intervalRegularDarbouxScheduleCompute F hinterval hregular
+        (fun n => intervalRegularAutomaticPieces hregular lengthBound (fun k => k) n)
+        (fun n => n)
+        (fun n => intervalRegularAutomaticPieces_pos hregular lengthBound (fun k => k) n) m).hi <=
+      (intervalRegularDarbouxScheduleCompute F hinterval hregular
+        (fun n => intervalRegularAutomaticPieces hregular lengthBound (fun k => k) n)
+        (fun n => n)
+        (fun n => intervalRegularAutomaticPieces_pos hregular lengthBound (fun k => k) n) n).hi) :
+    forall n : Nat,
+      ((intervalRegularDarbouxScheduleRaw
+        (IntervalRegularDarbouxSchedule.ofAutomaticLinearPrecision
+          hregular lengthBound hLength nested)).compute n).width <=
+        (F.upper - F.lower) * (1 / ((n + 1 : Nat) : Rat)) := by
+  intro n
+  let s := IntervalRegularDarbouxSchedule.ofAutomaticLinearPrecision
+    hregular lengthBound hLength nested
+  apply intervalRegularDarbouxScheduleRaw_width_le_of_tolerance s n
+  exact Rat.le_refl
+
 def intervalRegularDarbouxScheduleConstructionFor
     {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
     {hinterval : F.lower <= F.upper}

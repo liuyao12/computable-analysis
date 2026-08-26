@@ -129,6 +129,8 @@ endpoint difference.  It is therefore both a completed exponential FTC
 instance and the local ODE provider; the remaining exponential frontier is
 representation transport for a fully general inverse branch.
 
+The linear automatic schedule now exposes its explicit finite error budget via
+\lean{ComputableAnalysis.Integral.intervalRegularDarbouxScheduleRaw_linear_width_le}.
 For general effective continuity, the remaining schedule problem is explicit:
 choose a mesh and evaluator precision satisfying the interval-modulus budget,
 then prove cross-stage nesting and shrinking. The blueprint treats this as a
