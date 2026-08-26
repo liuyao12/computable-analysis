@@ -2999,6 +2999,15 @@ theorem prefixStabilize_contained_in_current_expand
   exact prefixStabilizeCompute_contained_in_current_expand
     candidate.compute radius n
 
+theorem prefixStabilize_width_le_current_expand
+    (candidate : RealRaw) (radius : Nat -> Rat) (n : Nat) :
+    ((prefixStabilize candidate radius).compute n).width <=
+      (candidate.compute n).width + 2 * radius n := by
+  have hcontains := prefixStabilize_contained_in_current_expand candidate radius n
+  exact Rat.le_trans
+    (QInterval.width_le_of_contains hcontains)
+    (by rw [QInterval.expand_width]; exact Rat.le_refl)
+
 private theorem prefixStabilizeCompute_step_nested
     (candidate : Nat -> QInterval) (radius : Nat -> Rat) (n : Nat) :
     (prefixStabilizeCompute candidate radius n).lo <=
