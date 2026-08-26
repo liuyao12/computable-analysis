@@ -7627,6 +7627,26 @@ theorem dyadicNestedRadicalSampleRaw_stabilized_equiv_anchor_of_equiv
   intro n
   exact Rat.le_refl
 
+/-! A witness schedule now promotes the nested-radical candidate to a public
+valid sample representation.  The public sine raw is the anchor: its validity
+comes from the construction, while the schedule supplies only the stagewise
+overlap edge. -/
+theorem ArctanSinPiConstruction.dyadicNestedRadicalSampleRaw_stabilized_equiv
+    (S : ArctanSinPiConstruction) {depth k : Nat} (hk : k < 2 ^ depth)
+    (d : DyadicTangentWitnessSchedule S.inverse depth k hk) :
+    (dyadicNestedRadicalSampleRaw_stabilized
+      (sinPiRawOfArctan S.inverse
+        (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+        (dyadicHalfDomain hk)) depth k).Equiv
+      (sinPiRawOfArctan S.inverse
+        (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+        (dyadicHalfDomain hk)) := by
+  apply dyadicNestedRadicalSampleRaw_stabilized_equiv_anchor_of_equiv hk
+    (S.sin_valid _ _)
+  exact RealRaw.equiv_symm
+    (arctanSinPi_nestedRadicalSample_equiv_of_witness_schedule
+      d)
+
 theorem dyadicNestedRadicalTableAt_succ_even
     (precision n k : Nat) :
     dyadicNestedRadicalTableAt precision (n + 1) (2 * k) =

@@ -1116,6 +1116,9 @@ The candidate side now also exposes
 `dyadicNestedRadicalSampleRaw_stabilized`: once the semantic overlap for one
 sample is proved, prefix stabilization supplies a valid public raw without
 silently assuming that the raw nested-radical boxes are cross-stage nested.
+`ArctanSinPiConstruction.dyadicNestedRadicalSampleRaw_stabilized_equiv`
+connects that stabilized candidate to the public sine sample when the
+all-precision witness schedule is supplied.
 The lower-level theorem
 `SinPiTransportSubgoals.exists_dyadic_tangent_witness_search_of_overlap_family`
 now exposes the finite boundary precisely: once an all-depth overlap family
