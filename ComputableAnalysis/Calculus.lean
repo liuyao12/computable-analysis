@@ -9272,6 +9272,39 @@ structure MonotoneDarbouxSchedule
     (monotoneDarbouxScheduleCompute F hinterval pieces evalPrecision
       pieces_pos)
 
+/-! Build a dyadic monotone schedule from the stronger endpoint-order
+certificate.  The mesh budget and shrinking-width witness remain explicit
+inputs; only the repetitive finite stage-nesting proof is discharged here. -/
+def MonotoneDarbouxSchedule.ofDyadicEndpointOrdered
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    (hF : EndpointOrderedNondecreasingOnInterval F)
+    (hinterval : F.lower <= F.upper)
+    (evalPrecision : Nat -> Nat)
+    (hprecision : forall {n m : Nat}, n <= m ->
+      evalPrecision n <= evalPrecision m)
+    (hbudget : forall n : Nat,
+      mesh F.lower F.upper (2 ^ n) <=
+        1 / ((hregular.inputPrecision (evalPrecision n) : Nat) : Rat))
+    (hwidths : RealRaw.WidthsShrinkToZero
+      (monotoneDarbouxScheduleCompute F hinterval
+        (fun n => 2 ^ n) evalPrecision
+        (fun n => by positivity))) :
+    MonotoneDarbouxSchedule F hregular hF.toNondecreasing hinterval where
+  pieces := fun n => 2 ^ n
+  evalPrecision := evalPrecision
+  pieces_pos := by
+    intro n
+    positivity
+  input_budget := hbudget
+  nested := by
+    intro n m hnm
+    have h := endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage_of_precision_mono
+      F hF hinterval evalPrecision hprecision hnm
+    simpa [monotoneDarbouxScheduleCompute,
+      nondecreasingDarbouxDyadicStage] using h
+  widths_shrink := by
+    simpa using hwidths
+
 def monotoneDarbouxScheduleRaw
     {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
     {hmonotone : NondecreasingOnInterval F}
