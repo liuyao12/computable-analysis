@@ -7430,6 +7430,25 @@ theorem intervalRegularDarbouxStage_contains_of_cellwise
   simpa [RationalPartition.boundIntegralTerm,
     RationalSubinterval.scaleBound, RationalSubinterval.width, hk] using hscaled
 
+/-- A nonnegative cellwise sample sum therefore overlaps the interval-regular
+Darboux stage.  The nonnegative-width premise is explicit because containment
+alone does not make an arbitrary interval a valid finite value. -/
+theorem intervalRegularDarbouxStage_overlaps_of_cellwise
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (P : RationalPartition F.lower F.upper) (prec : Nat)
+    (sample : (k : Nat) -> k < P.pieces -> QInterval)
+    (hsample : forall k (hk : k < P.pieces),
+      (intervalRegularDarbouxRange F hregular P k hk prec).ContainsInterval
+        (sample k hk))
+    (hsample_width : 0 <= (P.boundIntegralSum sample).width) :
+    QInterval.Overlaps
+      (intervalRegularDarbouxStage F hregular P prec)
+      (P.boundIntegralSum sample) := by
+  apply QInterval.overlaps_of_contains_right
+    (intervalRegularDarbouxStage_contains_of_cellwise
+      F hregular P prec sample hsample)
+  exact hsample_width
+
 theorem intervalRegularDarbouxStage_width_le_of_uniform_input_budget
     (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
     (pieces : Nat) (hpieces : 0 < pieces) (hab : F.lower <= F.upper)
