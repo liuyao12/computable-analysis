@@ -838,6 +838,78 @@ theorem mul_valid {x y : RealRaw}
         grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
   exact Rat.le_trans hwidth hscaled
 
+/-- Equivalent raw-real representatives remain equivalent after the literal
+four-corner product.  The witness is constructive: at each stage take the
+midpoint of the explicit intersection of the two input intervals, then use
+the finite product enclosure for the common rational product. -/
+theorem mul_equiv {x x' y y' : RealRaw}
+    (hx : x.Valid) (hx' : x'.Valid)
+    (hy : y.Valid) (hy' : y'.Valid)
+    (hxx' : x.Equiv x') (hyy' : y.Equiv y') :
+    (mul x y).Equiv (mul x' y') := by
+  intro n
+  have hxx := (compareAt_overlap_iff x x' n n).1 (hxx' n)
+  have hyy := (compareAt_overlap_iff y y' n n).1 (hyy' n)
+  have hxord : (QInterval.intersection (x.compute n) (x'.compute n)).lo <=
+      (QInterval.intersection (x.compute n) (x'.compute n)).hi := by
+    apply QInterval.intersection_ordered_of_overlaps
+      (interval_order_of_valid x hx n)
+      (interval_order_of_valid x' hx' n)
+    exact hxx
+  have hyord : (QInterval.intersection (y.compute n) (y'.compute n)).lo <=
+      (QInterval.intersection (y.compute n) (y'.compute n)).hi := by
+    apply QInterval.intersection_ordered_of_overlaps
+      (interval_order_of_valid y hy n)
+      (interval_order_of_valid y' hy' n)
+    exact hyy
+  let p : Rat := QInterval.midpoint
+    (QInterval.intersection (x.compute n) (x'.compute n))
+  let q : Rat := QInterval.midpoint
+    (QInterval.intersection (y.compute n) (y'.compute n))
+  have hp :
+      (QInterval.intersection (x.compute n) (x'.compute n)).lo <= p /\
+      p <= (QInterval.intersection (x.compute n) (x'.compute n)).hi := by
+    exact QInterval.midpoint_mem hxord
+  have hq :
+      (QInterval.intersection (y.compute n) (y'.compute n)).lo <= q /\
+      q <= (QInterval.intersection (y.compute n) (y'.compute n)).hi := by
+    exact QInterval.midpoint_mem hyord
+  have hxp : (x.compute n).lo <= p /\ p <= (x.compute n).hi := by
+    have hleft := QInterval.intersection_contained_left
+      (x.compute n) (x'.compute n)
+    have hright := QInterval.intersection_contained_left
+      (x.compute n) (x'.compute n)
+    exact ⟨Rat.le_trans hleft.1 hp.1, Rat.le_trans hp.2 hright.2⟩
+  have hxp' : (x'.compute n).lo <= p /\ p <= (x'.compute n).hi := by
+    have hleft := QInterval.intersection_contained_right
+      (x.compute n) (x'.compute n)
+    have hright := QInterval.intersection_contained_right
+      (x.compute n) (x'.compute n)
+    exact ⟨Rat.le_trans hleft.1 hp.1, Rat.le_trans hp.2 hright.2⟩
+  have hyp : (y.compute n).lo <= q /\ q <= (y.compute n).hi := by
+    have hleft := QInterval.intersection_contained_left
+      (y.compute n) (y'.compute n)
+    have hright := QInterval.intersection_contained_left
+      (y.compute n) (y'.compute n)
+    exact ⟨Rat.le_trans hleft.1 hq.1, Rat.le_trans hq.2 hright.2⟩
+  have hyp' : (y'.compute n).lo <= q /\ q <= (y'.compute n).hi := by
+    have hleft := QInterval.intersection_contained_right
+      (y.compute n) (y'.compute n)
+    have hright := QInterval.intersection_contained_right
+      (y.compute n) (y'.compute n)
+    exact ⟨Rat.le_trans hleft.1 hq.1, Rat.le_trans hq.2 hright.2⟩
+  apply (compareAt_overlap_iff (mul x y) (mul x' y') n n).2
+  change QInterval.Overlaps
+    (QBox.mulRealInterval
+      (x.compute n).lo (x.compute n).hi
+      (y.compute n).lo (y.compute n).hi)
+    (QBox.mulRealInterval
+      (x'.compute n).lo (x'.compute n).hi
+      (y'.compute n).lo (y'.compute n).hi)
+  have hprod := QBox.mulRealInterval_contains hxp.1 hxp.2 hyp.1 hyp.2
+  have hprod' := QBox.mulRealInterval_contains hxp'.1 hxp'.2 hyp'.1 hyp'.2
+  exact ⟨Rat.le_trans hprod.1 hprod'.2, Rat.le_trans hprod'.1 hprod.2⟩
+
 end RealRaw
 
 namespace ComplexRaw
