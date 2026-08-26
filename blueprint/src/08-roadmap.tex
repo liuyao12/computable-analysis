@@ -89,11 +89,13 @@ real numbers.
 
 The candidate side is already executable and shrinking: the first four finite
 depths have explicit overlap checks against the independent Stieltjes
-evaluator.  These anchors are recorded by
+evaluator.  These opt-in anchors (from
+\texttt{ComputableAnalysis.SinPiIntegralAnchors}) are recorded by
 \texttt{dyadicNestedRadicalLeftSum\_zero\_overlaps\_stieltjes} and
 \texttt{dyadicNestedRadicalLeftSum\_one\_overlaps\_stieltjes} and
-\texttt{dyadicNestedRadicalLeftSum\_two\_overlaps\_stieltjes} and
-\texttt{dyadicNestedRadicalLeftSum\_three\_overlaps\_stieltjes}; the remaining theorem is
+\texttt{dyadicNestedRadicalLeftSum\_two\_overlaps\_stieltjes},
+\texttt{dyadicNestedRadicalLeftSum\_three\_overlaps\_stieltjes}, and
+\texttt{dyadicNestedRadicalLeftSum\_four\_overlaps\_stieltjes}; the remaining theorem is
 the uniform branch transport, not the existence of the candidate algorithm.
 The finite-search side is now complete as an interface: an explicit admissible
 rational witness in a candidate list yields a certified search hit, and
