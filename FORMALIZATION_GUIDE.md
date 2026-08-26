@@ -40,9 +40,9 @@ The current strong point is checking specified rational and complex interval
 arguments, finite linear systems, and certified special-function
 representations. The following general constructions remain active targets:
 
-- product and quotient rules for arbitrary interval evaluators (the
-  affine-product finite certificate is now checked; the general interval
-  closure remains an active target);
+- quotient rules for arbitrary interval evaluators (the affine-product finite
+  certificate is checked; signed raw-real multiplication is now closed, while
+  function-level products still require explicit local range bounds);
 - general chain rules for arbitrary interval evaluators (the exact rational
   layer now has a budget-explicit `EffectiveDerivativeExact.compOfBudget`; an
   interval-valued composition still needs its own box-level contract);
@@ -910,13 +910,14 @@ stagewise computation.  The validity proof is inherited from
 `RealRaw.add_valid`; continuity, derivative certificates, and FTC data remain
 separate obligations.
 
-For products, use `FunctionOnInterval.mulOfNonnegBounded`.  It requires a
-pointwise rational majorant for each nonnegative factor, which is the finite
-condition needed to keep interval multiplication nested and shrinking.  Its
-companion `mulOfNonnegBounded_compute` exposes the stagewise `QBox` product;
-this is the preferred entry point for a subsequent derivative or FTC
-certificate.  Signed or unbounded products remain separate targets rather
-than being silently inferred from an ambient real multiplication operation.
+For function-level products, use `FunctionOnInterval.mulOfNonnegBounded`.  It
+requires a pointwise rational majorant for each nonnegative factor, which is
+the finite condition needed by that representative function chart.  Its
+companion `mulOfNonnegBounded_compute` exposes the stagewise product.  At the
+raw-real level, arbitrary signed inputs are already closed under the literal
+four-corner product; use `RealRaw.mul_valid` and `RealRaw.mul_equiv`.  This
+does not remove the need to state local range hypotheses for a particular
+interval-valued function or derivative certificate.
 
 When two factor charts are connected by `FunctionOnInterval.Equivalent`,
 transport their certified bounded product with
@@ -1655,6 +1656,19 @@ nesting, and a rational width estimate.  The width schedule is obtained from
 the two stage-zero boxes: nested validity keeps all later coordinates within
 their explicit rational radii.  Thus general `ComplexRaw.mul` is a valid raw
 computation and respects overlap equivalence.
+
+The scalar version is available through the same interval mechanism:
+
+```lean
+import ComputableAnalysis.ComplexMultiplication
+
+open ComputableAnalysis
+
+#check RealRaw.mul_compute_ordered
+#check RealRaw.mul_compute_nested
+#check RealRaw.mul_valid
+#check RealRaw.mul_equiv
+```
 
 ```lean
 import ComputableAnalysis.ComplexMultiplication
