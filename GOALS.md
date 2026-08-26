@@ -5538,7 +5538,8 @@ by one for every nonempty input.
   `Integral.IntervalRegularDarbouxSchedule` packages orderedness, cross-stage
   nesting, and shrinking widths into a valid `RealRaw` and
   `Integral.ConstructionFor`.  Automatic synthesis of those coherence
-  certificates from regularity alone remains future work.
+  certificates from regularity alone remains future work; routine mesh sizing
+  is now automated by `Integral.intervalRegularAutomaticPieces_input_budget`.
 - Next FTA extensions: complex-coefficient linear polynomials using certified
   complex division away from zero, arbitrary quadratics via a computable
   discriminant square root, then

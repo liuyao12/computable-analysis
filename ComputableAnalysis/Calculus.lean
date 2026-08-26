@@ -7454,6 +7454,64 @@ structure IntervalRegularDarbouxSchedule
     (intervalRegularDarbouxScheduleCompute F hinterval hregular
       pieces evalPrecision pieces_pos)
 
+/-! Automatic mesh sizing is finite bookkeeping, not an analytic theorem.  A
+natural bound for the interval length is enough to choose a positive number
+of uniform cells whose mesh meets the regularity modulus. -/
+def intervalRegularAutomaticPieces
+    (hregular : IntervalRegularOn F) (lengthBound : Nat)
+    (evalPrecision : Nat -> Nat) (n : Nat) : Nat :=
+  hregular.inputPrecision (evalPrecision n) * max 1 lengthBound
+
+theorem intervalRegularAutomaticPieces_pos
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    (lengthBound : Nat) (evalPrecision : Nat -> Nat) (n : Nat) :
+    0 < intervalRegularAutomaticPieces hregular lengthBound evalPrecision n := by
+  unfold intervalRegularAutomaticPieces
+  have hp : 0 < hregular.inputPrecision (evalPrecision n) :=
+    hregular.inputPrecision_pos _
+  have hq : 0 < max 1 lengthBound := by omega
+  exact Nat.mul_pos hp hq
+
+theorem intervalRegularAutomaticPieces_input_budget
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    {a b : Rat} (hab : a <= b) (lengthBound : Nat)
+    (hLength : b - a <= (lengthBound : Rat))
+    (evalPrecision : Nat -> Nat) (n : Nat) :
+    mesh a b (intervalRegularAutomaticPieces hregular lengthBound
+      evalPrecision n) <=
+      1 / ((hregular.inputPrecision (evalPrecision n) : Nat) : Rat) := by
+  let p : Nat := hregular.inputPrecision (evalPrecision n)
+  let q : Nat := max 1 lengthBound
+  have hp : 0 < p := by
+    dsimp [p]
+    exact hregular.inputPrecision_pos _
+  have hq : 0 < q := by
+    dsimp [q]
+    omega
+  have hqbound : (lengthBound : Rat) <= (q : Rat) := by
+    dsimp [q]
+    exact_mod_cast (Nat.le_max_right 1 lengthBound)
+  have hlenq : b - a <= (q : Rat) := Rat.le_trans hLength hqbound
+  have hpq : 0 < p * q := Nat.mul_pos hp hq
+  unfold mesh
+  change (if p * q = 0 then 0 else (b - a) / ((p * q : Nat) : Rat)) <=
+    1 / (p : Rat)
+  rw [if_neg (Nat.ne_of_gt hpq)]
+  change (b - a) / ((p * q : Nat) : Rat) <= 1 / (p : Rat)
+  apply Rat.le_of_mul_le_mul_right (c := ((p * q : Nat) : Rat))
+  · rw [Rat.div_def]
+    rw [Rat.natCast_mul]
+    have hppos : (0 : Rat) < (p : Rat) := by exact_mod_cast hp
+    have hqpos : (0 : Rat) < (q : Rat) := by exact_mod_cast hq
+    have hpne : (p : Rat) ≠ 0 := Rat.ne_of_gt hppos
+    have hqne : (q : Rat) ≠ 0 := Rat.ne_of_gt hqpos
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel _ hpne,
+      Rat.mul_inv_cancel _ hqne]
+  · have hppos : (0 : Rat) < (p : Rat) := by exact_mod_cast hp
+    have hqpos : (0 : Rat) < (q : Rat) := by exact_mod_cast hq
+    rw [Rat.natCast_mul]
+    exact Rat.mul_pos hppos hqpos
+
 def intervalRegularDarbouxScheduleRaw
     {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
     {hinterval : F.lower <= F.upper}

@@ -1011,6 +1011,10 @@ value valid, and
 `Integral.intervalRegularDarbouxScheduleConstructionFor` exposes it through
 the ordinary integral interface. This is the preferred route for a new
 non-monotone function with an explicit finite schedule.
+The routine mesh obligation can be discharged by
+`Integral.intervalRegularAutomaticPieces_input_budget` after supplying a
+natural upper bound for the rational interval length; the corresponding
+`intervalRegularAutomaticPieces_pos` theorem supplies positivity.
 
 For a nondecreasing `FunctionOnInterval F`,
 `Integral.nondecreasingDarbouxRange F P k hk prec` is the endpoint box for
