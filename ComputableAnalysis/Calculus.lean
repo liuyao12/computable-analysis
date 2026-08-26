@@ -1528,6 +1528,51 @@ theorem splitScaledEndpointRange_contains
     rw [hidentity]
     exact hupp'
 
+/-! The same finite inequality with the endpoint orientation reversed.  It is
+the local refinement step for a nonincreasing Darboux range: the right cell's
+lower endpoint and the left cell's upper endpoint are the two coordinates that
+must be compared. -/
+theorem splitScaledEndpointRange_contains_decreasing
+    {a b c : Rat} (hab : a <= b) (hbc : b <= c)
+    {A B C : QInterval}
+    (hAlo : A.lo <= B.lo) (hBhi : B.hi <= C.hi) :
+    (scaleByRat (c - a) { lo := A.lo, hi := C.hi }).ContainsInterval
+      (addInterval
+        (scaleByRat (b - a) { lo := B.lo, hi := C.hi })
+        (scaleByRat (c - b) { lo := A.lo, hi := B.hi })) := by
+  have hab' : 0 <= b - a := (Rat.le_iff_sub_nonneg _ _).1 hab
+  have hbc' : 0 <= c - b := (Rat.le_iff_sub_nonneg _ _).1 hbc
+  have hac' : 0 <= c - a := by
+    calc
+      0 <= (b - a) + (c - b) := Rat.add_nonneg hab' hbc'
+      _ = c - a := by grind [Rat.sub_eq_add_neg, Rat.add_assoc]
+  unfold scaleByRat addInterval ContainsInterval
+  simp only [if_pos hab', if_pos hbc', if_pos hac']
+  have hAlo' : 0 <= B.lo - A.lo :=
+    (Rat.le_iff_sub_nonneg _ _).1 hAlo
+  have hBhi' : 0 <= C.hi - B.hi :=
+    (Rat.le_iff_sub_nonneg _ _).1 hBhi
+  have hlow : 0 <= (b - a) * (B.lo - A.lo) :=
+    Rat.mul_nonneg hab' hAlo'
+  have hupp : 0 <= (c - b) * (C.hi - B.hi) :=
+    Rat.mul_nonneg hbc' hBhi'
+  constructor
+  · apply (Rat.le_iff_sub_nonneg _ _).2
+    rw [show ((b - a) * B.lo + (c - b) * A.lo) -
+      (c - a) * A.lo = (b - a) * (B.lo - A.lo) by
+        grind [Rat.sub_eq_add_neg, Rat.add_mul, Rat.mul_add,
+          Rat.mul_neg, Rat.neg_mul, Rat.neg_neg, Rat.add_assoc,
+          Rat.add_comm]]
+    exact hlow
+  · apply (Rat.le_iff_sub_nonneg _ _).2
+    rw [show (c - a) * C.hi -
+      ((b - a) * C.hi + (c - b) * B.hi) =
+        (c - b) * (C.hi - B.hi) by
+        grind [Rat.sub_eq_add_neg, Rat.add_mul, Rat.mul_add,
+          Rat.mul_neg, Rat.neg_mul, Rat.neg_neg, Rat.add_assoc,
+          Rat.add_comm]]
+    exact hupp
+
 /-- Positive rational scaling preserves finite interval containment.  This is
 the scaling direction used when a derivative bound is converted into an
 endpoint-difference bound on a rational cell. -/
@@ -7998,6 +8043,26 @@ theorem endpointOrderedNondecreasing_splitScaledEndpointRange_contains
   · exact hF.lower_mono a b ha hb hab prec
   · exact hF.upper_mono b c hb hc hbc prec
 
+theorem endpointOrderedNonincreasing_splitScaledEndpointRange_contains
+    (F : FunctionOnInterval)
+    (hF : EndpointOrderedNonincreasingOnInterval F)
+    {a b c : Rat}
+    (ha : inDomainInterval F.lower F.upper a)
+    (hb : inDomainInterval F.lower F.upper b)
+    (hc : inDomainInterval F.lower F.upper c)
+    (hab : a <= b) (hbc : b <= c) (prec : Nat) :
+    QInterval.ContainsInterval
+      (QInterval.scaleByRat (c - a)
+        { lo := (F.compute c hc prec).lo, hi := (F.compute a ha prec).hi })
+      (QInterval.addInterval
+        (QInterval.scaleByRat (b - a)
+          { lo := (F.compute b hb prec).lo, hi := (F.compute a ha prec).hi })
+        (QInterval.scaleByRat (c - b)
+          { lo := (F.compute c hc prec).lo, hi := (F.compute b hb prec).hi })) := by
+  apply QInterval.splitScaledEndpointRange_contains_decreasing hab hbc
+  · exact hF.lower_mono b c hb hc hbc prec
+  · exact hF.upper_mono a b ha hb hab prec
+
 namespace MonotoneOnInterval
 
 def ofNondecreasing {F : FunctionOnInterval}
@@ -8804,6 +8869,14 @@ theorem endpointOrderedNondecreasingDarbouxStage_contains_uniform_double
     RationalSubinterval.width, RationalPartition.uniform_cell_width,
     RationalPartition.uniform, leftPoint, Nat.mul_add, Nat.add_mul] using hcoarse
 
+/-! The static dyadic instance of the monotone Darboux stage. -/
+def nondecreasingDarbouxDyadicStage (F : FunctionOnInterval)
+    (hinterval : F.lower <= F.upper) (evalPrecision : Nat -> Nat)
+    (n : Nat) : QInterval :=
+  let P := RationalPartition.uniform F.lower F.upper (2 ^ n)
+    (Nat.pow_pos (by omega : 0 < 2)) hinterval
+  nondecreasingDarbouxStage F P (evalPrecision n)
+
 /-! Arbitrary dyadic stages follow by finite composition of the preceding
 doubling certificate.  The evaluator precision is held fixed here; a
 precision schedule is handled separately by the evaluator-nesting fields of a
@@ -9086,13 +9159,6 @@ theorem nondecreasingDarbouxStage_overlaps_leftEndpointSamples
 chapter's increasing-function pseudocode.  The nondecreasing proof is not an
 input to this executable calculation; it is consumed by the later orderedness
 and shrinking certificates. -/
-def nondecreasingDarbouxDyadicStage (F : FunctionOnInterval)
-    (hinterval : F.lower <= F.upper) (evalPrecision : Nat -> Nat)
-    (n : Nat) : QInterval :=
-  let P := RationalPartition.uniform F.lower F.upper (2 ^ n)
-    (Nat.pow_pos (by omega : 0 < 2)) hinterval
-  nondecreasingDarbouxStage F P (evalPrecision n)
-
 /-! The cell estimate composes with the finite uniform-partition fold. -/
 theorem nondecreasingDarbouxStage_width_le_of_uniform_input_budget
     (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
