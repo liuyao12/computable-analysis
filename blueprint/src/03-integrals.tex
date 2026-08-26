@@ -107,6 +107,11 @@ function-specific, and is supplied as an explicit completion certificate.
 \begin{verbatim}
 mesh -> cell classification -> lower/upper rectangles -> overlap
 \end{verbatim}
+For a refinement certificate, every fine cell can first be located between two
+consecutive embedded coarse breakpoints:
+\lean{ComputableAnalysis.RationalPartition.Refines.cell_contained_in_coarse}
+The remaining whole-sum argument is a finite reindexing of these located
+cells, followed by the single-cell weighted interval inequality.
 This gives the computable mean-value/area principle for the functions covered
 by the certificates.
 \begin{figure}[!htbp]\centering

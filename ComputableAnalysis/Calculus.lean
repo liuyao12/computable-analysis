@@ -3884,6 +3884,26 @@ def cell {a b : Rat} (P : RationalPartition a b)
     have h := P.monotone (k + 1) P.pieces (Nat.succ_le_of_lt hk) (Nat.le_refl P.pieces)
     simpa [P.right_endpoint] using h
 
+/-! A fine cell between two consecutive embedded coarse breakpoints is
+contained in the corresponding coarse cell.  This is the finite geometric
+fact used before reindexing a refined Darboux fold. -/
+theorem Refines.cell_contained_in_coarse {a b : Rat}
+    {fine coarse : RationalPartition a b} (R : Refines fine coarse)
+    {i j : Nat} (hi : i < coarse.pieces) (hj : j < fine.pieces)
+    (hleft : R.index i <= j)
+    (hright : j + 1 <= R.index (i + 1)) :
+    (coarse.cell i hi).lower <= (fine.cell j hj).lower /\
+      (fine.cell j hj).upper <= (coarse.cell i hi).upper := by
+  have hjleft : R.index i <= j + 1 :=
+    Nat.le_trans hleft (Nat.le_succ j)
+  have hjright : j <= R.index (i + 1) :=
+    Nat.le_trans (Nat.le_succ j) hright
+  have hlower := R.point_between_consecutive hi hleft hjright
+  have hupper := R.point_between_consecutive hi hjleft hright
+  change coarse.point i <= fine.point j /\
+    fine.point (j + 1) <= coarse.point (i + 1)
+  exact ⟨hlower.1, hupper.2⟩
+
 /-- Every genuine cell of an explicit uniform partition has exactly its
 rational mesh width. -/
 theorem uniform_cell_width (a b : Rat) (pieces : Nat)
