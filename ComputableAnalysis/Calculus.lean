@@ -1481,6 +1481,53 @@ theorem scaleByRat_overlaps_of_nonneg {r : Rat} (hr : 0 <= r)
   exact ⟨Rat.mul_le_mul_of_nonneg_left hover.1 hr,
     Rat.mul_le_mul_of_nonneg_left hover.2 hr⟩
 
+/-! A single coarse cell contains the sum of its two refined endpoint-range
+cells.  This is the finite refinement calculation behind Darboux nesting: the
+left endpoint box is reused, the middle box is ordered coordinatewise, and the
+right endpoint box is reused. -/
+theorem splitScaledEndpointRange_contains
+    {a b c : Rat} (hab : a <= b) (hbc : b <= c)
+    {A B C : QInterval}
+    (hAlo : A.lo <= B.lo) (hBhi : B.hi <= C.hi) :
+    (scaleByRat (c - a) { lo := A.lo, hi := C.hi }).ContainsInterval
+      (addInterval
+        (scaleByRat (b - a) { lo := A.lo, hi := B.hi })
+        (scaleByRat (c - b) { lo := B.lo, hi := C.hi })) := by
+  have hab' : 0 <= b - a := (Rat.le_iff_sub_nonneg _ _).1 hab
+  have hbc' : 0 <= c - b := (Rat.le_iff_sub_nonneg _ _).1 hbc
+  have hac' : 0 <= c - a := by
+    calc
+      0 <= (b - a) + (c - b) := Rat.add_nonneg hab' hbc'
+      _ = c - a := by grind [Rat.sub_eq_add_neg, Rat.add_assoc]
+  unfold scaleByRat addInterval ContainsInterval
+  simp only [if_pos hab', if_pos hbc', if_pos hac']
+  have hAlo' : 0 <= B.lo - A.lo :=
+    (Rat.le_iff_sub_nonneg _ _).1 hAlo
+  have hBhi' : 0 <= C.hi - B.hi :=
+    (Rat.le_iff_sub_nonneg _ _).1 hBhi
+  have hlow : 0 <= (c - b) * (B.lo - A.lo) :=
+    Rat.mul_nonneg hbc' hAlo'
+  have hupp' : 0 <= (b - a) * (C.hi - B.hi) :=
+    Rat.mul_nonneg hab' hBhi'
+  constructor
+  · apply (Rat.le_iff_sub_nonneg _ _).2
+    have hidentity :
+        ((b - a) * A.lo + (c - b) * B.lo) - (c - a) * A.lo =
+          (c - b) * (B.lo - A.lo) := by
+      grind [Rat.sub_eq_add_neg, Rat.add_mul, Rat.mul_add, Rat.mul_neg,
+        Rat.neg_mul, Rat.neg_neg, Rat.add_assoc, Rat.add_comm]
+    rw [hidentity]
+    exact hlow
+  · apply (Rat.le_iff_sub_nonneg _ _).2
+    have hidentity :
+        (c - a) * C.hi -
+          ((b - a) * B.hi + (c - b) * C.hi) =
+          (b - a) * (C.hi - B.hi) := by
+      grind [Rat.sub_eq_add_neg, Rat.add_mul, Rat.mul_add, Rat.mul_neg,
+        Rat.neg_mul, Rat.neg_neg, Rat.add_assoc, Rat.add_comm]
+    rw [hidentity]
+    exact hupp'
+
 /-- Positive rational scaling preserves finite interval containment.  This is
 the scaling direction used when a derivative bound is converted into an
 endpoint-difference bound on a rational cell. -/
