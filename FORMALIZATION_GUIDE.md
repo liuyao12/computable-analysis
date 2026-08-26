@@ -1668,7 +1668,16 @@ open ComputableAnalysis
 #check RealRaw.mul_compute_nested
 #check RealRaw.mul_valid
 #check RealRaw.mul_equiv
+#check QInterval.inv_of_pos
+#check QInterval.inv_ordered_of_pos
+#check QInterval.inv_nested_of_pos
 ```
+
+These reciprocal lemmas are deliberately finite: they apply after an interval
+has been certified strictly positive.  A raw reciprocal still needs a
+separation-from-zero schedule (and a negative branch can be handled by sign
+transport); `RealRaw.HasComputableInv` is therefore not treated as a finished
+inverse algorithm.
 
 ```lean
 import ComputableAnalysis.ComplexMultiplication

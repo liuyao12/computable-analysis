@@ -674,6 +674,76 @@ theorem mul_nested {A B A' B' : QBox}
 
 end QBox
 
+namespace QInterval
+
+theorem inv_of_pos {I : QInterval} (hpos : 0 < I.lo) :
+    I.inv = { lo := 1 / I.hi, hi := 1 / I.lo } := by
+  simp [QInterval.inv, hpos]
+
+theorem inv_ordered_of_pos {I : QInterval}
+    (hpos : 0 < I.lo) (hI : I.lo <= I.hi) :
+    I.inv.lo <= I.inv.hi := by
+  rw [inv_of_pos hpos]
+  change 1 / I.hi <= 1 / I.lo
+  rw [Rat.div_def, Rat.div_def]
+  simp only [Rat.one_mul]
+  have hIhi : 0 < I.hi := by grind
+  have hprod : 0 < I.lo * I.hi := Rat.mul_pos hpos hIhi
+  apply Rat.le_of_mul_le_mul_right (c := I.lo * I.hi)
+  · have hlo : I.lo ≠ 0 := Rat.ne_of_gt hpos
+    have hhi : I.hi ≠ 0 := Rat.ne_of_gt hIhi
+    calc
+      I.hi⁻¹ * (I.lo * I.hi) = I.lo * (I.hi * I.hi⁻¹) := by
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ = I.lo := by rw [Rat.mul_inv_cancel _ hhi, Rat.mul_one]
+      _ <= I.hi := hI
+      _ = I.hi * (I.lo * I.lo⁻¹) := by
+        rw [Rat.mul_inv_cancel _ hlo, Rat.mul_one]
+      _ = I.lo⁻¹ * (I.lo * I.hi) := by
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  · exact hprod
+
+theorem inv_nested_of_pos {I J : QInterval}
+    (hIpos : 0 < I.lo) (hJpos : 0 < J.lo)
+    (hIJ : I.lo <= J.lo) (hJord : J.lo <= J.hi)
+    (hhiJ : J.hi <= I.hi) :
+    I.inv.ContainsInterval J.inv := by
+  rw [inv_of_pos hIpos, inv_of_pos hJpos]
+  change 1 / I.hi <= 1 / J.hi /\ 1 / J.lo <= 1 / I.lo
+  · constructor
+    · rw [Rat.div_def, Rat.div_def]
+      simp only [Rat.one_mul]
+      have hIhi : 0 < I.hi := by grind
+      have hJhi : 0 < J.hi := by grind
+      have hprod : 0 < J.hi * I.hi := Rat.mul_pos hJhi hIhi
+      apply Rat.le_of_mul_le_mul_right (c := J.hi * I.hi)
+      · have hIhi0 : I.hi ≠ 0 := Rat.ne_of_gt hIhi
+        have hJhi0 : J.hi ≠ 0 := Rat.ne_of_gt hJhi
+        calc
+          I.hi⁻¹ * (J.hi * I.hi) = J.hi := by
+            grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+          _ <= I.hi := hhiJ
+          _ = J.hi⁻¹ * (J.hi * I.hi) := by
+            grind [Rat.mul_assoc, Rat.mul_comm]
+      · exact hprod
+    · rw [Rat.div_def, Rat.div_def]
+      simp only [Rat.one_mul]
+      have hIlo0 : 0 < I.lo := hIpos
+      have hJlo0 : 0 < J.lo := hJpos
+      have hprod : 0 < J.lo * I.lo := Rat.mul_pos hJlo0 hIlo0
+      apply Rat.le_of_mul_le_mul_right (c := J.lo * I.lo)
+      · have hIlo : I.lo ≠ 0 := Rat.ne_of_gt hIlo0
+        have hJlo : J.lo ≠ 0 := Rat.ne_of_gt hJlo0
+        calc
+          J.lo⁻¹ * (J.lo * I.lo) = I.lo := by
+            grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+          _ <= J.lo := hIJ
+          _ = I.lo⁻¹ * (J.lo * I.lo) := by
+            grind [Rat.mul_assoc, Rat.mul_comm]
+      · exact hprod
+
+end QInterval
+
 namespace RealRaw
 
 private theorem qabs_le_of_interval_bounds {a b x B : Rat}

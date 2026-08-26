@@ -417,6 +417,20 @@ The second form is the computable one for flat or rapidly varying functions.
 It does not ask for a limiting inverse value: each bracket carries its own
 finite forward-image separation proof.
 
+The finite reciprocal step is similarly local.  Once a rational interval is
+strictly positive, `QInterval.inv` has ordered endpoints and preserves
+containment under interval refinement:
+
+\lean{ComputableAnalysis.QInterval.inv_of_pos}
+\lean{ComputableAnalysis.QInterval.inv_ordered_of_pos}
+\lean{ComputableAnalysis.QInterval.inv_nested_of_pos}
+\leanok
+
+This is not yet a raw reciprocal theorem.  Its raw construction must provide
+a stage at which the input is separated from zero, stabilize the earlier
+prefix, and then use this finite branch; the negative branch is transported
+by sign.
+
 \lean{ComputableAnalysis.EffectiveInverseSeparation}
 \lean{ComputableAnalysis.GapAwareInverseSeparation}
 \lean{ComputableAnalysis.EffectiveInverseSeparation.toGapAware}
