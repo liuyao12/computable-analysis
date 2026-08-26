@@ -192,6 +192,15 @@ theorem halfAnglePrefix_stage_ten_near_one :
   rw [halfAnglePrefix_stage_ten]
   native_decide
 
+/-! A higher finite prefix with the sharper rational circle approximation
+`103993/33102` gives a tighter rational certificate while keeping the
+computation entirely finite.  The approximation is input data, not an appeal
+to an exact value of pi. -/
+theorem halfAnglePrefix_sharp_stage_twelve_near_one :
+    qabs (halfAnglePrefix (103993 / 33102) 12 - 1) <=
+      1 / 100000000 := by
+  native_decide
+
 end FiniteSineIntegral
 
 end ComputableAnalysis
