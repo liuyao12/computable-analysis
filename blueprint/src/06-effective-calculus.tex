@@ -87,6 +87,13 @@ Darboux sums are nested by finite interval addition.
 \lean{ComputableAnalysis.Integral.exactRat_affine_integral_raw_valid}
 \lean{ComputableAnalysis.Integral.exactRat_affine_integral_raw_equiv_ofRat}
 
+The constant evaluator supplies the same stage-refinement pattern in its
+smallest form: its interval image is stage-independent, and its weighted
+Darboux sums therefore nest on every fixed partition.
+
+\lean{ComputableAnalysis.exactRat_constant_evalIntervalsNested}
+\lean{ComputableAnalysis.exactRat_constant_darbouxStage_nested}
+
 \lean{ComputableAnalysis.ExactFunction.riemannLeftExact_add}
 \lean{ComputableAnalysis.ExactFunction.EffectiveFTCExact.addOfCommonSchedule}
 \leanok

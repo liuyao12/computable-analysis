@@ -36,6 +36,24 @@ def exactRat_constant (c a b : Rat) :
   regular := exactRat_constant_intervalRegularOn c a b
   construction := (constantMonotoneConstructionFor c a b).construction
 
+theorem exactRat_constant_evalIntervalsNested (c a b : Rat) :
+    IntervalRegularOn.EvalIntervalsNested
+      (exactRat_constant_intervalRegularOn c a b) := by
+  exact IntervalRegularOn.EvalIntervalsNested.of_stageIndependent _
+    (by intro I hI n m; rfl)
+
+theorem exactRat_constant_darbouxStage_nested
+    (c a b : Rat) (P : RationalPartition a b) {n m : Nat} (hnm : n <= m) :
+    (Integral.intervalRegularDarbouxStage
+      (FunctionOnInterval.exactRat (fun _ => c) a b)
+      (exactRat_constant_intervalRegularOn c a b) P n).ContainsInterval
+      (Integral.intervalRegularDarbouxStage
+        (FunctionOnInterval.exactRat (fun _ => c) a b)
+        (exactRat_constant_intervalRegularOn c a b) P m) := by
+  exact Integral.intervalRegularDarbouxStage_contains_of_evalIntervalsNested
+    _ (exactRat_constant_intervalRegularOn c a b)
+    (exactRat_constant_evalIntervalsNested c a b) P hnm
+
 theorem exactRat_constant_raw_eq_ofRat (c a b : Rat) :
     raw (FunctionOnInterval.exactRat (fun _ => c) a b)
       (exactRat_constant c a b) =
