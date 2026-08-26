@@ -4019,6 +4019,16 @@ theorem dyadicPublicSquareIntegralRaw_stabilized_equiv_value_of_anchor
       S hanchor hover)
     hvalue
 
+theorem DyadicPublicSquareTangentTransportWitness.stabilized_equiv_value
+    {S : ArctanSinPiConstruction}
+    (h : DyadicPublicSquareTangentTransportWitness S)
+    (hsine : IntervalRegularOn S.onHalf)
+    (hvalue : tangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4))) :
+    (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral).Equiv
+      (RealRaw.ofRat (1 / 4)) := by
+  exact dyadicPublicSquareIntegralRaw_stabilized_equiv_value_of_anchor
+    S hsine tangentSquareIntegral_valid h.to_public_equiv hvalue
+
 def sinPiSquareOnHalfFunctionOnInterval
     (S : ArctanSinPiConstruction) : FunctionOnInterval where
   raw := {

@@ -571,6 +571,14 @@ interval-valued composition still requires a separate box-level contract.
    now transports the existing canonical half-angle certificate fields into
    the named structure directly.
 
+   The direct public-to-tangent transport is now explicit as
+   `DyadicPublicSquareTangentTransportWitness`: it requires stagewise
+   containment of the nested square sum inside the public square sum, then
+   derives public/tangent overlap and raw-real equivalence.  Its
+   `stabilized_equiv_value` theorem carries the tangent quarter-value through
+   the public prefix stabilizer.  This is a certificate interface, not a claim
+   that containment follows from the weaker public/nested overlap theorem.
+
    The square equal-dyadic candidate is now explicit as
    `dyadicNestedRadicalSquareLeftSum`, with raw wrapper
    `dyadicNestedRadicalSquareIntegralRaw`.  Its finite boxes satisfy
