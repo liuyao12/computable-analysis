@@ -8464,6 +8464,91 @@ theorem nonincreasingDarbouxRange_overlaps_point_value
     (F.compute x hx prec).lo <= (F.compute C.lower hlower prec).hi
   exact ⟨hright, hleft⟩
 
+/-! The decreasing cell ranges assemble by the same finite rectangle fold as
+the increasing ones. -/
+def nonincreasingDarbouxStage (F : FunctionOnInterval)
+    (P : RationalPartition F.lower F.upper) (prec : Nat) : QInterval :=
+  P.boundIntegralSum
+    (fun k hk => nonincreasingDarbouxRange F P k hk prec)
+
+theorem nonincreasingDarbouxStage_width_nonneg
+    (F : FunctionOnInterval) (hF : NonincreasingOnInterval F)
+    (P : RationalPartition F.lower F.upper) (prec : Nat) :
+    0 <= (nonincreasingDarbouxStage F P prec).width := by
+  unfold nonincreasingDarbouxStage
+  apply P.boundIntegralSum_width_nonneg_of_termwise
+  intro k hk
+  simp only [RationalPartition.boundIntegralTerm, dif_pos hk]
+  rw [RationalSubinterval.scaleBound,
+    QInterval.scaleByRat_width_of_nonneg]
+  · exact Rat.mul_nonneg (by
+      unfold RationalSubinterval.width
+      exact (Rat.le_iff_sub_nonneg _ _).2 (P.cell k hk).ordered)
+      (nonincreasingDarbouxRange_width_nonneg F hF P k hk prec)
+  · unfold RationalSubinterval.width
+    exact (Rat.le_iff_sub_nonneg _ _).2 (P.cell k hk).ordered
+
+theorem nonincreasingDarbouxStage_overlaps_rightEndpointSamples
+    (F : FunctionOnInterval) (hF : NonincreasingOnInterval F)
+    (P : RationalPartition F.lower F.upper) (prec : Nat) :
+    QInterval.Overlaps
+      (nonincreasingDarbouxStage F P prec)
+      (P.boundIntegralSum
+        (fun k hk => F.compute (P.point (k + 1))
+          (And.intro (P.cell k hk).lower_mem
+            (Rat.le_trans (P.cell k hk).ordered
+              (P.cell k hk).upper_mem)) prec)) := by
+  let hx : forall k, k < P.pieces ->
+      inDomainInterval F.lower F.upper (P.point (k + 1)) := fun k hk =>
+    And.intro (P.cell k hk).lower_mem
+      (Rat.le_trans (P.cell k hk).ordered
+        (P.cell k hk).upper_mem)
+  let sample : (k : Nat) -> k < P.pieces -> QInterval := fun k hk =>
+    F.compute (P.point (k + 1)) (hx k hk) prec
+  have hsample : forall k (hk : k < P.pieces),
+      QInterval.Overlaps
+        (nonincreasingDarbouxRange F P k hk prec)
+        (sample k hk) := by
+    intro k hk
+    exact nonincreasingDarbouxRange_overlaps_point_value F hF P k hk
+      (P.point (k + 1)) (hx k hk)
+      (by exact (P.cell k hk).ordered) (by exact Rat.le_refl) prec
+  have hsample_width : forall k (hk : k < P.pieces),
+      0 <= (sample k hk).width := by
+    intro k hk
+    exact (F.valid_on (P.point (k + 1))
+      (F.defined_on (P.point (k + 1)) (hx k hk))).1 prec
+  unfold nonincreasingDarbouxStage
+  apply P.boundIntegralSum_overlaps_of_termwise
+  · intro k hk
+    simp only [RationalPartition.boundIntegralTerm, dif_pos hk]
+    rw [RationalSubinterval.scaleBound,
+      QInterval.scaleByRat_width_of_nonneg]
+    · exact Rat.mul_nonneg (by
+        unfold RationalSubinterval.width
+        exact (Rat.le_iff_sub_nonneg _ _).2 (P.cell k hk).ordered)
+        (nonincreasingDarbouxRange_width_nonneg F hF P k hk prec)
+    · unfold RationalSubinterval.width
+      exact (Rat.le_iff_sub_nonneg _ _).2 (P.cell k hk).ordered
+  · intro k hk
+    simp only [RationalPartition.boundIntegralTerm, dif_pos hk]
+    rw [RationalSubinterval.scaleBound,
+      QInterval.scaleByRat_width_of_nonneg]
+    · exact Rat.mul_nonneg (by
+        unfold RationalSubinterval.width
+        exact (Rat.le_iff_sub_nonneg _ _).2 (P.cell k hk).ordered)
+        (hsample_width k hk)
+    · unfold RationalSubinterval.width
+      exact (Rat.le_iff_sub_nonneg _ _).2 (P.cell k hk).ordered
+  · intro k hk
+    simp only [RationalPartition.boundIntegralTerm, dif_pos hk]
+    unfold RationalSubinterval.scaleBound
+    apply QInterval.scaleByRat_overlaps_of_nonneg
+    · unfold RationalSubinterval.width
+      exact (Rat.le_iff_sub_nonneg _ _).2 (P.cell k hk).ordered
+    · exact hsample k hk
+  · simpa [sample, hx]
+
 /-! With the stronger coordinatewise certificate, the endpoint range upgrades
 from overlap to genuine containment.  This is the exact point at which the
 stronger monotonicity contract becomes useful to Darboux-sum enclosure proofs. -/
