@@ -36,21 +36,28 @@ or use a stabilized raw evaluator.
 ### Function portfolio and execution order
 
 The project should grow by adding concrete functions, not by introducing an
-unusable theorem about an unspecified class of functions.  The first portfolio
-is:
+unusable theorem about an unspecified class of functions.  The portfolio is
+representative: do not formalize a routine family member merely because its
+formula has a different degree or normalization.  The first representatives
+are:
 
-1. **Polynomial controls:** constants, affine functions, and the monomials
-   `x^2` through `x^5`.  These calibrate secant bounds, primitives, and exact
-   rational endpoint values.
-2. **Rational inverse functions:** `1/(1+x^2)` and `arctan x`.  These test
-   concave secant bounds and the project’s rational rectangle evaluator.
-3. **Power-series functions:** `exp x` and finite sine/cosine prefixes.  These
-   test explicit tail schedules while retaining rational interval values.
-4. **Product/composition functions:** the finite square prefix, followed by
-   the genuine computable function `sin(pi*x)^2` on `[0,1/2]`.
-5. **Next non-polynomial applications:** `sin(pi*x)^2` on other rational
-   arcs, rational trigonometric products, and Gaussian-type integrands when a
-   finite interval/tail certificate is available.
+1. **Polynomial controls:** constants, affine functions, and one nontrivial
+   monomial representative.  These calibrate secant bounds, primitives, and
+   exact rational endpoint values; other degrees reuse the same finite
+   algebraic pattern unless they introduce a new certificate mechanism.
+2. **Rational inverse functions:** one kernel/ inverse pair, represented by
+   `1/(1+x^2)` and `arctan x`.  This tests concave secant bounds and the
+   project’s rational rectangle evaluator.
+3. **Power-series functions:** `exp x` and one finite sine/cosine-prefix
+   route.  These test explicit tail schedules while retaining rational
+   interval values.
+4. **Product/composition functions:** one finite square-prefix example,
+   followed by the genuine computable function `sin(pi*x)^2` on `[0,1/2]`.
+5. **Further applications:** add a new function only when it contributes a
+   genuinely new evaluator, domain, estimate, or equivalence edge.  Rational
+   arcs, scalar multiples, sign changes, and routine compositions are
+   transported; piecewise functions are split into finitely many subintegrals
+   and assembled by the existing telescope.
 
 For every entry, the formalization target is a named `EffectiveDerivativeBoundFTC`
 certificate (or a clearly stated monotone-Darboux fallback), a raw integral,
