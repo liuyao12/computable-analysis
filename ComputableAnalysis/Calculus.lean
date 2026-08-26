@@ -1397,6 +1397,18 @@ theorem addInterval_width (I J : QInterval) :
   unfold addInterval QInterval.width
   grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
 
+/-! Overlap, unlike containment, is still compositional when the interval
+widths are known to be nonnegative.  This is the finite interval algebra used
+when a monotone endpoint range is only certified to overlap a point value. -/
+theorem addInterval_overlaps_of_nonneg
+    {A B C D : QInterval}
+    (hA : 0 <= A.width) (hB : 0 <= B.width)
+    (hC : 0 <= C.width) (hD : 0 <= D.width)
+    (hAC : A.Overlaps C) (hBD : B.Overlaps D) :
+    (addInterval A B).Overlaps (addInterval C D) := by
+  unfold addInterval Overlaps width at *
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
 end QInterval
 
 /-- Adding two finite enclosure comparisons adds their error budgets.  The
@@ -1459,6 +1471,15 @@ def scaleByRat (r : Rat) (I : QInterval) : QInterval :=
     { lo := r * I.lo, hi := r * I.hi }
   else
     { lo := r * I.hi, hi := r * I.lo }
+
+/-! Nonnegative rational scaling preserves overlap. -/
+theorem scaleByRat_overlaps_of_nonneg {r : Rat} (hr : 0 <= r)
+    {I J : QInterval} (hover : I.Overlaps J) :
+    (scaleByRat r I).Overlaps (scaleByRat r J) := by
+  unfold scaleByRat Overlaps at *
+  simp only [if_pos hr] at *
+  exact ⟨Rat.mul_le_mul_of_nonneg_left hover.1 hr,
+    Rat.mul_le_mul_of_nonneg_left hover.2 hr⟩
 
 /-- Positive rational scaling preserves finite interval containment.  This is
 the scaling direction used when a derivative bound is converted into an
@@ -4157,6 +4178,68 @@ theorem boundIntegralSum_contains_of_termwise {a b : Rat}
   · exact hterm k hk
   · simpa [boundIntegralTerm, hk] using
       (QInterval.containsInterval_refl ({ lo := 0, hi := 0 } : QInterval))
+
+/-! Termwise overlap is also preserved by the finite partition fold, provided
+both sides have ordered intervals.  This is deliberately separate from the
+containment theorem above: weak monotonicity supplies overlap, not an
+unjustified interval inclusion. -/
+theorem boundIntegralSum_overlaps_of_termwise {a b : Rat}
+    (P : RationalPartition a b)
+    (outer inner : (k : Nat) -> k < P.pieces -> QInterval)
+    (houter : forall k (hk : k < P.pieces),
+      0 <= (P.boundIntegralTerm outer k).width)
+    (hinner : forall k (hk : k < P.pieces),
+      0 <= (P.boundIntegralTerm inner k).width)
+    (hterm : forall k (hk : k < P.pieces),
+      QInterval.Overlaps
+        (P.boundIntegralTerm outer k)
+        (P.boundIntegralTerm inner k)) :
+    QInterval.Overlaps
+      (P.boundIntegralSum outer)
+      (P.boundIntegralSum inner) := by
+  unfold boundIntegralSum
+  have hfold : forall (xs : List Nat),
+      (forall k, k ∈ xs -> k < P.pieces) ->
+      forall (accOuter accInner : QInterval),
+      0 <= accOuter.width -> 0 <= accInner.width ->
+      QInterval.Overlaps accOuter accInner ->
+      QInterval.Overlaps
+        (xs.foldl (fun acc k =>
+          QInterval.addInterval acc (P.boundIntegralTerm outer k)) accOuter)
+        (xs.foldl (fun acc k =>
+          QInterval.addInterval acc (P.boundIntegralTerm inner k)) accInner) := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro _ accOuter accInner _ _ hover
+        exact hover
+    | cons k xs ih =>
+        intro hmem accOuter accInner hOuterWidth hInnerWidth hover
+        have hk : k < P.pieces := hmem k (by simp)
+        have hmemTail : forall j, j ∈ xs -> j < P.pieces := by
+          intro j hj
+          exact hmem j (by simp [hj])
+        have hOuterTerm := houter k hk
+        have hInnerTerm := hinner k hk
+        have hstep := QInterval.addInterval_overlaps_of_nonneg
+          hOuterWidth hOuterTerm hInnerWidth hInnerTerm hover (hterm k hk)
+        have hOuterNext : 0 <=
+            (QInterval.addInterval accOuter
+              (P.boundIntegralTerm outer k)).width := by
+          rw [QInterval.addInterval_width]
+          exact Rat.add_nonneg hOuterWidth hOuterTerm
+        have hInnerNext : 0 <=
+            (QInterval.addInterval accInner
+              (P.boundIntegralTerm inner k)).width := by
+          rw [QInterval.addInterval_width]
+          exact Rat.add_nonneg hInnerWidth hInnerTerm
+        exact ih hmemTail _ _ hOuterNext hInnerNext hstep
+  exact hfold (List.range P.pieces)
+    (by intro k hk; exact List.mem_range.mp hk)
+    { lo := 0, hi := 0 } { lo := 0, hi := 0 }
+    (by grind [QInterval.width, Rat.sub_eq_add_neg])
+    (by grind [QInterval.width, Rat.sub_eq_add_neg])
+    (by simp [QInterval.Overlaps])
 
 /-- The finite sum of computed endpoint differences over the cells of a
 rational partition, all evaluated at one common stage. -/
