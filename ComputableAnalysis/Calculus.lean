@@ -7915,6 +7915,31 @@ theorem toNondecreasing {F : FunctionOnInterval}
 
 end EndpointOrderedNondecreasingOnInterval
 
+/-! A single refinement step for the monotone Darboux construction.  The
+coarse endpoint range contains the sum of the two ranges obtained by inserting
+one rational breakpoint.  This is the local finite inequality from which
+dyadic-stage nesting is assembled; it uses only coordinatewise endpoint order
+and rational interval arithmetic. -/
+theorem endpointOrderedNondecreasing_splitScaledEndpointRange_contains
+    (F : FunctionOnInterval)
+    (hF : EndpointOrderedNondecreasingOnInterval F)
+    {a b c : Rat}
+    (ha : inDomainInterval F.lower F.upper a)
+    (hb : inDomainInterval F.lower F.upper b)
+    (hc : inDomainInterval F.lower F.upper c)
+    (hab : a <= b) (hbc : b <= c) (prec : Nat) :
+    QInterval.ContainsInterval
+      (QInterval.scaleByRat (c - a)
+        { lo := (F.compute a ha prec).lo, hi := (F.compute c hc prec).hi })
+      (QInterval.addInterval
+        (QInterval.scaleByRat (b - a)
+          { lo := (F.compute a ha prec).lo, hi := (F.compute b hb prec).hi })
+        (QInterval.scaleByRat (c - b)
+          { lo := (F.compute b hb prec).lo, hi := (F.compute c hc prec).hi })) := by
+  apply QInterval.splitScaledEndpointRange_contains hab hbc
+  · exact hF.lower_mono a b ha hb hab prec
+  · exact hF.upper_mono b c hb hc hbc prec
+
 namespace MonotoneOnInterval
 
 def ofNondecreasing {F : FunctionOnInterval}

@@ -191,6 +191,19 @@ functions such as \(\sin(\pi x)\): classify each cell as increasing,
 decreasing, or containing one certified turn, then refine only the local
 boxes needed by that classification.
 
+The atomic refinement inequality is explicit.  With coordinatewise endpoint
+order, the range rectangle on $[a,c]$ contains the sum of the two range
+rectangles on $[a,b]$ and $[b,c]$:
+
+\begin{verbatim}
+coarse [a,c] >= refined [a,b] + refined [b,c]
+\end{verbatim}
+
+This is the finite geometric step used to assemble dyadic nesting; no
+supremum or completed real is introduced.
+
+\lean{ComputableAnalysis.endpointOrderedNondecreasing_splitScaledEndpointRange_contains}
+
 There is one essential distinction.  Piecewise monotonicity describes the
 integrand and makes its area computable; it does not by itself say that the
 area equals the endpoint difference of that same function.  The FTC
