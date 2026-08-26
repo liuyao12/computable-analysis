@@ -158,6 +158,29 @@ theorem gaussianEvenIntegralPrefix_stage_twelve_minus_ten :
     gaussianEvenIntegralPrefix_stage_ten]
   native_decide
 
+/-! A finite tensor-product evaluator for the two-dimensional Gaussian.  Each
+factor is a rational Taylor prefix for `exp (-x^2)`; the weighted sum is the
+rectangle computation, so no Fubini or measure theorem is involved. -/
+def gaussianTaylorPointPrefix (terms : Nat) (x : Rat) : Rat :=
+  FinitePolynomial.taylorPrefix FormalPowerSeries.expCoeff terms (-(x * x))
+
+def gaussianTaylorProductIntegralSum (terms : Nat)
+    (xs ys : List (Rat × Rat)) : Rat :=
+  finiteProductIntegralSum2D xs ys
+    (gaussianTaylorPointPrefix terms)
+    (gaussianTaylorPointPrefix terms)
+
+theorem gaussianTaylorProductIntegralSum_factorized
+    (terms : Nat) (xs ys : List (Rat × Rat)) :
+    gaussianTaylorProductIntegralSum terms xs ys =
+      (xs.map (fun cell => cell.2 * gaussianTaylorPointPrefix terms cell.1)).foldl
+          (fun acc value => acc + value) 0 *
+        (ys.map (fun cell => cell.2 * gaussianTaylorPointPrefix terms cell.1)).foldl
+          (fun acc value => acc + value) 0 := by
+  exact finiteProductIntegralSum2D_factorized xs ys
+    (gaussianTaylorPointPrefix terms)
+    (gaussianTaylorPointPrefix terms)
+
 theorem gaussianEvenIntegralPrefix_stage_six_minus_four :
     gaussianEvenIntegralPrefix 6 1 - gaussianEvenIntegralPrefix 4 1 =
       23 / 2970 := by

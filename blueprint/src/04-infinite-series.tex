@@ -439,6 +439,11 @@ multiple-integral theorem: each cell contributes a rational width times its
 factor value, and the nested rectangular sum factors without invoking Fubini,
 measure, or a completed real space.
 
+For the Gaussian, the pointwise Taylor prefix
+\(\operatorname{expPrefix}_m(-x^2)\) supplies the factors.  Its two-dimensional
+weighted rectangle sum is therefore a finite tensor product, with an explicit
+factorization theorem ready for later tail estimates.
+
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix}
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_four}
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_six}
@@ -447,6 +452,9 @@ measure, or a completed real space.
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_twelve}
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_twelve_minus_ten}
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_six_minus_four}
+\lean{ComputableAnalysis.gaussianTaylorPointPrefix}
+\lean{ComputableAnalysis.gaussianTaylorProductIntegralSum}
+\lean{ComputableAnalysis.gaussianTaylorProductIntegralSum_factorized}
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_four_nonnegative}
 \lean{ComputableAnalysis.gaussianProductModel}
 \lean{ComputableAnalysis.gaussianProductModel_split}
