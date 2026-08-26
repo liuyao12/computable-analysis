@@ -4088,6 +4088,33 @@ theorem Refines.indexBlocks_flatMap_eq_range {a b : Rat}
   have h := aux coarse.pieces (Nat.le_refl _)
   simpa [R.index_zero, R.index_last, List.range_eq_range'] using h
 
+/-- Folding over a flattened list can be performed block by block.  This is
+the finite fold law used to transport interval additions across refinement
+blocks. -/
+theorem foldl_flatMap {α β γ : Type} (step : β → α → β)
+    (blocks : γ → List α) (xs : List γ) (initial : β) :
+    (xs.flatMap blocks).foldl step initial =
+      xs.foldl (fun acc block => (blocks block).foldl step acc) initial := by
+  induction xs generalizing initial with
+  | nil =>
+      rfl
+  | cons block blocks ih =>
+      simp only [List.flatMap_cons, List.foldl_append, List.foldl_cons,
+        List.foldl_nil]
+      rw [ih]
+
+/-- Applying the block-fold law to a certified refinement gives exactly the
+same finite fold as traversing all fine-cell indices in order. -/
+theorem Refines.foldl_indexBlocks_eq_foldl_range
+    {α β : Type} {a b : Rat}
+    {fine coarse : RationalPartition a b} (R : Refines fine coarse)
+    (step : β → α → β) (initial : β) (value : Nat → α) :
+    ((List.range coarse.pieces).flatMap R.indexBlock).foldl
+        (fun acc j => step acc (value j)) initial =
+      (List.range fine.pieces).foldl
+        (fun acc j => step acc (value j)) initial := by
+  rw [R.indexBlocks_flatMap_eq_range]
+
 /-- Every genuine cell of an explicit uniform partition has exactly its
 rational mesh width. -/
 theorem uniform_cell_width (a b : Rat) (pieces : Nat)

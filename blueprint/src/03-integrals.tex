@@ -132,6 +132,10 @@ Each coarse block is represented by an executable ordered fine-index list:
 \lean{ComputableAnalysis.RationalPartition.Refines.indexBlock}
 Flattening all such blocks recovers the complete fine partition range:
 \lean{ComputableAnalysis.RationalPartition.Refines.indexBlocks_flatMap_eq_range}
+The corresponding fold identity transports interval additions and other finite
+accumulations directly:
+\lean{ComputableAnalysis.RationalPartition.foldl_flatMap}
+\lean{ComputableAnalysis.RationalPartition.Refines.foldl_indexBlocks_eq_foldl_range}
 The remaining whole-sum argument is a finite reindexing of these located
 cells, followed by the single-cell weighted interval inequality.
 This gives the computable mean-value/area principle for the functions covered
