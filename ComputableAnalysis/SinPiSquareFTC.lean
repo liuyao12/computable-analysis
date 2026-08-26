@@ -3808,8 +3808,19 @@ theorem sinPiSquareOnHalfScheduled_compute_of_mem
     (sinPiSquareOnHalfScheduledFunctionOnInterval S).compute x
       (by exact hx) n =
       (sinPiSquareOnHalf S).compute x
-        (sinPiSquareFTCStageSchedule.stage n) := by
+      (sinPiSquareFTCStageSchedule.stage n) := by
   rfl
+
+theorem sinPiSquareOnHalfScheduled_compute_width_le
+    (S : ArctanSinPiConstruction) {x : Rat}
+    (hx : 0 <= x /\ x <= (1 : Rat) / 2) (n : Nat) :
+    ((sinPiSquareOnHalfScheduledFunctionOnInterval S).compute x
+      (by exact hx) n).width <=
+      2 * ((sinPiOnHalfRaw S).compute x
+        (sinPiSquareFTCStageSchedule.stage n)).width := by
+  rw [sinPiSquareOnHalfScheduled_compute_of_mem S hx n]
+  exact sinPiSquareOnHalf_compute_width_le S hx
+    (sinPiSquareFTCStageSchedule.stage n)
 
 
 /-! The inverse-search monotonicity obligation is kept as finite data.  It is

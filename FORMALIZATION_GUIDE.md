@@ -942,6 +942,9 @@ already been packaged as `RealRaw` values.
 The concrete `sin(pi*x)^2` evaluator uses this interface through
 `sinPiSquareOnHalf_compute_width_le`, giving the specialized bound
 `width(sin^2) <= 2 * width(sin)` on `[0, 1/2]`.
+The scheduled wrapper transports the same estimate through its explicit stage
+map via `sinPiSquareOnHalfScheduled_compute_width_le`; this is the form to
+use when assembling a scheduled integral certificate.
 
 ### Increasing pieces: start with the literal finite stage
 
