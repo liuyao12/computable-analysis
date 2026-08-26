@@ -139,6 +139,18 @@ then prove cross-stage nesting and shrinking. The blueprint treats this as a
 formal theorem target rather than calling it the classical compactness
 argument.
 
+For the stronger endpoint-ordered monotone evaluator, this schedule problem is
+now closed for equal dyadic meshes.  The local two-cell inequality,
+arbitrary-stage composition, precision-monotone transport, and the budget-based
+schedule constructor are all checked:
+\lean{ComputableAnalysis.endpointOrderedNondecreasingDarbouxStage_contains_uniform_double}
+\lean{ComputableAnalysis.endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage_of_precision_mono}
+\lean{ComputableAnalysis.Integral.nondecreasingDarbouxDyadicSchedule_widths_shrink_of_budget}
+\lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule.ofDyadicEndpointOrderedOfBudget}
+The general interval-regular case remains separate: interval images provide
+sound cell bounds and widths, but their cross-stage nesting still requires an
+explicit evaluator/refinement certificate.
+
 \section{Chapter completion matrix}
 
 The current boundary can be summarized without silently promoting a provider
