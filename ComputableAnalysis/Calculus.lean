@@ -9412,6 +9412,65 @@ def MonotoneDarbouxSchedule.ofDyadicEndpointOrderedOfBudget
     (nondecreasingDarbouxDyadicSchedule_widths_shrink_of_budget
       hregular hinterval evalPrecision hinput hbudget)
 
+/-! The fully scheduled version accepts an independently chosen monotone mesh
+exponent.  This is the preferred interface when an evaluator has a known
+complexity profile rather than a linear precision cost. -/
+theorem nondecreasingDarbouxScheduledSchedule_widths_shrink_of_budget
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    (hinterval : F.lower <= F.upper)
+    (stages evalPrecision : Nat -> Nat)
+    (hinput : forall n : Nat,
+      mesh F.lower F.upper (2 ^ stages n) <=
+        1 / ((hregular.inputPrecision (evalPrecision n) : Nat) : Rat))
+    (hbudget : forall eps : QPos, Exists fun N : Nat =>
+      forall n : Nat, N <= n ->
+        (F.upper - F.lower) *
+          (1 / ((evalPrecision n + 1 : Nat) : Rat)) <= eps.val) :
+    RealRaw.WidthsShrinkToZero
+      (monotoneDarbouxScheduleCompute F hinterval
+        (fun n => 2 ^ stages n) evalPrecision
+        (fun n => by positivity)) := by
+  intro eps
+  rcases hbudget eps with ⟨N, hN⟩
+  refine ⟨N, ?_⟩
+  intro n hn
+  exact Rat.le_trans
+    (nondecreasingDarbouxStage_width_le_of_uniform_input_budget
+      F hregular (2 ^ stages n) (by positivity) hinterval
+      (evalPrecision n) (hinput n))
+    (hN n hn)
+
+def MonotoneDarbouxSchedule.ofScheduledEndpointOrderedOfBudget
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    (hF : EndpointOrderedNondecreasingOnInterval F)
+    (hinterval : F.lower <= F.upper)
+    (stages evalPrecision : Nat -> Nat)
+    (hstage : forall {n m : Nat}, n <= m -> stages n <= stages m)
+    (hprecision : forall {n m : Nat}, n <= m ->
+      evalPrecision n <= evalPrecision m)
+    (hinput : forall n : Nat,
+      mesh F.lower F.upper (2 ^ stages n) <=
+        1 / ((hregular.inputPrecision (evalPrecision n) : Nat) : Rat))
+    (hbudget : forall eps : QPos, Exists fun N : Nat =>
+      forall n : Nat, N <= n ->
+        (F.upper - F.lower) *
+          (1 / ((evalPrecision n + 1 : Nat) : Rat)) <= eps.val) :
+    MonotoneDarbouxSchedule F hregular hF.toNondecreasing hinterval :=
+  { pieces := fun n => 2 ^ stages n
+    evalPrecision := evalPrecision
+    pieces_pos := by
+      intro n
+      positivity
+    input_budget := hinput
+    nested := by
+      intro n m hnm
+      have h := endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_scheduled_stage
+        F hF hinterval stages evalPrecision hstage hprecision hnm
+      simpa [monotoneDarbouxScheduleCompute,
+        nondecreasingDarbouxDyadicStage] using h
+    widths_shrink := nondecreasingDarbouxScheduledSchedule_widths_shrink_of_budget
+      hregular hinterval stages evalPrecision hinput hbudget }
+
 def monotoneDarbouxScheduleRaw
     {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
     {hmonotone : NondecreasingOnInterval F}
