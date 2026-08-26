@@ -1017,7 +1017,8 @@ natural upper bound for the rational interval length; the corresponding
 `intervalRegularAutomaticPieces_pos` theorem supplies positivity.
 `IntervalRegularDarbouxSchedule.ofAutomaticPieces` packages this automatic
 choice directly, leaving only the substantive stage coherence proofs to the
-caller.
+caller. Use `intervalRegularDarbouxScheduleIntegralFor` and its `_valid`
+theorem as the public raw integral endpoint.
 
 For a nondecreasing `FunctionOnInterval F`,
 `Integral.nondecreasingDarbouxRange F P k hk prec` is the endpoint box for

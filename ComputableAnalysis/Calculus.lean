@@ -7624,6 +7624,19 @@ def intervalRegularDarbouxScheduleConstructionFor
   compute := (intervalRegularDarbouxScheduleRaw s).compute
   certificate := intervalRegularDarbouxScheduleRaw_valid s
 
+def intervalRegularDarbouxScheduleIntegralFor
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hinterval : F.lower <= F.upper}
+    (s : IntervalRegularDarbouxSchedule F hregular hinterval) : RealRaw :=
+  Integral.integralFor F (intervalRegularDarbouxScheduleConstructionFor s)
+
+theorem intervalRegularDarbouxScheduleIntegralFor_valid
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hinterval : F.lower <= F.upper}
+    (s : IntervalRegularDarbouxSchedule F hregular hinterval) :
+    (intervalRegularDarbouxScheduleIntegralFor s).Valid :=
+  Integral.integralFor_valid F (intervalRegularDarbouxScheduleConstructionFor s)
+
 /-! A schedule-level bridge for the monotone Darboux algorithm.  The
 finite width theorem above is useful only once its stages are assembled into
 a valid raw computation.  This structure records precisely the remaining
