@@ -4521,13 +4521,19 @@ finite.
 
 ## Iteration-Based Construction Layers
 
-- Alternating series now have a first iteration-style raw layer.  See
-  `Series.AlternatingRaw` in `ComputableAnalysis/Series.lean`.
-- Proved: if the magnitudes of an alternating series shrink to zero, then the
-  intervals between consecutive partial sums shrink to zero.  See
-  `Series.AlternatingRaw.intervals_shrink`.
-- Next step for alternating series: prove nestedness/enclosure from
-  nonnegative decreasing terms, then instantiate Leibniz/arctangent series.
+- Alternating series now have a complete iteration-style raw layer in
+  `Series.AlternatingRaw`: nonnegative decreasing magnitudes give monotone
+  even partial sums, antitone odd partial sums, nested endpoint intervals,
+  and a valid shrinking `RealRaw`.
+- The concrete Leibniz instance is checked by
+  `Series.AlternatingRaw.leibnizAlternatingRaw`; its exact reciprocal width
+  and executable positive-tolerance stage selector are exposed by
+  `leibnizAlternatingRaw_width_eq_reciprocal` and
+  `leibnizAlternatingRaw_reaches_of_positive_tolerance`.
+- The remaining comparison is representational: the Leibniz raw must be
+  connected to the independent arctangent rectangle computation on the
+  desired branch.  The general alternating-series enclosure itself is no
+  longer an open item.
 
 ## Pi Representations
 
