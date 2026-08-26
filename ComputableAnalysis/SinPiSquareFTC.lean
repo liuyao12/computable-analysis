@@ -3840,6 +3840,54 @@ theorem dyadicPublicSquareLeftSum_width_le_of_sine_stage
       grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm,
         Rat.mul_inv_cancel (1 + 1) hden]
 
+theorem dyadicPublicSquareLeftSum_width_le_of_sine_regular
+    (S : ArctanSinPiConstruction)
+    (hsine : IntervalRegularOn S.onHalf) (n : Nat) :
+    (dyadicPublicSquareLeftSum S n).width <=
+      1 / ((n + 1 : Nat) : Rat) := by
+  apply dyadicPublicSquareLeftSum_width_le_of_sine_stage S n
+    (1 / ((n + 1 : Nat) : Rat))
+  intro k hk
+  let x := leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k
+  have hN : 0 < 2 ^ n := Nat.pow_pos (by omega)
+  have hleft := leftPoint_monotone hN (by native_decide :
+    (0 : Rat) <= (1 : Rat) / 2) (Nat.zero_le k)
+  have hright := leftPoint_monotone hN (by native_decide :
+    (0 : Rat) <= (1 : Rat) / 2) (by omega : k <= 2 ^ n)
+  rw [leftPoint_zero] at hleft
+  rw [leftPoint_endpoint hN] at hright
+  have hx : 0 <= x /\ x <= (1 : Rat) / 2 := by
+    exact ⟨by simpa [x] using hleft, by simpa [x] using hright⟩
+  let I : QInterval := { lo := x, hi := x }
+  have hI : subintervalOf I S.onHalf.lower S.onHalf.upper := by
+    unfold subintervalOf
+    simpa [I, ArctanSinPiConstruction.onHalf] using
+      (show (0 : Rat) <= x /\ x <= (1 : Rat) / 2 from hx)
+  have hsmall : I.width <=
+      1 / ((hsine.inputPrecision n : Nat) : Rat) := by
+    have hpos : 0 < ((hsine.inputPrecision n : Nat) : Rat) := by
+      exact (Rat.natCast_pos).2 (hsine.inputPrecision_pos n)
+    have hright : 0 <
+        1 / ((hsine.inputPrecision n : Nat) : Rat) := by
+      rw [Rat.div_def]
+      exact Rat.mul_pos (by native_decide) ((Rat.inv_pos).2 hpos)
+    unfold QInterval.width
+    dsimp [I]
+    grind [Rat.le_of_lt hright]
+  have houtput := hsine.output_width I hI n hsmall
+  have hcontains := hsine.contains_point_values I hI x
+    (S.onHalf.defined_on x hx) n (by simp [I]) (by simp [I])
+  have hpointwidth : (S.onHalf.compute x (S.onHalf.defined_on x hx) n).width <=
+      (hsine.evalInterval I hI n).width :=
+    QInterval.width_le_of_contains hcontains
+  have hsinewidth :
+      (S.onHalf.compute x (S.onHalf.defined_on x hx) n).width <=
+        1 / ((n + 1 : Nat) : Rat) :=
+    Rat.le_trans hpointwidth houtput.2
+  change ((sinPiRawOfArctan S.inverse x hx).compute n).width <=
+    1 / ((n + 1 : Nat) : Rat) at hsinewidth
+  simpa [x, sinPiOnHalfRaw, ArctanSinPiConstruction.onHalf, hx] using hsinewidth
+
 def sinPiSquareOnHalfFunctionOnInterval
     (S : ArctanSinPiConstruction) : FunctionOnInterval where
   raw := {

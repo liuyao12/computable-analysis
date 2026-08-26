@@ -951,6 +951,10 @@ the rectangle-sum modulus, and
 `dyadicPublicSquareLeftSum_width_le_of_sine_stage` specializes it to a sine
 width budget. The latter is the shrinking-width bridge for the public
 `sin(pi*x)^2` candidate.
+When the sine evaluator is supplied with `IntervalRegularOn`,
+`dyadicPublicSquareLeftSum_width_le_of_sine_regular` derives the uniform
+bound `width <= 1/(n+1)` by applying the interval contract to degenerate
+rational cells.
 
 ### Increasing pieces: start with the literal finite stage
 
