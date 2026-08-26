@@ -687,6 +687,9 @@ In particular, \code{Real.Representation.equiv} proves that any two certified
 representations of the same handle have equivalent raw evaluators.  This is an
 interoperability theorem about proved representations, not an identification
 of all raw algorithms by quotienting.
+At a requested stage, \code{Real.Representation.overlapsAt} exposes the
+corresponding interval overlap directly, so a consumer can switch
+implementations without rebuilding the spanning-tree argument.
 For functions, the same distinction is kept at the appropriate level: a
 \code{PartialRealFunRaw} is one domain-indexed computation, while
 \code{PartialRealFunction} packages several useful computations of one named
@@ -1383,6 +1386,8 @@ As for \code{Real}, this is a computation-oriented representation layer rather
 than a quotient construction.
 \lean{ComputableAnalysis.Complex.withAlternativeFrom}
 \lean{ComputableAnalysis.Complex.withAlternativeFromImplementation}
+\lean{ComputableAnalysis.Complex.Representation.equiv}
+\lean{ComputableAnalysis.Complex.Representation.overlapsAt}
 When a new algorithm is proved equivalent to an existing non-preferred
 implementation, either constructor composes that single local edge with the
 existing path to the preferred node.  Thus the registry need only be a finite

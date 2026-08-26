@@ -3675,6 +3675,16 @@ theorem Representation.equiv {x : Real} (source target : Representation x) :
   RealRaw.equiv_trans source.valid x.valid target.valid source.agrees
     (RealRaw.equiv_symm target.agrees)
 
+/-- Any two certified representations expose overlapping boxes at every
+stage.  This is the computation-level form of representation interchange:
+the spanning-tree equivalence is composed once, then consumers can use the
+boxes directly. -/
+theorem Representation.overlapsAt {x : Real}
+    (source target : Representation x) (stage : Nat) :
+    QInterval.Overlaps (source.raw.compute stage) (target.raw.compute stage) := by
+  exact (RealRaw.compareAt_overlap_iff source.raw target.raw stage stage).1
+    (source.equiv target stage)
+
 def preferredRepresentation (x : Real) : Representation x where
   raw := x.preferred
   valid := x.valid
@@ -5053,6 +5063,12 @@ def alternativeRepresentation {z : Complex} (rep : ComplexCert)
   cert := rep
   agrees := z.coherent h
 
+theorem Representation.equiv {z : Complex}
+    (source target : Representation z) :
+    source.cert.raw.Equiv target.cert.raw :=
+  ComplexRaw.equiv_trans source.cert.valid z.preferred.valid target.cert.valid
+    source.agrees (ComplexRaw.equiv_symm target.agrees)
+
 /- Add a new complex implementation through any already certified
    representation.  The stored edge is composed with that representation's
    path back to the preferred node, so callers only need to prove one local
@@ -5078,6 +5094,13 @@ def withAlternativeFromImplementation (z : Complex)
 
 def computeUsing {z : Complex} (rep : Representation z) (n : Nat) : QBox :=
   rep.cert.raw.compute n
+
+/-- The complex counterpart of `Real.Representation.overlapsAt`. -/
+theorem Representation.overlapsAt {z : Complex}
+    (source target : Representation z) (stage : Nat) :
+    QBox.Overlaps (source.cert.raw.compute stage) (target.cert.raw.compute stage) := by
+  exact (ComplexRaw.compareAt_overlap_iff source.cert.raw target.cert.raw stage stage).1
+    (source.equiv target stage)
 
 theorem representation_same_complex {z : Complex} (rep : Representation z) :
     (Complex.ofCert rep.cert).Equiv z :=

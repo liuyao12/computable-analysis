@@ -204,6 +204,8 @@ ComputableAnalysis.RealRaw.schedule_equiv
 ComputableAnalysis.RealRaw.equiv_of_schedule_equiv
 ComputableAnalysis.Real
 ComputableAnalysis.Real.ofRat
+ComputableAnalysis.Real.Representation.equiv
+ComputableAnalysis.Real.Representation.overlapsAt
 ComputableAnalysis.RealRaw.add_equiv
 ComputableAnalysis.RealRaw.sub_equiv
 ComputableAnalysis.RealRaw.mul_equiv_of_nonneg
@@ -356,6 +358,8 @@ ComputableAnalysis.Complex
 ComputableAnalysis.ComplexRaw.ofQComplex
 ComputableAnalysis.Complex.ofQComplex
 ComputableAnalysis.Complex.ofReal
+ComputableAnalysis.Complex.Representation.equiv
+ComputableAnalysis.Complex.Representation.overlapsAt
 ComputableAnalysis.FunctionRaw
 ComputableAnalysis.RealFunRaw
 ComputableAnalysis.RealFunRaw.add_valid
