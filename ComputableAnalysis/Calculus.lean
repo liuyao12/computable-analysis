@@ -9411,10 +9411,6 @@ theorem nondecreasingDarbouxStage_overlaps_leftEndpointSamples
     F hF P prec sample hsample hsample_width
   simpa [sample, hx] using hstage
 
-/-- The static dyadic instance of `nondecreasingDarbouxStage` used by the
-chapter's increasing-function pseudocode.  The nondecreasing proof is not an
-input to this executable calculation; it is consumed by the later orderedness
-and shrinking certificates. -/
 /-! The cell estimate composes with the finite uniform-partition fold. -/
 theorem nondecreasingDarbouxStage_width_le_of_uniform_input_budget
     (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
@@ -12781,4 +12777,165 @@ theorem inverse_function_from_bisection_search
     (hsearch : HasBisectionSearch I) :
     HasInverse I := by
   exact ⟨inverseRawOfSearch hsearch⟩
+
+namespace Integral
+
+/-! The public decreasing counterpart of `MonotoneDarbouxSchedule`.  It keeps
+the orientation in the type, while exposing exactly the same finite input
+budget, cross-stage nesting, and shrinking-width obligations. -/
+def nonincreasingDarbouxScheduleCompute
+    (F : FunctionOnInterval) (hinterval : F.lower <= F.upper)
+    (pieces evalPrecision : Nat -> Nat)
+    (hpieces : forall n, 0 < pieces n) (n : Nat) : QInterval :=
+  nonincreasingDarbouxStage F
+    (RationalPartition.uniform F.lower F.upper (pieces n)
+      (hpieces n) hinterval)
+    (evalPrecision n)
+
+structure NonincreasingDarbouxSchedule
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (hmonotone : NonincreasingOnInterval F)
+    (hinterval : F.lower <= F.upper) where
+  pieces : Nat -> Nat
+  evalPrecision : Nat -> Nat
+  pieces_pos : forall n, 0 < pieces n
+  input_budget : forall n,
+    mesh F.lower F.upper (pieces n) <=
+      1 / ((hregular.inputPrecision (evalPrecision n) : Nat) : Rat)
+  nested : forall n m, n <= m ->
+    (nonincreasingDarbouxScheduleCompute F hinterval pieces evalPrecision
+      pieces_pos n).lo <=
+    (nonincreasingDarbouxScheduleCompute F hinterval pieces evalPrecision
+      pieces_pos m).lo /\
+    (nonincreasingDarbouxScheduleCompute F hinterval pieces evalPrecision
+      pieces_pos m).hi <=
+    (nonincreasingDarbouxScheduleCompute F hinterval pieces evalPrecision
+      pieces_pos n).hi
+  widths_shrink : RealRaw.WidthsShrinkToZero
+    (nonincreasingDarbouxScheduleCompute F hinterval pieces evalPrecision
+      pieces_pos)
+
+def NonincreasingDarbouxSchedule.ofDyadicEndpointOrderedOfBudget
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    (hF : EndpointOrderedNonincreasingOnInterval F)
+    (hinterval : F.lower <= F.upper)
+    (evalPrecision : Nat -> Nat)
+    (hprecision : forall {n m : Nat}, n <= m ->
+      evalPrecision n <= evalPrecision m)
+    (hinput : forall n : Nat,
+      mesh F.lower F.upper (2 ^ n) <=
+        1 / ((hregular.inputPrecision (evalPrecision n) : Nat) : Rat))
+    (hbudget : forall eps : QPos, Exists fun N : Nat =>
+      forall n : Nat, N <= n ->
+        (F.upper - F.lower) *
+          (1 / ((evalPrecision n + 1 : Nat) : Rat)) <= eps.val) :
+    NonincreasingDarbouxSchedule F hregular hF.toNonincreasing hinterval where
+  pieces := fun n => 2 ^ n
+  evalPrecision := evalPrecision
+  pieces_pos := by
+    intro n
+    positivity
+  input_budget := hinput
+  nested := by
+    intro n m hnm
+    have h := endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_stage_of_precision_mono
+      F hF hinterval evalPrecision hprecision hnm
+    simpa [nonincreasingDarbouxScheduleCompute,
+      nonincreasingDarbouxDyadicStage] using h
+  widths_shrink := by
+    intro eps
+    rcases hbudget eps with ⟨N, hN⟩
+    refine ⟨N, ?_⟩
+    intro n hn
+    exact Rat.le_trans
+      (nonincreasingDarbouxDyadicStage_width_le_of_input_budget
+        F hregular hinterval evalPrecision n (hinput n))
+      (hN n hn)
+
+def nonincreasingDarbouxScheduleRaw
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hmonotone : NonincreasingOnInterval F}
+    {hinterval : F.lower <= F.upper}
+    (s : NonincreasingDarbouxSchedule F hregular hmonotone hinterval) :
+    RealRaw :=
+  { compute := nonincreasingDarbouxScheduleCompute F hinterval s.pieces
+      s.evalPrecision s.pieces_pos
+    rate := .unknown }
+
+theorem nonincreasingDarbouxScheduleRaw_valid
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hmonotone : NonincreasingOnInterval F}
+    {hinterval : F.lower <= F.upper}
+    (s : NonincreasingDarbouxSchedule F hregular hmonotone hinterval) :
+    (nonincreasingDarbouxScheduleRaw s).Valid := by
+  have hwidth : forall n,
+      0 <= (nonincreasingDarbouxScheduleCompute F hinterval s.pieces
+        s.evalPrecision s.pieces_pos n).width := by
+    intro n
+    change 0 <=
+      ((RationalPartition.uniform F.lower F.upper (s.pieces n)
+        (s.pieces_pos n) hinterval).boundIntegralSum
+        (fun k hk => nonincreasingDarbouxRange F
+          (RationalPartition.uniform F.lower F.upper (s.pieces n)
+            (s.pieces_pos n) hinterval) k hk (s.evalPrecision n))).width
+    exact nonincreasingDarbouxStage_width_nonneg F hmonotone _ _
+  change RealRaw.ValidCompute
+    (nonincreasingDarbouxScheduleCompute F hinterval s.pieces
+      s.evalPrecision s.pieces_pos)
+  refine ⟨hwidth, ?_, s.widths_shrink⟩
+  intro n m hnm
+  rcases s.nested n m hnm with ⟨hlo, hhi⟩
+  refine ⟨hlo, ?_⟩
+  constructor
+  · have hm := hwidth m
+    change 0 <=
+      (nonincreasingDarbouxScheduleCompute F hinterval s.pieces
+        s.evalPrecision s.pieces_pos m).hi -
+      (nonincreasingDarbouxScheduleCompute F hinterval s.pieces
+        s.evalPrecision s.pieces_pos m).lo at hm
+    grind [Rat.sub_eq_add_neg]
+  · exact hhi
+
+def nonincreasingDarbouxScheduleConstructionFor
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hmonotone : NonincreasingOnInterval F}
+    {hinterval : F.lower <= F.upper}
+    (s : NonincreasingDarbouxSchedule F hregular hmonotone hinterval) :
+    Integral.ConstructionFor F where
+  compute := (nonincreasingDarbouxScheduleRaw s).compute
+  certificate := nonincreasingDarbouxScheduleRaw_valid s
+
+def nonincreasingDarbouxScheduleIntegralFor
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hmonotone : NonincreasingOnInterval F}
+    {hinterval : F.lower <= F.upper}
+    (s : NonincreasingDarbouxSchedule F hregular hmonotone hinterval) :
+    RealRaw :=
+  Integral.integralFor F (nonincreasingDarbouxScheduleConstructionFor s)
+
+theorem nonincreasingDarbouxScheduleIntegralFor_valid
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hmonotone : NonincreasingOnInterval F}
+    {hinterval : F.lower <= F.upper}
+    (s : NonincreasingDarbouxSchedule F hregular hmonotone hinterval) :
+    (nonincreasingDarbouxScheduleIntegralFor s).Valid :=
+  Integral.integralFor_valid F (nonincreasingDarbouxScheduleConstructionFor s)
+
+theorem nonincreasingDarbouxScheduleIntegralFor_width_le_of_tolerance
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hmonotone : NonincreasingOnInterval F}
+    {hinterval : F.lower <= F.upper}
+    (s : NonincreasingDarbouxSchedule F hregular hmonotone hinterval)
+    (n : Nat) (eps : Rat)
+    (hbudget : (F.upper - F.lower) *
+        (1 / ((s.evalPrecision n + 1 : Nat) : Rat)) <= eps) :
+    ((nonincreasingDarbouxScheduleIntegralFor s).compute n).width <= eps := by
+  change (nonincreasingDarbouxScheduleCompute F hinterval s.pieces
+    s.evalPrecision s.pieces_pos n).width <= eps
+  exact Rat.le_trans
+    (nonincreasingDarbouxStage_width_le_of_uniform_input_budget
+      F hregular (s.pieces n) (s.pieces_pos n) hinterval
+      (s.evalPrecision n) (s.input_budget n))
+    hbudget
+end Integral
 end ComputableAnalysis
