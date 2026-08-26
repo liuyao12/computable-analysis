@@ -9305,6 +9305,56 @@ def MonotoneDarbouxSchedule.ofDyadicEndpointOrdered
   widths_shrink := by
     simpa using hwidths
 
+/-! The width witness for the dyadic schedule is itself finite.  Once the
+mesh/input budget is supplied, the previous stage estimate reduces shrinking
+to the eventual rational inequality
+`(b-a)/(precision n + 1) <= eps`. -/
+theorem nondecreasingDarbouxDyadicSchedule_widths_shrink_of_budget
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    (hinterval : F.lower <= F.upper)
+    (evalPrecision : Nat -> Nat)
+    (hinput : forall n : Nat,
+      mesh F.lower F.upper (2 ^ n) <=
+        1 / ((hregular.inputPrecision (evalPrecision n) : Nat) : Rat))
+    (hbudget : forall eps : QPos, Exists fun N : Nat =>
+      forall n : Nat, N <= n ->
+        (F.upper - F.lower) *
+          (1 / ((evalPrecision n + 1 : Nat) : Rat)) <= eps.val) :
+    RealRaw.WidthsShrinkToZero
+      (monotoneDarbouxScheduleCompute F hinterval
+        (fun n => 2 ^ n) evalPrecision
+        (fun n => by positivity)) := by
+  intro eps
+  rcases hbudget eps with ⟨N, hN⟩
+  refine ⟨N, ?_⟩
+  intro n hn
+  exact Rat.le_trans
+    (nondecreasingDarbouxDyadicStage_width_le_of_input_budget
+      F hregular hinterval evalPrecision n (hinput n))
+    (hN n hn)
+
+/-! Convenience constructor combining the explicit mesh budget with the
+eventual rational output budget. -/
+def MonotoneDarbouxSchedule.ofDyadicEndpointOrderedOfBudget
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    (hF : EndpointOrderedNondecreasingOnInterval F)
+    (hinterval : F.lower <= F.upper)
+    (evalPrecision : Nat -> Nat)
+    (hprecision : forall {n m : Nat}, n <= m ->
+      evalPrecision n <= evalPrecision m)
+    (hinput : forall n : Nat,
+      mesh F.lower F.upper (2 ^ n) <=
+        1 / ((hregular.inputPrecision (evalPrecision n) : Nat) : Rat))
+    (hbudget : forall eps : QPos, Exists fun N : Nat =>
+      forall n : Nat, N <= n ->
+        (F.upper - F.lower) *
+          (1 / ((evalPrecision n + 1 : Nat) : Rat)) <= eps.val) :
+    MonotoneDarbouxSchedule F hregular hF.toNondecreasing hinterval :=
+  MonotoneDarbouxSchedule.ofDyadicEndpointOrdered hregular hF hinterval
+    evalPrecision hprecision hinput
+    (nondecreasingDarbouxDyadicSchedule_widths_shrink_of_budget
+      hregular hinterval evalPrecision hinput hbudget)
+
 def monotoneDarbouxScheduleRaw
     {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
     {hmonotone : NondecreasingOnInterval F}
