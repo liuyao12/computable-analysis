@@ -4625,8 +4625,18 @@ theorem equiv_trans {x y z : ComplexRaw}
   exact ⟨
     ⟨equiv_trans_re_left hx hy hz hxySame hyzSame n,
       equiv_trans_im_left hx hy hz hxySame hyzSame n⟩,
-    ⟨equiv_trans_re_left hz hy hx hzySame hyxSame n,
+      ⟨equiv_trans_re_left hz hy hx hzySame hyxSame n,
       equiv_trans_im_left hz hy hx hzySame hyxSame n⟩⟩
+
+/-- Complex interval algorithms also compose through a common valid anchor.
+The anchor remains proof-side data; the real and imaginary boxes of the
+selected runtime representation are untouched. -/
+theorem equiv_of_common_anchor {x y anchor : ComplexRaw}
+    (hx : x.Valid) (hy : y.Valid) (hanchor : anchor.Valid)
+    (hxanchor : x.Equiv anchor) (hyanchor : y.Equiv anchor) :
+    x.Equiv y := by
+  exact equiv_trans hx hanchor hy
+    hxanchor (equiv_symm hyanchor)
 
 def ofQComplex (z : QComplex) : ComplexRaw where compute := fun _ => { lo := z, hi := z }
 

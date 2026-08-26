@@ -1287,6 +1287,10 @@ and whose real and imaginary widths both shrink to \(0\).  Equivalently, its
 coordinate interval sequences are real numbers.  Two complex numbers are
 equivalent when their boxes overlap at every stage, i.e. coordinatewise
 equivalence of the real and imaginary parts.
+The reusable representation rule is
+\lean{ComputableAnalysis.ComplexRaw.equiv_of_common_anchor}:
+two valid complex algorithms are equivalent when both are equivalent to one
+valid proof-side anchor.
 \end{definition}
 
 \begin{definition}[Complex arithmetic]\label{def:complex-arithmetic}

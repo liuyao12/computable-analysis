@@ -300,6 +300,8 @@ equivalent to an existing non-preferred implementation.  The constructor
 stores the composed edge to the preferred node, so the source proof remains a
 single local equivalence edge while the registry remains a finite spanning
 tree.
+At the raw-box level, `ComplexRaw.equiv_of_common_anchor` provides the same
+transport rule as `RealRaw.equiv_of_common_anchor` for complex algorithms.
 
 For `ComplexFunction`, use `ComplexFunction.withAlternativeFrom` or
 `ComplexFunction.withAlternativeFromImplementation` when the new algorithm is
