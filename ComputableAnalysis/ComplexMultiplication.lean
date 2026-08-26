@@ -1120,6 +1120,19 @@ theorem negativeInv_valid {x : RealRaw} {N : Nat}
   change 0 < -(x.compute N).hi
   grind
 
+theorem negativeInv_equiv_of_stages {x : RealRaw} {N M : Nat}
+    (hx : x.Valid)
+    (hNneg : (x.compute N).hi < 0)
+    (hMneg : (x.compute M).hi < 0) :
+    (negativeInv x N).Equiv (negativeInv x M) := by
+  unfold negativeInv
+  apply neg_equiv
+  apply positiveInv_equiv_of_stages (neg_valid hx)
+  · change 0 < -(x.compute N).hi
+    grind
+  · change 0 < -(x.compute M).hi
+    grind
+
 private theorem qabs_le_of_interval_bounds {a b x B : Rat}
     (ha : qabs a <= B) (hb : qabs b <= B)
     (hax : a <= x) (hxb : x <= b) : qabs x <= B := by
@@ -1383,6 +1396,18 @@ theorem divByNegative_valid {x y : RealRaw} {N : Nat}
     (divByNegative x y N).Valid := by
   unfold divByNegative
   exact mul_valid hx (negativeInv_valid hy hneg)
+
+theorem divByNegative_equiv_of_stages {x y : RealRaw} {N M : Nat}
+    (hx : x.Valid) (hy : y.Valid)
+    (hNneg : (y.compute N).hi < 0)
+    (hMneg : (y.compute M).hi < 0) :
+    (divByNegative x y N).Equiv (divByNegative x y M) := by
+  unfold divByNegative
+  apply mul_equiv hx hx
+    (negativeInv_valid hy hNneg)
+    (negativeInv_valid hy hMneg)
+    (equiv_refl _ hx)
+  exact negativeInv_equiv_of_stages hy hNneg hMneg
 
 theorem negativeInv_mul_self_equiv_one {x : RealRaw} {N : Nat}
     (hx : x.Valid) (hneg : (x.compute N).hi < 0) :
