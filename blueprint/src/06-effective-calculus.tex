@@ -67,7 +67,7 @@ errors are paid from half-budgets.  Thus linear combinations can be assembled
 from existing certificates without a new completeness argument or a second
 integral construction.
 
-\lean{ComputableAnalysis.riemannLeftExact_add}
+\lean{ComputableAnalysis.ExactFunction.riemannLeftExact_add}
 \lean{ComputableAnalysis.ExactFunction.EffectiveFTCExact.addOfCommonSchedule}
 \leanok
 
@@ -75,7 +75,7 @@ Rational scaling is the other linear-combination primitive.  The finite fold
 scales exactly, and the endpoint budget is multiplied by the rational absolute
 value.  One representative certificate covers routine coefficient variants.
 
-\lean{ComputableAnalysis.riemannLeftExact_scale}
+\lean{ComputableAnalysis.ExactFunction.riemannLeftExact_scale}
 \lean{ComputableAnalysis.ExactFunction.EffectiveFTCExact.scaleOfSchedule}
 \leanok
 
@@ -87,7 +87,7 @@ value.  One representative certificate covers routine coefficient variants.
 \lean{ComputableAnalysis.ExactFunction.ftcErrorExact_cube_threeSquare_unit_of_pos}
 \lean{ComputableAnalysis.riemannLeftExact_doubleId_of_pos}
 \lean{ComputableAnalysis.riemannLeftExact_threeSquare_unit_of_pos}
-\lean{ComputableAnalysis.riemannLeftExact_affine_substitution}
+\lean{ComputableAnalysis.ExactFunction.riemannLeftExact_affine_substitution}
 \lean{ComputableAnalysis.ExactFunction.squareFTCExactUnit}
 \lean{ComputableAnalysis.Integral.cubeEffectiveFTCData}
 \lean{ComputableAnalysis.Integral.cubeEffectiveFTC_equiv_endpoint}
@@ -649,7 +649,7 @@ effective derivative certificate.
 
 This is the representative product instance.  General products still require
 bounded interval multiplication and a synchronized schedule for the two
-this finite certificate.
+factor evaluators; the finite certificate keeps those obligations explicit.
 The reusable bound-facing corollary makes the bookkeeping explicit: supplied
 rational bounds for the two factor values, their two secants, and their local
 errors reduce the product proof to one visible sum of two linear errors and

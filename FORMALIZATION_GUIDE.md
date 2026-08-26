@@ -792,7 +792,7 @@ the inner schedule and budget supplied explicitly.  This is the representative
 linear-combination rule; routine coefficient variants should not be duplicated.
 
 The matching integral-side identity is
-`ComputableAnalysis.riemannLeftExact_affine_substitution`. It transports a
+`ComputableAnalysis.ExactFunction.riemannLeftExact_affine_substitution`. It transports a
 positive affine change of variable through the finite left-rectangle fold.
 This is the substitution algebra that an effective FTC certificate can later
 carry to the nested interval level; it is deliberately not stated as a
