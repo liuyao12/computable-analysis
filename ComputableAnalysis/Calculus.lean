@@ -4051,6 +4051,43 @@ theorem range'_interval_append (a b c : Nat) (hab : a <= b) (hbc : b <= c) :
         subst b
         simp [Nat.sub_self]
 
+/-- The fine-cell indices belonging to one coarse block, listed in order.
+The range is half-open at the right endpoint, so adjacent blocks do not
+duplicate an embedded coarse breakpoint. -/
+def Refines.indexBlock {a b : Rat} {fine coarse : RationalPartition a b}
+    (R : Refines fine coarse) (i : Nat) : List Nat :=
+  List.range' (R.index i) (R.index (i + 1) - R.index i) 1
+
+/-! Flattening all coarse index blocks recovers the complete fine-cell range.
+This is the finite reindexing identity underlying refined Darboux sums. -/
+theorem Refines.indexBlocks_flatMap_eq_range {a b : Rat}
+    {fine coarse : RationalPartition a b} (R : Refines fine coarse) :
+    (List.range coarse.pieces).flatMap (R.indexBlock) = List.range fine.pieces := by
+  have aux : ∀ n, n ≤ coarse.pieces →
+      (List.range n).flatMap (R.indexBlock) =
+        List.range' (R.index 0) (R.index n - R.index 0) 1 := by
+    intro n
+    induction n with
+    | zero =>
+        intro _
+        simp [Refines.indexBlock]
+    | succ n ih =>
+        intro hn
+        have hn' : n ≤ coarse.pieces := Nat.le_trans (Nat.le_succ n) hn
+        have hindex : R.index n ≤ R.index (n + 1) :=
+          R.index_mono _ _ (Nat.le_succ n)
+        have hstart : R.index 0 ≤ R.index n :=
+          R.index_mono _ _ (Nat.zero_le n)
+        have happend := range'_interval_append
+          (R.index 0) (R.index n) (R.index (n + 1))
+          hstart hindex
+        simp only [List.range_succ, List.flatMap_append, List.flatMap_cons,
+          List.flatMap_nil]
+        simp only [List.append_nil, Refines.indexBlock]
+        rw [ih hn', happend]
+  have h := aux coarse.pieces (Nat.le_refl _)
+  simpa [R.index_zero, R.index_last, List.range_eq_range'] using h
+
 /-- Every genuine cell of an explicit uniform partition has exactly its
 rational mesh width. -/
 theorem uniform_cell_width (a b : Rat) (pieces : Nat)

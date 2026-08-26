@@ -128,6 +128,10 @@ The dependent witness is also exposed as a direct unique-existence contract:
 \lean{ComputableAnalysis.RationalPartition.Refines.existsUnique_index_block_of_fine_cell}
 The finite range algebra used to concatenate adjacent blocks is explicit:
 \lean{ComputableAnalysis.RationalPartition.range'_interval_append}
+Each coarse block is represented by an executable ordered fine-index list:
+\lean{ComputableAnalysis.RationalPartition.Refines.indexBlock}
+Flattening all such blocks recovers the complete fine partition range:
+\lean{ComputableAnalysis.RationalPartition.Refines.indexBlocks_flatMap_eq_range}
 The remaining whole-sum argument is a finite reindexing of these located
 cells, followed by the single-cell weighted interval inequality.
 This gives the computable mean-value/area principle for the functions covered
