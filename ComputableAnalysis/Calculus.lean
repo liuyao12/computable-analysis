@@ -8566,6 +8566,29 @@ theorem nonincreasingDarbouxRange_overlaps_point_value
     (F.compute x hx prec).lo <= (F.compute C.lower hlower prec).hi
   exact ⟨hright, hleft⟩
 
+theorem endpointOrderedNonincreasingDarbouxRange_contains_point_value
+    (F : FunctionOnInterval)
+    (hF : EndpointOrderedNonincreasingOnInterval F)
+    (P : RationalPartition F.lower F.upper)
+    (k : Nat) (hk : k < P.pieces) (x : Rat)
+    (hx : inDomainInterval F.lower F.upper x)
+    (hlo : (P.cell k hk).lower <= x)
+    (hhi : x <= (P.cell k hk).upper) (prec : Nat) :
+    QInterval.ContainsInterval
+      (nonincreasingDarbouxRange F P k hk prec)
+      (F.compute x hx prec) := by
+  let C := P.cell k hk
+  have hlower : inDomainInterval F.lower F.upper C.lower :=
+    And.intro C.lower_mem (Rat.le_trans C.ordered C.upper_mem)
+  have hupper : inDomainInterval F.lower F.upper C.upper :=
+    And.intro (Rat.le_trans C.lower_mem C.ordered) C.upper_mem
+  have hleft := hF.lower_mono x C.upper hx hupper hhi prec
+  have hright := hF.upper_mono C.lower x hlower hx hlo prec
+  change (F.compute C.upper hupper prec).lo <=
+      (F.compute x hx prec).lo /\
+    (F.compute x hx prec).hi <= (F.compute C.lower hlower prec).hi
+  exact ⟨hleft, hright⟩
+
 /-! The decreasing cell ranges assemble by the same finite rectangle fold as
 the increasing ones. -/
 def nonincreasingDarbouxStage (F : FunctionOnInterval)
