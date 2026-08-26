@@ -7378,7 +7378,38 @@ def NonincreasingOnInterval (F : FunctionOnInterval) : Prop :=
     (hy : inDomainInterval F.lower F.upper y),
     x <= y ->
       forall n,
-        (F.compute y hy n).lo <= (F.compute x hx n).hi
+      (F.compute y hy n).lo <= (F.compute x hx n).hi
+
+/-! A stronger monotonicity certificate keeps the two endpoint coordinates
+ordered separately.  This is the extra finite data needed for automatic
+cross-stage comparisons of lower and upper Darboux sums; weak monotonicity
+alone intentionally exposes only overlap. -/
+structure EndpointOrderedNondecreasingOnInterval
+    (F : FunctionOnInterval) : Prop where
+  lower_mono : forall x y
+    (hx : inDomainInterval F.lower F.upper x)
+    (hy : inDomainInterval F.lower F.upper y),
+    x <= y -> forall n,
+      (F.compute x hx n).lo <= (F.compute y hy n).lo
+  upper_mono : forall x y
+    (hx : inDomainInterval F.lower F.upper x)
+    (hy : inDomainInterval F.lower F.upper y),
+    x <= y -> forall n,
+      (F.compute x hx n).hi <= (F.compute y hy n).hi
+
+namespace EndpointOrderedNondecreasingOnInterval
+
+/-- Coordinatewise endpoint order implies the project's weak interval order. -/
+theorem toNondecreasing {F : FunctionOnInterval}
+    (h : EndpointOrderedNondecreasingOnInterval F) :
+    NondecreasingOnInterval F := by
+  intro x y hx hy hxy n
+  have hlo := h.lower_mono x y hx hy hxy n
+  have hyordered := (F.valid_on y (F.defined_on y hy)).1 n
+  change 0 <= (F.compute y hy n).hi - (F.compute y hy n).lo at hyordered
+  grind [Rat.sub_eq_add_neg]
+
+end EndpointOrderedNondecreasingOnInterval
 
 namespace MonotoneOnInterval
 
