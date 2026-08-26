@@ -223,6 +223,25 @@ special-function evaluator. A merely effective modulus of continuity can be
 added later by supplying a corresponding cell-width schedule; it is not
 silently identified with the Lipschitz case.
 
+The general interval-regular layer now exposes the finite step that comes
+before a raw integral.  Each cell is assigned the common image enclosure
+provided by `IntervalRegularOn`, and a uniform partition gives the explicit
+bound
+
+\begin{verbatim}
+width(sum of cell boxes) <= (b-a)/(requested precision + 1).
+\end{verbatim}
+
+This works without monotonicity.  It is intentionally only a finite
+quadrature candidate: cross-stage nesting still has to be supplied before it
+is promoted to a `realRaw` integral.
+
+\lean{ComputableAnalysis.Integral.intervalRegularDarbouxRange}
+\lean{ComputableAnalysis.Integral.intervalRegularDarbouxRange_width_le}
+\lean{ComputableAnalysis.Integral.intervalRegularDarbouxStage}
+\lean{ComputableAnalysis.Integral.intervalRegularDarbouxStage_width_le_of_uniform_input_budget}
+\leanok
+
 \lean{ComputableAnalysis.Integral.LipschitzOnUnit}
 \lean{ComputableAnalysis.LipschitzDyadic.compute}
 \lean{ComputableAnalysis.LipschitzDyadic.compute_width}

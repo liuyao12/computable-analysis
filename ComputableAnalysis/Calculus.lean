@@ -7128,6 +7128,67 @@ end NonincreasingOnInterval
 
 namespace Integral
 
+/-! A general interval-regular cell range.  Unlike the monotone endpoint
+range below, this uses the common image enclosure supplied by
+`IntervalRegularOn`; no ordering of endpoint values is assumed. -/
+def intervalRegularDarbouxRange
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (P : RationalPartition F.lower F.upper)
+    (k : Nat) (hk : k < P.pieces) (prec : Nat) : QInterval := by
+  let C := P.cell k hk
+  let I : QInterval := { lo := C.lower, hi := C.upper }
+  have hI : subintervalOf I F.lower F.upper := by
+    exact ⟨C.lower_mem, C.ordered, C.upper_mem⟩
+  exact hregular.evalInterval I hI prec
+
+theorem intervalRegularDarbouxRange_width_le
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (P : RationalPartition F.lower F.upper)
+    (k : Nat) (hk : k < P.pieces) (prec : Nat)
+    (hsmall : (P.cell k hk).width <=
+      1 / ((hregular.inputPrecision prec : Nat) : Rat)) :
+    (intervalRegularDarbouxRange F hregular P k hk prec).width <=
+      1 / ((prec + 1 : Nat) : Rat) := by
+  unfold intervalRegularDarbouxRange
+  let C := P.cell k hk
+  let I : QInterval := { lo := C.lower, hi := C.upper }
+  have hI : subintervalOf I F.lower F.upper := by
+    exact ⟨C.lower_mem, C.ordered, C.upper_mem⟩
+  have houtput := hregular.output_width I hI prec (by
+    change C.width <= _
+    exact hsmall)
+  exact houtput.2
+
+/-! The finite general Darboux sum uses the interval image of each cell.  It
+is a computable enclosure candidate for arbitrary interval-regular functions;
+validity across requested stages still requires an explicit nesting witness. -/
+def intervalRegularDarbouxStage
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (P : RationalPartition F.lower F.upper) (prec : Nat) : QInterval :=
+  P.boundIntegralSum
+    (fun k hk => intervalRegularDarbouxRange F hregular P k hk prec)
+
+theorem intervalRegularDarbouxStage_width_le_of_uniform_input_budget
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (pieces : Nat) (hpieces : 0 < pieces) (hab : F.lower <= F.upper)
+    (prec : Nat)
+    (hsmall : mesh F.lower F.upper pieces <=
+      1 / ((hregular.inputPrecision prec : Nat) : Rat)) :
+    (intervalRegularDarbouxStage F hregular
+      (RationalPartition.uniform F.lower F.upper pieces hpieces hab) prec).width <=
+      (F.upper - F.lower) * (1 / ((prec + 1 : Nat) : Rat)) := by
+  unfold intervalRegularDarbouxStage
+  apply RationalPartition.uniform_boundIntegralSum_width_le
+    pieces hpieces hab
+    (fun k hk => intervalRegularDarbouxRange F hregular
+      (RationalPartition.uniform F.lower F.upper pieces hpieces hab) k hk prec)
+    (1 / ((prec + 1 : Nat) : Rat))
+  intro k hk
+  apply intervalRegularDarbouxRange_width_le F hregular
+    (RationalPartition.uniform F.lower F.upper pieces hpieces hab) k hk prec
+  simpa [RationalPartition.uniform_cell_width F.lower F.upper pieces hpieces hab k hk]
+    using hsmall
+
 /-- The finite endpoint range used by a nondecreasing Darboux cell.
 
 For a rational cell `[p,r]`, the lower endpoint is evaluated at `p` and the

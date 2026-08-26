@@ -993,6 +993,16 @@ value transport through
 
 ### Increasing pieces: start with the literal finite stage
 
+For an arbitrary `IntervalRegularOn F`, use
+`Integral.intervalRegularDarbouxRange` for the common image box of a cell and
+`Integral.intervalRegularDarbouxStage` for its finite uniform-partition sum.
+The theorem
+`Integral.intervalRegularDarbouxStage_width_le_of_uniform_input_budget` gives
+the explicit `(b-a)/(prec+1)` width bound once the mesh is below the input
+modulus.  This is a general finite quadrature candidate, not yet a universal
+integrability theorem: cross-stage nesting remains a separate certificate
+obligation before constructing a `RealRaw` integral.
+
 For a nondecreasing `FunctionOnInterval F`,
 `Integral.nondecreasingDarbouxRange F P k hk prec` is the endpoint box for
 the `k`th rational cell of `P`, and
