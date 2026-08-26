@@ -703,6 +703,23 @@ theorem inv_ordered_of_pos {I : QInterval}
         grind [Rat.mul_assoc, Rat.mul_comm]
   · exact hprod
 
+theorem inv_width_eq_width_div_product_of_pos {I : QInterval}
+    (hpos : 0 < I.lo) (hI : I.lo <= I.hi) :
+    I.inv.width = I.width / (I.lo * I.hi) := by
+  rw [inv_of_pos hpos]
+  unfold QInterval.width
+  rw [Rat.div_def]
+  have hhi : 0 < I.hi := by grind
+  have hline : 1 / I.lo - 1 / I.hi =
+      (I.hi - I.lo) * (I.lo * I.hi)⁻¹ := by
+    rw [Rat.div_def, Rat.div_def]
+    have hlo0 : I.lo ≠ 0 := Rat.ne_of_gt hpos
+    have hhi0 : I.hi ≠ 0 := Rat.ne_of_gt hhi
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel,
+      Rat.inv_mul_cancel]
+  exact hline
+
 theorem inv_nested_of_pos {I J : QInterval}
     (hIpos : 0 < I.lo) (hJpos : 0 < J.lo)
     (hIJ : I.lo <= J.lo) (hJord : J.lo <= J.hi)
