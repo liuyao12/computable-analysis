@@ -421,6 +421,26 @@ def exactRat_affine_intervalRegularOn
     (fun x => r * x + c) a b (affineSlopeBound r)
     (exactRat_affine_lipschitz r c a b hab)
 
+theorem exactRat_affine_evalIntervalsNested
+    (r c a b : Rat) (hab : a <= b) :
+    IntervalRegularOn.EvalIntervalsNested
+      (exactRat_affine_intervalRegularOn r c a b hab) := by
+  intro I hI n m hnm
+  exact QInterval.containsInterval_refl _
+
+theorem exactRat_affine_darbouxStage_nested
+    (r c a b : Rat) (hab : a <= b)
+    (P : RationalPartition a b) {n m : Nat} (hnm : n <= m) :
+    (Integral.intervalRegularDarbouxStage
+      (FunctionOnInterval.exactRat (fun x => r * x + c) a b)
+      (exactRat_affine_intervalRegularOn r c a b hab) P n).ContainsInterval
+      (Integral.intervalRegularDarbouxStage
+        (FunctionOnInterval.exactRat (fun x => r * x + c) a b)
+        (exactRat_affine_intervalRegularOn r c a b hab) P m) := by
+  exact Integral.intervalRegularDarbouxStage_contains_of_evalIntervalsNested
+    _ (exactRat_affine_intervalRegularOn r c a b hab)
+    (exactRat_affine_evalIntervalsNested r c a b hab) P hnm
+
 def exactRat_affine_integral_certificate
     (r c a b : Rat) (hab : a <= b) :
     IntervalRegularIntegralCertificate
