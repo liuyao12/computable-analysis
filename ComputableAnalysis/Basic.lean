@@ -4833,6 +4833,22 @@ theorem agreeOnCommonDomain_symm {f g : FunctionRaw} :
   intro h z hg hf
   exact ComplexRaw.equiv_symm (h z hf hg)
 
+/-! The function-level spanning-tree rule.  The anchor need only be defined
+on the common inputs of the two outer representations; it need not cover
+either whole domain. -/
+theorem agreeOnCommonDomain_of_common_anchor
+    {f g anchor : FunctionRaw}
+    (hf : f.Valid) (hg : g.Valid) (ha : anchor.Valid)
+    (hdom : forall z, f.domain z -> g.domain z -> anchor.domain z)
+    (hfa : f.AgreeOnCommonDomain anchor)
+    (hga : g.AgreeOnCommonDomain anchor) :
+    f.AgreeOnCommonDomain g := by
+  intro z hfz hgz
+  have haz : anchor.domain z := hdom z hfz hgz
+  exact ComplexRaw.equiv_of_common_anchor
+    (hf z hfz) (hg z hgz) (ha z haz)
+    (hfa z hfz haz) (hga z hgz haz)
+
 /-- Short alias for `AgreeOnCommonDomain`. -/
 def Compatible (f g : FunctionRaw) : Prop := AgreeOnCommonDomain f g
 

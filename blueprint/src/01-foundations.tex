@@ -1454,6 +1454,11 @@ These constructors add a new representation through an existing one.  They
 require explicit domain coverage for the intermediate representation and then
 compose the local overlap equivalence, so the registry may be a finite
 spanning tree rather than a collection of pairwise proofs.
+At the raw function level, the reusable rule is
+\lean{ComputableAnalysis.FunctionRaw.agreeOnCommonDomain_of_common_anchor}:
+if two valid computations agree with a valid anchor wherever all three are
+defined, they agree with each other on their shared domain.  The anchor
+coverage hypothesis is explicit and need only hold on that shared domain.
 
 The library is intentionally representative rather than encyclopedic.  We
 formalize one complete example for each genuinely different computational

@@ -309,6 +309,11 @@ single local equivalence edge while the registry remains a finite spanning
 tree.
 At the raw-box level, `ComplexRaw.equiv_of_common_anchor` provides the same
 transport rule as `RealRaw.equiv_of_common_anchor` for complex algorithms.
+At the function level, use
+`FunctionRaw.agreeOnCommonDomain_of_common_anchor`: provide validity for both
+outer computations and the anchor, plus explicit anchor-domain coverage on
+their common inputs.  This is the complex-function version of the spanning
+tree rule; it does not assert agreement outside the shared domain.
 
 For `ComplexFunction`, use `ComplexFunction.withAlternativeFrom` or
 `ComplexFunction.withAlternativeFromImplementation` when the new algorithm is
