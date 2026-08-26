@@ -3767,6 +3767,30 @@ theorem rationalTangentSquareWitnessSearch_complete_of_grid_candidate
     exact ⟨k, by simpa using hk', rfl⟩
   · exact hadm
 
+/-! Package the executable side of the squared-sine witness search.  The
+geometric proof may choose a different grid depth and index at each requested
+stage; once those finite choices are certified admissible, the search itself
+is available uniformly.  This structure contains no limit object and does not
+claim that the witnesses have already been constructed. -/
+structure RationalTangentSquareWitnessCandidateFamily
+    (U S C : QInterval) where
+  gridDepth : Nat -> Nat
+  gridIndex : Nat -> Nat
+  gridIndex_le : forall n, gridIndex n <= 2 ^ gridDepth n
+  admissible : forall n,
+    rationalTangentSquareWitnessAdmissibleBool U S C
+      (U.lo + U.width *
+        ((gridIndex n : Rat) / ((2 ^ gridDepth n : Nat) : Rat))) = true
+
+theorem RationalTangentSquareWitnessCandidateFamily.search_exists
+    {U S C : QInterval}
+    (h : RationalTangentSquareWitnessCandidateFamily U S C) :
+    forall n, ∃ v, rationalTangentSquareWitnessSearch U S C
+      (h.gridDepth n) = some v := by
+  intro n
+  exact rationalTangentSquareWitnessSearch_complete_of_grid_candidate
+    (h.gridDepth n) (h.gridIndex n) (h.gridIndex_le n) (h.admissible n)
+
 theorem rationalTangentSquareWitnessSearch_sound
     {U S C : QInterval} {m : Nat} {u : Rat}
     (h : rationalTangentSquareWitnessSearch U S C m = some u) :

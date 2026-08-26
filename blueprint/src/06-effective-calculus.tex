@@ -523,7 +523,15 @@ first nonzero dyadic sample, the square-aware rational search finds
 (u=103/256), and the circle identity turns its sine and cosine containment
 into overlap of the sine-square and complementary-square intervals:
 
+At the general finite-search boundary, a stage may choose its own grid depth
+and grid index.  `RationalTangentSquareWitnessCandidateFamily` packages those
+choices and its Boolean admissibility proofs; its `search_exists` theorem
+turns them into executable search hits.  The geometric construction of the
+family remains a separate obligation.
+
 \lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_stage_one_demo}
+\lean{ComputableAnalysis.SinPiIntegral.RationalTangentSquareWitnessCandidateFamily}
+\lean{ComputableAnalysis.SinPiIntegral.RationalTangentSquareWitnessCandidateFamily.search_exists}
 \lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalStage_one_square_complement_overlap}
 \lean{ComputableAnalysis.SinPiIntegral.square_overlap_of_rationalTangentSquareWitnessSearch}
 \lean{ComputableAnalysis.SinPiIntegral.signed_square_overlap_of_rationalTangentSquareWitnessSearch}
