@@ -4884,6 +4884,13 @@ structure Representation (f : ComplexFunction) where
   valid : raw.Valid
   agrees : raw.AgreeOnCommonDomain f.preferred
 
+theorem Representation.eval_equiv_preferred
+    {f : ComplexFunction} (rep : Representation f)
+    {z : QComplex} (hr : rep.raw.domain z)
+    (hf : f.preferred.domain z) :
+    (rep.raw.evalRaw z hr).Equiv (f.preferred.evalRaw z hf) :=
+  rep.agrees z hr hf
+
 def ofRaw (raw : FunctionRaw) (h : raw.Valid) : ComplexFunction where
   preferred := raw
   valid := h

@@ -323,6 +323,10 @@ composes the local equivalence edge with the existing path to the preferred
 function.  This keeps partial domains honest while allowing a genuine
 spanning-tree registry.
 
+At a shared rational input, use
+`ComplexFunction.Representation.eval_equiv_preferred` to retrieve the stored
+pointwise equivalence directly, without manually unpacking the representation.
+
 For partial real functions, the preferred representation can serve as the
 spanning node for two alternative views.  When the source domain is known to
 lie in the preferred domain, use
