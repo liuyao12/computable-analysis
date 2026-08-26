@@ -785,6 +785,11 @@ For sums of certified primitives, use
 shared finite stage schedule and half-budget endpoint certificates; the
 finite identity `riemannLeftExact_add` then supplies the exact algebraic
 transport.
+For a rational coefficient, use
+`ExactFunction.EffectiveFTCExact.scaleOfSchedule`.  It reuses the derivative
+scaling certificate and transports the finite endpoint error by `qabs c`, with
+the inner schedule and budget supplied explicitly.  This is the representative
+linear-combination rule; routine coefficient variants should not be duplicated.
 
 The matching integral-side identity is
 `ComputableAnalysis.riemannLeftExact_affine_substitution`. It transports a

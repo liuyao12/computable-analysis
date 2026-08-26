@@ -674,6 +674,33 @@ theorem riemannLeftExact_affine_substitution
     grind [Rat.mul_assoc, Rat.mul_comm]
   simpa [riemannLeftExact] using hsum n
 
+/-! Finite left-rectangle sums commute with rational scaling.  This is the
+small algebraic fact needed to transport an exact FTC certificate through a
+rational coefficient; it is independent of any limiting argument. -/
+theorem riemannLeftExact_scale
+    (c : Rat) (f : Rat -> Rat) (a b : Rat) (n : Nat) :
+    riemannLeftExact (fun x => c * f x) a b n =
+      c * riemannLeftExact f a b n := by
+  unfold riemannLeftExact
+  have hfold : forall (xs : List Nat) (w : Rat) (p : Nat -> Rat)
+      (acc : Rat),
+      xs.foldl (fun acc k => acc + w * (c * f (p k))) (c * acc) =
+        c * xs.foldl (fun acc k => acc + w * f (p k)) acc := by
+    intro xs
+    induction xs with
+    | nil => intro w p acc; simp
+    | cons k ks ih =>
+        intro w p acc
+        simp only [List.foldl_cons]
+        have h := ih w p (acc + w * f (p k))
+        have hacc : c * acc + w * (c * f (p k)) =
+            c * (acc + w * f (p k)) := by
+          grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm]
+        rw [hacc]
+        exact h
+  simpa [Rat.zero_mul, Rat.mul_zero, Rat.zero_add] using
+    hfold (List.range n) (mesh a b n) (fun k => leftPoint a b n k) 0
+
 /-! Finite left-rectangle sums distribute over addition.  This is the small
 algebraic fact needed to assemble exact FTC certificates on a common stage
 schedule; it is independent of any limiting argument. -/
@@ -752,6 +779,44 @@ def EffectiveFTCExact.addOfCommonSchedule
         have htwo : (2 : Rat)⁻¹ + (2 : Rat)⁻¹ = 1 := by native_decide
         rw [← Rat.mul_add, htwo, Rat.mul_one]
         exact Rat.le_refl
+
+/-! Rational scaling closure for exact FTC certificates.  The derivative
+schedule and the endpoint-error schedule are supplied explicitly, so the
+computational cost remains visible and no convergence rate is inferred. -/
+def EffectiveFTCExact.scaleOfSchedule
+    (c : Rat)
+    {F dF : Rat -> Rat} {a b : Rat}
+    (D : EffectiveFTCExact F dF a b)
+    (inner : QPos -> QPos)
+    (hbudget : forall eps,
+      qabs c * (inner eps).val <= eps.val)
+    (hradius : forall eps,
+      (inner eps).val <= (D.derivative.stepRadius (inner eps)).val)
+    (chooseN : QPos -> Nat)
+    (herror : forall eps,
+      ftcErrorExact F dF a b (chooseN eps) <= (inner eps).val) :
+    EffectiveFTCExact (fun x => c * F x) (fun x => c * dF x) a b where
+  derivative := ExactFunction.EffectiveDerivativeExact.scale
+    c D.derivative inner hbudget hradius
+  chooseN := chooseN
+  good := by
+    intro eps
+    have herror' := herror eps
+    unfold ftcErrorExact at herror' ⊢
+    rw [riemannLeftExact_scale]
+    have hdecomp :
+        c * riemannLeftExact dF a b (chooseN eps) -
+            ((c * F b) - (c * F a)) =
+          c * (riemannLeftExact dF a b (chooseN eps) - (F b - F a)) := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    rw [hdecomp, qabs_mul]
+    calc
+      qabs c * qabs
+          (riemannLeftExact dF a b (chooseN eps) - (F b - F a)) <=
+          qabs c * (inner eps).val :=
+        Rat.mul_le_mul_of_nonneg_left herror' (qabs_nonneg _)
+      _ <= eps.val := hbudget eps
 
 /-! The finite FTC certificate transports along the same positive affine map.
 The rectangle identity is exact at each finite mesh, so the only analytic
