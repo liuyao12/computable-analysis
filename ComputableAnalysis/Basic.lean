@@ -4916,6 +4916,25 @@ theorem Representation.eval_equiv_preferred
     (rep.raw.evalRaw z hr).Equiv (f.preferred.evalRaw z hf) :=
   rep.agrees z hr hf
 
+/-- Directly expose the stagewise output-box overlap for two complex-function
+representations on a shared rational-complex input. -/
+theorem Representation.overlapsAt_on_common_domain
+    {f : ComplexFunction} (source target : Representation f)
+    (hsource : forall z, source.raw.domain z -> f.preferred.domain z)
+    {z : QComplex} (hzs : source.raw.domain z)
+    (hzt : target.raw.domain z) (stage : Nat) :
+    QBox.Overlaps
+      (source.raw.compute z hzs stage) (target.raw.compute z hzt stage) := by
+  have hzf : f.preferred.domain z := hsource z hzs
+  have heq : (source.raw.evalRaw z hzs).Equiv
+      (target.raw.evalRaw z hzt) :=
+    ComplexRaw.equiv_trans (source.valid z hzs) (f.valid z hzf)
+      (target.valid z hzt) (source.agrees z hzs hzf)
+      (ComplexRaw.equiv_symm (target.agrees z hzt hzf))
+  exact (ComplexRaw.compareAt_overlap_iff
+    (source.raw.evalRaw z hzs) (target.raw.evalRaw z hzt) stage stage).1
+    (heq stage)
+
 def ofRaw (raw : FunctionRaw) (h : raw.Valid) : ComplexFunction where
   preferred := raw
   valid := h

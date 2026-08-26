@@ -361,6 +361,7 @@ ComputableAnalysis.Complex.ofReal
 ComputableAnalysis.Complex.Representation.equiv
 ComputableAnalysis.Complex.Representation.overlapsAt
 ComputableAnalysis.PartialRealFunction.Representation.overlapsAt_on_common_domain
+ComputableAnalysis.ComplexFunction.Representation.overlapsAt_on_common_domain
 ComputableAnalysis.FunctionRaw
 ComputableAnalysis.RealFunRaw
 ComputableAnalysis.RealFunRaw.add_valid
