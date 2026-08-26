@@ -118,6 +118,8 @@ Every genuine fine cell is covered by one of those finite coarse blocks:
 The combined form supplies the valid fine-cell witness and its containment in
 one step:
 \lean{ComputableAnalysis.RationalPartition.Refines.cell_contained_in_coarse_of_index_block}
+The resulting coverage statement exposes the geometric fact directly:
+\lean{ComputableAnalysis.RationalPartition.Refines.exists_coarse_cell_containing_fine_cell}
 The remaining whole-sum argument is a finite reindexing of these located
 cells, followed by the single-cell weighted interval inequality.
 This gives the computable mean-value/area principle for the functions covered

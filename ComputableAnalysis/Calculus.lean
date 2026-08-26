@@ -3954,6 +3954,24 @@ theorem Refines.cell_contained_in_coarse_of_index_block {a b : Rat}
     (R.index_in_coarse_block hi hleft hright) hleft
     (Nat.succ_le_of_lt hright)
 
+/-- Direct finite coverage form: every genuine fine cell is contained in at
+least one coarse cell.  This is the geometric statement needed by a refined
+Darboux-sum proof; the preceding lemmas retain the explicit index witness
+when a later argument needs the block itself. -/
+theorem Refines.exists_coarse_cell_containing_fine_cell {a b : Rat}
+    {fine coarse : RationalPartition a b} (R : Refines fine coarse)
+    {j : Nat} (hj : j < fine.pieces) :
+    ∃ (i : Nat) (hi : i < coarse.pieces),
+      (coarse.cell i hi).lower <=
+        (fine.cell j hj).lower ∧
+      (fine.cell j hj).upper <=
+        (coarse.cell i hi).upper := by
+  rcases R.exists_index_block_of_fine_cell hj with
+    ⟨i, hi, hleft, hright⟩
+  have hcontained := R.cell_contained_in_coarse_of_index_block
+    hi hleft hright
+  exact ⟨i, hi, hcontained.1, hcontained.2⟩
+
 /-- Every genuine cell of an explicit uniform partition has exactly its
 rational mesh width. -/
 theorem uniform_cell_width (a b : Rat) (pieces : Nat)
