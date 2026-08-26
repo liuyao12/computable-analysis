@@ -231,6 +231,9 @@ mesh comparison for the stronger endpoint-order certificate:
 Finite composition gives the corresponding arbitrary-stage statement at fixed
 evaluation precision:
 \lean{ComputableAnalysis.endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage}
+When evaluator precision is itself monotone, the same containment holds for
+the complete scheduled stages:
+\lean{ComputableAnalysis.endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage_of_precision_mono}
 \lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule}
 \lean{ComputableAnalysis.Integral.monotoneDarbouxSchedule_widths_shrink_of_budget}
 \lean{ComputableAnalysis.Integral.monotoneDarbouxSchedule_linear_precision_budget}

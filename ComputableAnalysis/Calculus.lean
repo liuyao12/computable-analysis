@@ -8588,6 +8588,35 @@ theorem endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage
         subst n
         exact QInterval.containsInterval_refl _
 
+/-! Cross-stage nesting for the actual scheduled evaluator.  The earlier mesh
+is first compared with the same mesh at the later evaluation precision, then
+the fixed-precision dyadic theorem compares that later coarse mesh with the
+later fine mesh. -/
+theorem endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage_of_precision_mono
+    (F : FunctionOnInterval)
+    (hF : EndpointOrderedNondecreasingOnInterval F)
+    (hinterval : F.lower <= F.upper)
+    (evalPrecision : Nat -> Nat)
+    (hprecision : forall {n m : Nat}, n <= m ->
+      evalPrecision n <= evalPrecision m)
+    {n m : Nat} (hnm : n <= m) :
+    QInterval.ContainsInterval
+      (nondecreasingDarbouxDyadicStage F hinterval evalPrecision n)
+      (nondecreasingDarbouxDyadicStage F hinterval evalPrecision m) := by
+  have hprecision_stage := nondecreasingDarbouxStage_contains_of_precision F
+    (RationalPartition.uniform F.lower F.upper (2 ^ n)
+      (by positivity) hinterval)
+    (evalPrecision n) (evalPrecision m) (hprecision hnm)
+  have hmesh := endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage
+    F hF hinterval (evalPrecision m) hnm
+  have hcombined :
+      QInterval.ContainsInterval
+        (nondecreasingDarbouxDyadicStage F hinterval evalPrecision n)
+        (nondecreasingDarbouxDyadicStage F hinterval
+          (fun _ => evalPrecision m) n) := by
+    simpa [nondecreasingDarbouxDyadicStage] using hprecision_stage
+  exact hcombined.trans hmesh
+
 /-! Evaluator refinement is automatically coherent when the partition is held
 fixed.  The endpoint boxes at a later precision are contained in the earlier
 boxes, and positive cell-width scaling plus the finite-sum containment lemma
