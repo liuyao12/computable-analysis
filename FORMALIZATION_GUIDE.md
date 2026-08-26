@@ -1676,13 +1676,16 @@ open ComputableAnalysis
 #check RealRaw.positiveInv_compute_ordered
 #check RealRaw.positiveInv_compute_nested
 #check RealRaw.positiveInv_valid
+#check RealRaw.negativeInv
+#check RealRaw.negativeInv_valid
 ```
 
 These reciprocal lemmas are deliberately finite: they apply after an interval
 has been certified strictly positive.  `RealRaw.positiveInv_valid` packages
-the resulting separated branch as a shrinking raw real.  A negative branch
-can be handled by sign transport; the unrestricted `HasComputableInv`
-interface is not used as a substitute for either explicit branch.
+the resulting separated branch as a shrinking raw real, and
+`RealRaw.negativeInv_valid` transports it through negation.  The unrestricted
+`HasComputableInv` interface is not used as a substitute for either explicit
+branch.
 
 ```lean
 import ComputableAnalysis.ComplexMultiplication

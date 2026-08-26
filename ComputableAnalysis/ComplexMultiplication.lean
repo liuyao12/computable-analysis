@@ -928,6 +928,18 @@ theorem positiveInv_valid {x : RealRaw} {N : Nat}
       simp [positiveInv, positiveInvCompute, Nat.not_lt_of_ge hnN]
       exact Rat.le_trans hinv hquot
 
+def negativeInv (x : RealRaw) (N : Nat) : RealRaw :=
+  -(positiveInv (-x) N)
+
+theorem negativeInv_valid {x : RealRaw} {N : Nat}
+    (hx : x.Valid) (hneg : (x.compute N).hi < 0) :
+    (negativeInv x N).Valid := by
+  unfold negativeInv
+  apply neg_valid
+  apply positiveInv_valid (neg_valid hx)
+  change 0 < -(x.compute N).hi
+  grind
+
 private theorem qabs_le_of_interval_bounds {a b x B : Rat}
     (ha : qabs a <= B) (hb : qabs b <= B)
     (hax : a <= x) (hxb : x <= b) : qabs x <= B := by
