@@ -573,6 +573,45 @@ theorem nBallVolumeModel_nonneg
       (Rat.pow_nonneg hpi))
     (Rat.pow_nonneg hradius)
 
+private theorem rat_pow_le_pow_of_nonneg {a b : Rat}
+    (ha : 0 <= a) (hab : a <= b) : forall k : Nat, a ^ k <= b ^ k
+  | 0 => by simp
+  | k + 1 => by
+      rw [Rat.pow_succ, Rat.pow_succ]
+      calc
+        a ^ k * a <= b ^ k * a :=
+          Rat.mul_le_mul_of_nonneg_right
+            (rat_pow_le_pow_of_nonneg ha hab k) ha
+        _ <= b ^ k * b :=
+          Rat.mul_le_mul_of_nonneg_left hab (Rat.pow_nonneg (by grind))
+
+/-! Refining either rational input refines the finite volume model.  This is
+the order theorem used when a `piApprox` or radius is supplied by nested
+rational intervals. -/
+theorem nBallVolumeModel_mono
+    (n : Nat) {pi₁ pi₂ r₁ r₂ : Rat}
+    (hpi₁ : 0 <= pi₁) (hpi : pi₁ <= pi₂)
+    (hr₁ : 0 <= r₁) (hr : r₁ <= r₂) :
+    nBallVolumeModel n pi₁ r₁ <= nBallVolumeModel n pi₂ r₂ := by
+  unfold nBallVolumeModel
+  have hcoeff : 0 <= nBallCoeff n := nBallCoeff_nonneg n
+  have hpi₂ : 0 <= pi₂ := Rat.le_trans hpi₁ hpi
+  have hpiPow : pi₁ ^ nBallPiExponent n <= pi₂ ^ nBallPiExponent n :=
+    rat_pow_le_pow_of_nonneg hpi₁ hpi _
+  have hrPow : r₁ ^ n <= r₂ ^ n :=
+    rat_pow_le_pow_of_nonneg hr₁ hr _
+  have hpiFactor_le :
+      nBallCoeff n * pi₁ ^ nBallPiExponent n <=
+        nBallCoeff n * pi₂ ^ nBallPiExponent n := by
+    exact Rat.mul_le_mul_of_nonneg_left hpiPow hcoeff
+  calc
+    nBallCoeff n * pi₁ ^ nBallPiExponent n * r₁ ^ n <=
+        nBallCoeff n * pi₂ ^ nBallPiExponent n * r₁ ^ n :=
+      Rat.mul_le_mul_of_nonneg_right hpiFactor_le (Rat.pow_nonneg hr₁)
+    _ <= nBallCoeff n * pi₂ ^ nBallPiExponent n * r₂ ^ n :=
+      Rat.mul_le_mul_of_nonneg_left hrPow
+        (Rat.mul_nonneg hcoeff (Rat.pow_nonneg hpi₂))
+
 theorem nBallVolumeModel_stage_six :
     nBallVolumeModel 6 (355 / 113) 1 = 44738875 / 8657382 := by
   native_decide

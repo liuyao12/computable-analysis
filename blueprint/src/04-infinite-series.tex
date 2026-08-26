@@ -484,7 +484,7 @@ piApprox, r, n -> rational volume model -> refine piApprox
 
 Here `piApprox` is an input computation, so the model is useful at every
 stage even when the value of pi has not been named as a completed real.
-The recurrence, scaling law, nonnegativity, and concrete dimensions are
+The recurrence, scaling law, nonnegativity, monotone refinement law, and concrete dimensions are
 finite rational theorems. It is a representative for a whole family of
 volume calculations; we do not duplicate a proof for every dimension.
 
@@ -492,6 +492,9 @@ volume calculations; we do not duplicate a proof for every dimension.
 \lean{ComputableAnalysis.nBallVolumeModel}
 \lean{ComputableAnalysis.nBallVolumeModel_recurrence}
 \lean{ComputableAnalysis.nBallVolumeModel_scale}
+\lean{ComputableAnalysis.nBallCoeff_nonneg}
+\lean{ComputableAnalysis.nBallVolumeModel_nonneg}
+\lean{ComputableAnalysis.nBallVolumeModel_mono}
 \lean{ComputableAnalysis.nBallVolumeModel_stage_six}
 \lean{ComputableAnalysis.nBallVolumeModel_stage_seven}
 \lean{ComputableAnalysis.nBallVolumeModel_stage_ten}
