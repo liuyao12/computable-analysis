@@ -421,6 +421,36 @@ def exactRat_affine_intervalRegularOn
     (fun x => r * x + c) a b (affineSlopeBound r)
     (exactRat_affine_lipschitz r c a b hab)
 
+def exactRat_affine_integral_certificate
+    (r c a b : Rat) (hab : a <= b) :
+    IntervalRegularIntegralCertificate
+      (FunctionOnInterval.exactRat (fun x => r * x + c) a b) where
+  regular := exactRat_affine_intervalRegularOn r c a b hab
+  construction := by
+    by_cases hr : 0 <= r
+    · exact (affineMonotoneConstructionFor hr).construction
+    · have hrle : r <= 0 := by grind
+      exact (affineMonotoneConstructionFor_of_nonpos hrle).construction
+
+theorem exactRat_affine_integral_raw_eq_ofRat
+    (r c a b : Rat) (hab : a <= b) :
+    raw (FunctionOnInterval.exactRat (fun x => r * x + c) a b)
+      (exactRat_affine_integral_certificate r c a b hab) =
+      RealRaw.ofRat ((b - a) * (r * (a + b) / 2 + c)) := by
+  by_cases hr : 0 <= r
+  · unfold raw exactRat_affine_integral_certificate
+    simp only [dif_pos hr]
+    rfl
+  · unfold raw exactRat_affine_integral_certificate
+    simp only [dif_neg hr]
+    rfl
+
+theorem exactRat_affine_integral_raw_valid
+    (r c a b : Rat) (hab : a <= b) :
+    (raw (FunctionOnInterval.exactRat (fun x => r * x + c) a b)
+      (exactRat_affine_integral_certificate r c a b hab)).Valid := by
+  exact raw_valid _ (exactRat_affine_integral_certificate r c a b hab)
+
 def exactSquareInterval (I : QInterval) : QInterval :=
   { lo := I.lo * I.lo, hi := I.hi * I.hi }
 
