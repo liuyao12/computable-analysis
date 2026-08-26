@@ -384,6 +384,18 @@ theorem PiecewiseRectangleCertificate.lower_le_upper
   have hgap := certificate.gap_nonneg
   grind [Rat.sub_eq_add_neg]
 
+theorem PiecewiseRectangleCertificate.gap_le_common_range
+    (certificate : PiecewiseRectangleCertificate) (rangeWidth : Rat)
+    (hwidth : ∀ I, I ∈ certificate.cells → I.width ≤ rangeWidth) :
+    certificate.upperSum - certificate.lowerSum ≤
+      (certificate.cells.length : Rat) *
+        (certificate.domainWidth * rangeWidth) := by
+  unfold PiecewiseRectangleCertificate.upperSum
+    PiecewiseRectangleCertificate.lowerSum
+  exact piecewiseRectangleAreaSum_gap_le_common_range
+    certificate.domainWidth rangeWidth certificate.cells
+    certificate.domain_nonneg hwidth
+
 def quadraticTurnExample : List QInterval :=
   [ pieceCellBounds .increasing 0 1 0 0
   , pieceCellBounds .decreasing 1 0 0 0 ]
