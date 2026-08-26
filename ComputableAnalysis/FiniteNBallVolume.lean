@@ -612,6 +612,44 @@ theorem nBallVolumeModel_mono
       Rat.mul_le_mul_of_nonneg_left hrPow
         (Rat.mul_nonneg hcoeff (Rat.pow_nonneg hpi₂))
 
+/-! Monotonicity turns independent rational input boxes into a volume box.
+The endpoint hypotheses are the finite domain certificate; no real-valued
+evaluation is needed to propagate the enclosure. -/
+def nBallVolumeModelInterval
+    (n : Nat) (piBox radiusBox : QInterval) : QInterval :=
+  { lo := nBallVolumeModel n piBox.lo radiusBox.lo
+    hi := nBallVolumeModel n piBox.hi radiusBox.hi }
+
+theorem nBallVolumeModelInterval_contains
+    (n : Nat) (piBox radiusBox : QInterval)
+    {pi radius : Rat}
+    (hpi_lo_nonneg : 0 <= piBox.lo)
+    (hpi : piBox.lo <= pi /\ pi <= piBox.hi)
+    (hradius_lo_nonneg : 0 <= radiusBox.lo)
+    (hradius : radiusBox.lo <= radius /\ radius <= radiusBox.hi) :
+    (nBallVolumeModelInterval n piBox radiusBox).ContainsInterval
+      { lo := nBallVolumeModel n pi radius
+        hi := nBallVolumeModel n pi radius } := by
+  unfold nBallVolumeModelInterval QInterval.ContainsInterval
+  constructor
+  · exact nBallVolumeModel_mono n hpi_lo_nonneg hpi.1
+      hradius_lo_nonneg hradius.1
+  · exact nBallVolumeModel_mono n (Rat.le_trans hpi_lo_nonneg hpi.1)
+      hpi.2 (Rat.le_trans hradius_lo_nonneg hradius.1) hradius.2
+
+theorem nBallVolumeModelInterval_ordered
+    (n : Nat) (piBox radiusBox : QInterval)
+    {pi radius : Rat}
+    (hpi_lo_nonneg : 0 <= piBox.lo)
+    (hpi : piBox.lo <= pi /\ pi <= piBox.hi)
+    (hradius_lo_nonneg : 0 <= radiusBox.lo)
+    (hradius : radiusBox.lo <= radius /\ radius <= radiusBox.hi) :
+    (nBallVolumeModelInterval n piBox radiusBox).lo <=
+      (nBallVolumeModelInterval n piBox radiusBox).hi := by
+  have hcontains := nBallVolumeModelInterval_contains n piBox radiusBox
+    hpi_lo_nonneg hpi hradius_lo_nonneg hradius
+  exact Rat.le_trans hcontains.1 hcontains.2
+
 theorem nBallVolumeModel_stage_six :
     nBallVolumeModel 6 (355 / 113) 1 = 44738875 / 8657382 := by
   native_decide
