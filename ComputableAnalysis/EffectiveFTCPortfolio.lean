@@ -493,6 +493,20 @@ structure TangentSquareIntegralValueSubgoal where
   upper_contains :
     forall n, (1 / 4 : Rat) <= (SinPiIntegral.tangentSquareIntegral.compute n).hi
 
+/-! The unscaled tangent-chart raw cannot satisfy the provisional `1/4`
+enclosure above.  At stage eight its left endpoint is already larger than
+`1/4`.  Keeping this contradiction explicit prevents the normalized target
+from being accidentally assigned to the unscaled chart. -/
+theorem TangentSquareIntegralValueSubgoal.impossible :
+    ¬ TangentSquareIntegralValueSubgoal := by
+  intro H
+  have hbad : ¬
+      (SinPiIntegral.tangentSquareIntegral.compute 8).lo <=
+        (1 / 4 : Rat) := by
+    rw [SinPiIntegral.tangentSquareIntegral_compute]
+    native_decide
+  exact hbad (H.lower_contains 8)
+
 def normalizedTangentSquareIntegral : RealRaw :=
   SinPiIntegral.reciprocalPiRaw * SinPiIntegral.tangentSquareIntegral
 

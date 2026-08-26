@@ -79,27 +79,20 @@ That bridge is now represented by the checked
    The nested-radical route is now split into the checked
    `NestedRadicalSinPiSquareValueSubgoal`: one field is the finite common
    witness between the nested-radical square sum and `tangentSquareIntegral`,
-   and the other is `TangentSquareIntegralValueSubgoal`, whose two inequalities
-   say that every anchor interval contains `1/4`.  Its `value` theorem closes
-   the stabilized dyadic value once those finite certificates are supplied.
+   and the anchor must identify the unscaled chart with the quarter-turn raw
+   `halfQuarterTurnRaw 1`.  The older `TangentSquareIntegralValueSubgoal`
+   incorrectly assigned `1/4` to that unscaled chart; its contradiction is now
+   proved by `TangentSquareIntegralValueSubgoal.impossible` at stage eight.
+   The normalized product route is the valid path to `1/4`.
    The separate algorithm-compatibility obligation is represented by
    `TangentSquareFTCIntegralCompatibilitySubgoal`: stagewise overlap between
    the effective FTC bounded-sum raw and the independent dyadic anchor.
    Its concrete form is `TangentSquareFTCIntegralCommonWitness`, four rational
    inequalities per stage that produce this overlap automatically.
-   The first anchor check is now executable as
-   `tangentSquareIntegral_stage_zero_contains_quarter`; the remaining anchor
-   work is now the concrete `TangentSquareLeftSumQuarterCertificate`: bound
-   the finite left sum within the explicit `64/2^n` Darboux margin.  Its
-   `to_value_subgoal` theorem converts that rational-sum certificate into the
-   uniform all-stage interval containment, without an appeal to completed real
-   numbers.  The first two nontrivial finite left sums are checked directly by
-   `tangentSquareLeftSum_stage_one_quarter_certificate` and
-   `tangentSquareLeftSum_stage_two_quarter_certificate`; these are regression
-   anchors for the eventual uniform estimate.  Stage three is now checked as
-   `tangentSquareLeftSum_stage_three_quarter_certificate`, extending the
-   finite evidence without claiming the all-stage bound.  Stage four is now
-   checked as `tangentSquareLeftSum_stage_four_quarter_certificate`.  The
+   The first unscaled anchor check remains executable as
+   `tangentSquareIntegral_stage_zero_contains_quarter`, but it is only a wide
+   interval overlap and not a value theorem.  The former all-stage quarter
+   certificate has been withdrawn from the roadmap because its target was misnormalized.  The
    reusable finite fold
    `rat_list_sum_pair_error` now assembles cellwise endpoint/left-sample
    errors into a global rational bound, leaving only the concrete tangent

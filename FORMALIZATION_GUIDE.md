@@ -1849,9 +1849,13 @@ global sine function merely to obtain the integral.
 For the squared-sine route, use
 `DyadicNestedRadicalSquareTangentCommonWitness.of_overlap` to package the
 stagewise candidate/anchor overlap. Its `stabilized_equiv_value` theorem
-transports the stabilized candidate to `1/4` once the tangent-square anchor
-has been identified. The remaining obligation is therefore the finite overlap
-family itself, not witness construction or prefix stabilization.
+transports the stabilized candidate to the value represented by the unscaled
+quarter-turn chart. The rational value `1/4` is obtained only after the
+`reciprocalPiRaw` normalization and its quarter-scale equivalence; the
+obsolete unscaled quarter-value contract is explicitly refuted by
+`TangentSquareIntegralValueSubgoal.impossible`. The remaining obligation is
+therefore the normalized finite overlap family itself, not witness construction
+or prefix stabilization.
 
 The future canonical-logarithm π formula has one explicit entry point:
 `PiProofs.CanonicalLogTwoCertificate`. Supply a valid raw value at two and
