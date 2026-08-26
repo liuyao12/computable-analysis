@@ -7962,6 +7962,52 @@ def nondecreasingDarbouxStage (F : FunctionOnInterval)
   P.boundIntegralSum
     (fun k hk => nondecreasingDarbouxRange F P k hk prec)
 
+/-! The cellwise containment lifts through the positive cell-width scaling and
+the finite partition sum.  This is the strong-order counterpart of the weak
+left-endpoint overlap theorem. -/
+theorem endpointOrderedNondecreasingDarbouxStage_contains_leftEndpointSamples
+    (F : FunctionOnInterval)
+    (hF : EndpointOrderedNondecreasingOnInterval F)
+    (P : RationalPartition F.lower F.upper) (prec : Nat) :
+    QInterval.ContainsInterval
+      (nondecreasingDarbouxStage F P prec)
+      (P.boundIntegralSum
+        (fun k hk => F.compute (P.point k)
+          (And.intro (P.cell k hk).lower_mem
+            (Rat.le_trans (P.cell k hk).ordered
+              (P.cell k hk).upper_mem)) prec)) := by
+  let hx : forall k, k < P.pieces ->
+      inDomainInterval F.lower F.upper (P.point k) := fun k hk =>
+    And.intro (P.cell k hk).lower_mem
+      (Rat.le_trans (P.cell k hk).ordered (P.cell k hk).upper_mem)
+  let sample : (k : Nat) -> k < P.pieces -> QInterval := fun k hk =>
+    F.compute (P.point k) (hx k hk) prec
+  have hsample : forall k (hk : k < P.pieces),
+      QInterval.ContainsInterval
+        (nondecreasingDarbouxRange F P k hk prec)
+        (sample k hk) := by
+    intro k hk
+    have hpoint := endpointOrderedNondecreasingDarbouxRange_contains_point_value
+      F hF P k hk (P.point k) (hx k hk)
+      (by exact Rat.le_refl) (by exact (P.cell k hk).ordered) prec
+    exact hpoint
+  have hterm : forall k (hk : k < P.pieces),
+      QInterval.ContainsInterval
+        ((P.cell k hk).scaleBound
+          (nondecreasingDarbouxRange F P k hk prec))
+        ((P.cell k hk).scaleBound (sample k hk)) := by
+    intro k hk
+    apply QInterval.scaleByRat_contains_of_nonneg
+    · unfold RationalSubinterval.width
+      have hcell := (P.cell k hk).ordered
+      grind
+    · exact hsample k hk
+  unfold nondecreasingDarbouxStage
+  apply P.boundIntegralSum_contains_of_termwise
+  intro k hk
+  simp only [RationalPartition.boundIntegralTerm, dif_pos hk]
+  simpa [RationalSubinterval.scaleBound] using hterm k hk
+
 /-! A monotone endpoint range need only overlap a chosen sample box.  After
 positive cell-width scaling, the overlap survives the complete finite sum.
 This is the precise partition-level transport needed for changing evaluator
