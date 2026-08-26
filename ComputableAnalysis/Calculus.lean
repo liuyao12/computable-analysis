@@ -7336,6 +7336,31 @@ def intervalRegularDarbouxRange
     exact ⟨C.lower_mem, C.ordered, C.upper_mem⟩
   exact hregular.evalInterval I hI prec
 
+/-- Every point value on a partition cell is enclosed by that cell's interval
+image.  This is the local soundness statement behind the general Darboux
+sum: no supremum or completed-real range is needed. -/
+theorem intervalRegularDarbouxRange_contains_point_value
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (P : RationalPartition F.lower F.upper)
+    (k : Nat) (hk : k < P.pieces) (x : Rat)
+    (hxlo : (P.cell k hk).lower <= x)
+    (hxhi : x <= (P.cell k hk).upper) (prec : Nat) :
+    QInterval.ContainsInterval
+      (intervalRegularDarbouxRange F hregular P k hk prec)
+      (F.compute x
+        (And.intro
+          (Rat.le_trans (P.cell k hk).lower_mem hxlo)
+          (Rat.le_trans hxhi (P.cell k hk).upper_mem)) prec) := by
+  unfold intervalRegularDarbouxRange
+  let C := P.cell k hk
+  let I : QInterval := { lo := C.lower, hi := C.upper }
+  have hI : subintervalOf I F.lower F.upper := by
+    exact ⟨C.lower_mem, C.ordered, C.upper_mem⟩
+  have hxF : inDomainInterval F.lower F.upper x := by
+    exact ⟨Rat.le_trans C.lower_mem hxlo,
+      Rat.le_trans hxhi C.upper_mem⟩
+  exact hregular.contains_point_values I hI x hxF prec hxlo hxhi
+
 theorem intervalRegularDarbouxRange_width_le
     (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
     (P : RationalPartition F.lower F.upper)
