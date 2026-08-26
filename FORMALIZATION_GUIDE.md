@@ -902,6 +902,9 @@ error/radius budgets remain explicit inputs.
 Products use `ExactFunction.EffectiveDerivativeExact.mulOfBudget`, whose
 explicit obligation includes the quadratic finite corner term; it is a
 certificate constructor, not an automatic theorem for arbitrary limits.
+When factor and secant magnitudes are already available as rational bounds,
+use `product_differenceQuotient_error_le_qabs_of_bounds` to reduce the local
+obligation to the two factor-error terms plus the explicit corner budget.
 
 ### Increasing pieces: start with the literal finite stage
 

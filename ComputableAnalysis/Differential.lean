@@ -1507,6 +1507,65 @@ theorem product_differenceQuotient_error_le_qabs
               qabs (differenceQuotient v x h) := by
       rw [qabs_mul, qabs_mul, qabs_mul, qabs_mul]
 
+/-! The provider-facing form replaces the raw factor and secant magnitudes by
+explicit rational bounds.  This is the form normally consumed when the two
+factors come from interval evaluators: all remaining work is the local error
+budget, while the quadratic corner term stays visible. -/
+theorem product_differenceQuotient_error_le_qabs_of_bounds
+    (u du v dv : Rat -> Rat) (x h : Rat) (hh : h ≠ 0)
+    (U V DU DV eu ev : Rat)
+    (hU : 0 <= U) (hV : 0 <= V) (hDU : 0 <= DU) (hDV : 0 <= DV)
+    (hu : qabs (u x) <= U) (hv : qabs (v x) <= V)
+    (hev : qabs (differenceQuotient v x h - dv x) <= ev)
+    (heu : qabs (differenceQuotient u x h - du x) <= eu)
+    (hdu : qabs (differenceQuotient u x h) <= DU)
+    (hdv : qabs (differenceQuotient v x h) <= DV) :
+    qabs (differenceQuotient (fun z => u z * v z) x h -
+      (u x * dv x + v x * du x)) <=
+      U * ev + V * eu + qabs h * DU * DV := by
+  have hbase := product_differenceQuotient_error_le_qabs u du v dv x h hh
+  calc
+    qabs (differenceQuotient (fun z => u z * v z) x h -
+        (u x * dv x + v x * du x)) <=
+        qabs (u x) * qabs (differenceQuotient v x h - dv x) +
+          qabs (v x) * qabs (differenceQuotient u x h - du x) +
+          qabs h * qabs (differenceQuotient u x h) *
+            qabs (differenceQuotient v x h) := hbase
+    _ <= U * qabs (differenceQuotient v x h - dv x) +
+          V * qabs (differenceQuotient u x h - du x) +
+          qabs h * qabs (differenceQuotient u x h) *
+            qabs (differenceQuotient v x h) := by
+      apply rat_add_le_add
+      · apply rat_add_le_add
+        · exact Rat.mul_le_mul_of_nonneg_right hu
+            (qabs_nonneg (differenceQuotient v x h - dv x))
+        · exact Rat.mul_le_mul_of_nonneg_right hv
+            (qabs_nonneg (differenceQuotient u x h - du x))
+      · exact Rat.le_refl
+    _ <= U * ev + V * eu +
+          qabs h * qabs (differenceQuotient u x h) *
+            qabs (differenceQuotient v x h) := by
+      apply rat_add_le_add
+      · apply rat_add_le_add
+        · exact Rat.mul_le_mul_of_nonneg_left hev hU
+        · exact Rat.mul_le_mul_of_nonneg_left heu hV
+      · exact Rat.le_refl
+    _ <= U * ev + V * eu + qabs h * DU * DV := by
+      apply (Rat.add_le_add_left).2
+      have hfirst := Rat.mul_le_mul_of_nonneg_left hdu
+        (qabs_nonneg h)
+      have hsecond := Rat.mul_le_mul_of_nonneg_right hfirst
+        (qabs_nonneg (differenceQuotient v x h))
+      have hthird := Rat.mul_le_mul_of_nonneg_left hdv
+        (Rat.mul_nonneg (qabs_nonneg h) hDU)
+      calc
+        qabs h * qabs (differenceQuotient u x h) *
+              qabs (differenceQuotient v x h) <=
+            qabs h * DU * qabs (differenceQuotient v x h) := by
+              simpa [Rat.mul_assoc] using hsecond
+        _ <= qabs h * DU * DV := by
+              simpa [Rat.mul_assoc] using hthird
+
 /-! Product closure from a supplied finite corner budget.  The budget is the
 computable obligation: it accounts for factor-value errors, factor secant
 errors, and the quadratic corner remainder. -/

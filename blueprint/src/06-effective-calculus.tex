@@ -631,8 +631,11 @@ effective derivative certificate.
 
 This is the representative product instance.  General products still require
 bounded interval multiplication and a synchronized schedule for the two
-factor errors; routine scalar, sign, and affine variants are transported from
 this finite certificate.
+The reusable bound-facing corollary makes the bookkeeping explicit: supplied
+rational bounds for the two factor values, their two secants, and their local
+errors reduce the product proof to one visible sum of two linear errors and
+the quadratic corner term.
 
 The finite algebra used before choosing a radius is reusable on its own:
 
@@ -647,6 +650,7 @@ The finite algebra used before choosing a radius is reusable on its own:
 \lean{ComputableAnalysis.ExactFunction.product_differenceQuotient_right}
 \lean{ComputableAnalysis.ExactFunction.product_differenceQuotient_corner}
 \lean{ComputableAnalysis.ExactFunction.product_differenceQuotient_error_le_qabs}
+\lean{ComputableAnalysis.ExactFunction.product_differenceQuotient_error_le_qabs_of_bounds}
 \leanok
 
 When a selected stage schedule is not nested, prefix stabilization is the
