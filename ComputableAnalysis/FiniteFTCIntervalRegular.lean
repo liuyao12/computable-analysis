@@ -1253,6 +1253,14 @@ theorem exactRat_pow_darbouxStage_nested_unit
     _ (exactRat_pow_intervalRegularOn_unit power)
     (exactRat_pow_evalIntervalsNested_unit power) P hnm
 
+theorem exactRat_pow_nondecreasingDarbouxStage_stage_independent
+    (power : Nat) (P : RationalPartition 0 1) (n m : Nat) :
+    Integral.nondecreasingDarbouxStage
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ power) 0 1) P n =
+      Integral.nondecreasingDarbouxStage
+        (FunctionOnInterval.exactRat (fun x : Rat => x ^ power) 0 1) P m := by
+  rfl
+
 def exactRat_pow_integral_certificate (n : Nat) :
     Integral.IntervalRegularIntegralCertificate
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1) where
