@@ -245,6 +245,10 @@ Interval regularity supplies the matching shrinking-width estimate for that
 decreasing stage:
 \lean{ComputableAnalysis.Integral.nonincreasingDarbouxRange_width_le_of_intervalRegular}
 \lean{ComputableAnalysis.Integral.nonincreasingDarbouxStage_width_le_of_uniform_input_budget}
+At dyadic mesh levels this becomes the same explicit input-budget and
+tolerance interface used by increasing stages:
+\lean{ComputableAnalysis.Integral.nonincreasingDarbouxDyadicStage_width_le_of_input_budget}
+\lean{ComputableAnalysis.Integral.nonincreasingDarbouxDyadicStage_width_le_of_input_budget_and_tolerance}
 The mirrored finite refinement comparison is also proved for decreasing
 stages:
 \lean{ComputableAnalysis.Integral.endpointOrderedNonincreasingDarbouxStage_contains_uniform_double}

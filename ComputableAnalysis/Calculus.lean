@@ -8802,6 +8802,35 @@ def nonincreasingDarbouxDyadicStage (F : FunctionOnInterval)
     (Nat.pow_pos (by omega : 0 < 2)) hinterval
   nonincreasingDarbouxStage F P (evalPrecision n)
 
+theorem nonincreasingDarbouxDyadicStage_width_le_of_input_budget
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (hinterval : F.lower <= F.upper) (evalPrecision : Nat -> Nat) (n : Nat)
+    (hsmall : mesh F.lower F.upper (2 ^ n) <=
+      1 / ((hregular.inputPrecision (evalPrecision n) : Nat) : Rat)) :
+    (nonincreasingDarbouxDyadicStage F hinterval evalPrecision n).width <=
+      (F.upper - F.lower) *
+        (1 / ((evalPrecision n + 1 : Nat) : Rat)) := by
+  unfold nonincreasingDarbouxDyadicStage
+  apply nonincreasingDarbouxStage_width_le_of_uniform_input_budget
+    F hregular (2 ^ n) (Nat.pow_pos (by omega : 0 < 2)) hinterval
+    (evalPrecision n)
+  exact hsmall
+
+theorem nonincreasingDarbouxDyadicStage_width_le_of_input_budget_and_tolerance
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (hinterval : F.lower <= F.upper) (evalPrecision : Nat -> Nat) (n : Nat)
+    (hsmall : mesh F.lower F.upper (2 ^ n) <=
+      1 / ((hregular.inputPrecision (evalPrecision n) : Nat) : Rat))
+    (eps : Rat)
+    (hbudget : (F.upper - F.lower) *
+        (1 / ((evalPrecision n + 1 : Nat) : Rat)) <= eps) :
+    (nonincreasingDarbouxDyadicStage F hinterval evalPrecision n).width <=
+      eps := by
+  exact Rat.le_trans
+    (nonincreasingDarbouxDyadicStage_width_le_of_input_budget
+      F hregular hinterval evalPrecision n hsmall)
+    hbudget
+
 theorem endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_stage
     (F : FunctionOnInterval)
     (hF : EndpointOrderedNonincreasingOnInterval F)
