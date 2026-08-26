@@ -224,6 +224,9 @@ case: the two cell areas add to (1), and the primitive
 \lean{ComputableAnalysis.MonotoneOnInterval}
 \lean{ComputableAnalysis.EndpointOrderedNondecreasingOnInterval}
 \lean{ComputableAnalysis.EndpointOrderedNondecreasingOnInterval.toNondecreasing}
+Exact rational evaluators obtain this stronger contract directly from a
+rational monotonicity proof:
+\lean{ComputableAnalysis.FunctionOnInterval.exactRat_endpointOrderedNondecreasing}
 \lean{ComputableAnalysis.QInterval.splitScaledEndpointRange_contains}
 The local inequality is now assembled into a complete two-stage uniform
 mesh comparison for the stronger endpoint-order certificate:

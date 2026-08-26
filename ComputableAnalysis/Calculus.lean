@@ -6395,6 +6395,23 @@ theorem exactRat_compute (f : Rat -> Rat) (a b x : Rat)
     (exactRat f a b).compute x hx n = { lo := f x, hi := f x } :=
   rfl
 
+/-! Exact rational evaluators inherit coordinatewise endpoint monotonicity
+directly from the underlying rational formula.  This adapter is useful for
+polynomials and other finite algebraic representatives: no interval-analysis
+proof is needed because every stage is a degenerate rational box. -/
+theorem exactRat_endpointOrderedNondecreasing
+    (f : Rat -> Rat) (a b : Rat)
+    (hmono : forall x y,
+      inDomainInterval a b x -> inDomainInterval a b y ->
+      x <= y -> f x <= f y) :
+    EndpointOrderedNondecreasingOnInterval (exactRat f a b) where
+  lower_mono := by
+    intro x y hx hy hxy n
+    simpa [exactRat_compute] using hmono x y hx hy hxy
+  upper_mono := by
+    intro x y hx hy hxy n
+    simpa [exactRat_compute] using hmono x y hx hy hxy
+
 /-! Pointwise addition on a common rational interval.
 
 This is the interval-level counterpart of `RealFunRaw.add`.  The domain
