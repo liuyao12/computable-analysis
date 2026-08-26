@@ -945,6 +945,12 @@ The concrete `sin(pi*x)^2` evaluator uses this interface through
 The scheduled wrapper transports the same estimate through its explicit stage
 map via `sinPiSquareOnHalfScheduled_compute_width_le`; this is the form to
 use when assembling a scheduled integral certificate.
+At the finite integration layer,
+`dyadicPublicSquareLeftSum_width_le_of_stage` folds the sample bounds into
+the rectangle-sum modulus, and
+`dyadicPublicSquareLeftSum_width_le_of_sine_stage` specializes it to a sine
+width budget. The latter is the shrinking-width bridge for the public
+`sin(pi*x)^2` candidate.
 
 ### Increasing pieces: start with the literal finite stage
 

@@ -2752,6 +2752,55 @@ theorem dyadicPublicSquareLeftSum_overlap_of_sample_overlaps
     { lo := 0, hi := 0 } { lo := 0, hi := 0 } (by
       simp [QInterval.Overlaps])
 
+theorem dyadicPublicSquareLeftSum_width_le_of_stage
+    (S : ArctanSinPiConstruction) (n : Nat) (eps : Rat)
+    (hstage : forall k, k < 2 ^ n ->
+      ((sinPiSquareOnHalf S).compute
+        (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k) n).width <= eps) :
+    (dyadicPublicSquareLeftSum S n).width <= (1 / 2 : Rat) * eps := by
+  let N := 2 ^ n
+  have hN : 0 < N := by
+    dsimp [N]
+    exact Nat.pow_pos (by omega)
+  have hmesh : 0 <= mesh 0 ((1 : Rat) / 2) N :=
+    mesh_nonneg_of_le hN (by native_decide)
+  have hsum := RationalPartition.rat_add_fold_le_length_mul (List.range N)
+    (fun k =>
+      (QInterval.scaleByRat (mesh 0 ((1 : Rat) / 2) N)
+        ((sinPiSquareOnHalf S).compute
+          (leftPoint 0 ((1 : Rat) / 2) N k) n)).width)
+    (mesh 0 ((1 : Rat) / 2) N * eps) (by
+      intro k hk
+      have hklt : k < N := List.mem_range.mp hk
+      rw [QInterval.scaleByRat_width_of_nonneg hmesh]
+      exact Rat.mul_le_mul_of_nonneg_left
+        (hstage k (by simpa [N] using hklt)) hmesh)
+  calc
+    (dyadicPublicSquareLeftSum S n).width =
+        (List.range N).foldl
+          (fun total k => total +
+            (QInterval.scaleByRat (mesh 0 ((1 : Rat) / 2) N)
+              ((sinPiSquareOnHalf S).compute
+                (leftPoint 0 ((1 : Rat) / 2) N k) n)).width) 0 := by
+      unfold dyadicPublicSquareLeftSum
+      rw [RationalPartition.addInterval_fold_width]
+      have hzero : ({ lo := 0, hi := 0 } : QInterval).width = 0 := by
+        unfold QInterval.width
+        grind
+      rw [hzero]
+      simp [N]
+      grind
+    _ <= (N : Rat) * (mesh 0 ((1 : Rat) / 2) N * eps) := by
+      simpa using hsum
+    _ = (1 / 2 : Rat) * eps := by
+      have hmesh_total := natCast_mul_mesh_eq_sub
+        (a := (0 : Rat)) (b := (1 : Rat) / 2) hN
+      rw [show (N : Rat) * (mesh 0 ((1 : Rat) / 2) N * eps) =
+        ((N : Rat) * mesh 0 ((1 : Rat) / 2) N) * eps by
+          grind [Rat.mul_assoc]]
+      rw [hmesh_total]
+      rw [show (1 / 2 : Rat) - 0 = 1 / 2 by grind]
+
 theorem dyadicNestedRadicalSquareStage_width_le
     (n k : Nat) (hk : k < 2 ^ n) :
     (rationalSquareInterval (dyadicNestedRadicalStageSinAt n k)).width <=
@@ -3755,6 +3804,41 @@ theorem sinPiSquareOnHalf_compute_width_le
     _ = 2 * ((sinPiOnHalfRaw S).compute x n).width := by
       have htwo : (2 : Rat) = 1 + 1 := by native_decide
       rw [htwo, Rat.add_mul]
+
+theorem dyadicPublicSquareLeftSum_width_le_of_sine_stage
+    (S : ArctanSinPiConstruction) (n : Nat) (eps : Rat)
+    (hstage : forall k, k < 2 ^ n ->
+      ((sinPiOnHalfRaw S).compute
+        (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k) n).width <= eps) :
+    (dyadicPublicSquareLeftSum S n).width <= eps := by
+  have hsquare : forall k, k < 2 ^ n ->
+      ((sinPiSquareOnHalf S).compute
+        (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k) n).width <= 2 * eps := by
+    intro k hk
+    exact Rat.le_trans
+      (sinPiSquareOnHalf_compute_width_le S (by
+        have hN : 0 < 2 ^ n := Nat.pow_pos (by omega)
+        have hleft := leftPoint_monotone hN (by native_decide :
+          (0 : Rat) <= (1 : Rat) / 2) (Nat.zero_le k)
+        have hright := leftPoint_monotone hN (by native_decide :
+          (0 : Rat) <= (1 : Rat) / 2) (by omega : k <= 2 ^ n)
+        rw [leftPoint_zero] at hleft
+        rw [leftPoint_endpoint hN] at hright
+        exact ⟨by simpa using hleft, by simpa using hright⟩) n)
+      (Rat.mul_le_mul_of_nonneg_left (hstage k hk)
+        (by native_decide : (0 : Rat) <= 2))
+  have h := dyadicPublicSquareLeftSum_width_le_of_stage S n (2 * eps)
+    hsquare
+  calc
+    (dyadicPublicSquareLeftSum S n).width <= (1 / 2 : Rat) * (2 * eps) := h
+    _ = eps := by
+      have htwo : (2 : Rat) = 1 + 1 := by native_decide
+      rw [htwo, Rat.add_mul]
+      simp only [Rat.one_mul]
+      rw [Rat.div_def]
+      have hden : (1 + 1 : Rat) ≠ 0 := by native_decide
+      grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm,
+        Rat.mul_inv_cancel (1 + 1) hden]
 
 def sinPiSquareOnHalfFunctionOnInterval
     (S : ArctanSinPiConstruction) : FunctionOnInterval where
