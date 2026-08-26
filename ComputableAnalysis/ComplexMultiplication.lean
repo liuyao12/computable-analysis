@@ -980,6 +980,47 @@ theorem positiveInv_mul_self_equiv_one {x : RealRaw} {N : Nat}
     rw [hprod_eq] at hprod
     exact ⟨hprod.1, hprod.2⟩
 
+theorem neg_neg_equiv {x : RealRaw} (hx : x.Valid) : (-(-x)).Equiv x := by
+  intro n
+  apply (compareAt_overlap_iff (-(-x)) x n n).2
+  change QInterval.Overlaps (negCompute (neg x) n) (x.compute n)
+  simp [RealRaw.neg, negCompute, QInterval.Overlaps]
+  exact interval_order_of_valid x hx n
+
+theorem mul_neg_neg_equiv {x y : RealRaw}
+    (hx : x.Valid) (hy : y.Valid) :
+    (mul (-x) (-y)).Equiv (mul x y) := by
+  intro n
+  apply (compareAt_overlap_iff (mul (-x) (-y)) (mul x y) n n).2
+  change QInterval.Overlaps
+    (QBox.mulRealInterval
+      (-(x.compute n).hi) (-(x.compute n).lo)
+      (-(y.compute n).hi) (-(y.compute n).lo))
+    (QBox.mulRealInterval
+      (x.compute n).lo (x.compute n).hi
+      (y.compute n).lo (y.compute n).hi)
+  have hxord := interval_order_of_valid x hx n
+  have hyord := interval_order_of_valid y hy n
+  have hxp := QInterval.midpoint_mem hxord
+  have hyp := QInterval.midpoint_mem hyord
+  let p : Rat := QInterval.midpoint (x.compute n)
+  let q : Rat := QInterval.midpoint (y.compute n)
+  have hnegx : -(x.compute n).hi <= -p /\
+      -p <= -(x.compute n).lo := by
+    exact ⟨Rat.neg_le_neg hxp.2, Rat.neg_le_neg hxp.1⟩
+  have hnegy : -(y.compute n).hi <= -q /\
+      -q <= -(y.compute n).lo := by
+    exact ⟨Rat.neg_le_neg hyp.2, Rat.neg_le_neg hyp.1⟩
+  have hleft := QBox.mulRealInterval_contains
+    hnegx.1 hnegx.2 hnegy.1 hnegy.2
+  have hright := QBox.mulRealInterval_contains
+    hxp.1 hxp.2 hyp.1 hyp.2
+  have hpoint : (-p) * (-q) = p * q := by
+    grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
+  rw [hpoint] at hleft
+  exact ⟨Rat.le_trans hleft.1 hright.2,
+    Rat.le_trans hright.1 hleft.2⟩
+
 def negativeInv (x : RealRaw) (N : Nat) : RealRaw :=
   -(positiveInv (-x) N)
 
@@ -1243,6 +1284,33 @@ theorem divByNegative_valid {x y : RealRaw} {N : Nat}
     (divByNegative x y N).Valid := by
   unfold divByNegative
   exact mul_valid hx (negativeInv_valid hy hneg)
+
+theorem negativeInv_mul_self_equiv_one {x : RealRaw} {N : Nat}
+    (hx : x.Valid) (hneg : (x.compute N).hi < 0) :
+    (mul x (negativeInv x N)).Equiv one := by
+  have hnx : (-x).Valid := neg_valid hx
+  have hpos : 0 < ((-x).compute N).lo := by
+    change 0 < -(x.compute N).hi
+    grind
+  have hp : (positiveInv (-x) N).Valid := positiveInv_valid hnx hpos
+  have hfirst := mul_equiv
+    hx (neg_valid (neg_valid hx))
+    (neg_valid hp) (neg_valid hp)
+    (equiv_symm (neg_neg_equiv hx))
+    (equiv_refl _ (neg_valid hp))
+  have hsecond := mul_neg_neg_equiv (neg_valid hx) hp
+  have hthird := positiveInv_mul_self_equiv_one hnx hpos
+  unfold negativeInv
+  have hA : (mul x (-positiveInv (-x) N)).Valid :=
+    mul_valid hx (neg_valid hp)
+  have hB : (mul (-(-x)) (-positiveInv (-x) N)).Valid :=
+    mul_valid (neg_valid (neg_valid hx)) (neg_valid hp)
+  have hC : (mul (-x) (positiveInv (-x) N)).Valid :=
+    mul_valid (neg_valid hx) hp
+  have hone : one.Valid := by
+    exact ofRat_valid 1
+  exact equiv_trans hA hC hone
+    (equiv_trans hA hB hC hfirst hsecond) hthird
 
 end RealRaw
 
