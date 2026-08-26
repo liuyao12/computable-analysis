@@ -287,6 +287,25 @@ theorem reciprocalSquareTailPartial_succ_le
       (Rat.le_of_lt ((Rat.inv_pos).2 (Rat.pow_pos hden)))
   grind
 
+theorem reciprocalSquareTailPartial_mono
+    (cutoff : Rat) (hcutoff : 0 <= cutoff) :
+    forall m n, m ≤ n ->
+      reciprocalSquareTailPartial cutoff m ≤
+        reciprocalSquareTailPartial cutoff n := by
+  intro m n hmn
+  induction n with
+  | zero =>
+      have hm : m = 0 := by omega
+      subst m
+      exact Rat.le_refl
+  | succ n ih =>
+      by_cases hmn' : m ≤ n
+      · exact Rat.le_trans (ih hmn')
+          (reciprocalSquareTailPartial_succ_le cutoff hcutoff n)
+      · have hm : m = n + 1 := by omega
+        subst m
+        exact Rat.le_refl
+
 theorem reciprocalSquareTailPartial_stage_four :
     reciprocalSquareTailPartial 1 4 = 1669 / 3600 := by
   native_decide
