@@ -3352,6 +3352,17 @@ def uniformRefinesLeftCertificate {a b : Rat} (m n : Nat)
       (uniform a b n hn hab) :=
   (uniformCommonRefinement a b m n hm hn hab).refines_right
 
+/-- Consecutive dyadic uniform meshes carry an explicit refinement
+certificate.  This is the stage-to-stage geometric relation used by equal
+subdivision integrals. -/
+def dyadicRefinesNextCertificate (a b : Rat) (n : Nat) (hab : a <= b) :
+    Refines
+      (uniform a b (2 ^ (n + 1)) (by positivity) hab)
+      (uniform a b (2 ^ n) (by positivity) hab) := by
+  simpa [Nat.pow_succ, Nat.mul_comm] using
+    (uniformRefinesRightCertificate a b (2 ^ n) 2
+      (by positivity) (by norm_num) hab)
+
 /-- Insert one rational breakpoint after cell index `k`.  The new list keeps
 all old points in order, placing `x` between `point k` and `point (k+1)`.
 Repeated use of this finite operation is the constructive route from explicit
