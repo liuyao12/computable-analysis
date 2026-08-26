@@ -4020,6 +4020,37 @@ theorem Refines.existsUnique_index_block_of_fine_cell {a b : Rat}
   · have hne : i ≠ k := fun h => hki h.symm
     exact False.elim (R.index_block_unique hne hleft hright hkleft hkright)
 
+/-- Adjacent half-open natural index ranges concatenate exactly.  This is the
+finite list algebra used to assemble the consecutive coarse blocks of a
+refinement into the complete fine-cell range. -/
+theorem range'_interval_append (a b c : Nat) (hab : a <= b) (hbc : b <= c) :
+    List.range' a (b - a) 1 ++ List.range' b (c - b) 1 =
+      List.range' a (c - a) 1 := by
+  induction c with
+  | zero =>
+      have hb : b = 0 := by omega
+      subst b
+      simp
+  | succ c ih =>
+      by_cases hbc' : b ≤ c
+      · have ih' := ih hbc'
+        have hlenb : c + 1 - b = (c - b) + 1 := by omega
+        have hlena : c + 1 - a = (c - a) + 1 := by omega
+        have hstartb : b + (c - b) = c := by omega
+        have hstarta : a + (c - a) = c := by omega
+        have hsplitb : List.range' b (c + 1 - b) 1 =
+            List.range' b (c - b) 1 ++ List.range' c 1 1 := by
+          simpa [hlenb, hstartb] using
+            (List.range'_append_1 (s := b) (m := c - b) (n := 1)).symm
+        have hsplita : List.range' a (c + 1 - a) 1 =
+            List.range' a (c - a) 1 ++ List.range' c 1 1 := by
+          simpa [hlena, hstarta] using
+            (List.range'_append_1 (s := a) (m := c - a) (n := 1)).symm
+        rw [hsplitb, hsplita, ← List.append_assoc, ih']
+      · have hb : b = c + 1 := by omega
+        subst b
+        simp [Nat.sub_self]
+
 /-- Every genuine cell of an explicit uniform partition has exactly its
 rational mesh width. -/
 theorem uniform_cell_width (a b : Rat) (pieces : Nat)

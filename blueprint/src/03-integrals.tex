@@ -126,6 +126,8 @@ Therefore the coarse block assigned to a fine cell is unique:
 \lean{ComputableAnalysis.RationalPartition.Refines.index_block_unique}
 The dependent witness is also exposed as a direct unique-existence contract:
 \lean{ComputableAnalysis.RationalPartition.Refines.existsUnique_index_block_of_fine_cell}
+The finite range algebra used to concatenate adjacent blocks is explicit:
+\lean{ComputableAnalysis.RationalPartition.range'_interval_append}
 The remaining whole-sum argument is a finite reindexing of these located
 cells, followed by the single-cell weighted interval inequality.
 This gives the computable mean-value/area principle for the functions covered
