@@ -4000,6 +4000,26 @@ theorem Refines.index_block_unique {a b : Rat}
   · exact R.index_blocks_disjoint_of_order hik hleft hright hkleft hkright
   · exact R.index_blocks_disjoint_of_order hki hkleft hkright hleft hright
 
+/-- Unique-existence form of the finite block assignment.  The index `j` of
+each genuine fine cell has one coarse owner, with the owner validity and the
+half-open block bounds included in the witness. -/
+theorem Refines.existsUnique_index_block_of_fine_cell {a b : Rat}
+    {fine coarse : RationalPartition a b} (R : Refines fine coarse)
+    {j : Nat} (hj : j < fine.pieces) :
+    ∃ i, (∃ hi : i < coarse.pieces,
+      R.index i ≤ j ∧ j < R.index (i + 1)) ∧
+      ∀ k, (∃ hk : k < coarse.pieces,
+        R.index k ≤ j ∧ j < R.index (k + 1)) → k = i := by
+  rcases R.exists_index_block_of_fine_cell hj with
+    ⟨i, hi, hleft, hright⟩
+  refine ⟨i, ⟨hi, hleft, hright⟩, ?_⟩
+  intro k hk
+  rcases hk with ⟨hk, hkleft, hkright⟩
+  by_cases hki : k = i
+  · exact hki
+  · have hne : i ≠ k := fun h => hki h.symm
+    exact False.elim (R.index_block_unique hne hleft hright hkleft hkright)
+
 /-- Every genuine cell of an explicit uniform partition has exactly its
 rational mesh width. -/
 theorem uniform_cell_width (a b : Rat) (pieces : Nat)
