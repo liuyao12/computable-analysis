@@ -7407,6 +7407,29 @@ def intervalRegularDarbouxStage
   P.boundIntegralSum
     (fun k hk => intervalRegularDarbouxRange F hregular P k hk prec)
 
+/-- The general Darboux stage encloses any finite cellwise choice of sample
+intervals.  This is the partition-level form of cell-image soundness used by
+quadrature rules and by changes of evaluator. -/
+theorem intervalRegularDarbouxStage_contains_of_cellwise
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (P : RationalPartition F.lower F.upper) (prec : Nat)
+    (sample : (k : Nat) -> k < P.pieces -> QInterval)
+    (hsample : forall k (hk : k < P.pieces),
+      (intervalRegularDarbouxRange F hregular P k hk prec).ContainsInterval
+        (sample k hk)) :
+    (intervalRegularDarbouxStage F hregular P prec).ContainsInterval
+      (P.boundIntegralSum sample) := by
+  unfold intervalRegularDarbouxStage
+  apply P.boundIntegralSum_contains_of_termwise
+  intro k hk
+  have hscaled := QInterval.scaleByRat_contains_of_nonneg
+    (by
+      change 0 <= (P.cell k hk).upper - (P.cell k hk).lower
+      exact (Rat.le_iff_sub_nonneg _ _).1 (P.cell k hk).ordered)
+    (hsample k hk)
+  simpa [RationalPartition.boundIntegralTerm,
+    RationalSubinterval.scaleBound, RationalSubinterval.width, hk] using hscaled
+
 theorem intervalRegularDarbouxStage_width_le_of_uniform_input_budget
     (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
     (pieces : Nat) (hpieces : 0 < pieces) (hab : F.lower <= F.upper)
