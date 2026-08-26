@@ -8864,6 +8864,42 @@ theorem endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_stage_of_prec
     simpa [nonincreasingDarbouxDyadicStage] using hmesh
   exact hcombined.trans hmesh'
 
+theorem endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_scheduled_stage
+    (F : FunctionOnInterval)
+    (hF : EndpointOrderedNonincreasingOnInterval F)
+    (hinterval : F.lower <= F.upper)
+    (stages evalPrecision : Nat -> Nat)
+    (hstage : forall {n m : Nat}, n <= m -> stages n <= stages m)
+    (hprecision : forall {n m : Nat}, n <= m ->
+      evalPrecision n <= evalPrecision m)
+    {n m : Nat} (hnm : n <= m) :
+    QInterval.ContainsInterval
+      (nonincreasingDarbouxDyadicStage F hinterval
+        (fun k => evalPrecision k) (stages n))
+      (nonincreasingDarbouxDyadicStage F hinterval
+        (fun k => evalPrecision k) (stages m)) := by
+  have hprecision_stage := nonincreasingDarbouxStage_contains_of_precision F
+    (RationalPartition.uniform F.lower F.upper (2 ^ stages n)
+      (by positivity) hinterval)
+    (evalPrecision n) (evalPrecision m) (hprecision hnm)
+  have hmesh := endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_stage
+    F hF hinterval (evalPrecision m) (hstage hnm)
+  have hcombined :
+      QInterval.ContainsInterval
+        (nonincreasingDarbouxDyadicStage F hinterval
+          (fun k => evalPrecision k) (stages n))
+        (nonincreasingDarbouxDyadicStage F hinterval
+          (fun _ => evalPrecision m) (stages n)) := by
+    simpa [nonincreasingDarbouxDyadicStage] using hprecision_stage
+  have hmesh' :
+      QInterval.ContainsInterval
+        (nonincreasingDarbouxDyadicStage F hinterval
+          (fun _ => evalPrecision m) (stages n))
+        (nonincreasingDarbouxDyadicStage F hinterval
+          (fun _ => evalPrecision m) (stages m)) := by
+    simpa [nonincreasingDarbouxDyadicStage] using hmesh
+  exact hcombined.trans hmesh'
+
 /-! With the stronger coordinatewise certificate, the endpoint range upgrades
 from overlap to genuine containment.  This is the exact point at which the
 stronger monotonicity contract becomes useful to Darboux-sum enclosure proofs. -/
@@ -8997,6 +9033,46 @@ def nondecreasingDarbouxStage (F : FunctionOnInterval)
     (P : RationalPartition F.lower F.upper) (prec : Nat) : QInterval :=
   P.boundIntegralSum
     (fun k hk => nondecreasingDarbouxRange F P k hk prec)
+
+/-! Evaluator refinement is automatically coherent when the partition is held
+fixed.  The endpoint boxes at a later precision are contained in the earlier
+boxes, and positive cell-width scaling plus the finite-sum containment lemma
+lift this to the complete Darboux stage. -/
+theorem nondecreasingDarbouxStage_contains_of_precision
+    (F : FunctionOnInterval)
+    (P : RationalPartition F.lower F.upper)
+    (p q : Nat) (hpq : p <= q) :
+    QInterval.ContainsInterval
+      (nondecreasingDarbouxStage F P p)
+      (nondecreasingDarbouxStage F P q) := by
+  have hterm : forall k (hk : k < P.pieces),
+      QInterval.ContainsInterval
+        (nondecreasingDarbouxRange F P k hk p)
+        (nondecreasingDarbouxRange F P k hk q) := by
+    intro k hk
+    let C := P.cell k hk
+    have hlower : inDomainInterval F.lower F.upper C.lower :=
+      And.intro C.lower_mem (Rat.le_trans C.ordered C.upper_mem)
+    have hupper : inDomainInterval F.lower F.upper C.upper :=
+      And.intro (Rat.le_trans C.lower_mem C.ordered) C.upper_mem
+    have hleft := (F.valid_on C.lower
+      (F.defined_on C.lower hlower)).2.1 p q hpq
+    have hright := (F.valid_on C.upper
+      (F.defined_on C.upper hupper)).2.1 p q hpq
+    change (F.compute C.lower hlower p).lo <=
+        (F.compute C.lower hlower q).lo /\
+      (F.compute C.upper hupper q).hi <=
+        (F.compute C.upper hupper p).hi
+    exact ⟨hleft.1, hright.2.2⟩
+  unfold nondecreasingDarbouxStage
+  apply P.boundIntegralSum_contains_of_termwise
+  intro k hk
+  simp only [RationalPartition.boundIntegralTerm, dif_pos hk]
+  apply QInterval.scaleByRat_contains_of_nonneg
+  · unfold RationalSubinterval.width
+    have hcell := (P.cell k hk).ordered
+    grind
+  · exact hterm k hk
 
 /-! One complete uniform refinement step for the strong monotone certificate.
 The proof is deliberately phrased through the generic blockwise transport
@@ -9171,46 +9247,6 @@ theorem endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_scheduled_sta
           (fun _ => evalPrecision m) (stages m)) := by
     simpa [nondecreasingDarbouxDyadicStage] using hmesh
   exact hcombined.trans hmesh'
-
-/-! Evaluator refinement is automatically coherent when the partition is held
-fixed.  The endpoint boxes at a later precision are contained in the earlier
-boxes, and positive cell-width scaling plus the finite-sum containment lemma
-lift this to the complete Darboux stage. -/
-theorem nondecreasingDarbouxStage_contains_of_precision
-    (F : FunctionOnInterval)
-    (P : RationalPartition F.lower F.upper)
-    (p q : Nat) (hpq : p <= q) :
-    QInterval.ContainsInterval
-      (nondecreasingDarbouxStage F P p)
-      (nondecreasingDarbouxStage F P q) := by
-  have hterm : forall k (hk : k < P.pieces),
-      QInterval.ContainsInterval
-        (nondecreasingDarbouxRange F P k hk p)
-        (nondecreasingDarbouxRange F P k hk q) := by
-    intro k hk
-    let C := P.cell k hk
-    have hlower : inDomainInterval F.lower F.upper C.lower :=
-      And.intro C.lower_mem (Rat.le_trans C.ordered C.upper_mem)
-    have hupper : inDomainInterval F.lower F.upper C.upper :=
-      And.intro (Rat.le_trans C.lower_mem C.ordered) C.upper_mem
-    have hleft := (F.valid_on C.lower
-      (F.defined_on C.lower hlower)).2.1 p q hpq
-    have hright := (F.valid_on C.upper
-      (F.defined_on C.upper hupper)).2.1 p q hpq
-    change (F.compute C.lower hlower p).lo <=
-        (F.compute C.lower hlower q).lo /\
-      (F.compute C.upper hupper q).hi <=
-        (F.compute C.upper hupper p).hi
-    exact ⟨hleft.1, hright.2.2⟩
-  unfold nondecreasingDarbouxStage
-  apply P.boundIntegralSum_contains_of_termwise
-  intro k hk
-  simp only [RationalPartition.boundIntegralTerm, dif_pos hk]
-  apply QInterval.scaleByRat_contains_of_nonneg
-  · unfold RationalSubinterval.width
-    have hcell := (P.cell k hk).ordered
-    grind
-  · exact hterm k hk
 
 /-! The cellwise containment lifts through the positive cell-width scaling and
 the finite partition sum.  This is the strong-order counterpart of the weak
