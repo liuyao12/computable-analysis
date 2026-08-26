@@ -958,6 +958,17 @@ the cell level: divide the endpoint-increment box by the positive cell width,
 and it overlaps the derivative-range box.  This is the effective MVT used by
 the FTC bridge.
 
+The convex derivative interface makes the neighboring-secant picture
+explicit.  A supplied left/right derivative raw is ordered at a corner, its
+one-sided derivatives are monotone along the interval, and the endpoint
+secants bound the derivative enclosure:
+
+\lean{ComputableAnalysis.leftDerivativeAt_mono}
+\lean{ComputableAnalysis.rightDerivativeAt_mono}
+\lean{ComputableAnalysis.leftDerivativeAt_le_rightDerivativeAt}
+\lean{ComputableAnalysis.derivative_between_neighboring_secants}
+\leanok
+
 \lean{ComputableAnalysis.Integral.finiteQuadrature_average_between_bounds}
 \lean{ComputableAnalysis.ExactCellOrderPreservation.integral_average_overlaps_bounds}
 \lean{ComputableAnalysis.CandidateDerivativeCellControl.endpoint_average_overlaps_bound}
