@@ -3835,6 +3835,31 @@ theorem signed_square_overlap_of_rationalTangentSquareWitnessSearch
   · exact ⟨hs.2.2.2.2.1, hs.2.2.2.2.2⟩
   · exact rationalCircleSin_sq_add_cos_sq _
 
+/-! Consume a stagewise candidate family at the interval level.  The search
+family supplies the finite rational witness, while the two adapters below
+turn its soundness into the square-overlap facts used by the integral
+transport.  The family itself remains the place where geometric construction
+data is supplied. -/
+theorem RationalTangentSquareWitnessCandidateFamily.square_overlap
+    {U S C : QInterval}
+    (h : RationalTangentSquareWitnessCandidateFamily U S C)
+    (hS : subintervalOf S 0 1) (hC : subintervalOf C 0 1) :
+    forall n : Nat, QInterval.Overlaps (rationalSquareInterval S)
+      (rationalOneMinusSquareInterval C) := by
+  intro n
+  obtain ⟨v, hv⟩ := h.search_exists n
+  exact square_overlap_of_rationalTangentSquareWitnessSearch hv hS hC
+
+theorem RationalTangentSquareWitnessCandidateFamily.signed_square_overlap
+    {U S C : QInterval}
+    (h : RationalTangentSquareWitnessCandidateFamily U S C)
+    (hS : subintervalOf S 0 1) (hC : subintervalOf C (-1) 1) :
+    forall n : Nat, QInterval.Overlaps (rationalSquareInterval S)
+      (rationalOneMinusSquareIntervalSigned C) := by
+  intro n
+  obtain ⟨v, hv⟩ := h.search_exists n
+  exact signed_square_overlap_of_rationalTangentSquareWitnessSearch hv hS hC
+
 theorem dyadicNestedRadicalStageSinAt_subinterval
     (n k : Nat) (hk : k < 2 ^ n) :
     subintervalOf (dyadicNestedRadicalStageSinAt n k) 0 1 := by
