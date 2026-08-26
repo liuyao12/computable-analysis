@@ -282,6 +282,30 @@ qabs(m) * inner(eps) <= eps -> composed derivative error <= eps
 Negative slopes require a separate two-sided or orientation-reversing
 certificate; the forward-only contract does not hide that obligation.
 
+The same finite factorization works for a general inner rational computation.
+For (g(x+h)-g(x)\ne0), the composite quotient is the product of the outer
+quotient at the inner increment and the inner quotient:
+
+\begin{verbatim}
+(f(g(x+h))-f(g(x)))/h
+  = (f(g(x+h))-f(g(x)))/(g(x+h)-g(x))
+      * (g(x+h)-g(x))/h
+
+weighted outer error + weighted inner error <= eps
+    -> effective derivative of f o g
+\end{verbatim}
+
+The constructor exposes positivity of the inner increment, both radius
+transports, and the finite weighted-error budget as hypotheses.  This is the
+general exact-rational chain-rule interface; interval-valued composition is a
+separate future layer because its boxes need additional domain and nesting
+certificates.
+
+\lean{ComputableAnalysis.ExactFunction.differenceQuotient_comp_factorization}
+\lean{ComputableAnalysis.ExactFunction.differenceQuotient_comp_error_le}
+\lean{ComputableAnalysis.ExactFunction.EffectiveDerivativeExact.compOfBudget}
+\leanok
+
 The same finite mechanism now closes multiplication when rational majorants
 are supplied for both factors and both proposed derivatives.  The certificate
 contains the explicit corner term coming from the product finite difference;

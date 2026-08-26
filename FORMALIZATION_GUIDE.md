@@ -40,9 +40,12 @@ The current strong point is checking specified rational and complex interval
 arguments, finite linear systems, and certified special-function
 representations. The following general constructions remain active targets:
 
-- product, chain, and quotient rules for arbitrary interval evaluators (the
+- product and quotient rules for arbitrary interval evaluators (the
   affine-product finite certificate is now checked; the general interval
   closure remains an active target);
+- general chain rules for arbitrary interval evaluators (the exact rational
+  layer now has a budget-explicit `EffectiveDerivativeExact.compOfBudget`; an
+  interval-valued composition still needs its own box-level contract);
 - construction of an integral from every interval-regular function;
 - general FTC, substitution, and automatic construction of bounded
   piecewise integration-by-parts certificates;
@@ -507,6 +510,14 @@ next composition step: after the two signed-scalar certificates have been
 constructed, it adds them on a common chart and pays the doubled internal
 precision budget.  Its explicit schedule equalities are the intended input
 for linear ODE residuals and finite Taylor coefficient combinations.
+
+The exact rational chain rule is available as
+`ExactFunction.differenceQuotient_comp_factorization`,
+`ExactFunction.differenceQuotient_comp_error_le`, and
+`ExactFunction.EffectiveDerivativeExact.compOfBudget`.  The constructor keeps
+the inner increment, outer step-radius transport, and weighted error budget
+explicit.  It is a reusable proof interface for composed computations, not an
+automatic theorem about arbitrary functions or limits.
 
 Negation is also closed at the interval level:
 `FunctionOnInterval.neg` reverses endpoint boxes without changing their

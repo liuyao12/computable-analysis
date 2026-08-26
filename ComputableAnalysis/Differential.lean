@@ -565,6 +565,135 @@ theorem differenceQuotient_affine_comp_of_step
     grind
   · exact differenceQuotient_affine_comp f hm hh
 
+/-! A finite chain-rule factorization for a general inner rational evaluator.
+The inner increment is kept explicit: this is the algebraic reason the
+constructor below asks for a positive increment certificate rather than
+silently invoking a classical inverse or a limit. -/
+theorem differenceQuotient_comp_factorization
+    (f g : Rat -> Rat) {x h : Rat}
+    (hh : h ≠ 0)
+    (hgh : g (x + h) - g x ≠ 0) :
+    differenceQuotient (fun z => f (g z)) x h =
+      differenceQuotient f (g x) (g (x + h) - g x) *
+        differenceQuotient g x h := by
+  unfold differenceQuotient
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+  have hghcancel : (g (x + h) - g x) *
+      (g (x + h) - g x)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ hgh
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-! The finite chain-rule error separates into the outer derivative error and
+the inner derivative error.  The statement is intentionally rational and
+forward-step only; a later schedule chooses the two tolerances and proves
+that their weighted sum fits the requested budget. -/
+theorem differenceQuotient_comp_error_le
+    (f df g dg : Rat -> Rat) {x h : Rat}
+    (hh : h ≠ 0)
+    (hgh : g (x + h) - g x ≠ 0) :
+    qabs (differenceQuotient (fun z => f (g z)) x h -
+      df (g x) * dg x) <=
+      qabs (differenceQuotient f (g x) (g (x + h) - g x)) *
+          qabs (differenceQuotient g x h - dg x) +
+        qabs (dg x) *
+          qabs (differenceQuotient f (g x) (g (x + h) - g x) -
+            df (g x)) := by
+  have hdecomp :
+      differenceQuotient (fun z => f (g z)) x h -
+          df (g x) * dg x =
+        differenceQuotient f (g x) (g (x + h) - g x) *
+            (differenceQuotient g x h - dg x) +
+          (differenceQuotient f (g x) (g (x + h) - g x) -
+            df (g x)) * dg x := by
+    rw [differenceQuotient_comp_factorization f g hh hgh]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  rw [hdecomp]
+  calc
+    qabs
+        (differenceQuotient f (g x) (g (x + h) - g x) *
+            (differenceQuotient g x h - dg x) +
+          (differenceQuotient f (g x) (g (x + h) - g x) -
+            df (g x)) * dg x) <=
+        qabs (differenceQuotient f (g x) (g (x + h) - g x) *
+            (differenceQuotient g x h - dg x)) +
+          qabs ((differenceQuotient f (g x) (g (x + h) - g x) -
+            df (g x)) * dg x) := qabs_add_le _ _
+    _ = qabs (differenceQuotient f (g x) (g (x + h) - g x)) *
+          qabs (differenceQuotient g x h - dg x) +
+        qabs (dg x) *
+          qabs (differenceQuotient f (g x) (g (x + h) - g x) -
+            df (g x)) := by
+      rw [qabs_mul, qabs_mul]
+      grind [Rat.mul_comm]
+
+/-! General composition closure for forward effective derivatives.  The
+caller supplies positive inner increments, the outer step-radius transport,
+and one rational weighted-error budget.  These are exactly the finite data
+needed to compose two algorithms; no continuity or completed-real limit is
+implicit in the constructor. -/
+def EffectiveDerivativeExact.compOfBudget
+    {f df g dg : Rat -> Rat}
+    (outer : EffectiveDerivativeExact f df)
+    (inner : EffectiveDerivativeExact g dg)
+    (outerTol innerTol : QPos -> QPos)
+    (stepRadius : QPos -> QPos)
+    (hinner_pos : forall (eps : QPos) (x h : Rat),
+      0 < h -> h <= (stepRadius eps).val ->
+        0 < g (x + h) - g x)
+    (hinner_radius : forall (eps : QPos) (x h : Rat),
+      0 < h -> h <= (stepRadius eps).val ->
+        h <= (inner.stepRadius (innerTol eps)).val)
+    (houter_radius : forall (eps : QPos) (x h : Rat),
+      0 < h -> h <= (stepRadius eps).val ->
+        g (x + h) - g x <=
+          (outer.stepRadius (outerTol eps)).val)
+    (hbudget : forall (eps : QPos) (x h : Rat),
+      0 < h -> h <= (stepRadius eps).val ->
+      qabs (differenceQuotient f (g x) (g (x + h) - g x)) *
+          (innerTol eps).val +
+        qabs (dg x) * (outerTol eps).val <= eps.val) :
+    EffectiveDerivativeExact (fun x => f (g x))
+      (fun x => df (g x) * dg x) where
+  stepRadius := stepRadius
+  good := by
+    intro x h eps hh hhle
+    have hpos := hinner_pos eps x h hh hhle
+    have hinner := inner.good x h (innerTol eps) hh
+      (hinner_radius eps x h hh hhle)
+    have houter := outer.good (g x) (g (x + h) - g x)
+      (outerTol eps) hpos
+      (houter_radius eps x h hh hhle)
+    have hfactor := differenceQuotient_comp_error_le f df g dg
+      (Rat.ne_of_gt hh)
+      (Rat.ne_of_gt hpos)
+    have hinner' :
+        qabs (differenceQuotient g x h - dg x) <=
+          (innerTol eps).val := by
+      simpa [differenceQuotient] using hinner
+    have houter' :
+        qabs (differenceQuotient f (g x) (g (x + h) - g x) -
+          df (g x)) <= (outerTol eps).val := by
+      simpa [differenceQuotient] using houter
+    calc
+      qabs (differenceQuotient (fun z => f (g z)) x h -
+          df (g x) * dg x) <=
+        qabs (differenceQuotient f (g x) (g (x + h) - g x)) *
+            qabs (differenceQuotient g x h - dg x) +
+          qabs (dg x) *
+            qabs (differenceQuotient f (g x) (g (x + h) - g x) -
+              df (g x)) := hfactor
+      _ <= qabs (differenceQuotient f (g x) (g (x + h) - g x)) *
+            (innerTol eps).val + qabs (dg x) * (outerTol eps).val := by
+        apply rat_add_le_add
+        · exact Rat.mul_le_mul_of_nonneg_left hinner'
+            (qabs_nonneg _)
+        · exact Rat.mul_le_mul_of_nonneg_left houter'
+            (qabs_nonneg _)
+      _ <= eps.val := hbudget eps x h hh hhle
+
 /-! Positive-slope affine reparametrization is a genuine closure operation on
 the forward effective-derivative certificate.  The inner budget controls the
 outer error after multiplication by the slope, while the radius condition
