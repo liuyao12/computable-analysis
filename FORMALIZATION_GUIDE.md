@@ -767,6 +767,13 @@ handles positive endpoint transport. Use these rational identities as the
 starting point for substitution and angle-chart proofs; they do not require a
 limit or a completed real function.
 
+At the certificate level, use
+`ExactFunction.EffectiveDerivativeExact.affineCompOfPositiveSlope`.  Its
+`hbudget` pays for the factor `qabs m`, and its radius hypothesis transports
+the step `m*h` into the outer derivative certificate.  Negative slopes are
+not silently accepted: the forward-only derivative contract needs a separate
+orientation-reversing or two-sided wrapper.
+
 The matching integral-side identity is
 `ComputableAnalysis.riemannLeftExact_affine_substitution`. It transports a
 positive affine change of variable through the finite left-rectangle fold.

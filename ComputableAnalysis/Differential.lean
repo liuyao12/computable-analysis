@@ -565,6 +565,54 @@ theorem differenceQuotient_affine_comp_of_step
     grind
   · exact differenceQuotient_affine_comp f hm hh
 
+/-! Positive-slope affine reparametrization is a genuine closure operation on
+the forward effective-derivative certificate.  The inner budget controls the
+outer error after multiplication by the slope, while the radius condition
+transports the step `m*h` into the outer certificate. -/
+def EffectiveDerivativeExact.affineCompOfPositiveSlope
+    {f df : Rat -> Rat} (D : EffectiveDerivativeExact f df)
+    (m c : Rat) (hm : 0 < m)
+    (inner : QPos -> QPos)
+    (hbudget : forall eps, qabs m * (inner eps).val <= eps.val)
+    (hradius : forall eps,
+      m * (inner eps).val <= (D.stepRadius (inner eps)).val) :
+    EffectiveDerivativeExact
+      (fun x => f (affine m c x))
+      (fun x => m * df (affine m c x)) where
+  stepRadius := inner
+  good := by
+    intro x h eps hh hhle
+    have hmhpos : 0 < m * h := Rat.mul_pos hm hh
+    have hmh_le : m * h <= m * (inner eps).val := by
+      exact Rat.mul_le_mul_of_nonneg_left hhle (Rat.le_of_lt hm)
+    have houter : m * h <= (D.stepRadius (inner eps)).val :=
+      Rat.le_trans hmh_le (hradius eps)
+    have hD := D.good (affine m c x) (m * h) (inner eps)
+      hmhpos houter
+    have hD' : qabs
+        (differenceQuotient f (affine m c x) (m * h) -
+          df (affine m c x)) <= (inner eps).val := by
+      simpa [differenceQuotient] using hD
+    have hcomp := differenceQuotient_affine_comp_of_step f
+      (x := x) (m := m) (c := c) (h := h) (Rat.ne_of_gt hh)
+    change qabs
+      (differenceQuotient (fun z => f (affine m c z)) x h -
+        m * df (affine m c x)) <= eps.val
+    rw [hcomp]
+    calc
+      qabs (m * differenceQuotient f (affine m c x) (m * h) -
+          m * df (affine m c x)) <=
+          qabs m * qabs
+            (differenceQuotient f (affine m c x) (m * h) -
+              df (affine m c x)) := by
+            rw [← qabs_mul]
+            congr 1
+            grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+              Rat.mul_assoc]
+      _ <= qabs m * (inner eps).val :=
+        Rat.mul_le_mul_of_nonneg_left hD' (qabs_nonneg _)
+      _ <= eps.val := hbudget eps
+
 /-! An affine reparametrization transports the finite left-rectangle sum
 exactly.  This is the computational core of substitution: it is an identity
 of rational folds, before any shrinking or abstract integral is introduced.

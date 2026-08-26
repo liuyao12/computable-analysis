@@ -245,8 +245,22 @@ f(m(x+h)+c)-f(mx+c)     m * (f(y+m h)-f(y))
 
 \lean{ComputableAnalysis.ExactFunction.differenceQuotient_affine_comp}
 \lean{ComputableAnalysis.ExactFunction.differenceQuotient_affine_comp_of_step}
+\lean{ComputableAnalysis.ExactFunction.EffectiveDerivativeExact.affineCompOfPositiveSlope}
 \lean{ComputableAnalysis.ExactFunction.secant_bracket_affine_endpoint_transport}
 \leanok
+
+The certificate-level chain rule carries the same finite bookkeeping into the
+effective derivative interface.  A positive affine slope transports the outer
+step, while `hbudget` pays for the factor (m) multiplying the outer error:
+
+
+\begin{verbatim}
+h <= inner(eps) -> m*h <= outer radius
+qabs(m) * inner(eps) <= eps -> composed derivative error <= eps
+\end{verbatim}
+
+Negative slopes require a separate two-sided or orientation-reversing
+certificate; the forward-only contract does not hide that obligation.
 
 The same finite mechanism now closes multiplication when rational majorants
 are supplied for both factors and both proposed derivatives.  The certificate
