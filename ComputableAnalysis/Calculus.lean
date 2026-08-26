@@ -2,6 +2,8 @@ import ComputableAnalysis.Basic
 
 namespace ComputableAnalysis
 
+set_option maxHeartbeats 1000000
+
 def mesh (a b : Rat) (n : Nat) : Rat := if n = 0 then 0 else (b - a) / n
 def leftPoint (a b : Rat) (n k : Nat) : Rat := a + (k : Rat) * mesh a b n
 
@@ -1390,6 +1392,29 @@ theorem zero_addInterval (I : QInterval) :
   cases I
   unfold addInterval
   congr <;> grind
+
+theorem addInterval_assoc (A B C : QInterval) :
+    addInterval (addInterval A B) C = addInterval A (addInterval B C) := by
+  cases A; cases B; cases C
+  simp [addInterval, Rat.add_assoc]
+
+theorem addInterval_fold_initial (xs : List Nat) (term : Nat -> QInterval)
+    (initial : QInterval) :
+    xs.foldl (fun acc k => addInterval acc (term k)) initial =
+      addInterval initial
+        (xs.foldl (fun acc k => addInterval acc (term k))
+          { lo := 0, hi := 0 }) := by
+  induction xs generalizing initial with
+  | nil =>
+      cases initial
+      simp [addInterval]
+      <;> grind
+  | cons k xs ih =>
+      simp only [List.foldl]
+      rw [ih (addInterval initial (term k))]
+      rw [zero_addInterval]
+      rw [ih (term k)]
+      rw [addInterval_assoc]
 
 /-- Interval addition adds enclosure widths exactly. -/
 theorem addInterval_width (I J : QInterval) :
@@ -3402,19 +3427,19 @@ certificate.  This is the stage-to-stage geometric relation used by equal
 subdivision integrals. -/
 def dyadicRefinesNextCertificate (a b : Rat) (n : Nat) (hab : a <= b) :
     Refines
-      (uniform a b (2 ^ (n + 1)) (by positivity) hab)
-      (uniform a b (2 ^ n) (by positivity) hab) := by
+      (uniform a b (2 ^ (n + 1)) (Nat.pow_pos (by omega : 0 < 2)) hab)
+      (uniform a b (2 ^ n) (Nat.pow_pos (by omega : 0 < 2)) hab) := by
   simpa [Nat.pow_succ, Nat.mul_comm] using
-    (uniformRefinesRightCertificate a b (2 ^ n) 2
-      (by positivity) (by norm_num) hab)
+    (uniformRefinesRightCertificate (a := a) (b := b) (2 ^ n) 2
+      (Nat.pow_pos (by omega : 0 < 2)) (by omega) hab)
 
 /-- Arbitrary later-to-earlier dyadic stages compose into one explicit finite
 refinement certificate. -/
-theorem dyadicRefinesCertificate (a b : Rat) {n m : Nat}
+def dyadicRefinesCertificate (a b : Rat) {n m : Nat}
     (hnm : n <= m) (hab : a <= b) :
     Refines
-      (uniform a b (2 ^ m) (by positivity) hab)
-      (uniform a b (2 ^ n) (by positivity) hab) := by
+      (uniform a b (2 ^ m) (Nat.pow_pos (by omega : 0 < 2)) hab)
+      (uniform a b (2 ^ n) (Nat.pow_pos (by omega : 0 < 2)) hab) := by
   induction m generalizing n with
   | zero =>
       have hn : n = 0 := by omega
@@ -3422,12 +3447,12 @@ theorem dyadicRefinesCertificate (a b : Rat) {n m : Nat}
       exact Refines.refl _
   | succ m ih =>
       by_cases hnm' : n <= m
-      · have hprev := ih hnm' hab
+      · have hprev := ih hnm'
         have hnext := dyadicRefinesNextCertificate a b m hab
         exact hnext.trans hprev
       · have hn : n = m + 1 := by omega
         subst n
-        exact dyadicRefinesNextCertificate a b m hab
+        exact Refines.refl _
 
 /-- Insert one rational breakpoint after cell index `k`.  The new list keeps
 all old points in order, placing `x` between `point k` and `point (k+1)`.
@@ -4229,10 +4254,6 @@ theorem Refines.foldl_indexBlocks_eq_foldl_range
         (fun acc j => step acc (value j)) initial := by
   rw [R.indexBlocks_flatMap_eq_range]
 
-/-- A fine partition's interval sum can be traversed coarse block by coarse
-block.  The summand remains the total `boundIntegralTerm`, so out-of-range
-indices stay harmlessly degenerate and no dependent proof transport is hidden
-in the reindexing step. -/
 /-- Every genuine cell of an explicit uniform partition has exactly its
 rational mesh width. -/
 theorem uniform_cell_width (a b : Rat) (pieces : Nat)
@@ -4541,6 +4562,7 @@ theorem addInterval_fold_overlaps_of_mem (xs : List Nat)
         (fun j hj => houter j (List.mem_cons_of_mem k hj))
         (fun j hj => hinner j (List.mem_cons_of_mem k hj))
         houternext hinnernext hstep
+        (fun j hj => hterm j (List.mem_cons_of_mem k hj))
 
 /-- Moving a rational initial value outside a finite addition fold. -/
 theorem rat_add_fold_initial (xs : List Nat) (term : Nat -> Rat)
@@ -4627,10 +4649,27 @@ theorem Refines.boundIntegralSum_eq_indexBlockFold
         { lo := 0, hi := 0 } := by
   unfold boundIntegralSum
   symm
-  exact R.foldl_indexBlocks_eq_foldl_range
-    (fun acc q => QInterval.addInterval acc q)
-    { lo := 0, hi := 0 }
-    (fun j => fine.boundIntegralTerm bound j)
+  calc
+    (List.range coarse.pieces).foldl
+        (fun acc i =>
+          (R.indexBlock i).foldl
+            (fun acc j => QInterval.addInterval acc
+              (fine.boundIntegralTerm bound j)) acc)
+        { lo := 0, hi := 0 } =
+      ((List.range coarse.pieces).flatMap R.indexBlock).foldl
+        (fun acc j => QInterval.addInterval acc
+          (fine.boundIntegralTerm bound j)) { lo := 0, hi := 0 } :=
+      (foldl_flatMap
+        (fun acc j => QInterval.addInterval acc
+          (fine.boundIntegralTerm bound j))
+        R.indexBlock (List.range coarse.pieces) { lo := 0, hi := 0 }).symm
+    _ = (List.range fine.pieces).foldl
+        (fun acc j => QInterval.addInterval acc
+          (fine.boundIntegralTerm bound j)) { lo := 0, hi := 0 } :=
+      R.foldl_indexBlocks_eq_foldl_range
+        (fun acc q => QInterval.addInterval acc q)
+        { lo := 0, hi := 0 }
+        (fun j => fine.boundIntegralTerm bound j)
 
 /-- Blockwise refinement comparison for complete interval-valued Darboux sums.
 It is enough to prove one containment certificate for each coarse cell and the
@@ -4650,15 +4689,42 @@ theorem Refines.boundIntegralSum_contains_of_blockwise
       (fine.boundIntegralSum fineBound) := by
   rw [R.boundIntegralSum_eq_indexBlockFold]
   unfold boundIntegralSum
-  apply addInterval_fold_contains_of_mem
-    (List.range coarse.pieces)
-    (coarse.boundIntegralTerm coarseBound)
-    (fun i =>
+  have hnormalized : ∀ initial,
+      (List.range coarse.pieces).foldl
+        (fun acc i =>
+          (R.indexBlock i).foldl
+            (fun acc j => QInterval.addInterval acc
+            (fine.boundIntegralTerm fineBound j)) acc)
+        initial =
+      (List.range coarse.pieces).foldl
+        (fun acc i => QInterval.addInterval acc
+          ((R.indexBlock i).foldl
+            (fun acc j => QInterval.addInterval acc
+              (fine.boundIntegralTerm fineBound j))
+            { lo := 0, hi := 0 }))
+        initial := by
+    induction (List.range coarse.pieces) with
+    | nil => intro initial; rfl
+    | cons i xs ih =>
+        intro initial
+        simp only [List.foldl]
+        rw [ih]
+        have hfold := QInterval.addInterval_fold_initial
+          (R.indexBlock i)
+          (fun j => fine.boundIntegralTerm fineBound j) initial
+        rw [hfold]
+  rw [hnormalized]
+  refine addInterval_fold_contains_of_mem
+    (xs := List.range coarse.pieces)
+    (outer := coarse.boundIntegralTerm coarseBound)
+    (inner := fun i =>
       (R.indexBlock i).foldl
         (fun acc j => QInterval.addInterval acc
           (fine.boundIntegralTerm fineBound j))
         { lo := 0, hi := 0 })
-    (QInterval.containsInterval_refl _)
+    (outerInit := { lo := 0, hi := 0 })
+    (innerInit := { lo := 0, hi := 0 })
+    (QInterval.containsInterval_refl _) ?_
   intro i hi
   exact hblock i (List.mem_range.mp hi)
 
@@ -4691,14 +4757,41 @@ theorem Refines.boundIntegralSum_overlaps_of_blockwise
       (fine.boundIntegralSum fineBound) := by
   rw [R.boundIntegralSum_eq_indexBlockFold]
   unfold boundIntegralSum
+  have hnormalized : ∀ initial,
+      (List.range coarse.pieces).foldl
+        (fun acc i =>
+          (R.indexBlock i).foldl
+            (fun acc j => QInterval.addInterval acc
+            (fine.boundIntegralTerm fineBound j)) acc)
+        initial =
+      (List.range coarse.pieces).foldl
+        (fun acc i => QInterval.addInterval acc
+          ((R.indexBlock i).foldl
+            (fun acc j => QInterval.addInterval acc
+              (fine.boundIntegralTerm fineBound j))
+            { lo := 0, hi := 0 }))
+        initial := by
+    induction (List.range coarse.pieces) with
+    | nil => intro initial; rfl
+    | cons i xs ih =>
+        intro initial
+        simp only [List.foldl]
+        rw [ih]
+        have hfold := QInterval.addInterval_fold_initial
+          (R.indexBlock i)
+          (fun j => fine.boundIntegralTerm fineBound j) initial
+        rw [hfold]
+  rw [hnormalized]
   apply addInterval_fold_overlaps_of_mem
-    (List.range coarse.pieces)
-    (coarse.boundIntegralTerm coarseBound)
-    (fun i =>
+    (xs := List.range coarse.pieces)
+    (outer := coarse.boundIntegralTerm coarseBound)
+    (inner := fun i =>
       (R.indexBlock i).foldl
         (fun acc j => QInterval.addInterval acc
           (fine.boundIntegralTerm fineBound j))
         { lo := 0, hi := 0 })
+    (outerInit := { lo := 0, hi := 0 })
+    (innerInit := { lo := 0, hi := 0 })
   · intro i hi
     exact hcoarse i (List.mem_range.mp hi)
   · intro i hi
@@ -6440,36 +6533,6 @@ theorem exactRat_compute (f : Rat -> Rat) (a b x : Rat)
     (exactRat f a b).compute x hx n = { lo := f x, hi := f x } :=
   rfl
 
-/-! Exact rational evaluators inherit coordinatewise endpoint monotonicity
-directly from the underlying rational formula.  This adapter is useful for
-polynomials and other finite algebraic representatives: no interval-analysis
-proof is needed because every stage is a degenerate rational box. -/
-theorem exactRat_endpointOrderedNondecreasing
-    (f : Rat -> Rat) (a b : Rat)
-    (hmono : forall x y,
-      inDomainInterval a b x -> inDomainInterval a b y ->
-      x <= y -> f x <= f y) :
-    EndpointOrderedNondecreasingOnInterval (exactRat f a b) where
-  lower_mono := by
-    intro x y hx hy hxy n
-    simpa [exactRat_compute] using hmono x y hx hy hxy
-  upper_mono := by
-    intro x y hx hy hxy n
-    simpa [exactRat_compute] using hmono x y hx hy hxy
-
-theorem exactRat_endpointOrderedNonincreasing
-    (f : Rat -> Rat) (a b : Rat)
-    (hmono : forall x y,
-      inDomainInterval a b x -> inDomainInterval a b y ->
-      x <= y -> f y <= f x) :
-    EndpointOrderedNonincreasingOnInterval (exactRat f a b) where
-  lower_mono := by
-    intro x y hx hy hxy n
-    simpa [exactRat_compute] using hmono x y hx hy hxy
-  upper_mono := by
-    intro x y hx hy hxy n
-    simpa [exactRat_compute] using hmono x y hx hy hxy
-
 /-! Pointwise addition on a common rational interval.
 
 This is the interval-level counterpart of `RealFunRaw.add`.  The domain
@@ -8018,6 +8081,38 @@ theorem toNonincreasing {F : FunctionOnInterval}
 
 end EndpointOrderedNonincreasingOnInterval
 
+/-! Exact rational evaluators inherit coordinatewise endpoint monotonicity
+directly from the underlying rational formula. -/
+theorem exactRat_endpointOrderedNondecreasing
+    (f : Rat -> Rat) (a b : Rat)
+    (hmono : forall x y,
+      inDomainInterval a b x -> inDomainInterval a b y ->
+      x <= y -> f x <= f y) :
+    EndpointOrderedNondecreasingOnInterval (FunctionOnInterval.exactRat f a b) where
+  lower_mono := by
+    intro x y hx hy hxy n
+    change f x <= f y
+    exact hmono x y hx hy hxy
+  upper_mono := by
+    intro x y hx hy hxy n
+    change f x <= f y
+    exact hmono x y hx hy hxy
+
+theorem exactRat_endpointOrderedNonincreasing
+    (f : Rat -> Rat) (a b : Rat)
+    (hmono : forall x y,
+      inDomainInterval a b x -> inDomainInterval a b y ->
+      x <= y -> f y <= f x) :
+    EndpointOrderedNonincreasingOnInterval (FunctionOnInterval.exactRat f a b) where
+  lower_mono := by
+    intro x y hx hy hxy n
+    change f y <= f x
+    exact hmono x y hx hy hxy
+  upper_mono := by
+    intro x y hx hy hxy n
+    change f y <= f x
+    exact hmono x y hx hy hxy
+
 /-! A single refinement step for the monotone Darboux construction.  The
 coarse endpoint range contains the sum of the two ranges obtained by inserting
 one rational breakpoint.  This is the local finite inequality from which
@@ -8559,12 +8654,12 @@ theorem nonincreasingDarbouxRange_overlaps_point_value
     And.intro C.lower_mem (Rat.le_trans C.ordered C.upper_mem)
   have hupper : inDomainInterval F.lower F.upper C.upper :=
     And.intro (Rat.le_trans C.lower_mem C.ordered) C.upper_mem
-  have hleft := hF x C.lower hx hlower hlo prec
-  have hright := hF C.upper x hupper hx hhi prec
+  have hleft := hF x C.upper hx hupper hhi prec
+  have hright := hF C.lower x hlower hx hlo prec
   change (F.compute C.upper hupper prec).lo <=
       (F.compute x hx prec).hi /\
     (F.compute x hx prec).lo <= (F.compute C.lower hlower prec).hi
-  exact ⟨hright, hleft⟩
+  exact ⟨hleft, hright⟩
 
 theorem endpointOrderedNonincreasingDarbouxRange_contains_point_value
     (F : FunctionOnInterval)
@@ -8608,10 +8703,12 @@ theorem nonincreasingDarbouxStage_width_nonneg
     QInterval.scaleByRat_width_of_nonneg]
   · exact Rat.mul_nonneg (by
       unfold RationalSubinterval.width
-      exact (Rat.le_iff_sub_nonneg _ _).2 (P.cell k hk).ordered)
+      have hcell := (P.cell k hk).ordered
+      grind [Rat.sub_eq_add_neg])
       (nonincreasingDarbouxRange_width_nonneg F hF P k hk prec)
   · unfold RationalSubinterval.width
-    exact (Rat.le_iff_sub_nonneg _ _).2 (P.cell k hk).ordered
+    have hcell := (P.cell k hk).ordered
+    grind [Rat.sub_eq_add_neg]
 
 theorem nonincreasingDarbouxStage_overlaps_rightEndpointSamples
     (F : FunctionOnInterval) (hF : NonincreasingOnInterval F)
@@ -8620,14 +8717,15 @@ theorem nonincreasingDarbouxStage_overlaps_rightEndpointSamples
       (nonincreasingDarbouxStage F P prec)
       (P.boundIntegralSum
         (fun k hk => F.compute (P.point (k + 1))
-          (And.intro (P.cell k hk).lower_mem
-            (Rat.le_trans (P.cell k hk).ordered
-              (P.cell k hk).upper_mem)) prec)) := by
+          (And.intro
+            (Rat.le_trans (P.cell k hk).lower_mem
+              (P.cell k hk).ordered)
+            (P.cell k hk).upper_mem) prec)) := by
   let hx : forall k, k < P.pieces ->
       inDomainInterval F.lower F.upper (P.point (k + 1)) := fun k hk =>
-    And.intro (P.cell k hk).lower_mem
-      (Rat.le_trans (P.cell k hk).ordered
-        (P.cell k hk).upper_mem)
+    And.intro
+      (Rat.le_trans (P.cell k hk).lower_mem (P.cell k hk).ordered)
+      (P.cell k hk).upper_mem
   let sample : (k : Nat) -> k < P.pieces -> QInterval := fun k hk =>
     F.compute (P.point (k + 1)) (hx k hk) prec
   have hsample : forall k (hk : k < P.pieces),
@@ -8651,28 +8749,32 @@ theorem nonincreasingDarbouxStage_overlaps_rightEndpointSamples
       QInterval.scaleByRat_width_of_nonneg]
     · exact Rat.mul_nonneg (by
         unfold RationalSubinterval.width
-        exact (Rat.le_iff_sub_nonneg _ _).2 (P.cell k hk).ordered)
+        have hcell := (P.cell k hk).ordered
+        grind [Rat.sub_eq_add_neg])
         (nonincreasingDarbouxRange_width_nonneg F hF P k hk prec)
     · unfold RationalSubinterval.width
-      exact (Rat.le_iff_sub_nonneg _ _).2 (P.cell k hk).ordered
+      have hcell := (P.cell k hk).ordered
+      grind [Rat.sub_eq_add_neg]
   · intro k hk
     simp only [RationalPartition.boundIntegralTerm, dif_pos hk]
     rw [RationalSubinterval.scaleBound,
       QInterval.scaleByRat_width_of_nonneg]
     · exact Rat.mul_nonneg (by
         unfold RationalSubinterval.width
-        exact (Rat.le_iff_sub_nonneg _ _).2 (P.cell k hk).ordered)
+        have hcell := (P.cell k hk).ordered
+        grind [Rat.sub_eq_add_neg])
         (hsample_width k hk)
     · unfold RationalSubinterval.width
-      exact (Rat.le_iff_sub_nonneg _ _).2 (P.cell k hk).ordered
+      have hcell := (P.cell k hk).ordered
+      grind [Rat.sub_eq_add_neg]
   · intro k hk
     simp only [RationalPartition.boundIntegralTerm, dif_pos hk]
     unfold RationalSubinterval.scaleBound
     apply QInterval.scaleByRat_overlaps_of_nonneg
     · unfold RationalSubinterval.width
-      exact (Rat.le_iff_sub_nonneg _ _).2 (P.cell k hk).ordered
-  · exact hsample k hk
-  · simpa [sample, hx]
+      have hcell := (P.cell k hk).ordered
+      grind [Rat.sub_eq_add_neg]
+    · simpa [sample, hx] using hsample k hk
 
 theorem nonincreasingDarbouxStage_width_le_of_uniform_input_budget
     (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
@@ -8731,7 +8833,8 @@ theorem nonincreasingDarbouxStage_contains_of_precision
   simp only [RationalPartition.boundIntegralTerm, dif_pos hk]
   apply QInterval.scaleByRat_contains_of_nonneg
   · unfold RationalSubinterval.width
-    exact (Rat.le_iff_sub_nonneg _ _).2 (P.cell k hk).ordered
+    have hcell := (P.cell k hk).ordered
+    grind [Rat.sub_eq_add_neg]
   · exact hterm k hk
 
 /-! One uniform refinement step for a coordinatewise nonincreasing evaluator.
@@ -8747,13 +8850,14 @@ theorem endpointOrderedNonincreasingDarbouxStage_contains_uniform_double
         (RationalPartition.uniform F.lower F.upper pieces hpieces hab) prec)
       (nonincreasingDarbouxStage F
         (RationalPartition.uniform F.lower F.upper (pieces * 2)
-          (Nat.mul_pos hpieces (by norm_num)) hab) prec) := by
+          (Nat.mul_pos hpieces (by omega)) hab) prec) := by
   let coarse := RationalPartition.uniform F.lower F.upper pieces hpieces hab
   let fine := RationalPartition.uniform F.lower F.upper (pieces * 2)
-    (Nat.mul_pos hpieces (by norm_num)) hab
+    (Nat.mul_pos hpieces (by omega)) hab
   let R : RationalPartition.Refines fine coarse :=
-    RationalPartition.uniformRefinesRightCertificate F.lower F.upper pieces 2
-      hpieces (by norm_num) hab
+    RationalPartition.uniformRefinesRightCertificate
+      (a := F.lower) (b := F.upper) pieces 2
+      hpieces (by omega) hab
   apply R.boundIntegralSum_contains_of_blockwise
   intro i hi
   have hindex : R.index i = i * 2 := by
@@ -8761,39 +8865,81 @@ theorem endpointOrderedNonincreasingDarbouxStage_contains_uniform_double
   have hindex_next : R.index (i + 1) = (i + 1) * 2 := by
     rfl
   have hblock : R.indexBlock i = [i * 2, i * 2 + 1] := by
-    simp [RationalPartition.Refines.indexBlock, hindex, hindex_next]
-    omega
+    simp [RationalPartition.Refines.indexBlock, hindex, hindex_next, coarse,
+      Nat.mul_add, Nat.add_mul, List.range']
   rw [hblock]
   simp only [List.foldl_cons, List.foldl_nil]
   have hi0 : i * 2 < fine.pieces :=
     R.indexBlock_mem_fine hi (by simp [hblock])
   have hi1 : i * 2 + 1 < fine.pieces :=
     R.indexBlock_mem_fine hi (by simp [hblock])
+  have hi1' : i * 2 + 1 < pieces * 2 := by
+    change i * 2 + 1 < pieces * 2 at hi1
+    exact hi1
+  have hmesh : mesh F.lower F.upper (pieces * 2) =
+      mesh F.lower F.upper pieces / 2 :=
+    mesh_refine_mul_right hpieces (by omega)
+  have hpoint0 :
+      (RationalPartition.uniform F.lower F.upper (pieces * 2)
+        (Nat.mul_pos hpieces (by omega)) hab).point (i * 2) =
+        (RationalPartition.uniform F.lower F.upper pieces hpieces hab).point i := by
+    exact RationalPartition.uniform_refines_right hpieces (by omega) hab
+  have hpoint2 :
+      (RationalPartition.uniform F.lower F.upper (pieces * 2)
+        (Nat.mul_pos hpieces (by omega)) hab).point (i * 2 + 1 + 1) =
+        (RationalPartition.uniform F.lower F.upper pieces hpieces hab).point (i + 1) := by
+    simpa [Nat.mul_add, Nat.add_mul] using
+      (RationalPartition.uniform_refines_right (a := F.lower) (b := F.upper)
+        (m := pieces) (n := 2) (i := i + 1) hpieces (by omega) hab)
+  have hi' : i < pieces := by
+    change i < pieces at hi
+    exact hi
+  have hp0 : fine.point (i * 2) = coarse.point i :=
+    R.point_eq i (Nat.le_of_lt hi)
+  have hp2 : fine.point ((i + 1) * 2) = coarse.point (i + 1) :=
+    R.point_eq (i + 1) (Nat.succ_le_of_lt hi)
+  have hp2' : fine.point (i * 2 + 1 + 1) = coarse.point (i + 1) := by
+    rw [show i * 2 + 1 + 1 = (i + 1) * 2 by omega, hp2]
   have hcoarse := endpointOrderedNonincreasing_splitScaledEndpointRange_contains
-    F hF (coarse.point i) (fine.point (i * 2 + 1))
-      (coarse.point (i + 1))
+    F hF (a := coarse.point i) (b := fine.point (i * 2 + 1))
+      (c := coarse.point (i + 1))
+
       (by
-        exact (coarse.cell i hi).contains_inDomain
-          (by simp [RationalSubinterval.contains]))
+        apply (coarse.cell i hi).contains_inDomain
+        constructor
+        · exact Rat.le_refl
+        · exact (coarse.cell i hi).ordered)
       (by
-        exact (fine.cell (i * 2 + 1) hi1).contains_inDomain
-          (by simp [RationalSubinterval.contains]))
+        apply (fine.cell (i * 2 + 1) hi1).contains_inDomain
+        constructor
+        · exact Rat.le_refl
+        · exact (fine.cell (i * 2 + 1) hi1).ordered)
       (by
-        exact (coarse.cell (i + 1) (Nat.succ_le_of_lt hi)).contains_inDomain
-          (by simp [RationalSubinterval.contains]))
+        apply (coarse.cell i hi).contains_inDomain
+        constructor
+        · exact (coarse.cell i hi).ordered
+        · exact Rat.le_refl)
       (by
-        simpa [coarse, fine, RationalPartition.uniform, leftPoint]
-          using (fine.monotone (i * 2) (i * 2 + 1) (by omega)
-            (by omega)))
+        calc
+          coarse.point i = fine.point (i * 2) :=
+            (R.point_eq i (Nat.le_of_lt hi)).symm
+          _ <= fine.point (i * 2 + 1) :=
+            fine.monotone _ _ (by omega) (by omega))
       (by
-        simpa [coarse, fine, RationalPartition.uniform, leftPoint]
-          using (fine.monotone (i * 2 + 1) ((i + 1) * 2) (by omega)
-            (by omega)))
+        calc
+          fine.point (i * 2 + 1) <= fine.point ((i + 1) * 2) :=
+            fine.monotone _ _ (by omega) (by omega)
+          _ = coarse.point (i + 1) :=
+            R.point_eq (i + 1) (Nat.succ_le_of_lt hi))
       prec
-  simpa [coarse, fine, R, RationalPartition.boundIntegralTerm,
-    RationalSubinterval.scaleBound, nonincreasingDarbouxRange,
-    RationalSubinterval.width, RationalPartition.uniform_cell_width,
-    RationalPartition.uniform, leftPoint, Nat.mul_add, Nat.add_mul] using hcoarse
+  simp only [RationalPartition.boundIntegralTerm, dif_pos hi, dif_pos hi0,
+    dif_pos hi1, RationalSubinterval.scaleBound, RationalSubinterval.width,
+    RationalPartition.cell, nonincreasingDarbouxRange,
+    QInterval.zero_addInterval]
+  simpa [coarse, fine, RationalPartition.uniform, hpoint0, hpoint2,
+    hp0, hp2, hp2', mesh, leftPoint, Rat.div_def, Rat.mul_assoc,
+    Rat.mul_comm, Rat.inv_mul_rev, QInterval.ContainsInterval,
+    QInterval.scaleByRat] using hcoarse
 
 def nonincreasingDarbouxDyadicStage (F : FunctionOnInterval)
     (hinterval : F.lower <= F.upper) (evalPrecision : Nat -> Nat)
@@ -8848,7 +8994,7 @@ theorem endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_stage
       by_cases hnm' : n <= m
       · have hprev := ih hnm'
         have hstep := endpointOrderedNonincreasingDarbouxStage_contains_uniform_double
-          F hF (2 ^ m) (by positivity) hinterval prec
+          F hF (2 ^ m) (Nat.pow_pos (by omega : 0 < 2)) hinterval prec
         have hstep' :
             QInterval.ContainsInterval
               (nonincreasingDarbouxDyadicStage F hinterval
@@ -8874,7 +9020,7 @@ theorem endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_stage_of_prec
       (nonincreasingDarbouxDyadicStage F hinterval evalPrecision m) := by
   have hprecision_stage := nonincreasingDarbouxStage_contains_of_precision F
     (RationalPartition.uniform F.lower F.upper (2 ^ n)
-      (by positivity) hinterval)
+      (Nat.pow_pos (by omega : 0 < 2)) hinterval)
     (evalPrecision n) (evalPrecision m) (hprecision hnm)
   have hmesh := endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_stage
     F hF hinterval (evalPrecision m) hnm
@@ -8904,19 +9050,19 @@ theorem endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_scheduled_sta
     {n m : Nat} (hnm : n <= m) :
     QInterval.ContainsInterval
       (nonincreasingDarbouxDyadicStage F hinterval
-        (fun k => evalPrecision k) (stages n))
+        (fun _ => evalPrecision n) (stages n))
       (nonincreasingDarbouxDyadicStage F hinterval
-        (fun k => evalPrecision k) (stages m)) := by
+        (fun _ => evalPrecision m) (stages m)) := by
   have hprecision_stage := nonincreasingDarbouxStage_contains_of_precision F
     (RationalPartition.uniform F.lower F.upper (2 ^ stages n)
-      (by positivity) hinterval)
+      (Nat.pow_pos (by omega : 0 < 2)) hinterval)
     (evalPrecision n) (evalPrecision m) (hprecision hnm)
   have hmesh := endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_stage
     F hF hinterval (evalPrecision m) (hstage hnm)
   have hcombined :
       QInterval.ContainsInterval
         (nonincreasingDarbouxDyadicStage F hinterval
-          (fun k => evalPrecision k) (stages n))
+          (fun _ => evalPrecision n) (stages n))
         (nonincreasingDarbouxDyadicStage F hinterval
           (fun _ => evalPrecision m) (stages n)) := by
     simpa [nonincreasingDarbouxDyadicStage] using hprecision_stage
@@ -9117,13 +9263,14 @@ theorem endpointOrderedNondecreasingDarbouxStage_contains_uniform_double
         (RationalPartition.uniform F.lower F.upper pieces hpieces hab) prec)
       (nondecreasingDarbouxStage F
         (RationalPartition.uniform F.lower F.upper (pieces * 2)
-          (Nat.mul_pos hpieces (by norm_num)) hab) prec) := by
+          (Nat.mul_pos hpieces (by omega)) hab) prec) := by
   let coarse := RationalPartition.uniform F.lower F.upper pieces hpieces hab
   let fine := RationalPartition.uniform F.lower F.upper (pieces * 2)
-    (Nat.mul_pos hpieces (by norm_num)) hab
+    (Nat.mul_pos hpieces (by omega)) hab
   let R : RationalPartition.Refines fine coarse :=
-    RationalPartition.uniformRefinesRightCertificate F.lower F.upper pieces 2
-      hpieces (by norm_num) hab
+    RationalPartition.uniformRefinesRightCertificate
+      (a := F.lower) (b := F.upper) pieces 2
+      hpieces (by omega) hab
   apply R.boundIntegralSum_contains_of_blockwise
   intro i hi
   have hindex : R.index i = i * 2 := by
@@ -9131,39 +9278,80 @@ theorem endpointOrderedNondecreasingDarbouxStage_contains_uniform_double
   have hindex_next : R.index (i + 1) = (i + 1) * 2 := by
     rfl
   have hblock : R.indexBlock i = [i * 2, i * 2 + 1] := by
-    simp [RationalPartition.Refines.indexBlock, hindex, hindex_next]
-    omega
+    simp [RationalPartition.Refines.indexBlock, hindex, hindex_next, coarse,
+      Nat.mul_add, Nat.add_mul, List.range']
   rw [hblock]
   simp only [List.foldl_cons, List.foldl_nil]
   have hi0 : i * 2 < fine.pieces :=
     R.indexBlock_mem_fine hi (by simp [hblock])
   have hi1 : i * 2 + 1 < fine.pieces :=
     R.indexBlock_mem_fine hi (by simp [hblock])
+  have hi1' : i * 2 + 1 < pieces * 2 := by
+    change i * 2 + 1 < pieces * 2 at hi1
+    exact hi1
+  have hmesh : mesh F.lower F.upper (pieces * 2) =
+      mesh F.lower F.upper pieces / 2 :=
+    mesh_refine_mul_right hpieces (by omega)
+  have hpoint0 :
+      (RationalPartition.uniform F.lower F.upper (pieces * 2)
+        (Nat.mul_pos hpieces (by omega)) hab).point (i * 2) =
+        (RationalPartition.uniform F.lower F.upper pieces hpieces hab).point i := by
+    exact RationalPartition.uniform_refines_right hpieces (by omega) hab
+  have hpoint2 :
+      (RationalPartition.uniform F.lower F.upper (pieces * 2)
+        (Nat.mul_pos hpieces (by omega)) hab).point (i * 2 + 1 + 1) =
+        (RationalPartition.uniform F.lower F.upper pieces hpieces hab).point (i + 1) := by
+    simpa [Nat.mul_add, Nat.add_mul] using
+      (RationalPartition.uniform_refines_right (a := F.lower) (b := F.upper)
+        (m := pieces) (n := 2) (i := i + 1) hpieces (by omega) hab)
+  have hi' : i < pieces := by
+    change i < pieces at hi
+    exact hi
+  have hp0 : fine.point (i * 2) = coarse.point i :=
+    R.point_eq i (Nat.le_of_lt hi)
+  have hp2 : fine.point ((i + 1) * 2) = coarse.point (i + 1) :=
+    R.point_eq (i + 1) (Nat.succ_le_of_lt hi)
+  have hp2' : fine.point (i * 2 + 1 + 1) = coarse.point (i + 1) := by
+    rw [show i * 2 + 1 + 1 = (i + 1) * 2 by omega, hp2]
   have hcoarse := endpointOrderedNondecreasing_splitScaledEndpointRange_contains
-    F hF (coarse.point i) (fine.point (i * 2 + 1))
-      (coarse.point (i + 1))
+    F hF (a := coarse.point i) (b := fine.point (i * 2 + 1))
+      (c := coarse.point (i + 1))
       (by
-        exact (coarse.cell i hi).contains_inDomain
-          (by simp [RationalSubinterval.contains]))
+        apply (coarse.cell i hi).contains_inDomain
+        constructor
+        · exact Rat.le_refl
+        · exact (coarse.cell i hi).ordered)
       (by
-        exact (fine.cell (i * 2 + 1) hi1).contains_inDomain
-          (by simp [RationalSubinterval.contains]))
+        apply (fine.cell (i * 2 + 1) hi1).contains_inDomain
+        constructor
+        · exact Rat.le_refl
+        · exact (fine.cell (i * 2 + 1) hi1).ordered)
       (by
-        exact (coarse.cell (i + 1) (Nat.succ_le_of_lt hi)).contains_inDomain
-          (by simp [RationalSubinterval.contains]))
+        apply (coarse.cell i hi).contains_inDomain
+        constructor
+        · exact (coarse.cell i hi).ordered
+        · exact Rat.le_refl)
       (by
-        simpa [coarse, fine, RationalPartition.uniform, leftPoint]
-          using (fine.monotone (i * 2) (i * 2 + 1) (by omega)
-            (by omega)))
+        calc
+          coarse.point i = fine.point (i * 2) :=
+            (R.point_eq i (Nat.le_of_lt hi)).symm
+          _ <= fine.point (i * 2 + 1) :=
+            fine.monotone _ _ (by omega) (by omega))
       (by
-        simpa [coarse, fine, RationalPartition.uniform, leftPoint]
-          using (fine.monotone (i * 2 + 1) ((i + 1) * 2) (by omega)
-            (by omega)))
+        calc
+          fine.point (i * 2 + 1) <= fine.point ((i + 1) * 2) :=
+            fine.monotone _ _ (by omega) (by omega)
+          _ = coarse.point (i + 1) :=
+            R.point_eq (i + 1) (Nat.succ_le_of_lt hi))
       prec
-  simpa [coarse, fine, R, RationalPartition.boundIntegralTerm,
-    RationalSubinterval.scaleBound, nondecreasingDarbouxRange,
-    RationalSubinterval.width, RationalPartition.uniform_cell_width,
-    RationalPartition.uniform, leftPoint, Nat.mul_add, Nat.add_mul] using hcoarse
+  simp only [RationalPartition.boundIntegralTerm, dif_pos hi, dif_pos hi0,
+    dif_pos hi1, RationalSubinterval.scaleBound, RationalSubinterval.width,
+    RationalPartition.cell, nondecreasingDarbouxRange,
+    QInterval.zero_addInterval]
+  simpa [coarse, fine, RationalPartition.uniform, hpoint0, hpoint2,
+    hp0, hp2, hp2', mesh, leftPoint, Rat.div_def, Rat.mul_assoc,
+    Rat.mul_comm, Rat.inv_mul_rev, QInterval.ContainsInterval,
+    QInterval.scaleByRat] using hcoarse
 
 /-! The static dyadic instance of the monotone Darboux stage. -/
 def nondecreasingDarbouxDyadicStage (F : FunctionOnInterval)
@@ -9194,7 +9382,7 @@ theorem endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage
       by_cases hnm' : n <= m
       · have hprev := ih hnm'
         have hstep := endpointOrderedNondecreasingDarbouxStage_contains_uniform_double
-          F hF (2 ^ m) (by positivity) hinterval prec
+          F hF (2 ^ m) (Nat.pow_pos (by omega : 0 < 2)) hinterval prec
         have hstep' :
             QInterval.ContainsInterval
               (nondecreasingDarbouxDyadicStage F hinterval
@@ -9225,8 +9413,9 @@ theorem endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage_of_prec
       (nondecreasingDarbouxDyadicStage F hinterval evalPrecision m) := by
   have hprecision_stage := nondecreasingDarbouxStage_contains_of_precision F
     (RationalPartition.uniform F.lower F.upper (2 ^ n)
-      (by positivity) hinterval)
-    (evalPrecision n) (evalPrecision m) (hprecision hnm)
+      (Nat.pow_pos (by omega : 0 < 2)) hinterval)
+    (evalPrecision (stages n)) (evalPrecision (stages m))
+      (hprecision (hstage hnm))
   have hmesh := endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage
     F hF hinterval (evalPrecision m) hnm
   have hcombined :
@@ -9252,19 +9441,19 @@ theorem endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_scheduled_sta
     {n m : Nat} (hnm : n <= m) :
     QInterval.ContainsInterval
       (nondecreasingDarbouxDyadicStage F hinterval
-        (fun k => evalPrecision k) (stages n))
+        (fun _ => evalPrecision n) (stages n))
       (nondecreasingDarbouxDyadicStage F hinterval
-        (fun k => evalPrecision k) (stages m)) := by
+        (fun _ => evalPrecision m) (stages m)) := by
   have hprecision_stage := nondecreasingDarbouxStage_contains_of_precision F
     (RationalPartition.uniform F.lower F.upper (2 ^ stages n)
-      (by positivity) hinterval)
+      (Nat.pow_pos (by omega : 0 < 2)) hinterval)
     (evalPrecision n) (evalPrecision m) (hprecision hnm)
   have hmesh := endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage
     F hF hinterval (evalPrecision m) (hstage hnm)
   have hcombined :
       QInterval.ContainsInterval
         (nondecreasingDarbouxDyadicStage F hinterval
-          (fun k => evalPrecision k) (stages n))
+          (fun _ => evalPrecision n) (stages n))
         (nondecreasingDarbouxDyadicStage F hinterval
           (fun _ => evalPrecision m) (stages n)) := by
     simpa [nondecreasingDarbouxDyadicStage] using hprecision_stage
@@ -9897,20 +10086,20 @@ def MonotoneDarbouxSchedule.ofDyadicEndpointOrdered
     (hwidths : RealRaw.WidthsShrinkToZero
       (monotoneDarbouxScheduleCompute F hinterval
         (fun n => 2 ^ n) evalPrecision
-        (fun n => by positivity))) :
+        (fun n => Nat.pow_pos (by omega : 0 < 2)))) :
     MonotoneDarbouxSchedule F hregular hF.toNondecreasing hinterval where
   pieces := fun n => 2 ^ n
   evalPrecision := evalPrecision
   pieces_pos := by
     intro n
-    positivity
+    exact Nat.pow_pos (by omega : 0 < 2)
   input_budget := hbudget
   nested := by
     intro n m hnm
     have h := endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage_of_precision_mono
       F hF hinterval evalPrecision hprecision hnm
     simpa [monotoneDarbouxScheduleCompute,
-      nondecreasingDarbouxDyadicStage] using h
+      nondecreasingDarbouxDyadicStage] using And.intro h.1 h.2
   widths_shrink := by
     simpa using hwidths
 
@@ -9932,7 +10121,7 @@ theorem nondecreasingDarbouxDyadicSchedule_widths_shrink_of_budget
     RealRaw.WidthsShrinkToZero
       (monotoneDarbouxScheduleCompute F hinterval
         (fun n => 2 ^ n) evalPrecision
-        (fun n => by positivity)) := by
+        (fun n => Nat.pow_pos (by omega : 0 < 2))) := by
   intro eps
   rcases hbudget eps with ⟨N, hN⟩
   refine ⟨N, ?_⟩
@@ -9981,14 +10170,14 @@ theorem nondecreasingDarbouxScheduledSchedule_widths_shrink_of_budget
     RealRaw.WidthsShrinkToZero
       (monotoneDarbouxScheduleCompute F hinterval
         (fun n => 2 ^ stages n) evalPrecision
-        (fun n => by positivity)) := by
+        (fun n => Nat.pow_pos (by omega : 0 < 2))) := by
   intro eps
   rcases hbudget eps with ⟨N, hN⟩
   refine ⟨N, ?_⟩
   intro n hn
   exact Rat.le_trans
     (nondecreasingDarbouxStage_width_le_of_uniform_input_budget
-      F hregular (2 ^ stages n) (by positivity) hinterval
+      F hregular (2 ^ stages n) (Nat.pow_pos (by omega : 0 < 2)) hinterval
       (evalPrecision n) (hinput n))
     (hN n hn)
 
@@ -10012,14 +10201,14 @@ def MonotoneDarbouxSchedule.ofScheduledEndpointOrderedOfBudget
     evalPrecision := evalPrecision
     pieces_pos := by
       intro n
-      positivity
+      exact Nat.pow_pos (by omega : 0 < 2)
     input_budget := hinput
     nested := by
       intro n m hnm
       have h := endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_scheduled_stage
         F hF hinterval stages evalPrecision hstage hprecision hnm
       simpa [monotoneDarbouxScheduleCompute,
-        nondecreasingDarbouxDyadicStage] using h
+        nondecreasingDarbouxDyadicStage] using And.intro h.1 h.2
     widths_shrink := nondecreasingDarbouxScheduledSchedule_widths_shrink_of_budget
       hregular hinterval stages evalPrecision hinput hbudget }
 
@@ -12834,14 +13023,14 @@ def NonincreasingDarbouxSchedule.ofDyadicEndpointOrderedOfBudget
   evalPrecision := evalPrecision
   pieces_pos := by
     intro n
-    positivity
+    exact Nat.pow_pos (by omega : 0 < 2)
   input_budget := hinput
   nested := by
     intro n m hnm
     have h := endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_stage_of_precision_mono
       F hF hinterval evalPrecision hprecision hnm
     simpa [nonincreasingDarbouxScheduleCompute,
-      nonincreasingDarbouxDyadicStage] using h
+      nonincreasingDarbouxDyadicStage] using And.intro h.1 h.2
   widths_shrink := by
     intro eps
     rcases hbudget eps with ⟨N, hN⟩
