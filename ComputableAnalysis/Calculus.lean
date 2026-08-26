@@ -8757,6 +8757,44 @@ theorem endpointOrderedNonincreasingDarbouxStage_contains_uniform_double
     RationalSubinterval.width, RationalPartition.uniform_cell_width,
     RationalPartition.uniform, leftPoint, Nat.mul_add, Nat.add_mul] using hcoarse
 
+def nonincreasingDarbouxDyadicStage (F : FunctionOnInterval)
+    (hinterval : F.lower <= F.upper) (evalPrecision : Nat -> Nat)
+    (n : Nat) : QInterval :=
+  let P := RationalPartition.uniform F.lower F.upper (2 ^ n)
+    (Nat.pow_pos (by omega : 0 < 2)) hinterval
+  nonincreasingDarbouxStage F P (evalPrecision n)
+
+theorem endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_stage
+    (F : FunctionOnInterval)
+    (hF : EndpointOrderedNonincreasingOnInterval F)
+    (hinterval : F.lower <= F.upper) (prec : Nat)
+    {n m : Nat} (hnm : n <= m) :
+    QInterval.ContainsInterval
+      (nonincreasingDarbouxDyadicStage F hinterval (fun _ => prec) n)
+      (nonincreasingDarbouxDyadicStage F hinterval (fun _ => prec) m) := by
+  induction m generalizing n with
+  | zero =>
+      have hn : n = 0 := by omega
+      subst n
+      exact QInterval.containsInterval_refl _
+  | succ m ih =>
+      by_cases hnm' : n <= m
+      · have hprev := ih hnm'
+        have hstep := endpointOrderedNonincreasingDarbouxStage_contains_uniform_double
+          F hF (2 ^ m) (by positivity) hinterval prec
+        have hstep' :
+            QInterval.ContainsInterval
+              (nonincreasingDarbouxDyadicStage F hinterval
+                (fun _ => prec) m)
+              (nonincreasingDarbouxDyadicStage F hinterval
+                (fun _ => prec) (m + 1)) := by
+          simpa [nonincreasingDarbouxDyadicStage, Nat.pow_succ, Nat.mul_comm]
+            using hstep
+        exact hprev.trans hstep'
+      · have hn : n = m + 1 := by omega
+        subst n
+        exact QInterval.containsInterval_refl _
+
 /-! With the stronger coordinatewise certificate, the endpoint range upgrades
 from overlap to genuine containment.  This is the exact point at which the
 stronger monotonicity contract becomes useful to Darboux-sum enclosure proofs. -/
