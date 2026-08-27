@@ -1980,6 +1980,43 @@ theorem sinWeightedPartial_eq_mul_cosPartial (z : QComplex) (n : Nat) :
       simp [QComplex.mul, QComplex.add, QComplex.zero]
       grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
 
+def cosWeightedPartial (z : QComplex) (n : Nat) : QComplex :=
+  (List.range n).foldl
+    (fun acc k => QComplex.add acc
+      (QComplex.scaleRat (((2 * k + 2 : Nat) : Rat))
+        (cosTerm z (k + 1))))
+    QComplex.zero
+
+theorem cosWeightedPartial_eq_neg_mul_sinPartial (z : QComplex) (n : Nat) :
+    cosWeightedPartial z n =
+      QComplex.neg (QComplex.mul z (sinPartial z n)) := by
+  induction n with
+  | zero =>
+      simp [cosWeightedPartial, sinPartial, QComplex.mul, QComplex.neg,
+        QComplex.zero]
+      grind
+  | succ n ih =>
+      simp [cosWeightedPartial, sinPartial, List.range_succ,
+        List.foldl_append]
+      have ih' :
+          (List.range n).foldl
+              (fun acc (k : Nat) => QComplex.add acc
+                (QComplex.scaleRat (2 * (k : Rat) + 2)
+                  (cosTerm z (k + 1)))) QComplex.zero =
+            QComplex.neg (QComplex.mul z
+              ((List.range n).foldl
+                (fun acc k => QComplex.add acc (sinTerm z k)) QComplex.zero)) := by
+        simpa [cosWeightedPartial, sinPartial, Rat.natCast_mul,
+          Rat.natCast_add] using ih
+      have hterm :
+          QComplex.scaleRat (2 * (n : Rat) + 2) (cosTerm z (n + 1)) =
+            QComplex.neg (QComplex.mul z (sinTerm z n)) := by
+        simpa [Rat.natCast_mul, Rat.natCast_add] using
+          (cosTerm_succ_derivative_relation z n)
+      rw [ih', hterm]
+      simp [QComplex.mul, QComplex.add, QComplex.neg, QComplex.zero]
+      grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
 def errorBox (center : QComplex) (eps : QPos) : QBox :=
   { lo := { re := center.re - eps.val, im := center.im - eps.val },
     hi := { re := center.re + eps.val, im := center.im + eps.val } }

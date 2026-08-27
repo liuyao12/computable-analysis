@@ -3932,6 +3932,8 @@ potential-infinity precision schedule.
   induction, that the weighted sine prefix is exactly `z` times the cosine
   prefix.  This is the finite-sum bridge before any tail or infinite
   termwise-differentiation theorem.
+  The symmetric `ComplexSeries.cosWeightedPartial_eq_neg_mul_sinPartial`
+  now supplies the cosine-prefix side, including the sign and index shift.
 - The same formal layer now covers the coefficient-shift identities for trig
   and hyperbolic streams:
   `sin -> cos`, `cos -> -sin`, `sinh -> cosh`, and
