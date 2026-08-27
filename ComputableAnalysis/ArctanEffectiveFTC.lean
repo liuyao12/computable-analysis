@@ -324,6 +324,28 @@ theorem arctanKernelBound_ordered
     C.ordered (by exact Rat.le_refl)
   grind
 
+/-! The arctangent kernel's endpoint box is exactly the endpoint method for a
+nonincreasing derivative.  Exposing this adapter lets concave FTC clients
+consume the same finite bound without duplicating its order proof. -/
+def arctanKernelMonotoneDerivativeBoundMethod
+    (C : RationalSubinterval 0 1) :
+    MonotoneDerivativeBoundMethod arctanKernelRaw C where
+  kind := MonotonicityKind.nonincreasing
+  evalPrecision := fun n => n
+  domain_on := by
+    intro x hx
+    trivial
+  endpoint_bound_ordered := by
+    intro n
+    simpa [endpointDerivativeBound, arctanKernelBound,
+      arctanKernelRaw, RealFunRaw.exact] using
+      arctanKernelBound_ordered C n
+  endpoint_contains_values := by
+    intro n x hx
+    simpa [endpointDerivativeBound, arctanKernelBound,
+      arctanKernelRaw, RealFunRaw.exact] using
+      arctanKernelBound_contains C n hx
+
 def arctanKernelPaddedBound (C : RationalSubinterval 0 1)
     (δ : Rat) (n : Nat) : QInterval :=
   { lo := ArctanGeometry.integralKernel C.lower -
