@@ -463,6 +463,19 @@ theorem piecewiseRectangleSampleAreaSum_contains
             Rat.mul_le_mul_of_nonneg_left hcell.2 hdomain
           exact ⟨rat_add_le_add hlo htail.1, rat_add_le_add hhi htail.2⟩
 
+theorem PiecewiseRectangleCertificate.sampleAreaSum_contains
+    (certificate : PiecewiseRectangleCertificate) (values : List Rat)
+    (hlength : values.length = certificate.cells.length)
+    (hvalues : ∀ I v, (I, v) ∈ certificate.cells.zip values →
+      I.lo ≤ v ∧ v ≤ I.hi) :
+    certificate.lowerSum ≤
+        piecewiseRectangleSampleAreaSum certificate.domainWidth
+          certificate.cells values ∧
+      piecewiseRectangleSampleAreaSum certificate.domainWidth
+          certificate.cells values ≤ certificate.upperSum := by
+  exact piecewiseRectangleSampleAreaSum_contains certificate.domainWidth
+    certificate.cells values certificate.domain_nonneg hlength hvalues
+
 theorem PiecewiseRectangleCertificate.gap_eq_width_sum
     (certificate : PiecewiseRectangleCertificate) :
     certificate.upperSum - certificate.lowerSum =
