@@ -4144,7 +4144,9 @@ arguments.
   `polygonalPolynomialIntegralRaw` now exposes this finite primitive fold as
   a valid `ComplexRaw`, with an endpoint-equivalence theorem for open paths.
   `polygonalPolynomialIntegralRaw_split_at` now transports the same additivity
-  to the raw integral interface at an arbitrary intermediate vertex.
+  to the raw integral interface at an arbitrary intermediate vertex, and
+  `polygonalPolynomialIntegralRaw_split_at_add` exposes it directly as the sum
+  of the two certified `ComplexRaw` path integrals.
   This is an exact rational-complex integral evaluator, not an appeal to a
   completed complex path space.
   Its closed-path specialization

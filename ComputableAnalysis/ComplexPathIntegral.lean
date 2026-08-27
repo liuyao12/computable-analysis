@@ -523,6 +523,37 @@ theorem polygonalPolynomialIntegralRaw_split_at
   rw [polygonalPolynomialIntegralRaw, polygonalPolynomialPrimitiveTo_split_at]
   exact ComplexRaw.equiv_refl _ (ComplexRaw.ofQComplex_valid _)
 
+theorem polygonalPolynomialIntegralRaw_split_at_add
+    (coefficients : List QComplex) (start middle : QComplex)
+    (pre suf : List QComplex) :
+    (polygonalPolynomialIntegralRaw coefficients start
+      (pre ++ [middle] ++ suf)).Equiv
+      (ComplexRaw.add
+        (polygonalPolynomialIntegralRaw coefficients start (pre ++ [middle]))
+        (polygonalPolynomialIntegralRaw coefficients middle suf)) := by
+  intro n
+  apply (ComplexRaw.compareAt_overlap_iff
+    (polygonalPolynomialIntegralRaw coefficients start
+      (pre ++ [middle] ++ suf))
+    (ComplexRaw.add
+      (polygonalPolynomialIntegralRaw coefficients start (pre ++ [middle]))
+      (polygonalPolynomialIntegralRaw coefficients middle suf)) n n).2
+  rw [polygonalPolynomialIntegralRaw,
+    polygonalPolynomialPrimitiveTo_split_at]
+  change QBox.Overlaps
+    (QBox.point
+      (QComplex.add
+        (polygonalPolynomialPrimitiveTo coefficients start (pre ++ [middle]))
+        (polygonalPolynomialPrimitiveTo coefficients middle suf)))
+    (QBox.add
+      (QBox.point
+        (polygonalPolynomialPrimitiveTo coefficients start (pre ++ [middle])))
+      (QBox.point
+        (polygonalPolynomialPrimitiveTo coefficients middle suf)))
+  rw [QBox.add_point]
+  unfold QBox.Overlaps
+  exact ⟨QComplex.le_refl _, QComplex.le_refl _⟩
+
 theorem polygonalPolynomialIntegralRaw_closed_equiv_zero
     (coefficients : List QComplex) (start : QComplex)
     (vertices : List QComplex) :
