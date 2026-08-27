@@ -372,6 +372,25 @@ main complex-valued functions:
 \lean{ComputableAnalysis.FormalPowerSeries.coshCoeff_eq_of_secondDerivative}
 \leanok
 
+These identities give the chapter's finite initial-value principle.  A formal
+solution is not identified by appealing to a completed function space: its
+next rational coefficient is forced by the preceding one and the nonzero
+integer multiplier introduced by coefficient shift.  Thus
+
+\begin{verbatim}
+initial coefficient(s) + coefficient ODE
+        -> induction over rational coefficients
+        -> unique formal stream
+        -> interval evaluator and tail certificate
+        -> function-level calculus theorem
+\end{verbatim}
+
+The last arrow is deliberately separate.  Coefficient uniqueness supplies the
+algebraic candidate; an effective derivative or FTC certificate supplies its
+meaning as a shrinking interval computation on a rational domain.  This is the
+point at which the project replaces an appeal to completeness with explicit
+computational evidence.
+
 The first worked trigonometric prefix closes this loop.  The finite sine
 prefix is a rational polynomial: its coefficient shift supplies the cosine
 derivative, and its effective FTC certificate evaluates the corresponding
