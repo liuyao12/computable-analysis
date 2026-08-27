@@ -986,8 +986,17 @@ theorem rationalHalfAngleTangentInterval_width_le_of_box_widths
         (C.hi - C.lo) * ((1 + C.lo) * (1 + C.hi)) :=
       Rat.le_trans hsecond0 hsecond1
     have hsum := rat_add_le_add hfirst hsecond
-    simpa [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
-      Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm] using hsum
+    calc
+      S.hi * (1 + C.hi) - S.lo * (1 + C.lo) =
+          (S.hi - S.lo) * (1 + C.hi) + S.lo * (C.hi - C.lo) := by
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+          Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+      _ <= 2 * (S.hi - S.lo) * ((1 + C.lo) * (1 + C.hi)) +
+          (C.hi - C.lo) * ((1 + C.lo) * (1 + C.hi)) := hsum
+      _ = (2 * (S.hi - S.lo) + (C.hi - C.lo)) *
+          ((1 + C.lo) * (1 + C.hi)) := by
+        grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm,
+          Rat.add_assoc, Rat.add_comm]
   apply rationalHalfAngleTangentInterval_width_le_of_margin hC
     (2 * S.width + C.width)
   simpa [QInterval.width] using hCmargin
