@@ -91,6 +91,7 @@ The finite algebraic core is explicit in Lean:
 \lean{ComputableAnalysis.LinearODE.chronologicalProduct_rowAbsSum_le}
 \lean{ComputableAnalysis.LinearODE.chronologicalProduct_rowAbsSum_le_pow}
 \lean{ComputableAnalysis.LinearODE.chronologicalProduct_columnAbsSum_le_pow}
+\lean{ComputableAnalysis.LinearODE.chronologicalStepProduct_columnAbsSum_le_pow}
 \lean{ComputableAnalysis.LinearODE.chronologicalProduct_stateAbsSum_le}
 \lean{ComputableAnalysis.LinearODE.solvesHomogeneousRecurrence_eq_homogeneousTrajectory}
 \lean{ComputableAnalysis.LinearODE.solvesHomogeneousRecurrence_zero}
@@ -175,6 +176,9 @@ Consequently, a chronological transition with column bound \(c\) transports
 any rational state with total absolute size \(V\) into a state of size at most
 \(c^N V\) after \(N\) steps.  This is the finite stability estimate that the
 continuous provider must eventually refine with discretization and tail error.
+The same estimate is now available for a transition beginning at any mesh
+index, so local interval certificates compose without reindexing the system
+back to zero.
 
 The forcing term is handled by a literal finite Duhamel sum:
 

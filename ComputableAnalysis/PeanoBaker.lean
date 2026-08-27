@@ -752,6 +752,37 @@ def chronologicalStepProduct {dimension : Nat} (S : Nat -> RatMatrix dimension)
       matrixMul (S (start + steps))
         (chronologicalStepProduct S start steps) := rfl
 
+theorem chronologicalStepProduct_columnAbsSum_le_pow {dimension : Nat}
+    (S : Nat -> RatMatrix dimension) (c : Rat)
+    (hcolumn : forall n j, matrixColumnAbsSum (S n) j <= c)
+    (hc : 0 <= c) :
+    forall start steps j,
+      matrixColumnAbsSum (chronologicalStepProduct S start steps) j <= c ^ steps
+  | start, 0, j => by
+      rw [chronologicalStepProduct_zero, matrixColumnAbsSum_identity, Rat.pow_zero]
+      exact Rat.le_refl
+  | start, steps + 1, j => by
+      rw [chronologicalStepProduct_succ]
+      have hmul := matrixMul_columnAbsSum_le_of_column_bound
+        (S (start + steps)) (chronologicalStepProduct S start steps) c
+        (fun k => hcolumn (start + steps) k) j
+      have hprevious :
+          matrixColumnAbsSum (chronologicalStepProduct S start steps) j <=
+            c ^ steps :=
+        chronologicalStepProduct_columnAbsSum_le_pow S c hcolumn hc
+          start steps j
+      calc
+        matrixColumnAbsSum
+            (matrixMul (S (start + steps))
+              (chronologicalStepProduct S start steps)) j <=
+            c * matrixColumnAbsSum
+              (chronologicalStepProduct S start steps) j := hmul
+        _ <= c * c ^ steps :=
+          Rat.mul_le_mul_of_nonneg_left hprevious hc
+        _ = c ^ (steps + 1) := by
+          rw [Rat.pow_succ]
+          exact Rat.mul_comm _ _
+
 /-- Exact composition of time-shifted sampled transitions.  The transition
 over the later block occurs on the left, as required by chronological time
 ordering.  This is the finite semigroup law behind the future continuous
