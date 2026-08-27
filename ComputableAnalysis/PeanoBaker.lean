@@ -2058,6 +2058,19 @@ theorem chronologicalStepProduct_rowAbsSum_le {dimension : Nat}
         _ = ratProduct (fun k => bound (start + k)) (steps + 1) := by
           rw [ratProduct]
 
+theorem chronologicalStepProduct_rowAbsSum_le_pow {dimension : Nat}
+    (S : Nat -> RatMatrix dimension) (c : Rat)
+    (hbound : forall n i, matrixRowAbsSum (S n) i <= c)
+    (hc : 0 <= c) :
+    forall start steps i,
+      matrixRowAbsSum (chronologicalStepProduct S start steps) i <= c ^ steps := by
+  intro start steps i
+  have hgeneral := chronologicalStepProduct_rowAbsSum_le S (fun _ => c)
+    hbound (fun _ => hc) start steps i
+  rw [show (fun k => (fun _ => c) (start + k)) = (fun _ => c) from rfl,
+    ratProduct_const_eq_pow c steps] at hgeneral
+  exact hgeneral
+
 /-- The general sampled transition specializes exactly to the
 Peano--Baker chronological product for Euler increments. -/
 theorem chronologicalStepProduct_eulerIncrement {dimension : Nat}
