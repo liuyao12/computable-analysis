@@ -855,6 +855,20 @@ private theorem rat_div_nonneg_of_pos {a b : Rat}
   rw [Rat.div_def]
   exact Rat.mul_nonneg ha (Rat.le_of_lt (Rat.inv_pos.2 hb))
 
+/-! Clearing two positive rational denominators is a reusable normalization
+step for interval widths and margins. -/
+theorem rat_sub_div_mul_mul_of_pos
+    {a b x y : Rat} (hx : 0 < x) (hy : 0 < y) :
+    (a / x - b / y) * (x * y) = a * y - b * x := by
+  have hxi : x⁻¹ * x = 1 := Rat.inv_mul_cancel _ (Rat.ne_of_gt hx)
+  have hyi : y⁻¹ * y = 1 := Rat.inv_mul_cancel _ (Rat.ne_of_gt hy)
+  rw [Rat.div_def, Rat.div_def]
+  calc
+    (a * x⁻¹ - b * y⁻¹) * (x * y) =
+        a * (x⁻¹ * x) * y - b * (y⁻¹ * y) * x := by
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    _ = a * y - b * x := by rw [hxi, hyi]; grind
+
 theorem rationalHalfAngleTangentInterval_subinterval
     {S C : QInterval}
     (hS : subintervalOf S 0 1) (hC : subintervalOf C 0 1) :
