@@ -128,6 +128,38 @@ theorem gaussianEvenIntegralPrefix_interval_width
   unfold gaussianEvenIntegralPrefix_interval QInterval.width
   grind [Rat.sub_eq_add_neg]
 
+theorem gaussianEvenIntegralTailMajorant_mono
+    (radius : Rat) (start : Nat) :
+    forall terms₁ terms₂,
+      terms₁ <= terms₂ ->
+        gaussianEvenIntegralTailMajorant radius start terms₁ <=
+          gaussianEvenIntegralTailMajorant radius start terms₂ := by
+  intro terms₁ terms₂ hterms
+  obtain ⟨extra, rfl⟩ := Nat.exists_eq_add_of_le hterms
+  induction extra with
+  | zero =>
+      simp
+  | succ extra ih =>
+      rw [show terms₁ + (extra + 1) = (terms₁ + extra) + 1 by omega,
+        gaussianEvenIntegralTailMajorant]
+      calc
+        gaussianEvenIntegralTailMajorant radius start terms₁ <=
+            gaussianEvenIntegralTailMajorant radius start (terms₁ + extra) :=
+              ih (by omega)
+        _ <= gaussianEvenIntegralTailMajorant radius start (terms₁ + extra) +
+            qabs (gaussianEvenIntegralTerm
+              (start + (terms₁ + extra)) radius) := by
+          grind [qabs_nonneg]
+
+theorem gaussianEvenIntegralPrefix_interval_contains_future
+    (radius : Rat) (start terms₁ terms₂ : Nat) (hterms : terms₁ <= terms₂) :
+    (gaussianEvenIntegralPrefix_interval radius start terms₂).ContainsInterval
+      (gaussianEvenIntegralPrefix_interval radius start terms₁) := by
+  have htail := gaussianEvenIntegralTailMajorant_mono radius start
+    terms₁ terms₂ hterms
+  unfold gaussianEvenIntegralPrefix_interval QInterval.ContainsInterval
+  constructor <;> grind
+
 theorem gaussianEvenIntegralPrefix_stage_four :
     gaussianEvenIntegralPrefix 4 1 = 52 / 35 := by
   native_decide
