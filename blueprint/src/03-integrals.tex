@@ -583,11 +583,15 @@ cell widths <= e  ->  sum widths = width(sum) <= m*e
 This is the error-budget rule for a finite turning-point decomposition.  It
 does not claim that the assembled object is an infinite integral; it only
 exposes the finite budget that a later shrinking schedule must consume.
+The adaptive form replaces the common (e) by a bound (e_k) for each cell
+and sums the (e_k).  This is the natural contract when different pieces
+have different evaluators or different local conditioning.
 
 \lean{ComputableAnalysis.Integral.finiteRawSum}
 \lean{ComputableAnalysis.Integral.finiteRawSum_valid}
 \lean{ComputableAnalysis.Integral.finiteRawSum_compute_width_eq_foldl}
 \lean{ComputableAnalysis.Integral.finiteRawSum_compute_width_le_of_forall}
+\lean{ComputableAnalysis.Integral.finiteRawSum_compute_width_le_of_bounds}
 \lean{ComputableAnalysis.Integral.rawFold_compute_width_eq_foldl}
 \lean{ComputableAnalysis.Integral.finiteRawSum_append_equiv}
 \lean{ComputableAnalysis.Integral.FiniteRawListLe}

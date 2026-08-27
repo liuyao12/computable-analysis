@@ -6918,6 +6918,33 @@ theorem finiteRawSum_compute_width_le_of_forall
   intro x hx
   exact hbound x hx
 
+theorem finiteRawSum_compute_width_le_of_bounds
+    (xs : List RealRaw) (n : Nat) (bound : RealRaw -> Rat)
+    (hbound : forall x, x ∈ xs -> (x.compute n).width <= bound x) :
+    ((finiteRawSum xs).compute n).width <=
+      (xs.map bound).foldl (fun total r => total + r) 0 := by
+  rw [finiteRawSum_compute_width_eq_foldl]
+  induction xs with
+  | nil => simp
+  | cons x xs ih =>
+      have hx := hbound x (by simp)
+      have htail : forall y, y ∈ xs -> (y.compute n).width <= bound y := by
+        intro y hy
+        exact hbound y (by simp [hy])
+      have hrest := ih htail
+      simp only [List.map_cons, List.foldl]
+      rw [RationalPartition.rat_add_fold_initial]
+      simp only [Rat.zero_add]
+      calc
+        (x.compute n).width +
+            List.foldl (fun total x => total + (x.compute n).width) 0 xs <=
+            bound x + (xs.map bound).foldl (fun total r => total + r) 0 := by
+          exact _root_.ComputableAnalysis.rat_add_le_add hx hrest
+        _ = (xs.map bound).foldl (fun total r => total + r) (bound x) := by
+          symm
+          exact RationalPartition.rat_add_fold_initial
+            (xs.map bound) (fun r => r) (bound x)
+
 /-! The same width identity applies to a left-associated raw fold.  The
 piecewise integral API uses this form directly, while the canonical
 `finiteRawSum` form above is preferable for list transport. -/
