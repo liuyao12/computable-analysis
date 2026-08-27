@@ -89,6 +89,57 @@ structure RationalHalfAngleMarginCertificate
     rationalCircleSin witness / (1 + rationalCircleCos witness) + epsilon <=
       (dyadicTangentBoxAt B precision depth k hk).hi
 
+/-! The box-width form is the preferred provider interface.  The cosine input
+is a singleton rational box, so the generic half-angle modulus reduces the
+needed tangent-width proof to the sine-box width budget. -/
+def RationalHalfAngleMarginCertificate.of_box_widths
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {precision depth k : Nat} (hk : k < 2 ^ depth)
+    (u : Rat) (hu0 : 0 <= u) (hu1 : u <= 1)
+    (hsine : (dyadicNestedRadicalTableAt precision depth k).1.lo <=
+        rationalCircleSin u /\
+      rationalCircleSin u <=
+        (dyadicNestedRadicalTableAt precision depth k).1.hi)
+    (epsilon : Rat)
+    (hboxWidth :
+      2 * (dyadicNestedRadicalTableAt precision depth k).1.width <= epsilon)
+    (hleft :
+      (dyadicTangentBoxAt B precision depth k hk).lo + epsilon <=
+        rationalCircleSin u / (1 + rationalCircleCos u))
+    (hright :
+      rationalCircleSin u / (1 + rationalCircleCos u) + epsilon <=
+        (dyadicTangentBoxAt B precision depth k hk).hi) :
+    RationalHalfAngleMarginCertificate B precision depth k hk := by
+  have hS := dyadicNestedRadicalTableAt_bounds precision depth k
+    (Nat.le_of_lt hk)
+  have hcc := rationalCircleCos_bounds hu0 hu1
+  have hC : subintervalOf
+      ({ lo := rationalCircleCos u, hi := rationalCircleCos u } : QInterval) 0 1 := by
+    exact ⟨hcc.1, Rat.le_refl, hcc.2⟩
+  have hwidth' := rationalHalfAngleTangentInterval_width_le_of_box_widths
+    hS.1 hC
+  have hwidth :
+      (rationalHalfAngleTangentInterval
+        (dyadicNestedRadicalTableAt precision depth k).1
+        ({ lo := rationalCircleCos u, hi := rationalCircleCos u } : QInterval)).width
+        <= epsilon := by
+    calc
+      _ <= 2 * (dyadicNestedRadicalTableAt precision depth k).1.width +
+          ({ lo := rationalCircleCos u, hi := rationalCircleCos u } : QInterval).width :=
+        hwidth'
+      _ = 2 * (dyadicNestedRadicalTableAt precision depth k).1.width := by
+        simp only [QInterval.width, Rat.sub_self, Rat.add_zero]
+      _ <= epsilon := hboxWidth
+  exact {
+    witness := u
+    witness_nonneg := hu0
+    witness_le_one := hu1
+    sine_contains := hsine
+    epsilon := epsilon
+    tangent_width := hwidth
+    left_margin := hleft
+    right_margin := hright }
+
 def RationalHalfAngleMarginCertificate.toCanonical
     {B : IntegralIdentities.ArctanInverseBisection}
     {precision depth k : Nat} {hk : k < 2 ^ depth}
