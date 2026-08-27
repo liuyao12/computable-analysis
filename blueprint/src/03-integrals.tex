@@ -1150,6 +1150,23 @@ The equal-dyadic route is not silently identified with that chart.  Its exact
 remaining obligation is the finite `TangentChartTransport` structure, whose
 fields say that the public dyadic box and the chart box overlap at every
 stage.  A common rational witness is an equivalent, more constructive form.
+
+The nested-radical rectangle computation is nevertheless a complete raw
+candidate on its own: it is an executable list of rational intervals, and its
+width is bounded by (1/(n+1)).  The only missing raw-real field is
+cross-stage nesting.  It is supplied either by a direct nesting certificate,
+or by prefix stabilization after overlap with a valid anchor.  This keeps the
+algorithmic candidate separate from the semantic theorem that identifies its
+value.
+
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_valid}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_widths_shrink}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_equiv_of_overlap}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_stabilized}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_stabilized_valid_of_overlap}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_stabilized_equiv_reciprocalPi_of_overlap}
+
 The first four depths are nevertheless concrete Lean-certified anchors.  They
 are kept in the opt-in module
 \texttt{ComputableAnalysis.SinPiIntegralAnchors}, so importing the reusable
