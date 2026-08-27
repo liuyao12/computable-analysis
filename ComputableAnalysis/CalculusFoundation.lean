@@ -52,6 +52,22 @@ end ComputableAnalysis.ComplexPathIntegral
 
 namespace ComputableAnalysis
 
+/-! A finite trigonometric-prefix example belongs to the public calculus
+surface even though the full equal-dyadic sine transport is a separate
+geometric frontier.  Keeping this distinction visible prevents a polynomial
+prefix theorem from being mistaken for the completed sine theorem. -/
+
+/-- The first nonzero sine Taylor prefix, squared on `[0,1/2]`, satisfies the
+effective FTC and has the explicitly computed endpoint value. -/
+theorem effectiveFTC_sine_prefix_square :
+    FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      (RealRaw.ofRat (6389 / 161280)) := by
+  exact FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_value
+
+end ComputableAnalysis
+
+namespace ComputableAnalysis
+
 /-! The finite secant product rule is the algebraic product-rule interface for
 the effective calculus.  It is stated over rational endpoint values and a
 positive cell, before any derivative or limit representation is introduced. -/
