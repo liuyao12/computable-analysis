@@ -543,6 +543,11 @@ interval-valued composition still requires a separate box-level contract.
    avoids making the main evaluator module's exact-rational compilation path
    unnecessarily expensive.
 
+   The reusable adapter
+   `rationalTangentSquareWitnessSearch_complete_of_candidate` separates grid
+   membership from the Boolean interval-admissibility proof.  This is the
+   proof-facing interface for future stage/sample certificates.
+
    That evaluator-specific bridge is now present as
    `sinPiSquare_sample_overlap_of_sine_and_table_overlap`: it consumes the
    existing sine sample overlap and `sinPiRawOfArctan_bounds`, constructs the
