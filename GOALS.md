@@ -4117,6 +4117,8 @@ arguments.
   identifies the finite primitive value `c * (z_end - z_start)`, and
   `polygonalConstantDifferentialDisplacement_closed` proves its closed-path
   cancellation exactly.
+  `polygonalConstantDifferentialDisplacement_split_at` now transports finite
+  path additivity through the differential itself.
   The quadratic primitive layer
   `ComplexPathIntegral.polygonalQuadraticPrimitiveTo_append_endpoint` and
   `polygonalQuadraticPrimitiveTo_closed` extends this to the polynomial

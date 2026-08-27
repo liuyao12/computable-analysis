@@ -247,6 +247,22 @@ def polygonalConstantDifferentialDisplacement
     (c start : QComplex) (vertices : List QComplex) : QComplex :=
   QComplex.mul c (polygonalDisplacementTo start vertices)
 
+theorem polygonalConstantDifferentialDisplacement_split_at
+    (c start middle : QComplex) (pre suf : List QComplex) :
+    polygonalConstantDifferentialDisplacement c start
+        (pre ++ [middle] ++ suf) =
+      QComplex.add
+        (polygonalConstantDifferentialDisplacement c start (pre ++ [middle]))
+        (polygonalConstantDifferentialDisplacement c middle suf) := by
+  unfold polygonalConstantDifferentialDisplacement
+  rw [polygonalDisplacementTo_split_at]
+  cases c
+  cases (polygonalDisplacementTo start (pre ++ [middle]))
+  cases (polygonalDisplacementTo middle suf)
+  simp [QComplex.mul, QComplex.add]
+  constructor <;> grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+    Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+
 theorem polygonalConstantDifferentialDisplacement_append_endpoint
     (c start endpoint : QComplex) (vertices : List QComplex) :
     polygonalConstantDifferentialDisplacement c start
