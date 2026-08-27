@@ -5494,6 +5494,19 @@ theorem endpointRaw_width_le_of_tolerance
     (h.endpointRaw.compute n).width <= (precisionAtStage n).val := by
   exact h.endpoint_width (precisionAtStage n)
 
+theorem boundedIntegralRaw_precision_witness
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : DerivativeBoundFTC F dF a b) (eps : QPos) :
+    ∃ n : Nat, (h.boundedIntegralRaw.compute n).width <= eps.val := by
+  let n := eps.val.den + 1
+  refine ⟨n, ?_⟩
+  calc
+    (h.boundedIntegralRaw.compute n).width <= (precisionAtStage n).val :=
+      h.boundedIntegralRaw_width_le_of_tolerance n
+    _ = 1 / (((eps.val.den + 1 : Nat) : Rat)) := by
+      simp [n, precisionAtStage]
+    _ <= eps.val := ComputableAnalysis.FTC.one_div_den_succ_le_of_pos eps.property
+
 /-- The derivative-bound FTC bridge, in computable-real form. -/
 theorem equiv_endpoint
     {F dF : RealFunRaw} {a b : Rat}

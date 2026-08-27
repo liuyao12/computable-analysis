@@ -883,6 +883,9 @@ The certificate does not prescribe how derivative bounds are obtained.
 Monotonicity, convexity, power-series tails, and formula-specific interval
 arithmetic all implement the same interface. Thus the theorem is reusable
 without claiming that every function is integrable.
+Its raw integral exposes an explicit denominator-based precision witness:
+requested tolerance becomes a finite stage, rather than an existential appeal
+to completeness.
 
 The formal spine is now exposed as four layers:
 
@@ -898,6 +901,7 @@ StaticDyadicEffectiveFTC      -> equal-dyadic specialization
 \lean{ComputableAnalysis.effectiveDerivativeBoundFTC}
 \lean{ComputableAnalysis.FTC.effectiveFTC_definiteIntegralEqualsEndpoint}
 \lean{ComputableAnalysis.FTC.staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint}
+\lean{ComputableAnalysis.DerivativeBoundFTC.boundedIntegralRaw_precision_witness}
 \leanok
 
 The interval-level function interface is closed under addition on a common
