@@ -777,6 +777,43 @@ noncomputable def DyadicTangentWitnessFamily.of_canonical_halfAngle_certificate_
     B ht0 hcertificate precision depth k hk
   simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using h
 
+/-! The parity induction can now be exposed with only the genuinely new
+geometric cases as input.  A positive even index is reduced to its parent
+index; a positive odd index is supplied by the caller. -/
+noncomputable def DyadicTangentWitnessFamily.of_odd_canonical_halfAngle_certificate_family
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hodd : forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      0 < k -> k % 2 = 1 ->
+        CanonicalDyadicHalfAngleCertificateAt B precision depth k hk) :
+    DyadicTangentWitnessFamily B := by
+  let rec build (precision depth k : Nat) (hk : k < 2 ^ depth) :
+      0 < k -> CanonicalDyadicHalfAngleCertificateAt B precision depth k hk := by
+    intro hpos
+    cases depth with
+    | zero => omega
+    | succ n =>
+        by_cases heven : k % 2 = 0
+        · let j := k / 2
+          have hkj : k = 2 * j := by
+            dsimp [j]
+            omega
+          have hj : j < 2 ^ n := by
+            rw [Nat.pow_succ] at hk
+            omega
+          have hjpos : 0 < j := by omega
+          have hcert := CanonicalDyadicHalfAngleCertificateAt.of_even_parent B
+            precision n j hj
+            (build (dyadicNestedRadicalParentPrecision precision) n j hj hjpos)
+          simpa [hkj] using hcert
+        · have hodd' : k % 2 = 1 := by omega
+          exact hodd precision (n + 1) k hk hpos hodd'
+  apply DyadicTangentWitnessFamily.of_canonical_halfAngle_certificate_family B ht0
+  intro precision depth k hk hpos
+  exact build precision depth k hk hpos
+
 theorem ArctanSinPiConstruction.halfIntegral_equiv_of_canonical_halfAngle_certificate_family
     (S : ArctanSinPiConstruction)
     (pub : Integral.Construction S.onHalf.toRealFunRaw
