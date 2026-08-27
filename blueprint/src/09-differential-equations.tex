@@ -391,6 +391,33 @@ Thus the current foundation proves the algebraic and error-closing core, while
 the remaining theorem for a given ODE is a finite, inspectable obligation:
 regularity of the entries, simplex enclosure, and a compatible tail bound.
 
+For a constant rational coefficient, the coefficient layer already closes the
+scalar homogeneous case without a completeness argument.  If
+
+\[
+F'=rF,\qquad F(0)=1,
+\]
+
+then coefficient induction forces
+
+\[
+F_n=\frac{r^n}{n!}.
+\]
+
+The declarations `scaledExpCoeff_derivative` and
+`scaledExpCoeff_eq_of_scaledSelfDerivative` are the reusable bridge.  The
+analytic ODE layer still has to transport this recurrence through an interval
+evaluator and its explicit tail certificate; the recurrence itself is already
+finite rational algebra.
+
+\lean{ComputableAnalysis.FormalPowerSeries.scaledExpCoeff_derivative}
+\lean{ComputableAnalysis.FormalPowerSeries.scaledExpCoeff_eq_of_scaledSelfDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.sinCoeff_eq_of_secondDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.cosCoeff_eq_of_secondDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.sinhCoeff_eq_of_secondDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.coshCoeff_eq_of_secondDerivative}
+\leanok
+
 \section{Concrete rotation candidate}
 
 The rational circle supplies a complete variable-coefficient example before
