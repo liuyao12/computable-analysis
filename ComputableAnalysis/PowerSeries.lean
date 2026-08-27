@@ -2039,6 +2039,47 @@ theorem cosPartial_succ (z : QComplex) (n : Nat) :
       QComplex.add (cosPartial z n) (cosTerm z n) := by
   simp [cosPartial, List.range_succ, List.foldl_append]
 
+def sinIntegratedPartial (z : QComplex) (n : Nat) : QComplex :=
+  (List.range n).foldl
+    (fun acc k => QComplex.add acc
+      (QComplex.scaleRat (1 / (((2 * k + 2 : Nat) : Rat)))
+        (QComplex.mul z (sinTerm z k))))
+    QComplex.zero
+
+theorem sinIntegratedPartial_eq_one_sub_cosPartial (z : QComplex) (n : Nat) :
+    sinIntegratedPartial z n =
+      QComplex.sub QComplex.one (cosPartial z (n + 1)) := by
+  cases z with
+  | mk re im =>
+    let z : QComplex := { re := re, im := im }
+    change sinIntegratedPartial z n =
+      QComplex.sub QComplex.one (cosPartial z (n + 1))
+    induction n with
+    | zero =>
+      have hzero : cosTerm z 0 = QComplex.one := by
+        simp [cosTerm, sinSign, factorialRat, factorial, QComplex.pow,
+          QComplex.divRat, QComplex.scaleRat, QComplex.one, Rat.div_def]
+        native_decide
+      simp [sinIntegratedPartial, cosPartial, hzero, QComplex.sub,
+        QComplex.add, QComplex.neg, QComplex.zero, QComplex.one]
+      grind
+    | succ n ih =>
+      calc
+        sinIntegratedPartial z (n + 1) =
+            QComplex.add (sinIntegratedPartial z n)
+              (QComplex.scaleRat (1 / (((2 * n + 2 : Nat) : Rat)))
+                (QComplex.mul z (sinTerm z n))) := by
+          simp [sinIntegratedPartial, List.range_succ, List.foldl_append]
+        _ = QComplex.add
+              (QComplex.sub QComplex.one (cosPartial z (n + 1)))
+              (QComplex.neg (cosTerm z (n + 1))) := by
+          rw [ih, sinTerm_primitive_relation]
+        _ = QComplex.sub QComplex.one (cosPartial z ((n + 1) + 1)) := by
+          rw [cosPartial_succ z (n + 1)]
+          simp [QComplex.sub, QComplex.add, QComplex.neg, QComplex.one,
+            QComplex.zero]
+          grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+
 def sinWeightedPartial (z : QComplex) (n : Nat) : QComplex :=
   (List.range n).foldl
     (fun acc k => QComplex.add acc

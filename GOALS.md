@@ -3947,6 +3947,11 @@ potential-infinity precision schedule.
   `ComplexSeries.sinTerm_primitive_relation` scales `z * sinTerm z k` by the
   reciprocal new exponent and obtains the negative next cosine term.  This is
   the finite integration identity needed before any infinite passage.
+  Its list-inducted aggregate,
+  `ComplexSeries.sinIntegratedPartial_eq_one_sub_cosPartial`, now proves that
+  the integrated sine prefix is exactly `1 - cosPartial (n+1)`.  The proof is
+  finite rational-complex algebra; convergence and the effective FTC remain
+  separate later interfaces.
 - The same formal layer now covers the coefficient-shift identities for trig
   and hyperbolic streams:
   `sin -> cos`, `cos -> -sin`, `sinh -> cosh`, and
