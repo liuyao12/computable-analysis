@@ -6918,6 +6918,23 @@ theorem finiteRawSum_compute_width_le_of_forall
   intro x hx
   exact hbound x hx
 
+/-! The same width identity applies to a left-associated raw fold.  The
+piecewise integral API uses this form directly, while the canonical
+`finiteRawSum` form above is preferable for list transport. -/
+
+theorem rawFold_compute_width_eq_foldl
+    {α : Type} (xs : List α) (f : α -> RealRaw)
+    (initial : RealRaw) (n : Nat) :
+    ((xs.foldl (fun acc k => acc + f k) initial).compute n).width =
+      ((xs.foldl (fun acc k => QInterval.addInterval acc ((f k).compute n))
+        (initial.compute n)).width) := by
+  induction xs generalizing initial with
+  | nil => rfl
+  | cons x xs ih =>
+      simp only [List.foldl]
+      rw [ih]
+      rfl
+
 theorem finiteRawSum_append_equiv
     (xs ys : List RealRaw)
     (hxs : ∀ x ∈ xs, x.Valid)
@@ -11032,6 +11049,38 @@ theorem piecewiseMonotoneIntegralFor_valid (F : FunctionOnInterval)
   simpa [piecewiseMonotoneIntegralFor, step] using
     hfold (List.range c.pieces) (RealRaw.ofRat 0) (by
     simpa [RealRaw.Valid, RealRaw.ofRat] using RealRaw.ofRat_valid 0)
+
+/-! A uniform finite cell-width certificate propagates through the public
+piecewise fold.  This is the quantitative form needed before a separate
+stage schedule proves that the common bound shrinks to zero. -/
+
+theorem piecewiseMonotoneIntegralFor_compute_width_le_of_forall
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) (n : Nat) (bound : Rat)
+    (hbound : forall k (hk : k < c.pieces),
+      ((piecewiseMonotoneCellIntegral F c k hk).compute n).width <= bound) :
+    ((piecewiseMonotoneIntegralFor F c).compute n).width <=
+      (c.pieces : Rat) * bound := by
+  unfold piecewiseMonotoneIntegralFor
+  rw [rawFold_compute_width_eq_foldl]
+  rw [RationalPartition.addInterval_fold_width]
+  have hterm : forall k, k ∈ List.range c.pieces ->
+      (((if hk : k < c.pieces then
+        piecewiseMonotoneCellIntegral F c k hk
+       else RealRaw.zero).compute n).width) <= bound := by
+    intro k hk
+    have hkl : k < c.pieces := List.mem_range.1 hk
+    simp [hkl]
+    exact hbound k hkl
+  have hsum := RationalPartition.rat_add_fold_le_length_mul
+    (List.range c.pieces)
+    (fun k => (((if hk : k < c.pieces then
+      piecewiseMonotoneCellIntegral F c k hk
+     else RealRaw.zero).compute n).width)) bound hterm
+  have hzero : ((RealRaw.ofRat 0).compute n).width = 0 := by
+    simp [RealRaw.ofRat, QInterval.width] <;> grind
+  rw [hzero]
+  simpa [List.length_range, Rat.zero_add] using hsum
 
 /-! The two-cell case is the first reusable finite assembly law.  It exposes
 the piecewise fold as the sum of its two certified cell integrals, up to the

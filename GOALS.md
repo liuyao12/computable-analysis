@@ -2678,6 +2678,12 @@ with the sum of component widths, and
 `Integral.finiteRawSum_compute_width_le_of_forall` turns a common component
 bound into the length-times-bound estimate used by finite turning-point and
 piecewise FTC assemblies.
+The same identity is now exposed for the left-associated public fold by
+`Integral.rawFold_compute_width_eq_foldl`, and
+`Integral.piecewiseMonotoneIntegralFor_compute_width_le_of_forall` lifts a
+uniform cell bound to the actual `PiecewiseMonotoneConstructionFor` integral
+with the explicit factor `c.pieces`.  The potential-infinity schedule is still
+separate; this theorem supplies its finite quantitative input.
 The new `piecewiseRectangleAreaSum_constant` evaluates that constant per-cell
 budget exactly as `(cells.length : Rat) * value`.  Its companion
 `piecewiseRectangleAreaSum_gap_le_common_range` therefore gives the closed
