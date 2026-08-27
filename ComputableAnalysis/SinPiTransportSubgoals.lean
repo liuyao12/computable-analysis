@@ -277,6 +277,21 @@ noncomputable def DyadicTangentWitnessFamily.of_halfAngle_certificate_family
     exact canonical_dyadic_search_of_halfAngle_certificate_at B hpos
       (hcertificate precision depth k hk hpos)
 
+/-! The margin certificate is the lightweight provider-facing form of the same
+family.  Converting it here keeps the geometric witness obligations separate
+from the transport and finite-search plumbing. -/
+noncomputable def DyadicTangentWitnessFamily.of_margin_certificate_family
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      0 < k -> RationalHalfAngleMarginCertificate B precision depth k hk) :
+    DyadicTangentWitnessFamily B :=
+  DyadicTangentWitnessFamily.of_halfAngle_certificate_family B ht0
+    (fun precision depth k hk hpos =>
+      (hcertificate precision depth k hk hpos).toCanonical)
+
 /-! A finite candidate list is the executable interface to the geometric
 certificate.  The soundness theorem for the Boolean search turns a proof that
 each list has a hit into the certificate family above.  Thus the remaining
