@@ -747,6 +747,14 @@ derivative certificate.  Its endpoint primitive is still a finite rational
 polynomial, so this is a fully formalized precursor to the later
 trigonometric-square integral rather than an appeal to a completed sine.
 
+The supporting order estimates are explicit: on the half interval the square
+prefix is nondecreasing and its derivative variation is bounded by the cell
+width.  These are the finite monotonicity and error-budget facts consumed by
+the FTC certificate.
+
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquare_nondecreasing}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquare_derivative_width_le}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquare_derivative_certificate}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_endpoint}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_boundedIntegral_equiv_endpointDifference}
