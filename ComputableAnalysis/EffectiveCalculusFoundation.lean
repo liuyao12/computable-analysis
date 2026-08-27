@@ -60,3 +60,38 @@ theorem effectiveMeanValueBracket
     H hF hwidth n
 
 end ComputableAnalysis.Integral
+
+namespace ComputableAnalysis
+
+/-! Composition closure for effective derivatives.  The caller supplies the
+inner positivity, radius transports, and weighted error budget; all remaining
+work is finite rational error arithmetic. -/
+def effectiveDerivativeCompositionOfBudget
+    {f df g dg : Rat -> Rat}
+    (outer : EffectiveDerivativeExact f df)
+    (inner : EffectiveDerivativeExact g dg)
+    (outerTol innerTol : QPos -> QPos)
+    (stepRadius : QPos -> QPos)
+    (hinner_pos : forall (eps : QPos) (x h : Rat),
+      0 < h -> h <= (stepRadius eps).val ->
+        0 < g (x + h) - g x)
+    (hinner_radius : forall (eps : QPos) (x h : Rat),
+      0 < h -> h <= (stepRadius eps).val ->
+        h <= (inner.stepRadius (innerTol eps)).val)
+    (houter_radius : forall (eps : QPos) (x h : Rat),
+      0 < h -> h <= (stepRadius eps).val ->
+        g (x + h) - g x <=
+          (outer.stepRadius (outerTol eps)).val)
+    (hbudget : forall (eps : QPos) (x h : Rat),
+      0 < h -> h <= (stepRadius eps).val ->
+      qabs (ExactFunction.differenceQuotient f (g x)
+        (g (x + h) - g x)) *
+          (innerTol eps).val +
+        qabs (dg x) * (outerTol eps).val <= eps.val) :
+    EffectiveDerivativeExact (fun x => f (g x))
+      (fun x => df (g x) * dg x) :=
+  ExactFunction.EffectiveDerivativeExact.compOfBudget
+    outer inner outerTol innerTol stepRadius hinner_pos hinner_radius
+    houter_radius hbudget
+
+end ComputableAnalysis
