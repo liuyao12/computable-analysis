@@ -11670,6 +11670,35 @@ theorem piecewiseMonotoneIntegralFor_compute_width_le_of_forall
   rw [hzero]
   simpa [List.length_range, Rat.zero_add] using hsum
 
+/-! A common per-cell precision budget propagates to the finite-piece sum.
+This is the quantitative assembly lemma used when each monotone cell has its
+own effective integral algorithm but all cells are asked for one final
+tolerance. -/
+theorem piecewiseMonotoneIntegralFor_precision_witness_of_common_cell_budget
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) (eps : QPos)
+    (hcell : ∃ N : Nat, ∀ n, N <= n ->
+      ∀ k (hk : k < c.pieces),
+        ((piecewiseMonotoneCellIntegral F c k hk).compute n).width <=
+          eps.val / (c.pieces : Rat)) :
+    ∃ N : Nat, ∀ n, N <= n ->
+      ((piecewiseMonotoneIntegralFor F c).compute n).width <= eps.val := by
+  rcases hcell with ⟨N, hN⟩
+  refine ⟨N, ?_⟩
+  intro n hn
+  apply Rat.le_trans
+    (piecewiseMonotoneIntegralFor_compute_width_le_of_forall F c n
+      (eps.val / (c.pieces : Rat)) (by
+        intro k hk
+        exact hN n hn k hk))
+  have hpNat : 0 < c.pieces := c.positive
+  have hp : (c.pieces : Rat) ≠ 0 := by
+    exact_mod_cast (Nat.ne_of_gt hpNat)
+  rw [Rat.div_def]
+  rw [← Rat.mul_assoc, Rat.mul_comm (c.pieces : Rat) eps.val,
+    Rat.mul_assoc, Rat.mul_inv_cancel _ hp, Rat.mul_one]
+  exact Rat.le_refl
+
 theorem piecewiseMonotoneIntegralFor_compute_width_le_of_bounds
     (F : FunctionOnInterval)
     (c : PiecewiseMonotoneConstructionFor F) (n : Nat)

@@ -69,7 +69,13 @@ primitive.  The complete example identifies the resulting raw integral:
 \lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.compute_nested}
 \lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.compute_width}
 \lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.compute_widthsShrink}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_precision_witness_of_common_cell_budget}
 \leanok
+
+For a finite turning-point decomposition, every cell may choose its own
+algorithm.  It is enough to give all cells a common share of the final error
+budget; the finite assembly lemma then produces one global precision witness.
+The proof is finite error arithmetic, not a completeness argument.
 
 The first complete end-to-end FTC witness is affine: its finite-difference
 derivative is exactly constant, and a single rectangle computes the integral
