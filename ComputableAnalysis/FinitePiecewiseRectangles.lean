@@ -391,6 +391,20 @@ structure PiecewiseRectangleCertificate where
   domain_nonneg : 0 ≤ domainWidth
   cells_ordered : ∀ I, I ∈ cells → I.lo ≤ I.hi
 
+def PiecewiseRectangleCertificate.append
+    (left right : PiecewiseRectangleCertificate)
+    (_hwidth : left.domainWidth = right.domainWidth) :
+    PiecewiseRectangleCertificate where
+  domainWidth := left.domainWidth
+  cells := left.cells ++ right.cells
+  domain_nonneg := left.domain_nonneg
+  cells_ordered := by
+    intro I hI
+    rw [List.mem_append] at hI
+    rcases hI with hI | hI
+    · exact left.cells_ordered I hI
+    · exact right.cells_ordered I hI
+
 def PiecewiseRectangleCertificate.lowerSum
     (certificate : PiecewiseRectangleCertificate) : Rat :=
   piecewiseRectangleAreaSum
@@ -437,6 +451,32 @@ theorem PiecewiseRectangleCertificate.gap_le_common_range
   exact piecewiseRectangleAreaSum_gap_le_common_range
     certificate.domainWidth rangeWidth certificate.cells
     certificate.domain_nonneg hwidth
+
+theorem PiecewiseRectangleCertificate.append_gap_eq_add
+    (left right : PiecewiseRectangleCertificate)
+    (hwidth : left.domainWidth = right.domainWidth) :
+    (left.append right hwidth).upperSum - (left.append right hwidth).lowerSum =
+      (left.upperSum - left.lowerSum) + (right.upperSum - right.lowerSum) := by
+  unfold PiecewiseRectangleCertificate.append
+    PiecewiseRectangleCertificate.upperSum
+    PiecewiseRectangleCertificate.lowerSum
+  change
+    piecewiseRectangleAreaSum
+        ((left.cells ++ right.cells).map (fun I => left.domainWidth * I.hi)) -
+      piecewiseRectangleAreaSum
+        ((left.cells ++ right.cells).map (fun I => left.domainWidth * I.lo)) =
+      (piecewiseRectangleAreaSum
+          (left.cells.map (fun I => left.domainWidth * I.hi)) -
+        piecewiseRectangleAreaSum
+          (left.cells.map (fun I => left.domainWidth * I.lo))) +
+        (piecewiseRectangleAreaSum
+          (right.cells.map (fun I => right.domainWidth * I.hi)) -
+        piecewiseRectangleAreaSum
+          (right.cells.map (fun I => right.domainWidth * I.lo)))
+  rw [hwidth]
+  rw [List.map_append, List.map_append]
+  rw [piecewiseRectangleAreaSum_append, piecewiseRectangleAreaSum_append]
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
 
 def quadraticTurnExample : List QInterval :=
   [ pieceCellBounds .increasing 0 1 0 0
