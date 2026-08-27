@@ -967,6 +967,39 @@ theorem rationalHalfAngleTangentInterval_contains
     rw [Rat.div_def, Rat.div_def]
     grind [Rat.mul_assoc, Rat.mul_comm]
 
+/-! A target-directed interval margin rule.  It converts a point witness and
+a width budget into containment in a larger rational box. -/
+theorem qinterval_contains_of_point_margin
+    {U T : QInterval} {t eps : Rat}
+    (ht : T.lo <= t /\ t <= T.hi)
+    (hwidth : T.width <= eps)
+    (hleft : U.lo + eps <= t)
+    (hright : t + eps <= U.hi) :
+    U.ContainsInterval T := by
+  unfold QInterval.ContainsInterval QInterval.width at *
+  constructor
+  · have htarget : t - eps <= T.lo := by grind
+    grind
+  · have htarget : T.hi <= t + eps := by grind
+    grind
+
+/-! Specialized form for the half-angle box.  The caller supplies only the
+finite evaluator margin around the exact rational circle witness. -/
+theorem rationalHalfAngleTangentInterval_contains_of_margin
+    {U S C : QInterval} {s c eps : Rat}
+    (hS : subintervalOf S 0 1) (hC : subintervalOf C 0 1)
+    (hs : 0 <= s) (hc : 0 <= c)
+    (hcircle : s * s + c * c = 1)
+    (hsS : S.lo <= s /\ s <= S.hi)
+    (hcC : C.lo <= c /\ c <= C.hi)
+    (hwidth : (rationalHalfAngleTangentInterval S C).width <= eps)
+    (hleft : U.lo + eps <= s / (1 + c))
+    (hright : s / (1 + c) + eps <= U.hi) :
+    U.ContainsInterval (rationalHalfAngleTangentInterval S C) := by
+  apply qinterval_contains_of_point_margin
+    (rationalHalfAngleTangentInterval_contains hS hC hs hc hsS hcC)
+    hwidth hleft hright
+
 theorem rationalCircleSin_halfAngle_identity
     {s c : Rat} (hs : 0 <= s) (hc : 0 <= c)
     (hcircle : s * s + c * c = 1) :
