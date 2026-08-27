@@ -2012,6 +2012,52 @@ theorem chronologicalProduct_rowAbsSum_le_pow {dimension : Nat}
   rw [ratProduct_const_eq_pow c steps] at hgeneral
   exact hgeneral
 
+theorem chronologicalStepProduct_rowAbsSum_le {dimension : Nat}
+    (S : Nat -> RatMatrix dimension) (bound : Nat -> Rat)
+    (hbound : forall n i, matrixRowAbsSum (S n) i <= bound n)
+    (hbound_nonneg : forall n, 0 <= bound n) :
+    forall start steps i,
+      matrixRowAbsSum (chronologicalStepProduct S start steps) i <=
+        ratProduct (fun k => bound (start + k)) steps
+  | start, 0, i => by
+      rw [chronologicalStepProduct_zero, matrixRowAbsSum_identity, ratProduct]
+      native_decide
+  | start, steps + 1, i => by
+      rw [chronologicalStepProduct_succ]
+      have hmul := matrixMul_rowAbsSum_le
+        (S (start + steps)) (chronologicalStepProduct S start steps) i
+      have hprevious : forall k,
+          matrixRowAbsSum (chronologicalStepProduct S start steps) k <=
+            ratProduct (fun k => bound (start + k)) steps :=
+        fun k => chronologicalStepProduct_rowAbsSum_le S bound hbound
+          hbound_nonneg start steps k
+      have hweighted := finiteSum_mul_le_of_nonneg
+        (fun k => qabs ((S (start + steps)) i k))
+        (fun k => matrixRowAbsSum (chronologicalStepProduct S start steps) k)
+        (ratProduct (fun k => bound (start + k)) steps)
+        (fun k => qabs_nonneg _)
+        hprevious
+      calc
+        matrixRowAbsSum
+            (matrixMul (S (start + steps))
+              (chronologicalStepProduct S start steps)) i <=
+            finiteSum (fun k =>
+              qabs ((S (start + steps)) i k) *
+                matrixRowAbsSum (chronologicalStepProduct S start steps) k) :=
+          hmul
+        _ <= ratProduct (fun k => bound (start + k)) steps *
+              finiteSum (fun k => qabs ((S (start + steps)) i k)) :=
+          hweighted
+        _ = ratProduct (fun k => bound (start + k)) steps *
+            matrixRowAbsSum (S (start + steps)) i := rfl
+        _ <= ratProduct (fun k => bound (start + k)) steps *
+              bound (start + steps) := by
+          exact Rat.mul_le_mul_of_nonneg_left (hbound (start + steps) i)
+            (ratProduct_nonneg (fun k => bound (start + k))
+              (fun k => hbound_nonneg (start + k)) steps)
+        _ = ratProduct (fun k => bound (start + k)) (steps + 1) := by
+          rw [ratProduct]
+
 /-- The general sampled transition specializes exactly to the
 Peano--Baker chronological product for Euler increments. -/
 theorem chronologicalStepProduct_eulerIncrement {dimension : Nat}
