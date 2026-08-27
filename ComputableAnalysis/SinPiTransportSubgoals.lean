@@ -814,6 +814,44 @@ noncomputable def DyadicTangentWitnessFamily.of_odd_canonical_halfAngle_certific
   intro precision depth k hk hpos
   exact build precision depth k hk hpos
 
+/-! Separate the two genuinely odd geometric branches.  This is the
+user-facing induction interface: lower odd cells use the positive
+half-angle certificate, while upper odd cells use the reflected cosine
+certificate. -/
+noncomputable def DyadicTangentWitnessFamily.of_lower_upper_odd_canonical_halfAngle_certificate_families
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (lower : forall (precision n j : Nat)
+      (hbound : 2 * j + 1 <= 2 ^ n),
+      CanonicalDyadicHalfAngleCertificateAt B precision (n + 1) (2 * j + 1) (by
+        have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+          rw [Nat.pow_succ]
+          omega
+        rw [hpow]
+        omega))
+    (upper : forall (precision n k : Nat)
+      (hupper : 2 ^ n < k) (hk : k < 2 ^ (n + 1)),
+      CanonicalDyadicHalfAngleCertificateAt B precision (n + 1) k hk) :
+    DyadicTangentWitnessFamily B := by
+  apply DyadicTangentWitnessFamily.of_odd_canonical_halfAngle_certificate_family
+    B ht0
+  intro precision depth k hk hpos hodd
+  cases depth with
+  | zero => omega
+  | succ n =>
+      by_cases hlower : k <= 2 ^ n
+      · let j := k / 2
+        have hkj : k = 2 * j + 1 := by
+          dsimp [j]
+          omega
+        have hbound : 2 * j + 1 <= 2 ^ n := by omega
+        have hcert := lower precision n j hbound
+        simpa [hkj] using hcert
+      · have hupper : 2 ^ n < k := by omega
+        exact upper precision n k hupper hk
+
 theorem ArctanSinPiConstruction.halfIntegral_equiv_of_canonical_halfAngle_certificate_family
     (S : ArctanSinPiConstruction)
     (pub : Integral.Construction S.onHalf.toRealFunRaw
