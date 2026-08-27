@@ -582,6 +582,15 @@ theorem sinCosCoeff_eq_of_coupledDerivative
   · funext n
     exact (hpair n).2
 
+theorem sinCoeff_eq_of_secondDerivative
+    {F : Coeffs}
+    (hF : derivative (derivative F) = neg F)
+    (hzero : F 0 = 0)
+    (hone : (derivative F) 0 = 1) :
+    F = sinCoeff := by
+  exact (sinCosCoeff_eq_of_coupledDerivative
+    (F := F) (G := derivative F) (by rfl) hF hzero hone).1
+
 theorem sinhCoshCoeff_eq_of_coupledDerivative
     {F G : Coeffs}
     (hF : HasFormalDerivative F G)
@@ -613,6 +622,15 @@ theorem sinhCoshCoeff_eq_of_coupledDerivative
     exact (hpair n).1
   · funext n
     exact (hpair n).2
+
+theorem sinhCoeff_eq_of_secondDerivative
+    {F : Coeffs}
+    (hF : derivative (derivative F) = F)
+    (hzero : F 0 = 0)
+    (hone : (derivative F) 0 = 1) :
+    F = sinhCoeff := by
+  exact (sinhCoshCoeff_eq_of_coupledDerivative
+    (F := F) (G := derivative F) (by rfl) hF hzero hone).1
 
 /-- First-year calculus table entry: the formal derivative of `-cos` is `sin`. -/
 theorem neg_cosCoeff_hasFormalDerivative :

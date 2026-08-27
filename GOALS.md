@@ -3919,6 +3919,9 @@ potential-infinity precision schedule.
   `FormalPowerSeries.sinCosCoeff_eq_of_coupledDerivative` also closes the
   coupled system (F'=G,\ G'=-F) with (F(0)=0,\ G(0)=1) by simultaneous
   induction.
+  Consequently `FormalPowerSeries.sinCoeff_eq_of_secondDerivative` exposes
+  the equivalent oscillator uniqueness statement F''=-F with its two initial
+  coefficients.
 - The initial-value uniqueness bridges for the hyperbolic pair,
   `FormalPowerSeries.sinhCoeff_eq_of_hasFormalDerivative` and
   `FormalPowerSeries.coshCoeff_eq_of_hasFormalDerivative`, are now checked as
@@ -3926,6 +3929,8 @@ potential-infinity precision schedule.
   `FormalPowerSeries.sinhCoshCoeff_eq_of_coupledDerivative` also closes the
   coupled system (F'=G,\ G'=F) with (F(0)=0,\ G(0)=1) by simultaneous
   induction.
+  `FormalPowerSeries.sinhCoeff_eq_of_secondDerivative` gives the corresponding
+  F''=F initial-value form.
 - The finite rational bridge below the formal table is now checked too:
   `FinitePolynomial.powerSecant_eq_differenceQuotient` identifies the exact
   quotient of every monomial, and
