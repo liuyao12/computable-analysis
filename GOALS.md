@@ -536,6 +536,13 @@ interval-valued composition still requires a separate box-level contract.
    nested-radical sine sample-overlap certificates through this lemma and then
    construct the corresponding squared-integrand integral certificate.
 
+   The signed-cosine upper-half checkpoint is now isolated in
+   `SinPiSquareCheckpoints.lean`: the stage-2 sample `k = 3` uses tangent
+   interval `[1,2]`, finds `379/256` on an 8-grid, and proves the signed
+   square/complement overlap.  Keeping this executable regression separate
+   avoids making the main evaluator module's exact-rational compilation path
+   unnecessarily expensive.
+
    That evaluator-specific bridge is now present as
    `sinPiSquare_sample_overlap_of_sine_and_table_overlap`: it consumes the
    existing sine sample overlap and `sinPiRawOfArctan_bounds`, constructs the
