@@ -760,6 +760,34 @@ theorem square_convexOn (a b : Rat) : ConvexOn square a b := by
   rw [square_secantSlope_eq_add hxy, square_secantSlope_eq_add hyz]
   grind
 
+/-! The cubic gives the next finite curvature rung.  Its secant slope is a
+quadratic symmetric sum, and on the nonnegative unit interval the difference
+of neighboring secants factors into nonnegative rational terms. -/
+def cubeFunction (x : Rat) : Rat := x * x * x
+
+theorem cube_secantSlope_eq_quadratic {x y : Rat} (hxy : x < y) :
+    secantSlope cubeFunction x y = x * x + x * y + y * y := by
+  unfold secantSlope cubeFunction
+  rw [Rat.div_def]
+  have hcancel : (y - x) * (y - x)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (y - x) (Rat.ne_of_gt (by grind))
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem cube_convexOn_unit : ConvexOn cubeFunction 0 1 := by
+  intro x y z h0x hxy hyz hz1
+  rw [cube_secantSlope_eq_quadratic hxy,
+    cube_secantSlope_eq_quadratic hyz]
+  have hx0 : 0 <= x := h0x
+  have hy0 : 0 <= y := by grind
+  have hz0 : 0 <= z := by grind
+  have hfactor : 0 <= (z - x) * (z + x + y) := by
+    apply Rat.mul_nonneg
+    · grind
+    · exact Rat.add_nonneg (Rat.add_nonneg hz0 hx0) hy0
+  grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
 theorem square_secantSlopeInterval_eq
     {x y : Rat} (hxy : x < y) (n : Nat) :
     secantSlopeIntervalOfRealFun (RealFunRaw.exact square) x y n =
