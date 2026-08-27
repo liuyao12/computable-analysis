@@ -3921,7 +3921,10 @@ potential-infinity precision schedule.
   The supporting rational-complex algebra is now explicit as well:
   `QComplex.scaleRat_mul_left`, `QComplex.scaleRat_mul_right`, and
   `QComplex.scaleRat_scaleRat` provide the scalar/multiplication transport
-  needed by those future termwise identities.
+  needed by those future termwise identities.  The division transport
+  `QComplex.divRat_mul_right` and the checked identity
+  `ComplexSeries.sinTerm_derivative_relation` now close the corresponding
+  finite sine-term derivative step.
 - The same formal layer now covers the coefficient-shift identities for trig
   and hyperbolic streams:
   `sin -> cos`, `cos -> -sin`, `sinh -> cosh`, and

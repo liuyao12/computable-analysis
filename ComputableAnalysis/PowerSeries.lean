@@ -1791,6 +1791,33 @@ theorem scaleRat_scaleRat (r s : Rat) (z : QComplex) :
   simp [scaleRat]
   grind [Rat.mul_assoc, Rat.mul_comm]
 
+theorem scaleRat_divRat_cancel (r q : Rat) (z : QComplex) (hr : r ≠ 0) :
+    scaleRat r (divRat z (r * q)) = divRat z q := by
+  cases z
+  by_cases hq : q = 0
+  · subst q
+    simp [scaleRat, divRat, Rat.div_def]
+  · simp [scaleRat, divRat, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_inv_cancel r hr, Rat.mul_inv_cancel q hq]
+
+theorem scaleRat_commute (r s : Rat) (z : QComplex) :
+    scaleRat r (scaleRat s z) = scaleRat s (scaleRat r z) := by
+  rw [scaleRat_scaleRat, scaleRat_scaleRat]
+  congr 1
+  rw [Rat.mul_comm]
+
+theorem divRat_mul_right (z w : QComplex) (q : Rat) :
+    divRat (mul z w) q = mul z (divRat w q) := by
+  cases z
+  cases w
+  by_cases hq : q = 0
+  · subst q
+    simp [divRat, mul, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
+  · simp [divRat, mul, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
+
 end QComplex
 
 namespace ComplexSeries
@@ -1848,6 +1875,35 @@ theorem sinPartial_succ (z : QComplex) (n : Nat) :
 def cosTerm (z : QComplex) (k : Nat) : QComplex :=
   QComplex.scaleRat (sinSign k)
     (QComplex.divRat (QComplex.pow z (2 * k)) (factorialRat (2 * k)))
+
+theorem sinTerm_derivative_relation (z : QComplex) (k : Nat) :
+    QComplex.scaleRat (((2 * k + 1 : Nat) : Rat)) (sinTerm z k) =
+      QComplex.mul z (cosTerm z k) := by
+  have hfactor := FormalPowerSeries.factorialRat_succ (2 * k)
+  unfold sinTerm cosTerm
+  rw [hfactor]
+  change QComplex.scaleRat (((2 * k + 1 : Nat) : Rat))
+      (QComplex.scaleRat (sinSign k)
+        (QComplex.divRat
+          (QComplex.mul z (QComplex.pow z (2 * k)))
+          ((((2 * k + 1 : Nat) : Rat)) * factorialRat (2 * k)))) = _
+  calc
+    _ = QComplex.scaleRat (sinSign k)
+        (QComplex.scaleRat (((2 * k + 1 : Nat) : Rat))
+          (QComplex.divRat
+            (QComplex.mul z (QComplex.pow z (2 * k)))
+            ((((2 * k + 1 : Nat) : Rat)) * factorialRat (2 * k)))) := by
+      exact QComplex.scaleRat_commute _ _ _
+    _ = QComplex.scaleRat (sinSign k)
+        (QComplex.divRat (QComplex.mul z (QComplex.pow z (2 * k)))
+          (factorialRat (2 * k))) := by
+      rw [QComplex.scaleRat_divRat_cancel]
+      exact FormalPowerSeries.natCast_succ_ne_zero (2 * k)
+    _ = QComplex.mul z (QComplex.scaleRat (sinSign k)
+        (QComplex.divRat (QComplex.pow z (2 * k))
+          (factorialRat (2 * k)))) := by
+      rw [QComplex.divRat_mul_right]
+      rw [← QComplex.scaleRat_mul_right]
 
 def cosPartial (z : QComplex) (n : Nat) : QComplex :=
   (List.range n).foldl (fun acc k => QComplex.add acc (cosTerm z k)) QComplex.zero
