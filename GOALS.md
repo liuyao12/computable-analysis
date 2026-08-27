@@ -337,7 +337,10 @@ interval-valued composition still requires a separate box-level contract.
    the `sinPiStieltjesIntegral` interval.  Its `to_overlap` theorem supplies
    the stagewise transport, after which
    `dyadicNestedRadicalIntegralRaw_stabilized_equiv_reciprocalPi_of_commonWitness`
-   closes the computable value theorem.  The base checkpoint is now proved by
+   closes the computable value theorem.  The theorem
+   `dyadicNestedRadicalIntegralRaw_stabilized_width_le` also exposes the runtime
+   budget explicitly: candidate dyadic-sum width plus twice the Stieltjes anchor
+   width.  The base checkpoint is now proved by
    `dyadicNestedRadicalStieltjes_base_witness` at stage zero.  The exact
    stage-one, stage-two, and stage-three overlap checkpoints are also proved
    in `SinPiTransportSubgoals.lean`; the remaining refinement is now
