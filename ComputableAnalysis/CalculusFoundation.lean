@@ -32,3 +32,20 @@ requiring users to import the full benchmark catalogue in `ComputableAnalysis`.
 The imports expose certificates and raw algorithms; they do not introduce a
 completed real-number or measurable-function foundation.
 -/
+
+namespace ComputableAnalysis.ComplexPathIntegral
+
+/-! Public complex FTC entry point for finite polygonal paths.  The path is a
+finite list of rational-complex vertices and the primitive is supplied by its
+finite polynomial coefficients, so the theorem is entirely algebraic. -/
+theorem effectivePolynomialPathFTC
+    (coefficients : List QComplex) (start endpoint : QComplex)
+    (vertices : List QComplex) :
+    (polygonalPolynomialIntegralRaw coefficients start
+      (vertices ++ [endpoint])).Equiv
+      (ComplexRaw.ofQComplex
+        (polynomialPrimitiveIncrement coefficients start endpoint)) := by
+  exact polygonalPolynomialIntegralRaw_equiv_endpoint
+    coefficients start endpoint vertices
+
+end ComputableAnalysis.ComplexPathIntegral
