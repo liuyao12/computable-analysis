@@ -7416,6 +7416,44 @@ theorem finiteRawSum_rawAdjacentDifferenceList_equiv_last_sub_first
         (RealRaw.equiv_trans
           (RealRaw.add_valid hhead hleft) hmiddle htarget hadd htel)
 
+/-! The indexed form packages the complete finite telescope for a sequence of
+raw endpoint values. -/
+theorem finiteRawSum_range_adjacent_equiv
+    (f : Nat -> RealRaw) (n : Nat)
+    (hvalid : forall k, k <= n -> (f k).Valid) :
+    (finiteRawSum
+      ((List.range n).map (fun k => f (k + 1) - f k))).Equiv
+      (f n - f 0) := by
+  have hlast_aux : forall (g : Nat -> RealRaw) (m : Nat),
+      rawLast (g 0) ((List.range m).map (fun k => g (k + 1))) = g m := by
+    intro g m
+    induction m generalizing g with
+    | zero => simp [rawLast]
+    | succ m ih =>
+        rw [List.range_succ_eq_map]
+        simp only [List.map_cons, List.map_map]
+        have htail := ih (fun k => g (k + 1))
+        simpa [rawLast, Function.comp_def, Nat.add_assoc] using htail
+  have hvalues : forall z, z ∈ (f 0 ::
+      (List.range n).map (fun k => f (k + 1))) -> z.Valid := by
+    intro z hz
+    simp only [List.mem_cons] at hz
+    rcases hz with rfl | hz
+    · exact hvalid 0 (Nat.zero_le _)
+    · rcases List.mem_map.1 hz with ⟨j, hj, rfl⟩
+      exact hvalid (j + 1) (by
+        have hjlt : j < n := List.mem_range.1 hj
+        omega)
+  have hlist : f 0 :: (List.range n).map (fun k => f (k + 1)) =
+      (List.range (n + 1)).map f := by
+    simp [List.range_succ_eq_map, Function.comp_def]
+  have htel := finiteRawSum_rawAdjacentDifferenceList_equiv_last_sub_first
+    (x := f 0)
+    (xs := (List.range n).map (fun k => f (k + 1))) hvalues
+  rw [hlist, rawAdjacentDifferenceList_range_map] at htel
+  rw [hlast_aux f n] at htel
+  exact htel
+
 end Integral
 
 namespace TwoStageCandidateDerivativeFTC
