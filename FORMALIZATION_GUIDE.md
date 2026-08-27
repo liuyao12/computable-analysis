@@ -2103,6 +2103,14 @@ an admissible rational witness in the list certifies that the executable
 search returns a hit. The remaining all-stage theorem is therefore geometric
 witness existence, not search correctness.
 
+For bounded Gaussian prefixes, use
+`gaussianEvenIntegralPrefix_remainder_abs_le` together with
+`gaussianEvenIntegralTailMajorant_mono`: the explicit tail interval contains
+every later finite prefix, and
+`gaussianEvenIntegralPrefix_interval_contains_future` packages that nesting
+directly. This is the finite certificate to provide before attempting an
+improper Gaussian theorem.
+
 The public equal-dyadic transport contract is
 `SinPiIntegral.halfIntegral_equiv_of_dyadic_sample_overlap`. It requires the
 same fixed plan and one overlap proof for every finite sample. The coordinate
