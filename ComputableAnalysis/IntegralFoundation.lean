@@ -51,4 +51,19 @@ theorem nonincreasingDarbouxSchedule_precision_witness
     (nonincreasingDarbouxScheduleRaw_valid schedule).2.2 eps
   exact ⟨n, hn n (Nat.le_refl n)⟩
 
+/-! The matching increasing-side witness is exported here as well.  Both
+orientations therefore satisfy the same user-facing precision contract. -/
+theorem monotoneDarbouxSchedule_precision_witness
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hmonotone : NondecreasingOnInterval F}
+    {hinterval : F.lower <= F.upper}
+    (schedule : MonotoneDarbouxSchedule F hregular hmonotone hinterval)
+    (eps : QPos) :
+    ∃ n : Nat,
+      ((monotoneDarbouxScheduleIntegralFor schedule).compute n).width
+        <= eps.val := by
+  obtain ⟨n, hn⟩ :=
+    (monotoneDarbouxScheduleRaw_valid schedule).2.2 eps
+  exact ⟨n, hn n (Nat.le_refl n)⟩
+
 end ComputableAnalysis.Integral
