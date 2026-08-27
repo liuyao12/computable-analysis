@@ -788,6 +788,110 @@ theorem cube_convexOn_unit : ConvexOn cubeFunction 0 1 := by
   grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
     Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 
+/-! The same argument at the interval-valued level.  The lower-endpoint
+nonnegativity is explicit because cubic convexity is only valid on the
+nonnegative chart. -/
+theorem cube_secantSlopeInterval_eq_quadratic
+    {x y : Rat} (hxy : x < y) (n : Nat) :
+    secantSlopeIntervalOfRealFun (RealFunRaw.exact cubeFunction) x y n =
+      { lo := x * x + x * y + y * y,
+        hi := x * x + x * y + y * y } := by
+  unfold secantSlopeIntervalOfRealFun RealFunRaw.exact
+  simp only [QInterval.slopeBetween, QInterval.divByRat,
+    QInterval.subInterval, QInterval.scaleByRat]
+  have hpos : 0 < y - x := by grind
+  have hinv : 0 <= 1 / (y - x) := by
+    simpa [Rat.div_def] using
+      (Rat.le_of_lt (Rat.inv_pos.mpr hpos) : 0 <= (y - x)⁻¹)
+  have hquot :
+      1 / (y - x) * (cubeFunction y - cubeFunction x) =
+        x * x + x * y + y * y := by
+    rw [Rat.div_def]
+    have hcancel : (y - x) * (y - x)⁻¹ = 1 :=
+      Rat.mul_inv_cancel (y - x) (Rat.ne_of_gt hpos)
+    unfold cubeFunction
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  simp [hinv, hquot]
+
+private theorem cube_square_range_of_nonneg {a b x : Rat}
+    (ha : 0 <= a) (hab : a <= b) (hax : a <= x) (hxb : x <= b) :
+    a * a <= x * x ∧ x * x <= b * b := by
+  have hleft : 0 <= (x - a) * (x + a) :=
+    Rat.mul_nonneg (by grind) (by grind)
+  have hright : 0 <= (b - x) * (b + x) :=
+    Rat.mul_nonneg (by grind) (by grind)
+  constructor <;> grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+def cubeRaw_curvatureOnSubinterval_of_nonneg {a b : Rat}
+    (C : RationalSubinterval a b) (hC : 0 <= C.lower) :
+    CurvatureOnSubinterval (RealFunRaw.exact cubeFunction) C := by
+  refine
+    { kind := CurvatureKind.convex
+      evalPrecision := fun n => n
+      domain_on := ?_
+      secant_slope_order := ?_ }
+  · intro x hx
+    trivial
+  · intro n w x y z hw hx hy hz hwx hxy hyz
+    change QInterval.WeakLe
+      (secantSlopeIntervalOfRealFun (RealFunRaw.exact cubeFunction) w x n)
+      (secantSlopeIntervalOfRealFun (RealFunRaw.exact cubeFunction) y z n)
+    rw [cube_secantSlopeInterval_eq_quadratic hwx,
+      cube_secantSlopeInterval_eq_quadratic hyz]
+    unfold QInterval.WeakLe
+    have hw0 : 0 <= w := Rat.le_trans hC hw.1
+    have hx0 : 0 <= x := Rat.le_trans hC hx.1
+    have hy0 : 0 <= y := Rat.le_trans hC hy.1
+    have hz0 : 0 <= z := Rat.le_trans hC hz.1
+    have hfactor_left : 0 <= (y - w) * (y + w + x) := by
+      apply Rat.mul_nonneg
+      · grind
+      · exact Rat.add_nonneg (Rat.add_nonneg hy0 hw0) hx0
+    have hfactor_right : 0 <= (z - x) * (z + x + y) := by
+      apply Rat.mul_nonneg
+      · grind
+      · exact Rat.add_nonneg (Rat.add_nonneg hz0 hx0) hy0
+    grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+def cubeRaw_monotoneDerivativeBoundMethod_of_nonneg {a b : Rat}
+    (C : RationalSubinterval a b) (hC : 0 <= C.lower) :
+    MonotoneDerivativeBoundMethod
+      (RealFunRaw.exact (fun x : Rat => 3 * x * x)) C := by
+  refine
+    { kind := MonotonicityKind.nondecreasing
+      evalPrecision := fun n => n
+      domain_on := ?_
+      endpoint_bound_ordered := ?_
+      endpoint_contains_values := ?_ }
+  · intro x hx
+    trivial
+  · intro n
+    unfold endpointDerivativeBound RealFunRaw.exact
+    unfold QInterval.width
+    have hlow : 0 <= C.lower := hC
+    have hupper : 0 <= C.upper := Rat.le_trans hlow C.ordered
+    have hfactor : 0 <= (C.upper - C.lower) * (C.upper + C.lower) :=
+      Rat.mul_nonneg (by grind [C.ordered]) (Rat.add_nonneg hupper hlow)
+    grind [C.ordered, Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+  · intro n x hx
+    unfold endpointDerivativeBound RealFunRaw.exact
+    unfold QInterval.ContainsInterval
+    have hrange := cube_square_range_of_nonneg (a := C.lower) (b := C.upper)
+      (x := x) hC C.ordered hx.1 hx.2
+    constructor <;> grind
+
+def cubeRaw_derivativeBoundFromCurvature_of_nonneg {a b : Rat}
+    (C : RationalSubinterval a b) (hC : 0 <= C.lower) :
+    DerivativeBoundFromCurvature
+      (RealFunRaw.exact cubeFunction)
+      (RealFunRaw.exact (fun x : Rat => 3 * x * x)) C :=
+  { curvature := cubeRaw_curvatureOnSubinterval_of_nonneg C hC
+    monotoneDerivative := cubeRaw_monotoneDerivativeBoundMethod_of_nonneg C hC
+    compatible := rfl }
+
 theorem square_secantSlopeInterval_eq
     {x y : Rat} (hxy : x < y) (n : Nat) :
     secantSlopeIntervalOfRealFun (RealFunRaw.exact square) x y n =
