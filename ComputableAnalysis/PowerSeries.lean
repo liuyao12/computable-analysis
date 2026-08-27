@@ -406,6 +406,32 @@ theorem sinCoeff_hasFormalDerivative :
     HasFormalDerivative sinCoeff cosCoeff :=
   sinCoeff_derivative
 
+theorem sinCoeff_eq_of_hasFormalDerivative
+    {F : Coeffs}
+    (hF : HasFormalDerivative F cosCoeff)
+    (hzero : F 0 = 0) :
+    F = sinCoeff := by
+  have hprimitive :=
+    coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative hF
+  have hcoeffs : coeffsFromDerivativeAtZero 0 cosCoeff = sinCoeff := by
+    funext n
+    cases n <;> rfl
+  rw [hzero] at hprimitive
+  exact hprimitive.symm.trans hcoeffs
+
+theorem cosCoeff_eq_of_hasFormalDerivative
+    {F : Coeffs}
+    (hF : HasFormalDerivative F (neg sinCoeff))
+    (hone : F 0 = 1) :
+    F = cosCoeff := by
+  have hprimitive :=
+    coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative hF
+  have hcoeffs : coeffsFromDerivativeAtZero 1 (neg sinCoeff) = cosCoeff := by
+    funext n
+    cases n <;> rfl
+  rw [hone] at hprimitive
+  exact hprimitive.symm.trans hcoeffs
+
 /-- First-year calculus table entry: the formal derivative of `-cos` is `sin`. -/
 theorem neg_cosCoeff_hasFormalDerivative :
     HasFormalDerivative (neg cosCoeff) sinCoeff := by
