@@ -75,6 +75,19 @@ theorem effectiveFourierSeries_precision_witness
       (F.stabilized.compute N).height <= eps.val := by
   exact F.precision_witness eps
 
+/-! The first matrix ODE base case is likewise exposed at the scoped entry
+point.  It is an exact rational linear-algebra theorem, before any passage to
+a continuous matrix-valued function. -/
+theorem effectiveTwoByTwoSolutionUnique {a b c d : Rat}
+    (hdet : LinearODE.HarmonicOscillator.twoByTwoDeterminant a b c d ≠ 0)
+    (rhs u v : LinearODE.RatVector 2)
+    (hu : LinearODE.matrixApply
+      (LinearODE.HarmonicOscillator.twoByTwoMatrix a b c d) u = rhs)
+    (hv : LinearODE.matrixApply
+      (LinearODE.HarmonicOscillator.twoByTwoMatrix a b c d) v = rhs) :
+    u = v := by
+  exact LinearODE.HarmonicOscillator.twoByTwo_solution_unique hdet rhs u v hu hv
+
 end ComputableAnalysis
 
 namespace ComputableAnalysis
