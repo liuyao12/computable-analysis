@@ -3588,6 +3588,9 @@ requested output box `precisionAtStage n`. -/
 def arctanIntegralRectangleOnUnit_effectiveModulus :
     EffectiveModulusFor arctanIntegralRectangleOnUnit where
   inputPrecision := fun n => n + 1
+  inputPrecision_pos := by
+    intro n
+    omega
   evalPrecision := fun n =>
     4 * ((precisionAtStage n).val.den + 1)
   close := by
@@ -4388,6 +4391,9 @@ def coordinateTimesArctanIntegralRectangleDerivativeOnUnit_effectiveModulus :
     EffectiveModulusFor
       coordinateTimesArctanIntegralRectangleDerivativeOnUnit where
   inputPrecision := fun n => 6 * (n + 1)
+  inputPrecision_pos := by
+    intro n
+    exact Nat.mul_pos (by omega) (Nat.succ_pos n)
   evalPrecision := fun n =>
     4 * (((precisionAtStage n).val / 2).den + 1)
   close := by

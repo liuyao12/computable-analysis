@@ -372,6 +372,59 @@ theorem effectiveFTC_equiv_endpoint
   exact (RealRaw.compareAt_overlap_iff
     (riemannRawOfEffectiveFTC h) (endpointRawOfEffectiveFTC h) n n).2 hgood.1
 
+/-! The accuracy clauses of an effective FTC also give the two width-shrink
+   obligations needed by later raw-real adapters.  This is deliberately
+   separate from `Valid`: the scheduled boxes need not be nested in their
+   native stage order, so prefix stabilization still has a genuine role. -/
+
+theorem effectiveFTC_riemannRaw_widths_shrink
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveFTC F dF a b) :
+    RealRaw.WidthsShrinkToZero (riemannRawOfEffectiveFTC h).compute := by
+  intro eps
+  let N : Nat := eps.val.den + 1
+  refine ⟨N, ?_⟩
+  intro n hn
+  have hNpos : 0 < N := by
+    dsimp [N]
+    omega
+  have hnpos : 0 < n := Nat.lt_of_lt_of_le hNpos hn
+  have hprecision : (requestedPrecision n).val <= eps.val := by
+    rw [requestedPrecision, dif_neg (Nat.ne_of_gt hnpos)]
+    have hmono := one_div_nat_antitone
+      (n := eps.val.den + 1) (m := n)
+      (by omega) (by omega) hn
+    calc
+      1 / (n : Rat) <=
+          1 / (((eps.val.den + 1 : Nat) : Rat)) := hmono
+      _ <= eps.val := one_div_den_succ_le_of_pos eps.property
+  exact Rat.le_trans
+    (h.good (requestedPrecision n)).2.1 hprecision
+
+theorem effectiveFTC_endpointRaw_widths_shrink
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveFTC F dF a b) :
+    RealRaw.WidthsShrinkToZero (endpointRawOfEffectiveFTC h).compute := by
+  intro eps
+  let N : Nat := eps.val.den + 1
+  refine ⟨N, ?_⟩
+  intro n hn
+  have hNpos : 0 < N := by
+    dsimp [N]
+    omega
+  have hnpos : 0 < n := Nat.lt_of_lt_of_le hNpos hn
+  have hprecision : (requestedPrecision n).val <= eps.val := by
+    rw [requestedPrecision, dif_neg (Nat.ne_of_gt hnpos)]
+    have hmono := one_div_nat_antitone
+      (n := eps.val.den + 1) (m := n)
+      (by omega) (by omega) hn
+    calc
+      1 / (n : Rat) <=
+          1 / (((eps.val.den + 1 : Nat) : Rat)) := hmono
+      _ <= eps.val := one_div_den_succ_le_of_pos eps.property
+  exact Rat.le_trans
+    (h.good (requestedPrecision n)).2.2 hprecision
+
 /-! A scheduled FTC need not produce nested boxes at its public stage index.
 The following adapter makes the finite Riemann computation into a valid raw
 real by prefix-stabilizing it against the canonical endpoint difference. -/

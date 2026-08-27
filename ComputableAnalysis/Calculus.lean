@@ -5505,7 +5505,7 @@ theorem boundedIntegralRaw_precision_witness
       h.boundedIntegralRaw_width_le_of_tolerance n
     _ = 1 / (((eps.val.den + 1 : Nat) : Rat)) := by
       simp [n, precisionAtStage]
-    _ <= eps.val := ComputableAnalysis.FTC.one_div_den_succ_le_of_pos eps.property
+    _ <= eps.val := one_div_den_succ_le_of_pos eps.property
 
 /-- The derivative-bound FTC bridge, in computable-real form. -/
 theorem equiv_endpoint
@@ -7528,6 +7528,7 @@ interval.  This is the continuity data used by IVT and eventually by the
 integral constructor; it includes the domain certificate. -/
 structure EffectiveModulusFor (F : FunctionOnInterval) where
   inputPrecision : Nat -> Nat
+  inputPrecision_pos : forall n, 0 < inputPrecision n
   evalPrecision : Nat -> Nat
   close :
     forall x y n
@@ -7556,7 +7557,7 @@ theorem EffectiveModulusFor.epsilonDeltaContinuous
   have hstage : (precisionAtStage n).val <= eps.val := by
     dsimp [n]
     simp [precisionAtStage]
-    exact FTC.one_div_den_succ_le_of_pos eps.property
+    simpa [Rat.natCast_add] using one_div_den_succ_le_of_pos eps.property
   unfold intervalNearAtPrecision at hnear
   unfold QInterval.NearAt at hnear ⊢
   rcases hnear with ⟨hxylo, hyxlo, hxwidth, hywidth⟩
@@ -8091,6 +8092,9 @@ presentation used by effective continuity consumers. -/
 def exactRat_constant_effectiveModulusFor (c a b : Rat) :
     EffectiveModulusFor (FunctionOnInterval.exactRat (fun _ => c) a b) where
   inputPrecision := fun _n => 1
+  inputPrecision_pos := by
+    intro n
+    omega
   evalPrecision := fun _n => 0
   close := by
     intro x y n hx hy hxy
@@ -10436,15 +10440,6 @@ theorem intervalRegularDarbouxScheduleRaw_precision_witness
   obtain ⟨N, hN⟩ := s.widths_shrink eps
   exact ⟨N, hN N (Nat.le_refl N)⟩
 
-theorem intervalRegularDarbouxScheduleIntegralFor_precision_witness
-    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
-    {hinterval : F.lower <= F.upper}
-    (s : IntervalRegularDarbouxSchedule F hregular hinterval) (eps : QPos) :
-    ∃ n : Nat,
-      ((intervalRegularDarbouxScheduleIntegralFor s).compute n).width <= eps.val := by
-  obtain ⟨N, hN⟩ := intervalRegularDarbouxScheduleRaw_precision_witness s eps
-  exact ⟨N, hN⟩
-
 theorem intervalRegularDarbouxScheduleRaw_width_le_of_tolerance
     {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
     {hinterval : F.lower <= F.upper}
@@ -10509,6 +10504,15 @@ def intervalRegularDarbouxScheduleIntegralFor
     {hinterval : F.lower <= F.upper}
     (s : IntervalRegularDarbouxSchedule F hregular hinterval) : RealRaw :=
   Integral.integralFor F (intervalRegularDarbouxScheduleConstructionFor s)
+
+theorem intervalRegularDarbouxScheduleIntegralFor_precision_witness
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hinterval : F.lower <= F.upper}
+    (s : IntervalRegularDarbouxSchedule F hregular hinterval) (eps : QPos) :
+    ∃ n : Nat,
+      ((intervalRegularDarbouxScheduleIntegralFor s).compute n).width <= eps.val := by
+  obtain ⟨N, hN⟩ := intervalRegularDarbouxScheduleRaw_precision_witness s eps
+  exact ⟨N, hN⟩
 
 theorem intervalRegularDarbouxScheduleIntegralFor_valid
     {F : FunctionOnInterval} {hregular : IntervalRegularOn F}

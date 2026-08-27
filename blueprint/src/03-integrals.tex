@@ -906,6 +906,16 @@ StaticDyadicEffectiveFTC      -> equal-dyadic specialization
 \lean{ComputableAnalysis.DerivativeBoundFTC.boundedIntegralRaw_precision_witness}
 \leanok
 
+The general `EffectiveFTC` contract now exposes the corresponding shrinking
+facts for both scheduled sides.  Accuracy at precision (1/n) is therefore
+not only a pointwise error claim: it supplies the width-shrink input required
+by the raw-real layer.  Nesting remains a separate obligation, handled by
+prefix stabilization when a schedule chooses stages out of order.
+
+\lean{ComputableAnalysis.FTC.effectiveFTC_riemannRaw_widths_shrink}
+\lean{ComputableAnalysis.FTC.effectiveFTC_endpointRaw_widths_shrink}
+\leanok
+
 The interval-level function interface is closed under addition on a common
 rational chart.  This is the algebraic operation used when primitives or
 integrands are assembled from separately certified pieces; validity is proved

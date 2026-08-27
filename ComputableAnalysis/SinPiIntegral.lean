@@ -2986,6 +2986,10 @@ def oneMinusCosOnHalf_effectiveModulus
     EffectiveModulusFor (oneMinusCosOnHalf B) where
   inputPrecision := fun n =>
     2 * tangentModulus.inputPrecision (4 * (n + 1))
+  inputPrecision_pos := by
+    intro n
+    exact Nat.mul_pos (by omega)
+      (tangentModulus.inputPrecision_pos (4 * (n + 1)))
   evalPrecision := fun n =>
     tangentModulus.evalPrecision (4 * (n + 1))
   close := by
@@ -5091,6 +5095,10 @@ def ArctanSinPiConstruction.sinPiOnHalf_effectiveModulus
     EffectiveModulusFor S.onHalf where
   inputPrecision := fun n =>
     2 * tangentModulus.inputPrecision (2 * (n + 1))
+  inputPrecision_pos := by
+    intro n
+    exact Nat.mul_pos (by omega)
+      (tangentModulus.inputPrecision_pos (2 * (n + 1)))
   evalPrecision := fun n =>
     tangentModulus.evalPrecision (2 * (n + 1))
   close := by
