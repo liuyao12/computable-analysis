@@ -105,6 +105,20 @@ theorem effectiveGeneralIntegralFor_precision_witness_of_cell_budgets
   exact piecewiseMonotoneIntegralFor_precision_witness_of_cell_budgets
     F c eps bound hcell hsum
 
+/-! Representation changes are explicit: an alternative finite list of cell
+evaluators can be used once its entries are proved equivalent to the
+canonical list. -/
+theorem effectiveGeneralIntegralFor_equiv_of_finiteRawListEquiv
+    (F : FunctionOnInterval)
+    (c : GeneralConstructionFor F)
+    (xs : List RealRaw)
+    (hxs : ∀ x, x ∈ xs -> x.Valid)
+    (hlist : FiniteRawListEquiv
+      (piecewiseMonotoneCellList F c) xs) :
+    (generalIntegralFor F c).Equiv (finiteRawSum xs) := by
+  exact piecewiseMonotoneIntegralFor_equiv_of_finiteRawListEquiv
+    F c xs hxs hlist
+
 /-! Publicly expose the finite mean-value conclusion through the effective
 calculus entry point.  The conclusion is an overlap of rational boxes, so it
 does not select an attained intermediate real number. -/

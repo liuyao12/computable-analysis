@@ -11897,6 +11897,30 @@ theorem piecewiseMonotoneIntegralFor_equiv_finiteRawSum
   simpa [piecewiseMonotoneIntegralFor, piecewiseMonotoneCellList,
     cell, step, RealRaw.zero] using hclean
 
+/-! A client may substitute another finite evaluator list for the canonical
+cell list.  The supplied list equivalence is the explicit representation edge
+between the two implementations; the finite sum then transports it to the
+assembled integral. -/
+theorem piecewiseMonotoneIntegralFor_equiv_of_finiteRawListEquiv
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F)
+    (xs : List RealRaw)
+    (hxs : ∀ x, x ∈ xs -> x.Valid)
+    (hlist : FiniteRawListEquiv
+      (piecewiseMonotoneCellList F c) xs) :
+    (piecewiseMonotoneIntegralFor F c).Equiv (finiteRawSum xs) := by
+  have hcanonical : ∀ x, x ∈ piecewiseMonotoneCellList F c -> x.Valid :=
+    piecewiseMonotoneCellList_valid F c
+  have hsum : (finiteRawSum (piecewiseMonotoneCellList F c)).Equiv
+      (finiteRawSum xs) :=
+    finiteRawSum_equiv_of_forall hlist hcanonical hxs
+  exact RealRaw.equiv_trans
+    (piecewiseMonotoneIntegralFor_valid F c)
+    (finiteRawSum_valid _ hcanonical)
+    (finiteRawSum_valid _ hxs)
+    (piecewiseMonotoneIntegralFor_equiv_finiteRawSum F c)
+    hsum
+
 /-! A cell endpoint difference is the raw subtraction of the two endpoint
 evaluators.  Its validity follows directly from the interval function's
 pointwise validity; no global real-valued function or completeness principle
