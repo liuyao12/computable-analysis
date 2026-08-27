@@ -2031,6 +2031,52 @@ theorem sinTerm_primitive_relation (z : QComplex) (k : Nat) :
       cases z <;> simp [QComplex.scaleRat, QComplex.neg]
       grind [Rat.div_def, Rat.inv_mul_cancel, Rat.mul_assoc, Rat.mul_comm]
 
+theorem cosTerm_primitive_relation (z : QComplex) (k : Nat) :
+    QComplex.scaleRat (1 / (((2 * k + 1 : Nat) : Rat)))
+        (QComplex.mul z (cosTerm z k)) =
+      sinTerm z k := by
+  have hd : (((2 * k + 1 : Nat) : Rat)) ≠ 0 :=
+    FormalPowerSeries.natCast_succ_ne_zero (2 * k)
+  calc
+    _ = QComplex.scaleRat (1 / (((2 * k + 1 : Nat) : Rat)))
+        (QComplex.scaleRat (((2 * k + 1 : Nat) : Rat)) (sinTerm z k)) := by
+      rw [sinTerm_derivative_relation]
+    _ = QComplex.scaleRat
+        (1 / (((2 * k + 1 : Nat) : Rat)) * (((2 * k + 1 : Nat) : Rat)))
+        (sinTerm z k) := by
+      rw [QComplex.scaleRat_scaleRat]
+    _ = sinTerm z k := by
+      have hcancel :
+          (1 / (((2 * k + 1 : Nat) : Rat))) * (((2 * k + 1 : Nat) : Rat)) = 1 := by
+        rw [Rat.div_def, Rat.one_mul]
+        exact Rat.inv_mul_cancel _ hd
+      rw [hcancel]
+      cases z <;> simp [QComplex.scaleRat]
+
+def cosIntegratedPartial (z : QComplex) (n : Nat) : QComplex :=
+  (List.range n).foldl
+    (fun acc k => QComplex.add acc
+      (QComplex.scaleRat (1 / (((2 * k + 1 : Nat) : Rat)))
+        (QComplex.mul z (cosTerm z k))))
+    QComplex.zero
+
+theorem cosIntegratedPartial_eq_sinPartial (z : QComplex) (n : Nat) :
+    cosIntegratedPartial z n = sinPartial z n := by
+  induction n with
+  | zero =>
+      simp [cosIntegratedPartial, sinPartial, QComplex.zero]
+  | succ n ih =>
+      calc
+        cosIntegratedPartial z (n + 1) =
+            QComplex.add (cosIntegratedPartial z n)
+              (QComplex.scaleRat (1 / (((2 * n + 1 : Nat) : Rat)))
+                (QComplex.mul z (cosTerm z n))) := by
+          simp [cosIntegratedPartial, List.range_succ, List.foldl_append]
+        _ = QComplex.add (sinPartial z n) (sinTerm z n) := by
+          rw [ih, cosTerm_primitive_relation]
+        _ = sinPartial z (n + 1) := by
+          rw [sinPartial_succ]
+
 def cosPartial (z : QComplex) (n : Nat) : QComplex :=
   (List.range n).foldl (fun acc k => QComplex.add acc (cosTerm z k)) QComplex.zero
 

@@ -3952,6 +3952,10 @@ potential-infinity precision schedule.
   the integrated sine prefix is exactly `1 - cosPartial (n+1)`.  The proof is
   finite rational-complex algebra; convergence and the effective FTC remain
   separate later interfaces.
+  The symmetric identity `ComplexSeries.cosTerm_primitive_relation` and its
+  list aggregate `ComplexSeries.cosIntegratedPartial_eq_sinPartial` provide
+  the corresponding cosine-to-sine primitive.  Together these are the finite
+  trigonometric integration interface.
 - The same formal layer now covers the coefficient-shift identities for trig
   and hyperbolic streams:
   `sin -> cos`, `cos -> -sin`, `sinh -> cosh`, and
