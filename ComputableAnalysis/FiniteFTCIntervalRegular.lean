@@ -2340,6 +2340,56 @@ theorem cubeEffectiveFTC_equiv_endpoint :
       cubeEffectiveFTCData.toDerivativeBoundFTC.endpointRaw := by
   exact effectiveDerivativeBoundFTC cubeEffectiveFTCData
 
+/-! The cubic schedule can now be viewed through the curvature interface.  All
+finite budgets are inherited from `cubeEffectiveFTCData`; the new certificate
+only records that the derivative bounds arise from convexity of the cubic. -/
+def cubeCurvatureFTCData :
+    CurvatureFTCCertificate cubePrimitiveRaw cubeDerivativeRaw 0 1 where
+  primitive_domain_lower := trivial
+  primitive_domain_upper := trivial
+  choosePartition := cubeEffectiveFTCData.choosePartition
+  chooseEndpointPrecision := cubeEffectiveFTCData.chooseEndpointPrecision
+  chooseBoundStage := cubeEffectiveFTCData.chooseBoundStage
+  curvatureBound := by
+    intro eps k hk
+    let C := (cubeEffectiveFTCData.choosePartition eps).cell k hk
+    exact ExactFunction.cubeRaw_derivativeBoundFromCurvature_of_nonneg C C.lower_mem
+  localControl := by
+    intro eps k hk
+    simpa [cubeEffectiveFTCData,
+      ExactFunction.cubeRaw_derivativeBoundFromCurvature_of_nonneg,
+      ExactFunction.cubeRaw_monotoneDerivativeBoundMethod_of_nonneg,
+      ExactFunction.cubeRaw_curvatureOnSubinterval_of_nonneg,
+      DerivativeBoundFromCurvature.toDerivativeBound,
+      MonotoneDerivativeBoundMethod.toDerivativeBound,
+      endpointDerivativeBound, cubeEffectiveDerivativeBound,
+      cubeEffectiveBound, cubeDerivativeRaw, cubePrimitiveRaw,
+      RealFunRaw.exact] using
+      (cubeEffectiveFTCData.localControl eps k hk)
+  riemann_width := by
+    intro eps
+    simpa [cubeEffectiveFTCData,
+      ExactFunction.cubeRaw_derivativeBoundFromCurvature_of_nonneg,
+      ExactFunction.cubeRaw_monotoneDerivativeBoundMethod_of_nonneg,
+      DerivativeBoundFromCurvature.toDerivativeBound,
+      MonotoneDerivativeBoundMethod.toDerivativeBound,
+      endpointDerivativeBound, cubeEffectiveDerivativeBound,
+      cubeEffectiveBound, cubeDerivativeRaw, RealFunRaw.exact] using
+      (cubeEffectiveFTCData.riemann_width eps)
+  endpoint_width := cubeEffectiveFTCData.endpoint_width
+  overlap := by
+    intro eps
+    change QInterval.Overlaps
+      ((cubeEffectivePartitionOf eps).boundIntegralSum
+        (fun k hk => (cubeEffectiveDerivativeBound eps k hk).bound 0))
+      (endpointDifferenceInterval cubePrimitiveRaw 0 1 0)
+    exact cubeEffectiveFTCData.toDerivativeBoundFTC.overlap eps
+
+theorem cubeCurvatureFTC_equiv_endpoint :
+    cubeCurvatureFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      cubeCurvatureFTCData.toDerivativeBoundFTC.endpointRaw := by
+  exact cubeCurvatureFTCData.equiv_endpoint
+
 /-! ## Quartic effective FTC instance
 
 The quartic is the next polynomial regression.  Its derivative enclosure is
