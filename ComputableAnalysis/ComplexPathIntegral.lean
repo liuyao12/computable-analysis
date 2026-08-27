@@ -511,6 +511,14 @@ theorem polygonalIntegralRawEntire_valid
     have hnest := certificate.nested n m hnm
     exact ⟨hnest.1.1, hnest.2.1, hnest.1.2, hnest.2.2⟩
 
+theorem PolygonalIntegralCertificate.precision_witness
+    {f : EntireBoxFunctionRaw} {vertices : List QComplex}
+    (certificate : PolygonalIntegralCertificate f vertices) (eps : QPos) :
+    ∃ N : Nat, ∀ n : Nat, N <= n ->
+      (polygonalIntegralBoxEntire f vertices n).width <= eps.val /\
+      (polygonalIntegralBoxEntire f vertices n).height <= eps.val := by
+  exact certificate.widths_shrink eps
+
 def zero : QComplex := QComplex.zero
 def one : QComplex := QComplex.one
 def I : QComplex := { re := 0, im := 1 }

@@ -4101,6 +4101,9 @@ arguments.
   boundary explicit: ordered boxes, stage nesting, and potential-infinity
   width shrinkage must be supplied as finite certificates before the raw
   algorithm is promoted to a valid represented complex number.
+  `PolygonalIntegralCertificate.precision_witness` now exposes the resulting
+  requested-tolerance stage directly, with both coordinate widths bounded by
+  the supplied positive rational tolerance.
   The finite displacement identities
   `ComplexPathIntegral.polygonalDisplacementTo_append_endpoint` and
   `ComplexPathIntegral.polygonalDisplacementTo_closed` now provide the exact
