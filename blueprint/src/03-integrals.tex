@@ -1537,6 +1537,12 @@ half-angle route now consumes the weaker statement it actually proves—public
 circle-box overlap—without requiring literal equality with the clipped
 square-root evaluator:
 
+The reflected rational point is obtained algebraically by reciprocal
+parameter symmetry: sine is unchanged and cosine changes sign.
+
+\lean{ComputableAnalysis.SinPiIntegral.rationalCircleSin_inv}
+\lean{ComputableAnalysis.SinPiIntegral.rationalCircleCos_inv}
+
 \begin{verbatim}
 table cosine box -> half-angle geometry -> public/table overlap
                  -> direct branch-overlap adapter
