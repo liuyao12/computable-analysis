@@ -2643,6 +2643,12 @@ explicit.
 The companion `Integral.monotoneDarbouxScheduleRaw_width_le_of_tolerance`
 hands a supplied rational tolerance directly to any scheduled stage, making
 the finite width budget available to downstream FTC and MVT certificates.
+The turning-point layer now has the matching adaptive contract:
+`Integral.finiteStageSum_width_le_of_bounds` sums individual stage budgets,
+and `Integral.FinitePiecewiseStageAssembly.compute_width_le_of_bounds` exposes
+that bound for the complete monotone-piece/turning-gap assembly.  This is
+finite bookkeeping; the anchor-equivalence and potential-infinity schedule
+remain explicit.
 The independent `FinitePiecewiseRectangles` module now records the local
 equal-cell rule needed for a finite piecewise-monotone stage:
 `PieceCellKind.increasing` and `.decreasing` select endpoint order, while

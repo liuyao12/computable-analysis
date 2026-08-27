@@ -692,6 +692,8 @@ containing one of finitely many certified turns, and refine only the latter.
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.compute_widths_shrink}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.stabilizedRaw_valid}
 \lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.raw_widths_shrink}
+\lean{ComputableAnalysis.Integral.finiteStageSum_width_le_of_bounds}
+\lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.compute_width_le_of_bounds}
 \lean{ComputableAnalysis.Integral.MultiTurnIntegralCompletion.stabilizedRaw_valid}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.toMultiTurn}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.constructionFor}
@@ -707,6 +709,11 @@ already sum any supplied finite list of monotone-piece and turning-gap boxes;
 the remaining work for a new function is to supply its piece classification,
 shrinking budgets, and anchor equivalence. This does not introduce Lebesgue
 measure or a completed-real compactness argument.
+
+The assembly also accepts nonuniform budgets: if the (j)-th monotone piece
+or turning gap has width at most (e_j), the finite candidate is bounded by
+(sum_j e_j).  This is useful when a narrow, ill-conditioned turn receives
+more computation than a regular cell.
 
 This schedule layer is the honest frontier between the present foundation and
 the classical theorem that every continuous function on a closed interval is

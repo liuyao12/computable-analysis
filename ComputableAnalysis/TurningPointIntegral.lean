@@ -163,6 +163,36 @@ theorem finiteStageSum_width_le_length_mul
         _ = ((stages.length : Rat) + 1) * B := by
           grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc, Rat.add_comm]
 
+/-! The adaptive companion sums a separate rational budget for each supplied
+stage box.  This is the finite error contract used by nonuniform turning-point
+assemblies. -/
+
+theorem finiteStageSum_width_le_of_bounds
+    (stages : List ShrinkingStage) (n : Nat)
+    (bound : ShrinkingStage -> Rat)
+    (hbound : forall stage, stage ∈ stages ->
+      (stage.compute n).width <= bound stage) :
+    (finiteStageSum stages n).width <=
+      (stages.map bound).foldl (fun total r => total + r) 0 := by
+  induction stages with
+  | nil =>
+      simp only [finiteStageSum, List.map_nil, List.foldl]
+      change (0 : Rat) - 0 <= 0
+      rw [Rat.sub_self]
+      exact Rat.le_refl
+  | cons stage stages ih =>
+      have hstage := hbound stage (by simp)
+      have htail : forall other, other ∈ stages ->
+          (other.compute n).width <= bound other := by
+        intro other hother
+        exact hbound other (by simp [hother])
+      have hrest := ih htail
+      simp only [finiteStageSum, QInterval.addInterval_width,
+        List.map_cons, List.foldl]
+      simp only [Rat.zero_add]
+      rw [RationalPartition.rat_add_fold_initial]
+      exact _root_.ComputableAnalysis.rat_add_le_add hstage hrest
+
 /-- A finite sum of shrinking rational stage families has shrinking width.
 The proof gives each summand an equal rational portion of the requested error
 budget through structural recursion; it invokes neither completeness nor a
@@ -236,6 +266,14 @@ theorem compute_width_le_length_mul (A : FinitePiecewiseStageAssembly)
     (hbound : forall stage, stage ∈ A.stages -> (stage.compute n).width <= B) :
     (A.compute n).width <= (A.stages.length : Rat) * B :=
   finiteStageSum_width_le_length_mul A.stages n B hbound
+
+theorem compute_width_le_of_bounds (A : FinitePiecewiseStageAssembly)
+    (n : Nat) (bound : ShrinkingStage -> Rat)
+    (hbound : forall stage, stage ∈ A.stages ->
+      (stage.compute n).width <= bound stage) :
+    (A.compute n).width <=
+      (A.stages.map bound).foldl (fun total r => total + r) 0 :=
+  finiteStageSum_width_le_of_bounds A.stages n bound hbound
 
 theorem compute_widths_shrink (A : FinitePiecewiseStageAssembly) :
     RealRaw.WidthsShrinkToZero A.compute :=
