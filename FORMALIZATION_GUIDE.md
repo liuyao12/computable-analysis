@@ -1081,6 +1081,9 @@ pieces and
 decreasing pieces.  Both constructors use a cumulative natural-number stage
 to dominate the evaluator's input modulus; no monotonicity of that modulus is
 assumed.  Supply only a natural upper bound for the rational interval length.
+For a known non-linear decreasing mesh schedule, use
+`Integral.NonincreasingDarbouxSchedule.ofScheduledEndpointOrderedOfBudget`
+and its corresponding width theorem instead.
 To feed such a piece into `PiecewiseMonotoneConstructionFor`, use the
 corresponding `MonotoneConstructionFor.ofAutomaticEndpointOrderedNondecreasing`
 or `MonotoneConstructionFor.ofAutomaticEndpointOrderedNonincreasing` adapter.

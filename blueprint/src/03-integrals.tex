@@ -292,6 +292,9 @@ cells(n) := 2^stage(n),    precision(n) := n
 \lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule.ofAutomaticEndpointOrdered}
 The same construction is available with the orientation reversed:
 \lean{ComputableAnalysis.Integral.NonincreasingDarbouxSchedule.ofAutomaticEndpointOrdered}
+The decreasing side also exposes the general scheduled constructor:
+\lean{ComputableAnalysis.Integral.nonincreasingDarbouxScheduledSchedule_widths_shrink_of_budget}
+\lean{ComputableAnalysis.Integral.NonincreasingDarbouxSchedule.ofScheduledEndpointOrderedOfBudget}
 Both schedules can be promoted directly to a monotone piece for finite-turn
 assembly:
 \lean{ComputableAnalysis.Integral.MonotoneConstructionFor.ofAutomaticEndpointOrderedNondecreasing}

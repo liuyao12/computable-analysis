@@ -13411,6 +13411,62 @@ structure NonincreasingDarbouxSchedule
     (nonincreasingDarbouxScheduleCompute F hinterval pieces evalPrecision
       pieces_pos)
 
+theorem nonincreasingDarbouxScheduledSchedule_widths_shrink_of_budget
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    (hinterval : F.lower <= F.upper)
+    (stages evalPrecision : Nat -> Nat)
+    (hinput : forall n : Nat,
+      mesh F.lower F.upper (2 ^ stages n) <=
+        1 / ((hregular.inputPrecision (evalPrecision n) : Nat) : Rat))
+    (hbudget : forall eps : QPos, Exists fun N : Nat =>
+      forall n : Nat, N <= n ->
+        (F.upper - F.lower) *
+          (1 / ((evalPrecision n + 1 : Nat) : Rat)) <= eps.val) :
+    RealRaw.WidthsShrinkToZero
+      (nonincreasingDarbouxScheduleCompute F hinterval
+        (fun n => 2 ^ stages n) evalPrecision
+        (fun n => Nat.pow_pos (by omega : 0 < 2))) := by
+  intro eps
+  rcases hbudget eps with ⟨N, hN⟩
+  refine ⟨N, ?_⟩
+  intro n hn
+  exact Rat.le_trans
+    (nonincreasingDarbouxStage_width_le_of_uniform_input_budget
+      F hregular (2 ^ stages n) (Nat.pow_pos (by omega : 0 < 2)) hinterval
+      (evalPrecision n) (hinput n))
+    (hN n hn)
+
+def NonincreasingDarbouxSchedule.ofScheduledEndpointOrderedOfBudget
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    (hF : EndpointOrderedNonincreasingOnInterval F)
+    (hinterval : F.lower <= F.upper)
+    (stages evalPrecision : Nat -> Nat)
+    (hstage : forall {n m : Nat}, n <= m -> stages n <= stages m)
+    (hprecision : forall {n m : Nat}, n <= m ->
+      evalPrecision n <= evalPrecision m)
+    (hinput : forall n : Nat,
+      mesh F.lower F.upper (2 ^ stages n) <=
+        1 / ((hregular.inputPrecision (evalPrecision n) : Nat) : Rat))
+    (hbudget : forall eps : QPos, Exists fun N : Nat =>
+      forall n : Nat, N <= n ->
+        (F.upper - F.lower) *
+          (1 / ((evalPrecision n + 1 : Nat) : Rat)) <= eps.val) :
+    NonincreasingDarbouxSchedule F hregular hF.toNonincreasing hinterval :=
+  { pieces := fun n => 2 ^ stages n
+    evalPrecision := evalPrecision
+    pieces_pos := by
+      intro n
+      exact Nat.pow_pos (by omega : 0 < 2)
+    input_budget := hinput
+    nested := by
+      intro n m hnm
+      have h := endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_scheduled_stage
+        F hF hinterval stages evalPrecision hstage hprecision hnm
+      simpa [nonincreasingDarbouxScheduleCompute,
+        nonincreasingDarbouxDyadicStage] using And.intro h.1 h.2
+    widths_shrink := nonincreasingDarbouxScheduledSchedule_widths_shrink_of_budget
+      hregular hinterval stages evalPrecision hinput hbudget }
+
 def NonincreasingDarbouxSchedule.ofDyadicEndpointOrderedOfBudget
     {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
     (hF : EndpointOrderedNonincreasingOnInterval F)
