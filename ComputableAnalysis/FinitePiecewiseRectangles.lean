@@ -76,6 +76,34 @@ theorem pieceCellBounds_decreasing_contains_endpoints
         leftValue := by
   exact ⟨rfl, rfl⟩
 
+theorem pieceCellBounds_increasing_contains_value
+    {leftValue rightValue turnLower turnUpper value : Rat}
+    (hleft : leftValue ≤ value) (hright : value ≤ rightValue) :
+    (pieceCellBounds .increasing leftValue rightValue turnLower turnUpper).lo ≤ value /\
+      value ≤ (pieceCellBounds .increasing leftValue rightValue turnLower turnUpper).hi := by
+  exact ⟨hleft, hright⟩
+
+theorem pieceCellBounds_decreasing_contains_value
+    {leftValue rightValue turnLower turnUpper value : Rat}
+    (hleft : rightValue ≤ value) (hright : value ≤ leftValue) :
+    (pieceCellBounds .decreasing leftValue rightValue turnLower turnUpper).lo ≤ value /\
+      value ≤ (pieceCellBounds .decreasing leftValue rightValue turnLower turnUpper).hi := by
+  exact ⟨hleft, hright⟩
+
+theorem pieceCellBounds_turning_contains_value
+    {leftValue rightValue turnLower turnUpper value : Rat}
+    (hlower : turnLower ≤ value) (hupper : value ≤ turnUpper) :
+    (pieceCellBounds .turning leftValue rightValue turnLower turnUpper).lo ≤ value /\
+      value ≤ (pieceCellBounds .turning leftValue rightValue turnLower turnUpper).hi := by
+  unfold pieceCellBounds
+  have hmin : min leftValue (min rightValue turnLower) ≤ turnLower := by
+    rw [Rat.min_def, Rat.min_def]
+    split <;> split <;> grind
+  have hmax : turnUpper ≤ max leftValue (max rightValue turnUpper) := by
+    rw [Rat.max_def, Rat.max_def]
+    split <;> split <;> grind
+  exact ⟨Rat.le_trans hmin hlower, Rat.le_trans hupper hmax⟩
+
 theorem pieceCellBounds_turning_contains_range
     {leftValue rightValue turnLower turnUpper : Rat}
     (_h : turnLower ≤ turnUpper) :
@@ -149,6 +177,20 @@ def pieceCellUpperArea (domainWidth : Rat) (kind : PieceCellKind)
     (leftValue rightValue turnLower turnUpper : Rat) : Rat :=
   domainWidth *
     (pieceCellBounds kind leftValue rightValue turnLower turnUpper).hi
+
+theorem pieceCellArea_contains_scaled_value
+    {domainWidth leftValue rightValue turnLower turnUpper value : Rat}
+    {kind : PieceCellKind} (hdomain : 0 ≤ domainWidth)
+    (hvalue :
+      (pieceCellBounds kind leftValue rightValue turnLower turnUpper).lo ≤ value /\
+        value ≤ (pieceCellBounds kind leftValue rightValue turnLower turnUpper).hi) :
+    pieceCellLowerArea domainWidth kind leftValue rightValue turnLower turnUpper ≤
+        domainWidth * value /\
+      domainWidth * value ≤
+        pieceCellUpperArea domainWidth kind leftValue rightValue turnLower turnUpper := by
+  unfold pieceCellLowerArea pieceCellUpperArea
+  exact ⟨Rat.mul_le_mul_of_nonneg_left hvalue.1 hdomain,
+    Rat.mul_le_mul_of_nonneg_left hvalue.2 hdomain⟩
 
 theorem pieceCellLowerArea_le_upper
     {domainWidth leftValue rightValue turnLower turnUpper : Rat}

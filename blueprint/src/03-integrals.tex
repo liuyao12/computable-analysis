@@ -813,6 +813,18 @@ equivalence chain.
 \lean{ComputableAnalysis.PiecewiseRectangleCertificate.gap_le_common_range}
 \leanok
 
+The cell certificate now exposes the local semantic step explicitly.  An
+increasing or decreasing cell uses its endpoint order; a turning cell uses
+the supplied turn bracket.  In each case every certified value lies in the
+rectangle, and nonnegative cell width transports that enclosure to the
+corresponding area contribution.
+
+\lean{ComputableAnalysis.pieceCellBounds_increasing_contains_value}
+\lean{ComputableAnalysis.pieceCellBounds_decreasing_contains_value}
+\lean{ComputableAnalysis.pieceCellBounds_turning_contains_value}
+\lean{ComputableAnalysis.pieceCellArea_contains_scaled_value}
+\leanok
+
 The geometric certificate is deliberately elementary: a parent point on the
 unit circle with nonnegative coordinates has child coordinates satisfying
 
