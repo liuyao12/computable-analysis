@@ -93,6 +93,7 @@ finite transform -> coordinate tail box -> future-stage containment
 \lean{ComputableAnalysis.EffectiveFourierTailCertificate.stageBox_width}
 \lean{ComputableAnalysis.EffectiveFourierTailCertificate.stageBox_height}
 \lean{ComputableAnalysis.EffectiveFourierSeries.stabilized_valid}
+\lean{ComputableAnalysis.EffectiveFourierSeries.stabilized_width_le_of_candidate}
 \lean{ComputableAnalysis.EffectiveFourierSeries.precision_witness}
 \lean{ComputableAnalysis.finiteSupportFourierSeries_stabilized_equiv}
 \lean{ComputableAnalysis.quarterTurnGeometricTailCertificate_valid}
@@ -109,6 +110,11 @@ complex value.
 \lean{ComputableAnalysis.quarterTurnGeometricFourierSeries}
 \lean{ComputableAnalysis.quarterTurnGeometricFourierSeries_future_stage_enclosure}
 \leanok
+
+The stabilized Fourier box has an explicit width contract as well: its real
+coordinate width is bounded by the current candidate width plus twice the
+tail radius.  This is the complex-series analogue of the integral error
+budget and is the interface consumed by numerical applications.
 
 \section{The computable Fourier-series contract}
 

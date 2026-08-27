@@ -1643,6 +1643,10 @@ unnormalized inverse reconstruction, injectivity, conjugate symmetry,
 linearity, period-four indexing, and cyclic convolution. These are exact
 finite QComplex identities; they do not introduce Mathlib's completed
 complex numbers or silently claim convergence of a general Fourier series.
+The effective Fourier-series stabilizer now also exposes its real-coordinate
+error budget through `EffectiveFourierSeries.stabilized_width_le_of_candidate`:
+candidate width plus twice the supplied tail radius. This makes the tail
+certificate directly usable by downstream precision accounting.
 
 The exact lattice triangles in `FinitePickCertificate.lean` add item 92's
 finite coordinate core.  The `(4,3)` triangle has area `6`, boundary count `8`,

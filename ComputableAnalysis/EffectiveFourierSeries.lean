@@ -40,6 +40,12 @@ theorem EffectiveFourierSeries.stabilized_valid
     F.candidate_ordered F.candidate_shrinks
     F.future_containment F.radius_shrinks
 
+theorem EffectiveFourierSeries.stabilized_width_le_of_candidate
+    (F : EffectiveFourierSeries) (n : Nat) :
+    (F.stabilized.compute n).width <=
+      (F.candidate.compute n).width + 2 * F.radius n := by
+  exact ComplexRaw.cauchyStabilize_width_le_current_expand n
+
 theorem EffectiveFourierSeries.stage_contained
     (F : EffectiveFourierSeries) (n : Nat) :
     (QBox.point (finiteFourierSum F.root F.mode (F.stage n))).NestedIn
