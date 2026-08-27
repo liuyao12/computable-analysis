@@ -12242,6 +12242,79 @@ theorem piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_canonical_
   exact piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_telescope
     F c h hvalues htransport htotal
 
+/-! The final endpoint transport is also finite list algebra.  When the
+canonical endpoint list is used, its first and last entries are the endpoint
+evaluators of `F`; no separate telescope certificate is needed. -/
+theorem piecewiseMonotoneCanonicalEndpointDifference_equiv_totalEndpointDifference
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) {first : RealRaw} {rest : List RealRaw}
+    (hcanonical : first :: rest = piecewiseMonotoneEndpointValueList F c) :
+    (rawLast first rest - first).Equiv
+      (piecewiseMonotoneTotalEndpointDifference F c) := by
+  let endpoint : Nat -> RealRaw := fun k =>
+    if hk : k <= c.pieces then
+      F.raw.evalRaw (c.point k)
+        (F.defined_on (c.point k) (c.point_mem k hk))
+    else RealRaw.zero
+  have hshape : piecewiseMonotoneEndpointValueList F c =
+      endpoint 0 :: (List.range c.pieces).map (fun k => endpoint (k + 1)) := by
+    simp [piecewiseMonotoneEndpointValueList, endpoint,
+      List.range_succ_eq_map, Function.comp_def]
+  have hlast_aux : forall (g : Nat -> RealRaw) (m : Nat),
+      rawLast (g 0) ((List.range m).map (fun k => g (k + 1))) = g m := by
+    intro g m
+    induction m generalizing g with
+    | zero => simp [rawLast]
+    | succ m ih =>
+        rw [List.range_succ_eq_map]
+        simp only [List.map_cons, List.map_map]
+        have htail := ih (fun k => g (k + 1))
+        simpa [rawLast, Function.comp_def, Nat.add_assoc] using htail
+  rw [hshape] at hcanonical
+  have hfirst : first = endpoint 0 := by
+    injection hcanonical with hfirst _
+  have hrest : rest = (List.range c.pieces).map (fun k => endpoint (k + 1)) := by
+    injection hcanonical with _ hrest
+  rw [hfirst, hrest, hlast_aux endpoint c.pieces]
+  simpa [piecewiseMonotoneTotalEndpointDifference, endpoint] using
+    (RealRaw.equiv_refl
+      (piecewiseMonotoneTotalEndpointDifference F c)
+      (piecewiseMonotoneTotalEndpointDifference_valid F c))
+
+/-! With canonical endpoint values, the piecewise finite FTC now needs only
+the cell endpoint certificates. -/
+theorem piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_canonical_values
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F)
+    (h : PiecewiseMonotoneEndpointFTCFor F c) :
+    (piecewiseMonotoneIntegralFor F c).Equiv
+      (piecewiseMonotoneTotalEndpointDifference F c) := by
+  let first : RealRaw := F.raw.evalRaw (c.point 0)
+    (F.defined_on (c.point 0) (c.point_mem 0 (Nat.zero_le _)))
+  let endpoint : Nat -> RealRaw := fun k =>
+    if hk : k <= c.pieces then
+      F.raw.evalRaw (c.point k)
+        (F.defined_on (c.point k) (c.point_mem k hk))
+    else RealRaw.zero
+  let rest : List RealRaw := (List.range c.pieces).map
+    (fun k => endpoint (k + 1))
+  have hcanonical : first :: rest = piecewiseMonotoneEndpointValueList F c := by
+    simp [first, rest, endpoint, piecewiseMonotoneEndpointValueList,
+      List.range_succ_eq_map, Function.comp_def]
+  have hvalues : forall x, x ∈ first :: rest -> x.Valid := by
+    rw [hcanonical]
+    exact piecewiseMonotoneEndpointValueList_valid F c
+  have htotal := piecewiseMonotoneCanonicalEndpointDifference_equiv_totalEndpointDifference
+    F c hcanonical
+  have htransport :
+      FiniteRawListEquiv
+        (piecewiseMonotoneEndpointDifferenceList F c)
+        (rawAdjacentDifferenceList (first :: rest)) := by
+    rw [hcanonical]
+    exact piecewiseMonotoneEndpointDifferenceList_equiv_canonicalAdjacent F c
+  exact piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_telescope
+    F c h hvalues htransport htotal
+
 /-- A one-piece promotion from a monotone construction computes the same raw
 integral as the original monotone construction. -/
 theorem piecewiseMonotoneIntegralFor_ofMonotone_equiv

@@ -684,8 +684,14 @@ function is difficult and use a cheaper evaluator elsewhere.
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneTotalEndpointDifference_valid}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_telescope}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_canonical_telescope}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneCanonicalEndpointDifference_equiv_totalEndpointDifference}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_canonical_values}
 \lean{ComputableAnalysis.Integral.generalIntegralFor_equiv_totalEndpointDifference_of_telescope}
 \leanok
+
+With canonical partition endpoints, the last finite transport is automatic:
+cellwise FTC certificates now close the piecewise integral directly to the
+endpoint difference.
 
 Finite rectangular products use the same assembly law in any fixed number
 of dimensions.  The nested sum is finite and rational; induction factors a
