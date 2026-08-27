@@ -1129,6 +1129,19 @@ def duhamelSum (system : DiscreteLinearSystem dimension) (final : Nat) :
     RatVector dimension :=
   vectorSequenceSum (duhamelTerm system final) final
 
+/-- Apply the finite geometric forcing estimate directly to a sampled
+inhomogeneous system.  The hypothesis is intentionally a term certificate:
+the transition-growth proof and the forcing evaluator can be supplied
+independently, then combined without any infinite trajectory object. -/
+theorem duhamelSum_abs_le_geometric {dimension : Nat}
+    (system : DiscreteLinearSystem dimension) (final : Nat) (c g : Rat)
+    (hc : 0 <= c) (hg : 0 <= g)
+    (hterm : forall k, vectorAbsSum (duhamelTerm system final k) <= g * c ^ k) :
+    vectorAbsSum (duhamelSum system final) <= g * geometricBudget c final := by
+  unfold duhamelSum
+  exact vectorSequenceSum_abs_le_geometric
+    (duhamelTerm system final) c g hc hg hterm final
+
 private theorem forcingTransition_succ
     (system : DiscreteLinearSystem dimension) (n k : Nat) (hk : k < n) :
     forcingTransition system (n + 1) k =

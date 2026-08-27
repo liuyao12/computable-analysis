@@ -190,6 +190,7 @@ forcing samples -> time-ordered transitions -> finite Duhamel sum
 \lean{ComputableAnalysis.LinearODE.vectorAbsSum_add_le}
 \lean{ComputableAnalysis.LinearODE.geometricBudget}
 \lean{ComputableAnalysis.LinearODE.vectorSequenceSum_abs_le_geometric}
+\lean{ComputableAnalysis.LinearODE.duhamelSum_abs_le_geometric}
 \leanok
 
 The forcing sum has the same cut law as the transition product: its prefix
@@ -211,6 +212,8 @@ samples has size at most $g$ times the finite geometric budget
 
 This is the inhomogeneous stability estimate needed before passing from a
 sampled system to an analytic ODE provider.
+The public Duhamel wrapper accepts exactly this per-term certificate and
+returns the bound for the sampled forcing response.
 
 The motivating forced oscillator is now connected to this abstract algebra.
 Its two-dimensional Euler provider proves the velocity update and, after
