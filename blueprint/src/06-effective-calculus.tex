@@ -160,6 +160,20 @@ FTC before special functions enter.
 \lean{ComputableAnalysis.Integral.exactRat_nondecreasingDarbouxStage_stage_independent}
 \leanok
 
+Finite Taylor prefixes carry the corresponding derivative certificate directly:
+the derivative is the coefficient-shift prefix, and the proof is a rational
+secant bound on a bounded symmetric box.  This is the finite bridge used by
+the sine and exponential series; the tail-enclosed functions still require
+their own nesting and error certificates.
+
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefixSecantBound}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefix_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.sineTaylorPrefix_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.cosineTaylorPrefix_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefixAtSecantBound}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefixAt_hasDerivativeOnInterval}
+\leanok
+
 The square now also closes the full derivative-bound route.  The primitive
 $x^3/3$ and derivative $x^2$ are represented by rational interval evaluators;
 the effective FTC identifies the bounded rectangle computation with the
