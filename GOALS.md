@@ -2672,6 +2672,12 @@ packages the common-range form: a uniform value-width certificate bounds the
 whole mesh gap by the sum of the domain widths times that range budget.  This
 separates the two refinement obligations cleanly—geometric mesh width and
 function-value uncertainty—before any potential-infinity schedule is added.
+The finite raw-sum layer now exposes the corresponding public error contract:
+`Integral.finiteRawSum_compute_width_eq_foldl` identifies the assembled width
+with the sum of component widths, and
+`Integral.finiteRawSum_compute_width_le_of_forall` turns a common component
+bound into the length-times-bound estimate used by finite turning-point and
+piecewise FTC assemblies.
 The new `piecewiseRectangleAreaSum_constant` evaluates that constant per-cell
 budget exactly as `(cells.length : Rat) * value`.  Its companion
 `piecewiseRectangleAreaSum_gap_le_common_range` therefore gives the closed

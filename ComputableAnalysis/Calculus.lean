@@ -4565,7 +4565,7 @@ theorem addInterval_fold_overlaps_of_mem (xs : List Nat)
         (fun j hj => hterm j (List.mem_cons_of_mem k hj))
 
 /-- Moving a rational initial value outside a finite addition fold. -/
-theorem rat_add_fold_initial (xs : List Nat) (term : Nat -> Rat)
+theorem rat_add_fold_initial {α : Type} (xs : List α) (term : α -> Rat)
     (initial : Rat) :
     xs.foldl (fun total k => total + term k) initial =
       initial + xs.foldl (fun total k => total + term k) 0 := by
@@ -4601,7 +4601,7 @@ theorem addInterval_fold_width (xs : List Nat) (term : Nat -> QInterval)
 
 /-- A finite rational addition fold whose every term is bounded above by a
 constant is bounded by that constant times the number of terms. -/
-theorem rat_add_fold_le_length_mul (xs : List Nat) (term : Nat -> Rat)
+theorem rat_add_fold_le_length_mul {α : Type} (xs : List α) (term : α -> Rat)
     (c : Rat) (hterm : forall k, k ∈ xs -> term k <= c) :
     xs.foldl (fun total k => total + term k) 0 <= (xs.length : Rat) * c := by
   induction xs with
@@ -6885,6 +6885,38 @@ theorem finiteRawSum_valid :
         exact hxs y (by simp [hy])
       simpa [finiteRawSum] using
         RealRaw.add_valid hx (finiteRawSum_valid xs htail)
+
+/-! Finite piece assemblies expose a literal error budget.  This is only the
+interval arithmetic of the finite sum; it does not assert that the sum is an
+integral or invoke a limiting argument. -/
+
+theorem finiteRawSum_compute_width_eq_foldl
+    (xs : List RealRaw) (n : Nat) :
+    ((finiteRawSum xs).compute n).width =
+      xs.foldl (fun total x => total + (x.compute n).width) 0 := by
+  induction xs with
+  | nil =>
+      simp [finiteRawSum, RealRaw.zero, RealRaw.ofRat, QInterval.width] <;>
+        grind
+  | cons x xs ih =>
+      change (QInterval.addInterval (x.compute n)
+        ((finiteRawSum xs).compute n)).width = _
+      rw [QInterval.addInterval_width]
+      rw [ih]
+      simp only [List.foldl]
+      rw [show (0 : Rat) + (x.compute n).width = (x.compute n).width by
+        grind]
+      simpa using (RationalPartition.rat_add_fold_initial xs
+        (fun y => (y.compute n).width) (x.compute n).width).symm
+
+theorem finiteRawSum_compute_width_le_of_forall
+    (xs : List RealRaw) (n : Nat) (bound : Rat)
+    (hbound : forall x, x ∈ xs -> (x.compute n).width <= bound) :
+    ((finiteRawSum xs).compute n).width <= (xs.length : Rat) * bound := by
+  rw [finiteRawSum_compute_width_eq_foldl]
+  apply RationalPartition.rat_add_fold_le_length_mul
+  intro x hx
+  exact hbound x hx
 
 theorem finiteRawSum_append_equiv
     (xs ys : List RealRaw)

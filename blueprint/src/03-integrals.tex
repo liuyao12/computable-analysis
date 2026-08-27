@@ -572,8 +572,22 @@ member of an indexed list, then map that proof across the list.  This is the
 single closure used by piecewise primitives and other finite decompositions;
 routine changes of formula do not require another induction.
 
+The quantitative companion is equally explicit.  At every stage, the width
+of a finite raw sum is exactly the sum of the component widths.  Thus a
+uniform cell bound (e) over (m) pieces gives the total bound (m e):
+
+\begin{verbatim}
+cell widths <= e  ->  sum widths = width(sum) <= m*e
+\end{verbatim}
+
+This is the error-budget rule for a finite turning-point decomposition.  It
+does not claim that the assembled object is an infinite integral; it only
+exposes the finite budget that a later shrinking schedule must consume.
+
 \lean{ComputableAnalysis.Integral.finiteRawSum}
 \lean{ComputableAnalysis.Integral.finiteRawSum_valid}
+\lean{ComputableAnalysis.Integral.finiteRawSum_compute_width_eq_foldl}
+\lean{ComputableAnalysis.Integral.finiteRawSum_compute_width_le_of_forall}
 \lean{ComputableAnalysis.Integral.finiteRawSum_append_equiv}
 \lean{ComputableAnalysis.Integral.FiniteRawListLe}
 \lean{ComputableAnalysis.Integral.FiniteRawListLe.refl}
