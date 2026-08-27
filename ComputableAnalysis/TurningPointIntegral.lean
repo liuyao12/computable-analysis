@@ -694,6 +694,28 @@ theorem stabilizedRaw_valid {F : FunctionOnInterval}
     completion.anchor_valid completion.candidate_equiv_anchor
     completion.anchor_width_le_radius completion.radius_shrinks
 
+theorem stabilizedRaw_width_le_of_bounds {F : FunctionOnInterval}
+    {C : SingleTurnIntegralCandidate F}
+    (completion : SingleTurnIntegralCompletion C) (n : Nat)
+    (leftBound middleBound rightBound : Rat)
+    (hleft : (C.leftBox n).width <= leftBound)
+    (hmiddle : (C.middleBox n).width <= middleBound)
+    (hright : (C.rightBox n).width <= rightBound) :
+    (completion.stabilizedRaw.compute n).width <=
+      leftBound + middleBound + rightBound + 2 * completion.radius n := by
+  have hcandidate := C.compute_width_le_of_bounds n
+    leftBound middleBound rightBound hleft hmiddle hright
+  have hstable := RealRaw.prefixStabilize_width_le_current_expand
+    C.raw completion.radius n
+  change (completion.stabilizedRaw.compute n).width <=
+    (C.compute n).width + 2 * completion.radius n at hstable
+  calc
+    (completion.stabilizedRaw.compute n).width <=
+        (C.compute n).width + 2 * completion.radius n := hstable
+    _ <= (leftBound + middleBound + rightBound) +
+          2 * completion.radius n :=
+      rat_add_le_add hcandidate Rat.le_refl
+
 theorem stabilizedRaw_equiv_anchor {F : FunctionOnInterval}
     {C : SingleTurnIntegralCandidate F}
     (completion : SingleTurnIntegralCompletion C) :

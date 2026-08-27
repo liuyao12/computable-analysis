@@ -2694,6 +2694,10 @@ The adaptive counterpart `Integral.finiteRawSum_compute_width_le_of_bounds`
 allows a separate rational budget for each raw component and bounds the total
 width by their finite sum.  This is the intended interface for nonuniform
 turning-point meshes and differently conditioned special-function cells.
+The one-turn completion now carries that budget through prefix stabilization:
+`Integral.SingleTurnIntegralCompletion.stabilizedRaw_width_le_of_bounds`
+adds only twice the explicit anchor-radius budget to the three component
+bounds.
 The comparison lemma `RationalPartition.rat_add_fold_le_of_forall` and its
 piecewise lift `Integral.piecewiseMonotoneIntegralFor_compute_width_le_of_bounds`
 now propagate those nonuniform budgets through the actual public fold.

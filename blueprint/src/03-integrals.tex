@@ -695,6 +695,7 @@ allocated according to the difficulty of each part.
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.compute_width_le_of_bounds}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.compute_widths_shrink}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.stabilizedRaw_valid}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.stabilizedRaw_width_le_of_bounds}
 \lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.raw_widths_shrink}
 \lean{ComputableAnalysis.Integral.finiteStageSum_width_le_of_bounds}
 \lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.compute_width_le_of_bounds}
@@ -718,6 +719,11 @@ The assembly also accepts nonuniform budgets: if the (j)-th monotone piece
 or turning gap has width at most (e_j), the finite candidate is bounded by
 (sum_j e_j).  This is useful when a narrow, ill-conditioned turn receives
 more computation than a regular cell.
+
+After prefix stabilization, the public computation also exposes its runtime
+error contract: the width is bounded by the three component budgets plus twice
+the explicit anchor-radius budget. Thus stabilization preserves both
+correctness and a usable finite estimate.
 
 This schedule layer is the honest frontier between the present foundation and
 the classical theorem that every continuous function on a closed interval is
@@ -782,6 +788,11 @@ child_sine^2 = (1 - parent_cosine)/2
 child_cosine^2 = (1 + parent_cosine)/2
 child_sine, child_cosine >= 0
 \end{verbatim}
+
+After prefix stabilization, the public computation also exposes its runtime
+error contract: the width is bounded by the three component budgets plus twice
+the explicit anchor-radius budget.  Thus stabilization preserves both
+correctness and a usable finite estimate.
 
 Lean records this as a finite half-angle certificate. It is the formal
 version of the geometric picture behind the nested radicals. The repository
