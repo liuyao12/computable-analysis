@@ -6627,6 +6627,17 @@ theorem cauchyStabilize_width_le_current_expand
   rw [QBox.expand_width] at hwidthHeight
   exact hwidthHeight.1
 
+theorem cauchyStabilize_height_le_current_expand
+    {candidate : ComplexRaw} {radius : Nat -> Rat}
+    (n : Nat) :
+    ((cauchyStabilize candidate radius).compute n).height <=
+      (candidate.compute n).height + 2 * radius n := by
+  have hcurrent := cauchyStabilizeCompute_contained_in_current_expand
+    candidate.compute radius n
+  have hwidthHeight := QBox.width_height_le_of_nested hcurrent
+  rw [QBox.expand_height] at hwidthHeight
+  exact hwidthHeight.2
+
 /-- The finite-prefix stabilization does not depend on a particular valid
 widening-radius schedule once the direct candidate is fixed.  At every stage
 both intersections contain that same ordered rational candidate box, hence
