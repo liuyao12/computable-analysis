@@ -3908,6 +3908,9 @@ potential-infinity precision schedule.
   proves the coefficient recurrence for \(F'=rF\), and
   `scaledExpCoeff_eq_of_scaledSelfDerivative` proves its initial-value
   uniqueness for every rational parameter \(r\).
+- The rational-complex term evaluator has the matching finite recurrence
+  `ComplexSeries.expTerm_succ_recurrence`, linking the coefficient law to the
+  complex-variable exponential terms.
 - The same formal layer now covers the coefficient-shift identities for trig
   and hyperbolic streams:
   `sin -> cos`, `cos -> -sin`, `sinh -> cosh`, and

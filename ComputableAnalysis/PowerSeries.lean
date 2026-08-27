@@ -1774,6 +1774,24 @@ namespace ComplexSeries
 def expTerm (z : QComplex) (n : Nat) : QComplex :=
   QComplex.divRat (QComplex.pow z n) (factorialRat n)
 
+theorem expTerm_succ_recurrence (z : QComplex) (n : Nat) :
+    QComplex.scaleRat (((n + 1 : Nat) : Rat))
+        (expTerm z (n + 1)) =
+      QComplex.mul z (expTerm z n) := by
+  cases z with
+  | mk re im =>
+      simp [expTerm, QComplex.scaleRat, QComplex.divRat, QComplex.mul,
+        QComplex.pow, FormalPowerSeries.factorialRat_succ]
+      have hn : (((n + 1 : Nat) : Rat) ≠ 0) :=
+        FormalPowerSeries.natCast_succ_ne_zero n
+      have hf : factorialRat n ≠ 0 := by
+        unfold factorialRat
+        exact_mod_cast FormalPowerSeries.factorial_ne_zero n
+      rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm,
+        Rat.mul_inv_cancel (((n + 1 : Nat) : Rat)) hn,
+        Rat.mul_inv_cancel (factorialRat n) hf]
+
 def expPartial (z : QComplex) (n : Nat) : QComplex :=
   (List.range n).foldl (fun acc k => QComplex.add acc (expTerm z k)) QComplex.zero
 
