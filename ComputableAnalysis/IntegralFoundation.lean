@@ -32,3 +32,23 @@ piecewise variants are obtained by transport and finite assembly.
 The imports expose rational interval computations and proof certificates.  No
 completed real-number or measurable-function foundation is introduced here.
 -/
+
+namespace ComputableAnalysis.Integral
+
+/-! The decreasing Darboux schedule has the same arbitrary-precision public
+contract as the increasing schedule.  The witness comes from its explicit
+width-shrink certificate, not from completeness of an ambient real space. -/
+theorem nonincreasingDarbouxSchedule_precision_witness
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hmonotone : NonincreasingOnInterval F}
+    {hinterval : F.lower <= F.upper}
+    (schedule : NonincreasingDarbouxSchedule F hregular hmonotone hinterval)
+    (eps : QPos) :
+    ∃ n : Nat,
+      ((nonincreasingDarbouxScheduleIntegralFor schedule).compute n).width
+        <= eps.val := by
+  obtain ⟨n, hn⟩ :=
+    (nonincreasingDarbouxScheduleRaw_valid schedule).2.2 eps
+  exact ⟨n, hn n (Nat.le_refl n)⟩
+
+end ComputableAnalysis.Integral
