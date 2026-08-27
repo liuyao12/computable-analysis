@@ -1562,6 +1562,24 @@ theorem addInterval_overlaps_of_nonneg
   unfold addInterval Overlaps width at *
   constructor <;> grind [Rat.sub_eq_add_neg]
 
+/-! A common image box gives a reusable quantitative continuity step.  This is
+   the finite interval argument behind both the epsilon--delta theorem and
+   the explicit effective-modulus adapter below. -/
+theorem nearAt_of_contains_common
+    {A B O : QInterval} {eps : QPos}
+    (hA : O.ContainsInterval A) (hB : O.ContainsInterval B)
+    (hAordered : A.lo <= A.hi) (hBordered : B.lo <= B.hi)
+    (hwidth : O.width <= eps.val) :
+    QInterval.NearAt A B eps := by
+  have hAwidth : A.width <= O.width := width_le_of_contains hA
+  have hBwidth : B.width <= O.width := width_le_of_contains hB
+  unfold NearAt ContainsInterval width at *
+  constructor
+  · grind [Rat.sub_eq_add_neg]
+  constructor
+  · grind [Rat.sub_eq_add_neg]
+  exact ⟨Rat.le_trans hAwidth hwidth, Rat.le_trans hBwidth hwidth⟩
+
 end QInterval
 
 /-- Adding two finite enclosure comparisons adds their error budgets.  The
@@ -8258,6 +8276,96 @@ theorem ScheduledIntervalRegularOn.epsilonDeltaContinuous
     unfold QInterval.width at hYwidth
     grind [Rat.sub_eq_add_neg]
   exact ⟨hwidthX, hwidthY⟩
+
+/-! A one-step reciprocal estimate lets an interval-regular evaluator use the
+   next output stage while still meeting the public `precisionAtStage n`
+   budget. -/
+theorem one_div_nat_succ_le (n : Nat) :
+    1 / (((n + 2 : Nat) : Rat)) <=
+      1 / (((n + 1 : Nat) : Rat)) := by
+  apply Rat.le_of_mul_le_mul_right
+    (c := ((n + 1 : Nat) : Rat) * ((n + 2 : Nat) : Rat))
+  · rw [Rat.div_def, Rat.div_def]
+    have h₁ : ((n + 1 : Nat) : Rat) ≠ 0 := by
+      exact Rat.ne_of_gt ((Rat.natCast_pos).2 (by omega))
+    have h₂ : ((n + 2 : Nat) : Rat) ≠ 0 := by
+      exact Rat.ne_of_gt ((Rat.natCast_pos).2 (by omega))
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  · exact Rat.mul_pos
+      ((Rat.natCast_pos).2 (by omega))
+      ((Rat.natCast_pos).2 (by omega))
+
+/-! Interval regularity is stronger than an epsilon--delta existence claim:
+   its image-box schedule can be installed directly as an explicit effective
+   modulus.  The one-stage shift keeps the output box within the requested
+   `precisionAtStage` budget and avoids any ambient real topology. -/
+def IntervalRegularOn.toEffectiveModulusFor
+    {F : FunctionOnInterval} (h : IntervalRegularOn F) :
+    EffectiveModulusFor F where
+  inputPrecision := fun n => h.inputPrecision (n + 1)
+  inputPrecision_pos := fun n => h.inputPrecision_pos (n + 1)
+  evalPrecision := fun n => n + 1
+  close := by
+    intro x y n hx hy hclose
+    let I : QInterval := { lo := min x y, hi := max x y }
+    have hI : subintervalOf I F.lower F.upper := by
+      rcases hx with ⟨hxlo, hxhi⟩
+      rcases hy with ⟨hylo, hyhi⟩
+      dsimp [I]
+      constructor
+      · grind
+      constructor <;> grind
+    have hIwidth : I.width = qabs (y - x) := by
+      dsimp [I]
+      exact QInterval.endpointHull_width x y
+    have hsmall : I.width <=
+        1 / ((h.inputPrecision (n + 1) : Nat) : Rat) := by
+      rw [hIwidth]
+      exact hclose
+    have houtput := h.output_width I hI (n + 1) hsmall
+    have htarget :
+        1 / (((n + 2 : Nat) : Rat)) <= (precisionAtStage n).val := by
+      cases n with
+      | zero => native_decide
+      | succ n =>
+          simp only [precisionAtStage, dif_neg (Nat.succ_ne_zero n)]
+          calc
+            1 / (((n + 1 + 2 : Nat) : Rat)) <=
+                1 / (((n + 1 + 1 : Nat) : Rat)) := by
+              simpa [Nat.add_assoc] using one_div_nat_succ_le (n + 1)
+            _ <= 1 / (((n + 1 : Nat) : Rat)) := by
+              simpa [Nat.add_assoc] using one_div_nat_succ_le n
+    have hboxwidth : (h.evalInterval I hI (n + 1)).width <=
+        (precisionAtStage n).val :=
+      Rat.le_trans houtput.2 htarget
+    have hxlo : I.lo <= x := by
+      dsimp [I]
+      grind
+    have hxhi : x <= I.hi := by
+      dsimp [I]
+      grind
+    have hylo : I.lo <= y := by
+      dsimp [I]
+      grind
+    have hyhi : y <= I.hi := by
+      dsimp [I]
+      grind
+    have hcontainsX := h.contains_point_values I hI x hx (n + 1) hxlo hxhi
+    have hcontainsY := h.contains_point_values I hI y hy (n + 1) hylo hyhi
+    have hXordered :
+        (F.compute x hx (n + 1)).lo <= (F.compute x hx (n + 1)).hi := by
+      have hw := (F.valid_on x (F.defined_on x hx)).1 (n + 1)
+      change 0 <= (F.compute x hx (n + 1)).hi -
+        (F.compute x hx (n + 1)).lo at hw
+      grind [Rat.sub_eq_add_neg]
+    have hYordered :
+        (F.compute y hy (n + 1)).lo <= (F.compute y hy (n + 1)).hi := by
+      have hw := (F.valid_on y (F.defined_on y hy)).1 (n + 1)
+      change 0 <= (F.compute y hy (n + 1)).hi -
+        (F.compute y hy (n + 1)).lo at hw
+      grind [Rat.sub_eq_add_neg]
+    exact QInterval.nearAt_of_contains_common
+      hcontainsX hcontainsY hXordered hYordered hboxwidth
 
 /-- A certified continuous function on a rational interval.
 

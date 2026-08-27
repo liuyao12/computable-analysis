@@ -260,6 +260,24 @@ requested output width -> input-width budget -> rational image box
 The interval form is stronger for integration because it gives one box for an
 entire cell.  It implies the rational epsilon--delta form constructively:
 
+\begin{verbatim}
+interval image box -> epsilon--delta continuity
+                  -> explicit input/output stage schedule
+                  -> effective modulus consumed by FTC
+\end{verbatim}
+
+The reverse direction is not assumed: an epsilon--delta statement alone does
+not tell the integral constructor how to enclose every value on a whole cell.
+The adapter below uses the interval image itself, shifts one output stage to
+fit the public precision schedule, and records positivity of the input
+precision.  The common-image lemma is the finite geometric step: two point
+boxes contained in one image box are `NearAt` once that image box is narrow.
+
+\lean{ComputableAnalysis.QInterval.nearAt_of_contains_common}
+\lean{ComputableAnalysis.one_div_nat_succ_le}
+\lean{ComputableAnalysis.IntervalRegularOn.toEffectiveModulusFor}
+\leanok
+
 For addition, the finite-difference algebra is explicit:
 
 \begin{verbatim}
