@@ -55,6 +55,13 @@ theorem effectiveSquareCurvatureFTC :
       squareCurvatureFTCData.toDerivativeBoundFTC.endpointRaw := by
   exact squareCurvatureFTC_equiv_endpoint
 
+/-- The curvature certificate's bounded integral is the normalized square
+integral, whose finite endpoint value is one. -/
+theorem effectiveSquareCurvatureFTC_value_one :
+    squareCurvatureFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      (RealRaw.ofRat 1) := by
+  exact effectiveFTCPortfolio.square_effective_value
+
 /-! The scoped entry point gives the finite-piece FTC its project-facing name.
 The partition, cell endpoint certificates, and endpoint transport remain
 explicit inputs; this wrapper adds no completeness or general continuity
