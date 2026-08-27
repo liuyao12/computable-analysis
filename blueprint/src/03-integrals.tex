@@ -1340,7 +1340,15 @@ explanation; the witness-search adapter is the minimal proof obligation for
 closing the numerical integral.  The weaker but directly usable route is now
 explicit: canonical rational unit-circle certificates discharge all three
 nonzero parity branches without asserting equality between the square-root
-and circle interval evaluators; the zero endpoint remains exact.
+and circle interval evaluators.  The two boundary samples are already closed
+independently: the zero sample and the terminal sample (k=2^n) have
+stagewise overlap with the arctangent-backed sine evaluator for every (n).
+Only the interior branches need the uniform witness family.
+
+\lean{ComputableAnalysis.SinPiIntegral.arctanSinPi_nestedRadicalStage_sample_overlap_zero}
+\lean{ComputableAnalysis.SinPiIntegral.arctanSinPi_nestedRadicalStage_sample_overlap_last}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalStageSinAt_last}
+\leanok
 
 The unrestricted unit tangent chart is already complete: a finite dyadic grid
 hits every positive-width sine target, and the Boolean witness search returns
