@@ -699,6 +699,25 @@ theorem leftStieltjesSum_const_left (c : Rat) (g : Nat -> Rat) (n : Nat) :
       grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
         Rat.mul_add, Rat.add_mul]
 
+theorem rightStieltjesSum_one_right (f : Nat -> Rat) (n : Nat) :
+    rightStieltjesSum f (fun _ => (1 : Rat)) n = f n - f 0 := by
+  induction n with
+  | zero =>
+      grind [rightStieltjesSum]
+  | succ n ih =>
+      rw [rightStieltjesSum, ih]
+      grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+theorem rightStieltjesSum_const_right (f : Nat -> Rat) (c : Rat) (n : Nat) :
+    rightStieltjesSum f (fun _ => c) n = c * (f n - f 0) := by
+  induction n with
+  | zero =>
+      grind [rightStieltjesSum]
+  | succ n ih =>
+      rw [rightStieltjesSum, ih]
+      grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+        Rat.mul_add, Rat.add_mul]
+
 /-! The square case is the finite chain rule.  It is the form used by
 substitution and by energy estimates: the endpoint change of `f^2` is the
 left-endpoint sum for `2 f df`, plus the explicitly visible quadratic
