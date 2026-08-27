@@ -8,6 +8,7 @@ import ComputableAnalysis.TurningPointIntegral
 import ComputableAnalysis.AbsIntegral
 import ComputableAnalysis.PrimitivePiecewiseFTC
 import ComputableAnalysis.FiniteFTCIntervalRegular
+import ComputableAnalysis.FinitePiecewiseRectangles
 import ComputableAnalysis.FiniteSinePrefixFTC
 import ComputableAnalysis.PolynomialFTCValues
 import ComputableAnalysis.FiniteFTCPolynomial
