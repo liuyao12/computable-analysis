@@ -2973,6 +2973,10 @@ the normalization and boundedness of every requested schedule precision
 explicit. The companion `FTC.requestedPrecision_antitone` proves the selector
 is nonincreasing across finite stages, supplying the schedule-order invariant
 needed by later endpoint-transport arguments.
+The stabilized effective-FTC adapter now also exposes its runtime budget via
+`FTC.effectiveFTCStabilizedRaw_width_le_of_candidate`: stabilization adds only
+twice the supplied anchor radius to the candidate Riemann width. This makes
+the general FTC interface usable for explicit downstream error accounting.
 The finite polynomial integration-by-parts module now exposes both endpoint
 orientations of the product-rule telescope on rational grids. Its
 quadratic/cubic specialization proves both sums equal one at every positive

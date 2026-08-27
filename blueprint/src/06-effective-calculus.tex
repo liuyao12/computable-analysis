@@ -669,6 +669,7 @@ monotone derivative on cell -> endpoint secants -> derivative interval
 \lean{ComputableAnalysis.constructionFor_of_selectedStageCandidateDerivativeFTC}
 \lean{ComputableAnalysis.definiteIdentityFor_of_selectedStageCandidateDerivativeFTC}
 \lean{ComputableAnalysis.FTC.effectiveFTC_riemannRaw_equiv_endpointDifference_of_endpointAgreement}
+\lean{ComputableAnalysis.FTC.effectiveFTCStabilizedRaw_width_le_of_candidate}
 \lean{ComputableAnalysis.FTC.effectiveFTCStabilizedRaw_valid}
 \lean{ComputableAnalysis.FTC.effectiveFTCStabilizedRaw_equiv_endpointDifference}
 \lean{ComputableAnalysis.effectiveFTCStabilizedConstructionFor}
@@ -708,6 +709,11 @@ proved equivalent to the primitive endpoint difference.  No completeness or
 universal continuous-function integrability theorem is used.  The remaining
 work for a new function is therefore provider-specific finite data, not a new
 FTC foundation.
+
+The stabilizer also exposes the numerical contract directly: its output width
+is at most the candidate Riemann width plus twice the supplied anchor radius.
+This lets an application track a finite error budget without unfolding the
+representation machinery.
 
 The arctangent certificate is a complete non-polynomial client of this API.
 Its derivative enclosure is obtained from the rational kernel
