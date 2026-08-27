@@ -2977,6 +2977,10 @@ The stabilized effective-FTC adapter now also exposes its runtime budget via
 `FTC.effectiveFTCStabilizedRaw_width_le_of_candidate`: stabilization adds only
 twice the supplied anchor radius to the candidate Riemann width. This makes
 the general FTC interface usable for explicit downstream error accounting.
+The derivative-bound public raws now expose the complementary stage guarantees
+`DerivativeBoundFTC.boundedIntegralRaw_width_le_of_tolerance` and
+`DerivativeBoundFTC.endpointRaw_width_le_of_tolerance`, so both sides of the
+FTC comparison carry their requested precision explicitly.
 The finite polynomial integration-by-parts module now exposes both endpoint
 orientations of the product-rule telescope on rational grids. Its
 quadratic/cubic specialization proves both sums equal one at every positive

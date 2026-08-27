@@ -5351,8 +5351,20 @@ def boundedIntegralRaw
 
 def endpointRaw
     {F dF : RealFunRaw} {a b : Rat}
-    (h : DerivativeBoundFTC F dF a b) : RealRaw where
+  (h : DerivativeBoundFTC F dF a b) : RealRaw where
   compute := h.endpointCompute
+
+theorem boundedIntegralRaw_width_le_of_tolerance
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : DerivativeBoundFTC F dF a b) (n : Nat) :
+    (h.boundedIntegralRaw.compute n).width <= (precisionAtStage n).val := by
+  exact h.riemann_width (precisionAtStage n)
+
+theorem endpointRaw_width_le_of_tolerance
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : DerivativeBoundFTC F dF a b) (n : Nat) :
+    (h.endpointRaw.compute n).width <= (precisionAtStage n).val := by
+  exact h.endpoint_width (precisionAtStage n)
 
 /-- The derivative-bound FTC bridge, in computable-real form. -/
 theorem equiv_endpoint
