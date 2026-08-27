@@ -14,6 +14,7 @@ import ComputableAnalysis.EffectiveFourierSeries
 import ComputableAnalysis.EffectiveFourierTail
 import ComputableAnalysis.ExponentialLogarithmFoundation
 import ComputableAnalysis.ScalarODEUniqueness
+import ComputableAnalysis.DifferentialEquationsFoundation
 import ComputableAnalysis.PeanoBaker
 import ComputableAnalysis.GeometricRotationODE
 import ComputableAnalysis.RotationPeanoBakerBridge
