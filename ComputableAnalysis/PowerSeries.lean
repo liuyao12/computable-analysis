@@ -1947,6 +1947,39 @@ theorem cosPartial_succ (z : QComplex) (n : Nat) :
       QComplex.add (cosPartial z n) (cosTerm z n) := by
   simp [cosPartial, List.range_succ, List.foldl_append]
 
+def sinWeightedPartial (z : QComplex) (n : Nat) : QComplex :=
+  (List.range n).foldl
+    (fun acc k => QComplex.add acc
+      (QComplex.scaleRat (((2 * k + 1 : Nat) : Rat)) (sinTerm z k)))
+    QComplex.zero
+
+theorem sinWeightedPartial_eq_mul_cosPartial (z : QComplex) (n : Nat) :
+    sinWeightedPartial z n = QComplex.mul z (cosPartial z n) := by
+  induction n with
+  | zero =>
+      simp [sinWeightedPartial, cosPartial, QComplex.mul, QComplex.zero]
+      grind
+  | succ n ih =>
+      simp [sinWeightedPartial, cosPartial, List.range_succ, List.foldl_append]
+      have ih' :
+          (List.range n).foldl
+              (fun acc (k : Nat) => QComplex.add acc
+                (QComplex.scaleRat (2 * (k : Rat) + 1)
+                  (sinTerm z k))) QComplex.zero =
+            QComplex.mul z
+              ((List.range n).foldl
+                (fun acc k => QComplex.add acc (cosTerm z k)) QComplex.zero) := by
+        simpa [sinWeightedPartial, cosPartial, Rat.natCast_mul,
+          Rat.natCast_add] using ih
+      have hterm :
+          QComplex.scaleRat (2 * (n : Rat) + 1) (sinTerm z n) =
+            QComplex.mul z (cosTerm z n) := by
+        simpa [Rat.natCast_mul, Rat.natCast_add] using
+          (sinTerm_derivative_relation z n)
+      rw [ih', hterm]
+      simp [QComplex.mul, QComplex.add, QComplex.zero]
+      grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
 def errorBox (center : QComplex) (eps : QPos) : QBox :=
   { lo := { re := center.re - eps.val, im := center.im - eps.val },
     hi := { re := center.re + eps.val, im := center.im + eps.val } }

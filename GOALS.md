@@ -3927,7 +3927,11 @@ potential-infinity precision schedule.
   finite sine-term derivative step.  The companion
   `ComplexSeries.cosTerm_succ_derivative_relation` closes the alternating
   cosine step, so the two finite term recurrences now expose the complete
-  `sin`/`cos` coefficient-level differentiation pair.
+  `sin`/`cos` coefficient-level differentiation pair.  The finite aggregate
+  `ComplexSeries.sinWeightedPartial_eq_mul_cosPartial` then proves, by list
+  induction, that the weighted sine prefix is exactly `z` times the cosine
+  prefix.  This is the finite-sum bridge before any tail or infinite
+  termwise-differentiation theorem.
 - The same formal layer now covers the coefficient-shift identities for trig
   and hyperbolic streams:
   `sin -> cos`, `cos -> -sin`, `sinh -> cosh`, and
