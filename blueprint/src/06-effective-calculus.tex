@@ -973,8 +973,13 @@ The concave mirror is now available as the same finite rational estimate:
 the right outer secant is a lower bound and the left outer secant an upper
 bound.  This is the order-theoretic input used by inverse-function examples.
 
+At the derivative level, centered secant hulls obey the same reversed order
+when their finite neighborhoods are separated.  This supplies the direct
+concave analogue of the convex derivative monotonicity lemma.
+
 \lean{ComputableAnalysis.concave_outer_secants_bound_inner_secants}
 \lean{ComputableAnalysis.concaveOuterSecantBracket}
+\lean{ComputableAnalysis.ConvexDerivative.centeredInterval_weakLe_of_concave}
 \leanok
 
 \lean{ComputableAnalysis.Integral.finiteQuadrature_average_between_bounds}

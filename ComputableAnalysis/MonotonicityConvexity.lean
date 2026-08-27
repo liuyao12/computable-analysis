@@ -431,6 +431,35 @@ theorem centeredInterval_weakLe_of_convex
   unfold QInterval.WeakLe centeredInterval QInterval.hull at *
   grind
 
+/-! The concave counterpart reverses the derivative order.  The proof is the
+same finite four-secant calculation, with the concavity branch of the
+curvature certificate supplying the reversed outer-secant inequality. -/
+theorem centeredInterval_weakLe_of_concave
+    {F : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
+    (H : CurvatureOnSubinterval F C)
+    (hconc : H.kind = CurvatureKind.concave)
+    {q₁ q₂ h₁ h₂ : Rat}
+    (_hq₁_left : C.contains (q₁ - h₁))
+    (hq₁ : C.contains q₁)
+    (hq₁_right : C.contains (q₁ + h₁))
+    (hq₂_left : C.contains (q₂ - h₂))
+    (hq₂ : C.contains q₂)
+    (_hq₂_right : C.contains (q₂ + h₂))
+    (hq₁_right_pos : q₁ < q₁ + h₁)
+    (hgap : q₁ + h₁ <= q₂ - h₂)
+    (hq₂_left_pos : q₂ - h₂ < q₂)
+    (n : Nat) :
+    QInterval.WeakLe
+      (centeredInterval F q₂ h₂ (H.evalPrecision n))
+      (centeredInterval F q₁ h₁ (H.evalPrecision n)) := by
+  have hsec := H.secant_slope_order n
+      q₁ (q₁ + h₁) (q₂ - h₂) q₂
+      hq₁ hq₁_right hq₂_left hq₂
+      hq₁_right_pos hgap hq₂_left_pos
+  rw [hconc] at hsec
+  unfold QInterval.WeakLe centeredInterval QInterval.hull at *
+  grind
+
 /-- A rational point with a certified rational neighborhood contained in the
 convexity cell.  This is the "interior point" condition needed for centered
 left and right secants. -/
