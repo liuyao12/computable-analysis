@@ -4133,6 +4133,9 @@ arguments.
   `ComplexPathIntegral.polynomialPrimitiveEval` and its path fold
   `polygonalPolynomialPrimitiveTo` now package the same endpoint cancellation
   for every finite rational-complex polynomial primitive.
+  `polygonalPolynomialPrimitiveTo_split_at` adds the corresponding finite
+  additivity law at an intermediate path vertex, completing the polynomial
+  path-composition interface.
 
 ## Algebraic Numbers and FTA
 

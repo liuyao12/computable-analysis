@@ -428,6 +428,28 @@ theorem polygonalPolynomialPrimitiveTo_append_endpoint
       rw [ih]
       exact htel _ _ _
 
+theorem polygonalPolynomialPrimitiveTo_split_at
+    (coefficients : List QComplex) (start middle : QComplex)
+    (pre suf : List QComplex) :
+    polygonalPolynomialPrimitiveTo coefficients start
+        (pre ++ [middle] ++ suf) =
+      QComplex.add
+        (polygonalPolynomialPrimitiveTo coefficients start (pre ++ [middle]))
+        (polygonalPolynomialPrimitiveTo coefficients middle suf) := by
+  induction pre generalizing start with
+  | nil =>
+      simp [polygonalPolynomialPrimitiveTo, QComplex.add, QComplex.zero]
+      constructor <;> grind [Rat.add_assoc, Rat.add_comm]
+  | cons vertex pre ih =>
+      simp only [List.cons_append, polygonalPolynomialPrimitiveTo]
+      rw [ih]
+      cases start
+      cases vertex
+      cases middle
+      simp [polynomialPrimitiveIncrement, QComplex.sub, QComplex.add,
+        QComplex.neg]
+      constructor <;> grind [Rat.add_assoc, Rat.add_comm, Rat.sub_eq_add_neg]
+
 theorem polygonalPolynomialPrimitiveTo_closed
     (coefficients : List QComplex) (start : QComplex)
     (vertices : List QComplex) :
