@@ -68,6 +68,8 @@ certificates.
 \lean{ComputableAnalysis.ExactFunction.squareFTCExactUnit}
 \lean{ComputableAnalysis.Integral.cubeEffectiveFTCData}
 \lean{ComputableAnalysis.Integral.cubeEffectiveFTC_equiv_endpoint}
+\lean{ComputableAnalysis.Integral.cubeCurvatureFTCData}
+\lean{ComputableAnalysis.Integral.cubeCurvatureFTC_equiv_endpoint}
 \lean{ComputableAnalysis.Integral.cubicIntegralEffectiveFTCData}
 \lean{ComputableAnalysis.Integral.cubicIntegralEffectiveFTC_equiv_endpoint}
 \lean{ComputableAnalysis.Integral.cubicIntegralEffectiveFTC_equiv_one_fourth}
@@ -116,6 +118,7 @@ function computations.
 \lean{ComputableAnalysis.Integral.cubicIntegralEffectiveFTC_integral_equiv_one_fourth}
 \lean{ComputableAnalysis.Integral.quarticIntegralEffectiveFTC_equiv_one_fifth}
 \lean{ComputableAnalysis.Integral.fifthIntegralEffectiveFTC_equiv_one_sixth}
+\lean{ComputableAnalysis.Integral.exactRat_nondecreasingDarbouxStage_stage_independent}
 \lean{ComputableAnalysis.exactRat_pow_nondecreasingDarbouxStage_stage_independent}
 \leanok
 
@@ -400,7 +403,14 @@ first nonzero dyadic sample, the square-aware rational search finds
 into overlap of the sine-square and complementary-square intervals:
 
 \lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_stage_one_demo}
+\lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_complete_of_candidate}
 \lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalStage_one_square_complement_overlap}
+\lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_stage_two_left_demo}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalStage_two_left_square_complement_overlap}
+\lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_stage_two_middle_demo}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalStage_two_middle_square_complement_overlap}
+\lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_stage_two_right_demo}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalStage_two_right_square_complement_overlap}
 \lean{ComputableAnalysis.SinPiIntegral.square_overlap_of_rationalTangentSquareWitnessSearch}
 \lean{ComputableAnalysis.SinPiIntegral.signed_square_overlap_of_rationalTangentSquareWitnessSearch}
 \lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalStage_square_complement_overlap_of_search_family}
@@ -491,6 +501,7 @@ primitive.  The proof now calls the generic endpoint transport theorem rather
 than duplicating that representation argument locally.
 
 \lean{ComputableAnalysis.Integral.arctanEffectiveFTC_equiv_endpoint}
+\lean{ComputableAnalysis.Integral.arctanKernelMonotoneDerivativeBoundMethod}
 \lean{ComputableAnalysis.Integral.arctanEffectiveFTC_boundedIntegral_equiv_endpointDifference}
 \lean{ComputableAnalysis.Integral.arctanEffectiveFTCStabilized_valid}
 \lean{ComputableAnalysis.Integral.arctanEffectiveFTCStabilized_equiv_endpointDifference}
@@ -517,6 +528,7 @@ trigonometric-square integral rather than an appeal to a completed sine.
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_endpoint}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_boundedIntegral_equiv_endpointDifference}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_value}
+\lean{ComputableAnalysis.effectiveFTC_sine_prefix_square}
 \leanok
 
 The interface is the reusable calculus API: finite secant bounds feed
@@ -582,6 +594,13 @@ For a convex function, the secant over a cell lies between the neighboring
 secants.  Thus a finite mesh supplies both the lower and upper derivative
 boxes; refining the mesh is the effective replacement for invoking a least
 upper bound.
+The concave mirror is now available as the same finite rational estimate:
+the right outer secant is a lower bound and the left outer secant an upper
+bound.  This is the order-theoretic input used by inverse-function examples.
+
+At the derivative level, centered secant hulls obey the same reversed order
+when their finite neighborhoods are separated.  This supplies the direct
+concave analogue of the convex derivative monotonicity lemma.
 
 The first formal mean-value statement is deliberately about the average, not
 an existential point:
@@ -599,6 +618,13 @@ real-number object.
 
 \lean{ComputableAnalysis.Integral.finiteQuadrature_average_between_bounds}
 \lean{ComputableAnalysis.ExactCellOrderPreservation.integral_average_overlaps_bounds}
+\lean{ComputableAnalysis.concave_outer_secants_bound_inner_secants}
+\lean{ComputableAnalysis.concaveOuterSecantBracket}
+\lean{ComputableAnalysis.ConvexDerivative.centeredInterval_weakLe_of_concave}
+\lean{ComputableAnalysis.ConcaveDerivative.Pointwise}
+\lean{ComputableAnalysis.ConcaveDerivative.Pointwise.compute_weakLe_of_gap}
+\lean{ComputableAnalysis.ConcaveDerivative.PointwiseFunction.toRealFunRaw}
+\lean{ComputableAnalysis.ConcaveDerivative.PointwiseFunction.valid}
 \leanok
 
 \subsection{A cubic checkpoint}

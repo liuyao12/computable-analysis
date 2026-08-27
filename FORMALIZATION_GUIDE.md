@@ -925,6 +925,9 @@ An even more geometric entry point is
 `SinPiSquareFTC.dyadicPublicSquareLeftSum_overlap_of_rational_circle_overlap_family`:
 it reduces the positive samples to rational-circle image overlap and handles
 the zero endpoint separately.
+Once the tangent anchor has its quarter-value certificate, the companion
+`DyadicNestedRadicalSquareTangentCommonWitness.stabilized_equiv_value` theorem
+passes that value through the public prefix-stabilized computation.
 The named structure
 `SinPiSquareFTC.DyadicSquareCircleOverlapFamily` packages those two fields,
 and `to_square_sum_overlap` is the downstream entry point.

@@ -522,6 +522,26 @@ from monomial brackets structurally.
    nested-radical sine sample-overlap certificates through this lemma and then
    construct the corresponding squared-integrand integral certificate.
 
+   The square-aware search now has a second executable regression level:
+   `rationalTangentSquareWitnessSearch_stage_two_left_demo` and
+   `rationalTangentSquareWitnessSearch_stage_two_middle_demo` find rational
+   circle witnesses at the first two interior samples of stage two.  Their
+   overlap theorems are checked without completed-real arithmetic; these
+   checkpoints constrain the finite search interface while the uniform family
+   proof remains open.
+
+   The reusable adapter
+   `rationalTangentSquareWitnessSearch_complete_of_candidate` now separates
+   grid membership from the Boolean interval-admissibility proof.  This is the
+   intended proof-facing interface for future stage/sample certificates.
+
+   The signed-cosine upper-half checkpoint is now isolated in
+   `SinPiSquareCheckpoints.lean`: the stage-2 sample `k = 3` uses tangent
+   interval `[1,2]`, finds `379/256` on an 8-grid, and proves the signed
+   square/complement overlap.  Keeping this executable regression separate
+   avoids making the main evaluator module's exact-rational compilation path
+   unnecessarily expensive.
+
    That evaluator-specific bridge is now present as
    `sinPiSquare_sample_overlap_of_sine_and_table_overlap`: it consumes the
    existing sine sample overlap and `sinPiRawOfArctan_bounds`, constructs the
@@ -4483,13 +4503,19 @@ finite.
 
 ## Iteration-Based Construction Layers
 
-- Alternating series now have a first iteration-style raw layer.  See
-  `Series.AlternatingRaw` in `ComputableAnalysis/Series.lean`.
-- Proved: if the magnitudes of an alternating series shrink to zero, then the
-  intervals between consecutive partial sums shrink to zero.  See
-  `Series.AlternatingRaw.intervals_shrink`.
-- Next step for alternating series: prove nestedness/enclosure from
-  nonnegative decreasing terms, then instantiate Leibniz/arctangent series.
+- Alternating series now have a complete iteration-style raw layer in
+  `Series.AlternatingRaw`: nonnegative decreasing magnitudes give monotone
+  even partial sums, antitone odd partial sums, nested endpoint intervals,
+  and a valid shrinking `RealRaw`.
+- The concrete Leibniz instance is checked by
+  `Series.AlternatingRaw.leibnizAlternatingRaw`; its exact reciprocal width
+  and executable positive-tolerance stage selector are exposed by
+  `leibnizAlternatingRaw_width_eq_reciprocal` and
+  `leibnizAlternatingRaw_reaches_of_positive_tolerance`.
+- The remaining comparison is representational: the Leibniz raw must be
+  connected to the independent arctangent rectangle computation on the
+  desired branch.  The general alternating-series enclosure itself is no
+  longer an open item.
 
 ## Pi Representations
 

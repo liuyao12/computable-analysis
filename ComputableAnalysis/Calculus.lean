@@ -7186,6 +7186,14 @@ def nondecreasingDarbouxStage (F : FunctionOnInterval)
   P.boundIntegralSum
     (fun k hk => nondecreasingDarbouxRange F P k hk prec)
 
+theorem exactRat_nondecreasingDarbouxStage_stage_independent
+    (f : Rat -> Rat) (a b : Rat) (P : RationalPartition a b) (n m : Nat) :
+    nondecreasingDarbouxStage
+      (FunctionOnInterval.exactRat f a b) P n =
+      nondecreasingDarbouxStage
+        (FunctionOnInterval.exactRat f a b) P m := by
+  rfl
+
 /-- The static dyadic instance of `nondecreasingDarbouxStage` used by the
 chapter's increasing-function pseudocode.  The nondecreasing proof is not an
 input to this executable calculation; it is consumed by the later orderedness

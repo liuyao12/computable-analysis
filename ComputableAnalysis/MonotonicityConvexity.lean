@@ -431,6 +431,35 @@ theorem centeredInterval_weakLe_of_convex
   unfold QInterval.WeakLe centeredInterval QInterval.hull at *
   grind
 
+/-! The concave counterpart reverses the derivative order.  The proof is the
+same finite four-secant calculation, with the concavity branch of the
+curvature certificate supplying the reversed outer-secant inequality. -/
+theorem centeredInterval_weakLe_of_concave
+    {F : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
+    (H : CurvatureOnSubinterval F C)
+    (hconc : H.kind = CurvatureKind.concave)
+    {q₁ q₂ h₁ h₂ : Rat}
+    (_hq₁_left : C.contains (q₁ - h₁))
+    (hq₁ : C.contains q₁)
+    (hq₁_right : C.contains (q₁ + h₁))
+    (hq₂_left : C.contains (q₂ - h₂))
+    (hq₂ : C.contains q₂)
+    (_hq₂_right : C.contains (q₂ + h₂))
+    (hq₁_right_pos : q₁ < q₁ + h₁)
+    (hgap : q₁ + h₁ <= q₂ - h₂)
+    (hq₂_left_pos : q₂ - h₂ < q₂)
+    (n : Nat) :
+    QInterval.WeakLe
+      (centeredInterval F q₂ h₂ (H.evalPrecision n))
+      (centeredInterval F q₁ h₁ (H.evalPrecision n)) := by
+  have hsec := H.secant_slope_order n
+      q₁ (q₁ + h₁) (q₂ - h₂) q₂
+      hq₁ hq₁_right hq₂_left hq₂
+      hq₁_right_pos hgap hq₂_left_pos
+  rw [hconc] at hsec
+  unfold QInterval.WeakLe centeredInterval QInterval.hull at *
+  grind
+
 /-- A rational point with a certified rational neighborhood contained in the
 convexity cell.  This is the "interior point" condition needed for centered
 left and right secants. -/
@@ -596,6 +625,164 @@ end PointwiseFunction
 
 end ConvexDerivative
 
+/-! The same centered-secant construction works for concave primitives.  The
+only change is the order: as the center moves right, the certified derivative
+boxes move weakly left.  Keeping this as a separate namespace makes the
+orientation visible to clients and avoids encoding concavity by negating a
+particular raw evaluator. -/
+namespace ConcaveDerivative
+
+abbrev centeredInterval (F : RealFunRaw) (q h : Rat) (prec : Nat) : QInterval :=
+  ConvexDerivative.centeredInterval F q h prec
+abbrev InteriorPoint {a b : Rat} (C : RationalSubinterval a b) (q : Rat) :=
+  ConvexDerivative.InteriorPoint C q
+
+structure Pointwise {F : RealFunRaw} {a b : Rat}
+    {C : RationalSubinterval a b} (H : CurvatureOnSubinterval F C) (q : Rat) where
+  concave : H.kind = CurvatureKind.concave
+  interior : InteriorPoint C q
+  step : Nat -> Rat
+  step_pos : forall n, 0 < step n
+  step_le_radius : forall n, step n <= interior.radius
+  valid :
+    RealRaw.ValidCompute
+      (fun n => centeredInterval F q (step n) (H.evalPrecision n))
+
+namespace Pointwise
+
+def compute {F : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
+    {H : CurvatureOnSubinterval F C} {q : Rat}
+    (D : Pointwise H q) (n : Nat) : QInterval :=
+  centeredInterval F q (D.step n) (H.evalPrecision n)
+
+def raw {F : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
+    {H : CurvatureOnSubinterval F C} {q : Rat}
+    (D : Pointwise H q) : RealRaw where
+  compute := D.compute
+
+theorem raw_valid {F : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
+    {H : CurvatureOnSubinterval F C} {q : Rat}
+    (D : Pointwise H q) : D.raw.Valid := by
+  change RealRaw.ValidCompute
+    (fun n => centeredInterval F q (D.step n) (H.evalPrecision n))
+  exact D.valid
+
+theorem left_mem {F : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
+    {H : CurvatureOnSubinterval F C} {q : Rat}
+    (D : Pointwise H q) (n : Nat) :
+    C.contains (q - D.step n) := by
+  have hpos := D.step_pos n
+  have hle := D.step_le_radius n
+  have hleft := D.interior.left_mem
+  have hcenter := D.interior.center_mem
+  unfold RationalSubinterval.contains at *
+  constructor <;> grind
+
+theorem center_mem {F : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
+    {H : CurvatureOnSubinterval F C} {q : Rat}
+    (D : Pointwise H q) : C.contains q :=
+  D.interior.center_mem
+
+theorem right_mem {F : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
+    {H : CurvatureOnSubinterval F C} {q : Rat}
+    (D : Pointwise H q) (n : Nat) :
+    C.contains (q + D.step n) := by
+  have hpos := D.step_pos n
+  have hle := D.step_le_radius n
+  have hright := D.interior.right_mem
+  have hcenter := D.interior.center_mem
+  unfold RationalSubinterval.contains at *
+  constructor <;> grind
+
+theorem left_lt_center {F : RealFunRaw} {a b : Rat}
+    {C : RationalSubinterval a b} {H : CurvatureOnSubinterval F C}
+    {q : Rat} (D : Pointwise H q) (n : Nat) :
+    q - D.step n < q := by
+  have hpos := D.step_pos n
+  grind
+
+theorem center_lt_right {F : RealFunRaw} {a b : Rat}
+    {C : RationalSubinterval a b} {H : CurvatureOnSubinterval F C}
+    {q : Rat} (D : Pointwise H q) (n : Nat) :
+    q < q + D.step n := by
+  have hpos := D.step_pos n
+  grind
+
+/-- Concave derivative boxes are antitone once the two centered neighborhoods
+are disjoint. -/
+theorem compute_weakLe_of_gap
+    {F : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
+    {H : CurvatureOnSubinterval F C} {q1 q2 : Rat}
+    (D1 : Pointwise H q1) (D2 : Pointwise H q2)
+    (n : Nat)
+    (hgap : q1 + D1.step n <= q2 - D2.step n) :
+    QInterval.WeakLe (D2.compute n) (D1.compute n) := by
+  simpa [compute] using
+    ConvexDerivative.centeredInterval_weakLe_of_concave
+      H D1.concave
+      (D1.left_mem n) (D1.center_mem) (D1.right_mem n)
+      (D2.left_mem n) (D2.center_mem) (D2.right_mem n)
+      (D1.center_lt_right n) hgap (D2.left_lt_center n) n
+
+end Pointwise
+
+/-! A family of concave pointwise derivative certificates can be exposed as a
+partial function on the rational domain where the centered secant hulls have
+been proved to converge. -/
+structure PointwiseFunction {F : RealFunRaw} {a b : Rat}
+    {C : RationalSubinterval a b} (H : CurvatureOnSubinterval F C) where
+  domain : Rat -> Prop
+  derivAt : forall q, domain q -> Pointwise H q
+
+namespace PointwiseFunction
+
+def toPartialRealFunRaw {F : RealFunRaw} {a b : Rat}
+    {C : RationalSubinterval a b} {H : CurvatureOnSubinterval F C}
+    (D : PointwiseFunction H) : PartialRealFunRaw where
+  definedAt := D.domain
+  compute := fun q hq n => (D.derivAt q hq).compute n
+
+theorem partial_valid {F : RealFunRaw} {a b : Rat}
+    {C : RationalSubinterval a b} {H : CurvatureOnSubinterval F C}
+    (D : PointwiseFunction H) :
+    forall q hq,
+      RealRaw.ValidCompute (D.toPartialRealFunRaw.compute q hq) := by
+  intro q hq
+  simpa [toPartialRealFunRaw, Pointwise.compute] using (D.derivAt q hq).valid
+
+noncomputable def toRealFunRaw {F : RealFunRaw} {a b : Rat}
+    {C : RationalSubinterval a b} {H : CurvatureOnSubinterval F C}
+    (D : PointwiseFunction H) : RealFunRaw := by
+  classical
+  exact
+    { domain := D.domain
+      compute := fun q n =>
+        if hq : D.domain q then
+          (D.derivAt q hq).compute n
+        else
+          { lo := 0, hi := 0 } }
+
+theorem valid {F : RealFunRaw} {a b : Rat}
+    {C : RationalSubinterval a b} {H : CurvatureOnSubinterval F C}
+    (D : PointwiseFunction H) : D.toRealFunRaw.Valid := by
+  intro q hq
+  classical
+  have hqD : D.domain q := by
+    simpa [toRealFunRaw] using hq
+  have hcompute :
+      RealFunRaw.applyCompute D.toRealFunRaw q = (D.derivAt q hqD).compute := by
+    funext n
+    simp [toRealFunRaw, RealFunRaw.applyCompute, hqD, Pointwise.compute]
+  rw [hcompute]
+  change RealRaw.ValidCompute
+    (fun n => centeredInterval F q
+      ((D.derivAt q hqD).step n) (H.evalPrecision n))
+  exact (D.derivAt q hqD).valid
+
+end PointwiseFunction
+
+end ConcaveDerivative
+
 namespace ExactFunction
 
 def secantSlope (f : Rat -> Rat) (x y : Rat) : Rat :=
@@ -681,6 +868,48 @@ theorem convex_outer_secants_bound_inner_secants
       (Rat.le_trans (by grind : y <= v) (Rat.le_trans (by grind : v <= r) hrb))
   · exact convex_inner_secant_le_right_outer hf
       (Rat.le_trans hal (by grind : l <= x)) hxy hyv hvr hrb
+
+/-! The concave mirror of the neighboring-secant estimate.  It is kept as a
+finite rational theorem rather than derived through a completed-real
+derivative: for a concave function, the right outer secant is a lower bound
+and the left outer secant is an upper bound for every strictly interior
+secant. -/
+
+theorem concave_outer_secants_bound_inner_secants
+    {f : Rat -> Rat} {a b l u x y v r : Rat}
+    (hf : ConcaveOn f a b)
+    (hal : a <= l) (hlu : l < u) (hux : u < x)
+    (hxy : x < y) (hyv : y < v) (hvr : v < r) (hrb : r <= b) :
+    secantSlope f v r <= secantSlope f x y /\
+      secantSlope f x y <= secantSlope f l u := by
+  constructor
+  · have h1 : secantSlope f y v <= secantSlope f x y :=
+      hf x y v (Rat.le_trans hal (by grind : l <= x)) hxy hyv
+        (Rat.le_trans (by grind : v <= r) hrb)
+    have h2 : secantSlope f v r <= secantSlope f y v :=
+      hf y v r (by grind) hyv hvr hrb
+    exact Rat.le_trans h2 h1
+  · have h1 : secantSlope f u x <= secantSlope f l u :=
+      hf l u x hal hlu hux
+        (Rat.le_trans (by grind : x <= y)
+          (Rat.le_trans (by grind : y <= v) (Rat.le_trans (by grind : v <= r) hrb)))
+    have h2 : secantSlope f x y <= secantSlope f u x :=
+      hf u x y (by grind) hux hxy
+        (Rat.le_trans (by grind : y <= v) (Rat.le_trans (by grind : v <= r) hrb))
+    exact Rat.le_trans h2 h1
+
+def concaveOuterSecantBracket
+    {a b : Rat} (f : Rat -> Rat) (hf : ConcaveOn f a b)
+    (l u v r : Rat)
+    (hal : a <= l) (hlu : l < u) (_huv : u < v)
+    (hvr : v < r) (hrb : r <= b) :
+    StrictSecantSlopeBracketOn f u v where
+  lower := secantSlope f v r
+  upper := secantSlope f l u
+  bounds := by
+    intro x y hux hxy hyv
+    exact concave_outer_secants_bound_inner_secants
+      hf hal hlu hux hxy hyv hvr hrb
 
 def convexOuterSecantBracket
     {a b : Rat} (f : Rat -> Rat) (hf : ConvexOn f a b)
