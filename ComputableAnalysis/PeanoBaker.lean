@@ -1007,6 +1007,29 @@ theorem vectorSequenceSum_congr_on {dimension : Nat}
         vectorSequenceSum_congr_on f g n (fun k hk => h k (by omega)),
         h n (by omega)]
 
+/-- Split a finite vector sum at a time cut.  The shifted suffix is kept
+explicit, so this identity can be used to compose forcing contributions on
+successive mesh intervals without introducing an infinite series. -/
+theorem vectorSequenceSum_split {dimension : Nat}
+    (f : Nat -> RatVector dimension) (first second : Nat) :
+    vectorSequenceSum f (first + second) =
+      vectorAdd (vectorSequenceSum f first)
+        (vectorSequenceSum (fun k => f (first + k)) second) := by
+  induction second with
+  | zero =>
+      simp [vectorSequenceSum, vectorAdd_zero_right]
+  | succ second ih =>
+      rw [show first + (second + 1) = (first + second) + 1 by omega]
+      rw [vectorSequenceSum, ih]
+      change vectorAdd
+          (vectorAdd (vectorSequenceSum f first)
+            (vectorSequenceSum (fun k => f (first + k)) second))
+          (f (first + second)) =
+        vectorAdd (vectorSequenceSum f first)
+          (vectorAdd (vectorSequenceSum (fun k => f (first + k)) second)
+            (f (first + second)))
+      exact vectorAdd_assoc _ _ _
+
 theorem matrixApply_vectorSequenceSum {dimension : Nat}
     (A : RatMatrix dimension) (f : Nat -> RatVector dimension) :
     forall n,

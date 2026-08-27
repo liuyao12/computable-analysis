@@ -186,7 +186,17 @@ forcing samples -> time-ordered transitions -> finite Duhamel sum
 
 \lean{ComputableAnalysis.LinearODE.trajectory_zeroInitial_eq_duhamelSum}
 \lean{ComputableAnalysis.LinearODE.trajectory_eq_transition_add_duhamelSum}
+\lean{ComputableAnalysis.LinearODE.vectorSequenceSum_split}
 \leanok
+
+The forcing sum has the same cut law as the transition product: its prefix
+and shifted suffix add exactly.  This makes interval-by-interval forcing
+certificates composable while keeping every contribution a finite rational
+vector.
+
+\begin{verbatim}
+sum(first + second) = sum(first) + shiftedSum(second)
+\end{verbatim}
 
 The motivating forced oscillator is now connected to this abstract algebra.
 Its two-dimensional Euler provider proves the velocity update and, after
