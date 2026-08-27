@@ -1851,6 +1851,38 @@ theorem expPartial_succ (z : QComplex) (n : Nat) :
       QComplex.add (expPartial z n) (expTerm z n) := by
   simp [expPartial, List.range_succ, List.foldl_append]
 
+def expWeightedPartial (z : QComplex) (n : Nat) : QComplex :=
+  (List.range n).foldl
+    (fun acc k => QComplex.add acc
+      (QComplex.scaleRat (((k + 1 : Nat) : Rat)) (expTerm z (k + 1))))
+    QComplex.zero
+
+theorem expWeightedPartial_eq_mul_expPartial (z : QComplex) (n : Nat) :
+    expWeightedPartial z n = QComplex.mul z (expPartial z n) := by
+  induction n with
+  | zero =>
+      simp [expWeightedPartial, expPartial, QComplex.mul, QComplex.zero]
+      grind
+  | succ n ih =>
+      simp [expWeightedPartial, expPartial, List.range_succ,
+        List.foldl_append]
+      have ih' :
+          (List.range n).foldl
+              (fun acc (k : Nat) => QComplex.add acc
+                (QComplex.scaleRat ((k : Rat) + 1)
+                  (expTerm z (k + 1)))) QComplex.zero =
+            QComplex.mul z
+              ((List.range n).foldl
+                (fun acc k => QComplex.add acc (expTerm z k)) QComplex.zero) := by
+        simpa [expWeightedPartial, expPartial, Rat.natCast_add] using ih
+      have hterm :
+          QComplex.scaleRat ((n : Rat) + 1) (expTerm z (n + 1)) =
+            QComplex.mul z (expTerm z n) := by
+        simpa [Rat.natCast_add] using expTerm_succ_recurrence z n
+      rw [ih', hterm]
+      simp [QComplex.mul, QComplex.add, QComplex.zero]
+      grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
 def sinSign (k : Nat) : Rat := if k % 2 = 0 then 1 else -1
 
 theorem sinSign_succ (k : Nat) : sinSign (k + 1) = -sinSign k := by

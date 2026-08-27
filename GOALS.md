@@ -3934,6 +3934,10 @@ potential-infinity precision schedule.
   termwise-differentiation theorem.
   The symmetric `ComplexSeries.cosWeightedPartial_eq_neg_mul_sinPartial`
   now supplies the cosine-prefix side, including the sign and index shift.
+  The same finite induction now covers the exponential series through
+  `ComplexSeries.expWeightedPartial_eq_mul_expPartial`, completing the
+  finite coefficient-level derivative bridge for the three basic complex
+  power-series evaluators.
 - The same formal layer now covers the coefficient-shift identities for trig
   and hyperbolic streams:
   `sin -> cos`, `cos -> -sin`, `sinh -> cosh`, and
