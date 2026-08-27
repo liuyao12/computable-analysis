@@ -1597,6 +1597,8 @@ certificate when the identity is promoted from finite sums to an integral.
 \lean{ComputableAnalysis.rightStieltjesSum_const_right}
 \lean{ComputableAnalysis.leftStieltjesSum_const_path}
 \lean{ComputableAnalysis.leftStieltjesSum_affine_path}
+\lean{ComputableAnalysis.rightStieltjesSum_const_path}
+\lean{ComputableAnalysis.rightStieltjesSum_affine_path}
 \leanok
 
 In particular, a constant integrand against any rational path is exact at
@@ -1612,6 +1614,8 @@ conventions can be interchanged in the finite integration-by-parts identity.
 For an affine integrator path (s g+t), the translation term vanishes and
 the slope (s) factors out; this is the exact finite transport used by a
 chart substitution.
+The same factorization holds when the affine path is the first argument of a
+right Stieltjes sum.
 
 The tangent-chart substitution is also finite.  For a chart cell
 \((p\mapsto r)\), compute the two endpoint Jacobian ratios, fold the lower and
