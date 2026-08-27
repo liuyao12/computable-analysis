@@ -4626,6 +4626,24 @@ theorem rat_add_fold_le_length_mul {α : Type} (xs : List α) (term : α -> Rat)
         _ = ((xs.length : Rat) + 1) * c := by
           grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc, Rat.add_comm]
 
+theorem rat_add_fold_le_of_forall {α : Type} (xs : List α)
+    (term bound : α -> Rat)
+    (h : forall x, x ∈ xs -> term x <= bound x) :
+    xs.foldl (fun total x => total + term x) 0 <=
+      xs.foldl (fun total x => total + bound x) 0 := by
+  induction xs with
+  | nil => simp
+  | cons x xs ih =>
+      have hx := h x (by simp)
+      have ht : forall y, y ∈ xs -> term y <= bound y := by
+        intro y hy
+        exact h y (by simp [hy])
+      have hi := ih ht
+      simp only [List.foldl, Rat.zero_add]
+      rw [rat_add_fold_initial xs term (term x),
+        rat_add_fold_initial xs bound (bound x)]
+      exact _root_.ComputableAnalysis.rat_add_le_add hx hi
+
 def boundIntegralSum {a b : Rat} (P : RationalPartition a b)
     (bound : (k : Nat) -> k < P.pieces -> QInterval) : QInterval :=
   (List.range P.pieces).foldl
@@ -11108,6 +11126,35 @@ theorem piecewiseMonotoneIntegralFor_compute_width_le_of_forall
     simp [RealRaw.ofRat, QInterval.width] <;> grind
   rw [hzero]
   simpa [List.length_range, Rat.zero_add] using hsum
+
+theorem piecewiseMonotoneIntegralFor_compute_width_le_of_bounds
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) (n : Nat)
+    (bound : Nat -> Rat)
+    (hbound : forall k (hk : k < c.pieces),
+      ((piecewiseMonotoneCellIntegral F c k hk).compute n).width <= bound k) :
+    ((piecewiseMonotoneIntegralFor F c).compute n).width <=
+      (List.range c.pieces).foldl (fun total k => total + bound k) 0 := by
+  unfold piecewiseMonotoneIntegralFor
+  rw [rawFold_compute_width_eq_foldl]
+  rw [RationalPartition.addInterval_fold_width]
+  have hterm : forall k, k ∈ List.range c.pieces ->
+      (((if hk : k < c.pieces then
+        piecewiseMonotoneCellIntegral F c k hk
+       else RealRaw.zero).compute n).width) <= bound k := by
+    intro k hk
+    have hkl : k < c.pieces := List.mem_range.1 hk
+    simp [hkl]
+    exact hbound k hkl
+  have hsum := RationalPartition.rat_add_fold_le_of_forall
+    (List.range c.pieces)
+    (fun k => (((if hk : k < c.pieces then
+      piecewiseMonotoneCellIntegral F c k hk
+     else RealRaw.zero).compute n).width)) bound hterm
+  have hzero : ((RealRaw.ofRat 0).compute n).width = 0 := by
+    simp [RealRaw.ofRat, QInterval.width] <;> grind
+  rw [hzero]
+  simpa [Rat.zero_add] using hsum
 
 /-! The two-cell case is the first reusable finite assembly law.  It exposes
 the piecewise fold as the sum of its two certified cell integrals, up to the

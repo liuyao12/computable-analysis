@@ -2688,6 +2688,9 @@ The adaptive counterpart `Integral.finiteRawSum_compute_width_le_of_bounds`
 allows a separate rational budget for each raw component and bounds the total
 width by their finite sum.  This is the intended interface for nonuniform
 turning-point meshes and differently conditioned special-function cells.
+The comparison lemma `RationalPartition.rat_add_fold_le_of_forall` and its
+piecewise lift `Integral.piecewiseMonotoneIntegralFor_compute_width_le_of_bounds`
+now propagate those nonuniform budgets through the actual public fold.
 The new `piecewiseRectangleAreaSum_constant` evaluates that constant per-cell
 budget exactly as `(cells.length : Rat) * value`.  Its companion
 `piecewiseRectangleAreaSum_gap_le_common_range` therefore gives the closed
