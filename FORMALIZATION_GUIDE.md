@@ -858,6 +858,16 @@ is useful for regression tests and error estimates.
 For a positive stage, `ComputableAnalysis.riemannLeftExact_affine_error_of_pos`
 normalizes that formula to the exact integral value plus an explicit
 `1 / n` rectangle error.
+For finite Riemann--Stieltjes proofs, the core transport API is in
+`Calculus`: `leftStieltjesSum_const_left` and
+`rightStieltjesSum_const_right` telescope constant integrands, while
+`leftStieltjesSum_affine_path` and
+`rightStieltjesSum_affine_path` factor an affine path. The companion
+`leftStieltjesSum_affine_integrand` and
+`rightStieltjesSum_affine_integrator` retain the translation as the endpoint
+increment of the other path. These are rational finite identities; use them
+before introducing any represented integral or completeness argument.
+
 The nonlinear calibration theorem
 `ComputableAnalysis.ExactFunction.ftcErrorExact_square_doubleId_of_pos`
 packages the same idea for the primitive `x^2`: its finite FTC error is
