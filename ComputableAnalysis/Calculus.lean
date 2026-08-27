@@ -7539,6 +7539,29 @@ structure EffectiveModulusFor (F : FunctionOnInterval) where
           (F.compute y hy (evalPrecision n))
           n
 
+theorem EffectiveModulusFor.epsilonDeltaContinuous
+    {F : FunctionOnInterval} (h : EffectiveModulusFor F) :
+    EpsilonDeltaContinuousOn F := by
+  intro eps
+  let n : Nat := eps.val.den + 1
+  let delta : QPos :=
+    { val := 1 / ((h.inputPrecision n : Nat) : Rat)
+      property := one_div_nat_pos (h.inputPrecision_pos n) }
+  refine ⟨delta, h.evalPrecision n, ?_⟩
+  intro x y hx hy hxy
+  have hinput : qabs (y - x) <=
+      1 / ((h.inputPrecision n : Nat) : Rat) := by
+    simpa [delta] using hxy
+  have hnear := h.close x y n hx hy hinput
+  have hstage : (precisionAtStage n).val <= eps.val := by
+    dsimp [n]
+    simp [precisionAtStage]
+    exact FTC.one_div_den_succ_le_of_pos eps.property
+  unfold intervalNearAtPrecision at hnear
+  unfold QInterval.NearAt at hnear ⊢
+  rcases hnear with ⟨hxylo, hyxlo, hxwidth, hywidth⟩
+  exact ⟨by grind, by grind, by grind, by grind⟩
+
 /-- Generic interval-level regularity.
 
 This is the continuity notion we want calculus theorems to consume.  It does

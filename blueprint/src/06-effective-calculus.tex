@@ -423,6 +423,7 @@ explicit error budget later consumed by a partition-level FTC certificate.
 \leanok
 
 \lean{ComputableAnalysis.EffectiveModulusFor}
+\lean{ComputableAnalysis.EffectiveModulusFor.epsilonDeltaContinuous}
 \lean{ComputableAnalysis.IntervalRegularOn}
 \lean{ComputableAnalysis.IntervalRegularOn.evalIntervals_overlap_of_common_point}
 \lean{ComputableAnalysis.IntervalRegularOn.evalIntervals_overlap_of_common_point_at}
@@ -441,8 +442,8 @@ explicit error budget later consumed by a partition-level FTC certificate.
 \lean{ComputableAnalysis.Integral.unitConstantMonotoneDarbouxSchedule_integral_eq_one}
 \leanok
 
-This implication uses only rational endpoint hulls, interval containment, and
-the requested denominator.  The reverse direction is not automatic: an
+The modulus-to-epsilon--delta implication uses only rational endpoint hulls,
+interval containment, and the requested denominator.  The reverse direction is not automatic: an
 epsilon--delta modulus must still be upgraded to a cell-image evaluator before
 it can drive a Darboux integral.
 
