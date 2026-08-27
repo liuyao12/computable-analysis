@@ -98,6 +98,23 @@ the packaged overlap family can be built with
 This is a finite geometric certificate to add, not a hidden use of completed
 real numbers.
 
+The missing certificate has a deliberately concrete shape.  For every
+precision, depth, and dyadic index, provide rational data
+
+\begin{verbatim}
+cosine box C in [0,1], witnesses s,c in Q
+s >= 0, c >= 0, s^2 + c^2 = 1
+s lies in the nested-radical sine box; c lies in C
+the half-angle tangent interval from (s,C) lies in the inverse box
+\end{verbatim}
+
+The even child reuses the parent sine and refines its cosine; the odd child
+uses the half-angle square-root step; the reflected branch uses the terminal
+cosine symmetry.  These three finite clauses are exactly the fields of
+\lean{ComputableAnalysis.CanonicalDyadicHalfAngleCertificateAt}.  Once they
+are supplied recursively, the existing parity and FTC adapters produce the
+equal-dyadic sine integral; no new real-number existence theorem is needed.
+
 The candidate side is already executable and shrinking: the first four finite
 depths have explicit overlap checks against the independent Stieltjes
 evaluator.  These opt-in anchors (from
