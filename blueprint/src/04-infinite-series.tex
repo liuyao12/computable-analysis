@@ -150,6 +150,11 @@ increment laws directly: increasing a prefix by one stage adds exactly one
 rational-complex term.  These laws are the induction interface for later
 tail, derivative, and termwise-integration proofs.
 
+The weighted-prefix identities make the index shift explicit: the derivative
+of the term at index (k+1) is (z) times the term at index (k).  Thus the
+finite prefix theorem is an exact algebraic statement; no infinite
+interchange is being hidden in the notation.
+
 \lean{ComputableAnalysis.ComplexSeries.expPartial_succ}
 \lean{ComputableAnalysis.ComplexSeries.sinPartial_succ}
 \lean{ComputableAnalysis.ComplexSeries.cosPartial_succ}
