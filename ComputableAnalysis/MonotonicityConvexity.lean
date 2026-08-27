@@ -899,6 +899,45 @@ theorem cubeRaw_derivativeBoundFromCurvature_of_nonneg_bound
       { lo := 3 * C.lower * C.lower, hi := 3 * C.upper * C.upper } := by
   rfl
 
+/-! The quartic is globally convex.  The difference of neighboring secants
+factors into a nonnegative distance times a sum of squares. -/
+def quarticFunction (x : Rat) : Rat := x ^ 4
+
+theorem quartic_secantSlope_eq_cubic {x y : Rat} (hxy : x < y) :
+    secantSlope quarticFunction x y =
+      x ^ 3 + x ^ 2 * y + x * y ^ 2 + y ^ 3 := by
+  unfold secantSlope quarticFunction
+  rw [Rat.div_def]
+  have hcancel : (y - x) * (y - x)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (y - x) (Rat.ne_of_gt (by grind))
+  grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem quartic_convexOn (a b : Rat) : ConvexOn quarticFunction a b := by
+  intro x y z _hax hxy hyz _hzb
+  rw [quartic_secantSlope_eq_cubic hxy,
+    quartic_secantSlope_eq_cubic hyz]
+  have hsum : 0 <= x ^ 2 + x * y + x * z + y ^ 2 + y * z + z ^ 2 := by
+    have hsq : 0 <= (x + y + z) ^ 2 := by
+      simpa [show (2 : Nat) = 1 + 1 by omega, Rat.pow_succ,
+        Rat.pow_one] using rat_square_nonneg_basic (x + y + z)
+    have hxsq : 0 <= x ^ 2 := by
+      simpa [show (2 : Nat) = 1 + 1 by omega, Rat.pow_succ,
+        Rat.pow_one] using rat_square_nonneg_basic x
+    have hysq : 0 <= y ^ 2 := by
+      simpa [show (2 : Nat) = 1 + 1 by omega, Rat.pow_succ,
+        Rat.pow_one] using rat_square_nonneg_basic y
+    have hzsq : 0 <= z ^ 2 := by
+      simpa [show (2 : Nat) = 1 + 1 by omega, Rat.pow_succ,
+        Rat.pow_one] using rat_square_nonneg_basic z
+    grind [Rat.pow_succ, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  have hfactor : 0 <= (z - x) *
+      (x ^ 2 + x * y + x * z + y ^ 2 + y * z + z ^ 2) := by
+    exact Rat.mul_nonneg (by grind) hsum
+  grind [Rat.pow_succ, Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
 theorem square_secantSlopeInterval_eq
     {x y : Rat} (hxy : x < y) (n : Nat) :
     secantSlopeIntervalOfRealFun (RealFunRaw.exact square) x y n =
