@@ -6800,6 +6800,48 @@ def canonical_dyadic_certificate_at_of_rational_witness
   · exact ⟨hcc.1, Rat.le_refl, hcc.2⟩
   · exact ⟨Rat.le_refl, Rat.le_refl⟩
 
+/-! A target-directed constructor for the canonical certificate.  The caller
+supplies only the rational witness and an explicit margin around its
+half-angle parameter; all interval and circle fields are synthesized. -/
+def canonical_dyadic_certificate_at_of_rational_witness_with_margin
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {precision depth k : Nat} (hk : k < 2 ^ depth)
+    (u : Rat) (hu0 : 0 <= u) (hu1 : u <= 1)
+    (hsine : (dyadicNestedRadicalTableAt precision depth k).1.lo <=
+        rationalCircleSin u /\
+      rationalCircleSin u <=
+        (dyadicNestedRadicalTableAt precision depth k).1.hi)
+    (eps : Rat)
+    (hwidth :
+      (rationalHalfAngleTangentInterval
+        (dyadicNestedRadicalTableAt precision depth k).1
+        ({ lo := rationalCircleCos u, hi := rationalCircleCos u } : QInterval)).width
+        <= eps)
+    (hleft :
+      (dyadicTangentBoxAt B precision depth k hk).lo + eps <=
+        rationalCircleSin u / (1 + rationalCircleCos u))
+    (hright :
+      rationalCircleSin u / (1 + rationalCircleCos u) + eps <=
+        (dyadicTangentBoxAt B precision depth k hk).hi) :
+    CanonicalDyadicHalfAngleCertificateAt B precision depth k hk := by
+  have hS := dyadicNestedRadicalTableAt_bounds precision depth k
+    (Nat.le_of_lt hk)
+  have hsc := rationalCircleSin_bounds hu0 hu1
+  have hcc := rationalCircleCos_bounds hu0 hu1
+  have hC : subintervalOf
+      ({ lo := rationalCircleCos u, hi := rationalCircleCos u } : QInterval) 0 1 := by
+    exact ⟨hcc.1, Rat.le_refl, hcc.2⟩
+  have hU := dyadicTangentBoxAt_bounds B precision depth k hk
+  have houter := rationalHalfAngleTangentInterval_contains_of_margin
+    (U := dyadicTangentBoxAt B precision depth k hk)
+    (S := (dyadicNestedRadicalTableAt precision depth k).1)
+    (C := ({ lo := rationalCircleCos u, hi := rationalCircleCos u } : QInterval))
+    (s := rationalCircleSin u) (c := rationalCircleCos u) (eps := eps)
+    hS.1 hC hsc.1 hcc.1 (rationalCircleSin_sq_add_cos_sq u)
+    hsine ⟨Rat.le_refl, Rat.le_refl⟩ hwidth hleft hright
+  exact canonical_dyadic_certificate_at_of_rational_witness B hk u hu0 hu1
+    hsine houter
+
 def canonicalDyadicCertificateAdmissibleBool
     (B : IntegralIdentities.ArctanInverseBisection)
     (precision depth k : Nat) (hk : k < 2 ^ depth) (u : Rat) : Bool :=
