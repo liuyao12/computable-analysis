@@ -1722,7 +1722,11 @@ finite boxes -> product bounds -> tail certificate -> nested enclosure
 
 The two-dimensional product layer is literal finite algebra: sampled
 rectangle values are folded over two rational lists, and separable products
-factor into the product of their one-dimensional folds. The Gaussian layer
+factor into the product of their one-dimensional folds. The same construction
+is now exposed for an arbitrary finite list of coordinate axes; the Gaussian
+wrapper generates one Taylor evaluator per axis, so dimension changes do not
+change the proof pattern. Positivity is checked by the same finite induction.
+The Gaussian layer
 then integrates even exponential Taylor prefixes on a bounded interval and
 keeps the improper tail as a separate finite upper-bound ladder. The
 $n$-ball layer records the familiar recurrence as a rational coefficient
@@ -1733,6 +1737,9 @@ domain.
 \lean{ComputableAnalysis.finiteProductSum2D_factorized}
 \lean{ComputableAnalysis.finiteProductIntegralSum2D_factorized}
 \lean{ComputableAnalysis.finiteProductIntegralNestedSum_two_factor}
+\lean{ComputableAnalysis.gaussianTaylorProductIntegralNestedSum}
+\lean{ComputableAnalysis.gaussianTaylorProductIntegralNestedSum_factorized}
+\lean{ComputableAnalysis.gaussianTaylorProductIntegralNestedSum_nonneg}
 \lean{ComputableAnalysis.finiteProductIntegralSum2D_weighted_stage}
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_eight}
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix_succ}
