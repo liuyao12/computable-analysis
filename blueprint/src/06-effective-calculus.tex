@@ -133,6 +133,8 @@ value.  One representative certificate covers routine coefficient variants.
 \lean{ComputableAnalysis.ExactFunction.squareFTCExactUnit}
 \lean{ComputableAnalysis.Integral.cubeEffectiveFTCData}
 \lean{ComputableAnalysis.Integral.cubeEffectiveFTC_equiv_endpoint}
+\lean{ComputableAnalysis.Integral.cubeCurvatureFTCData}
+\lean{ComputableAnalysis.Integral.cubeCurvatureFTC_equiv_endpoint}
 \lean{ComputableAnalysis.Integral.cubicIntegralEffectiveFTCData}
 \lean{ComputableAnalysis.Integral.cubicIntegralEffectiveFTC_equiv_endpoint}
 \lean{ComputableAnalysis.Integral.cubicIntegralEffectiveFTC_equiv_one_fourth}
@@ -179,6 +181,17 @@ to exponential and trigonometric evaluators.
 \lean{ComputableAnalysis.Integral.cubicIntegralEffectiveFTC_integral_equiv_one_fourth}
 \lean{ComputableAnalysis.Integral.quarticIntegralEffectiveFTC_equiv_one_fifth}
 \lean{ComputableAnalysis.Integral.fifthIntegralEffectiveFTC_equiv_one_sixth}
+\lean{ComputableAnalysis.Integral.exactRat_quartic_intervalRegularOn_unit}
+\lean{ComputableAnalysis.Integral.exactRat_quartic_lipschitz_on_unit}
+\lean{ComputableAnalysis.Integral.exactRat_quartic_integral_raw_valid}
+\lean{ComputableAnalysis.Integral.exactRat_quartic_integral_raw_equiv_one_fifth}
+\lean{ComputableAnalysis.Integral.exactRat_quintic_intervalRegularOn_unit}
+\lean{ComputableAnalysis.Integral.exactRat_quintic_lipschitz_on_unit}
+\lean{ComputableAnalysis.Integral.exactRat_quintic_integral_raw_valid}
+\lean{ComputableAnalysis.Integral.exactQuintic_uniformLeftSum_le_one_sixth_of_pos}
+\lean{ComputableAnalysis.Integral.exactQuintic_uniformRightSum_ge_one_sixth_of_pos}
+\lean{ComputableAnalysis.Integral.exactQuintic_compute_contains_one_sixth_at_stage}
+\lean{ComputableAnalysis.Integral.exactRat_quintic_integral_raw_equiv_one_sixth}
 \leanok
 
 \section{A normalized trigonometric bridge}
@@ -345,7 +358,10 @@ certificates.
 
 \lean{ComputableAnalysis.ExactFunction.differenceQuotient_comp_factorization}
 \lean{ComputableAnalysis.ExactFunction.differenceQuotient_comp_error_le}
+\lean{ComputableAnalysis.ExactFunction.effectiveDifferenceQuotientCompositionFactorization}
+\lean{ComputableAnalysis.ExactFunction.effectiveDifferenceQuotientCompositionErrorLe}
 \lean{ComputableAnalysis.ExactFunction.EffectiveDerivativeExact.compOfBudget}
+\lean{ComputableAnalysis.effectiveDerivativeCompositionOfBudget}
 \leanok
 
 The same finite mechanism now closes multiplication when rational majorants
@@ -358,6 +374,7 @@ not smuggled in through completeness of the reals.
 
 \lean{ComputableAnalysis.FinitePolynomial.SecantDerivativeBound.mul}
 \lean{ComputableAnalysis.FinitePolynomial.SecantDerivativeBound.mulToHasDerivativeOnInterval}
+\lean{ComputableAnalysis.effectiveSecantProductRule}
 \leanok
 
 At the raw-real level, the literal four-corner product is valid for arbitrary
@@ -655,6 +672,15 @@ monotone derivative on cell -> endpoint secants -> derivative interval
 \lean{ComputableAnalysis.ExactConvexOn.secantRaw_valid}
 \lean{ComputableAnalysis.ExactFunction.square_secantSlope_eq_add}
 \lean{ComputableAnalysis.ExactFunction.square_convexOn}
+\lean{ComputableAnalysis.ExactFunction.cube_secantSlope_eq_quadratic}
+\lean{ComputableAnalysis.ExactFunction.cube_convexOn_unit}
+\lean{ComputableAnalysis.ExactFunction.cube_secantSlopeInterval_eq_quadratic}
+\lean{ComputableAnalysis.ExactFunction.cubeRaw_curvatureOnSubinterval_of_nonneg}
+\lean{ComputableAnalysis.ExactFunction.cubeRaw_monotoneDerivativeBoundMethod_of_nonneg}
+\lean{ComputableAnalysis.ExactFunction.cubeRaw_derivativeBoundFromCurvature_of_nonneg}
+\lean{ComputableAnalysis.ExactFunction.cubeRaw_derivativeBoundFromCurvature_of_nonneg_bound}
+\lean{ComputableAnalysis.ExactFunction.quartic_secantSlope_eq_cubic}
+\lean{ComputableAnalysis.ExactFunction.quartic_convexOn}
 \lean{ComputableAnalysis.ExactFunction.square_secantSlopeInterval_eq}
 \lean{ComputableAnalysis.ExactFunction.squareRaw_curvatureOnSubinterval}
 \lean{ComputableAnalysis.ExactFunction.squareRaw_monotoneDerivativeBoundMethod}
@@ -681,7 +707,10 @@ monotone derivative on cell -> endpoint secants -> derivative interval
 \lean{ComputableAnalysis.twoStageCandidateDerivativeFTC}
 \lean{ComputableAnalysis.constructionFor_of_selectedStageCandidateDerivativeFTC}
 \lean{ComputableAnalysis.definiteIdentityFor_of_selectedStageCandidateDerivativeFTC}
+\lean{ComputableAnalysis.DerivativeBoundFTC.boundedIntegralRaw_width_le_of_tolerance}
+\lean{ComputableAnalysis.DerivativeBoundFTC.endpointRaw_width_le_of_tolerance}
 \lean{ComputableAnalysis.FTC.effectiveFTC_riemannRaw_equiv_endpointDifference_of_endpointAgreement}
+\lean{ComputableAnalysis.FTC.effectiveFTCStabilizedRaw_width_le_of_candidate}
 \lean{ComputableAnalysis.FTC.effectiveFTCStabilizedRaw_valid}
 \lean{ComputableAnalysis.FTC.effectiveFTCStabilizedRaw_equiv_endpointDifference}
 \lean{ComputableAnalysis.effectiveFTCStabilizedConstructionFor}
@@ -712,6 +741,7 @@ theorem only requires that both schedules close the same rational error budget.
 \lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.endpointRaw_equiv_endpointDifference}
 \lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.boundedIntegralRaw_equiv_endpointDifference}
 \lean{ComputableAnalysis.effectiveDerivativeBoundFTC}
+\lean{ComputableAnalysis.Integral.effectiveGeneralIntegralFor_equiv_totalEndpointDifference_of_telescope}
 \leanok
 
 These two theorems are the general computable FTC closure: once a function
@@ -721,6 +751,11 @@ proved equivalent to the primitive endpoint difference.  No completeness or
 universal continuous-function integrability theorem is used.  The remaining
 work for a new function is therefore provider-specific finite data, not a new
 FTC foundation.
+
+The stabilizer also exposes the numerical contract directly: its output width
+is at most the candidate Riemann width plus twice the supplied anchor radius.
+This lets an application track a finite error budget without unfolding the
+representation machinery.
 
 The arctangent certificate is a complete non-polynomial client of this API.
 Its derivative enclosure is obtained from the rational kernel
@@ -752,10 +787,19 @@ derivative certificate.  Its endpoint primitive is still a finite rational
 polynomial, so this is a fully formalized precursor to the later
 trigonometric-square integral rather than an appeal to a completed sine.
 
+The supporting order estimates are explicit: on the half interval the square
+prefix is nondecreasing and its derivative variation is bounded by the cell
+width.  These are the finite monotonicity and error-budget facts consumed by
+the FTC certificate.
+
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquare_nondecreasing}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquare_derivative_width_le}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquare_derivative_certificate}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_endpoint}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_boundedIntegral_equiv_endpointDifference}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_value}
+\lean{ComputableAnalysis.effectiveFTC_sine_prefix_square}
 \leanok
 
 The interface is the reusable calculus API: finite secant bounds feed
@@ -1007,9 +1051,19 @@ concave analogue of the convex derivative monotonicity lemma.
 \lean{ComputableAnalysis.ConcaveDerivative.PointwiseFunction.valid}
 \leanok
 
+The provider-facing curvature closure is available directly from the scoped
+effective-calculus entry point:
+\lean{ComputableAnalysis.Integral.effectiveCurvatureFTC}
+\lean{ComputableAnalysis.Integral.effectiveConvexFTC}
+\lean{ComputableAnalysis.Integral.effectiveConcaveFTC}
+\lean{ComputableAnalysis.Integral.effectiveSquareCurvatureFTC}
+\lean{ComputableAnalysis.Integral.effectiveSquareCurvatureFTC_value_one}
+\leanok
+
 \lean{ComputableAnalysis.Integral.finiteQuadrature_average_between_bounds}
 \lean{ComputableAnalysis.ExactCellOrderPreservation.integral_average_overlaps_bounds}
 \lean{ComputableAnalysis.CandidateDerivativeCellControl.endpoint_average_overlaps_bound}
+\lean{ComputableAnalysis.Integral.effectiveMeanValueBracket}
 \lean{ComputableAnalysis.QInterval.divByRat_overlaps_of_pos}
 \lean{ComputableAnalysis.QInterval.divByRat_scaleByRat_self_of_pos}
 \leanok

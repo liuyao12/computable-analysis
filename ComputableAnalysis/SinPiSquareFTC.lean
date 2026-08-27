@@ -3322,6 +3322,15 @@ def dyadicNestedRadicalSquareIntegralRaw_stabilized
   RealRaw.prefixStabilize dyadicNestedRadicalSquareIntegralRaw
     (fun n => (anchor.compute n).width)
 
+theorem dyadicNestedRadicalSquareIntegralRaw_stabilized_width_le
+    (anchor : RealRaw) (n : Nat) :
+    ((dyadicNestedRadicalSquareIntegralRaw_stabilized anchor).compute n).width <=
+      (dyadicNestedRadicalSquareIntegralRaw.compute n).width +
+        2 * (anchor.compute n).width := by
+  exact RealRaw.prefixStabilize_width_le_current_expand
+    dyadicNestedRadicalSquareIntegralRaw
+    (fun n => (anchor.compute n).width) n
+
 theorem dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_overlap
     {anchor : RealRaw} (hanchor : anchor.Valid)
     (hover : dyadicNestedRadicalSquareIntegralRaw.Equiv anchor) :
@@ -4012,6 +4021,61 @@ theorem dyadicNestedRadicalStage_one_square_complement_overlap :
     constructor <;> native_decide
   exact square_overlap_of_rationalTangentSquareWitnessSearch hsearch hS hC
 
+/-! The next dyadic level is checked at a finer finite grid.  These two
+checkpoints cover the interior samples at `k = 1` and `k = 2`; they are
+deliberately executable facts, not an approximation claim for all stages. -/
+theorem rationalTangentSquareWitnessSearch_stage_two_left_demo :
+    rationalTangentSquareWitnessSearch
+      ({ lo := 0, hi := 1 } : QInterval)
+      (dyadicNestedRadicalStageSinAt 2 1)
+      (dyadicNestedRadicalStageTable 2 1).2 16 =
+        some ((1581 : Rat) / 8192) := by
+  native_decide
+
+theorem dyadicNestedRadicalStage_two_left_square_complement_overlap :
+    QInterval.Overlaps
+      (rationalSquareInterval (dyadicNestedRadicalStageSinAt 2 1))
+      (rationalOneMinusSquareInterval
+        (dyadicNestedRadicalStageTable 2 1).2) := by
+  have hsearch := rationalTangentSquareWitnessSearch_stage_two_left_demo
+  have hS : subintervalOf (dyadicNestedRadicalStageSinAt 2 1) 0 1 := by
+    unfold subintervalOf
+    constructor
+    · native_decide
+    constructor <;> native_decide
+  have hC : subintervalOf (dyadicNestedRadicalStageTable 2 1).2 0 1 := by
+    unfold subintervalOf
+    constructor
+    · native_decide
+    constructor <;> native_decide
+  exact square_overlap_of_rationalTangentSquareWitnessSearch hsearch hS hC
+
+theorem rationalTangentSquareWitnessSearch_stage_two_middle_demo :
+    rationalTangentSquareWitnessSearch
+      ({ lo := 0, hi := 1 } : QInterval)
+      (dyadicNestedRadicalStageSinAt 2 2)
+      (dyadicNestedRadicalStageTable 2 2).2 16 =
+        some ((27135 : Rat) / 65536) := by
+  native_decide
+
+theorem dyadicNestedRadicalStage_two_middle_square_complement_overlap :
+    QInterval.Overlaps
+      (rationalSquareInterval (dyadicNestedRadicalStageSinAt 2 2))
+      (rationalOneMinusSquareInterval
+        (dyadicNestedRadicalStageTable 2 2).2) := by
+  have hsearch := rationalTangentSquareWitnessSearch_stage_two_middle_demo
+  have hS : subintervalOf (dyadicNestedRadicalStageSinAt 2 2) 0 1 := by
+    unfold subintervalOf
+    constructor
+    · native_decide
+    constructor <;> native_decide
+  have hC : subintervalOf (dyadicNestedRadicalStageTable 2 2).2 0 1 := by
+    unfold subintervalOf
+    constructor
+    · native_decide
+    constructor <;> native_decide
+  exact square_overlap_of_rationalTangentSquareWitnessSearch hsearch hS hC
+
 theorem CanonicalDyadicHalfAngleCertificateAt.to_square_complement_overlap
     {B : IntegralIdentities.ArctanInverseBisection}
     {precision depth k : Nat} {hk : k < 2 ^ depth}
@@ -4240,6 +4304,15 @@ def dyadicPublicSquareIntegralRaw_stabilized
     (S : ArctanSinPiConstruction) (anchor : RealRaw) : RealRaw :=
   RealRaw.prefixStabilize (dyadicPublicSquareIntegralRaw S)
     (fun n => (anchor.compute n).width)
+
+theorem dyadicPublicSquareIntegralRaw_stabilized_width_le
+    (S : ArctanSinPiConstruction) (anchor : RealRaw) (n : Nat) :
+    ((dyadicPublicSquareIntegralRaw_stabilized S anchor).compute n).width <=
+      ((dyadicPublicSquareIntegralRaw S).compute n).width +
+        2 * (anchor.compute n).width := by
+  exact RealRaw.prefixStabilize_width_le_current_expand
+    (dyadicPublicSquareIntegralRaw S)
+    (fun n => (anchor.compute n).width) n
 
 theorem dyadicPublicSquareIntegralRaw_stabilized_valid_of_overlap
     (S : ArctanSinPiConstruction)

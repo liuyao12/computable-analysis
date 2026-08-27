@@ -8,6 +8,11 @@ The focused Lean entry point for this route is
 imports without requiring an agent to depend on the full 100-theorem
 benchmark catalogue.
 
+As an integration check, this entry point builds under Lean 4.33 with all 88
+imported modules. The focused entry point is therefore the recommended first
+compile test for a new proof, while individual chapter modules remain useful
+for fast iteration.
+
 \section{Admission rule}
 
 Include a result when it yields a rational certificate, a shrinking `realRaw`,
@@ -51,11 +56,14 @@ overlap theorem, the completed
 Riemann--Stieltjes sine integral, the arctangent effective FTC instance, effective FTC interfaces, interval-regularity to
 epsilon--delta continuity, polynomial/Taylor secant certificates,
 power-series tails, finite Fourier transforms, finite Gaussian prefixes,
+finite sine/cosine primitive prefixes and their endpoint identities,
 separable finite product sums, the rational \(n\)-ball recurrence, logarithm,
 rotation derivatives, the finite L'Hôpital remainder pattern, the tangent-square
-FTC instance, the common-prefix exponential FTC instance, the centered
-exponential initial-value certificate, and scalar linear ODE uniqueness are
-checked in Lean. The finite raw-sum algebra used to
+FTC instance, the common-prefix exponential FTC instance, and the centered
+exponential initial-value certificate are checked in Lean. The scalar linear
+ODE chapter has a checked finite-mesh uniqueness closure, conditional on its
+explicit rational envelope provider; the provider itself remains a stated
+analytic certificate obligation. The finite raw-sum algebra used to
 concatenate certified pieces is also checked, so adjacent-interval and
 multi-turn proofs have an explicit assembly layer. The
 two-stage product FTC for the positive (x\arctan(x)) branch is also checked:
@@ -89,6 +97,23 @@ the packaged overlap family can be built with
 \lean{ComputableAnalysis.DyadicSquareCircleOverlapFamily.of_precision_halfAngle_certificate_family}.
 This is a finite geometric certificate to add, not a hidden use of completed
 real numbers.
+
+The missing certificate has a deliberately concrete shape.  For every
+precision, depth, and dyadic index, provide rational data
+
+\begin{verbatim}
+cosine box C in [0,1], witnesses s,c in Q
+s >= 0, c >= 0, s^2 + c^2 = 1
+s lies in the nested-radical sine box; c lies in C
+the half-angle tangent interval from (s,C) lies in the inverse box
+\end{verbatim}
+
+The even child reuses the parent sine and refines its cosine; the odd child
+uses the half-angle square-root step; the reflected branch uses the terminal
+cosine symmetry.  These three finite clauses are exactly the fields of
+\lean{ComputableAnalysis.CanonicalDyadicHalfAngleCertificateAt}.  Once they
+are supplied recursively, the existing parity and FTC adapters produce the
+equal-dyadic sine integral; no new real-number existence theorem is needed.
 
 The candidate side is already executable and shrinking: the first four finite
 depths have explicit overlap checks against the independent Stieltjes
@@ -182,7 +207,8 @@ Circle/trigonometry &
 rational geometry, nested-radical dyadic values, finite rotations &
 remaining branch witnesses for unrestricted dyadic inverse transport \\
 Integrals/FTC &
-rectangle, Lipschitz--Darboux, polynomial, arctangent, Stieltjes sine, finite
+rectangle, Lipschitz--Darboux, polynomial (including stage-uniform quartic and
+quintic raw certificates), arctangent, Stieltjes sine, finite
 quadrature mean-value brackets, the completed two-cell absolute-value FTC,
 generic multi-turn stage assembly, increasing and decreasing Darboux stages,
 the two-stage product FTC, and endpoint-ordered monotone dyadic

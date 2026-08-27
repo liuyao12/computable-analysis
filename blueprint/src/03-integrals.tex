@@ -293,12 +293,14 @@ The same budget path is available with that arbitrary exponent schedule:
 \lean{ComputableAnalysis.Integral.monotoneDarbouxSchedule_linear_precision_budget}
 \lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule.ofAutomaticLinearPrecision}
 \lean{ComputableAnalysis.Integral.monotoneDarbouxScheduleRaw_valid}
+\lean{ComputableAnalysis.Integral.monotoneDarbouxSchedule_precision_witness}
 The decreasing orientation now reaches the same public `RealRaw` interface:
 \lean{ComputableAnalysis.Integral.NonincreasingDarbouxSchedule}
 \lean{ComputableAnalysis.Integral.NonincreasingDarbouxSchedule.ofDyadicEndpointOrderedOfBudget}
 \lean{ComputableAnalysis.Integral.nonincreasingDarbouxScheduleRaw_valid}
 \lean{ComputableAnalysis.Integral.nonincreasingDarbouxScheduleIntegralFor_valid}
 \lean{ComputableAnalysis.Integral.nonincreasingDarbouxScheduleIntegralFor_width_le_of_tolerance}
+\lean{ComputableAnalysis.Integral.nonincreasingDarbouxSchedule_precision_witness}
 \lean{ComputableAnalysis.Integral.PiecewiseMonotoneConstructionFor}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_valid}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_two_equiv}
@@ -572,8 +574,27 @@ member of an indexed list, then map that proof across the list.  This is the
 single closure used by piecewise primitives and other finite decompositions;
 routine changes of formula do not require another induction.
 
+The quantitative companion is equally explicit.  At every stage, the width
+of a finite raw sum is exactly the sum of the component widths.  Thus a
+uniform cell bound (e) over (m) pieces gives the total bound (m e):
+
+\begin{verbatim}
+cell widths <= e  ->  sum widths = width(sum) <= m*e
+\end{verbatim}
+
+This is the error-budget rule for a finite turning-point decomposition.  It
+does not claim that the assembled object is an infinite integral; it only
+exposes the finite budget that a later shrinking schedule must consume.
+The adaptive form replaces the common (e) by a bound (e_k) for each cell
+and sums the (e_k).  This is the natural contract when different pieces
+have different evaluators or different local conditioning.
+
 \lean{ComputableAnalysis.Integral.finiteRawSum}
 \lean{ComputableAnalysis.Integral.finiteRawSum_valid}
+\lean{ComputableAnalysis.Integral.finiteRawSum_compute_width_eq_foldl}
+\lean{ComputableAnalysis.Integral.finiteRawSum_compute_width_le_of_forall}
+\lean{ComputableAnalysis.Integral.finiteRawSum_compute_width_le_of_bounds}
+\lean{ComputableAnalysis.Integral.rawFold_compute_width_eq_foldl}
 \lean{ComputableAnalysis.Integral.finiteRawSum_append_equiv}
 \lean{ComputableAnalysis.Integral.FiniteRawListLe}
 \lean{ComputableAnalysis.Integral.FiniteRawListLe.refl}
@@ -609,11 +630,21 @@ The composition theorem makes the remaining finite transport certificate
 explicit: once the endpoint list is shown to be an adjacent-difference list,
 the generic raw telescoping theorem closes the endpoint identity.
 
+The public piecewise fold now also carries the quantitative version of this
+assembly rule.  If every certified cell has stage-(n) width at most (e),
+then the (m)-piece integral fold has width at most (m e).  The theorem is
+finite bookkeeping; a shrinking schedule is still a separate hypothesis.
+For adaptive cells, the corresponding theorem sums the individual bounds
+(e_0,ldots,e_{m-1}).  A proof may therefore spend precision where the
+function is difficult and use a cheaper evaluator elsewhere.
+
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneCellList}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneCellList_length}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneCellList_ne_nil}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneCellList_valid}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneCellList_finiteRawSum_valid}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_compute_width_le_of_forall}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_compute_width_le_of_bounds}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneEndpointDifference}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneEndpointDifference_valid}
 \lean{ComputableAnalysis.Integral.PiecewiseMonotoneEndpointFTCFor}
@@ -621,6 +652,7 @@ the generic raw telescoping theorem closes the endpoint identity.
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneTotalEndpointDifference}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneTotalEndpointDifference_valid}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_telescope}
+\lean{ComputableAnalysis.Integral.generalIntegralFor_equiv_totalEndpointDifference_of_telescope}
 \leanok
 
 Finite rectangular products use the same assembly law in any fixed number
@@ -656,14 +688,22 @@ is therefore bounded by the range bound times the turn-bracket width; no value a
 the turn is required. This is the constructive form of the practical rule
 used for \(\sin(\pi x)/x\): classify each cell as increasing, decreasing, or
 containing one of finitely many certified turns, and refine only the latter.
+For one turn, the three finite budgets are independent: left piece, unresolved
+middle bracket, and right piece.  Their widths add, so computation can be
+allocated according to the difficulty of each part.
 
 \lean{ComputableAnalysis.Integral.TurningPointBracket}
 \lean{ComputableAnalysis.Integral.TurningPointBracket.widths_shrink}
 \lean{ComputableAnalysis.Integral.TurningBracketIntegralCandidate}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.compute_width_le_of_bounds}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.compute_widths_shrink}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.stabilizedRaw_valid}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.stabilizedRaw_width_le_of_bounds}
 \lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.raw_widths_shrink}
+\lean{ComputableAnalysis.Integral.finiteStageSum_width_le_of_bounds}
+\lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.compute_width_le_of_bounds}
 \lean{ComputableAnalysis.Integral.MultiTurnIntegralCompletion.stabilizedRaw_valid}
+\lean{ComputableAnalysis.Integral.MultiTurnIntegralCompletion.stabilizedRaw_width_le_of_bounds}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.toMultiTurn}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.constructionFor}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.constructionFor_compute_eq}
@@ -678,6 +718,17 @@ already sum any supplied finite list of monotone-piece and turning-gap boxes;
 the remaining work for a new function is to supply its piece classification,
 shrinking budgets, and anchor equivalence. This does not introduce Lebesgue
 measure or a completed-real compactness argument.
+
+The assembly also accepts nonuniform budgets: if the (j)-th monotone piece
+or turning gap has width at most (e_j), the finite candidate is bounded by
+(sum_j e_j).  This is useful when a narrow, ill-conditioned turn receives
+more computation than a regular cell.
+
+After prefix stabilization, the public computation also exposes its runtime
+error contract: the width is bounded by the finite sum of component budgets
+plus twice the explicit anchor-radius budget. The one-turn specialization is
+the three-term version above. Thus stabilization preserves both correctness
+and a usable finite estimate, including for arbitrary finite turn lists.
 
 This schedule layer is the honest frontier between the present foundation and
 the classical theorem that every continuous function on a closed interval is
@@ -742,6 +793,11 @@ child_sine^2 = (1 - parent_cosine)/2
 child_cosine^2 = (1 + parent_cosine)/2
 child_sine, child_cosine >= 0
 \end{verbatim}
+
+After prefix stabilization, the public computation also exposes its runtime
+error contract: the width is bounded by the three component budgets plus twice
+the explicit anchor-radius budget.  Thus stabilization preserves both
+correctness and a usable finite estimate.
 
 Lean records this as a finite half-angle certificate. It is the formal
 version of the geometric picture behind the nested radicals. The repository
@@ -1094,6 +1150,23 @@ The equal-dyadic route is not silently identified with that chart.  Its exact
 remaining obligation is the finite `TangentChartTransport` structure, whose
 fields say that the public dyadic box and the chart box overlap at every
 stage.  A common rational witness is an equivalent, more constructive form.
+
+The nested-radical rectangle computation is nevertheless a complete raw
+candidate on its own: it is an executable list of rational intervals, and its
+width is bounded by (1/(n+1)).  The only missing raw-real field is
+cross-stage nesting.  It is supplied either by a direct nesting certificate,
+or by prefix stabilization after overlap with a valid anchor.  This keeps the
+algorithmic candidate separate from the semantic theorem that identifies its
+value.
+
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_valid}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_widths_shrink}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_equiv_of_overlap}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_stabilized}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_stabilized_valid_of_overlap}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_stabilized_equiv_reciprocalPi_of_overlap}
+
 The first four depths are nevertheless concrete Lean-certified anchors.  They
 are kept in the opt-in module
 \texttt{ComputableAnalysis.SinPiIntegralAnchors}, so importing the reusable
@@ -1118,6 +1191,8 @@ square route, finite transport from sample boxes to the complete equal-dyadic
 sum is formalized once and reused:
 
 \lean{ComputableAnalysis.SinPiSquareFTC.dyadicPublicSquareLeftSum}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized_width_le}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareIntegralRaw_stabilized_width_le}
 \lean{ComputableAnalysis.SinPiSquareFTC.dyadicPublicSquareLeftSum_overlap_of_sample_overlaps}
 \lean{ComputableAnalysis.SinPiSquareFTC.dyadicPublicSquareLeftSum_overlap_of_canonical_search_family}
 \lean{ComputableAnalysis.SinPiSquareFTC.dyadicPublicSquareLeftSum_overlap_of_halfAngle_certificate_family}
@@ -1282,7 +1357,15 @@ explanation; the witness-search adapter is the minimal proof obligation for
 closing the numerical integral.  The weaker but directly usable route is now
 explicit: canonical rational unit-circle certificates discharge all three
 nonzero parity branches without asserting equality between the square-root
-and circle interval evaluators; the zero endpoint remains exact.
+and circle interval evaluators.  The two boundary samples are already closed
+independently: the zero sample and the terminal sample (k=2^n) have
+stagewise overlap with the arctangent-backed sine evaluator for every (n).
+Only the interior branches need the uniform witness family.
+
+\lean{ComputableAnalysis.SinPiIntegral.arctanSinPi_nestedRadicalStage_sample_overlap_zero}
+\lean{ComputableAnalysis.SinPiIntegral.arctanSinPi_nestedRadicalStage_sample_overlap_last}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalStageSinAt_last}
+\leanok
 
 The unrestricted unit tangent chart is already complete: a finite dyadic grid
 hits every positive-width sine target, and the Boolean witness search returns
@@ -1403,6 +1486,7 @@ compatibility alias.
 \lean{ComputableAnalysis.SinPiIntegral.sinPiStieltjesIntegral}
 \lean{ComputableAnalysis.SinPiIntegral.sinPiStieltjesIntegral_valid}
 \lean{ComputableAnalysis.SinPiIntegral.sinPiStieltjesIntegral_equiv_reciprocalPi}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_stabilized_width_le}
 \lean{ComputableAnalysis.SinPiIntegral.computableSinPiHalfIntegral}
 \lean{ComputableAnalysis.SinPiIntegral.computableSinPiHalfIntegral_valid}
 \lean{ComputableAnalysis.SinPiIntegral.computableSinPiHalfIntegral_equiv_reciprocalPi}
@@ -1523,6 +1607,9 @@ the main transport rules:
 \lean{ComputableAnalysis.Integral.IntegrationByPartsCertificate.right_integral_equiv_endpoint_sub_left}
 \lean{ComputableAnalysis.finiteIntegrationByParts_onPartition}
 \lean{ComputableAnalysis.finiteIntegrationByParts_withVariation_onPartition}
+\lean{ComputableAnalysis.effectiveFiniteIntegrationByParts}
+\lean{ComputableAnalysis.effectiveFiniteSquareChain}
+\lean{ComputableAnalysis.effectiveFiniteSquareChain_left_bounds}
 \lean{ComputableAnalysis.coordinateIntegrationByParts_onPartition_endpoint_bracket}
 \lean{ComputableAnalysis.RationalPartition.endpointDifferenceSum_contains}
 \lean{ComputableAnalysis.RationalPartition.boundIntegralSum_overlaps_endpointDifference}
@@ -1594,9 +1681,20 @@ to manufacture a closed polygon merely to invoke the theorem.
 \lean{ComputableAnalysis.ComplexPathIntegral.EntireBoxFunctionRaw}
 \lean{ComputableAnalysis.ComplexPathIntegral.polygonalDisplacementTo}
 \lean{ComputableAnalysis.ComplexPathIntegral.polygonalMonomialPrimitiveTo_append_endpoint}
+\lean{ComputableAnalysis.ComplexPathIntegral.polygonalMonomialPrimitiveTo_split_at}
 \lean{ComputableAnalysis.ComplexPathIntegral.polygonalPolynomialPrimitiveTo_append_endpoint}
+\lean{ComputableAnalysis.ComplexPathIntegral.polygonalPolynomialPrimitiveTo_split_at}
+\lean{ComputableAnalysis.ComplexPathIntegral.polygonalPolynomialIntegralRaw}
+\lean{ComputableAnalysis.ComplexPathIntegral.polygonalPolynomialIntegralRaw_valid}
+\lean{ComputableAnalysis.ComplexPathIntegral.polygonalPolynomialIntegralRaw_equiv_endpoint}
+\lean{ComputableAnalysis.ComplexPathIntegral.effectivePolynomialPathFTC}
+\lean{ComputableAnalysis.ComplexPathIntegral.polygonalPolynomialIntegralRaw_split_at}
+\lean{ComputableAnalysis.ComplexPathIntegral.polygonalPolynomialIntegralRaw_split_at_add}
+\lean{ComputableAnalysis.ComplexPathIntegral.polygonalPolynomialIntegralRaw_closed_equiv_zero}
 \lean{ComputableAnalysis.ComplexPathIntegral.polygonalDisplacementTo_closed}
+\lean{ComputableAnalysis.ComplexPathIntegral.polygonalDisplacementTo_split_at}
 \lean{ComputableAnalysis.ComplexPathIntegral.polygonalConstantDifferentialDisplacement}
+\lean{ComputableAnalysis.ComplexPathIntegral.polygonalConstantDifferentialDisplacement_split_at}
 \lean{ComputableAnalysis.ComplexPathIntegral.polygonalConstantDifferentialDisplacement_closed}
 \lean{ComputableAnalysis.ComplexPathIntegral.finiteConstantDifferentialExactness_closed}
 \lean{ComputableAnalysis.ComplexPathIntegral.finitePolynomialDifferentialExactness_closed}
@@ -1605,6 +1703,7 @@ to manufacture a closed polygon merely to invoke the theorem.
 \lean{ComputableAnalysis.ComplexPathIntegral.FiniteClosedPolynomialPathCertificate}
 \lean{ComputableAnalysis.ComplexPathIntegral.FiniteClosedPolynomialPathCertificate.exactDisplacement_eq_zero}
 \lean{ComputableAnalysis.ComplexPathIntegral.polygonalIntegralRawEntire_valid}
+\lean{ComputableAnalysis.ComplexPathIntegral.PolygonalIntegralCertificate.precision_witness}
 \leanok
 
 The sine integral in Chapter~\ref{ch:rational-circle-trigonometry} is the

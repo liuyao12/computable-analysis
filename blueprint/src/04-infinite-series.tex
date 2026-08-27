@@ -42,6 +42,9 @@ certificates.
 
 \lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_step}
 \lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_prefix}
+\lean{ComputableAnalysis.effectiveFiniteTaylorFTC_prefix}
+\lean{ComputableAnalysis.FormalPowerSeries.cosineTaylorIntegralPartial}
+\lean{ComputableAnalysis.FormalPowerSeries.cosineTaylorIntegralPartial_eq_sineTaylorPartial}
 \leanok
 
 \section{Finite Fourier analysis}
@@ -93,7 +96,10 @@ finite transform -> coordinate tail box -> future-stage containment
 \lean{ComputableAnalysis.EffectiveFourierTailCertificate.stageBox_width}
 \lean{ComputableAnalysis.EffectiveFourierTailCertificate.stageBox_height}
 \lean{ComputableAnalysis.EffectiveFourierSeries.stabilized_valid}
+\lean{ComputableAnalysis.EffectiveFourierSeries.stabilized_width_le_of_candidate}
+\lean{ComputableAnalysis.EffectiveFourierSeries.stabilized_height_le_of_candidate}
 \lean{ComputableAnalysis.EffectiveFourierSeries.precision_witness}
+\lean{ComputableAnalysis.effectiveFourierSeries_precision_witness}
 \lean{ComputableAnalysis.finiteSupportFourierSeries_stabilized_equiv}
 \lean{ComputableAnalysis.quarterTurnGeometricTailCertificate_valid}
 \lean{ComputableAnalysis.EffectiveFourierSampleCertificate.toSeries_valid}
@@ -109,6 +115,13 @@ complex value.
 \lean{ComputableAnalysis.quarterTurnGeometricFourierSeries}
 \lean{ComputableAnalysis.quarterTurnGeometricFourierSeries_future_stage_enclosure}
 \leanok
+
+The stabilized Fourier box has an explicit width contract as well: its real
+coordinate width is bounded by the current candidate width plus twice the
+tail radius.  This is the complex-series analogue of the integral error
+budget and is the interface consumed by numerical applications.
+The imaginary coordinate has the identical bound, so a complex error budget
+can be tracked coordinatewise.
 
 \section{The computable Fourier-series contract}
 
@@ -135,6 +148,47 @@ formula may be new, but it must end in the same finite transform plus tail
 interface. Pointwise convergence, termwise integration, or an L2-style
 claim is a further theorem only after its own finite norm or tail certificate
 has been supplied.
+
+The complex exponential, sine, and cosine evaluators expose their finite
+increment laws directly: increasing a prefix by one stage adds exactly one
+rational-complex term.  These laws are the induction interface for later
+tail, derivative, and termwise-integration proofs.
+
+The weighted-prefix identities make the index shift explicit: the derivative
+of the term at index (k+1) is (z) times the term at index (k).  Thus the
+finite prefix theorem is an exact algebraic statement; no infinite
+interchange is being hidden in the notation.
+
+\lean{ComputableAnalysis.ComplexSeries.expPartial_succ}
+\lean{ComputableAnalysis.ComplexSeries.sinPartial_succ}
+\lean{ComputableAnalysis.ComplexSeries.cosPartial_succ}
+\lean{ComputableAnalysis.ComplexSeries.expTerm_succ_recurrence}
+\lean{ComputableAnalysis.ComplexSeries.sinSign_succ}
+\lean{ComputableAnalysis.QComplex.scaleRat_mul_left}
+\lean{ComputableAnalysis.QComplex.scaleRat_mul_right}
+\lean{ComputableAnalysis.QComplex.scaleRat_scaleRat}
+\lean{ComputableAnalysis.QComplex.scaleRat_divRat_cancel}
+\lean{ComputableAnalysis.QComplex.scaleRat_commute}
+\lean{ComputableAnalysis.QComplex.divRat_mul_right}
+\lean{ComputableAnalysis.ComplexSeries.sinTerm_derivative_relation}
+\lean{ComputableAnalysis.ComplexSeries.cosTerm_succ_derivative_relation}
+\lean{ComputableAnalysis.ComplexSeries.sinTerm_primitive_relation}
+\lean{ComputableAnalysis.ComplexSeries.cosTerm_primitive_relation}
+\lean{ComputableAnalysis.ComplexSeries.sinIntegratedPartial}
+\lean{ComputableAnalysis.ComplexSeries.sinIntegratedPartial_eq_one_sub_cosPartial}
+\lean{ComputableAnalysis.ComplexSeries.cosIntegratedPartial}
+\lean{ComputableAnalysis.ComplexSeries.cosIntegratedPartial_eq_sinPartial}
+\lean{ComputableAnalysis.ComplexSeries.sinWeightedPartial_eq_mul_cosPartial}
+\lean{ComputableAnalysis.ComplexSeries.cosWeightedPartial}
+\lean{ComputableAnalysis.ComplexSeries.cosWeightedPartial_eq_neg_mul_sinPartial}
+\lean{ComputableAnalysis.ComplexSeries.expWeightedPartial}
+\lean{ComputableAnalysis.ComplexSeries.expWeightedPartial_eq_mul_expPartial}
+\lean{ComputableAnalysis.ComplexSeries.expIntegratedPartial}
+\lean{ComputableAnalysis.ComplexSeries.expIntegratedPartial_eq_expPartial_sub_one}
+\lean{ComputableAnalysis.effectiveExpIntegratedPartial_eq_expPartial_sub_one}
+\lean{ComputableAnalysis.effectiveSinIntegratedPartial_eq_one_sub_cosPartial}
+\lean{ComputableAnalysis.effectiveCosIntegratedPartial_eq_sinPartial}
+\leanok
 
 \subsection{A computable (L^2)-style boundary}
 
@@ -238,10 +292,16 @@ obligations.
 
 \lean{ComputableAnalysis.FormalPowerSeries.coeffsFromDerivativeAtZero}
 \lean{ComputableAnalysis.FormalPowerSeries.coeffsFromDerivativeAtZero_hasFormalDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.derivative_coeffsFromDerivativeAtZero}
+\lean{ComputableAnalysis.FormalPowerSeries.coeffsFromDerivativeAtZero_derivative}
+\lean{ComputableAnalysis.FormalPowerSeries.coeffsFromDerivativeAtZero_add}
+\lean{ComputableAnalysis.FormalPowerSeries.coeffsFromDerivativeAtZero_scaleRat}
 \lean{ComputableAnalysis.FormalPowerSeries.derivative_add}
 \lean{ComputableAnalysis.FormalPowerSeries.derivative_scaleRat}
 \lean{ComputableAnalysis.FormalPowerSeries.HasFormalDerivative.add}
 \lean{ComputableAnalysis.FormalPowerSeries.HasFormalDerivative.scaleRat}
+\lean{ComputableAnalysis.ComplexSeries.expTerm_succ_recurrence}
 \leanok
 
 Concrete scalar series instantiate the same contract. The geometric raw and
@@ -344,11 +404,47 @@ The formal coefficient layer already records the derivative shifts for the
 main complex-valued functions:
 
 \lean{ComputableAnalysis.PowerSeries.atanTaylorCoeff_hasFormalDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.atanTaylorCoeff_eq_of_hasFormalDerivative}
 \lean{ComputableAnalysis.FormalPowerSeries.coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.derivative_coeffsFromDerivativeAtZero}
+\lean{ComputableAnalysis.FormalPowerSeries.coeffsFromDerivativeAtZero_derivative}
 \lean{ComputableAnalysis.PowerSeries.expCoeff_hasFormalDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.expCoeff_eq_of_hasFormalDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.expCoeff_eq_of_selfDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.scaledExpCoeff_derivative}
+\lean{ComputableAnalysis.FormalPowerSeries.scaledExpCoeff_eq_of_scaledSelfDerivative}
 \lean{ComputableAnalysis.PowerSeries.sinCoeff_hasFormalDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.sinCoeff_eq_of_hasFormalDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.cosCoeff_eq_of_hasFormalDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.sinCosCoeff_eq_of_coupledDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.sinCoeff_eq_of_secondDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.cosCoeff_eq_of_secondDerivative}
 \lean{ComputableAnalysis.PowerSeries.neg_cosCoeff_hasFormalDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.sinhCoeff_eq_of_hasFormalDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.coshCoeff_eq_of_hasFormalDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.sinhCoshCoeff_eq_of_coupledDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.sinhCoeff_eq_of_secondDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.coshCoeff_eq_of_secondDerivative}
 \leanok
+
+These identities give the chapter's finite initial-value principle.  A formal
+solution is not identified by appealing to a completed function space: its
+next rational coefficient is forced by the preceding one and the nonzero
+integer multiplier introduced by coefficient shift.  Thus
+
+\begin{verbatim}
+initial coefficient(s) + coefficient ODE
+        -> induction over rational coefficients
+        -> unique formal stream
+        -> interval evaluator and tail certificate
+        -> function-level calculus theorem
+\end{verbatim}
+
+The last arrow is deliberately separate.  Coefficient uniqueness supplies the
+algebraic candidate; an effective derivative or FTC certificate supplies its
+meaning as a shrinking interval computation on a rational domain.  This is the
+point at which the project replaces an appeal to completeness with explicit
+computational evidence.
 
 The first worked trigonometric prefix closes this loop.  The finite sine
 prefix is a rational polynomial: its coefficient shift supplies the cosine
@@ -459,6 +555,8 @@ factorization theorem ready for later tail estimates.
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_twelve_minus_ten}
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_six_minus_four}
 \lean{ComputableAnalysis.gaussianTaylorPointPrefix}
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_interval_contains}
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_interval_width}
 \lean{ComputableAnalysis.gaussianTaylorProductIntegralSum}
 \lean{ComputableAnalysis.gaussianTaylorProductIntegralSum_factorized}
 \lean{ComputableAnalysis.gaussianTaylorProductIntegralSum_stage_four_unit_square}

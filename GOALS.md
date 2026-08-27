@@ -337,7 +337,10 @@ interval-valued composition still requires a separate box-level contract.
    the `sinPiStieltjesIntegral` interval.  Its `to_overlap` theorem supplies
    the stagewise transport, after which
    `dyadicNestedRadicalIntegralRaw_stabilized_equiv_reciprocalPi_of_commonWitness`
-   closes the computable value theorem.  The base checkpoint is now proved by
+   closes the computable value theorem.  The theorem
+   `dyadicNestedRadicalIntegralRaw_stabilized_width_le` also exposes the runtime
+   budget explicitly: candidate dyadic-sum width plus twice the Stieltjes anchor
+   width.  The base checkpoint is now proved by
    `dyadicNestedRadicalStieltjes_base_witness` at stage zero.  The exact
    stage-one, stage-two, and stage-three overlap checkpoints are also proved
    in `SinPiTransportSubgoals.lean`; the remaining refinement is now
@@ -536,6 +539,18 @@ interval-valued composition still requires a separate box-level contract.
    nested-radical sine sample-overlap certificates through this lemma and then
    construct the corresponding squared-integrand integral certificate.
 
+   The signed-cosine upper-half checkpoint is now isolated in
+   `SinPiSquareCheckpoints.lean`: the stage-2 sample `k = 3` uses tangent
+   interval `[1,2]`, finds `379/256` on an 8-grid, and proves the signed
+   square/complement overlap.  Keeping this executable regression separate
+   avoids making the main evaluator module's exact-rational compilation path
+   unnecessarily expensive.
+
+   The reusable adapter
+   `rationalTangentSquareWitnessSearch_complete_of_candidate` separates grid
+   membership from the Boolean interval-admissibility proof.  This is the
+   proof-facing interface for future stage/sample certificates.
+
    That evaluator-specific bridge is now present as
    `sinPiSquare_sample_overlap_of_sine_and_table_overlap`: it consumes the
    existing sine sample overlap and `sinPiRawOfArctan_bounds`, constructs the
@@ -612,7 +627,9 @@ interval-valued composition still requires a separate box-level contract.
 
    The square route now exposes the same direct-only repair:
    `dyadicNestedRadicalSquareIntegralRaw_stabilized` and its theorems
-   `..._valid_of_overlap` and `..._equiv_anchor_of_overlap`.  Thus the
+   `..._valid_of_overlap`, `..._equiv_anchor_of_overlap`, and
+   `..._stabilized_width_le`.  The public square candidate likewise exposes
+   `dyadicPublicSquareIntegralRaw_stabilized_width_le`.  Thus the
    cross-stage nesting subgoal is reduced to one explicit common-anchor
    overlap theorem; stabilization itself is formalized and sorry-free.
 
@@ -1631,6 +1648,13 @@ unnormalized inverse reconstruction, injectivity, conjugate symmetry,
 linearity, period-four indexing, and cyclic convolution. These are exact
 finite QComplex identities; they do not introduce Mathlib's completed
 complex numbers or silently claim convergence of a general Fourier series.
+The effective Fourier-series stabilizer now also exposes its real-coordinate
+error budget through `EffectiveFourierSeries.stabilized_width_le_of_candidate`:
+candidate width plus twice the supplied tail radius. This makes the tail
+certificate directly usable by downstream precision accounting.
+The matching imaginary-coordinate theorem
+`EffectiveFourierSeries.stabilized_height_le_of_candidate` completes the
+coordinatewise complex error contract.
 
 The exact lattice triangles in `FinitePickCertificate.lean` add item 92's
 finite coordinate core.  The `(4,3)` triangle has area `6`, boundary count `8`,
@@ -2631,6 +2655,12 @@ explicit.
 The companion `Integral.monotoneDarbouxScheduleRaw_width_le_of_tolerance`
 hands a supplied rational tolerance directly to any scheduled stage, making
 the finite width budget available to downstream FTC and MVT certificates.
+The turning-point layer now has the matching adaptive contract:
+`Integral.finiteStageSum_width_le_of_bounds` sums individual stage budgets,
+and `Integral.FinitePiecewiseStageAssembly.compute_width_le_of_bounds` exposes
+that bound for the complete monotone-piece/turning-gap assembly.  This is
+finite bookkeeping; the anchor-equivalence and potential-infinity schedule
+remain explicit.
 The independent `FinitePiecewiseRectangles` module now records the local
 equal-cell rule needed for a finite piecewise-monotone stage:
 `PieceCellKind.increasing` and `.decreasing` select endpoint order, while
@@ -2660,6 +2690,33 @@ packages the common-range form: a uniform value-width certificate bounds the
 whole mesh gap by the sum of the domain widths times that range budget.  This
 separates the two refinement obligations cleanly—geometric mesh width and
 function-value uncertainty—before any potential-infinity schedule is added.
+The finite raw-sum layer now exposes the corresponding public error contract:
+`Integral.finiteRawSum_compute_width_eq_foldl` identifies the assembled width
+with the sum of component widths, and
+`Integral.finiteRawSum_compute_width_le_of_forall` turns a common component
+bound into the length-times-bound estimate used by finite turning-point and
+piecewise FTC assemblies.
+The same identity is now exposed for the left-associated public fold by
+`Integral.rawFold_compute_width_eq_foldl`, and
+`Integral.piecewiseMonotoneIntegralFor_compute_width_le_of_forall` lifts a
+uniform cell bound to the actual `PiecewiseMonotoneConstructionFor` integral
+with the explicit factor `c.pieces`.  The potential-infinity schedule is still
+separate; this theorem supplies its finite quantitative input.
+The adaptive counterpart `Integral.finiteRawSum_compute_width_le_of_bounds`
+allows a separate rational budget for each raw component and bounds the total
+width by their finite sum.  This is the intended interface for nonuniform
+turning-point meshes and differently conditioned special-function cells.
+The one-turn completion now carries that budget through prefix stabilization:
+`Integral.SingleTurnIntegralCompletion.stabilizedRaw_width_le_of_bounds`
+adds only twice the explicit anchor-radius budget to the three component
+bounds.
+The same contract is now available for the generic finite-turn completion:
+`Integral.MultiTurnIntegralCompletion.stabilizedRaw_width_le_of_bounds`
+propagates an independently supplied budget for every monotone piece and
+turning gap, then adds the explicit anchor-radius budget.
+The comparison lemma `RationalPartition.rat_add_fold_le_of_forall` and its
+piecewise lift `Integral.piecewiseMonotoneIntegralFor_compute_width_le_of_bounds`
+now propagate those nonuniform budgets through the actual public fold.
 The new `piecewiseRectangleAreaSum_constant` evaluates that constant per-cell
 budget exactly as `(cells.length : Rat) * value`.  Its companion
 `piecewiseRectangleAreaSum_gap_le_common_range` therefore gives the closed
@@ -2678,7 +2735,9 @@ width without invoking a completed real or a limiting sum.
   `FinitePiecewiseStageAssembly` now proves the finite rational aggregation
   has shrinking width; its common-rate estimate is the literal number of
   boxes times the supplied per-box width bound. Supplying the individual boxes
-  and proving that their combined stage encloses the intended integral remain
+  can now use `SingleTurnIntegralCandidate.compute_width_le_of_bounds` to
+  combine independent left, middle, and right budgets directly.
+  The remaining proof that their combined stage encloses the intended integral remains
   function-by-function work. This is consciously not a universal existence definition for
   integrals. The reusable
   `IntegralIdentities.LipschitzDyadic` constructor now turns a rational
@@ -2926,6 +2985,14 @@ the normalization and boundedness of every requested schedule precision
 explicit. The companion `FTC.requestedPrecision_antitone` proves the selector
 is nonincreasing across finite stages, supplying the schedule-order invariant
 needed by later endpoint-transport arguments.
+The stabilized effective-FTC adapter now also exposes its runtime budget via
+`FTC.effectiveFTCStabilizedRaw_width_le_of_candidate`: stabilization adds only
+twice the supplied anchor radius to the candidate Riemann width. This makes
+the general FTC interface usable for explicit downstream error accounting.
+The derivative-bound public raws now expose the complementary stage guarantees
+`DerivativeBoundFTC.boundedIntegralRaw_width_le_of_tolerance` and
+`DerivativeBoundFTC.endpointRaw_width_le_of_tolerance`, so both sides of the
+FTC comparison carry their requested precision explicitly.
 The finite polynomial integration-by-parts module now exposes both endpoint
 orientations of the product-rule telescope on rational grids. Its
 quadratic/cubic specialization proves both sums equal one at every positive
@@ -3823,6 +3890,76 @@ potential-infinity precision schedule.
   stream `1/n!`. See
   `FormalPowerSeries.expCoeff_derivative` in
   `ComputableAnalysis/PowerSeries.lean`.
+  `FormalPowerSeries.expCoeff_eq_of_hasFormalDerivative` also records the
+  finite coefficient-level uniqueness bridge from the initial coefficient and
+  the supplied exponential derivative stream.
+  `FormalPowerSeries.expCoeff_eq_of_selfDerivative` closes the corresponding
+  self-derivative initial-value recurrence \(F'=F,\ F(0)=1\) coefficient by
+  coefficient.
+  The formal primitive operator now has an explicit inverse-pair API:
+  `derivative_coeffsFromDerivativeAtZero` and
+  `coeffsFromDerivativeAtZero_derivative` state the two coefficient-level FTC
+  directions, with the constant coefficient supplying the integration anchor.
+  Its linearity is now checked as well by
+  `coeffsFromDerivativeAtZero_add` and
+  `coeffsFromDerivativeAtZero_scaleRat`, so finite termwise integration can
+  assemble sums and rational scalar multiples through the same API.
+  The parameterized form is now also checked: `scaledExpCoeff_derivative`
+  proves the coefficient recurrence for \(F'=rF\), and
+  `scaledExpCoeff_eq_of_scaledSelfDerivative` proves its initial-value
+  uniqueness for every rational parameter \(r\).
+- The rational-complex term evaluator has the matching finite recurrence
+  `ComplexSeries.expTerm_succ_recurrence`, linking the coefficient law to the
+  complex-variable exponential terms.
+- The complex partial-sum interface is now explicit: `expPartial_succ`,
+  `sinPartial_succ`, and `cosPartial_succ` expose one-term prefix increments,
+  while `ComplexSeries.expTerm_succ_recurrence` records the factorial
+  recurrence at rational-complex coordinates.
+  The alternating sign stream used by the trigonometric terms also has the
+  checked parity recurrence `ComplexSeries.sinSign_succ`, isolating this finite
+  obligation before termwise trigonometric differentiation.
+  The supporting rational-complex algebra is now explicit as well:
+  `QComplex.scaleRat_mul_left`, `QComplex.scaleRat_mul_right`, and
+  `QComplex.scaleRat_scaleRat` provide the scalar/multiplication transport
+  needed by those future termwise identities.  The division transport
+  `QComplex.divRat_mul_right` and the checked identity
+  `ComplexSeries.sinTerm_derivative_relation` now close the corresponding
+  finite sine-term derivative step.  The companion
+  `ComplexSeries.cosTerm_succ_derivative_relation` closes the alternating
+  cosine step, so the two finite term recurrences now expose the complete
+  `sin`/`cos` coefficient-level differentiation pair.  The finite aggregate
+  `ComplexSeries.sinWeightedPartial_eq_mul_cosPartial` then proves, by list
+  induction, that the weighted sine prefix is exactly `z` times the cosine
+  prefix.  This is the finite-sum bridge before any tail or infinite
+  termwise-differentiation theorem.
+  The symmetric `ComplexSeries.cosWeightedPartial_eq_neg_mul_sinPartial`
+  now supplies the cosine-prefix side, including the sign and index shift.
+  The same finite induction now covers the exponential series through
+  `ComplexSeries.expWeightedPartial_eq_mul_expPartial`, completing the
+  finite coefficient-level derivative bridge for the three basic complex
+  power-series evaluators.  In the exponential case the weighted prefix is
+  deliberately formed from `expTerm (k+1)`, recording the coefficient shift
+  explicitly rather than treating a finite prefix as an infinite series.
+  The matching finite integration identity
+  `ComplexSeries.expIntegratedPartial_eq_expPartial_sub_one` now records the
+  primitive prefix and its constant-term anchor exactly.
+  The matching trigonometric primitive step
+  `ComplexSeries.sinTerm_primitive_relation` scales `z * sinTerm z k` by the
+  reciprocal new exponent and obtains the negative next cosine term.  This is
+  the finite integration identity needed before any infinite passage.
+  Its list-inducted aggregate,
+  `ComplexSeries.sinIntegratedPartial_eq_one_sub_cosPartial`, now proves that
+  the integrated sine prefix is exactly `1 - cosPartial (n+1)`.  The proof is
+  finite rational-complex algebra; convergence and the effective FTC remain
+  separate later interfaces.
+  The symmetric identity `ComplexSeries.cosTerm_primitive_relation` and its
+  list aggregate `ComplexSeries.cosIntegratedPartial_eq_sinPartial` provide
+  the corresponding cosine-to-sine primitive.  Together these are the finite
+  trigonometric integration interface.
+  On the rational real axis, `FormalPowerSeries.cosineTaylorIntegralPartial`
+  is an explicit finite primitive whose prefix identity is
+  `cosineTaylorIntegralPartial_eq_sineTaylorPartial`.  This is the same
+  integration bridge in the coefficient notation used by the real FTC tests.
 - The same formal layer now covers the coefficient-shift identities for trig
   and hyperbolic streams:
   `sin -> cos`, `cos -> -sin`, `sinh -> cosh`, and
@@ -3831,6 +3968,28 @@ potential-infinity precision schedule.
   `FormalPowerSeries.cosCoeff_derivative`,
   `FormalPowerSeries.sinhCoeff_derivative`, and
   `FormalPowerSeries.coshCoeff_derivative`.
+- The initial-value uniqueness bridges
+  `FormalPowerSeries.sinCoeff_eq_of_hasFormalDerivative` and
+  `FormalPowerSeries.cosCoeff_eq_of_hasFormalDerivative` are now checked as
+  well.
+  `FormalPowerSeries.sinCosCoeff_eq_of_coupledDerivative` also closes the
+  coupled system (F'=G,\ G'=-F) with (F(0)=0,\ G(0)=1) by simultaneous
+  induction.
+  Consequently `FormalPowerSeries.sinCoeff_eq_of_secondDerivative` exposes
+  the equivalent oscillator uniqueness statement F''=-F with its two initial
+  coefficients.  `FormalPowerSeries.cosCoeff_eq_of_secondDerivative` gives the
+  complementary cosine initial data.
+- The initial-value uniqueness bridges for the hyperbolic pair,
+  `FormalPowerSeries.sinhCoeff_eq_of_hasFormalDerivative` and
+  `FormalPowerSeries.coshCoeff_eq_of_hasFormalDerivative`, are now checked as
+  well.
+  `FormalPowerSeries.sinhCoshCoeff_eq_of_coupledDerivative` also closes the
+  coupled system (F'=G,\ G'=F) with (F(0)=0,\ G(0)=1) by simultaneous
+  induction.
+  `FormalPowerSeries.sinhCoeff_eq_of_secondDerivative` gives the corresponding
+  F''=F initial-value form, while
+  `FormalPowerSeries.coshCoeff_eq_of_secondDerivative` gives the complementary
+  hyperbolic-cosine data.
 - The finite rational bridge below the formal table is now checked too:
   `FinitePolynomial.powerSecant_eq_differenceQuotient` identifies the exact
   quotient of every monomial, and
@@ -3863,7 +4022,9 @@ potential-infinity precision schedule.
   `ComputableAnalysis/ScalarODEUniqueness.lean`. Its checked closure turns a
   rational envelope with `B_(r+1) <= B_r/2` into zero error by an executable
   dyadic stage; `SelfDerivativeDirectMeshComparison` then gives function
-  agreement. The remaining analytic theorem derives that envelope by
+  agreement. Thus the finite-mesh closure is complete once its explicit
+  envelope provider is supplied; the remaining analytic theorem derives that
+  envelope by
   subtracting two derivative certificates on short rational blocks and
   chaining finitely many blocks. This is intentionally independent of
   Peano--Baker/Picard iteration. The vector linear theorem and a future
@@ -4039,16 +4200,24 @@ arguments.
   boundary explicit: ordered boxes, stage nesting, and potential-infinity
   width shrinkage must be supplied as finite certificates before the raw
   algorithm is promoted to a valid represented complex number.
+  `PolygonalIntegralCertificate.precision_witness` now exposes the resulting
+  requested-tolerance stage directly, with both coordinate widths bounded by
+  the supplied positive rational tolerance.
   The finite displacement identities
   `ComplexPathIntegral.polygonalDisplacementTo_append_endpoint` and
   `ComplexPathIntegral.polygonalDisplacementTo_closed` now provide the exact
   endpoint-cancellation seed for closed polygonal paths, still entirely in
   rational complex arithmetic.
+  `ComplexPathIntegral.polygonalDisplacementTo_split_at` adds finite path
+  additivity at an intermediate vertex, the algebraic prerequisite for
+  composing polygonal segments.
   The constant-differential lift
   `ComplexPathIntegral.polygonalConstantDifferentialDisplacement_append_endpoint`
   identifies the finite primitive value `c * (z_end - z_start)`, and
   `polygonalConstantDifferentialDisplacement_closed` proves its closed-path
   cancellation exactly.
+  `polygonalConstantDifferentialDisplacement_split_at` now transports finite
+  path additivity through the differential itself.
   The quadratic primitive layer
   `ComplexPathIntegral.polygonalQuadraticPrimitiveTo_append_endpoint` and
   `polygonalQuadraticPrimitiveTo_closed` extends this to the polynomial
@@ -4059,10 +4228,30 @@ arguments.
   `polygonalMonomialPrimitiveTo_closed` covers `z^n dz` with the executable
   natural power and primitive `z^(n+1)/(n+1)`. This is an algebraic finite
   schema, not a claim about an infinite analytic power function.
+  `polygonalMonomialPrimitiveTo_split_at` now supplies finite additivity for
+  this monomial path integral at an arbitrary intermediate vertex.
   The coefficient-list evaluator
   `ComplexPathIntegral.polynomialPrimitiveEval` and its path fold
   `polygonalPolynomialPrimitiveTo` now package the same endpoint cancellation
   for every finite rational-complex polynomial primitive.
+  `polygonalPolynomialPrimitiveTo_split_at` adds the corresponding finite
+  additivity law at an intermediate path vertex, completing the polynomial
+  path-composition interface.
+  `polygonalPolynomialIntegralRaw` now exposes this finite primitive fold as
+  a valid `ComplexRaw`, with an endpoint-equivalence theorem for open paths.
+  `polygonalPolynomialIntegralRaw_split_at` now transports the same additivity
+  to the raw integral interface at an arbitrary intermediate vertex, and
+  `polygonalPolynomialIntegralRaw_split_at_add` exposes it directly as the sum
+  of the two certified `ComplexRaw` path integrals.
+  The general piecewise-monotone interface now likewise exports
+  `Integral.generalIntegralFor_equiv_totalEndpointDifference_of_telescope`, so
+  a finite turning-point FTC proof can be consumed through the public general
+  integral name without unfolding its implementation.
+  This is an exact rational-complex integral evaluator, not an appeal to a
+  completed complex path space.
+  Its closed-path specialization
+  `polygonalPolynomialIntegralRaw_closed_equiv_zero` is the corresponding
+  finite Cauchy-style theorem for polynomial differentials.
 
 ## Algebraic Numbers and FTA
 
@@ -4458,12 +4647,18 @@ the focused `FiniteSineIntegral` module builds cleanly.
   `FormalPowerSeries.coeffsFromDerivativeAtZero`; the theorem
   `FormalPowerSeries.coeffsFromDerivativeAtZero_hasFormalDerivative` proves
   that differentiating the constructed coefficient stream gives the supplied
-  derivative stream.
+  derivative stream.  The converse uniqueness theorem
+  `FormalPowerSeries.coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative`
+  shows that the initial coefficient and derivative stream determine the
+  formal primitive coefficient-by-coefficient.
 - First checked Taylor coefficient route for arctangent:
   `FormalPowerSeries.atanTaylorCoeff_hasFormalDerivative` proves that the
   arctangent coefficient stream differentiates to the coefficient stream for
-  `1/(1+x^2)`, and `Taylor.arctanTaylorCoefficientRoute` records the odd
-  coefficients `(-1)^k/(2k+1)`.
+  `1/(1+x^2)`, while
+  `FormalPowerSeries.atanTaylorCoeff_eq_of_hasFormalDerivative` gives the
+  corresponding uniqueness statement from the zero constant coefficient.
+  `Taylor.arctanTaylorCoefficientRoute` records the odd coefficients
+  `(-1)^k/(2k+1)`.
 - The analytic input for that route is now a certified rational function:
   `Taylor.arctanKernelOnInterval` is `1/(1+x^2)` as a function on any rational
   interval, backed by `Taylor.arctanKernel_regular_on_every_interval`.

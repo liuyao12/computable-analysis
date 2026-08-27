@@ -126,6 +126,8 @@ candidate -> finite derivative certificate + initial raw value
 \lean{ComputableAnalysis.SolvesSelfDerivativeOnInterval}
 \lean{ComputableAnalysis.SolvesSelfDerivativeOnInterval.derivative_self}
 \lean{ComputableAnalysis.SelfDerivativeInitialValueUnique}
+\lean{ComputableAnalysis.LinearODE.effectiveDiscreteRecurrence_unique}
+\lean{ComputableAnalysis.LinearODE.effectiveDiscreteVariationOfConstants}
 \leanok
 
 The absolute-value estimate is the first finite norm substitute in this
@@ -306,6 +308,8 @@ do not depend on the preferred exponential implementation.
 The checked finite uniqueness statement is the recurrence theorem above; the
 two-by-two instance is also available as
 \lean{ComputableAnalysis.LinearODE.twoByTwo_solution_unique}.
+The scoped calculus entry point also exposes this finite rational theorem as
+\lean{ComputableAnalysis.effectiveTwoByTwoSolutionUnique}.
 
 The direct scalar uniqueness route is also exposed independently of the
 matrix expansion. Its only analytic input is a finite mesh-contraction
@@ -390,6 +394,34 @@ function-specific input between these two layers.
 Thus the current foundation proves the algebraic and error-closing core, while
 the remaining theorem for a given ODE is a finite, inspectable obligation:
 regularity of the entries, simplex enclosure, and a compatible tail bound.
+
+For a constant rational coefficient, the coefficient layer already closes the
+scalar homogeneous case without a completeness argument.  If
+
+\[
+F'=rF,\qquad F(0)=1,
+\]
+
+then coefficient induction forces
+
+\[
+F_n=\frac{r^n}{n!}.
+\]
+
+The declarations `scaledExpCoeff_derivative` and
+`scaledExpCoeff_eq_of_scaledSelfDerivative` are the reusable bridge.  The
+analytic ODE layer still has to transport this recurrence through an interval
+evaluator and its explicit tail certificate; the recurrence itself is already
+finite rational algebra.
+
+\lean{ComputableAnalysis.FormalPowerSeries.scaledExpCoeff_derivative}
+\lean{ComputableAnalysis.FormalPowerSeries.scaledExpCoeff_eq_of_scaledSelfDerivative}
+\lean{ComputableAnalysis.ComplexSeries.expWeightedPartial_eq_mul_expPartial}
+\lean{ComputableAnalysis.FormalPowerSeries.sinCoeff_eq_of_secondDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.cosCoeff_eq_of_secondDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.sinhCoeff_eq_of_secondDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.coshCoeff_eq_of_secondDerivative}
+\leanok
 
 \section{Concrete rotation candidate}
 
@@ -532,6 +564,8 @@ algebra or split into pieces and integrated piecewise; the blueprint does not
 enumerate every syntactic variant.
 
 \lean{ComputableAnalysis.ComplexPathIntegral.polygonalIntegralRawEntire_valid}
+\lean{ComputableAnalysis.ComplexPathIntegral.PolygonalIntegralCertificate.precision_witness}
+\lean{ComputableAnalysis.ComplexPathIntegral.polygonalDisplacementTo_split_at}
 \lean{ComputableAnalysis.ComplexPathIntegral.finiteConstantDifferentialExactness_closed}
 \lean{ComputableAnalysis.ComplexPathIntegral.finitePolynomialDifferentialExactness_closed}
 \lean{ComputableAnalysis.unitSquareZDifferentialCertificate}

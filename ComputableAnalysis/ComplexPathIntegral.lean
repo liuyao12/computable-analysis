@@ -220,11 +220,48 @@ theorem polygonalDisplacementTo_closed
   simp [QComplex.sub, QComplex.add, QComplex.neg, QComplex.zero]
   grind [Rat.sub_eq_add_neg]
 
+theorem polygonalDisplacementTo_split_at
+    (start middle : QComplex) (pre suf : List QComplex) :
+    polygonalDisplacementTo start (pre ++ [middle] ++ suf) =
+      QComplex.add
+        (polygonalDisplacementTo start (pre ++ [middle]))
+        (polygonalDisplacementTo middle suf) := by
+  induction pre generalizing start with
+  | nil =>
+      cases middle
+      cases start
+      simp [polygonalDisplacementTo, QComplex.sub, QComplex.add,
+        QComplex.neg, QComplex.zero]
+      constructor <;> grind [Rat.add_assoc, Rat.add_comm]
+  | cons vertex pre ih =>
+      simp only [List.cons_append, polygonalDisplacementTo]
+      rw [ih]
+      cases start
+      cases vertex
+      simp [QComplex.sub, QComplex.add, QComplex.neg]
+      constructor <;> grind [Rat.add_assoc, Rat.add_comm, Rat.sub_eq_add_neg]
+
 /-- Finite primitive-cancellation value for the constant differential
 `c dz` along a polygonal path. -/
 def polygonalConstantDifferentialDisplacement
     (c start : QComplex) (vertices : List QComplex) : QComplex :=
   QComplex.mul c (polygonalDisplacementTo start vertices)
+
+theorem polygonalConstantDifferentialDisplacement_split_at
+    (c start middle : QComplex) (pre suf : List QComplex) :
+    polygonalConstantDifferentialDisplacement c start
+        (pre ++ [middle] ++ suf) =
+      QComplex.add
+        (polygonalConstantDifferentialDisplacement c start (pre ++ [middle]))
+        (polygonalConstantDifferentialDisplacement c middle suf) := by
+  unfold polygonalConstantDifferentialDisplacement
+  rw [polygonalDisplacementTo_split_at]
+  cases c
+  cases (polygonalDisplacementTo start (pre ++ [middle]))
+  cases (polygonalDisplacementTo middle suf)
+  simp [QComplex.mul, QComplex.add]
+  constructor <;> grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+    Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
 
 theorem polygonalConstantDifferentialDisplacement_append_endpoint
     (c start endpoint : QComplex) (vertices : List QComplex) :
@@ -327,6 +364,27 @@ theorem polygonalMonomialPrimitiveTo_append_endpoint
       constructor <;> grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
         Rat.mul_assoc, Rat.mul_comm]
 
+theorem polygonalMonomialPrimitiveTo_split_at
+    (degree : Nat) (start middle : QComplex) (pre suf : List QComplex) :
+    polygonalMonomialPrimitiveTo degree start
+        (pre ++ [middle] ++ suf) =
+      QComplex.add
+        (polygonalMonomialPrimitiveTo degree start (pre ++ [middle]))
+        (polygonalMonomialPrimitiveTo degree middle suf) := by
+  induction pre generalizing start with
+  | nil =>
+      simp [polygonalMonomialPrimitiveTo, QComplex.add, QComplex.zero]
+      constructor <;> grind [Rat.add_assoc, Rat.add_comm]
+  | cons vertex pre ih =>
+      simp only [List.cons_append, polygonalMonomialPrimitiveTo]
+      rw [ih]
+      cases start
+      cases vertex
+      cases middle
+      simp [monomialPrimitiveIncrement, QComplex.sub, QComplex.add,
+        QComplex.neg, QComplex.scaleRat, QComplex.natPow, QComplex.mul]
+      constructor <;> grind [Rat.add_assoc, Rat.add_comm, Rat.sub_eq_add_neg]
+
 theorem polygonalMonomialPrimitiveTo_closed
     (degree : Nat) (start : QComplex) (vertices : List QComplex) :
     polygonalMonomialPrimitiveTo degree start (vertices ++ [start]) =
@@ -391,6 +449,28 @@ theorem polygonalPolynomialPrimitiveTo_append_endpoint
       rw [ih]
       exact htel _ _ _
 
+theorem polygonalPolynomialPrimitiveTo_split_at
+    (coefficients : List QComplex) (start middle : QComplex)
+    (pre suf : List QComplex) :
+    polygonalPolynomialPrimitiveTo coefficients start
+        (pre ++ [middle] ++ suf) =
+      QComplex.add
+        (polygonalPolynomialPrimitiveTo coefficients start (pre ++ [middle]))
+        (polygonalPolynomialPrimitiveTo coefficients middle suf) := by
+  induction pre generalizing start with
+  | nil =>
+      simp [polygonalPolynomialPrimitiveTo, QComplex.add, QComplex.zero]
+      constructor <;> grind [Rat.add_assoc, Rat.add_comm]
+  | cons vertex pre ih =>
+      simp only [List.cons_append, polygonalPolynomialPrimitiveTo]
+      rw [ih]
+      cases start
+      cases vertex
+      cases middle
+      simp [polynomialPrimitiveIncrement, QComplex.sub, QComplex.add,
+        QComplex.neg]
+      constructor <;> grind [Rat.add_assoc, Rat.add_comm, Rat.sub_eq_add_neg]
+
 theorem polygonalPolynomialPrimitiveTo_closed
     (coefficients : List QComplex) (start : QComplex)
     (vertices : List QComplex) :
@@ -401,6 +481,86 @@ theorem polygonalPolynomialPrimitiveTo_closed
   simp [polynomialPrimitiveIncrement, polynomialPrimitiveEval,
     QComplex.sub, QComplex.add, QComplex.neg, QComplex.zero]
   constructor <;> grind
+
+/-! An exact finite polynomial path integral is useful when the differential is
+already presented by its primitive coefficients.  It is a rational-complex
+algorithm at every stage; no limiting path construction is involved. -/
+def polygonalPolynomialIntegralRaw
+    (coefficients : List QComplex) (start : QComplex)
+    (vertices : List QComplex) : ComplexRaw :=
+  ComplexRaw.ofQComplex
+    (polygonalPolynomialPrimitiveTo coefficients start vertices)
+
+theorem polygonalPolynomialIntegralRaw_valid
+    (coefficients : List QComplex) (start : QComplex)
+    (vertices : List QComplex) :
+    (polygonalPolynomialIntegralRaw coefficients start vertices).Valid := by
+  exact ComplexRaw.ofQComplex_valid _
+
+theorem polygonalPolynomialIntegralRaw_equiv_endpoint
+    (coefficients : List QComplex) (start endpoint : QComplex)
+    (vertices : List QComplex) :
+    (polygonalPolynomialIntegralRaw coefficients start (vertices ++ [endpoint])).Equiv
+      (ComplexRaw.ofQComplex
+        (polynomialPrimitiveIncrement coefficients start endpoint)) := by
+  rw [polygonalPolynomialIntegralRaw,
+    polygonalPolynomialPrimitiveTo_append_endpoint]
+  exact ComplexRaw.equiv_refl _ (ComplexRaw.ofQComplex_valid _)
+
+/-! The finite path integral respects subdivision at an explicitly supplied
+intermediate vertex.  This is the path-integral form of additivity: it is an
+exact rational identity for polynomial differentials, with no completed path
+or limiting integral involved. -/
+theorem polygonalPolynomialIntegralRaw_split_at
+    (coefficients : List QComplex) (start middle : QComplex)
+    (pre suf : List QComplex) :
+    (polygonalPolynomialIntegralRaw coefficients start
+      (pre ++ [middle] ++ suf)).Equiv
+      (ComplexRaw.ofQComplex
+        (QComplex.add
+          (polygonalPolynomialPrimitiveTo coefficients start (pre ++ [middle]))
+          (polygonalPolynomialPrimitiveTo coefficients middle suf))) := by
+  rw [polygonalPolynomialIntegralRaw, polygonalPolynomialPrimitiveTo_split_at]
+  exact ComplexRaw.equiv_refl _ (ComplexRaw.ofQComplex_valid _)
+
+theorem polygonalPolynomialIntegralRaw_split_at_add
+    (coefficients : List QComplex) (start middle : QComplex)
+    (pre suf : List QComplex) :
+    (polygonalPolynomialIntegralRaw coefficients start
+      (pre ++ [middle] ++ suf)).Equiv
+      (ComplexRaw.add
+        (polygonalPolynomialIntegralRaw coefficients start (pre ++ [middle]))
+        (polygonalPolynomialIntegralRaw coefficients middle suf)) := by
+  intro n
+  apply (ComplexRaw.compareAt_overlap_iff
+    (polygonalPolynomialIntegralRaw coefficients start
+      (pre ++ [middle] ++ suf))
+    (ComplexRaw.add
+      (polygonalPolynomialIntegralRaw coefficients start (pre ++ [middle]))
+      (polygonalPolynomialIntegralRaw coefficients middle suf)) n n).2
+  rw [polygonalPolynomialIntegralRaw,
+    polygonalPolynomialPrimitiveTo_split_at]
+  change QBox.Overlaps
+    (QBox.point
+      (QComplex.add
+        (polygonalPolynomialPrimitiveTo coefficients start (pre ++ [middle]))
+        (polygonalPolynomialPrimitiveTo coefficients middle suf)))
+    (QBox.add
+      (QBox.point
+        (polygonalPolynomialPrimitiveTo coefficients start (pre ++ [middle])))
+      (QBox.point
+        (polygonalPolynomialPrimitiveTo coefficients middle suf)))
+  rw [QBox.add_point]
+  unfold QBox.Overlaps
+  exact ⟨QComplex.le_refl _, QComplex.le_refl _⟩
+
+theorem polygonalPolynomialIntegralRaw_closed_equiv_zero
+    (coefficients : List QComplex) (start : QComplex)
+    (vertices : List QComplex) :
+    (polygonalPolynomialIntegralRaw coefficients start
+      (vertices ++ [start])).Equiv (ComplexRaw.ofQComplex QComplex.zero) := by
+  rw [polygonalPolynomialIntegralRaw, polygonalPolynomialPrimitiveTo_closed]
+  exact ComplexRaw.equiv_refl _ (ComplexRaw.ofQComplex_valid _)
 
 /-- A point on the straight segment from `a` to `b`, with parameter `k/n`. -/
 def segmentPoint (a b : QComplex) (n : Nat) (k : Nat) : QComplex :=
@@ -510,6 +670,14 @@ theorem polygonalIntegralRawEntire_valid
   · intro n m hnm
     have hnest := certificate.nested n m hnm
     exact ⟨hnest.1.1, hnest.2.1, hnest.1.2, hnest.2.2⟩
+
+theorem PolygonalIntegralCertificate.precision_witness
+    {f : EntireBoxFunctionRaw} {vertices : List QComplex}
+    (certificate : PolygonalIntegralCertificate f vertices) (eps : QPos) :
+    ∃ N : Nat, ∀ n : Nat, N <= n ->
+      (polygonalIntegralBoxEntire f vertices n).width <= eps.val /\
+      (polygonalIntegralBoxEntire f vertices n).height <= eps.val := by
+  exact certificate.widths_shrink eps
 
 def zero : QComplex := QComplex.zero
 def one : QComplex := QComplex.one

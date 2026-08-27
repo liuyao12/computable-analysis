@@ -4565,7 +4565,7 @@ theorem addInterval_fold_overlaps_of_mem (xs : List Nat)
         (fun j hj => hterm j (List.mem_cons_of_mem k hj))
 
 /-- Moving a rational initial value outside a finite addition fold. -/
-theorem rat_add_fold_initial (xs : List Nat) (term : Nat -> Rat)
+theorem rat_add_fold_initial {α : Type} (xs : List α) (term : α -> Rat)
     (initial : Rat) :
     xs.foldl (fun total k => total + term k) initial =
       initial + xs.foldl (fun total k => total + term k) 0 := by
@@ -4601,7 +4601,7 @@ theorem addInterval_fold_width (xs : List Nat) (term : Nat -> QInterval)
 
 /-- A finite rational addition fold whose every term is bounded above by a
 constant is bounded by that constant times the number of terms. -/
-theorem rat_add_fold_le_length_mul (xs : List Nat) (term : Nat -> Rat)
+theorem rat_add_fold_le_length_mul {α : Type} (xs : List α) (term : α -> Rat)
     (c : Rat) (hterm : forall k, k ∈ xs -> term k <= c) :
     xs.foldl (fun total k => total + term k) 0 <= (xs.length : Rat) * c := by
   induction xs with
@@ -4625,6 +4625,24 @@ theorem rat_add_fold_le_length_mul (xs : List Nat) (term : Nat -> Rat)
         _ <= c + (xs.length : Rat) * c := rat_add_le_add hk hrest
         _ = ((xs.length : Rat) + 1) * c := by
           grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc, Rat.add_comm]
+
+theorem rat_add_fold_le_of_forall {α : Type} (xs : List α)
+    (term bound : α -> Rat)
+    (h : forall x, x ∈ xs -> term x <= bound x) :
+    xs.foldl (fun total x => total + term x) 0 <=
+      xs.foldl (fun total x => total + bound x) 0 := by
+  induction xs with
+  | nil => simp
+  | cons x xs ih =>
+      have hx := h x (by simp)
+      have ht : forall y, y ∈ xs -> term y <= bound y := by
+        intro y hy
+        exact h y (by simp [hy])
+      have hi := ih ht
+      simp only [List.foldl, Rat.zero_add]
+      rw [rat_add_fold_initial xs term (term x),
+        rat_add_fold_initial xs bound (bound x)]
+      exact _root_.ComputableAnalysis.rat_add_le_add hx hi
 
 def boundIntegralSum {a b : Rat} (P : RationalPartition a b)
     (bound : (k : Nat) -> k < P.pieces -> QInterval) : QInterval :=
@@ -5333,8 +5351,20 @@ def boundedIntegralRaw
 
 def endpointRaw
     {F dF : RealFunRaw} {a b : Rat}
-    (h : DerivativeBoundFTC F dF a b) : RealRaw where
+  (h : DerivativeBoundFTC F dF a b) : RealRaw where
   compute := h.endpointCompute
+
+theorem boundedIntegralRaw_width_le_of_tolerance
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : DerivativeBoundFTC F dF a b) (n : Nat) :
+    (h.boundedIntegralRaw.compute n).width <= (precisionAtStage n).val := by
+  exact h.riemann_width (precisionAtStage n)
+
+theorem endpointRaw_width_le_of_tolerance
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : DerivativeBoundFTC F dF a b) (n : Nat) :
+    (h.endpointRaw.compute n).width <= (precisionAtStage n).val := by
+  exact h.endpoint_width (precisionAtStage n)
 
 /-- The derivative-bound FTC bridge, in computable-real form. -/
 theorem equiv_endpoint
@@ -6885,6 +6915,82 @@ theorem finiteRawSum_valid :
         exact hxs y (by simp [hy])
       simpa [finiteRawSum] using
         RealRaw.add_valid hx (finiteRawSum_valid xs htail)
+
+/-! Finite piece assemblies expose a literal error budget.  This is only the
+interval arithmetic of the finite sum; it does not assert that the sum is an
+integral or invoke a limiting argument. -/
+
+theorem finiteRawSum_compute_width_eq_foldl
+    (xs : List RealRaw) (n : Nat) :
+    ((finiteRawSum xs).compute n).width =
+      xs.foldl (fun total x => total + (x.compute n).width) 0 := by
+  induction xs with
+  | nil =>
+      simp [finiteRawSum, RealRaw.zero, RealRaw.ofRat, QInterval.width] <;>
+        grind
+  | cons x xs ih =>
+      change (QInterval.addInterval (x.compute n)
+        ((finiteRawSum xs).compute n)).width = _
+      rw [QInterval.addInterval_width]
+      rw [ih]
+      simp only [List.foldl]
+      rw [show (0 : Rat) + (x.compute n).width = (x.compute n).width by
+        grind]
+      simpa using (RationalPartition.rat_add_fold_initial xs
+        (fun y => (y.compute n).width) (x.compute n).width).symm
+
+theorem finiteRawSum_compute_width_le_of_forall
+    (xs : List RealRaw) (n : Nat) (bound : Rat)
+    (hbound : forall x, x ∈ xs -> (x.compute n).width <= bound) :
+    ((finiteRawSum xs).compute n).width <= (xs.length : Rat) * bound := by
+  rw [finiteRawSum_compute_width_eq_foldl]
+  apply RationalPartition.rat_add_fold_le_length_mul
+  intro x hx
+  exact hbound x hx
+
+theorem finiteRawSum_compute_width_le_of_bounds
+    (xs : List RealRaw) (n : Nat) (bound : RealRaw -> Rat)
+    (hbound : forall x, x ∈ xs -> (x.compute n).width <= bound x) :
+    ((finiteRawSum xs).compute n).width <=
+      (xs.map bound).foldl (fun total r => total + r) 0 := by
+  rw [finiteRawSum_compute_width_eq_foldl]
+  induction xs with
+  | nil => simp
+  | cons x xs ih =>
+      have hx := hbound x (by simp)
+      have htail : forall y, y ∈ xs -> (y.compute n).width <= bound y := by
+        intro y hy
+        exact hbound y (by simp [hy])
+      have hrest := ih htail
+      simp only [List.map_cons, List.foldl]
+      rw [RationalPartition.rat_add_fold_initial]
+      simp only [Rat.zero_add]
+      calc
+        (x.compute n).width +
+            List.foldl (fun total x => total + (x.compute n).width) 0 xs <=
+            bound x + (xs.map bound).foldl (fun total r => total + r) 0 := by
+          exact _root_.ComputableAnalysis.rat_add_le_add hx hrest
+        _ = (xs.map bound).foldl (fun total r => total + r) (bound x) := by
+          symm
+          exact RationalPartition.rat_add_fold_initial
+            (xs.map bound) (fun r => r) (bound x)
+
+/-! The same width identity applies to a left-associated raw fold.  The
+piecewise integral API uses this form directly, while the canonical
+`finiteRawSum` form above is preferable for list transport. -/
+
+theorem rawFold_compute_width_eq_foldl
+    {α : Type} (xs : List α) (f : α -> RealRaw)
+    (initial : RealRaw) (n : Nat) :
+    ((xs.foldl (fun acc k => acc + f k) initial).compute n).width =
+      ((xs.foldl (fun acc k => QInterval.addInterval acc ((f k).compute n))
+        (initial.compute n)).width) := by
+  induction xs generalizing initial with
+  | nil => rfl
+  | cons x xs ih =>
+      simp only [List.foldl]
+      rw [ih]
+      rfl
 
 theorem finiteRawSum_append_equiv
     (xs ys : List RealRaw)
@@ -11001,6 +11107,67 @@ theorem piecewiseMonotoneIntegralFor_valid (F : FunctionOnInterval)
     hfold (List.range c.pieces) (RealRaw.ofRat 0) (by
     simpa [RealRaw.Valid, RealRaw.ofRat] using RealRaw.ofRat_valid 0)
 
+/-! A uniform finite cell-width certificate propagates through the public
+piecewise fold.  This is the quantitative form needed before a separate
+stage schedule proves that the common bound shrinks to zero. -/
+
+theorem piecewiseMonotoneIntegralFor_compute_width_le_of_forall
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) (n : Nat) (bound : Rat)
+    (hbound : forall k (hk : k < c.pieces),
+      ((piecewiseMonotoneCellIntegral F c k hk).compute n).width <= bound) :
+    ((piecewiseMonotoneIntegralFor F c).compute n).width <=
+      (c.pieces : Rat) * bound := by
+  unfold piecewiseMonotoneIntegralFor
+  rw [rawFold_compute_width_eq_foldl]
+  rw [RationalPartition.addInterval_fold_width]
+  have hterm : forall k, k ∈ List.range c.pieces ->
+      (((if hk : k < c.pieces then
+        piecewiseMonotoneCellIntegral F c k hk
+       else RealRaw.zero).compute n).width) <= bound := by
+    intro k hk
+    have hkl : k < c.pieces := List.mem_range.1 hk
+    simp [hkl]
+    exact hbound k hkl
+  have hsum := RationalPartition.rat_add_fold_le_length_mul
+    (List.range c.pieces)
+    (fun k => (((if hk : k < c.pieces then
+      piecewiseMonotoneCellIntegral F c k hk
+     else RealRaw.zero).compute n).width)) bound hterm
+  have hzero : ((RealRaw.ofRat 0).compute n).width = 0 := by
+    simp [RealRaw.ofRat, QInterval.width] <;> grind
+  rw [hzero]
+  simpa [List.length_range, Rat.zero_add] using hsum
+
+theorem piecewiseMonotoneIntegralFor_compute_width_le_of_bounds
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) (n : Nat)
+    (bound : Nat -> Rat)
+    (hbound : forall k (hk : k < c.pieces),
+      ((piecewiseMonotoneCellIntegral F c k hk).compute n).width <= bound k) :
+    ((piecewiseMonotoneIntegralFor F c).compute n).width <=
+      (List.range c.pieces).foldl (fun total k => total + bound k) 0 := by
+  unfold piecewiseMonotoneIntegralFor
+  rw [rawFold_compute_width_eq_foldl]
+  rw [RationalPartition.addInterval_fold_width]
+  have hterm : forall k, k ∈ List.range c.pieces ->
+      (((if hk : k < c.pieces then
+        piecewiseMonotoneCellIntegral F c k hk
+       else RealRaw.zero).compute n).width) <= bound k := by
+    intro k hk
+    have hkl : k < c.pieces := List.mem_range.1 hk
+    simp [hkl]
+    exact hbound k hkl
+  have hsum := RationalPartition.rat_add_fold_le_of_forall
+    (List.range c.pieces)
+    (fun k => (((if hk : k < c.pieces then
+      piecewiseMonotoneCellIntegral F c k hk
+     else RealRaw.zero).compute n).width)) bound hterm
+  have hzero : ((RealRaw.ofRat 0).compute n).width = 0 := by
+    simp [RealRaw.ofRat, QInterval.width] <;> grind
+  rw [hzero]
+  simpa [Rat.zero_add] using hsum
+
 /-! The two-cell case is the first reusable finite assembly law.  It exposes
 the piecewise fold as the sum of its two certified cell integrals, up to the
 interval-representative equivalence. -/
@@ -11442,6 +11609,28 @@ theorem generalIntegralFor_ofNondecreasing_equiv
   simpa [generalIntegralFor] using
     piecewiseMonotoneIntegralFor_ofNondecreasing_equiv
       (F := F) c hinterval
+
+/-! Publicly expose the finite-piece FTC endpoint theorem through the
+project-facing general-integral name.  The hypotheses remain deliberately
+finite: the caller supplies the endpoint transport certificate for the chosen
+rational partition. -/
+theorem generalIntegralFor_equiv_totalEndpointDifference_of_telescope
+    (F : FunctionOnInterval)
+    (c : GeneralConstructionFor F)
+    (h : PiecewiseMonotoneEndpointFTCFor F c)
+    {first : RealRaw} {rest : List RealRaw}
+    (hvalues : forall x, x ∈ first :: rest -> x.Valid)
+    (htransport :
+      FiniteRawListEquiv
+        (piecewiseMonotoneEndpointDifferenceList F c)
+        (rawAdjacentDifferenceList (first :: rest)))
+    (htotal : (rawLast first rest - first).Equiv
+      (piecewiseMonotoneTotalEndpointDifference F c)) :
+    (generalIntegralFor F c).Equiv
+      (piecewiseMonotoneTotalEndpointDifference F c) := by
+  simpa [generalIntegralFor] using
+    piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_telescope
+      F c h hvalues htransport htotal
 
 abbrev ExistsGeneralConstructionFor (F : FunctionOnInterval) : Prop :=
   ExistsPiecewiseMonotoneConstructionFor F

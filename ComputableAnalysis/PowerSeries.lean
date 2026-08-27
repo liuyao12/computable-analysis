@@ -118,6 +118,9 @@ def atanTaylorCoeff : Coeffs :=
 def expCoeff : Coeffs :=
   fun n => 1 / factorialRat n
 
+def scaledExpCoeff (r : Rat) : Coeffs :=
+  fun n => r ^ n / factorialRat n
+
 mutual
 
 /-- Sine coefficients, defined by the differential system `sin' = cos`. -/
@@ -171,6 +174,17 @@ theorem mul_div_cancel_left {a b : Rat} (ha : a ≠ 0) :
     _ = b := by
       rw [Rat.mul_one]
 
+theorem eq_div_of_mul_eq {a x y : Rat} (ha : a ≠ 0)
+    (h : a * x = y) : x = y / a := by
+  calc
+    x = 1 * x := by rw [Rat.one_mul]
+    _ = (a⁻¹ * a) * x := by
+      rw [Rat.inv_mul_cancel a ha, Rat.one_mul]
+    _ = a⁻¹ * (a * x) := by rw [Rat.mul_assoc]
+    _ = a⁻¹ * y := by rw [h]
+    _ = y / a := by
+      rw [Rat.div_def, Rat.mul_comm]
+
 theorem coeffsFromDerivativeAtZero_hasFormalDerivative (F0 : Rat) (dF : Coeffs) :
     HasFormalDerivative (coeffsFromDerivativeAtZero F0 dF) dF := by
   unfold HasFormalDerivative
@@ -194,6 +208,40 @@ theorem coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative
       rw [← congrFun hF n, Rat.div_def]
       have hne : (((n + 1 : Nat) : Rat)) ≠ 0 := natCast_succ_ne_zero n
       grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel _ hne]
+
+theorem derivative_coeffsFromDerivativeAtZero (F0 : Rat) (dF : Coeffs) :
+    derivative (coeffsFromDerivativeAtZero F0 dF) = dF := by
+  exact coeffsFromDerivativeAtZero_hasFormalDerivative F0 dF
+
+theorem coeffsFromDerivativeAtZero_derivative (F : Coeffs) :
+    coeffsFromDerivativeAtZero (F 0) (derivative F) = F := by
+  exact coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative (F := F) (dF := derivative F)
+    (by rfl)
+
+theorem coeffsFromDerivativeAtZero_add
+    (F0 G0 : Rat) (dF dG : Coeffs) :
+    coeffsFromDerivativeAtZero (F0 + G0) (add dF dG) =
+      add (coeffsFromDerivativeAtZero F0 dF)
+        (coeffsFromDerivativeAtZero G0 dG) := by
+  funext n
+  cases n with
+  | zero => rfl
+  | succ n =>
+      dsimp [coeffsFromDerivativeAtZero, add]
+      rw [Rat.div_def, Rat.div_def, Rat.div_def]
+      grind [Rat.add_mul, Rat.mul_add]
+
+theorem coeffsFromDerivativeAtZero_scaleRat
+    (r F0 : Rat) (dF : Coeffs) :
+    coeffsFromDerivativeAtZero (r * F0) (scaleRat r dF) =
+      scaleRat r (coeffsFromDerivativeAtZero F0 dF) := by
+  funext n
+  cases n with
+  | zero => rfl
+  | succ n =>
+      dsimp [coeffsFromDerivativeAtZero, scaleRat]
+      rw [Rat.div_def, Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm]
 
 theorem derivative_neg (c : Coeffs) :
     derivative (neg c) = neg (derivative c) := by
@@ -263,6 +311,19 @@ the geometric-series coefficients gives the odd arctangent coefficients. -/
 theorem atanTaylorCoeff_hasFormalDerivative :
     HasFormalDerivative atanTaylorCoeff oneOverOnePlusSquareCoeff :=
   coeffsFromDerivativeAtZero_hasFormalDerivative 0 oneOverOnePlusSquareCoeff
+
+/-! The arctangent coefficient stream is the unique formal primitive with
+zero constant coefficient and derivative stream `1/(1+x^2)`.  This is the
+coefficient-level uniqueness step used when comparing independently supplied
+arctangent computations. -/
+theorem atanTaylorCoeff_eq_of_hasFormalDerivative
+    {F : Coeffs}
+    (hF : HasFormalDerivative F oneOverOnePlusSquareCoeff)
+    (hzero : F 0 = 0) :
+    F = atanTaylorCoeff := by
+  symm
+  simpa [atanTaylorCoeff, hzero] using
+    (coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative hF)
 
 theorem atanTaylorCoeff_zero :
     atanTaylorCoeff 0 = 0 := rfl
@@ -364,10 +425,267 @@ theorem expCoeff_hasFormalDerivative :
     HasFormalDerivative expCoeff expCoeff :=
   expCoeff_derivative
 
+/-! The exponential coefficient stream is the unique formal solution of the
+initial-value system `F' = F`, `F 0 = 1`.  This is the coefficient-level
+counterpart of the constructive ODE uniqueness interface. -/
+theorem expCoeff_eq_of_hasFormalDerivative
+    {F : Coeffs}
+    (hF : HasFormalDerivative F expCoeff)
+    (hzero : F 0 = 1) :
+    F = expCoeff := by
+  have hFprimitive :=
+    coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative hF
+  have hexp0 : expCoeff 0 = 1 := by
+    unfold expCoeff factorialRat factorial
+    native_decide
+  have hexpprimitive :=
+    coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative
+      (F := expCoeff) expCoeff_hasFormalDerivative
+  have hFprimitive' :
+      coeffsFromDerivativeAtZero 1 expCoeff = F := by
+    simpa [hzero] using hFprimitive
+  have hexpprimitive' :
+      coeffsFromDerivativeAtZero 1 expCoeff = expCoeff := by
+    simpa [hexp0] using hexpprimitive
+  exact hFprimitive'.symm.trans hexpprimitive'
+
+/-! The preceding theorem accepts the derivative stream explicitly.  This
+version exposes the usual self-derivative equation directly. -/
+theorem expCoeff_eq_of_selfDerivative
+    {F : Coeffs}
+    (hF : HasFormalDerivative F F)
+    (hzero : F 0 = 1) :
+    F = expCoeff := by
+  funext n
+  induction n with
+  | zero =>
+      have hone : (1 : Rat)⁻¹ = 1 := by native_decide
+      simpa [expCoeff, factorialRat, factorial, Rat.div_def, hone] using hzero
+  | succ n ih =>
+      have hrec := congrFun hF n
+      change (((n + 1 : Nat) : Rat) * F (n + 1)) = F n at hrec
+      rw [ih] at hrec
+      rw [expCoeff] at hrec
+      rw [expCoeff, factorialRat_succ]
+      have hn : (((n + 1 : Nat) : Rat) ≠ 0) := natCast_succ_ne_zero n
+      have hf : factorialRat n ≠ 0 := by
+        unfold factorialRat
+        exact_mod_cast factorial_ne_zero n
+      rw [Rat.div_def] at hrec ⊢
+      calc
+        F (n + 1) = 1 * F (n + 1) := by rw [Rat.one_mul]
+        _ = ((((n + 1 : Nat) : Rat)⁻¹ * (((n + 1 : Nat) : Rat))) * F (n + 1)) := by
+          rw [Rat.inv_mul_cancel (((n + 1 : Nat) : Rat)) hn, Rat.one_mul]
+        _ = (((n + 1 : Nat) : Rat)⁻¹ *
+          ((((n + 1 : Nat) : Rat) * F (n + 1)))) := by
+          rw [Rat.mul_assoc]
+        _ = (((n + 1 : Nat) : Rat)⁻¹ * (1 * (factorialRat n)⁻¹)) := by
+          rw [hrec]
+        _ = (1 * ((((n + 1 : Nat) : Rat) * factorialRat n))⁻¹) := by
+          rw [Rat.inv_mul_rev]
+          grind [Rat.mul_assoc, Rat.mul_comm,
+            Rat.mul_inv_cancel (((n + 1 : Nat) : Rat)) hn,
+            Rat.mul_inv_cancel (factorialRat n) hf]
+
+theorem scaledExpCoeff_derivative (r : Rat) :
+    HasFormalDerivative (scaledExpCoeff r) (scaleRat r (scaledExpCoeff r)) := by
+  unfold HasFormalDerivative
+  funext n
+  dsimp [derivative, coefficientShift, scaledExpCoeff, scaleRat]
+  rw [Rat.pow_succ, factorialRat_succ]
+  have hn : (((n + 1 : Nat) : Rat) ≠ 0) := natCast_succ_ne_zero n
+  have hf : factorialRat n ≠ 0 := by
+    unfold factorialRat
+    exact_mod_cast factorial_ne_zero n
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm,
+    Rat.mul_inv_cancel (((n + 1 : Nat) : Rat)) hn,
+    Rat.mul_inv_cancel (factorialRat n) hf]
+
+theorem scaledExpCoeff_eq_of_scaledSelfDerivative
+    {r : Rat} {F : Coeffs}
+    (hF : HasFormalDerivative F (scaleRat r F))
+    (hzero : F 0 = 1) :
+    F = scaledExpCoeff r := by
+  funext n
+  induction n with
+  | zero =>
+      have hone : (1 : Rat)⁻¹ = 1 := by native_decide
+      simpa [scaledExpCoeff, factorialRat, factorial, Rat.div_def, hone] using hzero
+  | succ n ih =>
+      have hrec := congrFun hF n
+      change (((n + 1 : Nat) : Rat) * F (n + 1)) = r * F n at hrec
+      rw [ih] at hrec
+      rw [scaledExpCoeff] at hrec
+      rw [scaledExpCoeff, Rat.pow_succ, factorialRat_succ]
+      have hn : (((n + 1 : Nat) : Rat) ≠ 0) := natCast_succ_ne_zero n
+      have hf : factorialRat n ≠ 0 := by
+        unfold factorialRat
+        exact_mod_cast factorial_ne_zero n
+      rw [Rat.div_def] at hrec ⊢
+      calc
+        F (n + 1) = 1 * F (n + 1) := by rw [Rat.one_mul]
+        _ = ((((n + 1 : Nat) : Rat)⁻¹ * (((n + 1 : Nat) : Rat))) * F (n + 1)) := by
+          rw [Rat.inv_mul_cancel (((n + 1 : Nat) : Rat)) hn, Rat.one_mul]
+        _ = (((n + 1 : Nat) : Rat)⁻¹ *
+          ((((n + 1 : Nat) : Rat) * F (n + 1)))) := by
+          rw [Rat.mul_assoc]
+        _ = (((n + 1 : Nat) : Rat)⁻¹ *
+          (r * ((factorialRat n)⁻¹ * (r ^ n)))) := by
+          rw [hrec]
+          congr 1
+          grind [Rat.mul_assoc, Rat.mul_comm]
+        _ = (r ^ n * r) *
+          ((((n + 1 : Nat) : Rat) * factorialRat n)⁻¹) := by
+          rw [Rat.inv_mul_rev]
+          grind [Rat.mul_assoc, Rat.mul_comm,
+            Rat.mul_inv_cancel (((n + 1 : Nat) : Rat)) hn,
+            Rat.mul_inv_cancel (factorialRat n) hf]
+
 /-- First-year calculus table entry: the formal derivative of `sin` is `cos`. -/
 theorem sinCoeff_hasFormalDerivative :
     HasFormalDerivative sinCoeff cosCoeff :=
   sinCoeff_derivative
+
+theorem sinCoeff_eq_of_hasFormalDerivative
+    {F : Coeffs}
+    (hF : HasFormalDerivative F cosCoeff)
+    (hzero : F 0 = 0) :
+    F = sinCoeff := by
+  have hprimitive :=
+    coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative hF
+  have hcoeffs : coeffsFromDerivativeAtZero 0 cosCoeff = sinCoeff := by
+    funext n
+    cases n <;> rfl
+  rw [hzero] at hprimitive
+  exact hprimitive.symm.trans hcoeffs
+
+theorem cosCoeff_eq_of_hasFormalDerivative
+    {F : Coeffs}
+    (hF : HasFormalDerivative F (neg sinCoeff))
+    (hone : F 0 = 1) :
+    F = cosCoeff := by
+  have hprimitive :=
+    coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative hF
+  have hcoeffs : coeffsFromDerivativeAtZero 1 (neg sinCoeff) = cosCoeff := by
+    funext n
+    cases n <;> rfl
+  rw [hone] at hprimitive
+  exact hprimitive.symm.trans hcoeffs
+
+/-! Coupled initial-value uniqueness for the trigonometric coefficient system.
+The proof is a simultaneous induction on the two rational recurrences. -/
+theorem sinCosCoeff_eq_of_coupledDerivative
+    {F G : Coeffs}
+    (hF : HasFormalDerivative F G)
+    (hG : HasFormalDerivative G (neg F))
+    (hFzero : F 0 = 0)
+    (hGone : G 0 = 1) :
+    F = sinCoeff ∧ G = cosCoeff := by
+  have hpair : ∀ n, F n = sinCoeff n ∧ G n = cosCoeff n := by
+    intro n
+    induction n with
+    | zero =>
+        constructor
+        · simpa [sinCoeff] using hFzero
+        · simpa [cosCoeff] using hGone
+    | succ n ih =>
+        have hFrec := congrFun hF n
+        change (((n + 1 : Nat) : Rat) * F (n + 1)) = G n at hFrec
+        have hGrec := congrFun hG n
+        change (((n + 1 : Nat) : Rat) * G (n + 1)) = -F n at hGrec
+        rw [ih.2] at hFrec
+        rw [ih.1] at hGrec
+        constructor
+        · rw [sinCoeff]
+          exact eq_div_of_mul_eq (natCast_succ_ne_zero n) hFrec
+        · rw [cosCoeff]
+          exact eq_div_of_mul_eq (natCast_succ_ne_zero n) hGrec
+  constructor
+  · funext n
+    exact (hpair n).1
+  · funext n
+    exact (hpair n).2
+
+theorem sinCoeff_eq_of_secondDerivative
+    {F : Coeffs}
+    (hF : derivative (derivative F) = neg F)
+    (hzero : F 0 = 0)
+    (hone : (derivative F) 0 = 1) :
+    F = sinCoeff := by
+  exact (sinCosCoeff_eq_of_coupledDerivative
+    (F := F) (G := derivative F) (by rfl) hF hzero hone).1
+
+theorem cosCoeff_eq_of_secondDerivative
+    {F : Coeffs}
+    (hF : derivative (derivative F) = neg F)
+    (hone : F 0 = 1)
+    (hzero : (derivative F) 0 = 0) :
+    F = cosCoeff := by
+  have hneg : HasFormalDerivative (neg (derivative F)) F := by
+    unfold HasFormalDerivative
+    rw [derivative_neg, hF, neg_neg]
+  have hbase : HasFormalDerivative F (neg (neg (derivative F))) := by
+    unfold HasFormalDerivative
+    rw [neg_neg]
+  have hnegzero : (neg (derivative F)) 0 = 0 := by
+    dsimp [neg]
+    rw [hzero]
+    native_decide
+  exact (sinCosCoeff_eq_of_coupledDerivative
+    (F := neg (derivative F)) (G := F) hneg hbase hnegzero hone).2
+
+theorem sinhCoshCoeff_eq_of_coupledDerivative
+    {F G : Coeffs}
+    (hF : HasFormalDerivative F G)
+    (hG : HasFormalDerivative G F)
+    (hFzero : F 0 = 0)
+    (hGone : G 0 = 1) :
+    F = sinhCoeff ∧ G = coshCoeff := by
+  have hpair : ∀ n, F n = sinhCoeff n ∧ G n = coshCoeff n := by
+    intro n
+    induction n with
+    | zero =>
+        constructor
+        · simpa [sinhCoeff] using hFzero
+        · simpa [coshCoeff] using hGone
+    | succ n ih =>
+        have hFrec := congrFun hF n
+        change (((n + 1 : Nat) : Rat) * F (n + 1)) = G n at hFrec
+        have hGrec := congrFun hG n
+        change (((n + 1 : Nat) : Rat) * G (n + 1)) = F n at hGrec
+        rw [ih.2] at hFrec
+        rw [ih.1] at hGrec
+        constructor
+        · rw [sinhCoeff]
+          exact eq_div_of_mul_eq (natCast_succ_ne_zero n) hFrec
+        · rw [coshCoeff]
+          exact eq_div_of_mul_eq (natCast_succ_ne_zero n) hGrec
+  constructor
+  · funext n
+    exact (hpair n).1
+  · funext n
+    exact (hpair n).2
+
+theorem sinhCoeff_eq_of_secondDerivative
+    {F : Coeffs}
+    (hF : derivative (derivative F) = F)
+    (hzero : F 0 = 0)
+    (hone : (derivative F) 0 = 1) :
+    F = sinhCoeff := by
+  exact (sinhCoshCoeff_eq_of_coupledDerivative
+    (F := F) (G := derivative F) (by rfl) hF hzero hone).1
+
+theorem coshCoeff_eq_of_secondDerivative
+    {F : Coeffs}
+    (hF : derivative (derivative F) = F)
+    (hone : F 0 = 1)
+    (hzero : (derivative F) 0 = 0) :
+    F = coshCoeff := by
+  have hbase : HasFormalDerivative F (derivative F) := by rfl
+  have hpair := sinhCoshCoeff_eq_of_coupledDerivative
+    (F := derivative F) (G := F) hF hbase hzero hone
+  exact hpair.2
 
 /-- First-year calculus table entry: the formal derivative of `-cos` is `sin`. -/
 theorem neg_cosCoeff_hasFormalDerivative :
@@ -384,6 +702,32 @@ theorem coshCoeff_hasFormalDerivative :
 theorem sinhCoeff_hasFormalDerivative :
     HasFormalDerivative sinhCoeff coshCoeff :=
   sinhCoeff_derivative
+
+theorem sinhCoeff_eq_of_hasFormalDerivative
+    {F : Coeffs}
+    (hF : HasFormalDerivative F coshCoeff)
+    (hzero : F 0 = 0) :
+    F = sinhCoeff := by
+  have hprimitive :=
+    coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative hF
+  have hcoeffs : coeffsFromDerivativeAtZero 0 coshCoeff = sinhCoeff := by
+    funext n
+    cases n <;> rfl
+  rw [hzero] at hprimitive
+  exact hprimitive.symm.trans hcoeffs
+
+theorem coshCoeff_eq_of_hasFormalDerivative
+    {F : Coeffs}
+    (hF : HasFormalDerivative F sinhCoeff)
+    (hone : F 0 = 1) :
+    F = coshCoeff := by
+  have hprimitive :=
+    coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative hF
+  have hcoeffs : coeffsFromDerivativeAtZero 1 sinhCoeff = coshCoeff := by
+    funext n
+    cases n <;> rfl
+  rw [hone] at hprimitive
+  exact hprimitive.symm.trans hcoeffs
 
 /-- Primary coefficient-shift names for the finite series algebra.
 
@@ -469,6 +813,21 @@ def sineTaylorIntegralPartial (x : Rat) : Nat -> Rat
   | n + 1 =>
       sineTaylorIntegralPartial x n +
         altSign n * x ^ (2 * n + 2) / factorialRat (2 * n + 2)
+
+def cosineTaylorIntegralPartial (x : Rat) : Nat -> Rat
+  | 0 => 0
+  | n + 1 =>
+      cosineTaylorIntegralPartial x n +
+        altSign n * x ^ (2 * n + 1) / factorialRat (2 * n + 1)
+
+theorem cosineTaylorIntegralPartial_eq_sineTaylorPartial (x : Rat) :
+    forall n, cosineTaylorIntegralPartial x n = sineTaylorPartial x n := by
+  intro n
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+      rw [cosineTaylorIntegralPartial, sineTaylorPartial, ih]
+      rfl
 
 theorem factorialRat_add_two (n : Nat) :
     factorialRat (2 * n + 2) =
@@ -1425,15 +1784,164 @@ theorem qabs_normalized_power_differenceQuotient_sub_monomial_le
 
 end FinitePolynomial
 
+namespace QComplex
+
+theorem scaleRat_mul_left (r : Rat) (z w : QComplex) :
+    scaleRat r (mul z w) = mul (scaleRat r z) w := by
+  cases z
+  cases w
+  simp [scaleRat, mul]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
+
+theorem scaleRat_mul_right (r : Rat) (z w : QComplex) :
+    scaleRat r (mul z w) = mul z (scaleRat r w) := by
+  cases z
+  cases w
+  simp [scaleRat, mul]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
+
+theorem scaleRat_scaleRat (r s : Rat) (z : QComplex) :
+    scaleRat r (scaleRat s z) = scaleRat (r * s) z := by
+  cases z
+  simp [scaleRat]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem scaleRat_divRat_cancel (r q : Rat) (z : QComplex) (hr : r ≠ 0) :
+    scaleRat r (divRat z (r * q)) = divRat z q := by
+  cases z
+  by_cases hq : q = 0
+  · subst q
+    simp [scaleRat, divRat, Rat.div_def]
+  · simp [scaleRat, divRat, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_inv_cancel r hr, Rat.mul_inv_cancel q hq]
+
+theorem scaleRat_commute (r s : Rat) (z : QComplex) :
+    scaleRat r (scaleRat s z) = scaleRat s (scaleRat r z) := by
+  rw [scaleRat_scaleRat, scaleRat_scaleRat]
+  congr 1
+  rw [Rat.mul_comm]
+
+theorem divRat_mul_right (z w : QComplex) (q : Rat) :
+    divRat (mul z w) q = mul z (divRat w q) := by
+  cases z
+  cases w
+  by_cases hq : q = 0
+  · subst q
+    simp [divRat, mul, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
+  · simp [divRat, mul, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
+
+end QComplex
+
 namespace ComplexSeries
 
 def expTerm (z : QComplex) (n : Nat) : QComplex :=
   QComplex.divRat (QComplex.pow z n) (factorialRat n)
 
+theorem expTerm_succ_recurrence (z : QComplex) (n : Nat) :
+    QComplex.scaleRat (((n + 1 : Nat) : Rat))
+        (expTerm z (n + 1)) =
+      QComplex.mul z (expTerm z n) := by
+  cases z with
+  | mk re im =>
+      simp [expTerm, QComplex.scaleRat, QComplex.divRat, QComplex.mul,
+        QComplex.pow, FormalPowerSeries.factorialRat_succ]
+      have hn : (((n + 1 : Nat) : Rat) ≠ 0) :=
+        FormalPowerSeries.natCast_succ_ne_zero n
+      have hf : factorialRat n ≠ 0 := by
+        unfold factorialRat
+        exact_mod_cast FormalPowerSeries.factorial_ne_zero n
+      rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm,
+        Rat.mul_inv_cancel (((n + 1 : Nat) : Rat)) hn,
+        Rat.mul_inv_cancel (factorialRat n) hf]
+
 def expPartial (z : QComplex) (n : Nat) : QComplex :=
   (List.range n).foldl (fun acc k => QComplex.add acc (expTerm z k)) QComplex.zero
 
+theorem expPartial_succ (z : QComplex) (n : Nat) :
+    expPartial z (n + 1) =
+      QComplex.add (expPartial z n) (expTerm z n) := by
+  simp [expPartial, List.range_succ, List.foldl_append]
+
+def expWeightedPartial (z : QComplex) (n : Nat) : QComplex :=
+  (List.range n).foldl
+    (fun acc k => QComplex.add acc
+      (QComplex.scaleRat (((k + 1 : Nat) : Rat)) (expTerm z (k + 1))))
+    QComplex.zero
+
+theorem expWeightedPartial_eq_mul_expPartial (z : QComplex) (n : Nat) :
+    expWeightedPartial z n = QComplex.mul z (expPartial z n) := by
+  induction n with
+  | zero =>
+      simp [expWeightedPartial, expPartial, QComplex.mul, QComplex.zero]
+      grind
+  | succ n ih =>
+      simp [expWeightedPartial, expPartial, List.range_succ,
+        List.foldl_append]
+      have ih' :
+          (List.range n).foldl
+              (fun acc (k : Nat) => QComplex.add acc
+                (QComplex.scaleRat ((k : Rat) + 1)
+                  (expTerm z (k + 1)))) QComplex.zero =
+            QComplex.mul z
+              ((List.range n).foldl
+                (fun acc k => QComplex.add acc (expTerm z k)) QComplex.zero) := by
+        simpa [expWeightedPartial, expPartial, Rat.natCast_add] using ih
+      have hterm :
+          QComplex.scaleRat ((n : Rat) + 1) (expTerm z (n + 1)) =
+            QComplex.mul z (expTerm z n) := by
+        simpa [Rat.natCast_add] using expTerm_succ_recurrence z n
+      rw [ih', hterm]
+      simp [QComplex.mul, QComplex.add, QComplex.zero]
+      grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+def expIntegratedPartial (z : QComplex) (n : Nat) : QComplex :=
+  (List.range n).foldl
+    (fun acc k => QComplex.add acc (expTerm z (k + 1))) QComplex.zero
+
+theorem expIntegratedPartial_eq_expPartial_sub_one (z : QComplex) (n : Nat) :
+    expIntegratedPartial z n =
+      QComplex.sub (expPartial z (n + 1)) QComplex.one := by
+  cases z with
+  | mk re im =>
+    let z : QComplex := { re := re, im := im }
+    change expIntegratedPartial z n =
+      QComplex.sub (expPartial z (n + 1)) QComplex.one
+    induction n with
+    | zero =>
+      have hzero : expTerm z 0 = QComplex.one := by
+        simp [expTerm, QComplex.pow, factorialRat, factorial,
+          QComplex.divRat, QComplex.one, Rat.div_def]
+        native_decide
+      simp [expIntegratedPartial, expPartial, hzero, QComplex.sub,
+        QComplex.add, QComplex.neg, QComplex.zero, QComplex.one]
+      grind
+    | succ n ih =>
+      calc
+        expIntegratedPartial z (n + 1) =
+            QComplex.add (expIntegratedPartial z n)
+              (expTerm z (n + 1)) := by
+          simp [expIntegratedPartial, List.range_succ, List.foldl_append]
+        _ = QComplex.add
+              (QComplex.sub (expPartial z (n + 1)) QComplex.one)
+              (expTerm z (n + 1)) := by rw [ih]
+        _ = QComplex.sub (expPartial z ((n + 1) + 1)) QComplex.one := by
+          rw [expPartial_succ z (n + 1)]
+          simp only [QComplex.sub, QComplex.add, QComplex.neg, QComplex.zero,
+            QComplex.one]
+          grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+
 def sinSign (k : Nat) : Rat := if k % 2 = 0 then 1 else -1
+
+theorem sinSign_succ (k : Nat) : sinSign (k + 1) = -sinSign k := by
+  by_cases h : k % 2 = 0
+  · have h' : (k + 1) % 2 ≠ 0 := by omega
+    simp [sinSign, h, h']
+  · have h' : (k + 1) % 2 = 0 := by omega
+    simp [sinSign, h, h']
 
 def sinTerm (z : QComplex) (k : Nat) : QComplex :=
   QComplex.scaleRat (sinSign k)
@@ -1442,12 +1950,266 @@ def sinTerm (z : QComplex) (k : Nat) : QComplex :=
 def sinPartial (z : QComplex) (n : Nat) : QComplex :=
   (List.range n).foldl (fun acc k => QComplex.add acc (sinTerm z k)) QComplex.zero
 
+theorem sinPartial_succ (z : QComplex) (n : Nat) :
+    sinPartial z (n + 1) =
+      QComplex.add (sinPartial z n) (sinTerm z n) := by
+  simp [sinPartial, List.range_succ, List.foldl_append]
+
 def cosTerm (z : QComplex) (k : Nat) : QComplex :=
   QComplex.scaleRat (sinSign k)
     (QComplex.divRat (QComplex.pow z (2 * k)) (factorialRat (2 * k)))
 
+theorem sinTerm_derivative_relation (z : QComplex) (k : Nat) :
+    QComplex.scaleRat (((2 * k + 1 : Nat) : Rat)) (sinTerm z k) =
+      QComplex.mul z (cosTerm z k) := by
+  have hfactor := FormalPowerSeries.factorialRat_succ (2 * k)
+  unfold sinTerm cosTerm
+  rw [hfactor]
+  change QComplex.scaleRat (((2 * k + 1 : Nat) : Rat))
+      (QComplex.scaleRat (sinSign k)
+        (QComplex.divRat
+          (QComplex.mul z (QComplex.pow z (2 * k)))
+          ((((2 * k + 1 : Nat) : Rat)) * factorialRat (2 * k)))) = _
+  calc
+    _ = QComplex.scaleRat (sinSign k)
+        (QComplex.scaleRat (((2 * k + 1 : Nat) : Rat))
+          (QComplex.divRat
+            (QComplex.mul z (QComplex.pow z (2 * k)))
+            ((((2 * k + 1 : Nat) : Rat)) * factorialRat (2 * k)))) := by
+      exact QComplex.scaleRat_commute _ _ _
+    _ = QComplex.scaleRat (sinSign k)
+        (QComplex.divRat (QComplex.mul z (QComplex.pow z (2 * k)))
+          (factorialRat (2 * k))) := by
+      rw [QComplex.scaleRat_divRat_cancel]
+      exact FormalPowerSeries.natCast_succ_ne_zero (2 * k)
+    _ = QComplex.mul z (QComplex.scaleRat (sinSign k)
+        (QComplex.divRat (QComplex.pow z (2 * k))
+          (factorialRat (2 * k)))) := by
+      rw [QComplex.divRat_mul_right]
+      rw [← QComplex.scaleRat_mul_right]
+
+theorem cosTerm_succ_derivative_relation (z : QComplex) (k : Nat) :
+    QComplex.scaleRat (((2 * k + 2 : Nat) : Rat)) (cosTerm z (k + 1)) =
+      QComplex.neg (QComplex.mul z (sinTerm z k)) := by
+  have hfactor := FormalPowerSeries.factorialRat_succ (2 * k + 1)
+  unfold cosTerm sinTerm
+  have hindex : 2 * (k + 1) = 2 * k + 1 + 1 := by omega
+  rw [hindex]
+  rw [hfactor]
+  change QComplex.scaleRat (((2 * k + 2 : Nat) : Rat))
+      (QComplex.scaleRat (sinSign (k + 1))
+        (QComplex.divRat
+          (QComplex.mul z (QComplex.pow z (2 * k + 1)))
+          ((((2 * k + 2 : Nat) : Rat)) * factorialRat (2 * k + 1)))) = _
+  calc
+    _ = QComplex.scaleRat (sinSign (k + 1))
+        (QComplex.scaleRat (((2 * k + 2 : Nat) : Rat))
+          (QComplex.divRat
+            (QComplex.mul z (QComplex.pow z (2 * k + 1)))
+            ((((2 * k + 2 : Nat) : Rat)) * factorialRat (2 * k + 1)))) := by
+      exact QComplex.scaleRat_commute _ _ _
+    _ = QComplex.scaleRat (sinSign (k + 1))
+        (QComplex.divRat (QComplex.mul z (QComplex.pow z (2 * k + 1)))
+          (factorialRat (2 * k + 1))) := by
+      rw [QComplex.scaleRat_divRat_cancel]
+      exact FormalPowerSeries.natCast_succ_ne_zero (2 * k + 1)
+    _ = QComplex.neg (QComplex.mul z (QComplex.scaleRat (sinSign k)
+        (QComplex.divRat (QComplex.pow z (2 * k + 1))
+          (factorialRat (2 * k + 1))))) := by
+      rw [sinSign_succ]
+      simp only [QComplex.scaleRat, QComplex.neg]
+      rw [QComplex.divRat_mul_right]
+      simp [QComplex.mul, QComplex.divRat, Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
+
+theorem sinTerm_primitive_relation (z : QComplex) (k : Nat) :
+    QComplex.scaleRat (1 / (((2 * k + 2 : Nat) : Rat)))
+        (QComplex.mul z (sinTerm z k)) =
+      QComplex.neg (cosTerm z (k + 1)) := by
+  have hd : (((2 * k + 2 : Nat) : Rat)) ≠ 0 :=
+    FormalPowerSeries.natCast_succ_ne_zero (2 * k + 1)
+  calc
+    _ = QComplex.scaleRat (1 / (((2 * k + 2 : Nat) : Rat)))
+        (QComplex.neg
+          (QComplex.scaleRat (((2 * k + 2 : Nat) : Rat))
+            (cosTerm z (k + 1)))) := by
+      rw [cosTerm_succ_derivative_relation]
+      cases z <;> simp [QComplex.neg]
+    _ = QComplex.neg
+        (QComplex.scaleRat (1 / (((2 * k + 2 : Nat) : Rat)))
+          (QComplex.scaleRat (((2 * k + 2 : Nat) : Rat))
+            (cosTerm z (k + 1)))) := by
+      cases z <;> simp [QComplex.scaleRat, QComplex.neg]
+      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
+    _ = QComplex.neg (cosTerm z (k + 1)) := by
+      rw [QComplex.scaleRat_scaleRat]
+      cases z <;> simp [QComplex.scaleRat, QComplex.neg]
+      grind [Rat.div_def, Rat.inv_mul_cancel, Rat.mul_assoc, Rat.mul_comm]
+
+theorem cosTerm_primitive_relation (z : QComplex) (k : Nat) :
+    QComplex.scaleRat (1 / (((2 * k + 1 : Nat) : Rat)))
+        (QComplex.mul z (cosTerm z k)) =
+      sinTerm z k := by
+  have hd : (((2 * k + 1 : Nat) : Rat)) ≠ 0 :=
+    FormalPowerSeries.natCast_succ_ne_zero (2 * k)
+  calc
+    _ = QComplex.scaleRat (1 / (((2 * k + 1 : Nat) : Rat)))
+        (QComplex.scaleRat (((2 * k + 1 : Nat) : Rat)) (sinTerm z k)) := by
+      rw [sinTerm_derivative_relation]
+    _ = QComplex.scaleRat
+        (1 / (((2 * k + 1 : Nat) : Rat)) * (((2 * k + 1 : Nat) : Rat)))
+        (sinTerm z k) := by
+      rw [QComplex.scaleRat_scaleRat]
+    _ = sinTerm z k := by
+      have hcancel :
+          (1 / (((2 * k + 1 : Nat) : Rat))) * (((2 * k + 1 : Nat) : Rat)) = 1 := by
+        rw [Rat.div_def, Rat.one_mul]
+        exact Rat.inv_mul_cancel _ hd
+      rw [hcancel]
+      cases z <;> simp [QComplex.scaleRat]
+
+def cosIntegratedPartial (z : QComplex) (n : Nat) : QComplex :=
+  (List.range n).foldl
+    (fun acc k => QComplex.add acc
+      (QComplex.scaleRat (1 / (((2 * k + 1 : Nat) : Rat)))
+        (QComplex.mul z (cosTerm z k))))
+    QComplex.zero
+
+theorem cosIntegratedPartial_eq_sinPartial (z : QComplex) (n : Nat) :
+    cosIntegratedPartial z n = sinPartial z n := by
+  induction n with
+  | zero =>
+      simp [cosIntegratedPartial, sinPartial, QComplex.zero]
+  | succ n ih =>
+      calc
+        cosIntegratedPartial z (n + 1) =
+            QComplex.add (cosIntegratedPartial z n)
+              (QComplex.scaleRat (1 / (((2 * n + 1 : Nat) : Rat)))
+                (QComplex.mul z (cosTerm z n))) := by
+          simp [cosIntegratedPartial, List.range_succ, List.foldl_append]
+        _ = QComplex.add (sinPartial z n) (sinTerm z n) := by
+          rw [ih, cosTerm_primitive_relation]
+        _ = sinPartial z (n + 1) := by
+          rw [sinPartial_succ]
+
 def cosPartial (z : QComplex) (n : Nat) : QComplex :=
   (List.range n).foldl (fun acc k => QComplex.add acc (cosTerm z k)) QComplex.zero
+
+theorem cosPartial_succ (z : QComplex) (n : Nat) :
+    cosPartial z (n + 1) =
+      QComplex.add (cosPartial z n) (cosTerm z n) := by
+  simp [cosPartial, List.range_succ, List.foldl_append]
+
+def sinIntegratedPartial (z : QComplex) (n : Nat) : QComplex :=
+  (List.range n).foldl
+    (fun acc k => QComplex.add acc
+      (QComplex.scaleRat (1 / (((2 * k + 2 : Nat) : Rat)))
+        (QComplex.mul z (sinTerm z k))))
+    QComplex.zero
+
+theorem sinIntegratedPartial_eq_one_sub_cosPartial (z : QComplex) (n : Nat) :
+    sinIntegratedPartial z n =
+      QComplex.sub QComplex.one (cosPartial z (n + 1)) := by
+  cases z with
+  | mk re im =>
+    let z : QComplex := { re := re, im := im }
+    change sinIntegratedPartial z n =
+      QComplex.sub QComplex.one (cosPartial z (n + 1))
+    induction n with
+    | zero =>
+      have hzero : cosTerm z 0 = QComplex.one := by
+        simp [cosTerm, sinSign, factorialRat, factorial, QComplex.pow,
+          QComplex.divRat, QComplex.scaleRat, QComplex.one, Rat.div_def]
+        native_decide
+      simp [sinIntegratedPartial, cosPartial, hzero, QComplex.sub,
+        QComplex.add, QComplex.neg, QComplex.zero, QComplex.one]
+      grind
+    | succ n ih =>
+      calc
+        sinIntegratedPartial z (n + 1) =
+            QComplex.add (sinIntegratedPartial z n)
+              (QComplex.scaleRat (1 / (((2 * n + 2 : Nat) : Rat)))
+                (QComplex.mul z (sinTerm z n))) := by
+          simp [sinIntegratedPartial, List.range_succ, List.foldl_append]
+        _ = QComplex.add
+              (QComplex.sub QComplex.one (cosPartial z (n + 1)))
+              (QComplex.neg (cosTerm z (n + 1))) := by
+          rw [ih, sinTerm_primitive_relation]
+        _ = QComplex.sub QComplex.one (cosPartial z ((n + 1) + 1)) := by
+          rw [cosPartial_succ z (n + 1)]
+          simp [QComplex.sub, QComplex.add, QComplex.neg, QComplex.one,
+            QComplex.zero]
+          grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+
+def sinWeightedPartial (z : QComplex) (n : Nat) : QComplex :=
+  (List.range n).foldl
+    (fun acc k => QComplex.add acc
+      (QComplex.scaleRat (((2 * k + 1 : Nat) : Rat)) (sinTerm z k)))
+    QComplex.zero
+
+theorem sinWeightedPartial_eq_mul_cosPartial (z : QComplex) (n : Nat) :
+    sinWeightedPartial z n = QComplex.mul z (cosPartial z n) := by
+  induction n with
+  | zero =>
+      simp [sinWeightedPartial, cosPartial, QComplex.mul, QComplex.zero]
+      grind
+  | succ n ih =>
+      simp [sinWeightedPartial, cosPartial, List.range_succ, List.foldl_append]
+      have ih' :
+          (List.range n).foldl
+              (fun acc (k : Nat) => QComplex.add acc
+                (QComplex.scaleRat (2 * (k : Rat) + 1)
+                  (sinTerm z k))) QComplex.zero =
+            QComplex.mul z
+              ((List.range n).foldl
+                (fun acc k => QComplex.add acc (cosTerm z k)) QComplex.zero) := by
+        simpa [sinWeightedPartial, cosPartial, Rat.natCast_mul,
+          Rat.natCast_add] using ih
+      have hterm :
+          QComplex.scaleRat (2 * (n : Rat) + 1) (sinTerm z n) =
+            QComplex.mul z (cosTerm z n) := by
+        simpa [Rat.natCast_mul, Rat.natCast_add] using
+          (sinTerm_derivative_relation z n)
+      rw [ih', hterm]
+      simp [QComplex.mul, QComplex.add, QComplex.zero]
+      grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+def cosWeightedPartial (z : QComplex) (n : Nat) : QComplex :=
+  (List.range n).foldl
+    (fun acc k => QComplex.add acc
+      (QComplex.scaleRat (((2 * k + 2 : Nat) : Rat))
+        (cosTerm z (k + 1))))
+    QComplex.zero
+
+theorem cosWeightedPartial_eq_neg_mul_sinPartial (z : QComplex) (n : Nat) :
+    cosWeightedPartial z n =
+      QComplex.neg (QComplex.mul z (sinPartial z n)) := by
+  induction n with
+  | zero =>
+      simp [cosWeightedPartial, sinPartial, QComplex.mul, QComplex.neg,
+        QComplex.zero]
+      grind
+  | succ n ih =>
+      simp [cosWeightedPartial, sinPartial, List.range_succ,
+        List.foldl_append]
+      have ih' :
+          (List.range n).foldl
+              (fun acc (k : Nat) => QComplex.add acc
+                (QComplex.scaleRat (2 * (k : Rat) + 2)
+                  (cosTerm z (k + 1)))) QComplex.zero =
+            QComplex.neg (QComplex.mul z
+              ((List.range n).foldl
+                (fun acc k => QComplex.add acc (sinTerm z k)) QComplex.zero)) := by
+        simpa [cosWeightedPartial, sinPartial, Rat.natCast_mul,
+          Rat.natCast_add] using ih
+      have hterm :
+          QComplex.scaleRat (2 * (n : Rat) + 2) (cosTerm z (n + 1)) =
+            QComplex.neg (QComplex.mul z (sinTerm z n)) := by
+        simpa [Rat.natCast_mul, Rat.natCast_add] using
+          (cosTerm_succ_derivative_relation z n)
+      rw [ih', hterm]
+      simp [QComplex.mul, QComplex.add, QComplex.neg, QComplex.zero]
+      grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
 
 def errorBox (center : QComplex) (eps : QPos) : QBox :=
   { lo := { re := center.re - eps.val, im := center.im - eps.val },

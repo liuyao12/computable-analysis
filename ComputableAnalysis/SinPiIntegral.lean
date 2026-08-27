@@ -8237,6 +8237,15 @@ def dyadicNestedRadicalIntegralRaw_stabilized : RealRaw :=
   RealRaw.prefixStabilize dyadicNestedRadicalIntegralRaw
     (fun n => (sinPiStieltjesIntegral.compute n).width)
 
+theorem dyadicNestedRadicalIntegralRaw_stabilized_width_le
+    (n : Nat) :
+    (dyadicNestedRadicalIntegralRaw_stabilized.compute n).width <=
+      (dyadicNestedRadicalIntegralRaw.compute n).width +
+        2 * (sinPiStieltjesIntegral.compute n).width := by
+  exact RealRaw.prefixStabilize_width_le_current_expand
+    dyadicNestedRadicalIntegralRaw
+    (fun n => (sinPiStieltjesIntegral.compute n).width) n
+
 theorem dyadicNestedRadicalIntegralRaw_stabilized_valid_of_overlap
     (hoverlap : forall n,
       QInterval.Overlaps

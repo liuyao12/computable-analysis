@@ -585,6 +585,19 @@ aliases. At a chosen expansion point this is linear Taylor-coefficient data,
 not yet an interval-analytic derivative theorem for the corresponding boxed
 raw functions. Downstream proofs must preserve that distinction.
 
+For initial-value arguments, use the checked coefficient-level uniqueness API:
+`FormalPowerSeries.scaledExpCoeff_derivative` establishes the recurrence for
+`F' = rF`, and
+`FormalPowerSeries.scaledExpCoeff_eq_of_scaledSelfDerivative` proves that the
+initial coefficient determines every coefficient.  The analogous oscillator
+interfaces are `FormalPowerSeries.sinCoeff_eq_of_secondDerivative`,
+`cosCoeff_eq_of_secondDerivative`,
+`sinhCoeff_eq_of_secondDerivative`, and
+`coshCoeff_eq_of_secondDerivative`.  These are finite rational proofs.  To
+use one for an actual function, add a separate interval evaluator, shrinking
+tail bound, and derivative/FTC transport certificate; do not treat coefficient
+uniqueness alone as a theorem about a completed real-valued function.
+
 The finite polynomial bridge is now checked at the rational level:
 `FinitePolynomial.qabs_normalized_power_differenceQuotient_sub_monomial_le`
 proves an explicit `|h|` error bound for the literal quotient of

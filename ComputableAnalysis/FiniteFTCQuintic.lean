@@ -292,5 +292,170 @@ theorem exactQuintic_compute_contains_one_sixth :
   · exact Rat.le_trans hl.1 (by native_decide)
   · exact Rat.le_trans (by native_decide) hr.2
 
+theorem exactQuintic_uniformLeftSum_le_one_sixth_of_pos
+    {n : Nat} (hn : 0 < n) :
+    IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+        (fun x : Rat => x ^ 5) n <= 1 / 6 := by
+  rw [exactQuintic_uniformLeftSum_eq hn, Series.fifthPowerSum_eq]
+  have hnrat : 0 < (n : Rat) := (Rat.natCast_pos).2 hn
+  have hden : 0 < (n : Rat) ^ 6 := Rat.pow_pos hnrat
+  apply Rat.le_of_mul_le_mul_right (c := (n : Rat) ^ 6)
+  · rw [Rat.div_def, Rat.div_def]
+    have hpoly : (n : Rat) ^ 2 * ((n : Rat) - 1) ^ 2 *
+        (2 * (n : Rat) ^ 2 - 2 * (n : Rat) - 1) <=
+        2 * (n : Rat) ^ 6 := by
+      have hcore : 0 <= 6 * (n : Rat) ^ 3 - 5 * (n : Rat) ^ 2 + 1 := by
+        have hn1 : 1 <= (n : Rat) := by
+          exact_mod_cast (Nat.one_le_iff_ne_zero.mpr (by omega : n ≠ 0))
+        have hn2 : 1 <= (n : Rat) ^ 2 := by
+          have h := Rat.mul_le_mul_of_nonneg_right hn1 (by grind : (0 : Rat) <= n)
+          calc
+            1 = (1 : Rat) * 1 := by native_decide
+            _ <= 1 * (n : Rat) := by simpa using hn1
+            _ <= (n : Rat) * (n : Rat) := h
+            _ = (n : Rat) ^ 2 := by grind [Rat.pow_succ, Rat.mul_assoc]
+        have hn3 : 1 <= (n : Rat) ^ 3 := by
+          have h := Rat.mul_le_mul_of_nonneg_right hn2 (by grind : (0 : Rat) <= n)
+          calc
+            1 = (1 : Rat) * 1 := by native_decide
+            _ <= 1 * (n : Rat) := by simpa using hn1
+            _ <= (n : Rat) ^ 2 * (n : Rat) := h
+            _ = (n : Rat) ^ 3 := by grind [Rat.pow_succ, Rat.mul_assoc]
+        have hlin : 0 <= 6 * (n : Rat) - 5 := by grind
+        have hprod : 0 <= (n : Rat) ^ 2 * (6 * (n : Rat) - 5) :=
+          Rat.mul_nonneg (Rat.pow_nonneg (by grind)) hlin
+        grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc]
+      have hdiff : 0 <= 2 * (n : Rat) ^ 6 -
+          (n : Rat) ^ 2 * ((n : Rat) - 1) ^ 2 *
+            (2 * (n : Rat) ^ 2 - 2 * (n : Rat) - 1) := by
+        have hfactor : 2 * (n : Rat) ^ 6 -
+            (n : Rat) ^ 2 * ((n : Rat) - 1) ^ 2 *
+              (2 * (n : Rat) ^ 2 - 2 * (n : Rat) - 1) =
+            (n : Rat) ^ 2 * (6 * (n : Rat) ^ 3 - 5 * (n : Rat) ^ 2 + 1) := by
+          grind [Rat.pow_succ, Rat.mul_assoc, Rat.mul_add, Rat.add_mul,
+            Rat.sub_eq_add_neg]
+        rw [hfactor]
+        exact Rat.mul_nonneg (Rat.pow_nonneg (by grind)) hcore
+      have := hdiff
+      grind [Rat.sub_eq_add_neg]
+    have hscaled := Rat.mul_le_mul_of_nonneg_right hpoly
+      (Rat.le_of_lt ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 12)))
+    have hcancel : ((n : Rat) ^ 6)⁻¹ * (n : Rat) ^ 6 = 1 :=
+      Rat.inv_mul_cancel _ (Rat.ne_of_gt hden)
+    calc
+      (n : Rat) ^ 2 * ((n : Rat) - 1) ^ 2 *
+          (2 * (n : Rat) ^ 2 - 2 * (n : Rat) - 1) *
+          12⁻¹ * ((n : Rat) ^ 6)⁻¹ * (n : Rat) ^ 6 =
+        (n : Rat) ^ 2 * ((n : Rat) - 1) ^ 2 *
+          (2 * (n : Rat) ^ 2 - 2 * (n : Rat) - 1) * 12⁻¹ := by
+            grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= 2 * (n : Rat) ^ 6 * 12⁻¹ := hscaled
+      _ = 1 / 6 * (n : Rat) ^ 6 := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  · exact hden
+
+theorem exactQuintic_uniformRightSum_ge_one_sixth_of_pos
+    {n : Nat} (hn : 0 < n) :
+    1 / 6 <= IntegralIdentities.LipschitzDyadic.uniformRightEndpointSum
+        (fun x : Rat => x ^ 5) n := by
+  rw [exactQuintic_uniformRightSum_eq hn, Series.fifthPowerSum_eq]
+  have hcast : ((n + 1 : Nat) : Rat) = (n : Rat) + 1 := by
+    simp [Rat.natCast_add]
+  rw [hcast]
+  have hnrat : 0 < (n : Rat) := (Rat.natCast_pos).2 hn
+  have hden : 0 < (n : Rat) ^ 6 := Rat.pow_pos hnrat
+  apply Rat.le_of_mul_le_mul_right (c := (n : Rat) ^ 6)
+  · rw [Rat.div_def, Rat.div_def]
+    have hpoly : 2 * (n : Rat) ^ 6 <=
+        ((n : Rat) + 1) ^ 2 * (n : Rat) ^ 2 *
+          (2 * ((n : Rat) + 1) ^ 2 - 2 * ((n : Rat) + 1) - 1) := by
+      have hn1 : 1 <= (n : Rat) := by
+        exact_mod_cast (Nat.one_le_iff_ne_zero.mpr (by omega : n ≠ 0))
+      have hcore : 0 <= 6 * (n : Rat) ^ 3 + 5 * (n : Rat) ^ 2 - 1 := by
+        have hn2 : 1 <= (n : Rat) ^ 2 := by
+          have h := Rat.mul_le_mul_of_nonneg_right hn1 (by grind : (0 : Rat) <= n)
+          calc
+            1 = (1 : Rat) * 1 := by native_decide
+            _ <= 1 * (n : Rat) := by simpa using hn1
+            _ <= (n : Rat) * (n : Rat) := h
+            _ = (n : Rat) ^ 2 := by grind [Rat.pow_succ, Rat.mul_assoc]
+        have hn3 : 1 <= (n : Rat) ^ 3 := by
+          have h := Rat.mul_le_mul_of_nonneg_right hn2 (by grind : (0 : Rat) <= n)
+          calc
+            1 = (1 : Rat) * 1 := by native_decide
+            _ <= 1 * (n : Rat) := by simpa using hn1
+            _ <= (n : Rat) ^ 2 * (n : Rat) := h
+            _ = (n : Rat) ^ 3 := by grind [Rat.pow_succ, Rat.mul_assoc]
+        have hlin : 0 <= 6 * (n : Rat) - 5 := by grind
+        have hprod : 0 <= (n : Rat) ^ 2 * (6 * (n : Rat) - 5) :=
+          Rat.mul_nonneg (Rat.pow_nonneg (by grind)) hlin
+        grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc]
+      have hdiff : 0 <=
+          ((n : Rat) + 1) ^ 2 * (n : Rat) ^ 2 *
+            (2 * ((n : Rat) + 1) ^ 2 - 2 * ((n : Rat) + 1) - 1) -
+            2 * (n : Rat) ^ 6 := by
+        have hfactor :
+            ((n : Rat) + 1) ^ 2 * (n : Rat) ^ 2 *
+              (2 * ((n : Rat) + 1) ^ 2 - 2 * ((n : Rat) + 1) - 1) -
+              2 * (n : Rat) ^ 6 =
+            (n : Rat) ^ 2 * (6 * (n : Rat) ^ 3 + 5 * (n : Rat) ^ 2 - 1) := by
+          grind [Rat.pow_succ, Rat.mul_assoc, Rat.mul_add, Rat.add_mul,
+            Rat.sub_eq_add_neg]
+        rw [hfactor]
+        exact Rat.mul_nonneg (Rat.pow_nonneg (by grind)) hcore
+      have := hdiff
+      grind [Rat.sub_eq_add_neg]
+    have hscaled := Rat.mul_le_mul_of_nonneg_right hpoly
+      (Rat.le_of_lt ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 12)))
+    have hcancel : ((n : Rat) ^ 6)⁻¹ * (n : Rat) ^ 6 = 1 :=
+      Rat.inv_mul_cancel _ (Rat.ne_of_gt hden)
+    calc
+      1 * 6⁻¹ * (n : Rat) ^ 6 = 2 * (n : Rat) ^ 6 * 12⁻¹ := by
+        have hconst : (6 : Rat)⁻¹ = 2 * 12⁻¹ := by native_decide
+        rw [hconst]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= ((n : Rat) + 1) ^ 2 * (n : Rat) ^ 2 *
+          (2 * ((n : Rat) + 1) ^ 2 - 2 * ((n : Rat) + 1) - 1) * 12⁻¹ := hscaled
+      _ = ((n : Rat) + 1) ^ 2 * ((n : Rat) + 1 - 1) ^ 2 *
+          (2 * ((n : Rat) + 1) ^ 2 - 2 * ((n : Rat) + 1) - 1) / 12 *
+          ((n : Rat) ^ 6)⁻¹ * (n : Rat) ^ 6 := by
+            have hminus : (n : Rat) + 1 - 1 = (n : Rat) := by grind
+            rw [hminus]
+            rw [Rat.div_def]
+            grind [Rat.mul_assoc, Rat.mul_comm]
+  · exact hden
+
+theorem exactQuintic_compute_contains_one_sixth_at_stage (stage : Nat) :
+    (IntegralIdentities.LipschitzDyadic.compute (fun x : Rat => x ^ 5) 5 stage).ContainsInterval
+      { lo := 1 / 6, hi := 1 / 6 } := by
+  let n : Nat := 2 ^ stage
+  have hn : 0 < n := by
+    dsimp [n]
+    exact Nat.pow_pos (by omega : 0 < 2)
+  have hl := IntegralIdentities.LipschitzDyadic.compute_contains_uniformLeftEndpointSum
+    exactRat_quintic_lipschitz_on_unit stage
+  have hr := IntegralIdentities.LipschitzDyadic.compute_contains_uniformRightEndpointSum
+    exactRat_quintic_lipschitz_on_unit stage
+  have hleft := exactQuintic_uniformLeftSum_le_one_sixth_of_pos hn
+  have hright := exactQuintic_uniformRightSum_ge_one_sixth_of_pos hn
+  unfold QInterval.ContainsInterval
+  constructor
+  · exact Rat.le_trans hl.1 hleft
+  · exact Rat.le_trans hright hr.2
+
+theorem exactRat_quintic_integral_raw_equiv_one_sixth :
+    (Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ 5) 0 1)
+      exactRat_quintic_integral_certificate).Equiv
+      (RealRaw.ofRat (1 / 6)) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+  change QInterval.Overlaps
+    (IntegralIdentities.LipschitzDyadic.compute (fun x : Rat => x ^ 5) 5 n)
+    { lo := 1 / 6, hi := 1 / 6 }
+  unfold QInterval.Overlaps
+  exact exactQuintic_compute_contains_one_sixth_at_stage n
+
 end Integral
 end ComputableAnalysis

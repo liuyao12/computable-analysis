@@ -394,6 +394,15 @@ def effectiveFTCStabilizedRaw
     (radius : Nat -> Rat) : RealRaw :=
   RealRaw.prefixStabilize (riemannRawOfEffectiveFTC h) radius
 
+theorem effectiveFTCStabilizedRaw_width_le_of_candidate
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveFTC F dF a b)
+    (radius : Nat -> Rat) (n : Nat) :
+    ((effectiveFTCStabilizedRaw h radius).compute n).width <=
+      ((riemannRawOfEffectiveFTC h).compute n).width + 2 * radius n := by
+  exact RealRaw.prefixStabilize_width_le_current_expand
+    (riemannRawOfEffectiveFTC h) radius n
+
 theorem effectiveFTCStabilizedRaw_valid
     {F dF : RealFunRaw} {a b : Rat}
     (h : EffectiveFTC F dF a b)

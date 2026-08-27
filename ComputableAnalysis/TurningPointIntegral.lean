@@ -163,6 +163,36 @@ theorem finiteStageSum_width_le_length_mul
         _ = ((stages.length : Rat) + 1) * B := by
           grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc, Rat.add_comm]
 
+/-! The adaptive companion sums a separate rational budget for each supplied
+stage box.  This is the finite error contract used by nonuniform turning-point
+assemblies. -/
+
+theorem finiteStageSum_width_le_of_bounds
+    (stages : List ShrinkingStage) (n : Nat)
+    (bound : ShrinkingStage -> Rat)
+    (hbound : forall stage, stage ∈ stages ->
+      (stage.compute n).width <= bound stage) :
+    (finiteStageSum stages n).width <=
+      (stages.map bound).foldl (fun total r => total + r) 0 := by
+  induction stages with
+  | nil =>
+      simp only [finiteStageSum, List.map_nil, List.foldl]
+      change (0 : Rat) - 0 <= 0
+      rw [Rat.sub_self]
+      exact Rat.le_refl
+  | cons stage stages ih =>
+      have hstage := hbound stage (by simp)
+      have htail : forall other, other ∈ stages ->
+          (other.compute n).width <= bound other := by
+        intro other hother
+        exact hbound other (by simp [hother])
+      have hrest := ih htail
+      simp only [finiteStageSum, QInterval.addInterval_width,
+        List.map_cons, List.foldl]
+      simp only [Rat.zero_add]
+      rw [RationalPartition.rat_add_fold_initial]
+      exact _root_.ComputableAnalysis.rat_add_le_add hstage hrest
+
 /-- A finite sum of shrinking rational stage families has shrinking width.
 The proof gives each summand an equal rational portion of the requested error
 budget through structural recursion; it invokes neither completeness nor a
@@ -237,6 +267,14 @@ theorem compute_width_le_length_mul (A : FinitePiecewiseStageAssembly)
     (A.compute n).width <= (A.stages.length : Rat) * B :=
   finiteStageSum_width_le_length_mul A.stages n B hbound
 
+theorem compute_width_le_of_bounds (A : FinitePiecewiseStageAssembly)
+    (n : Nat) (bound : ShrinkingStage -> Rat)
+    (hbound : forall stage, stage ∈ A.stages ->
+      (stage.compute n).width <= bound stage) :
+    (A.compute n).width <=
+      (A.stages.map bound).foldl (fun total r => total + r) 0 :=
+  finiteStageSum_width_le_of_bounds A.stages n bound hbound
+
 theorem compute_widths_shrink (A : FinitePiecewiseStageAssembly) :
     RealRaw.WidthsShrinkToZero A.compute :=
   finiteStageSum_widths_shrink A.stages
@@ -282,6 +320,27 @@ theorem stabilizedRaw_valid
   RealRaw.prefixStabilize_valid assembly.raw_widths_shrink
     completion.anchor_valid completion.assembly_equiv_anchor
     completion.anchor_width_le_radius completion.radius_shrinks
+
+theorem stabilizedRaw_width_le_of_bounds
+    {assembly : FinitePiecewiseStageAssembly}
+    (completion : MultiTurnIntegralCompletion assembly) (n : Nat)
+    (bound : ShrinkingStage -> Rat)
+    (hbound : forall stage, stage ∈ assembly.stages ->
+      (stage.compute n).width <= bound stage) :
+    (completion.stabilizedRaw.compute n).width <=
+      (assembly.stages.map bound).foldl (fun total r => total + r) 0 +
+        2 * completion.radius n := by
+  have hassembly := assembly.compute_width_le_of_bounds n bound hbound
+  have hstable := RealRaw.prefixStabilize_width_le_current_expand
+    assembly.raw completion.radius n
+  change (completion.stabilizedRaw.compute n).width <=
+    (assembly.compute n).width + 2 * completion.radius n at hstable
+  calc
+    (completion.stabilizedRaw.compute n).width <=
+        (assembly.compute n).width + 2 * completion.radius n := hstable
+    _ <= (assembly.stages.map bound).foldl (fun total r => total + r) 0 +
+          2 * completion.radius n :=
+      rat_add_le_add hassembly Rat.le_refl
 
 theorem stabilizedRaw_equiv_anchor
     {assembly : FinitePiecewiseStageAssembly}
@@ -470,6 +529,20 @@ theorem compute_width_nonneg {F : FunctionOnInterval}
     (Rat.add_nonneg (C.leftBox_width_nonneg n) (C.middleBox_width_nonneg n))
     (C.rightBox_width_nonneg n)
 
+/-! The one-turn candidate exposes its three finite error budgets separately.
+This avoids forcing callers to allocate equal thirds when the outer and middle
+computations have different conditioning. -/
+
+theorem compute_width_le_of_bounds {F : FunctionOnInterval}
+    (C : SingleTurnIntegralCandidate F) (n : Nat)
+    (leftBound middleBound rightBound : Rat)
+    (hleft : (C.leftBox n).width <= leftBound)
+    (hmiddle : (C.middleBox n).width <= middleBound)
+    (hright : (C.rightBox n).width <= rightBound) :
+    (C.compute n).width <= leftBound + middleBound + rightBound := by
+  rw [C.compute_width]
+  exact rat_add_le_add (rat_add_le_add hleft hmiddle) hright
+
 theorem middleBox_widths_shrink {F : FunctionOnInterval}
     (C : SingleTurnIntegralCandidate F) :
     RealRaw.WidthsShrinkToZero C.middleBox :=
@@ -641,6 +714,28 @@ theorem stabilizedRaw_valid {F : FunctionOnInterval}
   RealRaw.prefixStabilize_valid C.compute_widths_shrink
     completion.anchor_valid completion.candidate_equiv_anchor
     completion.anchor_width_le_radius completion.radius_shrinks
+
+theorem stabilizedRaw_width_le_of_bounds {F : FunctionOnInterval}
+    {C : SingleTurnIntegralCandidate F}
+    (completion : SingleTurnIntegralCompletion C) (n : Nat)
+    (leftBound middleBound rightBound : Rat)
+    (hleft : (C.leftBox n).width <= leftBound)
+    (hmiddle : (C.middleBox n).width <= middleBound)
+    (hright : (C.rightBox n).width <= rightBound) :
+    (completion.stabilizedRaw.compute n).width <=
+      leftBound + middleBound + rightBound + 2 * completion.radius n := by
+  have hcandidate := C.compute_width_le_of_bounds n
+    leftBound middleBound rightBound hleft hmiddle hright
+  have hstable := RealRaw.prefixStabilize_width_le_current_expand
+    C.raw completion.radius n
+  change (completion.stabilizedRaw.compute n).width <=
+    (C.compute n).width + 2 * completion.radius n at hstable
+  calc
+    (completion.stabilizedRaw.compute n).width <=
+        (C.compute n).width + 2 * completion.radius n := hstable
+    _ <= (leftBound + middleBound + rightBound) +
+          2 * completion.radius n :=
+      rat_add_le_add hcandidate Rat.le_refl
 
 theorem stabilizedRaw_equiv_anchor {F : FunctionOnInterval}
     {C : SingleTurnIntegralCandidate F}
