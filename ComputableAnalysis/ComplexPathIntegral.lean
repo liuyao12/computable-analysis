@@ -195,6 +195,39 @@ def polygonalDisplacementTo (start : QComplex) : List QComplex -> QComplex
       QComplex.add (QComplex.sub stop start)
         (polygonalDisplacementTo stop rest)
 
+def polygonalManhattanLength (start : QComplex) : List QComplex -> Rat
+  | [] => 0
+  | stop :: rest =>
+      qabs (stop.re - start.re) + qabs (stop.im - start.im) +
+        polygonalManhattanLength stop rest
+
+theorem polygonalManhattanLength_append_endpoint_ge_displacement
+    (start endpoint : QComplex) (vertices : List QComplex) :
+    qabs (endpoint.re - start.re) + qabs (endpoint.im - start.im) ≤
+      polygonalManhattanLength start (vertices ++ [endpoint]) := by
+  induction vertices generalizing start with
+  | nil =>
+      simp [polygonalManhattanLength]
+      grind
+  | cons vertex vertices ih =>
+      simp only [List.cons_append, polygonalManhattanLength]
+      have hre : qabs (endpoint.re - start.re) ≤
+          qabs (vertex.re - start.re) + qabs (endpoint.re - vertex.re) := by
+        have h := qabs_add_le (vertex.re - start.re) (endpoint.re - vertex.re)
+        have hsum : (vertex.re - start.re) + (endpoint.re - vertex.re) =
+            endpoint.re - start.re := by grind
+        rw [← hsum]
+        exact h
+      have him : qabs (endpoint.im - start.im) ≤
+          qabs (vertex.im - start.im) + qabs (endpoint.im - vertex.im) := by
+        have h := qabs_add_le (vertex.im - start.im) (endpoint.im - vertex.im)
+        have hsum : (vertex.im - start.im) + (endpoint.im - vertex.im) =
+            endpoint.im - start.im := by grind
+        rw [← hsum]
+        exact h
+      have htail := ih vertex
+      grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+
 theorem polygonalDisplacementTo_append_endpoint
     (start endpoint : QComplex) (vertices : List QComplex) :
     polygonalDisplacementTo start (vertices ++ [endpoint]) =

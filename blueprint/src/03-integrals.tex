@@ -1800,8 +1800,15 @@ Closing the path is the special case in which the endpoint difference is zero.
 Thus applications can use the endpoint primitive directly; they do not need
 to manufacture a closed polygon merely to invoke the theorem.
 
+For geometric bookkeeping, the rational Manhattan length of a polygonal path
+is at least the Manhattan displacement of its endpoints.  This is the finite
+triangle inequality for broken paths; it uses only rational coordinate
+arithmetic and leaves Euclidean square-root length as a later refinement.
+
 \lean{ComputableAnalysis.ComplexPathIntegral.EntireBoxFunctionRaw}
 \lean{ComputableAnalysis.ComplexPathIntegral.polygonalDisplacementTo}
+\lean{ComputableAnalysis.ComplexPathIntegral.polygonalManhattanLength}
+\lean{ComputableAnalysis.ComplexPathIntegral.polygonalManhattanLength_append_endpoint_ge_displacement}
 \lean{ComputableAnalysis.ComplexPathIntegral.polygonalMonomialPrimitiveTo_append_endpoint}
 \lean{ComputableAnalysis.ComplexPathIntegral.polygonalMonomialPrimitiveTo_split_at}
 \lean{ComputableAnalysis.ComplexPathIntegral.polygonalPolynomialPrimitiveTo_append_endpoint}
