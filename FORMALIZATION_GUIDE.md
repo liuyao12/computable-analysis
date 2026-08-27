@@ -1073,6 +1073,15 @@ the finite bracket width smaller than any requested rational epsilon.  This
 keeps the computation, its validity proof, and its endpoint identity visibly
 separate.
 
+When the stronger endpoint-ordered monotonicity certificate is available, the
+schedule bookkeeping is automatic in both orientations.  Use
+`Integral.MonotoneDarbouxSchedule.ofAutomaticEndpointOrdered` for increasing
+pieces and
+`Integral.NonincreasingDarbouxSchedule.ofAutomaticEndpointOrdered` for
+decreasing pieces.  Both constructors use a cumulative natural-number stage
+to dominate the evaluator's input modulus; no monotonicity of that modulus is
+assumed.  Supply only a natural upper bound for the rational interval length.
+
 ### Non-rational turns in a finite monotone decomposition
 
 Do not make a non-rational turn a distinguished kind of integral.  For every

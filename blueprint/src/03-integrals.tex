@@ -290,6 +290,8 @@ cells(n) := 2^stage(n),    precision(n) := n
 \lean{ComputableAnalysis.Integral.cumulativeInputStage_mono}
 \lean{ComputableAnalysis.Integral.mesh_le_of_cumulative_input_stage}
 \lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule.ofAutomaticEndpointOrdered}
+The same construction is available with the orientation reversed:
+\lean{ComputableAnalysis.Integral.NonincreasingDarbouxSchedule.ofAutomaticEndpointOrdered}
 \leanok
 The result packages directly into a public dyadic monotone-integral schedule;
 the mesh budget and width-shrink witness remain explicit inputs:

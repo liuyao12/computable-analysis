@@ -190,6 +190,8 @@ transport, and the budget-based schedule constructor are all checked:
 \lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule.ofDyadicEndpointOrderedOfBudget}
 \lean{ComputableAnalysis.Integral.nondecreasingDarbouxScheduledSchedule_widths_shrink_of_budget}
 \lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule.ofScheduledEndpointOrderedOfBudget}
+The orientation-reversed constructor is now automatic as well:
+\lean{ComputableAnalysis.Integral.NonincreasingDarbouxSchedule.ofAutomaticEndpointOrdered}
 The general interval-regular case remains separate: interval images provide
 sound cell bounds and widths, but their cross-stage nesting still requires an
 explicit evaluator/refinement certificate.
@@ -212,7 +214,7 @@ quintic raw certificates), arctangent, Stieltjes sine, finite
 quadrature mean-value brackets, the completed two-cell absolute-value FTC,
 generic multi-turn stage assembly, increasing and decreasing Darboux stages,
 the two-stage product FTC, and endpoint-ordered monotone dyadic
-schedules with arbitrary monotone computational budgets &
+schedules with arbitrary monotone computational budgets in both orientations &
 endpoint identification for multi-turn candidates, all-stage equal-dyadic sine,
 and normalized \(\sin^2\) transports \\
 Power series/Fourier &

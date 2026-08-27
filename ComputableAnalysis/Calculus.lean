@@ -13448,6 +13448,48 @@ def NonincreasingDarbouxSchedule.ofDyadicEndpointOrderedOfBudget
         F hregular hinterval evalPrecision n (hinput n))
       (hN n hn)
 
+/-! Default constructor for endpoint-ordered nonincreasing functions.  The
+cumulative stage absorbs an arbitrary evaluator input modulus, exactly as in
+the nondecreasing case, while the Darboux bounds retain their reversed
+orientation. -/
+def NonincreasingDarbouxSchedule.ofAutomaticEndpointOrdered
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    (hF : EndpointOrderedNonincreasingOnInterval F)
+    {hinterval : F.lower <= F.upper} (lengthBound : Nat)
+    (hLength : F.upper - F.lower <= (lengthBound : Rat)) :
+    NonincreasingDarbouxSchedule F hregular hF.toNonincreasing hinterval := by
+  let stages := cumulativeInputStage hregular lengthBound
+  let evalPrecision : Nat -> Nat := fun n => n
+  have hstage : forall {n m : Nat}, n <= m -> stages n <= stages m := by
+    intro n m hnm
+    exact cumulativeInputStage_mono hregular lengthBound n m hnm
+  have hinput : forall n : Nat,
+      mesh F.lower F.upper (2 ^ stages n) <=
+        1 / ((hregular.inputPrecision (evalPrecision n) : Nat) : Rat) := by
+    intro n
+    exact mesh_le_of_cumulative_input_stage hinterval lengthBound hLength
+      hregular n
+  refine ⟨(fun n => 2 ^ stages n), evalPrecision, ?_, hinput, ?_, ?_⟩
+  · intro n
+    exact Nat.pow_pos (by omega : 0 < 2)
+  · intro n m hnm
+    have h := endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_scheduled_stage
+      F hF hinterval stages evalPrecision hstage (by
+        intro n m hnm
+        exact hnm) hnm
+    simpa [nonincreasingDarbouxScheduleCompute,
+      nonincreasingDarbouxDyadicStage, stages, evalPrecision] using And.intro h.1 h.2
+  · intro eps
+    rcases intervalRegularDarbouxSchedule_linear_precision_budget
+      (hinterval := hinterval) lengthBound hLength eps with ⟨N, hN⟩
+    refine ⟨N, ?_⟩
+    intro n hn
+    exact Rat.le_trans
+      (nonincreasingDarbouxStage_width_le_of_uniform_input_budget
+        F hregular (2 ^ stages n) (Nat.pow_pos (by omega : 0 < 2)) hinterval
+        (evalPrecision n) (hinput n))
+      (hN n hn)
+
 def nonincreasingDarbouxScheduleRaw
     {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
     {hmonotone : NonincreasingOnInterval F}
