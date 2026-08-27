@@ -12435,6 +12435,18 @@ theorem generalIntegralFor_equiv_totalEndpointDifference_of_telescope
     piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_telescope
       F c h hvalues htransport htotal
 
+/-! Project-facing canonical form: a finite piecewise-monotone integral reaches
+its endpoint difference from the cellwise FTC certificates alone. -/
+theorem generalIntegralFor_equiv_totalEndpointDifference_of_canonical_values
+    (F : FunctionOnInterval)
+    (c : GeneralConstructionFor F)
+    (h : PiecewiseMonotoneEndpointFTCFor F c) :
+    (generalIntegralFor F c).Equiv
+      (piecewiseMonotoneTotalEndpointDifference F c) := by
+  simpa [generalIntegralFor] using
+    piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_canonical_values
+      F c h
+
 abbrev ExistsGeneralConstructionFor (F : FunctionOnInterval) : Prop :=
   ExistsPiecewiseMonotoneConstructionFor F
 
