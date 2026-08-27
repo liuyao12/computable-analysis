@@ -3930,7 +3930,9 @@ potential-infinity precision schedule.
   `ComputableAnalysis/ScalarODEUniqueness.lean`. Its checked closure turns a
   rational envelope with `B_(r+1) <= B_r/2` into zero error by an executable
   dyadic stage; `SelfDerivativeDirectMeshComparison` then gives function
-  agreement. The remaining analytic theorem derives that envelope by
+  agreement. Thus the finite-mesh closure is complete once its explicit
+  envelope provider is supplied; the remaining analytic theorem derives that
+  envelope by
   subtracting two derivative certificates on short rational blocks and
   chaining finitely many blocks. This is intentionally independent of
   Peano--Baker/Picard iteration. The vector linear theorem and a future

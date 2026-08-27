@@ -53,9 +53,11 @@ epsilon--delta continuity, polynomial/Taylor secant certificates,
 power-series tails, finite Fourier transforms, finite Gaussian prefixes,
 separable finite product sums, the rational \(n\)-ball recurrence, logarithm,
 rotation derivatives, the finite L'Hôpital remainder pattern, the tangent-square
-FTC instance, the common-prefix exponential FTC instance, the centered
-exponential initial-value certificate, and scalar linear ODE uniqueness are
-checked in Lean. The finite raw-sum algebra used to
+FTC instance, the common-prefix exponential FTC instance, and the centered
+exponential initial-value certificate are checked in Lean. The scalar linear
+ODE chapter has a checked finite-mesh uniqueness closure, conditional on its
+explicit rational envelope provider; the provider itself remains a stated
+analytic certificate obligation. The finite raw-sum algebra used to
 concatenate certified pieces is also checked, so adjacent-interval and
 multi-turn proofs have an explicit assembly layer. The
 two-stage product FTC for the positive (x\arctan(x)) branch is also checked:
