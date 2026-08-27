@@ -1170,6 +1170,9 @@ On the inverse side, `dyadicTangentBoxAt_contains_of_precision_le` proves the
 available same-sample refinement law: a later tangent box is enclosed by the
 earlier one.  This is useful for transporting branch data, but it does not
 replace the missing common-witness proof for the narrower child box.
+The companion `dyadicTangentBox_contains_at_precision_of_depth_le` starts from
+the native-depth box, which is the canonical coarse box used by the public
+sample interface.
 `ArctanSinPiConstruction.dyadicNestedRadicalSampleRaw_stabilized_equiv`
 connects that stabilized candidate to the public sine sample when the
 all-precision witness schedule is supplied.

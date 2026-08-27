@@ -5417,6 +5417,27 @@ theorem dyadicTangentBoxAt_contains_of_precision_le
     (dyadicNormalizedBranch hk)).2.1 precision₁ precision₂ hprecision
   exact ⟨hnested.1, hnested.2.2⟩
 
+/-! The native-depth box is the canonical coarse box for a dyadic sample. -/
+theorem dyadicTangentBox_contains_at_precision_of_depth_le
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {depth k : Nat} (hk : k < 2 ^ depth)
+    (precision : Nat) (hdepth : depth <= precision) :
+    QInterval.ContainsInterval
+      (dyadicTangentBox B hk)
+      (dyadicTangentBoxAt B precision depth k hk) := by
+  unfold dyadicTangentBox dyadicTangentBoxAt
+  change QInterval.ContainsInterval
+    ((B.tangentAt
+      (2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+      (dyadicNormalizedBranch hk)).compute depth)
+    ((B.tangentAt
+      (2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+      (dyadicNormalizedBranch hk)).compute precision)
+  have hnested := (B.tangentAt_valid
+    (2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+    (dyadicNormalizedBranch hk)).2.1 depth precision hdepth
+  exact ⟨hnested.1, hnested.2.2⟩
+
 theorem dyadicTangentBox_bounds
     (B : IntegralIdentities.ArctanInverseBisection)
     {n k : Nat} (hk : k < 2 ^ n) :
