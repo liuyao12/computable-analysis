@@ -2698,6 +2698,10 @@ The one-turn completion now carries that budget through prefix stabilization:
 `Integral.SingleTurnIntegralCompletion.stabilizedRaw_width_le_of_bounds`
 adds only twice the explicit anchor-radius budget to the three component
 bounds.
+The same contract is now available for the generic finite-turn completion:
+`Integral.MultiTurnIntegralCompletion.stabilizedRaw_width_le_of_bounds`
+propagates an independently supplied budget for every monotone piece and
+turning gap, then adds the explicit anchor-radius budget.
 The comparison lemma `RationalPartition.rat_add_fold_le_of_forall` and its
 piecewise lift `Integral.piecewiseMonotoneIntegralFor_compute_width_le_of_bounds`
 now propagate those nonuniform budgets through the actual public fold.

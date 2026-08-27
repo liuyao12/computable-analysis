@@ -321,6 +321,27 @@ theorem stabilizedRaw_valid
     completion.anchor_valid completion.assembly_equiv_anchor
     completion.anchor_width_le_radius completion.radius_shrinks
 
+theorem stabilizedRaw_width_le_of_bounds
+    {assembly : FinitePiecewiseStageAssembly}
+    (completion : MultiTurnIntegralCompletion assembly) (n : Nat)
+    (bound : ShrinkingStage -> Rat)
+    (hbound : forall stage, stage ∈ assembly.stages ->
+      (stage.compute n).width <= bound stage) :
+    (completion.stabilizedRaw.compute n).width <=
+      (assembly.stages.map bound).foldl (fun total r => total + r) 0 +
+        2 * completion.radius n := by
+  have hassembly := assembly.compute_width_le_of_bounds n bound hbound
+  have hstable := RealRaw.prefixStabilize_width_le_current_expand
+    assembly.raw completion.radius n
+  change (completion.stabilizedRaw.compute n).width <=
+    (assembly.compute n).width + 2 * completion.radius n at hstable
+  calc
+    (completion.stabilizedRaw.compute n).width <=
+        (assembly.compute n).width + 2 * completion.radius n := hstable
+    _ <= (assembly.stages.map bound).foldl (fun total r => total + r) 0 +
+          2 * completion.radius n :=
+      rat_add_le_add hassembly Rat.le_refl
+
 theorem stabilizedRaw_equiv_anchor
     {assembly : FinitePiecewiseStageAssembly}
     (completion : MultiTurnIntegralCompletion assembly) :

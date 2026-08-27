@@ -700,6 +700,7 @@ allocated according to the difficulty of each part.
 \lean{ComputableAnalysis.Integral.finiteStageSum_width_le_of_bounds}
 \lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.compute_width_le_of_bounds}
 \lean{ComputableAnalysis.Integral.MultiTurnIntegralCompletion.stabilizedRaw_valid}
+\lean{ComputableAnalysis.Integral.MultiTurnIntegralCompletion.stabilizedRaw_width_le_of_bounds}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.toMultiTurn}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.constructionFor}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.constructionFor_compute_eq}
@@ -721,9 +722,10 @@ or turning gap has width at most (e_j), the finite candidate is bounded by
 more computation than a regular cell.
 
 After prefix stabilization, the public computation also exposes its runtime
-error contract: the width is bounded by the three component budgets plus twice
-the explicit anchor-radius budget. Thus stabilization preserves both
-correctness and a usable finite estimate.
+error contract: the width is bounded by the finite sum of component budgets
+plus twice the explicit anchor-radius budget. The one-turn specialization is
+the three-term version above. Thus stabilization preserves both correctness
+and a usable finite estimate, including for arbitrary finite turn lists.
 
 This schedule layer is the honest frontier between the present foundation and
 the classical theorem that every continuous function on a closed interval is
