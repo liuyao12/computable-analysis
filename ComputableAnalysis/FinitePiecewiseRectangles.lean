@@ -508,6 +508,21 @@ theorem PiecewiseRectangleCertificate.append_upperSum_eq_add
           (right.cells.map (fun I => right.domainWidth * I.hi))
   rw [hwidth, List.map_append, piecewiseRectangleAreaSum_append]
 
+theorem PiecewiseRectangleCertificate.append_gap_le_add_common_range
+    (left right : PiecewiseRectangleCertificate)
+    (hwidth : left.domainWidth = right.domainWidth)
+    (rangeWidth : Rat)
+    (hleft : ∀ I, I ∈ left.cells → I.width ≤ rangeWidth)
+    (hright : ∀ I, I ∈ right.cells → I.width ≤ rangeWidth) :
+    (left.append right hwidth).upperSum -
+        (left.append right hwidth).lowerSum ≤
+      (left.cells.length : Rat) * (left.domainWidth * rangeWidth) +
+        (right.cells.length : Rat) * (right.domainWidth * rangeWidth) := by
+  rw [PiecewiseRectangleCertificate.append_gap_eq_add left right hwidth]
+  exact rat_add_le_add
+    (left.gap_le_common_range rangeWidth hleft)
+    (right.gap_le_common_range rangeWidth hright)
+
 def quadraticTurnExample : List QInterval :=
   [ pieceCellBounds .increasing 0 1 0 0
   , pieceCellBounds .decreasing 1 0 0 0 ]
