@@ -7149,6 +7149,22 @@ def rawAdjacentDifferenceList : List RealRaw -> List RealRaw
   | x :: [] => []
   | x :: y :: ys => (y - x) :: rawAdjacentDifferenceList (y :: ys)
 
+/-! Canonical finite endpoint telescopes can be generated from an indexed
+endpoint computation without a separately supplied list proof. -/
+theorem rawAdjacentDifferenceList_range_map
+    (f : Nat -> RealRaw) (n : Nat) :
+    rawAdjacentDifferenceList ((List.range (n + 1)).map f) =
+      (List.range n).map (fun k => f (k + 1) - f k) := by
+  induction n generalizing f with
+  | zero => simp [List.range_succ_eq_map, rawAdjacentDifferenceList]
+  | succ n ih =>
+      rw [List.range_succ_eq_map]
+      simp only [List.map_cons, List.map_map]
+      have htail := ih (fun k => f (k + 1))
+      have h := congrArg (fun z => (f 1 - f 0) :: z) htail
+      simpa [List.range_succ_eq_map, Function.comp_def,
+        rawAdjacentDifferenceList, Nat.add_assoc] using h
+
 theorem rawAdjacentDifferenceList_length (xs : List RealRaw) :
     (rawAdjacentDifferenceList xs).length = xs.length - 1 := by
   induction xs with
@@ -11505,6 +11521,46 @@ theorem piecewiseMonotoneEndpointDifferenceList_length
     (c : PiecewiseMonotoneConstructionFor F) :
     (piecewiseMonotoneEndpointDifferenceList F c).length = c.pieces := by
   simp [piecewiseMonotoneEndpointDifferenceList]
+
+/-! The canonical endpoint list is indexed by the partition points rather than
+by an arbitrary caller-supplied list.  Its adjacent differences are exactly
+the cell endpoint differences, by finite list algebra. -/
+def piecewiseMonotoneEndpointValueList
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) : List RealRaw :=
+  (List.range (c.pieces + 1)).map (fun k =>
+    if hk : k <= c.pieces then
+      F.raw.evalRaw (c.point k)
+        (F.defined_on (c.point k) (c.point_mem k hk))
+    else RealRaw.zero)
+
+theorem piecewiseMonotoneEndpointValueList_valid
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) :
+    forall x, x ∈ piecewiseMonotoneEndpointValueList F c -> x.Valid := by
+  intro x hx
+  rcases List.mem_map.1 hx with ⟨k, hk, rfl⟩
+  have hk' : k <= c.pieces := by
+    have hklt : k < c.pieces + 1 := List.mem_range.1 hk
+    omega
+  simp [piecewiseMonotoneEndpointValueList, hk']
+  exact F.valid_on (c.point k)
+    (F.defined_on (c.point k) (c.point_mem k hk'))
+
+theorem piecewiseMonotoneEndpointValueList_adjacent
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) :
+    rawAdjacentDifferenceList (piecewiseMonotoneEndpointValueList F c) =
+      piecewiseMonotoneEndpointDifferenceList F c := by
+  unfold piecewiseMonotoneEndpointValueList
+  rw [rawAdjacentDifferenceList_range_map]
+  simp only [piecewiseMonotoneEndpointDifferenceList, List.map_map]
+  apply List.map_congr_left
+  intro a ha
+  have ha' : a < c.pieces := List.mem_range.1 ha
+  have ha1 : a + 1 <= c.pieces := by omega
+  have ha0 : a <= c.pieces := by omega
+  simp [ha', ha0, ha1, piecewiseMonotoneEndpointDifference]
 
 structure PiecewiseMonotoneEndpointFTCFor
     (F : FunctionOnInterval)

@@ -910,6 +910,11 @@ For a piecewise-monotone integrand, use the separate-primitive API in
 `ComputableAnalysis.PrimitivePiecewiseFTC`: the cell areas belong to `F`,
 while the endpoint list is evaluated from the proposed primitive `P`.
 `Integral.absOnUnit_piecewise_primitiveFTC` is the reference two-cell example.
+For the canonical partition endpoints, use
+`Integral.piecewiseMonotoneEndpointValueList`; its validity and
+`Integral.piecewiseMonotoneEndpointValueList_adjacent` theorem generate the
+adjacent-difference list automatically.  Keep an explicit transport
+certificate when using an independently computed primitive endpoint list.
 
 `FTC.EffectiveFTC` and `FTC.effectiveFTC_definiteIntegralEqualsEndpoint`
 describe one checked endpoint-bridge route.  The generic bridge from an
