@@ -938,6 +938,60 @@ theorem rationalHalfAngleTangentInterval_width_le_of_margin
               rw [hcancel, Rat.mul_one]
     _ <= eps * ((1 + C.lo) * (1 + C.hi)) := hmargin
 
+theorem rationalHalfAngleTangentInterval_width_le_of_box_widths
+    {S C : QInterval} (hS : subintervalOf S 0 1)
+    (hC : subintervalOf C 0 1) :
+    (rationalHalfAngleTangentInterval S C).width <=
+      2 * S.width + C.width := by
+  unfold QInterval.width
+  have hCmargin :
+      S.hi * (1 + C.hi) - S.lo * (1 + C.lo) <=
+        (2 * (S.hi - S.lo) + (C.hi - C.lo)) *
+          ((1 + C.lo) * (1 + C.hi)) := by
+    unfold subintervalOf at hS hC
+    have hdlo : 0 < 1 + C.lo := by grind
+    have hdhi : 0 < 1 + C.hi := by grind
+    have hdS : 0 <= S.hi - S.lo := by grind
+    have hdC : 0 <= C.hi - C.lo := by grind
+    have hB0 : 0 <= 1 + C.hi := Rat.le_of_lt hdhi
+    have hBbound : 1 + C.hi <=
+        2 * ((1 + C.lo) * (1 + C.hi)) := by
+      have h := Rat.mul_le_mul_of_nonneg_right
+        (show (1 : Rat) <= 2 * (1 + C.lo) by grind) hB0
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    have hfirst :
+        (S.hi - S.lo) * (1 + C.hi) <=
+          2 * (S.hi - S.lo) *
+            ((1 + C.lo) * (1 + C.hi)) := by
+      have h := Rat.mul_le_mul_of_nonneg_left hBbound hdS
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    have hsecond0 : S.lo * (C.hi - C.lo) <= C.hi - C.lo := by
+      have hSlo : S.lo <= 1 := Rat.le_trans hS.2.1 hS.2.2
+      have h := Rat.mul_le_mul_of_nonneg_right hSlo hdC
+      simpa [Rat.one_mul] using h
+    have hD1 : (1 : Rat) <= (1 + C.lo) * (1 + C.hi) := by
+      have hA : (1 : Rat) <= 1 + C.lo := by grind
+      have hB : (1 : Rat) <= 1 + C.hi := by grind
+      have hstep : 1 * (1 + C.hi) <=
+          (1 + C.lo) * (1 + C.hi) :=
+        Rat.mul_le_mul_of_nonneg_right hA (by grind)
+      have hstep2 : (1 : Rat) <= 1 * (1 + C.hi) := by
+        simpa [Rat.one_mul] using hB
+      exact Rat.le_trans hstep2 hstep
+    have hsecond1 : C.hi - C.lo <=
+        (C.hi - C.lo) * ((1 + C.lo) * (1 + C.hi)) := by
+      have h := Rat.mul_le_mul_of_nonneg_left hD1 hdC
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    have hsecond : S.lo * (C.hi - C.lo) <=
+        (C.hi - C.lo) * ((1 + C.lo) * (1 + C.hi)) :=
+      Rat.le_trans hsecond0 hsecond1
+    have hsum := rat_add_le_add hfirst hsecond
+    simpa [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm] using hsum
+  apply rationalHalfAngleTangentInterval_width_le_of_margin hC
+    (2 * S.width + C.width)
+  simpa [QInterval.width] using hCmargin
+
 theorem rationalHalfAngleTangentInterval_subinterval
     {S C : QInterval}
     (hS : subintervalOf S 0 1) (hC : subintervalOf C 0 1) :
