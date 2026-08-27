@@ -82,6 +82,11 @@ requires only that their finite sum fit inside the requested tolerance.  This
 is the interface used when different pieces have different computational
 complexities.
 
+Representation changes are equally explicit.  A client may replace the
+canonical finite cell list by another list of raw evaluators when it supplies
+validity and one equivalence edge for each corresponding cell; finite-sum
+transport then carries that edge to the assembled integral.
+
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_precision_witness_of_cell_budgets}
 \lean{ComputableAnalysis.Integral.effectiveGeneralIntegralFor_precision_witness_of_cell_budgets}
 \lean{ComputableAnalysis.Integral.effectiveGeneralIntegralFor_equiv_of_finiteRawListEquiv}
