@@ -482,6 +482,31 @@ theorem polygonalPolynomialPrimitiveTo_closed
     QComplex.sub, QComplex.add, QComplex.neg, QComplex.zero]
   constructor <;> grind
 
+/-! An exact finite polynomial path integral is useful when the differential is
+already presented by its primitive coefficients.  It is a rational-complex
+algorithm at every stage; no limiting path construction is involved. -/
+def polygonalPolynomialIntegralRaw
+    (coefficients : List QComplex) (start : QComplex)
+    (vertices : List QComplex) : ComplexRaw :=
+  ComplexRaw.ofQComplex
+    (polygonalPolynomialPrimitiveTo coefficients start vertices)
+
+theorem polygonalPolynomialIntegralRaw_valid
+    (coefficients : List QComplex) (start : QComplex)
+    (vertices : List QComplex) :
+    (polygonalPolynomialIntegralRaw coefficients start vertices).Valid := by
+  exact ComplexRaw.ofQComplex_valid _
+
+theorem polygonalPolynomialIntegralRaw_equiv_endpoint
+    (coefficients : List QComplex) (start endpoint : QComplex)
+    (vertices : List QComplex) :
+    (polygonalPolynomialIntegralRaw coefficients start (vertices ++ [endpoint])).Equiv
+      (ComplexRaw.ofQComplex
+        (polynomialPrimitiveIncrement coefficients start endpoint)) := by
+  rw [polygonalPolynomialIntegralRaw,
+    polygonalPolynomialPrimitiveTo_append_endpoint]
+  exact ComplexRaw.equiv_refl _ (ComplexRaw.ofQComplex_valid _)
+
 /-- A point on the straight segment from `a` to `b`, with parameter `k/n`. -/
 def segmentPoint (a b : QComplex) (n : Nat) (k : Nat) : QComplex :=
   QComplex.add a

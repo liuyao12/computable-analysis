@@ -4138,6 +4138,10 @@ arguments.
   `polygonalPolynomialPrimitiveTo_split_at` adds the corresponding finite
   additivity law at an intermediate path vertex, completing the polynomial
   path-composition interface.
+  `polygonalPolynomialIntegralRaw` now exposes this finite primitive fold as
+  a valid `ComplexRaw`, with an endpoint-equivalence theorem for open paths.
+  This is an exact rational-complex integral evaluator, not an appeal to a
+  completed complex path space.
 
 ## Algebraic Numbers and FTA
 
