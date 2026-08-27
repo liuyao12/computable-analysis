@@ -3943,6 +3943,10 @@ potential-infinity precision schedule.
   The matching finite integration identity
   `ComplexSeries.expIntegratedPartial_eq_expPartial_sub_one` now records the
   primitive prefix and its constant-term anchor exactly.
+  The matching trigonometric primitive step
+  `ComplexSeries.sinTerm_primitive_relation` scales `z * sinTerm z k` by the
+  reciprocal new exponent and obtains the negative next cosine term.  This is
+  the finite integration identity needed before any infinite passage.
 - The same formal layer now covers the coefficient-shift identities for trig
   and hyperbolic streams:
   `sin -> cos`, `cos -> -sin`, `sinh -> cosh`, and

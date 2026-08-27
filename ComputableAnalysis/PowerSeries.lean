@@ -2007,6 +2007,30 @@ theorem cosTerm_succ_derivative_relation (z : QComplex) (k : Nat) :
       simp [QComplex.mul, QComplex.divRat, Rat.div_def]
       grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
 
+theorem sinTerm_primitive_relation (z : QComplex) (k : Nat) :
+    QComplex.scaleRat (1 / (((2 * k + 2 : Nat) : Rat)))
+        (QComplex.mul z (sinTerm z k)) =
+      QComplex.neg (cosTerm z (k + 1)) := by
+  have hd : (((2 * k + 2 : Nat) : Rat)) ≠ 0 :=
+    FormalPowerSeries.natCast_succ_ne_zero (2 * k + 1)
+  calc
+    _ = QComplex.scaleRat (1 / (((2 * k + 2 : Nat) : Rat)))
+        (QComplex.neg
+          (QComplex.scaleRat (((2 * k + 2 : Nat) : Rat))
+            (cosTerm z (k + 1)))) := by
+      rw [cosTerm_succ_derivative_relation]
+      cases z <;> simp [QComplex.neg]
+    _ = QComplex.neg
+        (QComplex.scaleRat (1 / (((2 * k + 2 : Nat) : Rat)))
+          (QComplex.scaleRat (((2 * k + 2 : Nat) : Rat))
+            (cosTerm z (k + 1)))) := by
+      cases z <;> simp [QComplex.scaleRat, QComplex.neg]
+      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
+    _ = QComplex.neg (cosTerm z (k + 1)) := by
+      rw [QComplex.scaleRat_scaleRat]
+      cases z <;> simp [QComplex.scaleRat, QComplex.neg]
+      grind [Rat.div_def, Rat.inv_mul_cancel, Rat.mul_assoc, Rat.mul_comm]
+
 def cosPartial (z : QComplex) (n : Nat) : QComplex :=
   (List.range n).foldl (fun acc k => QComplex.add acc (cosTerm z k)) QComplex.zero
 
