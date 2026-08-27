@@ -4,6 +4,63 @@ namespace ComputableAnalysis
 
 namespace SinPiIntegral
 
+/-! The even branch can be generated from the certificate at its parent
+precision.  The dyadic table reuses the parent entry, while the inverse box
+at the requested precision is the outer box in the nesting chain. -/
+def CanonicalDyadicHalfAngleCertificateAt.of_even_parent
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (precision n k : Nat) (hk : k < 2 ^ n)
+    (h : CanonicalDyadicHalfAngleCertificateAt B
+      (dyadicNestedRadicalParentPrecision precision) n k hk) :
+    CanonicalDyadicHalfAngleCertificateAt B precision (n + 1) (2 * k) (by
+      have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+        rw [Nat.pow_succ]
+        omega
+      rw [hpow]
+      omega) := by
+  let childhk : 2 * k < 2 ^ (n + 1) := by
+    have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+      rw [Nat.pow_succ]
+      omega
+    rw [hpow]
+    omega
+  have hprecision : precision <= dyadicNestedRadicalParentPrecision precision := by
+    unfold dyadicNestedRadicalParentPrecision
+    have hsq : precision + 1 <= (precision + 1) * (precision + 1) :=
+      Nat.le_mul_of_pos_right (precision + 1) (Nat.succ_pos _)
+    have hscaled : precision + 1 <=
+        16 * ((precision + 1) * (precision + 1)) :=
+      Nat.le_trans hsq (Nat.le_mul_of_pos_left _ (by omega))
+    have hp : precision <= precision + 1 := Nat.le_succ _
+    simpa [Nat.mul_assoc] using Nat.le_trans hp hscaled
+  have hbox := dyadicTangentBoxAt_contains_of_precision_le B
+    precision (dyadicNestedRadicalParentPrecision precision) n k hk hprecision
+  have houter :
+      (dyadicTangentBoxAt B precision (n + 1) (2 * k) childhk).ContainsInterval
+        (rationalHalfAngleTangentInterval
+          ((dyadicNestedRadicalTableAt precision (n + 1) (2 * k)).1)
+          h.cosineBox) := by
+    have hbox' :
+        (dyadicTangentBoxAt B precision n k hk).ContainsInterval
+          (dyadicTangentBoxAt B
+            (dyadicNestedRadicalParentPrecision precision) n k hk) := hbox
+    have htrans := QInterval.ContainsInterval.trans hbox' h.outer_tangent_contains
+    simpa [dyadicNestedRadicalTableAt_succ_even,
+      dyadicTangentBoxAt, childhk,
+      dyadicTangentBoxAt_even_input precision n k hk] using htrans
+  refine {
+    cosineBox := h.cosineBox
+    cosineBox_subinterval := h.cosineBox_subinterval
+    sineWitness := h.sineWitness
+    cosineWitness := h.cosineWitness
+    sine_nonneg := h.sine_nonneg
+    cosine_nonneg := h.cosine_nonneg
+    circle_identity := h.circle_identity
+    sine_contains := ?_
+    cosine_contains := h.cosine_contains
+    outer_tangent_contains := houter }
+  simpa [dyadicNestedRadicalTableAt_succ_even] using h.sine_contains
+
 /-! An overlap-facing constructor for the even branch.  This is the natural
 finite interface when the geometric proof establishes the public/table
 overlap directly rather than exposing the successful grid witness. -/

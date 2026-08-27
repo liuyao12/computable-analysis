@@ -1413,6 +1413,12 @@ now named explicitly:
 \lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalTableAt_succ_even}
 \lean{ComputableAnalysis.SinPiIntegral.dyadicTangentBoxAt_even_input}
 
+Consequently an even-branch canonical certificate is inherited from the
+parent certificate at the scheduled finer precision; only the odd and
+reflected-odd geometric cases remain as independent branch obligations:
+
+\lean{ComputableAnalysis.SinPiIntegral.CanonicalDyadicHalfAngleCertificateAt.of_even_parent}
+
 The inverse side has the complementary refinement law: at one fixed dyadic
 sample, a later tangent computation is enclosed by the earlier one.  This is
 the exact finite fact available for the even branch; it does not by itself
