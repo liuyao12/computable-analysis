@@ -91,6 +91,28 @@ derivative certificates on a rational interval:
 \lean{ComputableAnalysis.RotationSeries.uniformRotationCosOnTwo_hasDerivativeOnInterval}
 \leanok
 
+These two coordinate certificates already form a computable initial-value
+system on the rational chart $[-2,2]$.  At the origin every finite prefix
+contains the exact values $\cos(0)=1$ and $\sin(0)=0$; the negative-sine
+coordinate is transported by an explicit interval negation.  Thus the package
+proves the finite, representation-level statement
+
+\begin{verbatim}
+S' = C,  C' = -S,  C(0)=1,  S(0)=0
+        -> rotation initial-value certificate
+\end{verbatim}
+
+It is intentionally an initial-value candidate rather than an appeal to a
+classical uniqueness theorem: identifying it with a separately constructed
+geometric rotation remains a representation-equivalence obligation.
+
+\lean{ComputableAnalysis.RotationSeries.uniformRotationCosOnTwo_zero_equiv_one}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationSinOnTwo_zero_equiv_zero}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationNegSinOnTwo_equiv_neg_sin}
+\lean{ComputableAnalysis.RotationSeries.RotationDerivativeInitialCertificate}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationOnTwo_rotationInitialCertificate}
+\leanok
+
 The finite Taylor-prefix layer also supplies derivative certificates for
 polynomial approximants. Thus the route from power series to calculus is
 explicit:

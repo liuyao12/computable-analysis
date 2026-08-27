@@ -451,6 +451,27 @@ uniqueness bridge.
 \lean{ComputableAnalysis.RotationPeanoBakerBridge.rotationCenter_eq_expPartial}
 \leanok
 
+The series-side rotation candidate is available at the same interface.  Its
+coordinates are explicit factorial-prefix computations, its derivative laws
+are finite secant certificates, and its initial values are exact rational
+overlaps.  This is the clean hand-off from the exponential chapter to the
+linear ODE chapter:
+
+\begin{verbatim}
+factorial-prefix coordinates -> S'=C, C'=-S -> initial-value certificate
+\end{verbatim}
+
+The certificate remains a representation-level candidate until a separate
+uniqueness/transport proof identifies it with the rational-circle chart.
+
+\lean{ComputableAnalysis.RotationSeries.RotationDerivativeInitialCertificate}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationOnTwo_rotationInitialCertificate}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationSinOnTwo_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationCosOnTwo_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationSinOnTwo_zero_equiv_zero}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationCosOnTwo_zero_equiv_one}
+\leanok
+
 \section{Vector ODE admission checklist}
 
 A concrete vector system is ready for the foundation when its provider can
