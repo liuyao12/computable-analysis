@@ -123,6 +123,17 @@ The normalized product overlap is explicitly checked at dyadic stages 0, 1,
 and 2; these are regression anchors, not a substitute for the all-stage
 certificate.
 
+At stage 2 the square-aware search now covers all three interior samples:
+the positive branches use witnesses \(1581/8192\) and \(27135/65536\), while
+the reflected branch uses \(379/256\).  These checks validate the three
+finite branch shapes; they do not assert the uniform geometric family needed
+for arbitrary depth.
+
+\lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_stage_two_left_demo}
+\lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_stage_two_middle_demo}
+\lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_stage_two_right_demo}
+\leanok
+
 \lean{ComputableAnalysis.SinPiIntegral.DyadicHalfAngleChildCertificate}
 \lean{ComputableAnalysis.SinPiIntegral.DyadicReflectedHalfAngleCertificate}
 \lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_branch_certificate_families}
