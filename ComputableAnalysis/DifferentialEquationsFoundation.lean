@@ -40,4 +40,17 @@ theorem effectiveDiscreteVariationOfConstants
   exact DiscreteLinearSystem.trajectory_eq_transition_add_zeroInitial
     system initial n
 
+/-! The Duhamel form is the version consumed by an inhomogeneous ODE
+provider: the finite forcing response is an explicit sum of transported
+forcing samples. -/
+theorem effectiveDiscreteVariationOfConstants_duhamel
+    (system : DiscreteLinearSystem dimension) (initial : RatVector dimension)
+    (n : Nat) :
+    system.trajectory initial n =
+      vectorAdd
+        (matrixApply (chronologicalStepProduct system.step 0 n) initial)
+        (DiscreteLinearSystem.duhamelSum system n) := by
+  exact DiscreteLinearSystem.trajectory_eq_transition_add_duhamelSum
+    system initial n
+
 end ComputableAnalysis.LinearODE
