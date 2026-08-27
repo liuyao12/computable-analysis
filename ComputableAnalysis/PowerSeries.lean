@@ -573,6 +573,38 @@ theorem sinCosCoeff_eq_of_coupledDerivative
   · funext n
     exact (hpair n).2
 
+theorem sinhCoshCoeff_eq_of_coupledDerivative
+    {F G : Coeffs}
+    (hF : HasFormalDerivative F G)
+    (hG : HasFormalDerivative G F)
+    (hFzero : F 0 = 0)
+    (hGone : G 0 = 1) :
+    F = sinhCoeff ∧ G = coshCoeff := by
+  have hpair : ∀ n, F n = sinhCoeff n ∧ G n = coshCoeff n := by
+    intro n
+    induction n with
+    | zero =>
+        constructor
+        · simpa [sinhCoeff] using hFzero
+        · simpa [coshCoeff] using hGone
+    | succ n ih =>
+        have hFrec := congrFun hF n
+        change (((n + 1 : Nat) : Rat) * F (n + 1)) = G n at hFrec
+        have hGrec := congrFun hG n
+        change (((n + 1 : Nat) : Rat) * G (n + 1)) = F n at hGrec
+        rw [ih.2] at hFrec
+        rw [ih.1] at hGrec
+        constructor
+        · rw [sinhCoeff]
+          exact eq_div_of_mul_eq (natCast_succ_ne_zero n) hFrec
+        · rw [coshCoeff]
+          exact eq_div_of_mul_eq (natCast_succ_ne_zero n) hGrec
+  constructor
+  · funext n
+    exact (hpair n).1
+  · funext n
+    exact (hpair n).2
+
 /-- First-year calculus table entry: the formal derivative of `-cos` is `sin`. -/
 theorem neg_cosCoeff_hasFormalDerivative :
     HasFormalDerivative (neg cosCoeff) sinCoeff := by

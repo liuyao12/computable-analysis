@@ -3919,6 +3919,9 @@ potential-infinity precision schedule.
   `FormalPowerSeries.sinhCoeff_eq_of_hasFormalDerivative` and
   `FormalPowerSeries.coshCoeff_eq_of_hasFormalDerivative`, are now checked as
   well.
+  `FormalPowerSeries.sinhCoshCoeff_eq_of_coupledDerivative` also closes the
+  coupled system (F'=G,\ G'=F) with (F(0)=0,\ G(0)=1) by simultaneous
+  induction.
 - The finite rational bridge below the formal table is now checked too:
   `FinitePolynomial.powerSecant_eq_differenceQuotient` identifies the exact
   quotient of every monomial, and
