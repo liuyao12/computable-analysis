@@ -61,6 +61,43 @@ def CanonicalDyadicHalfAngleCertificateAt.of_even_parent
     outer_tangent_contains := houter }
   simpa [dyadicNestedRadicalTableAt_succ_even] using h.sine_contains
 
+/-! A named proof object for the finite data supplied by a rational
+half-angle search.  It is independent of any completed real number: the
+witness, its sine-box location, and the three rational margin checks are
+explicit fields. -/
+structure RationalHalfAngleMarginCertificate
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (precision depth k : Nat) (hk : k < 2 ^ depth) where
+  witness : Rat
+  witness_nonneg : 0 <= witness
+  witness_le_one : witness <= 1
+  sine_contains :
+    (dyadicNestedRadicalTableAt precision depth k).1.lo <=
+        rationalCircleSin witness /\
+      rationalCircleSin witness <=
+        (dyadicNestedRadicalTableAt precision depth k).1.hi
+  epsilon : Rat
+  tangent_width :
+    (rationalHalfAngleTangentInterval
+      (dyadicNestedRadicalTableAt precision depth k).1
+      ({ lo := rationalCircleCos witness, hi := rationalCircleCos witness } : QInterval)).width
+      <= epsilon
+  left_margin :
+    (dyadicTangentBoxAt B precision depth k hk).lo + epsilon <=
+      rationalCircleSin witness / (1 + rationalCircleCos witness)
+  right_margin :
+    rationalCircleSin witness / (1 + rationalCircleCos witness) + epsilon <=
+      (dyadicTangentBoxAt B precision depth k hk).hi
+
+def RationalHalfAngleMarginCertificate.toCanonical
+    {B : IntegralIdentities.ArctanInverseBisection}
+    {precision depth k : Nat} {hk : k < 2 ^ depth}
+    (h : RationalHalfAngleMarginCertificate B precision depth k hk) :
+    CanonicalDyadicHalfAngleCertificateAt B precision depth k hk :=
+  canonical_dyadic_certificate_at_of_rational_witness_with_margin
+    B hk h.witness h.witness_nonneg h.witness_le_one h.sine_contains
+    h.epsilon h.tangent_width h.left_margin h.right_margin
+
 /-! An overlap-facing constructor for the even branch.  This is the natural
 finite interface when the geometric proof establishes the public/table
 overlap directly rather than exposing the successful grid witness. -/
