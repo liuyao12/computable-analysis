@@ -3890,6 +3890,9 @@ potential-infinity precision schedule.
   stream `1/n!`. See
   `FormalPowerSeries.expCoeff_derivative` in
   `ComputableAnalysis/PowerSeries.lean`.
+  `FormalPowerSeries.expCoeff_eq_of_hasFormalDerivative` also records the
+  finite coefficient-level uniqueness bridge from the initial coefficient and
+  the supplied exponential derivative stream.
 - The same formal layer now covers the coefficient-shift identities for trig
   and hyperbolic streams:
   `sin -> cos`, `cos -> -sin`, `sinh -> cosh`, and

@@ -377,6 +377,30 @@ theorem expCoeff_hasFormalDerivative :
     HasFormalDerivative expCoeff expCoeff :=
   expCoeff_derivative
 
+/-! The exponential coefficient stream is the unique formal solution of the
+initial-value system `F' = F`, `F 0 = 1`.  This is the coefficient-level
+counterpart of the constructive ODE uniqueness interface. -/
+theorem expCoeff_eq_of_hasFormalDerivative
+    {F : Coeffs}
+    (hF : HasFormalDerivative F expCoeff)
+    (hzero : F 0 = 1) :
+    F = expCoeff := by
+  have hFprimitive :=
+    coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative hF
+  have hexp0 : expCoeff 0 = 1 := by
+    unfold expCoeff factorialRat factorial
+    native_decide
+  have hexpprimitive :=
+    coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative
+      (F := expCoeff) expCoeff_hasFormalDerivative
+  have hFprimitive' :
+      coeffsFromDerivativeAtZero 1 expCoeff = F := by
+    simpa [hzero] using hFprimitive
+  have hexpprimitive' :
+      coeffsFromDerivativeAtZero 1 expCoeff = expCoeff := by
+    simpa [hexp0] using hexpprimitive
+  exact hFprimitive'.symm.trans hexpprimitive'
+
 /-- First-year calculus table entry: the formal derivative of `sin` is `cos`. -/
 theorem sinCoeff_hasFormalDerivative :
     HasFormalDerivative sinCoeff cosCoeff :=
