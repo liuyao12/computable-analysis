@@ -3896,6 +3896,10 @@ potential-infinity precision schedule.
   `FormalPowerSeries.expCoeff_eq_of_selfDerivative` closes the corresponding
   self-derivative initial-value recurrence \(F'=F,\ F(0)=1\) coefficient by
   coefficient.
+  The parameterized form is now also checked: `scaledExpCoeff_derivative`
+  proves the coefficient recurrence for \(F'=rF\), and
+  `scaledExpCoeff_eq_of_scaledSelfDerivative` proves its initial-value
+  uniqueness for every rational parameter \(r\).
 - The same formal layer now covers the coefficient-shift identities for trig
   and hyperbolic streams:
   `sin -> cos`, `cos -> -sin`, `sinh -> cosh`, and
