@@ -507,6 +507,22 @@ theorem polygonalPolynomialIntegralRaw_equiv_endpoint
     polygonalPolynomialPrimitiveTo_append_endpoint]
   exact ComplexRaw.equiv_refl _ (ComplexRaw.ofQComplex_valid _)
 
+/-! The finite path integral respects subdivision at an explicitly supplied
+intermediate vertex.  This is the path-integral form of additivity: it is an
+exact rational identity for polynomial differentials, with no completed path
+or limiting integral involved. -/
+theorem polygonalPolynomialIntegralRaw_split_at
+    (coefficients : List QComplex) (start middle : QComplex)
+    (pre suf : List QComplex) :
+    (polygonalPolynomialIntegralRaw coefficients start
+      (pre ++ [middle] ++ suf)).Equiv
+      (ComplexRaw.ofQComplex
+        (QComplex.add
+          (polygonalPolynomialPrimitiveTo coefficients start (pre ++ [middle]))
+          (polygonalPolynomialPrimitiveTo coefficients middle suf))) := by
+  rw [polygonalPolynomialIntegralRaw, polygonalPolynomialPrimitiveTo_split_at]
+  exact ComplexRaw.equiv_refl _ (ComplexRaw.ofQComplex_valid _)
+
 theorem polygonalPolynomialIntegralRaw_closed_equiv_zero
     (coefficients : List QComplex) (start : QComplex)
     (vertices : List QComplex) :
