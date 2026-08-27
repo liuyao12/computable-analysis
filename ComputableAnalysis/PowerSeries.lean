@@ -814,6 +814,21 @@ def sineTaylorIntegralPartial (x : Rat) : Nat -> Rat
       sineTaylorIntegralPartial x n +
         altSign n * x ^ (2 * n + 2) / factorialRat (2 * n + 2)
 
+def cosineTaylorIntegralPartial (x : Rat) : Nat -> Rat
+  | 0 => 0
+  | n + 1 =>
+      cosineTaylorIntegralPartial x n +
+        altSign n * x ^ (2 * n + 1) / factorialRat (2 * n + 1)
+
+theorem cosineTaylorIntegralPartial_eq_sineTaylorPartial (x : Rat) :
+    forall n, cosineTaylorIntegralPartial x n = sineTaylorPartial x n := by
+  intro n
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+      rw [cosineTaylorIntegralPartial, sineTaylorPartial, ih]
+      rfl
+
 theorem factorialRat_add_two (n : Nat) :
     factorialRat (2 * n + 2) =
       (((2 * n + 2 : Nat) : Rat) * ((2 * n + 1 : Nat) : Rat)) *

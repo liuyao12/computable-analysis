@@ -3956,6 +3956,10 @@ potential-infinity precision schedule.
   list aggregate `ComplexSeries.cosIntegratedPartial_eq_sinPartial` provide
   the corresponding cosine-to-sine primitive.  Together these are the finite
   trigonometric integration interface.
+  On the rational real axis, `FormalPowerSeries.cosineTaylorIntegralPartial`
+  is an explicit finite primitive whose prefix identity is
+  `cosineTaylorIntegralPartial_eq_sineTaylorPartial`.  This is the same
+  integration bridge in the coefficient notation used by the real FTC tests.
 - The same formal layer now covers the coefficient-shift identities for trig
   and hyperbolic streams:
   `sin -> cos`, `cos -> -sin`, `sinh -> cosh`, and
