@@ -744,6 +744,22 @@ theorem leftStieltjesSum_affine_path (f g : Nat -> Rat)
             leftStieltjesSum_const_path]
     _ = s * leftStieltjesSum f g n := by simp
 
+theorem leftStieltjesSum_affine_integrand (f g : Nat -> Rat)
+    (s t : Rat) (n : Nat) :
+    leftStieltjesSum (fun i => s * f i + t) g n =
+      s * leftStieltjesSum f g n + t * (g n - g 0) := by
+  calc
+    leftStieltjesSum (fun i => s * f i + t) g n =
+        leftStieltjesSum (fun i => s * f i + (fun _ => t) i) g n := by
+          rfl
+    _ = leftStieltjesSum (fun i => s * f i) g n +
+        leftStieltjesSum (fun _ => t) g n := by
+          exact leftStieltjesSum_add_left
+            (fun i => s * f i) (fun _ => t) g n
+    _ = s * leftStieltjesSum f g n + t * (g n - g 0) := by
+          rw [leftStieltjesSum_scale_left,
+            leftStieltjesSum_const_left]
+
 theorem rightStieltjesSum_const_path (g : Nat -> Rat) (c : Rat) (n : Nat) :
     rightStieltjesSum (fun _ => c) g n = 0 := by
   induction n with
@@ -769,6 +785,22 @@ theorem rightStieltjesSum_affine_path (f g : Nat -> Rat)
           rw [rightStieltjesSum_scale_left,
             rightStieltjesSum_const_path]
     _ = s * rightStieltjesSum f g n := by simp
+
+theorem rightStieltjesSum_affine_integrator (f g : Nat -> Rat)
+    (s t : Rat) (n : Nat) :
+    rightStieltjesSum f (fun i => s * g i + t) n =
+      s * rightStieltjesSum f g n + t * (f n - f 0) := by
+  calc
+    rightStieltjesSum f (fun i => s * g i + t) n =
+        rightStieltjesSum f (fun i => s * g i + (fun _ => t) i) n := by
+          rfl
+    _ = rightStieltjesSum f (fun i => s * g i) n +
+        rightStieltjesSum f (fun _ => t) n := by
+          exact rightStieltjesSum_add_right f
+            (fun i => s * g i) (fun _ => t) n
+    _ = s * rightStieltjesSum f g n + t * (f n - f 0) := by
+          rw [rightStieltjesSum_scale_right,
+            rightStieltjesSum_const_right]
 
 /-! The square case is the finite chain rule.  It is the form used by
 substitution and by energy estimates: the endpoint change of `f^2` is the
