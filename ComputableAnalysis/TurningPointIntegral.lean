@@ -508,6 +508,20 @@ theorem compute_width_nonneg {F : FunctionOnInterval}
     (Rat.add_nonneg (C.leftBox_width_nonneg n) (C.middleBox_width_nonneg n))
     (C.rightBox_width_nonneg n)
 
+/-! The one-turn candidate exposes its three finite error budgets separately.
+This avoids forcing callers to allocate equal thirds when the outer and middle
+computations have different conditioning. -/
+
+theorem compute_width_le_of_bounds {F : FunctionOnInterval}
+    (C : SingleTurnIntegralCandidate F) (n : Nat)
+    (leftBound middleBound rightBound : Rat)
+    (hleft : (C.leftBox n).width <= leftBound)
+    (hmiddle : (C.middleBox n).width <= middleBound)
+    (hright : (C.rightBox n).width <= rightBound) :
+    (C.compute n).width <= leftBound + middleBound + rightBound := by
+  rw [C.compute_width]
+  exact rat_add_le_add (rat_add_le_add hleft hmiddle) hright
+
 theorem middleBox_widths_shrink {F : FunctionOnInterval}
     (C : SingleTurnIntegralCandidate F) :
     RealRaw.WidthsShrinkToZero C.middleBox :=

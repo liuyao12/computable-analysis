@@ -685,10 +685,14 @@ is therefore bounded by the range bound times the turn-bracket width; no value a
 the turn is required. This is the constructive form of the practical rule
 used for \(\sin(\pi x)/x\): classify each cell as increasing, decreasing, or
 containing one of finitely many certified turns, and refine only the latter.
+For one turn, the three finite budgets are independent: left piece, unresolved
+middle bracket, and right piece.  Their widths add, so computation can be
+allocated according to the difficulty of each part.
 
 \lean{ComputableAnalysis.Integral.TurningPointBracket}
 \lean{ComputableAnalysis.Integral.TurningPointBracket.widths_shrink}
 \lean{ComputableAnalysis.Integral.TurningBracketIntegralCandidate}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.compute_width_le_of_bounds}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.compute_widths_shrink}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.stabilizedRaw_valid}
 \lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.raw_widths_shrink}

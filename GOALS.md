@@ -2715,7 +2715,9 @@ width without invoking a completed real or a limiting sum.
   `FinitePiecewiseStageAssembly` now proves the finite rational aggregation
   has shrinking width; its common-rate estimate is the literal number of
   boxes times the supplied per-box width bound. Supplying the individual boxes
-  and proving that their combined stage encloses the intended integral remain
+  can now use `SingleTurnIntegralCandidate.compute_width_le_of_bounds` to
+  combine independent left, middle, and right budgets directly.
+  The remaining proof that their combined stage encloses the intended integral remains
   function-by-function work. This is consciously not a universal existence definition for
   integrals. The reusable
   `IntegralIdentities.LipschitzDyadic` constructor now turns a rational
