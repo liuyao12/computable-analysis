@@ -49,3 +49,17 @@ theorem effectivePolynomialPathFTC
     coefficients start endpoint vertices
 
 end ComputableAnalysis.ComplexPathIntegral
+
+namespace ComputableAnalysis
+
+/-! The finite secant product rule is the algebraic product-rule interface for
+the effective calculus.  It is stated over rational endpoint values and a
+positive cell, before any derivative or limit representation is introduced. -/
+theorem effectiveSecantProductRule
+    {x y f0 f1 g0 g1 : Rat} (hxy : x < y) :
+    (f1 * g1 - f0 * g0) / (y - x) =
+      f0 * ((g1 - g0) / (y - x)) +
+        g1 * ((f1 - f0) / (y - x)) := by
+  exact secantSlope_product_transport hxy
+
+end ComputableAnalysis
