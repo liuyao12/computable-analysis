@@ -64,6 +64,17 @@ theorem effectiveFTC_sine_prefix_square :
       (RealRaw.ofRat (6389 / 161280)) := by
   exact FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_value
 
+/-! Fourier stages use the same representation discipline: a precision
+witness is an actual finite rational-complex transform inside the stabilized
+box. -/
+theorem effectiveFourierSeries_precision_witness
+    (F : EffectiveFourierSeries) (eps : QPos) :
+    ∃ N : Nat, ∃ q : QComplex,
+      (QBox.point q).NestedIn (F.stabilized.compute N) /\
+      (F.stabilized.compute N).width <= eps.val /\
+      (F.stabilized.compute N).height <= eps.val := by
+  exact F.precision_witness eps
+
 end ComputableAnalysis
 
 namespace ComputableAnalysis
