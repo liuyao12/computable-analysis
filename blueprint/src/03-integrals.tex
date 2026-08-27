@@ -278,6 +278,19 @@ the complete scheduled stages:
 The mesh exponent may itself be an arbitrary monotone schedule, allowing the
 algorithm to spend extra work where the evaluator requires it:
 \lean{ComputableAnalysis.endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_scheduled_stage}
+For endpoint-ordered monotone evaluators, the remaining schedule bookkeeping
+is now automatic.  A cumulative natural-number budget absorbs an arbitrary
+input-precision modulus, makes the dyadic mesh monotone, and proves the mesh
+bound by rational cross-multiplication:
+\begin{verbatim}
+stage(n) := sum of all input budgets through n
+cells(n) := 2^stage(n),    precision(n) := n
+\end{verbatim}
+\lean{ComputableAnalysis.Integral.cumulativeInputStage}
+\lean{ComputableAnalysis.Integral.cumulativeInputStage_mono}
+\lean{ComputableAnalysis.Integral.mesh_le_of_cumulative_input_stage}
+\lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule.ofAutomaticEndpointOrdered}
+\leanok
 The result packages directly into a public dyadic monotone-integral schedule;
 the mesh budget and width-shrink witness remain explicit inputs:
 \lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule.ofDyadicEndpointOrdered}

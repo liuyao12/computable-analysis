@@ -9900,6 +9900,130 @@ def intervalRegularAutomaticPieces
     (evalPrecision : Nat -> Nat) (n : Nat) : Nat :=
   hregular.inputPrecision (evalPrecision n) * max 1 lengthBound
 
+/-! A cumulative stage budget makes the mesh schedule monotone even when an
+evaluator's input-modulus function is not monotone.  The stage is deliberately
+over-sized: only its monotonicity and the resulting finite mesh bound matter. -/
+def cumulativeInputStage
+    (hregular : IntervalRegularOn F) (lengthBound : Nat) : Nat -> Nat
+  | 0 => hregular.inputPrecision 0 * max 1 lengthBound
+  | n + 1 => cumulativeInputStage hregular lengthBound n +
+      hregular.inputPrecision (n + 1) * max 1 lengthBound
+
+theorem cumulativeInputStage_succ
+    (hregular : IntervalRegularOn F) (lengthBound n : Nat) :
+    cumulativeInputStage hregular lengthBound (n + 1) =
+      cumulativeInputStage hregular lengthBound n +
+        hregular.inputPrecision (n + 1) * max 1 lengthBound := by
+  rfl
+
+theorem cumulativeInputStage_pos
+    (hregular : IntervalRegularOn F) (lengthBound n : Nat) :
+    0 < cumulativeInputStage hregular lengthBound n := by
+  induction n with
+  | zero =>
+      exact Nat.mul_pos (hregular.inputPrecision_pos 0) (by omega)
+  | succ n ih =>
+      rw [cumulativeInputStage_succ]
+      have hterm : 0 <=
+          hregular.inputPrecision (n + 1) * max 1 lengthBound := by omega
+      omega
+
+theorem cumulativeInputStage_mono
+    (hregular : IntervalRegularOn F) (lengthBound : Nat) :
+    forall n m, n <= m ->
+      cumulativeInputStage hregular lengthBound n <=
+        cumulativeInputStage hregular lengthBound m := by
+  intro n m hnm
+  induction m generalizing n with
+  | zero =>
+      have : n = 0 := by omega
+      simpa [this]
+  | succ m ih =>
+      by_cases h : n <= m
+      · have hm : cumulativeInputStage hregular lengthBound m <=
+            cumulativeInputStage hregular lengthBound (m + 1) := by
+          rw [cumulativeInputStage_succ]
+          omega
+        exact Nat.le_trans (ih n h) hm
+      · have : n = m + 1 := by omega
+        simpa [this]
+
+theorem cumulativeInputStage_dominates
+    (hregular : IntervalRegularOn F) (lengthBound n : Nat) :
+    hregular.inputPrecision n * max 1 lengthBound <=
+      cumulativeInputStage hregular lengthBound n := by
+  induction n with
+  | zero => exact Nat.le_refl _
+  | succ n ih =>
+      rw [cumulativeInputStage_succ]
+      omega
+
+theorem nat_le_two_pow (n : Nat) : n <= 2 ^ n := by
+  induction n with
+  | zero => omega
+  | succ n ih =>
+      rw [Nat.pow_succ]
+      have hone : 1 <= 2 ^ n := Nat.one_le_pow n 2 (by omega)
+      omega
+
+/-! The cumulative stage is converted to a rational mesh budget.  The proof
+uses only the natural inequality `n <= 2^n` and cross-multiplication in `Rat`;
+it is the bookkeeping needed by the automatic monotone schedule below. -/
+theorem mesh_le_of_cumulative_input_stage
+    {a b : Rat} (hab : a <= b) (lengthBound : Nat)
+    (hLength : b - a <= (lengthBound : Rat))
+    (hregular : IntervalRegularOn F) (n : Nat) :
+    mesh a b (2 ^ cumulativeInputStage hregular lengthBound n) <=
+      1 / ((hregular.inputPrecision n : Nat) : Rat) := by
+  let p : Nat := hregular.inputPrecision n
+  let L : Nat := max 1 lengthBound
+  let s : Nat := cumulativeInputStage hregular lengthBound n
+  have hp : 0 < p := by
+    dsimp [p]
+    exact hregular.inputPrecision_pos n
+  have hL : (lengthBound : Rat) <= (L : Rat) := by
+    dsimp [L]
+    exact_mod_cast (Nat.le_max_right 1 lengthBound)
+  have hlenL : b - a <= (L : Rat) := Rat.le_trans hLength hL
+  have hstage : p * L <= s := by
+    dsimp [p, L, s]
+    exact cumulativeInputStage_dominates hregular lengthBound n
+  have hpow : p * L <= 2 ^ s :=
+    Nat.le_trans hstage (nat_le_two_pow s)
+  have hpowRat : (0 : Rat) < ((2 ^ s : Nat) : Rat) := by
+    exact (Rat.natCast_pos).2 (Nat.two_pow_pos s)
+  have hprod : (p : Rat) * (L : Rat) <= ((2 ^ s : Nat) : Rat) := by
+    exact_mod_cast hpow
+  have hprod' : (b - a) * (p : Rat) <= ((2 ^ s : Nat) : Rat) := by
+    have hnonneg : 0 <= (p : Rat) := Rat.le_of_lt ((Rat.natCast_pos).2 hp)
+    calc
+      (b - a) * (p : Rat) <= (L : Rat) * (p : Rat) :=
+        Rat.mul_le_mul_of_nonneg_right hlenL hnonneg
+      _ = (p : Rat) * (L : Rat) := by
+        grind [Rat.mul_comm]
+      _ <= ((2 ^ s : Nat) : Rat) := hprod
+  unfold mesh
+  rw [if_neg (Nat.ne_of_gt (Nat.two_pow_pos s))]
+  apply Rat.le_of_mul_le_mul_right (c := ((2 ^ s : Nat) : Rat))
+  · rw [Rat.div_def]
+    have hpne : (p : Rat) ≠ 0 := Rat.ne_of_gt ((Rat.natCast_pos).2 hp)
+    have hdiv : b - a <= ((2 ^ s : Nat) : Rat) / (p : Rat) := by
+      apply Rat.le_of_mul_le_mul_right (c := (p : Rat))
+      · rw [Rat.div_def]
+        have hpne' : (p : Rat) ≠ 0 := Rat.ne_of_gt ((Rat.natCast_pos).2 hp)
+        grind [Rat.mul_assoc, Rat.mul_comm,
+          Rat.mul_inv_cancel _ hpne']
+      · exact (Rat.natCast_pos).2 hp
+    calc
+      (b - a) * ((2 ^ s : Nat) : Rat)⁻¹ *
+          ((2 ^ s : Nat) : Rat) = b - a := by
+        rw [Rat.mul_assoc, Rat.inv_mul_cancel _ (Rat.ne_of_gt hpowRat), Rat.mul_one]
+      _ <= ((2 ^ s : Nat) : Rat) / (p : Rat) := hdiv
+      _ = (1 / (p : Rat)) * ((2 ^ s : Nat) : Rat) := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  · exact hpowRat
+
 theorem intervalRegularAutomaticPieces_pos
     {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
     (lengthBound : Nat) (evalPrecision : Nat -> Nat) (n : Nat) :
@@ -10389,6 +10513,28 @@ def MonotoneDarbouxSchedule.ofScheduledEndpointOrderedOfBudget
         nondecreasingDarbouxDyadicStage] using And.intro h.1 h.2
     widths_shrink := nondecreasingDarbouxScheduledSchedule_widths_shrink_of_budget
       hregular hinterval stages evalPrecision hinput hbudget }
+
+/-! Default constructor for endpoint-ordered monotone functions.  The
+cumulative stage absorbs an arbitrary evaluator input modulus, so users no
+longer need to manufacture a monotone precision schedule by hand. -/
+def MonotoneDarbouxSchedule.ofAutomaticEndpointOrdered
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    (hF : EndpointOrderedNondecreasingOnInterval F)
+    {hinterval : F.lower <= F.upper} (lengthBound : Nat)
+    (hLength : F.upper - F.lower <= (lengthBound : Rat)) :
+    MonotoneDarbouxSchedule F hregular hF.toNondecreasing hinterval := by
+  apply MonotoneDarbouxSchedule.ofScheduledEndpointOrderedOfBudget
+    hregular hF hinterval
+    (cumulativeInputStage hregular lengthBound) (fun n => n)
+  · intro n m hnm
+    exact cumulativeInputStage_mono hregular lengthBound n m hnm
+  · intro n m hnm
+    exact hnm
+  · intro n
+    exact mesh_le_of_cumulative_input_stage hinterval lengthBound hLength
+      hregular n
+  · exact intervalRegularDarbouxSchedule_linear_precision_budget
+      (hinterval := hinterval) lengthBound hLength
 
 def monotoneDarbouxScheduleRaw
     {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
