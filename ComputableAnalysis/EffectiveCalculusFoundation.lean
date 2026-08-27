@@ -42,4 +42,21 @@ theorem effectiveGeneralIntegralFor_equiv_totalEndpointDifference_of_telescope
   exact generalIntegralFor_equiv_totalEndpointDifference_of_telescope
     F c h hvalues htransport htotal
 
+/-! Publicly expose the finite mean-value conclusion through the effective
+calculus entry point.  The conclusion is an overlap of rational boxes, so it
+does not select an attained intermediate real number. -/
+theorem effectiveMeanValueBracket
+    {F dF : RealFunRaw} {a b : Rat}
+    {C : RationalSubinterval a b}
+    (H : CandidateDerivativeCellControl F dF C)
+    (hF : F.Valid) (hwidth : 0 < C.width) (n : Nat) :
+    QInterval.Overlaps
+      (H.bound n)
+      (QInterval.divByRat
+        (endpointDifferenceInterval F C.lower C.upper
+          (H.endpointPrecision n))
+        C.width) := by
+  exact CandidateDerivativeCellControl.endpoint_average_overlaps_bound
+    H hF hwidth n
+
 end ComputableAnalysis.Integral
