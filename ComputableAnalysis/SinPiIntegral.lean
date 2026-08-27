@@ -2098,6 +2098,37 @@ def rationalCircleCos (u : Rat) : Rat :=
 def rationalCircleCosInterval (U : QInterval) : QInterval :=
   { lo := rationalCircleCos U.hi, hi := rationalCircleCos U.lo }
 
+/-! The rational circle chart recovers its parameter from the half-angle
+quotient.  The reflected quotient recovers the reciprocal parameter. -/
+theorem rationalCircleSin_halfAngle_parameter (u : Rat) :
+    rationalCircleSin u / (1 + rationalCircleCos u) = u := by
+  unfold rationalCircleSin rationalCircleCos
+  have hd : 0 < 1 + u * u := RationalCircle.Stage.one_add_square_pos u
+  have hdne : 1 + u * u ≠ 0 := Rat.ne_of_gt hd
+  simp only [Rat.div_def]
+  have hcancel : (1 + u * u)⁻¹ * (1 + u * u) = 1 :=
+    Rat.inv_mul_cancel _ hdne
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm,
+    Rat.sub_eq_add_neg, Rat.inv_mul_rev]
+
+theorem rationalCircleSin_reflected_halfAngle_parameter
+    (u : Rat) (hu : u ≠ 0) :
+    rationalCircleSin u / (1 - rationalCircleCos u) = u⁻¹ := by
+  unfold rationalCircleSin rationalCircleCos
+  have hd : 0 < 1 + u * u := RationalCircle.Stage.one_add_square_pos u
+  have hdne : 1 + u * u ≠ 0 := Rat.ne_of_gt hd
+  have huu : u * u ≠ 0 := by
+    intro hzero
+    rcases Rat.mul_eq_zero.mp hzero with hzero | hzero
+    · exact hu hzero
+    · exact hu hzero
+  simp only [Rat.div_def]
+  have hcancel : (1 + u * u)⁻¹ * (1 + u * u) = 1 :=
+    Rat.inv_mul_cancel _ hdne
+  have hucancel : u⁻¹ * u = 1 := Rat.inv_mul_cancel _ hu
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm,
+    Rat.sub_eq_add_neg, Rat.inv_mul_rev]
+
 /-! Reciprocal parameters describe the same sine coordinate and the
 opposite cosine coordinate.  This is the rational projective symmetry used
 when reflecting an odd dyadic branch across the quarter turn. -/
