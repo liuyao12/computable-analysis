@@ -1030,6 +1030,71 @@ theorem vectorSequenceSum_split {dimension : Nat}
             (f (first + second)))
       exact vectorAdd_assoc _ _ _
 
+theorem finiteSum_nonneg {dimension : Nat} (f : Fin dimension -> Rat)
+    (hf : forall i, 0 <= f i) :
+    0 <= finiteSum f := by
+  have hzero : finiteSum (fun _ : Fin dimension => (0 : Rat)) = 0 :=
+    finiteSum_zero dimension
+  have h := finiteSum_le (fun i => hf i)
+  rw [hzero] at h
+  exact h
+
+theorem vectorAbsSum_nonneg {dimension : Nat} (x : RatVector dimension) :
+    0 <= vectorAbsSum x := by
+  unfold vectorAbsSum
+  exact finiteSum_nonneg _ (fun i => qabs_nonneg _)
+
+theorem vectorAbsSum_add_le {dimension : Nat} (x y : RatVector dimension) :
+    vectorAbsSum (vectorAdd x y) <= vectorAbsSum x + vectorAbsSum y := by
+  unfold vectorAbsSum vectorAdd
+  calc
+    finiteSum (fun i => qabs (x i + y i)) <=
+        finiteSum (fun i => qabs (x i) + qabs (y i)) :=
+      finiteSum_le (fun i => qabs_add_le _ _)
+    _ = finiteSum (fun i => qabs (x i)) +
+        finiteSum (fun i => qabs (y i)) := finiteSum_add _ _
+
+def geometricBudget (c : Rat) : Nat -> Rat
+  | 0 => 0
+  | n + 1 => geometricBudget c n + c ^ n
+
+theorem geometricBudget_succ (c : Rat) (n : Nat) :
+    geometricBudget c (n + 1) = geometricBudget c n + c ^ n := by
+  rfl
+
+/- The finite response of a stable system is bounded by a geometric forcing
+   budget.  This is the norm-estimate form used by a later continuous ODE
+   provider: only finite vector sums and rational powers occur here. -/
+theorem vectorSequenceSum_abs_le_geometric {dimension : Nat}
+    (f : Nat -> RatVector dimension) (c g : Rat)
+    (hc : 0 <= c) (hg : 0 <= g)
+    (hterm : forall k, vectorAbsSum (f k) <= g * c ^ k) :
+    forall n, vectorAbsSum (vectorSequenceSum f n) <= g * geometricBudget c n
+  | 0 => by
+      rw [vectorSequenceSum, geometricBudget]
+      unfold vectorAbsSum vectorZero
+      have hq : (fun _ : Fin dimension => qabs 0) =
+          (fun _ : Fin dimension => (0 : Rat)) := by
+        funext i
+        unfold qabs
+        simp
+      rw [hq, finiteSum_zero]
+      rw [Rat.mul_zero]
+      exact Rat.le_refl
+  | n + 1 => by
+      rw [vectorSequenceSum, geometricBudget_succ]
+      have hprev := vectorSequenceSum_abs_le_geometric f c g hc hg hterm n
+      have hsum := vectorAbsSum_add_le
+        (vectorSequenceSum f n) (f n)
+      calc
+        vectorAbsSum (vectorAdd (vectorSequenceSum f n) (f n)) <=
+            vectorAbsSum (vectorSequenceSum f n) + vectorAbsSum (f n) := hsum
+        _ <= g * geometricBudget c n + g * c ^ n :=
+          rat_add_le_add hprev (hterm n)
+        _ = g * geometricBudget c (n + 1) := by
+          rw [geometricBudget_succ]
+          exact (Rat.mul_add _ _ _).symm
+
 theorem matrixApply_vectorSequenceSum {dimension : Nat}
     (A : RatMatrix dimension) (f : Nat -> RatVector dimension) :
     forall n,

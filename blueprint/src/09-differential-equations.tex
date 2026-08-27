@@ -187,6 +187,9 @@ forcing samples -> time-ordered transitions -> finite Duhamel sum
 \lean{ComputableAnalysis.LinearODE.trajectory_zeroInitial_eq_duhamelSum}
 \lean{ComputableAnalysis.LinearODE.trajectory_eq_transition_add_duhamelSum}
 \lean{ComputableAnalysis.LinearODE.vectorSequenceSum_split}
+\lean{ComputableAnalysis.LinearODE.vectorAbsSum_add_le}
+\lean{ComputableAnalysis.LinearODE.geometricBudget}
+\lean{ComputableAnalysis.LinearODE.vectorSequenceSum_abs_le_geometric}
 \leanok
 
 The forcing sum has the same cut law as the transition product: its prefix
@@ -197,6 +200,17 @@ vector.
 \begin{verbatim}
 sum(first + second) = sum(first) + shiftedSum(second)
 \end{verbatim}
+
+The same finite norm surrogate gives a forcing budget.  If the $k$th forcing
+vector has size at most $g c^k$, then the accumulated response after $N$
+samples has size at most $g$ times the finite geometric budget
+
+\begin{verbatim}
+||sum forcing|| <= g * (1 + c + ... + c^(N-1)).
+\end{verbatim}
+
+This is the inhomogeneous stability estimate needed before passing from a
+sampled system to an analytic ODE provider.
 
 The motivating forced oscillator is now connected to this abstract algebra.
 Its two-dimensional Euler provider proves the velocity update and, after
