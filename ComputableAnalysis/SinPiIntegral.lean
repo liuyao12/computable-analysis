@@ -869,6 +869,25 @@ theorem rat_sub_div_mul_mul_of_pos
           grind [Rat.mul_assoc, Rat.mul_comm]
     _ = a * y - b * x := by rw [hxi, hyi]; grind
 
+theorem rationalHalfAngleTangentInterval_width_formula
+    {S C : QInterval} (hC : subintervalOf C 0 1) :
+    (rationalHalfAngleTangentInterval S C).width =
+      (S.hi * (1 + C.hi) - S.lo * (1 + C.lo)) /
+        ((1 + C.lo) * (1 + C.hi)) := by
+  unfold rationalHalfAngleTangentInterval QInterval.width
+  unfold subintervalOf at hC
+  have hdlo : 0 < 1 + C.lo := by grind
+  have hdhi : 0 < 1 + C.hi := by grind
+  have hD : 0 < (1 + C.lo) * (1 + C.hi) := Rat.mul_pos hdlo hdhi
+  apply rat_eq_of_mul_eq_mul_pos_local hD
+  rw [rat_sub_div_mul_mul_of_pos hdlo hdhi]
+  rw [Rat.div_def]
+  have hcancel :
+      ((1 + C.lo) * (1 + C.hi))⁻¹ *
+        ((1 + C.lo) * (1 + C.hi)) = 1 :=
+    Rat.inv_mul_cancel _ (Rat.ne_of_gt hD)
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
 theorem rationalHalfAngleTangentInterval_subinterval
     {S C : QInterval}
     (hS : subintervalOf S 0 1) (hC : subintervalOf C 0 1) :
