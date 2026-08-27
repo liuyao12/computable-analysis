@@ -64,6 +64,35 @@ theorem effectiveSecantProductRule
 
 end ComputableAnalysis
 
+namespace ComputableAnalysis.ExactFunction
+
+/-! Public finite chain-rule factorization and error estimate.  The nonzero
+inner increment is explicit, so this is a rational forward-step theorem rather
+than an assertion about an attained derivative at a limit point. -/
+theorem effectiveDifferenceQuotientCompositionFactorization
+    (f g : Rat -> Rat) {x h : Rat}
+    (hh : h ≠ 0)
+    (hgh : g (x + h) - g x ≠ 0) :
+    differenceQuotient (fun z => f (g z)) x h =
+      differenceQuotient f (g x) (g (x + h) - g x) *
+        differenceQuotient g x h := by
+  exact differenceQuotient_comp_factorization f g hh hgh
+
+theorem effectiveDifferenceQuotientCompositionErrorLe
+    (f df g dg : Rat -> Rat) {x h : Rat}
+    (hh : h ≠ 0)
+    (hgh : g (x + h) - g x ≠ 0) :
+    qabs (differenceQuotient (fun z => f (g z)) x h -
+      df (g x) * dg x) <=
+      qabs (differenceQuotient f (g x) (g (x + h) - g x)) *
+          qabs (differenceQuotient g x h - dg x) +
+        qabs (dg x) *
+          qabs (differenceQuotient f (g x) (g (x + h) - g x) -
+            df (g x)) := by
+  exact differenceQuotient_comp_error_le f df g dg hh hgh
+
+end ComputableAnalysis.ExactFunction
+
 namespace ComputableAnalysis
 
 /-! Public finite integration-by-parts and square-chain identities.  The
