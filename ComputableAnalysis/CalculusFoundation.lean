@@ -63,3 +63,32 @@ theorem effectiveSecantProductRule
   exact secantSlope_product_transport hxy
 
 end ComputableAnalysis
+
+namespace ComputableAnalysis
+
+/-! Public finite integration-by-parts and square-chain identities.  The
+quadratic-variation term is retained explicitly, so the finite statement does
+not rely on silently discarding a mesh error. -/
+theorem effectiveFiniteIntegrationByParts
+    (f g : Nat -> Rat) (n : Nat) :
+    leftStieltjesSum f g n + rightStieltjesSum f g n =
+      f n * g n - f 0 * g 0 := by
+  exact finiteIntegrationByParts f g n
+
+theorem effectiveFiniteSquareChain
+    (f : Nat -> Rat) (n : Nat) :
+    2 * leftStieltjesSum f f n + quadraticVariationSum f f n =
+      f n * f n - f 0 * f 0 := by
+  exact finiteSquareStieltjes_chain f n
+
+theorem effectiveFiniteSquareChain_left_bounds
+    (f : Nat -> Rat) (n : Nat) (eps : Rat)
+    (hvariation : 0 <= quadraticVariationSum f f n)
+    (hvariation_le : quadraticVariationSum f f n <= eps) :
+    f n * f n - f 0 * f 0 - eps <=
+        2 * leftStieltjesSum f f n /\
+      2 * leftStieltjesSum f f n <=
+        f n * f n - f 0 * f 0 := by
+  exact finiteSquareStieltjes_left_bounds f n eps hvariation hvariation_le
+
+end ComputableAnalysis
