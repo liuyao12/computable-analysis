@@ -4562,8 +4562,11 @@ the focused `FiniteSineIntegral` module builds cleanly.
 - First checked Taylor coefficient route for arctangent:
   `FormalPowerSeries.atanTaylorCoeff_hasFormalDerivative` proves that the
   arctangent coefficient stream differentiates to the coefficient stream for
-  `1/(1+x^2)`, and `Taylor.arctanTaylorCoefficientRoute` records the odd
-  coefficients `(-1)^k/(2k+1)`.
+  `1/(1+x^2)`, while
+  `FormalPowerSeries.atanTaylorCoeff_eq_of_hasFormalDerivative` gives the
+  corresponding uniqueness statement from the zero constant coefficient.
+  `Taylor.arctanTaylorCoefficientRoute` records the odd coefficients
+  `(-1)^k/(2k+1)`.
 - The analytic input for that route is now a certified rational function:
   `Taylor.arctanKernelOnInterval` is `1/(1+x^2)` as a function on any rational
   interval, backed by `Taylor.arctanKernel_regular_on_every_interval`.

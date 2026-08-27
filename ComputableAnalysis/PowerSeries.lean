@@ -264,6 +264,19 @@ theorem atanTaylorCoeff_hasFormalDerivative :
     HasFormalDerivative atanTaylorCoeff oneOverOnePlusSquareCoeff :=
   coeffsFromDerivativeAtZero_hasFormalDerivative 0 oneOverOnePlusSquareCoeff
 
+/-! The arctangent coefficient stream is the unique formal primitive with
+zero constant coefficient and derivative stream `1/(1+x^2)`.  This is the
+coefficient-level uniqueness step used when comparing independently supplied
+arctangent computations. -/
+theorem atanTaylorCoeff_eq_of_hasFormalDerivative
+    {F : Coeffs}
+    (hF : HasFormalDerivative F oneOverOnePlusSquareCoeff)
+    (hzero : F 0 = 0) :
+    F = atanTaylorCoeff := by
+  symm
+  simpa [atanTaylorCoeff, hzero] using
+    (coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative hF)
+
 theorem atanTaylorCoeff_zero :
     atanTaylorCoeff 0 = 0 := rfl
 
