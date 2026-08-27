@@ -145,6 +145,17 @@ interface. Pointwise convergence, termwise integration, or an L2-style
 claim is a further theorem only after its own finite norm or tail certificate
 has been supplied.
 
+The complex exponential, sine, and cosine evaluators expose their finite
+increment laws directly: increasing a prefix by one stage adds exactly one
+rational-complex term.  These laws are the induction interface for later
+tail, derivative, and termwise-integration proofs.
+
+\lean{ComputableAnalysis.ComplexSeries.expPartial_succ}
+\lean{ComputableAnalysis.ComplexSeries.sinPartial_succ}
+\lean{ComputableAnalysis.ComplexSeries.cosPartial_succ}
+\lean{ComputableAnalysis.ComplexSeries.expTerm_succ_recurrence}
+\leanok
+
 \subsection{A computable (L^2)-style boundary}
 
 The project can expose an (L^2)-style object without introducing measurable

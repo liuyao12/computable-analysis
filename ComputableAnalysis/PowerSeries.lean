@@ -1795,6 +1795,11 @@ theorem expTerm_succ_recurrence (z : QComplex) (n : Nat) :
 def expPartial (z : QComplex) (n : Nat) : QComplex :=
   (List.range n).foldl (fun acc k => QComplex.add acc (expTerm z k)) QComplex.zero
 
+theorem expPartial_succ (z : QComplex) (n : Nat) :
+    expPartial z (n + 1) =
+      QComplex.add (expPartial z n) (expTerm z n) := by
+  simp [expPartial, List.range_succ, List.foldl_append]
+
 def sinSign (k : Nat) : Rat := if k % 2 = 0 then 1 else -1
 
 def sinTerm (z : QComplex) (k : Nat) : QComplex :=
@@ -1804,12 +1809,22 @@ def sinTerm (z : QComplex) (k : Nat) : QComplex :=
 def sinPartial (z : QComplex) (n : Nat) : QComplex :=
   (List.range n).foldl (fun acc k => QComplex.add acc (sinTerm z k)) QComplex.zero
 
+theorem sinPartial_succ (z : QComplex) (n : Nat) :
+    sinPartial z (n + 1) =
+      QComplex.add (sinPartial z n) (sinTerm z n) := by
+  simp [sinPartial, List.range_succ, List.foldl_append]
+
 def cosTerm (z : QComplex) (k : Nat) : QComplex :=
   QComplex.scaleRat (sinSign k)
     (QComplex.divRat (QComplex.pow z (2 * k)) (factorialRat (2 * k)))
 
 def cosPartial (z : QComplex) (n : Nat) : QComplex :=
   (List.range n).foldl (fun acc k => QComplex.add acc (cosTerm z k)) QComplex.zero
+
+theorem cosPartial_succ (z : QComplex) (n : Nat) :
+    cosPartial z (n + 1) =
+      QComplex.add (cosPartial z n) (cosTerm z n) := by
+  simp [cosPartial, List.range_succ, List.foldl_append]
 
 def errorBox (center : QComplex) (eps : QPos) : QBox :=
   { lo := { re := center.re - eps.val, im := center.im - eps.val },

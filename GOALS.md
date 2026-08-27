@@ -3911,6 +3911,10 @@ potential-infinity precision schedule.
 - The rational-complex term evaluator has the matching finite recurrence
   `ComplexSeries.expTerm_succ_recurrence`, linking the coefficient law to the
   complex-variable exponential terms.
+- The complex partial-sum interface is now explicit: `expPartial_succ`,
+  `sinPartial_succ`, and `cosPartial_succ` expose one-term prefix increments,
+  while `ComplexSeries.expTerm_succ_recurrence` records the factorial
+  recurrence at rational-complex coordinates.
 - The same formal layer now covers the coefficient-shift identities for trig
   and hyperbolic streams:
   `sin -> cos`, `cos -> -sin`, `sinh -> cosh`, and
