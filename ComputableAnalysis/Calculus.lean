@@ -11728,6 +11728,30 @@ theorem piecewiseMonotoneIntegralFor_compute_width_le_of_bounds
   rw [hzero]
   simpa [Rat.zero_add] using hsum
 
+/-! The heterogeneous form lets each cell carry its own rational error
+budget.  The only global obligation is the finite sum of those budgets. -/
+theorem piecewiseMonotoneIntegralFor_precision_witness_of_cell_budgets
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) (eps : QPos)
+    (bound : Nat -> Rat)
+    (hcell : ∃ N : Nat, ∀ n, N <= n ->
+      ∀ k (hk : k < c.pieces),
+        ((piecewiseMonotoneCellIntegral F c k hk).compute n).width <=
+          bound k)
+    (hsum : (List.range c.pieces).foldl
+      (fun total k => total + bound k) 0 <= eps.val) :
+    ∃ N : Nat, ∀ n, N <= n ->
+      ((piecewiseMonotoneIntegralFor F c).compute n).width <= eps.val := by
+  rcases hcell with ⟨N, hN⟩
+  refine ⟨N, ?_⟩
+  intro n hn
+  exact Rat.le_trans
+    (piecewiseMonotoneIntegralFor_compute_width_le_of_bounds F c n bound
+      (by
+        intro k hk
+        exact hN n hn k hk))
+    hsum
+
 /-! The two-cell case is the first reusable finite assembly law.  It exposes
 the piecewise fold as the sum of its two certified cell integrals, up to the
 interval-representative equivalence. -/

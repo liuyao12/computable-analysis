@@ -77,6 +77,14 @@ algorithm.  It is enough to give all cells a common share of the final error
 budget; the finite assembly lemma then produces one global precision witness.
 The proof is finite error arithmetic, not a completeness argument.
 
+The heterogeneous form accepts a separate rational budget for each cell and
+requires only that their finite sum fit inside the requested tolerance.  This
+is the interface used when different pieces have different computational
+complexities.
+
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_precision_witness_of_cell_budgets}
+\leanok
+
 The first complete end-to-end FTC witness is affine: its finite-difference
 derivative is exactly constant, and a single rectangle computes the integral
 exactly.  This is the base case for the later polynomial and special-function
