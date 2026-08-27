@@ -742,7 +742,8 @@ theorem leftStieltjesSum_affine_path (f g : Nat -> Rat)
     _ = s * leftStieltjesSum f g n + 0 := by
           rw [leftStieltjesSum_scale_right,
             leftStieltjesSum_const_path]
-    _ = s * leftStieltjesSum f g n := by simp
+    _ = s * leftStieltjesSum f g n := by
+      rw [Rat.add_zero]
 
 theorem leftStieltjesSum_affine_integrand (f g : Nat -> Rat)
     (s t : Rat) (n : Nat) :
@@ -784,7 +785,8 @@ theorem rightStieltjesSum_affine_path (f g : Nat -> Rat)
     _ = s * rightStieltjesSum f g n + 0 := by
           rw [rightStieltjesSum_scale_left,
             rightStieltjesSum_const_path]
-    _ = s * rightStieltjesSum f g n := by simp
+    _ = s * rightStieltjesSum f g n := by
+      rw [Rat.add_zero]
 
 theorem rightStieltjesSum_affine_integrator (f g : Nat -> Rat)
     (s t : Rat) (n : Nat) :
