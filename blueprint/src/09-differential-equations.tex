@@ -92,6 +92,7 @@ The finite algebraic core is explicit in Lean:
 \lean{ComputableAnalysis.LinearODE.chronologicalProduct_rowAbsSum_le_pow}
 \lean{ComputableAnalysis.LinearODE.chronologicalProduct_columnAbsSum_le_pow}
 \lean{ComputableAnalysis.LinearODE.chronologicalStepProduct_columnAbsSum_le_pow}
+\lean{ComputableAnalysis.LinearODE.chronologicalStepProduct_stateAbsSum_le}
 \lean{ComputableAnalysis.LinearODE.chronologicalProduct_stateAbsSum_le}
 \lean{ComputableAnalysis.LinearODE.solvesHomogeneousRecurrence_eq_homogeneousTrajectory}
 \lean{ComputableAnalysis.LinearODE.solvesHomogeneousRecurrence_zero}
@@ -179,6 +180,8 @@ continuous provider must eventually refine with discretization and tail error.
 The same estimate is now available for a transition beginning at any mesh
 index, so local interval certificates compose without reindexing the system
 back to zero.
+Applied to a state or an error vector, it gives the same (c^N) multiplier
+for any local block.
 
 The forcing term is handled by a literal finite Duhamel sum:
 

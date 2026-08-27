@@ -783,6 +783,19 @@ theorem chronologicalStepProduct_columnAbsSum_le_pow {dimension : Nat}
           rw [Rat.pow_succ]
           exact Rat.mul_comm _ _
 
+theorem chronologicalStepProduct_stateAbsSum_le {dimension : Nat}
+    (S : Nat -> RatMatrix dimension) (c : Rat)
+    (hcolumn : forall n j, matrixColumnAbsSum (S n) j <= c)
+    (hc : 0 <= c) (start steps : Nat) (x : RatVector dimension) :
+    vectorAbsSum
+        (matrixApply (chronologicalStepProduct S start steps) x) <=
+      c ^ steps * vectorAbsSum x := by
+  apply matrixApply_vectorAbsSum_le_of_column_bound
+    (chronologicalStepProduct S start steps) x (c ^ steps)
+  intro j
+  exact chronologicalStepProduct_columnAbsSum_le_pow S c hcolumn hc
+    start steps j
+
 /-- Exact composition of time-shifted sampled transitions.  The transition
 over the later block occurs on the left, as required by chronological time
 ordering.  This is the finite semigroup law behind the future continuous
