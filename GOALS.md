@@ -4109,6 +4109,9 @@ arguments.
   `ComplexPathIntegral.polygonalDisplacementTo_closed` now provide the exact
   endpoint-cancellation seed for closed polygonal paths, still entirely in
   rational complex arithmetic.
+  `ComplexPathIntegral.polygonalDisplacementTo_split_at` adds finite path
+  additivity at an intermediate vertex, the algebraic prerequisite for
+  composing polygonal segments.
   The constant-differential lift
   `ComplexPathIntegral.polygonalConstantDifferentialDisplacement_append_endpoint`
   identifies the finite primitive value `c * (z_end - z_start)`, and

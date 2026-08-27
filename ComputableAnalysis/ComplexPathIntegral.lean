@@ -220,6 +220,27 @@ theorem polygonalDisplacementTo_closed
   simp [QComplex.sub, QComplex.add, QComplex.neg, QComplex.zero]
   grind [Rat.sub_eq_add_neg]
 
+theorem polygonalDisplacementTo_split_at
+    (start middle : QComplex) (pre suf : List QComplex) :
+    polygonalDisplacementTo start (pre ++ [middle] ++ suf) =
+      QComplex.add
+        (polygonalDisplacementTo start (pre ++ [middle]))
+        (polygonalDisplacementTo middle suf) := by
+  induction pre generalizing start with
+  | nil =>
+      cases middle
+      cases start
+      simp [polygonalDisplacementTo, QComplex.sub, QComplex.add,
+        QComplex.neg, QComplex.zero]
+      constructor <;> grind [Rat.add_assoc, Rat.add_comm]
+  | cons vertex pre ih =>
+      simp only [List.cons_append, polygonalDisplacementTo]
+      rw [ih]
+      cases start
+      cases vertex
+      simp [QComplex.sub, QComplex.add, QComplex.neg]
+      constructor <;> grind [Rat.add_assoc, Rat.add_comm, Rat.sub_eq_add_neg]
+
 /-- Finite primitive-cancellation value for the constant differential
 `c dz` along a polygonal path. -/
 def polygonalConstantDifferentialDisplacement
