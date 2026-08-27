@@ -4147,6 +4147,10 @@ arguments.
   to the raw integral interface at an arbitrary intermediate vertex, and
   `polygonalPolynomialIntegralRaw_split_at_add` exposes it directly as the sum
   of the two certified `ComplexRaw` path integrals.
+  The general piecewise-monotone interface now likewise exports
+  `Integral.generalIntegralFor_equiv_totalEndpointDifference_of_telescope`, so
+  a finite turning-point FTC proof can be consumed through the public general
+  integral name without unfolding its implementation.
   This is an exact rational-complex integral evaluator, not an appeal to a
   completed complex path space.
   Its closed-path specialization

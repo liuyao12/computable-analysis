@@ -11610,6 +11610,28 @@ theorem generalIntegralFor_ofNondecreasing_equiv
     piecewiseMonotoneIntegralFor_ofNondecreasing_equiv
       (F := F) c hinterval
 
+/-! Publicly expose the finite-piece FTC endpoint theorem through the
+project-facing general-integral name.  The hypotheses remain deliberately
+finite: the caller supplies the endpoint transport certificate for the chosen
+rational partition. -/
+theorem generalIntegralFor_equiv_totalEndpointDifference_of_telescope
+    (F : FunctionOnInterval)
+    (c : GeneralConstructionFor F)
+    (h : PiecewiseMonotoneEndpointFTCFor F c)
+    {first : RealRaw} {rest : List RealRaw}
+    (hvalues : forall x, x ∈ first :: rest -> x.Valid)
+    (htransport :
+      FiniteRawListEquiv
+        (piecewiseMonotoneEndpointDifferenceList F c)
+        (rawAdjacentDifferenceList (first :: rest)))
+    (htotal : (rawLast first rest - first).Equiv
+      (piecewiseMonotoneTotalEndpointDifference F c)) :
+    (generalIntegralFor F c).Equiv
+      (piecewiseMonotoneTotalEndpointDifference F c) := by
+  simpa [generalIntegralFor] using
+    piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_telescope
+      F c h hvalues htransport htotal
+
 abbrev ExistsGeneralConstructionFor (F : FunctionOnInterval) : Prop :=
   ExistsPiecewiseMonotoneConstructionFor F
 
