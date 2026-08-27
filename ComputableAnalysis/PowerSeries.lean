@@ -174,6 +174,17 @@ theorem mul_div_cancel_left {a b : Rat} (ha : a ≠ 0) :
     _ = b := by
       rw [Rat.mul_one]
 
+theorem eq_div_of_mul_eq {a x y : Rat} (ha : a ≠ 0)
+    (h : a * x = y) : x = y / a := by
+  calc
+    x = 1 * x := by rw [Rat.one_mul]
+    _ = (a⁻¹ * a) * x := by
+      rw [Rat.inv_mul_cancel a ha, Rat.one_mul]
+    _ = a⁻¹ * (a * x) := by rw [Rat.mul_assoc]
+    _ = a⁻¹ * y := by rw [h]
+    _ = y / a := by
+      rw [Rat.div_def, Rat.mul_comm]
+
 theorem coeffsFromDerivativeAtZero_hasFormalDerivative (F0 : Rat) (dF : Coeffs) :
     HasFormalDerivative (coeffsFromDerivativeAtZero F0 dF) dF := by
   unfold HasFormalDerivative
@@ -527,6 +538,40 @@ theorem cosCoeff_eq_of_hasFormalDerivative
     cases n <;> rfl
   rw [hone] at hprimitive
   exact hprimitive.symm.trans hcoeffs
+
+/-! Coupled initial-value uniqueness for the trigonometric coefficient system.
+The proof is a simultaneous induction on the two rational recurrences. -/
+theorem sinCosCoeff_eq_of_coupledDerivative
+    {F G : Coeffs}
+    (hF : HasFormalDerivative F G)
+    (hG : HasFormalDerivative G (neg F))
+    (hFzero : F 0 = 0)
+    (hGone : G 0 = 1) :
+    F = sinCoeff ∧ G = cosCoeff := by
+  have hpair : ∀ n, F n = sinCoeff n ∧ G n = cosCoeff n := by
+    intro n
+    induction n with
+    | zero =>
+        constructor
+        · simpa [sinCoeff] using hFzero
+        · simpa [cosCoeff] using hGone
+    | succ n ih =>
+        have hFrec := congrFun hF n
+        change (((n + 1 : Nat) : Rat) * F (n + 1)) = G n at hFrec
+        have hGrec := congrFun hG n
+        change (((n + 1 : Nat) : Rat) * G (n + 1)) = -F n at hGrec
+        rw [ih.2] at hFrec
+        rw [ih.1] at hGrec
+        constructor
+        · rw [sinCoeff]
+          exact eq_div_of_mul_eq (natCast_succ_ne_zero n) hFrec
+        · rw [cosCoeff]
+          exact eq_div_of_mul_eq (natCast_succ_ne_zero n) hGrec
+  constructor
+  · funext n
+    exact (hpair n).1
+  · funext n
+    exact (hpair n).2
 
 /-- First-year calculus table entry: the formal derivative of `-cos` is `sin`. -/
 theorem neg_cosCoeff_hasFormalDerivative :

@@ -3912,6 +3912,9 @@ potential-infinity precision schedule.
   `FormalPowerSeries.sinCoeff_eq_of_hasFormalDerivative` and
   `FormalPowerSeries.cosCoeff_eq_of_hasFormalDerivative` are now checked as
   well.
+  `FormalPowerSeries.sinCosCoeff_eq_of_coupledDerivative` also closes the
+  coupled system (F'=G,\ G'=-F) with (F(0)=0,\ G(0)=1) by simultaneous
+  induction.
 - The initial-value uniqueness bridges for the hyperbolic pair,
   `FormalPowerSeries.sinhCoeff_eq_of_hasFormalDerivative` and
   `FormalPowerSeries.coshCoeff_eq_of_hasFormalDerivative`, are now checked as
