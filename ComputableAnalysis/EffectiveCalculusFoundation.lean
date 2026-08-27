@@ -2,6 +2,7 @@ import ComputableAnalysis.IntegralFoundation
 import ComputableAnalysis.FiniteTaylorFTCInterface
 import ComputableAnalysis.FiniteMonotoneSequenceInterface
 import ComputableAnalysis.FinitePolynomialCalculus
+import ComputableAnalysis.PolynomialMeanValue
 import ComputableAnalysis.FiniteLHopitalCertificate
 import ComputableAnalysis.FiniteGapAwareInverseSearch
 import ComputableAnalysis.EffectiveFTCPortfolio

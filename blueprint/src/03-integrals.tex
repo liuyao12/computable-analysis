@@ -965,6 +965,19 @@ that an attained real point \(t\in(a,b)\) exists:
 \lean{ComputableAnalysis.Polynomial.finitePolynomial_secant_qabs_error_le_derivative_gap}
 \leanok
 
+The polynomial MVT certificate is executable: a coefficient list is evaluated
+by finite Horner recursion, and its derivative is evaluated by the matching
+finite recursion.  Nonnegative coefficients make the derivative bracket
+monotone on a nonnegative rational interval.  This is the reusable finite
+engine behind the cubic, quartic, and quintic examples; it supplies a bracket
+for the secant slope without selecting an intermediate completed-real point.
+
+\lean{ComputableAnalysis.Polynomial.finiteDerivativeEval}
+\lean{ComputableAnalysis.Polynomial.finiteDerivativeEval_cons}
+\lean{ComputableAnalysis.Polynomial.finitePolynomial_secant_derivative_bracket}
+\lean{ComputableAnalysis.Polynomial.finitePolynomial_secant_qabs_error_le_derivative_gap}
+\leanok
+
 The local-to-global proof is a finite telescoping argument:
 
 \begin{verbatim}
