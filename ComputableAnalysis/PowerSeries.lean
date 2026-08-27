@@ -218,6 +218,31 @@ theorem coeffsFromDerivativeAtZero_derivative (F : Coeffs) :
   exact coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative (F := F) (dF := derivative F)
     (by rfl)
 
+theorem coeffsFromDerivativeAtZero_add
+    (F0 G0 : Rat) (dF dG : Coeffs) :
+    coeffsFromDerivativeAtZero (F0 + G0) (add dF dG) =
+      add (coeffsFromDerivativeAtZero F0 dF)
+        (coeffsFromDerivativeAtZero G0 dG) := by
+  funext n
+  cases n with
+  | zero => rfl
+  | succ n =>
+      dsimp [coeffsFromDerivativeAtZero, add]
+      rw [Rat.div_def, Rat.div_def, Rat.div_def]
+      grind [Rat.add_mul, Rat.mul_add]
+
+theorem coeffsFromDerivativeAtZero_scaleRat
+    (r F0 : Rat) (dF : Coeffs) :
+    coeffsFromDerivativeAtZero (r * F0) (scaleRat r dF) =
+      scaleRat r (coeffsFromDerivativeAtZero F0 dF) := by
+  funext n
+  cases n with
+  | zero => rfl
+  | succ n =>
+      dsimp [coeffsFromDerivativeAtZero, scaleRat]
+      rw [Rat.div_def, Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
 theorem derivative_neg (c : Coeffs) :
     derivative (neg c) = neg (derivative c) := by
   funext n

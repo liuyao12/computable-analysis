@@ -3900,6 +3900,10 @@ potential-infinity precision schedule.
   `derivative_coeffsFromDerivativeAtZero` and
   `coeffsFromDerivativeAtZero_derivative` state the two coefficient-level FTC
   directions, with the constant coefficient supplying the integration anchor.
+  Its linearity is now checked as well by
+  `coeffsFromDerivativeAtZero_add` and
+  `coeffsFromDerivativeAtZero_scaleRat`, so finite termwise integration can
+  assemble sums and rational scalar multiples through the same API.
   The parameterized form is now also checked: `scaledExpCoeff_derivative`
   proves the coefficient recurrence for \(F'=rF\), and
   `scaledExpCoeff_eq_of_scaledSelfDerivative` proves its initial-value
