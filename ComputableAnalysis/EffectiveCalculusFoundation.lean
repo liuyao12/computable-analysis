@@ -31,6 +31,22 @@ theorem effectiveCurvatureFTC
       h.toDerivativeBoundFTC.endpointRaw := by
   exact curvatureFTC h
 
+/-- Convex providers can close the effective FTC directly. -/
+theorem effectiveConvexFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : ConvexFTCCertificate F dF a b) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      h.toDerivativeBoundFTC.endpointRaw := by
+  exact convexFTC h
+
+/-- Concave providers can close the effective FTC directly. -/
+theorem effectiveConcaveFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : ConcaveFTCCertificate F dF a b) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      h.toDerivativeBoundFTC.endpointRaw := by
+  exact concaveFTC h
+
 /-! The scoped entry point gives the finite-piece FTC its project-facing name.
 The partition, cell endpoint certificates, and endpoint transport remain
 explicit inputs; this wrapper adds no completeness or general continuity
