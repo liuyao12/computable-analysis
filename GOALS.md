@@ -3893,6 +3893,9 @@ potential-infinity precision schedule.
   `FormalPowerSeries.expCoeff_eq_of_hasFormalDerivative` also records the
   finite coefficient-level uniqueness bridge from the initial coefficient and
   the supplied exponential derivative stream.
+  `FormalPowerSeries.expCoeff_eq_of_selfDerivative` closes the corresponding
+  self-derivative initial-value recurrence \(F'=F,\ F(0)=1\) coefficient by
+  coefficient.
 - The same formal layer now covers the coefficient-shift identities for trig
   and hyperbolic streams:
   `sin -> cos`, `cos -> -sin`, `sinh -> cosh`, and

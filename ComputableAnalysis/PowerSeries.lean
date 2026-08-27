@@ -401,6 +401,44 @@ theorem expCoeff_eq_of_hasFormalDerivative
     simpa [hexp0] using hexpprimitive
   exact hFprimitive'.symm.trans hexpprimitive'
 
+/-! The preceding theorem accepts the derivative stream explicitly.  This
+version exposes the usual self-derivative equation directly. -/
+theorem expCoeff_eq_of_selfDerivative
+    {F : Coeffs}
+    (hF : HasFormalDerivative F F)
+    (hzero : F 0 = 1) :
+    F = expCoeff := by
+  funext n
+  induction n with
+  | zero =>
+      have hone : (1 : Rat)⁻¹ = 1 := by native_decide
+      simpa [expCoeff, factorialRat, factorial, Rat.div_def, hone] using hzero
+  | succ n ih =>
+      have hrec := congrFun hF n
+      change (((n + 1 : Nat) : Rat) * F (n + 1)) = F n at hrec
+      rw [ih] at hrec
+      rw [expCoeff] at hrec
+      rw [expCoeff, factorialRat_succ]
+      have hn : (((n + 1 : Nat) : Rat) ≠ 0) := natCast_succ_ne_zero n
+      have hf : factorialRat n ≠ 0 := by
+        unfold factorialRat
+        exact_mod_cast factorial_ne_zero n
+      rw [Rat.div_def] at hrec ⊢
+      calc
+        F (n + 1) = 1 * F (n + 1) := by rw [Rat.one_mul]
+        _ = ((((n + 1 : Nat) : Rat)⁻¹ * (((n + 1 : Nat) : Rat))) * F (n + 1)) := by
+          rw [Rat.inv_mul_cancel (((n + 1 : Nat) : Rat)) hn, Rat.one_mul]
+        _ = (((n + 1 : Nat) : Rat)⁻¹ *
+          ((((n + 1 : Nat) : Rat) * F (n + 1)))) := by
+          rw [Rat.mul_assoc]
+        _ = (((n + 1 : Nat) : Rat)⁻¹ * (1 * (factorialRat n)⁻¹)) := by
+          rw [hrec]
+        _ = (1 * ((((n + 1 : Nat) : Rat) * factorialRat n))⁻¹) := by
+          rw [Rat.inv_mul_rev]
+          grind [Rat.mul_assoc, Rat.mul_comm,
+            Rat.mul_inv_cancel (((n + 1 : Nat) : Rat)) hn,
+            Rat.mul_inv_cancel (factorialRat n) hf]
+
 /-- First-year calculus table entry: the formal derivative of `sin` is `cos`. -/
 theorem sinCoeff_hasFormalDerivative :
     HasFormalDerivative sinCoeff cosCoeff :=
