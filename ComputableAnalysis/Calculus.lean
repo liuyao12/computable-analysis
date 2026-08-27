@@ -10413,6 +10413,15 @@ theorem intervalRegularDarbouxScheduleRaw_precision_witness
   obtain ⟨N, hN⟩ := s.widths_shrink eps
   exact ⟨N, hN N (Nat.le_refl N)⟩
 
+theorem intervalRegularDarbouxScheduleIntegralFor_precision_witness
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hinterval : F.lower <= F.upper}
+    (s : IntervalRegularDarbouxSchedule F hregular hinterval) (eps : QPos) :
+    ∃ n : Nat,
+      ((intervalRegularDarbouxScheduleIntegralFor s).compute n).width <= eps.val := by
+  obtain ⟨N, hN⟩ := intervalRegularDarbouxScheduleRaw_precision_witness s eps
+  exact ⟨N, hN⟩
+
 theorem intervalRegularDarbouxScheduleRaw_width_le_of_tolerance
     {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
     {hinterval : F.lower <= F.upper}
