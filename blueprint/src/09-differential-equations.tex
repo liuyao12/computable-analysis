@@ -102,6 +102,8 @@ The finite algebraic core is explicit in Lean:
 \lean{ComputableAnalysis.LinearODE.trajectory_eq_transition_add_zeroInitial}
 \lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum}
 \lean{ComputableAnalysis.LinearODE.discretePeanoBakerExpansion}
+\lean{ComputableAnalysis.LinearODE.orderedIndexWords_length}
+\lean{ComputableAnalysis.LinearODE.chronologicalProduct_split}
 \leanok
 
 These uniqueness results are exact finite induction statements: two sampled
@@ -109,6 +111,17 @@ trajectories with the same initial state and the same rational update rule
 agree at every finite index.  The chronological product is therefore not an
 assumed evolution operator; it is a proved finite normal form for the ordered
 matrix actions.
+
+The same finite normal form composes across a cut.  If a mesh has `first`
+steps followed by `second` steps, the later transition is the left factor:
+
+\begin{verbatim}
+P(first + second) = P_shifted(second) * P(first)
+\end{verbatim}
+
+This is the discrete evolution law needed for patching local certificates and
+for keeping time ordering visible when a continuous provider is eventually
+added.  It is a matrix identity over rationals, proved by finite induction.
 
 These are finite sampled statements.  They become ODE theorems only after an
 effective-FTC provider supplies the coefficient, simplex, and tail bounds.
