@@ -8,7 +8,17 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v5
+      # The public calculus foundation is the supported compatibility target.
+      # Building the default executable also traverses unrelated experiments
+      # and leaves the status check opaque on the large Lean 4.33 workspace.
       - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: true
+          build-args: "ComputableAnalysis.CalculusFoundation"
+          test: false
+          lint: false
