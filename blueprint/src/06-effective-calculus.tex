@@ -969,6 +969,14 @@ secants bound the derivative enclosure:
 \lean{ComputableAnalysis.derivative_between_neighboring_secants}
 \leanok
 
+The concave mirror is now available as the same finite rational estimate:
+the right outer secant is a lower bound and the left outer secant an upper
+bound.  This is the order-theoretic input used by inverse-function examples.
+
+\lean{ComputableAnalysis.concave_outer_secants_bound_inner_secants}
+\lean{ComputableAnalysis.concaveOuterSecantBracket}
+\leanok
+
 \lean{ComputableAnalysis.Integral.finiteQuadrature_average_between_bounds}
 \lean{ComputableAnalysis.ExactCellOrderPreservation.integral_average_overlaps_bounds}
 \lean{ComputableAnalysis.CandidateDerivativeCellControl.endpoint_average_overlaps_bound}

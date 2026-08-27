@@ -776,6 +776,48 @@ theorem convex_outer_secants_bound_inner_secants
   · exact convex_inner_secant_le_right_outer hf
       (Rat.le_trans hal (by grind : l <= x)) hxy hyv hvr hrb
 
+/-! The concave mirror of the neighboring-secant estimate.  It is kept as a
+finite rational theorem rather than derived through a completed-real
+derivative: for a concave function, the right outer secant is a lower bound
+and the left outer secant is an upper bound for every strictly interior
+secant. -/
+
+theorem concave_outer_secants_bound_inner_secants
+    {f : Rat -> Rat} {a b l u x y v r : Rat}
+    (hf : ConcaveOn f a b)
+    (hal : a <= l) (hlu : l < u) (hux : u < x)
+    (hxy : x < y) (hyv : y < v) (hvr : v < r) (hrb : r <= b) :
+    secantSlope f v r <= secantSlope f x y /\
+      secantSlope f x y <= secantSlope f l u := by
+  constructor
+  · have h1 : secantSlope f y v <= secantSlope f x y :=
+      hf x y v (Rat.le_trans hal (by grind : l <= x)) hxy hyv
+        (Rat.le_trans (by grind : v <= r) hrb)
+    have h2 : secantSlope f v r <= secantSlope f y v :=
+      hf y v r (by grind) hyv hvr hrb
+    exact Rat.le_trans h2 h1
+  · have h1 : secantSlope f u x <= secantSlope f l u :=
+      hf l u x hal hlu hux
+        (Rat.le_trans (by grind : x <= y)
+          (Rat.le_trans (by grind : y <= v) (Rat.le_trans (by grind : v <= r) hrb)))
+    have h2 : secantSlope f x y <= secantSlope f u x :=
+      hf u x y (by grind) hux hxy
+        (Rat.le_trans (by grind : y <= v) (Rat.le_trans (by grind : v <= r) hrb))
+    exact Rat.le_trans h2 h1
+
+def concaveOuterSecantBracket
+    {a b : Rat} (f : Rat -> Rat) (hf : ConcaveOn f a b)
+    (l u v r : Rat)
+    (hal : a <= l) (hlu : l < u) (_huv : u < v)
+    (hvr : v < r) (hrb : r <= b) :
+    StrictSecantSlopeBracketOn f u v where
+  lower := secantSlope f v r
+  upper := secantSlope f l u
+  bounds := by
+    intro x y hux hxy hyv
+    exact concave_outer_secants_bound_inner_secants
+      hf hal hlu hux hxy hyv hvr hrb
+
 def convexOuterSecantBracket
     {a b : Rat} (f : Rat -> Rat) (hf : ConvexOn f a b)
     (l u v r : Rat)
