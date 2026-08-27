@@ -448,6 +448,32 @@ theorem sinhCoeff_hasFormalDerivative :
     HasFormalDerivative sinhCoeff coshCoeff :=
   sinhCoeff_derivative
 
+theorem sinhCoeff_eq_of_hasFormalDerivative
+    {F : Coeffs}
+    (hF : HasFormalDerivative F coshCoeff)
+    (hzero : F 0 = 0) :
+    F = sinhCoeff := by
+  have hprimitive :=
+    coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative hF
+  have hcoeffs : coeffsFromDerivativeAtZero 0 coshCoeff = sinhCoeff := by
+    funext n
+    cases n <;> rfl
+  rw [hzero] at hprimitive
+  exact hprimitive.symm.trans hcoeffs
+
+theorem coshCoeff_eq_of_hasFormalDerivative
+    {F : Coeffs}
+    (hF : HasFormalDerivative F sinhCoeff)
+    (hone : F 0 = 1) :
+    F = coshCoeff := by
+  have hprimitive :=
+    coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative hF
+  have hcoeffs : coeffsFromDerivativeAtZero 1 sinhCoeff = coshCoeff := by
+    funext n
+    cases n <;> rfl
+  rw [hone] at hprimitive
+  exact hprimitive.symm.trans hcoeffs
+
 /-- Primary coefficient-shift names for the finite series algebra.
 
 The formal-derivative declarations above remain stable compatibility API; the

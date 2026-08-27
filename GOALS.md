@@ -3905,6 +3905,10 @@ potential-infinity precision schedule.
   `FormalPowerSeries.sinCoeff_eq_of_hasFormalDerivative` and
   `FormalPowerSeries.cosCoeff_eq_of_hasFormalDerivative` are now checked as
   well.
+- The initial-value uniqueness bridges for the hyperbolic pair,
+  `FormalPowerSeries.sinhCoeff_eq_of_hasFormalDerivative` and
+  `FormalPowerSeries.coshCoeff_eq_of_hasFormalDerivative`, are now checked as
+  well.
 - The finite rational bridge below the formal table is now checked too:
   `FinitePolynomial.powerSecant_eq_differenceQuotient` identifies the exact
   quotient of every monomial, and
