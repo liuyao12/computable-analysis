@@ -4129,6 +4129,8 @@ arguments.
   `polygonalMonomialPrimitiveTo_closed` covers `z^n dz` with the executable
   natural power and primitive `z^(n+1)/(n+1)`. This is an algebraic finite
   schema, not a claim about an infinite analytic power function.
+  `polygonalMonomialPrimitiveTo_split_at` now supplies finite additivity for
+  this monomial path integral at an arbitrary intermediate vertex.
   The coefficient-list evaluator
   `ComplexPathIntegral.polynomialPrimitiveEval` and its path fold
   `polygonalPolynomialPrimitiveTo` now package the same endpoint cancellation

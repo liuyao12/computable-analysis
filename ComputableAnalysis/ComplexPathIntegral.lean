@@ -364,6 +364,27 @@ theorem polygonalMonomialPrimitiveTo_append_endpoint
       constructor <;> grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
         Rat.mul_assoc, Rat.mul_comm]
 
+theorem polygonalMonomialPrimitiveTo_split_at
+    (degree : Nat) (start middle : QComplex) (pre suf : List QComplex) :
+    polygonalMonomialPrimitiveTo degree start
+        (pre ++ [middle] ++ suf) =
+      QComplex.add
+        (polygonalMonomialPrimitiveTo degree start (pre ++ [middle]))
+        (polygonalMonomialPrimitiveTo degree middle suf) := by
+  induction pre generalizing start with
+  | nil =>
+      simp [polygonalMonomialPrimitiveTo, QComplex.add, QComplex.zero]
+      constructor <;> grind [Rat.add_assoc, Rat.add_comm]
+  | cons vertex pre ih =>
+      simp only [List.cons_append, polygonalMonomialPrimitiveTo]
+      rw [ih]
+      cases start
+      cases vertex
+      cases middle
+      simp [monomialPrimitiveIncrement, QComplex.sub, QComplex.add,
+        QComplex.neg, QComplex.scaleRat, QComplex.natPow, QComplex.mul]
+      constructor <;> grind [Rat.add_assoc, Rat.add_comm, Rat.sub_eq_add_neg]
+
 theorem polygonalMonomialPrimitiveTo_closed
     (degree : Nat) (start : QComplex) (vertices : List QComplex) :
     polygonalMonomialPrimitiveTo degree start (vertices ++ [start]) =
