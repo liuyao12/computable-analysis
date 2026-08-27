@@ -4555,7 +4555,10 @@ the focused `FiniteSineIntegral` module builds cleanly.
   `FormalPowerSeries.coeffsFromDerivativeAtZero`; the theorem
   `FormalPowerSeries.coeffsFromDerivativeAtZero_hasFormalDerivative` proves
   that differentiating the constructed coefficient stream gives the supplied
-  derivative stream.
+  derivative stream.  The converse uniqueness theorem
+  `FormalPowerSeries.coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative`
+  shows that the initial coefficient and derivative stream determine the
+  formal primitive coefficient-by-coefficient.
 - First checked Taylor coefficient route for arctangent:
   `FormalPowerSeries.atanTaylorCoeff_hasFormalDerivative` proves that the
   arctangent coefficient stream differentiates to the coefficient stream for
