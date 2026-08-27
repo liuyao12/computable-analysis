@@ -1802,6 +1802,13 @@ theorem expPartial_succ (z : QComplex) (n : Nat) :
 
 def sinSign (k : Nat) : Rat := if k % 2 = 0 then 1 else -1
 
+theorem sinSign_succ (k : Nat) : sinSign (k + 1) = -sinSign k := by
+  by_cases h : k % 2 = 0
+  · have h' : (k + 1) % 2 ≠ 0 := by omega
+    simp [sinSign, h, h']
+  · have h' : (k + 1) % 2 = 0 := by omega
+    simp [sinSign, h, h']
+
 def sinTerm (z : QComplex) (k : Nat) : QComplex :=
   QComplex.scaleRat (sinSign k)
     (QComplex.divRat (QComplex.pow z (2 * k + 1)) (factorialRat (2 * k + 1)))
