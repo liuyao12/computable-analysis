@@ -11734,6 +11734,30 @@ theorem piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_telescope
   exact RealRaw.equiv_trans hintegral hsum_adjacent htotal_valid
     hintegral_adjacent hadjacent_total
 
+/-! Convenience form for the canonical partition endpoints.  The caller may
+still choose the endpoint representation and prove the final endpoint-value
+transport, but the adjacent-difference list transport is discharged by the
+canonical finite identity above. -/
+theorem piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_canonical_telescope
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F)
+    (h : PiecewiseMonotoneEndpointFTCFor F c)
+    {first : RealRaw} {rest : List RealRaw}
+    (hvalues : forall x, x ∈ first :: rest -> x.Valid)
+    (hcanonical : first :: rest = piecewiseMonotoneEndpointValueList F c)
+    (htotal : (rawLast first rest - first).Equiv
+      (piecewiseMonotoneTotalEndpointDifference F c)) :
+    (piecewiseMonotoneIntegralFor F c).Equiv
+      (piecewiseMonotoneTotalEndpointDifference F c) := by
+  have htransport :
+      FiniteRawListEquiv
+        (piecewiseMonotoneEndpointDifferenceList F c)
+        (rawAdjacentDifferenceList (first :: rest)) := by
+    rw [hcanonical]
+    exact piecewiseMonotoneEndpointDifferenceList_equiv_canonicalAdjacent F c
+  exact piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_telescope
+    F c h hvalues htransport htotal
+
 /-- A one-piece promotion from a monotone construction computes the same raw
 integral as the original monotone construction. -/
 theorem piecewiseMonotoneIntegralFor_ofMonotone_equiv

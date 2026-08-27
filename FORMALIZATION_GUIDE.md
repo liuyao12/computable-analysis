@@ -919,6 +919,9 @@ The corresponding
 `Integral.piecewiseMonotoneEndpointDifferenceList_equiv_canonicalAdjacent`
 theorem supplies the finite list equivalence directly for the canonical
 partition endpoints.
+Use `Integral.piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_canonical_telescope`
+when the chosen endpoint list is canonical; it removes the redundant
+adjacent-list argument from the piecewise FTC call.
 
 `FTC.EffectiveFTC` and `FTC.effectiveFTC_definiteIntegralEqualsEndpoint`
 describe one checked endpoint-bridge route.  The generic bridge from an
