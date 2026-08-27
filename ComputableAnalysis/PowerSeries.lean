@@ -1769,6 +1769,30 @@ theorem qabs_normalized_power_differenceQuotient_sub_monomial_le
 
 end FinitePolynomial
 
+namespace QComplex
+
+theorem scaleRat_mul_left (r : Rat) (z w : QComplex) :
+    scaleRat r (mul z w) = mul (scaleRat r z) w := by
+  cases z
+  cases w
+  simp [scaleRat, mul]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
+
+theorem scaleRat_mul_right (r : Rat) (z w : QComplex) :
+    scaleRat r (mul z w) = mul z (scaleRat r w) := by
+  cases z
+  cases w
+  simp [scaleRat, mul]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
+
+theorem scaleRat_scaleRat (r s : Rat) (z : QComplex) :
+    scaleRat r (scaleRat s z) = scaleRat (r * s) z := by
+  cases z
+  simp [scaleRat]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+end QComplex
+
 namespace ComplexSeries
 
 def expTerm (z : QComplex) (n : Nat) : QComplex :=

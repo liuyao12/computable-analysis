@@ -3918,6 +3918,10 @@ potential-infinity precision schedule.
   The alternating sign stream used by the trigonometric terms also has the
   checked parity recurrence `ComplexSeries.sinSign_succ`, isolating this finite
   obligation before termwise trigonometric differentiation.
+  The supporting rational-complex algebra is now explicit as well:
+  `QComplex.scaleRat_mul_left`, `QComplex.scaleRat_mul_right`, and
+  `QComplex.scaleRat_scaleRat` provide the scalar/multiplication transport
+  needed by those future termwise identities.
 - The same formal layer now covers the coefficient-shift identities for trig
   and hyperbolic streams:
   `sin -> cos`, `cos -> -sin`, `sinh -> cosh`, and
