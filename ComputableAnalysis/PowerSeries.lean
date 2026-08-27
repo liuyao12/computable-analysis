@@ -591,6 +591,25 @@ theorem sinCoeff_eq_of_secondDerivative
   exact (sinCosCoeff_eq_of_coupledDerivative
     (F := F) (G := derivative F) (by rfl) hF hzero hone).1
 
+theorem cosCoeff_eq_of_secondDerivative
+    {F : Coeffs}
+    (hF : derivative (derivative F) = neg F)
+    (hone : F 0 = 1)
+    (hzero : (derivative F) 0 = 0) :
+    F = cosCoeff := by
+  have hneg : HasFormalDerivative (neg (derivative F)) F := by
+    unfold HasFormalDerivative
+    rw [derivative_neg, hF, neg_neg]
+  have hbase : HasFormalDerivative F (neg (neg (derivative F))) := by
+    unfold HasFormalDerivative
+    rw [neg_neg]
+  have hnegzero : (neg (derivative F)) 0 = 0 := by
+    dsimp [neg]
+    rw [hzero]
+    native_decide
+  exact (sinCosCoeff_eq_of_coupledDerivative
+    (F := neg (derivative F)) (G := F) hneg hbase hnegzero hone).2
+
 theorem sinhCoshCoeff_eq_of_coupledDerivative
     {F G : Coeffs}
     (hF : HasFormalDerivative F G)
@@ -631,6 +650,17 @@ theorem sinhCoeff_eq_of_secondDerivative
     F = sinhCoeff := by
   exact (sinhCoshCoeff_eq_of_coupledDerivative
     (F := F) (G := derivative F) (by rfl) hF hzero hone).1
+
+theorem coshCoeff_eq_of_secondDerivative
+    {F : Coeffs}
+    (hF : derivative (derivative F) = F)
+    (hone : F 0 = 1)
+    (hzero : (derivative F) 0 = 0) :
+    F = coshCoeff := by
+  have hbase : HasFormalDerivative F (derivative F) := by rfl
+  have hpair := sinhCoshCoeff_eq_of_coupledDerivative
+    (F := derivative F) (G := F) hF hbase hzero hone
+  exact hpair.2
 
 /-- First-year calculus table entry: the formal derivative of `-cos` is `sin`. -/
 theorem neg_cosCoeff_hasFormalDerivative :
