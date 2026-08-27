@@ -676,6 +676,29 @@ theorem finiteIntegrationByParts_withVariation
             grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
               Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 
+/-! Constants are the first exact Riemann--Stieltjes integrands.  Their
+finite sums telescope against an arbitrary rational path, so this identity
+is available before any limiting or completed-real construction. -/
+
+theorem leftStieltjesSum_one_left (g : Nat -> Rat) (n : Nat) :
+    leftStieltjesSum (fun _ => (1 : Rat)) g n = g n - g 0 := by
+  induction n with
+  | zero =>
+      grind [leftStieltjesSum]
+  | succ n ih =>
+      rw [leftStieltjesSum, ih]
+      grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+theorem leftStieltjesSum_const_left (c : Rat) (g : Nat -> Rat) (n : Nat) :
+    leftStieltjesSum (fun _ => c) g n = c * (g n - g 0) := by
+  induction n with
+  | zero =>
+      grind [leftStieltjesSum]
+  | succ n ih =>
+      rw [leftStieltjesSum, ih]
+      grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+        Rat.mul_add, Rat.add_mul]
+
 /-! The square case is the finite chain rule.  It is the form used by
 substitution and by energy estimates: the endpoint change of `f^2` is the
 left-endpoint sum for `2 f df`, plus the explicitly visible quadratic
