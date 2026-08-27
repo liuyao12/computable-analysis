@@ -228,6 +228,20 @@ theorem polygonalManhattanLength_append_endpoint_ge_displacement
       have htail := ih vertex
       grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
 
+theorem polygonalManhattanLength_split_at
+    (start middle : QComplex) (pre suf : List QComplex) :
+    polygonalManhattanLength start (pre ++ [middle] ++ suf) =
+      polygonalManhattanLength start (pre ++ [middle]) +
+        polygonalManhattanLength middle suf := by
+  induction pre generalizing start with
+  | nil =>
+      simp [polygonalManhattanLength]
+      grind
+  | cons vertex pre ih =>
+      simp only [List.cons_append, polygonalManhattanLength]
+      rw [ih vertex]
+      grind [Rat.add_assoc]
+
 theorem polygonalDisplacementTo_append_endpoint
     (start endpoint : QComplex) (vertices : List QComplex) :
     polygonalDisplacementTo start (vertices ++ [endpoint]) =
