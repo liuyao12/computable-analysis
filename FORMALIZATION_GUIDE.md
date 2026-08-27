@@ -1166,6 +1166,10 @@ The candidate side now also exposes
 `dyadicNestedRadicalSampleRaw_stabilized`: once the semantic overlap for one
 sample is proved, prefix stabilization supplies a valid public raw without
 silently assuming that the raw nested-radical boxes are cross-stage nested.
+On the inverse side, `dyadicTangentBoxAt_contains_of_precision_le` proves the
+available same-sample refinement law: a later tangent box is enclosed by the
+earlier one.  This is useful for transporting branch data, but it does not
+replace the missing common-witness proof for the narrower child box.
 `ArctanSinPiConstruction.dyadicNestedRadicalSampleRaw_stabilized_equiv`
 connects that stabilized candidate to the public sine sample when the
 all-precision witness schedule is supplied.

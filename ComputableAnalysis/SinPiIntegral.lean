@@ -5393,6 +5393,30 @@ theorem dyadicTangentBoxAt_bounds
     (2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
     (dyadicNormalizedBranch hk) precision
 
+/-! A same-sample inverse box is nested when its computation precision is
+refined.  This is the finite transport law needed by the even dyadic branch:
+the child has the same rational angle as its parent, but may ask the inverse
+evaluator at a later precision. -/
+theorem dyadicTangentBoxAt_contains_of_precision_le
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (precision₁ precision₂ depth k : Nat) (hk : k < 2 ^ depth)
+    (hprecision : precision₁ <= precision₂) :
+    QInterval.ContainsInterval
+      (dyadicTangentBoxAt B precision₁ depth k hk)
+      (dyadicTangentBoxAt B precision₂ depth k hk) := by
+  unfold dyadicTangentBoxAt
+  change QInterval.ContainsInterval
+    ((B.tangentAt
+      (2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+      (dyadicNormalizedBranch hk)).compute precision₁)
+    ((B.tangentAt
+      (2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+      (dyadicNormalizedBranch hk)).compute precision₂)
+  have hnested := (B.tangentAt_valid
+    (2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+    (dyadicNormalizedBranch hk)).2.1 precision₁ precision₂ hprecision
+  exact ⟨hnested.1, hnested.2.2⟩
+
 theorem dyadicTangentBox_bounds
     (B : IntegralIdentities.ArctanInverseBisection)
     {n k : Nat} (hk : k < 2 ^ n) :

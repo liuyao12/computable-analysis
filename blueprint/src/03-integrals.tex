@@ -1357,6 +1357,13 @@ The even nested-radical branch is now packaged directly from a successful
 finite tangent-witness search.  It reuses the public circle box, proves its
 ordering, and transports the search overlap to the parent table precision:
 
+The inverse side has the complementary refinement law: at one fixed dyadic
+sample, a later tangent computation is enclosed by the earlier one.  This is
+the exact finite fact available for the even branch; it does not by itself
+produce a common witness for the narrower child box.
+
+\lean{ComputableAnalysis.SinPiIntegral.dyadicTangentBoxAt_contains_of_precision_le}
+
 \lean{ComputableAnalysis.SinPiIntegral.DyadicEvenStepCertificate.ofWitnessSearch}
 \lean{ComputableAnalysis.SinPiIntegral.qinterval_overlaps_of_contained_left}
 \lean{ComputableAnalysis.SinPiIntegral.DyadicEvenStepCertificate.to_public_overlap}
