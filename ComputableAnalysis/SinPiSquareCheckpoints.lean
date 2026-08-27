@@ -22,6 +22,58 @@ theorem rationalTangentSquareWitnessSearch_complete_of_candidate
     ∃ v, rationalTangentSquareWitnessSearch U S C m = some v := by
   exact rationalTangentSquareWitnessSearchList_complete hmem hadm
 
+theorem rationalTangentSquareWitnessSearch_stage_two_left_demo :
+    rationalTangentSquareWitnessSearch
+      ({ lo := 0, hi := 1 } : QInterval)
+      (dyadicNestedRadicalStageSinAt 2 1)
+      (dyadicNestedRadicalStageTable 2 1).2 16 =
+        some ((1581 : Rat) / 8192) := by
+  native_decide
+
+theorem dyadicNestedRadicalStage_two_left_square_complement_overlap :
+    QInterval.Overlaps
+      (rationalSquareInterval (dyadicNestedRadicalStageSinAt 2 1))
+      (rationalOneMinusSquareInterval
+        (dyadicNestedRadicalStageTable 2 1).2) := by
+  have hsearch := rationalTangentSquareWitnessSearch_stage_two_left_demo
+  have hS : subintervalOf (dyadicNestedRadicalStageSinAt 2 1) 0 1 := by
+    unfold subintervalOf
+    constructor
+    · native_decide
+    constructor <;> native_decide
+  have hC : subintervalOf (dyadicNestedRadicalStageTable 2 1).2 0 1 := by
+    unfold subintervalOf
+    constructor
+    · native_decide
+    constructor <;> native_decide
+  exact square_overlap_of_rationalTangentSquareWitnessSearch hsearch hS hC
+
+theorem rationalTangentSquareWitnessSearch_stage_two_middle_demo :
+    rationalTangentSquareWitnessSearch
+      ({ lo := 0, hi := 1 } : QInterval)
+      (dyadicNestedRadicalStageSinAt 2 2)
+      (dyadicNestedRadicalStageTable 2 2).2 16 =
+        some ((27135 : Rat) / 65536) := by
+  native_decide
+
+theorem dyadicNestedRadicalStage_two_middle_square_complement_overlap :
+    QInterval.Overlaps
+      (rationalSquareInterval (dyadicNestedRadicalStageSinAt 2 2))
+      (rationalOneMinusSquareInterval
+        (dyadicNestedRadicalStageTable 2 2).2) := by
+  have hsearch := rationalTangentSquareWitnessSearch_stage_two_middle_demo
+  have hS : subintervalOf (dyadicNestedRadicalStageSinAt 2 2) 0 1 := by
+    unfold subintervalOf
+    constructor
+    · native_decide
+    constructor <;> native_decide
+  have hC : subintervalOf (dyadicNestedRadicalStageTable 2 2).2 0 1 := by
+    unfold subintervalOf
+    constructor
+    · native_decide
+    constructor <;> native_decide
+  exact square_overlap_of_rationalTangentSquareWitnessSearch hsearch hS hC
+
 theorem rationalTangentSquareWitnessSearch_stage_two_right_demo :
     rationalTangentSquareWitnessSearch
       ({ lo := 1, hi := 2 } : QInterval)

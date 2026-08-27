@@ -575,6 +575,9 @@ The next signed branch is also checked independently: at stage two and
 sample (k=3), the tangent interval ([1,2]) finds (u=379/256) on an
 8-grid.  This is a finite regression certificate for the reflected cosine
 branch, not an all-depth transport theorem.
+The two positive stage-two samples are checked as well, with witnesses
+\(1581/8192\) and \(27135/65536\) on the 16-grid.  Together these cover all
+three interior samples at that finite depth.
 
 At the general finite-search boundary, a stage may choose its own grid depth
 and grid index.  `RationalTangentSquareWitnessCandidateFamily` packages those
@@ -585,6 +588,10 @@ once that family is supplied.
 
 \lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_stage_one_demo}
 \lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_complete_of_candidate}
+\lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_stage_two_left_demo}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalStage_two_left_square_complement_overlap}
+\lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_stage_two_middle_demo}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalStage_two_middle_square_complement_overlap}
 \lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_stage_two_right_demo}
 \lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalStage_two_right_square_complement_overlap}
 \lean{ComputableAnalysis.SinPiIntegral.RationalTangentSquareWitnessCandidateFamily}
