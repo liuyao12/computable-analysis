@@ -161,6 +161,19 @@ theorem effectiveMeanValueBracket
 
 end ComputableAnalysis.Integral
 
+namespace ComputableAnalysis.FinitePolynomial
+
+/-! Public focused-entry-point name for the parametric finite power rule. -/
+def effectiveMonomialPowerRule
+    (a b C : Rat) (n : Nat)
+    (hleft : -C <= a) (hright : b <= C) (hC1 : 1 <= C) :
+    HasDerivativeOnInterval
+      (normalizedMonomialOnInterval a b n)
+      (monomialOnInterval a b n) :=
+  normalizedMonomial_hasDerivativeOnInterval a b C n hleft hright hC1
+
+end ComputableAnalysis.FinitePolynomial
+
 namespace ComputableAnalysis
 
 /-! Composition closure for effective derivatives.  The caller supplies the
