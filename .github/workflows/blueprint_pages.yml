@@ -33,6 +33,17 @@ jobs:
         with:
           python-version: "3.x"
 
+      # Build the public Lean entry point first.  The blueprint renderer uses
+      # the resulting environment to resolve and display \lean declarations;
+      # without this step CI silently emits prose while dropping those links.
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: true
+          build-args: "ComputableAnalysis.CalculusFoundation"
+          test: false
+          lint: false
+
       - name: Install system dependencies
         run: |
           sudo apt-get update
