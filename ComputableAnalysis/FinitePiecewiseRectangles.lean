@@ -415,6 +415,54 @@ def PiecewiseRectangleCertificate.upperSum
   piecewiseRectangleAreaSum
     (certificate.cells.map (fun I => certificate.domainWidth * I.hi))
 
+def piecewiseRectangleSampleAreaSum (domainWidth : Rat) :
+    List QInterval → List Rat → Rat
+  | [], _ => 0
+  | _ :: _, [] => 0
+  | _ :: cells, value :: values =>
+      domainWidth * value + piecewiseRectangleSampleAreaSum domainWidth cells values
+
+theorem piecewiseRectangleSampleAreaSum_contains
+    (domainWidth : Rat) (cells : List QInterval) (values : List Rat)
+    (hdomain : 0 ≤ domainWidth)
+    (hlength : values.length = cells.length)
+    (hvalues : ∀ I v, (I, v) ∈ cells.zip values →
+      I.lo ≤ v ∧ v ≤ I.hi) :
+    piecewiseRectangleAreaSum
+        (cells.map (fun I => domainWidth * I.lo)) ≤
+      piecewiseRectangleSampleAreaSum domainWidth cells values ∧
+      piecewiseRectangleSampleAreaSum domainWidth cells values ≤
+        piecewiseRectangleAreaSum
+          (cells.map (fun I => domainWidth * I.hi)) := by
+  induction cells generalizing values with
+  | nil =>
+      cases values with
+      | nil => simp [piecewiseRectangleSampleAreaSum, piecewiseRectangleAreaSum]
+      | cons value values => simp at hlength
+  | cons cell cells ih =>
+      cases values with
+      | nil => simp at hlength
+      | cons value values =>
+          simp only [List.map_cons, piecewiseRectangleAreaSum,
+            piecewiseRectangleSampleAreaSum]
+          have hcell : cell.lo ≤ value ∧ value ≤ cell.hi := by
+            apply hvalues cell value
+            simp
+          have htail_length : values.length = cells.length := by
+            simp at hlength
+            omega
+          have htail_values : ∀ I v, (I, v) ∈ cells.zip values →
+              I.lo ≤ v ∧ v ≤ I.hi := by
+            intro I v hmem
+            apply hvalues I v
+            simp [hmem]
+          have htail := ih values htail_length htail_values
+          have hlo : domainWidth * cell.lo ≤ domainWidth * value :=
+            Rat.mul_le_mul_of_nonneg_left hcell.1 hdomain
+          have hhi : domainWidth * value ≤ domainWidth * cell.hi :=
+            Rat.mul_le_mul_of_nonneg_left hcell.2 hdomain
+          exact ⟨rat_add_le_add hlo htail.1, rat_add_le_add hhi htail.2⟩
+
 theorem PiecewiseRectangleCertificate.gap_eq_width_sum
     (certificate : PiecewiseRectangleCertificate) :
     certificate.upperSum - certificate.lowerSum =
