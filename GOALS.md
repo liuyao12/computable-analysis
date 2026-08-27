@@ -3924,7 +3924,10 @@ potential-infinity precision schedule.
   needed by those future termwise identities.  The division transport
   `QComplex.divRat_mul_right` and the checked identity
   `ComplexSeries.sinTerm_derivative_relation` now close the corresponding
-  finite sine-term derivative step.
+  finite sine-term derivative step.  The companion
+  `ComplexSeries.cosTerm_succ_derivative_relation` closes the alternating
+  cosine step, so the two finite term recurrences now expose the complete
+  `sin`/`cos` coefficient-level differentiation pair.
 - The same formal layer now covers the coefficient-shift identities for trig
   and hyperbolic streams:
   `sin -> cos`, `cos -> -sin`, `sinh -> cosh`, and
