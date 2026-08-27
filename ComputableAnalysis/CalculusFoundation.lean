@@ -1,4 +1,6 @@
 import ComputableAnalysis.IntegralFoundation
+import ComputableAnalysis.SinPiSquareFTC
+import ComputableAnalysis.SinPiSquareCheckpoints
 import ComputableAnalysis.EffectiveCalculusFoundation
 import ComputableAnalysis.PowerSeries
 import ComputableAnalysis.FiniteTaylorFTCInterface

@@ -571,6 +571,11 @@ first nonzero dyadic sample, the square-aware rational search finds
 (u=103/256), and the circle identity turns its sine and cosine containment
 into overlap of the sine-square and complementary-square intervals:
 
+The next signed branch is also checked independently: at stage two and
+sample (k=3), the tangent interval ([1,2]) finds (u=379/256) on an
+8-grid.  This is a finite regression certificate for the reflected cosine
+branch, not an all-depth transport theorem.
+
 At the general finite-search boundary, a stage may choose its own grid depth
 and grid index.  `RationalTangentSquareWitnessCandidateFamily` packages those
 choices and its Boolean admissibility proofs; its `search_exists` theorem
@@ -579,6 +584,9 @@ family remains a separate obligation; the calculus-side assembly is complete
 once that family is supplied.
 
 \lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_stage_one_demo}
+\lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_complete_of_candidate}
+\lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_stage_two_right_demo}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalStage_two_right_square_complement_overlap}
 \lean{ComputableAnalysis.SinPiIntegral.RationalTangentSquareWitnessCandidateFamily}
 \lean{ComputableAnalysis.SinPiIntegral.RationalTangentSquareWitnessCandidateFamily.search_exists}
 \lean{ComputableAnalysis.SinPiIntegral.RationalTangentSquareWitnessCandidateFamily.square_overlap}
