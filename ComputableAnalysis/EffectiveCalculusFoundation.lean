@@ -21,6 +21,16 @@ representative certificates.
 
 namespace ComputableAnalysis.Integral
 
+/-! Curvature is the intended provider-facing route to the effective FTC:
+convex and concave functions supply monotone derivative bounds, while this
+wrapper closes the same finite endpoint certificate. -/
+theorem effectiveCurvatureFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : CurvatureFTCCertificate F dF a b) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      h.toDerivativeBoundFTC.endpointRaw := by
+  exact curvatureFTC h
+
 /-! The scoped entry point gives the finite-piece FTC its project-facing name.
 The partition, cell endpoint certificates, and endpoint transport remain
 explicit inputs; this wrapper adds no completeness or general continuity
