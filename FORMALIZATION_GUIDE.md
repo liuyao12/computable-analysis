@@ -1081,6 +1081,9 @@ pieces and
 decreasing pieces.  Both constructors use a cumulative natural-number stage
 to dominate the evaluator's input modulus; no monotonicity of that modulus is
 assumed.  Supply only a natural upper bound for the rational interval length.
+To feed such a piece into `PiecewiseMonotoneConstructionFor`, use the
+corresponding `MonotoneConstructionFor.ofAutomaticEndpointOrderedNondecreasing`
+or `MonotoneConstructionFor.ofAutomaticEndpointOrderedNonincreasing` adapter.
 
 ### Non-rational turns in a finite monotone decomposition
 

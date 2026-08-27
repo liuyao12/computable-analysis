@@ -13543,6 +13543,31 @@ def nonincreasingDarbouxScheduleConstructionFor
   compute := (nonincreasingDarbouxScheduleRaw s).compute
   certificate := nonincreasingDarbouxScheduleRaw_valid s
 
+/-! Promote the automatic schedules to the generic monotone-piece interface.
+These adapters are the intended entry point when a certified piece is later
+assembled into a finite-turn integral. -/
+def MonotoneConstructionFor.ofAutomaticEndpointOrderedNondecreasing
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    (hF : EndpointOrderedNondecreasingOnInterval F)
+    {hinterval : F.lower <= F.upper} (lengthBound : Nat)
+    (hLength : F.upper - F.lower <= (lengthBound : Rat)) :
+    MonotoneConstructionFor F where
+  monotone := MonotoneOnInterval.ofNondecreasing hF.toNondecreasing
+  construction := monotoneDarbouxScheduleConstructionFor
+    (MonotoneDarbouxSchedule.ofAutomaticEndpointOrdered
+      hregular hF (hinterval := hinterval) lengthBound hLength)
+
+def MonotoneConstructionFor.ofAutomaticEndpointOrderedNonincreasing
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    (hF : EndpointOrderedNonincreasingOnInterval F)
+    {hinterval : F.lower <= F.upper} (lengthBound : Nat)
+    (hLength : F.upper - F.lower <= (lengthBound : Rat)) :
+    MonotoneConstructionFor F where
+  monotone := MonotoneOnInterval.ofNonincreasing hF.toNonincreasing
+  construction := nonincreasingDarbouxScheduleConstructionFor
+    (NonincreasingDarbouxSchedule.ofAutomaticEndpointOrdered
+      hregular hF (hinterval := hinterval) lengthBound hLength)
+
 def nonincreasingDarbouxScheduleIntegralFor
     {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
     {hmonotone : NonincreasingOnInterval F}

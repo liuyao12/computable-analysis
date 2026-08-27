@@ -292,6 +292,10 @@ cells(n) := 2^stage(n),    precision(n) := n
 \lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule.ofAutomaticEndpointOrdered}
 The same construction is available with the orientation reversed:
 \lean{ComputableAnalysis.Integral.NonincreasingDarbouxSchedule.ofAutomaticEndpointOrdered}
+Both schedules can be promoted directly to a monotone piece for finite-turn
+assembly:
+\lean{ComputableAnalysis.Integral.MonotoneConstructionFor.ofAutomaticEndpointOrderedNondecreasing}
+\lean{ComputableAnalysis.Integral.MonotoneConstructionFor.ofAutomaticEndpointOrderedNonincreasing}
 \leanok
 The result packages directly into a public dyadic monotone-integral schedule;
 the mesh budget and width-shrink witness remain explicit inputs:
