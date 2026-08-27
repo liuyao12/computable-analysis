@@ -1883,6 +1883,42 @@ theorem expWeightedPartial_eq_mul_expPartial (z : QComplex) (n : Nat) :
       simp [QComplex.mul, QComplex.add, QComplex.zero]
       grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
 
+def expIntegratedPartial (z : QComplex) (n : Nat) : QComplex :=
+  (List.range n).foldl
+    (fun acc k => QComplex.add acc (expTerm z (k + 1))) QComplex.zero
+
+theorem expIntegratedPartial_eq_expPartial_sub_one (z : QComplex) (n : Nat) :
+    expIntegratedPartial z n =
+      QComplex.sub (expPartial z (n + 1)) QComplex.one := by
+  cases z with
+  | mk re im =>
+    let z : QComplex := { re := re, im := im }
+    change expIntegratedPartial z n =
+      QComplex.sub (expPartial z (n + 1)) QComplex.one
+    induction n with
+    | zero =>
+      have hzero : expTerm z 0 = QComplex.one := by
+        simp [expTerm, QComplex.pow, factorialRat, factorial,
+          QComplex.divRat, QComplex.one, Rat.div_def]
+        native_decide
+      simp [expIntegratedPartial, expPartial, hzero, QComplex.sub,
+        QComplex.add, QComplex.neg, QComplex.zero, QComplex.one]
+      grind
+    | succ n ih =>
+      calc
+        expIntegratedPartial z (n + 1) =
+            QComplex.add (expIntegratedPartial z n)
+              (expTerm z (n + 1)) := by
+          simp [expIntegratedPartial, List.range_succ, List.foldl_append]
+        _ = QComplex.add
+              (QComplex.sub (expPartial z (n + 1)) QComplex.one)
+              (expTerm z (n + 1)) := by rw [ih]
+        _ = QComplex.sub (expPartial z ((n + 1) + 1)) QComplex.one := by
+          rw [expPartial_succ z (n + 1)]
+          simp only [QComplex.sub, QComplex.add, QComplex.neg, QComplex.zero,
+            QComplex.one]
+          grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+
 def sinSign (k : Nat) : Rat := if k % 2 = 0 then 1 else -1
 
 theorem sinSign_succ (k : Nat) : sinSign (k + 1) = -sinSign k := by

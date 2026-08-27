@@ -3940,6 +3940,9 @@ potential-infinity precision schedule.
   power-series evaluators.  In the exponential case the weighted prefix is
   deliberately formed from `expTerm (k+1)`, recording the coefficient shift
   explicitly rather than treating a finite prefix as an infinite series.
+  The matching finite integration identity
+  `ComplexSeries.expIntegratedPartial_eq_expPartial_sub_one` now records the
+  primitive prefix and its constant-term anchor exactly.
 - The same formal layer now covers the coefficient-shift identities for trig
   and hyperbolic streams:
   `sin -> cos`, `cos -> -sin`, `sinh -> cosh`, and
