@@ -562,6 +562,9 @@ factorization theorem ready for later tail estimates.
 \lean{ComputableAnalysis.gaussianTaylorProductIntegralSum_stage_four_unit_square}
 \lean{ComputableAnalysis.gaussianTaylorProductIntegralNestedSum3D_factorized}
 \lean{ComputableAnalysis.gaussianTaylorProductIntegralNestedSum3D_stage_four_unit_cube}
+\lean{ComputableAnalysis.gaussianTaylorProductIntegralNestedSum}
+\lean{ComputableAnalysis.gaussianTaylorProductIntegralNestedSum_factorized}
+\lean{ComputableAnalysis.gaussianTaylorProductIntegralNestedSum_nonneg}
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_four_nonnegative}
 \lean{ComputableAnalysis.gaussianProductModel}
 \lean{ComputableAnalysis.gaussianProductModel_split}
@@ -609,10 +612,14 @@ volume calculations; we do not duplicate a proof for every dimension.
 \leanok
 
 Thus the Gaussian and n-ball entries are in scope as finite, separable,
-precision-refinable computations. A full Gaussian identity or a general
-multiple-integral theorem is admitted only after its evaluator supplies the
-corresponding finite tail and transport certificates; the name of a classical
-integral does not provide those certificates for free.
+precision-refinable computations. The Gaussian rectangle evaluator is now
+dimension-independent: a finite list of coordinate axes generates the matching
+list of one-variable Taylor evaluators, and its nested sum factors into the
+finite product of coordinate sums. Positivity is likewise a finite induction.
+A full Gaussian identity or a general multiple-integral theorem is admitted
+only after its evaluator supplies the corresponding finite tail and transport
+certificates; the name of a classical integral does not provide those
+certificates for free.
 
 The next finite layer is a tail ladder. At selected rational points, the
 exponential evaluator itself certifies the Gaussian bound

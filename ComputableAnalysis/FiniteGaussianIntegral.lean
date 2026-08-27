@@ -225,6 +225,39 @@ theorem gaussianTaylorProductIntegralNestedSum3D_stage_four_unit_cube :
       6331625 / 2097152 := by
   native_decide
 
+/-! The same Gaussian rectangle evaluator is available in arbitrary finite
+dimension.  The axes are carried as a list rather than being hard-coded to
+two or three coordinates; the factor list is generated from that same list,
+so the construction cannot silently lose or add a coordinate. -/
+
+def gaussianTaylorProductIntegralNestedSum
+    (terms : Nat) (axes : List (List (Rat × Rat))) : Rat :=
+  finiteProductIntegralNestedSum axes
+    (axes.map (fun _ => gaussianTaylorPointPrefix terms))
+
+theorem gaussianTaylorProductIntegralNestedSum_factorized
+    (terms : Nat) (axes : List (List (Rat × Rat))) :
+    gaussianTaylorProductIntegralNestedSum terms axes =
+      finiteProductIntegralFactorProduct axes
+        (axes.map (fun _ => gaussianTaylorPointPrefix terms)) := by
+  unfold gaussianTaylorProductIntegralNestedSum
+  rw [finiteProductIntegralNestedSum_factorized]
+  exact finiteProductIntegralSum_eq_factorProduct axes
+    (axes.map (fun _ => gaussianTaylorPointPrefix terms))
+
+theorem gaussianTaylorProductIntegralNestedSum_nonneg
+    (terms : Nat) (axes : List (List (Rat × Rat)))
+    (hwidth : forall cells, cells ∈ axes ->
+      forall cell, cell ∈ cells -> 0 <= cell.2)
+    (hfactor : forall x : Rat, 0 <= gaussianTaylorPointPrefix terms x) :
+    0 <= gaussianTaylorProductIntegralNestedSum terms axes := by
+  unfold gaussianTaylorProductIntegralNestedSum
+  apply finiteProductIntegralNestedSum_nonneg axes
+    (axes.map (fun _ => gaussianTaylorPointPrefix terms)) hwidth
+  intro factor hfactor_mem x
+  rcases List.mem_map.1 hfactor_mem with ⟨cells, hcells, rfl⟩
+  exact hfactor x
+
 theorem gaussianEvenIntegralPrefix_stage_six_minus_four :
     gaussianEvenIntegralPrefix 6 1 - gaussianEvenIntegralPrefix 4 1 =
       23 / 2970 := by
