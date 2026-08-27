@@ -119,6 +119,15 @@ theorem effectiveGeneralIntegralFor_equiv_of_finiteRawListEquiv
   exact piecewiseMonotoneIntegralFor_equiv_of_finiteRawListEquiv
     F c xs hxs hlist
 
+/-! The canonical representation is available without unfolding the general
+integral alias: it is the finite sum of the certified cell raws. -/
+theorem effectiveGeneralIntegralFor_equiv_finiteRawSum
+    (F : FunctionOnInterval)
+    (c : GeneralConstructionFor F) :
+    (generalIntegralFor F c).Equiv
+      (finiteRawSum (piecewiseMonotoneCellList F c)) := by
+  exact piecewiseMonotoneIntegralFor_equiv_finiteRawSum F c
+
 /-! Publicly expose the finite mean-value conclusion through the effective
 calculus entry point.  The conclusion is an overlap of rational boxes, so it
 does not select an attained intermediate real number. -/
