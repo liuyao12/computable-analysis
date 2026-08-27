@@ -886,7 +886,57 @@ theorem rationalHalfAngleTangentInterval_width_formula
       ((1 + C.lo) * (1 + C.hi))⁻¹ *
         ((1 + C.lo) * (1 + C.hi)) = 1 :=
     Rat.inv_mul_cancel _ (Rat.ne_of_gt hD)
-  grind [Rat.mul_assoc, Rat.mul_comm]
+  symm
+  calc
+    (S.hi * (1 + C.hi) - S.lo * (1 + C.lo)) *
+        ((1 + C.lo) * (1 + C.hi))⁻¹ *
+        ((1 + C.lo) * (1 + C.hi)) =
+        S.hi * (1 + C.hi) - S.lo * (1 + C.lo) := by
+          calc
+            (S.hi * (1 + C.hi) - S.lo * (1 + C.lo)) *
+                ((1 + C.lo) * (1 + C.hi))⁻¹ *
+                ((1 + C.lo) * (1 + C.hi)) =
+                (S.hi * (1 + C.hi) - S.lo * (1 + C.lo)) *
+                  (((1 + C.lo) * (1 + C.hi))⁻¹ *
+                    ((1 + C.lo) * (1 + C.hi))) := by
+              grind [Rat.mul_assoc]
+            _ = S.hi * (1 + C.hi) - S.lo * (1 + C.lo) := by
+              rw [hcancel, Rat.mul_one]
+/-! Turn the exact width formula into the form most useful for a finite
+certificate: a numerator-versus-denominator inequality implies the requested
+width budget. -/
+theorem rationalHalfAngleTangentInterval_width_le_of_margin
+    {S C : QInterval} (hC : subintervalOf C 0 1) (eps : Rat)
+    (hmargin : S.hi * (1 + C.hi) - S.lo * (1 + C.lo) <=
+      eps * ((1 + C.lo) * (1 + C.hi))) :
+    (rationalHalfAngleTangentInterval S C).width <= eps := by
+  rw [rationalHalfAngleTangentInterval_width_formula hC]
+  unfold subintervalOf at hC
+  have hdlo : 0 < 1 + C.lo := by grind
+  have hdhi : 0 < 1 + C.hi := by grind
+  have hD : 0 < (1 + C.lo) * (1 + C.hi) := Rat.mul_pos hdlo hdhi
+  apply Rat.le_of_mul_le_mul_right (c := (1 + C.lo) * (1 + C.hi)) ?_ hD
+  rw [Rat.div_def]
+  have hcancel :
+      ((1 + C.lo) * (1 + C.hi))⁻¹ *
+        ((1 + C.lo) * (1 + C.hi)) = 1 :=
+    Rat.inv_mul_cancel _ (Rat.ne_of_gt hD)
+  calc
+    (S.hi * (1 + C.hi) - S.lo * (1 + C.lo)) *
+        ((1 + C.lo) * (1 + C.hi))⁻¹ *
+        ((1 + C.lo) * (1 + C.hi)) =
+        S.hi * (1 + C.hi) - S.lo * (1 + C.lo) := by
+          calc
+            (S.hi * (1 + C.hi) - S.lo * (1 + C.lo)) *
+                ((1 + C.lo) * (1 + C.hi))⁻¹ *
+                ((1 + C.lo) * (1 + C.hi)) =
+                (S.hi * (1 + C.hi) - S.lo * (1 + C.lo)) *
+                  (((1 + C.lo) * (1 + C.hi))⁻¹ *
+                    ((1 + C.lo) * (1 + C.hi))) := by
+              grind [Rat.mul_assoc]
+            _ = S.hi * (1 + C.hi) - S.lo * (1 + C.lo) := by
+              rw [hcancel, Rat.mul_one]
+    _ <= eps * ((1 + C.lo) * (1 + C.hi)) := hmargin
 
 theorem rationalHalfAngleTangentInterval_subinterval
     {S C : QInterval}
