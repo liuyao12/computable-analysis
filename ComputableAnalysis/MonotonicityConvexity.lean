@@ -892,6 +892,13 @@ def cubeRaw_derivativeBoundFromCurvature_of_nonneg {a b : Rat}
     monotoneDerivative := cubeRaw_monotoneDerivativeBoundMethod_of_nonneg C hC
     compatible := rfl }
 
+theorem cubeRaw_derivativeBoundFromCurvature_of_nonneg_bound
+    {a b : Rat} (C : RationalSubinterval a b) (hC : 0 <= C.lower)
+    (n : Nat) :
+    (cubeRaw_derivativeBoundFromCurvature_of_nonneg C hC).toDerivativeBound.bound n =
+      { lo := 3 * C.lower * C.lower, hi := 3 * C.upper * C.upper } := by
+  rfl
+
 theorem square_secantSlopeInterval_eq
     {x y : Rat} (hxy : x < y) (n : Nat) :
     secantSlopeIntervalOfRealFun (RealFunRaw.exact square) x y n =
