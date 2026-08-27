@@ -627,7 +627,9 @@ interval-valued composition still requires a separate box-level contract.
 
    The square route now exposes the same direct-only repair:
    `dyadicNestedRadicalSquareIntegralRaw_stabilized` and its theorems
-   `..._valid_of_overlap` and `..._equiv_anchor_of_overlap`.  Thus the
+   `..._valid_of_overlap`, `..._equiv_anchor_of_overlap`, and
+   `..._stabilized_width_le`.  The public square candidate likewise exposes
+   `dyadicPublicSquareIntegralRaw_stabilized_width_le`.  Thus the
    cross-stage nesting subgoal is reduced to one explicit common-anchor
    overlap theorem; stabilization itself is formalized and sorry-free.
 

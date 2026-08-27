@@ -3322,6 +3322,15 @@ def dyadicNestedRadicalSquareIntegralRaw_stabilized
   RealRaw.prefixStabilize dyadicNestedRadicalSquareIntegralRaw
     (fun n => (anchor.compute n).width)
 
+theorem dyadicNestedRadicalSquareIntegralRaw_stabilized_width_le
+    (anchor : RealRaw) (n : Nat) :
+    ((dyadicNestedRadicalSquareIntegralRaw_stabilized anchor).compute n).width <=
+      (dyadicNestedRadicalSquareIntegralRaw.compute n).width +
+        2 * (anchor.compute n).width := by
+  exact RealRaw.prefixStabilize_width_le_current_expand
+    dyadicNestedRadicalSquareIntegralRaw
+    (fun n => (anchor.compute n).width) n
+
 theorem dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_overlap
     {anchor : RealRaw} (hanchor : anchor.Valid)
     (hover : dyadicNestedRadicalSquareIntegralRaw.Equiv anchor) :
@@ -4295,6 +4304,15 @@ def dyadicPublicSquareIntegralRaw_stabilized
     (S : ArctanSinPiConstruction) (anchor : RealRaw) : RealRaw :=
   RealRaw.prefixStabilize (dyadicPublicSquareIntegralRaw S)
     (fun n => (anchor.compute n).width)
+
+theorem dyadicPublicSquareIntegralRaw_stabilized_width_le
+    (S : ArctanSinPiConstruction) (anchor : RealRaw) (n : Nat) :
+    ((dyadicPublicSquareIntegralRaw_stabilized S anchor).compute n).width <=
+      ((dyadicPublicSquareIntegralRaw S).compute n).width +
+        2 * (anchor.compute n).width := by
+  exact RealRaw.prefixStabilize_width_le_current_expand
+    (dyadicPublicSquareIntegralRaw S)
+    (fun n => (anchor.compute n).width) n
 
 theorem dyadicPublicSquareIntegralRaw_stabilized_valid_of_overlap
     (S : ArctanSinPiConstruction)
