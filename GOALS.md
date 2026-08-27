@@ -2977,11 +2977,13 @@ The same schedule now reaches stage 256 exactly:
   `Integral.affineMonotoneIntegralFor_eq_ofRat` and
   `Integral.affineMonotoneIntegralFor_of_nonpos_eq_ofRat` expose the affine
   raw integrals by their exact endpoint formula.
-- FTC route for ordinary functions: do not pursue a generic "effective FTC"
-  whose hypotheses are derivative bounds and local controls.  The main theorem
-  should be the exact convex FTC: exact convexity on `[a,b]` implies the
-  one-sided convex derivative is monotone, integrable, and has integral
-  `F b - F a`.
+- FTC route for ordinary functions: use the generic `EffectiveDerivativeBoundFTC`
+  certificate as the reusable finite bridge.  Its hypotheses are explicit
+  derivative bounds, local endpoint controls, a shrinking width budget, and
+  stagewise overlap with the endpoint difference.  Exact convexity is the
+  next constructor target: it should produce those bounds from supplied
+  one-sided derivative algorithms and finite secant certificates, rather than
+  smuggling in an infimum, supremum, or completed-real theorem.
 - Exact convexity is now stated through `RealRaw.Le` and rational secants.
   See `RealRaw.Le`, `secantRaw`, and `ExactConvexOn`.
 - Convex derivative: a construction supplies a valid raw interval algorithm
