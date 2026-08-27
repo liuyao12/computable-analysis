@@ -1685,6 +1685,25 @@ the main transport rules:
 \lean{ComputableAnalysis.RationalPartition.boundIntegralSum_overlaps_endpointDifference}
 \leanok
 
+The polynomial integration-by-parts ladder has a higher finite rung as well.
+For the rational grid on $[0,1]$, the quartic and quintic increments satisfy
+the same two endpoint-weighted identities at every positive mesh size:
+
+\begin{verbatim}
+Δ(x^4) * x^5_left + x^4_right * Δ(x^5) -> 1
+x^4_left * Δ(x^5) + Δ(x^4) * x^5_right -> 1
+\end{verbatim}
+
+These are finite telescoping product identities.  They add no new integral
+axiom; they are regression examples showing that the integration-by-parts
+contract scales to higher polynomial degrees.
+
+\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticLeftRightSum_eq_endpoint_difference}
+\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticRightLeftSum_eq_endpoint_difference}
+\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticLeftRightSum_eq_one}
+\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticRightLeftSum_eq_one}
+\leanok
+
 Linearity and additivity are stated as certificate contracts:
 
 \begin{verbatim}
