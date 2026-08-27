@@ -86,6 +86,25 @@ theorem effectiveGeneralIntegralFor_equiv_totalEndpointDifference_of_telescope
   exact generalIntegralFor_equiv_totalEndpointDifference_of_telescope
     F c h hvalues htransport htotal
 
+/-! The focused entry point also exposes the nonuniform finite-piece error
+budget.  This is the preferred interface for clients whose cells have
+different evaluator costs: only the finite sum of their rational budgets is
+charged against the requested tolerance. -/
+theorem effectiveGeneralIntegralFor_precision_witness_of_cell_budgets
+    (F : FunctionOnInterval)
+    (c : GeneralConstructionFor F) (eps : QPos)
+    (bound : Nat -> Rat)
+    (hcell : ∃ N : Nat, ∀ n, N <= n ->
+      ∀ k (hk : k < c.pieces),
+        ((piecewiseMonotoneCellIntegral F c k hk).compute n).width <=
+          bound k)
+    (hsum : (List.range c.pieces).foldl
+      (fun total k => total + bound k) 0 <= eps.val) :
+    ∃ N : Nat, ∀ n, N <= n ->
+      ((generalIntegralFor F c).compute n).width <= eps.val := by
+  exact piecewiseMonotoneIntegralFor_precision_witness_of_cell_budgets
+    F c eps bound hcell hsum
+
 /-! Publicly expose the finite mean-value conclusion through the effective
 calculus entry point.  The conclusion is an overlap of rational boxes, so it
 does not select an attained intermediate real number. -/
