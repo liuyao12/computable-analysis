@@ -8367,6 +8367,81 @@ def IntervalRegularOn.toEffectiveModulusFor
     exact QInterval.nearAt_of_contains_common
       hcontainsX hcontainsY hXordered hYordered hboxwidth
 
+/-! The adaptive version keeps the evaluator's chosen output stage.  This is
+   the form used when interval images are cheaper or more accurate at a stage
+   different from the raw point evaluator's requested index. -/
+def ScheduledIntervalRegularOn.toEffectiveModulusFor
+    {F : FunctionOnInterval} (h : ScheduledIntervalRegularOn F) :
+    EffectiveModulusFor F where
+  inputPrecision := fun n => h.inputPrecision (n + 1)
+  inputPrecision_pos := fun n => h.inputPrecision_pos (n + 1)
+  evalPrecision := fun n => h.evalPrecision (n + 1)
+  close := by
+    intro x y n hx hy hclose
+    let I : QInterval := { lo := min x y, hi := max x y }
+    have hI : subintervalOf I F.lower F.upper := by
+      rcases hx with ⟨hxlo, hxhi⟩
+      rcases hy with ⟨hylo, hyhi⟩
+      dsimp [I]
+      constructor
+      · grind
+      constructor <;> grind
+    have hIwidth : I.width = qabs (y - x) := by
+      dsimp [I]
+      exact QInterval.endpointHull_width x y
+    have hsmall : I.width <=
+        1 / ((h.inputPrecision (n + 1) : Nat) : Rat) := by
+      rw [hIwidth]
+      exact hclose
+    have houtput := h.output_width I hI (n + 1) hsmall
+    have htarget :
+        1 / (((n + 2 : Nat) : Rat)) <= (precisionAtStage n).val := by
+      cases n with
+      | zero => native_decide
+      | succ n =>
+          simp only [precisionAtStage, dif_neg (Nat.succ_ne_zero n)]
+          calc
+            1 / (((n + 1 + 2 : Nat) : Rat)) <=
+                1 / (((n + 1 + 1 : Nat) : Rat)) := by
+              simpa [Nat.add_assoc] using one_div_nat_succ_le (n + 1)
+            _ <= 1 / (((n + 1 : Nat) : Rat)) := by
+              simpa [Nat.add_assoc] using one_div_nat_succ_le n
+    have hboxwidth : (h.evalInterval I hI (n + 1)).width <=
+        (precisionAtStage n).val :=
+      Rat.le_trans houtput.2 htarget
+    have hxlo : I.lo <= x := by
+      dsimp [I]
+      grind
+    have hxhi : x <= I.hi := by
+      dsimp [I]
+      grind
+    have hylo : I.lo <= y := by
+      dsimp [I]
+      grind
+    have hyhi : y <= I.hi := by
+      dsimp [I]
+      grind
+    have hcontainsX := h.contains_point_values I hI x hx (n + 1) hxlo hxhi
+    have hcontainsY := h.contains_point_values I hI y hy (n + 1) hylo hyhi
+    have hXordered :
+        (F.compute x hx (h.evalPrecision (n + 1))).lo <=
+          (F.compute x hx (h.evalPrecision (n + 1))).hi := by
+      have hw := (F.valid_on x (F.defined_on x hx)).1
+        (h.evalPrecision (n + 1))
+      change 0 <= (F.compute x hx (h.evalPrecision (n + 1))).hi -
+        (F.compute x hx (h.evalPrecision (n + 1))).lo at hw
+      grind [Rat.sub_eq_add_neg]
+    have hYordered :
+        (F.compute y hy (h.evalPrecision (n + 1))).lo <=
+          (F.compute y hy (h.evalPrecision (n + 1))).hi := by
+      have hw := (F.valid_on y (F.defined_on y hy)).1
+        (h.evalPrecision (n + 1))
+      change 0 <= (F.compute y hy (h.evalPrecision (n + 1))).hi -
+        (F.compute y hy (h.evalPrecision (n + 1))).lo at hw
+      grind [Rat.sub_eq_add_neg]
+    exact QInterval.nearAt_of_contains_common
+      hcontainsX hcontainsY hXordered hYordered hboxwidth
+
 /-- A certified continuous function on a rational interval.
 
 This is the theorem-facing package.  `FunctionOnInterval` says the evaluator is

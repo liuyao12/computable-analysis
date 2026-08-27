@@ -276,7 +276,13 @@ boxes contained in one image box are `NearAt` once that image box is narrow.
 \lean{ComputableAnalysis.QInterval.nearAt_of_contains_common}
 \lean{ComputableAnalysis.one_div_nat_succ_le}
 \lean{ComputableAnalysis.IntervalRegularOn.toEffectiveModulusFor}
+\lean{ComputableAnalysis.ScheduledIntervalRegularOn.toEffectiveModulusFor}
 \leanok
+
+The scheduled adapter is the one intended for special functions whose
+interval evaluator chooses its own internal precision.  It preserves that
+choice in the output field while still presenting the canonical modulus
+interface to downstream FTC and inverse-search code.
 
 For addition, the finite-difference algebra is explicit:
 
