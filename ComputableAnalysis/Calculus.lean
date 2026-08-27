@@ -11562,6 +11562,26 @@ theorem piecewiseMonotoneEndpointValueList_adjacent
   have ha0 : a <= c.pieces := by omega
   simp [ha', ha0, ha1, piecewiseMonotoneEndpointDifference]
 
+theorem piecewiseMonotoneEndpointDifferenceList_valid
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) :
+    forall x, x ∈ piecewiseMonotoneEndpointDifferenceList F c -> x.Valid := by
+  intro x hx
+  rcases List.mem_map.1 hx with ⟨k, hk, rfl⟩
+  have hk' : k < c.pieces := List.mem_range.1 hk
+  simp [piecewiseMonotoneEndpointDifferenceList, hk']
+  exact piecewiseMonotoneEndpointDifference_valid F c k hk'
+
+theorem piecewiseMonotoneEndpointDifferenceList_equiv_canonicalAdjacent
+    (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) :
+    FiniteRawListEquiv
+      (piecewiseMonotoneEndpointDifferenceList F c)
+      (rawAdjacentDifferenceList (piecewiseMonotoneEndpointValueList F c)) := by
+  rw [piecewiseMonotoneEndpointValueList_adjacent]
+  exact FiniteRawListEquiv.refl
+    (piecewiseMonotoneEndpointDifferenceList_valid F c)
+
 structure PiecewiseMonotoneEndpointFTCFor
     (F : FunctionOnInterval)
     (c : PiecewiseMonotoneConstructionFor F) where

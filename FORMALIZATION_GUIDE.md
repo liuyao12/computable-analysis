@@ -915,6 +915,10 @@ For the canonical partition endpoints, use
 `Integral.piecewiseMonotoneEndpointValueList_adjacent` theorem generate the
 adjacent-difference list automatically.  Keep an explicit transport
 certificate when using an independently computed primitive endpoint list.
+The corresponding
+`Integral.piecewiseMonotoneEndpointDifferenceList_equiv_canonicalAdjacent`
+theorem supplies the finite list equivalence directly for the canonical
+partition endpoints.
 
 `FTC.EffectiveFTC` and `FTC.effectiveFTC_definiteIntegralEqualsEndpoint`
 describe one checked endpoint-bridge route.  The generic bridge from an
