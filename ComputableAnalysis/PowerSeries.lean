@@ -209,6 +209,15 @@ theorem coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative
       have hne : (((n + 1 : Nat) : Rat)) ≠ 0 := natCast_succ_ne_zero n
       grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel _ hne]
 
+theorem derivative_coeffsFromDerivativeAtZero (F0 : Rat) (dF : Coeffs) :
+    derivative (coeffsFromDerivativeAtZero F0 dF) = dF := by
+  exact coeffsFromDerivativeAtZero_hasFormalDerivative F0 dF
+
+theorem coeffsFromDerivativeAtZero_derivative (F : Coeffs) :
+    coeffsFromDerivativeAtZero (F 0) (derivative F) = F := by
+  exact coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative (F := F) (dF := derivative F)
+    (by rfl)
+
 theorem derivative_neg (c : Coeffs) :
     derivative (neg c) = neg (derivative c) := by
   funext n

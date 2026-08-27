@@ -3896,6 +3896,10 @@ potential-infinity precision schedule.
   `FormalPowerSeries.expCoeff_eq_of_selfDerivative` closes the corresponding
   self-derivative initial-value recurrence \(F'=F,\ F(0)=1\) coefficient by
   coefficient.
+  The formal primitive operator now has an explicit inverse-pair API:
+  `derivative_coeffsFromDerivativeAtZero` and
+  `coeffsFromDerivativeAtZero_derivative` state the two coefficient-level FTC
+  directions, with the constant coefficient supplying the integration anchor.
   The parameterized form is now also checked: `scaledExpCoeff_derivative`
   proves the coefficient recurrence for \(F'=rF\), and
   `scaledExpCoeff_eq_of_scaledSelfDerivative` proves its initial-value
