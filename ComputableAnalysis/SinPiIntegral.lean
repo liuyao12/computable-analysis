@@ -5784,6 +5784,19 @@ theorem dyadicNestedRadicalTableAt_succ_odd
         (sine, dyadicNestedRadicalNeg cosine) := by
   simp [dyadicNestedRadicalTableAt, hodd]
 
+/-! The corresponding equal-mesh sample is the same rational point. -/
+theorem dyadicTangentBoxAt_even_input
+    (precision n k : Nat) (hk : k < 2 ^ n) :
+    2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ (n + 1)) (2 * k) =
+      2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k := by
+  rw [show 2 ^ (n + 1) = 2 ^ n * 2 by rw [Nat.pow_succ]]
+  have hpow : 0 < 2 ^ n := Nat.pow_pos (by omega)
+  have hrefine := leftPoint_refine_mul_right
+    (a := (0 : Rat)) (b := (1 : Rat) / 2)
+    (m := 2 ^ n) (n := 2) (i := k) hpow (by omega)
+  simpa [Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using congrArg
+    (fun x : Rat => 2 * x) hrefine
+
 theorem dyadicHalfAngleSinInput_subinterval
     (I : QInterval) (hI : subintervalOf I (-1) 1) :
     subintervalOf (dyadicHalfAngleSinInput I) 0 1 := by

@@ -1406,6 +1406,13 @@ The even nested-radical branch is now packaged directly from a successful
 finite tangent-witness search.  It reuses the public circle box, proves its
 ordering, and transports the search overlap to the parent table precision:
 
+At the computational level, the even child is simply the parent sample at a
+later precision.  The dyadic-table equation and the equal-mesh identity are
+now named explicitly:
+
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalTableAt_succ_even}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicTangentBoxAt_even_input}
+
 The inverse side has the complementary refinement law: at one fixed dyadic
 sample, a later tangent computation is enclosed by the earlier one.  This is
 the exact finite fact available for the even branch; it does not by itself
