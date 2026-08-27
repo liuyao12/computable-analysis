@@ -7,6 +7,7 @@ import ComputableAnalysis.FiniteQuadratureMeanValue
 import ComputableAnalysis.FiniteLHopitalCertificate
 import ComputableAnalysis.FiniteGapAwareInverseSearch
 import ComputableAnalysis.EffectiveFTCPortfolio
+import ComputableAnalysis.FinitePiecewiseAbsoluteValue
 
 /-!
 # Effective calculus foundation

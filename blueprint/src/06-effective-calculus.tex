@@ -35,6 +35,21 @@ and piecewise variants reuse those certificates; a broken function such as
 detail belongs in Lean, where each new instance must expose its own domain and
 stage schedule.
 
+The first explicit turning-point client is \(|x|\) on \([-1,1]\).  Its
+rational chart is split at the critical point (0): the left cell is
+nonincreasing, the right cell is nondecreasing, and the two certified raw
+cell integrals are assembled by a finite sum.  The result is (1).  This is
+the intended treatment of a piecewise-smooth integrand: split at finitely
+many rational critical points, rather than forcing one global monotonicity
+certificate.
+
+\lean{ComputableAnalysis.Integral.absoluteValueOnUnit}
+\lean{ComputableAnalysis.Integral.absoluteValueLeft_nonincreasing}
+\lean{ComputableAnalysis.Integral.absoluteValueRight_nondecreasing}
+\lean{ComputableAnalysis.Integral.absoluteValuePiecewise}
+\lean{ComputableAnalysis.Integral.absoluteValuePiecewise_integral_equiv_one}
+\leanok
+
 The same foundation also has a genuinely nonconstant Lipschitz--Darboux
 route.  For the identity function, midpoint refinement gives nested rational
 boxes of width \(2/2^n\); this is the model for integrating functions whose
