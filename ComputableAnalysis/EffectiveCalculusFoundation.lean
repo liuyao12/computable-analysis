@@ -47,6 +47,14 @@ theorem effectiveConcaveFTC
       h.toDerivativeBoundFTC.endpointRaw := by
   exact concaveFTC h
 
+/-- The square function is the first complete concrete curvature client: its
+finite convexity bounds feed the effective FTC and close at the endpoint
+difference. -/
+theorem effectiveSquareCurvatureFTC :
+    squareCurvatureFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      squareCurvatureFTCData.toDerivativeBoundFTC.endpointRaw := by
+  exact squareCurvatureFTC_equiv_endpoint
+
 /-! The scoped entry point gives the finite-piece FTC its project-facing name.
 The partition, cell endpoint certificates, and endpoint transport remain
 explicit inputs; this wrapper adds no completeness or general continuity
