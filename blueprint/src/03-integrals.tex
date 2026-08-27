@@ -1595,6 +1595,8 @@ certificate when the identity is promoted from finite sums to an integral.
 \lean{ComputableAnalysis.leftStieltjesSum_const_left}
 \lean{ComputableAnalysis.rightStieltjesSum_one_right}
 \lean{ComputableAnalysis.rightStieltjesSum_const_right}
+\lean{ComputableAnalysis.leftStieltjesSum_const_path}
+\lean{ComputableAnalysis.leftStieltjesSum_affine_path}
 \leanok
 
 In particular, a constant integrand against any rational path is exact at
@@ -1607,6 +1609,9 @@ This is the smallest Riemann--Stieltjes change-of-variables law; it is
 available before a limiting integral or an abstract real is introduced.
 The right-endpoint orientation has the identical endpoint law, so the two
 conventions can be interchanged in the finite integration-by-parts identity.
+For an affine integrator path (s g+t), the translation term vanishes and
+the slope (s) factors out; this is the exact finite transport used by a
+chart substitution.
 
 The tangent-chart substitution is also finite.  For a chart cell
 \((p\mapsto r)\), compute the two endpoint Jacobian ratios, fold the lower and
