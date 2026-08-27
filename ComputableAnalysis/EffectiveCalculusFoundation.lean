@@ -105,6 +105,20 @@ theorem effectiveGeneralIntegralFor_precision_witness_of_cell_budgets
   exact piecewiseMonotoneIntegralFor_precision_witness_of_cell_budgets
     F c eps bound hcell hsum
 
+/-! Uniform allocation is the convenient entry point when all cells use the
+same evaluator schedule. -/
+theorem effectiveGeneralIntegralFor_precision_witness_of_common_cell_budget
+    (F : FunctionOnInterval)
+    (c : GeneralConstructionFor F) (eps : QPos)
+    (hcell : ∃ N : Nat, ∀ n, N <= n ->
+      ∀ k (hk : k < c.pieces),
+        ((piecewiseMonotoneCellIntegral F c k hk).compute n).width <=
+          eps.val / (c.pieces : Rat)) :
+    ∃ N : Nat, ∀ n, N <= n ->
+      ((generalIntegralFor F c).compute n).width <= eps.val := by
+  exact piecewiseMonotoneIntegralFor_precision_witness_of_common_cell_budget
+    F c eps hcell
+
 /-! Representation changes are explicit: an alternative finite list of cell
 evaluators can be used once its entries are proved equivalent to the
 canonical list. -/
