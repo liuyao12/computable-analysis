@@ -625,6 +625,109 @@ end PointwiseFunction
 
 end ConvexDerivative
 
+/-! The same centered-secant construction works for concave primitives.  The
+only change is the order: as the center moves right, the certified derivative
+boxes move weakly left.  Keeping this as a separate namespace makes the
+orientation visible to clients and avoids encoding concavity by negating a
+particular raw evaluator. -/
+namespace ConcaveDerivative
+
+abbrev centeredInterval (F : RealFunRaw) (q h : Rat) (prec : Nat) : QInterval :=
+  ConvexDerivative.centeredInterval F q h prec
+abbrev InteriorPoint {a b : Rat} (C : RationalSubinterval a b) (q : Rat) :=
+  ConvexDerivative.InteriorPoint C q
+
+structure Pointwise {F : RealFunRaw} {a b : Rat}
+    {C : RationalSubinterval a b} (H : CurvatureOnSubinterval F C) (q : Rat) where
+  concave : H.kind = CurvatureKind.concave
+  interior : InteriorPoint C q
+  step : Nat -> Rat
+  step_pos : forall n, 0 < step n
+  step_le_radius : forall n, step n <= interior.radius
+  valid :
+    RealRaw.ValidCompute
+      (fun n => centeredInterval F q (step n) (H.evalPrecision n))
+
+namespace Pointwise
+
+def compute {F : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
+    {H : CurvatureOnSubinterval F C} {q : Rat}
+    (D : Pointwise H q) (n : Nat) : QInterval :=
+  centeredInterval F q (D.step n) (H.evalPrecision n)
+
+def raw {F : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
+    {H : CurvatureOnSubinterval F C} {q : Rat}
+    (D : Pointwise H q) : RealRaw where
+  compute := D.compute
+
+theorem raw_valid {F : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
+    {H : CurvatureOnSubinterval F C} {q : Rat}
+    (D : Pointwise H q) : D.raw.Valid := by
+  change RealRaw.ValidCompute
+    (fun n => centeredInterval F q (D.step n) (H.evalPrecision n))
+  exact D.valid
+
+theorem left_mem {F : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
+    {H : CurvatureOnSubinterval F C} {q : Rat}
+    (D : Pointwise H q) (n : Nat) :
+    C.contains (q - D.step n) := by
+  have hpos := D.step_pos n
+  have hle := D.step_le_radius n
+  have hleft := D.interior.left_mem
+  have hcenter := D.interior.center_mem
+  unfold RationalSubinterval.contains at *
+  constructor <;> grind
+
+theorem center_mem {F : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
+    {H : CurvatureOnSubinterval F C} {q : Rat}
+    (D : Pointwise H q) : C.contains q :=
+  D.interior.center_mem
+
+theorem right_mem {F : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
+    {H : CurvatureOnSubinterval F C} {q : Rat}
+    (D : Pointwise H q) (n : Nat) :
+    C.contains (q + D.step n) := by
+  have hpos := D.step_pos n
+  have hle := D.step_le_radius n
+  have hright := D.interior.right_mem
+  have hcenter := D.interior.center_mem
+  unfold RationalSubinterval.contains at *
+  constructor <;> grind
+
+theorem left_lt_center {F : RealFunRaw} {a b : Rat}
+    {C : RationalSubinterval a b} {H : CurvatureOnSubinterval F C}
+    {q : Rat} (D : Pointwise H q) (n : Nat) :
+    q - D.step n < q := by
+  have hpos := D.step_pos n
+  grind
+
+theorem center_lt_right {F : RealFunRaw} {a b : Rat}
+    {C : RationalSubinterval a b} {H : CurvatureOnSubinterval F C}
+    {q : Rat} (D : Pointwise H q) (n : Nat) :
+    q < q + D.step n := by
+  have hpos := D.step_pos n
+  grind
+
+/-- Concave derivative boxes are antitone once the two centered neighborhoods
+are disjoint. -/
+theorem compute_weakLe_of_gap
+    {F : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
+    {H : CurvatureOnSubinterval F C} {q1 q2 : Rat}
+    (D1 : Pointwise H q1) (D2 : Pointwise H q2)
+    (n : Nat)
+    (hgap : q1 + D1.step n <= q2 - D2.step n) :
+    QInterval.WeakLe (D2.compute n) (D1.compute n) := by
+  simpa [compute] using
+    ConvexDerivative.centeredInterval_weakLe_of_concave
+      H D1.concave
+      (D1.left_mem n) (D1.center_mem) (D1.right_mem n)
+      (D2.left_mem n) (D2.center_mem) (D2.right_mem n)
+      (D1.center_lt_right n) hgap (D2.left_lt_center n) n
+
+end Pointwise
+
+end ConcaveDerivative
+
 namespace ExactFunction
 
 def secantSlope (f : Rat -> Rat) (x y : Rat) : Rat :=
