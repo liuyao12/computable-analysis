@@ -4142,6 +4142,9 @@ arguments.
   a valid `ComplexRaw`, with an endpoint-equivalence theorem for open paths.
   This is an exact rational-complex integral evaluator, not an appeal to a
   completed complex path space.
+  Its closed-path specialization
+  `polygonalPolynomialIntegralRaw_closed_equiv_zero` is the corresponding
+  finite Cauchy-style theorem for polynomial differentials.
 
 ## Algebraic Numbers and FTA
 

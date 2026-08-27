@@ -507,6 +507,14 @@ theorem polygonalPolynomialIntegralRaw_equiv_endpoint
     polygonalPolynomialPrimitiveTo_append_endpoint]
   exact ComplexRaw.equiv_refl _ (ComplexRaw.ofQComplex_valid _)
 
+theorem polygonalPolynomialIntegralRaw_closed_equiv_zero
+    (coefficients : List QComplex) (start : QComplex)
+    (vertices : List QComplex) :
+    (polygonalPolynomialIntegralRaw coefficients start
+      (vertices ++ [start])).Equiv (ComplexRaw.ofQComplex QComplex.zero) := by
+  rw [polygonalPolynomialIntegralRaw, polygonalPolynomialPrimitiveTo_closed]
+  exact ComplexRaw.equiv_refl _ (ComplexRaw.ofQComplex_valid _)
+
 /-- A point on the straight segment from `a` to `b`, with parameter `k/n`. -/
 def segmentPoint (a b : QComplex) (n : Nat) (k : Nat) : QComplex :=
   QComplex.add a
