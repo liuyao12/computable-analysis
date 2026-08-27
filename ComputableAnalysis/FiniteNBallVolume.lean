@@ -343,9 +343,43 @@ theorem finiteProductIntegralNestedSum_nonneg
                   (by
                     intro cells' hcells' cell' hcell'
                     exact hwidth cells' (by simp [hcells']) cell' hcell')
-                  (by
+              (by
                     intro factor' hfactor' x
                     exact hfactor factor' (by simp [hfactor']) x))
+
+/-! Repeating one weighted coordinate rule across a finite number of axes is
+the rectangular analogue of a product measure, but it is only list recursion:
+there is no infinite product or measure construction here. -/
+
+def repeatIntegralAxis (axis : List (Rat × Rat)) : Nat -> List (List (Rat × Rat))
+  | 0 => []
+  | count + 1 => axis :: repeatIntegralAxis axis count
+
+theorem finiteProductIntegralFactorProduct_repeat_axis
+    (axis : List (Rat × Rat)) (factor : Rat -> Rat) (dimension : Nat) :
+    finiteProductIntegralFactorProduct
+      (repeatIntegralAxis axis dimension)
+      (List.replicate dimension factor) =
+      ((axis.map (fun cell => cell.2 * factor cell.1)).foldl
+        (fun acc value => acc + value) 0) ^ dimension := by
+  induction dimension with
+  | zero => simp [repeatIntegralAxis, finiteProductIntegralFactorProduct]
+  | succ dimension ih =>
+      simp only [repeatIntegralAxis, List.replicate_succ,
+        finiteProductIntegralFactorProduct]
+      rw [ih, Rat.pow_succ]
+      grind [Rat.mul_comm]
+
+theorem finiteProductIntegralNestedSum_repeat_axis_factorized
+    (axis : List (Rat × Rat)) (factor : Rat -> Rat) (dimension : Nat) :
+    finiteProductIntegralNestedSum
+      (repeatIntegralAxis axis dimension)
+  (List.replicate dimension factor) =
+      ((axis.map (fun cell => cell.2 * factor cell.1)).foldl
+        (fun acc value => acc + value) 0) ^ dimension := by
+  rw [finiteProductIntegralNestedSum_factorized]
+  rw [finiteProductIntegralSum_eq_factorProduct]
+  exact finiteProductIntegralFactorProduct_repeat_axis axis factor dimension
 
 /- A concrete weighted rectangular computation.  The two sample lists carry
 cell widths, so this is a finite two-dimensional integral cell sum rather than
