@@ -1417,6 +1417,47 @@ private theorem scaleRat_ofRat_equiv (c q : Rat) :
     simp [RealRaw.scaleRat, RealRaw.scaleRatCompute, RealRaw.ofRat,
       RealRaw.ofRat_compute, hc, hc', QInterval.Overlaps]
 
+theorem effectiveFiniteTaylorEndpointRaw_scale
+    (c : Rat) (coeffs : Nat -> Rat) (terms : Nat) (a b : Rat) :
+    (effectiveFiniteTaylorEndpointRaw (fun k => c * coeffs k) terms a b).Equiv
+      (RealRaw.scaleRat c (effectiveFiniteTaylorEndpointRaw coeffs terms a b)) := by
+  have hscaled := effectiveFiniteTaylorEndpointRaw_equiv_finiteMonomialSum
+    (fun k => c * coeffs k) terms a b
+  have hbase := effectiveFiniteTaylorEndpointRaw_equiv_finiteMonomialSum
+    coeffs terms a b
+  let q := FinitePolynomial.finiteMonomialIntegralSum coeffs terms a b
+  let cq := FinitePolynomial.finiteMonomialIntegralSum
+    (fun k => c * coeffs k) terms a b
+  have hqvalid : (RealRaw.ofRat q).Valid := by
+    unfold RealRaw.ofRat RealRaw.Valid
+    exact RealRaw.ofRat_valid _
+  have hcqvalid : (RealRaw.ofRat cq).Valid := by
+    unfold RealRaw.ofRat RealRaw.Valid
+    exact RealRaw.ofRat_valid _
+  have hscale :
+      (RealRaw.ofRat cq).Equiv (RealRaw.scaleRat c (RealRaw.ofRat q)) := by
+    have hq : cq = c * q := by
+      dsimp [cq, q]
+      exact effectiveFinitePolynomialIntegralSum_scale c coeffs terms a b
+    rw [hq]
+    exact RealRaw.equiv_symm (scaleRat_ofRat_equiv c q)
+  have htransport :
+      (RealRaw.scaleRat c (RealRaw.ofRat q)).Equiv
+        (RealRaw.scaleRat c (effectiveFiniteTaylorEndpointRaw coeffs terms a b)) := by
+    exact RealRaw.equiv_symm (RealRaw.scaleRat_equiv hbase)
+  have hscaleTransport :
+      (RealRaw.ofRat cq).Equiv
+        (RealRaw.scaleRat c (effectiveFiniteTaylorEndpointRaw coeffs terms a b)) := by
+    exact RealRaw.equiv_trans hcqvalid
+      (RealRaw.scaleRat_valid hqvalid)
+      (RealRaw.scaleRat_valid (effectiveFiniteTaylorEndpointRaw_valid _ _ _ _))
+      hscale htransport
+  exact RealRaw.equiv_trans
+    (effectiveFiniteTaylorEndpointRaw_valid _ _ _ _)
+    hcqvalid
+    (RealRaw.scaleRat_valid (effectiveFiniteTaylorEndpointRaw_valid _ _ _ _))
+    hscaled hscaleTransport
+
 private theorem scaleRat_width_eq_qabs_mul (c : Rat) (x : RealRaw)
     (n : Nat) :
     ((RealRaw.scaleRat c x).compute n).width =
