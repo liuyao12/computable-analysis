@@ -174,6 +174,30 @@ theorem effectiveLinearODESquareZeroUniformStep
   exact LinearODE.chronologicalProduct_constant_square_zero_uniform_step
     A T steps hsteps hAA
 
+theorem effectiveLinearODESimplexVolume_eq_closed
+    (T : Rat) (degree : Nat) :
+    LinearODE.orderedSimplexVolume T degree =
+      T ^ degree / factorialRat degree := by
+  exact LinearODE.orderedSimplexVolume_eq_closed T degree
+
+theorem effectiveLinearODEPeanoBakerTerm_succ
+    {dimension : Nat} (A : LinearODE.RatMatrix dimension)
+    (T : Rat) (degree : Nat) :
+    LinearODE.constantPeanoBakerSimplexTerm A T (degree + 1) =
+      LinearODE.matrixScale (T / ((degree + 1 : Nat) : Rat))
+        (LinearODE.matrixMul A
+          (LinearODE.constantPeanoBakerSimplexTerm A T degree)) := by
+  exact LinearODE.constantPeanoBakerSimplexTerm_succ A T degree
+
+theorem effectiveLinearODEPeanoBakerPartial_succ
+    {dimension : Nat} (A : LinearODE.RatMatrix dimension)
+    (T : Rat) (terms : Nat) :
+    LinearODE.constantPeanoBakerSimplexPartial A T (terms + 1) =
+      LinearODE.matrixAdd
+        (LinearODE.constantPeanoBakerSimplexPartial A T terms)
+        (LinearODE.constantPeanoBakerSimplexTerm A T terms) := by
+  exact LinearODE.constantPeanoBakerSimplexPartial_succ A T terms
+
 def effectivePeanoBakerFactorialRemainderCertificate
     {M T : Rat} (hM : 0 <= M) (hT : 0 <= T) (eps : QPos) :
     LinearODE.PeanoBakerFactorialRemainderCertificate M T eps := by
