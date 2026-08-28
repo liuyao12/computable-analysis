@@ -181,6 +181,52 @@ theorem gaussianEvenIntegralTerm_abs_le_factorialTailTerm
       rw [Rat.mul_assoc, Rat.mul_inv_cancel _ (Rat.ne_of_gt hdenpos)]
       simp
 
+/- For nonnegative radius, the absolute integrated term has the expected
+   factorial form.  This equality exposes the ratio used by the alternating
+   series certificate, rather than hiding it in an inequality. -/
+theorem gaussianEvenIntegralTerm_abs_eq_scaled_factorialTailTerm
+    {radius : Rat} (hr : 0 <= radius) (k : Nat) :
+    qabs (gaussianEvenIntegralTerm k radius) =
+      2 * radius * RationalMajorant.factorialTailTerm (radius * radius) k /
+        ((2 * k + 1 : Nat) : Rat) := by
+  have hdenpos : 0 < ((2 * k + 1 : Nat) : Rat) := by grind
+  have hcoef : 0 <= FormalPowerSeries.expCoeff k := by
+    unfold FormalPowerSeries.expCoeff
+    rw [Rat.div_def, Rat.one_mul]
+    exact Rat.le_of_lt ((Rat.inv_pos).2 (RationalMajorant.factorialRat_pos k))
+  have hsign : qabs ((-1 : Rat) ^ k) = 1 := by
+    rw [RationalMajorant.qabs_pow_eq_pow_qabs]
+    have hone : qabs (-1 : Rat) = 1 := by native_decide
+    rw [hone]
+    let rec honepow : ∀ n : Nat, (1 : Rat) ^ n = 1
+      | 0 => by native_decide
+      | n + 1 => by
+          rw [Rat.pow_succ, honepow n]
+          native_decide
+    exact honepow k
+  let rec hpow_even : ∀ n : Nat, radius ^ (2 * n) = (radius * radius) ^ n
+    | 0 => by simp [Rat.pow_zero]
+    | n + 1 => by
+        rw [show 2 * (n + 1) = (2 * n) + 2 by omega,
+          Rat.pow_succ, Rat.pow_succ, hpow_even n, Rat.pow_succ]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  unfold gaussianEvenIntegralTerm
+  rw [Rat.div_def, qabs_mul, qabs_mul, qabs_mul, qabs_mul,
+    qabs_eq_self_of_nonneg (by native_decide : (0 : Rat) <= 2), hsign]
+  rw [Rat.mul_one, RationalMajorant.qabs_pow_eq_pow_qabs,
+    qabs_eq_self_of_nonneg hr]
+  rw [show 2 * k + 1 = (2 * k) + 1 by rfl, Rat.pow_succ, hpow_even k]
+  have hdeninv : qabs (((2 * k + 1 : Nat) : Rat)⁻¹) =
+      ((2 * k + 1 : Nat) : Rat)⁻¹ :=
+    qabs_eq_self_of_nonneg (Rat.le_of_lt ((Rat.inv_pos).2 hdenpos))
+  have hcoefabs : qabs (FormalPowerSeries.expCoeff k) =
+      FormalPowerSeries.expCoeff k := qabs_eq_self_of_nonneg hcoef
+  rw [hdeninv]
+  rw [hcoefabs]
+  unfold FormalPowerSeries.expCoeff RationalMajorant.factorialTailTerm
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
 def gaussianEvenIntegralTailMajorant (radius : Rat) (start : Nat) : Nat → Rat
   | 0 => 0
   | terms + 1 =>
