@@ -1540,6 +1540,19 @@ theorem exactRat_pow_monotoneIntegralFor_eq_dyadicRaw (n : Nat) :
       (exactRat_pow_integral_certificate n) := by
   rfl
 
+/-! The generic power certificate exposes its runtime error exactly.  The
+    bound is proportional to the Lipschitz constant `n` and inversely to the
+    dyadic mesh size; this is the finite error contract behind the uniform
+    monomial integral family. -/
+
+theorem exactRat_pow_integral_raw_compute_width (n stage : Nat) :
+    ((Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1)
+      (exactRat_pow_integral_certificate n)).compute stage).width =
+      (2 * (n : Rat)) * (1 / (((2 ^ stage : Nat) : Rat))) := by
+  unfold Integral.raw Integral.integralFor exactRat_pow_integral_certificate
+  exact IntegralIdentities.LipschitzDyadic.compute_width n stage
+
 /-! The normalized monomial primitive is also available as one generic
 endpoint-difference object.  Its adjacent-interval law is purely finite
 subtraction, so it does not depend on an integral construction or on a
