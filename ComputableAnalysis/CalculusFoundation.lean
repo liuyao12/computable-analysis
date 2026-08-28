@@ -1865,6 +1865,20 @@ theorem effectiveFourierSeries_stabilized_width_le
       (F.candidate.compute n).width + 2 * F.radius n := by
   exact F.stabilized_width_le_of_candidate n
 
+theorem effectiveFourPointComplexFourierTransform_parseval
+    (x₀ x₁ x₂ x₃ : QComplex) :
+    QComplex.normSq
+          (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0) +
+        QComplex.normSq
+          (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 1) +
+        QComplex.normSq
+          (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 2) +
+        QComplex.normSq
+          (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 3) =
+      4 * (QComplex.normSq x₀ + QComplex.normSq x₁ +
+        QComplex.normSq x₂ + QComplex.normSq x₃) := by
+  exact fourPointComplexFourierTransform_parseval x₀ x₁ x₂ x₃
+
 /-! The first matrix ODE base case is likewise exposed at the scoped entry
 point.  It is an exact rational linear-algebra theorem, before any passage to
 a continuous matrix-valued function. -/
