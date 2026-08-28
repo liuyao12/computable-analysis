@@ -309,6 +309,25 @@ theorem effectiveDyadicNestedRadical_sample_coordinate
       (k : Rat) / ((2 ^ n : Nat) : Rat) := by
   exact SinPiIntegral.dyadicNestedRadical_sample_coordinate hk
 
+theorem effectiveDyadicNestedRadicalIntegralRaw_stabilized_valid_of_overlap
+    (hoverlap : forall n,
+      QInterval.Overlaps
+        (SinPiIntegral.dyadicNestedRadicalLeftSum n)
+        (SinPiIntegral.sinPiStieltjesIntegral.compute n)) :
+    SinPiIntegral.dyadicNestedRadicalIntegralRaw_stabilized.Valid := by
+  exact SinPiIntegral.dyadicNestedRadicalIntegralRaw_stabilized_valid_of_overlap
+    hoverlap
+
+theorem effectiveDyadicNestedRadicalIntegralRaw_stabilized_equiv_reciprocalPi_of_overlap
+    (hoverlap : forall n,
+      QInterval.Overlaps
+        (SinPiIntegral.dyadicNestedRadicalLeftSum n)
+        (SinPiIntegral.sinPiStieltjesIntegral.compute n)) :
+    SinPiIntegral.dyadicNestedRadicalIntegralRaw_stabilized.Equiv
+      SinPiIntegral.reciprocalPiRaw := by
+  exact SinPiIntegral.dyadicNestedRadicalIntegralRaw_stabilized_equiv_reciprocalPi_of_overlap
+    hoverlap
+
 theorem effectiveIntervalRegularDarbouxSchedule_widths_shrink_of_budget
     {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
     {hinterval : F.lower <= F.upper} (lengthBound : Nat)
