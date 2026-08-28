@@ -23,6 +23,29 @@ or introducing a completed function space.
 
 namespace ComputableAnalysis
 
+/-! A finite complex coefficient prefix has the same termwise primitive
+constructor as the rational polynomial layer.  The coefficient stream and
+the evaluation point are rational-complex, while division by the natural
+index remains a rational scalar operation. -/
+def complexFinitePrimitiveTerm
+    (coefficients : Nat -> QComplex) (z : QComplex) (k : Nat) : QComplex :=
+  QComplex.scaleRat (1 / (((k + 1 : Nat) : Rat)))
+    (QComplex.mul (coefficients k) (QComplex.pow z (k + 1)))
+
+def complexFinitePrimitivePrefix
+    (coefficients : Nat -> QComplex) (z : QComplex) (terms : Nat) : QComplex :=
+  (List.range terms).foldl
+    (fun acc k => QComplex.add acc
+      (complexFinitePrimitiveTerm coefficients z k)) QComplex.zero
+
+theorem complexFinitePrimitivePrefix_succ
+    (coefficients : Nat -> QComplex) (z : QComplex) (terms : Nat) :
+    complexFinitePrimitivePrefix coefficients z (terms + 1) =
+      QComplex.add
+        (complexFinitePrimitivePrefix coefficients z terms)
+        (complexFinitePrimitiveTerm coefficients z terms) := by
+  simp [complexFinitePrimitivePrefix, List.range_succ, List.foldl_append]
+
 /-! Project-facing names for the finite termwise-FTC bridge.  These are exact
 rational identities for finite prefixes; convergence and tail transport are
 separate certificates. -/
