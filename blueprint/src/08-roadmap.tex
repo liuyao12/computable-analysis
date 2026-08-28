@@ -13,6 +13,13 @@ imported modules. The focused entry point is therefore the recommended first
 compile test for a new proof, while individual chapter modules remain useful
 for fast iteration.
 
+The dependency boundary is intentional and auditable: the project source
+imports project modules plus Lean's rational ordered-arithmetic substrate
+(`Init.Grind.Ordered.Rat`).  The scoped calculus chain does not import
+mathlib's standard real numbers, measure theory, topology, or completion
+interfaces.  Any stronger classical bridge must therefore appear as an
+explicit theorem target rather than entering through an unnoticed import.
+
 \section{Admission rule}
 
 Include a result when it yields a rational certificate, a shrinking `realRaw`,
