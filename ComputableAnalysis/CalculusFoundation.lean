@@ -447,6 +447,23 @@ theorem effectiveFiniteTripleRectangularSum_swap23 {α β γ : Type}
       finiteTripleRectangularSum xs zs ys (fun x z y => cellValue x y z) := by
   exact finiteTripleRectangularSum_swap23 xs ys zs cellValue
 
+theorem effectiveFiniteTripleRectangularSum_nonneg {α β γ : Type}
+    (xs : List α) (ys : List β) (zs : List γ)
+    (cellValue : α -> β -> γ -> Rat)
+    (h : forall x, x ∈ xs -> forall y, y ∈ ys ->
+      forall z, z ∈ zs -> 0 <= cellValue x y z) :
+    0 <= finiteTripleRectangularSum xs ys zs cellValue := by
+  exact finiteTripleRectangularSum_nonneg xs ys zs cellValue h
+
+theorem effectiveFiniteTripleRectangularSum_mono {α β γ : Type}
+    (xs : List α) (ys : List β) (zs : List γ)
+    (lower upper : α -> β -> γ -> Rat)
+    (h : forall x, x ∈ xs -> forall y, y ∈ ys ->
+      forall z, z ∈ zs -> lower x y z <= upper x y z) :
+    finiteTripleRectangularSum xs ys zs lower <=
+      finiteTripleRectangularSum xs ys zs upper := by
+  exact finiteTripleRectangularSum_mono xs ys zs lower upper h
+
 theorem effectiveFiniteTripleRectangularSum_add {α β γ : Type}
     (xs : List α) (ys : List β) (zs : List γ)
     (f g : α -> β -> γ -> Rat) :
