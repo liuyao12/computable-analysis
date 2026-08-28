@@ -200,6 +200,16 @@ theorem effectiveComplexFunctionRepresentation_overlapsAt_on_common_domain
   exact ComplexFunction.Representation.overlapsAt_on_common_domain
     source target hsource hzs hzt stage
 
+theorem effectiveComplexFunction_agreeOnCommonDomain_of_common_anchor
+    {f g anchor : FunctionRaw}
+    (hf : f.Valid) (hg : g.Valid) (ha : anchor.Valid)
+    (hdom : forall z, f.domain z -> g.domain z -> anchor.domain z)
+    (hfa : f.AgreeOnCommonDomain anchor)
+    (hga : g.AgreeOnCommonDomain anchor) :
+    f.AgreeOnCommonDomain g := by
+  exact FunctionRaw.agreeOnCommonDomain_of_common_anchor
+    hf hg ha hdom hfa hga
+
 theorem effectiveIntervalRegularDarbouxSchedule_widths_shrink_of_budget
     {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
     {hinterval : F.lower <= F.upper} (lengthBound : Nat)
