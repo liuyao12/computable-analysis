@@ -123,6 +123,13 @@ theorem effectiveConcaveFTC
       h.toDerivativeBoundFTC.endpointRaw := by
   exact Integral.effectiveConcaveFTC h
 
+theorem effectiveCurvatureFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : CurvatureFTCCertificate F dF a b) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      h.toDerivativeBoundFTC.endpointRaw := by
+  exact Integral.effectiveCurvatureFTC h
+
 theorem effectiveMeanValueBracket
     {F dF : RealFunRaw} {a b : Rat}
     {C : RationalSubinterval a b}
