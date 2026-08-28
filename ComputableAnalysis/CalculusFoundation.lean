@@ -1289,6 +1289,27 @@ theorem effectiveFinitePolynomialIntegralRaw_equiv_value
   · exact effectiveFinitePolynomialIntegralRaw_equiv_anchor coeffs terms
   · exact effectiveFinitePolynomialIntegralAnchorRaw_equiv_value coeffs terms
 
+/-! A small end-to-end regression keeps the abstract polynomial bridge tied to
+an ordinary calculus calculation.  The coefficient stream is finite and
+rational; no completed-real integral is hidden in the statement. -/
+
+def effectiveUnitSquareIntegralRaw : RealRaw :=
+  effectiveFinitePolynomialIntegralRaw
+    (fun k => if k = 2 then 1 else 0) 3
+
+theorem effectiveUnitSquareIntegralRaw_equiv_one_third :
+    effectiveUnitSquareIntegralRaw.Equiv (RealRaw.ofRat (1 / 3)) := by
+  have h := effectiveFinitePolynomialIntegralRaw_equiv_value
+    (fun k => if k = 2 then 1 else 0) 3
+  have hvalue : finiteRatSum
+      ((List.range 3).map (fun k =>
+        (if k = 2 then 1 else 0) * (1 / ((k + 1 : Nat) : Rat)))) =
+      (1 / 3 : Rat) := by
+    native_decide
+  unfold effectiveFinitePolynomialIntegralValue at h
+  rw [hvalue] at h
+  simpa [effectiveUnitSquareIntegralRaw] using h
+
 def effectiveFiniteTaylorDerivativeOnInterval
     (coeffs : Nat -> Rat) (terms : Nat) (a b C : Rat)
     (hleft : -C <= a) (hright : b <= C) (hC1 : 1 <= C) :
