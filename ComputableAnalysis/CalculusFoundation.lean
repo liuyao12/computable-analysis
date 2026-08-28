@@ -372,6 +372,30 @@ theorem effectiveComplexCoefficientDerivative_primitiveCoefficients
       coefficients := by
   exact complexCoefficientDerivative_primitiveCoefficients coefficients
 
+/-! Public generic finite-polynomial FTC bridge.  A finite Taylor primitive is
+defined over rational inputs, its derivative is a finite coefficient prefix,
+and the endpoint difference is the corresponding finite monomial sum.  The
+secant certificate below is the reusable proof object for turning that exact
+algebra into the interval derivative contract consumed by effective FTC. -/
+theorem effectiveFiniteTaylorFTC_endpointDifference_eq_finiteMonomialIntegralSum
+    (coeffs : Nat -> Rat) (terms : Nat) (a b : Rat) :
+    FinitePolynomial.integratedTaylorPrefix coeffs terms b -
+        FinitePolynomial.integratedTaylorPrefix coeffs terms a =
+      FinitePolynomial.finiteMonomialIntegralSum coeffs terms a b := by
+  exact FinitePolynomial.integratedTaylorPrefix_endpointDifference_eq_finiteMonomialIntegralSum
+    coeffs terms a b
+
+def effectiveFiniteTaylorDerivativeOnInterval
+    (coeffs : Nat -> Rat) (terms : Nat) (a b C : Rat)
+    (hleft : -C <= a) (hright : b <= C) (hC1 : 1 <= C) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat
+        (FinitePolynomial.integratedTaylorPrefix coeffs terms) a b)
+      (FunctionOnInterval.exactRat
+        (FinitePolynomial.taylorDerivativePrefix coeffs terms) a b) :=
+  FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval
+    coeffs terms a b C hleft hright hC1
+
 /-! A finite trigonometric-prefix example belongs to the public calculus
 surface even though the full equal-dyadic sine transport is a separate
 geometric frontier.  Keeping this distinction visible prevents a polynomial
