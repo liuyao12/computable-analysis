@@ -1189,6 +1189,16 @@ theorem effectiveFinitePolynomialIntegralAnchorRaw_valid
   rcases hx with ⟨k, hk, rfl⟩
   exact RealRaw.scaleRat_valid (RealRaw.ofRat_valid _)
 
+theorem effectiveFinitePolynomialIntegralRaw_widths_shrink :
+    RealRaw.WidthsShrinkToZero
+      (effectiveFinitePolynomialIntegralRaw coeffs terms).compute := by
+  exact (effectiveFinitePolynomialIntegralRaw_valid coeffs terms).2.2
+
+theorem effectiveFinitePolynomialIntegralAnchorRaw_widths_shrink :
+    RealRaw.WidthsShrinkToZero
+      (effectiveFinitePolynomialIntegralAnchorRaw coeffs terms).compute := by
+  exact (effectiveFinitePolynomialIntegralAnchorRaw_valid coeffs terms).2.2
+
 theorem effectiveFinitePolynomialIntegralRaw_equiv_anchor
     (coeffs : Nat -> Rat) (terms : Nat) :
     (effectiveFinitePolynomialIntegralRaw coeffs terms).Equiv
