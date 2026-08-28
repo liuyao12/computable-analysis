@@ -1201,7 +1201,29 @@ theorem effectiveFinitePolynomialIntegralRaw_compute_width_le
       ((List.range terms).map (fun k =>
         RealRaw.scaleRat (coeffs k)
           (Integral.raw (FunctionOnInterval.exactRat (fun x => x ^ k) 0 1)
-            (Integral.exactRat_pow_integral_certificate k)))) stage bound hpoint)
+      (Integral.exactRat_pow_integral_certificate k)))) stage bound hpoint)
+
+theorem effectiveFinitePolynomialIntegralRaw_compute_width_le_of_bounds
+    (coeffs : Nat -> Rat) (terms stage : Nat) (bound : Nat -> Rat)
+    (hbound : forall k, k < terms ->
+      qabs (coeffs k) *
+          ((2 * (k : Rat)) * (1 / (((2 ^ stage : Nat) : Rat)))) <= bound k) :
+    ((effectiveFinitePolynomialIntegralRaw coeffs terms).compute stage).width <=
+      (List.range terms).foldl (fun total k => total + bound k) 0 := by
+  unfold effectiveFinitePolynomialIntegralRaw
+  rw [Integral.finiteRawSum_compute_width_eq_foldl]
+  have hsum := RationalPartition.rat_add_fold_le_of_forall
+    (xs := List.range terms)
+    (term := fun k =>
+      ((RealRaw.scaleRat (coeffs k)
+        (Integral.raw (FunctionOnInterval.exactRat (fun x => x ^ k) 0 1)
+          (Integral.exactRat_pow_integral_certificate k))).compute stage).width)
+    (bound := bound) (by
+      intro k hk
+      rw [scaleRat_width_eq_qabs_mul]
+      rw [Integral.exactRat_pow_integral_raw_compute_width]
+      exact hbound k (List.mem_range.mp hk))
+  simpa only [List.foldl_map] using hsum
 
 set_option maxHeartbeats 100000000 in
 theorem effectiveFinitePolynomialIntegralAnchorRaw_equiv_value
