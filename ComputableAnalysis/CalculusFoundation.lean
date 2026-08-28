@@ -176,6 +176,30 @@ theorem effectiveIntervalRegularDarbouxStage_contains_of_evalIntervalsNested
   exact Integral.intervalRegularDarbouxStage_contains_of_evalIntervalsNested
     F hregular hstage P hnm
 
+/-! Public representation-chain transport.  A real uses a preferred raw
+algorithm and parent-relative implementation edges; any two certified views
+are interchangeable by transitivity.  Complex function views additionally
+state the common-domain coverage needed to compose partial representations. -/
+theorem effectiveRealRepresentation_equiv
+    {x : Real} (source target : Real.Representation x) :
+    source.raw.Equiv target.raw := by
+  exact source.equiv target
+
+theorem effectiveRealRepresentation_overlapsAt
+    {x : Real} (source target : Real.Representation x) (stage : Nat) :
+    QInterval.Overlaps (source.raw.compute stage) (target.raw.compute stage) := by
+  exact source.overlapsAt target stage
+
+theorem effectiveComplexFunctionRepresentation_overlapsAt_on_common_domain
+    {f : ComplexFunction} (source target : ComplexFunction.Representation f)
+    (hsource : forall z, source.raw.domain z -> f.preferred.domain z)
+    {z : QComplex} (hzs : source.raw.domain z) (hzt : target.raw.domain z)
+    (stage : Nat) :
+    QBox.Overlaps
+      (source.raw.compute z hzs stage) (target.raw.compute z hzt stage) := by
+  exact ComplexFunction.Representation.overlapsAt_on_common_domain
+    source target hsource hzs hzt stage
+
 theorem effectiveIntervalRegularDarbouxSchedule_widths_shrink_of_budget
     {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
     {hinterval : F.lower <= F.upper} (lengthBound : Nat)

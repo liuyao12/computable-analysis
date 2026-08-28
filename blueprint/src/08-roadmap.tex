@@ -295,3 +295,11 @@ cell estimate and its error budget before stating the limiting-looking
 corollary.  Classical completeness, Lebesgue measure, and unrestricted
 measurability are not implicit fallbacks: if a result needs one of them,
 state a computable proxy or record the bridge as a separate theorem target.
+
+The representation layer implements the spanning-tree rule directly.  A
+consumer asks for a certified representation, uses its finite boxes, and
+transports to another representation through the stored equivalence edges:
+
+\lean{ComputableAnalysis.effectiveRealRepresentation_equiv}
+\lean{ComputableAnalysis.effectiveRealRepresentation_overlapsAt}
+\lean{ComputableAnalysis.effectiveComplexFunctionRepresentation_overlapsAt_on_common_domain}
