@@ -203,6 +203,18 @@ theorem finiteRatSum_scale {α : Type} (xs : List α)
       rw [ih]
       grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc]
 
+theorem finiteRatSum_congr {α : Type} (xs : List α)
+    (f g : α -> Rat) (h : forall x, x ∈ xs -> f x = g x) :
+    finiteRatSum (xs.map f) = finiteRatSum (xs.map g) := by
+  induction xs with
+  | nil => rfl
+  | cons x xs ih =>
+      simp only [List.map_cons, finiteRatSum]
+      rw [h x (by simp)]
+      rw [ih (by
+        intro y hy
+        exact h y (by simp [hy]))]
+
 theorem finiteRectangularSum_nonneg {α β : Type} (xs : List α) (ys : List β)
     (cellValue : α -> β -> Rat)
     (h : forall x, x ∈ xs -> forall y, y ∈ ys -> 0 <= cellValue x y) :
@@ -242,6 +254,22 @@ theorem finiteRectangularSum_scale {α β : Type}
       simp only [finiteRectangularSum]
       rw [finiteRatSum_scale, ih]
       grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc]
+
+theorem finiteRectangularSum_congr {α β : Type}
+    (xs : List α) (ys : List β)
+    (f g : α -> β -> Rat)
+    (h : forall x, x ∈ xs -> forall y, y ∈ ys -> f x y = g x y) :
+    finiteRectangularSum xs ys f = finiteRectangularSum xs ys g := by
+  induction xs with
+  | nil => rfl
+  | cons x xs ih =>
+      simp only [finiteRectangularSum]
+      rw [finiteRatSum_congr]
+      · rw [ih]
+        intro x' hx' y hy
+        exact h x' (by simp [hx']) y hy
+      · intro y hy
+        exact h x (by simp) y hy
 
 theorem finiteRectangularSum_mono {α β : Type} (xs : List α) (ys : List β)
     (lower upper : α -> β -> Rat)

@@ -376,6 +376,13 @@ theorem effectiveFiniteRectangularSum_scale {α β : Type}
       scale * finiteRectangularSum xs ys f := by
   exact finiteRectangularSum_scale xs ys scale f
 
+theorem effectiveFiniteRectangularSum_congr {α β : Type}
+    (xs : List α) (ys : List β)
+    (f g : α -> β -> Rat)
+    (h : forall x, x ∈ xs -> forall y, y ∈ ys -> f x y = g x y) :
+    finiteRectangularSum xs ys f = finiteRectangularSum xs ys g := by
+  exact finiteRectangularSum_congr xs ys f g h
+
 theorem effectiveFiniteWeightedRectangularSum_swap
     (xs ys : List (Rat × Rat)) (cellValue : Rat -> Rat -> Rat) :
     finiteWeightedRectangularSum xs ys cellValue =
