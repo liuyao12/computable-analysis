@@ -294,6 +294,11 @@ theorem effectiveSineWitnessSearch_exists_of_overlap_of_positive_width
   exact SinPiIntegral.exists_rationalTangentWitnessBoxSearch_of_overlap_of_positive_width
     hU hS hover hwidth
 
+theorem effectiveDyadicNestedRadicalIntegralRaw_widths_shrink :
+    RealRaw.WidthsShrinkToZero
+      SinPiIntegral.dyadicNestedRadicalIntegralRaw.compute := by
+  exact SinPiIntegral.dyadicNestedRadicalIntegralRaw_widths_shrink
+
 theorem effectiveIntervalRegularDarbouxSchedule_widths_shrink_of_budget
     {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
     {hinterval : F.lower <= F.upper} (lengthBound : Nat)
