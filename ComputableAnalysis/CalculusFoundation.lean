@@ -294,6 +294,47 @@ theorem effectiveSineWitnessSearch_exists_of_overlap_of_positive_width
   exact SinPiIntegral.exists_rationalTangentWitnessBoxSearch_of_overlap_of_positive_width
     hU hS hover hwidth
 
+/-! Public constructors for the proof-producing canonical dyadic witness
+    search.  These expose the finite rational certificate boundary without
+    exposing the implementation of the candidate-list traversal. -/
+def effectiveCanonicalDyadicCertificate_at_of_rational_witness
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {precision depth k : Nat} (hk : k < 2 ^ depth)
+    (u : Rat) (hu0 : 0 <= u) (hu1 : u <= 1)
+    (hsine : (SinPiIntegral.dyadicNestedRadicalTableAt precision depth k).1.lo <=
+        SinPiIntegral.rationalCircleSin u /\
+      SinPiIntegral.rationalCircleSin u <=
+        (SinPiIntegral.dyadicNestedRadicalTableAt precision depth k).1.hi)
+    (houter : (SinPiIntegral.dyadicTangentBoxAt B precision depth k hk).ContainsInterval
+      (SinPiIntegral.rationalHalfAngleTangentInterval
+        ((SinPiIntegral.dyadicNestedRadicalTableAt precision depth k).1)
+        { lo := SinPiIntegral.rationalCircleCos u,
+          hi := SinPiIntegral.rationalCircleCos u })) :
+    SinPiIntegral.CanonicalDyadicHalfAngleCertificateAt B precision depth k hk := by
+  exact SinPiIntegral.canonical_dyadic_certificate_at_of_rational_witness
+    B hk u hu0 hu1 hsine houter
+
+noncomputable def effectiveCanonicalDyadicCertificateSearchAt_sound
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {precision depth k : Nat} {hk : k < 2 ^ depth}
+    {candidates : List Rat} {u : Rat}
+    (hsearch : SinPiIntegral.canonicalDyadicCertificateSearchAt
+      B precision depth k hk candidates = some u) :
+    SinPiIntegral.CanonicalDyadicHalfAngleCertificateAt B precision depth k hk := by
+  exact SinPiIntegral.canonicalDyadicCertificateSearchAt_sound B hsearch
+
+theorem effectiveCanonicalDyadicCertificateSearchAt_some_of_mem_of_admissible
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {precision depth k : Nat} {hk : k < 2 ^ depth}
+    {candidates : List Rat} {u : Rat}
+    (hmem : u ∈ candidates)
+    (hadm : SinPiIntegral.canonicalDyadicCertificateAdmissibleBool
+      B precision depth k hk u = true) :
+    ∃ v, SinPiIntegral.canonicalDyadicCertificateSearchAt
+      B precision depth k hk candidates = some v := by
+  exact SinPiIntegral.canonicalDyadicCertificateSearchAt_some_of_mem_of_admissible
+    B hmem hadm
+
 theorem effectiveDyadicNestedRadicalIntegralRaw_widths_shrink :
     RealRaw.WidthsShrinkToZero
       SinPiIntegral.dyadicNestedRadicalIntegralRaw.compute := by
