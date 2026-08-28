@@ -148,6 +148,24 @@ theorem effectiveSquareCurvatureFTC_value_one :
       (RealRaw.ofRat 1) := by
   exact Integral.effectiveSquareCurvatureFTC_value_one
 
+/-! Rational bridge for the first non-polynomial product example.  The
+    combined derivative evaluator is definitionally the tangent-square
+    density, and the primitive's endpoint difference is the quarter-turn
+    anchor; only the separate sine-representation overlap remains. -/
+theorem effectiveTangentSquareCombinedDerivative_compute_eq_density
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) (n : Nat) :
+    SinPiIntegral.tangentSquareCombinedDerivativeRaw.compute x n =
+      SinPiIntegral.tangentSquareDensityRaw.compute x n := by
+  exact SinPiIntegral.tangentSquareCombinedDerivativeRaw_compute_eq_density
+    hx0 hx1 n
+
+theorem effectiveTangentSquarePrimitive_endpointDifference_equiv_halfQuarterTurn :
+    (endpointDifferenceRaw
+      SinPiIntegral.tangentSquareEffectivePrimitiveOnUnit 0 1
+      SinPiIntegral.tangentSquareEffectivePrimitive_endpointDifference_valid).Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
+  exact SinPiIntegral.tangentSquareEffectivePrimitive_endpointDifference_equiv_halfQuarterTurn
+
 /-! Public finite integration-by-parts laws.  These are the algebraic
 rectangle identities behind later Stieltjes and change-of-variables proofs;
 the variation term is retained explicitly rather than discarded by a limit. -/
