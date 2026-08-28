@@ -105,6 +105,37 @@ theorem effectiveFTC_endpointDifference
       (endpointDifferenceRaw F a b hendpoint) := by
   exact h.boundedIntegralRaw_equiv_endpointDifference hendpoint
 
+/-! Public curvature-facing FTC entry points.  These are the project's
+    certificate form of the classical MVT/FTC route: convexity or concavity
+    supplies finite derivative brackets, while endpoint transport remains an
+    explicit rational obligation. -/
+theorem effectiveConvexFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : ConvexFTCCertificate F dF a b) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      h.toDerivativeBoundFTC.endpointRaw := by
+  exact Integral.effectiveConvexFTC h
+
+theorem effectiveConcaveFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : ConcaveFTCCertificate F dF a b) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      h.toDerivativeBoundFTC.endpointRaw := by
+  exact Integral.effectiveConcaveFTC h
+
+theorem effectiveMeanValueBracket
+    {F dF : RealFunRaw} {a b : Rat}
+    {C : RationalSubinterval a b}
+    (H : CandidateDerivativeCellControl F dF C)
+    (hF : F.Valid) (hwidth : 0 < C.width) (n : Nat) :
+    QInterval.Overlaps
+      (H.bound n)
+      (QInterval.divByRat
+        (endpointDifferenceInterval F C.lower C.upper
+          (H.endpointPrecision n))
+        C.width) := by
+  exact Integral.effectiveMeanValueBracket H hF hwidth n
+
 /-! Public finite integration-by-parts laws.  These are the algebraic
 rectangle identities behind later Stieltjes and change-of-variables proofs;
 the variation term is retained explicitly rather than discarded by a limit. -/
