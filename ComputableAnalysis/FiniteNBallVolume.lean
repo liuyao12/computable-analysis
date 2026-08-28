@@ -621,6 +621,15 @@ theorem finiteWeightedTripleRectangularSum_unitCube_stage :
       (fun _ _ _ => 1) = 1 := by
   native_decide
 
+theorem finiteWeightedTripleRectangularSum_singleCell
+    (x y z dx dy dz value : Rat) :
+    finiteWeightedTripleRectangularSum
+      [(x, dx)] [(y, dy)] [(z, dz)] (fun _ _ _ => value) =
+      dx * dy * dz * value := by
+  simp [finiteWeightedTripleRectangularSum, finiteTripleRectangularSum,
+    finiteRectangularSum, finiteRatSum]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
 /-! The same finite algebra in arbitrary dimension.  A list of sample lists
 and a list of one-variable factors describes a separable rectangular sum. -/
 

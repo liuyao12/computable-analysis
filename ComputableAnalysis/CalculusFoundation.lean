@@ -584,6 +584,14 @@ theorem effectiveFiniteWeightedTripleRectangularSum_unitCube_stage :
       (fun _ _ _ => 1) = 1 := by
   exact finiteWeightedTripleRectangularSum_unitCube_stage
 
+theorem effectiveFiniteWeightedTripleRectangularSum_singleCell
+    (x y z dx dy dz value : Rat) :
+    finiteWeightedTripleRectangularSum
+      [(x, dx)] [(y, dy)] [(z, dz)] (fun _ _ _ => value) =
+      dx * dy * dz * value := by
+  exact finiteWeightedTripleRectangularSum_singleCell
+    x y z dx dy dz value
+
 theorem effectiveFiniteTripleRectangularSum_add {α β γ : Type}
     (xs : List α) (ys : List β) (zs : List γ)
     (f g : α -> β -> γ -> Rat) :
