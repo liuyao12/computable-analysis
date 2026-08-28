@@ -349,6 +349,18 @@ theorem stabilizedRaw_equiv_anchor
   RealRaw.prefixStabilize_equiv_anchor completion.anchor_valid
     completion.assembly_equiv_anchor completion.anchor_width_le_radius
 
+/- A finite-turn computation can change representatives through the same
+   spanning-edge rule used by abstract computable reals. -/
+theorem stabilizedRaw_equiv_of_anchor
+    {assembly : FinitePiecewiseStageAssembly}
+    (completion : MultiTurnIntegralCompletion assembly)
+    {target : RealRaw} (htarget : target.Valid)
+    (hanchor : completion.anchor.Equiv target) :
+    completion.stabilizedRaw.Equiv target := by
+  exact RealRaw.equiv_trans completion.stabilizedRaw_valid
+    completion.anchor_valid htarget completion.stabilizedRaw_equiv_anchor
+    hanchor
+
 end MultiTurnIntegralCompletion
 
 /-- Bound the integral over the unresolved turning-point bracket by its
