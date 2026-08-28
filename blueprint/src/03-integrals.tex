@@ -1333,6 +1333,11 @@ sum is formalized once and reused:
 \lean{ComputableAnalysis.SinPiSquareFTC.DyadicSquareCircleOverlapFamily.to_square_sum_overlap}
 \leanok
 
+The public square sum is first prefix-stabilized before equivalence is
+composed.  The bridge from the Lipschitz-dyadic tangent integral to the
+effective FTC anchor is an explicit certificate; this is where the two
+independent computations are proved to represent the same integral.
+
 The remaining work is geometric rather than integral construction: provide
 one finite certificate for each dyadic sine sample, uniformly in depth and
 precision.  The integral assembly and piecewise rule are already reusable;
