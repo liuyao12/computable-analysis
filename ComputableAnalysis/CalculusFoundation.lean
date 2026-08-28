@@ -171,6 +171,12 @@ theorem effectiveTangentSquareFTC_integral_equiv_halfQuarterTurn :
       (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
   exact SinPiIntegral.tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn
 
+theorem effectiveReciprocalPi_quarterTurn_equiv_quarter :
+    (SinPiIntegral.reciprocalPiRaw *
+      RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Equiv
+      (RealRaw.ofRat (1 / 4)) := by
+  exact reciprocalPi_quarterTurn_equiv_quarter
+
 /-! Public finite integration-by-parts laws.  These are the algebraic
 rectangle identities behind later Stieltjes and change-of-variables proofs;
 the variation term is retained explicitly rather than discarded by a limit. -/
