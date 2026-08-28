@@ -284,6 +284,56 @@ theorem effectiveSinPiHalfIntegral_equiv_reciprocalPi_of_canonical_certificate_f
   exact S.halfIntegral_equiv_reciprocalPi_of_canonical_certificate_family
     pub g cg hdyadic hplan hevaluator family hintegral
 
+/-! The parity adapter makes the geometric workload explicit: even samples
+    are inherited from their parent, while the caller supplies only the two
+    odd branches. -/
+noncomputable def effectiveDyadicTangentWitnessFamily_of_lower_upper_odd_certificates
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (lower : forall (precision n j : Nat)
+      (hbound : 2 * j + 1 <= 2 ^ n),
+      SinPiIntegral.CanonicalDyadicHalfAngleCertificateAt B precision (n + 1)
+        (2 * j + 1) (by
+          have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+            rw [Nat.pow_succ]
+            omega
+          rw [hpow]
+          omega))
+    (upper : forall (precision n k : Nat)
+      (hupper : 2 ^ n < k) (hk : k < 2 ^ (n + 1)),
+      SinPiIntegral.CanonicalDyadicHalfAngleCertificateAt B precision (n + 1) k hk) :
+    SinPiIntegral.DyadicTangentWitnessFamily B := by
+  exact SinPiIntegral.DyadicTangentWitnessFamily.of_lower_upper_odd_canonical_halfAngle_certificate_families
+    B ht0 lower upper
+
+theorem effectiveSinPiHalfIntegral_equiv_of_canonical_halfAngle_certificate_family
+    (S : SinPiIntegral.ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        SinPiIntegral.dyadicNestedRadicalStageSinAt n k)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      0 < k -> SinPiIntegral.CanonicalDyadicHalfAngleCertificateAt
+        S.inverse precision depth k hk) :
+    (S.halfIntegral pub).Equiv
+      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+  exact S.halfIntegral_equiv_of_canonical_halfAngle_certificate_family
+    pub g cg hdyadic hplan hevaluator ht0 hcertificate
+
 theorem effectiveSineWitnessSearch_exists_of_overlap_of_positive_width
     {U S : QInterval} (hU : subintervalOf U 0 1)
     (hS : subintervalOf S 0 1)
