@@ -139,6 +139,57 @@ theorem finiteProductSum2D_factorized (xs ys : List Rat) (f g : Rat -> Rat) :
       rw [hright]
       grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc, Rat.mul_assoc]
 
+/-! A general finite rectangular sum.  Unlike `finiteProductSum2D`, the cell
+value may depend on both coordinates arbitrarily; this is the finite Fubini
+law used when separability is unavailable. -/
+
+def finiteRatSum : List Rat -> Rat
+  | [] => 0
+  | value :: rest => value + finiteRatSum rest
+
+def finiteRectangularSum (xs ys : List Rat) (h : Rat -> Rat -> Rat) : Rat :=
+  match xs with
+  | [] => 0
+  | x :: rest => finiteRatSum (ys.map (h x)) +
+      finiteRectangularSum rest ys h
+
+private theorem finiteRectangularSum_empty_right (xs : List Rat)
+    (h : Rat -> Rat -> Rat) :
+    finiteRectangularSum xs [] h = 0 := by
+  induction xs with
+  | nil => rfl
+  | cons x xs ih =>
+      simp only [finiteRectangularSum, List.map_nil, finiteRatSum]
+      rw [ih]
+      grind
+
+private theorem finiteRectangularSum_right_cons (xs ys : List Rat)
+    (y : Rat) (h : Rat -> Rat -> Rat) :
+    finiteRectangularSum xs (y :: ys) h =
+      finiteRectangularSum xs ys h +
+        finiteRatSum (xs.map (fun x => h x y)) := by
+  induction xs with
+  | nil =>
+      simp [finiteRectangularSum, finiteRatSum]
+      grind
+  | cons x xs ih =>
+      simp only [finiteRectangularSum, List.map_cons, finiteRatSum]
+      rw [ih]
+      grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+
+theorem finiteRectangularSum_swap (xs ys : List Rat)
+    (h : Rat -> Rat -> Rat) :
+    finiteRectangularSum xs ys h =
+      finiteRectangularSum ys xs (fun y x => h x y) := by
+  induction xs with
+  | nil =>
+      exact (finiteRectangularSum_empty_right ys (fun y x => h x y)).symm
+  | cons x xs ih =>
+      simp only [finiteRectangularSum]
+      rw [ih]
+      rw [finiteRectangularSum_right_cons]
+      grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+
 /-! The same finite algebra in arbitrary dimension.  A list of sample lists
 and a list of one-variable factors describes a separable rectangular sum. -/
 

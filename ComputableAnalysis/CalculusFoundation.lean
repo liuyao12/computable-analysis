@@ -338,6 +338,15 @@ theorem effectiveFiniteProductIntegralNestedSum_factorized
       finiteProductIntegralSum samples factors := by
   exact finiteProductIntegralNestedSum_factorized samples factors
 
+/-! General finite Fubini symmetry.  Cell values may depend on both sampled
+coordinates; the theorem is just commutation of two finite rational folds and
+does not assume separability, an integral operator, or a completed space. -/
+theorem effectiveFiniteRectangularSum_swap
+    (xs ys : List Rat) (h : Rat -> Rat -> Rat) :
+    finiteRectangularSum xs ys h =
+      finiteRectangularSum ys xs (fun y x => h x y) := by
+  exact finiteRectangularSum_swap xs ys h
+
 theorem effectiveFiniteProductIntegralSum2D_nonneg
     (xs ys : List (Rat × Rat)) (f g : Rat -> Rat)
     (hx : forall cell, cell ∈ xs -> 0 <= cell.2 * f cell.1)

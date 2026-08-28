@@ -637,6 +637,21 @@ volume calculations; we do not duplicate a proof for every dimension.
 \lean{ComputableAnalysis.nBallVolumeModel_stage_thirteen}
 \leanok
 
+The separable theorem has a non-separable companion.  If a finite cell value
+depends on both coordinates, the two orders of summation still agree by a
+literal finite reindexing:
+
+\begin{verbatim}
+finite x-list -> finite y-list -> cell value h(x,y)
+             = finite y-list -> finite x-list -> h(x,y)
+\end{verbatim}
+
+This is the finite Fubini core.  It is an identity of rational folds, not a
+theorem about an infinite integral or a completed function space.
+
+\lean{ComputableAnalysis.effectiveFiniteRectangularSum_swap}
+\leanok
+
 Thus the Gaussian and n-ball entries are in scope as finite, separable,
 precision-refinable computations. The Gaussian rectangle evaluator is now
 dimension-independent: a finite list of coordinate axes generates the matching
