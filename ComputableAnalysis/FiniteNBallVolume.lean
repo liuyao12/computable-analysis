@@ -341,6 +341,25 @@ theorem finiteWeightedRectangularSum_mono
   · exact hvalue x hx y hy
   · exact Rat.mul_nonneg (hwidthX x hx) (hwidthY y hy)
 
+theorem finiteWeightedRectangularSum_add
+    (xs ys : List (Rat × Rat)) (f g : Rat -> Rat -> Rat) :
+    finiteWeightedRectangularSum xs ys (fun x y => f x y + g x y) =
+      finiteWeightedRectangularSum xs ys f +
+        finiteWeightedRectangularSum xs ys g := by
+  simpa [finiteWeightedRectangularSum, Rat.mul_add] using
+    (finiteRectangularSum_add xs ys
+      (fun x y => x.2 * y.2 * f x.1 y.1)
+      (fun x y => x.2 * y.2 * g x.1 y.1))
+
+theorem finiteWeightedRectangularSum_scale
+    (xs ys : List (Rat × Rat)) (scale : Rat)
+    (f : Rat -> Rat -> Rat) :
+    finiteWeightedRectangularSum xs ys (fun x y => scale * f x y) =
+      scale * finiteWeightedRectangularSum xs ys f := by
+  simpa [finiteWeightedRectangularSum, Rat.mul_assoc, Rat.mul_comm] using
+    (finiteRectangularSum_scale xs ys scale
+      (fun x y => x.2 * y.2 * f x.1 y.1))
+
 /-! The same finite algebra in arbitrary dimension.  A list of sample lists
 and a list of one-variable factors describes a separable rectangular sum. -/
 

@@ -404,6 +404,20 @@ theorem effectiveFiniteWeightedRectangularSum_mono
   exact finiteWeightedRectangularSum_mono xs ys lower upper
     hwidthX hwidthY hvalue
 
+theorem effectiveFiniteWeightedRectangularSum_add
+    (xs ys : List (Rat × Rat)) (f g : Rat -> Rat -> Rat) :
+    finiteWeightedRectangularSum xs ys (fun x y => f x y + g x y) =
+      finiteWeightedRectangularSum xs ys f +
+        finiteWeightedRectangularSum xs ys g := by
+  exact finiteWeightedRectangularSum_add xs ys f g
+
+theorem effectiveFiniteWeightedRectangularSum_scale
+    (xs ys : List (Rat × Rat)) (scale : Rat)
+    (f : Rat -> Rat -> Rat) :
+    finiteWeightedRectangularSum xs ys (fun x y => scale * f x y) =
+      scale * finiteWeightedRectangularSum xs ys f := by
+  exact finiteWeightedRectangularSum_scale xs ys scale f
+
 theorem effectiveFiniteProductIntegralSum2D_nonneg
     (xs ys : List (Rat × Rat)) (f g : Rat -> Rat)
     (hx : forall cell, cell ∈ xs -> 0 <= cell.2 * f cell.1)
