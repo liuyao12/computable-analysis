@@ -943,6 +943,19 @@ theorem effectiveFactorialTailPartial_shifted_le_eps {C : Rat}
       terms <= eps.val := by
   exact RationalMajorant.factorialTailPartial_shifted_le_eps hC eps terms
 
+theorem effectiveSineTaylorIntegralPartial_eq_one_sub_cosineTaylorPartial_succ
+    (x : Rat) (n : Nat) :
+    FormalPowerSeries.sineTaylorIntegralPartial x n =
+      1 - FormalPowerSeries.cosineTaylorPartial x (n + 1) := by
+  exact FormalPowerSeries.sineTaylorIntegralPartial_eq_one_sub_cosineTaylorPartial_succ
+    x n
+
+theorem effectiveCosineTaylorIntegralPartial_eq_sineTaylorPartial
+    (x : Rat) (n : Nat) :
+    FormalPowerSeries.cosineTaylorIntegralPartial x n =
+      FormalPowerSeries.sineTaylorPartial x n := by
+  exact FormalPowerSeries.cosineTaylorIntegralPartial_eq_sineTaylorPartial x n
+
 /-! Public generic finite-polynomial FTC bridge.  A finite Taylor primitive is
 defined over rational inputs, its derivative is a finite coefficient prefix,
 and the endpoint difference is the corresponding finite monomial sum.  The
