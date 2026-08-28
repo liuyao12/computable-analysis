@@ -1012,6 +1012,35 @@ theorem effectiveFiniteTaylorCertificate_endpointRaw_equiv_prefixIncrement
       (RealRaw.ofRat certificate.prefixIncrement) := by
   exact certificate.endpointRaw_equiv_prefixIncrement
 
+noncomputable def effectiveFiniteTaylorEndpointRaw
+    (coeffs : Nat -> Rat) (terms : Nat) (a b : Rat) : RealRaw :=
+  (finiteTaylorCertificate coeffs terms a b).endpointRaw
+
+theorem effectiveFiniteTaylorEndpointRaw_valid
+    (coeffs : Nat -> Rat) (terms : Nat) (a b : Rat) :
+    (effectiveFiniteTaylorEndpointRaw coeffs terms a b).Valid := by
+  exact (finiteTaylorCertificate coeffs terms a b).endpointRaw_valid
+
+theorem effectiveFiniteTaylorEndpointRaw_equiv_endpointDifference
+    (coeffs : Nat -> Rat) (terms : Nat) (a b : Rat) :
+    (effectiveFiniteTaylorEndpointRaw coeffs terms a b).Equiv
+      (RealRaw.ofRat
+        (FinitePolynomial.integratedTaylorPrefix coeffs terms b -
+          FinitePolynomial.integratedTaylorPrefix coeffs terms a)) := by
+  exact (finiteTaylorCertificate coeffs terms a b).endpointRaw_equiv_prefixIncrement
+
+theorem effectiveFiniteTaylorEndpointRaw_equiv_finiteMonomialSum
+    (coeffs : Nat -> Rat) (terms : Nat) (a b : Rat) :
+    (effectiveFiniteTaylorEndpointRaw coeffs terms a b).Equiv
+      (RealRaw.ofRat
+        (FinitePolynomial.finiteMonomialIntegralSum coeffs terms a b)) := by
+  have h := effectiveFiniteTaylorEndpointRaw_equiv_endpointDifference
+    coeffs terms a b
+  have hvalue := effectiveFiniteTaylorFTC_endpointDifference_eq_finiteMonomialIntegralSum
+    coeffs terms a b
+  rw [hvalue] at h
+  exact h
+
 /-- Focused-entry-point access to the closed monomial FTC family.  The
     implementation remains in `Integral`; this wrapper is the stable import
     surface for downstream formalizations. -/
