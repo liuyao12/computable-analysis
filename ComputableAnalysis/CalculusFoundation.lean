@@ -136,6 +136,18 @@ theorem effectiveMeanValueBracket
         C.width) := by
   exact Integral.effectiveMeanValueBracket H hF hwidth n
 
+/-! Concrete regression client: the rational square certificate closes the
+    curvature-to-FTC pipeline at the normalized value one. -/
+theorem effectiveSquareCurvatureFTC :
+    Integral.squareCurvatureFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      Integral.squareCurvatureFTCData.toDerivativeBoundFTC.endpointRaw := by
+  exact Integral.effectiveSquareCurvatureFTC
+
+theorem effectiveSquareCurvatureFTC_value_one :
+    Integral.squareCurvatureFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      (RealRaw.ofRat 1) := by
+  exact Integral.effectiveSquareCurvatureFTC_value_one
+
 /-! Public finite integration-by-parts laws.  These are the algebraic
 rectangle identities behind later Stieltjes and change-of-variables proofs;
 the variation term is retained explicitly rather than discarded by a limit. -/
