@@ -1107,6 +1107,12 @@ the foundation separates the uniform theorem from its finite value algebra:
 the derivative/FTC certificate is degree-independent, while each claimed
 closed value is backed by its own rational power-sum identity.
 
+The square case is also packaged as a domain-aware definite identity: the
+explicit primitive is $x^3/3$, its endpoint computation is rational, and the
+existing dyadic square certificate is transported through the generic
+construction interface. This is the model for adding further closed
+polynomial integrals.
+
 \lean{ComputableAnalysis.FinitePolynomial.normalizedMonomialSecantBound}
 \lean{ComputableAnalysis.FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.FinitePolynomial.taylorPrefix_hasDerivativeOnInterval}
@@ -1197,6 +1203,8 @@ existing raw integral and transport lemmas are reused.
 \lean{ComputableAnalysis.Integral.exactRat_zero_integral_raw_equiv_one}
 \lean{ComputableAnalysis.Integral.exactRat_one_integral_raw_equiv_half}
 \lean{ComputableAnalysis.Integral.exactRat_square_integral_raw_equiv_one_third}
+\lean{ComputableAnalysis.Integral.exactRat_square_integral_raw_equiv_square_endpoint}
+\lean{ComputableAnalysis.Integral.exactRat_square_definiteIdentity}
 \lean{ComputableAnalysis.Integral.exactRat_pow_nondecreasing_on_unit}
 \lean{ComputableAnalysis.Integral.exactRat_pow_monotoneConstructionFor}
 \lean{ComputableAnalysis.Integral.exactRat_pow_monotoneIntegralFor_valid}

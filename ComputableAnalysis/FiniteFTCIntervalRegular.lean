@@ -877,6 +877,97 @@ theorem exactRat_square_integral_raw_equiv_one_third :
   unfold QInterval.Overlaps
   exact exactSquare_compute_contains_one_third n
 
+/-! The square certificate is also exposed through the domain-aware definite
+integral interface.  This is the first nonlinear closed-value client of the
+generic construction/endpoint bridge. -/
+
+def squarePrimitiveOnUnit : FunctionOnInterval :=
+  FunctionOnInterval.exactRat (fun x : Rat => x ^ 3 / 3) 0 1
+
+theorem squarePrimitiveOnUnit_compute_zero (n : Nat) :
+    squarePrimitiveOnUnit.toRealFunRaw.compute 0 n =
+      { lo := (0 : Rat), hi := 0 } := by
+  rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+    squarePrimitiveOnUnit (x := 0)
+      (hx := ⟨by native_decide, by native_decide⟩) n]
+  change ({ lo := (0 : Rat) ^ 3 / 3, hi := 0 ^ 3 / 3 } : QInterval) = _
+  native_decide
+
+theorem squarePrimitiveOnUnit_compute_one (n : Nat) :
+    squarePrimitiveOnUnit.toRealFunRaw.compute 1 n =
+      { lo := (1 / 3 : Rat), hi := 1 / 3 } := by
+  rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+    squarePrimitiveOnUnit (x := 1)
+      (hx := ⟨by native_decide, by native_decide⟩) n]
+  change ({ lo := (1 : Rat) ^ 3 / 3, hi := 1 ^ 3 / 3 } : QInterval) = _
+  native_decide
+
+theorem squarePrimitiveOnUnit_endpoint_compute (n : Nat) :
+    endpointDifferenceCompute squarePrimitiveOnUnit.toRealFunRaw 0 1 n =
+      { lo := (1 / 3 : Rat), hi := 1 / 3 } := by
+  simp [endpointDifferenceCompute, endpointDifferenceInterval,
+    squarePrimitiveOnUnit_compute_one, squarePrimitiveOnUnit_compute_zero]
+  native_decide
+
+theorem squarePrimitiveOnUnit_endpoint_valid :
+    RealRaw.ValidCompute
+      (endpointDifferenceCompute squarePrimitiveOnUnit.toRealFunRaw 0 1) := by
+  have hcompute :
+      endpointDifferenceCompute squarePrimitiveOnUnit.toRealFunRaw 0 1 =
+        fun _ : Nat => ({ lo := (1 / 3 : Rat), hi := 1 / 3 } : QInterval) := by
+    funext n
+    exact squarePrimitiveOnUnit_endpoint_compute n
+  rw [hcompute]
+  exact RealRaw.ofRat_valid _
+
+theorem exactRat_square_integral_raw_equiv_square_endpoint :
+    (Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x * x) 0 1)
+      exactRat_square_integral_certificate).Equiv
+      (endpointDifferenceRaw squarePrimitiveOnUnit.toRealFunRaw 0 1
+        squarePrimitiveOnUnit_endpoint_valid) := by
+  have hendpoint :
+      (endpointDifferenceRaw squarePrimitiveOnUnit.toRealFunRaw 0 1
+        squarePrimitiveOnUnit_endpoint_valid).Equiv
+        (RealRaw.ofRat (1 / 3)) := by
+    apply RealRaw.sameStageOverlap_equiv
+    intro n
+    apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+    change QInterval.Overlaps
+      (endpointDifferenceCompute squarePrimitiveOnUnit.toRealFunRaw 0 1 n)
+      { lo := (1 / 3 : Rat), hi := 1 / 3 }
+    rw [squarePrimitiveOnUnit_endpoint_compute]
+    exact ⟨by native_decide, by native_decide⟩
+  have hmid : (RealRaw.ofRat (1 / 3)).Valid := by
+    change RealRaw.ValidCompute
+      (fun _ : Nat => ({ lo := (1 / 3 : Rat), hi := 1 / 3 } : QInterval))
+    exact RealRaw.ofRat_valid _
+  have hend :
+      (endpointDifferenceRaw squarePrimitiveOnUnit.toRealFunRaw 0 1
+        squarePrimitiveOnUnit_endpoint_valid).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using
+      squarePrimitiveOnUnit_endpoint_valid
+  exact RealRaw.equiv_trans
+    (Integral.raw_valid _ exactRat_square_integral_certificate)
+    hmid
+    hend
+    exactRat_square_integral_raw_equiv_one_third
+    (RealRaw.equiv_symm hendpoint)
+
+def exactRat_square_definiteIdentity :
+    Integral.DefiniteIdentityFor
+      (FunctionOnInterval.exactRat (fun x : Rat => x * x) 0 1)
+      squarePrimitiveOnUnit :=
+  Integral.DefiniteIdentityFor.ofConstruction rfl rfl
+    exactRat_square_integral_certificate.construction
+    squarePrimitiveOnUnit_endpoint_valid (by
+      change (Integral.raw
+        (FunctionOnInterval.exactRat (fun x : Rat => x * x) 0 1)
+        exactRat_square_integral_certificate).Equiv
+        (endpointDifferenceRaw squarePrimitiveOnUnit.toRealFunRaw 0 1
+          squarePrimitiveOnUnit_endpoint_valid)
+      exact exactRat_square_integral_raw_equiv_square_endpoint)
+
 theorem stableSquare_integral_raw_equiv_one_third :
     (Integral.raw stableSquareFunction stableSquare_integral_certificate).Equiv
       (RealRaw.ofRat (1 / 3)) := by
