@@ -84,7 +84,7 @@ compact audit from the repository root:
 rg -n '^import\s+(Mathlib|Mathlib\.|Std\.|Batteries\.)' ComputableAnalysis
 rg -n '\b(sorry|admit)\b' ComputableAnalysis
 lake build computableanalysis
-lake env .lake/packages/checkdecls/.lake/build/bin/checkdecls blueprint/lean_decls
+leanblueprint checkdecls
 ```
 
 The first two commands should print nothing.  The build and declaration check
