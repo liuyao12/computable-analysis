@@ -1248,6 +1248,25 @@ theorem effectiveFinitePolynomialIntegralAnchorRaw_equiv_value
     (by simpa [xs, ys] using hlist)
     (by simpa [ys, Function.comp_def] using hvalue)
 
+/-- The complete finite polynomial integral bridge: the assembled computation
+    is equivalent to its closed rational value.  This is the theorem a user
+    should invoke when a finite polynomial integral needs to enter an
+    application proof. -/
+theorem effectiveFinitePolynomialIntegralRaw_equiv_value
+    (coeffs : Nat -> Rat) (terms : Nat) :
+    (effectiveFinitePolynomialIntegralRaw coeffs terms).Equiv
+      (RealRaw.ofRat (effectiveFinitePolynomialIntegralValue coeffs terms)) := by
+  have hvalue :
+      (RealRaw.ofRat (effectiveFinitePolynomialIntegralValue coeffs terms)).Valid := by
+    unfold RealRaw.ofRat RealRaw.Valid
+    exact RealRaw.ofRat_valid _
+  apply RealRaw.equiv_trans
+    (effectiveFinitePolynomialIntegralRaw_valid coeffs terms)
+    (effectiveFinitePolynomialIntegralAnchorRaw_valid coeffs terms)
+    hvalue
+  · exact effectiveFinitePolynomialIntegralRaw_equiv_anchor coeffs terms
+  · exact effectiveFinitePolynomialIntegralAnchorRaw_equiv_value coeffs terms
+
 def effectiveFiniteTaylorDerivativeOnInterval
     (coeffs : Nat -> Rat) (terms : Nat) (a b C : Rat)
     (hleft : -C <= a) (hright : b <= C) (hC1 : 1 <= C) :
