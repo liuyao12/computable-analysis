@@ -939,6 +939,23 @@ theorem effectiveFourierSeries_precision_witness
       (F.stabilized.compute N).height <= eps.val := by
   exact F.precision_witness eps
 
+theorem effectiveFourierSeries_stabilized_valid
+    (F : EffectiveFourierSeries) :
+    F.stabilized.Valid := by
+  exact F.stabilized_valid
+
+theorem effectiveFourierSeries_stage_contained
+    (F : EffectiveFourierSeries) (n : Nat) :
+    (QBox.point (finiteFourierSum F.root F.mode (F.stage n))).NestedIn
+      (F.stabilized.compute n) := by
+  exact F.stage_contained n
+
+theorem effectiveFourierSeries_stabilized_width_le
+    (F : EffectiveFourierSeries) (n : Nat) :
+    (F.stabilized.compute n).width <=
+      (F.candidate.compute n).width + 2 * F.radius n := by
+  exact F.stabilized_width_le_of_candidate n
+
 /-! The first matrix ODE base case is likewise exposed at the scoped entry
 point.  It is an exact rational linear-algebra theorem, before any passage to
 a continuous matrix-valued function. -/
