@@ -176,6 +176,25 @@ theorem effectiveIntervalRegularDarbouxStage_contains_of_evalIntervalsNested
   exact Integral.intervalRegularDarbouxStage_contains_of_evalIntervalsNested
     F hregular hstage P hnm
 
+theorem effectiveIntervalRegularDarbouxSchedule_widths_shrink_of_budget
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    {hinterval : F.lower <= F.upper} (lengthBound : Nat)
+    (hLength : F.upper - F.lower <= (lengthBound : Rat))
+    (evalPrecision : Nat -> Nat)
+    (hbudget : forall eps : QPos, Exists fun N : Nat =>
+      forall n : Nat, N <= n ->
+        (F.upper - F.lower) *
+          (1 / ((evalPrecision n + 1 : Nat) : Rat)) <= eps.val) :
+    RealRaw.WidthsShrinkToZero
+      (Integral.intervalRegularDarbouxScheduleCompute F hinterval hregular
+        (fun n => Integral.intervalRegularAutomaticPieces hregular
+          lengthBound evalPrecision n)
+        evalPrecision
+        (fun n => Integral.intervalRegularAutomaticPieces_pos hregular
+          lengthBound evalPrecision n)) := by
+  exact Integral.intervalRegularDarbouxSchedule_widths_shrink_of_budget
+    hregular lengthBound hLength evalPrecision hbudget
+
 /-! Public finite multiple-integral bridge.  An outer right sum of inner
 left sums is exactly the complementary one-dimensional rectangle sum. -/
 theorem effectiveUniformTriangleRightSum_eq_complementUniformLeftEndpointSum
