@@ -1011,6 +1011,64 @@ def effectiveExactRatQuinticDefiniteIdentity :
       Integral.quinticPrimitiveOnUnit :=
   Integral.exactRat_quintic_definiteIdentity
 
+/-! Assemble a finite polynomial integral from the certified monomial raws.
+    The separate anchor raw keeps the computation graph explicit; reducing
+    that finite sum to one rational is an independent finite arithmetic step. -/
+
+def effectiveFinitePolynomialIntegralRaw
+    (coeffs : Nat -> Rat) (terms : Nat) : RealRaw :=
+  Integral.finiteRawSum ((List.range terms).map (fun k =>
+    RealRaw.scaleRat (coeffs k)
+      (Integral.raw
+        (FunctionOnInterval.exactRat (fun x : Rat => x ^ k) 0 1)
+        (Integral.exactRat_pow_integral_certificate k))))
+
+def effectiveFinitePolynomialIntegralAnchorRaw
+    (coeffs : Nat -> Rat) (terms : Nat) : RealRaw :=
+  Integral.finiteRawSum ((List.range terms).map (fun k =>
+    RealRaw.scaleRat (coeffs k)
+      (RealRaw.ofRat (1 / ((k + 1 : Nat) : Rat)))))
+
+theorem effectiveFinitePolynomialIntegralRaw_valid
+    (coeffs : Nat -> Rat) (terms : Nat) :
+    (effectiveFinitePolynomialIntegralRaw coeffs terms).Valid := by
+  apply Integral.finiteRawSum_valid
+  intro x hx
+  simp only [List.mem_map] at hx
+  rcases hx with ⟨k, hk, rfl⟩
+  exact RealRaw.scaleRat_valid
+    (Integral.raw_valid _ (Integral.exactRat_pow_integral_certificate k))
+
+theorem effectiveFinitePolynomialIntegralAnchorRaw_valid
+    (coeffs : Nat -> Rat) (terms : Nat) :
+    (effectiveFinitePolynomialIntegralAnchorRaw coeffs terms).Valid := by
+  apply Integral.finiteRawSum_valid
+  intro x hx
+  simp only [List.mem_map] at hx
+  rcases hx with ⟨k, hk, rfl⟩
+  exact RealRaw.scaleRat_valid (RealRaw.ofRat_valid _)
+
+theorem effectiveFinitePolynomialIntegralRaw_equiv_anchor
+    (coeffs : Nat -> Rat) (terms : Nat) :
+    (effectiveFinitePolynomialIntegralRaw coeffs terms).Equiv
+      (effectiveFinitePolynomialIntegralAnchorRaw coeffs terms) := by
+  unfold effectiveFinitePolynomialIntegralRaw
+    effectiveFinitePolynomialIntegralAnchorRaw
+  apply Integral.finiteRawSum_equiv_of_forall
+  · apply Integral.finiteRawListEquiv_map_of_forall
+    intro k hk
+    exact RealRaw.scaleRat_equiv
+      (Integral.exactRat_pow_integral_raw_equiv_one_div_succ k)
+  · intro x hx
+    simp only [List.mem_map] at hx
+    rcases hx with ⟨k, hk, rfl⟩
+    exact RealRaw.scaleRat_valid
+      (Integral.raw_valid _ (Integral.exactRat_pow_integral_certificate k))
+  · intro x hx
+    simp only [List.mem_map] at hx
+    rcases hx with ⟨k, hk, rfl⟩
+    exact RealRaw.scaleRat_valid (RealRaw.ofRat_valid _)
+
 def effectiveFiniteTaylorDerivativeOnInterval
     (coeffs : Nat -> Rat) (terms : Nat) (a b C : Rat)
     (hleft : -C <= a) (hright : b <= C) (hC1 : 1 <= C) :
