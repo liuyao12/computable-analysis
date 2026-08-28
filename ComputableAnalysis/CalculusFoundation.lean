@@ -1636,6 +1636,18 @@ theorem effectiveSinPiHalfIntegral_equiv_endpoint
         h.endpoint_valid) := by
   exact SinPiIntegral.halfIntegral_equiv_endpoint h
 
+theorem effectiveSinPiHalfIntegral_equiv_reciprocalPi_of_FTC
+    {C : RationalCircle.GeometricTrig.FunctionRawConstruction}
+    {hdefined : forall x, 0 <= x -> x <= (1 : Rat) / 2 ->
+      C.sinFunctionRaw.definedAt (2 * x)}
+    (h : SinPiIntegral.HalfIntegralFTCCertificate C hdefined)
+    (hendpoint :
+      (endpointDifferenceRaw h.primitive 0 ((1 : Rat) / 2)
+        h.endpoint_valid).Equiv SinPiIntegral.reciprocalPiRaw) :
+    (SinPiIntegral.halfIntegral C hdefined h.integral).Equiv
+      SinPiIntegral.reciprocalPiRaw := by
+  exact SinPiIntegral.halfIntegral_equiv_reciprocalPi_of_FTC h hendpoint
+
 /-! Fourier stages use the same representation discipline: a precision
 witness is an actual finite rational-complex transform inside the stabilized
 box. -/
