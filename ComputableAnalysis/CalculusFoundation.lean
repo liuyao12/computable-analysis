@@ -57,6 +57,15 @@ end ComputableAnalysis.ComplexPathIntegral
 
 namespace ComputableAnalysis
 
+/-! Public entry-point wrapper for the coefficient-level complex FTC bridge.
+Downstream proofs can recover a coefficient stream after formal integration
+without importing the series implementation module directly. -/
+theorem effectiveComplexCoefficientDerivative_primitiveCoefficients
+    (coefficients : Nat -> QComplex) :
+    complexCoefficientDerivative (complexPrimitiveCoefficients coefficients) =
+      coefficients := by
+  exact complexCoefficientDerivative_primitiveCoefficients coefficients
+
 /-! A finite trigonometric-prefix example belongs to the public calculus
 surface even though the full equal-dyadic sine transport is a separate
 geometric frontier.  Keeping this distinction visible prevents a polynomial
