@@ -233,6 +233,22 @@ def effectiveIntervalRegularDarbouxSchedule_ofAutomaticPieces
   Integral.IntervalRegularDarbouxSchedule.ofAutomaticPieces hregular
     lengthBound hLength evalPrecision hbudget nested
 
+theorem effectiveIntervalRegularDarbouxScheduleRaw_valid
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hinterval : F.lower <= F.upper}
+    (s : Integral.IntervalRegularDarbouxSchedule F hregular hinterval) :
+    (Integral.intervalRegularDarbouxScheduleRaw s).Valid := by
+  exact Integral.intervalRegularDarbouxScheduleRaw_valid s
+
+theorem effectiveIntervalRegularDarbouxScheduleRaw_precision_witness
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hinterval : F.lower <= F.upper}
+    (s : Integral.IntervalRegularDarbouxSchedule F hregular hinterval)
+    (eps : QPos) :
+    ∃ n : Nat,
+      ((Integral.intervalRegularDarbouxScheduleRaw s).compute n).width <= eps.val := by
+  exact Integral.intervalRegularDarbouxScheduleRaw_precision_witness s eps
+
 /-! Public finite multiple-integral bridge.  An outer right sum of inner
 left sums is exactly the complementary one-dimensional rectangle sum. -/
 theorem effectiveUniformTriangleRightSum_eq_complementUniformLeftEndpointSum
