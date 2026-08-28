@@ -1554,6 +1554,33 @@ noncomputable def monomialPrimitiveEndpointDifference
   endpointDifferenceRaw (monomialPrimitiveRaw n) a b
     (endpointDifference_valid_of_fun_valid (RealFunRaw.exact_valid _) trivial trivial)
 
+theorem monomialPrimitiveEndpointDifference_compute (n : Nat) (a b : Rat)
+    (stage : Nat) :
+    endpointDifferenceCompute (monomialPrimitiveRaw n) a b stage =
+      { lo := b ^ (n + 1) / ((n + 1 : Nat) : Rat) -
+          a ^ (n + 1) / ((n + 1 : Nat) : Rat),
+        hi := b ^ (n + 1) / ((n + 1 : Nat) : Rat) -
+          a ^ (n + 1) / ((n + 1 : Nat) : Rat) } := by
+  simp [endpointDifferenceCompute, endpointDifferenceInterval,
+    monomialPrimitiveRaw, RealFunRaw.exact]
+
+theorem monomialPrimitiveEndpointDifference_equiv_ofRat
+    (n : Nat) (a b : Rat) :
+    (monomialPrimitiveEndpointDifference n a b).Equiv
+      (RealRaw.ofRat
+        (b ^ (n + 1) / ((n + 1 : Nat) : Rat) -
+          a ^ (n + 1) / ((n + 1 : Nat) : Rat))) := by
+  intro stage
+  apply (RealRaw.compareAt_overlap_iff _ _ stage stage).2
+  change QInterval.Overlaps
+    (endpointDifferenceCompute (monomialPrimitiveRaw n) a b stage)
+    { lo := b ^ (n + 1) / ((n + 1 : Nat) : Rat) -
+        a ^ (n + 1) / ((n + 1 : Nat) : Rat),
+      hi := b ^ (n + 1) / ((n + 1 : Nat) : Rat) -
+        a ^ (n + 1) / ((n + 1 : Nat) : Rat) }
+  rw [monomialPrimitiveEndpointDifference_compute]
+  exact ⟨Rat.le_refl, Rat.le_refl⟩
+
 theorem monomialPrimitiveEndpointDifference_compute_zero_one (n stage : Nat) :
     (endpointDifferenceCompute (monomialPrimitiveRaw n) 0 1 stage) =
       { lo := (1 / ((n : Rat) + 1) : Rat),

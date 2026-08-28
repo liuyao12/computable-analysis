@@ -1160,12 +1160,15 @@ layer.
 \leanok
 
 The corresponding normalized primitive is exposed once, rather than
-duplicated for each degree.  Its endpoint differences telescope across
-adjacent rational intervals by finite subtraction; this is the algebraic
+duplicated for each degree.  At arbitrary rational endpoints its computation
+is an exact rational interval, and its endpoint differences telescope across
+adjacent rational intervals by finite subtraction.  This is the algebraic
 backbone that a partition-level FTC certificate assembles.
 
 \lean{ComputableAnalysis.Integral.monomialPrimitiveRaw}
 \lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference}
+\lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference_compute}
+\lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference_equiv_ofRat}
 \lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference_compute_zero_one}
 \lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference_valid}
 \lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference_zero_one_equiv}
