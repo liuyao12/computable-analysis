@@ -1201,6 +1201,23 @@ theorem effectivePrefixTail_precision_witness_of_components
       rw [Rat.div_def]
       grind
 
+theorem effectiveFiniteRawSum_valid_of_components
+    (xs : List RealRaw) (hxs : forall x, x ∈ xs -> x.Valid) :
+    (Integral.finiteRawSum xs).Valid := by
+  exact Integral.finiteRawSum_valid xs hxs
+
+theorem effectiveFiniteRawSum_widths_shrink_of_components
+    (xs : List RealRaw) (hxs : forall x, x ∈ xs -> x.Valid) :
+    RealRaw.WidthsShrinkToZero (Integral.finiteRawSum xs).compute := by
+  exact (effectiveFiniteRawSum_valid_of_components xs hxs).2.2
+
+theorem effectiveFiniteRawSum_precision_witness_of_components
+    (xs : List RealRaw) (hxs : forall x, x ∈ xs -> x.Valid)
+    (eps : QPos) :
+    ∃ N : Nat, ∀ n : Nat, N <= n ->
+      ((Integral.finiteRawSum xs).compute n).width <= eps.val := by
+  exact effectiveFiniteRawSum_widths_shrink_of_components xs hxs eps
+
 /-- Focused-entry-point access to the closed monomial FTC family.  The
     implementation remains in `Integral`; this wrapper is the stable import
     surface for downstream formalizations. -/
