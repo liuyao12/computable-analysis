@@ -81,6 +81,15 @@ theorem effectiveFiniteProductIntegralSum2D_nonneg
     0 <= finiteProductIntegralSum2D xs ys f g := by
   exact finiteProductIntegralSum2D_nonneg xs ys f g hx hy
 
+/-! Finite Fubini symmetry for a separable weighted rectangle sum. -/
+theorem effectiveFiniteProductIntegralSum2D_swap
+    (xs ys : List (Rat × Rat)) (f g : Rat -> Rat) :
+    finiteProductIntegralSum2D xs ys f g =
+      finiteProductIntegralSum2D ys xs g f := by
+  rw [finiteProductIntegralSum2D_factorized,
+    finiteProductIntegralSum2D_factorized]
+  exact Rat.mul_comm _ _
+
 theorem effectiveFiniteProductIntegralNestedSum_nonneg
     (samples : List (List (Rat × Rat))) (factors : List (Rat -> Rat))
     (hwidth : forall cells, cells ∈ samples ->
