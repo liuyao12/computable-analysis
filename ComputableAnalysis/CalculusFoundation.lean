@@ -195,6 +195,44 @@ theorem effectiveIntervalRegularDarbouxSchedule_widths_shrink_of_budget
   exact Integral.intervalRegularDarbouxSchedule_widths_shrink_of_budget
     hregular lengthBound hLength evalPrecision hbudget
 
+def effectiveIntervalRegularDarbouxSchedule_ofAutomaticPieces
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    {hinterval : F.lower <= F.upper} (lengthBound : Nat)
+    (hLength : F.upper - F.lower <= (lengthBound : Rat))
+    (evalPrecision : Nat -> Nat)
+    (hbudget : forall eps : QPos, Exists fun N : Nat =>
+      forall n : Nat, N <= n ->
+        (F.upper - F.lower) *
+          (1 / ((evalPrecision n + 1 : Nat) : Rat)) <= eps.val)
+    (nested : forall n m, n <= m ->
+      (Integral.intervalRegularDarbouxScheduleCompute F hinterval hregular
+        (fun n => Integral.intervalRegularAutomaticPieces hregular
+          lengthBound evalPrecision n)
+        evalPrecision
+        (fun n => Integral.intervalRegularAutomaticPieces_pos hregular
+          lengthBound evalPrecision n) n).lo <=
+      (Integral.intervalRegularDarbouxScheduleCompute F hinterval hregular
+        (fun n => Integral.intervalRegularAutomaticPieces hregular
+          lengthBound evalPrecision n)
+        evalPrecision
+        (fun n => Integral.intervalRegularAutomaticPieces_pos hregular
+          lengthBound evalPrecision n) m).lo /\
+      (Integral.intervalRegularDarbouxScheduleCompute F hinterval hregular
+        (fun n => Integral.intervalRegularAutomaticPieces hregular
+          lengthBound evalPrecision n)
+        evalPrecision
+        (fun n => Integral.intervalRegularAutomaticPieces_pos hregular
+          lengthBound evalPrecision n) m).hi <=
+      (Integral.intervalRegularDarbouxScheduleCompute F hinterval hregular
+        (fun n => Integral.intervalRegularAutomaticPieces hregular
+          lengthBound evalPrecision n)
+        evalPrecision
+        (fun n => Integral.intervalRegularAutomaticPieces_pos hregular
+          lengthBound evalPrecision n) n).hi) :
+    Integral.IntervalRegularDarbouxSchedule F hregular hinterval :=
+  Integral.IntervalRegularDarbouxSchedule.ofAutomaticPieces hregular
+    lengthBound hLength evalPrecision hbudget nested
+
 /-! Public finite multiple-integral bridge.  An outer right sum of inner
 left sums is exactly the complementary one-dimensional rectangle sum. -/
 theorem effectiveUniformTriangleRightSum_eq_complementUniformLeftEndpointSum
