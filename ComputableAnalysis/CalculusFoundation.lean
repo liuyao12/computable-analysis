@@ -163,6 +163,19 @@ theorem effectivePeanoBakerFactorialTail_le_eps
         LinearODE.peanoBakerFactorialTailShift M T eps) terms <= eps.val := by
   exact LinearODE.peanoBakerFactorialTail_shifted_le_eps hM hT eps terms
 
+/-! Public same-partition nesting theorem for interval-image Darboux stages.
+The evaluator's cross-stage containment is an explicit hypothesis; this does
+not silently provide the changing-partition nesting needed for a universal
+integral. -/
+theorem effectiveIntervalRegularDarbouxStage_contains_of_evalIntervalsNested
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (hstage : Integral.IntervalRegularOn.EvalIntervalsNested hregular)
+    (P : RationalPartition F.lower F.upper) {n m : Nat} (hnm : n <= m) :
+    (Integral.intervalRegularDarbouxStage F hregular P n).ContainsInterval
+      (Integral.intervalRegularDarbouxStage F hregular P m) := by
+  exact Integral.intervalRegularDarbouxStage_contains_of_evalIntervalsNested
+    F hregular hstage P hnm
+
 /-! Public finite multiple-integral bridge.  An outer right sum of inner
 left sums is exactly the complementary one-dimensional rectangle sum. -/
 theorem effectiveUniformTriangleRightSum_eq_complementUniformLeftEndpointSum
