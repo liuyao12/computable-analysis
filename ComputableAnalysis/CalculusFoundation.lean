@@ -177,6 +177,17 @@ theorem effectiveReciprocalPi_quarterTurn_equiv_quarter :
       (RealRaw.ofRat (1 / 4)) := by
   exact reciprocalPi_quarterTurn_equiv_quarter
 
+theorem effectiveCanonicalDyadicCertificate_square_complement_overlap
+    {B : IntegralIdentities.ArctanInverseBisection}
+    {precision depth k : Nat} {hk : k < 2 ^ depth}
+    (h : SinPiIntegral.CanonicalDyadicHalfAngleCertificateAt
+      B precision depth k hk) :
+    QInterval.Overlaps
+      (SinPiIntegral.rationalSquareInterval
+        (SinPiIntegral.dyadicNestedRadicalTableAt precision depth k).1)
+      (SinPiIntegral.rationalOneMinusSquareInterval h.cosineBox) := by
+  exact SinPiIntegral.CanonicalDyadicHalfAngleCertificateAt.to_square_complement_overlap h
+
 /-! Public finite integration-by-parts laws.  These are the algebraic
 rectangle identities behind later Stieltjes and change-of-variables proofs;
 the variation term is retained explicitly rather than discarded by a limit. -/
