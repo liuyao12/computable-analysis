@@ -1138,6 +1138,25 @@ theorem effectiveFiniteTaylorEndpointRaw_reverse
   exact RealRaw.equiv_trans habvalid htotalvalid
     (RealRaw.neg_valid hbavalid) hab (RealRaw.equiv_symm hright)
 
+/-! Generic prefix-plus-tail bookkeeping.  A tail certificate is kept as a
+separate raw computation; the only assembly fact needed here is finite
+interval arithmetic on the two widths. -/
+
+theorem effectivePrefixTail_width_eq_add
+    (head tail : RealRaw) (stage : Nat) :
+    ((head + tail).compute stage).width =
+      (head.compute stage).width + (tail.compute stage).width := by
+  exact RealRaw.add_width head tail stage
+
+theorem effectivePrefixTail_width_le_of_bounds
+    (head tail : RealRaw) (stage : Nat)
+    (prefixBound tailBound : Rat)
+    (hprefix : (head.compute stage).width <= prefixBound)
+    (htail : (tail.compute stage).width <= tailBound) :
+    ((head + tail).compute stage).width <= prefixBound + tailBound := by
+  rw [effectivePrefixTail_width_eq_add]
+  exact _root_.ComputableAnalysis.rat_add_le_add hprefix htail
+
 /-- Focused-entry-point access to the closed monomial FTC family.  The
     implementation remains in `Integral`; this wrapper is the stable import
     surface for downstream formalizations. -/
