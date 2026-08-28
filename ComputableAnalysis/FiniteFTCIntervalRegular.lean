@@ -1554,6 +1554,49 @@ noncomputable def monomialPrimitiveEndpointDifference
   endpointDifferenceRaw (monomialPrimitiveRaw n) a b
     (endpointDifference_valid_of_fun_valid (RealFunRaw.exact_valid _) trivial trivial)
 
+theorem monomialPrimitiveEndpointDifference_compute_zero_one (n stage : Nat) :
+    (endpointDifferenceCompute (monomialPrimitiveRaw n) 0 1 stage) =
+      { lo := (1 / ((n : Rat) + 1) : Rat),
+        hi := (1 / ((n : Rat) + 1) : Rat) } := by
+  have hone : (1 : Rat) ^ n = 1 := by
+    induction n with
+    | zero => rw [Rat.pow_zero]
+    | succ n ih => rw [Rat.pow_succ, ih]; native_decide
+  have hzero : (0 : Rat) / ((n : Rat) + 1) = 0 := by
+    rw [Rat.div_def]
+    simp
+  have hsub : (1 / ((n : Rat) + 1) : Rat) - 0 =
+      1 / ((n : Rat) + 1) := by
+    simpa [Rat.sub_def] using
+      (Rat.normalize_self (1 / ((n : Rat) + 1) : Rat))
+  simp [endpointDifferenceCompute, endpointDifferenceInterval,
+    monomialPrimitiveRaw, RealFunRaw.exact, Rat.pow_succ, Rat.natCast_add,
+    hone, hzero, hsub]
+
+theorem monomialPrimitiveEndpointDifference_valid (n : Nat) :
+    RealRaw.ValidCompute
+      (endpointDifferenceCompute (monomialPrimitiveRaw n) 0 1) := by
+  have hcompute :
+      endpointDifferenceCompute (monomialPrimitiveRaw n) 0 1 =
+        fun _ : Nat =>
+          ({ lo := 1 / ((n : Rat) + 1), hi := 1 / ((n : Rat) + 1) } : QInterval) := by
+    funext stage
+    exact monomialPrimitiveEndpointDifference_compute_zero_one n stage
+  rw [hcompute]
+  exact RealRaw.ofRat_valid _
+
+theorem monomialPrimitiveEndpointDifference_zero_one_equiv (n : Nat) :
+    (monomialPrimitiveEndpointDifference n 0 1).Equiv
+      (RealRaw.ofRat (1 / ((n : Rat) + 1) : Rat)) := by
+  intro stage
+  apply (RealRaw.compareAt_overlap_iff _ _ stage stage).2
+  change QInterval.Overlaps
+    (endpointDifferenceCompute (monomialPrimitiveRaw n) 0 1 stage)
+    { lo := (1 / ((n : Rat) + 1) : Rat),
+      hi := (1 / ((n : Rat) + 1) : Rat) }
+  rw [monomialPrimitiveEndpointDifference_compute_zero_one]
+  exact ⟨Rat.le_refl, Rat.le_refl⟩
+
 theorem monomialPrimitiveEndpointDifference_adjacent_additive
     (n : Nat) (a b c : Rat) :
     (monomialPrimitiveEndpointDifference n a b +

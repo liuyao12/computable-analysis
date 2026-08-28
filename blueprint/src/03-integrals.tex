@@ -1166,8 +1166,15 @@ backbone that a partition-level FTC certificate assembles.
 
 \lean{ComputableAnalysis.Integral.monomialPrimitiveRaw}
 \lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference}
+\lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference_compute_zero_one}
+\lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference_valid}
+\lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference_zero_one_equiv}
 \lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference_adjacent_additive}
 \leanok
+
+For every degree, the endpoint side is therefore already uniform: the
+primitive $x^{n+1}/(n+1)$ computes exactly to $1/(n+1)$ on $[0,1]$.
+The remaining work is the integral-side certificate, not a new primitive.
 
 At a finite mesh, the left rectangle sum for $x^n$ is not an abstract
 limit: it is exactly the scaled finite power sum
