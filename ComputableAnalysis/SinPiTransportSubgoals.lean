@@ -4,6 +4,72 @@ namespace ComputableAnalysis
 
 namespace SinPiIntegral
 
+/- Refining a tangent box can only enlarge the rational-circle sine interval
+   when viewed in the outer (coarser) box. -/
+theorem rationalCircleSinInterval_contains_of_input_contains
+    {U V : QInterval} (hU : subintervalOf U 0 1)
+    (hV : subintervalOf V 0 1)
+    (h : QInterval.ContainsInterval U V) :
+    QInterval.ContainsInterval
+      (rationalCircleSinInterval U)
+      (rationalCircleSinInterval V) := by
+  unfold rationalCircleSinInterval QInterval.ContainsInterval
+  constructor
+  · exact rationalCircleSin_mono_public hU.1 h.1
+      (Rat.le_trans hV.2.1 hV.2.2)
+  · exact rationalCircleSin_mono_public
+      (Rat.le_trans hV.1 hV.2.1) h.2 hU.2.2
+
+/- The even child reuses the parent sample.  Precision nesting and the
+   rational-circle monotonicity law therefore transport the parent overlap. -/
+theorem dyadicNestedRadical_even_overlap_of_parent_overlap
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (precision n k : Nat) (hk : k < 2 ^ n)
+    (hparent : QInterval.Overlaps
+      (rationalCircleSinInterval
+        (dyadicTangentBoxAt B
+          (dyadicNestedRadicalParentPrecision precision) n k hk))
+      ((dyadicNestedRadicalTableAt
+        (dyadicNestedRadicalParentPrecision precision) n k).1)) :
+    QInterval.Overlaps
+      (rationalCircleSinInterval
+        (dyadicTangentBoxAt B precision (n + 1) (2 * k) (by
+          have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+            rw [Nat.pow_succ]
+            omega
+          rw [hpow]
+          omega)))
+      ((dyadicNestedRadicalTableAt precision (n + 1) (2 * k)).1) := by
+  let childhk : 2 * k < 2 ^ (n + 1) := by
+    have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+      rw [Nat.pow_succ]
+      omega
+    rw [hpow]
+    omega
+  have hprecision : precision <= dyadicNestedRadicalParentPrecision precision := by
+    unfold dyadicNestedRadicalParentPrecision
+    have hsq : precision + 1 <= (precision + 1) * (precision + 1) :=
+      Nat.le_mul_of_pos_right (precision + 1) (Nat.succ_pos _)
+    have hscaled : precision + 1 <=
+        16 * ((precision + 1) * (precision + 1)) :=
+      Nat.le_trans hsq (Nat.le_mul_of_pos_left _ (by omega))
+    exact Nat.le_trans (Nat.le_succ _) (by simpa [Nat.mul_assoc] using hscaled)
+  have hbox := dyadicTangentBoxAt_contains_of_precision_le B
+    precision (dyadicNestedRadicalParentPrecision precision) n k hk hprecision
+  have hcontain : QInterval.ContainsInterval
+      (dyadicTangentBoxAt B precision (n + 1) (2 * k) childhk)
+      (dyadicTangentBoxAt B
+        (dyadicNestedRadicalParentPrecision precision) n k hk) := by
+    simpa [dyadicTangentBoxAt, childhk,
+      dyadicTangentBoxAt_even_input precision n k hk] using hbox
+  have hcircle := rationalCircleSinInterval_contains_of_input_contains
+    (dyadicTangentBoxAt_bounds B precision (n + 1) (2 * k) childhk)
+    (dyadicTangentBoxAt_bounds B
+      (dyadicNestedRadicalParentPrecision precision) n k hk) hcontain
+  rw [dyadicNestedRadicalTableAt_succ_even]
+  exact ⟨Rat.le_trans hcircle.1 hparent.1,
+    Rat.le_trans hparent.2 hcircle.2⟩
+
 /- The even branch can be built directly from the parent overlap proved by
    the precision-nesting lemma in `SinPiIntegral`.  No finite tangent search
    is needed for this parity branch. -/
@@ -41,6 +107,7 @@ def DyadicEvenStepCertificate.of_parent_overlap
         simpa [rationalCircleSinInterval, QInterval.width] using hwidth.1
       · exact Rat.le_refl
     parent_overlap := by
+      rw [dyadicNestedRadicalTableAt_succ_even] at hchild
       simpa [childhk] using hchild
     public_child_eq := rfl }
 
@@ -667,6 +734,70 @@ noncomputable def DyadicTangentWitnessFamily.of_overlap_family
   · have hpos : 0 < k := by omega
     exact canonical_dyadic_search_of_overlap_at B hk hpos
       (hover depth k hk hpos precision)
+
+/- The even overlap family is derived by depth induction: the parent overlap
+   is transported across precision nesting, while the two odd families remain
+   the explicit geometric inputs. -/
+noncomputable def DyadicTangentWitnessFamily.of_odd_overlap_families
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (lower_overlap : forall (precision n j : Nat)
+      (hbound : 2 * j + 1 <= 2 ^ n),
+      QInterval.Overlaps
+        (rationalCircleSinInterval
+          (dyadicTangentBoxAt B precision (n + 1) (2 * j + 1)
+            (by
+              have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+                rw [Nat.pow_succ]
+                omega
+              rw [hpow]
+              omega)))
+        ((dyadicNestedRadicalTableAt precision (n + 1) (2 * j + 1)).1))
+    (upper_overlap : forall (precision n k : Nat)
+      (hupper : 2 ^ n < k) (hk : k < 2 ^ (n + 1)),
+      QInterval.Overlaps
+        (rationalCircleSinInterval
+          (dyadicTangentBoxAt B precision (n + 1) k (by
+            have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+              rw [Nat.pow_succ]
+              omega
+            rw [hpow]
+            omega)))
+        ((dyadicNestedRadicalTableAt precision (n + 1) k).1)) :
+    DyadicTangentWitnessFamily B := by
+  apply DyadicTangentWitnessFamily.of_overlap_family_core B ht0
+  intro depth k hk hpos precision
+  induction depth generalizing precision k with
+  | zero => omega
+  | succ n ih =>
+      by_cases hzero : k = 0
+      · subst k
+        simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using
+          (dyadicNestedRadical_zero_sample_overlap_of_endpoint B ht0
+            precision (n + 1) (by omega))
+      · by_cases heven : k % 2 = 0
+        · obtain ⟨j, rfl⟩ : ∃ j, k = 2 * j := by
+            exact ⟨k / 2, by omega⟩
+          have hj : j < 2 ^ n := by
+            rw [Nat.pow_succ] at hk
+            omega
+          have hparent := ih
+            j hj (by omega) (dyadicNestedRadicalParentPrecision precision)
+          have hchild := dyadicNestedRadical_even_overlap_of_parent_overlap
+            B precision n j hj hparent
+          simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using hchild
+        · have hodd : k % 2 = 1 := by omega
+          by_cases hlower : k <= 2 ^ n
+          · obtain ⟨j, rfl⟩ : ∃ j, k = 2 * j + 1 := by
+              exact ⟨k / 2, by omega⟩
+            have hbound : 2 * j + 1 <= 2 ^ n := by omega
+            simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using
+              (lower_overlap precision n j hbound)
+          · have hupper : 2 ^ n < k := by omega
+            simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using
+              (upper_overlap precision n k hupper hk)
 
 /-! Final assembly adapter for the three finite refinement branches.  Once
 the even, lower-odd, and reflected-upper-odd certificates are supplied, the

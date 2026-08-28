@@ -1223,6 +1223,11 @@ private theorem rationalCircleSin_mono {a b : Rat}
     exact Rat.mul_nonneg hnum (Rat.le_of_lt ((Rat.inv_pos).2 hden))
   grind [Rat.sub_eq_add_neg]
 
+theorem rationalCircleSin_mono_public {a b : Rat}
+    (ha : 0 <= a) (hab : a <= b) (hb : b <= 1) :
+    rationalCircleSin a <= rationalCircleSin b := by
+  exact rationalCircleSin_mono ha hab hb
+
 theorem rationalCircleSinInterval_overlap_of_halfAngle_boxes
     {S C : QInterval} (hS : subintervalOf S 0 1)
     (hC : subintervalOf C 0 1) {s c : Rat}
@@ -5669,80 +5674,6 @@ theorem dyadicTangentBoxAt_contains_of_precision_le
     (2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
     (dyadicNormalizedBranch hk)).2.1 precision₁ precision₂ hprecision
   exact ⟨hnested.1, hnested.2.2⟩
-
-/- Refining a tangent box can only enlarge the rational-circle sine interval
-   when viewed in the outer (coarser) box.  This is the order-theoretic
-   transport needed to propagate an overlap through an even dyadic child. -/
-theorem rationalCircleSinInterval_contains_of_input_contains
-    {U V : QInterval} (hU : subintervalOf U 0 1)
-    (hV : subintervalOf V 0 1)
-    (h : QInterval.ContainsInterval U V) :
-    QInterval.ContainsInterval
-      (rationalCircleSinInterval U)
-      (rationalCircleSinInterval V) := by
-  unfold rationalCircleSinInterval QInterval.ContainsInterval
-  constructor
-  · exact rationalCircleSin_mono hU.1 h.1
-      (Rat.le_trans hV.2.1 hV.2.2)
-  · exact rationalCircleSin_mono hV.1 h.2 hU.2.2
-
-/- The even-child overlap is a genuine induction lemma, not merely a
-   certificate constructor: the child reuses the parent rational sample, and
-   precision nesting transports the outer circle interval. -/
-theorem dyadicNestedRadical_even_overlap_of_parent_overlap
-    (B : IntegralIdentities.ArctanInverseBisection)
-    (precision n k : Nat) (hk : k < 2 ^ n)
-    (hparent : QInterval.Overlaps
-      (rationalCircleSinInterval
-        (dyadicTangentBoxAt B
-          (dyadicNestedRadicalParentPrecision precision) n k hk))
-      ((dyadicNestedRadicalTableAt
-        (dyadicNestedRadicalParentPrecision precision) n k).1)) :
-    QInterval.Overlaps
-      (rationalCircleSinInterval
-        (dyadicTangentBoxAt B (precision) (n + 1) (2 * k) (by
-          have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
-            rw [Nat.pow_succ]
-            omega
-          rw [hpow]
-          omega)))
-      ((dyadicNestedRadicalTableAt precision (n + 1) (2 * k)).1) := by
-  let childhk : 2 * k < 2 ^ (n + 1) := by
-    have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
-      rw [Nat.pow_succ]
-      omega
-    rw [hpow]
-    omega
-  have hprecision : precision <= dyadicNestedRadicalParentPrecision precision := by
-    unfold dyadicNestedRadicalParentPrecision
-    have hsq : precision + 1 <= (precision + 1) * (precision + 1) :=
-      Nat.le_mul_of_pos_right (precision + 1) (Nat.succ_pos _)
-    have hscaled : precision + 1 <=
-        16 * ((precision + 1) * (precision + 1)) :=
-      Nat.le_trans hsq (Nat.le_mul_of_pos_left _ (by omega))
-    exact Nat.le_trans (Nat.le_succ _) (by simpa [Nat.mul_assoc] using hscaled)
-  have hbox := dyadicTangentBoxAt_contains_of_precision_le B
-    precision (dyadicNestedRadicalParentPrecision precision) n k hk hprecision
-  have hcontain : QInterval.ContainsInterval
-      (dyadicTangentBoxAt B precision (n + 1) (2 * k) childhk)
-      (dyadicTangentBoxAt B
-        (dyadicNestedRadicalParentPrecision precision) n k hk) := by
-    have hbox' := hbox
-    simpa [dyadicTangentBoxAt, childhk,
-      dyadicTangentBoxAt_even_input precision n k hk] using hbox'
-  have hcircle : QInterval.ContainsInterval
-      (rationalCircleSinInterval
-        (dyadicTangentBoxAt B precision (n + 1) (2 * k) childhk))
-      (rationalCircleSinInterval
-        (dyadicTangentBoxAt B
-          (dyadicNestedRadicalParentPrecision precision) n k hk)) :=
-    rationalCircleSinInterval_contains_of_input_contains
-      (dyadicTangentBoxAt_bounds B precision (n + 1) (2 * k) childhk)
-      (dyadicTangentBoxAt_bounds B
-        (dyadicNestedRadicalParentPrecision precision) n k hk) hcontain
-  rw [dyadicNestedRadicalTableAt_succ_even]
-  exact ⟨Rat.le_trans hcircle.1 hparent.1,
-    Rat.le_trans hparent.2 hcircle.2⟩
 
 /-! The native-depth box is the canonical coarse box for a dyadic sample. -/
 theorem dyadicTangentBox_contains_at_precision_of_depth_le

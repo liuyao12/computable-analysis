@@ -179,18 +179,26 @@ theorem effectiveTangentSquareFTC_integral_equiv_halfQuarterTurn :
   exact SinPiIntegral.tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn
 
 theorem effectiveDyadicPublicSquareIntegral_equiv_halfQuarterTurn
-    {S : ArctanSinPiConstruction}
-    (h : SinPiIntegral.DyadicPublicSquareTangentTransportWitness S) :
-    (SinPiIntegral.dyadicPublicSquareIntegralRaw S).Equiv
+    {S : SinPiIntegral.ArctanSinPiConstruction}
+    (h : SinPiIntegral.DyadicPublicSquareTangentTransportWitness S)
+    (hsine : IntervalRegularOn S.onHalf)
+    (hbridge : SinPiIntegral.tangentSquareIntegral.Equiv
+      SinPiIntegral.tangentSquareEffectiveFTCData.integralRaw) :
+    (SinPiIntegral.dyadicPublicSquareIntegralRaw_stabilized S
+      SinPiIntegral.tangentSquareIntegral).Equiv
       (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
-  exact h.to_public_equiv_halfQuarterTurn
+  exact h.to_public_equiv_halfQuarterTurn hsine hbridge
 
 theorem effectiveDyadicPublicSquareIntegral_equiv_halfQuarterTurn_shared
-    {S : ArctanSinPiConstruction}
-    (h : SinPiIntegral.DyadicPublicSquareTangentSharedWitness S) :
-    (SinPiIntegral.dyadicPublicSquareIntegralRaw S).Equiv
+    {S : SinPiIntegral.ArctanSinPiConstruction}
+    (h : SinPiIntegral.DyadicPublicSquareTangentSharedWitness S)
+    (hsine : IntervalRegularOn S.onHalf)
+    (hbridge : SinPiIntegral.tangentSquareIntegral.Equiv
+      SinPiIntegral.tangentSquareEffectiveFTCData.integralRaw) :
+    (SinPiIntegral.dyadicPublicSquareIntegralRaw_stabilized S
+      SinPiIntegral.tangentSquareIntegral).Equiv
       (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
-  exact h.to_public_equiv_halfQuarterTurn
+  exact h.to_public_equiv_halfQuarterTurn hsine hbridge
 
 theorem effectiveReciprocalPi_quarterTurn_equiv_quarter :
     (SinPiIntegral.reciprocalPiRaw *

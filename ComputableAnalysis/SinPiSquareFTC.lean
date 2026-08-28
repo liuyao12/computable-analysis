@@ -4281,20 +4281,6 @@ theorem DyadicPublicSquareTangentTransportWitness.to_public_equiv
     (dyadicPublicSquareIntegralRaw S) tangentSquareIntegral n n).2
     (h.to_public_overlap n)
 
-/- A complete public-value bridge: once the cellwise transport certificate is
-   supplied, the equal-dyadic public square integral has the quarter-turn
-   value proved by the effective tangent-square FTC. -/
-theorem DyadicPublicSquareTangentTransportWitness.to_public_equiv_halfQuarterTurn
-    {S : ArctanSinPiConstruction}
-    (h : DyadicPublicSquareTangentTransportWitness S) :
-    (dyadicPublicSquareIntegralRaw S).Equiv
-      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
-  exact RealRaw.equiv_trans (dyadicPublicSquareIntegralRaw S).Valid
-    tangentSquareEffectiveFTCData.integral_valid
-    (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid
-    h.to_public_equiv
-    tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn
-
 theorem DyadicPublicSquareTangentSharedWitness.to_public_equiv
     {S : ArctanSinPiConstruction}
     (h : DyadicPublicSquareTangentSharedWitness S) :
@@ -4304,19 +4290,6 @@ theorem DyadicPublicSquareTangentSharedWitness.to_public_equiv
   exact (RealRaw.compareAt_overlap_iff
     (dyadicPublicSquareIntegralRaw S) tangentSquareIntegral n n).2
     (h.to_public_common_witness.to_overlap n)
-
-/- The shared-witness route is already sufficient for the final value: it
-   reaches the same quarter-turn anchor as the stronger containment route. -/
-theorem DyadicPublicSquareTangentSharedWitness.to_public_equiv_halfQuarterTurn
-    {S : ArctanSinPiConstruction}
-    (h : DyadicPublicSquareTangentSharedWitness S) :
-    (dyadicPublicSquareIntegralRaw S).Equiv
-      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
-  exact RealRaw.equiv_trans (dyadicPublicSquareIntegralRaw S).Valid
-    tangentSquareEffectiveFTCData.integral_valid
-    (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid
-    h.to_public_equiv
-    tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn
 
 theorem dyadicPublicSquareIntegralRaw_widths_shrink
     (S : ArctanSinPiConstruction)
@@ -4406,6 +4379,66 @@ theorem DyadicPublicSquareTangentSharedWitness.stabilized_valid
     (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral).Valid := by
   exact dyadicPublicSquareIntegralRaw_stabilized_valid_of_overlap
     S hsine tangentSquareIntegral_valid h.to_public_equiv
+
+/- The stabilized public evaluator is the valid representative used for
+   transitive transport to the quarter-turn anchor. -/
+theorem DyadicPublicSquareTangentTransportWitness.to_public_equiv_halfQuarterTurn
+    {S : ArctanSinPiConstruction}
+    (h : DyadicPublicSquareTangentTransportWitness S)
+    (hsine : IntervalRegularOn S.onHalf)
+    (hbridge : tangentSquareIntegral.Equiv
+      tangentSquareEffectiveFTCData.integralRaw) :
+    (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral).Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
+  have hstable :
+      (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral).Equiv
+        tangentSquareEffectiveFTCData.integralRaw :=
+    RealRaw.equiv_trans
+      (dyadicPublicSquareIntegralRaw_stabilized_valid_of_overlap
+        S hsine tangentSquareIntegral_valid h.to_public_equiv)
+      tangentSquareIntegral_valid tangentSquareEffectiveFTCData.integral_valid
+      (dyadicPublicSquareIntegralRaw_stabilized_equiv_anchor_of_overlap
+        S tangentSquareIntegral_valid h.to_public_equiv)
+      hbridge
+  exact RealRaw.equiv_trans
+    (dyadicPublicSquareIntegralRaw_stabilized_valid_of_overlap
+      S hsine tangentSquareIntegral_valid h.to_public_equiv)
+    tangentSquareEffectiveFTCData.integral_valid
+    (by
+      change (RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).Valid
+      exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+        CauchyPi.piCircleArea_valid)
+    hstable
+    tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn
+
+theorem DyadicPublicSquareTangentSharedWitness.to_public_equiv_halfQuarterTurn
+    {S : ArctanSinPiConstruction}
+    (h : DyadicPublicSquareTangentSharedWitness S)
+    (hsine : IntervalRegularOn S.onHalf)
+    (hbridge : tangentSquareIntegral.Equiv
+      tangentSquareEffectiveFTCData.integralRaw) :
+    (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral).Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
+  have hstable :
+      (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral).Equiv
+        tangentSquareEffectiveFTCData.integralRaw :=
+    RealRaw.equiv_trans
+      (dyadicPublicSquareIntegralRaw_stabilized_valid_of_overlap
+        S hsine tangentSquareIntegral_valid h.to_public_equiv)
+      tangentSquareIntegral_valid tangentSquareEffectiveFTCData.integral_valid
+      (dyadicPublicSquareIntegralRaw_stabilized_equiv_anchor_of_overlap
+        S tangentSquareIntegral_valid h.to_public_equiv)
+      hbridge
+  exact RealRaw.equiv_trans
+    (dyadicPublicSquareIntegralRaw_stabilized_valid_of_overlap
+      S hsine tangentSquareIntegral_valid h.to_public_equiv)
+    tangentSquareEffectiveFTCData.integral_valid
+    (by
+      change (RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).Valid
+      exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+        CauchyPi.piCircleArea_valid)
+    hstable
+    tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn
 
 def sinPiSquareOnHalfFunctionOnInterval
     (S : ArctanSinPiConstruction) : FunctionOnInterval where
