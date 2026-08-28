@@ -576,6 +576,14 @@ theorem effectiveFiniteWeightedTripleRectangularSum_swap23_raw
         (fun x z y => x.2 * y.2 * z.2 * cellValue x.1 y.1 z.1) := by
   exact finiteWeightedTripleRectangularSum_swap23_raw xs ys zs cellValue
 
+theorem effectiveFiniteWeightedTripleRectangularSum_unitCube_stage :
+    finiteWeightedTripleRectangularSum
+      [(0, 1 / 2), (1 / 2, 1 / 2)]
+      [(0, 1 / 2), (1 / 2, 1 / 2)]
+      [(0, 1 / 2), (1 / 2, 1 / 2)]
+      (fun _ _ _ => 1) = 1 := by
+  exact finiteWeightedTripleRectangularSum_unitCube_stage
+
 theorem effectiveFiniteTripleRectangularSum_add {α β γ : Type}
     (xs : List α) (ys : List β) (zs : List γ)
     (f g : α -> β -> γ -> Rat) :

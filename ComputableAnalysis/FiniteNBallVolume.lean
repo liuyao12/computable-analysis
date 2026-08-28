@@ -609,6 +609,18 @@ theorem finiteWeightedTripleRectangularSum_swap23_raw
     (finiteTripleRectangularSum_swap23 xs ys zs
       (fun x y z => x.2 * y.2 * z.2 * cellValue x.1 y.1 z.1))
 
+/-! A concrete three-dimensional volume checkpoint.  The unit cube is split
+into two rational half-width cells in each coordinate; the constant density
+one is evaluated by the weighted finite fold. -/
+
+theorem finiteWeightedTripleRectangularSum_unitCube_stage :
+    finiteWeightedTripleRectangularSum
+      [(0, 1 / 2), (1 / 2, 1 / 2)]
+      [(0, 1 / 2), (1 / 2, 1 / 2)]
+      [(0, 1 / 2), (1 / 2, 1 / 2)]
+      (fun _ _ _ => 1) = 1 := by
+  native_decide
+
 /-! The same finite algebra in arbitrary dimension.  A list of sample lists
 and a list of one-variable factors describes a separable rectangular sum. -/
 
