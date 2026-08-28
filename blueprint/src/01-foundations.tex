@@ -989,6 +989,11 @@ The pair (99991,12345) supplies a further terminating certificate: its gcd is
 
 \begin{remark}[Algebraic numbers, starting with \(\sqrt2\)]
 \label{rem:algebraic-numbers-sqrt-two}
+The scoped calculus entry point imports this real-free algebraic layer.  Its
+irrationality statement is about `RealRaw.Irrational`: a nested rational
+interval computation is irrational when it is not equivalent to any rational
+interval computation.  Thus the theorem has the same mathematical content as
+the classical square-root criterion without using a standard real number.
 \lean{ComputableAnalysis.sqrt}
 \lean{ComputableAnalysis.sqrtRaw}
 \lean{ComputableAnalysis.sqrtStageEps}

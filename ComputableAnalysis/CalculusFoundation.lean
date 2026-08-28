@@ -25,6 +25,8 @@ import ComputableAnalysis.FiniteGaussianIntegral
 import ComputableAnalysis.ComplexCircleBridge
 import ComputableAnalysis.ComplexPathIntegral
 import ComputableAnalysis.FiniteComplexPathCertificate
+import ComputableAnalysis.IrrationalSqrt
+import ComputableAnalysis.SqrtTwoDescent
 
 /-!
 # Computable calculus foundation
