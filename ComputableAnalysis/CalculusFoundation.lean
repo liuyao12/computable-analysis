@@ -185,6 +185,13 @@ theorem effectiveDyadicPublicSquareIntegral_equiv_halfQuarterTurn
       (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
   exact h.to_public_equiv_halfQuarterTurn
 
+theorem effectiveDyadicPublicSquareIntegral_equiv_halfQuarterTurn_shared
+    {S : ArctanSinPiConstruction}
+    (h : SinPiIntegral.DyadicPublicSquareTangentSharedWitness S) :
+    (SinPiIntegral.dyadicPublicSquareIntegralRaw S).Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
+  exact h.to_public_equiv_halfQuarterTurn
+
 theorem effectiveReciprocalPi_quarterTurn_equiv_quarter :
     (SinPiIntegral.reciprocalPiRaw *
       RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Equiv

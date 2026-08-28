@@ -4305,6 +4305,19 @@ theorem DyadicPublicSquareTangentSharedWitness.to_public_equiv
     (dyadicPublicSquareIntegralRaw S) tangentSquareIntegral n n).2
     (h.to_public_common_witness.to_overlap n)
 
+/- The shared-witness route is already sufficient for the final value: it
+   reaches the same quarter-turn anchor as the stronger containment route. -/
+theorem DyadicPublicSquareTangentSharedWitness.to_public_equiv_halfQuarterTurn
+    {S : ArctanSinPiConstruction}
+    (h : DyadicPublicSquareTangentSharedWitness S) :
+    (dyadicPublicSquareIntegralRaw S).Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
+  exact RealRaw.equiv_trans (dyadicPublicSquareIntegralRaw S).Valid
+    tangentSquareEffectiveFTCData.integral_valid
+    (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid
+    h.to_public_equiv
+    tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn
+
 theorem dyadicPublicSquareIntegralRaw_widths_shrink
     (S : ArctanSinPiConstruction)
     (hsine : IntervalRegularOn S.onHalf) :
