@@ -1101,6 +1101,43 @@ theorem effectiveFiniteTaylorEndpointRaw_self_equiv_zero
   rw [Rat.sub_self] at h
   simpa [RealRaw.zero] using h
 
+theorem effectiveFiniteTaylorEndpointRaw_reverse
+    (coeffs : Nat -> Rat) (terms : Nat) (a b : Rat) :
+    (effectiveFiniteTaylorEndpointRaw coeffs terms a b).Equiv
+      (-(effectiveFiniteTaylorEndpointRaw coeffs terms b a)) := by
+  let P := FinitePolynomial.integratedTaylorPrefix coeffs terms
+  have hab := effectiveFiniteTaylorEndpointRaw_equiv_endpointDifference
+    coeffs terms a b
+  have hba := effectiveFiniteTaylorEndpointRaw_equiv_endpointDifference
+    coeffs terms b a
+  have habvalid := effectiveFiniteTaylorEndpointRaw_valid coeffs terms a b
+  have hbavalid := effectiveFiniteTaylorEndpointRaw_valid coeffs terms b a
+  have hqvalid : (RealRaw.ofRat (P a - P b)).Valid := by
+    unfold RealRaw.ofRat RealRaw.Valid
+    exact RealRaw.ofRat_valid _
+  have hnegvalid : (-(RealRaw.ofRat (P a - P b))).Valid :=
+    RealRaw.neg_valid hqvalid
+  have htotalvalid : (RealRaw.ofRat (P b - P a)).Valid := by
+    unfold RealRaw.ofRat RealRaw.Valid
+    exact RealRaw.ofRat_valid _
+  have hnegRat :
+      (-(RealRaw.ofRat (P a - P b))).Equiv
+        (RealRaw.ofRat (P b - P a)) := by
+    intro n
+    apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+    change QInterval.Overlaps
+      { lo := -(P a - P b), hi := -(P a - P b) }
+      { lo := P b - P a, hi := P b - P a }
+    unfold QInterval.Overlaps
+    constructor <;> grind [Rat.sub_def]
+  have hright :
+      (-(effectiveFiniteTaylorEndpointRaw coeffs terms b a)).Equiv
+        (RealRaw.ofRat (P b - P a)) := by
+    exact RealRaw.equiv_trans (RealRaw.neg_valid hbavalid)
+      hnegvalid htotalvalid (RealRaw.neg_equiv hba) hnegRat
+  exact RealRaw.equiv_trans habvalid htotalvalid
+    (RealRaw.neg_valid hbavalid) hab (RealRaw.equiv_symm hright)
+
 /-- Focused-entry-point access to the closed monomial FTC family.  The
     implementation remains in `Integral`; this wrapper is the stable import
     surface for downstream formalizations. -/
