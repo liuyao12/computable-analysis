@@ -150,6 +150,19 @@ theorem effectiveLinearODEDuhamel
   exact LinearODE.effectiveDiscreteVariationOfConstants_duhamel
     system initial n
 
+def effectivePeanoBakerFactorialRemainderCertificate
+    {M T : Rat} (hM : 0 <= M) (hT : 0 <= T) (eps : QPos) :
+    LinearODE.PeanoBakerFactorialRemainderCertificate M T eps := by
+  exact LinearODE.peanoBakerFactorialRemainderCertificate hM hT eps
+
+theorem effectivePeanoBakerFactorialTail_le_eps
+    {M T : Rat} (hM : 0 <= M) (hT : 0 <= T) (eps : QPos)
+    (terms : Nat) :
+    LinearODE.peanoBakerFactorialTail M T
+      (RationalMajorant.factorialTailStart (M * T) +
+        LinearODE.peanoBakerFactorialTailShift M T eps) terms <= eps.val := by
+  exact LinearODE.peanoBakerFactorialTail_shifted_le_eps hM hT eps terms
+
 /-! Public finite multiple-integral bridge.  An outer right sum of inner
 left sums is exactly the complementary one-dimensional rectangle sum. -/
 theorem effectiveUniformTriangleRightSum_eq_complementUniformLeftEndpointSum
