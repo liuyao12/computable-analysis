@@ -1,6 +1,7 @@
 import ComputableAnalysis.FiniteNBallVolume
 import ComputableAnalysis.FiniteExponentialTaylor
 import ComputableAnalysis.ExpProofs
+import ComputableAnalysis.Series
 
 /-!
 # Finite Gaussian integral prefixes
@@ -45,6 +46,29 @@ theorem gaussianEvenIntegralPrefix_term_difference (terms : Nat) (radius : Rat) 
 def gaussianEvenIntegralTerm (k : Nat) (radius : Rat) : Rat :=
   2 * FormalPowerSeries.expCoeff k * (-1 : Rat) ^ k *
     radius ^ (2 * k + 1) / ((2 * k + 1 : Nat) : Rat)
+
+/- The alternating-series adapter is the point where a bounded Gaussian
+   computation becomes a `RealRaw`.  The two analytic obligations are kept
+   explicit: monotonicity of the integrated term magnitudes and their
+   potential-infinity modulus. -/
+def gaussianEvenIntegralAlternatingRaw (radius : Rat)
+    (hdecreasing : forall k, qabs (gaussianEvenIntegralTerm (k + 1) radius) <=
+      qabs (gaussianEvenIntegralTerm k radius))
+    (hshrinks : ShrinksToZero
+      (fun k => qabs (gaussianEvenIntegralTerm k radius))) :
+    Series.AlternatingRaw where
+  term := fun k => qabs (gaussianEvenIntegralTerm k radius)
+  term_nonneg := fun k => qabs_nonneg _
+  term_decreasing := hdecreasing
+  term_shrinks := hshrinks
+
+theorem gaussianEvenIntegralAlternatingRaw_valid (radius : Rat)
+    (hdecreasing : forall k, qabs (gaussianEvenIntegralTerm (k + 1) radius) <=
+      qabs (gaussianEvenIntegralTerm k radius))
+    (hshrinks : ShrinksToZero
+      (fun k => qabs (gaussianEvenIntegralTerm k radius))) :
+    (gaussianEvenIntegralAlternatingRaw radius hdecreasing hshrinks).toRealRaw.Valid := by
+  exact (gaussianEvenIntegralAlternatingRaw radius hdecreasing hshrinks).toRealRaw_valid
 
 /- The extra factor in a Gaussian integral term is controlled by the same
    factorial majorant as the exponential series.  Keeping the radius and its
