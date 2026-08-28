@@ -450,6 +450,96 @@ theorem exactRat_quartic_integral_raw_equiv_one_fifth :
   unfold QInterval.Overlaps
   exact exactQuartic_compute_contains_one_fifth n
 
+/-! The quartic certificate is also exposed through the domain-aware definite
+integral interface, with the rational primitive `x^5 / 5`. -/
+
+def quarticPrimitiveOnUnit : FunctionOnInterval :=
+  FunctionOnInterval.exactRat (fun x : Rat => x ^ 5 / 5) 0 1
+
+theorem quarticPrimitiveOnUnit_compute_zero (n : Nat) :
+    quarticPrimitiveOnUnit.toRealFunRaw.compute 0 n =
+      { lo := (0 : Rat), hi := 0 } := by
+  rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+    quarticPrimitiveOnUnit (x := 0)
+      (hx := ⟨by native_decide, by native_decide⟩) n]
+  change ({ lo := (0 : Rat) ^ 5 / 5, hi := 0 ^ 5 / 5 } : QInterval) = _
+  native_decide
+
+theorem quarticPrimitiveOnUnit_compute_one (n : Nat) :
+    quarticPrimitiveOnUnit.toRealFunRaw.compute 1 n =
+      { lo := (1 / 5 : Rat), hi := 1 / 5 } := by
+  rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+    quarticPrimitiveOnUnit (x := 1)
+      (hx := ⟨by native_decide, by native_decide⟩) n]
+  change ({ lo := (1 : Rat) ^ 5 / 5, hi := 1 ^ 5 / 5 } : QInterval) = _
+  native_decide
+
+theorem quarticPrimitiveOnUnit_endpoint_compute (n : Nat) :
+    endpointDifferenceCompute quarticPrimitiveOnUnit.toRealFunRaw 0 1 n =
+      { lo := (1 / 5 : Rat), hi := 1 / 5 } := by
+  simp [endpointDifferenceCompute, endpointDifferenceInterval,
+    quarticPrimitiveOnUnit_compute_one, quarticPrimitiveOnUnit_compute_zero]
+  native_decide
+
+theorem quarticPrimitiveOnUnit_endpoint_valid :
+    RealRaw.ValidCompute
+      (endpointDifferenceCompute quarticPrimitiveOnUnit.toRealFunRaw 0 1) := by
+  have hcompute :
+      endpointDifferenceCompute quarticPrimitiveOnUnit.toRealFunRaw 0 1 =
+        fun _ : Nat => ({ lo := (1 / 5 : Rat), hi := 1 / 5 } : QInterval) := by
+    funext n
+    exact quarticPrimitiveOnUnit_endpoint_compute n
+  rw [hcompute]
+  exact RealRaw.ofRat_valid _
+
+theorem exactRat_quartic_integral_raw_equiv_quartic_endpoint :
+    (Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ 4) 0 1)
+      exactRat_quartic_integral_certificate).Equiv
+      (endpointDifferenceRaw quarticPrimitiveOnUnit.toRealFunRaw 0 1
+        quarticPrimitiveOnUnit_endpoint_valid) := by
+  have hendpoint :
+      (endpointDifferenceRaw quarticPrimitiveOnUnit.toRealFunRaw 0 1
+        quarticPrimitiveOnUnit_endpoint_valid).Equiv
+        (RealRaw.ofRat (1 / 5)) := by
+    apply RealRaw.sameStageOverlap_equiv
+    intro n
+    apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+    change QInterval.Overlaps
+      (endpointDifferenceCompute quarticPrimitiveOnUnit.toRealFunRaw 0 1 n)
+      { lo := (1 / 5 : Rat), hi := 1 / 5 }
+    rw [quarticPrimitiveOnUnit_endpoint_compute]
+    exact ⟨by native_decide, by native_decide⟩
+  have hmid : (RealRaw.ofRat (1 / 5)).Valid := by
+    change RealRaw.ValidCompute
+      (fun _ : Nat => ({ lo := (1 / 5 : Rat), hi := 1 / 5 } : QInterval))
+    exact RealRaw.ofRat_valid _
+  have hend :
+      (endpointDifferenceRaw quarticPrimitiveOnUnit.toRealFunRaw 0 1
+        quarticPrimitiveOnUnit_endpoint_valid).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using
+      quarticPrimitiveOnUnit_endpoint_valid
+  exact RealRaw.equiv_trans
+    (Integral.raw_valid _ exactRat_quartic_integral_certificate)
+    hmid
+    hend
+    exactRat_quartic_integral_raw_equiv_one_fifth
+    (RealRaw.equiv_symm hendpoint)
+
+def exactRat_quartic_definiteIdentity :
+    Integral.DefiniteIdentityFor
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ 4) 0 1)
+      quarticPrimitiveOnUnit :=
+  Integral.DefiniteIdentityFor.ofConstruction rfl rfl
+    exactRat_quartic_integral_certificate.construction
+    quarticPrimitiveOnUnit_endpoint_valid (by
+      change (Integral.raw
+        (FunctionOnInterval.exactRat (fun x : Rat => x ^ 4) 0 1)
+        exactRat_quartic_integral_certificate).Equiv
+        (endpointDifferenceRaw quarticPrimitiveOnUnit.toRealFunRaw 0 1
+          quarticPrimitiveOnUnit_endpoint_valid)
+      exact exactRat_quartic_integral_raw_equiv_quartic_endpoint)
+
 
 end Integral
 

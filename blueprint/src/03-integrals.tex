@@ -1113,6 +1113,10 @@ existing dyadic square certificate is transported through the generic
 construction interface. This is the model for adding further closed
 polynomial integrals.
 
+The quartic case follows the same public pattern: the dyadic $x^4$
+evaluator is transported to the endpoint primitive $x^5/5$, yielding the
+domain-aware identity $int_0^1 x^4\,dx=1/5$.
+
 \lean{ComputableAnalysis.FinitePolynomial.normalizedMonomialSecantBound}
 \lean{ComputableAnalysis.FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.FinitePolynomial.taylorPrefix_hasDerivativeOnInterval}
@@ -1261,6 +1265,8 @@ effective FTC layer, rather than separate foundations:
 \]
 
 \lean{ComputableAnalysis.Integral.quarticIntegralEffectiveFTC_equiv_one_fifth}
+\lean{ComputableAnalysis.Integral.exactRat_quartic_integral_raw_equiv_quartic_endpoint}
+\lean{ComputableAnalysis.Integral.exactRat_quartic_definiteIdentity}
 \lean{ComputableAnalysis.Integral.fifthIntegralEffectiveFTC_equiv_one_sixth}
 \leanok
 
