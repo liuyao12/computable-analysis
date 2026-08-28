@@ -354,6 +354,15 @@ theorem effectiveFiniteRectangularSum_nonneg
     0 <= finiteRectangularSum xs ys cellValue := by
   exact finiteRectangularSum_nonneg xs ys cellValue h
 
+theorem effectiveFiniteRectangularSum_mono
+    (xs ys : List Rat)
+    (lower upper : Rat -> Rat -> Rat)
+    (h : forall x, x ∈ xs -> forall y, y ∈ ys ->
+      lower x y <= upper x y) :
+    finiteRectangularSum xs ys lower <=
+      finiteRectangularSum xs ys upper := by
+  exact finiteRectangularSum_mono xs ys lower upper h
+
 theorem effectiveFiniteProductIntegralSum2D_nonneg
     (xs ys : List (Rat × Rat)) (f g : Rat -> Rat)
     (hx : forall cell, cell ∈ xs -> 0 <= cell.2 * f cell.1)
