@@ -425,6 +425,14 @@ theorem effectiveFiniteWeightedRectangularSum_scale
       scale * finiteWeightedRectangularSum xs ys f := by
   exact finiteWeightedRectangularSum_scale xs ys scale f
 
+theorem effectiveFiniteWeightedRectangularSum_congr
+    (xs ys : List (Rat × Rat)) (f g : Rat -> Rat -> Rat)
+    (h : forall x, x ∈ xs -> forall y, y ∈ ys ->
+      f x.1 y.1 = g x.1 y.1) :
+    finiteWeightedRectangularSum xs ys f =
+      finiteWeightedRectangularSum xs ys g := by
+  exact finiteWeightedRectangularSum_congr xs ys f g h
+
 theorem effectiveFiniteProductIntegralSum2D_nonneg
     (xs ys : List (Rat × Rat)) (f g : Rat -> Rat)
     (hx : forall cell, cell ∈ xs -> 0 <= cell.2 * f cell.1)

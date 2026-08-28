@@ -388,6 +388,17 @@ theorem finiteWeightedRectangularSum_scale
     (finiteRectangularSum_scale xs ys scale
       (fun x y => x.2 * y.2 * f x.1 y.1))
 
+theorem finiteWeightedRectangularSum_congr
+    (xs ys : List (Rat × Rat)) (f g : Rat -> Rat -> Rat)
+    (h : forall x, x ∈ xs -> forall y, y ∈ ys ->
+      f x.1 y.1 = g x.1 y.1) :
+    finiteWeightedRectangularSum xs ys f =
+      finiteWeightedRectangularSum xs ys g := by
+  unfold finiteWeightedRectangularSum
+  apply finiteRectangularSum_congr
+  intro x hx y hy
+  rw [h x hx y hy]
+
 /-! The same finite algebra in arbitrary dimension.  A list of sample lists
 and a list of one-variable factors describes a separable rectangular sum. -/
 
