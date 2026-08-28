@@ -32,6 +32,12 @@ as the common interface for the remaining chapters.
 The public scoped entry point exposes the general contract and its final
 representation-transport step:
 
+Any concrete integral can enter the identity layer through one generic
+certificate: provide a valid `ConstructionFor`, a valid endpoint computation,
+and their explicit overlap.  Derivative-bound and curvature constructors are
+convenience specializations of this same pattern.
+
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.ofConstruction}
 \lean{ComputableAnalysis.effectiveFTC}
 \lean{ComputableAnalysis.effectiveFTC_endpointDifference}
 \lean{ComputableAnalysis.effectiveConvexFTC}

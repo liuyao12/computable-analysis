@@ -338,6 +338,31 @@ structure DefiniteIdentityFor
         primitive.toRealFunRaw integrand.lower integrand.upper
         endpoint_valid)
 
+/-! The generic consumer-facing constructor.  A special-function proof need
+only provide a valid domain-aware computation and an explicit endpoint
+equivalence; it does not need to pass through one of the derivative-bound
+specializations below. -/
+def DefiniteIdentityFor.ofConstruction
+    {integrand primitive : FunctionOnInterval}
+    (same_lower : primitive.lower = integrand.lower)
+    (same_upper : primitive.upper = integrand.upper)
+    (construction : Integral.ConstructionFor integrand)
+    (endpoint_valid :
+      RealRaw.ValidCompute
+        (endpointDifferenceCompute
+          primitive.toRealFunRaw integrand.lower integrand.upper))
+    (equivalent :
+      (Integral.integralFor integrand construction).Equiv
+        (endpointDifferenceRaw
+          primitive.toRealFunRaw integrand.lower integrand.upper
+          endpoint_valid)) :
+    DefiniteIdentityFor integrand primitive where
+  same_lower := same_lower
+  same_upper := same_upper
+  construction := construction
+  endpoint_valid := endpoint_valid
+  equivalent := equivalent
+
 namespace DefiniteIdentityFor
 
 theorem integral_valid
