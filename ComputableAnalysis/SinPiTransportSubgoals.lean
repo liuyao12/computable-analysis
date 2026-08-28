@@ -4,6 +4,46 @@ namespace ComputableAnalysis
 
 namespace SinPiIntegral
 
+/- The even branch can be built directly from the parent overlap proved by
+   the precision-nesting lemma in `SinPiIntegral`.  No finite tangent search
+   is needed for this parity branch. -/
+def DyadicEvenStepCertificate.of_parent_overlap
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (precision n k : Nat) (hk : k < 2 ^ n)
+    (hparent : QInterval.Overlaps
+      (rationalCircleSinInterval
+        (dyadicTangentBoxAt B
+          (dyadicNestedRadicalParentPrecision precision) n k hk))
+      ((dyadicNestedRadicalTableAt
+        (dyadicNestedRadicalParentPrecision precision) n k).1)) :
+    DyadicEvenStepCertificate B precision n k hk := by
+  let childhk : 2 * k < 2 ^ (n + 1) := by
+    have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+      rw [Nat.pow_succ]
+      omega
+    rw [hpow]
+    omega
+  have hchild := dyadicNestedRadical_even_overlap_of_parent_overlap
+    B precision n k hk hparent
+  exact {
+    childRaw := rationalCircleSinInterval
+      (dyadicTangentBoxAt B precision (n + 1) (2 * k) childhk)
+    parentRaw := rationalCircleSinInterval
+      (dyadicTangentBoxAt B precision (n + 1) (2 * k) childhk)
+    parent_contained := by
+      have hU := dyadicTangentBoxAt_bounds B precision (n + 1) (2 * k) childhk
+      have hwidth := rationalCircleSinInterval_width_le hU
+      unfold subintervalOf
+      constructor
+      · exact Rat.le_refl
+      constructor
+      · apply (Rat.le_iff_sub_nonneg _ _).2
+        simpa [rationalCircleSinInterval, QInterval.width] using hwidth.1
+      · exact Rat.le_refl
+    parent_overlap := by
+      simpa [childhk] using hchild
+    public_child_eq := rfl }
+
 /-! The even branch can be generated from the certificate at its parent
 precision.  The dyadic table reuses the parent entry, while the inverse box
 at the requested precision is the outer box in the nesting chain. -/
