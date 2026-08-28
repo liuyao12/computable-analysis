@@ -303,6 +303,13 @@ theorem effectiveLinearODEChronologicalProduct_split
         (LinearODE.chronologicalProduct B first) := by
   exact LinearODE.chronologicalProduct_split B first second
 
+theorem effectiveLinearODEChronologicalProduct_constant
+    {dimension : Nat} (B : LinearODE.RatMatrix dimension) (steps : Nat) :
+    LinearODE.chronologicalProduct (fun _ => B) steps =
+      LinearODE.matrixPow
+        (LinearODE.matrixAdd (LinearODE.matrixIdentity dimension) B) steps := by
+  exact LinearODE.chronologicalProduct_constant B steps
+
 theorem effectiveLinearODESquareZeroUniformStep
     {dimension : Nat} (A : LinearODE.RatMatrix dimension)
     (T : Rat) (steps : Nat) (hsteps : 0 < steps)
