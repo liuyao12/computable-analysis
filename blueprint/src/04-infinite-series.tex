@@ -650,6 +650,14 @@ This is the finite Fubini core.  The index lists may be any finite types; only
 the cell certificates are rational.  It is an identity of rational folds, not
 a theorem about an infinite integral or a completed function space.
 
+Finite linearity is equally literal: adding two sampled cell tables adds their
+rectangular sums, and rational scaling pulls through the fold.  These are the
+finite algebraic laws later used to assemble independent integral certificates;
+they are not axioms about an abstract integral operator.
+
+\lean{ComputableAnalysis.effectiveFiniteRectangularSum_add}
+\lean{ComputableAnalysis.effectiveFiniteRectangularSum_scale}
+
 For actual rectangle meshes, each index carries its rational cell width.  The
 weighted form preserves the same order symmetry and proves nonnegativity from
 nonnegative widths and sampled values:

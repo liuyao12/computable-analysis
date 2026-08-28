@@ -363,6 +363,19 @@ theorem effectiveFiniteRectangularSum_mono {α β : Type}
       finiteRectangularSum xs ys upper := by
   exact finiteRectangularSum_mono xs ys lower upper h
 
+theorem effectiveFiniteRectangularSum_add {α β : Type}
+    (xs : List α) (ys : List β)
+    (f g : α -> β -> Rat) :
+    finiteRectangularSum xs ys (fun x y => f x y + g x y) =
+      finiteRectangularSum xs ys f + finiteRectangularSum xs ys g := by
+  exact finiteRectangularSum_add xs ys f g
+
+theorem effectiveFiniteRectangularSum_scale {α β : Type}
+    (xs : List α) (ys : List β) (scale : Rat) (f : α -> β -> Rat) :
+    finiteRectangularSum xs ys (fun x y => scale * f x y) =
+      scale * finiteRectangularSum xs ys f := by
+  exact finiteRectangularSum_scale xs ys scale f
+
 theorem effectiveFiniteWeightedRectangularSum_swap
     (xs ys : List (Rat × Rat)) (cellValue : Rat -> Rat -> Rat) :
     finiteWeightedRectangularSum xs ys cellValue =

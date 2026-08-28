@@ -181,6 +181,28 @@ theorem finiteRatSum_le {α : Type} (xs : List α)
         intro y hy
         exact h y (by simp [hy])
 
+theorem finiteRatSum_add {α : Type} (xs : List α)
+    (f g : α -> Rat) :
+    finiteRatSum (xs.map (fun x => f x + g x)) =
+      finiteRatSum (xs.map f) + finiteRatSum (xs.map g) := by
+  induction xs with
+  | nil => grind [finiteRatSum]
+  | cons x xs ih =>
+      simp only [List.map_cons, finiteRatSum]
+      rw [ih]
+      grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+
+theorem finiteRatSum_scale {α : Type} (xs : List α)
+    (scale : Rat) (f : α -> Rat) :
+    finiteRatSum (xs.map (fun x => scale * f x)) =
+      scale * finiteRatSum (xs.map f) := by
+  induction xs with
+  | nil => grind [finiteRatSum]
+  | cons x xs ih =>
+      simp only [List.map_cons, finiteRatSum]
+      rw [ih]
+      grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc]
+
 theorem finiteRectangularSum_nonneg {α β : Type} (xs : List α) (ys : List β)
     (cellValue : α -> β -> Rat)
     (h : forall x, x ∈ xs -> forall y, y ∈ ys -> 0 <= cellValue x y) :
@@ -197,6 +219,29 @@ theorem finiteRectangularSum_nonneg {α β : Type} (xs : List α) (ys : List β)
       · apply ih
         intro x' hx' y hy
         exact h x' (by simp [hx']) y hy
+
+theorem finiteRectangularSum_add {α β : Type}
+    (xs : List α) (ys : List β)
+    (f g : α -> β -> Rat) :
+    finiteRectangularSum xs ys (fun x y => f x y + g x y) =
+      finiteRectangularSum xs ys f + finiteRectangularSum xs ys g := by
+  induction xs with
+  | nil => grind [finiteRectangularSum]
+  | cons x xs ih =>
+      simp only [finiteRectangularSum]
+      rw [finiteRatSum_add, ih]
+      grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+
+theorem finiteRectangularSum_scale {α β : Type}
+    (xs : List α) (ys : List β) (scale : Rat) (f : α -> β -> Rat) :
+    finiteRectangularSum xs ys (fun x y => scale * f x y) =
+      scale * finiteRectangularSum xs ys f := by
+  induction xs with
+  | nil => grind [finiteRectangularSum]
+  | cons x xs ih =>
+      simp only [finiteRectangularSum]
+      rw [finiteRatSum_scale, ih]
+      grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc]
 
 theorem finiteRectangularSum_mono {α β : Type} (xs : List α) (ys : List β)
     (lower upper : α -> β -> Rat)
