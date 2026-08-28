@@ -1992,6 +1992,110 @@ theorem exactRat_pow_integral_raw_equiv_one_div_succ (k : Nat) :
       hi := 1 / ((k + 1 : Nat) : Rat) }
   exact exactRat_pow_compute_contains_one_div_succ k stage
 
+/-! The arbitrary-power certificate is also available through the
+domain-aware definite-integral interface.  Thus square and cube are merely
+the first named instances of one reusable monomial FTC family. -/
+
+def powPrimitiveOnUnit (k : Nat) : FunctionOnInterval :=
+  FunctionOnInterval.exactRat
+    (fun x : Rat => x ^ (k + 1) / ((k + 1 : Nat) : Rat)) 0 1
+
+private def powEndpointInterval (k : Nat) : QInterval :=
+  QInterval.mk (1 / ((k + 1 : Nat) : Rat)) (1 / ((k + 1 : Nat) : Rat))
+
+theorem powPrimitiveOnUnit_compute_zero (k n : Nat) :
+    (powPrimitiveOnUnit k).toRealFunRaw.compute 0 n =
+      { lo := (0 : Rat), hi := 0 } := by
+  rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+    (powPrimitiveOnUnit k) (x := 0)
+      (hx := by
+        change (0 : Rat) ≤ 0 ∧ (0 : Rat) ≤ 1
+        exact ⟨Rat.le_refl, by native_decide⟩) n]
+  change QInterval.mk ((0 : Rat) ^ (k + 1) / ((k + 1 : Nat) : Rat))
+    (0 ^ (k + 1) / ((k + 1 : Nat) : Rat)) = _
+  have hpos : 0 < k + 1 := by omega
+  simp [Series.rat_zero_pow_of_pos hpos, Rat.div_def]
+
+theorem powPrimitiveOnUnit_compute_one (k n : Nat) :
+    (powPrimitiveOnUnit k).toRealFunRaw.compute 1 n =
+      { lo := 1 / ((k + 1 : Nat) : Rat),
+        hi := 1 / ((k + 1 : Nat) : Rat) } := by
+  rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+    (powPrimitiveOnUnit k) (x := 1)
+      (hx := by
+        change (0 : Rat) ≤ 1 ∧ (1 : Rat) ≤ 1
+        exact ⟨by native_decide, Rat.le_refl⟩) n]
+  change QInterval.mk ((1 : Rat) ^ (k + 1) / ((k + 1 : Nat) : Rat))
+    (1 ^ (k + 1) / ((k + 1 : Nat) : Rat)) = _
+  simp [Series.rat_one_pow]
+
+theorem powPrimitiveOnUnit_endpoint_compute (k n : Nat) :
+    endpointDifferenceCompute (powPrimitiveOnUnit k).toRealFunRaw 0 1 n =
+      { lo := 1 / ((k + 1 : Nat) : Rat),
+        hi := 1 / ((k + 1 : Nat) : Rat) } := by
+  simp [endpointDifferenceCompute, endpointDifferenceInterval,
+    powPrimitiveOnUnit_compute_one, powPrimitiveOnUnit_compute_zero]
+  grind [Rat.sub_def]
+
+theorem powPrimitiveOnUnit_endpoint_valid (k : Nat) :
+    RealRaw.ValidCompute
+      (endpointDifferenceCompute (powPrimitiveOnUnit k).toRealFunRaw 0 1) := by
+  have hcompute :
+      endpointDifferenceCompute (powPrimitiveOnUnit k).toRealFunRaw 0 1 =
+        (fun _ : Nat => powEndpointInterval k) := by
+    funext n
+    exact powPrimitiveOnUnit_endpoint_compute k n
+  rw [hcompute]
+  exact RealRaw.ofRat_valid _
+
+theorem exactRat_pow_integral_raw_equiv_pow_endpoint (k : Nat) :
+    (Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ k) 0 1)
+      (exactRat_pow_integral_certificate k)).Equiv
+      (endpointDifferenceRaw (powPrimitiveOnUnit k).toRealFunRaw 0 1
+        (powPrimitiveOnUnit_endpoint_valid k)) := by
+  have hendpoint :
+      (endpointDifferenceRaw (powPrimitiveOnUnit k).toRealFunRaw 0 1
+        (powPrimitiveOnUnit_endpoint_valid k)).Equiv
+        (RealRaw.ofRat (1 / ((k + 1 : Nat) : Rat))) := by
+    apply RealRaw.sameStageOverlap_equiv
+    intro n
+    apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+    change QInterval.Overlaps
+      (endpointDifferenceCompute (powPrimitiveOnUnit k).toRealFunRaw 0 1 n)
+      { lo := 1 / ((k + 1 : Nat) : Rat),
+        hi := 1 / ((k + 1 : Nat) : Rat) }
+    rw [powPrimitiveOnUnit_endpoint_compute]
+    exact ⟨Rat.le_refl, Rat.le_refl⟩
+  have hmid : (RealRaw.ofRat (1 / ((k + 1 : Nat) : Rat))).Valid := by
+    change RealRaw.ValidCompute
+      (fun _ : Nat => powEndpointInterval k)
+    exact RealRaw.ofRat_valid _
+  have hend :
+      (endpointDifferenceRaw (powPrimitiveOnUnit k).toRealFunRaw 0 1
+        (powPrimitiveOnUnit_endpoint_valid k)).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using
+      powPrimitiveOnUnit_endpoint_valid k
+  exact RealRaw.equiv_trans
+    (Integral.raw_valid _ (exactRat_pow_integral_certificate k))
+    hmid hend
+    (exactRat_pow_integral_raw_equiv_one_div_succ k)
+    (RealRaw.equiv_symm hendpoint)
+
+def exactRat_pow_definiteIdentity (k : Nat) :
+    Integral.DefiniteIdentityFor
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ k) 0 1)
+      (powPrimitiveOnUnit k) :=
+  Integral.DefiniteIdentityFor.ofConstruction rfl rfl
+    (exactRat_pow_integral_certificate k).construction
+    (powPrimitiveOnUnit_endpoint_valid k) (by
+      change (Integral.raw
+        (FunctionOnInterval.exactRat (fun x : Rat => x ^ k) 0 1)
+        (exactRat_pow_integral_certificate k)).Equiv
+        (endpointDifferenceRaw (powPrimitiveOnUnit k).toRealFunRaw 0 1
+          (powPrimitiveOnUnit_endpoint_valid k))
+      exact exactRat_pow_integral_raw_equiv_pow_endpoint k)
+
 theorem uniformRightEndpointSum_pow_sub_left_eq_scaled_last_power
     {k n : Nat} (hk : 0 < k) :
     _root_.ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformRightEndpointSum
