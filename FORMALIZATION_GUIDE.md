@@ -143,7 +143,7 @@ Start with the smallest target module rather than importing
 | Rational finite-difference derivatives | `ComputableAnalysis.Differential` | `HasDerivativeOnInterval`, `HasForwardDerivativeAt` |
 | Sector-area time | `ComputableAnalysis.SectorAreaReparametrization` | `angleOnUnit`, `angleOnUnit_hasDerivative`, `angleOnUnitRegular_intervalRegular`, `angleOnUnitRegular_invertible`, `angleAt_equiv_two_arctanGeom` |
 | Finite rational circle powers | `ComputableAnalysis.RationalCircle` | `RationalCircle.Trigonometry.pointPow`, `pointPow_add`, `pointPow_mul`, and `pointPow_normSq_of_unit` |
-| Definite-integral-to-endpoint packages and concrete arctangent work | `ComputableAnalysis.IntegralIdentities` | `Integral.DefiniteIdentityFor`, `IntegralIdentities` |
+| Definite-integral-to-endpoint packages and concrete arctangent work | `ComputableAnalysis.IntegralIdentities` | `Integral.DefiniteIdentityFor`, `Integral.DefiniteIdentityFor.ofConstruction`, `IntegralIdentities` |
 | Finite arithmetic, geometric, and power sums | `ComputableAnalysis.Series` | `Series.arithmeticSum_eq`, `Series.geometricSum_eq`, `Series.powerSum`, and the low-degree closed forms |
 | Finite Basel-series certificates | `ComputableAnalysis.DirichletSeries` | `zetaTwoPartial_nonneg`, `zetaTwoFiniteTail_le_telescoping`, `zetaTwoInterval_nested`, and `zetaTwoRaw_validCompute` |
 | Formal power series and rational tail bounds | `ComputableAnalysis.PowerSeries` | `FormalPowerSeries`, `RationalMajorant` |
@@ -257,6 +257,24 @@ pointwise on the overlap of two partial domains, requiring only that the anchor
 be defined at those shared inputs.  This is the preferred way to connect
 independently implemented special-function computations without duplicating
 their evaluation procedures.
+
+## Minimal proof recipe for one definite integral
+
+For a concrete integrand, the smallest complete proof object is:
+
+```text
+valid ConstructionFor
+valid endpointDifference computation
+overlap/equivalence between the two raw computations
+        -> DefiniteIdentityFor.ofConstruction
+```
+
+The construction may be a rectangle sum, a finite-turn assembly, a power
+series prefix, or another explicit rational algorithm. The endpoint
+equivalence is the theorem-specific content; the constructor supplies the
+common domain-aware identity interface. This is the intended route for a
+specific computable function. The project does not require, or silently
+postulate, that every continuous function is integrable.
 
 ### Functions: complex first, concrete first, abstract only when useful
 
