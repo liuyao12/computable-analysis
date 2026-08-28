@@ -236,6 +236,16 @@ theorem effectiveSinPiHalfIntegral_equiv_reciprocalPi_of_canonical_certificate_f
   exact S.halfIntegral_equiv_reciprocalPi_of_canonical_certificate_family
     pub g cg hdyadic hplan hevaluator family hintegral
 
+theorem effectiveSineWitnessSearch_exists_of_overlap_of_positive_width
+    {U S : QInterval} (hU : subintervalOf U 0 1)
+    (hS : subintervalOf S 0 1)
+    (hover : QInterval.Overlaps
+      (SinPiIntegral.rationalCircleSinInterval U) S)
+    (hwidth : 0 < S.width) :
+    ∃ m u, SinPiIntegral.rationalTangentWitnessBoxSearch U S m = some u := by
+  exact SinPiIntegral.exists_rationalTangentWitnessBoxSearch_of_overlap_of_positive_width
+    hU hS hover hwidth
+
 theorem effectiveIntervalRegularDarbouxSchedule_widths_shrink_of_budget
     {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
     {hinterval : F.lower <= F.upper} (lengthBound : Nat)
