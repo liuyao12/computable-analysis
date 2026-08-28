@@ -184,21 +184,33 @@ theorem gaussianEvenIntegralTailMajorant_le_factorialTailPartial
       simpa [Rat.mul_add, Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
         Nat.add_comm] using hadd
 
-/- On the unit radius range, the factorial modulus is an actual computable
-   epsilon schedule for the integrated Gaussian series. -/
+/- On the unit radius range, halve the requested budget before calling the
+   factorial modulus; the integrated Gaussian's factor `2 * radius` then fits
+   inside the original epsilon. -/
+def gaussianEvenIntegralUnitRadiusStage (eps : QPos) : Nat :=
+  let half : QPos := ⟨eps.val / 2, by
+    rw [Rat.div_def]
+    exact Rat.mul_pos eps.property
+      ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))⟩
+  RationalMajorant.factorialTailStart 1 +
+    RationalMajorant.halfDecayShift
+      (2 * RationalMajorant.factorialTailTerm 1
+        (RationalMajorant.factorialTailStart 1)) half
+
 theorem gaussianEvenIntegralTailMajorant_unit_radius_le_eps
     {radius : Rat} (hr : 0 <= radius) (hradius : radius <= 1)
     (hradiusSq : radius * radius <= 1)
     (eps : QPos) (terms : Nat) :
     gaussianEvenIntegralTailMajorant radius
-        (RationalMajorant.factorialTailStart 1 +
-          RationalMajorant.halfDecayShift
-            (2 * RationalMajorant.factorialTailTerm 1
-              (RationalMajorant.factorialTailStart 1)) eps) terms <= 2 * eps.val := by
+      (gaussianEvenIntegralUnitRadiusStage eps) terms <= eps.val := by
+  let half : QPos := ⟨eps.val / 2, by
+    rw [Rat.div_def]
+    exact Rat.mul_pos eps.property
+      ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))⟩
   let start : Nat := RationalMajorant.factorialTailStart 1 +
     RationalMajorant.halfDecayShift
       (2 * RationalMajorant.factorialTailTerm 1
-        (RationalMajorant.factorialTailStart 1)) eps
+        (RationalMajorant.factorialTailStart 1)) half
   have hbound := gaussianEvenIntegralTailMajorant_le_factorialTailPartial
     (C := 1) (radius := radius) hr (by native_decide) hradiusSq start terms
   have hpartial : 0 <= RationalMajorant.factorialTailPartial 1 start terms := by
@@ -212,10 +224,15 @@ theorem gaussianEvenIntegralTailMajorant_unit_radius_le_eps
     have htwo := Rat.mul_le_mul_of_nonneg_left hrad (by native_decide : (0 : Rat) <= 2)
     simpa [Rat.mul_assoc] using htwo
   have hfactorial := RationalMajorant.factorialTailPartial_shifted_le_eps
-    (C := 1) (by native_decide) eps terms
+    (C := 1) (by native_decide) half terms
   have hfactorialScaled := Rat.mul_le_mul_of_nonneg_left hfactorial
     (by native_decide : (0 : Rat) <= 2)
+  have hhalf : 2 * half.val = eps.val := by
+    dsimp [half]
+    rw [Rat.div_def]
+    grind
   dsimp [start] at hbound ⊢
+  rw [hhalf] at hfactorialScaled
   exact Rat.le_trans (Rat.le_trans hbound hscaled) hfactorialScaled
 
 theorem gaussianEvenIntegralPrefix_succ_eq_term (terms : Nat) (radius : Rat) :
