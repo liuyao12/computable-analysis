@@ -1104,6 +1104,25 @@ theorem effectiveFinitePolynomialIntegralValue_eq_finiteMonomialIntegralSum
       rw [hzeroDiv]
       grind [Rat.sub_def]
 
+theorem effectiveFinitePolynomialIntegralValue_add
+    (coeffs₁ coeffs₂ : Nat -> Rat) (terms : Nat) :
+    effectiveFinitePolynomialIntegralValue
+        (fun k => coeffs₁ k + coeffs₂ k) terms =
+      effectiveFinitePolynomialIntegralValue coeffs₁ terms +
+        effectiveFinitePolynomialIntegralValue coeffs₂ terms := by
+  rw [effectiveFinitePolynomialIntegralValue_eq_finiteMonomialIntegralSum,
+    effectiveFinitePolynomialIntegralValue_eq_finiteMonomialIntegralSum,
+    effectiveFinitePolynomialIntegralValue_eq_finiteMonomialIntegralSum]
+  exact effectiveFinitePolynomialIntegralSum_add coeffs₁ coeffs₂ terms 0 1
+
+theorem effectiveFinitePolynomialIntegralValue_scale
+    (c : Rat) (coeffs : Nat -> Rat) (terms : Nat) :
+    effectiveFinitePolynomialIntegralValue (fun k => c * coeffs k) terms =
+      c * effectiveFinitePolynomialIntegralValue coeffs terms := by
+  rw [effectiveFinitePolynomialIntegralValue_eq_finiteMonomialIntegralSum,
+    effectiveFinitePolynomialIntegralValue_eq_finiteMonomialIntegralSum]
+  exact effectiveFinitePolynomialIntegralSum_scale c coeffs terms 0 1
+
 private theorem scaleRat_ofRat_equiv (c q : Rat) :
     (RealRaw.scaleRat c (RealRaw.ofRat q)).Equiv
       (RealRaw.ofRat (c * q)) := by
