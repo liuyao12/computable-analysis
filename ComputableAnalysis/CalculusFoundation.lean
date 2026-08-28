@@ -936,6 +936,22 @@ theorem effectiveFiniteTaylorFTC_endpointDifference_eq_finiteMonomialIntegralSum
   exact FinitePolynomial.integratedTaylorPrefix_endpointDifference_eq_finiteMonomialIntegralSum
     coeffs terms a b
 
+theorem effectiveFinitePolynomialIntegralSum_add
+    (coeffs₁ coeffs₂ : Nat -> Rat) (terms : Nat) (a b : Rat) :
+    FinitePolynomial.finiteMonomialIntegralSum
+        (fun k => coeffs₁ k + coeffs₂ k) terms a b =
+      FinitePolynomial.finiteMonomialIntegralSum coeffs₁ terms a b +
+        FinitePolynomial.finiteMonomialIntegralSum coeffs₂ terms a b := by
+  exact FinitePolynomial.finiteMonomialIntegralSum_add
+    coeffs₁ coeffs₂ terms a b
+
+theorem effectiveFinitePolynomialIntegralSum_scale
+    (c : Rat) (coeffs : Nat -> Rat) (terms : Nat) (a b : Rat) :
+    FinitePolynomial.finiteMonomialIntegralSum
+        (fun k => c * coeffs k) terms a b =
+      c * FinitePolynomial.finiteMonomialIntegralSum coeffs terms a b := by
+  exact FinitePolynomial.finiteMonomialIntegralSum_scale c coeffs terms a b
+
 /-- Public entry point for a finite Taylor certificate.  Its fold identity is
     the exact finite FTC calculation consumed by later tail arguments. -/
 theorem effectiveFiniteTaylorCertificate_fold_identity

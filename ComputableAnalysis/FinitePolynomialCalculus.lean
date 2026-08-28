@@ -1005,10 +1005,40 @@ theorem finiteMonomialIntegralSum_succ
     (coeffs : Nat -> Rat) (terms : Nat) (a b : Rat) :
     finiteMonomialIntegralSum coeffs (terms + 1) a b =
       finiteMonomialIntegralSum coeffs terms a b +
-        coeffs terms *
-          (b ^ (terms + 1) / ((terms + 1 : Nat) : Rat) -
-            a ^ (terms + 1) / ((terms + 1 : Nat) : Rat)) := by
+          coeffs terms *
+            (b ^ (terms + 1) / ((terms + 1 : Nat) : Rat) -
+              a ^ (terms + 1) / ((terms + 1 : Nat) : Rat)) := by
   rfl
+
+/-! Finite polynomial integration is linear in the coefficient stream.  These
+laws are deliberately stated for the folded rational sum: they are the
+finite assembly rules used before attaching any raw-real or tail semantics. -/
+
+theorem finiteMonomialIntegralSum_add
+    (coeffs₁ coeffs₂ : Nat -> Rat) (terms : Nat) (a b : Rat) :
+    finiteMonomialIntegralSum (fun k => coeffs₁ k + coeffs₂ k) terms a b =
+      finiteMonomialIntegralSum coeffs₁ terms a b +
+        finiteMonomialIntegralSum coeffs₂ terms a b := by
+  induction terms with
+  | zero =>
+      change (0 : Rat) = 0 + 0
+      exact (Rat.zero_add 0).symm
+  | succ n ih =>
+      rw [finiteMonomialIntegralSum, finiteMonomialIntegralSum,
+        finiteMonomialIntegralSum, ih]
+      grind [Rat.add_mul, Rat.mul_add, Rat.sub_eq_add_neg,
+        Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+
+theorem finiteMonomialIntegralSum_scale
+    (c : Rat) (coeffs : Nat -> Rat) (terms : Nat) (a b : Rat) :
+    finiteMonomialIntegralSum (fun k => c * coeffs k) terms a b =
+      c * finiteMonomialIntegralSum coeffs terms a b := by
+  induction terms with
+  | zero => simp [finiteMonomialIntegralSum]
+  | succ n ih =>
+      rw [finiteMonomialIntegralSum, finiteMonomialIntegralSum, ih]
+      grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm,
+        Rat.sub_eq_add_neg]
 
 /-- The corresponding finite derivative prefix `sum_{k<n} c_k x^k`. -/
 def taylorDerivativePrefix (coeffs : Nat -> Rat) : Nat -> Rat -> Rat

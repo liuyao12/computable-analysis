@@ -1239,6 +1239,14 @@ identities for finite polynomial expressions.
 \lean{ComputableAnalysis.Integral.exactRat_pow_definiteIdentity}
 \leanok
 
+The finite polynomial sum is linear in its coefficient stream.  Addition and
+rational scaling are therefore exact finite assembly operations; no new
+integral construction or limiting object is introduced at this stage.
+
+\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralSum_add}
+\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralSum_scale}
+\leanok
+
 This is also a scope rule: the parametric monomial evaluator is the one
 representative formalization for the whole routine family.  New proof effort
 is spent on a closed-value identity only when a later application needs that
