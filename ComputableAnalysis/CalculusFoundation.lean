@@ -67,6 +67,13 @@ theorem effectiveUniformTriangleRightSum_eq_complementUniformLeftEndpointSum
   exact ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformTriangleRightSum_eq_complementUniformLeftEndpointSum
     f mesh hmesh
 
+/-! Public arbitrary-dimensional finite product-integral factorization. -/
+theorem effectiveFiniteProductIntegralNestedSum_factorized
+    (samples : List (List (Rat × Rat))) (factors : List (Rat -> Rat)) :
+    finiteProductIntegralNestedSum samples factors =
+      finiteProductIntegralSum samples factors := by
+  exact finiteProductIntegralNestedSum_factorized samples factors
+
 /-! Public entry-point wrapper for the coefficient-level complex FTC bridge.
 Downstream proofs can recover a coefficient stream after formal integration
 without importing the series implementation module directly. -/
