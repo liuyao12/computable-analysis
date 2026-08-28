@@ -128,6 +128,20 @@ theorem gaussianEvenIntegralPrefix_interval_width
   unfold gaussianEvenIntegralPrefix_interval QInterval.width
   grind [Rat.sub_eq_add_neg]
 
+theorem gaussianEvenIntegralPrefix_interval_ordered
+    (radius : Rat) (start terms : Nat) :
+    (gaussianEvenIntegralPrefix_interval radius start terms).lo <=
+      (gaussianEvenIntegralPrefix_interval radius start terms).hi := by
+  unfold gaussianEvenIntegralPrefix_interval
+  have hnonneg : 0 <= gaussianEvenIntegralTailMajorant radius start terms := by
+    induction terms with
+    | zero =>
+        simp [gaussianEvenIntegralTailMajorant]
+    | succ terms ih =>
+        rw [gaussianEvenIntegralTailMajorant]
+        exact Rat.add_nonneg ih (qabs_nonneg _)
+  grind [Rat.sub_eq_add_neg]
+
 theorem gaussianEvenIntegralTailMajorant_mono
     (radius : Rat) (start : Nat) :
     forall terms₁ terms₂,
