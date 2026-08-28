@@ -1310,6 +1310,23 @@ theorem effectiveUnitSquareIntegralRaw_equiv_one_third :
   rw [hvalue] at h
   simpa [effectiveUnitSquareIntegralRaw] using h
 
+def effectiveUnitCubeIntegralRaw : RealRaw :=
+  effectiveFinitePolynomialIntegralRaw
+    (fun k => if k = 3 then 1 else 0) 4
+
+theorem effectiveUnitCubeIntegralRaw_equiv_one_fourth :
+    effectiveUnitCubeIntegralRaw.Equiv (RealRaw.ofRat (1 / 4)) := by
+  have h := effectiveFinitePolynomialIntegralRaw_equiv_value
+    (fun k => if k = 3 then 1 else 0) 4
+  have hvalue : finiteRatSum
+      ((List.range 4).map (fun k =>
+        (if k = 3 then 1 else 0) * (1 / ((k + 1 : Nat) : Rat)))) =
+      (1 / 4 : Rat) := by
+    native_decide
+  unfold effectiveFinitePolynomialIntegralValue at h
+  rw [hvalue] at h
+  simpa [effectiveUnitCubeIntegralRaw] using h
+
 theorem effectiveFinitePolynomialIntegralValue_eq_endpointDifference
     (coeffs : Nat -> Rat) (terms : Nat) :
     effectiveFinitePolynomialIntegralValue coeffs terms =
