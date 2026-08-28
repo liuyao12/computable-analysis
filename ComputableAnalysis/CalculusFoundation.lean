@@ -923,6 +923,26 @@ theorem effectiveComplexCoefficientDerivative_primitiveCoefficients
       coefficients := by
   exact complexCoefficientDerivative_primitiveCoefficients coefficients
 
+/-! Public power-series tail entry points.  These are rational majorant
+theorems: an infinite series is approached through finite prefixes plus an
+explicit tail budget, rather than introduced as a completed-real object. -/
+
+theorem effectiveGeometricTailPartial_bound {C r : Rat} {N k : Nat}
+    (hC : 0 <= C) (hr0 : 0 <= r) (hrHalf : r <= (1 : Rat) / 2) :
+    RationalMajorant.geomTailPartial C r N k <=
+      RationalMajorant.geomTailBound C r N := by
+  exact RationalMajorant.geometric_tail_partial_bound hC hr0 hrHalf
+
+theorem effectiveFactorialTailPartial_shifted_le_eps {C : Rat}
+    (hC : 0 <= C) (eps : QPos) (terms : Nat) :
+    RationalMajorant.factorialTailPartial C
+      (RationalMajorant.factorialTailStart C +
+        RationalMajorant.halfDecayShift
+          (2 * RationalMajorant.factorialTailTerm C
+            (RationalMajorant.factorialTailStart C)) eps)
+      terms <= eps.val := by
+  exact RationalMajorant.factorialTailPartial_shifted_le_eps hC eps terms
+
 /-! Public generic finite-polynomial FTC bridge.  A finite Taylor primitive is
 defined over rational inputs, its derivative is a finite coefficient prefix,
 and the endpoint difference is the corresponding finite monomial sum.  The
