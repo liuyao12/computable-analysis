@@ -1626,6 +1626,16 @@ theorem effectiveFTC_sine_prefix_square :
       (RealRaw.ofRat (6389 / 161280)) := by
   exact FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_value
 
+theorem effectiveSinPiHalfIntegral_equiv_endpoint
+    {C : RationalCircle.GeometricTrig.FunctionRawConstruction}
+    {hdefined : forall x, 0 <= x -> x <= (1 : Rat) / 2 ->
+      C.sinFunctionRaw.definedAt (2 * x)}
+    (h : SinPiIntegral.HalfIntegralFTCCertificate C hdefined) :
+    (SinPiIntegral.halfIntegral C hdefined h.integral).Equiv
+      (endpointDifferenceRaw h.primitive 0 ((1 : Rat) / 2)
+        h.endpoint_valid) := by
+  exact SinPiIntegral.halfIntegral_equiv_endpoint h
+
 /-! Fourier stages use the same representation discipline: a precision
 witness is an actual finite rational-complex transform inside the stabilized
 box. -/
