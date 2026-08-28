@@ -1092,6 +1092,15 @@ theorem effectiveFiniteTaylorEndpointRaw_split
   exact RealRaw.equiv_trans habvalid htotalvalid hsumvalid hab
     (RealRaw.equiv_symm hright)
 
+theorem effectiveFiniteTaylorEndpointRaw_self_equiv_zero
+    (coeffs : Nat -> Rat) (terms : Nat) (a : Rat) :
+    (effectiveFiniteTaylorEndpointRaw coeffs terms a a).Equiv
+      RealRaw.zero := by
+  have h := effectiveFiniteTaylorEndpointRaw_equiv_endpointDifference
+    coeffs terms a a
+  rw [Rat.sub_self] at h
+  simpa [RealRaw.zero] using h
+
 /-- Focused-entry-point access to the closed monomial FTC family.  The
     implementation remains in `Integral`; this wrapper is the stable import
     surface for downstream formalizations. -/
