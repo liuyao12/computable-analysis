@@ -514,6 +514,22 @@ theorem effectiveFiniteWeightedTripleRectangularSum_congr
       finiteWeightedTripleRectangularSum xs ys zs g := by
   exact finiteWeightedTripleRectangularSum_congr xs ys zs f g h
 
+theorem effectiveFiniteWeightedTripleRectangularSum_swap12_raw
+    (xs ys zs : List (Rat × Rat))
+    (cellValue : Rat -> Rat -> Rat -> Rat) :
+    finiteWeightedTripleRectangularSum xs ys zs cellValue =
+      finiteTripleRectangularSum ys xs zs
+        (fun y x z => y.2 * x.2 * z.2 * cellValue x.1 y.1 z.1) := by
+  exact finiteWeightedTripleRectangularSum_swap12_raw xs ys zs cellValue
+
+theorem effectiveFiniteWeightedTripleRectangularSum_swap23_raw
+    (xs ys zs : List (Rat × Rat))
+    (cellValue : Rat -> Rat -> Rat -> Rat) :
+    finiteWeightedTripleRectangularSum xs ys zs cellValue =
+      finiteTripleRectangularSum xs zs ys
+        (fun x z y => x.2 * y.2 * z.2 * cellValue x.1 y.1 z.1) := by
+  exact finiteWeightedTripleRectangularSum_swap23_raw xs ys zs cellValue
+
 theorem effectiveFiniteTripleRectangularSum_add {α β γ : Type}
     (xs : List α) (ys : List β) (zs : List γ)
     (f g : α -> β -> γ -> Rat) :

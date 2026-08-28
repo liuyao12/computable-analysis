@@ -587,6 +587,28 @@ theorem finiteWeightedTripleRectangularSum_congr
   intro x hx y hy z hz
   rw [h x hx y hy z hz]
 
+theorem finiteWeightedTripleRectangularSum_swap12_raw
+    (xs ys zs : List (Rat × Rat))
+    (cellValue : Rat -> Rat -> Rat -> Rat) :
+    finiteWeightedTripleRectangularSum xs ys zs cellValue =
+      finiteTripleRectangularSum ys xs zs
+        (fun y x z => y.2 * x.2 * z.2 * cellValue x.1 y.1 z.1) := by
+  simpa [finiteWeightedTripleRectangularSum, Rat.mul_comm,
+    Rat.mul_assoc] using
+    (finiteTripleRectangularSum_swap12 xs ys zs
+      (fun x y z => x.2 * y.2 * z.2 * cellValue x.1 y.1 z.1))
+
+theorem finiteWeightedTripleRectangularSum_swap23_raw
+    (xs ys zs : List (Rat × Rat))
+    (cellValue : Rat -> Rat -> Rat -> Rat) :
+    finiteWeightedTripleRectangularSum xs ys zs cellValue =
+      finiteTripleRectangularSum xs zs ys
+        (fun x z y => x.2 * y.2 * z.2 * cellValue x.1 y.1 z.1) := by
+  simpa [finiteWeightedTripleRectangularSum, Rat.mul_comm,
+    Rat.mul_assoc] using
+    (finiteTripleRectangularSum_swap23 xs ys zs
+      (fun x y z => x.2 * y.2 * z.2 * cellValue x.1 y.1 z.1))
+
 /-! The same finite algebra in arbitrary dimension.  A list of sample lists
 and a list of one-variable factors describes a separable rectangular sum. -/
 
