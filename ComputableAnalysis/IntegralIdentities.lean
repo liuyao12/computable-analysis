@@ -7767,12 +7767,10 @@ verified midpoint construction of `∫_0^1 dx/(1+x^2)` computes the endpoint
 difference of the geometric arctangent primitive. -/
 def arctanGeomUnitRectangleDefiniteIdentity :
     Integral.DefiniteIdentityFor
-      (oneOverOnePlusSquareOnInterval 0 1) arctanGeomOnUnit where
-  same_lower := rfl
-  same_upper := rfl
-  construction := arctanIntegralRectangleConstructionAtOne
-  endpoint_valid := arctanGeomOnUnit_endpointDifference_valid
-  equivalent := by
+      (oneOverOnePlusSquareOnInterval 0 1) arctanGeomOnUnit :=
+  Integral.DefiniteIdentityFor.ofConstruction rfl rfl
+    arctanIntegralRectangleConstructionAtOne
+    arctanGeomOnUnit_endpointDifference_valid (by
     have hleft : arctanIntegralRectangleForAtOne.Valid :=
       arctanIntegralRectangleForAtOne_valid
     have hmid : (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
@@ -7790,7 +7788,7 @@ def arctanGeomUnitRectangleDefiniteIdentity :
     exact RealRaw.equiv_trans hleft hmid hright
       arctanIntegralRectangleForAtOne_equiv_arctanGeom_one
       (RealRaw.equiv_symm
-        arctanGeomOnUnit_endpointDifference_equiv_arctanGeom_one)
+        arctanGeomOnUnit_endpointDifference_equiv_arctanGeom_one))
 
 /-- The same unit arctangent endpoint identity, but with the integral side
 explicitly packaged as a monotone integral for the decreasing kernel. -/
