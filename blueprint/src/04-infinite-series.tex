@@ -46,6 +46,13 @@ recovered by finite rational cancellation.  This is the formal derivative
 side of termwise FTC for complex series; convergence is still a separate
 tail obligation.
 
+A
+\texttt{FiniteTaylorCertificate} is the reusable seam between these layers:
+it packages a finite prefix, exposes its endpoint increment as a `realRaw`,
+and records its exact finite fold.  A later remainder bound may enclose the
+full series around that prefix, but it is never smuggled into the finite FTC
+identity.
+
 \lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_step}
 \lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_prefix}
 \lean{ComputableAnalysis.effectiveFiniteTaylorFTC_prefix}
