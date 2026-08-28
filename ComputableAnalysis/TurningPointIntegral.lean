@@ -767,6 +767,16 @@ theorem integralFor_valid {F : FunctionOnInterval}
     (Integral.integralFor F completion.constructionFor).Valid :=
   Integral.integralFor_valid F completion.constructionFor
 
+/- The standard public integral retains the completion's certified anchor.
+   This is the final representation bridge for a finite-turn candidate. -/
+theorem integralFor_equiv_anchor {F : FunctionOnInterval}
+    {C : SingleTurnIntegralCandidate F}
+    (completion : SingleTurnIntegralCompletion C) :
+    (Integral.integralFor F completion.constructionFor).Equiv
+      completion.anchor := by
+  change completion.stabilizedRaw.Equiv completion.anchor
+  exact completion.stabilizedRaw_equiv_anchor
+
 end SingleTurnIntegralCompletion
 
 end Integral
