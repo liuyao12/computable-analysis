@@ -347,6 +347,13 @@ theorem effectiveFiniteRectangularSum_swap
       finiteRectangularSum ys xs (fun y x => h x y) := by
   exact finiteRectangularSum_swap xs ys h
 
+theorem effectiveFiniteRectangularSum_nonneg
+    (xs ys : List Rat)
+    (cellValue : Rat -> Rat -> Rat)
+    (h : forall x, x ∈ xs -> forall y, y ∈ ys -> 0 <= cellValue x y) :
+    0 <= finiteRectangularSum xs ys cellValue := by
+  exact finiteRectangularSum_nonneg xs ys cellValue h
+
 theorem effectiveFiniteProductIntegralSum2D_nonneg
     (xs ys : List (Rat × Rat)) (f g : Rat -> Rat)
     (hx : forall cell, cell ∈ xs -> 0 <= cell.2 * f cell.1)

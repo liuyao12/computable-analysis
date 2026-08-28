@@ -153,6 +153,36 @@ def finiteRectangularSum (xs ys : List Rat) (h : Rat -> Rat -> Rat) : Rat :=
   | x :: rest => finiteRatSum (ys.map (h x)) +
       finiteRectangularSum rest ys h
 
+theorem finiteRatSum_nonneg (xs : List Rat)
+    (h : forall x, x ∈ xs -> 0 <= x) :
+    0 <= finiteRatSum xs := by
+  induction xs with
+  | nil => simp [finiteRatSum]
+  | cons x xs ih =>
+      simp only [finiteRatSum]
+      apply Rat.add_nonneg
+      · exact h x (by simp)
+      · apply ih
+        intro y hy
+        exact h y (by simp [hy])
+
+theorem finiteRectangularSum_nonneg (xs ys : List Rat)
+    (cellValue : Rat -> Rat -> Rat)
+    (h : forall x, x ∈ xs -> forall y, y ∈ ys -> 0 <= cellValue x y) :
+    0 <= finiteRectangularSum xs ys cellValue := by
+  induction xs with
+  | nil => simp [finiteRectangularSum]
+  | cons x xs ih =>
+      simp only [finiteRectangularSum]
+      apply Rat.add_nonneg
+      · apply finiteRatSum_nonneg
+        intro value hvalue
+        rcases List.mem_map.mp hvalue with ⟨y, hy, rfl⟩
+        exact h x (by simp) y hy
+      · apply ih
+        intro x' hx' y hy
+        exact h x' (by simp [hx']) y hy
+
 private theorem finiteRectangularSum_empty_right (xs : List Rat)
     (h : Rat -> Rat -> Rat) :
     finiteRectangularSum xs [] h = 0 := by
