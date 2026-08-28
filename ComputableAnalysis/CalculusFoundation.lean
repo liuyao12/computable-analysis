@@ -1175,6 +1175,32 @@ theorem effectivePrefixTail_widths_shrink_of_components
     RealRaw.WidthsShrinkToZero (head + tail).compute := by
   exact (RealRaw.add_valid hhead htail).2.2
 
+theorem effectivePrefixTail_precision_witness_of_components
+    (head tail : RealRaw) (hhead : head.Valid) (htail : tail.Valid)
+    (eps : QPos) :
+    ∃ N : Nat, ∀ n : Nat, N <= n ->
+      ((head + tail).compute n).width <= eps.val := by
+  let half : QPos :=
+    { val := eps.val / 2
+      property := by
+        rw [Rat.div_def]
+        exact Rat.mul_pos eps.property
+          ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2)) }
+  obtain ⟨Nhead, hhead'⟩ := hhead.2.2 half
+  obtain ⟨Ntail, htail'⟩ := htail.2.2 half
+  refine ⟨max Nhead Ntail, ?_⟩
+  intro n hn
+  rw [effectivePrefixTail_width_eq_add]
+  have hh := hhead' n (Nat.le_trans (Nat.le_max_left _ _) hn)
+  have ht := htail' n (Nat.le_trans (Nat.le_max_right _ _) hn)
+  calc
+    (head.compute n).width + (tail.compute n).width <= half.val + half.val :=
+      _root_.ComputableAnalysis.rat_add_le_add hh ht
+    _ = eps.val := by
+      dsimp [half]
+      rw [Rat.div_def]
+      grind
+
 /-- Focused-entry-point access to the closed monomial FTC family.  The
     implementation remains in `Integral`; this wrapper is the stable import
     surface for downstream formalizations. -/
