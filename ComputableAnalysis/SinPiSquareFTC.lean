@@ -4281,6 +4281,20 @@ theorem DyadicPublicSquareTangentTransportWitness.to_public_equiv
     (dyadicPublicSquareIntegralRaw S) tangentSquareIntegral n n).2
     (h.to_public_overlap n)
 
+/- A complete public-value bridge: once the cellwise transport certificate is
+   supplied, the equal-dyadic public square integral has the quarter-turn
+   value proved by the effective tangent-square FTC. -/
+theorem DyadicPublicSquareTangentTransportWitness.to_public_equiv_halfQuarterTurn
+    {S : ArctanSinPiConstruction}
+    (h : DyadicPublicSquareTangentTransportWitness S) :
+    (dyadicPublicSquareIntegralRaw S).Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
+  exact RealRaw.equiv_trans (dyadicPublicSquareIntegralRaw S).Valid
+    tangentSquareEffectiveFTCData.integral_valid
+    (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid
+    h.to_public_equiv
+    tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn
+
 theorem DyadicPublicSquareTangentSharedWitness.to_public_equiv
     {S : ArctanSinPiConstruction}
     (h : DyadicPublicSquareTangentSharedWitness S) :
