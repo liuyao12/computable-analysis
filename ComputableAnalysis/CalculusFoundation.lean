@@ -76,6 +76,47 @@ theorem effectiveFTC_endpointDifference
       (endpointDifferenceRaw F a b hendpoint) := by
   exact h.boundedIntegralRaw_equiv_endpointDifference hendpoint
 
+/-! Public finite integration-by-parts laws.  These are the algebraic
+rectangle identities behind later Stieltjes and change-of-variables proofs;
+the variation term is retained explicitly rather than discarded by a limit. -/
+theorem effectiveFiniteIntegrationByParts_onPartition {a b : Rat}
+    (P : RationalPartition a b) (f g : Rat -> Rat) :
+    leftStieltjesSum (fun i => f (P.clampedPath i))
+        (fun i => g (P.clampedPath i)) P.pieces +
+      rightStieltjesSum (fun i => f (P.clampedPath i))
+        (fun i => g (P.clampedPath i)) P.pieces =
+      f b * g b - f a * g a := by
+  exact RationalPartition.finiteIntegrationByParts_onPartition P f g
+
+theorem effectiveFiniteIntegrationByParts_withVariation_onPartition {a b : Rat}
+    (P : RationalPartition a b) (f g : Rat -> Rat) :
+    leftStieltjesSum (fun i => f (P.clampedPath i))
+        (fun i => g (P.clampedPath i)) P.pieces +
+      leftStieltjesSum (fun i => g (P.clampedPath i))
+        (fun i => f (P.clampedPath i)) P.pieces +
+      quadraticVariationSum (fun i => f (P.clampedPath i))
+        (fun i => g (P.clampedPath i)) P.pieces =
+      f b * g b - f a * g a := by
+  exact RationalPartition.finiteIntegrationByParts_withVariation_onPartition P f g
+
+theorem effectiveCoordinateIntegrationByParts_endpointBracket {a b : Rat}
+    (P : RationalPartition a b) (v : Rat -> Rat) (delta : Rat)
+    (hstep : P.MaxStepAtMost delta)
+    (hv : forall i, 0 <= v (P.clampedPath (i + 1)) -
+      v (P.clampedPath i)) :
+    b * v b - a * v a - delta * (v b - v a) <=
+        leftStieltjesSum P.clampedPath
+          (fun i => v (P.clampedPath i)) P.pieces +
+      leftStieltjesSum (fun i => v (P.clampedPath i))
+          P.clampedPath P.pieces /\
+      leftStieltjesSum P.clampedPath
+          (fun i => v (P.clampedPath i)) P.pieces +
+        leftStieltjesSum (fun i => v (P.clampedPath i))
+          P.clampedPath P.pieces <=
+        b * v b - a * v a := by
+  exact RationalPartition.coordinateIntegrationByParts_onPartition_endpoint_bracket
+    P v delta hstep hv
+
 /-! Public finite multiple-integral bridge.  An outer right sum of inner
 left sums is exactly the complementary one-dimensional rectangle sum. -/
 theorem effectiveUniformTriangleRightSum_eq_complementUniformLeftEndpointSum
