@@ -38,6 +38,7 @@ and their explicit overlap.  Derivative-bound and curvature constructors are
 convenience specializations of this same pattern.
 
 \lean{ComputableAnalysis.Integral.DefiniteIdentityFor.ofConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.affineIdentityQuadraticDefiniteIdentity}
 \lean{ComputableAnalysis.effectiveFTC}
 \lean{ComputableAnalysis.effectiveFTC_endpointDifference}
 \lean{ComputableAnalysis.effectiveConvexFTC}
@@ -562,6 +563,16 @@ endpoints reverse in the cell image, while the represented integral still
 transports to the same rational endpoint formula. This is the representative
 pattern reused for decreasing pieces; separate copies for every affine slope
 are unnecessary.
+
+The identity function now also has its elementary primitive (x^2/2).  Its
+rectangle integral and endpoint difference are assembled through the generic
+certificate interface, giving a complete nonconstant FTC example before any
+special-function geometry is introduced.
+
+\lean{ComputableAnalysis.IntegralIdentities.affineIdentityQuadraticPrimitive_endpoint_compute}
+\lean{ComputableAnalysis.IntegralIdentities.affineIdentityQuadraticPrimitive_endpoint_equiv_half}
+\lean{ComputableAnalysis.IntegralIdentities.affineIdentityQuadraticDefiniteIdentity}
+\leanok
 
 \section{Beyond Lipschitz: effective monotone schedules}
 

@@ -16670,6 +16670,86 @@ theorem affineIdentityLipschitz_integral_equiv_half :
         grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add]
       · exact Rat.mul_pos (by native_decide) ((Rat.natCast_pos).2 hn)) hr.2
 
+/-! The same affine integral is now given its elementary quadratic primitive.
+This is a concrete FTC instance for the generic `DefiniteIdentityFor` API:
+the rectangle computation is unchanged, while the endpoint computation is
+the exact rational difference of `x^2 / 2`. -/
+def affineIdentityQuadraticPrimitive : FunctionOnInterval :=
+  FunctionOnInterval.exactRat (fun x : Rat => x * x / 2) 0 1
+
+theorem affineIdentityQuadraticPrimitive_compute_zero (n : Nat) :
+    affineIdentityQuadraticPrimitive.toRealFunRaw.compute 0 n =
+      { lo := (0 : Rat), hi := 0 } := by
+  rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+    affineIdentityQuadraticPrimitive (x := 0)
+      (hx := ⟨by native_decide, by native_decide⟩) n]
+  change ({ lo := (0 : Rat) * 0 / 2, hi := 0 * 0 / 2 } : QInterval) = _
+  native_decide
+
+theorem affineIdentityQuadraticPrimitive_compute_one (n : Nat) :
+    affineIdentityQuadraticPrimitive.toRealFunRaw.compute 1 n =
+      { lo := (1 / 2 : Rat), hi := 1 / 2 } := by
+  rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+    affineIdentityQuadraticPrimitive (x := 1)
+      (hx := ⟨by native_decide, by native_decide⟩) n]
+  change ({ lo := (1 : Rat) * 1 / 2, hi := 1 * 1 / 2 } : QInterval) = _
+  native_decide
+
+theorem affineIdentityQuadraticPrimitive_endpoint_compute (n : Nat) :
+    endpointDifferenceCompute affineIdentityQuadraticPrimitive.toRealFunRaw 0 1 n =
+      { lo := (1 / 2 : Rat), hi := 1 / 2 } := by
+  simp [endpointDifferenceCompute, endpointDifferenceInterval,
+    affineIdentityQuadraticPrimitive_compute_one,
+    affineIdentityQuadraticPrimitive_compute_zero]
+  native_decide
+
+theorem affineIdentityQuadraticPrimitive_endpoint_valid :
+    RealRaw.ValidCompute
+      (endpointDifferenceCompute affineIdentityQuadraticPrimitive.toRealFunRaw 0 1) := by
+  have hcompute :
+      endpointDifferenceCompute affineIdentityQuadraticPrimitive.toRealFunRaw 0 1 =
+        fun _ : Nat => ({ lo := (1 / 2 : Rat), hi := 1 / 2 } : QInterval) := by
+    funext n
+    exact affineIdentityQuadraticPrimitive_endpoint_compute n
+  rw [hcompute]
+  exact RealRaw.ofRat_valid _
+
+theorem affineIdentityQuadraticPrimitive_endpoint_equiv_half :
+    (endpointDifferenceRaw affineIdentityQuadraticPrimitive.toRealFunRaw 0 1
+      affineIdentityQuadraticPrimitive_endpoint_valid).Equiv
+      (RealRaw.ofRat (1 / 2)) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+  change QInterval.Overlaps
+    (endpointDifferenceCompute affineIdentityQuadraticPrimitive.toRealFunRaw 0 1 n)
+    { lo := (1 / 2 : Rat), hi := 1 / 2 }
+  rw [affineIdentityQuadraticPrimitive_endpoint_compute]
+  exact ⟨Rat.le_refl, Rat.le_refl⟩
+
+def affineIdentityQuadraticDefiniteIdentity :
+    Integral.DefiniteIdentityFor
+      (FunctionOnInterval.exactRat (fun x : Rat => x) 0 1)
+      affineIdentityQuadraticPrimitive :=
+  Integral.DefiniteIdentityFor.ofConstruction rfl rfl
+    affineIdentityLipschitzConstruction
+    affineIdentityQuadraticPrimitive_endpoint_valid (by
+  have hendpoint :
+      (endpointDifferenceRaw affineIdentityQuadraticPrimitive.toRealFunRaw 0 1
+        affineIdentityQuadraticPrimitive_endpoint_valid).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using
+      affineIdentityQuadraticPrimitive_endpoint_valid
+  have hhalf : (RealRaw.ofRat (1 / 2)).Valid := by
+    exact RealRaw.ofRat_valid _
+  exact RealRaw.equiv_trans
+        (Integral.integralFor_valid
+          (FunctionOnInterval.exactRat (fun x : Rat => x) 0 1)
+          affineIdentityLipschitzConstruction)
+        hhalf
+        hendpoint
+        affineIdentityLipschitz_integral_equiv_half
+        (RealRaw.equiv_symm
+          affineIdentityQuadraticPrimitive_endpoint_equiv_half))
+
 def arctanKernelLipschitzConstruction :
     Integral.ConstructionFor
       (FunctionOnInterval.exactRat
