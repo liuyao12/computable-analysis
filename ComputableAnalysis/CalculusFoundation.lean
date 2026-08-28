@@ -962,6 +962,22 @@ theorem effectiveFiniteTaylorCertificate_endpointRaw_equiv_prefixIncrement
       (RealRaw.ofRat certificate.prefixIncrement) := by
   exact certificate.endpointRaw_equiv_prefixIncrement
 
+/-- Focused-entry-point access to the closed monomial FTC family.  The
+    implementation remains in `Integral`; this wrapper is the stable import
+    surface for downstream formalizations. -/
+def effectiveExactRatPowDefiniteIdentity (k : Nat) :
+    Integral.DefiniteIdentityFor
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ k) 0 1)
+      (Integral.powPrimitiveOnUnit k) :=
+  Integral.exactRat_pow_definiteIdentity k
+
+theorem effectiveExactRatPowIntegral_equiv_ofRat (k : Nat) :
+    (Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ k) 0 1)
+      (Integral.exactRat_pow_integral_certificate k)).Equiv
+      (RealRaw.ofRat (1 / ((k + 1 : Nat) : Rat))) :=
+  Integral.exactRat_pow_integral_raw_equiv_one_div_succ k
+
 def effectiveFiniteTaylorDerivativeOnInterval
     (coeffs : Nat -> Rat) (terms : Nat) (a b C : Rat)
     (hleft : -C <= a) (hright : b <= C) (hC1 : 1 <= C) :
