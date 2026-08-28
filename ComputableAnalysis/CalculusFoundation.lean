@@ -1,4 +1,5 @@
 import ComputableAnalysis.IntegralFoundation
+import ComputableAnalysis.FiniteFTCQuintic
 import ComputableAnalysis.SinPiSquareFTC
 import ComputableAnalysis.SinPiSquareCheckpoints
 import ComputableAnalysis.EffectiveCalculusFoundation
@@ -977,6 +978,22 @@ theorem effectiveExactRatPowIntegral_equiv_ofRat (k : Nat) :
       (Integral.exactRat_pow_integral_certificate k)).Equiv
       (RealRaw.ofRat (1 / ((k + 1 : Nat) : Rat))) :=
   Integral.exactRat_pow_integral_raw_equiv_one_div_succ k
+
+/-- Named focused-entry-point aliases for the first higher-degree interval
+    bounded FTC regressions.  Their separate modules retain the detailed
+    budgets; these names make the closed polynomial ladder discoverable from
+    the foundation import. -/
+def effectiveExactRatQuarticDefiniteIdentity :
+    Integral.DefiniteIdentityFor
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ 4) 0 1)
+      Integral.quarticPrimitiveOnUnit :=
+  Integral.exactRat_quartic_definiteIdentity
+
+def effectiveExactRatQuinticDefiniteIdentity :
+    Integral.DefiniteIdentityFor
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ 5) 0 1)
+      Integral.quinticPrimitiveOnUnit :=
+  Integral.exactRat_quintic_definiteIdentity
 
 def effectiveFiniteTaylorDerivativeOnInterval
     (coeffs : Nat -> Rat) (terms : Nat) (a b C : Rat)
