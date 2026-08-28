@@ -184,6 +184,40 @@ theorem gaussianEvenIntegralTailMajorant_le_factorialTailPartial
       simpa [Rat.mul_add, Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
         Nat.add_comm] using hadd
 
+/- On the unit radius range, the factorial modulus is an actual computable
+   epsilon schedule for the integrated Gaussian series. -/
+theorem gaussianEvenIntegralTailMajorant_unit_radius_le_eps
+    {radius : Rat} (hr : 0 <= radius) (hradius : radius <= 1)
+    (hradiusSq : radius * radius <= 1)
+    (eps : QPos) (terms : Nat) :
+    gaussianEvenIntegralTailMajorant radius
+        (RationalMajorant.factorialTailStart 1 +
+          RationalMajorant.halfDecayShift
+            (2 * RationalMajorant.factorialTailTerm 1
+              (RationalMajorant.factorialTailStart 1)) eps) terms <= 2 * eps.val := by
+  let start : Nat := RationalMajorant.factorialTailStart 1 +
+    RationalMajorant.halfDecayShift
+      (2 * RationalMajorant.factorialTailTerm 1
+        (RationalMajorant.factorialTailStart 1)) eps
+  have hbound := gaussianEvenIntegralTailMajorant_le_factorialTailPartial
+    (C := 1) (radius := radius) hr (by native_decide) hradiusSq start terms
+  have hpartial : 0 <= RationalMajorant.factorialTailPartial 1 start terms := by
+    have hmono := RationalMajorant.factorialTailPartial_mono
+      (C := 1) (N := start) (by native_decide) 0 terms (Nat.zero_le terms)
+    simpa [RationalMajorant.factorialTailPartial] using hmono
+  have hscaled : 2 * radius *
+      RationalMajorant.factorialTailPartial 1 start terms <=
+      2 * RationalMajorant.factorialTailPartial 1 start terms := by
+    have hrad := Rat.mul_le_mul_of_nonneg_right hradius hpartial
+    have htwo := Rat.mul_le_mul_of_nonneg_left hrad (by native_decide : (0 : Rat) <= 2)
+    simpa [Rat.mul_assoc] using htwo
+  have hfactorial := RationalMajorant.factorialTailPartial_shifted_le_eps
+    (C := 1) (by native_decide) eps terms
+  have hfactorialScaled := Rat.mul_le_mul_of_nonneg_left hfactorial
+    (by native_decide : (0 : Rat) <= 2)
+  dsimp [start] at hbound ⊢
+  exact Rat.le_trans (Rat.le_trans hbound hscaled) hfactorialScaled
+
 theorem gaussianEvenIntegralPrefix_succ_eq_term (terms : Nat) (radius : Rat) :
     gaussianEvenIntegralPrefix (terms + 1) radius =
       gaussianEvenIntegralPrefix terms radius +
