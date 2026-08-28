@@ -1205,20 +1205,27 @@ rational quantity, before any appeal to a completed number system.
 \lean{ComputableAnalysis.Integral.uniformRightEndpointSum_pow_sub_left_eq_inv_of_pos}
 \leanok
 
-The rectangle sandwich is also available as a certificate interface.  If the
-finite adjacent-power inequalities are supplied, telescoping proves the
-lower and upper sums bound $1/(k+1)$ at every positive rational mesh.  The
-remaining binomial inequality is therefore a small, explicit algebraic
-provider; no integral or completeness theorem is hidden in this step.
+The rectangle sandwich is now closed uniformly.  Induction proves the two
+adjacent-power inequalities, telescoping gives the lower and upper bounds for
+$1/(k+1)$ at every positive rational mesh, and the certified raw integral is
+therefore equivalent to that rational value.  The proof uses only finite
+rational arithmetic; no integral or completeness theorem is hidden in this
+step.
 
 \lean{ComputableAnalysis.Integral.uniformLeftEndpointSum_pow_le_one_div_succ_of_step}
 \lean{ComputableAnalysis.Integral.uniformRightEndpointSum_pow_ge_one_div_succ_of_step}
+\lean{ComputableAnalysis.Integral.uniformLeftEndpointSum_pow_le_one_div_succ}
+\lean{ComputableAnalysis.Integral.uniformRightEndpointSum_pow_ge_one_div_succ}
+\lean{ComputableAnalysis.Integral.nonneg_pow_le_shifted_pow}
+\lean{ComputableAnalysis.Integral.monomial_power_increment_lower}
+\lean{ComputableAnalysis.Integral.monomial_power_increment_upper}
+\lean{ComputableAnalysis.Integral.exactRat_pow_compute_contains_one_div_succ}
+\lean{ComputableAnalysis.Integral.exactRat_pow_integral_raw_equiv_one_div_succ}
 \leanok
 
 This finite certificate now feeds the integral constructor for every
-monomial on $[0,1]$.  The project therefore distinguishes two claims:
-the dyadic integral is already a valid computable object, while identifying
-it with the closed value $1/(n+1)$ is a separate endpoint theorem.
+monomial on $[0,1]$, and the value theorem is closed uniformly at the same
+time.
 
 This is also a scope rule: the parametric monomial evaluator is the one
 representative formalization for the whole routine family.  New proof effort

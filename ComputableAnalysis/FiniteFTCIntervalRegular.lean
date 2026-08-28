@@ -1725,6 +1725,95 @@ private theorem inv_pow_mul_pow_eq_one {x : Rat} (hx : x ≠ 0) :
       have hbase : x⁻¹ * x = 1 := Rat.inv_mul_cancel _ hx
       grind [Rat.mul_assoc, Rat.mul_comm]
 
+theorem nonneg_pow_le_shifted_pow (x : Rat) (hx : 0 <= x) :
+    forall m : Nat, x ^ m <= (x + 1) ^ m := by
+  intro m
+  induction m with
+  | zero => simp [Rat.pow_zero]
+  | succ m ih =>
+      rw [Rat.pow_succ, Rat.pow_succ]
+      calc
+        x ^ m * x <= (x + 1) ^ m * x :=
+          Rat.mul_le_mul_of_nonneg_right ih hx
+        _ <= (x + 1) ^ m * (x + 1) :=
+          Rat.mul_le_mul_of_nonneg_left (by grind)
+            (Rat.pow_nonneg (by grind))
+
+theorem monomial_power_increment_lower (x : Rat) (hx : 0 <= x) :
+    forall n : Nat,
+      ((n + 1 : Nat) : Rat) * x ^ n <=
+        (x + 1) ^ (n + 1) - x ^ (n + 1) := by
+  intro n
+  induction n with
+  | zero =>
+      rw [Rat.pow_zero, Rat.pow_succ]
+      grind
+  | succ n ih =>
+      have hrec : (x + 1) * ((x + 1) ^ (n + 1) - x ^ (n + 1)) +
+          x ^ (n + 1) = (x + 1) ^ (n + 2) - x ^ (n + 2) := by
+        grind [Rat.pow_succ, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+          Rat.mul_comm]
+      have hnonneg : 0 <= ((n + 1 : Nat) : Rat) * x ^ n := by
+        exact Rat.mul_nonneg (by exact_mod_cast (Nat.zero_le (n + 1)))
+          (Rat.pow_nonneg hx)
+      have hscale0 := Rat.mul_le_mul_of_nonneg_left
+        (by grind : x <= x + 1) hnonneg
+      have hscale : ((n + 1 : Nat) : Rat) * x ^ n * x <=
+          (x + 1) * (((n + 1 : Nat) : Rat) * x ^ n) := by
+        grind [Rat.mul_comm]
+      have hmul := Rat.mul_le_mul_of_nonneg_left ih
+        (by grind : 0 <= x + 1)
+      have hstep1 := (Rat.add_le_add_right (c := x ^ (n + 1))).2 hscale
+      have hstep2 := (Rat.add_le_add_right (c := x ^ (n + 1))).2 hmul
+      have hleft : ((n + 1 + 1 : Nat) : Rat) * x ^ (n + 1) =
+          ((n + 1 : Nat) : Rat) * x ^ n * x + x ^ (n + 1) := by
+        rw [Rat.pow_succ]
+        grind [Rat.natCast_add, Rat.mul_assoc, Rat.mul_comm]
+      rw [hleft]
+      calc
+        _ <= (x + 1) * (((n + 1 : Nat) : Rat) * x ^ n) +
+            x ^ (n + 1) := hstep1
+        _ <= (x + 1) * ((x + 1) ^ (n + 1) - x ^ (n + 1)) +
+            x ^ (n + 1) := hstep2
+        _ = _ := hrec
+
+theorem monomial_power_increment_upper (x : Rat) (hx : 0 <= x) :
+    forall n : Nat,
+      (x + 1) ^ (n + 1) - x ^ (n + 1) <=
+        ((n + 1 : Nat) : Rat) * (x + 1) ^ n := by
+  intro n
+  induction n with
+  | zero =>
+      rw [Rat.pow_zero, Rat.pow_succ]
+      grind
+  | succ n ih =>
+      have hrec : (x + 1) * ((x + 1) ^ (n + 1) - x ^ (n + 1)) +
+          x ^ (n + 1) = (x + 1) ^ (n + 2) - x ^ (n + 2) := by
+        grind [Rat.pow_succ, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+          Rat.mul_comm]
+      have hmono := nonneg_pow_le_shifted_pow x hx (n + 1)
+      have hmul := Rat.mul_le_mul_of_nonneg_left ih
+        (by grind : 0 <= x + 1)
+      have hstep : (x + 1) * ((x + 1) ^ (n + 1) - x ^ (n + 1)) +
+          x ^ (n + 1) <=
+          (x + 1) * (((n + 1 : Nat) : Rat) * (x + 1) ^ n) +
+            x ^ (n + 1) :=
+        (Rat.add_le_add_right (c := x ^ (n + 1))).2 hmul
+      have hbound : (x + 1) * (((n + 1 : Nat) : Rat) * (x + 1) ^ n) +
+          x ^ (n + 1) <= ((n + 2 : Nat) : Rat) * (x + 1) ^ (n + 1) := by
+        rw [Rat.pow_succ]
+        have hpos : 0 <= ((n + 1 : Nat) : Rat) * (x + 1) ^ n := by
+          exact Rat.mul_nonneg (by exact_mod_cast (Nat.zero_le (n + 1)))
+            (Rat.pow_nonneg (by grind))
+        grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+      calc
+        (x + 1) ^ (n + 2) - x ^ (n + 2) =
+            (x + 1) * ((x + 1) ^ (n + 1) - x ^ (n + 1)) +
+              x ^ (n + 1) := hrec.symm
+        _ <= (x + 1) * (((n + 1 : Nat) : Rat) * (x + 1) ^ n) +
+              x ^ (n + 1) := hstep
+        _ <= _ := hbound
+
 theorem uniformLeftEndpointSum_pow_le_one_div_succ_of_step
     {k N : Nat} (hN : 0 < N)
     (hstep : forall j : Nat,
@@ -1753,6 +1842,16 @@ theorem uniformLeftEndpointSum_pow_le_one_div_succ_of_step
       (Rat.ne_of_gt hNrat) (k + 1)
     grind [Rat.mul_assoc, Rat.mul_comm]
   · exact hprod
+
+theorem uniformLeftEndpointSum_pow_le_one_div_succ
+    {k N : Nat} (hN : 0 < N) :
+    _root_.ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+      (fun x : Rat => x ^ k) N <=
+      1 / ((k + 1 : Nat) : Rat) := by
+  apply uniformLeftEndpointSum_pow_le_one_div_succ_of_step hN
+  intro j
+  simpa [Rat.natCast_add] using monomial_power_increment_lower (j : Rat)
+    (by exact_mod_cast (Nat.zero_le j)) k
 
 private theorem power_succ_mul_powerSumBlock_ge_pow_succ_of_step
     (k : Nat) :
@@ -1851,6 +1950,47 @@ theorem uniformRightEndpointSum_pow_ge_one_div_succ_of_step
       Rat.inv_mul_cancel _ hkne
     grind [Rat.mul_assoc, Rat.mul_comm]
   · exact hprod
+
+theorem uniformRightEndpointSum_pow_ge_one_div_succ
+    {k N : Nat} (hN : 0 < N) :
+    _root_.ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformRightEndpointSum
+      (fun x : Rat => x ^ k) N >=
+      1 / ((k + 1 : Nat) : Rat) := by
+  apply uniformRightEndpointSum_pow_ge_one_div_succ_of_step hN
+  intro j
+  simpa [Rat.natCast_add] using monomial_power_increment_upper (j : Rat)
+    (by exact_mod_cast (Nat.zero_le j)) k
+
+theorem exactRat_pow_compute_contains_one_div_succ (k stage : Nat) :
+    (IntegralIdentities.LipschitzDyadic.compute (fun x : Rat => x ^ k) k stage).ContainsInterval
+      { lo := 1 / ((k + 1 : Nat) : Rat),
+        hi := 1 / ((k + 1 : Nat) : Rat) } := by
+  let N : Nat := 2 ^ stage
+  have hN : 0 < N := by
+    dsimp [N]
+    exact Nat.pow_pos (by omega : 0 < 2)
+  have hl := IntegralIdentities.LipschitzDyadic.compute_contains_uniformLeftEndpointSum
+    (exactPow_lipschitz_on_unit k) stage
+  have hr := IntegralIdentities.LipschitzDyadic.compute_contains_uniformRightEndpointSum
+    (exactPow_lipschitz_on_unit k) stage
+  have hleft := uniformLeftEndpointSum_pow_le_one_div_succ (k := k) (N := N) hN
+  have hright := uniformRightEndpointSum_pow_ge_one_div_succ (k := k) (N := N) hN
+  unfold QInterval.ContainsInterval
+  dsimp [N] at hleft hright
+  exact ⟨Rat.le_trans hl.1 hleft, Rat.le_trans hright hr.2⟩
+
+theorem exactRat_pow_integral_raw_equiv_one_div_succ (k : Nat) :
+    (Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ k) 0 1)
+      (exactRat_pow_integral_certificate k)).Equiv
+      (RealRaw.ofRat (1 / ((k + 1 : Nat) : Rat))) := by
+  intro stage
+  apply (RealRaw.compareAt_overlap_iff _ _ stage stage).2
+  change QInterval.Overlaps
+    (IntegralIdentities.LipschitzDyadic.compute (fun x : Rat => x ^ k) k stage)
+    { lo := 1 / ((k + 1 : Nat) : Rat),
+      hi := 1 / ((k + 1 : Nat) : Rat) }
+  exact exactRat_pow_compute_contains_one_div_succ k stage
 
 theorem uniformRightEndpointSum_pow_sub_left_eq_scaled_last_power
     {k n : Nat} (hk : 0 < k) :
