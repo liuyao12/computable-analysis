@@ -700,6 +700,14 @@ separable integrand into one finite sum per coordinate.  This is the algebraic
 core needed by box integrals, Gaussian products, and the finite simplex sums
 used later for ODEs.  It is not a measure-theoretic Fubini theorem.
 
+The first genuinely iterated example is still finite: the outer right sum of
+the inner left sums equals the ordinary left sum for the complementary kernel
+\((1-x)f(x)\).  This is the rectangle-level integration-by-parts/Fubini
+identity used by later Gaussian and simplex constructions.  It is an exact
+rational identity, not a theorem about measurable functions.
+
+\lean{ComputableAnalysis.effectiveUniformTriangleRightSum_eq_complementUniformLeftEndpointSum}
+
 \lean{ComputableAnalysis.finiteProductNestedSum}
 \lean{ComputableAnalysis.finiteProductSum}
 \lean{ComputableAnalysis.finiteProductNestedSum_factorized}

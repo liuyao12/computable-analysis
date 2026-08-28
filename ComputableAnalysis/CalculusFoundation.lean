@@ -57,6 +57,16 @@ end ComputableAnalysis.ComplexPathIntegral
 
 namespace ComputableAnalysis
 
+/-! Public finite multiple-integral bridge.  An outer right sum of inner
+left sums is exactly the complementary one-dimensional rectangle sum. -/
+theorem effectiveUniformTriangleRightSum_eq_complementUniformLeftEndpointSum
+    (f : Rat -> Rat) (mesh : Nat) (hmesh : 0 < mesh) :
+    ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformTriangleRightSum f mesh mesh =
+      ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+        (fun x => (1 - x) * f x) mesh := by
+  exact ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformTriangleRightSum_eq_complementUniformLeftEndpointSum
+    f mesh hmesh
+
 /-! Public entry-point wrapper for the coefficient-level complex FTC bridge.
 Downstream proofs can recover a coefficient stream after formal integration
 without importing the series implementation module directly. -/
