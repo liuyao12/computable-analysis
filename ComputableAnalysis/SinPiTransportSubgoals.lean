@@ -496,6 +496,45 @@ def DyadicReflectedHalfAngleCertificate.of_table_parent
   childRawSin_eq := rfl
   public_child_eq := hpublic
 
+/- Provider-facing constructor for the reflected upper branch.  The parent
+   box can be produced by any certified reflection-aware computation; its
+   equality to the reflected table box and the public square-root equality
+   are the only representation-specific inputs. -/
+def DyadicReflectedHalfAngleCertificate.of_parent_overlap
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (precision n k : Nat) (hupper : 2 ^ n < k) (hk : k < 2 ^ (n + 1))
+    (parentRawCos : QInterval)
+    (hparentRawCos_subinterval : subintervalOf parentRawCos (-1) 1)
+    (hparentRawCos_eq : parentRawCos = dyadicNestedRadicalNeg
+      (dyadicNestedRadicalTableAt
+        (dyadicNestedRadicalParentPrecision precision) n
+        (2 * 2 ^ n - k)).2)
+    (hparent_overlap : QInterval.Overlaps parentRawCos
+      (dyadicNestedRadicalNeg
+        (dyadicNestedRadicalTableAt
+          (dyadicNestedRadicalParentPrecision precision) n
+          (2 * 2 ^ n - k)).2))
+    (hpublic_child_eq :
+      sqrtOnUnitEvalIntervalClipped
+          (dyadicHalfAngleSinInput parentRawCos) precision =
+        rationalCircleSinInterval
+          (dyadicTangentBoxAt B precision (n + 1) k (by
+            have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+              rw [Nat.pow_succ]
+              omega
+            rw [hpow]
+            omega))) :
+    DyadicReflectedHalfAngleCertificate B precision n k hupper hk := by
+  exact {
+    parentRawCos := parentRawCos
+    parentRawCos_subinterval := hparentRawCos_subinterval
+    parentRawCos_eq := hparentRawCos_eq
+    parent_overlap := hparent_overlap
+    childRawSin := sqrtOnUnitEvalIntervalClipped
+      (dyadicHalfAngleSinInput parentRawCos) precision
+    childRawSin_eq := rfl
+    public_child_eq := hpublic_child_eq }
+
 theorem exists_dyadic_tangent_witness_search_of_overlap_family
     (B : IntegralIdentities.ArctanInverseBisection)
     (hover : forall (depth k : Nat) (hk : k < 2 ^ depth), 0 < k ->
