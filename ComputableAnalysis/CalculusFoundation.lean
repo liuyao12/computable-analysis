@@ -1041,6 +1041,74 @@ theorem effectiveFiniteTaylorEndpointRaw_equiv_finiteMonomialSum
   rw [hvalue] at h
   exact h
 
+theorem effectiveFiniteTaylorEndpointRaw_add
+    (coeffs₁ coeffs₂ : Nat -> Rat) (terms : Nat) (a b : Rat) :
+    (effectiveFiniteTaylorEndpointRaw (fun k => coeffs₁ k + coeffs₂ k) terms a b).Equiv
+      (effectiveFiniteTaylorEndpointRaw coeffs₁ terms a b +
+        effectiveFiniteTaylorEndpointRaw coeffs₂ terms a b) := by
+  have hsum := effectiveFiniteTaylorEndpointRaw_equiv_finiteMonomialSum
+    (fun k => coeffs₁ k + coeffs₂ k) terms a b
+  have h₁ := effectiveFiniteTaylorEndpointRaw_equiv_finiteMonomialSum
+    coeffs₁ terms a b
+  have h₂ := effectiveFiniteTaylorEndpointRaw_equiv_finiteMonomialSum
+    coeffs₂ terms a b
+  let q₁ := FinitePolynomial.finiteMonomialIntegralSum coeffs₁ terms a b
+  let q₂ := FinitePolynomial.finiteMonomialIntegralSum coeffs₂ terms a b
+  have hq₁valid : (RealRaw.ofRat q₁).Valid := by
+    unfold RealRaw.ofRat RealRaw.Valid
+    exact RealRaw.ofRat_valid _
+  have hq₂valid : (RealRaw.ofRat q₂).Valid := by
+    unfold RealRaw.ofRat RealRaw.Valid
+    exact RealRaw.ofRat_valid _
+  have htransport :
+      (effectiveFiniteTaylorEndpointRaw coeffs₁ terms a b +
+        effectiveFiniteTaylorEndpointRaw coeffs₂ terms a b).Equiv
+        (RealRaw.ofRat q₁ + RealRaw.ofRat q₂) := by
+    exact RealRaw.add_equiv
+      (effectiveFiniteTaylorEndpointRaw_valid _ _ _ _)
+      hq₁valid
+      (effectiveFiniteTaylorEndpointRaw_valid _ _ _ _)
+      hq₂valid
+      (by simpa [q₁] using h₁)
+      (by simpa [q₂] using h₂)
+  have hcollapse :
+      (RealRaw.ofRat q₁ + RealRaw.ofRat q₂).Equiv
+        (RealRaw.ofRat
+          (FinitePolynomial.finiteMonomialIntegralSum
+            (fun k => coeffs₁ k + coeffs₂ k) terms a b)) := by
+    have h := ComputableAnalysis.ofRat_add_equiv q₁ q₂
+    have hq : q₁ + q₂ =
+        FinitePolynomial.finiteMonomialIntegralSum
+          (fun k => coeffs₁ k + coeffs₂ k) terms a b := by
+      dsimp [q₁, q₂]
+      exact (effectiveFinitePolynomialIntegralSum_add coeffs₁ coeffs₂ terms a b).symm
+    rw [← hq]
+    exact h
+  have hright :
+      (effectiveFiniteTaylorEndpointRaw coeffs₁ terms a b +
+        effectiveFiniteTaylorEndpointRaw coeffs₂ terms a b).Equiv
+        (RealRaw.ofRat
+          (FinitePolynomial.finiteMonomialIntegralSum
+            (fun k => coeffs₁ k + coeffs₂ k) terms a b)) := by
+    exact RealRaw.equiv_trans
+      (RealRaw.add_valid
+        (effectiveFiniteTaylorEndpointRaw_valid _ _ _ _)
+        (effectiveFiniteTaylorEndpointRaw_valid _ _ _ _))
+      (RealRaw.add_valid hq₁valid hq₂valid)
+      (by
+        unfold RealRaw.ofRat RealRaw.Valid
+        exact RealRaw.ofRat_valid _)
+      htransport hcollapse
+  exact RealRaw.equiv_trans
+    (effectiveFiniteTaylorEndpointRaw_valid _ _ _ _)
+    (by
+      unfold RealRaw.ofRat RealRaw.Valid
+      exact RealRaw.ofRat_valid _)
+    (RealRaw.add_valid
+      (effectiveFiniteTaylorEndpointRaw_valid _ _ _ _)
+      (effectiveFiniteTaylorEndpointRaw_valid _ _ _ _))
+    hsum (RealRaw.equiv_symm hright)
+
 theorem effectiveFiniteTaylorEndpointRaw_split
     (coeffs : Nat -> Rat) (terms : Nat) (a c b : Rat) :
     (effectiveFiniteTaylorEndpointRaw coeffs terms a b).Equiv
