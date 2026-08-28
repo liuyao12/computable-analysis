@@ -86,6 +86,19 @@ theorem effectiveGeneralIntegralFor_equiv_totalEndpointDifference_of_telescope
   exact generalIntegralFor_equiv_totalEndpointDifference_of_telescope
     F c h hvalues htransport htotal
 
+/-! The canonical finite-piece endpoint theorem is the common multi-turn
+closure.  When each certified cell already uses the adjacent endpoint
+representative, the finite telescope is discharged internally; only the
+piecewise endpoint-FTC certificates remain as inputs. -/
+theorem effectiveGeneralIntegralFor_equiv_totalEndpointDifference_of_canonical_values
+    (F : FunctionOnInterval)
+    (c : GeneralConstructionFor F)
+    (h : PiecewiseMonotoneEndpointFTCFor F c) :
+    (generalIntegralFor F c).Equiv
+      (piecewiseMonotoneTotalEndpointDifference F c) := by
+  exact generalIntegralFor_equiv_totalEndpointDifference_of_canonical_values
+    F c h
+
 /-! The focused entry point also exposes the nonuniform finite-piece error
 budget.  This is the preferred interface for clients whose cells have
 different evaluator costs: only the finite sum of their rational budgets is
