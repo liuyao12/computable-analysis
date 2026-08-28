@@ -1218,6 +1218,14 @@ theorem effectiveFiniteRawSum_precision_witness_of_components
       ((Integral.finiteRawSum xs).compute n).width <= eps.val := by
   exact effectiveFiniteRawSum_widths_shrink_of_components xs hxs eps
 
+theorem effectiveFiniteRawSum_equiv_of_components
+    {xs ys : List RealRaw}
+    (hxy : Integral.FiniteRawListEquiv xs ys)
+    (hxs : forall x, x ∈ xs -> x.Valid)
+    (hys : forall y, y ∈ ys -> y.Valid) :
+    (Integral.finiteRawSum xs).Equiv (Integral.finiteRawSum ys) := by
+  exact Integral.finiteRawSum_equiv_of_forall hxy hxs hys
+
 /-- Focused-entry-point access to the closed monomial FTC family.  The
     implementation remains in `Integral`; this wrapper is the stable import
     surface for downstream formalizations. -/
