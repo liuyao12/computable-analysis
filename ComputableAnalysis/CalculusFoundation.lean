@@ -74,6 +74,22 @@ theorem effectiveFiniteProductIntegralNestedSum_factorized
       finiteProductIntegralSum samples factors := by
   exact finiteProductIntegralNestedSum_factorized samples factors
 
+theorem effectiveFiniteProductIntegralSum2D_nonneg
+    (xs ys : List (Rat × Rat)) (f g : Rat -> Rat)
+    (hx : forall cell, cell ∈ xs -> 0 <= cell.2 * f cell.1)
+    (hy : forall cell, cell ∈ ys -> 0 <= cell.2 * g cell.1) :
+    0 <= finiteProductIntegralSum2D xs ys f g := by
+  exact finiteProductIntegralSum2D_nonneg xs ys f g hx hy
+
+theorem effectiveFiniteProductIntegralNestedSum_nonneg
+    (samples : List (List (Rat × Rat))) (factors : List (Rat -> Rat))
+    (hwidth : forall cells, cells ∈ samples ->
+      forall cell, cell ∈ cells -> 0 <= cell.2)
+    (hfactor : forall factor, factor ∈ factors ->
+      forall x, 0 <= factor x) :
+    0 <= finiteProductIntegralNestedSum samples factors := by
+  exact finiteProductIntegralNestedSum_nonneg samples factors hwidth hfactor
+
 /-! Public entry-point wrapper for the coefficient-level complex FTC bridge.
 Downstream proofs can recover a coefficient stream after formal integration
 without importing the series implementation module directly. -/
