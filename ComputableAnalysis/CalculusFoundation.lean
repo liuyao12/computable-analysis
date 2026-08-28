@@ -318,6 +318,13 @@ theorem effectiveDyadicNestedRadicalIntegralRaw_stabilized_valid_of_overlap
   exact SinPiIntegral.dyadicNestedRadicalIntegralRaw_stabilized_valid_of_overlap
     hoverlap
 
+theorem effectiveDyadicNestedRadicalIntegralRaw_stabilized_width_le
+    (n : Nat) :
+    (SinPiIntegral.dyadicNestedRadicalIntegralRaw_stabilized.compute n).width <=
+      (SinPiIntegral.dyadicNestedRadicalIntegralRaw.compute n).width +
+        2 * (SinPiIntegral.sinPiStieltjesIntegral.compute n).width := by
+  exact SinPiIntegral.dyadicNestedRadicalIntegralRaw_stabilized_width_le n
+
 theorem effectiveDyadicNestedRadicalIntegralRaw_stabilized_equiv_reciprocalPi_of_overlap
     (hoverlap : forall n,
       QInterval.Overlaps
