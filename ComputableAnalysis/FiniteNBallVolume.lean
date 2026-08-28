@@ -441,6 +441,47 @@ theorem finiteTripleRectangularSum_swap23 {α β γ : Type}
     finiteRectangularSum_eq_outerSum] at hswap
   exact hswap
 
+/-! A weighted three-coordinate rectangular sum.  The coordinate widths are
+part of the finite computation, while the sampled value may depend on all
+three coordinates. -/
+
+theorem finiteTripleRectangularSum_add {α β γ : Type}
+    (xs : List α) (ys : List β) (zs : List γ)
+    (f g : α -> β -> γ -> Rat) :
+    finiteTripleRectangularSum xs ys zs (fun x y z => f x y z + g x y z) =
+      finiteTripleRectangularSum xs ys zs f +
+        finiteTripleRectangularSum xs ys zs g := by
+  unfold finiteTripleRectangularSum
+  rw [← finiteRectangularSum_add]
+  apply finiteRectangularSum_congr
+  intro x hx y hy
+  exact finiteRatSum_add zs (f x y) (g x y)
+
+theorem finiteTripleRectangularSum_scale {α β γ : Type}
+    (xs : List α) (ys : List β) (zs : List γ) (scale : Rat)
+    (f : α -> β -> γ -> Rat) :
+    finiteTripleRectangularSum xs ys zs (fun x y z => scale * f x y z) =
+      scale * finiteTripleRectangularSum xs ys zs f := by
+  unfold finiteTripleRectangularSum
+  rw [← finiteRectangularSum_scale]
+  apply finiteRectangularSum_congr
+  intro x hx y hy
+  exact finiteRatSum_scale zs scale (f x y)
+
+theorem finiteTripleRectangularSum_congr {α β γ : Type}
+    (xs : List α) (ys : List β) (zs : List γ)
+    (f g : α -> β -> γ -> Rat)
+    (h : forall x, x ∈ xs -> forall y, y ∈ ys ->
+      forall z, z ∈ zs -> f x y z = g x y z) :
+    finiteTripleRectangularSum xs ys zs f =
+      finiteTripleRectangularSum xs ys zs g := by
+  unfold finiteTripleRectangularSum
+  apply finiteRectangularSum_congr
+  intro x hx y hy
+  apply finiteRatSum_congr
+  intro z hz
+  exact h x hx y hy z hz
+
 /-! The same finite algebra in arbitrary dimension.  A list of sample lists
 and a list of one-variable factors describes a separable rectangular sum. -/
 
