@@ -5,6 +5,7 @@ import ComputableAnalysis.EffectiveCalculusFoundation
 import ComputableAnalysis.PowerSeries
 import ComputableAnalysis.SeriesFoundation
 import ComputableAnalysis.FiniteTaylorFTCInterface
+import ComputableAnalysis.FiniteTaylorCertificate
 import ComputableAnalysis.FiniteSineIntegral
 import ComputableAnalysis.FiniteMonotoneSequenceInterface
 import ComputableAnalysis.Series
@@ -933,6 +934,19 @@ theorem effectiveFiniteTaylorFTC_endpointDifference_eq_finiteMonomialIntegralSum
       FinitePolynomial.finiteMonomialIntegralSum coeffs terms a b := by
   exact FinitePolynomial.integratedTaylorPrefix_endpointDifference_eq_finiteMonomialIntegralSum
     coeffs terms a b
+
+/-- Public entry point for a finite Taylor certificate.  Its fold identity is
+    the exact finite FTC calculation consumed by later tail arguments. -/
+theorem effectiveFiniteTaylorCertificate_fold_identity
+    (certificate : FiniteTaylorCertificate) :
+    certificate.prefixIncrement =
+      (List.range certificate.terms).foldl
+        (fun acc k => acc + certificate.coefficients k *
+          (certificate.rightEndpoint ^ (k + 1) /
+              ((k + 1 : Nat) : Rat) -
+            certificate.leftEndpoint ^ (k + 1) /
+              ((k + 1 : Nat) : Rat))) 0 := by
+  exact certificate.fold_identity
 
 def effectiveFiniteTaylorDerivativeOnInterval
     (coeffs : Nat -> Rat) (terms : Nat) (a b C : Rat)
