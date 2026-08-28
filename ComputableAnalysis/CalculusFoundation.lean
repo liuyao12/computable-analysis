@@ -1300,6 +1300,26 @@ def effectiveFiniteTaylorDerivativeOnInterval
   FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval
     coeffs terms a b C hleft hright hC1
 
+/-! Stable entry points for the general effective FTC interface.  The
+certificate is the theorem: finite derivative bounds, local endpoint
+containment, and a shrinking width schedule are enough to identify the
+integral raw with the endpoint-difference raw. -/
+
+theorem effectiveDerivativeBoundFTC_equiv_endpoint
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveDerivativeBoundFTC F dF a b) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      h.toDerivativeBoundFTC.endpointRaw := by
+  exact h.toDerivativeBoundFTC.equiv_endpoint
+
+theorem effectiveDerivativeBoundFTC_boundedIntegralRaw_equiv_endpointDifference
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveDerivativeBoundFTC F dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b)) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      (endpointDifferenceRaw F a b hendpoint) := by
+  exact h.boundedIntegralRaw_equiv_endpointDifference hendpoint
+
 /-! A finite trigonometric-prefix example belongs to the public calculus
 surface even though the full equal-dyadic sine transport is a separate
 geometric frontier.  Keeping this distinction visible prevents a polynomial
