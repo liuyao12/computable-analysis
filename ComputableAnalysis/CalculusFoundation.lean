@@ -152,6 +152,28 @@ theorem effectiveLinearODEDuhamel
   exact LinearODE.effectiveDiscreteVariationOfConstants_duhamel
     system initial n
 
+theorem effectiveLinearODEChronologicalProduct_split
+    (B : Nat -> LinearODE.RatMatrix dimension)
+    (first second : Nat) :
+    LinearODE.chronologicalProduct B (first + second) =
+      LinearODE.matrixMul
+        (LinearODE.chronologicalProduct
+          (fun k => B (first + k)) second)
+        (LinearODE.chronologicalProduct B first) := by
+  exact LinearODE.chronologicalProduct_split B first second
+
+theorem effectiveLinearODESquareZeroUniformStep
+    {dimension : Nat} (A : LinearODE.RatMatrix dimension)
+    (T : Rat) (steps : Nat) (hsteps : 0 < steps)
+    (hAA : LinearODE.matrixMul A A = LinearODE.matrixZero dimension) :
+    LinearODE.chronologicalProduct
+        (fun _ => LinearODE.matrixScale
+          (T / ((steps : Nat) : Rat)) A) steps =
+      LinearODE.matrixAdd (LinearODE.matrixIdentity dimension)
+        (LinearODE.matrixScale T A) := by
+  exact LinearODE.chronologicalProduct_constant_square_zero_uniform_step
+    A T steps hsteps hAA
+
 def effectivePeanoBakerFactorialRemainderCertificate
     {M T : Rat} (hM : 0 <= M) (hT : 0 <= T) (eps : QPos) :
     LinearODE.PeanoBakerFactorialRemainderCertificate M T eps := by
