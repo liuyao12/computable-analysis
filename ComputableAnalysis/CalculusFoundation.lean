@@ -117,6 +117,39 @@ theorem effectiveCoordinateIntegrationByParts_endpointBracket {a b : Rat}
   exact RationalPartition.coordinateIntegrationByParts_onPartition_endpoint_bracket
     P v delta hstep hv
 
+/-! Public finite vector-ODE facade.  These are exact rational recurrence and
+Duhamel identities; continuous coefficient and tail providers remain
+explicit inputs in the ODE chapter. -/
+theorem effectiveLinearODERecurrence_unique
+    (system : LinearODE.DiscreteLinearSystem dimension)
+    (initial : LinearODE.RatVector dimension)
+    (candidate : Nat -> LinearODE.RatVector dimension)
+    (hsolution : system.SolvesRecurrence initial candidate) :
+    forall n, candidate n = system.trajectory initial n := by
+  exact LinearODE.effectiveDiscreteRecurrence_unique
+    system initial candidate hsolution
+
+theorem effectiveLinearODEVariationOfConstants
+    (system : LinearODE.DiscreteLinearSystem dimension)
+    (initial : LinearODE.RatVector dimension) (n : Nat) :
+    system.trajectory initial n =
+      LinearODE.vectorAdd
+        (LinearODE.matrixApply
+          (LinearODE.chronologicalStepProduct system.step 0 n) initial)
+        (system.trajectory (LinearODE.vectorZero dimension) n) := by
+  exact LinearODE.effectiveDiscreteVariationOfConstants system initial n
+
+theorem effectiveLinearODEDuhamel
+    (system : LinearODE.DiscreteLinearSystem dimension)
+    (initial : LinearODE.RatVector dimension) (n : Nat) :
+    system.trajectory initial n =
+      LinearODE.vectorAdd
+        (LinearODE.matrixApply
+          (LinearODE.chronologicalStepProduct system.step 0 n) initial)
+        (LinearODE.DiscreteLinearSystem.duhamelSum system n) := by
+  exact LinearODE.effectiveDiscreteVariationOfConstants_duhamel
+    system initial n
+
 /-! Public finite multiple-integral bridge.  An outer right sum of inner
 left sums is exactly the complementary one-dimensional rectangle sum. -/
 theorem effectiveUniformTriangleRightSum_eq_complementUniformLeftEndpointSum
