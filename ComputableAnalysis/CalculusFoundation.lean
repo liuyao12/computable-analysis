@@ -57,6 +57,25 @@ end ComputableAnalysis.ComplexPathIntegral
 
 namespace ComputableAnalysis
 
+/-! Public effective FTC bridge.  The certificate packages a finite
+derivative-bound computation, its rational partition, and the width budget;
+the result identifies the resulting raw integral with the certificate's
+endpoint computation. -/
+theorem effectiveFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveDerivativeBoundFTC F dF a b) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      h.toDerivativeBoundFTC.endpointRaw := by
+  exact effectiveDerivativeBoundFTC h
+
+theorem effectiveFTC_endpointDifference
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveDerivativeBoundFTC F dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b)) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      (endpointDifferenceRaw F a b hendpoint) := by
+  exact h.boundedIntegralRaw_equiv_endpointDifference hendpoint
+
 /-! Public finite multiple-integral bridge.  An outer right sum of inner
 left sums is exactly the complementary one-dimensional rectangle sum. -/
 theorem effectiveUniformTriangleRightSum_eq_complementUniformLeftEndpointSum
