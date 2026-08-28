@@ -73,6 +73,14 @@ explicit rational envelope provider; the provider itself remains a stated
 analytic certificate obligation. The finite raw-sum algebra used to
 concatenate certified pieces is also checked, so adjacent-interval and
 multi-turn proofs have an explicit assembly layer. The
+monomial layer now has a degree-uniform primitive endpoint computation at
+arbitrary rational endpoints, together with an explicit dyadic raw-integral
+width contract. Finite Taylor certificates likewise expose their endpoint
+increments as native `realRaw` computations. The
+\lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference_compute}
+\lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference_equiv_ofRat}
+\lean{ComputableAnalysis.Integral.exactRat_pow_integral_raw_compute_width}
+\lean{ComputableAnalysis.FiniteTaylorCertificate.endpointRaw_equiv_prefixIncrement}
 two-stage product FTC for the positive (x\arctan(x)) branch is also checked:
 its stabilized bounded derivative sum is transported to an independent
 arctangent rectangle evaluator. The
