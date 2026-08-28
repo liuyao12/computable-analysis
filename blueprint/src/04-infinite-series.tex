@@ -675,6 +675,21 @@ cell widths + sampled value -> width_x * width_y * value
 \lean{ComputableAnalysis.effectiveFiniteWeightedRectangularSum_scale}
 \lean{ComputableAnalysis.effectiveFiniteWeightedRectangularSum_congr}
 
+The same construction extends to three coordinates.  Adjacent summation
+orders can be exchanged for an arbitrary rational cell function:
+
+\begin{verbatim}
+sum_x sum_y sum_z h(x,y,z)
+      -> sum_y sum_x sum_z h(x,y,z)
+      -> sum_x sum_z sum_y h(x,y,z)
+\end{verbatim}
+
+These are finite rearrangements of rational folds, suitable for three-variable
+rectangle certificates without importing a classical Fubini theorem.
+
+\lean{ComputableAnalysis.effectiveFiniteTripleRectangularSum_swap12}
+\lean{ComputableAnalysis.effectiveFiniteTripleRectangularSum_swap23}
+
 \lean{ComputableAnalysis.effectiveFiniteRectangularSum_swap}
 \lean{ComputableAnalysis.effectiveFiniteRectangularSum_nonneg}
 \lean{ComputableAnalysis.effectiveFiniteRectangularSum_mono}

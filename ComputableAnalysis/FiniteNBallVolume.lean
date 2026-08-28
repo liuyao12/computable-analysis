@@ -289,6 +289,16 @@ theorem finiteRectangularSum_mono {α β : Type} (xs : List α) (ys : List β)
         intro x' hx' y hy
         exact h x' (by simp [hx']) y hy
 
+theorem finiteRectangularSum_eq_outerSum {α β : Type}
+    (xs : List α) (ys : List β) (h : α -> β -> Rat) :
+    finiteRectangularSum xs ys h =
+      finiteRatSum (xs.map (fun x => finiteRatSum (ys.map (h x)))) := by
+  induction xs with
+  | nil => rfl
+  | cons x xs ih =>
+      simp only [finiteRectangularSum, List.map_cons, finiteRatSum]
+      rw [ih]
+
 private theorem finiteRectangularSum_empty_right {α β : Type} (xs : List α)
     (h : α -> β -> Rat) :
     finiteRectangularSum xs [] h = 0 := by
@@ -398,6 +408,38 @@ theorem finiteWeightedRectangularSum_congr
   apply finiteRectangularSum_congr
   intro x hx y hy
   rw [h x hx y hy]
+
+/-! A finite three-coordinate rectangular sum.  The value may depend on all
+three coordinates; the definition is only a nested rational fold. -/
+
+def finiteTripleRectangularSum {α β γ : Type}
+    (xs : List α) (ys : List β) (zs : List γ)
+    (cellValue : α -> β -> γ -> Rat) : Rat :=
+  finiteRectangularSum xs ys
+    (fun x y => finiteRatSum (zs.map (cellValue x y)))
+
+theorem finiteTripleRectangularSum_swap12 {α β γ : Type}
+    (xs : List α) (ys : List β) (zs : List γ)
+    (cellValue : α -> β -> γ -> Rat) :
+    finiteTripleRectangularSum xs ys zs cellValue =
+      finiteTripleRectangularSum ys xs zs (fun y x z => cellValue x y z) := by
+  exact finiteRectangularSum_swap xs ys
+    (fun x y => finiteRatSum (zs.map (cellValue x y)))
+
+theorem finiteTripleRectangularSum_swap23 {α β γ : Type}
+    (xs : List α) (ys : List β) (zs : List γ)
+    (cellValue : α -> β -> γ -> Rat) :
+    finiteTripleRectangularSum xs ys zs cellValue =
+      finiteTripleRectangularSum xs zs ys (fun x z y => cellValue x y z) := by
+  unfold finiteTripleRectangularSum
+  rw [finiteRectangularSum_eq_outerSum, finiteRectangularSum_eq_outerSum]
+  apply finiteRatSum_congr
+  intro x hx
+  have hswap := finiteRectangularSum_swap ys zs
+    (fun y z => cellValue x y z)
+  rw [finiteRectangularSum_eq_outerSum,
+    finiteRectangularSum_eq_outerSum] at hswap
+  exact hswap
 
 /-! The same finite algebra in arbitrary dimension.  A list of sample lists
 and a list of one-variable factors describes a separable rectangular sum. -/
