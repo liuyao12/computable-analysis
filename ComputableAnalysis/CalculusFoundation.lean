@@ -3,6 +3,7 @@ import ComputableAnalysis.SinPiSquareFTC
 import ComputableAnalysis.SinPiSquareCheckpoints
 import ComputableAnalysis.EffectiveCalculusFoundation
 import ComputableAnalysis.PowerSeries
+import ComputableAnalysis.SeriesFoundation
 import ComputableAnalysis.FiniteTaylorFTCInterface
 import ComputableAnalysis.FiniteSineIntegral
 import ComputableAnalysis.FiniteMonotoneSequenceInterface
