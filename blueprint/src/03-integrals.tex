@@ -1325,6 +1325,16 @@ value.
 \lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_stabilized}
 \lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_stabilized_valid_of_overlap}
 \lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_stabilized_equiv_reciprocalPi_of_overlap}
+
+The half-angle evaluator has a finite circle invariant: after clipping the
+sine and cosine boxes, their squared sum overlaps the exact rational box
+$[1,1]$. This is the local geometric step that an all-stage witness family
+can reuse.
+
+\lean{ComputableAnalysis.SinPiIntegral.dyadicHalfAngleSinInput_width}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicHalfAngleCosInput_width}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicHalfAngle_clipped_square_sum_overlaps_one}
+
 The scoped calculus entry point exposes the raw algorithm’s proved width
 contract directly:
 
