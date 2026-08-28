@@ -388,6 +388,27 @@ theorem endpoint_raw_valid
       I.endpoint_valid).Valid := by
   simpa [endpointDifferenceRaw, RealRaw.Valid] using I.endpoint_valid
 
+/-! This is the main consumer-facing endpoint rule.  A concrete proof may
+first identify its endpoint difference with any valid anchor (usually a
+rational singleton or another special-function raw); this theorem then
+transports the definite integral to that anchor. -/
+theorem integral_equiv_of_endpoint_anchor
+    {integrand primitive : FunctionOnInterval}
+    (I : DefiniteIdentityFor integrand primitive)
+    {anchor : RealRaw}
+    (hanchor_valid : anchor.Valid)
+    (hendpoint :
+      (endpointDifferenceRaw
+        primitive.toRealFunRaw integrand.lower integrand.upper
+        I.endpoint_valid).Equiv anchor) :
+    (Integral.integralFor integrand I.construction).Equiv anchor := by
+  exact RealRaw.equiv_trans
+    I.integral_valid
+    I.endpoint_raw_valid
+    hanchor_valid
+    I.equivalent
+    hendpoint
+
 /-- Replace the integral construction in a domain-aware definite-integral
 identity by an equivalent construction. -/
 def transportConstruction
