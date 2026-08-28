@@ -419,6 +419,38 @@ def DyadicHalfAngleChildCertificate.of_table_parent
   childRawSin_eq := rfl
   public_child_eq := hpublic
 
+/- Provider-facing constructor for the lower odd branch.  The parent cosine
+   may be any rational box overlapping the nested table; the only public
+   representation obligation is that the child circle box is the matching
+   clipped half-angle square-root computation. -/
+def DyadicHalfAngleChildCertificate.of_parent_overlap
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (precision n j : Nat) (hbound : 2 * j + 1 <= 2 ^ n)
+    (parentRawCos : QInterval)
+    (hparentRawCos_subinterval : subintervalOf parentRawCos (-1) 1)
+    (hparent_overlap : QInterval.Overlaps parentRawCos
+      ((dyadicNestedRadicalTableAt
+        (dyadicNestedRadicalParentPrecision precision) n (2 * j + 1)).2))
+    (hpublic_child_eq :
+      sqrtOnUnitEvalIntervalClipped
+          (dyadicHalfAngleSinInput parentRawCos) precision =
+        rationalCircleSinInterval
+          (dyadicTangentBoxAt B precision (n + 1) (2 * j + 1) (by
+            have hpow : 2 ^ (n + 1) = 2 * 2 ^ n := by
+              rw [Nat.pow_succ]
+              omega
+            rw [hpow]
+            omega))) :
+    DyadicHalfAngleChildCertificate B precision n j hbound := by
+  exact {
+    parentRawCos := parentRawCos
+    parentRawCos_subinterval := hparentRawCos_subinterval
+    parent_overlap := hparent_overlap
+    childRawSin := sqrtOnUnitEvalIntervalClipped
+      (dyadicHalfAngleSinInput parentRawCos) precision
+    childRawSin_eq := rfl
+    public_child_eq := hpublic_child_eq }
+
 def DyadicReflectedHalfAngleCertificate.of_table_parent
     (B : IntegralIdentities.ArctanInverseBisection)
     (precision n k : Nat) (hupper : 2 ^ n < k) (hk : k < 2 ^ (n + 1))
