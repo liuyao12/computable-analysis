@@ -46,6 +46,54 @@ theorem complexFinitePrimitivePrefix_succ
         (complexFinitePrimitiveTerm coefficients z terms) := by
   simp [complexFinitePrimitivePrefix, List.range_succ, List.foldl_append]
 
+private theorem qcomplex_sub_add_sub (a b c d : QComplex) :
+    QComplex.sub (QComplex.add a b) (QComplex.add c d) =
+      QComplex.add (QComplex.sub a c) (QComplex.sub b d) := by
+  cases a <;> cases b <;> cases c <;> cases d <;>
+    simp [QComplex.sub, QComplex.add, QComplex.neg, QComplex.zero] <;>
+    grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+
+private theorem qcomplex_scale_mul_sub (r : Rat) (c z w : QComplex) :
+    QComplex.sub (QComplex.scaleRat r (QComplex.mul c z))
+        (QComplex.scaleRat r (QComplex.mul c w)) =
+      QComplex.scaleRat r (QComplex.mul c (QComplex.sub z w)) := by
+  cases r <;> cases c <;> cases z <;> cases w <;>
+    simp [QComplex.sub, QComplex.add, QComplex.neg, QComplex.scaleRat,
+      QComplex.mul] <;>
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+      Rat.add_comm, Rat.add_left_comm]
+
+theorem complexFinitePrimitivePrefix_endpointDifference
+    (coefficients : Nat -> QComplex) (z w : QComplex) (terms : Nat) :
+    QComplex.sub
+        (complexFinitePrimitivePrefix coefficients z terms)
+        (complexFinitePrimitivePrefix coefficients w terms) =
+      (List.range terms).foldl
+        (fun acc k => QComplex.add acc
+          (QComplex.scaleRat (1 / (((k + 1 : Nat) : Rat)))
+            (QComplex.mul (coefficients k)
+              (QComplex.sub (QComplex.pow z (k + 1))
+                (QComplex.pow w (k + 1)))))) QComplex.zero := by
+  induction terms with
+  | zero =>
+      simp [complexFinitePrimitivePrefix, QComplex.sub, QComplex.add,
+        QComplex.neg, QComplex.zero, Rat.zero_add, Rat.add_zero]
+  | succ terms ih =>
+      rw [complexFinitePrimitivePrefix_succ, complexFinitePrimitivePrefix_succ]
+      rw [qcomplex_sub_add_sub]
+      rw [ih]
+      have hterm :
+          QComplex.sub (complexFinitePrimitiveTerm coefficients z terms)
+              (complexFinitePrimitiveTerm coefficients w terms) =
+            QComplex.scaleRat (1 / (((terms + 1 : Nat) : Rat)))
+              (QComplex.mul (coefficients terms)
+                (QComplex.sub (QComplex.pow z (terms + 1))
+                  (QComplex.pow w (terms + 1)))) := by
+        unfold complexFinitePrimitiveTerm
+        exact qcomplex_scale_mul_sub _ _ _ _
+      rw [hterm]
+      simp [List.range_succ, List.foldl_append]
+
 /-! Project-facing names for the finite termwise-FTC bridge.  These are exact
 rational identities for finite prefixes; convergence and tail transport are
 separate certificates. -/
