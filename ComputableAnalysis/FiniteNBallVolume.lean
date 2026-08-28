@@ -508,6 +508,85 @@ theorem finiteTripleRectangularSum_congr {α β γ : Type}
   intro z hz
   exact h x hx y hy z hz
 
+/-! Width-weighted three-coordinate rectangles.  Keeping the cell widths
+explicit makes this the direct finite precursor of a triple integral. -/
+
+def finiteWeightedTripleRectangularSum
+    (xs ys zs : List (Rat × Rat))
+    (cellValue : Rat -> Rat -> Rat -> Rat) : Rat :=
+  finiteTripleRectangularSum xs ys zs
+    (fun x y z => x.2 * y.2 * z.2 * cellValue x.1 y.1 z.1)
+
+theorem finiteWeightedTripleRectangularSum_nonneg
+    (xs ys zs : List (Rat × Rat)) (cellValue : Rat -> Rat -> Rat -> Rat)
+    (hwidthX : forall cell, cell ∈ xs -> 0 <= cell.2)
+    (hwidthY : forall cell, cell ∈ ys -> 0 <= cell.2)
+    (hwidthZ : forall cell, cell ∈ zs -> 0 <= cell.2)
+    (hvalue : forall x, x ∈ xs -> forall y, y ∈ ys ->
+      forall z, z ∈ zs -> 0 <= cellValue x.1 y.1 z.1) :
+    0 <= finiteWeightedTripleRectangularSum xs ys zs cellValue := by
+  apply finiteTripleRectangularSum_nonneg
+  intro x hx y hy z hz
+  apply Rat.mul_nonneg
+  · apply Rat.mul_nonneg
+    · apply Rat.mul_nonneg (hwidthX x hx) (hwidthY y hy)
+
+    · exact hwidthZ z hz
+  · exact hvalue x hx y hy z hz
+
+theorem finiteWeightedTripleRectangularSum_mono
+    (xs ys zs : List (Rat × Rat))
+    (lower upper : Rat -> Rat -> Rat -> Rat)
+    (hwidthX : forall cell, cell ∈ xs -> 0 <= cell.2)
+    (hwidthY : forall cell, cell ∈ ys -> 0 <= cell.2)
+    (hwidthZ : forall cell, cell ∈ zs -> 0 <= cell.2)
+    (hvalue : forall x, x ∈ xs -> forall y, y ∈ ys ->
+      forall z, z ∈ zs -> lower x.1 y.1 z.1 <= upper x.1 y.1 z.1) :
+    finiteWeightedTripleRectangularSum xs ys zs lower <=
+      finiteWeightedTripleRectangularSum xs ys zs upper := by
+  apply finiteTripleRectangularSum_mono
+  intro x hx y hy z hz
+  apply Rat.mul_le_mul_of_nonneg_left
+  · exact hvalue x hx y hy z hz
+  · apply Rat.mul_nonneg
+    · apply Rat.mul_nonneg (hwidthX x hx) (hwidthY y hy)
+
+    · exact hwidthZ z hz
+
+theorem finiteWeightedTripleRectangularSum_add
+    (xs ys zs : List (Rat × Rat))
+    (f g : Rat -> Rat -> Rat -> Rat) :
+    finiteWeightedTripleRectangularSum xs ys zs
+        (fun x y z => f x y z + g x y z) =
+      finiteWeightedTripleRectangularSum xs ys zs f +
+        finiteWeightedTripleRectangularSum xs ys zs g := by
+  simpa [finiteWeightedTripleRectangularSum, Rat.mul_add] using
+    (finiteTripleRectangularSum_add xs ys zs
+      (fun x y z => x.2 * y.2 * z.2 * f x.1 y.1 z.1)
+      (fun x y z => x.2 * y.2 * z.2 * g x.1 y.1 z.1))
+
+theorem finiteWeightedTripleRectangularSum_scale
+    (xs ys zs : List (Rat × Rat)) (scale : Rat)
+    (f : Rat -> Rat -> Rat -> Rat) :
+    finiteWeightedTripleRectangularSum xs ys zs
+        (fun x y z => scale * f x y z) =
+      scale * finiteWeightedTripleRectangularSum xs ys zs f := by
+  simpa [finiteWeightedTripleRectangularSum, Rat.mul_assoc, Rat.mul_comm] using
+    (finiteTripleRectangularSum_scale xs ys zs scale
+      (fun x y z => x.2 * y.2 * z.2 * f x.1 y.1 z.1))
+
+theorem finiteWeightedTripleRectangularSum_congr
+    (xs ys zs : List (Rat × Rat))
+    (f g : Rat -> Rat -> Rat -> Rat)
+    (h : forall x, x ∈ xs -> forall y, y ∈ ys ->
+      forall z, z ∈ zs -> f x.1 y.1 z.1 = g x.1 y.1 z.1) :
+    finiteWeightedTripleRectangularSum xs ys zs f =
+      finiteWeightedTripleRectangularSum xs ys zs g := by
+  unfold finiteWeightedTripleRectangularSum
+  apply finiteTripleRectangularSum_congr
+  intro x hx y hy z hz
+  rw [h x hx y hy z hz]
+
 /-! The same finite algebra in arbitrary dimension.  A list of sample lists
 and a list of one-variable factors describes a separable rectangular sum. -/
 

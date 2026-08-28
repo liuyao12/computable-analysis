@@ -464,6 +464,56 @@ theorem effectiveFiniteTripleRectangularSum_mono {α β γ : Type}
       finiteTripleRectangularSum xs ys zs upper := by
   exact finiteTripleRectangularSum_mono xs ys zs lower upper h
 
+theorem effectiveFiniteWeightedTripleRectangularSum_nonneg
+    (xs ys zs : List (Rat × Rat)) (cellValue : Rat -> Rat -> Rat -> Rat)
+    (hwidthX : forall cell, cell ∈ xs -> 0 <= cell.2)
+    (hwidthY : forall cell, cell ∈ ys -> 0 <= cell.2)
+    (hwidthZ : forall cell, cell ∈ zs -> 0 <= cell.2)
+    (hvalue : forall x, x ∈ xs -> forall y, y ∈ ys ->
+      forall z, z ∈ zs -> 0 <= cellValue x.1 y.1 z.1) :
+    0 <= finiteWeightedTripleRectangularSum xs ys zs cellValue := by
+  exact finiteWeightedTripleRectangularSum_nonneg xs ys zs cellValue
+    hwidthX hwidthY hwidthZ hvalue
+
+theorem effectiveFiniteWeightedTripleRectangularSum_mono
+    (xs ys zs : List (Rat × Rat))
+    (lower upper : Rat -> Rat -> Rat -> Rat)
+    (hwidthX : forall cell, cell ∈ xs -> 0 <= cell.2)
+    (hwidthY : forall cell, cell ∈ ys -> 0 <= cell.2)
+    (hwidthZ : forall cell, cell ∈ zs -> 0 <= cell.2)
+    (hvalue : forall x, x ∈ xs -> forall y, y ∈ ys ->
+      forall z, z ∈ zs -> lower x.1 y.1 z.1 <= upper x.1 y.1 z.1) :
+    finiteWeightedTripleRectangularSum xs ys zs lower <=
+      finiteWeightedTripleRectangularSum xs ys zs upper := by
+  exact finiteWeightedTripleRectangularSum_mono xs ys zs lower upper
+    hwidthX hwidthY hwidthZ hvalue
+
+theorem effectiveFiniteWeightedTripleRectangularSum_add
+    (xs ys zs : List (Rat × Rat))
+    (f g : Rat -> Rat -> Rat -> Rat) :
+    finiteWeightedTripleRectangularSum xs ys zs
+        (fun x y z => f x y z + g x y z) =
+      finiteWeightedTripleRectangularSum xs ys zs f +
+        finiteWeightedTripleRectangularSum xs ys zs g := by
+  exact finiteWeightedTripleRectangularSum_add xs ys zs f g
+
+theorem effectiveFiniteWeightedTripleRectangularSum_scale
+    (xs ys zs : List (Rat × Rat)) (scale : Rat)
+    (f : Rat -> Rat -> Rat -> Rat) :
+    finiteWeightedTripleRectangularSum xs ys zs
+        (fun x y z => scale * f x y z) =
+      scale * finiteWeightedTripleRectangularSum xs ys zs f := by
+  exact finiteWeightedTripleRectangularSum_scale xs ys zs scale f
+
+theorem effectiveFiniteWeightedTripleRectangularSum_congr
+    (xs ys zs : List (Rat × Rat))
+    (f g : Rat -> Rat -> Rat -> Rat)
+    (h : forall x, x ∈ xs -> forall y, y ∈ ys ->
+      forall z, z ∈ zs -> f x.1 y.1 z.1 = g x.1 y.1 z.1) :
+    finiteWeightedTripleRectangularSum xs ys zs f =
+      finiteWeightedTripleRectangularSum xs ys zs g := by
+  exact finiteWeightedTripleRectangularSum_congr xs ys zs f g h
+
 theorem effectiveFiniteTripleRectangularSum_add {α β γ : Type}
     (xs : List α) (ys : List β) (zs : List γ)
     (f g : α -> β -> γ -> Rat) :
