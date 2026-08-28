@@ -210,6 +210,32 @@ theorem effectiveComplexFunction_agreeOnCommonDomain_of_common_anchor
   exact FunctionRaw.agreeOnCommonDomain_of_common_anchor
     hf hg ha hdom hfa hga
 
+/-! Public conditional equal-dyadic sine transport.  The theorem consumes a
+canonical finite half-angle certificate family and an independently certified
+integral for the comparison evaluator; the geometric family is intentionally
+not synthesized here. -/
+theorem effectiveSinPiHalfIntegral_equiv_reciprocalPi_of_canonical_certificate_family
+    (S : SinPiIntegral.ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        SinPiIntegral.dyadicNestedRadicalStageSinAt n k)
+    (family : SinPiIntegral.DyadicCanonicalCertificateFamily S.inverse)
+    (hintegral : (Integral.integral g 0 ((1 : Rat) / 2) cg).Equiv
+      SinPiIntegral.reciprocalPiRaw) :
+    (S.halfIntegral pub).Equiv SinPiIntegral.reciprocalPiRaw := by
+  exact S.halfIntegral_equiv_reciprocalPi_of_canonical_certificate_family
+    pub g cg hdyadic hplan hevaluator family hintegral
+
 theorem effectiveIntervalRegularDarbouxSchedule_widths_shrink_of_budget
     {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
     {hinterval : F.lower <= F.upper} (lengthBound : Nat)
