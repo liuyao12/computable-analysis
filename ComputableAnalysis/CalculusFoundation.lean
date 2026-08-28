@@ -371,6 +371,17 @@ theorem effectivePeanoBakerFactorialRemainderInterval_contains_tail
           certificate terms).hi := by
   exact certificate.tail_mem_interval hM hT terms
 
+theorem effectivePeanoBakerFactorialRemainderInterval_width_le
+    {M T : Rat} (certificate :
+      LinearODE.PeanoBakerFactorialRemainderCertificate M T eps)
+    (terms : Nat) :
+    (LinearODE.PeanoBakerFactorialRemainderCertificate.interval
+      certificate terms).width <= eps.val := by
+  unfold LinearODE.PeanoBakerFactorialRemainderCertificate.interval
+    QInterval.width
+  have htail := certificate.tail_le_eps terms
+  grind [Rat.sub_eq_add_neg]
+
 /-! Public same-partition nesting theorem for interval-image Darboux stages.
 The evaluator's cross-stage containment is an explicit hypothesis; this does
 not silently provide the changing-partition nesting needed for a universal
