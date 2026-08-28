@@ -50,6 +50,19 @@ jobs:
       - name: Install blueprint dependencies
         run: python -m pip install -r blueprint/requirements.txt
 
+      # leanblueprint resolves \lean{...} references from Lean's generated
+      # declaration metadata.  Build the supported scoped entry point first;
+      # otherwise the web renderer silently emits declaration names without
+      # theorem links on a clean Pages runner.
+      - name: Build Lean declarations for Blueprint links
+        uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: true
+          build-args: "ComputableAnalysis.CalculusFoundation"
+          test: false
+          lint: false
+
       - name: Build blueprint web output
         run: leanblueprint web
 
