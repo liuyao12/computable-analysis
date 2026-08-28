@@ -1205,6 +1205,16 @@ rational quantity, before any appeal to a completed number system.
 \lean{ComputableAnalysis.Integral.uniformRightEndpointSum_pow_sub_left_eq_inv_of_pos}
 \leanok
 
+The rectangle sandwich is also available as a certificate interface.  If the
+finite adjacent-power inequalities are supplied, telescoping proves the
+lower and upper sums bound $1/(k+1)$ at every positive rational mesh.  The
+remaining binomial inequality is therefore a small, explicit algebraic
+provider; no integral or completeness theorem is hidden in this step.
+
+\lean{ComputableAnalysis.Integral.uniformLeftEndpointSum_pow_le_one_div_succ_of_step}
+\lean{ComputableAnalysis.Integral.uniformRightEndpointSum_pow_ge_one_div_succ_of_step}
+\leanok
+
 This finite certificate now feeds the integral constructor for every
 monomial on $[0,1]$.  The project therefore distinguishes two claims:
 the dyadic integral is already a valid computable object, while identifying

@@ -1692,6 +1692,91 @@ theorem uniformLeftEndpointSum_pow_eq_scaled_powerSum
   rw [hrewrite]
   exact foldl_scaled_power_range (1 / (n : Rat)) k n
 
+private theorem powerSum_mul_succ_le_pow_succ_of_step
+    (k : Nat) :
+    forall N : Nat,
+      (forall j : Nat,
+        ((k + 1 : Nat) : Rat) * (j : Rat) ^ k <=
+          ((j + 1 : Nat) : Rat) ^ (k + 1) - (j : Rat) ^ (k + 1)) ->
+      ((k + 1 : Nat) : Rat) * Series.powerSum k N <=
+        (N : Rat) ^ (k + 1) := by
+  intro N
+  induction N with
+  | zero =>
+      intro h
+      rw [Series.powerSum_zero]
+      simp only [Rat.mul_zero]
+      rw [show k + 1 = k + 0 + 1 by omega, Rat.pow_succ]
+      simp
+  | succ N ih =>
+      intro h
+      rw [Series.powerSum_succ, Rat.pow_succ]
+      have hi := ih (fun j => h j)
+      have hs := h N
+      grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+private theorem inv_pow_mul_pow_eq_one {x : Rat} (hx : x ≠ 0) :
+    forall k : Nat, x⁻¹ ^ k * x ^ k = 1 := by
+  intro k
+  induction k with
+  | zero => simp [Rat.pow_zero]
+  | succ k ih =>
+      rw [Rat.pow_succ, Rat.pow_succ]
+      have hbase : x⁻¹ * x = 1 := Rat.inv_mul_cancel _ hx
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem uniformLeftEndpointSum_pow_le_one_div_succ_of_step
+    {k N : Nat} (hN : 0 < N)
+    (hstep : forall j : Nat,
+      ((k + 1 : Nat) : Rat) * (j : Rat) ^ k <=
+        ((j + 1 : Nat) : Rat) ^ (k + 1) - (j : Rat) ^ (k + 1)) :
+    _root_.ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+      (fun x : Rat => x ^ k) N <=
+      1 / ((k + 1 : Nat) : Rat) := by
+  rw [uniformLeftEndpointSum_pow_eq_scaled_powerSum k N]
+  have hsum := powerSum_mul_succ_le_pow_succ_of_step k N hstep
+  have hNrat : 0 < (N : Rat) := (Rat.natCast_pos).2 hN
+  have hNpow : 0 < (N : Rat) ^ (k + 1) := Rat.pow_pos hNrat
+  have hkp1 : 0 < ((k + 1 : Nat) : Rat) :=
+    (Rat.natCast_pos).2 (by omega)
+  have hprod : 0 < (N : Rat) ^ (k + 1) * ((k + 1 : Nat) : Rat) :=
+    Rat.mul_pos hNpow hkp1
+  apply Rat.le_of_mul_le_mul_right (c := (N : Rat) ^ (k + 1) *
+    ((k + 1 : Nat) : Rat))
+  · rw [Rat.div_def, Rat.div_def]
+    have hNne : (N : Rat) ^ (k + 1) ≠ 0 := Rat.ne_of_gt hNpow
+    have hkne : ((k + 1 : Nat) : Rat) ≠ 0 := Rat.ne_of_gt hkp1
+    have hkcancel : ((k + 1 : Nat) : Rat)⁻¹ *
+        ((k + 1 : Nat) : Rat) = 1 :=
+      Rat.inv_mul_cancel _ hkne
+    have hNcancel := inv_pow_mul_pow_eq_one
+      (Rat.ne_of_gt hNrat) (k + 1)
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  · exact hprod
+
+private theorem power_succ_mul_powerSumBlock_ge_pow_succ_of_step
+    (k : Nat) :
+    forall N : Nat,
+      (forall j : Nat,
+        ((j + 1 : Nat) : Rat) ^ (k + 1) - (j : Rat) ^ (k + 1) <=
+          ((k + 1 : Nat) : Rat) * ((j + 1 : Nat) : Rat) ^ k) ->
+      (N : Rat) ^ (k + 1) <=
+        ((k + 1 : Nat) : Rat) * Series.powerSumBlock k 1 N := by
+  intro N
+  induction N with
+  | zero =>
+      intro h
+      simp [Series.powerSumBlock]
+      rw [show k + 1 = k + 0 + 1 by omega, Rat.pow_succ]
+      simp
+  | succ N ih =>
+      intro h
+      rw [Series.powerSumBlock_succ, Rat.pow_succ]
+      have hi := ih (fun j => h j)
+      have hs := h N
+      grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm,
+        Rat.natCast_add]
+
 private theorem foldl_scaled_shifted_power_range (h : Rat) (k n : Nat) :
     (List.range n : List Nat).foldl
       (fun acc (j : Nat) =>
@@ -1737,6 +1822,35 @@ theorem uniformRightEndpointSum_pow_eq_scaled_powerSumBlock
     rw [harg]
   rw [hrewrite]
   exact foldl_scaled_shifted_power_range (1 / (n : Rat)) k n
+
+theorem uniformRightEndpointSum_pow_ge_one_div_succ_of_step
+    {k N : Nat} (hN : 0 < N)
+    (hstep : forall j : Nat,
+      ((j + 1 : Nat) : Rat) ^ (k + 1) - (j : Rat) ^ (k + 1) <=
+        ((k + 1 : Nat) : Rat) * ((j + 1 : Nat) : Rat) ^ k) :
+    _root_.ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformRightEndpointSum
+      (fun x : Rat => x ^ k) N >=
+      1 / ((k + 1 : Nat) : Rat) := by
+  rw [uniformRightEndpointSum_pow_eq_scaled_powerSumBlock k N]
+  have hsum := power_succ_mul_powerSumBlock_ge_pow_succ_of_step k N hstep
+  have hNrat : 0 < (N : Rat) := (Rat.natCast_pos).2 hN
+  have hNpow : 0 < (N : Rat) ^ (k + 1) := Rat.pow_pos hNrat
+  have hkp1 : 0 < ((k + 1 : Nat) : Rat) :=
+    (Rat.natCast_pos).2 (by omega)
+  have hprod : 0 < (N : Rat) ^ (k + 1) * ((k + 1 : Nat) : Rat) :=
+    Rat.mul_pos hNpow hkp1
+  apply Rat.le_of_mul_le_mul_right (c := (N : Rat) ^ (k + 1) *
+    ((k + 1 : Nat) : Rat))
+  · rw [Rat.div_def, Rat.div_def]
+    have hNne : (N : Rat) ^ (k + 1) ≠ 0 := Rat.ne_of_gt hNpow
+    have hkne : ((k + 1 : Nat) : Rat) ≠ 0 := Rat.ne_of_gt hkp1
+    have hNcancel := inv_pow_mul_pow_eq_one
+      (Rat.ne_of_gt hNrat) (k + 1)
+    have hkcancel : ((k + 1 : Nat) : Rat)⁻¹ *
+        ((k + 1 : Nat) : Rat) = 1 :=
+      Rat.inv_mul_cancel _ hkne
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  · exact hprod
 
 theorem uniformRightEndpointSum_pow_sub_left_eq_scaled_last_power
     {k n : Nat} (hk : 0 < k) :
