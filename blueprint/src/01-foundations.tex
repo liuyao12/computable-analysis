@@ -783,6 +783,16 @@ of the squared norm of a sum exposes the finite algebra used by later norm
 and triangle certificates.
 \end{theorem}
 
+The same finite inequality has a geometric reading.  For rational vertices,
+the length of a broken path is at least the direct endpoint segment; a
+genuine reversal makes it strict.  The proof is induction over the finite
+list of vertices, using only the rational triangle inequality:
+
+\lean{ComputableAnalysis.effectivePolygonalPath_length_ge_endpoint}
+\lean{ComputableAnalysis.effectiveRationalPolyline_length_ge_direct}
+\lean{ComputableAnalysis.effectiveRationalPolyline_length_strict_of_genuine_turn}
+\leanok
+
 \begin{theorem}[Rational AM--GM square certificate]
 \label{thm:rational-am-gm}
 \lean{ComputableAnalysis.rat_square_nonneg_basic}

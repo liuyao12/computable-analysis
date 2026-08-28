@@ -23,6 +23,7 @@ import ComputableAnalysis.RotationPeanoBakerBridge
 import ComputableAnalysis.FiniteNBallVolume
 import ComputableAnalysis.FiniteGaussianIntegral
 import ComputableAnalysis.ComplexCircleBridge
+import ComputableAnalysis.RationalCircle
 import ComputableAnalysis.ComplexPathIntegral
 import ComputableAnalysis.FiniteComplexPathCertificate
 import ComputableAnalysis.IrrationalSqrt
@@ -58,6 +59,32 @@ theorem effectivePolynomialPathFTC
 end ComputableAnalysis.ComplexPathIntegral
 
 namespace ComputableAnalysis
+
+/-! Finite geometric control used by the integral and circle chapters.  The
+    polygonal-path inequality is derived by induction from a rational
+    triangle inequality; it is not imported as a completeness or Euclidean
+    existence principle. -/
+theorem effectivePolygonalPath_length_ge_endpoint
+    (segmentLength : PiCirclePoint -> PiCirclePoint -> Rat)
+    (hzero : forall p, segmentLength p p = 0)
+    (htriangle : forall p q r,
+      segmentLength p r <= segmentLength p q + segmentLength q r)
+    (p : PiCirclePoint) (rest : List PiCirclePoint) :
+    segmentLength p (RationalCircle.Stage.polygonalPathEndpoint p rest) <=
+      RationalCircle.Stage.polygonalPathLengthFrom segmentLength p rest := by
+  exact RationalCircle.Stage.polygonalPath_length_ge_endpoint
+    segmentLength hzero htriangle p rest
+
+theorem effectiveRationalPolyline_length_ge_direct (steps : List Rat) :
+    RationalCircle.Stage.rationalDirectLength steps <=
+      RationalCircle.Stage.rationalPolylineLength steps := by
+  exact RationalCircle.Stage.rationalPolyline_length_ge_direct steps
+
+theorem effectiveRationalPolyline_length_strict_of_genuine_turn
+    {u v : Rat} (huv : u * v < 0) :
+    RationalCircle.Stage.rationalDirectLength [u, v] <
+      RationalCircle.Stage.rationalPolylineLength [u, v] := by
+  exact RationalCircle.Stage.rationalPolyline_length_two_step_strict_of_genuine_turn huv
 
 /-! Public effective FTC bridge.  The certificate packages a finite
 derivative-bound computation, its rational partition, and the width budget;
