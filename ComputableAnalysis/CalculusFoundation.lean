@@ -948,6 +948,20 @@ theorem effectiveFiniteTaylorCertificate_fold_identity
               ((k + 1 : Nat) : Rat))) 0 := by
   exact certificate.fold_identity
 
+/-- Public validity and value transport for the finite polynomial endpoint
+    computation.  This is the consumer-facing entry point before a later
+    proof assembles several polynomial or special-function certificates. -/
+theorem effectiveFiniteTaylorCertificate_endpointRaw_valid
+    (certificate : FiniteTaylorCertificate) :
+    certificate.endpointRaw.Valid := by
+  exact certificate.endpointRaw_valid
+
+theorem effectiveFiniteTaylorCertificate_endpointRaw_equiv_prefixIncrement
+    (certificate : FiniteTaylorCertificate) :
+    certificate.endpointRaw.Equiv
+      (RealRaw.ofRat certificate.prefixIncrement) := by
+  exact certificate.endpointRaw_equiv_prefixIncrement
+
 def effectiveFiniteTaylorDerivativeOnInterval
     (coeffs : Nat -> Rat) (terms : Nat) (a b C : Rat)
     (hleft : -C <= a) (hright : b <= C) (hC1 : 1 <= C) :
