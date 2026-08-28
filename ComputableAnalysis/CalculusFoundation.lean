@@ -1165,6 +1165,16 @@ theorem effectivePrefixTail_equiv_of_components
     (head + tail).Equiv (head' + tail') := by
   exact RealRaw.add_equiv hhead hhead' htail htail' hheadEq htailEq
 
+theorem effectivePrefixTail_valid_of_components
+    (head tail : RealRaw) (hhead : head.Valid) (htail : tail.Valid) :
+    (head + tail).Valid := by
+  exact RealRaw.add_valid hhead htail
+
+theorem effectivePrefixTail_widths_shrink_of_components
+    (head tail : RealRaw) (hhead : head.Valid) (htail : tail.Valid) :
+    RealRaw.WidthsShrinkToZero (head + tail).compute := by
+  exact (RealRaw.add_valid hhead htail).2.2
+
 /-- Focused-entry-point access to the closed monomial FTC family.  The
     implementation remains in `Integral`; this wrapper is the stable import
     surface for downstream formalizations. -/
