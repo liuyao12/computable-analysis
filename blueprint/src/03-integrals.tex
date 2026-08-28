@@ -1250,7 +1250,15 @@ integral construction or limiting object is introduced at this stage.
 \lean{ComputableAnalysis.effectiveFinitePolynomialIntegralRaw_valid}
 \lean{ComputableAnalysis.effectiveFinitePolynomialIntegralAnchorRaw_valid}
 \lean{ComputableAnalysis.effectiveFinitePolynomialIntegralRaw_equiv_anchor}
+\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralValue}
+\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralValue_eq_finiteMonomialIntegralSum}
+\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralAnchorRaw_equiv_value}
 \leanok
+
+The assembled anchor therefore collapses to the single rational finite sum
+\(\sum_{k<n} c_k/(k+1)\).  The computation, its representation-chain
+anchor, and the familiar finite polynomial value are linked by explicit finite
+proofs.
 
 This is also a scope rule: the parametric monomial evaluator is the one
 representative formalization for the whole routine family.  New proof effort

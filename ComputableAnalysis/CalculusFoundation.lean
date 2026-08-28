@@ -1029,6 +1029,98 @@ def effectiveFinitePolynomialIntegralAnchorRaw
     RealRaw.scaleRat (coeffs k)
       (RealRaw.ofRat (1 / ((k + 1 : Nat) : Rat)))))
 
+def effectiveFinitePolynomialIntegralValue
+    (coeffs : Nat -> Rat) (terms : Nat) : Rat :=
+  finiteRatSum ((List.range terms).map (fun k =>
+    coeffs k * (1 / ((k + 1 : Nat) : Rat))))
+
+private theorem finitePolynomialRatSum_append (xs ys : List Rat) :
+    finiteRatSum (xs ++ ys) = finiteRatSum xs + finiteRatSum ys := by
+  induction xs with
+  | nil =>
+      simp [finiteRatSum]
+      grind [Rat.zero_add]
+  | cons x xs ih =>
+      simp only [List.cons_append, finiteRatSum]
+      rw [ih]
+      grind [Rat.add_assoc]
+
+theorem effectiveFinitePolynomialIntegralValue_eq_finiteMonomialIntegralSum
+    (coeffs : Nat -> Rat) (terms : Nat) :
+    effectiveFinitePolynomialIntegralValue coeffs terms =
+      FinitePolynomial.finiteMonomialIntegralSum coeffs terms 0 1 := by
+  induction terms with
+  | zero => rfl
+  | succ n ih =>
+      simp only [effectiveFinitePolynomialIntegralValue, List.range_succ,
+        List.map_append, FinitePolynomial.finiteMonomialIntegralSum]
+      rw [finitePolynomialRatSum_append]
+      simp only [List.map_singleton, finiteRatSum]
+      rw [Rat.add_zero]
+      change effectiveFinitePolynomialIntegralValue coeffs n +
+        coeffs n * (1 / ((n + 1 : Nat) : Rat)) =
+        FinitePolynomial.finiteMonomialIntegralSum coeffs n 0 1 +
+          coeffs n * (1 ^ (n + 1) / ((n + 1 : Nat) : Rat) -
+            0 ^ (n + 1) / ((n + 1 : Nat) : Rat))
+      rw [ih]
+      have hzero : (0 : Rat) ^ (n + 1) = 0 := by
+        exact Series.rat_zero_pow_of_pos (by omega)
+      simp [Series.rat_one_pow, hzero]
+      have hzeroDiv : (0 : Rat) / ((n : Rat) + 1) = 0 := by
+        rw [Rat.div_def, Rat.zero_mul]
+      rw [hzeroDiv]
+      grind [Rat.sub_def]
+
+private theorem scaleRat_ofRat_equiv (c q : Rat) :
+    (RealRaw.scaleRat c (RealRaw.ofRat q)).Equiv
+      (RealRaw.ofRat (c * q)) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+  by_cases hc : 0 <= c
+  · simp [RealRaw.scaleRat, RealRaw.scaleRatCompute, RealRaw.ofRat,
+      RealRaw.ofRat_compute, hc, QInterval.Overlaps]
+  · have hc' : c < 0 := by grind
+    simp [RealRaw.scaleRat, RealRaw.scaleRatCompute, RealRaw.ofRat,
+      RealRaw.ofRat_compute, hc, hc', QInterval.Overlaps]
+
+set_option maxHeartbeats 100000000 in
+private theorem finiteRawSum_ofRat_equiv_sum (xs : List Rat) :
+    (Integral.finiteRawSum (xs.map RealRaw.ofRat)).Equiv
+      (RealRaw.ofRat (finiteRatSum xs)) := by
+  induction xs with
+  | nil =>
+      have hzero : (RealRaw.ofRat (0 : Rat)).Valid := by
+        unfold RealRaw.ofRat RealRaw.Valid
+        exact RealRaw.ofRat_valid 0
+      exact RealRaw.equiv_refl _ hzero
+  | cons x xs ih =>
+      have hxvalid : (RealRaw.ofRat x).Valid := by
+        unfold RealRaw.ofRat RealRaw.Valid
+        exact RealRaw.ofRat_valid x
+      have htail : (Integral.finiteRawSum (xs.map RealRaw.ofRat)).Valid := by
+        apply Integral.finiteRawSum_valid
+        intro y hy
+        simp only [List.mem_map] at hy
+        rcases hy with ⟨z, hz, rfl⟩
+        exact RealRaw.ofRat_valid _
+      have htail' : (RealRaw.ofRat (finiteRatSum xs)).Valid := by
+        unfold RealRaw.ofRat RealRaw.Valid
+        exact RealRaw.ofRat_valid _
+      have hvalue : (RealRaw.ofRat (x + finiteRatSum xs)).Valid := by
+        unfold RealRaw.ofRat RealRaw.Valid
+        exact RealRaw.ofRat_valid _
+      have hsum :
+          (RealRaw.ofRat x + Integral.finiteRawSum (xs.map RealRaw.ofRat)).Equiv
+            (RealRaw.ofRat x + RealRaw.ofRat (finiteRatSum xs)) :=
+        RealRaw.add_equiv hxvalid hxvalid htail htail'
+          (RealRaw.equiv_refl _ hxvalid) ih
+      exact RealRaw.equiv_trans
+        (RealRaw.add_valid hxvalid htail)
+        (RealRaw.add_valid hxvalid htail')
+        hvalue
+        hsum
+        (ComputableAnalysis.ofRat_add_equiv x (finiteRatSum xs))
+
 theorem effectiveFinitePolynomialIntegralRaw_valid
     (coeffs : Nat -> Rat) (terms : Nat) :
     (effectiveFinitePolynomialIntegralRaw coeffs terms).Valid := by
@@ -1068,6 +1160,51 @@ theorem effectiveFinitePolynomialIntegralRaw_equiv_anchor
     simp only [List.mem_map] at hx
     rcases hx with ⟨k, hk, rfl⟩
     exact RealRaw.scaleRat_valid (RealRaw.ofRat_valid _)
+
+set_option maxHeartbeats 100000000 in
+theorem effectiveFinitePolynomialIntegralAnchorRaw_equiv_value
+    (coeffs : Nat -> Rat) (terms : Nat) :
+    (effectiveFinitePolynomialIntegralAnchorRaw coeffs terms).Equiv
+      (RealRaw.ofRat (effectiveFinitePolynomialIntegralValue coeffs terms)) := by
+  unfold effectiveFinitePolynomialIntegralAnchorRaw
+    effectiveFinitePolynomialIntegralValue
+  let xs : List RealRaw := (List.range terms).map (fun k =>
+    RealRaw.scaleRat (coeffs k)
+      (RealRaw.ofRat (1 / ((k + 1 : Nat) : Rat))))
+  let ys : List RealRaw := (List.range terms).map (fun k =>
+    RealRaw.ofRat (coeffs k * (1 / ((k + 1 : Nat) : Rat))))
+  have hxse : forall x, x ∈ xs -> x.Valid := by
+    intro x hx
+    simp only [xs, List.mem_map] at hx
+    rcases hx with ⟨k, hk, rfl⟩
+    exact RealRaw.scaleRat_valid (RealRaw.ofRat_valid _)
+  have hyse : forall x, x ∈ ys -> x.Valid := by
+    intro x hx
+    simp only [ys, List.mem_map] at hx
+    rcases hx with ⟨k, hk, rfl⟩
+    exact RealRaw.ofRat_valid _
+  have hxs : (Integral.finiteRawSum xs).Valid :=
+    Integral.finiteRawSum_valid xs hxse
+  have hys : (Integral.finiteRawSum ys).Valid :=
+    Integral.finiteRawSum_valid ys hyse
+  have hlist : (Integral.finiteRawSum xs).Equiv
+      (Integral.finiteRawSum ys) := by
+    apply Integral.finiteRawSum_equiv_of_forall
+    · apply Integral.finiteRawListEquiv_map_of_forall
+      intro k hk
+      exact scaleRat_ofRat_equiv (coeffs k)
+        (1 / ((k + 1 : Nat) : Rat))
+    · exact hxse
+    · exact hyse
+  have hvalue := finiteRawSum_ofRat_equiv_sum
+    ((List.range terms).map (fun k =>
+      coeffs k * (1 / ((k + 1 : Nat) : Rat))))
+  exact RealRaw.equiv_trans hxs hys
+    (by
+      unfold RealRaw.ofRat RealRaw.Valid
+      exact RealRaw.ofRat_valid _)
+    (by simpa [xs, ys] using hlist)
+    (by simpa [ys, Function.comp_def] using hvalue)
 
 def effectiveFiniteTaylorDerivativeOnInterval
     (coeffs : Nat -> Rat) (terms : Nat) (a b C : Rat)
