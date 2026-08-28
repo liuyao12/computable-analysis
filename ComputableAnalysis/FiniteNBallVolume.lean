@@ -147,7 +147,8 @@ def finiteRatSum : List Rat -> Rat
   | [] => 0
   | value :: rest => value + finiteRatSum rest
 
-def finiteRectangularSum (xs ys : List Rat) (h : Rat -> Rat -> Rat) : Rat :=
+def finiteRectangularSum {α β : Type} (xs : List α) (ys : List β)
+    (h : α -> β -> Rat) : Rat :=
   match xs with
   | [] => 0
   | x :: rest => finiteRatSum (ys.map (h x)) +
@@ -166,7 +167,8 @@ theorem finiteRatSum_nonneg (xs : List Rat)
         intro y hy
         exact h y (by simp [hy])
 
-theorem finiteRatSum_le (xs : List Rat) (f g : Rat -> Rat)
+theorem finiteRatSum_le {α : Type} (xs : List α)
+    (f g : α -> Rat)
     (h : forall x, x ∈ xs -> f x <= g x) :
     finiteRatSum (xs.map f) <= finiteRatSum (xs.map g) := by
   induction xs with
@@ -179,8 +181,8 @@ theorem finiteRatSum_le (xs : List Rat) (f g : Rat -> Rat)
         intro y hy
         exact h y (by simp [hy])
 
-theorem finiteRectangularSum_nonneg (xs ys : List Rat)
-    (cellValue : Rat -> Rat -> Rat)
+theorem finiteRectangularSum_nonneg {α β : Type} (xs : List α) (ys : List β)
+    (cellValue : α -> β -> Rat)
     (h : forall x, x ∈ xs -> forall y, y ∈ ys -> 0 <= cellValue x y) :
     0 <= finiteRectangularSum xs ys cellValue := by
   induction xs with
@@ -196,8 +198,8 @@ theorem finiteRectangularSum_nonneg (xs ys : List Rat)
         intro x' hx' y hy
         exact h x' (by simp [hx']) y hy
 
-theorem finiteRectangularSum_mono (xs ys : List Rat)
-    (lower upper : Rat -> Rat -> Rat)
+theorem finiteRectangularSum_mono {α β : Type} (xs : List α) (ys : List β)
+    (lower upper : α -> β -> Rat)
     (h : forall x, x ∈ xs -> forall y, y ∈ ys ->
       lower x y <= upper x y) :
     finiteRectangularSum xs ys lower <=
@@ -214,8 +216,8 @@ theorem finiteRectangularSum_mono (xs ys : List Rat)
         intro x' hx' y hy
         exact h x' (by simp [hx']) y hy
 
-private theorem finiteRectangularSum_empty_right (xs : List Rat)
-    (h : Rat -> Rat -> Rat) :
+private theorem finiteRectangularSum_empty_right {α β : Type} (xs : List α)
+    (h : α -> β -> Rat) :
     finiteRectangularSum xs [] h = 0 := by
   induction xs with
   | nil => rfl
@@ -224,8 +226,8 @@ private theorem finiteRectangularSum_empty_right (xs : List Rat)
       rw [ih]
       grind
 
-private theorem finiteRectangularSum_right_cons (xs ys : List Rat)
-    (y : Rat) (h : Rat -> Rat -> Rat) :
+private theorem finiteRectangularSum_right_cons {α β : Type}
+    (xs : List α) (ys : List β) (y : β) (h : α -> β -> Rat) :
     finiteRectangularSum xs (y :: ys) h =
       finiteRectangularSum xs ys h +
         finiteRatSum (xs.map (fun x => h x y)) := by
@@ -238,8 +240,8 @@ private theorem finiteRectangularSum_right_cons (xs ys : List Rat)
       rw [ih]
       grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
 
-theorem finiteRectangularSum_swap (xs ys : List Rat)
-    (h : Rat -> Rat -> Rat) :
+theorem finiteRectangularSum_swap {α β : Type} (xs : List α) (ys : List β)
+    (h : α -> β -> Rat) :
     finiteRectangularSum xs ys h =
       finiteRectangularSum ys xs (fun y x => h x y) := by
   induction xs with

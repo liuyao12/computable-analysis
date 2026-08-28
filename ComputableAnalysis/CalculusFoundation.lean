@@ -341,22 +341,22 @@ theorem effectiveFiniteProductIntegralNestedSum_factorized
 /-! General finite Fubini symmetry.  Cell values may depend on both sampled
 coordinates; the theorem is just commutation of two finite rational folds and
 does not assume separability, an integral operator, or a completed space. -/
-theorem effectiveFiniteRectangularSum_swap
-    (xs ys : List Rat) (h : Rat -> Rat -> Rat) :
+theorem effectiveFiniteRectangularSum_swap {α β : Type}
+    (xs : List α) (ys : List β) (h : α -> β -> Rat) :
     finiteRectangularSum xs ys h =
       finiteRectangularSum ys xs (fun y x => h x y) := by
   exact finiteRectangularSum_swap xs ys h
 
-theorem effectiveFiniteRectangularSum_nonneg
-    (xs ys : List Rat)
-    (cellValue : Rat -> Rat -> Rat)
+theorem effectiveFiniteRectangularSum_nonneg {α β : Type}
+    (xs : List α) (ys : List β)
+    (cellValue : α -> β -> Rat)
     (h : forall x, x ∈ xs -> forall y, y ∈ ys -> 0 <= cellValue x y) :
     0 <= finiteRectangularSum xs ys cellValue := by
   exact finiteRectangularSum_nonneg xs ys cellValue h
 
-theorem effectiveFiniteRectangularSum_mono
-    (xs ys : List Rat)
-    (lower upper : Rat -> Rat -> Rat)
+theorem effectiveFiniteRectangularSum_mono {α β : Type}
+    (xs : List α) (ys : List β)
+    (lower upper : α -> β -> Rat)
     (h : forall x, x ∈ xs -> forall y, y ∈ ys ->
       lower x y <= upper x y) :
     finiteRectangularSum xs ys lower <=
