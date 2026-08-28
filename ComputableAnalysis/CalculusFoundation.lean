@@ -1218,6 +1218,22 @@ theorem effectiveFinitePolynomialIntegralAnchorRaw_widths_shrink :
       (effectiveFinitePolynomialIntegralAnchorRaw coeffs terms).compute := by
   exact (effectiveFinitePolynomialIntegralAnchorRaw_valid coeffs terms).2.2
 
+theorem effectiveFinitePolynomialIntegralRaw_precision_witness
+    (coeffs : Nat -> Rat) (terms : Nat) (eps : QPos) :
+    ∃ N : Nat, ∀ n : Nat, N <= n ->
+      ((effectiveFinitePolynomialIntegralRaw coeffs terms).compute n).width <=
+        eps.val := by
+  exact effectiveFinitePolynomialIntegralRaw_widths_shrink
+    (coeffs := coeffs) (terms := terms) eps
+
+theorem effectiveFinitePolynomialIntegralAnchorRaw_precision_witness
+    (coeffs : Nat -> Rat) (terms : Nat) (eps : QPos) :
+    ∃ N : Nat, ∀ n : Nat, N <= n ->
+      ((effectiveFinitePolynomialIntegralAnchorRaw coeffs terms).compute n).width <=
+        eps.val := by
+  exact effectiveFinitePolynomialIntegralAnchorRaw_widths_shrink
+    (coeffs := coeffs) (terms := terms) eps
+
 theorem effectiveFinitePolynomialIntegralRaw_equiv_anchor
     (coeffs : Nat -> Rat) (terms : Nat) :
     (effectiveFinitePolynomialIntegralRaw coeffs terms).Equiv
