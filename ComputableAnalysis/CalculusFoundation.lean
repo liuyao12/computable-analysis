@@ -1157,6 +1157,14 @@ theorem effectivePrefixTail_width_le_of_bounds
   rw [effectivePrefixTail_width_eq_add]
   exact _root_.ComputableAnalysis.rat_add_le_add hprefix htail
 
+theorem effectivePrefixTail_equiv_of_components
+    {head head' tail tail' : RealRaw}
+    (hhead : head.Valid) (hhead' : head'.Valid)
+    (htail : tail.Valid) (htail' : tail'.Valid)
+    (hheadEq : head.Equiv head') (htailEq : tail.Equiv tail') :
+    (head + tail).Equiv (head' + tail') := by
+  exact RealRaw.add_equiv hhead hhead' htail htail' hheadEq htailEq
+
 /-- Focused-entry-point access to the closed monomial FTC family.  The
     implementation remains in `Integral`; this wrapper is the stable import
     surface for downstream formalizations. -/
