@@ -253,6 +253,34 @@ theorem finiteRectangularSum_swap {α β : Type} (xs : List α) (ys : List β)
       rw [finiteRectangularSum_right_cons]
       grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
 
+/-! Weighted cell form for two finite coordinate partitions. -/
+
+def finiteWeightedRectangularSum
+    (xs ys : List (Rat × Rat)) (cellValue : Rat -> Rat -> Rat) : Rat :=
+  finiteRectangularSum xs ys
+    (fun x y => x.2 * y.2 * cellValue x.1 y.1)
+
+theorem finiteWeightedRectangularSum_swap
+    (xs ys : List (Rat × Rat)) (cellValue : Rat -> Rat -> Rat) :
+    finiteWeightedRectangularSum xs ys cellValue =
+      finiteWeightedRectangularSum ys xs (fun y x => cellValue x y) := by
+  simpa [finiteWeightedRectangularSum, Rat.mul_comm] using
+    (finiteRectangularSum_swap xs ys
+      (fun x y => x.2 * y.2 * cellValue x.1 y.1))
+
+theorem finiteWeightedRectangularSum_nonneg
+    (xs ys : List (Rat × Rat)) (cellValue : Rat -> Rat -> Rat)
+    (hwidthX : forall cell, cell ∈ xs -> 0 <= cell.2)
+    (hwidthY : forall cell, cell ∈ ys -> 0 <= cell.2)
+    (hvalue : forall x, x ∈ xs -> forall y, y ∈ ys ->
+      0 <= cellValue x.1 y.1) :
+    0 <= finiteWeightedRectangularSum xs ys cellValue := by
+  apply finiteRectangularSum_nonneg
+  intro x hx y hy
+  apply Rat.mul_nonneg
+  · apply Rat.mul_nonneg (hwidthX x hx) (hwidthY y hy)
+  · exact hvalue x hx y hy
+
 /-! The same finite algebra in arbitrary dimension.  A list of sample lists
 and a list of one-variable factors describes a separable rectangular sum. -/
 

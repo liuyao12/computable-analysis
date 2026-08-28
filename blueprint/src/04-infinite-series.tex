@@ -650,6 +650,18 @@ This is the finite Fubini core.  The index lists may be any finite types; only
 the cell certificates are rational.  It is an identity of rational folds, not
 a theorem about an infinite integral or a completed function space.
 
+For actual rectangle meshes, each index carries its rational cell width.  The
+weighted form preserves the same order symmetry and proves nonnegativity from
+nonnegative widths and sampled values:
+
+\begin{verbatim}
+cell widths + sampled value -> width_x * width_y * value
+                            -> finite weighted enclosure
+\end{verbatim}
+
+\lean{ComputableAnalysis.effectiveFiniteWeightedRectangularSum_swap}
+\lean{ComputableAnalysis.effectiveFiniteWeightedRectangularSum_nonneg}
+
 \lean{ComputableAnalysis.effectiveFiniteRectangularSum_swap}
 \lean{ComputableAnalysis.effectiveFiniteRectangularSum_nonneg}
 \lean{ComputableAnalysis.effectiveFiniteRectangularSum_mono}
