@@ -38,6 +38,43 @@ def complexFinitePrimitivePrefix
     (fun acc k => QComplex.add acc
       (complexFinitePrimitiveTerm coefficients z k)) QComplex.zero
 
+def complexPrimitiveCoefficients (coefficients : Nat -> QComplex) : Nat -> QComplex
+  | 0 => QComplex.zero
+  | k + 1 =>
+      QComplex.scaleRat (1 / (((k + 1 : Nat) : Rat))) (coefficients k)
+
+def complexCoefficientDerivative (coefficients : Nat -> QComplex) : Nat -> QComplex :=
+  fun k => QComplex.scaleRat (((k + 1 : Nat) : Rat)) (coefficients (k + 1))
+
+private theorem qcomplex_scaleRat_nat_inv (k : Nat) (z : QComplex) :
+    QComplex.scaleRat (((k + 1 : Nat) : Rat))
+        (QComplex.scaleRat (1 / (((k + 1 : Nat) : Rat))) z) = z := by
+  rw [QComplex.scaleRat_scaleRat]
+  have hk : (((k + 1 : Nat) : Rat)) ≠ 0 := by
+    exact FormalPowerSeries.natCast_succ_ne_zero k
+  have hcancel :
+      (((k + 1 : Nat) : Rat)) * (1 / (((k + 1 : Nat) : Rat))) = 1 := by
+    rw [Rat.div_def]
+    simp only [Rat.one_mul]
+    rw [Rat.mul_comm]
+    exact Rat.inv_mul_cancel _ hk
+  rw [hcancel]
+  cases z <;> simp [QComplex.scaleRat]
+
+theorem complexCoefficientDerivative_primitiveCoefficients
+    (coefficients : Nat -> QComplex) :
+    complexCoefficientDerivative (complexPrimitiveCoefficients coefficients) =
+      coefficients := by
+  funext k
+  cases k with
+  | zero =>
+      simpa [complexCoefficientDerivative, complexPrimitiveCoefficients] using
+        qcomplex_scaleRat_nat_inv 0 (coefficients 0)
+  | succ k =>
+      simpa [complexCoefficientDerivative, complexPrimitiveCoefficients,
+        Rat.natCast_add] using
+        qcomplex_scaleRat_nat_inv (k + 1) (coefficients (k + 1))
+
 theorem complexFinitePrimitivePrefix_succ
     (coefficients : Nat -> QComplex) (z : QComplex) (terms : Nat) :
     complexFinitePrimitivePrefix coefficients z (terms + 1) =

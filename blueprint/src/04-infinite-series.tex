@@ -40,6 +40,12 @@ trigonometric, and Fourier prefixes.  It is not an interchange theorem for an
 infinite series: the tail and the passage to a raw real are separate
 certificates.
 
+At the coefficient level, the primitive is reversible: multiply its
+coefficient at index (k+1) by (k+1), and the original coefficient is
+recovered by finite rational cancellation.  This is the formal derivative
+side of termwise FTC for complex series; convergence is still a separate
+tail obligation.
+
 \lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_step}
 \lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_prefix}
 \lean{ComputableAnalysis.effectiveFiniteTaylorFTC_prefix}
@@ -47,6 +53,9 @@ certificates.
 \lean{ComputableAnalysis.FormalPowerSeries.cosineTaylorIntegralPartial_eq_sineTaylorPartial}
 \lean{ComputableAnalysis.complexFinitePrimitiveTerm}
 \lean{ComputableAnalysis.complexFinitePrimitivePrefix}
+\lean{ComputableAnalysis.complexPrimitiveCoefficients}
+\lean{ComputableAnalysis.complexCoefficientDerivative}
+\lean{ComputableAnalysis.complexCoefficientDerivative_primitiveCoefficients}
 \lean{ComputableAnalysis.complexFinitePrimitivePrefix_succ}
 \lean{ComputableAnalysis.complexFinitePrimitivePrefix_endpointDifference}
 \leanok
