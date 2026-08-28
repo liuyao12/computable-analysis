@@ -46,11 +46,143 @@ def gaussianEvenIntegralTerm (k : Nat) (radius : Rat) : Rat :=
   2 * FormalPowerSeries.expCoeff k * (-1 : Rat) ^ k *
     radius ^ (2 * k + 1) / ((2 * k + 1 : Nat) : Rat)
 
+/- The extra factor in a Gaussian integral term is controlled by the same
+   factorial majorant as the exponential series.  Keeping the radius and its
+   square bound explicit makes this usable for bounded, finite-stage Gaussian
+   convergence without introducing an improper integral. -/
+theorem gaussianEvenIntegralTerm_abs_le_factorialTailTerm
+    {C radius : Rat} (hr : 0 <= radius) (hC : 0 <= C)
+    (hR : radius * radius <= C) (k : Nat) :
+    qabs (gaussianEvenIntegralTerm k radius) <=
+      2 * radius * RationalMajorant.factorialTailTerm C k := by
+  have hden : 1 <= ((2 * k + 1 : Nat) : Rat) := by
+    have hk : (0 : Rat) <= (k : Rat) := Rat.natCast_nonneg
+    grind
+  unfold gaussianEvenIntegralTerm
+  rw [Rat.div_def, qabs_mul]
+  have hdenpos : 0 < ((2 * k + 1 : Nat) : Rat) := by
+    grind
+  have hinv0 : 0 <= (((2 * k + 1 : Nat) : Rat)⁻¹) :=
+    Rat.le_of_lt ((Rat.inv_pos).2 hdenpos)
+  rw [qabs_eq_self_of_nonneg hinv0]
+  have hnumer :
+      qabs (2 * FormalPowerSeries.expCoeff k * (-1 : Rat) ^ k *
+        radius ^ (2 * k + 1)) <=
+        2 * radius * RationalMajorant.factorialTailTerm C k := by
+    rw [qabs_mul, qabs_mul, qabs_mul,
+      qabs_eq_self_of_nonneg (by native_decide : (0 : Rat) <= 2)]
+    have hsign : qabs ((-1 : Rat) ^ k) = 1 := by
+      rw [RationalMajorant.qabs_pow_eq_pow_qabs]
+      have hone : qabs (-1 : Rat) = 1 := by native_decide
+      rw [hone]
+      let rec honepow : ∀ n : Nat, (1 : Rat) ^ n = 1
+        | 0 => by native_decide
+        | n + 1 => by
+            rw [Rat.pow_succ, honepow n]
+            native_decide
+      exact honepow k
+    rw [hsign]
+    simp only [Rat.mul_one, RationalMajorant.qabs_pow_eq_pow_qabs]
+    have hrabs : qabs radius = radius := qabs_eq_self_of_nonneg hr
+    rw [hrabs]
+    let rec hpow_even : ∀ n : Nat, radius ^ (2 * n) = (radius * radius) ^ n
+      | 0 => by simp [Rat.pow_zero]
+      | n + 1 => by
+          rw [show 2 * (n + 1) = (2 * n) + 2 by omega,
+            Rat.pow_succ, Rat.pow_succ, hpow_even n]
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    rw [show 2 * k + 1 = (2 * k) + 1 by rfl, Rat.pow_succ, hpow_even]
+    have hRabs : qabs (radius * radius) <= C := by
+      calc
+        qabs (radius * radius) = radius * radius := by
+          rw [qabs_mul]
+          rw [qabs_eq_self_of_nonneg hr]
+        _ <= C := hR
+    have hpow : (radius * radius) ^ k <= C ^ k := by
+      have := RationalMajorant.qabs_pow_le_pow hC hRabs k
+      rw [RationalMajorant.qabs_pow_eq_pow_qabs] at this
+      rw [qabs_eq_self_of_nonneg (Rat.mul_nonneg hr hr)] at this
+      exact this
+    have hcoef : 0 <= FormalPowerSeries.expCoeff k := by
+      unfold FormalPowerSeries.expCoeff
+      rw [Rat.div_def, Rat.one_mul]
+      exact Rat.le_of_lt ((Rat.inv_pos).2 (RationalMajorant.factorialRat_pos k))
+    have hterm :
+        FormalPowerSeries.expCoeff k * (radius * radius) ^ k <=
+          RationalMajorant.factorialTailTerm C k := by
+      calc
+        FormalPowerSeries.expCoeff k * (radius * radius) ^ k <=
+            FormalPowerSeries.expCoeff k * C ^ k :=
+          Rat.mul_le_mul_of_nonneg_left hpow hcoef
+        _ = RationalMajorant.factorialTailTerm C k := by
+          unfold FormalPowerSeries.expCoeff RationalMajorant.factorialTailTerm
+          rw [Rat.div_def, Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    have hcoefabs : qabs (FormalPowerSeries.expCoeff k) =
+        FormalPowerSeries.expCoeff k := qabs_eq_self_of_nonneg hcoef
+    calc
+      2 * qabs (FormalPowerSeries.expCoeff k) *
+          ((radius * radius) ^ k * radius) =
+          2 * radius * (FormalPowerSeries.expCoeff k *
+            (radius * radius) ^ k) := by
+            rw [hcoefabs]
+            grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= 2 * radius * RationalMajorant.factorialTailTerm C k :=
+        Rat.mul_le_mul_of_nonneg_left hterm
+          (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 2) hr)
+  have htarget : 0 <=
+      2 * radius * RationalMajorant.factorialTailTerm C k := by
+    exact Rat.mul_nonneg (Rat.mul_nonneg (by native_decide) hr)
+      (RationalMajorant.factorialTailTerm_nonneg hC k)
+  have hscaled :
+      qabs (2 * FormalPowerSeries.expCoeff k * (-1 : Rat) ^ k *
+        radius ^ (2 * k + 1)) <=
+        (2 * radius * RationalMajorant.factorialTailTerm C k) *
+          ((2 * k + 1 : Nat) : Rat) := by
+    have hmul := Rat.mul_le_mul_of_nonneg_right hden htarget
+    calc
+      qabs (2 * FormalPowerSeries.expCoeff k * (-1 : Rat) ^ k *
+          radius ^ (2 * k + 1)) <=
+          2 * radius * RationalMajorant.factorialTailTerm C k := hnumer
+      _ <= (2 * radius * RationalMajorant.factorialTailTerm C k) *
+          ((2 * k + 1 : Nat) : Rat) := by
+        simpa [Rat.mul_comm] using hmul
+  have hmul := Rat.mul_le_mul_of_nonneg_right hscaled hinv0
+  calc
+    qabs (2 * FormalPowerSeries.expCoeff k * (-1 : Rat) ^ k *
+        radius ^ (2 * k + 1)) * ((2 * k + 1 : Nat) : Rat)⁻¹ <=
+        (2 * radius * RationalMajorant.factorialTailTerm C k) *
+          ((2 * k + 1 : Nat) : Rat) * ((2 * k + 1 : Nat) : Rat)⁻¹ := hmul
+    _ = 2 * radius * RationalMajorant.factorialTailTerm C k := by
+      rw [Rat.mul_assoc, Rat.mul_inv_cancel _ (Rat.ne_of_gt hdenpos)]
+      simp
+
 def gaussianEvenIntegralTailMajorant (radius : Rat) (start : Nat) : Nat → Rat
   | 0 => 0
   | terms + 1 =>
       gaussianEvenIntegralTailMajorant radius start terms +
         qabs (gaussianEvenIntegralTerm (start + terms) radius)
+
+/- The whole finite Gaussian tail is bounded by the corresponding finite
+   factorial majorant.  This is the finite-stage bridge from the integrated
+   even exponential series to the existing computable tail machinery. -/
+theorem gaussianEvenIntegralTailMajorant_le_factorialTailPartial
+    {C radius : Rat} (hr : 0 <= radius) (hC : 0 <= C)
+    (hR : radius * radius <= C) (start terms : Nat) :
+    gaussianEvenIntegralTailMajorant radius start terms <=
+      2 * radius * RationalMajorant.factorialTailPartial C start terms := by
+  induction terms with
+  | zero =>
+      simp [gaussianEvenIntegralTailMajorant,
+        RationalMajorant.factorialTailPartial]
+  | succ terms ih =>
+      rw [gaussianEvenIntegralTailMajorant,
+        RationalMajorant.factorialTailPartial]
+      have hterm := gaussianEvenIntegralTerm_abs_le_factorialTailTerm
+        (C := C) (radius := radius) hr hC hR (start + terms)
+      have hadd := rat_add_le_add ih hterm
+      simpa [Rat.mul_add, Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
+        Nat.add_comm] using hadd
 
 theorem gaussianEvenIntegralPrefix_succ_eq_term (terms : Nat) (radius : Rat) :
     gaussianEvenIntegralPrefix (terms + 1) radius =
