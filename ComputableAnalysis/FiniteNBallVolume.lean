@@ -281,6 +281,21 @@ theorem finiteWeightedRectangularSum_nonneg
   · apply Rat.mul_nonneg (hwidthX x hx) (hwidthY y hy)
   · exact hvalue x hx y hy
 
+theorem finiteWeightedRectangularSum_mono
+    (xs ys : List (Rat × Rat))
+    (lower upper : Rat -> Rat -> Rat)
+    (hwidthX : forall cell, cell ∈ xs -> 0 <= cell.2)
+    (hwidthY : forall cell, cell ∈ ys -> 0 <= cell.2)
+    (hvalue : forall x, x ∈ xs -> forall y, y ∈ ys ->
+      lower x.1 y.1 <= upper x.1 y.1) :
+    finiteWeightedRectangularSum xs ys lower <=
+      finiteWeightedRectangularSum xs ys upper := by
+  apply finiteRectangularSum_mono
+  intro x hx y hy
+  apply Rat.mul_le_mul_of_nonneg_left
+  · exact hvalue x hx y hy
+  · exact Rat.mul_nonneg (hwidthX x hx) (hwidthY y hy)
+
 /-! The same finite algebra in arbitrary dimension.  A list of sample lists
 and a list of one-variable factors describes a separable rectangular sum. -/
 

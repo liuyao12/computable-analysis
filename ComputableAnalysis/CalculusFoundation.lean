@@ -379,6 +379,18 @@ theorem effectiveFiniteWeightedRectangularSum_nonneg
   exact finiteWeightedRectangularSum_nonneg xs ys cellValue
     hwidthX hwidthY hvalue
 
+theorem effectiveFiniteWeightedRectangularSum_mono
+    (xs ys : List (Rat × Rat))
+    (lower upper : Rat -> Rat -> Rat)
+    (hwidthX : forall cell, cell ∈ xs -> 0 <= cell.2)
+    (hwidthY : forall cell, cell ∈ ys -> 0 <= cell.2)
+    (hvalue : forall x, x ∈ xs -> forall y, y ∈ ys ->
+      lower x.1 y.1 <= upper x.1 y.1) :
+    finiteWeightedRectangularSum xs ys lower <=
+      finiteWeightedRectangularSum xs ys upper := by
+  exact finiteWeightedRectangularSum_mono xs ys lower upper
+    hwidthX hwidthY hvalue
+
 theorem effectiveFiniteProductIntegralSum2D_nonneg
     (xs ys : List (Rat × Rat)) (f g : Rat -> Rat)
     (hx : forall cell, cell ∈ xs -> 0 <= cell.2 * f cell.1)
