@@ -1927,6 +1927,96 @@ theorem exactRat_cube_integral_raw_equiv_one_fourth :
   unfold QInterval.Overlaps
   exact exactCube_compute_contains_one_fourth n
 
+/-! The cubic certificate is also exposed through the domain-aware definite
+integral interface, with the rational primitive `x^4 / 4`. -/
+
+def cubePrimitiveOnUnit : FunctionOnInterval :=
+  FunctionOnInterval.exactRat (fun x : Rat => x ^ 4 / 4) 0 1
+
+theorem cubePrimitiveOnUnit_compute_zero (n : Nat) :
+    cubePrimitiveOnUnit.toRealFunRaw.compute 0 n =
+      { lo := (0 : Rat), hi := 0 } := by
+  rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+    cubePrimitiveOnUnit (x := 0)
+      (hx := ⟨by native_decide, by native_decide⟩) n]
+  change ({ lo := (0 : Rat) ^ 4 / 4, hi := 0 ^ 4 / 4 } : QInterval) = _
+  native_decide
+
+theorem cubePrimitiveOnUnit_compute_one (n : Nat) :
+    cubePrimitiveOnUnit.toRealFunRaw.compute 1 n =
+      { lo := (1 / 4 : Rat), hi := 1 / 4 } := by
+  rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+    cubePrimitiveOnUnit (x := 1)
+      (hx := ⟨by native_decide, by native_decide⟩) n]
+  change ({ lo := (1 : Rat) ^ 4 / 4, hi := 1 ^ 4 / 4 } : QInterval) = _
+  native_decide
+
+theorem cubePrimitiveOnUnit_endpoint_compute (n : Nat) :
+    endpointDifferenceCompute cubePrimitiveOnUnit.toRealFunRaw 0 1 n =
+      { lo := (1 / 4 : Rat), hi := 1 / 4 } := by
+  simp [endpointDifferenceCompute, endpointDifferenceInterval,
+    cubePrimitiveOnUnit_compute_one, cubePrimitiveOnUnit_compute_zero]
+  native_decide
+
+theorem cubePrimitiveOnUnit_endpoint_valid :
+    RealRaw.ValidCompute
+      (endpointDifferenceCompute cubePrimitiveOnUnit.toRealFunRaw 0 1) := by
+  have hcompute :
+      endpointDifferenceCompute cubePrimitiveOnUnit.toRealFunRaw 0 1 =
+        fun _ : Nat => ({ lo := (1 / 4 : Rat), hi := 1 / 4 } : QInterval) := by
+    funext n
+    exact cubePrimitiveOnUnit_endpoint_compute n
+  rw [hcompute]
+  exact RealRaw.ofRat_valid _
+
+theorem exactRat_cube_integral_raw_equiv_cube_endpoint :
+    (Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ 3) 0 1)
+      exactRat_cube_integral_certificate).Equiv
+      (endpointDifferenceRaw cubePrimitiveOnUnit.toRealFunRaw 0 1
+        cubePrimitiveOnUnit_endpoint_valid) := by
+  have hendpoint :
+      (endpointDifferenceRaw cubePrimitiveOnUnit.toRealFunRaw 0 1
+        cubePrimitiveOnUnit_endpoint_valid).Equiv
+        (RealRaw.ofRat (1 / 4)) := by
+    apply RealRaw.sameStageOverlap_equiv
+    intro n
+    apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+    change QInterval.Overlaps
+      (endpointDifferenceCompute cubePrimitiveOnUnit.toRealFunRaw 0 1 n)
+      { lo := (1 / 4 : Rat), hi := 1 / 4 }
+    rw [cubePrimitiveOnUnit_endpoint_compute]
+    exact ⟨by native_decide, by native_decide⟩
+  have hmid : (RealRaw.ofRat (1 / 4)).Valid := by
+    change RealRaw.ValidCompute
+      (fun _ : Nat => ({ lo := (1 / 4 : Rat), hi := 1 / 4 } : QInterval))
+    exact RealRaw.ofRat_valid _
+  have hend :
+      (endpointDifferenceRaw cubePrimitiveOnUnit.toRealFunRaw 0 1
+        cubePrimitiveOnUnit_endpoint_valid).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using
+      cubePrimitiveOnUnit_endpoint_valid
+  exact RealRaw.equiv_trans
+    (Integral.raw_valid _ exactRat_cube_integral_certificate)
+    hmid
+    hend
+    exactRat_cube_integral_raw_equiv_one_fourth
+    (RealRaw.equiv_symm hendpoint)
+
+def exactRat_cube_definiteIdentity :
+    Integral.DefiniteIdentityFor
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ 3) 0 1)
+      cubePrimitiveOnUnit :=
+  Integral.DefiniteIdentityFor.ofConstruction rfl rfl
+    exactRat_cube_integral_certificate.construction
+    cubePrimitiveOnUnit_endpoint_valid (by
+      change (Integral.raw
+        (FunctionOnInterval.exactRat (fun x : Rat => x ^ 3) 0 1)
+        exactRat_cube_integral_certificate).Equiv
+        (endpointDifferenceRaw cubePrimitiveOnUnit.toRealFunRaw 0 1
+          cubePrimitiveOnUnit_endpoint_valid)
+      exact exactRat_cube_integral_raw_equiv_cube_endpoint)
+
 theorem stableCube_integral_raw_equiv_one_fourth :
     (Integral.raw stableCubeFunction stableCube_integral_certificate).Equiv
       (RealRaw.ofRat (1 / 4)) := by
