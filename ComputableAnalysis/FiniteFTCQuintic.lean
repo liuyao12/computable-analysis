@@ -457,5 +457,95 @@ theorem exactRat_quintic_integral_raw_equiv_one_sixth :
   unfold QInterval.Overlaps
   exact exactQuintic_compute_contains_one_sixth_at_stage n
 
+/-! The quintic certificate is exposed through the domain-aware definite
+integral interface, with the rational primitive `x^6 / 6`. -/
+
+def quinticPrimitiveOnUnit : FunctionOnInterval :=
+  FunctionOnInterval.exactRat (fun x : Rat => x ^ 6 / 6) 0 1
+
+theorem quinticPrimitiveOnUnit_compute_zero (n : Nat) :
+    quinticPrimitiveOnUnit.toRealFunRaw.compute 0 n =
+      { lo := (0 : Rat), hi := 0 } := by
+  rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+    quinticPrimitiveOnUnit (x := 0)
+      (hx := ⟨by native_decide, by native_decide⟩) n]
+  change ({ lo := (0 : Rat) ^ 6 / 6, hi := 0 ^ 6 / 6 } : QInterval) = _
+  native_decide
+
+theorem quinticPrimitiveOnUnit_compute_one (n : Nat) :
+    quinticPrimitiveOnUnit.toRealFunRaw.compute 1 n =
+      { lo := (1 / 6 : Rat), hi := 1 / 6 } := by
+  rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+    quinticPrimitiveOnUnit (x := 1)
+      (hx := ⟨by native_decide, by native_decide⟩) n]
+  change ({ lo := (1 : Rat) ^ 6 / 6, hi := 1 ^ 6 / 6 } : QInterval) = _
+  native_decide
+
+theorem quinticPrimitiveOnUnit_endpoint_compute (n : Nat) :
+    endpointDifferenceCompute quinticPrimitiveOnUnit.toRealFunRaw 0 1 n =
+      { lo := (1 / 6 : Rat), hi := 1 / 6 } := by
+  simp [endpointDifferenceCompute, endpointDifferenceInterval,
+    quinticPrimitiveOnUnit_compute_one, quinticPrimitiveOnUnit_compute_zero]
+  native_decide
+
+theorem quinticPrimitiveOnUnit_endpoint_valid :
+    RealRaw.ValidCompute
+      (endpointDifferenceCompute quinticPrimitiveOnUnit.toRealFunRaw 0 1) := by
+  have hcompute :
+      endpointDifferenceCompute quinticPrimitiveOnUnit.toRealFunRaw 0 1 =
+        fun _ : Nat => ({ lo := (1 / 6 : Rat), hi := 1 / 6 } : QInterval) := by
+    funext n
+    exact quinticPrimitiveOnUnit_endpoint_compute n
+  rw [hcompute]
+  exact RealRaw.ofRat_valid _
+
+theorem exactRat_quintic_integral_raw_equiv_quintic_endpoint :
+    (Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ 5) 0 1)
+      exactRat_quintic_integral_certificate).Equiv
+      (endpointDifferenceRaw quinticPrimitiveOnUnit.toRealFunRaw 0 1
+        quinticPrimitiveOnUnit_endpoint_valid) := by
+  have hendpoint :
+      (endpointDifferenceRaw quinticPrimitiveOnUnit.toRealFunRaw 0 1
+        quinticPrimitiveOnUnit_endpoint_valid).Equiv
+        (RealRaw.ofRat (1 / 6)) := by
+    apply RealRaw.sameStageOverlap_equiv
+    intro n
+    apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+    change QInterval.Overlaps
+      (endpointDifferenceCompute quinticPrimitiveOnUnit.toRealFunRaw 0 1 n)
+      { lo := (1 / 6 : Rat), hi := 1 / 6 }
+    rw [quinticPrimitiveOnUnit_endpoint_compute]
+    exact ⟨by native_decide, by native_decide⟩
+  have hmid : (RealRaw.ofRat (1 / 6)).Valid := by
+    change RealRaw.ValidCompute
+      (fun _ : Nat => ({ lo := (1 / 6 : Rat), hi := 1 / 6 } : QInterval))
+    exact RealRaw.ofRat_valid _
+  have hend :
+      (endpointDifferenceRaw quinticPrimitiveOnUnit.toRealFunRaw 0 1
+        quinticPrimitiveOnUnit_endpoint_valid).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using
+      quinticPrimitiveOnUnit_endpoint_valid
+  exact RealRaw.equiv_trans
+    (Integral.raw_valid _ exactRat_quintic_integral_certificate)
+    hmid
+    hend
+    exactRat_quintic_integral_raw_equiv_one_sixth
+    (RealRaw.equiv_symm hendpoint)
+
+def exactRat_quintic_definiteIdentity :
+    Integral.DefiniteIdentityFor
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ 5) 0 1)
+      quinticPrimitiveOnUnit :=
+  Integral.DefiniteIdentityFor.ofConstruction rfl rfl
+    exactRat_quintic_integral_certificate.construction
+    quinticPrimitiveOnUnit_endpoint_valid (by
+      change (Integral.raw
+        (FunctionOnInterval.exactRat (fun x : Rat => x ^ 5) 0 1)
+        exactRat_quintic_integral_certificate).Equiv
+        (endpointDifferenceRaw quinticPrimitiveOnUnit.toRealFunRaw 0 1
+          quinticPrimitiveOnUnit_endpoint_valid)
+      exact exactRat_quintic_integral_raw_equiv_quintic_endpoint)
+
 end Integral
 end ComputableAnalysis
