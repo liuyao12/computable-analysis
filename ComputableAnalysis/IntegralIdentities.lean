@@ -363,6 +363,40 @@ def DefiniteIdentityFor.ofConstruction
   endpoint_valid := endpoint_valid
   equivalent := equivalent
 
+/-! A common-anchor constructor is convenient when the integral computation
+and the endpoint computation are proved separately against the same raw
+representative.  It performs only the representation-safe transitivity
+step; the anchor itself remains explicit proof data. -/
+def DefiniteIdentityFor.ofConstructionAndAnchor
+    {integrand primitive : FunctionOnInterval}
+    (same_lower : primitive.lower = integrand.lower)
+    (same_upper : primitive.upper = integrand.upper)
+    (construction : Integral.ConstructionFor integrand)
+    (endpoint_valid :
+      RealRaw.ValidCompute
+        (endpointDifferenceCompute
+          primitive.toRealFunRaw integrand.lower integrand.upper))
+    (anchor : RealRaw)
+    (anchor_valid : anchor.Valid)
+    (integral_anchor :
+      (Integral.integralFor integrand construction).Equiv anchor)
+    (endpoint_anchor :
+      (endpointDifferenceRaw
+        primitive.toRealFunRaw integrand.lower integrand.upper endpoint_valid).Equiv
+        anchor) :
+    DefiniteIdentityFor integrand primitive where
+  same_lower := same_lower
+  same_upper := same_upper
+  construction := construction
+  endpoint_valid := endpoint_valid
+  equivalent := by
+    exact RealRaw.equiv_trans
+      (Integral.integralFor_valid integrand construction)
+      anchor_valid
+      (by simpa [endpointDifferenceRaw, RealRaw.Valid] using endpoint_valid)
+      integral_anchor
+      (RealRaw.equiv_symm endpoint_anchor)
+
 namespace DefiniteIdentityFor
 
 theorem integral_valid

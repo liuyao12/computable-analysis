@@ -37,8 +37,13 @@ certificate: provide a valid `ConstructionFor`, a valid endpoint computation,
 and their explicit overlap.  Derivative-bound and curvature constructors are
 convenience specializations of this same pattern.
 
+When the integral and endpoint computations are each compared with a common
+anchor, use the corresponding common-anchor constructor; no direct comparison
+between the two algorithms is required.
+
 \lean{ComputableAnalysis.Integral.DefiniteIdentityFor.ofConstruction}
 \lean{ComputableAnalysis.Integral.DefiniteIdentityFor.integral_equiv_of_endpoint_anchor}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.ofConstructionAndAnchor}
 \lean{ComputableAnalysis.IntegralIdentities.affineIdentityQuadraticDefiniteIdentity}
 \lean{ComputableAnalysis.effectiveFTC}
 \lean{ComputableAnalysis.effectiveFTC_endpointDifference}
