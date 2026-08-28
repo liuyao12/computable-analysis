@@ -299,6 +299,16 @@ theorem effectiveDyadicNestedRadicalIntegralRaw_widths_shrink :
       SinPiIntegral.dyadicNestedRadicalIntegralRaw.compute := by
   exact SinPiIntegral.dyadicNestedRadicalIntegralRaw_widths_shrink
 
+theorem effectiveDyadicNestedRadicalLeftSum_width_nonneg (n : Nat) :
+    0 <= (SinPiIntegral.dyadicNestedRadicalLeftSum n).width := by
+  exact SinPiIntegral.dyadicNestedRadicalLeftSum_width_nonneg n
+
+theorem effectiveDyadicNestedRadical_sample_coordinate
+    {n k : Nat} (hk : k < 2 ^ n) :
+    2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k =
+      (k : Rat) / ((2 ^ n : Nat) : Rat) := by
+  exact SinPiIntegral.dyadicNestedRadical_sample_coordinate hk
+
 theorem effectiveIntervalRegularDarbouxSchedule_widths_shrink_of_budget
     {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
     {hinterval : F.lower <= F.upper} (lengthBound : Nat)
