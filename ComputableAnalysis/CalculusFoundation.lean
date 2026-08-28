@@ -1041,6 +1041,57 @@ theorem effectiveFiniteTaylorEndpointRaw_equiv_finiteMonomialSum
   rw [hvalue] at h
   exact h
 
+theorem effectiveFiniteTaylorEndpointRaw_split
+    (coeffs : Nat -> Rat) (terms : Nat) (a c b : Rat) :
+    (effectiveFiniteTaylorEndpointRaw coeffs terms a b).Equiv
+      (effectiveFiniteTaylorEndpointRaw coeffs terms a c +
+        effectiveFiniteTaylorEndpointRaw coeffs terms c b) := by
+  let P := FinitePolynomial.integratedTaylorPrefix coeffs terms
+  let q := P c - P a
+  let r := P b - P c
+  have hab := effectiveFiniteTaylorEndpointRaw_equiv_endpointDifference
+    coeffs terms a b
+  have hac := effectiveFiniteTaylorEndpointRaw_equiv_endpointDifference
+    coeffs terms a c
+  have hcb := effectiveFiniteTaylorEndpointRaw_equiv_endpointDifference
+    coeffs terms c b
+  have habvalid := effectiveFiniteTaylorEndpointRaw_valid coeffs terms a b
+  have hacvalid := effectiveFiniteTaylorEndpointRaw_valid coeffs terms a c
+  have hcbvalid := effectiveFiniteTaylorEndpointRaw_valid coeffs terms c b
+  have hqvalid : (RealRaw.ofRat q).Valid := by
+    unfold RealRaw.ofRat RealRaw.Valid
+    exact RealRaw.ofRat_valid _
+  have hrvalid : (RealRaw.ofRat r).Valid := by
+    unfold RealRaw.ofRat RealRaw.Valid
+    exact RealRaw.ofRat_valid _
+  have hsumvalid := RealRaw.add_valid hacvalid hcbvalid
+  have htransport :
+      (effectiveFiniteTaylorEndpointRaw coeffs terms a c +
+        effectiveFiniteTaylorEndpointRaw coeffs terms c b).Equiv
+        (RealRaw.ofRat q + RealRaw.ofRat r) := by
+    exact RealRaw.add_equiv hacvalid hqvalid hcbvalid hrvalid hac hcb
+  have hcollapse :
+      (RealRaw.ofRat q + RealRaw.ofRat r).Equiv
+        (RealRaw.ofRat (P b - P a)) := by
+    have h := ComputableAnalysis.ofRat_add_equiv q r
+    have hqr : q + r = P b - P a := by
+      dsimp [q, r]
+      grind [Rat.sub_def, Rat.add_assoc]
+    rw [← hqr]
+    exact h
+  have htotalvalid : (RealRaw.ofRat (P b - P a)).Valid := by
+    unfold RealRaw.ofRat RealRaw.Valid
+    exact RealRaw.ofRat_valid _
+  have hqrvalid : (RealRaw.ofRat q + RealRaw.ofRat r).Valid :=
+    RealRaw.add_valid hqvalid hrvalid
+  have hright :
+      (effectiveFiniteTaylorEndpointRaw coeffs terms a c +
+        effectiveFiniteTaylorEndpointRaw coeffs terms c b).Equiv
+        (RealRaw.ofRat (P b - P a)) :=
+    RealRaw.equiv_trans hsumvalid hqrvalid htotalvalid htransport hcollapse
+  exact RealRaw.equiv_trans habvalid htotalvalid hsumvalid hab
+    (RealRaw.equiv_symm hright)
+
 /-- Focused-entry-point access to the closed monomial FTC family.  The
     implementation remains in `Integral`; this wrapper is the stable import
     surface for downstream formalizations. -/
