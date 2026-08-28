@@ -1310,6 +1310,31 @@ theorem effectiveUnitSquareIntegralRaw_equiv_one_third :
   rw [hvalue] at h
   simpa [effectiveUnitSquareIntegralRaw] using h
 
+theorem effectiveFinitePolynomialIntegralValue_eq_endpointDifference
+    (coeffs : Nat -> Rat) (terms : Nat) :
+    effectiveFinitePolynomialIntegralValue coeffs terms =
+      FinitePolynomial.integratedTaylorPrefix coeffs terms 1 -
+        FinitePolynomial.integratedTaylorPrefix coeffs terms 0 := by
+  calc
+    effectiveFinitePolynomialIntegralValue coeffs terms =
+        FinitePolynomial.finiteMonomialIntegralSum coeffs terms 0 1 :=
+      effectiveFinitePolynomialIntegralValue_eq_finiteMonomialIntegralSum
+        coeffs terms
+    _ = FinitePolynomial.integratedTaylorPrefix coeffs terms 1 -
+          FinitePolynomial.integratedTaylorPrefix coeffs terms 0 :=
+      (effectiveFiniteTaylorFTC_endpointDifference_eq_finiteMonomialIntegralSum
+        coeffs terms 0 1).symm
+
+theorem effectiveFinitePolynomialIntegralRaw_equiv_endpointDifferenceValue
+    (coeffs : Nat -> Rat) (terms : Nat) :
+    (effectiveFinitePolynomialIntegralRaw coeffs terms).Equiv
+      (RealRaw.ofRat
+        (FinitePolynomial.integratedTaylorPrefix coeffs terms 1 -
+          FinitePolynomial.integratedTaylorPrefix coeffs terms 0)) := by
+  have h := effectiveFinitePolynomialIntegralRaw_equiv_value coeffs terms
+  rw [effectiveFinitePolynomialIntegralValue_eq_endpointDifference] at h
+  exact h
+
 def effectiveFiniteTaylorDerivativeOnInterval
     (coeffs : Nat -> Rat) (terms : Nat) (a b C : Rat)
     (hleft : -C <= a) (hright : b <= C) (hC1 : 1 <= C) :
