@@ -1083,6 +1083,22 @@ private theorem scaleRat_ofRat_equiv (c q : Rat) :
     simp [RealRaw.scaleRat, RealRaw.scaleRatCompute, RealRaw.ofRat,
       RealRaw.ofRat_compute, hc, hc', QInterval.Overlaps]
 
+private theorem scaleRat_width_eq_qabs_mul (c : Rat) (x : RealRaw)
+    (n : Nat) :
+    ((RealRaw.scaleRat c x).compute n).width =
+      qabs c * (x.compute n).width := by
+  by_cases hc : 0 <= c
+  · unfold RealRaw.scaleRat RealRaw.scaleRatCompute QInterval.width
+    simp only [if_pos hc]
+    simp only [qabs_eq_self_of_nonneg hc]
+    grind
+  · have hc' : c < 0 := by grind
+    unfold RealRaw.scaleRat RealRaw.scaleRatCompute QInterval.width
+    simp only [if_neg hc]
+    unfold qabs
+    rw [if_pos hc']
+    grind
+
 set_option maxHeartbeats 100000000 in
 private theorem finiteRawSum_ofRat_equiv_sum (xs : List Rat) :
     (Integral.finiteRawSum (xs.map RealRaw.ofRat)).Equiv
@@ -1160,6 +1176,32 @@ theorem effectiveFinitePolynomialIntegralRaw_equiv_anchor
     simp only [List.mem_map] at hx
     rcases hx with ⟨k, hk, rfl⟩
     exact RealRaw.scaleRat_valid (RealRaw.ofRat_valid _)
+
+theorem effectiveFinitePolynomialIntegralRaw_compute_width_le
+    (coeffs : Nat -> Rat) (terms stage : Nat) (bound : Rat)
+    (hbound : forall k, k < terms ->
+      qabs (coeffs k) *
+          ((2 * (k : Rat)) * (1 / (((2 ^ stage : Nat) : Rat)))) <= bound) :
+    ((effectiveFinitePolynomialIntegralRaw coeffs terms).compute stage).width <=
+      (terms : Rat) * bound := by
+  unfold effectiveFinitePolynomialIntegralRaw
+  have hpoint : forall x, x ∈ (List.range terms).map (fun k =>
+      RealRaw.scaleRat (coeffs k)
+        (Integral.raw (FunctionOnInterval.exactRat (fun x => x ^ k) 0 1)
+          (Integral.exactRat_pow_integral_certificate k))) ->
+      (x.compute stage).width <= bound := by
+    intro x hx
+    simp only [List.mem_map] at hx
+    rcases hx with ⟨k, hk, rfl⟩
+    rw [scaleRat_width_eq_qabs_mul]
+    rw [Integral.exactRat_pow_integral_raw_compute_width]
+    exact hbound k (List.mem_range.mp hk)
+  simpa only [List.length_map, List.length_range] using
+    (Integral.finiteRawSum_compute_width_le_of_forall
+      ((List.range terms).map (fun k =>
+        RealRaw.scaleRat (coeffs k)
+          (Integral.raw (FunctionOnInterval.exactRat (fun x => x ^ k) 0 1)
+            (Integral.exactRat_pow_integral_certificate k)))) stage bound hpoint)
 
 set_option maxHeartbeats 100000000 in
 theorem effectiveFinitePolynomialIntegralAnchorRaw_equiv_value
