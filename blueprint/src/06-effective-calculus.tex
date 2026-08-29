@@ -505,6 +505,8 @@ by complex special functions and Fourier constructions.
 \lean{ComputableAnalysis.QBox.overlaps_of_common_point}
 \lean{ComputableAnalysis.effectiveComplexRaw_mul_add_equiv}
 \lean{ComputableAnalysis.effectiveComplexRaw_add_mul_equiv}
+\lean{ComputableAnalysis.effectiveComplexRaw_mul_neg_equiv}
+\lean{ComputableAnalysis.effectiveComplexRaw_neg_mul_equiv}
 \lean{ComputableAnalysis.FunctionRaw.mul_one_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.one_mul_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.mul_zero_agreeOnCommonDomain}
@@ -517,6 +519,8 @@ by complex special functions and Fourier constructions.
 \lean{ComputableAnalysis.FunctionRaw.pow_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.mul_add_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.add_mul_agreeOnCommonDomain}
+\lean{ComputableAnalysis.FunctionRaw.mul_neg_agreeOnCommonDomain}
+\lean{ComputableAnalysis.FunctionRaw.neg_mul_agreeOnCommonDomain}
 \lean{ComputableAnalysis.ComplexFunction.mul_one_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.one_mul_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.mul_zero_representation_agrees_preferred}
@@ -526,6 +530,8 @@ by complex special functions and Fourier constructions.
 \lean{ComputableAnalysis.ComplexFunction.pow_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.mul_add_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.add_mul_representation_agrees_preferred}
+\lean{ComputableAnalysis.ComplexFunction.mul_neg_representation_agrees_preferred}
+\lean{ComputableAnalysis.ComplexFunction.neg_mul_representation_agrees_preferred}
 \leanok
 
 The corresponding zero laws are proved by the same four-corner calculation:
@@ -549,6 +555,12 @@ Finite powers are defined recursively from the certified one and product
 operations.  Validity and representation transport follow by induction, so a
 polynomial may be evaluated with repeated products without introducing a
 separate real-number power operation.
+
+Negated factors are handled by the same center-point argument.  The box
+operation reverses endpoints, and the exact rational identity
+$z(-w)=-(zw)$ (and its left-handed form) transports through the overlap
+relation.  This closes signed products used by subtraction and finite
+difference formulas.
 
 Addition is closed by the same finite box argument, completing the basic
 complex linear-combination operations used by series prefixes.

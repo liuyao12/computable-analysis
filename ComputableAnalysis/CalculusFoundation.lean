@@ -2478,6 +2478,83 @@ theorem QBox.overlaps_of_common_point {A B : QBox} {z : QComplex}
     ⟨Rat.le_trans hB.1.1 hA.2.1,
       Rat.le_trans hB.1.2 hA.2.2⟩⟩
 
+theorem QBox.neg_contains {A : QBox} {z : QComplex}
+    (hA : A.lo <= z /\ z <= A.hi) :
+    (QBox.neg A).lo <= QComplex.neg z /\
+      QComplex.neg z <= (QBox.neg A).hi := by
+  unfold QBox.neg QComplex.neg
+  simp only [QComplex.le_def]
+  exact ⟨⟨Rat.neg_le_neg hA.2.1, Rat.neg_le_neg hA.2.2⟩,
+    ⟨Rat.neg_le_neg hA.1.1, Rat.neg_le_neg hA.1.2⟩⟩
+
+theorem effectiveComplexRaw_mul_neg_equiv
+    {z w : ComplexRaw} (hz : z.Valid) (hw : w.Valid) :
+    (ComplexRaw.mul z (ComplexRaw.neg w)).Equiv
+      (ComplexRaw.neg (ComplexRaw.mul z w)) := by
+  intro n
+  let A := z.compute n
+  let B := w.compute n
+  let x := A.center
+  let y := B.center
+  have hx : A.lo <= x /\ x <= A.hi := by
+    exact QBox.center_mem (ComplexRaw.valid_ordered hz n)
+  have hy : B.lo <= y /\ y <= B.hi := by
+    exact QBox.center_mem (ComplexRaw.valid_ordered hw n)
+  have hny := QBox.neg_contains hy
+  have hleft := QBox.mul_contains hx.1 hx.2 hny.1 hny.2
+  have hzw := QBox.mul_contains hx.1 hx.2 hy.1 hy.2
+  have hright := QBox.neg_contains hzw
+  have hidentity : QComplex.mul x (QComplex.neg y) =
+      QComplex.neg (QComplex.mul x y) := by
+    exact QComplex.mul_neg_cert x y
+  have hright' : (QBox.neg (QBox.mul A B)).lo <=
+      QComplex.mul x (QComplex.neg y) /\
+      QComplex.mul x (QComplex.neg y) <=
+        (QBox.neg (QBox.mul A B)).hi := by
+    rw [hidentity]
+    exact hright
+  apply (ComplexRaw.compareAt_overlap_iff
+    (ComplexRaw.mul z (ComplexRaw.neg w))
+    (ComplexRaw.neg (ComplexRaw.mul z w)) n n).2
+  change QBox.Overlaps
+    (QBox.mul A (QBox.neg B))
+    (QBox.neg (QBox.mul A B))
+  exact QBox.overlaps_of_common_point hleft hright'
+
+theorem effectiveComplexRaw_neg_mul_equiv
+    {z w : ComplexRaw} (hz : z.Valid) (hw : w.Valid) :
+    (ComplexRaw.mul (ComplexRaw.neg z) w).Equiv
+      (ComplexRaw.neg (ComplexRaw.mul z w)) := by
+  intro n
+  let A := z.compute n
+  let B := w.compute n
+  let x := A.center
+  let y := B.center
+  have hx : A.lo <= x /\ x <= A.hi := by
+    exact QBox.center_mem (ComplexRaw.valid_ordered hz n)
+  have hy : B.lo <= y /\ y <= B.hi := by
+    exact QBox.center_mem (ComplexRaw.valid_ordered hw n)
+  have hnx := QBox.neg_contains hx
+  have hleft := QBox.mul_contains hnx.1 hnx.2 hy.1 hy.2
+  have hzw := QBox.mul_contains hx.1 hx.2 hy.1 hy.2
+  have hright := QBox.neg_contains hzw
+  have hidentity : QComplex.mul (QComplex.neg x) y =
+      QComplex.neg (QComplex.mul x y) := by
+    exact QComplex.neg_mul_cert x y
+  have hright' : (QBox.neg (QBox.mul A B)).lo <=
+      QComplex.mul (QComplex.neg x) y /\
+      QComplex.mul (QComplex.neg x) y <=
+        (QBox.neg (QBox.mul A B)).hi := by
+    rw [hidentity]
+    exact hright
+  apply (ComplexRaw.compareAt_overlap_iff
+    (ComplexRaw.mul (ComplexRaw.neg z) w)
+    (ComplexRaw.neg (ComplexRaw.mul z w)) n n).2
+  change QBox.Overlaps
+    (QBox.mul (QBox.neg A) B)
+    (QBox.neg (QBox.mul A B))
+  exact QBox.overlaps_of_common_point hleft hright'
+
 theorem effectiveComplexRaw_mul_add_equiv
     {z w v : ComplexRaw} (hz : z.Valid) (hw : w.Valid) (hv : v.Valid) :
     (ComplexRaw.mul z (ComplexRaw.add w v)).Equiv
@@ -3346,6 +3423,31 @@ theorem FunctionRaw.add_mul_agreeOnCommonDomain
   exact effectiveComplexRaw_add_mul_equiv
     (hf z hleft.1.1) (hg z hleft.1.2) (hh z hleft.2)
 
+theorem FunctionRaw.mul_neg_agreeOnCommonDomain
+    {f g : FunctionRaw} (hf : f.Valid) (hg : g.Valid) :
+    (FunctionRaw.mul f (FunctionRaw.neg g)).AgreeOnCommonDomain
+      (FunctionRaw.neg (FunctionRaw.mul f g)) := by
+  intro z hleft hright
+  change (ComplexRaw.mul (f.evalRaw z hleft.1)
+      (ComplexRaw.neg (g.evalRaw z hleft.2))).Equiv
+    (ComplexRaw.neg (ComplexRaw.mul (f.evalRaw z hright.1)
+      (g.evalRaw z hright.2)))
+  exact effectiveComplexRaw_mul_neg_equiv
+    (hf z hleft.1) (hg z hleft.2)
+
+theorem FunctionRaw.neg_mul_agreeOnCommonDomain
+    {f g : FunctionRaw} (hf : f.Valid) (hg : g.Valid) :
+    (FunctionRaw.mul (FunctionRaw.neg f) g).AgreeOnCommonDomain
+      (FunctionRaw.neg (FunctionRaw.mul f g)) := by
+  intro z hleft hright
+  change (ComplexRaw.mul
+      (ComplexRaw.neg (f.evalRaw z hleft.1))
+      (g.evalRaw z hleft.2)).Equiv
+    (ComplexRaw.neg (ComplexRaw.mul (f.evalRaw z hright.1)
+      (g.evalRaw z hright.2)))
+  exact effectiveComplexRaw_neg_mul_equiv
+    (hf z hleft.1) (hg z hleft.2)
+
 /-! The abstract complex-function API exposes the certified product only
 after the raw product closure has been established.  This keeps the handle
 layer honest: multiplication carries the intersection domain and inherits
@@ -3446,6 +3548,22 @@ theorem ComplexFunction.pow_representation_agrees_preferred
       (FunctionRaw.pow f.preferred n) := by
   exact FunctionRaw.pow_agreeOnCommonDomain
     rf.valid f.valid rf.agrees n
+
+theorem ComplexFunction.mul_neg_representation_agrees_preferred
+    (f g : ComplexFunction) :
+    (ComplexFunction.mul f (ComplexFunction.neg g)).preferred.AgreeOnCommonDomain
+      (ComplexFunction.neg (ComplexFunction.mul f g)).preferred := by
+  change (FunctionRaw.mul f.preferred (FunctionRaw.neg g.preferred)).AgreeOnCommonDomain
+    (FunctionRaw.neg (FunctionRaw.mul f.preferred g.preferred))
+  exact FunctionRaw.mul_neg_agreeOnCommonDomain f.valid g.valid
+
+theorem ComplexFunction.neg_mul_representation_agrees_preferred
+    (f g : ComplexFunction) :
+    (ComplexFunction.mul (ComplexFunction.neg f) g).preferred.AgreeOnCommonDomain
+      (ComplexFunction.neg (ComplexFunction.mul f g)).preferred := by
+  change (FunctionRaw.mul (FunctionRaw.neg f.preferred) g.preferred).AgreeOnCommonDomain
+    (FunctionRaw.neg (FunctionRaw.mul f.preferred g.preferred))
+  exact FunctionRaw.neg_mul_agreeOnCommonDomain f.valid g.valid
 
 end ComputableAnalysis
 
