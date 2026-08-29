@@ -502,9 +502,19 @@ complex linear-combination operations used by series prefixes.
 \lean{ComputableAnalysis.FunctionRaw.add_agreeOnCommonDomain}
 \leanok
 
+Negation is the explicit interval-reversing operation.  Together with
+nonnegative rational scaling, it supplies the representation-level pieces for
+signed linear combinations while keeping every order reversal visible.
+
+\lean{ComputableAnalysis.effectiveComplexRaw_neg_equiv}
+\lean{ComputableAnalysis.FunctionRaw.neg}
+\lean{ComputableAnalysis.FunctionRaw.neg_valid}
+\lean{ComputableAnalysis.FunctionRaw.neg_agreeOnCommonDomain}
+\leanok
+
 Nonnegative rational scaling completes the order-preserving linear operations
-at the complex raw-function level.  A signed scalar is obtained by making the
-interval reversal explicit through negation.
+at the complex raw-function level.  A signed scalar is assembled from this
+operation and the explicit negation above.
 
 \lean{ComputableAnalysis.FunctionRaw.scaleRat}
 \lean{ComputableAnalysis.FunctionRaw.scaleRat_valid_of_nonneg}

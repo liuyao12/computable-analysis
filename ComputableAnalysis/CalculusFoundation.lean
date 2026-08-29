@@ -1980,6 +1980,25 @@ theorem effectiveComplexRaw_add_equiv
   · constructor <;> grind [Rat.add_assoc]
   · constructor <;> grind [Rat.add_assoc]
 
+/-! Negation is the interval-reversing operation needed to assemble signed
+linear combinations from the order-preserving nonnegative scaling primitive. -/
+theorem effectiveComplexRaw_neg_equiv
+    {z w : ComplexRaw}
+    (hzw : z.Equiv w) :
+    (ComplexRaw.neg z).Equiv (ComplexRaw.neg w) := by
+  intro n
+  have hover := (ComplexRaw.compareAt_overlap_iff z w n n).1 (hzw n)
+  apply (ComplexRaw.compareAt_overlap_iff
+    (ComplexRaw.neg z) (ComplexRaw.neg w) n n).2
+  change QBox.Overlaps
+    { lo := { re := -(z.compute n).hi.re, im := -(z.compute n).hi.im },
+      hi := { re := -(z.compute n).lo.re, im := -(z.compute n).lo.im } }
+    { lo := { re := -(w.compute n).hi.re, im := -(w.compute n).hi.im },
+      hi := { re := -(w.compute n).lo.re, im := -(w.compute n).lo.im } }
+  unfold QBox.Overlaps at hover ⊢
+  simp only [QComplex.le_def] at hover ⊢
+  constructor <;> constructor <;> grind [Rat.neg_le_neg]
+
 def FunctionRaw.add (f g : FunctionRaw) : FunctionRaw where
   domain := fun z => f.domain z /\ g.domain z
   compute := fun z hz n =>
@@ -2016,6 +2035,29 @@ theorem FunctionRaw.add_agreeOnCommonDomain
     (hg z hleft.2) (hg' z hright.2)
     (hff z hleft.1 hright.1)
     (hgg z hleft.2 hright.2)
+
+def FunctionRaw.neg (f : FunctionRaw) : FunctionRaw where
+  domain := f.domain
+  compute := fun z hz n => QBox.neg (f.compute z hz n)
+
+theorem FunctionRaw.neg_valid
+    {f : FunctionRaw} (hf : f.Valid) :
+    (FunctionRaw.neg f).Valid := by
+  intro z hz
+  have hneg : (ComplexRaw.neg (f.evalRaw z hz)).Valid :=
+    ComplexRaw.neg_valid (hf z hz)
+  change (ComplexRaw.neg (f.evalRaw z hz)).Valid at hneg
+  change (ComplexRaw.neg (f.evalRaw z hz)).Valid
+  exact hneg
+
+theorem FunctionRaw.neg_agreeOnCommonDomain
+    {f g : FunctionRaw}
+    (hfg : f.AgreeOnCommonDomain g) :
+    (FunctionRaw.neg f).AgreeOnCommonDomain (FunctionRaw.neg g) := by
+  intro z hfz hgz
+  change (ComplexRaw.neg (f.evalRaw z hfz)).Equiv
+    (ComplexRaw.neg (g.evalRaw z hgz))
+  exact effectiveComplexRaw_neg_equiv (hfg z hfz hgz)
 
 /-! Nonnegative rational scaling is the order-preserving scalar operation on
 complex raw functions.  Negative scaling is intentionally assembled from
