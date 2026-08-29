@@ -180,6 +180,16 @@ theorem effectiveTangentSquareFTC_integral_equiv_halfQuarterTurn :
       (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
   exact SinPiIntegral.tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn
 
+/-! Public transport for the independent tangent-square computation.  A
+stagewise rational overlap certificate is the only application-specific
+input; the theorem then exposes the effective-FTC quarter-turn value through
+the focused calculus entry point. -/
+theorem effectiveTangentSquareIntegral_equiv_halfQuarterTurn_of_overlap
+    (h : SinPiIntegral.TangentSquareIntegralEffectiveFTCOverlap) :
+    SinPiIntegral.tangentSquareIntegral.Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
+  exact h.to_halfQuarterTurn
+
 theorem effectiveDyadicPublicSquareIntegral_equiv_halfQuarterTurn
     {S : SinPiIntegral.ArctanSinPiConstruction}
     (h : SinPiIntegral.DyadicPublicSquareTangentTransportWitness S)
