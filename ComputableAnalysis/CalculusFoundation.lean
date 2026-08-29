@@ -2088,6 +2088,55 @@ theorem effectiveComplexRaw_add_assoc_equiv
   simp only [QComplex.le_def]
   constructor <;> constructor <;> grind [Rat.add_assoc]
 
+theorem effectiveComplexRaw_scaleRat_add_equiv_of_nonneg
+    (r : Rat) (hr : 0 <= r) {z w : ComplexRaw}
+    (hz : z.Valid) (hw : w.Valid) :
+    (ComplexRaw.scaleRat r (ComplexRaw.add z w)).Equiv
+      (ComplexRaw.add (ComplexRaw.scaleRat r z)
+        (ComplexRaw.scaleRat r w)) := by
+  intro n
+  have hzorder_re : (z.compute n).lo.re ≤ (z.compute n).hi.re := by
+    have h := (hz.1 n).1
+    unfold QBox.width at h
+    grind [Rat.sub_eq_add_neg]
+  have hzorder_im : (z.compute n).lo.im ≤ (z.compute n).hi.im := by
+    have h := (hz.1 n).2
+    unfold QBox.height at h
+    grind [Rat.sub_eq_add_neg]
+  have hworder_re : (w.compute n).lo.re ≤ (w.compute n).hi.re := by
+    have h := (hw.1 n).1
+    unfold QBox.width at h
+    grind [Rat.sub_eq_add_neg]
+  have hworder_im : (w.compute n).lo.im ≤ (w.compute n).hi.im := by
+    have h := (hw.1 n).2
+    unfold QBox.height at h
+    grind [Rat.sub_eq_add_neg]
+  apply (ComplexRaw.compareAt_overlap_iff
+    (ComplexRaw.scaleRat r (ComplexRaw.add z w))
+    (ComplexRaw.add (ComplexRaw.scaleRat r z)
+      (ComplexRaw.scaleRat r w)) n n).2
+  simp only [ComplexRaw.scaleRat, ComplexRaw.add, QBox.scaleRat,
+    QBox.add, if_pos hr]
+  change QBox.Overlaps
+    { lo := { re := r * ((z.compute n).lo.re + (w.compute n).lo.re),
+              im := r * ((z.compute n).lo.im + (w.compute n).lo.im) },
+      hi := { re := r * ((z.compute n).hi.re + (w.compute n).hi.re),
+              im := r * ((z.compute n).hi.im + (w.compute n).hi.im) } }
+    { lo := { re := r * (z.compute n).lo.re + r * (w.compute n).lo.re,
+              im := r * (z.compute n).lo.im + r * (w.compute n).lo.im },
+      hi := { re := r * (z.compute n).hi.re + r * (w.compute n).hi.re,
+              im := r * (z.compute n).hi.im + r * (w.compute n).hi.im } }
+  unfold QBox.Overlaps
+  have hsum_re : (z.compute n).lo.re + (w.compute n).lo.re ≤
+      (z.compute n).hi.re + (w.compute n).hi.re := by
+    grind
+  have hsum_im : (z.compute n).lo.im + (w.compute n).lo.im ≤
+      (z.compute n).hi.im + (w.compute n).hi.im := by
+    grind
+  have hscaled_re := Rat.mul_le_mul_of_nonneg_left hsum_re hr
+  have hscaled_im := Rat.mul_le_mul_of_nonneg_left hsum_im hr
+  constructor <;> constructor <;> grind [Rat.mul_add]
+
 def FunctionRaw.zero : FunctionRaw where
   domain := fun _ => True
   compute := fun _ _ _ => QBox.zero
@@ -2282,6 +2331,22 @@ def FunctionRaw.scaleRat (r : Rat) (f : FunctionRaw) : FunctionRaw where
   domain := f.domain
   compute := fun z hz n => QBox.scaleRat r (f.compute z hz n)
 
+theorem FunctionRaw.scaleRat_add_agreeOnCommonDomain_of_nonneg
+    {r : Rat} (hr : 0 <= r) {f g : FunctionRaw}
+    (hf : f.Valid) (hg : g.Valid) :
+    (FunctionRaw.scaleRat r (FunctionRaw.add f g)).AgreeOnCommonDomain
+      (FunctionRaw.add (FunctionRaw.scaleRat r f)
+        (FunctionRaw.scaleRat r g)) := by
+  intro z hleft hright
+  change (ComplexRaw.scaleRat r
+      (ComplexRaw.add (f.evalRaw z hleft.1)
+        (g.evalRaw z hleft.2))).Equiv
+    (ComplexRaw.add
+      (ComplexRaw.scaleRat r (f.evalRaw z hright.1))
+      (ComplexRaw.scaleRat r (g.evalRaw z hright.2)))
+  exact effectiveComplexRaw_scaleRat_add_equiv_of_nonneg r hr
+    (hf z hleft.1) (hg z hleft.2)
+
 theorem FunctionRaw.scaleRat_valid_of_nonneg
     {r : Rat} (hr : 0 <= r) {f : FunctionRaw} (hf : f.Valid) :
     (FunctionRaw.scaleRat r f).Valid := by
@@ -2468,6 +2533,17 @@ def ComplexFunction.scaleRat (r : Rat) (f : ComplexFunction) : ComplexFunction :
   ComplexFunction.ofRaw
     (FunctionRaw.scaleRat r f.preferred)
     (FunctionRaw.scaleRat_valid f.valid)
+
+theorem ComplexFunction.scaleRat_add_representation_agrees_preferred_of_nonneg
+    (r : Rat) (hr : 0 <= r) (f g : ComplexFunction) :
+    ((ComplexFunction.scaleRat r (ComplexFunction.add f g)).preferred).AgreeOnCommonDomain
+      ((ComplexFunction.add (ComplexFunction.scaleRat r f)
+        (ComplexFunction.scaleRat r g)).preferred) := by
+  change (FunctionRaw.scaleRat r (FunctionRaw.add f.preferred g.preferred)).AgreeOnCommonDomain
+    (FunctionRaw.add (FunctionRaw.scaleRat r f.preferred)
+      (FunctionRaw.scaleRat r g.preferred))
+  exact FunctionRaw.scaleRat_add_agreeOnCommonDomain_of_nonneg hr
+    f.valid g.valid
 
 def ComplexFunction.sub (f g : ComplexFunction) : ComplexFunction :=
   ComplexFunction.ofRaw

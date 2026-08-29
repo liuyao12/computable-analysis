@@ -519,6 +519,14 @@ Commutativity and associativity are proved in the same form.  They justify
 reordering and regrouping finite complex sums while retaining each evaluator
 and its domain proofs explicitly.
 
+Nonnegative rational scaling distributes over addition by coordinatewise box
+arithmetic.  This is the finite algebraic rule behind factoring coefficients
+in Taylor and Fourier prefixes; signed coefficients continue to use the
+explicit negation transport.
+
+\lean{ComputableAnalysis.effectiveComplexRaw_scaleRat_add_equiv_of_nonneg}
+\lean{ComputableAnalysis.FunctionRaw.scaleRat_add_agreeOnCommonDomain_of_nonneg}
+
 Finite linear combinations use a single recursive constructor.  The empty
 sum is the everywhere-defined zero computation; a nonempty sum intersects
 domains and applies the certified binary addition.  Thus every finite series
@@ -582,6 +590,7 @@ rational-box computations.
 \lean{ComputableAnalysis.ComplexFunction.add_zero_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.add_comm_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.add_assoc_representation_agrees_preferred}
+\lean{ComputableAnalysis.ComplexFunction.scaleRat_add_representation_agrees_preferred_of_nonneg}
 \lean{ComputableAnalysis.ComplexFunction.neg}
 \lean{ComputableAnalysis.ComplexFunction.scaleRat}
 \lean{ComputableAnalysis.ComplexFunction.sub}
