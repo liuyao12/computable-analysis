@@ -2059,6 +2059,46 @@ theorem FunctionRaw.sum_valid
     exact FunctionRaw.add_valid (hfs f (by simp))
       (ih (fun g hg => hfs g (by simp [hg])))
 
+theorem FunctionRaw.zero_agreeOnCommonDomain :
+    FunctionRaw.zero.AgreeOnCommonDomain FunctionRaw.zero := by
+  intro z _ _
+  exact ComplexRaw.equiv_refl ComplexRaw.zero
+    (ComplexRaw.ofQComplex_valid QComplex.zero)
+
+def FunctionRaw.AgreeList : List FunctionRaw → List FunctionRaw → Prop
+  | [], [] => True
+  | f :: fs, g :: gs =>
+      f.AgreeOnCommonDomain g ∧ FunctionRaw.AgreeList fs gs
+  | _, _ => False
+
+theorem FunctionRaw.sum_agreeOnCommonDomain
+    {fs gs : List FunctionRaw}
+    (hfs : ∀ f, f ∈ fs → f.Valid)
+    (hgs : ∀ g, g ∈ gs → g.Valid)
+    (hpair : FunctionRaw.AgreeList fs gs) :
+    (FunctionRaw.sum fs).AgreeOnCommonDomain
+      (FunctionRaw.sum gs) := by
+  induction fs generalizing gs with
+  | nil =>
+    cases gs with
+    | nil => exact FunctionRaw.zero_agreeOnCommonDomain
+    | cons g gs => simp [FunctionRaw.AgreeList] at hpair
+  | cons f fs ih =>
+    cases gs with
+    | nil => simp [FunctionRaw.AgreeList] at hpair
+    | cons g gs =>
+      rcases hpair with ⟨hfg, htail⟩
+      exact FunctionRaw.add_agreeOnCommonDomain
+        (hfs f (by simp))
+        (hgs g (by simp))
+        (FunctionRaw.sum_valid fs (fun x hx => hfs x (by simp [hx])))
+        (FunctionRaw.sum_valid gs (fun x hx => hgs x (by simp [hx])))
+        hfg
+        (ih
+          (fun x hx => hfs x (by simp [hx]))
+          (fun x hx => hgs x (by simp [hx]))
+          htail)
+
 def FunctionRaw.neg (f : FunctionRaw) : FunctionRaw where
   domain := f.domain
   compute := fun z hz n => QBox.neg (f.compute z hz n)

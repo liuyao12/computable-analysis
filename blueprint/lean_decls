@@ -4972,6 +4972,9 @@ ComputableAnalysis.FunctionRaw.zero
 ComputableAnalysis.FunctionRaw.zero_valid
 ComputableAnalysis.FunctionRaw.sum
 ComputableAnalysis.FunctionRaw.sum_valid
+ComputableAnalysis.FunctionRaw.AgreeList
+ComputableAnalysis.FunctionRaw.zero_agreeOnCommonDomain
+ComputableAnalysis.FunctionRaw.sum_agreeOnCommonDomain
 ComputableAnalysis.effectiveComplexRaw_neg_equiv
 ComputableAnalysis.FunctionRaw.neg
 ComputableAnalysis.FunctionRaw.neg_valid
