@@ -500,16 +500,19 @@ by complex special functions and Fourier constructions.
 \lean{ComputableAnalysis.effectiveComplexRaw_mul_zero_equiv}
 \lean{ComputableAnalysis.effectiveComplexRaw_zero_mul_equiv}
 \lean{ComputableAnalysis.effectiveComplexRaw_mul_comm_equiv}
+\lean{ComputableAnalysis.effectiveComplexRaw_mul_assoc_equiv}
 \lean{ComputableAnalysis.FunctionRaw.mul_one_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.one_mul_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.mul_zero_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.zero_mul_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.mul_comm_agreeOnCommonDomain}
+\lean{ComputableAnalysis.FunctionRaw.mul_assoc_agreeOnCommonDomain}
 \lean{ComputableAnalysis.ComplexFunction.mul_one_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.one_mul_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.mul_zero_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.zero_mul_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.mul_comm_representation_agrees_preferred}
+\lean{ComputableAnalysis.ComplexFunction.mul_assoc_representation_agrees_preferred}
 \leanok
 
 The corresponding zero laws are proved by the same four-corner calculation:
@@ -522,6 +525,12 @@ Commutativity is likewise an overlap theorem, not a definitional rewrite:
 the two four-corner products enumerate the same rational products in a
 different order.  This is enough to reorder certified finite products while
 preserving their explicit evaluators.
+
+Associativity is obtained by choosing rational centers inside the three input
+boxes.  Both parenthesizations contain the same finite complex product by
+the box soundness theorem, so they overlap even though their computed boxes
+need not be definitionally equal.  This is the reassociation rule needed by
+Horner evaluation and finite power-series prefixes.
 
 Addition is closed by the same finite box argument, completing the basic
 complex linear-combination operations used by series prefixes.
