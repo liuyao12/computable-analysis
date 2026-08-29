@@ -726,6 +726,16 @@ theorem effectiveFiniteFourierSampleInnerProduct_scale
   exact finiteFourierSampleInnerProduct_scale root length mode r sample₀ sample
     hsample
 
+theorem effectiveFiniteFourierSampleInnerProduct_conj
+    (root : QComplex) (length mode : Nat)
+    (sample₀ sample : Nat → QComplex)
+    (hsample : ∀ k, sample k = QComplex.conj (sample₀ k)) :
+    finiteFourierSampleInnerProduct (QComplex.conj root) length mode sample =
+      QComplex.conj
+        (finiteFourierSampleInnerProduct root length mode sample₀) := by
+  exact finiteFourierSampleInnerProduct_conj root length mode sample₀ sample
+    hsample
+
 /-! Public finite multiple-integral bridge.  An outer right sum of inner
 left sums is exactly the complementary one-dimensional rectangle sum. -/
 theorem effectiveUniformTriangleRightSum_eq_complementUniformLeftEndpointSum
