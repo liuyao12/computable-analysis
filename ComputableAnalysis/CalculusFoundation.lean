@@ -2240,6 +2240,32 @@ theorem effectiveMulRealInterval_zero {a b : Rat} :
   unfold QBox.mulRealInterval min4 max4 minRat maxRat2
   simp
 
+theorem effectiveMulRealInterval_zero_left {a b : Rat} :
+    QBox.mulRealInterval 0 0 a b = ({ lo := 0, hi := 0 } : QInterval) := by
+  unfold QBox.mulRealInterval min4 max4 minRat maxRat2
+  simp
+
+theorem effectiveMulRealInterval_one_left_overlap {a b : Rat} (hab : a <= b) :
+    QInterval.Overlaps
+      (QBox.mulRealInterval 1 1 a b)
+      ({ lo := a, hi := b } : QInterval) := by
+  by_cases ha : 0 <= a
+  · have heq := QBox.mulRealInterval_of_nonneg
+      (by native_decide : (0 : Rat) <= 1)
+      (by native_decide : (1 : Rat) <= 1) ha hab
+    rw [heq]
+    simp [QInterval.Overlaps]
+    exact hab
+  · have hault : a < 0 := by grind
+    by_cases hb : b <= 0
+    · unfold QBox.mulRealInterval min4 max4 minRat maxRat2
+      simp only [QInterval.Overlaps]
+      constructor <;> grind
+    · have hbpos : 0 < b := by grind
+      unfold QBox.mulRealInterval min4 max4 minRat maxRat2
+      simp only [QInterval.Overlaps]
+      constructor <;> grind
+
 theorem effectiveComplexRaw_mul_one_equiv {z : ComplexRaw} (hz : z.Valid) :
     (ComplexRaw.mul z ComplexRaw.one).Equiv z := by
   intro n
@@ -2280,6 +2306,50 @@ theorem effectiveComplexRaw_mul_one_equiv {z : ComplexRaw} (hz : z.Valid) :
   have hreal_hi := hreal'.2
   have himag_lo := himag'.1
   have himag_hi := himag'.2
+  constructor <;> constructor <;> grind
+
+theorem effectiveComplexRaw_one_mul_equiv {z : ComplexRaw} (hz : z.Valid) :
+    (ComplexRaw.mul ComplexRaw.one z).Equiv z := by
+  intro n
+  have hzre : (z.compute n).lo.re ≤ (z.compute n).hi.re := by
+    have h := (hz.1 n).1
+    unfold QBox.width at h
+    grind [Rat.sub_eq_add_neg]
+  have hzim : (z.compute n).lo.im ≤ (z.compute n).hi.im := by
+    have h := (hz.1 n).2
+    unfold QBox.height at h
+    grind [Rat.sub_eq_add_neg]
+  have hreal0 := effectiveMulRealInterval_one_left_overlap hzre
+  have himag0 := effectiveMulRealInterval_one_left_overlap hzim
+  have hreal :
+      (QBox.mulRealInterval 1 1 (z.compute n).lo.re
+        (z.compute n).hi.re).lo ≤ (z.compute n).hi.re /\
+      (z.compute n).lo.re ≤
+        (QBox.mulRealInterval 1 1 (z.compute n).lo.re
+          (z.compute n).hi.re).hi := by
+    simpa [QInterval.Overlaps] using hreal0
+  have himag :
+      (QBox.mulRealInterval 1 1 (z.compute n).lo.im
+        (z.compute n).hi.im).lo ≤ (z.compute n).hi.im /\
+      (z.compute n).lo.im ≤
+        (QBox.mulRealInterval 1 1 (z.compute n).lo.im
+          (z.compute n).hi.im).hi := by
+    simpa [QInterval.Overlaps] using himag0
+  have hzeroRe := effectiveMulRealInterval_zero_left
+      (a := (z.compute n).lo.im) (b := (z.compute n).hi.im)
+  have hzeroIm := effectiveMulRealInterval_zero_left
+      (a := (z.compute n).lo.re) (b := (z.compute n).hi.re)
+  apply (ComplexRaw.compareAt_overlap_iff
+    (ComplexRaw.mul ComplexRaw.one z) z n n).2
+  change QBox.Overlaps
+    (QBox.mul (QBox.point QComplex.one) (z.compute n)) (z.compute n)
+  simp [QBox.mul, QBox.point, QComplex.one, hzeroRe, hzeroIm]
+  unfold QBox.Overlaps
+  simp only [QComplex.le_def]
+  have hreal_lo := hreal.1
+  have hreal_hi := hreal.2
+  have himag_lo := himag.1
+  have himag_hi := himag.2
   constructor <;> constructor <;> grind
 
 /-! Negation is the interval-reversing operation needed to assemble signed
@@ -2955,6 +3025,15 @@ theorem FunctionRaw.mul_one_agreeOnCommonDomain
     (f.evalRaw z hright)
   exact effectiveComplexRaw_mul_one_equiv (hf z hleft.1)
 
+theorem FunctionRaw.one_mul_agreeOnCommonDomain
+    {f : FunctionRaw} (hf : f.Valid) :
+    (FunctionRaw.mul FunctionRaw.one f).AgreeOnCommonDomain f := by
+  intro z hleft hright
+  change (ComplexRaw.mul (FunctionRaw.one.evalRaw z hleft.1)
+      (f.evalRaw z hleft.2)).Equiv
+    (f.evalRaw z hright)
+  exact effectiveComplexRaw_one_mul_equiv (hf z hleft.2)
+
 /-! The abstract complex-function API exposes the certified product only
 after the raw product closure has been established.  This keeps the handle
 layer honest: multiplication carries the intersection domain and inherits
@@ -2971,6 +3050,14 @@ theorem ComplexFunction.mul_one_representation_agrees_preferred
   change (FunctionRaw.mul f.preferred FunctionRaw.one).AgreeOnCommonDomain
     f.preferred
   exact FunctionRaw.mul_one_agreeOnCommonDomain f.valid
+
+theorem ComplexFunction.one_mul_representation_agrees_preferred
+    (f : ComplexFunction) :
+    ((ComplexFunction.mul ComplexFunction.one f).preferred).AgreeOnCommonDomain
+      f.preferred := by
+  change (FunctionRaw.mul FunctionRaw.one f.preferred).AgreeOnCommonDomain
+    f.preferred
+  exact FunctionRaw.one_mul_agreeOnCommonDomain f.valid
 
 theorem ComplexFunction.mul_representation_agrees_preferred
     {f g : ComplexFunction}
