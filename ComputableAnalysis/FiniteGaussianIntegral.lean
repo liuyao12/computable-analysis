@@ -848,6 +848,17 @@ theorem reciprocalSquareTailPartial_le_inv_cutoff
       (Rat.le_of_lt ((Rat.inv_pos).2 hpos))
   grind [Rat.sub_eq_add_neg]
 
+theorem reciprocalSquareTailPartial_reaches_of_positive_tolerance
+    (eps : QPos) (terms : Nat) :
+    reciprocalSquareTailPartial (eps.val.den + 1 : Nat) terms <= eps.val := by
+  have hcutoff : 0 < ((eps.val.den + 1 : Nat) : Rat) := by
+    exact (Rat.natCast_pos).2 (Nat.succ_pos eps.val.den)
+  calc
+    reciprocalSquareTailPartial (eps.val.den + 1 : Nat) terms <=
+        1 / ((eps.val.den + 1 : Nat) : Rat) :=
+      reciprocalSquareTailPartial_le_inv_cutoff hcutoff terms
+    _ <= eps.val := one_div_den_succ_le_of_pos eps.property
+
 theorem reciprocalSquareTailPartial_succ (cutoff : Rat) (terms : Nat) :
     reciprocalSquareTailPartial cutoff (terms + 1) =
       reciprocalSquareTailPartial cutoff terms +
