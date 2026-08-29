@@ -2017,6 +2017,35 @@ theorem FunctionRaw.add_agreeOnCommonDomain
     (hff z hleft.1 hright.1)
     (hgg z hleft.2 hright.2)
 
+/-! Nonnegative rational scaling is the order-preserving scalar operation on
+complex raw functions.  Negative scaling is intentionally assembled from
+negation plus this primitive, so interval reversal stays explicit. -/
+def FunctionRaw.scaleRat (r : Rat) (f : FunctionRaw) : FunctionRaw where
+  domain := f.domain
+  compute := fun z hz n => QBox.scaleRat r (f.compute z hz n)
+
+theorem FunctionRaw.scaleRat_valid_of_nonneg
+    {r : Rat} (hr : 0 <= r) {f : FunctionRaw} (hf : f.Valid) :
+    (FunctionRaw.scaleRat r f).Valid := by
+  intro z hz
+  have hscaled : (ComplexRaw.scaleRat r (f.evalRaw z hz)).Valid :=
+    ComplexRaw.scaleRat_valid_of_nonneg hr (hf z hz)
+  change (ComplexRaw.scaleRat r (f.evalRaw z hz)).Valid at hscaled
+  change (ComplexRaw.scaleRat r (f.evalRaw z hz)).Valid
+  exact hscaled
+
+theorem FunctionRaw.scaleRat_agreeOnCommonDomain_of_nonneg
+    {r : Rat} (hr : 0 <= r)
+    {f g : FunctionRaw}
+    (hfg : f.AgreeOnCommonDomain g) :
+    (FunctionRaw.scaleRat r f).AgreeOnCommonDomain
+      (FunctionRaw.scaleRat r g) := by
+  intro z hfz hgz
+  change (ComplexRaw.scaleRat r (f.evalRaw z hfz)).Equiv
+    (ComplexRaw.scaleRat r (g.evalRaw z hgz))
+  exact ComplexRaw.scaleRat_equiv_of_nonneg hr
+    (hfg z hfz hgz)
+
 /-! Function-level representation equivalence records the same domain and a
 pointwise raw-real equivalence.  This is the lightweight bridge needed when a
 later proof switches between two certified implementations of one function. -/
