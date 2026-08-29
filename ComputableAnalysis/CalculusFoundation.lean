@@ -680,6 +680,31 @@ theorem effectiveIntervalRegularDarbouxScheduleRaw_precision_witness
       ((Integral.intervalRegularDarbouxScheduleRaw s).compute n).width <= eps.val := by
   exact Integral.intervalRegularDarbouxScheduleRaw_precision_witness s eps
 
+/-! The arbitrary-power monomial FTC family is exposed as one public theorem:
+the dyadic integral of `x^k` on the unit interval agrees with the rational
+endpoint value `1 / (k + 1)`. -/
+theorem effectiveExactRatPowIntegral_equiv_one_div_succ (k : Nat) :
+    (Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ k) 0 1)
+      (Integral.exactRat_pow_integral_certificate k)).Equiv
+      (RealRaw.ofRat (1 / ((k + 1 : Nat) : Rat))) := by
+  exact Integral.exactRat_pow_integral_raw_equiv_one_div_succ k
+
+theorem effectiveExactRatPowIntegral_equiv_pow_endpoint (k : Nat) :
+    (Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ k) 0 1)
+      (Integral.exactRat_pow_integral_certificate k)).Equiv
+      (endpointDifferenceRaw
+        (Integral.powPrimitiveOnUnit k).toRealFunRaw 0 1
+        (Integral.powPrimitiveOnUnit_endpoint_valid k)) := by
+  exact Integral.exactRat_pow_integral_raw_equiv_pow_endpoint k
+
+def effectiveExactRatPow_definiteIdentity (k : Nat) :
+    Integral.DefiniteIdentityFor
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ k) 0 1)
+      (Integral.powPrimitiveOnUnit k) := by
+  exact Integral.exactRat_pow_definiteIdentity k
+
 /-! Public finite multiple-integral bridge.  An outer right sum of inner
 left sums is exactly the complementary one-dimensional rectangle sum. -/
 theorem effectiveUniformTriangleRightSum_eq_complementUniformLeftEndpointSum
