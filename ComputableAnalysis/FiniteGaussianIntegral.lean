@@ -227,6 +227,201 @@ theorem gaussianEvenIntegralTerm_abs_eq_scaled_factorialTailTerm
   rw [Rat.div_def, Rat.div_def]
   grind [Rat.mul_assoc, Rat.mul_comm]
 
+theorem gaussianEvenIntegralTerm_abs_decreasing
+    {radius : Rat} (hr : 0 <= radius) (hradiusSq : radius * radius <= 1)
+    (k : Nat) :
+    qabs (gaussianEvenIntegralTerm (k + 1) radius) <=
+      qabs (gaussianEvenIntegralTerm k radius) := by
+  rw [gaussianEvenIntegralTerm_abs_eq_scaled_factorialTailTerm hr,
+    gaussianEvenIntegralTerm_abs_eq_scaled_factorialTailTerm hr,
+    RationalMajorant.factorialTailTerm_succ]
+  let C : Rat := radius * radius
+  let T : Rat := RationalMajorant.factorialTailTerm C k
+  let d₁ : Rat := ((2 * k + 1 : Nat) : Rat)
+  let d₂ : Rat := ((2 * (k + 1) + 1 : Nat) : Rat)
+  have hC : 0 <= C := by
+    dsimp [C]
+    exact Rat.mul_nonneg hr hr
+  have hT : 0 <= T := by
+    dsimp [T]
+    exact RationalMajorant.factorialTailTerm_nonneg hC k
+  have hscale : 0 <= 2 * radius :=
+    Rat.mul_nonneg (by native_decide : (0 : Rat) <= 2) hr
+  have hd₁ : 0 < d₁ := by
+    dsimp [d₁]
+    exact (Rat.natCast_pos).2 (by omega)
+  have hd₂ : 0 < d₂ := by
+    dsimp [d₂]
+    exact (Rat.natCast_pos).2 (by omega)
+  have hratio : C / ((k + 1 : Nat) : Rat) <= 1 := by
+    apply Rat.le_of_mul_le_mul_right (c := ((k + 1 : Nat) : Rat))
+    · rw [Rat.div_def, Rat.mul_assoc,
+        Rat.inv_mul_cancel _ (Rat.ne_of_gt (by exact_mod_cast (Nat.succ_pos k)))]
+      calc
+        C * 1 = C := by simp
+        _ <= 1 := by simpa [C] using hradiusSq
+        _ <= ((k + 1 : Nat) : Rat) := by exact_mod_cast (by omega)
+        _ = 1 * ((k + 1 : Nat) : Rat) := by simp
+    · exact (Rat.natCast_pos).2 (Nat.succ_pos k)
+  have hden : d₂⁻¹ <= d₁⁻¹ := by
+    apply Rat.le_of_mul_le_mul_right (c := d₁ * d₂)
+    · calc
+        d₂⁻¹ * (d₁ * d₂) = d₁ := by
+          rw [show d₂⁻¹ * (d₁ * d₂) = d₁ * (d₂⁻¹ * d₂) by
+            grind [Rat.mul_assoc, Rat.mul_comm]]
+          rw [Rat.inv_mul_cancel d₂ (Rat.ne_of_gt hd₂)]
+          simp
+        _ <= d₂ := by
+          dsimp [d₁, d₂]
+          exact_mod_cast (by omega)
+        _ = d₁⁻¹ * (d₁ * d₂) := by
+          rw [show d₁⁻¹ * (d₁ * d₂) = d₂ * (d₁⁻¹ * d₁) by
+            grind [Rat.mul_assoc, Rat.mul_comm]]
+          rw [Rat.inv_mul_cancel d₁ (Rat.ne_of_gt hd₁)]
+          simp
+    · exact Rat.mul_pos hd₁ hd₂
+  have hfirst : T * (C / ((k + 1 : Nat) : Rat)) <= T := by
+    calc
+      T * (C / ((k + 1 : Nat) : Rat)) <= T * 1 :=
+        Rat.mul_le_mul_of_nonneg_left hratio hT
+      _ = T := by simp
+  have hsecond : 2 * radius * T / d₂ <= 2 * radius * T / d₁ := by
+    rw [Rat.div_def, Rat.div_def]
+    exact Rat.mul_le_mul_of_nonneg_left hden
+      (Rat.mul_nonneg hscale hT)
+  calc
+    2 * radius * (T * (C / ((k + 1 : Nat) : Rat))) / d₂ <=
+        2 * radius * T / d₂ := by
+      rw [Rat.div_def, Rat.div_def]
+      apply Rat.mul_le_mul_of_nonneg_right
+      · exact Rat.mul_le_mul_of_nonneg_left hfirst hscale
+      · exact Rat.le_of_lt ((Rat.inv_pos).2 hd₂)
+    _ <= 2 * radius * T / d₁ := hsecond
+
+theorem gaussianEvenIntegralTerm_abs_shrinks_unit_radius
+    {radius : Rat} (hr : 0 <= radius) (hradius : radius <= 1)
+    (hradiusSq : radius * radius <= 1) :
+    ShrinksToZero (fun k => qabs (gaussianEvenIntegralTerm k radius)) := by
+  intro eps
+  let C : Rat := radius * radius
+  let start : Nat := RationalMajorant.factorialTailStart C
+  let half : QPos := ⟨eps.val / 2, by
+    rw [Rat.div_def]
+    exact Rat.mul_pos eps.property
+      ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))⟩
+  let shift : Nat := RationalMajorant.halfDecayShift
+    (2 * RationalMajorant.factorialTailTerm C start) half
+  refine ⟨start + shift, ?_⟩
+  intro k hk
+  obtain ⟨d, hd⟩ := Nat.exists_eq_add_of_le hk
+  have hC : 0 <= C := by
+    dsimp [C]
+    exact Rat.mul_nonneg hr hr
+  have hstart := RationalMajorant.factorialTailStart_satisfies C
+  have hgeom := RationalMajorant.factorialTailTerm_le_geometric_from_start
+    hC hstart (shift + d)
+  have hpow : ((1 : Rat) / 2) ^ (shift + d) <=
+      ((1 : Rat) / 2) ^ shift :=
+    Series.halfPow_add_le_left shift d
+  have hbound : RationalMajorant.factorialTailTerm C start *
+      ((1 : Rat) / 2) ^ shift <= half.val := by
+    have hspec := RationalMajorant.halfDecayShift_spec
+      (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 2)
+        (RationalMajorant.factorialTailTerm_nonneg hC start)) half
+    have hsmall : RationalMajorant.factorialTailTerm C start *
+        ((1 : Rat) / 2) ^ shift <=
+        2 * RationalMajorant.factorialTailTerm C start *
+          ((1 : Rat) / 2) ^ shift := by
+      exact Rat.mul_le_mul_of_nonneg_right
+        (by grind [RationalMajorant.factorialTailTerm_nonneg hC start])
+        (Rat.pow_nonneg (by native_decide))
+    exact Rat.le_trans hsmall (by simpa [shift] using hspec)
+  have hterm : RationalMajorant.factorialTailTerm C (start + shift + d) <=
+      half.val := by
+    calc
+      RationalMajorant.factorialTailTerm C (start + shift + d) <=
+          RationalMajorant.factorialTailTerm C start *
+            ((1 : Rat) / 2) ^ (shift + d) := by
+        simpa [Nat.add_assoc] using hgeom
+      _ <= RationalMajorant.factorialTailTerm C start *
+          ((1 : Rat) / 2) ^ shift := by
+        exact Rat.mul_le_mul_of_nonneg_left hpow
+          (RationalMajorant.factorialTailTerm_nonneg hC start)
+      _ <= half.val := hbound
+  have hterm' : qabs (gaussianEvenIntegralTerm k radius) <= eps.val := by
+    rw [gaussianEvenIntegralTerm_abs_eq_scaled_factorialTailTerm hr]
+    have hden : 0 <= ((2 * k + 1 : Nat) : Rat)⁻¹ := by
+      exact Rat.le_of_lt ((Rat.inv_pos).2 (by grind))
+    have hCk : 0 <= RationalMajorant.factorialTailTerm C k :=
+      RationalMajorant.factorialTailTerm_nonneg hC k
+    have hfactorial_k : RationalMajorant.factorialTailTerm C k <= half.val := by
+      simpa [C, start, shift, hd, Nat.add_assoc] using hterm
+    have hscaled := Rat.mul_le_mul_of_nonneg_left hfactorial_k
+      (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 2) hr)
+    have hrad := Rat.mul_le_mul_of_nonneg_left hradius
+      (RationalMajorant.factorialTailTerm_nonneg hC k)
+    have hfinal : 2 * radius *
+        RationalMajorant.factorialTailTerm C k <=
+        2 * RationalMajorant.factorialTailTerm C k := by
+      have htwo := Rat.mul_le_mul_of_nonneg_left hrad
+        (by native_decide : (0 : Rat) <= 2)
+      have htwo' : 2 * (radius *
+          RationalMajorant.factorialTailTerm C k) <=
+          2 * RationalMajorant.factorialTailTerm C k := by
+        calc
+          2 * (radius * RationalMajorant.factorialTailTerm C k) =
+              2 * (RationalMajorant.factorialTailTerm C k * radius) := by
+                grind [Rat.mul_comm]
+          _ <= 2 * (RationalMajorant.factorialTailTerm C k * 1) := htwo
+          _ = 2 * RationalMajorant.factorialTailTerm C k := by simp
+      calc
+        2 * radius * RationalMajorant.factorialTailTerm C k =
+            radius * (2 * RationalMajorant.factorialTailTerm C k) := by
+              grind [Rat.mul_assoc, Rat.mul_comm]
+        _ = 2 * (radius * RationalMajorant.factorialTailTerm C k) := by
+              grind [Rat.mul_assoc, Rat.mul_comm]
+        _ <= 2 * RationalMajorant.factorialTailTerm C k := htwo'
+    have hdenle : 2 * radius *
+        RationalMajorant.factorialTailTerm C k /
+          ((2 * k + 1 : Nat) : Rat) <=
+        2 * radius * RationalMajorant.factorialTailTerm C k := by
+      have hX : 0 <= 2 * radius *
+          RationalMajorant.factorialTailTerm C k :=
+        Rat.mul_nonneg
+          (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 2) hr) hCk
+      have hdge : 1 <= ((2 * k + 1 : Nat) : Rat) := by grind
+      apply Rat.le_of_mul_le_mul_right
+        (c := ((2 * k + 1 : Nat) : Rat))
+      · rw [Rat.div_def, Rat.mul_assoc,
+          Rat.inv_mul_cancel _ (Rat.ne_of_gt (by grind)), Rat.mul_one]
+        simpa using Rat.mul_le_mul_of_nonneg_left hdge hX
+      · exact (Rat.natCast_pos).2 (by omega)
+    have hhalf : 2 * half.val = eps.val := by
+      dsimp [half]
+      rw [Rat.div_def]
+      grind
+    have hscaled2 := Rat.mul_le_mul_of_nonneg_left hfactorial_k
+      (by native_decide : (0 : Rat) <= 2)
+    rw [hhalf] at hscaled2
+    exact Rat.le_trans hdenle (Rat.le_trans hfinal hscaled2)
+  exact hterm'
+
+/- The bounded Gaussian is now a certified alternating `RealRaw`: all proof
+   obligations are discharged by the preceding rational ratio and factorial
+   modulus lemmas. -/
+def gaussianEvenIntegralUnitRadiusAlternatingRaw
+    {radius : Rat} (hr : 0 <= radius) (hradius : radius <= 1)
+    (hradiusSq : radius * radius <= 1) : Series.AlternatingRaw :=
+  gaussianEvenIntegralAlternatingRaw radius
+    (fun k => gaussianEvenIntegralTerm_abs_decreasing hr hradiusSq k)
+    (gaussianEvenIntegralTerm_abs_shrinks_unit_radius hr hradius hradiusSq)
+
+theorem gaussianEvenIntegralUnitRadiusAlternatingRaw_valid
+    {radius : Rat} (hr : 0 <= radius) (hradius : radius <= 1)
+    (hradiusSq : radius * radius <= 1) :
+    (gaussianEvenIntegralUnitRadiusAlternatingRaw hr hradius hradiusSq).toRealRaw.Valid := by
+  exact (gaussianEvenIntegralUnitRadiusAlternatingRaw hr hradius hradiusSq).toRealRaw_valid
+
 def gaussianEvenIntegralTailMajorant (radius : Rat) (start : Nat) : Nat → Rat
   | 0 => 0
   | terms + 1 =>
