@@ -2096,8 +2096,8 @@ theorem FunctionRaw.sum_agreeOnCommonDomain
         hfg
         (ih
           (fun x hx => hfs x (by simp [hx]))
-          (fun x hx => hgs x (by simp [hx]))
-          htail)
+            (fun x hx => hgs x (by simp [hx]))
+            htail)
 
 def FunctionRaw.neg (f : FunctionRaw) : FunctionRaw where
   domain := f.domain
@@ -2218,6 +2218,20 @@ theorem FunctionRaw.scaleRat_agreeOnCommonDomain
     (ComplexRaw.scaleRat r (g.evalRaw z hgz))
   exact effectiveComplexRaw_scaleRat_equiv (hfg z hfz hgz)
 
+def FunctionRaw.linearCombination : List (Rat × FunctionRaw) → FunctionRaw :=
+  fun terms =>
+    FunctionRaw.sum
+      (terms.map (fun term => FunctionRaw.scaleRat term.1 term.2))
+
+theorem FunctionRaw.linearCombination_valid
+    (terms : List (Rat × FunctionRaw))
+    (hterms : ∀ term, term ∈ terms → term.2.Valid) :
+    (FunctionRaw.linearCombination terms).Valid := by
+  apply FunctionRaw.sum_valid
+  intro f hf
+  obtain ⟨term, hterm, rfl⟩ := List.mem_map.mp hf
+  exact FunctionRaw.scaleRat_valid (hterms term hterm)
+
 /-! Subtraction is assembled from the already certified addition and
 negation operations.  No separate interval-arithmetic theorem is needed. -/
 def FunctionRaw.sub (f g : FunctionRaw) : FunctionRaw :=
@@ -2278,6 +2292,16 @@ def ComplexFunction.sum (fs : List ComplexFunction) : ComplexFunction :=
       intro raw hraw
       obtain ⟨f, hf, rfl⟩ := List.mem_map.mp hraw
       exact f.valid))
+
+def ComplexFunction.linearCombination
+    (terms : List (Rat × ComplexFunction)) : ComplexFunction :=
+  ComplexFunction.ofRaw
+    (FunctionRaw.linearCombination
+      (terms.map (fun term => (term.1, term.2.preferred))))
+    (FunctionRaw.linearCombination_valid _ (by
+      intro term hterm
+      obtain ⟨original, horiginal, rfl⟩ := List.mem_map.mp hterm
+      exact original.2.valid))
 
 /-! Function-level representation equivalence records the same domain and a
 pointwise raw-real equivalence.  This is the lightweight bridge needed when a
