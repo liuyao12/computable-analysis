@@ -4993,6 +4993,7 @@ ComputableAnalysis.ComplexFunction.add
 ComputableAnalysis.ComplexFunction.neg
 ComputableAnalysis.ComplexFunction.scaleRat
 ComputableAnalysis.ComplexFunction.sub
+ComputableAnalysis.ComplexFunction.sum
 ComputableAnalysis.RealRaw.mul_valid
 ComputableAnalysis.RealRaw.mul_equiv
 ComputableAnalysis.FunctionOnInterval.mulOfNonnegBounded

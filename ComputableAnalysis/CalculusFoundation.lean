@@ -2271,6 +2271,14 @@ def ComplexFunction.sub (f g : ComplexFunction) : ComplexFunction :=
     (FunctionRaw.sub f.preferred g.preferred)
     (FunctionRaw.sub_valid f.valid g.valid)
 
+def ComplexFunction.sum (fs : List ComplexFunction) : ComplexFunction :=
+  ComplexFunction.ofRaw
+    (FunctionRaw.sum (fs.map (fun f => f.preferred)))
+    (FunctionRaw.sum_valid _ (by
+      intro raw hraw
+      obtain ⟨f, hf, rfl⟩ := List.mem_map.mp hraw
+      exact f.valid))
+
 /-! Function-level representation equivalence records the same domain and a
 pointwise raw-real equivalence.  This is the lightweight bridge needed when a
 later proof switches between two certified implementations of one function. -/
