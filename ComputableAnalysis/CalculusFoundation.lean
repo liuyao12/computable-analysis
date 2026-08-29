@@ -2265,6 +2265,9 @@ theorem FunctionRaw.sub_agreeOnCommonDomain
 /-! The abstract function handle exposes the same certified operations as its
 preferred raw representative.  Alternative evaluators remain explicit data
 which can be attached with `ComplexFunction.withAlternative`. -/
+def ComplexFunction.zero : ComplexFunction :=
+  ComplexFunction.ofRaw FunctionRaw.zero FunctionRaw.zero_valid
+
 def ComplexFunction.add (f g : ComplexFunction) : ComplexFunction :=
   ComplexFunction.ofRaw
     (FunctionRaw.add f.preferred g.preferred)

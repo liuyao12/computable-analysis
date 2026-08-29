@@ -4990,6 +4990,7 @@ ComputableAnalysis.FunctionRaw.sub
 ComputableAnalysis.FunctionRaw.sub_valid
 ComputableAnalysis.FunctionRaw.sub_agreeOnCommonDomain
 ComputableAnalysis.ComplexFunction.add
+ComputableAnalysis.ComplexFunction.zero
 ComputableAnalysis.ComplexFunction.neg
 ComputableAnalysis.ComplexFunction.scaleRat
 ComputableAnalysis.ComplexFunction.sub
