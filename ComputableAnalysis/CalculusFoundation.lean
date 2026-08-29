@@ -2088,6 +2088,73 @@ theorem FunctionRaw.scaleRat_agreeOnCommonDomain_of_nonneg
   exact ComplexRaw.scaleRat_equiv_of_nonneg hr
     (hfg z hfz hgz)
 
+private theorem effectiveComplexRaw_scaleRat_neg_eq
+    {r : Rat} (hr : r < 0) (z : ComplexRaw) :
+    ∀ n, (ComplexRaw.scaleRat r z).compute n =
+      (ComplexRaw.neg (ComplexRaw.scaleRat (-r) z)).compute n := by
+  cases z with
+  | mk compute rate =>
+    intro n
+    have hrnot : ¬ 0 <= r := by grind
+    have hrpos : 0 <= -r := by grind
+    simp only [ComplexRaw.scaleRat, ComplexRaw.neg, QBox.scaleRat,
+      if_neg hrnot, if_pos hrpos]
+    congr 1 <;> simp [Rat.neg_mul]
+
+theorem effectiveComplexRaw_scaleRat_valid
+    {r : Rat} {z : ComplexRaw} (hz : z.Valid) :
+    (ComplexRaw.scaleRat r z).Valid := by
+  by_cases hr : 0 <= r
+  · exact ComplexRaw.scaleRat_valid_of_nonneg hr hz
+  · have hrlt : r < 0 := by grind
+    have hrnonneg : 0 <= -r := by grind
+    have hcompute := effectiveComplexRaw_scaleRat_neg_eq hrlt z
+    have hneg : (ComplexRaw.neg (ComplexRaw.scaleRat (-r) z)).Valid :=
+      ComplexRaw.neg_valid
+        (ComplexRaw.scaleRat_valid_of_nonneg hrnonneg hz)
+    change ComplexRaw.ValidCompute (ComplexRaw.scaleRat r z).compute
+    rw [funext hcompute]
+    exact hneg
+
+theorem effectiveComplexRaw_scaleRat_equiv
+    {r : Rat} {z w : ComplexRaw} (hzw : z.Equiv w) :
+    (ComplexRaw.scaleRat r z).Equiv (ComplexRaw.scaleRat r w) := by
+  by_cases hr : 0 <= r
+  · exact ComplexRaw.scaleRat_equiv_of_nonneg hr hzw
+  · have hrlt : r < 0 := by grind
+    have hrnonneg : 0 <= -r := by grind
+    have hzcompute := effectiveComplexRaw_scaleRat_neg_eq hrlt z
+    have hwcompute := effectiveComplexRaw_scaleRat_neg_eq hrlt w
+    intro n
+    have hneg := effectiveComplexRaw_neg_equiv
+      (ComplexRaw.scaleRat_equiv_of_nonneg hrnonneg hzw) n
+    change ComplexRaw.compareBoxes
+      ((ComplexRaw.scaleRat r z).compute n)
+      ((ComplexRaw.scaleRat r w).compute n) =
+      ComplexRaw.CompareAt.overlap
+    rw [hzcompute n, hwcompute n]
+    exact hneg
+
+theorem FunctionRaw.scaleRat_valid
+    {r : Rat} {f : FunctionRaw} (hf : f.Valid) :
+    (FunctionRaw.scaleRat r f).Valid := by
+  intro z hz
+  have hscaled : (ComplexRaw.scaleRat r (f.evalRaw z hz)).Valid :=
+    effectiveComplexRaw_scaleRat_valid (hf z hz)
+  change (ComplexRaw.scaleRat r (f.evalRaw z hz)).Valid at hscaled
+  change (ComplexRaw.scaleRat r (f.evalRaw z hz)).Valid
+  exact hscaled
+
+theorem FunctionRaw.scaleRat_agreeOnCommonDomain
+    {r : Rat} {f g : FunctionRaw}
+    (hfg : f.AgreeOnCommonDomain g) :
+    (FunctionRaw.scaleRat r f).AgreeOnCommonDomain
+      (FunctionRaw.scaleRat r g) := by
+  intro z hfz hgz
+  change (ComplexRaw.scaleRat r (f.evalRaw z hfz)).Equiv
+    (ComplexRaw.scaleRat r (g.evalRaw z hgz))
+  exact effectiveComplexRaw_scaleRat_equiv (hfg z hfz hgz)
+
 /-! Function-level representation equivalence records the same domain and a
 pointwise raw-real equivalence.  This is the lightweight bridge needed when a
 later proof switches between two certified implementations of one function. -/

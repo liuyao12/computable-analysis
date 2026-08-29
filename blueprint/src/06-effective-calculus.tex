@@ -519,6 +519,15 @@ operation and the explicit negation above.
 \lean{ComputableAnalysis.FunctionRaw.scaleRat}
 \lean{ComputableAnalysis.FunctionRaw.scaleRat_valid_of_nonneg}
 \lean{ComputableAnalysis.FunctionRaw.scaleRat_agreeOnCommonDomain_of_nonneg}
+The same operation is valid for an arbitrary rational coefficient.  The
+negative branch is reduced to nonnegative scaling followed by the certified
+interval reversal, so the public function API has no hidden ordered-real
+assumption.
+
+\lean{ComputableAnalysis.effectiveComplexRaw_scaleRat_valid}
+\lean{ComputableAnalysis.effectiveComplexRaw_scaleRat_equiv}
+\lean{ComputableAnalysis.FunctionRaw.scaleRat_valid}
+\lean{ComputableAnalysis.FunctionRaw.scaleRat_agreeOnCommonDomain}
 \leanok
 \lean{ComputableAnalysis.RealRaw.mul_valid}
 \lean{ComputableAnalysis.RealRaw.mul_equiv}
