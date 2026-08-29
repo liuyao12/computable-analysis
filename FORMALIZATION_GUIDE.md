@@ -497,6 +497,13 @@ user-facing handles for an L2-style coefficient computation: a finite complex
 prefix plus a rational omitted-energy budget, without measurable functions or
 a completed Hilbert space.
 
+For definite integrals, the corresponding public algebra is
+`effectiveIntegral_add_of_endpoint_additive`,
+`effectiveIntegral_scaleRat_of_endpoint_scaleRat`, and
+`effectiveIntegral_le_of_endpoint_le`.  Each reduces the claimed law to a
+finite endpoint certificate and raw-interval transport; none assumes a
+complete ordered field.
+
 When a Fourier computation has finite support, use
 `finiteSupportFourierSeries_stabilized_equiv`. It proves that the stabilized
 complex raw object is equivalent to the exact rational-complex finite

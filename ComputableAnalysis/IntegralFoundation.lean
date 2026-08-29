@@ -89,4 +89,41 @@ theorem effectiveIntegral_add_of_endpoint_additive
   exact DefiniteIdentityFor.integral_add_equiv_of_endpoint_additive
     Iab Ibc Iac hendpoint
 
+/-! Rational scaling is transported in exactly the same way: the scaled
+integral and the scaled primitive endpoint difference are related by the
+finite certificate, while `RealRaw.scaleRat` performs the representation
+change. -/
+theorem effectiveIntegral_scaleRat_of_endpoint_scaleRat
+    {integrand primitive scaledIntegrand scaledPrimitive : FunctionOnInterval}
+    {r : Rat}
+    (I : DefiniteIdentityFor integrand primitive)
+    (J : DefiniteIdentityFor scaledIntegrand scaledPrimitive)
+    (hendpoint :
+      (endpointDifferenceRaw scaledPrimitive.toRealFunRaw
+        scaledIntegrand.lower scaledIntegrand.upper J.endpoint_valid).Equiv
+        (RealRaw.scaleRat r
+          (endpointDifferenceRaw primitive.toRealFunRaw
+            integrand.lower integrand.upper I.endpoint_valid))) :
+    (Integral.integralFor scaledIntegrand J.construction).Equiv
+      (RealRaw.scaleRat r
+        (Integral.integralFor integrand I.construction)) := by
+  exact DefiniteIdentityFor.integral_scaleRat_equiv_of_endpoint_scaleRat
+    I J hendpoint
+
+/-! Order is likewise an endpoint fact once the two FTC identities are known.
+The result is an order relation between raw interval algorithms, not an
+appeal to an order-complete real field. -/
+theorem effectiveIntegral_le_of_endpoint_le
+    {integrandF primitiveF integrandG primitiveG : FunctionOnInterval}
+    (IF : DefiniteIdentityFor integrandF primitiveF)
+    (IG : DefiniteIdentityFor integrandG primitiveG)
+    (hendpoint :
+      (endpointDifferenceRaw primitiveF.toRealFunRaw
+        integrandF.lower integrandF.upper IF.endpoint_valid).Le
+        (endpointDifferenceRaw primitiveG.toRealFunRaw
+          integrandG.lower integrandG.upper IG.endpoint_valid)) :
+    (Integral.integralFor integrandF IF.construction).Le
+      (Integral.integralFor integrandG IG.construction) := by
+  exact DefiniteIdentityFor.integral_le_of_endpoint_le IF IG hendpoint
+
 end ComputableAnalysis.Integral
