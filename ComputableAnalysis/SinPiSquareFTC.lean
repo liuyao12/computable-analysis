@@ -4271,6 +4271,25 @@ def dyadicPublicSquareIntegralRaw
     (S : ArctanSinPiConstruction) : RealRaw where
   compute := dyadicPublicSquareLeftSum S
 
+/- The square-circle certificate already controls every finite rectangle sum.
+    Since the nested square raw is defined by those same sums, the result is
+    an actual raw-real equivalence; no limit or completeness argument is
+    needed at this transport step. -/
+theorem DyadicSquareCircleOverlapFamily.to_public_equiv_nested
+    {S : ArctanSinPiConstruction}
+    (certificate : DyadicSquareCircleOverlapFamily S) :
+    (dyadicPublicSquareIntegralRaw S).Equiv
+      dyadicNestedRadicalSquareIntegralRaw := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (dyadicPublicSquareIntegralRaw S)
+    dyadicNestedRadicalSquareIntegralRaw n n).2
+  change QInterval.Overlaps
+    (dyadicPublicSquareLeftSum S n)
+    (dyadicNestedRadicalSquareLeftSum n)
+  exact certificate.to_square_sum_overlap n
+
 theorem DyadicPublicSquareTangentTransportWitness.to_public_equiv
     {S : ArctanSinPiConstruction}
     (h : DyadicPublicSquareTangentTransportWitness S) :
