@@ -2200,10 +2200,19 @@ def FunctionRaw.zero : FunctionRaw where
   domain := fun _ => True
   compute := fun _ _ _ => QBox.zero
 
+def FunctionRaw.one : FunctionRaw where
+  domain := fun _ => True
+  compute := fun _ _ _ => QBox.point QComplex.one
+
 theorem FunctionRaw.zero_valid : FunctionRaw.zero.Valid := by
   intro z hz
   change ComplexRaw.zero.Valid
   exact ComplexRaw.ofQComplex_valid QComplex.zero
+
+theorem FunctionRaw.one_valid : FunctionRaw.one.Valid := by
+  intro z hz
+  change ComplexRaw.ofQComplex QComplex.one |>.Valid
+  exact ComplexRaw.ofQComplex_valid QComplex.one
 
 /-! Negation is the interval-reversing operation needed to assemble signed
 linear combinations from the order-preserving nonnegative scaling primitive. -/
@@ -2560,6 +2569,9 @@ preferred raw representative.  Alternative evaluators remain explicit data
 which can be attached with `ComplexFunction.withAlternative`. -/
 def ComplexFunction.zero : ComplexFunction :=
   ComplexFunction.ofRaw FunctionRaw.zero FunctionRaw.zero_valid
+
+def ComplexFunction.one : ComplexFunction :=
+  ComplexFunction.ofRaw FunctionRaw.one FunctionRaw.one_valid
 
 def ComplexFunction.add (f g : ComplexFunction) : ComplexFunction :=
   ComplexFunction.ofRaw
