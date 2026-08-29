@@ -2337,6 +2337,22 @@ def ComplexFunction.add (f g : ComplexFunction) : ComplexFunction :=
     (FunctionRaw.add f.preferred g.preferred)
     (FunctionRaw.add_valid f.valid g.valid)
 
+theorem ComplexFunction.zero_add_representation_agrees_preferred
+    (f : ComplexFunction) :
+    (ComplexFunction.add ComplexFunction.zero f).preferred.AgreeOnCommonDomain
+      f.preferred := by
+  change (FunctionRaw.add FunctionRaw.zero f.preferred).AgreeOnCommonDomain
+    f.preferred
+  exact FunctionRaw.zero_add_agreeOnCommonDomain f.valid
+
+theorem ComplexFunction.add_zero_representation_agrees_preferred
+    (f : ComplexFunction) :
+    (ComplexFunction.add f ComplexFunction.zero).preferred.AgreeOnCommonDomain
+      f.preferred := by
+  change (FunctionRaw.add f.preferred FunctionRaw.zero).AgreeOnCommonDomain
+    f.preferred
+  exact FunctionRaw.add_zero_agreeOnCommonDomain f.valid
+
 def ComplexFunction.neg (f : ComplexFunction) : ComplexFunction :=
   ComplexFunction.ofRaw
     (FunctionRaw.neg f.preferred)
