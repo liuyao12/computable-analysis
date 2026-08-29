@@ -126,4 +126,14 @@ theorem effectiveIntegral_le_of_endpoint_le
       (Integral.integralFor integrandG IG.construction) := by
   exact DefiniteIdentityFor.integral_le_of_endpoint_le IF IG hendpoint
 
+/-! Concrete regression client: the constant function is integrated exactly by
+one rational rectangle, and the result is identified with the linear
+primitive's endpoint difference. -/
+theorem effectiveConstantIntegral_equiv_endpoint (c a b : Rat) :
+    DefiniteIntegralEqualsEndpointDifference
+      (Integral.linearPrimitiveFunRaw c) (Integral.constantFunRaw c)
+      a b (Integral.constantConstruction c a b)
+      (constantPrimitiveEndpoint_valid c a b) := by
+  exact constant_integral_equiv_endpoint c a b
+
 end ComputableAnalysis.Integral
