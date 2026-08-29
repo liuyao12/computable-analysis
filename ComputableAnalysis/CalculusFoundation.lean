@@ -1912,6 +1912,25 @@ theorem effectiveFiniteFourierSynthesisAt_scale
   exact finiteFourierSynthesisAt_scale root k modes r coefficient₀ coefficient
     hcoefficient
 
+theorem effectiveFiniteFourierReconstruction_coefficient_formula
+    (certificate : FiniteFourierReconstructionCertificate)
+    {mode : Nat} (hmode : mode ∈ certificate.orthogonality.modes) :
+    certificate.coefficient mode =
+      QComplex.scaleRat
+        (1 / (certificate.orthogonality.length : Rat))
+        (finiteFourierSampleInnerProduct
+          certificate.orthogonality.root certificate.orthogonality.length
+          mode certificate.sample) := by
+  exact certificate.coefficient_formula_at hmode
+
+theorem effectiveFiniteFourierReconstruction_reconstructs
+    (certificate : FiniteFourierReconstructionCertificate)
+    {k : Nat} (hk : k < certificate.orthogonality.length) :
+    finiteFourierSynthesisAt certificate.orthogonality.root k
+        certificate.orthogonality.modes certificate.coefficient =
+      certificate.sample k := by
+  exact certificate.reconstructs hk
+
 theorem effectiveFourPointComplexFourierTransform_parseval
     (x₀ x₁ x₂ x₃ : QComplex) :
     QComplex.normSq

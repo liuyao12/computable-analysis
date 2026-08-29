@@ -134,6 +134,8 @@ finite transform -> coordinate tail box -> future-stage containment
 \lean{ComputableAnalysis.finiteSupportFourierSeries_stabilized_equiv}
 \lean{ComputableAnalysis.effectiveFiniteFourierSynthesisAt_add}
 \lean{ComputableAnalysis.effectiveFiniteFourierSynthesisAt_scale}
+\lean{ComputableAnalysis.effectiveFiniteFourierReconstruction_coefficient_formula}
+\lean{ComputableAnalysis.effectiveFiniteFourierReconstruction_reconstructs}
 \lean{ComputableAnalysis.quarterTurnGeometricTailCertificate_valid}
 \lean{ComputableAnalysis.EffectiveFourierSampleCertificate.toSeries_valid}
 \lean{ComputableAnalysis.EffectiveFourierSampleCertificate.sample_interval_witness}
@@ -186,6 +188,11 @@ At each finite stage, synthesis is linear in the coefficient table: addition
 and rational scaling commute with the finite mode fold.  These laws are the
 algebraic interface for assembling Fourier approximations before a tail
 argument is introduced.
+
+Given a finite orthogonality certificate, the coefficient is the normalized
+sample inner product, and synthesis reconstructs every certified sample.  This
+is the project’s finite DFT inversion theorem: all analytic convergence work is
+still isolated in the later tail certificate.
 
 The complex exponential, sine, and cosine evaluators expose their finite
 increment laws directly: increasing a prefix by one stage adds exactly one
