@@ -132,6 +132,8 @@ finite transform -> coordinate tail box -> future-stage containment
 \lean{ComputableAnalysis.effectiveFourierSeries_stage_contained}
 \lean{ComputableAnalysis.effectiveFourierSeries_stabilized_width_le}
 \lean{ComputableAnalysis.finiteSupportFourierSeries_stabilized_equiv}
+\lean{ComputableAnalysis.effectiveFiniteFourierSynthesisAt_add}
+\lean{ComputableAnalysis.effectiveFiniteFourierSynthesisAt_scale}
 \lean{ComputableAnalysis.quarterTurnGeometricTailCertificate_valid}
 \lean{ComputableAnalysis.EffectiveFourierSampleCertificate.toSeries_valid}
 \lean{ComputableAnalysis.EffectiveFourierSampleCertificate.sample_interval_witness}
@@ -179,6 +181,11 @@ formula may be new, but it must end in the same finite transform plus tail
 interface. Pointwise convergence, termwise integration, or an L2-style
 claim is a further theorem only after its own finite norm or tail certificate
 has been supplied.
+
+At each finite stage, synthesis is linear in the coefficient table: addition
+and rational scaling commute with the finite mode fold.  These laws are the
+algebraic interface for assembling Fourier approximations before a tail
+argument is introduced.
 
 The complex exponential, sine, and cosine evaluators expose their finite
 increment laws directly: increasing a prefix by one stage adds exactly one

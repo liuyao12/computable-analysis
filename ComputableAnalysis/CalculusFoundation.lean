@@ -1886,6 +1886,32 @@ theorem effectiveFourierSeries_stabilized_width_le
       (F.candidate.compute n).width + 2 * F.radius n := by
   exact F.stabilized_width_le_of_candidate n
 
+/-! Finite Fourier synthesis is linear in its coefficient table.  These
+public wrappers keep the algebraic stage interface next to the stabilized
+Fourier object, before any termwise-limit theorem is attempted. -/
+theorem effectiveFiniteFourierSynthesisAt_add
+    (root : QComplex) (k : Nat) (modes : List Nat)
+    (coefficient₁ coefficient₂ coefficient : Nat → QComplex)
+    (hcoefficient : ∀ mode, mode ∈ modes →
+      coefficient mode = QComplex.add (coefficient₁ mode) (coefficient₂ mode)) :
+    finiteFourierSynthesisAt root k modes coefficient =
+      QComplex.add
+        (finiteFourierSynthesisAt root k modes coefficient₁)
+        (finiteFourierSynthesisAt root k modes coefficient₂) := by
+  exact finiteFourierSynthesisAt_add root k modes coefficient₁ coefficient₂
+    coefficient hcoefficient
+
+theorem effectiveFiniteFourierSynthesisAt_scale
+    (root : QComplex) (k : Nat) (modes : List Nat)
+    (r : Rat) (coefficient₀ coefficient : Nat → QComplex)
+    (hcoefficient : ∀ mode, mode ∈ modes →
+      coefficient mode = QComplex.scaleRat r (coefficient₀ mode)) :
+    finiteFourierSynthesisAt root k modes coefficient =
+      QComplex.scaleRat r
+        (finiteFourierSynthesisAt root k modes coefficient₀) := by
+  exact finiteFourierSynthesisAt_scale root k modes r coefficient₀ coefficient
+    hcoefficient
+
 theorem effectiveFourPointComplexFourierTransform_parseval
     (x₀ x₁ x₂ x₃ : QComplex) :
     QComplex.normSq
