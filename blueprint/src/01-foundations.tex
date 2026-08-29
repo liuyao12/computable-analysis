@@ -690,6 +690,12 @@ of all raw algorithms by quotienting.
 At a requested stage, \code{Real.Representation.overlapsAt} exposes the
 corresponding interval overlap directly, so a consumer can switch
 implementations without rebuilding the spanning-tree argument.
+The parent-relative constructors expose the same transport when registering a
+new implementation:
+\lean{ComputableAnalysis.Real.withAlternativeFrom_equiv_preferred}
+\lean{ComputableAnalysis.Real.withAlternativeFrom_overlaps_preferred}
+\lean{ComputableAnalysis.Real.withAlternativeFromImplementation_equiv_preferred}
+\lean{ComputableAnalysis.Real.withAlternativeFromImplementation_overlaps_preferred}
 For functions, the same distinction is kept at the appropriate level: a
 \code{PartialRealFunRaw} is one domain-indexed computation, while
 \code{PartialRealFunction} packages several useful computations of one named

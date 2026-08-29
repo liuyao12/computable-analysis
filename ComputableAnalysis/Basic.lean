@@ -3718,6 +3718,23 @@ def withAlternativeFrom (x : Real) (parent : Representation x)
         (RealRaw.equiv_symm parent.agrees) (RealRaw.equiv_symm h) } ::
       x.implementations
 
+/-! The parent-relative insertion above is the operation used to maintain the
+    spanning tree.  Expose its transitive edge explicitly: consumers that are
+    handed the new raw algorithm need not know which existing representation
+    was used as its parent. -/
+theorem withAlternativeFrom_equiv_preferred (x : Real)
+    (parent : Representation x) (rep : RealRaw) (hvalid : rep.Valid)
+    (h : rep.Equiv parent.raw) :
+    rep.Equiv x.preferred := by
+  exact RealRaw.equiv_trans hvalid parent.valid x.valid h parent.agrees
+
+theorem withAlternativeFrom_overlaps_preferred (x : Real)
+    (parent : Representation x) (rep : RealRaw) (hvalid : rep.Valid)
+    (h : rep.Equiv parent.raw) (stage : Nat) :
+    QInterval.Overlaps (rep.compute stage) (x.preferred.compute stage) := by
+  exact (RealRaw.compareAt_overlap_iff rep x.preferred stage stage).1
+    (withAlternativeFrom_equiv_preferred x parent rep hvalid h stage)
+
 def withAlternativeFromImplementation (x : Real)
     (parent : RealImplementation x.preferred)
     (rep : RealRaw) (hvalid : rep.Valid)
@@ -3730,6 +3747,20 @@ def withAlternativeFromImplementation (x : Real)
       equivalent := RealRaw.equiv_trans x.valid parent.valid hvalid
         parent.equivalent (RealRaw.equiv_symm h) } ::
       x.implementations
+
+theorem withAlternativeFromImplementation_equiv_preferred (x : Real)
+    (parent : RealImplementation x.preferred) (rep : RealRaw)
+    (hvalid : rep.Valid) (h : rep.Equiv parent.raw) :
+    rep.Equiv x.preferred := by
+  exact RealRaw.equiv_trans hvalid parent.valid x.valid h
+    (RealRaw.equiv_symm parent.equivalent)
+
+theorem withAlternativeFromImplementation_overlaps_preferred (x : Real)
+    (parent : RealImplementation x.preferred) (rep : RealRaw)
+    (hvalid : rep.Valid) (h : rep.Equiv parent.raw) (stage : Nat) :
+    QInterval.Overlaps (rep.compute stage) (x.preferred.compute stage) := by
+  exact (RealRaw.compareAt_overlap_iff rep x.preferred stage stage).1
+    (withAlternativeFromImplementation_equiv_preferred x parent rep hvalid h stage)
 
 def computeUsing {x : Real} (rep : Representation x) (n : Nat) : QInterval :=
   rep.raw.compute n
