@@ -463,6 +463,13 @@ the representative chart for interval-valued calculus.
 
 \lean{ComputableAnalysis.RealRaw.mul_compute_ordered}
 \lean{ComputableAnalysis.RealRaw.mul_compute_nested}
+
+At the function level this closure is now public as well.  Two valid interval
+functions may be multiplied even when their values change sign; the proof is
+pointwise and inherits the rational four-corner bound.
+
+\lean{ComputableAnalysis.effectiveRealFunRaw_mul_valid}
+\leanok
 \lean{ComputableAnalysis.RealRaw.mul_valid}
 \lean{ComputableAnalysis.RealRaw.mul_equiv}
 \leanok

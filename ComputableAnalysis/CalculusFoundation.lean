@@ -1941,6 +1941,25 @@ theorem effectiveSecantProductRule
         g1 * ((f1 - f0) / (y - x)) := by
   exact secantSlope_product_transport hxy
 
+/-! Signed products close the gap left by the nonnegative product adapter in
+`Calculus.lean`.  The four-corner rational interval product is valid for any
+two valid raw real values; boundedness is obtained from their stage-zero
+intervals, not from a completed real-number model. -/
+theorem effectiveRealFunRaw_mul_valid
+    {f g : RealFunRaw} (hf : f.Valid) (hg : g.Valid) :
+    (RealFunRaw.mul f g).Valid := by
+  intro x hx
+  let X : RealRaw := { compute := f.compute x }
+  let Y : RealRaw := { compute := g.compute x }
+  have hX : X.Valid := by
+    simpa [X, RealRaw.Valid, RealFunRaw.applyCompute] using hf x hx.1
+  have hY : Y.Valid := by
+    simpa [Y, RealRaw.Valid, RealFunRaw.applyCompute] using hg x hx.2
+  have hproduct : (X * Y).Valid := RealRaw.mul_valid hX hY
+  change RealRaw.ValidCompute (RealRaw.mulCompute X Y) at hproduct
+  change RealRaw.ValidCompute (RealRaw.mulCompute X Y)
+  exact hproduct
+
 end ComputableAnalysis
 
 namespace ComputableAnalysis.ExactFunction
