@@ -2155,6 +2155,36 @@ theorem FunctionRaw.scaleRat_agreeOnCommonDomain
     (ComplexRaw.scaleRat r (g.evalRaw z hgz))
   exact effectiveComplexRaw_scaleRat_equiv (hfg z hfz hgz)
 
+/-! Subtraction is assembled from the already certified addition and
+negation operations.  No separate interval-arithmetic theorem is needed. -/
+def FunctionRaw.sub (f g : FunctionRaw) : FunctionRaw :=
+  FunctionRaw.add f (FunctionRaw.neg g)
+
+theorem FunctionRaw.sub_valid
+    {f g : FunctionRaw} (hf : f.Valid) (hg : g.Valid) :
+    (FunctionRaw.sub f g).Valid := by
+  exact FunctionRaw.add_valid hf (FunctionRaw.neg_valid hg)
+
+theorem FunctionRaw.sub_agreeOnCommonDomain
+    {f f' g g' : FunctionRaw}
+    (hf : f.Valid) (hf' : f'.Valid)
+    (hg : g.Valid) (hg' : g'.Valid)
+    (hff : f.AgreeOnCommonDomain f')
+    (hgg : g.AgreeOnCommonDomain g') :
+    (FunctionRaw.sub f g).AgreeOnCommonDomain
+      (FunctionRaw.sub f' g') := by
+  intro z hleft hright
+  change (ComplexRaw.add (f.evalRaw z hleft.1)
+      (ComplexRaw.neg (g.evalRaw z hleft.2))).Equiv
+    (ComplexRaw.add (f'.evalRaw z hright.1)
+      (ComplexRaw.neg (g'.evalRaw z hright.2)))
+  exact effectiveComplexRaw_add_equiv
+    (hf z hleft.1) (hf' z hright.1)
+    (ComplexRaw.neg_valid (hg z hleft.2))
+    (ComplexRaw.neg_valid (hg' z hright.2))
+    (hff z hleft.1 hright.1)
+    (effectiveComplexRaw_neg_equiv (hgg z hleft.2 hright.2))
+
 /-! Function-level representation equivalence records the same domain and a
 pointwise raw-real equivalence.  This is the lightweight bridge needed when a
 later proof switches between two certified implementations of one function. -/

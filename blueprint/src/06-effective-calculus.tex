@@ -529,6 +529,15 @@ assumption.
 \lean{ComputableAnalysis.FunctionRaw.scaleRat_valid}
 \lean{ComputableAnalysis.FunctionRaw.scaleRat_agreeOnCommonDomain}
 \leanok
+
+Subtraction is only an assembly rule: intersect the domains, negate the second
+box computation, and add.  Its validity and representation transport are
+therefore inherited from the two primitive operations.
+
+\lean{ComputableAnalysis.FunctionRaw.sub}
+\lean{ComputableAnalysis.FunctionRaw.sub_valid}
+\lean{ComputableAnalysis.FunctionRaw.sub_agreeOnCommonDomain}
+\leanok
 \lean{ComputableAnalysis.RealRaw.mul_valid}
 \lean{ComputableAnalysis.RealRaw.mul_equiv}
 \leanok
