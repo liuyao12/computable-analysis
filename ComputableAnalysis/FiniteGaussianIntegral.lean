@@ -773,6 +773,81 @@ def reciprocalSquareTailPartial (cutoff : Rat) : Nat -> Rat
       reciprocalSquareTailPartial cutoff terms +
         1 / (cutoff + (terms + 1 : Nat)) ^ 2
 
+theorem reciprocalSquareTerm_le_telescopeStep
+    {cutoff : Rat} (hcutoff : 0 < cutoff) (n : Nat) :
+    1 / (cutoff + (n + 1 : Nat)) ^ 2 <=
+      1 / (cutoff + (n : Nat)) -
+        1 / (cutoff + (n + 1 : Nat)) := by
+  let M : Rat := cutoff + (n : Nat)
+  let S : Rat := cutoff + (n + 1 : Nat)
+  have hMpos : 0 < M := by
+    dsimp [M]
+    have hn : 0 <= ((n : Nat) : Rat) := Rat.natCast_nonneg
+    grind
+  have hSpos : 0 < S := by
+    dsimp [S]
+    have hn : 0 <= ((n + 1 : Nat) : Rat) := Rat.natCast_nonneg
+    grind
+  have hMne : M ≠ 0 := Rat.ne_of_gt hMpos
+  have hSne : S ≠ 0 := Rat.ne_of_gt hSpos
+  have hSSne : S * S ≠ 0 := Rat.ne_of_gt (Rat.mul_pos hSpos hSpos)
+  have hMS : M <= S := by
+    dsimp [M, S]
+    have hn : (n : Rat) <= (n + 1 : Rat) := by exact_mod_cast (Nat.le_succ n)
+    grind
+  apply Rat.le_of_mul_le_mul_right (c := (S * S) * M)
+  · rw [show (cutoff + (n + 1 : Nat)) ^ 2 = S * S by
+      dsimp [S]
+      rw [Rat.pow_succ, Rat.pow_succ]
+      simp [Rat.mul_assoc]]
+    calc
+      (1 / (S * S)) * ((S * S) * M) = M := by
+        rw [Rat.div_def]
+        have hcancel : (S * S) * (S * S)⁻¹ = 1 :=
+          Rat.mul_inv_cancel (S * S) hSSne
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= S := hMS
+      _ = (1 / M - 1 / S) * ((S * S) * M) := by
+        rw [Rat.div_def, Rat.div_def]
+        have hMcancel : M * M⁻¹ = 1 := Rat.mul_inv_cancel M hMne
+        have hScancel : S * S⁻¹ = 1 := Rat.mul_inv_cancel S hSne
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_assoc, Rat.add_comm,
+          Rat.mul_assoc, Rat.mul_comm]
+  · exact Rat.mul_pos (Rat.mul_pos hSpos hSpos) hMpos
+
+theorem reciprocalSquareTailPartial_le_telescoping
+    {cutoff : Rat} (hcutoff : 0 < cutoff) (terms : Nat) :
+    reciprocalSquareTailPartial cutoff terms <=
+      1 / cutoff - 1 / (cutoff + (terms : Nat)) := by
+  induction terms with
+  | zero =>
+      simp [reciprocalSquareTailPartial, Rat.add_zero, Rat.sub_self]
+  | succ terms ih =>
+      rw [reciprocalSquareTailPartial]
+      have hstep := reciprocalSquareTerm_le_telescopeStep hcutoff terms
+      have hadd := rat_add_le_add ih hstep
+      calc
+        reciprocalSquareTailPartial cutoff terms +
+            1 / (cutoff + (terms + 1 : Nat)) ^ 2 <=
+            (1 / cutoff - 1 / (cutoff + (terms : Nat))) +
+              (1 / (cutoff + (terms : Nat)) -
+                1 / (cutoff + (terms + 1 : Nat))) := hadd
+        _ = 1 / cutoff - 1 / (cutoff + (terms + 1 : Nat)) := by
+          grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+theorem reciprocalSquareTailPartial_le_inv_cutoff
+    {cutoff : Rat} (hcutoff : 0 < cutoff) (terms : Nat) :
+    reciprocalSquareTailPartial cutoff terms <= 1 / cutoff := by
+  have htel := reciprocalSquareTailPartial_le_telescoping hcutoff terms
+  have hpos : 0 < cutoff + (terms : Nat) := by
+    have hn : 0 <= ((terms : Nat) : Rat) := Rat.natCast_nonneg
+    grind
+  have hnonneg : 0 <= 1 / (cutoff + (terms : Nat)) := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg (by native_decide)
+      (Rat.le_of_lt ((Rat.inv_pos).2 hpos))
+  grind [Rat.sub_eq_add_neg]
+
 theorem reciprocalSquareTailPartial_succ (cutoff : Rat) (terms : Nat) :
     reciprocalSquareTailPartial cutoff (terms + 1) =
       reciprocalSquareTailPartial cutoff terms +
