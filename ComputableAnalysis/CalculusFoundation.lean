@@ -705,6 +705,27 @@ def effectiveExactRatPow_definiteIdentity (k : Nat) :
       (Integral.powPrimitiveOnUnit k) := by
   exact Integral.exactRat_pow_definiteIdentity k
 
+theorem effectiveFiniteFourierSampleInnerProduct_add
+    (root : QComplex) (length mode : Nat)
+    (sample₁ sample₂ sample : Nat → QComplex)
+    (hsample : ∀ k, sample k = QComplex.add (sample₁ k) (sample₂ k)) :
+    finiteFourierSampleInnerProduct root length mode sample =
+      QComplex.add
+        (finiteFourierSampleInnerProduct root length mode sample₁)
+        (finiteFourierSampleInnerProduct root length mode sample₂) := by
+  exact finiteFourierSampleInnerProduct_add root length mode sample₁ sample₂
+    sample hsample
+
+theorem effectiveFiniteFourierSampleInnerProduct_scale
+    (root : QComplex) (length mode : Nat)
+    (r : Rat) (sample₀ sample : Nat → QComplex)
+    (hsample : ∀ k, sample k = QComplex.scaleRat r (sample₀ k)) :
+    finiteFourierSampleInnerProduct root length mode sample =
+      QComplex.scaleRat r
+        (finiteFourierSampleInnerProduct root length mode sample₀) := by
+  exact finiteFourierSampleInnerProduct_scale root length mode r sample₀ sample
+    hsample
+
 /-! Public finite multiple-integral bridge.  An outer right sum of inner
 left sums is exactly the complementary one-dimensional rectangle sum. -/
 theorem effectiveUniformTriangleRightSum_eq_complementUniformLeftEndpointSum
