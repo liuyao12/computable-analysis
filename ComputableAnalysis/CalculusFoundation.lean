@@ -2354,6 +2354,23 @@ theorem ComplexFunction.linearCombination_representation_agrees_preferred
   rw [hmap]
   exact hsum
 
+def ComplexFunction.linearCombination_withAlternative
+    {terms : List (Rat × ComplexFunction)}
+    {alternatives : List (Rat × FunctionRaw)}
+    (halt : ∀ term, term ∈ alternatives → term.2.Valid)
+    (hpair : FunctionRaw.AgreeList
+      (alternatives.map (fun term =>
+        FunctionRaw.scaleRat term.1 term.2))
+      (terms.map (fun term =>
+        FunctionRaw.scaleRat term.1 term.2.preferred))) : ComplexFunction :=
+  ComplexFunction.withAlternative
+    (ComplexFunction.linearCombination terms)
+    (FunctionRaw.linearCombination alternatives)
+    (FunctionRaw.linearCombination_valid alternatives halt)
+    (FunctionRaw.agreeOnCommonDomain_symm
+      (ComplexFunction.linearCombination_representation_agrees_preferred
+        halt hpair))
+
 theorem ComplexFunction.add_representation_agrees_preferred
     {f g : ComplexFunction}
     (rf : ComplexFunction.Representation f)
