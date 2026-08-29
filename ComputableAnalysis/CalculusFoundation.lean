@@ -1968,6 +1968,17 @@ theorem effectiveFiniteFourierSynthesisAt_scale
   exact finiteFourierSynthesisAt_scale root k modes r coefficient₀ coefficient
     hcoefficient
 
+theorem effectiveFiniteFourierSynthesisAt_conj
+    (root : QComplex) (k : Nat) (modes : List Nat)
+    (coefficient₀ coefficient : Nat → QComplex)
+    (hcoefficient : ∀ mode, mode ∈ modes →
+      coefficient mode = QComplex.conj (coefficient₀ mode)) :
+    finiteFourierSynthesisAt (QComplex.conj root) k modes coefficient =
+      QComplex.conj
+        (finiteFourierSynthesisAt root k modes coefficient₀) := by
+  exact finiteFourierSynthesisAt_conj root k modes coefficient₀ coefficient
+    hcoefficient
+
 theorem effectiveFiniteFourierReconstruction_coefficient_formula
     (certificate : FiniteFourierReconstructionCertificate)
     {mode : Nat} (hmode : mode ∈ certificate.orthogonality.modes) :
