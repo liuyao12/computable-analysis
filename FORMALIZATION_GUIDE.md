@@ -490,6 +490,13 @@ ready-made `quarterTurnConstantBlockCancellationCertificate` is the reference
 instance, and its repeated-block theorem can be used directly in later finite
 stage constructions.
 
+The scoped calculus entry point also exposes the finite-energy boundary via
+`effectiveFourierEnergyInterval_ordered` and
+`effectiveFourierEnergyInterval_contains_total`.  These are the intended
+user-facing handles for an L2-style coefficient computation: a finite complex
+prefix plus a rational omitted-energy budget, without measurable functions or
+a completed Hilbert space.
+
 When a Fourier computation has finite support, use
 `finiteSupportFourierSeries_stabilized_equiv`. It proves that the stabilized
 complex raw object is equivalent to the exact rational-complex finite

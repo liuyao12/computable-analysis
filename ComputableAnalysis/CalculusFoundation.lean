@@ -1900,6 +1900,20 @@ theorem effectiveFourPointComplexFourierTransform_parseval
         QComplex.normSq x₂ + QComplex.normSq x₃) := by
   exact fourPointComplexFourierTransform_parseval x₀ x₁ x₂ x₃
 
+/-! The finite-energy boundary is public at the same scoped entry point.  It
+packages an omitted Fourier tail as a rational interval, without introducing
+measurable functions or a completed Hilbert space. -/
+theorem effectiveFourierEnergyInterval_ordered
+    (certificate : FiniteFourierEnergyTailCertificate) :
+    (certificate.energyInterval).lo <= (certificate.energyInterval).hi := by
+  exact certificate.energyInterval_ordered
+
+theorem effectiveFourierEnergyInterval_contains_total
+    (certificate : FiniteFourierEnergyTailCertificate) :
+    (certificate.energyInterval).ContainsInterval
+      { lo := certificate.totalEnergy, hi := certificate.totalEnergy } := by
+  exact certificate.energyInterval_contains_total
+
 /-! The first matrix ODE base case is likewise exposed at the scoped entry
 point.  It is an exact rational linear-algebra theorem, before any passage to
 a continuous matrix-valued function. -/
