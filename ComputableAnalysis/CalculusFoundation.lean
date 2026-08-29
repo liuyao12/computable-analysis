@@ -2248,6 +2248,29 @@ theorem FunctionRaw.sub_agreeOnCommonDomain
     (hff z hleft.1 hright.1)
     (effectiveComplexRaw_neg_equiv (hgg z hleft.2 hright.2))
 
+/-! The abstract function handle exposes the same certified operations as its
+preferred raw representative.  Alternative evaluators remain explicit data
+which can be attached with `ComplexFunction.withAlternative`. -/
+def ComplexFunction.add (f g : ComplexFunction) : ComplexFunction :=
+  ComplexFunction.ofRaw
+    (FunctionRaw.add f.preferred g.preferred)
+    (FunctionRaw.add_valid f.valid g.valid)
+
+def ComplexFunction.neg (f : ComplexFunction) : ComplexFunction :=
+  ComplexFunction.ofRaw
+    (FunctionRaw.neg f.preferred)
+    (FunctionRaw.neg_valid f.valid)
+
+def ComplexFunction.scaleRat (r : Rat) (f : ComplexFunction) : ComplexFunction :=
+  ComplexFunction.ofRaw
+    (FunctionRaw.scaleRat r f.preferred)
+    (FunctionRaw.scaleRat_valid f.valid)
+
+def ComplexFunction.sub (f g : ComplexFunction) : ComplexFunction :=
+  ComplexFunction.ofRaw
+    (FunctionRaw.sub f.preferred g.preferred)
+    (FunctionRaw.sub_valid f.valid g.valid)
+
 /-! Function-level representation equivalence records the same domain and a
 pointwise raw-real equivalence.  This is the lightweight bridge needed when a
 later proof switches between two certified implementations of one function. -/

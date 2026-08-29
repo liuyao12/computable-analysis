@@ -4989,6 +4989,10 @@ ComputableAnalysis.FunctionRaw.scaleRat_agreeOnCommonDomain
 ComputableAnalysis.FunctionRaw.sub
 ComputableAnalysis.FunctionRaw.sub_valid
 ComputableAnalysis.FunctionRaw.sub_agreeOnCommonDomain
+ComputableAnalysis.ComplexFunction.add
+ComputableAnalysis.ComplexFunction.neg
+ComputableAnalysis.ComplexFunction.scaleRat
+ComputableAnalysis.ComplexFunction.sub
 ComputableAnalysis.RealRaw.mul_valid
 ComputableAnalysis.RealRaw.mul_equiv
 ComputableAnalysis.FunctionOnInterval.mulOfNonnegBounded
