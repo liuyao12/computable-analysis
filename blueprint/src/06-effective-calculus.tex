@@ -482,6 +482,16 @@ function evaluators without rebuilding the product argument.
 \lean{ComputableAnalysis.RealFunRaw.equivOn_trans}
 \lean{ComputableAnalysis.effectiveRealFunRaw_mul_equivOn}
 \leanok
+
+The complex-function layer has the same closure: products intersect the
+rational-complex domains, use four-corner box multiplication, and preserve
+agreement on common inputs.  This is the representation-level operation used
+by complex special functions and Fourier constructions.
+
+\lean{ComputableAnalysis.FunctionRaw.mul}
+\lean{ComputableAnalysis.FunctionRaw.mul_valid}
+\lean{ComputableAnalysis.FunctionRaw.mul_agreeOnCommonDomain}
+\leanok
 \lean{ComputableAnalysis.RealRaw.mul_valid}
 \lean{ComputableAnalysis.RealRaw.mul_equiv}
 \leanok

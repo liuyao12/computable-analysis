@@ -2033,6 +2033,47 @@ theorem effectiveRealFunRaw_mul_equivOn
     exact RealRaw.mul_equiv hX hX' hY hY'
       (hff.2 x hfx) (hgg.2 x hgx)
 
+/-! Complex-valued raw functions have the same constructive product closure.
+The domain is the intersection of the two input domains, and the output box
+is the rational four-corner product of the two certified complex boxes. -/
+def FunctionRaw.mul (f g : FunctionRaw) : FunctionRaw where
+  domain := fun z => f.domain z /\ g.domain z
+  compute := fun z hz n =>
+    QBox.mul (f.compute z hz.1 n) (g.compute z hz.2 n)
+
+theorem FunctionRaw.mul_valid
+    {f g : FunctionRaw} (hf : f.Valid) (hg : g.Valid) :
+    (FunctionRaw.mul f g).Valid := by
+  intro z hz
+  have hproduct : (ComplexRaw.mul (f.evalRaw z hz.1)
+      (g.evalRaw z hz.2)).Valid :=
+    ComplexRaw.mul_valid (hf z hz.1) (hg z hz.2)
+  change (ComplexRaw.mul (f.evalRaw z hz.1)
+    (g.evalRaw z hz.2)).Valid at hproduct
+  change (ComplexRaw.mul (f.evalRaw z hz.1)
+    (g.evalRaw z hz.2)).Valid
+  exact hproduct
+
+theorem FunctionRaw.mul_agreeOnCommonDomain
+    {f f' g g' : FunctionRaw}
+    (hf : f.Valid) (hf' : f'.Valid)
+    (hg : g.Valid) (hg' : g'.Valid)
+    (hff : f.AgreeOnCommonDomain f')
+    (hgg : g.AgreeOnCommonDomain g') :
+    (FunctionRaw.mul f g).AgreeOnCommonDomain
+      (FunctionRaw.mul f' g') := by
+  intro z hleft hright
+  let F := f.evalRaw z hleft.1
+  let F' := f'.evalRaw z hright.1
+  let G := g.evalRaw z hleft.2
+  let G' := g'.evalRaw z hright.2
+  change (ComplexRaw.mul F G).Equiv (ComplexRaw.mul F' G')
+  exact ComplexRaw.mul_equiv
+    (hf z hleft.1) (hf' z hright.1)
+    (hg z hleft.2) (hg' z hright.2)
+    (hff z hleft.1 hright.1)
+    (hgg z hleft.2 hright.2)
+
 end ComputableAnalysis
 
 namespace ComputableAnalysis.ExactFunction

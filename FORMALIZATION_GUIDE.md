@@ -2360,3 +2360,9 @@ When the boundary is unclear, report it plainly in the proof statement and
 add the missing bridge to [GOALS.md](GOALS.md), rather than silently importing
 classical real analysis.  That discipline is what makes the project useful as
 a checkable foundation instead of a collection of familiar-looking formulas.
+
+The complex raw-function product is available at the calculus boundary as
+`FunctionRaw.mul`.  Its validity and common-domain implementation transport
+are `FunctionRaw.mul_valid` and `FunctionRaw.mul_agreeOnCommonDomain`; these
+are the preferred entry points for multiplying independently certified complex
+special-function representations.
