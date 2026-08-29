@@ -166,6 +166,14 @@ chart itself has a completed effective FTC with natural endpoint \(\pi/4\).
 The intended \(\sin^2\) integral is a different, normalized object: the
 Jacobian contributes a reciprocal-\(\pi\) factor, and the equal-dyadic
 nested-radical boxes must overlap that normalized product at every stage.
+The direct Lipschitz-dyadic tangent-square computation and the scheduled
+effective-FTC computation are now joined by the explicit
+\texttt{TangentSquareIntegralEffectiveFTCOverlap} certificate.  Its
+\texttt{to\_equiv} and \texttt{to\_halfQuarterTurn} theorems reduce their
+identification to finite stagewise rational overlaps and then transport the
+result to the quarter-turn anchor.  Thus the remaining squared-sine work is
+the geometric overlap with this anchor, not a hidden appeal to a completed
+real integral.
 The repository currently checks the product validity and the first finite
 overlaps; the all-stage common-witness family is the remaining theorem.
 The normalized product overlap is explicitly checked at dyadic stages 0, 1,
