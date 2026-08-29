@@ -502,6 +502,17 @@ complex linear-combination operations used by series prefixes.
 \lean{ComputableAnalysis.FunctionRaw.add_agreeOnCommonDomain}
 \leanok
 
+Finite linear combinations use a single recursive constructor.  The empty
+sum is the everywhere-defined zero computation; a nonempty sum intersects
+domains and applies the certified binary addition.  Thus every finite series
+prefix remains a finite rational-box computation.
+
+\lean{ComputableAnalysis.FunctionRaw.zero}
+\lean{ComputableAnalysis.FunctionRaw.zero_valid}
+\lean{ComputableAnalysis.FunctionRaw.sum}
+\lean{ComputableAnalysis.FunctionRaw.sum_valid}
+\leanok
+
 Negation is the explicit interval-reversing operation.  Together with
 nonnegative rational scaling, it supplies the representation-level pieces for
 signed linear combinations while keeping every order reversal visible.

@@ -1980,6 +1980,15 @@ theorem effectiveComplexRaw_add_equiv
   · constructor <;> grind [Rat.add_assoc]
   · constructor <;> grind [Rat.add_assoc]
 
+def FunctionRaw.zero : FunctionRaw where
+  domain := fun _ => True
+  compute := fun _ _ _ => QBox.zero
+
+theorem FunctionRaw.zero_valid : FunctionRaw.zero.Valid := by
+  intro z hz
+  change ComplexRaw.zero.Valid
+  exact ComplexRaw.ofQComplex_valid QComplex.zero
+
 /-! Negation is the interval-reversing operation needed to assemble signed
 linear combinations from the order-preserving nonnegative scaling primitive. -/
 theorem effectiveComplexRaw_neg_equiv
@@ -2035,6 +2044,20 @@ theorem FunctionRaw.add_agreeOnCommonDomain
     (hg z hleft.2) (hg' z hright.2)
     (hff z hleft.1 hright.1)
     (hgg z hleft.2 hright.2)
+
+def FunctionRaw.sum : List FunctionRaw → FunctionRaw
+  | [] => FunctionRaw.zero
+  | f :: fs => FunctionRaw.add f (FunctionRaw.sum fs)
+
+theorem FunctionRaw.sum_valid
+    (fs : List FunctionRaw)
+    (hfs : ∀ f, f ∈ fs → f.Valid) :
+    (FunctionRaw.sum fs).Valid := by
+  induction fs with
+  | nil => exact FunctionRaw.zero_valid
+  | cons f fs ih =>
+    exact FunctionRaw.add_valid (hfs f (by simp))
+      (ih (fun g hg => hfs g (by simp [hg])))
 
 def FunctionRaw.neg (f : FunctionRaw) : FunctionRaw where
   domain := f.domain
