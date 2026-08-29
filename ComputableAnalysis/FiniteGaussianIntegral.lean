@@ -1010,6 +1010,24 @@ theorem gaussianTailBoxUpperPartial_le_reciprocalSquareTailPartial
       rw [gaussianTailBoxUpperPartial, reciprocalSquareTailPartial]
       exact rat_add_le_add ih (hdom terms)
 
+/- The complete finite outer-tail pipeline: a uniform pointwise certificate
+   is transported through the shell sum and then given an executable cutoff
+   for the requested rational tolerance. -/
+theorem gaussianTailBoxUpperPartial_reaches_of_positive_tolerance
+    {eps : QPos} (stage terms : Nat)
+    (hdom : forall n : Nat,
+      gaussianTailBoxUpper (((eps.val.den + 1 : Nat) : Rat) +
+        (n + 1 : Nat)) stage <=
+        1 / (((eps.val.den + 1 : Nat) : Rat) +
+          (n + 1 : Nat)) ^ 2) :
+    gaussianTailBoxUpperPartial ((eps.val.den + 1 : Nat) : Rat) stage terms <= eps.val := by
+  have hcutoff : 0 <= ((eps.val.den + 1 : Nat) : Rat) := by
+    exact Rat.natCast_nonneg
+  exact Rat.le_trans
+    (gaussianTailBoxUpperPartial_le_reciprocalSquareTailPartial
+      hcutoff stage terms hdom)
+    (reciprocalSquareTailPartial_reaches_of_positive_tolerance eps terms)
+
 theorem gaussianTailBoxUpper_stage_twenty_ladder :
     gaussianTailBoxUpper 2 20 <= 1 / 4 /\
       gaussianTailBoxUpper 3 20 <= 1 / 9 /\
