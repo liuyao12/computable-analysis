@@ -2352,6 +2352,46 @@ theorem effectiveComplexRaw_one_mul_equiv {z : ComplexRaw} (hz : z.Valid) :
   have himag_hi := himag.2
   constructor <;> constructor <;> grind
 
+theorem effectiveComplexRaw_mul_zero_equiv {z : ComplexRaw} (hz : z.Valid) :
+    (ComplexRaw.mul z ComplexRaw.zero).Equiv ComplexRaw.zero := by
+  intro n
+  have hzre : (z.compute n).lo.re ≤ (z.compute n).hi.re := by
+    have h := (hz.1 n).1
+    unfold QBox.width at h
+    grind [Rat.sub_eq_add_neg]
+  have hzim : (z.compute n).lo.im ≤ (z.compute n).hi.im := by
+    have h := (hz.1 n).2
+    unfold QBox.height at h
+    grind [Rat.sub_eq_add_neg]
+  apply (ComplexRaw.compareAt_overlap_iff
+    (ComplexRaw.mul z ComplexRaw.zero) ComplexRaw.zero n n).2
+  change QBox.Overlaps
+    (QBox.mul (z.compute n) (QBox.point QComplex.zero))
+    (QBox.point QComplex.zero)
+  simp [QBox.mul, QBox.point, QComplex.zero,
+    effectiveMulRealInterval_zero, QInterval.Overlaps]
+  constructor <;> constructor <;> grind
+
+theorem effectiveComplexRaw_zero_mul_equiv {z : ComplexRaw} (hz : z.Valid) :
+    (ComplexRaw.mul ComplexRaw.zero z).Equiv ComplexRaw.zero := by
+  intro n
+  have hzre : (z.compute n).lo.re ≤ (z.compute n).hi.re := by
+    have h := (hz.1 n).1
+    unfold QBox.width at h
+    grind [Rat.sub_eq_add_neg]
+  have hzim : (z.compute n).lo.im ≤ (z.compute n).hi.im := by
+    have h := (hz.1 n).2
+    unfold QBox.height at h
+    grind [Rat.sub_eq_add_neg]
+  apply (ComplexRaw.compareAt_overlap_iff
+    (ComplexRaw.mul ComplexRaw.zero z) ComplexRaw.zero n n).2
+  change QBox.Overlaps
+    (QBox.mul (QBox.point QComplex.zero) (z.compute n))
+    (QBox.point QComplex.zero)
+  simp [QBox.mul, QBox.point, QComplex.zero,
+    effectiveMulRealInterval_zero_left, QInterval.Overlaps]
+  constructor <;> constructor <;> grind
+
 /-! Negation is the interval-reversing operation needed to assemble signed
 linear combinations from the order-preserving nonnegative scaling primitive. -/
 theorem effectiveComplexRaw_neg_equiv
@@ -3034,6 +3074,26 @@ theorem FunctionRaw.one_mul_agreeOnCommonDomain
     (f.evalRaw z hright)
   exact effectiveComplexRaw_one_mul_equiv (hf z hleft.2)
 
+theorem FunctionRaw.mul_zero_agreeOnCommonDomain
+    {f : FunctionRaw} (hf : f.Valid) :
+    (FunctionRaw.mul f FunctionRaw.zero).AgreeOnCommonDomain
+      FunctionRaw.zero := by
+  intro z hleft hright
+  change (ComplexRaw.mul (f.evalRaw z hleft.1)
+      (FunctionRaw.zero.evalRaw z hleft.2)).Equiv
+    (FunctionRaw.zero.evalRaw z hright)
+  exact effectiveComplexRaw_mul_zero_equiv (hf z hleft.1)
+
+theorem FunctionRaw.zero_mul_agreeOnCommonDomain
+    {f : FunctionRaw} (hf : f.Valid) :
+    (FunctionRaw.mul FunctionRaw.zero f).AgreeOnCommonDomain
+      FunctionRaw.zero := by
+  intro z hleft hright
+  change (ComplexRaw.mul (FunctionRaw.zero.evalRaw z hleft.1)
+      (f.evalRaw z hleft.2)).Equiv
+    (FunctionRaw.zero.evalRaw z hright)
+  exact effectiveComplexRaw_zero_mul_equiv (hf z hleft.2)
+
 /-! The abstract complex-function API exposes the certified product only
 after the raw product closure has been established.  This keeps the handle
 layer honest: multiplication carries the intersection domain and inherits
@@ -3058,6 +3118,22 @@ theorem ComplexFunction.one_mul_representation_agrees_preferred
   change (FunctionRaw.mul FunctionRaw.one f.preferred).AgreeOnCommonDomain
     f.preferred
   exact FunctionRaw.one_mul_agreeOnCommonDomain f.valid
+
+theorem ComplexFunction.mul_zero_representation_agrees_preferred
+    (f : ComplexFunction) :
+    ((ComplexFunction.mul f ComplexFunction.zero).preferred).AgreeOnCommonDomain
+      ComplexFunction.zero.preferred := by
+  change (FunctionRaw.mul f.preferred FunctionRaw.zero).AgreeOnCommonDomain
+    FunctionRaw.zero
+  exact FunctionRaw.mul_zero_agreeOnCommonDomain f.valid
+
+theorem ComplexFunction.zero_mul_representation_agrees_preferred
+    (f : ComplexFunction) :
+    ((ComplexFunction.mul ComplexFunction.zero f).preferred).AgreeOnCommonDomain
+      ComplexFunction.zero.preferred := by
+  change (FunctionRaw.mul FunctionRaw.zero f.preferred).AgreeOnCommonDomain
+    FunctionRaw.zero
+  exact FunctionRaw.zero_mul_agreeOnCommonDomain f.valid
 
 theorem ComplexFunction.mul_representation_agrees_preferred
     {f g : ComplexFunction}
