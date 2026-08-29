@@ -901,6 +901,29 @@ theorem gaussianTailPointLadder_stage_twenty :
 def gaussianTailBoxUpper (x : Rat) (stage : Nat) : Rat :=
   ((expPowerSeries (-(x * x))).compute stage).hi
 
+/- A finite shell sum of certified pointwise Gaussian upper boxes.  The shell
+   is deliberately indexed by rational sample points; no cell at infinity is
+   introduced by the definition. -/
+def gaussianTailBoxUpperPartial (cutoff : Rat) (stage : Nat) : Nat -> Rat
+  | 0 => 0
+  | terms + 1 =>
+      gaussianTailBoxUpperPartial cutoff stage terms +
+        gaussianTailBoxUpper (cutoff + (terms + 1 : Nat)) stage
+
+theorem gaussianTailBoxUpperPartial_le_reciprocalSquareTailPartial
+    {cutoff : Rat} (hcutoff : 0 <= cutoff) (stage terms : Nat)
+    (hdom : forall n : Nat,
+      gaussianTailBoxUpper (cutoff + (n + 1 : Nat)) stage <=
+        1 / (cutoff + (n + 1 : Nat)) ^ 2) :
+    gaussianTailBoxUpperPartial cutoff stage terms <=
+      reciprocalSquareTailPartial cutoff terms := by
+  induction terms with
+  | zero =>
+      rfl
+  | succ terms ih =>
+      rw [gaussianTailBoxUpperPartial, reciprocalSquareTailPartial]
+      exact rat_add_le_add ih (hdom terms)
+
 theorem gaussianTailBoxUpper_stage_twenty_ladder :
     gaussianTailBoxUpper 2 20 <= 1 / 4 /\
       gaussianTailBoxUpper 3 20 <= 1 / 9 /\
