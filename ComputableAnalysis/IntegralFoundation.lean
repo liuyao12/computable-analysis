@@ -67,4 +67,26 @@ theorem monotoneDarbouxSchedule_precision_witness
     (monotoneDarbouxScheduleRaw_valid schedule).2.2 eps
   exact ⟨n, hn n (Nat.le_refl n)⟩
 
+/-! Public FTC additivity: once three finite constructions have endpoint
+identities, additivity over adjacent intervals is only the rational endpoint
+telescope.  No completeness or completed real-valued integral is involved. -/
+theorem effectiveIntegral_add_of_endpoint_additive
+    {integrandAB primitiveAB integrandBC primitiveBC integrandAC primitiveAC :
+      FunctionOnInterval}
+    (Iab : DefiniteIdentityFor integrandAB primitiveAB)
+    (Ibc : DefiniteIdentityFor integrandBC primitiveBC)
+    (Iac : DefiniteIdentityFor integrandAC primitiveAC)
+    (hendpoint :
+      ((endpointDifferenceRaw primitiveAB.toRealFunRaw
+          integrandAB.lower integrandAB.upper Iab.endpoint_valid) +
+        (endpointDifferenceRaw primitiveBC.toRealFunRaw
+          integrandBC.lower integrandBC.upper Ibc.endpoint_valid)).Equiv
+          (endpointDifferenceRaw primitiveAC.toRealFunRaw
+            integrandAC.lower integrandAC.upper Iac.endpoint_valid)) :
+    ((Integral.integralFor integrandAB Iab.construction) +
+      (Integral.integralFor integrandBC Ibc.construction)).Equiv
+        (Integral.integralFor integrandAC Iac.construction) := by
+  exact DefiniteIdentityFor.integral_add_equiv_of_endpoint_additive
+    Iab Ibc Iac hendpoint
+
 end ComputableAnalysis.Integral
