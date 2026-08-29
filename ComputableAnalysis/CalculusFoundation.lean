@@ -1960,6 +1960,44 @@ theorem effectiveRealFunRaw_mul_valid
   change RealRaw.ValidCompute (RealRaw.mulCompute X Y)
   exact hproduct
 
+/-! Function-level representation equivalence records the same domain and a
+pointwise raw-real equivalence.  This is the lightweight bridge needed when a
+later proof switches between two certified implementations of one function. -/
+def RealFunRaw.EquivOn (f g : RealFunRaw) : Prop :=
+  f.domain = g.domain /\
+    ∀ x, f.domain x ->
+      ({ compute := f.compute x } : RealRaw).Equiv
+        ({ compute := g.compute x } : RealRaw)
+
+theorem effectiveRealFunRaw_mul_equivOn
+    {f f' g g' : RealFunRaw}
+    (hf : f.Valid) (hf' : f'.Valid)
+    (hg : g.Valid) (hg' : g'.Valid)
+    (hff : f.EquivOn f') (hgg : g.EquivOn g') :
+    (RealFunRaw.mul f g).EquivOn (RealFunRaw.mul f' g') := by
+  constructor
+  · funext x
+    simp only [RealFunRaw.mul]
+    rw [hff.1, hgg.1]
+  · intro x hx
+    have hfx : f.domain x := hx.1
+    have hgx : g.domain x := hx.2
+    let X : RealRaw := { compute := f.compute x }
+    let X' : RealRaw := { compute := f'.compute x }
+    let Y : RealRaw := { compute := g.compute x }
+    let Y' : RealRaw := { compute := g'.compute x }
+    have hX : X.Valid := by
+      simpa [X, RealRaw.Valid, RealFunRaw.applyCompute] using hf x hfx
+    have hX' : X'.Valid := by
+      simpa [X', RealRaw.Valid, RealFunRaw.applyCompute] using hf' x (hff.1 ▸ hfx)
+    have hY : Y.Valid := by
+      simpa [Y, RealRaw.Valid, RealFunRaw.applyCompute] using hg x hgx
+    have hY' : Y'.Valid := by
+      simpa [Y', RealRaw.Valid, RealFunRaw.applyCompute] using hg' x (hgg.1 ▸ hgx)
+    change (X * Y).Equiv (X' * Y')
+    exact RealRaw.mul_equiv hX hX' hY hY'
+      (hff.2 x hfx) (hgg.2 x hgx)
+
 end ComputableAnalysis
 
 namespace ComputableAnalysis.ExactFunction

@@ -470,6 +470,15 @@ pointwise and inherits the rational four-corner bound.
 
 \lean{ComputableAnalysis.effectiveRealFunRaw_mul_valid}
 \leanok
+
+An implementation change can be transported compositionally as well.  The
+new `EquivOn` relation records common rational domain and pointwise raw-real
+overlap; multiplication preserves it, so proofs may switch between certified
+function evaluators without rebuilding the product argument.
+
+\lean{ComputableAnalysis.RealFunRaw.EquivOn}
+\lean{ComputableAnalysis.effectiveRealFunRaw_mul_equivOn}
+\leanok
 \lean{ComputableAnalysis.RealRaw.mul_valid}
 \lean{ComputableAnalysis.RealRaw.mul_equiv}
 \leanok
