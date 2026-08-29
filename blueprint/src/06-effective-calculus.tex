@@ -499,14 +499,17 @@ by complex special functions and Fourier constructions.
 \lean{ComputableAnalysis.effectiveComplexRaw_one_mul_equiv}
 \lean{ComputableAnalysis.effectiveComplexRaw_mul_zero_equiv}
 \lean{ComputableAnalysis.effectiveComplexRaw_zero_mul_equiv}
+\lean{ComputableAnalysis.effectiveComplexRaw_mul_comm_equiv}
 \lean{ComputableAnalysis.FunctionRaw.mul_one_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.one_mul_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.mul_zero_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.zero_mul_agreeOnCommonDomain}
+\lean{ComputableAnalysis.FunctionRaw.mul_comm_agreeOnCommonDomain}
 \lean{ComputableAnalysis.ComplexFunction.mul_one_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.one_mul_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.mul_zero_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.zero_mul_representation_agrees_preferred}
+\lean{ComputableAnalysis.ComplexFunction.mul_comm_representation_agrees_preferred}
 \leanok
 
 The corresponding zero laws are proved by the same four-corner calculation:
@@ -514,6 +517,11 @@ every rational box multiplied by the point box $[0,0]+i[0,0]$ overlaps the
 zero box, on either side.  Thus the multiplicative identities used by finite
 polynomial and power-series calculations are available without identifying
 raw computations definitionally.
+
+Commutativity is likewise an overlap theorem, not a definitional rewrite:
+the two four-corner products enumerate the same rational products in a
+different order.  This is enough to reorder certified finite products while
+preserving their explicit evaluators.
 
 Addition is closed by the same finite box argument, completing the basic
 complex linear-combination operations used by series prefixes.
