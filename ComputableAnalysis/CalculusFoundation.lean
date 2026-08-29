@@ -2866,6 +2866,24 @@ theorem FunctionRaw.mul_agreeOnCommonDomain
     (hff z hleft.1 hright.1)
     (hgg z hleft.2 hright.2)
 
+/-! The abstract complex-function API exposes the certified product only
+after the raw product closure has been established.  This keeps the handle
+layer honest: multiplication carries the intersection domain and inherits
+validity from the four-corner rational box product. -/
+def ComplexFunction.mul (f g : ComplexFunction) : ComplexFunction :=
+  ComplexFunction.ofRaw
+    (FunctionRaw.mul f.preferred g.preferred)
+    (FunctionRaw.mul_valid f.valid g.valid)
+
+theorem ComplexFunction.mul_representation_agrees_preferred
+    {f g : ComplexFunction}
+    (rf : ComplexFunction.Representation f)
+    (rg : ComplexFunction.Representation g) :
+    (FunctionRaw.mul rf.raw rg.raw).AgreeOnCommonDomain
+      (FunctionRaw.mul f.preferred g.preferred) := by
+  exact FunctionRaw.mul_agreeOnCommonDomain
+    rf.valid f.valid rg.valid g.valid rf.agrees rg.agrees
+
 end ComputableAnalysis
 
 namespace ComputableAnalysis.ExactFunction
