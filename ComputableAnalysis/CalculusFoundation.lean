@@ -2204,6 +2204,10 @@ def FunctionRaw.one : FunctionRaw where
   domain := fun _ => True
   compute := fun _ _ _ => QBox.point QComplex.one
 
+def FunctionRaw.constant (c : QComplex) : FunctionRaw where
+  domain := fun _ => True
+  compute := fun _ _ _ => QBox.point c
+
 theorem FunctionRaw.zero_valid : FunctionRaw.zero.Valid := by
   intro z hz
   change ComplexRaw.zero.Valid
@@ -2213,6 +2217,20 @@ theorem FunctionRaw.one_valid : FunctionRaw.one.Valid := by
   intro z hz
   change ComplexRaw.ofQComplex QComplex.one |>.Valid
   exact ComplexRaw.ofQComplex_valid QComplex.one
+
+theorem FunctionRaw.constant_valid (c : QComplex) :
+    (FunctionRaw.constant c).Valid := by
+  intro z hz
+  change (ComplexRaw.ofQComplex c).Valid
+  exact ComplexRaw.ofQComplex_valid c
+
+theorem FunctionRaw.constant_agreeOnCommonDomain (c : QComplex) :
+    (FunctionRaw.constant c).AgreeOnCommonDomain
+      (FunctionRaw.constant c) := by
+  intro z hleft hright
+  exact ComplexRaw.equiv_refl
+    ((FunctionRaw.constant c).evalRaw z hleft)
+    (FunctionRaw.constant_valid c z hleft)
 
 theorem effectiveMulRealInterval_one_overlap {a b : Rat} (hab : a <= b) :
     QInterval.Overlaps
@@ -3448,6 +3466,48 @@ theorem FunctionRaw.neg_mul_agreeOnCommonDomain
   exact effectiveComplexRaw_neg_mul_equiv
     (hf z hleft.1) (hg z hleft.2)
 
+def FunctionRaw.polynomial (coeffs : List QComplex) (f : FunctionRaw) : FunctionRaw :=
+  coeffs.foldr
+    (fun c acc => FunctionRaw.add (FunctionRaw.constant c)
+      (FunctionRaw.mul f acc))
+    FunctionRaw.zero
+
+theorem FunctionRaw.polynomial_valid
+    (coeffs : List QComplex) {f : FunctionRaw} (hf : f.Valid) :
+    (FunctionRaw.polynomial coeffs f).Valid := by
+  induction coeffs with
+  | nil => exact FunctionRaw.zero_valid
+  | cons c cs ih =>
+    change (FunctionRaw.add (FunctionRaw.constant c)
+      (FunctionRaw.mul f (FunctionRaw.polynomial cs f))).Valid
+    exact FunctionRaw.add_valid (FunctionRaw.constant_valid c)
+      (FunctionRaw.mul_valid hf ih)
+
+theorem FunctionRaw.polynomial_agreeOnCommonDomain
+    (coeffs : List QComplex) {f g : FunctionRaw}
+    (hf : f.Valid) (hg : g.Valid)
+    (hfg : f.AgreeOnCommonDomain g) :
+    (FunctionRaw.polynomial coeffs f).AgreeOnCommonDomain
+      (FunctionRaw.polynomial coeffs g) := by
+  induction coeffs with
+  | nil => exact FunctionRaw.zero_agreeOnCommonDomain
+  | cons c cs ih =>
+    change (FunctionRaw.add (FunctionRaw.constant c)
+      (FunctionRaw.mul f (FunctionRaw.polynomial cs f))).AgreeOnCommonDomain
+      (FunctionRaw.add (FunctionRaw.constant c)
+        (FunctionRaw.mul g (FunctionRaw.polynomial cs g)))
+    exact FunctionRaw.add_agreeOnCommonDomain
+      (FunctionRaw.constant_valid c) (FunctionRaw.constant_valid c)
+      (FunctionRaw.mul_valid hf (FunctionRaw.polynomial_valid cs hf))
+      (FunctionRaw.mul_valid hg (FunctionRaw.polynomial_valid cs hg))
+      (FunctionRaw.constant_agreeOnCommonDomain c)
+      (FunctionRaw.mul_agreeOnCommonDomain (f := f) (f' := g)
+        (g := FunctionRaw.polynomial cs f)
+        (g' := FunctionRaw.polynomial cs g) hf hg
+        (FunctionRaw.polynomial_valid cs hf)
+        (FunctionRaw.polynomial_valid cs hg)
+        hfg ih)
+
 /-! The abstract complex-function API exposes the certified product only
 after the raw product closure has been established.  This keeps the handle
 layer honest: multiplication carries the intersection domain and inherits
@@ -3461,6 +3521,17 @@ def ComplexFunction.pow (f : ComplexFunction) (n : Nat) : ComplexFunction :=
   ComplexFunction.ofRaw
     (FunctionRaw.pow f.preferred n)
     (FunctionRaw.pow_valid f.valid)
+
+def ComplexFunction.constant (c : QComplex) : ComplexFunction :=
+  ComplexFunction.ofRaw
+    (FunctionRaw.constant c)
+    (FunctionRaw.constant_valid c)
+
+def ComplexFunction.polynomial
+    (coeffs : List QComplex) (f : ComplexFunction) : ComplexFunction :=
+  ComplexFunction.ofRaw
+    (FunctionRaw.polynomial coeffs f.preferred)
+    (FunctionRaw.polynomial_valid coeffs f.valid)
 
 theorem ComplexFunction.mul_one_representation_agrees_preferred
     (f : ComplexFunction) :
@@ -3548,6 +3619,14 @@ theorem ComplexFunction.pow_representation_agrees_preferred
       (FunctionRaw.pow f.preferred n) := by
   exact FunctionRaw.pow_agreeOnCommonDomain
     rf.valid f.valid rf.agrees n
+
+theorem ComplexFunction.polynomial_representation_agrees_preferred
+    {f : ComplexFunction} (coeffs : List QComplex)
+    (rf : ComplexFunction.Representation f) :
+    (FunctionRaw.polynomial coeffs rf.raw).AgreeOnCommonDomain
+      (FunctionRaw.polynomial coeffs f.preferred) := by
+  exact FunctionRaw.polynomial_agreeOnCommonDomain
+    coeffs rf.valid f.valid rf.agrees
 
 theorem ComplexFunction.mul_neg_representation_agrees_preferred
     (f g : ComplexFunction) :

@@ -493,6 +493,8 @@ by complex special functions and Fourier constructions.
 \lean{ComputableAnalysis.FunctionRaw.mul_agreeOnCommonDomain}
 \lean{ComputableAnalysis.ComplexFunction.mul}
 \lean{ComputableAnalysis.ComplexFunction.pow}
+\lean{ComputableAnalysis.ComplexFunction.constant}
+\lean{ComputableAnalysis.ComplexFunction.polynomial}
 \lean{ComputableAnalysis.ComplexFunction.mul_representation_agrees_preferred}
 \lean{ComputableAnalysis.effectiveMulRealInterval_one_overlap}
 \lean{ComputableAnalysis.effectiveMulRealInterval_zero}
@@ -517,6 +519,12 @@ by complex special functions and Fourier constructions.
 \lean{ComputableAnalysis.FunctionRaw.pow_valid}
 \lean{ComputableAnalysis.FunctionRaw.one_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.pow_agreeOnCommonDomain}
+\lean{ComputableAnalysis.FunctionRaw.constant}
+\lean{ComputableAnalysis.FunctionRaw.constant_valid}
+\lean{ComputableAnalysis.FunctionRaw.constant_agreeOnCommonDomain}
+\lean{ComputableAnalysis.FunctionRaw.polynomial}
+\lean{ComputableAnalysis.FunctionRaw.polynomial_valid}
+\lean{ComputableAnalysis.FunctionRaw.polynomial_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.mul_add_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.add_mul_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.mul_neg_agreeOnCommonDomain}
@@ -528,6 +536,7 @@ by complex special functions and Fourier constructions.
 \lean{ComputableAnalysis.ComplexFunction.mul_comm_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.mul_assoc_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.pow_representation_agrees_preferred}
+\lean{ComputableAnalysis.ComplexFunction.polynomial_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.mul_add_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.add_mul_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.mul_neg_representation_agrees_preferred}
@@ -555,6 +564,12 @@ Finite powers are defined recursively from the certified one and product
 operations.  Validity and representation transport follow by induction, so a
 polynomial may be evaluated with repeated products without introducing a
 separate real-number power operation.
+
+The resulting Horner evaluator is a finite polynomial over a certified
+complex function: coefficients are rational complex points, constants are
+exact point boxes, and each step is addition after multiplication.  Its
+validity and transport proofs are structural inductions on the coefficient
+list, making this the common entry point for polynomial calculus.
 
 Negated factors are handled by the same center-point argument.  The box
 operation reverses endpoints, and the exact rational identity
