@@ -706,6 +706,11 @@ When two certified views share a rational input, the preferred view supplies
 the spanning comparison:
 \lean{ComputableAnalysis.PartialRealFunction.Representation.equiv_on_common_domain}
 \lean{ComputableAnalysis.PartialRealFunction.Representation.overlapsAt_on_common_domain}
+When registering a new partial-function computation through an existing
+representation, use the parent-relative constructor and its transport lemmas:
+\lean{ComputableAnalysis.PartialRealFunction.withAlternativeFrom}
+\lean{ComputableAnalysis.PartialRealFunction.withAlternativeFrom_equiv_preferred}
+\lean{ComputableAnalysis.PartialRealFunction.withAlternativeFrom_overlaps_preferred}
 This is a domain-aware transport theorem, not an assertion that unrelated
 partial functions agree outside their certified overlap.
 \end{definition}

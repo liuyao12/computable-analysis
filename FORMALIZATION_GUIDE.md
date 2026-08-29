@@ -353,6 +353,12 @@ any target representation at a shared rational input.  The theorem transports
 through the preferred evaluator and keeps domain hypotheses explicit; it does
 not pretend that two representations agree outside their common domain.
 
+When a new evaluator is certified through an existing representation, use
+`PartialRealFunction.withAlternativeFrom` with explicit domain coverage and
+pointwise equivalence.  Its `...equiv_preferred` and
+`...overlaps_preferred` lemmas expose the composed path and the resulting
+stagewise interval overlap.
+
 Recommended pattern:
 
 ```lean
