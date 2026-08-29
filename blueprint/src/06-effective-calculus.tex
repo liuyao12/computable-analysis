@@ -523,6 +523,7 @@ by complex special functions and Fourier constructions.
 \lean{ComputableAnalysis.FunctionRaw.constant_valid}
 \lean{ComputableAnalysis.FunctionRaw.constant_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.polynomial}
+\lean{ComputableAnalysis.FunctionRaw.polynomial_compute}
 \lean{ComputableAnalysis.FunctionRaw.polynomial_valid}
 \lean{ComputableAnalysis.FunctionRaw.polynomial_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.mul_add_agreeOnCommonDomain}
@@ -570,6 +571,10 @@ complex function: coefficients are rational complex points, constants are
 exact point boxes, and each step is addition after multiplication.  Its
 validity and transport proofs are structural inductions on the coefficient
 list, making this the common entry point for polynomial calculus.
+
+The computation equation identifies this function-level evaluator with the
+existing rational-box polynomial evaluator, so its enclosure and root-exclusion
+lemmas can be reused directly.
 
 Negated factors are handled by the same center-point argument.  The box
 operation reverses endpoints, and the exact rational identity

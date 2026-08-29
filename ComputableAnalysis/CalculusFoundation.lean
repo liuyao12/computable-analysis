@@ -3472,6 +3472,26 @@ def FunctionRaw.polynomial (coeffs : List QComplex) (f : FunctionRaw) : Function
       (FunctionRaw.mul f acc))
     FunctionRaw.zero
 
+theorem FunctionRaw.polynomial_compute
+    (coeffs : List QComplex) {f : FunctionRaw} {z : QComplex}
+    (hz : f.domain z) (n : Nat)
+    (h : (FunctionRaw.polynomial coeffs f).domain z) :
+    (FunctionRaw.polynomial coeffs f).compute z h n =
+      QBox.evalPoly coeffs (f.compute z hz n) := by
+  induction coeffs with
+  | nil => rfl
+  | cons c cs ih =>
+    change (FunctionRaw.add (FunctionRaw.constant c)
+      (FunctionRaw.mul f (FunctionRaw.polynomial cs f))).compute z h n =
+      QBox.add (QBox.point c)
+        (QBox.mul (f.compute z hz n) (QBox.evalPoly cs (f.compute z hz n)))
+    change QBox.add (QBox.point c)
+        (QBox.mul (f.compute z hz n)
+          ((FunctionRaw.polynomial cs f).compute z _ n)) =
+      QBox.add (QBox.point c)
+        (QBox.mul (f.compute z hz n) (QBox.evalPoly cs (f.compute z hz n)))
+    rw [ih]
+
 theorem FunctionRaw.polynomial_valid
     (coeffs : List QComplex) {f : FunctionRaw} (hf : f.Valid) :
     (FunctionRaw.polynomial coeffs f).Valid := by
