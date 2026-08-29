@@ -5147,6 +5147,22 @@ def withAlternativeFrom (z : Complex) (parent : Representation z)
         rep.valid (ComplexRaw.equiv_symm parent.agrees) (ComplexRaw.equiv_symm h) } ::
       z.implementations
 
+/-! Parent-relative registration composes the new local edge with the
+    existing path to the preferred complex computation. -/
+theorem withAlternativeFrom_equiv_preferred (z : Complex)
+    (parent : Representation z) (rep : ComplexCert)
+    (h : rep.raw.Equiv parent.cert.raw) :
+    rep.raw.Equiv z.preferred.raw := by
+  exact ComplexRaw.equiv_trans rep.valid parent.cert.valid
+    z.preferred.valid h parent.agrees
+
+theorem withAlternativeFrom_overlaps_preferred (z : Complex)
+    (parent : Representation z) (rep : ComplexCert)
+    (h : rep.raw.Equiv parent.cert.raw) (stage : Nat) :
+    QBox.Overlaps (rep.raw.compute stage) (z.preferred.raw.compute stage) := by
+  exact (ComplexRaw.compareAt_overlap_iff rep.raw z.preferred.raw stage stage).1
+    (withAlternativeFrom_equiv_preferred z parent rep h stage)
+
 def withAlternativeFromImplementation (z : Complex)
     (parent : ComplexImplementation z.preferred.raw)
     (rep : ComplexCert) (h : rep.raw.Equiv parent.cert.raw) : Complex where
@@ -5156,6 +5172,20 @@ def withAlternativeFromImplementation (z : Complex)
       equivalent := ComplexRaw.equiv_trans z.preferred.valid parent.cert.valid
         rep.valid parent.equivalent (ComplexRaw.equiv_symm h) } ::
       z.implementations
+
+theorem withAlternativeFromImplementation_equiv_preferred (z : Complex)
+    (parent : ComplexImplementation z.preferred.raw) (rep : ComplexCert)
+    (h : rep.raw.Equiv parent.cert.raw) :
+    rep.raw.Equiv z.preferred.raw := by
+  exact ComplexRaw.equiv_trans rep.valid parent.cert.valid
+    z.preferred.valid h (ComplexRaw.equiv_symm parent.equivalent)
+
+theorem withAlternativeFromImplementation_overlaps_preferred (z : Complex)
+    (parent : ComplexImplementation z.preferred.raw) (rep : ComplexCert)
+    (h : rep.raw.Equiv parent.cert.raw) (stage : Nat) :
+    QBox.Overlaps (rep.raw.compute stage) (z.preferred.raw.compute stage) := by
+  exact (ComplexRaw.compareAt_overlap_iff rep.raw z.preferred.raw stage stage).1
+    (withAlternativeFromImplementation_equiv_preferred z parent rep h stage)
 
 def computeUsing {z : Complex} (rep : Representation z) (n : Nat) : QBox :=
   rep.cert.raw.compute n
