@@ -4957,6 +4957,9 @@ ComputableAnalysis.RealRaw.mul_compute_ordered
 ComputableAnalysis.RealRaw.mul_compute_nested
 ComputableAnalysis.effectiveRealFunRaw_mul_valid
 ComputableAnalysis.RealFunRaw.EquivOn
+ComputableAnalysis.RealFunRaw.equivOn_refl
+ComputableAnalysis.RealFunRaw.equivOn_symm
+ComputableAnalysis.RealFunRaw.equivOn_trans
 ComputableAnalysis.effectiveRealFunRaw_mul_equivOn
 ComputableAnalysis.RealRaw.mul_valid
 ComputableAnalysis.RealRaw.mul_equiv

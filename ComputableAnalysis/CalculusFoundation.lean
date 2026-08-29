@@ -1969,6 +1969,41 @@ def RealFunRaw.EquivOn (f g : RealFunRaw) : Prop :=
       ({ compute := f.compute x } : RealRaw).Equiv
         ({ compute := g.compute x } : RealRaw)
 
+theorem RealFunRaw.equivOn_refl (f : RealFunRaw) (hf : f.Valid) :
+    f.EquivOn f := by
+  constructor
+  · rfl
+  · intro x hx
+    exact RealRaw.equiv_refl { compute := f.compute x } (hf x hx)
+
+theorem RealFunRaw.equivOn_symm {f g : RealFunRaw}
+    (hfg : f.EquivOn g) : g.EquivOn f := by
+  constructor
+  · exact hfg.1.symm
+  · intro x hx
+    exact RealRaw.equiv_symm (hfg.2 x (hfg.1.symm ▸ hx))
+
+theorem RealFunRaw.equivOn_trans {f g h : RealFunRaw}
+    (hf : f.Valid) (hg : g.Valid) (hh : h.Valid)
+    (hfg : f.EquivOn g) (hgh : g.EquivOn h) :
+    f.EquivOn h := by
+  constructor
+  · exact hfg.1.trans hgh.1
+  · intro x hx
+    let F : RealRaw := { compute := f.compute x }
+    let G : RealRaw := { compute := g.compute x }
+    let H : RealRaw := { compute := h.compute x }
+    have hF : F.Valid := by
+      simpa [F, RealRaw.Valid, RealFunRaw.applyCompute] using hf x hx
+    have hG : G.Valid := by
+      simpa [G, RealRaw.Valid, RealFunRaw.applyCompute] using
+        hg x (hfg.1 ▸ hx)
+    have hH : H.Valid := by
+      simpa [H, RealRaw.Valid, RealFunRaw.applyCompute] using
+        hh x (hgh.1 ▸ (hfg.1 ▸ hx))
+    exact RealRaw.equiv_trans hF hG hH
+      (hfg.2 x hx) (hgh.2 x (hfg.1 ▸ hx))
+
 theorem effectiveRealFunRaw_mul_equivOn
     {f f' g g' : RealFunRaw}
     (hf : f.Valid) (hf' : f'.Valid)
