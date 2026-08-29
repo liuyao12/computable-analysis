@@ -3285,6 +3285,34 @@ theorem FunctionRaw.mul_assoc_agreeOnCommonDomain
   exact effectiveComplexRaw_mul_assoc_equiv
     (hf z hleft.1.1) (hg z hleft.1.2) (hh z hleft.2)
 
+def FunctionRaw.pow (f : FunctionRaw) : Nat -> FunctionRaw
+  | 0 => FunctionRaw.one
+  | n + 1 => FunctionRaw.mul (FunctionRaw.pow f n) f
+
+theorem FunctionRaw.pow_valid {f : FunctionRaw} (hf : f.Valid) :
+    (FunctionRaw.pow f n).Valid := by
+  induction n with
+  | zero => exact FunctionRaw.one_valid
+  | succ n ih => exact FunctionRaw.mul_valid ih hf
+
+theorem FunctionRaw.one_agreeOnCommonDomain :
+    FunctionRaw.one.AgreeOnCommonDomain FunctionRaw.one := by
+  intro z hleft hright
+  exact ComplexRaw.equiv_refl
+    (FunctionRaw.one.evalRaw z hleft)
+    (FunctionRaw.one_valid z hleft)
+
+theorem FunctionRaw.pow_agreeOnCommonDomain
+    {f g : FunctionRaw} (hf : f.Valid) (hg : g.Valid)
+    (hfg : f.AgreeOnCommonDomain g) (n : Nat) :
+    (FunctionRaw.pow f n).AgreeOnCommonDomain
+      (FunctionRaw.pow g n) := by
+  induction n with
+  | zero => exact FunctionRaw.one_agreeOnCommonDomain
+  | succ n ih =>
+    exact FunctionRaw.mul_agreeOnCommonDomain
+      (FunctionRaw.pow_valid hf) (FunctionRaw.pow_valid hg) hf hg ih hfg
+
 theorem FunctionRaw.mul_add_agreeOnCommonDomain
     {f g h : FunctionRaw} (hf : f.Valid) (hg : g.Valid) (hh : h.Valid) :
     (FunctionRaw.mul f (FunctionRaw.add g h)).AgreeOnCommonDomain
@@ -3326,6 +3354,11 @@ def ComplexFunction.mul (f g : ComplexFunction) : ComplexFunction :=
   ComplexFunction.ofRaw
     (FunctionRaw.mul f.preferred g.preferred)
     (FunctionRaw.mul_valid f.valid g.valid)
+
+def ComplexFunction.pow (f : ComplexFunction) (n : Nat) : ComplexFunction :=
+  ComplexFunction.ofRaw
+    (FunctionRaw.pow f.preferred n)
+    (FunctionRaw.pow_valid f.valid)
 
 theorem ComplexFunction.mul_one_representation_agrees_preferred
     (f : ComplexFunction) :
@@ -3406,6 +3439,13 @@ theorem ComplexFunction.mul_representation_agrees_preferred
       (FunctionRaw.mul f.preferred g.preferred) := by
   exact FunctionRaw.mul_agreeOnCommonDomain
     rf.valid f.valid rg.valid g.valid rf.agrees rg.agrees
+
+theorem ComplexFunction.pow_representation_agrees_preferred
+    {f : ComplexFunction} (rf : ComplexFunction.Representation f) (n : Nat) :
+    (FunctionRaw.pow rf.raw n).AgreeOnCommonDomain
+      (FunctionRaw.pow f.preferred n) := by
+  exact FunctionRaw.pow_agreeOnCommonDomain
+    rf.valid f.valid rf.agrees n
 
 end ComputableAnalysis
 

@@ -492,6 +492,7 @@ by complex special functions and Fourier constructions.
 \lean{ComputableAnalysis.FunctionRaw.mul_valid}
 \lean{ComputableAnalysis.FunctionRaw.mul_agreeOnCommonDomain}
 \lean{ComputableAnalysis.ComplexFunction.mul}
+\lean{ComputableAnalysis.ComplexFunction.pow}
 \lean{ComputableAnalysis.ComplexFunction.mul_representation_agrees_preferred}
 \lean{ComputableAnalysis.effectiveMulRealInterval_one_overlap}
 \lean{ComputableAnalysis.effectiveMulRealInterval_zero}
@@ -510,6 +511,10 @@ by complex special functions and Fourier constructions.
 \lean{ComputableAnalysis.FunctionRaw.zero_mul_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.mul_comm_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.mul_assoc_agreeOnCommonDomain}
+\lean{ComputableAnalysis.FunctionRaw.pow}
+\lean{ComputableAnalysis.FunctionRaw.pow_valid}
+\lean{ComputableAnalysis.FunctionRaw.one_agreeOnCommonDomain}
+\lean{ComputableAnalysis.FunctionRaw.pow_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.mul_add_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.add_mul_agreeOnCommonDomain}
 \lean{ComputableAnalysis.ComplexFunction.mul_one_representation_agrees_preferred}
@@ -518,6 +523,7 @@ by complex special functions and Fourier constructions.
 \lean{ComputableAnalysis.ComplexFunction.zero_mul_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.mul_comm_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.mul_assoc_representation_agrees_preferred}
+\lean{ComputableAnalysis.ComplexFunction.pow_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.mul_add_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.add_mul_representation_agrees_preferred}
 \leanok
@@ -538,6 +544,11 @@ boxes.  Both parenthesizations contain the same finite complex product by
 the box soundness theorem, so they overlap even though their computed boxes
 need not be definitionally equal.  This is the reassociation rule needed by
 Horner evaluation and finite power-series prefixes.
+
+Finite powers are defined recursively from the certified one and product
+operations.  Validity and representation transport follow by induction, so a
+polynomial may be evaluated with repeated products without introducing a
+separate real-number power operation.
 
 Addition is closed by the same finite box argument, completing the basic
 complex linear-combination operations used by series prefixes.
