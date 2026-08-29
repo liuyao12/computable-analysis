@@ -93,7 +93,10 @@ That bridge is now represented by the checked
    equivalence.
    The separate algorithm-compatibility obligation is represented by
    `TangentSquareFTCIntegralCompatibilitySubgoal`: stagewise overlap between
-   the effective FTC bounded-sum raw and the independent dyadic anchor.
+   the effective FTC bounded-sum raw and the independent dyadic anchor.  The
+   focused calculus entry point now exposes the same closure through
+   `effectiveTangentSquareIntegral_equiv_halfQuarterTurn_of_overlap`; users
+   only need to provide the stagewise rational overlap certificate.
    Its concrete form is `TangentSquareFTCIntegralCommonWitness`, four rational
    inequalities per stage that produce this overlap automatically.
    The first unscaled anchor check remains executable as

@@ -117,6 +117,12 @@ and a checked certificate.  A `structure`, a `Prop`, or a `noncomputable def`
 may organize the API, but does not by itself count as a completed
 formalization.
 
+For the squared-sine tangent-chart route, the public closure theorem is
+`effectiveTangentSquareIntegral_equiv_halfQuarterTurn_of_overlap` in
+`ComputableAnalysis.CalculusFoundation`.  Supply its finite stagewise
+rational overlap certificate; the effective FTC and quarter-turn transport
+are already assembled.
+
 ## Fast navigation
 
 Start with the smallest target module rather than importing
