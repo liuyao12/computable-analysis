@@ -1960,6 +1960,63 @@ theorem effectiveRealFunRaw_mul_valid
   change RealRaw.ValidCompute (RealRaw.mulCompute X Y)
   exact hproduct
 
+/-! Addition has the same representation-transport property as multiplication.
+The proof is pointwise rational box arithmetic: overlapping input boxes give
+overlapping sums. -/
+theorem effectiveComplexRaw_add_equiv
+    {z z' w w' : ComplexRaw}
+    (hz : z.Valid) (hz' : z'.Valid)
+    (hw : w.Valid) (hw' : w'.Valid)
+    (hzz' : z.Equiv z') (hww' : w.Equiv w') :
+    (ComplexRaw.add z w).Equiv (ComplexRaw.add z' w') := by
+  intro n
+  have hzz := (ComplexRaw.compareAt_overlap_iff z z' n n).1 (hzz' n)
+  have hww := (ComplexRaw.compareAt_overlap_iff w w' n n).1 (hww' n)
+  apply (ComplexRaw.compareAt_overlap_iff
+    (ComplexRaw.add z w) (ComplexRaw.add z' w') n n).2
+  unfold ComplexRaw.add QBox.add QBox.Overlaps QComplex.add at *
+  simp only [QComplex.le_def] at hzz hww
+  constructor
+  · constructor <;> grind [Rat.add_assoc]
+  · constructor <;> grind [Rat.add_assoc]
+
+def FunctionRaw.add (f g : FunctionRaw) : FunctionRaw where
+  domain := fun z => f.domain z /\ g.domain z
+  compute := fun z hz n =>
+    QBox.add (f.compute z hz.1 n) (g.compute z hz.2 n)
+
+theorem FunctionRaw.add_valid
+    {f g : FunctionRaw} (hf : f.Valid) (hg : g.Valid) :
+    (FunctionRaw.add f g).Valid := by
+  intro z hz
+  have hadd : (ComplexRaw.add (f.evalRaw z hz.1)
+      (g.evalRaw z hz.2)).Valid :=
+    ComplexRaw.add_valid (hf z hz.1) (hg z hz.2)
+  change (ComplexRaw.add (f.evalRaw z hz.1)
+    (g.evalRaw z hz.2)).Valid at hadd
+  change (ComplexRaw.add (f.evalRaw z hz.1)
+    (g.evalRaw z hz.2)).Valid
+  exact hadd
+
+theorem FunctionRaw.add_agreeOnCommonDomain
+    {f f' g g' : FunctionRaw}
+    (hf : f.Valid) (hf' : f'.Valid)
+    (hg : g.Valid) (hg' : g'.Valid)
+    (hff : f.AgreeOnCommonDomain f')
+    (hgg : g.AgreeOnCommonDomain g') :
+    (FunctionRaw.add f g).AgreeOnCommonDomain
+      (FunctionRaw.add f' g') := by
+  intro z hleft hright
+  change (ComplexRaw.add (f.evalRaw z hleft.1)
+      (g.evalRaw z hleft.2)).Equiv
+    (ComplexRaw.add (f'.evalRaw z hright.1)
+      (g'.evalRaw z hright.2))
+  exact effectiveComplexRaw_add_equiv
+    (hf z hleft.1) (hf' z hright.1)
+    (hg z hleft.2) (hg' z hright.2)
+    (hff z hleft.1 hright.1)
+    (hgg z hleft.2 hright.2)
+
 /-! Function-level representation equivalence records the same domain and a
 pointwise raw-real equivalence.  This is the lightweight bridge needed when a
 later proof switches between two certified implementations of one function. -/

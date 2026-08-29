@@ -4964,6 +4964,10 @@ ComputableAnalysis.effectiveRealFunRaw_mul_equivOn
 ComputableAnalysis.FunctionRaw.mul
 ComputableAnalysis.FunctionRaw.mul_valid
 ComputableAnalysis.FunctionRaw.mul_agreeOnCommonDomain
+ComputableAnalysis.effectiveComplexRaw_add_equiv
+ComputableAnalysis.FunctionRaw.add
+ComputableAnalysis.FunctionRaw.add_valid
+ComputableAnalysis.FunctionRaw.add_agreeOnCommonDomain
 ComputableAnalysis.RealRaw.mul_valid
 ComputableAnalysis.RealRaw.mul_equiv
 ComputableAnalysis.FunctionOnInterval.mulOfNonnegBounded
