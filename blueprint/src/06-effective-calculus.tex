@@ -502,14 +502,22 @@ complex linear-combination operations used by series prefixes.
 \lean{ComputableAnalysis.FunctionRaw.add_agreeOnCommonDomain}
 \lean{ComputableAnalysis.effectiveComplexRaw_zero_add_equiv}
 \lean{ComputableAnalysis.effectiveComplexRaw_add_zero_equiv}
+\lean{ComputableAnalysis.effectiveComplexRaw_add_comm_equiv}
+\lean{ComputableAnalysis.effectiveComplexRaw_add_assoc_equiv}
 \lean{ComputableAnalysis.FunctionRaw.zero_add_agreeOnCommonDomain}
 \lean{ComputableAnalysis.FunctionRaw.add_zero_agreeOnCommonDomain}
+\lean{ComputableAnalysis.FunctionRaw.add_comm_agreeOnCommonDomain}
+\lean{ComputableAnalysis.FunctionRaw.add_assoc_agreeOnCommonDomain}
 \leanok
 
 The zero laws are stated on common domains: the zero computation is defined
 everywhere, while a function representation may have a restricted domain.
 This is the basic identity rule used when rearranging finite sums without
 identifying raw computations definitionally.
+
+Commutativity and associativity are proved in the same form.  They justify
+reordering and regrouping finite complex sums while retaining each evaluator
+and its domain proofs explicitly.
 
 Finite linear combinations use a single recursive constructor.  The empty
 sum is the everywhere-defined zero computation; a nonempty sum intersects
@@ -572,6 +580,8 @@ rational-box computations.
 \lean{ComputableAnalysis.ComplexFunction.zero}
 \lean{ComputableAnalysis.ComplexFunction.zero_add_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.add_zero_representation_agrees_preferred}
+\lean{ComputableAnalysis.ComplexFunction.add_comm_representation_agrees_preferred}
+\lean{ComputableAnalysis.ComplexFunction.add_assoc_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.neg}
 \lean{ComputableAnalysis.ComplexFunction.scaleRat}
 \lean{ComputableAnalysis.ComplexFunction.sub}
