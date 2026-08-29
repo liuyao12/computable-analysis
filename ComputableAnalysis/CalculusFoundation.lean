@@ -1931,6 +1931,17 @@ theorem effectiveFiniteFourierReconstruction_reconstructs
       certificate.sample k := by
   exact certificate.reconstructs hk
 
+theorem effectiveFiniteFourierReconstruction_reconstructs_of_coefficient_congr
+    (certificate : FiniteFourierReconstructionCertificate)
+    (coefficient' : Nat → QComplex)
+    (hcoeff : ∀ mode, mode ∈ certificate.orthogonality.modes →
+      coefficient' mode = certificate.coefficient mode)
+    {k : Nat} (hk : k < certificate.orthogonality.length) :
+    finiteFourierSynthesisAt certificate.orthogonality.root k
+        certificate.orthogonality.modes coefficient' =
+      certificate.sample k := by
+  exact certificate.reconstructs_of_coefficient_congr coefficient' hcoeff hk
+
 theorem effectiveFourPointComplexFourierTransform_parseval
     (x₀ x₁ x₂ x₃ : QComplex) :
     QComplex.normSq
