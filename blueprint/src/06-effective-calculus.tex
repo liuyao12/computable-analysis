@@ -500,7 +500,16 @@ complex linear-combination operations used by series prefixes.
 \lean{ComputableAnalysis.FunctionRaw.add}
 \lean{ComputableAnalysis.FunctionRaw.add_valid}
 \lean{ComputableAnalysis.FunctionRaw.add_agreeOnCommonDomain}
+\lean{ComputableAnalysis.effectiveComplexRaw_zero_add_equiv}
+\lean{ComputableAnalysis.effectiveComplexRaw_add_zero_equiv}
+\lean{ComputableAnalysis.FunctionRaw.zero_add_agreeOnCommonDomain}
+\lean{ComputableAnalysis.FunctionRaw.add_zero_agreeOnCommonDomain}
 \leanok
+
+The zero laws are stated on common domains: the zero computation is defined
+everywhere, while a function representation may have a restricted domain.
+This is the basic identity rule used when rearranging finite sums without
+identifying raw computations definitionally.
 
 Finite linear combinations use a single recursive constructor.  The empty
 sum is the everywhere-defined zero computation; a nonempty sum intersects

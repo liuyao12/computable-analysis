@@ -1980,6 +1980,52 @@ theorem effectiveComplexRaw_add_equiv
   · constructor <;> grind [Rat.add_assoc]
   · constructor <;> grind [Rat.add_assoc]
 
+/-! The additive identity is also representation transport: adding the
+canonical rational zero changes neither coordinate interval.  As with all
+function-level identities below, the statement is an equivalence of raw
+computations rather than definitional equality. -/
+theorem effectiveComplexRaw_zero_add_equiv
+    {z : ComplexRaw} (hz : z.Valid) :
+    (ComplexRaw.add ComplexRaw.zero z).Equiv z := by
+  intro n
+  have hzorder_re : (z.compute n).lo.re ≤ (z.compute n).hi.re := by
+    have h := (hz.1 n).1
+    unfold QBox.width at h
+    grind [Rat.sub_eq_add_neg]
+  have hzorder_im : (z.compute n).lo.im ≤ (z.compute n).hi.im := by
+    have h := (hz.1 n).2
+    unfold QBox.height at h
+    grind [Rat.sub_eq_add_neg]
+  apply (ComplexRaw.compareAt_overlap_iff
+    (ComplexRaw.add ComplexRaw.zero z) z n n).2
+  change QBox.Overlaps
+    (QBox.add (ComplexRaw.zero.compute n) (z.compute n)) (z.compute n)
+  unfold ComplexRaw.zero ComplexRaw.ofQComplex
+    QBox.add QBox.Overlaps QComplex.add
+  simp [QComplex.zero, QComplex.le_def]
+  constructor <;> constructor <;> grind
+
+theorem effectiveComplexRaw_add_zero_equiv
+    {z : ComplexRaw} (hz : z.Valid) :
+    (ComplexRaw.add z ComplexRaw.zero).Equiv z := by
+  intro n
+  have hzorder_re : (z.compute n).lo.re ≤ (z.compute n).hi.re := by
+    have h := (hz.1 n).1
+    unfold QBox.width at h
+    grind [Rat.sub_eq_add_neg]
+  have hzorder_im : (z.compute n).lo.im ≤ (z.compute n).hi.im := by
+    have h := (hz.1 n).2
+    unfold QBox.height at h
+    grind [Rat.sub_eq_add_neg]
+  apply (ComplexRaw.compareAt_overlap_iff
+    (ComplexRaw.add z ComplexRaw.zero) z n n).2
+  change QBox.Overlaps
+    (QBox.add (z.compute n) (ComplexRaw.zero.compute n)) (z.compute n)
+  unfold ComplexRaw.zero ComplexRaw.ofQComplex
+    QBox.add QBox.Overlaps QComplex.add
+  simp [QComplex.zero, QComplex.le_def]
+  constructor <;> constructor <;> grind
+
 def FunctionRaw.zero : FunctionRaw where
   domain := fun _ => True
   compute := fun _ _ _ => QBox.zero
@@ -2044,6 +2090,24 @@ theorem FunctionRaw.add_agreeOnCommonDomain
     (hg z hleft.2) (hg' z hright.2)
     (hff z hleft.1 hright.1)
     (hgg z hleft.2 hright.2)
+
+theorem FunctionRaw.zero_add_agreeOnCommonDomain
+    {f : FunctionRaw} (hf : f.Valid) :
+    (FunctionRaw.add FunctionRaw.zero f).AgreeOnCommonDomain f := by
+  intro z hleft hright
+  change (ComplexRaw.add
+    (FunctionRaw.zero.evalRaw z hleft.1)
+    (f.evalRaw z hleft.2)).Equiv (f.evalRaw z hright)
+  exact effectiveComplexRaw_zero_add_equiv (hf z hright)
+
+theorem FunctionRaw.add_zero_agreeOnCommonDomain
+    {f : FunctionRaw} (hf : f.Valid) :
+    (FunctionRaw.add f FunctionRaw.zero).AgreeOnCommonDomain f := by
+  intro z hleft hright
+  change (ComplexRaw.add
+    (f.evalRaw z hleft.1)
+    (FunctionRaw.zero.evalRaw z hleft.2)).Equiv (f.evalRaw z hright)
+  exact effectiveComplexRaw_add_zero_equiv (hf z hright)
 
 def FunctionRaw.sum : List FunctionRaw → FunctionRaw
   | [] => FunctionRaw.zero
