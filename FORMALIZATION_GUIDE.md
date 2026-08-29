@@ -359,6 +359,11 @@ pointwise equivalence.  Its `...equiv_preferred` and
 `...overlaps_preferred` lemmas expose the composed path and the resulting
 stagewise interval overlap.
 
+If the parent is already a registered
+`PartialRealFunctionImplementation`, use
+`PartialRealFunction.withAlternativeFromImplementation`; its corresponding
+transport lemmas provide the same preferred equivalence and box overlap.
+
 Recommended pattern:
 
 ```lean

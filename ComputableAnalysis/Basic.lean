@@ -4019,6 +4019,142 @@ def withAlternative (f : PartialRealFunction) (raw : PartialRealFunRaw)
   implementations :=
     { raw := raw, valid := hvalid, agrees := h } :: f.implementations
 
+/-! Register a partial-function implementation through an existing
+    representation.  The domain-cover hypothesis is explicit because
+    pointwise transitivity is available only where all three computations are
+    defined.  The registry stores the resulting local edge to the preferred
+    computation, so a finite spanning tree remains sufficient. -/
+def withAlternativeFrom (f : PartialRealFunction)
+    (parent : Representation f) (raw : PartialRealFunRaw)
+    (hvalid : raw.Valid)
+    (hcover : forall x, raw.definedAt x -> f.preferred.definedAt x ->
+      parent.raw.definedAt x)
+    (h : forall x (hr : raw.definedAt x) (hp : f.preferred.definedAt x),
+      (raw.evalRaw x hr).Equiv
+        (parent.raw.evalRaw x (hcover x hr hp))) : PartialRealFunction where
+  preferred := f.preferred
+  valid := f.valid
+  implementations :=
+    { raw := raw
+      valid := hvalid
+      agrees := by
+        intro x hp hr
+        have hpv : (f.preferred.evalRaw x hp).Valid := by
+          simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using f.valid x hp
+        have hparv : (parent.raw.evalRaw x (hcover x hr hp)).Valid := by
+          simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using
+            parent.valid x (hcover x hr hp)
+        have hrv : (raw.evalRaw x hr).Valid := by
+          simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using hvalid x hr
+        exact RealRaw.equiv_trans hpv hparv hrv
+          (RealRaw.equiv_symm (parent.agrees x (hcover x hr hp) hp))
+          (RealRaw.equiv_symm (h x hr hp)) } ::
+      f.implementations
+
+theorem withAlternativeFrom_equiv_preferred (f : PartialRealFunction)
+    (parent : Representation f) (raw : PartialRealFunRaw)
+    (hvalid : raw.Valid)
+    (hcover : forall x, raw.definedAt x -> f.preferred.definedAt x ->
+      parent.raw.definedAt x)
+    (h : forall x (hr : raw.definedAt x) (hp : f.preferred.definedAt x),
+      (raw.evalRaw x hr).Equiv
+        (parent.raw.evalRaw x (hcover x hr hp)))
+    {x : Rat} (hr : raw.definedAt x) (hp : f.preferred.definedAt x) :
+    (raw.evalRaw x hr).Equiv (f.preferred.evalRaw x hp) := by
+  have hpv : (f.preferred.evalRaw x hp).Valid := by
+    simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using f.valid x hp
+  have hparv : (parent.raw.evalRaw x (hcover x hr hp)).Valid := by
+    simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using
+      parent.valid x (hcover x hr hp)
+  have hrv : (raw.evalRaw x hr).Valid := by
+    simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using hvalid x hr
+  exact RealRaw.equiv_trans hrv hparv hpv (h x hr hp)
+    (parent.agrees x (hcover x hr hp) hp)
+
+theorem withAlternativeFrom_overlaps_preferred (f : PartialRealFunction)
+    (parent : Representation f) (raw : PartialRealFunRaw)
+    (hvalid : raw.Valid)
+    (hcover : forall x, raw.definedAt x -> f.preferred.definedAt x ->
+      parent.raw.definedAt x)
+    (h : forall x (hr : raw.definedAt x) (hp : f.preferred.definedAt x),
+      (raw.evalRaw x hr).Equiv
+        (parent.raw.evalRaw x (hcover x hr hp)))
+    {x : Rat} (hr : raw.definedAt x) (hp : f.preferred.definedAt x)
+    (stage : Nat) :
+    QInterval.Overlaps (raw.compute x hr stage)
+      (f.preferred.compute x hp stage) := by
+  exact (RealRaw.compareAt_overlap_iff
+    (raw.evalRaw x hr) (f.preferred.evalRaw x hp) stage stage).1
+    (withAlternativeFrom_equiv_preferred f parent raw hvalid hcover h hr hp stage)
+
+/-! The implementation-record variant avoids rebuilding a
+    `PartialRealFunction.Representation` when the parent is already in the
+    function's registry. -/
+def withAlternativeFromImplementation (f : PartialRealFunction)
+    (parent : PartialRealFunctionImplementation f.preferred)
+    (raw : PartialRealFunRaw) (hvalid : raw.Valid)
+    (hcover : forall x, raw.definedAt x -> f.preferred.definedAt x ->
+      parent.raw.definedAt x)
+    (h : forall x (hr : raw.definedAt x) (hp : f.preferred.definedAt x),
+      (raw.evalRaw x hr).Equiv
+        (parent.raw.evalRaw x (hcover x hr hp))) : PartialRealFunction where
+  preferred := f.preferred
+  valid := f.valid
+  implementations :=
+    { raw := raw
+      valid := hvalid
+      agrees := by
+        intro x hp hr
+        have hpv : (f.preferred.evalRaw x hp).Valid := by
+          simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using f.valid x hp
+        have hparv : (parent.raw.evalRaw x (hcover x hr hp)).Valid := by
+          simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using
+            parent.valid x (hcover x hr hp)
+        have hrv : (raw.evalRaw x hr).Valid := by
+          simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using hvalid x hr
+        exact RealRaw.equiv_trans hpv hparv hrv
+          (parent.agrees x hp (hcover x hr hp))
+          (RealRaw.equiv_symm (h x hr hp)) } :: f.implementations
+
+theorem withAlternativeFromImplementation_equiv_preferred
+    (f : PartialRealFunction)
+    (parent : PartialRealFunctionImplementation f.preferred)
+    (raw : PartialRealFunRaw) (hvalid : raw.Valid)
+    (hcover : forall x, raw.definedAt x -> f.preferred.definedAt x ->
+      parent.raw.definedAt x)
+    (h : forall x (hr : raw.definedAt x) (hp : f.preferred.definedAt x),
+      (raw.evalRaw x hr).Equiv
+        (parent.raw.evalRaw x (hcover x hr hp)))
+    {x : Rat} (hr : raw.definedAt x) (hp : f.preferred.definedAt x) :
+    (raw.evalRaw x hr).Equiv (f.preferred.evalRaw x hp) := by
+  have hpv : (f.preferred.evalRaw x hp).Valid := by
+    simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using f.valid x hp
+  have hparv : (parent.raw.evalRaw x (hcover x hr hp)).Valid := by
+    simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using
+      parent.valid x (hcover x hr hp)
+  have hrv : (raw.evalRaw x hr).Valid := by
+    simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using hvalid x hr
+  exact RealRaw.equiv_trans hrv hparv hpv (h x hr hp)
+    (RealRaw.equiv_symm (parent.agrees x hp (hcover x hr hp)))
+
+theorem withAlternativeFromImplementation_overlaps_preferred
+    (f : PartialRealFunction)
+    (parent : PartialRealFunctionImplementation f.preferred)
+    (raw : PartialRealFunRaw) (hvalid : raw.Valid)
+    (hcover : forall x, raw.definedAt x -> f.preferred.definedAt x ->
+      parent.raw.definedAt x)
+    (h : forall x (hr : raw.definedAt x) (hp : f.preferred.definedAt x),
+      (raw.evalRaw x hr).Equiv
+        (parent.raw.evalRaw x (hcover x hr hp)))
+    {x : Rat} (hr : raw.definedAt x) (hp : f.preferred.definedAt x)
+    (stage : Nat) :
+    QInterval.Overlaps (raw.compute x hr stage)
+      (f.preferred.compute x hp stage) := by
+  exact (RealRaw.compareAt_overlap_iff
+    (raw.evalRaw x hr) (f.preferred.evalRaw x hp) stage stage).1
+    (withAlternativeFromImplementation_equiv_preferred f parent raw hvalid
+      hcover h hr hp stage)
+
 end PartialRealFunction
 
 structure EffectiveContinuous (f : RealFunRaw) where
