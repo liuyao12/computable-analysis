@@ -2293,6 +2293,20 @@ def ComplexFunction.sum (fs : List ComplexFunction) : ComplexFunction :=
       obtain ⟨f, hf, rfl⟩ := List.mem_map.mp hraw
       exact f.valid))
 
+theorem ComplexFunction.sum_representation_agrees_preferred
+    {fs : List ComplexFunction} {alternatives : List FunctionRaw}
+    (halt : ∀ raw, raw ∈ alternatives → raw.Valid)
+    (hpair : FunctionRaw.AgreeList alternatives
+      (fs.map (fun f => f.preferred))) :
+    (FunctionRaw.sum alternatives).AgreeOnCommonDomain
+      (FunctionRaw.sum (fs.map (fun f => f.preferred))) := by
+  apply FunctionRaw.sum_agreeOnCommonDomain
+  · exact halt
+  · intro raw hraw
+    obtain ⟨f, hf, rfl⟩ := List.mem_map.mp hraw
+    exact f.valid
+  · exact hpair
+
 def ComplexFunction.linearCombination
     (terms : List (Rat × ComplexFunction)) : ComplexFunction :=
   ComplexFunction.ofRaw
