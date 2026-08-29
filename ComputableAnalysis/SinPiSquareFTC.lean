@@ -2356,6 +2356,41 @@ theorem tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn :
   TangentSquareEffectiveFTCData.integral_equiv_halfQuarterTurn
     tangentSquareEffectiveFTCData
 
+/-! The two tangent-square integrals are independent computations.  The
+effective-FTC computation uses scheduled derivative boxes, while
+`tangentSquareIntegral` uses the direct Lipschitz dyadic construction.  The
+only required bridge is therefore a finite, stagewise overlap certificate;
+no identification of their internal sums is assumed. -/
+
+structure TangentSquareIntegralEffectiveFTCOverlap where
+  overlap : forall n,
+    QInterval.Overlaps
+      (tangentSquareIntegral.compute n)
+      (tangentSquareEffectiveFTCData.integralRaw.compute n)
+
+theorem TangentSquareIntegralEffectiveFTCOverlap.to_equiv
+    (h : TangentSquareIntegralEffectiveFTCOverlap) :
+    tangentSquareIntegral.Equiv
+      tangentSquareEffectiveFTCData.integralRaw := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    tangentSquareIntegral tangentSquareEffectiveFTCData.integralRaw n n).2
+  exact h.overlap n
+
+theorem TangentSquareIntegralEffectiveFTCOverlap.to_halfQuarterTurn
+    (h : TangentSquareIntegralEffectiveFTCOverlap) :
+    tangentSquareIntegral.Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
+  exact RealRaw.equiv_trans tangentSquareIntegral_valid
+    tangentSquareEffectiveFTCData.integral_valid
+    (by
+      change (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid
+      change (RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).Valid
+      exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+        CauchyPi.piCircleArea_valid)
+    h.to_equiv tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn
+
 theorem tangentSquareEffectivePrimitive_endpoint_contains
     (C : RationalSubinterval 0 1) (δ η : QPos) (N : Nat)
     (hC : 0 < C.width) (hη : η.val = C.width * δ.val / 3)
