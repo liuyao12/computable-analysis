@@ -526,6 +526,11 @@ explicit negation transport.
 
 \lean{ComputableAnalysis.effectiveComplexRaw_scaleRat_add_equiv_of_nonneg}
 \lean{ComputableAnalysis.FunctionRaw.scaleRat_add_agreeOnCommonDomain_of_nonneg}
+The signed version has the same conclusion; its negative branch explicitly
+reverses the lower and upper endpoints before applying rational arithmetic.
+
+\lean{ComputableAnalysis.effectiveComplexRaw_scaleRat_add_equiv}
+\lean{ComputableAnalysis.FunctionRaw.scaleRat_add_agreeOnCommonDomain}
 
 Finite linear combinations use a single recursive constructor.  The empty
 sum is the everywhere-defined zero computation; a nonempty sum intersects
@@ -591,6 +596,7 @@ rational-box computations.
 \lean{ComputableAnalysis.ComplexFunction.add_comm_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.add_assoc_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.scaleRat_add_representation_agrees_preferred_of_nonneg}
+\lean{ComputableAnalysis.ComplexFunction.scaleRat_add_representation_agrees_preferred}
 \lean{ComputableAnalysis.ComplexFunction.neg}
 \lean{ComputableAnalysis.ComplexFunction.scaleRat}
 \lean{ComputableAnalysis.ComplexFunction.sub}
