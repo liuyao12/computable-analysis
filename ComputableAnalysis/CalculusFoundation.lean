@@ -2303,6 +2303,37 @@ def ComplexFunction.linearCombination
       obtain ⟨original, horiginal, rfl⟩ := List.mem_map.mp hterm
       exact original.2.valid))
 
+theorem ComplexFunction.add_representation_agrees_preferred
+    {f g : ComplexFunction}
+    (rf : ComplexFunction.Representation f)
+    (rg : ComplexFunction.Representation g) :
+    (FunctionRaw.add rf.raw rg.raw).AgreeOnCommonDomain
+      (FunctionRaw.add f.preferred g.preferred) := by
+  exact FunctionRaw.add_agreeOnCommonDomain
+    rf.valid f.valid rg.valid g.valid rf.agrees rg.agrees
+
+theorem ComplexFunction.neg_representation_agrees_preferred
+    {f : ComplexFunction} (rf : ComplexFunction.Representation f) :
+    (FunctionRaw.neg rf.raw).AgreeOnCommonDomain
+      (FunctionRaw.neg f.preferred) := by
+  exact FunctionRaw.neg_agreeOnCommonDomain rf.agrees
+
+theorem ComplexFunction.scaleRat_representation_agrees_preferred
+    {r : Rat} {f : ComplexFunction}
+    (rf : ComplexFunction.Representation f) :
+    (FunctionRaw.scaleRat r rf.raw).AgreeOnCommonDomain
+      (FunctionRaw.scaleRat r f.preferred) := by
+  exact FunctionRaw.scaleRat_agreeOnCommonDomain rf.agrees
+
+theorem ComplexFunction.sub_representation_agrees_preferred
+    {f g : ComplexFunction}
+    (rf : ComplexFunction.Representation f)
+    (rg : ComplexFunction.Representation g) :
+    (FunctionRaw.sub rf.raw rg.raw).AgreeOnCommonDomain
+      (FunctionRaw.sub f.preferred g.preferred) := by
+  exact FunctionRaw.sub_agreeOnCommonDomain
+    rf.valid f.valid rg.valid g.valid rf.agrees rg.agrees
+
 /-! Function-level representation equivalence records the same domain and a
 pointwise raw-real equivalence.  This is the lightweight bridge needed when a
 later proof switches between two certified implementations of one function. -/

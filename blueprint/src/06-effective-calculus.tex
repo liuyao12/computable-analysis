@@ -568,6 +568,17 @@ rational-box computations.
 \lean{ComputableAnalysis.FunctionRaw.linearCombination_valid}
 \lean{ComputableAnalysis.ComplexFunction.linearCombination}
 \leanok
+These operations also transport alternative implementations.  Given a
+representation of each input, the corresponding raw operation is proved to
+agree with the preferred operation; it can then be registered with
+\texttt{ComplexFunction.withAlternative}.  The spanning relation therefore
+survives algebraic construction rather than being discarded at each step.
+
+\lean{ComputableAnalysis.ComplexFunction.add_representation_agrees_preferred}
+\lean{ComputableAnalysis.ComplexFunction.neg_representation_agrees_preferred}
+\lean{ComputableAnalysis.ComplexFunction.scaleRat_representation_agrees_preferred}
+\lean{ComputableAnalysis.ComplexFunction.sub_representation_agrees_preferred}
+\leanok
 \lean{ComputableAnalysis.RealRaw.mul_valid}
 \lean{ComputableAnalysis.RealRaw.mul_equiv}
 \leanok
