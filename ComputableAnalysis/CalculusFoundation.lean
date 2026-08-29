@@ -2303,6 +2303,43 @@ def ComplexFunction.linearCombination
       obtain ⟨original, horiginal, rfl⟩ := List.mem_map.mp hterm
       exact original.2.valid))
 
+theorem ComplexFunction.linearCombination_representation_agrees_preferred
+    {terms : List (Rat × ComplexFunction)}
+    {alternatives : List (Rat × FunctionRaw)}
+    (halt : ∀ term, term ∈ alternatives → term.2.Valid)
+    (hpair : FunctionRaw.AgreeList
+      (alternatives.map (fun term =>
+        FunctionRaw.scaleRat term.1 term.2))
+      (terms.map (fun term =>
+        FunctionRaw.scaleRat term.1 term.2.preferred))) :
+    (FunctionRaw.linearCombination alternatives).AgreeOnCommonDomain
+      (FunctionRaw.linearCombination
+        (terms.map (fun term => (term.1, term.2.preferred)))) := by
+  have hsum :
+      (FunctionRaw.sum
+        (alternatives.map (fun term =>
+          FunctionRaw.scaleRat term.1 term.2))).AgreeOnCommonDomain
+        (FunctionRaw.sum
+          (terms.map (fun term =>
+            FunctionRaw.scaleRat term.1 term.2.preferred))) := by
+    apply FunctionRaw.sum_agreeOnCommonDomain
+    · intro raw hraw
+      obtain ⟨term, hterm, rfl⟩ := List.mem_map.mp hraw
+      exact FunctionRaw.scaleRat_valid (halt term hterm)
+    · intro raw hraw
+      obtain ⟨term, hterm, rfl⟩ := List.mem_map.mp hraw
+      exact FunctionRaw.scaleRat_valid term.2.valid
+    · exact hpair
+  have hmap :
+      (terms.map (fun term => (term.1, term.2.preferred))).map
+          (fun term => FunctionRaw.scaleRat term.1 term.2) =
+        terms.map (fun term =>
+          FunctionRaw.scaleRat term.1 term.2.preferred) := by
+    simp [List.map_map]
+  unfold FunctionRaw.linearCombination
+  rw [hmap]
+  exact hsum
+
 theorem ComplexFunction.add_representation_agrees_preferred
     {f g : ComplexFunction}
     (rf : ComplexFunction.Representation f)
