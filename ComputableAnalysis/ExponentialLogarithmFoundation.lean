@@ -21,6 +21,18 @@ certificates.
 
 namespace ComputableAnalysis
 
+/-! Stable foundation-level name for the centered exponential's scalar-ODE
+    representation bridge.  The finite uniqueness provider remains explicit. -/
+theorem effectiveCenteredExponential_equivalent_of_selfDerivative_unique
+    (hunique : SelfDerivativeInitialValueUnique)
+    (f : FunctionOnInterval)
+    (hf : SolvesSelfDerivativeOnInterval f)
+    (hinitial : hf.initial = 0)
+    (hvalue : hf.initial_value.Equiv (RealRaw.ofRat 1)) :
+    FunctionOnInterval.Equivalent ExpProofs.uniformExpOnSymmetricUnit f := by
+  exact ExpProofs.uniformExpOnSymmetricUnit_equivalent_of_selfDerivative_unique
+    hunique f hf hinitial hvalue
+
 /-! Small public names for the completed exp/log results in this chapter.
 The detailed proofs remain in their focused modules. -/
 
