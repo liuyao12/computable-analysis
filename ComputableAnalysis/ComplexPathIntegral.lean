@@ -739,6 +739,17 @@ theorem polygonalLeftSum_constant
           congr 1 <;> grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
             Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
 
+/-! A closed polygon has zero sampled integral for a constant differential. -/
+theorem polygonalLeftSum_constant_closed
+    (c start : QComplex) (vertices : List QComplex) (n : Nat) (hn : 0 < n)
+    (evalPrecision : Nat) :
+    polygonalLeftSumEntire (FunctionRaw.exact (fun _ => c))
+      (by intro z; change True; trivial)
+      (start :: (vertices ++ [start])) n evalPrecision =
+      QBox.point QComplex.zero := by
+  rw [polygonalLeftSum_constant c start (vertices ++ [start]) n hn evalPrecision]
+  rw [polygonalConstantDifferentialDisplacement_closed]
+
 /-- Interval enclosure for one subsegment contribution.
 
 The whole subsegment is first boxed, then `f` is evaluated on that box, and

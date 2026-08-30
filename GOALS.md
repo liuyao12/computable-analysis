@@ -5764,8 +5764,9 @@ by one for every nonempty input.
   `c * (b - a)`.  This is the first endpoint identity for the sampled path
   evaluator itself. `polygonalLeftSum_constant` assembles the same identity
   over every finite polygonal path and yields exact cancellation for closed
-  paths; convergence for nonconstant interval-valued functions remains the
-  next complex-integral bridge.
+  paths. `polygonalLeftSum_constant_closed` exposes that cancellation directly
+  for the sampled evaluator; convergence for nonconstant interval-valued
+  functions remains the next complex-integral bridge.
 
 - The finite quarter-turn checkpoint now advances benchmark item 17:
   `FiniteRotationQuarterTurnExample` evaluates the common factorial rotation
