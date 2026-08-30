@@ -68,6 +68,18 @@ theorem effectivePolygonalLeftSumRawEntire_valid
     (polygonalLeftSumRawEntire f hEntire vertices evalPrecision).Valid := by
   exact polygonalLeftSumRawEntire_valid certificate
 
+/-! Public path-integral convergence bridge.  A stagewise overlap certificate
+identifies the executable left-sum and interval-box representations without
+introducing a classical path limit. -/
+theorem effectivePolygonalLeftSumIntegral_equiv
+    {f : FunctionRaw} {hEntire : forall z, f.domain z}
+    {boxFunction : EntireBoxFunctionRaw} {vertices : List QComplex}
+    {evalPrecision : Nat -> Nat}
+    (certificate : PolygonalLeftSumIntegralOverlapCertificate f hEntire
+      boxFunction vertices evalPrecision) :
+    certificate.leftRaw.Equiv certificate.intervalRaw := by
+  exact certificate.equiv
+
 end ComputableAnalysis.ComplexPathIntegral
 
 namespace ComputableAnalysis

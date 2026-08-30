@@ -46,8 +46,70 @@ theorem polygonalLeftSumRawEntire_valid
     exact (QBox.ordered_iff_width_height_nonneg _).1
       (certificate.ordered n)
   · intro n m hnm
-    have hnest := certificate.nested n m hnm
+    have hnest := @PolygonalLeftSumCertificate.nested f hEntire vertices
+      evalPrecision certificate n m hnm
     exact ⟨hnest.1.1, hnest.2.1, hnest.1.2, hnest.2.2⟩
+
+/-! A representation-level convergence certificate for polygonal integration.
+The two algorithms need not share an evaluator or a rate: same-stage box
+overlap, together with the two validity certificates, is the complete
+computable obligation for identifying them. -/
+structure PolygonalLeftSumIntegralOverlapCertificate
+    (f : FunctionRaw) (hEntire : forall z, f.domain z)
+    (boxFunction : EntireBoxFunctionRaw) (vertices : List QComplex)
+    (evalPrecision : Nat -> Nat) where
+  left_sum : PolygonalLeftSumCertificate f hEntire vertices evalPrecision
+  interval_integral : PolygonalIntegralCertificate boxFunction vertices
+  overlap : forall n,
+    QBox.Overlaps
+      ((polygonalLeftSumRawEntire f hEntire vertices evalPrecision).compute n)
+      ((polygonalIntegralRawEntire boxFunction vertices).compute n)
+
+def PolygonalLeftSumIntegralOverlapCertificate.leftRaw
+    {f : FunctionRaw} {hEntire : forall z, f.domain z}
+    {boxFunction : EntireBoxFunctionRaw} {vertices : List QComplex}
+    {evalPrecision : Nat -> Nat}
+    (_certificate : PolygonalLeftSumIntegralOverlapCertificate f hEntire
+      boxFunction vertices evalPrecision) : ComplexRaw :=
+  polygonalLeftSumRawEntire f hEntire vertices evalPrecision
+
+def PolygonalLeftSumIntegralOverlapCertificate.intervalRaw
+    {f : FunctionRaw} {hEntire : forall z, f.domain z}
+    {boxFunction : EntireBoxFunctionRaw} {vertices : List QComplex}
+    {evalPrecision : Nat -> Nat}
+    (_certificate : PolygonalLeftSumIntegralOverlapCertificate f hEntire
+      boxFunction vertices evalPrecision) : ComplexRaw :=
+  polygonalIntegralRawEntire boxFunction vertices
+
+theorem PolygonalLeftSumIntegralOverlapCertificate.leftRaw_valid
+    {f : FunctionRaw} {hEntire : forall z, f.domain z}
+    {boxFunction : EntireBoxFunctionRaw} {vertices : List QComplex}
+    {evalPrecision : Nat -> Nat}
+    (certificate : PolygonalLeftSumIntegralOverlapCertificate f hEntire
+      boxFunction vertices evalPrecision) :
+    certificate.leftRaw.Valid := by
+  exact polygonalLeftSumRawEntire_valid certificate.left_sum
+
+theorem PolygonalLeftSumIntegralOverlapCertificate.intervalRaw_valid
+    {f : FunctionRaw} {hEntire : forall z, f.domain z}
+    {boxFunction : EntireBoxFunctionRaw} {vertices : List QComplex}
+    {evalPrecision : Nat -> Nat}
+    (certificate : PolygonalLeftSumIntegralOverlapCertificate f hEntire
+      boxFunction vertices evalPrecision) :
+    certificate.intervalRaw.Valid := by
+  exact polygonalIntegralRawEntire_valid certificate.interval_integral
+
+theorem PolygonalLeftSumIntegralOverlapCertificate.equiv
+    {f : FunctionRaw} {hEntire : forall z, f.domain z}
+    {boxFunction : EntireBoxFunctionRaw} {vertices : List QComplex}
+    {evalPrecision : Nat -> Nat}
+    (certificate : PolygonalLeftSumIntegralOverlapCertificate f hEntire
+      boxFunction vertices evalPrecision) :
+    certificate.leftRaw.Equiv certificate.intervalRaw := by
+  intro n
+  exact (ComplexRaw.compareAt_overlap_iff
+    certificate.leftRaw certificate.intervalRaw n n).2
+    (certificate.overlap n)
 
 /-! The direct finite exactness theorem for a closed polygonal path. -/
 theorem finiteConstantDifferentialExactness_closed
