@@ -623,6 +623,10 @@ certificate, the same stabilizer can be validated without an external anchor:
 \lean{ComputableAnalysis.RealRaw.prefixStabilize_valid_of_future}.  The
 anchor-free theorem is the preferred interface for a computation whose own
 refinement proof is already available.
+The matching representation bridge is
+\lean{ComputableAnalysis.RealRaw.candidate_equiv_prefixStabilize_of_future}:
+the stabilized computation remains equivalent to the original candidate at
+each common stage.
 \end{proposition}
 
 \begin{definition}[Stage schedules]\label{def:stage-schedule}

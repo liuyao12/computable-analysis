@@ -270,6 +270,8 @@ is contained in each earlier radius-expanded box, use
 `RealRaw.prefixStabilize_valid_of_future`. It validates the same runtime
 prefix intersection without requiring an external anchor or an equivalence
 edge; this is the preferred route for self-contained refinement proofs.
+Use `RealRaw.candidate_equiv_prefixStabilize_of_future` to transport the
+candidate's value to the stabilized representation after that proof.
 
 The function-level analogue is
 `RealFunRaw.equivalentWith_of_common_anchor`.  It applies the same rule

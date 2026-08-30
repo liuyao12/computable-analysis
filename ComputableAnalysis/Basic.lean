@@ -3212,6 +3212,26 @@ theorem prefixStabilize_valid_of_future
           grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm,
             Rat.mul_inv_cancel]
 
+theorem candidate_equiv_prefixStabilize_of_future
+    {candidate : RealRaw} {radius : Nat -> Rat}
+    (hcandidate_ordered : forall n, 0 <= (candidate.compute n).width)
+    (hfuture : forall k n, k <= n ->
+      (QInterval.expand (candidate.compute k) (radius k)).ContainsInterval
+        (candidate.compute n)) :
+    candidate.Equiv (prefixStabilize candidate radius) := by
+  have hcontains := prefixStabilizeCompute_contains_future
+    (candidate := candidate.compute) (radius := radius) hfuture
+  intro n
+  apply (compareAt_overlap_iff candidate
+    (prefixStabilize candidate radius) n n).2
+  have hcontain := hcontains n n (Nat.le_refl n)
+  have horder : (candidate.compute n).lo <= (candidate.compute n).hi := by
+    have hw := hcandidate_ordered n
+    unfold QInterval.width at hw
+    grind
+  exact ⟨Rat.le_trans horder hcontain.2,
+    Rat.le_trans hcontain.1 horder⟩
+
 theorem prefixStabilize_equiv_anchor
     {candidate anchor : RealRaw} {radius : Nat -> Rat}
     (hanchor : anchor.Valid)
