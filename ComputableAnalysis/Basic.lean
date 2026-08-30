@@ -7135,6 +7135,23 @@ theorem cauchyStabilize_valid
             grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm,
               Rat.mul_inv_cancel]
 
+/-! The direct candidate and its complex prefix stabilization overlap at each
+stage.  This is the complex counterpart of the anchor-free real bridge and
+lets clients retain the original finite computation as the semantic edge. -/
+theorem candidate_equiv_cauchyStabilize_of_future
+    {candidate : ComplexRaw} {radius : Nat -> Rat}
+    (hordered : forall n, (candidate.compute n).Ordered)
+    (hfuture : forall k n, k <= n ->
+      (candidate.compute n).NestedIn
+        (QBox.expand (candidate.compute k) (radius k))) :
+    candidate.Equiv (cauchyStabilize candidate radius) := by
+  intro n
+  apply (compareAt_overlap_iff candidate
+    (cauchyStabilize candidate radius) n n).2
+  have hcontain := cauchyStabilize_contains_current hfuture n
+  exact ⟨QComplex.le_trans (hordered n) hcontain.2,
+    QComplex.le_trans hcontain.1 (hordered n)⟩
+
 private theorem half_pos_complex {q : Rat} (hq : 0 < q) : 0 < q / 2 := by
   rw [Rat.div_def]
   exact Rat.mul_pos hq ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))
