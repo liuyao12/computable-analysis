@@ -4231,6 +4231,27 @@ def withAlternativeFromPath (f : PartialRealFunction)
           (RealRaw.equiv_symm (hpath x hr hp hpar).equiv) } ::
       f.implementations
 
+theorem withAlternativeFromPath_equiv_preferred (f : PartialRealFunction)
+    (parent : Representation f) (raw : PartialRealFunRaw)
+    (hvalid : raw.Valid)
+    (hcover : forall x, raw.definedAt x -> f.preferred.definedAt x ->
+      parent.raw.definedAt x)
+    (hpath : forall x (hr : raw.definedAt x) (hp : f.preferred.definedAt x)
+      (hpar : parent.raw.definedAt x),
+      RealRaw.EquivalencePath (raw.evalRaw x hr)
+        (parent.raw.evalRaw x hpar))
+    {x : Rat} (hr : raw.definedAt x) (hp : f.preferred.definedAt x) :
+    (raw.evalRaw x hr).Equiv (f.preferred.evalRaw x hp) := by
+  let hpar := hcover x hr hp
+  have hrv : (raw.evalRaw x hr).Valid := by
+    simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using hvalid x hr
+  have hpv : (f.preferred.evalRaw x hp).Valid := by
+    simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using f.valid x hp
+  have hparv : (parent.raw.evalRaw x hpar).Valid := by
+    simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using parent.valid x hpar
+  exact RealRaw.equiv_trans hrv hparv hpv (hpath x hr hp hpar).equiv
+    (parent.agrees x hpar hp)
+
 theorem withAlternativeFrom_equiv_preferred (f : PartialRealFunction)
     (parent : Representation f) (raw : PartialRealFunRaw)
     (hvalid : raw.Valid)
@@ -5487,6 +5508,20 @@ def withAlternativeFromImplementation (f : ComplexFunction)
           (hvalid z hr)
           (parent.agrees z hf hp) (ComplexRaw.equiv_symm (h z hr hf hp)) } ::
       f.implementations
+
+theorem withAlternativeFromPath_equiv_preferred (f : ComplexFunction)
+    (parent : Representation f) (raw : FunctionRaw) (hvalid : raw.Valid)
+    (hcover : forall z, raw.domain z -> f.preferred.domain z ->
+      parent.raw.domain z)
+    (hpath : forall z (hr : raw.domain z) (hf : f.preferred.domain z)
+      (hp : parent.raw.domain z),
+      ComplexRaw.EquivalencePath (raw.evalRaw z hr) (parent.raw.evalRaw z hp))
+    {z : QComplex} (hr : raw.domain z) (hf : f.preferred.domain z) :
+    (raw.evalRaw z hr).Equiv (f.preferred.evalRaw z hf) := by
+  let hp := hcover z hr hf
+  exact ComplexRaw.equiv_trans (hvalid z hr) (parent.valid z hp)
+    (f.valid z hf) (hpath z hr hf hp).equiv
+    (parent.agrees z hp hf)
 
 end ComplexFunction
 
