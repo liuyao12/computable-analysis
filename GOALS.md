@@ -199,17 +199,16 @@ interval-valued composition still requires a separate box-level contract.
    `monomial_succ_secant_derivative_bracket`.
 
 4. **Concave inverse-function case.**  **Complete.**  Formalize `F x = arctan x` on
-   `[0,1]`, with `dF x = 1/(1+x*x)`.  Use concavity to order neighboring
-   secants and the existing rational rectangle evaluator to produce the
-   derivative boxes.  The current finite bridge is
-   `arctanForwardQuotientPaddedKernelBound_contains`: it converts the
-   tangent-chart and ordinary-forward overlaps into containment after paying
-   explicit stage widths.  The theorem
-   `arctanForwardQuotient_padding_width_le` supplies the stage schedule, and
-   `arctanForwardEndpoint_scale_contains` transports the quotient enclosure
-   to the primitive endpoint difference.  The remaining proof is to assemble
-   these local boxes into `arctanEffectiveFTCData`; the public endpoint
-   equivalence is `arctanEffectiveFTC_equiv_endpoint`.
+   `[0,1]`, with `dF x = 1/(1+x*x)`.  Concavity orders neighboring secants,
+   while the rational rectangle evaluator supplies the derivative boxes.
+   `arctanForwardQuotientPaddedKernelBound_contains` is the finite bridge from
+   tangent-chart and ordinary-forward overlaps; `arctanForwardEndpoint_scale_contains`
+   transports the quotient enclosure to the primitive endpoint difference.
+   These local controls are assembled in `arctanEffectiveFTCData`, and
+   `arctanEffectiveFTC_equiv_endpoint` exposes the effective FTC result.  The
+   stabilized endpoint-difference raw is
+   `arctanEffectiveFTCStabilized`, so this rung is a complete computable
+   inverse-function example rather than merely a collection of local bounds.
 
 5. **Convex exponential case.**  **Complete as a selected-stage certificate.**
    Use the computable exponential evaluator
