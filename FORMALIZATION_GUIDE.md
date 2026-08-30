@@ -66,6 +66,12 @@ An integral formalization must therefore add an explicit schedule certificate
 assembly. This is the computable replacement for silently invoking compactness
 or completeness of the classical real line.
 
+An `EffectiveModulusFor` does give a checked local enclosure on any cell whose
+width is below its input budget: `EffectiveModulusFor.local_expand_contains`
+widenes the left-endpoint box by twice the stage tolerance. This is useful for
+cellwise constructions, but it is intentionally not a global interval
+evaluator; that upgrade requires a finite covering certificate.
+
 A declaration may be a useful interface, a target `Prop`, or a fully proved
 theorem.  The guide calls out that distinction.  A named `def` or `structure`
 is never evidence that its intended mathematical theorem has been proved.

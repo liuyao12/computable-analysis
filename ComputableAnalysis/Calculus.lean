@@ -7596,6 +7596,33 @@ structure EffectiveModulusFor (F : FunctionOnInterval) where
           (F.compute y hy (evalPrecision n))
           n
 
+/-! A local interval enclosure is the exact amount of interval structure
+    supplied by an effective modulus.  It is deliberately conditional on the
+    cell being within the modulus radius; a global interval evaluator needs a
+    separate finite covering argument. -/
+theorem EffectiveModulusFor.local_expand_contains
+    {F : FunctionOnInterval} (h : EffectiveModulusFor F)
+    (I : QInterval) (hI : subintervalOf I F.lower F.upper)
+    (x : Rat) (hx : inDomainInterval F.lower F.upper x)
+    (n : Nat) (hIlo : I.lo <= x) (hIhi : x <= I.hi)
+    (hsmall : I.width <=
+      1 / ((h.inputPrecision n : Nat) : Rat)) :
+    QInterval.ContainsInterval
+      (QInterval.expand
+        (F.compute I.lo
+          ⟨hI.1, Rat.le_trans hI.2.1 hI.2.2⟩
+          (h.evalPrecision n))
+        (2 * (precisionAtStage n).val))
+      (F.compute x hx (h.evalPrecision n)) := by
+  have hclose := h.close I.lo x n
+    ⟨hI.1, Rat.le_trans hI.2.1 hI.2.2⟩ hx (by
+      change qabs (x - I.lo) <=
+        1 / ((h.inputPrecision n : Nat) : Rat)
+      rw [qabs_eq_self_of_nonneg (by grind)]
+      have hdiff : x - I.lo <= I.hi - I.lo := by grind
+      exact Rat.le_trans hdiff hsmall)
+  exact QInterval.expand_contains_right_of_near hclose
+
 theorem EffectiveModulusFor.epsilonDeltaContinuous
     {F : FunctionOnInterval} (h : EffectiveModulusFor F) :
     EpsilonDeltaContinuousOn F := by

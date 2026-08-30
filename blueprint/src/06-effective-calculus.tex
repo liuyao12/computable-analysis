@@ -306,6 +306,13 @@ interval image box -> epsilon--delta continuity
 
 The reverse direction is not assumed: an epsilon--delta statement alone does
 not tell the integral constructor how to enclose every value on a whole cell.
+An effective modulus does give the exact local statement needed on a cell
+whose width is below its input budget: widen the left-endpoint box by twice
+the stage tolerance.  This is a local enclosure lemma, not a hidden compactness
+argument; a global evaluator still needs a finite covering certificate.
+
+\lean{ComputableAnalysis.EffectiveModulusFor.local_expand_contains}
+
 The adapter below uses the interval image itself, shifts one output stage to
 fit the public precision schedule, and records positivity of the input
 precision.  The common-image lemma is the finite geometric step: two point
@@ -733,6 +740,7 @@ explicit error budget later consumed by a partition-level FTC certificate.
 \leanok
 
 \lean{ComputableAnalysis.EffectiveModulusFor}
+\lean{ComputableAnalysis.EffectiveModulusFor.local_expand_contains}
 \lean{ComputableAnalysis.EffectiveModulusFor.epsilonDeltaContinuous}
 \lean{ComputableAnalysis.IntervalRegularOn}
 \lean{ComputableAnalysis.IntervalRegularOn.evalIntervals_overlap_of_common_point}
