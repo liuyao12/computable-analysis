@@ -4704,6 +4704,9 @@ finite.
   certificate, using the rational `1/(n+1)` schedule. The kernel prefix is
   also identified with the finite Leibniz partial sum by
   `Taylor.ArctanKernel.kernelPartialIntegralAtOne_eq_series_partialSum`, and
+  the full adjacent-prefix raw is now explicitly equivalent to the independent
+  `Series.AlternatingRaw.leibnizAlternatingRaw` through
+  `Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_equiv_leibnizAlternatingRaw`;
   the adjacent-prefix interval is exposed as the valid raw object
   `Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_valid` with bridge
   `Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_compute_eq_kernel`.

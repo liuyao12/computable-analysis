@@ -547,6 +547,46 @@ theorem kernelPartialIntegralAtOneRaw_compute_eq_kernel (n : Nat) :
   rw [← kernelPartialIntegralAtOne_eq_series_partialSum (2 * n + 1),
     ← kernelPartialIntegralAtOne_eq_series_partialSum (2 * n)]
 
+/-! The integrated finite kernel and the independent Leibniz alternating raw
+algorithm are two schedules for the same rational series.  The kernel uses
+the next even partial sum as its lower endpoint; this is a nested refinement
+of the standard even/odd Leibniz interval, so overlap is immediate at every
+finite stage. -/
+
+theorem kernelPartialIntegralAtOneRaw_equiv_leibnizAlternatingRaw :
+    kernelPartialIntegralAtOneRaw.Equiv
+      Series.AlternatingRaw.leibnizAlternatingRaw.toRealRaw := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    kernelPartialIntegralAtOneRaw
+    Series.AlternatingRaw.leibnizAlternatingRaw.toRealRaw n n).2
+  change QInterval.Overlaps
+    (kernelPartialIntegralAtOneRaw.compute n)
+    (Series.AlternatingRaw.leibnizAlternatingRaw.toRealRaw.compute n)
+  rw [kernelPartialIntegralAtOneRaw_compute_eq_kernel]
+  change QInterval.Overlaps
+    { lo := kernelPartialIntegralAtOne (2 * n + 1),
+      hi := kernelPartialIntegralAtOne (2 * n) }
+    (Series.AlternatingRaw.leibnizAlternatingRaw.interval n)
+  rw [Series.AlternatingRaw.interval_eq_endpoints]
+  rw [kernelPartialIntegralAtOne_eq_series_partialSum]
+  rw [kernelPartialIntegralAtOne_eq_series_partialSum]
+  unfold QInterval.Overlaps
+  have hupper :
+      Series.partialSum Series.leibnizTerm (2 * n + 2) <=
+        Series.partialSum Series.leibnizTerm (2 * n + 1) := by
+    rw [show 2 * n + 2 = (2 * n + 1) + 1 by omega,
+      Series.partialSum]
+    simp [Series.signedTerm, Series.alternatingSign]
+    grind [Series.leibnizTerm_nonneg]
+  have hlower :
+      Series.partialSum Series.leibnizTerm (2 * n) <=
+        Series.partialSum Series.leibnizTerm (2 * n + 1) := by
+    rw [Series.partialSum_even_succ]
+    grind [Series.leibnizTerm_nonneg]
+  exact ⟨hupper, hlower⟩
+
 /-- Finite monomial integrals add across an intermediate point. -/
 theorem kernelTermIntegralBetween_split (p q r : Rat) (j : Nat) :
     kernelTermIntegralBetween p r j =
