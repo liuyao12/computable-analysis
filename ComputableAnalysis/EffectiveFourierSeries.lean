@@ -40,6 +40,12 @@ theorem EffectiveFourierSeries.stabilized_valid
     F.candidate_ordered F.candidate_shrinks
     F.future_containment F.radius_shrinks
 
+theorem EffectiveFourierSeries.candidate_equiv_stabilized
+    (F : EffectiveFourierSeries) :
+    F.candidate.Equiv F.stabilized := by
+  exact ComplexRaw.candidate_equiv_cauchyStabilize_of_future
+    F.candidate_ordered F.future_containment
+
 theorem EffectiveFourierSeries.stabilized_width_le_of_candidate
     (F : EffectiveFourierSeries) (n : Nat) :
     (F.stabilized.compute n).width <=
