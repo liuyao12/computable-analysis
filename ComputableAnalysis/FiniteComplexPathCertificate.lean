@@ -60,6 +60,35 @@ theorem PolygonalLeftSumCertificate.of_stage_eq_point
     rw [hcompute n]
     simp [QBox.point, QBox.width, QBox.height] <;> grind
 
+theorem constantClosedPolygonalLeftSumCertificate
+    (c start : QComplex) (vertices : List QComplex)
+    (evalPrecision : Nat -> Nat) :
+    PolygonalLeftSumCertificate (FunctionRaw.exact (fun _ => c))
+      (by intro z; change True; trivial)
+      (start :: (vertices ++ [start])) evalPrecision := by
+  apply PolygonalLeftSumCertificate.of_stage_eq_point QComplex.zero
+  intro n
+  cases n with
+  | zero =>
+      have hzero : forall xs : List QComplex,
+          polygonalLeftSumEntire (FunctionRaw.exact (fun _ => c))
+            (by intro z; change True; trivial) xs 0 (evalPrecision 0) =
+            QBox.zero := by
+        intro xs
+        induction xs with
+        | nil => rfl
+        | cons x xs ih =>
+            cases xs with
+            | nil => rfl
+            | cons y ys =>
+                simp [polygonalLeftSumEntire, segmentLeftSumEntire,
+                  segmentLeftSum, QBox.zero, QBox.add, QBox.point,
+                  QComplex.zero, QComplex.add, ih] <;> grind
+      exact hzero _
+  | succ n =>
+      exact polygonalLeftSum_constant_closed c start vertices (n + 1)
+        (Nat.succ_pos n) (evalPrecision (n + 1))
+
 theorem polygonalLeftSumRawEntire_valid
     {f : FunctionRaw} {hEntire : forall z, f.domain z}
     {vertices : List QComplex} {evalPrecision : Nat -> Nat}

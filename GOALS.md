@@ -5769,7 +5769,10 @@ by one for every nonempty input.
   functions remains the next complex-integral bridge. The generic constructor
   `PolygonalLeftSumCertificate.of_stage_eq_point` now turns any stagewise
   constant point-box computation into the validity certificate automatically,
-  including orderedness, nesting, and zero width.
+  including orderedness, nesting, and zero width. The concrete
+  `constantClosedPolygonalLeftSumCertificate` instantiates this constructor
+  for a closed constant path, including the stage-zero branch, and therefore
+  produces a valid `ComplexRaw` certificate without a separate limit argument.
 
 - The finite quarter-turn checkpoint now advances benchmark item 17:
   `FiniteRotationQuarterTurnExample` evaluates the common factorial rotation
