@@ -111,6 +111,19 @@ theorem PolygonalLeftSumIntegralOverlapCertificate.equiv
     certificate.leftRaw certificate.intervalRaw n n).2
     (certificate.overlap n)
 
+theorem PolygonalLeftSumIntegralOverlapCertificate.equiv_of_interval_anchor
+    {f : FunctionRaw} {hEntire : forall z, f.domain z}
+    {boxFunction : EntireBoxFunctionRaw} {vertices : List QComplex}
+    {evalPrecision : Nat -> Nat} (certificate :
+      PolygonalLeftSumIntegralOverlapCertificate f hEntire boxFunction
+        vertices evalPrecision) {anchor : ComplexRaw}
+    (hanchor : anchor.Valid)
+    (hinterval_anchor : certificate.intervalRaw.Equiv anchor) :
+    certificate.leftRaw.Equiv anchor := by
+  exact ComplexRaw.equiv_trans
+    certificate.leftRaw_valid certificate.intervalRaw_valid hanchor
+    certificate.equiv hinterval_anchor
+
 /-! The direct finite exactness theorem for a closed polygonal path. -/
 theorem finiteConstantDifferentialExactness_closed
     (c start : QComplex) (vertices : List QComplex) :

@@ -80,6 +80,17 @@ theorem effectivePolygonalLeftSumIntegral_equiv
     certificate.leftRaw.Equiv certificate.intervalRaw := by
   exact certificate.equiv
 
+theorem effectivePolygonalLeftSumIntegral_equiv_of_interval_anchor
+    {f : FunctionRaw} {hEntire : forall z, f.domain z}
+    {boxFunction : EntireBoxFunctionRaw} {vertices : List QComplex}
+    {evalPrecision : Nat -> Nat} (certificate :
+      PolygonalLeftSumIntegralOverlapCertificate f hEntire boxFunction
+        vertices evalPrecision) {anchor : ComplexRaw}
+    (hanchor : anchor.Valid)
+    (hinterval_anchor : certificate.intervalRaw.Equiv anchor) :
+    certificate.leftRaw.Equiv anchor := by
+  exact certificate.equiv_of_interval_anchor hanchor hinterval_anchor
+
 end ComputableAnalysis.ComplexPathIntegral
 
 namespace ComputableAnalysis
