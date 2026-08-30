@@ -518,6 +518,9 @@ interval-valued composition still requires a separate box-level contract.
    isolated as a finite secant-bracket theorem for the displayed primitive;
    its exact rational secant quotient is now exposed by
    `sineTaylorPrefixThreeSquarePrimitive_secant_formula`.
+   Its companion `sineTaylorPrefixThreeSquarePrimitive_secant_bracket` now
+   exposes the finite computable MVT content: the primitive's secant slope is
+   enclosed by the endpoint derivative values on every rational cell.
 
    The true tangent-chart endpoint route now has a named computable primitive
    `tangentSquarePrimitiveOnUnit`: the existing geometric arctangent evaluator
