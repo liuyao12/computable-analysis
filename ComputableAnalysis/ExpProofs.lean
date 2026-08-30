@@ -9887,6 +9887,24 @@ def uniformExpOnSymmetricUnit_solvesSelfDerivative :
   initial_value_equiv := by
     exact uniformExpOnSymmetricUnit_zero_equiv_one
 
+/- The centered exponential has the same representation-level uniqueness
+   interface as the unit chart.  The interval is wider, but no new analytic
+   principle is needed: any supplied finite uniqueness provider transports the
+   certified solution to every other solution with the same initial data. -/
+theorem uniformExpOnSymmetricUnit_equivalent_of_selfDerivative_unique
+    (hunique : SelfDerivativeInitialValueUnique)
+    (f : FunctionOnInterval)
+    (hf : SolvesSelfDerivativeOnInterval f)
+    (hinitial : hf.initial = 0)
+    (hvalue : hf.initial_value.Equiv (RealRaw.ofRat 1)) :
+    FunctionOnInterval.Equivalent uniformExpOnSymmetricUnit f := by
+  let he := uniformExpOnSymmetricUnit_solvesSelfDerivative
+  apply hunique uniformExpOnSymmetricUnit f he hf
+  · change (0 : Rat) = hf.initial
+    exact hinitial.symm
+  · change (RealRaw.ofRat 1).Equiv hf.initial_value
+    exact RealRaw.equiv_symm hvalue
+
 /-- The total series-function wrapper inherits the exact power-series initial
 value at zero. -/
 theorem expPowerSeriesFunction_zero_equiv_one :
