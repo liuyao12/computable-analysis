@@ -3621,6 +3621,14 @@ theorem EquivalencePath.equiv {x y : RealRaw}
   | cons hx hy hz hxy tail ih =>
       exact equiv_trans hx hy hz hxy ih
 
+theorem EquivalencePath.trans {x y z : RealRaw}
+    (left : EquivalencePath x y) (right : EquivalencePath y z) :
+    EquivalencePath x z := by
+  induction left with
+  | refl hx => exact right
+  | cons hx hy _ hxy tail ih =>
+      exact EquivalencePath.cons hx hy right.right_valid hxy (ih right)
+
 theorem equiv_of_schedule_equiv {x y : RealRaw}
     (hx : x.Valid) (hy : y.Valid)
     (sigma tau : StageSchedule) :
@@ -5177,6 +5185,14 @@ theorem EquivalencePath.equiv {x y : ComplexRaw}
   | refl hx => exact equiv_refl _ hx
   | cons hx hy hz hxy tail ih =>
       exact equiv_trans hx hy hz hxy ih
+
+theorem EquivalencePath.trans {x y z : ComplexRaw}
+    (left : EquivalencePath x y) (right : EquivalencePath y z) :
+    EquivalencePath x z := by
+  induction left with
+  | refl hx => exact right
+  | cons hx hy _ hxy tail ih =>
+      exact EquivalencePath.cons hx hy right.right_valid hxy (ih right)
 
 def ofQComplex (z : QComplex) : ComplexRaw where compute := fun _ => { lo := z, hi := z }
 
