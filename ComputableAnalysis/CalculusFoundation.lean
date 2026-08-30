@@ -58,6 +58,16 @@ theorem effectivePolynomialPathFTC
   exact polygonalPolynomialIntegralRaw_equiv_endpoint
     coefficients start endpoint vertices
 
+/-! Public certificate entry point for the left-endpoint polygonal integral.
+The evaluator is executable at every finite stage; validity still comes from
+the supplied orderedness, nesting, and shrinking certificates. -/
+theorem effectivePolygonalLeftSumRawEntire_valid
+    {f : FunctionRaw} {hEntire : forall z, f.domain z}
+    {vertices : List QComplex} {evalPrecision : Nat -> Nat}
+    (certificate : PolygonalLeftSumCertificate f hEntire vertices evalPrecision) :
+    (polygonalLeftSumRawEntire f hEntire vertices evalPrecision).Valid := by
+  exact polygonalLeftSumRawEntire_valid certificate
+
 end ComputableAnalysis.ComplexPathIntegral
 
 namespace ComputableAnalysis
