@@ -187,6 +187,10 @@ structure EntireBoxFunctionRaw where
   point : FunctionRaw
   boxCompute : QBox -> QBox
 
+def constantBoxFunction (c : QComplex) : EntireBoxFunctionRaw where
+  point := FunctionRaw.exact (fun _ => c)
+  boxCompute := fun _ => QBox.point c
+
 /-! Finite endpoint algebra for polygonal paths. -/
 
 def polygonalDisplacementTo (start : QComplex) : List QComplex -> QComplex
@@ -779,6 +783,63 @@ def polygonalIntegralBoxEntire (f : EntireBoxFunctionRaw) :
         (segmentIntegralBoxEntire f a b n)
         (polygonalIntegralBoxEntire f (b :: rest) n)
   | _, _ => QBox.zero
+
+theorem segmentIntegralBoxEntire_constant
+    (c a b : QComplex) (n : Nat) (hn : 0 < n) :
+    segmentIntegralBoxEntire (constantBoxFunction c) a b n =
+      QBox.point (QComplex.mul c (QComplex.sub b a)) := by
+  unfold segmentIntegralBoxEntire subsegmentIntegralBox constantBoxFunction
+  simp only [QBox.mul_point]
+  rw [foldl_point_add_scaled]
+  have hn0 : (n : Rat) ≠ 0 := by
+    exact Rat.ne_of_gt (Rat.natCast_pos.mpr hn)
+  have hcancel : (n : Rat) * (n : Rat)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (n : Rat) hn0
+  simp [segmentStep, QComplex.scaleRat, QComplex.sub, QComplex.mul,
+    QComplex.add, QComplex.zero, QComplex.neg, QBox.zero, QBox.point,
+    QBox.add, Rat.div_def, hcancel, Rat.mul_assoc, Rat.mul_comm,
+    Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg] <;>
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
+
+theorem polygonalIntegralBoxEntire_constant
+    (c start : QComplex) (vertices : List QComplex) (n : Nat) (hn : 0 < n) :
+    polygonalIntegralBoxEntire (constantBoxFunction c) (start :: vertices) n =
+      QBox.point (polygonalConstantDifferentialDisplacement c start vertices) := by
+  induction vertices generalizing start with
+  | nil =>
+      simp [polygonalIntegralBoxEntire, polygonalConstantDifferentialDisplacement,
+        polygonalDisplacementTo, QBox.zero, QBox.point, QComplex.mul,
+        QComplex.zero]
+      constructor <;> grind
+  | cons vertex rest ih =>
+      cases rest with
+      | nil =>
+          rw [polygonalIntegralBoxEntire]
+          rw [segmentIntegralBoxEntire_constant c start vertex n hn]
+          rw [ih vertex]
+          rw [QBox.add_point]
+          simp [polygonalConstantDifferentialDisplacement,
+            polygonalDisplacementTo, QBox.add_point, QBox.zero,
+            QComplex.mul, QComplex.add, QComplex.zero]
+          congr 1 <;> grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+            Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+      | cons next rest =>
+          rw [polygonalIntegralBoxEntire]
+          rw [segmentIntegralBoxEntire_constant c start vertex n hn]
+          rw [ih vertex]
+          rw [QBox.add_point]
+          simp [polygonalConstantDifferentialDisplacement,
+            polygonalDisplacementTo, QComplex.mul, QComplex.add,
+            QComplex.sub, QComplex.neg]
+          congr 1 <;> grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+            Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+
+theorem polygonalIntegralBoxEntire_constant_closed
+    (c start : QComplex) (vertices : List QComplex) (n : Nat) (hn : 0 < n) :
+    polygonalIntegralBoxEntire (constantBoxFunction c)
+      (start :: (vertices ++ [start])) n = QBox.point QComplex.zero := by
+  rw [polygonalIntegralBoxEntire_constant c start (vertices ++ [start]) n hn]
+  rw [polygonalConstantDifferentialDisplacement_closed]
 
 /-- A raw complex algorithm for a polygonal path integral.
 

@@ -198,6 +198,69 @@ theorem PolygonalLeftSumIntegralOverlapCertificate.equiv_of_interval_anchor
     certificate.leftRaw_valid certificate.intervalRaw_valid hanchor
     certificate.equiv hinterval_anchor
 
+theorem constantClosedPolygonalLeftSumIntegralOverlapCertificate
+    (c start : QComplex) (vertices : List QComplex)
+    (evalPrecision : Nat -> Nat) :
+    PolygonalLeftSumIntegralOverlapCertificate
+      (FunctionRaw.exact (fun _ => c))
+      (by intro z; change True; trivial) (constantBoxFunction c)
+      (start :: (vertices ++ [start])) evalPrecision := by
+  have hleft : forall n,
+      (polygonalLeftSumRawEntire (FunctionRaw.exact (fun _ => c))
+        (by intro z; change True; trivial)
+        (start :: (vertices ++ [start])) evalPrecision).compute n =
+        QBox.point QComplex.zero := by
+    intro n
+    cases n with
+    | zero =>
+        have hzero : forall xs : List QComplex,
+            polygonalLeftSumEntire (FunctionRaw.exact (fun _ => c))
+              (by intro z; change True; trivial) xs 0 (evalPrecision 0) =
+              QBox.zero := by
+          intro xs
+          induction xs with
+          | nil => rfl
+          | cons x xs ih =>
+              cases xs with
+              | nil => rfl
+              | cons y ys =>
+                  simp [polygonalLeftSumEntire, segmentLeftSumEntire,
+                    segmentLeftSum, QBox.zero, QBox.add, QBox.point,
+                    QComplex.zero, QComplex.add, ih] <;> grind
+        exact hzero _
+    | succ n =>
+        exact polygonalLeftSum_constant_closed c start vertices (n + 1)
+          (Nat.succ_pos n) (evalPrecision (n + 1))
+  have hinterval : forall n,
+      (polygonalIntegralRawEntire (constantBoxFunction c)
+        (start :: (vertices ++ [start]))).compute n =
+        QBox.point QComplex.zero := by
+    intro n
+    cases n with
+    | zero =>
+        have hzero : forall xs : List QComplex,
+            polygonalIntegralBoxEntire (constantBoxFunction c) xs 0 =
+              QBox.zero := by
+          intro xs
+          induction xs with
+          | nil => rfl
+          | cons x xs ih =>
+              cases xs with
+              | nil => rfl
+              | cons y ys =>
+                  rw [polygonalIntegralBoxEntire]
+                  rw [ih]
+                  simp [polygonalIntegralBoxEntire, segmentIntegralBoxEntire,
+                    subsegmentIntegralBox, constantBoxFunction, QBox.zero,
+                    QBox.add, QBox.point, QComplex.zero, QComplex.add] <;>
+                    grind
+        exact hzero _
+    | succ n =>
+        exact polygonalIntegralBoxEntire_constant_closed c start vertices
+          (n + 1) (Nat.succ_pos n)
+  exact PolygonalLeftSumIntegralOverlapCertificate.of_stage_eq_point
+    QComplex.zero hleft hinterval
+
 /-! The direct finite exactness theorem for a closed polygonal path. -/
 theorem finiteConstantDifferentialExactness_closed
     (c start : QComplex) (vertices : List QComplex) :

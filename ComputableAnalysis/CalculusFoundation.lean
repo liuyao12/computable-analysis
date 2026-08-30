@@ -130,6 +130,16 @@ theorem effectivePolygonalLeftSumIntegralOverlapOfStageEqPoint
   exact PolygonalLeftSumIntegralOverlapCertificate.of_stage_eq_point anchor
     hleft hinterval
 
+theorem effectiveConstantClosedPolygonalLeftSumIntegralOverlapCertificate
+    (c start : QComplex) (vertices : List QComplex)
+    (evalPrecision : Nat -> Nat) :
+    PolygonalLeftSumIntegralOverlapCertificate
+      (FunctionRaw.exact (fun _ => c))
+      (by intro z; change True; trivial) (constantBoxFunction c)
+      (start :: (vertices ++ [start])) evalPrecision := by
+  exact constantClosedPolygonalLeftSumIntegralOverlapCertificate c start vertices
+    evalPrecision
+
 /-! Public certificate entry point for the left-endpoint polygonal integral.
 The evaluator is executable at every finite stage; validity still comes from
 the supplied orderedness, nesting, and shrinking certificates. -/

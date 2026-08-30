@@ -2098,6 +2098,12 @@ segment is exactly (c(b-a)) at every positive subdivision count. The finite
 fold identity makes this endpoint law explicit before any path limit is taken.
 The same identity assembles over any finite polygonal path and reduces a closed
 path to zero by endpoint cancellation.
+The independently defined interval evaluator agrees with this point-valued
+computation stage by stage in the constant closed-path case, so
+\lean{ComputableAnalysis.ComplexPathIntegral.constantClosedPolygonalLeftSumIntegralOverlapCertificate}
+packages the two representations as one explicit equivalence certificate.
+The public convenience wrapper is
+\lean{ComputableAnalysis.ComplexPathIntegral.effectiveConstantClosedPolygonalLeftSumIntegralOverlapCertificate}.
 
 The open-path statement is the actual complex FTC: the finite sum of
 polynomial increments telescopes to

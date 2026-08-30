@@ -5779,6 +5779,9 @@ by one for every nonempty input.
   `PolygonalLeftSumIntegralOverlapCertificate.of_stage_eq_point` now packages
   the common-anchor case as an explicit equivalence edge between the two
   representations.
+  `constantClosedPolygonalLeftSumIntegralOverlapCertificate` instantiates that
+  edge for the independent constant interval evaluator on a closed path,
+  including both stage-zero and positive-stage branches.
 
 - The finite quarter-turn checkpoint now advances benchmark item 17:
   `FiniteRotationQuarterTurnExample` evaluates the common factorial rotation
