@@ -2989,6 +2989,26 @@ private theorem prefixStabilizeCompute_contained_in_current_expand
         (prefixStabilizeCompute candidate radius n)
         (QInterval.expand (candidate (n + 1)) (radius (n + 1)))
 
+private theorem prefixStabilizeCompute_contains_future
+    {candidate : Nat -> QInterval} {radius : Nat -> Rat}
+    (hfuture : forall k n, k <= n ->
+      (QInterval.expand (candidate k) (radius k)).ContainsInterval
+        (candidate n)) :
+    forall k n, k <= n ->
+      (prefixStabilizeCompute candidate radius k).ContainsInterval
+        (candidate n) := by
+  intro k
+  induction k with
+  | zero =>
+      intro n _
+      exact hfuture 0 n (Nat.zero_le n)
+  | succ k ih =>
+      intro n hkn
+      rw [prefixStabilizeCompute]
+      apply QInterval.intersection_contains
+      · exact ih n (Nat.le_trans (Nat.le_succ k) hkn)
+      · exact hfuture (k + 1) n hkn
+
 /-- At every stage, finite-prefix stabilization is contained in the current
 widened candidate interval.  This exposes the direct runtime width bound of a
 stabilized algorithm without referring to its proof-side anchor. -/
@@ -3109,6 +3129,82 @@ theorem prefixStabilize_valid
         _ <= half.val + 2 * quarter.val := by
           exact rat_add_le_add hcandidate_width
             (Rat.mul_le_mul_of_nonneg_left hradius_width
+              (by native_decide : (0 : Rat) <= 2))
+        _ = eps.val := by
+          dsimp [half, quarter]
+          rw [Rat.div_def, Rat.div_def]
+          grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm,
+            Rat.mul_inv_cancel]
+
+/-! A direct-only validity theorem for a candidate whose future boxes are
+    already contained in every earlier widened box.  The runtime remains the
+    same finite prefix intersection; the proof no longer needs an external
+    anchor or an equivalence edge. -/
+theorem prefixStabilize_valid_of_future
+    {candidate : RealRaw} {radius : Nat -> Rat}
+    (hcandidate_ordered : forall n, 0 <= (candidate.compute n).width)
+    (hcandidate_shrinks : WidthsShrinkToZero candidate.compute)
+    (hfuture : forall k n, k <= n ->
+      (QInterval.expand (candidate.compute k) (radius k)).ContainsInterval
+        (candidate.compute n))
+    (hradius_shrinks : ShrinksToZero radius) :
+    (prefixStabilize candidate radius).Valid := by
+  have hcontains := prefixStabilizeCompute_contains_future
+    (candidate := candidate.compute) (radius := radius) hfuture
+  have hcurrent := prefixStabilizeCompute_contained_in_current_expand
+    candidate.compute radius
+  have hstep := prefixStabilizeCompute_step_nested candidate.compute radius
+  have hordered : forall n,
+      ((prefixStabilize candidate radius).compute n).lo <=
+        ((prefixStabilize candidate radius).compute n).hi := by
+    intro n
+    have hcontain := hcontains n n (Nat.le_refl n)
+    exact Rat.le_trans hcontain.1
+      (Rat.le_trans (by
+        have hw := hcandidate_ordered n
+        unfold QInterval.width at hw
+        grind) hcontain.2)
+  constructor
+  · intro n
+    unfold QInterval.width
+    grind [hordered n]
+  · constructor
+    · intro n m hnm
+      induction hnm with
+      | refl => exact ⟨Rat.le_refl, hordered n, Rat.le_refl⟩
+      | step hnm ih =>
+          rename_i k
+          have hnext := hstep k
+          exact ⟨Rat.le_trans ih.1 hnext.1,
+            hordered (k + 1), Rat.le_trans hnext.2 ih.2.2⟩
+    · intro eps
+      let half : QPos := ⟨eps.val / 2, by
+        rw [Rat.div_def]
+        exact Rat.mul_pos eps.property
+          ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))⟩
+      let quarter : QPos := ⟨eps.val / 4, by
+        rw [Rat.div_def]
+        exact Rat.mul_pos eps.property
+          ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 4))⟩
+      obtain ⟨Nc, hNc⟩ := hcandidate_shrinks half
+      obtain ⟨Nr, hNr⟩ := hradius_shrinks quarter
+      refine ⟨Nat.max Nc Nr, ?_⟩
+      intro n hn
+      have hcn : Nc <= n := Nat.le_trans (Nat.le_max_left _ _) hn
+      have hrn : Nr <= n := Nat.le_trans (Nat.le_max_right _ _) hn
+      have hc := hNc n hcn
+      have hr := hNr n hrn
+      have hcurrent_width :
+          ((prefixStabilize candidate radius).compute n).width <=
+            (QInterval.expand (candidate.compute n) (radius n)).width := by
+        exact QInterval.width_le_of_contains (hcurrent n)
+      rw [QInterval.expand_width] at hcurrent_width
+      calc
+        ((prefixStabilize candidate radius).compute n).width <=
+            (candidate.compute n).width + 2 * radius n := hcurrent_width
+        _ <= half.val + 2 * quarter.val := by
+          exact rat_add_le_add hc
+            (Rat.mul_le_mul_of_nonneg_left hr
               (by native_decide : (0 : Rat) <= 2))
         _ = eps.val := by
           dsimp [half, quarter]

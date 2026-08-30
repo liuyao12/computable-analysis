@@ -618,6 +618,11 @@ only the direct intervals and the public radii; the anchor appears only in the
 finite rational proof of the enclosure.  Thus this construction packages a
 known error bound into a nested evaluator without invoking a limit theorem or
 completeness.
+When the candidate itself has the stronger finite future-containment
+certificate, the same stabilizer can be validated without an external anchor:
+\lean{ComputableAnalysis.RealRaw.prefixStabilize_valid_of_future}.  The
+anchor-free theorem is the preferred interface for a computation whose own
+refinement proof is already available.
 \end{proposition}
 
 \begin{definition}[Stage schedules]\label{def:stage-schedule}
