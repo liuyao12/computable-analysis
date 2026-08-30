@@ -5552,6 +5552,12 @@ theorem withAlternativeFrom_overlaps_preferred (z : Complex)
   exact (ComplexRaw.compareAt_overlap_iff rep.raw z.preferred.raw stage stage).1
     (withAlternativeFrom_equiv_preferred z parent rep h stage)
 
+/- Register a complex implementation after any finite validity-carrying raw
+   path.  This is the complex counterpart of `Real.withAlternativeFromPath`. -/
+def withAlternativeFromPath (z : Complex) (rep : ComplexCert)
+    (path : ComplexRaw.EquivalencePath rep.raw z.preferred.raw) : Complex :=
+  z.withAlternative rep path.equiv
+
 def withAlternativeFromImplementation (z : Complex)
     (parent : ComplexImplementation z.preferred.raw)
     (rep : ComplexCert) (h : rep.raw.Equiv parent.cert.raw) : Complex where
