@@ -5729,11 +5729,13 @@ by one for every nonempty input.
   The same certificate interface now covers arbitrary finite polynomial
   differentials through `finitePolynomialDifferentialExactness_closed` and
   `FiniteClosedPolynomialPathCertificate.exactDisplacement_eq_zero`.
-  The planned left-sum layer is now explicit as
+  The left-sum layer is now explicit as
   `polygonalLeftSumRawEntire`; `PolygonalLeftSumCertificate` and
   `polygonalLeftSumRawEntire_valid` promote it to a valid `ComplexRaw` only
   when orderedness, nesting, and shrinking widths are supplied as finite
-  certificates.
+  certificates. The focused calculus entry point
+  `effectivePolygonalLeftSumRawEntire_valid` now exposes that promotion to
+  downstream users.
 - Next FTC extensions: exact polynomial derivative facts, then interval-valued
   Riemann-sum convergence under `IntervalRegularOn`.
   `Integral.IntervalRegularIntegralCertificate` now names the honest bridge
@@ -5751,10 +5753,10 @@ by one for every nonempty input.
   complex division away from zero, arbitrary quadratics via a computable
   discriminant square root, then
   the constructive root-search/argument-principle route for arbitrary degree.
-- Next complex integral extensions: package polygonal left sums as valid
-  `ComplexRaw`s, prove endpoint-primitive cancellation for polynomial
-  differentials, then use that as the first sorry-free Cauchy theorem for
-  closed polygonal paths.
+- Next complex integral extensions: prove convergence/overlap between
+  certified polygonal left sums and interval-valued path integrals, then use
+  the existing finite polynomial endpoint cancellation as the first
+  sorry-free Cauchy theorem for closed polygonal paths.
 
 - The finite quarter-turn checkpoint now advances benchmark item 17:
   `FiniteRotationQuarterTurnExample` evaluates the common factorial rotation
