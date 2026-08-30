@@ -167,6 +167,23 @@ theorem effectiveSquareCurvatureFTC_value_one :
       (RealRaw.ofRat 1) := by
   exact Integral.effectiveSquareCurvatureFTC_value_one
 
+/-! Public acceptance interface for the normalized squared-sine example.  The
+primitive and its finite derivative certificate remain explicit inputs; once
+provided, the generic effective FTC and endpoint transport are available at
+the focused calculus boundary. -/
+theorem effectiveSinPiSquareFTC_equiv_endpoint
+    {S : SinPiIntegral.ArctanSinPiConstruction}
+    (D : SinPiIntegral.SinPiSquareEffectiveFTCData S) :
+    D.integralRaw.Equiv D.endpointRaw := by
+  exact D.integral_equiv_endpoint
+
+theorem effectiveSinPiSquareFTC_equiv_value
+    {S : SinPiIntegral.ArctanSinPiConstruction}
+    (D : SinPiIntegral.SinPiSquareEffectiveFTCData S)
+    (hvalue : D.endpointRaw.Equiv (RealRaw.ofRat (1 / 4))) :
+    D.integralRaw.Equiv (RealRaw.ofRat (1 / 4)) := by
+  exact D.endpoint_equiv_of_value hvalue
+
 /-! Rational bridge for the first non-polynomial product example.  The
     combined derivative evaluator is definitionally the tangent-square
     density, and the primitive's endpoint difference is the quarter-turn
