@@ -3608,6 +3608,11 @@ inductive EquivalencePath : RealRaw -> RealRaw -> Prop
       (hxy : x.Equiv y) (tail : EquivalencePath y z) :
       EquivalencePath x z
 
+def EquivalencePath.single {x y : RealRaw}
+    (hx : x.Valid) (hy : y.Valid) (hxy : x.Equiv y) :
+    EquivalencePath x y :=
+  EquivalencePath.cons hx hy hy hxy (EquivalencePath.refl hy)
+
 theorem EquivalencePath.right_valid {x y : RealRaw}
     (path : EquivalencePath x y) : y.Valid := by
   cases path with
@@ -5180,6 +5185,11 @@ inductive EquivalencePath : ComplexRaw -> ComplexRaw -> Prop
   | cons {x y z : ComplexRaw} (hx : x.Valid) (hy : y.Valid) (hz : z.Valid)
       (hxy : x.Equiv y) (tail : EquivalencePath y z) :
       EquivalencePath x z
+
+def EquivalencePath.single {x y : ComplexRaw}
+    (hx : x.Valid) (hy : y.Valid) (hxy : x.Equiv y) :
+    EquivalencePath x y :=
+  EquivalencePath.cons hx hy hy hxy (EquivalencePath.refl hy)
 
 theorem EquivalencePath.right_valid {x y : ComplexRaw}
     (path : EquivalencePath x y) : y.Valid := by

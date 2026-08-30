@@ -4188,6 +4188,7 @@ ComputableAnalysis.RealRaw.equiv_of_common_anchor
 ComputableAnalysis.RealRaw.EquivalencePath
 ComputableAnalysis.RealRaw.EquivalencePath.right_valid
 ComputableAnalysis.RealRaw.EquivalencePath.equiv
+ComputableAnalysis.RealRaw.EquivalencePath.single
 ComputableAnalysis.RealRaw.EquivalencePath.trans
 ComputableAnalysis.RealRaw.EquivalencePath.symm
 ComputableAnalysis.RealRaw.prefixStabilize_width_le_current_expand
@@ -5687,6 +5688,7 @@ ComputableAnalysis.SinPiIntegral.DyadicSquareCircleOverlapFamily.to_public_equiv
 ComputableAnalysis.ComplexRaw.EquivalencePath
 ComputableAnalysis.ComplexRaw.EquivalencePath.right_valid
 ComputableAnalysis.ComplexRaw.EquivalencePath.equiv
+ComputableAnalysis.ComplexRaw.EquivalencePath.single
 ComputableAnalysis.ComplexRaw.EquivalencePath.trans
 ComputableAnalysis.ComplexRaw.EquivalencePath.symm
 ComputableAnalysis.Real.withAlternativeFromPath
