@@ -4198,6 +4198,39 @@ def withAlternativeFrom (f : PartialRealFunction)
           (RealRaw.equiv_symm (h x hr hp)) } ::
       f.implementations
 
+/-! Register a partial-function implementation through a finite chain of raw
+    equivalences.  The chain is checked pointwise on the covered domain; this
+    keeps the preferred evaluator as the spanning node without requiring a
+    direct theorem between every pair of implementations. -/
+def withAlternativeFromPath (f : PartialRealFunction)
+    (parent : Representation f) (raw : PartialRealFunRaw)
+    (hvalid : raw.Valid)
+    (hcover : forall x, raw.definedAt x -> f.preferred.definedAt x ->
+      parent.raw.definedAt x)
+    (hpath : forall x (hr : raw.definedAt x) (hp : f.preferred.definedAt x)
+      (hpar : parent.raw.definedAt x),
+      RealRaw.EquivalencePath (raw.evalRaw x hr)
+        (parent.raw.evalRaw x hpar)) : PartialRealFunction where
+  preferred := f.preferred
+  valid := f.valid
+  implementations :=
+    { raw := raw
+      valid := hvalid
+      agrees := by
+        intro x hp hr
+        let hpar := hcover x hr hp
+        exact RealRaw.equiv_trans
+          (show (f.preferred.evalRaw x hp).Valid by
+            simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using f.valid x hp)
+          (show (parent.raw.evalRaw x hpar).Valid by
+            simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using
+              parent.valid x hpar)
+          (show (raw.evalRaw x hr).Valid by
+            simpa [PartialRealFunRaw.evalRaw, RealRaw.Valid] using hvalid x hr)
+          (RealRaw.equiv_symm (parent.agrees x hpar hp))
+          (RealRaw.equiv_symm (hpath x hr hp hpar).equiv) } ::
+      f.implementations
+
 theorem withAlternativeFrom_equiv_preferred (f : PartialRealFunction)
     (parent : Representation f) (raw : PartialRealFunRaw)
     (hvalid : raw.Valid)
