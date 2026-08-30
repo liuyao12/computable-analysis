@@ -717,6 +717,76 @@ def effectiveIntervalRegularDarbouxScheduleIntegralFor
     (s : Integral.IntervalRegularDarbouxSchedule F hregular hinterval) : RealRaw :=
   Integral.intervalRegularDarbouxScheduleIntegralFor s
 
+def effectiveIntervalRegularDarbouxSchedule_ofAutomaticLinearPrecision
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    {hinterval : F.lower <= F.upper} (lengthBound : Nat)
+    (hLength : F.upper - F.lower <= (lengthBound : Rat))
+    (nested : forall n m, n <= m ->
+      (Integral.intervalRegularDarbouxScheduleCompute F hinterval hregular
+        (fun n => Integral.intervalRegularAutomaticPieces hregular lengthBound
+          (fun k => k) n)
+        (fun n => n)
+        (fun n => Integral.intervalRegularAutomaticPieces_pos hregular lengthBound
+          (fun k => k) n) n).lo <=
+      (Integral.intervalRegularDarbouxScheduleCompute F hinterval hregular
+        (fun n => Integral.intervalRegularAutomaticPieces hregular lengthBound
+          (fun k => k) n)
+        (fun n => n)
+        (fun n => Integral.intervalRegularAutomaticPieces_pos hregular lengthBound
+          (fun k => k) n) m).lo /\
+      (Integral.intervalRegularDarbouxScheduleCompute F hinterval hregular
+        (fun n => Integral.intervalRegularAutomaticPieces hregular lengthBound
+          (fun k => k) n)
+        (fun n => n)
+        (fun n => Integral.intervalRegularAutomaticPieces_pos hregular lengthBound
+          (fun k => k) n) m).hi <=
+      (Integral.intervalRegularDarbouxScheduleCompute F hinterval hregular
+        (fun n => Integral.intervalRegularAutomaticPieces hregular lengthBound
+          (fun k => k) n)
+        (fun n => n)
+        (fun n => Integral.intervalRegularAutomaticPieces_pos hregular lengthBound
+          (fun k => k) n) n).hi) :
+    Integral.IntervalRegularDarbouxSchedule F hregular hinterval :=
+  Integral.IntervalRegularDarbouxSchedule.ofAutomaticLinearPrecision
+    hregular lengthBound hLength nested
+
+theorem effectiveIntervalRegularDarbouxScheduleRaw_linear_width_le
+    {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
+    {hinterval : F.lower <= F.upper} (lengthBound : Nat)
+    (hLength : F.upper - F.lower <= (lengthBound : Rat))
+    (nested : forall n m, n <= m ->
+      (Integral.intervalRegularDarbouxScheduleCompute F hinterval hregular
+        (fun n => Integral.intervalRegularAutomaticPieces hregular lengthBound
+          (fun k => k) n)
+        (fun n => n)
+        (fun n => Integral.intervalRegularAutomaticPieces_pos hregular lengthBound
+          (fun k => k) n) n).lo <=
+      (Integral.intervalRegularDarbouxScheduleCompute F hinterval hregular
+        (fun n => Integral.intervalRegularAutomaticPieces hregular lengthBound
+          (fun k => k) n)
+        (fun n => n)
+        (fun n => Integral.intervalRegularAutomaticPieces_pos hregular lengthBound
+          (fun k => k) n) m).lo /\
+      (Integral.intervalRegularDarbouxScheduleCompute F hinterval hregular
+        (fun n => Integral.intervalRegularAutomaticPieces hregular lengthBound
+          (fun k => k) n)
+        (fun n => n)
+        (fun n => Integral.intervalRegularAutomaticPieces_pos hregular lengthBound
+          (fun k => k) n) m).hi <=
+      (Integral.intervalRegularDarbouxScheduleCompute F hinterval hregular
+        (fun n => Integral.intervalRegularAutomaticPieces hregular lengthBound
+          (fun k => k) n)
+        (fun n => n)
+        (fun n => Integral.intervalRegularAutomaticPieces_pos hregular lengthBound
+          (fun k => k) n) n).hi) :
+    ∀ n : Nat,
+      ((Integral.intervalRegularDarbouxScheduleRaw
+        (effectiveIntervalRegularDarbouxSchedule_ofAutomaticLinearPrecision
+          hregular lengthBound hLength nested)).compute n).width <=
+        (F.upper - F.lower) * (1 / ((n + 1 : Nat) : Rat)) := by
+  exact Integral.intervalRegularDarbouxScheduleRaw_linear_width_le
+    hregular lengthBound hLength nested
+
 theorem effectiveIntervalRegularDarbouxScheduleIntegralFor_valid
     {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
     {hinterval : F.lower <= F.upper}
