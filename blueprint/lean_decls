@@ -5682,3 +5682,4 @@ ComputableAnalysis.ComplexRaw.EquivalencePath.right_valid
 ComputableAnalysis.ComplexRaw.EquivalencePath.equiv
 ComputableAnalysis.Real.withAlternativeFromPath
 ComputableAnalysis.Complex.withAlternativeFromPath
+ComputableAnalysis.ComplexFunction.withAlternativeFromPath

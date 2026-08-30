@@ -5412,6 +5412,29 @@ def withAlternativeFrom (f : ComplexFunction) (parent : Representation f)
           (ComplexRaw.equiv_symm (parent.agrees z hp hf))
           (ComplexRaw.equiv_symm (h z hr hf hp)) } :: f.implementations
 
+/- Register a complex-function implementation when its pointwise evaluator is
+   connected to an existing representation by a finite raw equivalence path.
+   Domain coverage and validity remain explicit at every rational input. -/
+def withAlternativeFromPath (f : ComplexFunction) (parent : Representation f)
+    (raw : FunctionRaw) (hvalid : raw.Valid)
+    (hcover : forall z, raw.domain z -> f.preferred.domain z -> parent.raw.domain z)
+    (hpath : forall z (hr : raw.domain z) (hf : f.preferred.domain z)
+      (hp : parent.raw.domain z),
+      ComplexRaw.EquivalencePath (raw.evalRaw z hr) (parent.raw.evalRaw z hp)) :
+    ComplexFunction where
+  preferred := f.preferred
+  valid := f.valid
+  implementations :=
+    { raw := raw
+      valid := hvalid
+      agrees := by
+        intro z hf hr
+        let hp := hcover z hr hf
+        exact ComplexRaw.equiv_trans (f.valid z hf) (parent.valid z hp)
+          (hvalid z hr)
+          (ComplexRaw.equiv_symm (parent.agrees z hp hf))
+          (ComplexRaw.equiv_symm (hpath z hr hf hp).equiv) } :: f.implementations
+
 def withAlternativeFromImplementation (f : ComplexFunction)
     (parent : ComplexFunctionImplementation f.preferred)
     (raw : FunctionRaw) (hvalid : raw.Valid)
