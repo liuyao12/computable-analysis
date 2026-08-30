@@ -1341,6 +1341,10 @@ The reusable representation rule is
 \lean{ComputableAnalysis.ComplexRaw.equiv_of_common_anchor}:
 two valid complex algorithms are equivalent when both are equivalent to one
 valid proof-side anchor.
+The corresponding finite path is
+\lean{ComputableAnalysis.ComplexRaw.EquivalencePath}; its
+\lean{ComputableAnalysis.ComplexRaw.EquivalencePath.equiv}
+theorem composes only validity-carrying edges.
 
 The same finite-prefix idea is available without an anchor.  If a complex
 candidate's later boxes lie inside earlier radius-expanded boxes, then

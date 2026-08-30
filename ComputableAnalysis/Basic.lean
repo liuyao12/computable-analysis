@@ -5069,6 +5069,29 @@ theorem equiv_of_common_anchor {x y anchor : ComplexRaw}
   exact equiv_trans hx hanchor hy
     hxanchor (equiv_symm hyanchor)
 
+/-! The complex representation chain is proof-carrying as well.  Each finite
+edge records validity at its endpoints, so complex-valued functions and
+series can switch implementations without appealing to a completed complex
+field. -/
+inductive EquivalencePath : ComplexRaw -> ComplexRaw -> Prop
+  | refl {x : ComplexRaw} (hx : x.Valid) : EquivalencePath x x
+  | cons {x y z : ComplexRaw} (hx : x.Valid) (hy : y.Valid) (hz : z.Valid)
+      (hxy : x.Equiv y) (tail : EquivalencePath y z) :
+      EquivalencePath x z
+
+theorem EquivalencePath.right_valid {x y : ComplexRaw}
+    (path : EquivalencePath x y) : y.Valid := by
+  cases path with
+  | refl hx => exact hx
+  | cons _ _ hz _ _ => exact hz
+
+theorem EquivalencePath.equiv {x y : ComplexRaw}
+    (path : EquivalencePath x y) : x.Equiv y := by
+  induction path with
+  | refl hx => exact equiv_refl _ hx
+  | cons hx hy hz hxy tail ih =>
+      exact equiv_trans hx hy hz hxy ih
+
 def ofQComplex (z : QComplex) : ComplexRaw where compute := fun _ => { lo := z, hi := z }
 
 theorem ofQComplex_valid (z : QComplex) :
