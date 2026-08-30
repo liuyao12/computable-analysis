@@ -354,6 +354,17 @@ theorem effectiveDyadicPublicSquareIntegral_equiv_halfQuarterTurn_shared
       (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
   exact h.to_public_equiv_halfQuarterTurn hsine hbridge
 
+/- Stable focused-entry-point name for the representation edge before the
+   quarter-turn transport.  The shared witness proves the public stabilized
+   evaluator agrees with the tangent-square anchor itself. -/
+theorem effectiveDyadicPublicSquareIntegral_stabilized_equiv_tangentSquare_shared
+    {S : SinPiIntegral.ArctanSinPiConstruction}
+    (h : SinPiIntegral.DyadicPublicSquareTangentSharedWitness S) :
+    (SinPiIntegral.dyadicPublicSquareIntegralRaw_stabilized S
+      SinPiIntegral.tangentSquareIntegral).Equiv
+      SinPiIntegral.tangentSquareIntegral := by
+  exact h.stabilized_equiv_tangentSquare
+
 theorem effectiveReciprocalPi_quarterTurn_equiv_quarter :
     (SinPiIntegral.reciprocalPiRaw *
       RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Equiv
