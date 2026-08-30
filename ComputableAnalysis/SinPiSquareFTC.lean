@@ -4434,6 +4434,17 @@ theorem DyadicPublicSquareTangentSharedWitness.stabilized_valid
   exact dyadicPublicSquareIntegralRaw_stabilized_valid_of_overlap
     S hsine tangentSquareIntegral_valid h.to_public_equiv
 
+/- The stabilized public evaluator is equivalent to its valid tangent-square
+   anchor.  This is the representation edge consumed by later value and FTC
+   proofs; it is stronger than merely recording validity. -/
+theorem DyadicPublicSquareTangentSharedWitness.stabilized_equiv_tangentSquare
+    {S : ArctanSinPiConstruction}
+    (h : DyadicPublicSquareTangentSharedWitness S) :
+    (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral).Equiv
+      tangentSquareIntegral := by
+  exact dyadicPublicSquareIntegralRaw_stabilized_equiv_anchor_of_overlap
+    S tangentSquareIntegral_valid h.to_public_equiv
+
 /- The stabilized public evaluator is the valid representative used for
    transitive transport to the quarter-turn anchor. -/
 theorem DyadicPublicSquareTangentTransportWitness.to_public_equiv_halfQuarterTurn
