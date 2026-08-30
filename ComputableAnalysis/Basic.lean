@@ -4252,6 +4252,24 @@ theorem withAlternativeFromPath_equiv_preferred (f : PartialRealFunction)
   exact RealRaw.equiv_trans hrv hparv hpv (hpath x hr hp hpar).equiv
     (parent.agrees x hpar hp)
 
+theorem withAlternativeFromPath_overlaps_preferred (f : PartialRealFunction)
+    (parent : Representation f) (raw : PartialRealFunRaw)
+    (hvalid : raw.Valid)
+    (hcover : forall x, raw.definedAt x -> f.preferred.definedAt x ->
+      parent.raw.definedAt x)
+    (hpath : forall x (hr : raw.definedAt x) (hp : f.preferred.definedAt x)
+      (hpar : parent.raw.definedAt x),
+      RealRaw.EquivalencePath (raw.evalRaw x hr)
+        (parent.raw.evalRaw x hpar))
+    {x : Rat} (hr : raw.definedAt x) (hp : f.preferred.definedAt x)
+    (stage : Nat) :
+    QInterval.Overlaps (raw.compute x hr stage)
+      (f.preferred.compute x hp stage) := by
+  exact (RealRaw.compareAt_overlap_iff
+    (raw.evalRaw x hr) (f.preferred.evalRaw x hp) stage stage).1
+    (withAlternativeFromPath_equiv_preferred f parent raw hvalid hcover hpath
+      hr hp stage)
+
 theorem withAlternativeFrom_equiv_preferred (f : PartialRealFunction)
     (parent : Representation f) (raw : PartialRealFunRaw)
     (hvalid : raw.Valid)
@@ -5522,6 +5540,21 @@ theorem withAlternativeFromPath_equiv_preferred (f : ComplexFunction)
   exact ComplexRaw.equiv_trans (hvalid z hr) (parent.valid z hp)
     (f.valid z hf) (hpath z hr hf hp).equiv
     (parent.agrees z hp hf)
+
+theorem withAlternativeFromPath_overlaps_preferred (f : ComplexFunction)
+    (parent : Representation f) (raw : FunctionRaw) (hvalid : raw.Valid)
+    (hcover : forall z, raw.domain z -> f.preferred.domain z ->
+      parent.raw.domain z)
+    (hpath : forall z (hr : raw.domain z) (hf : f.preferred.domain z)
+      (hp : parent.raw.domain z),
+      ComplexRaw.EquivalencePath (raw.evalRaw z hr) (parent.raw.evalRaw z hp))
+    {z : QComplex} (hr : raw.domain z) (hf : f.preferred.domain z)
+    (stage : Nat) :
+    QBox.Overlaps (raw.compute z hr stage) (f.preferred.compute z hf stage) := by
+  exact (ComplexRaw.compareAt_overlap_iff
+    (raw.evalRaw z hr) (f.preferred.evalRaw z hf) stage stage).1
+    (withAlternativeFromPath_equiv_preferred f parent raw hvalid hcover hpath
+      hr hf stage)
 
 end ComplexFunction
 
