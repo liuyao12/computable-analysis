@@ -4270,6 +4270,20 @@ theorem withAlternativeFromPath_overlaps_preferred (f : PartialRealFunction)
     (withAlternativeFromPath_equiv_preferred f parent raw hvalid hcover hpath
       hr hp stage)
 
+/-! The registry-relative form is a convenience wrapper around the same
+    spanning-tree rule. -/
+def withAlternativeFromImplementationPath (f : PartialRealFunction)
+    (parent : PartialRealFunctionImplementation f.preferred)
+    (raw : PartialRealFunRaw) (hvalid : raw.Valid)
+    (hcover : forall x, raw.definedAt x -> f.preferred.definedAt x ->
+      parent.raw.definedAt x)
+    (hpath : forall x (hr : raw.definedAt x) (hp : f.preferred.definedAt x)
+      (hpar : parent.raw.definedAt x),
+      RealRaw.EquivalencePath (raw.evalRaw x hr)
+        (parent.raw.evalRaw x hpar)) : PartialRealFunction :=
+  f.withAlternativeFromPath (implementationRepresentation parent) raw hvalid
+    hcover hpath
+
 theorem withAlternativeFrom_equiv_preferred (f : PartialRealFunction)
     (parent : Representation f) (raw : PartialRealFunRaw)
     (hvalid : raw.Valid)
@@ -5555,6 +5569,19 @@ theorem withAlternativeFromPath_overlaps_preferred (f : ComplexFunction)
     (raw.evalRaw z hr) (f.preferred.evalRaw z hf) stage stage).1
     (withAlternativeFromPath_equiv_preferred f parent raw hvalid hcover hpath
       hr hf stage)
+
+/-! The registry-relative form for complex-valued functions. -/
+def withAlternativeFromImplementationPath (f : ComplexFunction)
+    (parent : ComplexFunctionImplementation f.preferred)
+    (raw : FunctionRaw) (hvalid : raw.Valid)
+    (hcover : forall z, raw.domain z -> f.preferred.domain z ->
+      parent.raw.domain z)
+    (hpath : forall z (hr : raw.domain z) (hf : f.preferred.domain z)
+      (hpar : parent.raw.domain z),
+      ComplexRaw.EquivalencePath (raw.evalRaw z hr) (parent.raw.evalRaw z hpar)) :
+    ComplexFunction :=
+  f.withAlternativeFromPath (implementationRepresentation parent) raw hvalid
+    hcover hpath
 
 end ComplexFunction
 
