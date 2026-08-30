@@ -1536,6 +1536,19 @@ sum is formalized once and reused:
 \lean{ComputableAnalysis.SinPiIntegral.DyadicSquareCircleOverlapFamily.to_square_sum_overlap}
 \leanok
 
+\begin{proposition}[Stabilized public sine-square representation]
+The public dyadic square evaluator is not used as a raw-real representative
+until its finite boxes have been stabilized against a valid tangent-square
+anchor.  A shared witness therefore yields the representation edge consumed
+by later value and FTC transport; this is the precise role of stabilization
+in the equal-dyadic route.
+
+\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareTangentSharedWitness.stabilized_valid}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareTangentSharedWitness.stabilized_equiv_tangentSquare}
+\lean{ComputableAnalysis.effectiveDyadicPublicSquareIntegral_stabilized_equiv_tangentSquare_shared}
+\leanok
+\end{proposition}
+
 The public square sum is first prefix-stabilized before equivalence is
 composed.  The bridge from the Lipschitz-dyadic tangent integral to the
 effective FTC anchor is an explicit certificate; this is where the two
