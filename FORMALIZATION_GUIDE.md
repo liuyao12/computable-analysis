@@ -71,6 +71,8 @@ width is below its input budget: `EffectiveModulusFor.local_expand_contains`
 widenes the left-endpoint box by twice the stage tolerance. This is useful for
 cellwise constructions, but it is intentionally not a global interval
 evaluator; that upgrade requires a finite covering certificate.
+The companion `EffectiveModulusFor.local_expand_width_le` records the resulting
+five-fold stage-width budget explicitly.
 
 A declaration may be a useful interface, a target `Prop`, or a fully proved
 theorem.  The guide calls out that distinction.  A named `def` or `structure`

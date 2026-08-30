@@ -7623,6 +7623,36 @@ theorem EffectiveModulusFor.local_expand_contains
       exact Rat.le_trans hdiff hsmall)
   exact QInterval.expand_contains_right_of_near hclose
 
+theorem EffectiveModulusFor.local_expand_width_le
+    {F : FunctionOnInterval} (h : EffectiveModulusFor F)
+    (I : QInterval) (hI : subintervalOf I F.lower F.upper)
+    (n : Nat) (hsmall : I.width <=
+      1 / ((h.inputPrecision n : Nat) : Rat)) :
+    (QInterval.expand
+      (F.compute I.lo
+        ⟨hI.1, Rat.le_trans hI.2.1 hI.2.2⟩
+        (h.evalPrecision n))
+      (2 * (precisionAtStage n).val)).width <=
+        5 * (precisionAtStage n).val := by
+  have hclose := h.close I.lo I.lo n
+    ⟨hI.1, Rat.le_trans hI.2.1 hI.2.2⟩
+    ⟨hI.1, Rat.le_trans hI.2.1 hI.2.2⟩ (by
+      have hzero : I.lo - I.lo = 0 := by grind
+      rw [hzero]
+      have hpos : 0 < 1 / ((h.inputPrecision n : Nat) : Rat) :=
+        one_div_nat_pos (h.inputPrecision_pos n)
+      exact Rat.le_of_lt hpos)
+  have hpointwidth := hclose.2.2.1
+  rw [QInterval.expand_width]
+  have hnonneg : 0 <= (precisionAtStage n).val := by
+    by_cases hn : n = 0
+    · subst n
+      native_decide
+    · simp only [precisionAtStage, dif_neg hn]
+      exact Rat.le_of_lt
+        (one_div_nat_pos (Nat.pos_of_ne_zero hn))
+  grind
+
 theorem EffectiveModulusFor.epsilonDeltaContinuous
     {F : FunctionOnInterval} (h : EffectiveModulusFor F) :
     EpsilonDeltaContinuousOn F := by
