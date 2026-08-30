@@ -690,6 +690,45 @@ theorem effectiveIntervalRegularDarbouxScheduleRaw_precision_witness
       ((Integral.intervalRegularDarbouxScheduleRaw s).compute n).width <= eps.val := by
   exact Integral.intervalRegularDarbouxScheduleRaw_precision_witness s eps
 
+/-! Consumer-facing integral object for an interval-regular schedule.  The
+schedule already carries the construction certificate; this alias keeps
+downstream proofs at the focused calculus boundary instead of reaching into
+the implementation namespace. -/
+def effectiveIntervalRegularDarbouxScheduleIntegralFor
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hinterval : F.lower <= F.upper}
+    (s : Integral.IntervalRegularDarbouxSchedule F hregular hinterval) : RealRaw :=
+  Integral.intervalRegularDarbouxScheduleIntegralFor s
+
+theorem effectiveIntervalRegularDarbouxScheduleIntegralFor_valid
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hinterval : F.lower <= F.upper}
+    (s : Integral.IntervalRegularDarbouxSchedule F hregular hinterval) :
+    (effectiveIntervalRegularDarbouxScheduleIntegralFor s).Valid := by
+  exact Integral.intervalRegularDarbouxScheduleIntegralFor_valid s
+
+theorem effectiveIntervalRegularDarbouxScheduleIntegralFor_precision_witness
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hinterval : F.lower <= F.upper}
+    (s : Integral.IntervalRegularDarbouxSchedule F hregular hinterval)
+    (eps : QPos) :
+    ∃ n : Nat,
+      ((effectiveIntervalRegularDarbouxScheduleIntegralFor s).compute n).width <=
+        eps.val := by
+  exact Integral.intervalRegularDarbouxScheduleIntegralFor_precision_witness s eps
+
+theorem effectiveIntervalRegularDarbouxScheduleIntegralFor_width_le_of_tolerance
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hinterval : F.lower <= F.upper}
+    (s : Integral.IntervalRegularDarbouxSchedule F hregular hinterval)
+    (n : Nat) (eps : Rat)
+    (hbudget : (F.upper - F.lower) *
+        (1 / ((s.evalPrecision n + 1 : Nat) : Rat)) <= eps) :
+    ((effectiveIntervalRegularDarbouxScheduleIntegralFor s).compute n).width <=
+      eps := by
+  exact Integral.intervalRegularDarbouxScheduleIntegralFor_width_le_of_tolerance
+    s n eps hbudget
+
 /-! The arbitrary-power monomial FTC family is exposed as one public theorem:
 the dyadic integral of `x^k` on the unit interval agrees with the rational
 endpoint value `1 / (k + 1)`. -/
