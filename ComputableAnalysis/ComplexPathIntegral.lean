@@ -638,6 +638,39 @@ def segmentLeftSumEntire (f : FunctionRaw) (hEntire : forall z, f.domain z)
     (a b : QComplex) (n evalPrecision : Nat) : QBox :=
   segmentLeftSum f a b n (fun k => hEntire (segmentPoint a b n k.val)) evalPrecision
 
+/-! Finite box-fold algebra used by constant and polynomial path sums. -/
+theorem foldl_point_add_scaled {α : Type} (v : QComplex) :
+    forall (xs : List α) (acc : QBox),
+      xs.foldl (fun total _ => QBox.add total (QBox.point v)) acc =
+        QBox.add acc (QBox.point (QComplex.scaleRat (xs.length : Rat) v)) := by
+  intro xs
+  induction xs with
+  | nil =>
+      intro acc
+      cases acc with
+      | mk lo hi =>
+        cases lo with
+        | mk lore loim =>
+          cases hi with
+          | mk hire hiim =>
+            cases v with
+            | mk vre vim =>
+              simp [QBox.add, QBox.point, QComplex.scaleRat, QComplex.add]
+              constructor
+              · constructor <;> grind
+              · constructor <;> grind
+  | cons x xs ih =>
+      intro acc
+      rw [List.foldl_cons, ih]
+      cases acc with
+      | mk lo hi =>
+        cases v with
+        | mk vre vim =>
+          simp [QBox.add, QBox.point, QComplex.scaleRat, QComplex.add,
+            Rat.natCast_add]
+          constructor <;> grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc,
+            Rat.add_comm]
+
 /-- Left Riemann sum over a polygonal path, represented by consecutive
 vertices.  To integrate around a closed polygon, repeat the first vertex at the
 end of the list. -/

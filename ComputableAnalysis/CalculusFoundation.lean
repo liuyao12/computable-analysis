@@ -58,6 +58,13 @@ theorem effectivePolynomialPathFTC
   exact polygonalPolynomialIntegralRaw_equiv_endpoint
     coefficients start endpoint vertices
 
+/-! Public finite algebra for accumulating identical point contributions. -/
+theorem effectiveFoldlPointAddScaled {α : Type} (v : QComplex)
+    (xs : List α) (acc : QBox) :
+    xs.foldl (fun total _ => QBox.add total (QBox.point v)) acc =
+      QBox.add acc (QBox.point (QComplex.scaleRat (xs.length : Rat) v)) := by
+  exact foldl_point_add_scaled v xs acc
+
 /-! Public certificate entry point for the left-endpoint polygonal integral.
 The evaluator is executable at every finite stage; validity still comes from
 the supplied orderedness, nesting, and shrinking certificates. -/
