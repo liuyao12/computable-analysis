@@ -3874,6 +3874,14 @@ theorem withAlternativeFrom_overlaps_preferred (x : Real)
   exact (RealRaw.compareAt_overlap_iff rep x.preferred stage stage).1
     (withAlternativeFrom_equiv_preferred x parent rep hvalid h stage)
 
+/- Register an implementation after an arbitrary finite chain of certified
+   representations.  The stored handle remains compact, while the path
+   supplies the proof that the new implementation connects to the preferred
+   representative. -/
+def withAlternativeFromPath (x : Real) (rep : RealRaw) (hvalid : rep.Valid)
+    (path : RealRaw.EquivalencePath rep x.preferred) : Real :=
+  x.withAlternative rep hvalid path.equiv
+
 def withAlternativeFromImplementation (x : Real)
     (parent : RealImplementation x.preferred)
     (rep : RealRaw) (hvalid : rep.Valid)
