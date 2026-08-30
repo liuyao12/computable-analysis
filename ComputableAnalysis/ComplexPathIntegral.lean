@@ -806,6 +806,28 @@ structure PolygonalIntegralCertificate
   widths_shrink : ComplexRaw.WidthsShrinkToZero
     (polygonalIntegralBoxEntire f vertices)
 
+theorem PolygonalIntegralCertificate.of_stage_eq_point
+    {f : EntireBoxFunctionRaw} {vertices : List QComplex}
+    (anchor : QComplex)
+    (hcompute : forall n, polygonalIntegralBoxEntire f vertices n =
+      QBox.point anchor) :
+    PolygonalIntegralCertificate f vertices := by
+  refine
+    { ordered := ?_
+      nested := ?_
+      widths_shrink := ?_ }
+  · intro n
+    rw [hcompute n]
+    simp [QBox.Ordered, QBox.point, QComplex.le_def]
+  · intro n m hnm
+    rw [hcompute m, hcompute n]
+    simp [QBox.NestedIn, QBox.point, QComplex.le_def]
+  · intro eps
+    refine ⟨0, ?_⟩
+    intro n hn
+    rw [hcompute n]
+    simp [QBox.point, QBox.width, QBox.height] <;> grind
+
 theorem polygonalIntegralRawEntire_valid
     {f : EntireBoxFunctionRaw} {vertices : List QComplex}
     (certificate : PolygonalIntegralCertificate f vertices) :

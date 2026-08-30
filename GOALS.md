@@ -5773,6 +5773,9 @@ by one for every nonempty input.
   `constantClosedPolygonalLeftSumCertificate` instantiates this constructor
   for a closed constant path, including the stage-zero branch, and therefore
   produces a valid `ComplexRaw` certificate without a separate limit argument.
+  The matching `PolygonalIntegralCertificate.of_stage_eq_point` constructor
+  now exposes the same promotion for interval-valued path integrals, keeping
+  the left-sum and interval-integral representations symmetric.
 
 - The finite quarter-turn checkpoint now advances benchmark item 17:
   `FiniteRotationQuarterTurnExample` evaluates the common factorial rotation
