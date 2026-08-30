@@ -122,6 +122,13 @@ the packaged overlap family can be built with
 This is a finite geometric certificate to add, not a hidden use of completed
 real numbers.
 
+The search-facing form is now packaged as
+\lean{ComputableAnalysis.SinPiIntegral.DyadicCanonicalCertificateSearchFamily}.
+It exposes a finite rational candidate list and a proof that the executable
+witness search succeeds at each precision, depth, and interior dyadic sample;
+\lean{ComputableAnalysis.SinPiIntegral.DyadicCanonicalCertificateSearchFamily.toCanonicalFamily}
+then supplies the canonical certificate family used by the existing transport.
+
 The missing certificate has a deliberately concrete shape.  For every
 precision, depth, and dyadic index, provide rational data
 

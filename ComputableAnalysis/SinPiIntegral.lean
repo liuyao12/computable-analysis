@@ -9155,6 +9155,31 @@ structure DyadicCanonicalCertificateFamily
     forall precision,
       CanonicalDyadicHalfAngleCertificateAt B precision depth k hk
 
+/-! A search-facing version of the canonical family.  It keeps the finite
+    rational candidate lists visible, so an external proof or verified search
+    procedure can discharge the geometric obligation without constructing the
+    certificate fields by hand. -/
+structure DyadicCanonicalCertificateSearchFamily
+    (B : IntegralIdentities.ArctanInverseBisection) where
+  zero_equiv :
+    (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero
+  candidates : Nat -> Nat -> Nat -> List Rat
+  search_succeeds : forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+    0 < k -> ∃ u,
+      canonicalDyadicCertificateSearchAt B precision depth k hk
+        (candidates precision depth k) = some u
+
+noncomputable def DyadicCanonicalCertificateSearchFamily.toCanonicalFamily
+    {B : IntegralIdentities.ArctanInverseBisection}
+    (H : DyadicCanonicalCertificateSearchFamily B) :
+    DyadicCanonicalCertificateFamily B where
+  zero_equiv := H.zero_equiv
+  interior := fun depth k hk hpos precision => by
+    let hs := H.search_succeeds precision depth k hk hpos
+    exact canonicalDyadicCertificateSearchAt_sound B (Classical.choose_spec hs)
+
 noncomputable def DyadicCanonicalCertificateFamily.toWitnessFamily
     {B : IntegralIdentities.ArctanInverseBisection}
     (C : DyadicCanonicalCertificateFamily B) :
