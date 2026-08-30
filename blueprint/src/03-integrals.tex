@@ -2111,6 +2111,13 @@ agreement contract starts at positive stages:
 \lean{ComputableAnalysis.ComplexPathIntegral.PolygonalLeftSumIntegralPositiveStageAgreement}
 and its constant-path instance
 \lean{ComputableAnalysis.ComplexPathIntegral.constantPolygonalLeftSumIntegralPositiveStageAgreement}.
+For scalar raw numbers, the cofinal successor schedule is already formalized:
+\lean{ComputableAnalysis.RealRaw.StageSchedule.id}
+\lean{ComputableAnalysis.RealRaw.schedule}
+\lean{ComputableAnalysis.RealRaw.schedule_valid}
+\lean{ComputableAnalysis.RealRaw.schedule_equiv}
+This is the model for giving a future open-path raw evaluator a shifted,
+valid public schedule.
 
 The open-path statement is the actual complex FTC: the finite sum of
 polynomial increments telescopes to
