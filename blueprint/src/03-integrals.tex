@@ -1426,6 +1426,21 @@ remaining obligation is the finite `TangentChartTransport` structure, whose
 fields say that the public dyadic box and the chart box overlap at every
 stage.  A common rational witness is an equivalent, more constructive form.
 
+For the squared test function, the same separation is now visible in the
+public API.  The evaluator is a literal interval product, its finite square
+sum has an explicit shrinking-width proof, and the tangent-chart primitive has
+its own effective FTC certificate.  The unresolved statement is only the
+representation edge between these computations: a stagewise rational overlap
+family for the dyadic samples.  Thus the project has already formalized the
+integral machinery needed by the example; what remains is the geometric
+half-angle transport, not an appeal to a stronger theory of integration.
+
+\lean{ComputableAnalysis.SinPiIntegral.sinPiSquareOnHalf_valid}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_widths_shrink}
+\lean{ComputableAnalysis.SinPiIntegral.tangentSquareEffectiveCandidateFTC_equiv_endpoint}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicSquareCircleOverlapFamily.to_square_sum_overlap}
+\leanok
+
 The nested-radical rectangle computation is nevertheless a complete raw
 candidate on its own: it is an executable list of rational intervals, and its
 width is bounded by (1/(n+1)).  The only missing raw-real field is
