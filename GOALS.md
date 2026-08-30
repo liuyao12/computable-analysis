@@ -5762,8 +5762,10 @@ by one for every nonempty input.
   integrand regression theorem `segmentLeftSum_constant`: for every positive
   rational subdivision count, the executable left sum on a segment is exactly
   `c * (b - a)`.  This is the first endpoint identity for the sampled path
-  evaluator itself; convergence for nonconstant interval-valued functions
-  remains the next complex-integral bridge.
+  evaluator itself. `polygonalLeftSum_constant` assembles the same identity
+  over every finite polygonal path and yields exact cancellation for closed
+  paths; convergence for nonconstant interval-valued functions remains the
+  next complex-integral bridge.
 
 - The finite quarter-turn checkpoint now advances benchmark item 17:
   `FiniteRotationQuarterTurnExample` evaluates the common factorial rotation

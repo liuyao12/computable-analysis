@@ -703,6 +703,42 @@ def polygonalLeftSumEntire (f : FunctionRaw) (hEntire : forall z, f.domain z) :
         (polygonalLeftSumEntire f hEntire (b :: rest) n evalPrecision)
   | _, _, _ => QBox.zero
 
+/-! The constant-integrand identity assembles over a finite polygonal path. -/
+theorem polygonalLeftSum_constant
+    (c start : QComplex) (vertices : List QComplex) (n : Nat) (hn : 0 < n)
+    (evalPrecision : Nat) :
+    polygonalLeftSumEntire (FunctionRaw.exact (fun _ => c))
+      (by intro z; change True; trivial) (start :: vertices) n evalPrecision =
+      QBox.point (polygonalConstantDifferentialDisplacement c start vertices) := by
+  induction vertices generalizing start with
+  | nil =>
+      simp [polygonalLeftSumEntire, polygonalConstantDifferentialDisplacement,
+        polygonalDisplacementTo, QBox.zero, QBox.point, QComplex.mul,
+        QComplex.zero]
+      constructor <;> grind
+  | cons vertex rest ih =>
+      cases rest with
+      | nil =>
+          rw [polygonalLeftSumEntire]
+          rw [segmentLeftSum_constant c start vertex n hn evalPrecision]
+          rw [ih vertex]
+          rw [QBox.add_point]
+          simp [polygonalConstantDifferentialDisplacement,
+            polygonalDisplacementTo, QBox.add_point, QBox.zero,
+            QComplex.mul, QComplex.add, QComplex.zero]
+          congr 1 <;> grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+            Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+      | cons next rest =>
+          rw [polygonalLeftSumEntire]
+          rw [segmentLeftSum_constant c start vertex n hn evalPrecision]
+          rw [ih vertex]
+          rw [QBox.add_point]
+          simp [polygonalConstantDifferentialDisplacement,
+            polygonalDisplacementTo, QComplex.mul, QComplex.add,
+            QComplex.sub, QComplex.neg]
+          congr 1 <;> grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+            Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+
 /-- Interval enclosure for one subsegment contribution.
 
 The whole subsegment is first boxed, then `f` is evaluated on that box, and

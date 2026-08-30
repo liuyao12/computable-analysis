@@ -2096,6 +2096,8 @@ uniform refinement and overlap certificates for a larger class of functions.
 As a regression case, the left sum for a constant integrand on one rational
 segment is exactly (c(b-a)) at every positive subdivision count. The finite
 fold identity makes this endpoint law explicit before any path limit is taken.
+The same identity assembles over any finite polygonal path and reduces a closed
+path to zero by endpoint cancellation.
 
 The open-path statement is the actual complex FTC: the finite sum of
 polynomial increments telescopes to
@@ -2154,6 +2156,8 @@ arithmetic and leaves Euclidean square-root length as a later refinement.
 \lean{ComputableAnalysis.ComplexPathIntegral.effectiveFoldlPointAddScaled}
 \lean{ComputableAnalysis.ComplexPathIntegral.segmentLeftSum_constant}
 \lean{ComputableAnalysis.ComplexPathIntegral.effectiveSegmentLeftSumConstant}
+\lean{ComputableAnalysis.ComplexPathIntegral.polygonalLeftSum_constant}
+\lean{ComputableAnalysis.ComplexPathIntegral.effectivePolygonalLeftSumConstant}
 \leanok
 
 The sine integral in Chapter~\ref{ch:rational-circle-trigonometry} is the

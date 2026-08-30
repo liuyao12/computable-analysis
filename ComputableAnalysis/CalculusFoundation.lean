@@ -72,6 +72,14 @@ theorem effectiveSegmentLeftSumConstant
       QBox.point (QComplex.mul c (QComplex.sub b a)) := by
   exact segmentLeftSum_constant c a b n hn evalPrecision
 
+theorem effectivePolygonalLeftSumConstant
+    (c start : QComplex) (vertices : List QComplex) (n : Nat) (hn : 0 < n)
+    (evalPrecision : Nat) :
+    polygonalLeftSumEntire (FunctionRaw.exact (fun _ => c))
+      (by intro z; change True; trivial) (start :: vertices) n evalPrecision =
+      QBox.point (polygonalConstantDifferentialDisplacement c start vertices) := by
+  exact polygonalLeftSum_constant c start vertices n hn evalPrecision
+
 /-! Public certificate entry point for the left-endpoint polygonal integral.
 The evaluator is executable at every finite stage; validity still comes from
 the supplied orderedness, nesting, and shrinking certificates. -/
