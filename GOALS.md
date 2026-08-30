@@ -5776,6 +5776,9 @@ by one for every nonempty input.
   The matching `PolygonalIntegralCertificate.of_stage_eq_point` constructor
   now exposes the same promotion for interval-valued path integrals, keeping
   the left-sum and interval-integral representations symmetric.
+  `PolygonalLeftSumIntegralOverlapCertificate.of_stage_eq_point` now packages
+  the common-anchor case as an explicit equivalence edge between the two
+  representations.
 
 - The finite quarter-turn checkpoint now advances benchmark item 17:
   `FiniteRotationQuarterTurnExample` evaluates the common factorial rotation

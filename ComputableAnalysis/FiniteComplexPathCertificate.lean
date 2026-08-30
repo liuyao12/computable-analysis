@@ -118,6 +118,27 @@ structure PolygonalLeftSumIntegralOverlapCertificate
       ((polygonalLeftSumRawEntire f hEntire vertices evalPrecision).compute n)
       ((polygonalIntegralRawEntire boxFunction vertices).compute n)
 
+theorem PolygonalLeftSumIntegralOverlapCertificate.of_stage_eq_point
+    {f : FunctionRaw} {hEntire : forall z, f.domain z}
+    {boxFunction : EntireBoxFunctionRaw} {vertices : List QComplex}
+    {evalPrecision : Nat -> Nat} (anchor : QComplex)
+    (hleft : forall n,
+      (polygonalLeftSumRawEntire f hEntire vertices evalPrecision).compute n =
+        QBox.point anchor)
+    (hinterval : forall n,
+      (polygonalIntegralRawEntire boxFunction vertices).compute n =
+        QBox.point anchor) :
+    PolygonalLeftSumIntegralOverlapCertificate f hEntire boxFunction vertices
+      evalPrecision := by
+  refine
+    { left_sum := PolygonalLeftSumCertificate.of_stage_eq_point anchor hleft
+      interval_integral := PolygonalIntegralCertificate.of_stage_eq_point anchor
+        hinterval
+      overlap := ?_ }
+  intro n
+  rw [hleft n, hinterval n]
+  simp [QBox.Overlaps, QBox.point, QComplex.le_def]
+
 def PolygonalLeftSumIntegralOverlapCertificate.leftRaw
     {f : FunctionRaw} {hEntire : forall z, f.domain z}
     {boxFunction : EntireBoxFunctionRaw} {vertices : List QComplex}
