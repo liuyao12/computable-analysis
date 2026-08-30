@@ -232,6 +232,34 @@ theorem effectiveFTC_endpointDifference
       (endpointDifferenceRaw F a b hendpoint) := by
   exact h.boundedIntegralRaw_equiv_endpointDifference hendpoint
 
+/-! Once the canonical certificate records nesting for its scheduled sum, the
+    endpoint-difference theorem can safely be presented as ordinary
+    subtraction of the primitive's two certified evaluations. -/
+theorem effectiveCanonicalFTC_endpointDifference_apply
+    {F dF : RealFunRaw} {a b : Rat}
+    (hF : F.Valid)
+    (h : CanonicalCandidateDerivativeFTC F dF a b) :
+    h.integralRaw.Equiv
+      ((F.apply hF b h.candidate.toDerivativeBoundFTC.primitive_domain_upper) -
+        (F.apply hF a h.candidate.toDerivativeBoundFTC.primitive_domain_lower)) := by
+  let A := F.apply hF a h.candidate.toDerivativeBoundFTC.primitive_domain_lower
+  let B := F.apply hF b h.candidate.toDerivativeBoundFTC.primitive_domain_upper
+  have hA : A.Valid := by
+    simpa [A, RealFunRaw.apply, RealFunRaw.applyCompute, RealRaw.Valid] using
+      hF a h.candidate.toDerivativeBoundFTC.primitive_domain_lower
+  have hB : B.Valid := by
+    simpa [B, RealFunRaw.apply, RealFunRaw.applyCompute, RealRaw.Valid] using
+      hF b h.candidate.toDerivativeBoundFTC.primitive_domain_upper
+  have hsub : (B - A).Valid := RealRaw.sub_valid hB hA
+  have hendpoint := endpointDifferenceRaw_equiv_sub_apply hF
+    h.candidate.toDerivativeBoundFTC.primitive_domain_lower
+    h.candidate.toDerivativeBoundFTC.primitive_domain_upper h.endpoint_valid
+  have hendpointRawValid : h.endpointRaw.Valid := by
+    simpa [CanonicalCandidateDerivativeFTC.endpointRaw, endpointDifferenceRaw,
+      RealRaw.Valid] using h.endpoint_valid
+  exact RealRaw.equiv_trans h.integral_valid hendpointRawValid hsub
+    h.integral_equiv_canonical_endpoint hendpoint
+
 /-! Public curvature-facing FTC entry points.  These are the project's
     certificate form of the classical MVT/FTC route: convexity or concavity
     supplies finite derivative brackets, while endpoint transport remains an
