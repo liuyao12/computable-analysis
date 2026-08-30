@@ -2104,6 +2104,11 @@ computation stage by stage in the constant closed-path case, so
 packages the two representations as one explicit equivalence certificate.
 The public convenience wrapper is
 \lean{ComputableAnalysis.ComplexPathIntegral.effectiveConstantClosedPolygonalLeftSumIntegralOverlapCertificate}.
+For an open path, stage zero is the zero initialization, so the honest
+agreement contract starts at positive stages:
+\lean{ComputableAnalysis.ComplexPathIntegral.PolygonalLeftSumIntegralPositiveStageAgreement}
+and its constant-path instance
+\lean{ComputableAnalysis.ComplexPathIntegral.constantPolygonalLeftSumIntegralPositiveStageAgreement}.
 
 The open-path statement is the actual complex FTC: the finite sum of
 polynomial increments telescopes to

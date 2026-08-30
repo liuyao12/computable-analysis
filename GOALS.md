@@ -5782,6 +5782,13 @@ by one for every nonempty input.
   `constantClosedPolygonalLeftSumIntegralOverlapCertificate` instantiates that
   edge for the independent constant interval evaluator on a closed path,
   including both stage-zero and positive-stage branches.
+  For open paths, the new
+  `PolygonalLeftSumIntegralPositiveStageAgreement` records the exact positive-
+  stage endpoint displacement while preserving the intentional zero-box
+  initialization at stage zero; its constant instance is
+  `constantPolygonalLeftSumIntegralPositiveStageAgreement`.  A future generic
+  open-path overlap certificate must therefore either shift the schedule or
+  supply a stage-zero anchor containing the displacement.
 
 - The finite quarter-turn checkpoint now advances benchmark item 17:
   `FiniteRotationQuarterTurnExample` evaluates the common factorial rotation

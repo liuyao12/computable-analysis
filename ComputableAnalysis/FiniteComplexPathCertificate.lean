@@ -118,6 +118,39 @@ structure PolygonalLeftSumIntegralOverlapCertificate
       ((polygonalLeftSumRawEntire f hEntire vertices evalPrecision).compute n)
       ((polygonalIntegralRawEntire boxFunction vertices).compute n)
 
+/-! Open paths expose a small but important initialization boundary: both raw
+evaluators return the zero box at stage zero.  The following interface records
+their genuine positive-stage agreement without pretending that an arbitrary
+open-path displacement overlaps the zero initialization. -/
+
+structure PolygonalLeftSumIntegralPositiveStageAgreement
+    (f : FunctionRaw) (hEntire : forall z, f.domain z)
+    (boxFunction : EntireBoxFunctionRaw) (vertices : List QComplex)
+    (evalPrecision : Nat -> Nat) where
+  anchor : QComplex
+  left_succ : forall n,
+    (polygonalLeftSumRawEntire f hEntire vertices evalPrecision).compute (n + 1) =
+      QBox.point anchor
+  interval_succ : forall n,
+    (polygonalIntegralRawEntire boxFunction vertices).compute (n + 1) =
+      QBox.point anchor
+
+def constantPolygonalLeftSumIntegralPositiveStageAgreement
+    (c start : QComplex) (vertices : List QComplex)
+    (evalPrecision : Nat -> Nat) :
+    PolygonalLeftSumIntegralPositiveStageAgreement
+      (FunctionRaw.exact (fun _ => c))
+      (by intro z; change True; trivial) (constantBoxFunction c)
+      (start :: vertices) evalPrecision := by
+  let anchor := polygonalConstantDifferentialDisplacement c start vertices
+  refine { anchor := anchor, left_succ := ?_, interval_succ := ?_ }
+  · intro n
+    exact polygonalLeftSum_constant c start vertices (n + 1)
+      (Nat.succ_pos n) (evalPrecision (n + 1))
+  · intro n
+    exact polygonalIntegralBoxEntire_constant c start vertices
+      (n + 1) (Nat.succ_pos n)
+
 theorem PolygonalLeftSumIntegralOverlapCertificate.of_stage_eq_point
     {f : FunctionRaw} {hEntire : forall z, f.domain z}
     {boxFunction : EntireBoxFunctionRaw} {vertices : List QComplex}
