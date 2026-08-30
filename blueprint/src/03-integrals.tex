@@ -936,6 +936,7 @@ currently keeps this layer self-contained rather than importing Mathlib's
 real-number geometry; a future import would be useful only if it supplied the
 same rational/interval statements without pulling in completed reals.
 
+\begin{proposition}[Anchor-free dyadic sample stabilization]
 There is also a useful distinction between a sample computation and its
 semantic anchor. For a fixed dyadic sample, the nested-radical boxes at any
 two requested precisions overlap, while the later box has width at most
@@ -950,6 +951,7 @@ certificate is needed merely to make the sample a valid `realRaw`.
 \lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSampleRaw_stabilized_valid_anchor_free}
 \lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSampleRaw_equiv_stabilized_anchor_free}
 \leanok
+\end{proposition}
 
 \section{The central bridge: an effective FTC}
 \label{thm:convex-ftc}
