@@ -7053,6 +7053,38 @@ theorem integralFor_valid (F : FunctionOnInterval)
     (integralFor F c).Valid :=
   c.certificate
 
+/-! A reusable anchor-free constructor.  A candidate evaluator need not first
+be related to a completed or independently named real: finite future
+containment plus shrinking radii already supplies the nesting certificate
+required by `ConstructionFor`. -/
+def constructionFor_of_future_containment
+    (F : FunctionOnInterval) (candidate : RealRaw) (radius : Nat -> Rat)
+    (hcandidate_ordered : forall n, 0 <= (candidate.compute n).width)
+    (hcandidate_shrinks : RealRaw.WidthsShrinkToZero candidate.compute)
+    (hfuture : forall k n, k <= n ->
+      (QInterval.expand (candidate.compute k) (radius k)).ContainsInterval
+        (candidate.compute n))
+    (hradius_shrinks : ShrinksToZero radius) :
+    ConstructionFor F where
+  compute := (RealRaw.prefixStabilize candidate radius).compute
+  certificate := RealRaw.prefixStabilize_valid_of_future
+    hcandidate_ordered hcandidate_shrinks hfuture hradius_shrinks
+
+theorem constructionFor_of_future_containment_integral_equiv_candidate
+    (F : FunctionOnInterval) (candidate : RealRaw) (radius : Nat -> Rat)
+    (hcandidate_ordered : forall n, 0 <= (candidate.compute n).width)
+    (hcandidate_shrinks : RealRaw.WidthsShrinkToZero candidate.compute)
+    (hfuture : forall k n, k <= n ->
+      (QInterval.expand (candidate.compute k) (radius k)).ContainsInterval
+        (candidate.compute n))
+    (hradius_shrinks : ShrinksToZero radius) :
+    candidate.Equiv
+      (integralFor F
+        (constructionFor_of_future_containment F candidate radius
+          hcandidate_ordered hcandidate_shrinks hfuture hradius_shrinks)) := by
+  exact RealRaw.candidate_equiv_prefixStabilize_of_future
+    hcandidate_ordered hfuture
+
 /-! Finite sums of raw representatives are the algebraic core of piecewise
 integral assembly.  Keeping this operation explicit lets an adjacent
 interval or multi-turn proof concatenate certified pieces before it proves

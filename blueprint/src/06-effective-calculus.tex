@@ -1319,6 +1319,20 @@ prefix envelope, using the endpoint difference only in the proof.  The
 runtime remains a finite rational computation, while validity and equivalence
 are supplied by width and radius certificates.
 
+The stronger anchor-free form is now public as well.  If every future box is
+contained in an earlier box expanded by a computable radius, and both the
+candidate widths and radii shrink, the prefix envelope is itself a valid raw
+real.  This is the preferred interface for algorithms whose refinement rule
+already proves cross-stage containment.
+
+\begin{proposition}[Anchor-free candidate construction]
+\lean{ComputableAnalysis.RealRaw.prefixStabilize_valid_of_future}
+\lean{ComputableAnalysis.RealRaw.candidate_equiv_prefixStabilize_of_future}
+\lean{ComputableAnalysis.Integral.constructionFor_of_future_containment}
+\lean{ComputableAnalysis.Integral.constructionFor_of_future_containment_integral_equiv_candidate}
+\leanok
+\end{proposition}
+
 \section{Secants before completeness}
 \label{thm:finite-quadrature-mean-value}
 
