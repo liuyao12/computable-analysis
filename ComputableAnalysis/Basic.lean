@@ -4633,6 +4633,32 @@ overlap at every common stage.
 def Equiv (z w : ComplexRaw) : Prop :=
   z.SameStageOverlap w
 
+/-! Cofinal stage schedules apply to complex box algorithms just as they do
+to real interval algorithms.  In particular, `RealRaw.StageSchedule.id`
+starts at stage one, which removes a zero-box initialization from a public
+schedule without changing the represented complex value. -/
+
+def schedule (sigma : RealRaw.StageSchedule) (z : ComplexRaw) : ComplexRaw where
+  compute := fun n => z.compute (sigma.stage n)
+
+theorem schedule_valid (z : ComplexRaw) (hz : z.Valid)
+    (sigma : RealRaw.StageSchedule) :
+    (schedule sigma z).Valid := by
+  constructor
+  · intro n
+    exact hz.1 (sigma.stage n)
+  · constructor
+    · intro n m hnm
+      exact hz.2.1 (sigma.stage n) (sigma.stage m)
+        (sigma.monotone n m hnm)
+    · intro eps
+      obtain ⟨N, hN⟩ := hz.2.2 eps
+      obtain ⟨k, hk⟩ := sigma.cofinal N
+      refine ⟨k, ?_⟩
+      intro n hkn
+      exact hN (sigma.stage n)
+        (Nat.le_trans hk (sigma.monotone k n hkn))
+
 theorem sameStageOverlap_equiv {z w : ComplexRaw} :
     z.SameStageOverlap w -> z.Equiv w := by
   intro h
@@ -4642,6 +4668,63 @@ theorem sameStageOverlap_equiv {z w : ComplexRaw} :
 of the other, even at different stages. -/
 def AllStagesOverlap (z w : ComplexRaw) : Prop :=
   forall n m, compareAt z w n m = .overlap
+
+theorem allStagesOverlap_refl (z : ComplexRaw) (hz : z.Valid) :
+    z.AllStagesOverlap z := by
+  intro n m
+  rcases Nat.le_total n m with hnm | hmn
+  · have hnest := hz.2.1 n m hnm
+    have hnr : (z.compute n).lo.re <= (z.compute n).hi.re := by
+      have h := (hz.1 n).1
+      unfold QBox.width at h
+      grind
+    have hni : (z.compute n).lo.im <= (z.compute n).hi.im := by
+      have h := (hz.1 n).2
+      unfold QBox.height at h
+      grind
+    have hmr : (z.compute m).lo.re <= (z.compute m).hi.re := by
+      have h := (hz.1 m).1
+      unfold QBox.width at h
+      grind
+    have hmi : (z.compute m).lo.im <= (z.compute m).hi.im := by
+      have h := (hz.1 m).2
+      unfold QBox.height at h
+      grind
+    apply (compareAt_overlap_iff z z n m).2
+    exact ⟨
+      ⟨Rat.le_trans hnest.1 hmr,
+        Rat.le_trans hnest.2.2.1 hmi⟩,
+      ⟨Rat.le_trans hmr hnest.2.1,
+        Rat.le_trans hmi hnest.2.2.2⟩⟩
+  · have hnest := hz.2.1 m n hmn
+    have hnr : (z.compute n).lo.re <= (z.compute n).hi.re := by
+      have h := (hz.1 n).1
+      unfold QBox.width at h
+      grind
+    have hni : (z.compute n).lo.im <= (z.compute n).hi.im := by
+      have h := (hz.1 n).2
+      unfold QBox.height at h
+      grind
+    have hmr : (z.compute m).lo.re <= (z.compute m).hi.re := by
+      have h := (hz.1 m).1
+      unfold QBox.width at h
+      grind
+    have hmi : (z.compute m).lo.im <= (z.compute m).hi.im := by
+      have h := (hz.1 m).2
+      unfold QBox.height at h
+      grind
+    apply (compareAt_overlap_iff z z n m).2
+    exact ⟨
+      ⟨Rat.le_trans hnr hnest.2.1,
+        Rat.le_trans hni hnest.2.2.2⟩,
+      ⟨Rat.le_trans hnest.1 hnr,
+        Rat.le_trans hnest.2.2.1 hni⟩⟩
+
+theorem schedule_equiv (z : ComplexRaw) (hz : z.Valid)
+    (sigma : RealRaw.StageSchedule) :
+    z.Equiv (schedule sigma z) := by
+  intro n
+  exact allStagesOverlap_refl z hz n (sigma.stage n)
 
 theorem allStagesOverlap_equiv {z w : ComplexRaw} :
     z.AllStagesOverlap w -> z.Equiv w := by

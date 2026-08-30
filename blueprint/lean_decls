@@ -203,6 +203,9 @@ ComputableAnalysis.RealRaw.StageSchedule.id
 ComputableAnalysis.RealRaw.schedule
 ComputableAnalysis.RealRaw.schedule_valid
 ComputableAnalysis.RealRaw.schedule_equiv
+ComputableAnalysis.ComplexRaw.schedule
+ComputableAnalysis.ComplexRaw.schedule_valid
+ComputableAnalysis.ComplexRaw.schedule_equiv
 ComputableAnalysis.RealRaw.equiv_of_schedule_equiv
 ComputableAnalysis.Real
 ComputableAnalysis.Real.ofRat

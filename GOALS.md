@@ -5792,6 +5792,10 @@ by one for every nonempty input.
   `constantPolygonalLeftSumIntegralPositiveStageAgreement`.  A future generic
   open-path overlap certificate must therefore either shift the schedule or
   supply a stage-zero anchor containing the displacement.
+  The corresponding cofinal schedule transport is now also available for
+  `ComplexRaw` through `ComplexRaw.schedule`, `ComplexRaw.schedule_valid`,
+  and `ComplexRaw.schedule_equiv`, keeping the real and complex foundations
+  aligned.
 
 - The finite quarter-turn checkpoint now advances benchmark item 17:
   `FiniteRotationQuarterTurnExample` evaluates the common factorial rotation
