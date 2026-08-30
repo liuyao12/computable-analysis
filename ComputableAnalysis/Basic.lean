@@ -3598,6 +3598,29 @@ theorem equiv_of_common_anchor {x y anchor : RealRaw}
   exact equiv_trans hx hanchor hy
     hxanchor (equiv_symm hyanchor)
 
+/-! A finite, proof-carrying path of interchangeable raw representations.
+Each edge records validity of its source and target; this makes the
+spanning-tree rule explicit and ensures that representation transport never
+uses transitivity through an invalid raw candidate. -/
+inductive EquivalencePath : RealRaw -> RealRaw -> Prop
+  | refl {x : RealRaw} (hx : x.Valid) : EquivalencePath x x
+  | cons {x y z : RealRaw} (hx : x.Valid) (hy : y.Valid) (hz : z.Valid)
+      (hxy : x.Equiv y) (tail : EquivalencePath y z) :
+      EquivalencePath x z
+
+theorem EquivalencePath.right_valid {x y : RealRaw}
+    (path : EquivalencePath x y) : y.Valid := by
+  cases path with
+  | refl hx => exact hx
+  | cons _ _ hz _ _ => exact hz
+
+theorem EquivalencePath.equiv {x y : RealRaw}
+    (path : EquivalencePath x y) : x.Equiv y := by
+  induction path with
+  | refl hx => exact equiv_refl _ hx
+  | cons hx hy hz hxy tail ih =>
+      exact equiv_trans hx hy hz hxy ih
+
 theorem equiv_of_schedule_equiv {x y : RealRaw}
     (hx : x.Valid) (hy : y.Valid)
     (sigma tau : StageSchedule) :
