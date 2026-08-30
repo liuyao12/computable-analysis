@@ -2093,6 +2093,10 @@ not a theorem about a completed complex plane. The polygonal integral itself
 is already a `ComplexRaw` computation; a later analytic path theorem may add
 uniform refinement and overlap certificates for a larger class of functions.
 
+As a regression case, the left sum for a constant integrand on one rational
+segment is exactly (c(b-a)) at every positive subdivision count. The finite
+fold identity makes this endpoint law explicit before any path limit is taken.
+
 The open-path statement is the actual complex FTC: the finite sum of
 polynomial increments telescopes to
 \[
@@ -2148,6 +2152,8 @@ arithmetic and leaves Euclidean square-root length as a later refinement.
 \lean{ComputableAnalysis.ComplexPathIntegral.effectivePolygonalLeftSumIntegral_equiv_of_interval_anchor}
 \lean{ComputableAnalysis.ComplexPathIntegral.foldl_point_add_scaled}
 \lean{ComputableAnalysis.ComplexPathIntegral.effectiveFoldlPointAddScaled}
+\lean{ComputableAnalysis.ComplexPathIntegral.segmentLeftSum_constant}
+\lean{ComputableAnalysis.ComplexPathIntegral.effectiveSegmentLeftSumConstant}
 \leanok
 
 The sine integral in Chapter~\ref{ch:rational-circle-trigonometry} is the

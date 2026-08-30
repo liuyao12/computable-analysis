@@ -671,6 +671,27 @@ theorem foldl_point_add_scaled {α : Type} (v : QComplex) :
           constructor <;> grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc,
             Rat.add_comm]
 
+/-! A constant integrand gives the expected finite segment integral. -/
+theorem segmentLeftSum_constant
+    (c a b : QComplex) (n : Nat) (hn : 0 < n) (evalPrecision : Nat) :
+    segmentLeftSumEntire (FunctionRaw.exact (fun _ => c))
+      (by intro z; change True; trivial)
+      a b n evalPrecision =
+      QBox.point (QComplex.mul c (QComplex.sub b a)) := by
+  unfold segmentLeftSumEntire segmentLeftSum
+  simp only [FunctionRaw.exact]
+  simp only [QBox.mul_point]
+  rw [foldl_point_add_scaled]
+  have hn0 : (n : Rat) ≠ 0 := by
+    exact Rat.ne_of_gt (Rat.natCast_pos.mpr hn)
+  have hcancel : (n : Rat) * (n : Rat)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (n : Rat) hn0
+  simp [FunctionRaw.exact, QBox.mul_point, segmentStep, QComplex.scaleRat,
+    QComplex.sub, QComplex.mul, QComplex.add, QComplex.zero, QComplex.neg,
+    QBox.zero, QBox.point, QBox.add, Rat.div_def, hcancel, Rat.mul_assoc,
+    Rat.mul_comm, Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg] <;>
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
+
 /-- Left Riemann sum over a polygonal path, represented by consecutive
 vertices.  To integrate around a closed polygon, repeat the first vertex at the
 end of the list. -/

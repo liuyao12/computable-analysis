@@ -65,6 +65,13 @@ theorem effectiveFoldlPointAddScaled {α : Type} (v : QComplex)
       QBox.add acc (QBox.point (QComplex.scaleRat (xs.length : Rat) v)) := by
   exact foldl_point_add_scaled v xs acc
 
+theorem effectiveSegmentLeftSumConstant
+    (c a b : QComplex) (n : Nat) (hn : 0 < n) (evalPrecision : Nat) :
+    segmentLeftSumEntire (FunctionRaw.exact (fun _ => c))
+      (by intro z; change True; trivial) a b n evalPrecision =
+      QBox.point (QComplex.mul c (QComplex.sub b a)) := by
+  exact segmentLeftSum_constant c a b n hn evalPrecision
+
 /-! Public certificate entry point for the left-endpoint polygonal integral.
 The evaluator is executable at every finite stage; validity still comes from
 the supplied orderedness, nesting, and shrinking certificates. -/
