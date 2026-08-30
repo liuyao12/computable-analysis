@@ -7955,6 +7955,67 @@ theorem dyadicNestedRadicalSampleRaw_widths_shrink
       (dyadicNestedRadicalTableAt_width_le precision depth k
         (Nat.le_of_lt hk)).1) eps
 
+/-! The precision table supplies more than shrinking: any two precision
+boxes for a fixed dyadic sample overlap.  That finite fact is enough to build
+an anchor-free public raw.  Use the later box's width as the finite slack in
+the earlier box; the resulting radius is `1/(n+1)`, so no independent
+semantic real is needed in the validity proof. -/
+def dyadicNestedRadicalSampleRadius : Nat -> Rat :=
+  fun n => 1 / ((n + 1 : Nat) : Rat)
+
+theorem dyadicNestedRadicalSampleRaw_future_contained
+    {depth k : Nat} (hk : k < 2 ^ depth) :
+    forall p q, p <= q ->
+      (QInterval.expand
+        ((dyadicNestedRadicalSampleRaw depth k).compute p)
+        (dyadicNestedRadicalSampleRadius p)).ContainsInterval
+        ((dyadicNestedRadicalSampleRaw depth k).compute q) := by
+  intro p q hpq
+  apply QInterval.expand_contains_right_of_overlaps
+  · exact (dyadicNestedRadicalTableAt_overlap_of_precisions p q depth k
+      (Nat.le_of_lt hk)).1
+  · have hwidth := (dyadicNestedRadicalTableAt_width_le q depth k
+      (Nat.le_of_lt hk)).1
+    have hrecip := FTC.one_div_nat_antitone
+      (n := p + 1) (m := q + 1) (by omega) (by omega) (by omega)
+    exact Rat.le_trans hwidth (by
+      simpa [dyadicNestedRadicalSampleRadius] using hrecip)
+
+theorem dyadicNestedRadicalSampleRadius_shrinksToZero :
+    ShrinksToZero dyadicNestedRadicalSampleRadius := by
+  apply shrinksToZero_of_natOverSuccBound (C := 1)
+  intro n
+  exact Rat.le_refl
+
+theorem dyadicNestedRadicalSampleRaw_stabilized_valid_anchor_free
+    {depth k : Nat} (hk : k < 2 ^ depth) :
+    (RealRaw.prefixStabilize (dyadicNestedRadicalSampleRaw depth k)
+      dyadicNestedRadicalSampleRadius).Valid := by
+  apply RealRaw.prefixStabilize_valid_of_future
+  · intro n
+    have hbounds := dyadicNestedRadicalTableAt_bounds n depth k
+      (Nat.le_of_lt hk)
+    have horder := hbounds.1.2.1
+    unfold dyadicNestedRadicalSampleRaw QInterval.width
+    grind
+  · exact dyadicNestedRadicalSampleRaw_widths_shrink hk
+  · exact dyadicNestedRadicalSampleRaw_future_contained hk
+  · exact dyadicNestedRadicalSampleRadius_shrinksToZero
+
+theorem dyadicNestedRadicalSampleRaw_equiv_stabilized_anchor_free
+    {depth k : Nat} (hk : k < 2 ^ depth) :
+    (dyadicNestedRadicalSampleRaw depth k).Equiv
+      (RealRaw.prefixStabilize (dyadicNestedRadicalSampleRaw depth k)
+        dyadicNestedRadicalSampleRadius) := by
+  apply RealRaw.candidate_equiv_prefixStabilize_of_future
+  · intro n
+    have hbounds := dyadicNestedRadicalTableAt_bounds n depth k
+      (Nat.le_of_lt hk)
+    have horder := hbounds.1.2.1
+    unfold dyadicNestedRadicalSampleRaw QInterval.width
+    grind
+  · exact dyadicNestedRadicalSampleRaw_future_contained hk
+
 /-! Prefix stabilization turns that shrinking sample candidate into a valid
 public raw once an independent semantic anchor and stagewise overlap have
 been proved.  The anchor is proof-side data only; the stabilized evaluator

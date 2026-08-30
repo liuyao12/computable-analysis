@@ -936,6 +936,21 @@ currently keeps this layer self-contained rather than importing Mathlib's
 real-number geometry; a future import would be useful only if it supplied the
 same rational/interval statements without pulling in completed reals.
 
+There is also a useful distinction between a sample computation and its
+semantic anchor. For a fixed dyadic sample, the nested-radical boxes at any
+two requested precisions overlap, while the later box has width at most
+$1/(n+1)$. Consequently prefix stabilization can be driven by the candidate
+itself, with radius $1/(n+1)$; no independently chosen real or endpoint
+certificate is needed merely to make the sample a valid `realRaw`.
+
+\lean{ComputableAnalysis.dyadicNestedRadicalSampleRadius}
+\lean{ComputableAnalysis.dyadicNestedRadicalTableAt_overlap_of_precisions}
+\lean{ComputableAnalysis.dyadicNestedRadicalSampleRaw_future_contained}
+\lean{ComputableAnalysis.dyadicNestedRadicalSampleRadius_shrinksToZero}
+\lean{ComputableAnalysis.dyadicNestedRadicalSampleRaw_stabilized_valid_anchor_free}
+\lean{ComputableAnalysis.dyadicNestedRadicalSampleRaw_equiv_stabilized_anchor_free}
+\leanok
+
 \section{The central bridge: an effective FTC}
 \label{thm:convex-ftc}
 \label{thm:effective-derivative-bound-ftc}
