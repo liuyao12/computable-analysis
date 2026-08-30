@@ -5766,7 +5766,10 @@ by one for every nonempty input.
   over every finite polygonal path and yields exact cancellation for closed
   paths. `polygonalLeftSum_constant_closed` exposes that cancellation directly
   for the sampled evaluator; convergence for nonconstant interval-valued
-  functions remains the next complex-integral bridge.
+  functions remains the next complex-integral bridge. The generic constructor
+  `PolygonalLeftSumCertificate.of_stage_eq_point` now turns any stagewise
+  constant point-box computation into the validity certificate automatically,
+  including orderedness, nesting, and zero width.
 
 - The finite quarter-turn checkpoint now advances benchmark item 17:
   `FiniteRotationQuarterTurnExample` evaluates the common factorial rotation

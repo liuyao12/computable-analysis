@@ -36,6 +36,30 @@ structure PolygonalLeftSumCertificate
   widths_shrink : ComplexRaw.WidthsShrinkToZero
     (polygonalLeftSumRawEntire f hEntire vertices evalPrecision).compute
 
+theorem PolygonalLeftSumCertificate.of_stage_eq_point
+    {f : FunctionRaw} {hEntire : forall z, f.domain z}
+    {vertices : List QComplex} {evalPrecision : Nat -> Nat}
+    (anchor : QComplex)
+    (hcompute : forall n,
+      (polygonalLeftSumRawEntire f hEntire vertices evalPrecision).compute n =
+        QBox.point anchor) :
+    PolygonalLeftSumCertificate f hEntire vertices evalPrecision := by
+  refine
+    { ordered := ?_
+      nested := ?_
+      widths_shrink := ?_ }
+  · intro n
+    rw [hcompute n]
+    simp [QBox.Ordered, QBox.point, QComplex.le_def]
+  · intro n m hnm
+    rw [hcompute m, hcompute n]
+    simp [QBox.NestedIn, QBox.point, QComplex.le_def]
+  · intro eps
+    refine ⟨0, ?_⟩
+    intro n hn
+    rw [hcompute n]
+    simp [QBox.point, QBox.width, QBox.height] <;> grind
+
 theorem polygonalLeftSumRawEntire_valid
     {f : FunctionRaw} {hEntire : forall z, f.domain z}
     {vertices : List QComplex} {evalPrecision : Nat -> Nat}

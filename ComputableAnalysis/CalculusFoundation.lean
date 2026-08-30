@@ -89,6 +89,16 @@ theorem effectivePolygonalLeftSumConstantClosed
       QBox.point QComplex.zero := by
   exact polygonalLeftSum_constant_closed c start vertices n hn evalPrecision
 
+theorem effectivePolygonalLeftSumCertificateOfStageEqPoint
+    {f : FunctionRaw} {hEntire : forall z, f.domain z}
+    {vertices : List QComplex} {evalPrecision : Nat -> Nat}
+    (anchor : QComplex)
+    (hcompute : forall n,
+      (polygonalLeftSumRawEntire f hEntire vertices evalPrecision).compute n =
+        QBox.point anchor) :
+    PolygonalLeftSumCertificate f hEntire vertices evalPrecision := by
+  exact PolygonalLeftSumCertificate.of_stage_eq_point anchor hcompute
+
 /-! Public certificate entry point for the left-endpoint polygonal integral.
 The evaluator is executable at every finite stage; validity still comes from
 the supplied orderedness, nesting, and shrinking certificates. -/
