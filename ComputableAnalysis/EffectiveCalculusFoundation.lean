@@ -239,6 +239,18 @@ end ComputableAnalysis.FinitePolynomial
 
 namespace ComputableAnalysis
 
+/-! Public nonlinear seed cases.  These concrete rational finite-difference
+    certificates are the first clients of the general product/FTC interfaces. -/
+theorem effectiveSquareDerivative_nonempty :
+    Nonempty (EffectiveDerivativeExact
+      ExactFunction.square ExactFunction.doubleId) :=
+  ExactFunction.square_derivative_effective
+
+theorem effectiveSquareFTCExactUnit_nonempty :
+    Nonempty (EffectiveFTCExact
+      ExactFunction.square ExactFunction.doubleId 0 1) :=
+  ⟨ExactFunction.squareFTCExactUnit⟩
+
 /-! Composition closure for effective derivatives.  The caller supplies the
 inner positivity, radius transports, and weighted error budget; all remaining
 work is finite rational error arithmetic. -/
