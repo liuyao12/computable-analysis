@@ -247,8 +247,9 @@ transport, and the budget-based schedule constructor are all checked:
 The orientation-reversed constructor is now automatic as well:
 \lean{ComputableAnalysis.Integral.NonincreasingDarbouxSchedule.ofAutomaticEndpointOrdered}
 The general interval-regular case remains separate: interval images provide
-sound cell bounds and widths, but their cross-stage nesting still requires an
-explicit evaluator/refinement certificate.
+sound cell bounds and widths.  Schedule-level addition and nonnegative-product
+closure are now formalized, but each adaptive special function still supplies
+its own cross-stage evaluator/refinement certificate.
 
 \section{Chapter completion matrix}
 
@@ -283,7 +284,8 @@ computable exponential, \(\log 2\), local inverse and FTC certificates &
 representation transport for a fully general inverse branch \\
 Effective calculus &
 finite secant, derivative-bound, curvature, stabilization, separated signed
-reciprocal/product/quotient closure, and finite L'Hôpital remainder contracts &
+reciprocal/product/quotient closure, schedule-level interval addition and
+nonnegative-product regularity, and finite L'Hôpital remainder contracts &
 automatic schedule synthesis for arbitrary interval-regular functions whose
 interval images lack an explicit cross-stage refinement certificate \\
 Algebraic roots/FTA &

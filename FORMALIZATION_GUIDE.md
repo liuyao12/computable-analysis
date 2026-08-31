@@ -1087,6 +1087,9 @@ finite product modulus
 `width(FG) <= BF * width(G) + BG * width(F)` under nonnegative pointwise
 bounds.  This is the box-level input needed by a future interval product-rule
 constructor; it does not itself assert a derivative or a limiting product.
+The generic schedule-level regularity constructor is
+`IntervalRegularOn.mulOfSchedule`; it consumes this bound together with
+explicit image bounds and product cross-stage transport.
 For theorem-facing representation changes, use
 `FunctionOnInterval.PointwiseMul`: it records common chart alignment and
 pointwise raw equivalence without selecting an evaluator or silently adding a
