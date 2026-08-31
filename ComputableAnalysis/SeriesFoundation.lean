@@ -237,6 +237,26 @@ theorem alternatingSeriesCertificate_raw_equiv_alternatingRaw
   · have hnonneg := S.term_nonneg (2 * n)
     grind
 
+/-! The named Leibniz client keeps the π construction discoverable from the
+    generic interface. -/
+def leibnizSeriesCertificate : RationalSeriesCertificate :=
+  alternatingSeriesCertificate Series.AlternatingRaw.leibnizAlternatingRaw
+
+theorem leibnizSeriesCertificate_raw_equiv_leibnizAlternatingRaw :
+    leibnizSeriesCertificate.raw.Equiv
+      Series.AlternatingRaw.leibnizAlternatingRaw.toRealRaw := by
+  exact alternatingSeriesCertificate_raw_equiv_alternatingRaw
+    Series.AlternatingRaw.leibnizAlternatingRaw
+
+theorem leibnizSeriesCertificate_raw_width (n : Nat) :
+    (leibnizSeriesCertificate.raw.compute n).width =
+      2 / ((4 * n + 1 : Nat) : Rat) := by
+  rw [leibnizSeriesCertificate, RationalSeriesCertificate.raw_width]
+  simp [alternatingSeriesCertificate,
+    Series.AlternatingRaw.leibnizAlternatingRaw, Series.leibnizTerm]
+  grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc,
+    Rat.add_comm, Rat.add_left_comm]
+
 /-! The same certificate pattern for complex-valued series.  The refinement
     field is rectangular-box nesting, since a complex remainder has separate
     real and imaginary budgets. -/
