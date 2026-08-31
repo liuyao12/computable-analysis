@@ -4710,8 +4710,8 @@ def Overlaps (A B : QBox) : Prop := A.lo <= B.hi /\ B.lo <= A.hi
 /-- Coordinatewise conjugation of a rational complex box.  The imaginary
     endpoints reverse, while the real endpoints are unchanged. -/
 def conj (B : QBox) : QBox :=
-  { lo := QComplex.conj B.hi
-    hi := QComplex.conj B.lo }
+  { lo := { re := B.lo.re, im := -B.hi.im }
+    hi := { re := B.hi.re, im := -B.lo.im } }
 
 instance overlapsDecidable (A B : QBox) : Decidable (Overlaps A B) := by
   unfold Overlaps

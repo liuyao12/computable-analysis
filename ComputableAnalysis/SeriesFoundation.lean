@@ -784,6 +784,29 @@ theorem ComplexSeriesCertificate.conj_raw_equiv_conj
   have hr := S.remainder_nonneg n
   constructor <;> constructor <;> grind [Rat.sub_eq_add_neg]
 
+/-! Conjugation is also a representation-preserving operation on arbitrary
+    valid complex raws, not only on series certificates. -/
+theorem ComplexRaw.conj_valid (z : ComplexRaw) (hz : z.Valid) :
+    (ComplexRaw.conj z).Valid := by
+  unfold ComplexRaw.Valid ComplexRaw.ValidCompute ComplexRaw.conj
+  constructor
+  · intro n
+    have h := hz.1 n
+    simp [QBox.conj, QComplex.conj, QBox.width, QBox.height] at h ⊢
+    exact ⟨h.1, by grind⟩
+  constructor
+  · intro n m hnm
+    have h := hz.2.1 n m hnm
+    simp [QBox.conj, QComplex.conj, QComplex.le_def] at h ⊢
+    exact ⟨h.1, h.2.1, by grind, by grind⟩
+  · intro eps
+    obtain ⟨N, hN⟩ := hz.2.2 eps
+    refine ⟨N, ?_⟩
+    intro n hn
+    have h := hN n hn
+    simp [QBox.conj, QComplex.conj, QBox.width, QBox.height] at h ⊢
+    exact ⟨h.1, by grind⟩
+
 /-! A finite complex coefficient prefix has the same termwise primitive
 constructor as the rational polynomial layer.  The coefficient stream and
 the evaluation point are rational-complex, while division by the natural
