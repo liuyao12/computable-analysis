@@ -257,6 +257,11 @@ theorem leibnizSeriesCertificate_raw_width (n : Nat) :
   grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc,
     Rat.add_comm, Rat.add_left_comm]
 
+theorem leibnizSeriesCertificate_raw_precision_witness (eps : QPos) :
+    ∃ N : Nat, ∀ n, N ≤ n ->
+      (leibnizSeriesCertificate.raw.compute n).width ≤ eps.val := by
+  exact leibnizSeriesCertificate.raw_precision_witness eps
+
 /-! The same adapter names the rational sine Taylor computation.  Its tail
     radius is the factorial majorant already used by the sine chapter. -/
 def sineSeriesCertificate (x : Rat) (hx : qabs x <= 2) :
