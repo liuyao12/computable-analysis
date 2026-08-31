@@ -7147,6 +7147,29 @@ def neg (z : ComplexRaw) : ComplexRaw where
 def conj (z : ComplexRaw) : ComplexRaw where
   compute := fun eps => QBox.conj (z.compute eps)
 
+/-! Conjugation is also a representation-preserving operation on arbitrary
+    valid complex raws, not only on series certificates. -/
+theorem conj_valid (z : ComplexRaw) (hz : z.Valid) :
+    (ComplexRaw.conj z).Valid := by
+  unfold ComplexRaw.Valid ComplexRaw.ValidCompute ComplexRaw.conj
+  constructor
+  · intro n
+    have h := hz.1 n
+    simp [QBox.conj, QComplex.conj, QBox.width, QBox.height] at h ⊢
+    exact ⟨h.1, by grind⟩
+  constructor
+  · intro n m hnm
+    have h := hz.2.1 n m hnm
+    simp [QBox.conj, QComplex.conj, QComplex.le_def] at h ⊢
+    exact ⟨h.1, h.2.1, by grind, by grind⟩
+  · intro eps
+    obtain ⟨N, hN⟩ := hz.2.2 eps
+    refine ⟨N, ?_⟩
+    intro n hn
+    have h := hN n hn
+    simp [QBox.conj, QComplex.conj, QBox.width, QBox.height] at h ⊢
+    exact ⟨h.1, by grind⟩
+
 def sub (z w : ComplexRaw) : ComplexRaw :=
   add z (neg w)
 
