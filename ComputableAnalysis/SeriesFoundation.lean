@@ -176,6 +176,46 @@ theorem geometricSeriesCertificate_raw_equiv_geometricRaw
         (1 / (1 - r) - Series.geometricSum r n)
     grind
 
+/-! The alternating-series interval is another concrete client.  We retain
+    the even partial sum as the center and the next term as a symmetric
+    rational radius; the decrease proof supplies the nesting inequality. -/
+def alternatingSeriesCertificate (S : Series.AlternatingRaw) :
+    RationalSeriesCertificate where
+  partialSum := fun n => Series.partialSum S.term (2 * n)
+  remainder := fun n => S.term (2 * n)
+  remainder_nonneg := by
+    intro n
+    exact S.term_nonneg _
+  refinement := by
+    intro n
+    have hstep := Series.partialSum_even_step S.term n
+    have hdec₁ := S.term_decreasing (2 * n)
+    have hdec₂ := S.term_decreasing (2 * n + 1)
+    have hdiff :
+        Series.partialSum S.term (2 * (n + 1)) -
+            Series.partialSum S.term (2 * n) =
+          S.term (2 * n) - S.term (2 * n + 1) := by
+      rw [hstep]
+      grind [Rat.sub_eq_add_neg]
+    have hnonneg : 0 <= S.term (2 * n) - S.term (2 * n + 1) := by
+      grind
+    rw [hdiff, qabs_eq_self_of_nonneg hnonneg]
+    grind
+  tail_budget := by
+    intro eps
+    obtain ⟨N, hN⟩ := S.term_shrinks eps
+    refine ⟨N, ?_⟩
+    intro n hn
+    have h := hN (2 * n) (by omega)
+    simp only [QInterval.width] at h ⊢
+    grind
+
+theorem alternatingSeriesCertificate_raw_precision_witness
+    (S : Series.AlternatingRaw) (eps : QPos) :
+    ∃ N : Nat, ∀ n, N ≤ n ->
+      ((alternatingSeriesCertificate S).raw.compute n).width ≤ eps.val := by
+  exact (alternatingSeriesCertificate S).raw_precision_witness eps
+
 /-! The same certificate pattern for complex-valued series.  The refinement
     field is rectangular-box nesting, since a complex remainder has separate
     real and imaginary budgets. -/
