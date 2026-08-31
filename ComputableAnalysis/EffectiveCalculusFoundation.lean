@@ -172,6 +172,40 @@ theorem effectiveMeanValueBracket
   exact CandidateDerivativeCellControl.endpoint_average_overlaps_bound
     H hF hwidth n
 
+/-! Affine cells provide the first completely closed adjacent-interval
+    additivity instances.  The endpoint formula is rational, so these are
+    finite raw-overlap proofs in either orientation. -/
+theorem effectiveAffineMonotoneIntegralFor_adjacent_additive
+    {r c a b d : Rat} (hr : 0 <= r) :
+    (monotoneIntegralFor
+      (FunctionOnInterval.exactRat (fun x => r * x + c) a d)
+      (affineMonotoneConstructionFor (r := r) (c := c) (a := a) (b := d) hr)).Equiv
+      { compute := RealRaw.addCompute
+          (monotoneIntegralFor
+            (FunctionOnInterval.exactRat (fun x => r * x + c) a b)
+            (affineMonotoneConstructionFor (r := r) (c := c) (a := a) (b := b) hr))
+          (monotoneIntegralFor
+            (FunctionOnInterval.exactRat (fun x => r * x + c) b d)
+            (affineMonotoneConstructionFor (r := r) (c := c) (a := b) (b := d) hr)) } := by
+  exact affineMonotoneIntegralFor_adjacent_additive hr
+
+theorem effectiveAffineMonotoneIntegralFor_of_nonpos_adjacent_additive
+    {r c a b d : Rat} (hr : r <= 0) :
+    (monotoneIntegralFor
+      (FunctionOnInterval.exactRat (fun x => r * x + c) a d)
+      (affineMonotoneConstructionFor_of_nonpos
+        (r := r) (c := c) (a := a) (b := d) hr)).Equiv
+      { compute := RealRaw.addCompute
+          (monotoneIntegralFor
+            (FunctionOnInterval.exactRat (fun x => r * x + c) a b)
+            (affineMonotoneConstructionFor_of_nonpos
+              (r := r) (c := c) (a := a) (b := b) hr))
+          (monotoneIntegralFor
+            (FunctionOnInterval.exactRat (fun x => r * x + c) b d)
+            (affineMonotoneConstructionFor_of_nonpos
+              (r := r) (c := c) (a := b) (b := d) hr)) } := by
+  exact affineMonotoneIntegralFor_of_nonpos_adjacent_additive hr
+
 end ComputableAnalysis.Integral
 
 namespace ComputableAnalysis.FinitePolynomial
