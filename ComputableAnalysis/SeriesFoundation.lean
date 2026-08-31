@@ -619,6 +619,29 @@ theorem ComplexSeriesCertificate.scale_raw_precision_witness
         ((S.scale c hc budget hbudget).raw.compute n).height ≤ eps.val := by
   exact (S.scale c hc budget hbudget).raw_precision_witness eps
 
+/-! The certificate's scaled evaluator is an explicit representation edge to
+    the ordinary complex raw scalar action.  Keeping this edge public lets a
+    later consumer move between a tail-budgeted series computation and an
+    existing `ComplexRaw` expression without identifying the two evaluators
+    definitionally. -/
+theorem ComplexSeriesCertificate.scale_raw_equiv_scaleRat
+    (c : Rat) (hc : 0 <= c) (S : ComplexSeriesCertificate)
+    (budget : QPos -> QPos)
+    (hbudget : forall eps, c * (budget eps).val <= eps.val) :
+    (S.scale c hc budget hbudget).raw.Equiv
+      (ComplexRaw.scaleRat c S.raw) := by
+  intro n
+  apply (ComplexRaw.compareAt_overlap_iff
+    (S.scale c hc budget hbudget).raw
+    (ComplexRaw.scaleRat c S.raw) n n).2
+  simp only [ComplexSeriesCertificate.raw, ComplexSeriesCertificate.scale,
+    ComplexRaw.scaleRat, QBox.scaleRat, if_pos hc, QBox.expand, QBox.point,
+    QComplex.scaleRat]
+  unfold QBox.Overlaps
+  have hr : 0 <= c * S.remainder n :=
+    Rat.mul_nonneg hc (S.remainder_nonneg n)
+  constructor <;> constructor <;> grind [Rat.mul_add, Rat.sub_eq_add_neg]
+
 /-! A finite complex coefficient prefix has the same termwise primitive
 constructor as the rational polynomial layer.  The coefficient stream and
 the evaluation point are rational-complex, while division by the natural
