@@ -662,6 +662,47 @@ theorem ComplexSeriesCertificate.scale_raw_equiv_scaleRat
     Rat.mul_nonneg hc (S.remainder_nonneg n)
   constructor <;> constructor <;> grind [Rat.mul_add, Rat.sub_eq_add_neg]
 
+/-! Negation is the sign-change closure needed by signed Fourier and
+    alternating combinations.  The radius is unchanged; only the rectangular
+    endpoints reverse. -/
+def ComplexSeriesCertificate.neg
+    (S : ComplexSeriesCertificate) : ComplexSeriesCertificate where
+  partialSum := fun n => QComplex.neg (S.partialSum n)
+  remainder := S.remainder
+  remainder_nonneg := S.remainder_nonneg
+  refinement := by
+    intro n
+    have hs := S.refinement n
+    have hr := S.remainder_nonneg n
+    simp [QBox.NestedIn, QBox.expand, QBox.point, QComplex.neg,
+      QComplex.le_def] at hs ⊢
+    constructor <;> constructor <;> grind [Rat.sub_eq_add_neg]
+  tail_budget := S.tail_budget
+
+theorem ComplexSeriesCertificate.neg_raw_valid
+    (S : ComplexSeriesCertificate) :
+    S.neg.raw.Valid := by
+  exact S.neg.raw_valid
+
+theorem ComplexSeriesCertificate.neg_raw_precision_witness
+    (S : ComplexSeriesCertificate) (eps : QPos) :
+    ∃ N : Nat, ∀ n, N ≤ n ->
+      (S.neg.raw.compute n).width ≤ eps.val ∧
+        (S.neg.raw.compute n).height ≤ eps.val := by
+  exact S.neg.raw_precision_witness eps
+
+theorem ComplexSeriesCertificate.neg_raw_equiv_neg
+    (S : ComplexSeriesCertificate) :
+    S.neg.raw.Equiv (ComplexRaw.neg S.raw) := by
+  intro n
+  apply (ComplexRaw.compareAt_overlap_iff S.neg.raw
+    (ComplexRaw.neg S.raw) n n).2
+  simp only [ComplexSeriesCertificate.raw, ComplexSeriesCertificate.neg,
+    ComplexRaw.neg, QBox.neg, QBox.expand, QBox.point, QComplex.neg]
+  unfold QBox.Overlaps
+  have hr := S.remainder_nonneg n
+  constructor <;> constructor <;> grind [Rat.sub_eq_add_neg]
+
 /-! A finite complex coefficient prefix has the same termwise primitive
 constructor as the rational polynomial layer.  The coefficient stream and
 the evaluation point are rational-complex, while division by the natural
