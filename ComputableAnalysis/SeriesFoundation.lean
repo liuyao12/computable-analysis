@@ -177,6 +177,61 @@ theorem RationalSeriesCertificate.add_raw_precision_witness
       ((S.add T).raw.compute n).width ≤ eps.val := by
   exact (S.add T).raw_precision_witness eps
 
+/-! Scalar multiplication is closed under an explicit precision allocator.
+    The allocator is part of the certificate client: this keeps the cost of
+    amplifying a tail visible instead of hiding an inverse or a rate. -/
+def RationalSeriesCertificate.scale
+    (c : Rat) (hc : 0 <= c) (S : RationalSeriesCertificate)
+    (budget : QPos -> QPos)
+    (hbudget : forall eps, c * (budget eps).val <= eps.val) :
+    RationalSeriesCertificate where
+  partialSum := fun n => c * S.partialSum n
+  remainder := fun n => c * S.remainder n
+  remainder_nonneg := by
+    intro n
+    exact Rat.mul_nonneg hc (S.remainder_nonneg n)
+  refinement := by
+    intro n
+    have hs := S.refinement n
+    have hdiff :
+        c * S.partialSum (n + 1) - c * S.partialSum n =
+          c * (S.partialSum (n + 1) - S.partialSum n) := by
+      grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg]
+    have hcabs : qabs c = c := qabs_eq_self_of_nonneg hc
+    rw [hdiff, qabs_mul, hcabs]
+    rw [← Rat.mul_add]
+    exact Rat.mul_le_mul_of_nonneg_left hs hc
+  tail_budget := by
+    intro eps
+    obtain ⟨N, hN⟩ := S.tail_budget (budget eps)
+    refine ⟨N, ?_⟩
+    intro n hn
+    have h := hN n hn
+    have hb := hbudget eps
+    simp only [QInterval.width] at h ⊢
+    have hrem : S.remainder n <= (budget eps).val := by grind
+    calc
+      c * S.remainder n - 0 = c * S.remainder n := by grind
+      _ <= c * (budget eps).val :=
+        Rat.mul_le_mul_of_nonneg_left hrem hc
+      _ <= eps.val := hb
+
+theorem RationalSeriesCertificate.scale_raw_valid
+    (c : Rat) (hc : 0 <= c) (S : RationalSeriesCertificate)
+    (budget : QPos -> QPos)
+    (hbudget : forall eps, c * (budget eps).val <= eps.val) :
+    (S.scale c hc budget hbudget).raw.Valid := by
+  exact (S.scale c hc budget hbudget).raw_valid
+
+theorem RationalSeriesCertificate.scale_raw_precision_witness
+    (c : Rat) (hc : 0 <= c) (S : RationalSeriesCertificate)
+    (budget : QPos -> QPos)
+    (hbudget : forall eps, c * (budget eps).val <= eps.val)
+    (eps : QPos) :
+    ∃ N : Nat, ∀ n, N ≤ n ->
+      ((S.scale c hc budget hbudget).raw.compute n).width <= eps.val := by
+  exact (S.scale c hc budget hbudget).raw_precision_witness eps
+
 /-! The geometric prefix is the first concrete client of the generic
     certificate.  Its remainder is written as a rational gap to the closed
     endpoint formula; the generic constructor then supplies the symmetric
