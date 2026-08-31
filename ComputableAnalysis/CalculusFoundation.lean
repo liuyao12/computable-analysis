@@ -2241,6 +2241,21 @@ theorem effectiveFTC_sine_prefix_square :
       (RealRaw.ofRat (6389 / 161280)) := by
   exact FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_value
 
+/-! The completed sine half-integral is exposed alongside the finite-prefix
+    regression.  Its evaluator is the tangent-chart Riemann--Stieltjes
+    computation; the companion theorem records that the same value is obtained
+    through the chart's effective FTC.  Equal-dyadic-in-`x` transport remains a
+    separate certificate in `SinPiIntegral`. -/
+theorem effectiveSinPiHalfIntegral_equiv_reciprocalPi :
+    SinPiIntegral.computableSinPiHalfIntegral.Equiv
+      SinPiIntegral.reciprocalPiRaw := by
+  exact SinPiIntegral.computableSinPiHalfIntegral_equiv_reciprocalPi
+
+theorem effectiveSinPiHalfIntegral_equiv_reciprocalPi_tangentChartFTC :
+    SinPiIntegral.computableSinPiHalfIntegral.Equiv
+      SinPiIntegral.reciprocalPiRaw := by
+  exact SinPiIntegral.computableSinPiHalfIntegral_equiv_reciprocalPi_of_FTC
+
 theorem effectiveSinPiHalfIntegral_equiv_endpoint
     {C : RationalCircle.GeometricTrig.FunctionRawConstruction}
     {hdefined : forall x, 0 <= x -> x <= (1 : Rat) / 2 ->

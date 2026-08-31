@@ -1152,6 +1152,16 @@ the FTC certificate.
 \lean{ComputableAnalysis.effectiveFTC_sine_prefix_square}
 \leanok
 
+The public half-interval sine integral is already a complete computable
+theorem in the tangent coordinate.  Uniform equal-dyadic samples in the
+original $x$ coordinate require one additional geometric transport family;
+that obligation is kept visible rather than hidden in a classical integral.
+
+\lean{ComputableAnalysis.effectiveSinPiHalfIntegral_equiv_reciprocalPi}
+\lean{ComputableAnalysis.effectiveSinPiHalfIntegral_equiv_reciprocalPi_tangentChartFTC}
+\lean{ComputableAnalysis.effectiveSinPiHalfIntegral_equiv_endpoint}
+\leanok
+
 The interface is the reusable calculus API: finite secant bounds feed
 derivative certificates; derivative bounds feed partition boxes; the effective
 FTC turns those boxes into endpoint differences. Monomial and finite
