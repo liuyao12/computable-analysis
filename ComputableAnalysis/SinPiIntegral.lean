@@ -9171,6 +9171,32 @@ structure DyadicCanonicalCertificateSearchFamily
       canonicalDyadicCertificateSearchAt B precision depth k hk
         (candidates precision depth k) = some u
 
+/-! A still more direct input form: the caller supplies one admissible member
+    of each finite candidate list.  The executable search-success proof is
+    then derived by finite list recursion. -/
+structure DyadicCanonicalCertificateCandidateFamily
+    (B : IntegralIdentities.ArctanInverseBisection) where
+  zero_equiv :
+    (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero
+  candidates : Nat -> Nat -> Nat -> List Rat
+  admissible : forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+    0 < k -> ∃ u, u ∈ candidates precision depth k /\
+      canonicalDyadicCertificateAdmissibleBool B precision depth k hk u = true
+
+def DyadicCanonicalCertificateCandidateFamily.toSearchFamily
+    {B : IntegralIdentities.ArctanInverseBisection}
+    (H : DyadicCanonicalCertificateCandidateFamily B) :
+    DyadicCanonicalCertificateSearchFamily B where
+  zero_equiv := H.zero_equiv
+  candidates := H.candidates
+  search_succeeds := by
+    intro precision depth k hk hpos
+    obtain ⟨u, hmem, hadm⟩ := H.admissible precision depth k hk hpos
+    exact canonicalDyadicCertificateSearchAt_some_of_mem_of_admissible
+      B hmem hadm
+
 noncomputable def DyadicCanonicalCertificateSearchFamily.toCanonicalFamily
     {B : IntegralIdentities.ArctanInverseBisection}
     (H : DyadicCanonicalCertificateSearchFamily B) :

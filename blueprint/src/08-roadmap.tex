@@ -128,6 +128,11 @@ It exposes a finite rational candidate list and a proof that the executable
 witness search succeeds at each precision, depth, and interior dyadic sample;
 \lean{ComputableAnalysis.SinPiIntegral.DyadicCanonicalCertificateSearchFamily.toCanonicalFamily}
 then supplies the canonical certificate family used by the existing transport.
+For proof authors who want to expose the witness itself, the more direct
+\lean{ComputableAnalysis.SinPiIntegral.DyadicCanonicalCertificateCandidateFamily}
+requires only a listed admissible rational; its
+\lean{ComputableAnalysis.SinPiIntegral.DyadicCanonicalCertificateCandidateFamily.toSearchFamily}
+conversion derives the search-success field by finite list recursion.
 
 The missing certificate has a deliberately concrete shape.  For every
 precision, depth, and dyadic index, provide rational data
