@@ -7870,6 +7870,12 @@ theorem conj_implementation_equivalent
       (ComplexRaw.conj impl.cert.raw) := by
   exact ComplexRaw.conj_equiv impl.equivalent
 
+theorem conj_conj_equiv (z : Complex) :
+    (Complex.conj (Complex.conj z)).Equiv z := by
+  change (ComplexRaw.conj (ComplexRaw.conj z.preferred.raw)).Equiv
+    z.preferred.raw
+  exact ComplexRaw.conj_conj_equiv z.preferred.raw z.preferred.valid
+
 end Complex
 
 end ComputableAnalysis
