@@ -1546,7 +1546,7 @@ theorem effectiveFTCPortfolio : EffectiveFTCPortfolio where
   cube := Integral.cubeEffectiveFTC_equiv_endpoint
   quartic := Integral.quarticEffectiveFTC_equiv_endpoint
   fifth := Integral.fifthIntegralEffectiveFTC_equiv_endpoint
-  arctan := Integral.arctanEffectiveFTC_equiv_endpoint
+  arctan := effectiveDerivativeBoundFTC Integral.arctanEffectiveFTCData
   tangentPullback := SinPiIntegral.tangentPullbackEffectiveFTC_equiv_endpoint
   tangentSquareEffective := SinPiIntegral.tangentSquareEffectiveIntegralRaw_equiv_endpoint
   tangentSquareEndpoint :=

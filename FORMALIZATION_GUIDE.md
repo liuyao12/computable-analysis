@@ -147,6 +147,12 @@ The representative nonlinear regression is
 proves the domain-aware integral of `(x-x^3/6)^2` on `[0,1/2]` is
 `6389/161280`.
 
+For a genuinely non-polynomial client, copy the shape of
+`arctanEffectiveFTCConstruction` and
+`arctanEffectiveFTCIntegral_equiv_arctanGeom_one`: the module supplies the
+finite derivative certificate and endpoint interpretation, while the generic
+effective FTC supplies stabilization and validity.
+
 ## The squared-sine transport
 
 The canonical route is a pairwise chain:

@@ -1098,13 +1098,15 @@ The arctangent certificate is a complete non-polynomial client of this API.
 Its derivative enclosure is obtained from the rational kernel
 $1/(1+x^2)$, while the endpoint evaluator is the integral-defined arctangent
 primitive.  The proof now calls the generic endpoint transport theorem rather
-than duplicating that representation argument locally.
+than duplicating width shrinking, stabilization, validity, or representation
+transport locally.
 
-\lean{ComputableAnalysis.Integral.arctanEffectiveFTC_equiv_endpoint}
 \lean{ComputableAnalysis.Integral.arctanKernelMonotoneDerivativeBoundMethod}
-\lean{ComputableAnalysis.Integral.arctanEffectiveFTC_boundedIntegral_equiv_endpointDifference}
-\lean{ComputableAnalysis.Integral.arctanEffectiveFTCStabilized_valid}
-\lean{ComputableAnalysis.Integral.arctanEffectiveFTCStabilized_equiv_endpointDifference}
+\lean{ComputableAnalysis.Integral.arctanEffectiveFTCData}
+\lean{ComputableAnalysis.Integral.arctanKernelOnUnit}
+\lean{ComputableAnalysis.Integral.arctanEffectiveFTCConstruction}
+\lean{ComputableAnalysis.Integral.arctanEffectiveFTCIntegral_equiv_endpointDifference}
+\lean{ComputableAnalysis.Integral.arctanEffectiveFTCIntegral_equiv_arctanGeom_one}
 \leanok
 
 The same contract is now instantiated by a finite sine Taylor prefix on

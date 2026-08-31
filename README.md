@@ -73,6 +73,8 @@ were already nested.
 domain-aware integral of `FunctionOnInterval.ofRealFunRaw dF a b ...`.
 `Integral.effectiveFTCIntegral_equiv_endpointDifference` is the user-facing
 FTC theorem: the resulting integral equals the primitive endpoint difference.
+The arctangent kernel `1/(1+x^2)` is the canonical non-polynomial client of
+this route; it no longer carries a parallel local stabilization pipeline.
 
 The main active application is the equal-dyadic computation of
 `sin(pi*x)^2` on `[0,1/2]`. Pairwise overlap certificates connect the public

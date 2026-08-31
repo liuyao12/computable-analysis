@@ -814,130 +814,47 @@ def arctanEffectiveFTCData :
     intro eps
     exact arctanFTC_endpoint_width_le eps
 
-theorem arctanEffectiveFTC_equiv_endpoint :
-    arctanEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
-      arctanEffectiveFTCData.toDerivativeBoundFTC.endpointRaw :=
-  effectiveDerivativeBoundFTC arctanEffectiveFTCData
-
-/-! The selected partition is chosen from the requested precision and is not
-itself a nested stage schedule.  Prefix stabilization turns the finite FTC
-candidate into a valid raw real while retaining the same endpoint value. -/
-
-theorem arctanEffectiveFTC_boundedIntegral_widthsShrink :
-    RealRaw.WidthsShrinkToZero
-      arctanEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.compute := by
-  intro eps
-  refine ⟨eps.val.den + 1, ?_⟩
-  intro n hn
-  have hnpos : 0 < n := by omega
-  have hprec : (precisionAtStage n).val <= eps.val := by
-    have hden : 0 < (eps.val.den + 1 : Nat) := by omega
-    have hanti := FTC.one_div_nat_antitone
-      (n := eps.val.den + 1) (m := n)
-      (by exact hden) hnpos hn
-    have hbase := FTC.one_div_den_succ_le_of_pos eps.property
-    calc
-      (precisionAtStage n).val = 1 / (n : Rat) := by
-        simp [precisionAtStage, Nat.ne_of_gt hnpos]
-      _ <= 1 / (((eps.val.den + 1 : Nat) : Rat)) := hanti
-      _ <= eps.val := hbase
-  change
-    (DerivativeBoundFTC.boundedIntegralInterval
-      arctanEffectiveFTCData.toDerivativeBoundFTC
-      (precisionAtStage n)).width <= eps.val
-  exact Rat.le_trans
-    (arctanEffectiveFTCData.toDerivativeBoundFTC.riemann_width
-      (precisionAtStage n)) hprec
-
-def arctanEffectiveFTCEndpointValid :
+theorem arctanEffectiveFTCEndpointValid :
     RealRaw.ValidCompute
       (endpointDifferenceCompute arctanPrimitiveRaw 0 1) :=
   endpointDifference_valid_of_fun_valid arctanPrimitiveRaw_valid
     (by exact ⟨by native_decide, by native_decide⟩)
     (by exact ⟨by native_decide, by native_decide⟩)
 
-theorem arctanEffectiveFTC_boundedIntegral_equiv_endpointDifference :
-    arctanEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+/-! The flagship non-polynomial client now uses the canonical construction
+directly.  The general effective FTC owns width shrinking, stabilization,
+validity, and endpoint transport; this module supplies only the arctangent
+certificate and its geometric endpoint interpretation. -/
+
+def arctanKernelOnUnit : FunctionOnInterval :=
+  FunctionOnInterval.ofRealFunRaw arctanKernelRaw 0 1
+    (by intro _x _hx; trivial) (RealFunRaw.exact_valid _)
+
+def arctanEffectiveFTCConstruction :
+    Integral.ConstructionFor arctanKernelOnUnit := by
+  unfold arctanKernelOnUnit
+  exact Integral.effectiveFTCConstructionFor arctanEffectiveFTCData
+    (RealFunRaw.exact_valid _) (by intro _x _hx; trivial)
+    arctanEffectiveFTCEndpointValid
+
+theorem arctanEffectiveFTCIntegral_equiv_endpointDifference :
+    (Integral.integralFor arctanKernelOnUnit
+      arctanEffectiveFTCConstruction).Equiv
       (endpointDifferenceRaw arctanPrimitiveRaw 0 1
         arctanEffectiveFTCEndpointValid) := by
-  exact EffectiveDerivativeBoundFTC.boundedIntegralRaw_equiv_endpointDifference
-    arctanEffectiveFTCData arctanEffectiveFTCEndpointValid
-
-def arctanEffectiveFTCStabilized : RealRaw :=
-  RealRaw.prefixStabilize
-    arctanEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw
-    (fun n =>
-      (endpointDifferenceRaw arctanPrimitiveRaw 0 1
-        arctanEffectiveFTCEndpointValid).compute n |>.width)
-
-theorem arctanEffectiveFTCStabilized_valid :
-    arctanEffectiveFTCStabilized.Valid := by
-  unfold arctanEffectiveFTCStabilized
-  apply RealRaw.prefixStabilize_valid
-    (candidate := arctanEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw)
-    (anchor := endpointDifferenceRaw arctanPrimitiveRaw 0 1
-      arctanEffectiveFTCEndpointValid)
-    (radius := fun n =>
-      (endpointDifferenceRaw arctanPrimitiveRaw 0 1
-        arctanEffectiveFTCEndpointValid).compute n |>.width)
-  · exact arctanEffectiveFTC_boundedIntegral_widthsShrink
-  · simpa [endpointDifferenceRaw, RealRaw.Valid] using
-      arctanEffectiveFTCEndpointValid
-  · exact arctanEffectiveFTC_boundedIntegral_equiv_endpointDifference
-  · intro n
-    exact Rat.le_refl
-  · intro eps
-    obtain ⟨N, hN⟩ := arctanEffectiveFTCEndpointValid.2.2 eps
-    exact ⟨N, fun n hn => hN n hn⟩
-
-theorem arctanEffectiveFTCStabilized_equiv_endpointDifference :
-    arctanEffectiveFTCStabilized.Equiv
-      (endpointDifferenceRaw arctanPrimitiveRaw 0 1
-        arctanEffectiveFTCEndpointValid) := by
-  unfold arctanEffectiveFTCStabilized
-  apply RealRaw.prefixStabilize_equiv_anchor
-    (candidate := arctanEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw)
-    (anchor := endpointDifferenceRaw arctanPrimitiveRaw 0 1
-      arctanEffectiveFTCEndpointValid)
-    (radius := fun n =>
-      (endpointDifferenceRaw arctanPrimitiveRaw 0 1
-        arctanEffectiveFTCEndpointValid).compute n |>.width)
-  · simpa [endpointDifferenceRaw, RealRaw.Valid] using
-      arctanEffectiveFTCEndpointValid
-  · exact arctanEffectiveFTC_boundedIntegral_equiv_endpointDifference
-  · intro n
-    exact Rat.le_refl
-
-def arctanEffectiveFTCStabilizedConstruction :
-    Integral.ConstructionFor
-      (FunctionOnInterval.exactRat
-        (fun x : Rat => 1 / (1 + x * x)) 0 1) where
-  compute := arctanEffectiveFTCStabilized.compute
-  certificate := by
-    simpa [RealRaw.Valid] using arctanEffectiveFTCStabilized_valid
-
-theorem arctanEffectiveFTCStabilizedIntegral_equiv_endpointDifference :
-    (Integral.integralFor
-      (FunctionOnInterval.exactRat
-        (fun x : Rat => 1 / (1 + x * x)) 0 1)
-      arctanEffectiveFTCStabilizedConstruction).Equiv
-      (endpointDifferenceRaw arctanPrimitiveRaw 0 1
-        arctanEffectiveFTCEndpointValid) := by
-  change arctanEffectiveFTCStabilized.Equiv
-    (endpointDifferenceRaw arctanPrimitiveRaw 0 1
-      arctanEffectiveFTCEndpointValid)
-  exact arctanEffectiveFTCStabilized_equiv_endpointDifference
+  simpa [arctanKernelOnUnit, arctanEffectiveFTCConstruction] using
+    (Integral.effectiveFTCIntegral_equiv_endpointDifference
+      arctanEffectiveFTCData (RealFunRaw.exact_valid _)
+      (by intro _x _hx; trivial) arctanEffectiveFTCEndpointValid)
 
 /-! The effective certificate is now connected to the geometric arctangent
 primitive already used by the circle chapter.  This is the public
 non-polynomial FTC conclusion: the rectangle integral of the rational kernel
 is the quarter-turn angle, without introducing a standard real number. -/
 
-theorem arctanEffectiveFTCStabilizedIntegral_equiv_arctanGeom_one :
-    (Integral.integralFor
-      (FunctionOnInterval.exactRat
-        (fun x : Rat => 1 / (1 + x * x)) 0 1)
-      arctanEffectiveFTCStabilizedConstruction).Equiv
+theorem arctanEffectiveFTCIntegral_equiv_arctanGeom_one :
+    (Integral.integralFor arctanKernelOnUnit
+      arctanEffectiveFTCConstruction).Equiv
       (ArctanGeometry.arctanGeom (1 : Rat)) := by
   have hprimitive : arctanPrimitiveRaw.Valid := arctanPrimitiveRaw_valid
   have hzero : arctanPrimitiveRaw.domain (0 : Rat) := by
@@ -1004,12 +921,9 @@ theorem arctanEffectiveFTCStabilizedIntegral_equiv_arctanGeom_one :
         (x := (1 : Rat)) (by native_decide) (by native_decide)) n
     constructor <;> grind [Rat.sub_eq_add_neg]
   have hI :
-      (Integral.integralFor
-        (FunctionOnInterval.exactRat
-          (fun x : Rat => 1 / (1 + x * x)) 0 1)
-        arctanEffectiveFTCStabilizedConstruction).Valid := by
-    change arctanEffectiveFTCStabilized.Valid
-    exact arctanEffectiveFTCStabilized_valid
+      (Integral.integralFor arctanKernelOnUnit
+        arctanEffectiveFTCConstruction).Valid :=
+    Integral.integralFor_valid _ _
   have hsubValid :
       ((arctanPrimitiveRaw.apply hprimitive (1 : Rat) hone) -
           (arctanPrimitiveRaw.apply hprimitive (0 : Rat) hzero)).Valid := by
@@ -1030,14 +944,12 @@ theorem arctanEffectiveFTCStabilizedIntegral_equiv_arctanGeom_one :
     ArctanGeometry.arctanGeom_valid_on_unit
       (x := (1 : Rat)) (by native_decide) (by native_decide)
   have hIToSub :
-      (Integral.integralFor
-        (FunctionOnInterval.exactRat
-          (fun x : Rat => 1 / (1 + x * x)) 0 1)
-        arctanEffectiveFTCStabilizedConstruction).Equiv
+      (Integral.integralFor arctanKernelOnUnit
+        arctanEffectiveFTCConstruction).Equiv
         ((arctanPrimitiveRaw.apply hprimitive (1 : Rat) hone) -
           (arctanPrimitiveRaw.apply hprimitive (0 : Rat) hzero)) :=
     RealRaw.equiv_trans hI hendpoint hsubValid
-      arctanEffectiveFTCStabilizedIntegral_equiv_endpointDifference
+      arctanEffectiveFTCIntegral_equiv_endpointDifference
       hsubPrimitive
   exact RealRaw.equiv_trans hI hsubValid hgeomOneValid hIToSub
     (RealRaw.equiv_trans hsubValid hgeomSubValid hgeomOneValid hsubGeom hzeroGeom)

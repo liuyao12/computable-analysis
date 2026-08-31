@@ -34,7 +34,10 @@ For the primitive route, wrap the derivative evaluator with
 `FunctionOnInterval.ofRealFunRaw`.  The theorem
 `Integral.effectiveFTCIntegral_equiv_endpointDifference` then identifies the
 constructed domain-aware integral with the primitive endpoint difference.
-The representative client is
+The canonical non-polynomial client is
+`Integral.arctanEffectiveFTCIntegral_equiv_arctanGeom_one`; it supplies only
+the finite arctangent certificate and endpoint interpretation.  The squared
+finite-prefix regression is
 `FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCConstruction_equiv_value`.
 
 ## Build a finite turning-bracket computation

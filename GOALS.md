@@ -79,6 +79,10 @@ not re-exported by the canonical root.
 - `FunctionOnInterval.ofRealFunRaw` records a certified raw integrand on its
   rational interval, and `Integral.effectiveFTCConstructionFor` turns the
   stabilized FTC output directly into the domain-aware integral API.
+- The arctangent kernel is the canonical non-polynomial client: it supplies
+  one `EffectiveDerivativeBoundFTC` certificate and obtains its construction,
+  validity, and endpoint identity from the general route without local
+  stabilization wrappers.
 - The nonlinear regression `(x - x^3/6)^2` on `[0,1/2]` now uses this
   construction route and is identified with `6389/161280`.
 
