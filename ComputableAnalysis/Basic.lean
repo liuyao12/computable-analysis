@@ -7184,6 +7184,17 @@ theorem conj_conj_equiv (z : ComplexRaw) (hz : z.Valid) :
   unfold QBox.Ordered at ho
   simpa [ComplexRaw.conj, QBox.conj, QBox.Overlaps] using ho
 
+/-! Conjugation transports an overlap certificate between any two complex
+    raw representations. -/
+theorem conj_equiv {z w : ComplexRaw} (hzw : z.Equiv w) :
+    (ComplexRaw.conj z).Equiv (ComplexRaw.conj w) := by
+  intro n
+  have h := (ComplexRaw.compareAt_overlap_iff z w n n).1 (hzw n)
+  apply (ComplexRaw.compareAt_overlap_iff
+    (ComplexRaw.conj z) (ComplexRaw.conj w) n n).2
+  simp [ComplexRaw.conj, QBox.conj, QBox.Overlaps] at h ⊢
+  exact ⟨⟨h.1.1, h.2.2⟩, ⟨h.2.1, h.1.2⟩⟩
+
 def sub (z w : ComplexRaw) : ComplexRaw :=
   add z (neg w)
 
@@ -7826,5 +7837,39 @@ def divByApart (_z w : ComplexRaw) : Prop :=
   w.Valid -> ApartZero w -> Exists fun quotient : ComplexRaw => quotient.Valid
 
 end ComplexRaw
+
+namespace Complex
+
+/-! Conjugation lifts through the representation registry.  Every stored
+    implementation is conjugated and its existing parent-relative edge is
+    transported by `ComplexRaw.conj_equiv`; the abstract value therefore
+    retains the same spanning-tree discipline. -/
+def conjugateImplementation {parent : ComplexRaw}
+    (impl : ComplexImplementation parent) :
+    ComplexImplementation (ComplexRaw.conj parent) where
+  cert := {
+    raw := ComplexRaw.conj impl.cert.raw
+    valid := ComplexRaw.conj_valid impl.cert.raw impl.cert.valid }
+  equivalent := ComplexRaw.conj_equiv impl.equivalent
+
+def conj (z : Complex) : Complex where
+  preferred := {
+    raw := ComplexRaw.conj z.preferred.raw
+    valid := ComplexRaw.conj_valid z.preferred.raw z.preferred.valid }
+  implementations := z.implementations.map conjugateImplementation
+
+set_option maxHeartbeats 1000000 in
+theorem conj_preferred_valid (z : Complex) :
+    ((Complex.conj z).preferred).raw.Valid := by
+  exact ComplexRaw.conj_valid z.preferred.raw z.preferred.valid
+
+set_option maxHeartbeats 1000000 in
+theorem conj_implementation_equivalent
+    {z : Complex} {impl : ComplexImplementation z.preferred.raw} :
+    (Complex.conj z).preferred.raw.Equiv
+      (ComplexRaw.conj impl.cert.raw) := by
+  exact ComplexRaw.conj_equiv impl.equivalent
+
+end Complex
 
 end ComputableAnalysis

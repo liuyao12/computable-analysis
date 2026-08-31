@@ -4218,6 +4218,10 @@ ComputableAnalysis.QBox.conj_conj
 ComputableAnalysis.ComplexRaw.conj
 ComputableAnalysis.ComplexRaw.conj_valid
 ComputableAnalysis.ComplexRaw.conj_conj_equiv
+ComputableAnalysis.ComplexRaw.conj_equiv
+ComputableAnalysis.Complex.conj
+ComputableAnalysis.Complex.conj_preferred_valid
+ComputableAnalysis.Complex.conj_implementation_equivalent
 ComputableAnalysis.ComplexSeriesCertificate.conj
 ComputableAnalysis.ComplexSeriesCertificate.conj_raw_valid
 ComputableAnalysis.ComplexSeriesCertificate.conj_raw_precision_witness
