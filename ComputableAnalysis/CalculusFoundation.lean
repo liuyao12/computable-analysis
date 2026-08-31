@@ -195,6 +195,20 @@ def effectiveCenteredExponential_solvesSelfDerivative :
       ExpProofs.uniformExpOnSymmetricUnit := by
   exact ExpProofs.uniformExpOnSymmetricUnit_solvesSelfDerivative
 
+/-! Constructive mean-value mechanism for convex primitives.  The derivative
+    is an explicit raw evaluator and the conclusion is an order bracket by
+    rational endpoint secants; no intermediate point or completed supremum is
+    introduced. -/
+theorem effectiveConvexDerivative_between_neighboring_secants
+    {F : RealFunRaw} {a b q : Rat}
+    {hF : ExactConvexOn F a b}
+    (Dleft : LeftDerivativeAt hF q)
+    (Dright : RightDerivativeAt hF q)
+    (haq : a < q) (hqb : q < b) :
+    (secantRaw F a q).Le Dleft.raw /\
+      Dright.raw.Le (secantRaw F q b) := by
+  exact derivative_between_neighboring_secants Dleft Dright haq hqb
+
 /-! Finite geometric control used by the integral and circle chapters.  The
     polygonal-path inequality is derived by induction from a rational
     triangle inequality; it is not imported as a completeness or Euclidean
