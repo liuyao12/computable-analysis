@@ -206,6 +206,22 @@ theorem effectiveAffineMonotoneIntegralFor_of_nonpos_adjacent_additive
               (r := r) (c := c) (a := b) (b := d) hr)) } := by
   exact affineMonotoneIntegralFor_of_nonpos_adjacent_additive hr
 
+theorem effectiveAffineMonotoneIntegralFor_eq_ofRat
+    {r c a b : Rat} (hr : 0 <= r) :
+    monotoneIntegralFor
+      (FunctionOnInterval.exactRat (fun x => r * x + c) a b)
+      (affineMonotoneConstructionFor hr) =
+      RealRaw.ofRat ((b - a) * (r * (a + b) / 2 + c)) := by
+  exact affineMonotoneIntegralFor_eq_ofRat hr
+
+theorem effectiveAffineMonotoneIntegralFor_of_nonpos_eq_ofRat
+    {r c a b : Rat} (hr : r <= 0) :
+    monotoneIntegralFor
+      (FunctionOnInterval.exactRat (fun x => r * x + c) a b)
+      (affineMonotoneConstructionFor_of_nonpos hr) =
+      RealRaw.ofRat ((b - a) * (r * (a + b) / 2 + c)) := by
+  exact affineMonotoneIntegralFor_of_nonpos_eq_ofRat hr
+
 end ComputableAnalysis.Integral
 
 namespace ComputableAnalysis.FinitePolynomial
