@@ -1124,7 +1124,7 @@ theorem sineTaylorPrefixThreeSquareEffectiveFTC_boundedIntegral_equiv_endpointDi
     sineTaylorPrefixThreeSquareEffectiveFTCData
     sineTaylorPrefixThreeSquareEffectiveFTCEndpointValid
 
-/-! Canonical valid output of the non-polynomial effective-FTC regression.
+/-! Canonical valid output of the squared-prefix effective-FTC regression.
 The native bounded sums are free to choose unrelated partitions from one
 requested tolerance to the next; the general FTC stabilizer now supplies the
 nesting rather than asking this example to prove it again. -/
@@ -1176,6 +1176,55 @@ theorem sineTaylorPrefixThreeSquareEffectiveFTCStabilized_equiv_value :
     sineTaylorPrefixThreeSquareEffectiveFTCStabilized_valid
     hendpoint (RealRaw.ofRat_valid _)
     sineTaylorPrefixThreeSquareEffectiveFTCStabilized_equiv_endpointDifference
+    sineTaylorPrefixThreeSquare_endpointDifference_equiv_value
+
+/-! Domain-aware client of the canonical effective-FTC constructor.  This is
+the representative path that users should copy: certify the raw integrand on
+its rational interval, obtain an `Integral.ConstructionFor`, and invoke the
+endpoint theorem. -/
+
+def sineTaylorPrefixThreeSquareIntegrand : FunctionOnInterval :=
+  FunctionOnInterval.ofRealFunRaw sineTaylorPrefixThreeSquareRaw
+    0 ((1 : Rat) / 2) (by intro _x _hx; trivial)
+    (RealFunRaw.exact_valid _)
+
+def sineTaylorPrefixThreeSquareEffectiveFTCConstruction :
+    Integral.ConstructionFor sineTaylorPrefixThreeSquareIntegrand := by
+  unfold sineTaylorPrefixThreeSquareIntegrand
+  exact Integral.effectiveFTCConstructionFor
+    sineTaylorPrefixThreeSquareEffectiveFTCData
+    (RealFunRaw.exact_valid _) (by intro _x _hx; trivial)
+    sineTaylorPrefixThreeSquareEffectiveFTCEndpointValid
+
+theorem sineTaylorPrefixThreeSquareEffectiveFTCConstruction_equiv_endpointDifference :
+    (Integral.integralFor sineTaylorPrefixThreeSquareIntegrand
+      sineTaylorPrefixThreeSquareEffectiveFTCConstruction).Equiv
+      (endpointDifferenceRaw sineTaylorPrefixThreeSquarePrimitiveRaw 0
+        ((1 : Rat) / 2)
+        sineTaylorPrefixThreeSquareEffectiveFTCEndpointValid) := by
+  simpa [sineTaylorPrefixThreeSquareIntegrand,
+    sineTaylorPrefixThreeSquareEffectiveFTCConstruction] using
+    (Integral.effectiveFTCIntegral_equiv_endpointDifference
+      sineTaylorPrefixThreeSquareEffectiveFTCData
+      (RealFunRaw.exact_valid _) (by intro _x _hx; trivial)
+      sineTaylorPrefixThreeSquareEffectiveFTCEndpointValid)
+
+theorem sineTaylorPrefixThreeSquareEffectiveFTCConstruction_equiv_value :
+    (Integral.integralFor sineTaylorPrefixThreeSquareIntegrand
+      sineTaylorPrefixThreeSquareEffectiveFTCConstruction).Equiv
+      (RealRaw.ofRat (6389 / 161280)) := by
+  have hintegral :
+      (Integral.integralFor sineTaylorPrefixThreeSquareIntegrand
+        sineTaylorPrefixThreeSquareEffectiveFTCConstruction).Valid :=
+    Integral.integralFor_valid _ _
+  have hendpoint :
+      (endpointDifferenceRaw sineTaylorPrefixThreeSquarePrimitiveRaw 0
+        ((1 : Rat) / 2)
+        sineTaylorPrefixThreeSquareEffectiveFTCEndpointValid).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using
+      sineTaylorPrefixThreeSquareEffectiveFTCEndpointValid
+  exact RealRaw.equiv_trans hintegral hendpoint (RealRaw.ofRat_valid _)
+    sineTaylorPrefixThreeSquareEffectiveFTCConstruction_equiv_endpointDifference
     sineTaylorPrefixThreeSquare_endpointDifference_equiv_value
 
 theorem sineTaylorPrefixThreeSquareEffectiveFTC_equiv_value :

@@ -71,6 +71,12 @@ partition, a shrinking non-rational turning-point bracket, or a direct
 finite change-of-variables comparison. Supply a separate completion theorem
 that connects the runtime boxes to the intended integral value.
 
+When a primitive is known, construct `EffectiveDerivativeBoundFTC`, restrict
+the certified derivative with `FunctionOnInterval.ofRealFunRaw`, and publish
+`Integral.effectiveFTCConstructionFor`.  The endpoint theorem is
+`Integral.effectiveFTCIntegral_equiv_endpointDifference`; do not stop at the
+internal stabilized raw evaluator.
+
 Do not introduce a universal integral merely because a function is bounded,
 continuous, or pointwise defined. Record a reusable pattern only when every
 hypothesis needed for its finite proof is visible in the structure.

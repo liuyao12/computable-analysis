@@ -76,8 +76,11 @@ not re-exported by the canonical root.
   assume that the native Riemann candidate was already nested.
 - The matching equivalence theorem identifies the stabilized integral with
   the primitive's endpoint difference.
-- The non-polynomial regression `(x - x^3/6)^2` on `[0,1/2]` now uses this
-  route and is identified with `6389/161280`.
+- `FunctionOnInterval.ofRealFunRaw` records a certified raw integrand on its
+  rational interval, and `Integral.effectiveFTCConstructionFor` turns the
+  stabilized FTC output directly into the domain-aware integral API.
+- The nonlinear regression `(x - x^3/6)^2` on `[0,1/2]` now uses this
+  construction route and is identified with `6389/161280`.
 
 ### Series, special functions, and ODEs
 
@@ -101,15 +104,12 @@ is open.
    nested-radical computation overlaps the normalized tangent-square anchor.
    The canonical chain stabilizer then gives a valid integral equivalent to
    `1/4`; a stronger three-way same-stage witness is unnecessary.
-3. **General user-facing FTC construction.** Package the stabilized
-   derivative-bound raw directly as an `Integral.ConstructionFor`, so clients
-   do not repeat endpoint-validity boilerplate.
-4. **Fourier series.** Complete effective reconstruction for one genuinely
+3. **Fourier series.** Complete effective reconstruction for one genuinely
    infinite, nontrivial class with explicit coefficient and tail schedules.
-5. **Linear ODEs.** Lift finite Peano--Baker/Duhamel algebra to interval-valued
+4. **Linear ODEs.** Lift finite Peano--Baker/Duhamel algebra to interval-valued
    simplex computations with a uniform factorial-tail certificate, then prove
    uniqueness.
-6. **Complex special functions.** Treat special functions as complex-variable
+5. **Complex special functions.** Treat special functions as complex-variable
    computations from the start, adding one representative per new evaluator
    or analytic estimate.
 
@@ -126,9 +126,10 @@ endpoints `a ≤ b`, a provider supplies:
 6. a valid endpoint-difference computation.
 
 The library forms finite bounded sums, proves their widths shrink, stabilizes
-them against the endpoint computation, and returns a valid integral equivalent
-to `F(b) - F(a)`. No theorem that every continuous function is integrable is
-needed for this workflow.
+them against the endpoint computation, and returns an
+`Integral.ConstructionFor` whose integral is equivalent to `F(b) - F(a)`. No
+theorem that every continuous function is integrable is needed for this
+workflow.
 
 ## Wiedijk challenge
 

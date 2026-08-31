@@ -69,6 +69,11 @@ endpoint computation; prefix stabilization then supplies nestedness. It does
 not assume a completed real line or that independently selected finite sums
 were already nested.
 
+`Integral.effectiveFTCConstructionFor` packages that output as a
+domain-aware integral of `FunctionOnInterval.ofRealFunRaw dF a b ...`.
+`Integral.effectiveFTCIntegral_equiv_endpointDifference` is the user-facing
+FTC theorem: the resulting integral equals the primitive endpoint difference.
+
 The main active application is the equal-dyadic computation of
 `sin(pi*x)^2` on `[0,1/2]`. Pairwise overlap certificates connect the public
 dyadic evaluator, the nested-radical evaluator, and the normalized tangent

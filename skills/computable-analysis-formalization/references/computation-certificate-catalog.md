@@ -29,9 +29,13 @@ rational step when necessary. Keep a coefficient identity for a formal power
 series distinct from an analytic derivative theorem for the corresponding
 boxed function.
 
-Use `FTC.EffectiveFTC`, `Integral.DefiniteIdentityFor`, or a dedicated
-finite comparison only after providing the required integral construction.
-A familiar primitive is a proposal to check, not an integral table entry.
+For a checked primitive, use `EffectiveDerivativeBoundFTC`, then
+`FunctionOnInterval.ofRealFunRaw` and
+`Integral.effectiveFTCConstructionFor`.  The public endpoint theorem is
+`Integral.effectiveFTCIntegral_equiv_endpointDifference`.  Use
+`Integral.DefiniteIdentityFor` or a dedicated finite comparison when a
+different construction already exists.  A familiar primitive is a proposal
+to check, not an integral table entry.
 
 ## Series, exponential, and logarithm
 

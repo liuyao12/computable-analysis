@@ -985,6 +985,21 @@ The native bounded sums need not be nested: different stages may choose
 different partitions and evaluator precisions.  The width theorem and
 endpoint overlap are sufficient.  Prefix stabilization supplies nestedness,
 so the theorem does not assume the validity it is meant to construct.
+The public API then restricts the derivative computation to its certified
+rational interval and packages the stabilized value as an integral
+construction:
+
+\begin{verbatim}
+certified dF on [a,b] -> FunctionOnInterval
+                      -> Integral.ConstructionFor
+                      -> integral = F(b)-F(a)
+\end{verbatim}
+
+\lean{ComputableAnalysis.FunctionOnInterval.ofRealFunRaw}
+\lean{ComputableAnalysis.Integral.effectiveFTCConstructionFor}
+\lean{ComputableAnalysis.Integral.effectiveFTCIntegral_equiv_endpointDifference}
+\leanok
+
 The older `EffectiveFTC` adapter remains compatibility API for existing
 clients, not a second foundation.
 
@@ -1367,7 +1382,7 @@ All monomial degrees use one arbitrary-power certificate:
 \lean{ComputableAnalysis.Integral.exactRat_pow_definiteIdentity}
 \leanok
 
-The first non-polynomial test is a squared sine prefix.  Its finite Taylor
+The first nonlinear test is a squared sine prefix.  Its finite Taylor
 surrogate is integrated by the same effective FTC and evaluated by a rational
 certificate (the current prefix value is \(6389/161280\)).  The exact
 tangent-chart route is also exposed: its rational derivative certificate
@@ -1548,6 +1563,9 @@ The closed finite instances are linked directly to their certificates:
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCStabilized_valid}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCStabilized_equiv_endpointDifference}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCStabilized_equiv_value}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCConstruction}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCConstruction_equiv_endpointDifference}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCConstruction_equiv_value}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquarePrimitive_secant_formula}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquarePrimitive_secant_bracket}
 \lean{ComputableAnalysis.effectiveSinPiHalfIntegral_equiv_reciprocalPi_of_canonical_certificate_family}

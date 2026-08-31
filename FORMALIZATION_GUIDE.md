@@ -108,7 +108,14 @@ Use:
 ```lean
 EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_valid
 EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_equiv_endpointDifference
+Integral.effectiveFTCConstructionFor
+Integral.effectiveFTCIntegral_equiv_endpointDifference
 ```
+
+For a public integral, certify `dF.Valid` and its domain on `[a,b]`, then use
+`FunctionOnInterval.ofRealFunRaw` and `Integral.effectiveFTCConstructionFor`.
+The raw stabilizer remains the internal value computation; clients should
+normally expose the resulting `ConstructionFor`.
 
 These theorems do not assume the native finite sums are already nested. The
 older `FTC.effectiveFTCStabilizedRaw_valid` route is compatibility API for
@@ -132,12 +139,13 @@ For primitive `F`, derivative `dF`, and rational interval `[a,b]`, provide:
 - a global width bound by the stage tolerance;
 - validity of the canonical endpoint-difference computation.
 
-Then use the stabilized FTC output. Do not separately prove nesting for the
-bounded-sum candidate.
+Then use `Integral.effectiveFTCConstructionFor`. Do not separately prove
+nesting for the bounded-sum candidate.
 
-The representative non-polynomial regression is
-`sineTaylorPrefixThreeSquareEffectiveFTCStabilized_equiv_value`, which proves
-the integral of `(x-x^3/6)^2` on `[0,1/2]` is `6389/161280`.
+The representative nonlinear regression is
+`sineTaylorPrefixThreeSquareEffectiveFTCConstruction_equiv_value`, which
+proves the domain-aware integral of `(x-x^3/6)^2` on `[0,1/2]` is
+`6389/161280`.
 
 ## The squared-sine transport
 

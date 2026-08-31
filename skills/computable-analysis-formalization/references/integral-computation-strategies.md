@@ -18,7 +18,7 @@ separate from the raw interval computation.
 
 | Shape of the integrand | Construct | Typical proof obligation |
 | --- | --- | --- |
-| Exact derivative of a checked primitive | Endpoint difference plus a specific FTC certificate | Prove the finite derivative error and endpoint bridge |
+| Exact derivative of a checked primitive | `EffectiveDerivativeBoundFTC` then `Integral.effectiveFTCConstructionFor` | Prove finite derivative bounds, interval-domain validity, and the endpoint bridge |
 | Monotone on one rational interval | `MonotoneConstructionFor` or `NondecreasingConstructionFor` | Prove the declared order and the rectangle-width schedule |
 | Rational-Lipschitz on `[0,1]` | `IntegralIdentities.LipschitzDyadic` | Prove a rational Lipschitz constant and the dyadic error bound |
 | Monotone on finitely many rational pieces | `PiecewiseMonotoneConstructionFor` | Prove order independently on every piece and combine their boxes |
@@ -29,6 +29,13 @@ Use the exact expression of the integrand in every construction. State where
 denominators stay apart from zero and where a branch or sign condition holds.
 Use an interval evaluator rather than endpoint samples when the function is
 inexact.
+
+For the primitive route, wrap the derivative evaluator with
+`FunctionOnInterval.ofRealFunRaw`.  The theorem
+`Integral.effectiveFTCIntegral_equiv_endpointDifference` then identifies the
+constructed domain-aware integral with the primitive endpoint difference.
+The representative client is
+`FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCConstruction_equiv_value`.
 
 ## Build a finite turning-bracket computation
 

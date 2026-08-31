@@ -6830,9 +6830,36 @@ def ofStable
     change RealRaw.ValidCompute (f.compute x)
     exact valid_on x hx
 
+/-- Restrict a certified raw rational-input function to a closed rational
+interval.
+
+The evaluator is unchanged: this constructor only records that every rational
+input in `[a,b]` belongs to the raw function's represented domain.  It is the
+canonical bridge from the `RealFunRaw` calculus layer to the domain-aware
+`FunctionOnInterval` integral API. -/
+def ofRealFunRaw
+    (f : RealFunRaw) (a b : Rat)
+    (hdomain : forall x, inDomainInterval a b x -> f.domain x)
+    (hvalid : f.Valid) : FunctionOnInterval where
+  raw :=
+    { definedAt := inDomainInterval a b
+      compute := fun x _hx n => f.compute x n
+      rate := fun x hx => f.rate x (hdomain x hx) }
+  lower := a
+  upper := b
+  defined_on := fun _x hx => hx
+  valid_on := fun x hx => hvalid x (hdomain x hx)
+
 def compute (F : FunctionOnInterval) (x : Rat) (hx : inDomainInterval F.lower F.upper x)
     (n : Nat) : QInterval :=
   F.raw.compute x (F.defined_on x hx) n
+
+@[simp] theorem ofRealFunRaw_compute
+    (f : RealFunRaw) (a b : Rat)
+    (hdomain : forall x, inDomainInterval a b x -> f.domain x)
+    (hvalid : f.Valid)
+    (x : Rat) (hx : inDomainInterval a b x) (n : Nat) :
+    (ofRealFunRaw f a b hdomain hvalid).compute x hx n = f.compute x n := rfl
 
 @[simp] theorem ofStable_compute
     (f : StablePartialRealFunRaw)
@@ -7255,6 +7282,38 @@ theorem integralFor_valid (F : FunctionOnInterval)
     (c : ConstructionFor F) :
     (integralFor F c).Valid :=
   c.certificate
+
+/-- The domain-aware integral construction produced by the canonical
+effective FTC.
+
+The provider supplies pointwise validity and interval-domain coverage for the
+derivative evaluator.  The FTC certificate supplies the finite partitions,
+derivative boxes, endpoint control, and shrinking widths.  Prefix
+stabilization then provides the `ValidCompute` field required by
+`ConstructionFor`; clients do not need to repeat that boilerplate. -/
+def effectiveFTCConstructionFor
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveDerivativeBoundFTC F dF a b)
+    (hdF : dF.Valid)
+    (hdomain : forall x, inDomainInterval a b x -> dF.domain x)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b)) :
+    ConstructionFor (FunctionOnInterval.ofRealFunRaw dF a b hdomain hdF) where
+  compute := (h.stabilizedBoundedIntegralRaw hendpoint).compute
+  certificate := h.stabilizedBoundedIntegralRaw_valid hendpoint
+
+/-- User-facing effective FTC: the domain-aware constructed integral equals
+the primitive endpoint difference. -/
+theorem effectiveFTCIntegral_equiv_endpointDifference
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveDerivativeBoundFTC F dF a b)
+    (hdF : dF.Valid)
+    (hdomain : forall x, inDomainInterval a b x -> dF.domain x)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b)) :
+    (integralFor (FunctionOnInterval.ofRealFunRaw dF a b hdomain hdF)
+      (effectiveFTCConstructionFor
+        h hdF hdomain hendpoint)).Equiv
+      (endpointDifferenceRaw F a b hendpoint) := by
+  exact h.stabilizedBoundedIntegralRaw_equiv_endpointDifference hendpoint
 
 /-! A reusable anchor-free constructor.  A candidate evaluator need not first
 be related to a completed or independently named real: finite future
