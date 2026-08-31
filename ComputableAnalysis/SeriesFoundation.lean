@@ -558,6 +558,67 @@ theorem ComplexSeriesCertificate.add_raw_equiv_add
   constructor <;> grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
     Rat.sub_eq_add_neg]
 
+/-! Nonnegative rational scaling is the complex companion to certificate
+    addition.  It scales both coordinates and the shared radius, while the
+    caller supplies the precision budget for amplification. -/
+def ComplexSeriesCertificate.scale
+    (c : Rat) (hc : 0 <= c) (S : ComplexSeriesCertificate)
+    (budget : QPos -> QPos)
+    (hbudget : forall eps, c * (budget eps).val <= eps.val) :
+    ComplexSeriesCertificate where
+  partialSum := fun n => QComplex.scaleRat c (S.partialSum n)
+  remainder := fun n => c * S.remainder n
+  remainder_nonneg := by
+    intro n
+    exact Rat.mul_nonneg hc (S.remainder_nonneg n)
+  refinement := by
+    intro n
+    have hs := S.refinement n
+    simp [QBox.NestedIn, QBox.expand, QBox.point, QComplex.scaleRat,
+      QComplex.le_def, hc] at hs ⊢
+    constructor
+    · constructor
+      · have h := Rat.mul_le_mul_of_nonneg_left hs.1.1 hc
+        grind [Rat.mul_add, Rat.sub_eq_add_neg]
+      · have h := Rat.mul_le_mul_of_nonneg_left hs.1.2 hc
+        grind [Rat.mul_add, Rat.sub_eq_add_neg]
+    · constructor
+      · have h := Rat.mul_le_mul_of_nonneg_left hs.2.1 hc
+        grind [Rat.mul_add, Rat.sub_eq_add_neg]
+      · have h := Rat.mul_le_mul_of_nonneg_left hs.2.2 hc
+        grind [Rat.mul_add, Rat.sub_eq_add_neg]
+  tail_budget := by
+    intro eps
+    obtain ⟨N, hN⟩ := S.tail_budget (budget eps)
+    refine ⟨N, ?_⟩
+    intro n hn
+    have h := hN n hn
+    have hb := hbudget eps
+    simp only [QInterval.width] at h ⊢
+    have hrem : S.remainder n <= (budget eps).val := by grind
+    calc
+      c * S.remainder n - 0 = c * S.remainder n := by grind
+      _ <= c * (budget eps).val :=
+        Rat.mul_le_mul_of_nonneg_left hrem hc
+      _ <= eps.val := hb
+
+theorem ComplexSeriesCertificate.scale_raw_valid
+    (c : Rat) (hc : 0 <= c) (S : ComplexSeriesCertificate)
+    (budget : QPos -> QPos)
+    (hbudget : forall eps, c * (budget eps).val <= eps.val) :
+    (S.scale c hc budget hbudget).raw.Valid := by
+  exact (S.scale c hc budget hbudget).raw_valid
+
+theorem ComplexSeriesCertificate.scale_raw_precision_witness
+    (c : Rat) (hc : 0 <= c) (S : ComplexSeriesCertificate)
+    (budget : QPos -> QPos)
+    (hbudget : forall eps, c * (budget eps).val <= eps.val)
+    (eps : QPos) :
+    ∃ N : Nat, ∀ n, N ≤ n ->
+      ((S.scale c hc budget hbudget).raw.compute n).width ≤ eps.val ∧
+        ((S.scale c hc budget hbudget).raw.compute n).height ≤ eps.val := by
+  exact (S.scale c hc budget hbudget).raw_precision_witness eps
+
 /-! A finite complex coefficient prefix has the same termwise primitive
 constructor as the rational polynomial layer.  The coefficient stream and
 the evaluation point are rational-complex, while division by the natural
