@@ -1277,63 +1277,24 @@ without rebuilding a function-on-interval wrapper:
 
 For the concrete nested-radical sine-square evaluator, the same finite
 modulus is now available without reopening the raw-real packaging:
-\lean{ComputableAnalysis.sinPiSquareOnHalf_compute_width_le}
-\leanok
-The stage-aware form is
-\lean{ComputableAnalysis.sinPiSquareOnHalfScheduled_compute_width_le}
-\leanok
-The finite rectangle-sum forms are
-\lean{ComputableAnalysis.dyadicPublicSquareLeftSum_width_le_of_stage}
-\lean{ComputableAnalysis.dyadicPublicSquareLeftSum_width_le_of_sine_stage}
-\leanok
-The uniform regularity specialization is
-\lean{ComputableAnalysis.dyadicPublicSquareLeftSum_width_le_of_sine_regular}
-\leanok
-The public finite algorithm and its shrinking-width result are
-\lean{ComputableAnalysis.dyadicPublicSquareIntegralRaw}
-\lean{ComputableAnalysis.dyadicPublicSquareIntegralRaw_widths_shrink}
-\leanok
-The finite orderedness companion is
-\lean{ComputableAnalysis.dyadicPublicSquareLeftSum_ordered}
-\leanok
-The explicit stabilization bridge is
-\lean{ComputableAnalysis.dyadicPublicSquareIntegralRaw_stabilized}
-\lean{ComputableAnalysis.dyadicPublicSquareIntegralRaw_stabilized_valid_of_overlap}
-\lean{ComputableAnalysis.dyadicPublicSquareIntegralRaw_stabilized_equiv_value_of_anchor}
+The squared-sine implementation needs only one public transport pattern.  Its
+finite sums have an explicit width bound; one shared rational witness connects
+the public, nested-radical, and anchor boxes.  The anchor remains a parameter,
+so the transport layer cannot accidentally confuse \(\pi/4\) with \(1/4\).
+
+\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareLeftSum_width_le_of_sine_regular}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareIntegralRaw_widths_shrink}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareAnchorSharedWitness}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareAnchorSharedWitness.to_public_equiv}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareAnchorSharedWitness.stabilized_valid}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareAnchorSharedWitness.stabilized_equiv_value}
 \leanok
 
-The public candidate must be connected to an anchor directly: overlap through
-the nested table is not transitive.  The transport certificate
-\lean{ComputableAnalysis.DyadicPublicSquareTangentTransportWitness}
-packages containment of every nested square-sum interval in its public
-counterpart together with the nested/tangent common witness.  Its
-\lean{ComputableAnalysis.DyadicPublicSquareTangentTransportWitness.to_public_overlap}
-and
-\lean{ComputableAnalysis.DyadicPublicSquareTangentTransportWitness.to_public_equiv}
-theorems turn that finite rational certificate into the direct public-anchor
-overlap and raw-real equivalence needed by stabilization.  The value-level
-corollary
-\lean{ComputableAnalysis.DyadicPublicSquareTangentTransportWitness.stabilized_equiv_value}
-then transports the tangent quarter-value certificate through the public
-prefix-stabilized evaluator.
-Its validity corollary
-\lean{ComputableAnalysis.DyadicPublicSquareTangentSharedWitness.stabilized_valid}
-shows that the un-stabilized public candidate itself need not be nested.
-The effective-FTC representation and the stabilized public representation are
-connected by
-\lean{ComputableAnalysis.SinPiIntegral.SinPiSquareEffectiveFTCData.integral_equiv_public_stabilized}.
-It requires explicit value certificates for both routes; the transport itself
-uses only validity and equivalence of `RealRaw` representations.
-\leanok
+The calculus-facing specialization chooses the normalized tangent product and
+closes the public value at \(1/4\).
 
-The direct certificate need not assert containment.  The weaker interface
-\lean{ComputableAnalysis.DyadicPublicSquareTangentSharedWitness}
-uses one rational witness in the public, nested, and tangent intervals at
-each stage; its
-\lean{ComputableAnalysis.DyadicPublicSquareTangentSharedWitness.to_public_equiv}
-and
-\lean{ComputableAnalysis.DyadicPublicSquareTangentSharedWitness.stabilized_equiv_value}
-theorems provide the same transport without composing overlap relations.
+\lean{ComputableAnalysis.effectiveDyadicPublicSquareIntegral_equiv_quarter}
+\lean{ComputableAnalysis.SinPiIntegral.SinPiSquareEffectiveFTCData.integral_equiv_public_stabilized}
 \leanok
 
 The reusable bound-facing corollary makes the bookkeeping explicit: supplied

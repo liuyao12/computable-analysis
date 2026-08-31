@@ -3166,32 +3166,33 @@ theorem dyadicNestedRadicalSquareIntegralRaw_equiv_of_overlap
     dyadicNestedRadicalSquareIntegralRaw anchor n n).2 (hoverlap n)
 
 /-! The remaining square change-of-variables certificate is represented by a
-rational common witness at every finite stage.  The four inequalities are the
-complete proof obligation for transporting the squared dyadic sum to the
-tangent-square anchor; no exact value of either integral is included here. -/
-structure DyadicNestedRadicalSquareTangentCommonWitness where
+rational common witness at every finite stage.  The anchor is a parameter:
+normalization and value belong to the application layer, not to this finite
+transport structure. -/
+structure DyadicNestedRadicalSquareAnchorCommonWitness (anchor : RealRaw) where
   witness : Nat -> Rat
   candidate_lo_le : forall n,
     (dyadicNestedRadicalSquareLeftSum n).lo <= witness n
   witness_le_candidate_hi : forall n,
     witness n <= (dyadicNestedRadicalSquareLeftSum n).hi
-  tangent_lo_le : forall n,
-    (tangentSquareIntegral.compute n).lo <= witness n
-  witness_le_tangent_hi : forall n,
-    witness n <= (tangentSquareIntegral.compute n).hi
+  anchor_lo_le : forall n,
+    (anchor.compute n).lo <= witness n
+  witness_le_anchor_hi : forall n,
+    witness n <= (anchor.compute n).hi
 
 /- A stagewise overlap is equivalently packaged by choosing the larger lower
 endpoint.  Keeping this constructor next to the four inequalities makes the
 square route match the public sine transport API. -/
-def DyadicNestedRadicalSquareTangentCommonWitness.of_overlap
+def DyadicNestedRadicalSquareAnchorCommonWitness.of_overlap
+    {anchor : RealRaw} (hanchor : anchor.Valid)
     (hoverlap : forall n,
       QInterval.Overlaps
         (dyadicNestedRadicalSquareLeftSum n)
-        (tangentSquareIntegral.compute n)) :
-    DyadicNestedRadicalSquareTangentCommonWitness where
+        (anchor.compute n)) :
+    DyadicNestedRadicalSquareAnchorCommonWitness anchor where
   witness := fun n => max
     (dyadicNestedRadicalSquareLeftSum n).lo
-    (tangentSquareIntegral.compute n).lo
+    (anchor.compute n).lo
   candidate_lo_le := by
     intro n
     rw [Rat.max_def]
@@ -3210,67 +3211,48 @@ def DyadicNestedRadicalSquareTangentCommonWitness.of_overlap
       grind
     rw [Rat.max_def]
     split <;> grind
-  tangent_lo_le := by
+  anchor_lo_le := by
     intro n
     rw [Rat.max_def]
     split <;> grind
-  witness_le_tangent_hi := by
+  witness_le_anchor_hi := by
     intro n
     have hover := hoverlap n
     unfold QInterval.Overlaps at hover
     have hright :
-        (tangentSquareIntegral.compute n).lo <=
-          (tangentSquareIntegral.compute n).hi := by
-      have hwidth := tangentSquareIntegral_valid.1 n
+        (anchor.compute n).lo <= (anchor.compute n).hi := by
+      have hwidth := hanchor.1 n
       change 0 <=
-        (tangentSquareIntegral.compute n).hi -
-          (tangentSquareIntegral.compute n).lo at hwidth
+        (anchor.compute n).hi - (anchor.compute n).lo at hwidth
       grind
     rw [Rat.max_def]
     split <;> grind
 
-theorem DyadicNestedRadicalSquareTangentCommonWitness.to_overlap
-    (h : DyadicNestedRadicalSquareTangentCommonWitness) (n : Nat) :
+theorem DyadicNestedRadicalSquareAnchorCommonWitness.to_overlap
+    {anchor : RealRaw}
+    (h : DyadicNestedRadicalSquareAnchorCommonWitness anchor) (n : Nat) :
     QInterval.Overlaps
       (dyadicNestedRadicalSquareLeftSum n)
-      (tangentSquareIntegral.compute n) := by
+      (anchor.compute n) := by
   unfold QInterval.Overlaps
   exact ⟨Rat.le_trans (h.candidate_lo_le n)
-      (h.witness_le_tangent_hi n),
-    Rat.le_trans (h.tangent_lo_le n)
+      (h.witness_le_anchor_hi n),
+    Rat.le_trans (h.anchor_lo_le n)
       (h.witness_le_candidate_hi n)⟩
 
-theorem DyadicNestedRadicalSquareTangentCommonWitness.to_equiv
-    (h : DyadicNestedRadicalSquareTangentCommonWitness) :
-    dyadicNestedRadicalSquareIntegralRaw.Equiv tangentSquareIntegral := by
+theorem DyadicNestedRadicalSquareAnchorCommonWitness.to_equiv
+    {anchor : RealRaw}
+    (h : DyadicNestedRadicalSquareAnchorCommonWitness anchor) :
+    dyadicNestedRadicalSquareIntegralRaw.Equiv anchor := by
   exact dyadicNestedRadicalSquareIntegralRaw_equiv_of_overlap
-    tangentSquareIntegral h.to_overlap
-
-/-! A direct public-to-anchor transport certificate.  Stagewise overlap is
-not transitive, so the public sine-square table cannot obtain an equivalence
-to the tangent anchor merely by passing through the nested table.  What is
-needed is the stronger, and very concrete, containment certificate below:
-each nested interval must lie inside its public counterpart.  The common
-witness for the nested route then becomes a common witness for the public
-route without introducing any real-number argument. -/
-structure DyadicPublicSquareTangentCommonWitness
-    (S : ArctanSinPiConstruction) where
-  witness : Nat -> Rat
-  candidate_lo_le : forall n,
-    (dyadicPublicSquareLeftSum S n).lo <= witness n
-  witness_le_candidate_hi : forall n,
-    witness n <= (dyadicPublicSquareLeftSum S n).hi
-  tangent_lo_le : forall n,
-    (tangentSquareIntegral.compute n).lo <= witness n
-  witness_le_tangent_hi : forall n,
-    witness n <= (tangentSquareIntegral.compute n).hi
+    anchor h.to_overlap
 
 /- A shared witness is the weakest direct three-way certificate used by the
-public route: one rational point lies in the public, nested, and tangent
+public route: one rational point lies in the public, nested, and anchor
 intervals at every stage.  It avoids assuming that either overlap relation
 can be composed transitively. -/
-structure DyadicPublicSquareTangentSharedWitness
-    (S : ArctanSinPiConstruction) where
+structure DyadicPublicSquareAnchorSharedWitness
+    (S : ArctanSinPiConstruction) (anchor : RealRaw) where
   witness : Nat -> Rat
   public_lo_le : forall n,
     (dyadicPublicSquareLeftSum S n).lo <= witness n
@@ -3280,74 +3262,32 @@ structure DyadicPublicSquareTangentSharedWitness
     (dyadicNestedRadicalSquareLeftSum n).lo <= witness n
   witness_le_nested_hi : forall n,
     witness n <= (dyadicNestedRadicalSquareLeftSum n).hi
-  tangent_lo_le : forall n,
-    (tangentSquareIntegral.compute n).lo <= witness n
-  witness_le_tangent_hi : forall n,
-    witness n <= (tangentSquareIntegral.compute n).hi
+  anchor_lo_le : forall n,
+    (anchor.compute n).lo <= witness n
+  witness_le_anchor_hi : forall n,
+    witness n <= (anchor.compute n).hi
 
-def DyadicPublicSquareTangentSharedWitness.to_public_common_witness
-    {S : ArctanSinPiConstruction}
-    (h : DyadicPublicSquareTangentSharedWitness S) :
-    DyadicPublicSquareTangentCommonWitness S where
-  witness := h.witness
-  candidate_lo_le := h.public_lo_le
-  witness_le_candidate_hi := h.witness_le_public_hi
-  tangent_lo_le := h.tangent_lo_le
-  witness_le_tangent_hi := h.witness_le_tangent_hi
-
-def DyadicPublicSquareTangentSharedWitness.to_nested_common_witness
-    {S : ArctanSinPiConstruction}
-    (h : DyadicPublicSquareTangentSharedWitness S) :
-    DyadicNestedRadicalSquareTangentCommonWitness where
+def DyadicPublicSquareAnchorSharedWitness.to_nested_common_witness
+    {S : ArctanSinPiConstruction} {anchor : RealRaw}
+    (h : DyadicPublicSquareAnchorSharedWitness S anchor) :
+    DyadicNestedRadicalSquareAnchorCommonWitness anchor where
   witness := h.witness
   candidate_lo_le := h.nested_lo_le
   witness_le_candidate_hi := h.witness_le_nested_hi
-  tangent_lo_le := h.tangent_lo_le
-  witness_le_tangent_hi := h.witness_le_tangent_hi
+  anchor_lo_le := h.anchor_lo_le
+  witness_le_anchor_hi := h.witness_le_anchor_hi
 
-structure DyadicPublicSquareTangentTransportWitness
-    (S : ArctanSinPiConstruction) where
-  nested_tangent : DyadicNestedRadicalSquareTangentCommonWitness
-  public_contains_nested : forall n,
-    (dyadicPublicSquareLeftSum S n).ContainsInterval
-      (dyadicNestedRadicalSquareLeftSum n)
-
-def DyadicPublicSquareTangentTransportWitness.to_public_common_witness
-    {S : ArctanSinPiConstruction}
-    (h : DyadicPublicSquareTangentTransportWitness S) :
-    DyadicPublicSquareTangentCommonWitness S where
-  witness := h.nested_tangent.witness
-  candidate_lo_le := by
-    intro n
-    exact Rat.le_trans (h.public_contains_nested n).1
-      (h.nested_tangent.candidate_lo_le n)
-  witness_le_candidate_hi := by
-    intro n
-    exact Rat.le_trans (h.nested_tangent.witness_le_candidate_hi n)
-      (h.public_contains_nested n).2
-  tangent_lo_le := h.nested_tangent.tangent_lo_le
-  witness_le_tangent_hi := h.nested_tangent.witness_le_tangent_hi
-
-theorem DyadicPublicSquareTangentCommonWitness.to_overlap
-    {S : ArctanSinPiConstruction}
-    (h : DyadicPublicSquareTangentCommonWitness S) (n : Nat) :
+theorem DyadicPublicSquareAnchorSharedWitness.to_public_overlap
+    {S : ArctanSinPiConstruction} {anchor : RealRaw}
+    (h : DyadicPublicSquareAnchorSharedWitness S anchor) (n : Nat) :
     QInterval.Overlaps
       (dyadicPublicSquareLeftSum S n)
-      (tangentSquareIntegral.compute n) := by
+      (anchor.compute n) := by
   unfold QInterval.Overlaps
-  exact ⟨Rat.le_trans (h.candidate_lo_le n)
-      (h.witness_le_tangent_hi n),
-    Rat.le_trans (h.tangent_lo_le n)
-      (h.witness_le_candidate_hi n)⟩
-
-theorem DyadicPublicSquareTangentTransportWitness.to_public_overlap
-    {S : ArctanSinPiConstruction}
-    (h : DyadicPublicSquareTangentTransportWitness S) :
-    forall n, QInterval.Overlaps
-      (dyadicPublicSquareLeftSum S n)
-      (tangentSquareIntegral.compute n) := by
-  intro n
-  exact h.to_public_common_witness.to_overlap n
+  exact ⟨Rat.le_trans (h.public_lo_le n)
+      (h.witness_le_anchor_hi n),
+    Rat.le_trans (h.anchor_lo_le n)
+      (h.witness_le_public_hi n)⟩
 
 /- Prefix stabilization is the direct-only implementation of the missing
 cross-stage nesting proof.  The anchor is a proof-side object; the stabilized
@@ -3383,45 +3323,6 @@ theorem dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_anchor_of_overlap
   apply RealRaw.prefixStabilize_equiv_anchor hanchor hover
   intro n
   exact Rat.le_refl
-
-/-! The concrete common-anchor interface for the `sin²` target.  The only
-remaining evaluator-specific proposition is the overlap hypothesis below;
-once it is supplied, validity and equivalence of the stabilized dyadic
-integral are automatic consequences of the finite width certificate. -/
-
-theorem dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_tangentSquareIntegral_overlap
-    (hover : dyadicNestedRadicalSquareIntegralRaw.Equiv tangentSquareIntegral) :
-    (dyadicNestedRadicalSquareIntegralRaw_stabilized tangentSquareIntegral).Valid := by
-  exact dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_overlap
-    tangentSquareIntegral_valid hover
-
-theorem dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_tangentSquareIntegral
-    (hover : dyadicNestedRadicalSquareIntegralRaw.Equiv tangentSquareIntegral) :
-    (dyadicNestedRadicalSquareIntegralRaw_stabilized tangentSquareIntegral).Equiv
-      tangentSquareIntegral := by
-  exact dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_anchor_of_overlap
-    tangentSquareIntegral_valid hover
-
-theorem dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_value_of_anchor
-    (hover : dyadicNestedRadicalSquareIntegralRaw.Equiv tangentSquareIntegral)
-    (hvalue : tangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4))) :
-    (dyadicNestedRadicalSquareIntegralRaw_stabilized tangentSquareIntegral).Equiv
-      (RealRaw.ofRat (1 / 4)) := by
-  exact RealRaw.equiv_trans
-    (dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_tangentSquareIntegral_overlap
-      hover)
-    tangentSquareIntegral_valid (RealRaw.ofRat_valid _)
-    (dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_tangentSquareIntegral
-      hover)
-    hvalue
-
-theorem DyadicNestedRadicalSquareTangentCommonWitness.stabilized_equiv_value
-    (h : DyadicNestedRadicalSquareTangentCommonWitness)
-    (hvalue : tangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4))) :
-    (dyadicNestedRadicalSquareIntegralRaw_stabilized
-      tangentSquareIntegral).Equiv (RealRaw.ofRat (1 / 4)) := by
-  exact dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_value_of_anchor
-    h.to_equiv hvalue
 
 /- The finite rational-circle identity used by the future primitive proof.
    Keeping this as an algebraic theorem makes the intended `sin²` route
@@ -4325,25 +4226,15 @@ theorem DyadicSquareCircleOverlapFamily.to_public_equiv_nested
     (dyadicNestedRadicalSquareLeftSum n)
   exact certificate.to_square_sum_overlap n
 
-theorem DyadicPublicSquareTangentTransportWitness.to_public_equiv
-    {S : ArctanSinPiConstruction}
-    (h : DyadicPublicSquareTangentTransportWitness S) :
-    (dyadicPublicSquareIntegralRaw S).Equiv tangentSquareIntegral := by
+theorem DyadicPublicSquareAnchorSharedWitness.to_public_equiv
+    {S : ArctanSinPiConstruction} {anchor : RealRaw}
+    (h : DyadicPublicSquareAnchorSharedWitness S anchor) :
+    (dyadicPublicSquareIntegralRaw S).Equiv anchor := by
   apply RealRaw.sameStageOverlap_equiv
   intro n
   exact (RealRaw.compareAt_overlap_iff
-    (dyadicPublicSquareIntegralRaw S) tangentSquareIntegral n n).2
+    (dyadicPublicSquareIntegralRaw S) anchor n n).2
     (h.to_public_overlap n)
-
-theorem DyadicPublicSquareTangentSharedWitness.to_public_equiv
-    {S : ArctanSinPiConstruction}
-    (h : DyadicPublicSquareTangentSharedWitness S) :
-    (dyadicPublicSquareIntegralRaw S).Equiv tangentSquareIntegral := by
-  apply RealRaw.sameStageOverlap_equiv
-  intro n
-  exact (RealRaw.compareAt_overlap_iff
-    (dyadicPublicSquareIntegralRaw S) tangentSquareIntegral n n).2
-    (h.to_public_common_witness.to_overlap n)
 
 theorem dyadicPublicSquareIntegralRaw_widths_shrink
     (S : ArctanSinPiConstruction)
@@ -4406,104 +4297,36 @@ theorem dyadicPublicSquareIntegralRaw_stabilized_equiv_value_of_anchor
       S hanchor hover)
     hvalue
 
-theorem DyadicPublicSquareTangentTransportWitness.stabilized_equiv_value
-    {S : ArctanSinPiConstruction}
-    (h : DyadicPublicSquareTangentTransportWitness S)
+theorem DyadicPublicSquareAnchorSharedWitness.stabilized_equiv_value
+    {S : ArctanSinPiConstruction} {anchor : RealRaw}
+    (h : DyadicPublicSquareAnchorSharedWitness S anchor)
     (hsine : IntervalRegularOn S.onHalf)
-    (hvalue : tangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4))) :
-    (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral).Equiv
+    (hanchor : anchor.Valid)
+    (hvalue : anchor.Equiv (RealRaw.ofRat (1 / 4))) :
+    (dyadicPublicSquareIntegralRaw_stabilized S anchor).Equiv
       (RealRaw.ofRat (1 / 4)) := by
   exact dyadicPublicSquareIntegralRaw_stabilized_equiv_value_of_anchor
-    S hsine tangentSquareIntegral_valid h.to_public_equiv hvalue
+    S hsine hanchor h.to_public_equiv hvalue
 
-theorem DyadicPublicSquareTangentSharedWitness.stabilized_equiv_value
-    {S : ArctanSinPiConstruction}
-    (h : DyadicPublicSquareTangentSharedWitness S)
-    (hsine : IntervalRegularOn S.onHalf)
-    (hvalue : tangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4))) :
-    (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral).Equiv
-      (RealRaw.ofRat (1 / 4)) := by
-  exact dyadicPublicSquareIntegralRaw_stabilized_equiv_value_of_anchor
-    S hsine tangentSquareIntegral_valid h.to_public_equiv hvalue
-
-theorem DyadicPublicSquareTangentSharedWitness.stabilized_valid
-    {S : ArctanSinPiConstruction}
-    (h : DyadicPublicSquareTangentSharedWitness S)
+theorem DyadicPublicSquareAnchorSharedWitness.stabilized_valid
+    {S : ArctanSinPiConstruction} {anchor : RealRaw}
+    (h : DyadicPublicSquareAnchorSharedWitness S anchor)
+    (hanchor : anchor.Valid)
     (hsine : IntervalRegularOn S.onHalf) :
-    (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral).Valid := by
+    (dyadicPublicSquareIntegralRaw_stabilized S anchor).Valid := by
   exact dyadicPublicSquareIntegralRaw_stabilized_valid_of_overlap
-    S hsine tangentSquareIntegral_valid h.to_public_equiv
+    S hsine hanchor h.to_public_equiv
 
-/- The stabilized public evaluator is equivalent to its valid tangent-square
+/- The stabilized public evaluator is equivalent to its valid
    anchor.  This is the representation edge consumed by later value and FTC
    proofs; it is stronger than merely recording validity. -/
-theorem DyadicPublicSquareTangentSharedWitness.stabilized_equiv_tangentSquare
-    {S : ArctanSinPiConstruction}
-    (h : DyadicPublicSquareTangentSharedWitness S) :
-    (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral).Equiv
-      tangentSquareIntegral := by
+theorem DyadicPublicSquareAnchorSharedWitness.stabilized_equiv_anchor
+    {S : ArctanSinPiConstruction} {anchor : RealRaw}
+    (h : DyadicPublicSquareAnchorSharedWitness S anchor)
+    (hanchor : anchor.Valid) :
+    (dyadicPublicSquareIntegralRaw_stabilized S anchor).Equiv anchor := by
   exact dyadicPublicSquareIntegralRaw_stabilized_equiv_anchor_of_overlap
-    S tangentSquareIntegral_valid h.to_public_equiv
-
-/- The stabilized public evaluator is the valid representative used for
-   transitive transport to the quarter-turn anchor. -/
-theorem DyadicPublicSquareTangentTransportWitness.to_public_equiv_halfQuarterTurn
-    {S : ArctanSinPiConstruction}
-    (h : DyadicPublicSquareTangentTransportWitness S)
-    (hsine : IntervalRegularOn S.onHalf)
-    (hbridge : tangentSquareIntegral.Equiv
-      tangentSquareEffectiveFTCData.integralRaw) :
-    (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral).Equiv
-      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
-  have hstable :
-      (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral).Equiv
-        tangentSquareEffectiveFTCData.integralRaw :=
-    RealRaw.equiv_trans
-      (dyadicPublicSquareIntegralRaw_stabilized_valid_of_overlap
-        S hsine tangentSquareIntegral_valid h.to_public_equiv)
-      tangentSquareIntegral_valid tangentSquareEffectiveFTCData.integral_valid
-      (dyadicPublicSquareIntegralRaw_stabilized_equiv_anchor_of_overlap
-        S tangentSquareIntegral_valid h.to_public_equiv)
-      hbridge
-  exact RealRaw.equiv_trans
-    (dyadicPublicSquareIntegralRaw_stabilized_valid_of_overlap
-      S hsine tangentSquareIntegral_valid h.to_public_equiv)
-    tangentSquareEffectiveFTCData.integral_valid
-    (by
-      change (RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).Valid
-      exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
-        CauchyPi.piCircleArea_valid)
-    hstable
-    tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn
-
-theorem DyadicPublicSquareTangentSharedWitness.to_public_equiv_halfQuarterTurn
-    {S : ArctanSinPiConstruction}
-    (h : DyadicPublicSquareTangentSharedWitness S)
-    (hsine : IntervalRegularOn S.onHalf)
-    (hbridge : tangentSquareIntegral.Equiv
-      tangentSquareEffectiveFTCData.integralRaw) :
-    (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral).Equiv
-      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
-  have hstable :
-      (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral).Equiv
-        tangentSquareEffectiveFTCData.integralRaw :=
-    RealRaw.equiv_trans
-      (dyadicPublicSquareIntegralRaw_stabilized_valid_of_overlap
-        S hsine tangentSquareIntegral_valid h.to_public_equiv)
-      tangentSquareIntegral_valid tangentSquareEffectiveFTCData.integral_valid
-      (dyadicPublicSquareIntegralRaw_stabilized_equiv_anchor_of_overlap
-        S tangentSquareIntegral_valid h.to_public_equiv)
-      hbridge
-  exact RealRaw.equiv_trans
-    (dyadicPublicSquareIntegralRaw_stabilized_valid_of_overlap
-      S hsine tangentSquareIntegral_valid h.to_public_equiv)
-    tangentSquareEffectiveFTCData.integral_valid
-    (by
-      change (RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).Valid
-      exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
-        CauchyPi.piCircleArea_valid)
-    hstable
-    tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn
+    S hanchor h.to_public_equiv
 
 def sinPiSquareOnHalfFunctionOnInterval
     (S : ArctanSinPiConstruction) : FunctionOnInterval where
@@ -5171,19 +4994,19 @@ theorem SinPiSquareEffectiveFTCData.integral_equiv_public_stabilized
     (D : SinPiSquareEffectiveFTCData S)
     (hsine : IntervalRegularOn S.onHalf)
     (hvalue : D.endpointRaw.Equiv (RealRaw.ofRat (1 / 4)))
-    (hshared : DyadicPublicSquareTangentSharedWitness S)
-    (hanchor_value : tangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4))) :
+    {anchor : RealRaw} (hanchor : anchor.Valid)
+    (hshared : DyadicPublicSquareAnchorSharedWitness S anchor)
+    (hanchor_value : anchor.Equiv (RealRaw.ofRat (1 / 4))) :
     D.integralRaw.Equiv
-      (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral) := by
+      (dyadicPublicSquareIntegralRaw_stabilized S anchor) := by
   have hD : D.integralRaw.Valid := D.integral_valid
   have hq : (RealRaw.ofRat (1 / 4)).Valid := RealRaw.ofRat_valid _
   have hpublic :
-      (dyadicPublicSquareIntegralRaw_stabilized S tangentSquareIntegral).Valid :=
-    DyadicPublicSquareTangentSharedWitness.stabilized_valid hshared hsine
+      (dyadicPublicSquareIntegralRaw_stabilized S anchor).Valid :=
+    hshared.stabilized_valid hanchor hsine
   exact RealRaw.equiv_of_common_anchor hD hpublic hq
     (D.endpoint_equiv_of_value hvalue)
-    (DyadicPublicSquareTangentSharedWitness.stabilized_equiv_value
-      hshared hsine hanchor_value)
+    (hshared.stabilized_equiv_value hsine hanchor hanchor_value)
 
 end SinPiIntegral
 

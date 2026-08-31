@@ -76,14 +76,11 @@ That bridge is now represented by the checked
    the endpoint equivalence to `1/4`; its `integral_value` theorem derives the
    desired integral equivalence from those fields.
 
-   The nested-radical route is now split into the checked
-   `NestedRadicalSinPiSquareValueSubgoal`: one field is the finite common
-   witness between the nested-radical square sum and `tangentSquareIntegral`,
-   and the anchor must identify the unscaled chart with the quarter-turn raw
-   `halfQuarterTurnRaw 1`.  The older `TangentSquareIntegralValueSubgoal`
-   incorrectly assigned `1/4` to that unscaled chart; its contradiction is now
-   proved by `TangentSquareIntegralValueSubgoal.impossible` at stage eight.
-   The normalized product route is the valid path to `1/4`.
+   The nested-radical route uses the anchor-parametric
+   `DyadicNestedRadicalSquareAnchorCommonWitness`.  For the actual
+   `sin(pi*x)^2` theorem its anchor is the normalized product
+   `reciprocalPiRaw * tangentSquareIntegral`; the unscaled chart represents
+   `halfQuarterTurnRaw 1`, not `1/4`.
    The composition step is now packaged by
    `NormalizedTangentSquareValueSubgoal.of_quarter_turn`: once the valid
    quarter-turn certificate is supplied, reciprocal-π product transport is
@@ -99,11 +96,8 @@ That bridge is now represented by the checked
    only need to provide the stagewise rational overlap certificate.
    Its concrete form is `TangentSquareFTCIntegralCommonWitness`, four rational
    inequalities per stage that produce this overlap automatically.
-   The first unscaled anchor check remains executable as
-   `tangentSquareIntegral_stage_zero_contains_quarter`, but it is only a wide
-   interval overlap and not a value theorem.  The former all-stage quarter
-   certificate has been withdrawn from the roadmap because its target was misnormalized.  The
-   reusable finite fold
+   Misnormalized unscaled-`1/4` contracts and their coarse finite checkpoints
+   have been removed.  The reusable finite fold
    `rat_list_sum_pair_error` now assembles cellwise endpoint/left-sample
    errors into a global rational bound, leaving only the concrete tangent
    square cell inequalities to be supplied.  The first such local inequality
@@ -132,9 +126,8 @@ That bridge is now represented by the checked
    `reciprocalPiRaw * tangentSquareIntegral`, matching
    `integral_0^(1/2) sin(pi*x)^2 dx`.  The reciprocal-π quarter-scale identity
    is now formalized by `reciprocalPi_quarterTurn_equiv_quarter`.  The remaining
-   contract is `NormalizedTangentSquareValueSubgoal`, whose `value` theorem
-   requires the normalized raw validity and transport to the quarter-turn
-   anchor.
+   contract is one all-stage shared witness against the normalized anchor;
+   `effectiveDyadicPublicSquareIntegral_equiv_quarter` then closes the value.
 
 The rational arithmetic layer now exposes `rat_mul_le_mul_of_nonneg`, the
 product-order lemma needed when a cell estimate multiplies two nonnegative
@@ -157,7 +150,7 @@ interval-valued composition still requires a separate box-level contract.
 | rung | integrand on the stated interval | primitive used by the certificate | target | Lean evidence |
 |---|---|---|---|---|
 | A | `1`, `x` on `[0,1/2]` | affine primitives | `1/2`, `1/8` | affine interval certificates |
-| B | `x^2`, `x^3`, `x^4`, `x^5` on `[0,1]` | `x^3/3`, `x^4/4`, `x^5/5`, `x^6/6` | `1/3`, `1/4`, `1/5`, `1/6` | complete finite certificates in `FiniteFTCIntervalRegular.lean` and `FiniteFTCQuartic.lean`; `fifthIntegralEffectiveFTC_equiv_one_sixth` closes the fifth-power rung |
+| B | `x^n` on `[0,1]` | `x^(n+1)/(n+1)` | `1/(n+1)` | generic `exactRat_pow_integral_raw_equiv_one_div_succ` and `exactRat_pow_definiteIdentity` |
 | C | `1/(1+x^2)` on `[0,1]` | rational rectangle `arctan` raw | `arctan 1 - arctan 0` | **complete:** `arctanEffectiveFTCData` and `arctanEffectiveFTC_equiv_endpoint` |
 | T | `4u/(1+u^2)^2` on `[0,1]` | `2u^2/(1+u^2)` | `1` | complete `CandidateDerivativeFTC` certificate and direct equivalence to `positiveTangentPullbackIntegral`; value theorem exported by `tangentPullbackEffectiveFTC_equiv_one` |
 | D | `exp x` on `[0,1]` | computable exponential raw | endpoint difference | **complete:** `uniformExpOnUnit_effectiveFTC` in `ExpProofs.lean` (selected-stage certificate) |
@@ -591,18 +584,11 @@ interval-valued composition still requires a separate box-level contract.
    now transports the existing canonical half-angle certificate fields into
    the named structure directly.
 
-   The direct public-to-tangent transport is now explicit as
-   `DyadicPublicSquareTangentTransportWitness`: it requires stagewise
-   containment of the nested square sum inside the public square sum, then
-   derives public/tangent overlap and raw-real equivalence.  Its
-   `stabilized_equiv_value` theorem carries the tangent quarter-value through
-   the public prefix stabilizer.  This is a certificate interface, not a claim
-   that containment follows from the weaker public/nested overlap theorem.
-   The preferred direct formulation is now
-   `DyadicPublicSquareTangentSharedWitness`, which supplies one rational
-   witness in all three intervals at each stage and therefore avoids any
-   transitivity assumption while allowing public and nested boxes to differ
-   in either direction.
+   The public transport uses one canonical interface,
+   `DyadicPublicSquareAnchorSharedWitness`.  It supplies one rational witness
+   in the public, nested, and chosen anchor intervals at each stage, avoiding
+   any transitivity assumption.  For this application the chosen anchor is
+   `normalizedTangentSquareIntegral`.
    With the sine regularity certificate, `stabilized_valid` now proves the
    usable public computation is valid after prefix stabilization, so raw
    candidate nesting is no longer required for the public route.
@@ -720,27 +706,12 @@ interval-valued composition still requires a separate box-level contract.
    `tangentSquareRationalPart`, whose rational derivative is the correction in
    `tangentSquareDensity_decomposition` (there is no spurious factor of two).
 
-   The first of these is now an explicit proposition consumed by
-   `dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_tangentSquareIntegral_overlap`
-   and
-   `dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_tangentSquareIntegral`.
-   The final raw-real transport step is now packaged as
-   `dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_value_of_anchor`:
-   after the overlap and anchor-value certificates are supplied, it closes
-   the nested-radical square integral at `1/4` without any classical-real
-   reasoning.
-   Supplying
-   `dyadicNestedRadicalSquareIntegralRaw.Equiv tangentSquareIntegral` is
-   therefore the exact next subgoal; no hidden convergence or completeness
-   assumption remains in the stabilization step.
-   The overlap obligation is now exposed in the same finite-witness form as
-   the sine route: `DyadicNestedRadicalSquareTangentCommonWitness` has four
-   rational inequalities, `to_overlap` turns them into stagewise interval
-   overlap, and `to_equiv` transports the complete square raw integral to
-   `tangentSquareIntegral`.  The constructor
-   `DyadicNestedRadicalSquareTangentCommonWitness.of_overlap` now packages
-   any stagewise overlap by choosing the larger lower endpoint, and
-   `stabilized_equiv_value` carries the resulting witness directly to `1/4`.
+   The overlap obligation is exposed by
+   `DyadicNestedRadicalSquareAnchorCommonWitness`: four rational inequalities
+   give stagewise overlap and equivalence to any valid anchor.  The square
+   application instantiates the anchor with `normalizedTangentSquareIntegral`.
+   Generic prefix stabilization then supplies validity and value transport;
+   no tangent-specific or unscaled-`1/4` adapter remains.
    The finite part of the transport is now closed generically by
    `dyadicPublicSquareLeftSum` and
    `dyadicPublicSquareLeftSum_overlap_of_sample_overlaps`: stagewise overlap

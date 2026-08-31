@@ -1502,108 +1502,45 @@ sine-integral foundation does not pay for these large executable regressions:
 These finite checks seed the eventual geometric induction; they are not being
 promoted to an all-stage convergence claim.
 
-The squared-sine route is a useful intermediate application: squaring the
-same certified samples gives a monotone Darboux integral, and the FTC/value
-transport identifies it with \(1/4\) once the endpoint certificate is supplied.
+For the squared-sine example the normalization is part of the computation:
+\[
+ \int_0^{1/2}\sin(\pi x)^2\,dx
+   =(1/\pi)\int_0^1\frac{4u}{(1+u^2)^2}\,du
+   =(1/\pi)(\pi/4)=1/4.
+\]
+The unscaled tangent chart therefore anchors \(\pi/4\), never \(1/4\).
 
-Only one representative per computational pattern is needed.  For the
-square route, finite transport from sample boxes to the complete equal-dyadic
-sum is formalized once and reused:
+The finite transport layer is anchor-parametric.  One rational witness lies
+in the public dyadic box, the nested-radical box, and the chosen anchor box at
+each stage.  Prefix stabilization then gives a valid representative and
+transports its value.
 
-\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareLeftSum}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized_width_le}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareIntegralRaw_stabilized_width_le}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareLeftSum_overlap_of_sample_overlaps}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareLeftSum_overlap_of_canonical_search_family}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareLeftSum_overlap_of_halfAngle_certificate_family}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareLeftSum_overlap_of_rational_circle_overlap_family}
-\lean{ComputableAnalysis.effectiveDyadicPublicSquareIntegral_equiv_halfQuarterTurn}
-\lean{ComputableAnalysis.effectiveDyadicPublicSquareIntegral_equiv_halfQuarterTurn_shared}
-\lean{ComputableAnalysis.effectiveDyadicPublicSquareIntegral_stabilized_equiv_tangentSquare_shared}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicSquareCircleOverlapFamily}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicSquareCircleOverlapFamily.of_halfAngle_certificate_family}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicSquareCircleOverlapFamily.of_branch_certificate_family}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicSquareCircleOverlapFamily.to_public_equiv_nested}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicSquareCircleOverlapFamily.to_square_sum_overlap}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareAnchorSharedWitness}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareAnchorSharedWitness.to_public_equiv}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareAnchorSharedWitness.stabilized_valid}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareAnchorSharedWitness.stabilized_equiv_value}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicNestedRadicalSquareAnchorCommonWitness.of_overlap}
 \leanok
 
-\begin{proposition}[Stabilized public sine-square representation]
-The public dyadic square evaluator is not used as a raw-real representative
-until its finite boxes have been stabilized against a valid tangent-square
-anchor.  A shared witness therefore yields the representation edge consumed
-by later value and FTC transport; this is the precise role of stabilization
-in the equal-dyadic route.
+The application layer chooses the normalized tangent product and proves its
+value through the effective FTC quarter-turn computation.  The public theorem
+therefore concludes \(1/4\) directly.
 
-\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareTangentSharedWitness.stabilized_valid}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareTangentSharedWitness.stabilized_equiv_tangentSquare}
-\lean{ComputableAnalysis.effectiveDyadicPublicSquareIntegral_stabilized_equiv_tangentSquare_shared}
-\leanok
-\end{proposition}
-
-The public square sum is first prefix-stabilized before equivalence is
-composed.  The bridge from the Lipschitz-dyadic tangent integral to the
-effective FTC anchor is an explicit certificate; this is where the two
-independent computations are proved to represent the same integral.
-
-The remaining work is geometric rather than integral construction: provide
-one finite certificate for each dyadic sine sample, uniformly in depth and
-precision.  The integral assembly and piecewise rule are already reusable;
-functions such as \(|x|\) are handled by splitting the domain into their
-finitely many monotone pieces, rather than duplicating routine variants.
-
-The fixed-sample candidate already has a shrinking width schedule.  Its
-cross-stage nesting is kept separate: after a semantic overlap with an
-independent valid anchor, prefix stabilization makes the sample a valid raw
-algorithm using only candidate boxes at runtime.
-
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSampleRaw_widths_shrink}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSampleRaw_stabilized}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSampleRaw_stabilized_valid_of_equiv}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSampleRaw_stabilized_equiv_anchor_of_equiv}
-\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.dyadicNestedRadicalSampleRaw_stabilized_equiv}
-\leanok
-
-The reusable interval-transfer step is now generic: after the correctly
-scaled raw integral is identified with its target, combine its stage width
-with the finite rectangle margin.  The scaling must come first: the unscaled
-tangent-chart integral represents the quarter-turn, while the normalized
-squared-sine integral represents \(1/4\).
-
-\lean{ComputableAnalysis.finite_sum_close_of_raw_equiv_of_margin}
-\leanok
-
-\lean{ComputableAnalysis.SinPiIntegral.sinPiSquareMonotoneIntegral}
-\lean{ComputableAnalysis.SinPiIntegral.sinPiSquareMonotoneIntegral_valid}
-\lean{ComputableAnalysis.SinPiIntegral.sinPiSquareMonotoneIntegral_equiv_value}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareTangentSharedWitness.stabilized_valid}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareTangentSharedWitness.stabilized_equiv_tangentSquare}
-\lean{ComputableAnalysis.SinPiIntegral.tangentSquareEffectiveFTCData}
-\lean{ComputableAnalysis.SinPiIntegral.tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn}
-\lean{ComputableAnalysis.SinPiIntegral.TangentSquareIntegralEffectiveFTCOverlap}
-\lean{ComputableAnalysis.SinPiIntegral.TangentSquareIntegralEffectiveFTCOverlap.to_equiv}
-\lean{ComputableAnalysis.SinPiIntegral.TangentSquareIntegralEffectiveFTCOverlap.to_halfQuarterTurn}
-\lean{ComputableAnalysis.effectiveTangentSquareIntegral_equiv_halfQuarterTurn_of_overlap}
-\lean{ComputableAnalysis.reciprocalPi_quarterTurn_equiv_quarter}
-\lean{ComputableAnalysis.halfQuarterTurnRaw_bounds}
-\lean{ComputableAnalysis.normalizedTangentSquareAnchor_valid}
-\lean{ComputableAnalysis.normalizedTangentSquare_chart_transport_of_common_witness}
-\lean{ComputableAnalysis.NormalizedTangentSquareTransportSubgoal.of_witnesses}
-\lean{ComputableAnalysis.NormalizedTangentSquareQuarterBoundsSubgoal}
-\lean{ComputableAnalysis.NormalizedTangentSquareQuarterBoundsSubgoal.of_value}
-\lean{ComputableAnalysis.NestedRadicalSquareQuarterBoundsSubgoal.toNormalizedCommonWitness}
-\lean{ComputableAnalysis.NormalizedTangentSquareCommonWitness.of_overlap}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicNestedRadicalSquareTangentCommonWitness.of_overlap}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicNestedRadicalSquareTangentCommonWitness.stabilized_equiv_value}
-\lean{ComputableAnalysis.NestedRadicalSquareIntegralConstructionSubgoal.normalized_commonWitness_of_integral_equiv}
-\lean{ComputableAnalysis.NestedRadicalSquareIntegralConstructionSubgoal.of_branch_certificate_family}
+\lean{ComputableAnalysis.normalizedTangentSquareIntegral}
 \lean{ComputableAnalysis.NormalizedTangentSquareValueSubgoal.value}
-\lean{ComputableAnalysis.NormalizedTangentSquareValueSubgoal.of_quarter_turn}
-\lean{ComputableAnalysis.NormalizedTangentSquareValueSubgoal.of_common_witness}
-\lean{ComputableAnalysis.TangentSquareQuarterTurnValueSubgoal}
-\lean{ComputableAnalysis.TangentSquareQuarterTurnValueSubgoal.value}
-\lean{ComputableAnalysis.TangentSquareIntegralValueSubgoal.impossible}
-\lean{ComputableAnalysis.TangentSquareFTCIntegralCommonWitness}
-\lean{ComputableAnalysis.TangentSquareFTCIntegralCommonWitness.to_compatibility}
+\lean{ComputableAnalysis.NormalizedTangentSquareTransportSubgoal.value}
+\lean{ComputableAnalysis.effectiveDyadicPublicSquareIntegral_equiv_quarter}
+\lean{ComputableAnalysis.NestedRadicalSquareIntegralConstructionSubgoal.value_of_normalized_transport}
+\lean{ComputableAnalysis.NestedRadicalSquareIntegralConstructionSubgoal.value_of_quarter_bounds}
+\leanok
+
+What remains is geometric: provide the shared witness uniformly for every
+dyadic sample.  The weighted fold, stabilization, FTC endpoint, and normalized
+value transport are already reusable.
+
+\lean{ComputableAnalysis.SinPiIntegral.DyadicSquareCircleOverlapFamily.to_square_sum_overlap}
+\lean{ComputableAnalysis.SinPiIntegral.tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn}
+\lean{ComputableAnalysis.reciprocalPi_quarterTurn_equiv_quarter}
 \leanok
 
 \lean{ComputableAnalysis.SinPiIntegral.computableSinPiHalfIntegral_equiv_reciprocalPi_of_FTC}

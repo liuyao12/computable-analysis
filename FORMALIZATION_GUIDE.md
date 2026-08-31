@@ -1317,28 +1317,14 @@ An even more geometric entry point is
 it reduces the positive samples to rational-circle image overlap and handles
 the zero endpoint separately.
 
-Once the tangent anchor has its quarter-value certificate, the companion
-`SinPiSquareFTC.DyadicNestedRadicalSquareTangentCommonWitness.stabilized_equiv_value`
-theorem passes that value through the public prefix-stabilized computation.
+Use `SinPiIntegral.DyadicPublicSquareAnchorSharedWitness` for the public
+square route. One rational witness must lie in the public, nested-radical, and
+chosen anchor intervals at every stage. Its `to_public_equiv`,
+`stabilized_valid`, and `stabilized_equiv_value` theorems perform the entire
+representation transport without composing overlap relations. The anchor is
+generic; for `sin(pi*x)^2`, instantiate it with
+`normalizedTangentSquareIntegral`, not the unscaled tangent chart.
 
-The public-to-anchor step is intentionally stronger than chaining overlaps.
-`SinPiSquareFTC.DyadicPublicSquareTangentTransportWitness` asks for a
-stagewise containment of the nested square table inside the public square
-table, together with the nested-table/tangent common witness.  Its
-`to_public_overlap` and `to_public_equiv` theorems then transport the direct
-public candidate to the tangent anchor using only rational interval
-inequalities.  This is the remaining geometric certificate for the public
-sin² integral; no transitivity of overlap is assumed.
-The weaker and more natural direct interface is
-`SinPiSquareFTC.DyadicPublicSquareTangentSharedWitness`: one rational witness
-is required to lie in all three stage intervals.  It yields the same public
-equivalence and stabilized-value theorem without requiring containment.
-With sine regularity, `DyadicPublicSquareTangentSharedWitness.stabilized_valid`
-also exposes the stabilized public computation as a valid `RealRaw`; the
-un-stabilized candidate need not itself be nested.
-Once the tangent anchor has its quarter-value certificate, the companion
-`DyadicPublicSquareTangentTransportWitness.stabilized_equiv_value` theorem
-passes that value through the public prefix-stabilized computation.
 The two calculus routes can now be compared directly:
 `SinPiSquareEffectiveFTCData.integral_equiv_public_stabilized` transports an
 effective-FTC integral representation to the stabilized public square
@@ -2261,15 +2247,12 @@ with `DyadicTangentWitnessFamily.of_canonical_candidate_family`; it derives the
 finite search-hit obligations from list membership and admissibility.
 
 For the squared-sine route, use
-`DyadicNestedRadicalSquareTangentCommonWitness.of_overlap` to package the
-stagewise candidate/anchor overlap. Its `stabilized_equiv_value` theorem
-transports the stabilized candidate to the value represented by the unscaled
-quarter-turn chart. The rational value `1/4` is obtained only after the
-`reciprocalPiRaw` normalization and its quarter-scale equivalence; the
-obsolete unscaled quarter-value contract is explicitly refuted by
-`TangentSquareIntegralValueSubgoal.impossible`. The remaining obligation is
-therefore the normalized finite overlap family itself, not witness construction
-or prefix stabilization. Once the quarter-turn certificate is assembled,
+`SinPiIntegral.DyadicNestedRadicalSquareAnchorCommonWitness.of_overlap` to
+package stagewise overlap with any valid anchor. The rational value `1/4`
+comes from the normalized product
+`reciprocalPiRaw * tangentSquareIntegral`; the unscaled chart represents the
+quarter-turn. The remaining obligation is therefore the normalized finite
+overlap family itself. Once the quarter-turn certificate is assembled,
 `NormalizedTangentSquareValueSubgoal.of_quarter_turn` performs the product
 transport automatically. The provider-facing shortcut
 `NormalizedTangentSquareValueSubgoal.of_common_witness` assembles the

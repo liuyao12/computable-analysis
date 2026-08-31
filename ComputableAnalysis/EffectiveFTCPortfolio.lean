@@ -483,30 +483,6 @@ structure EffectiveFTCPortfolio where
     (ExpProofs.uniformExpOnUnit_selectedStageFTCIndexed.toSelected.boundedIntegralRaw).Equiv
       ExpProofs.uniformExpOnUnit_selectedStageFTCIndexed.toSelected.endpointRaw
 
-/- The raw `tangentSquareIntegral` is unscaled: its natural endpoint is the
-   quarter-turn raw.  The rational `1/4` target below is retained only as a
-   provisional contract for the normalized reciprocal-pi product; it must not
-   be read as a value theorem for the unscaled chart integral. -/
-structure TangentSquareIntegralValueSubgoal where
-  lower_contains :
-    forall n, (SinPiIntegral.tangentSquareIntegral.compute n).lo <= (1 / 4 : Rat)
-  upper_contains :
-    forall n, (1 / 4 : Rat) <= (SinPiIntegral.tangentSquareIntegral.compute n).hi
-
-/-! The unscaled tangent-chart raw cannot satisfy the provisional `1/4`
-enclosure above.  At stage eight its left endpoint is already larger than
-`1/4`.  Keeping this contradiction explicit prevents the normalized target
-from being accidentally assigned to the unscaled chart. -/
-theorem TangentSquareIntegralValueSubgoal.impossible :
-    ¬ TangentSquareIntegralValueSubgoal := by
-  intro H
-  have hbad : ¬
-      (SinPiIntegral.tangentSquareIntegral.compute 8).lo <=
-        (1 / 4 : Rat) := by
-    rw [SinPiIntegral.tangentSquareIntegral_compute]
-    native_decide
-  exact hbad (H.lower_contains 8)
-
 def normalizedTangentSquareIntegral : RealRaw :=
   SinPiIntegral.reciprocalPiRaw * SinPiIntegral.tangentSquareIntegral
 
@@ -519,34 +495,6 @@ structure NormalizedTangentSquareValueSubgoal where
     normalizedTangentSquareIntegral.Equiv
       (SinPiIntegral.reciprocalPiRaw *
         RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))
-
-/-! The correctly scaled transport obligation for the genuine `sin²` target.
-The equal-dyadic integral is in the original `x` variable, whereas the
-tangent-chart integral is in `u`; the Jacobian contributes `1/pi`.  Thus the
-finite overlap must be against `normalizedTangentSquareIntegral`, not the
-unscaled chart integral. -/
-structure NormalizedTangentSquareCommonWitness where
-  witness : Nat -> Rat
-  candidate_lo_le : forall n,
-    (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).lo <= witness n
-  witness_le_candidate_hi : forall n,
-    witness n <= (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).hi
-  normalized_lo_le : forall n,
-    (normalizedTangentSquareIntegral.compute n).lo <= witness n
-  witness_le_normalized_hi : forall n,
-    witness n <= (normalizedTangentSquareIntegral.compute n).hi
-
-theorem NormalizedTangentSquareCommonWitness.to_equiv
-    (H : NormalizedTangentSquareCommonWitness) :
-    SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw.Equiv
-      normalizedTangentSquareIntegral := by
-  apply SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_equiv_of_overlap
-  intro n
-  unfold QInterval.Overlaps
-  exact ⟨Rat.le_trans (H.candidate_lo_le n)
-      (H.witness_le_normalized_hi n),
-      Rat.le_trans (H.normalized_lo_le n)
-      (H.witness_le_candidate_hi n)⟩
 
 /-! A signed product cannot use the nonnegative-product shortcut at coarse
 stages.  This certificate exposes exactly the three obligations required by
@@ -583,47 +531,6 @@ theorem normalizedTangentSquareProduct_ordered (n : Nat) :
     (d := (SinPiIntegral.tangentSquareIntegral.compute n).hi) hrecip htangent
   unfold QInterval.width
   grind
-
-/- Overlap and a rational common witness are interchangeable at this layer.
-   The constructor chooses the larger lower endpoint; all upper-endpoint
-   obligations follow from the two interval-order certificates. -/
-def NormalizedTangentSquareCommonWitness.of_overlap
-    (hoverlap : forall n,
-      QInterval.Overlaps
-        (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n)
-        (normalizedTangentSquareIntegral.compute n)) :
-    NormalizedTangentSquareCommonWitness where
-  witness := fun n => max
-    (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).lo
-    (normalizedTangentSquareIntegral.compute n).lo
-  candidate_lo_le := by
-    intro n
-    rw [Rat.max_def]
-    split <;> grind
-  witness_le_candidate_hi := by
-    intro n
-    have hover := hoverlap n
-    unfold QInterval.Overlaps at hover
-    have horder := SinPiIntegral.dyadicNestedRadicalSquareLeftSum_ordered n
-    change 0 <=
-      (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).hi -
-        (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).lo at horder
-    rw [Rat.max_def]
-    split <;> grind
-  normalized_lo_le := by
-    intro n
-    rw [Rat.max_def]
-    split <;> grind
-  witness_le_normalized_hi := by
-    intro n
-    have hover := hoverlap n
-    unfold QInterval.Overlaps at hover
-    have horder := normalizedTangentSquareProduct_ordered n
-    change 0 <=
-      (normalizedTangentSquareIntegral.compute n).hi -
-        (normalizedTangentSquareIntegral.compute n).lo at horder
-    rw [Rat.max_def]
-    split <;> grind
 
 theorem normalizedTangentSquareProduct_nested (n m : Nat) (hnm : n <= m) :
     (normalizedTangentSquareIntegral.compute n).lo <=
@@ -948,7 +855,9 @@ theorem SignedRawProductEquivalenceSubgoal.equiv
     (H.stage_overlap n)
 
 structure NormalizedTangentSquareTransportSubgoal where
-  commonWitness : NormalizedTangentSquareCommonWitness
+  commonWitness :
+    SinPiIntegral.DyadicNestedRadicalSquareAnchorCommonWitness
+      normalizedTangentSquareIntegral
   normalized_validity :
     SignedRawProductValiditySubgoal
       SinPiIntegral.reciprocalPiRaw SinPiIntegral.tangentSquareIntegral
@@ -959,6 +868,13 @@ structure NormalizedTangentSquareTransportSubgoal where
     SinPiIntegral.reciprocalPiRaw SinPiIntegral.reciprocalPiRaw
     SinPiIntegral.tangentSquareIntegral
     (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))
+
+theorem NormalizedTangentSquareTransportSubgoal.normalized_value
+    (H : NormalizedTangentSquareTransportSubgoal) :
+    normalizedTangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4)) := by
+  exact RealRaw.equiv_trans H.normalized_validity.valid
+    H.normalized_anchor_valid (RealRaw.ofRat_valid _)
+    H.chart_transport.equiv reciprocalPi_quarterTurn_equiv_quarter
 
 theorem NormalizedTangentSquareTransportSubgoal.value
     (H : NormalizedTangentSquareTransportSubgoal) :
@@ -971,20 +887,10 @@ theorem NormalizedTangentSquareTransportSubgoal.value
   have hstable :=
     SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_anchor_of_overlap
       hnormalized hcandidate
-  have hchart :
-      normalizedTangentSquareIntegral.Equiv
-        (SinPiIntegral.reciprocalPiRaw *
-          RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) :=
-    H.chart_transport.equiv
-  have hanchor :
-      normalizedTangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4)) := by
-    exact RealRaw.equiv_trans hnormalized
-      H.normalized_anchor_valid (RealRaw.ofRat_valid _)
-      hchart reciprocalPi_quarterTurn_equiv_quarter
   exact RealRaw.equiv_trans
     (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_overlap
       hnormalized hcandidate)
-    hnormalized (RealRaw.ofRat_valid _) hstable hanchor
+    hnormalized (RealRaw.ofRat_valid _) hstable H.normalized_value
 
 theorem NormalizedTangentSquareValueSubgoal.value
     (H : NormalizedTangentSquareValueSubgoal) :
@@ -992,14 +898,6 @@ theorem NormalizedTangentSquareValueSubgoal.value
   exact RealRaw.equiv_trans H.normalized_valid
     H.anchor_valid (RealRaw.ofRat_valid _) H.chart_transport
     reciprocalPi_quarterTurn_equiv_quarter
-
-theorem tangentSquareIntegral_stage_zero_contains_quarter :
-    QInterval.Overlaps
-      (SinPiIntegral.tangentSquareIntegral.compute 0)
-      ({ lo := (1 / 4 : Rat), hi := 1 / 4 } : QInterval) := by
-  unfold QInterval.Overlaps
-  rw [SinPiIntegral.tangentSquareIntegral_compute]
-  native_decide
 
 theorem tangentSquareIntegral_width (n : Nat) :
     (SinPiIntegral.tangentSquareIntegral.compute n).width =
@@ -1011,42 +909,6 @@ theorem tangentSquareIntegral_width (n : Nat) :
     128 / (((2 ^ n : Nat) : Rat))
   rw [show (2 : Rat) * 64 = 128 by native_decide]
   simp [Rat.div_def]
-
-theorem tangentSquareLeftSum_stage_one_quarter_certificate :
-    ((1 / 4 : Rat) - (64 : Rat) / (((2 ^ 1 : Nat) : Rat)) <=
-        IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
-          SinPiIntegral.tangentSquareDensity (2 ^ 1)) ∧
-      (IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
-          SinPiIntegral.tangentSquareDensity (2 ^ 1) <=
-        (1 / 4 : Rat) + (64 : Rat) / (((2 ^ 1 : Nat) : Rat))) := by
-  native_decide
-
-theorem tangentSquareLeftSum_stage_two_quarter_certificate :
-    ((1 / 4 : Rat) - (64 : Rat) / (((2 ^ 2 : Nat) : Rat)) <=
-        IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
-          SinPiIntegral.tangentSquareDensity (2 ^ 2)) ∧
-      (IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
-          SinPiIntegral.tangentSquareDensity (2 ^ 2) <=
-        (1 / 4 : Rat) + (64 : Rat) / (((2 ^ 2 : Nat) : Rat))) := by
-  native_decide
-
-theorem tangentSquareLeftSum_stage_three_quarter_certificate :
-    ((1 / 4 : Rat) - (64 : Rat) / (((2 ^ 3 : Nat) : Rat)) <=
-        IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
-          SinPiIntegral.tangentSquareDensity (2 ^ 3)) ∧
-      (IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
-          SinPiIntegral.tangentSquareDensity (2 ^ 3) <=
-        (1 / 4 : Rat) + (64 : Rat) / (((2 ^ 3 : Nat) : Rat))) := by
-  native_decide
-
-theorem tangentSquareLeftSum_stage_four_quarter_certificate :
-    ((1 / 4 : Rat) - (64 : Rat) / (((2 ^ 4 : Nat) : Rat)) <=
-        IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
-          SinPiIntegral.tangentSquareDensity (2 ^ 4)) ∧
-      (IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
-          SinPiIntegral.tangentSquareDensity (2 ^ 4) <=
-        (1 / 4 : Rat) + (64 : Rat) / (((2 ^ 4 : Nat) : Rat))) := by
-  native_decide
 
 /-! A reusable value-transfer lemma for Lipschitz rectangle sums.  If a raw
 integral computation is already known to represent the rational value `q`,
@@ -1079,48 +941,6 @@ theorem finite_sum_close_of_raw_equiv_of_margin
   have hradius' := hradius n
   have hmargin_radius' := hmargin_radius n
   constructor <;> grind
-
-structure TangentSquareLeftSumQuarterCertificate where
-  lower_sum :
-    forall n,
-      IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
-          SinPiIntegral.tangentSquareDensity (2 ^ n) <=
-        (1 / 4 : Rat) +
-          (64 : Rat) / (((2 ^ n : Nat) : Rat))
-  upper_sum :
-    forall n,
-      (1 / 4 : Rat) -
-          (64 : Rat) / (((2 ^ n : Nat) : Rat))
-          <= IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
-            SinPiIntegral.tangentSquareDensity (2 ^ n)
-
-theorem TangentSquareLeftSumQuarterCertificate.to_value_subgoal
-    (H : TangentSquareLeftSumQuarterCertificate) :
-    TangentSquareIntegralValueSubgoal := by
-  constructor
-  · intro n
-    have hmargin :=
-      IntegralIdentities.LipschitzDyadic.compute_contains_uniformLeftEndpointSum_margin
-        SinPiIntegral.tangentSquareDensity_lipschitz_on_unit n
-    rw [SinPiIntegral.tangentSquareIntegral_compute]
-    change (IntegralIdentities.LipschitzDyadic.compute
-      SinPiIntegral.tangentSquareDensity 64 n).lo <= (1 / 4 : Rat)
-    have hleft := hmargin.1
-    have hsum := H.lower_sum n
-    exact Rat.le_trans hleft (by
-      grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_assoc, Rat.mul_comm])
-  · intro n
-    have hmargin :=
-      IntegralIdentities.LipschitzDyadic.compute_contains_uniformLeftEndpointSum_margin
-        SinPiIntegral.tangentSquareDensity_lipschitz_on_unit n
-    rw [SinPiIntegral.tangentSquareIntegral_compute]
-    change (1 / 4 : Rat) <=
-      (IntegralIdentities.LipschitzDyadic.compute
-        SinPiIntegral.tangentSquareDensity 64 n).hi
-    have hright := hmargin.2
-    have hsum := H.upper_sum n
-    exact Rat.le_trans (by
-      grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_assoc, Rat.mul_comm]) hright
 
 structure TangentSquareFTCIntegralCompatibilitySubgoal where
   stage_overlap :
@@ -1261,7 +1081,8 @@ theorem normalizedTangentSquare_chart_transport_of_common_witness
   · exact htangent
 
 def NormalizedTangentSquareTransportSubgoal.of_witnesses
-    (common : NormalizedTangentSquareCommonWitness)
+    (common : SinPiIntegral.DyadicNestedRadicalSquareAnchorCommonWitness
+      normalizedTangentSquareIntegral)
     (effective_integral_valid :
       SinPiIntegral.tangentSquareEffectiveIntegralRaw.Valid)
     (endpoint_valid :
@@ -1336,35 +1157,6 @@ def NormalizedTangentSquareValueSubgoal.of_common_witness
     (TangentSquareQuarterTurnValueSubgoal.of_common_witness
       effective_integral_valid endpoint_valid common endpoint_equiv_quarter)
 
-theorem TangentSquareIntegralValueSubgoal.value
-    (H : TangentSquareIntegralValueSubgoal) :
-    SinPiIntegral.tangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4)) := by
-  intro n
-  apply (RealRaw.compareAt_overlap_iff
-    SinPiIntegral.tangentSquareIntegral (RealRaw.ofRat (1 / 4)) n n).2
-  change QInterval.Overlaps
-    (SinPiIntegral.tangentSquareIntegral.compute n)
-    ((RealRaw.ofRat (1 / 4)).compute n)
-  unfold QInterval.Overlaps RealRaw.ofRat
-  exact ⟨H.lower_contains n, H.upper_contains n⟩
-
-/-! The remaining genuine `sin(pi*x)^2` transport is packaged as two finite
-certificates.  The closure theorem below is unconditional once these fields
-are supplied; no completed-real existence theorem is hidden in the package. -/
-structure NestedRadicalSinPiSquareValueSubgoal where
-  commonWitness :
-    SinPiIntegral.DyadicNestedRadicalSquareTangentCommonWitness
-  tangentAnchorValue :
-    TangentSquareIntegralValueSubgoal
-
-theorem NestedRadicalSinPiSquareValueSubgoal.value
-    (H : NestedRadicalSinPiSquareValueSubgoal) :
-    (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized
-      SinPiIntegral.tangentSquareIntegral).Equiv
-      (RealRaw.ofRat (1 / 4)) := by
-  exact SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_value_of_anchor
-    H.commonWitness.to_equiv H.tangentAnchorValue.value
-
 /- The specialized construction boundary for the squared nested-radical
    evaluator.  Once these fields are supplied, the generic equal-plan
    interval-sum theorem transports the public `sin²` integral to the
@@ -1407,8 +1199,10 @@ def NestedRadicalSquareIntegralConstructionSubgoal.normalized_commonWitness_of_i
     (hvalue :
       (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).Equiv
         normalizedTangentSquareIntegral) :
-    NormalizedTangentSquareCommonWitness := by
-  apply NormalizedTangentSquareCommonWitness.of_overlap
+    SinPiIntegral.DyadicNestedRadicalSquareAnchorCommonWitness
+      normalizedTangentSquareIntegral := by
+  apply SinPiIntegral.DyadicNestedRadicalSquareAnchorCommonWitness.of_overlap
+    normalizedTangentSquareIntegral_valid
   intro n
   have hevaluator :
       (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).Valid := by
@@ -1597,80 +1391,61 @@ def NormalizedTangentSquareQuarterBoundsSubgoal.of_value
 def NestedRadicalSquareQuarterBoundsSubgoal.toNormalizedCommonWitness
     (H : NestedRadicalSquareQuarterBoundsSubgoal)
     (N : NormalizedTangentSquareQuarterBoundsSubgoal) :
-    NormalizedTangentSquareCommonWitness := by
+    SinPiIntegral.DyadicNestedRadicalSquareAnchorCommonWitness
+      normalizedTangentSquareIntegral := by
   refine {
     witness := fun _ => (1 / 4 : Rat)
     candidate_lo_le := H.lower_contains
     witness_le_candidate_hi := H.upper_contains
-    normalized_lo_le := N.lower_contains
-    witness_le_normalized_hi := N.upper_contains }
-
-def NestedRadicalSquareQuarterBoundsSubgoal.toCommonWitness
-    (H : NestedRadicalSquareQuarterBoundsSubgoal)
-    (T : TangentSquareIntegralValueSubgoal) :
-    SinPiIntegral.DyadicNestedRadicalSquareTangentCommonWitness := by
-  refine {
-    witness := fun _ => (1 / 4 : Rat)
-    candidate_lo_le := H.lower_contains
-    witness_le_candidate_hi := H.upper_contains
-    tangent_lo_le := T.lower_contains
-    witness_le_tangent_hi := T.upper_contains }
-
-def NestedRadicalSquareQuarterBoundsSubgoal.toValueSubgoal
-    (H : NestedRadicalSquareQuarterBoundsSubgoal)
-    (T : TangentSquareIntegralValueSubgoal) :
-    NestedRadicalSinPiSquareValueSubgoal :=
-  { commonWitness := H.toCommonWitness T
-    tangentAnchorValue := T }
-
-def NestedRadicalSquareQuarterBoundsSubgoal.toValueSubgoal_of_tangent_sum_certificate
-    (H : NestedRadicalSquareQuarterBoundsSubgoal)
-    (T : TangentSquareLeftSumQuarterCertificate) :
-    NestedRadicalSinPiSquareValueSubgoal :=
-  H.toValueSubgoal T.to_value_subgoal
+    anchor_lo_le := N.lower_contains
+    witness_le_anchor_hi := N.upper_contains }
 
 theorem NestedRadicalSquareIntegralConstructionSubgoal.transport_of_compute
     {S : SinPiIntegral.ArctanSinPiConstruction}
     (H : NestedRadicalSquareIntegralConstructionSubgoal S)
+    {anchor : RealRaw} (hanchor : anchor.Valid)
     (hcompute : forall n,
       (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).compute n =
         SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw.compute n)
-    (hcommon : SinPiIntegral.DyadicNestedRadicalSquareTangentCommonWitness) :
+    (hcommon :
+      SinPiIntegral.DyadicNestedRadicalSquareAnchorCommonWitness anchor) :
     (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).Equiv
       (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized
-        SinPiIntegral.tangentSquareIntegral) := by
+        anchor) := by
   have hevaluator :
       (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).Valid := by
     exact FTC.integral_valid_of_construction H.integral
-  have hanchor := hcommon.to_equiv
+  have hequiv := hcommon.to_equiv
   have hcontains := RealRaw.prefixStabilize_contains_anchor
     (candidate := SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw)
-    (anchor := SinPiIntegral.tangentSquareIntegral)
-    SinPiIntegral.tangentSquareIntegral_valid hanchor
+    (anchor := anchor)
+    hanchor hequiv
     (fun n => Rat.le_refl)
   apply RealRaw.sameStageOverlap_equiv
   intro n
   apply (RealRaw.compareAt_overlap_iff
     (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral)
     (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized
-      SinPiIntegral.tangentSquareIntegral) n n).2
+      anchor) n n).2
   rw [hcompute n]
   have hcommon' :=
     (RealRaw.compareAt_overlap_iff
       SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw
-      SinPiIntegral.tangentSquareIntegral n n).1 (hanchor n)
+      anchor n n).1 (hequiv n)
   have hstable' := hcontains n
   exact ⟨Rat.le_trans hcommon'.1 hstable'.2,
     Rat.le_trans hstable'.1 hcommon'.2⟩
 
-theorem NestedRadicalSquareIntegralConstructionSubgoal.value_of_tangent_anchor
+theorem NestedRadicalSquareIntegralConstructionSubgoal.value_of_anchor
     {S : SinPiIntegral.ArctanSinPiConstruction}
     (H : NestedRadicalSquareIntegralConstructionSubgoal S)
-    (htransport :
-      (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).Equiv
-        (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized
-          SinPiIntegral.tangentSquareIntegral))
-    (hvalue : NestedRadicalSinPiSquareValueSubgoal) :
+    {anchor : RealRaw} (hanchor : anchor.Valid)
+    (hcompute : forall n,
+      (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).compute n =
+        SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw.compute n)
+    (hcommon :
+      SinPiIntegral.DyadicNestedRadicalSquareAnchorCommonWitness anchor)
+    (hvalue : anchor.Equiv (RealRaw.ofRat (1 / 4))) :
     (Integral.integral (SinPiIntegral.sinPiSquareOnHalf S) 0 ((1 : Rat) / 2)
       H.publicConstruction).Equiv (RealRaw.ofRat (1 / 4)) := by
   have hpublic :
@@ -1682,27 +1457,46 @@ theorem NestedRadicalSquareIntegralConstructionSubgoal.value_of_tangent_anchor
     exact FTC.integral_valid_of_construction H.integral
   have hstable :
       (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized
-        SinPiIntegral.tangentSquareIntegral).Valid := by
-    exact SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_tangentSquareIntegral_overlap
-      hvalue.commonWitness.to_equiv
+        anchor).Valid := by
+    exact SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_overlap
+      hanchor hcommon.to_equiv
+  have hstableValue :
+      (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized
+        anchor).Equiv (RealRaw.ofRat (1 / 4)) := by
+    exact RealRaw.equiv_trans hstable hanchor (RealRaw.ofRat_valid _)
+      (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_anchor_of_overlap
+        hanchor hcommon.to_equiv) hvalue
   exact RealRaw.equiv_trans hpublic hevaluator
     (RealRaw.ofRat_valid (1 / 4)) H.public_equiv_evaluator
       (RealRaw.equiv_trans hevaluator hstable (RealRaw.ofRat_valid (1 / 4))
-        htransport hvalue.value)
+        (H.transport_of_compute hanchor hcompute hcommon) hstableValue)
+
+theorem NestedRadicalSquareIntegralConstructionSubgoal.value_of_normalized_transport
+    {S : SinPiIntegral.ArctanSinPiConstruction}
+    (H : NestedRadicalSquareIntegralConstructionSubgoal S)
+    (hcompute : forall n,
+      (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).compute n =
+        SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw.compute n)
+    (htransport : NormalizedTangentSquareTransportSubgoal) :
+    (Integral.integral (SinPiIntegral.sinPiSquareOnHalf S) 0 ((1 : Rat) / 2)
+      H.publicConstruction).Equiv (RealRaw.ofRat (1 / 4)) := by
+  exact H.value_of_anchor htransport.normalized_validity.valid hcompute
+    htransport.commonWitness htransport.normalized_value
 
 theorem NestedRadicalSquareIntegralConstructionSubgoal.value_of_quarter_bounds
     {S : SinPiIntegral.ArctanSinPiConstruction}
     (H : NestedRadicalSquareIntegralConstructionSubgoal S)
-    (htransport :
-      (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).Equiv
-        (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized
-          SinPiIntegral.tangentSquareIntegral))
+    (hcompute : forall n,
+      (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).compute n =
+        SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw.compute n)
     (hsquare : NestedRadicalSquareQuarterBoundsSubgoal)
-    (htangent : TangentSquareIntegralValueSubgoal) :
+    (hnormalized : NormalizedTangentSquareValueSubgoal) :
     (Integral.integral (SinPiIntegral.sinPiSquareOnHalf S) 0 ((1 : Rat) / 2)
       H.publicConstruction).Equiv (RealRaw.ofRat (1 / 4)) := by
-  exact H.value_of_tangent_anchor htransport
-    (hsquare.toValueSubgoal htangent)
+  let hbounds := NormalizedTangentSquareQuarterBoundsSubgoal.of_value
+    hnormalized.value
+  exact H.value_of_anchor hnormalized.normalized_valid hcompute
+    (hsquare.toNormalizedCommonWitness hbounds) hnormalized.value
 
 theorem effectiveFTCPortfolio : EffectiveFTCPortfolio where
   square_value := Integral.exactRat_square_integral_raw_equiv_one_third
