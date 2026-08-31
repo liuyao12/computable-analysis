@@ -1095,6 +1095,11 @@ uniform bound.  Keep this semantic relation separate from
 The theorem
 `FunctionOnInterval.PointwiseMul.of_mulOfNonnegBounded` connects the two
 layers when explicit nonnegative pointwise bounds have been supplied.
+For addition, `FunctionOnInterval.IntervalRegularOn.addOfSchedule` is the
+generic closure constructor.  It requires an explicit synchronized stage,
+input-budget transport, output-width budget, and cross-stage containment;
+these obligations are the finite replacement for silently assuming that two
+adaptive evaluators share a common refinement schedule.
 The corresponding raw-real theorem is
 `RealRaw.mul_width_le_of_nonneg_bounded`; use it when the factor boxes have
 already been packaged as `RealRaw` values.

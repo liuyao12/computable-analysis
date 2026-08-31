@@ -302,6 +302,13 @@ without pretending that every product has a uniform computable modulus.
 The bounded product constructor supplies this relation through
 \lean{ComputableAnalysis.FunctionOnInterval.PointwiseMul.of_mulOfNonnegBounded}.
 
+The corresponding additive closure is now a schedule-level certificate:
+\lean{ComputableAnalysis.FunctionOnInterval.IntervalRegularOn.addOfSchedule}.
+It accepts two interval-regular functions only after the provider supplies
+the synchronized stage, input-budget transport, shrinking width budget, and
+cross-stage containment of point values.  This is the exact finite interface
+needed for sums of primitives and for assembling piecewise calculus proofs.
+
 Continuity is not a predicate on an ambient completed function space.  A
 function exposes either a pointwise modulus or an interval image algorithm:
 

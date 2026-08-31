@@ -7793,6 +7793,92 @@ structure IntervalRegularOn (F : FunctionOnInterval) where
         (evalInterval I hI n)
         (F.compute x hx n)
 
+/-! A certificate-level closure rule for addition.
+
+The component evaluators may need a finer or otherwise synchronized stage than
+the public sum requests.  The four schedule obligations below keep that fact
+visible: each component must accept the new cell budget, the two output widths
+must fit the requested sum budget, and each component image must contain its
+requested-stage point value.  Thus this is a constructive closure theorem,
+not an implicit compactness or stage-monotonicity assumption. -/
+def IntervalRegularOn.addOfSchedule
+    {F G : FunctionOnInterval}
+    (same_lower : F.lower = G.lower) (same_upper : F.upper = G.upper)
+    (hF : IntervalRegularOn F) (hG : IntervalRegularOn G)
+    (stage : Nat -> Nat) (inputPrecision : Nat -> Nat)
+    (inputPrecision_pos : forall n, 0 < inputPrecision n)
+    (input_budget_F : forall (n : Nat) (I : QInterval)
+      (hI : subintervalOf I F.lower F.upper),
+      I.width <= 1 / ((inputPrecision n : Nat) : Rat) ->
+        I.width <= 1 / ((hF.inputPrecision (stage n) : Nat) : Rat))
+    (input_budget_G : forall (n : Nat) (I : QInterval)
+      (hI : subintervalOf I G.lower G.upper),
+      I.width <= 1 / ((inputPrecision n : Nat) : Rat) ->
+        I.width <= 1 / ((hG.inputPrecision (stage n) : Nat) : Rat))
+    (output_budget : forall n,
+      1 / (((stage n + 1 : Nat) : Rat)) +
+          1 / (((stage n + 1 : Nat) : Rat)) <=
+        1 / (((n + 1 : Nat) : Rat)))
+    (point_transport_F : forall (n : Nat) (I : QInterval)
+      (hI : subintervalOf I F.lower F.upper) (x : Rat)
+      (hx : inDomainInterval F.lower F.upper x),
+      I.lo <= x -> x <= I.hi ->
+        QInterval.ContainsInterval
+          (hF.evalInterval I hI (stage n)) (F.compute x hx n))
+    (point_transport_G : forall (n : Nat) (I : QInterval)
+      (hI : subintervalOf I G.lower G.upper) (x : Rat)
+      (hx : inDomainInterval G.lower G.upper x),
+      I.lo <= x -> x <= I.hi ->
+        QInterval.ContainsInterval
+          (hG.evalInterval I hI (stage n)) (G.compute x hx n)) :
+    IntervalRegularOn
+      (FunctionOnInterval.add F G same_lower same_upper) where
+  evalInterval := fun I hI n =>
+    QInterval.addInterval
+      (hF.evalInterval I (by
+        simpa [FunctionOnInterval.add] using hI) (stage n))
+      (hG.evalInterval I (by
+        simpa [FunctionOnInterval.add, same_lower, same_upper] using hI)
+        (stage n))
+  inputPrecision := inputPrecision
+  inputPrecision_pos := inputPrecision_pos
+  output_width := by
+    intro I hI n hsmall
+    have hIF : subintervalOf I F.lower F.upper := by
+      simpa [FunctionOnInterval.add] using hI
+    have hIG : subintervalOf I G.lower G.upper := by
+      simpa [FunctionOnInterval.add, same_lower, same_upper] using hI
+    have hsmallF := input_budget_F n I hIF hsmall
+    have hsmallG := input_budget_G n I hIG hsmall
+    have hFout := hF.output_width I hIF (stage n) hsmallF
+    have hGout := hG.output_width I hIG (stage n) hsmallG
+    rw [QInterval.addInterval_width]
+    constructor
+    · exact Rat.add_nonneg hFout.1 hGout.1
+    · exact Rat.le_trans (by
+        simpa [QInterval.addInterval_width] using
+          (show (hF.evalInterval I hIF (stage n)).width +
+            (hG.evalInterval I hIG (stage n)).width <=
+            1 / (((stage n + 1 : Nat) : Rat)) +
+              1 / (((stage n + 1 : Nat) : Rat)) from by
+            grind)) (output_budget n)
+  contains_point_values := by
+    intro I hI x hx n hxlo hxhi
+    have hIF : subintervalOf I F.lower F.upper := by
+      simpa [FunctionOnInterval.add] using hI
+    have hIG : subintervalOf I G.lower G.upper := by
+      simpa [FunctionOnInterval.add, same_lower, same_upper] using hI
+    have hFcontains := point_transport_F n I hIF x
+      (by exact hx) hxlo hxhi
+    have hGcontains := point_transport_G n I hIG x
+      (by
+        constructor
+        · rw [← same_lower]
+          exact hx.1
+        · rw [← same_upper]
+          exact hx.2) hxlo hxhi
+    exact QInterval.addInterval_contains hFcontains hGcontains
+
 /-- Two interval-image certificates for the same function cannot disagree at
 a shared rational sample: both output boxes contain the same point-value
 box.  This is the basic representation-switching lemma for adaptive
