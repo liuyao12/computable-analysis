@@ -7020,6 +7020,49 @@ def PointwiseMul (F G H : FunctionOnInterval) : Prop :=
         ((F.raw.evalRaw x (F.defined_on x hxF)) *
           (G.raw.evalRaw x (G.defined_on x hxG)))
 
+/-! The bounded evaluator is semantically a pointwise product.  This bridge
+is useful because downstream calculus certificates can reason with the
+abstract relation while the interval algorithm keeps its explicit bounds. -/
+theorem PointwiseMul.of_mulOfNonnegBounded
+    (F G : FunctionOnInterval)
+    (same_lower : F.lower = G.lower) (same_upper : F.upper = G.upper)
+    (Fbounds : forall x (hx : inDomainInterval F.lower F.upper x),
+      Exists fun B : Rat => 0 < B /\ forall n,
+        0 <= (F.compute x hx n).lo /\ (F.compute x hx n).hi <= B)
+    (Gbounds : forall x (hx : inDomainInterval G.lower G.upper x),
+      Exists fun B : Rat => 0 < B /\ forall n,
+        0 <= (G.compute x hx n).lo /\ (G.compute x hx n).hi <= B) :
+    PointwiseMul F G
+      (mulOfNonnegBounded F G same_lower same_upper Fbounds Gbounds) := by
+  refine ⟨same_lower, same_upper, rfl, rfl, ?_⟩
+  intro x hxF hxG hxH
+  let X : RealRaw := F.raw.evalRaw x (F.defined_on x hxF)
+  let Y : RealRaw := G.raw.evalRaw x (G.defined_on x hxG)
+  have hX : X.Valid := by
+    change RealRaw.ValidCompute (F.raw.compute x (F.defined_on x hxF))
+    exact F.valid_on x (F.defined_on x hxF)
+  have hY : Y.Valid := by
+    change RealRaw.ValidCompute (G.raw.compute x (G.defined_on x hxG))
+    exact G.valid_on x (G.defined_on x hxG)
+  rcases Fbounds x hxF with ⟨BF, hBF, hFbounds⟩
+  rcases Gbounds x hxG with ⟨BG, hBG, hGbounds⟩
+  have hXbounds : forall n, 0 <= (X.compute n).lo /\
+      (X.compute n).hi <= BF := by
+    intro n
+    change 0 <= (F.raw.compute x (F.defined_on x hxF) n).lo /\
+      (F.raw.compute x (F.defined_on x hxF) n).hi <= BF
+    exact hFbounds n
+  have hYbounds : forall n, 0 <= (Y.compute n).lo /\
+      (Y.compute n).hi <= BG := by
+    intro n
+    change 0 <= (G.raw.compute x (G.defined_on x hxG) n).lo /\
+      (G.raw.compute x (G.defined_on x hxG) n).hi <= BG
+    exact hGbounds n
+  have hproduct : (X * Y).Valid :=
+    RealRaw.mul_valid_of_nonneg_bounded hX hY hBF hBG hXbounds hYbounds
+  change (X * Y).Equiv (X * Y)
+  exact RealRaw.equiv_refl (X * Y) hproduct
+
 /-- Pointwise rational-scalar relation for interval-certified functions. -/
 def PointwiseScaleRat (r : Rat) (F G : FunctionOnInterval) : Prop :=
   F.lower = G.lower /\ F.upper = G.upper /\

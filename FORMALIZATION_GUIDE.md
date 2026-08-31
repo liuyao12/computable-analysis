@@ -1092,6 +1092,9 @@ For theorem-facing representation changes, use
 pointwise raw equivalence without selecting an evaluator or silently adding a
 uniform bound.  Keep this semantic relation separate from
 `mulOfNonnegBounded`, which is the constructive interval evaluator.
+The theorem
+`FunctionOnInterval.PointwiseMul.of_mulOfNonnegBounded` connects the two
+layers when explicit nonnegative pointwise bounds have been supplied.
 The corresponding raw-real theorem is
 `RealRaw.mul_width_le_of_nonneg_bounded`; use it when the factor boxes have
 already been packaged as `RealRaw` values.
