@@ -118,6 +118,65 @@ theorem RationalSeriesCertificate.raw_precision_witness
       (S.raw.compute n).width ≤ eps.val := by
   exact (S.raw_valid).2.2 eps
 
+/-! Certificate addition is the basic termwise-series closure.  The tail
+    budgets are split between the two summands, while the rational triangle
+    inequality proves the one-step refinement. -/
+def RationalSeriesCertificate.add
+    (S T : RationalSeriesCertificate) : RationalSeriesCertificate where
+  partialSum := fun n => S.partialSum n + T.partialSum n
+  remainder := fun n => S.remainder n + T.remainder n
+  remainder_nonneg := by
+    intro n
+    exact Rat.add_nonneg (S.remainder_nonneg n) (T.remainder_nonneg n)
+  refinement := by
+    intro n
+    have hs := S.refinement n
+    have ht := T.refinement n
+    have hdiff :
+        (S.partialSum (n + 1) + T.partialSum (n + 1)) -
+            (S.partialSum n + T.partialSum n) =
+          (S.partialSum (n + 1) - S.partialSum n) +
+            (T.partialSum (n + 1) - T.partialSum n) := by
+      grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+        Rat.add_left_comm]
+    rw [hdiff]
+    calc
+      qabs (S.partialSum (n + 1) - S.partialSum n +
+          (T.partialSum (n + 1) - T.partialSum n)) +
+          (S.remainder (n + 1) + T.remainder (n + 1)) <=
+        qabs (S.partialSum (n + 1) - S.partialSum n) +
+          qabs (T.partialSum (n + 1) - T.partialSum n) +
+            (S.remainder (n + 1) + T.remainder (n + 1)) := by
+        exact (Rat.add_le_add_right
+          (c := S.remainder (n + 1) + T.remainder (n + 1))).2
+          (qabs_add_le _ _)
+      _ <= S.remainder n + T.remainder n := by
+        grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+  tail_budget := by
+    intro eps
+    let half : QPos := ⟨eps.val / 2, by grind [eps.property]⟩
+    obtain ⟨NS, hS⟩ := S.tail_budget half
+    obtain ⟨NT, hT⟩ := T.tail_budget half
+    refine ⟨max NS NT, ?_⟩
+    intro n hn
+    have hNS : NS ≤ n := Nat.le_trans (Nat.le_max_left _ _) hn
+    have hNT : NT ≤ n := Nat.le_trans (Nat.le_max_right _ _) hn
+    have hs := hS n hNS
+    have ht := hT n hNT
+    simp only [QInterval.width] at hs ht ⊢
+    grind
+
+theorem RationalSeriesCertificate.add_raw_valid
+    (S T : RationalSeriesCertificate) :
+    (S.add T).raw.Valid := by
+  exact (S.add T).raw_valid
+
+theorem RationalSeriesCertificate.add_raw_precision_witness
+    (S T : RationalSeriesCertificate) (eps : QPos) :
+    ∃ N : Nat, ∀ n, N ≤ n ->
+      ((S.add T).raw.compute n).width ≤ eps.val := by
+  exact (S.add T).raw_precision_witness eps
+
 /-! The geometric prefix is the first concrete client of the generic
     certificate.  Its remainder is written as a rational gap to the closed
     endpoint formula; the generic constructor then supplies the symmetric
