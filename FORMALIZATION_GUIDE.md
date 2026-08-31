@@ -74,6 +74,29 @@ evaluator; that upgrade requires a finite covering certificate.
 The companion `EffectiveModulusFor.local_expand_width_le` records the resulting
 five-fold stage-width budget explicitly.
 
+### Product and composition checklist
+
+For a new product such as `sin²`, separate the proof into three layers:
+
+1. Use `FunctionOnInterval.mulOfNonnegBounded` (or
+   `RealFunRaw.mul_valid_of_nonneg_bounded`) to prove that the pointwise
+   interval product is a valid raw function. Supply positive rational bounds
+   for both factors at every rational input.
+2. Prove the finite width estimate for the product evaluator. On nonnegative
+   ranges this is the rational inequality
+   `width(FG) ≤ B_F * width(G) + B_G * width(F)`.
+3. Only then build an `IntervalRegularOn` or integral certificate. A product
+   of regular evaluators is not automatic: the evaluator may need a scheduled
+   stage (so both factors are refined far enough) and a uniform or cellwise
+   range bound. Do not infer this closure from classical compactness.
+
+The checked finite-difference counterpart is
+`effectiveDerivativeProductOfBudget`, whose budget explicitly retains the
+quadratic corner term. For the current squared-sine route, the corresponding
+finite sample transport is exposed by
+`dyadicPublicSquareLeftSum_overlap_of_sample_overlaps`; the remaining input is
+the geometric all-stage certificate, not another generic real-number theorem.
+
 A declaration may be a useful interface, a target `Prop`, or a fully proved
 theorem.  The guide calls out that distinction.  A named `def` or `structure`
 is never evidence that its intended mathematical theorem has been proved.
