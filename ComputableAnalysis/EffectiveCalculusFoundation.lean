@@ -270,4 +270,21 @@ def effectiveDerivativeCompositionOfBudget
     outer inner outerTol innerTol stepRadius hinner_pos hinner_radius
     houter_radius hbudget
 
+/-! Product closure has the same provider-facing shape.  The finite budget
+    explicitly accounts for both factor secant errors and the quadratic corner
+    term; no general product theorem over a completed real space is assumed. -/
+def effectiveDerivativeProductOfBudget
+    {u du v dv : Rat -> Rat}
+    (stepRadius : QPos -> QPos)
+    (hbudget : forall eps x h,
+      0 < h -> h <= (stepRadius eps).val ->
+      qabs (u x) * qabs (ExactFunction.differenceQuotient v x h - dv x) +
+        qabs (v x) * qabs (ExactFunction.differenceQuotient u x h - du x) +
+          qabs h * qabs (ExactFunction.differenceQuotient u x h) *
+            qabs (ExactFunction.differenceQuotient v x h) <= eps.val) :
+    EffectiveDerivativeExact (fun x => u x * v x)
+      (fun x => u x * dv x + v x * du x) :=
+  ExactFunction.EffectiveDerivativeExact.mulOfBudget
+    u du v dv stepRadius hbudget
+
 end ComputableAnalysis
