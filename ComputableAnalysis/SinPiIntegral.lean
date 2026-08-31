@@ -9206,6 +9206,12 @@ noncomputable def DyadicCanonicalCertificateSearchFamily.toCanonicalFamily
     let hs := H.search_succeeds precision depth k hk hpos
     exact canonicalDyadicCertificateSearchAt_sound B (Classical.choose_spec hs)
 
+noncomputable def DyadicCanonicalCertificateCandidateFamily.toCanonicalFamily
+    {B : IntegralIdentities.ArctanInverseBisection}
+    (H : DyadicCanonicalCertificateCandidateFamily B) :
+    DyadicCanonicalCertificateFamily B :=
+  H.toSearchFamily.toCanonicalFamily
+
 noncomputable def DyadicCanonicalCertificateFamily.toWitnessFamily
     {B : IntegralIdentities.ArctanInverseBisection}
     (C : DyadicCanonicalCertificateFamily B) :
