@@ -257,6 +257,29 @@ theorem leibnizSeriesCertificate_raw_width (n : Nat) :
   grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc,
     Rat.add_comm, Rat.add_left_comm]
 
+/-! The same adapter names the rational sine Taylor computation.  Its tail
+    radius is the factorial majorant already used by the sine chapter. -/
+def sineSeriesCertificate (x : Rat) (hx : qabs x <= 2) :
+    RationalSeriesCertificate :=
+  alternatingSeriesCertificate (Series.AlternatingRaw.sineAlternatingRaw x hx)
+
+theorem sineSeriesCertificate_raw_equiv_sineAlternatingRaw
+    (x : Rat) (hx : qabs x <= 2) :
+    (sineSeriesCertificate x hx).raw.Equiv
+      (Series.AlternatingRaw.sineAlternatingRaw x hx).toRealRaw := by
+  exact alternatingSeriesCertificate_raw_equiv_alternatingRaw _
+
+theorem sineSeriesCertificate_raw_width
+    (x : Rat) (hx : qabs x <= 2) (n : Nat) :
+    ((sineSeriesCertificate x hx).raw.compute n).width =
+      2 * RationalMajorant.factorialTailTerm (qabs x) (4 * n + 1) := by
+  rw [sineSeriesCertificate, RationalSeriesCertificate.raw_width]
+  simp [alternatingSeriesCertificate,
+    Series.AlternatingRaw.sineAlternatingRaw,
+    Series.sineTermMagnitude_eq_factorialTailTerm]
+  congr 1
+  grind
+
 /-! The same certificate pattern for complex-valued series.  The refinement
     field is rectangular-box nesting, since a complex remainder has separate
     real and imaginary budgets. -/
