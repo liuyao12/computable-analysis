@@ -163,8 +163,8 @@ interval-valued composition still requires a separate box-level contract.
 | D | `exp x` on `[0,1]` | computable exponential raw | endpoint difference | **complete:** `uniformExpOnUnit_effectiveFTC` in `ExpProofs.lean` (selected-stage certificate) |
 | E | finite sine prefix `x-x^3/6` on `[0,1/2]` | `x^2/2-x^4/24` | `47/384` | complete `EffectiveDerivativeBoundFTC` certificate |
 | F | squared prefix `(x-x^3/6)^2` on `[0,1/2]` | `x^3/3-x^5/15+x^7/252` | `6389/161280` | complete `EffectiveDerivativeBoundFTC` certificate |
-| G | nested-radical `sin (pi*x)` on `[0,1/2]` | arctan/circle construction | `1/pi` | direct FTC route exists; effective tail transport pending |
-| H | nested-radical `sin (pi*x)^2` on `[0,1/2]` | cosine-identity or transported square primitive | `1/4` | scheduled interval-regularity and monotonicity certificates complete; endpoint/FTC transport pending |
+| G | nested-radical `sin (pi*x)` on `[0,1/2]` | arctan/circle construction | `1/pi` | tangent-coordinate Riemann--Stieltjes value and its effective-FTC provenance are complete; equal-dyadic transport remains |
+| H | nested-radical `sin (pi*x)^2` on `[0,1/2]` | cosine-identity or transported square primitive | `1/4` | scheduled interval-regularity, monotonicity, and normalized tangent-chart certificates are complete; the all-stage common-witness transport remains |
 
 1. **Exact affine and constant cases.**  Integrate `fun _ => 1` and
    `fun x => x` on rational intervals.  These are regression tests for the

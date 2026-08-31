@@ -72,8 +72,16 @@ ODE chapter has a checked finite-mesh uniqueness closure, conditional on its
 explicit rational envelope provider; the provider itself remains a stated
 analytic certificate obligation. The finite raw-sum algebra used to
 concatenate certified pieces is also checked, so adjacent-interval and
-multi-turn proofs have an explicit assembly layer. The
-monomial layer now has a degree-uniform primitive endpoint computation at
+multi-turn proofs have an explicit assembly layer.
+The public sine theorem is exposed as
+\lean{ComputableAnalysis.effectiveSinPiHalfIntegral_equiv_reciprocalPi}
+and its tangent-chart FTC provenance as
+\lean{ComputableAnalysis.effectiveSinPiHalfIntegral_equiv_reciprocalPi_tangentChartFTC}.
+These identify the computable tangent-coordinate integral; the separate
+equal-dyadic nested-radical transport remains the main representation
+frontier.
+
+The monomial layer now has a degree-uniform primitive endpoint computation at
 arbitrary rational endpoints, together with an explicit dyadic raw-integral
 width contract. Finite Taylor certificates likewise expose their endpoint
 increments as native `realRaw` computations through the public calculus
