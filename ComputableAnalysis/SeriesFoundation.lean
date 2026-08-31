@@ -177,6 +177,19 @@ theorem RationalSeriesCertificate.add_raw_precision_witness
       ((S.add T).raw.compute n).width ≤ eps.val := by
   exact (S.add T).raw_precision_witness eps
 
+theorem RationalSeriesCertificate.add_raw_equiv_add
+    (S T : RationalSeriesCertificate) :
+    (S.add T).raw.Equiv (RealRaw.add S.raw T.raw) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (S.add T).raw (RealRaw.add S.raw T.raw) n n).2
+  simp [RationalSeriesCertificate.raw, RationalSeriesCertificate.add,
+    RealRaw.add, RealRaw.addCompute, QInterval.Overlaps]
+  have hsnonneg := S.remainder_nonneg n
+  have htnonneg := T.remainder_nonneg n
+  constructor <;> grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+    Rat.add_left_comm]
+
 /-! Scalar multiplication is closed under an explicit precision allocator.
     The allocator is part of the certificate client: this keeps the cost of
     amplifying a tail visible instead of hiding an inverse or a rate. -/
