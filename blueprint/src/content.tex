@@ -1,176 +1,105 @@
 \chapter*{Preface}
 \addcontentsline{toc}{chapter}{Preface}
 
-The aim of this project is to formalize a strain of classical mathematics
-that was already effective in practice before the modern completeness theory
-of the real numbers was isolated.  The guiding idea is simple: replace an
-appeal to a completed continuum by a transparent rational interval algorithm,
-then prove the finite estimates that make the algorithm valid.
-
-The main objects are therefore not arbitrary points of a complete metric
-space.  They are algorithms
+This project develops calculus from explicit finite computations.  A raw real
+is an algorithm
 \[
-  n \longmapsto [a_n,b_n],
-  \qquad a_n,b_n\in\Q,\qquad a_n\le b_n,
+  n\longmapsto [a_n,b_n],\qquad a_n,b_n\in\Q,
 \]
- whose intervals are nested and whose widths shrink to zero.  Equality means
- overlap at every common computation stage, possibly after cofinal changes of
-stage.  This is strong enough for the fundamental theorem of calculus, the
-fundamental theorem of algebra, Archimedes' computation of pi, Euler's
-series arguments, and the elementary functions, but it keeps the proof
-obligations finite and inspectable.
+together with proofs that the intervals are ordered, nested, and shrink to
+arbitrary rational precision.  Independent algorithms are identified by
+finite overlap certificates.  The abstract real retains useful algorithms
+and a maintained tree of such equivalences; a raw algorithm stores none of
+them.
 
-The main calculus route is deliberately ordered as
-
+The calculus route is
 \begin{verbatim}
-circle and trigonometry -> integral -> FTC bridge -> power series
--> exponential/logarithm -> linear ODEs
+rational intervals -> circle/trigonometry -> integral -> effective FTC
+                   -> series/Fourier -> exponential/logarithm -> linear ODEs
 \end{verbatim}
+Every function is an explicit computation on its natural represented domain.
+The project adds one representative for each genuinely new computational
+pattern and transports routine scalar, sign, polynomial, and finite-piece
+variants.  It does not assert that every continuous function is integrable or
+import completeness of the standard real numbers.
 
-The FTC belongs at the beginning of the integral chapter, but it is developed
-in two consecutive layers.  Chapter~\ref{ch:integrals} introduces the
-historical question and states the finite endpoint--area contract as soon as
-the first rectangle integral is defined.  The following chapter,
-\ref{ch:effective-calculus}, is the FTC bridge: it develops the derivative,
-convexity, monotonicity, turning-point, and tail certificates that discharge
-that contract.  Only then do power series and special functions consume it.
-This keeps the historical idea visible without pretending that every
-continuous function is automatically integrable in the foundation.
-Algebra and the fundamental theorem of algebra are recorded as a parallel
-computable branch, not as a prerequisite for this calculus route.
+The integral chapter introduces rectangle algorithms and the endpoint-area
+question.  The effective-calculus chapter supplies the derivative bounds,
+width budgets, and stabilization theorem that answer it.  Native finite sums
+may be chosen independently at successive stages; the canonical FTC theorem
+proves shrinking and stabilizes them against the primitive endpoint
+computation rather than assuming they were already nested.
 
 \section*{\texorpdfstring{\(\pi\)}{Pi} scoreboard}
 \label{sec:pi-scoreboard}
-\lean{ComputableAnalysis.PiProofs.PiIntegrationFamily}
 \lean{ComputableAnalysis.piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piCircumferenceDirect}
-\lean{ComputableAnalysis.PiProofs.piCircumferenceDirect_equiv_piCircleArea}
 \lean{ComputableAnalysis.piMachin}
-\lean{ComputableAnalysis.PiProofs.cauchyFullLineIntegral_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piReciprocalQuarticCompact_equiv_piCircleArea}
 \leanok
 \input{pi-scoreboard-table.tex}
 
 \section*{Wiedijk's List of 100 Theorem Formalization Challenge}
-\noindent\href{https://www.cs.ru.nl/\%7Efreek/100/index.html}{Freek Wiedijk's original list of 100 theorems.}
-\quad The theorem names below link to their corresponding statements in this
-blueprint.
-The following index gives the theorem names from the benchmark and links
-each scoped entry to its blueprint statement.  These are formalized
-rational, finite, or certificate-level cores; a link does not claim the
-unrestricted classical theorem when the chapter marks that bridge as
-deferred.
+\noindent\href{https://www.cs.ru.nl/\%7Efreek/100/index.html}
+{Freek Wiedijk's original list of 100 theorems.}
+
+The project tracks only the sixteen entries whose content belongs to
+represented numbers, infinite processes, calculus, or function theory.
+Routine finite algebra, combinatorics, and elementary coordinate geometry are
+reused from Lean when needed.  A linked entry states the project's computable
+target; it does not silently claim a stronger classical theorem.
 
 \begin{center}
 \small
-\begin{tabular}{p{0.08\textwidth}p{0.38\textwidth}p{0.42\textwidth}}
-\textbf{No.} & \textbf{Theorem} & \textbf{Blueprint location}\\
+\begin{tabular}{p{0.08\textwidth}p{0.42\textwidth}p{0.38\textwidth}}
+\textbf{No.} & \textbf{Theorem} & \textbf{Project target}\\
 \hline
-1 & \benchmarklink{ch-foundations}{rem:algebraic-numbers-sqrt-two}{Irrationality of \(\sqrt2\) (\texttt{RealRaw} descent proof)}
-  & Foundations (interval algorithm plus infinite descent)\\
-2 & \benchmarklink{ch-algebra-fta}{thm:finite-box-polynomial-soundness}{Fundamental Theorem of Algebra (finite root-isolation core)}
-  & Algebra and FTA\\
-3 & \benchmarklink{ch-foundations}{thm:rational-code-surjection}{Denumerability of \(\mathbb Q\)}
-  & Foundations\\
-4 & \benchmarklink{ch-rational-circle-trigonometry}{thm:rational-circle-pythagorean}{Pythagorean theorem}
-  & Circle and trigonometry\\
-8 & \benchmarklink{ch-foundations}{ex:algebraic-inverse-branches}{Doubling the cube (finite cube-root inverse core)}
-  & Foundations (constructibility bridge separate)\\
-9 & \benchmarklink{ch-rational-circle-trigonometry}{thm:geometric-pi-validity}{Area of a circle (finite subdivision core)}
-  & Circle and integrals (limit bridge separate)\\
-11 & \benchmarklink{ch-foundations}{thm:finite-fta-factorization}{Infinitude of primes (Euclid finite-unboundedness core)}
-  & Foundations (potential-infinity certificate)\\
-14 & \benchmarklink{ch-infinite-series}{thm:basel-geometric-overlap}{Euler's Basel sum (computable overlap core)}
-  & Infinite series (identity deferred)\\
-15 & \benchmarklink{ch-integrals}{thm:convex-ftc}{Fundamental Theorem of Integral Calculus (finite Darboux-sum core)}
-  & Integrals (classical identification separate)\\
-16 & \benchmarklink{ch-algebra-fta}{thm:finite-deflation-soundness}{Abel--Ruffini theorem (supplied-root deflation boundary)}
-  & Algebra and FTA (boundary)\\
-17 & \benchmarklink{ch-rational-circle-trigonometry}{thm:finite-quarter-turn}{de Moivre's formula (finite rotation core)}
-  & Circle and trigonometry (complex completion separate)\\
-21 & \benchmarklink{ch-integrals}{thm:finite-green-rectangle}{Green's theorem (finite polygon boundary core)}
-  & Integrals (polygonal/rectangle bridge)\\
-23 & \benchmarklink{ch-rational-circle-trigonometry}{thm:rational-circle-pythagorean}{Formula for Pythagorean triples}
-  & Circle and trigonometry\\
-26 & \benchmarklink{ch-infinite-series}{thm:leibniz-arctan}{Leibniz series for \(\pi\) (finite prefix/tail core)}
-  & Infinite series (identity deferred)\\
-27 & \benchmarklink{ch-rational-circle-trigonometry}{thm:rational-triangle-orientation}{Sum of angles of a triangle (signed-area core)}
-  & Circle and trigonometry (angle semantics separate)\\
-34 & \benchmarklink{ch-infinite-series}{thm:harmonic-dyadic-lower-bound}{Divergence of the harmonic series (dyadic reachability core)}
-  & Infinite series (potential-infinity formulation)\\
-35 & \benchmarklink{ch-effective-calculus}{thm:finite-taylor-ftc-prefix}{Taylor's theorem (finite prefix/remainder core)}
-  & Effective calculus\\
-37 & \benchmarklink{ch-algebra-fta}{thm:rational-cubic-roots}{Solution of a cubic (finite split/isolation core)}
-  & Algebra and FTA\\
-39 & \benchmarklink{ch-foundations}{thm:finite-pell-certificate}{Solutions to Pell's equation (finite recurrence core)}
-  & Foundations (potential-infinity formulation)\\
-43 & \benchmarklink{ch-rational-circle-trigonometry}{thm:finite-rectangle-isoperimetric}{Isoperimetric theorem (rectangle/Heron core)}
-  & Circle and trigonometry (plane-region bridge separate)\\
-44 & \benchmarklink{ch-foundations}{thm:finite-counting-recurrences}{Binomial theorem (finite Pascal/expansion core)}
-  & Foundations and infinite series\\
-46 & \benchmarklink{ch-algebra-fta}{thm:rational-quartic-roots}{General quartic equation (finite quadratic-split core)}
-  & Algebra and FTA (Ferrari/radical bridge separate)\\
-49 & \benchmarklink{ch-differential-equations}{thm:finite-cayley-hamilton-boundary}{Cayley--Hamilton theorem (annihilator certificate)}
-  & Differential equations (computable boundary)\\
-55 & \benchmarklink{ch-rational-circle-trigonometry}{thm:rational-chord-power}{Product of segments of chords (directed/square-root core)}
-  & Circle and trigonometry (unsigned-length bridge separate)\\
-57 & \benchmarklink{ch-rational-circle-trigonometry}{thm:rational-heron}{Heron's formula (squared-area core)}
-  & Circle and trigonometry (square-root bridge separate)\\
-60 & \benchmarklink{ch-foundations}{thm:bezout-certificate}{Bézout's identity}
-  & Foundations\\
-64 & \benchmarklink{ch-effective-calculus}{thm:finite-lhopital-interface}{L'Hopital's rule (finite cancellation core)}
-  & Effective calculus (computable boundary)\\
-65 & \benchmarklink{ch-rational-circle-trigonometry}{thm:finite-isosceles-interface}{Isosceles triangle theorem (coordinate certificate)}
-  & Circle and trigonometry (finite core)\\
-66 & \benchmarklink{ch-infinite-series}{thm:finite-geometric-series-interface}{Sum of a geometric series (finite prefix and tail)}
-  & Infinite series (potential-infinity core)\\
-68 & \benchmarklink{ch-infinite-series}{thm:arithmetic-series-sum}{Sum of an arithmetic series (finite closed form)}
-  & Infinite series\\
-69 & \benchmarklink{ch-foundations}{thm:euclidean-gcd}{Greatest-common-divisor algorithm}
-  & Foundations\\
-73 & \benchmarklink{ch-foundations}{thm:finite-monotone-sequence}{Ascending or descending sequences}
-  & Foundations (finite order core)\\
-74 & \benchmarklink{ch-foundations}{thm:nat-induction-schema}{Mathematical induction}
-  & Foundations\\
-75 & \benchmarklink{ch-effective-calculus}{thm:finite-quadrature-mean-value}{Mean Value Theorem (finite average bracket)}
-  & Effective calculus (attained-point bridge separate)\\
-76 & \benchmarklink{ch-infinite-series}{thm:finite-fourier-interface}{Fourier series (finite transform/Parseval core)}
-  & Infinite series (finite transform core)\\
-79 & \benchmarklink{ch-foundations}{thm:constructive-inverse-function}{Intermediate Value Theorem (finite inverse-search core)}
-  & Foundations/effective calculus (range bridge separate)\\
-80 & \benchmarklink{ch-foundations}{thm:finite-fta-factorization}{Fundamental Theorem of Arithmetic (factor certificate)}
-  & Foundations (finite core)\\
-81 & \benchmarklink{ch-infinite-series}{thm:finite-prime-reciprocal-interface}{Prime reciprocal series (finite extension core)}
-  & Infinite series (potential-infinity core)\\
-89 & \benchmarklink{ch-algebra-fta}{thm:finite-factor-remainder-interface}{Factor and remainder theorems (finite core)}
-  & Algebra and FTA (computable boundary)\\
-91 & \benchmarklink{ch-foundations}{thm:finite-triangle-inequality-interface}{Triangle inequality (rational absolute value)}
-  & Foundations (finite core)\\
-92 & \benchmarklink{ch-rational-circle-trigonometry}{thm:finite-pick-rectangle-family}{Pick's theorem}
-  & Circle and trigonometry (finite lattice core)\\
-94 & \benchmarklink{ch-rational-circle-trigonometry}{thm:finite-law-of-cosines-interface}{Law of cosines (squared-length core)}
-  & Circle and trigonometry (finite core)\\
-95 & \benchmarklink{ch-rational-circle-trigonometry}{thm:finite-ptolemy-interface}{Ptolemy's theorem (squared-chord core)}
-  & Circle and trigonometry (unsigned-length bridge deferred)\\
-97 & \benchmarklink{ch-differential-equations}{thm:finite-cramer-interface}{Cramer's rule (rational solver)}
-  & Differential equations (finite core)\\
-98 & \benchmarklink{ch-foundations}{thm:finite-bertrand-certificate}{Bertrand's postulate}
-  & Foundations (finite prime-search core)\\
-100 & \benchmarklink{ch-algebra-fta}{thm:finite-descartes-sign-interface}{Descartes rule of signs (finite sign count)}
-  & Algebra and FTA (finite core)\\
-\hline
-38 & \benchmarklink{ch-foundations}{thm:rational-am-gm}{Arithmetic--geometric mean inequality}
-  & Supporting foundations lemma\\
-42 & \benchmarklink{ch-infinite-series}{thm:finite-reciprocal-triangular-interface}{Reciprocal triangular numbers (telescoping core)}
-  & Supporting series interface\\
-77 & \benchmarklink{ch-infinite-series}{thm:finite-power-sum-interface}{Sums of powers (closed finite forms)}
-  & Supporting series interface\\
-78 & \benchmarklink{ch-foundations}{thm:finite-cauchy-schwarz-interface}{Cauchy--Schwarz inequality (finite lists)}
-  & Supporting foundations interface\\
-85 & \benchmarklink{ch-foundations}{thm:three-digit-divisibility}{Divisibility by 3}
-  & Supporting foundations lemma\\
-90 & \benchmarklink{ch-infinite-series}{thm:finite-stirling-certificate}{Stirling's formula (finite bounded-ratio core)}
-  & Supporting series (asymptotic bridge separate)\\
+1 & \benchmarklink{ch-foundations}{rem:algebraic-numbers-sqrt-two}
+  {Irrationality of \(\sqrt2\)}
+  & computable square root and infinite descent\\
+2 & \benchmarklink{ch-algebra-fta}{thm:finite-box-polynomial-soundness}
+  {Fundamental Theorem of Algebra}
+  & finite complex root isolation/deflation frontier\\
+9 & \benchmarklink{ch-rational-circle-trigonometry}{thm:geometric-pi-validity}
+  {Area of a circle}
+  & rational area subdivision and pi equivalence\\
+14 & \benchmarklink{ch-infinite-series}{thm:basel-geometric-overlap}
+  {Euler's Basel sum}
+  & effective partial sums, tails, and geometric bridge\\
+15 & \benchmarklink{ch-integrals}{thm:convex-ftc}
+  {Fundamental Theorem of Integral Calculus}
+  & stabilized derivative-bound endpoint theorem\\
+17 & \benchmarklink{ch-rational-circle-trigonometry}{thm:finite-quarter-turn}
+  {de Moivre's formula}
+  & finite rational-complex rotations\\
+21 & \benchmarklink{ch-integrals}{thm:finite-green-rectangle}
+  {Green's theorem}
+  & finite polygon/rectangle identity and refinement frontier\\
+26 & \benchmarklink{ch-infinite-series}{thm:leibniz-arctan}
+  {Leibniz series for \(\pi\)}
+  & alternating rational series with explicit tail\\
+34 & \benchmarklink{ch-infinite-series}{thm:harmonic-dyadic-lower-bound}
+  {Divergence of the harmonic series}
+  & computable threshold for every rational height\\
+35 & \benchmarklink{ch-effective-calculus}{thm:finite-taylor-ftc-prefix}
+  {Taylor's theorem}
+  & finite identity with explicit remainder\\
+64 & \benchmarklink{ch-effective-calculus}{thm:finite-lhopital-interface}
+  {L'Hopital's rule}
+  & effective quotient/remainder frontier\\
+66 & \benchmarklink{ch-infinite-series}{thm:finite-geometric-series-interface}
+  {Sum of a geometric series}
+  & finite prefix and shrinking tail\\
+75 & \benchmarklink{ch-effective-calculus}{thm:finite-quadrature-mean-value}
+  {Mean Value Theorem}
+  & derivative/average enclosure without attained point\\
+76 & \benchmarklink{ch-infinite-series}{thm:finite-fourier-interface}
+  {Fourier series}
+  & finite transform plus effective reconstruction frontier\\
+79 & \benchmarklink{ch-foundations}{thm:constructive-inverse-function}
+  {Intermediate Value Theorem}
+  & branch-local bisection/inverse search\\
+90 & \benchmarklink{ch-infinite-series}{thm:finite-stirling-certificate}
+  {Stirling's formula}
+  & requested-precision asymptotic certificate frontier\\
 \end{tabular}
 \end{center}
 

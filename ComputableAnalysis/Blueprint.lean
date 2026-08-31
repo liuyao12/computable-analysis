@@ -1,0 +1,49 @@
+import ComputableAnalysis
+import ComputableAnalysis.FiniteAMGMExample
+import ComputableAnalysis.FiniteAMGMInterface
+import ComputableAnalysis.FiniteBertrandCertificate
+import ComputableAnalysis.FiniteBezoutCertificate
+import ComputableAnalysis.FiniteBisectionCertificate
+import ComputableAnalysis.FiniteCauchySchwarzExample
+import ComputableAnalysis.FiniteCauchySchwarzFourExample
+import ComputableAnalysis.FiniteCauchySchwarzInterface
+import ComputableAnalysis.FiniteCauchySchwarzList
+import ComputableAnalysis.FiniteCauchySchwarzSixExample
+import ComputableAnalysis.FiniteCauchySchwarzThreeExample
+import ComputableAnalysis.FiniteComplexTriangleExample
+import ComputableAnalysis.FiniteCoordinateInequality
+import ComputableAnalysis.FiniteCubeRootBisectionExample
+import ComputableAnalysis.FiniteCubeRootCertificate
+import ComputableAnalysis.FiniteCubicMVTExample
+import ComputableAnalysis.FiniteDecimalDivisibility
+import ComputableAnalysis.FiniteDecimalExample
+import ComputableAnalysis.FiniteDigitDivisibilityInterface
+import ComputableAnalysis.FiniteDyadicAMGM
+import ComputableAnalysis.FiniteDyadicAMGMExample
+import ComputableAnalysis.FiniteEuclideanGcdInterface
+import ComputableAnalysis.FiniteFourthRootBisectionExample
+import ComputableAnalysis.FiniteGcdSecondExample
+import ComputableAnalysis.FiniteGeometricSeriesInterface
+import ComputableAnalysis.FiniteInductionExample
+import ComputableAnalysis.FinitePascalExample
+import ComputableAnalysis.FinitePellCertificate
+import ComputableAnalysis.FinitePrimeFactorExample
+import ComputableAnalysis.FinitePrimeInfinitude
+import ComputableAnalysis.FinitePrimeIntervalInterface
+import ComputableAnalysis.FiniteQuinticDeflationExample
+import ComputableAnalysis.FiniteRationalCodeExample
+import ComputableAnalysis.FiniteSqrtTwoBisectionExample
+import ComputableAnalysis.FiniteSquareRootBisectionExample
+import ComputableAnalysis.FiniteSubsetCountExample
+import ComputableAnalysis.FiniteTriangleCertificate
+
+/-!
+# Blueprint declaration index
+
+This module is a documentation build target. It imports the canonical public
+API plus fixed-stage examples that are still linked from the blueprint, so
+GitHub Pages can resolve those declaration links.
+
+It is intentionally not imported by the canonical root: examples remain
+opt-in and do not enlarge the supported public surface.
+-/

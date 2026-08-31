@@ -5,6 +5,10 @@ defaultTargets = ["computableanalysis"]
 [[lean_lib]]
 name = "ComputableAnalysis"
 
+[[lean_lib]]
+name = "ComputableAnalysisBlueprint"
+roots = ["ComputableAnalysis.Blueprint"]
+
 [[lean_exe]]
 name = "computableanalysis"
 root = "Main"

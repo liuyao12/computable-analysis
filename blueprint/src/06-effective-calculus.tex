@@ -118,8 +118,6 @@ Darboux sums are nested by finite interval addition.
 \lean{ComputableAnalysis.Integral.affineSlopeBound}
 \lean{ComputableAnalysis.Integral.exactRat_affine_lipschitz}
 \lean{ComputableAnalysis.Integral.exactRat_affine_intervalRegularOn}
-\lean{ComputableAnalysis.exactRat_affine_evalIntervalsNested}
-\lean{ComputableAnalysis.exactRat_affine_darbouxStage_nested}
 \lean{ComputableAnalysis.Integral.exactRat_affine_integral_certificate}
 \lean{ComputableAnalysis.Integral.exactRat_affine_integral_raw_eq_ofRat}
 \lean{ComputableAnalysis.Integral.exactRat_affine_integral_raw_valid}
@@ -129,21 +127,12 @@ The constant evaluator supplies the same stage-refinement pattern in its
 smallest form: its interval image is stage-independent, and its weighted
 Darboux sums therefore nest on every fixed partition.
 
-\lean{ComputableAnalysis.exactRat_constant_evalIntervalsNested}
-\lean{ComputableAnalysis.exactRat_constant_darbouxStage_nested}
-\lean{ComputableAnalysis.exactRat_square_evalIntervalsNested_unit}
-\lean{ComputableAnalysis.exactRat_square_darbouxStage_nested_unit}
-\lean{ComputableAnalysis.exactRat_cube_evalIntervalsNested_unit}
-\lean{ComputableAnalysis.exactRat_cube_darbouxStage_nested_unit}
 More generally, the monomial evaluator is stage-independent for every
 natural power, so the same nested-stage theorem covers the whole polynomial
 ladder:
-\lean{ComputableAnalysis.exactRat_pow_evalIntervalsNested_unit}
-\lean{ComputableAnalysis.exactRat_pow_darbouxStage_nested_unit}
 For exact rational monomials, the corresponding finite endpoint Darboux
 bracket is independent of the requested evaluator stage; the stage parameter
 becomes substantive only for interval-valued special-function computations.
-\lean{ComputableAnalysis.exactRat_pow_nondecreasingDarbouxStage_stage_independent}
 \lean{ComputableAnalysis.Integral.exactRat_nondecreasingDarbouxStage_stage_independent}
 
 \lean{ComputableAnalysis.ExactFunction.riemannLeftExact_add}
@@ -181,7 +170,6 @@ value.  One representative certificate covers routine coefficient variants.
 \lean{ComputableAnalysis.Integral.effectiveFifthIntegralFTC_equiv_one_sixth}
 \lean{ComputableAnalysis.Integral.cubicIntegralEffectiveFTCData}
 \lean{ComputableAnalysis.Integral.cubicIntegralEffectiveFTC_equiv_endpoint}
-\lean{ComputableAnalysis.Integral.cubicIntegralEffectiveFTC_equiv_one_fourth}
 \leanok
 
 The polynomial ladder is now visible at the public monotone-integral level.
@@ -192,15 +180,6 @@ integration theorem: each evaluator carries its own rational construction and
 overlap proof.  They provide the first reusable test family for the effective
 FTC before special functions enter.
 
-\lean{ComputableAnalysis.Integral.exactRat_square_nondecreasing}
-\lean{ComputableAnalysis.Integral.exactRat_square_monotone_integral_valid}
-\lean{ComputableAnalysis.Integral.exactRat_square_monotone_integral_eq_one_third}
-\lean{ComputableAnalysis.Integral.exactRat_cube_nondecreasing}
-\lean{ComputableAnalysis.Integral.exactRat_cube_monotone_integral_valid}
-\lean{ComputableAnalysis.Integral.exactRat_cube_monotone_integral_eq_one_fourth}
-\lean{ComputableAnalysis.Integral.exactRat_quartic_nondecreasing}
-\lean{ComputableAnalysis.Integral.exactRat_quartic_monotone_integral_valid}
-\lean{ComputableAnalysis.Integral.exactRat_quartic_monotone_integral_eq_one_fifth}
 \lean{ComputableAnalysis.Integral.exactRat_nondecreasingDarbouxStage_stage_independent}
 \leanok
 
@@ -262,12 +241,9 @@ then transports the sample box.  What remains is the geometric induction that
 supplies those overlaps for every dyadic cell.  A failed finite search remains
 visible rather than being treated as an oracle.
 
-\lean{ComputableAnalysis.EffectiveFTCPortfolio.halfQuarterTurnRaw_bounds}
-\lean{ComputableAnalysis.EffectiveFTCPortfolio.reciprocalPi_quarterTurn_equiv_quarter}
 \lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSquareLeftSum_width_le_of_stage}
 \lean{ComputableAnalysis.SinPiIntegral.exists_rationalTangentWitnessBoxSearch_of_overlap_of_positive_width}
 \lean{ComputableAnalysis.SinPiIntegral.rationalTangentWitnessBoxSearch_overlap_of_success}
-\lean{ComputableAnalysis.EffectiveFTCPortfolio.NormalizedTangentSquareTransportSubgoal.value}
 \leanok
 
 \section{Continuity as a finite certificate}
@@ -290,9 +266,8 @@ without pretending that every product has a uniform computable modulus.
 The bounded product constructor supplies this relation through
 \lean{ComputableAnalysis.FunctionOnInterval.PointwiseMul.of_mulOfNonnegBounded}.
 
-The corresponding additive closure is now a schedule-level certificate:
-\lean{ComputableAnalysis.FunctionOnInterval.IntervalRegularOn.addOfSchedule}.
-It accepts two interval-regular functions only after the provider supplies
+The corresponding additive closure is a schedule-level certificate.  It
+accepts two interval-regular functions only after the provider supplies
 the synchronized stage, input-budget transport, shrinking width budget, and
 cross-stage containment of point values.  This is the exact finite interface
 needed for sums of primitives and for assembling piecewise calculus proofs.
@@ -476,7 +451,6 @@ bounded computational theorem, while the unrestricted textbook version is
 not smuggled in through completeness of the reals.
 
 \lean{ComputableAnalysis.FinitePolynomial.SecantDerivativeBound.mul}
-\lean{ComputableAnalysis.FinitePolynomial.SecantDerivativeBound.mulToHasDerivativeOnInterval}
 \lean{ComputableAnalysis.effectiveSecantProductRule}
 \leanok
 
@@ -767,8 +741,6 @@ explicit error budget later consumed by a partition-level FTC certificate.
 \lean{ComputableAnalysis.IntervalRegularOn.evalIntervals_overlap_of_common_point}
 \lean{ComputableAnalysis.IntervalRegularOn.evalIntervals_overlap_of_common_point_at}
 \lean{ComputableAnalysis.IntervalRegularOn.evalIntervals_overlap_of_common_point_at_intervals}
-\lean{ComputableAnalysis.IntervalRegularOn.EvalIntervalsNested}
-\lean{ComputableAnalysis.IntervalRegularOn.EvalIntervalsNested.of_stageIndependent}
 \lean{ComputableAnalysis.Integral.intervalRegularDarbouxStage_contains_of_evalIntervalsNested}
 \lean{ComputableAnalysis.effectiveIntervalRegularDarbouxStage_contains_of_evalIntervalsNested}
 \lean{ComputableAnalysis.effectiveIntervalRegularDarbouxSchedule_widths_shrink_of_budget}
@@ -898,8 +870,6 @@ is used.
 \lean{ComputableAnalysis.GapAwareInverseSeparation}
 \lean{ComputableAnalysis.EffectiveInverseSeparation.toGapAware}
 \lean{ComputableAnalysis.InvertibleFunctionOnInterval}
-\lean{ComputableAnalysis.DyadicInverseTrace}
-\lean{ComputableAnalysis.DyadicInverseTrace.toSearch}
 \leanok
 
 Concrete branches should not repeat the inverse-record plumbing.  The
@@ -1050,8 +1020,6 @@ monotone derivative on cell -> endpoint secants -> derivative interval
 \lean{ComputableAnalysis.CurvatureFTCCertificate}
 \lean{ComputableAnalysis.CurvatureFTCCertificate.toDerivativeBoundFTC}
 \lean{ComputableAnalysis.CurvatureFTCCertificate.equiv_endpoint}
-\lean{ComputableAnalysis.squareCurvatureFTCData}
-\lean{ComputableAnalysis.squareCurvatureFTC_equiv_endpoint}
 \lean{ComputableAnalysis.curvatureFTC}
 \lean{ComputableAnalysis.ConvexFTCCertificate.equiv_endpoint}
 \lean{ComputableAnalysis.ConvexFTCCertificate.toCurvatureFTCCertificate}
@@ -1064,17 +1032,13 @@ monotone derivative on cell -> endpoint secants -> derivative interval
 \lean{ComputableAnalysis.TwoStageCandidateDerivativeFTC.closeAt}
 \lean{ComputableAnalysis.TwoStageCandidateDerivativeFTC.equiv_endpoint}
 \lean{ComputableAnalysis.twoStageCandidateDerivativeFTC}
-\lean{ComputableAnalysis.constructionFor_of_selectedStageCandidateDerivativeFTC}
-\lean{ComputableAnalysis.definiteIdentityFor_of_selectedStageCandidateDerivativeFTC}
 \lean{ComputableAnalysis.DerivativeBoundFTC.boundedIntegralRaw_width_le_of_tolerance}
 \lean{ComputableAnalysis.DerivativeBoundFTC.endpointRaw_width_le_of_tolerance}
-\lean{ComputableAnalysis.FTC.effectiveFTC_riemannRaw_equiv_endpointDifference_of_endpointAgreement}
-\lean{ComputableAnalysis.FTC.effectiveFTCStabilizedRaw_width_le_of_candidate}
-\lean{ComputableAnalysis.FTC.effectiveFTCStabilizedRaw_valid}
-\lean{ComputableAnalysis.FTC.effectiveFTCStabilizedRaw_equiv_endpointDifference}
-\lean{ComputableAnalysis.effectiveFTCStabilizedConstructionFor}
-\lean{ComputableAnalysis.effectiveFTCStabilizedIntegralFor_valid}
-\lean{ComputableAnalysis.effectiveFTCStabilizedIntegralFor_equiv_endpointDifference}
+\lean{ComputableAnalysis.DerivativeBoundFTC.boundedIntegralRaw_widths_shrink}
+\lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw}
+\lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_width_le}
+\lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_valid}
+\lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_equiv_endpointDifference}
 \leanok
 
 The effective FTC certificate also exposes endpoint representation transport
@@ -1099,15 +1063,18 @@ theorem only requires that both schedules close the same rational error budget.
 
 \lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.endpointRaw_equiv_endpointDifference}
 \lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.boundedIntegralRaw_equiv_endpointDifference}
+\lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_valid}
+\lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_equiv_endpointDifference}
 \lean{ComputableAnalysis.effectiveDerivativeBoundFTC}
 \lean{ComputableAnalysis.effectiveCanonicalFTC_endpointDifference_apply}
 \lean{ComputableAnalysis.Integral.effectiveGeneralIntegralFor_equiv_totalEndpointDifference_of_telescope}
 \leanok
 
-These two theorems are the general computable FTC closure: once a function
+The stabilized theorems are the general computable FTC closure: once a function
 supplies finite derivative bounds, local endpoint containments, a shrinking
-width budget, and endpoint-stage agreement, its bounded Riemann computation is
-proved equivalent to the primitive endpoint difference.  No completeness or
+width budget, and a valid endpoint computation, its bounded Riemann computation
+becomes a valid raw integral equivalent to the primitive endpoint difference.
+No prior nesting assumption, completeness theorem, or
 universal continuous-function integrability theorem is used.  The remaining
 work for a new function is therefore provider-specific finite data, not a new
 FTC foundation.
@@ -1158,9 +1125,10 @@ the FTC certificate.
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquare_derivative_width_le}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquare_derivative_certificate}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_endpoint}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_boundedIntegral_equiv_endpointDifference}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_value}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCStabilized}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCStabilized_valid}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCStabilized_equiv_endpointDifference}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCStabilized_equiv_value}
 \lean{ComputableAnalysis.effectiveFTC_sine_prefix_square}
 \leanok
 
@@ -1263,9 +1231,8 @@ certificate is isolated as
 \lean{ComputableAnalysis.QInterval.mulRealInterval_width_le_of_nonneg_bounded}.
 It states the finite bound directly for two nonnegative rational boxes.
 
-The reusable product-regularity constructor is
-\lean{ComputableAnalysis.FunctionOnInterval.IntervalRegularOn.mulOfSchedule}.
-It accepts the width and range budgets, but leaves the cross-stage product
+The reusable product-regularity constructor accepts width and range budgets,
+but leaves the cross-stage product
 containment as an explicit provider certificate.  This is the finite seam at
 which a nested-radical or other adaptive special-function evaluator enters
 the general FTC machinery.
@@ -1277,23 +1244,24 @@ without rebuilding a function-on-interval wrapper:
 
 For the concrete nested-radical sine-square evaluator, the same finite
 modulus is now available without reopening the raw-real packaging:
-The squared-sine implementation needs only one public transport pattern.  Its
-finite sums have an explicit width bound; one shared rational witness connects
-the public, nested-radical, and anchor boxes.  The anchor remains a parameter,
-so the transport layer cannot accidentally confuse \(\pi/4\) with \(1/4\).
+The squared-sine implementation uses a two-edge transport chain.  Its finite
+sums have explicit shrinking bounds; public boxes overlap nested-radical
+boxes, which overlap the normalized anchor.  Widening by the middle width
+makes the composition sound without demanding a three-way witness.
 
 \lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareLeftSum_width_le_of_sine_regular}
 \lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareIntegralRaw_widths_shrink}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareAnchorSharedWitness}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareAnchorSharedWitness.to_public_equiv}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareAnchorSharedWitness.stabilized_valid}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareAnchorSharedWitness.stabilized_equiv_value}
+\lean{ComputableAnalysis.RealRaw.overlapChainStabilize}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized_valid}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized_equiv_value}
 \leanok
 
 The calculus-facing specialization chooses the normalized tangent product and
 closes the public value at \(1/4\).
 
-\lean{ComputableAnalysis.effectiveDyadicPublicSquareIntegral_equiv_quarter}
+\lean{ComputableAnalysis.effectiveDyadicPublicSquareIntegral_chain_equiv_quarter}
+\lean{ComputableAnalysis.effectiveDyadicPublicSquareIntegral_chain_valid}
 \lean{ComputableAnalysis.SinPiIntegral.SinPiSquareEffectiveFTCData.integral_equiv_public_stabilized}
 \leanok
 
@@ -1357,8 +1325,6 @@ functions.  If (l<u<x<y<v<r), the two outer secants bracket the interior
 secant, and the bracket is packaged for direct consumption by a finite FTC or
 witness search:
 
-\lean{ComputableAnalysis.IntervalFunction.convex_outer_secants_bound_inner_secants}
-\lean{ComputableAnalysis.IntervalFunction.convexOuterSecantBracket}
 \leanok
 
 The interval-valued raw interface deliberately records only a weak
@@ -1406,13 +1372,9 @@ At the derivative level, centered secant hulls obey the same reversed order
 when their finite neighborhoods are separated.  This supplies the direct
 concave analogue of the convex derivative monotonicity lemma.
 
-\lean{ComputableAnalysis.concave_outer_secants_bound_inner_secants}
-\lean{ComputableAnalysis.concaveOuterSecantBracket}
 \lean{ComputableAnalysis.ConvexDerivative.centeredInterval_weakLe_of_concave}
 \lean{ComputableAnalysis.ConcaveDerivative.Pointwise}
 \lean{ComputableAnalysis.ConcaveDerivative.Pointwise.compute_weakLe_of_gap}
-\lean{ComputableAnalysis.ConcaveDerivative.PointwiseFunction.toRealFunRaw}
-\lean{ComputableAnalysis.ConcaveDerivative.PointwiseFunction.valid}
 \leanok
 
 The provider-facing curvature closure is available directly from the scoped
@@ -1425,7 +1387,6 @@ effective-calculus entry point:
 \leanok
 
 \lean{ComputableAnalysis.Integral.finiteQuadrature_average_between_bounds}
-\lean{ComputableAnalysis.ExactCellOrderPreservation.integral_average_overlaps_bounds}
 \lean{ComputableAnalysis.CandidateDerivativeCellControl.endpoint_average_overlaps_bound}
 \lean{ComputableAnalysis.Integral.effectiveMeanValueBracket}
 \lean{ComputableAnalysis.QInterval.divByRat_overlaps_of_pos}
@@ -1502,7 +1463,6 @@ calculus foundations.
 \lean{ComputableAnalysis.FiniteLHopitalCertificate.affine_residual_quotient_eq_base_of_cross_product_eq_zero}
 \lean{ComputableAnalysis.FiniteLHopitalCertificate.quadratic_linear_worked_remainder}
 \lean{ComputableAnalysis.FiniteLHopitalCertificate.quadratic_linear_worked_remainder_at_stage}
-\lean{ComputableAnalysis.FiniteLHopitalCertificate.cubic_linear_worked_remainder_at_stage_error_le_four_div}
 \leanok
 
 This is the project's finite L'Hôpital pattern. It supports a requested

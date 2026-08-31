@@ -3247,10 +3247,11 @@ theorem DyadicNestedRadicalSquareAnchorCommonWitness.to_equiv
   exact dyadicNestedRadicalSquareIntegralRaw_equiv_of_overlap
     anchor h.to_overlap
 
-/- A shared witness is the weakest direct three-way certificate used by the
-public route: one rational point lies in the public, nested, and anchor
-intervals at every stage.  It avoids assuming that either overlap relation
-can be composed transitively. -/
+/- Legacy compatibility certificate. It asks one rational point to lie in
+all three intervals at every stage. New proofs should use the weaker pairwise
+`DyadicSquareCircleOverlapFamily` and
+`DyadicNestedRadicalSquareAnchorCommonWitness`, composed by
+`dyadicPublicSquareIntegralRaw_chainStabilized`. -/
 structure DyadicPublicSquareAnchorSharedWitness
     (S : ArctanSinPiConstruction) (anchor : RealRaw) where
   witness : Nat -> Rat
@@ -4245,6 +4246,71 @@ theorem dyadicPublicSquareIntegralRaw_widths_shrink
   exact shrinksToZero_of_natOverSuccBound
     (fun n => dyadicPublicSquareLeftSum_width_le_of_sine_regular S hsine n)
 
+/-! Canonical transport through the nested-radical implementation.
+
+The public and nested-radical finite sums need not be valid raw reals before
+stabilization, so their two overlap edges cannot be composed by abstract
+transitivity. `overlapChainStabilize` performs the missing finite operation:
+it widens the public stage by the vanishing nested-radical width and then
+intersects prefixes using the valid anchor's width schedule. -/
+
+def dyadicPublicSquareIntegralRaw_chainStabilized
+    (S : ArctanSinPiConstruction) (anchor : RealRaw) : RealRaw :=
+  RealRaw.overlapChainStabilize
+    (dyadicPublicSquareIntegralRaw S)
+    dyadicNestedRadicalSquareIntegralRaw
+    anchor
+
+theorem dyadicPublicSquareIntegralRaw_chainStabilized_width_le
+    (S : ArctanSinPiConstruction) (anchor : RealRaw) (n : Nat) :
+    ((dyadicPublicSquareIntegralRaw_chainStabilized S anchor).compute n).width <=
+      (dyadicPublicSquareLeftSum S n).width +
+        2 * (dyadicNestedRadicalSquareLeftSum n).width +
+          2 * (anchor.compute n).width := by
+  exact RealRaw.overlapChainStabilize_width_le
+    (dyadicPublicSquareIntegralRaw S)
+    dyadicNestedRadicalSquareIntegralRaw anchor n
+
+theorem dyadicPublicSquareIntegralRaw_chainStabilized_valid
+    {S : ArctanSinPiConstruction} {anchor : RealRaw}
+    (hsine : IntervalRegularOn S.onHalf)
+    (hanchor : anchor.Valid)
+    (hcircle : DyadicSquareCircleOverlapFamily S)
+    (hcommon : DyadicNestedRadicalSquareAnchorCommonWitness anchor) :
+    (dyadicPublicSquareIntegralRaw_chainStabilized S anchor).Valid := by
+  exact RealRaw.overlapChainStabilize_valid
+    (dyadicPublicSquareIntegralRaw_widths_shrink S hsine)
+    dyadicNestedRadicalSquareIntegralRaw_widths_shrink
+    hanchor hcircle.to_public_equiv_nested hcommon.to_equiv
+
+theorem dyadicPublicSquareIntegralRaw_chainStabilized_equiv_anchor
+    {S : ArctanSinPiConstruction} {anchor : RealRaw}
+    (hanchor : anchor.Valid)
+    (hcircle : DyadicSquareCircleOverlapFamily S)
+    (hcommon : DyadicNestedRadicalSquareAnchorCommonWitness anchor) :
+    (dyadicPublicSquareIntegralRaw_chainStabilized S anchor).Equiv anchor := by
+  exact RealRaw.overlapChainStabilize_equiv_anchor
+    hanchor hcircle.to_public_equiv_nested hcommon.to_equiv
+
+theorem dyadicPublicSquareIntegralRaw_chainStabilized_equiv_value
+    {S : ArctanSinPiConstruction} {anchor : RealRaw}
+    (hsine : IntervalRegularOn S.onHalf)
+    (hanchor : anchor.Valid)
+    (hcircle : DyadicSquareCircleOverlapFamily S)
+    (hcommon : DyadicNestedRadicalSquareAnchorCommonWitness anchor)
+    {q : Rat} (hvalue : anchor.Equiv (RealRaw.ofRat q)) :
+    (dyadicPublicSquareIntegralRaw_chainStabilized S anchor).Equiv
+      (RealRaw.ofRat q) := by
+  exact RealRaw.equiv_trans
+    (dyadicPublicSquareIntegralRaw_chainStabilized_valid
+      hsine hanchor hcircle hcommon)
+    hanchor (RealRaw.ofRat_valid q)
+    (dyadicPublicSquareIntegralRaw_chainStabilized_equiv_anchor
+      hanchor hcircle hcommon)
+    hvalue
+
+/- Legacy direct-anchor stabilizer. The canonical pairwise route is
+`dyadicPublicSquareIntegralRaw_chainStabilized`. -/
 def dyadicPublicSquareIntegralRaw_stabilized
     (S : ArctanSinPiConstruction) (anchor : RealRaw) : RealRaw :=
   RealRaw.prefixStabilize (dyadicPublicSquareIntegralRaw S)

@@ -1124,6 +1124,60 @@ theorem sineTaylorPrefixThreeSquareEffectiveFTC_boundedIntegral_equiv_endpointDi
     sineTaylorPrefixThreeSquareEffectiveFTCData
     sineTaylorPrefixThreeSquareEffectiveFTCEndpointValid
 
+/-! Canonical valid output of the non-polynomial effective-FTC regression.
+The native bounded sums are free to choose unrelated partitions from one
+requested tolerance to the next; the general FTC stabilizer now supplies the
+nesting rather than asking this example to prove it again. -/
+def sineTaylorPrefixThreeSquareEffectiveFTCStabilized : RealRaw :=
+  sineTaylorPrefixThreeSquareEffectiveFTCData.stabilizedBoundedIntegralRaw
+    sineTaylorPrefixThreeSquareEffectiveFTCEndpointValid
+
+theorem sineTaylorPrefixThreeSquareEffectiveFTCStabilized_valid :
+    sineTaylorPrefixThreeSquareEffectiveFTCStabilized.Valid := by
+  exact EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_valid
+    sineTaylorPrefixThreeSquareEffectiveFTCData
+    sineTaylorPrefixThreeSquareEffectiveFTCEndpointValid
+
+theorem sineTaylorPrefixThreeSquareEffectiveFTCStabilized_equiv_endpointDifference :
+    sineTaylorPrefixThreeSquareEffectiveFTCStabilized.Equiv
+      (endpointDifferenceRaw sineTaylorPrefixThreeSquarePrimitiveRaw 0
+        ((1 : Rat) / 2)
+        sineTaylorPrefixThreeSquareEffectiveFTCEndpointValid) := by
+  exact EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_equiv_endpointDifference
+    sineTaylorPrefixThreeSquareEffectiveFTCData
+    sineTaylorPrefixThreeSquareEffectiveFTCEndpointValid
+
+theorem sineTaylorPrefixThreeSquare_endpointDifference_equiv_value :
+    (endpointDifferenceRaw sineTaylorPrefixThreeSquarePrimitiveRaw 0
+      ((1 : Rat) / 2)
+      sineTaylorPrefixThreeSquareEffectiveFTCEndpointValid).Equiv
+      (RealRaw.ofRat (6389 / 161280)) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+  have hzero :
+      ((1 / 2 : Rat) ^ 3 / 3 - (1 / 2 : Rat) ^ 5 / 15 +
+        (1 / 2 : Rat) ^ 7 / 252) -
+        ((0 : Rat) ^ 3 / 3 - (0 : Rat) ^ 5 / 15 +
+          (0 : Rat) ^ 7 / 252) = 6389 / 161280 := by native_decide
+  simp [endpointDifferenceRaw, endpointDifferenceCompute,
+    endpointDifferenceInterval, sineTaylorPrefixThreeSquarePrimitiveRaw,
+    RealFunRaw.exact, RealRaw.ofRat, hzero, QInterval.Overlaps]
+
+theorem sineTaylorPrefixThreeSquareEffectiveFTCStabilized_equiv_value :
+    sineTaylorPrefixThreeSquareEffectiveFTCStabilized.Equiv
+      (RealRaw.ofRat (6389 / 161280)) := by
+  have hendpoint :
+      (endpointDifferenceRaw sineTaylorPrefixThreeSquarePrimitiveRaw 0
+        ((1 : Rat) / 2)
+        sineTaylorPrefixThreeSquareEffectiveFTCEndpointValid).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using
+      sineTaylorPrefixThreeSquareEffectiveFTCEndpointValid
+  exact RealRaw.equiv_trans
+    sineTaylorPrefixThreeSquareEffectiveFTCStabilized_valid
+    hendpoint (RealRaw.ofRat_valid _)
+    sineTaylorPrefixThreeSquareEffectiveFTCStabilized_equiv_endpointDifference
+    sineTaylorPrefixThreeSquare_endpointDifference_equiv_value
+
 theorem sineTaylorPrefixThreeSquareEffectiveFTC_equiv_value :
     sineTaylorPrefixThreeSquareEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
       (RealRaw.ofRat (6389 / 161280)) := by

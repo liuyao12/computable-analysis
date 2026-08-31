@@ -1461,6 +1461,40 @@ def precisionAtStage (n : Nat) : QPos :=
     else
       { val := (1 / (n : Rat)), property := one_div_nat_pos (Nat.pos_of_ne_zero hn) }
 
+/-- The public stage tolerance is a potential-infinity schedule: for every
+positive rational target, all sufficiently late stages are below it. -/
+theorem precisionAtStage_shrinksToZero :
+    ShrinksToZero (fun n => (precisionAtStage n).val) := by
+  intro eps
+  let N : Nat := eps.val.den + 1
+  refine ⟨N, ?_⟩
+  intro n hn
+  have hNpos : 0 < N := by
+    dsimp [N]
+    omega
+  have hnpos : 0 < n := Nat.lt_of_lt_of_le hNpos hn
+  have hmono : (1 / (n : Rat)) <= 1 / (N : Rat) := by
+    have hNrat : (0 : Rat) < (N : Rat) := (Rat.natCast_pos).2 hNpos
+    have hnrat : (0 : Rat) < (n : Rat) := (Rat.natCast_pos).2 hnpos
+    have hNne : (N : Rat) ≠ 0 := Rat.ne_of_gt hNrat
+    have hnne : (n : Rat) ≠ 0 := Rat.ne_of_gt hnrat
+    apply Rat.le_of_mul_le_mul_right (c := (N : Rat) * (n : Rat))
+    · calc
+        (1 / (n : Rat)) * ((N : Rat) * (n : Rat)) = (N : Rat) := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+        _ <= (n : Rat) := by exact_mod_cast hn
+        _ = (1 / (N : Rat)) * ((N : Rat) * (n : Rat)) := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    · exact Rat.mul_pos hNrat hnrat
+  calc
+    (precisionAtStage n).val = 1 / (n : Rat) := by
+      simp [precisionAtStage, Nat.ne_of_gt hnpos]
+    _ <= 1 / (N : Rat) := hmono
+    _ = 1 / (((eps.val.den + 1 : Nat) : Rat)) := by rfl
+    _ <= eps.val := one_div_den_succ_le_of_pos eps.property
+
 def intervalCloseAtPrecision (I J : QInterval) (n : Nat) : Prop :=
   QInterval.CloseAt I J (precisionAtStage n)
 
@@ -5552,6 +5586,33 @@ theorem boundedIntegralRaw_precision_witness
       simp [n, precisionAtStage]
     _ <= eps.val := one_div_den_succ_le_of_pos eps.property
 
+/-- The finite bounded sums shrink uniformly along the public stage schedule.
+Unlike `boundedIntegralRaw_precision_witness`, this is the eventual statement
+needed by a valid raw-real construction. -/
+theorem boundedIntegralRaw_widths_shrink
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : DerivativeBoundFTC F dF a b) :
+    RealRaw.WidthsShrinkToZero h.boundedIntegralRaw.compute := by
+  intro eps
+  obtain ⟨N, hN⟩ := precisionAtStage_shrinksToZero eps
+  refine ⟨N, ?_⟩
+  intro n hn
+  exact Rat.le_trans
+    (h.boundedIntegralRaw_width_le_of_tolerance n)
+    (hN n hn)
+
+theorem endpointRaw_widths_shrink
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : DerivativeBoundFTC F dF a b) :
+    RealRaw.WidthsShrinkToZero h.endpointRaw.compute := by
+  intro eps
+  obtain ⟨N, hN⟩ := precisionAtStage_shrinksToZero eps
+  refine ⟨N, ?_⟩
+  intro n hn
+  exact Rat.le_trans
+    (h.endpointRaw_width_le_of_tolerance n)
+    (hN n hn)
+
 /-- The derivative-bound FTC bridge, in computable-real form. -/
 theorem equiv_endpoint
     {F dF : RealFunRaw} {a b : Rat}
@@ -5763,6 +5824,61 @@ theorem EffectiveDerivativeBoundFTC.boundedIntegralRaw_equiv_endpointDifference
     (endpointDifferenceInterval F a b n)
   exact ⟨Rat.le_trans hcontains.1 hover2.1,
     Rat.le_trans hover2.2 hcontains.2⟩
+
+/-! The canonical effective FTC output. The native finite bounded sums may
+select unrelated partitions at successive requested precisions, so they need
+not themselves be nested. Prefix stabilization supplies nesting from their
+proved shrinking widths and their finite overlap with the primitive endpoint.
+No prior validity assumption on the Riemann candidate is required. -/
+
+def EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveDerivativeBoundFTC F dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b)) :
+    RealRaw :=
+  RealRaw.prefixStabilize h.toDerivativeBoundFTC.boundedIntegralRaw
+    (fun n =>
+      ((endpointDifferenceRaw F a b hendpoint).compute n).width)
+
+theorem EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_width_le
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveDerivativeBoundFTC F dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b))
+    (n : Nat) :
+    ((h.stabilizedBoundedIntegralRaw hendpoint).compute n).width <=
+      (h.toDerivativeBoundFTC.boundedIntegralRaw.compute n).width +
+        2 * ((endpointDifferenceRaw F a b hendpoint).compute n).width := by
+  exact RealRaw.prefixStabilize_width_le_current_expand
+    h.toDerivativeBoundFTC.boundedIntegralRaw
+    (fun n =>
+      ((endpointDifferenceRaw F a b hendpoint).compute n).width) n
+
+theorem EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_valid
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveDerivativeBoundFTC F dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b)) :
+    (h.stabilizedBoundedIntegralRaw hendpoint).Valid := by
+  unfold EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw
+  apply RealRaw.prefixStabilize_valid
+    h.toDerivativeBoundFTC.boundedIntegralRaw_widths_shrink
+    (by simpa [endpointDifferenceRaw, RealRaw.Valid] using hendpoint)
+    (h.boundedIntegralRaw_equiv_endpointDifference hendpoint)
+  · intro n
+    exact Rat.le_refl
+  · exact hendpoint.2.2
+
+theorem EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_equiv_endpointDifference
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveDerivativeBoundFTC F dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b)) :
+    (h.stabilizedBoundedIntegralRaw hendpoint).Equiv
+      (endpointDifferenceRaw F a b hendpoint) := by
+  unfold EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw
+  apply RealRaw.prefixStabilize_equiv_anchor
+    (by simpa [endpointDifferenceRaw, RealRaw.Valid] using hendpoint)
+    (h.boundedIntegralRaw_equiv_endpointDifference hendpoint)
+  intro n
+  exact Rat.le_refl
 
 /-- Global finite certificate for the "candidate derivative versus computed
 secants" strategy.

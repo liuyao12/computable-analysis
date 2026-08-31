@@ -62,7 +62,6 @@ small fixed dimensions.
 
 The finite algebraic core is explicit in Lean:
 
-\lean{ComputableAnalysis.LinearODE.solvesRecurrence_eq_trajectory}
 \lean{ComputableAnalysis.LinearODE.finiteSum_qabs_mul_le}
 \lean{ComputableAnalysis.LinearODE.finiteSum_le}
 \lean{ComputableAnalysis.LinearODE.matrixApply_qabs_le}
@@ -96,14 +95,8 @@ The finite algebraic core is explicit in Lean:
 \lean{ComputableAnalysis.LinearODE.chronologicalStepProduct_columnAbsSum_le_pow}
 \lean{ComputableAnalysis.LinearODE.chronologicalStepProduct_stateAbsSum_le}
 \lean{ComputableAnalysis.LinearODE.chronologicalProduct_stateAbsSum_le}
-\lean{ComputableAnalysis.LinearODE.solvesHomogeneousRecurrence_eq_homogeneousTrajectory}
-\lean{ComputableAnalysis.LinearODE.solvesHomogeneousRecurrence_zero}
-\lean{ComputableAnalysis.LinearODE.homogeneousTrajectory_eq_chronologicalStepProduct}
-\lean{ComputableAnalysis.LinearODE.homogeneousTrajectory_vectorAdd}
-\lean{ComputableAnalysis.LinearODE.homogeneousTrajectory_vectorScale}
 \lean{ComputableAnalysis.LinearODE.matrixApply_matrixAdd}
 \lean{ComputableAnalysis.LinearODE.matrixApply_matrixScale}
-\lean{ComputableAnalysis.LinearODE.trajectory_eq_transition_add_zeroInitial}
 \lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum}
 \lean{ComputableAnalysis.LinearODE.discretePeanoBakerExpansion}
 \lean{ComputableAnalysis.LinearODE.orderedIndexWords_length}
@@ -211,13 +204,6 @@ forcing samples -> time-ordered transitions -> finite Duhamel sum
                                       -> exact sampled trajectory
 \end{verbatim}
 
-\lean{ComputableAnalysis.LinearODE.trajectory_zeroInitial_eq_duhamelSum}
-\lean{ComputableAnalysis.LinearODE.trajectory_eq_transition_add_duhamelSum}
-\lean{ComputableAnalysis.LinearODE.vectorSequenceSum_split}
-\lean{ComputableAnalysis.LinearODE.vectorAbsSum_add_le}
-\lean{ComputableAnalysis.LinearODE.geometricBudget}
-\lean{ComputableAnalysis.LinearODE.vectorSequenceSum_abs_le_geometric}
-\lean{ComputableAnalysis.LinearODE.duhamelSum_abs_le_geometric}
 \leanok
 
 The forcing sum has the same cut law as the transition product: its prefix
@@ -377,10 +363,8 @@ certified `RealRaw` computation.  A second edge transports the same result
 to the canonical factorial power-series evaluator, so later ODE identities
 do not depend on the preferred exponential implementation.
 
-The checked finite uniqueness statement is the recurrence theorem above; the
-two-by-two instance is also available as
-\lean{ComputableAnalysis.LinearODE.twoByTwo_solution_unique}.
-The scoped calculus entry point also exposes this finite rational theorem as
+The checked finite uniqueness statement is the recurrence theorem above.  The
+scoped calculus entry point exposes its two-by-two finite rational instance as
 \lean{ComputableAnalysis.effectiveTwoByTwoSolutionUnique}.
 
 The direct scalar uniqueness route is also exposed independently of the
@@ -536,12 +520,8 @@ factorial-prefix coordinates -> S'=C, C'=-S -> initial-value certificate
 The certificate remains a representation-level candidate until a separate
 uniqueness/transport proof identifies it with the rational-circle chart.
 
-\lean{ComputableAnalysis.RotationSeries.RotationDerivativeInitialCertificate}
-\lean{ComputableAnalysis.RotationSeries.uniformRotationOnTwo_rotationInitialCertificate}
 \lean{ComputableAnalysis.RotationSeries.uniformRotationSinOnTwo_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.RotationSeries.uniformRotationCosOnTwo_hasDerivativeOnInterval}
-\lean{ComputableAnalysis.RotationSeries.uniformRotationSinOnTwo_zero_equiv_zero}
-\lean{ComputableAnalysis.RotationSeries.uniformRotationCosOnTwo_zero_equiv_one}
 \leanok
 
 \section{Vector ODE admission checklist}
@@ -665,7 +645,5 @@ enumerate every syntactic variant.
 \lean{ComputableAnalysis.ComplexPathIntegral.polygonalDisplacementTo_split_at}
 \lean{ComputableAnalysis.ComplexPathIntegral.finiteConstantDifferentialExactness_closed}
 \lean{ComputableAnalysis.ComplexPathIntegral.finitePolynomialDifferentialExactness_closed}
-\lean{ComputableAnalysis.unitSquareZDifferentialCertificate}
-\lean{ComputableAnalysis.unitSquareZDifferentialCertificate_exactDisplacement_zero}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.toQComplex_pointMul}
 \leanok

@@ -1,362 +1,125 @@
 \chapter{Formalization Roadmap}
 
-The blueprint is a map, not a second proof. Figures show the computation;
-pseudocode names the invariant; Lean carries the details.
-
-The focused Lean entry point for this route is
-\texttt{ComputableAnalysis.CalculusFoundation}. It collects the chapter
-imports without requiring an agent to depend on the full 100-theorem
-benchmark catalogue.
-
-As an integration check, this entry point builds under Lean 4.33 with all 106
-imported modules. The focused entry point is therefore the recommended first
-compile test for a new proof, while individual chapter modules remain useful
-for fast iteration.
-
-The dependency boundary is intentional and auditable: the project source
-imports project modules plus Lean's rational ordered-arithmetic substrate
-(`Init.Grind.Ordered.Rat`).  The scoped calculus chain does not import
-mathlib's standard real numbers, measure theory, topology, or completion
-interfaces.  Any stronger classical bridge must therefore appear as an
-explicit theorem target rather than entering through an unnoticed import.
+The blueprint is a map, not a second proof.  Figures show computations,
+pseudocode states invariants, and Lean carries the finite estimates.
 
 \section{Admission rule}
 
-Include a result when it yields a rational certificate, a shrinking `realRaw`,
-a valid `real`, or an overlap between independent computations. Reuse routine
-finite combinatorics from the library.
+Add a result only when it contributes a new interval algorithm, represented
+domain, convergence estimate, integral/derivative certificate, or
+equivalence edge.  Routine finite algebra and combinatorics are dependencies.
+Scalar multiples, sign changes, degree variants, and finitely piecewise
+functions are transported from one representative theorem.
 
-Use one representative for each computational pattern. A scalar multiple,
-sign change, or routine composition is a transport of an existing certificate,
-not a new chapter theorem. If a function is naturally piecewise, split the
-domain into its finitely many pieces and assemble the separate integrals. For
-example, $|x|$ on $[-1,1]$ is two affine-cell integrals joined by a finite
-sum. The foundation should formalize the assembly rule once and spend new
-proof effort on genuinely new evaluators, estimates, or equivalence edges.
+The canonical Lean entry point is
+\texttt{ComputableAnalysis.CalculusFoundation}.  Its import chain uses Lean's
+rational ordered arithmetic and project modules, not standard real numbers,
+measure theory, topology, or a completion construction.
 
-\section{Order}
-
-\begin{verbatim}
-foundations -> circle/trigonometry -> integral algorithm -> effective FTC
-            -> power series -> exponential/logarithm -> linear ODEs
-\end{verbatim}
-
-\section{List of 100 Theorem Formalization Challenge}
-\label{sec:100-theorem-alignment}
-
-The preface indexes the scoped entries and links each to its blueprint
-statement. The list is a progress scoreboard, not a promise to reproduce the
-unrestricted classical theorem.
-
-The authoritative computable proxy currently contains 52 scoped entries. Its
-Lean registry, including machine-checked coverage of the benchmark numbers, is
-\texttt{ComputableAnalysis/WiedijkScoreboard.lean}. Each entry records the
-project-native replacement: a finite certificate, a raw-real equivalence, or
-an explicitly named constructive substitute when the unrestricted theorem
-requires classical completeness or another out-of-scope object.
-
-\section{Proof frontier}
-
-The rational circle, dyadic sine values, left/right/trapezoid rectangle sums
-and their finite transport and width budgets, the monotone endpoint-range
-overlap theorem, the completed
-Riemann--Stieltjes sine integral, the arctangent effective FTC instance, effective FTC interfaces, interval-regularity to
-epsilon--delta continuity, polynomial/Taylor secant certificates,
-power-series tails, finite Fourier transforms, finite Gaussian prefixes,
-finite sine/cosine primitive prefixes and their endpoint identities,
-separable finite product sums, the rational \(n\)-ball recurrence, logarithm,
-rotation derivatives, the finite L'Hôpital remainder pattern, the tangent-square
-FTC instance, the common-prefix exponential FTC instance, and the centered
-exponential initial-value certificate are checked in Lean. The scalar linear
-ODE chapter has a checked finite-mesh uniqueness closure, conditional on its
-explicit rational envelope provider; the provider itself remains a stated
-analytic certificate obligation. The finite raw-sum algebra used to
-concatenate certified pieces is also checked, so adjacent-interval and
-multi-turn proofs have an explicit assembly layer.
-The public sine theorem is exposed as
-\lean{ComputableAnalysis.effectiveSinPiHalfIntegral_equiv_reciprocalPi}
-and its tangent-chart FTC provenance as
-\lean{ComputableAnalysis.effectiveSinPiHalfIntegral_equiv_reciprocalPi_tangentChartFTC}.
-These identify the computable tangent-coordinate integral; the separate
-equal-dyadic nested-radical transport remains the main representation
-frontier.
-
-The monomial layer now has a degree-uniform primitive endpoint computation at
-arbitrary rational endpoints, together with an explicit dyadic raw-integral
-width contract. Finite Taylor certificates likewise expose their endpoint
-increments as native `realRaw` computations through the public calculus
-entry point. The
-\lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference_compute}
-\lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference_equiv_ofRat}
-\lean{ComputableAnalysis.Integral.exactRat_pow_integral_raw_compute_width}
-\lean{ComputableAnalysis.FiniteTaylorCertificate.endpointRaw_equiv_prefixIncrement}
-\lean{ComputableAnalysis.effectiveFiniteTaylorCertificate_endpointRaw_valid}
-\lean{ComputableAnalysis.effectiveFiniteTaylorCertificate_endpointRaw_equiv_prefixIncrement}
-\lean{ComputableAnalysis.effectiveExactRatPowDefiniteIdentity}
-\lean{ComputableAnalysis.effectiveExactRatPowIntegral_equiv_ofRat}
-\lean{ComputableAnalysis.effectiveExactRatQuarticDefiniteIdentity}
-\lean{ComputableAnalysis.effectiveExactRatQuinticDefiniteIdentity}
-two-stage product FTC for the positive (x\arctan(x)) branch is also checked:
-its stabilized bounded derivative sum is transported to an independent
-arctangent rectangle evaluator. The
-first non-monotone endpoint identity is now also checked: the two affine cells
-for \(\lvert x\rvert\) on \([-1,1]\) are transported through the separate
-primitive \(x\lvert x\rvert/2\) to the value (1), and the completed finite-turn
-candidate now has an explicit public `ConstructionFor` bridge to its certified
-anchor. The
-principal unfinished representation step is the equal-dyadic sine FTC
-transport; the integral itself is already complete through the tangent-chart
-Riemann--Stieltjes route. The
-monotone Darboux machinery, including its automatic linear schedule and
-explicit width budget, and the sine modulus are already present; the
-remaining provider is target-directed inverse data that transports each
-half-angle box to a certified tangent witness, or an equivalent dyadic
-bisection trace.  The parity assembly itself is now packaged in the direct
-overlap adapter
-\texttt{dyadicNestedRadical\_sample\_overlap\_of\_canonical\_halfAngle\_certificate\_family}:
-once the canonical rational half-angle certificates are supplied, it proves
-all dyadic sample overlaps without asserting evaluator equality.  The older
-`DyadicNestedRadicalBranchCertificateFamily` remains available for the
-stronger equality-shaped route.  The missing input is therefore the genuine
-all-depth geometric certificate family, not the parity induction or a hidden
-completed-real argument.
-The precision-indexed certificate interface is now connected to the public
-stage-indexed interface by
-\lean{ComputableAnalysis.canonical_dyadic_halfAngle_certificate_of_native_precision}
-and
-\lean{ComputableAnalysis.canonical_dyadic_halfAngle_certificate_family_of_precision_family};
-the packaged overlap family can be built with
-\lean{ComputableAnalysis.DyadicSquareCircleOverlapFamily.of_precision_halfAngle_certificate_family}.
-This is a finite geometric certificate to add, not a hidden use of completed
-real numbers.
-
-The search-facing form is now packaged as
-\lean{ComputableAnalysis.SinPiIntegral.DyadicCanonicalCertificateSearchFamily}.
-It exposes a finite rational candidate list and a proof that the executable
-witness search succeeds at each precision, depth, and interior dyadic sample;
-\lean{ComputableAnalysis.SinPiIntegral.DyadicCanonicalCertificateSearchFamily.toCanonicalFamily}
-then supplies the canonical certificate family used by the existing transport.
-For proof authors who want to expose the witness itself, the more direct
-\lean{ComputableAnalysis.SinPiIntegral.DyadicCanonicalCertificateCandidateFamily}
-requires only a listed admissible rational; its
-\lean{ComputableAnalysis.SinPiIntegral.DyadicCanonicalCertificateCandidateFamily.toSearchFamily}
-conversion derives the search-success field by finite list recursion.
-
-The missing certificate has a deliberately concrete shape.  For every
-precision, depth, and dyadic index, provide rational data
+\section{Dependency order}
 
 \begin{verbatim}
-cosine box C in [0,1], witnesses s,c in Q
-s >= 0, c >= 0, s^2 + c^2 = 1
-s lies in the nested-radical sine box; c lies in C
-the half-angle tangent interval from (s,C) lies in the inverse box
+foundations -> circle/trigonometry -> finite integrals -> effective FTC
+            -> series/Fourier -> exponential/logarithm -> linear ODEs
 \end{verbatim}
 
-The even child reuses the parent sine and refines its cosine; the odd child
-uses the half-angle square-root step; the reflected branch uses the terminal
-cosine symmetry.  These three finite clauses are exactly the fields of
-\lean{ComputableAnalysis.CanonicalDyadicHalfAngleCertificateAt}.  Once they
-are supplied recursively, the existing parity and FTC adapters produce the
-equal-dyadic sine integral; no new real-number existence theorem is needed.
+Algebraic root certificates form a parallel branch.  They enter the calculus
+route only when a special function or complex application needs them.
 
-The candidate side is already executable and shrinking: the first four finite
-depths have explicit overlap checks against the independent Stieltjes
-evaluator.  These opt-in anchors (from
-\texttt{ComputableAnalysis.SinPiIntegralAnchors}) are recorded by
-\texttt{dyadicNestedRadicalLeftSum\_zero\_overlaps\_stieltjes} and
-\texttt{dyadicNestedRadicalLeftSum\_one\_overlaps\_stieltjes} and
-\texttt{dyadicNestedRadicalLeftSum\_two\_overlaps\_stieltjes},
-\texttt{dyadicNestedRadicalLeftSum\_three\_overlaps\_stieltjes}, and
-\texttt{dyadicNestedRadicalLeftSum\_four\_overlaps\_stieltjes}; the remaining theorem is
-the uniform branch transport, not the existence of the candidate algorithm.
-The finite-search side is now complete as an interface: an explicit admissible
-rational witness in a candidate list yields a certified search hit, and
-\texttt{DyadicTangentWitnessFamily.of\_canonical\_candidate\_family} packages
-such families directly.  What remains is the geometric proof that supplies
-those admissible witnesses uniformly at every depth and precision.
+\section{Canonical FTC boundary}
 
-For the squared-sine route, the same interface is now cell-indexed:
-\texttt{RationalTangentSquareWitnessCellFamily} records the tangent, sine, and
-cosine boxes together with a finite grid choice for every dyadic cell, and its
-search/overlap adapters feed the square transport directly.  The geometric
-construction of this family remains the substantive open step.
+The effective derivative-bound certificate now produces a valid integral,
+not merely a same-stage overlap:
 
-The same accounting applies to the squared-sine experiment.  The tangent
-chart itself has a completed effective FTC with natural endpoint \(\pi/4\).
-The intended \(\sin^2\) integral is a different, normalized object: the
-Jacobian contributes a reciprocal-\(\pi\) factor, and the equal-dyadic
-nested-radical boxes must overlap that normalized product at every stage.
-The direct Lipschitz-dyadic tangent-square computation and the scheduled
-effective-FTC computation are now joined by the explicit
-\texttt{TangentSquareIntegralEffectiveFTCOverlap} certificate.  Its
-\texttt{to\_equiv} and \texttt{to\_halfQuarterTurn} theorems reduce their
-identification to finite stagewise rational overlaps and then transport the
-result to the quarter-turn anchor.  Thus the remaining squared-sine work is
-the geometric overlap with this anchor, not a hidden appeal to a completed
-real integral.
-The repository currently checks the product validity and the first finite
-overlaps; the all-stage common-witness family is the remaining theorem.
-The normalized product overlap is explicitly checked at dyadic stages 0, 1,
-and 2; these are regression anchors, not a substitute for the all-stage
-certificate.
+\begin{verbatim}
+finite cell bounds
+  -> bounded sums with shrinking width
+  -> overlap with valid endpoint computation
+  -> prefix stabilization
+  -> valid integral equivalent to endpoint difference
+\end{verbatim}
 
-At stage 2 the square-aware search now covers all three interior samples:
-the positive branches use witnesses \(1581/8192\) and \(27135/65536\), while
-the reflected branch uses \(379/256\).  These checks validate the three
-finite branch shapes; they do not assert the uniform geometric family needed
-for arbitrary depth.
-
-\lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_stage_two_left_demo}
-\lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_stage_two_middle_demo}
-\lean{ComputableAnalysis.SinPiIntegral.rationalTangentSquareWitnessSearch_stage_two_right_demo}
+\lean{ComputableAnalysis.DerivativeBoundFTC.boundedIntegralRaw_widths_shrink}
+\lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_valid}
+\lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_equiv_endpointDifference}
 \leanok
 
-\lean{ComputableAnalysis.SinPiIntegral.DyadicHalfAngleChildCertificate}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicReflectedHalfAngleCertificate}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_branch_certificate_families}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_canonical_search_family}
+Successive finite sums may use unrelated partitions.  The proof derives
+shrinking width and then supplies nestedness; it does not assume the native
+candidate was already a valid \texttt{realRaw}.  The squared finite sine
+prefix is the first non-polynomial regression of this exact route.
+
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCStabilized_valid}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCStabilized_equiv_value}
 \leanok
 
-The centered exponential chart has now crossed that boundary as well:
-`uniformExpOnSymmetricUnit_effectiveFTC` and
-`uniformExpOnSymmetricUnit_solvesSelfDerivative` supply the partition-level
-endpoint and local scalar-ODE certificates on `[-1,1]`, and the stabilized
-integral is transported to the
-endpoint difference.  It is therefore both a completed exponential FTC
-instance and the local ODE provider; the remaining exponential frontier is
-representation transport for a fully general inverse branch.
+\section{Main representation frontier}
 
-The linear automatic schedule now exposes its explicit finite error budget via
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxScheduleRaw_linear_width_le}.
-For general effective continuity, the remaining schedule problem is explicit:
-choose a mesh and evaluator precision satisfying the interval-modulus budget,
-then prove cross-stage nesting and shrinking. The blueprint treats this as a
-formal theorem target rather than calling it the classical compactness
-argument.
+For the equal-dyadic integral of \(\sin(\pi x)^2\), two pairwise geometric
+certificates remain:
 
-For the stronger endpoint-ordered monotone evaluator, this schedule problem is
-now closed for dyadic meshes with an arbitrary monotone exponent schedule.  The
-local two-cell inequality, arbitrary-stage composition, precision-monotone
-transport, and the budget-based schedule constructor are all checked:
-\lean{ComputableAnalysis.endpointOrderedNondecreasingDarbouxStage_contains_uniform_double}
-\lean{ComputableAnalysis.endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage_of_precision_mono}
-\lean{ComputableAnalysis.Integral.nondecreasingDarbouxDyadicSchedule_widths_shrink_of_budget}
-\lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule.ofDyadicEndpointOrderedOfBudget}
-\lean{ComputableAnalysis.Integral.nondecreasingDarbouxScheduledSchedule_widths_shrink_of_budget}
-\lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule.ofScheduledEndpointOrderedOfBudget}
-The orientation-reversed constructor is now automatic as well:
-\lean{ComputableAnalysis.Integral.NonincreasingDarbouxSchedule.ofAutomaticEndpointOrdered}
-The general interval-regular case remains separate: interval images provide
-sound cell bounds and widths.  Schedule-level addition and nonnegative-product
-closure are now formalized, but each adaptive special function still supplies
-its own cross-stage evaluator/refinement certificate.
+\begin{verbatim}
+public dyadic squares
+  <-> nested-radical squares
+  <-> normalized tangent-square anchor
+  <-> 1/4
+\end{verbatim}
 
-\section{Chapter completion matrix}
+Overlap is not transitive for arbitrary interval boxes.  The chain
+stabilizer widens by the vanishing middle width and then intersects prefixes
+against the valid anchor.  Therefore no three-way same-stage witness is
+required.
 
-The current boundary can be summarized without silently promoting a provider
-interface to a universal theorem:
+\lean{ComputableAnalysis.RealRaw.overlapChainStabilize_valid}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized_valid}
+\lean{ComputableAnalysis.effectiveDyadicPublicSquareIntegral_chain_equiv_quarter}
+\leanok
+
+The remaining work is the uniform rational-circle certificate for every
+dyadic sample and the nested-radical-to-normalized-anchor witness.  Fixed
+depth checks are regression tests, not substitutes for these all-stage
+theorems.
+
+\section{Next foundations}
 
 \begin{center}
-\begin{tabular}{p{0.19\textwidth}p{0.34\textwidth}p{0.34\textwidth}}
-\textbf{Chapter} & \textbf{Closed foundation} & \textbf{Explicit frontier} \\
+\begin{tabular}{p{0.21\textwidth}p{0.34\textwidth}p{0.34\textwidth}}
+\textbf{Area} & \textbf{Checked core} & \textbf{Next theorem}\\
 \hline
 Circle/trigonometry &
-rational geometry, nested-radical dyadic values, finite rotations &
-remaining branch witnesses for unrestricted dyadic inverse transport \\
+rational parametrization, area pi, dyadic radicals, finite rotations &
+uniform dyadic circle/tangent witness\\
 Integrals/FTC &
-rectangle, Lipschitz--Darboux, polynomial (including stage-uniform quartic and
-quintic raw certificates), arctangent, Stieltjes sine, finite
-quadrature mean-value brackets, the completed two-cell absolute-value FTC,
-generic multi-turn stage assembly, increasing and decreasing Darboux stages,
-the two-stage product FTC, and endpoint-ordered monotone dyadic
-schedules with arbitrary monotone computational budgets in both orientations,
-and canonical finite-piece endpoint identification, including the public
-finite-turn construction bridge &
-non-canonical endpoint identification for multi-turn candidates, all-stage equal-dyadic sine,
-and normalized \(\sin^2\) transports \\
-Power series/Fourier &
-finite transforms, coefficient identities, tails, finite termwise FTC,
-bounded Gaussian prefixes, dimension-independent separable product sums, and
-the rational \(n\)-ball recurrence &
-general infinite Fourier-space constructions \\
+monotone and finite-turn sums, stabilized effective FTC, arctangent and
+polynomial clients &
+public construction wrapper for the stabilized FTC output\\
+Series/Fourier &
+finite transforms, orthogonality, explicit tails, finite Taylor FTC &
+effective reconstruction for one nontrivial infinite class\\
 Exponential/logarithm &
-computable exponential, \(\log 2\), local inverse and FTC certificates &
-representation transport for a fully general inverse branch \\
-Effective calculus &
-finite secant, derivative-bound, curvature, stabilization, separated signed
-reciprocal/product/quotient closure, schedule-level interval addition and
-nonnegative-product regularity, and finite L'Hôpital remainder contracts &
-automatic schedule synthesis for arbitrary interval-regular functions whose
-interval images lack an explicit cross-stage refinement certificate \\
-Algebraic roots/FTA &
-rational-polynomial root witnesses, complex interval residuals, and supplied-root
-synthetic deflation &
-elimination/resultant certificates for closure under algebraic operations and
-general root isolation \\
+power-series and repeated-product evaluators, derivative and inverse
+certificates &
+canonical representation transport on complex domains\\
 Linear ODEs &
-finite Peano--Baker algebra, scalar uniqueness contract, centered exponential
-provider &
-general vector analytic provider and its tail certificate \\
+chronological products, Duhamel sums, finite Peano--Baker algebra,
+factorial-tail bounds &
+interval simplex evaluator and constructive uniqueness\\
+Algebraic roots &
+rational/complex boxes, finite exclusion and supplied-root deflation &
+general isolation and elimination certificates\\
 \end{tabular}
 \end{center}
 
-Thus ``foundation complete'' means that every admitted theorem supplies its own
-finite computation and proof certificate; it does not mean that the
-classical existence theorem for all continuous functions has been reintroduced
-under another name.
+\section{Wiedijk challenge}
 
-\section{Style}
+The preface contains the canonical sixteen-item analysis subset of Freek
+Wiedijk's list.  The Lean registry stores names, scope, and whether the
+computable target is checked or remains a substantive frontier.
 
-Use only `realRaw` and `real` when the distinction from standard real numbers
-matters; leave implementation names and proof details to Lean.
-
-\section{How to formalize a new theorem}
-
-Start with the computation, not with a completed function space:
-
-\begin{verbatim}
-domain -> finite evaluator -> rational enclosure -> validity -> equivalence
-
-raw computation A ----\\
-                     overlap at every stage -> abstract real/function result
-raw computation B ----/
-
-For inverse functions, the same rule applies to the forward branch: use the
-representation whose finite schedule is convenient for search, and attach a
-pointwise equivalence edge to the semantic evaluator.  This is the intended
-way to maintain the project's chain of interchangeable computations.
-
-derivative/area claim -> cell certificate -> mesh refinement -> endpoint overlap
-\end{verbatim}
-
-For adaptive evaluators, keep the native computation schedule visible.  The
-scheduled interval-regularity contract can be consumed directly when a
-requested-stage containment proof is available; an identity schedule is the
-ordinary special case.  This prevents stage changes from being mistaken for
-definitional equality of computations.
-
-\lean{ComputableAnalysis.ScheduledIntervalRegularOn}
-\lean{ComputableAnalysis.ScheduledIntervalRegularOn.toIntervalRegularOn_of_requested_stage}
-\lean{ComputableAnalysis.ScheduledIntervalRegularOn.toIntervalRegularOn_of_identity_schedule}
-\lean{ComputableAnalysis.IntervalRegularOn.toScheduledIntervalRegularOn_identity}
+\lean{ComputableAnalysis.wiedijkAnalysisEntries}
+\lean{ComputableAnalysis.wiedijkAnalysisEntries_count}
+\lean{ComputableAnalysis.wiedijkAnalysisNumbers_distinct}
 \leanok
 
-For a new real-valued quantity, add one `realRaw` evaluator and prove its
-order, nesting, and shrinking-width obligations.  If another evaluator is
-already available, add one finite overlap edge to it; the abstract `real` or
-function layer can then use the maintained chain of such edges.  For a
-function, keep the evaluator total but attach its rational domain and use the
-domain proof at every call.  For an integral or derivative, expose the finite
-cell estimate and its error budget before stating the limiting-looking
-corollary.  Classical completeness, Lebesgue measure, and unrestricted
-measurability are not implicit fallbacks: if a result needs one of them,
-state a computable proxy or record the bridge as a separate theorem target.
-
-The representation layer implements the spanning-tree rule directly.  A
-consumer asks for a certified representation, uses its finite boxes, and
-transports to another representation through the stored equivalence edges:
-
-\lean{ComputableAnalysis.effectiveRealRepresentation_equiv}
-\lean{ComputableAnalysis.effectiveRealRepresentation_overlapsAt}
-\lean{ComputableAnalysis.effectiveComplexFunctionRepresentation_overlapsAt_on_common_domain}
-\lean{ComputableAnalysis.effectiveComplexFunction_agreeOnCommonDomain_of_common_anchor}
+The registry is only an index.  Subject modules own theorem statements and
+proofs; numbered aliases and routine finite proxies are intentionally absent.

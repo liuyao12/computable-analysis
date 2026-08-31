@@ -120,12 +120,9 @@ assuming extensional equality of interval algorithms.
 \lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalTableAt_overlap_of_precisions}
 \leanok
 
-The executable table and its refinement laws are exposed as
-\lean{ComputableAnalysis.RationalCircle.GeometricTrig.dyadicNestedRadicalTable}
-\lean{ComputableAnalysis.RationalCircle.GeometricTrig.dyadicNestedRadicalTable_succ_even}
-\lean{ComputableAnalysis.RationalCircle.GeometricTrig.dyadicNestedRadicalSinAt_succ_even}.
-At a dyadic input, the public coordinate is related to the circle evaluator by
-\lean{ComputableAnalysis.RationalCircle.GeometricTrig.sinPiRawOfArctan_dyadic_compute_eq_circle}.
+The executable table is consumed through the refinement and unit-circle laws
+below.  At dyadic inputs, the public coordinate is transported to the same
+rational-circle evaluator by an explicit overlap certificate.
 
 The finite trigonometric table also carries the identities needed by later
 integration proofs: refinement preserves a sample, every sample lies on the
@@ -143,18 +140,11 @@ introduced.
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_sin_last}
 \leanok
 
-The remaining semantic obligation is packaged as one finite certificate
-family.  It supplies the exact endpoint, even-index reuse, lower half-angle,
-and reflected upper-half-angle boxes; the assembly theorem then proves
-stagewise overlap with the arctangent evaluator:
-
-\lean{ComputableAnalysis.RationalCircle.GeometricTrig.DyadicNestedRadicalBranchCertificateFamily}
-\lean{ComputableAnalysis.RationalCircle.GeometricTrig.DyadicNestedRadicalBranchCertificateFamily.sample_overlap}
-\leanok
-
-This is deliberately a proof input, not an implicit completeness argument.
-Once the family is instantiated, the integral transport theorem can consume it
-without knowing how the individual rational witnesses were found.
+The remaining semantic obligation is finite: exact endpoints, even-index
+reuse, lower half-angle boxes, and reflected upper-half-angle boxes must
+together prove stagewise overlap with the arctangent evaluator.  The integral
+transport theorem consumes that certificate without knowing how its rational
+witnesses were found.
 
 \section{The input to integration}
 
@@ -181,22 +171,6 @@ map.  The geometric area loop and its rectangle comparison are certified by
 \lean{ComputableAnalysis.ArctanGeometry.arctanGeom_one_compute_eq}.
 This is the bridge used by the integral and FTC chapters; no classical
 real-valued angle function is assumed.
-
-The bisection branch need not use the geometric evaluator's native stage
-schedule.  A faster or more regular scheduled evaluator is admissible when
-its point values are proved equivalent to the geometric `realRaw`; the
-abstract inverse package records that equivalence rather than requiring
-definitional equality.
-
-The scheduled rectangle branch now supplies the full inverse-ready data:
-\lean{ComputableAnalysis.arctanScheduledRectangleOnUnit_intervalRegular}
-\lean{ComputableAnalysis.arctanScheduledRectangleOnUnit_nondecreasing}
-\lean{ComputableAnalysis.arctanScheduledRectangleOnUnit_effectiveInverseSeparation}
-\lean{ComputableAnalysis.arctanScheduledRectangleOnUnit_invertible}
-\lean{ComputableAnalysis.arctanScheduledRectangleOnUnit_equivalent_geometric_branch}
-The last edge is the representation-chain link: inverse search may use the
-regular scheduled evaluator while the geometric arctangent remains the
-semantic anchor for the circle construction.
 
 The public calculus entry point also exposes the lightweight scheduled core;
 it is enough when an application needs only a staged arctangent value and its
@@ -229,7 +203,5 @@ equivalence certificates.  The circle uses rational coordinates and the
 half-angle table; it does not pretend that every function is naturally
 presented by a rational formula.
 
-\lean{ComputableAnalysis.RationalCircle.GeometricTrig.dyadicNestedRadicalTable}
-\lean{ComputableAnalysis.RationalCircle.GeometricTrig.sinPiRawOfArctan}
 \lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalTableAt_overlap_of_precisions}
 \leanok

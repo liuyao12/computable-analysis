@@ -366,7 +366,6 @@ an endpoint formula, and a power inequality certify the remaining gap.
 
 \lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate}
 \lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate.gap_le_tolerance}
-\lean{ComputableAnalysis.geometricRaw_reaches_of_positive_tolerance}
 \lean{ComputableAnalysis.geometricSeriesCertificate}
 \lean{ComputableAnalysis.geometricSeriesCertificate_raw_equiv_geometricRaw}
 \leanok
@@ -398,10 +397,6 @@ majorant of the sine Taylor terms:
 \lean{ComputableAnalysis.sineSeriesCertificate_raw_width}
 \leanok
 
-\lean{ComputableAnalysis.geometricRaw_valid_of_le_half}
-\lean{ComputableAnalysis.geometricRaw_equiv_inv_one_sub}
-\lean{ComputableAnalysis.AlternatingRaw.toRealRaw_valid}
-\lean{ComputableAnalysis.leibnizAlternatingRaw_valid}
 \leanok
 
 \section{Pi and power series}
@@ -508,18 +503,15 @@ main complex-valued functions:
 \lean{ComputableAnalysis.FormalPowerSeries.coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative}
 \lean{ComputableAnalysis.FormalPowerSeries.derivative_coeffsFromDerivativeAtZero}
 \lean{ComputableAnalysis.FormalPowerSeries.coeffsFromDerivativeAtZero_derivative}
-\lean{ComputableAnalysis.PowerSeries.expCoeff_hasFormalDerivative}
 \lean{ComputableAnalysis.FormalPowerSeries.expCoeff_eq_of_hasFormalDerivative}
 \lean{ComputableAnalysis.FormalPowerSeries.expCoeff_eq_of_selfDerivative}
 \lean{ComputableAnalysis.FormalPowerSeries.scaledExpCoeff_derivative}
 \lean{ComputableAnalysis.FormalPowerSeries.scaledExpCoeff_eq_of_scaledSelfDerivative}
-\lean{ComputableAnalysis.PowerSeries.sinCoeff_hasFormalDerivative}
 \lean{ComputableAnalysis.FormalPowerSeries.sinCoeff_eq_of_hasFormalDerivative}
 \lean{ComputableAnalysis.FormalPowerSeries.cosCoeff_eq_of_hasFormalDerivative}
 \lean{ComputableAnalysis.FormalPowerSeries.sinCosCoeff_eq_of_coupledDerivative}
 \lean{ComputableAnalysis.FormalPowerSeries.sinCoeff_eq_of_secondDerivative}
 \lean{ComputableAnalysis.FormalPowerSeries.cosCoeff_eq_of_secondDerivative}
-\lean{ComputableAnalysis.PowerSeries.neg_cosCoeff_hasFormalDerivative}
 \lean{ComputableAnalysis.FormalPowerSeries.sinhCoeff_eq_of_hasFormalDerivative}
 \lean{ComputableAnalysis.FormalPowerSeries.coshCoeff_eq_of_hasFormalDerivative}
 \lean{ComputableAnalysis.FormalPowerSeries.sinhCoshCoeff_eq_of_coupledDerivative}
@@ -601,8 +593,6 @@ potential-infinity budget: choose a natural stage from the requested positive
 rational tolerance. Identifying this common anchor with the rectangle
 computation of $\pi/4$ is a separate geometric certificate.
 
-\lean{ComputableAnalysis.PiProofs.leibnizSeries_equiv_arctan_one}
-\lean{ComputableAnalysis.PiProofs.leibnizSeries_equiv_arctanSeries_one}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_equiv_leibnizAlternatingRaw}
 \lean{ComputableAnalysis.Series.AlternatingRaw.leibnizAlternatingRaw_width_eq_reciprocal}
 \lean{ComputableAnalysis.Series.AlternatingRaw.leibnizAlternatingRaw_reaches_of_positive_tolerance}

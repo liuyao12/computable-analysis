@@ -441,6 +441,10 @@ theorem effectiveFTC_riemannRaw_equiv_endpointDifference_of_endpointAgreement
     (by simpa [endpointDifferenceRaw, RealRaw.Valid] using agreement.endpoint_valid)
     (effectiveFTC_equiv_endpoint h) agreement.equivalent
 
+/- Compatibility adapter for the older `EffectiveFTC` interface. Its
+validity theorem retains the historical valid-Riemann premise. New clients
+should use `EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw`, whose
+validity is derived without that circular assumption. -/
 def effectiveFTCStabilizedRaw
     {F dF : RealFunRaw} {a b : Rat}
     (h : EffectiveFTC F dF a b)

@@ -12,13 +12,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-      # The public calculus foundation is the supported compatibility target.
-      # Building the default executable also traverses unrelated experiments
-      # and leaves the status check opaque on the large Lean 4.33 workspace.
+      # The canonical root exports the supported calculus and algebraic
+      # foundations plus the scoped Wiedijk registry. Worked examples remain
+      # opt-in modules and are not part of this public compatibility target.
       - uses: leanprover/lean-action@v1
         with:
           auto-config: false
           build: true
-          build-args: "ComputableAnalysis.CalculusFoundation"
+          build-args: "ComputableAnalysis"
           test: false
           lint: false

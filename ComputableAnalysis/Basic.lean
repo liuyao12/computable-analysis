@@ -1455,6 +1455,16 @@ theorem expand_contains_right_of_overlaps
   unfold expand ContainsInterval width Overlaps at *
   grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
 
+/-- Compose two finite interval overlaps without pretending that overlap is
+transitive. Widening the left interval by the width of the middle interval
+is enough to bridge the possible gap to the right interval. -/
+theorem expand_left_overlaps_of_overlap_chain
+    {I J K : QInterval}
+    (hIJ : I.Overlaps J) (hJK : J.Overlaps K) :
+    (expand I J.width).Overlaps K := by
+  unfold expand width Overlaps at *
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
 /-- Quantitative nearness gives a concrete enclosure after widening the first
 box by twice the tolerance.  One tolerance covers the gap between the two
 boxes and the other covers the width of the right box. -/
@@ -2935,6 +2945,91 @@ theorem candidate_equiv_anchorRebox
   exact ⟨Rat.le_trans hcandidate_anchor.1 hcontains.2,
     Rat.le_trans hcontains.1 hcandidate_anchor.2⟩
 
+/-! Same-stage overlap is intentionally not transitive for arbitrary raw
+interval algorithms. The following direct computation is the constructive
+replacement: if `candidate` overlaps `bridge` and `bridge` overlaps an
+anchor, enlarge each candidate stage by the bridge stage's width. The
+result overlaps the anchor at that same stage, and the enlargement vanishes
+whenever both input widths do. -/
+
+def overlapChainExpand (candidate bridge : RealRaw) : RealRaw where
+  compute := fun n =>
+    QInterval.expand (candidate.compute n) (bridge.compute n).width
+
+theorem overlapChainExpand_compute
+    (candidate bridge : RealRaw) (n : Nat) :
+    (overlapChainExpand candidate bridge).compute n =
+      QInterval.expand (candidate.compute n) (bridge.compute n).width := rfl
+
+theorem overlapChainExpand_width
+    (candidate bridge : RealRaw) (n : Nat) :
+    ((overlapChainExpand candidate bridge).compute n).width =
+      (candidate.compute n).width + 2 * (bridge.compute n).width := by
+  exact QInterval.expand_width _ _
+
+theorem overlapChainExpand_equiv
+    {candidate bridge anchor : RealRaw}
+    (hcandidate_bridge : candidate.Equiv bridge)
+    (hbridge_anchor : bridge.Equiv anchor) :
+    (overlapChainExpand candidate bridge).Equiv anchor := by
+  intro n
+  apply (compareAt_overlap_iff
+    (overlapChainExpand candidate bridge) anchor n n).2
+  exact QInterval.expand_left_overlaps_of_overlap_chain
+    ((compareAt_overlap_iff candidate bridge n n).1
+      (hcandidate_bridge n))
+    ((compareAt_overlap_iff bridge anchor n n).1
+      (hbridge_anchor n))
+
+theorem candidate_equiv_overlapChainExpand
+    {candidate bridge : RealRaw}
+    (hcandidate_ordered : forall n, 0 <= (candidate.compute n).width)
+    (hbridge_ordered : forall n, 0 <= (bridge.compute n).width) :
+    candidate.Equiv (overlapChainExpand candidate bridge) := by
+  intro n
+  apply (compareAt_overlap_iff candidate
+    (overlapChainExpand candidate bridge) n n).2
+  change QInterval.Overlaps (candidate.compute n)
+    (QInterval.expand (candidate.compute n) (bridge.compute n).width)
+  unfold QInterval.Overlaps QInterval.expand
+  have hc := hcandidate_ordered n
+  have hb := hbridge_ordered n
+  unfold QInterval.width at hc hb
+  constructor <;> grind
+
+theorem overlapChainExpand_widths_shrink
+    {candidate bridge : RealRaw}
+    (hcandidate : WidthsShrinkToZero candidate.compute)
+    (hbridge : WidthsShrinkToZero bridge.compute) :
+    WidthsShrinkToZero (overlapChainExpand candidate bridge).compute := by
+  intro eps
+  let half : QPos := ⟨eps.val / 2, by
+    rw [Rat.div_def]
+    exact Rat.mul_pos eps.property
+      ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))⟩
+  let quarter : QPos := ⟨eps.val / 4, by
+    rw [Rat.div_def]
+    exact Rat.mul_pos eps.property
+      ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 4))⟩
+  obtain ⟨Nc, hNc⟩ := hcandidate half
+  obtain ⟨Nb, hNb⟩ := hbridge quarter
+  refine ⟨Nat.max Nc Nb, ?_⟩
+  intro n hn
+  have hcn : Nc <= n := Nat.le_trans (Nat.le_max_left _ _) hn
+  have hbn : Nb <= n := Nat.le_trans (Nat.le_max_right _ _) hn
+  rw [overlapChainExpand_width]
+  calc
+    (candidate.compute n).width + 2 * (bridge.compute n).width <=
+        half.val + 2 * quarter.val := by
+      exact rat_add_le_add (hNc n hcn)
+        (Rat.mul_le_mul_of_nonneg_left (hNb n hbn)
+          (by native_decide : (0 : Rat) <= 2))
+    _ = eps.val := by
+      dsimp [half, quarter]
+      rw [Rat.div_def, Rat.div_def]
+      grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm,
+        Rat.mul_inv_cancel]
+
 /-- Finite prefix stabilization of an interval algorithm.  Unlike
 `anchorReboxCompute`, this computation reads only the candidate intervals and
 a rational error-radius schedule: at each stage it intersects all widened
@@ -3263,6 +3358,52 @@ theorem candidate_equiv_prefixStabilize
   apply (compareAt_overlap_iff candidate (prefixStabilize candidate radius) n n).2
   exact ⟨Rat.le_trans hcandidate_anchor.1 hcontains.2,
     Rat.le_trans hcontains.1 hcandidate_anchor.2⟩
+
+/-- Stabilize a two-edge overlap chain into a valid direct interval
+algorithm. The middle raw need not already be nested: its vanishing width is
+used only as a finite error allowance. -/
+def overlapChainStabilize
+    (candidate bridge anchor : RealRaw) : RealRaw :=
+  prefixStabilize (overlapChainExpand candidate bridge)
+    (fun n => (anchor.compute n).width)
+
+theorem overlapChainStabilize_width_le
+    (candidate bridge anchor : RealRaw) (n : Nat) :
+    ((overlapChainStabilize candidate bridge anchor).compute n).width <=
+      (candidate.compute n).width + 2 * (bridge.compute n).width +
+        2 * (anchor.compute n).width := by
+  have h := prefixStabilize_width_le_current_expand
+    (overlapChainExpand candidate bridge)
+    (fun n => (anchor.compute n).width) n
+  rw [overlapChainExpand_width] at h
+  exact h
+
+theorem overlapChainStabilize_valid
+    {candidate bridge anchor : RealRaw}
+    (hcandidate : WidthsShrinkToZero candidate.compute)
+    (hbridge : WidthsShrinkToZero bridge.compute)
+    (hanchor : anchor.Valid)
+    (hcandidate_bridge : candidate.Equiv bridge)
+    (hbridge_anchor : bridge.Equiv anchor) :
+    (overlapChainStabilize candidate bridge anchor).Valid := by
+  apply prefixStabilize_valid
+    (overlapChainExpand_widths_shrink hcandidate hbridge)
+    hanchor
+    (overlapChainExpand_equiv hcandidate_bridge hbridge_anchor)
+  · intro n
+    exact Rat.le_refl
+  · exact hanchor.2.2
+
+theorem overlapChainStabilize_equiv_anchor
+    {candidate bridge anchor : RealRaw}
+    (hanchor : anchor.Valid)
+    (hcandidate_bridge : candidate.Equiv bridge)
+    (hbridge_anchor : bridge.Equiv anchor) :
+    (overlapChainStabilize candidate bridge anchor).Equiv anchor := by
+  apply prefixStabilize_equiv_anchor hanchor
+    (overlapChainExpand_equiv hcandidate_bridge hbridge_anchor)
+  intro n
+  exact Rat.le_refl
 
 theorem validCompute_stage_eq_of_zero_width
     {compute : Nat -> QInterval}

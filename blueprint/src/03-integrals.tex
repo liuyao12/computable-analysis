@@ -175,10 +175,8 @@ accumulations directly:
 The interval-valued Darboux sum uses this identity directly:
 \lean{ComputableAnalysis.RationalPartition.Refines.boundIntegralSum_eq_indexBlockFold}
 The blockwise containment rule then compares complete fine and coarse sums:
-\lean{ComputableAnalysis.addInterval_fold_contains_of_mem}
 \lean{ComputableAnalysis.RationalPartition.Refines.boundIntegralSum_contains_of_blockwise}
 The weaker overlap rule is available separately:
-\lean{ComputableAnalysis.addInterval_fold_overlaps_of_mem}
 \lean{ComputableAnalysis.RationalPartition.Refines.boundIntegralSum_overlaps_of_blockwise}
 Uniform grids also expose full refinement certificates, not only pointwise
 breakpoint equalities:
@@ -258,12 +256,10 @@ case: the two cell areas add to (1), and the primitive
 \lean{ComputableAnalysis.EndpointOrderedNondecreasingOnInterval.toNondecreasing}
 Exact rational evaluators obtain this stronger contract directly from a
 rational monotonicity proof:
-\lean{ComputableAnalysis.FunctionOnInterval.exactRat_endpointOrderedNondecreasing}
 The decreasing case has the mirrored endpoint-order contract and Darboux cell
 range:
 \lean{ComputableAnalysis.EndpointOrderedNonincreasingOnInterval}
 \lean{ComputableAnalysis.EndpointOrderedNonincreasingOnInterval.toNonincreasing}
-\lean{ComputableAnalysis.FunctionOnInterval.exactRat_endpointOrderedNonincreasing}
 \lean{ComputableAnalysis.Integral.nonincreasingDarbouxRange_width_nonneg}
 \lean{ComputableAnalysis.Integral.nonincreasingDarbouxRange_overlaps_point_value}
 Under coordinatewise endpoint order, the decreasing range upgrades from overlap
@@ -290,26 +286,20 @@ levels at fixed evaluator precision:
 Evaluator precision may also increase with the stage; the two refinements
 compose into one nested decreasing schedule:
 \lean{ComputableAnalysis.Integral.nonincreasingDarbouxStage_contains_of_precision}
-\lean{ComputableAnalysis.endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_stage_of_precision_mono}
 As on the increasing side, the mesh exponent may be an arbitrary monotone
 schedule rather than the stage number itself:
-\lean{ComputableAnalysis.endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_scheduled_stage}
 \lean{ComputableAnalysis.QInterval.splitScaledEndpointRange_contains}
 The decreasing orientation uses the mirrored finite inequality:
 \lean{ComputableAnalysis.QInterval.splitScaledEndpointRange_contains_decreasing}
 \lean{ComputableAnalysis.endpointOrderedNonincreasing_splitScaledEndpointRange_contains}
 The local inequality is now assembled into a complete two-stage uniform
 mesh comparison for the stronger endpoint-order certificate:
-\lean{ComputableAnalysis.endpointOrderedNondecreasingDarbouxStage_contains_uniform_double}
 Finite composition gives the corresponding arbitrary-stage statement at fixed
 evaluation precision:
-\lean{ComputableAnalysis.endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage}
 When evaluator precision is itself monotone, the same containment holds for
 the complete scheduled stages:
-\lean{ComputableAnalysis.endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage_of_precision_mono}
 The mesh exponent may itself be an arbitrary monotone schedule, allowing the
 algorithm to spend extra work where the evaluator requires it:
-\lean{ComputableAnalysis.endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_scheduled_stage}
 For endpoint-ordered monotone evaluators, the remaining schedule bookkeeping
 is now automatic.  A cumulative natural-number budget absorbs an arbitrary
 input-precision modulus, makes the dyadic mesh monotone, and proves the mesh
@@ -445,8 +435,6 @@ explicit additional certificate.
 \lean{ComputableAnalysis.Integral.endpointOrderedNondecreasingDarbouxRange_contains_point_value}
 \lean{ComputableAnalysis.Integral.intervalRegularDarbouxRange_width_le}
 \lean{ComputableAnalysis.Integral.intervalRegularDarbouxStage}
-\lean{ComputableAnalysis.IntervalRegularOn.EvalIntervalsNested}
-\lean{ComputableAnalysis.IntervalRegularOn.EvalIntervalsNested.of_stageIndependent}
 \lean{ComputableAnalysis.Integral.intervalRegularDarbouxStage_contains_of_evalIntervalsNested}
 \lean{ComputableAnalysis.RationalPartition.boundIntegralSum_width_nonneg_of_termwise}
 \lean{ComputableAnalysis.Integral.intervalRegularDarbouxRange_contains_point_value}
@@ -469,7 +457,6 @@ ordinary domain-aware integral interface.  This is the computable analogue of
 the classical existence step, with the coherence proof visible at the API
 boundary.
 
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxSchedule}
 \lean{ComputableAnalysis.Integral.intervalRegularDarbouxScheduleRaw_valid}
 \lean{ComputableAnalysis.Integral.intervalRegularDarbouxScheduleRaw_precision_witness}
 \lean{ComputableAnalysis.Integral.intervalRegularDarbouxScheduleIntegralFor_precision_witness}
@@ -555,13 +542,6 @@ The finite base cases are explicit as well.  Constants and affine functions
 are integrated by rational endpoint formulas; their monotonicity certificates
 are retained so the same constructions can be inserted into a piecewise plan.
 
-\lean{ComputableAnalysis.exactRat_constant_nondecreasing}
-\lean{ComputableAnalysis.constantMonotoneIntegralFor_eq_ofRat}
-\lean{ComputableAnalysis.exactRat_affine_nondecreasing}
-\lean{ComputableAnalysis.affineMonotoneIntegralFor_eq_ofRat}
-\lean{ComputableAnalysis.affineMonotoneIntegralFor_of_nonpos_eq_ofRat}
-\lean{ComputableAnalysis.affineMonotoneIntegralFor_adjacent_additive}
-\lean{ComputableAnalysis.affineMonotoneIntegralFor_of_nonpos_adjacent_additive}
 \lean{ComputableAnalysis.Integral.effectiveAffineMonotoneIntegralFor_adjacent_additive}
 \lean{ComputableAnalysis.Integral.effectiveAffineMonotoneIntegralFor_of_nonpos_adjacent_additive}
 \lean{ComputableAnalysis.Integral.effectiveAffineMonotoneIntegralFor_eq_ofRat}
@@ -983,32 +963,30 @@ Its raw integral exposes an explicit denominator-based precision witness:
 requested tolerance becomes a finite stage, rather than an existential appeal
 to completeness.
 
-The formal spine is now exposed as four layers:
+The canonical spine has three layers:
 
 \begin{verbatim}
-EffectiveFTC                 -> scheduled Riemann sums vs endpoint box
-EffectiveDerivativeBoundFTC  -> local derivative bounds -> EffectiveFTC
-Convex/concave FTC            -> secant bounds -> derivative-bound certificate
-StaticDyadicEffectiveFTC      -> equal-dyadic specialization
+finite derivative boxes -> shrinking bounded sums
+                        -> overlap with a valid endpoint computation
+                        -> prefix-stabilized valid integral
 \end{verbatim}
 
-\lean{ComputableAnalysis.EffectiveFTC}
 \lean{ComputableAnalysis.EffectiveDerivativeBoundFTC}
 \lean{ComputableAnalysis.effectiveDerivativeBoundFTC}
-\lean{ComputableAnalysis.FTC.effectiveFTC_definiteIntegralEqualsEndpoint}
-\lean{ComputableAnalysis.FTC.staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint}
+\lean{ComputableAnalysis.precisionAtStage_shrinksToZero}
 \lean{ComputableAnalysis.DerivativeBoundFTC.boundedIntegralRaw_precision_witness}
+\lean{ComputableAnalysis.DerivativeBoundFTC.boundedIntegralRaw_widths_shrink}
+\lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw}
+\lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_valid}
+\lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_equiv_endpointDifference}
 \leanok
 
-The general `EffectiveFTC` contract now exposes the corresponding shrinking
-facts for both scheduled sides.  Accuracy at precision (1/n) is therefore
-not only a pointwise error claim: it supplies the width-shrink input required
-by the raw-real layer.  Nesting remains a separate obligation, handled by
-prefix stabilization when a schedule chooses stages out of order.
-
-\lean{ComputableAnalysis.FTC.effectiveFTC_riemannRaw_widths_shrink}
-\lean{ComputableAnalysis.FTC.effectiveFTC_endpointRaw_widths_shrink}
-\leanok
+The native bounded sums need not be nested: different stages may choose
+different partitions and evaluator precisions.  The width theorem and
+endpoint overlap are sufficient.  Prefix stabilization supplies nestedness,
+so the theorem does not assume the validity it is meant to construct.
+The older `EffectiveFTC` adapter remains compatibility API for existing
+clients, not a second foundation.
 
 The interval-level function interface is closed under addition on a common
 rational chart.  This is the algebraic operation used when primitives or
@@ -1089,8 +1067,6 @@ endpoint increment divided by the cell width overlaps the certified range of
 the integrand.  This is the project’s constructive replacement for asserting
 that an attained real point \(t\in(a,b)\) exists:
 
-\lean{ComputableAnalysis.ExactCellOrderPreservation.integral_average_between_bounds}
-\lean{ComputableAnalysis.ExactCellOrderPreservation.integral_average_overlaps_bounds}
 \lean{ComputableAnalysis.Polynomial.finitePolynomial_secant_derivative_bracket}
 \lean{ComputableAnalysis.Polynomial.finitePolynomial_secant_qabs_error_le_derivative_gap}
 \leanok
@@ -1126,8 +1102,6 @@ cell certificate and error budget:
 \lean{ComputableAnalysis.RationalPartition.boundIntegralSum_contains_endpointDifference}
 \lean{ComputableAnalysis.RationalPartition.boundIntegralSum_overlaps_endpointDifference}
 \lean{ComputableAnalysis.DerivativeBoundFTC}
-\lean{ComputableAnalysis.effectiveFTC_equiv_endpoint}
-\lean{ComputableAnalysis.effectiveFTC_definiteIntegralEqualsEndpoint}
 \leanok
 
 The checked polynomial ladder now reaches constant, affine, square, cube,
@@ -1156,10 +1130,6 @@ domain-aware identity $int_0^1 x^4\,dx=1/5$.
 \lean{ComputableAnalysis.FinitePolynomial.normalizedMonomialSecantBound}
 \lean{ComputableAnalysis.FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.FinitePolynomial.taylorPrefix_hasDerivativeOnInterval}
-\lean{ComputableAnalysis.squarePrimitiveEndpointDifference_adjacent_additive}
-\lean{ComputableAnalysis.cubicPrimitiveEndpointDifference_adjacent_additive}
-\lean{ComputableAnalysis.quarticPrimitiveEndpointDifference_adjacent_additive}
-\lean{ComputableAnalysis.fifthPrimitiveEndpointDifference_adjacent_additive}
 \leanok
 
 The square evaluator also has an independent interval-regular route on
@@ -1167,16 +1137,12 @@ $[-1,1]$: the factorization $s^2-t^2=(s-t)(s+t)$ gives the rational
 Lipschitz bound $2$.  This is useful when the same polynomial is treated as
 a non-monotone integrand rather than by its closed primitive formula.
 
-\lean{ComputableAnalysis.exactSquare_lipschitz_on_minusOne_one}
-\lean{ComputableAnalysis.exactRat_square_intervalRegularOn_minusOne_one}
 \leanok
 
 The same route now covers the cubic evaluator on $[-1,1]$: the finite
 factorization $s^3-t^3=(s-t)(s^2+st+t^2)$ and the bound
 $|s^2+st+t^2|\le 3$ give a rational Lipschitz certificate.
 
-\lean{ComputableAnalysis.exactCube_lipschitz_on_minusOne_one}
-\lean{ComputableAnalysis.exactRat_cube_intervalRegularOn_minusOne_one}
 \leanok
 
 More generally, the finite power-difference recurrence gives one reusable
@@ -1376,7 +1342,6 @@ effective FTC certificate used for the complete \(x^3\) instance.
 \lean{ComputableAnalysis.Integral.exactRat_cube_integral_raw_equiv_one_fourth}
 \lean{ComputableAnalysis.Integral.exactRat_cube_integral_raw_equiv_cube_endpoint}
 \lean{ComputableAnalysis.Integral.exactRat_cube_definiteIdentity}
-\lean{ComputableAnalysis.Integral.cubicIntegralEffectiveFTC_equiv_one_fourth}
 \lean{ComputableAnalysis.FiniteFTC.cubeDerivativeIntegralRaw_valid}
 \lean{ComputableAnalysis.FiniteFTC.cubeDerivativeIntegralRaw_equiv_one}
 \lean{ComputableAnalysis.FiniteFTC.cubeDerivativeDarboux_sums_mem_raw_succ}
@@ -1487,21 +1452,6 @@ evaluator, prefix stabilization supplies validity and the value transport:
 \lean{ComputableAnalysis.effectiveDyadicNestedRadicalIntegralRaw_stabilized_width_le}
 \lean{ComputableAnalysis.effectiveDyadicNestedRadicalIntegralRaw_stabilized_equiv_reciprocalPi_of_overlap}
 
-The first four depths are nevertheless concrete Lean-certified anchors.  They
-are kept in the opt-in module
-\texttt{ComputableAnalysis.SinPiIntegralAnchors}, so importing the reusable
-sine-integral foundation does not pay for these large executable regressions:
-
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalLeftSum_zero_overlaps_stieltjes}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalLeftSum_one_overlaps_stieltjes}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalLeftSum_two_overlaps_stieltjes}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalLeftSum_three_overlaps_stieltjes}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalLeftSum_four_overlaps_stieltjes}
-\leanok
-
-These finite checks seed the eventual geometric induction; they are not being
-promoted to an all-stage convergence claim.
-
 For the squared-sine example the normalization is part of the computation:
 \[
  \int_0^{1/2}\sin(\pi x)^2\,dx
@@ -1510,15 +1460,16 @@ For the squared-sine example the normalization is part of the computation:
 \]
 The unscaled tangent chart therefore anchors \(\pi/4\), never \(1/4\).
 
-The finite transport layer is anchor-parametric.  One rational witness lies
-in the public dyadic box, the nested-radical box, and the chosen anchor box at
-each stage.  Prefix stabilization then gives a valid representative and
-transports its value.
+The finite transport uses only the pairwise information actually available:
+the public dyadic box overlaps the nested-radical box, and that box overlaps
+the normalized anchor.  Since overlap is not transitive, the chain evaluator
+widens by the vanishing middle width before prefix stabilization.
 
-\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareAnchorSharedWitness}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareAnchorSharedWitness.to_public_equiv}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareAnchorSharedWitness.stabilized_valid}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicPublicSquareAnchorSharedWitness.stabilized_equiv_value}
+\lean{ComputableAnalysis.RealRaw.overlapChainStabilize}
+\lean{ComputableAnalysis.RealRaw.overlapChainStabilize_valid}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized_valid}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized_equiv_value}
 \lean{ComputableAnalysis.SinPiIntegral.DyadicNestedRadicalSquareAnchorCommonWitness.of_overlap}
 \leanok
 
@@ -1529,14 +1480,15 @@ therefore concludes \(1/4\) directly.
 \lean{ComputableAnalysis.normalizedTangentSquareIntegral}
 \lean{ComputableAnalysis.NormalizedTangentSquareValueSubgoal.value}
 \lean{ComputableAnalysis.NormalizedTangentSquareTransportSubgoal.value}
-\lean{ComputableAnalysis.effectiveDyadicPublicSquareIntegral_equiv_quarter}
+\lean{ComputableAnalysis.effectiveDyadicPublicSquareIntegral_chain_equiv_quarter}
+\lean{ComputableAnalysis.effectiveDyadicPublicSquareIntegral_chain_valid}
 \lean{ComputableAnalysis.NestedRadicalSquareIntegralConstructionSubgoal.value_of_normalized_transport}
 \lean{ComputableAnalysis.NestedRadicalSquareIntegralConstructionSubgoal.value_of_quarter_bounds}
 \leanok
 
-What remains is geometric: provide the shared witness uniformly for every
-dyadic sample.  The weighted fold, stabilization, FTC endpoint, and normalized
-value transport are already reusable.
+What remains is geometric: provide the public-to-nested circle certificate
+and the nested-to-normalized-anchor witness uniformly.  A stronger three-way
+same-stage witness is unnecessary.
 
 \lean{ComputableAnalysis.SinPiIntegral.DyadicSquareCircleOverlapFamily.to_square_sum_overlap}
 \lean{ComputableAnalysis.SinPiIntegral.tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn}
@@ -1592,9 +1544,10 @@ The closed finite instances are linked directly to their certificates:
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTC_boundedIntegral_equiv_endpointDifference}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTC_equiv_fortySeven_over_threeEightFour}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_endpoint}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_boundedIntegral_equiv_endpointDifference}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_value}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCStabilized}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCStabilized_valid}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCStabilized_equiv_endpointDifference}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCStabilized_equiv_value}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquarePrimitive_secant_formula}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquarePrimitive_secant_bracket}
 \lean{ComputableAnalysis.effectiveSinPiHalfIntegral_equiv_reciprocalPi_of_canonical_certificate_family}
@@ -1877,7 +1830,6 @@ plus the explicitly recorded quadratic variation:
 \lean{ComputableAnalysis.unitMeshSquareIntegralRaw_valid}
 \lean{ComputableAnalysis.unitMeshSquareIntegralRaw_equiv_one}
 \lean{ComputableAnalysis.unitMeshSquareIntegralRaw_lower_eq_left_sum}
-\lean{ComputableAnalysis.unitMeshSquareIntegralRaw_equiv_affineMonotoneIntegral}
 \lean{ComputableAnalysis.quadraticVariationSum_nonneg_of_step_nonnegative}
 \lean{ComputableAnalysis.quadraticVariationSum_le_stepBound_mul_endpointDifference}
 \lean{ComputableAnalysis.quadraticVariationSum_le_endpointVariationProduct_of_step_nonnegative}
@@ -1990,14 +1942,11 @@ the main transport rules:
 \lean{ComputableAnalysis.Integral.IntegrationByPartsCertificate}
 \lean{ComputableAnalysis.Integral.IntegrationByPartsCertificate.left_integral_equiv_endpoint_sub_right}
 \lean{ComputableAnalysis.Integral.IntegrationByPartsCertificate.right_integral_equiv_endpoint_sub_left}
-\lean{ComputableAnalysis.finiteIntegrationByParts_onPartition}
-\lean{ComputableAnalysis.finiteIntegrationByParts_withVariation_onPartition}
 \lean{ComputableAnalysis.effectiveFiniteIntegrationByParts_onPartition}
 \lean{ComputableAnalysis.effectiveFiniteIntegrationByParts_withVariation_onPartition}
 \lean{ComputableAnalysis.effectiveFiniteIntegrationByParts}
 \lean{ComputableAnalysis.effectiveFiniteSquareChain}
 \lean{ComputableAnalysis.effectiveFiniteSquareChain_left_bounds}
-\lean{ComputableAnalysis.coordinateIntegrationByParts_onPartition_endpoint_bracket}
 \lean{ComputableAnalysis.effectiveCoordinateIntegrationByParts_endpointBracket}
 \lean{ComputableAnalysis.RationalPartition.endpointDifferenceSum_contains}
 \lean{ComputableAnalysis.RationalPartition.boundIntegralSum_overlaps_endpointDifference}
@@ -2031,8 +1980,6 @@ certified endpoint representations.
 
 \lean{ComputableAnalysis.endpointDifferenceRaw_adjacent_additive}
 \lean{ComputableAnalysis.FunctionOnInterval.endpointDifferenceRaw_adjacent_additive}
-\lean{ComputableAnalysis.DefiniteIdentityFor.integral_add_equiv_of_endpoint_additive}
-\lean{ComputableAnalysis.DefiniteIdentityFor.integral_equiv_add_of_endpoint_add}
 \leanok
 
 This is the constructive replacement for silently importing a global vector

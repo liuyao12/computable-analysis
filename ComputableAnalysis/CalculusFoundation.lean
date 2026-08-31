@@ -394,6 +394,36 @@ theorem effectiveDyadicPublicSquareIntegral_equiv_quarter
       (RealRaw.ofRat (1 / 4)) := by
   exact h.stabilized_equiv_value hsine hvalue.normalized_valid hvalue.value
 
+/-! Canonical pairwise transport.  The public/nested and nested/anchor
+overlaps are enough: the overlap-chain stabilizer inserts the vanishing
+nested-radical width, so callers no longer need the stronger three-way
+same-stage witness. -/
+theorem effectiveDyadicPublicSquareIntegral_chain_equiv_quarter
+    {S : SinPiIntegral.ArctanSinPiConstruction}
+    (hcircle : SinPiIntegral.DyadicSquareCircleOverlapFamily S)
+    (hcommon :
+      SinPiIntegral.DyadicNestedRadicalSquareAnchorCommonWitness
+        normalizedTangentSquareIntegral)
+    (hsine : IntervalRegularOn S.onHalf)
+    (hvalue : NormalizedTangentSquareValueSubgoal) :
+    (SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized S
+      normalizedTangentSquareIntegral).Equiv
+      (RealRaw.ofRat (1 / 4)) := by
+  exact SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized_equiv_value
+    hsine hvalue.normalized_valid hcircle hcommon hvalue.value
+
+theorem effectiveDyadicPublicSquareIntegral_chain_valid
+    {S : SinPiIntegral.ArctanSinPiConstruction}
+    (hcircle : SinPiIntegral.DyadicSquareCircleOverlapFamily S)
+    (hcommon :
+      SinPiIntegral.DyadicNestedRadicalSquareAnchorCommonWitness
+        normalizedTangentSquareIntegral)
+    (hsine : IntervalRegularOn S.onHalf) :
+    (SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized S
+      normalizedTangentSquareIntegral).Valid := by
+  exact SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized_valid
+    hsine normalizedTangentSquareIntegral_valid hcircle hcommon
+
 /- Stable focused-entry-point name for the normalized representation edge. -/
 theorem effectiveDyadicPublicSquareIntegral_stabilized_equiv_normalizedTangentSquare
     {S : SinPiIntegral.ArctanSinPiConstruction}

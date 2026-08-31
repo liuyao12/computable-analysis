@@ -9,7 +9,6 @@ import ComputableAnalysis.FiniteFTAIsolationExample
 import ComputableAnalysis.FiniteDeflationChain
 import ComputableAnalysis.FiniteDeflationExample
 import ComputableAnalysis.FiniteDescartesInterface
-import ComputableAnalysis.FiniteDescartesExamples
 
 /-!
 # Finite algebraic and root-certificate foundation

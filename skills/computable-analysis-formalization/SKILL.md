@@ -37,9 +37,10 @@ for any definite-integral task, especially one with non-rational breakpoints.
    computation inspectable by reduction or by a theorem describing it.
 4. Prove its local algebra: ordered endpoints, inclusions, finite-sum
    identities, and an explicit width bound.
-5. Prove validity and a rational convergence schedule. Use an anchor plus
-   finite-prefix stabilization only when a direct nested evaluator is not
-   available.
+5. Prove validity and a rational convergence schedule. Use prefix
+   stabilization when a shrinking candidate overlaps a valid anchor. If the
+   evidence is a two-edge chain through a non-nested middle computation, use
+   `RealRaw.overlapChainStabilize`; do not assume overlap is transitive.
 6. State the function-specific semantic bridge: an endpoint identity, a
    range enclosure, a comparison with an independently valid raw evaluator,
    or a finite recurrence. Do not silently promote an interface to a theorem.
@@ -54,8 +55,8 @@ for any definite-integral task, especially one with non-rational breakpoints.
 | One computable number | `RealRaw` and `QInterval` | Valid boxes, a width modulus, and equivalence when comparing definitions |
 | Rational function on an interval | `FunctionDomains` | A denominator-apart certificate on the whole interval |
 | Continuity of a boxed function | `IntervalRegularOn` | A literal rational epsilon-delta modulus |
-| Derivative or textbook primitive | `Differential`, `FTC` | Finite-difference enclosure and a particular endpoint bridge |
-| Definite integral | `Calculus` plus the integral reference | A construction for this function, not a general existence assertion |
+| Derivative or textbook primitive | `Differential`, `EffectiveCalculusFoundation` | Finite-difference enclosure and a particular endpoint bridge |
+| Definite integral | `IntegralFoundation` plus the integral reference | A construction for this function, not a general existence assertion |
 | Turning point or irrational split | `TurningPointIntegral` | Shrinking rational brackets and a central range estimate |
 | Power series or a tail | `PowerSeries`, `Series`, `ExpProofs` | A rational tail majorant and a rate |
 | Monotone inverse or algebraic branch | `Extension`, `AlgebraicFunctions` | Separation, range, and bisection certificates |
@@ -79,8 +80,8 @@ hypothesis needed for its finite proof is visible in the structure.
 Run the smallest relevant Lean file while iterating, then run:
 
 ```bash
-lake build ComputableAnalysis
-lake env .lake/packages/checkdecls/.lake/build/bin/checkdecls blueprint/lean_decls
+lake build ComputableAnalysis ComputableAnalysis.Blueprint
+lake exe checkdecls blueprint/lean_decls
 rg -n '^import\s+(Mathlib|Mathlib\.|Std\.|Batteries\.)' ComputableAnalysis
 rg -n '\b(sorry|admit)\b' ComputableAnalysis
 ```
