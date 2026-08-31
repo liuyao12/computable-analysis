@@ -178,6 +178,13 @@ Do not construct the older three-way
 `DyadicPublicSquareAnchorSharedWitness`; it asks for stronger same-stage data
 than the proof needs.
 
+For unsquared sine, use
+`CanonicalDyadicHalfAngleCertificateAt` and the single all-samples adapter
+`DyadicTangentWitnessFamily.of_canonical_halfAngle_certificate_family`.
+The zero and even cases are derived; the substantive provider obligation is
+the positive odd half-angle certificate. Do not split this public API into
+three parallel even/lower/upper theorem families.
+
 ## Series
 
 An infinite series belongs in the foundation only when it has:

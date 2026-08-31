@@ -1402,26 +1402,12 @@ before it is identified with \(1/4\).  For the unsquared sine route, the
 remaining certificate is target-directed: each nested-radical sample must be
 matched to a tangent box by a finite bisection trace or half-angle witness.
 
-The tangent-chart value theorem is already public:
-
-\begin{verbatim}
-finite tangent-chart FTC -> tangentChartIntegral = 1/pi
-                         -> public sine half-integral = 1/pi
-\end{verbatim}
-
-The equal-dyadic route is not silently identified with that chart.  Its exact
-remaining obligation is the finite `TangentChartTransport` structure, whose
-fields say that the public dyadic box and the chart box overlap at every
-stage.  A common rational witness is an equivalent, more constructive form.
-
-For the squared test function, the same separation is now visible in the
-public API.  The evaluator is a literal interval product, its finite square
-sum has an explicit shrinking-width proof, and the tangent-chart primitive has
-its own effective FTC certificate.  The unresolved statement is only the
-representation edge between these computations: a stagewise rational overlap
-family for the dyadic samples.  Thus the project has already formalized the
-integral machinery needed by the example; what remains is the geometric
-half-angle transport, not an appeal to a stronger theory of integration.
+The tangent-chart FTC already proves the value (1/\pi).  The independent
+equal-dyadic algorithm still needs one representation edge: its positive odd
+nested-radical sample must overlap the inverse-arctangent circle box.  Zero,
+even refinement, reflection, induction, and integral transport are checked.
+The squared route needs the analogous sample overlap before its endpoint
+certificate yields (1/4).
 
 \lean{ComputableAnalysis.SinPiIntegral.sinPiSquareOnHalf_valid}
 \lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_widths_shrink}
@@ -1726,9 +1712,6 @@ even overlap + lower overlap + reflected overlap
 \lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_margin_certificate_family}
 \lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_of_canonical_halfAngle_certificate_family}
 \lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_canonical_halfAngle_certificate_family}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_canonical_halfAngle_families}
-\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_of_canonical_halfAngle_families}
-\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_canonical_halfAngle_families}
 \leanok
 
 The lower and reflected constructors make the remaining proof obligations
@@ -1784,7 +1767,7 @@ hidden in the interface.
 \lean{ComputableAnalysis.SinPiIntegral.canonicalDyadicCertificateSearchAt_some_of_mem_of_admissible}
 \lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_canonical_search_family}
 \lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_canonical_candidate_family}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_branch_certificate_families}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicNestedRadicalBranchCertificateFamily.toWitnessFamily}
 \lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificates}
 \lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_branch_certificates}
 \leanok
