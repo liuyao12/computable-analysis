@@ -112,6 +112,12 @@ theorem RationalSeriesCertificate.raw_width
   simp [RationalSeriesCertificate.raw, QInterval.width]
   grind [Rat.sub_eq_add_neg]
 
+theorem RationalSeriesCertificate.raw_precision_witness
+    (S : RationalSeriesCertificate) (eps : QPos) :
+    ∃ N : Nat, ∀ n, N ≤ n ->
+      (S.raw.compute n).width ≤ eps.val := by
+  exact (S.raw_valid).2.2 eps
+
 /-! The same certificate pattern for complex-valued series.  The refinement
     field is rectangular-box nesting, since a complex remainder has separate
     real and imaginary budgets. -/
@@ -188,6 +194,13 @@ theorem ComplexSeriesCertificate.raw_height
     (S.raw.compute n).height = 2 * S.remainder n := by
   simp [ComplexSeriesCertificate.raw, QBox.expand, QBox.point, QBox.height]
   grind [Rat.sub_eq_add_neg]
+
+theorem ComplexSeriesCertificate.raw_precision_witness
+    (S : ComplexSeriesCertificate) (eps : QPos) :
+    ∃ N : Nat, ∀ n, N ≤ n ->
+      (S.raw.compute n).width ≤ eps.val ∧
+        (S.raw.compute n).height ≤ eps.val := by
+  exact (S.raw_valid).2.2 eps
 
 /-! A finite complex coefficient prefix has the same termwise primitive
 constructor as the rational polynomial layer.  The coefficient stream and
