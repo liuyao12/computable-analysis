@@ -216,6 +216,27 @@ theorem alternatingSeriesCertificate_raw_precision_witness
       ((alternatingSeriesCertificate S).raw.compute n).width ≤ eps.val := by
   exact (alternatingSeriesCertificate S).raw_precision_witness eps
 
+theorem alternatingSeriesCertificate_raw_equiv_alternatingRaw
+    (S : Series.AlternatingRaw) :
+    (alternatingSeriesCertificate S).raw.Equiv S.toRealRaw := by
+  intro n
+  have hinterval := Series.AlternatingRaw.interval_eq_endpoints S n
+  apply (RealRaw.compareAt_overlap_iff
+    (alternatingSeriesCertificate S).raw S.toRealRaw n n).2
+  have hcompute : S.toRealRaw.compute n = S.interval n := rfl
+  rw [hcompute, hinterval]
+  simp only [RationalSeriesCertificate.raw, alternatingSeriesCertificate,
+    Series.AlternatingRaw.toRealRaw]
+  constructor
+  · have hnonneg := S.term_nonneg (2 * n)
+    have hle : Series.partialSum S.term (2 * n) <=
+        Series.partialSum S.term (2 * n + 1) := by
+      rw [Series.partialSum_even_succ]
+      grind
+    grind
+  · have hnonneg := S.term_nonneg (2 * n)
+    grind
+
 /-! The same certificate pattern for complex-valued series.  The refinement
     field is rectangular-box nesting, since a complex remainder has separate
     real and imaginary budgets. -/
