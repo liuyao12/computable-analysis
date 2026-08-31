@@ -23,6 +23,95 @@ or introducing a completed function space.
 
 namespace ComputableAnalysis
 
+/-! A series certificate packages exactly the data needed to turn rational
+    partial sums into a valid `realRaw`: a nonnegative tail bound, a one-step
+    refinement inequality, and an explicit tail budget.  The partial sums
+    need not have a named convergence rate. -/
+structure RationalSeriesCertificate where
+  partialSum : Nat -> Rat
+  remainder : Nat -> Rat
+  remainder_nonneg : forall n, 0 <= remainder n
+  refinement : forall n,
+    qabs (partialSum (n + 1) - partialSum n) + remainder (n + 1) <= remainder n
+  tail_budget : RealRaw.WidthsShrinkToZero (fun n =>
+    ({ lo := 0, hi := remainder n } : QInterval))
+
+def RationalSeriesCertificate.raw (S : RationalSeriesCertificate) : RealRaw where
+  compute := fun n =>
+    { lo := S.partialSum n - S.remainder n
+      hi := S.partialSum n + S.remainder n }
+
+theorem RationalSeriesCertificate.raw_valid
+    (S : RationalSeriesCertificate) : S.raw.Valid := by
+  unfold RealRaw.Valid RealRaw.ValidCompute RationalSeriesCertificate.raw
+  constructor
+  · intro n
+    simp [QInterval.width, RationalSeriesCertificate.raw]
+    grind [S.remainder_nonneg n]
+  constructor
+  · intro n m hnm
+    have hstep : forall j,
+        S.partialSum j - S.remainder j <=
+            S.partialSum (j + 1) - S.remainder (j + 1) ∧
+        S.partialSum (j + 1) + S.remainder (j + 1) <=
+            S.partialSum j + S.remainder j := by
+      intro j
+      have href := S.refinement j
+      have hleft := neg_qabs_le_self (S.partialSum (j + 1) - S.partialSum j)
+      have hright := self_le_qabs (S.partialSum (j + 1) - S.partialSum j)
+      constructor <;> grind [Rat.sub_eq_add_neg]
+    induction m generalizing n with
+    | zero =>
+        have hn : n = 0 := by omega
+        subst n
+        simp [QInterval.width]
+        grind [S.remainder_nonneg 0]
+    | succ m ih =>
+        by_cases hnm' : n <= m
+        · have hprev := ih n hnm'
+          have hs := hstep m
+          exact ⟨Rat.le_trans hprev.1 hs.1,
+            (by
+              have hnonneg := S.remainder_nonneg (m + 1)
+              grind),
+            Rat.le_trans hs.2 hprev.2.2⟩
+        · have hn : n = m + 1 := by omega
+          subst n
+          have hnonneg := S.remainder_nonneg (m + 1)
+          dsimp
+          grind
+  · intro eps
+    let half : QPos := ⟨eps.val / 2, by grind [eps.property]⟩
+    obtain ⟨N, hN⟩ := S.tail_budget half
+    refine ⟨N, ?_⟩
+    intro n hn
+    have htail := hN n hn
+    have htail' : S.remainder n <= half.val := by
+      dsimp [QInterval.width] at htail
+      grind
+    simp only [QInterval.width, RationalSeriesCertificate.raw]
+    calc
+      S.partialSum n + S.remainder n -
+          (S.partialSum n - S.remainder n) <= 2 * half.val := by
+        grind
+      _ = eps.val := by
+        dsimp [half]
+        have htwo : (2 : Rat) ≠ 0 := by native_decide
+        grind [Rat.mul_assoc, Rat.mul_comm,
+          Rat.inv_mul_cancel (2 : Rat) htwo]
+
+theorem RationalSeriesCertificate.raw_compute_interval
+    (S : RationalSeriesCertificate) (n : Nat) :
+    (S.raw.compute n).lo = S.partialSum n - S.remainder n ∧
+    (S.raw.compute n).hi = S.partialSum n + S.remainder n := by
+  simp [RationalSeriesCertificate.raw]
+
+theorem RationalSeriesCertificate.raw_width
+    (S : RationalSeriesCertificate) (n : Nat) :
+    (S.raw.compute n).width = 2 * S.remainder n := by
+  simp [RationalSeriesCertificate.raw, QInterval.width]
+  grind [Rat.sub_eq_add_neg]
+
 /-! A finite complex coefficient prefix has the same termwise primitive
 constructor as the rational polynomial layer.  The coefficient stream and
 the evaluation point are rational-complex, while division by the natural

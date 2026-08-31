@@ -618,6 +618,12 @@ For the Gaussian, the pointwise Taylor prefix
 weighted rectangle sum is therefore a finite tensor product, with an explicit
 factorization theorem ready for later tail estimates.
 
+The generic series object is a rational partial sum plus a rational remainder
+budget.  The refinement inequality makes the intervals nest; the tail budget
+makes their widths shrink.  This is the project’s replacement for silently
+invoking completeness: every infinite-looking value is first presented as an
+explicit interval algorithm.
+
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix}
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_four}
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_six}
@@ -648,6 +654,11 @@ factorization theorem ready for later tail estimates.
 \lean{ComputableAnalysis.gaussianTaylorProductIntegralNestedSum}
 \lean{ComputableAnalysis.gaussianTaylorProductIntegralNestedSum_factorized}
 \lean{ComputableAnalysis.gaussianTaylorProductIntegralNestedSum_nonneg}
+\lean{ComputableAnalysis.RationalSeriesCertificate}
+\lean{ComputableAnalysis.RationalSeriesCertificate.raw}
+\lean{ComputableAnalysis.RationalSeriesCertificate.raw_valid}
+\lean{ComputableAnalysis.RationalSeriesCertificate.raw_compute_interval}
+\lean{ComputableAnalysis.RationalSeriesCertificate.raw_width}
 \lean{ComputableAnalysis.repeatIntegralAxis}
 \lean{ComputableAnalysis.finiteProductIntegralFactorProduct_repeat_axis}
 \lean{ComputableAnalysis.finiteProductIntegralNestedSum_repeat_axis_factorized}
