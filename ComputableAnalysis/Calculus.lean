@@ -1550,6 +1550,33 @@ theorem addInterval_width (I J : QInterval) :
   unfold addInterval QInterval.width
   grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
 
+/-! A finite width estimate for multiplying two nonnegative rational
+intervals.  This is the interval-level analogue of the raw-real product
+modulus and is the arithmetic core of scheduled product regularity. -/
+theorem mulRealInterval_width_le_of_nonneg_bounded
+    {a b c d BF BG : Rat}
+    (ha0 : 0 <= a) (hab : a <= b)
+    (hc0 : 0 <= c) (hcd : c <= d)
+    (hB : b <= BF) (hD : d <= BG) :
+    (QBox.mulRealInterval a b c d).width <=
+      BF * (d - c) + BG * (b - a) := by
+  rw [QBox.mulRealInterval_of_nonneg ha0 hab hc0 hcd]
+  unfold QInterval.width
+  have hda : 0 <= d - c := by grind [Rat.sub_eq_add_neg]
+  have hba : 0 <= b - a := by grind [Rat.sub_eq_add_neg]
+  have hfirst : a * (d - c) <= BF * (d - c) :=
+    Rat.mul_le_mul_of_nonneg_right (Rat.le_trans hab hB) hda
+  have hsecond : (b - a) * d <= (b - a) * BG :=
+    Rat.mul_le_mul_of_nonneg_left hD hba
+  calc
+    b * d - a * c = a * (d - c) + (b - a) * d := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    _ <= BF * (d - c) + (b - a) * BG := by
+      grind
+    _ = BF * (d - c) + BG * (b - a) := by
+      rw [Rat.mul_comm (b - a) BG]
+
 /-! Overlap, unlike containment, is still compositional when the interval
 widths are known to be nonnegative.  This is the finite interval algebra used
 when a monotone endpoint range is only certified to overlap a point value. -/

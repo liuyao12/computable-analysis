@@ -1270,6 +1270,11 @@ range hypotheses.
 \lean{ComputableAnalysis.FunctionOnInterval.mulOfNonnegBounded_compute_width_le}
 \leanok
 
+The rational interval arithmetic used by a future scheduled product
+certificate is isolated as
+\lean{ComputableAnalysis.QInterval.mulRealInterval_width_le_of_nonneg_bounded}.
+It states the finite bound directly for two nonnegative rational boxes.
+
 The same estimate is exposed at the raw-real layer, where it can be reused
 without rebuilding a function-on-interval wrapper:
 \lean{ComputableAnalysis.RealRaw.mul_width_le_of_nonneg_bounded}
