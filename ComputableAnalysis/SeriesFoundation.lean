@@ -177,6 +177,18 @@ theorem ComplexSeriesCertificate.raw_compute_box
       QBox.expand (QBox.point (S.partialSum n)) (S.remainder n) := by
   rfl
 
+theorem ComplexSeriesCertificate.raw_width
+    (S : ComplexSeriesCertificate) (n : Nat) :
+    (S.raw.compute n).width = 2 * S.remainder n := by
+  simp [ComplexSeriesCertificate.raw, QBox.expand, QBox.point, QBox.width]
+  grind [Rat.sub_eq_add_neg]
+
+theorem ComplexSeriesCertificate.raw_height
+    (S : ComplexSeriesCertificate) (n : Nat) :
+    (S.raw.compute n).height = 2 * S.remainder n := by
+  simp [ComplexSeriesCertificate.raw, QBox.expand, QBox.point, QBox.height]
+  grind [Rat.sub_eq_add_neg]
+
 /-! A finite complex coefficient prefix has the same termwise primitive
 constructor as the rational polynomial layer.  The coefficient stream and
 the evaluation point are rational-complex, while division by the natural
