@@ -65,6 +65,30 @@ theorem effectiveSquareCurvatureFTC_value_one :
       (RealRaw.ofRat 1) := by
   exact effectiveFTCPortfolio.square_effective_value
 
+/-! The polynomial regression ladder is part of the public FTC interface too.
+    These aliases keep the finite budgets and endpoint computations in their
+    detailed module while giving downstream proof authors one stable place to
+    discover the nonlinear examples. -/
+theorem effectiveCubeFTC_equiv_endpoint :
+    cubeEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      cubeEffectiveFTCData.toDerivativeBoundFTC.endpointRaw := by
+  exact cubeEffectiveFTC_equiv_endpoint
+
+theorem effectiveQuarticFTC_equiv_endpoint :
+    quarticEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      quarticEffectiveFTCData.toDerivativeBoundFTC.endpointRaw := by
+  exact quarticEffectiveFTC_equiv_endpoint
+
+theorem effectiveQuarticIntegralFTC_equiv_one_fifth :
+    quarticIntegralEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      (RealRaw.ofRat (1 / 5)) := by
+  exact quarticIntegralEffectiveFTC_equiv_one_fifth
+
+theorem effectiveFifthIntegralFTC_equiv_one_sixth :
+    fifthIntegralEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      (RealRaw.ofRat (1 / 6)) := by
+  exact fifthIntegralEffectiveFTC_equiv_one_sixth
+
 /-! The scoped entry point gives the finite-piece FTC its project-facing name.
 The partition, cell endpoint certificates, and endpoint transport remain
 explicit inputs; this wrapper adds no completeness or general continuity
