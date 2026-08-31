@@ -323,4 +323,27 @@ def effectiveDerivativeProductOfBudget
   ExactFunction.EffectiveDerivativeExact.mulOfBudget
     u du v dv stepRadius hbudget
 
+/-! The square specialization is the common nonlinear observable in the
+    calculus examples.  It keeps the product-rule corner term explicit while
+    presenting the familiar derivative `2*u*du` to downstream certificates. -/
+def effectiveDerivativeSquareOfBudget
+    {u du : Rat -> Rat}
+    (stepRadius : QPos -> QPos)
+    (hbudget : forall eps x h,
+      0 < h -> h <= (stepRadius eps).val ->
+      qabs (u x) * qabs (ExactFunction.differenceQuotient u x h - du x) +
+        qabs (u x) * qabs (ExactFunction.differenceQuotient u x h - du x) +
+          qabs h * qabs (ExactFunction.differenceQuotient u x h) *
+            qabs (ExactFunction.differenceQuotient u x h) <= eps.val) :
+    EffectiveDerivativeExact (fun x => u x * u x)
+      (fun x => 2 * u x * du x) := by
+  have hproduct := effectiveDerivativeProductOfBudget
+    (u := u) (du := du) (v := u) (dv := du) stepRadius hbudget
+  have hderiv : (fun x => u x * du x + u x * du x) =
+      (fun x => 2 * u x * du x) := by
+    funext x
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.add_comm]
+  rw [hderiv] at hproduct
+  exact hproduct
+
 end ComputableAnalysis
