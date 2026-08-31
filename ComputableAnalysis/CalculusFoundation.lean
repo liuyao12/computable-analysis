@@ -646,6 +646,30 @@ theorem effectiveSinPiHalfIntegral_equiv_reciprocalPi_of_canonical_certificate_f
   exact S.halfIntegral_equiv_reciprocalPi_of_canonical_certificate_family
     pub g cg hdyadic hplan hevaluator family hintegral
 
+/-! The direct candidate-facing variant keeps the finite rational witness
+    lists and admissibility proofs visible to callers. -/
+theorem effectiveSinPiHalfIntegral_equiv_reciprocalPi_of_candidate_family
+    (S : SinPiIntegral.ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        SinPiIntegral.dyadicNestedRadicalStageSinAt n k)
+    (family : SinPiIntegral.DyadicCanonicalCertificateCandidateFamily S.inverse)
+    (hintegral : (Integral.integral g 0 ((1 : Rat) / 2) cg).Equiv
+      SinPiIntegral.reciprocalPiRaw) :
+    (S.halfIntegral pub).Equiv SinPiIntegral.reciprocalPiRaw := by
+  exact S.halfIntegral_equiv_reciprocalPi_of_candidate_family
+    pub g cg hdyadic hplan hevaluator family hintegral
+
 /-! The parity adapter makes the geometric workload explicit: even samples
     are inherited from their parent, while the caller supplies only the two
     odd branches. -/
