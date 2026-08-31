@@ -245,6 +245,26 @@ theorem RationalSeriesCertificate.scale_raw_precision_witness
       ((S.scale c hc budget hbudget).raw.compute n).width <= eps.val := by
   exact (S.scale c hc budget hbudget).raw_precision_witness eps
 
+/-! The rational certificate's scaled computation is an explicit edge to the
+    ordinary raw-real scalar action.  This is the real-valued counterpart of
+    the complex series bridge below. -/
+theorem RationalSeriesCertificate.scale_raw_equiv_scaleRat
+    (c : Rat) (hc : 0 <= c) (S : RationalSeriesCertificate)
+    (budget : QPos -> QPos)
+    (hbudget : forall eps, c * (budget eps).val <= eps.val) :
+    (S.scale c hc budget hbudget).raw.Equiv
+      (RealRaw.scaleRat c S.raw) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (S.scale c hc budget hbudget).raw
+    (RealRaw.scaleRat c S.raw) n n).2
+  simp only [RationalSeriesCertificate.raw, RationalSeriesCertificate.scale,
+    RealRaw.scaleRat, RealRaw.scaleRatCompute, if_pos hc]
+  unfold QInterval.Overlaps
+  have hr : 0 <= c * S.remainder n :=
+    Rat.mul_nonneg hc (S.remainder_nonneg n)
+  constructor <;> grind [Rat.mul_add, Rat.sub_eq_add_neg]
+
 /-! The geometric prefix is the first concrete client of the generic
     certificate.  Its remainder is written as a rational gap to the closed
     endpoint formula; the generic constructor then supplies the symmetric
