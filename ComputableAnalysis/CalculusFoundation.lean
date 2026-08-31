@@ -187,6 +187,14 @@ end ComputableAnalysis.ComplexPathIntegral
 
 namespace ComputableAnalysis
 
+/-! The centered exponential is the first completely supplied scalar ODE
+    provider in the public entry point: its derivative certificate and exact
+    rational initial value are both finite raw-data statements. -/
+def effectiveCenteredExponential_solvesSelfDerivative :
+    SolvesSelfDerivativeOnInterval
+      ExpProofs.uniformExpOnSymmetricUnit := by
+  exact ExpProofs.uniformExpOnSymmetricUnit_solvesSelfDerivative
+
 /-! Finite geometric control used by the integral and circle chapters.  The
     polygonal-path inequality is derived by induction from a rational
     triangle inequality; it is not imported as a completeness or Euclidean
