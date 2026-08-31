@@ -118,6 +118,64 @@ theorem RationalSeriesCertificate.raw_precision_witness
       (S.raw.compute n).width ≤ eps.val := by
   exact (S.raw_valid).2.2 eps
 
+/-! The geometric prefix is the first concrete client of the generic
+    certificate.  Its remainder is written as a rational gap to the closed
+    endpoint formula; the generic constructor then supplies the symmetric
+    interval representation. -/
+def geometricSeriesCertificate
+    {r : Rat} (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
+    (hr1 : r < 1) : RationalSeriesCertificate where
+  partialSum := Series.geometricSum r
+  remainder := fun n => 1 / (1 - r) - Series.geometricSum r n
+  remainder_nonneg := by
+    intro n
+    have hsum := Series.geometricSum_le_inv_one_sub hr0 hr1 n
+    grind
+  refinement := by
+    intro n
+    rw [Series.geometricSum_succ]
+    have hpow : 0 <= r ^ n := Rat.pow_nonneg hr0
+    have hcancel : Series.geometricSum r n + r ^ n -
+        Series.geometricSum r n = r ^ n := by grind
+    rw [hcancel, qabs_eq_self_of_nonneg hpow]
+    have hden : 0 < 1 - r := by grind
+    grind [Rat.div_def, Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+      Rat.mul_assoc, Rat.mul_comm]
+  tail_budget := by
+    intro eps
+    obtain ⟨N, hN⟩ :=
+      (Series.geometricRaw_valid_of_le_half hr0 hrhalf hr1).2.2 eps
+    refine ⟨N, ?_⟩
+    intro n hn
+    have h := hN n hn
+    have h' : 1 / (1 - r) - Series.geometricSum r n <= eps.val := by
+      simpa [Series.geometricRaw, QInterval.width,
+        Rat.sub_eq_add_neg, Rat.add_comm, Rat.add_left_comm, Rat.add_assoc] using h
+    simp only [QInterval.width]
+    grind
+
+theorem geometricSeriesCertificate_raw_equiv_geometricRaw
+    {r : Rat} (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
+    (hr1 : r < 1) :
+    (geometricSeriesCertificate hr0 hrhalf hr1).raw.Equiv
+      (Series.geometricRaw r hr0 hr1) := by
+  intro n
+  have hsum := Series.geometricSum_le_inv_one_sub hr0 hr1 n
+  apply (RealRaw.compareAt_overlap_iff
+    (geometricSeriesCertificate hr0 hrhalf hr1).raw
+    (Series.geometricRaw r hr0 hr1) n n).2
+  simp only [RationalSeriesCertificate.raw, geometricSeriesCertificate,
+    Series.geometricRaw]
+  constructor
+  · change Series.geometricSum r n -
+      (1 / (1 - r) - Series.geometricSum r n) <=
+        1 / (1 - r)
+    grind
+  · change Series.geometricSum r n <=
+      Series.geometricSum r n +
+        (1 / (1 - r) - Series.geometricSum r n)
+    grind
+
 /-! The same certificate pattern for complex-valued series.  The refinement
     field is rectangular-box nesting, since a complex remainder has separate
     real and imaginary budgets. -/
