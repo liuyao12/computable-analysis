@@ -291,7 +291,14 @@ still supplied by its own finite certificate.
 
 \lean{ComputableAnalysis.FunctionOnInterval.add}
 \lean{ComputableAnalysis.FunctionOnInterval.add_compute}
+\lean{ComputableAnalysis.FunctionOnInterval.PointwiseMul}
 \leanok
+
+Products have the analogous semantic interface, `PointwiseMul`.  It records
+only common-domain alignment and pointwise raw equivalence; bounds and the
+finite interval multiplication algorithm remain explicit provider data.
+Thus a product identity can be reused by derivative and integral proofs
+without pretending that every product has a uniform computable modulus.
 
 Continuity is not a predicate on an ambient completed function space.  A
 function exposes either a pointwise modulus or an interval image algorithm:

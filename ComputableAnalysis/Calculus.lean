@@ -7003,6 +7003,23 @@ def PointwiseAdd (F G H : FunctionOnInterval) : Prop :=
         ((F.raw.evalRaw x (F.defined_on x hxF)) +
           (G.raw.evalRaw x (G.defined_on x hxG)))
 
+/-! Pointwise multiplication is kept as a separate theorem-facing relation.
+
+Unlike the evaluator constructor `mulOfNonnegBounded`, this relation does not
+choose bounds or an interval multiplication algorithm.  It records only the
+semantic fact needed when a derivative, integral, or special-function proof
+switches between equivalent implementations of a product. -/
+def PointwiseMul (F G H : FunctionOnInterval) : Prop :=
+  F.lower = G.lower /\ F.upper = G.upper /\
+  F.lower = H.lower /\ F.upper = H.upper /\
+  forall x
+    (hxF : inDomainInterval F.lower F.upper x)
+    (hxG : inDomainInterval G.lower G.upper x)
+    (hxH : inDomainInterval H.lower H.upper x),
+      (H.raw.evalRaw x (H.defined_on x hxH)).Equiv
+        ((F.raw.evalRaw x (F.defined_on x hxF)) *
+          (G.raw.evalRaw x (G.defined_on x hxG)))
+
 /-- Pointwise rational-scalar relation for interval-certified functions. -/
 def PointwiseScaleRat (r : Rat) (F G : FunctionOnInterval) : Prop :=
   F.lower = G.lower /\ F.upper = G.upper /\

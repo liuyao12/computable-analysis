@@ -1087,6 +1087,11 @@ finite product modulus
 `width(FG) <= BF * width(G) + BG * width(F)` under nonnegative pointwise
 bounds.  This is the box-level input needed by a future interval product-rule
 constructor; it does not itself assert a derivative or a limiting product.
+For theorem-facing representation changes, use
+`FunctionOnInterval.PointwiseMul`: it records common chart alignment and
+pointwise raw equivalence without selecting an evaluator or silently adding a
+uniform bound.  Keep this semantic relation separate from
+`mulOfNonnegBounded`, which is the constructive interval evaluator.
 The corresponding raw-real theorem is
 `RealRaw.mul_width_le_of_nonneg_bounded`; use it when the factor boxes have
 already been packaged as `RealRaw` values.
