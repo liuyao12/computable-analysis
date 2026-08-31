@@ -521,14 +521,10 @@ input modulus without any analytic choice:
 The arctangent kernel is the first named instance: its bound $L=2$ gives
 an interval width $4/2^n$ before any endpoint or FTC identification.
 
-The unit-chart constructor is the first named instance, but the same proof is
-now available on an arbitrary ordered rational chart.  The interval endpoints
-are explicit data; no automatic rescaling or completed-real argument is
-hidden in the construction.
-
-The same certificate now feeds the FTC layer directly: a unit-interval
-Lipschitz evaluator can be promoted to the interval-image regularity contract
-used by the general effective FTC statements.
+One constructor turns a natural-number Lipschitz bound on any ordered rational
+chart into the interval-image certificate used by the FTC layer.  The unit and
+unit-subinterval names are adapters to that constructor; they do not duplicate
+the proof or hide a rescaling argument.
 
 The Lipschitz constant is implementation data, not part of the represented
 function. If two certified constants are available, their Darboux boxes share
@@ -545,10 +541,6 @@ bridge: scale the function, its Lipschitz bound, and every rectangle box.
 \lean{ComputableAnalysis.IntervalRegularOn.of_lipschitzOnUnit}
 \lean{ComputableAnalysis.IntervalRegularOn.of_lipschitzOnUnitSubinterval}
 \leanok
-
-The same finite enclosure works on any ordered rational chart when the
-Lipschitz bound is supplied as a natural-number certificate; the endpoints
-remain part of the domain data, and the precision schedule is unchanged.
 
 \lean{ComputableAnalysis.Integral.LipschitzOnIntervalNat}
 \lean{ComputableAnalysis.IntervalRegularOn.of_lipschitzOnIntervalNat}
@@ -1397,9 +1389,7 @@ the explicit left/right sums for $3x^2$, not from a completeness axiom.
 The containment theorem makes that connection literal: each stage box contains
 the matching left and right finite sums.
 
-The same endpoint-difference certificate has also been instantiated for the
-next two polynomial primitives.  These are useful regression tests for the
-effective FTC layer, rather than separate foundations:
+All monomial degrees use one arbitrary-power certificate:
 
 \[
   \int_0^1 x^3\,dx=\frac14,\qquad
@@ -1407,12 +1397,9 @@ effective FTC layer, rather than separate foundations:
   \int_0^1 x^5\,dx=\frac16.
 \]
 
-\lean{ComputableAnalysis.Integral.quarticIntegralEffectiveFTC_equiv_one_fifth}
-\lean{ComputableAnalysis.Integral.exactRat_quartic_integral_raw_equiv_quartic_endpoint}
-\lean{ComputableAnalysis.Integral.exactRat_quartic_definiteIdentity}
-\lean{ComputableAnalysis.Integral.fifthIntegralEffectiveFTC_equiv_one_sixth}
-\lean{ComputableAnalysis.Integral.exactRat_quintic_integral_raw_equiv_quintic_endpoint}
-\lean{ComputableAnalysis.Integral.exactRat_quintic_definiteIdentity}
+\lean{ComputableAnalysis.Integral.exactRat_pow_integral_raw_equiv_one_div_succ}
+\lean{ComputableAnalysis.Integral.exactRat_pow_integral_raw_equiv_pow_endpoint}
+\lean{ComputableAnalysis.Integral.exactRat_pow_definiteIdentity}
 \leanok
 
 The first non-polynomial test is a squared sine prefix.  Its finite Taylor
@@ -1915,8 +1902,7 @@ uniform u-mesh -> inverse-chart x-samples -> Stieltjes rectangles -> overlap
                          +-- substitution theorem (when needed)
 \end{verbatim}
 
-This construction is checked in Lean; its earlier name remains only as a
-compatibility alias.
+This construction is checked in Lean under its Riemann--Stieltjes name.
 
 \lean{ComputableAnalysis.SinPiIntegral.sinPiStieltjesIntegral}
 \lean{ComputableAnalysis.SinPiIntegral.sinPiStieltjesIntegral_valid}
@@ -1926,7 +1912,6 @@ compatibility alias.
 \lean{ComputableAnalysis.SinPiIntegral.computableSinPiHalfIntegral_valid}
 \lean{ComputableAnalysis.SinPiIntegral.computableSinPiHalfIntegral_equiv_reciprocalPi}
 \lean{ComputableAnalysis.SinPiIntegral.computableSinPiHalfIntegral_equiv_reciprocalPi_of_FTC}
-\lean{ComputableAnalysis.SinPiIntegral.sinPiUnevenSamplingIntegral}
 \leanok
 
 This is the first completed end-to-end sine integral in the project.  It uses
@@ -2079,25 +2064,6 @@ the main transport rules:
 \lean{ComputableAnalysis.effectiveCoordinateIntegrationByParts_endpointBracket}
 \lean{ComputableAnalysis.RationalPartition.endpointDifferenceSum_contains}
 \lean{ComputableAnalysis.RationalPartition.boundIntegralSum_overlaps_endpointDifference}
-\leanok
-
-The polynomial integration-by-parts ladder has a higher finite rung as well.
-For the rational grid on $[0,1]$, the quartic and quintic increments satisfy
-the same two endpoint-weighted identities at every positive mesh size:
-
-\begin{verbatim}
-Δ(x^4) * x^5_left + x^4_right * Δ(x^5) -> 1
-x^4_left * Δ(x^5) + Δ(x^4) * x^5_right -> 1
-\end{verbatim}
-
-These are finite telescoping product identities.  They add no new integral
-axiom; they are regression examples showing that the integration-by-parts
-contract scales to higher polynomial degrees.
-
-\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticLeftRightSum_eq_endpoint_difference}
-\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticRightLeftSum_eq_endpoint_difference}
-\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticLeftRightSum_eq_one}
-\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticRightLeftSum_eq_one}
 \leanok
 
 Linearity and additivity are stated as certificate contracts:

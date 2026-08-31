@@ -14,23 +14,23 @@ namespace ComputableAnalysis
 
 open FiniteDeflationChain
 
-def quinticBoundaryPolynomial : CPoly.Coeffs :=
+def factorizedQuinticBoundaryPolynomial : CPoly.Coeffs :=
   factorizedQuinticPolynomial quinticBoundaryMinusTwo
     quinticBoundaryMinusOne quinticBoundaryZero quinticBoundaryOne
     quinticBoundaryTwo
 
 theorem quintic_boundary_polynomial_coeffs :
-    quinticBoundaryPolynomial =
+    factorizedQuinticBoundaryPolynomial =
       [{ re := 0, im := 0 }, { re := 4, im := 0 }, { re := 0, im := 0 },
         { re := -5, im := 0 }, { re := 0, im := 0 }, { re := 1, im := 0 }] := by
   native_decide
 
 theorem quintic_boundary_eval_at_two :
-    CPoly.eval quinticBoundaryPolynomial quinticBoundaryTwo = QComplex.zero := by
+    CPoly.eval factorizedQuinticBoundaryPolynomial quinticBoundaryTwo = QComplex.zero := by
   native_decide
 
 theorem quintic_boundary_deflation_chain :
-    IsDeflationChain quinticBoundaryPolynomial
+    IsDeflationChain factorizedQuinticBoundaryPolynomial
       [quinticBoundaryMinusTwo, quinticBoundaryMinusOne,
         quinticBoundaryZero, quinticBoundaryOne, quinticBoundaryTwo] := by
   rcases quintic_boundary_example_roots with
@@ -52,7 +52,7 @@ theorem quintic_boundary_deflation_chain :
   exact ⟨hq4two, trivial⟩
 
 theorem quintic_boundary_deflated_coeffs :
-    deflatedCoeffs quinticBoundaryPolynomial
+    deflatedCoeffs factorizedQuinticBoundaryPolynomial
         [quinticBoundaryMinusTwo, quinticBoundaryMinusOne,
           quinticBoundaryZero, quinticBoundaryOne, quinticBoundaryTwo] =
       [QComplex.one, QComplex.zero, QComplex.zero, QComplex.zero,
@@ -60,22 +60,22 @@ theorem quintic_boundary_deflated_coeffs :
   native_decide
 
 theorem quintic_boundary_horner_factorization (x : QComplex) :
-    CPoly.eval quinticBoundaryPolynomial x =
+    CPoly.eval factorizedQuinticBoundaryPolynomial x =
       QComplex.mul
         (rootFactorProduct
           [quinticBoundaryMinusTwo, quinticBoundaryMinusOne,
             quinticBoundaryZero, quinticBoundaryOne, quinticBoundaryTwo] x)
         (CPoly.eval
-          (deflatedCoeffs quinticBoundaryPolynomial
+          (deflatedCoeffs factorizedQuinticBoundaryPolynomial
             [quinticBoundaryMinusTwo, quinticBoundaryMinusOne,
               quinticBoundaryZero, quinticBoundaryOne, quinticBoundaryTwo]) x) := by
-  exact horner_factorization quinticBoundaryPolynomial
+  exact horner_factorization factorizedQuinticBoundaryPolynomial
     [quinticBoundaryMinusTwo, quinticBoundaryMinusOne,
       quinticBoundaryZero, quinticBoundaryOne, quinticBoundaryTwo] x
     quintic_boundary_deflation_chain
 
 theorem quintic_boundary_exact_factorization (x : QComplex) :
-    CPoly.eval quinticBoundaryPolynomial x =
+    CPoly.eval factorizedQuinticBoundaryPolynomial x =
       rootFactorProduct
         [quinticBoundaryMinusTwo, quinticBoundaryMinusOne,
           quinticBoundaryZero, quinticBoundaryOne, quinticBoundaryTwo] x := by

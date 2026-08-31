@@ -229,27 +229,15 @@ separate overlap steps.
 The cubic uses the same contract with primitive $x^4/4$ and closes at
 $1/4$; the proof changes only the finite power-range bound.
 
-The same finite schedule is already checked for the quartic and fifth
-monomial targets, closing at $1/5$ and $1/6$.  Together these examples give a
-small regression family for the derivative-bound FTC before the project moves
-to exponential and trigonometric evaluators.
+Higher monomials add no new calculus pattern. They use the single
+arbitrary-power certificate before moving to exponential and trigonometric
+evaluators.
 
 \lean{ComputableAnalysis.Integral.squareIntegralEffectiveFTC_endpoint_equiv_one_third}
 \lean{ComputableAnalysis.Integral.squareIntegralEffectiveFTC_integral_equiv_one_third}
 \lean{ComputableAnalysis.Integral.cubicIntegralEffectiveFTC_integral_equiv_one_fourth}
-\lean{ComputableAnalysis.Integral.quarticIntegralEffectiveFTC_equiv_one_fifth}
-\lean{ComputableAnalysis.Integral.fifthIntegralEffectiveFTC_equiv_one_sixth}
-\lean{ComputableAnalysis.Integral.exactRat_quartic_intervalRegularOn_unit}
-\lean{ComputableAnalysis.Integral.exactRat_quartic_lipschitz_on_unit}
-\lean{ComputableAnalysis.Integral.exactRat_quartic_integral_raw_valid}
-\lean{ComputableAnalysis.Integral.exactRat_quartic_integral_raw_equiv_one_fifth}
-\lean{ComputableAnalysis.Integral.exactRat_quintic_intervalRegularOn_unit}
-\lean{ComputableAnalysis.Integral.exactRat_quintic_lipschitz_on_unit}
-\lean{ComputableAnalysis.Integral.exactRat_quintic_integral_raw_valid}
-\lean{ComputableAnalysis.Integral.exactQuintic_uniformLeftSum_le_one_sixth_of_pos}
-\lean{ComputableAnalysis.Integral.exactQuintic_uniformRightSum_ge_one_sixth_of_pos}
-\lean{ComputableAnalysis.Integral.exactQuintic_compute_contains_one_sixth_at_stage}
-\lean{ComputableAnalysis.Integral.exactRat_quintic_integral_raw_equiv_one_sixth}
+\lean{ComputableAnalysis.Integral.exactRat_pow_integral_raw_equiv_one_div_succ}
+\lean{ComputableAnalysis.Integral.exactRat_pow_definiteIdentity}
 \leanok
 
 \section{A normalized trigonometric bridge}

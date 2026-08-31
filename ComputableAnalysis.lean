@@ -34,7 +34,6 @@ import ComputableAnalysis.FiniteFTCIntervalRegular
 import ComputableAnalysis.PolynomialFTCValues
 import ComputableAnalysis.FiniteMonotoneSquareIntegral
 import ComputableAnalysis.FinitePiecewiseRectangles
-import ComputableAnalysis.FiniteFTCQuintic
 import ComputableAnalysis.FiniteFTCQuartic
 import ComputableAnalysis.FiniteFTCPolynomial
 import ComputableAnalysis.FiniteSineIntegral
@@ -42,7 +41,6 @@ import ComputableAnalysis.FiniteBaselStageMillion
 import ComputableAnalysis.FiniteNBallVolume
 import ComputableAnalysis.FiniteGaussianIntegral
 import ComputableAnalysis.FinitePolynomialIntegrationByParts
-import ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts
 import ComputableAnalysis.ComplexPolynomial
 import ComputableAnalysis.CanonicalPiBridge
 import ComputableAnalysis.CircumferenceBridge

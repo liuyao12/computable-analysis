@@ -35,13 +35,15 @@ theorem adjacentCurvatureCertificates_refineSquaredChord
   have href : RationalCircle.Stage.RefinesByDoubling
       (rationalCircleStage stage) (rationalCircleStage (2 * stage)) := by
     rfl
+  have h :=
+    RationalCircle.Stage.midpoint_curvature_certificate_refines_squared_chord_of_refinement
+      href hstage k hk
+  have hindex : 2 * (k + 1) = 2 * k + 2 := by omega
   simpa [circleSamplePoint_eq_rationalCircleStage,
     pointSegmentNormSq_eq_rationalCircleSegmentNormSq,
     curvatureChordLower, pointCross_eq_rationalCircleCross,
     RationalCircle.Stage.refineIndex, RationalCircle.Stage.insertedIndex,
-    Rat.add_assoc] using
-    (RationalCircle.Stage.midpoint_curvature_certificate_refines_squared_chord_of_refinement
-      href hstage k hk)
+    Rat.add_assoc, hindex] using h
 
 /-- The explicit secant-margin budget holds at the initial one-cell stage.
 This is a finite rational normalization check, not a numerical approximation
@@ -130,7 +132,7 @@ private theorem circleSamplePoint_cross_le_one (stage : Nat) (k : Nat) :
     RationalCircle.Stage.cross
         (circleSamplePoint stage k)
         (circleSamplePoint stage (k + 1)) <= 1 := by
-  simpa [circleSamplePoint, circlePoint] using
+  simpa [circleSamplePoint, circlePoint, RationalCircle.Stage.point] using
     point_cross_le_one (circleParameter stage k) (circleParameter stage (k + 1))
 
 private theorem secant_curvature_gap {p q : PiCirclePoint}
@@ -227,9 +229,14 @@ private theorem adjacent_secant_curvature_gap
     exact Rat.inv_pos.mpr ((Rat.natCast_pos).2 hstage)
   have hcross_mesh : h / 2 <= c := by
     dsimp [h, c, p, q]
-    simpa [circleSamplePoint, circlePoint] using
-      (RationalCircle.Stage.samplePoint_cross_ge_half_step
-        (rationalCircleStage stage) hstage k hk)
+    have hcross :=
+      RationalCircle.Stage.samplePoint_cross_ge_half_step
+        (rationalCircleStage stage) hstage k hk
+    change
+      (1 / (stage : Rat)) / 2 <=
+        RationalCircle.Stage.cross
+          (circleSamplePoint stage k) (circleSamplePoint stage (k + 1)) at hcross
+    exact hcross
   have hhalf_nonneg : 0 <= h / 2 := by
     rw [Rat.div_def]
     exact Rat.le_of_lt (Rat.mul_pos hh (by native_decide))
@@ -628,7 +635,7 @@ theorem piCircumferenceDirect_equiv_piCircumferenceFan :
     piCircumference.Equiv piCircumferenceFan :=
   RealRaw.equiv_trans
     piCircumference_valid
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     piCircumferenceFan_valid
     piCircumferenceDirect_equiv_piCircleArea
     (RealRaw.equiv_symm piCircumferenceFan_equiv_piCircleArea)

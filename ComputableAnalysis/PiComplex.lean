@@ -131,7 +131,11 @@ theorem halfPiFromArctanGeom_equiv_twoArctanGeomOne :
     ((1 : Rat) / 2) (4 : Rat) (by native_decide) (by native_decide)
     (ArctanGeometry.arctanGeom (1 : Rat)) arctanGeomOneValid
   have htwo : ((1 : Rat) / 2) * 4 = 2 := by native_decide
-  simpa [halfPiFromArctanGeom, twoArctanGeomOne, htwo] using hscale
+  change
+    (RealRaw.scaleRat ((1 : Rat) / 2)
+      (RealRaw.scaleRat 4 (ArctanGeometry.arctanGeom (1 : Rat)))).Equiv
+    (RealRaw.scaleRat 2 (ArctanGeometry.arctanGeom (1 : Rat)))
+  simpa [htwo] using hscale
 
 theorem halfPi_equiv_twoArctanGeomOne :
     halfPi.Equiv twoArctanGeomOne := by
@@ -182,7 +186,7 @@ theorem geometricQuarterTurnOne_valid :
     (RationalCircle.GeometricTrig.quarterTurnRaw (1 : Rat)).Valid := by
   unfold RationalCircle.GeometricTrig.quarterTurnRaw
   exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
 
 /-- The literal doubled unit-slope arctangent and the normalized geometric
 quarter-turn use the same finite area computation. -/
@@ -264,7 +268,8 @@ theorem halfPiRotationCandidate_contained_expand_geometricRotationCandidate
           (GeometricPiRotation.halfPi.compute n).width))) := by
   simpa [halfPiRotationCandidate, halfPiInput,
     GeometricPiRotation.rotationCandidate,
-    GeometricPiRotation.halfPiInput] using
+    GeometricPiRotation.halfPiInput,
+    RotationLift.HalfPiInput.crossRadius] using
     RotationLift.HalfPiInput.rotationCandidate_sameStage_contained_expand_of_equiv
       halfPiInput GeometricPiRotation.halfPiInput
       halfPi_equiv_geometricHalfPi n
@@ -281,6 +286,7 @@ theorem geometricRotationCandidate_contained_expand_halfPiRotationCandidate
   simpa [halfPiRotationCandidate, halfPiInput,
     GeometricPiRotation.rotationCandidate,
     GeometricPiRotation.halfPiInput,
+    RotationLift.HalfPiInput.crossRadius,
     Rat.add_comm] using
     RotationLift.HalfPiInput.rotationCandidate_sameStage_contained_expand_of_equiv
       GeometricPiRotation.halfPiInput halfPiInput
@@ -304,8 +310,9 @@ def halfPiRotationRadius (n : Nat) : Rat :=
 
 theorem halfPiRotationRadius_shrinks :
     ShrinksToZero halfPiRotationRadius := by
-  simpa [halfPiRotationRadius] using
-    RotationLift.HalfPiInput.rotationRadius_shrinks halfPiInput
+  change ShrinksToZero
+    (RotationLift.HalfPiInput.rotationRadius halfPiInput)
+  exact RotationLift.HalfPiInput.rotationRadius_shrinks halfPiInput
 
 /-- The represented-angle imaginary-axis rotation.  It stabilizes the
 finite boxes obtained by evaluating one common factorial schedule at the
@@ -570,10 +577,12 @@ theorem negativeTwoImaginaryRaw_mul_imaginaryHalf_equiv_piCircleArea :
   have hproductToAffine :
       (negativeTwoImaginaryRaw * imaginaryHalf).Equiv
         (ComplexRaw.qcomplexLeftMul negativeTwoImaginaryScalar imaginaryHalf) := by
-    simpa [negativeTwoImaginaryRaw] using
-      ComplexRaw.equiv_symm
-        (ComplexRaw.qcomplexLeftMul_equiv_mul_ofQComplex
-          negativeTwoImaginaryScalar imaginaryHalf_valid)
+    change
+      ((ComplexRaw.ofQComplex negativeTwoImaginaryScalar).mul imaginaryHalf).Equiv
+        (ComplexRaw.qcomplexLeftMul negativeTwoImaginaryScalar imaginaryHalf)
+    exact ComplexRaw.equiv_symm
+      (ComplexRaw.qcomplexLeftMul_equiv_mul_ofQComplex
+        negativeTwoImaginaryScalar imaginaryHalf_valid)
   exact ComplexRaw.equiv_trans
     (ComplexRaw.mul_valid negativeTwoImaginaryRaw_valid imaginaryHalf_valid)
     (ComplexRaw.qcomplexLeftMul_valid negativeTwoImaginaryScalar imaginaryHalf_valid)

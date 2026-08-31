@@ -139,8 +139,8 @@ def rectangleKernelIntegralAtNonnegativeUnit
   construction :=
     { compute := ArctanGeometry.arctanIntegralRectangleCompute x
       certificate := by
-        simpa [ArctanGeometry.arctanIntegralRectangleRaw] using
-          ArctanGeometry.arctanIntegralRectangleRaw_valid hx0 hx1 }
+        change (ArctanGeometry.arctanIntegralRectangleRaw x).Valid
+        exact ArctanGeometry.arctanIntegralRectangleRaw_valid hx0 hx1 }
 
 theorem rectangleKernelIntegralRaw_equiv_rectangleRaw_nonnegativeUnit
     (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
@@ -682,7 +682,8 @@ theorem validAt (x : Rat) (hx : arctanDomain x) :
 
 theorem valid : ArctanValid := by
   intro x hx
-  simpa [RealFunRaw.applyCompute, arctanFunction] using validAt x hx
+  change (arctan x).Valid
+  exact validAt x hx
 
 end ArctanValidity
 
@@ -1177,7 +1178,9 @@ def piLeibnizRate : RealRaw.Rate piLeibniz.compute :=
 
 theorem leibnizSeriesValid : leibnizSeries.Valid := by
   exact RealRaw.valid_of_natScale_valid (by omega : 0 < (4 : Nat))
-    (by simpa [piLeibniz] using leibnizValid)
+    (by
+      change RealRaw.ValidCompute piLeibniz.compute
+      exact leibnizValid)
 
 theorem arctan_one_state_eq_leibniz_state (n : Nat) :
     ArctanValidity.state 1 n =
@@ -7398,7 +7401,7 @@ theorem geometricBranchIdentity_of_machinUnitAdditions
       (RealRaw.sub_equiv
         (RealRaw.natScale_valid 4 hA) hBBvalid hD hD hfourA_BB hDrefl)
       hBBminus_E
-  simpa [A, D, E] using hfinal
+  simpa [GeometricBranchIdentity, A, D, E] using hfinal
 
 /-- The universal unit-addition law proves Machin's three exact bounded
 addition instances, hence its geometric branch identity. -/
@@ -8702,8 +8705,8 @@ theorem rationalPointPathLength_lo_nonneg
                   ((q.x - p.x) * (q.x - p.x) +
                     (q.y - p.y) * (q.y - p.y))
                   (pointSegmentNormSq_sqrtDomain p q) n).lo := by
-            simpa [pointSegmentNormSq] using
-              pointSegmentLengthInterval_lo_nonneg p q n
+            change 0 <= (pointSegmentLengthInterval p q n).lo
+            exact pointSegmentLengthInterval_lo_nonneg p q n
           simp [rationalPointPathLength,
             rationalPointPathLength.totalLength]
           exact Rat.add_nonneg hseg_nonneg ih
@@ -8729,9 +8732,11 @@ theorem rationalPointPathLength_lo_le_hi
               (sqrtPartialRaw.compute
                 ((q.x - p.x) * (q.x - p.x) +
                   (q.y - p.y) * (q.y - p.y))
-                (pointSegmentNormSq_sqrtDomain p q) n).hi := by
-            simpa [pointSegmentNormSq] using
-              pointSegmentLengthInterval_lo_le_hi p q n
+                  (pointSegmentNormSq_sqrtDomain p q) n).hi := by
+            change
+              (pointSegmentLengthInterval p q n).lo <=
+                (pointSegmentLengthInterval p q n).hi
+            exact pointSegmentLengthInterval_lo_le_hi p q n
           simp [rationalPointPathLength,
             rationalPointPathLength.totalLength]
           grind
@@ -10554,10 +10559,9 @@ theorem arctanGeomPresentation_equiv_arctanSeriesPresentation_on_nonnegativeUnit
           change qabs x <= 1
           rw [qabs_eq_self_of_nonneg hx0]
           exact hx1)) := by
-  simpa [arctan.geom, arctan.series, ArctanGeometry.representation,
-    ArctanGeometry.functionRaw, Elementary.Arctan.powerSeries,
-    Elementary.Arctan.powerSeriesFunctionRaw, PartialRealFunRaw.evalRaw] using
-    (RealRaw.equiv_symm (arctanEqualsGeom_finiteRiemannBridge hx0 hx1))
+  change (ArctanGeometry.arctanGeom x).Equiv (arctan x)
+  exact RealRaw.equiv_symm
+    (arctanEqualsGeom_finiteRiemannBridge hx0 hx1)
 
 /-- The series/kernal-integral comparison obtained from the finite Riemann
 bridge.  This is the analytic input used at the two arguments in Machin's
@@ -12348,7 +12352,11 @@ theorem piFromArctanIntegral_equiv_piCircleArea_of_definite_identity
   have hintegralEndpoint :
       (IntegralIdentities.arctanIntegral (1 : Rat) I.construction).Equiv
         (endpointDifferenceRaw primitive 0 1 I.endpoint_valid) := by
-    simpa [IntegralIdentities.arctanIntegral] using I.equivalent
+    change DefiniteIntegralEqualsEndpointDifference
+      primitive
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      0 1 I.construction I.endpoint_valid
+    exact I.equivalent
   have hendpointValid :
       (endpointDifferenceRaw primitive 0 1 I.endpoint_valid).Valid := by
     simpa [endpointDifferenceRaw, RealRaw.Valid] using I.endpoint_valid
@@ -12417,10 +12425,22 @@ theorem piFromArctanIntegralFor_equiv_piCircleArea_of_definiteIdentityFor
         (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
         I.construction).Equiv
         (endpointDifferenceRaw primitive.toRealFunRaw 0 1 I.endpoint_valid) := by
-    simpa using I.equivalent
+    change
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        I.construction).Equiv
+      (endpointDifferenceRaw primitive.toRealFunRaw
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).lower
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).upper
+        I.endpoint_valid)
+    exact I.equivalent
   have hendpointValid :
       (endpointDifferenceRaw primitive.toRealFunRaw 0 1 I.endpoint_valid).Valid := by
-    simpa [endpointDifferenceRaw, RealRaw.Valid] using I.endpoint_valid
+    change RealRaw.ValidCompute
+      (endpointDifferenceCompute primitive.toRealFunRaw
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).lower
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).upper)
+    exact I.endpoint_valid
   have hgeomValid :
       (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
     ArctanGeometry.arctanGeom_valid_on_unit
@@ -12460,10 +12480,22 @@ theorem piFromArctanGeneralIntegralFor_equiv_piCircleArea_of_generalDefiniteIden
         (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
         I.construction).Equiv
         (endpointDifferenceRaw primitive.toRealFunRaw 0 1 I.endpoint_valid) := by
-    simpa using I.equivalent
+    change
+      (Integral.generalIntegralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        I.construction).Equiv
+      (endpointDifferenceRaw primitive.toRealFunRaw
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).lower
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).upper
+        I.endpoint_valid)
+    exact I.equivalent
   have hendpointValid :
       (endpointDifferenceRaw primitive.toRealFunRaw 0 1 I.endpoint_valid).Valid := by
-    simpa [endpointDifferenceRaw, RealRaw.Valid] using I.endpoint_valid
+    change RealRaw.ValidCompute
+      (endpointDifferenceCompute primitive.toRealFunRaw
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).lower
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).upper)
+    exact I.endpoint_valid
   have hgeomValid :
       (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
     ArctanGeometry.arctanGeom_valid_on_unit
@@ -15122,6 +15154,12 @@ theorem areaPolygonValid : AreaPolygonValid :=
 theorem piCircleAreaPolygon_valid : piCircleAreaPolygon.Valid :=
   areaPolygonValid
 
+/-- Canonical bridge from the area-loop predicate to the public raw-real
+validity interface. -/
+theorem piCircleArea_valid : piCircleArea.Valid := by
+  change AreaValid
+  exact AreaLoopValidity.areaValid
+
 /-- Nilakantha's cubically convergent rational series is the same pi
 computation as the verified circle-area construction.  The only new series
 step is the finite endpoint transformation in `Nilakantha.equiv_piLeibniz`. -/
@@ -15130,13 +15168,12 @@ theorem piNilakantha_equiv_piCircleArea :
   RealRaw.equiv_trans
     Nilakantha.valid
     leibnizValid
-    (by simpa [piCircleArea, AreaValid, RealRaw.Valid] using
-      AreaLoopValidity.areaValid)
+    piCircleArea_valid
     Nilakantha.equiv_piLeibniz
     (RealRaw.equiv_trans
       leibnizValid
       fourArctanSeriesOneValid
-      (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+      piCircleArea_valid
       piLeibniz_equiv_four_arctanSeries_one
       four_arctanSeries_one_equiv_piCircleArea)
 
@@ -15170,7 +15207,7 @@ theorem piCircumferenceStabilized_valid : piCircumferenceStabilized.Valid := by
   unfold piCircumferenceStabilized
   exact RealRaw.prefixStabilize_valid
     circumferenceWidthsShrink
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     piCircumference_equiv_piCircleArea_of_verified_area_polygon
     circumferenceStabilizationRadius_covers_area
     circumferenceStabilizationRadius_shrinks
@@ -15181,7 +15218,7 @@ theorem piCircumference_equiv_piCircumferenceStabilized :
     piCircumference.Equiv piCircumferenceStabilized := by
   unfold piCircumferenceStabilized
   exact RealRaw.candidate_equiv_prefixStabilize
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     piCircumference_equiv_piCircleArea_of_verified_area_polygon
     circumferenceStabilizationRadius_covers_area
 
@@ -15191,7 +15228,7 @@ theorem piCircumferenceStabilized_equiv_piCircleArea :
     piCircumferenceStabilized.Equiv piCircleArea := by
   unfold piCircumferenceStabilized
   exact RealRaw.prefixStabilize_equiv_anchor
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     piCircumference_equiv_piCircleArea_of_verified_area_polygon
     circumferenceStabilizationRadius_covers_area
 
@@ -15215,7 +15252,7 @@ theorem piCircumferenceReboxed_valid : piCircumferenceReboxed.Valid := by
   exact RealRaw.anchorRebox_valid
     piCircumference_ordered
     circumferenceWidthsShrink
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     piCircumference_equiv_piCircleArea_of_verified_area_polygon
 
 /-- The direct perimeter intervals overlap their certified reboxed
@@ -15224,7 +15261,7 @@ theorem piCircumference_equiv_piCircumferenceReboxed :
     piCircumference.Equiv piCircumferenceReboxed := by
   unfold piCircumferenceReboxed
   exact RealRaw.candidate_equiv_anchorRebox
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     piCircumference_equiv_piCircleArea_of_verified_area_polygon
 
 /-- The certified reboxed perimeter computation agrees with the baseline
@@ -15233,24 +15270,32 @@ theorem piCircumferenceReboxed_equiv_piCircleArea :
     piCircumferenceReboxed.Equiv piCircleArea := by
   unfold piCircumferenceReboxed
   exact RealRaw.anchorRebox_equiv_anchor
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
 
 /-- The initial certified π handle, retaining the two perimeter
 normalizations available before the remaining independent routes have been
 assembled below.  `piCertified` is the full presentation registry declared at
 the end of this file. -/
+def piCircumferenceStabilizedImplementation :
+    RealImplementation piCircleArea where
+  raw := piCircumferenceStabilized
+  valid := piCircumferenceStabilized_valid
+  equivalent := RealRaw.equiv_symm
+    piCircumferenceStabilized_equiv_piCircleArea
+
+def piCircumferenceReboxedImplementation :
+    RealImplementation piCircleArea where
+  raw := piCircumferenceReboxed
+  valid := piCircumferenceReboxed_valid
+  equivalent := RealRaw.equiv_symm
+    piCircumferenceReboxed_equiv_piCircleArea
+
 def piCertifiedPerimeter : Real :=
   { preferred := piCircleArea
-    valid := by simpa [AreaValid] using AreaLoopValidity.areaValid
+    valid := piCircleArea_valid
     implementations :=
-      [ { raw := piCircumferenceStabilized
-          valid := piCircumferenceStabilized_valid
-          equivalent := RealRaw.equiv_symm
-            piCircumferenceStabilized_equiv_piCircleArea }
-        { raw := piCircumferenceReboxed
-          valid := piCircumferenceReboxed_valid
-          equivalent := RealRaw.equiv_symm
-            piCircumferenceReboxed_equiv_piCircleArea } ] }
+      [piCircumferenceStabilizedImplementation,
+        piCircumferenceReboxedImplementation] }
 
 theorem piCertifiedPerimeter_preferred :
     piCertifiedPerimeter.preferred = piCircleArea :=
@@ -15266,7 +15311,7 @@ theorem fourArctanGeomOneValid :
   change RealRaw.ValidCompute
     (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).compute)
   rw [hcompute]
-  simpa [AreaValid] using AreaLoopValidity.areaValid
+  exact piCircleArea_valid
 
 theorem arctanGeomOneValid :
     (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
@@ -15347,7 +15392,7 @@ theorem piMachin_equiv_piCircleArea_of_powerSeriesGeometryAtMachinSmallInputs
   exact RealRaw.equiv_trans
     machinValid
     (RealRaw.natScale_valid 4 hg1)
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     hscaled
     four_arctanGeom_one_equiv_piCircleArea
 
@@ -15381,7 +15426,7 @@ theorem leibnizEqArea_of_kernelComparisonAtOne
   RealRaw.equiv_trans
     leibnizValid
     fourArctanSeriesOneValid
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     piLeibniz_equiv_four_arctanSeries_one
     (four_arctanSeries_one_equiv_piCircleArea_of_kernelComparisonAtOne
       route)
@@ -15471,7 +15516,7 @@ theorem piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs
   RealRaw.equiv_trans
     machinValid
     leibnizValid
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     (RealRaw.equiv_symm
       (leibnizEqMachin_of_kernelComparisonAtMachinInputs route hgeom))
     (leibnizEqArea_of_kernelComparisonAtOne route.one)
@@ -15540,7 +15585,7 @@ theorem four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea :
     (RealRaw.natScale_valid 4
       ArctanGeometry.arctanIntegralRectangleRawAtOne_valid)
     fourArctanGeomOneValid
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     hscale
     four_arctanGeom_one_equiv_piCircleArea
 
@@ -15562,7 +15607,7 @@ theorem piFromArctanIntegrationByPartsMesh_equiv_piCircleArea :
     IntegralIdentities.piFromArctanIntegrationByPartsMesh_valid
     (RealRaw.natScale_valid 4
       ArctanGeometry.arctanIntegralRectangleRawAtOne_valid)
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     hscale
     four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea
 
@@ -15576,7 +15621,7 @@ theorem piTriangleLogSeries_equiv_piCircleArea :
   exact RealRaw.equiv_trans
     Logarithm.piTriangleLogSeries_valid
     fourArctanGeomOneValid
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     Logarithm.piTriangleLogSeries_equiv_four_arctanGeom_one
     four_arctanGeom_one_equiv_piCircleArea
 
@@ -15589,7 +15634,7 @@ theorem piTriangleLogReciprocalIntegral_equiv_piCircleArea :
   exact RealRaw.equiv_trans
     Logarithm.piTriangleLogReciprocalIntegral_valid
     fourArctanGeomOneValid
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     Logarithm.piTriangleLogReciprocalIntegral_equiv_four_arctanGeom_one
     four_arctanGeom_one_equiv_piCircleArea
 
@@ -15602,7 +15647,7 @@ theorem piTriangleLogSquareSubstitutionIntegral_equiv_piCircleArea :
   exact RealRaw.equiv_trans
     Logarithm.piTriangleLogSquareSubstitutionIntegral_valid
     fourArctanGeomOneValid
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     Logarithm.piTriangleLogSquareSubstitutionIntegral_equiv_four_arctanGeom_one
     four_arctanGeom_one_equiv_piCircleArea
 
@@ -15626,7 +15671,7 @@ theorem four_arctanIntegralRectangleForAtOne_equiv_piCircleArea :
   exact RealRaw.equiv_trans
     hleft
     fourArctanGeomOneValid
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     hscaled
     four_arctanGeom_one_equiv_piCircleArea
 
@@ -15670,6 +15715,12 @@ theorem piSymmetricCauchyPiecewiseIntegral_equiv_four_arctanIntegralRectangleFor
     have h := RealRaw.scaleRat_scaleRat_equiv_of_nonneg
       (2 : Rat) (2 : Rat) (by native_decide) (by native_decide)
       IntegralIdentities.arctanIntegralRectangleForAtOne hA
+    change
+      (RealRaw.scaleRat 2
+        (RealRaw.scaleRat 2
+          IntegralIdentities.arctanIntegralRectangleForAtOne)).Equiv
+      (RealRaw.scaleRat 4
+        IntegralIdentities.arctanIntegralRectangleForAtOne)
     simpa only [show (2 : Rat) * (2 : Rat) = 4 by native_decide] using h
   exact RealRaw.equiv_trans
     IntegralIdentities.piSymmetricCauchyPiecewiseIntegral_valid
@@ -15685,7 +15736,7 @@ theorem piSymmetricCauchyPiecewiseIntegral_equiv_piCircleArea :
     IntegralIdentities.piSymmetricCauchyPiecewiseIntegral_valid
     (RealRaw.natScale_valid 4
       IntegralIdentities.arctanIntegralRectangleForAtOne_valid)
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     piSymmetricCauchyPiecewiseIntegral_equiv_four_arctanIntegralRectangleForAtOne
     four_arctanIntegralRectangleForAtOne_equiv_piCircleArea
 
@@ -15719,7 +15770,7 @@ theorem four_arctanIntegralRectangleMonotoneForAtOne_equiv_piCircleArea :
   exact RealRaw.equiv_trans
     hleft
     hrect
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     hscaled
     four_arctanIntegralRectangleForAtOne_equiv_piCircleArea
 
@@ -15781,7 +15832,7 @@ theorem piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea :
   exact RealRaw.equiv_trans
     piFromArctanIntegralRectangleUnitAtOne_valid
     fourArctanGeomOneValid
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     hscaled
     four_arctanGeom_one_equiv_piCircleArea
 
@@ -15937,7 +15988,7 @@ theorem piReciprocalQuarticCompact_equiv_piCircleArea :
   exact RealRaw.equiv_trans
     piReciprocalQuarticCompact_valid
     IntegralIdentities.cauchyFullLineIntegral_valid
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicIntegral_equiv_cauchyFullLine
     cauchyFullLineIntegral_equiv_piCircleArea
 
@@ -15949,7 +16000,7 @@ theorem reciprocalQuarticMinusOneExpectedPi_valid :
     IntegralIdentities.reciprocalQuarticExpectedPiMultiple
   exact RealRaw.scaleRat_valid_of_nonneg
     (by native_decide : (0 : Rat) <= 1 / 1)
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
 
 /-- The expected value of the clean reciprocal quartic projective integral is
 equivalent to the baseline circle-area pi.  This is only the expected-value
@@ -15964,7 +16015,7 @@ theorem reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea :
     IntegralIdentities.reciprocalQuarticMinusOneExpectedPi piCircleArea n n).2
   have hordered :=
     RealRaw.interval_order_of_valid piCircleArea
-      (by simpa [AreaValid] using AreaLoopValidity.areaValid) n
+      piCircleArea_valid n
   unfold IntegralIdentities.reciprocalQuarticMinusOneExpectedPi
     IntegralIdentities.reciprocalQuarticExpectedPiMultiple
     RealRaw.scaleRat RealRaw.scaleRatCompute
@@ -15981,7 +16032,7 @@ theorem reciprocalQuarticMinusOneProjectiveRoute_equiv_piCircleArea
   RealRaw.equiv_trans
     R.projectiveIntegral_valid
     reciprocalQuarticMinusOneExpectedPi_valid
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     R.computes_expected
     reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea
 
@@ -18063,7 +18114,7 @@ theorem piTriangleLogSquareStieltjes_equiv_piCircleArea :
   exact RealRaw.equiv_trans
     piTriangleLogSquareStieltjes_valid
     Logarithm.piTriangleLogReciprocalIntegral_valid
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     piTriangleLogSquareStieltjes_equiv_piTriangleLogReciprocalIntegral
     piTriangleLogReciprocalIntegral_equiv_piCircleArea
 

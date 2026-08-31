@@ -65,7 +65,7 @@ theorem piFromCanonicalLogTwo_equiv_piCircleArea
   exact RealRaw.equiv_trans
     (piFromCanonicalLogTwo_valid logTwo)
     Logarithm.piTriangleLogReciprocalIntegral_valid
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircleArea_valid
     (piFromCanonicalLogTwo_equiv_reciprocalIntegral logTwo)
     piTriangleLogReciprocalIntegral_equiv_piCircleArea
 

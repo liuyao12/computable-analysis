@@ -1970,17 +1970,10 @@ the secant of `x^4` on `[0,1]` is `1`, with finite derivative bracket `[0,4]`.
 The Descartes examples now include `threeVariationCubic`: the finite list for
 `(x-1)(x-2)(x-3)` has three sign variations, and exact factorization proves
 that its positive rational roots are precisely `1`, `2`, and `3`.
-The finite integration-by-parts ladder now includes
-`FiniteQuarticQuinticIntegrationByParts`: the two endpoint-weighted rational
-grid sums for `x^4` and `x^5` telescope to the endpoint product `1` at every
-positive stage, with stage four checked explicitly.  This extends the finite
-FTC/product-rule core of item 15 without introducing a completed integral or
-a real-number limit.
-The existing `FiniteFTCQuintic` certificate is now surfaced as the next
-item-15 checkpoint: finite left and right endpoint sums for `x^5` on `[0,1]`
-enclose `1/6`, with stage twenty linked explicitly in the Blueprint.  This
-keeps the quintic FTC construction discoverable alongside the quartic and
-sextic checkpoints.
+The finite integration-by-parts and monomial FTC ladders are now routed
+through the generic telescope and power-integral theorems.  The former
+quartic/quintic regression modules were removed during canonization: their
+degree-specific statements added no content beyond the generic construction.
 The new `FiniteComplexQuadraticExample` supplies the next worked FTA
 boundary: Lean checks both distinct rational-coordinate roots of
 `z^2 - 2*z + 5`, the factorization into the two supplied linear factors, and
@@ -2542,15 +2535,9 @@ and its validity theorem provide the finite raw integral for `x^4` on
 `Series.fourthPowerSum`, and `exactQuartic_compute_contains_one_fifth` plus
 `exactRat_quartic_integral_raw_equiv_one_fifth` identify the result with the
 exact rational value `1/5`.
-The quintic finite pass is now checked as well: `FiniteFTCQuintic` supplies
-interval regularity, a rational Lipschitz bound, both finite endpoint-sum
-identities, and a concrete stage-10 enclosure containing `1/6`. The
-all-stage exact-value equivalence remains open, so this is a finite
-certificate-level FTC result, not a general regularity-to-integrability
-theorem.
-The same quintic computation now has a direct stage-20 containment certificate
-`exactQuintic_compute_contains_one_sixth_stage20`, strengthening the finite
-precision evidence while leaving the all-stage symbolic inequality open.
+The generic monomial pass now subsumes the former quintic-only finite
+certificate: `Integral.exactRat_pow_integral_raw_equiv_one_div_succ` gives the
+all-stage value for every natural degree, including `1/6` for degree five.
 The FTC endpoint layer now also records the stage-eight left sum for the
 derivative `6*x^5`: `5439/8192 <= 6/7`.  This extends the finite polynomial
 checkpoint pattern to the sextic case without adding a completed-limit claim.

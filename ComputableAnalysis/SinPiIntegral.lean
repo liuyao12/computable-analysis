@@ -5063,17 +5063,6 @@ theorem sinPiStieltjesIntegral_equiv_reciprocalPi :
     sinPiStieltjesIntegral.Equiv reciprocalPiRaw := by
   exact tangentChartIntegral_equiv_reciprocalPi
 
-/-! Compatibility name for earlier blueprint versions. -/
-def sinPiUnevenSamplingIntegral : RealRaw := sinPiStieltjesIntegral
-
-theorem sinPiUnevenSamplingIntegral_valid :
-    sinPiUnevenSamplingIntegral.Valid := by
-  exact sinPiStieltjesIntegral_valid
-
-theorem sinPiUnevenSamplingIntegral_equiv_reciprocalPi :
-  sinPiUnevenSamplingIntegral.Equiv reciprocalPiRaw := by
-  exact sinPiStieltjesIntegral_equiv_reciprocalPi
-
 /-! Public evaluated value.
 
 The executable route is the Riemann--Stieltjes presentation: the tangent

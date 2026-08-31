@@ -5441,9 +5441,6 @@ theorem agreeOnCommonDomain_of_common_anchor
     (hf z hfz) (hg z hgz) (ha z haz)
     (hfa z hfz haz) (hga z hgz haz)
 
-/-- Short alias for `AgreeOnCommonDomain`. -/
-def Compatible (f g : FunctionRaw) : Prop := AgreeOnCommonDomain f g
-
 end FunctionRaw
 
 /- The abstract complex-function layer.  A named special function is a

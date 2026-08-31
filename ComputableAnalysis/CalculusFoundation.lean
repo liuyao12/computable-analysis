@@ -1,5 +1,4 @@
 import ComputableAnalysis.IntegralFoundation
-import ComputableAnalysis.FiniteFTCQuintic
 import ComputableAnalysis.SinPiSquareFTC
 import ComputableAnalysis.SinPiSquareCheckpoints
 import ComputableAnalysis.EffectiveCalculusFoundation
@@ -19,7 +18,6 @@ import ComputableAnalysis.ExponentialLogarithmFoundation
 import ComputableAnalysis.ScalarODEUniqueness
 import ComputableAnalysis.DifferentialEquationsFoundation
 import ComputableAnalysis.PeanoBaker
-import ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts
 import ComputableAnalysis.GeometricRotationODE
 import ComputableAnalysis.RotationPeanoBakerBridge
 import ComputableAnalysis.FiniteNBallVolume
@@ -1742,10 +1740,7 @@ theorem effectiveExactRatPowIntegral_equiv_ofRat (k : Nat) :
       (RealRaw.ofRat (1 / ((k + 1 : Nat) : Rat))) :=
   Integral.exactRat_pow_integral_raw_equiv_one_div_succ k
 
-/-- Named focused-entry-point aliases for the first higher-degree interval
-    bounded FTC regressions.  Their separate modules retain the detailed
-    budgets; these names make the closed polynomial ladder discoverable from
-    the foundation import. -/
+/-- Named focused-entry-point adapter retained for the quartic regression. -/
 def effectiveExactRatQuarticDefiniteIdentity :
     Integral.DefiniteIdentityFor
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ 4) 0 1)
@@ -1755,8 +1750,8 @@ def effectiveExactRatQuarticDefiniteIdentity :
 def effectiveExactRatQuinticDefiniteIdentity :
     Integral.DefiniteIdentityFor
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ 5) 0 1)
-      Integral.quinticPrimitiveOnUnit :=
-  Integral.exactRat_quintic_definiteIdentity
+      (Integral.powPrimitiveOnUnit 5) :=
+  Integral.exactRat_pow_definiteIdentity 5
 
 /-! Assemble a finite polynomial integral from the certified monomial raws.
     The separate anchor raw keeps the computation graph explicit; reducing
