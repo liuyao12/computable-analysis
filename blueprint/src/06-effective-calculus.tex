@@ -456,6 +456,13 @@ certificates.
 \lean{ComputableAnalysis.effectiveDerivativeSquareOfBudget}
 \leanok
 
+The square specialization is the first reusable nonlinear observable.  Given
+an effective derivative budget for (u), it returns the derivative budget for
+(u^2) with (2u,du) as its candidate derivative.  Its corner term is not
+discarded: the provider must still drive the product of the two finite
+difference quotients below the requested rational tolerance.  This is the
+contract consumed by squared-sine examples.
+
 The same finite mechanism now closes multiplication when rational majorants
 are supplied for both factors and both proposed derivatives.  The certificate
 contains the explicit corner term coming from the product finite difference;
