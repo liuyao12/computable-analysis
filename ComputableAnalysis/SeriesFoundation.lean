@@ -265,6 +265,47 @@ theorem RationalSeriesCertificate.scale_raw_equiv_scaleRat
     Rat.mul_nonneg hc (S.remainder_nonneg n)
   constructor <;> grind [Rat.mul_add, Rat.sub_eq_add_neg]
 
+/-! Negation is the real-valued sign-change closure paired with the complex
+    series operation below.  The remainder is unchanged and the interval
+    endpoints reverse explicitly. -/
+def RationalSeriesCertificate.neg
+    (S : RationalSeriesCertificate) : RationalSeriesCertificate where
+  partialSum := fun n => -(S.partialSum n)
+  remainder := S.remainder
+  remainder_nonneg := S.remainder_nonneg
+  refinement := by
+    intro n
+    have harg :
+        -S.partialSum (n + 1) - -S.partialSum n =
+          -(S.partialSum (n + 1) - S.partialSum n) := by
+      grind [Rat.sub_eq_add_neg]
+    rw [harg, qabs_neg]
+    exact S.refinement n
+  tail_budget := S.tail_budget
+
+theorem RationalSeriesCertificate.neg_raw_valid
+    (S : RationalSeriesCertificate) :
+    S.neg.raw.Valid := by
+  exact S.neg.raw_valid
+
+theorem RationalSeriesCertificate.neg_raw_precision_witness
+    (S : RationalSeriesCertificate) (eps : QPos) :
+    ∃ N : Nat, ∀ n, N ≤ n ->
+      (S.neg.raw.compute n).width ≤ eps.val := by
+  exact S.neg.raw_precision_witness eps
+
+theorem RationalSeriesCertificate.neg_raw_equiv_neg
+    (S : RationalSeriesCertificate) :
+    S.neg.raw.Equiv (RealRaw.neg S.raw) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff S.neg.raw
+    (RealRaw.neg S.raw) n n).2
+  simp only [RationalSeriesCertificate.raw, RationalSeriesCertificate.neg,
+    RealRaw.neg, RealRaw.negCompute]
+  unfold QInterval.Overlaps
+  have hr := S.remainder_nonneg n
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
 /-! The geometric prefix is the first concrete client of the generic
     certificate.  Its remainder is written as a rational gap to the closed
     endpoint formula; the generic constructor then supplies the symmetric
