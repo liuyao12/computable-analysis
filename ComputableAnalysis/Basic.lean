@@ -4713,6 +4713,10 @@ def conj (B : QBox) : QBox :=
   { lo := { re := B.lo.re, im := -B.hi.im }
     hi := { re := B.hi.re, im := -B.lo.im } }
 
+@[simp] theorem conj_conj (B : QBox) : conj (conj B) = B := by
+  cases B
+  simp [conj, QComplex.conj]
+
 instance overlapsDecidable (A B : QBox) : Decidable (Overlaps A B) := by
   unfold Overlaps
   infer_instance
@@ -7157,6 +7161,7 @@ theorem conj_valid (z : ComplexRaw) (hz : z.Valid) :
     have h := hz.1 n
     simp [QBox.conj, QComplex.conj, QBox.width, QBox.height] at h ⊢
     exact ⟨h.1, by grind⟩
+
   constructor
   · intro n m hnm
     have h := hz.2.1 n m hnm
@@ -7169,6 +7174,15 @@ theorem conj_valid (z : ComplexRaw) (hz : z.Valid) :
     have h := hN n hn
     simp [QBox.conj, QComplex.conj, QBox.width, QBox.height] at h ⊢
     exact ⟨h.1, by grind⟩
+
+theorem conj_conj_equiv (z : ComplexRaw) (hz : z.Valid) :
+    (ComplexRaw.conj (ComplexRaw.conj z)).Equiv z := by
+  intro n
+  apply (ComplexRaw.compareAt_overlap_iff
+    (ComplexRaw.conj (ComplexRaw.conj z)) z n n).2
+  have ho := ComplexRaw.valid_ordered hz n
+  unfold QBox.Ordered at ho
+  simpa [ComplexRaw.conj, QBox.conj, QBox.Overlaps] using ho
 
 def sub (z w : ComplexRaw) : ComplexRaw :=
   add z (neg w)
