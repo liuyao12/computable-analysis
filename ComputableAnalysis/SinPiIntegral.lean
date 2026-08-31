@@ -9317,6 +9317,31 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_canonical_cer
   exact S.halfIntegral_equiv_reciprocalPi_of_witness_family
     pub g cg hdyadic hplan hevaluator family.toWitnessFamily hintegral
 
+/-! A direct theorem-facing shortcut for explicit finite candidate data. The
+candidate family packages the rational lists and their admissibility proofs;
+the conversion to successful certificates is the only hidden step. -/
+theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_candidate_family
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (family : DyadicCanonicalCertificateCandidateFamily S.inverse)
+    (hintegral :
+      (Integral.integral g 0 ((1 : Rat) / 2) cg).Equiv reciprocalPiRaw) :
+    (S.halfIntegral pub).Equiv reciprocalPiRaw := by
+  exact S.halfIntegral_equiv_reciprocalPi_of_canonical_certificate_family
+    pub g cg hdyadic hplan hevaluator family.toCanonicalFamily hintegral
+
 theorem ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificates
     (S : ArctanSinPiConstruction)
     (pub : Integral.Construction S.onHalf.toRealFunRaw
