@@ -2194,6 +2194,19 @@ theorem effectiveDerivativeBoundFTC_boundedIntegralRaw_equiv_endpointDifference
       (endpointDifferenceRaw F a b hendpoint) := by
   exact h.boundedIntegralRaw_equiv_endpointDifference hendpoint
 
+/-! The unsquared finite sine prefix is the smallest public trigonometric
+    FTC client.  It keeps the finite Taylor computation visible while
+    exposing the same endpoint contract used by the later sine transport. -/
+theorem effectiveFTC_sine_prefix :
+    FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTCData.toDerivativeBoundFTC.endpointRaw := by
+  exact FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTC_equiv_endpoint
+
+theorem effectiveFTC_sine_prefix_equiv_value :
+    FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      (RealRaw.ofRat (47 / 384)) := by
+  exact FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTC_equiv_fortySeven_over_threeEightFour
+
 /-! A finite trigonometric-prefix example belongs to the public calculus
 surface even though the full equal-dyadic sine transport is a separate
 geometric frontier.  Keeping this distinction visible prevents a polynomial
