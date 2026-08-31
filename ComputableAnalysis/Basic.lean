@@ -4707,6 +4707,12 @@ def NestedIn (inner outer : QBox) : Prop :=
 
 def Overlaps (A B : QBox) : Prop := A.lo <= B.hi /\ B.lo <= A.hi
 
+/-- Coordinatewise conjugation of a rational complex box.  The imaginary
+    endpoints reverse, while the real endpoints are unchanged. -/
+def conj (B : QBox) : QBox :=
+  { lo := QComplex.conj B.hi
+    hi := QComplex.conj B.lo }
+
 instance overlapsDecidable (A B : QBox) : Decidable (Overlaps A B) := by
   unfold Overlaps
   infer_instance
@@ -7135,6 +7141,11 @@ def add (z w : ComplexRaw) : ComplexRaw where
 
 def neg (z : ComplexRaw) : ComplexRaw where
   compute := fun eps => QBox.neg (z.compute eps)
+
+/-- Conjugation of a complex raw computation, with the imaginary interval
+    endpoints reversed at each finite stage. -/
+def conj (z : ComplexRaw) : ComplexRaw where
+  compute := fun eps => QBox.conj (z.compute eps)
 
 def sub (z w : ComplexRaw) : ComplexRaw :=
   add z (neg w)

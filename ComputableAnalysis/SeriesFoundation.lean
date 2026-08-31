@@ -744,6 +744,46 @@ theorem ComplexSeriesCertificate.neg_raw_equiv_neg
   have hr := S.remainder_nonneg n
   constructor <;> constructor <;> grind [Rat.sub_eq_add_neg]
 
+/-! Conjugation preserves a rectangular series certificate.  This is the
+    complex-valued counterpart of sign change and is the transport edge used
+    when Fourier coefficients are paired with their conjugates. -/
+def ComplexSeriesCertificate.conj
+    (S : ComplexSeriesCertificate) : ComplexSeriesCertificate where
+  partialSum := fun n => QComplex.conj (S.partialSum n)
+  remainder := S.remainder
+  remainder_nonneg := S.remainder_nonneg
+  refinement := by
+    intro n
+    have hs := S.refinement n
+    simp [QBox.NestedIn, QBox.expand, QBox.point, QBox.conj,
+      QComplex.conj, QComplex.le_def] at hs ⊢
+    constructor <;> constructor <;> grind [Rat.sub_eq_add_neg]
+  tail_budget := S.tail_budget
+
+theorem ComplexSeriesCertificate.conj_raw_valid
+    (S : ComplexSeriesCertificate) :
+    S.conj.raw.Valid := by
+  exact S.conj.raw_valid
+
+theorem ComplexSeriesCertificate.conj_raw_precision_witness
+    (S : ComplexSeriesCertificate) (eps : QPos) :
+    ∃ N : Nat, ∀ n, N ≤ n ->
+      (S.conj.raw.compute n).width ≤ eps.val ∧
+        (S.conj.raw.compute n).height ≤ eps.val := by
+  exact S.conj.raw_precision_witness eps
+
+theorem ComplexSeriesCertificate.conj_raw_equiv_conj
+    (S : ComplexSeriesCertificate) :
+    S.conj.raw.Equiv (ComplexRaw.conj S.raw) := by
+  intro n
+  apply (ComplexRaw.compareAt_overlap_iff S.conj.raw
+    (ComplexRaw.conj S.raw) n n).2
+  simp only [ComplexSeriesCertificate.raw, ComplexSeriesCertificate.conj,
+    ComplexRaw.conj, QBox.conj, QBox.expand, QBox.point, QComplex.conj]
+  unfold QBox.Overlaps
+  have hr := S.remainder_nonneg n
+  constructor <;> constructor <;> grind [Rat.sub_eq_add_neg]
+
 /-! A finite complex coefficient prefix has the same termwise primitive
 constructor as the rational polynomial layer.  The coefficient stream and
 the evaluation point are rational-complex, while division by the natural
