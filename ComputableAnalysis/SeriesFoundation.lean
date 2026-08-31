@@ -496,6 +496,68 @@ theorem ComplexSeriesCertificate.raw_precision_witness
         (S.raw.compute n).height ≤ eps.val := by
   exact (S.raw_valid).2.2 eps
 
+/-! Complex series are closed under addition as well.  The two coordinate
+    widths share the same tail-radius budget, so a quarter split leaves room
+    for both summands and both coordinates. -/
+def ComplexSeriesCertificate.add
+    (S T : ComplexSeriesCertificate) : ComplexSeriesCertificate where
+  partialSum := fun n => QComplex.add (S.partialSum n) (T.partialSum n)
+  remainder := fun n => S.remainder n + T.remainder n
+  remainder_nonneg := by
+    intro n
+    exact Rat.add_nonneg (S.remainder_nonneg n) (T.remainder_nonneg n)
+  refinement := by
+    intro n
+    have hs := S.refinement n
+    have ht := T.refinement n
+    simp [QBox.NestedIn, QBox.expand, QBox.point, QComplex.add,
+      QComplex.le_def] at hs ht ⊢
+    grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+  tail_budget := by
+    intro eps
+    let quarter : QPos := ⟨eps.val / 4, by grind [eps.property]⟩
+    obtain ⟨NS, hS⟩ := S.tail_budget quarter
+    obtain ⟨NT, hT⟩ := T.tail_budget quarter
+    refine ⟨max NS NT, ?_⟩
+    intro n hn
+    have hNS : NS ≤ n := Nat.le_trans (Nat.le_max_left _ _) hn
+    have hNT : NT ≤ n := Nat.le_trans (Nat.le_max_right _ _) hn
+    have hs := hS n hNS
+    have ht := hT n hNT
+    simp only [QInterval.width] at hs ht
+    simp only [QInterval.width]
+    dsimp [quarter] at hs ht ⊢
+    have hfour : (4 : Rat) ≠ 0 := by native_decide
+    grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm,
+      Rat.inv_mul_cancel (4 : Rat) hfour]
+
+theorem ComplexSeriesCertificate.add_raw_valid
+    (S T : ComplexSeriesCertificate) :
+    (S.add T).raw.Valid := by
+  exact (S.add T).raw_valid
+
+theorem ComplexSeriesCertificate.add_raw_precision_witness
+    (S T : ComplexSeriesCertificate) (eps : QPos) :
+    ∃ N : Nat, ∀ n, N ≤ n ->
+      ((S.add T).raw.compute n).width ≤ eps.val ∧
+        ((S.add T).raw.compute n).height ≤ eps.val := by
+  exact (S.add T).raw_precision_witness eps
+
+theorem ComplexSeriesCertificate.add_raw_equiv_add
+    (S T : ComplexSeriesCertificate) :
+    (S.add T).raw.Equiv (ComplexRaw.add S.raw T.raw) := by
+  intro n
+  apply (ComplexRaw.compareAt_overlap_iff
+    (S.add T).raw (ComplexRaw.add S.raw T.raw) n n).2
+  simp only [ComplexSeriesCertificate.raw, ComplexSeriesCertificate.add,
+    ComplexRaw.add]
+  unfold QBox.Overlaps QBox.expand QBox.point QBox.add QComplex.add
+  simp only [QComplex.le_def]
+  have hsnonneg := S.remainder_nonneg n
+  have htnonneg := T.remainder_nonneg n
+  constructor <;> grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
+    Rat.sub_eq_add_neg]
+
 /-! A finite complex coefficient prefix has the same termwise primitive
 constructor as the rational polynomial layer.  The coefficient stream and
 the evaluation point are rational-complex, while division by the natural
