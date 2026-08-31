@@ -1100,6 +1100,10 @@ generic closure constructor.  It requires an explicit synchronized stage,
 input-budget transport, output-width budget, and cross-stage containment;
 these obligations are the finite replacement for silently assuming that two
 adaptive evaluators share a common refinement schedule.
+For products, use `FunctionOnInterval.IntervalRegularOn.mulOfSchedule`.  It
+automates the rational width calculation from nonnegative image bounds while
+requiring the provider to certify cross-stage containment of the product
+point values.
 The corresponding raw-real theorem is
 `RealRaw.mul_width_le_of_nonneg_bounded`; use it when the factor boxes have
 already been packaged as `RealRaw` values.

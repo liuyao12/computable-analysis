@@ -7906,6 +7906,157 @@ def IntervalRegularOn.addOfSchedule
           exact hx.2) hxlo hxhi
     exact QInterval.addInterval_contains hFcontains hGcontains
 
+/-! Product closure with an explicit cross-stage product certificate.
+
+The width estimate is automatic from the rational image bounds, but a product
+provider still has to show that its chosen stage box contains the requested
+point product.  Keeping that obligation explicit is what prevents an
+adaptive evaluator from being mistaken for a silently monotone sequence. -/
+def IntervalRegularOn.mulOfSchedule
+    {F G : FunctionOnInterval}
+    (same_lower : F.lower = G.lower) (same_upper : F.upper = G.upper)
+    (hF : IntervalRegularOn F) (hG : IntervalRegularOn G)
+    (Fbounds : forall x (hx : inDomainInterval F.lower F.upper x),
+      Exists fun B : Rat => 0 < B /\ forall n,
+        0 <= (F.compute x hx n).lo /\ (F.compute x hx n).hi <= B)
+    (Gbounds : forall x (hx : inDomainInterval G.lower G.upper x),
+      Exists fun B : Rat => 0 < B /\ forall n,
+        0 <= (G.compute x hx n).lo /\ (G.compute x hx n).hi <= B)
+    (BF BG : Rat) (hBF : 0 < BF) (hBG : 0 < BG)
+    (stage : Nat -> Nat) (inputPrecision : Nat -> Nat)
+    (inputPrecision_pos : forall n, 0 < inputPrecision n)
+    (input_budget_F : forall (n : Nat) (I : QInterval)
+      (hI : subintervalOf I F.lower F.upper),
+      I.width <= 1 / ((inputPrecision n : Nat) : Rat) ->
+        I.width <= 1 / ((hF.inputPrecision (stage n) : Nat) : Rat))
+    (input_budget_G : forall (n : Nat) (I : QInterval)
+      (hI : subintervalOf I G.lower G.upper),
+      I.width <= 1 / ((inputPrecision n : Nat) : Rat) ->
+        I.width <= 1 / ((hG.inputPrecision (stage n) : Nat) : Rat))
+    (image_bounds_F : forall (n : Nat) (I : QInterval)
+      (hI : subintervalOf I F.lower F.upper),
+      0 <= (hF.evalInterval I hI (stage n)).lo /\
+        (hF.evalInterval I hI (stage n)).hi <= BF)
+    (image_bounds_G : forall (n : Nat) (I : QInterval)
+      (hI : subintervalOf I G.lower G.upper),
+      0 <= (hG.evalInterval I hI (stage n)).lo /\
+        (hG.evalInterval I hI (stage n)).hi <= BG)
+    (output_budget : forall n,
+      BF / (((stage n + 1 : Nat) : Rat)) +
+          BG / (((stage n + 1 : Nat) : Rat)) <=
+        1 / (((n + 1 : Nat) : Rat)))
+    (product_transport : forall (n : Nat) (I : QInterval)
+      (hI : subintervalOf I
+        (FunctionOnInterval.mulOfNonnegBounded F G same_lower same_upper
+          Fbounds Gbounds).lower
+        (FunctionOnInterval.mulOfNonnegBounded F G same_lower same_upper
+          Fbounds Gbounds).upper)
+      (x : Rat)
+      (hx : inDomainInterval
+        (FunctionOnInterval.mulOfNonnegBounded F G same_lower same_upper
+          Fbounds Gbounds).lower
+        (FunctionOnInterval.mulOfNonnegBounded F G same_lower same_upper
+          Fbounds Gbounds).upper x),
+      I.lo <= x -> x <= I.hi ->
+        QInterval.ContainsInterval
+          (QBox.mulRealInterval
+            (hF.evalInterval I (by
+              simpa [FunctionOnInterval.mulOfNonnegBounded] using hI)
+              (stage n)).lo
+            (hF.evalInterval I (by
+              simpa [FunctionOnInterval.mulOfNonnegBounded] using hI)
+              (stage n)).hi
+            (hG.evalInterval I (by
+              simpa [FunctionOnInterval.mulOfNonnegBounded, same_lower,
+                same_upper] using hI) (stage n)).lo
+            (hG.evalInterval I (by
+              simpa [FunctionOnInterval.mulOfNonnegBounded, same_lower,
+                same_upper] using hI) (stage n)).hi)
+          ((FunctionOnInterval.mulOfNonnegBounded F G same_lower same_upper
+            Fbounds Gbounds).compute x hx n)) :
+    IntervalRegularOn
+      (FunctionOnInterval.mulOfNonnegBounded F G same_lower same_upper
+        Fbounds Gbounds) where
+  evalInterval := fun I hI n =>
+    QBox.mulRealInterval
+      (hF.evalInterval I (by
+        simpa [FunctionOnInterval.mulOfNonnegBounded] using hI) (stage n)).lo
+      (hF.evalInterval I (by
+        simpa [FunctionOnInterval.mulOfNonnegBounded] using hI) (stage n)).hi
+      (hG.evalInterval I (by
+        simpa [FunctionOnInterval.mulOfNonnegBounded, same_lower, same_upper]
+          using hI) (stage n)).lo
+      (hG.evalInterval I (by
+        simpa [FunctionOnInterval.mulOfNonnegBounded, same_lower, same_upper]
+          using hI) (stage n)).hi
+  inputPrecision := inputPrecision
+  inputPrecision_pos := inputPrecision_pos
+  output_width := by
+    intro I hI n hsmall
+    have hIF : subintervalOf I F.lower F.upper := by
+      simpa [FunctionOnInterval.mulOfNonnegBounded] using hI
+    have hIG : subintervalOf I G.lower G.upper := by
+      simpa [FunctionOnInterval.mulOfNonnegBounded, same_lower, same_upper]
+        using hI
+    have hsmallF := input_budget_F n I hIF hsmall
+    have hsmallG := input_budget_G n I hIG hsmall
+    have hFout := hF.output_width I hIF (stage n) hsmallF
+    have hGout := hG.output_width I hIG (stage n) hsmallG
+    have hFb := image_bounds_F n I hIF
+    have hGb := image_bounds_G n I hIG
+    have hForder :
+        (hF.evalInterval I hIF (stage n)).lo <=
+          (hF.evalInterval I hIF (stage n)).hi := by
+      have hw := hFout.1
+      change 0 <= (hF.evalInterval I hIF (stage n)).hi -
+        (hF.evalInterval I hIF (stage n)).lo at hw
+      exact (Rat.le_iff_sub_nonneg _ _).2 hw
+    have hGorder :
+        (hG.evalInterval I hIG (stage n)).lo <=
+          (hG.evalInterval I hIG (stage n)).hi := by
+      have hw := hGout.1
+      change 0 <= (hG.evalInterval I hIG (stage n)).hi -
+        (hG.evalInterval I hIG (stage n)).lo at hw
+      exact (Rat.le_iff_sub_nonneg _ _).2 hw
+    have hwidth := QInterval.mulRealInterval_width_le_of_nonneg_bounded
+      hFb.1 hForder hGb.1 hGorder hFb.2 hGb.2
+    have hnonneg : 0 <=
+        (QBox.mulRealInterval
+          (hF.evalInterval I hIF (stage n)).lo
+          (hF.evalInterval I hIF (stage n)).hi
+          (hG.evalInterval I hIG (stage n)).lo
+          (hG.evalInterval I hIG (stage n)).hi).width := by
+      rw [QBox.mulRealInterval_of_nonneg hFb.1 hForder hGb.1 hGorder]
+      unfold QInterval.width
+      have hb0 : 0 <= (hF.evalInterval I hIF (stage n)).hi :=
+        Rat.le_trans hFb.1 hForder
+      have hleft := Rat.mul_le_mul_of_nonneg_right hForder hGb.1
+      have hright := Rat.mul_le_mul_of_nonneg_left hGorder hb0
+      exact (Rat.le_iff_sub_nonneg _ _).1 (Rat.le_trans hleft hright)
+    have hGscaled := Rat.mul_le_mul_of_nonneg_left hGout.2
+      (Rat.le_of_lt hBF)
+    have hFscaled := Rat.mul_le_mul_of_nonneg_left hFout.2
+      (Rat.le_of_lt hBG)
+    have hbound :
+        BF * (hG.evalInterval I hIG (stage n)).width +
+            BG * (hF.evalInterval I hIF (stage n)).width <=
+          1 / (((n + 1 : Nat) : Rat)) := by
+      have hstagepos : 0 < (((stage n + 1 : Nat) : Rat)) :=
+        (Rat.natCast_pos).2 (by omega)
+      have hsum :
+          BF * (1 / (((stage n + 1 : Nat) : Rat))) +
+              BG * (1 / (((stage n + 1 : Nat) : Rat))) <=
+            1 / (((n + 1 : Nat) : Rat)) := by
+        simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm] using
+          output_budget n
+      grind [Rat.add_mul, Rat.mul_add]
+    constructor
+    · exact hnonneg
+    · exact Rat.le_trans hwidth hbound
+  contains_point_values := by
+    intro I hI x hx n hxlo hxhi
+    exact product_transport n I hI x hx hxlo hxhi
+
 /-- Two interval-image certificates for the same function cannot disagree at
 a shared rational sample: both output boxes contain the same point-value
 box.  This is the basic representation-switching lemma for adaptive
