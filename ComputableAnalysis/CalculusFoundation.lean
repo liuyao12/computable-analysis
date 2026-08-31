@@ -10,7 +10,6 @@ import ComputableAnalysis.FiniteTaylorCertificate
 import ComputableAnalysis.FiniteSineIntegral
 import ComputableAnalysis.FiniteMonotoneSequenceInterface
 import ComputableAnalysis.Series
-import ComputableAnalysis.SeriesFoundation
 import ComputableAnalysis.FirstYearCalculus
 import ComputableAnalysis.FiniteFourierFoundation
 import ComputableAnalysis.FiniteFourierOrthogonality

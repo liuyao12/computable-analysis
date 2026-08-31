@@ -112,6 +112,71 @@ theorem RationalSeriesCertificate.raw_width
   simp [RationalSeriesCertificate.raw, QInterval.width]
   grind [Rat.sub_eq_add_neg]
 
+/-! The same certificate pattern for complex-valued series.  The refinement
+    field is rectangular-box nesting, since a complex remainder has separate
+    real and imaginary budgets. -/
+structure ComplexSeriesCertificate where
+  partialSum : Nat -> QComplex
+  remainder : Nat -> Rat
+  remainder_nonneg : forall n, 0 <= remainder n
+  refinement : forall n,
+    (QBox.expand (QBox.point (partialSum (n + 1))) (remainder (n + 1))).NestedIn
+      (QBox.expand (QBox.point (partialSum n)) (remainder n))
+  tail_budget : RealRaw.WidthsShrinkToZero (fun n =>
+    ({ lo := 0, hi := remainder n } : QInterval))
+
+def ComplexSeriesCertificate.raw (S : ComplexSeriesCertificate) : ComplexRaw where
+  compute := fun n => QBox.expand (QBox.point (S.partialSum n)) (S.remainder n)
+
+theorem ComplexSeriesCertificate.raw_valid
+    (S : ComplexSeriesCertificate) : S.raw.Valid := by
+  unfold ComplexRaw.Valid ComplexRaw.ValidCompute ComplexSeriesCertificate.raw
+  constructor
+  · intro n
+    simp [QBox.expand, QBox.point, QBox.width, QBox.height]
+    exact ⟨by grind [S.remainder_nonneg n], by grind [S.remainder_nonneg n]⟩
+  constructor
+  · intro n m hnm
+    induction m generalizing n with
+    | zero =>
+        have hn : n = 0 := by omega
+        subst n
+        simp
+    | succ m ih =>
+        by_cases hnm' : n <= m
+        · have hprev := ih n hnm'
+          have hs := S.refinement m
+          simp [QBox.NestedIn, QBox.expand, QBox.point, QComplex.le_def] at hs
+          exact ⟨Rat.le_trans hprev.1 hs.1.1,
+            Rat.le_trans hs.2.1 hprev.2.1,
+            Rat.le_trans hprev.2.2.1 hs.1.2,
+            Rat.le_trans hs.2.2 hprev.2.2.2⟩
+        · have hn : n = m + 1 := by omega
+          subst n
+          simp
+  · intro eps
+    let half : QPos := ⟨eps.val / 2, by grind [eps.property]⟩
+    obtain ⟨N, hN⟩ := S.tail_budget half
+    refine ⟨N, ?_⟩
+    intro n hn
+    have htail := hN n hn
+    dsimp [QInterval.width] at htail
+    have htail' : S.remainder n <= half.val := by grind
+    simp [QBox.expand, QBox.point, QBox.width, QBox.height]
+    constructor <;> calc
+      _ <= 2 * half.val := by grind
+      _ = eps.val := by
+        dsimp [half]
+        have htwo : (2 : Rat) ≠ 0 := by native_decide
+        grind [Rat.mul_assoc, Rat.mul_comm,
+          Rat.inv_mul_cancel (2 : Rat) htwo]
+
+theorem ComplexSeriesCertificate.raw_compute_box
+    (S : ComplexSeriesCertificate) (n : Nat) :
+    S.raw.compute n =
+      QBox.expand (QBox.point (S.partialSum n)) (S.remainder n) := by
+  rfl
+
 /-! A finite complex coefficient prefix has the same termwise primitive
 constructor as the rational polynomial layer.  The coefficient stream and
 the evaluation point are rational-complex, while division by the natural
