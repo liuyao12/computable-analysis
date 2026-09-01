@@ -94,9 +94,9 @@ not require `x` to advertise a convergence rate. Do not define a public
 same-stage composition `evalInterval (x.compute n) ... n`; validity of that
 composition does not follow from `x.Valid`.
 
-`InvertibleFunctionOnInterval.forwardIntervalRaw` remains a low-level
-same-stage interface used by the current inverse-separation proof. New
-ordinary function applications should use `applyRealRaw`.
+Inverse branches use the same mechanism through
+`InvertibleFunctionOnInterval.forwardRealRaw`; there is no separate
+same-stage composition API.
 
 ### Inverse branches
 
@@ -120,6 +120,11 @@ Use `InvertibleFunctionOnInterval.source_equiv_of_forward_equiv` for
 uniqueness: equivalent forward interval computations imply equivalent source
 computations when the separation schedule resolves every positive rational
 gap. This is a finite interval theorem, not an appeal to real completeness.
+An `InverseBisectionSearch` must provide both its literal finite target
+brackets (`value_overlaps`) and the representation edge
+`forward_equiv_target`. The former alone can be vacuous when an unscheduled
+image box is too wide; the latter certifies the canonical adaptive
+application.
 
 ## Integrating a new function
 

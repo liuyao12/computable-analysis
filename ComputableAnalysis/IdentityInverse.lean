@@ -67,6 +67,50 @@ theorem identityInvertibleOnUnit_endpoint_range
     (y.value.compute n).hi <= 1 at h
   exact h
 
+theorem identityForwardRealRaw_equiv_target
+    (y : InRangeRaw identityInvertibleOnUnit) :
+    (identityInvertibleOnUnit.forwardRealRaw
+      { compute := fun n => y.value.compute n }
+      (by simpa [RealRaw.Valid] using y.value_valid)
+      (by
+        intro n
+        have h := identityInvertibleOnUnit_endpoint_range y n
+        exact ⟨h.1, RealRaw.interval_order_of_valid y.value y.value_valid n,
+          h.2⟩)).Equiv y.value := by
+  let X : RealRaw := { compute := fun n => y.value.compute n }
+  have hX : X.Valid := by simpa [X, RealRaw.Valid] using y.value_valid
+  have hsource : forall n,
+      subintervalOf (X.compute n)
+        identityInvertibleOnUnit.continuous.function.lower
+        identityInvertibleOnUnit.continuous.function.upper := by
+    intro n
+    change subintervalOf (X.compute n) 0 1
+    have h := identityInvertibleOnUnit_endpoint_range y n
+    exact ⟨h.1, RealRaw.interval_order_of_valid X hX n, h.2⟩
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  let s : Nat :=
+    identityInvertibleOnUnit.continuous.inputStage X hX n
+  have hns : n <= s :=
+    identityInvertibleOnUnit.continuous.le_inputStage X hX n
+  have hnested := hX.2.1 n s hns
+  have hcontains :=
+    identityInvertibleOnUnit.continuous.applyRealRaw_contains_candidate
+      X hX hsource n
+  have hcandidate :
+      (identityInvertibleOnUnit.continuous.applyCandidate X hX
+        hsource).compute n =
+        X.compute s := by
+    rfl
+  apply (RealRaw.compareAt_overlap_iff
+    (identityInvertibleOnUnit.continuous.applyRealRaw X hX
+      hsource) X n n).2
+  rw [hcandidate] at hcontains
+  exact ⟨Rat.le_trans hcontains.1
+      (Rat.le_trans hnested.2.1 hnested.2.2),
+    Rat.le_trans hnested.1
+      (Rat.le_trans hnested.2.1 hcontains.2)⟩
+
 def identityInverseBisectionSearch
     (y : InRangeRaw identityInvertibleOnUnit) :
     InverseBisectionSearch identityInvertibleOnUnit y where
@@ -81,6 +125,17 @@ def identityInverseBisectionSearch
     change QInterval.Overlaps (y.value.compute n) (y.value.compute n)
     have h := RealRaw.interval_order_of_valid y.value y.value_valid n
     exact ⟨h, h⟩
+  forward_equiv_target := by
+    change (identityInvertibleOnUnit.forwardRealRaw
+      { compute := fun n => y.value.compute n }
+      y.value_valid
+      (by
+        intro n
+        have h := identityInvertibleOnUnit_endpoint_range y n
+        exact ⟨h.1,
+          RealRaw.interval_order_of_valid y.value y.value_valid n, h.2⟩)).Equiv
+      y.value
+    exact identityForwardRealRaw_equiv_target y
 
 def identityInverseRaw : InverseRaw identityInvertibleOnUnit :=
   inverseRawOfSearch identityInverseBisectionSearch

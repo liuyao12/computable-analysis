@@ -1235,6 +1235,47 @@ theorem sqrtRaw_halfAngle_square_sum_equiv_one
   · exact sqrtRaw_mul_self_equiv_of_domain r (sqrtDomain_of_unit hr)
   · exact hsum
 
+theorem squareOnUnit_forward_sqrtRaw_equiv_rat
+    (q : Rat) (hq : inDomainInterval 0 1 q) :
+    (squareOnUnit_invertible.forwardRealRaw
+      (sqrtRaw q (sqrtDomain_of_unit hq))
+      (sqrtRaw_valid q (sqrtDomain_of_unit hq))
+      (by
+        intro n
+        simpa [sqrtRaw, squareOnUnit_invertible,
+          squareOnUnit_continuous,
+          InvertibleFunctionOnInterval.function, squareOnUnit] using
+          sqrtApproxOnUnit_subinterval q hq n)).Equiv
+      (RealRaw.ofRat q) := by
+  let X : RealRaw := sqrtRaw q (sqrtDomain_of_unit hq)
+  have hX : X.Valid := sqrtRaw_valid q (sqrtDomain_of_unit hq)
+  have hsource : forall n,
+      subintervalOf (X.compute n) squareOnUnit.lower squareOnUnit.upper := by
+    intro n
+    simpa [X, sqrtRaw, squareOnUnit] using
+      sqrtApproxOnUnit_subinterval q hq n
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  have hcontains := squareOnUnit_continuous.applyRealRaw_contains_candidate
+    X hX hsource n
+  let s : Nat := squareOnUnit_continuous.inputStage X hX n
+  have hspec := sqrtApproxOnDomain_spec q (sqrtDomain_of_unit hq) s
+  have hcandidate :
+      ((squareOnUnit_continuous.applyCandidate X hX hsource).compute n).lo <= q /\
+        q <= ((squareOnUnit_continuous.applyCandidate X hX hsource).compute n).hi := by
+    change sq (sqrtApproxOnDomain q (sqrtDomain_of_unit hq) s).lo <= q /\
+      q <= sq (sqrtApproxOnDomain q (sqrtDomain_of_unit hq) s).hi
+    exact ⟨hspec.2.2.1, hspec.2.2.2⟩
+  apply (RealRaw.compareAt_overlap_iff
+    (squareOnUnit_continuous.applyRealRaw X hX hsource)
+    (RealRaw.ofRat q) n n).2
+  simpa [RealRaw.ofRat, QInterval.Overlaps] using
+    (show
+      ((squareOnUnit_continuous.applyRealRaw X hX hsource).compute n).lo <= q /\
+        q <= ((squareOnUnit_continuous.applyRealRaw X hX hsource).compute n).hi
+      from ⟨Rat.le_trans hcontains.1 hcandidate.1,
+        Rat.le_trans hcandidate.2 hcontains.2⟩)
+
 /-- The existing rational square-root bisection is a concrete inverse search
 for each exact rational target in the unit range of squaring. -/
 def sqrtOnUnitBisectionSearch (q : Rat) (hq : inDomainInterval 0 1 q) :
@@ -1249,6 +1290,12 @@ def sqrtOnUnitBisectionSearch (q : Rat) (hq : inDomainInterval 0 1 q) :
     change sq (sqrtApproxOnDomain q (sqrtDomain_of_unit hq) n).lo <= q /\
       q <= sq (sqrtApproxOnDomain q (sqrtDomain_of_unit hq) n).hi
     exact ⟨hspec.2.2.1, hspec.2.2.2⟩
+  forward_equiv_target := by
+    change (squareOnUnit_invertible.forwardRealRaw
+      { compute := sqrtApproxOnDomain q (sqrtDomain_of_unit hq) }
+      (sqrtApproxOnDomain_valid q (sqrtDomain_of_unit hq))
+      (sqrtApproxOnUnit_subinterval q hq)).Equiv (RealRaw.ofRat q)
+    simpa only [sqrtRaw] using squareOnUnit_forward_sqrtRaw_equiv_rat q hq
 
 /-- A represented target with an explicit rational anchor can reuse the
 existing square-root bisection trace.  The anchor is not a chosen exact real
@@ -1284,6 +1331,18 @@ def sqrtOnUnitRepresentedTargetSearch
     change QInterval.Overlaps E (y.value.compute n)
     unfold QInterval.Overlaps
     exact ⟨Rat.le_trans hE.1 hY.2, Rat.le_trans hY.1 hE.2⟩
+  forward_equiv_target := by
+    have hforward := (sqrtOnUnitBisectionSearch q hq).forward_equiv_target
+    have hforwardValid :
+        (squareOnUnit_invertible.forwardRealRaw
+          { compute := (sqrtOnUnitBisectionSearch q hq).compute_preimage }
+          (sqrtOnUnitBisectionSearch q hq).valid_preimage
+          (sqrtOnUnitBisectionSearch q hq).preimage_subinterval).Valid :=
+      squareOnUnit_invertible.forwardRealRaw_valid _ _ _
+    exact RealRaw.equiv_trans
+      hforwardValid
+      (RealRaw.ofRat_valid q) y.value_valid
+      hforward (RealRaw.equiv_symm heq)
 
 /- A represented-target stage certificate.  The rational anchor supplies the
 endpoint-square bracket and width budget, while the transported target field

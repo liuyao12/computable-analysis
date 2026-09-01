@@ -6811,17 +6811,13 @@ theorem tangentAt_equiv_of_candidate
     (hcandidateSource : forall n,
       subintervalOf (candidate.compute n)
         B.branch.function.lower B.branch.function.upper)
-    (htangentForward : (B.branch.forwardIntervalRaw
-      (B.tangentAt t ht) (B.tangentAt_stays_in_source t ht)).Valid)
-    (hcandidateForward : (B.branch.forwardIntervalRaw candidate
-      hcandidateSource).Valid)
-    (hcandidateTarget : (B.branch.forwardIntervalRaw candidate
+    (hcandidateTarget : (B.branch.forwardRealRaw candidate hcandidate
       hcandidateSource).Equiv (B.targetAt t ht).value) :
     (B.tangentAt t ht).Equiv candidate := by
   simpa [tangentAt] using
     (B.bisectionAt t ht).preimage_equiv_of_candidate
       B.branch_separation_resolves candidate hcandidate
-      hcandidateSource htangentForward hcandidateForward hcandidateTarget
+      hcandidateSource hcandidateTarget
 
 /-- Differences of inverse targets retain their geometric sector meaning.
 This is the finite angle-increment interface used by the computable sine
