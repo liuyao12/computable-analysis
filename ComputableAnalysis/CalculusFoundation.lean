@@ -20,6 +20,7 @@ import ComputableAnalysis.DifferentialEquationsFoundation
 import ComputableAnalysis.PeanoBaker
 import ComputableAnalysis.GeometricRotationODE
 import ComputableAnalysis.RotationPeanoBakerBridge
+import ComputableAnalysis.SectorAreaReparametrization
 import ComputableAnalysis.FiniteNBallVolume
 import ComputableAnalysis.FiniteGaussianIntegral
 import ComputableAnalysis.ComplexCircleBridge

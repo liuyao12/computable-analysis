@@ -1,5 +1,6 @@
 import ComputableAnalysis.GeometricRotationODE
 import ComputableAnalysis.IntegralIdentities
+import ComputableAnalysis.CauchyPi
 
 /-!
 # Sector-area time for the rational circle chart
@@ -808,6 +809,198 @@ def arctanOnUnitRegular_invertible : InvertibleFunctionOnInterval where
   monotone := arctanOnUnitRegular_monotone
   separation := arctanOnUnitRegular_effectiveInverseSeparation
   orientation := trivial
+
+/-- The accelerated arctangent branch is only a scheduled representative of
+the geometric arctangent.  This is the canonical equivalence edge consumed by
+the inverse-trigonometric layer. -/
+theorem arctanOnUnitRegular_equivalent_geometric :
+    FunctionOnInterval.Equivalent arctanOnUnitRegular
+      IntegralIdentities.arctanGeomOnUnit := by
+  refine ⟨rfl, rfl, ?_⟩
+  intro x hxRegular hxGeometric
+  let rectangle := ArctanGeometry.arctanIntegralRectangleRaw x
+  let scheduled := RealRaw.schedule angleOnUnitRegularSchedule rectangle
+  have hRectangle : rectangle.Valid :=
+    ArctanGeometry.arctanIntegralRectangleRaw_valid hxRegular.1 hxRegular.2
+  have hScheduled : scheduled.Valid :=
+    RealRaw.schedule_valid rectangle hRectangle angleOnUnitRegularSchedule
+  have hGeometric : (ArctanGeometry.arctanGeom x).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit hxGeometric.1 hxGeometric.2
+  have hScheduleEquiv : scheduled.Equiv rectangle :=
+    RealRaw.equiv_symm
+      (RealRaw.schedule_equiv rectangle hRectangle angleOnUnitRegularSchedule)
+  have hRectangleEquiv : rectangle.Equiv (ArctanGeometry.arctanGeom x) :=
+    ArctanGeometry.arctanIntegralRectangleRaw_equiv_arctanGeom hxRegular.1
+  have h := RealRaw.equiv_trans hScheduled hRectangle hGeometric
+    hScheduleEquiv hRectangleEquiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+  have hover := (RealRaw.compareAt_overlap_iff scheduled
+    (ArctanGeometry.arctanGeom x) n n).1 (h n)
+  change QInterval.Overlaps
+    (arctanOnUnitRegular.compute x hxRegular n)
+    ((ArctanGeometry.arctanGeom x).compute n)
+  rw [arctanOnUnitRegular_compute]
+  simpa [scheduled, rectangle, RealRaw.schedule,
+    angleOnUnitRegularSchedule,
+    ArctanGeometry.arctanIntegralRectangleRaw] using hover
+
+/-- The upper endpoint evaluator of the canonical arctangent branch.  Targets
+are obtained by rationally scaling this one raw computation; there is no
+second `pi/4` evaluator hidden in the inverse layer. -/
+def arctanOnUnitRegularUpper : RealRaw :=
+  PartialRealFunRaw.apply arctanOnUnitRegular.raw arctanOnUnitRegular.valid_on
+    (1 : Rat) (arctanOnUnitRegular.defined_on (1 : Rat) (by
+      change (0 : Rat) <= 1 /\ 1 <= 1
+      native_decide))
+
+theorem arctanOnUnitRegularUpper_valid : arctanOnUnitRegularUpper.Valid := by
+  exact arctanOnUnitRegular.valid_on (1 : Rat)
+    (arctanOnUnitRegular.defined_on (1 : Rat) (by
+      change (0 : Rat) <= 1 /\ 1 <= 1
+      native_decide))
+
+theorem arctanOnUnitRegularUpper_compute (n : Nat) :
+    arctanOnUnitRegularUpper.compute n =
+      ArctanGeometry.arctanIntegralRectangleCompute 1
+        (angleOnUnitRegularSchedule.stage n) := by
+  let hOne : inDomainInterval arctanOnUnitRegular.lower
+      arctanOnUnitRegular.upper (1 : Rat) := by
+    change (0 : Rat) <= 1 /\ 1 <= 1
+    native_decide
+  unfold arctanOnUnitRegularUpper PartialRealFunRaw.apply
+  change arctanOnUnitRegular.raw.compute (1 : Rat) _ n = _
+  exact arctanOnUnitRegular_compute (1 : Rat) hOne n
+
+/-- A normalized quarter-turn target represented in the native endpoint
+schedule of the canonical arctangent branch. -/
+def arctanOnUnitRegularTarget
+    (t : RationalCircle.GeometricTrig.QuarterTurn)
+    (ht : RationalCircle.GeometricTrig.firstQuadrantBranch t) :
+    InRangeRaw arctanOnUnitRegular_invertible where
+  value := RealRaw.scaleRat t arctanOnUnitRegularUpper
+  value_valid := RealRaw.scaleRat_valid_of_nonneg ht.1
+    arctanOnUnitRegularUpper_valid
+  rangePrecision := fun n => n
+  in_range := by
+    intro n
+    let hZero : inDomainInterval arctanOnUnitRegular.lower
+        arctanOnUnitRegular.upper (0 : Rat) := by
+      change (0 : Rat) <= 0 /\ 0 <= 1
+      native_decide
+    let hOne : inDomainInterval arctanOnUnitRegular.lower
+        arctanOnUnitRegular.upper (1 : Rat) := by
+      change (0 : Rat) <= 1 /\ 1 <= 1
+      native_decide
+    have hZeroCompute :
+        (arctanOnUnitRegular.compute 0 hZero n).lo = 0 := by
+      rw [arctanOnUnitRegular_compute,
+        ArctanGeometry.arctanIntegralRectangleCompute_zero_lower]
+    have hOneCompute :
+        arctanOnUnitRegular.compute 1 hOne n =
+          ArctanGeometry.arctanIntegralRectangleCompute 1
+            (angleOnUnitRegularSchedule.stage n) :=
+      arctanOnUnitRegular_compute 1 hOne n
+    have hUpperLo : 0 <=
+        (ArctanGeometry.arctanIntegralRectangleCompute 1
+          (angleOnUnitRegularSchedule.stage n)).lo :=
+      ArctanGeometry.arctanIntegralRectangleCompute_lower_nonnegative
+        (by native_decide) _
+    have hUpperOrder :=
+      ArctanGeometry.arctanIntegralRectangleCompute_ordered
+        (x := (1 : Rat)) (by native_decide)
+        (angleOnUnitRegularSchedule.stage n)
+    have hUpperHi : 0 <=
+        (ArctanGeometry.arctanIntegralRectangleCompute 1
+          (angleOnUnitRegularSchedule.stage n)).hi := by
+      unfold QInterval.width at hUpperOrder
+      grind [Rat.sub_eq_add_neg]
+    have hRange :
+        (arctanOnUnitRegular.compute 0 hZero n).lo <=
+            ((RealRaw.scaleRat t arctanOnUnitRegularUpper).compute n).lo /\
+          ((RealRaw.scaleRat t arctanOnUnitRegularUpper).compute n).hi <=
+            (arctanOnUnitRegular.compute 1 hOne n).hi := by
+      rw [hZeroCompute, hOneCompute]
+      simp only [RealRaw.scaleRat, RealRaw.scaleRatCompute, if_pos ht.1]
+      rw [arctanOnUnitRegularUpper_compute]
+      change 0 <= t *
+          (ArctanGeometry.arctanIntegralRectangleCompute 1
+            (angleOnUnitRegularSchedule.stage n)).lo /\
+        t * (ArctanGeometry.arctanIntegralRectangleCompute 1
+            (angleOnUnitRegularSchedule.stage n)).hi <=
+          (ArctanGeometry.arctanIntegralRectangleCompute 1
+            (angleOnUnitRegularSchedule.stage n)).hi
+      constructor
+      · exact Rat.mul_nonneg ht.1 hUpperLo
+      · calc
+          t * (ArctanGeometry.arctanIntegralRectangleCompute 1
+                (angleOnUnitRegularSchedule.stage n)).hi <=
+              1 * (ArctanGeometry.arctanIntegralRectangleCompute 1
+                (angleOnUnitRegularSchedule.stage n)).hi :=
+            Rat.mul_le_mul_of_nonneg_right ht.2 hUpperHi
+          _ = _ := Rat.one_mul _
+    simpa [InvertibleFunctionOnInterval.EndpointRangeContains,
+      InvertibleFunctionOnInterval.lowerValueBox,
+      InvertibleFunctionOnInterval.upperValueBox,
+      InvertibleFunctionOnInterval.function,
+      arctanOnUnitRegular_invertible,
+      arctanOnUnitRegular_continuous,
+      arctanOnUnitRegular_effectiveInverseSeparation,
+      arctanOnUnitRegular, FunctionOnInterval.scaleRat,
+      angleOnUnitRegular, angleOnUnit,
+      IntegralIdentities.arctanIntegralRectangleOnUnit] using hRange
+
+/-- The native scaled-endpoint target represents exactly the geometric
+sector area `t * pi/4`. -/
+theorem arctanOnUnitRegularTarget_equiv_halfQuarterTurn
+    (t : RationalCircle.GeometricTrig.QuarterTurn)
+    (ht : RationalCircle.GeometricTrig.firstQuadrantBranch t) :
+    (arctanOnUnitRegularTarget t ht).value.Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw t) := by
+  let hOne : inDomainInterval arctanOnUnitRegular.lower
+      arctanOnUnitRegular.upper (1 : Rat) := by
+    change (0 : Rat) <= 1 /\ 1 <= 1
+    native_decide
+  let hGeomOne : inDomainInterval IntegralIdentities.arctanGeomOnUnit.lower
+      IntegralIdentities.arctanGeomOnUnit.upper (1 : Rat) := by
+    change (0 : Rat) <= 1 /\ 1 <= 1
+    native_decide
+  have hUpperGeom : arctanOnUnitRegularUpper.Equiv
+      (ArctanGeometry.arctanGeom (1 : Rat)) := by
+    simpa [arctanOnUnitRegularUpper, IntegralIdentities.arctanGeomOnUnit,
+      PartialRealFunRaw.apply] using
+      (arctanOnUnitRegular_equivalent_geometric.2.2
+        (1 : Rat) hOne hGeomOne)
+  have hUpperQuarter : arctanOnUnitRegularUpper.Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) :=
+    RealRaw.equiv_trans arctanOnUnitRegularUpper_valid
+      ArctanGeometry.arctanGeom_one_valid
+      (RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+        CauchyPi.piCircleArea_valid)
+      hUpperGeom
+      ArctanGeometry.arctanGeom_one_equiv_piCircleArea_quarter
+  have hScaled := RealRaw.scaleRat_equiv_of_nonneg ht.1 hUpperQuarter
+  have hCompose := RealRaw.scaleRat_scaleRat_equiv_of_nonneg t
+    ((1 : Rat) / 4) ht.1 (by native_decide) piCircleArea
+    CauchyPi.piCircleArea_valid
+  have hNestedValid :
+      (RealRaw.scaleRat t
+        (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))).Valid :=
+    RealRaw.scaleRat_valid_of_nonneg ht.1
+      (RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+        CauchyPi.piCircleArea_valid)
+  have hTargetValid :
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw t).Valid := by
+    exact RealRaw.scaleRat_valid_of_nonneg
+      (by
+        change 0 <= t / 4
+        rw [Rat.div_def]
+        exact Rat.mul_nonneg ht.1 (by native_decide))
+      CauchyPi.piCircleArea_valid
+  apply RealRaw.equiv_trans
+    (arctanOnUnitRegularTarget t ht).value_valid hNestedValid hTargetValid hScaled
+  simpa [RationalCircle.GeometricTrig.halfQuarterTurnRaw,
+    Rat.div_def, Rat.mul_assoc] using hCompose
 
 /-- The accelerated sector angle at a rational chart point.  This is the
 reader-facing raw-real evaluator associated with angleOnUnitRegular. -/

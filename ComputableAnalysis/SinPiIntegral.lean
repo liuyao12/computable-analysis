@@ -552,102 +552,6 @@ theorem dyadicCell_valid_of_width_le_one
     intro n
     exact hbound n
 
-/-- The dyadic cell selected by a known rational preimage witness. -/
-def dyadicWitnessCell (a b z : Rat) : Nat -> QInterval
-  | 0 => { lo := a, hi := b }
-  | n + 1 =>
-      let previous := dyadicWitnessCell a b z n
-      let midpoint := (previous.lo + previous.hi) / 2
-      if z <= midpoint then
-        { lo := previous.lo, hi := midpoint }
-      else
-        { lo := midpoint, hi := previous.hi }
-
-/-- The executable left/right decisions for the witness-driven bisection. -/
-def dyadicWitnessPath (a b z : Rat) (n : Nat) : Bool :=
-  if z <= ((dyadicWitnessCell a b z n).lo +
-      (dyadicWitnessCell a b z n).hi) / 2 then true else false
-
-private theorem dyadicMidpoint_mem {l r : Rat} (h : l <= r) :
-    l <= (l + r) / 2 /\ (l + r) / 2 <= r := by
-  have htwo : (2 : Rat) > 0 := by native_decide
-  constructor
-  · apply Rat.le_of_mul_le_mul_right (c := (2 : Rat))
-    · rw [Rat.div_def]
-      have hc : (2 : Rat) * (2 : Rat)⁻¹ = 1 := by native_decide
-      grind [Rat.mul_assoc, Rat.mul_comm]
-    · exact htwo
-  · apply Rat.le_of_mul_le_mul_right (c := (2 : Rat))
-    · rw [Rat.div_def]
-      have hc : (2 : Rat) * (2 : Rat)⁻¹ = 1 := by native_decide
-      grind [Rat.mul_assoc, Rat.mul_comm]
-    · exact htwo
-
-theorem dyadicCell_dyadicWitnessPath_eq (a b z : Rat) :
-    forall n, dyadicCell a b (dyadicWitnessPath a b z) n =
-      dyadicWitnessCell a b z n := by
-  intro n
-  induction n with
-  | zero => rfl
-  | succ n ih =>
-      simp only [dyadicCell, dyadicWitnessCell, ih, dyadicWitnessPath]
-      split <;> simp_all
-
-theorem dyadicWitnessCell_source (a b z : Rat) (hab : a <= b)
-    (hz : a <= z) (hz' : z <= b) :
-    forall n, subintervalOf (dyadicWitnessCell a b z n) a b := by
-  intro n
-  induction n with
-  | zero =>
-      exact ⟨Rat.le_refl, hab, Rat.le_refl⟩
-  | succ n ih =>
-      simp only [dyadicWitnessCell]
-      have hmid := dyadicMidpoint_mem ih.2.1
-      split
-      · constructor
-        · exact ih.1
-        constructor
-        · exact hmid.1
-        · exact Rat.le_trans hmid.2 ih.2.2
-      · constructor
-        · exact Rat.le_trans ih.1 hmid.1
-        constructor
-        · exact hmid.2
-        · exact ih.2.2
-
-theorem dyadicWitnessCell_contains (a b z : Rat) (hab : a <= b)
-    (hz : a <= z) (hz' : z <= b) :
-    forall n, (dyadicWitnessCell a b z n).lo <= z /\
-      z <= (dyadicWitnessCell a b z n).hi := by
-  intro n
-  induction n with
-  | zero => exact ⟨hz, hz'⟩
-  | succ n ih =>
-      simp only [dyadicWitnessCell]
-      have hsource := dyadicWitnessCell_source a b z hab hz hz' n
-      have hmid := dyadicMidpoint_mem hsource.2.1
-      split
-      · constructor
-        · exact ih.1
-        · assumption
-      · constructor
-        · have hnot : ¬z <=
-              ((dyadicWitnessCell a b z n).lo +
-                (dyadicWitnessCell a b z n).hi) / 2 := by
-            assumption
-          exact Rat.le_of_lt ((Rat.not_le).1 hnot)
-        · change z <= (dyadicWitnessCell a b z n).hi
-          exact ih.2
-
-theorem dyadicCell_dyadicWitnessPath_contains
-    (a b z : Rat) (hab : a <= b)
-    (hz : a <= z) (hz' : z <= b) :
-    forall n, (dyadicCell a b (dyadicWitnessPath a b z) n).lo <= z /\
-      z <= (dyadicCell a b (dyadicWitnessPath a b z) n).hi := by
-  intro n
-  rw [dyadicCell_dyadicWitnessPath_eq]
-  exact dyadicWitnessCell_contains a b z hab hz hz' n
-
 /-- A fully executable inverse trace for a monotone interval branch.
 
 `path` is the actual finite search trace.  `value_overlaps` is the one
@@ -696,55 +600,6 @@ def DyadicInverseTrace.ofPath
     I.function.lower I.function.upper path hsource
   value_overlaps := value_overlaps
 
-/-- Construct a complete dyadic inverse trace from a rational preimage
-witness.  This is the constructive finite core used by special-angle
-certificates: the witness is kept inside every cell, and interval regularity
-transports its forward raw value to the target box. -/
-def DyadicInverseTrace.ofRationalWitness
-    {I : InvertibleFunctionOnInterval} {y : InRangeRaw I}
-    (z : Rat)
-    (hz : inDomainInterval I.function.lower I.function.upper z)
-    (hwidth : I.function.upper - I.function.lower <= 1)
-    (hvalue :
-      ({ compute := I.function.compute z hz } : RealRaw).Equiv y.value) :
-    DyadicInverseTrace I y := by
-  apply DyadicInverseTrace.ofPath
-    (dyadicWitnessPath I.function.lower I.function.upper z)
-    I.source_ordered hwidth
-  intro n
-  let C := dyadicCell I.function.lower I.function.upper
-    (dyadicWitnessPath I.function.lower I.function.upper z) n
-  have hCsource := dyadicCell_subinterval_of_source
-    I.function.lower I.function.upper
-    (dyadicWitnessPath I.function.lower I.function.upper z)
-    I.source_ordered n
-  have hCcontains := dyadicCell_dyadicWitnessPath_contains
-    I.function.lower I.function.upper z I.source_ordered hz.1 hz.2 n
-  have houter := I.continuous.regular.contains_point_values
-    C hCsource z hz n hCcontains.1 hCcontains.2
-  have hzvalid : ({ compute := I.function.compute z hz } : RealRaw).Valid := by
-    exact I.function.valid_on z (I.function.defined_on z hz)
-  have heq := RealRaw.sameStageOverlap_of_equiv
-    hzvalid y.value_valid hvalue n
-  have hover := (RealRaw.compareAt_overlap_iff
-    ({ compute := I.function.compute z hz } : RealRaw) y.value n n).1 heq
-  change QInterval.Overlaps
-    (I.continuous.regular.evalInterval C hCsource n)
-    (y.value.compute n)
-  unfold QInterval.ContainsInterval at houter
-  unfold QInterval.Overlaps at hover ⊢
-  change
-    (I.function.compute z hz n).lo <= (y.value.compute n).hi /\
-      (y.value.compute n).lo <= (I.function.compute z hz n).hi at hover
-  change
-    (I.continuous.regular.evalInterval C hCsource n).lo <=
-        (I.function.compute z hz n).lo /\
-      (I.function.compute z hz n).hi <=
-        (I.continuous.regular.evalInterval C hCsource n).hi at houter
-  constructor
-  · exact Rat.le_trans houter.1 hover.1
-  · exact Rat.le_trans hover.2 houter.2
-
 /-- Turn an executable dyadic trace into the inverse-search interface. -/
 def DyadicInverseTrace.toSearch
     {I : InvertibleFunctionOnInterval} {y : InRangeRaw I}
@@ -761,8 +616,8 @@ theorem DyadicInverseTrace.toSearch_compute_preimage
       dyadicCell I.function.lower I.function.upper h.path n :=
   rfl
 
-/-- The arctangent inverse package obtained once every target has an
-executable dyadic trace.  This is the exact assembly point for the
+/-- The arctangent inverse package obtained once every normalized geometric
+target has an executable dyadic trace.  This is the exact assembly point for the
 arctangent-defined sine construction: no choice of an inverse is taken. -/
 def arctanInverseBisectionOfDyadicTraces
     (branch : InvertibleFunctionOnInterval)
@@ -774,52 +629,14 @@ def arctanInverseBisectionOfDyadicTraces
     (targetAt_equiv_halfQuarterTurn :
       forall t ht, (targetAt t ht).value.Equiv
         (RationalCircle.GeometricTrig.halfQuarterTurnRaw t))
-    (traceAt : forall y : InRangeRaw branch,
-      DyadicInverseTrace branch y) :
+    (traceAt : forall t ht,
+      DyadicInverseTrace branch (targetAt t ht)) :
     IntegralIdentities.ArctanInverseBisection where
   branch := branch
   branch_is_geometric := branch_is_geometric
   targetAt := targetAt
   targetAt_equiv_halfQuarterTurn := targetAt_equiv_halfQuarterTurn
-  bisectionAt := fun y => (traceAt y).toSearch
-
-/-! Build the inverse-search package from rational preimage witnesses.
-
-This is the strongest fully executable shortcut currently available: for each
-normalized first-quadrant target, a rational slope witness is supplied and is
-then kept inside every selected dyadic cell.  The constructor does not choose
-an inverse or appeal to a completed real line; the witness family is the
-finite search data.  The general arctangent branch still needs a separate
-construction of such witnesses (or an equivalent target-directed search).
--/
-def arctanInverseBisectionOfRationalWitnesses
-    (branch : InvertibleFunctionOnInterval)
-    (branch_is_geometric :
-      FunctionOnInterval.Equivalent branch.function
-        IntegralIdentities.arctanGeomOnUnit)
-    (targetAt : forall t : RationalCircle.GeometricTrig.QuarterTurn,
-      RationalCircle.GeometricTrig.firstQuadrantBranch t -> InRangeRaw branch)
-    (targetAt_equiv_halfQuarterTurn :
-      forall t ht, (targetAt t ht).value.Equiv
-        (RationalCircle.GeometricTrig.halfQuarterTurnRaw t))
-    (targetWitness : forall _y : InRangeRaw branch, Rat)
-    (targetWitness_in_domain : forall y : InRangeRaw branch,
-      inDomainInterval branch.function.lower branch.function.upper
-        (targetWitness y))
-    (targetWitness_equiv : forall y : InRangeRaw branch,
-      ({ compute := branch.function.compute
-          (targetWitness y) (targetWitness_in_domain y) } : RealRaw).Equiv
-        y.value)
-    (source_width : branch.function.upper - branch.function.lower <= 1) :
-    IntegralIdentities.ArctanInverseBisection := by
-  apply arctanInverseBisectionOfDyadicTraces branch branch_is_geometric
-    targetAt targetAt_equiv_halfQuarterTurn
-  intro y
-  exact DyadicInverseTrace.ofRationalWitness
-    (targetWitness y)
-    (targetWitness_in_domain y)
-    source_width
-    (targetWitness_equiv y)
+  bisectionAt := fun t ht => (traceAt t ht).toSearch
 
 /-- The rational circle parametrization used after the inverse-arctangent
 search.  For a half-angle slope `u`, its imaginary coordinate is

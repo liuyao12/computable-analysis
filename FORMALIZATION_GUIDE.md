@@ -85,6 +85,12 @@ Package a regular monotone computation as an
 scale. The canonical arctangent branch is the one-half view of the sector-area
 clock in `SectorAreaReparametrization`.
 
+Inverse data should be target-local. For trigonometry, construct the native
+scaled-endpoint target with `arctanOnUnitRegularTarget`, prove its geometric
+meaning once, and supply a finite search only for those normalized targets.
+Do not demand an inverse for every value carrying a nominal endpoint-range
+certificate.
+
 Use `InvertibleFunctionOnInterval.source_equiv_of_forward_equiv` for
 uniqueness: equivalent forward interval computations imply equivalent source
 computations when the separation schedule resolves every positive rational

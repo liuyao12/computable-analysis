@@ -7445,21 +7445,20 @@ structure ArctanInverseBisection where
   targetAt_equiv_halfQuarterTurn :
     forall t ht, (targetAt t ht).value.Equiv
       (RationalCircle.GeometricTrig.halfQuarterTurnRaw t)
-  bisectionAt : forall y : InRangeRaw branch,
-    InverseBisectionSearch branch y
+  /-- Only the normalized geometric targets used by trigonometry require an
+  inverse search.  Requiring a search for every nominal `InRangeRaw` would be
+  both stronger than the construction needs and weaker semantically, because
+  an arbitrary range certificate need not expose a cofinal precision. -/
+  bisectionAt : forall t ht,
+    InverseBisectionSearch branch (targetAt t ht)
 
 namespace ArctanInverseBisection
-
-/-- The inverse evaluator obtained from the supplied certified bisection
-searches. -/
-def inverseRaw (B : ArctanInverseBisection) : InverseRaw B.branch :=
-  inverseRawOfSearch B.bisectionAt
 
 /-- The half-angle slope raw real at a normalized first-quadrant angle. -/
 def tangentAt (B : ArctanInverseBisection)
     (t : RationalCircle.GeometricTrig.QuarterTurn)
     (ht : RationalCircle.GeometricTrig.firstQuadrantBranch t) : RealRaw :=
-  (B.inverseRaw).apply (B.targetAt t ht)
+  { compute := (B.bisectionAt t ht).compute_preimage }
 
 /-- The first-quadrant half-angle slope function produced by the constructive
 inverse theorem.  Its outputs are rational boxes for the slope in `[0,1]`;
@@ -7473,7 +7472,7 @@ theorem tangentAt_valid (B : ArctanInverseBisection)
     (t : RationalCircle.GeometricTrig.QuarterTurn)
     (ht : RationalCircle.GeometricTrig.firstQuadrantBranch t) :
     (B.tangentAt t ht).Valid :=
-  (B.inverseRaw).apply_valid (B.targetAt t ht)
+  (B.bisectionAt t ht).valid_preimage
 
 theorem tangentRaw_valid (B : ArctanInverseBisection) :
     forall t ht, RealRaw.ValidCompute (B.tangentRaw.compute t ht) := by
@@ -7486,7 +7485,7 @@ theorem tangentAt_stays_in_source (B : ArctanInverseBisection)
     (ht : RationalCircle.GeometricTrig.firstQuadrantBranch t) :
     forall n, subintervalOf ((B.tangentAt t ht).compute n)
       B.branch.function.lower B.branch.function.upper :=
-  (B.inverseRaw).apply_stays_in_source (B.targetAt t ht)
+  (B.bisectionAt t ht).preimage_subinterval
 
 /-- The first-quadrant inverse output lies in the actual unit slope interval,
 because its forward branch is certified equivalent to `arctanGeomOnUnit`. -/
@@ -7514,7 +7513,7 @@ theorem tangentAt_forward_overlaps_target
         ((B.tangentAt t ht).compute n)
         (B.tangentAt_stays_in_source t ht n) n)
       ((B.targetAt t ht).value.compute n) :=
-  (B.inverseRaw).apply_value_overlaps_target (B.targetAt t ht)
+  (B.bisectionAt t ht).value_overlaps
 
 theorem targetAt_halfQuarterTurn_equiv
     (B : ArctanInverseBisection)

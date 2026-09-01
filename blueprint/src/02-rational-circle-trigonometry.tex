@@ -175,10 +175,17 @@ real-valued angle function is assumed.
 There is one accelerated rectangle schedule.  It represents sector-area time
 for rotation; its one-half scaling is the canonical undoubled arctangent
 branch.  That view supplies interval regularity, monotonicity, and effective
-separation for finite inverse search:
+separation for finite inverse search.  A normalized target (t) is the
+literal rational scaling of the branch's upper-endpoint computation; Lean
+proves that this native target is (t\pi/4).  The inverse package therefore
+asks for a search only at these geometric targets, not at every raw value that
+can be enclosed between endpoint boxes:
 \lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_compute}
 \lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_intervalRegular}
 \lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_invertible}
+\lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_equivalent_geometric}
+\lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegularTarget}
+\lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegularTarget_equiv_halfQuarterTurn}
 
 Inverse uniqueness is generic: equivalent forward interval computations on
 an effectively separating branch imply equivalent source computations.

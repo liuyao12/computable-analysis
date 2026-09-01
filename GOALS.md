@@ -105,11 +105,12 @@ not re-exported by the canonical root.
 Work in dependency order. Do not add routine examples while an earlier bridge
 is open.
 
-1. **Equal-dyadic sine transport.** Prove the positive odd half-angle step
-   connecting inverse-arctangent boxes to nested-radical boxes. The zero and
-   even branches, reflection, induction, and integral transport are already
-   checked. Use the single all-samples certificate-family interface; do not
-   add another parity-split wrapper.
+1. **Equal-dyadic sine transport.** Complete the target-directed finite search
+   for the canonical scaled-endpoint arctangent targets, then prove the
+   positive odd half-angle overlap with the nested-radical boxes. The target
+   validity, geometric equivalence, zero/even branches, reflection, induction,
+   and integral transport are already checked. Use the single all-samples
+   certificate-family interface; do not add another parity-split wrapper.
 2. **Squared sine.** Supply the two substantive pairwise certificates:
    public dyadic squares overlap the nested-radical computation, and the
    nested-radical computation overlaps the normalized tangent-square anchor.
