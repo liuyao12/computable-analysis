@@ -7,9 +7,8 @@ import ComputableAnalysis.IntegralIdentities
 The rational-circle chart has variable angular speed
 `2 / (1 + t^2)`.  This module packages its primitive as an interval-domain
 function and gives the explicit epsilon--delta derivative certificate needed
-to reparametrize by sector-area time.  This module owns the doubled sector
-clock used by the rotation and ODE layers; the undoubled arctangent inverse is
-packaged separately.
+to reparametrize by sector-area time.  The same accelerated rectangle schedule
+also supplies the undoubled arctangent branch by rational scaling.
 -/
 
 namespace ComputableAnalysis
@@ -701,6 +700,113 @@ def angleOnUnitRegular_invertible : InvertibleFunctionOnInterval where
     native_decide
   monotone := angleOnUnitRegular_monotone
   separation := angleOnUnitRegular_effectiveInverseSeparation
+  orientation := trivial
+
+/-! The undoubled arctangent is a view of the canonical sector clock, not a
+second rectangle schedule. -/
+def arctanOnUnitRegular : FunctionOnInterval :=
+  FunctionOnInterval.scaleRat ((1 : Rat) / 2) angleOnUnitRegular
+
+theorem arctanOnUnitRegular_compute
+    (x : Rat)
+    (hx : inDomainInterval arctanOnUnitRegular.lower
+      arctanOnUnitRegular.upper x)
+    (n : Nat) :
+    arctanOnUnitRegular.compute x hx n =
+      ArctanGeometry.arctanIntegralRectangleCompute x
+        (angleOnUnitRegularSchedule.stage n) := by
+  let hxBase : inDomainInterval angleOnUnitRegular.lower
+      angleOnUnitRegular.upper x := by
+    simpa [arctanOnUnitRegular, FunctionOnInterval.scaleRat] using hx
+  change QInterval.scaleRat ((1 : Rat) / 2)
+      (angleOnUnitRegular.compute x hxBase n) = _
+  rw [angleOnUnitRegular_compute]
+  have hhalf : (0 : Rat) <= 1 / 2 := by native_decide
+  have htwo : (0 : Rat) <= 2 := by native_decide
+  change QInterval.scaleRat (1 / 2)
+      (QInterval.scaleRat 2
+        (ArctanGeometry.arctanIntegralRectangleCompute x (64 * (n + 1)))) =
+    ArctanGeometry.arctanIntegralRectangleCompute x (64 * (n + 1))
+  cases hA : ArctanGeometry.arctanIntegralRectangleCompute x
+      (64 * (n + 1)) with
+  | mk lo hi =>
+      have hscale : ((1 : Rat) / 2) * 2 = 1 := by native_decide
+      simp only [QInterval.scaleRat, if_pos hhalf, if_pos htwo]
+      have hlo : ((1 : Rat) / 2) * (2 * lo) = lo := by
+        rw [← Rat.mul_assoc, hscale, Rat.one_mul]
+      have hhi : ((1 : Rat) / 2) * (2 * hi) = hi := by
+        rw [← Rat.mul_assoc, hscale, Rat.one_mul]
+      rw [hlo, hhi]
+
+def arctanOnUnitRegular_intervalRegular :
+    IntervalRegularOn arctanOnUnitRegular where
+  evalInterval := fun I hI n =>
+    QInterval.scaleRat ((1 : Rat) / 2)
+      (angleOnUnitRegular_intervalRegular.evalInterval I hI n)
+  inputPrecision := angleOnUnitRegular_intervalRegular.inputPrecision
+  inputPrecision_pos := angleOnUnitRegular_intervalRegular.inputPrecision_pos
+  output_width := by
+    intro I hI n hsmall
+    have hbase := angleOnUnitRegular_intervalRegular.output_width
+      I hI n hsmall
+    have hhalf : (0 : Rat) <= (1 : Rat) / 2 := by native_decide
+    rw [QInterval.scaleRat_width_of_nonneg hhalf]
+    constructor
+    · exact Rat.mul_nonneg hhalf hbase.1
+    · calc
+        ((1 : Rat) / 2) *
+              (angleOnUnitRegular_intervalRegular.evalInterval I hI n).width <=
+            ((1 : Rat) / 2) * (1 / (((n + 1 : Nat) : Rat))) :=
+          Rat.mul_le_mul_of_nonneg_left hbase.2 hhalf
+        _ <= 1 / (((n + 1 : Nat) : Rat)) := by
+          have hnonneg : 0 <= 1 / (((n + 1 : Nat) : Rat)) := by
+            rw [Rat.div_def]
+            exact Rat.mul_nonneg (by native_decide)
+              (Rat.le_of_lt ((Rat.inv_pos).2
+                ((Rat.natCast_pos).2 (Nat.succ_pos n))))
+          grind
+  contains_point_values := by
+    intro I hI x hx n hxlo hxhi
+    have hbase := angleOnUnitRegular_intervalRegular.contains_point_values
+      I hI x hx n hxlo hxhi
+    exact QInterval.scaleRat_contains_of_nonneg
+      (by native_decide : (0 : Rat) <= (1 : Rat) / 2) hbase
+
+def arctanOnUnitRegular_continuous : ContinuousFunctionOnInterval where
+  function := arctanOnUnitRegular
+  regular := arctanOnUnitRegular_intervalRegular
+
+theorem arctanOnUnitRegular_nondecreasing :
+    NondecreasingOnInterval arctanOnUnitRegular := by
+  intro x y hx hy hxy n
+  rw [arctanOnUnitRegular_compute, arctanOnUnitRegular_compute]
+  exact ArctanGeometry.arctanIntegralRectangleCompute_lower_le_upper_of_le
+    hx.1 hxy (angleOnUnitRegularSchedule.stage n)
+
+def arctanOnUnitRegular_monotone :
+    MonotoneOnInterval arctanOnUnitRegular :=
+  MonotoneOnInterval.ofNondecreasing arctanOnUnitRegular_nondecreasing
+
+def arctanOnUnitRegular_effectiveInverseSeparation :
+    EffectiveInverseSeparation arctanOnUnitRegular where
+  kind := .nondecreasing
+  inputPrecision := fun n => n + 1
+  inputPrecision_pos := fun n => Nat.succ_pos n
+  outputPrecision := fun n => n
+  separated := by
+    intro x y hx hy n hsep
+    rw [arctanOnUnitRegular_compute, arctanOnUnitRegular_compute]
+    exact
+      ArctanGeometry.arctanIntegralRectangleCompute_boxes_strictly_separated
+        hx.1 hx.2 hy.1 hy.2 n hsep
+
+def arctanOnUnitRegular_invertible : InvertibleFunctionOnInterval where
+  continuous := arctanOnUnitRegular_continuous
+  source_ordered := by
+    change (0 : Rat) <= 1
+    native_decide
+  monotone := arctanOnUnitRegular_monotone
+  separation := arctanOnUnitRegular_effectiveInverseSeparation
   orientation := trivial
 
 /-- The accelerated sector angle at a rational chart point.  This is the

@@ -78,6 +78,18 @@ when an application needs it, and prove:
 Routine scalar multiples, sign changes, polynomial combinations, and finite
 piecewise definitions should use existing algebra and assembly theorems.
 
+### Inverse branches
+
+Package a regular monotone computation as an
+`InvertibleFunctionOnInterval`; do not add a second evaluator merely to change
+scale. The canonical arctangent branch is the one-half view of the sector-area
+clock in `SectorAreaReparametrization`.
+
+Use `InvertibleFunctionOnInterval.source_equiv_of_forward_equiv` for
+uniqueness: equivalent forward interval computations imply equivalent source
+computations when the separation schedule resolves every positive rational
+gap. This is a finite interval theorem, not an appeal to real completeness.
+
 ## Integrating a new function
 
 Choose the first applicable route.

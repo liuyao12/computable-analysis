@@ -63,6 +63,11 @@ not re-exported by the canonical root.
 - Rational parametrization of the circle, rational area bounds, arctangent
   presentations, nested-radical dyadic sine values, and finite complex
   rotations are executable.
+- The regular arctangent branch reuses the accelerated sector-area clock by
+  one-half scaling; it has interval regularity, monotonicity, and effective
+  inverse separation without a second schedule.
+- Effective inverse branches have a generic source-uniqueness theorem based
+  on equivalent forward interval computations and finite separation.
 - Independent pi computations are connected by explicit `RealRaw.Equiv`
   theorems.
 

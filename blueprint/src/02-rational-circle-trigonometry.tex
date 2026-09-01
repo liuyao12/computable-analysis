@@ -172,14 +172,17 @@ map.  The geometric area loop and its rectangle comparison are certified by
 This is the bridge used by the integral and FTC chapters; no classical
 real-valued angle function is assumed.
 
-The canonical undoubled arctangent branch uses one accelerated rectangle
-schedule.  The same implementation supplies the pointwise width bound,
-interval regularity, monotonicity, strict separation, and equivalence with the
-geometric branch needed by finite inverse search:
-\lean{ComputableAnalysis.ArctanScheduledRegular.arctanScheduledRectangleOnUnit_width_le}
-\lean{ComputableAnalysis.ArctanScheduledRegular.arctanScheduledRectangleOnUnit_intervalRegular}
-\lean{ComputableAnalysis.ArctanScheduledRegular.arctanScheduledRectangleOnUnit_invertible}
-\lean{ComputableAnalysis.ArctanScheduledRegular.arctanScheduledRectangleOnUnit_equivalent_geometric_branch}
+There is one accelerated rectangle schedule.  It represents sector-area time
+for rotation; its one-half scaling is the canonical undoubled arctangent
+branch.  That view supplies interval regularity, monotonicity, and effective
+separation for finite inverse search:
+\lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_compute}
+\lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_intervalRegular}
+\lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_invertible}
+
+Inverse uniqueness is generic: equivalent forward interval computations on
+an effectively separating branch imply equivalent source computations.
+\lean{ComputableAnalysis.InvertibleFunctionOnInterval.source_equiv_of_forward_equiv}
 
 The function-facing circle coordinates are exposed separately from the
 construction record.  Their validity is a raw-computation statement; it does
