@@ -12,12 +12,8 @@ import ComputableAnalysis.FiniteSinePrefixFTC
 import ComputableAnalysis.PolynomialFTCValues
 import ComputableAnalysis.FiniteFTCPolynomial
 import ComputableAnalysis.SinPiIntegral
-import ComputableAnalysis.SinPiTransportSubgoals
-import ComputableAnalysis.SinPiTransportAdapter
-import ComputableAnalysis.SinPiSquareFTC
 import ComputableAnalysis.TangentPullbackEffectiveFTC
 import ComputableAnalysis.StableRotationDerivative
-import ComputableAnalysis.EffectiveFTCPortfolio
 import ComputableAnalysis.FiniteLHopitalCertificate
 import ComputableAnalysis.MonotonicityConvexity
 

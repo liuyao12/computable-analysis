@@ -6,7 +6,6 @@ import ComputableAnalysis.PolynomialMeanValue
 import ComputableAnalysis.FiniteQuadratureMeanValue
 import ComputableAnalysis.FiniteLHopitalCertificate
 import ComputableAnalysis.FiniteGapAwareInverseSearch
-import ComputableAnalysis.EffectiveFTCPortfolio
 import ComputableAnalysis.FinitePiecewiseAbsoluteValue
 
 /-!
@@ -63,7 +62,22 @@ integral, whose finite endpoint value is one. -/
 theorem effectiveSquareCurvatureFTC_value_one :
     squareCurvatureFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
       (RealRaw.ofRat 1) := by
-  exact effectiveFTCPortfolio.square_effective_value
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    squareCurvatureFTCData.toDerivativeBoundFTC.boundedIntegralRaw
+    (RealRaw.ofRat 1) n n).2
+  let H := squareCurvatureFTCData.toDerivativeBoundFTC
+  change QInterval.Overlaps
+    (H.boundedIntegralInterval (precisionAtStage n))
+    ({ lo := 1, hi := 1 } : QInterval)
+  have hover := H.overlap (precisionAtStage n)
+  simp [H, squareCurvatureFTCData, squareEffectiveFTCData,
+    endpointDifferenceInterval, squarePrimitiveRaw, RealFunRaw.exact] at hover
+  simp [H, DerivativeBoundFTC.boundedIntegralInterval,
+    squareCurvatureFTCData, squareEffectiveFTCData, squarePrimitiveRaw,
+    RealFunRaw.exact] at ⊢
+  unfold QInterval.Overlaps at hover ⊢
+  grind
 
 /-! The polynomial regression ladder is part of the public FTC interface too.
     These aliases keep the finite budgets and endpoint computations in their

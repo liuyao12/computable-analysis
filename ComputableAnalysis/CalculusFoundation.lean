@@ -1,6 +1,4 @@
 import ComputableAnalysis.IntegralFoundation
-import ComputableAnalysis.SinPiSquareFTC
-import ComputableAnalysis.SinPiSquareCheckpoints
 import ComputableAnalysis.EffectiveCalculusFoundation
 import ComputableAnalysis.PowerSeries
 import ComputableAnalysis.SeriesFoundation
@@ -330,92 +328,6 @@ theorem effectiveSquareCurvatureFTC_value_one :
     Integral.squareCurvatureFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
       (RealRaw.ofRat 1) := by
   exact Integral.effectiveSquareCurvatureFTC_value_one
-
-/-! Public acceptance interface for the normalized squared-sine example.  The
-primitive and its finite derivative certificate remain explicit inputs; once
-provided, the generic effective FTC and endpoint transport are available at
-the focused calculus boundary. -/
-theorem effectiveSinPiSquareFTC_equiv_endpoint
-    {S : SinPiIntegral.ArctanSinPiConstruction}
-    (D : SinPiIntegral.SinPiSquareEffectiveFTCData S) :
-    D.integralRaw.Equiv D.endpointRaw := by
-  exact D.integral_equiv_endpoint
-
-theorem effectiveSinPiSquareFTC_equiv_value
-    {S : SinPiIntegral.ArctanSinPiConstruction}
-    (D : SinPiIntegral.SinPiSquareEffectiveFTCData S)
-    (hvalue : D.endpointRaw.Equiv (RealRaw.ofRat (1 / 4))) :
-    D.integralRaw.Equiv (RealRaw.ofRat (1 / 4)) := by
-  exact D.endpoint_equiv_of_value hvalue
-
-/-! Rational bridge for the first non-polynomial product example.  The
-    combined derivative evaluator is definitionally the tangent-square
-    density, and the primitive's endpoint difference is the quarter-turn
-    anchor; only the separate sine-representation overlap remains. -/
-theorem effectiveTangentSquareCombinedDerivative_compute_eq_density
-    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) (n : Nat) :
-    SinPiIntegral.tangentSquareCombinedDerivativeRaw.compute x n =
-      SinPiIntegral.tangentSquareDensityRaw.compute x n := by
-  exact SinPiIntegral.tangentSquareCombinedDerivativeRaw_compute_eq_density
-    hx0 hx1 n
-
-theorem effectiveTangentSquarePrimitive_endpointDifference_equiv_halfQuarterTurn :
-    (endpointDifferenceRaw
-      SinPiIntegral.tangentSquareEffectivePrimitiveOnUnit 0 1
-      SinPiIntegral.tangentSquareEffectivePrimitive_endpointDifference_valid).Equiv
-      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
-  exact SinPiIntegral.tangentSquareEffectivePrimitive_endpointDifference_equiv_halfQuarterTurn
-
-theorem effectiveTangentSquareFTC_integral_equiv_halfQuarterTurn :
-    SinPiIntegral.tangentSquareEffectiveFTCData.integralRaw.Equiv
-      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
-  exact SinPiIntegral.tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn
-
-/-! Public transport for the independent tangent-square computation.  A
-stagewise rational overlap certificate is the only application-specific
-input; the theorem then exposes the effective-FTC quarter-turn value through
-the focused calculus entry point. -/
-theorem effectiveTangentSquareIntegral_equiv_halfQuarterTurn_of_overlap
-    (h : SinPiIntegral.TangentSquareIntegralEffectiveFTCOverlap) :
-    SinPiIntegral.tangentSquareIntegral.Equiv
-      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
-  exact h.to_halfQuarterTurn
-
-/-! Canonical pairwise transport.  The public/nested and nested/anchor
-overlaps are enough: the overlap-chain stabilizer inserts the vanishing
-nested-radical width, so callers no longer need the stronger three-way
-same-stage witness. -/
-theorem effectiveDyadicPublicSquareIntegral_chain_equiv_quarter
-    {S : SinPiIntegral.ArctanSinPiConstruction}
-    (hcircle : SinPiIntegral.DyadicSquareCircleOverlapFamily S)
-    (hcommon :
-      SinPiIntegral.DyadicNestedRadicalSquareAnchorCommonWitness
-        normalizedTangentSquareIntegral)
-    (hsine : IntervalRegularOn S.onHalf)
-    (hvalue : NormalizedTangentSquareValueSubgoal) :
-    (SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized S
-      normalizedTangentSquareIntegral).Equiv
-      (RealRaw.ofRat (1 / 4)) := by
-  exact SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized_equiv_value
-    hsine hvalue.normalized_valid hcircle hcommon hvalue.value
-
-theorem effectiveDyadicPublicSquareIntegral_chain_valid
-    {S : SinPiIntegral.ArctanSinPiConstruction}
-    (hcircle : SinPiIntegral.DyadicSquareCircleOverlapFamily S)
-    (hcommon :
-      SinPiIntegral.DyadicNestedRadicalSquareAnchorCommonWitness
-        normalizedTangentSquareIntegral)
-    (hsine : IntervalRegularOn S.onHalf) :
-    (SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized S
-      normalizedTangentSquareIntegral).Valid := by
-  exact SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized_valid
-    hsine normalizedTangentSquareIntegral_valid hcircle hcommon
-
-theorem effectiveReciprocalPi_quarterTurn_equiv_quarter :
-    (SinPiIntegral.reciprocalPiRaw *
-      RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Equiv
-      (RealRaw.ofRat (1 / 4)) := by
-  exact reciprocalPi_quarterTurn_equiv_quarter
 
 /-! Public finite integration-by-parts laws.  These are the algebraic
 rectangle identities behind later Stieltjes and change-of-variables proofs;
@@ -1575,19 +1487,6 @@ theorem effectiveExactRatPowIntegral_equiv_ofRat (k : Nat) :
       (Integral.exactRat_pow_integral_certificate k)).Equiv
       (RealRaw.ofRat (1 / ((k + 1 : Nat) : Rat))) :=
   Integral.exactRat_pow_integral_raw_equiv_one_div_succ k
-
-/-- Named focused-entry-point adapter retained for the quartic regression. -/
-def effectiveExactRatQuarticDefiniteIdentity :
-    Integral.DefiniteIdentityFor
-      (FunctionOnInterval.exactRat (fun x : Rat => x ^ 4) 0 1)
-      Integral.quarticPrimitiveOnUnit :=
-  Integral.exactRat_quartic_definiteIdentity
-
-def effectiveExactRatQuinticDefiniteIdentity :
-    Integral.DefiniteIdentityFor
-      (FunctionOnInterval.exactRat (fun x : Rat => x ^ 5) 0 1)
-      (Integral.powPrimitiveOnUnit 5) :=
-  Integral.exactRat_pow_definiteIdentity 5
 
 /-! Assemble a finite polynomial integral from the certified monomial raws.
     The separate anchor raw keeps the computation graph explicit; reducing

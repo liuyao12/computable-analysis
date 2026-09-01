@@ -108,13 +108,14 @@ not re-exported by the canonical root.
 Work in dependency order. Do not add routine examples while an earlier bridge
 is open.
 
-1. **Equal-dyadic sine transport.** Prove that the anchor-free nested-radical
-   half-angle tangent box is contained in the corresponding inverse-arctangent
-   tangent box at every positive dyadic sample and precision. The interval
-   unit-circle law, circle-image overlap, target validity, zero endpoint, and
-   integral transport are checked. Use
-   `DyadicHalfAngleTangentContainmentFamily`; do not add rational point searches
-   or parity-specific public wrappers.
+1. **Equal-dyadic sine transport.** Prove that the canonical stabilized
+   nested-radical half-angle tangent is equivalent to the inverse-arctangent
+   tangent at every positive dyadic sample. The interval unit-circle law,
+   direct half-angle computation, stabilization, target validity, zero
+   endpoint, and semantic integral transport are checked. Use
+   `DyadicHalfAngleTangentEquivalenceFamily`; do not impose matching stage
+   schedules or add rational point searches and parity-specific public
+   wrappers.
 2. **Squared sine.** Supply the two substantive pairwise certificates:
    public dyadic squares overlap the nested-radical computation, and the
    nested-radical computation overlaps the normalized tangent-square anchor.

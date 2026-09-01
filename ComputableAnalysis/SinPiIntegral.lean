@@ -6087,34 +6087,6 @@ theorem dyadicNestedRadicalHalfAngleTangentRaw_circleSin_overlap
   exact rationalCircleSinInterval_overlap_of_halfAngle_boxes_of_square_sum_overlap
     hS hC hcircle
 
-/-- The only geometric fact still needed to identify the inverse-arctangent
-sample with the nested-radical sample is containment of the direct
-half-angle tangent box in the inverse solver's tangent box. -/
-theorem dyadicTangentBoxAt_circleSin_overlap_of_halfAngleTangent_contains
-    (B : IntegralIdentities.ArctanInverseBisection)
-    {precision depth k : Nat} (hk : k < 2 ^ depth)
-    (hcontains : (dyadicTangentBoxAt B precision depth k hk).ContainsInterval
-      ((dyadicNestedRadicalHalfAngleTangentRaw depth k).compute precision)) :
-    QInterval.Overlaps
-      (rationalCircleSinInterval
-        (dyadicTangentBoxAt B precision depth k hk))
-      (dyadicNestedRadicalTableAt precision depth k).1 := by
-  let S := (dyadicNestedRadicalTableAt precision depth k).1
-  let C := dyadicNestedRadicalPositiveCosAt precision depth k
-  have hbounds := dyadicNestedRadicalTableAt_bounds precision depth k
-    (Nat.le_of_lt hk)
-  have hS : subintervalOf S 0 1 := hbounds.1
-  have hC : subintervalOf C 0 1 :=
-    QInterval.absHull_unit_bounds hbounds.2
-  have hcircle := dyadicNestedRadicalTableAt_positive_circle_overlap
-    precision depth k (Nat.le_of_lt hk)
-  change QInterval.Overlaps
-    (rationalCircleSinInterval (dyadicTangentBoxAt B precision depth k hk)) S
-  exact
-    rationalCircleSinInterval_overlap_of_halfAngle_boxes_of_square_sum_overlap_of_outer
-      (dyadicTangentBoxAt_bounds B precision depth k hk)
-      hS hC hcontains hcircle
-
 theorem arctanSinPi_nestedRadicalStage_sample_overlap_of_tangent_witness
     (B : IntegralIdentities.ArctanInverseBisection)
     {x : Rat} (hx : 0 <= x /\ x <= (1 : Rat) / 2) (n k : Nat)
@@ -7805,6 +7777,16 @@ theorem dyadicNestedRadicalHalfAngleTangentRaw_overlap_of_precisions
 def dyadicNestedRadicalHalfAngleTangentRadius : Nat -> Rat :=
   fun n => 3 / ((n + 1 : Nat) : Rat)
 
+/-- The canonical valid `realRaw` for the direct nested-radical half-angle
+slope.  The finite table itself is allowed to use a convenient, non-nested
+precision schedule; prefix stabilization turns its mutually compatible boxes
+into one nested computation without choosing a completed real number. -/
+def dyadicNestedRadicalHalfAngleTangent
+    (depth k : Nat) : RealRaw :=
+  RealRaw.prefixStabilize
+    (dyadicNestedRadicalHalfAngleTangentRaw depth k)
+    dyadicNestedRadicalHalfAngleTangentRadius
+
 theorem dyadicNestedRadicalHalfAngleTangentRaw_widths_shrink
     {depth k : Nat} (hk : k < 2 ^ depth) :
     RealRaw.WidthsShrinkToZero
@@ -7839,11 +7821,10 @@ theorem dyadicNestedRadicalHalfAngleTangentRadius_shrinksToZero :
   intro n
   exact Rat.le_refl
 
-theorem dyadicNestedRadicalHalfAngleTangentRaw_stabilized_valid
+theorem dyadicNestedRadicalHalfAngleTangent_valid
     {depth k : Nat} (hk : k < 2 ^ depth) :
-    (RealRaw.prefixStabilize
-      (dyadicNestedRadicalHalfAngleTangentRaw depth k)
-      dyadicNestedRadicalHalfAngleTangentRadius).Valid := by
+    (dyadicNestedRadicalHalfAngleTangent depth k).Valid := by
+  unfold dyadicNestedRadicalHalfAngleTangent
   apply RealRaw.prefixStabilize_valid_of_future
   · intro n
     have hbounds := dyadicNestedRadicalHalfAngleTangentRaw_bounds hk n
@@ -7852,12 +7833,11 @@ theorem dyadicNestedRadicalHalfAngleTangentRaw_stabilized_valid
   · exact dyadicNestedRadicalHalfAngleTangentRaw_future_contained hk
   · exact dyadicNestedRadicalHalfAngleTangentRadius_shrinksToZero
 
-theorem dyadicNestedRadicalHalfAngleTangentRaw_equiv_stabilized
+theorem dyadicNestedRadicalHalfAngleTangentRaw_equiv
     {depth k : Nat} (hk : k < 2 ^ depth) :
     (dyadicNestedRadicalHalfAngleTangentRaw depth k).Equiv
-      (RealRaw.prefixStabilize
-        (dyadicNestedRadicalHalfAngleTangentRaw depth k)
-        dyadicNestedRadicalHalfAngleTangentRadius) := by
+      (dyadicNestedRadicalHalfAngleTangent depth k) := by
+  unfold dyadicNestedRadicalHalfAngleTangent
   apply RealRaw.candidate_equiv_prefixStabilize_of_future
   · intro n
     have hbounds := dyadicNestedRadicalHalfAngleTangentRaw_bounds hk n
@@ -8975,30 +8955,36 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_of_precision_first_certificat
   intro n k hk hpos precision
   exact hcertificate precision n k hk hpos
 
-/-- Canonical geometric interface for the equal-dyadic sine route.  The
-nested-radical construction already proves its circle law; a provider only
-identifies its half-angle tangent box with the box returned by the
-inverse-arctangent computation. -/
-structure DyadicHalfAngleTangentContainmentFamily
+/-- Canonical representation edge for the equal-dyadic sine route.
+
+The inverse-arctangent computation and the direct nested-radical computation
+may refine at unrelated rates.  Their semantic connection is therefore
+`RealRaw.Equiv`, not containment of boxes carrying the same stage number.
+Together with `dyadicNestedRadicalHalfAngleTangentRaw_equiv`, these edges form
+the intended spanning tree of implementations. -/
+structure DyadicHalfAngleTangentEquivalenceFamily
     (B : IntegralIdentities.ArctanInverseBisection) where
   endpoint_zero : (B.tangentAt 0
       RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
       RealRaw.zero
-  interior_contains : forall (precision depth k : Nat)
-    (hk : k < 2 ^ depth), 0 < k ->
-    (dyadicTangentBoxAt B precision depth k hk).ContainsInterval
-      ((dyadicNestedRadicalHalfAngleTangentRaw depth k).compute precision)
+  interior_equiv : forall (depth k : Nat) (hk : k < 2 ^ depth), 0 < k ->
+    (B.tangentAt
+      (2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+      (dyadicNormalizedBranch hk)).Equiv
+      (dyadicNestedRadicalHalfAngleTangent depth k)
 
-theorem DyadicHalfAngleTangentContainmentFamily.rational_circle_overlap
+theorem DyadicHalfAngleTangentEquivalenceFamily.interior_allStagesOverlap
     {B : IntegralIdentities.ArctanInverseBisection}
-    (H : DyadicHalfAngleTangentContainmentFamily B)
-    (precision depth k : Nat) (hk : k < 2 ^ depth) (hpos : 0 < k) :
-    QInterval.Overlaps
-      (rationalCircleSinInterval
-        (dyadicTangentBoxAt B precision depth k hk))
-      (dyadicNestedRadicalTableAt precision depth k).1 := by
-  exact dyadicTangentBoxAt_circleSin_overlap_of_halfAngleTangent_contains
-    B hk (H.interior_contains precision depth k hk hpos)
+    (H : DyadicHalfAngleTangentEquivalenceFamily B)
+    {depth k : Nat} (hk : k < 2 ^ depth) (hpos : 0 < k) :
+    (B.tangentAt
+      (2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+      (dyadicNormalizedBranch hk)).AllStagesOverlap
+      (dyadicNestedRadicalHalfAngleTangent depth k) := by
+  exact RealRaw.allStagesOverlap_of_equiv
+    (B.tangentAt_valid _ _)
+    (dyadicNestedRadicalHalfAngleTangent_valid hk)
+    (H.interior_equiv depth k hk hpos)
 
 theorem ArctanSinPiConstruction.halfIntegral_equiv_of_overlap_family
     (S : ArctanSinPiConstruction)
@@ -9030,31 +9016,6 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_of_overlap_family
   intro n k hk
   exact arctanSinPi_nestedRadicalSample_equiv_of_overlap_family
     S.inverse ht0 hk (hover n k hk)
-
-/-- Equal-dyadic sine transport using the single canonical geometric
-containment obligation. -/
-theorem ArctanSinPiConstruction.halfIntegral_equiv_of_halfAngleTangentContainmentFamily
-    (S : ArctanSinPiConstruction)
-    (pub : Integral.Construction S.onHalf.toRealFunRaw
-      0 ((1 : Rat) / 2))
-    (g : RealFunRaw)
-    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
-    (hdyadic : pub.plan = Integral.staticDyadicPlan)
-    (hplan : pub.plan = cg.plan)
-    (hevaluator : forall n k,
-      k < (pub.plan n).subdivisions ->
-      g.compute
-        (leftPoint 0 ((1 : Rat) / 2)
-          (pub.plan n).subdivisions k)
-        (pub.plan n).evalPrecision =
-        dyadicNestedRadicalStageSinAt n k)
-    (family : DyadicHalfAngleTangentContainmentFamily S.inverse) :
-    (S.halfIntegral pub).Equiv
-      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
-  apply S.halfIntegral_equiv_of_overlap_family
-    pub g cg hdyadic hplan hevaluator family.endpoint_zero
-  intro n k hk hpos precision
-  exact family.rational_circle_overlap precision n k hk hpos
 
 theorem ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificate_family
     (S : ArctanSinPiConstruction)

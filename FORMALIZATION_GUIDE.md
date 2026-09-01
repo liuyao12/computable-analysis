@@ -211,12 +211,12 @@ The public API deliberately has no three-way shared-witness certificate: such
 a certificate asks for stronger same-stage data than the proof needs.
 
 For unsquared sine, use
-`DyadicHalfAngleTangentContainmentFamily`. The nested-radical evaluator already
-proves the sine/cosine interval circle law and the induced rational-circle
-overlap. A provider supplies only the containment of its explicit half-angle
-tangent box in the inverse-arctangent tangent box. Do not introduce rational
-point witnesses, candidate-list searches, or parallel parity adapters for
-this public API.
+`DyadicHalfAngleTangentEquivalenceFamily`. The nested-radical evaluator already
+proves the sine/cosine interval circle law and stabilizes its explicit
+half-angle tangent into a valid `realRaw`. A provider supplies the equivalence
+edge to the inverse-arctangent tangent. The algorithms may use different
+stage schedules, so do not replace this edge with same-stage containment or
+introduce rational point searches and parallel parity adapters.
 
 ## Series
 

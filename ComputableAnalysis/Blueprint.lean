@@ -1,4 +1,5 @@
 import ComputableAnalysis
+import ComputableAnalysis.SinPiSquareFTC
 import ComputableAnalysis.FiniteAMGMExample
 import ComputableAnalysis.FiniteAMGMInterface
 import ComputableAnalysis.FiniteBertrandCertificate

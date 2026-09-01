@@ -76,10 +76,11 @@ FTC theorem: the resulting integral equals the primitive endpoint difference.
 The arctangent kernel `1/(1+x^2)` is the canonical non-polynomial client of
 this route; it no longer carries a parallel local stabilization pipeline.
 
-The main active application is the equal-dyadic computation of
-`sin(pi*x)^2` on `[0,1/2]`. Pairwise overlap certificates connect the public
-dyadic evaluator, the nested-radical evaluator, and the normalized tangent
-anchor; the generic overlap-chain stabilizer then yields the value `1/4`.
+The main active application is the equal-dyadic computation of `sin(pi*x)` on
+`[0,1/2]`. Its direct nested-radical half-angle tangent is now a valid
+`RealRaw`; the remaining geometric theorem is one equivalence edge to the
+inverse-arctangent implementation. The larger squared-sine checkpoint and
+search portfolios are opt-in modules rather than part of the canonical root.
 
 ## Project documents
 
