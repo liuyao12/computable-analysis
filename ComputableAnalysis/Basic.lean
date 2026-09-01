@@ -1379,6 +1379,19 @@ fact explicitly rather than silently replacing an empty intersection. -/
 def intersection (I J : QInterval) : QInterval :=
   { lo := max I.lo J.lo, hi := min I.hi J.hi }
 
+/-- The additive inverse of a rational interval, with endpoint order
+preserved. -/
+def neg (I : QInterval) : QInterval :=
+  { lo := -I.hi, hi := -I.lo }
+
+theorem neg_width (I : QInterval) : (neg I).width = I.width := by
+  unfold neg width
+  grind [Rat.sub_eq_add_neg]
+
+@[simp] theorem neg_neg (I : QInterval) : neg (neg I) = I := by
+  cases I
+  simp [neg]
+
 theorem hull_contains_left (I J : QInterval) : (hull I J).ContainsInterval I := by
   unfold ContainsInterval hull
   grind

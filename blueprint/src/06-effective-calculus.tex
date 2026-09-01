@@ -358,10 +358,10 @@ certificates.
 
 \lean{ComputableAnalysis.ExactFunction.differenceQuotient_comp_factorization}
 \lean{ComputableAnalysis.ExactFunction.differenceQuotient_comp_error_le}
-\lean{ComputableAnalysis.ExactFunction.effectiveDifferenceQuotientCompositionFactorization}
-\lean{ComputableAnalysis.ExactFunction.effectiveDifferenceQuotientCompositionErrorLe}
+\lean{ComputableAnalysis.ExactFunction.differenceQuotient_comp_factorization}
+\lean{ComputableAnalysis.ExactFunction.differenceQuotient_comp_error_le}
 \lean{ComputableAnalysis.ExactFunction.EffectiveDerivativeExact.compOfBudget}
-\lean{ComputableAnalysis.effectiveDerivativeCompositionOfBudget}
+\lean{ComputableAnalysis.ExactFunction.EffectiveDerivativeExact.compOfBudget}
 \leanok
 
 The same finite mechanism now closes multiplication when rational majorants
@@ -374,7 +374,7 @@ not smuggled in through completeness of the reals.
 
 \lean{ComputableAnalysis.FinitePolynomial.SecantDerivativeBound.mul}
 \lean{ComputableAnalysis.FinitePolynomial.SecantDerivativeBound.mulToHasDerivativeOnInterval}
-\lean{ComputableAnalysis.effectiveSecantProductRule}
+\lean{ComputableAnalysis.secantSlope_product_transport}
 \leanok
 
 At the raw-real level, the literal four-corner product is valid for arbitrary
@@ -728,7 +728,7 @@ theorem only requires that both schedules close the same rational error budget.
 \lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.endpointRaw_equiv_endpointDifference}
 \lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.boundedIntegralRaw_equiv_endpointDifference}
 \lean{ComputableAnalysis.effectiveDerivativeBoundFTC}
-\lean{ComputableAnalysis.Integral.effectiveGeneralIntegralFor_equiv_totalEndpointDifference_of_telescope}
+\lean{ComputableAnalysis.Integral.generalIntegralFor_equiv_totalEndpointDifference_of_telescope}
 \leanok
 
 These two theorems are the general computable FTC closure: once a function
@@ -786,7 +786,7 @@ the FTC certificate.
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_endpoint}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_boundedIntegral_equiv_endpointDifference}
 \lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_value}
-\lean{ComputableAnalysis.effectiveFTC_sine_prefix_square}
+\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_value}
 \leanok
 
 The interface is the reusable calculus API: finite secant bounds feed
@@ -1040,17 +1040,17 @@ concave analogue of the convex derivative monotonicity lemma.
 
 The provider-facing curvature closure is available directly from the scoped
 effective-calculus entry point:
-\lean{ComputableAnalysis.Integral.effectiveCurvatureFTC}
-\lean{ComputableAnalysis.Integral.effectiveConvexFTC}
-\lean{ComputableAnalysis.Integral.effectiveConcaveFTC}
-\lean{ComputableAnalysis.Integral.effectiveSquareCurvatureFTC}
+\lean{ComputableAnalysis.Integral.curvatureFTC}
+\lean{ComputableAnalysis.Integral.convexFTC}
+\lean{ComputableAnalysis.Integral.concaveFTC}
+\lean{ComputableAnalysis.Integral.squareCurvatureFTC_equiv_endpoint}
 \lean{ComputableAnalysis.Integral.effectiveSquareCurvatureFTC_value_one}
 \leanok
 
 \lean{ComputableAnalysis.Integral.finiteQuadrature_average_between_bounds}
 \lean{ComputableAnalysis.ExactCellOrderPreservation.integral_average_overlaps_bounds}
 \lean{ComputableAnalysis.CandidateDerivativeCellControl.endpoint_average_overlaps_bound}
-\lean{ComputableAnalysis.Integral.effectiveMeanValueBracket}
+\lean{ComputableAnalysis.Integral.CandidateDerivativeCellControl.endpoint_average_overlaps_bound}
 \lean{ComputableAnalysis.QInterval.divByRat_overlaps_of_pos}
 \lean{ComputableAnalysis.QInterval.divByRat_scaleByRat_self_of_pos}
 \leanok
