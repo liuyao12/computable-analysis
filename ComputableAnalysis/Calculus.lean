@@ -3401,6 +3401,27 @@ def inDomainInterval (a b x : Rat) : Prop :=
 def subintervalOf (I : QInterval) (a b : Rat) : Prop :=
   a <= I.lo /\ I.lo <= I.hi /\ I.hi <= b
 
+namespace QInterval
+
+theorem neg_subinterval
+    (I : QInterval) {lo hi : Rat}
+    (hI : subintervalOf I lo hi) :
+    subintervalOf (neg I) (-hi) (-lo) := by
+  unfold neg subintervalOf at *
+  grind
+
+theorem neg_unit_subinterval
+    (I : QInterval) (hI : subintervalOf I (-1) 1) :
+    subintervalOf (neg I) (-1) 1 := by
+  simpa using (neg_subinterval I hI)
+
+theorem absHull_subinterval_unit
+    {I : QInterval} (hI : subintervalOf I (-1) 1) :
+    subintervalOf (absHull I) 0 1 := by
+  exact absHull_unit_bounds hI
+
+end QInterval
+
 /-- A rational closed subinterval of a rational closed interval.  This is the
 piece size used by the convex/concave calculus certificates below. -/
 structure RationalSubinterval (a b : Rat) where

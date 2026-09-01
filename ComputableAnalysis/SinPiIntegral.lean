@@ -601,12 +601,53 @@ theorem rationalHalfAngleTangentInterval_contains
       (s / (1 + c) * (1 + C.hi)) * (1 + c)
     rw [Rat.div_def, Rat.div_def]
     grind [Rat.mul_assoc, Rat.mul_comm]
+
   · apply Rat.le_of_mul_le_mul_right (c := 1 + c) ?_ hd
     apply Rat.le_of_mul_le_mul_right (c := 1 + C.lo) ?_ hdlo
     change s / (1 + c) * (1 + c) * (1 + C.lo) <=
       (S.hi / (1 + C.lo)) * (1 + c) * (1 + C.lo)
     rw [Rat.div_def, Rat.div_def]
     grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem rationalHalfAngleTangentInterval_overlap_of_overlaps
+    {S₁ S₂ C₁ C₂ : QInterval}
+    (hS₁ : subintervalOf S₁ 0 1) (hS₂ : subintervalOf S₂ 0 1)
+    (hC₁ : subintervalOf C₁ 0 1) (hC₂ : subintervalOf C₂ 0 1)
+    (hS : QInterval.Overlaps S₁ S₂)
+    (hC : QInterval.Overlaps C₁ C₂) :
+    QInterval.Overlaps
+      (rationalHalfAngleTangentInterval S₁ C₁)
+      (rationalHalfAngleTangentInterval S₂ C₂) := by
+  let s : Rat := max S₁.lo S₂.lo
+  let c : Rat := max C₁.lo C₂.lo
+  have hs₁ : S₁.lo <= s /\ s <= S₁.hi := by
+    dsimp [s]
+    unfold QInterval.Overlaps at hS
+    unfold subintervalOf at hS₁ hS₂
+    grind
+  have hs₂ : S₂.lo <= s /\ s <= S₂.hi := by
+    dsimp [s]
+    unfold QInterval.Overlaps at hS
+    unfold subintervalOf at hS₁ hS₂
+    grind
+  have hc₁ : C₁.lo <= c /\ c <= C₁.hi := by
+    dsimp [c]
+    unfold QInterval.Overlaps at hC
+    unfold subintervalOf at hC₁ hC₂
+    grind
+  have hc₂ : C₂.lo <= c /\ c <= C₂.hi := by
+    dsimp [c]
+    unfold QInterval.Overlaps at hC
+    unfold subintervalOf at hC₁ hC₂
+    grind
+  have hs0 : 0 <= s := Rat.le_trans hS₁.1 hs₁.1
+  have hc0 : 0 <= c := Rat.le_trans hC₁.1 hc₁.1
+  have ht₁ := rationalHalfAngleTangentInterval_contains
+    hS₁ hC₁ hs0 hc0 hs₁ hc₁
+  have ht₂ := rationalHalfAngleTangentInterval_contains
+    hS₂ hC₂ hs0 hc0 hs₂ hc₂
+  unfold QInterval.Overlaps
+  exact ⟨Rat.le_trans ht₁.1 ht₂.2, Rat.le_trans ht₂.1 ht₁.2⟩
 
 /-! A target-directed interval margin rule.  It converts a point witness and
 a width budget into containment in a larger rational box. -/
@@ -5223,9 +5264,6 @@ dyadic range, even indices reuse the preceding level and odd indices apply
 the positive half-angle square roots; the upper half is recovered by the
 symmetry `sin (pi-theta)=sin theta`, `cos (pi-theta)=-cos theta`. -/
 
-def dyadicNestedRadicalNeg (I : QInterval) : QInterval :=
-  { lo := -I.hi, hi := -I.lo }
-
 def dyadicNestedRadicalTable : Nat -> Nat -> QInterval × QInterval
   | 0, k =>
       if k = 0 then
@@ -5242,7 +5280,7 @@ def dyadicNestedRadicalTable : Nat -> Nat -> QInterval × QInterval
         let reflected := if k <= bound then k else 2 * bound - k
         let parent := dyadicNestedRadicalTable n reflected
         let parentCos :=
-          if k <= bound then parent.2 else dyadicNestedRadicalNeg parent.2
+          if k <= bound then parent.2 else QInterval.neg parent.2
         let sinInput : QInterval :=
           { lo := (1 - parentCos.hi) / 2,
             hi := (1 - parentCos.lo) / 2 }
@@ -5252,7 +5290,7 @@ def dyadicNestedRadicalTable : Nat -> Nat -> QInterval × QInterval
         let sine := sqrtOnUnitEvalIntervalTotal sinInput (n + 1)
         let cosine := sqrtOnUnitEvalIntervalTotal cosInput (n + 1)
         if k <= bound then (sine, cosine)
-        else (sine, dyadicNestedRadicalNeg cosine)
+        else (sine, QInterval.neg cosine)
   termination_by n => n
 
 def dyadicNestedRadicalSinAt (n k : Nat) : QInterval :=
@@ -5444,13 +5482,13 @@ def dyadicNestedRadicalTableAt (precision : Nat) : Nat -> Nat -> QInterval × QI
         let parent := dyadicNestedRadicalTableAt
           (dyadicNestedRadicalParentPrecision precision) n reflected
         let parentCos :=
-          if k <= bound then parent.2 else dyadicNestedRadicalNeg parent.2
+          if k <= bound then parent.2 else QInterval.neg parent.2
         let sinInput := dyadicHalfAngleSinInput parentCos
         let cosInput := dyadicHalfAngleCosInput parentCos
         let sine := sqrtOnUnitEvalIntervalClipped sinInput precision
         let cosine := sqrtOnUnitEvalIntervalClipped cosInput precision
         if k <= bound then (sine, cosine)
-        else (sine, dyadicNestedRadicalNeg cosine)
+        else (sine, QInterval.neg cosine)
   termination_by n => n
 
 def dyadicNestedRadicalStageTable (n k : Nat) : QInterval × QInterval :=
@@ -5463,6 +5501,20 @@ def dyadicNestedRadicalSampleRaw (depth k : Nat) : RealRaw where
   compute := fun precision =>
     (dyadicNestedRadicalTableAt precision depth k).1
 
+/-- The table stores an oriented cosine.  On the public first-quadrant
+dyadic mesh, the half-angle tangent needs its nonnegative magnitude. -/
+def dyadicNestedRadicalPositiveCosAt
+    (precision depth k : Nat) : QInterval :=
+  QInterval.absHull (dyadicNestedRadicalTableAt precision depth k).2
+
+/-- A direct nested-radical computation of the half-angle slope
+`sin(theta)/(1+cos(theta))` at a fixed dyadic angle. -/
+def dyadicNestedRadicalHalfAngleTangentRaw (depth k : Nat) : RealRaw where
+  compute := fun precision =>
+    rationalHalfAngleTangentInterval
+      (dyadicNestedRadicalTableAt precision depth k).1
+      (dyadicNestedRadicalPositiveCosAt precision depth k)
+
 theorem dyadicNestedRadicalTableAt_succ_odd
     (precision n k : Nat) (hodd : k % 2 = 1) :
     dyadicNestedRadicalTableAt precision (n + 1) k =
@@ -5471,13 +5523,13 @@ theorem dyadicNestedRadicalTableAt_succ_odd
       let parent := dyadicNestedRadicalTableAt
         (dyadicNestedRadicalParentPrecision precision) n reflected
       let parentCos :=
-        if k <= bound then parent.2 else dyadicNestedRadicalNeg parent.2
+        if k <= bound then parent.2 else QInterval.neg parent.2
       let sine := sqrtOnUnitEvalIntervalClipped
         (dyadicHalfAngleSinInput parentCos) precision
       let cosine := sqrtOnUnitEvalIntervalClipped
         (dyadicHalfAngleCosInput parentCos) precision
       if k <= bound then (sine, cosine) else
-        (sine, dyadicNestedRadicalNeg cosine) := by
+        (sine, QInterval.neg cosine) := by
   simp [dyadicNestedRadicalTableAt, hodd]
 
 /-! The corresponding equal-mesh sample is the same rational point. -/
@@ -5608,7 +5660,7 @@ theorem dyadicHalfAngle_child_sine_overlap_of_raw_halfAngle_upper
     {I J K : QInterval}
     (precision n k : Nat) (hI : subintervalOf I (-1) 1)
     (hJ : subintervalOf J (-1) 1)
-    (hJeq : J = dyadicNestedRadicalNeg
+    (hJeq : J = QInterval.neg
       (dyadicNestedRadicalTableAt
         (dyadicNestedRadicalParentPrecision precision) n
         (2 * 2 ^ n - k)).2)
@@ -5632,27 +5684,6 @@ theorem dyadicHalfAngle_child_sine_overlap_of_raw_halfAngle_upper
     simp [hle, hJeq, hupper, hbound]
   rw [hraw, htable']
   exact hsqrt
-
-theorem dyadicNestedRadicalNeg_subinterval
-    (I : QInterval) (hI : subintervalOf I 0 1) :
-    subintervalOf (dyadicNestedRadicalNeg I) (-1) 0 := by
-  unfold dyadicNestedRadicalNeg subintervalOf at *
-  rcases hI with ⟨hlo, hord, hhi⟩
-  change -1 <= -I.hi ∧ -I.hi <= -I.lo ∧ -I.lo <= 0
-  grind [Rat.sub_eq_add_neg]
-
-theorem dyadicNestedRadicalNeg_unit_subinterval
-    (I : QInterval) (hI : subintervalOf I (-1) 1) :
-    subintervalOf (dyadicNestedRadicalNeg I) (-1) 1 := by
-  unfold dyadicNestedRadicalNeg subintervalOf at *
-  rcases hI with ⟨hlo, hord, hhi⟩
-  change -1 <= -I.hi ∧ -I.hi <= -I.lo ∧ -I.lo <= 1
-  grind [Rat.sub_eq_add_neg]
-
-theorem dyadicNestedRadicalNeg_width (I : QInterval) :
-    (dyadicNestedRadicalNeg I).width = I.width := by
-  unfold dyadicNestedRadicalNeg QInterval.width
-  grind [Rat.sub_eq_add_neg]
 
 theorem one_div_nat_succ_half (n : Nat) :
     (1 / ((n + 1 : Nat) : Rat)) / 2 =
@@ -5710,12 +5741,12 @@ theorem dyadicNestedRadicalTableAt_bounds
           if k <= bound then
             (dyadicNestedRadicalTableAt parentPrecision n reflected).2
           else
-            dyadicNestedRadicalNeg
+            QInterval.neg
               (dyadicNestedRadicalTableAt parentPrecision n reflected).2
         have hparentCos : subintervalOf parentCos (-1) 1 := by
           by_cases hle : k <= bound
           · simpa [parentCos, hle] using hparent.2
-          · have hneg := dyadicNestedRadicalNeg_unit_subinterval
+          · have hneg := QInterval.neg_unit_subinterval
               (dyadicNestedRadicalTableAt parentPrecision n reflected).2 hparent.2
             simpa [parentCos, hle] using hneg
         have hsinInput := dyadicHalfAngleSinInput_subinterval
@@ -5728,7 +5759,7 @@ theorem dyadicNestedRadicalTableAt_bounds
         have hcos := sqrtOnUnitEvalIntervalClipped_subinterval
           (dyadicHalfAngleCosInput parentCos)
           hcosInput precision
-        have hcosneg := dyadicNestedRadicalNeg_subinterval
+        have hcosneg := QInterval.neg_subinterval
           (sqrtOnUnitEvalIntervalClipped
             (dyadicHalfAngleCosInput parentCos) precision) hcos
         by_cases hle : k <= bound
@@ -5752,22 +5783,22 @@ theorem dyadicNestedRadicalTableAt_bounds
             have hnegone : (-1 : Rat) <= 0 := by native_decide
             grind, hcos'.2.1, hcos'.2.2⟩⟩
         · simp [dyadicNestedRadicalTableAt, he, bound, reflected, hle]
-          have hpc : parentCos = dyadicNestedRadicalNeg
+          have hpc : parentCos = QInterval.neg
               (dyadicNestedRadicalTableAt parentPrecision n (2 * bound - k)).2 := by
             simp [parentCos, parentPrecision, bound, reflected, hle]
           rw [hpc] at hsine hcosneg
           have hsine' : subintervalOf
               (sqrtOnUnitEvalIntervalClipped
                 (dyadicHalfAngleSinInput
-                  (dyadicNestedRadicalNeg
+                  (QInterval.neg
                     (dyadicNestedRadicalTableAt parentPrecision n (2 * bound - k)).2))
                 precision) 0 1 := by
             exact hsine
           have hcosneg' : subintervalOf
-              (dyadicNestedRadicalNeg
+              (QInterval.neg
                 (sqrtOnUnitEvalIntervalClipped
                   (dyadicHalfAngleCosInput
-                    (dyadicNestedRadicalNeg
+                    (QInterval.neg
                       (dyadicNestedRadicalTableAt parentPrecision n (2 * bound - k)).2))
                   precision))
               (-1) 0 := by
@@ -6130,12 +6161,12 @@ theorem dyadicNestedRadicalTableAt_sin_width_pos
           if k <= bound then
             (dyadicNestedRadicalTableAt parentPrecision n reflected).2
           else
-            dyadicNestedRadicalNeg
+            QInterval.neg
               (dyadicNestedRadicalTableAt parentPrecision n reflected).2
         have hparentCos : subintervalOf parentCos (-1) 1 := by
           by_cases hle : k <= bound
           · simpa [parentCos, hle] using hbounds.2
-          · have hneg := dyadicNestedRadicalNeg_unit_subinterval
+          · have hneg := QInterval.neg_unit_subinterval
               (dyadicNestedRadicalTableAt parentPrecision n reflected).2 hbounds.2
             simpa [parentCos, hle] using hneg
         have hinput := dyadicHalfAngleSinInput_subinterval
@@ -6151,13 +6182,13 @@ theorem dyadicNestedRadicalTableAt_sin_width_pos
               (dyadicNestedRadicalTableAt parentPrecision n k).2)
             hinput precision
         · simp [dyadicNestedRadicalTableAt, he, bound, reflected, hle]
-          have hpc : parentCos = dyadicNestedRadicalNeg
+          have hpc : parentCos = QInterval.neg
               (dyadicNestedRadicalTableAt parentPrecision n (2 * bound - k)).2 := by
             simp [parentCos, parentPrecision, bound, reflected, hle]
           rw [hpc] at hinput
           exact sqrtOnUnitEvalIntervalClipped_width_pos
             (dyadicHalfAngleSinInput
-              (dyadicNestedRadicalNeg
+              (QInterval.neg
                 (dyadicNestedRadicalTableAt parentPrecision n (2 * bound - k)).2))
             hinput precision
 
@@ -6817,7 +6848,7 @@ theorem dyadicNestedRadicalTableAt_overlap_of_precisions
             (dyadicNestedRadicalTableAt
               (dyadicNestedRadicalParentPrecision precision₁) n reflected).2
           else
-            dyadicNestedRadicalNeg
+            QInterval.neg
               (dyadicNestedRadicalTableAt
                 (dyadicNestedRadicalParentPrecision precision₁) n reflected).2
         let parentCos₂ :=
@@ -6825,27 +6856,27 @@ theorem dyadicNestedRadicalTableAt_overlap_of_precisions
             (dyadicNestedRadicalTableAt
               (dyadicNestedRadicalParentPrecision precision₂) n reflected).2
           else
-            dyadicNestedRadicalNeg
+            QInterval.neg
               (dyadicNestedRadicalTableAt
                 (dyadicNestedRadicalParentPrecision precision₂) n reflected).2
         have hparentCos : QInterval.Overlaps parentCos₁ parentCos₂ := by
           by_cases hle : k <= bound
           · simpa [parentCos₁, parentCos₂, hle] using hparent.2
-          · unfold parentCos₁ parentCos₂ dyadicNestedRadicalNeg
+          · unfold parentCos₁ parentCos₂ QInterval.neg
               QInterval.Overlaps
             rcases hparent.2 with ⟨h₁, h₂⟩
             constructor <;> grind
         have hboundsCos₁ : subintervalOf parentCos₁ (-1) 1 := by
           by_cases hle : k <= bound
           · simpa [parentCos₁, hle] using hbounds₁.2
-          · have hneg := dyadicNestedRadicalNeg_unit_subinterval
+          · have hneg := QInterval.neg_unit_subinterval
               (dyadicNestedRadicalTableAt
                 (dyadicNestedRadicalParentPrecision precision₁) n reflected).2 hbounds₁.2
             simpa [parentCos₁, hle] using hneg
         have hboundsCos₂ : subintervalOf parentCos₂ (-1) 1 := by
           by_cases hle : k <= bound
           · simpa [parentCos₂, hle] using hbounds₂.2
-          · have hneg := dyadicNestedRadicalNeg_unit_subinterval
+          · have hneg := QInterval.neg_unit_subinterval
               (dyadicNestedRadicalTableAt
                 (dyadicNestedRadicalParentPrecision precision₂) n reflected).2 hbounds₂.2
             simpa [parentCos₂, hle] using hneg
@@ -6860,15 +6891,15 @@ theorem dyadicNestedRadicalTableAt_overlap_of_precisions
           exact ⟨hsine', hcos'⟩
         · have hneg :
               QInterval.Overlaps
-                (dyadicNestedRadicalNeg
+                (QInterval.neg
                   (sqrtOnUnitEvalIntervalClipped
                     (dyadicHalfAngleCosInput
                       parentCos₁) precision₁))
-                (dyadicNestedRadicalNeg
+                (QInterval.neg
                   (sqrtOnUnitEvalIntervalClipped
                     (dyadicHalfAngleCosInput
                       parentCos₂) precision₂)) := by
-            unfold dyadicNestedRadicalNeg QInterval.Overlaps
+            unfold QInterval.neg QInterval.Overlaps
             have hcos' := hcos
             change _ <= _ ∧ _ <= _
             rcases hcos' with ⟨hlo, hhi⟩
@@ -7085,12 +7116,12 @@ structure DyadicReflectedHalfAngleCertificate
     (hupper : 2 ^ n < k) (hk : k < 2 ^ (n + 1)) where
   parentRawCos : QInterval
   parentRawCos_subinterval : subintervalOf parentRawCos (-1) 1
-  parentRawCos_eq : parentRawCos = dyadicNestedRadicalNeg
+  parentRawCos_eq : parentRawCos = QInterval.neg
     (dyadicNestedRadicalTableAt
       (dyadicNestedRadicalParentPrecision precision) n
       (2 * 2 ^ n - k)).2
   parent_overlap : QInterval.Overlaps parentRawCos
-    (dyadicNestedRadicalNeg
+    (QInterval.neg
       (dyadicNestedRadicalTableAt
         (dyadicNestedRadicalParentPrecision precision) n
         (2 * 2 ^ n - k)).2)
@@ -7131,14 +7162,14 @@ theorem DyadicReflectedHalfAngleCertificate.to_public_overlap
     (dyadicNestedRadicalParentPrecision precision) n
     (2 * 2 ^ n - k) hreflect
   have hJ : subintervalOf
-      (dyadicNestedRadicalNeg
+      (QInterval.neg
         (dyadicNestedRadicalTableAt
           (dyadicNestedRadicalParentPrecision precision) n
           (2 * 2 ^ n - k)).2) (-1) 1 :=
-    dyadicNestedRadicalNeg_unit_subinterval _ hbounds.2
+    QInterval.neg_unit_subinterval _ hbounds.2
   have hover := dyadicHalfAngle_child_sine_overlap_of_raw_halfAngle_upper
     (I := h.parentRawCos)
-    (J := dyadicNestedRadicalNeg
+    (J := QInterval.neg
       (dyadicNestedRadicalTableAt
         (dyadicNestedRadicalParentPrecision precision) n
         (2 * 2 ^ n - k)).2)
@@ -7322,17 +7353,17 @@ theorem dyadicNestedRadicalTableAt_width_le
           if k <= bound then
             (dyadicNestedRadicalTableAt parentPrecision n reflected).2
           else
-            dyadicNestedRadicalNeg
+            QInterval.neg
               (dyadicNestedRadicalTableAt parentPrecision n reflected).2
         have hparentCosWidth : parentCos.width =
             (dyadicNestedRadicalTableAt parentPrecision n reflected).2.width := by
           by_cases hle : k <= bound
           · simp [parentCos, hle]
-          · simp [parentCos, hle, dyadicNestedRadicalNeg_width]
+          · simp [parentCos, hle, QInterval.neg_width]
         have hparentCosBounds : subintervalOf parentCos (-1) 1 := by
           by_cases hle : k <= bound
           · simpa [parentCos, hle] using hbounds.2
-          · have hneg := dyadicNestedRadicalNeg_unit_subinterval
+          · have hneg := QInterval.neg_unit_subinterval
               (dyadicNestedRadicalTableAt parentPrecision n reflected).2 hbounds.2
             simpa [parentCos, hle] using hneg
         have hsinInput := dyadicHalfAngleSinInput_subinterval
@@ -7385,8 +7416,146 @@ theorem dyadicNestedRadicalTableAt_width_le
             by simpa [parentCos, reflected, hle, parentPrecision] using hcos⟩
         · simp [dyadicNestedRadicalTableAt, he, bound, reflected, hle]
           exact ⟨by simpa [parentCos, reflected, hle, parentPrecision] using hsine,
-            by simpa [dyadicNestedRadicalNeg_width, parentCos, reflected, hle,
+            by simpa [QInterval.neg_width, parentCos, reflected, hle,
               parentPrecision] using hcos⟩
+
+theorem dyadicNestedRadicalPositiveCosAt_bounds
+    (precision depth k : Nat) (hk : k <= 2 ^ depth) :
+    subintervalOf
+      (dyadicNestedRadicalPositiveCosAt precision depth k) 0 1 := by
+  apply QInterval.absHull_subinterval_unit
+  exact (dyadicNestedRadicalTableAt_bounds precision depth k hk).2
+
+theorem dyadicNestedRadicalPositiveCosAt_width_le
+    (precision depth k : Nat) (hk : k <= 2 ^ depth) :
+    (dyadicNestedRadicalPositiveCosAt precision depth k).width <=
+      1 / ((precision + 1 : Nat) : Rat) := by
+  have hbounds := (dyadicNestedRadicalTableAt_bounds precision depth k hk).2
+  have habs := QInterval.absHull_width_le hbounds.2.1
+  exact Rat.le_trans habs
+    (dyadicNestedRadicalTableAt_width_le precision depth k hk).2
+
+theorem dyadicNestedRadicalPositiveCosAt_overlap_of_precisions
+    (precision₁ precision₂ depth k : Nat) (hk : k <= 2 ^ depth) :
+    QInterval.Overlaps
+      (dyadicNestedRadicalPositiveCosAt precision₁ depth k)
+      (dyadicNestedRadicalPositiveCosAt precision₂ depth k) := by
+  have hbounds₁ := (dyadicNestedRadicalTableAt_bounds precision₁ depth k hk).2
+  have hbounds₂ := (dyadicNestedRadicalTableAt_bounds precision₂ depth k hk).2
+  apply QInterval.absHull_overlaps_of_overlaps
+    hbounds₁.2.1 hbounds₂.2.1
+  exact (dyadicNestedRadicalTableAt_overlap_of_precisions
+    precision₁ precision₂ depth k hk).2
+
+theorem dyadicNestedRadicalHalfAngleTangentRaw_bounds
+    {depth k : Nat} (hk : k < 2 ^ depth) (precision : Nat) :
+    subintervalOf
+      ((dyadicNestedRadicalHalfAngleTangentRaw depth k).compute precision) 0 1 := by
+  apply rationalHalfAngleTangentInterval_subinterval
+  · exact (dyadicNestedRadicalTableAt_bounds precision depth k
+      (Nat.le_of_lt hk)).1
+  · exact dyadicNestedRadicalPositiveCosAt_bounds precision depth k
+      (Nat.le_of_lt hk)
+
+theorem dyadicNestedRadicalHalfAngleTangentRaw_width_le
+    {depth k : Nat} (hk : k < 2 ^ depth) (precision : Nat) :
+    ((dyadicNestedRadicalHalfAngleTangentRaw depth k).compute precision).width <=
+      3 / ((precision + 1 : Nat) : Rat) := by
+  have hS := (dyadicNestedRadicalTableAt_bounds precision depth k
+    (Nat.le_of_lt hk)).1
+  have hC := dyadicNestedRadicalPositiveCosAt_bounds precision depth k
+    (Nat.le_of_lt hk)
+  have ht := rationalHalfAngleTangentInterval_width_le_of_box_widths hS hC
+  have hsWidth := (dyadicNestedRadicalTableAt_width_le precision depth k
+    (Nat.le_of_lt hk)).1
+  have hcWidth := dyadicNestedRadicalPositiveCosAt_width_le precision depth k
+    (Nat.le_of_lt hk)
+  unfold dyadicNestedRadicalHalfAngleTangentRaw at *
+  exact Rat.le_trans ht (by
+    rw [Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm])
+
+theorem dyadicNestedRadicalHalfAngleTangentRaw_overlap_of_precisions
+    {depth k : Nat} (hk : k < 2 ^ depth) (precision₁ precision₂ : Nat) :
+    QInterval.Overlaps
+      ((dyadicNestedRadicalHalfAngleTangentRaw depth k).compute precision₁)
+      ((dyadicNestedRadicalHalfAngleTangentRaw depth k).compute precision₂) := by
+  unfold dyadicNestedRadicalHalfAngleTangentRaw
+  apply rationalHalfAngleTangentInterval_overlap_of_overlaps
+  · exact (dyadicNestedRadicalTableAt_bounds precision₁ depth k
+      (Nat.le_of_lt hk)).1
+  · exact (dyadicNestedRadicalTableAt_bounds precision₂ depth k
+      (Nat.le_of_lt hk)).1
+  · exact dyadicNestedRadicalPositiveCosAt_bounds precision₁ depth k
+      (Nat.le_of_lt hk)
+  · exact dyadicNestedRadicalPositiveCosAt_bounds precision₂ depth k
+      (Nat.le_of_lt hk)
+  · exact (dyadicNestedRadicalTableAt_overlap_of_precisions
+      precision₁ precision₂ depth k (Nat.le_of_lt hk)).1
+  · exact dyadicNestedRadicalPositiveCosAt_overlap_of_precisions
+      precision₁ precision₂ depth k (Nat.le_of_lt hk)
+
+def dyadicNestedRadicalHalfAngleTangentRadius : Nat -> Rat :=
+  fun n => 3 / ((n + 1 : Nat) : Rat)
+
+theorem dyadicNestedRadicalHalfAngleTangentRaw_widths_shrink
+    {depth k : Nat} (hk : k < 2 ^ depth) :
+    RealRaw.WidthsShrinkToZero
+      (dyadicNestedRadicalHalfAngleTangentRaw depth k).compute := by
+  intro eps
+  exact shrinksToZero_of_natOverSuccBound (C := 3)
+    (fun precision => dyadicNestedRadicalHalfAngleTangentRaw_width_le
+      hk precision) eps
+
+theorem dyadicNestedRadicalHalfAngleTangentRaw_future_contained
+    {depth k : Nat} (hk : k < 2 ^ depth) :
+    forall p q, p <= q ->
+      (QInterval.expand
+        ((dyadicNestedRadicalHalfAngleTangentRaw depth k).compute p)
+        (dyadicNestedRadicalHalfAngleTangentRadius p)).ContainsInterval
+        ((dyadicNestedRadicalHalfAngleTangentRaw depth k).compute q) := by
+  intro p q hpq
+  apply QInterval.expand_contains_right_of_overlaps
+  · exact dyadicNestedRadicalHalfAngleTangentRaw_overlap_of_precisions hk p q
+  · have hwidth := dyadicNestedRadicalHalfAngleTangentRaw_width_le hk q
+    have hrecip := FTC.one_div_nat_antitone
+      (n := p + 1) (m := q + 1) (by omega) (by omega) (by omega)
+    have hscaled := Rat.mul_le_mul_of_nonneg_left hrecip
+      (by native_decide : (0 : Rat) <= 3)
+    exact Rat.le_trans hwidth (by
+      simpa [dyadicNestedRadicalHalfAngleTangentRadius, Rat.div_def,
+        Rat.mul_assoc] using hscaled)
+
+theorem dyadicNestedRadicalHalfAngleTangentRadius_shrinksToZero :
+    ShrinksToZero dyadicNestedRadicalHalfAngleTangentRadius := by
+  apply shrinksToZero_of_natOverSuccBound (C := 3)
+  intro n
+  exact Rat.le_refl
+
+theorem dyadicNestedRadicalHalfAngleTangentRaw_stabilized_valid
+    {depth k : Nat} (hk : k < 2 ^ depth) :
+    (RealRaw.prefixStabilize
+      (dyadicNestedRadicalHalfAngleTangentRaw depth k)
+      dyadicNestedRadicalHalfAngleTangentRadius).Valid := by
+  apply RealRaw.prefixStabilize_valid_of_future
+  · intro n
+    have hbounds := dyadicNestedRadicalHalfAngleTangentRaw_bounds hk n
+    exact (Rat.le_iff_sub_nonneg _ _).1 hbounds.2.1
+  · exact dyadicNestedRadicalHalfAngleTangentRaw_widths_shrink hk
+  · exact dyadicNestedRadicalHalfAngleTangentRaw_future_contained hk
+  · exact dyadicNestedRadicalHalfAngleTangentRadius_shrinksToZero
+
+theorem dyadicNestedRadicalHalfAngleTangentRaw_equiv_stabilized
+    {depth k : Nat} (hk : k < 2 ^ depth) :
+    (dyadicNestedRadicalHalfAngleTangentRaw depth k).Equiv
+      (RealRaw.prefixStabilize
+        (dyadicNestedRadicalHalfAngleTangentRaw depth k)
+        dyadicNestedRadicalHalfAngleTangentRadius) := by
+  apply RealRaw.candidate_equiv_prefixStabilize_of_future
+  · intro n
+    have hbounds := dyadicNestedRadicalHalfAngleTangentRaw_bounds hk n
+    exact (Rat.le_iff_sub_nonneg _ _).1 hbounds.2.1
+  · exact dyadicNestedRadicalHalfAngleTangentRaw_future_contained hk
 
 /-! A fixed dyadic sample already has a shrinking width schedule.  Its
 cross-stage nesting is a separate semantic question, so this theorem records

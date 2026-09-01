@@ -63,6 +63,9 @@ not re-exported by the canonical root.
 - Rational parametrization of the circle, rational area bounds, arctangent
   presentations, nested-radical dyadic sine values, and finite complex
   rotations are executable.
+- The oriented dyadic cosine table has one canonical nonnegative-magnitude
+  projection. Together with the sine boxes it gives a half-angle tangent
+  `RealRaw` whose stabilized form is valid without a completed-real anchor.
 - The regular arctangent branch reuses the accelerated sector-area clock by
   one-half scaling; it has interval regularity, monotonicity, and effective
   inverse separation without a second schedule.
@@ -109,8 +112,10 @@ is open.
    for the canonical scaled-endpoint arctangent targets, then prove the
    positive odd half-angle overlap with the nested-radical boxes. The target
    validity, geometric equivalence, zero/even branches, reflection, induction,
-   and integral transport are already checked. Use the single all-samples
-   certificate-family interface; do not add another parity-split wrapper.
+   integral transport, and anchor-free nested-radical half-angle tangent raw
+   are already checked. What remains is its geometric identification with the
+   arctangent target. Use the single all-samples certificate-family interface;
+   do not add another parity-split wrapper.
 2. **Squared sine.** Supply the two substantive pairwise certificates:
    public dyadic squares overlap the nested-radical computation, and the
    nested-radical computation overlaps the normalized tangent-square anchor.

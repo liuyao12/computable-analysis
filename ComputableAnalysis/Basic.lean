@@ -1379,6 +1379,20 @@ fact explicitly rather than silently replacing an empty intersection. -/
 def intersection (I J : QInterval) : QInterval :=
   { lo := max I.lo J.lo, hi := min I.hi J.hi }
 
+/-- The additive inverse of a rational interval, with endpoint order
+preserved.  This is the canonical interval-negation operation used by all
+later algorithms. -/
+def neg (I : QInterval) : QInterval :=
+  { lo := -I.hi, hi := -I.lo }
+
+theorem neg_width (I : QInterval) : (neg I).width = I.width := by
+  unfold neg width
+  grind [Rat.sub_eq_add_neg]
+
+theorem neg_neg (I : QInterval) : neg (neg I) = I := by
+  cases I
+  simp [neg]
+
 theorem hull_contains_left (I J : QInterval) : (hull I J).ContainsInterval I := by
   unfold ContainsInterval hull
   grind
@@ -2371,6 +2385,83 @@ theorem three_dvd_iff_decimalDigitSum_dvd (n : Nat) :
     decimalDigitSum_mod_three]
 
 namespace QInterval
+
+/-- The least elementary interval enclosure of the absolute values of an
+ordered rational interval.  On one side of zero this merely preserves or
+negates the box; across zero its lower endpoint is exactly zero. -/
+def absHull (I : QInterval) : QInterval :=
+  if I.hi <= 0 then neg I
+  else if 0 <= I.lo then I
+  else { lo := 0, hi := max (-I.lo) I.hi }
+
+theorem absHull_contains_qabs
+    {I : QInterval} {x : Rat}
+    (hI : I.lo <= I.hi) (hx : I.lo <= x /\ x <= I.hi) :
+    (absHull I).lo <= qabs x /\ qabs x <= (absHull I).hi := by
+  unfold absHull
+  by_cases hhi : I.hi <= 0
+  · simp [hhi, neg]
+    rw [qabs_eq_neg_of_nonpos (Rat.le_trans hx.2 hhi)]
+    grind
+  · simp [hhi]
+    by_cases hlo : 0 <= I.lo
+    · simp [hlo]
+      rw [qabs_eq_self_of_nonneg (Rat.le_trans hlo hx.1)]
+      exact hx
+    · simp [hlo]
+      by_cases hxn : x <= 0
+      · rw [qabs_eq_neg_of_nonpos hxn]
+        grind
+      · have hx0 : 0 <= x := by grind
+        rw [qabs_eq_self_of_nonneg hx0]
+        grind
+
+theorem absHull_unit_bounds
+    {I : QInterval} (hI : (-1 : Rat) <= I.lo /\ I.lo <= I.hi /\ I.hi <= 1) :
+    (0 : Rat) <= (absHull I).lo /\
+      (absHull I).lo <= (absHull I).hi /\ (absHull I).hi <= 1 := by
+  unfold absHull at *
+  rcases hI with ⟨hlo, hord, hhi⟩
+  by_cases hzhi : I.hi <= 0
+  · simp [hzhi, neg]
+    grind
+  · simp [hzhi]
+    by_cases hzlo : 0 <= I.lo
+    · simp [hzlo]
+      exact ⟨hord, hhi⟩
+    · simp [hzlo]
+      grind
+
+theorem absHull_width_le
+    {I : QInterval} (hI : I.lo <= I.hi) :
+    (absHull I).width <= I.width := by
+  unfold absHull
+  by_cases hhi : I.hi <= 0
+  · simp [hhi, neg_width]
+  · simp [hhi]
+    by_cases hlo : 0 <= I.lo
+    · simp [hlo]
+    · simp [hlo, width]
+      grind [Rat.sub_eq_add_neg]
+
+theorem absHull_overlaps_of_overlaps
+    {I J : QInterval}
+    (hI : I.lo <= I.hi) (hJ : J.lo <= J.hi)
+    (hover : I.Overlaps J) :
+    (absHull I).Overlaps (absHull J) := by
+  let x : Rat := max I.lo J.lo
+  have hxI : I.lo <= x /\ x <= I.hi := by
+    dsimp [x]
+    unfold Overlaps at hover
+    grind
+  have hxJ : J.lo <= x /\ x <= J.hi := by
+    dsimp [x]
+    unfold Overlaps at hover
+    grind
+  have haI := absHull_contains_qabs hI hxI
+  have haJ := absHull_contains_qabs hJ hxJ
+  unfold Overlaps
+  exact ⟨Rat.le_trans haI.1 haJ.2, Rat.le_trans haJ.1 haI.2⟩
 
 /-- The rational midpoint of an ordered interval stays in that interval. -/
 theorem midpoint_mem {I : QInterval} (hI : I.lo <= I.hi) :

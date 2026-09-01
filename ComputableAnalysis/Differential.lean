@@ -1937,9 +1937,6 @@ def scaleRat (r : Rat) (I : QInterval) : QInterval :=
   else
     { lo := r * I.hi, hi := r * I.lo }
 
-def neg (I : QInterval) : QInterval :=
-  { lo := -I.hi, hi := -I.lo }
-
 def sub (I J : QInterval) : QInterval :=
   { lo := I.lo - J.hi, hi := I.hi - J.lo }
 

@@ -63,8 +63,14 @@ parent cosine box -> (1 +/- cosine)/2 -> rational square-root box
 Every finite stage carries the unit-circle identity, endpoint values, and
 refinement law.  Changing internal precision gives overlapping boxes, so
 later proofs may change schedules through an explicit representation edge.
+The table's oriented cosine is folded to its nonnegative magnitude before the
+half-angle quotient is formed.  The resulting rational tangent boxes shrink,
+overlap across precisions, and stabilize to a valid computation without a
+completed-real anchor.
 
 \lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalTableAt_overlap_of_precisions}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalHalfAngleTangentRaw_stabilized_valid}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalHalfAngleTangentRaw_equiv_stabilized}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_point_refineIndex}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_cos_sq_add_sin_sq}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_cos_zero}

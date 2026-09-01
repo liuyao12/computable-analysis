@@ -26,11 +26,8 @@ def ofRat (q : Rat) : QInterval :=
 def add (I J : QInterval) : QInterval :=
   { lo := I.lo + J.lo, hi := I.hi + J.hi }
 
-def neg (I : QInterval) : QInterval :=
-  { lo := -I.hi, hi := -I.lo }
-
 def sub (I J : QInterval) : QInterval :=
-  add I (neg J)
+  add I (QInterval.neg J)
 
 def scaleRat (r : Rat) (I : QInterval) : QInterval :=
   if 0 <= r then

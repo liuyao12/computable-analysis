@@ -524,7 +524,7 @@ def DyadicReflectedHalfAngleCertificate.of_table_parent
     (hpublic :
       sqrtOnUnitEvalIntervalClipped
           (dyadicHalfAngleSinInput
-            (dyadicNestedRadicalNeg
+            (QInterval.neg
               (dyadicNestedRadicalTableAt
                 (dyadicNestedRadicalParentPrecision precision) n
                 (2 * 2 ^ n - k)).2))
@@ -537,17 +537,17 @@ def DyadicReflectedHalfAngleCertificate.of_table_parent
             rw [hpow]
             omega))) :
     DyadicReflectedHalfAngleCertificate B precision n k hupper hk where
-  parentRawCos := dyadicNestedRadicalNeg
+  parentRawCos := QInterval.neg
     (dyadicNestedRadicalTableAt
       (dyadicNestedRadicalParentPrecision precision) n (2 * 2 ^ n - k)).2
   parentRawCos_subinterval := by
-    exact dyadicNestedRadicalNeg_unit_subinterval _
+    exact QInterval.neg_unit_subinterval _
       (dyadicNestedRadicalTableAt_bounds
         (dyadicNestedRadicalParentPrecision precision) n
         (2 * 2 ^ n - k) (by omega)).2
   parentRawCos_eq := rfl
   parent_overlap := by
-    have hbounds := dyadicNestedRadicalNeg_unit_subinterval _
+    have hbounds := QInterval.neg_unit_subinterval _
       (dyadicNestedRadicalTableAt_bounds
         (dyadicNestedRadicalParentPrecision precision) n
         (2 * 2 ^ n - k) (by omega)).2
@@ -555,7 +555,7 @@ def DyadicReflectedHalfAngleCertificate.of_table_parent
     exact ⟨hbounds.2.1, hbounds.2.1⟩
   childRawSin := sqrtOnUnitEvalIntervalClipped
     (dyadicHalfAngleSinInput
-      (dyadicNestedRadicalNeg
+      (QInterval.neg
         (dyadicNestedRadicalTableAt
           (dyadicNestedRadicalParentPrecision precision) n
           (2 * 2 ^ n - k)).2))
@@ -572,12 +572,12 @@ def DyadicReflectedHalfAngleCertificate.of_parent_overlap
     (precision n k : Nat) (hupper : 2 ^ n < k) (hk : k < 2 ^ (n + 1))
     (parentRawCos : QInterval)
     (hparentRawCos_subinterval : subintervalOf parentRawCos (-1) 1)
-    (hparentRawCos_eq : parentRawCos = dyadicNestedRadicalNeg
+    (hparentRawCos_eq : parentRawCos = QInterval.neg
       (dyadicNestedRadicalTableAt
         (dyadicNestedRadicalParentPrecision precision) n
         (2 * 2 ^ n - k)).2)
     (hparent_overlap : QInterval.Overlaps parentRawCos
-      (dyadicNestedRadicalNeg
+      (QInterval.neg
         (dyadicNestedRadicalTableAt
           (dyadicNestedRadicalParentPrecision precision) n
           (2 * 2 ^ n - k)).2))
