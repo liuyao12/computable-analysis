@@ -83,16 +83,20 @@ piecewise definitions should use existing algebra and assembly theorems.
 For `F : ContinuousFunctionOnInterval`, use:
 
 ```lean
-F.applyRealRaw x hx hsource
-F.applyRealRaw_valid x hx hsource
+F.applyReal x hsource
+F.applyReal_equiv hxy hxsource hysource
+F.mapImplementation x hsource impl himplSource
 ```
 
-The operator searches the stages of `x` until its interval is narrow enough
-for the requested output stage, keeps the schedule cofinal, evaluates the
-rational interval algorithm, and prefix-stabilizes the image boxes. It does
-not require `x` to advertise a convergence rate. Do not define a public
-same-stage composition `evalInterval (x.compute n) ... n`; validity of that
-composition does not follow from `x.Valid`.
+`applyReal` is the public abstract operation. Underneath it, `applyRealRaw`
+searches the stages of the preferred implementation until its interval is
+narrow enough, evaluates the rational interval algorithm, and
+prefix-stabilizes the image boxes. It does not require an advertised
+convergence rate. `applyReal_equiv` is the sole representation-congruence
+rule, and `mapImplementation` transports one parent-child edge through the
+function. Do not rebuild this argument for named functions or define a public
+same-stage composition `evalInterval (x.compute n) ... n`; its validity does
+not follow from `x.Valid`.
 
 Inverse branches use the same mechanism through
 `InvertibleFunctionOnInterval.forwardRealRaw`; there is no separate

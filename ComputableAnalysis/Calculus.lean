@@ -9223,6 +9223,109 @@ theorem applyCandidate_equiv_applyRealRaw
     (F.applyCandidate_ordered x hx hsource)
     (F.applyCandidate_future x hx hsource)
 
+/-- Canonical adaptive application depends only on the represented input real,
+not on the chosen raw implementation.  The two adaptive schedules may inspect
+different input stages; all-stage overlap supplies a rational point common to
+those two boxes, whose computed image is enclosed by both output boxes. -/
+theorem applyRealRaw_equiv
+    (F : ContinuousFunctionOnInterval) {x y : RealRaw}
+    (hx : x.Valid) (hy : y.Valid) (hxy : x.Equiv y)
+    (hxsource : forall n,
+      subintervalOf (x.compute n) F.function.lower F.function.upper)
+    (hysource : forall n,
+      subintervalOf (y.compute n) F.function.lower F.function.upper) :
+    (F.applyRealRaw x hx hxsource).Equiv
+      (F.applyRealRaw y hy hysource) := by
+  intro n
+  let sx := F.inputStage x hx n
+  let sy := F.inputStage y hy n
+  have hinput : (x.compute sx).Overlaps (y.compute sy) :=
+    (RealRaw.compareAt_overlap_iff x y sx sy).1
+      (RealRaw.allStagesOverlap_of_equiv hx hy hxy sx sy)
+  let q : Rat := (QInterval.intersection (x.compute sx) (y.compute sy)).lo
+  have hxordered : (x.compute sx).lo <= (x.compute sx).hi := by
+    have := hx.1 sx
+    unfold QInterval.width at this
+    grind [Rat.sub_eq_add_neg]
+  have hyordered : (y.compute sy).lo <= (y.compute sy).hi := by
+    have := hy.1 sy
+    unfold QInterval.width at this
+    grind [Rat.sub_eq_add_neg]
+  have hintersection := QInterval.intersection_ordered_of_overlaps
+    hxordered hyordered hinput
+  have hleft := QInterval.intersection_contained_left
+    (x.compute sx) (y.compute sy)
+  have hright := QInterval.intersection_contained_right
+    (x.compute sx) (y.compute sy)
+  have hqxlo : (x.compute sx).lo <= q := hleft.1
+  have hqylo : (y.compute sy).lo <= q := hright.1
+  have hqxhi : q <= (x.compute sx).hi :=
+    Rat.le_trans hintersection hleft.2
+  have hqyhi : q <= (y.compute sy).hi :=
+    Rat.le_trans hintersection hright.2
+  have hq : inDomainInterval F.function.lower F.function.upper q := by
+    exact ⟨Rat.le_trans (hxsource sx).1 hqxlo,
+      Rat.le_trans hqxhi (hxsource sx).2.2⟩
+  have hcandidate :
+      ((F.applyCandidate x hx hxsource).compute n).Overlaps
+        ((F.applyCandidate y hy hysource).compute n) := by
+    change
+      (F.regular.evalInterval (x.compute sx) (hxsource sx) n).Overlaps
+        (F.regular.evalInterval (y.compute sy) (hysource sy) n)
+    exact IntervalRegularOn.evalIntervals_overlap_of_common_point_at_intervals
+      F.regular F.regular (x.compute sx) (y.compute sy)
+      (hxsource sx) (hysource sy) q hq
+      hqxlo hqxhi hqylo hqyhi n n
+  have hxstable := F.applyRealRaw_contains_candidate x hx hxsource n
+  have hystable := F.applyRealRaw_contains_candidate y hy hysource n
+  apply (RealRaw.compareAt_overlap_iff
+    (F.applyRealRaw x hx hxsource)
+    (F.applyRealRaw y hy hysource) n n).2
+  unfold QInterval.Overlaps
+  constructor
+  · exact Rat.le_trans hxstable.1
+      (Rat.le_trans hcandidate.1 hystable.2)
+  · exact Rat.le_trans hystable.1
+      (Rat.le_trans hcandidate.2 hxstable.2)
+
+/-- Apply a certified continuous computation to the preferred implementation
+of an abstract real.  Alternative implementations can be transported with
+`mapImplementation` below. -/
+def applyReal
+    (F : ContinuousFunctionOnInterval) (x : Real)
+    (hsource : forall n,
+      subintervalOf (x.compute n) F.function.lower F.function.upper) : Real :=
+  Real.ofRaw (F.applyRealRaw x.preferred x.valid hsource)
+    (F.applyRealRaw_valid x.preferred x.valid hsource)
+
+/-- Abstract application is representation-independent. -/
+theorem applyReal_equiv
+    (F : ContinuousFunctionOnInterval) {x y : Real}
+    (hxy : x.Equiv y)
+    (hxsource : forall n,
+      subintervalOf (x.compute n) F.function.lower F.function.upper)
+    (hysource : forall n,
+      subintervalOf (y.compute n) F.function.lower F.function.upper) :
+    (F.applyReal x hxsource).Equiv (F.applyReal y hysource) :=
+  F.applyRealRaw_equiv x.valid y.valid hxy hxsource hysource
+
+/-- Map one certified implementation edge through a continuous computation.
+Only the parent-child equivalence is needed, so a `Real` can continue to use a
+spanning tree rather than storing every pairwise equivalence. -/
+def mapImplementation
+    (F : ContinuousFunctionOnInterval) (x : Real)
+    (hsource : forall n,
+      subintervalOf (x.compute n) F.function.lower F.function.upper)
+    (impl : RealImplementation x.preferred)
+    (himplSource : forall n,
+      subintervalOf (impl.raw.compute n)
+        F.function.lower F.function.upper) :
+    RealImplementation (F.applyRealRaw x.preferred x.valid hsource) where
+  raw := F.applyRealRaw impl.raw impl.valid himplSource
+  valid := F.applyRealRaw_valid impl.raw impl.valid himplSource
+  equivalent := F.applyRealRaw_equiv x.valid impl.valid impl.equivalent
+    hsource himplSource
+
 end ContinuousFunctionOnInterval
 
 /-- Constructive monotonicity on rational points of the interval.

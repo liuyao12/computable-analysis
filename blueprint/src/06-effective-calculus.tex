@@ -103,7 +103,10 @@ ring laws remain in Lean rather than being repeated here.
 A valid input need not converge at the same rate as the function's interval
 evaluator.  Output stage \(n\) therefore searches for a sufficiently narrow
 input box before evaluation.  Finite prefix intersections make the resulting
-image boxes nested.
+image boxes nested.  If two input algorithms represent the same real, their
+possibly different selected boxes overlap; a rational point in that overlap
+shows that the two applications represent the same output.  Thus one
+implementation edge maps to one output edge, with no pairwise registry.
 
 \begin{verbatim}
 output stage n -> search input stages -> interval image
@@ -113,6 +116,10 @@ output stage n -> search input stages -> interval image
 \lean{ComputableAnalysis.ContinuousFunctionOnInterval.inputStage}
 \lean{ComputableAnalysis.ContinuousFunctionOnInterval.applyRealRaw}
 \lean{ComputableAnalysis.ContinuousFunctionOnInterval.applyRealRaw_valid}
+\lean{ComputableAnalysis.ContinuousFunctionOnInterval.applyRealRaw_equiv}
+\lean{ComputableAnalysis.ContinuousFunctionOnInterval.applyReal}
+\lean{ComputableAnalysis.ContinuousFunctionOnInterval.applyReal_equiv}
+\lean{ComputableAnalysis.ContinuousFunctionOnInterval.mapImplementation}
 \leanok
 
 \section{The effective FTC}
