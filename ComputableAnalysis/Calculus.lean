@@ -6872,7 +6872,7 @@ def exactRat (f : Rat -> Rat) (a b : Rat) : FunctionOnInterval where
   defined_on := fun _ _ => trivial
   valid_on := by
     intro x _hx
-    simpa using RealRaw.ofRat_valid (f x)
+    simpa using RealRaw.ofRat_validCompute (f x)
 
 theorem exactRat_compute (f : Rat -> Rat) (a b x : Rat)
     (hx : inDomainInterval a b x) (n : Nat) :

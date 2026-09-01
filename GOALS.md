@@ -108,14 +108,12 @@ not re-exported by the canonical root.
 Work in dependency order. Do not add routine examples while an earlier bridge
 is open.
 
-1. **Equal-dyadic sine transport.** Prove that the canonical stabilized
-   nested-radical half-angle tangent is equivalent to the inverse-arctangent
-   tangent at every positive dyadic sample. The interval unit-circle law,
-   direct half-angle computation, stabilization, target validity, zero
-   endpoint, and semantic integral transport are checked. Use
-   `DyadicHalfAngleTangentEquivalenceFamily`; do not impose matching stage
-   schedules or add rational point searches and parity-specific public
-   wrappers.
+1. **Inverse-arctangent source edge.** Construct the effective bisection
+   instance and inhabit `DyadicHalfAngleTangentEquivalenceFamily`.  Once that
+   one tangent edge is available, `sine_equiv` already transports every
+   equal-dyadic sine sample to the valid nested-radical representative,
+   including zero.  Do not add matching-stage searches, certificate families,
+   or parity-specific public wrappers.
 2. **Squared sine.** Derive the two square-sum edges from the same tangent
    representation family and the checked tangent-square FTC: public dyadic
    squares to nested radicals, then nested radicals to the normalized

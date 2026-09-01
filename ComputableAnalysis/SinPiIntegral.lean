@@ -1353,6 +1353,22 @@ theorem rationalCircleSinInterval_overlap_of_input_overlap
   exact rationalCircleSinInterval_overlap_of_common_point hU hV u
     ⟨huUlo, huUhi⟩ ⟨huVlo, huVhi⟩
 
+/-- The first-quadrant circle-sine interval map preserves interval
+containment.  This is the finite functoriality theorem used to transport a
+represented half-angle tangent without choosing a point from either box. -/
+theorem rationalCircleSinInterval_contains_of_contains
+    {U V : QInterval} (hU : subintervalOf U 0 1)
+    (hV : subintervalOf V 0 1)
+    (hcontains : U.ContainsInterval V) :
+    (rationalCircleSinInterval U).ContainsInterval
+      (rationalCircleSinInterval V) := by
+  unfold rationalCircleSinInterval QInterval.ContainsInterval
+  constructor
+  · exact rationalCircleSin_mono hU.1 hcontains.1
+      (Rat.le_trans hV.2.1 hV.2.2)
+  · exact rationalCircleSin_mono
+      (Rat.le_trans hV.1 hV.2.1) hcontains.2 hU.2.2
+
 theorem rationalCircleSin_difference_le_qabs
     {a b : Rat} (ha0 : 0 <= a) (ha1 : a <= 1)
     (hb0 : 0 <= b) (hb1 : b <= 1) :
@@ -1877,7 +1893,7 @@ theorem rationalCircleSinInterval_near_of_near
       simpa [rationalCircleSinInterval, QInterval.width] using hwidth
     grind
 
-private theorem rationalCircleSinInterval_valid
+theorem rationalCircleSinInterval_valid
     (u : Nat -> QInterval)
     (hu : RealRaw.ValidCompute u)
     (hubounds : forall n, 0 <= (u n).lo /\ (u n).hi <= 1) :
@@ -1929,6 +1945,33 @@ private theorem rationalCircleSinInterval_valid
           2 * ((u n).hi - (u n).lo) := hw
       _ <= 2 * half.val := hscaled
       _ = eps.val := hhalf
+
+/-- Apply the rational first-quadrant circle chart to a represented
+half-angle slope.  The operation remains an explicit stagewise rational
+interval computation. -/
+def rationalCircleSinRaw (u : RealRaw) : RealRaw where
+  compute := fun n => rationalCircleSinInterval (u.compute n)
+
+theorem rationalCircleSinRaw_valid
+    {u : RealRaw} (hu : u.Valid)
+    (hubounds : forall n, subintervalOf (u.compute n) 0 1) :
+    (rationalCircleSinRaw u).Valid := by
+  exact rationalCircleSinInterval_valid u.compute hu
+    (fun n => ⟨(hubounds n).1, (hubounds n).2.2⟩)
+
+theorem rationalCircleSinRaw_equiv
+    {u v : RealRaw}
+    (hubounds : forall n, subintervalOf (u.compute n) 0 1)
+    (hvbounds : forall n, subintervalOf (v.compute n) 0 1)
+    (huv : u.Equiv v) :
+    (rationalCircleSinRaw u).Equiv (rationalCircleSinRaw v) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (rationalCircleSinRaw u) (rationalCircleSinRaw v) n n).2
+  exact rationalCircleSinInterval_overlap_of_input_overlap
+    (hubounds n) (hvbounds n)
+    ((RealRaw.compareAt_overlap_iff u v n n).1 (huv n))
 
 /-! The real-coordinate companion used by the primitive. -/
 
@@ -2333,6 +2376,27 @@ def sinPiRawOfArctan
             have hhalf : (2 : Rat) * (1 / 2) = 1 := by native_decide
             rw [hhalf] at h
             exact h) n))
+
+theorem sinPiRawOfArctan_valid
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (x : Rat) (hx : 0 <= x /\ x <= (1 : Rat) / 2) :
+    (sinPiRawOfArctan B x hx).Valid := by
+  let ht : RationalCircle.GeometricTrig.firstQuadrantBranch (2 * x) := by
+    change 0 <= 2 * x /\ 2 * x <= 1
+    constructor
+    · exact Rat.mul_nonneg (by native_decide) hx.1
+    · have h := Rat.mul_le_mul_of_nonneg_left hx.2
+        (by native_decide : (0 : Rat) <= 2)
+      rw [show (2 : Rat) * (1 / 2) = 1 by native_decide] at h
+      exact h
+  change RealRaw.ValidCompute
+    (fun n => rationalCircleSinInterval ((B.tangentAt (2 * x) ht).compute n))
+  exact rationalCircleSinInterval_valid
+    (B.tangentAt (2 * x) ht).compute
+    (B.tangentAt_valid (2 * x) ht)
+    (fun n =>
+      let h := B.tangentAt_stays_in_unitSlope (2 * x) ht n
+      ⟨h.1, h.2.2⟩)
 
 theorem arctanSinPi_sample_overlap_of_tangent_witness
     (B : IntegralIdentities.ArctanInverseBisection)
@@ -7906,11 +7970,7 @@ theorem dyadicNestedRadicalHalfAngleTangentRaw_overlap_of_precisions
 def dyadicNestedRadicalHalfAngleTangentRadius : Nat -> Rat :=
   fun n => 3 / ((n + 1 : Nat) : Rat)
 
-/-- The canonical valid `realRaw` for the direct nested-radical half-angle
-slope.  The finite table itself is allowed to use a convenient, non-nested
-precision schedule; prefix stabilization turns its mutually compatible boxes
-into one nested computation without choosing a completed real number. -/
-def dyadicNestedRadicalHalfAngleTangent
+private def dyadicNestedRadicalHalfAngleTangentPrefix
     (depth k : Nat) : RealRaw :=
   RealRaw.prefixStabilize
     (dyadicNestedRadicalHalfAngleTangentRaw depth k)
@@ -7950,10 +8010,28 @@ theorem dyadicNestedRadicalHalfAngleTangentRadius_shrinksToZero :
   intro n
   exact Rat.le_refl
 
-theorem dyadicNestedRadicalHalfAngleTangent_valid
+/-- The canonical valid `realRaw` for the direct nested-radical half-angle
+slope.  Prefix stabilization makes the finite table nested; the final fixed
+intersection records the mathematical first-quadrant range `[0,1]` even at
+the widened early stages. -/
+def dyadicNestedRadicalHalfAngleTangent
+    (depth k : Nat) : RealRaw :=
+  RealRaw.intersectFixed
+    (dyadicNestedRadicalHalfAngleTangentPrefix depth k)
+    { lo := 0, hi := 1 }
+
+private theorem dyadicNestedRadicalHalfAngleTangentPrefix_contains_raw
+    {depth k : Nat} (hk : k < 2 ^ depth) (precision : Nat) :
+    (dyadicNestedRadicalHalfAngleTangentPrefix depth k).compute precision
+      |>.ContainsInterval
+        ((dyadicNestedRadicalHalfAngleTangentRaw depth k).compute precision) := by
+  exact RealRaw.prefixStabilize_contains_current_of_future
+    (dyadicNestedRadicalHalfAngleTangentRaw_future_contained hk) precision
+
+private theorem dyadicNestedRadicalHalfAngleTangentPrefix_valid
     {depth k : Nat} (hk : k < 2 ^ depth) :
-    (dyadicNestedRadicalHalfAngleTangent depth k).Valid := by
-  unfold dyadicNestedRadicalHalfAngleTangent
+    (dyadicNestedRadicalHalfAngleTangentPrefix depth k).Valid := by
+  unfold dyadicNestedRadicalHalfAngleTangentPrefix
   apply RealRaw.prefixStabilize_valid_of_future
   · intro n
     have hbounds := dyadicNestedRadicalHalfAngleTangentRaw_bounds hk n
@@ -7962,16 +8040,67 @@ theorem dyadicNestedRadicalHalfAngleTangent_valid
   · exact dyadicNestedRadicalHalfAngleTangentRaw_future_contained hk
   · exact dyadicNestedRadicalHalfAngleTangentRadius_shrinksToZero
 
+private theorem dyadicNestedRadicalHalfAngleTangentPrefix_overlaps_unit
+    {depth k : Nat} (hk : k < 2 ^ depth) (precision : Nat) :
+    QInterval.Overlaps
+      ((dyadicNestedRadicalHalfAngleTangentPrefix depth k).compute precision)
+      ({ lo := 0, hi := 1 } : QInterval) := by
+  have hcontains :=
+    dyadicNestedRadicalHalfAngleTangentPrefix_contains_raw hk precision
+  have hbounds :=
+    dyadicNestedRadicalHalfAngleTangentRaw_bounds hk precision
+  unfold QInterval.Overlaps QInterval.ContainsInterval at hcontains
+  exact ⟨Rat.le_trans hcontains.1
+      (Rat.le_trans hbounds.2.1 hbounds.2.2),
+    Rat.le_trans hbounds.1
+      (Rat.le_trans hbounds.2.1 hcontains.2)⟩
+
+theorem dyadicNestedRadicalHalfAngleTangent_valid
+    {depth k : Nat} (hk : k < 2 ^ depth) :
+    (dyadicNestedRadicalHalfAngleTangent depth k).Valid := by
+  unfold dyadicNestedRadicalHalfAngleTangent
+  exact RealRaw.intersectFixed_valid
+    (dyadicNestedRadicalHalfAngleTangentPrefix_valid hk)
+    (by native_decide)
+    (dyadicNestedRadicalHalfAngleTangentPrefix_overlaps_unit hk)
+
+theorem dyadicNestedRadicalHalfAngleTangent_bounds
+    {depth k : Nat} (hk : k < 2 ^ depth) (precision : Nat) :
+    subintervalOf
+      ((dyadicNestedRadicalHalfAngleTangent depth k).compute precision) 0 1 := by
+  have hcontains := RealRaw.intersectFixed_contains_right
+    (dyadicNestedRadicalHalfAngleTangentPrefix depth k)
+    ({ lo := 0, hi := 1 } : QInterval) precision
+  exact ⟨hcontains.1,
+    RealRaw.interval_order_of_valid
+      (dyadicNestedRadicalHalfAngleTangent depth k)
+      (dyadicNestedRadicalHalfAngleTangent_valid hk) precision,
+    hcontains.2⟩
+
+theorem dyadicNestedRadicalHalfAngleTangent_contains_raw
+    {depth k : Nat} (hk : k < 2 ^ depth) (precision : Nat) :
+    ((dyadicNestedRadicalHalfAngleTangent depth k).compute precision)
+      |>.ContainsInterval
+        ((dyadicNestedRadicalHalfAngleTangentRaw depth k).compute precision) := by
+  unfold dyadicNestedRadicalHalfAngleTangent
+  apply QInterval.intersection_contains
+  · exact dyadicNestedRadicalHalfAngleTangentPrefix_contains_raw hk precision
+  · have hbounds :=
+      dyadicNestedRadicalHalfAngleTangentRaw_bounds hk precision
+    exact ⟨hbounds.1, hbounds.2.2⟩
+
 theorem dyadicNestedRadicalHalfAngleTangentRaw_equiv
     {depth k : Nat} (hk : k < 2 ^ depth) :
     (dyadicNestedRadicalHalfAngleTangentRaw depth k).Equiv
       (dyadicNestedRadicalHalfAngleTangent depth k) := by
-  unfold dyadicNestedRadicalHalfAngleTangent
-  apply RealRaw.candidate_equiv_prefixStabilize_of_future
-  · intro n
-    have hbounds := dyadicNestedRadicalHalfAngleTangentRaw_bounds hk n
-    exact (Rat.le_iff_sub_nonneg _ _).1 hbounds.2.1
-  · exact dyadicNestedRadicalHalfAngleTangentRaw_future_contained hk
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (dyadicNestedRadicalHalfAngleTangentRaw depth k)
+    (dyadicNestedRadicalHalfAngleTangent depth k) n n).2
+  have hcontains := dyadicNestedRadicalHalfAngleTangent_contains_raw hk n
+  have horder := (dyadicNestedRadicalHalfAngleTangentRaw_bounds hk n).2.1
+  exact ⟨Rat.le_trans horder hcontains.2,
+    Rat.le_trans hcontains.1 horder⟩
 
 /-! A fixed dyadic sample already has a shrinking width schedule.  Its
 cross-stage nesting is a separate semantic question, so this theorem records
@@ -8018,10 +8147,30 @@ theorem dyadicNestedRadicalSampleRadius_shrinksToZero :
   intro n
   exact Rat.le_refl
 
-theorem dyadicNestedRadicalSampleRaw_stabilized_valid_anchor_free
+private def dyadicNestedRadicalSamplePrefix
+    (depth k : Nat) : RealRaw :=
+  RealRaw.prefixStabilize (dyadicNestedRadicalSampleRaw depth k)
+    dyadicNestedRadicalSampleRadius
+
+/-- The canonical represented sine value at one dyadic point.  It is built
+only from the nested-radical table, finite prefix stabilization, and the
+known range `[0,1]`; no inverse-arctangent computation is read at runtime. -/
+def dyadicNestedRadicalSample (depth k : Nat) : RealRaw :=
+  RealRaw.intersectFixed (dyadicNestedRadicalSamplePrefix depth k)
+    { lo := 0, hi := 1 }
+
+private theorem dyadicNestedRadicalSamplePrefix_contains_raw
+    {depth k : Nat} (hk : k < 2 ^ depth) (precision : Nat) :
+    (dyadicNestedRadicalSamplePrefix depth k).compute precision
+      |>.ContainsInterval
+        ((dyadicNestedRadicalSampleRaw depth k).compute precision) := by
+  exact RealRaw.prefixStabilize_contains_current_of_future
+    (dyadicNestedRadicalSampleRaw_future_contained hk) precision
+
+private theorem dyadicNestedRadicalSamplePrefix_valid
     {depth k : Nat} (hk : k < 2 ^ depth) :
-    (RealRaw.prefixStabilize (dyadicNestedRadicalSampleRaw depth k)
-      dyadicNestedRadicalSampleRadius).Valid := by
+    (dyadicNestedRadicalSamplePrefix depth k).Valid := by
+  unfold dyadicNestedRadicalSamplePrefix
   apply RealRaw.prefixStabilize_valid_of_future
   · intro n
     have hbounds := dyadicNestedRadicalTableAt_bounds n depth k
@@ -8033,69 +8182,108 @@ theorem dyadicNestedRadicalSampleRaw_stabilized_valid_anchor_free
   · exact dyadicNestedRadicalSampleRaw_future_contained hk
   · exact dyadicNestedRadicalSampleRadius_shrinksToZero
 
-theorem dyadicNestedRadicalSampleRaw_equiv_stabilized_anchor_free
+private theorem dyadicNestedRadicalSamplePrefix_overlaps_unit
+    {depth k : Nat} (hk : k < 2 ^ depth) (precision : Nat) :
+    QInterval.Overlaps
+      ((dyadicNestedRadicalSamplePrefix depth k).compute precision)
+      ({ lo := 0, hi := 1 } : QInterval) := by
+  have hcontains := dyadicNestedRadicalSamplePrefix_contains_raw hk precision
+  have hbounds := (dyadicNestedRadicalTableAt_bounds precision depth k
+    (Nat.le_of_lt hk)).1
+  unfold QInterval.Overlaps QInterval.ContainsInterval at hcontains
+  exact ⟨Rat.le_trans hcontains.1
+      (Rat.le_trans hbounds.2.1 hbounds.2.2),
+    Rat.le_trans hbounds.1
+      (Rat.le_trans hbounds.2.1 hcontains.2)⟩
+
+theorem dyadicNestedRadicalSample_valid
+    {depth k : Nat} (hk : k < 2 ^ depth) :
+    (dyadicNestedRadicalSample depth k).Valid := by
+  unfold dyadicNestedRadicalSample
+  exact RealRaw.intersectFixed_valid
+    (dyadicNestedRadicalSamplePrefix_valid hk)
+    (by native_decide)
+    (dyadicNestedRadicalSamplePrefix_overlaps_unit hk)
+
+theorem dyadicNestedRadicalSample_bounds
+    {depth k : Nat} (hk : k < 2 ^ depth) (precision : Nat) :
+    subintervalOf ((dyadicNestedRadicalSample depth k).compute precision) 0 1 := by
+  have hcontains := RealRaw.intersectFixed_contains_right
+    (dyadicNestedRadicalSamplePrefix depth k)
+    ({ lo := 0, hi := 1 } : QInterval) precision
+  exact ⟨hcontains.1,
+    RealRaw.interval_order_of_valid (dyadicNestedRadicalSample depth k)
+      (dyadicNestedRadicalSample_valid hk) precision,
+    hcontains.2⟩
+
+theorem dyadicNestedRadicalSample_contains_raw
+    {depth k : Nat} (hk : k < 2 ^ depth) (precision : Nat) :
+    ((dyadicNestedRadicalSample depth k).compute precision)
+      |>.ContainsInterval
+        ((dyadicNestedRadicalSampleRaw depth k).compute precision) := by
+  unfold dyadicNestedRadicalSample
+  apply QInterval.intersection_contains
+  · exact dyadicNestedRadicalSamplePrefix_contains_raw hk precision
+  · have hbounds := (dyadicNestedRadicalTableAt_bounds precision depth k
+      (Nat.le_of_lt hk)).1
+    exact ⟨hbounds.1, hbounds.2.2⟩
+
+theorem dyadicNestedRadicalSampleRaw_equiv
     {depth k : Nat} (hk : k < 2 ^ depth) :
     (dyadicNestedRadicalSampleRaw depth k).Equiv
-      (RealRaw.prefixStabilize (dyadicNestedRadicalSampleRaw depth k)
-        dyadicNestedRadicalSampleRadius) := by
-  apply RealRaw.candidate_equiv_prefixStabilize_of_future
-  · intro n
-    have hbounds := dyadicNestedRadicalTableAt_bounds n depth k
-      (Nat.le_of_lt hk)
-    have horder := hbounds.1.2.1
-    unfold dyadicNestedRadicalSampleRaw QInterval.width
-    grind
-  · exact dyadicNestedRadicalSampleRaw_future_contained hk
-
-/-! Prefix stabilization turns that shrinking sample candidate into a valid
-public raw once an independent semantic anchor and stagewise overlap have
-been proved.  The anchor is proof-side data only; the stabilized evaluator
-uses the candidate boxes and the rational anchor-width schedule. -/
-def dyadicNestedRadicalSampleRaw_stabilized
-    (anchor : RealRaw) (depth k : Nat) : RealRaw :=
-  RealRaw.prefixStabilize (dyadicNestedRadicalSampleRaw depth k)
-    (fun n => (anchor.compute n).width)
-
-theorem dyadicNestedRadicalSampleRaw_stabilized_valid_of_equiv
-    {anchor : RealRaw} {depth k : Nat} (hk : k < 2 ^ depth)
-    (hanchor : anchor.Valid)
-    (hover : (dyadicNestedRadicalSampleRaw depth k).Equiv anchor) :
-    (dyadicNestedRadicalSampleRaw_stabilized anchor depth k).Valid := by
-  apply RealRaw.prefixStabilize_valid
-    (dyadicNestedRadicalSampleRaw_widths_shrink hk)
-    hanchor hover
-  · intro n
-    exact Rat.le_refl
-  · exact hanchor.2.2
-
-theorem dyadicNestedRadicalSampleRaw_stabilized_equiv_anchor_of_equiv
-    {anchor : RealRaw} {depth k : Nat} (hk : k < 2 ^ depth)
-    (hanchor : anchor.Valid)
-    (hover : (dyadicNestedRadicalSampleRaw depth k).Equiv anchor) :
-    (dyadicNestedRadicalSampleRaw_stabilized anchor depth k).Equiv anchor := by
-  apply RealRaw.prefixStabilize_equiv_anchor hanchor hover
+      (dyadicNestedRadicalSample depth k) := by
   intro n
-  exact Rat.le_refl
+  apply (RealRaw.compareAt_overlap_iff
+    (dyadicNestedRadicalSampleRaw depth k)
+    (dyadicNestedRadicalSample depth k) n n).2
+  have hcontains := dyadicNestedRadicalSample_contains_raw hk n
+  have horder := (dyadicNestedRadicalTableAt_bounds n depth k
+    (Nat.le_of_lt hk)).1.2.1
+  exact ⟨Rat.le_trans horder hcontains.2,
+    Rat.le_trans hcontains.1 horder⟩
 
-/-! A witness schedule now promotes the nested-radical candidate to a public
-valid sample representation.  The public sine raw is the anchor: its validity
-comes from the construction, while the schedule supplies only the stagewise
-overlap edge. -/
-theorem ArctanSinPiConstruction.dyadicNestedRadicalSampleRaw_stabilized_equiv
-    (S : ArctanSinPiConstruction) {depth k : Nat} (hk : k < 2 ^ depth)
-    (d : DyadicTangentWitnessSchedule S.inverse depth k hk) :
-    (dyadicNestedRadicalSampleRaw_stabilized
-      (sinPiRawOfArctan S.inverse
-        (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
-        (dyadicHalfDomain hk)) depth k).Equiv
-      (sinPiRawOfArctan S.inverse
-        (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
-        (dyadicHalfDomain hk)) := by
-  apply dyadicNestedRadicalSampleRaw_stabilized_equiv_anchor_of_equiv hk
-    (S.sin_valid _ _)
-  exact RealRaw.equiv_symm
-    (arctanSinPi_nestedRadicalSample_equiv_of_witness_schedule
-      d)
+/-- The same direct dyadic sine value computed through its half-angle tangent
+and the rational circle chart.  This is a second implementation, not a second
+definition of sine; the theorem below installs its one spanning-tree edge to
+the canonical nested-radical sample. -/
+def dyadicNestedRadicalHalfAngleSine (depth k : Nat) : RealRaw :=
+  rationalCircleSinRaw (dyadicNestedRadicalHalfAngleTangent depth k)
+
+theorem dyadicNestedRadicalHalfAngleSine_valid
+    {depth k : Nat} (hk : k < 2 ^ depth) :
+    (dyadicNestedRadicalHalfAngleSine depth k).Valid := by
+  exact rationalCircleSinRaw_valid
+    (dyadicNestedRadicalHalfAngleTangent_valid hk)
+    (dyadicNestedRadicalHalfAngleTangent_bounds hk)
+
+theorem dyadicNestedRadicalHalfAngleSine_equiv_sample
+    {depth k : Nat} (hk : k < 2 ^ depth) :
+    (dyadicNestedRadicalHalfAngleSine depth k).Equiv
+      (dyadicNestedRadicalSample depth k) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro precision
+  apply (RealRaw.compareAt_overlap_iff
+    (dyadicNestedRadicalHalfAngleSine depth k)
+    (dyadicNestedRadicalSample depth k) precision precision).2
+  have htangent := dyadicNestedRadicalHalfAngleTangent_contains_raw
+    hk precision
+  have hsinContains := rationalCircleSinInterval_contains_of_contains
+    (dyadicNestedRadicalHalfAngleTangent_bounds hk precision)
+    (dyadicNestedRadicalHalfAngleTangentRaw_bounds hk precision)
+    htangent
+  have hmiddle :=
+    dyadicNestedRadicalHalfAngleTangentRaw_circleSin_overlap hk precision
+  have hsample := dyadicNestedRadicalSample_contains_raw hk precision
+  change QInterval.Overlaps
+    (rationalCircleSinInterval
+      ((dyadicNestedRadicalHalfAngleTangent depth k).compute precision))
+    ((dyadicNestedRadicalSample depth k).compute precision)
+  unfold QInterval.ContainsInterval at hsinContains hsample
+  unfold QInterval.Overlaps at hmiddle ⊢
+  exact ⟨Rat.le_trans hsinContains.1
+      (Rat.le_trans hmiddle.1 hsample.2),
+    Rat.le_trans hsample.1
+      (Rat.le_trans hmiddle.2 hsinContains.2)⟩
 
 theorem dyadicNestedRadicalTableAt_succ_even
     (precision n k : Nat) :
@@ -9102,18 +9290,89 @@ structure DyadicHalfAngleTangentEquivalenceFamily
       (dyadicNormalizedBranch hk)).Equiv
       (dyadicNestedRadicalHalfAngleTangent depth k)
 
-theorem DyadicHalfAngleTangentEquivalenceFamily.interior_allStagesOverlap
+/-- The tangent spanning-tree edge transports directly through the rational
+circle chart.  No witness search, matching stage schedule, or auxiliary
+certificate family is needed at the sine level. -/
+theorem DyadicHalfAngleTangentEquivalenceFamily.interior_sine_equiv
     {B : IntegralIdentities.ArctanInverseBisection}
     (H : DyadicHalfAngleTangentEquivalenceFamily B)
     {depth k : Nat} (hk : k < 2 ^ depth) (hpos : 0 < k) :
-    (B.tangentAt
-      (2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
-      (dyadicNormalizedBranch hk)).AllStagesOverlap
-      (dyadicNestedRadicalHalfAngleTangent depth k) := by
-  exact RealRaw.allStagesOverlap_of_equiv
-    (B.tangentAt_valid _ _)
-    (dyadicNestedRadicalHalfAngleTangent_valid hk)
-    (H.interior_equiv depth k hk hpos)
+    (sinPiRawOfArctan B
+      (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+      (dyadicHalfDomain hk)).Equiv
+      (dyadicNestedRadicalSample depth k) := by
+  let t : Rat := 2 * leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k
+  let ht : RationalCircle.GeometricTrig.firstQuadrantBranch t :=
+    dyadicNormalizedBranch hk
+  have hinverse :
+      (rationalCircleSinRaw (B.tangentAt t ht)).Valid := by
+    exact rationalCircleSinRaw_valid
+      (B.tangentAt_valid t ht)
+      (B.tangentAt_stays_in_unitSlope t ht)
+  have hdirect :
+      (dyadicNestedRadicalHalfAngleSine depth k).Valid :=
+    dyadicNestedRadicalHalfAngleSine_valid hk
+  have hmap :
+      (rationalCircleSinRaw (B.tangentAt t ht)).Equiv
+        (dyadicNestedRadicalHalfAngleSine depth k) := by
+    exact rationalCircleSinRaw_equiv
+      (B.tangentAt_stays_in_unitSlope t ht)
+      (dyadicNestedRadicalHalfAngleTangent_bounds hk)
+      (H.interior_equiv depth k hk hpos)
+  have hsample := dyadicNestedRadicalSample_valid hk
+  have htrans := RealRaw.equiv_trans hinverse hdirect hsample hmap
+    (dyadicNestedRadicalHalfAngleSine_equiv_sample hk)
+  simpa [t, ht, rationalCircleSinRaw, sinPiRawOfArctan,
+    IntegralIdentities.ArctanInverseBisection.tangentAt,
+    IntegralIdentities.ArctanInverseBisection.tangentRaw] using htrans
+
+theorem dyadicNestedRadicalSample_zero_equiv_zero (depth : Nat) :
+    (dyadicNestedRadicalSample depth 0).Equiv RealRaw.zero := by
+  have hk : 0 < 2 ^ depth := Nat.pow_pos (by omega : 0 < 2)
+  intro precision
+  apply (RealRaw.compareAt_overlap_iff
+    (dyadicNestedRadicalSample depth 0) RealRaw.zero
+    precision precision).2
+  have hcontains := dyadicNestedRadicalSample_contains_raw hk precision
+  have hzero := dyadicNestedRadicalTableAt_zero precision depth
+  change QInterval.Overlaps
+    ((dyadicNestedRadicalSample depth 0).compute precision)
+    ({ lo := 0, hi := 0 } : QInterval)
+  change ((dyadicNestedRadicalSample depth 0).compute precision).lo <= 0 /\
+    0 <= ((dyadicNestedRadicalSample depth 0).compute precision).hi
+  unfold QInterval.ContainsInterval at hcontains
+  simpa [dyadicNestedRadicalSampleRaw, hzero] using hcontains
+
+/-- Canonical pointwise bridge for every left endpoint of an equal-dyadic
+partition.  The zero endpoint is exact; positive samples use the one tangent
+equivalence edge and the direct circle-chart transport above. -/
+theorem DyadicHalfAngleTangentEquivalenceFamily.sine_equiv
+    {B : IntegralIdentities.ArctanInverseBisection}
+    (H : DyadicHalfAngleTangentEquivalenceFamily B)
+    {depth k : Nat} (hk : k < 2 ^ depth) :
+    (sinPiRawOfArctan B
+      (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) k)
+      (dyadicHalfDomain hk)).Equiv
+      (dyadicNestedRadicalSample depth k) := by
+  by_cases hkzero : k = 0
+  · subst k
+    have hsin := sinPiRawOfArctan_zero_equiv_zero_of_tangent_endpoint
+      B H.endpoint_zero
+    have hleft : leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) 0 = 0 := by
+      exact leftPoint_zero 0 ((1 : Rat) / 2) (2 ^ depth)
+    have hsin' :
+        (sinPiRawOfArctan B
+          (leftPoint 0 ((1 : Rat) / 2) (2 ^ depth) 0)
+          (dyadicHalfDomain hk)).Equiv RealRaw.zero := by
+      simpa [hleft] using hsin
+    exact RealRaw.equiv_trans
+      (sinPiRawOfArctan_valid B _ (dyadicHalfDomain hk))
+      (by simpa [RealRaw.zero] using RealRaw.ofRat_valid (0 : Rat))
+      (dyadicNestedRadicalSample_valid hk)
+      hsin'
+      (RealRaw.equiv_symm
+        (dyadicNestedRadicalSample_zero_equiv_zero depth))
+  · exact H.interior_sine_equiv hk (by omega)
 
 theorem ArctanSinPiConstruction.halfIntegral_equiv_of_overlap_family
     (S : ArctanSinPiConstruction)

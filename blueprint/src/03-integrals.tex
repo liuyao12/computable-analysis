@@ -187,20 +187,19 @@ uniform tangent mesh -> unequal angle samples -> Stieltjes sum
 \leanok
 
 The equal-dyadic route uses nested radicals at the original \(x\)-samples.
-The finite sine and cosine boxes are now proved to straddle the unit circle,
-so their half-angle tangent box maps back to the sine box.  No exact rational
-point on the circle and no candidate-list search is needed.  The direct
-half-angle computation is stabilized into a valid \texttt{realRaw}.  The open
-geometric statement is the representation edge identifying it with the
-inverse-arctangent computation.  This is an equivalence of computations, not
-a same-stage containment claim: the two algorithms may refine at different
-rates.
+The half-angle tangent and sine sample are valid \texttt{realRaw}
+computations.  One tangent equivalence edge to inverse arctangent now
+transports directly through the rational circle chart to every sine sample,
+including zero.  The remaining task is to construct that one bisection edge;
+no rational point search or parallel certificate family is needed.
 
 \lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalTableAt_positive_circle_overlap}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalHalfAngleTangentRaw_circleSin_overlap}
 \lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalHalfAngleTangent_valid}
 \lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalHalfAngleTangentRaw_equiv}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSample_valid}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalHalfAngleSine_equiv_sample}
 \lean{ComputableAnalysis.SinPiIntegral.DyadicHalfAngleTangentEquivalenceFamily}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicHalfAngleTangentEquivalenceFamily.sine_equiv}
 \leanok
 
 For the square,

@@ -1457,7 +1457,7 @@ def oneOverOnePlusSquareOnInterval (a b : Rat) : FunctionOnInterval where
   valid_on := by
     intro x hx
     simpa [oneOverOnePlusSquareRaw] using
-      RealRaw.ofRat_valid (1 / (1 + x * x))
+      RealRaw.ofRat_validCompute (1 / (1 + x * x))
 
 theorem oneOverOnePlusSquareOnInterval_valid (a b : Rat) :
     (oneOverOnePlusSquareOnInterval a b).toRealFunRaw.Valid :=
@@ -12090,7 +12090,7 @@ def reciprocalQuarticMinusOneCompactOnInterval (a b : Rat) : FunctionOnInterval 
   valid_on := by
     intro x _hx
     simpa [reciprocalQuarticMinusOneCompactRaw] using
-      RealRaw.ofRat_valid (reciprocalQuarticSymmetricDensity (-1) x)
+      RealRaw.ofRat_validCompute (reciprocalQuarticSymmetricDensity (-1) x)
 
 theorem reciprocalQuarticMinusOneCompactOnInterval_valid (a b : Rat) :
     (reciprocalQuarticMinusOneCompactOnInterval a b).toRealFunRaw.Valid :=
@@ -14079,7 +14079,7 @@ def reciprocalQuarticMinusOneUnitOnInterval : FunctionOnInterval where
   valid_on := by
     intro t _ht
     simpa [reciprocalQuarticMinusOneUnitRaw] using
-      RealRaw.ofRat_valid (reciprocalQuarticMinusOneUnitDensity t)
+      RealRaw.ofRat_validCompute (reciprocalQuarticMinusOneUnitDensity t)
 
 /-- The concrete domain-aware integral construction for the affine compact
 quartic density.  Unlike the earlier unconstrained placeholder interface, its

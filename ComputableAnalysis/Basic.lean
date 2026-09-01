@@ -3213,6 +3213,32 @@ private theorem prefixStabilizeCompute_contains_future
       · exact ih n (Nat.le_trans (Nat.le_succ k) hkn)
       · exact hfuture (k + 1) n hkn
 
+/-- Finite-prefix stabilization contains every later candidate box whenever
+the candidate satisfies the explicit future-containment contract.  This is
+the public elimination rule for `prefixStabilize`: downstream interval maps
+should use this theorem rather than unfold the finite intersection. -/
+theorem prefixStabilize_contains_future
+    {candidate : RealRaw} {radius : Nat -> Rat}
+    (hfuture : forall k n, k <= n ->
+      (QInterval.expand (candidate.compute k) (radius k)).ContainsInterval
+        (candidate.compute n)) :
+    forall k n, k <= n ->
+      ((prefixStabilize candidate radius).compute k).ContainsInterval
+        (candidate.compute n) := by
+  exact prefixStabilizeCompute_contains_future hfuture
+
+/-- In particular, the stabilized box at a stage contains the candidate box
+from that same stage. -/
+theorem prefixStabilize_contains_current_of_future
+    {candidate : RealRaw} {radius : Nat -> Rat}
+    (hfuture : forall k n, k <= n ->
+      (QInterval.expand (candidate.compute k) (radius k)).ContainsInterval
+        (candidate.compute n))
+    (n : Nat) :
+    ((prefixStabilize candidate radius).compute n).ContainsInterval
+      (candidate.compute n) := by
+  exact prefixStabilize_contains_future hfuture n n (Nat.le_refl n)
+
 /-- At every stage, finite-prefix stabilization is contained in the current
 widened candidate interval.  This exposes the direct runtime width bound of a
 stabilized algorithm without referring to its proof-side anchor. -/
@@ -3435,6 +3461,75 @@ theorem candidate_equiv_prefixStabilize_of_future
     grind
   exact ⟨Rat.le_trans horder hcontain.2,
     Rat.le_trans hcontain.1 horder⟩
+
+/-! Restricting a represented real to a certified fixed rational interval is
+another finite operation.  It is useful for computations whose mathematical
+range is known (for example a first-quadrant tangent), while an earlier
+stabilization step may have widened its first few boxes beyond that range. -/
+
+def intersectFixed (x : RealRaw) (J : QInterval) : RealRaw where
+  compute := fun n => QInterval.intersection (x.compute n) J
+
+theorem intersectFixed_compute (x : RealRaw) (J : QInterval) (n : Nat) :
+    (intersectFixed x J).compute n = QInterval.intersection (x.compute n) J :=
+  rfl
+
+theorem intersectFixed_contains_right
+    (x : RealRaw) (J : QInterval) (n : Nat) :
+    J.ContainsInterval ((intersectFixed x J).compute n) := by
+  exact QInterval.intersection_contained_right (x.compute n) J
+
+theorem intersectFixed_valid
+    {x : RealRaw} {J : QInterval}
+    (hx : x.Valid) (hJ : J.lo <= J.hi)
+    (hover : forall n, QInterval.Overlaps (x.compute n) J) :
+    (intersectFixed x J).Valid := by
+  have hordered : forall n,
+      ((intersectFixed x J).compute n).lo <=
+        ((intersectFixed x J).compute n).hi := by
+    intro n
+    exact QInterval.intersection_ordered_of_overlaps
+      (interval_order_of_valid x hx n) hJ (hover n)
+  constructor
+  · intro n
+    unfold QInterval.width
+    grind [hordered n]
+  constructor
+  · intro n m hnm
+    have hxm : (x.compute n).ContainsInterval (x.compute m) := by
+      have h := hx.2.1 n m hnm
+      exact ⟨h.1, h.2.2⟩
+    have hmleft := QInterval.intersection_contained_left (x.compute m) J
+    have hmright := QInterval.intersection_contained_right (x.compute m) J
+    have hncontains : (x.compute n).ContainsInterval
+        ((intersectFixed x J).compute m) := by
+      exact ⟨Rat.le_trans hxm.1 hmleft.1,
+        Rat.le_trans hmleft.2 hxm.2⟩
+    have hJcontains : J.ContainsInterval
+        ((intersectFixed x J).compute m) := hmright
+    have hcontains : ((intersectFixed x J).compute n).ContainsInterval
+        ((intersectFixed x J).compute m) := by
+      exact QInterval.intersection_contains hncontains hJcontains
+    exact ⟨hcontains.1, hordered m, hcontains.2⟩
+  · intro eps
+    obtain ⟨N, hN⟩ := hx.2.2 eps
+    refine ⟨N, ?_⟩
+    intro n hn
+    have hcontains := QInterval.intersection_contained_left (x.compute n) J
+    exact Rat.le_trans (QInterval.width_le_of_contains hcontains) (hN n hn)
+
+theorem intersectFixed_equiv
+    {x : RealRaw} {J : QInterval}
+    (hx : x.Valid) (hJ : J.lo <= J.hi)
+    (hover : forall n, QInterval.Overlaps (x.compute n) J) :
+    (intersectFixed x J).Equiv x := by
+  have hclip := intersectFixed_valid hx hJ hover
+  intro n
+  apply (compareAt_overlap_iff (intersectFixed x J) x n n).2
+  have hcontains := QInterval.intersection_contained_left (x.compute n) J
+  have hordered := interval_order_of_valid (intersectFixed x J) hclip n
+  exact ⟨Rat.le_trans hordered hcontains.2,
+    Rat.le_trans hcontains.1 hordered⟩
 
 theorem prefixStabilize_equiv_anchor
     {candidate anchor : RealRaw} {radius : Nat -> Rat}
@@ -3916,7 +4011,8 @@ private theorem rat_sub_self (q : Rat) : q - q = 0 := by
 
 namespace RealRaw
 
-theorem ofRat_valid (q : Rat) : ValidCompute (fun _ : Nat => { lo := q, hi := q }) := by
+theorem ofRat_validCompute (q : Rat) :
+    ValidCompute (fun _ : Nat => { lo := q, hi := q }) := by
   constructor
   · intro n
     show 0 <= q - q
@@ -3934,6 +4030,12 @@ theorem ofRat_valid (q : Rat) : ValidCompute (fun _ : Nat => { lo := q, hi := q 
 
 def ofRat (q : Rat) : RealRaw where
   compute := fun _ => { lo := q, hi := q }
+
+/-- A rational constant is a valid raw real.  Clients should not need to
+unfold `RealRaw.Valid` or reason about its constant compute function. -/
+theorem ofRat_valid (q : Rat) : (ofRat q).Valid := by
+  change ValidCompute (fun _ : Nat => { lo := q, hi := q })
+  exact ofRat_validCompute q
 
 instance : Coe Rat RealRaw where
   coe := ofRat

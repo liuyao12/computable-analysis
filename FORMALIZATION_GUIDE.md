@@ -218,11 +218,12 @@ searches.
 
 For unsquared sine, use
 `DyadicHalfAngleTangentEquivalenceFamily`. The nested-radical evaluator already
-proves the sine/cosine interval circle law and stabilizes its explicit
-half-angle tangent into a valid `realRaw`. A provider supplies the equivalence
-edge to the inverse-arctangent tangent. The algorithms may use different
-stage schedules, so do not replace this edge with same-stage containment or
-introduce rational point searches and parallel parity adapters.
+stabilizes both its explicit half-angle tangent and sine sample into valid
+`realRaw` representatives. A provider supplies only the tangent equivalence
+edge to the inverse-arctangent computation; `sine_equiv` transports that edge
+through the rational circle chart. The algorithms may use different stage
+schedules, so do not replace this edge with same-stage containment or add
+rational searches and parallel certificate APIs.
 
 ## Series
 

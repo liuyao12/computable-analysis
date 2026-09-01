@@ -1014,7 +1014,7 @@ def squareRaw : PartialRealFunRaw where
 
 theorem squareRaw_valid (x : Rat) (hx : squareRaw.definedAt x) :
     RealRaw.ValidCompute (squareRaw.compute x hx) := by
-  simpa [squareRaw] using RealRaw.ofRat_valid (sq x)
+  simpa [squareRaw] using RealRaw.ofRat_validCompute (sq x)
 
 /-- The exact squaring function restricted to the nonnegative unit interval. -/
 def squareOnUnit : FunctionOnInterval where
