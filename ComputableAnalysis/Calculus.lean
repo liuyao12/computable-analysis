@@ -6620,10 +6620,6 @@ structure ConvexFTCCertificate (F dF : RealFunRaw) (a b : Rat) where
             ((convexBound eps k hk).toDerivativeBound).bound (chooseBoundStage eps)))
         (endpointDifferenceInterval F a b (chooseEndpointPrecision eps))
 
-/-- Backward-compatible name for the older blueprint/API wording. -/
-abbrev LegacyConvexFTC (F dF : RealFunRaw) (a b : Rat) :=
-  ConvexFTCCertificate F dF a b
-
 namespace ConvexFTCCertificate
 
 def toCurvatureFTCCertificate
@@ -6734,36 +6730,6 @@ theorem equiv_endpoint
   h.toDerivativeBoundFTC.equiv_endpoint
 
 end ConcaveFTCCertificate
-
-/- Legacy namespace aliases retained for existing references. -/
-namespace LegacyConvexFTC
-
-def toDerivativeBoundFTC
-    {F dF : RealFunRaw} {a b : Rat}
-    (h : LegacyConvexFTC F dF a b) :
-    DerivativeBoundFTC F dF a b :=
-  ConvexFTCCertificate.toDerivativeBoundFTC h
-
-theorem equiv_endpoint
-    {F dF : RealFunRaw} {a b : Rat}
-    (h : LegacyConvexFTC F dF a b) :
-    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
-      h.toDerivativeBoundFTC.endpointRaw :=
-  ConvexFTCCertificate.equiv_endpoint h
-
-end LegacyConvexFTC
-
-/-- Compatibility theorem for the old convexity-facing FTC name.
-
-Once a convexity certificate has produced derivative bounds on the chosen
-rational partition cells, the finite FTC conclusion is exactly the
-derivative-bound endpoint equivalence. -/
-theorem legacyConvexFTC
-    {F dF : RealFunRaw} {a b : Rat}
-    (h : LegacyConvexFTC F dF a b) :
-    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
-      h.toDerivativeBoundFTC.endpointRaw :=
-  h.equiv_endpoint
 
 /-- Completed convexity-facing FTC bridge used by the integral chapter.
 
