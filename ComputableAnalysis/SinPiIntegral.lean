@@ -2773,6 +2773,135 @@ theorem reciprocalPiRaw_bounds (n : Nat) :
     rw [honeone] at hone
     exact hone
 
+/-- The geometric quarter-turn box is uniformly contained in `[0,1]`.
+This is the boundedness input needed to multiply it by the reciprocal-circle
+area computation without appealing to completed real multiplication. -/
+theorem halfQuarterTurnRaw_one_bounds (n : Nat) :
+    0 <= ((RationalCircle.GeometricTrig.halfQuarterTurnRaw
+      (1 : Rat)).compute n).lo ∧
+      ((RationalCircle.GeometricTrig.halfQuarterTurnRaw
+        (1 : Rat)).compute n).hi <= 1 := by
+  change 0 <= ((RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).compute n).lo ∧
+    ((RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).compute n).hi <= 1
+  unfold RealRaw.scaleRat RealRaw.scaleRatCompute
+  simp only [if_pos (by native_decide : (0 : Rat) <= (1 : Rat) / 4)]
+  have hpi := piCircleArea_interval_bounds n
+  constructor
+  · exact Rat.mul_nonneg (by native_decide)
+      (Rat.le_trans (by native_decide) hpi.1)
+  · have h := Rat.mul_le_mul_of_nonneg_left hpi.2
+      (by native_decide : (0 : Rat) <= 1 / 4)
+    calc
+      (1 / 4 : Rat) * (piCircleArea.compute n).hi <=
+          (1 / 4 : Rat) * 4 := h
+      _ = 1 := by native_decide
+
+theorem reciprocalPiMulHalfQuarterTurnRaw_valid :
+    (reciprocalPiRaw *
+      RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid := by
+  apply RealRaw.mul_valid_of_nonneg_bounded (Bx := 1) (By := 1)
+    reciprocalPiRaw_valid
+  · change (RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).Valid
+    exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+      CauchyPi.piCircleArea_valid
+  · native_decide
+  · native_decide
+  · exact reciprocalPiRaw_bounds
+  · exact halfQuarterTurnRaw_one_bounds
+
+/-! The normalized quarter-turn product is exactly `1/4` as an equivalence of
+explicit interval computations.  The two factors use the same circle-area
+boxes, so each finite product box contains `1/4`; no limit arithmetic is
+used. -/
+set_option maxHeartbeats 1000000 in
+theorem reciprocalPiMulHalfQuarterTurnRaw_equiv_quarter :
+    (reciprocalPiRaw *
+      RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Equiv
+      (RealRaw.ofRat (1 / 4)) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (reciprocalPiRaw *
+      RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))
+    (RealRaw.ofRat (1 / 4)) n n).2
+  change QInterval.Overlaps
+    (QBox.mulRealInterval
+      (reciprocalPiRaw.compute n).lo
+      (reciprocalPiRaw.compute n).hi
+      ((RationalCircle.GeometricTrig.halfQuarterTurnRaw
+        (1 : Rat)).compute n).lo
+      ((RationalCircle.GeometricTrig.halfQuarterTurnRaw
+        (1 : Rat)).compute n).hi)
+    ({ lo := 1 / 4, hi := 1 / 4 } : QInterval)
+  have hrecip_compute :
+      reciprocalPiRaw.compute n = QInterval.inv (piCircleArea.compute n) := by
+    rfl
+  have hquarter_compute :
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw
+        (1 : Rat)).compute n =
+        ({ lo := (1 : Rat) / 4 * (piCircleArea.compute n).lo,
+           hi := (1 : Rat) / 4 * (piCircleArea.compute n).hi } : QInterval) := by
+    unfold RationalCircle.GeometricTrig.halfQuarterTurnRaw
+      RealRaw.scaleRat RealRaw.scaleRatCompute
+    simp only [if_pos (by native_decide : (0 : Rat) <= (1 : Rat) / 4)]
+  rw [hrecip_compute, hquarter_compute]
+  have hPorder := RealRaw.interval_order_of_valid piCircleArea
+    CauchyPi.piCircleArea_valid n
+  have hPlo : 0 < (piCircleArea.compute n).lo :=
+    piCircleArea_interval_positive n
+  have hPhi : 0 < (piCircleArea.compute n).hi := by grind
+  have hinvnonneg : 0 <= (QInterval.inv (piCircleArea.compute n)).lo := by
+    rw [show QInterval.inv (piCircleArea.compute n) =
+        { lo := 1 / (piCircleArea.compute n).hi,
+          hi := 1 / (piCircleArea.compute n).lo } by
+      simp [QInterval.inv, hPlo]]
+    rw [Rat.div_def]
+    exact Rat.le_of_lt (Rat.mul_pos (by native_decide)
+      ((Rat.inv_pos).2 hPhi))
+  have hinvorder :
+      (QInterval.inv (piCircleArea.compute n)).lo <=
+        (QInterval.inv (piCircleArea.compute n)).hi := by
+    rw [show QInterval.inv (piCircleArea.compute n) =
+        { lo := 1 / (piCircleArea.compute n).hi,
+          hi := 1 / (piCircleArea.compute n).lo } by
+      simp [QInterval.inv, hPlo]]
+    exact one_div_antitone_pos_local hPlo hPorder
+  have hscale_nonneg : 0 <= (1 / 4 : Rat) *
+      (piCircleArea.compute n).lo :=
+    Rat.mul_nonneg (by native_decide) (Rat.le_of_lt hPlo)
+  have hscale_order : (1 / 4 : Rat) *
+      (piCircleArea.compute n).lo <= (1 / 4 : Rat) *
+      (piCircleArea.compute n).hi :=
+    Rat.mul_le_mul_of_nonneg_left hPorder (by native_decide)
+  rw [QBox.mulRealInterval_of_nonneg hinvnonneg hinvorder
+    hscale_nonneg hscale_order]
+  unfold QInterval.Overlaps
+  simp [QInterval.inv, hPlo, hPorder, hPhi]
+  constructor
+  · apply Rat.le_of_mul_le_mul_right (c := (piCircleArea.compute n).hi)
+    · rw [Rat.div_def]
+      have hhi_ne : (piCircleArea.compute n).hi ≠ 0 := Rat.ne_of_gt hPhi
+      calc
+        (1 * (piCircleArea.compute n).hi⁻¹ *
+            (1 / 4 * (piCircleArea.compute n).lo)) *
+            (piCircleArea.compute n).hi =
+            (1 / 4 : Rat) * (piCircleArea.compute n).lo := by
+              grind [Rat.mul_assoc, Rat.mul_comm,
+                Rat.mul_inv_cancel _ hhi_ne]
+        _ <= (1 / 4 : Rat) * (piCircleArea.compute n).hi := hscale_order
+    · exact hPhi
+  · apply Rat.le_of_mul_le_mul_right (c := (piCircleArea.compute n).lo)
+    · rw [Rat.div_def]
+      have hlo_ne : (piCircleArea.compute n).lo ≠ 0 := Rat.ne_of_gt hPlo
+      calc
+        (1 / 4 : Rat) * (piCircleArea.compute n).lo =
+            (1 / 4 : Rat) * (1 * (piCircleArea.compute n).lo) := by simp
+        _ <= (1 * (piCircleArea.compute n).lo⁻¹ *
+            (1 / 4 * (piCircleArea.compute n).hi)) *
+            (piCircleArea.compute n).lo := by
+              grind [Rat.mul_assoc, Rat.mul_comm,
+                Rat.mul_inv_cancel _ hlo_ne]
+    · exact hPlo
+
 def oneMinusCosFunRaw
     (B : IntegralIdentities.ArctanInverseBisection) : RealFunRaw where
   domain := fun x => 0 <= x /\ x <= (1 : Rat) / 2

@@ -2391,6 +2391,42 @@ theorem TangentSquareIntegralEffectiveFTCOverlap.to_halfQuarterTurn
         CauchyPi.piCircleArea_valid)
     h.to_equiv tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn
 
+/-- The canonical normalized tangent-square anchor.  It combines the direct
+dyadic tangent-square integral with the reciprocal circle-area computation. -/
+def normalizedTangentSquareIntegralRaw : RealRaw :=
+  reciprocalPiRaw * tangentSquareIntegral
+
+theorem normalizedTangentSquareIntegralRaw_valid :
+    normalizedTangentSquareIntegralRaw.Valid := by
+  exact RealRaw.mul_valid reciprocalPiRaw_valid tangentSquareIntegral_valid
+
+/-- Once the direct tangent-square integral is connected to its effective-FTC
+implementation, normalization gives the exact value `1/4`.  Product transport
+uses the general signed interval multiplication theorem; no special product
+certificate or portfolio wrapper is needed. -/
+theorem TangentSquareIntegralEffectiveFTCOverlap.normalized_equiv_quarter
+    (h : TangentSquareIntegralEffectiveFTCOverlap) :
+    normalizedTangentSquareIntegralRaw.Equiv (RealRaw.ofRat (1 / 4)) := by
+  have hquarter :
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid := by
+    change (RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).Valid
+    exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+      CauchyPi.piCircleArea_valid
+  have hproduct : normalizedTangentSquareIntegralRaw.Equiv
+      (reciprocalPiRaw *
+        RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
+    unfold normalizedTangentSquareIntegralRaw
+    exact RealRaw.mul_equiv
+      reciprocalPiRaw_valid reciprocalPiRaw_valid
+      tangentSquareIntegral_valid hquarter
+      (RealRaw.equiv_refl reciprocalPiRaw reciprocalPiRaw_valid)
+      h.to_halfQuarterTurn
+  exact RealRaw.equiv_trans
+    normalizedTangentSquareIntegralRaw_valid
+    reciprocalPiMulHalfQuarterTurnRaw_valid
+    (RealRaw.ofRat_valid (1 / 4))
+    hproduct reciprocalPiMulHalfQuarterTurnRaw_equiv_quarter
+
 theorem tangentSquareEffectivePrimitive_endpoint_contains
     (C : RationalSubinterval 0 1) (δ η : QPos) (N : Nat)
     (hC : 0 < C.width) (hη : η.val = C.width * δ.val / 3)

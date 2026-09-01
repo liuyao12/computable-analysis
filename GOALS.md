@@ -116,11 +116,13 @@ is open.
    `DyadicHalfAngleTangentEquivalenceFamily`; do not impose matching stage
    schedules or add rational point searches and parity-specific public
    wrappers.
-2. **Squared sine.** Supply the two substantive pairwise certificates:
-   public dyadic squares overlap the nested-radical computation, and the
-   nested-radical computation overlaps the normalized tangent-square anchor.
-   The canonical chain stabilizer then gives a valid integral equivalent to
-   `1/4`; a stronger three-way same-stage witness is unnecessary.
+2. **Squared sine.** Derive the two square-sum edges from the same tangent
+   representation family and the checked tangent-square FTC: public dyadic
+   squares to nested radicals, then nested radicals to the normalized
+   tangent-square anchor.  The anchor's validity and conditional `1/4` value
+   are checked.  These are downstream consequences of item 1, not a second
+   finite-search problem.  The canonical chain stabilizer then gives the
+   public value.
 3. **Fourier series.** Complete effective reconstruction for one genuinely
    infinite, nontrivial class with explicit coefficient and tail schedules.
 4. **Linear ODEs.** Lift finite Peano--Baker/Duhamel algebra to interval-valued
@@ -172,6 +174,8 @@ from Lean when an analytic proof needs them.
   blueprint.
 - A provider structure is not counted as a completed theorem until an
   inhabitant and its endpoint/value theorem are checked.
+- Do not keep orphan portfolio, checkpoint, or assumption-repackaging modules
+  in the source tree.  Git history is the archive for superseded proof routes.
 - No `sorry`, `admit`, standard real numbers, measure theory, or hidden
   completeness enters the canonical import chain.
 

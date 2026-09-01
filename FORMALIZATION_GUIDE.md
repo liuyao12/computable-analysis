@@ -200,15 +200,21 @@ normalized tangent-square anchor
 1/4
 ```
 
-Use `dyadicPublicSquareIntegralRaw_chainStabilized`. Required mathematical
-inputs are:
+Use `dyadicPublicSquareIntegralRaw_chainStabilized`. Its current open provider
+instances are:
 
 - `DyadicSquareCircleOverlapFamily`;
 - `DyadicNestedRadicalSquareAnchorCommonWitness` for the normalized anchor;
-- `NormalizedTangentSquareValueSubgoal`.
+- `TangentSquareIntegralEffectiveFTCOverlap`.
 
 The public API deliberately has no three-way shared-witness certificate: such
 a certificate asks for stronger same-stage data than the proof needs.
+The normalized anchor is already valid, and
+`TangentSquareIntegralEffectiveFTCOverlap.normalized_equiv_quarter` gives its
+value from the tangent-square FTC bridge.  The chain theorem is not a completed
+value theorem until these providers are inhabited.  Derive them from the
+canonical tangent representation edge rather than reviving finite candidate
+searches.
 
 For unsquared sine, use
 `DyadicHalfAngleTangentEquivalenceFamily`. The nested-radical evaluator already
