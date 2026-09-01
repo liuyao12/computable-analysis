@@ -1,201 +1,99 @@
 \chapter{Algebraic Root Certificates and the FTA Boundary}\label{ch:algebra-fta}
 
-An algebraic value is a rational box together with a polynomial-image
-certificate. Isolation and deflation are finite; completed-number
-identification is a bridge.
+This chapter is included only because root isolation is an infinite
+refinement process used by special functions and ODEs.  Routine finite
+polynomial algebra is reused from Lean.
 
-\section{Isolation and deflation}
+The scoped entry point is
+\texttt{ComputableAnalysis.AlgebraicFoundation}.
+
+\section{Finite root search}
 \label{thm:finite-box-polynomial-soundness}
-\label{thm:finite-deflation-soundness}
-\label{thm:rational-cubic-roots}
-\label{thm:rational-quartic-roots}
-\label{thm:finite-factor-remainder-interface}
-\label{thm:finite-descartes-sign-interface}
+
+A candidate complex box is evaluated by rational interval arithmetic.  A box
+whose polynomial image excludes zero is discarded; the others are subdivided.
 
 \begin{verbatim}
-box -> interval polynomial evaluation -> discard or subdivide
-    -> optionally deflate a supplied exact factor
-\end{verbatim}
-This replaces radical formulas by finite search. Cubic and quartic examples
-illustrate isolation, factor/remainder certificates, and Descartes-style sign
-counts.
-
-The Lean interface separates the finite computation from the algebraic claim:
-
-\begin{verbatim}
- rational coefficients -> complex interval evaluator -> residual box
-                                              -> root witness
- supplied root list -> synthetic division -> factored remainder
- \end{verbatim}
-
-The rational-polynomial layer supplies nonzero annihilators for exact rational
-and rational-complex values:
-
-\lean{ComputableAnalysis.RatPoly.linearRoot_nonzero}
-\lean{ComputableAnalysis.RatPoly.linearRoot_exact_root}
-\lean{ComputableAnalysis.RatPoly.qcomplexRoot_nonzero}
-\lean{ComputableAnalysis.RatPoly.qcomplexRoot_exact_root}
-\leanok
-
-An algebraic complex value is therefore a certified complex computation plus a
-rational-polynomial witness.  Addition, negation, and multiplication of the
-raw boxes are computationally valid; the annihilator for a sum or product is
-kept as an explicit elimination obligation rather than obtained from an
-ambient algebraic closure theorem:
-
-\lean{ComputableAnalysis.AlgebraicComplex.add_annihilator_exists}
-\lean{ComputableAnalysis.AlgebraicComplex.neg_annihilator_exists}
-\lean{ComputableAnalysis.AlgebraicComplex.mul_annihilator_exists}
-\lean{ComputableAnalysis.AlgebraicComplex.mulRaw_valid}
-\leanok
-
-The chapter’s scoped Lean entry point is
-\texttt{ComputableAnalysis.AlgebraicFoundation}.  It collects these finite
-algebraic and root-certificate interfaces without importing the benchmark
-catalogue or asserting a completed algebraically closed field.
-
-For supplied roots, synthetic division is iterated over a finite list.  The
-factorization theorem and the distinct-root transport theorem are the useful
-finite replacements for saying that a polynomial splits over a completed
-complex field:
-
-\lean{ComputableAnalysis.FiniteDeflationChain.IsDeflationChain}
-\lean{ComputableAnalysis.FiniteDeflationChain.deflatedCoeffs_length}
-\lean{ComputableAnalysis.FiniteDeflationChain.exactRoot_of_exactRoot_of_ne}
-\lean{ComputableAnalysis.FiniteDeflationChain.horner_factorization}
-\leanok
-
-\section{The finite meaning of ``find a root''}
-
-The project does not begin with an abstract complex plane and then invoke the
-fundamental theorem of algebra.  It begins with a finite search contract:
-
-\begin{verbatim}
-  candidate box -> polynomial interval image
-                  -> reject / subdivide / retain
-                  -> residual certificate
+rational polynomial + initial box -> interval evaluation
+                                  -> reject or subdivide
+                                  -> shrinking retained boxes
 \end{verbatim}
 
-For a real interval, sign information and Descartes counts are finite
-exclusion data.  For a complex box, the same role is played by a rational
-complex residual bound.  A root is therefore a retained box plus a proof that
-every requested stage remains compatible with the polynomial evaluation; the
-box need not contain an attained irrational point.
-
-The checked examples give the two useful scales of this interface.  The
-quadratic certificate identifies the two supplied complex roots and excludes
-the wrong candidate region:
-
-\lean{ComputableAnalysis.finiteFTAQuadratic_upper_root}
-\lean{ComputableAnalysis.finiteFTAQuadratic_lower_root}
-\lean{ComputableAnalysis.finiteFTAQuadratic_roots_are_distinct}
-\lean{ComputableAnalysis.finiteFTAQuadratic_root_search_upper}
-\lean{ComputableAnalysis.finiteFTAQuadratic_root_search_skips_nonroot}
-\lean{ComputableAnalysis.finiteFTAQuadratic_zero_is_excluded}
-\leanok
-
-The real-root side uses the same pattern without pretending that a sign-count
-is a global existence theorem.  The quadratic, cubic, quartic, quintic,
-sextic, and septic examples record polynomial evaluation, variation count,
-and the resulting positive-root predicate as separate rational certificates:
-
-\leanok
-
-Thus the computable replacement for a general FTA theorem is deliberately
-layered: root isolation, root exclusion, and supplied-root deflation are
-closed finite mechanisms; unrestricted complex root existence and a complete
-root-isolation algorithm remain explicit frontier theorems.
-
-\section{A worked deflation trace}
-
-For the polynomial
-\( (X-1)(X-2)(X-3) \), the supplied roots are not an oracle hidden in a
-factorization theorem.  The finite chain checks one root at a time, records
-the quotient length, and verifies the final Horner identity:
-
-\lean{ComputableAnalysis.FiniteDeflationExample.cubic_root_one}
-\lean{ComputableAnalysis.FiniteDeflationExample.cubic_deflation_chain}
-\lean{ComputableAnalysis.FiniteDeflationExample.cubic_deflated_coeffs}
-\lean{ComputableAnalysis.FiniteDeflationExample.cubic_horner_factorization}
-\leanok
-
-This is the intended algebraic interface for later calculus applications:
-when a special function or ODE introduces a known algebraic factor, the
-formalization supplies that factor and receives a certified residual.  It does
-not need to duplicate a universal algebraic-closure development.
-
-\section{Complex boxes as a finite search}
-
-The complex version makes the stage parameter visible. Start with a rational
-rectangle, subdivide it into finitely many children, and retain only children
-whose polynomial image is still compatible with zero:
-
-\begin{verbatim}
-initial QBox -> finite subdivision at depth d
-             -> reject root-free boxes
-             -> retain boxes containing supplied roots
-             -> width = initial width / 2^d
-\end{verbatim}
-
-For the quadratic model, the upper and lower roots survive every displayed
-depth while a neighborhood of zero is excluded. This is a genuine shrinking
-complex `realRaw`-style computation: it records boxes and residual tests, not
-an assertion that an irrational complex coordinate has been attained.
-
-The reusable subdivision layer is independent of the quadratic example.  It
-splits any ordered rational complex box into four rational children, proves
-that the children cover the parent, filters them by polynomial-image overlap
-with zero, and carries a supplied root through every finite depth:
+The reusable subdivision theorem covers the parent, preserves any supplied
+root, and gives the exact dyadic width and height after each finite depth.
 
 \lean{ComputableAnalysis.FiniteFTASubdivision.dyadicChildren_cover}
-\lean{ComputableAnalysis.FiniteFTASubdivision.root_mem_survivingChildren}
 \lean{ComputableAnalysis.FiniteFTASubdivision.root_mem_survivingSubdivide}
 \lean{ComputableAnalysis.FiniteFTASubdivision.survivingSubdivide_nestedIn_parent}
 \lean{ComputableAnalysis.FiniteFTASubdivision.survivingSubdivide_width_height_exact}
 \leanok
 
-\lean{ComputableAnalysis.finiteFTAZeroNeighborhood}
-\lean{ComputableAnalysis.finiteFTAZeroNeighborhood_ordered}
-\lean{ComputableAnalysis.finiteFTAZeroNeighborhood_exclusion}
+The quadratic example checks both sides of the contract: two supplied roots
+survive, while a rational neighborhood of zero is excluded.
+
+\lean{ComputableAnalysis.finiteFTAQuadratic_upper_root}
+\lean{ComputableAnalysis.finiteFTAQuadratic_lower_root}
 \lean{ComputableAnalysis.finiteFTAZeroNeighborhood_is_root_free}
-\lean{ComputableAnalysis.finiteFTARootSearchDomain}
-\lean{ComputableAnalysis.finiteFTARootSearchDomain_ordered}
-\lean{ComputableAnalysis.finiteFTAUpperRoot_survives_depth_two}
-\lean{ComputableAnalysis.finiteFTALowerRoot_survives_depth_two}
-\lean{ComputableAnalysis.finiteFTAUpperRoot_survives_depth_three}
-\lean{ComputableAnalysis.finiteFTALowerRoot_survives_depth_three}
-\lean{ComputableAnalysis.finiteFTAUpperRoot_survives_depth_four}
-\lean{ComputableAnalysis.finiteFTALowerRoot_survives_depth_four}
-\lean{ComputableAnalysis.finiteFTAUpperRoot_survives_depth_five}
-\lean{ComputableAnalysis.finiteFTALowerRoot_survives_depth_five}
-\lean{ComputableAnalysis.finiteFTAUpperRoot_survives_depth_six}
-\lean{ComputableAnalysis.finiteFTALowerRoot_survives_depth_six}
+\leanok
+
+These are soundness theorems for finite search.  A complete FTA
+formalization still needs an effective existence argument ensuring that the
+retained boxes isolate all roots without importing a completed algebraically
+closed field.
+
+\section{Supplied-root deflation}
+
+When geometry or an earlier search already certifies a root, synthetic
+division removes its factor.  Iterating this operation over a finite list gives
+a checked factorization and transports distinct remaining roots to the next
+quotient.
+
+\lean{ComputableAnalysis.FiniteDeflationChain.IsDeflationChain}
+\lean{ComputableAnalysis.FiniteDeflationChain.exactRoot_of_exactRoot_of_ne}
+\lean{ComputableAnalysis.FiniteDeflationChain.horner_factorization}
+\leanok
+
+The cubic trace \((X-1)(X-2)(X-3)\) is the representative example.  It checks
+one supplied root at a time and verifies the final Horner identity.
+
+\lean{ComputableAnalysis.FiniteDeflationExample.cubic_deflation_chain}
+\lean{ComputableAnalysis.FiniteDeflationExample.cubic_horner_factorization}
+\leanok
+
+A supplied-root quintic uses the same mechanism.  It demonstrates finite
+factor removal, not a general quintic solver.
+
+\lean{ComputableAnalysis.quintic_boundary_deflation_chain}
+\lean{ComputableAnalysis.quintic_boundary_exact_factorization}
+\leanok
+
+\section{Algebraic represented values}
+
+An exact rational or rational-complex point has a nonzero linear annihilator.
+More general algebraic computations pair a shrinking complex box with an
+explicit polynomial witness.  Arithmetic on their boxes is computable;
+annihilators for sums and products remain explicit elimination obligations.
+
+\lean{ComputableAnalysis.RatPoly.linearRoot_exact_root}
+\lean{ComputableAnalysis.RatPoly.qcomplexRoot_exact_root}
+\lean{ComputableAnalysis.AlgebraicComplex.add_annihilator_exists}
+\lean{ComputableAnalysis.AlgebraicComplex.mul_annihilator_exists}
 \leanok
 
 \section{Boundary}
 
-The supplied-root quintic certificate is a boundary result: it peels known
-factors, but is not a general quintic solver.
-
-For the worked polynomial with supplied roots (-2,-1,0,1,2), the chain
-records the coefficients, transports each remaining root through the next
-synthetic quotient, and ends with a constant deflated polynomial:
+The present chapter provides:
 
 \begin{verbatim}
-five supplied roots -> five finite quotient steps
-                   -> Horner factorization
-                   -> exact product identity
+finite exclusion + supplied-root preservation + finite deflation
 \end{verbatim}
 
-This is the algebraic analogue of choosing a known computational branch. It
-is useful downstream when a factor is already certified by geometry or an
-earlier inverse search; it does not manufacture the roots. The general FTA
-and general quintic solver remain outside the current constructive boundary.
+The Wiedijk FTA target requires one further constructive theorem:
 
-\lean{ComputableAnalysis.quintic_boundary_polynomial_coeffs}
-\lean{ComputableAnalysis.quintic_boundary_eval_at_two}
-\lean{ComputableAnalysis.quintic_boundary_deflation_chain}
-\lean{ComputableAnalysis.quintic_boundary_deflated_coeffs}
-\lean{ComputableAnalysis.quintic_boundary_horner_factorization}
-\lean{ComputableAnalysis.quintic_boundary_exact_factorization}
-\leanok
+\begin{verbatim}
+polynomial data -> finite stage and retained boxes
+                -> all roots represented, isolated, and exhausted
+\end{verbatim}
+
+Until that provider is proved, the project does not describe finite
+subdivision soundness as a completed Fundamental Theorem of Algebra.

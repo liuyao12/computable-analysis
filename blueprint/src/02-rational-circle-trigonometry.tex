@@ -1,218 +1,145 @@
 \chapter{Circle and Trigonometry}\label{ch:rational-circle-trigonometry}
 
-The scoped Lean entry point for this chapter is
-\texttt{ComputableAnalysis.CircleFoundation}.  It collects rational geometry,
-the arctangent/circle-area route, finite rotations, and stable complex
-coordinates.  Similar trigonometric identities are transports of these
-representative certificates.
+Circle geometry supplies the first special function without assuming standard
+real trigonometry.  Exact rational coordinates give squared identities;
+\texttt{realRaw} length or angle computations are added only where the
+application needs them.
 
-Rational coordinates and squared lengths are the geometric starting point.
-`realRaw` computes; `real` records the certified value.
+The scoped Lean entry point is
+\texttt{ComputableAnalysis.CircleFoundation}.
 
-\section{Finite geometry}
+\section{Finite rational geometry}
 \label{thm:rational-circle-pythagorean}
-\label{thm:rational-triangle-orientation}
-\label{thm:finite-rectangle-isoperimetric}
-\label{thm:rational-chord-power}
-\label{thm:rational-heron}
-\label{thm:finite-isosceles-interface}
-\label{thm:finite-pick-rectangle-family}
-\label{thm:finite-law-of-cosines-interface}
-\label{thm:finite-ptolemy-interface}
 
 \begin{verbatim}
-coordinates -> rational identity -> squared-length certificate
-                                      -> square-root bracket when needed
-\end{verbatim}
-Pythagoras, Heron, the cosine law, Ptolemy, Pick, and orientation share this
-pattern. Lengths are recovered from certified brackets; no completed plane is
-needed for the finite statements.
-
-The geometric API keeps three layers separate:
-
-\begin{verbatim}
-exact rational coordinates -> squared identities -> interval lengths
-                         -> area/order certificate
+rational coordinates -> squared identity -> interval length if needed
 \end{verbatim}
 
-The last step is always a finite comparison between rational boxes.  Geometry
-is used to supply the inequalities; the abstract `real` layer only packages
-the resulting nested computations.
-
-The basic certificates are available directly in Lean:
-
-Coordinate identities and signed area:
+The project keeps only geometry used downstream.  Pythagorean coordinates,
+shoelace area, half-angle refinement, and the broken-line inequality support
+circle subdivision and integral bounds.  Routine Euclidean identities are
+reused from Lean rather than catalogued here.
 
 \lean{ComputableAnalysis.RationalCircle.pythagoreanTriple_identity}
 \lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_shoelace}
-\lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_quadrilateral_diagonal_additivity}
-\lean{ComputableAnalysis.RationalCircle.heron_squared_identity}
-
-The path inequality is proved for finite rational chains.  In particular, a
-broken line is no shorter than its direct chord, and a genuine turn makes the
-inequality strict:
-
-\lean{ComputableAnalysis.RationalCircle.PositiveHalfAngleCoordinates.child_circle}
-\lean{ComputableAnalysis.RationalCircle.PositiveHalfAngleCoordinates.child_unit_bounds}
-\lean{ComputableAnalysis.RationalCircle.Stage.point_normSq}
 \lean{ComputableAnalysis.RationalCircle.Stage.rationalPolyline_length_ge_direct}
 \lean{ComputableAnalysis.RationalCircle.Stage.rationalPolyline_length_two_step_strict_of_genuine_turn}
+\leanok
 
 \section{Archimedes and rational circles}
 \label{thm:geometric-pi-validity}
 
-Crude subdivisions are not a failed approximation: they are a family of
-computations whose relations can be certified.
+Crude subdivisions are not failed approximations.  They are finite
+computations whose inclusion and refinement relations can be proved.
+
 \begin{verbatim}
-subdivide -> certify cells -> add bounds -> compare or refine
+rational circle points -> inscribed/circumscribed cells
+                       -> finite area and length bounds -> refine
 \end{verbatim}
+
 \begin{figure}[!htbp]\centering
 \rationalCircleSubdivisionAnimation
-\caption{Crude subdivisions become a certified enclosure.}
+\caption{Crude rational subdivisions become a certified enclosure.}
 \label{fig:rational-parameter-line}\end{figure}
+
+The resulting area and circumference computations are independent
+representations.  Their equivalence is a theorem in the \(\pi\) scoreboard,
+not a definitional identification.
 
 \section{Angles and rotations}
 \label{thm:finite-quarter-turn}
 
-The blueprint writes sine in one way: \(\sin(\pi x)\).  Inside the circle
-algorithm we use the normalized quarter-turn coordinate \(t=2x\) on this
-half-period; it is only an implementation parameter.
+The blueprint writes sine as \(\sin(\pi x)\).  On the half-period, the circle
+algorithm may internally use the normalized parameter \(t=2x\); this is an
+implementation coordinate, not a second sine convention.
+
+The half-angle computation is the central algorithm:
 
 \begin{verbatim}
-area bracket -> angle bracket -> rational circle -> finite identities
-\end{verbatim}
-Quarter-turns and de Moivre belong here as finite rotation certificates;
-unrestricted angle semantics remain a separate bridge.
-The common-prefix complex rotation evaluator exposes stable real and imaginary
-coordinates; their shrinking boxes provide the shared continuity modulus.
-The derivative layer identifies the two coordinate derivatives with the
-opposite coordinate, closing the finite rotation calculus at the public stable
-evaluator level:
-
-\begin{verbatim}
-complex-prefix quotient -> coordinate quotient -> target coordinate box
-sin derivative = cos       cos derivative = -sin
+parent cosine box -> (1 +/- cosine)/2 -> rational square-root box
+                  -> child sine/cosine boxes -> repeat
 \end{verbatim}
 
-The proof is a transport of finite interval certificates, not an appeal to a
-completed real-valued sine function.
+Every finite stage carries the unit-circle identity, endpoint values, and
+refinement law.  Changing internal precision gives overlapping boxes, so
+later proofs may change schedules through an explicit representation edge.
+
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalTableAt_overlap_of_precisions}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_point_refineIndex}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_cos_sq_add_sin_sq}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_cos_zero}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_sin_last}
+\leanok
+
+A complex factorial-prefix evaluator gives a second rotation computation.  Its
+coordinate derivatives are finite interval theorems,
+\[
+  S'=C,\qquad C'=-S.
+\]
+The later ODE uniqueness bridge identifies this series candidate with the
+geometric circle chart.
 
 \lean{ComputableAnalysis.RotationSeries.stableUniformRotationSinFunction_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.RotationSeries.stableUniformRotationCosFunction_hasDerivativeOnInterval}
 \leanok
 
-The half-angle algorithm is the central example:
+\section{Arctangent as the angle chart}
 
-\begin{verbatim}
-parent circle box -> (1 +/- cosine)/2 -> rational sqrt box
-                  -> child sine/cosine boxes -> repeat
-\end{verbatim}
+The rational kernel \(1/(1+t^2)\) supplies an area coordinate on the unit
+tangent interval.  Equal rational rectangles give a nested computation of the
+geometric arctangent, and the endpoint is the quarter-turn anchor.
 
-Each stage records range, circle-equation, and width invariants.  Nested
-radicals are therefore not an appeal to an already completed square root; they
-are executable interval refinements.
-
-The table is also representation-stable: changing the requested internal
-precision produces overlapping sine and cosine boxes.  Thus a later proof may
-switch evaluator precision without introducing a new notion of angle or
-assuming extensional equality of interval algorithms.
-
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalTableAt_overlap_of_precisions}
-\leanok
-
-The executable table is consumed through the refinement and unit-circle laws
-below.  At dyadic inputs, the public coordinate is transported to the same
-rational-circle evaluator by an explicit overlap certificate.
-
-The finite trigonometric table also carries the identities needed by later
-integration proofs: refinement preserves a sample, every sample lies on the
-unit circle, and the two endpoint coordinates are exact.  These are rational
-stage statements, so they remain available before any completed angle is
-introduced.
-
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_point_refineIndex}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_cos_refineIndex}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_sin_refineIndex}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_cos_sq_add_sin_sq}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_cos_zero}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_sin_zero}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_cos_last}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_sin_last}
-\leanok
-
-The remaining semantic obligation is finite: exact endpoints, even-index
-reuse, lower half-angle boxes, and reflected upper-half-angle boxes must
-together prove stagewise overlap with the arctangent evaluator.  The integral
-transport theorem consumes that certificate without knowing how its rational
-witnesses were found.
-
-\section{The input to integration}
-
-This chapter supplies the function values; Chapter~\ref{ch:integrals} supplies
-the area theorem.  The first target is
-\(\int_0^{1/2}\sin(\pi x)\,dx\), whose samples come from the arctangent
-inverse and the rational circle.  Its equal-dyadic rectangle computation and
-the effective FTC are developed in the next chapter, so the same integral
-interface can be reused for other special functions.
-
-\begin{verbatim}
-circle geometry -> rational sine/cosine boxes -> function evaluator
-                                          -> integral chapter
-\end{verbatim}
-
-The endpoint facts \(\cos(0)=1\) and \(\cos(\pi/2)=0\) are the anchors used
-later to identify the endpoint difference with reciprocal pi.
-
-The inverse-arctangent route is a finite search followed by the rational circle
-map.  The geometric area loop and its rectangle comparison are certified by
-\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_succ}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_nested}
 \lean{ComputableAnalysis.ArctanGeometry.arctanGeom_valid_on_unit}
-\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_one_compute_eq}.
-This is the bridge used by the integral and FTC chapters; no classical
-real-valued angle function is assumed.
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_one_compute_eq}
+\leanok
 
-There is one accelerated rectangle schedule.  It represents sector-area time
-for rotation; its one-half scaling is the canonical undoubled arctangent
-branch.  That view supplies interval regularity, monotonicity, and effective
-separation for finite inverse search.  A normalized target $t$ is the
-literal rational scaling of the branch's upper-endpoint computation; Lean
-proves that this native target is $t\pi/4$.  The inverse package therefore
-asks for a search only at these geometric targets, not at every raw value that
-can be enclosed between endpoint boxes:
-\lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_compute}
+For inversion, the accelerated rectangle schedule supplies interval
+regularity, monotonicity, and effective separation.  A rational target is
+bisected in this area coordinate and then mapped to the rational circle.
+
+\begin{verbatim}
+angle target box -> tangent-parameter bisection -> rational circle point
+                 -> sine/cosine boxes
+\end{verbatim}
+
 \lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_intervalRegular}
-\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_width_le_sixteenth_input_precision}
-\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_boxes_strictly_separated}
 \lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_invertible}
 \lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_equivalent_geometric}
-\lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegularTarget}
-\lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegularTarget_equiv_halfQuarterTurn}
-
-Inverse uniqueness is generic: equivalent forward interval computations on
-an effectively separating branch imply equivalent source computations.
 \lean{ComputableAnalysis.InvertibleFunctionOnInterval.source_equiv_of_forward_equiv}
+\leanok
 
-The function-facing circle coordinates are exposed separately from the
-construction record.  Their validity is a raw-computation statement; it does
-not assert that a single closed formula covers every possible angle chart.
+The function-facing sine and cosine computations are obtained from this point
+constructor.  They remain partial on their declared rational chart; no single
+closed formula is asserted for every possible angle representation.
 
-\lean{ComputableAnalysis.RationalCircle.GeometricTrig.cosFunctionRawOfPoint}
-\lean{ComputableAnalysis.RationalCircle.GeometricTrig.sinFunctionRawOfPoint}
-\lean{ComputableAnalysis.RationalCircle.GeometricTrig.cosFunctionRawOfPoint_compute_eq}
-\lean{ComputableAnalysis.RationalCircle.GeometricTrig.sinFunctionRawOfPoint_compute_eq}
-\lean{ComputableAnalysis.RationalCircle.GeometricTrig.FunctionRawConstruction}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.FunctionRawConstruction.cosFunctionRaw}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.FunctionRawConstruction.sinFunctionRaw}
 \leanok
 
+\section{Input to integration}
+
+This chapter supplies value boxes.  Chapter~\ref{ch:integrals} supplies the
+area and FTC certificates.  Its first target,
+\[
+  \int_0^{1/2}\sin(\pi x)\,dx,
+\]
+uses either equal dyadic nested-radical samples or unequal samples coming from
+uniform tangent subdivisions.
+
+\begin{verbatim}
+circle/arctangent geometry -> rational sine/cosine value boxes
+                           -> rectangle or Stieltjes integral
+\end{verbatim}
+
+The remaining equal-dyadic obligation is geometric: positive odd
+nested-radical samples must overlap the corresponding arctangent-backed circle
+boxes at every depth.  Boundary, parity, reflection, finite-search soundness,
+and integral transport are handled in the integral chapter.
+
 \section{Scope boundary}
 
-Arbitrary discontinuities and non-effective measure are outside scope.  The
-starting dense domain need not always be the rationals themselves: a natural
-computational chart may use a rational parametrization, a dyadic mesh, or a
-finite algebraic extension.  What matters is that the evaluator is defined on
-its declared dense input chart and that overlapping charts carry explicit
-equivalence certificates.  The circle uses rational coordinates and the
-half-angle table; it does not pretend that every function is naturally
-presented by a rational formula.
+Only geometry that certifies an infinite process is developed here.  The
+natural dense chart may be rational coordinates, dyadic angle samples, or a
+finite algebraic extension; it need not be a formula on rational numbers
+alone.  Overlapping charts are connected by explicit equivalence edges.
