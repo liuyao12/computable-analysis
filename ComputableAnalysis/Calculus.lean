@@ -13588,6 +13588,396 @@ namespace InvertibleFunctionOnInterval
 def function (I : InvertibleFunctionOnInterval) : FunctionOnInterval :=
   I.continuous.function
 
+/-- Evaluate an interval function on every interval produced by a raw source
+computation.  The source certificate is explicit: this construction does not
+silently extend the function beyond its certified rational branch. -/
+def forwardIntervalRaw (I : InvertibleFunctionOnInterval) (x : RealRaw)
+    (hsource : forall n,
+      subintervalOf (x.compute n) I.function.lower I.function.upper) :
+    RealRaw where
+  compute := fun n =>
+    I.continuous.regular.evalInterval (x.compute n) (hsource n) n
+
+private theorem not_strictly_separated_of_forward_equiv
+    (I : InvertibleFunctionOnInterval)
+    (hresolves : forall eps : QPos, Exists fun k : Nat =>
+      1 / ((I.separation.inputPrecision k : Nat) : Rat) <= eps.val)
+    {x y : RealRaw}
+    (hx : x.Valid) (hy : y.Valid)
+    (hxsource : forall n,
+      subintervalOf (x.compute n) I.function.lower I.function.upper)
+    (hysource : forall n,
+      subintervalOf (y.compute n) I.function.lower I.function.upper)
+    (hforwardX : (I.forwardIntervalRaw x hxsource).Valid)
+    (hforwardY : (I.forwardIntervalRaw y hysource).Valid)
+    (hforward : (I.forwardIntervalRaw x hxsource).Equiv
+      (I.forwardIntervalRaw y hysource)) :
+    forall N, ¬(x.compute N).hi < (y.compute N).lo := by
+  intro N hstrict
+  let a : Rat := (x.compute N).hi
+  let b : Rat := (y.compute N).lo
+  have ha : inDomainInterval I.function.lower I.function.upper a := by
+    have h := hxsource N
+    exact ⟨Rat.le_trans h.1 h.2.1, h.2.2⟩
+  have hb : inDomainInterval I.function.lower I.function.upper b := by
+    have h := hysource N
+    exact ⟨h.1, Rat.le_trans h.2.1 h.2.2⟩
+  have hab : a < b := by simpa [a, b] using hstrict
+  have hgap : 0 < b - a := (Rat.lt_iff_sub_pos a b).mp hab
+  let sourceGap : QPos := ⟨b - a, hgap⟩
+  obtain ⟨k, hk⟩ := hresolves sourceGap
+  let p : Nat := I.separation.outputPrecision k
+  cases hkind : I.separation.kind with
+  | nondecreasing =>
+      have hinc : I.monotone.increasing := by
+        have h := I.orientation
+        simpa [hkind] using h
+      have hsep := I.separation.separated a b ha hb k (by
+        change a + 1 / ((I.separation.inputPrecision k : Nat) : Rat) <= b
+        have := hk
+        dsimp [sourceGap] at this
+        grind [Rat.sub_eq_add_neg])
+      rw [hkind] at hsep
+      have houtputGap :
+          0 < (I.function.compute b hb p).lo -
+            (I.function.compute a ha p).hi := by
+        exact (Rat.lt_iff_sub_pos _ _).mp (by
+          simpa [InvertibleFunctionOnInterval.function, p] using hsep)
+      let eps : QPos :=
+        ⟨((I.function.compute b hb p).lo -
+            (I.function.compute a ha p).hi) / 3, by
+          rw [Rat.div_def]
+          exact Rat.mul_pos houtputGap
+            ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 3))⟩
+      obtain ⟨NX, hNX⟩ := hforwardX.2.2 eps
+      obtain ⟨NY, hNY⟩ := hforwardY.2.2 eps
+      let n : Nat := max (max (max N p) NX) NY
+      have hNn : N <= n := by
+        dsimp [n]
+        omega
+      have hpn : p <= n := by
+        dsimp [n]
+        omega
+      have hNXn : NX <= n := by
+        dsimp [n]
+        omega
+      have hNYn : NY <= n := by
+        dsimp [n]
+        omega
+      let q : Rat := (x.compute n).hi
+      let r : Rat := (y.compute n).lo
+      have hxnested := hx.2.1 N n hNn
+      have hynested := hy.2.1 N n hNn
+      have hq_le_a : q <= a := by
+        simpa [q, a] using hxnested.2.2
+      have hb_le_r : b <= r := by
+        simpa [r, b] using hynested.1
+      have hq : inDomainInterval I.function.lower I.function.upper q := by
+        have h := hxsource n
+        exact ⟨Rat.le_trans h.1 h.2.1, h.2.2⟩
+      have hr : inDomainInterval I.function.lower I.function.upper r := by
+        have h := hysource n
+        exact ⟨h.1, Rat.le_trans h.2.1 h.2.2⟩
+      have hqmono := I.monotone.monotone_inc hinc q a hq ha hq_le_a n
+      have hrmono := I.monotone.monotone_inc hinc b r hb hr hb_le_r n
+      have haNested :=
+        (I.function.valid_on a (I.function.defined_on a ha)).2.1 p n hpn
+      have hbNested :=
+        (I.function.valid_on b (I.function.defined_on b hb)).2.1 p n hpn
+      have hXcontains := I.continuous.regular.contains_point_values
+        (x.compute n) (hxsource n) q hq n
+        (by simpa [q] using (hxsource n).2.1) (by simp [q])
+      have hYcontains := I.continuous.regular.contains_point_values
+        (y.compute n) (hysource n) r hr n
+        (by simp [r]) (by simpa [r] using (hysource n).2.1)
+      have hXwidth := hNX n hNXn
+      have hYwidth := hNY n hNYn
+      have hqmono' :
+          (I.function.compute q hq n).lo <=
+            (I.function.compute a ha n).hi := by
+        simpa [InvertibleFunctionOnInterval.function] using hqmono
+      have hrmono' :
+          (I.function.compute b hb n).lo <=
+            (I.function.compute r hr n).hi := by
+        simpa [InvertibleFunctionOnInterval.function] using hrmono
+      have hXcontains' :
+          (I.continuous.regular.evalInterval
+            (x.compute n) (hxsource n) n).lo <=
+            (I.function.compute q hq n).lo := by
+        simpa [InvertibleFunctionOnInterval.function] using hXcontains.1
+      have hYcontains' :
+          (I.function.compute r hr n).hi <=
+            (I.continuous.regular.evalInterval
+              (y.compute n) (hysource n) n).hi := by
+        simpa [InvertibleFunctionOnInterval.function] using hYcontains.2
+      have hXwidth' :
+          (I.continuous.regular.evalInterval
+            (x.compute n) (hxsource n) n).width <= eps.val := by
+        simpa [forwardIntervalRaw] using hXwidth
+      have hYwidth' :
+          (I.continuous.regular.evalInterval
+            (y.compute n) (hysource n) n).width <= eps.val := by
+        simpa [forwardIntervalRaw] using hYwidth
+      have haUpper :
+          (I.function.compute a ha n).hi <=
+            (I.function.compute a ha p).hi := by
+        simpa [FunctionOnInterval.compute] using haNested.2.2
+      have hbLower :
+          (I.function.compute b hb p).lo <=
+            (I.function.compute b hb n).lo := by
+        simpa [FunctionOnInterval.compute] using hbNested.1
+      have hXupper :
+          ((I.forwardIntervalRaw x hxsource).compute n).hi <=
+            (I.function.compute a ha p).hi + eps.val := by
+        change
+          (I.continuous.regular.evalInterval
+            (x.compute n) (hxsource n) n).hi <=
+              (I.function.compute a ha p).hi + eps.val
+        have hfromWidth :
+            (I.continuous.regular.evalInterval
+                (x.compute n) (hxsource n) n).hi <=
+              (I.continuous.regular.evalInterval
+                  (x.compute n) (hxsource n) n).lo + eps.val := by
+          grind [QInterval.width, Rat.sub_eq_add_neg]
+        exact Rat.le_trans hfromWidth
+          (rat_add_le_add
+            (Rat.le_trans hXcontains' (Rat.le_trans hqmono' haUpper))
+            (Rat.le_refl : eps.val <= eps.val))
+      have hYlower :
+          (I.function.compute b hb p).lo - eps.val <=
+            ((I.forwardIntervalRaw y hysource).compute n).lo := by
+        change
+          (I.function.compute b hb p).lo - eps.val <=
+            (I.continuous.regular.evalInterval (y.compute n) (hysource n) n).lo
+        have hfromWidth :
+            (I.continuous.regular.evalInterval
+                (y.compute n) (hysource n) n).hi - eps.val <=
+              (I.continuous.regular.evalInterval
+                (y.compute n) (hysource n) n).lo := by
+          grind [QInterval.width, Rat.sub_eq_add_neg]
+        have hpoint :
+            (I.function.compute b hb p).lo <=
+              (I.continuous.regular.evalInterval
+                (y.compute n) (hysource n) n).hi :=
+          Rat.le_trans hbLower (Rat.le_trans hrmono' hYcontains')
+        grind [Rat.sub_eq_add_neg]
+      have hforwardStrict :
+          ((I.forwardIntervalRaw x hxsource).compute n).hi <
+            ((I.forwardIntervalRaw y hysource).compute n).lo := by
+        have hthree : (0 : Rat) < 3 := by native_decide
+        have hbudget : eps.val + eps.val <
+            (I.function.compute b hb p).lo -
+              (I.function.compute a ha p).hi := by
+          have hscale :
+              3 * eps.val =
+                (I.function.compute b hb p).lo -
+                  (I.function.compute a ha p).hi := by
+            dsimp [eps]
+            rw [Rat.div_def]
+            grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+          grind
+        grind [Rat.sub_eq_add_neg]
+      have hover := (RealRaw.compareAt_overlap_iff
+        (I.forwardIntervalRaw x hxsource)
+        (I.forwardIntervalRaw y hysource) n n).1 (hforward n)
+      exact (Rat.ne_of_lt hforwardStrict)
+        (Rat.le_antisymm (Rat.le_of_lt hforwardStrict) hover.2)
+  | nonincreasing =>
+      have hdec : ¬I.monotone.increasing := by
+        have h := I.orientation
+        simpa [hkind] using h
+      have hsep := I.separation.separated a b ha hb k (by
+        change a + 1 / ((I.separation.inputPrecision k : Nat) : Rat) <= b
+        have := hk
+        dsimp [sourceGap] at this
+        grind [Rat.sub_eq_add_neg])
+      rw [hkind] at hsep
+      have houtputGap :
+          0 < (I.function.compute a ha p).lo -
+            (I.function.compute b hb p).hi := by
+        exact (Rat.lt_iff_sub_pos _ _).mp (by
+          simpa [InvertibleFunctionOnInterval.function, p] using hsep)
+      let eps : QPos :=
+        ⟨((I.function.compute a ha p).lo -
+            (I.function.compute b hb p).hi) / 3, by
+          rw [Rat.div_def]
+          exact Rat.mul_pos houtputGap
+            ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 3))⟩
+      obtain ⟨NX, hNX⟩ := hforwardX.2.2 eps
+      obtain ⟨NY, hNY⟩ := hforwardY.2.2 eps
+      let n : Nat := max (max (max N p) NX) NY
+      have hNn : N <= n := by
+        dsimp [n]
+        omega
+      have hpn : p <= n := by
+        dsimp [n]
+        omega
+      have hNXn : NX <= n := by
+        dsimp [n]
+        omega
+      have hNYn : NY <= n := by
+        dsimp [n]
+        omega
+      let q : Rat := (x.compute n).hi
+      let r : Rat := (y.compute n).lo
+      have hxnested := hx.2.1 N n hNn
+      have hynested := hy.2.1 N n hNn
+      have hq_le_a : q <= a := by
+        simpa [q, a] using hxnested.2.2
+      have hb_le_r : b <= r := by
+        simpa [r, b] using hynested.1
+      have hq : inDomainInterval I.function.lower I.function.upper q := by
+        have h := hxsource n
+        exact ⟨Rat.le_trans h.1 h.2.1, h.2.2⟩
+      have hr : inDomainInterval I.function.lower I.function.upper r := by
+        have h := hysource n
+        exact ⟨h.1, Rat.le_trans h.2.1 h.2.2⟩
+      have hqmono := I.monotone.monotone_dec hdec q a hq ha hq_le_a n
+      have hrmono := I.monotone.monotone_dec hdec b r hb hr hb_le_r n
+      have haNested :=
+        (I.function.valid_on a (I.function.defined_on a ha)).2.1 p n hpn
+      have hbNested :=
+        (I.function.valid_on b (I.function.defined_on b hb)).2.1 p n hpn
+      have hXcontains := I.continuous.regular.contains_point_values
+        (x.compute n) (hxsource n) q hq n
+        (by simpa [q] using (hxsource n).2.1) (by simp [q])
+      have hYcontains := I.continuous.regular.contains_point_values
+        (y.compute n) (hysource n) r hr n
+        (by simp [r]) (by simpa [r] using (hysource n).2.1)
+      have hXwidth := hNX n hNXn
+      have hYwidth := hNY n hNYn
+      have hqmono' :
+          (I.function.compute a ha n).lo <=
+            (I.function.compute q hq n).hi := by
+        simpa [InvertibleFunctionOnInterval.function] using hqmono
+      have hrmono' :
+          (I.function.compute r hr n).lo <=
+            (I.function.compute b hb n).hi := by
+        simpa [InvertibleFunctionOnInterval.function] using hrmono
+      have hXcontains' :
+          (I.function.compute q hq n).hi <=
+            (I.continuous.regular.evalInterval
+              (x.compute n) (hxsource n) n).hi := by
+        simpa [InvertibleFunctionOnInterval.function] using hXcontains.2
+      have hYcontains' :
+          (I.continuous.regular.evalInterval
+            (y.compute n) (hysource n) n).lo <=
+            (I.function.compute r hr n).lo := by
+        simpa [InvertibleFunctionOnInterval.function] using hYcontains.1
+      have hXwidth' :
+          (I.continuous.regular.evalInterval
+            (x.compute n) (hxsource n) n).width <= eps.val := by
+        simpa [forwardIntervalRaw] using hXwidth
+      have hYwidth' :
+          (I.continuous.regular.evalInterval
+            (y.compute n) (hysource n) n).width <= eps.val := by
+        simpa [forwardIntervalRaw] using hYwidth
+      have haLower :
+          (I.function.compute a ha p).lo <=
+            (I.function.compute a ha n).lo := by
+        simpa [FunctionOnInterval.compute] using haNested.1
+      have hbUpper :
+          (I.function.compute b hb n).hi <=
+            (I.function.compute b hb p).hi := by
+        simpa [FunctionOnInterval.compute] using hbNested.2.2
+      have hXlower :
+          (I.function.compute a ha p).lo - eps.val <=
+            ((I.forwardIntervalRaw x hxsource).compute n).lo := by
+        change
+          (I.function.compute a ha p).lo - eps.val <=
+            (I.continuous.regular.evalInterval (x.compute n) (hxsource n) n).lo
+        have hfromWidth :
+            (I.continuous.regular.evalInterval
+                (x.compute n) (hxsource n) n).hi - eps.val <=
+              (I.continuous.regular.evalInterval
+                (x.compute n) (hxsource n) n).lo := by
+          grind [QInterval.width, Rat.sub_eq_add_neg]
+        have hpoint :
+            (I.function.compute a ha p).lo <=
+              (I.continuous.regular.evalInterval
+                (x.compute n) (hxsource n) n).hi :=
+          Rat.le_trans haLower (Rat.le_trans hqmono' hXcontains')
+        grind [Rat.sub_eq_add_neg]
+      have hYupper :
+          ((I.forwardIntervalRaw y hysource).compute n).hi <=
+            (I.function.compute b hb p).hi + eps.val := by
+        change
+          (I.continuous.regular.evalInterval (y.compute n) (hysource n) n).hi <=
+            (I.function.compute b hb p).hi + eps.val
+        have hfromWidth :
+            (I.continuous.regular.evalInterval
+                (y.compute n) (hysource n) n).hi <=
+              (I.continuous.regular.evalInterval
+                  (y.compute n) (hysource n) n).lo + eps.val := by
+          grind [QInterval.width, Rat.sub_eq_add_neg]
+        exact Rat.le_trans hfromWidth
+          (rat_add_le_add
+            (Rat.le_trans hYcontains' (Rat.le_trans hrmono' hbUpper))
+            (Rat.le_refl : eps.val <= eps.val))
+      have hforwardStrict :
+          ((I.forwardIntervalRaw y hysource).compute n).hi <
+            ((I.forwardIntervalRaw x hxsource).compute n).lo := by
+        have hthree : (0 : Rat) < 3 := by native_decide
+        have hbudget : eps.val + eps.val <
+            (I.function.compute a ha p).lo -
+              (I.function.compute b hb p).hi := by
+          have hscale :
+              3 * eps.val =
+                (I.function.compute a ha p).lo -
+                  (I.function.compute b hb p).hi := by
+            dsimp [eps]
+            rw [Rat.div_def]
+            grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+          grind
+        grind [Rat.sub_eq_add_neg]
+      have hover := (RealRaw.compareAt_overlap_iff
+        (I.forwardIntervalRaw x hxsource)
+        (I.forwardIntervalRaw y hysource) n n).1 (hforward n)
+      exact (Rat.ne_of_lt hforwardStrict)
+        (Rat.le_antisymm (Rat.le_of_lt hforwardStrict) hover.1)
+
+/-- Constructive inverse uniqueness on a certified rational branch.
+
+If the effective separation modulus resolves every positive rational source
+gap, then two valid source-valued raw computations are equivalent whenever
+their valid interval-forward evaluations are equivalent.  The proof uses only
+nested rational intervals, finite separation, and shrinking widths; it does
+not pass through completed real numbers or invoke completeness. -/
+theorem source_equiv_of_forward_equiv
+    (I : InvertibleFunctionOnInterval)
+    (hresolves : forall eps : QPos, Exists fun k : Nat =>
+      1 / ((I.separation.inputPrecision k : Nat) : Rat) <= eps.val)
+    {x y : RealRaw}
+    (hx : x.Valid) (hy : y.Valid)
+    (hxsource : forall n,
+      subintervalOf (x.compute n) I.function.lower I.function.upper)
+    (hysource : forall n,
+      subintervalOf (y.compute n) I.function.lower I.function.upper)
+    (hforwardX : (I.forwardIntervalRaw x hxsource).Valid)
+    (hforwardY : (I.forwardIntervalRaw y hysource).Valid)
+    (hforward : (I.forwardIntervalRaw x hxsource).Equiv
+      (I.forwardIntervalRaw y hysource)) :
+    x.Equiv y := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff x y n n).2
+  constructor
+  · by_cases h : (x.compute n).lo <= (y.compute n).hi
+    · exact h
+    · exfalso
+      have hstrict : (y.compute n).hi < (x.compute n).lo := by
+        simpa [Rat.not_le] using h
+      exact (not_strictly_separated_of_forward_equiv I hresolves
+        hy hx hysource hxsource hforwardY hforwardX
+        (RealRaw.equiv_symm hforward) n) hstrict
+  · by_cases h : (y.compute n).lo <= (x.compute n).hi
+    · exact h
+    · exfalso
+      have hstrict : (x.compute n).hi < (y.compute n).lo := by
+        simpa [Rat.not_le] using h
+      exact (not_strictly_separated_of_forward_equiv I hresolves
+        hx hy hxsource hysource hforwardX hforwardY hforward n) hstrict
+
 end InvertibleFunctionOnInterval
 
 /-! A branch contract for functions whose effective separation depends on the

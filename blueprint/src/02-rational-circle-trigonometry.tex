@@ -172,12 +172,14 @@ map.  The geometric area loop and its rectangle comparison are certified by
 This is the bridge used by the integral and FTC chapters; no classical
 real-valued angle function is assumed.
 
-The public calculus entry point also exposes the lightweight scheduled core;
-it is enough when an application needs only a staged arctangent value and its
-raw equivalence, not the full inverse-search package:
-\lean{ComputableAnalysis.arctanScheduledCoreRaw_valid}
-\lean{ComputableAnalysis.arctanScheduledCoreRaw_width_le}
-\lean{ComputableAnalysis.arctanScheduledCoreRaw_equiv_arctanGeom}
+The canonical undoubled arctangent branch uses one accelerated rectangle
+schedule.  The same implementation supplies the pointwise width bound,
+interval regularity, monotonicity, strict separation, and equivalence with the
+geometric branch needed by finite inverse search:
+\lean{ComputableAnalysis.ArctanScheduledRegular.arctanScheduledRectangleOnUnit_width_le}
+\lean{ComputableAnalysis.ArctanScheduledRegular.arctanScheduledRectangleOnUnit_intervalRegular}
+\lean{ComputableAnalysis.ArctanScheduledRegular.arctanScheduledRectangleOnUnit_invertible}
+\lean{ComputableAnalysis.ArctanScheduledRegular.arctanScheduledRectangleOnUnit_equivalent_geometric_branch}
 
 The function-facing circle coordinates are exposed separately from the
 construction record.  Their validity is a raw-computation statement; it does
