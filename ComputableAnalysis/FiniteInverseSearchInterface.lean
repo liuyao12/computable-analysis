@@ -200,22 +200,6 @@ theorem FiniteInverseSearchCertificate.toRealRaw_valid
       grind [hsub.1, hsub.2]
     exact Rat.le_trans hwidth_mono hreach
 
-/-! The same finite certificate also generates the full stage-indexed
-interval computation.  This is an alias of `toRealRaw`, not a second
-implementation: the bisection trace is the representative computation used
-at every stage.  No completed real or choice of a limiting point is
-introduced. -/
-def FiniteInverseSearchCertificate.toRealRawFamily
-    (certificate : FiniteInverseSearchCertificate) : RealRaw :=
-  certificate.toRealRaw
-
-theorem FiniteInverseSearchCertificate.toRealRawFamily_valid
-    (certificate : FiniteInverseSearchCertificate)
-    (hwidth : certificate.initialInterval.width <= 1) :
-    certificate.toRealRawFamily.Valid := by
-  simpa [FiniteInverseSearchCertificate.toRealRawFamily] using
-    certificate.toRealRaw_valid hwidth
-
 def finiteInverseSearchCertificate
     (map : Rat → Rat) (target : Rat) (initialInterval : QInterval)
     (stage : Nat) (ordered : initialInterval.lo ≤ initialInterval.hi)

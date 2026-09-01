@@ -5604,88 +5604,10 @@ theorem sinPiRawOfArctan_dyadic_compute_eq_circle
       rationalCircleSinInterval (dyadicTangentBox B hk) := by
   rfl
 
-/-! An executable nested-radical table.  The table is total so that its raw
-algorithm can be inspected before its invariant is proved.  On the valid
-dyadic range, even indices reuse the preceding level and odd indices apply
-the positive half-angle square roots; the upper half is recovered by the
-symmetry `sin (pi-theta)=sin theta`, `cos (pi-theta)=-cos theta`. -/
-
-def dyadicNestedRadicalTable : Nat -> Nat -> QInterval × QInterval
-  | 0, k =>
-      if k = 0 then
-        ({ lo := 0, hi := 0 }, { lo := 1, hi := 1 })
-      else if k = 1 then
-        ({ lo := 1, hi := 1 }, { lo := 0, hi := 0 })
-      else
-        ({ lo := 0, hi := 1 }, { lo := -1, hi := 1 })
-  | n + 1, k =>
-      if k % 2 = 0 then
-        dyadicNestedRadicalTable n (k / 2)
-      else
-        let bound := 2 ^ n
-        let reflected := if k <= bound then k else 2 * bound - k
-        let parent := dyadicNestedRadicalTable n reflected
-        let parentCos :=
-          if k <= bound then parent.2 else QInterval.neg parent.2
-        let sinInput : QInterval :=
-          { lo := (1 - parentCos.hi) / 2,
-            hi := (1 - parentCos.lo) / 2 }
-        let cosInput : QInterval :=
-          { lo := (1 + parentCos.lo) / 2,
-            hi := (1 + parentCos.hi) / 2 }
-        let sine := sqrtOnUnitEvalIntervalTotal sinInput (n + 1)
-        let cosine := sqrtOnUnitEvalIntervalTotal cosInput (n + 1)
-        if k <= bound then (sine, cosine)
-        else (sine, QInterval.neg cosine)
-  termination_by n => n
-
-def dyadicNestedRadicalSinAt (n k : Nat) : QInterval :=
-  (dyadicNestedRadicalTable n k).1
-
-def dyadicNestedRadicalCosAt (n k : Nat) : QInterval :=
-  (dyadicNestedRadicalTable n k).2
-
-theorem dyadicNestedRadicalTable_zero_zero :
-    dyadicNestedRadicalTable 0 0 =
-      ({ lo := 0, hi := 0 }, { lo := 1, hi := 1 }) := by
-  simp [dyadicNestedRadicalTable]
-
-theorem dyadicNestedRadicalTable_zero_one :
-    dyadicNestedRadicalTable 0 1 =
-      ({ lo := 1, hi := 1 }, { lo := 0, hi := 0 }) := by
-  simp [dyadicNestedRadicalTable]
-
-theorem dyadicNestedRadicalSinAt_zero_zero :
-    dyadicNestedRadicalSinAt 0 0 = { lo := 0, hi := 0 } := by
-  simp [dyadicNestedRadicalSinAt, dyadicNestedRadicalTable]
-
-theorem dyadicNestedRadicalSinAt_zero_one :
-    dyadicNestedRadicalSinAt 0 1 = { lo := 1, hi := 1 } := by
-  simp [dyadicNestedRadicalSinAt, dyadicNestedRadicalTable]
-
-theorem dyadicNestedRadicalTable_one_one :
-    dyadicNestedRadicalTable 1 1 =
-      (sqrtOnUnitEvalIntervalTotal { lo := (1 : Rat) / 2, hi := (1 : Rat) / 2 } 1,
-       sqrtOnUnitEvalIntervalTotal { lo := (1 : Rat) / 2, hi := (1 : Rat) / 2 } 1) := by
-  simp [dyadicNestedRadicalTable]
-  constructor <;> congr 1 <;> native_decide
-
-theorem dyadicNestedRadicalTable_succ_even (n k : Nat) :
-    dyadicNestedRadicalTable (n + 1) (2 * k) =
-      dyadicNestedRadicalTable n k := by
-  simp [dyadicNestedRadicalTable]
-
-theorem dyadicNestedRadicalSinAt_succ_even (n k : Nat) :
-    dyadicNestedRadicalSinAt (n + 1) (2 * k) =
-      dyadicNestedRadicalSinAt n k := by
-  simp [dyadicNestedRadicalSinAt, dyadicNestedRadicalTable]
-
-/-! The two indices of the mathematical mesh and the evaluator precision
-must not be conflated.  The first table above is retained as the small
-recurrence exposed in early versions of the blueprint.  The certified raw
-algorithm uses the following version: `precision` is held fixed while the
-half-angle path is recursively rebuilt from level zero.  Thus a later mesh
-stage never reuses a stale low-precision parent box. -/
+/-! The mathematical mesh depth and evaluator precision are independent.
+The certified table holds `precision` fixed while rebuilding the half-angle
+path from level zero, so a finer mesh never reuses a stale low-precision
+parent box. -/
 
 def dyadicHalfAngleSinInput (I : QInterval) : QInterval :=
   { lo := (1 - I.hi) / 2, hi := (1 - I.lo) / 2 }

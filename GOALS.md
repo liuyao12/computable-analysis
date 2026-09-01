@@ -108,12 +108,14 @@ not re-exported by the canonical root.
 Work in dependency order. Do not add routine examples while an earlier bridge
 is open.
 
-1. **Inverse-arctangent source edge.** Construct the effective bisection
-   instance and inhabit `DyadicHalfAngleTangentEquivalenceFamily`.  Once that
-   one tangent edge is available, `sine_equiv` already transports every
-   equal-dyadic sine sample to the valid nested-radical representative,
-   including zero.  Do not add matching-stage searches, certificate families,
-   or parity-specific public wrappers.
+1. **Inverse-arctangent source edge.** Follow one route: construct the
+   effective bisection instance; lift rational chart addition to bounded
+   `RealRaw` slopes; prove that the nested-radical table has normalized angle
+   `k / 2^n`; then apply constructive inverse uniqueness to inhabit
+   `DyadicHalfAngleTangentEquivalenceFamily`.  Its `sine_equiv` theorem already
+   transports every equal-dyadic sine sample, including zero.  Do not add
+   matching-stage searches, certificate families, or parity-specific public
+   wrappers.
 2. **Squared sine.** Derive the two square-sum edges from the same tangent
    representation family and the checked tangent-square FTC: public dyadic
    squares to nested radicals, then nested radicals to the normalized

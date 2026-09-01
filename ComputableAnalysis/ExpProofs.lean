@@ -7909,11 +7909,11 @@ uses the same rational center map at every stage; the certificate supplies the
 endpoint bracket, and the generic constructor supplies nesting and the
 explicit width modulus. -/
 def uniformExpCenter_threeHalves_inverse : RealRaw :=
-  (uniformExpCenter_threeHalves_certificate 0).toRealRawFamily
+  (uniformExpCenter_threeHalves_certificate 0).toRealRaw
 
 theorem uniformExpCenter_threeHalves_inverse_valid :
     uniformExpCenter_threeHalves_inverse.Valid := by
-  exact FiniteInverseSearchCertificate.toRealRawFamily_valid
+  exact FiniteInverseSearchCertificate.toRealRaw_valid
     (uniformExpCenter_threeHalves_certificate 0) (by native_decide)
 
 theorem uniformExpCenter_threeHalves_inverse_stage_bracket (n : Nat) :

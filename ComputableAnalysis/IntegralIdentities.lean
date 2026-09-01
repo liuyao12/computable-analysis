@@ -16243,17 +16243,10 @@ rational unit branch. -/
 def rectangle : Elementary.Arctan.FunctionRepresentation :=
   IntegralIdentities.arctanIntegralRectangleRepresentation
 
-theorem rectangle_raw_eq :
-    rectangle.raw = IntegralIdentities.arctanIntegralRectangleFunctionRaw := rfl
-
 /-- The monotone-integral packaging of the same unit-branch rectangle
 construction. -/
 def rectangleMonotone : Elementary.Arctan.FunctionRepresentation :=
   IntegralIdentities.arctanIntegralRectangleMonotoneRepresentation
-
-theorem rectangleMonotone_raw_eq :
-    rectangleMonotone.raw =
-      IntegralIdentities.arctanIntegralRectangleMonotoneFunctionRaw := rfl
 
 end integral
 end arctan
