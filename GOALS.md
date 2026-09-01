@@ -3719,23 +3719,12 @@ potential-infinity precision schedule.
   `((1-u^2)/(1+u^2), 2u/(1+u^2))` at that recovered slope `u`; its coordinate
   projections are the first-octant cosine and sine functions.
   The old `ArctanInverseConstruction` remains only the downstream
-  special-value contract.  The next analytic task is to construct the new
-  bridge by proving interval regularity, monotonicity, and effective
-  separation for `arctanGeomOnUnit`; no inverse law is assumed as a bare
-  proposition.  The monotonicity and separation certificates are now
-  formalized in `ArctanGeomInverseData`: they transport the rectangle
-  evaluator's finite order bounds through the certified containment of each
-  positive-loop box.  This keeps the inverse route entirely interval-valued
-  and executable.  The matching box-valued continuity theorem is
-  `arctanGeomOnUnit_near_of_qabs_le`, with the explicit modulus packaged as
-  `arctanGeomOnUnit_effectiveModulus`; interval regularity and the data-valued
-  bisection search are the remaining pieces of this branch.  The native
-  positive-loop evaluator is now also exposed through the cofinal finite
-  schedule `arctanGeomScheduledStage`; `arctanGeomScheduledOnUnit` retains
-  the same geometric boxes while satisfying the literal width estimate
-  `arctanGeomScheduledOnUnit_width_le`.  This is the intended evaluator for
-  the interval-image certificate, rather than silently changing the native
-  algorithm's precision convention.
+  special-value contract.  The canonical scheduled rectangle branch in
+  `ArctanScheduledRegular` now supplies interval regularity, monotonicity,
+  effective separation, an `InvertibleFunctionOnInterval`, and pointwise
+  equivalence with the geometric arctangent.  The remaining analytic task is
+  the target-specific finite search for normalized quarter-turn targets; no
+  inverse law is assumed as a bare proposition.
 - The completed rational-slope half of that route is now exposed as
   `RationalCircle.GeometricTrig.FirstQuadrantArctanWitness`.
   `arctan_to_sine_cosine_coordinates` packages one arctangent equation

@@ -7,8 +7,9 @@ import ComputableAnalysis.IntegralIdentities
 The rational-circle chart has variable angular speed
 `2 / (1 + t^2)`.  This module packages its primitive as an interval-domain
 function and gives the explicit epsilon--delta derivative certificate needed
-to reparametrize by sector-area time.  It intentionally stops before the
-inverse/reparametrized-curve and vector-uniqueness arguments.
+to reparametrize by sector-area time.  This module owns the doubled sector
+clock used by the rotation and ODE layers; the undoubled arctangent inverse is
+packaged separately.
 -/
 
 namespace ComputableAnalysis
