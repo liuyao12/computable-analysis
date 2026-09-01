@@ -52,8 +52,8 @@ budget on each cell.  The cells are summed after their rational budgets have
 been checked.  Thus \(|x|\) is simply two monotone integrals, not a new global
 integration theory.
 
-\lean{ComputableAnalysis.Integral.effectiveGeneralIntegralFor_precision_witness_of_cell_budgets}
-\lean{ComputableAnalysis.Integral.effectiveGeneralIntegralFor_equiv_of_finiteRawListEquiv}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_precision_witness_of_cell_budgets}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_equiv_of_finiteRawListEquiv}
 \lean{ComputableAnalysis.Integral.absoluteValuePiecewise_integral_equiv_one}
 \leanok
 
@@ -73,7 +73,6 @@ with separate rational bounds for the two errors.
 \lean{ComputableAnalysis.HasDerivativeOnInterval.addOfCommonSchedule}
 \lean{ComputableAnalysis.HasDerivativeOnInterval.scaleRat}
 \lean{ComputableAnalysis.ExactFunction.EffectiveDerivativeExact.compOfBudget}
-\lean{ComputableAnalysis.effectiveDerivativeCompositionOfBudget}
 \leanok
 
 The product rule retains its corner term.  For affine factors it is an exact
@@ -83,7 +82,7 @@ errors and the quadratic corner error explicitly.
 \lean{ComputableAnalysis.ExactFunction.affineProduct_differenceQuotient}
 \lean{ComputableAnalysis.ExactFunction.affineProduct_derivative_effective}
 \lean{ComputableAnalysis.effectiveSecantProductRule}
-\lean{ComputableAnalysis.effectiveDerivativeProductOfBudget}
+\lean{ComputableAnalysis.ExactFunction.EffectiveDerivativeExact.mulOfBudget}
 \leanok
 
 At the complex-function level, addition, multiplication, finite powers, and
@@ -157,7 +156,7 @@ arbitrary-power secant certificate proves the power rule and
 calculus mechanism.
 
 \lean{ComputableAnalysis.FinitePolynomial.monomialSecantDerivativeBound}
-\lean{ComputableAnalysis.FinitePolynomial.effectiveMonomialPowerRule}
+\lean{ComputableAnalysis.FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.effectiveExactRatPowIntegral_equiv_one_div_succ}
 \leanok
 
@@ -213,7 +212,7 @@ one.
 \lean{ComputableAnalysis.derivative_between_neighboring_secants}
 \lean{ComputableAnalysis.effectiveConvexDerivative_between_neighboring_secants}
 \lean{ComputableAnalysis.Integral.finiteQuadrature_average_between_bounds}
-\lean{ComputableAnalysis.Integral.effectiveMeanValueBracket}
+\lean{ComputableAnalysis.CandidateDerivativeCellControl.endpoint_average_overlaps_bound}
 \leanok
 
 The reusable curvature certificate converts monotone one-sided derivative
@@ -223,9 +222,9 @@ representative convex calculation; concavity is its order-reversed form.
 \lean{ComputableAnalysis.MonotoneDerivativeBoundMethod}
 \lean{ComputableAnalysis.CurvatureFTCCertificate}
 \lean{ComputableAnalysis.CurvatureFTCCertificate.equiv_endpoint}
-\lean{ComputableAnalysis.Integral.effectiveConvexFTC}
-\lean{ComputableAnalysis.Integral.effectiveConcaveFTC}
-\lean{ComputableAnalysis.Integral.effectiveSquareCurvatureFTC_value_one}
+\lean{ComputableAnalysis.ConvexFTCCertificate.equiv_endpoint}
+\lean{ComputableAnalysis.ConcaveFTCCertificate.equiv_endpoint}
+\lean{ComputableAnalysis.Integral.squareCurvatureFTC_equiv_one}
 \leanok
 
 The cubic shows both possible outcomes.  On \([0,1]\), a dyadic bisection

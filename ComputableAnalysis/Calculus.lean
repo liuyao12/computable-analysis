@@ -6752,37 +6752,6 @@ theorem equiv_endpoint
 
 end ConcaveFTCCertificate
 
-/-- Completed convexity-facing FTC bridge used by the integral chapter.
-
-This is currently the derivative-bound formulation: convexity supplies the
-local monotone derivative bounds, and the general derivative-bound FTC returns
-endpoint equivalence for the integral raw real. -/
-theorem convexFTC
-    {F dF : RealFunRaw} {a b : Rat}
-    (h : ConvexFTCCertificate F dF a b) :
-    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
-      h.toDerivativeBoundFTC.endpointRaw :=
-  h.equiv_endpoint
-
-/-- Completed concavity-facing FTC bridge used by the arctangent-integral
-route. -/
-theorem concaveFTC
-    {F dF : RealFunRaw} {a b : Rat}
-    (h : ConcaveFTCCertificate F dF a b) :
-    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
-      h.toDerivativeBoundFTC.endpointRaw :=
-  h.equiv_endpoint
-
-/-- Curvature-facing FTC bridge.  This is the version useful for both convex
-and concave primitives, including the arctangent primitive on the unit
-interval. -/
-theorem curvatureFTC
-    {F dF : RealFunRaw} {a b : Rat}
-    (h : CurvatureFTCCertificate F dF a b) :
-    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
-      h.toDerivativeBoundFTC.endpointRaw :=
-  h.equiv_endpoint
-
 /-- A partial function together with a proof that it is defined at every
 rational point of a closed rational interval.
 

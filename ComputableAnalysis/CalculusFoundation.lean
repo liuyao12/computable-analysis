@@ -279,56 +279,6 @@ theorem effectiveCanonicalFTC_endpointDifference_apply
   exact RealRaw.equiv_trans h.integral_valid hendpointRawValid hsub
     h.integral_equiv_canonical_endpoint hendpoint
 
-/-! Public curvature-facing FTC entry points.  These are the project's
-    certificate form of the classical MVT/FTC route: convexity or concavity
-    supplies finite derivative brackets, while endpoint transport remains an
-    explicit rational obligation. -/
-theorem effectiveConvexFTC
-    {F dF : RealFunRaw} {a b : Rat}
-    (h : ConvexFTCCertificate F dF a b) :
-    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
-      h.toDerivativeBoundFTC.endpointRaw := by
-  exact Integral.effectiveConvexFTC h
-
-theorem effectiveConcaveFTC
-    {F dF : RealFunRaw} {a b : Rat}
-    (h : ConcaveFTCCertificate F dF a b) :
-    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
-      h.toDerivativeBoundFTC.endpointRaw := by
-  exact Integral.effectiveConcaveFTC h
-
-theorem effectiveCurvatureFTC
-    {F dF : RealFunRaw} {a b : Rat}
-    (h : CurvatureFTCCertificate F dF a b) :
-    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
-      h.toDerivativeBoundFTC.endpointRaw := by
-  exact Integral.effectiveCurvatureFTC h
-
-theorem effectiveMeanValueBracket
-    {F dF : RealFunRaw} {a b : Rat}
-    {C : RationalSubinterval a b}
-    (H : CandidateDerivativeCellControl F dF C)
-    (hF : F.Valid) (hwidth : 0 < C.width) (n : Nat) :
-    QInterval.Overlaps
-      (H.bound n)
-      (QInterval.divByRat
-        (endpointDifferenceInterval F C.lower C.upper
-          (H.endpointPrecision n))
-        C.width) := by
-  exact Integral.effectiveMeanValueBracket H hF hwidth n
-
-/-! Concrete regression client: the rational square certificate closes the
-    curvature-to-FTC pipeline at the normalized value one. -/
-theorem effectiveSquareCurvatureFTC :
-    Integral.squareCurvatureFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
-      Integral.squareCurvatureFTCData.toDerivativeBoundFTC.endpointRaw := by
-  exact Integral.effectiveSquareCurvatureFTC
-
-theorem effectiveSquareCurvatureFTC_value_one :
-    Integral.squareCurvatureFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
-      (RealRaw.ofRat 1) := by
-  exact Integral.effectiveSquareCurvatureFTC_value_one
-
 /-! Public finite integration-by-parts laws.  These are the algebraic
 rectangle identities behind later Stieltjes and change-of-variables proofs;
 the variation term is retained explicitly rather than discarded by a limit. -/

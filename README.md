@@ -42,6 +42,9 @@ For narrower imports:
 - `ComputableAnalysis.AlgebraicFoundation`
 - `ComputableAnalysis.CalculusFoundation`
 
+These foundation modules collect imports without renaming their declarations;
+the canonical theorem name remains the one defined in its subject module.
+
 ## Core representation
 
 - `RealRaw` is one stage-indexed rational interval algorithm.

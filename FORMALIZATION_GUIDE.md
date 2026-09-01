@@ -18,6 +18,10 @@ For faster iteration, import the narrowest foundation listed in
 lake build ComputableAnalysis.CalculusFoundation
 ```
 
+Foundation modules are import surfaces, not renaming namespaces. Refer to a
+declaration by the name in its subject module; do not add an `effective...`
+alias merely because a theorem is re-exported by a broader foundation.
+
 ## The four layers
 
 1. **Finite evaluator.** At stage `n`, compute a rational interval or complex

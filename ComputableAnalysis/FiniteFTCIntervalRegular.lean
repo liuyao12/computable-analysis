@@ -2737,6 +2737,29 @@ theorem squareCurvatureFTC_equiv_endpoint :
       squareCurvatureFTCData.toDerivativeBoundFTC.endpointRaw := by
   exact squareCurvatureFTCData.equiv_endpoint
 
+/-- The square curvature certificate closes at its explicit rational endpoint
+value.  This subject theorem is the sole public value statement; foundation
+modules import it without adding aliases. -/
+theorem squareCurvatureFTC_equiv_one :
+    squareCurvatureFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      (RealRaw.ofRat 1) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    squareCurvatureFTCData.toDerivativeBoundFTC.boundedIntegralRaw
+    (RealRaw.ofRat 1) n n).2
+  let H := squareCurvatureFTCData.toDerivativeBoundFTC
+  change QInterval.Overlaps
+    (H.boundedIntegralInterval (precisionAtStage n))
+    ({ lo := 1, hi := 1 } : QInterval)
+  have hover := H.overlap (precisionAtStage n)
+  simp [H, squareCurvatureFTCData, squareEffectiveFTCData,
+    endpointDifferenceInterval, squarePrimitiveRaw, RealFunRaw.exact] at hover
+  simp [H, DerivativeBoundFTC.boundedIntegralInterval,
+    squareCurvatureFTCData, squareEffectiveFTCData, squarePrimitiveRaw,
+    RealFunRaw.exact] at ⊢
+  unfold QInterval.Overlaps at hover ⊢
+  grind
+
 /-! ## Cubic effective FTC instance
 
 This is the first non-linear reuse of the adapter.  On `[a,b] ⊆ [0,1]`, the

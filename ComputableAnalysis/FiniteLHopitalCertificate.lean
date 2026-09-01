@@ -4,7 +4,7 @@ import ComputableAnalysis.Differential
 # A finite rational L'Hôpital certificate
 
 This module packages one useful step beyond bare common-factor cancellation.
-After cancelling a nonzero linear factor, affine residuals admit an exact
+After cancelling a nonzero linear factor, affine residuals have an exact
 cross-product remainder formula.  The formula records the coefficient that
 controls the residual quotient algebraically; it is a finite rational
 certificate and does not assert a limit theorem.
