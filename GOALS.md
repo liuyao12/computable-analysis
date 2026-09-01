@@ -162,7 +162,8 @@ from Lean when an analytic proof needs them.
   import them rather than reproving them under new names.
 - Keep one representative for a computational pattern. Derive scalar,
   sign, degree, and finite-piece variants by transport.
-- Mark compatibility adapters as legacy and do not link them from the
+- Keep a compatibility adapter only while a concrete consumer needs it;
+  otherwise remove the closed adapter chain. Do not link adapters from the
   blueprint.
 - A provider structure is not counted as a completed theorem until an
   inhabitant and its endpoint/value theorem are checked.

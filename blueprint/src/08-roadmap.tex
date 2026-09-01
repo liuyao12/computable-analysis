@@ -39,22 +39,10 @@ finite cell bounds
   -> valid integral equivalent to endpoint difference
 \end{verbatim}
 
-\lean{ComputableAnalysis.DerivativeBoundFTC.boundedIntegralRaw_widths_shrink}
-\lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_valid}
-\lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_equiv_endpointDifference}
-\lean{ComputableAnalysis.Integral.effectiveFTCConstructionFor}
-\lean{ComputableAnalysis.Integral.effectiveFTCIntegral_equiv_endpointDifference}
-\leanok
-
 Successive finite sums may use unrelated partitions.  The proof derives
 shrinking width and then supplies nestedness; it does not assume the native
 candidate was already a valid \texttt{realRaw}.  The squared finite sine
 prefix is the first nonlinear regression of this exact route.
-
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCStabilized_valid}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCStabilized_equiv_value}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCConstruction_equiv_value}
-\leanok
 
 \section{Main representation frontier}
 
@@ -72,11 +60,6 @@ Overlap is not transitive for arbitrary interval boxes.  The chain
 stabilizer widens by the vanishing middle width and then intersects prefixes
 against the valid anchor.  Therefore no three-way same-stage witness is
 required.
-
-\lean{ComputableAnalysis.RealRaw.overlapChainStabilize_valid}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized_valid}
-\lean{ComputableAnalysis.effectiveDyadicPublicSquareIntegral_chain_equiv_quarter}
-\leanok
 
 The remaining work is the uniform rational-circle certificate for every
 dyadic sample and the nested-radical-to-normalized-anchor witness.  Fixed

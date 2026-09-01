@@ -1252,15 +1252,6 @@ def constructionFor_of_effectiveFTC
   certificate := by
     simpa [RealRaw.Valid, FTC.riemannRawOfEffectiveFTC] using hvalid
 
-theorem integralFor_effectiveFTC_compute_eq
-    {integrand primitive : FunctionOnInterval}
-    (h : EffectiveFTC primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hvalid : (FTC.riemannRawOfEffectiveFTC h).Valid) :
-    (Integral.integralFor integrand
-      (constructionFor_of_effectiveFTC h hvalid)).compute =
-        FTC.riemannComputeOfEffectiveFTC h := rfl
-
 /-- Turn an `EffectiveFTC` certificate into the domain-aware definite-integral
 identity interface.
 
@@ -1315,15 +1306,6 @@ def constructionFor_of_staticDyadicEffectiveFTC
     Integral.ConstructionFor integrand :=
   constructionFor_of_effectiveFTC h.toEffectiveFTC hvalid
 
-theorem integralFor_staticDyadicEffectiveFTC_compute_eq
-    {integrand primitive : FunctionOnInterval}
-    (h : StaticDyadicEffectiveFTC primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hvalid : (FTC.riemannRawOfEffectiveFTC h.toEffectiveFTC).Valid) :
-    (Integral.integralFor integrand
-      (constructionFor_of_staticDyadicEffectiveFTC h hvalid)).compute =
-        FTC.riemannComputeOfEffectiveFTC h.toEffectiveFTC := rfl
-
 /-- Domain-aware definite-integral identity produced by a static-dyadic
 `EffectiveFTC` certificate. -/
 def definiteIdentityFor_of_staticDyadicEffectiveFTC
@@ -1346,80 +1328,6 @@ def definiteIdentityFor_of_staticDyadicEffectiveFTC
   definiteIdentityFor_of_effectiveFTC
     same_lower same_upper h.toEffectiveFTC
     hriemann hscheduledEndpoint hendpoint hendpoint_equiv
-
-def definiteIdentityFor_of_effectiveFTC_endpointAgreement
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : EffectiveFTC primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hriemann : (FTC.riemannRawOfEffectiveFTC h).Valid)
-    (endpoint :
-      FTC.EndpointScheduleAgreement primitive.toRealFunRaw
-        integrand.lower integrand.upper
-        (FTC.endpointRawOfEffectiveFTC h)) :
-    DefiniteIdentityFor integrand primitive :=
-  definiteIdentityFor_of_effectiveFTC
-    same_lower same_upper h hriemann
-    endpoint.scheduled_valid endpoint.endpoint_valid endpoint.equivalent
-
-def definiteIdentityFor_of_effectiveFTC_stageSchedule
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : EffectiveFTC primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hriemann : (FTC.riemannRawOfEffectiveFTC h).Valid)
-    (hendpoint :
-      RealRaw.ValidCompute
-        (endpointDifferenceCompute
-          primitive.toRealFunRaw integrand.lower integrand.upper))
-    (sigma : RealRaw.StageSchedule)
-    (hsigma :
-      forall n, h.chooseEvalPrecision (FTC.requestedPrecision n) =
-        sigma.stage n) :
-    DefiniteIdentityFor integrand primitive :=
-  definiteIdentityFor_of_effectiveFTC_endpointAgreement
-    same_lower same_upper h hriemann
-    (FTC.endpointScheduleAgreement_of_effectiveFTC_stageSchedule
-      h hendpoint sigma hsigma)
-
-def definiteIdentityFor_of_staticDyadicEffectiveFTC_endpointAgreement
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : StaticDyadicEffectiveFTC primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hriemann : (FTC.riemannRawOfEffectiveFTC h.toEffectiveFTC).Valid)
-    (endpoint :
-      FTC.EndpointScheduleAgreement primitive.toRealFunRaw
-        integrand.lower integrand.upper
-        (FTC.endpointRawOfEffectiveFTC h.toEffectiveFTC)) :
-    DefiniteIdentityFor integrand primitive :=
-  definiteIdentityFor_of_staticDyadicEffectiveFTC
-    same_lower same_upper h hriemann
-    endpoint.scheduled_valid endpoint.endpoint_valid endpoint.equivalent
-
-def definiteIdentityFor_of_staticDyadicEffectiveFTC_stageSchedule
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : StaticDyadicEffectiveFTC primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hriemann : (FTC.riemannRawOfEffectiveFTC h.toEffectiveFTC).Valid)
-    (hendpoint :
-      RealRaw.ValidCompute
-        (endpointDifferenceCompute
-          primitive.toRealFunRaw integrand.lower integrand.upper))
-    (sigma : RealRaw.StageSchedule)
-    (hsigma :
-      forall n, h.chooseEvalPrecision (FTC.requestedPrecision n) =
-        sigma.stage n) :
-    DefiniteIdentityFor integrand primitive :=
-  definiteIdentityFor_of_staticDyadicEffectiveFTC_endpointAgreement
-    same_lower same_upper h hriemann
-    (FTC.endpointScheduleAgreement_of_staticDyadicEffectiveFTC_stageSchedule
-      h hendpoint sigma hsigma)
 
 /-- Package a stabilized two-stage finite FTC evaluator as a public
 domain-aware integral construction.
@@ -1461,15 +1369,6 @@ def constructionFor_of_derivativeBoundFTC
   compute := h.boundedIntegralCompute
   certificate := by
     simpa [RealRaw.Valid, DerivativeBoundFTC.boundedIntegralRaw] using hvalid
-
-theorem integralFor_derivativeBoundFTC_compute_eq
-    {integrand primitive : FunctionOnInterval}
-    (h : DerivativeBoundFTC primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hvalid : h.boundedIntegralRaw.Valid) :
-    (Integral.integralFor integrand
-      (constructionFor_of_derivativeBoundFTC h hvalid)).compute =
-        h.boundedIntegralCompute := rfl
 
 /-- Turn a derivative-bound FTC certificate into the domain-aware definite
 integral identity interface.
@@ -1515,104 +1414,6 @@ def definiteIdentityFor_of_derivativeBoundFTC
       hbridge
       hendpoint_equiv
 
-def definiteIdentityFor_of_derivativeBoundFTC_endpointAgreement
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : DerivativeBoundFTC primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hbounded : h.boundedIntegralRaw.Valid)
-    (endpoint :
-      FTC.EndpointScheduleAgreement primitive.toRealFunRaw
-        integrand.lower integrand.upper h.endpointRaw) :
-    DefiniteIdentityFor integrand primitive :=
-  definiteIdentityFor_of_derivativeBoundFTC
-    same_lower same_upper h hbounded
-    endpoint.scheduled_valid endpoint.endpoint_valid endpoint.equivalent
-
-def definiteIdentityFor_of_derivativeBoundFTC_stageSchedule
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : DerivativeBoundFTC primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hbounded : h.boundedIntegralRaw.Valid)
-    (hendpoint :
-      RealRaw.ValidCompute
-        (endpointDifferenceCompute
-          primitive.toRealFunRaw integrand.lower integrand.upper))
-    (sigma : RealRaw.StageSchedule)
-    (hsigma :
-      forall n, h.chooseEndpointPrecision (precisionAtStage n) =
-        sigma.stage n) :
-    DefiniteIdentityFor integrand primitive :=
-  definiteIdentityFor_of_derivativeBoundFTC_endpointAgreement
-    same_lower same_upper h hbounded
-    (FTC.endpointScheduleAgreement_of_derivativeBoundFTC_stageSchedule
-      h hendpoint sigma hsigma)
-
-/-! The selected-stage FTC interface is the direct form used by evaluators
-whose derivative and endpoint boxes are deliberately computed at one common
-finite stage.  Keep this bridge separate from the derivative-bound wrapper:
-the selected-stage certificate already contains the finite telescope and
-should be consumable without an artificial re-packaging step. -/
-
-def constructionFor_of_selectedStageCandidateDerivativeFTC
-    {integrand primitive : FunctionOnInterval}
-    (h : SelectedStageCandidateDerivativeFTC
-      primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hvalid : h.boundedIntegralRaw.Valid) :
-    Integral.ConstructionFor integrand where
-  compute := h.boundedIntegralCompute
-  certificate := by
-    simpa [RealRaw.Valid, SelectedStageCandidateDerivativeFTC.boundedIntegralRaw] using hvalid
-
-theorem integralFor_selectedStageCandidateDerivativeFTC_compute_eq
-    {integrand primitive : FunctionOnInterval}
-    (h : SelectedStageCandidateDerivativeFTC
-      primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hvalid : h.boundedIntegralRaw.Valid) :
-    (Integral.integralFor integrand
-      (constructionFor_of_selectedStageCandidateDerivativeFTC h hvalid)).compute =
-        h.boundedIntegralCompute := rfl
-
-def definiteIdentityFor_of_selectedStageCandidateDerivativeFTC
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : SelectedStageCandidateDerivativeFTC
-      primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hbounded : h.boundedIntegralRaw.Valid)
-    (hscheduledEndpoint : h.endpointRaw.Valid)
-    (hendpoint :
-      RealRaw.ValidCompute
-        (endpointDifferenceCompute
-          primitive.toRealFunRaw integrand.lower integrand.upper))
-    (hendpoint_equiv :
-      h.endpointRaw.Equiv
-        (endpointDifferenceRaw
-          primitive.toRealFunRaw integrand.lower integrand.upper hendpoint)) :
-    DefiniteIdentityFor integrand primitive where
-  same_lower := same_lower
-  same_upper := same_upper
-  construction := constructionFor_of_selectedStageCandidateDerivativeFTC h hbounded
-  endpoint_valid := hendpoint
-  equivalent := by
-    have hbridge :
-        (Integral.integralFor integrand
-          (constructionFor_of_selectedStageCandidateDerivativeFTC h hbounded)).Equiv
-            h.endpointRaw := by
-      simpa [Integral.integralFor,
-        constructionFor_of_selectedStageCandidateDerivativeFTC,
-        SelectedStageCandidateDerivativeFTC.boundedIntegralRaw] using h.equiv_endpoint
-    exact RealRaw.equiv_trans
-      (Integral.integralFor_valid integrand
-        (constructionFor_of_selectedStageCandidateDerivativeFTC h hbounded))
-      hscheduledEndpoint hendpoint hbridge hendpoint_equiv
-
 /-- Candidate-derivative specialization of
 `constructionFor_of_derivativeBoundFTC`. -/
 def constructionFor_of_candidateDerivativeFTC
@@ -1622,15 +1423,6 @@ def constructionFor_of_candidateDerivativeFTC
     (hvalid : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid) :
     Integral.ConstructionFor integrand :=
   constructionFor_of_derivativeBoundFTC h.toDerivativeBoundFTC hvalid
-
-theorem integralFor_candidateDerivativeFTC_compute_eq
-    {integrand primitive : FunctionOnInterval}
-    (h : CandidateDerivativeFTC primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hvalid : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid) :
-    (Integral.integralFor integrand
-      (constructionFor_of_candidateDerivativeFTC h hvalid)).compute =
-        h.toDerivativeBoundFTC.boundedIntegralCompute := rfl
 
 /-- Turn a candidate-derivative FTC certificate into the domain-aware
 definite-integral identity interface. -/
@@ -1655,45 +1447,6 @@ def definiteIdentityFor_of_candidateDerivativeFTC
     same_lower same_upper h.toDerivativeBoundFTC
     hbounded hscheduledEndpoint hendpoint hendpoint_equiv
 
-def definiteIdentityFor_of_candidateDerivativeFTC_endpointAgreement
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : CandidateDerivativeFTC primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
-    (endpoint :
-      FTC.EndpointScheduleAgreement primitive.toRealFunRaw
-        integrand.lower integrand.upper
-        h.toDerivativeBoundFTC.endpointRaw) :
-    DefiniteIdentityFor integrand primitive :=
-  definiteIdentityFor_of_candidateDerivativeFTC
-    same_lower same_upper h hbounded
-    endpoint.scheduled_valid endpoint.endpoint_valid endpoint.equivalent
-
-def definiteIdentityFor_of_candidateDerivativeFTC_stageSchedule
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : CandidateDerivativeFTC primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
-    (hendpoint :
-      RealRaw.ValidCompute
-        (endpointDifferenceCompute
-          primitive.toRealFunRaw integrand.lower integrand.upper))
-    (sigma : RealRaw.StageSchedule)
-    (hsigma :
-      forall n,
-        h.toDerivativeBoundFTC.chooseEndpointPrecision
-            (precisionAtStage n) =
-          sigma.stage n) :
-    DefiniteIdentityFor integrand primitive :=
-  definiteIdentityFor_of_candidateDerivativeFTC_endpointAgreement
-    same_lower same_upper h hbounded
-    (FTC.endpointScheduleAgreement_of_candidateDerivativeFTC_stageSchedule
-      h hendpoint sigma hsigma)
-
 /-- Convexity-facing specialization of
 `definiteIdentityFor_of_derivativeBoundFTC`.
 
@@ -1706,15 +1459,6 @@ def constructionFor_of_curvatureFTC
     (hvalid : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid) :
     Integral.ConstructionFor integrand :=
   constructionFor_of_derivativeBoundFTC h.toDerivativeBoundFTC hvalid
-
-theorem integralFor_curvatureFTC_compute_eq
-    {integrand primitive : FunctionOnInterval}
-    (h : CurvatureFTCCertificate primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hvalid : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid) :
-    (Integral.integralFor integrand
-      (constructionFor_of_curvatureFTC h hvalid)).compute =
-        h.toDerivativeBoundFTC.boundedIntegralCompute := rfl
 
 /-- Turn a curvature FTC certificate into the domain-aware definite-integral
 identity interface.  This covers both convex and concave curvature data. -/
@@ -1739,45 +1483,6 @@ def definiteIdentityFor_of_curvatureFTC
     same_lower same_upper h.toDerivativeBoundFTC
     hbounded hscheduledEndpoint hendpoint hendpoint_equiv
 
-def definiteIdentityFor_of_curvatureFTC_endpointAgreement
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : CurvatureFTCCertificate primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
-    (endpoint :
-      FTC.EndpointScheduleAgreement primitive.toRealFunRaw
-        integrand.lower integrand.upper
-        h.toDerivativeBoundFTC.endpointRaw) :
-    DefiniteIdentityFor integrand primitive :=
-  definiteIdentityFor_of_curvatureFTC
-    same_lower same_upper h hbounded
-    endpoint.scheduled_valid endpoint.endpoint_valid endpoint.equivalent
-
-def definiteIdentityFor_of_curvatureFTC_stageSchedule
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : CurvatureFTCCertificate primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
-    (hendpoint :
-      RealRaw.ValidCompute
-        (endpointDifferenceCompute
-          primitive.toRealFunRaw integrand.lower integrand.upper))
-    (sigma : RealRaw.StageSchedule)
-    (hsigma :
-      forall n,
-        h.toDerivativeBoundFTC.chooseEndpointPrecision
-            (precisionAtStage n) =
-          sigma.stage n) :
-    DefiniteIdentityFor integrand primitive :=
-  definiteIdentityFor_of_curvatureFTC_endpointAgreement
-    same_lower same_upper h hbounded
-    (FTC.endpointScheduleAgreement_of_curvatureFTC_stageSchedule
-      h hendpoint sigma hsigma)
-
 def constructionFor_of_convexFTC
     {integrand primitive : FunctionOnInterval}
     (h : ConvexFTCCertificate primitive.toRealFunRaw integrand.toRealFunRaw
@@ -1785,15 +1490,6 @@ def constructionFor_of_convexFTC
     (hvalid : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid) :
     Integral.ConstructionFor integrand :=
   constructionFor_of_curvatureFTC h.toCurvatureFTCCertificate hvalid
-
-theorem integralFor_convexFTC_compute_eq
-    {integrand primitive : FunctionOnInterval}
-    (h : ConvexFTCCertificate primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hvalid : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid) :
-    (Integral.integralFor integrand
-      (constructionFor_of_convexFTC h hvalid)).compute =
-        h.toDerivativeBoundFTC.boundedIntegralCompute := rfl
 
 def definiteIdentityFor_of_convexFTC
     {integrand primitive : FunctionOnInterval}
@@ -1816,45 +1512,6 @@ def definiteIdentityFor_of_convexFTC
     same_lower same_upper h.toCurvatureFTCCertificate
     hbounded hscheduledEndpoint hendpoint hendpoint_equiv
 
-def definiteIdentityFor_of_convexFTC_endpointAgreement
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : ConvexFTCCertificate primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
-    (endpoint :
-      FTC.EndpointScheduleAgreement primitive.toRealFunRaw
-        integrand.lower integrand.upper
-        h.toDerivativeBoundFTC.endpointRaw) :
-    DefiniteIdentityFor integrand primitive :=
-  definiteIdentityFor_of_convexFTC
-    same_lower same_upper h hbounded
-    endpoint.scheduled_valid endpoint.endpoint_valid endpoint.equivalent
-
-def definiteIdentityFor_of_convexFTC_stageSchedule
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : ConvexFTCCertificate primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
-    (hendpoint :
-      RealRaw.ValidCompute
-        (endpointDifferenceCompute
-          primitive.toRealFunRaw integrand.lower integrand.upper))
-    (sigma : RealRaw.StageSchedule)
-    (hsigma :
-      forall n,
-        h.toDerivativeBoundFTC.chooseEndpointPrecision
-            (precisionAtStage n) =
-          sigma.stage n) :
-    DefiniteIdentityFor integrand primitive :=
-  definiteIdentityFor_of_convexFTC_endpointAgreement
-    same_lower same_upper h hbounded
-    (FTC.endpointScheduleAgreement_of_convexFTC_stageSchedule
-      h hendpoint sigma hsigma)
-
 def constructionFor_of_concaveFTC
     {integrand primitive : FunctionOnInterval}
     (h : ConcaveFTCCertificate primitive.toRealFunRaw integrand.toRealFunRaw
@@ -1862,15 +1519,6 @@ def constructionFor_of_concaveFTC
     (hvalid : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid) :
     Integral.ConstructionFor integrand :=
   constructionFor_of_curvatureFTC h.toCurvatureFTCCertificate hvalid
-
-theorem integralFor_concaveFTC_compute_eq
-    {integrand primitive : FunctionOnInterval}
-    (h : ConcaveFTCCertificate primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hvalid : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid) :
-    (Integral.integralFor integrand
-      (constructionFor_of_concaveFTC h hvalid)).compute =
-        h.toDerivativeBoundFTC.boundedIntegralCompute := rfl
 
 def definiteIdentityFor_of_concaveFTC
     {integrand primitive : FunctionOnInterval}
@@ -1892,235 +1540,6 @@ def definiteIdentityFor_of_concaveFTC
   definiteIdentityFor_of_curvatureFTC
     same_lower same_upper h.toCurvatureFTCCertificate
     hbounded hscheduledEndpoint hendpoint hendpoint_equiv
-
-def definiteIdentityFor_of_concaveFTC_endpointAgreement
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : ConcaveFTCCertificate primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
-    (endpoint :
-      FTC.EndpointScheduleAgreement primitive.toRealFunRaw
-        integrand.lower integrand.upper
-        h.toDerivativeBoundFTC.endpointRaw) :
-    DefiniteIdentityFor integrand primitive :=
-  definiteIdentityFor_of_concaveFTC
-    same_lower same_upper h hbounded
-    endpoint.scheduled_valid endpoint.endpoint_valid endpoint.equivalent
-
-def definiteIdentityFor_of_concaveFTC_stageSchedule
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : ConcaveFTCCertificate primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
-    (hendpoint :
-      RealRaw.ValidCompute
-        (endpointDifferenceCompute
-          primitive.toRealFunRaw integrand.lower integrand.upper))
-    (sigma : RealRaw.StageSchedule)
-    (hsigma :
-      forall n,
-        h.toDerivativeBoundFTC.chooseEndpointPrecision
-            (precisionAtStage n) =
-          sigma.stage n) :
-    DefiniteIdentityFor integrand primitive :=
-  definiteIdentityFor_of_concaveFTC_endpointAgreement
-    same_lower same_upper h hbounded
-    (FTC.endpointScheduleAgreement_of_concaveFTC_stageSchedule
-      h hendpoint sigma hsigma)
-
-def generalDefiniteIdentityFor_of_effectiveFTC_stageSchedule
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : EffectiveFTC primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hriemann : (FTC.riemannRawOfEffectiveFTC h).Valid)
-    (hendpoint :
-      RealRaw.ValidCompute
-        (endpointDifferenceCompute
-          primitive.toRealFunRaw integrand.lower integrand.upper))
-    (sigma : RealRaw.StageSchedule)
-    (hsigma :
-      forall n, h.chooseEvalPrecision (FTC.requestedPrecision n) =
-        sigma.stage n)
-    (construction : Integral.GeneralConstructionFor integrand)
-    (hconstruction :
-      (Integral.generalIntegralFor integrand construction).Equiv
-        (Integral.integralFor integrand
-          (constructionFor_of_effectiveFTC h hriemann))) :
-    GeneralDefiniteIdentityFor integrand primitive :=
-  GeneralDefiniteIdentityFor.ofDefiniteIdentityFor
-    (definiteIdentityFor_of_effectiveFTC_stageSchedule
-      same_lower same_upper h hriemann hendpoint sigma hsigma)
-    construction hconstruction
-
-def generalDefiniteIdentityFor_of_staticDyadicEffectiveFTC_stageSchedule
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : StaticDyadicEffectiveFTC primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hriemann : (FTC.riemannRawOfEffectiveFTC h.toEffectiveFTC).Valid)
-    (hendpoint :
-      RealRaw.ValidCompute
-        (endpointDifferenceCompute
-          primitive.toRealFunRaw integrand.lower integrand.upper))
-    (sigma : RealRaw.StageSchedule)
-    (hsigma :
-      forall n, h.chooseEvalPrecision (FTC.requestedPrecision n) =
-        sigma.stage n)
-    (construction : Integral.GeneralConstructionFor integrand)
-    (hconstruction :
-      (Integral.generalIntegralFor integrand construction).Equiv
-        (Integral.integralFor integrand
-          (constructionFor_of_staticDyadicEffectiveFTC h hriemann))) :
-    GeneralDefiniteIdentityFor integrand primitive :=
-  GeneralDefiniteIdentityFor.ofDefiniteIdentityFor
-    (definiteIdentityFor_of_staticDyadicEffectiveFTC_stageSchedule
-      same_lower same_upper h hriemann hendpoint sigma hsigma)
-    construction hconstruction
-
-def generalDefiniteIdentityFor_of_derivativeBoundFTC_stageSchedule
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : DerivativeBoundFTC primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hbounded : h.boundedIntegralRaw.Valid)
-    (hendpoint :
-      RealRaw.ValidCompute
-        (endpointDifferenceCompute
-          primitive.toRealFunRaw integrand.lower integrand.upper))
-    (sigma : RealRaw.StageSchedule)
-    (hsigma :
-      forall n, h.chooseEndpointPrecision (precisionAtStage n) =
-        sigma.stage n)
-    (construction : Integral.GeneralConstructionFor integrand)
-    (hconstruction :
-      (Integral.generalIntegralFor integrand construction).Equiv
-        (Integral.integralFor integrand
-          (constructionFor_of_derivativeBoundFTC h hbounded))) :
-    GeneralDefiniteIdentityFor integrand primitive :=
-  GeneralDefiniteIdentityFor.ofDefiniteIdentityFor
-    (definiteIdentityFor_of_derivativeBoundFTC_stageSchedule
-      same_lower same_upper h hbounded hendpoint sigma hsigma)
-    construction hconstruction
-
-def generalDefiniteIdentityFor_of_candidateDerivativeFTC_stageSchedule
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : CandidateDerivativeFTC primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
-    (hendpoint :
-      RealRaw.ValidCompute
-        (endpointDifferenceCompute
-          primitive.toRealFunRaw integrand.lower integrand.upper))
-    (sigma : RealRaw.StageSchedule)
-    (hsigma :
-      forall n,
-        h.toDerivativeBoundFTC.chooseEndpointPrecision
-            (precisionAtStage n) =
-          sigma.stage n)
-    (construction : Integral.GeneralConstructionFor integrand)
-    (hconstruction :
-      (Integral.generalIntegralFor integrand construction).Equiv
-        (Integral.integralFor integrand
-          (constructionFor_of_candidateDerivativeFTC h hbounded))) :
-    GeneralDefiniteIdentityFor integrand primitive :=
-  GeneralDefiniteIdentityFor.ofDefiniteIdentityFor
-    (definiteIdentityFor_of_candidateDerivativeFTC_stageSchedule
-      same_lower same_upper h hbounded hendpoint sigma hsigma)
-    construction hconstruction
-
-def generalDefiniteIdentityFor_of_curvatureFTC_stageSchedule
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : CurvatureFTCCertificate primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
-    (hendpoint :
-      RealRaw.ValidCompute
-        (endpointDifferenceCompute
-          primitive.toRealFunRaw integrand.lower integrand.upper))
-    (sigma : RealRaw.StageSchedule)
-    (hsigma :
-      forall n,
-        h.toDerivativeBoundFTC.chooseEndpointPrecision
-            (precisionAtStage n) =
-          sigma.stage n)
-    (construction : Integral.GeneralConstructionFor integrand)
-    (hconstruction :
-      (Integral.generalIntegralFor integrand construction).Equiv
-        (Integral.integralFor integrand
-          (constructionFor_of_curvatureFTC h hbounded))) :
-    GeneralDefiniteIdentityFor integrand primitive :=
-  GeneralDefiniteIdentityFor.ofDefiniteIdentityFor
-    (definiteIdentityFor_of_curvatureFTC_stageSchedule
-      same_lower same_upper h hbounded hendpoint sigma hsigma)
-    construction hconstruction
-
-def generalDefiniteIdentityFor_of_convexFTC_stageSchedule
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : ConvexFTCCertificate primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
-    (hendpoint :
-      RealRaw.ValidCompute
-        (endpointDifferenceCompute
-          primitive.toRealFunRaw integrand.lower integrand.upper))
-    (sigma : RealRaw.StageSchedule)
-    (hsigma :
-      forall n,
-        h.toDerivativeBoundFTC.chooseEndpointPrecision
-            (precisionAtStage n) =
-          sigma.stage n)
-    (construction : Integral.GeneralConstructionFor integrand)
-    (hconstruction :
-      (Integral.generalIntegralFor integrand construction).Equiv
-        (Integral.integralFor integrand
-          (constructionFor_of_convexFTC h hbounded))) :
-    GeneralDefiniteIdentityFor integrand primitive :=
-  GeneralDefiniteIdentityFor.ofDefiniteIdentityFor
-    (definiteIdentityFor_of_convexFTC_stageSchedule
-      same_lower same_upper h hbounded hendpoint sigma hsigma)
-    construction hconstruction
-
-def generalDefiniteIdentityFor_of_concaveFTC_stageSchedule
-    {integrand primitive : FunctionOnInterval}
-    (same_lower : primitive.lower = integrand.lower)
-    (same_upper : primitive.upper = integrand.upper)
-    (h : ConcaveFTCCertificate primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper)
-    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
-    (hendpoint :
-      RealRaw.ValidCompute
-        (endpointDifferenceCompute
-          primitive.toRealFunRaw integrand.lower integrand.upper))
-    (sigma : RealRaw.StageSchedule)
-    (hsigma :
-      forall n,
-        h.toDerivativeBoundFTC.chooseEndpointPrecision
-            (precisionAtStage n) =
-          sigma.stage n)
-    (construction : Integral.GeneralConstructionFor integrand)
-    (hconstruction :
-      (Integral.generalIntegralFor integrand construction).Equiv
-        (Integral.integralFor integrand
-          (constructionFor_of_concaveFTC h hbounded))) :
-    GeneralDefiniteIdentityFor integrand primitive :=
-  GeneralDefiniteIdentityFor.ofDefiniteIdentityFor
-    (definiteIdentityFor_of_concaveFTC_stageSchedule
-      same_lower same_upper h hbounded hendpoint sigma hsigma)
-    construction hconstruction
 
 theorem endpointDifference_linearPrimitive_compute
     (c a b : Rat) (n : Nat) :

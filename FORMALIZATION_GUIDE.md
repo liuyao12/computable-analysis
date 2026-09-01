@@ -91,6 +91,11 @@ meaning once, and supply a finite search only for those normalized targets.
 Do not demand an inverse for every value carrying a nominal endpoint-range
 certificate.
 
+Reuse the quantitative rectangle facts in `ArctanGeometry`—in particular
+`arctanIntegralRectangleCompute_width_le_sixteenth_input_precision` and
+`arctanIntegralRectangleCompute_boxes_strictly_separated`. Do not re-prove
+their finite tail estimate in a scaled presentation module.
+
 Use `InvertibleFunctionOnInterval.source_equiv_of_forward_equiv` for
 uniqueness: equivalent forward interval computations imply equivalent source
 computations when the separation schedule resolves every positive rational
@@ -134,6 +139,12 @@ For a public integral, certify `dF.Valid` and its domain on `[a,b]`, then use
 `FunctionOnInterval.ofRealFunRaw` and `Integral.effectiveFTCConstructionFor`.
 The raw stabilizer remains the internal value computation; clients should
 normally expose the resulting `ConstructionFor`.
+
+When an endpoint identity itself must be packaged, use
+`Integral.DefiniteIdentityFor`. Pass a certified endpoint computation to the
+direct constructor for the relevant FTC certificate. Endpoint-agreement and
+stage-schedule conversion lemmas belong in `FTC`; duplicating one adapter for
+every certificate subtype is not part of the public integral API.
 
 These theorems do not assume the native finite sums are already nested. The
 older `FTC.effectiveFTCStabilizedRaw_valid` route is compatibility API for

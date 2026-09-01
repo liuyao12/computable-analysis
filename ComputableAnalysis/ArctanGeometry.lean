@@ -3962,7 +3962,9 @@ theorem arctanIntegralRectangleCompute_width_le_four_div_succ
     _ = 4 / (((n + 1 : Nat) : Rat)) := by
           exact four_mul_one_div_eq_div (n + 1)
 
-private theorem arctanIntegralRectangleCompute_width_le_sixteenth_gap
+/-- At stage `64 (n+1)`, every unit-chart arctangent rectangle box is at
+most one sixteenth of the inverse-search input scale `1/(n+1)`. -/
+theorem arctanIntegralRectangleCompute_width_le_sixteenth_input_precision
     {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) (n : Nat) :
     (arctanIntegralRectangleCompute x (64 * (n + 1))).width <=
       1 / (16 * (((n + 1 : Nat) : Rat))) := by
@@ -4088,8 +4090,10 @@ theorem arctanIntegralRectangleCompute_boxes_strictly_separated
         Rat.mul_le_mul_of_nonneg_right hstep (by native_decide)
       _ <= (y - x) * integralKernel y :=
         Rat.mul_le_mul_of_nonneg_left hkernel (by grind [Rat.sub_eq_add_neg])
-  have hwidthX := arctanIntegralRectangleCompute_width_le_sixteenth_gap hx0 hx1 n
-  have hwidthY := arctanIntegralRectangleCompute_width_le_sixteenth_gap hy0 hy1 n
+  have hwidthX :=
+    arctanIntegralRectangleCompute_width_le_sixteenth_input_precision hx0 hx1 n
+  have hwidthY :=
+    arctanIntegralRectangleCompute_width_le_sixteenth_input_precision hy0 hy1 n
   have hsixteenth : 1 / (16 * d) = delta / 16 := by
     dsimp [delta]
     rw [Rat.div_def, Rat.inv_mul_rev]
