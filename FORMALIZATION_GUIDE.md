@@ -183,6 +183,12 @@ These theorems do not assume the native finite sums are already nested. The
 older `FTC.effectiveFTCStabilizedRaw_valid` route is compatibility API for
 existing `EffectiveFTC` clients and is not the preferred foundation.
 
+For algebra on certified integrals, reuse
+`Integral.Construction.addOfCommonPlan` and
+`Integral.Construction.scaleRat`; their corresponding `integral_*_equiv`
+theorems transport the result. Addition requires a shared finite plan, making
+the exact rectangle identity explicit instead of hiding a resampling step.
+
 ### Stieltjes/change of variable
 
 When the natural sampling coordinate is not the public variable, represent the
@@ -237,17 +243,17 @@ Use `dyadicPublicSquareIntegralRaw_chainStabilized`. Its current open provider
 instances are:
 
 - `DyadicSquareCircleOverlapFamily`;
-- `DyadicNestedRadicalSquareAnchorCommonWitness` for the normalized anchor;
-- `TangentSquareIntegralEffectiveFTCOverlap`.
+- `DyadicNestedRadicalSquareAnchorCommonWitness` for
+  `normalizedTangentSquareEffectiveFTCIntegralRaw`.
 
 The public API deliberately has no three-way shared-witness certificate: such
 a certificate asks for stronger same-stage data than the proof needs.
 The normalized anchor is already valid, and
-`TangentSquareIntegralEffectiveFTCOverlap.normalized_equiv_quarter` gives its
-value from the tangent-square FTC bridge.  The chain theorem is not a completed
-value theorem until these providers are inhabited.  Derive them from the
-canonical tangent representation edge rather than reviving finite candidate
-searches.
+`normalizedTangentSquareEffectiveFTCIntegralRaw_equiv_quarter` gives its value
+directly from the tangent-square effective FTC.  The chain theorem is not a
+completed value theorem until the two finite transport providers are
+inhabited.  Derive them from the canonical tangent representation edge rather
+than reviving finite candidate searches.
 
 For unsquared sine, use
 `DyadicHalfAngleTangentEquivalenceFamily`. The nested-radical evaluator already

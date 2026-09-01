@@ -2392,6 +2392,24 @@ theorem riemannLeftInterval_scale_of_neg
   rw [hzero] at h
   simpa [stepF, stepR] using h
 
+/-! Signed rational scaling commutes with every left-endpoint rectangle fold
+on an ordered interval.  The zero-cell case is handled directly; positive
+meshes use the orientation-sensitive finite identities above. -/
+theorem riemannLeftInterval_scale
+    (r : Rat) (f : RealFunRaw) (a b : Rat) (hab : a <= b)
+    (subdivisions prec : Nat) :
+    riemannLeftInterval (RealFunRaw.scaleRat r f) a b subdivisions prec =
+      QInterval.scaleByRat r
+        (riemannLeftInterval f a b subdivisions prec) := by
+  by_cases hr : 0 <= r
+  · exact riemannLeftInterval_scale_of_nonneg hr f a b subdivisions prec
+  · have hrneg : r < 0 := Rat.not_le.mp hr
+    by_cases hn : subdivisions = 0
+    · subst subdivisions
+      simp [riemannLeftInterval, QInterval.scaleByRat]
+    · exact riemannLeftInterval_scale_of_neg hrneg f a b hab
+        subdivisions prec (Nat.pos_of_ne_zero hn)
+
 /-! Nonnegative rational scaling commutes with the right-endpoint rectangle
 fold as well. -/
 theorem riemannRightInterval_scale_of_nonneg
@@ -2767,6 +2785,13 @@ theorem valid {I : Raw} (cert : Certificate I) :
     I.Valid :=
   ⟨cert.width_nonneg, cert.nested, cert.widths_shrink⟩
 
+/-- Package a proof that an integral algorithm is valid as its canonical
+certificate.  `Certificate` intentionally has the same three fields as
+`Raw.Valid`; this constructor keeps later integral constructions from
+repeating that bookkeeping. -/
+theorem ofValid {I : Raw} (h : I.Valid) : Certificate I :=
+  ⟨h.1, h.2.1, h.2.2⟩
+
 def realRaw {I : Raw} (cert : Certificate I) : RealRaw :=
   I.toRealRaw cert.valid
 
@@ -2796,6 +2821,110 @@ structure Construction (f : RealFunRaw) (a b : Rat) where
 /-- The constructive integral operator. -/
 def integral (f : RealFunRaw) (a b : Rat) (c : Construction f a b) : RealRaw :=
   Certificate.realRaw c.certificate
+
+namespace Construction
+
+theorem addAlgorithm_compute_of_common_plan
+    {f g : RealFunRaw} {a b : Rat}
+    (cf : Construction f a b) (cg : Construction g a b)
+    (hplan : cf.plan = cg.plan) :
+    (algorithm (RealFunRaw.add f g) a b cf.plan).compute =
+      ((integral f a b cf) + (integral g a b cg)).compute := by
+  funext n
+  change riemannLeftInterval (RealFunRaw.add f g) a b
+      (cf.plan n).subdivisions (cf.plan n).evalPrecision =
+    QInterval.addInterval
+      (riemannLeftInterval f a b
+        (cf.plan n).subdivisions (cf.plan n).evalPrecision)
+      (riemannLeftInterval g a b
+        (cg.plan n).subdivisions (cg.plan n).evalPrecision)
+  rw [riemannLeftInterval_add, hplan]
+
+/-! Addition of certified integral computations with a common finite plan.
+
+The resulting construction runs the pointwise sum evaluator on exactly the
+same samples.  Its certificate is inherited from raw-real addition through
+the exact finite rectangle identity `riemannLeftInterval_add`; no uniqueness
+of limits or completed integral space is used. -/
+def addOfCommonPlan
+    {f g : RealFunRaw} {a b : Rat}
+    (cf : Construction f a b) (cg : Construction g a b)
+    (hplan : cf.plan = cg.plan) :
+    Construction (RealFunRaw.add f g) a b where
+  plan := cf.plan
+  certificate := by
+    have hf : (integral f a b cf).Valid := cf.certificate.valid
+    have hg : (integral g a b cg).Valid := cg.certificate.valid
+    have hsum : ((integral f a b cf) + (integral g a b cg)).Valid :=
+      RealRaw.add_valid hf hg
+    apply Certificate.ofValid
+    unfold Raw.Valid
+    rw [addAlgorithm_compute_of_common_plan cf cg hplan]
+    exact hsum
+
+theorem scaleRatAlgorithm_compute
+    {f : RealFunRaw} {a b : Rat} (hab : a <= b)
+    (r : Rat) (cf : Construction f a b) :
+    (algorithm (RealFunRaw.scaleRat r f) a b cf.plan).compute =
+      (RealRaw.scaleRat r (integral f a b cf)).compute := by
+  funext n
+  change riemannLeftInterval (RealFunRaw.scaleRat r f) a b
+      (cf.plan n).subdivisions (cf.plan n).evalPrecision =
+    RealRaw.scaleRatCompute r (integral f a b cf) n
+  rw [riemannLeftInterval_scale r f a b hab]
+  rfl
+
+/-! Rational scaling of a certified integral computation on an ordered
+interval.  The plan is unchanged, including its evaluation precision; the
+finite rectangle identity handles both scalar signs and the certificate is
+transported from `RealRaw.scaleRat`. -/
+def scaleRat
+    {f : RealFunRaw} {a b : Rat} (hab : a <= b)
+    (r : Rat) (cf : Construction f a b) :
+    Construction (RealFunRaw.scaleRat r f) a b where
+  plan := cf.plan
+  certificate := by
+    have hf : (integral f a b cf).Valid := cf.certificate.valid
+    have hscaled : (RealRaw.scaleRat r (integral f a b cf)).Valid :=
+      RealRaw.scaleRat_valid hf
+    apply Certificate.ofValid
+    unfold Raw.Valid
+    rw [scaleRatAlgorithm_compute hab r cf]
+    exact hscaled
+
+end Construction
+
+/-! The construction-level integral is exactly additive when its two inputs
+share a finite sampling plan.  This theorem packages both existence of the
+sum construction and its representation edge. -/
+theorem integral_add_equiv_of_common_plan
+    {f g : RealFunRaw} {a b : Rat}
+    (cf : Construction f a b) (cg : Construction g a b)
+    (hplan : cf.plan = cg.plan) :
+    (integral (RealFunRaw.add f g) a b
+      (Construction.addOfCommonPlan cf cg hplan)).Equiv
+        ((integral f a b cf) + (integral g a b cg)) := by
+  have hvalid :
+      (integral (RealFunRaw.add f g) a b
+        (Construction.addOfCommonPlan cf cg hplan)).Valid :=
+    (Construction.addOfCommonPlan cf cg hplan).certificate.valid
+  apply RealRaw.equiv_of_compute_eq hvalid
+  exact Construction.addAlgorithm_compute_of_common_plan cf cg hplan
+
+/-! The construction-level integral commutes with every rational scalar on
+an ordered interval. -/
+theorem integral_scaleRat_equiv
+    {f : RealFunRaw} {a b : Rat} (hab : a <= b)
+    (r : Rat) (cf : Construction f a b) :
+    (integral (RealFunRaw.scaleRat r f) a b
+      (Construction.scaleRat hab r cf)).Equiv
+        (RealRaw.scaleRat r (integral f a b cf)) := by
+  have hvalid :
+      (integral (RealFunRaw.scaleRat r f) a b
+        (Construction.scaleRat hab r cf)).Valid :=
+    (Construction.scaleRat hab r cf).certificate.valid
+  apply RealRaw.equiv_of_compute_eq hvalid
+  exact Construction.scaleRatAlgorithm_compute hab r cf
 
 /-- Two integral constructions with the same plan represent the same raw
 integral when their integrand enclosures agree at every finite sample read by

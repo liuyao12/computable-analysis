@@ -3669,6 +3669,17 @@ theorem sameStageOverlap_refl (x : RealRaw) (hx : x.Valid) :
 theorem equiv_refl (x : RealRaw) (hx : x.Valid) : x.Equiv x :=
   sameStageOverlap_equiv (sameStageOverlap_refl x hx)
 
+/-- Raw representatives with the same interval computation are equivalent;
+rate metadata and other implementation fields are irrelevant. -/
+theorem equiv_of_compute_eq {x y : RealRaw} (hx : x.Valid)
+    (hcompute : x.compute = y.compute) : x.Equiv y := by
+  apply sameStageOverlap_equiv
+  intro n
+  apply (compareAt_overlap_iff x y n n).2
+  rw [← congrFun hcompute n]
+  have hordered := interval_order_of_valid x hx n
+  exact ⟨hordered, hordered⟩
+
 theorem equiv_symm {x y : RealRaw} : x.Equiv y -> y.Equiv x := by
   intro h n
   have hover := (compareAt_overlap_iff x y n n).1 (h n)

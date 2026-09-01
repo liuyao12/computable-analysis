@@ -71,8 +71,19 @@ Left, right, and trapezoid folds are finite presentation choices.  Their
 algebra is proved before any claim that they determine the same integral.
 
 \lean{ComputableAnalysis.riemannLeftInterval_add}
+\lean{ComputableAnalysis.riemannLeftInterval_scale}
 \lean{ComputableAnalysis.riemannRightInterval}
 \lean{ComputableAnalysis.riemannTrapezoidInterval_eq_half_add_left_right}
+\leanok
+
+Certified computations with a common plan inherit this finite algebra.  Thus
+later FTC clients compose constructions instead of reproving validity of the
+same rectangle folds.
+
+\lean{ComputableAnalysis.Integral.Construction.addOfCommonPlan}
+\lean{ComputableAnalysis.Integral.integral_add_equiv_of_common_plan}
+\lean{ComputableAnalysis.Integral.Construction.scaleRat}
+\lean{ComputableAnalysis.Integral.integral_scaleRat_equiv}
 \leanok
 
 \section{Monotone pieces and finitely many turns}
@@ -206,14 +217,12 @@ For the square,
 \[
   \int_0^{1/2}\sin(\pi x)^2\,dx=\frac14.
 \]
-The chain constructor is checked: given the two pairwise providers, it
-stabilizes public dyadic boxes through nested-radical boxes and a normalized
-tangent anchor.  The providers are not yet inhabited.  They are to be derived
-from the same tangent representation edge above and the checked
-tangent-square FTC, not from a second finite-search API.
+The effective-FTC tangent anchor is unconditionally normalized to \(1/4\).
+The remaining work is finite transport from public dyadic boxes through
+nested-radical boxes to that anchor.
 
 \lean{ComputableAnalysis.SinPiIntegral.reciprocalPiMulHalfQuarterTurnRaw_equiv_quarter}
-\lean{ComputableAnalysis.SinPiIntegral.TangentSquareIntegralEffectiveFTCOverlap.normalized_equiv_quarter}
+\lean{ComputableAnalysis.SinPiIntegral.normalizedTangentSquareEffectiveFTCIntegralRaw_equiv_quarter}
 \lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized}
 \lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized_equiv_value}
 \lean{ComputableAnalysis.SinPiIntegral.SinPiSquareEffectiveFTCData.integral_equiv_public_chainStabilized}

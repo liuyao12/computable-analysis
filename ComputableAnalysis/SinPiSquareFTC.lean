@@ -2356,73 +2356,37 @@ theorem tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn :
   TangentSquareEffectiveFTCData.integral_equiv_halfQuarterTurn
     tangentSquareEffectiveFTCData
 
-/-! The two tangent-square integrals are independent computations.  The
-effective-FTC computation uses scheduled derivative boxes, while
-`tangentSquareIntegral` uses the direct Lipschitz dyadic construction.  The
-only required bridge is therefore a finite, stagewise overlap certificate;
-no identification of their internal sums is assumed. -/
+/-! The canonical tangent-square anchor uses the already certified
+effective-FTC computation.  The remaining nested-radical proof can connect
+its finite sums directly to this anchor; no bridge to a duplicate direct
+Lipschitz integral is part of the public route. -/
+def normalizedTangentSquareEffectiveFTCIntegralRaw : RealRaw :=
+  reciprocalPiRaw * tangentSquareEffectiveFTCData.integralRaw
 
-structure TangentSquareIntegralEffectiveFTCOverlap where
-  overlap : forall n,
-    QInterval.Overlaps
-      (tangentSquareIntegral.compute n)
-      (tangentSquareEffectiveFTCData.integralRaw.compute n)
-
-theorem TangentSquareIntegralEffectiveFTCOverlap.to_equiv
-    (h : TangentSquareIntegralEffectiveFTCOverlap) :
-    tangentSquareIntegral.Equiv
-      tangentSquareEffectiveFTCData.integralRaw := by
-  apply RealRaw.sameStageOverlap_equiv
-  intro n
-  apply (RealRaw.compareAt_overlap_iff
-    tangentSquareIntegral tangentSquareEffectiveFTCData.integralRaw n n).2
-  exact h.overlap n
-
-theorem TangentSquareIntegralEffectiveFTCOverlap.to_halfQuarterTurn
-    (h : TangentSquareIntegralEffectiveFTCOverlap) :
-    tangentSquareIntegral.Equiv
-      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
-  exact RealRaw.equiv_trans tangentSquareIntegral_valid
+theorem normalizedTangentSquareEffectiveFTCIntegralRaw_valid :
+    normalizedTangentSquareEffectiveFTCIntegralRaw.Valid := by
+  exact RealRaw.mul_valid reciprocalPiRaw_valid
     tangentSquareEffectiveFTCData.integral_valid
-    (by
-      change (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid
-      change (RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).Valid
-      exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
-        CauchyPi.piCircleArea_valid)
-    h.to_equiv tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn
 
-/-- The canonical normalized tangent-square anchor.  It combines the direct
-dyadic tangent-square integral with the reciprocal circle-area computation. -/
-def normalizedTangentSquareIntegralRaw : RealRaw :=
-  reciprocalPiRaw * tangentSquareIntegral
-
-theorem normalizedTangentSquareIntegralRaw_valid :
-    normalizedTangentSquareIntegralRaw.Valid := by
-  exact RealRaw.mul_valid reciprocalPiRaw_valid tangentSquareIntegral_valid
-
-/-- Once the direct tangent-square integral is connected to its effective-FTC
-implementation, normalization gives the exact value `1/4`.  Product transport
-uses the general signed interval multiplication theorem; no special product
-certificate or portfolio wrapper is needed. -/
-theorem TangentSquareIntegralEffectiveFTCOverlap.normalized_equiv_quarter
-    (h : TangentSquareIntegralEffectiveFTCOverlap) :
-    normalizedTangentSquareIntegralRaw.Equiv (RealRaw.ofRat (1 / 4)) := by
+theorem normalizedTangentSquareEffectiveFTCIntegralRaw_equiv_quarter :
+    normalizedTangentSquareEffectiveFTCIntegralRaw.Equiv
+      (RealRaw.ofRat (1 / 4)) := by
   have hquarter :
       (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid := by
     change (RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).Valid
     exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
       CauchyPi.piCircleArea_valid
-  have hproduct : normalizedTangentSquareIntegralRaw.Equiv
+  have hproduct : normalizedTangentSquareEffectiveFTCIntegralRaw.Equiv
       (reciprocalPiRaw *
         RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
-    unfold normalizedTangentSquareIntegralRaw
+    unfold normalizedTangentSquareEffectiveFTCIntegralRaw
     exact RealRaw.mul_equiv
       reciprocalPiRaw_valid reciprocalPiRaw_valid
-      tangentSquareIntegral_valid hquarter
+      tangentSquareEffectiveFTCData.integral_valid hquarter
       (RealRaw.equiv_refl reciprocalPiRaw reciprocalPiRaw_valid)
-      h.to_halfQuarterTurn
+      tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn
   exact RealRaw.equiv_trans
-    normalizedTangentSquareIntegralRaw_valid
+    normalizedTangentSquareEffectiveFTCIntegralRaw_valid
     reciprocalPiMulHalfQuarterTurnRaw_valid
     (RealRaw.ofRat_valid (1 / 4))
     hproduct reciprocalPiMulHalfQuarterTurnRaw_equiv_quarter
