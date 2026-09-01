@@ -707,6 +707,92 @@ theorem rationalCircleSin_halfAngle_identity
     hpos
   grind [Rat.mul_assoc, Rat.mul_comm]
 
+/-- The half-angle circle formula lies below the proposed sine coordinate
+when the proposed point lies on or outside the rational unit circle. -/
+theorem rationalCircleSin_halfAngle_le_self_of_one_le_sq_sum
+    {s c : Rat} (hs : 0 <= s) (hc : 0 <= c)
+    (hsum : 1 <= s * s + c * c) :
+    rationalCircleSin (s / (1 + c)) <= s := by
+  let d : Rat := 1 + c
+  let u : Rat := s * d⁻¹
+  let D : Rat := 1 + u * u
+  have hd : 0 < d := by dsimp [d]; grind
+  have hd0 : d ≠ 0 := Rat.ne_of_gt hd
+  have hdi : 0 <= d⁻¹ := Rat.le_of_lt (Rat.inv_pos.2 hd)
+  have hu : 0 <= u := Rat.mul_nonneg hs hdi
+  have hD : 0 < D := by
+    dsimp [D]
+    have := Rat.mul_nonneg hu hu
+    grind
+  have hD0 : D ≠ 0 := Rat.ne_of_gt hD
+  have hcancelD : D⁻¹ * D = 1 := Rat.inv_mul_cancel D hD0
+  have hcanceld : d⁻¹ * d = 1 := Rat.inv_mul_cancel d hd0
+  unfold rationalCircleSin
+  rw [Rat.div_def, Rat.div_def]
+  change 2 * u * D⁻¹ <= s
+  apply Rat.le_of_mul_le_mul_right (c := D) ?_ hD
+  rw [show 2 * u * D⁻¹ * D = 2 * u by
+    grind [Rat.mul_assoc]]
+  apply Rat.le_of_mul_le_mul_right (c := d * d) ?_ (Rat.mul_pos hd hd)
+  have hleft : 2 * u * (d * d) = 2 * s * d := by
+    dsimp [u]
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hright : s * D * (d * d) = s * (d * d + s * s) := by
+    dsimp [D, u]
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  rw [hleft, hright]
+  dsimp [d]
+  have hfactor : 2 * (1 + c) <= (1 + c) * (1 + c) + s * s := by
+    grind [Rat.mul_add, Rat.add_mul]
+  calc
+    2 * s * (1 + c) = s * (2 * (1 + c)) := by
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ <= s * ((1 + c) * (1 + c) + s * s) :=
+      Rat.mul_le_mul_of_nonneg_left hfactor hs
+
+/-- The half-angle circle formula lies above the proposed sine coordinate
+when the proposed point lies on or inside the rational unit circle. -/
+theorem rationalCircleSin_halfAngle_ge_self_of_sq_sum_le_one
+    {s c : Rat} (hs : 0 <= s) (hc : 0 <= c)
+    (hsum : s * s + c * c <= 1) :
+    s <= rationalCircleSin (s / (1 + c)) := by
+  let d : Rat := 1 + c
+  let u : Rat := s * d⁻¹
+  let D : Rat := 1 + u * u
+  have hd : 0 < d := by dsimp [d]; grind
+  have hd0 : d ≠ 0 := Rat.ne_of_gt hd
+  have hdi : 0 <= d⁻¹ := Rat.le_of_lt (Rat.inv_pos.2 hd)
+  have hu : 0 <= u := Rat.mul_nonneg hs hdi
+  have hD : 0 < D := by
+    dsimp [D]
+    have := Rat.mul_nonneg hu hu
+    grind
+  have hD0 : D ≠ 0 := Rat.ne_of_gt hD
+  have hcancelD : D⁻¹ * D = 1 := Rat.inv_mul_cancel D hD0
+  have hcanceld : d⁻¹ * d = 1 := Rat.inv_mul_cancel d hd0
+  unfold rationalCircleSin
+  rw [Rat.div_def, Rat.div_def]
+  change s <= 2 * u * D⁻¹
+  apply Rat.le_of_mul_le_mul_right (c := D) ?_ hD
+  rw [show 2 * u * D⁻¹ * D = 2 * u by
+    grind [Rat.mul_assoc]]
+  apply Rat.le_of_mul_le_mul_right (c := d * d) ?_ (Rat.mul_pos hd hd)
+  have hleft : s * D * (d * d) = s * (d * d + s * s) := by
+    dsimp [D, u]
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hright : 2 * u * (d * d) = 2 * s * d := by
+    dsimp [u]
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  rw [hleft, hright]
+  dsimp [d]
+  have hfactor : (1 + c) * (1 + c) + s * s <= 2 * (1 + c) := by
+    grind [Rat.mul_add, Rat.add_mul]
+  calc
+    s * ((1 + c) * (1 + c) + s * s) <= s * (2 * (1 + c)) :=
+      Rat.mul_le_mul_of_nonneg_left hfactor hs
+    _ = 2 * s * (1 + c) := by
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
 private theorem rationalCircleSin_den_pos {u : Rat} (hu : 0 <= u) :
     0 < 1 + u * u := by
   have hsq : 0 <= u * u := Rat.mul_nonneg hu hu
@@ -826,6 +912,73 @@ theorem rationalCircleSinInterval_overlap_of_halfAngle_boxes
       S.lo <= s := hsS.1
       _ = rationalCircleSin (s / (1 + c)) := hid.symm
       _ <= rationalCircleSin (rationalHalfAngleTangentInterval S C).hi := hsinHi
+
+/-- Interval form of the half-angle circle identity.  Unlike the pointwise
+version, this asks only that the squared-sum enclosure straddle `1`; it does
+not require an exact rational point on the unit circle. -/
+theorem rationalCircleSinInterval_overlap_of_halfAngle_boxes_of_square_sum_overlap
+    {S C : QInterval}
+    (hS : subintervalOf S 0 1) (hC : subintervalOf C 0 1)
+    (hcircle : QInterval.Overlaps
+      ({ lo := S.lo * S.lo + C.lo * C.lo,
+         hi := S.hi * S.hi + C.hi * C.hi } : QInterval)
+      ({ lo := 1, hi := 1 } : QInterval)) :
+    QInterval.Overlaps
+      (rationalCircleSinInterval
+        (rationalHalfAngleTangentInterval S C)) S := by
+  have hT := rationalHalfAngleTangentInterval_subinterval hS hC
+  have hUpperPoint := rationalHalfAngleTangentInterval_contains
+    hS hC (Rat.le_trans hS.1 hS.2.1)
+      (Rat.le_trans hC.1 hC.2.1)
+      ⟨hS.2.1, Rat.le_refl⟩ ⟨hC.2.1, Rat.le_refl⟩
+  have hLowerPoint := rationalHalfAngleTangentInterval_contains
+    hS hC hS.1 hC.1
+      ⟨Rat.le_refl, hS.2.1⟩ ⟨Rat.le_refl, hC.2.1⟩
+  have hcircleLow : S.lo * S.lo + C.lo * C.lo <= 1 := by
+    unfold QInterval.Overlaps at hcircle
+    exact hcircle.1
+  have hcircleHigh : 1 <= S.hi * S.hi + C.hi * C.hi := by
+    unfold QInterval.Overlaps at hcircle
+    exact hcircle.2
+  have hUpperSelf :=
+    rationalCircleSin_halfAngle_le_self_of_one_le_sq_sum
+      (Rat.le_trans hS.1 hS.2.1) (Rat.le_trans hC.1 hC.2.1)
+      hcircleHigh
+  have hLowerSelf :=
+    rationalCircleSin_halfAngle_ge_self_of_sq_sum_le_one
+      hS.1 hC.1 hcircleLow
+  have hsinLo := rationalCircleSin_mono_public
+    hT.1 hUpperPoint.1 (Rat.le_trans hUpperPoint.2 hT.2.2)
+  have hsinHi := rationalCircleSin_mono_public
+    (Rat.le_trans hT.1 hLowerPoint.1) hLowerPoint.2 hT.2.2
+  unfold rationalCircleSinInterval QInterval.Overlaps
+  exact ⟨Rat.le_trans hsinLo hUpperSelf,
+    Rat.le_trans hLowerSelf hsinHi⟩
+
+/-- Enlarging the half-angle tangent box preserves the circle-image overlap.
+This is the canonical transport theorem for interval circle data. -/
+theorem rationalCircleSinInterval_overlap_of_halfAngle_boxes_of_square_sum_overlap_of_outer
+    {U S C : QInterval}
+    (hU : subintervalOf U 0 1)
+    (hS : subintervalOf S 0 1) (hC : subintervalOf C 0 1)
+    (houter : U.ContainsInterval
+      (rationalHalfAngleTangentInterval S C))
+    (hcircle : QInterval.Overlaps
+      ({ lo := S.lo * S.lo + C.lo * C.lo,
+         hi := S.hi * S.hi + C.hi * C.hi } : QInterval)
+      ({ lo := 1, hi := 1 } : QInterval)) :
+    QInterval.Overlaps (rationalCircleSinInterval U) S := by
+  have hT := rationalHalfAngleTangentInterval_subinterval hS hC
+  have hhalf :=
+    rationalCircleSinInterval_overlap_of_halfAngle_boxes_of_square_sum_overlap
+      hS hC hcircle
+  have hsinlo := rationalCircleSin_mono_public
+    hU.1 houter.1 (Rat.le_trans hT.2.1 hT.2.2)
+  have hsinhi := rationalCircleSin_mono_public
+    (Rat.le_trans hT.1 hT.2.1) houter.2 hU.2.2
+  unfold rationalCircleSinInterval QInterval.Overlaps at *
+  exact ⟨Rat.le_trans hsinlo hhalf.1,
+    Rat.le_trans hhalf.2 hsinhi⟩
 
 theorem rationalCircleSinInterval_overlap_of_halfAngle_boxes_of_outer_tangent
     {U S C : QInterval} (hU : subintervalOf U 0 1)
@@ -5808,6 +5961,160 @@ theorem dyadicNestedRadicalTableAt_bounds
             have hone : (-1 : Rat) <= 1 := by native_decide
             grind⟩⟩
 
+/-- Every finite dyadic nested-radical table entry encloses a point of the
+unit circle.  The cosine is unoriented here because the tangent construction
+uses its nonnegative magnitude on the first-quadrant mesh. -/
+theorem dyadicNestedRadicalTableAt_positive_circle_overlap
+    (precision depth k : Nat) (hk : k <= 2 ^ depth) :
+    QInterval.Overlaps
+      ({ lo :=
+          sq (dyadicNestedRadicalTableAt precision depth k).1.lo +
+            sq (dyadicNestedRadicalPositiveCosAt precision depth k).lo,
+         hi :=
+          sq (dyadicNestedRadicalTableAt precision depth k).1.hi +
+            sq (dyadicNestedRadicalPositiveCosAt precision depth k).hi } :
+        QInterval)
+      ({ lo := 1, hi := 1 } : QInterval) := by
+  induction depth generalizing precision k with
+  | zero =>
+      have hk' : k = 0 ∨ k = 1 := by omega
+      rcases hk' with rfl | rfl <;>
+        simp [dyadicNestedRadicalTableAt,
+          dyadicNestedRadicalPositiveCosAt, QInterval.absHull,
+          QInterval.neg, sq, QInterval.Overlaps] <;> native_decide
+  | succ depth ih =>
+      by_cases heven : k % 2 = 0
+      · have hkrep : k = 2 * (k / 2) := by omega
+        have hhalf : k / 2 <= 2 ^ depth := by
+          have hpow : 2 ^ (depth + 1) = 2 * 2 ^ depth := by
+            rw [Nat.pow_succ]
+            omega
+          rw [hpow] at hk
+          omega
+        rw [hkrep]
+        simpa [dyadicNestedRadicalTableAt,
+          dyadicNestedRadicalPositiveCosAt] using
+          ih (dyadicNestedRadicalParentPrecision precision) (k / 2) hhalf
+      · let bound := 2 ^ depth
+        let reflected := if k <= bound then k else 2 * bound - k
+        let parentPrecision := dyadicNestedRadicalParentPrecision precision
+        have hpow : 2 ^ (depth + 1) = 2 * bound := by
+          dsimp [bound]
+          rw [Nat.pow_succ]
+          omega
+        have hkbound : k <= 2 * bound := by
+          rw [← hpow]
+          exact hk
+        have hreflect : reflected <= bound := by
+          dsimp [reflected]
+          split <;> omega
+        have hparentBounds := (dyadicNestedRadicalTableAt_bounds
+          parentPrecision depth reflected hreflect).2
+        let parentCos :=
+          if k <= bound then
+            (dyadicNestedRadicalTableAt parentPrecision depth reflected).2
+          else QInterval.neg
+            (dyadicNestedRadicalTableAt parentPrecision depth reflected).2
+        have hparentCos : subintervalOf parentCos (-1) 1 := by
+          by_cases hle : k <= bound
+          · simpa [parentCos, hle] using hparentBounds
+          · simpa [parentCos, hle] using
+              QInterval.neg_unit_subinterval
+                (dyadicNestedRadicalTableAt parentPrecision depth reflected).2
+                hparentBounds
+        let sine := sqrtOnUnitEvalIntervalClipped
+          (dyadicHalfAngleSinInput parentCos) precision
+        let cosine := sqrtOnUnitEvalIntervalClipped
+          (dyadicHalfAngleCosInput parentCos) precision
+        have hpair := dyadicHalfAngle_clipped_square_sum_overlaps_one
+          parentCos hparentCos precision
+        have hcosInput := dyadicHalfAngleCosInput_subinterval
+          parentCos hparentCos
+        have hcos := sqrtOnUnitEvalIntervalClipped_subinterval
+          (dyadicHalfAngleCosInput parentCos) hcosInput precision
+        have habsCos : QInterval.absHull cosine = cosine :=
+          QInterval.absHull_eq_self_of_nonneg hcos.2.1 hcos.1
+        have habsNegCos : QInterval.absHull (QInterval.neg cosine) = cosine :=
+          QInterval.absHull_neg_eq_self_of_nonneg hcos.1
+        by_cases hle : k <= bound
+        · have htable : dyadicNestedRadicalTableAt precision (depth + 1) k =
+              (sine, cosine) := by
+            simp [dyadicNestedRadicalTableAt, heven, bound, reflected,
+              parentPrecision, parentCos, sine, cosine, hle]
+          unfold dyadicNestedRadicalPositiveCosAt
+          rw [htable]
+          change QInterval.Overlaps
+            ({ lo := sq sine.lo + sq (QInterval.absHull cosine).lo,
+               hi := sq sine.hi + sq (QInterval.absHull cosine).hi } : QInterval)
+            ({ lo := 1, hi := 1 } : QInterval)
+          rw [habsCos]
+          exact hpair
+        · have htable : dyadicNestedRadicalTableAt precision (depth + 1) k =
+              (sine, QInterval.neg cosine) := by
+            simp [dyadicNestedRadicalTableAt, heven, bound, reflected,
+              parentPrecision, parentCos, sine, cosine, hle]
+          unfold dyadicNestedRadicalPositiveCosAt
+          rw [htable]
+          change QInterval.Overlaps
+            ({ lo := sq sine.lo + sq (QInterval.absHull
+                (QInterval.neg cosine)).lo,
+               hi := sq sine.hi + sq (QInterval.absHull
+                (QInterval.neg cosine)).hi } : QInterval)
+            ({ lo := 1, hi := 1 } : QInterval)
+          rw [habsNegCos]
+          exact hpair
+
+/-- Applying the rational circle map to the direct half-angle tangent box
+recovers the dyadic nested-radical sine box at every finite precision. -/
+theorem dyadicNestedRadicalHalfAngleTangentRaw_circleSin_overlap
+    {depth k : Nat} (hk : k < 2 ^ depth) (precision : Nat) :
+    QInterval.Overlaps
+      (rationalCircleSinInterval
+        ((dyadicNestedRadicalHalfAngleTangentRaw depth k).compute precision))
+      (dyadicNestedRadicalTableAt precision depth k).1 := by
+  let S := (dyadicNestedRadicalTableAt precision depth k).1
+  let C := dyadicNestedRadicalPositiveCosAt precision depth k
+  have hbounds := dyadicNestedRadicalTableAt_bounds precision depth k
+    (Nat.le_of_lt hk)
+  have hS : subintervalOf S 0 1 := by
+    exact hbounds.1
+  have hC : subintervalOf C 0 1 := by
+    exact QInterval.absHull_unit_bounds hbounds.2
+  have hcircle := dyadicNestedRadicalTableAt_positive_circle_overlap
+    precision depth k (Nat.le_of_lt hk)
+  change QInterval.Overlaps
+    (rationalCircleSinInterval (rationalHalfAngleTangentInterval S C)) S
+  exact rationalCircleSinInterval_overlap_of_halfAngle_boxes_of_square_sum_overlap
+    hS hC hcircle
+
+/-- The only geometric fact still needed to identify the inverse-arctangent
+sample with the nested-radical sample is containment of the direct
+half-angle tangent box in the inverse solver's tangent box. -/
+theorem dyadicTangentBoxAt_circleSin_overlap_of_halfAngleTangent_contains
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {precision depth k : Nat} (hk : k < 2 ^ depth)
+    (hcontains : (dyadicTangentBoxAt B precision depth k hk).ContainsInterval
+      ((dyadicNestedRadicalHalfAngleTangentRaw depth k).compute precision)) :
+    QInterval.Overlaps
+      (rationalCircleSinInterval
+        (dyadicTangentBoxAt B precision depth k hk))
+      (dyadicNestedRadicalTableAt precision depth k).1 := by
+  let S := (dyadicNestedRadicalTableAt precision depth k).1
+  let C := dyadicNestedRadicalPositiveCosAt precision depth k
+  have hbounds := dyadicNestedRadicalTableAt_bounds precision depth k
+    (Nat.le_of_lt hk)
+  have hS : subintervalOf S 0 1 := hbounds.1
+  have hC : subintervalOf C 0 1 :=
+    QInterval.absHull_unit_bounds hbounds.2
+  have hcircle := dyadicNestedRadicalTableAt_positive_circle_overlap
+    precision depth k (Nat.le_of_lt hk)
+  change QInterval.Overlaps
+    (rationalCircleSinInterval (dyadicTangentBoxAt B precision depth k hk)) S
+  exact
+    rationalCircleSinInterval_overlap_of_halfAngle_boxes_of_square_sum_overlap_of_outer
+      (dyadicTangentBoxAt_bounds B precision depth k hk)
+      hS hC hcontains hcircle
+
 theorem arctanSinPi_nestedRadicalStage_sample_overlap_of_tangent_witness
     (B : IntegralIdentities.ArctanInverseBisection)
     {x : Rat} (hx : 0 <= x /\ x <= (1 : Rat) / 2) (n k : Nat)
@@ -8668,6 +8975,31 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_of_precision_first_certificat
   intro n k hk hpos precision
   exact hcertificate precision n k hk hpos
 
+/-- Canonical geometric interface for the equal-dyadic sine route.  The
+nested-radical construction already proves its circle law; a provider only
+identifies its half-angle tangent box with the box returned by the
+inverse-arctangent computation. -/
+structure DyadicHalfAngleTangentContainmentFamily
+    (B : IntegralIdentities.ArctanInverseBisection) where
+  endpoint_zero : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero
+  interior_contains : forall (precision depth k : Nat)
+    (hk : k < 2 ^ depth), 0 < k ->
+    (dyadicTangentBoxAt B precision depth k hk).ContainsInterval
+      ((dyadicNestedRadicalHalfAngleTangentRaw depth k).compute precision)
+
+theorem DyadicHalfAngleTangentContainmentFamily.rational_circle_overlap
+    {B : IntegralIdentities.ArctanInverseBisection}
+    (H : DyadicHalfAngleTangentContainmentFamily B)
+    (precision depth k : Nat) (hk : k < 2 ^ depth) (hpos : 0 < k) :
+    QInterval.Overlaps
+      (rationalCircleSinInterval
+        (dyadicTangentBoxAt B precision depth k hk))
+      (dyadicNestedRadicalTableAt precision depth k).1 := by
+  exact dyadicTangentBoxAt_circleSin_overlap_of_halfAngleTangent_contains
+    B hk (H.interior_contains precision depth k hk hpos)
+
 theorem ArctanSinPiConstruction.halfIntegral_equiv_of_overlap_family
     (S : ArctanSinPiConstruction)
     (pub : Integral.Construction S.onHalf.toRealFunRaw
@@ -8698,6 +9030,31 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_of_overlap_family
   intro n k hk
   exact arctanSinPi_nestedRadicalSample_equiv_of_overlap_family
     S.inverse ht0 hk (hover n k hk)
+
+/-- Equal-dyadic sine transport using the single canonical geometric
+containment obligation. -/
+theorem ArctanSinPiConstruction.halfIntegral_equiv_of_halfAngleTangentContainmentFamily
+    (S : ArctanSinPiConstruction)
+    (pub : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hdyadic : pub.plan = Integral.staticDyadicPlan)
+    (hplan : pub.plan = cg.plan)
+    (hevaluator : forall n k,
+      k < (pub.plan n).subdivisions ->
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (pub.plan n).subdivisions k)
+        (pub.plan n).evalPrecision =
+        dyadicNestedRadicalStageSinAt n k)
+    (family : DyadicHalfAngleTangentContainmentFamily S.inverse) :
+    (S.halfIntegral pub).Equiv
+      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+  apply S.halfIntegral_equiv_of_overlap_family
+    pub g cg hdyadic hplan hevaluator family.endpoint_zero
+  intro n k hk hpos precision
+  exact family.rational_circle_overlap precision n k hk hpos
 
 theorem ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificate_family
     (S : ArctanSinPiConstruction)

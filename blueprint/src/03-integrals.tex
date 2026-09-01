@@ -186,15 +186,18 @@ uniform tangent mesh -> unequal angle samples -> Stieltjes sum
 \lean{ComputableAnalysis.SinPiIntegral.computableSinPiHalfIntegral_equiv_reciprocalPi}
 \leanok
 
-The stronger equal-dyadic route uses nested radicals at the original
-\(x\)-samples.  Boundary, parity, reflection, finite search soundness, and
-integral transport are formalized.  Its remaining theorem is the uniform
-all-depth geometric certificate connecting every positive odd nested-radical
-sample to the corresponding rational-circle box.
+The equal-dyadic route uses nested radicals at the original \(x\)-samples.
+The finite sine and cosine boxes are now proved to straddle the unit circle,
+so their half-angle tangent box maps back to the sine box.  No exact rational
+point on the circle and no candidate-list search is needed.  The only open
+geometric statement is that this explicit tangent box lies inside the box
+computed by inverse arctangent; one containment family then transports every
+sample and the integral.
 
-\lean{ComputableAnalysis.SinPiIntegral.canonicalDyadicCertificateSearchAt_sound}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_canonical_search_family}
-\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificates}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalTableAt_positive_circle_overlap}
+\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalHalfAngleTangentRaw_circleSin_overlap}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicHalfAngleTangentContainmentFamily}
+\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_of_halfAngleTangentContainmentFamily}
 \leanok
 
 For the square,
@@ -203,7 +206,7 @@ For the square,
 \]
 The calculus-side chain is complete: public dyadic boxes overlap
 nested-radical boxes, which overlap the normalized tangent anchor.  The same
-all-depth geometric overlap family is the remaining provider.
+tangent-box containment is the remaining provider.
 
 \lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized}
 \lean{ComputableAnalysis.effectiveDyadicPublicSquareIntegral_chain_equiv_quarter}

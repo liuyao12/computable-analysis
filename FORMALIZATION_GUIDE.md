@@ -211,11 +211,12 @@ The public API deliberately has no three-way shared-witness certificate: such
 a certificate asks for stronger same-stage data than the proof needs.
 
 For unsquared sine, use
-`CanonicalDyadicHalfAngleCertificateAt` and the single all-samples adapter
-`DyadicTangentWitnessFamily.of_canonical_halfAngle_certificate_family`.
-The zero and even cases are derived; the substantive provider obligation is
-the positive odd half-angle certificate. Do not split this public API into
-three parallel even/lower/upper theorem families.
+`DyadicHalfAngleTangentContainmentFamily`. The nested-radical evaluator already
+proves the sine/cosine interval circle law and the induced rational-circle
+overlap. A provider supplies only the containment of its explicit half-angle
+tangent box in the inverse-arctangent tangent box. Do not introduce rational
+point witnesses, candidate-list searches, or parallel parity adapters for
+this public API.
 
 ## Series
 

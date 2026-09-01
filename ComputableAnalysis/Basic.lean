@@ -2394,6 +2394,24 @@ def absHull (I : QInterval) : QInterval :=
   else if 0 <= I.lo then I
   else { lo := 0, hi := max (-I.lo) I.hi }
 
+@[simp] theorem absHull_eq_self_of_nonneg
+    {I : QInterval} (hI : I.lo <= I.hi) (hlo : 0 <= I.lo) :
+    absHull I = I := by
+  unfold absHull
+  by_cases hhi : I.hi <= 0
+  · have hzeroLo : I.lo = 0 := by grind
+    have hzeroHi : I.hi = 0 := by grind
+    cases I
+    simp_all [neg]
+  · simp [hhi, hlo]
+
+@[simp] theorem absHull_neg_eq_self_of_nonneg
+    {I : QInterval} (hlo : 0 <= I.lo) :
+    absHull (neg I) = I := by
+  unfold absHull
+  rw [if_pos (by change -I.lo <= 0; grind)]
+  exact neg_neg I
+
 theorem absHull_contains_qabs
     {I : QInterval} {x : Rat}
     (hI : I.lo <= I.hi) (hx : I.lo <= x /\ x <= I.hi) :

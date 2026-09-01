@@ -108,14 +108,13 @@ not re-exported by the canonical root.
 Work in dependency order. Do not add routine examples while an earlier bridge
 is open.
 
-1. **Equal-dyadic sine transport.** Complete the target-directed finite search
-   for the canonical scaled-endpoint arctangent targets, then prove the
-   positive odd half-angle overlap with the nested-radical boxes. The target
-   validity, geometric equivalence, zero/even branches, reflection, induction,
-   integral transport, and anchor-free nested-radical half-angle tangent raw
-   are already checked. What remains is its geometric identification with the
-   arctangent target. Use the single all-samples certificate-family interface;
-   do not add another parity-split wrapper.
+1. **Equal-dyadic sine transport.** Prove that the anchor-free nested-radical
+   half-angle tangent box is contained in the corresponding inverse-arctangent
+   tangent box at every positive dyadic sample and precision. The interval
+   unit-circle law, circle-image overlap, target validity, zero endpoint, and
+   integral transport are checked. Use
+   `DyadicHalfAngleTangentContainmentFamily`; do not add rational point searches
+   or parity-specific public wrappers.
 2. **Squared sine.** Supply the two substantive pairwise certificates:
    public dyadic squares overlap the nested-radical computation, and the
    nested-radical computation overlaps the normalized tangent-square anchor.
