@@ -1,2165 +1,326 @@
 \chapter{Integrals and the Fundamental Theorem}\label{ch:integrals}
 
-The scoped Lean entry point for this chapter is
-\texttt{ComputableAnalysis.IntegralFoundation}.  It exposes the finite
-rectangle, piecewise, polynomial, arctangent, Stieltjes, and effective-FTC
-certificates.  Routine variants are transported from these representatives;
-the blueprint does not require a separate formalization for every similar
-function.
-
-The motivating integral is circle area: crude rectangles produce nested
-rational bounds for the area under the arctangent kernel. An integral is a
-program returning such bounds. Lebesgue measure is outside scope.
-
-This chapter is where the Fundamental Theorem of Calculus belongs. It is the
-first general bridge from local change to accumulated area; later chapters
-only instantiate and reuse its certificate interface. We state the contract
-here immediately after the first area algorithm. The next chapter packages
-the derivative-bound, convexity, monotonicity, and tail certificates that
-make the contract effective.
-
-The order is intentional:
+The motivating integral is circle area.  Crude rectangles under the rational
+arctangent kernel give finite lower and upper bounds; an integral is the
+resulting \texttt{realRaw} computation.  Lebesgue measure and arbitrary
+measurable functions are outside the project.
 
 \begin{verbatim}
-circle/arctan example -> rectangle integral -> FTC contract
-                      -> effective certificates -> power series
-                      -> exp/log -> linear ODEs
+rational partition -> value boxes on each cell -> weighted finite sum
+                   -> shrinking area box -> realRaw integral
 \end{verbatim}
 
-FTC is introduced immediately after the first computable integral, then used
-as the common interface for the remaining chapters.
-
-The public scoped entry point exposes the general contract and its final
-representation-transport step:
-
-Any concrete integral can enter the identity layer through one generic
-certificate: provide a valid `ConstructionFor`, a valid endpoint computation,
-and their explicit overlap.  Derivative-bound and curvature constructors are
-convenience specializations of this same pattern.
-
-When the integral and endpoint computations are each compared with a common
-anchor, use the corresponding common-anchor constructor; no direct comparison
-between the two algorithms is required.
-
-\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.ofConstruction}
-\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.integral_equiv_of_endpoint_anchor}
-\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.ofConstructionAndAnchor}
-\lean{ComputableAnalysis.IntegralIdentities.affineIdentityQuadraticDefiniteIdentity}
-\lean{ComputableAnalysis.effectiveFTC}
-\lean{ComputableAnalysis.effectiveFTC_endpointDifference}
-\lean{ComputableAnalysis.effectiveConvexFTC}
-\lean{ComputableAnalysis.effectiveConcaveFTC}
-\lean{ComputableAnalysis.effectiveCurvatureFTC}
-\lean{ComputableAnalysis.effectiveMeanValueBracket}
-\lean{ComputableAnalysis.effectiveSquareCurvatureFTC}
-\lean{ComputableAnalysis.effectiveSquareCurvatureFTC_value_one}
-\lean{ComputableAnalysis.effectiveSinPiSquareFTC_equiv_endpoint}
-\lean{ComputableAnalysis.effectiveSinPiSquareFTC_equiv_value}
-\lean{ComputableAnalysis.effectiveTangentSquareCombinedDerivative_compute_eq_density}
-\lean{ComputableAnalysis.effectiveTangentSquarePrimitive_endpointDifference_equiv_halfQuarterTurn}
-\lean{ComputableAnalysis.effectiveTangentSquareFTC_integral_equiv_halfQuarterTurn}
-\lean{ComputableAnalysis.effectiveReciprocalPi_quarterTurn_equiv_quarter}
-\lean{ComputableAnalysis.effectiveCanonicalDyadicCertificate_square_complement_overlap}
-
-The blueprint writes sine only as \(\sin(\pi x)\).  A normalized quarter-turn
-parameter may occur inside the circle algorithm as an implementation detail.
+The scoped Lean entry point is
+\texttt{ComputableAnalysis.IntegralFoundation}.  It exposes one construction
+for each genuinely different computational pattern and transports routine
+variants through explicit equivalence edges.
 
 \section{FTC as the organizing contract}
 \label{sec:integrals-ftc-contract}
 
-Once the rectangle algorithm has produced a certified area, the next question
-is not another special function.  It is the general finite statement that
-turns a derivative computation into an endpoint difference:
+The point of integration is the relation between accumulated area and endpoint
+change.  A concrete theorem supplies a valid integral computation, a valid
+primitive endpoint computation, and either a direct overlap or a common
+anchor.
 
 \begin{verbatim}
-derivative bounds -> cell rectangles -> finite telescoping sum
-                  -> endpoint difference within the same rational box
+derivative/range boxes -> cell rectangles -> finite telescope
+                       -> primitive endpoint difference
 \end{verbatim}
 
-This is the computable form of the FTC.  The theorem is introduced at this
-point because it explains why integration is useful; its hypotheses are then
-implemented by Lipschitz, monotone, convex, power-series, and turning-point
-certificates.  Chapter~\ref{ch:effective-calculus} contains that reusable
-implementation layer.  Chapters~\ref{ch:infinite-series}--\ref{ch:differential-equations}
-consume the contract rather than reopening the foundations.
-
-The first algebraic law is already finite: the rectangle fold for a pointwise
-sum is the interval sum of the two rectangle folds.  No limiting argument is
-needed here; convergence and representation transport are separate
-certificates.
-
-Left-endpoint rectangles are the default implementation, but the same finite
-algebra applies to right-endpoint rectangles.  The convention is therefore a
-choice of sample schedule, not a change of foundation.
-
-The trapezoid schedule is the finite midpoint of those two presentations:
-average the two endpoint boxes cell by cell.  Its identity with half the sum
-of the left and right folds is proved before any limiting argument.
-
-\begin{verbatim}
-left  := fold (mesh * value at x_k)
-right := fold (mesh * value at x_(k+1))
-trap  := half (left + right)
-
-left.width <= eps and right.width <= eps -> trap.width <= eps
-sample overlap at both endpoints -> trap overlap
-\end{verbatim}
-
-These are identities between finite rational computations.  A theorem that
-the three schedules converge to the same abstract integral is admitted only
-after a separate nesting, shrinking, and evaluator-equivalence certificate.
-
-\lean{ComputableAnalysis.riemannLeftInterval_add}
-\lean{ComputableAnalysis.riemannRightInterval}
-\lean{ComputableAnalysis.riemannRightInterval_add}
-\lean{ComputableAnalysis.riemannRightInterval_congr_of_samples}
-\lean{ComputableAnalysis.riemannRightInterval_overlap_of_samples}
-\lean{ComputableAnalysis.riemannTrapezoidInterval}
-\lean{ComputableAnalysis.riemannTrapezoidInterval_eq_half_add_left_right}
-\lean{ComputableAnalysis.riemannTrapezoidInterval_width_eq_half_add_left_right}
-\lean{ComputableAnalysis.riemannTrapezoidInterval_width_le_of_left_right_width_le}
-\lean{ComputableAnalysis.riemannTrapezoidInterval_overlap_of_samples}
-\lean{ComputableAnalysis.riemannTrapezoidInterval_congr_of_samples}
-\lean{ComputableAnalysis.riemannLeftInterval_scale_of_nonneg}
-\lean{ComputableAnalysis.riemannLeftInterval_scale_of_neg}
-\lean{ComputableAnalysis.riemannRightInterval_scale_of_nonneg}
-\lean{ComputableAnalysis.riemannRightInterval_scale_of_neg}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.ofConstruction}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.ofConstructionAndAnchor}
+\lean{ComputableAnalysis.effectiveFTC_endpointDifference}
 \leanok
+
+This contract is stated before its general proof because it organizes the rest
+of the book.  Chapter~\ref{ch:effective-calculus} constructs its derivative,
+curvature, and stabilization certificates.  Series, exponential, logarithm,
+and ODE chapters consume it without defining new integrals.
 
 \section{Rectangle algorithm}
 
-The question is not how to choose the best subdivision. Every certified
-subdivision is a computation, and the theory relates all of them.
+The decisive abstraction is not a faster area algorithm.  It is the study of
+all certified subdivisions, including crude rectangles, and of the finite
+relations among them.  Refinement locates every fine cell in exactly one coarse
+cell; a blockwise interval inequality then compares the complete sums.
 
-For each cell, certify monotonicity or isolate finitely many turns.  A turn is
-represented by a nested rational bracket; the left, middle, and right boxes
-are then assembled by finite interval addition.  The assembled width is
-proved to shrink.  Only the final comparison with the intended integral is
-function-specific, and is supplied as an explicit completion certificate.
-\begin{verbatim}
-mesh -> cell classification -> lower/upper rectangles -> overlap
-\end{verbatim}
-For a refinement certificate, every fine cell can first be located between two
-consecutive embedded coarse breakpoints:
-\lean{ComputableAnalysis.RationalPartition.Refines.cell_contained_in_coarse}
-The strict index form records the finite block of fine cells belonging to a
-coarse cell:
-\lean{ComputableAnalysis.RationalPartition.Refines.index_in_coarse_block}
-Every genuine fine cell is covered by one of those finite coarse blocks:
-\lean{ComputableAnalysis.RationalPartition.Refines.exists_index_block_of_fine_cell}
-The combined form supplies the valid fine-cell witness and its containment in
-one step:
-\lean{ComputableAnalysis.RationalPartition.Refines.cell_contained_in_coarse_of_index_block}
-The resulting coverage statement exposes the geometric fact directly:
-\lean{ComputableAnalysis.RationalPartition.Refines.exists_coarse_cell_containing_fine_cell}
-Separated coarse blocks are disjoint under the same half-open convention:
-\lean{ComputableAnalysis.RationalPartition.Refines.index_blocks_disjoint_of_order}
-Therefore the coarse block assigned to a fine cell is unique:
-\lean{ComputableAnalysis.RationalPartition.Refines.index_block_unique}
-The dependent witness is also exposed as a direct unique-existence contract:
 \lean{ComputableAnalysis.RationalPartition.Refines.existsUnique_index_block_of_fine_cell}
-The finite range algebra used to concatenate adjacent blocks is explicit:
-\lean{ComputableAnalysis.RationalPartition.range'_interval_append}
-Each coarse block is represented by an executable ordered fine-index list:
-\lean{ComputableAnalysis.RationalPartition.Refines.indexBlock}
-Its list membership is exactly the corresponding half-open index inequality:
-\lean{ComputableAnalysis.RationalPartition.Refines.mem_indexBlock_iff}
-Every emitted member is certified as a genuine fine-cell index:
-\lean{ComputableAnalysis.RationalPartition.Refines.indexBlock_mem_fine}
-Flattening all such blocks recovers the complete fine partition range:
-\lean{ComputableAnalysis.RationalPartition.Refines.indexBlocks_flatMap_eq_range}
-The corresponding fold identity transports interval additions and other finite
-accumulations directly:
-\lean{ComputableAnalysis.RationalPartition.foldl_flatMap}
-\lean{ComputableAnalysis.RationalPartition.Refines.foldl_indexBlocks_eq_foldl_range}
-The interval-valued Darboux sum uses this identity directly:
-\lean{ComputableAnalysis.RationalPartition.Refines.boundIntegralSum_eq_indexBlockFold}
-The blockwise containment rule then compares complete fine and coarse sums:
 \lean{ComputableAnalysis.RationalPartition.Refines.boundIntegralSum_contains_of_blockwise}
-The weaker overlap rule is available separately:
-\lean{ComputableAnalysis.RationalPartition.Refines.boundIntegralSum_overlaps_of_blockwise}
-Uniform grids also expose full refinement certificates, not only pointwise
-breakpoint equalities:
-\lean{ComputableAnalysis.RationalPartition.uniformRefinesRightCertificate}
-\lean{ComputableAnalysis.RationalPartition.uniformRefinesLeftCertificate}
-Consecutive dyadic meshes therefore have a named stage-refinement certificate:
-\lean{ComputableAnalysis.RationalPartition.dyadicRefinesNextCertificate}
-Composing these finite certificates gives refinement for every pair of stages:
 \lean{ComputableAnalysis.RationalPartition.dyadicRefinesCertificate}
-The remaining whole-sum argument is a finite reindexing of these located
-cells, followed by the single-cell weighted interval inequality.
-This gives the computable mean-value/area principle for the functions covered
-by the certificates.
+\leanok
+
+For a decreasing rational kernel, left and right endpoint rectangles give
+upper and lower sums.  Their difference is an explicit rational error.
+
 \begin{figure}[!htbp]\centering
 \arctanRectangleEnclosureAnimation
-\caption{Certified lower and upper rectangles.}
+\caption{Certified lower and upper rectangles for the arctangent kernel.}
 \label{fig:arctan-rectangle-enclosure}\end{figure}
 
-For $\sin(\pi x)$ on $[0,1/2]$, the endpoints are exact and each interior
-sample has a stage-dependent value bracket.
+The same picture works for interval-valued samples.  At stage \(n\),
+\(\sin(\pi x)\) is sampled on \(2^n\) dyadic cells; every interior dyadic value
+has its own stage-\(n\) nested-radical bracket, while both endpoints are exact.
+
 \begin{figure}[!htbp]\centering
 \intervalSineIntegralStageAnimation
-\caption{Value brackets and rectangle bounds.}
+\caption{Stage-dependent sine value brackets and rectangle bounds.}
 \label{fig:interval-sine-integral-stage}\end{figure}
+
+Left, right, and trapezoid folds are finite presentation choices.  Their
+algebra is proved before any claim that they determine the same integral.
+
+\lean{ComputableAnalysis.riemannLeftInterval_add}
+\lean{ComputableAnalysis.riemannRightInterval}
+\lean{ComputableAnalysis.riemannTrapezoidInterval_eq_half_add_left_right}
+\leanok
 
 \section{Monotone pieces and finitely many turns}
 
-The usable generalization is piecewise, not an unrestricted measurable
-function.  A monotone cell uses its endpoint range as the Darboux bracket;
-finitely many turning points split a function into such cells.  The same
-rectangle computation then adds the cell brackets.
+A monotone cell uses its endpoint value boxes.  A function with finitely many
+turns is split into monotone cells and finitely bracketed turning cells; each
+cell may use its own evaluator and rational error budget.
 
 \begin{verbatim}
-finite breakpoints -> monotone cells -> endpoint ranges
-                  -> add cell brackets -> one integral raw
+finite breakpoints -> monotone/turning cells -> local area boxes
+                   -> finite sum -> global shrinking budget
 \end{verbatim}
 
-The Lean layer separates the geometric classification from the computation:
-the monotone schedule supplies the dyadic ranges, while a piecewise-monotone
-certificate supplies the finite assembly.  This is the route used for
-functions such as \(\sin(\pi x)\): classify each cell as increasing,
-decreasing, or containing one certified turn, then refine only the local
-boxes needed by that classification.
-
-The atomic refinement inequality is explicit.  With coordinatewise endpoint
-order, the range rectangle on $[a,c]$ contains the sum of the two range
-rectangles on $[a,b]$ and $[b,c]$:
-
-\begin{verbatim}
-coarse [a,c] >= refined [a,b] + refined [b,c]
-\end{verbatim}
-
-This is the finite geometric step used to assemble dyadic nesting; no
-supremum or completed real is introduced.
-
-\lean{ComputableAnalysis.endpointOrderedNondecreasing_splitScaledEndpointRange_contains}
-
-There is one essential distinction.  Piecewise monotonicity describes the
-integrand and makes its area computable; it does not by itself say that the
-area equals the endpoint difference of that same function.  The FTC
-certificate supplies a (possibly separately represented) primitive.  For
-example, \(\lvert x\rvert\) on \([-1,1]\) is the first two-piece area
-example, while \(x\lvert x\rvert/2\) is the corresponding primitive for an
-endpoint identity.  This is why the general FTC interface is stated after
-the rectangle assembly, and why each special function must provide its own
-primitive/evaluator equivalence.
-
-The public primitive-specific interface now makes this distinction explicit:
-it transports the cell integrals through a primitive endpoint list and then
-uses the same finite telescope as the single-function interface.  The
-absolute-value construction now supplies the first completed finite-turn FTC
-case: the two cell areas add to (1), and the primitive
-\(P(x)=x\lvert x\rvert/2\) transports that sum to \(P(1)-P(-1)=1\).
-
-\lean{ComputableAnalysis.MonotoneOnInterval}
-\lean{ComputableAnalysis.EndpointOrderedNondecreasingOnInterval}
-\lean{ComputableAnalysis.EndpointOrderedNondecreasingOnInterval.toNondecreasing}
-Exact rational evaluators obtain this stronger contract directly from a
-rational monotonicity proof:
-The decreasing case has the mirrored endpoint-order contract and Darboux cell
-range:
-\lean{ComputableAnalysis.EndpointOrderedNonincreasingOnInterval}
-\lean{ComputableAnalysis.EndpointOrderedNonincreasingOnInterval.toNonincreasing}
-\lean{ComputableAnalysis.Integral.nonincreasingDarbouxRange_width_nonneg}
-\lean{ComputableAnalysis.Integral.nonincreasingDarbouxRange_overlaps_point_value}
-Under coordinatewise endpoint order, the decreasing range upgrades from overlap
-to genuine point-value containment:
-\lean{ComputableAnalysis.Integral.endpointOrderedNonincreasingDarbouxRange_contains_point_value}
-The cell result lifts to a complete decreasing partition stage, sampled at
-right endpoints:
-\lean{ComputableAnalysis.Integral.nonincreasingDarbouxStage_width_nonneg}
-\lean{ComputableAnalysis.Integral.nonincreasingDarbouxStage_overlaps_rightEndpointSamples}
-Interval regularity supplies the matching shrinking-width estimate for that
-decreasing stage:
-\lean{ComputableAnalysis.Integral.nonincreasingDarbouxRange_width_le_of_intervalRegular}
-\lean{ComputableAnalysis.Integral.nonincreasingDarbouxStage_width_le_of_uniform_input_budget}
-At dyadic mesh levels this becomes the same explicit input-budget and
-tolerance interface used by increasing stages:
-\lean{ComputableAnalysis.Integral.nonincreasingDarbouxDyadicStage_width_le_of_input_budget}
-\lean{ComputableAnalysis.Integral.nonincreasingDarbouxDyadicStage_width_le_of_input_budget_and_tolerance}
-The mirrored finite refinement comparison is also proved for decreasing
-stages:
-\lean{ComputableAnalysis.Integral.endpointOrderedNonincreasingDarbouxStage_contains_uniform_double}
-Finite composition gives decreasing-stage containment across arbitrary dyadic
-levels at fixed evaluator precision:
-\lean{ComputableAnalysis.Integral.endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_stage}
-Evaluator precision may also increase with the stage; the two refinements
-compose into one nested decreasing schedule:
-\lean{ComputableAnalysis.Integral.nonincreasingDarbouxStage_contains_of_precision}
-As on the increasing side, the mesh exponent may be an arbitrary monotone
-schedule rather than the stage number itself:
-\lean{ComputableAnalysis.QInterval.splitScaledEndpointRange_contains}
-The decreasing orientation uses the mirrored finite inequality:
-\lean{ComputableAnalysis.QInterval.splitScaledEndpointRange_contains_decreasing}
-\lean{ComputableAnalysis.endpointOrderedNonincreasing_splitScaledEndpointRange_contains}
-The local inequality is now assembled into a complete two-stage uniform
-mesh comparison for the stronger endpoint-order certificate:
-Finite composition gives the corresponding arbitrary-stage statement at fixed
-evaluation precision:
-When evaluator precision is itself monotone, the same containment holds for
-the complete scheduled stages:
-The mesh exponent may itself be an arbitrary monotone schedule, allowing the
-algorithm to spend extra work where the evaluator requires it:
-For endpoint-ordered monotone evaluators, the remaining schedule bookkeeping
-is now automatic.  A cumulative natural-number budget absorbs an arbitrary
-input-precision modulus, makes the dyadic mesh monotone, and proves the mesh
-bound by rational cross-multiplication:
-\begin{verbatim}
-stage(n) := sum of all input budgets through n
-cells(n) := 2^stage(n),    precision(n) := n
-\end{verbatim}
-\lean{ComputableAnalysis.Integral.cumulativeInputStage}
-\lean{ComputableAnalysis.Integral.cumulativeInputStage_mono}
-\lean{ComputableAnalysis.Integral.mesh_le_of_cumulative_input_stage}
-\lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule.ofAutomaticEndpointOrdered}
-The same construction is available with the orientation reversed:
-\lean{ComputableAnalysis.Integral.NonincreasingDarbouxSchedule.ofAutomaticEndpointOrdered}
-The decreasing side also exposes the general scheduled constructor:
-\lean{ComputableAnalysis.Integral.nonincreasingDarbouxScheduledSchedule_widths_shrink_of_budget}
-\lean{ComputableAnalysis.Integral.NonincreasingDarbouxSchedule.ofScheduledEndpointOrderedOfBudget}
-Both schedules can be promoted directly to a monotone piece for finite-turn
-assembly:
-\lean{ComputableAnalysis.Integral.MonotoneConstructionFor.ofAutomaticEndpointOrderedNondecreasing}
-\lean{ComputableAnalysis.Integral.MonotoneConstructionFor.ofAutomaticEndpointOrderedNonincreasing}
-\leanok
-The result packages directly into a public dyadic monotone-integral schedule;
-the mesh budget and width-shrink witness remain explicit inputs:
-\lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule.ofDyadicEndpointOrdered}
-The standard budget-to-shrink implication and its convenience constructor are
-also exposed:
-\lean{ComputableAnalysis.Integral.nondecreasingDarbouxDyadicSchedule_widths_shrink_of_budget}
-\lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule.ofDyadicEndpointOrderedOfBudget}
-The same budget path is available with that arbitrary exponent schedule:
-\lean{ComputableAnalysis.Integral.nondecreasingDarbouxScheduledSchedule_widths_shrink_of_budget}
-\lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule.ofScheduledEndpointOrderedOfBudget}
-\lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule}
-\lean{ComputableAnalysis.Integral.monotoneDarbouxSchedule_widths_shrink_of_budget}
-\lean{ComputableAnalysis.Integral.monotoneDarbouxSchedule_linear_precision_budget}
-\lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule.ofAutomaticLinearPrecision}
-\lean{ComputableAnalysis.Integral.monotoneDarbouxScheduleRaw_valid}
-\lean{ComputableAnalysis.Integral.monotoneDarbouxSchedule_precision_witness}
-The decreasing orientation now reaches the same public `RealRaw` interface:
-\lean{ComputableAnalysis.Integral.NonincreasingDarbouxSchedule}
-\lean{ComputableAnalysis.Integral.NonincreasingDarbouxSchedule.ofDyadicEndpointOrderedOfBudget}
-\lean{ComputableAnalysis.Integral.nonincreasingDarbouxScheduleRaw_valid}
-\lean{ComputableAnalysis.Integral.nonincreasingDarbouxScheduleIntegralFor_valid}
-\lean{ComputableAnalysis.Integral.nonincreasingDarbouxScheduleIntegralFor_width_le_of_tolerance}
-\lean{ComputableAnalysis.Integral.nonincreasingDarbouxSchedule_precision_witness}
-\lean{ComputableAnalysis.Integral.effectiveIntegral_add_of_endpoint_additive}
-\lean{ComputableAnalysis.Integral.effectiveIntegral_scaleRat_of_endpoint_scaleRat}
-\lean{ComputableAnalysis.Integral.effectiveIntegral_le_of_endpoint_le}
-\lean{ComputableAnalysis.Integral.effectiveConstantIntegral_equiv_endpoint}
-\lean{ComputableAnalysis.Integral.PiecewiseMonotoneConstructionFor}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_valid}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_two_equiv}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_equiv_finiteRawSum}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneEndpointDifferenceList_length}
-\lean{ComputableAnalysis.Integral.piecewisePrimitiveEndpointDifference}
-\lean{ComputableAnalysis.Integral.piecewisePrimitiveEndpointDifferenceList}
-\lean{ComputableAnalysis.Integral.piecewisePrimitiveEndpointDifferenceList_length}
-\lean{ComputableAnalysis.Integral.piecewisePrimitiveTotalEndpointDifference}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_equiv_totalPrimitiveEndpointDifference_of_telescope}
-\lean{ComputableAnalysis.Integral.absOnUnit_piecewise_cell_primitiveFTC}
-\lean{ComputableAnalysis.Integral.absOnUnit_piecewise_primitiveFTC}
-\lean{ComputableAnalysis.Integral.constructionFor_of_curvatureFTC}
-\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_curvatureFTC}
-\leanok
-
-The dyadic implementation uses the normalized angle \(2x=k/2^n\).  Its
-finite stage is an explicit indexed rectangle sum:
-
-\begin{verbatim}
-for k in range(2^n):
-    (sine, cosine) = nested_radical_table(n, k)
-    add (1/2^(n+1)) * sine to the interval sum
-\end{verbatim}
-
-The finite sum is packaged as a raw candidate. The remaining certificate
-proves that the half-angle boxes enclose the intended values and that the
-resulting sums are nested and shrink. Only after that certificate is supplied
-does the raw candidate become a computable integral.
-
-The implementation keeps mesh level and evaluation precision separate:
-each stage rebuilds its nested-radical paths at the current precision.  This
-prevents an old, coarse parent box from being reused forever at refined
-stages.
-
-Each square-root box is then clipped to its geometric range \([0,1]\).  The
-exact root remains enclosed, while the clipping makes the range invariant
-inductive: lower-half cosine boxes lie in \([0,1]\), reflected boxes in
-\([-1,0]\), and sine boxes in \([0,1]\). Lean proves this finite geometric
-invariant directly.
-
-\section{The first general integrability theorem}
-
-The project does not claim that every continuous function is integrable by
-default. It proves the stronger-for-computation statement for an explicit
-rational Lipschitz certificate:
-
-\begin{verbatim}
-f : rational evaluator on [0,1]
-L : certified Lipschitz bound
-        |
-        v
-dyadic cells -> lower/upper Lipschitz rectangles
-                 -> nested raw integral
-                 -> width <= 2*L/2^stage
-\end{verbatim}
-
-This is the foundation's replacement for a completeness-based existence
-theorem. The rate is visible, executable, and can be transported to a
-special-function evaluator. A merely effective modulus of continuity can be
-added later by supplying a corresponding cell-width schedule; it is not
-silently identified with the Lipschitz case.
-
-The general interval-regular layer now exposes the finite step that comes
-before a raw integral.  Each cell is assigned the common image enclosure
-provided by `IntervalRegularOn`, and a uniform partition gives the explicit
-bound
-
-\begin{verbatim}
-width(sum of cell boxes) <= (b-a)/(requested precision + 1).
-\end{verbatim}
-
-This works without monotonicity.  It is intentionally only a finite
-quadrature candidate: cross-stage nesting still has to be supplied before it
-is promoted to a `realRaw` integral.
-
-The first reusable part of that coherence proof is now factored out: if the
-interval images nest at later evaluator stages, the weighted Darboux sum nests
-on every fixed partition.  Refinement across changing partitions remains an
-explicit additional certificate.
-
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxRange}
-\lean{ComputableAnalysis.Integral.nondecreasingDarbouxRange_overlaps_point_value}
-\lean{ComputableAnalysis.Integral.endpointOrderedNondecreasingDarbouxRange_contains_point_value}
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxRange_width_le}
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxStage}
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxStage_contains_of_evalIntervalsNested}
-\lean{ComputableAnalysis.RationalPartition.boundIntegralSum_width_nonneg_of_termwise}
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxRange_contains_point_value}
-\lean{ComputableAnalysis.RationalPartition.boundIntegralSum_overlaps_of_termwise}
-\lean{ComputableAnalysis.RationalPartition.boundIntegralSum_contains_of_termwise}
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxStage_contains_of_cellwise}
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxStage_overlaps_of_cellwise}
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxStage_overlaps_of_cellwise_ordered_samples}
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxStage_overlaps_leftEndpointSamples}
-\lean{ComputableAnalysis.Integral.nondecreasingDarbouxStage_overlaps_leftEndpointSamples}
-\lean{ComputableAnalysis.Integral.nondecreasingDarbouxStage_contains_of_precision}
-\lean{ComputableAnalysis.Integral.endpointOrderedNondecreasingDarbouxStage_contains_leftEndpointSamples}
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxStage_width_le_of_uniform_input_budget}
-\leanok
-
-To publish such candidates as an actual `realRaw`, the schedule-level
-certificate records the remaining finite facts explicitly: ordered stages,
-cross-stage nesting, and shrinking widths.  Once supplied, it constructs the
-ordinary domain-aware integral interface.  This is the computable analogue of
-the classical existence step, with the coherence proof visible at the API
-boundary.
-
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxScheduleRaw_valid}
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxScheduleRaw_precision_witness}
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxScheduleIntegralFor_precision_witness}
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxScheduleRaw_width_le_of_tolerance}
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxScheduleRaw_linear_width_le}
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxScheduleConstructionFor}
-\lean{ComputableAnalysis.effectiveIntervalRegularDarbouxSchedule_widths_shrink_of_budget}
-\lean{ComputableAnalysis.effectiveIntervalRegularDarbouxSchedule_ofAutomaticPieces}
-\lean{ComputableAnalysis.effectiveIntervalRegularDarbouxScheduleRaw_valid}
-\lean{ComputableAnalysis.effectiveIntervalRegularDarbouxScheduleRaw_precision_witness}
-\lean{ComputableAnalysis.effectiveIntervalRegularDarbouxScheduleIntegralFor}
-\lean{ComputableAnalysis.effectiveIntervalRegularDarbouxSchedule_ofAutomaticLinearPrecision}
-\lean{ComputableAnalysis.effectiveIntervalRegularDarbouxScheduleRaw_linear_width_le}
-\lean{ComputableAnalysis.effectiveIntervalRegularDarbouxScheduleIntegralFor_valid}
-\lean{ComputableAnalysis.effectiveIntervalRegularDarbouxScheduleIntegralFor_precision_witness}
-\lean{ComputableAnalysis.effectiveIntervalRegularDarbouxScheduleIntegralFor_width_le_of_tolerance}
-\leanok
-
-The mesh condition itself is routine finite arithmetic.  Given a natural
-upper bound for the interval length, the automatic piece count meets the
-input modulus without any analytic choice:
-
-\lean{ComputableAnalysis.Integral.intervalRegularAutomaticPieces}
-\lean{ComputableAnalysis.Integral.intervalRegularAutomaticPieces_pos}
-\lean{ComputableAnalysis.Integral.intervalRegularAutomaticPieces_input_budget}
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxStage_width_nonneg_of_uniform_input_budget}
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxSchedule_widths_shrink_of_budget}
-\lean{ComputableAnalysis.Integral.IntervalRegularDarbouxSchedule.ofAutomaticPieces}
-\lean{ComputableAnalysis.Integral.IntervalRegularDarbouxSchedule.ofAutomaticLinearPrecision}
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxScheduleIntegralFor}
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxScheduleIntegralFor_valid}
-\lean{ComputableAnalysis.Integral.intervalRegularDarbouxScheduleIntegralFor_width_le_of_tolerance}
-\leanok
-
-\lean{ComputableAnalysis.Integral.LipschitzOnUnit}
-\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.compute}
-\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.compute_width}
-\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.compute_nested}
-\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.raw_valid}
-\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.construction}
-\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.compute_overlap_of_lipschitz_bounds}
-\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.raw_equiv_of_lipschitz_bounds}
-\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.compute_add}
-\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.raw_add_equiv}
-\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.compute_natScale}
-\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.raw_natScale_equiv}
-\leanok
-
-The arctangent kernel is the first named instance: its bound $L=2$ gives
-an interval width $4/2^n$ before any endpoint or FTC identification.
-
-One constructor turns a natural-number Lipschitz bound on any ordered rational
-chart into the interval-image certificate used by the FTC layer.  The unit and
-unit-subinterval names are adapters to that constructor; they do not duplicate
-the proof or hide a rescaling argument.
-
-The Lipschitz constant is implementation data, not part of the represented
-function. If two certified constants are available, their Darboux boxes share
-the same finite rectangle sum and therefore define equivalent `realRaw`s.
-
-Addition is likewise finite: the box for a sum with bound (L+M) is the
-interval sum of the component boxes. The raw equivalence theorem exposes this
-as the project’s linearity bridge; no linearity axiom for an abstract integral
-is assumed.
-
-For a nonnegative rational scale, the same finite argument gives the scalar
-bridge: scale the function, its Lipschitz bound, and every rectangle box.
-
-\lean{ComputableAnalysis.IntervalRegularOn.of_lipschitzOnUnit}
-\lean{ComputableAnalysis.IntervalRegularOn.of_lipschitzOnUnitSubinterval}
-\leanok
-
-\lean{ComputableAnalysis.Integral.LipschitzOnIntervalNat}
-\lean{ComputableAnalysis.IntervalRegularOn.of_lipschitzOnIntervalNat}
-\lean{ComputableAnalysis.Integral.LipschitzOnIntervalNat.of_unit_subinterval}
-\leanok
-
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquare_lipschitz_on_unit}
-\lean{ComputableAnalysis.IntegralIdentities.arctanKernelLipschitzIntegral_valid}
-\leanok
-
-The finite base cases are explicit as well.  Constants and affine functions
-are integrated by rational endpoint formulas; their monotonicity certificates
-are retained so the same constructions can be inserted into a piecewise plan.
-
-\lean{ComputableAnalysis.Integral.effectiveAffineMonotoneIntegralFor_adjacent_additive}
-\lean{ComputableAnalysis.Integral.effectiveAffineMonotoneIntegralFor_of_nonpos_adjacent_additive}
-\lean{ComputableAnalysis.Integral.effectiveAffineMonotoneIntegralFor_eq_ofRat}
-\lean{ComputableAnalysis.Integral.effectiveAffineMonotoneIntegralFor_of_nonpos_eq_ofRat}
-\lean{ComputableAnalysis.Integral.exactRat_affine_signed_unitSlope_raw_equiv_ofRat}
-\lean{ComputableAnalysis.Integral.effectiveConstantIntegral_equiv_endpoint}
-\leanok
-
-The affine case already closes adjacent-interval additivity with no limiting
-argument: the endpoint formula on $[a,c]$ is rationally equal to the sum of
-the formulas on $[a,b]$ and $[b,c]$. This is the first nonconstant instance
-of the general additivity contract, for both increasing and decreasing
-affine functions; later piecewise constructions must supply the corresponding
-finite assembly and endpoint-equivalence certificate.
-
-The signed affine certificate makes the decreasing case explicit: interval
-endpoints reverse in the cell image, while the represented integral still
-transports to the same rational endpoint formula. This is the representative
-pattern reused for decreasing pieces; separate copies for every affine slope
-are unnecessary.
-
-The identity function now also has its elementary primitive $x^2/2$.  Its
-rectangle integral and endpoint difference are assembled through the generic
-certificate interface, giving a complete nonconstant FTC example before any
-special-function geometry is introduced.
-
-\lean{ComputableAnalysis.IntegralIdentities.affineIdentityQuadraticPrimitive_endpoint_compute}
-\lean{ComputableAnalysis.IntegralIdentities.affineIdentityQuadraticPrimitive_endpoint_equiv_half}
-\lean{ComputableAnalysis.IntegralIdentities.affineIdentityQuadraticDefiniteIdentity}
-\leanok
-
-\section{Beyond Lipschitz: effective monotone schedules}
-
-The next layer accepts an interval-level modulus rather than one global
-Lipschitz constant. For a nondecreasing evaluator, endpoint boxes on each
-cell give a Darboux range. The finite width estimate is already general:
-
-\begin{verbatim}
-interval regularity + mesh/input budget
-    -> endpoint Darboux boxes
-    -> width <= (b-a)/(requested evaluation stage + 1)
-\end{verbatim}
-
-The public schedule records exactly what a proof must still establish:
-
-\begin{verbatim}
-pieces(n), precision(n)
-    -> mesh budget
-    -> nesting across stages
-    -> widths shrink to zero
-    -> valid computable integral
-\end{verbatim}
-
-\lean{ComputableAnalysis.IntervalRegularOn}
-\lean{ComputableAnalysis.Integral.nondecreasingDarbouxDyadicStage_width_le_of_input_budget}
 \lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule}
 \lean{ComputableAnalysis.Integral.monotoneDarbouxScheduleRaw_valid}
-\lean{ComputableAnalysis.Integral.monotoneDarbouxScheduleConstructionFor}
-\lean{ComputableAnalysis.Integral.monotoneDarbouxScheduleIntegralFor_valid}
-\lean{ComputableAnalysis.Integral.monotoneDarbouxScheduleIntegralFor_width_le_of_tolerance}
-\lean{ComputableAnalysis.Integral.generalConstructionFor}
-\lean{ComputableAnalysis.Integral.generalConstructionFor_compute_eq}
-\lean{ComputableAnalysis.Integral.integralFor_generalConstructionFor_valid}
-\lean{ComputableAnalysis.Integral.integralFor_generalConstructionFor_equiv}
-\leanok
-
-Finite piece assembly has its own reusable algebra layer. A list of valid
-raw representatives can be concatenated before any endpoint theorem is
-proved:
-
-\begin{verbatim}
-finiteRawSum (pieces ++ more)
-    == finiteRawSum pieces + finiteRawSum more
-\end{verbatim}
-
-The equality is overlap-equivalence of interval algorithms. It is the exact
-finite statement used by adjacent-interval and multi-turn proofs; it does
-not assert that an arbitrary integrand has an integral.
-
-The telescoping algebra is independent of interval domains: for any nonempty
-list of valid raw endpoint values, the finite sum of adjacent differences is
-equivalent to the last value minus the first.  Domain-specific FTC proofs
-only need to transport their endpoint evaluators into this list theorem.
-
-The corresponding finite transport is generic: prove one equivalence for each
-member of an indexed list, then map that proof across the list.  This is the
-single closure used by piecewise primitives and other finite decompositions;
-routine changes of formula do not require another induction.
-
-The quantitative companion is equally explicit.  At every stage, the width
-of a finite raw sum is exactly the sum of the component widths.  Thus a
-uniform cell bound (e) over (m) pieces gives the total bound (m e):
-
-\begin{verbatim}
-cell widths <= e  ->  sum widths = width(sum) <= m*e
-\end{verbatim}
-
-This is the error-budget rule for a finite turning-point decomposition.  It
-does not claim that the assembled object is an infinite integral; it only
-exposes the finite budget that a later shrinking schedule must consume.
-The adaptive form replaces the common $e$ by a bound $e_k$ for each cell
-and sums the $e_k$.  This is the natural contract when different pieces
-have different evaluators or different local conditioning.
-
-\lean{ComputableAnalysis.Integral.finiteRawSum}
-\lean{ComputableAnalysis.Integral.finiteRawSum_valid}
-\lean{ComputableAnalysis.Integral.finiteRawSum_compute_width_eq_foldl}
-\lean{ComputableAnalysis.Integral.finiteRawSum_compute_width_le_of_forall}
-\lean{ComputableAnalysis.Integral.finiteRawSum_compute_width_le_of_bounds}
-\lean{ComputableAnalysis.Integral.rawFold_compute_width_eq_foldl}
-\lean{ComputableAnalysis.Integral.finiteRawSum_append_equiv}
-\lean{ComputableAnalysis.Integral.FiniteRawListLe}
-\lean{ComputableAnalysis.Integral.FiniteRawListLe.refl}
-\lean{ComputableAnalysis.Integral.FiniteRawListEquiv}
-\lean{ComputableAnalysis.Integral.FiniteRawListEquiv.refl}
-\lean{ComputableAnalysis.Integral.FiniteRawListEquiv.symm}
-\lean{ComputableAnalysis.Integral.finiteRawListEquiv_map_of_forall}
-\lean{ComputableAnalysis.Integral.finiteRawSum_equiv_of_forall}
-\lean{ComputableAnalysis.Integral.finiteRawSum_le_of_forall₂}
-\lean{ComputableAnalysis.Integral.rawLast}
-\lean{ComputableAnalysis.Integral.rawAdjacentDifferenceList}
-\lean{ComputableAnalysis.Integral.rawAdjacentDifferenceList_range_map}
-\lean{ComputableAnalysis.Integral.rawAdjacentDifferenceList_valid}
-\lean{ComputableAnalysis.Integral.finiteRawSum_rawAdjacentDifferenceList_equiv_last_sub_first}
-\lean{ComputableAnalysis.Integral.finiteRawSum_range_adjacent_equiv}
-\leanok
-
-The same finite sum is order-preserving: a pairwise lower enclosure remains
-below the corresponding upper enclosure after assembly.  This is the finite
-order core used by Darboux and derivative-bound certificates; it is not the
-classical theorem that an arbitrary integral operator preserves order.
-
-For a piecewise-monotone certificate, the cell indices form a finite
-range-indexed list.  Every cell is valid, hence its finite raw sum is valid
-before any theorem identifies the sum with an endpoint difference.  The
-two-cell theorem is the first concrete assembly instance; the general
-finite-sum equivalence now identifies the public fold with the same canonical
-sum for any finite number of turns.
-
-To connect those cells to an FTC conclusion, the construction must supply a
-per-cell endpoint certificate.  The next theorem transports the assembled
-integral to the finite sum of those endpoint differences; the separate
-adjacent-endpoint theorem then performs the telescoping step.
-The composition theorem makes the remaining finite transport certificate
-explicit: once the endpoint list is shown to be an adjacent-difference list,
-the generic raw telescoping theorem closes the endpoint identity.
-
-The public piecewise fold now also carries the quantitative version of this
-assembly rule.  If every certified cell has stage-$n$ width at most $e$,
-then the $m$-piece integral fold has width at most $me$.  The theorem is
-finite bookkeeping; a shrinking schedule is still a separate hypothesis.
-For adaptive cells, the corresponding theorem sums the individual bounds
-$e_0,\ldots,e_{m-1}$.  A proof may therefore spend precision where the
-function is difficult and use a cheaper evaluator elsewhere.
-
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneCellList}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneCellList_length}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneCellList_ne_nil}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneCellList_valid}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneCellList_finiteRawSum_valid}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_compute_width_le_of_forall}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_compute_width_le_of_bounds}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneEndpointDifference}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneEndpointDifference_valid}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneEndpointValueList}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneEndpointValueList_valid}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneEndpointValueList_adjacent}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneEndpointDifferenceList_valid}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneEndpointDifferenceList_equiv_canonicalAdjacent}
-\lean{ComputableAnalysis.Integral.PiecewiseMonotoneEndpointFTCFor}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_equiv_endpointDifferenceList}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneTotalEndpointDifference}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneTotalEndpointDifference_valid}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_telescope}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_canonical_telescope}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneCanonicalEndpointDifference_equiv_totalEndpointDifference}
-\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_canonical_values}
-\lean{ComputableAnalysis.Integral.generalIntegralFor_equiv_totalEndpointDifference_of_telescope}
-\lean{ComputableAnalysis.Integral.generalIntegralFor_equiv_totalEndpointDifference_of_canonical_values}
-\lean{ComputableAnalysis.Integral.effectiveGeneralIntegralFor_equiv_totalEndpointDifference_of_canonical_values}
-\leanok
-
-With canonical partition endpoints, the last finite transport is automatic:
-cellwise FTC certificates now close the piecewise integral directly to the
-endpoint difference.
-
-Finite rectangular products use the same assembly law in any fixed number
-of dimensions.  The nested sum is finite and rational; induction factors a
-separable integrand into one finite sum per coordinate.  This is the algebraic
-core needed by box integrals, Gaussian products, and the finite simplex sums
-used later for ODEs.  It is not a measure-theoretic Fubini theorem.
-
-The first genuinely iterated example is still finite: the outer right sum of
-the inner left sums equals the ordinary left sum for the complementary kernel
-\((1-x)f(x)\).  This is the rectangle-level integration-by-parts/Fubini
-identity used by later Gaussian and simplex constructions.  It is an exact
-rational identity, not a theorem about measurable functions.
-
-\lean{ComputableAnalysis.effectiveUniformTriangleRightSum_eq_complementUniformLeftEndpointSum}
-\lean{ComputableAnalysis.effectiveFiniteProductIntegralNestedSum_factorized}
-\lean{ComputableAnalysis.effectiveFiniteProductIntegralSum2D_nonneg}
-\lean{ComputableAnalysis.effectiveFiniteProductIntegralSum2D_swap}
-\lean{ComputableAnalysis.effectiveFiniteProductIntegralNestedSum_nonneg}
-
-\lean{ComputableAnalysis.finiteProductNestedSum}
-\lean{ComputableAnalysis.finiteProductSum}
-\lean{ComputableAnalysis.finiteProductNestedSum_factorized}
-\lean{ComputableAnalysis.finiteProductIntegralNestedSum}
-\lean{ComputableAnalysis.finiteProductIntegralSum}
-\lean{ComputableAnalysis.finiteProductIntegralNestedSum_factorized}
-\lean{ComputableAnalysis.finiteProductIntegralNestedSum_two_factor}
-\leanok
-
-\section{Functions that turn finitely many times}
-
-The next usable class is not “all continuous functions.” It is a function
-whose interval is split into finitely many monotone pieces, with each
-non-rational turning point represented by a shrinking rational bracket. At
-stage \(n\), integrate the certified left and right monotone pieces and put a
-range enclosure over the unresolved middle bracket:
-
-\begin{verbatim}
-turn bracket -> left monotone box + middle range box + right monotone box
-             -> finite rational sum -> shrinking integral candidate
-\end{verbatim}
-
-The middle contribution needs only a bound on the function range. Its width
-is therefore bounded by the range bound times the turn-bracket width; no value at
-the turn is required. This is the constructive form of the practical rule
-used for \(\sin(\pi x)/x\): classify each cell as increasing, decreasing, or
-containing one of finitely many certified turns, and refine only the latter.
-For one turn, the three finite budgets are independent: left piece, unresolved
-middle bracket, and right piece.  Their widths add, so computation can be
-allocated according to the difficulty of each part.
-
-\lean{ComputableAnalysis.Integral.TurningPointBracket}
-\lean{ComputableAnalysis.Integral.TurningPointBracket.widths_shrink}
-\lean{ComputableAnalysis.Integral.TurningBracketIntegralCandidate}
-\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.compute_width_le_of_bounds}
-\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.compute_widths_shrink}
-\lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.stabilizedRaw_valid}
-\lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.stabilizedRaw_width_le_of_bounds}
-\lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.raw_widths_shrink}
-\lean{ComputableAnalysis.Integral.finiteStageSum_width_le_of_bounds}
-\lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.compute_width_le_of_bounds}
+\lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly}
 \lean{ComputableAnalysis.Integral.MultiTurnIntegralCompletion.stabilizedRaw_valid}
-\lean{ComputableAnalysis.Integral.MultiTurnIntegralCompletion.stabilizedRaw_width_le_of_bounds}
-\lean{ComputableAnalysis.Integral.MultiTurnIntegralCompletion.stabilizedRaw_equiv_of_anchor}
-\lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.toMultiTurn}
-\lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.constructionFor}
-\lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.constructionFor_compute_eq}
-\lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.integralFor_valid}
-\lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.integralFor_equiv_anchor}
 \leanok
 
-The last declaration is deliberately a completion certificate, not a
-universal theorem. It says that a particular three-part candidate overlaps
-its chosen endpoint representative. The reusable
-`FinitePiecewiseStageAssembly` and `MultiTurnIntegralCompletion` structures
-already sum any supplied finite list of monotone-piece and turning-gap boxes;
-the remaining work for a new function is to supply its piece classification,
-shrinking budgets, and anchor equivalence. This does not introduce Lebesgue
-measure or a completed-real compactness argument.
+This is the project's general integrability boundary: not every continuous
+function, but every supplied finite decomposition whose local boxes and total
+budget are certified.  Piecewise formulas add no new foundation.  For example,
+\(|x|\) on \([-1,1]\) is exactly two monotone integrals.
 
-The assembly also accepts nonuniform budgets: if the $j$-th monotone piece
-or turning gap has width at most $e_j$, the finite candidate is bounded by
-$\sum_j e_j$.  This is useful when a narrow, ill-conditioned turn receives
-more computation than a regular cell.
-
-After prefix stabilization, the public computation also exposes its runtime
-error contract: the width is bounded by the finite sum of component budgets
-plus twice the explicit anchor-radius budget. The one-turn specialization is
-the three-term version above. Thus stabilization preserves both correctness
-and a usable finite estimate, including for arbitrary finite turn lists.
-
-This schedule layer is the honest frontier between the present foundation and
-the classical theorem that every continuous function on a closed interval is
-integrable. The missing work is constructive schedule synthesis and its finite
-nesting proof; no completeness axiom is being hidden in that gap.
-
-Thus interval regularity is a local input contract, not an automatic integral
-constructor. A completed computable integral must expose the additional
-cross-stage nesting and shrinking certificate, or assemble finitely many
-already-certified pieces. Routine function variants do not require new
-formalizations when they reuse that same certificate pattern.
-
-There is a deliberate distinction here. The project’s weak monotonicity
-predicate compares the lower endpoint of one value box with the upper endpoint
-of the next, so it proves overlap of an endpoint range with every point value.
-It does not compare lower endpoints with lower endpoints or upper endpoints
-with upper endpoints. Therefore it cannot, by itself, prove that a finer
-Darboux stage is nested inside a coarser one. An automatic schedule must add
-that stronger endpoint-order certificate (or use a common validated anchor);
-the missing proof is mathematical data, not a tactic or completeness axiom.
-
-\section{First complete finite-turn example}
-
-The absolute value is the smallest non-monotone test case. On $[-1,0]$ it is
-the affine function $-x$; on $[0,1]$ it is the affine function $x$. The two
-exact rational cell integrals are therefore each $1/2$, and the piecewise
-assembly proves
-
-\[
-  \int_{-1}^{1} |x|\,dx = 1.
-\]
-
-This is a complete proof through the public general-integral interface: one
-rational evaluator, one rational turn, two monotonicity certificates, and a
-finite sum identified with a rational anchor. Later examples with irrational
-turning points use the same interface; only the turn bracket and middle range
-box become nontrivial.
-
-This example now has two independent certified routes: the piecewise-monotone
-construction identifies the value, while the global Lipschitz witness supplies
-interval regularity for the general effective-calculus layer.  The two roles
-are intentionally separate and can be compared through the representation
-equivalence chain.
-
-\lean{ComputableAnalysis.Integral.absOnUnit}
-\lean{ComputableAnalysis.Integral.absRat_lipschitzOnIntervalNat}
-\lean{ComputableAnalysis.Integral.absOnUnit_intervalRegular}
-\lean{ComputableAnalysis.Integral.absOnUnit_left}
-\lean{ComputableAnalysis.Integral.absOnUnit_right}
-\lean{ComputableAnalysis.Integral.absOnUnit_piecewise}
-\lean{ComputableAnalysis.Integral.absOnUnit_piecewise_integral_valid}
-\lean{ComputableAnalysis.Integral.absOnUnit_piecewise_integral_two_equiv}
-\lean{ComputableAnalysis.Integral.absOnUnit_piecewise_integral_equiv_one}
-\lean{ComputableAnalysis.PiecewiseRectangleCertificate.gap_le_common_range}
+\lean{ComputableAnalysis.Integral.absoluteValuePiecewise_integral_equiv_one}
 \leanok
 
-The cell certificate now exposes the local semantic step explicitly.  An
-increasing or decreasing cell uses its endpoint order; a turning cell uses
-the supplied turn bracket.  In each case every certified value lies in the
-rectangle, and nonnegative cell width transports that enclosure to the
-corresponding area contribution.
+The distinction between integrability and FTC is essential.  Monotone pieces
+compute the area of an integrand; an endpoint theorem additionally supplies a
+primitive, possibly through a different evaluator.  Finite cell endpoint
+differences then telescope.
 
-\lean{ComputableAnalysis.pieceCellBounds_increasing_contains_value}
-\lean{ComputableAnalysis.pieceCellBounds_decreasing_contains_value}
-\lean{ComputableAnalysis.pieceCellBounds_turning_contains_value}
-\lean{ComputableAnalysis.pieceCellArea_contains_scaled_value}
-\lean{ComputableAnalysis.piecewiseRectangleSampleAreaSum}
-\lean{ComputableAnalysis.piecewiseRectangleSampleAreaSum_contains}
-\lean{ComputableAnalysis.PiecewiseRectangleCertificate.sampleAreaSum_contains}
-\lean{ComputableAnalysis.PiecewiseRectangleCertificate.append}
-\lean{ComputableAnalysis.PiecewiseRectangleCertificate.append_lowerSum_eq_add}
-\lean{ComputableAnalysis.PiecewiseRectangleCertificate.append_upperSum_eq_add}
-\lean{ComputableAnalysis.PiecewiseRectangleCertificate.append_gap_eq_add}
-\lean{ComputableAnalysis.PiecewiseRectangleCertificate.append_gap_le_add_common_range}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_equiv_totalPrimitiveEndpointDifference_of_telescope}
+\lean{ComputableAnalysis.Integral.absOnUnit_piecewise_primitiveFTC}
 \leanok
-
-The geometric certificate is deliberately elementary: a parent point on the
-unit circle with nonnegative coordinates has child coordinates satisfying
-
-\begin{verbatim}
-child_sine^2 = (1 - parent_cosine)/2
-child_cosine^2 = (1 + parent_cosine)/2
-child_sine, child_cosine >= 0
-\end{verbatim}
-
-After prefix stabilization, the public computation also exposes its runtime
-error contract: the width is bounded by the three component budgets plus twice
-the explicit anchor-radius budget.  Thus stabilization preserves both
-correctness and a usable finite estimate.
-
-Lean records this as a finite half-angle certificate. It is the formal
-version of the geometric picture behind the nested radicals. The repository
-currently keeps this layer self-contained rather than importing Mathlib's
-real-number geometry; a future import would be useful only if it supplied the
-same rational/interval statements without pulling in completed reals.
-
-\begin{proposition}[Anchor-free dyadic sample stabilization]
-There is also a useful distinction between a sample computation and its
-semantic anchor. For a fixed dyadic sample, the nested-radical boxes at any
-two requested precisions overlap, while the later box has width at most
-$1/(n+1)$. Consequently prefix stabilization can be driven by the candidate
-itself, with radius $1/(n+1)$; no independently chosen real or endpoint
-certificate is needed merely to make the sample a valid `realRaw`.
-
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSampleRadius}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalTableAt_overlap_of_precisions}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSampleRaw_future_contained}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSampleRadius_shrinksToZero}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSampleRaw_stabilized_valid_anchor_free}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSampleRaw_equiv_stabilized_anchor_free}
-\leanok
-\end{proposition}
 
 \section{The central bridge: an effective FTC}
 \label{thm:convex-ftc}
 \label{thm:effective-derivative-bound-ftc}
 
-The historical core of calculus is the converse relation between local change
-and accumulated area. Here the FTC is the chapter's central theorem: it is
-proved from finite comparisons, not imported from completeness.
+Historically, the FTC came first for the functions people could explicitly
+calculate.  Its mean-value corollary was then isolated as a structural
+principle and eventually used to rebuild calculus from completeness.  This
+project keeps the earlier computational direction: local finite bounds prove
+the endpoint identity directly.
+
+For each cell, a derivative box encloses the primitive increment after
+multiplication by the cell width.  The finite sum telescopes.  Different
+stages may choose unrelated partitions; shrinking width plus endpoint overlap
+is enough, because prefix stabilization constructs nested output boxes.
 
 \begin{verbatim}
-derivative bounds -> lower/upper rectangles -> endpoint difference -> overlap
-\end{verbatim}
-
-On each cell, a certified derivative bound controls the difference between
-the rectangle sum and the primitive's endpoint increment.  For monotone or
-convex/concave derivatives, neighboring secants provide the needed bounds;
-finite turning-point certificates extend the construction piecewise.  The
-result is an effective FTC: every requested output precision comes with a
-finite partition and a rational error certificate.
-
-The public contract is general:
-
-\begin{verbatim}
-candidate derivative -> cell bounds -> finite sum -> endpoint overlap
-                                         -> shrinking raw integral
-\end{verbatim}
-
-The certificate does not prescribe how derivative bounds are obtained.
-Monotonicity, convexity, power-series tails, and formula-specific interval
-arithmetic all implement the same interface. Thus the theorem is reusable
-without claiming that every function is integrable.
-Its raw integral exposes an explicit denominator-based precision witness:
-requested tolerance becomes a finite stage, rather than an existential appeal
-to completeness.
-
-The canonical spine has three layers:
-
-\begin{verbatim}
-finite derivative boxes -> shrinking bounded sums
-                        -> overlap with a valid endpoint computation
-                        -> prefix-stabilized valid integral
+finite derivative boxes -> bounded Riemann sums -> endpoint overlap
+                         -> prefix-stabilized realRaw integral
 \end{verbatim}
 
 \lean{ComputableAnalysis.EffectiveDerivativeBoundFTC}
 \lean{ComputableAnalysis.effectiveDerivativeBoundFTC}
-\lean{ComputableAnalysis.precisionAtStage_shrinksToZero}
-\lean{ComputableAnalysis.DerivativeBoundFTC.boundedIntegralRaw_precision_witness}
-\lean{ComputableAnalysis.DerivativeBoundFTC.boundedIntegralRaw_widths_shrink}
-\lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw}
 \lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_valid}
 \lean{ComputableAnalysis.EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_equiv_endpointDifference}
-\leanok
-
-The native bounded sums need not be nested: different stages may choose
-different partitions and evaluator precisions.  The width theorem and
-endpoint overlap are sufficient.  Prefix stabilization supplies nestedness,
-so the theorem does not assume the validity it is meant to construct.
-The public API then restricts the derivative computation to its certified
-rational interval and packages the stabilized value as an integral
-construction:
-
-\begin{verbatim}
-certified dF on [a,b] -> FunctionOnInterval
-                      -> Integral.ConstructionFor
-                      -> integral = F(b)-F(a)
-\end{verbatim}
-
-\lean{ComputableAnalysis.FunctionOnInterval.ofRealFunRaw}
-\lean{ComputableAnalysis.Integral.effectiveFTCConstructionFor}
 \lean{ComputableAnalysis.Integral.effectiveFTCIntegral_equiv_endpointDifference}
 \leanok
 
-The older `EffectiveFTC` adapter remains compatibility API for existing
-clients, not a second foundation.
+Convexity and concavity are especially computable providers: neighboring
+secants bound a monotone derivative.  The finite mean-value conclusion is an
+average bracket, not the assertion that an inaccessible point is attained.
 
-The interval-level function interface is closed under addition on a common
-rational chart.  This is the algebraic operation used when primitives or
-integrands are assembled from separately certified pieces; validity is proved
-directly from `RealRaw` addition, while continuity and FTC data remain
-separate certificates.
-
-\begin{verbatim}
-F, G on [a,b] -> F + G on [a,b]
-             -> valid interval boxes at every stage
-             -> derivative/integral certificates supplied separately
-\end{verbatim}
-
-\lean{ComputableAnalysis.FunctionOnInterval.add}
-\lean{ComputableAnalysis.FunctionOnInterval.add_compute}
-\lean{ComputableAnalysis.QInterval.differenceQuotient_addInterval}
-\lean{ComputableAnalysis.intervalNearAtPrecision_addInterval}
+\lean{ComputableAnalysis.Integral.effectiveConvexFTC}
+\lean{ComputableAnalysis.Integral.effectiveConcaveFTC}
+\lean{ComputableAnalysis.Integral.effectiveMeanValueBracket}
 \leanok
 
-The finite product-rule estimate is also used end to end.  On the positive
-unit branch, the factor $x\arctan(x)$ is integrated by a two-stage
-certificate: factor boxes and the endpoint secant are computed at separate
-finite stages, their bounded derivative sum is stabilized by explicit
-overlap, and the result is transported to the independent arctangent
-rectangle evaluator.  This is a concrete product FTC, not merely a local
-quotient identity.
-
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageFTC}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageFTC_equiv_endpoint}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageRaw_widthsShrink}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageStabilizedRaw_valid}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageStabilizedRaw_equiv_rectangleAtOne}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageConstruction}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral_valid}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral_equiv_arctanGeom_one}
-\leanok
-
-The first non-polynomial instance is already closed: Lean constructs
-`arctanEffectiveFTCData` for the rational kernel \(1/(1+x^2)\) and proves its
-finite rectangle integral equivalent to the endpoint primitive. This is the
-project's working FTC, not an appeal to a general real-number completeness
-theorem.  The Lipschitz--Darboux version now closes the entire value chain:
+Exact rational powers provide one representative polynomial family:
 \[
-\text{rational rectangles}
-\;\longrightarrow\;
-\arctan(1)
-\;\longrightarrow\;
-\frac{\pi}{4}.
+  \int_0^1 x^n\,dx=\frac1{n+1}.
 \]
+One arbitrary-power certificate replaces separate square, cube, quartic, and
+higher-degree proofs.
 
-\lean{ComputableAnalysis.IntegralIdentities.arctanKernelLipschitzIntegral}
-\lean{ComputableAnalysis.IntegralIdentities.arctanKernelLipschitzIntegral_valid}
-\lean{ComputableAnalysis.IntegralIdentities.arctanKernelLipschitzIntegral_equiv_rectangleForAtOne}
-\lean{ComputableAnalysis.IntegralIdentities.arctanKernelLipschitzIntegral_equiv_arctanGeom_one}
-\lean{ComputableAnalysis.IntegralIdentities.arctanKernelLipschitzIntegral_equiv_halfQuarterTurn}
-\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_one_valid}
+\lean{ComputableAnalysis.Integral.exactRat_pow_integral_raw_equiv_one_div_succ}
+\lean{ComputableAnalysis.Integral.exactRat_pow_definiteIdentity}
 \leanok
+
+Arctangent is the first non-polynomial instance.  Its derivative is the
+rational kernel \(1/(1+x^2)\), so the generic FTC identifies the rectangle
+integral with the geometric quarter-turn endpoint.
 
 \lean{ComputableAnalysis.Integral.arctanEffectiveFTCData}
-\lean{ComputableAnalysis.Integral.arctanKernelOnUnit}
 \lean{ComputableAnalysis.Integral.arctanEffectiveFTCConstruction}
-\lean{ComputableAnalysis.Integral.arctanEffectiveFTCIntegral_equiv_endpointDifference}
 \lean{ComputableAnalysis.Integral.arctanEffectiveFTCIntegral_equiv_arctanGeom_one}
 \leanok
 
-Chapter~\ref{ch:effective-calculus} packages this theorem for reuse: it does
-not introduce a competing notion of integral or a second foundation.
+\section{The sine integrals}
 
-The classical mean value theorem is the zero-width corollary.  At finite
-precision, \texttt{endpoint\_difference\_overlaps\_bound} records its useful content:
-the scaled derivative range overlaps the endpoint-increment box.  A literal
-intermediate point is not selected; the bracket is refined until the desired
-precision is reached.  We therefore recover MVT only where the function has
-the required effective monotonicity or turning-point certificate.
-
-The finite rational form is already explicit for one cell: the average
-endpoint increment divided by the cell width overlaps the certified range of
-the integrand.  This is the project’s constructive replacement for asserting
-that an attained real point \(t\in(a,b)\) exists:
-
-\lean{ComputableAnalysis.Polynomial.finitePolynomial_secant_derivative_bracket}
-\lean{ComputableAnalysis.Polynomial.finitePolynomial_secant_qabs_error_le_derivative_gap}
-\leanok
-
-The polynomial MVT certificate is executable: a coefficient list is evaluated
-by finite Horner recursion, and its derivative is evaluated by the matching
-finite recursion.  Nonnegative coefficients make the derivative bracket
-monotone on a nonnegative rational interval.  This is the reusable finite
-engine behind the cubic, quartic, and quintic examples; it supplies a bracket
-for the secant slope without selecting an intermediate completed-real point.
-
-\lean{ComputableAnalysis.Polynomial.finiteDerivativeEval}
-\lean{ComputableAnalysis.Polynomial.finiteDerivativeEval_cons}
-\lean{ComputableAnalysis.Polynomial.finitePolynomial_secant_derivative_bracket}
-\lean{ComputableAnalysis.Polynomial.finitePolynomial_secant_qabs_error_le_derivative_gap}
-\leanok
-
-The local-to-global proof is a finite telescoping argument:
-
-\begin{verbatim}
-cell derivative range -> cell width * range contains endpoint increment
-all cells              -> finite sum contains F(b)-F(a)
-width budget           -> effective FTC bracket
-\end{verbatim}
-
-These are separate reusable contracts, so a new function need only supply its
-cell certificate and error budget:
-
-\lean{ComputableAnalysis.CandidateDerivativeCellControl.endpoint_difference_overlaps_bound}
-\lean{ComputableAnalysis.CandidateDerivativeCellControl.endpoint_average_overlaps_bound}
-\lean{ComputableAnalysis.QInterval.divByRat_overlaps_of_pos}
-\lean{ComputableAnalysis.QInterval.divByRat_scaleByRat_self_of_pos}
-\lean{ComputableAnalysis.RationalPartition.boundIntegralSum_contains_endpointDifference}
-\lean{ComputableAnalysis.RationalPartition.boundIntegralSum_overlaps_endpointDifference}
-\lean{ComputableAnalysis.DerivativeBoundFTC}
-\leanok
-
-The checked polynomial ladder now reaches constant, affine, square, cube,
-quartic, and quintic evaluators, with a finite sextic Darboux checkpoint; the
-square case uses the finite bound
-\(v^2-u^2=(v-u)(v+u)\le 2(v-u)\) on \([0,1]\); the cube case uses the
-analogous three-term factorization and modulus \(3(n+1)\).  The corresponding
-finite dyadic integrals are identified with \(1/3,1/4,1/5,1/6\) by overlap
-with rational singleton intervals. The reusable polynomial layer also gives
-finite secant certificates for every normalized monomial and every finite
-Taylor prefix; these are the main inputs for non-polynomial functions.  Thus
-the foundation separates the uniform theorem from its finite value algebra:
-the derivative/FTC certificate is degree-independent, while each claimed
-closed value is backed by its own rational power-sum identity.
-
-The square case is also packaged as a domain-aware definite identity: the
-explicit primitive is $x^3/3$, its endpoint computation is rational, and the
-existing dyadic square certificate is transported through the generic
-construction interface. This is the model for adding further closed
-polynomial integrals.
-
-The quartic case follows the same public pattern: the dyadic $x^4$
-evaluator is transported to the endpoint primitive $x^5/5$, yielding the
-domain-aware identity $int_0^1 x^4\,dx=1/5$.
-
-\lean{ComputableAnalysis.FinitePolynomial.normalizedMonomialSecantBound}
-\lean{ComputableAnalysis.FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval}
-\lean{ComputableAnalysis.FinitePolynomial.taylorPrefix_hasDerivativeOnInterval}
-\leanok
-
-The square evaluator also has an independent interval-regular route on
-$[-1,1]$: the factorization $s^2-t^2=(s-t)(s+t)$ gives the rational
-Lipschitz bound $2$.  This is useful when the same polynomial is treated as
-a non-monotone integrand rather than by its closed primitive formula.
-
-\leanok
-
-The same route now covers the cubic evaluator on $[-1,1]$: the finite
-factorization $s^3-t^3=(s-t)(s^2+st+t^2)$ and the bound
-$|s^2+st+t^2|\le 3$ give a rational Lipschitz certificate.
-
-\leanok
-
-More generally, the finite power-difference recurrence gives one reusable
-certificate for every monomial: on $[-1,1]$, $x^n$ is Lipschitz with the
-natural rational bound $n$, including the constant case $n=0$.  This is the
-parametric form used when a finite Taylor prefix is supplied to the FTC
-layer.
-
-\lean{ComputableAnalysis.Integral.exactPow_lipschitz_on_minusOne_one}
-\lean{ComputableAnalysis.Integral.exactRat_pow_intervalRegularOn_minusOne_one}
-\leanok
-
-The corresponding normalized primitive is exposed once, rather than
-duplicated for each degree.  At arbitrary rational endpoints its computation
-is an exact rational interval, and its endpoint differences telescope across
-adjacent rational intervals by finite subtraction.  This is the algebraic
-backbone that a partition-level FTC certificate assembles.
-
-\lean{ComputableAnalysis.Integral.monomialPrimitiveRaw}
-\lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference}
-\lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference_compute}
-\lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference_equiv_ofRat}
-\lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference_compute_zero_one}
-\lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference_valid}
-\lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference_zero_one_equiv}
-\lean{ComputableAnalysis.Integral.monomialPrimitiveEndpointDifference_adjacent_additive}
-\leanok
-
-For every degree, the endpoint side is therefore already uniform: the
-primitive $x^{n+1}/(n+1)$ computes exactly to $1/(n+1)$ on $[0,1]$.
-The remaining work is the integral-side certificate, not a new primitive.
-
-At a finite mesh, the left rectangle sum for $x^n$ is not an abstract
-limit: it is exactly the scaled finite power sum
-
+There are two useful subdivisions for
 \[
-  \sum_{j<N}\frac1N\left(\frac jN\right)^n
-  = \left(\frac1N\right)^{n+1}\sum_{j<N}j^n.
+  \int_0^{1/2}\sin(\pi x)\,dx.
 \]
 
-\lean{ComputableAnalysis.Integral.uniformLeftEndpointSum_pow_eq_scaled_powerSum}
-\leanok
-
-The right-endpoint computation has the matching shifted power-sum form.  For
-$n>0$, the two finite sums differ by exactly the final rectangle:
-
-\[
-  R_N(x^k)-L_N(x^k)=\left(\frac1N\right)^{k+1}N^k.
-\]
-
-Thus for every positive exponent the Darboux gap is an explicit shrinking
-rational quantity, before any appeal to a completed number system.
-
-\lean{ComputableAnalysis.Integral.uniformRightEndpointSum_pow_eq_scaled_powerSumBlock}
-\lean{ComputableAnalysis.Integral.uniformRightEndpointSum_pow_sub_left_eq_scaled_last_power}
-\lean{ComputableAnalysis.Integral.uniformRightEndpointSum_pow_sub_left_eq_inv_of_pos}
-\leanok
-
-The rectangle sandwich is now closed uniformly.  Induction proves the two
-adjacent-power inequalities, telescoping gives the lower and upper bounds for
-$1/(k+1)$ at every positive rational mesh, and the certified raw integral is
-therefore equivalent to that rational value.  The proof uses only finite
-rational arithmetic; no integral or completeness theorem is hidden in this
-step.
-
-\lean{ComputableAnalysis.Integral.uniformLeftEndpointSum_pow_le_one_div_succ_of_step}
-\lean{ComputableAnalysis.Integral.uniformRightEndpointSum_pow_ge_one_div_succ_of_step}
-\lean{ComputableAnalysis.Integral.uniformLeftEndpointSum_pow_le_one_div_succ}
-\lean{ComputableAnalysis.Integral.uniformRightEndpointSum_pow_ge_one_div_succ}
-\lean{ComputableAnalysis.Integral.nonneg_pow_le_shifted_pow}
-\lean{ComputableAnalysis.Integral.monomial_power_increment_lower}
-\lean{ComputableAnalysis.Integral.monomial_power_increment_upper}
-\lean{ComputableAnalysis.Integral.exactRat_pow_compute_contains_one_div_succ}
-\lean{ComputableAnalysis.Integral.exactRat_pow_integral_raw_equiv_one_div_succ}
-\leanok
-
-This finite certificate now feeds the integral constructor for every
-monomial on $[0,1]$, and the value theorem is closed uniformly at the same
-time.
-
-The same certificate is now packaged as a domain-aware FTC identity.  The
-primitive is the explicit rational function $x^{k+1}/(k+1)$, so a consumer
-can invoke one theorem for every monomial and then combine the resulting
-identities for finite polynomial expressions.
-
-\lean{ComputableAnalysis.Integral.powPrimitiveOnUnit}
-\lean{ComputableAnalysis.Integral.powPrimitiveOnUnit_endpoint_compute}
-\lean{ComputableAnalysis.Integral.powPrimitiveOnUnit_endpoint_valid}
-\lean{ComputableAnalysis.Integral.exactRat_pow_integral_raw_equiv_pow_endpoint}
-\lean{ComputableAnalysis.Integral.exactRat_pow_definiteIdentity}
-\leanok
-
-The finite polynomial sum is linear in its coefficient stream.  Addition and
-rational scaling are therefore exact finite assembly operations; no new
-integral construction or limiting object is introduced at this stage.
-
-\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralSum_add}
-\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralSum_scale}
-\lean{ComputableAnalysis.effectiveFiniteTaylorEndpointRaw}
-\lean{ComputableAnalysis.effectiveFiniteTaylorEndpointRaw_valid}
-\lean{ComputableAnalysis.effectiveFiniteTaylorEndpointRaw_equiv_endpointDifference}
-\lean{ComputableAnalysis.effectiveFiniteTaylorEndpointRaw_equiv_finiteMonomialSum}
-\lean{ComputableAnalysis.effectiveFiniteTaylorEndpointRaw_add}
-\lean{ComputableAnalysis.effectiveFiniteTaylorEndpointRaw_scale}
-\lean{ComputableAnalysis.effectiveFiniteTaylorEndpointRaw_split}
-\lean{ComputableAnalysis.effectiveFiniteTaylorEndpointRaw_self_equiv_zero}
-\lean{ComputableAnalysis.effectiveFiniteTaylorEndpointRaw_reverse}
-\lean{ComputableAnalysis.effectivePrefixTail_width_eq_add}
-\lean{ComputableAnalysis.effectivePrefixTail_width_le_of_bounds}
-\lean{ComputableAnalysis.effectivePrefixTail_equiv_of_components}
-\lean{ComputableAnalysis.effectivePrefixTail_valid_of_components}
-\lean{ComputableAnalysis.effectivePrefixTail_widths_shrink_of_components}
-\lean{ComputableAnalysis.effectivePrefixTail_precision_witness_of_components}
-\lean{ComputableAnalysis.effectiveFiniteRawSum_valid_of_components}
-\lean{ComputableAnalysis.effectiveFiniteRawSum_widths_shrink_of_components}
-\lean{ComputableAnalysis.effectiveFiniteRawSum_precision_witness_of_components}
-\lean{ComputableAnalysis.effectiveFiniteRawSum_equiv_of_components}
-\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralValue_add}
-\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralValue_scale}
-\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralRaw}
-\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralAnchorRaw}
-\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralRaw_valid}
-\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralAnchorRaw_valid}
-\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralRaw_widths_shrink}
-\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralAnchorRaw_widths_shrink}
-\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralRaw_precision_witness}
-\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralAnchorRaw_precision_witness}
-\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralRaw_equiv_anchor}
-\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralValue}
-\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralValue_eq_finiteMonomialIntegralSum}
-\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralAnchorRaw_equiv_value}
-\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralRaw_compute_width_le}
-\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralRaw_compute_width_le_of_bounds}
-\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralRaw_equiv_value}
-\lean{ComputableAnalysis.effectiveSinPiHalfIntegral_equiv_endpoint}
-\lean{ComputableAnalysis.effectiveSinPiHalfIntegral_equiv_reciprocalPi_of_FTC}
-\lean{ComputableAnalysis.effectiveDerivativeBoundFTC_equiv_endpoint}
-\lean{ComputableAnalysis.effectiveDerivativeBoundFTC_boundedIntegralRaw_equiv_endpointDifference}
-\lean{ComputableAnalysis.effectiveUnitSquareIntegralRaw}
-\lean{ComputableAnalysis.effectiveUnitSquareIntegralRaw_equiv_one_third}
-\lean{ComputableAnalysis.effectiveUnitCubeIntegralRaw}
-\lean{ComputableAnalysis.effectiveUnitCubeIntegralRaw_equiv_one_fourth}
-\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralValue_eq_endpointDifference}
-\lean{ComputableAnalysis.effectiveFinitePolynomialIntegralRaw_equiv_endpointDifferenceValue}
-\leanok
-
-The assembled anchor therefore collapses to the single rational finite sum
-\(\sum_{k<n} c_k/(k+1)\).  The computation, its representation-chain
-anchor, and the familiar finite polynomial value are linked by explicit finite
-proofs.
-
-This is also a scope rule: the parametric monomial evaluator is the one
-representative formalization for the whole routine family.  New proof effort
-is spent on a closed-value identity only when a later application needs that
-degree or when it exposes genuinely new finite algebra; otherwise the
-existing raw integral and transport lemmas are reused.
-
-\lean{ComputableAnalysis.Integral.exactPow_lipschitz_on_unit}
-\lean{ComputableAnalysis.Integral.exactRat_pow_intervalRegularOn_unit}
-\lean{ComputableAnalysis.Integral.exactRat_pow_integral_certificate}
-\lean{ComputableAnalysis.Integral.exactRat_pow_integral_raw_valid}
-\lean{ComputableAnalysis.Integral.exactRat_pow_integral_raw_compute_width}
-\lean{ComputableAnalysis.Integral.exactRat_zero_integral_raw_equiv_one}
-\lean{ComputableAnalysis.Integral.exactRat_one_integral_raw_equiv_half}
-\lean{ComputableAnalysis.Integral.exactRat_square_integral_raw_equiv_one_third}
-\lean{ComputableAnalysis.Integral.exactRat_square_integral_raw_equiv_square_endpoint}
-\lean{ComputableAnalysis.Integral.exactRat_square_definiteIdentity}
-\lean{ComputableAnalysis.Integral.exactRat_pow_nondecreasing_on_unit}
-\lean{ComputableAnalysis.Integral.exactRat_pow_monotoneConstructionFor}
-\lean{ComputableAnalysis.Integral.exactRat_pow_monotoneIntegralFor_valid}
-\lean{ComputableAnalysis.Integral.exactRat_pow_monotoneIntegralFor_eq_dyadicRaw}
-\leanok
-
-The first three monomials are now closed-value regressions of the same
-computable integral interface:
-
-\[
-  \int_0^1 1\,dx=1,\qquad
-  \int_0^1 x\,dx=\frac12,\qquad
-  \int_0^1 x^2\,dx=\frac13.
-\]
-
-The quadratic proof is still finite at every stage: the endpoint sums are
-reduced to the finite sum of squares, and the two resulting rational bounds
-contain $1/3$.  No completeness or completed-real limit is introduced.
-
-\lean{ComputableAnalysis.Integral.exactRat_square_integral_raw_valid}
-\lean{ComputableAnalysis.Integral.exactSquare_compute_contains_one_third}
-\leanok
-
-For the cubic case the first rectangle identity is explicit:
-\(\sum_{k<n}3(k/n)^2(1/n)\) is evaluated by a finite sum-of-squares
-induction.  The interval-regular layer then supplies the domain-restricted
-effective FTC certificate used for the complete \(x^3\) instance.
-
-\lean{ComputableAnalysis.riemannLeftExact_threeSquare_unit_of_pos}
-\lean{ComputableAnalysis.Integral.exactRat_cube_integral_raw_equiv_one_fourth}
-\lean{ComputableAnalysis.Integral.exactRat_cube_integral_raw_equiv_cube_endpoint}
-\lean{ComputableAnalysis.Integral.exactRat_cube_definiteIdentity}
-\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeIntegralRaw_valid}
-\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeIntegralRaw_equiv_one}
-\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeDarboux_sums_mem_raw_succ}
-\leanok
-
-The finite polynomial ledger also exposes an independent raw bracket for the
-same value.  At stage $n$ it returns a symmetric rational enclosure around
-the endpoint difference $1$, with width $O(1/(n+1))$; the bound comes from
-the explicit left/right sums for $3x^2$, not from a completeness axiom.
-The containment theorem makes that connection literal: each stage box contains
-the matching left and right finite sums.
-
-All monomial degrees use one arbitrary-power certificate:
-
-\[
-  \int_0^1 x^3\,dx=\frac14,\qquad
-  \int_0^1 x^4\,dx=\frac15,\qquad
-  \int_0^1 x^5\,dx=\frac16.
-\]
-
-\lean{ComputableAnalysis.Integral.exactRat_pow_integral_raw_equiv_one_div_succ}
-\lean{ComputableAnalysis.Integral.exactRat_pow_integral_raw_equiv_pow_endpoint}
-\lean{ComputableAnalysis.Integral.exactRat_pow_definiteIdentity}
-\leanok
-
-The first nonlinear test is a squared sine prefix.  Its finite Taylor
-surrogate is integrated by the same effective FTC and evaluated by a rational
-certificate (the current prefix value is \(6389/161280\)).  The exact
-tangent-chart route is also exposed: its rational derivative certificate
-transports the integral to the quarter-turn anchor \(\pi/4\).  The endpoint
-schedule is made nested by finite prefix stabilization and is now a verified
-raw real.  The integral-side certificate has two parts: validity of the finite
-Riemann-sum raw computation, and a same-stage overlap bridge from that
-computation to the canonical endpoint box.  The tangent-chart proof now
-constructs the public integral raw by anchor-reboxing: finite boxes are
-intersected with the nested endpoint anchor, so validity follows from ordered
-widths, an explicit \(2/(n+1)\) shrink bound, and the overlap theorem.  Lean
-also proves constructively that the chosen endpoint stage is no earlier than
-the public stage: the positive rational stage budget has a denominator large
-enough to dominate the requested stage.  The equal-dyadic \(\sin^2\) route
-separately needs its arctangent-backed regularity and endpoint certificate
-before it is identified with \(1/4\).  For the unsquared sine route, the
-remaining certificate is target-directed: each nested-radical sample must be
-matched to a tangent box by a finite bisection trace or half-angle witness.
-
-The tangent-chart FTC already proves the value $1/\pi$.  The independent
-equal-dyadic algorithm still needs one representation edge: its positive odd
-nested-radical sample must overlap the inverse-arctangent circle box.  Zero,
-even refinement, reflection, induction, and integral transport are checked.
-The squared route needs the analogous sample overlap before its endpoint
-certificate yields $1/4$.
-
-\lean{ComputableAnalysis.SinPiIntegral.sinPiSquareOnHalf_valid}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_widths_shrink}
-\lean{ComputableAnalysis.SinPiIntegral.tangentSquareEffectiveCandidateFTC_equiv_endpoint}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicSquareCircleOverlapFamily.to_square_sum_overlap}
-\leanok
-
-The nested-radical rectangle computation is nevertheless a complete raw
-candidate on its own: it is an executable list of rational intervals, and its
-width is bounded by (1/(n+1)).  The only missing raw-real field is
-cross-stage nesting.  It is supplied either by a direct nesting certificate,
-or by prefix stabilization after overlap with a valid anchor.  This keeps the
-algorithmic candidate separate from the semantic theorem that identifies its
-value.
-
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_valid}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_widths_shrink}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_equiv_of_overlap}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_stabilized}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_stabilized_valid_of_overlap}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_stabilized_equiv_reciprocalPi_of_overlap}
-
-The half-angle evaluator has a finite circle invariant: after clipping the
-sine and cosine boxes, their squared sum overlaps the exact rational box
-$[1,1]$. This is the local geometric step that an all-stage witness family
-can reuse.
-
-\lean{ComputableAnalysis.SinPiIntegral.dyadicHalfAngleSinInput_width}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicHalfAngleCosInput_width}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicHalfAngle_clipped_square_sum_overlaps_one}
-
-The scoped calculus entry point exposes the raw algorithm’s proved width
-contract directly:
-
-\lean{ComputableAnalysis.effectiveDyadicNestedRadicalIntegralRaw_widths_shrink}
-\lean{ComputableAnalysis.effectiveDyadicNestedRadicalLeftSum_width_nonneg}
-\lean{ComputableAnalysis.effectiveDyadicNestedRadical_sample_coordinate}
-With a stagewise overlap certificate against the independent Stieltjes
-evaluator, prefix stabilization supplies validity and the value transport:
-
-\lean{ComputableAnalysis.effectiveDyadicNestedRadicalIntegralRaw_stabilized_valid_of_overlap}
-\lean{ComputableAnalysis.effectiveDyadicNestedRadicalIntegralRaw_stabilized_width_le}
-\lean{ComputableAnalysis.effectiveDyadicNestedRadicalIntegralRaw_stabilized_equiv_reciprocalPi_of_overlap}
-
-For the squared-sine example the normalization is part of the computation:
-\[
- \int_0^{1/2}\sin(\pi x)^2\,dx
-   =(1/\pi)\int_0^1\frac{4u}{(1+u^2)^2}\,du
-   =(1/\pi)(\pi/4)=1/4.
-\]
-The unscaled tangent chart therefore anchors \(\pi/4\), never \(1/4\).
-
-The finite transport uses only the pairwise information actually available:
-the public dyadic box overlaps the nested-radical box, and that box overlaps
-the normalized anchor.  Since overlap is not transitive, the chain evaluator
-widens by the vanishing middle width before prefix stabilization.
-
-\lean{ComputableAnalysis.RealRaw.overlapChainStabilize}
-\lean{ComputableAnalysis.RealRaw.overlapChainStabilize_valid}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized_valid}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized_equiv_value}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicNestedRadicalSquareAnchorCommonWitness.of_overlap}
-\leanok
-
-The application layer chooses the normalized tangent product and proves its
-value through the effective FTC quarter-turn computation.  The public theorem
-therefore concludes \(1/4\) directly.
-
-\lean{ComputableAnalysis.normalizedTangentSquareIntegral}
-\lean{ComputableAnalysis.NormalizedTangentSquareValueSubgoal.value}
-\lean{ComputableAnalysis.NormalizedTangentSquareTransportSubgoal.value}
-\lean{ComputableAnalysis.effectiveDyadicPublicSquareIntegral_chain_equiv_quarter}
-\lean{ComputableAnalysis.effectiveDyadicPublicSquareIntegral_chain_valid}
-\lean{ComputableAnalysis.NestedRadicalSquareIntegralConstructionSubgoal.value_of_normalized_transport}
-\lean{ComputableAnalysis.NestedRadicalSquareIntegralConstructionSubgoal.value_of_quarter_bounds}
-\leanok
-
-What remains is geometric: provide the public-to-nested circle certificate
-and the nested-to-normalized-anchor witness uniformly.  A stronger three-way
-same-stage witness is unnecessary.
-
-\lean{ComputableAnalysis.SinPiIntegral.DyadicSquareCircleOverlapFamily.to_square_sum_overlap}
-\lean{ComputableAnalysis.SinPiIntegral.tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn}
-\lean{ComputableAnalysis.reciprocalPi_quarterTurn_equiv_quarter}
-\leanok
-
-\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.TangentChartTransport}
-\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_transport}
-\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.tangentChartTransport_of_staticFTC_of_endpoint_equiv}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicNestedRadicalRoute.integral_equiv_reciprocalPi}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicNestedRadicalRouteSearchData.integral_equiv_reciprocalPi}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicNestedRadicalRouteSearchData.integral_compute_eq_leftSum}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicNestedRadicalRouteSearchData.integral_equiv_reciprocalPi_of_stieltjes_overlap}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalLeftSum_width_nonneg}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicNestedRadicalStieltjesCommonWitness.of_overlap}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicNestedRadicalBranchCertificateFamily.toWitnessFamily}
-\leanok
-
-The preferred finite bridge is a rational witness search, rather than equality
-of the two interval implementations.  A rational unit-circle point is placed
-inside the nested-radical sine and cosine boxes, and its half-angle tangent
-box is placed inside the inverse-tangent box.  The circle identity then proves
-the required sine-box overlap:
-
-\lean{ComputableAnalysis.SinPiIntegral.CanonicalDyadicHalfAngleCertificateAt}
-\lean{ComputableAnalysis.SinPiIntegral.canonical_dyadic_overlap_of_halfAngle_outer_tangent_at}
-\lean{ComputableAnalysis.SinPiIntegral.canonical_dyadic_certificate_at_of_rational_witness}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicCanonicalCertificateFamily}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicCanonicalCertificateSearchFamily}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicCanonicalCertificateCandidateFamily}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicCanonicalCertificateCandidateFamily.toSearchFamily}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicCanonicalCertificateCandidateFamily.toCanonicalFamily}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicCanonicalCertificateSearchFamily.toCanonicalFamily}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicCanonicalCertificateFamily.toWitnessFamily}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicNestedRadicalBranchCertificateFamily.rational_circle_overlap}
-\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificate_family}
-\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_branch_certificate_family}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareLeftSum_overlap_of_branch_certificate_family}
-\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_of_precision_first_certificate_family}
-\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_canonical_certificate_family}
-\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_candidate_family}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_canonical_search_family}
-\leanok
-The integral and Darboux layers do not require a completed real sine function.
-
-The closed finite instances are linked directly to their certificates:
-
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixOne_eq_identity}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixOneIntegralRaw_equiv_one_eighth}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTCData}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTC_equiv_endpoint}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTC_boundedIntegral_equiv_endpointDifference}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeEffectiveFTC_equiv_fortySeven_over_threeEightFour}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCStabilized}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCStabilized_valid}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCStabilized_equiv_endpointDifference}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCStabilized_equiv_value}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCConstruction}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCConstruction_equiv_endpointDifference}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCConstruction_equiv_value}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquarePrimitive_secant_formula}
-\lean{ComputableAnalysis.FiniteSinePrefix.sineTaylorPrefixThreeSquarePrimitive_secant_bracket}
-\lean{ComputableAnalysis.effectiveSinPiHalfIntegral_equiv_reciprocalPi_of_canonical_certificate_family}
-\lean{ComputableAnalysis.effectiveSinPiHalfIntegral_equiv_reciprocalPi_of_candidate_family}
-\lean{ComputableAnalysis.effectiveDyadicTangentWitnessFamily_of_lower_upper_odd_certificates}
-\lean{ComputableAnalysis.effectiveSinPiHalfIntegral_equiv_of_canonical_halfAngle_certificate_family}
-\lean{ComputableAnalysis.effectiveSineWitnessSearch_exists_of_overlap_of_positive_width}
-\lean{ComputableAnalysis.effectiveCanonicalDyadicCertificate_at_of_rational_witness}
-\lean{ComputableAnalysis.effectiveCanonicalDyadicCertificateSearchAt_sound}
-\lean{ComputableAnalysis.effectiveCanonicalDyadicCertificateSearchAt_some_of_mem_of_admissible}
-\leanok
-
-The target-directed inverse search has the same shape as the integral
-algorithm.  A cell is bisected, its certified forward image is compared with
-the target box, and one Boolean decision is retained:
+The completed route divides the rational tangent parameter uniformly.  Its
+images in \(x\) are uneven, so the finite sums are naturally
+Riemann--Stieltjes sums.  The result is the reciprocal-\(\pi\) computation.
 
 \begin{verbatim}
-cell := [lo,hi]
-mid  := (lo+hi)/2
-if forward_image([lo,mid]) is below target:
-    cell := [mid,hi]
-else:
-    cell := [lo,mid]
-record target-overlaps-forward-image(cell)
+uniform tangent mesh -> unequal angle samples -> Stieltjes sum
+                     -> rational endpoint identity -> 1/pi
 \end{verbatim}
 
-The trace itself is a rational computation.  Its proof fields are source
-containment, halving width, and the final overlap at every requested stage.
-This is the finite inverse certificate consumed by the nested-radical sine
-integral.
-
-The even nested-radical branch is now packaged directly from a successful
-finite tangent-witness search.  It reuses the public circle box, proves its
-ordering, and transports the search overlap to the parent table precision:
-
-At the computational level, the even child is simply the parent sample at a
-later precision.  The dyadic-table equation and the equal-mesh identity are
-now named explicitly:
-
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalTableAt_succ_even}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicTangentBoxAt_even_input}
-
-Consequently an even-branch canonical certificate is inherited from the
-parent certificate at the scheduled finer precision; only the odd and
-reflected-odd geometric cases remain as independent branch obligations:
-
-\lean{ComputableAnalysis.SinPiIntegral.CanonicalDyadicHalfAngleCertificateAt.of_even_parent}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_odd_canonical_halfAngle_certificate_family}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_lower_upper_odd_canonical_halfAngle_certificate_families}
-
-The inverse side has the complementary refinement law: at one fixed dyadic
-sample, a later tangent computation is enclosed by the earlier one.  This is
-the exact finite fact available for the even branch; it does not by itself
-produce a common witness for the narrower child box.
-
-\lean{ComputableAnalysis.SinPiIntegral.dyadicTangentBoxAt_contains_of_precision_le}
-\lean{ComputableAnalysis.SinPiIntegral.rationalCircleSinInterval_contains_of_input_contains}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadical_even_overlap_of_parent_overlap}
-The native-depth adapter packages the same law against the canonical public
-sample box:
-
-\lean{ComputableAnalysis.SinPiIntegral.dyadicTangentBox_contains_at_precision_of_depth_le}
-
-\lean{ComputableAnalysis.SinPiIntegral.DyadicEvenStepCertificate.ofWitnessSearch}
-\lean{ComputableAnalysis.SinPiIntegral.qinterval_overlaps_of_contained_left}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicEvenStepCertificate.to_public_overlap}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicEvenStepCertificate.of_overlap}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicEvenStepCertificate.of_parent_overlap}
-\leanok
-
-There is also a shorter completion route.  Instead of requiring exact
-half-angle interval identities, supply a finite rational tangent-witness
-search for every sampled box.  The public integral needs only the resulting
-stagewise overlap, and Lean already assembles those overlaps into the
-equal-dyadic integral:
-
-\begin{verbatim}
-sample box + finite witness search -> sine/table overlap
-all dyadic samples             -> integral equivalence
-\end{verbatim}
-
-\lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily}
-\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_of_canonical_nestedRadical_search}
-\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_of_witness_family}
-\lean{ComputableAnalysis.SinPiIntegral.halfIntegral_equiv_of_dyadic_sample_overlap}
-\lean{ComputableAnalysis.SinPiIntegral.sinPi_half_dyadic_normalized_sample}
-\leanok
-
-The exact even/lower/reflected certificate family remains the geometric
-explanation; the witness-search adapter is the minimal proof obligation for
-closing the numerical integral.  The weaker but directly usable route is now
-explicit: canonical rational unit-circle certificates discharge all three
-nonzero parity branches without asserting equality between the square-root
-and circle interval evaluators.  The two boundary samples are already closed
-independently: the zero sample and the terminal sample $k=2^n$ have
-stagewise overlap with the arctangent-backed sine evaluator for every $n$.
-Only the interior branches need the uniform witness family.
-
-\lean{ComputableAnalysis.SinPiIntegral.arctanSinPi_nestedRadicalStage_sample_overlap_zero}
-\lean{ComputableAnalysis.SinPiIntegral.arctanSinPi_nestedRadicalStage_sample_overlap_last}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalStageSinAt_last}
-\leanok
-
-The unrestricted unit tangent chart is already complete: a finite dyadic grid
-hits every positive-width sine target, and the Boolean witness search returns
-that hit.  The remaining difficulty is only restricting the search to the
-smaller inverse-arctangent box at each dyadic sample.
-
-\lean{ComputableAnalysis.SinPiIntegral.rationalCircleSin_dyadic_grid_hit}
-\lean{ComputableAnalysis.SinPiIntegral.rationalTangentWitnessSearch_unit_complete}
-\lean{ComputableAnalysis.SinPiIntegral.rationalTangentWitnessBoxSearch_complete_of_overlap}
-\lean{ComputableAnalysis.SinPiIntegral.exists_rationalTangentWitnessBoxSearch_of_overlap_of_positive_width}
-\leanok
-
-Two concrete searches are already checked as finite sanity tests.  They use
-the grid candidates (103/256) and (791/4096) at successive dyadic stages.
-The reusable soundness theorem converts any successful search into the
-circle-box overlap required by the transport step:
-
-\lean{ComputableAnalysis.SinPiIntegral.rationalTangentWitnessSearch_stage_one_demo}
-\lean{ComputableAnalysis.SinPiIntegral.rationalTangentWitnessSearch_stage_two_demo}
-\lean{ComputableAnalysis.SinPiIntegral.rationalTangentWitnessSearch_overlap_of_success}
-\lean{ComputableAnalysis.SinPiIntegral.rationalTangentWitnessBoxSearch_overlap_of_success}
-\leanok
-
-The interface deliberately separates the integration theorem from the
-special-function implementation:
-
-\begin{verbatim}
-dyadic coordinate 2*x = k/2^n
-       -> nested-radical or other sample box
-       -> overlap with the public sine box
-       -> equal-dyadic integral equivalence
-\end{verbatim}
-
-Thus the proof of the integral does not need a theorem that all points of the
-interval have nested-radical values.  It only needs the finite boxes actually
-read by the fixed quadrature algorithm.
-
-When interval arithmetic proves only overlap, the exact-box equality can be
-avoided altogether.  The direct branch-overlap adapter accepts the three
-finite even/lower/reflected overlap families and assembles them into the same
-search witness family:
-
-\begin{verbatim}
-even overlap + lower overlap + reflected overlap
-    -> all dyadic sample overlaps -> integral transport
-\end{verbatim}
-
-\lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_branch_overlap_families}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_odd_overlap_families}
-\lean{ComputableAnalysis.SinPiIntegral.exists_dyadic_tangent_witness_search_of_overlap_family}
-\lean{ComputableAnalysis.SinPiIntegral.lower_overlap_of_canonical_halfAngle_certificate}
-\lean{ComputableAnalysis.SinPiIntegral.upper_overlap_of_canonical_halfAngle_certificate}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadical_sample_overlap_of_direct_branch_overlaps}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadical_sample_overlap_of_canonical_halfAngle_certificate_family}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_canonical_halfAngle_certificate_family}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_margin_certificate_family}
-\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_of_canonical_halfAngle_certificate_family}
-\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_canonical_halfAngle_certificate_family}
-\leanok
-
-The lower and reflected constructors make the remaining proof obligations
-minimal.  Their parent boxes are taken from the nested table.  The canonical
-half-angle route now consumes the weaker statement it actually proves—public
-circle-box overlap—without requiring literal equality with the clipped
-square-root evaluator:
-
-The reflected rational point is obtained algebraically by reciprocal
-parameter symmetry: sine is unchanged and cosine changes sign.
-
-\lean{ComputableAnalysis.SinPiIntegral.rationalCircleSin_inv}
-\lean{ComputableAnalysis.SinPiIntegral.rationalCircleCos_inv}
-\lean{ComputableAnalysis.SinPiIntegral.rationalCircleSin_halfAngle_parameter}
-\lean{ComputableAnalysis.SinPiIntegral.rationalCircleSin_reflected_halfAngle_parameter}
-
-The interval-margin calculations use a separate exact denominator-clearing
-lemma over rationals:
-
-\lean{ComputableAnalysis.SinPiIntegral.rat_sub_div_mul_mul_of_pos}
-\lean{ComputableAnalysis.SinPiIntegral.rationalHalfAngleTangentInterval_width_formula}
-\lean{ComputableAnalysis.SinPiIntegral.rationalHalfAngleTangentInterval_width_le_of_margin}
-\lean{ComputableAnalysis.SinPiIntegral.rationalHalfAngleTangentInterval_width_le_of_box_widths}
-\lean{ComputableAnalysis.SinPiIntegral.qinterval_contains_of_point_margin}
-\lean{ComputableAnalysis.SinPiIntegral.rationalHalfAngleTangentInterval_contains_of_margin}
-\lean{ComputableAnalysis.SinPiIntegral.canonical_dyadic_certificate_at_of_rational_witness_with_margin}
-\lean{ComputableAnalysis.SinPiIntegral.RationalHalfAngleMarginCertificate}
-\lean{ComputableAnalysis.SinPiIntegral.RationalHalfAngleMarginCertificate.of_box_widths}
-\lean{ComputableAnalysis.SinPiIntegral.RationalHalfAngleMarginCertificate.toCanonical}
-
-\begin{verbatim}
-table cosine box -> half-angle geometry -> public/table overlap
-                 -> direct branch-overlap adapter
-\end{verbatim}
-
-\lean{ComputableAnalysis.SinPiIntegral.DyadicHalfAngleChildCertificate.of_table_parent}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicHalfAngleChildCertificate.of_parent_overlap}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicReflectedHalfAngleCertificate.of_parent_overlap}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicReflectedHalfAngleCertificate.of_table_parent}
-\leanok
-
-The search itself is proof-producing: a successful Boolean hit is converted
-into the complete half-angle certificate consumed by the transport theorem.
-
-The final adapter makes the proof boundary explicit.  One supplies a finite
-candidate list for each dyadic sample and proves that the executable search
-has a hit.  The adapter converts those finite successes into the witness
-family used by the integral theorem; no completeness or unbounded search is
-hidden in the interface.
-
-\lean{ComputableAnalysis.SinPiIntegral.canonicalDyadicCertificateSearchAt}
-\lean{ComputableAnalysis.SinPiIntegral.canonicalDyadicCertificateSearchAt_sound}
-\lean{ComputableAnalysis.SinPiIntegral.canonicalDyadicCertificateSearchAt_some_of_mem_of_admissible}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_canonical_search_family}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_canonical_candidate_family}
-\lean{ComputableAnalysis.SinPiIntegral.DyadicNestedRadicalBranchCertificateFamily.toWitnessFamily}
-\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificates}
-\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_branch_certificates}
-\leanok
-
-\begin{verbatim}
-sine prefix   -> square prefix -> derivative bounds -> FTC endpoint box
-tangent chart -> rational derivative certificate -> endpoint = quarter-turn
-equal dyadic  -> regularity + endpoint identity -> integral = 1/4
-\end{verbatim}
-
-\section{Riemann--Stieltjes viewpoint}
-
-Uneven samples are finite Riemann--Stieltjes sums: a monotone chart supplies
-the increments of the integrator, while the function supplies the sampled
-values.  For the sine example, use
-\(x(u)=2\arctan(u)/\pi\).  Equal subdivisions in \(u\) therefore produce
-unequal subdivisions in \(x\), computing
-\(\int_0^{1/2}\sin(\pi x)\,dx\) through Stieltjes sums.
-
-\begin{verbatim}
-uniform u-mesh -> inverse-chart x-samples -> Stieltjes rectangles -> overlap
-                         |
-                         +-- substitution theorem (when needed)
-\end{verbatim}
-
-This construction is checked in Lean under its Riemann--Stieltjes name.
-
-\lean{ComputableAnalysis.SinPiIntegral.sinPiStieltjesIntegral}
 \lean{ComputableAnalysis.SinPiIntegral.sinPiStieltjesIntegral_valid}
 \lean{ComputableAnalysis.SinPiIntegral.sinPiStieltjesIntegral_equiv_reciprocalPi}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalIntegralRaw_stabilized_width_le}
-\lean{ComputableAnalysis.SinPiIntegral.computableSinPiHalfIntegral}
-\lean{ComputableAnalysis.SinPiIntegral.computableSinPiHalfIntegral_valid}
 \lean{ComputableAnalysis.SinPiIntegral.computableSinPiHalfIntegral_equiv_reciprocalPi}
 \leanok
 
-This is the first completed end-to-end sine integral in the project.  It uses
-uneven samples in the original $x$-coordinate, but uniform subdivisions in
-the rational tangent coordinate $u$; the equal-dyadic version remains a
-separate, stronger transport theorem.
+The stronger equal-dyadic route uses nested radicals at the original
+\(x\)-samples.  Boundary, parity, reflection, finite search soundness, and
+integral transport are formalized.  Its remaining theorem is the uniform
+all-depth geometric certificate connecting every positive odd nested-radical
+sample to the corresponding rational-circle box.
 
-The finite algebra is shared by both presentations.  Stieltjes sums are
-linear in the sampled function, and the proof is induction over the finite
-mesh.  This is the interface later used for affine changes of variable and
-termwise integration of finite power series.
+\lean{ComputableAnalysis.SinPiIntegral.canonicalDyadicCertificateSearchAt_sound}
+\lean{ComputableAnalysis.SinPiIntegral.DyadicTangentWitnessFamily.of_canonical_search_family}
+\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificates}
+\leanok
 
-The square specialization is the finite chain rule.  For every rational
-sample path, the endpoint change of $f^2$ is the left sum for $2f\,df$
-plus the explicitly recorded quadratic variation:
+For the square,
+\[
+  \int_0^{1/2}\sin(\pi x)^2\,dx=\frac14.
+\]
+The calculus-side chain is complete: public dyadic boxes overlap
+nested-radical boxes, which overlap the normalized tangent anchor.  The same
+all-depth geometric overlap family is the remaining provider.
 
+\lean{ComputableAnalysis.SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized}
+\lean{ComputableAnalysis.effectiveDyadicPublicSquareIntegral_chain_equiv_quarter}
+\lean{ComputableAnalysis.SinPiIntegral.SinPiSquareEffectiveFTCData.integral_equiv_public_chainStabilized}
+\leanok
+
+\section{Riemann--Stieltjes and finite identities}
+
+A finite Stieltjes sum records increments of one rational path weighted by
+samples of another.  It is the common finite language for substitution,
+integration by parts, and chain rules.
+
+The square identity retains the quadratic variation:
 \[
   2\sum_i f_i\,\Delta f_i+\sum_i(\Delta f_i)^2
-    = f_n^2-f_0^2.
+  =f_n^2-f_0^2.
 \]
+If the maximum step shrinks, the variation term receives an explicit rational
+bound and the endpoint identity follows.
 
 \lean{ComputableAnalysis.finiteSquareStieltjes_chain}
-\lean{ComputableAnalysis.finiteSquareStieltjes_left_bounds}
-\lean{ComputableAnalysis.unitMeshPath_square_left_bounds}
-\lean{ComputableAnalysis.unitMeshPath_square_left_sum_exact}
-\lean{ComputableAnalysis.unitMeshSquareIntegralRaw_valid}
-\lean{ComputableAnalysis.unitMeshSquareIntegralRaw_equiv_one}
-\lean{ComputableAnalysis.unitMeshSquareIntegralRaw_lower_eq_left_sum}
-\lean{ComputableAnalysis.quadraticVariationSum_nonneg_of_step_nonnegative}
 \lean{ComputableAnalysis.quadraticVariationSum_le_stepBound_mul_endpointDifference}
-\lean{ComputableAnalysis.quadraticVariationSum_le_endpointVariationProduct_of_step_nonnegative}
+\lean{ComputableAnalysis.unitMeshSquareIntegralRaw_equiv_one}
 \leanok
 
-The same certificate is also an exposed raw-real computation: stage $n$
-returns the rational interval $[1-1/(n+1),1]$.  Its validity is proved by
-finite nesting plus the denominator-based epsilon schedule, and its value is
-identified with the rational point $1$ by stagewise overlap.  This is the
-model pattern for turning a finite integral estimate into a computable real.
-
-\lean{ComputableAnalysis.unitMeshSquareIntegralRaw}
-
-\leanok
-
-The affine change-of-variable identity is already exact at this finite level.
-Scaling the sampled function by the affine slope transports the left-rectangle
-fold to the affine image interval:
-
-\begin{verbatim}
-mesh in x -> scaled mesh in y -> same finite rectangle total
-\end{verbatim}
-
-This is the algebraic core of substitution.  The identity is valid for every
-rational slope; positivity is the extra hypothesis when the interval is to
-retain its orientation.  The effective FTC supplies the additional shrinking
-certificate when the identity is promoted from finite sums to an integral.
+Affine substitution is already exact for every finite mesh.  A general chart
+supplies positive denominator and endpoint-Jacobian enclosures cell by cell;
+no universal substitution theorem is assumed.
 
 \lean{ComputableAnalysis.ExactFunction.riemannLeftExact_affine_substitution}
-\lean{ComputableAnalysis.ExactFunction.differenceQuotient_affine_comp_of_step}
-\leanok
-
-\lean{ComputableAnalysis.leftStieltjesSum_add_left}
-\lean{ComputableAnalysis.leftStieltjesSum_add_right}
-\lean{ComputableAnalysis.leftStieltjesSum_scale_left}
-\lean{ComputableAnalysis.leftStieltjesSum_scale_right}
-\lean{ComputableAnalysis.rightStieltjesSum_add_left}
-\lean{ComputableAnalysis.rightStieltjesSum_add_right}
-\lean{ComputableAnalysis.rightStieltjesSum_scale_left}
-\lean{ComputableAnalysis.rightStieltjesSum_scale_right}
-\lean{ComputableAnalysis.leftStieltjesSum_one_left}
-\lean{ComputableAnalysis.leftStieltjesSum_const_left}
-\lean{ComputableAnalysis.rightStieltjesSum_one_right}
-\lean{ComputableAnalysis.rightStieltjesSum_const_right}
-\lean{ComputableAnalysis.leftStieltjesSum_const_path}
-\lean{ComputableAnalysis.leftStieltjesSum_affine_path}
-\lean{ComputableAnalysis.leftStieltjesSum_affine_integrand}
-\lean{ComputableAnalysis.rightStieltjesSum_const_path}
-\lean{ComputableAnalysis.rightStieltjesSum_affine_path}
-\lean{ComputableAnalysis.rightStieltjesSum_affine_integrator}
-\leanok
-
-In particular, a constant integrand against any rational path is exact at
-every finite stage:
-
-\[
-  \sum_i c\,\Delta g_i = c\,(g_n-g_0).
-\]
-This is the smallest Riemann--Stieltjes change-of-variables law; it is
-available before a limiting integral or an abstract real is introduced.
-The right-endpoint orientation has the identical endpoint law, so the two
-conventions can be interchanged in the finite integration-by-parts identity.
-For an affine integrator path (s g+t), the translation term vanishes and
-the slope (s) factors out; this is the exact finite transport used by a
-chart substitution.
-The same factorization holds when the affine path is the first argument of a
-right Stieltjes sum.
-The remaining two formulas include the translation contribution explicitly;
-it becomes an endpoint increment of the opposite path.
-
-The tangent-chart substitution is also finite.  For a chart cell
-\((p\mapsto r)\), compute the two endpoint Jacobian ratios, fold the lower and
-upper rectangle contributions, and retain the enclosure relation:
-
-\begin{verbatim}
-source cells -> chart cells
-             -> lower/upper endpoint Jacobian folds
-             -> transported bracket contains source bracket
-\end{verbatim}
-
-This is the certificate used by the arctangent and sine constructions.  It
-does not assert a general substitution theorem for arbitrary limiting
-integrals; the mesh, denominator positivity, and endpoint enclosure remain
-explicit inputs.
-
-\lean{ComputableAnalysis.IntegralIdentities.chartAddLowerTransportSum}
-\lean{ComputableAnalysis.IntegralIdentities.chartAddUpperTransportSum}
 \lean{ComputableAnalysis.IntegralIdentities.chartAddPartition_transport_certificate}
 \leanok
 
-\section{Finite identities}
+\section{Finite integration by parts}
 \label{thm:finite-green-rectangle}
 \label{def:integration-by-parts-certificate}
 \label{thm:integration-by-parts-certificate}
 \label{cor:arctangent-logarithm-pi-route}
 
+For any finite sample path, the two orientations of each rectangle boundary
+cancel algebraically.  Attaching shrinking variation bounds promotes that
+identity to represented integrals.
+
 \begin{verbatim}
-finite boundary sum -> algebraic identity -> endpoint difference
-                                      -> certified error budget
+finite boundary sum -> algebraic cancellation -> endpoint difference
+                    -> explicit variation budget -> integral identity
 \end{verbatim}
-Green's rectangle identity, Stieltjes transport, substitution, telescoping, integration by parts,
-and polynomial FTC are instances of this finite pattern.
 
-The algebraic order is deliberate: first prove identities for one finite
-partition, then attach a shrinking certificate.  The Lean interface exposes
-the main transport rules:
-
-\lean{ComputableAnalysis.Integral.integral_equiv_of_plan_and_samples}
-\lean{ComputableAnalysis.Integral.integral_equiv_of_plan_and_sample_overlaps}
 \lean{ComputableAnalysis.Integral.IntegrationByPartsCertificate}
 \lean{ComputableAnalysis.Integral.IntegrationByPartsCertificate.left_integral_equiv_endpoint_sub_right}
-\lean{ComputableAnalysis.Integral.IntegrationByPartsCertificate.right_integral_equiv_endpoint_sub_left}
-\lean{ComputableAnalysis.effectiveFiniteIntegrationByParts_onPartition}
 \lean{ComputableAnalysis.effectiveFiniteIntegrationByParts_withVariation_onPartition}
 \lean{ComputableAnalysis.effectiveFiniteIntegrationByParts}
-\lean{ComputableAnalysis.effectiveFiniteSquareChain}
-\lean{ComputableAnalysis.effectiveFiniteSquareChain_left_bounds}
-\lean{ComputableAnalysis.effectiveCoordinateIntegrationByParts_endpointBracket}
-\lean{ComputableAnalysis.RationalPartition.endpointDifferenceSum_contains}
-\lean{ComputableAnalysis.RationalPartition.boundIntegralSum_overlaps_endpointDifference}
 \leanok
 
-Linearity and additivity are stated as certificate contracts:
+This one certificate covers Green's rectangle identity, Stieltjes
+integration by parts, and the arctangent--logarithm--\(\pi\) route.  Adjacent
+interval additivity is likewise endpoint telescoping, available when each
+piece has an FTC certificate.
 
-\begin{verbatim}
-same finite plan + sample transport -> equivalent integrals
-adjacent endpoint boxes -> telescoping endpoint box
-finite partition identity + shrinking widths -> computable integral law
-\end{verbatim}
-
-\lean{ComputableAnalysis.Integral.Linear}
-\lean{ComputableAnalysis.Integral.CompatibleWithScaleRat}
+\lean{ComputableAnalysis.endpointDifferenceRaw_adjacent_additive}
 \lean{ComputableAnalysis.Integral.AdditiveOnAdjacentIntervals}
 \leanok
 
-The first algebra law is already proved at the raw level.  For rational
-endpoints \(a\le b\le c\), the two finite endpoint boxes telescope:
-
-\begin{verbatim}
-[F(b)-F(a)] + [F(c)-F(b)]  ->  [F(c)-F(a)]
-        finite interval arithmetic, with overlap at every stage
-\end{verbatim}
-
-No limit law is being assumed here.  The definite-integral theorem then
-transports this finite identity through three FTC certificates.  Thus the
-usual additivity statement is available exactly when the three integrals have
-certified endpoint representations.
-
-\lean{ComputableAnalysis.endpointDifferenceRaw_adjacent_additive}
-\lean{ComputableAnalysis.FunctionOnInterval.endpointDifferenceRaw_adjacent_additive}
-\leanok
-
-This is the constructive replacement for silently importing a global vector
-space of integrable functions.  Each concrete family supplies the construction
-and the finite certificates required by the contract.
-
 \section{Complex polygonal integrals}
 
-The same finite viewpoint applies to complex-valued functions. A path is a
-finite list of rational-complex vertices; integration is a finite sum over its
-segments:
+A complex path is a finite list of rational-complex vertices.  Segment sums
+are finite box computations.  Polynomial differentials telescope to the
+primitive endpoint difference; a closed path is the special case in which
+that difference is zero.
 
 \begin{verbatim}
-vertices -> segment increments -> complex differential sum
-         -> endpoint primitive difference
-closed path -> exact displacement = 0
+vertices -> segment increments -> finite complex sum
+         -> polynomial primitive endpoint difference
 \end{verbatim}
 
-Constant and polynomial differentials are the first representatives. Their
-closed-path exactness is an algebraic identity over rational complex boxes,
-not a theorem about a completed complex plane. The polygonal integral itself
-is already a `ComplexRaw` computation; a later analytic path theorem may add
-uniform refinement and overlap certificates for a larger class of functions.
-
-As a regression case, the left sum for a constant integrand on one rational
-segment is exactly (c(b-a)) at every positive subdivision count. The finite
-fold identity makes this endpoint law explicit before any path limit is taken.
-The same identity assembles over any finite polygonal path and reduces a closed
-path to zero by endpoint cancellation.
-The independently defined interval evaluator agrees with this point-valued
-computation stage by stage in the constant closed-path case, so
-\lean{ComputableAnalysis.ComplexPathIntegral.constantClosedPolygonalLeftSumIntegralOverlapCertificate}
-packages the two representations as one explicit equivalence certificate.
-The public convenience wrapper is
-\lean{ComputableAnalysis.ComplexPathIntegral.effectiveConstantClosedPolygonalLeftSumIntegralOverlapCertificate}.
-For an open path, stage zero is the zero initialization, so the honest
-agreement contract starts at positive stages:
-\lean{ComputableAnalysis.ComplexPathIntegral.PolygonalLeftSumIntegralPositiveStageAgreement}
-and its constant-path instance
-\lean{ComputableAnalysis.ComplexPathIntegral.constantPolygonalLeftSumIntegralPositiveStageAgreement}.
-For scalar raw numbers, the cofinal successor schedule is already formalized:
-\lean{ComputableAnalysis.RealRaw.StageSchedule.id}
-\lean{ComputableAnalysis.RealRaw.schedule}
-\lean{ComputableAnalysis.RealRaw.schedule_valid}
-\lean{ComputableAnalysis.RealRaw.schedule_equiv}
-This is the model for giving a future open-path raw evaluator a shifted,
-valid public schedule.
-The same schedule transport is now available for complex boxes:
-\lean{ComputableAnalysis.ComplexRaw.schedule}
-\lean{ComputableAnalysis.ComplexRaw.schedule_valid}
-\lean{ComputableAnalysis.ComplexRaw.schedule_equiv}
-
-The open-path statement is the actual complex FTC: the finite sum of
-polynomial increments telescopes to
-\[
-  P(z_{\rm end})-P(z_{\rm start}).
-\]
-Closing the path is the special case in which the endpoint difference is zero.
-Thus applications can use the endpoint primitive directly; they do not need
-to manufacture a closed polygon merely to invoke the theorem.
-
-For geometric bookkeeping, the rational Manhattan length of a polygonal path
-is at least the Manhattan displacement of its endpoints.  This is the finite
-triangle inequality for broken paths; it uses only rational coordinate
-arithmetic and leaves Euclidean square-root length as a later refinement.
-
-\lean{ComputableAnalysis.ComplexPathIntegral.EntireBoxFunctionRaw}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalDisplacementTo}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalManhattanLength}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalManhattanLength_append_endpoint_ge_displacement}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalManhattanLength_split_at}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalMonomialPrimitiveTo_append_endpoint}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalMonomialPrimitiveTo_split_at}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalPolynomialPrimitiveTo_append_endpoint}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalPolynomialPrimitiveTo_split_at}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalPolynomialIntegralRaw}
 \lean{ComputableAnalysis.ComplexPathIntegral.polygonalPolynomialIntegralRaw_valid}
 \lean{ComputableAnalysis.ComplexPathIntegral.polygonalPolynomialIntegralRaw_equiv_endpoint}
 \lean{ComputableAnalysis.ComplexPathIntegral.effectivePolynomialPathFTC}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalPolynomialIntegralRaw_split_at}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalPolynomialIntegralRaw_split_at_add}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalPolynomialIntegralRaw_closed_equiv_zero}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalDisplacementTo_closed}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalDisplacementTo_split_at}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalConstantDifferentialDisplacement}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalConstantDifferentialDisplacement_split_at}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalConstantDifferentialDisplacement_closed}
-\lean{ComputableAnalysis.ComplexPathIntegral.finiteConstantDifferentialExactness_closed}
 \lean{ComputableAnalysis.ComplexPathIntegral.finitePolynomialDifferentialExactness_closed}
-\lean{ComputableAnalysis.ComplexPathIntegral.FiniteClosedPolygonalPathCertificate}
-\lean{ComputableAnalysis.ComplexPathIntegral.FiniteClosedPolygonalPathCertificate.exactDisplacement_eq_zero}
-\lean{ComputableAnalysis.ComplexPathIntegral.FiniteClosedPolynomialPathCertificate}
-\lean{ComputableAnalysis.ComplexPathIntegral.FiniteClosedPolynomialPathCertificate.exactDisplacement_eq_zero}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalIntegralRawEntire_valid}
-\lean{ComputableAnalysis.ComplexPathIntegral.PolygonalIntegralCertificate.precision_witness}
-\lean{ComputableAnalysis.ComplexPathIntegral.PolygonalLeftSumCertificate}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalLeftSumRawEntire_valid}
-\lean{ComputableAnalysis.ComplexPathIntegral.effectivePolygonalLeftSumRawEntire_valid}
-\lean{ComputableAnalysis.ComplexPathIntegral.PolygonalLeftSumIntegralOverlapCertificate}
-\lean{ComputableAnalysis.ComplexPathIntegral.PolygonalLeftSumIntegralOverlapCertificate.leftRaw_valid}
-\lean{ComputableAnalysis.ComplexPathIntegral.PolygonalLeftSumIntegralOverlapCertificate.intervalRaw_valid}
-\lean{ComputableAnalysis.ComplexPathIntegral.PolygonalLeftSumIntegralOverlapCertificate.equiv}
-\lean{ComputableAnalysis.ComplexPathIntegral.PolygonalLeftSumIntegralOverlapCertificate.equiv_of_interval_anchor}
-\lean{ComputableAnalysis.ComplexPathIntegral.effectivePolygonalLeftSumIntegral_equiv}
-\lean{ComputableAnalysis.ComplexPathIntegral.effectivePolygonalLeftSumIntegral_equiv_of_interval_anchor}
-\lean{ComputableAnalysis.ComplexPathIntegral.foldl_point_add_scaled}
-\lean{ComputableAnalysis.ComplexPathIntegral.effectiveFoldlPointAddScaled}
-\lean{ComputableAnalysis.ComplexPathIntegral.segmentLeftSum_constant}
-\lean{ComputableAnalysis.ComplexPathIntegral.effectiveSegmentLeftSumConstant}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalLeftSum_constant}
-\lean{ComputableAnalysis.ComplexPathIntegral.effectivePolygonalLeftSumConstant}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalLeftSum_constant_closed}
-\lean{ComputableAnalysis.ComplexPathIntegral.effectivePolygonalLeftSumConstantClosed}
-\lean{ComputableAnalysis.ComplexPathIntegral.PolygonalLeftSumCertificate.of_stage_eq_point}
-\lean{ComputableAnalysis.ComplexPathIntegral.effectivePolygonalLeftSumCertificateOfStageEqPoint}
-\lean{ComputableAnalysis.ComplexPathIntegral.constantClosedPolygonalLeftSumCertificate}
-\lean{ComputableAnalysis.ComplexPathIntegral.effectiveConstantClosedPolygonalLeftSumCertificate}
-\lean{ComputableAnalysis.ComplexPathIntegral.PolygonalIntegralCertificate.of_stage_eq_point}
-\lean{ComputableAnalysis.ComplexPathIntegral.effectivePolygonalIntegralCertificateOfStageEqPoint}
-\lean{ComputableAnalysis.ComplexPathIntegral.PolygonalLeftSumIntegralOverlapCertificate.of_stage_eq_point}
-\lean{ComputableAnalysis.ComplexPathIntegral.effectivePolygonalLeftSumIntegralOverlapOfStageEqPoint}
 \leanok
 
-The sine integral in Chapter~\ref{ch:rational-circle-trigonometry} is the
-first integration target: the circle/arctangent construction supplies the
-values, the rectangle algorithm supplies the area, and this FTC supplies the
-endpoint identity once its finite trigonometric certificate is instantiated.
+The finite triangle inequality is represented by Manhattan length: every
+polygonal path is at least its endpoint displacement.  Euclidean
+square-root length may be added only when an application needs that stronger
+geometry.
 
-\section{Tails and products}
+\lean{ComputableAnalysis.ComplexPathIntegral.polygonalManhattanLength_append_endpoint_ge_displacement}
+\leanok
 
-Compactify the domain, bound the tail, and combine finite bounds. Multiple
-integrals are iterated finite enclosures; Gaussian and $n$-ball formulas are
-the main examples.
-\begin{verbatim}
-finite boxes -> product bounds -> tail certificate -> nested enclosure
-\end{verbatim}
+\section{Finite products and improper tails}
 
-The two-dimensional product layer is literal finite algebra: sampled
-rectangle values are folded over two rational lists, and separable products
-factor into the product of their one-dimensional folds. The same construction
-is now exposed for an arbitrary finite list of coordinate axes; the Gaussian
-wrapper generates one Taylor evaluator per axis, so dimension changes do not
-change the proof pattern. Positivity is checked by the same finite induction.
-The Gaussian layer
-then integrates even exponential Taylor prefixes on a bounded interval and
-keeps the improper tail as a separate finite upper-bound ladder. The
-$n$-ball layer records the familiar recurrence as a rational coefficient
-model, with the chosen `RealRaw` approximation to $pi$ supplied later.
-None of these statements introduces Lebesgue measure or an attained infinite
-domain.
-When all axes use the same rule, the finite nested sum is the corresponding
-one-axis sum raised to the number of axes. This is the exact finite pattern
-used by separable Gaussian prefixes.
+Multiple integrals are iterated finite enclosures.  Separable products factor
+into one finite sum per coordinate; dimension changes do not change the proof
+pattern.
 
-\lean{ComputableAnalysis.finiteProductSum2D_factorized}
-\lean{ComputableAnalysis.finiteProductIntegralSum2D_factorized}
-\lean{ComputableAnalysis.finiteProductIntegralNestedSum_two_factor}
-\lean{ComputableAnalysis.gaussianTaylorProductIntegralNestedSum}
+\lean{ComputableAnalysis.finiteProductIntegralNestedSum_factorized}
 \lean{ComputableAnalysis.gaussianTaylorProductIntegralNestedSum_factorized}
-\lean{ComputableAnalysis.gaussianTaylorProductIntegralNestedSum_nonneg}
-\lean{ComputableAnalysis.repeatIntegralAxis}
-\lean{ComputableAnalysis.finiteProductIntegralFactorProduct_repeat_axis}
 \lean{ComputableAnalysis.finiteProductIntegralNestedSum_repeat_axis_factorized}
-\lean{ComputableAnalysis.finiteProductIntegralSum2D_weighted_stage}
-\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_eight}
-\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_succ}
-\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_term_difference}
-\lean{ComputableAnalysis.gaussianEvenIntegralTerm}
-\lean{ComputableAnalysis.gaussianEvenIntegralTailMajorant}
-\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_succ_eq_term}
+\leanok
+
+The Gaussian route integrates even Taylor prefixes on a bounded box and keeps
+the unbounded tail as a separate rational ladder.  The \(n\)-ball recurrence
+is then a computable target linked to the Gaussian integral; neither result
+uses Lebesgue measure or treats infinity as attained.
+
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix_remainder_abs_le}
-\lean{ComputableAnalysis.reciprocalSquareTailPartial_succ}
 \lean{ComputableAnalysis.gaussianTailBoxUpper_stage_twenty_ladder}
 \lean{ComputableAnalysis.nBallVolumeModel_recurrence}
-\lean{ComputableAnalysis.nBallVolumeModel_scale}
-\lean{ComputableAnalysis.nBallCoeff_nonneg}
-\lean{ComputableAnalysis.nBallVolumeModel_nonneg}
 \leanok
 
 \section{Interface}
 
 \begin{verbatim}
-intervals -> monotone pieces -> finite identities -> overlap
+interval evaluators -> finite cell geometry -> finite sum
+                    -> shrinking budget -> representation overlap
 \end{verbatim}
+
+Every theorem in this chapter follows that route.  When a new function needs a
+different local computation, it contributes that evaluator and its finite
+bounds; it does not duplicate the integral, FTC, or representation machinery.
