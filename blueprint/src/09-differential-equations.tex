@@ -1,649 +1,159 @@
 \chapter{Linear Differential Equations}\label{ch:differential-equations}
 
-Linear ODEs are the first large consumer of the preceding machinery. We do
-not postulate a completed space of trajectories: a requested precision is met
-by a finite matrix computation together with a rational error certificate.
-
-The scoped Lean entry point is
-\texttt{ComputableAnalysis.DifferentialEquationsFoundation}.  It collects the
-finite derivative, uniqueness, Peano--Baker, and rotation interfaces without
-importing the benchmark catalogue or a completed trajectory space.
-
-For $y'(t)=A(t)y(t)+b(t)$, the coefficient and forcing entries are
-interval-certified computations on a common rational domain. The effective FTC
-supplies the simplex integrals; this chapter supplies their finite matrix
-assembly and uniqueness principle.
-
-The analytic hand-off is the same one used by every earlier chapter:
+Linear ODEs are built from finite computations, not from a completed space of
+trajectories.  For
+\[
+  y'(t)=A(t)y(t)+b(t),
+\]
+the data are rational interval evaluators for \(A\) and \(b\).  At every
+requested precision they produce finitely many ordered matrix products,
+simplex enclosures, and a rational remainder interval.
 
 \begin{verbatim}
-coefficient/forcing evaluator -> cell or simplex bounds
-                              -> effective FTC endpoint certificate
-                              -> finite transition and Duhamel boxes
+coefficient boxes -> ordered words -> finite transition
+                  -> Duhamel sum -> factorial remainder
 \end{verbatim}
 
-The finite box part is now dimension-independent.  A separable coefficient
-product can be assembled as a weighted nested rational sum and factored into
-one finite sum per coordinate.  This supplies the rectangular component of a
-multiple integral; chronological ordering and simplex restrictions remain
-explicit additional data, rather than being hidden inside a Fubini or measure
-theorem.
+The scoped Lean entry point is
+\texttt{ComputableAnalysis.DifferentialEquationsFoundation}.  Its algebra is
+dimension-independent and uses only finite rational vectors and matrices.
 
-\lean{ComputableAnalysis.finiteProductIntegralNestedSum}
-\lean{ComputableAnalysis.finiteProductIntegralSum}
-\lean{ComputableAnalysis.finiteProductIntegralNestedSum_factorized}
-\lean{ComputableAnalysis.finiteProductIntegralSum2D_weighted_stage}
-\leanok
-
-The weighted stage is a concrete rectangular multiple-integral example: cell
-widths are part of the rational data, and the result is computed exactly
-before any potential refinement or tail argument is introduced.
-
-The reusable contract is exposed here so an ODE instance can be added without
-introducing a new notion of integration:
-
-\lean{ComputableAnalysis.EffectiveFTC}
-\lean{ComputableAnalysis.FTC.effectiveFTC_definiteIntegralEqualsEndpoint}
-\lean{ComputableAnalysis.EffectiveDerivativeBoundFTC}
-\leanok
-
-\section{Construction}
+\section{Finite construction}
 \label{thm:finite-cramer-interface}
 \label{thm:finite-cayley-hamilton-boundary}
 
-\begin{verbatim}
-initial state -> sampled matrices -> ordered words -> tail bound -> enclosure
-\end{verbatim}
-The Lean layer defines rational vectors and matrices, executable finite sums,
-chronological products, and the noncommutative Peano--Baker word expansion.
-The order is part of the theorem: later transitions multiply on the left.
-Cramer's rule handles finite solves; Cayley--Hamilton supplies recurrences for
-small fixed dimensions.
+Later times multiply on the left.  Thus chronological products retain the
+order of a variable coefficient, and splitting a mesh gives the finite
+evolution law
+\[
+  P_{m+n}=P_{m,n}P_m.
+\]
+Expanding the product yields the discrete Peano--Baker sum.  Adding sampled
+forcing gives the exact finite variation-of-constants formula.
 
-The finite algebraic core is explicit in Lean:
-
-\lean{ComputableAnalysis.LinearODE.finiteSum_qabs_mul_le}
-\lean{ComputableAnalysis.LinearODE.finiteSum_le}
-\lean{ComputableAnalysis.LinearODE.matrixApply_qabs_le}
-\lean{ComputableAnalysis.LinearODE.matrixMul_qabs_le}
-\lean{ComputableAnalysis.LinearODE.matrixRowAbsSum}
-\lean{ComputableAnalysis.LinearODE.matrixRowAbsSum_identity}
-\lean{ComputableAnalysis.LinearODE.matrixRowAbsSum_matrixScale}
-\lean{ComputableAnalysis.LinearODE.matrixRowAbsSum_matrixAdd_le}
-\lean{ComputableAnalysis.LinearODE.matrixRowAbsSum_affineStep_le}
-\lean{ComputableAnalysis.LinearODE.matrixMul_rowAbsSum_le}
-\lean{ComputableAnalysis.LinearODE.finiteSum_mul_le_of_nonneg}
-\lean{ComputableAnalysis.LinearODE.finiteSum_mul_le_of_le_left}
-\lean{ComputableAnalysis.LinearODE.vectorAbsSum}
-\lean{ComputableAnalysis.LinearODE.matrixColumnAbsSum}
-\lean{ComputableAnalysis.LinearODE.matrixColumnAbsSum_identity}
-\lean{ComputableAnalysis.LinearODE.matrixColumnAbsSum_matrixScale}
-\lean{ComputableAnalysis.LinearODE.matrixColumnAbsSum_matrixAdd_le}
-\lean{ComputableAnalysis.LinearODE.matrixColumnAbsSum_affineStep_le}
-\lean{ComputableAnalysis.LinearODE.matrixApply_vectorAbsSum_le}
-\lean{ComputableAnalysis.LinearODE.matrixApply_vectorAbsSum_le_of_column_bound}
-\lean{ComputableAnalysis.LinearODE.matrixMul_columnAbsSum_le}
-\lean{ComputableAnalysis.LinearODE.matrixMul_columnAbsSum_le_of_column_bound}
-\lean{ComputableAnalysis.LinearODE.ratProduct}
-\lean{ComputableAnalysis.LinearODE.ratProduct_nonneg}
-\lean{ComputableAnalysis.LinearODE.ratProduct_const_eq_pow}
-\lean{ComputableAnalysis.LinearODE.chronologicalProduct_rowAbsSum_le}
-\lean{ComputableAnalysis.LinearODE.chronologicalProduct_rowAbsSum_le_pow}
-\lean{ComputableAnalysis.LinearODE.chronologicalProduct_columnAbsSum_le_pow}
-\lean{ComputableAnalysis.LinearODE.chronologicalStepProduct_rowAbsSum_le}
-\lean{ComputableAnalysis.LinearODE.chronologicalStepProduct_rowAbsSum_le_pow}
-\lean{ComputableAnalysis.LinearODE.chronologicalStepProduct_columnAbsSum_le_pow}
-\lean{ComputableAnalysis.LinearODE.chronologicalStepProduct_stateAbsSum_le}
-\lean{ComputableAnalysis.LinearODE.chronologicalProduct_stateAbsSum_le}
-\lean{ComputableAnalysis.LinearODE.matrixApply_matrixAdd}
-\lean{ComputableAnalysis.LinearODE.matrixApply_matrixScale}
-\lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum}
+\lean{ComputableAnalysis.LinearODE.orderedIndexWords}
 \lean{ComputableAnalysis.LinearODE.discretePeanoBakerExpansion}
-\lean{ComputableAnalysis.LinearODE.orderedIndexWords_length}
 \lean{ComputableAnalysis.LinearODE.chronologicalProduct_split}
-\leanok
-
-These uniqueness results are exact finite induction statements: two sampled
-trajectories with the same initial state and the same rational update rule
-agree at every finite index.  The chronological product is therefore not an
-assumed evolution operator; it is a proved finite normal form for the ordered
-matrix actions.
-
-The same finite normal form composes across a cut.  If a mesh has `first`
-steps followed by `second` steps, the later transition is the left factor:
-
-\begin{verbatim}
-P(first + second) = P_shifted(second) * P(first)
-\end{verbatim}
-
-This is the discrete evolution law needed for patching local certificates and
-for keeping time ordering visible when a continuous provider is eventually
-added.  It is a matrix identity over rationals, proved by finite induction.
-
-These are finite sampled statements.  They become ODE theorems only after an
-effective-FTC provider supplies the coefficient, simplex, and tail bounds.
-
-The uniqueness interface keeps that hand-off explicit.  A candidate exposes a
-finite derivative certificate, a rational initial point, and an initial raw
-value; uniqueness then asks only for equivalence of two such representations.
-It does not quantify over an ambient space of continuous trajectories:
-
-\begin{verbatim}
-candidate -> finite derivative certificate + initial raw value
-         -> mesh/tail comparison -> pointwise raw equivalence
-\end{verbatim}
-
-\lean{ComputableAnalysis.SolvesSelfDerivativeOnInterval}
-\lean{ComputableAnalysis.SolvesSelfDerivativeOnInterval.derivative_self}
-\lean{ComputableAnalysis.SelfDerivativeInitialValueUnique}
-\lean{ComputableAnalysis.LinearODE.effectiveDiscreteRecurrence_unique}
-\lean{ComputableAnalysis.LinearODE.effectiveDiscreteVariationOfConstants}
-\lean{ComputableAnalysis.effectiveLinearODERecurrence_unique}
 \lean{ComputableAnalysis.effectiveLinearODEVariationOfConstants}
 \lean{ComputableAnalysis.effectiveLinearODEDuhamel}
-The scoped entry point also exposes the two exact transition identities that
-are most useful when composing local ODE certificates:
-
-\lean{ComputableAnalysis.effectiveLinearODEChronologicalProduct_split}
-\lean{ComputableAnalysis.effectiveLinearODESquareZeroUniformStep}
-The factorial coefficient is itself a finite recurrence, exposed through the
-same scoped entry point:
-
-\lean{ComputableAnalysis.effectiveLinearODESimplexVolume_eq_closed}
-\lean{ComputableAnalysis.effectiveLinearODEPeanoBakerTerm_succ}
-\lean{ComputableAnalysis.effectiveLinearODEPeanoBakerPartial_succ}
-\lean{ComputableAnalysis.effectivePeanoBakerFactorialRemainderCertificate}
-\lean{ComputableAnalysis.effectivePeanoBakerFactorialTail_le_eps}
 \leanok
 
-The absolute-value estimate is the first finite norm substitute in this
-chapter.  It bounds each matrix-action coordinate by a rational sum of entry
-and state magnitudes.  A later provider may add a row-sum or maximum-entry
-bound, but it no longer needs to import a completed normed matrix space merely
-to justify the local estimate.  The multiplication version makes the estimate
-composable: every chronological word inherits a finite entrywise bound by
-repeatedly applying the same certificate.  The row-absolute sum packages this
-calculation into a weighted finite norm surrogate, with an explicit
-matrix-product inequality.  It is the interface a later factorial-tail proof
-can use for sampled transition products.  Scaling multiplies the row bound by
-the scalar's rational absolute value, and addition is controlled by the sum of
-row bounds.  Thus the same certificate also follows affine Euler updates of
-the form \(I+B_k\).
+Row and column absolute sums are finite rational bounds, sufficient to carry
+state and forcing errors through these products.  No normed or completed
+function space is needed.
 
-The finite transition-growth theorem now iterates this estimate.  If the
-row-sum of step \(I+B_k\) is bounded by \(c_k\), then every row of the first
-\(N\) chronological product is bounded by the rational product
-\(\prod_{k<N} c_k\).  This is a finite induction, and supplies the growth
-factor separately from the factorial tail.
-For a uniform bound \(c_k=c\), this becomes the compact estimate \(c^N\),
-which is the constant-coefficient growth factor used by the elementary
-exponential and rotation providers.
-
-The complementary state estimate is column-based: the total absolute size of
-the transformed vector is bounded by the column-weighted finite sum, and by
-\(c\) times the previous vector size when every column sum is at most \(c\).
-This is still only a finite rational calculation, but it is now suitable for
-tracking forcing terms and state errors.
-Consequently, a chronological transition with column bound \(c\) transports
-any rational state with total absolute size \(V\) into a state of size at most
-\(c^N V\) after \(N\) steps.  This is the finite stability estimate that the
-continuous provider must eventually refine with discretization and tail error.
-The same estimate is now available for a transition beginning at any mesh
-index, so local interval certificates compose without reindexing the system
-back to zero.
-Applied to a state or an error vector, it gives the same (c^N) multiplier
-for any local block.
-The row-oriented companion is also available for arbitrary-start blocks;
-together the two orientations support left- and right-acting operator estimates.
-
-The forcing term is handled by a literal finite Duhamel sum:
-
+For a constant coefficient, the ordered-simplex factor is generated by
 \begin{verbatim}
-initial state -> chronological transition * initial state
-forcing samples -> time-ordered transitions -> finite Duhamel sum
-                                      -> exact sampled trajectory
+V(0,T) := 1
+V(r+1,T) := T/(r+1) * V(r,T)
 \end{verbatim}
+and is proved equal to \(T^r/r!\).  This finite identity explains the
+factorial in the Peano--Baker expansion.
 
+\lean{ComputableAnalysis.LinearODE.orderedSimplexVolume}
+\lean{ComputableAnalysis.LinearODE.orderedSimplexVolume_eq_closed}
+\lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexTerm_eq_orderedSimplexVolume}
 \leanok
 
-The forcing sum has the same cut law as the transition product: its prefix
-and shifted suffix add exactly.  This makes interval-by-interval forcing
-certificates composable while keeping every contribution a finite rational
-vector.
+\section{Tail and uniqueness}
 
-\begin{verbatim}
-sum(first + second) = sum(first) + shiftedSum(second)
-\end{verbatim}
+If \(M\) bounds the coefficient on an interval of length \(T\), terms after
+degree \(r\) are enclosed by an explicit factorial majorant.  A finite search
+chooses a shift making that bound smaller than any positive rational
+tolerance.
 
-The same finite norm surrogate gives a forcing budget.  If the $k$th forcing
-vector has size at most $g c^k$, then the accumulated response after $N$
-samples has size at most $g$ times the finite geometric budget
-
-\begin{verbatim}
-||sum forcing|| <= g * (1 + c + ... + c^(N-1)).
-\end{verbatim}
-
-This is the inhomogeneous stability estimate needed before passing from a
-sampled system to an analytic ODE provider.
-The public Duhamel wrapper accepts exactly this per-term certificate and
-returns the bound for the sampled forcing response.
-
-The motivating forced oscillator is now connected to this abstract algebra.
-Its two-dimensional Euler provider proves the velocity update and, after
-eliminating velocity, the exact finite second-difference equation
-
-\[
- q_{n+2}-2q_{n+1}+q_n
- =-h^2\omega^2q_n+h^2r_n.
-\]
-
-This is a discrete theorem over rational states, not a claim that the mesh
-has converged to a continuous trajectory.
-
-\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.trajectory_position_succ}
-\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.trajectory_velocity_succ}
-\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.trajectory_position_secondDifference}
-\leanok
-
-The first concrete trajectory bridge is the constant square-zero case. If
-(A^2=0), every constant Euler increment (hA) is pairwise product-zero, so
-after (N) equal steps the transition is exactly
-[
-  (I+hA)^N = I+(Nh)A.
-]
-This is not an approximation theorem: it is a finite rational identity and a
-useful test case for triangular and affine systems.
-
-\lean{ComputableAnalysis.LinearODE.matrixSequenceSum_constant_scale}
-\lean{ComputableAnalysis.LinearODE.chronologicalProduct_constant_square_zero}
-\lean{ComputableAnalysis.LinearODE.chronologicalProduct_constant_square_zero_uniform_step}
-\lean{ComputableAnalysis.effectiveLinearODEChronologicalProduct_constant}
-\leanok
-
-The tail is not an informal limit. If the coefficient bound is $M$ on a
-time interval of length $T$, the omitted degree-$r$ words are charged to
-the finite factorial majorant $(MT)^r/r!$. An executable shift chooses the
-first stage below any requested positive rational tolerance.
-
-The reusable uniqueness certificate is equally finite.  A candidate error is
-required to satisfy, for every iteration count (q),
-
-\[
-  0\le e(x)\le B\,\frac{(MT)^{N+q}}{(N+q)!}.
-\]
-
-The computable factorial-tail shift makes the right side smaller than any
-positive rational tolerance; therefore the error is exactly zero.  This is
-the pointwise replacement for taking a supremum norm in a completed function
-space.
-
-\lean{ComputableAnalysis.LinearODE.ZeroInitialVolterraIterationBound}
-\lean{ComputableAnalysis.LinearODE.zeroInitialVolterra_iteration_le_eps}
-\lean{ComputableAnalysis.LinearODE.zeroInitialVolterraIterationBound_eq_zero}
-\lean{ComputableAnalysis.LinearODE.SelfDerivativeVolterraComparison}
-\lean{ComputableAnalysis.LinearODE.SelfDerivativeVolterraComparison.equivalent}
-\leanok
-
-The construction is therefore a family of finite approximants:
-
-\begin{verbatim}
-P_0(t) = y_0
-P_(r+1)(t) = y_0 + integral_0^t (A(s) P_r(s) + b(s)) ds
-return P_r(t) +/- factorial_tail(M*T,r)
-\end{verbatim}
-
-Every integral in this pseudocode is an effective-FTC certificate on a finite
-simplex or rectangle. The matrix products are finite ordered words; no
-infinite matrix, function space, or completed trajectory is introduced.
-
-\section{Evolution and uniqueness}
-
-Mesh transitions give a finite variation-of-constants construction:
-\begin{verbatim}
-mesh -> local transitions -> compatible prefixes -> overlap -> trajectory box
-\end{verbatim}
-
-The equality principle is pointwise overlap of raw intervals.  The scalar
-self-derivative case is already closed by a finite mesh-halving certificate:
-subtract two candidates, repeatedly halve a rational error envelope, and use
-the explicit tolerance schedule to force the error to zero.  For vector
-systems, the Lean certificate is modular: the finite Peano--Baker layer closes
-the argument once the analytic provider has supplied the coefficient bound and
-the iterated error estimate.
-
-For $y'=y$, the error envelope is scalar and the factorial estimate is
-explicit. This gives uniqueness from the same finite data used to construct
-the solution. The vector theorem has the identical shape; its remaining
-provider fields are only matrix-norm bounds, coefficient regularity, and the
-finite simplex tail estimate.
-
-The exponential is the first nearly complete analytic provider for this route.
-Its centered evaluator supplies the two-sided local derivative record and the
-exact initial value required by the scalar self-derivative interface:
-
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_hasDerivativeOnInterval}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_solvesSelfDerivative}
-\lean{ComputableAnalysis.effectiveCenteredExponential_solvesSelfDerivative}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_equivalent_of_selfDerivative_unique}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_zero_equiv_one}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_solvesSelfDerivative}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_equivalent_of_selfDerivative_unique}
-\leanok
-
-At the `RealFunRaw`/effective-FTC boundary, the same evaluator is exposed on
-$[-1,1]$ and proved valid.  A scaled finite partition schedule supplies the
-two-sided derivative boxes, local endpoint transport, and the final dyadic
-telescope.  No completeness principle is hidden behind this construction.
-
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnitRealFunRaw}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnitRealFunRaw_valid}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_effectiveFTC}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_solvesSelfDerivative}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnitStabilized_valid}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnitStabilizedIntegral_equiv_endpointDifference}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnitStabilizedIntegral_equiv_exp_endpoint_subtraction}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnitStabilizedIntegral_equiv_powerSeries_endpoint_subtraction}
-\leanok
-
-The one-sided unit chart is also stabilized and identifies its integral with
-the endpoint difference \(\exp(1)-\exp(0)\), providing the elementary scalar
-ODE example before the centered local chart is used.
-
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitStabilized_valid}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_solvesSelfDerivative}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitStabilizedIntegral_equiv_endpointDifference}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitStabilizedIntegral_equiv_exp_endpoint_subtraction}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitStabilizedIntegral_equiv_powerSeries_endpoint_subtraction}
-
-Thus the centered exponential is a checked local ODE provider and its
-integral identification is already a finite, executable theorem.
-In ordinary notation, the new representation edge reads
-\(\int_{-1}^{1}\exp(x)\,dx=\exp(1)-\exp(-1)\); every term is still a
-certified `RealRaw` computation.  A second edge transports the same result
-to the canonical factorial power-series evaluator, so later ODE identities
-do not depend on the preferred exponential implementation.
-
-The checked finite uniqueness statement is the recurrence theorem above.  The
-scoped calculus entry point exposes its two-by-two finite rational instance as
-\lean{ComputableAnalysis.effectiveTwoByTwoSolutionUnique}.
-
-The direct scalar uniqueness route is also exposed independently of the
-matrix expansion. Its only analytic input is a finite mesh-contraction
-certificate; the conclusion is pointwise interval-overlap equivalence of the
-two candidate trajectories.
-
-\lean{ComputableAnalysis.ScalarODE.DirectMeshHalvingCertificate.error_eq_zero}
-\lean{ComputableAnalysis.ScalarODE.ShortBlockMeshSweep.canonical}
-\lean{ComputableAnalysis.ScalarODE.ShortBlockMeshSweep.canonical_next_le_half}
-\lean{ComputableAnalysis.ScalarODE.SelfDerivativeDirectMeshComparison.equivalent}
-\lean{ComputableAnalysis.ScalarODE.selfDerivativeInitialValueUnique_of_directMesh}
-\leanok
-
-\section{The scalar theorem in its smallest constructive form}
-
-The scalar equation is the model for the whole chapter.  Two candidate
-representations are compared only through a rational error envelope:
-
-\begin{verbatim}
-initial values agree
-        |
-finite derivative boxes -> short mesh block -> error shrinks by 1/2
-        |
-repeat the block finitely many times for any requested precision
-        |
-every stage contains zero error -> raw interval equivalence
-\end{verbatim}
-
-The halving step is the effective substitute for saying that a continuous
-error has supremum zero.  Its data are finite: a previous and next rational
-bound, a verified contraction inequality, and a finite schedule of such
-blocks.  The result is pointwise equivalence of the two raw functions, not an
-equality of elements of a completed trajectory space.
-
-\lean{ComputableAnalysis.ScalarODE.ShortBlockMeshSweep}
-\lean{ComputableAnalysis.ScalarODE.ShortBlockMeshSweep.next_le_half}
-\lean{ComputableAnalysis.ScalarODE.DirectMeshHalvingCertificate}
-\lean{ComputableAnalysis.ScalarODE.DirectMeshHalvingCertificate.ofShortBlockSweeps}
-\lean{ComputableAnalysis.ScalarODE.DirectMeshHalvingCertificate.error_eq_zero}
-\lean{ComputableAnalysis.ScalarODE.SelfDerivativeDirectMeshComparison}
-\lean{ComputableAnalysis.ScalarODE.SelfDerivativeDirectMeshComparison.equivalent}
-\leanok
-
-This is the chapter's reusable uniqueness theorem.  A new scalar ODE provider
-need only supply the local derivative enclosure and the short-block
-contraction; it should not reprove the halving or raw-equivalence machinery.
-For a vector system, the analogous scalar bound is replaced by row/column
-absolute sums and a factorial tail.
-
-\section{What remains before a general linear ODE theorem}
-
-The finite Peano--Baker layer already supplies the algebraic skeleton:
-
-\begin{verbatim}
-coefficient boxes -> ordered matrix words -> finite transition
-                 -> Duhamel sum -> factorial remainder interval
-\end{verbatim}
-
-The missing universal theorem is not matrix algebra.  It is the provider that
-turns a particular coefficient evaluator into compatible simplex boxes and a
-tail budget.  Keeping that input explicit prevents the usual compactness and
-completeness argument from reappearing under the name ``continuous solution''.
-
-The provider boundary is represented directly by the existing finite types:
-the coefficient and forcing entries share a rational interval, regularity is
-requested componentwise, and the tail is packaged by an explicit requested-
-precision certificate.  The simplex-box constructor remains the
-function-specific input between these two layers.
-
-\lean{ComputableAnalysis.LinearODE.IntervalLinearSystem}
-\lean{ComputableAnalysis.LinearODE.IntervalLinearSystem.CoefficientsRegular}
+\lean{ComputableAnalysis.LinearODE.PeanoBakerFactorialRemainderCertificate}
 \lean{ComputableAnalysis.LinearODE.peanoBakerFactorialRemainderCertificate}
-\lean{ComputableAnalysis.LinearODE.PeanoBakerFactorialRemainderCertificate.tail_le_eps}
-\lean{ComputableAnalysis.effectivePeanoBakerFactorialRemainderInterval_contains_tail}
-\lean{ComputableAnalysis.effectivePeanoBakerFactorialRemainderInterval_width_le}
+\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_shifted_le_eps}
 \leanok
 
+The same estimate proves uniqueness.  If the pointwise error satisfies, for
+every finite \(q\),
+\[
+  0\le e(x)\le B\frac{(MT)^{N+q}}{(N+q)!},
+\]
+then every requested positive tolerance eventually contains it, so its raw
+interval computation is equivalent to zero.  This is the constructive
+replacement for a supremum-norm argument.
+
 \lean{ComputableAnalysis.LinearODE.ZeroInitialVolterraIterationBound}
+\lean{ComputableAnalysis.LinearODE.zeroInitialVolterraIterationBound_eq_zero}
 \lean{ComputableAnalysis.LinearODE.SelfDerivativeVolterraComparison}
 \lean{ComputableAnalysis.LinearODE.SelfDerivativeVolterraComparison.equivalent}
 \lean{ComputableAnalysis.LinearODE.selfDerivativeInitialValueUnique_of_volterra}
 \leanok
 
-Thus the current foundation proves the algebraic and error-closing core, while
-the remaining theorem for a given ODE is a finite, inspectable obligation:
-regularity of the entries, simplex enclosure, and a compatible tail bound.
-
-For a constant rational coefficient, the coefficient layer already closes the
-scalar homogeneous case without a completeness argument.  If
-
-\[
-F'=rF,\qquad F(0)=1,
-\]
-
-then coefficient induction forces
-
-\[
-F_n=\frac{r^n}{n!}.
-\]
-
-The declarations `scaledExpCoeff_derivative` and
-`scaledExpCoeff_eq_of_scaledSelfDerivative` are the reusable bridge.  The
-analytic ODE layer still has to transport this recurrence through an interval
-evaluator and its explicit tail certificate; the recurrence itself is already
-finite rational algebra.
-
-\lean{ComputableAnalysis.FormalPowerSeries.scaledExpCoeff_derivative}
-\lean{ComputableAnalysis.FormalPowerSeries.scaledExpCoeff_eq_of_scaledSelfDerivative}
-\lean{ComputableAnalysis.ComplexSeries.expWeightedPartial_eq_mul_expPartial}
-\lean{ComputableAnalysis.FormalPowerSeries.sinCoeff_eq_of_secondDerivative}
-\lean{ComputableAnalysis.FormalPowerSeries.cosCoeff_eq_of_secondDerivative}
-\lean{ComputableAnalysis.FormalPowerSeries.sinhCoeff_eq_of_secondDerivative}
-\lean{ComputableAnalysis.FormalPowerSeries.coshCoeff_eq_of_secondDerivative}
-\leanok
-
-\section{Concrete rotation candidate}
-
-The rational circle supplies a complete variable-coefficient example before
-any constant-coefficient exponential is identified.  Its rational chart
-\[
-p(t)=\left(\frac{1-t^2}{1+t^2},\frac{2t}{1+t^2}\right),\qquad 0\leq t\leq1,
-\]
-starts at $1$, ends at $i$, and satisfies
-\[
-p'(t)=\frac{2i}{1+t^2}\,p(t).
-\]
-All three statements are rational identities plus interval derivative
-certificates.  The resulting structure is a genuine complex initial-value
-candidate: it records the derivative, the rotation equation, and exact
-initial and terminal boxes.  It does not identify $t=1$ with the
-constant-coefficient angle $\pi/2$; that is a separate reparametrization and
-uniqueness bridge.
-
-\lean{ComputableAnalysis.GeometricRotationODE.GeometricRotationSystemCertificate}
-\lean{ComputableAnalysis.GeometricRotationODE.pointOnUnit_geometricRotationSystemCertificate}
-\lean{ComputableAnalysis.GeometricRotationODE.point_hasComplexDerivativeOnUnit}
-\lean{ComputableAnalysis.GeometricRotationODE.pointDerivativeOnUnit_equiv_pointAngularVelocityOnUnit}
-\lean{ComputableAnalysis.RotationPeanoBakerBridge.rotationCenter_eq_constantPeanoBakerPartial}
-\lean{ComputableAnalysis.RotationPeanoBakerBridge.rotationCenter_eq_expPartial}
-\leanok
-
-The series-side rotation candidate is available at the same interface.  Its
-coordinates are explicit factorial-prefix computations, its derivative laws
-are finite secant certificates, and its initial values are exact rational
-overlaps.  This is the clean hand-off from the exponential chapter to the
-linear ODE chapter:
+Hence the intended solver is simply:
 
 \begin{verbatim}
-factorial-prefix coordinates -> S'=C, C'=-S -> initial-value certificate
+P_0(t)       := y_0
+P_(r+1)(t)   := y_0 + integral_0^t (A(s) P_r(s) + b(s)) ds
+answer       := P_r(t) +/- factorial_tail(M*T,r)
 \end{verbatim}
 
-The certificate remains a representation-level candidate until a separate
-uniqueness/transport proof identifies it with the rational-circle chart.
+Every displayed integral denotes a finite effective-FTC certificate over a
+rectangle or ordered simplex.
 
+\section{Representative solutions}
+\label{thm:linear-ode-elementary-function-agreement}
+
+The centered exponential is the scalar test case.  Its interval evaluator has
+derivative equal to itself, exact initial value \(1\), and a stabilized
+integral equal to its endpoint difference.  The Volterra theorem then
+identifies any competing certified solution with it.
+
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_effectiveFTC}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnitStabilizedIntegral_equiv_endpointDifference}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_equivalent_of_selfDerivative_unique}
+\leanok
+
+Rotation supplies the complex example.  The rational circle chart
+\[
+  p(t)=\left(\frac{1-t^2}{1+t^2},\frac{2t}{1+t^2}\right)
+\]
+satisfies \(p'(t)=2i(1+t^2)^{-1}p(t)\) by rational identities and finite
+derivative boxes.  The factorial-prefix sine and cosine computations provide
+the constant-coefficient candidate; a uniqueness/reparametrization
+certificate is the remaining bridge between the two.
+
+\lean{ComputableAnalysis.GeometricRotationODE.pointOnUnit_geometricRotationSystemCertificate}
+\lean{ComputableAnalysis.GeometricRotationODE.pointDerivativeOnUnit_equiv_pointAngularVelocityOnUnit}
+\lean{ComputableAnalysis.RotationPeanoBakerBridge.rotationCenter_eq_expPartial}
 \lean{ComputableAnalysis.RotationSeries.uniformRotationSinOnTwo_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.RotationSeries.uniformRotationCosOnTwo_hasDerivativeOnInterval}
 \leanok
 
-\section{Vector ODE admission checklist}
+For forcing, the same finite Duhamel construction yields the sampled harmonic
+oscillator identity
+\[
+  q_{n+2}-2q_{n+1}+q_n=-h^2\omega^2q_n+h^2r_n.
+\]
 
-A concrete vector system is ready for the foundation when its provider can
-fill these fields:
+\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.trajectory_position_secondDifference}
+\leanok
+
+\section{Remaining analytic provider}
+
+The matrix algebra, factorial tail, and error-closing argument are formalized.
+The missing general theorem is the function-specific provider that converts
+coefficient evaluators into compatible interval-valued simplex computations.
+It must supply:
 
 \begin{verbatim}
-coefficient/forcing boxes on each cell
-    -> ordered word products and row/column bounds
-    -> finite simplex or Duhamel enclosure
-    -> factorial tail with a requested-stage shift
+componentwise coefficient/forcing regularity
+    -> finite simplex enclosures
+    -> uniform factorial-tail certificate
     -> initial-value transport and raw overlap
 \end{verbatim}
 
-The matrix layer does not require a preferred norm or a completed vector
-space. Row and column absolute sums are finite rational surrogates; the
-provider may choose whichever orientation gives the tighter certificate. The
-same contract handles homogeneous and forced systems, because the forcing is
-added through the finite Duhamel sum. A new system therefore contributes
-coefficient and tail certificates, not a second ODE foundation.
-
-\lean{ComputableAnalysis.LinearODE.orderedIndexWords}
-\lean{ComputableAnalysis.LinearODE.discretePeanoBakerExpansion}
-\lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum}
-\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail}
-\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_shifted_le_eps}
-\lean{ComputableAnalysis.LinearODE.ZeroInitialVolterraIterationBound}
-\lean{ComputableAnalysis.LinearODE.zeroInitialVolterraIterationBound_eq_zero}
-\lean{ComputableAnalysis.LinearODE.SelfDerivativeVolterraComparison.equivalent}
+\lean{ComputableAnalysis.LinearODE.IntervalLinearSystem}
+\lean{ComputableAnalysis.LinearODE.IntervalLinearSystem.CoefficientsRegular}
+\lean{ComputableAnalysis.effectivePeanoBakerFactorialRemainderInterval_contains_tail}
+\lean{ComputableAnalysis.effectivePeanoBakerFactorialRemainderInterval_width_le}
 \leanok
 
-\section{Special cases}
-
-For constant generators, matrix words reduce to powers. For rotations, even
-and odd words split into cosine and sine prefixes, connecting the ODE chapter
-back to the circle construction. Scalar $y'=y$ is the first uniqueness
-case; affine forcing then gives variation of constants.
-\label{thm:linear-ode-elementary-function-agreement}
-
-The constant-coefficient and rotation algebra is checked before any analytic
-series theorem:
-
-For a constant generator, the ordered-simplex volume is built recursively:
-
-\begin{verbatim}
-V(0,T) := 1
-V(r+1,T) := T/(r+1) * V(r,T)
-V(r,T)  = T^r/r!
-\end{verbatim}
-
-This is a finite rational identity.  It explains the factorial coefficient in
-the Peano--Baker terms before any infinite series or completed function space
-is introduced.
-
-\lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexTerm_succ}
-\lean{ComputableAnalysis.LinearODE.orderedSimplexVolume}
-\lean{ComputableAnalysis.LinearODE.orderedSimplexVolume_eq_closed}
-\lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexTerm_eq_orderedSimplexVolume}
-\lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexPartial_succ}
-\lean{ComputableAnalysis.LinearODE.matrixPow_add_two_eq_zero_of_mul_self_eq_zero}
-\lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexPartial_add_two_eq_identity_add_scale_of_mul_self_eq_zero}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.generator_rowAbsSum}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.affineGenerator_rowAbsSum_le}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.rotationChronologicalProduct_rowAbsSum_le}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.generator_columnAbsSum}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.affineGenerator_columnAbsSum_le}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.rotationChronologicalProduct_columnAbsSum_le}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.rotationChronologicalProduct_stateAbsSum_le}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.generator_square}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.simplexPartial_even_split}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.simplexPartial_odd_split}
-\leanok
-
-For the quarter-turn generator, each row has absolute sum \(1\); a scaled
-Euler step therefore has row bound \(1+|h|\), and \(N\) such steps have bound
-\((1+|h|)^N\).  This is a concrete growth certificate for the rotation family,
-not yet the analytic assertion that the discrete product equals the continuous
-rotation.
-
-The analytic convergence input is a rational factorial tail.  It supplies a
-computable stage for every requested error, and the Volterra comparison turns
-that bound into uniqueness for the self-derivative equation:
-
-\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_shifted_le_eps}
-\lean{ComputableAnalysis.LinearODE.PeanoBakerFactorialRemainderCertificate}
-\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialRemainderCertificate}
-\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_nonneg}
-\lean{ComputableAnalysis.LinearODE.PeanoBakerFactorialRemainderCertificate.interval}
-\lean{ComputableAnalysis.LinearODE.PeanoBakerFactorialRemainderCertificate.tail_mem_interval}
-\lean{ComputableAnalysis.LinearODE.SelfDerivativeVolterraComparison.equivalent}
-\lean{ComputableAnalysis.LinearODE.selfDerivativeInitialValueUnique_of_volterra}
-\lean{ComputableAnalysis.LinearODE.effectiveDiscreteVariationOfConstants_duhamel}
-\lean{ComputableAnalysis.effectiveLinearODEDuhamel}
-\leanok
-
-\section{Finite complex paths}
-
-\begin{verbatim}
-path -> segment increments -> finite sum -> endpoint certificate
-\end{verbatim}
-Complex-valued functions are supported from the start by pairing rational real
-and imaginary interval computations. Polygonal paths give finite
-zero-displacement identities for the constant and polynomial differentials
-covered here; analytic path-independence enters only after the corresponding
-finite subdivision certificate is supplied.
-
-The public complex layer is therefore small but complete at its finite core:
-boxes enclose rational-complex values, polygonal left sums are assembled at a
-requested evaluator stage, and closed-path exactness is proved for constant
-and polynomial differentials. This is the complex counterpart of the real
-FTC contract, with path subdivision replacing interval subdivision.
-
-This chapter follows a representative-coverage rule: one certified example
-of a computational pattern is enough. Routine functions are transported by
-algebra or split into pieces and integrated piecewise; the blueprint does not
-enumerate every syntactic variant.
-
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalIntegralRawEntire_valid}
-\lean{ComputableAnalysis.ComplexPathIntegral.PolygonalIntegralCertificate.precision_witness}
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalDisplacementTo_split_at}
-\lean{ComputableAnalysis.ComplexPathIntegral.finiteConstantDifferentialExactness_closed}
-\lean{ComputableAnalysis.ComplexPathIntegral.finitePolynomialDifferentialExactness_closed}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.toQComplex_pointMul}
-\leanok
+This obligation is deliberately explicit.  A new linear system contributes
+its evaluators, simplex bounds, and tail schedule; it does not introduce a
+second theory of integration or appeal to completeness of standard real
+numbers.
