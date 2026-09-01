@@ -6703,6 +6703,11 @@ interval-regularity and effective-separation proofs for `arctanGeomOnUnit`.
 -/
 structure ArctanInverseBisection where
   branch : InvertibleFunctionOnInterval
+  /-- Every positive rational source gap is eventually resolved by the
+  branch's finite separation schedule.  This is the constructive uniqueness
+  datum needed to compare the search output with another implementation. -/
+  branch_separation_resolves : forall eps : QPos, Exists fun k : Nat =>
+    1 / ((branch.separation.inputPrecision k : Nat) : Rat) <= eps.val
   /-- The inverse branch may use a different stage schedule from the
   geometric arctangent.  Pointwise `FunctionOnInterval.Equivalent` is the
   intended link: the abstract branch stores the representation actually used
@@ -6727,7 +6732,7 @@ namespace ArctanInverseBisection
 def tangentAt (B : ArctanInverseBisection)
     (t : RationalCircle.GeometricTrig.QuarterTurn)
     (ht : RationalCircle.GeometricTrig.firstQuadrantBranch t) : RealRaw :=
-  { compute := (B.bisectionAt t ht).compute_preimage }
+  (B.bisectionAt t ht).preimage
 
 /-- The first-quadrant half-angle slope function produced by the constructive
 inverse theorem.  Its outputs are rational boxes for the slope in `[0,1]`;
@@ -6741,7 +6746,7 @@ theorem tangentAt_valid (B : ArctanInverseBisection)
     (t : RationalCircle.GeometricTrig.QuarterTurn)
     (ht : RationalCircle.GeometricTrig.firstQuadrantBranch t) :
     (B.tangentAt t ht).Valid :=
-  (B.bisectionAt t ht).valid_preimage
+  (B.bisectionAt t ht).preimage_valid
 
 theorem tangentRaw_valid (B : ArctanInverseBisection) :
     forall t ht, RealRaw.ValidCompute (B.tangentRaw.compute t ht) := by
@@ -6754,7 +6759,7 @@ theorem tangentAt_stays_in_source (B : ArctanInverseBisection)
     (ht : RationalCircle.GeometricTrig.firstQuadrantBranch t) :
     forall n, subintervalOf ((B.tangentAt t ht).compute n)
       B.branch.function.lower B.branch.function.upper :=
-  (B.bisectionAt t ht).preimage_subinterval
+  (B.bisectionAt t ht).preimage_stays_in_source
 
 /-- The first-quadrant inverse output lies in the actual unit slope interval,
 because its forward branch is certified equivalent to `arctanGeomOnUnit`. -/
@@ -6791,6 +6796,32 @@ theorem targetAt_halfQuarterTurn_equiv
     (B.targetAt t ht).value.Equiv
       (RationalCircle.GeometricTrig.halfQuarterTurnRaw t) :=
   B.targetAt_equiv_halfQuarterTurn t ht
+
+/-- The inverse-arctangent output agrees with any valid source computation
+whose valid branch image represents the same target.
+
+This is the canonical representation-edge constructor for alternative
+half-angle slope algorithms.  It uses the generic finite-separation theorem;
+no completed-real inverse or uniqueness principle is imported. -/
+theorem tangentAt_equiv_of_candidate
+    (B : ArctanInverseBisection)
+    (t : RationalCircle.GeometricTrig.QuarterTurn)
+    (ht : RationalCircle.GeometricTrig.firstQuadrantBranch t)
+    (candidate : RealRaw) (hcandidate : candidate.Valid)
+    (hcandidateSource : forall n,
+      subintervalOf (candidate.compute n)
+        B.branch.function.lower B.branch.function.upper)
+    (htangentForward : (B.branch.forwardIntervalRaw
+      (B.tangentAt t ht) (B.tangentAt_stays_in_source t ht)).Valid)
+    (hcandidateForward : (B.branch.forwardIntervalRaw candidate
+      hcandidateSource).Valid)
+    (hcandidateTarget : (B.branch.forwardIntervalRaw candidate
+      hcandidateSource).Equiv (B.targetAt t ht).value) :
+    (B.tangentAt t ht).Equiv candidate := by
+  simpa [tangentAt] using
+    (B.bisectionAt t ht).preimage_equiv_of_candidate
+      B.branch_separation_resolves candidate hcandidate
+      hcandidateSource htangentForward hcandidateForward hcandidateTarget
 
 /-- Differences of inverse targets retain their geometric sector meaning.
 This is the finite angle-increment interface used by the computable sine

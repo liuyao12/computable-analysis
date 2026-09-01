@@ -78,6 +78,26 @@ when an application needs it, and prove:
 Routine scalar multiples, sign changes, polynomial combinations, and finite
 piecewise definitions should use existing algebra and assembly theorems.
 
+### Applying a continuous computation to a real
+
+For `F : ContinuousFunctionOnInterval`, use:
+
+```lean
+F.applyRealRaw x hx hsource
+F.applyRealRaw_valid x hx hsource
+```
+
+The operator searches the stages of `x` until its interval is narrow enough
+for the requested output stage, keeps the schedule cofinal, evaluates the
+rational interval algorithm, and prefix-stabilizes the image boxes. It does
+not require `x` to advertise a convergence rate. Do not define a public
+same-stage composition `evalInterval (x.compute n) ... n`; validity of that
+composition does not follow from `x.Valid`.
+
+`InvertibleFunctionOnInterval.forwardIntervalRaw` remains a low-level
+same-stage interface used by the current inverse-separation proof. New
+ordinary function applications should use `applyRealRaw`.
+
 ### Inverse branches
 
 Package a regular monotone computation as an

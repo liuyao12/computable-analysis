@@ -98,6 +98,23 @@ ring laws remain in Lean rather than being repeated here.
 \lean{ComputableAnalysis.ComplexFunction.linearCombination_withAlternative}
 \leanok
 
+\section{Adaptive application}
+
+A valid input need not converge at the same rate as the function's interval
+evaluator.  Output stage \(n\) therefore searches for a sufficiently narrow
+input box before evaluation.  Finite prefix intersections make the resulting
+image boxes nested.
+
+\begin{verbatim}
+output stage n -> search input stages -> interval image
+               -> prefix stabilization -> valid realRaw
+\end{verbatim}
+
+\lean{ComputableAnalysis.ContinuousFunctionOnInterval.inputStage}
+\lean{ComputableAnalysis.ContinuousFunctionOnInterval.applyRealRaw}
+\lean{ComputableAnalysis.ContinuousFunctionOnInterval.applyRealRaw_valid}
+\leanok
+
 \section{The effective FTC}
 
 On each positive cell, a derivative box scales to an enclosure of the

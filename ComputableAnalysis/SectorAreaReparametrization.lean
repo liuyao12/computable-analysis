@@ -578,6 +578,19 @@ def arctanOnUnitRegular_invertible : InvertibleFunctionOnInterval where
   separation := arctanOnUnitRegular_effectiveInverseSeparation
   orientation := trivial
 
+/-- The canonical arctangent separation schedule resolves every positive
+rational source gap.  Choosing the denominator of the requested gap is a
+literal finite witness; no Archimedean property of completed reals is used. -/
+theorem arctanOnUnitRegular_separation_resolves :
+    forall eps : QPos, Exists fun k : Nat =>
+      1 / ((arctanOnUnitRegular_invertible.separation.inputPrecision k : Nat) : Rat) <=
+        eps.val := by
+  intro eps
+  refine ⟨eps.val.den, ?_⟩
+  simpa [arctanOnUnitRegular_invertible,
+    arctanOnUnitRegular_effectiveInverseSeparation] using
+    one_div_den_succ_le_of_pos eps.property
+
 /-- The accelerated arctangent branch is only a scheduled representative of
 the geometric arctangent.  This is the canonical equivalence edge consumed by
 the inverse-trigonometric layer. -/

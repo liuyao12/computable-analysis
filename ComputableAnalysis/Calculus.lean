@@ -8975,6 +8975,235 @@ structure ContinuousFunctionOnInterval where
   function : FunctionOnInterval
   regular : IntervalRegularOn function
 
+namespace ContinuousFunctionOnInterval
+
+/-! Applying a continuous interval computation to an arbitrary valid
+`RealRaw` must not assume that input and output stage numbers happen to have
+compatible convergence rates.  The following schedule searches the input
+computation for a box narrow enough for each requested output stage and keeps
+all earlier requirements.  The extra `max` with the public stage makes the
+schedule cofinal, which is useful when inverse arguments later need to inspect
+a prescribed input box. -/
+
+private def eventualWitness
+    (p : Nat -> Prop) [DecidablePred p]
+    (h : Exists fun N : Nat => forall n, N <= n -> p n)
+    (n : Nat := 0) : Subtype p :=
+  if hp : p n then ⟨n, hp⟩ else eventualWitness p h (n + 1)
+termination_by (Classical.choose h) - n
+decreasing_by
+  have hspec := Classical.choose_spec h
+  have hnlt : n < Classical.choose h := by
+    by_cases hn : n < Classical.choose h
+    · exact hn
+    · exact False.elim (hp (hspec n (Nat.le_of_not_gt hn)))
+  omega
+
+private def firstAdequateInputStage
+    (F : ContinuousFunctionOnInterval) (x : RealRaw) (hx : x.Valid)
+    (n : Nat) : Nat :=
+  (eventualWitness
+    (fun k => (x.compute k).width <=
+      1 / ((F.regular.inputPrecision n : Nat) : Rat))
+    (hx.2.2
+      { val := 1 / ((F.regular.inputPrecision n : Nat) : Rat)
+        property := one_div_nat_pos (F.regular.inputPrecision_pos n) })).val
+
+def inputStage
+    (F : ContinuousFunctionOnInterval) (x : RealRaw) (hx : x.Valid) :
+    Nat -> Nat
+  | 0 => firstAdequateInputStage F x hx 0
+  | n + 1 => max (inputStage F x hx n)
+      (max (n + 1) (firstAdequateInputStage F x hx (n + 1)))
+
+theorem inputStage_mono
+    (F : ContinuousFunctionOnInterval) (x : RealRaw) (hx : x.Valid)
+    {k n : Nat} (hkn : k <= n) :
+    F.inputStage x hx k <= F.inputStage x hx n := by
+  induction hkn with
+  | refl => exact Nat.le_refl _
+  | @step n hkn ih =>
+      exact Nat.le_trans ih (Nat.le_max_left _ _)
+
+theorem inputStage_le_of_pos
+    (F : ContinuousFunctionOnInterval) (x : RealRaw) (hx : x.Valid)
+    {n : Nat} (hn : 0 < n) :
+    n <= F.inputStage x hx n := by
+  cases n with
+  | zero => omega
+  | succ n =>
+      exact Nat.le_trans (Nat.le_max_left _ _)
+        (Nat.le_max_right _ _)
+
+private theorem firstAdequateInputStage_width
+    (F : ContinuousFunctionOnInterval) (x : RealRaw) (hx : x.Valid)
+    (n : Nat) :
+    (x.compute (firstAdequateInputStage F x hx n)).width <=
+      1 / ((F.regular.inputPrecision n : Nat) : Rat) := by
+  exact (eventualWitness
+    (fun k => (x.compute k).width <=
+      1 / ((F.regular.inputPrecision n : Nat) : Rat))
+    (hx.2.2
+      { val := 1 / ((F.regular.inputPrecision n : Nat) : Rat)
+        property := one_div_nat_pos (F.regular.inputPrecision_pos n) })).property
+
+theorem inputStage_width
+    (F : ContinuousFunctionOnInterval) (x : RealRaw) (hx : x.Valid)
+    (n : Nat) :
+    (x.compute (F.inputStage x hx n)).width <=
+      1 / ((F.regular.inputPrecision n : Nat) : Rat) := by
+  cases n with
+  | zero =>
+      exact firstAdequateInputStage_width F x hx 0
+  | succ n =>
+      have hstage : firstAdequateInputStage F x hx (n + 1) <=
+          F.inputStage x hx (n + 1) :=
+        Nat.le_trans (Nat.le_max_right _ _) (Nat.le_max_right _ _)
+      have hnested := hx.2.1 _ _ hstage
+      exact Rat.le_trans (QInterval.width_le_of_contains
+        ⟨hnested.1, hnested.2.2⟩)
+        (firstAdequateInputStage_width F x hx (n + 1))
+
+/-- The unstabilized image boxes selected by the adaptive input schedule. -/
+def applyCandidate
+    (F : ContinuousFunctionOnInterval) (x : RealRaw) (hx : x.Valid)
+    (hsource : forall n,
+      subintervalOf (x.compute n) F.function.lower F.function.upper) :
+    RealRaw where
+  compute := fun n =>
+    F.regular.evalInterval (x.compute (F.inputStage x hx n))
+      (hsource (F.inputStage x hx n)) n
+
+theorem applyCandidate_ordered
+    (F : ContinuousFunctionOnInterval) (x : RealRaw) (hx : x.Valid)
+    (hsource : forall n,
+      subintervalOf (x.compute n) F.function.lower F.function.upper) :
+    forall n, 0 <= ((F.applyCandidate x hx hsource).compute n).width := by
+  intro n
+  exact (F.regular.output_width _ _ n (F.inputStage_width x hx n)).1
+
+theorem applyCandidate_width
+    (F : ContinuousFunctionOnInterval) (x : RealRaw) (hx : x.Valid)
+    (hsource : forall n,
+      subintervalOf (x.compute n) F.function.lower F.function.upper)
+    (n : Nat) :
+    ((F.applyCandidate x hx hsource).compute n).width <=
+      1 / (((n + 1 : Nat) : Rat)) := by
+  exact (F.regular.output_width _ _ n (F.inputStage_width x hx n)).2
+
+theorem applyCandidate_shrinks
+    (F : ContinuousFunctionOnInterval) (x : RealRaw) (hx : x.Valid)
+    (hsource : forall n,
+      subintervalOf (x.compute n) F.function.lower F.function.upper) :
+    RealRaw.WidthsShrinkToZero (F.applyCandidate x hx hsource).compute := by
+  apply shrinksToZero_of_natOverSuccBound (C := 1)
+  intro n
+  simpa using F.applyCandidate_width x hx hsource n
+
+theorem applyCandidate_overlaps
+    (F : ContinuousFunctionOnInterval) (x : RealRaw) (hx : x.Valid)
+    (hsource : forall n,
+      subintervalOf (x.compute n) F.function.lower F.function.upper)
+    {k n : Nat} (hkn : k <= n) :
+    ((F.applyCandidate x hx hsource).compute k).Overlaps
+      ((F.applyCandidate x hx hsource).compute n) := by
+  let sk := F.inputStage x hx k
+  let sn := F.inputStage x hx n
+  have hstage : sk <= sn := F.inputStage_mono x hx hkn
+  have hxnested := hx.2.1 sk sn hstage
+  let q : Rat := (x.compute sn).lo
+  have hq : inDomainInterval F.function.lower F.function.upper q := by
+    have hs := hsource sn
+    exact ⟨by simpa [q] using hs.1,
+      by simpa [q] using Rat.le_trans hs.2.1 hs.2.2⟩
+  have hq_sk_lo : (x.compute sk).lo <= q := by
+    simpa [q] using hxnested.1
+  have hq_sk_hi : q <= (x.compute sk).hi := by
+    simpa [q] using Rat.le_trans hxnested.2.1 hxnested.2.2
+  have hq_sn_lo : (x.compute sn).lo <= q := by simp [q]
+  have hq_sn_hi : q <= (x.compute sn).hi := by
+    simpa [q] using hxnested.2.1
+  have hkcontains := F.regular.contains_point_values
+    (x.compute sk) (hsource sk) q hq k hq_sk_lo hq_sk_hi
+  have hncontains := F.regular.contains_point_values
+    (x.compute sn) (hsource sn) q hq n hq_sn_lo hq_sn_hi
+  have hpointNested :=
+    (F.function.valid_on q (F.function.defined_on q hq)).2.1 k n hkn
+  have hpointLower :
+      (F.function.compute q hq k).lo <=
+        (F.function.compute q hq n).lo := by
+    simpa [FunctionOnInterval.compute] using hpointNested.1
+  have hpointOrdered :
+      (F.function.compute q hq n).lo <=
+        (F.function.compute q hq n).hi := by
+    simpa [FunctionOnInterval.compute] using hpointNested.2.1
+  have hpointUpper :
+      (F.function.compute q hq n).hi <=
+        (F.function.compute q hq k).hi := by
+    simpa [FunctionOnInterval.compute] using hpointNested.2.2
+  change
+    (F.regular.evalInterval (x.compute sk) (hsource sk) k).Overlaps
+      (F.regular.evalInterval (x.compute sn) (hsource sn) n)
+  constructor
+  · exact Rat.le_trans hkcontains.1
+      (Rat.le_trans hpointLower
+        (Rat.le_trans hpointOrdered hncontains.2))
+  · exact Rat.le_trans hncontains.1
+      (Rat.le_trans hpointOrdered
+        (Rat.le_trans hpointUpper hkcontains.2))
+
+private def applyRadius (n : Nat) : Rat :=
+  1 / (((n + 1 : Nat) : Rat))
+
+theorem applyCandidate_future
+    (F : ContinuousFunctionOnInterval) (x : RealRaw) (hx : x.Valid)
+    (hsource : forall n,
+      subintervalOf (x.compute n) F.function.lower F.function.upper) :
+    forall k n, k <= n ->
+      (QInterval.expand ((F.applyCandidate x hx hsource).compute k)
+        (applyRadius k)).ContainsInterval
+        ((F.applyCandidate x hx hsource).compute n) := by
+  intro k n hkn
+  apply QInterval.expand_contains_right_of_overlaps
+  · exact F.applyCandidate_overlaps x hx hsource hkn
+  · exact Rat.le_trans (F.applyCandidate_width x hx hsource n)
+      (one_div_nat_antitone_succ hkn)
+
+/-- Canonical application of an interval-regular function to a valid raw
+real.  Runtime evaluation searches for adequate input precision and performs
+only finite rational interval operations. -/
+def applyRealRaw
+    (F : ContinuousFunctionOnInterval) (x : RealRaw) (hx : x.Valid)
+    (hsource : forall n,
+      subintervalOf (x.compute n) F.function.lower F.function.upper) :
+    RealRaw :=
+  RealRaw.prefixStabilize (F.applyCandidate x hx hsource) applyRadius
+
+theorem applyRealRaw_valid
+    (F : ContinuousFunctionOnInterval) (x : RealRaw) (hx : x.Valid)
+    (hsource : forall n,
+      subintervalOf (x.compute n) F.function.lower F.function.upper) :
+    (F.applyRealRaw x hx hsource).Valid := by
+  apply RealRaw.prefixStabilize_valid_of_future
+  · exact F.applyCandidate_ordered x hx hsource
+  · exact F.applyCandidate_shrinks x hx hsource
+  · exact F.applyCandidate_future x hx hsource
+  · apply shrinksToZero_of_natOverSuccBound (C := 1)
+    intro n
+    exact Rat.le_refl
+
+theorem applyCandidate_equiv_applyRealRaw
+    (F : ContinuousFunctionOnInterval) (x : RealRaw) (hx : x.Valid)
+    (hsource : forall n,
+      subintervalOf (x.compute n) F.function.lower F.function.upper) :
+    (F.applyCandidate x hx hsource).Equiv
+      (F.applyRealRaw x hx hsource) := by
+  exact RealRaw.candidate_equiv_prefixStabilize_of_future
+    (F.applyCandidate_ordered x hx hsource)
+    (F.applyCandidate_future x hx hsource)
+
+end ContinuousFunctionOnInterval
+
 /-- Constructive monotonicity on rational points of the interval.
 
 The field `increasing` means nondecreasing; its negation selects the
@@ -13965,6 +14194,37 @@ theorem source_equiv_of_forward_equiv
       exact (not_strictly_separated_of_forward_equiv I hresolves
         hx hy hxsource hysource hforwardX hforwardY hforward n) hstrict
 
+/-- Constructive inverse uniqueness through a common represented target.
+
+This is the form used by inverse algorithms.  Each source computation may
+have an unrelated stage schedule; it is enough that its valid interval image
+represents the same valid target.  The proof composes `RealRaw.Equiv` edges
+and then applies finite effective separation, never interval-overlap
+transitivity or completed-real uniqueness. -/
+theorem source_equiv_of_common_forward_target
+    (I : InvertibleFunctionOnInterval)
+    (hresolves : forall eps : QPos, Exists fun k : Nat =>
+      1 / ((I.separation.inputPrecision k : Nat) : Rat) <= eps.val)
+    {x y target : RealRaw}
+    (hx : x.Valid) (hy : y.Valid)
+    (hxsource : forall n,
+      subintervalOf (x.compute n) I.function.lower I.function.upper)
+    (hysource : forall n,
+      subintervalOf (y.compute n) I.function.lower I.function.upper)
+    (hforwardX : (I.forwardIntervalRaw x hxsource).Valid)
+    (hforwardY : (I.forwardIntervalRaw y hysource).Valid)
+    (htarget : target.Valid)
+    (hforwardX_target : (I.forwardIntervalRaw x hxsource).Equiv target)
+    (hforwardY_target : (I.forwardIntervalRaw y hysource).Equiv target) :
+    x.Equiv y := by
+  have hforward :
+      (I.forwardIntervalRaw x hxsource).Equiv
+        (I.forwardIntervalRaw y hysource) :=
+    RealRaw.equiv_trans hforwardX htarget hforwardY
+      hforwardX_target (RealRaw.equiv_symm hforwardY_target)
+  exact I.source_equiv_of_forward_equiv hresolves
+    hx hy hxsource hysource hforwardX hforwardY hforward
+
 end InvertibleFunctionOnInterval
 
 /-! A branch contract for functions whose effective separation depends on the
@@ -14898,6 +15158,73 @@ structure InverseBisectionSearch (I : InvertibleFunctionOnInterval) (y : InRange
           (preimage_subinterval n)
           n)
         (y.value.compute n)
+
+namespace InverseBisectionSearch
+
+/-- The represented source value computed by one certified inverse search. -/
+def preimage {I : InvertibleFunctionOnInterval} {y : InRangeRaw I}
+    (search : InverseBisectionSearch I y) : RealRaw where
+  compute := search.compute_preimage
+
+theorem preimage_valid {I : InvertibleFunctionOnInterval} {y : InRangeRaw I}
+    (search : InverseBisectionSearch I y) : search.preimage.Valid :=
+  search.valid_preimage
+
+theorem preimage_stays_in_source
+    {I : InvertibleFunctionOnInterval} {y : InRangeRaw I}
+    (search : InverseBisectionSearch I y) :
+    forall n, subintervalOf (search.preimage.compute n)
+      I.function.lower I.function.upper :=
+  search.preimage_subinterval
+
+/-- The forward computation of the search output represents its target.
+
+The search already supplies the finite same-stage overlaps.  The stronger
+source-uniqueness theorem below separately requires validity, because an
+arbitrary interval evaluator need not preserve a raw input's unscheduled
+convergence rate. -/
+theorem forward_equiv_target
+    {I : InvertibleFunctionOnInterval} {y : InRangeRaw I}
+    (search : InverseBisectionSearch I y) :
+    (I.forwardIntervalRaw search.preimage
+      search.preimage_stays_in_source).Equiv y.value := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (I.forwardIntervalRaw search.preimage
+      search.preimage_stays_in_source) y.value n n).2
+  exact search.value_overlaps n
+
+/-- A certified inverse search agrees with any valid source computation whose
+valid forward image represents the same target.
+
+This packages the project-native inverse uniqueness argument needed by
+special functions: the search and candidate may refine at unrelated rates,
+and equality is obtained from finite separation rather than completeness of
+the real numbers. -/
+theorem preimage_equiv_of_candidate
+    {I : InvertibleFunctionOnInterval} {y : InRangeRaw I}
+    (search : InverseBisectionSearch I y)
+    (hresolves : forall eps : QPos, Exists fun k : Nat =>
+      1 / ((I.separation.inputPrecision k : Nat) : Rat) <= eps.val)
+    (candidate : RealRaw) (hcandidate : candidate.Valid)
+    (hcandidateSource : forall n,
+      subintervalOf (candidate.compute n)
+        I.function.lower I.function.upper)
+    (hsearchForward : (I.forwardIntervalRaw search.preimage
+      search.preimage_stays_in_source).Valid)
+    (hcandidateForward : (I.forwardIntervalRaw candidate
+      hcandidateSource).Valid)
+    (hcandidateTarget : (I.forwardIntervalRaw candidate
+      hcandidateSource).Equiv y.value) :
+    search.preimage.Equiv candidate := by
+  exact I.source_equiv_of_common_forward_target hresolves
+    search.preimage_valid hcandidate
+    search.preimage_stays_in_source hcandidateSource
+    hsearchForward hcandidateForward y.value_valid
+    search.forward_equiv_target hcandidateTarget
+
+end InverseBisectionSearch
 
 /-- Computational data assigning a finite certified search to every target in
 the stated range.  This is data, rather than a merely nonempty proposition,

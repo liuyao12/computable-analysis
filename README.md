@@ -51,6 +51,11 @@ For narrower imports:
 - abstract complex functions retain equivalent computations on intersections
   of their domains.
 
+`ContinuousFunctionOnInterval.applyRealRaw` is the canonical real-input
+application operator. It searches the input algorithm for enough precision at
+each output stage and then performs finite prefix stabilization; callers do
+not supply or assume a convergence rate.
+
 A raw evaluator does not know its equivalence proofs. Adding a new
 implementation requires one edge to the existing equivalence tree, not a
 quadratic family of pairwise proofs.
