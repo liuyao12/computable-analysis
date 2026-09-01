@@ -157,6 +157,10 @@ computation as a finite Stieltjes sum. A substitution theorem is then an
 equivalence between two explicit sum algorithms, not an appeal to a general
 completed-real change-of-variables theorem.
 
+Expose one evaluated theorem for the resulting integral. Keep FTC or chart
+arguments as reusable certificate transports; do not publish a second value
+theorem whose only distinction is the proof route used to obtain it.
+
 ## Effective FTC provider checklist
 
 For primitive `F`, derivative `dF`, and rational interval `[a,b]`, provide:

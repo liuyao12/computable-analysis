@@ -12338,44 +12338,6 @@ theorem piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
   rw [← four_arctanGeom_one_compute_eq_piCircleArea_compute n]
   exact hover
 
-theorem piFromArctanIntegral_equiv_piCircleArea_of_definite_identity
-    (primitive : RealFunRaw)
-    (I : Integral.DefiniteIdentity
-      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
-      primitive 0 1)
-    (hendpoint :
-      (endpointDifferenceRaw primitive 0 1 I.endpoint_valid).Equiv
-        (ArctanGeometry.arctanGeom (1 : Rat))) :
-    (IntegralIdentities.PiFromArctanIntegral
-      (IntegralIdentities.arctanIntegral (1 : Rat) I.construction)).Equiv
-        piCircleArea := by
-  have hintegralEndpoint :
-      (IntegralIdentities.arctanIntegral (1 : Rat) I.construction).Equiv
-        (endpointDifferenceRaw primitive 0 1 I.endpoint_valid) := by
-    change DefiniteIntegralEqualsEndpointDifference
-      primitive
-      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
-      0 1 I.construction I.endpoint_valid
-    exact I.equivalent
-  have hendpointValid :
-      (endpointDifferenceRaw primitive 0 1 I.endpoint_valid).Valid := by
-    simpa [endpointDifferenceRaw, RealRaw.Valid] using I.endpoint_valid
-  have hgeomValid :
-      (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
-    ArctanGeometry.arctanGeom_valid_on_unit
-      (by native_decide) (by native_decide)
-  have hgeom :
-      (IntegralIdentities.arctanIntegral (1 : Rat) I.construction).Equiv
-        (ArctanGeometry.arctanGeom (1 : Rat)) :=
-    RealRaw.equiv_trans
-      (IntegralIdentities.arctanIntegral_valid (1 : Rat) I.construction)
-      hendpointValid
-      hgeomValid
-      hintegralEndpoint
-      hendpoint
-  exact piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
-    I.construction hgeom
-
 theorem piFromArctanIntegralFor_equiv_piCircleArea_of_geom_agreement
     (c : Integral.ConstructionFor
       (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1))

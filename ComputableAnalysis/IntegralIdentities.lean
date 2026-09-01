@@ -241,83 +241,6 @@ theorem effectiveFTCStabilizedIntegralFor_equiv_endpointDifference
 
 namespace Integral
 
-/-- A definite-integral identity on raw total functions:
-the integral of `integrand` over `[a,b]` equals the endpoint difference of the
-primitive. -/
-structure DefiniteIdentity
-    (integrand primitive : RealFunRaw) (a b : Rat) where
-  construction : Integral.Construction integrand a b
-  endpoint_valid :
-    RealRaw.ValidCompute (endpointDifferenceCompute primitive a b)
-  equivalent :
-    DefiniteIntegralEqualsEndpointDifference
-      primitive integrand a b construction endpoint_valid
-
-namespace DefiniteIdentity
-
-theorem integral_valid
-    {integrand primitive : RealFunRaw} {a b : Rat}
-    (I : DefiniteIdentity integrand primitive a b) :
-    (Integral.integral integrand a b I.construction).Valid :=
-  FTC.integral_valid_of_construction I.construction
-
-theorem endpoint_formula
-    {integrand primitive : RealFunRaw} {a b : Rat}
-    (I : DefiniteIdentity integrand primitive a b) :
-    DefiniteIntegralEqualsEndpointDifference
-      primitive integrand a b I.construction I.endpoint_valid :=
-  I.equivalent
-
-end DefiniteIdentity
-
-/-- The same definite-integral identity, but with both functions already
-certified on a finite rational interval. -/
-structure DefiniteIdentityOnInterval
-    (integrand primitive : FunctionOnInterval) where
-  same_lower : primitive.lower = integrand.lower
-  same_upper : primitive.upper = integrand.upper
-  construction :
-    Integral.Construction
-      integrand.toRealFunRaw integrand.lower integrand.upper
-  endpoint_valid :
-    RealRaw.ValidCompute
-      (endpointDifferenceCompute
-        primitive.toRealFunRaw integrand.lower integrand.upper)
-  equivalent :
-    DefiniteIntegralEqualsEndpointDifference
-      primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper construction endpoint_valid
-
-namespace DefiniteIdentityOnInterval
-
-def toDefiniteIdentity
-    {integrand primitive : FunctionOnInterval}
-    (I : DefiniteIdentityOnInterval integrand primitive) :
-    DefiniteIdentity
-      integrand.toRealFunRaw primitive.toRealFunRaw
-      integrand.lower integrand.upper where
-  construction := I.construction
-  endpoint_valid := I.endpoint_valid
-  equivalent := I.equivalent
-
-theorem integral_valid
-    {integrand primitive : FunctionOnInterval}
-    (I : DefiniteIdentityOnInterval integrand primitive) :
-    (Integral.integral
-      integrand.toRealFunRaw integrand.lower integrand.upper
-      I.construction).Valid :=
-  I.toDefiniteIdentity.integral_valid
-
-theorem endpoint_formula
-    {integrand primitive : FunctionOnInterval}
-    (I : DefiniteIdentityOnInterval integrand primitive) :
-    DefiniteIntegralEqualsEndpointDifference
-      primitive.toRealFunRaw integrand.toRealFunRaw
-      integrand.lower integrand.upper I.construction I.endpoint_valid :=
-  I.equivalent
-
-end DefiniteIdentityOnInterval
-
 /-- A definite-integral identity for the domain-aware `ConstructionFor`
 interface.  This is the version used by hand-built interval constructions,
 where the raw computation is already a valid integral on the whole
@@ -1174,72 +1097,6 @@ noncomputable def ofMonotone
 
 end GeneralDefiniteIdentityFor
 
-def definiteIdentity_of_effectiveFTC
-    {primitive integrand : RealFunRaw} {a b : Rat}
-    (h : EffectiveFTC primitive integrand a b)
-    (c : Integral.Construction integrand a b)
-    (hendpoint :
-      RealRaw.ValidCompute (endpointDifferenceCompute primitive a b))
-    (hplan : c.plan = FTC.integralPlanOfEffectiveFTC h)
-    (hscheduledEndpoint : (FTC.endpointRawOfEffectiveFTC h).Valid)
-    (hendpoint_equiv :
-      (FTC.endpointRawOfEffectiveFTC h).Equiv
-        (endpointDifferenceRaw primitive a b hendpoint)) :
-    DefiniteIdentity integrand primitive a b where
-  construction := c
-  endpoint_valid := hendpoint
-  equivalent :=
-    FTC.effectiveFTC_definiteIntegralEqualsEndpoint
-      h c hendpoint hplan hscheduledEndpoint hendpoint_equiv
-
-def definiteIdentity_of_staticDyadicEffectiveFTC
-    {primitive integrand : RealFunRaw} {a b : Rat}
-    (h : StaticDyadicEffectiveFTC primitive integrand a b)
-    (c : Integral.Construction integrand a b)
-    (hendpoint :
-      RealRaw.ValidCompute (endpointDifferenceCompute primitive a b))
-    (hplan : c.plan = FTC.integralPlanOfStaticDyadicEffectiveFTC h)
-    (hscheduledEndpoint : (FTC.endpointRawOfEffectiveFTC h.toEffectiveFTC).Valid)
-    (hendpoint_equiv :
-      (FTC.endpointRawOfEffectiveFTC h.toEffectiveFTC).Equiv
-        (endpointDifferenceRaw primitive a b hendpoint)) :
-    DefiniteIdentity integrand primitive a b where
-  construction := c
-  endpoint_valid := hendpoint
-  equivalent :=
-    FTC.staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint
-      h c hendpoint hplan hscheduledEndpoint hendpoint_equiv
-
-def definiteIdentity_of_effectiveFTC_endpointAgreement
-    {primitive integrand : RealFunRaw} {a b : Rat}
-    (h : EffectiveFTC primitive integrand a b)
-    (c : Integral.Construction integrand a b)
-    (hplan : c.plan = FTC.integralPlanOfEffectiveFTC h)
-    (endpoint :
-      FTC.EndpointScheduleAgreement primitive a b
-        (FTC.endpointRawOfEffectiveFTC h)) :
-    DefiniteIdentity integrand primitive a b where
-  construction := c
-  endpoint_valid := endpoint.endpoint_valid
-  equivalent :=
-    FTC.effectiveFTC_definiteIntegralEqualsEndpoint_of_endpointAgreement
-      h c hplan endpoint
-
-def definiteIdentity_of_staticDyadicEffectiveFTC_endpointAgreement
-    {primitive integrand : RealFunRaw} {a b : Rat}
-    (h : StaticDyadicEffectiveFTC primitive integrand a b)
-    (c : Integral.Construction integrand a b)
-    (hplan : c.plan = FTC.integralPlanOfStaticDyadicEffectiveFTC h)
-    (endpoint :
-      FTC.EndpointScheduleAgreement primitive a b
-        (FTC.endpointRawOfEffectiveFTC h.toEffectiveFTC)) :
-    DefiniteIdentity integrand primitive a b where
-  construction := c
-  endpoint_valid := endpoint.endpoint_valid
-  equivalent :=
-    FTC.staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint_of_endpointAgreement
-      h c hplan endpoint
-
 /-- Package the scheduled Riemann algorithm from an `EffectiveFTC` certificate
 as a domain-aware integral construction. -/
 def constructionFor_of_effectiveFTC
@@ -1578,13 +1435,6 @@ theorem constant_integral_equiv_endpoint (c a b : Rat) :
       Rat.mul_assoc, Rat.mul_comm]
   rw [harea]
   exact ⟨Rat.le_refl, Rat.le_refl⟩
-
-def constantDefiniteIdentity (c a b : Rat) :
-    DefiniteIdentity
-      (Integral.constantFunRaw c) (Integral.linearPrimitiveFunRaw c) a b where
-  construction := Integral.constantConstruction c a b
-  endpoint_valid := constantPrimitiveEndpoint_valid c a b
-  equivalent := constant_integral_equiv_endpoint c a b
 
 end Integral
 
@@ -14828,83 +14678,6 @@ theorem geometricSinOnInterval_valid
   intro x hx
   exact (geometricSinOnInterval C a b hdefined).valid_on
     x ((geometricSinOnInterval C a b hdefined).defined_on x hx)
-
-/-- The target package saying that geometric sine and cosine satisfy their
-definite-integral identities on a chosen rational interval.  The derivative
-proofs and the integral constructions are supplied as data. -/
-structure GeometricTrigIntegralIdentities
-    (C : RationalCircle.GeometricTrig.FunctionRawConstruction)
-    (a b : Rat) where
-  cos_defined :
-    forall x, inDomainInterval a b x -> C.cosFunctionRaw.definedAt x
-  sin_defined :
-    forall x, inDomainInterval a b x -> C.sinFunctionRaw.definedAt x
-  negCos : FunctionOnInterval
-  integral_cos_eq_sin :
-    Integral.DefiniteIdentityOnInterval
-      (geometricCosOnInterval C a b cos_defined)
-      (geometricSinOnInterval C a b sin_defined)
-  integral_sin_eq_negCos :
-    Integral.DefiniteIdentityOnInterval
-      (geometricSinOnInterval C a b sin_defined)
-      negCos
-
-namespace GeometricTrigIntegralIdentities
-
-def cosOnInterval
-    {C : RationalCircle.GeometricTrig.FunctionRawConstruction}
-    {a b : Rat}
-    (H : GeometricTrigIntegralIdentities C a b) :
-    FunctionOnInterval :=
-  geometricCosOnInterval C a b H.cos_defined
-
-def sinOnInterval
-    {C : RationalCircle.GeometricTrig.FunctionRawConstruction}
-    {a b : Rat}
-    (H : GeometricTrigIntegralIdentities C a b) :
-    FunctionOnInterval :=
-  geometricSinOnInterval C a b H.sin_defined
-
-theorem cos_integral_valid
-    {C : RationalCircle.GeometricTrig.FunctionRawConstruction}
-    {a b : Rat}
-    (H : GeometricTrigIntegralIdentities C a b) :
-    (Integral.integral
-      (H.cosOnInterval).toRealFunRaw
-      (H.cosOnInterval).lower
-      (H.cosOnInterval).upper
-      H.integral_cos_eq_sin.construction).Valid :=
-  H.integral_cos_eq_sin.integral_valid
-
-theorem sin_integral_valid
-    {C : RationalCircle.GeometricTrig.FunctionRawConstruction}
-    {a b : Rat}
-    (H : GeometricTrigIntegralIdentities C a b) :
-    (Integral.integral
-      (H.sinOnInterval).toRealFunRaw
-      (H.sinOnInterval).lower
-      (H.sinOnInterval).upper
-      H.integral_sin_eq_negCos.construction).Valid :=
-  H.integral_sin_eq_negCos.integral_valid
-
-end GeometricTrigIntegralIdentities
-
-/-- Inverse elementary functions represented by the kernels that a calculus
-student would recognize.  These identities are deliberately interval-local:
-the branch and endpoint choices are part of the data. -/
-structure InverseElementaryIntegralIdentities where
-  arctan : FunctionOnInterval
-  arctanKernel : FunctionOnInterval
-  integral_invOnePlusSquare_eq_arctan :
-    Integral.DefiniteIdentityOnInterval arctanKernel arctan
-  arcsin : FunctionOnInterval
-  arcsinKernel : FunctionOnInterval
-  integral_invSqrtOneMinusSquare_eq_arcsin :
-    Integral.DefiniteIdentityOnInterval arcsinKernel arcsin
-  log : FunctionOnInterval
-  logKernel : FunctionOnInterval
-  integral_invX_eq_log :
-    Integral.DefiniteIdentityOnInterval logKernel log
 
 /-- Abelian-integral forms related to trigonometric and inverse-trigonometric
 functions.  The first two are inverse representations; elliptic integrals are
