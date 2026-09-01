@@ -3001,6 +3001,16 @@ theorem PeanoBakerFactorialRemainderCertificate.tail_mem_interval
   exact ⟨peanoBakerFactorialTail_nonneg hM hT certificate.start terms,
     Rat.le_refl⟩
 
+theorem PeanoBakerFactorialRemainderCertificate.interval_width_le
+    {M T : Rat} {eps : QPos}
+    (certificate : PeanoBakerFactorialRemainderCertificate M T eps)
+    (terms : Nat) :
+    (PeanoBakerFactorialRemainderCertificate.interval
+      certificate terms).width <= eps.val := by
+  unfold PeanoBakerFactorialRemainderCertificate.interval QInterval.width
+  have htail := certificate.tail_le_eps terms
+  grind [Rat.sub_eq_add_neg]
+
 /-- The computable iteration count used in the zero-initial Volterra
 uniqueness argument.  The factor B is a rational enclosure bound for a
 candidate difference, while the remaining factor is the usual Peano--Baker
