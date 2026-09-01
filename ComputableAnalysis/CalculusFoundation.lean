@@ -381,20 +381,6 @@ theorem effectiveTangentSquareIntegral_equiv_halfQuarterTurn_of_overlap
       (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
   exact h.to_halfQuarterTurn
 
-/-! The public equal-dyadic square integral uses the normalized tangent chart.
-The reciprocal-pi factor is part of the anchor, so the represented value is
-`1/4`, not the unscaled quarter-turn. -/
-theorem effectiveDyadicPublicSquareIntegral_equiv_quarter
-    {S : SinPiIntegral.ArctanSinPiConstruction}
-    (h : SinPiIntegral.DyadicPublicSquareAnchorSharedWitness S
-      normalizedTangentSquareIntegral)
-    (hsine : IntervalRegularOn S.onHalf)
-    (hvalue : NormalizedTangentSquareValueSubgoal) :
-    (SinPiIntegral.dyadicPublicSquareIntegralRaw_stabilized S
-      normalizedTangentSquareIntegral).Equiv
-      (RealRaw.ofRat (1 / 4)) := by
-  exact h.stabilized_equiv_value hsine hvalue.normalized_valid hvalue.value
-
 /-! Canonical pairwise transport.  The public/nested and nested/anchor
 overlaps are enough: the overlap-chain stabilizer inserts the vanishing
 nested-radical width, so callers no longer need the stronger three-way
@@ -424,16 +410,6 @@ theorem effectiveDyadicPublicSquareIntegral_chain_valid
       normalizedTangentSquareIntegral).Valid := by
   exact SinPiIntegral.dyadicPublicSquareIntegralRaw_chainStabilized_valid
     hsine normalizedTangentSquareIntegral_valid hcircle hcommon
-
-/- Stable focused-entry-point name for the normalized representation edge. -/
-theorem effectiveDyadicPublicSquareIntegral_stabilized_equiv_normalizedTangentSquare
-    {S : SinPiIntegral.ArctanSinPiConstruction}
-    (h : SinPiIntegral.DyadicPublicSquareAnchorSharedWitness S
-      normalizedTangentSquareIntegral) :
-    (SinPiIntegral.dyadicPublicSquareIntegralRaw_stabilized S
-      normalizedTangentSquareIntegral).Equiv
-      normalizedTangentSquareIntegral := by
-  exact h.stabilized_equiv_anchor normalizedTangentSquareIntegral_valid
 
 theorem effectiveReciprocalPi_quarterTurn_equiv_quarter :
     (SinPiIntegral.reciprocalPiRaw *

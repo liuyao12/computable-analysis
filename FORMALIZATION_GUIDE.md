@@ -207,9 +207,8 @@ inputs are:
 - `DyadicNestedRadicalSquareAnchorCommonWitness` for the normalized anchor;
 - `NormalizedTangentSquareValueSubgoal`.
 
-Do not construct the older three-way
-`DyadicPublicSquareAnchorSharedWitness`; it asks for stronger same-stage data
-than the proof needs.
+The public API deliberately has no three-way shared-witness certificate: such
+a certificate asks for stronger same-stage data than the proof needs.
 
 For unsquared sine, use
 `CanonicalDyadicHalfAngleCertificateAt` and the single all-samples adapter
