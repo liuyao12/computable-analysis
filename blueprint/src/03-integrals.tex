@@ -563,7 +563,7 @@ transports to the same rational endpoint formula. This is the representative
 pattern reused for decreasing pieces; separate copies for every affine slope
 are unnecessary.
 
-The identity function now also has its elementary primitive (x^2/2).  Its
+The identity function now also has its elementary primitive $x^2/2$.  Its
 rectangle integral and endpoint difference are assembled through the generic
 certificate interface, giving a complete nonconstant FTC example before any
 special-function geometry is introduced.
@@ -642,8 +642,8 @@ cell widths <= e  ->  sum widths = width(sum) <= m*e
 This is the error-budget rule for a finite turning-point decomposition.  It
 does not claim that the assembled object is an infinite integral; it only
 exposes the finite budget that a later shrinking schedule must consume.
-The adaptive form replaces the common (e) by a bound (e_k) for each cell
-and sums the (e_k).  This is the natural contract when different pieces
+The adaptive form replaces the common $e$ by a bound $e_k$ for each cell
+and sums the $e_k$.  This is the natural contract when different pieces
 have different evaluators or different local conditioning.
 
 \lean{ComputableAnalysis.Integral.finiteRawSum}
@@ -690,11 +690,11 @@ explicit: once the endpoint list is shown to be an adjacent-difference list,
 the generic raw telescoping theorem closes the endpoint identity.
 
 The public piecewise fold now also carries the quantitative version of this
-assembly rule.  If every certified cell has stage-(n) width at most (e),
-then the (m)-piece integral fold has width at most (m e).  The theorem is
+assembly rule.  If every certified cell has stage-$n$ width at most $e$,
+then the $m$-piece integral fold has width at most $me$.  The theorem is
 finite bookkeeping; a shrinking schedule is still a separate hypothesis.
 For adaptive cells, the corresponding theorem sums the individual bounds
-(e_0,ldots,e_{m-1}).  A proof may therefore spend precision where the
+$e_0,\ldots,e_{m-1}$.  A proof may therefore spend precision where the
 function is difficult and use a cheaper evaluator elsewhere.
 
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneCellList}
@@ -806,9 +806,9 @@ the remaining work for a new function is to supply its piece classification,
 shrinking budgets, and anchor equivalence. This does not introduce Lebesgue
 measure or a completed-real compactness argument.
 
-The assembly also accepts nonuniform budgets: if the (j)-th monotone piece
-or turning gap has width at most (e_j), the finite candidate is bounded by
-(sum_j e_j).  This is useful when a narrow, ill-conditioned turn receives
+The assembly also accepts nonuniform budgets: if the $j$-th monotone piece
+or turning gap has width at most $e_j$, the finite candidate is bounded by
+$\sum_j e_j$.  This is useful when a narrow, ill-conditioned turn receives
 more computation than a regular cell.
 
 After prefix stabilization, the public computation also exposes its runtime
@@ -1022,7 +1022,7 @@ F, G on [a,b] -> F + G on [a,b]
 \leanok
 
 The finite product-rule estimate is also used end to end.  On the positive
-unit branch, the factor (x\arctan(x)) is integrated by a two-stage
+unit branch, the factor $x\arctan(x)$ is integrated by a two-stage
 certificate: factor boxes and the endpoint secant are computed at separate
 finite stages, their bounded derivative sum is stabilized by explicit
 overlap, and the result is transported to the independent arctangent
@@ -1402,12 +1402,12 @@ before it is identified with \(1/4\).  For the unsquared sine route, the
 remaining certificate is target-directed: each nested-radical sample must be
 matched to a tangent box by a finite bisection trace or half-angle witness.
 
-The tangent-chart FTC already proves the value (1/\pi).  The independent
+The tangent-chart FTC already proves the value $1/\pi$.  The independent
 equal-dyadic algorithm still needs one representation edge: its positive odd
 nested-radical sample must overlap the inverse-arctangent circle box.  Zero,
 even refinement, reflection, induction, and integral transport are checked.
 The squared route needs the analogous sample overlap before its endpoint
-certificate yields (1/4).
+certificate yields $1/4$.
 
 \lean{ComputableAnalysis.SinPiIntegral.sinPiSquareOnHalf_valid}
 \lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_widths_shrink}
@@ -1645,8 +1645,8 @@ closing the numerical integral.  The weaker but directly usable route is now
 explicit: canonical rational unit-circle certificates discharge all three
 nonzero parity branches without asserting equality between the square-root
 and circle interval evaluators.  The two boundary samples are already closed
-independently: the zero sample and the terminal sample (k=2^n) have
-stagewise overlap with the arctangent-backed sine evaluator for every (n).
+independently: the zero sample and the terminal sample $k=2^n$ have
+stagewise overlap with the arctangent-backed sine evaluator for every $n$.
 Only the interior branches need the uniform witness family.
 
 \lean{ComputableAnalysis.SinPiIntegral.arctanSinPi_nestedRadicalStage_sample_overlap_zero}

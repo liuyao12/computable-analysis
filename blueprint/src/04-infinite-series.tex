@@ -240,9 +240,9 @@ interchange is being hidden in the notation.
 \lean{ComputableAnalysis.effectiveCosIntegratedPartial_eq_sinPartial}
 \leanok
 
-\subsection{A computable (L^2)-style boundary}
+\subsection{A computable \texorpdfstring{\(L^2\)}{L2}-style boundary}
 
-The project can expose an (L^2)-style object without introducing measurable
+The project can expose an $L^2$-style object without introducing measurable
 functions.  A usable instance consists of finite complex coefficient lists,
 their rational energy
 
@@ -259,7 +259,7 @@ coefficient prefix -> finite energy -> tail-energy certificate
                   -> requested-norm enclosure -> overlap transport
 \end{verbatim}
 
-This is a constructive proxy for the parts of (L^2) theory used by an
+This is a constructive proxy for the parts of $L^2$ theory used by an
 application.  It does not assert that every measurable function has a
 Fourier expansion, nor does it identify coefficient energy with a Lebesgue
 integral.  Parseval for a finite transform is already available.  The
@@ -381,7 +381,7 @@ form of the Leibniz pattern used by the $pi$ chapter.
 \leanok
 
 The named Leibniz instance is the representation-chain entry point for the
-π computation:
+\(\pi\) computation:
 
 \lean{ComputableAnalysis.leibnizSeriesCertificate}
 \lean{ComputableAnalysis.leibnizSeriesCertificate_raw_equiv_leibnizAlternatingRaw}
@@ -848,8 +848,8 @@ the cell evaluator explicitly in the target fold:
 
 \lean{ComputableAnalysis.effectiveFiniteWeightedTripleRectangularSum_swap12_raw}
 \lean{ComputableAnalysis.effectiveFiniteWeightedTripleRectangularSum_swap23_raw}
-The unit cube gives a first concrete volume checkpoint: a (2\times2\times2)
-rational partition and constant density one evaluate exactly to (1).
+The unit cube gives a first concrete volume checkpoint: a $2\times2\times2$
+rational partition and constant density one evaluate exactly to $1$.
 
 \lean{ComputableAnalysis.effectiveFiniteWeightedTripleRectangularSum_unitCube_stage}
 The atomic cell calculation is the reusable local rule:
@@ -873,7 +873,7 @@ certificates for free.
 
 The next finite layer is a tail ladder. At selected rational points, the
 exponential evaluator itself certifies the Gaussian bound
-exp(-x^2) <= 1/x^2. Summing those certified boxes gives a rational budget
+$\exp(-x^2) \leq 1/x^2$. Summing those certified boxes gives a rational budget
 for a finite collection of tail cells:
 
 \begin{verbatim}
