@@ -109,8 +109,8 @@ Work in dependency order. Do not add routine examples while an earlier bridge
 is open.
 
 1. **Inverse-arctangent source edge / computable IVT frontier.** Construct a finite inverse plan for
-   `arctanOnUnitRegular` (its interval regularity and separation are already
-   checked).  A sound midpoint kernel may retain its parent when its finite
+   `arctanOnUnitRegular` (its interval regularity, fixed-gap separation, and
+   denominator-selected gap-aware separation are checked).  A sound midpoint kernel may retain its parent when its finite
    target and midpoint boxes overlap, so a total plan needs a third, central
    case: a certified small source bracket compatible with that overlap.  It
    must not claim that strict left/right comparisons are available at every
