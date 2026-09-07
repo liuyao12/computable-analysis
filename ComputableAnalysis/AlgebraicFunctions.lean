@@ -1254,10 +1254,9 @@ theorem squareOnUnit_forward_sqrtRaw_equiv_rat
     intro n
     simpa [X, sqrtRaw, squareOnUnit] using
       sqrtApproxOnUnit_subinterval q hq n
-  apply RealRaw.sameStageOverlap_equiv
+  apply squareOnUnit_continuous.applyRealRaw_equiv_of_applyCandidate_overlap
+    X hX hsource (RealRaw.ofRat q) (RealRaw.ofRat_valid q)
   intro n
-  have hcontains := squareOnUnit_continuous.applyRealRaw_contains_candidate
-    X hX hsource n
   let s : Nat := squareOnUnit_continuous.inputStage X hX n
   have hspec := sqrtApproxOnDomain_spec q (sqrtDomain_of_unit hq) s
   have hcandidate :
@@ -1266,15 +1265,7 @@ theorem squareOnUnit_forward_sqrtRaw_equiv_rat
     change sq (sqrtApproxOnDomain q (sqrtDomain_of_unit hq) s).lo <= q /\
       q <= sq (sqrtApproxOnDomain q (sqrtDomain_of_unit hq) s).hi
     exact ⟨hspec.2.2.1, hspec.2.2.2⟩
-  apply (RealRaw.compareAt_overlap_iff
-    (squareOnUnit_continuous.applyRealRaw X hX hsource)
-    (RealRaw.ofRat q) n n).2
-  simpa [RealRaw.ofRat, QInterval.Overlaps] using
-    (show
-      ((squareOnUnit_continuous.applyRealRaw X hX hsource).compute n).lo <= q /\
-        q <= ((squareOnUnit_continuous.applyRealRaw X hX hsource).compute n).hi
-      from ⟨Rat.le_trans hcontains.1 hcandidate.1,
-        Rat.le_trans hcandidate.2 hcontains.2⟩)
+  simpa [RealRaw.ofRat, QInterval.Overlaps] using hcandidate
 
 /-- The existing rational square-root bisection is a concrete inverse search
 for each exact rational target in the unit range of squaring. -/
