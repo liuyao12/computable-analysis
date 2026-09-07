@@ -3456,27 +3456,6 @@ structure DyadicSquareCircleOverlapFamily
       (rationalCircleSinInterval (dyadicTangentBox S.inverse hk))
       (dyadicNestedRadicalStageSinAt n k)
 
-def DyadicSquareCircleOverlapFamily.of_halfAngle_certificate_family
-    (S : ArctanSinPiConstruction)
-    (ht0 : (S.inverse.tangentAt 0
-      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
-      RealRaw.zero)
-    (hcertificate : forall (n k : Nat) (hk : k < 2 ^ n),
-      0 < k -> CanonicalDyadicHalfAngleCertificate S.inverse n k hk) :
-    DyadicSquareCircleOverlapFamily S where
-  endpoint_zero := ht0
-  positive_overlap := by
-    intro n k hk hpos
-    exact canonical_dyadic_overlap_of_halfAngle_outer_tangent
-      S.inverse hk
-      (hcertificate n k hk hpos).cosineBox_subinterval
-      (hcertificate n k hk hpos).outer_tangent_contains
-      (hcertificate n k hk hpos).sine_nonneg
-      (hcertificate n k hk hpos).cosine_nonneg
-      (hcertificate n k hk hpos).circle_identity
-      (hcertificate n k hk hpos).sine_contains
-      (hcertificate n k hk hpos).cosine_contains
-
 theorem DyadicSquareCircleOverlapFamily.of_branch_certificate_family
     (S : ArctanSinPiConstruction)
     (family : DyadicNestedRadicalBranchCertificateFamily S.inverse) :
@@ -3950,27 +3929,6 @@ theorem CanonicalDyadicHalfAngleCertificateAt.to_square_complement_overlap
       (Nat.le_of_lt hk)).1
     h.cosineBox_subinterval h.sine_contains h.cosine_contains
     h.circle_identity
-
-theorem canonical_dyadic_certificate_at_of_rational_witness_square_overlap
-    (B : IntegralIdentities.ArctanInverseBisection)
-    {precision depth k : Nat} (hk : k < 2 ^ depth)
-    (u : Rat) (hu0 : 0 <= u) (hu1 : u <= 1)
-    (hsine : (dyadicNestedRadicalTableAt precision depth k).1.lo <=
-        rationalCircleSin u /\
-      rationalCircleSin u <=
-        (dyadicNestedRadicalTableAt precision depth k).1.hi)
-    (houter : (dyadicTangentBoxAt B precision depth k hk).ContainsInterval
-      (rationalHalfAngleTangentInterval
-        ((dyadicNestedRadicalTableAt precision depth k).1)
-        { lo := rationalCircleCos u, hi := rationalCircleCos u })) :
-    QInterval.Overlaps
-      (rationalSquareInterval
-        (dyadicNestedRadicalTableAt precision depth k).1)
-      (rationalOneMinusSquareInterval
-        ({ lo := rationalCircleCos u, hi := rationalCircleCos u } : QInterval)) := by
-  let h := canonical_dyadic_certificate_at_of_rational_witness
-    B hk u hu0 hu1 hsine houter
-  exact h.to_square_complement_overlap
 
 /-! The same transport target, named at a dyadic nested-radical sample.  The
 remaining witness-search proof only has to supply the two interval-membership
