@@ -109,7 +109,8 @@ Work in dependency order. Do not add routine examples while an earlier bridge
 is open.
 
 1. **Inverse-arctangent source edge.** Follow one route: construct the
-   effective bisection instance; lift rational chart addition to bounded
+   finite bisection plan for `arctanOnUnitRegular` (its interval regularity
+   and separation are already checked); lift rational chart addition to bounded
    `RealRaw` slopes; prove that the nested-radical table has normalized angle
    `k / 2^n`; then apply constructive inverse uniqueness to inhabit
    `DyadicHalfAngleTangentEquivalenceFamily`.  The remaining stage-box proof
