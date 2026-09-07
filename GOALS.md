@@ -121,7 +121,10 @@ is open.
    has the fixed-stage finite-IVT invariant: every iterate retains its
    oriented endpoint bracket around the target box, including a central
    overlap; each normalized arctangent target supplies the initial full-chart
-   bracket.  At each finite depth the checked dichotomy is now explicit:
+   bracket.  The explicit arctangent interval-image formula also turns each
+   such endpoint bracket into a whole-bracket image enclosure of the target;
+   this uses endpoint coherence, not an assumed global image-monotonicity
+   axiom.  At each finite depth the checked dichotomy is now explicit:
    either all decisions were strict and the bracket has dyadic width, or a
    rational midpoint forward box overlaps the target.  For each fixed source
    interval, the arctangent rectangle-image boxes now also refine across

@@ -387,6 +387,30 @@ theorem angleOnUnitRegularImage_nested
     by grind [Rat.sub_eq_add_neg],
     by grind [Rat.sub_eq_add_neg]⟩
 
+/-- The widened image of a source interval uses exactly the same lower-end
+box as the image of its degenerate lower endpoint.  This explicit endpoint
+coherence is stronger than the generic point-containment contract and is what
+lets the arctangent inverse construction turn endpoint brackets into image
+certificates. -/
+theorem angleOnUnitRegularImage_lower_eq_degenerate
+    (I : QInterval)
+    (hI : subintervalOf I angleOnUnitRegular.lower angleOnUnitRegular.upper)
+    (n : Nat) :
+    (angleOnUnitRegularImage I hI n).lo =
+      (angleOnUnitRegularImage { lo := I.lo, hi := I.lo }
+        ⟨hI.1, Rat.le_refl, Rat.le_trans hI.2.1 hI.2.2⟩ n).lo := by
+  rfl
+
+/-- The analogous explicit coherence at the upper endpoint. -/
+theorem angleOnUnitRegularImage_upper_eq_degenerate
+    (I : QInterval)
+    (hI : subintervalOf I angleOnUnitRegular.lower angleOnUnitRegular.upper)
+    (n : Nat) :
+    (angleOnUnitRegularImage I hI n).hi =
+      (angleOnUnitRegularImage { lo := I.hi, hi := I.hi }
+        ⟨Rat.le_trans hI.1 hI.2.1, Rat.le_refl, hI.2.2⟩ n).hi := by
+  rfl
+
 /-- The interval image has width bounded by twice the source width plus four
 copies of the explicit point-box budget. -/
 private theorem angleOnUnitRegularImage_width_le
@@ -614,6 +638,52 @@ theorem arctanOnUnitRegular_intervalImage_nested
   exact ⟨(angleOnUnitRegularImage_nested I hI n m hnm).1,
     (angleOnUnitRegularImage_nested I hI n m hnm).2.2⟩
 
+/-- The arctangent interval image retains the exact lower endpoint box of its
+degenerate endpoint image.  It follows by positive half-scaling from the
+sector-clock formula. -/
+theorem arctanOnUnitRegular_intervalImage_lower_eq_degenerate
+    (I : QInterval)
+    (hI : subintervalOf I arctanOnUnitRegular.lower
+      arctanOnUnitRegular.upper) (n : Nat) :
+    (arctanOnUnitRegular_intervalRegular.evalInterval I hI n).lo =
+    (arctanOnUnitRegular_intervalRegular.evalInterval
+        { lo := I.lo, hi := I.lo }
+        ⟨hI.1, Rat.le_refl, Rat.le_trans hI.2.1 hI.2.2⟩ n).lo := by
+  let hIBase : subintervalOf I angleOnUnitRegular.lower
+      angleOnUnitRegular.upper := by
+    simpa [arctanOnUnitRegular, FunctionOnInterval.scaleRat] using hI
+  change (QInterval.scaleRat ((1 : Rat) / 2)
+      (angleOnUnitRegularImage I hIBase n)).lo =
+    (QInterval.scaleRat ((1 : Rat) / 2)
+      (angleOnUnitRegularImage { lo := I.lo, hi := I.lo }
+        ⟨hIBase.1, Rat.le_refl, Rat.le_trans hIBase.2.1 hIBase.2.2⟩ n)).lo
+  simp only [QInterval.scaleRat, if_pos (by native_decide : (0 : Rat) <= 1 / 2)]
+  exact congrArg (fun z : Rat => ((1 : Rat) / 2) * z)
+    (angleOnUnitRegularImage_lower_eq_degenerate
+      (I := I) (hI := hIBase) (n := n))
+
+/-- The analogous upper-endpoint coherence for the arctangent image. -/
+theorem arctanOnUnitRegular_intervalImage_upper_eq_degenerate
+    (I : QInterval)
+    (hI : subintervalOf I arctanOnUnitRegular.lower
+      arctanOnUnitRegular.upper) (n : Nat) :
+    (arctanOnUnitRegular_intervalRegular.evalInterval I hI n).hi =
+    (arctanOnUnitRegular_intervalRegular.evalInterval
+        { lo := I.hi, hi := I.hi }
+        ⟨Rat.le_trans hI.1 hI.2.1, Rat.le_refl, hI.2.2⟩ n).hi := by
+  let hIBase : subintervalOf I angleOnUnitRegular.lower
+      angleOnUnitRegular.upper := by
+    simpa [arctanOnUnitRegular, FunctionOnInterval.scaleRat] using hI
+  change (QInterval.scaleRat ((1 : Rat) / 2)
+      (angleOnUnitRegularImage I hIBase n)).hi =
+    (QInterval.scaleRat ((1 : Rat) / 2)
+      (angleOnUnitRegularImage { lo := I.hi, hi := I.hi }
+        ⟨Rat.le_trans hIBase.1 hIBase.2.1, Rat.le_refl, hIBase.2.2⟩ n)).hi
+  simp only [QInterval.scaleRat, if_pos (by native_decide : (0 : Rat) <= 1 / 2)]
+  exact congrArg (fun z : Rat => ((1 : Rat) / 2) * z)
+    (angleOnUnitRegularImage_upper_eq_degenerate
+      (I := I) (hI := hIBase) (n := n))
+
 /-- A later witnessed image--target intersection is still witnessed at every
 earlier common stage.  Both sides are finite rational enclosures which only
 shrink with the stage, so this transports an overlap without extracting an
@@ -638,6 +708,26 @@ theorem arctanOnUnitRegular_intervalImage_overlaps_raw_of_later
 def arctanOnUnitRegular_continuous : ContinuousFunctionOnInterval where
   function := arctanOnUnitRegular
   regular := arctanOnUnitRegular_intervalRegular
+
+/-- On the canonical arctangent branch, an oriented finite bisection bracket
+encloses its target in the interval image of the entire source bracket.
+Unlike the generic interval-regularity interface, this uses the checked
+endpoint coherence of the explicit sector-area evaluator. -/
+theorem arctanOnUnitRegular_bracket_image_contains_target
+    (Y I : QInterval)
+    (hI : subintervalOf I arctanOnUnitRegular.lower
+      arctanOnUnitRegular.upper) (n : Nat)
+    (hbracket : gapAwareTargetBisectionBracket
+      arctanOnUnitRegular_continuous Y I hI n) :
+    (arctanOnUnitRegular_intervalRegular.evalInterval I hI n).ContainsInterval
+      Y := by
+  unfold gapAwareTargetBisectionBracket at hbracket
+  exact ⟨by
+      rw [arctanOnUnitRegular_intervalImage_lower_eq_degenerate]
+      exact hbracket.1,
+    by
+      rw [arctanOnUnitRegular_intervalImage_upper_eq_degenerate]
+      exact hbracket.2⟩
 
 theorem arctanOnUnitRegular_nondecreasing :
     NondecreasingOnInterval arctanOnUnitRegular := by
