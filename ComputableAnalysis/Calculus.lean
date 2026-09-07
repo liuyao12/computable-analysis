@@ -15027,6 +15027,79 @@ theorem gapAwareTargetBisectionFixedIterate_subinterval
       F.function.lower F.function.upper :=
   (gapAwareTargetBisectionFixedIterateWithProof F Y I hI precision n).2
 
+/-- A finite target search either still carries an oriented endpoint bracket,
+or has stopped at a concrete rational midpoint whose forward box met the
+target.  The two cases must remain distinct: a midpoint-overlap witness is
+not automatically a new endpoint bracket at a sharper rectangle stage. -/
+inductive GapAwareTargetBisectionSearchState
+    (F : ContinuousFunctionOnInterval) (Y : QInterval) where
+  | bracket : {J : QInterval // subintervalOf J F.function.lower F.function.upper} ->
+      GapAwareTargetBisectionSearchState F Y
+  | midpoint : {J : QInterval // subintervalOf J F.function.lower F.function.upper} ->
+      GapAwareTargetBisectionSearchState F Y
+
+namespace GapAwareTargetBisectionSearchState
+
+def source {F : ContinuousFunctionOnInterval} {Y : QInterval} :
+    GapAwareTargetBisectionSearchState F Y -> QInterval
+  | .bracket J => J.1
+  | .midpoint J => J.1
+
+theorem source_subinterval
+    {F : ContinuousFunctionOnInterval} {Y : QInterval}
+    (state : GapAwareTargetBisectionSearchState F Y) :
+    subintervalOf state.source F.function.lower F.function.upper := by
+  cases state with
+  | bracket J => exact J.2
+  | midpoint J => exact J.2
+
+end GapAwareTargetBisectionSearchState
+
+/-- Literal finite conservative search with a terminal midpoint state.  The
+only branches are decidable rational comparisons of finite interval boxes;
+once the central-overlap branch is reached, later requested depths preserve
+that concrete witness rather than treating it as an endpoint bracket. -/
+def gapAwareTargetBisectionSearchWithProof
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision : Nat) : Nat -> GapAwareTargetBisectionSearchState F Y
+  | 0 => .bracket ⟨I, hI⟩
+  | n + 1 =>
+      match gapAwareTargetBisectionSearchWithProof F Y I hI precision n with
+      | .midpoint P => .midpoint P
+      | .bracket P =>
+          let M : QInterval := { lo := P.1.midpoint, hi := P.1.midpoint }
+          have hM : subintervalOf M F.function.lower F.function.upper :=
+            ⟨Rat.le_trans P.2.1 (QInterval.midpoint_mem P.2.2.1).1,
+              Rat.le_refl,
+              Rat.le_trans (QInterval.midpoint_mem P.2.2.1).2 P.2.2.2⟩
+          let V := F.regular.evalInterval M hM precision
+          if hbelow : V.hi < Y.lo then
+            .bracket ⟨{ lo := P.1.midpoint, hi := P.1.hi },
+              ⟨Rat.le_trans P.2.1 (QInterval.midpoint_mem P.2.2.1).1,
+                (QInterval.midpoint_mem P.2.2.1).2, P.2.2.2⟩⟩
+          else if habove : Y.hi < V.lo then
+            .bracket ⟨{ lo := P.1.lo, hi := P.1.midpoint },
+              ⟨P.2.1, (QInterval.midpoint_mem P.2.2.1).1,
+                Rat.le_trans (QInterval.midpoint_mem P.2.2.1).2 P.2.2.2⟩⟩
+          else
+            .midpoint ⟨M, hM⟩
+
+/-- The source interval delivered by the terminal-aware finite search. -/
+def gapAwareTargetBisectionSearch
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision steps : Nat) : QInterval :=
+  (gapAwareTargetBisectionSearchWithProof F Y I hI precision steps).source
+
+theorem gapAwareTargetBisectionSearch_subinterval
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision steps : Nat) :
+    subintervalOf (gapAwareTargetBisectionSearch F Y I hI precision steps)
+      F.function.lower F.function.upper :=
+  (gapAwareTargetBisectionSearchWithProof F Y I hI precision steps).source_subinterval
+
 theorem gapAwareTargetBisectionFixedIterate_width_le
     (F : ContinuousFunctionOnInterval) (Y I : QInterval)
     (hI : subintervalOf I F.function.lower F.function.upper)
