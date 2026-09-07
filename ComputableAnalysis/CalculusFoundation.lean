@@ -19,14 +19,9 @@ import ComputableAnalysis.PeanoBaker
 import ComputableAnalysis.GeometricRotationODE
 import ComputableAnalysis.RotationPeanoBakerBridge
 import ComputableAnalysis.SectorAreaReparametrization
-import ComputableAnalysis.FiniteNBallVolume
-import ComputableAnalysis.FiniteGaussianIntegral
 import ComputableAnalysis.ComplexCircleBridge
 import ComputableAnalysis.RationalCircle
 import ComputableAnalysis.ComplexPathIntegral
-import ComputableAnalysis.FiniteComplexPathCertificate
-import ComputableAnalysis.IrrationalSqrt
-import ComputableAnalysis.SqrtTwoDescent
 
 /-!
 # Computable calculus foundation
