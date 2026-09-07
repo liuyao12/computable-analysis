@@ -63,7 +63,6 @@ import ComputableAnalysis.Extension
 import ComputableAnalysis.FinitePolynomialCalculus
 import ComputableAnalysis.FiniteExponentialTaylor
 import ComputableAnalysis.FiniteExponentialTaylorExample
-import ComputableAnalysis.FinitePolynomialIntegrationByParts
 import ComputableAnalysis.FirstYearCalculus
 import ComputableAnalysis.FTC
 import ComputableAnalysis.FTA
