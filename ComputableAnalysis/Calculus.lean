@@ -15454,6 +15454,81 @@ theorem gapAwareTargetBisectionFixedIterate_width_eq_div_pow_of_decided
       rw [Rat.div_def, Rat.div_def]
       grind [Rat.mul_assoc, Rat.mul_comm]
 
+/-- Finite constructive-IVT dichotomy for conservative midpoint search.
+At a chosen rational evaluation stage, either every midpoint decision is
+strict and the target bracket has the expected dyadic width, or a concrete
+rational midpoint already has a certified forward interval overlapping the
+target box.  This is the exact finite alternative used by a future
+cross-stage inverse algorithm; it does not postulate an attained root. -/
+theorem gapAwareTargetBisectionFixedIterate_strict_or_midpoint_overlap
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision n : Nat)
+    (hbracket : gapAwareTargetBisectionBracket F Y I hI precision) :
+    ((forall k, k < n ->
+        gapAwareTargetBisectionFixedDecision F Y I hI precision k) /\
+      gapAwareTargetBisectionBracket F Y
+        (gapAwareTargetBisectionFixedIterate F Y I hI precision n)
+        (gapAwareTargetBisectionFixedIterate_subinterval F Y I hI precision n)
+        precision /\
+      (gapAwareTargetBisectionFixedIterate F Y I hI precision n).width =
+        I.width / (2 ^ n : Rat)) \/
+      ∃ k, k < n /\ QInterval.Overlaps
+        (gapAwareTargetBisectionMidpointRange F
+          (gapAwareTargetBisectionFixedIterate F Y I hI precision k)
+          (gapAwareTargetBisectionFixedIterate_subinterval F Y I hI precision k)
+          precision) Y := by
+  induction n with
+  | zero =>
+      left
+      refine ⟨(by intro k hk; omega),
+        gapAwareTargetBisectionFixedIterate_preserves_bracket
+          F Y I hI precision 0 hbracket, ?_⟩
+      exact gapAwareTargetBisectionFixedIterate_width_eq_div_pow_of_decided
+        F Y I hI precision 0 (by intro k hk; omega)
+  | succ n ih =>
+      rcases ih with ⟨hprevious, _, _⟩ | ⟨k, hk, hoverlap⟩
+      · by_cases hcurrent :
+          gapAwareTargetBisectionFixedDecision F Y I hI precision n
+        · left
+          have hall : forall k, k < n + 1 ->
+              gapAwareTargetBisectionFixedDecision F Y I hI precision k := by
+            intro k hk
+            by_cases heq : k = n
+            · simpa [heq] using hcurrent
+            · exact hprevious k (by omega)
+          exact ⟨hall,
+            gapAwareTargetBisectionFixedIterate_preserves_bracket
+              F Y I hI precision (n + 1) hbracket,
+            gapAwareTargetBisectionFixedIterate_width_eq_div_pow_of_decided
+              F Y I hI precision (n + 1) hall⟩
+        · right
+          let P := gapAwareTargetBisectionFixedIterateWithProof
+            F Y I hI precision n
+          have hneither :
+              ¬(gapAwareTargetBisectionMidpointRange F P.1 P.2 precision).hi < Y.lo /\
+                ¬Y.hi < (gapAwareTargetBisectionMidpointRange F P.1 P.2 precision).lo := by
+            change ¬(
+              (F.regular.evalInterval
+                { lo := P.1.midpoint, hi := P.1.midpoint }
+                ⟨Rat.le_trans P.2.1 (QInterval.midpoint_mem P.2.2.1).1,
+                  Rat.le_refl,
+                  Rat.le_trans (QInterval.midpoint_mem P.2.2.1).2 P.2.2.2⟩
+                precision).hi < Y.lo \/
+              Y.hi < (F.regular.evalInterval
+                { lo := P.1.midpoint, hi := P.1.midpoint }
+                ⟨Rat.le_trans P.2.1 (QInterval.midpoint_mem P.2.2.1).1,
+                  Rat.le_refl,
+                  Rat.le_trans (QInterval.midpoint_mem P.2.2.1).2 P.2.2.2⟩
+                precision).lo) at hcurrent
+            exact not_or.mp hcurrent
+          refine ⟨n, Nat.lt_succ_self n, ?_⟩
+          change QInterval.Overlaps
+            (gapAwareTargetBisectionMidpointRange F P.1 P.2 precision) Y
+          exact gapAwareTargetBisectionMidpointRange_overlaps_target_of_not_separated
+            F Y P.1 P.2 precision hneither.1 hneither.2
+      · exact Or.inr ⟨k, by omega, hoverlap⟩
+
 structure GapAwareInRangeRaw
     (I : GapAwareInvertibleFunctionOnInterval) where
   value : RealRaw
