@@ -729,6 +729,27 @@ theorem arctanOnUnitRegular_bracket_image_contains_target
       rw [arctanOnUnitRegular_intervalImage_upper_eq_degenerate]
       exact hbracket.2⟩
 
+/-- Every finite conservative bisection iterate on the canonical arctangent
+branch still has an interval image enclosing the target.  The statement is
+finite and executable: it follows by preserving the endpoint bracket at the
+chosen rectangle stage, then applying the explicit endpoint-coherence lemma. -/
+theorem arctanOnUnitRegular_fixedBisection_image_contains_target
+    (Y I : QInterval)
+    (hI : subintervalOf I arctanOnUnitRegular.lower
+      arctanOnUnitRegular.upper)
+    (precision steps : Nat)
+    (hbracket : gapAwareTargetBisectionBracket
+      arctanOnUnitRegular_continuous Y I hI precision) :
+    (arctanOnUnitRegular_intervalRegular.evalInterval
+      (gapAwareTargetBisectionFixedIterate
+        arctanOnUnitRegular_continuous Y I hI precision steps)
+      (gapAwareTargetBisectionFixedIterate_subinterval
+        arctanOnUnitRegular_continuous Y I hI precision steps)
+      precision).ContainsInterval Y := by
+  apply arctanOnUnitRegular_bracket_image_contains_target Y
+  exact gapAwareTargetBisectionFixedIterate_preserves_bracket
+    arctanOnUnitRegular_continuous Y I hI precision steps hbracket
+
 theorem arctanOnUnitRegular_nondecreasing :
     NondecreasingOnInterval arctanOnUnitRegular := by
   intro x y hx hy hxy n

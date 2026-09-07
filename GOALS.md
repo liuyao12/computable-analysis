@@ -124,7 +124,8 @@ is open.
    bracket.  The explicit arctangent interval-image formula also turns each
    such endpoint bracket into a whole-bracket image enclosure of the target;
    this uses endpoint coherence, not an assumed global image-monotonicity
-   axiom.  At each finite depth the checked dichotomy is now explicit:
+   axiom, and therefore applies to every fixed finite bisection iterate.
+   At each finite depth the checked dichotomy is now explicit:
    either all decisions were strict and the bracket has dyadic width, or a
    rational midpoint forward box overlaps the target.  For each fixed source
    interval, the arctangent rectangle-image boxes now also refine across
