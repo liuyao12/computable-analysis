@@ -1550,6 +1550,18 @@ theorem overlaps_of_contains_left {outer inner target : QInterval}
   exact ⟨Rat.le_trans hcontains.1 hoverlaps.1,
     Rat.le_trans hoverlaps.2 hcontains.2⟩
 
+/-- A finite overlap remains valid after either enclosure is widened.  This is
+the elementary transport step for comparing a later, sharper certificate with
+an earlier one; it does not select a limiting point. -/
+theorem overlaps_of_contains_both
+    {outerA innerA outerB innerB : QInterval}
+    (hA : outerA.ContainsInterval innerA)
+    (hB : outerB.ContainsInterval innerB)
+    (hoverlaps : innerA.Overlaps innerB) : outerA.Overlaps outerB := by
+  unfold ContainsInterval Overlaps at *
+  exact ⟨Rat.le_trans hA.1 (Rat.le_trans hoverlaps.1 hB.2),
+    Rat.le_trans hB.1 (Rat.le_trans hoverlaps.2 hA.2)⟩
+
 /-- Adding two enclosing intervals still encloses the sum of the inner
 intervals.  This is the finite algebra used to assemble cellwise FTC bounds. -/
 theorem addInterval_contains {A B C D : QInterval}

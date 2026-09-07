@@ -594,6 +594,47 @@ def arctanOnUnitRegular_intervalRegular :
     exact QInterval.scaleRat_contains_of_nonneg
       (by native_decide : (0 : Rat) <= (1 : Rat) / 2) hbase
 
+/-- The finite interval images for the undoubled arctangent branch refine at
+a fixed rational source interval.  This is the forward certificate in the
+same normalization used by inverse bisection, obtained from the sector-clock
+images by positive half-scaling. -/
+theorem arctanOnUnitRegular_intervalImage_nested
+    (I : QInterval)
+    (hI : subintervalOf I arctanOnUnitRegular.lower
+      arctanOnUnitRegular.upper) :
+    forall n m, n <= m ->
+      (arctanOnUnitRegular_intervalRegular.evalInterval I hI n).ContainsInterval
+        (arctanOnUnitRegular_intervalRegular.evalInterval I hI m) := by
+  intro n m hnm
+  change (QInterval.scaleRat ((1 : Rat) / 2)
+      (angleOnUnitRegularImage I hI n)).ContainsInterval
+    (QInterval.scaleRat ((1 : Rat) / 2)
+      (angleOnUnitRegularImage I hI m))
+  apply QInterval.scaleRat_contains_of_nonneg (by native_decide)
+  exact ⟨(angleOnUnitRegularImage_nested I hI n m hnm).1,
+    (angleOnUnitRegularImage_nested I hI n m hnm).2.2⟩
+
+/-- A later witnessed image--target intersection is still witnessed at every
+earlier common stage.  Both sides are finite rational enclosures which only
+shrink with the stage, so this transports an overlap without extracting an
+inverse value or appealing to completeness. -/
+theorem arctanOnUnitRegular_intervalImage_overlaps_raw_of_later
+    (I : QInterval)
+    (hI : subintervalOf I arctanOnUnitRegular.lower
+      arctanOnUnitRegular.upper)
+    (y : RealRaw) (hy : y.Valid)
+    {n m : Nat} (hnm : n <= m)
+    (hoverlaps : QInterval.Overlaps
+      (arctanOnUnitRegular_intervalRegular.evalInterval I hI m)
+      (y.compute m)) :
+    QInterval.Overlaps
+      (arctanOnUnitRegular_intervalRegular.evalInterval I hI n)
+      (y.compute n) := by
+  apply QInterval.overlaps_of_contains_both
+    (arctanOnUnitRegular_intervalImage_nested I hI n m hnm)
+  · exact ⟨(hy.2.1 n m hnm).1, (hy.2.1 n m hnm).2.2⟩
+  · exact hoverlaps
+
 def arctanOnUnitRegular_continuous : ContinuousFunctionOnInterval where
   function := arctanOnUnitRegular
   regular := arctanOnUnitRegular_intervalRegular
