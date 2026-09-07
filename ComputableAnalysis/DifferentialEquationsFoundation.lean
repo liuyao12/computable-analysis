@@ -6,7 +6,6 @@ import ComputableAnalysis.RotationPeanoBakerBridge
 import ComputableAnalysis.StableRotationDerivative
 import ComputableAnalysis.RotationCalculus
 import ComputableAnalysis.RotationDerivative
-import ComputableAnalysis.FiniteRotationQuarterTurnExample
 
 /-!
 # Finite differential-equations foundation

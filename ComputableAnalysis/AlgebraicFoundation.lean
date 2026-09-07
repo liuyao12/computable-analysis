@@ -5,9 +5,7 @@ import ComputableAnalysis.FTA
 import ComputableAnalysis.FiniteFTASubdivision
 import ComputableAnalysis.FiniteQuadraticRootInterval
 import ComputableAnalysis.FiniteFTARootExclusion
-import ComputableAnalysis.FiniteFTAIsolationExample
 import ComputableAnalysis.FiniteDeflationChain
-import ComputableAnalysis.FiniteDeflationExample
 import ComputableAnalysis.FiniteDescartesInterface
 
 /-!
