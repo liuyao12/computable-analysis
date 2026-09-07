@@ -578,6 +578,38 @@ def arctanOnUnitRegular_invertible : InvertibleFunctionOnInterval where
   separation := arctanOnUnitRegular_effectiveInverseSeparation
   orientation := trivial
 
+/-- The same explicit rectangle separation is gap-aware: for a particular
+rational source gap, its denominator selects a finite output stage that
+strictly separates the two arctangent boxes.  This is the branch contract
+consumed by finite target-local inverse searches; it is not yet an inverse
+algorithm or an equivalence theorem for every target. -/
+def arctanOnUnitRegular_gapAwareSeparation :
+    GapAwareInverseSeparation arctanOnUnitRegular where
+  kind := .nondecreasing
+  outputPrecision := fun {x y} _ _ => (y - x).den
+  separated := by
+    intro x y hx hy hxy n
+    have hgap : 0 < y - x := (Rat.lt_iff_sub_pos x y).mp hxy
+    have hden : 1 / ((((y - x).den + 1 : Nat) : Rat)) <= y - x := by
+      simpa using one_div_den_succ_le_of_pos hgap
+    change (arctanOnUnitRegular.compute x hx ((y - x).den)).hi <
+      (arctanOnUnitRegular.compute y hy ((y - x).den)).lo
+    rw [arctanOnUnitRegular_compute, arctanOnUnitRegular_compute]
+    apply ArctanGeometry.arctanIntegralRectangleCompute_boxes_strictly_separated
+      hx.1 hx.2 hy.1 hy.2
+    grind [Rat.sub_eq_add_neg]
+
+/-- Gap-aware presentation of the canonical arctangent branch. -/
+def arctanOnUnitRegular_gapAwareInvertible :
+    GapAwareInvertibleFunctionOnInterval where
+  continuous := arctanOnUnitRegular_continuous
+  source_ordered := by
+    change (0 : Rat) <= 1
+    native_decide
+  monotone := arctanOnUnitRegular_monotone
+  separation := arctanOnUnitRegular_gapAwareSeparation
+  orientation := trivial
+
 /-- The canonical arctangent separation schedule resolves every positive
 rational source gap.  Choosing the denominator of the requested gap is a
 literal finite witness; no Archimedean property of completed reals is used. -/

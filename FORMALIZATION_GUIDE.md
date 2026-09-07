@@ -136,7 +136,9 @@ application.
 
 When the output precision needed to distinguish two source points depends on
 their actual rational gap, use `GapAwareInvertibleFunctionOnInterval` and a
-`GapAwareInverseBisectionSearch`. Its public result is
+`GapAwareInverseBisectionSearch`. The canonical arctangent branch is exposed
+as `arctanOnUnitRegular_gapAwareInvertible`: the denominator of the source
+gap selects its separating rectangle stage. Its public result is
 `GapAwareInverseBisectionSearch.preimage`, with checked validity,
 source-domain containment, and finite forward-image/target overlap. The
 corresponding `GapAwareInverseRaw.apply` exposes the same three facts for a
