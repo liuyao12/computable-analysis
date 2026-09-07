@@ -214,4 +214,93 @@ def finiteInverseSearchCertificate
   lower_bracket := lower_bracket
   upper_bracket := upper_bracket
 
+/-- A finite grid cannot jump over a target interval when each successive
+image increment is no wider than that interval.  This is the discrete
+crossing principle behind constructive inverse approximation: it is entirely
+rational and contains no appeal to an attained intermediate value. -/
+theorem finiteGrid_interval_crossing
+    {f : Rat -> Rat} {v : Nat -> Rat} {N : Nat}
+    {lo hi : Rat} (hN : 0 < N)
+    (hlo : 0 <= lo) (hhi : hi <= 1) (hlohi : lo <= hi)
+    (hstart : f (v 0) = 0) (hend : f (v N) = 1)
+    (hstep : forall k, k < N ->
+      f (v (k + 1)) - f (v k) <= hi - lo) :
+    exists k, k <= N /\ lo <= f (v k) /\ f (v k) <= hi := by
+  by_cases hhit : exists k, k <= N /\ lo <= f (v k) /\ f (v k) <= hi
+  · exact hhit
+  · exfalso
+    have hno : forall k, k <= N ->
+        ¬(lo <= f (v k) /\ f (v k) <= hi) := by
+      intro k hk hinside
+      exact hhit ⟨k, hk, hinside.1, hinside.2⟩
+    have hbelow : forall k, k <= N -> f (v k) < lo := by
+      intro k hk
+      induction k with
+      | zero =>
+          have hn := hno 0 (by omega)
+          rw [hstart] at hn ⊢
+          have hnot : ¬lo <= (0 : Rat) := by
+            intro hzero
+            apply hn
+            exact ⟨hzero, by grind⟩
+          exact Rat.not_le.mp hnot
+      | succ k ih =>
+          have hklt : k < N := by omega
+          have hprev := ih (by omega)
+          have hs := hstep k hklt
+          have hupp : f (v (k + 1)) < hi := by
+            have hstrict : f (v k) + (hi - lo) < hi := by grind
+            grind [Rat.sub_eq_add_neg]
+          have hn := hno (k + 1) hk
+          have hnot : ¬lo <= f (v (k + 1)) := by
+            intro hlow
+            apply hn
+            exact ⟨hlow, Rat.le_of_lt hupp⟩
+          exact Rat.not_le.mp hnot
+    have hfinal := hbelow N (by omega)
+    rw [hend] at hfinal
+    exact by grind
+
+/-- Endpoint-parametric form of `finiteGrid_interval_crossing`, suitable for
+interval algorithms whose endpoint enclosures are not normalized to zero and
+one. -/
+theorem finiteGrid_interval_crossing_between
+    {f : Rat -> Rat} {v : Nat -> Rat} {N : Nat}
+    {lo hi : Rat} (hN : 0 < N) (hlohi : lo <= hi)
+    (hstart : f (v 0) <= hi) (hend : lo <= f (v N))
+    (hstep : forall k, k < N ->
+      f (v (k + 1)) - f (v k) <= hi - lo) :
+    exists k, k <= N /\ lo <= f (v k) /\ f (v k) <= hi := by
+  by_cases hhit : exists k, k <= N /\ lo <= f (v k) /\ f (v k) <= hi
+  · exact hhit
+  · exfalso
+    have hno : forall k, k <= N ->
+        ¬(lo <= f (v k) /\ f (v k) <= hi) := by
+      intro k hk hbad
+      exact hhit ⟨k, hk, hbad.1, hbad.2⟩
+    have hbelow : forall k, k <= N -> f (v k) < lo := by
+      intro k hk
+      induction k with
+      | zero =>
+          have hn := hno 0 (by omega)
+          have hnot : ¬lo <= f (v 0) := by
+            intro hlow
+            apply hn
+            exact ⟨hlow, Rat.le_trans hstart (by grind)⟩
+          exact Rat.not_le.mp hnot
+      | succ k ih =>
+          have hklt : k < N := by omega
+          have hprev := ih (by omega)
+          have hs := hstep k hklt
+          have hupp : f (v (k + 1)) < hi := by
+            have hstrict : f (v k) + (hi - lo) < hi := by grind
+            grind [Rat.sub_eq_add_neg]
+          have hn := hno (k + 1) hk
+          have hnot : ¬lo <= f (v (k + 1)) := by
+            intro hlow
+            apply hn
+            exact ⟨hlow, Rat.le_of_lt hupp⟩
+          exact Rat.not_le.mp hnot
+    exact (Rat.not_lt.mpr hend) (hbelow N (by omega))
+
 end ComputableAnalysis

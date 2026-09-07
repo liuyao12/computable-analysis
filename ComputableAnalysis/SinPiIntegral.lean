@@ -3,6 +3,7 @@ import ComputableAnalysis.AlgebraicFunctions
 import ComputableAnalysis.CauchyPi
 import ComputableAnalysis.Calculus
 import ComputableAnalysis.TrigSpecialValues
+import ComputableAnalysis.FiniteInverseSearchInterface
 
 /-!
 # The half-interval integral of `sin (pi * x)`
@@ -1128,92 +1129,6 @@ theorem rationalTangentWitnessSearch_overlap_of_success
   exact rationalCircleSinInterval_overlap_of_tangent_witness
     hS hU u ⟨hw.1, hw.2.1⟩ ⟨hw.2.2.1, hw.2.2.2⟩
 
-theorem rationalGrid_interval_crossing
-    {f : Rat -> Rat} {v : Nat -> Rat} {N : Nat}
-    {lo hi : Rat} (hN : 0 < N)
-    (hlo : 0 <= lo) (hhi : hi <= 1) (hlohi : lo <= hi)
-    (hstart : f (v 0) = 0) (hend : f (v N) = 1)
-    (hstep : forall k, k < N ->
-      f (v (k + 1)) - f (v k) <= hi - lo) :
-    exists k, k <= N /\ lo <= f (v k) /\ f (v k) <= hi := by
-  by_cases hhit : exists k, k <= N /\ lo <= f (v k) /\ f (v k) <= hi
-  · exact hhit
-  · exfalso
-    have hnone := hhit
-    have hno : forall k, k <= N ->
-        ¬(lo <= f (v k) /\ f (v k) <= hi) := by
-      intro k hk
-      intro hhit
-      exact hnone ⟨k, hk, hhit.1, hhit.2⟩
-    have hbelow : forall k, k <= N -> f (v k) < lo := by
-      intro k hk
-      induction k with
-      | zero =>
-          have hn := hno 0 (by omega)
-          rw [hstart] at hn ⊢
-          have hnot : ¬lo <= (0 : Rat) := by
-            intro hzero
-            apply hn
-            exact ⟨hzero, by grind⟩
-          exact Rat.not_le.mp hnot
-      | succ k ih =>
-          have hklt : k < N := by omega
-          have hprev := ih (by omega)
-          have hs := hstep k hklt
-          have hupp : f (v (k + 1)) < hi := by
-            have hstrict : f (v k) + (hi - lo) < hi := by
-              grind
-            grind [Rat.sub_eq_add_neg]
-          have hn := hno (k + 1) hk
-          have hnot : ¬lo <= f (v (k + 1)) := by
-            intro hlow
-            apply hn
-            exact ⟨hlow, Rat.le_of_lt hupp⟩
-          exact Rat.not_le.mp hnot
-    have hfinal := hbelow N (by omega)
-    rw [hend] at hfinal
-    exact by grind
-
-/-! Endpoint-parametric version of the finite crossing argument. -/
-theorem rationalGrid_interval_crossing_between
-    {f : Rat -> Rat} {v : Nat -> Rat} {N : Nat}
-    {lo hi : Rat} (hN : 0 < N) (hlohi : lo <= hi)
-    (hstart : f (v 0) <= hi) (hend : lo <= f (v N))
-    (hstep : forall k, k < N ->
-      f (v (k + 1)) - f (v k) <= hi - lo) :
-    exists k, k <= N /\ lo <= f (v k) /\ f (v k) <= hi := by
-  by_cases hhit : exists k, k <= N /\ lo <= f (v k) /\ f (v k) <= hi
-  · exact hhit
-  · exfalso
-    have hno : forall k, k <= N ->
-        ¬(lo <= f (v k) /\ f (v k) <= hi) := by
-      intro k hk hbad
-      exact hhit ⟨k, hk, hbad.1, hbad.2⟩
-    have hbelow : forall k, k <= N -> f (v k) < lo := by
-      intro k hk
-      induction k with
-      | zero =>
-          have hn := hno 0 (by omega)
-          have hnot : ¬lo <= f (v 0) := by
-            intro hlow
-            apply hn
-            exact ⟨hlow, Rat.le_trans hstart (by grind)⟩
-          exact Rat.not_le.mp hnot
-      | succ k ih =>
-          have hklt : k < N := by omega
-          have hprev := ih (by omega)
-          have hs := hstep k hklt
-          have hupp : f (v (k + 1)) < hi := by
-            have hstrict : f (v k) + (hi - lo) < hi := by grind
-            grind [Rat.sub_eq_add_neg]
-          have hn := hno (k + 1) hk
-          have hnot : ¬lo <= f (v (k + 1)) := by
-            intro hlow
-            apply hn
-            exact ⟨hlow, Rat.le_of_lt hupp⟩
-          exact Rat.not_le.mp hnot
-    exact (Rat.not_lt.mpr hend) (hbelow N (by omega))
-
 theorem rationalCircleSin_bounds {u : Rat} (hu : 0 <= u) (hu1 : u <= 1) :
     0 <= rationalCircleSin u /\ rationalCircleSin u <= 1 := by
   have hzero : rationalCircleSin (0 : Rat) = 0 := by
@@ -1548,7 +1463,7 @@ theorem rationalTangentWitnessBoxSearch_complete_of_overlap
       rw [Rat.div_def, Rat.div_def]
       grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
     exact Rat.le_trans hdiff' hmesh'
-  obtain ⟨k, hk, hlow, hhigh⟩ := rationalGrid_interval_crossing_between
+  obtain ⟨k, hk, hlow, hhigh⟩ := finiteGrid_interval_crossing_between
     hN hS.2.1 hstart hend hstep
   have hmem : v k ∈ rationalTangentWitnessBoxGrid U m := by
     unfold rationalTangentWitnessBoxGrid
@@ -1761,7 +1676,7 @@ theorem rationalCircleSin_dyadic_grid_hit
             2 / (N : Rat) := by grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
         _ <= S.hi - S.lo := hmesh
     exact Rat.le_trans hdiff' hmesh'
-  have hcross := rationalGrid_interval_crossing
+  have hcross := finiteGrid_interval_crossing
     (f := rationalCircleSin) (v := v) (lo := S.lo) (hi := S.hi)
     hN hS.1 hS.2.2 hS.2.1 hstart hend hstep
   simpa [v, d] using hcross
