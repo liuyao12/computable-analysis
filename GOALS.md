@@ -108,7 +108,7 @@ not re-exported by the canonical root.
 Work in dependency order. Do not add routine examples while an earlier bridge
 is open.
 
-1. **Inverse-arctangent source edge.** Construct a finite inverse plan for
+1. **Inverse-arctangent source edge / computable IVT frontier.** Construct a finite inverse plan for
    `arctanOnUnitRegular` (its interval regularity and separation are already
    checked).  A sound midpoint kernel may retain its parent when its finite
    target and midpoint boxes overlap, so a total plan needs a third, central

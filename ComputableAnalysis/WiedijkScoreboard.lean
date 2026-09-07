@@ -60,8 +60,8 @@ def wiedijkAnalysisEntries : List WiedijkEntry := [
     "finite derivative/average enclosure; no attained intermediate point required"⟩,
   ⟨76, "Fourier series", .frontier,
     "finite transforms plus effective tails and reconstruction certificates"⟩,
-  ⟨79, "Intermediate value theorem", .checked,
-    "branch-local bisection/inverse search for represented targets"⟩,
+  ⟨79, "Intermediate value theorem", .frontier,
+    "gap-aware target-local searches; all-stage arctangent inverse branch remains open"⟩,
   ⟨90, "Stirling's formula", .frontier,
     "computable asymptotic ratio with a requested-precision certificate"⟩
 ]
