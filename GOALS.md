@@ -135,7 +135,9 @@ is open.
    image at every chosen depth (using the final strict bracket or the central
    rational midpoint).  The literal finite search now keeps those outcomes
    distinct, with a checked invariant: it either retains an endpoint bracket
-   or stops at a concrete midpoint-overlap witness.  The remaining work is
+   or stops at a concrete midpoint-overlap witness; the canonical arctangent
+   branch lifts either outcome to a checked forward-image/target overlap.
+   The remaining work is
    to synchronize these fixed-stage brackets
    across output stages and prove their source widths shrink.  Then lift rational chart
    addition to bounded `RealRaw` slopes;

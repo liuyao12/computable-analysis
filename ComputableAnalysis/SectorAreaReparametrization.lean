@@ -809,6 +809,53 @@ theorem arctanOnUnitRegular_finite_narrow_image_overlap
         (y.compute precision)
       exact hoverlap
 
+/-- A certified terminal search state on the arctangent branch has a forward
+image overlapping its target.  This is a small case split: a bracket uses the
+explicit endpoint-image theorem, while a midpoint state already contains the
+required finite overlap. -/
+theorem arctanOnUnitRegular_searchState_image_overlaps
+    (Y : QInterval) (hY : 0 <= Y.width) (precision : Nat)
+    (state : GapAwareTargetBisectionSearchState
+      arctanOnUnitRegular_continuous Y)
+    (hstate : state.Certified arctanOnUnitRegular_continuous Y precision) :
+    QInterval.Overlaps
+      (arctanOnUnitRegular_intervalRegular.evalInterval state.source
+        state.source_subinterval precision) Y := by
+  change QInterval.Overlaps
+    (arctanOnUnitRegular_continuous.regular.evalInterval state.source
+      state.source_subinterval precision) Y
+  cases state with
+  | bracket J =>
+      exact QInterval.overlaps_of_contains_right
+        (arctanOnUnitRegular_bracket_image_contains_target Y J.1 J.2 precision
+          (by simpa [GapAwareTargetBisectionSearchState.Certified] using hstate)) hY
+  | midpoint J =>
+      simpa [GapAwareTargetBisectionSearchState.Certified,
+        GapAwareTargetBisectionSearchState.source] using hstate
+
+/-- The literal terminal-aware finite search is a certified one-stage
+arctangent inverse locator: its returned rational source box has an image
+overlapping the target box. -/
+theorem arctanOnUnitRegular_search_image_overlaps
+    (Y I : QInterval) (hY : 0 <= Y.width)
+    (hI : subintervalOf I arctanOnUnitRegular.lower
+      arctanOnUnitRegular.upper)
+    (precision steps : Nat)
+    (hbracket : gapAwareTargetBisectionBracket
+      arctanOnUnitRegular_continuous Y I hI precision) :
+    QInterval.Overlaps
+      (arctanOnUnitRegular_intervalRegular.evalInterval
+        (gapAwareTargetBisectionSearch
+          arctanOnUnitRegular_continuous Y I hI precision steps)
+        (gapAwareTargetBisectionSearch_subinterval
+          arctanOnUnitRegular_continuous Y I hI precision steps)
+        precision) Y := by
+  exact arctanOnUnitRegular_searchState_image_overlaps Y hY precision
+    (gapAwareTargetBisectionSearchWithProof
+      arctanOnUnitRegular_continuous Y I hI precision steps)
+    (gapAwareTargetBisectionSearchWithProof_certified
+      arctanOnUnitRegular_continuous Y I hI precision steps hbracket)
+
 theorem arctanOnUnitRegular_nondecreasing :
     NondecreasingOnInterval arctanOnUnitRegular := by
   intro x y hx hy hxy n
