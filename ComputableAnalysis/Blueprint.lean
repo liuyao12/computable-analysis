@@ -3,6 +3,7 @@ import ComputableAnalysis.SinPiSquareFTC
 import ComputableAnalysis.IntegralIdentities
 import ComputableAnalysis.SeriesFoundation
 import ComputableAnalysis.Series
+import ComputableAnalysis.FirstYearCalculus
 import ComputableAnalysis.DifferentialEquationsFoundation
 import ComputableAnalysis.ComplexPathIntegral
 import ComputableAnalysis.EffectiveFourierTail
