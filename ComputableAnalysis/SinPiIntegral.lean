@@ -6798,6 +6798,29 @@ def canonicalDyadicCertificateAdmissibleBool
         ({ lo := rationalCircleCos u, hi := rationalCircleCos u } : QInterval)).hi <=
       (dyadicTangentBoxAt B precision depth k hk).hi)
 
+/-- The finite admissibility test is exactly the conjunction consumed by the
+certificate constructor.  Keeping this reflection lemma separate lets a
+search decode one Boolean result once, rather than repeatedly invoking the
+decision procedure for each rational inequality. -/
+theorem canonicalDyadicCertificateAdmissibleBool_eq_true_iff
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (precision depth k : Nat) (hk : k < 2 ^ depth) (u : Rat) :
+    canonicalDyadicCertificateAdmissibleBool B precision depth k hk u = true ↔
+      0 <= u /\ u <= 1 /\
+      (dyadicNestedRadicalTableAt precision depth k).1.lo <=
+        rationalCircleSin u /\
+      rationalCircleSin u <=
+        (dyadicNestedRadicalTableAt precision depth k).1.hi /\
+      (dyadicTangentBoxAt B precision depth k hk).lo <=
+        (rationalHalfAngleTangentInterval
+          ((dyadicNestedRadicalTableAt precision depth k).1)
+          ({ lo := rationalCircleCos u, hi := rationalCircleCos u } : QInterval)).lo /\
+      (rationalHalfAngleTangentInterval
+        ((dyadicNestedRadicalTableAt precision depth k).1)
+        ({ lo := rationalCircleCos u, hi := rationalCircleCos u } : QInterval)).hi <=
+          (dyadicTangentBoxAt B precision depth k hk).hi := by
+  simp [canonicalDyadicCertificateAdmissibleBool, Bool.and_eq_true, and_assoc]
+
 def canonicalDyadicCertificateSearchAt
     (B : IntegralIdentities.ArctanInverseBisection)
     (precision depth k : Nat) (hk : k < 2 ^ depth)
