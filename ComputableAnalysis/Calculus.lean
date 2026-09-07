@@ -14735,6 +14735,21 @@ theorem gapAwareTargetBisectionStep_of_above
     simpa [gapAwareTargetBisectionMidpointRange] using habove
   simp [gapAwareTargetBisectionStep, hnotbelow', habove']
 
+/-! A fixed-stage target bracket records the finite invariant needed by an
+inverse search.  The endpoint image boxes enclose the target box in its
+orientation.  This is deliberately a statement about rational boxes at one
+stage, rather than an appeal to an intermediate value in a completed line. -/
+def gapAwareTargetBisectionBracket
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) : Prop :=
+  (F.regular.evalInterval
+      { lo := I.lo, hi := I.lo }
+      ⟨hI.1, Rat.le_refl, Rat.le_trans hI.2.1 hI.2.2⟩ n).lo <= Y.lo /\
+    Y.hi <=
+      (F.regular.evalInterval
+        { lo := I.hi, hi := I.hi }
+        ⟨Rat.le_trans hI.1 hI.2.1, Rat.le_refl, hI.2.2⟩ n).hi
+
 def gapAwareTargetBisectionStrictDecision
     (F : ContinuousFunctionOnInterval) (Y I : QInterval)
     (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) : Prop :=
@@ -14786,6 +14801,48 @@ theorem gapAwareTargetBisectionStep_subinterval
       exact ⟨Rat.le_refl, hm.1, hm.2⟩
     · simp [gapAwareTargetBisectionStep, hbelow, habove]
       exact ⟨Rat.le_refl, hI.2.1, Rat.le_refl⟩
+
+/-- A conservative midpoint step preserves the oriented finite target
+bracket.  In the central case it retains the old bracket; in either strict
+case the midpoint image itself supplies the replacement endpoint bound. -/
+theorem gapAwareTargetBisectionStep_preserves_bracket
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat)
+    (hbracket : gapAwareTargetBisectionBracket F Y I hI n) :
+    gapAwareTargetBisectionBracket F Y
+      (gapAwareTargetBisectionStep F Y I hI n)
+      (⟨Rat.le_trans hI.1
+          (gapAwareTargetBisectionStep_subinterval F Y I hI n).1,
+        (gapAwareTargetBisectionStep_subinterval F Y I hI n).2.1,
+        Rat.le_trans
+          (gapAwareTargetBisectionStep_subinterval F Y I hI n).2.2
+          hI.2.2⟩) n := by
+  have hm := QInterval.midpoint_mem hI.2.1
+  by_cases hbelow :
+      (F.regular.evalInterval
+        { lo := I.midpoint, hi := I.midpoint }
+        ⟨Rat.le_trans hI.1 hm.1, Rat.le_refl,
+          Rat.le_trans hm.2 hI.2.2⟩ n).hi < Y.lo
+  · simp only [gapAwareTargetBisectionBracket]
+    simp only [gapAwareTargetBisectionStep, hbelow, if_pos]
+    constructor
+    · exact Rat.le_trans
+        (gapAwareTargetBisectionMidpointRange_ordered F I hI n) (Rat.le_of_lt hbelow)
+    · simpa [gapAwareTargetBisectionBracket] using hbracket.2
+  · by_cases habove :
+        Y.hi < (F.regular.evalInterval
+          { lo := I.midpoint, hi := I.midpoint }
+          ⟨Rat.le_trans hI.1 hm.1, Rat.le_refl,
+            Rat.le_trans hm.2 hI.2.2⟩ n).lo
+    · simp only [gapAwareTargetBisectionBracket]
+      simp only [gapAwareTargetBisectionStep, hbelow, if_neg, habove, if_pos]
+      constructor
+      · simpa [gapAwareTargetBisectionBracket] using hbracket.1
+      · exact Rat.le_trans (Rat.le_of_lt habove)
+          (gapAwareTargetBisectionMidpointRange_ordered F I hI n)
+    · simp [gapAwareTargetBisectionStep, hbelow, habove,
+        gapAwareTargetBisectionBracket]
+      exact hbracket
 
 theorem gapAwareTargetBisectionStep_width_le
     (F : ContinuousFunctionOnInterval) (Y I : QInterval)
@@ -14936,6 +14993,38 @@ theorem gapAwareTargetBisectionFixedIterate_width_le
         F Y I hI precision n
       have hstep := gapAwareTargetBisectionStep_width_le F Y P.1 P.2 precision
       exact Rat.le_trans hstep ih
+
+/-- At a fixed finite output stage, every conservative bisection iterate
+retains the endpoint bracket around the target box.  This is the finite
+intermediate-value invariant: it makes no claim that every midpoint decision
+is strict, and therefore remains valid in the central-overlap case. -/
+theorem gapAwareTargetBisectionFixedIterate_preserves_bracket
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision n : Nat)
+    (hbracket : gapAwareTargetBisectionBracket F Y I hI precision) :
+    gapAwareTargetBisectionBracket F Y
+      (gapAwareTargetBisectionFixedIterate F Y I hI precision n)
+      (gapAwareTargetBisectionFixedIterate_subinterval F Y I hI precision n)
+      precision := by
+  induction n with
+  | zero =>
+      simpa [gapAwareTargetBisectionFixedIterate,
+        gapAwareTargetBisectionFixedIterateWithProof] using hbracket
+  | succ n ih =>
+      let P := gapAwareTargetBisectionFixedIterateWithProof
+        F Y I hI precision n
+      have hP : gapAwareTargetBisectionBracket F Y P.1 P.2 precision := by
+        change gapAwareTargetBisectionBracket F Y
+          (gapAwareTargetBisectionFixedIterate F Y I hI precision n)
+          (gapAwareTargetBisectionFixedIterate_subinterval F Y I hI precision n)
+          precision
+        exact ih
+      change gapAwareTargetBisectionBracket F Y
+        (gapAwareTargetBisectionStep F Y P.1 P.2 precision)
+        _ precision
+      exact gapAwareTargetBisectionStep_preserves_bracket
+        F Y P.1 P.2 precision hP
 
 /-! A scheduled variant separates the evaluator precision from the number of
 midpoint steps.  This is essential for computable inverse branches whose

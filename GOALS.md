@@ -117,7 +117,11 @@ is open.
    that the midpoint forward box overlaps the target box.  A total plan still
    needs a certified small source bracket whose target and forward stages stay
    synchronized across outputs; it must not claim that strict left/right
-   comparisons are available at every midpoint.  Then lift rational chart
+   comparisons are available at every midpoint.  The conservative kernel now
+   has the fixed-stage finite-IVT invariant: every iterate retains its
+   oriented endpoint bracket around the target box, including a central
+   overlap.  The remaining work is to synchronize these fixed-stage brackets
+   across output stages and prove their source widths shrink.  Then lift rational chart
    addition to bounded `RealRaw` slopes;
    prove that the nested-radical table has normalized angle `k / 2^n`; and use
    constructive inverse uniqueness to inhabit
