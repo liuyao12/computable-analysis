@@ -14750,6 +14750,40 @@ def gapAwareTargetBisectionBracket
         { lo := I.hi, hi := I.hi }
         ⟨Rat.le_trans hI.1 hI.2.1, Rat.le_refl, hI.2.2⟩ n).hi
 
+/-- An endpoint range enclosure for point evaluators induces the interval
+endpoint bracket used by conservative bisection.  Interval regularity is used
+only to widen each endpoint point-box; no global IVT or completeness premise
+is introduced. -/
+theorem gapAwareTargetBisectionBracket_of_endpoint_range
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat)
+    (hrange :
+      (F.function.compute I.lo
+        ⟨hI.1, Rat.le_trans hI.2.1 hI.2.2⟩ n).lo <= Y.lo /\
+        Y.hi <= (F.function.compute I.hi
+          ⟨Rat.le_trans hI.1 hI.2.1, hI.2.2⟩ n).hi) :
+    gapAwareTargetBisectionBracket F Y I hI n := by
+  unfold gapAwareTargetBisectionBracket
+  constructor
+  · let L : QInterval := { lo := I.lo, hi := I.lo }
+    have hL : subintervalOf L F.function.lower F.function.upper :=
+      ⟨hI.1, Rat.le_refl, Rat.le_trans hI.2.1 hI.2.2⟩
+    have hcontains := F.regular.contains_point_values L hL I.lo
+      ⟨hI.1, Rat.le_trans hI.2.1 hI.2.2⟩ n
+      (by dsimp [L]; exact Rat.le_refl)
+      (by dsimp [L]; exact Rat.le_refl)
+    change (F.regular.evalInterval L hL n).lo <= Y.lo
+    exact Rat.le_trans hcontains.1 hrange.1
+  · let U : QInterval := { lo := I.hi, hi := I.hi }
+    have hU : subintervalOf U F.function.lower F.function.upper :=
+      ⟨Rat.le_trans hI.1 hI.2.1, Rat.le_refl, hI.2.2⟩
+    have hcontains := F.regular.contains_point_values U hU I.hi
+      ⟨Rat.le_trans hI.1 hI.2.1, hI.2.2⟩ n
+      (by dsimp [U]; exact Rat.le_refl)
+      (by dsimp [U]; exact Rat.le_refl)
+    change Y.hi <= (F.regular.evalInterval U hU n).hi
+    exact Rat.le_trans hrange.2 hcontains.2
+
 def gapAwareTargetBisectionStrictDecision
     (F : ContinuousFunctionOnInterval) (Y I : QInterval)
     (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) : Prop :=

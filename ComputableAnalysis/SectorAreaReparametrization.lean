@@ -821,6 +821,41 @@ def arctanOnUnitRegular_gapAwareTargetWidth
           (64 * (n + 1))).width := Rat.one_mul _
       _ <= _ := hbase
 
+/-- Every normalized quarter-turn target starts the conservative inverse
+search with a certified finite bracket on the full unit slope chart.  Combined
+with the generic fixed-stage preservation theorem, this is the finite-IVT
+part of the inverse construction; cross-stage source shrinking remains a
+separate obligation. -/
+theorem arctanOnUnitRegular_gapAwareTarget_initialBracket
+    (t : RationalCircle.GeometricTrig.QuarterTurn)
+    (ht : RationalCircle.GeometricTrig.firstQuadrantBranch t) (n : Nat) :
+    gapAwareTargetBisectionBracket arctanOnUnitRegular_continuous
+      ((arctanOnUnitRegular_gapAwareTarget t ht).value.compute n)
+      { lo := arctanOnUnitRegular.lower, hi := arctanOnUnitRegular.upper }
+      (by
+        exact ⟨Rat.le_refl, arctanOnUnitRegular_invertible.source_ordered,
+          Rat.le_refl⟩) n := by
+  let I : QInterval :=
+    { lo := arctanOnUnitRegular.lower, hi := arctanOnUnitRegular.upper }
+  have hI : subintervalOf I arctanOnUnitRegular.lower
+      arctanOnUnitRegular.upper := by
+    exact ⟨Rat.le_refl, arctanOnUnitRegular_invertible.source_ordered,
+      Rat.le_refl⟩
+  apply gapAwareTargetBisectionBracket_of_endpoint_range
+    arctanOnUnitRegular_continuous
+    ((arctanOnUnitRegular_gapAwareTarget t ht).value.compute n) I hI n
+  simpa [I, arctanOnUnitRegular_gapAwareTarget,
+    arctanOnUnitRegularTarget,
+    GapAwareInvertibleFunctionOnInterval.EndpointRangeContains,
+    GapAwareInvertibleFunctionOnInterval.function,
+    arctanOnUnitRegular_gapAwareInvertible,
+    arctanOnUnitRegular_gapAwareSeparation,
+    arctanOnUnitRegular_continuous,
+    arctanOnUnitRegular_intervalRegular,
+    arctanOnUnitRegular, FunctionOnInterval.scaleRat,
+    angleOnUnitRegular, angleOnUnit] using
+    (arctanOnUnitRegular_gapAwareTarget t ht).in_range n
+
 /-- The native scaled-endpoint target represents exactly the geometric
 sector area `t * pi/4`. -/
 theorem arctanOnUnitRegularTarget_equiv_halfQuarterTurn

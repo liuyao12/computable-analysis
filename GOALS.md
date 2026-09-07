@@ -120,7 +120,8 @@ is open.
    comparisons are available at every midpoint.  The conservative kernel now
    has the fixed-stage finite-IVT invariant: every iterate retains its
    oriented endpoint bracket around the target box, including a central
-   overlap.  The remaining work is to synchronize these fixed-stage brackets
+   overlap; each normalized arctangent target supplies the initial full-chart
+   bracket.  The remaining work is to synchronize these fixed-stage brackets
    across output stages and prove their source widths shrink.  Then lift rational chart
    addition to bounded `RealRaw` slopes;
    prove that the nested-radical table has normalized angle `k / 2^n`; and use
