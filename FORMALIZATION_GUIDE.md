@@ -134,6 +134,15 @@ brackets (`value_overlaps`) and the representation edge
 image box is too wide; the latter certifies the canonical adaptive
 application.
 
+Do not require a strict left/right comparison at every midpoint. A target box
+can genuinely overlap the finite image box of its midpoint. In that case a
+total search needs a certified small central source bracket. Its forward-image
+overlap is obtained from
+`IntervalRegularOn.evalInterval_overlaps_of_point_overlaps`: an interval image
+containing the midpoint image still overlaps the target. The separate work is
+to prove that the chosen central brackets are nested, shrink, stay in the
+source interval, and carry the required forward-equivalence edge.
+
 ## Integrating a new function
 
 Choose the first applicable route.
