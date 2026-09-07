@@ -750,6 +750,65 @@ theorem arctanOnUnitRegular_fixedBisection_image_contains_target
   exact gapAwareTargetBisectionFixedIterate_preserves_bracket
     arctanOnUnitRegular_continuous Y I hI precision steps hbracket
 
+/-- Finite constructive IVT for the canonical arctangent branch.  Given a
+valid target box and an oriented endpoint bracket, every requested dyadic
+depth has a rational source box no wider than that depth's dyadic mesh whose
+finite interval image overlaps the target.  In the strictly decided case it
+is the final bisection bracket; in the central case it is the concrete
+rational midpoint that already overlaps the target.  No completed inverse or
+choice of a limiting point is used. -/
+theorem arctanOnUnitRegular_finite_narrow_image_overlap
+    (y : RealRaw) (hy : y.Valid) (I : QInterval)
+    (hI : subintervalOf I arctanOnUnitRegular.lower
+      arctanOnUnitRegular.upper)
+    (precision steps : Nat)
+    (hbracket : gapAwareTargetBisectionBracket
+      arctanOnUnitRegular_continuous (y.compute precision) I hI precision) :
+    ∃ J : QInterval,
+      ∃ hJ : subintervalOf J arctanOnUnitRegular.lower
+        arctanOnUnitRegular.upper,
+        J.width <= I.width / (2 ^ steps : Rat) /\
+          QInterval.Overlaps
+            (arctanOnUnitRegular_intervalRegular.evalInterval J hJ precision)
+            (y.compute precision) := by
+  rcases gapAwareTargetBisectionFixedIterate_strict_or_midpoint_overlap
+    arctanOnUnitRegular_continuous (y.compute precision) I hI precision steps
+    hbracket with hstrict | ⟨k, hk, hoverlap⟩
+  · let J := gapAwareTargetBisectionFixedIterate
+      arctanOnUnitRegular_continuous (y.compute precision) I hI precision steps
+    let hJ := gapAwareTargetBisectionFixedIterate_subinterval
+      arctanOnUnitRegular_continuous (y.compute precision) I hI precision steps
+    refine ⟨J, hJ, ?_, ?_⟩
+    · rw [hstrict.2.2]
+      exact Rat.le_refl
+    · exact QInterval.overlaps_of_contains_right
+        (arctanOnUnitRegular_fixedBisection_image_contains_target
+          (y.compute precision) I hI precision steps hbracket)
+        (hy.1 precision)
+  · let P := gapAwareTargetBisectionFixedIterateWithProof
+      arctanOnUnitRegular_continuous (y.compute precision) I hI precision k
+    let J : QInterval := { lo := P.1.midpoint, hi := P.1.midpoint }
+    let hJ : subintervalOf J arctanOnUnitRegular.lower
+        arctanOnUnitRegular.upper :=
+      ⟨Rat.le_trans P.2.1 (QInterval.midpoint_mem P.2.2.1).1,
+        Rat.le_refl,
+        Rat.le_trans (QInterval.midpoint_mem P.2.2.1).2 P.2.2.2⟩
+    refine ⟨J, hJ, ?_, ?_⟩
+    · have hIwidth : 0 <= I.width := by
+        change 0 <= I.hi - I.lo
+        exact (Rat.le_iff_sub_nonneg I.lo I.hi).1 hI.2.1
+      have hpow : 0 < (2 ^ steps : Rat) :=
+        Rat.pow_pos (by native_decide)
+      change P.1.midpoint - P.1.midpoint <= I.width / (2 ^ steps : Rat)
+      rw [Rat.sub_self]
+      rw [Rat.div_def]
+      exact Rat.mul_nonneg hIwidth (Rat.le_of_lt (Rat.inv_pos.2 hpow))
+    · change QInterval.Overlaps
+        (gapAwareTargetBisectionMidpointRange
+          arctanOnUnitRegular_continuous P.1 P.2 precision)
+        (y.compute precision)
+      exact hoverlap
+
 theorem arctanOnUnitRegular_nondecreasing :
     NondecreasingOnInterval arctanOnUnitRegular := by
   intro x y hx hy hxy n

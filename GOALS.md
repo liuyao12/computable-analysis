@@ -130,7 +130,10 @@ is open.
    rational midpoint forward box overlaps the target.  For each fixed source
    interval, the arctangent rectangle-image boxes now also refine across
    output stages, and a later witnessed image--target overlap transports to
-   the earlier enclosing stage on both sides.  The remaining work is
+   the earlier enclosing stage on both sides.  The finite theorem now returns
+   a dyadically narrow rational source box with an overlapping arctangent
+   image at every chosen depth (using the final strict bracket or the central
+   rational midpoint).  The remaining work is
    to synchronize these fixed-stage brackets
    across output stages and prove their source widths shrink.  Then lift rational chart
    addition to bounded `RealRaw` slopes;
