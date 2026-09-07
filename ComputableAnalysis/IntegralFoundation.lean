@@ -10,7 +10,6 @@ import ComputableAnalysis.FiniteFTCIntervalRegular
 import ComputableAnalysis.FinitePiecewiseRectangles
 import ComputableAnalysis.FiniteSinePrefixFTC
 import ComputableAnalysis.PolynomialFTCValues
-import ComputableAnalysis.FiniteFTCPolynomial
 import ComputableAnalysis.SinPiIntegral
 import ComputableAnalysis.TangentPullbackEffectiveFTC
 import ComputableAnalysis.StableRotationDerivative
