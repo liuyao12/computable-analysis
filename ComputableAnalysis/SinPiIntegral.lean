@@ -6821,6 +6821,27 @@ theorem canonicalDyadicCertificateAdmissibleBool_eq_true_iff
           (dyadicTangentBoxAt B precision depth k hk).hi := by
   simp [canonicalDyadicCertificateAdmissibleBool, Bool.and_eq_true, and_assoc]
 
+/-- Executable companion to the rational candidate search.  A successful
+branch returns the full finite circle/tangent certificate, assembled directly
+from the reflected Boolean inequalities. -/
+def canonicalDyadicCertificateSearchAt_certificate
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (precision depth k : Nat) (hk : k < 2 ^ depth)
+    (candidates : List Rat) :
+    Option (CanonicalDyadicHalfAngleCertificateAt B precision depth k hk) :=
+  match candidates with
+  | [] => none
+  | u :: rest =>
+      if hadm : canonicalDyadicCertificateAdmissibleBool
+          B precision depth k hk u = true then
+        let h := (canonicalDyadicCertificateAdmissibleBool_eq_true_iff
+          B precision depth k hk u).mp hadm
+        some (canonical_dyadic_certificate_at_of_rational_witness B hk u
+          h.1 h.2.1 ⟨h.2.2.1, h.2.2.2.1⟩
+          ⟨h.2.2.2.2.1, h.2.2.2.2.2⟩)
+      else
+        canonicalDyadicCertificateSearchAt_certificate B precision depth k hk rest
+
 def canonicalDyadicCertificateSearchAt
     (B : IntegralIdentities.ArctanInverseBisection)
     (precision depth k : Nat) (hk : k < 2 ^ depth)
