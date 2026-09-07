@@ -48,50 +48,22 @@ def finiteTaylorCertificate
 
 namespace FiniteTaylorCertificate
 
-/-! A finite Taylor certificate can be exposed as an ordinary project-native
-    raw endpoint computation.  This is an exact finite object; no tail or
-    completed-real passage is included. -/
-
-noncomputable def endpointRaw (certificate : FiniteTaylorCertificate) : RealRaw :=
-  endpointDifferenceRaw
-    (RealFunRaw.exact
-      (FinitePolynomial.integratedTaylorPrefix certificate.coefficients
-        certificate.terms))
-    certificate.leftEndpoint certificate.rightEndpoint
-    (endpointDifference_valid_of_fun_valid (RealFunRaw.exact_valid _) trivial trivial)
+/-! A finite Taylor endpoint increment is already a rational finite sum.
+Expose it directly, rather than passing it through the general endpoint
+wrapper (whose proof-carrying domain arguments make the wrapper
+noncomputable).  No tail or completed-real passage is involved. -/
+def endpointRaw (certificate : FiniteTaylorCertificate) : RealRaw :=
+  RealRaw.ofRat certificate.prefixIncrement
 
 theorem endpointRaw_valid (certificate : FiniteTaylorCertificate) :
     certificate.endpointRaw.Valid := by
-  change RealRaw.ValidCompute
-    (endpointDifferenceCompute
-      (RealFunRaw.exact
-        (FinitePolynomial.integratedTaylorPrefix certificate.coefficients
-          certificate.terms))
-      certificate.leftEndpoint certificate.rightEndpoint)
-  exact endpointDifference_valid_of_fun_valid
-    (F := RealFunRaw.exact
-      (FinitePolynomial.integratedTaylorPrefix certificate.coefficients
-        certificate.terms))
-    (a := certificate.leftEndpoint) (b := certificate.rightEndpoint)
-    (RealFunRaw.exact_valid _) trivial trivial
+  exact RealRaw.ofRat_valid certificate.prefixIncrement
 
 theorem endpointRaw_equiv_prefixIncrement
     (certificate : FiniteTaylorCertificate) :
     certificate.endpointRaw.Equiv
       (RealRaw.ofRat certificate.prefixIncrement) := by
-  intro stage
-  apply (RealRaw.compareAt_overlap_iff _ _ stage stage).2
-  change QInterval.Overlaps
-    (endpointDifferenceCompute
-      (RealFunRaw.exact
-        (FinitePolynomial.integratedTaylorPrefix certificate.coefficients
-          certificate.terms))
-      certificate.leftEndpoint certificate.rightEndpoint stage)
-    { lo := certificate.prefixIncrement, hi := certificate.prefixIncrement }
-  unfold endpointDifferenceCompute endpointDifferenceInterval
-  simp [RealFunRaw.exact]
-  rw [certificate.prefix_eq]
-  exact ⟨Rat.le_refl, Rat.le_refl⟩
+  exact RealRaw.equiv_refl _ certificate.endpointRaw_valid
 
 end FiniteTaylorCertificate
 

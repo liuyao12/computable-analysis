@@ -397,7 +397,7 @@ theorem effectiveFiniteTaylorCertificate_endpointRaw_equiv_prefixIncrement
       (RealRaw.ofRat certificate.prefixIncrement) := by
   exact certificate.endpointRaw_equiv_prefixIncrement
 
-noncomputable def effectiveFiniteTaylorEndpointRaw
+def effectiveFiniteTaylorEndpointRaw
     (coeffs : Nat -> Rat) (terms : Nat) (a b : Rat) : RealRaw :=
   (finiteTaylorCertificate coeffs terms a b).endpointRaw
 
