@@ -5,7 +5,6 @@ import ComputableAnalysis.FinitePolynomialCalculus
 import ComputableAnalysis.PolynomialMeanValue
 import ComputableAnalysis.FiniteQuadratureMeanValue
 import ComputableAnalysis.FiniteLHopitalCertificate
-import ComputableAnalysis.FiniteGapAwareInverseSearch
 import ComputableAnalysis.FinitePiecewiseAbsoluteValue
 
 /-!

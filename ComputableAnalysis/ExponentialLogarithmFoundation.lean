@@ -1,7 +1,6 @@
 import ComputableAnalysis.ExpProofs
 import ComputableAnalysis.FiniteExponentialTaylor
 import ComputableAnalysis.RotationSeries
-import ComputableAnalysis.FiniteGapAwareInverseSearch
 import ComputableAnalysis.IdentityInverse
 import ComputableAnalysis.Logarithm
 
