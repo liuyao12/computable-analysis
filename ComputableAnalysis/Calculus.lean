@@ -15315,6 +15315,38 @@ structure GapAwareInverseBisectionSearch
           n)
         (y.value.compute n)
 
+namespace GapAwareInverseBisectionSearch
+
+/-- The raw source computation delivered by a certified gap-aware search. -/
+def preimage {I : GapAwareInvertibleFunctionOnInterval} {y : GapAwareInRangeRaw I}
+    (search : GapAwareInverseBisectionSearch I y) : RealRaw where
+  compute := search.compute_preimage
+
+theorem preimage_valid {I : GapAwareInvertibleFunctionOnInterval}
+    {y : GapAwareInRangeRaw I}
+    (search : GapAwareInverseBisectionSearch I y) : search.preimage.Valid :=
+  search.valid_preimage
+
+theorem preimage_stays_in_source {I : GapAwareInvertibleFunctionOnInterval}
+    {y : GapAwareInRangeRaw I}
+    (search : GapAwareInverseBisectionSearch I y) :
+    forall n, subintervalOf (search.preimage.compute n)
+      I.function.lower I.function.upper :=
+  search.preimage_subinterval
+
+theorem preimage_value_overlaps_target {I : GapAwareInvertibleFunctionOnInterval}
+    {y : GapAwareInRangeRaw I}
+    (search : GapAwareInverseBisectionSearch I y) :
+    forall n, QInterval.Overlaps
+      (I.continuous.regular.evalInterval
+        (search.preimage.compute n)
+        (search.preimage_stays_in_source n)
+        n)
+      (y.value.compute n) :=
+  search.value_overlaps
+
+end GapAwareInverseBisectionSearch
+
 structure GapAwareInverseRaw
     (I : GapAwareInvertibleFunctionOnInterval) where
   compute_preimage : GapAwareInRangeRaw I -> Nat -> QInterval
@@ -15328,6 +15360,36 @@ structure GapAwareInverseRaw
         (compute_preimage y n)
         (preimage_subinterval y n) n)
       (y.value.compute n)
+
+namespace GapAwareInverseRaw
+
+/-- Apply a branch-local gap-aware inverse evaluator to a certified target. -/
+def apply {I : GapAwareInvertibleFunctionOnInterval}
+    (inv : GapAwareInverseRaw I) (y : GapAwareInRangeRaw I) : RealRaw where
+  compute := inv.compute_preimage y
+
+theorem apply_valid {I : GapAwareInvertibleFunctionOnInterval}
+    (inv : GapAwareInverseRaw I) (y : GapAwareInRangeRaw I) :
+    (inv.apply y).Valid :=
+  inv.valid_preimage y
+
+theorem apply_stays_in_source {I : GapAwareInvertibleFunctionOnInterval}
+    (inv : GapAwareInverseRaw I) (y : GapAwareInRangeRaw I) :
+    forall n, subintervalOf ((inv.apply y).compute n)
+      I.function.lower I.function.upper :=
+  inv.preimage_subinterval y
+
+theorem apply_value_overlaps_target {I : GapAwareInvertibleFunctionOnInterval}
+    (inv : GapAwareInverseRaw I) (y : GapAwareInRangeRaw I) :
+    forall n, QInterval.Overlaps
+      (I.continuous.regular.evalInterval
+        ((inv.apply y).compute n)
+        (inv.apply_stays_in_source y n)
+        n)
+      (y.value.compute n) :=
+  inv.value_overlaps y
+
+end GapAwareInverseRaw
 
 def gapAwareInverseRawOfSearch
     {I : GapAwareInvertibleFunctionOnInterval}
