@@ -20,10 +20,11 @@ The imaginary exponential prefix provides sine and cosine as two coordinates.
 \leanok
 
 On \([1,2]\), \(\log2\) has a reciprocal-integral and an alternating-series
-implementation, compared directly by finite boxes. Inverse exponential is a
-branch-local bisection search with explicit separation certificates.
+implementation, compared directly by finite boxes. Branch-local inverse
+exponential searches are checked for selected certified targets; a
+target-parametric logarithm search remains a separate finite-search problem.
 \lean{ComputableAnalysis.Logarithm.logTwoSeries_equiv_logTwoReciprocalIntegral}
-\lean{ComputableAnalysis.GapAwareInverseBisectionSearch}
+\lean{ComputableAnalysis.GapAwareInverseBisectionSearch.preimage_valid}
 \leanok
 
 \section{A product FTC \(\pi\) bridge}
