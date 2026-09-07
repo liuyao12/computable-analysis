@@ -3477,21 +3477,6 @@ def DyadicSquareCircleOverlapFamily.of_halfAngle_certificate_family
       (hcertificate n k hk hpos).sine_contains
       (hcertificate n k hk hpos).cosine_contains
 
-/- Precision-aware geometric proofs naturally produce certificates for every
-   evaluator precision.  The native-precision bridge in `SinPiIntegral`
-   packages that family into the stage-indexed form used by this module. -/
-def DyadicSquareCircleOverlapFamily.of_precision_halfAngle_certificate_family
-    (S : ArctanSinPiConstruction)
-    (ht0 : (S.inverse.tangentAt 0
-      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
-      RealRaw.zero)
-    (hcertificate : forall (precision n k : Nat) (hk : k < 2 ^ n),
-      0 < k -> CanonicalDyadicHalfAngleCertificateAt S.inverse precision n k hk) :
-    DyadicSquareCircleOverlapFamily S := by
-  exact DyadicSquareCircleOverlapFamily.of_halfAngle_certificate_family S ht0
-    (canonical_dyadic_halfAngle_certificate_family_of_precision_family
-      S.inverse hcertificate)
-
 theorem DyadicSquareCircleOverlapFamily.of_branch_certificate_family
     (S : ArctanSinPiConstruction)
     (family : DyadicNestedRadicalBranchCertificateFamily S.inverse) :
@@ -3512,24 +3497,6 @@ theorem DyadicSquareCircleOverlapFamily.to_square_sum_overlap
         (dyadicNestedRadicalSquareLeftSum n) := by
   exact dyadicPublicSquareLeftSum_overlap_of_rational_circle_overlap_family
     S certificate.endpoint_zero certificate.positive_overlap
-
-/- The intended geometric interface: the existing canonical half-angle
-certificate family is enough to drive the square-sum transport. -/
-theorem dyadicPublicSquareLeftSum_overlap_of_halfAngle_certificate_family
-    (S : ArctanSinPiConstruction)
-    (ht0 : (S.inverse.tangentAt 0
-      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
-      RealRaw.zero)
-    (hcertificate : forall (n k : Nat) (hk : k < 2 ^ n),
-      0 < k -> CanonicalDyadicHalfAngleCertificate S.inverse n k hk) :
-    forall n,
-      QInterval.Overlaps
-        (dyadicPublicSquareLeftSum S n)
-        (dyadicNestedRadicalSquareLeftSum n) := by
-  apply dyadicPublicSquareLeftSum_overlap_of_canonical_search_family S
-  intro n k hk
-  exact canonical_dyadic_search_of_halfAngle_certificate_family
-    S.inverse ht0 hcertificate n k hk
 
 theorem dyadicPublicSquareLeftSum_overlap_of_branch_certificate_family
     (S : ArctanSinPiConstruction)
