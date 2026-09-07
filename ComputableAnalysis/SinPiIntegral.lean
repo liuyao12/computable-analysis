@@ -1371,50 +1371,21 @@ theorem rationalTangentWitnessBoxSearch_complete_of_overlap
     (hmesh : 2 * U.width / (((2 ^ m : Nat) : Rat)) <= S.width) :
     ∃ v, rationalTangentWitnessBoxSearch U S m = some v := by
   let N : Nat := 2 ^ m
-  let d : Rat := (N : Rat)
-  let v : Nat -> Rat := fun k =>
-    U.lo + U.width * ((k : Rat) / d)
+  let v : Nat -> Rat := finiteUniformGridPoint U N
   have hN : 0 < N := by
     dsimp [N]
     exact Nat.two_pow_pos m
-  have hd : 0 < d := by
-    dsimp [d]
-    exact (Rat.natCast_pos).2 hN
   have hwidth : 0 <= U.width := by
     unfold QInterval.width
     grind [hU.2.1]
-  have hq_bounds : forall k, k <= N ->
-      0 <= (k : Rat) / d /\ (k : Rat) / d <= 1 := by
-    intro k hk
-    rw [Rat.div_def]
-    constructor
-    · exact Rat.mul_nonneg Rat.natCast_nonneg
-        (Rat.le_of_lt (Rat.inv_pos.2 hd))
-    · apply Rat.le_of_mul_le_mul_right (c := d)
-      · rw [Rat.mul_assoc, Rat.inv_mul_cancel _ (Rat.ne_of_gt hd), Rat.mul_one]
-        simpa [N, d] using (show (k : Rat) <= (N : Rat) by exact_mod_cast hk)
-      · exact hd
   have hv_interval : forall k, k <= N ->
       U.lo <= v k /\ v k <= U.hi := by
     intro k hk
-    have hq := hq_bounds k hk
-    constructor
-    · dsimp [v]
-      grind [Rat.mul_nonneg hwidth hq.1]
-    · dsimp [v]
-      have hmul := Rat.mul_le_mul_of_nonneg_left hq.2 hwidth
-      unfold QInterval.width at hmul ⊢
-      grind
+    exact finiteUniformGridPoint_mem hN hU.2.1 hk
   have hv0 : v 0 = U.lo := by
-    dsimp [v]
-    rw [Rat.div_def]
-    simp
-    grind
+    exact finiteUniformGridPoint_zero U N
   have hvN : v N = U.hi := by
-    dsimp [v, d]
-    rw [Rat.div_def, Rat.mul_inv_cancel _ (Rat.ne_of_gt hd), Rat.mul_one]
-    unfold QInterval.width
-    grind
+    exact finiteUniformGridPoint_last U hN
   have hstart : rationalCircleSin (v 0) <= S.hi := by
     rw [hv0]
     exact hover.1
@@ -1436,13 +1407,13 @@ theorem rationalTangentWitnessBoxSearch_complete_of_overlap
       hleft0 hleft1 hright0 hright1
       (a := v k) (b := v (k + 1))
     have horder : v k <= v (k + 1) := by
-      dsimp [v]
+      dsimp [v, finiteUniformGridPoint]
       apply (Rat.add_le_add_left).2
       apply Rat.mul_le_mul_of_nonneg_left _ hwidth
       rw [Rat.div_def, Rat.div_def]
       exact Rat.mul_le_mul_of_nonneg_right
-        (by exact_mod_cast Nat.le_succ k)
-        (Rat.le_of_lt (Rat.inv_pos.2 hd))
+        (Rat.natCast_le_natCast.2 (Nat.le_succ k))
+        (Rat.le_of_lt (Rat.inv_pos.2 ((Rat.natCast_pos).2 hN)))
     have hdiff' : rationalCircleSin (v (k + 1)) - rationalCircleSin (v k) <=
         2 * (v (k + 1) - v k) := by
       have hqabs := hdiff
@@ -1458,10 +1429,16 @@ theorem rationalTangentWitnessBoxSearch_complete_of_overlap
           qabs_neg, qabs_eq_self_of_nonneg hnon]] at hqabs
       exact hqabs
     have hmesh' : 2 * (v (k + 1) - v k) <= S.width := by
-      dsimp [v, d]
-      unfold QInterval.width at hmesh ⊢
-      rw [Rat.div_def, Rat.div_def]
-      grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+      rw [show v (k + 1) - v k = U.width / (N : Rat) by
+        dsimp [v]
+        exact finiteUniformGridPoint_succ_sub U hN]
+      have hmeshN : 2 * U.width / (N : Rat) <= S.width := by
+        simpa [N] using hmesh
+      calc
+        2 * (U.width / (N : Rat)) = 2 * U.width / (N : Rat) := by
+          simp only [Rat.div_def]
+          rw [Rat.mul_assoc]
+        _ <= S.width := hmeshN
     exact Rat.le_trans hdiff' hmesh'
   obtain ⟨k, hk, hlow, hhigh⟩ := finiteGrid_interval_crossing_between
     hN hS.2.1 hstart hend hstep
@@ -1470,7 +1447,8 @@ theorem rationalTangentWitnessBoxSearch_complete_of_overlap
     apply List.mem_map.mpr
     let N' := 2 ^ m
     have hk' : k < N' + 1 := by dsimp [N']; omega
-    exact ⟨k, by simpa [N'] using hk', by simpa [v, d, N]⟩
+    exact ⟨k, by simpa [N'] using hk', by
+      simp [v, finiteUniformGridPoint, N]⟩
   apply rationalTangentWitnessSearchList_complete hmem
   have hbox := hv_interval k hk
   simp only [rationalTangentWitnessAdmissibleBool, Bool.and_eq_true]
