@@ -1,4 +1,5 @@
 import ComputableAnalysis.EffectiveFourierSeries
+import ComputableAnalysis.FiniteFourierGeometric
 
 /-!
 # Generic effective Fourier tails
