@@ -6698,8 +6698,9 @@ The forward branch is required to be the actual geometric arctangent on the
 unit slope interval, and every normalized quarter-turn target is required to
 be a valid, explicitly range-enclosed target for that branch.  The bisection
 field is consequently an `InverseBisectionSearch`, not a pair of opaque
-inverse-law propositions.  A concrete inhabitant still requires the pending
-interval-regularity and effective-separation proofs for `arctanGeomOnUnit`.
+inverse-law propositions.  Interval regularity and effective separation are
+provided by the scheduled arctangent branch in `SectorAreaReparametrization`;
+the remaining construction is its explicit finite bisection plan.
 -/
 structure ArctanInverseBisection where
   branch : InvertibleFunctionOnInterval
