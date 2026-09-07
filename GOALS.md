@@ -113,10 +113,12 @@ is open.
    denominator-selected gap-aware separation are checked), and its normalized
    targets have executable (1/(16(n+1))) width schedules.  A sound midpoint
    kernel may retain its parent when its finite target and midpoint boxes
-   overlap, so a total plan needs a third, central
-   case: a certified small source bracket compatible with that overlap.  It
-   must not claim that strict left/right comparisons are available at every
-   midpoint.  Then lift rational chart addition to bounded `RealRaw` slopes;
+   overlap.  The local third-case fact is checked: non-separation certifies
+   that the midpoint forward box overlaps the target box.  A total plan still
+   needs a certified small source bracket whose target and forward stages stay
+   synchronized across outputs; it must not claim that strict left/right
+   comparisons are available at every midpoint.  Then lift rational chart
+   addition to bounded `RealRaw` slopes;
    prove that the nested-radical table has normalized angle `k / 2^n`; and use
    constructive inverse uniqueness to inhabit
    `DyadicHalfAngleTangentEquivalenceFamily`.  The remaining stage-box proof

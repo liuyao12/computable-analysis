@@ -14637,6 +14637,24 @@ theorem gapAwareTargetBisectionMidpointRange_ordered
     (F.regular.evalInterval M hM n).hi
   exact (Rat.le_iff_sub_nonneg _ _).2 hnonneg
 
+/-- The third midpoint outcome is constructive information, not a failed
+comparison.  If neither strict separation is certified, the finite forward
+box at the rational midpoint overlaps the target box.  A total inverse
+search may use this as its central bracket case; it must still account for
+how target and forward stages are synchronized across successive outputs. -/
+theorem gapAwareTargetBisectionMidpointRange_overlaps_target_of_not_separated
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat)
+    (hnotbelow :
+      ¬(gapAwareTargetBisectionMidpointRange F I hI n).hi < Y.lo)
+    (hnotabove :
+      ¬Y.hi < (gapAwareTargetBisectionMidpointRange F I hI n).lo) :
+    (gapAwareTargetBisectionMidpointRange F I hI n).Overlaps Y := by
+  unfold QInterval.Overlaps
+  constructor
+  · exact (Rat.not_lt).mp hnotabove
+  · exact (Rat.not_lt).mp hnotbelow
+
 def gapAwareTargetBisectionStep
     (F : ContinuousFunctionOnInterval) (Y I : QInterval)
     (hI : subintervalOf I F.function.lower F.function.upper) (n : Nat) :
