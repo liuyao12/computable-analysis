@@ -1,6 +1,5 @@
 import ComputableAnalysis.PowerSeries
 import ComputableAnalysis.Series
-import ComputableAnalysis.FirstYearCalculus
 import ComputableAnalysis.FiniteTaylorFTCInterface
 import ComputableAnalysis.FinitePolynomialCalculus
 import ComputableAnalysis.FiniteSineIntegral
