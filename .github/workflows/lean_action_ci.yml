@@ -13,12 +13,13 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       # The canonical root exports the supported calculus and algebraic
-      # foundations plus the scoped Wiedijk registry. Worked examples remain
-      # opt-in modules and are not part of this public compatibility target.
+      # foundations plus the scoped Wiedijk registry.  PiProofs is an
+      # intentionally opt-in presentation module, but it supplies the
+      # project’s central arctangent/π bridge and must stay checked too.
       - uses: leanprover/lean-action@v1
         with:
           auto-config: false
           build: true
-          build-args: "ComputableAnalysis"
+          build-args: "ComputableAnalysis ComputableAnalysis.PiProofs"
           test: false
           lint: false
