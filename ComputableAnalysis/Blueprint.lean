@@ -1,5 +1,11 @@
 import ComputableAnalysis
 import ComputableAnalysis.SinPiSquareFTC
+import ComputableAnalysis.IntegralIdentities
+import ComputableAnalysis.SeriesFoundation
+import ComputableAnalysis.Series
+import ComputableAnalysis.DifferentialEquationsFoundation
+import ComputableAnalysis.ComplexPathIntegral
+import ComputableAnalysis.EffectiveFourierTail
 import ComputableAnalysis.FiniteAMGMExample
 import ComputableAnalysis.FiniteAMGMInterface
 import ComputableAnalysis.FiniteBertrandCertificate

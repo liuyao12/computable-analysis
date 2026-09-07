@@ -10,8 +10,8 @@ No completed sum is created by notation.
 Alternating, geometric, and factorial majorants all give finite evaluators and
 tail boxes. Regrouping or termwise calculus requires a finite prefix identity
 and a transported tail certificate.
-\lean{ComputableAnalysis.Series.AlternatingRaw.valid}
-\lean{ComputableAnalysis.Series.geometricRaw_valid}
+\lean{ComputableAnalysis.Series.leibnizAlternatingRaw_valid}
+\lean{ComputableAnalysis.Series.geometricRaw_valid_of_le_half}
 \lean{ComputableAnalysis.FiniteExponentialTaylor.scheduled_expTaylorPrefix_enclosure}
 \leanok
 
@@ -19,7 +19,7 @@ and a transported tail certificate.
 The alternating arctangent prefix at one overlaps the rational-circle quarter
 turn; fourfold normalization enters the \(\pi\) representation chain.
 \lean{ComputableAnalysis.ArctanGeometry.arctanGeom_valid_on_unit}
-\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanGeom_one}
+\lean{ComputableAnalysis.ArctanGeometry.piCircleArea_equiv_four_arctanGeom_one}
 \leanok
 
 Newton-style fast algorithms are additional certified computations, not a
@@ -30,6 +30,6 @@ equivalences between algorithms.
 Fourier begins with finite complex transforms, inverse transforms, and
 convolution. Infinite Fourier objects require a truncation evaluator, tail,
 and overlap certificate.
-\lean{ComputableAnalysis.FiniteFourierFoundation}
-\lean{ComputableAnalysis.EffectiveFourierTail}
+\lean{ComputableAnalysis.finiteFourierSum}
+\lean{ComputableAnalysis.EffectiveFourierTailCertificate.toSeries_valid}
 \leanok
