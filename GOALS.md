@@ -193,7 +193,8 @@ from Lean when an analytic proof needs them.
 
 Before publishing:
 
-1. build `ComputableAnalysis.CalculusFoundation` and `ComputableAnalysis`;
+1. build `ComputableAnalysis.CalculusFoundation`, `ComputableAnalysis`, and
+   `ComputableAnalysis.PiProofs` (the canonical arctangent/\(\pi\) bridge);
 2. run the blueprint declaration checker;
 3. render the blueprint web output;
 4. inspect changed files for `sorry`/`admit` and stale legacy links;
