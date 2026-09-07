@@ -763,6 +763,30 @@ def arctanOnUnitRegularTarget
       angleOnUnitRegular, angleOnUnit,
       IntegralIdentities.arctanIntegralRectangleOnUnit] using hRange
 
+/-- The same native scaled-endpoint target, viewed by the gap-aware inverse
+interface.  No target computation is duplicated: only the branch contract
+changes from fixed-gap to gap-aware separation. -/
+def arctanOnUnitRegular_gapAwareTarget
+    (t : RationalCircle.GeometricTrig.QuarterTurn)
+    (ht : RationalCircle.GeometricTrig.firstQuadrantBranch t) :
+    GapAwareInRangeRaw arctanOnUnitRegular_gapAwareInvertible where
+  value := (arctanOnUnitRegularTarget t ht).value
+  value_valid := (arctanOnUnitRegularTarget t ht).value_valid
+  rangePrecision := (arctanOnUnitRegularTarget t ht).rangePrecision
+  in_range := by
+    intro n
+    simpa [GapAwareInvertibleFunctionOnInterval.EndpointRangeContains,
+      GapAwareInvertibleFunctionOnInterval.function,
+      arctanOnUnitRegular_gapAwareInvertible,
+      arctanOnUnitRegular_gapAwareSeparation,
+      InvertibleFunctionOnInterval.EndpointRangeContains,
+      InvertibleFunctionOnInterval.lowerValueBox,
+      InvertibleFunctionOnInterval.upperValueBox,
+      InvertibleFunctionOnInterval.function,
+      arctanOnUnitRegular_invertible,
+      arctanOnUnitRegular_effectiveInverseSeparation] using
+      (arctanOnUnitRegularTarget t ht).in_range n
+
 /-- The native scaled-endpoint target represents exactly the geometric
 sector area `t * pi/4`. -/
 theorem arctanOnUnitRegularTarget_equiv_halfQuarterTurn
