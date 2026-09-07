@@ -15158,6 +15158,24 @@ theorem gapAwareTargetBisectionSearchWithProof_certified
                 GapAwareTargetBisectionSearchState.Certified, hs, M, hM, V,
                 hbelow, habove, gapAwareTargetBisectionMidpointRange] using hover
 
+/-- A terminal midpoint witness is stable under every further requested
+finite depth.  This is a computation-level fact, not a convergence claim:
+the search deliberately stops rather than revisiting a central witness. -/
+theorem gapAwareTargetBisectionSearchWithProof_midpoint_stable
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision n k : Nat)
+    (J : {J : QInterval // subintervalOf J F.function.lower F.function.upper})
+    (hfound : gapAwareTargetBisectionSearchWithProof F Y I hI precision n =
+      .midpoint J) :
+    gapAwareTargetBisectionSearchWithProof F Y I hI precision (n + k) =
+      .midpoint J := by
+  induction k with
+  | zero => simpa using hfound
+  | succ k ih =>
+      rw [Nat.add_succ]
+      simp [gapAwareTargetBisectionSearchWithProof, ih]
+
 theorem gapAwareTargetBisectionFixedIterate_width_le
     (F : ContinuousFunctionOnInterval) (Y I : QInterval)
     (hI : subintervalOf I F.function.lower F.function.upper)
