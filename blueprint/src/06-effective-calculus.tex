@@ -10,11 +10,12 @@ primitive + derivative boxes + mesh -> finite telescope -> endpoint overlap
 \leanok
 
 \section{Regression ladder}
-Affine functions close in one rectangle. Monomials test the derivative-bound
-schedules: \(\int_0^1x^2=1/3\), \(\int_0^1x^3=1/4\), and so on. Each is an
-overlap of finite integral and endpoint evaluators.
+Affine functions close in one rectangle. The square is the representative
+polynomial derivative-bound schedule: \(\int_0^1x^2=1/3\). Its finite
+integral and endpoint evaluators overlap; other routine degrees are obtained
+by the generic monomial mechanism when needed.
 \lean{ComputableAnalysis.ExactFunction.affineFTCExact}
-\lean{ComputableAnalysis.Integral.fifthIntegralEffectiveFTC_equiv_one_sixth}
+\lean{ComputableAnalysis.Integral.squareIntegralEffectiveFTC_integral_equiv_one_third}
 \leanok
 
 \section{Product and trigonometric transport}
