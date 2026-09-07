@@ -10455,14 +10455,12 @@ private theorem arctan_neg_equiv_neg_arctan_of_neg
   have hqabsnegx : qabs (-x) = -x := qabs_eq_self_of_nonneg hneg0
   have hstage : (arctan x).compute n = (-(arctan (-x))).compute n := by
     rw [ArctanValidity.arctan_compute_neg x hnot n]
-    change RealRaw.negCompute (ArctanValidity.positiveRaw (qabs x)) n =
-      RealRaw.negCompute (arctan (-x)) n
     have hpositive :
         (ArctanValidity.positiveRaw (qabs x)).compute n =
           (arctan (-x)).compute n := by
       rw [ArctanValidity.arctan_compute_nonneg (-x) hneg0 n]
       rw [hqabsx, hqabsnegx]
-    unfold RealRaw.negCompute
+    unfold RealRaw.negCompute QInterval.neg
     rw [hpositive]
   rw [← hstage]
   exact (RealRaw.compareAt_overlap_iff (arctan x) (arctan x) n n).1
