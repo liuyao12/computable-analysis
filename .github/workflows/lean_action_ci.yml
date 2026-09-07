@@ -8,7 +8,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # PiProofs is intentionally compiled below as part of the canonical
+    # trigonometric bridge.  A cold Lean build of that large proof module can
+    # exceed the former 20-minute cap even when it is progressing normally.
+    timeout-minutes: 60
 
     steps:
       - uses: actions/checkout@v5
