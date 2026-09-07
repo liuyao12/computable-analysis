@@ -1539,6 +1539,17 @@ theorem overlaps_of_contains_right {outer inner : QInterval}
   unfold ContainsInterval Overlaps width at *
   constructor <;> grind [Rat.sub_eq_add_neg]
 
+/-- Enlarging the left interval preserves a witnessed overlap.  This is the
+finite enclosure step used by inverse search when a target box meets the
+image of a rational midpoint: any interval evaluator containing that point
+image is still compatible with the target. -/
+theorem overlaps_of_contains_left {outer inner target : QInterval}
+    (hcontains : outer.ContainsInterval inner)
+    (hoverlaps : inner.Overlaps target) : outer.Overlaps target := by
+  unfold ContainsInterval Overlaps at *
+  exact ⟨Rat.le_trans hcontains.1 hoverlaps.1,
+    Rat.le_trans hoverlaps.2 hcontains.2⟩
+
 /-- Adding two enclosing intervals still encloses the sum of the inner
 intervals.  This is the finite algebra used to assemble cellwise FTC bounds. -/
 theorem addInterval_contains {A B C D : QInterval}
@@ -8079,6 +8090,27 @@ structure IntervalRegularOn (F : FunctionOnInterval) where
         QInterval.ContainsInterval
         (evalInterval I hI n)
         (F.compute x hx n)
+
+namespace IntervalRegularOn
+
+/-- A finite target box compatible with a rational point image is also
+compatible with every certified interval image that contains that point.
+This is the overlap branch of a constructive inverse search: it supplies the
+forward-image certificate for a small central source bracket, without making
+an invalid left/right decision at a coincident midpoint. -/
+theorem evalInterval_overlaps_of_point_overlaps
+    {F : FunctionOnInterval} (R : IntervalRegularOn F)
+    (I : QInterval) (hI : subintervalOf I F.lower F.upper)
+    (x : Rat) (hx : inDomainInterval F.lower F.upper x)
+    (n : Nat) (Y : QInterval)
+    (hxlo : I.lo <= x) (hxhi : x <= I.hi)
+    (hoverlaps : QInterval.Overlaps (F.compute x hx n) Y) :
+    QInterval.Overlaps (R.evalInterval I hI n) Y := by
+  apply QInterval.overlaps_of_contains_left
+    (R.contains_point_values I hI x hx n hxlo hxhi)
+  exact hoverlaps
+
+end IntervalRegularOn
 
 /-! A certificate-level closure rule for addition.
 
