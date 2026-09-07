@@ -470,6 +470,27 @@ alternating or harmonic series -> logTwoSeries
 \lean{ComputableAnalysis.Logarithm.logTwoSquareMesh_substitution_identity}
 \leanok
 
+\subsection{A triangle--logarithm \(\pi\) calculation}
+
+One finite-mesh identity gives a useful integration-by-parts-shaped
+calculation without postulating a general integration-by-parts theorem:
+\[
+  4\,\operatorname{arctanTriangle}
+  +2\int_1^2\frac{dt}{t}
+  =4\,\operatorname{arctan}(1).
+\]
+The left side combines the direct arctangent triangle with the independent
+reciprocal integral for \(\log 2\).  The proof is a chain of finite rectangle
+reindexings through the product FTC witness in
+Chapter~\ref{ch:effective-calculus}; the right side is then the geometric
+quarter-turn computation.  It is a single reusable pattern, not an assertion
+of general integral linearity or general logarithm laws.
+
+\lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral_equiv_four_arctanGeom_one}
+\leanok
+
 The remaining exp/log theorem is representation transport: identify this
 computable branch with the inverse-exponential branch on its stated positive
 domain. That is a finite monotone-search certificate, not an appeal to a

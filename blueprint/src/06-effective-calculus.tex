@@ -122,6 +122,32 @@ function computations.
 \lean{ComputableAnalysis.exactRat_pow_nondecreasingDarbouxStage_stage_independent}
 \leanok
 
+\section{A product-rule instance}
+
+The first non-polynomial FTC calculation is deliberately concrete.  On the
+unit interval, the certified primitive is
+\[
+  F(x)=x\,\arctan(x), \qquad
+  F'(x)=\arctan(x)+\frac{x}{1+x^2}.
+\]
+Two finite derivative-bound stages stabilize the dyadic rectangle evaluator
+and identify its integral with the endpoint difference:
+
+\begin{verbatim}
+finite boxes for F' -> two-stage bounded sum -> F(1)-F(0) = arctan(1)
+\end{verbatim}
+
+This is a certified product-rule calculation, not a library-wide product rule
+or integration-by-parts axiom.  Its value is that the same finite mesh
+comparison later joins the arctangent triangle and the reciprocal/logarithm
+strip into a \(\pi\) computation.
+
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageFTC}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageStabilizedRaw_valid}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral_equiv_arctanGeom_one}
+\leanok
+
 \section{A normalized trigonometric bridge}
 
 The tangent chart is a useful representative computation, but it is not yet
