@@ -134,6 +134,17 @@ brackets (`value_overlaps`) and the representation edge
 image box is too wide; the latter certifies the canonical adaptive
 application.
 
+When the output precision needed to distinguish two source points depends on
+their actual rational gap, use `GapAwareInvertibleFunctionOnInterval` and a
+`GapAwareInverseBisectionSearch`. Its public result is
+`GapAwareInverseBisectionSearch.preimage`, with checked validity,
+source-domain containment, and finite forward-image/target overlap. The
+corresponding `GapAwareInverseRaw.apply` exposes the same three facts for a
+target-local evaluator. This interface intentionally does **not** claim a
+`RealRaw.Equiv` edge: add that only after the search has supplied the separate
+all-stage argument. The exponential regression searches are examples of this
+weaker, already implemented interface.
+
 Do not require a strict left/right comparison at every midpoint. A target box
 can genuinely overlap the finite image box of its midpoint. In that case a
 total search needs a certified small central source bracket. Its forward-image
