@@ -1,4 +1,4 @@
-import ComputableAnalysis.FiniteMonotoneSequenceExample
+import ComputableAnalysis.Basic
 import ComputableAnalysis.Series
 
 /-!
@@ -10,6 +10,40 @@ is part of the interface.
 -/
 
 namespace ComputableAnalysis
+
+/-- A successor bound propagates to every finite pair of rational stages. -/
+theorem monotone_of_succ_le {f : Nat → Rat}
+    (hstep : ∀ n, f n ≤ f (n + 1)) :
+    ∀ ⦃a b : Nat⦄, a ≤ b → f a ≤ f b := by
+  intro a b hab
+  induction b generalizing a with
+  | zero =>
+      have : a = 0 := by omega
+      subst a
+      exact Rat.le_refl
+  | succ b ih =>
+      by_cases ha : a = b + 1
+      · subst a
+        exact Rat.le_refl
+      · have hab' : a ≤ b := by omega
+        exact Rat.le_trans (ih hab') (hstep b)
+
+/-- The reversed successor form of `monotone_of_succ_le`. -/
+theorem antitone_of_succ_ge {f : Nat → Rat}
+    (hstep : ∀ n, f (n + 1) ≤ f n) :
+    ∀ ⦃a b : Nat⦄, a ≤ b → f b ≤ f a := by
+  intro a b hab
+  induction b generalizing a with
+  | zero =>
+      have : a = 0 := by omega
+      subst a
+      exact Rat.le_refl
+  | succ b ih =>
+      by_cases ha : a = b + 1
+      · subst a
+        exact Rat.le_refl
+      · have hab' : a ≤ b := by omega
+        exact Rat.le_trans (hstep b) (ih hab')
 
 structure FiniteAscendingSequenceCertificate where
   sequence : Nat → Rat
@@ -118,27 +152,6 @@ theorem MonotoneIntervalCertificate.toReal_preferred_compute
     certificate.toReal.compute n =
       { lo := certificate.loStage n, hi := certificate.hiStage n } := by
   rfl
-
-def dyadicApproachIntervalCertificate : MonotoneIntervalCertificate where
-  loStage := dyadicApproach
-  hiStage := fun _ => 1
-  lower_succ := dyadicApproach_succ_le
-  upper_succ := by
-    intro n
-    exact Rat.le_refl
-  enclosed := by
-    intro n
-    exact dyadicApproach_le_one n
-  width_shrinks := by
-    intro eps
-    obtain ⟨N, hN⟩ := dyadicApproach_error_shrinks eps
-    refine ⟨N, ?_⟩
-    intro n hn
-    simpa [dyadicApproach_error] using hN n hn
-
-theorem dyadicApproachIntervalCertificate_valid :
-    dyadicApproachIntervalCertificate.toRealRaw.Valid := by
-  exact dyadicApproachIntervalCertificate.toRealRaw_valid
 
 def geometricSumIntervalCertificate
     (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)

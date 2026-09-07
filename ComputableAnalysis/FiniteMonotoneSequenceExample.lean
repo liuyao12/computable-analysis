@@ -1,4 +1,4 @@
-import ComputableAnalysis.Basic
+import ComputableAnalysis.FiniteMonotoneSequenceInterface
 
 /-!
 # A finite monotone-sequence certificate
@@ -9,38 +9,6 @@ finite pair of indices.  No limit or completeness principle is used.
 -/
 
 namespace ComputableAnalysis
-
-theorem monotone_of_succ_le {f : Nat → Rat}
-    (hstep : ∀ n, f n ≤ f (n + 1)) :
-    ∀ ⦃a b : Nat⦄, a ≤ b → f a ≤ f b := by
-  intro a b hab
-  induction b generalizing a with
-  | zero =>
-      have : a = 0 := by omega
-      subst a
-      exact Rat.le_refl
-  | succ b ih =>
-      by_cases ha : a = b + 1
-      · subst a
-        exact Rat.le_refl
-      · have hab' : a ≤ b := by omega
-        exact Rat.le_trans (ih hab') (hstep b)
-
-theorem antitone_of_succ_ge {f : Nat → Rat}
-    (hstep : ∀ n, f (n + 1) ≤ f n) :
-    ∀ ⦃a b : Nat⦄, a ≤ b → f b ≤ f a := by
-  intro a b hab
-  induction b generalizing a with
-  | zero =>
-      have : a = 0 := by omega
-      subst a
-      exact Rat.le_refl
-  | succ b ih =>
-      by_cases ha : a = b + 1
-      · subst a
-        exact Rat.le_refl
-      · have hab' : a ≤ b := by omega
-        exact Rat.le_trans (hstep b) (ih hab')
 
 def ascendingNaturalSequence (n : Nat) : Rat := n
 
