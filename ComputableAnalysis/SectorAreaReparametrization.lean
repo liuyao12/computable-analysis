@@ -787,6 +787,40 @@ def arctanOnUnitRegular_gapAwareTarget
       arctanOnUnitRegular_effectiveInverseSeparation] using
       (arctanOnUnitRegularTarget t ht).in_range n
 
+/-- The normalized quarter-turn target carries its own executable width
+schedule.  This is stronger than raw validity and is the target-side datum
+needed by a future total inverse search. -/
+def arctanOnUnitRegular_gapAwareTargetWidth
+    (t : RationalCircle.GeometricTrig.QuarterTurn)
+    (ht : RationalCircle.GeometricTrig.firstQuadrantBranch t) :
+    GapAwareTargetWidthCertificate (arctanOnUnitRegular_gapAwareTarget t ht) where
+  precision := fun n => n
+  width_le := by
+    intro n
+    have hbase :=
+      ArctanGeometry.arctanIntegralRectangleCompute_width_le_sixteenth_input_precision
+        (x := (1 : Rat)) (by native_decide) (by native_decide) n
+    have hnonneg : 0 <=
+        (ArctanGeometry.arctanIntegralRectangleCompute 1
+          (64 * (n + 1))).width := by
+      exact ArctanGeometry.arctanIntegralRectangleCompute_ordered
+        (x := (1 : Rat)) (by native_decide) _
+    change ((arctanOnUnitRegularTarget t ht).value.compute n).width <=
+      1 / (16 * ((n + 1 : Nat) : Rat))
+    change (QInterval.scaleRat t (arctanOnUnitRegularUpper.compute n)).width <=
+      1 / (16 * ((n + 1 : Nat) : Rat))
+    rw [arctanOnUnitRegularUpper_compute,
+      QInterval.scaleRat_width_of_nonneg ht.1]
+    calc
+      t * (ArctanGeometry.arctanIntegralRectangleCompute 1
+          (64 * (n + 1))).width <=
+        1 * (ArctanGeometry.arctanIntegralRectangleCompute 1
+          (64 * (n + 1))).width :=
+          Rat.mul_le_mul_of_nonneg_right ht.2 hnonneg
+      _ = (ArctanGeometry.arctanIntegralRectangleCompute 1
+          (64 * (n + 1))).width := Rat.one_mul _
+      _ <= _ := hbase
+
 /-- The native scaled-endpoint target represents exactly the geometric
 sector area `t * pi/4`. -/
 theorem arctanOnUnitRegularTarget_equiv_halfQuarterTurn

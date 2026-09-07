@@ -110,8 +110,10 @@ is open.
 
 1. **Inverse-arctangent source edge / computable IVT frontier.** Construct a finite inverse plan for
    `arctanOnUnitRegular` (its interval regularity, fixed-gap separation, and
-   denominator-selected gap-aware separation are checked).  A sound midpoint kernel may retain its parent when its finite
-   target and midpoint boxes overlap, so a total plan needs a third, central
+   denominator-selected gap-aware separation are checked), and its normalized
+   targets have executable (1/(16(n+1))) width schedules.  A sound midpoint
+   kernel may retain its parent when its finite target and midpoint boxes
+   overlap, so a total plan needs a third, central
    case: a certified small source bracket compatible with that overlap.  It
    must not claim that strict left/right comparisons are available at every
    midpoint.  Then lift rational chart addition to bounded `RealRaw` slopes;

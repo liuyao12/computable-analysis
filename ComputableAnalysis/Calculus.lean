@@ -15298,6 +15298,18 @@ structure GapAwareInRangeRaw
   in_range : forall n,
     I.EndpointRangeContains (rangePrecision n) (value.compute n)
 
+/-- An executable narrowing schedule for an inverse target.  `RealRaw.Valid`
+proves eventual shrinking only propositionally; an inverse algorithm needs a
+named stage at which the target box has a prescribed rational width.  The
+constant `16` is deliberately part of the contract so a client can reserve
+the remaining error budget for the forward interval image. -/
+structure GapAwareTargetWidthCertificate
+    {I : GapAwareInvertibleFunctionOnInterval} (y : GapAwareInRangeRaw I) where
+  precision : Nat -> Nat
+  width_le : forall n,
+    (y.value.compute (precision n)).width <=
+      1 / (16 * ((n + 1 : Nat) : Rat))
+
 structure GapAwareInverseBisectionSearch
     (I : GapAwareInvertibleFunctionOnInterval)
     (y : GapAwareInRangeRaw I) where

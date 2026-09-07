@@ -124,6 +124,12 @@ Reuse the quantitative rectangle facts in `ArctanGeometry`—in particular
 `arctanIntegralRectangleCompute_boxes_strictly_separated`. Do not re-prove
 their finite tail estimate in a scaled presentation module.
 
+For a total target-driven search, attach a
+`GapAwareTargetWidthCertificate`: it gives a named stage whose target box has
+width at most `1 / (16 * (n + 1))`. This cannot be recovered computationally
+from `RealRaw.Valid` alone. The canonical quarter-turn target already supplies
+`arctanOnUnitRegular_gapAwareTargetWidth`.
+
 Use `InvertibleFunctionOnInterval.source_equiv_of_forward_equiv` for
 uniqueness: equivalent forward interval computations imply equivalent source
 computations when the separation schedule resolves every positive rational

@@ -102,8 +102,9 @@ geometric arctangent, and the endpoint is the quarter-turn anchor.
 For inversion, the accelerated rectangle schedule supplies interval
 regularity, monotonicity, and gap-aware separation.  The latter selects a
 strictly separating finite stage from the denominator of a rational source
-gap.  Completing the all-stage target bisection still requires its central
-bracket argument.
+gap.  The target also has an explicit (1/(16(n+1))) width schedule;
+completing the all-stage target bisection still requires its central bracket
+argument.
 
 \begin{verbatim}
 angle target box -> tangent-parameter bisection -> rational circle point
@@ -114,6 +115,7 @@ angle target box -> tangent-parameter bisection -> rational circle point
 \lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_invertible}
 \lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_gapAwareInvertible}
 \lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_gapAwareTarget}
+\lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_gapAwareTargetWidth}
 \lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_equivalent_geometric}
 \lean{ComputableAnalysis.InvertibleFunctionOnInterval.forwardRealRaw}
 \lean{ComputableAnalysis.InvertibleFunctionOnInterval.source_equiv_of_forward_equiv}
