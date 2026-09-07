@@ -303,4 +303,62 @@ theorem finiteGrid_interval_crossing_between
           exact Rat.not_le.mp hnot
     exact (Rat.not_lt.mpr hend) (hbelow N (by omega))
 
+/-- The rational point at grid index `k` in a closed rational interval. -/
+def finiteUniformGridPoint (I : QInterval) (N k : Nat) : Rat :=
+  I.lo + I.width * ((k : Rat) / (N : Rat))
+
+theorem finiteUniformGridPoint_zero (I : QInterval) (N : Nat) :
+    finiteUniformGridPoint I N 0 = I.lo := by
+  simp [finiteUniformGridPoint, Rat.div_def, Rat.zero_mul, Rat.add_zero]
+
+theorem finiteUniformGridPoint_last (I : QInterval) {N : Nat} (hN : 0 < N) :
+    finiteUniformGridPoint I N N = I.hi := by
+  unfold finiteUniformGridPoint
+  rw [Rat.div_def, Rat.mul_inv_cancel _
+    (Rat.ne_of_gt ((Rat.natCast_pos).2 hN)), Rat.mul_one]
+  unfold QInterval.width
+  grind [Rat.sub_eq_add_neg]
+
+/-- Every finite uniform grid point lies in its source interval. -/
+theorem finiteUniformGridPoint_mem
+    {I : QInterval} {N k : Nat} (hN : 0 < N)
+    (hI : I.lo <= I.hi) (hk : k <= N) :
+    I.lo <= finiteUniformGridPoint I N k /\
+      finiteUniformGridPoint I N k <= I.hi := by
+  have hwidth : 0 <= I.width := by
+    unfold QInterval.width
+    grind [Rat.sub_eq_add_neg]
+  have hden : 0 < (N : Rat) := (Rat.natCast_pos).2 hN
+  have hfrac0 : 0 <= (k : Rat) / (N : Rat) := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg Rat.natCast_nonneg
+      (Rat.le_of_lt (Rat.inv_pos.2 hden))
+  have hfrac1 : (k : Rat) / (N : Rat) <= 1 := by
+    apply Rat.le_of_mul_le_mul_right (c := (N : Rat))
+    · rw [Rat.div_def, Rat.mul_assoc,
+        Rat.inv_mul_cancel _ (Rat.ne_of_gt hden), Rat.mul_one]
+      simpa [Rat.one_mul] using (Rat.natCast_le_natCast.2 hk)
+    · exact hden
+  constructor
+  · unfold finiteUniformGridPoint
+    grind [Rat.mul_nonneg hwidth hfrac0]
+  · unfold finiteUniformGridPoint
+    have hscaled := Rat.mul_le_mul_of_nonneg_left hfrac1 hwidth
+    unfold QInterval.width at hscaled ⊢
+    grind [Rat.sub_eq_add_neg]
+
+/-- Consecutive uniform grid points are separated by one exact mesh width. -/
+theorem finiteUniformGridPoint_succ_sub
+    (I : QInterval) {N k : Nat} (hN : 0 < N) :
+    finiteUniformGridPoint I N (k + 1) - finiteUniformGridPoint I N k =
+      I.width / (N : Rat) := by
+  unfold finiteUniformGridPoint
+  rw [Rat.div_def, Rat.div_def]
+  have hNne : (N : Rat) ≠ 0 := Rat.ne_of_gt ((Rat.natCast_pos).2 hN)
+  have hnat : ((k + 1 : Nat) : Rat) = (k : Rat) + 1 := by
+    norm_cast
+  rw [hnat]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+    Rat.mul_comm, Rat.mul_inv_cancel _ hNne]
+
 end ComputableAnalysis
