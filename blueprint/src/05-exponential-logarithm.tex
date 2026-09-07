@@ -1,179 +1,36 @@
 \chapter{Exponential and Logarithm}\label{ch:exponential-logarithm}
 
-Exponential and logarithm are special computations assembled from the series,
-FTC, and inverse-search interfaces.  They are not imported as functions on
-standard real numbers.
-
-\begin{verbatim}
-finite Taylor prefix + factorial tail -> exponential evaluator
-positive monotone branch + bisection  -> logarithm evaluator
-explicit overlap edges                -> common abstract functions
-\end{verbatim}
-
-The scoped Lean entry point is
-\texttt{ComputableAnalysis.ExponentialLogarithmFoundation}.
+Exponential and logarithm are rational algorithms, with laws proved by finite
+prefix identities and tail transport.
 
 \section{Exponential}
-
-For rational \(x\), the evaluator chooses a finite degree, computes
-\(\sum_{k\le N}x^k/k!\), and attaches a signed factorial-tail interval.
-Every later finite prefix lies in the same enclosure.
-
-\lean{ComputableAnalysis.FiniteExponentialTaylor.remainderPartial_eq_expTaylorPrefix_sub}
-\lean{ComputableAnalysis.FiniteExponentialTaylor.remainderPartial_abs_le_factorialTailPartial}
+\begin{verbatim}
+input x -> choose N -> sum x^k/k! -> factorial remainder box
+\end{verbatim}
 \lean{ComputableAnalysis.FiniteExponentialTaylor.scheduled_expTaylorPrefix_enclosure}
-\leanok
-
-Differentiation is first a coefficient shift.  On \([0,1]\), the scheduled
-interval evaluator has derivative equal to itself, exact value \(1\) at zero,
-and an effective-FTC integral equal to its endpoint difference.
-
-\begin{verbatim}
-Taylor evaluator -> interval derivative certificate -> effective FTC
-                 -> integral_0^1 exp = exp(1) - 1
-\end{verbatim}
-
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_hasDerivativeOnInterval}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_solvesSelfDerivative}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitStabilizedIntegral_equiv_endpointDifference}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_equivalent_expPowerSeriesOnUnit}
-\leanok
-
-The centered chart \([-1,1]\) is the reusable local version needed by ODEs.
-It permits two-sided steps and is connected to the same preferred exponential
-through an explicit equivalence edge.
-
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_hasDerivativeOnInterval}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_solvesSelfDerivative}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_effectiveFTC}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_effectiveFTC}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_equivalent_expPowerSeries}
 \leanok
+Thus \(\int_0^1\exp(x)\,dx=\exp(1)-1\) is an overlap of raw algorithms.
 
-\section{Complex rotation}
-
-The same factorial prefix at an imaginary input gives rational-complex sine
-and cosine coordinates.  Their derivative laws are finite prefix identities
-plus the same tail transport:
-
-\[
-  S'=C,\qquad C'=-S,\qquad S(0)=0,\qquad C(0)=1.
-\]
-
+\section{Complex rotation and logarithm}
+The imaginary exponential prefix provides sine and cosine as two coordinates.
 \lean{ComputableAnalysis.RotationSeries.rotationExpRaw_valid}
-\lean{ComputableAnalysis.RotationSeries.rotationSinRaw_valid}
-\lean{ComputableAnalysis.RotationSeries.rotationCosRaw_valid}
 \lean{ComputableAnalysis.RotationSeries.uniformRotationSinOnTwo_hasDerivativeOnInterval}
-\lean{ComputableAnalysis.RotationSeries.uniformRotationCosOnTwo_hasDerivativeOnInterval}
 \leanok
 
-This is a computable rotation candidate.  Identifying it with the rational
-circle chart is an ODE uniqueness and reparametrization theorem, not a
-definitional equation.
-
-\section{Logarithm by inverse search}
-
-On a positive branch, logarithm may be computed by bisection against the
-exponential evaluator.  A midpoint is discarded only when its whole
-finite image box is strictly below or above the target.
-
-\begin{verbatim}
-positive target -> source bracket -> finite exp image boxes
-                -> strict midpoint decision -> nested source bracket
-\end{verbatim}
-
-The key analytic input is gap-aware separation: the evaluator stage is chosen
-from the actual rational gap between trial inputs.  Positive Taylor
-coefficients give the lower separation bound on the unit branch.
-
-\lean{ComputableAnalysis.ExpProofs.uniformExpCenter_difference_ge_input}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_gapAwareSeparation}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_gapAwareInvertible}
-\lean{ComputableAnalysis.GapAwareScheduledInverseBisectionPlan}
-\lean{ComputableAnalysis.gapAwareScheduledInverseBisectionPlanToSearch}
-\leanok
-
-The target \(3/2\) is the finite regression case: three certified midpoint
-decisions produce
-\[
- [0,1/2]\supset[1/4,1/2]\supset[3/8,1/2].
-\]
-The general branch uses the same proof-carrying iterator; a new target supplies
-only its finite separation decisions.
-
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_three_halves_first_step}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_three_halves_third_step}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnitWarm_three_halves_width_from_decisions}
-\leanok
-
-\section{Logarithm by integral}
-
-The second logarithm representation integrates the reciprocal kernel on a
-positive rational interval.  On \([1,2]\), its derivative enclosure is a
-finite secant estimate with denominators separated from zero.
-
-\lean{ComputableAnalysis.FinitePolynomial.CenteredSecantDerivativeBound.logTwoKernel_hasDerivativeOnInterval}
-\lean{ComputableAnalysis.Logarithm.logTwoKernel_endpointDifference_contains_of_pos}
-\leanok
-
-For \(\log 2\), the dyadic reciprocal integral and alternating series are
-both valid \texttt{realRaw} computations and are proved equivalent by finite
-mesh comparisons.
-
-\begin{verbatim}
-1/x rectangles on [1,2] -> reciprocal integral
-alternating prefixes     -> logarithm series
-                         -> explicit equivalence edge
-\end{verbatim}
-
-\lean{ComputableAnalysis.Logarithm.logTwoReciprocalIntegral_valid}
-\lean{ComputableAnalysis.Logarithm.logTwoSeries_valid}
+On \([1,2]\), \(\log2\) has a reciprocal-integral and an alternating-series
+implementation, compared directly by finite boxes. Inverse exponential is a
+branch-local bisection search with explicit separation certificates.
 \lean{ComputableAnalysis.Logarithm.logTwoSeries_equiv_logTwoReciprocalIntegral}
-\lean{ComputableAnalysis.log_two_series_eq_reciprocal_integral}
+\lean{ComputableAnalysis.GapAwareScheduledInverseBisectionPlan}
 \leanok
 
-This is the complete logarithmic FTC example.  The general positive-interval
-theorem remains branch-local: each domain must provide reciprocal regularity,
-an integral schedule, and transport to its inverse-exponential search.
-
-\section{Representation chain and Euler connection}
-
-The intended chain is
-
-\begin{verbatim}
-integral logarithm <-> inverse exponential <-> power-series exponential
-                                      |
-                                      +-> complex rotation
-\end{verbatim}
-
-Each arrow is a pointwise overlap theorem between computations.  A spanning
-tree of these arrows is enough; pairwise comparison of every implementation
-is unnecessary.
-
-The integral-defined branch already supports the square-pullback and
-arctangent-strip identities used in the \(\pi\) comparison.
-
-\lean{ComputableAnalysis.Logarithm.logTwoSquarePullbackIntegral_equiv_reciprocalIntegral}
-\lean{ComputableAnalysis.Logarithm.arctanStripIntegrals_add_equiv_arctanKernelIntegral}
-\lean{ComputableAnalysis.exp.realEuler}
+\section{A product FTC \(\pi\) bridge}
+For \(F(x)=x\arctan x\), a two-stage derivative-bound computation identifies
+the unit integral of \(F'\) with \(\arctan(1)\).  Finite reindexing then joins
+the arctangent triangle and reciprocal/logarithm strip.  This is an instance,
+not a general integration-by-parts axiom.
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral_equiv_arctanGeom_one}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral_equiv_four_arctanGeom_one}
 \leanok
-
-The remaining general exp/log theorem is precisely the transport edge between
-the integral logarithm and monotone inverse-exponential branches on their
-common positive domain.  The contracts expose this obligation rather than
-appealing to a global classical inverse theorem.
-
-\lean{ComputableAnalysis.Elementary.LogIntegralAgreesWithInverseExp}
-\lean{ComputableAnalysis.exp.PowerSeriesLogIntegralInverseComparison}
-\lean{ComputableAnalysis.exp.powerSeries_equiv_logIntegralInverse_on_interval_of_volterra}
-\leanok
-
-\section{Interface}
-
-\begin{verbatim}
-explicit evaluator -> finite regularity/derivative/inverse certificate
-                   -> valid raw computation -> one equivalence edge
-\end{verbatim}
-
-New exponential or logarithmic algorithms should connect through this chain.
-Routine shifts, signs, scalings, and local restrictions are transported from
-the existing representatives.

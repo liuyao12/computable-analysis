@@ -1,224 +1,35 @@
-\chapter{Power Series and Fourier Analysis}\label{ch:infinite-series}
+\chapter{Power Series and Finite Fourier Algebra}\label{ch:infinite-series}
 
-An infinite series is represented by a finite prefix and a certified rational
-tail.  The tail, not a completed sum, is the analytic input.
-
+Potential infinity is a finite prefix plus a rational tail bound:
 \begin{verbatim}
-requested precision -> choose finite stage -> compute prefix
-                    -> attach tail box -> realRaw or complex raw value
+prefix N -> tail box -> enclosure of every later prefix -> shrinking realRaw
 \end{verbatim}
+No completed sum is created by notation.
 
-The scoped Lean entry point is
-\texttt{ComputableAnalysis.SeriesFoundation}.  Finite algebra is reused from
-Lean; this chapter records only the coefficient identities and tail mechanisms
-that lead to genuinely infinite processes.
-
-\section{Finite Taylor algebra}
-
-Differentiation and integration begin as coefficient shifts.  For a finite
-prefix, integrating term by term is exact rational algebra: divide the
-coefficient of \(x^n\) by \(n+1\), and the endpoint difference is the finite
-sum of the monomial integrals.  No interchange with an infinite sum has yet
-occurred.
-
-\lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_prefix}
-\lean{ComputableAnalysis.effectiveFiniteTaylorFTC_endpointDifference_eq_finiteMonomialIntegralSum}
-\lean{ComputableAnalysis.FiniteTaylorCertificate.endpointRaw_equiv_prefixIncrement}
-\lean{ComputableAnalysis.complexCoefficientDerivative_primitiveCoefficients}
+\section{Series certificates}
+Alternating, geometric, and factorial majorants all give finite evaluators and
+tail boxes. Regrouping or termwise calculus requires a finite prefix identity
+and a transported tail certificate.
+\lean{ComputableAnalysis.Series.AlternatingRaw.valid}
+\lean{ComputableAnalysis.Series.geometricRaw_valid}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.scheduled_expTaylorPrefix_enclosure}
 \leanok
 
-The familiar exponential and trigonometric derivative table is therefore
-first a finite coefficient recurrence.  A represented function is obtained
-only after its own tail and nesting proof.
-
-\lean{ComputableAnalysis.FirstYearCalculus.checked_power_series_table}
-\lean{ComputableAnalysis.ComplexSeries.expTerm_succ_recurrence}
-\lean{ComputableAnalysis.ComplexSeries.sinTerm_primitive_relation}
-\lean{ComputableAnalysis.ComplexSeries.cosTerm_primitive_relation}
+\section{Arctangent and \(\pi\)}
+The alternating arctangent prefix at one overlaps the rational-circle quarter
+turn; fourfold normalization enters the \(\pi\) representation chain.
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_valid_on_unit}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanGeom_one}
 \leanok
 
-\section{Series as computation}
-\label{thm:finite-geometric-series-interface}
-\label{thm:harmonic-dyadic-lower-bound}
-\label{thm:finite-stirling-certificate}
+Newton-style fast algorithms are additional certified computations, not a
+privileged approximation. The gain comes from moving through proved
+equivalences between algorithms.
 
-A convergent scalar series supplies finite prefixes \(S_n\), nonnegative tail
-radii \(r_n\), future containment, and a finite stage choice for every positive
-rational tolerance.  The generic constructor then returns a valid
-\texttt{realRaw}.  Complex series carry the same contract coordinatewise.
-
-\lean{ComputableAnalysis.RationalSeriesCertificate}
-\lean{ComputableAnalysis.RationalSeriesCertificate.raw_valid}
-\lean{ComputableAnalysis.ComplexSeriesCertificate}
-\lean{ComputableAnalysis.ComplexSeriesCertificate.raw_valid}
+\section{Fourier}
+Fourier begins with finite complex transforms, inverse transforms, and
+convolution. Infinite Fourier objects require a truncation evaluator, tail,
+and overlap certificate.
+\lean{ComputableAnalysis.FiniteFourierFoundation}
+\lean{ComputableAnalysis.EffectiveFourierTail}
 \leanok
-
-The geometric series is the smallest nontrivial instance.  Its finite
-endpoint formula and power inequality give the tail budget.
-
-\lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate}
-\lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate.gap_le_tolerance}
-\lean{ComputableAnalysis.geometricSeriesCertificate_raw_equiv_geometricRaw}
-\leanok
-
-An alternating series uses even partial sums as centers and the next term as
-radius.  The Leibniz arctangent series is the named instance used for
-\(\pi\).
-
-\lean{ComputableAnalysis.alternatingSeriesCertificate}
-\lean{ComputableAnalysis.alternatingSeriesCertificate_raw_equiv_alternatingRaw}
-\lean{ComputableAnalysis.leibnizSeriesCertificate}
-\lean{ComputableAnalysis.leibnizSeriesCertificate_raw_equiv_leibnizAlternatingRaw}
-\leanok
-
-Divergence is also potential rather than attained infinity.  For the harmonic
-series the target statement is an algorithm that, given any rational height,
-returns a finite dyadic block whose partial sum exceeds it.  Stirling's
-formula likewise belongs here only when equipped with a requested-precision
-remainder certificate.  These two Wiedijk entries remain explicit
-formalization frontiers.
-
-\section{Pi and power series}
-\label{thm:shared-rational-anchor}
-\label{thm:leibniz-arctan}
-
-The project studies the space of computations, fast and slow alike.  Crude
-rectangles, binomial expansions, termwise integration, and alternating
-prefixes are compared through finite overlap certificates.  This is a general
-lesson about discovery, not a claim about Newton's private reasoning:
-breakthroughs often come from understanding neighboring computations rather
-than directly optimizing the original one.
-
-\begin{verbatim}
-choose finite route -> compute enclosure -> compare with shared anchor
-                    -> refine only the needed certificate
-\end{verbatim}
-
-For the arctangent kernel, the integrated Taylor prefix and the Leibniz prefix
-are the same finite rational computation.  The alternating remainder gives
-the potential-infinity budget; comparison with the geometric quarter-turn is
-a separate representation edge.
-
-\lean{ComputableAnalysis.FinitePolynomial.integratedTaylorPrefix_endpointDifference_eq_finiteMonomialIntegralSum}
-\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_equiv_leibnizAlternatingRaw}
-\lean{ComputableAnalysis.Series.AlternatingRaw.leibnizAlternatingRaw_reaches_of_positive_tolerance}
-\leanok
-
-This route explains Newton-style acceleration: once integration of finite
-binomial prefixes is understood structurally, a different expansion can
-produce a much faster \(\pi\) algorithm without changing the foundation.
-
-\section{Finite Fourier analysis}
-\label{thm:finite-fourier-interface}
-
-Fourier analysis starts with exact transforms of finite rational-complex
-sample tables.
-
-\begin{verbatim}
-finite samples -> finite transform -> orthogonality -> exact reconstruction
-\end{verbatim}
-
-\lean{ComputableAnalysis.finiteFourierSum}
-\lean{ComputableAnalysis.FiniteFourierOrthogonalityCertificate}
-\lean{ComputableAnalysis.FiniteFourierReconstructionCertificate.reconstructs}
-\lean{ComputableAnalysis.fourPointFourierTransform_parseval}
-\leanok
-
-This finite DFT algebra is not yet a Fourier-series theorem.  A genuinely
-infinite-looking coefficient computation additionally supplies a coordinate
-tail radius containing every future stage.  Stabilization then produces a
-valid complex raw value with explicit width and height witnesses.
-
-\begin{verbatim}
-coefficient stages -> coordinate tail enclosure -> future containment
-                   -> stabilized complex computation -> precision witness
-\end{verbatim}
-
-\lean{ComputableAnalysis.EffectiveFourierTailCertificate}
-\lean{ComputableAnalysis.EffectiveFourierTailCertificate.future_stage_in_stageBox}
-\lean{ComputableAnalysis.EffectiveFourierSeries.stabilized_valid}
-\lean{ComputableAnalysis.EffectiveFourierSeries.candidate_equiv_stabilized}
-\lean{ComputableAnalysis.EffectiveFourierSeries.precision_witness}
-\leanok
-
-The quarter-turn geometric family is the first nonzero example; its radius
-\(2r^n\), for \(0\le r\le1/2\), controls every future coefficient stage.
-
-\lean{ComputableAnalysis.quarterTurnGeometricFourierSeries}
-\lean{ComputableAnalysis.quarterTurnGeometricFourierSeries_future_stage_enclosure}
-\leanok
-
-Finite synthesis remains linear, and an orthogonality certificate reconstructs
-the certified sample table exactly.  All later analytic work is isolated in
-the tail.
-
-\lean{ComputableAnalysis.effectiveFiniteFourierSynthesisAt_add}
-\lean{ComputableAnalysis.effectiveFiniteFourierSynthesisAt_scale}
-\lean{ComputableAnalysis.effectiveFiniteFourierReconstruction_reconstructs}
-\leanok
-
-\subsection{A computable \texorpdfstring{\(L^2\)}{L2} boundary}
-
-The project does not introduce measurable functions.  The useful computable
-substitute is a finite coefficient-energy prefix plus a rational tail interval
-containing the unknown remaining energy.
-
-\lean{ComputableAnalysis.qcomplexEnergy}
-\lean{ComputableAnalysis.qcomplexEnergy_nonneg}
-\lean{ComputableAnalysis.FiniteFourierEnergyTailCertificate}
-\lean{ComputableAnalysis.FiniteFourierEnergyTailCertificate.energyInterval_contains_total}
-\leanok
-
-This is enough for applications that consume finite energy bounds.  A
-Parseval or reconstruction theorem for a particular infinite family must
-still provide its own effective coefficient and tail estimates.
-
-\section{Fourier reconstruction frontier}
-
-A foundational Fourier-series result should not merely construct each
-coefficient.  It must give a nontrivial infinite family and a uniform
-algorithm for reconstruction error:
-
-\begin{verbatim}
-input evaluator -> finite coefficients -> finite synthesis
-                -> uniform tail bound -> pointwise or energy reconstruction
-\end{verbatim}
-
-Finite transforms, stabilization, and geometric-tail examples are complete.
-The missing major theorem is effective reconstruction for a genuinely
-infinite trigonometric family, followed by termwise integration and
-differentiation under explicit tail schedules.
-
-\section{Basel and factorial growth}
-\label{thm:basel-geometric-overlap}
-
-The computable Basel target compares two finite-enclosure algorithms:
-reciprocal-square prefixes with a telescoping tail, and an independent
-geometric or Fourier area computation.  The final theorem is their maintained
-overlap edge.  The necessary finite tail algebra is available, but the
-independent geometric identification remains a frontier.
-
-Factorial growth is treated in the same style.  Sine, exponential, Gaussian,
-and ODE computations use finite factorial-tail searches rather than a global
-theory of asymptotics.
-
-\lean{ComputableAnalysis.effectiveFactorialTailPartial_shifted_le_eps}
-\lean{ComputableAnalysis.effectiveSineTaylorIntegralPartial_eq_one_sub_cosineTaylorPartial_succ}
-\lean{ComputableAnalysis.effectiveExpIntegratedPartial_eq_expPartial_sub_one}
-\leanok
-
-Finite multidimensional Gaussian prefixes and the \(n\)-ball recurrence are
-documented once in Chapter~\ref{ch:integrals}, where their rectangle and tail
-certificates belong; they are not repeated here.
-
-\section{Interface}
-
-\begin{verbatim}
-finite coefficient identity -> prefix evaluator -> explicit tail
-                            -> stabilized raw value -> equivalence edge
-\end{verbatim}
-
-Every power-series or Fourier theorem should enter through this chain.  A
-routine sign, scaling, finite-support, or finite-algebra variant is transported
-from an existing representative rather than becoming another foundation
-theorem.
