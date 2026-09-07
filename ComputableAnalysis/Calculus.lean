@@ -15100,6 +15100,64 @@ theorem gapAwareTargetBisectionSearch_subinterval
       F.function.lower F.function.upper :=
   (gapAwareTargetBisectionSearchWithProof F Y I hI precision steps).source_subinterval
 
+/-- The proof invariant for terminal-aware finite bisection.  A continuing
+state carries the oriented endpoint bracket; a terminal state carries the
+direct midpoint-image overlap. -/
+def GapAwareTargetBisectionSearchState.Certified
+    (F : ContinuousFunctionOnInterval) (Y : QInterval) (precision : Nat) :
+    GapAwareTargetBisectionSearchState F Y -> Prop
+  | .bracket J => gapAwareTargetBisectionBracket F Y J.1 J.2 precision
+  | .midpoint J => QInterval.Overlaps (F.regular.evalInterval J.1 J.2 precision) Y
+
+/-- The literal terminal-aware search maintains exactly its advertised finite
+invariant.  This induction is wholly over the requested number of rational
+steps; it neither chooses nor assumes an attained inverse value. -/
+theorem gapAwareTargetBisectionSearchWithProof_certified
+    (F : ContinuousFunctionOnInterval) (Y I : QInterval)
+    (hI : subintervalOf I F.function.lower F.function.upper)
+    (precision steps : Nat)
+    (hbracket : gapAwareTargetBisectionBracket F Y I hI precision) :
+    (gapAwareTargetBisectionSearchWithProof F Y I hI precision steps).Certified
+      F Y precision := by
+  induction steps with
+  | zero =>
+      simpa [gapAwareTargetBisectionSearchWithProof,
+        GapAwareTargetBisectionSearchState.Certified] using hbracket
+  | succ steps ih =>
+      generalize hs : gapAwareTargetBisectionSearchWithProof
+        F Y I hI precision steps = state at ih ⊢
+      cases state with
+      | midpoint P =>
+          simpa [gapAwareTargetBisectionSearchWithProof,
+            GapAwareTargetBisectionSearchState.Certified, hs] using ih
+      | bracket P =>
+          have hP : gapAwareTargetBisectionBracket F Y P.1 P.2 precision := by
+            simpa [GapAwareTargetBisectionSearchState.Certified] using ih
+          let M : QInterval := { lo := P.1.midpoint, hi := P.1.midpoint }
+          have hM : subintervalOf M F.function.lower F.function.upper :=
+            ⟨Rat.le_trans P.2.1 (QInterval.midpoint_mem P.2.2.1).1,
+              Rat.le_refl,
+              Rat.le_trans (QInterval.midpoint_mem P.2.2.1).2 P.2.2.2⟩
+          let V := F.regular.evalInterval M hM precision
+          by_cases hbelow : V.hi < Y.lo
+          · have hstep := gapAwareTargetBisectionStep_preserves_bracket
+              F Y P.1 P.2 precision hP
+            simpa [gapAwareTargetBisectionSearchWithProof,
+              GapAwareTargetBisectionSearchState.Certified, hs, M, hM, V,
+              hbelow, gapAwareTargetBisectionStep] using hstep
+          · by_cases habove : Y.hi < V.lo
+            · have hstep := gapAwareTargetBisectionStep_preserves_bracket
+                F Y P.1 P.2 precision hP
+              simpa [gapAwareTargetBisectionSearchWithProof,
+                GapAwareTargetBisectionSearchState.Certified, hs, M, hM, V,
+                hbelow, habove, gapAwareTargetBisectionStep] using hstep
+            · have hover :=
+                gapAwareTargetBisectionMidpointRange_overlaps_target_of_not_separated
+                  F Y P.1 P.2 precision hbelow habove
+              simpa [gapAwareTargetBisectionSearchWithProof,
+                GapAwareTargetBisectionSearchState.Certified, hs, M, hM, V,
+                hbelow, habove, gapAwareTargetBisectionMidpointRange] using hover
+
 theorem gapAwareTargetBisectionFixedIterate_width_le
     (F : ContinuousFunctionOnInterval) (Y I : QInterval)
     (hI : subintervalOf I F.function.lower F.function.upper)
