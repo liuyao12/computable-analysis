@@ -206,21 +206,4 @@ theorem quarterTurnGeometricTailCertificate_valid
     (quarterTurnGeometricTailCertificate r hr0 hrhalf hr1).toSeries.stabilized.Valid := by
   exact EffectiveFourierTailCertificate.toSeries_valid _
 
-/-- The canonical nonzero geometric Fourier series is obtained from the
-generic tail certificate.  Keeping the finite tail estimate in one place
-prevents a second, extensionally identical Fourier constructor. -/
-def quarterTurnGeometricFourierSeries
-    (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
-    (hr1 : r < 1) : EffectiveFourierSeries :=
-  (quarterTurnGeometricTailCertificate r hr0 hrhalf hr1).toSeries
-
-theorem quarterTurnGeometricFourierSeries_future_stage_enclosure
-    (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
-    (hr1 : r < 1) (k n : Nat) (hkn : k <= n) :
-    (QBox.point (quarterTurnGeometricStage r n)).NestedIn
-      (QBox.expand (QBox.point (quarterTurnGeometricStage r k))
-        (2 * r ^ k)) := by
-  exact ((quarterTurnGeometricTailCertificate r hr0 hrhalf hr1).toSeries).future_containment
-    k n hkn
-
 end ComputableAnalysis
