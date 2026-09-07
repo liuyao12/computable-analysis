@@ -112,8 +112,12 @@ is open.
    effective bisection instance; lift rational chart addition to bounded
    `RealRaw` slopes; prove that the nested-radical table has normalized angle
    `k / 2^n`; then apply constructive inverse uniqueness to inhabit
-   `DyadicHalfAngleTangentEquivalenceFamily`.  Its `sine_equiv` theorem already
-   transports every equal-dyadic sine sample, including zero.  Do not add
+   `DyadicHalfAngleTangentEquivalenceFamily`.  The remaining stage-box proof
+   must supply simultaneous strict rational margins: a circle witness lies
+   inside the nested-radical sine box and its half-angle box lies inside the
+   inverse box.  Plain `RealRaw.Equiv` alone does not imply this same-stage
+   enclosure.  Its `sine_equiv` theorem already transports every equal-dyadic
+   sine sample, including zero.  Do not add
    matching-stage searches, certificate families, or parity-specific public
    wrappers.
 2. **Squared sine.** Derive the two square-sum edges from the same tangent
