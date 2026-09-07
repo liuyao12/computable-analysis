@@ -108,19 +108,22 @@ not re-exported by the canonical root.
 Work in dependency order. Do not add routine examples while an earlier bridge
 is open.
 
-1. **Inverse-arctangent source edge.** Follow one route: construct the
-   finite bisection plan for `arctanOnUnitRegular` (its interval regularity
-   and separation are already checked); lift rational chart addition to bounded
-   `RealRaw` slopes; prove that the nested-radical table has normalized angle
-   `k / 2^n`; then apply constructive inverse uniqueness to inhabit
+1. **Inverse-arctangent source edge.** Construct a finite inverse plan for
+   `arctanOnUnitRegular` (its interval regularity and separation are already
+   checked).  A sound midpoint kernel may retain its parent when its finite
+   target and midpoint boxes overlap, so a total plan needs a third, central
+   case: a certified small source bracket compatible with that overlap.  It
+   must not claim that strict left/right comparisons are available at every
+   midpoint.  Then lift rational chart addition to bounded `RealRaw` slopes;
+   prove that the nested-radical table has normalized angle `k / 2^n`; and use
+   constructive inverse uniqueness to inhabit
    `DyadicHalfAngleTangentEquivalenceFamily`.  The remaining stage-box proof
    must supply simultaneous strict rational margins: a circle witness lies
    inside the nested-radical sine box and its half-angle box lies inside the
    inverse box.  Plain `RealRaw.Equiv` alone does not imply this same-stage
    enclosure.  Its `sine_equiv` theorem already transports every equal-dyadic
-   sine sample, including zero.  Do not add
-   matching-stage searches, certificate families, or parity-specific public
-   wrappers.
+   sine sample, including zero.  Do not add matching-stage searches,
+   certificate families, or parity-specific public wrappers.
 2. **Squared sine.** Derive the two square-sum edges from the same tangent
    representation family and the checked tangent-square FTC: public dyadic
    squares to nested radicals, then nested radicals to the normalized
