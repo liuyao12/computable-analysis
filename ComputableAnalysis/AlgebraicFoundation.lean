@@ -1,7 +1,4 @@
 import ComputableAnalysis.Algebraic
-import ComputableAnalysis.AlgebraicNumbers
-import ComputableAnalysis.AlgebraicFunctions
-import ComputableAnalysis.FTA
 import ComputableAnalysis.FiniteFTASubdivision
 import ComputableAnalysis.FiniteQuadraticRootInterval
 import ComputableAnalysis.FiniteFTARootExclusion
