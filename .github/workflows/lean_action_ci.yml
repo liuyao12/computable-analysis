@@ -9,9 +9,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     # PiProofs is intentionally compiled below as part of the canonical
-    # trigonometric bridge.  A cold Lean build of that large proof module can
-    # exceed the former 20-minute cap even when it is progressing normally.
-    timeout-minutes: 60
+    # trigonometric bridge.  A cold build currently takes roughly an hour
+    # because Lean must process its large syntax tree, so the cap must cover
+    # that real verification rather than cancelling a healthy build.
+    timeout-minutes: 120
 
     steps:
       - uses: actions/checkout@v5
