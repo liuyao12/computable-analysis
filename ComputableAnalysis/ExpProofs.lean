@@ -7647,9 +7647,6 @@ theorem uniformExpOnUnitWarm_oneThird_bisection_value_overlaps (n : Nat) :
     simpa [hcell] using hmem.1
   have hcell_hi : (1 : Rat) / 3 ≤ (dyadicCell n k).hi := by
     simpa [hcell] using hmem.2
-  have hcontains := uniformExpOnUnitWarm_intervalRegular.contains_point_values
-    (dyadicCell n k) (dyadicCell_subinterval n k hk) ((1 : Rat) / 3)
-    (by constructor <;> native_decide) n hcell_lo hcell_hi
   have htarget_stage : n ≤
       uniformExpRationalTargetStage ((1 : Rat) / 3) n :=
     uniformExpRationalTargetStage_ge ((1 : Rat) / 3) n
@@ -7673,34 +7670,6 @@ theorem uniformExpOnUnitWarm_oneThird_bisection_value_overlaps (n : Nat) :
           (uniformExpRationalTargetStage ((1 : Rat) / 3) n + 4)).hi ≤
         ((uniformExpRaw ((1 : Rat) / 3)).compute (n + 4)).hi
     exact ⟨hrawnest.1, hrawnest.2.2⟩
-  have hcontains' :
-      QInterval.ContainsInterval
-        (uniformExpOnUnitWarm_intervalRegular.evalInterval
-          (uniformExpOnUnitWarm_oneThird_bisection_compute n)
-          (uniformExpOnUnitWarm_oneThird_bisection_compute_subinterval n) n)
-        (uniformExpOnUnitWarm.compute ((1 : Rat) / 3)
-          ⟨by native_decide, by native_decide⟩ n) := by
-    have hscheduled_sub := (gapAwareTargetBisectionScheduledIterateWithProof
-      uniformExpOnUnitWarm_continuous
-      (uniformExpOnUnitWarm_oneThird_target.value.compute n)
-      ({ lo := 0, hi := 1 } : QInterval)
-      uniformExpOnUnitWarm_unit_subinterval
-      (fun j => uniformExpOnUnitWarm_oneThird_target.rangePrecision j) n).2
-    have hcontains_scheduled :
-        QInterval.ContainsInterval
-          (uniformExpOnUnitWarm_intervalRegular.evalInterval
-            (gapAwareTargetBisectionScheduledIterate
-              uniformExpOnUnitWarm_continuous
-              (uniformExpOnUnitWarm_oneThird_target.value.compute n)
-              ({ lo := 0, hi := 1 } : QInterval)
-              uniformExpOnUnitWarm_unit_subinterval
-              (fun j => uniformExpOnUnitWarm_oneThird_target.rangePrecision j) n)
-            hscheduled_sub n)
-          (uniformExpOnUnitWarm.compute ((1 : Rat) / 3)
-            ⟨by native_decide, by native_decide⟩ n) := by
-      simpa only [hcell] using hcontains
-    simpa only [uniformExpOnUnitWarm_oneThird_bisection_compute] using
-      hcontains_scheduled
   have htarget_ordered :
       (uniformExpOnUnitWarm_oneThird_target.value.compute n).lo ≤
         (uniformExpOnUnitWarm_oneThird_target.value.compute n).hi := by
@@ -7709,11 +7678,26 @@ theorem uniformExpOnUnitWarm_oneThird_bisection_value_overlaps (n : Nat) :
       (uniformExpOnUnitWarm_oneThird_target.value.compute n).hi -
         (uniformExpOnUnitWarm_oneThird_target.value.compute n).lo at hw
     exact (Rat.le_iff_sub_nonneg _ _).2 hw
-  unfold QInterval.Overlaps
-  exact ⟨Rat.le_trans hcontains'.1
-      (Rat.le_trans htarget_nested.1 htarget_ordered),
-    Rat.le_trans (Rat.le_trans htarget_ordered htarget_nested.2)
-      hcontains'.2⟩
+  have hpoint_target : QInterval.Overlaps
+      (uniformExpOnUnitWarm.compute ((1 : Rat) / 3)
+        ⟨by native_decide, by native_decide⟩ n)
+      (uniformExpOnUnitWarm_oneThird_target.value.compute n) := by
+    unfold QInterval.Overlaps
+    exact ⟨Rat.le_trans htarget_nested.1 htarget_ordered,
+      Rat.le_trans htarget_ordered htarget_nested.2⟩
+  have hbis_lo : (uniformExpOnUnitWarm_oneThird_bisection_compute n).lo ≤
+      (1 : Rat) / 3 := by
+    simpa [uniformExpOnUnitWarm_oneThird_bisection_compute, hcell] using hcell_lo
+  have hbis_hi : (1 : Rat) / 3 ≤
+      (uniformExpOnUnitWarm_oneThird_bisection_compute n).hi := by
+    simpa [uniformExpOnUnitWarm_oneThird_bisection_compute, hcell] using hcell_hi
+  exact IntervalRegularOn.evalInterval_overlaps_of_point_overlaps
+    uniformExpOnUnitWarm_intervalRegular
+    (uniformExpOnUnitWarm_oneThird_bisection_compute n)
+    (uniformExpOnUnitWarm_oneThird_bisection_compute_subinterval n)
+    ((1 : Rat) / 3) (by constructor <;> native_decide) n
+    (uniformExpOnUnitWarm_oneThird_target.value.compute n)
+    hbis_lo hbis_hi hpoint_target
 
 def uniformExpOnUnitWarm_oneThird_bisection_search :
     GapAwareInverseBisectionSearch
