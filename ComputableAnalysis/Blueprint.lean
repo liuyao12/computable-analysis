@@ -6,6 +6,9 @@ import ComputableAnalysis.Series
 import ComputableAnalysis.DifferentialEquationsFoundation
 import ComputableAnalysis.ComplexPathIntegral
 import ComputableAnalysis.EffectiveFourierTail
+import ComputableAnalysis.FiniteDeflationExample
+import ComputableAnalysis.FiniteFTAConcreteCertificate
+import ComputableAnalysis.FiniteFTAIsolationExample
 import ComputableAnalysis.FiniteAMGMExample
 import ComputableAnalysis.FiniteAMGMInterface
 import ComputableAnalysis.FiniteBertrandCertificate
@@ -43,6 +46,9 @@ import ComputableAnalysis.FiniteSqrtTwoBisectionExample
 import ComputableAnalysis.FiniteSquareRootBisectionExample
 import ComputableAnalysis.FiniteSubsetCountExample
 import ComputableAnalysis.FiniteTriangleCertificate
+import ComputableAnalysis.FiniteMonotoneSequenceExample
+import ComputableAnalysis.IrrationalSqrt
+import ComputableAnalysis.SqrtTwoDescent
 
 /-!
 # Blueprint declaration index

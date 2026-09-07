@@ -138,6 +138,28 @@ theorem dyadicApproach_error_shrinks :
   exact Rat.le_trans (dyadicPower_le_one_div_succ n)
     (Rat.le_trans hinv (one_div_den_succ_le_of_pos eps.property))
 
+/-- The monotone interval presentation of the dyadic approach to one.
+
+This is the single concrete instance used in the blueprint to demonstrate how
+a bounded monotone process becomes a valid `RealRaw`; the general mechanism
+is `MonotoneIntervalCertificate`. -/
+def dyadicApproachIntervalCertificate : MonotoneIntervalCertificate where
+  loStage := dyadicApproach
+  hiStage := fun _ => 1
+  lower_succ := dyadicApproach_succ_le
+  upper_succ := fun _ => Rat.le_refl
+  enclosed := dyadicApproach_le_one
+  width_shrinks := by
+    intro eps
+    obtain ⟨N, hN⟩ := dyadicApproach_error_shrinks eps
+    exact ⟨N, fun n hn => by
+      change 1 - dyadicApproach n <= eps.val
+      exact hN n hn⟩
+
+theorem dyadicApproachIntervalCertificate_valid :
+    dyadicApproachIntervalCertificate.toRealRaw.Valid := by
+  exact dyadicApproachIntervalCertificate.toRealRaw_valid
+
 theorem dyadicApproach_stage8_certificate :
     dyadicApproach 8 = 255 / 256 /\
       1 - dyadicApproach 8 = 1 / 256 /\
