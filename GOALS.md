@@ -123,7 +123,9 @@ is open.
    overlap; each normalized arctangent target supplies the initial full-chart
    bracket.  At each finite depth the checked dichotomy is now explicit:
    either all decisions were strict and the bracket has dyadic width, or a
-   rational midpoint forward box overlaps the target.  The remaining work is
+   rational midpoint forward box overlaps the target.  For each fixed source
+   interval, the arctangent rectangle-image boxes now also refine across
+   output stages.  The remaining work is
    to synchronize these fixed-stage brackets
    across output stages and prove their source widths shrink.  Then lift rational chart
    addition to bounded `RealRaw` slopes;

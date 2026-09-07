@@ -334,6 +334,59 @@ def angleOnUnitRegularImage
   { lo := (angleOnUnitRegular.compute I.lo hLo n).lo - budget,
     hi := (angleOnUnitRegular.compute I.hi hHi n).hi + budget }
 
+/-- For a fixed rational source interval, the widened endpoint images refine
+with the rectangle stage.  The point boxes refine by their raw-validity proof,
+and the explicit `1/(8(n+1))` safety margin decreases.  This supplies the
+forward-side cross-stage coherence needed by a constructive inverse search. -/
+theorem angleOnUnitRegularImage_nested
+    (I : QInterval)
+    (hI : subintervalOf I angleOnUnitRegular.lower angleOnUnitRegular.upper) :
+    forall n m, n <= m ->
+      (angleOnUnitRegularImage I hI n).lo <=
+        (angleOnUnitRegularImage I hI m).lo /\
+      (angleOnUnitRegularImage I hI m).lo <=
+        (angleOnUnitRegularImage I hI m).hi /\
+      (angleOnUnitRegularImage I hI m).hi <=
+        (angleOnUnitRegularImage I hI n).hi := by
+  intro n m hnm
+  let hLo : inDomainInterval
+      angleOnUnitRegular.lower angleOnUnitRegular.upper I.lo :=
+    ⟨hI.1, Rat.le_trans hI.2.1 hI.2.2⟩
+  let hHi : inDomainInterval
+      angleOnUnitRegular.lower angleOnUnitRegular.upper I.hi :=
+    ⟨Rat.le_trans hI.1 hI.2.1, hI.2.2⟩
+  have hLoNested := (angleOnUnitRegular.valid_on I.lo hLo).2.1 n m hnm
+  have hHiNested := (angleOnUnitRegular.valid_on I.hi hHi).2.1 n m hnm
+  have hLoLower :
+      (angleOnUnitRegular.compute I.lo hLo n).lo <=
+        (angleOnUnitRegular.compute I.lo hLo m).lo := by
+    simpa [FunctionOnInterval.compute] using hLoNested.1
+  have hLoOrdered :
+      (angleOnUnitRegular.compute I.lo hLo m).lo <=
+        (angleOnUnitRegular.compute I.lo hLo m).hi := by
+    simpa [FunctionOnInterval.compute] using hLoNested.2.1
+  have hHiUpper :
+      (angleOnUnitRegular.compute I.hi hHi m).hi <=
+        (angleOnUnitRegular.compute I.hi hHi n).hi := by
+    simpa [FunctionOnInterval.compute] using hHiNested.2.2
+  have hbudget : 1 / (8 * ((m + 1 : Nat) : Rat)) <=
+      1 / (8 * ((n + 1 : Nat) : Rat)) := by
+    have hden : 8 * (n + 1) <= 8 * (m + 1) := by omega
+    simpa [Rat.natCast_mul] using
+      (FTC.one_div_nat_antitone
+        (by omega : 0 < 8 * (n + 1))
+        (by omega : 0 < 8 * (m + 1)) hden)
+  have hmono := angleOnUnitRegular_nondecreasing I.lo I.hi hLo hHi hI.2.1 m
+  have hbudgetNonneg : 0 <= 1 / (8 * ((m + 1 : Nat) : Rat)) := by
+    rw [Rat.div_def, Rat.one_mul]
+    exact Rat.le_of_lt (Rat.inv_pos.2 (by
+      exact Rat.mul_pos (by native_decide)
+        ((Rat.natCast_pos).2 (Nat.succ_pos m))))
+  dsimp [angleOnUnitRegularImage]
+  exact ⟨by grind [Rat.sub_eq_add_neg],
+    by grind [Rat.sub_eq_add_neg],
+    by grind [Rat.sub_eq_add_neg]⟩
+
 /-- The interval image has width bounded by twice the source width plus four
 copies of the explicit point-box budget. -/
 private theorem angleOnUnitRegularImage_width_le
