@@ -9343,6 +9343,29 @@ theorem applyRealRaw_contains_candidate
   exact RealRaw.prefixStabilize_contains_current_of_future
     (F.applyCandidate_future x hx hsource) n
 
+/-- Finite overlap with the canonical adaptive image already proves the
+represented forward equation.  This is the constructive replacement for an
+appeal to an attained inverse value: the adaptive image is stabilized only to
+make it a valid raw real, and stabilization retains every finite candidate
+box. -/
+theorem applyRealRaw_equiv_of_applyCandidate_overlap
+    (F : ContinuousFunctionOnInterval) (x : RealRaw) (hx : x.Valid)
+    (hsource : forall n,
+      subintervalOf (x.compute n) F.function.lower F.function.upper)
+    (y : RealRaw) (hy : y.Valid)
+    (hoverlaps : forall n,
+      QInterval.Overlaps ((F.applyCandidate x hx hsource).compute n)
+        (y.compute n)) :
+    (F.applyRealRaw x hx hsource).Equiv y := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  have hstable := F.applyRealRaw_contains_candidate x hx hsource n
+  have hover := hoverlaps n
+  apply (RealRaw.compareAt_overlap_iff
+    (F.applyRealRaw x hx hsource) y n n).2
+  exact ⟨Rat.le_trans hstable.1 hover.1,
+    Rat.le_trans hover.2 hstable.2⟩
+
 theorem applyCandidate_equiv_applyRealRaw
     (F : ContinuousFunctionOnInterval) (x : RealRaw) (hx : x.Valid)
     (hsource : forall n,
