@@ -2,10 +2,10 @@
 \addcontentsline{toc}{chapter}{Preface}
 
 This book develops calculus by constructing things: rational enclosures for
-numbers, geometric trigonometric values, rectangle integrals, secant
-computations of derivatives, power-series prefixes, and finite evolutions
-of linear systems.  Every infinite process comes with a proof that its
-finite computations agree and become arbitrarily accurate.
+numbers, polygonal areas and solid volumes, trigonometric values, rectangle
+integrals, secant computations of derivatives, power-series prefixes, and
+finite evolutions of linear systems.  Every infinite process comes with a
+proof that its finite computations agree and become arbitrarily accurate.
 
 The emphasis is on useful examples and reusable constructions, not on the
 largest possible classes of set-theoretic functions.  Rational inputs do
@@ -14,8 +14,12 @@ inputs without making a completed real line the foundation of the subject.
 An identity means equivalence of two computations, often obtained in very
 different ways.
 
-The first two chapters retain the interval and circle foundations.  The
-subsequent route is
+After the interval foundations, geometry comes before trigonometry.  Inner
+and outer polygons compute the circle; finite cylinder stacks and conical
+frusta establish the sphere--cylinder volume and surface comparisons.
+These geometric exhaustions require neither angle functions nor a general
+integral.  A separate chapter then uses sector area to construct angles,
+sine, and cosine.  The subsequent route is
 \[
  \begin{gathered}
  \text{independent rectangle integrals}
@@ -47,7 +51,8 @@ contain it.
 
 \clearpage
 \input{01-foundations.tex}
-\input{02-rational-circle-trigonometry.tex}
+\input{02-circle-sphere.tex}
+\input{02-trigonometry.tex}
 \input{03-integrals.tex}
 \input{06-effective-calculus.tex}
 \input{04-infinite-series.tex}

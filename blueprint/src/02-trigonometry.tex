@@ -1,0 +1,135 @@
+\chapter{Angles and Trigonometric Functions}\label{ch:rational-circle-trigonometry}
+
+The preceding chapter constructed circles, arc lengths, sector areas, and
+the sphere--cylinder comparisons without trigonometric functions.  We now
+use sector area to assign an angle coordinate to a point of the circle.
+The new objects are functions of that coordinate:
+\[
+ S(x)=\sin(\pi x),\qquad C(x)=\cos(\pi x).
+\]
+These names refer to the computations below, not to functions imported
+with an existing theory of differentiation.
+
+\section{The sector-area coordinate}
+\label{sec:sector-angle-coordinate}
+Recall the rational circle chart and its sector-area computation from
+Chapter~\ref{ch:circle-sphere}:
+\[
+ P(t)=\left(\frac{1-t^2}{1+t^2},\frac{2t}{1+t^2}\right),
+ \qquad A(1)=\pi/4.
+\]
+A full turn has normalized parameter length $2$ and a quarter turn has
+length $1/2$.  For rational $0\le x\le1/2$, the point with sector area
+$\pi x/2$ is to have coordinates $(C(x),S(x))$.
+
+The geometric estimates already proved are
+\[
+ \frac{v-u}{1+v^2}\le A(v)-A(u)\le\frac{v-u}{1+u^2},
+ \qquad \frac{v-u}{2}\le A(v)-A(u)\le v-u
+\]
+for rational $0\le u<v\le1$.  The chart therefore has interval
+continuity and a linear inverse-separation bound.  The target
+$\pi x/2=2xA(1)$ is enclosed by its endpoint values.  The trisection
+construction of Chapter~\ref{ch:foundations} computes a unique parameter
+$t$ such that
+\[
+ A(t)=\pi x/2.
+\]
+Evaluation of $P$ at this computed input gives $C(x),S(x)$.  At $x=0$
+and $x=1/2$ use $t=0,1$ directly.  Reflections in the coordinate axes and
+whole turns give the computation at every rational input.
+
+The conventional name $A(t)=\arctan t$ records the half-angle nature of
+this rational chart: the arc length from $(1,0)$ to $P(t)$ is $2A(t)$.
+No integral definition of arctangent is needed.  The rational rectangle
+bounds for $1/(1+t^2)$ that occur in the sector-area construction will
+later give an equivalent integral computation.
+
+\section{Dyadic rotations as another computation}
+\label{thm:finite-quarter-turn}
+If $(c,s)$ is a unit-circle point in the first quadrant, its half-angle
+point is
+\[
+ (a,b)=\left(\sqrt{(1+c)/2},\sqrt{(1-c)/2}\right).
+\]
+Finite algebra gives $a^2+b^2=1$, $a^2-b^2=c$, and $2ab=s$; the
+nonnegative sign in the last identity follows from $s\ge0$.  Thus the
+coordinate rotation matrix of $(a,b)$ squares to that of $(c,s)$.
+Additivity and invariance of sector area show that its angle coordinate
+is half that of the parent point.
+
+Repeated halving of the quarter turn, followed by finite rotation products,
+therefore constructs all dyadic angle samples by nested square roots.
+They agree with the inverse-sector construction by its separation and
+uniqueness.  This agreement is a geometric theorem between two computations,
+not an appeal to an already completed trigonometric function.
+
+\section{Addition laws and continuity}
+Multiplying the coordinate rotation matrices and using the additivity of
+sector area gives
+\begin{align*}
+ S(x+y)&=S(x)C(y)+C(x)S(y),\\
+ C(x+y)&=C(x)C(y)-S(x)S(y),\\
+ C(x)^2+S(x)^2&=1.
+\end{align*}
+The endpoint values are
+$S(0)=0$, $C(0)=1$, $S(1/2)=1$, and $C(1/2)=0$.
+Reflections give $S(-x)=-S(x)$ and $C(-x)=C(x)$; both have period $2$.
+
+A coordinate difference is bounded by chord length, and chord length by
+arc length.  The arc-length computation from Chapter~\ref{ch:circle-sphere}
+and the bound $\pi<4$ yield
+\[
+ |S(x)-S(y)|\le4|x-y|,\qquad
+ |C(x)-C(y)|\le4|x-y|.
+\]
+These hold for every rational pair, splitting across quadrant boundaries
+when necessary.  Thus dyadic approximation is another terminating way to
+evaluate any rational angle.  They also give evaluation at computed inputs
+on specified bounded intervals.
+
+\section{Small angles before differentiation}
+\label{sec:geometric-small-angle}
+For $0<h\le1/4$, chord, sector, and tangent comparisons give
+\[
+ S(h)\le\pi h\le S(h)/C(h).
+\]
+For the left inequality, the vertical displacement is at most the chord,
+which is at most the arc length.  For the right inequality, twice the
+sector area is at most twice the area of the enclosing tangent triangle.
+The geometric point lies between the positive horizontal axis and its
+bisector, so $C(h)>0$ with a positive computable lower bound.
+
+The half-angle identity and chord bound give
+\[
+ 0\le1-C(h)=2S(h/2)^2\le8h^2.
+\]
+Multiplying the upper tangent comparison by $C(h)$ and using $\pi<4$
+yields
+\[
+ 0\le\pi h-S(h)\le\pi h(1-C(h))\le32h^3.
+\]
+Odd and even symmetry therefore give, for $|h|\le1/4$,
+\[
+ |S(h)-\pi h|\le32|h|^3,\qquad |1-C(h)|\le8h^2.
+\]
+The second estimate also holds for all rational $h$, by the global chord
+bound and half-angle identity.  These finite geometric errors will prove
+both that the convex derivative computations terminate and that their
+values are $\pi C$ and $-\pi S$.
+
+\section{Input to integration}
+One of the first areas computed in two ways will be
+\[
+ \int_0^{1/2}S(x)\,dx.
+\]
+Equal-angle samples use the nested-radical dyadic construction.  Unequal
+samples use the rational circle parameter $t$ and the sector coordinate
+$2A(t)/\pi$.  Their comparison uses the explicit continuity bounds and
+finite refinements.  The later derivative computation and FTC identify
+the answer as $1/\pi$.
+
+The distinction between the chapters is now explicit: the preceding one
+computes particular geometric magnitudes, while this one constructs angle
+functions and compares their descriptions.  General integration organizes
+both sorts of computations only after they have been established.

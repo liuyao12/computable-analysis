@@ -1,0 +1,450 @@
+\chapter{The Circle, the Sphere, and the Cylinder}\label{ch:circle-sphere}
+
+Area, length, and volume can be computed before defining an integral of a
+function.  We start with finite polygons and prisms, then construct curved
+figures by inner and outer comparisons whose gaps shrink.  Each particular
+figure brings its own proof.  Neither trigonometric functions nor a general
+integration theorem is needed in this chapter.
+
+The sphere and cylinder results below are a coordinate reconstruction in
+the spirit of Archimedes' exhaustion arguments, not a transcription of his
+proofs.  His opening letters in \emph{On the Sphere and Cylinder} describe
+the surface, volume, spherical-segment, and sector comparisons pursued
+here.  The historical references are given at the end of the chapter.
+
+\section{Finite rational geometry}
+\label{thm:rational-circle-pythagorean}
+The rational chart
+\[
+ P(t)=\left(\frac{1-t^2}{1+t^2},\frac{2t}{1+t^2}\right)
+\]
+satisfies $P_1(t)^2+P_2(t)^2=1$ by expansion.  For $0\le t\le1$ it
+runs through the first quadrant, from $(1,0)$ to $(0,1)$.  Conversely a
+point of the unit circle in this quadrant has parameter $t=y/(1+x)$.
+
+Determinants give triangle and polygon areas.  Multiplying a polygon's
+area by a rational height gives the volume of a right prism: triangulate
+the base and use finite additivity.  Square-root computations give segment
+lengths and hence the areas of triangles and trapezoids in rational
+coordinate planes.  Computed lengths are enclosed by the rational
+arithmetic of Chapter~\ref{ch:foundations}; they are not assumed to be
+exact rational numbers.
+
+Reflections and the coordinate matrix
+\[
+ \begin{pmatrix}c&-s\\s&c\end{pmatrix},\qquad c^2+s^2=1,
+\]
+preserve squared lengths and determinants by finite algebra.  Here $c,s$
+are coordinates of a point, not previously defined trigonometric functions.
+The broken-line inequality compares polygonal lengths.
+
+\section{Archimedes and rational circles}
+\label{thm:geometric-pi-validity}
+Join finitely many points $P(t_i)$ to the origin, where
+$0=t_0<\cdots<t_N=t\le1$.  For $u=t_i,v=t_{i+1}$, the inner triangle
+and the outer quadrilateral cut out by the endpoint tangents have areas
+\[
+ I(u,v)=\frac{(v-u)(1+uv)}{(1+u^2)(1+v^2)},\qquad
+ O(u,v)=\frac{v-u}{1+uv}.
+\]
+The formulas follow from determinants and the two tangent equations
+$P(u)\mathbin{\cdot}z=P(v)\mathbin{\cdot}z=1$.
+Inserting a point increases the total inner area and decreases the total
+outer area: the changes are areas of finite triangles.  Also
+\[
+ \frac{v-u}{1+v^2}\le I(u,v)\le O(u,v)
+       \le\frac{v-u}{1+u^2}.
+\]
+Write $\delta=\max_i(t_{i+1}-t_i)$.  The total outer--inner gap is at
+most
+\[
+ \delta\sum_i\left(\frac1{1+t_i^2}-\frac1{1+t_{i+1}^2}\right)
+ =\delta\left(1-\frac1{1+t^2}\right)\le\delta.
+\]
+Nested rational subdivisions therefore define a sector-area computation
+$A(t)$.  Define
+\[
+ \pi=4A(1).
+\]
+A square and finer rational inscribed and circumscribed polygons give
+$2<\pi<4$.  Each strict inequality is witnessed by a finite computation.
+Scaling coordinates by $R$ scales every polygonal area by $R^2$; thus the
+disk of radius $R$ has area computation $\pi R^2$.
+
+\begin{figure}[htbp]\centering
+\rationalCircleSubdivisionAnimation
+\caption{Inner and outer rational polygons compute the circle's area.}
+\label{fig:rational-parameter-line}
+\end{figure}
+
+For later use, the same inequalities applied to a subarc give
+\[
+ \frac{v-u}{1+v^2}\le A(v)-A(u)\le\frac{v-u}{1+u^2}
+ \qquad(0\le u<v\le1).
+\]
+In particular $(v-u)/2\le A(v)-A(u)\le v-u$.  These are geometric
+area estimates.  Their later interpretation as rectangle bounds is not
+needed to construct them.
+
+\section{Circumference and sector length}
+Area and circumference are initially independent computations.  Approximate
+the boundary by inscribed chords and circumscribed tangent segments.
+For a unit-circle chord of length $c$, its midpoint is at distance
+$d=\sqrt{1-c^2/4}$ from the origin.  Twice its radial triangle area is
+$cd$, and
+\[
+ 0\le c-cd\le c^3/4.
+\]
+If $c_*$ is the largest chord, the difference between the inner perimeter
+and twice the inner area is at most $c_*^2$ times the inner perimeter
+divided by $4$.  The perimeters have a fixed rational bound supplied by
+an outer square.  The difference therefore shrinks.
+
+For a polygon tangent to the unit circle, twice its area equals its
+perimeter, triangle by triangle.  The inner and outer areas have already
+been proved to agree.  The polygonal length computations consequently agree
+as well, and give circumference $2\pi$.  Scaling gives circumference
+$2\pi R$ at radius $R$.
+
+The same comparison on a sector says that its arc length is twice its
+area divided by its radius.  Additivity and invariance under rotation
+follow by finite polygonal refinements and the determinant identities.
+Computed coordinates are handled by rational enclosures and their finite
+error bounds.  This proves the facts about arcs that the next chapter
+will use to introduce angle parameters.
+
+\section{Cylinders and cones by finite solid comparisons}
+\label{sec:cone-exhaustion}
+Extruding the circle's inner and outer polygons through a height $H$
+gives inner and outer prisms.  Their volume gap is $H$ times the planar
+area gap.  Thus a circular cylinder has volume computation
+\[
+ V_{\mathrm{cyl}}=\pi r^2H.
+\]
+Extruding boundary polygons instead gives lateral-area computation
+$2\pi rH$.  Including both end disks gives total area
+$2\pi rH+2\pi r^2$.
+
+To compute a cone with apex at height zero, base radius $r$, and height
+$H$, cut its axis at $z_k=kH/N$.  In slab $k$, the cone's radius lies
+between $rk/N$ and $r(k+1)/N$.  Inscribed and circumscribed cylinder
+stacks therefore have volumes
+\[
+ C_N^- =\frac{\pi r^2H}{N^3}\sum_{k=0}^{N-1}k^2,
+ \qquad
+ C_N^+ =\frac{\pi r^2H}{N^3}\sum_{k=1}^{N}k^2.
+\]
+These are finite solid containments, not a theorem about infinitesimal
+slices.  Each circular cylinder can itself be replaced by polygonal prisms
+with an arbitrarily small additional error.
+
+The identity
+$\sum_{k=1}^{N}k^2=N(N+1)(2N+1)/6$ follows by induction (or by
+summing successive cubes).  Consequently
+\[
+ C_N^\pm=\pi r^2H\left(\frac13\mathbin{\pm}\frac1{2N}
+                              +\frac1{6N^2}\right).
+\]
+Here the minus sign gives $C_N^-$ and the plus sign gives $C_N^+$.
+Their gap is $\pi r^2H/N$.  Refining, for example with $N=2^n$, gives
+nested solid bounds, and proves
+\[
+ \boxed{V_{\mathrm{cone}}=\frac13\pi r^2H.}
+\]
+All occurrences of $\pi$ in finite bounds are evaluated by its existing
+rational interval computation.  The displayed expressions abbreviate
+finite arithmetic on these enclosures.
+
+\section{The hemisphere and the cone fill the cylinder in the bounds}
+\label{sec:sphere-volume-exhaustion}
+Fix a positive rational radius $R$.  Use height $z$ above the equatorial
+plane.  The upper hemisphere has squared sectional radius $R^2-z^2$.
+Compare it with the cone whose sectional radius is $z$, both inside the
+cylinder of radius and height $R$.
+
+For a rational partition $0=z_0<\cdots<z_N=R$, put
+$\Delta z_i=z_{i+1}-z_i$.  Cylinder stacks bounding the hemisphere have
+volumes
+\[
+ H_P^-=\pi\sum_i(R^2-z_{i+1}^2)\Delta z_i,
+ \qquad
+ H_P^+=\pi\sum_i(R^2-z_i^2)\Delta z_i.
+\]
+The corresponding cone stacks have volumes
+\[
+ C_P^-=\pi\sum_i z_i^2\Delta z_i,
+ \qquad
+ C_P^+=\pi\sum_i z_{i+1}^2\Delta z_i.
+\]
+At every finite partition there are exact identities
+\[
+ \boxed{H_P^-+C_P^+=\pi R^3,
+        \qquad H_P^++C_P^-=\pi R^3.}
+\]
+Moreover their common gap is at most
+\[
+ \pi\max_i\Delta z_i\sum_i(z_{i+1}^2-z_i^2)
+ =\pi R^2\max_i\Delta z_i.
+\]
+Thus the independently bounded hemisphere and cone volumes add to the
+cylinder volume.  The cone calculation gives the hemisphere volume
+$2\pi R^3/3$, and reflection gives
+\begin{theorem}[Sphere volume]\label{thm:sphere-volume}
+The sphere's solid-volume computation is
+\[
+ \boxed{V_R=\frac43\pi R^3.}
+\]
+It is two-thirds of the volume of the circumscribed cylinder of radius
+$R$ and height $2R$.
+\end{theorem}
+
+For equal $N$-slab subdivisions on each hemisphere the explicit bounds are
+\[
+ \pi R^3\left(\frac43-\frac1N-\frac1{3N^2}\right)
+ \le V_R\le
+ \pi R^3\left(\frac43+\frac1N-\frac1{3N^2}\right).
+\]
+Their difference is $2\pi R^3/N$.  This is the entire exhaustion error,
+apart from requested finite precision in the disk-area computations.
+No general principle asserting equality of volumes from equality of
+cross-sections has been invoked.
+
+\section{A conical frustum's area is another polygonal computation}
+\label{lem:frustum-area}
+Rotate a segment with endpoint distances $r,r'$ from the axis and axial
+height $h$.  Its length is $\ell=\sqrt{h^2+(r-r')^2}$.
+We compute the lateral area of the resulting frustum from planar facets,
+before measuring the sphere's surface.
+
+Choose an inner polygon of the unit circle and the outer polygon given by
+its endpoint tangents.  Let their areas be $a^-,a^+$, their perimeters
+$p^-,p^+$, and let the inner chord lengths be $b_j$ with midpoint
+distances $d_j=\sqrt{1-b_j^2/4}$.  Scale these two polygons by $r$ and
+$r'$ in the two endpoint planes and join corresponding edges.
+
+An inner trapezoid has area
+\[
+ T_j=\frac{r+r'}2 b_j\sqrt{h^2+d_j^2(r-r')^2}.
+\]
+Its slant height lies between $d_j\ell$ and $\ell$.  Thus its total
+area $F^-$ satisfies
+\[
+ (r+r')\ell a^-
+ =\frac{r+r'}2\ell\sum_j b_jd_j
+ \le F^-\le\frac{r+r'}2\ell p^-.
+\]
+Every outer polygon edge has distance $1$ from the axis in its base
+plane.  The transverse slant height of the associated outer trapezoid is
+therefore exactly $\ell$.  Its total area is
+\[
+ F^+=\frac{r+r'}2\ell p^+=(r+r')\ell a^+.
+\]
+The planar comparisons $p^-\le2\pi$ and $a^-\le\pi\le a^+$ imply
+\[
+ F^-\le\pi(r+r')\ell\le F^+,
+ \qquad F^+-F^-\le(r+r')\ell(a^+-a^-).
+\]
+Refinement constructs a unique lateral-area computation and proves
+\[
+ \boxed{\operatorname{Area}(\text{frustum})=\pi(r+r')\ell.}
+\]
+The case $r'=0$ is the cone's lateral area $\pi r\ell$; the case $r=r'$
+is the cylinder's lateral area.  Degenerate zero-area cases are read
+directly.  This proof used only planar trapezoids and the circle's
+exhaustion, not an unproved formula for a surface of revolution.
+
+\section{The finite chord identity behind the sphere's surface}
+\label{lem:spherical-band-chord}
+Use coordinates $(r,z)$ in a meridian half-plane, with $r\ge0$.
+Take consecutive points
+\[
+ p=(r,z),\qquad q=(r',z'),\qquad
+ r^2+z^2=(r')^2+(z')^2=R^2,\qquad z>z'.
+\]
+Exclude the single diameter joining both poles.  Set
+\[
+ \Delta z=z-z',\quad \ell=|p-q|,\quad
+ m=(p+q)/2,\quad d=|m|=\sqrt{R^2-\ell^2/4}>0.
+\]
+The midpoint vector is perpendicular to the chord.  Its radial coordinate
+is $(r+r')/2$, so elementary similar right triangles give
+\[
+ \frac{r+r'}2\ell=d\Delta z.
+\]
+Rotating the chord gives an inner frustum of area
+\[
+ L(p,q)=\pi(r+r')\ell=2\pi d\Delta z.
+\]
+
+For an outer comparison, take the parallel tangent to the circle at
+$Rm/d$ and truncate it by the same two horizontal planes.  Its endpoint
+radii exceed $r,r'$ by the same amount
+\[
+ k=(R-d)\frac{\ell}{\Delta z}.
+\]
+The slant length is still $\ell$, so the tangent frustum has area
+\[
+ U(p,q)=2\pi\left(d\Delta z+(R-d)\frac{\ell^2}{\Delta z}\right).
+\]
+These are actual finite frustum computations.  Since $d\le R$ and
+$\ell\ge\Delta z$, their comparison is
+\[
+ \boxed{L(p,q)\le2\pi R\Delta z\le U(p,q).}
+\]
+The middle quantity is the independently computed area of the cylinder
+band of radius $R$ between the same planes.
+
+There is also a uniform error bound, including near the poles.  The
+nonnegative radii give
+\[
+ (r-r')^2\le|r^2-(r')^2|\le2R\Delta z,
+ \qquad \ell^2\le4R\Delta z.
+\]
+Using $R-d=\ell^2/(4(R+d))$ therefore yields
+\[
+ \boxed{U(p,q)-L(p,q)
+       =\frac{\pi\ell^4}{2(R+d)\Delta z}\le2\pi\ell^2.}
+\]
+This explicit estimate, not an assertion about arbitrary triangulations
+of a surface, will prove convergence.
+
+\section{Sphere and zone surface areas by exhaustion}
+\label{sec:sphere-area-exhaustion}
+For a full meridian take, on its northern half,
+\[
+ (r(t),z(t))=
+ R\left(\frac{2t}{1+t^2},\frac{1-t^2}{1+t^2}\right),
+ \qquad t=j/N,\quad 0\le j\le N,
+\]
+and reflect in the equatorial plane for the southern half.  These are
+rational points.  Adjacent northern chord lengths satisfy the exact identity
+\[
+ \ell(u,v)^2=
+ \frac{4R^2(v-u)^2}{(1+u^2)(1+v^2)}\le\frac{4R^2}{N^2}.
+\]
+The reflected chords have the same bound.  Write $\ell_*$ for the largest
+chord, so $\ell_*\le2R/N$.  Their total length is at most the meridian
+semicircle length $\pi R$, already computed from polygons.
+
+Let $L_P$ be the sum of inner frustum areas and $U_P$ the sum of the
+separate tangent-frustum areas.  The latter need not join along a common
+parallel; its validity is the finite comparison below, not a general claim
+that containment of surfaces orders their areas.  Adding the chord
+identities and the error estimates gives
+\[
+ L_P\le4\pi R^2\le U_P,
+ \qquad U_P-L_P\le2\pi\ell_*\sum_i\ell_i
+                  \le2\pi^2R\ell_*\le\frac{4\pi^2R^2}{N}.
+\]
+Thus $64R^2/N$ is a rational upper bound for the geometric gap.  All these
+intervals overlap, independently of the chosen meridian subdivisions.
+Compute the finitely many lengths, tangents, and areas to any further
+prescribed rational error and take finite-prefix intersections.  This
+constructs the sphere's surface-area computation, independently of its
+volume, and proves
+\begin{theorem}[Sphere area]\label{thm:sphere-area}
+The sphere's surface-area computation is
+\[
+ \boxed{\mathcal S_R=4\pi R^2.}
+\]
+It equals the lateral area of the circumscribed cylinder, and equals
+four times the area of a great-circle disk.
+\end{theorem}
+
+At the coarsest stage, the meridian consists of the two chords from the
+north pole to the equator and then to the south pole.  Its bounds are
+\[
+ 2\sqrt2\,\pi R^2\le\mathcal S_R
+       \le(8-2\sqrt2)\pi R^2.
+\]
+Further rational subdivisions improve these bounds by the proved schedule.
+
+The same proof works between any two fixed parallel planes with heights
+$z_0<z_1$.  The chord heights telescope to $H=z_1-z_0$ instead of $2R$.
+One may take rational heights and compute the endpoint radii by square
+roots.  With height mesh $\delta$, the earlier bound gives
+$\ell_*\le\sqrt{4R\delta}$, so refinement terminates even at a pole.
+The construction proves
+\[
+ \boxed{\operatorname{Area}(\text{spherical zone of height }H)
+                  =2\pi RH.}
+\]
+In particular a cap of height $h$ has area $2\pi Rh$.  The squared
+straight-line distance from its pole to a point of its rim is $2Rh$.
+The cap therefore has the area of the planar disk with that chord as
+radius, another of Archimedes' comparisons.
+
+Adding the two end disks to the circumscribed cylinder gives total area
+$6\pi R^2$.  Thus both the sphere's volume and its surface area are
+two-thirds of those of the cylinder \emph{including its bases}.  Lateral
+area alone instead equals the sphere's area.  These are distinct statements.
+
+\section{Caps and solid sectors}
+\label{sec:spherical-caps-sectors}
+The same finite sum identities also compute a spherical cap's volume.
+Let $0\le h\le2R$ be rational and measure depth $t$ from the north pole.
+The squared section radius is $q(t)=2Rt-t^2$.  For $t,u\in[0,2R]$,
+\[
+ |q(t)-q(u)|=|t-u|\,|2R-t-u|\le2R|t-u|.
+\]
+On $N$ equal depth slabs of thickness $\delta=h/N$, enclose squared
+radii between $\max(0,q(j\delta)-2R\delta)$ and
+$q(j\delta)+2R\delta$.  The associated cylinder stacks give volume
+bounds whose gap is at most $4\pi R h\delta$.
+
+Their reference sum, obtained using $q(j\delta)$, is exactly
+\[
+ \pi\delta\sum_{j=0}^{N-1}q(j\delta)
+ =\pi\left[R h^2\left(1-\frac1N\right)
+   -h^3\left(\frac13-\frac1{2N}+\frac1{6N^2}\right)\right].
+\]
+This uses only the finite sums of integers and squares.  Its difference
+from $\pi(Rh^2-h^3/3)$ is bounded by
+$\pi(Rh^2/N+h^3/(2N)+h^3/(6N^2))$, while either bounding stack differs
+from the reference sum by at most $2\pi R h\delta$.  These bounds
+construct the cap volume and prove
+\[
+ \boxed{V_{\mathrm{cap}}=\pi h^2\left(R-\frac h3\right).}
+\]
+For $h=0$ use the zero computation.  For $h=2R$ it agrees with the earlier,
+independent full-sphere computation.
+
+For $0\le h\le R$, the solid sector joining the cap to the center is
+the cap together with a cone of height $R-h$ and squared base radius
+$2Rh-h^2$.  The cone formula and finite additivity give
+\[
+ V_{\mathrm{sector}}
+ =\pi h^2(R-h/3)+\frac\pi3(2Rh-h^2)(R-h)
+ =\frac23\pi R^2h
+ =\frac R3\operatorname{Area}(\text{cap}).
+\]
+For $R<h\le2R$, subtract the opposite smaller sector from the sphere;
+the same formula results.  Taking the whole sphere gives
+$V_R=R\mathcal S_R/3$, now as a consequence of two independent geometric
+computations rather than a definition of either quantity.
+
+\section{What precedes calculus}
+Only finitely many polygons, prisms, cylinders, and planar frusta occur at
+any stage.  The operations are determinants, square roots, rational sums,
+and interval arithmetic.  Inner--outer gaps supply the needed number
+computations.  The first cone and sphere sums have been evaluated by finite
+integer identities, not by antiderivatives.  Surface area has its own
+facet construction, not the rule of differentiating volume with respect
+to radius.
+
+The next chapter introduces trigonometry by using sector area as an angle
+coordinate.  Only afterwards do we define a general rectangle integral
+and identify these particular geometric exhaustions as examples of it.
+That later organization explains and reuses the geometry; it is not a
+prerequisite for the results proved here.
+
+\begin{remark}[Historical source]
+Archimedes, \emph{On the Sphere and Cylinder}, Books I and II, in T. L.
+Heath's edition of \emph{The Works of Archimedes} (1897), especially the
+opening letters stating the principal results.  The texts are available
+as \href{https://doi.org/10.1017/CBO9780511695124.010}{Book I} and
+\href{https://doi.org/10.1017/CBO9780511695124.011}{Book II}.
+The rational-coordinate schedules and explicit error bounds in this
+chapter are our reconstruction; they should not be attributed verbatim
+to Archimedes.
+\end{remark}

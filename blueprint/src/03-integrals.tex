@@ -103,6 +103,28 @@ bracketing.  Moving either endpoint by at most $h$ changes the integral
 by at most $Bh$.  This is the required evaluation rule for variable
 endpoints; the bound and a domain enclosure are part of its data.
 
+\section{Recognizing the earlier geometric computations}
+\label{sec:geometry-as-integrals}
+The cone and sphere volumes of Chapter~\ref{ch:circle-sphere} were
+constructed before any of the definitions in this chapter.  Their finite
+cylinder stacks now give, by comparison with the corresponding rectangle
+sums,
+\[
+ V_{\mathrm{cone}}=\pi\left(\frac rH\right)^2\int_0^H z^2\,dz,
+ \qquad
+ V_R=\pi\int_{-R}^{R}(R^2-z^2)\,dz.
+\]
+These are equivalences between existing constructions.  In particular the
+cone calculation already proves $\int_0^H z^2\,dz=H^3/3$, without
+invoking an antiderivative.  The cap stacks likewise give
+\[
+ V_{\mathrm{cap}}=\pi\int_0^h(2Rt-t^2)\,dt.
+\]
+Later the FTC supplies different proofs and faster endpoint computations
+of these same quantities.  The sphere's surface area remains the
+independent facet-and-frustum computation: no volume slicing identity is
+silently used as a definition of curved surface area.
+
 \section{Accumulation computes a derivative locally}
 \label{sec:accumulation-derivative}
 Given an integral construction for $g$ on every subinterval, put
