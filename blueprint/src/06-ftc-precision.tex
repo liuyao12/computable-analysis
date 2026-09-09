@@ -1,0 +1,180 @@
+\section{The FTC as an explicit finite-output theorem}
+\label{sec:ftc-finite-output}
+
+The preceding theorem is mathematical, but its statement must still specify
+what is constructed and what proves termination.  We give that specification
+here.  This also states the theorem with an independently supplied derivative
+$g$: its conclusion is $\int_a^b g=f(b)-f(a)$, not merely an assertion
+that some unspecified derivative exists.
+
+\subsection{Orders, derivatives, and hypotheses}
+For raw computations $X_n=[x_n^-,x_n^+]$ and $Y_n=[y_n^-,y_n^+]$, use
+\[
+ X\le Y\quad\Longleftrightarrow\quad
+ x_n^-\le y_m^+\quad\text{for every }n,m\in\N.
+\]
+This is a predicate on rational endpoints.  It is compatible with arithmetic
+and equivalence: two computations are equivalent exactly when both orders
+hold.  Transitivity follows by choosing a sufficiently narrow intermediate
+box if a positive rational gap were to separate the other two.  No point
+in an infinite intersection is selected.  Bounds below use this order.
+
+For a function computation $f$, the notation $f'(x)=g(x)$ means the
+rational-input derivative relation
+\[
+ \forall\varepsilon\in\Q_{>0}\ \exists\delta\in\Q_{>0}\ 
+ \forall h\in\Q,\qquad
+ 0<|h|<\delta\ \Longrightarrow\
+ |f(x+h)-f(x)-h g(x)|\le\varepsilon |h|,
+\]
+with increments restricted to the declared domain.  This relation does not
+choose a derivative by an existence principle.  The secant algorithm
+constructs the candidate; its shrinking-gap proof proves validity, and
+the earlier secant sandwich proves this relation.  Uniqueness is proved
+by using any sufficiently small nonzero rational increment in the two
+relations and then taking arbitrarily small rational tolerances.
+
+Fix rational $A<a<b<B$.  Suppose $p,q$ are specified number-valued
+computations on the rational points of $[A,B]$, both convex in the finite
+rational sense.  For every rational $x\in[a,b]$, assume their centered
+secant gaps shrink to zero.  Explicitly, for $v=p$ and $v=q$, put
+\[
+ h_0(x)=\tfrac12\min(x-A,B-x),\qquad h_n(x)=2^{-n}h_0(x).
+\]
+The required shrinking statement is
+\[
+ \forall x\in[a,b]\cap\Q\ \forall\varepsilon\in\Q_{>0}\
+ \exists n,\qquad
+ \frac{v(x+h_n)-2v(x)+v(x-h_n)}{h_n}<\varepsilon.
+\]
+It proves termination of the rational-box precision search already
+specified in Definition~\ref{def:computed-derivative}.  The algorithm
+searches for a rational box width, not for an undecidable comparison of
+computed values.  The shrinking proof is not consulted at run time.
+No modulus uniform in $x$ is assumed.
+
+Let $f$ be a specified computation with $f(x)\sim p(x)-q(x)$ on this
+domain.  Then $d(x)=Dp(x)-Dq(x)$ is a valid computed derivative of $f$.
+If $g$ is any other specified computation satisfying $f'(x)=g(x)$ at
+every rational $x\in[a,b]$, uniqueness gives $g(x)\sim d(x)$.  The
+following output theorem therefore applies to $g$ as well as to $d$.
+
+\begin{theorem}[Finite-output fundamental theorem]
+\label{thm:ftc-finite-output}
+Under the hypotheses just given, the independent cell-range integral
+construction produces a valid raw computation $J$ of $\int_a^b g$.
+For every stage of $J$ and every stage of the independently computed
+endpoint difference $f(b)-f(a)$, their rational intervals overlap.
+Consequently
+\[
+ \boxed{\int_a^b g(x)\,dx\sim f(b)-f(a).}
+\]
+The construction below gives a terminating precision schedule and a
+finite bound for every tagged rational sum.
+\end{theorem}
+
+\subsection{Rational cell ranges and the error schedule}
+Put $L=b-a$.  Secant ordering proves that $Dp$ and $Dq$ are nondecreasing.
+Coarse enclosures of their four endpoint values give a rational $V\ge0$
+satisfying
+\[
+ V\ge Dp(b)-Dp(a)+Dq(b)-Dq(a).
+\]
+For example, add the upper bounds at $b$ minus the lower bounds at $a$
+for the two computations.  This finite quantity is already nonnegative.
+Alternatively outer secants provide such a bound before evaluating the
+endpoint derivatives.
+
+Choose a rational partition $P$ and compute, at every endpoint $x_i$,
+\[
+ Dp(x_i)\in[\alpha_i^p,\beta_i^p],\qquad
+ Dq(x_i)\in[\alpha_i^q,\beta_i^q]
+\]
+to widths at most $\theta>0$.  The actual rational ranges used for $g$
+on the cell $[x_i,x_{i+1}]$ are
+\[
+ l_i=\alpha_i^p-\beta_{i+1}^q,\qquad
+ u_i=\beta_{i+1}^p-\alpha_i^q.
+\]
+Monotonicity and $g\sim Dp-Dq$ prove $l_i\le g(t)\le u_i$ for all
+rational $t$ in that cell.  Set
+\[
+ J(P,\theta)=\left[\sum_i l_i\Delta x_i,\sum_i u_i\Delta x_i\right].
+\]
+Every endpoint of this interval is rational.  Finite telescoping gives
+\[
+ \boxed{\operatorname{width}J(P,\theta)
+           \le\mesh(P)V+4\theta L.}
+\]
+The four error terms per cell are precisely the four derivative endpoint
+enclosures used above.  For one convex primitive alone, the constant is
+$2\theta L$ instead.
+
+For requested width $\varepsilon>0$, take an equal partition with integer
+$N$ satisfying $LV/N\le\varepsilon/4$, and take
+$\theta\le\varepsilon/(16L)$.  An integer meeting this condition is
+found by rational arithmetic; for $V=0$ any positive $N$ suffices.
+There are only $2(N+1)$ terminating derivative precision searches at this
+stage.  The resulting interval has width at most $\varepsilon/2$.
+Use $\varepsilon=2^{-n}$ successively and intersect the finitely many
+output intervals obtained so far.
+
+Those intersections are nonempty independently of any primitive endpoint:
+for two partitions, take their finite common refinement.  On each refined
+cell choose a rational sample.  Its computed value is bounded by both
+parent cell ranges; adding the inequalities shows that each lower sum is
+at most the other upper sum.  Thus the two rational intervals overlap.
+A finite family of pairwise overlapping rational intervals has nonempty
+intersection, by finite maxima and minima.  This proves integral validity
+without defining the integral through $f(b)-f(a)$.
+
+\subsection{The endpoint identity is a separate proof}
+For each cell, the convex secant inequalities give
+\[
+ Dp(x_i)\Delta x_i\le p(x_{i+1})-p(x_i)
+                         \le Dp(x_{i+1})\Delta x_i,
+\]
+and similarly for $q$.  Subtract the second pair from the first, then
+apply the rational endpoint enclosures.  The result is
+\[
+ l_i\Delta x_i\le f(x_{i+1})-f(x_i)\le u_i\Delta x_i.
+\]
+Adding telescopes to $f(b)-f(a)$.  The raw-order definition shows that
+every enclosure of that difference overlaps $J(P,\theta)$, and hence
+every finite-prefix intersection of these intervals.  This proves the
+stated equivalence after, and separately from, integral validity.
+
+For any rational tag $\xi_i\in[x_i,x_{i+1}]$, monotone derivative ranges
+also give
+\[
+ \left|f(b)-f(a)-\sum_i g(\xi_i)\Delta x_i\right|
+                 \le\mesh(P)V.
+\]
+Replacing the tags' values by rational numbers $r_i$ with proved errors
+$|r_i-g(\xi_i)|\le\eta$ yields the fully quantitative formula
+\[
+ \boxed{\left|f(b)-f(a)-\sum_i r_i\Delta x_i\right|
+                     \le\mesh(P)V+\eta L.}
+\]
+This permits a different evaluator for $g$, unrelated to the secant
+evaluator, once pointwise derivative uniqueness has identified it.
+
+\subsection{The reverse direction and the boundary of the theorem}
+If a supplied nondecreasing computation $g$ is continuous at each rational
+point of an interval, its monotone rectangle integral constructs
+$F(x)=\int_a^x g$.  Ordered cell averages prove convexity of $F$.
+At an interior rational $x$, its left and right secants lie between
+$g(x-h)$ and $g(x+h)$.  Pointwise continuity makes the gap shrink, so
+the secant derivative computation terminates and $DF(x)\sim g(x)$.
+Thus accumulation constructs a primitive as well as recovering an
+already supplied one.  One-sided endpoint versions require their
+explicit domain and endpoint conditions.
+
+The convex-difference hypothesis is a sufficient computational construction,
+not a claim that every useful function must be presented that way.
+Subsequent series and local integral constructions establish their own
+finite increment bounds and transfer their identities through proved
+errors.  A formal proof must retain these bounds, rather than infer an
+FTC from pointwise rational differentiation alone.  Explicit jumps are
+handled separately by their delta contributions; they are not silently
+admitted by the present theorem.

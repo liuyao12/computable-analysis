@@ -1,0 +1,35 @@
+name: Audit rational foundation boundary
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ComputableAnalysis/**"
+      - "*.lean"
+      - "lakefile.toml"
+      - "lake-manifest.json"
+      - "blueprint/checks/check_foundation_imports.py"
+      - ".github/workflows/foundation_boundary.yml"
+  pull_request:
+    paths:
+      - "ComputableAnalysis/**"
+      - "*.lean"
+      - "lakefile.toml"
+      - "lake-manifest.json"
+      - "blueprint/checks/check_foundation_imports.py"
+      - ".github/workflows/foundation_boundary.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+      - name: Audit active imports and dependency boundary
+        run: python blueprint/checks/check_foundation_imports.py
