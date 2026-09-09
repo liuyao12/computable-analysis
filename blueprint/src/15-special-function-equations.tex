@@ -1,0 +1,202 @@
+\chapter{Special Functions from Equations and Integrals}
+\label{ch:special-equations}
+
+A differential equation is useful only after its chosen solution has been
+specified and its computation bounded.  A recurrence supplies local data;
+the fundamental matrix moves that data along certified paths.  Bessel
+and hypergeometric functions illustrate the two parts, and a Bessel zero
+shows how a special-function value can itself become an inverse computation.
+
+\section{Bessel functions of integer order}
+For an integer $m\ge0$, define
+\[
+ J_m(z)=\sum_{k\ge0}\frac{(-1)^k(z/2)^{2k+m}}{k!(k+m)!}.
+\]
+Every coefficient is rational.  On $|z|\le R$, the absolute terms have
+successive ratio
+\[
+ \frac{R^2}{4(k+1)(k+m+1)}.
+\]
+This decreases to zero; after it is at most $1/2$, the tail is at most
+twice the first omitted majorant term.  Multiplying by any fixed falling
+factorial gives a derivative-tail sequence with the same eventual property.
+Consequently these are entire function and derivative computations.  To
+obtain a geometric coefficient chart of any chosen radius, evaluate the
+absolute series majorant at a strictly larger radius and bound each
+coefficient by that weighted sum.
+
+Coefficient comparison proves
+\[
+ z^2J_m''+zJ_m'+(z^2-m^2)J_m=0,
+ \qquad J_0'=-J_1.
+\]
+For example the coefficient of degree $2k+m$ in the equation is
+$4k(k+m)a_k+a_{k-1}=0$ for $k\ge1$; the lowest coefficient is free
+and is set to $1/(2^m m!)$.  This both verifies the equation and records
+which local solution was selected.  Standard notation and the equation
+are in \href{https://dlmf.nist.gov/10.2}{DLMF, Section 10.2}.
+
+On a path avoiding zero, the state $(J_m,J_m')$ satisfies
+\[
+ Y'=\begin{pmatrix}0&1\\m^2/z^2-1&-1/z\end{pmatrix}Y.
+\]
+Start at a nonzero point with values from the entire series.  Pull back
+each rational polygonal path segment $z=p+t(q-p)$ to $0\le t\le1$:
+its coefficient matrix is $(q-p)A(p+t(q-p))$.  A certified positive
+separation from zero bounds all entries and supplies their continuity.
+The Peano--Baker construction then propagates the state.  Integral-equation
+uniqueness proves agreement with the series.  It is unnecessary, and
+incorrect, to apply the bounded-coefficient evolution theorem at $z=0$;
+the series handled that point separately.
+
+\section{A second Bessel computation}
+The circle functions give the bounded integral
+\[
+ B(z)=\int_0^1 E(izC(t))\,dt.
+\]
+The factorial majorant is uniform for $0\le t\le1$ on every bounded
+$z$-disk.  Thus it can be integrated term by term.  Symmetry cancels odd
+powers, and finite trigonometric integration gives
+\[
+ \int_0^1 C(t)^{2k}\,dt=\frac{\binom{2k}{k}}{4^k}.
+\]
+For completeness, differentiating $S(t)C(t)^{2k-1}$ and integrating its
+zero endpoint difference yields the recurrence
+$M_k=(2k-1)M_{k-1}/(2k)$, with $M_0=1$.
+The product has the uniform increment estimates already proved for sine
+and cosine, so this use of the FTC is justified.
+Substitution into the exponential coefficients shows $B=J_0$.
+For real $z$ its imaginary part cancels by $t\mapsto1-t$; hence
+\[
+ J_0(z)=\int_0^1\cos(zC(t))\,dt,
+\]
+where $\cos w=(E(iw)+E(-iw))/2$.  This is the normalized Bessel integral
+of \href{https://dlmf.nist.gov/10.9}{DLMF, Section 10.9}, proved here
+by finite moments and a uniform tail.
+
+\section{Computing a zero without a general root theorem}
+\label{sec:bessel-zero}
+Exact alternating-series bounds give
+\[
+ J_0(2)>\frac29>0,\qquad J_0(3)<-\frac{4199}{16384}<0.
+\]
+The first bound uses terms through $k=3$; the second uses terms through
+$k=4$.  Although the first absolute term at $3$ need not decrease, the
+remaining tail after these cutoffs does decrease and has the indicated
+sign.  At $0\le x\le3$, writing $q=x^2$, the tail in $J_1$ after its
+four displayed terms gives
+\[
+ J_1(x)\ge\frac x2
+       \left(1-\frac q8+\frac{q^2}{192}-\frac{q^3}{9216}\right).
+\]
+The polynomial in parentheses decreases on $[0,9]$: its derivative is
+$-1/8+q/96-q^2/3072<0$.  Its value at $9$ is $223/1024$.
+Therefore $J_1(x)\ge223/1024$ on $[2,3]$, and the certified FTC gives
+\[
+ J_0(u)-J_0(v)\ge\frac{223}{1024}(v-u)
+ \quad(2\le u<v\le3).
+\]
+The endpoint signs and this separation make the trisection inverse
+construction of Chapter~\ref{ch:foundations} terminate.  They compute a
+unique zero in $[2,3]$ as nested rational intervals.  Also
+$J_0(x)\ge1-x^2/4>0$ for $0\le x<2$, so this is its first positive
+zero.  The root is a new number computation, not a symbolic placeholder
+chosen by a completeness theorem.
+
+\section{A recurrence with a finite convergence disk}
+For rational parameters $a,b,c$ with $c\notin\{0,-1,-2,\ldots\}$, put
+\[
+ h_0=1,\qquad
+ (n+1)(n+c)h_{n+1}=(n+a)(n+b)h_n,
+ \qquad F(z)=\sum_{n\ge0}h_nz^n.
+\]
+If an upper parameter makes a numerator zero, the recurrence terminates
+and gives a polynomial.  Otherwise, for a chosen rational $r<1$, bound
+the term ratio by
+\[
+ r\frac{(n+|a|)(n+|b|)}{(n+1)(n-|c|)}\qquad(n>|c|).
+\]
+Choose rational $r<\theta<1$.  After clearing the positive denominator,
+the assertion that this ratio is at most $\theta$ is a quadratic
+polynomial inequality in $n$ with positive leading coefficient.  Choose
+an integer $N$ large enough that its expansion in $n=N+j$ has nonnegative
+coefficients.  That finite check proves the ratio bound for every $j\ge0$.
+The tail after $N$ is then bounded by its first omitted majorant term
+divided by $1-\theta$.  Derivative tails are handled by the same method.
+
+To supply a chart on $|z|<R<1$, apply this ratio argument at $R$ and
+bound the finitely many earlier weighted coefficients.  This gives a
+rational $M$ with $|h_n|\le M R^{-n}$ for all $n$.
+Coefficient comparison now proves
+\[
+ \boxed{z(1-z)F''+[c-(a+b+1)z]F'-abF=0.}
+\]
+The recurrence and $h_0=1$ identify the local solution, denoted
+${}_2F_1(a,b;c;z)$; see
+\href{https://dlmf.nist.gov/15.2}{DLMF, Section 15.2} and
+\href{https://dlmf.nist.gov/15.10}{Section 15.10} for the standard notation.
+
+\section{Continuation uses the equation, not repeated recentering alone}
+Away from $0$ and $1$ the preceding equation is a first-order system with
+\[
+ A(z)=\begin{pmatrix}
+ 0&1\\
+ ab/[z(1-z)]&((a+b+1)z-c)/[z(1-z)]
+ \end{pmatrix}.
+\]
+The convergent series gives starting data at a nonzero point inside the
+unit disk.  A finite path with certified separation from $0,1$ gives
+bounded coefficient computations on each pulled-back segment; the
+fundamental matrix propagates the state along the path.
+
+It also supplies fresh analytic charts.  Here is a finite majorant
+argument for any rational-coefficient system at an ordinary point.
+Suppose locally $A(z_0+w)=\sum A_jw^j$ with
+$\|A_j\|\le M R^{-j}$, obtained by polynomial and reciprocal charts.
+The solution coefficients satisfy
+\[
+ (n+1)y_{n+1}=\sum_{j=0}^n A_jy_{n-j}.
+\]
+Choose $0<r\le R/2$ with $2Mr\le1$, and a rational
+$C\ge\|y_0\|$.  Induction gives
+\[
+ \|y_n\|\le Cr^{-n}:
+ \quad \|y_{n+1}\|\le\frac{2MC}{n+1}r^{-n}
+                                      \le Cr^{-n-1}.
+\]
+On $|w|\le r/2$ the local series and all requested derivative tails
+are therefore effective.  Its integral equation identifies it with the
+propagated state.  Coefficient separation from the singularities allows
+this bound to be renewed at successive centers.
+
+Distinct paths may produce distinct branches.  The finite overlap and
+path-deformation certificates of Chapter~\ref{ch:complex-paths} say when
+they agree; there is no assumption of global single-valuedness.
+
+\section{The beta integral identifies the same local function}
+For positive rational $b,c-b$ and rational $a$, define on $|z|<1$
+\[
+ H(z)=\frac1{B(b,c-b)}\int_0^1
+       t^{b-1}(1-t)^{c-b-1}(1-zt)^{-a}\,dt.
+\]
+Use the local logarithm to define the last factor.  Its coefficient
+recurrence is $(n+1)d_{n+1}=(n+a)d_n$, $d_0=1$, obtained from
+$(1-w)D(1-w)^{-a}=a(1-w)^{-a}$.  The ratio estimate just used supplies
+uniform tails on smaller disks.  The positive beta weight provides the
+endpoint majorant, so the parameter-integral theorem applies.
+
+The beta--gamma identity and gamma recurrence give
+\[
+ \frac{B(b+n,c-b)}{B(b,c-b)}
+       =\frac{b(b+1)\cdots(b+n-1)}{c(c+1)\cdots(c+n-1)}.
+\]
+Thus integrating the binomial coefficients yields exactly the $h_n$
+above, and $H=F$.  This proves equivalence between an improper integral,
+a convergent series, and a propagated ODE computation.
+In particular the elliptic integral developed later has
+\[
+ K(m)=\frac\pi2\,{}_2F_1(1/2,1/2;1;m).
+\]
+The later geometric substitution gives its independent bounded quadrature;
+the coefficient identity here explains why its equation has the displayed
+hypergeometric form.

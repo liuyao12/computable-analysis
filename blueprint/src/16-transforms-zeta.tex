@@ -1,0 +1,255 @@
+\chapter{Transforms, Oscillatory Tails, and Zeta}
+\label{ch:transforms-zeta}
+
+The same function can be computed by a transform, an equation, or a finite
+sum with endpoint corrections.  Three examples show why the foundation
+must keep track of the error appropriate to each operation.  None requires
+an ambient space of arbitrary continuous or square-integrable functions.
+
+\section{Laplace transforms with an explicit half-plane}
+Suppose a concrete, locally integrable computation $f$ has a rational
+exponential bound $|f(t)|\le B E(\alpha t)$ on $t\ge0$.  On a certified
+half-plane $\Re s\ge\alpha+\sigma$, with rational $\sigma>0$, define
+\[
+ \mathcal Lf(s)=\int_0^\infty E(-st)f(t)\,dt.
+\]
+Its far tail is at most $B E(-\sigma T)/\sigma$.  The middle integral
+has the data of the particular $f$.  This constructs the transform.
+Multiplication of the integrand by $t^k$ still gives a computable
+exponential tail, by the polynomial-exponential calculation in
+Chapter~\ref{ch:improper-parameters}.  Expanding $E(-ht)$ with a smaller
+half-plane margin gives the parameter-majorant proof of
+\[
+ (\mathcal Lf)^{(k)}(s)=(-1)^k\int_0^\infty t^kE(-st)f(t)\,dt.
+\]
+The half-plane is part of the certificate, not an unspecified region of
+convergence.
+
+If $f$ is a certified piecewise primitive with finitely many jumps and
+its ordinary derivative has the needed tails, finite integration by parts
+and the explicit jump contributions give
+\[
+ \mathcal L(Df)(s)=s\mathcal Lf(s)-f(0+),
+\]
+where the transform includes interior impulse masses and no impulse at
+the initial endpoint.  Extending $f$ by zero to negative times instead
+adds $f(0+)\delta_0$ to its full-line derivative.  This distinguishes
+the two initial-value conventions rather than assigning a hidden half
+weight to the delta at zero.
+
+For an interior impulse $\delta_\tau$, its transform is $E(-s\tau)$.
+In particular, ordinary integrations by parts give
+\[
+ \mathcal L(S)(s)=\frac\pi{s^2+\pi^2},\qquad
+ \mathcal L(C)(s)=\frac{s}{s^2+\pi^2}\quad(\Re s>0).
+\]
+The denominators are separated on any supplied closed box inside that
+half-plane.  These formulas compare the oscillator's impulse kernel with
+a rational computation; they are not applications of an unproved transform
+inversion theorem.
+
+For a constant matrix $A$, the zero-past impulse response is $E(tA)$
+for $t>0$.  On $\Re s>\|A\|$, entrywise integration gives
+\[
+ (sI-A)\mathcal L(E(\cdot A))(s)=I.
+\]
+The finite geometric matrix series
+$s^{-1}\sum_{n\ge0}(A/s)^n$, with its norm tail, independently constructs
+$(sI-A)^{-1}$.  Uniqueness of that inverse proves their equivalence.  Thus
+the familiar resolvent is a second computation of the fundamental matrix's
+Laplace transform.
+
+\section{An oscillatory integral with no absolute-integral bound}
+Extend $S(t)/t$ at zero by the series value $\pi$.  For $0<T<U$,
+integration by parts using $DS=\pi C$, $DC=-\pi S$ gives
+\[
+ \left|\int_T^U\frac{S(t)}t\,dt\right|\le\frac{2}{\pi T}.
+\]
+Indeed the endpoint terms have bounds $1/(\pi T)$ and $1/(\pi U)$,
+and the remaining cosine integral is bounded by
+$(1/T-1/U)/\pi$.  Therefore bounded quadrature and this cancellation
+bound construct $I=\int_0^\infty S(t)/t\,dt$.
+
+To identify it, first use a positive real damping parameter $a$:
+\[
+ F(a)=\int_0^\infty E(-at)\frac{S(t)}t\,dt.
+\]
+On $a\ge a_0>0$ the exponential tails justify parameter differentiation,
+giving $F'(a)=-\pi/(a^2+\pi^2)$ by the Laplace calculation above.
+Also $|F(a)|\le\pi/a$ from the chord bound $|S(t)|\le\pi t$.
+Integrating this derivative between positive rational endpoints and sending
+the larger one to infinity with that explicit bound yields
+\[
+ F(a)=\int_a^\infty\frac\pi{u^2+\pi^2}\,du
+     =\frac\pi2-A(a/\pi)
+\]
+when $0<a\le\pi$; scaling and the previously computed angle integral
+prove the last equality.
+
+The damping can be removed with a finite estimate.  The function
+$E(-at)/t$ is positive decreasing; the same integration-by-parts argument
+bounds its oscillatory tail uniformly for all $a\ge0$ by $2/(\pi T)$.
+On $[0,T]$, the bound $|1-E(-at)|\le at$ gives
+\[
+ |F(a)-I|\le aT+\frac4{\pi T}.
+\]
+First choose a rational $T$, then a sufficiently small positive rational
+$a$.  This proves $F(a)\to I$ without an absolute domination on the
+infinite interval.  Since $A(a/\pi)\to0$ by its continuity estimate,
+\[
+ \boxed{\int_0^\infty\frac{S(t)}t\,dt=\frac\pi2.}
+\]
+For the normalized sinc $S(t)/(\pi t)$, the positive-half-line integral
+is $1/2$ and the whole-line integral is $1$.  The endpoint and normalization
+are stated explicitly.
+
+\section{A Fourier transform proved by an ODE}
+Let $f(x)=E(-\pi x^2)$ and define for real $\xi$
+\[
+ H(\xi)=\int_{-\infty}^\infty f(x)E(-2\pi i\xi x)\,dx.
+\]
+The gamma normalization and scaling give $H(0)=1$.  Each parameter
+derivative is controlled by a polynomial times the Gaussian.  For complex
+increments of size at most $r$, the envelope gains at most $E(2\pi r|x|)$.
+Once $|x|\ge4r$, this is still bounded together with the Gaussian by
+$E(-\pi x^2/2)$.  The remaining bounded interval is handled separately.
+This provides explicit integrable majorants for the parameter series.
+
+Differentiate under the integral by those bounds, and integrate the
+identity $f'(x)=-2\pi xf(x)$ by parts on finite symmetric intervals.
+Its boundary terms tend to zero with their Gaussian bounds.  The result is
+\[
+ H'(\xi)=-2\pi\xi H(\xi),\qquad H(0)=1.
+\]
+The integral-equation uniqueness of the ODE chapter identifies its
+computation as
+\[
+ \boxed{\int_{-\infty}^\infty E(-\pi x^2)E(-2\pi i\xi x)\,dx
+                         =E(-\pi\xi^2).}
+\]
+Multiplying the integrand by $x^k$ gives
+$(-2\pi i)^{-k}$ times the $k$th derivative on the right.  Thus each
+Gaussian times a specified polynomial has its transform computed by finite
+differentiation and polynomial algebra.  This is a genuine Fourier result
+without constructing a space of arbitrary $L^2$ functions.
+
+\section{Bernoulli polynomials are finite rational recurrences}
+To go beyond a series' original convergence region we shall use finite
+summation by parts.  Define polynomials $B_n(x)$ by
+\[
+ B_0=1,\qquad B_n'=nB_{n-1},\qquad\int_0^1 B_n(x)\,dx=0\quad(n\ge1).
+\]
+Polynomial integration fixes the constant term uniquely, so every coefficient
+is rational.  The first polynomials are
+\[
+ B_1=x-\tfrac12,\quad B_2=x^2-x+\tfrac16,
+ \quad B_4=x^4-2x^3+x^2-\tfrac1{30}.
+\]
+Induction using the recurrence and the zero mean proves
+$B_n(1-x)=(-1)^nB_n(x)$.  Also $B_n(1)=B_n(0)$ for $n\ge2$.
+Consequently the odd endpoint values vanish for odd $n>1$.
+Put $b_{2k}=B_{2k}(0)$ and $\widetilde B_n(t)=B_n(t-\lfloor t\rfloor)$.
+For integration this is simply a separate polynomial on each unit cell;
+no discontinuous floor computation at a computed input is needed.
+
+\section{Euler--Maclaurin as a finite identity}
+\label{thm:finite-euler-maclaurin}
+For integers $N<M$ and a specific function $f$ with certified derivatives
+and integration-by-parts identities through order $2p$, one has
+\begin{align*}
+ \sum_{n=N}^{M-1} f(n)
+ &=\int_N^M f(t)\,dt+\frac{f(N)-f(M)}2\\
+ &\quad+\sum_{k=1}^p\frac{b_{2k}}{(2k)!}
+                \bigl(f^{(2k-1)}(M)-f^{(2k-1)}(N)\bigr)\\
+ &\quad-\frac1{(2p)!}\int_N^M\widetilde B_{2p}(t)f^{(2p)}(t)\,dt.
+\end{align*}
+\begin{proof}
+On $[n,n+1]$, integration by parts gives
+\[
+ \int_n^{n+1}B_1(t-n)f'(t)\,dt
+       =\tfrac12(f(n)+f(n+1))-\int_n^{n+1}f(t)\,dt.
+\]
+Sum these identities.  Repeatedly use
+$\widetilde B_j=(\widetilde B_{j+1}/(j+1))'$ inside each cell to integrate
+the remaining term by parts.  Matching endpoint values cancel the internal
+boundaries for $j+1\ge2$, and the odd endpoint values above eliminate the
+odd corrections.  After $2p$ derivatives the displayed remainder is what
+remains.  Every step is a finite polynomial-weighted integral identity.
+\end{proof}
+
+This is the finite formula underlying the usual
+\href{https://dlmf.nist.gov/2.10}{Euler--Maclaurin expansion}.  Its remainder
+is part of the computation, not an unspecified asymptotic error.
+
+\section{Zeta beyond the defining sum}
+On a certified half-plane $\Re s\ge\sigma>1$, the series
+\[
+ \zeta(s)=\sum_{n\ge1}E(-sL(n))
+\]
+has tail at most $N^{1-\sigma}/(\sigma-1)$ after $N$ terms, by finite
+comparison with the integral of $t^{-\sigma}$.  This first constructs
+zeta only where the series has that bound.
+
+Apply the finite Euler--Maclaurin identity to $f(t)=t^{-s}$, whose
+uniform increment and derivative identities follow from the elementary
+exponential and logarithm computations.  Here
+\[
+ f^{(j)}(t)=(-1)^j s^{\overline j}t^{-s-j},\qquad
+ s^{\overline j}=s(s+1)\cdots(s+j-1)
+\]
+is a rising factorial, with $s^{\overline0}=1$.
+Sending the upper endpoint to infinity first in $\Re s>1$ gives
+\begin{align*}
+ \zeta(s)&=\sum_{n=1}^{N-1}n^{-s}
+       +\frac{N^{1-s}}{s-1}+\frac12N^{-s}\\
+ &\quad+\sum_{k=1}^p\frac{b_{2k}}{(2k)!}
+                   s^{\overline{2k-1}}N^{-s-2k+1}
+       +R_{N,p}(s),\\
+ R_{N,p}(s)&=-\frac{s^{\overline{2p}}}{(2p)!}
+              \int_N^\infty\widetilde B_{2p}(t)t^{-s-2p}\,dt.
+\end{align*}
+Let $C_{2p}$ be the sum of the absolute coefficients of $B_{2p}$, a
+rational upper bound on its absolute value in $[0,1]$.  For
+$\Re s\ge\sigma>1-2p$, the remainder satisfies
+\[
+ \boxed{|R_{N,p}(s)|\le
+ \frac{|s^{\overline{2p}}|C_{2p}}{(2p)!(\sigma+2p-1)}
+                 N^{1-\sigma-2p}.}
+\]
+A rational upper bound for the finite rising-factorial product is used
+for computed input boxes.  The remainder can be omitted to this error,
+or computed more accurately by integrating finitely many unit cells and
+using the same bound at a larger cutoff.
+
+Thus for a particular $s\ne1$, choose $p$ with $\Re s>1-2p$ and a
+certified separation from $s=1$, then increase $N$ until the error is small.
+This computes a value even when the original series diverges.
+Independence of $N$ follows from the finite summation identity.  Independence
+of $p$ follows by two further integrations by parts in the remainder:
+the extra correction is precisely the next displayed Bernoulli term,
+and the far boundary vanishes in the common half-plane.  This proves
+agreement without assuming an analytic continuation theorem.
+
+These formulas are analytic there, with their only possible pole at $1$.
+For the remainder, expand $t^{-w}$ near any fixed parameter.  The estimate
+$|L(t)|^n/n!\le\rho^{-n}t^\rho$ gives the parameter-majorant proof
+whenever $\rho<\Re s+2p-1$.  Hence the constructions also supply local
+charts and all requested parameter derivatives.  The residue at $1$ is
+$1$, read directly from $N^{1-s}/(s-1)$; its remaining part is computed
+by the removable series quotient.
+
+At $s=0$ take $p=1$; its rising factorials vanish and the formula gives
+$\zeta(0)=-1/2$.  At $s=-1$ take $p=2$, so the remainder vanishes and
+the finite terms give $\zeta(-1)=-1/12$.  This is a value of the proved
+continuation computation, not a claim that the divergent sum of positive
+integers converges to a negative number.  Standard zeta notation and
+continuation formulas are recorded in
+\href{https://dlmf.nist.gov/25.2}{DLMF, Section 25.2}.
+
+\section{The common foundation is the finite comparison}
+The constructions in this chapter use different kinds of error: an
+exponential far tail, oscillatory integration by parts, Gaussian parameter
+majorants, and a periodic-polynomial summation remainder.  None can be
+replaced by a bare claim that the function is familiar.  Once its bound
+has been proved, however, the existing interval, integration, derivative,
+and equivalence constructions apply to it without rebuilding the theory.

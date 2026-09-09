@@ -1,0 +1,227 @@
+\chapter{Improper Integrals, Parameters, and the Gamma Function}
+\label{ch:improper-parameters}
+
+A specific improper integral needs bounds at its missing endpoints, not a
+general theory of measurable functions.  A parameter derivative needs
+corresponding bounds for its finite Taylor errors.  Gamma, beta, and the
+error function give concrete tests of both requirements.
+
+\section{Two tails and one bounded computation}
+Suppose $f(t,z)$ has an integral computation on each truncated interval
+$[\varepsilon,T]$, and uniform bounds on every finite end piece are supplied:
+\[
+ \left|\int_u^\varepsilon f(t,z)\,dt\right|\le e_0(\varepsilon),
+ \quad
+ \left|\int_T^V f(t,z)\,dt\right|\le e_\infty(T)
+ \quad(0<u<\varepsilon<T<V).
+\]
+Both errors must shrink by proved schedules.  Evaluate the middle integral
+to error $\eta$ and enlarge its rational box by
+$e_0(\varepsilon)+e_\infty(T)$.  Comparisons on a larger common truncated
+interval prove compatibility of any two such boxes.  Finite intersections
+therefore construct $\int_0^\infty f(t,z)\,dt$.
+
+These tail bounds can be absolute-integral bounds, but need not be: later
+an oscillatory cancellation will give a bound without absolute convergence.
+No interchange of operations is inferred merely from the notation
+$\int_0^\infty$.
+
+\section{Parameter series with an integrable majorant}
+\label{thm:parameter-majorant}
+Suppose on every truncated interval a supplied identity is
+\[
+ f(t,z_0+w)=\sum_{n\ge0}a_n(t)w^n,
+ \qquad |a_n(t)|\le M(t)R^{-n},
+\]
+where $M$ is a nonnegative concrete integrand with proved endpoint tails
+and an integral bounded by a rational $B$.  Each $a_n$ is integrable on
+truncated intervals with the supplied continuity data.  The same bounds
+construct $A_n=\int_0^\infty a_n(t)\,dt$.  For $|w|\le r<R$, finite
+sums give
+\[
+ \left|\int_0^\infty f(t,z_0+w)\,dt-\sum_{n=0}^N A_nw^n\right|
+ \le\frac{B(r/R)^{N+1}}{1-r/R},\qquad |A_n|\le BR^{-n}.
+\]
+To prove this, first work on $[\varepsilon,T]$, where everything is a
+finite sum plus a uniform remainder.  Bound that remainder by the
+geometric tail times $M(t)$.  The omitted end pieces have the same bound
+with the corresponding tails of $M$.  Now make all three finite errors
+small.  This proves termwise integration and constructs a local series
+chart for the parameter function.  Its derivatives are the coefficient
+computations from Chapter~\ref{ch:local-models}; no dominated-convergence
+theorem is imported.
+
+\section{Euler's gamma integral with uniform rational budgets}
+For a rational complex $z$ with $\Re z>0$, define
+\[
+ \Gamma(z)=\int_0^\infty t^{z-1}E(-t)\,dt,
+ \qquad t^{z-1}=E((z-1)L(t)).
+\]
+The same construction accepts computed inputs in a certified region
+$a\le\Re z\le b$, where $a>0$ is rational.  On $0<t\le1$,
+\[
+ |t^{z-1}E(-t)|\le t^{a-1},\qquad e_0(\varepsilon)=\varepsilon^a/a.
+\]
+Choose an integer $m\ge\max(0,b-1)$.  On $t\ge1$, the absolute
+integrand is bounded by $t^mE(-t)$.  Repeated finite integration by parts
+on $[T,V]$, followed by the factorial bound for the exponential, gives
+\[
+ e_\infty(T)=E(-T)m!\sum_{j=0}^m\frac{T^j}{j!}.
+\]
+This expression tends to zero: for each fixed power, the exponential
+series has a higher power as a positive term, giving a rational decay
+bound, or repeated doubling of $T$ gives an effective search.  Computed
+bounds such as $e_0,e_\infty$ are replaced by rational upper enclosures
+when a numerical error budget is chosen.
+
+On each $[\varepsilon,T]$, powers and exponentials have already proved
+value, derivative, and continuity estimates, so the middle integral is
+an ordinary rectangle computation.  Gamma is therefore constructed for
+all these inputs, not introduced by assuming its improper integral exists.
+Its standard normalization is recorded in
+\href{https://dlmf.nist.gov/5.2}{DLMF, Section 5.2}.
+
+\section{All parameter derivatives, by one envelope}
+Fix $z_0$, and choose rational $0<\rho<a\le\Re z_0\le b$.
+Expanding $E(wL(t))$ gives
+\[
+ a_n(t)=t^{z_0-1}E(-t)\frac{L(t)^n}{n!}.
+\]
+The positive exponential series proves
+\[
+ \frac{|L(t)|^n}{n!}\le\rho^{-n}
+ \begin{cases}t^{-\rho},&0<t\le1,\\t^\rho,&t\ge1.\end{cases}
+\]
+Thus an integrable coefficient envelope is
+\[
+ M(t)=\begin{cases}t^{a-\rho-1}E(-t),&t\le1,\\
+                   t^{b+\rho-1}E(-t),&t\ge1.
+       \end{cases}
+\]
+Choose an integer $m\ge\max(0,b+\rho-1)$.  The preceding tail computations
+apply to $M$, and $\int M\le B=1/(a-\rho)+m!$ is a rational bound.
+The parameter-majorant argument supplies a gamma chart of radius $\rho$:
+\[
+ \Gamma^{(n)}(z_0)=\int_0^\infty t^{z_0-1}E(-t)L(t)^n\,dt,
+ \qquad |\Gamma^{(n)}(z_0)|\le n!B\rho^{-n}.
+\]
+The integral on the right is a computed quantity with its own tails.
+Every finite derivative order is now supported; no differentiation of an
+uncontrolled infinite integral has occurred.
+
+\section{Recurrence and continuation through known poles}
+Integrate the derivative of $t^zE(-t)$ on a truncated interval.  The two
+endpoint terms tend to zero by the same estimates, proving
+\[
+ \Gamma(z+1)=z\Gamma(z),\qquad \Gamma(1)=1.
+\]
+For a specific $z$ outside the nonpositive integers, choose $N$ so that
+$\Re(z+N)>0$ and certify separation of each factor in
+\[
+ \boxed{\Gamma(z)=\frac{\Gamma(z+N)}{z(z+1)\cdots(z+N-1)}.}
+\]
+Any two allowable choices agree by the recurrence.  This is an actual
+continuation algorithm, since shifting into the right half-plane supplies
+new integral bounds, not just a recentering of an old disk.
+
+At $z=-k$ the scalar value is replaced by its pole description.  Isolating
+the factor $z+k$ in the denominator and using $\Gamma(1)=1$ gives residue
+$(-1)^k/k!$.  The remaining analytic part can be computed by the local
+series arithmetic.  For computed inputs, the required separation from
+these poles must be supplied; no universal equality decision is asserted.
+For positive real arguments gamma is positively separated from zero:
+a lower rectangle on $[1,2]$ suffices.  Division by gamma elsewhere
+requires its own separation proof; zero-freeness is not assumed here.
+
+\section{Beta and a Gaussian normalization from the circle}
+For positive real parameters $a,b$, define
+\[
+ B(a,b)=\int_0^1 t^{a-1}(1-t)^{b-1}\,dt.
+\]
+On $(0,1/2]$ the second factor has an explicit rational upper bound;
+therefore the left tail is at most a constant times $\varepsilon^a/a$.
+Reflection gives the right-tail bound.  The middle integral is bounded
+quadrature.  These estimates work uniformly on separated parameter boxes.
+
+\begin{theorem}[Beta--gamma comparison]
+\label{thm:beta-gamma}
+These independent computations satisfy
+\[
+ B(a,b)\Gamma(a+b)=\Gamma(a)\Gamma(b).
+\]
+\end{theorem}
+\begin{proof}
+Multiply the truncated gamma integrals and interpret the product as finite
+rectangular sums in the positive quadrant.  Excluding small coordinate
+strips and far tails changes it by the products of the one-dimensional
+bounds already proved.  On each remaining bounded region the integrand
+is bounded and uniformly continuous.  Triangulate and change the order of
+integration; cells meeting the finitely many straight boundaries have
+total area tending to zero with the mesh.  Thus the product is equivalently
+computed by
+\[
+ \int_0^\infty E(-r)\int_0^r u^{a-1}(r-u)^{b-1}\,du\,dr.
+\]
+Here $r=u+v$ is just a shear with determinant $1$, verified on finite
+parallelograms; deleting a diagonal tail $r>R$ is controlled by the union
+of $u>R/2$ and $v>R/2$.  On each positive $r$ use the one-dimensional
+substitution $u=rt$, first away from the two endpoints and then with
+the beta endpoint bounds.  The inner integral is $r^{a+b-1}B(a,b)$.
+Its remaining endpoint and infinity bounds are the gamma bounds for
+$a+b$, proving the identity by finite error comparisons.
+\end{proof}
+
+At $a=b=1/2$, use $t=x^2$ and then the rational circle chart
+$x=2u/(1+u^2)$, on truncated intervals.  Cancellation gives
+\[
+ B(1/2,1/2)=4\int_0^1\frac{du}{1+u^2}=\pi.
+\]
+The endpoint bounds justify both limiting substitutions.  Positivity and
+the beta--gamma identity give $\Gamma(1/2)=\sqrt\pi$.  A final
+substitution $t=x^2$ therefore proves
+\[
+ \int_0^\infty E(-x^2)\,dx=\frac{\sqrt\pi}{2}.
+\]
+The Gaussian normalization has been connected to the earlier circle
+computation, without assuming a general two-dimensional change-of-variables
+theorem.  Standard beta notation is in
+\href{https://dlmf.nist.gov/5.12}{DLMF, Section 5.12}.
+
+\section{The error function: convergent and asymptotic computations}
+Define the entire local-series computation
+\[
+ \operatorname{erf}(z)=\frac2{\sqrt\pi}
+       \sum_{n=0}^\infty\frac{(-1)^nz^{2n+1}}{n!(2n+1)}.
+\]
+On $|z|\le r$, consecutive absolute terms have ratio at most
+$r^2/(n+1)$.  After that ratio is at most $1/2$, twice the first omitted
+term bounds the tail.  Differentiated tails are obtained in the same way.
+Finite integration of the exponential prefixes identifies the function
+on the real axis as $2\int_0^x E(-t^2)dt/\sqrt\pi$.
+
+For $x>0$, let $I_k(x)=\int_x^\infty E(-t^2)t^{-2k}dt$.
+Finite integration by parts and the vanishing far endpoint give
+\[
+ I_k(x)=\frac{E(-x^2)}{2x^{2k+1}}-\frac{2k+1}{2}I_{k+1}(x).
+\]
+Repeated substitution proves, for every finite $N\ge1$,
+\[
+ I_0(x)=\frac{E(-x^2)}{2x}
+   \sum_{k=0}^{N-1}\frac{(-1)^k(2k-1)!!}{(2x^2)^k}+R_N(x),
+\]
+where $(-1)!!=1$ and
+\[
+ 0\le(-1)^NR_N(x)
+ \le\frac{E(-x^2)}{2x}\frac{(2N-1)!!}{(2x^2)^N}.
+\]
+Indeed $R_N=(-1)^N(2N-1)!!\,I_N/2^N$, and the first integration-by-parts
+inequality bounds $I_N$ by $E(-x^2)/(2x^{2N+1})$.
+
+This gives the alternative computation
+$1-\operatorname{erf}(x)=2I_0(x)/\sqrt\pi$.  It also illustrates an
+important distinction: the asymptotic expression has a proved error for
+each \emph{finite} $N$, but its terms eventually grow at fixed $x$.
+It is not a convergent infinite series at that input.  Use it when its
+finite bound meets the requested precision; otherwise use bounded
+quadrature with tails or the convergent series.  The standard asymptotic
+formula appears in \href{https://dlmf.nist.gov/7.12}{DLMF, Section 7.12}.

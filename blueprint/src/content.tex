@@ -1,11 +1,12 @@
 \chapter*{Preface}
 \addcontentsline{toc}{chapter}{Preface}
 
-This book develops calculus by constructing things: rational enclosures for
+This book develops analysis by constructing things: rational enclosures for
 numbers, polygonal areas and solid volumes, trigonometric values, rectangle
-integrals, secant computations of derivatives, power-series prefixes, and
-finite evolutions of linear systems.  Every infinite process comes with a
-proof that its finite computations agree and become arbitrarily accurate.
+integrals, secant computations of derivatives, series and local models,
+finite evolutions, and transforms with proved endpoint errors.  Every
+infinite process comes with a proof that its finite computations agree
+and become arbitrarily accurate.
 
 The emphasis is on useful examples and reusable constructions, not on the
 largest possible classes of set-theoretic functions.  Rational inputs do
@@ -22,11 +23,11 @@ integral.  A separate chapter then uses sector area to construct angles,
 sine, and cosine.  The subsequent route is
 \[
  \begin{gathered}
- \text{independent rectangle integrals}
- \ \longrightarrow\ \text{convex secant derivatives and the FTC}\\
- \longrightarrow\ \text{series, elementary functions, and algebraic branches}\\
- \longrightarrow\ \text{Fourier computations, jumps, and delta inputs}\\
- \longrightarrow\ \text{fundamental matrices and an elliptic integral}.
+ \text{independent rectangle integrals and convex secant derivatives}\\
+ \longrightarrow\ \text{the FTC, series, and elementary computations}\\
+ \longrightarrow\ \text{local models, complex paths, and parameter integrals}\\
+ \longrightarrow\ \text{Fourier computations, impulses, and fundamental matrices}\\
+ \longrightarrow\ \text{special functions, transforms, and equivalent representations}.
  \end{gathered}
 \]
 
@@ -37,17 +38,30 @@ for all its increments.  Convex secant inequalities supply the missing
 interval control and construct the derivative itself.  Explicit jumps
 can subsequently be retained as delta inputs, rather than discarded.
 
-The fundamental matrix then unifies accumulation and propagation.  An
-ordinary forcing term is integrated against it; an impulse is a finite
-state update propagated by the same matrix.  The ramp, the oscillator,
-the Airy equation, and an elliptic integral give concrete instances.
+A local series brings higher derivatives and remainder bounds.  A
+nonlinear inverse brings a contraction estimate.  An improper integral
+brings endpoint tails, and its parameter derivatives bring an integrable
+majorant.  These different descriptions are not forced into one global
+function class.  The explicit smooth cutoff shows why analyticity is not
+a universal assumption; Lambert's function and gamma show why a linear
+ODE is not a universal representation either.
 
-All mathematical prerequisites needed for these constructions are developed
-in the text from finite rational algebra, with definitions, estimates, and
-proofs.  Theorems about unrestricted function or distribution spaces are
-not used to supply missing computations.  Conversely, a proved finite
-construction is not held back because a more general theory could also
-contain it.
+The fundamental matrix unifies accumulation and propagation.  An ordinary
+forcing term is integrated against it; an impulse is a finite state update
+propagated by the same matrix.  Bessel and hypergeometric recurrences supply
+local data which can be transported along certified paths.  The sinc and
+Gaussian transforms, gamma recurrence, and Euler--Maclaurin construction
+of zeta provide other ways to enlarge the domain of useful computations.
+An elliptic integral closes the main route by connecting geometry,
+quadrature, a series, and a differential equation.
+
+The mathematical prerequisites for each operation are stated where they
+are used and justified by finite estimates.  Theorems about unrestricted
+function or distribution spaces do not supply missing computations.
+Conversely, a useful finite construction is not held back because a more
+general theory could also contain it.  The aim is that working with a
+specific elementary or special function has a clear route through the
+same foundations, with new estimates added where that function needs them.
 
 \clearpage
 \input{01-foundations.tex}
@@ -58,7 +72,12 @@ contain it.
 \input{04-infinite-series.tex}
 \input{05-exponential-logarithm.tex}
 \input{07-algebra-fta.tex}
+\input{12-local-models.tex}
+\input{13-complex-paths.tex}
+\input{14-improper-parameters.tex}
 \input{10-fourier.tex}
 \input{11-impulses.tex}
 \input{09-differential-equations.tex}
+\input{15-special-function-equations.tex}
+\input{16-transforms-zeta.tex}
 \input{08-roadmap.tex}

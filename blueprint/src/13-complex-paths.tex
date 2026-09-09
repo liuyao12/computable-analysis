@@ -1,0 +1,172 @@
+\chapter{Complex Paths and Analytic Continuation}
+\label{ch:complex-paths}
+
+Complex analysis can begin with polynomial identities, finite paths, and
+the series charts just constructed.  The contour, its subdivision, and
+the local bounds are supplied data.  We prove the integral identities
+actually used, rather than first postulating an arbitrary holomorphic
+function on an arbitrary open set.
+
+\section{Integrating on a segment}
+For rational complex endpoints $p,q$, define
+\[
+ \int_{[p,q]}F(z)\,dz
+ =(q-p)\int_0^1 F(p+t(q-p))\,dt.
+\]
+The right side consists of two real integral computations.  A polygonal
+path is a finite list of such segments, and its integral is their sum.
+Its length has a rational upper bound obtained from coordinate differences.
+If two integrands differ by at most $\eta$ on the path of length at most
+$L$, their integrals differ by at most $L\eta$.
+
+In a single series disk, the primitive
+\[
+ P(c+w)=\sum_{n\ge0}\frac{a_n}{n+1}w^{n+1}
+\]
+has a geometric tail on every smaller disk.  Its finite polynomial
+identities and their tails prove
+\[
+ \int_{[p,q]}F=P(q)-P(p)
+\]
+whenever the segment stays in such a disk.  This also holds for a
+specified continuously differentiable parametrized arc in the disk: the
+finite polynomial chain rule gives the result, and its error is bounded
+by a supplied arc-length bound.  Circle arcs from the earlier geometric
+construction are one such family.
+
+\section{A finite form of the contour theorem}
+\label{thm:finite-contour}
+Suppose a rational triangulated polygon is supplied, and each closed
+triangle lies in a smaller certified series disk of $F$.  The descriptions
+are proved to agree on their overlaps.  The integral around each triangle
+is zero, by its local primitive.  Add these finitely many identities:
+interior edges cancel with their opposite orientations.  Therefore
+\[
+ \int_{\partial\Omega}F(z)\,dz=0.
+\]
+A polygon with holes is treated by the same cancellation, giving the
+outer boundary integral as the sum of the positively oriented inner
+boundary integrals.  A finite chain of these subdivisions proves equality
+of two path integrals.  No existence of a finite subcover is assumed:
+the finite subdivision and the certified disk margins are exhibited.
+
+This is also a computational form of contour deformation.  It is
+important to retain the overlap comparisons.  Merely evaluating the
+same printed formula on two sides of a branch cut is not a proof that
+one has continued the same function.
+
+\section{Coefficient extraction on a circle}
+For $0<r<R$, parametrize the circle by
+\[
+ z(t)=c+rE(2\pi it),\qquad 0\le t\le1.
+\]
+This is computed at rational $t$ by trigonometry, not by assuming circle
+points are rational.  Its derivative and length bound have already been
+proved.  Finite trigonometric orthogonality, or the trigonometric FTC,
+gives for every integer $j$
+\[
+ \int_0^1 E(2\pi ijt)\,dt=\begin{cases}1,&j=0,\\0,&j\ne0.\end{cases}
+\]
+Integrate a finite polynomial and use its uniform series tail.  The result is
+\[
+ \boxed{a_k=\frac1{2\pi i}\int_{|z-c|=r}
+                  \frac{F(z)}{(z-c)^{k+1}}\,dz.}
+\]
+If the value boxes on this circle certify $|F|\le B$, this formula gives
+$|a_k|\le B r^{-k}$.  Thus an independent boundary estimate can produce
+better coefficient bounds, rather than just use the original majorant.
+
+For a computed $w$ with $|w-c|<r$, expand
+$(z-w)^{-1}=\sum_{j\ge0}(w-c)^j/(z-c)^{j+1}$ on the circle.  Its tail
+is bounded by a geometric series with ratio $|w-c|/r$.  Finite integration
+and the coefficient formula give the local Cauchy identity
+\[
+ \boxed{F(w)=\frac1{2\pi i}\int_{|z-c|=r}
+                         \frac{F(z)}{z-w}\,dz.}
+\]
+Both sides are now specified computations with independent truncation and
+quadrature errors.  We have proved the identity for the supplied chart,
+not invoked it to manufacture a chart from unverified pointwise data.
+
+\section{Known poles and finite residues}
+Suppose near a specified point $s$ the computation has a proved description
+\[
+ F(z)=\sum_{j=1}^m b_{-j}(z-s)^{-j}+H(z),
+\]
+where $H$ has a series chart.  On a sufficiently small certified circle,
+finite coefficient extraction gives
+\[
+ \int F(z)\,dz=2\pi i b_{-1}.
+\]
+The coefficient $b_{-1}$ is called the residue.  The finite contour
+cancellation above transports this result to larger supplied polygonal
+contours when the region between them is covered by certified charts.
+For circular boundary components, approximate the arcs by the geometric
+polygonal construction inside the annular chart cover.  Uniform continuity
+and path-length bounds control the integral errors; radial joining edges
+cancel.  This supplies the same transport for those boundaries.
+
+As a direct example, on $|z|=2$,
+\[
+ \frac1{z(z-1)}=\sum_{n\ge0}z^{-n-2},
+\]
+so its integral is zero.  Around $0$ and $1$ separately the residues are
+$-1$ and $1$.  The two ways of computing the contour integral agree.
+The poles were supplied and their expansions proved; no unsupported
+search for every pole or zero has taken place.
+
+\section{Logarithm along a specified path}
+Start near $1$ with
+\[
+ L(1+w)=\sum_{n\ge1}\frac{(-1)^{n+1}}n w^n,\qquad |w|<1.
+\]
+Its derivative is the geometric series for $1/(1+w)$.  The series product
+and chain rules show $E(L(1+w))=1+w$: its quotient by $1+w$ has all
+nonconstant derivative coefficients zero and constant value $1$.
+On the positive real interval it agrees with the previously constructed
+logarithm by its primitive identity and the value at $1$.
+
+Suppose a value $L(c)$ has been continued to a nonzero computed point $c$.
+Choose a certified $d<|c|$ and set
+\[
+ L(c+w)=L(c)+\sum_{n\ge1}\frac{(-1)^{n+1}}n(w/c)^n,
+ \qquad |w|\le d.
+\]
+This is a fresh chart, whose radius comes from separation from zero.
+The value at the next center is computed from the old chart, and the two
+charts have derivative $1/z$ on their overlap.  Their local primitive
+identities and matching value prove agreement on the overlap, which is
+convex.  A finite chain of such steps computes continuation along a
+supplied path avoiding zero.  A rational positive distance from zero on
+each path piece gives a finite step schedule.
+
+The end value can depend on the path.  On the unit circle,
+\[
+ \int\frac{dz}{z}=\int_0^1 2\pi i\,dt=2\pi i.
+\]
+Thus continuation from $1$ once counterclockwise changes the logarithm
+value by $2\pi i$.  Starting with value $0$, the computation $E(L/2)$
+returns to $-1$, not $1$.  This constructs the sign change of the square
+root after a circuit.  A path and a starting branch are part of the input;
+there is no single globally chosen square-root computation on the
+punctured plane.
+
+\section{When does a chain of charts count as continuation?}
+A continuation certificate consists of finitely many local charts, steps
+lying strictly within their certified disks, and proved comparisons on
+each successive overlap.  Comparisons can be coefficient identities,
+local primitive identities, or the uniqueness estimates for an explicitly
+constructed differential or integral equation.  Equality of all Taylor
+coefficients at a common center implies equality on their common smaller
+disk by the finite tail estimates.  Matching only a finite jet is not
+enough unless an equation proves that it determines the later coefficients.
+
+A path change is justified by a finite subdivision whose cells stay in
+such common charts.  It does not follow from drawing apparently similar
+paths.  This requirement exposes the separation and branch information
+that an appeal to unrestricted analytic continuation would hide.
+
+The next chapters use two different ways to replenish local bounds:
+parameter integrals supply new majorants in right half-planes, while
+linear equations supply new evolution bounds away from their coefficient
+singularities.  Both can be connected to these local contour computations.
