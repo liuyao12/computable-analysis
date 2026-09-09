@@ -1,99 +1,148 @@
-\chapter{Algebraic Root Certificates and the FTA Boundary}\label{ch:algebra-fta}
+\chapter{Algebraic Branches and Rational Curves}\label{ch:algebra-fta}
 
-This chapter is included only because root isolation is an infinite
-refinement process used by special functions and ODEs.  Routine finite
-polynomial algebra is reused from Lean.
+An algebraic formula is useful only after a branch has been selected and
+its values enclosed.  We develop representative constructions: positive
+square roots, a certified simple complex root, and a rational curve.  Each
+has its own finite domain and separation data.
 
-The scoped entry point is
-\texttt{ComputableAnalysis.AlgebraicFoundation}.
+\section{Positive roots and their derivatives}
+On $[a,b]$ with rational $a>0$, the square-root bisection computation has
+\[
+ \frac{\sqrt y-\sqrt x}{y-x}
+      =\frac1{\sqrt y+\sqrt x}\qquad(x\ne y).
+\]
+As both inputs increase these slopes decrease, so the function is concave.
+On the interval the denominator is at least $2\sqrt a$, with an explicit
+rational positive lower bound obtainable by refinement.  The difference
+between the left and right secants at $x$ tends to zero by the root
+continuity estimate.  Consequently
+\[
+ D\sqrt x=\frac1{2\sqrt x}.
+\]
+The derivative is not bounded near zero; no theorem requiring a bounded
+endpoint derivative is applied there.
 
-\section{Finite root search}
-\label{thm:finite-box-polynomial-soundness}
+For a primitive of the square root, set $F(x)=\frac23 x\sqrt x$ for
+$x\ge0$, and extend by zero for $x\le0$.  If $0\le x<y$, write
+$u=\sqrt x$, $v=\sqrt y$.  Then
+\[
+ \frac{F(y)-F(x)}{y-x}
+       =\frac{2(v^2+uv+u^2)}{3(u+v)}
+\]
+when $u+v>0$.  It lies between $u$ and $v$: after clearing the positive
+denominator the two differences are
+$(v-u)(2v+u)$ and $(v-u)(v+2u)$.  Adjacent secants are therefore ordered;
+$F$ is convex and $DF(x)=\sqrt x$ on $x\ge0$, including the shrinking
+one-sided bound at zero.  The convex FTC gives
+\[
+ \int_0^b\sqrt x\,dx=\frac23 b\sqrt b.
+\]
+The reciprocal-root integral can also be computed as an improper integral:
+removing $[0,\varepsilon]$ has error $2\sqrt\varepsilon$, by the
+primitive $2\sqrt x$ on positive interior intervals and their FTC.  The tail bound, not a bare
+improper-integral symbol, defines the computation.
 
-A candidate complex box is evaluated by rational interval arithmetic.  A box
-whose polynomial image excludes zero is discarded; the others are subdivided.
+\section{Separated rational functions have finite remainder bounds}
+Let $P,Q$ be rational polynomials on a fixed interval with the supplied
+separation $|Q|\ge c>0$.  For numbers $v,w$ separated from zero,
+\[
+ \frac1w-\frac1v+\frac{w-v}{v^2}
+       =\frac{(w-v)^2}{v^2w}.
+\]
+Finite polynomial expansions and this identity give
+\[
+ \frac{P(x+h)}{Q(x+h)}-\frac{P(x)}{Q(x)}
+ =\frac{P'(x)Q(x)-P(x)Q'(x)}{Q(x)^2}h+R(x,h),
+ \qquad |R(x,h)|\le K h^2,
+\]
+with a rational $K$ computed from polynomial coefficient bounds, $c$, and
+the interval length.  Indeed the reciprocal remainder is bounded by
+$c^{-3}|Q(x+h)-Q(x)|^2$, and the polynomial linear remainders are bounded
+by their finite binomial expansions.  Multiplication adds only bounded
+quadratic terms.
 
-\begin{verbatim}
-rational polynomial + initial box -> interval evaluation
-                                  -> reject or subdivide
-                                  -> shrinking retained boxes
-\end{verbatim}
+Applying the estimate at $h$ and $-h$ cancels the linear terms.  Thus
+$P/Q+Kx^2$ is midpoint convex, hence convex, and its centered secant gaps
+are at most $4K|h|$.  The quotient formula is consequently the actual
+computed derivative, with a convex-difference FTC certificate.  This
+supplies, in particular, the rational substitutions in this chapter and
+the final elliptic-integral example.  No assertion about an arbitrary
+pointwise rational second derivative is used.
 
-The reusable subdivision theorem covers the parent, preserves any supplied
-root, and gives the exact dyadic width and height after each finite depth.
+\section{A complex root certified by contraction}
+Let $P$ be a polynomial with rational complex coefficients, and let $c$
+be a rational complex point with $P'(c)\ne0$.  Define
+\[
+ T(z)=z-P(z)/P'(c).
+\]
+Use the coordinate maximum norm on complex numbers.  Multiplication by
+$w$ has norm at most $|\Re w|+|\Im w|$.  Suppose finite polynomial
+bounds on the square $\|z-c\|_\infty\le r$ certify
+\[
+ \|T(c)-c\|_\infty\le(1-q)r,\qquad
+ \|T(z)-T(w)\|_\infty\le q\|z-w\|_\infty,
+ \quad 0\le q<1.
+\]
+The second inequality can be checked by factoring $P(z)-P(w)$ and
+bounding the resulting polynomial on two copies of the square.
+Then $T$ preserves the square.  Starting at $z_0=c$, compute the rational
+iterates $z_{n+1}=T(z_n)$.  For $m>n$,
+\[
+ \|z_m-z_n\|_\infty
+       \le\frac{q^n}{1-q}\|z_1-z_0\|_\infty.
+\]
+Rational boxes with this error, stabilized coordinatewise, define a root
+computation.  Polynomial continuity and the iteration identity prove
+$P(z)=0$.  Two root computations in the square have distance at most
+$q^n$ times their initial distance for every $n$, proving uniqueness
+without a fixed-point existence theorem.
 
-\lean{ComputableAnalysis.FiniteFTASubdivision.dyadicChildren_cover}
-\lean{ComputableAnalysis.FiniteFTASubdivision.root_mem_survivingSubdivide}
-\lean{ComputableAnalysis.FiniteFTASubdivision.survivingSubdivide_nestedIn_parent}
-\lean{ComputableAnalysis.FiniteFTASubdivision.survivingSubdivide_width_height_exact}
-\leanok
+\begin{example}[A nonrational complex root]
+For $P(z)=z^2+2$, take $c=3i/2$ and $r=1/6$.  The residual step has norm
+$1/12$.  Factoring $T(z)-T(w)$ gives contraction constant $q=2/9$ on
+the square, since
+\[
+ T(z)-T(w)=(z-w)\left(1-\frac{z+w}{3i}\right).
+\]
+Also $1/12\le(1-2/9)/6$.  Thus the iteration constructs its unique root
+there.  Comparison with the square-root construction identifies it as
+$i\sqrt2$; reflection gives the other root.  The exact polynomial identity
+$(z-i\sqrt2)(z+i\sqrt2)=z^2+2$ accounts for both roots.
+\end{example}
 
-The quadratic example checks both sides of the contract: two supplied roots
-survive, while a rational neighborhood of zero is excluded.
+This is a certificate for supplied root locations, not an invocation of a
+general complex root-existence theorem.  Polynomial identities, separation,
+and refinement are the concrete mathematical ingredients.
 
-\lean{ComputableAnalysis.finiteFTAQuadratic_upper_root}
-\lean{ComputableAnalysis.finiteFTAQuadratic_lower_root}
-\lean{ComputableAnalysis.finiteFTAZeroNeighborhood_is_root_free}
-\leanok
+\section{Rational parametrization changes the computation}
+The singular cubic
+\[
+ y^2=x^2(1-x)
+\]
+has the parametrization
+\[
+ x=1-t^2,\qquad y=t(1-t^2).
+\]
+Substitution verifies the equation by finite algebra.  Away from $x=0$,
+the inverse parameter is $t=y/x$.  Both coordinates are rational at
+rational $t$.  A rational differential form in $x,y$ therefore becomes a
+rational function of $t$ wherever the denominators are separated from
+zero.
 
-These are soundness theorems for finite search.  A complete FTA
-formalization still needs an effective existence argument ensuring that the
-retained boxes isolate all roots without importing a completed algebraically
-closed field.
+For example, on $0<t<1$,
+\[
+ \frac{dx}{y}=-\frac{2\,dt}{1-t^2}.
+\]
+Between rational parameters $0<u<v<1$, its integral is computed by
+\[
+ -\log\frac{1+v}{1-v}+\log\frac{1+u}{1-u}.
+\]
+Indeed $-2/(1-t^2)=-1/(1-t)-1/(1+t)$, and the logarithm FTC proves the
+formula.  The line-integral computation is defined along the parametrized
+path, so its orientation and domain are explicit.
 
-\section{Supplied-root deflation}
-
-When geometry or an earlier search already certifies a root, synthetic
-division removes its factor.  Iterating this operation over a finite list gives
-a checked factorization and transports distinct remaining roots to the next
-quotient.
-
-\lean{ComputableAnalysis.FiniteDeflationChain.IsDeflationChain}
-\lean{ComputableAnalysis.FiniteDeflationChain.exactRoot_of_exactRoot_of_ne}
-\lean{ComputableAnalysis.FiniteDeflationChain.horner_factorization}
-\leanok
-
-The cubic trace \((X-1)(X-2)(X-3)\) is the representative example.  It checks
-one supplied root at a time and verifies the final Horner identity.
-
-\lean{ComputableAnalysis.FiniteDeflationExample.cubic_deflation_chain}
-\lean{ComputableAnalysis.FiniteDeflationExample.cubic_horner_factorization}
-\leanok
-
-A supplied-root quintic uses the same mechanism.  It demonstrates finite
-factor removal, not a general quintic solver.
-
-\lean{ComputableAnalysis.quintic_boundary_deflation_chain}
-\lean{ComputableAnalysis.quintic_boundary_exact_factorization}
-\leanok
-
-\section{Algebraic represented values}
-
-An exact rational or rational-complex point has a nonzero linear annihilator.
-More general algebraic computations pair a shrinking complex box with an
-explicit polynomial witness.  Arithmetic on their boxes is computable;
-annihilators for sums and products remain explicit elimination obligations.
-
-\lean{ComputableAnalysis.RatPoly.linearRoot_exact_root}
-\lean{ComputableAnalysis.RatPoly.qcomplexRoot_exact_root}
-\lean{ComputableAnalysis.AlgebraicComplex.add_annihilator_exists}
-\lean{ComputableAnalysis.AlgebraicComplex.mul_annihilator_exists}
-\leanok
-
-\section{Boundary}
-
-The present chapter provides:
-
-\begin{verbatim}
-finite exclusion + supplied-root preservation + finite deflation
-\end{verbatim}
-
-The Wiedijk FTA target requires one further constructive theorem:
-
-\begin{verbatim}
-polynomial data -> finite stage and retained boxes
-                -> all roots represented, isolated, and exhausted
-\end{verbatim}
-
-Until that provider is proved, the project does not describe finite
-subdivision soundness as a completed Fundamental Theorem of Algebra.
+A parametrization is more than a closed formula: it can replace an
+algebraic-value algorithm by exact rational evaluation and turn a difficult
+integral into a previously understood one.  The final chapter will use a
+rational circle chart to regularize an integral whose next useful description is a differential equation
+rather than an elementary primitive.

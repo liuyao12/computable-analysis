@@ -1,35 +1,155 @@
-\chapter{Power Series and Finite Fourier Algebra}\label{ch:infinite-series}
+\chapter{Series and Finite Remainders}\label{ch:infinite-series}
 
-Potential infinity is a finite prefix plus a rational tail bound:
-\begin{verbatim}
-prefix N -> tail box -> enclosure of every later prefix -> shrinking realRaw
-\end{verbatim}
-No completed sum is created by notation.
+An infinite sum is useful here only when a finite prefix comes with a
+bound on every finite future correction.  This produces a number
+computation by stabilization.  Algebraic identities between prefixes,
+combined with tail bounds, then prove identities between the computations.
 
-\section{Series certificates}
-Alternating, geometric, and factorial majorants all give finite evaluators and
-tail boxes. Regrouping or termwise calculus requires a finite prefix identity
-and a transported tail certificate.
-\lean{ComputableAnalysis.Series.leibnizAlternatingRaw_valid}
-\lean{ComputableAnalysis.Series.geometricRaw_valid_of_le_half}
-\lean{ComputableAnalysis.FiniteExponentialTaylor.scheduled_expTaylorPrefix_enclosure}
-\leanok
+\section{Geometric and alternating sums}
+\label{thm:finite-geometric-series-interface}
+For rational $|r|<1$,
+\[
+ \left|\sum_{k=N+1}^{M}r^k\right|
+       \le\frac{|r|^{N+1}}{1-|r|}\qquad(M>N).
+\]
+The right side is a rational error tending to zero.  Thus the geometric
+series computes $1/(1-r)$ by its finite identity.
 
-\section{Arctangent and \(\pi\)}
-The alternating arctangent prefix at one overlaps the rational-circle quarter
-turn; fourfold normalization enters the \(\pi\) representation chain.
-\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_valid_on_unit}
-\lean{ComputableAnalysis.ArctanGeometry.piCircleArea_equiv_four_arctanGeom_one}
-\leanok
+If $a_n$ are nonnegative, decrease to zero with an effective bound, then
+even and odd partial sums of $\sum(-1)^na_n$ interleave; pairing adjacent
+terms proves that the next term bounds the remainder.  Computed rather
+than rational terms are evaluated to a finite total error budget.
 
-Newton-style fast algorithms are additional certified computations, not a
-privileged approximation. The gain comes from moving through proved
-equivalences between algorithms.
+\begin{example}[Divergence is also a computation]
+\label{thm:harmonic-dyadic-lower-bound}
+Grouping the terms with $2^{j-1}<n\le2^j$ gives
+\[
+ \sum_{n=1}^{2^m}\frac1n\ge1+\frac m2.
+\]
+For every rational height, this produces an explicit finite partial sum
+above it.  No infinite value is introduced.
+\end{example}
 
-\section{Fourier}
-Fourier begins with finite complex transforms, inverse transforms, and
-convolution. Infinite Fourier objects require a truncation evaluator, tail,
-and overlap certificate.
-\lean{ComputableAnalysis.finiteFourierSum}
-\lean{ComputableAnalysis.EffectiveFourierTailCertificate.toSeries_valid}
-\leanok
+The sum of reciprocal squares has the independent tail bound
+\[
+ \sum_{n=N+1}^{M}\frac1{n^2}
+ \le\sum_{n=N+1}^{M}\left(\frac1{n-1}-\frac1n\right)\le\frac1N.
+\]
+This constructs the number before identifying it with $\pi^2/6$.
+The identification will be a Fourier computation in
+Chapter~\ref{ch:fourier}.
+
+\section{Arctangent: a finite identity integrates to a series}
+\label{thm:leibniz-arctan}
+The exact polynomial identity
+\[
+ \frac1{1+t^2}=\sum_{k=0}^{N-1}(-1)^kt^{2k}
+              +\frac{(-1)^Nt^{2N}}{1+t^2}
+\]
+has an integrable remainder.  On $[0,x]$ with $0\le x\le1$ its
+absolute integral is at most $x^{2N+1}/(2N+1)$.  Finite polynomial
+integration and the already proved angle-area comparison yield
+\[
+ A(x)=\sum_{k=0}^{N-1}\frac{(-1)^kx^{2k+1}}{2k+1}+R_N(x),
+ \qquad |R_N(x)|\le\frac{x^{2N+1}}{2N+1}.
+\]
+At $x=1$ this is the Leibniz computation of $\pi/4$.  This is a proof of
+agreement between a geometric computation and a series computation, not
+an identification by notation.
+
+\section{A power series is a prefix together with a majorant}
+Suppose the coefficients $a_n$ are computable, and rational constants
+$M,R>0$ give $|a_n|\le M R^{-n}$.  On $|x|\le r<R$, put $q=r/R$.
+Then
+\[
+ F_N(x)=\sum_{n=0}^Na_nx^n,\qquad
+ |F-F_N|\le\frac{M q^{N+1}}{1-q}.
+\]
+The inequality means a bound on all finite future tails, and so constructs
+$F$.  Coefficient evaluations are made accurate enough that their finite
+weighted error is smaller than a prescribed remaining budget.  The same
+construction works in rational complex boxes on a smaller disk.
+
+For the differentiated prefixes the tail is bounded by
+\[
+ \frac{M}{R}q^N\left(\frac{N+1}{1-q}+\frac{q}{(1-q)^2}\right).
+\]
+This follows by summing $nq^{n-1}$, or differentiating a finite geometric
+identity and bounding its final terms.  Higher differentiated tails follow
+in exactly the same finite way, with explicit polynomial factors in $n$.
+One fixes the required order and writes its bound; no unrestricted exchange
+of limits is presumed.
+
+\begin{theorem}[Differentiation and integration of a supplied series]
+\label{thm:finite-taylor-ftc-prefix}
+On a smaller interval $[-r,r]$, the derivative is the computation with
+coefficients $(n+1)a_{n+1}$.  Its integral is computed term by term, and
+\[
+ \int_a^b\sum_{n=0}^{\infty}a_nx^n\,dx
+   =\sum_{n=0}^{\infty}\frac{a_n}{n+1}(b^{n+1}-a^{n+1}).
+\]
+\end{theorem}
+\begin{proof}
+Each finite polynomial has its exact algebraic derivative and primitive.
+For all prefixes the second derivatives have the common bound
+\[
+ K=\frac{2M}{R^2(1-q)^3}.
+\]
+The finite polynomial remainder identity gives
+$|F_N(y)-F_N(x)-F_N'(x)(y-x)|\le K|y-x|^2/2$ for a segment in
+$[-r,r]$.  One can derive this identity by integrating the polynomial
+second derivative twice; polynomial integration is just the binomial
+identity and finite telescoping.  Pass to the computations using the
+explicit tails for $F_N$ and $F_N'$.  This proves the derivative assertion.
+Uniform tail bounds change an integral by at most its interval length
+times the tail, proving the second assertion.
+\end{proof}
+
+For real coefficients, $F_N+Kx^2/2$ is convex, by the same finite polynomial
+second-difference identity.  Passing its inequalities through the tails
+proves that $F+Kx^2/2$ is convex.  Thus this derivative agrees with the
+convex-secant computation of Chapter~\ref{ch:effective-calculus}; it is not
+a competing notion of derivative.
+
+\section{Products, coefficient identities, and Taylor errors}
+For two supplied series, multiply finite prefixes.  Absolute majorants
+bound the two omitted tails and their product.  Regrouping their finite
+terms proves the Cauchy product identity.  The same argument in two
+variables justifies the coefficient comparisons used for exponential
+addition below.
+
+A Taylor polynomial is another finite computation of the same function.
+When a translated series or a finite remainder bound has been supplied,
+its error is bounded by that data.  For example the uniform bound $K$
+above gives the first-order error $K h^2/2$.  More generally a supplied
+bound $B$ on the polynomial/series $(m+1)$st derivatives gives
+$B|h|^{m+1}/(m+1)!$ by repeated finite polynomial integration and its
+uniform tails.  We do not infer such a remainder theorem from pointwise
+rational derivatives alone.
+
+\section{Binomial square-root computations}
+Put
+\[
+ c_0=1,\qquad c_{n+1}=\frac{2n+1}{2n+2}c_n
+       =\frac{\binom{2n+2}{n+1}}{4^{n+1}}.
+\]
+The coefficients are rational and $0<c_n\le1$, so
+$B(z)=\sum_{n\ge0}c_nz^n$ has a geometric tail on $|z|\le r<1$.
+The recurrence gives the coefficient identity
+\[
+ 2(1-z)B'(z)=B(z).
+\]
+By the product rules for series, every nonconstant coefficient of
+$(1-z)B(z)^2$ has derivative zero, and its constant coefficient is $1$.
+Consequently
+\[
+ (1-z)B(z)^2=1.
+\]
+For $0\le z<1$, positivity of the coefficients identifies this computation
+with the positive inverse square root $(1-z)^{-1/2}$.  The argument is
+coefficient algebra with tails; it does not use an ODE uniqueness theorem
+for arbitrary rational-point solutions.
+
+This example will reappear in the construction of an elliptic integral.
+It also illustrates how a recurrence can supply a special function, while
+an algebraic identity identifies what the computation evaluates.

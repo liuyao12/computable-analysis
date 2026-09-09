@@ -1,37 +1,163 @@
 \chapter{Exponential and Logarithm}\label{ch:exponential-logarithm}
 
-Exponential and logarithm are rational algorithms, with laws proved by finite
-prefix identities and tail transport.
+These functions are useful tests of the distinction between defining a
+computation and proving equivalence with another one.  We construct the
+exponential by factorial prefixes, the logarithm by rectangles, and then
+prove that they are inverse computations.
 
-\section{Exponential}
-\begin{verbatim}
-input x -> choose N -> sum x^k/k! -> factorial remainder box
-\end{verbatim}
-\lean{ComputableAnalysis.FiniteExponentialTaylor.scheduled_expTaylorPrefix_enclosure}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_effectiveFTC}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_effectiveFTC}
-\leanok
-Thus \(\int_0^1\exp(x)\,dx=\exp(1)-1\) is an overlap of raw algorithms.
+\section{Factorial prefixes}
+For a rational bound $R\ge|x|$, set
+\[
+ E_N(x)=\sum_{n=0}^N\frac{x^n}{n!}.
+\]
+If $N+2\ge2R$, the absolute terms after the first omitted one have
+successive ratio at most $1/2$.  Thus
+\[
+ |E-E_N|\le2\frac{R^{N+1}}{(N+1)!}.
+\]
+Finite-prefix stabilization constructs $E(x)$ on every bounded interval.
+The differentiated series is identical, so the previous chapter proves
+$DE=E$, with a uniform increment error bound on each such interval.
 
-\section{Complex rotation and logarithm}
-The imaginary exponential prefix provides sine and cosine as two coordinates.
-\lean{ComputableAnalysis.RotationSeries.rotationExpRaw_valid}
-\lean{ComputableAnalysis.RotationSeries.uniformRotationSinOnTwo_hasDerivativeOnInterval}
-\leanok
+Finite binomial algebra in the double series gives
+\[
+ E(x+y)=E(x)E(y),\qquad E(0)=1,\qquad E(x)E(-x)=1.
+\]
+To justify the rearrangement, first restrict to finitely many terms;
+the omitted terms are bounded by the product of the factorial majorants.
+For $x\ge0$, the coefficients give $E(x)\ge1+x$.  The reciprocal
+identity then proves positivity for negative $x$ as well.
 
-On \([1,2]\), \(\log2\) has a reciprocal-integral and an alternating-series
-implementation, compared directly by finite boxes. Branch-local inverse
-exponential searches are checked for selected certified targets; a
-target-parametric logarithm search remains a separate finite-search problem.
-\lean{ComputableAnalysis.Logarithm.logTwoSeries_equiv_logTwoReciprocalIntegral}
-\lean{ComputableAnalysis.GapAwareInverseBisectionSearch.preimage_valid}
-\leanok
+The midpoint difference has the form
+\[
+ E(x+h)+E(x-h)-2E(x)
+   =E(x)\bigl(E(h)+E(-h)-2\bigr)\ge0,
+\]
+since the final factor is a sum of nonnegative even powers.  Hence $E$ is
+convex.  The series remainder proves that its convex derivative computation
+terminates and has value $E$.
 
-\section{A product FTC \(\pi\) bridge}
-For \(F(x)=x\arctan x\), a two-stage derivative-bound computation identifies
-the unit integral of \(F'\) with \(\arctan(1)\).  Finite reindexing then joins
-the arctangent triangle and reciprocal/logarithm strip.  This is an instance,
-not a general integration-by-parts axiom.
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral_equiv_arctanGeom_one}
-\lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral_equiv_four_arctanGeom_one}
-\leanok
+\section{Compound interest is another computation}
+For $N\ge1$, the binomial coefficient of $x^k/k!$ in $(1+x/N)^N$ is
+\[
+ q_{N,k}=\prod_{j=0}^{k-1}(1-j/N)\quad(k\le N),
+\]
+and it is zero for $k>N$.  For $k\le N$,
+$0\le1-q_{N,k}\le k(k-1)/(2N)$, by expanding the finite product or
+inductively using $1-uv\le(1-u)+(1-v)$ for $u,v\in[0,1]$.
+For $k>N$ the same upper bound for $1-q_{N,k}=1$ still holds.
+Consequently, if $|x|\le R$ and $B_R$ is a rational upper bound for $E(R)$,
+\[
+ \left|(1+x/N)^N-E(x)\right|
+ \le\frac1{2N}\sum_{k\ge2}\frac{k(k-1)R^k}{k!}
+ \le\frac{R^2B_R}{2N}.
+\]
+Every infinite sum in this estimate has already been given a factorial
+tail.  This proves the compound-interest representation by a finite error
+budget.  For its usual positive-base interpretation also choose $N>R$.
+
+\section{The logarithm by accumulation}
+For rational $x>0$, define
+\[
+ L(x)=\int_1^x\frac{dt}{t}.
+\]
+On every positive rational interval $[a,b]$, the integrand is decreasing,
+bounded, and has the algebraic continuity estimate
+$|1/x-1/y|\le |x-y|/a^2$.  The integral is therefore constructed
+independently of $E$.  The accumulation estimate proves
+\[
+ DL(x)=1/x.
+\]
+Ordered integral averages make $L$ concave.  Its one-sided secants converge
+by the same continuity estimate, so this is also its computed derivative.
+
+For $0<x<y$ in $[a,b]$,
+\[
+ \frac{y-x}{b}\le L(y)-L(x)\le\frac{y-x}{a}.
+\]
+This supplies continuity and strict separation.  Rational scaling of
+partitions gives, for positive rational $x,y$,
+\[
+ L(xy)=L(x)+L(y).
+\]
+The same identity extends to computed positive inputs by the
+computed-input construction and the displayed bounds.  In particular
+$L(2^n)=nL(2)$, with $L(2)\ge1/2$, gives explicit arbitrarily large
+values, and reciprocation gives arbitrarily negative ones.
+
+\section{Proving the inverse relation}
+On a fixed bounded input interval choose rational bounds $B_E,K_E$ such
+that $|E|\le B_E$ and
+\[
+ |E(x+h)-E(x)-E(x)h|\le K_Eh^2/2.
+\]
+The factorial tails and the series remainder supply them.  Also enclose
+the image in $[c,d]$ with rational $c>0$, using $E(-x)=1/E(x)$.
+Accumulation and the Lipschitz bound $c^{-2}$ for $1/t$ give
+\[
+ |L(z+k)-L(z)-k/z|\le k^2/(2c^2)
+\]
+for a segment in that image interval.  The derivative bound gives
+$|E(x+h)-E(x)|\le B_E|h|$ (enlarge $B_E$ on the interval if necessary).
+Substitution into these two estimates proves the explicit composite error
+\[
+ |L(E(x+h))-L(E(x))-h|
+ \le\left(\frac{K_E}{2c}+\frac{B_E^2}{2c^2}\right)h^2.
+\]
+
+Adding these estimates on equal rational partitions shows that
+$L(E(x))-x$ has endpoint difference at most
+$\varepsilon$ times the interval length for every $\varepsilon>0$.
+At zero it is zero.  Hence
+\[
+ L(E(x))=x.
+\]
+This is a finite telescoping proof, not the invalid implication
+``pointwise rational derivative zero implies constant.''
+
+The identities extend to computed inputs on bounded intervals by
+continuity.  In particular, for a positive computed $y$, apply the identity
+to $x=L(y)$.  Both $E(L(y))$ and $y$ have logarithm $L(y)$, and the
+separation bound for $L$ proves their equivalence:
+\[
+ E(L(y))=y.
+\]
+Thus $E=\exp$ and $L=\log$ name inverse computations.
+
+\section{Representative consequences}
+Define $x^\alpha=E(\alpha L(x))$ on a positively separated interval,
+for a supplied computed constant $\alpha$.  The same finite increment
+composition gives
+\[
+ D(x^\alpha)=\alpha x^{\alpha-1}.
+\]
+This statement includes the domain and bounded-interval estimates; it is
+not an assertion that arbitrary rational-point differentiable functions
+can be freely composed and integrated.
+
+A particularly useful primitive is $xL(x)-x$.  The product calculation in
+Chapter~\ref{ch:effective-calculus} proves
+\[
+ \int_a^b L(x)\,dx=[xL(x)-x]_a^b\qquad(0<a<b).
+\]
+Another is the exponential itself:
+\[
+ \int_a^b E(x)\,dx=E(b)-E(a).
+\]
+The left sides are rectangle computations and the right sides are finite
+combinations of independently constructed values.
+
+Finally define, by the factorial series, $E(z)$ for rational complex
+inputs.  Coefficient separation gives
+\[
+ E(i\pi x)=C(x)+iS(x).
+\]
+For completeness, the even and odd factorial prefixes have derivatives
+$C'=-\pi S$, $S'=\pi C$ and the correct initial values.  Equality with
+the geometric pair follows from the following finite uniqueness argument:
+the difference satisfies its integral equation, and iterating that
+equation $n$ times bounds it by $B(\pi h)^n/n!$ on an interval of length
+$h$.  The integral equations follow by telescoping the already proved
+uniform increment bounds for both constructions.  This error tends to
+zero.  Chapter~\ref{ch:differential-equations} gives the matrix form of
+this same argument.

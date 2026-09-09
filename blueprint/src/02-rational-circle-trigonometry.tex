@@ -1,157 +1,194 @@
 \chapter{Circle and Trigonometry}\label{ch:rational-circle-trigonometry}
 
-Circle geometry supplies the first special function without assuming standard
-real trigonometry.  Exact rational coordinates give squared identities;
-\texttt{realRaw} length or angle computations are added only where the
-application needs them.
-
-The scoped Lean entry point is
-\texttt{ComputableAnalysis.CircleFoundation}.
+Circle geometry supplies the first special function without assuming
+standard real trigonometry.  Exact rational coordinates give squared
+identities; length and angle computations are added where needed.  The
+sine convention throughout is
+\[
+ S(x)=\sin(\pi x),\qquad C(x)=\cos(\pi x).
+\]
+These names designate the constructions below, not functions imported with
+an existing theory of differentiation.
 
 \section{Finite rational geometry}
 \label{thm:rational-circle-pythagorean}
+The rational chart
+\[
+ P(t)=\left(\frac{1-t^2}{1+t^2},\frac{2t}{1+t^2}\right)
+\]
+satisfies $P_1(t)^2+P_2(t)^2=1$ by expansion.  For $0\le t\le1$ it runs
+through the first quadrant, from $(1,0)$ to $(0,1)$.  Conversely a point of
+the unit circle in this quadrant has parameter $t=y/(1+x)$.
 
-\begin{verbatim}
-rational coordinates -> squared identity -> interval length if needed
-\end{verbatim}
-
-The project keeps only geometry used downstream.  Pythagorean coordinates,
-shoelace area, half-angle refinement, and the broken-line inequality support
-circle subdivision and integral bounds.  Routine Euclidean identities are
-reused from Lean rather than catalogued here.
-
-\lean{ComputableAnalysis.RationalCircle.pythagoreanTriple_identity}
-\lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_shoelace}
-\lean{ComputableAnalysis.RationalCircle.Stage.rationalPolyline_length_ge_direct}
-\lean{ComputableAnalysis.RationalCircle.Stage.rationalPolyline_length_two_step_strict_of_genuine_turn}
-\leanok
+Rational determinants give triangle and polygon areas.  The broken-line
+inequality of Chapter~\ref{ch:foundations} compares polygonal lengths.
+Reflections and the rational rotation matrix
+\[
+ \begin{pmatrix}c&-s\\s&c\end{pmatrix},\qquad c^2+s^2=1,
+\]
+preserve squared lengths and determinants by finite algebra.  These are all
+the geometric operations used in this chapter.
 
 \section{Archimedes and rational circles}
 \label{thm:geometric-pi-validity}
+Join finitely many points $P(t_i)$, where
+$0=t_0<\cdots<t_N=t\le1$, to the origin.  The inscribed triangle for
+$u=t_i,v=t_{i+1}$ has area
+\[
+ I(u,v)=\frac{(v-u)(1+uv)}{(1+u^2)(1+v^2)}.
+\]
+The two endpoint tangents meet outside the circle; the quadrilateral formed
+with the origin has area
+\[
+ O(u,v)=\frac{v-u}{1+uv}.
+\]
+Both formulas follow by determinants and the tangent equations
+$P(u)\mathbin{\cdot}z=P(v)\mathbin{\cdot}z=1$.
 
-Crude subdivisions are not failed approximations.  They are finite
-computations whose inclusion and refinement relations can be proved.
+Inserting a point increases the total inner area and decreases the total
+outer area: the changes are areas of finite triangles.  Moreover
+\[
+ \frac{v-u}{1+v^2}\le I(u,v)\le O(u,v)
+       \le\frac{v-u}{1+u^2}.
+\]
+Consequently the gap between the total outer and inner areas is at most
+\[
+ \mesh(P)\left(1-\frac1{1+t^2}\right)\le\mesh(P).
+\]
+Nested rational subdivisions therefore define a sector-area computation
+$A(t)$.  Define
+\[
+ \pi=4A(1).
+\]
+The square and a finer inscribed polygon give $2<\pi<4$.  The strict
+bounds are witnessed by finite area computations.  No circle integral or
+series formula has entered the definition.
 
-\begin{verbatim}
-rational circle points -> inscribed/circumscribed cells
-                       -> finite area and length bounds -> refine
-\end{verbatim}
-
-\begin{figure}[!htbp]\centering
+\begin{figure}[htbp]\centering
 \rationalCircleSubdivisionAnimation
-\caption{Crude rational subdivisions become a certified enclosure.}
-\label{fig:rational-parameter-line}\end{figure}
+\caption{Rational subdivisions give inner and outer bounds for the circle.}
+\label{fig:rational-parameter-line}
+\end{figure}
 
-The resulting area and circumference computations are independent
-representations.  Their equivalence is a theorem in the \(\pi\) scoreboard,
-not a definitional identification.
+Area and circumference are initially independent computations.  Here is
+their comparison.  For an inscribed chord of length $c$, its distance from
+the origin is $d=\sqrt{1-c^2/4}$, and twice the corresponding triangle area
+is $cd$.  Thus
+\[
+ 0\le c-cd\le c^3/4.
+\]
+The total inscribed length is bounded by the outer tangent length.  For a
+unit-circle tangential polygon, twice its area equals its perimeter,
+triangle by triangle.  As the largest chord shrinks, the displayed bound
+identifies circumference with twice disk area.  Hence the circumference is
+$2\pi$.  The same proof works for sectors: arc length is twice sector area.
+Rotation invariance and additivity follow by common refinements of the
+finite polygons.  They remain true for computed rotation matrices by
+coordinate approximation and the determinant error bounds.
 
 \section{Angles and rotations}
 \label{thm:finite-quarter-turn}
+A full turn has normalized parameter length $2$; a quarter turn has length
+$1/2$.  The point whose sector area is $\pi x/2$ is denoted $(C(x),S(x))$.
+The inverse construction below gives it for every rational
+$0\le x\le1/2$.  Reflection and periodicity then give every rational input.
 
-The blueprint writes sine as \(\sin(\pi x)\).  On the half-period, the circle
-algorithm may internally use the normalized parameter \(t=2x\); this is an
-implementation coordinate, not a second sine convention.
-
-The half-angle computation is the central algorithm:
-
-\begin{verbatim}
-parent cosine box -> (1 +/- cosine)/2 -> rational square-root box
-                  -> child sine/cosine boxes -> repeat
-\end{verbatim}
-
-Every finite stage carries the unit-circle identity, endpoint values, and
-refinement law.  Its half-angle tangent and sine are stabilized directly into
-valid computations; the sine is the rational-circle image of the tangent and
-is equivalent to the nested-radical sample.  No completed-real anchor is used.
-
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalTableAt_overlap_of_precisions}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalHalfAngleTangent_valid}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalHalfAngleTangentRaw_equiv}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalSample_valid}
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalHalfAngleSine_equiv_sample}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_point_refineIndex}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_cos_sq_add_sin_sq}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_cos_zero}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_sin_last}
-\leanok
-
-A complex factorial-prefix evaluator gives a second rotation computation.  Its
-coordinate derivatives are finite interval theorems,
+Equal dyadic subdivisions offer another computation.  If $(c,s)$ is the
+parent point in the first quadrant, the half-angle point is
 \[
-  S'=C,\qquad C'=-S.
+ \left(\sqrt{(1+c)/2},\sqrt{(1-c)/2}\right).
 \]
-The later ODE uniqueness bridge identifies this series candidate with the
-geometric circle chart.
+Squaring and applying the double-angle rotation identity proves this is its
+positive square root as a rotation.  Repeated halving and finite rotation
+products compute all dyadic angles.  Additivity of sector area shows that
+halving the rotation halves the angle parameter, so these are the same
+points as the sector-area construction.  The comparison is geometric,
+not an appeal to a completed trigonometric function.
 
-\lean{ComputableAnalysis.RotationSeries.stableUniformRotationSinFunction_hasDerivativeOnInterval}
-\lean{ComputableAnalysis.RotationSeries.stableUniformRotationCosFunction_hasDerivativeOnInterval}
-\leanok
+Rotation multiplication now gives
+\begin{align*}
+ S(x+y)&=S(x)C(y)+C(x)S(y),\\
+ C(x+y)&=C(x)C(y)-S(x)S(y),\\
+ C(x)^2+S(x)^2&=1.
+\end{align*}
+The endpoint values are
+$S(0)=0$, $C(0)=1$, $S(1/2)=1$, $C(1/2)=0$.
+Symmetries give $S(-x)=-S(x)$, $C(-x)=C(x)$, and period $2$.
+
+Chord length is at most arc length.  Thus, for rational arguments,
+\[
+ |S(x)-S(y)|\le4|x-y|,\qquad
+ |C(x)-C(y)|\le4|x-y|.
+\]
+This gives a rational continuity certificate.  In particular dyadic
+approximation evaluates every rational angle, and all these representations
+agree by the sector-area comparison.
 
 \section{Arctangent as the angle chart}
+For $0\le u<v\le1$, the area bounds already proved give
+\[
+ \frac{v-u}{1+v^2}\le A(v)-A(u)
+       \le\frac{v-u}{1+u^2}.
+\]
+In particular
+\[
+ \frac{v-u}{2}\le A(v)-A(u)\le v-u.
+\]
+The chart is interval-continuous and has a linear inverse-separation bound.
+For rational $x\in[0,1/2]$, the target $\pi x/2=2xA(1)$ is certified
+between its endpoint values.  Trisection therefore computes the unique
+parameter $t$ with
+\[
+ A(t)=\pi x/2.
+\]
+Evaluate $P(t)$ by the computed-input construction to obtain $C(x),S(x)$.
+At the endpoints use $t=0,1$ directly.
 
-The rational kernel \(1/(1+t^2)\) supplies an area coordinate on the unit
-tangent interval.  Equal rational rectangles give a nested computation of the
-geometric arctangent, and the endpoint is the quarter-turn anchor.
+The notation $A(t)=\arctan t$ records the usual angle chart: the geometric
+angle of $P(t)$ is $2A(t)$.  On a partition of $[0,t]$, the rectangle
+sums for $1/(1+u^2)$ bracket the same inner and outer areas.  Their gap is
+at most the mesh.  Thus these rectangles are already an equivalent
+computation of $A(t)$; Chapter~\ref{ch:integrals} will recognize them as
+an integral.  This order of construction avoids defining the sine through
+an FTC not yet proved.
 
-\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_nested}
-\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_valid_on_unit}
-\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_one_compute_eq}
-\leanok
-
-For inversion, the accelerated rectangle schedule supplies interval
-regularity, monotonicity, and gap-aware separation.  The latter selects a
-strictly separating finite stage from the denominator of a rational source
-gap.  The target also has an explicit (1/(16(n+1))) width schedule;
-completing the all-stage target bisection still requires its central bracket
-argument.
-
-\begin{verbatim}
-angle target box -> tangent-parameter bisection -> rational circle point
-                 -> sine/cosine boxes
-\end{verbatim}
-
-\lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_intervalRegular}
-\lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_invertible}
-\lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_gapAwareInvertible}
-\lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_gapAwareTarget}
-\lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_gapAwareTargetWidth}
-\lean{ComputableAnalysis.SectorAreaReparametrization.arctanOnUnitRegular_equivalent_geometric}
-\lean{ComputableAnalysis.InvertibleFunctionOnInterval.forwardRealRaw}
-\lean{ComputableAnalysis.InvertibleFunctionOnInterval.source_equiv_of_forward_equiv}
-\leanok
-
-The function-facing sine and cosine computations are obtained from this point
-constructor.  They remain partial on their declared rational chart; no single
-closed formula is asserted for every possible angle representation.
-
-\lean{ComputableAnalysis.RationalCircle.GeometricTrig.FunctionRawConstruction.cosFunctionRaw}
-\lean{ComputableAnalysis.RationalCircle.GeometricTrig.FunctionRawConstruction.sinFunctionRaw}
-\leanok
+\section{Small angles before differentiation}
+\label{sec:geometric-small-angle}
+For $0<h\le1/4$, compare the inscribed triangle, the sector, and the
+triangle cut out by its tangent.  Using arc length $\pi h$ gives
+\[
+ S(h)\le\pi h\le S(h)/C(h).
+\]
+The half-angle identity and the chord bound also give
+\[
+ 0\le1-C(h)=2S(h/2)^2\le8h^2.
+\]
+Multiplying the first comparison by the positive $C(h)$ and using
+$\pi<4$ yields
+\[
+ 0\le\pi h-S(h)\le\pi h(1-C(h))\le32h^3.
+\]
+Odd and even symmetry extend the estimates to negative $h$:
+\[
+ |S(h)-\pi h|\le32|h|^3,\qquad |1-C(h)|\le8h^2.
+\]
+These are finite geometric error bounds.  They will prove both the
+termination of derivative computations and their identification with
+$\pi C$ and $-\pi S$.
 
 \section{Input to integration}
-
-This chapter supplies value boxes.  Chapter~\ref{ch:integrals} supplies the
-area and FTC certificates.  Its first target,
+The first area to be computed in two ways is
 \[
-  \int_0^{1/2}\sin(\pi x)\,dx,
+ \int_0^{1/2}S(x)\,dx.
 \]
-uses either equal dyadic nested-radical samples or unequal samples coming from
-uniform tangent subdivisions.
+Equal dyadic samples use nested square roots.  Unequal samples use the
+rational parameter $t$ and the chart $P(t)$.  Both are legitimate finite
+computations; their integral equivalence follows from interval continuity
+and refinement.  The derivative computation and the FTC will identify the
+answer as $1/\pi$.
 
-\begin{verbatim}
-circle/arctangent geometry -> rational sine/cosine value boxes
-                           -> rectangle or Stieltjes integral
-\end{verbatim}
-
-The remaining equal-dyadic obligation is geometric: positive odd
-nested-radical samples must overlap the corresponding arctangent-backed circle
-boxes at every depth.  Boundary, parity, reflection, finite-search soundness,
-and integral transport are handled in the integral chapter.
-
-\section{Scope boundary}
-
-Only geometry that certifies an infinite process is developed here.  The
-natural dense chart may be rational coordinates, dyadic angle samples, or a
-finite algebraic extension; it need not be a formula on rational numbers
-alone.  Overlapping charts are connected by explicit equivalence edges.
+Only geometry that certifies these infinite processes has been used.
+Natural charts may be rational coordinates, dyadic angles, or computed
+square roots.  The mathematical function is tracked through proved
+comparisons between these descriptions, not through a preferred closed
+formula.

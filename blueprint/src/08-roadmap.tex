@@ -1,111 +1,130 @@
-\chapter{Formalization Roadmap}
+\chapter{An Elliptic Integral and Its Differential Equation}
+\label{ch:elliptic}
 
-The blueprint is a map, not a second proof.  Figures show computations,
-pseudocode states invariants, and Lean carries the finite estimates.
+A final example ties together rational parametrization, algebraic-value
+computations, integration, series, and a variable-coefficient fundamental
+matrix.  The point is not to develop all elliptic functions, but to give
+several equivalent ways of computing one useful family.
 
-\section{Admission rule}
+\section{Remove an endpoint singularity before computing}
+For rational $0\le m<1$, the familiar expression is
+\[
+ K(m)=\int_0^1\frac{dx}{\sqrt{(1-x^2)(1-mx^2)}}.
+\]
+We do not begin by assuming this improper integral exists.  Use the rational
+circle parameter $x=2u/(1+u^2)$.  For $0\le u<1$,
+\[
+ \sqrt{1-x^2}=\frac{1-u^2}{1+u^2},\qquad
+ \frac{dx}{du}=\frac{2(1-u^2)}{(1+u^2)^2}.
+\]
+Cancellation suggests the bounded integral
+\[
+ \boxed{K(m)=\int_0^1
+       \frac{2\,du}{\sqrt{(1+u^2)^2-4mu^2}}.}
+\]
+This is our first definition.  On $0\le m\le r<1$ its squared denominator
+is at least $(1-r)(1+u^2)^2\ge1-r$.  Positive-root bisection and separated
+reciprocals therefore give value computations, absolute bounds, and
+continuity moduli for the integrand.
 
-Add a result only when it contributes a new interval algorithm, represented
-domain, convergence estimate, integral/derivative certificate, or
-equivalence edge.  Routine finite algebra and combinatorics are dependencies.
-Scalar multiples, sign changes, degree variants, and finitely piecewise
-functions are transported from one representative theorem.
+For truncated $u$-intervals the substitution theorem proves agreement with
+the corresponding truncated original integral.  The omitted transformed
+interval of length $\varepsilon$ contributes at most
+$2\varepsilon/\sqrt{1-r}$, with any rational upper bound for this constant.
+It follows that the original improper expression is an equivalent
+computation, now accompanied by its missing tail estimate.
 
-The canonical Lean entry point is
-\texttt{ComputableAnalysis.CalculusFoundation}.  Its import chain uses Lean's
-rational ordered arithmetic and project modules, not standard real numbers,
-measure theory, topology, or a completion construction.
+At $m=0$ the integrand is $2/(1+u^2)$, so
+$K(0)=2A(1)=\pi/2$.
 
-\section{Dependency order}
+\section{A power series from the same integral}
+Put $c_n=\binom{2n}{n}/4^n$, as in
+Chapter~\ref{ch:infinite-series}.  The transformed integrand is
+\[
+ \frac2{1+u^2}\sum_{n=0}^{\infty}
+       c_n m^n\left(\frac{2u}{1+u^2}\right)^{2n}.
+\]
+Since $0\le 2u/(1+u^2)\le1$ and $c_n\le1$, truncating after $N$ has
+uniform error at most $2r^{N+1}/(1-r)$.  Integrating finite prefixes and
+using that error bound is therefore justified.
 
-\begin{verbatim}
-foundations -> circle/trigonometry -> finite integrals -> effective FTC
-            -> series/Fourier -> exponential/logarithm -> linear ODEs
-\end{verbatim}
+Let
+\[
+ I_n=\int_0^1\frac2{1+u^2}
+          \left(\frac{2u}{1+u^2}\right)^{2n}du.
+\]
+The angle substitution $x=2A(u)/\pi$ gives
+$I_n=\pi\int_0^{1/2}S(x)^{2n}dx$.  Differentiate the finite product
+$S^{2n-1}C$ using the already proved trigonometric derivatives and product
+rule.  Its endpoint values vanish for $n\ge1$, so integration by parts
+gives
+\[
+ 2n I_n=(2n-1)I_{n-1},\qquad I_0=\pi/2.
+\]
+The powers and products have uniform finite increment estimates obtained
+by multiplying those of $S$ and $C$, so the telescoping identity used here
+is certified on the whole interval.  Hence $I_n=(\pi/2)c_n$ and
+\[
+ \boxed{K(m)=\frac\pi2\sum_{n=0}^{\infty}c_n^2m^n.}
+\]
+A tail bound is $(\pi/2)r^{N+1}/(1-r)$, which can be replaced by the
+rational bound $2r^{N+1}/(1-r)$.
 
-Algebraic root certificates form a parallel branch.  They enter the calculus
-route only when a special function or complex application needs them.
+For example, at $m=1/2$ the first five terms of the normalized quantity
+$2K(m)/\pi$ are
+\[
+ 1+\frac18+\frac9{256}+\frac{25}{2048}
+          +\frac{1225}{262144}.
+\]
+The remaining normalized tail is at most $1/16$.  More precise boxes
+are obtained by the same rational recurrence, not by a new existence
+argument.  Rectangle quadrature and this series now compute the same number.
 
-\section{Canonical FTC boundary}
+\section{The differential equation is a coefficient identity}
+Writing $a_n=(\pi/2)c_n^2$, the recurrence is
+\[
+ (n+1)^2a_{n+1}=(n+1/2)^2a_n.
+\]
+The differentiated tails converge uniformly on $m\le r<1$, by the power
+series estimates.  Comparing coefficients therefore gives
+\[
+ \boxed{m(1-m)K''+(1-2m)K'-\tfrac14K=0,}
+\]
+with $K(0)=\pi/2$ and $K'(0)=\pi/8$.
+This is proved from finite recurrences and their tails, not from an abstract
+classification of period functions.
 
-The effective derivative-bound certificate now produces a valid integral,
-not merely a same-stage overlap:
+On an interval strictly inside $(0,1)$, put $Y=(K,K')^{\mathsf T}$.  It
+satisfies the linear system
+\[
+ Y'=\begin{pmatrix}
+ 0&1\\
+ \dfrac1{4m(1-m)}&\dfrac{2m-1}{m(1-m)}
+ \end{pmatrix}Y.
+\]
+For example, on $[1/4,3/4]$ the row-sum norm of this coefficient matrix is
+at most $4$.  The fundamental-matrix construction therefore has the
+factorial majorant of the preceding chapter.  The series supplies
+$Y(1/2)$, and propagation supplies $Y(3/4)$; integral-equation uniqueness
+identifies it with direct series evaluation there.
 
-\begin{verbatim}
-finite cell bounds
-  -> bounded sums with shrinking width
-  -> overlap with valid endpoint computation
-  -> prefix stabilization
-  -> valid integral equivalent to endpoint difference
-\end{verbatim}
+The coefficient matrix is singular at $m=0$ and $m=1$.  We have not
+applied its bounded-coefficient theorem across either point.  The series
+handles the specified regular solution at $m=0$; each evolution computation
+uses an explicitly separated interval.
 
-Successive finite sums may use unrelated partitions.  The proof derives
-shrinking width and then supplies nestedness; it does not assume the native
-candidate was already a valid \texttt{realRaw}.  The squared finite sine
-prefix is the first nonlinear regression of this exact route.
+\section{What the example connects}
+We now have three actual computations of $K$: bounded quadrature of an
+algebraic integrand, a rational coefficient series times $\pi/2$, and
+fundamental-matrix propagation from a computed initial state.  Their
+comparisons are proofs: rational substitution with an endpoint tail,
+termwise finite integration with a uniform remainder, and uniqueness for
+an integral equation.
 
-\section{Main representation frontier}
-
-For the equal-dyadic integral of \(\sin(\pi x)^2\), two pairwise geometric
-certificates remain:
-
-\begin{verbatim}
-public dyadic squares
-  <-> nested-radical squares
-  <-> normalized tangent-square anchor
-  <-> 1/4
-\end{verbatim}
-
-Overlap is not transitive for arbitrary interval boxes.  The chain
-stabilizer widens by the vanishing middle width and then intersects prefixes
-against the valid anchor.  Therefore no three-way same-stage witness is
-required.
-
-The remaining work is the uniform rational-circle certificate for every
-dyadic sample and the nested-radical-to-normalized-anchor witness.  Fixed
-depth checks are regression tests, not substitutes for these all-stage
-theorems.
-
-\section{Next foundations}
-
-\begin{center}
-\begin{tabular}{p{0.21\textwidth}p{0.34\textwidth}p{0.34\textwidth}}
-\textbf{Area} & \textbf{Checked core} & \textbf{Next theorem}\\
-\hline
-Circle/trigonometry &
-rational parametrization, area pi, dyadic radicals, finite rotations &
-uniform dyadic circle/tangent witness\\
-Integrals/FTC &
-monotone and finite-turn sums, stabilized effective FTC, arctangent and
-polynomial clients, domain-aware construction, addition and rational scaling &
-explicit finite product and chain-rule budgets\\
-Series/Fourier &
-finite transforms, orthogonality, explicit tails, finite Taylor FTC &
-effective reconstruction for one nontrivial infinite class\\
-Exponential/logarithm &
-power-series and repeated-product evaluators, derivative and inverse
-certificates &
-canonical representation transport on complex domains\\
-Linear ODEs &
-chronological products, Duhamel sums, finite Peano--Baker algebra,
-factorial-tail bounds &
-interval simplex evaluator and constructive uniqueness\\
-Algebraic roots &
-rational/complex boxes, finite exclusion and supplied-root deflation &
-general isolation and elimination certificates\\
-\end{tabular}
-\end{center}
-
-\section{Wiedijk challenge}
-
-The preface contains the canonical sixteen-item analysis subset of Freek
-Wiedijk's list.  The Lean registry stores names, scope, and whether the
-computable target is checked or remains a substantive frontier.
-
-\lean{ComputableAnalysis.wiedijkAnalysisEntries}
-\lean{ComputableAnalysis.wiedijkAnalysisEntries_count}
-\lean{ComputableAnalysis.wiedijkAnalysisNumbers_distinct}
-\leanok
-
-The registry is only an index.  Subject modules own theorem statements and
-proofs; numbered aliases and routine finite proxies are intentionally absent.
+The same matrix also computes a response to any finite list of impulses
+in its two state coordinates on a separated interval.  Thus delta inputs
+need no new theory for this example.  They are finite state updates
+propagated by a computation already constructed for a concrete special
+function.  This is the recurring pattern of the book: retain useful
+representations, prove their equivalence, and reuse the resulting
+computations in the next problem.

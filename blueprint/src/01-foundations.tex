@@ -1,1097 +1,140 @@
 \chapter{Computable Numbers and Functions}\label{ch:foundations}
 
-The scoped Lean entry point for this chapter is
-\texttt{ComputableAnalysis.FunctionFoundation}.  It collects the rational
-interval, complex-box, domain, and representation interfaces used by the
-calculus chapters without importing the benchmark catalogue.
+A number will be a computation, not an already available point of a
+completed line.  The computation gives rational bounds, and a proof explains
+why they agree and how they become arbitrarily close.  Different computations
+of the same number remain worth keeping: an elementary construction can
+explain a quantity which a different construction computes more quickly.
 
-\begin{theorem}[Rational numerator--denominator coding]
-\label{thm:rational-code-surjection}
-\lean{ComputableAnalysis.RationalCode}
-\lean{ComputableAnalysis.RationalCode.encode}
-\lean{ComputableAnalysis.RationalCode.decode}
-\lean{ComputableAnalysis.RationalCode.den_pos}
-\lean{ComputableAnalysis.RationalCode.decode_encode}
-\lean{ComputableAnalysis.RationalCode.encode_injective}
-\lean{ComputableAnalysis.RationalCode.encode_eq_iff}
-\lean{ComputableAnalysis.rationalCode_decode_surjective}
-\lean{ComputableAnalysis.triangular}
-\lean{ComputableAnalysis.triangular_succ}
-\lean{ComputableAnalysis.triangular_monotone}
-\lean{ComputableAnalysis.diagonalPair}
-\lean{ComputableAnalysis.diagonalUnpair}
-\lean{ComputableAnalysis.diagonalUnpair_spec}
-\lean{ComputableAnalysis.diagonalUnpair_diagonalPair}
-\lean{ComputableAnalysis.diagonalPair_injective}
-\lean{ComputableAnalysis.diagonalPair_surjective}
-\lean{ComputableAnalysis.integerCode}
-\lean{ComputableAnalysis.integerCode_injective}
-\lean{ComputableAnalysis.integerCode_surjective}
-\lean{ComputableAnalysis.rationalNatCode}
-\lean{ComputableAnalysis.rationalNatCode_injective}
-\lean{ComputableAnalysis.rationalNatCode_encode_surjective}
-\lean{ComputableAnalysis.rationalNatCode_existsUnique_canonical_index}
-\lean{ComputableAnalysis.rationalNatCode_existsUnique_canonical_decode_index}
-\lean{ComputableAnalysis.rationalNatCode_decode_surjective}
-\lean{ComputableAnalysis.rationalNatCode_index}
-\lean{ComputableAnalysis.rationalNatIndex_three_fifths}
-\lean{ComputableAnalysis.rationalNatCode_index_three_fifths}
-\lean{ComputableAnalysis.rationalNatCode_decode_three_fifths}
-\lean{ComputableAnalysis.rationalNatIndex}
-\lean{ComputableAnalysis.rationalNatIndex_injective}
-\lean{ComputableAnalysis.rationalNatCode_index}
-\leanok
-Every rational has a finite code consisting of an integer numerator and a
-positive natural denominator, and the normalization decoder is surjective
-onto the project's rational type.  The diagonal pairing, signed-integer code,
-and positive-denominator shift combine into the explicit natural-number
-decoder \texttt{rationalNatCode}, whose surjectivity is checked by
-\texttt{rationalNatCode\_decode\_surjective}; \texttt{diagonalPair\_injective} and
-\texttt{rationalNatCode\_injective} also certify that the natural-number code path is
-injective before decoding.  The stronger
-\texttt{rationalNatCode\_encode\_surjective} statement shows that every canonical
-numerator--denominator code is hit exactly before decoding.  This is the
-\texttt{rationalNatCode\_existsUnique\_canonical\_index} refinement of that statement:
-the canonical code has a unique natural-number index.  This is the
-constructive coding core of benchmark item 3 (denumerability of the rationals).
-The canonical decode-index theorem makes the normalization choice unique at
-the finite code level.  The explicit \texttt{rationalNatIndex} and
-\texttt{rationalNatIndex\_injective} now provide the matching injection from canonical
-rationals to natural indices, while retaining the finite-code interface.  The
-surjection and injection together complete the project's coding-level
-denumerability boundary for benchmark item 3.
-As a concrete audit point, the canonical index of (3/5) is (61), and Lean
-checks that decoding the enumerated code at (61) returns (3/5).
-\end{theorem}
+The finite arithmetic used below is ordinary integer and rational arithmetic.
+Fractions are reduced by the Euclidean algorithm; finite sums, products,
+polynomials, induction, and the triangle inequality require no limiting
+objects.  A rational input is a numerator and a positive denominator, not an
+oracle for a point on a continuum.
 
-\begin{theorem}[Finite induction schema]
-\label{thm:nat-induction-schema}
-\lean{ComputableAnalysis.nat_induction_schema}
-\leanok
-For any proposition-valued predicate on the natural numbers, a proof at zero
-and a proof step from $n$ to $n+1$ produce a proof at every natural number.
-This is the checked proof/programming principle used by the project's finite
-certificate constructions, and is the project's scoped formalization of
-benchmark item 74.
-\end{theorem}
-
-\begin{theorem}[Finite monotone-sequence propagation]
-\label{thm:finite-monotone-sequence}
-\lean{ComputableAnalysis.monotone_of_succ_le}
-\lean{ComputableAnalysis.antitone_of_succ_ge}
-\lean{ComputableAnalysis.ascendingNaturalSequence_succ_le}
-\lean{ComputableAnalysis.FiniteAscendingSequenceCertificate}
-\lean{ComputableAnalysis.FiniteAscendingSequenceCertificate.pair_le}
-\lean{ComputableAnalysis.FiniteDescendingSequenceCertificate}
-\lean{ComputableAnalysis.FiniteDescendingSequenceCertificate.pair_le}
-\lean{ComputableAnalysis.finiteAscendingSequenceCertificate}
-\lean{ComputableAnalysis.finiteDescendingSequenceCertificate}
-\lean{ComputableAnalysis.ascendingNaturalSequence}
-\lean{ComputableAnalysis.ascendingNaturalSequence_monotone}
-\lean{ComputableAnalysis.ascendingNaturalSequence_stage64}
-\lean{ComputableAnalysis.ascendingNaturalSequence_stage128}
-\lean{ComputableAnalysis.dyadicApproach}
-\lean{ComputableAnalysis.dyadicApproach_succ_le}
-\lean{ComputableAnalysis.dyadicApproach_le_one}
-\lean{ComputableAnalysis.dyadicApproach_error}
-\lean{ComputableAnalysis.dyadicApproach_error_shrinks}
-\lean{ComputableAnalysis.dyadicApproach_stage8_certificate}
-\lean{ComputableAnalysis.dyadicApproach_stage16_certificate}
-\lean{ComputableAnalysis.dyadicApproach_stage32_certificate}
-\lean{ComputableAnalysis.dyadicApproach_stage64_certificate}
-\lean{ComputableAnalysis.dyadicApproach_stage128_certificate}
-\leanok
-If each successor step of a rational sequence is nondecreasing, the same
-order is propagated to every finite pair of indices; the dual successor
-condition gives an antitone sequence.  The executable sequence
-\texttt{ascendingNaturalSequence} supplies a concrete ascending witness at
-stages 64 and 128.  The bounded dyadic sequence
-\(1-2^{-n}\) is also checked stage by stage: it is nondecreasing, bounded by
-1, and has an explicit rational error certificate (at stage 8, the error is
-\(1/256\)).  This is the project's potential-infinity core for benchmark item
-73.  The error-shrinking theorem supplies a denominator-derived stage for
-every positive rational tolerance, while no attained real limit is asserted.
-\end{theorem}
-
-\begin{theorem}[Finite subset and binomial recurrences]
-\label{thm:finite-counting-recurrences}
-\lean{ComputableAnalysis.FiniteCounting.subsetCount}
-\lean{ComputableAnalysis.FiniteCounting.subsetCount_succ}
-\lean{ComputableAnalysis.FiniteCounting.subsetCount_eq_pow}
-\lean{ComputableAnalysis.FiniteCounting.combination}
-\lean{ComputableAnalysis.FiniteCounting.combination_zero_right}
-\lean{ComputableAnalysis.FiniteCounting.combination_zero_left}
-\lean{ComputableAnalysis.FiniteCounting.combination_pascal}
-\lean{ComputableAnalysis.FiniteCounting.combination_rat_pascal}
-\lean{ComputableAnalysis.FiniteCounting.combination_outside}
-\lean{ComputableAnalysis.FiniteCounting.combination_rat_outside}
-\lean{ComputableAnalysis.FiniteCounting.combination_self}
-\lean{ComputableAnalysis.FiniteCounting.combination_rat_self}
-\lean{ComputableAnalysis.FiniteCounting.combination_one}
-\lean{ComputableAnalysis.FiniteCounting.combination_two_rat}
-\lean{ComputableAnalysis.FiniteCounting.combination_three_rat}
-\lean{ComputableAnalysis.FiniteCounting.combination_four_rat}
-\lean{ComputableAnalysis.FiniteCounting.combination_five_rat}
-\lean{ComputableAnalysis.FiniteCounting.combination_six_rat}
-\lean{ComputableAnalysis.FiniteCounting.combination_seven_rat}
-\lean{ComputableAnalysis.FiniteCounting.combination_eight_rat}
-\lean{ComputableAnalysis.pascal_combination_8_3}
-\lean{ComputableAnalysis.pascal_combination_7_2}
-\lean{ComputableAnalysis.pascal_combination_7_3}
-\lean{ComputableAnalysis.pascal_combination_8_3_recurrence}
-\lean{ComputableAnalysis.pascal_combination_8_3_certificate}
-\lean{ComputableAnalysis.pascal_combination_10_3}
-\lean{ComputableAnalysis.pascal_combination_9_2}
-\lean{ComputableAnalysis.pascal_combination_9_3}
-\lean{ComputableAnalysis.pascal_combination_10_3_recurrence}
-\lean{ComputableAnalysis.pascal_combination_10_3_certificate}
-\lean{ComputableAnalysis.pascal_combination_15_3}
-\lean{ComputableAnalysis.pascal_combination_14_2}
-\lean{ComputableAnalysis.pascal_combination_14_3}
-\lean{ComputableAnalysis.pascal_combination_15_3_recurrence}
-\lean{ComputableAnalysis.pascal_combination_15_3_certificate}
-\lean{ComputableAnalysis.pascal_combination_20_3}
-\lean{ComputableAnalysis.pascal_combination_19_2}
-\lean{ComputableAnalysis.pascal_combination_19_3}
-\lean{ComputableAnalysis.pascal_combination_20_3_recurrence}
-\lean{ComputableAnalysis.pascal_combination_20_3_certificate}
-\lean{ComputableAnalysis.pascal_combination_25_3}
-\lean{ComputableAnalysis.pascal_combination_24_2}
-\lean{ComputableAnalysis.pascal_combination_24_3}
-\lean{ComputableAnalysis.pascal_combination_25_3_recurrence}
-\lean{ComputableAnalysis.pascal_combination_25_3_certificate}
-\lean{ComputableAnalysis.pascal_combination_32_3}
-\lean{ComputableAnalysis.pascal_combination_31_2}
-\lean{ComputableAnalysis.pascal_combination_31_3}
-\lean{ComputableAnalysis.pascal_combination_32_3_recurrence}
-\lean{ComputableAnalysis.pascal_combination_32_3_certificate}
-\leanok
-The finite recurrence \texttt{subsetCount(n+1)=2*subsetCount(n)} gives the
-certificate core of the number-of-subsets theorem (benchmark item 52), while
-\texttt{combination} supplies Pascal's recurrence, its rational bridge
-\texttt{combination\textbackslash{}\_rat\_pascal}, and its zero-outside-range boundary for
-binomial coefficients (benchmark item 58), together with rationally cast
-outside-range and diagonal boundaries and the first-row identity
-\texttt{combination\_one}.  These are finite
-counting interfaces; a general finite-set cardinality library is intentionally
-not introduced here.
-The worked subset counter now also reaches stage 16, with exact value
-\(2^{16}=65536\), giving a finer finite checkpoint for item 52.
-It now also reaches stage 64, with exact value
-\(2^{64}=18446744073709551616\), extending the terminating recurrence
-certificate.
-The Pascal witness now reaches \(\binom{20}{3}=1140\), with the checked
-decomposition \(1140=171+969\) from the two predecessor coefficients.
-It now also reaches \(\binom{32}{3}=4960\), with the checked decomposition
-\(4960=465+4495\), extending the finite recurrence schedule.
-It now also reaches \(\binom{25}{3}=2300\), with the decomposition
-\(2300=276+2024\) checked from its two predecessor coefficients.
-\end{theorem}
-
-\begin{theorem}[Certificate-level fundamental theorem of arithmetic]
-\label{thm:finite-fta-factorization}
-\label{rem:finite-factorization-certificates}
-\lean{ComputableAnalysis.MultiplicativeCertificate}
-\lean{ComputableAnalysis.MultiplicativeCertificate.append}
-\lean{ComputableAnalysis.MultiplicativeCertificate.factors_nonempty}
-\lean{ComputableAnalysis.MultiplicativeCertificate.factor_dvd}
-\lean{ComputableAnalysis.PrimeFactorCertificate}
-\lean{ComputableAnalysis.PrimeFactorCertificate.append}
-\lean{ComputableAnalysis.primeFactorCertificate_exists}
-\lean{ComputableAnalysis.PrimeFactorCertificate.factor_dvd}
-\lean{ComputableAnalysis.PrimeFactorCertificate.factor_le}
-\lean{ComputableAnalysis.PrimeFactorCertificate.factors_nonempty}
-\lean{ComputableAnalysis.PrimeFactorCertificate.exists_prime_dvd}
-\lean{ComputableAnalysis.PrimeFactorCertificate.factor_mem_of_factor_mem}
-\lean{ComputableAnalysis.PrimeFactorCertificate.factor_mem_iff}
-\lean{ComputableAnalysis.PrimeFactorCertificate.factor_perm}
-\lean{ComputableAnalysis.PrimeFactorCertificate.factor_perm_of_nodup}
-\lean{ComputableAnalysis.factorizationCertificate60}
-\lean{ComputableAnalysis.primeFactorizationCertificate360}
-\lean{ComputableAnalysis.primeFactorizationCertificate360_factors}
-\lean{ComputableAnalysis.primeFactorizationCertificate360_product}
-\lean{ComputableAnalysis.primeFactorizationCertificate360_factor_dvd}
-\lean{ComputableAnalysis.primeFactorizationCertificate360_alternative}
-\lean{ComputableAnalysis.primeFactorizationCertificate360_alternative_factors}
-\lean{ComputableAnalysis.primeFactorizationCertificate360_factor_order_unique}
-\lean{ComputableAnalysis.primeFactorizationCertificate720}
-\lean{ComputableAnalysis.primeFactorizationCertificate720_product}
-\lean{ComputableAnalysis.primeFactorizationCertificate720_factor_dvd}
-\lean{ComputableAnalysis.primeFactorizationCertificate600}
-\lean{ComputableAnalysis.primeFactorizationCertificate600_product}
-\lean{ComputableAnalysis.primeFactorizationCertificate600_factor_dvd}
-\lean{ComputableAnalysis.primeFactorizationCertificate126}
-\lean{ComputableAnalysis.primeFactorizationCertificate126_product}
-\lean{ComputableAnalysis.primeFactorizationCertificate126_factor_dvd}
-\lean{ComputableAnalysis.primeFactorizationCertificate27720}
-\lean{ComputableAnalysis.primeFactorizationCertificate27720_product}
-\lean{ComputableAnalysis.primeFactorizationCertificate27720_factor_dvd}
-\lean{ComputableAnalysis.BasicPrime}
-\lean{ComputableAnalysis.basicPrime_of_no_proper_divisor}
-\lean{ComputableAnalysis.basicPrime_iff_no_proper_divisor}
-\lean{ComputableAnalysis.properDivisorSearch}
-\lean{ComputableAnalysis.properDivisorSearch_some_is_proper}
-\lean{ComputableAnalysis.properDivisorSearch_some_of_proper}
-\lean{ComputableAnalysis.properDivisorSearch_none_of_no_proper}
-\lean{ComputableAnalysis.properDivisorSearch_none_iff_no_proper}
-\lean{ComputableAnalysis.basicPrime_of_properDivisorSearch_none}
-\lean{ComputableAnalysis.basicPrime_two}
-\lean{ComputableAnalysis.basicPrime_three}
-\lean{ComputableAnalysis.basicPrime_five}
-\lean{ComputableAnalysis.basicPrime_eq_of_dvd}
-\lean{ComputableAnalysis.basicPrime_coprime_of_not_dvd}
-\lean{ComputableAnalysis.basicPrime_dvd_of_dvd_mul}
-\lean{ComputableAnalysis.basicPrime_dvd_of_dvd_pow}
-\lean{ComputableAnalysis.natProduct}
-\lean{ComputableAnalysis.natProduct_perm}
-\lean{ComputableAnalysis.list_mem_dvd_natProduct}
-\lean{ComputableAnalysis.foldl_mul_one_eq_natProduct}
-\lean{ComputableAnalysis.foldl_mul_acc_eq_acc_mul_foldl_one}
-\lean{ComputableAnalysis.MultiplicativeCertificate.append}
-\lean{ComputableAnalysis.MultiplicativeCertificate.factors_nonempty}
-\lean{ComputableAnalysis.MultiplicativeCertificate.factor_dvd}
-\lean{ComputableAnalysis.basicPrime_dvd_of_dvd_natProduct}
-\lean{ComputableAnalysis.PrimeFactorCertificate}
-\lean{ComputableAnalysis.PrimeFactorCertificate.append}
-\lean{ComputableAnalysis.primeFactorCertificate_exists}
-\lean{ComputableAnalysis.exists_basicPrime_dvd}
-\lean{ComputableAnalysis.exists_basicPrime_not_mem_of_all_basicPrime}
-\lean{ComputableAnalysis.shiftedRangeProduct}
-\lean{ComputableAnalysis.exists_basicPrime_gt}
-\lean{ComputableAnalysis.PrimeUnboundednessCertificate}
-\lean{ComputableAnalysis.primeUnboundednessCertificate}
-\lean{ComputableAnalysis.primeUnboundednessCertificate_exists}
-\lean{ComputableAnalysis.primeUnboundednessCertificate_stage_eight}
-\lean{ComputableAnalysis.PrimeFactorCertificate.factor_dvd}
-\lean{ComputableAnalysis.PrimeFactorCertificate.factor_le}
-\lean{ComputableAnalysis.PrimeFactorCertificate.factor_le}
-\lean{ComputableAnalysis.PrimeFactorCertificate.factors_nonempty}
-\lean{ComputableAnalysis.PrimeFactorCertificate.exists_prime_dvd}
-\lean{ComputableAnalysis.PrimeFactorCertificate.exists_factor_dvd}
-\lean{ComputableAnalysis.basicPrime_dvd_of_dvd_primeFactorization}
-\lean{ComputableAnalysis.basicPrime_eq_factor_of_dvd_primeFactorization}
-\lean{ComputableAnalysis.basicPrime_dvd_primeFactorization_iff}
-\lean{ComputableAnalysis.PrimeFactorCertificate.factor_mem_of_factor_mem}
-\lean{ComputableAnalysis.PrimeFactorCertificate.factor_mem_iff}
-\lean{ComputableAnalysis.natList_perm_cons_of_mem}
-\lean{ComputableAnalysis.primeFactorList_perm_of_same_product}
-\lean{ComputableAnalysis.PrimeFactorCertificate.factor_perm}
-\lean{ComputableAnalysis.natList_perm_of_nodup_of_mem_iff}
-\lean{ComputableAnalysis.PrimeFactorCertificate.factor_perm_of_nodup}
-\lean{ComputableAnalysis.primeFactorizationCertificate60}
-\lean{ComputableAnalysis.primeFactorizationCertificate360}
-\lean{ComputableAnalysis.primeFactorizationCertificate360_factors}
-\lean{ComputableAnalysis.primeFactorizationCertificate360_product}
-\lean{ComputableAnalysis.primeFactorizationCertificate360_factor_dvd}
-The foundation now has a finite certificate interface recording a list of
-nontrivial factors and its product, with the worked certificate
-$60=2\cdot2\cdot3\cdot5$.  The small primality predicate and its
-certificates for \(2,3,5\) now make the worked certificate prime-labelled.
-The constructor \texttt{MultiplicativeCertificate.append} composes the
-non-prime certificate layer for products before primality is imposed.
-The accompanying Euclid lemma, \texttt{basicPrime\textbackslash{}\_dvd\textbackslash{}\_of\textbackslash{}\_dvd\_mul}, is the
-first reusable step toward general factorization arguments: a certified basic
-prime dividing a product divides one of its factors.
-The finite list product \texttt{natProduct} and
-\texttt{basicPrime\textbackslash{}\_dvd\textbackslash{}\_of\textbackslash{}\_dvd\_natProduct} lift this to a prime dividing
-one member of a finite factor list, providing the next reusable FTA
-certificate step.
-The certificate-level corollary
-\texttt{basicPrime\textbackslash{}\_dvd\textbackslash{}\_of\textbackslash{}\_dvd\_primeFactorization} connects this list
-theorem directly to a \texttt{PrimeFactorCertificate}.
-The constructor \texttt{PrimeFactorCertificate.append} composes certificates
-for two factors while preserving both the prime labels and the product
-equation.  The companion theorem
-\texttt{PrimeFactorCertificate.factor\_dvd} shows that every listed factor
-divides the certified number, giving the converse direction to the prime
-divisor extraction theorem.
-The finite bound \texttt{PrimeFactorCertificate.factor\_le} further places every
-listed factor at or below the certified number whenever $1<n$, making the
-certificate list a bounded object for finite search and validation.
-The finite search and recursive constructor
-
-\texttt{primeFactorCertificate\_exists}
-
-now establish factorization existence for every $n>1$ at the certificate
-level.  The list-level theorem
-\texttt{primeFactorList\textbackslash{}\_perm\textbackslash{}\_of\textbackslash{}\_same\_product}, together with
-\texttt{PrimeFactorCertificate.factor\_perm}, proves uniqueness of the full
-prime-labelled factor list up to permutation, including repeated factors.
-The Euclid construction
-\texttt{exists\_basicPrime\_not\_mem\_of\_all\_basicPrime} adds the finite
-infinitude-of-primes core: from any finite list of certified primes, the
-product-plus-one construction returns a certified prime outside that list.
-The specialized evaluator \texttt{shiftedRangeProduct} and theorem
-\texttt{exists\_basicPrime\_gt} sharpen this to an executable unboundedness statement:
-for every finite bound (n), a certified prime (p>n) is produced.
-This is the project's checked certificate-level core of benchmark item 80;
-the usual classical formulation over a separately developed prime library is
-outside the current scope.
-The worked certificate \texttt{primeFactorizationCertificate360} supplies the list
-$(2,2,2,3,3,5)$, checks its product as $360$, and records the resulting
-divisibility witnesses for $2,3,5$.
-The companion certificates check the prime-labelled decompositions
-$(720=2^4\cdot3^2\cdot5)$ and
-$(600=2^3\cdot3\cdot5^2)$, with their products and distinct-prime
-divisibility witnesses verified directly.
-The additional certificate factors $126$ as $2\cdot3^2\cdot7$, with
-the product and divisibility witnesses checked by terminating computation.
-The larger certificate factors $27720$ as
-$2^3\cdot3^2\cdot5\cdot7\cdot11$, exercising the finite prime-search
-certificates for both $7$ and $11$.
-\end{theorem}
-
-\begin{theorem}[Finite Bertrand witnesses]
-\label{thm:finite-bertrand-certificate}
-\lean{ComputableAnalysis.bertrand_stage10}
-\lean{ComputableAnalysis.bertrand_stage20}
-\lean{ComputableAnalysis.bertrand_stage30}
-\lean{ComputableAnalysis.bertrand_stage40}
-\lean{ComputableAnalysis.bertrand_stage50}
-\lean{ComputableAnalysis.bertrand_stage60}
-\lean{ComputableAnalysis.bertrand_stage70}
-\lean{ComputableAnalysis.bertrand_stage80}
-\lean{ComputableAnalysis.bertrand_stage100}
-\lean{ComputableAnalysis.bertrand_finite_certificate}
-\lean{ComputableAnalysis.bertrand_extended_finite_certificate}
-\lean{ComputableAnalysis.bertrand_further_finite_certificate}
-\lean{ComputableAnalysis.FinitePrimeIntervalCertificate}
-\lean{ComputableAnalysis.FinitePrimeIntervalCertificate.in_interval}
-\lean{ComputableAnalysis.finitePrimeIntervalCertificate}
-\leanok
-The executable primality search verifies a prime between \(10\) and \(20\),
-namely \(11\), and a prime between \(20\) and \(40\), namely \(23\).  These
-are finite instances of benchmark item 98.  The extended ladder also checks
-\(31\in(30,60)\), \(41\in(40,80)\), \(53\in(50,100)\),
-\(61\in(60,120)\), \(71\in(70,140)\), \(83\in(80,160)\), and
-\(101\in(100,200)\), giving nine exact finite intervals;
-the general Bertrand postulate remains outside the current number-theory
-boundary.
-\end{theorem}
-
-\begin{theorem}[Three-digit divisibility by three]
-\label{thm:three-digit-divisibility}
-\lean{ComputableAnalysis.three_dvd_three_digit}
-\lean{ComputableAnalysis.decimalDigitSum}
-\lean{ComputableAnalysis.decimalDigitSum_succ_of_lt_ten}
-\lean{ComputableAnalysis.decimalDigitSum_eq_self_of_lt_ten}
-\lean{ComputableAnalysis.decimalDigitSum_succ_of_not_lt_ten}
-\lean{ComputableAnalysis.decimalDigitSum_mod_three}
-\lean{ComputableAnalysis.decimalDigitSum_mod_nine_proof}
-\lean{ComputableAnalysis.decimalDigitSum_mod_nine}
-\lean{ComputableAnalysis.three_dvd_iff_decimalDigitSum_dvd}
-\lean{ComputableAnalysis.decimalDigitSum_divisibility_certificate}
-\lean{ComputableAnalysis.decimalDigitSum_divisible_by_three_iff}
-\lean{ComputableAnalysis.decimal_123_digit_sum}
-\lean{ComputableAnalysis.decimal_123_divisible_by_three}
-\lean{ComputableAnalysis.decimal_123_digit_sum_certificate}
-\lean{ComputableAnalysis.decimal_124_not_divisible_by_three}
-\lean{ComputableAnalysis.decimal_321_digit_sum}
-\lean{ComputableAnalysis.decimal_321_divisible_by_three}
-\lean{ComputableAnalysis.decimal_321_digit_sum_certificate}
-\lean{ComputableAnalysis.decimal_322_not_divisible_by_three}
-\lean{ComputableAnalysis.decimal_999_digit_sum}
-\lean{ComputableAnalysis.decimal_999_divisible_by_three}
-\lean{ComputableAnalysis.decimal_1000_not_divisible_by_three}
-\lean{ComputableAnalysis.decimal_123456_digit_sum}
-\lean{ComputableAnalysis.decimal_123456_divisible_by_three}
-\lean{ComputableAnalysis.decimal_123456_digit_sum_certificate}
-\lean{ComputableAnalysis.decimal_123457_not_divisible_by_three}
-\lean{ComputableAnalysis.basePositionalValue}
-\lean{ComputableAnalysis.basePositionalValue_mod_sub_one}
-\lean{ComputableAnalysis.decimalPositionalValue_mod_nine}
-\leanok
-For natural digits (a,b,c), the decimal number (100a+10b+c) is divisible
-by (3) exactly when its digit sum (a+b+c) is divisible by (3).  This is
-the finite arithmetic core of benchmark item 85.  The terminating decimal
-digit-sum evaluator and its small-digit reduction are also exposed.  The
-global residue-preservation theorem is checked by well-founded recursion on
-the decimal reduction.
-The worked examples now also include the boundary pair $999$ and $1000$:
-the former has digit sum $27$ and is divisible by $3$, while the latter is
-not, providing a larger finite decision checkpoint.
-The six-digit checkpoint $123456$ has digit sum $21$ and is divisible by $3$;
-the neighboring value $123457$ supplies a terminating non-divisibility case.
-\end{theorem}
-
-The list-based positional evaluator linked above generalizes the same finite
-digit-sum congruence to every base $(b\ge2)$, modulo $(b-1)$, without assuming
-a canonical digit expansion.
-
-\section{Inverval arithmetic and real numbers \humanchecked}
+\section{Interval arithmetic and real numbers}
 
 \begin{definition}[Rational interval]\label{def:qinterval}
-\lean{ComputableAnalysis.QInterval}
-A \emph{rational interval} is a pair of rational numbers
+A \emph{rational interval} is a pair
 \[
-  [a,b]\in\Q\times\Q,\qquad a\le b.
+ [a,b]\in\Q\times\Q,\qquad a\le b.
 \]
-This is a formal interval object, not the set of rational points between
-\(a\) and \(b\).  The \emph{width} of the rational interval is defined as \(b-a\).
-
-Two rational intervals \([a, b]\) and \([c, d]\) \emph{overlap} when
-\[
-  a\le d\ \text{and}\ c\le b.
-\]
+It is a finite object, not the set of rational points between its endpoints.
+Its width is $b-a$.  Two intervals $[a,b]$ and $[c,d]$ overlap when
+$a\le d$ and $c\le b$.
 \end{definition}
 
-\begin{definition}[Interval sequence]\label{def:interval-sequence}
-\uses{def:qinterval}
-An \emph{interval sequence} is a sequence of rational intervals
+\begin{definition}[A computed number]\label{def:raw-real}
+A number computation is a terminating algorithm
 \[
-  [a_n,b_n]_{n\in\N},
-  \qquad a_n \leq b_n\in\Q.
+ n\longmapsto X_n=[a_n,b_n]
 \]
+whose intervals satisfy
+\[
+ n\le m\ \Longrightarrow\ a_n\le a_m\le b_m\le b_n,
+\]
+and whose widths become smaller than every positive rational tolerance.
+We also call such an algorithm a raw real.  No infinitely stored table of
+rational endpoints is allowed.
 \end{definition}
 
-\begin{definition}[Real number]\label{def:raw-real}
-\lean{ComputableAnalysis.RealRaw}
-\uses{def:interval-sequence}
-A \emph{real number} is an interval sequence \(x=[a_n,b_n]_{n\in\N}\) satisfying the
-following validity conditions:
-\[
-  n\le m\Rightarrow
-  a_n\le a_m\le b_m\le b_n,
-\]
-and for any $\eps\in\Q_{>0}$, there exists $N\in\N$ such that
-\[
-  b_N-a_N \le \eps.
-\]
+A request for precision $\varepsilon>0$ is answered by computing successive
+stages until $b_n-a_n<\varepsilon$.  A proof that the widths shrink proves
+that this search terminates.  An explicit rate is often useful, but need not
+be part of the algorithm's input.
+
+\begin{definition}[Equivalence]\label{def:raw-equiv}
+Two valid computations are equivalent when their intervals overlap at every
+stage.  We write $X\sim Y$, and use the usual equality sign in mathematical
+identities between their values.
 \end{definition}
 
-\begin{remark}[Computable number]\label{rem:computable-presentations}
-\uses{def:interval-sequence,def:raw-real}
-When the map 
-\[
-  n\mapsto [a_n,b_n]
-\]
-is given by a finite, terminating algorithm, as we always do in this project,
-the real number is said to be \emph{computable}. Storing all the rational numbers
-in an infinite table is not permitted. Evaluating at \(n\) is referred to as
-\emph{computing} the real number \emph{at stage} \(n\).
-\end{remark}
+Same-stage overlap implies overlap at any two stages, by passing to their
+maximum.  Equivalence is transitive: if two outer computations had disjoint
+intervals separated by a positive rational gap, a sufficiently narrow interval
+of a middle computation could not overlap both.  This proves transitivity
+using only finitely many rational comparisons.
 
-\begin{definition}[Positive and negative real numbers]\label{def:raw-real-sign}
-\lean{ComputableAnalysis.RealRaw.Pos}
-\lean{ComputableAnalysis.RealRaw.Neg}
-\uses{def:raw-real}
-Let \(x=[a_n,b_n]_{n\in\N}\) be a real number.  We say that \(x\) is
-\emph{positive} (resp. \emph{negative}) if there is some \(N\in\N\) such that
-\( a_N > 0\) (resp. \( b_N<0 \)).
-The number \(x\) is \emph{nonzero} if it is either positive or negative.
+Equality is a theorem about computations, not a proposed decision algorithm.
+To show two values differ, disjoint finite enclosures suffice.  To show a
+value is positive, it suffices to find an enclosure with positive lower
+endpoint.  Such a witness is called a separation from zero.
+
+\begin{definition}[Interval arithmetic]\label{def:raw-real-arithmetic}
+Addition and negation are computed by
+\[
+ [a,b]+[c,d]=[a+c,b+d],\qquad -[a,b]=[-b,-a].
+\]
+For multiplication take the least rational interval containing
+$ac,ad,bc,bd$.  If an interval $[a,b]$ avoids zero, its reciprocal enclosure
+is $[1/b,1/a]$.
 \end{definition}
 
-\begin{definition}[Interval Arithmetic]\label{def:raw-real-arithmetic}
-{\footnotesize\raggedright
-\lean{ComputableAnalysis.RealRaw.add}\par
-\lean{ComputableAnalysis.RealRaw.sub}\par
-\lean{ComputableAnalysis.RealRaw.mul}\par}
-\uses{def:raw-real,def:raw-real-sign}
-Let \(x\) and \(y\) be real numbers:
+These operations preserve inclusion.  If the factors have absolute bounds
+$B_X,B_Y$, the product width is at most
 \[
-  x=[a_n,b_n]_{n\in\N},\qquad y=[c_n,d_n]_{n\in\N}.
+ B_X\operatorname{width}(Y)+B_Y\operatorname{width}(X).
 \]
-Their sum is defined stagewise:
-\[
-  x+y := [a_n+c_n,b_n+d_n]_{n\in\N},
-\]
-Negation of \([c_n,d_n]\) is given by \([-d_n,-c_n]\), so the difference is
-\[
-  x-y := [a_n-d_n,b_n-c_n]_{n\in\N},
-\]
-The product is defined by taking the bounding interval of all four
-products:
-\[
-  xy:=
-  \left[
-    \min S_n,\max S_n
-  \right]_{n\in\N},
-  \qquad
-  S_n=\{a_nc_n,a_nd_n,b_nc_n,b_nd_n\}.
-\]
-An inverse needs an explicit apartness schedule: from a stage at which
-\([a_N,b_N]\) avoids zero, the intended later construction is
-\[
-  x^{-1}:= [ b_{N+n}^{-1}, a_{N+n}^{-1} ]_{n\in\N}.
-\]
-The current formal layer records this as a future computable-inverse
-obligation rather than claiming a completed general inverse or division
-operation.
-\end{definition}
+The bounds can be read from any initial enclosures.  If $|X|\ge c>0$ is
+certified, reciprocal widths are at most $c^{-2}\operatorname{width}(X)$
+once the intervals have that separation.  These estimates prove validity
+and compatibility with equivalence.  In particular, division is available
+when a nonzero denominator has been certified, not by deciding an arbitrary
+computed value's equality with zero.
 
+An inequality such as $|X-Y|\le r$ has an interval meaning: arbitrarily
+accurate enclosures certify the bound $r+\eta$ for each rational $\eta>0$.
+An assertion of containment in a closed rational interval can equivalently
+be phrased as overlap with that interval at every stage.  None of this
+requires choosing a point in an infinite intersection.
 
-\begin{proposition}[Arithmetic preserves real numbers]\label{prop:raw-arithmetic-valid}
-{\footnotesize\raggedright
-\lean{ComputableAnalysis.QBox.mulRealInterval_of_nonneg}\par
-\lean{ComputableAnalysis.RealRaw.mul_valid_of_nonneg_bounded}\par
-\lean{ComputableAnalysis.RealRaw.le_mul_le_mul_of_nonneg}\par
-\lean{ComputableAnalysis.RealRaw.mul_equiv_of_nonneg}\par
-\lean{ComputableAnalysis.RealRaw.scaleRat_valid_of_nonneg}\par
-\lean{ComputableAnalysis.RealRaw.valid_of_scaleRat_valid_of_pos}\par
-\lean{ComputableAnalysis.RealRaw.valid_of_natScale_valid}\par
-\lean{ComputableAnalysis.RealRaw.add_width}\par
-\lean{ComputableAnalysis.RealRaw.sub_width}\par
-\lean{ComputableAnalysis.RealRaw.natScale_width}\par
-\lean{ComputableAnalysis.RealRaw.scaleRat_equiv_of_nonneg}\par
-\lean{ComputableAnalysis.RealRaw.equiv_of_scaleRat_equiv_of_pos}\par
-\lean{ComputableAnalysis.RealRaw.equiv_of_natScale_equiv}\par}
-\uses{def:raw-real,def:raw-real-arithmetic}
-Addition, subtraction, negation, and rational scaling preserve valid raw
-reals.  The first checked multiplication theorem is deliberately local and
-quantitative: if both factors have nonnegative interval enclosures and a
-positive rational upper bound, their four-corner product enclosure is valid.
-At stage \(n\) its width is bounded by
+\begin{proposition}[Finite-prefix stabilization]\label{prop:raw-prefix-stabilization}
+Suppose rational numbers $q_n$ and positive rational errors $e_n\to0$
+are computed, and
 \[
- B_x\operatorname{width}(y_n)+B_y\operatorname{width}(x_n),
+ |q_m-q_n|\le e_n\qquad(m\ge n).
 \]
-so widths shrink by an explicit rational precision budget.  The same positive
-product computation respects proved raw equivalence.  This is the product
-case needed on positive bounded branches such as \([0,1]\); the fully
-sign-sensitive multiplication and an inverse construction remain separate
-foundational work, rather than consequences of an ambient completed field.
-Positive rational scaling is reversible at the level of validity and
-equivalence: if \(r>0\), then validity of \(rx\) implies validity of \(x\),
-and \(rx\sim ry\) implies \(x\sim y\).
-At each finite stage, addition and subtraction add interval widths exactly,
-and natural scaling multiplies them by the corresponding natural number; these
-finite identities support explicit precision budgets for composite
-computations.
+Then
+\[
+ X_n=\bigcap_{k=0}^n[q_k-e_k,q_k+e_k]
+\]
+is a valid number computation.
 \end{proposition}
+\begin{proof}
+The finite intersection contains $q_n$.  It is nested, and its width is at
+most $2e_n$.  All its endpoints are finite maxima and minima of rationals.
+\end{proof}
 
-\begin{definition}[Equivalence of real numbers]\label{def:raw-equiv}
-\lean{ComputableAnalysis.RealRaw.Equiv}
-\uses{def:raw-real}
-Two real numbers
-\[
-  x=[a_n,b_n]_{n\in\N},\qquad y=[c_n,d_n]_{n\in\N}
-\]
-are \emph{equivalent} if they overlap at every stage, i.e.,
-\[
-  [a_n,b_n] \mbox{ overlaps with } [c_n,d_n]
-  \qquad\text{for all }n.
-\]
-\end{definition}
-
-\begin{proposition}[Equivalence relation]\label{prop:raw-equiv-relation}
-\lean{ComputableAnalysis.RealRaw.equiv_refl}
-\lean{ComputableAnalysis.RealRaw.equiv_symm}
-\lean{ComputableAnalysis.RealRaw.equiv_trans}
-\lean{ComputableAnalysis.RealRaw.equiv_of_common_anchor}
-\lean{ComputableAnalysis.RealRaw.EquivalencePath}
-\lean{ComputableAnalysis.RealRaw.EquivalencePath.right_valid}
-\lean{ComputableAnalysis.RealRaw.EquivalencePath.equiv}
-\lean{ComputableAnalysis.RealRaw.EquivalencePath.single}
-\lean{ComputableAnalysis.RealRaw.EquivalencePath.trans}
-\lean{ComputableAnalysis.RealRaw.EquivalencePath.symm}
-\uses{def:raw-real,def:raw-equiv}
-Equivalence of real numbers is an equivalence relation.  The common-anchor
-form packages the representation-chain pattern used throughout calculus:
-two valid algorithms may be compared through one valid proof-side anchor.
-The finite path object records the same rule as explicit edges: every
-intermediate raw representation must be valid before equivalences are
-composed.
-\end{proposition}
-
-\begin{proposition}[Raw-real order compatibility]
-\lean{ComputableAnalysis.RealRaw.le_add_le_add}
-\lean{ComputableAnalysis.RealRaw.le_neg_le_neg}
-\lean{ComputableAnalysis.RealRaw.le_sub_le_sub}
-\lean{ComputableAnalysis.RealRaw.le_antisymm}
-\lean{ComputableAnalysis.RealRaw.le_scaleRat_le_scaleRat}
-\lean{ComputableAnalysis.RealRaw.le_scaleRat_le_scaleRat_of_nonpos}
-The interval-defined raw-real order is preserved by addition and subtraction,
-and by
-nonnegative rational scaling, and reverses under nonpositive scaling.  These
-are finite endpoint inequalities on the underlying algorithms; no
-completed-real order or completeness principle is used.
-\end{proposition}
-
-\begin{proposition}[Finite-prefix interval stabilization]
-\label{prop:raw-prefix-stabilization}
-{\footnotesize\raggedright
-\lean{ComputableAnalysis.RealRaw.prefixStabilize}\par
-\lean{ComputableAnalysis.RealRaw.prefixStabilize_width_le_current_expand}\par
-\lean{ComputableAnalysis.RealRaw.prefixStabilize_valid}\par}
-\uses{def:raw-real,def:raw-equiv}
-Suppose a direct interval algorithm $C_n$ overlaps a valid anchor algorithm
-$A_n$ at every stage, both have explicit rational width moduli, and a public
-rational radius $r_n$ satisfies $\operatorname{width}(A_n)\le r_n$ and
-$r_n\to0$.  The stabilized algorithm takes the finite intersection
-
-\[
-  \bigcap_{k=0}^{n} [C_k^- - r_k,\;C_k^+ + r_k].
-\]
-
-It is a valid raw real and overlaps both $C$ and $A$.  Evaluation reads
-only the direct intervals and the public radii; the anchor appears only in the
-finite rational proof of the enclosure.  Thus this construction packages a
-known error bound into a nested evaluator without invoking a limit theorem or
-completeness.
-When the candidate itself has the stronger finite future-containment
-certificate, the same stabilizer can be validated without an external anchor:
-\lean{ComputableAnalysis.RealRaw.prefixStabilize_valid_of_future}.  The
-anchor-free theorem is the preferred interface for a computation whose own
-refinement proof is already available.
-The matching representation bridge is
-\lean{ComputableAnalysis.RealRaw.candidate_equiv_prefixStabilize_of_future}:
-the stabilized computation remains equivalent to the original candidate at
-each common stage.
-\end{proposition}
+More generally, a sequence of pairwise overlapping rational intervals with
+shrinking widths can be stabilized in this way: pairwise overlap of a
+\emph{finite} family of intervals implies a nonempty common intersection.
+We shall repeatedly prove compatibility by common refinements or by bounds
+on every finite future correction.  An independently existing limit is
+never needed as an anchor.
 
 \begin{definition}[Stage schedules]\label{def:stage-schedule}
-\lean{ComputableAnalysis.RealRaw.StageSchedule}
-\lean{ComputableAnalysis.RealRaw.schedule}
-\uses{def:raw-real,def:raw-equiv}
-A \emph{stage schedule} is an increasing function
-\[
-  \sigma:\N\to\N.
-\]
-If \(x=[a_n,b_n]_{n\in\N}\), then the scheduled real number is
-\[
-  \sigma\ldot x:=[a_{\sigma(n)},b_{\sigma(n)}]_{n\in\N}.
-\]
+A stage schedule is an increasing, unbounded map $\sigma:\N\to\N$.
+Replacing $X_n$ by $X_{\sigma(n)}$ gives an equivalent computation.
 \end{definition}
 
-\begin{proposition}[Using stage schedules]\label{prop:stage-schedule-equiv}
-\lean{ComputableAnalysis.RealRaw.schedule_equiv}
-\lean{ComputableAnalysis.RealRaw.equiv_of_schedule_equiv}
-\uses{def:stage-schedule,def:raw-equiv}
-For every stage schedule \(\sigma\), one has
-\[
-  x\sim \sigma\ldot x.
-\]
-Thus, to prove \(x\sim y\), it is enough to choose schedules
-\(\sigma,\tau\) that make
-\[
-  \sigma\ldot x\sim \tau\ldot y
-\]
-easier to show.
-\end{proposition}
+Thus two algorithms can be compared at different speeds.  A useful named
+number can carry several computations connected by proved equivalences;
+transitivity supplies comparisons along a finite chain.  There is no reason
+to discard a slow geometric construction after discovering a faster series.
 
-\begin{proposition}[Bounded monotone computation]
-\label{prop:monotone-interval-computation}
-\lean{ComputableAnalysis.MonotoneIntervalCertificate}
-\lean{ComputableAnalysis.MonotoneIntervalCertificate.precision_witness}
-\lean{ComputableAnalysis.MonotoneIntervalCertificate.toRealRaw_valid}
-\lean{ComputableAnalysis.MonotoneIntervalCertificate.toReal}
-\lean{ComputableAnalysis.MonotoneIntervalCertificate.toReal_preferred_compute}
-\lean{ComputableAnalysis.dyadicApproachIntervalCertificate}
-\lean{ComputableAnalysis.dyadicApproachIntervalCertificate_valid}
-\lean{ComputableAnalysis.geometricSumIntervalCertificate}
-\lean{ComputableAnalysis.geometricSumIntervalCertificate_valid}
-\uses{def:raw-real}
-A bounded monotone process is represented by rational lower and upper
-endpoints.  The lower endpoint is certified to rise, the upper endpoint to
-fall, and a supplied rational width modulus gives every requested precision.
-The resulting `RealRaw` is constructed directly from these endpoint pairs.
-This is the project-native replacement for invoking a supremum or a
-completeness theorem.
-\end{proposition}
+\section{Examples of real numbers}
 
-\begin{definition}[Certified real handles]\label{def:reals-quotient}
-\lean{ComputableAnalysis.Real}
-\uses{def:raw-real,def:raw-equiv}
-The current Lean-facing real type is a \emph{certified handle}, not a quotient
-or a completed field.  It stores one preferred valid raw interval algorithm
-and a finite spanning registry of certified implementation edges.  Each edge
-records only that its child algorithm is valid and equivalent to its parent;
-pairwise equivalences are derived by transitivity when needed.  Stage
-algorithms remain the primary proof objects, while rates and future cost data
-are optional implementation metadata.
-When a new implementation is added, its certificate may compare it with any
-existing certified representation; it need not compare directly with the
-preferred one.
-In particular, \code{Real.Representation.equiv} proves that any two certified
-representations of the same handle have equivalent raw evaluators.  This is an
-interoperability theorem about proved representations, not an identification
-of all raw algorithms by quotienting.
-At a requested stage, \code{Real.Representation.overlapsAt} exposes the
-corresponding interval overlap directly, so a consumer can switch
-implementations without rebuilding the spanning-tree argument.
-The parent-relative constructors expose the same transport when registering a
-new implementation:
-\lean{ComputableAnalysis.Real.withAlternativeFrom_equiv_preferred}
-\lean{ComputableAnalysis.Real.withAlternativeFrom_overlaps_preferred}
-\lean{ComputableAnalysis.Real.withAlternativeFromPath}
-\lean{ComputableAnalysis.Real.withAlternativeFromImplementation_equiv_preferred}
-\lean{ComputableAnalysis.Real.withAlternativeFromImplementation_overlaps_preferred}
-For functions, the same distinction is kept at the appropriate level: a
-\code{PartialRealFunRaw} is one domain-indexed computation, while
-\code{PartialRealFunction} packages several useful computations of one named
-special function.  Their certificates assert agreement only on common domain
-points.  We do not first classify the function as continuous or analytic; we
-formalize the domain and properties needed by the application.
-When two certified views share a rational input, the preferred view supplies
-the spanning comparison:
-\lean{ComputableAnalysis.PartialRealFunction.Representation.equiv_on_common_domain}
-\lean{ComputableAnalysis.PartialRealFunction.Representation.overlapsAt_on_common_domain}
-When registering a new partial-function computation through an existing
-representation, use the parent-relative constructor and its transport lemmas:
-\lean{ComputableAnalysis.PartialRealFunction.withAlternativeFrom}
-\lean{ComputableAnalysis.PartialRealFunction.withAlternativeFromPath}
-\lean{ComputableAnalysis.PartialRealFunction.withAlternativeFromPath_equiv_preferred}
-\lean{ComputableAnalysis.PartialRealFunction.withAlternativeFromPath_overlaps_preferred}
-\lean{ComputableAnalysis.PartialRealFunction.withAlternativeFromImplementationPath}
-\lean{ComputableAnalysis.PartialRealFunction.withAlternativeFrom_equiv_preferred}
-\lean{ComputableAnalysis.PartialRealFunction.withAlternativeFrom_overlaps_preferred}
-\lean{ComputableAnalysis.PartialRealFunction.withAlternativeFromImplementation}
-\lean{ComputableAnalysis.PartialRealFunction.withAlternativeFromImplementation_equiv_preferred}
-\lean{ComputableAnalysis.PartialRealFunction.withAlternativeFromImplementation_overlaps_preferred}
-This is a domain-aware transport theorem, not an assertion that unrelated
-partial functions agree outside their certified overlap.
-\end{definition}
-
-\begin{proposition}[Raw arithmetic respects representations]\label{thm:raw-reals-field}
-\lean{ComputableAnalysis.Real.ofRat}
-\lean{ComputableAnalysis.RealRaw.add_equiv}
-\lean{ComputableAnalysis.RealRaw.sub_equiv}
-\lean{ComputableAnalysis.RealRaw.mul_equiv_of_nonneg}
-\uses{def:reals-quotient,def:raw-real-sign,def:raw-real-arithmetic,prop:raw-arithmetic-valid}
-The checked arithmetic operations preserve validity and are compatible with
-proved raw equivalence in their stated domains; in particular, the new
-nonnegative bounded product does not select a preferred representative.
-Constant rational intervals provide certified handles through
-\code{Real.ofRat}.  The development deliberately does not assert that these
-handles form a quotient, an ordered field, or a completed continuum; later
-theorems remain stated in terms of valid raw algorithms and explicit
-equivalence certificates.
-\end{proposition}
-
-\begin{remark}[No ambient completeness theorem]\label{rem:real-completeness}
-\uses{thm:raw-reals-field}
-No theorem identifies the raw interval representation with classical Cauchy
-reals or derives completeness.  When a proof needs existence or convergence,
-it constructs the relevant rational interval algorithm and proves orderedness,
-nesting, and an explicit width-shrinking bound directly.
-\end{remark}
-
-\section{Examples of real numbers \humanchecked}
-
-\subsection{Benchmark foundations}\label{sec:benchmark-foundations}
-
-The rational foundation already contains the exact triangle inequality for
-the project's absolute-value operation:
-\begin{theorem}[Rational triangle-inequality certificate]
-\label{thm:rational-triangle-inequality}
-\label{thm:finite-triangle-inequality-interface}
-The rational absolute-value inequality is the reusable finite interface for
-error budgets; completed metric-space formulations are separate bridges.
-\lean{ComputableAnalysis.qabs_add_le}
-\lean{ComputableAnalysis.qabs_add_le_three}
-\lean{ComputableAnalysis.qabs_three_term_triangle_certificate}
-\lean{ComputableAnalysis.qabs_five_term_triangle_certificate}
-\lean{ComputableAnalysis.qabs_perturbed_sub_le}
-\lean{ComputableAnalysis.complexTriangleZ}
-\lean{ComputableAnalysis.complexTriangleW}
-\lean{ComputableAnalysis.complexTriangle_norms}
-\lean{ComputableAnalysis.complexTriangle_squared_norm_bound}
-\lean{ComputableAnalysis.complexTriangle_certificate}
-\lean{ComputableAnalysis.rational_coordinate_cauchy_schwarz}
-\lean{ComputableAnalysis.qcomplex_coordinate_cauchy_schwarz}
-\lean{ComputableAnalysis.qcomplex_normSq_add_expansion}
-\lean{ComputableAnalysis.qcomplex_normSq_add_le_coordinate_abs}
-\lean{ComputableAnalysis.ratListSum}
-\lean{ComputableAnalysis.ratListAbsSum}
-\lean{ComputableAnalysis.ratListSum_append}
-\lean{ComputableAnalysis.ratListAbsSum_append}
-\lean{ComputableAnalysis.qabs_ratListSum_le}
-\lean{ComputableAnalysis.qabs_sub_le}
-\lean{ComputableAnalysis.QInterval.intersection_ordered_of_overlaps}
-\leanok
-The three-term form is included explicitly for chained interval-width and
-finite error estimates; these are the rational certificate core of benchmark
-item 91.  The list-level theorem \texttt{qabs\textbackslash{}\_ratListSum\_le} extends the
-same estimate to every finite rational error list.
-The five-term worked list ((-3,4,-2,7,-5)) has sum (1), absolute-value
-sum (21), and satisfies the same list-level triangle certificate.
-The append laws make these finite certificates compositional.
-These finite absolute-value and list-sum bounds are the project's constructive
-triangle-inequality interface for interval widths and error budgets.
-The perturbation form \texttt{qabs\_perturbed\_sub\_le} makes the error-budget
-use explicit: replacing \(x,y\) by \(x+e,y+f\) adds at most the certified
-rational error bounds for \(e\) and \(f\) to the original separation.
-The worked rational-complex certificate adds vectors $(3,4)$ and $(5,12)$:
-their squared norms are $25$ and $169$, the squared norm of their sum is
-$320$, and $320\le(5+13)^2$.
-The reusable coordinate Cauchy--Schwarz theorem is proved by the explicit
-Lagrange remainder $(a d-b c)^2$.  Its \texttt{QComplex} specialization bounds the
-dot product by the product of squared norms, and the accompanying expansion
-of the squared norm of a sum exposes the finite algebra used by later norm
-and triangle certificates.
-\end{theorem}
-
-The same finite inequality has a geometric reading.  For rational vertices,
-the length of a broken path is at least the direct endpoint segment; a
-genuine reversal makes it strict.  The proof is induction over the finite
-list of vertices, using only the rational triangle inequality:
-
-\lean{ComputableAnalysis.RationalCircle.Stage.polygonalPath_length_ge_endpoint}
-\lean{ComputableAnalysis.RationalCircle.Stage.rationalPolyline_length_ge_direct}
-\lean{ComputableAnalysis.RationalCircle.Stage.rationalPolyline_length_two_step_strict_of_genuine_turn}
-\leanok
-
-\begin{theorem}[Rational AM--GM square certificate]
-\label{thm:rational-am-gm}
-\lean{ComputableAnalysis.rat_square_nonneg_basic}
-\lean{ComputableAnalysis.am_gm_square_bound}
-\lean{ComputableAnalysis.am_gm_rational_half}
-\lean{ComputableAnalysis.am_gm_rational_half_eq_iff}
-\lean{ComputableAnalysis.am_gm_four}
-\lean{ComputableAnalysis.amgm_2_8_certificate}
-\lean{ComputableAnalysis.amgm_3_3_equality}
-\lean{ComputableAnalysis.amgm_2_8_and_equality_certificate}
-\lean{ComputableAnalysis.amgm_four_equal_certificate}
-\lean{ComputableAnalysis.amgm_four_strict_certificate}
-\lean{ComputableAnalysis.amgm_four_certificate}
-\lean{ComputableAnalysis.DyadicAMGM}
-\lean{ComputableAnalysis.FiniteAMGMCertificate}
-\lean{ComputableAnalysis.FiniteAMGMCertificate.product_le_average_pow}
-\lean{ComputableAnalysis.FiniteAMGMCertificate.product_mul_card_pow_le_sum_pow}
-\lean{ComputableAnalysis.finiteAMGMCertificate}
-\lean{ComputableAnalysis.DyadicAMGM.sum}
-\lean{ComputableAnalysis.DyadicAMGM.product}
-\lean{ComputableAnalysis.DyadicAMGM.product_le_average_pow}
-\lean{ComputableAnalysis.DyadicAMGM.product_mul_card_pow_le_sum_pow}
-\lean{ComputableAnalysis.dyadicAMGMExample}
-\lean{ComputableAnalysis.dyadicAMGMExample_sum}
-\lean{ComputableAnalysis.dyadicAMGMExample_product}
-\lean{ComputableAnalysis.dyadicAMGMExample_certificate}
-\lean{ComputableAnalysis.dyadicAMGMExample_numeric_bound}
-\lean{ComputableAnalysis.dyadicAMGMExampleDepthThree}
-\lean{ComputableAnalysis.dyadicAMGMExampleDepthThree_sum}
-\lean{ComputableAnalysis.dyadicAMGMExampleDepthThree_product}
-\lean{ComputableAnalysis.dyadicAMGMExampleDepthThree_certificate}
-\lean{ComputableAnalysis.dyadicAMGMExampleDepthThree_numeric_bound}
-\lean{ComputableAnalysis.dyadicAMGMExampleDepthFour}
-\lean{ComputableAnalysis.dyadicAMGMExampleDepthFour_sum}
-\lean{ComputableAnalysis.dyadicAMGMExampleDepthFour_product}
-\lean{ComputableAnalysis.dyadicAMGMExampleDepthFour_certificate}
-\lean{ComputableAnalysis.dyadicAMGMExampleDepthFour_numeric_bound}
-\lean{ComputableAnalysis.consecutiveDyadic}
-\lean{ComputableAnalysis.dyadicAMGMExampleDepthFive}
-\lean{ComputableAnalysis.dyadicAMGMExampleDepthFive_sum}
-\lean{ComputableAnalysis.dyadicAMGMExampleDepthFive_product}
-\lean{ComputableAnalysis.dyadicAMGMExampleDepthFive_certificate}
-\lean{ComputableAnalysis.dyadicAMGMExampleDepthFive_numeric_bound}
-\lean{ComputableAnalysis.sqrtRaw_le_am_gm}
-\lean{ComputableAnalysis.sqrtRaw_am_gm_eq_of_eq}
-\lean{ComputableAnalysis.sqrtRaw_am_gm_eq_iff}
-\leanok
-The square bound and paired four-variable certificate are the exact rational
-core of benchmark 38 (AM--GM).  The certified square-root interface lifts the
-bound to the project's represented nonnegative values, and the equality
-certificate records that equality occurs exactly when the two inputs coincide.
-The direct four-variable witnesses check equality for \((3,3,3,3)\) and a
-strict inequality for \((2,3,4,5)\), making the paired four-variable interface
-executable on both equality and non-equality data.
-The depth-three worked tree has leaves (1,\ldots,8), sum (36), product
-(40320), and satisfies the corresponding eight-term dyadic bound.
-The depth-four worked tree has leaves (1,\ldots,16), sum (136), product
-(20922789888000), and satisfies the corresponding sixteen-term dyadic bound.
-The generic finite constructor \texttt{consecutiveDyadic} now produces the depth-five
-tree with leaves (1,\ldots,32), sum (528), product
-(263130836933693530167218012160000000), and its corresponding thirty-two-term bound.
-The worked depth-two tree with leaves $(1,2,3,4)$ has sum $10$, product
-$24$, and satisfies the generic bound $24\le(10/4)^4$.  This is an
-executable finite witness for the recursive dyadic interface.
-\end{theorem}
-
-\begin{theorem}[Finite rational Cauchy--Schwarz certificates]
-\label{thm:rational-cauchy-schwarz}
-\label{thm:finite-cauchy-schwarz-interface}
-The list-level theorem is the finite project interface: dot products and sums
-of squares are rational folds, and the residual is a sum of squared minors.
-\lean{ComputableAnalysis.FiniteCauchySchwarzCertificate}
-\lean{ComputableAnalysis.FiniteCauchySchwarzCertificate.inequality}
-\lean{ComputableAnalysis.FiniteCauchySchwarzCertificate.square_sums_nonneg}
-\lean{ComputableAnalysis.finiteCauchySchwarzCertificate}
-\lean{ComputableAnalysis.finiteCauchySchwarzCertificate_inequality}
-\lean{ComputableAnalysis.cauchy_schwarz_2d}
-\lean{ComputableAnalysis.cauchy_schwarz_2d_eq_iff}
-\lean{ComputableAnalysis.cauchy_schwarz_3d}
-\lean{ComputableAnalysis.cauchy_schwarz_3d_eq_iff}
-\lean{ComputableAnalysis.cauchy_schwarz_4d}
-\lean{ComputableAnalysis.cauchy_schwarz_4d_eq_iff}
-\lean{ComputableAnalysis.cauchy_schwarz_5d}
-\lean{ComputableAnalysis.cauchy_schwarz_5d_eq_iff}
-\lean{ComputableAnalysis.cauchy_schwarz_6d}
-\lean{ComputableAnalysis.cauchy_schwarz_6d_eq_of_minors}
-\lean{ComputableAnalysis.rationalDot}
-\lean{ComputableAnalysis.rationalSumSquares}
-\lean{ComputableAnalysis.rationalMinorSquareSum}
-\lean{ComputableAnalysis.rationalDot_cauchy_schwarz_of_length_eq}
-\lean{ComputableAnalysis.cauchy_schwarz_2d_example_equality}
-\lean{ComputableAnalysis.cauchy_schwarz_2d_example_proportional}
-\lean{ComputableAnalysis.cauchy_schwarz_2d_example_certificate}
-\lean{ComputableAnalysis.cauchyThreeXs}
-\lean{ComputableAnalysis.cauchyThreeYs}
-\lean{ComputableAnalysis.cauchyThree_dot}
-\lean{ComputableAnalysis.cauchyThree_sum_squares}
-\lean{ComputableAnalysis.cauchyThree_minor_residual}
-\lean{ComputableAnalysis.cauchyThree_certificate}
-\lean{ComputableAnalysis.cauchyFourXs}
-\lean{ComputableAnalysis.cauchyFourYs}
-\lean{ComputableAnalysis.cauchyFour_dot}
-\lean{ComputableAnalysis.cauchyFour_sum_squares}
-\lean{ComputableAnalysis.cauchyFour_minor_residual}
-\lean{ComputableAnalysis.cauchyFour_certificate}
-\lean{ComputableAnalysis.cauchySixXs}
-\lean{ComputableAnalysis.cauchySixYs}
-\lean{ComputableAnalysis.cauchySix_dot}
-\lean{ComputableAnalysis.cauchySix_sum_squares}
-\lean{ComputableAnalysis.cauchySix_minor_residual}
-\lean{ComputableAnalysis.cauchySix_certificate}
-\leanok
-These finite rational Cauchy--Schwarz certificates cover benchmark 78 as
-supporting inequality infrastructure, without introducing a functional-analysis
-chapter.  The list-based certificate gives the same inequality for every
-finite equal-length rational vector, using an explicit sum of squared minors.
-The worked four-coordinate example uses ((1,2,3,4)) and ((4,3,2,1)):
-both squared norms are (30), the dot product is (20), and the residual is
-(500).
-The six-coordinate example uses ((1,2,3,4,5,6)) and ((6,5,4,3,2,1)):
-both squared norms are (91), the dot product is (56), and the residual is
-(5145).
-\end{theorem}
-
-Mathematical induction is the recursion
-principle used to check
-these finite identities and the series identities in Chapter~\ref{ch:infinite-series};
-it is not reintroduced as a separate completed-real theorem.
-The public schema is
-\lean{ComputableAnalysis.nat_induction_schema}.
-
-\begin{theorem}[Executable Euclidean gcd]
-\label{thm:euclidean-gcd}
-\lean{ComputableAnalysis.euclideanGcd}
-\lean{ComputableAnalysis.euclideanGcd_eq_gcd}
-\lean{ComputableAnalysis.euclideanGcd_step}
-\lean{ComputableAnalysis.euclideanGcd_zero_right}
-\lean{ComputableAnalysis.euclideanGcd_zero_left}
-\lean{ComputableAnalysis.euclideanGcd_pos_of_pos}
-\lean{ComputableAnalysis.euclideanGcd_pos_iff}
-\lean{ComputableAnalysis.euclideanGcd_eq_one_iff_coprime}
-\lean{ComputableAnalysis.euclideanGcd_comm}
-\lean{ComputableAnalysis.euclideanGcd_dvd_left}
-\lean{ComputableAnalysis.euclideanGcd_dvd_right}
-\lean{ComputableAnalysis.euclideanGcd_dvd_of_dvd}
-\lean{ComputableAnalysis.euclideanGcd_dvd_iff}
-\lean{ComputableAnalysis.gcd_remainder_swap}
-\lean{ComputableAnalysis.FiniteEuclideanGcdCertificate}
-\lean{ComputableAnalysis.FiniteEuclideanGcdCertificate.divides_left}
-\lean{ComputableAnalysis.FiniteEuclideanGcdCertificate.divides_right}
-\lean{ComputableAnalysis.FiniteEuclideanGcdCertificate.is_coprime_of_value_one}
-\lean{ComputableAnalysis.finiteEuclideanGcdCertificate}
-\lean{ComputableAnalysis.euclideanGcd_84_30}
-\lean{ComputableAnalysis.euclideanGcd_252_198}
-\lean{ComputableAnalysis.euclideanGcd_1071_462}
-\lean{ComputableAnalysis.euclideanGcd_12345_6789}
-\lean{ComputableAnalysis.euclideanGcd_99991_12345}
-\lean{Nat.gcd}
-\lean{Nat.gcd_rec}
-\lean{Nat.gcd_dvd_left}
-\lean{Nat.gcd_dvd_right}
-\lean{Nat.dvd_gcd}
-\leanok
-The executable loop is definitionally the usual remainder descent, and its
-equality with the core gcd is checked by induction on the second argument.
-The exact natural-number Euclidean primitive is also available from the Lean
-core and is used by the project's discrete modules.  These declarations provide
-the algorithmic gcd milestone (benchmark 69).
-\end{theorem}
-
-\begin{theorem}[Executable Bézout certificate]
-\label{thm:bezout-certificate}
-\lean{ComputableAnalysis.bezout_step_identity}
-\lean{ComputableAnalysis.bezout_exists}
-\lean{ComputableAnalysis.euclideanGcd_bezout_exists}
-\lean{ComputableAnalysis.euclideanGcd_84_30}
-\lean{ComputableAnalysis.bezout_84_30}
-\lean{ComputableAnalysis.bezout_84_30_certificate}
-\lean{ComputableAnalysis.euclideanGcd_252_198}
-\lean{ComputableAnalysis.bezout_252_198}
-\lean{ComputableAnalysis.bezout_252_198_certificate}
-\lean{ComputableAnalysis.euclideanGcd_1071_462}
-\lean{ComputableAnalysis.bezout_1071_462}
-\lean{ComputableAnalysis.bezout_1071_462_certificate}
-\lean{ComputableAnalysis.euclideanGcd_12345_6789}
-\lean{ComputableAnalysis.bezout_12345_6789}
-\lean{ComputableAnalysis.bezout_12345_6789_certificate}
-\lean{ComputableAnalysis.euclideanGcd_99991_12345}
-\lean{ComputableAnalysis.bezout_99991_12345}
-\lean{ComputableAnalysis.bezout_99991_12345_certificate}
-\leanok
-The recursive coefficient certificate \texttt{bezout\_exists} proves the signed
-Bézout identity for every natural input pair, covering benchmark item 60 in the
-exact-arithmetic representation.  The combined theorem
-\texttt{euclideanGcd\_bezout\_exists} identifies those coefficients with the
-executable Euclidean-loop result itself.
-The reusable finite interface packages the terminating gcd output with its
-integer witness and derives divisibility and coprimality from that certificate.
-The worked input pair (84,30) gives (gcd(84,30)=6) with the explicit
-certificate ((-1)84+3(30)=6).
-The pair (99991,12345) supplies a further terminating certificate: its gcd is
-(1), witnessed by \(2116\cdot99991-17139\cdot12345=1\).
-\end{theorem}
-
-\begin{remark}[Algebraic numbers, starting with \(\sqrt2\)]
+\subsection{Square roots and finite geometry}
 \label{rem:algebraic-numbers-sqrt-two}
-The scoped calculus entry point imports this real-free algebraic layer.  Its
-irrationality statement is about `RealRaw.Irrational`: a nested rational
-interval computation is irrational when it is not equivalent to any rational
-interval computation.  Thus the theorem has the same mathematical content as
-the classical square-root criterion without using a standard real number.
-\lean{ComputableAnalysis.sqrt}
-\lean{ComputableAnalysis.sqrtRaw}
-\lean{ComputableAnalysis.sqrtStageEps}
-\lean{ComputableAnalysis.one_div_natCast_den_eq}
-\lean{ComputableAnalysis.sqrtStageEps_den_eq}
-\lean{ComputableAnalysis.sqrtFuel_sqrtStageEps_eq}
-\lean{ComputableAnalysis.sqrtStageEps_den_mono}
-\lean{ComputableAnalysis.sqrtFuel_sqrtStageEps_mono}
-\lean{ComputableAnalysis.sqrtBisectStep_width_eq_half}
-\lean{ComputableAnalysis.sqrtBisect_width_eq}
-\lean{ComputableAnalysis.sqrtApproxOnDomain_width_eq}
-\lean{ComputableAnalysis.sqrtApproxOnDomain_width_eq_positive_stage}
-\lean{ComputableAnalysis.sqrtBisectStep_contains}
-\lean{ComputableAnalysis.sqrtBisect_contains_of_le_fuel}
-\lean{ComputableAnalysis.sqrtApproxOnDomain_width_le_nat_over_succ}
-\lean{ComputableAnalysis.sqrtApproxOnDomain_valid}
-\lean{ComputableAnalysis.sqrtRaw_valid}
-\lean{ComputableAnalysis.sqrtRaw_spec}
-\lean{ComputableAnalysis.sqrtCertified_of_domain}
-\lean{ComputableAnalysis.sqrtRat}
-\lean{ComputableAnalysis.irrational_sqrt_ratCast_iff_of_nonneg}
-\lean{ComputableAnalysis.irrational_sqrt_rat_iff_not_square}
-\lean{ComputableAnalysis.sqrtTwo_descent_core}
-\lean{ComputableAnalysis.two_not_rat_square_via_descent}
-\lean{ComputableAnalysis.sqrt_two_irrational_via_descent}
-\lean{ComputableAnalysis.sqrt_rational_iff_square}
-\lean{ComputableAnalysis.sqrt_rational_iff_lowest_terms_square}
-\lean{ComputableAnalysis.sqrt_irrational_iff_not_square}
-\lean{ComputableAnalysis.sqrt_irrational_iff_lowest_terms_nonsquare}
-\lean{ComputableAnalysis.sqrt_two_irrational}
-\lean{ComputableAnalysis.sqrtTwo_bisection_stage4}
-\lean{ComputableAnalysis.sqrtTwo_bisection_stage4_bracket}
-\lean{ComputableAnalysis.sqrtTwo_bisection_stage4_width}
-\lean{ComputableAnalysis.sqrtTwo_bisection_stage8}
-\lean{ComputableAnalysis.sqrtTwo_bisection_stage8_bracket}
-\lean{ComputableAnalysis.sqrtTwo_bisection_stage8_width}
-\lean{ComputableAnalysis.sqrtTwo_bisection_stage12}
-\lean{ComputableAnalysis.sqrtTwo_bisection_stage12_bracket}
-\lean{ComputableAnalysis.sqrtTwo_bisection_stage12_width}
-\lean{ComputableAnalysis.sqrtTwo_bisection_stage16}
-\lean{ComputableAnalysis.sqrtTwo_bisection_stage16_bracket}
-\lean{ComputableAnalysis.sqrtTwo_bisection_stage16_width}
-\lean{ComputableAnalysis.sqrtTwo_bisection_stage20}
-\lean{ComputableAnalysis.sqrtTwo_bisection_stage20_bracket}
-\lean{ComputableAnalysis.sqrtTwo_bisection_stage20_width}
-\lean{ComputableAnalysis.sqrtTwo_bisection_stage24}
-\lean{ComputableAnalysis.sqrtTwo_bisection_stage24_bracket}
-\lean{ComputableAnalysis.sqrtTwo_bisection_stage24_width}
-\uses{def:raw-real}
-The first nontrivial computable real number to keep in mind is \(\sqrt2\).
-For \(\sqrt2\), use rational secant--tangent updates:
+For a rational $q\ge0$, start with rational $0\le a\le b$ satisfying
+$a^2\le q\le b^2$.  Bisect and retain the half whose squared endpoints
+still bracket $q$.  If the midpoint square equals $q$, return the exact
+constant interval thereafter.  At stage $n$ the width is at most
+$(b-a)2^{-n}$, and finite interval multiplication proves that the resulting
+computation squares to $q$.
+
+For $\sqrt2$, the rational secant--tangent refinement gives another
+construction:
 \begin{verbatim}
 def sqrt2(n):
     a = 1
@@ -1101,831 +144,182 @@ def sqrt2(n):
         b = (b + 2/b) / 2
     return [a, b]
 \end{verbatim}
-\begin{figure}[ht]
-\centering
+All divisions here are exact rational divisions.  For one step, writing
+$a',b'$ for the new endpoints,
+\[
+ (a')^2-2=\frac{(a^2-2)(b^2-2)}{(a+b)^2},\qquad
+ (b')^2-2=\frac{(b^2-2)^2}{4b^2}.
+\]
+Also $a\le a'\le b'\le b$, and
+\[
+ b'-a'=\frac{(b-a)(b^2-2)}{2b(a+b)}\le\frac{b-a}{2}.
+\]
+These identities prove validity.  The bisection and secant--tangent
+computations are equivalent because both retain the unique nonnegative
+solution, with uniqueness following from $(u-v)(u+v)=u^2-v^2$ and the
+positive lower bounds in this example.
+
+\begin{figure}[htbp]\centering
 \sqrtSecantTangentAnimation
-\caption{Secant--tangent rational enclosure for \(\sqrt2\).}
+\caption{Secant--tangent rational enclosures for $\sqrt2$.}
 \label{fig:sqrt-secant-tangent}
 \end{figure}
-The named theorem \texttt{sqrt\_two\_irrational\_via\_descent} instantiates the general
-criterion at the benchmark value $2$.  Its nonsquare input is connected to the
-classical infinite-descent kernel \texttt{sqrtTwo\_descent\_core}, so the historical
-proof is visible while the resulting irrationality statement remains entirely
-over the project's \texttt{RealRaw} representation.
-The companion theorem \texttt{sqrtTwo\_bisection\_stage4} gives the explicit stage-four
-enclosure $[11/8,23/16]$ for the target equation $x^2=2$, with width $1/16$.
-Its bracket certificate records the two finite rational comparisons directly.
-At stage eight the same evaluator returns the tighter interval
-\([181/128,363/256]\), whose width is \(1/256\); this is another finite
-comparison checkpoint rather than an attained square root.
-At stage twelve the interval is \([181/128,5793/4096]\), with width
-\(1/4096\), giving a still finer finite enclosure.
-At stage sixteen it is \([92681/65536,46341/32768]\), with width
-\(1/65536\), extending the exact finite precision schedule.
-At stage twenty it is \([741455/524288,1482911/1048576]\), with width
-\(1/1048576\), extending the same finite schedule without treating the limit as
-an attained endpoint.
-At stage twenty-four it is
-\([11863283/8388608,23726567/16777216]\), with width \(1/16777216\),
-continuing the exact rational bisection schedule.
-Algebraic numbers are represented by rational isolating intervals.  Lean
-proves this computation's nesting, explicit width schedule, irrationality
-criterion, and unit-interval rational \(\varepsilon\)--\(\delta\) modulus.
-\end{remark}
 
-\begin{remark}[Pell recurrence certificates]
-\label{thm:finite-pell-certificate}
-\lean{ComputableAnalysis.pellPair}
-\lean{ComputableAnalysis.pellInvariant}
-\lean{ComputableAnalysis.FinitePellCertificate}
-\lean{ComputableAnalysis.pellPair_invariant}
-\lean{ComputableAnalysis.finitePellCertificate}
-\lean{ComputableAnalysis.FinitePellCertificate.solution}
-\lean{ComputableAnalysis.finitePellCertificate_stage_one}
-\lean{ComputableAnalysis.finitePellCertificate_stage_two}
-\lean{ComputableAnalysis.finitePellCertificate_stage_three}
-The recurrence
-\begin{verbatim}
-(x,y) -> (3x+4y, 2x+3y)
-\end{verbatim}
-preserves \(x^2-2y^2=1\).  Each stage is a finite rational certificate;
-the infinite family is a potential-infinity interface.
-\end{remark}
+There is no rational whose square is $2$: in a reduced fraction $p/q$, the
+identity $p^2=2q^2$ would make both $p$ and $q$ even.  Thus this is a
+nonrational quantity constructed entirely by rational arithmetic.
 
-\begin{remark}[Pseudocode convention]\label{rem:pseudocode-convention}
-\uses{rem:computable-presentations,rem:algebraic-numbers-sqrt-two}
-Displayed code is Python-like finite rational pseudocode.  Variables are
-rational unless stated otherwise; no floating-point operation is implied.  The
-linked Lean declarations supply the certificates.
-\end{remark}
+Square roots also compute lengths of rational vectors.  The finite identity
+\[
+ (a^2+b^2)(c^2+d^2)-(ac+bd)^2=(ad-bc)^2
+\]
+proves the coordinate Cauchy--Schwarz inequality and hence the broken-line
+inequality.  Shoelace determinants compute polygonal areas exactly.  These
+are the geometric tools needed for the circle, rather than a separate
+axiomatization of Euclidean space.
 
-\begin{remark}[Other types of real numbers]\label{rem:sources-of-raw-reals}
-\uses{def:interval-sequence,def:raw-real,rem:algebraic-numbers-sqrt-two}
-Beyond algebraic numbers, there are other useful ways of defining real
-numbers.  Most of the non-algebraic examples in this project fall into one of
-the following types:
-\begin{itemize}
-  \item Infinite series, for example,
-  \[
-    \frac{\pi}{4}
-    =
-    1-\frac{1}{3}+\frac{1}{5}-\frac{1}{7}+\cdots
-  \]
-  and
-  \[
-    \frac{\pi^2}{6}
-    =
-    1+\frac{1}{4}+\frac{1}{9}+\frac{1}{16}+\cdots .
-  \]
-  of Leibniz and Euler. These are easy to implement, though the latter requires a little
-  care with the upper bound (hint: telescoping sum).
+\subsection{Other computations of numbers}
+\label{rem:sources-of-raw-reals}
+The geometric sum illustrates a finite identity with a tail:
+\[
+ (1-r)\sum_{k=0}^{N}r^k=1-r^{N+1}.
+\]
+For rational $|r|<1$, the error $|r|^{N+1}/(1-|r|)$ gives a number
+computation.  Bounded monotonicity by itself does not supply a shrinking
+upper--lower gap; an error estimate or a terminating precision search is
+still necessary.
 
-  \item Continued fractions, such as
-  \[
-    \frac{4}{\pi}
-    =
-    1+\cfrac{1^2}{2+\cfrac{3^2}{2+\cfrac{5^2}{2+\cfrac{7^2}{2+\ddots}}}}.
-  \]
-  and finite truncations work as rational bounds.
-
-  \item Periods, i.e., integrals of rational or algebraic functions:
-  \[
-    \frac{\pi}{4}
-    =
-    \int_0^1\frac{\dd x}{1+x^2},
-  \]
-  \[
-    \frac{\pi}{6}
-    =
-    \int_0^{1/2}\frac{\dd x}{\sqrt{1-x^2}},
-  \]
-  \[
-    \frac{\pi}{12}+\frac{\sqrt3}{8}
-    =
-    \int_0^{1/2}\sqrt{1-x^2}\,\dd x.
-  \]
-  and upper and lower Riemann sums work. (The last one is what Newton used to compute \(\pi\),
-  with binomial expansion.)
-
-  \item Integrals (proper or not) of transcendental functions are also
-  likely in play, for instance
-  \[
-    \sqrt{2\pi}
-    =
-    \int_{-\infty}^{\infty} e^{-x^2/2}\,\dd x.
-  \]
-\end{itemize}
-
-One may define \(\pi\) by one of these formulas, and the others would be
-theorems (of equivalence of two real numbers). Or perhaps one should
-define \(\pi\) by Archimedes' method of exhaustion.
-\end{remark}
-
-\begin{remark}[Newton and the space of computations]
-\label{rem:newton-space-of-computations}
-The general lesson is not that one should work directly toward the best
-approximation of $\pi$.  Since Archimedes, many computations of area were
-available: polygonal exhaustions, rectangle sums, series, continued
-fractions, and integral representations.  A breakthrough can come from
-understanding this space of computations, fast and slow alike, and the
-relations that connect one computation to another, rather than from directly
-optimizing the original procedure.
-
-The Newton-era route from binomial series and term-by-term integration to a
-rapidly convergent series for $\pi$ is a useful mathematical example of this
-pattern; it soon surpassed the speed of direct Archimedean exhaustion.  This
-remark makes no claim about Newton's private reasoning or the exact order of
-his discoveries.  It extracts a broader methodological principle: progress
-often comes from moving through equivalent representations until a new
-connection reveals a better computation.
-
-This is the methodological model for the present project.  We formalize
-individual algorithms together with their validity, rates, common enclosures,
-and equivalence maps.  A slow rectangle computation remains mathematically
-valuable because it can be the bridge to a faster series or integral
-computation.
-\end{remark}
+Later we shall construct, and prove equivalent, the computations suggested
+by
+\[
+ \frac\pi4=1-\frac13+\frac15-\cdots
+   =\int_0^1\frac{dt}{1+t^2},\qquad
+ \sum_{n=1}^{\infty}\frac1{n^2}=\frac{\pi^2}{6}.
+\]
+At this point these are destinations, not definitions silently imported from
+ordinary calculus.  The circle will define $\pi$ geometrically; rectangles,
+series, and Fourier sums will then supply different computations of it.
 
 \begin{remark}[Calculus as equivalence]\label{rem:calculus-as-equivalence}
-\uses{def:raw-equiv,rem:sources-of-raw-reals}
 A great deal of calculus is the art of proving that independently constructed
-real numbers are equivalent. The great advance by Newton and Leibniz is
-to turn that art mechanical, by leveraging the fundamental formula
+numbers are equivalent.  The fundamental formula
 \[
-  \int_a^b f'(x)\,\dd x = f(b)-f(a)
+ \int_a^b f'(x)\,dx=f(b)-f(a)
 \]
-which we shall establish, \emph{without} the completeness of real numbers.
+turns an accumulation computation into an endpoint computation.  Its
+hypotheses must explain why local derivative information controls a whole
+rational interval; pointwise differentiation on the rationals alone does not.
 \end{remark}
 
-\begin{remark}[Algorithm with a variable]\label{rem:parameterized-constructions}
-\uses{rem:sources-of-raw-reals}
-In many of these algorithms, there is a natural variable that could assume
-different values (\(\sqrt{\phantom{x}}\), \(\arctan\), \(\arcsin\) in the
-examples above), so it makes sense to define the algorithms
+\section{Complex numbers}
+
+Let $\Q(i)=\{r+is:r,s\in\Q\}$.  A rational complex box is a pair of
+rational coordinate intervals.  A complex computation gives nested boxes
+whose two widths shrink to zero; equivalence is coordinatewise overlap.
+Addition and multiplication are rational box operations, using
 \[
-  n,t\longmapsto [a_n(t),b_n(t)]
+ (r+is)(u+iv)=(ru-sv)+i(rv+su).
 \]
-to be (computable) \emph{functions}. However, not all rational values of \(t\)
-need to result in a real number.
+For a denominator separated from zero use
+$z^{-1}=\overline z/( (\Re z)^2+(\Im z)^2)$ and the real reciprocal
+construction.  Finite rational coordinate bounds control all errors.
 
-This turns out to be crucial for establishing many of the equivalences of real
-numbers, and is how calculus appears to be the study of functions.
-\end{remark}
+The same convention applies to vectors and matrices: finitely many number
+computations, with finite sums and products.  No additional completeness
+principle appears when the number of coordinates increases.
 
-\begin{remark}[Complex variable]\label{rem:complex-parameters}
-\uses{rem:parameterized-constructions,def:qcomplex,def:qbox}
-It turns out that often it makes sense for the variable to assume complex values
-(at least for \(t+si\), with \(t,s\in\Q\)).  For example, power series may be evaluated
-inside a disk in the complex plane, and integrals can be taken over paths in the complex plane.
-\end{remark}
+\section{Algorithms with a variable}
+\label{rem:parameterized-constructions}
 
-\section{Complex numbers \humanchecked}
-
-One could define complex numbers as pairs of real numbers.  Instead, we follow
-the interval arithmetic more closely, using rectangular boxes with rational corners
-from the start.
-
-\begin{definition}[Field \(\Q(i)\)]\label{def:qcomplex}
-\lean{ComputableAnalysis.QComplex}
-Let
+\begin{definition}[Function computation]\label{def:real-fun-raw}
+A real-valued function computation consists of a declared domain of rational
+inputs and an algorithm
 \[
-  \Q(i):=\{r+is:r,s\in\Q\},
+ (x,n)\longmapsto [a_f(x,n),b_f(x,n)]
 \]
-with the standard field operations:
-\[
-  (r+is)(u+iv)=(ru-sv)+i(rv+su),
-\]
-etc. We also use the coordinatewise (partial) order:
-\[
-  r+is \le u+iv
-  \quad\Longleftrightarrow\quad
-  r\le u\ \text{and}\ s\le v.
-\]
-Note that this is not a total/linear order on \(\Q(i)\).
+which is a valid number computation at each permitted input $x$.
 \end{definition}
 
-\begin{definition}[Rational box]\label{def:qbox}
-\lean{ComputableAnalysis.QBox}
-\uses{def:qcomplex}
-A \emph{rational box} is a pair
+The outputs need not be rational.  In particular, $\sin(\pi x)$ will have
+rational inputs and computed outputs.  An algebraic, dyadic, or rational
+geometric chart may be a more natural first domain than all rationals;
+passing between charts requires an explicit comparison of computations.
+
+\begin{definition}[Interval continuity]\label{def:interval-regular}
+On a rational interval $[a,b]$, a continuity certificate supplies, for every
+positive rational $\varepsilon$, a positive rational $\mu(\varepsilon)$
+such that
 \[
-  \cbox{a}{b}\in \Q(i)\times\Q(i),
-  \qquad a\le b.
+ |x-y|\le\mu(\varepsilon)\quad\Longrightarrow\quad
+ |f(x)-f(y)|\le\varepsilon
 \]
-Two boxes \(\cbox{a}{b}\) and
-\(\cbox{c}{d}\) \emph{overlap} if
-\[
-  a\le d\ \text{and}\ c\le b.
-\]
+for rational $x,y$ in that interval.  This is uniform continuity on the
+specified interval, with usable data.  A different interval may have a
+different certificate.
 \end{definition}
 
-\begin{definition}[Box sequence]\label{def:box-sequence}
-\uses{def:qbox}
-A \emph{box sequence} is a sequence of rational boxes
-\[
-  \cbox{a_n}{b_n}_{n\in\N}.
-\]
-\end{definition}
+Together with point evaluation, this produces small output enclosures for
+small input intervals: evaluate at a rational sample and add the continuity
+error on both sides.  Conversely, shrinking interval-image bounds give
+this continuity certificate.  A finite grid and coarse value enclosures
+also give an absolute bound for $f$ on $[a,b]$.
 
-\begin{definition}[complex number]\label{def:complex-raw}
-\lean{ComputableAnalysis.ComplexRaw}
-\lean{ComputableAnalysis.ComplexRaw.realPart}
-\lean{ComputableAnalysis.ComplexRaw.imagPart}
-\uses{def:box-sequence,def:raw-equiv}
-A \emph{complex number} is a nested box sequence
+This is stronger than continuity at each rational point.  We do not infer it
+from compactness.  For square roots, finite algebra gives
 \[
-  z=\cbox{a_n}{b_n}_{n\in\N}
+ |\sqrt{x}-\sqrt{y}|\le\sqrt{|x-y|}\qquad(x,y\ge0),
 \]
-satisfying
-\[
-  n\le m\Rightarrow a_n\le a_m\le b_m\le b_n,
-\]
-and whose real and imaginary widths both shrink to \(0\).  Equivalently, its
-coordinate interval sequences are real numbers.  Two complex numbers are
-equivalent when their boxes overlap at every stage, i.e. coordinatewise
-equivalence of the real and imaginary parts.
-The reusable representation rule is
-\lean{ComputableAnalysis.ComplexRaw.equiv_of_common_anchor}:
-two valid complex algorithms are equivalent when both are equivalent to one
-valid proof-side anchor.
-The corresponding finite path is
-\lean{ComputableAnalysis.ComplexRaw.EquivalencePath}; its
-\lean{ComputableAnalysis.ComplexRaw.EquivalencePath.equiv}
-\lean{ComputableAnalysis.ComplexRaw.EquivalencePath.single}
-\lean{ComputableAnalysis.ComplexRaw.EquivalencePath.trans}
-\lean{ComputableAnalysis.ComplexRaw.EquivalencePath.symm}
-theorem composes only validity-carrying edges.
+so $\mu(\varepsilon)=\varepsilon^2$ works.  For a polynomial, expand
+$y^k-x^k=(y-x)\sum_{j=0}^{k-1}y^{k-1-j}x^j$ and bound the finite sum on
+the interval.  Separated rational functions follow by the reciprocal bound.
 
-The same finite-prefix idea is available without an anchor.  If a complex
-candidate's later boxes lie inside earlier radius-expanded boxes, then
-\lean{ComputableAnalysis.ComplexRaw.cauchyStabilize_valid} makes the prefix
-stabilization valid, and
-\lean{ComputableAnalysis.ComplexRaw.candidate_equiv_cauchyStabilize_of_future}
-keeps the original candidate as an explicit representation edge.
-\end{definition}
-
-\begin{definition}[Complex arithmetic]\label{def:complex-arithmetic}
-\lean{ComputableAnalysis.ComplexRaw.add}
-\lean{ComputableAnalysis.ComplexRaw.mul}
-\lean{ComputableAnalysis.QBox.mulRealInterval_contains}
-\lean{ComputableAnalysis.QBox.mul_contains}
-\lean{ComputableAnalysis.QBox.mulRealInterval_width_le_of_abs_bounded}
-\lean{ComputableAnalysis.QBox.mul_width_height_le_of_coordinateBounded}
-\lean{ComputableAnalysis.QBox.mul_overlaps_of_overlaps}
-\lean{ComputableAnalysis.ComplexRaw.mul_valid}
-\lean{ComputableAnalysis.ComplexRaw.mul_equiv}
-\lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_equiv_mul_ofQComplex}
-\lean{ComputableAnalysis.ComplexRaw.mulI}
-\lean{ComputableAnalysis.ComplexRaw.mulI_valid}
-\lean{ComputableAnalysis.ComplexRaw.imaginaryAxis}
-\lean{ComputableAnalysis.ComplexRaw.imaginaryAxis_valid}
-\uses{def:complex-raw,def:raw-real-arithmetic}
-For complex numbers as box sequences
-\[
-  z=\cbox{a_n}{b_n}_{n\in\N},\qquad
-  w=\cbox{c_n}{d_n}_{n\in\N},
-\]
-addition is stagewise:
-\[
-  z+w:=\cbox{a_n+c_n}{b_n+d_n}_{n\in\N}.
-\]
-Negation reverses the box:
-\[
-  -z:=\cbox{-b_n}{-a_n}_{n\in\N}.
-\]
-For multiplication, write the same box sequences in coordinates as
-\[
-  z=x+iy,\qquad w=u+iv,
-\]
-where \(x,y,u,v\) are real numbers.  Then define
-\[
-  zw:=(xu-yv)+i(xv+yu).
-\]
-At the level of rational boxes, multiplication is implemented by applying
-real interval arithmetic to these four real products and taking bounding
-intervals.  The four-corner interval contains every enclosed rational product,
-is ordered, and refines when both input intervals refine; the corresponding
-complex box satisfies the same three facts.  This already gives a certified
-raw product: every later input box lies in its stage-zero box, whose explicit
-rational coordinate radius yields a product-width modulus.  The resulting
-product respects raw overlap equivalence, witnessed at each stage by rational
-points in the two finite box intersections.
-For an exact rational complex scalar, the certified affine action
-\lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul}
-\lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_valid}
-\lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_equiv}
-is already available as a lower-cost exact implementation, with the two real
-scalar actions and the direct imaginary-unit rotation as its finite
-implementation.  The already certified special case
-\(iz=-\operatorname{im}(z)+i\operatorname{re}(z)\)
-is a coordinate rotation: it reverses one pair of endpoints and exchanges the
-coordinates.  Hence a certified real \(x\) already gives a certified complex
-handle \(ix\), and \(i\pi/2\) is literally its exact \(i/2\)-scalar action.
-The affine scalar action is proved equivalent to ordinary multiplication by
-its exact rational complex box, so either evaluator can be used in a
-representation-safe calculation.
-\end{definition}
-
-\begin{definition}[Complex inverse]\label{def:complex-inverse}
-\lean{ComputableAnalysis.ComplexRaw.ApartZero}
-\lean{ComputableAnalysis.ComplexRaw.HasComputableInv}
-\uses{def:complex-arithmetic,def:raw-real-arithmetic,def:raw-real-sign}
-A complex number \(z=x+iy\) is \emph{nonzero} if
-\[
-  x^2+y^2
-\]
-is nonzero as a real number.  For nonzero \(z\), define
-\[
-  z^{-1}
-  :=
-  \frac{x}{x^2+y^2}
-  -
-  i\,\frac{y}{x^2+y^2}.
-\]
-\end{definition}
-
-\begin{definition}[Certified complex handles]\label{def:complex-quotient}
-\lean{ComputableAnalysis.Complex}
-\uses{def:complex-raw}
-The current Lean-facing complex type stores a preferred certified complex-box
-algorithm and a finite spanning registry of certified implementation edges.
-As for \code{Real}, this is a computation-oriented representation layer rather
-than a quotient construction.
-\lean{ComputableAnalysis.Complex.withAlternativeFrom}
-\lean{ComputableAnalysis.Complex.withAlternativeFromImplementation}
-\lean{ComputableAnalysis.Complex.withAlternativeFrom_equiv_preferred}
-\lean{ComputableAnalysis.Complex.withAlternativeFrom_overlaps_preferred}
-\lean{ComputableAnalysis.Complex.withAlternativeFromPath}
-\lean{ComputableAnalysis.Complex.withAlternativeFromImplementation_equiv_preferred}
-\lean{ComputableAnalysis.Complex.withAlternativeFromImplementation_overlaps_preferred}
-\lean{ComputableAnalysis.Complex.Representation.equiv}
-\lean{ComputableAnalysis.Complex.Representation.overlapsAt}
-When a new algorithm is proved equivalent to an existing non-preferred
-implementation, either constructor composes that single local edge with the
-existing path to the preferred node.  Thus the registry need only be a finite
-spanning tree; users do not have to prove pairwise equivalence of all
-implementations.
-\end{definition}
-
-\begin{proposition}[Complex raw arithmetic is representation-aware]\label{thm:complex-field}
-\uses{def:complex-quotient,def:complex-arithmetic,def:complex-inverse}
-Addition, negation, rational scaling, real-axis embedding, and the
-imaginary-unit rotation carry validity lemmas.  General complex product now
-carries both its validity and overlap-congruence theorems; complex inverse
-remains an explicit certification target.  The project does not claim a
-quotient field structure for \code{Complex}; scientific constructions use
-only certified raw operations and their accompanying overlap proofs.
+\begin{proposition}[Computed inputs]\label{prop:computed-inputs}
+An interval-continuous rational-input computation can be evaluated on a
+number computation known to stay in its interval.
 \end{proposition}
+\begin{proof}
+Intersect each input enclosure with $[a,b]$, choose a rational sample in
+that finite intersection, and request enough input precision that all its
+samples have outputs within the desired continuity tolerance.  Evaluate
+the sample to the remaining tolerance.  The resulting output boxes are
+compatible across input refinements and shrink.  Finite-prefix intersections
+make them nested.  Equivalent input computations give equivalent outputs
+by the same estimate.
+\end{proof}
 
-\begin{proposition}[Available rational and real embeddings]\label{thm:rational-complex-field-square}
-\lean{ComputableAnalysis.ComplexRaw.ofQComplex}
-\lean{ComputableAnalysis.Complex.ofQComplex}
-\lean{ComputableAnalysis.Complex.ofReal}
-\uses{def:qcomplex,def:complex-quotient,thm:raw-reals-field,thm:complex-field}
-Lean provides constant rational-complex boxes and embeds certified reals on the
-real axis.  At the representation level the intended diagram is
-\[
-\begin{array}{ccc}
-\Q & \longrightarrow & \Q(i)\\
-\downarrow & & \downarrow\\
-\R & \longrightarrow & \C
-\end{array}
-\]
-but no field-homomorphism or quotient claim is used by the present calculus.
-\end{proposition}
+This is the precise meaning of an implicit continuation beyond rational
+inputs.  We have constructed an evaluation procedure, not postulated a
+function on a completed line.
 
-\section{Functions and domains}
-
-\begin{definition}[Complex-valued function representation]\label{def:function-raw}
-\lean{ComputableAnalysis.FunctionRaw}
-\uses{def:qcomplex,def:complex-raw}
-A \emph{complex-valued function representation} consists of:
-\begin{enumerate}
-  \item a rational domain predicate \(D_f\subseteq\Q(i)\), and
-  \item a finite stage algorithm which, given \(z\in D_f\) and \(n\in\N\),
-  returns a rational complex box \(B_f(z,n)\).
-\end{enumerate}
-The pointwise validity requirement is:
-for every fixed rational input \(z\in D_f\), the sequence
-\[
-  n\longmapsto B_f(z,n)
-\]
-is a complex number in the sense of \cref{def:complex-raw}.  At the
-computational layer, an input is supplied by a rational name and evaluation is
-a stage-indexed box algorithm.  The domain may be all rational names in a
-region, or only names in a branch domain, and every evaluation carries the
-domain proof.
-
-The project-facing abstract object is \code{ComplexFunction}.  It hosts
-several such computations of one useful special function.  Each registered
-representation has its own validity proof and a certificate
-\[
-  f\mathbin{\sim}g
-  \quad\text{on }D_f\cap D_g,
-\]
-not a claim that either representation belongs to a preselected classical
-function space.  Real-axis functions and one-sided Fourier views are derived
-restrictions of this complex layer when an application needs them.
-\lean{ComputableAnalysis.ComplexFunction.withAlternativeFrom}
-\lean{ComputableAnalysis.ComplexFunction.withAlternativeFromPath}
-\lean{ComputableAnalysis.ComplexFunction.withAlternativeFromPath_equiv_preferred}
-\lean{ComputableAnalysis.ComplexFunction.withAlternativeFromPath_overlaps_preferred}
-\lean{ComputableAnalysis.ComplexFunction.withAlternativeFromImplementationPath}
-\lean{ComputableAnalysis.ComplexFunction.withAlternativeFromImplementation}
-\lean{ComputableAnalysis.ComplexFunction.Representation.eval_equiv_preferred}
-\lean{ComputableAnalysis.ComplexFunction.Representation.overlapsAt_on_common_domain}
-These constructors add a new representation through an existing one.  They
-require explicit domain coverage for the intermediate representation and then
-compose the local overlap equivalence, so the registry may be a finite
-spanning tree rather than a collection of pairwise proofs.
-At the raw function level, the reusable rule is
-\lean{ComputableAnalysis.FunctionRaw.agreeOnCommonDomain_of_common_anchor}:
-if two valid computations agree with a valid anchor wherever all three are
-defined, they agree with each other on their shared domain.  The anchor
-coverage hypothesis is explicit and need only hold on that shared domain.
-
-The library is intentionally representative rather than encyclopedic.  We
-formalize one complete example for each genuinely different computational
-pattern, and obtain routine variants by algebraic transport, restriction, or
-composition.  Thus a new trigonometric, exponential, or special-function
-implementation should contribute its domain, stage algorithm, validity
-certificate, and one edge to the existing equivalence tree; it need not
-duplicate an already formalized evaluator merely because its notation differs.
-For a piecewise function such as \(\lvert x\rvert\), the integral is treated
-as the corresponding finite collection of interval integrals, split at the
-break point.  This records the real computational reason for the result
-without introducing a general discontinuous-function theory.
-\end{definition}
-
-\begin{definition}[Real-input and real-valued functions]\label{def:real-fun-raw}
-\lean{ComputableAnalysis.RealFunRaw}
-\lean{ComputableAnalysis.RealFunRaw.add_valid}
-\lean{ComputableAnalysis.PartialRealFunRaw}
-\uses{def:function-raw,thm:rational-complex-field-square}
-A real-input real-valued function is the real-axis specialization of
-\cref{def:function-raw}.  It consists of a rational domain predicate
-\(D_f\subseteq\Q\) and a stage algorithm
-\[
-  (x,n)\longmapsto [a_f(x,n),b_f(x,n)],
-  \qquad x\in D_f,\quad n\in\N,
-\]
-such that for every fixed rational \(x\in D_f\), the sequence
-\[
-  n\longmapsto [a_f(x,n),b_f(x,n)]
-\]
-is a real number in the sense of \cref{def:raw-real}.  In applications we often
-also require \(D_f\) to contain at least one nontrivial rational interval; this
-is recorded by the interval wrappers below rather than by changing the basic
-function definition.
-
-Lean has two presentations of this same idea.  \code{RealFunRaw} keeps the
-\code{compute} field total on rational inputs and stores a domain predicate
-saying where it is valid.  \code{PartialRealFunRaw} makes the domain proof an
-argument to \code{compute}.  In both cases, validity means exactly the
-pointwise condition above: for each fixed rational input in the domain, the
-stage sequence is a raw real.
-\end{definition}
-
-\begin{definition}[Rational segment]\label{def:rational-segment}
-\uses{def:qcomplex}
-A \emph{rational segment} in the complex plane is determined by two distinct
-rational complex points \(p,q\in\Q(i)\).  Its rational points are
-\[
-  (1-t)p+tq,\qquad t\in\Q,\quad 0\le t\le 1.
-\]
-The segment is real when \(p\) and \(q\) lie on the rational real axis.
-\end{definition}
-
-\begin{definition}[Agreement on an overlap]\label{def:function-agrees-on-overlap}
-\uses{def:function-raw,def:rational-segment,def:complex-raw}
-Let \(f\) and \(g\) be complex-valued function representations.  An
-\emph{agreement-on-overlap certificate} consists of a nontrivial rational
-segment \(S\) such that every rational point of \(S\) lies in both domains, and
-for every rational point \(q\in S\), the complex numbers \(f(q)\) and \(g(q)\)
-are equivalent.
-
-This is a local agreement statement with an explicit witness.  For arbitrary
-functions it is not promoted to a global equivalence relation; transitivity
-requires additional analytic structure.
-\end{definition}
-
-\begin{definition}[Function on an interval]\label{def:function-on-interval}
-\lean{ComputableAnalysis.FunctionOnInterval}
-\uses{def:qinterval,def:real-fun-raw,def:rational-segment}
-A function on a rational interval \([a,b]\) is the real-axis special case of
-the preceding setup: the interval is the rational segment from \(a+i0\) to
-\(b+i0\), the function is defined at every rational point of that segment, and
-the pointwise outputs are real numbers.
-\end{definition}
-
-\begin{definition}[Interval regularity (rational continuity)]\label{def:interval-regular}
-\lean{ComputableAnalysis.IntervalRegularOn}
-\lean{ComputableAnalysis.EpsilonDeltaContinuousOn}
-\uses{def:function-on-interval}
-Let \(F\) be a real-valued function on \([a,b]\).  An interval-regularity
-certificate assigns to each rational subinterval
-\[
-  K=[r,s]\subseteq [a,b]
-\]
-and each stage \(n\) a rational output interval \(Y(K,n)\).  It supplies a
-modulus \(M:\N\to\N\), positive at every stage, such that whenever
-\[
-  s-r\le \frac{1}{M(n)},
-\]
-and \(Y(K,n)=[u,v]\), we have
-\[
-  0\le v-u\le \frac{1}{n+1},
-\]
-and for every rational point \(x\in K\), the point-value interval
-\(F(x,n)\) is enclosed by \(Y(K,n)\).  Thus this is genuinely
-interval-valued continuity: it controls both the separation of values and
-the widths of their rational enclosures.  In particular, this is the
-project's epsilon--delta notion of continuity, stated only over rational
-inputs and rational tolerances: given \(\varepsilon>0\), it computes a
-\(\delta>0\) and a common evaluation stage at which inputs within
-\(\delta\) have \(\varepsilon\)-near output boxes.  No topology or completed
-real line is part of the definition.
-\end{definition}
-
-\begin{theorem}[Constructive monotone inverse-function theorem]
+\section{Inverting a monotone computation}
 \label{thm:constructive-inverse-function}
-\lean{ComputableAnalysis.EffectiveInverseSeparation}
-\lean{ComputableAnalysis.InvertibleFunctionOnInterval}
-\lean{ComputableAnalysis.InRangeRaw}
-\lean{ComputableAnalysis.InverseRaw}
-\lean{ComputableAnalysis.HasInverse}
-\lean{ComputableAnalysis.HasBisectionSearch}
-\lean{ComputableAnalysis.inverse_function_from_bisection_search}
-\lean{ComputableAnalysis.monotoneBisectionStep}
-\lean{ComputableAnalysis.monotoneBisectionStep_ordered}
-\lean{ComputableAnalysis.monotoneBisectionStep_subinterval}
-\lean{ComputableAnalysis.monotoneBisectionStep_preserves_bracket}
-\lean{ComputableAnalysis.monotoneTargetBisectionStep}
-\lean{ComputableAnalysis.monotoneBisectionStep_preserves_target_bracket}
-\lean{ComputableAnalysis.monotoneTargetBisectionStep_subinterval}
-\lean{ComputableAnalysis.monotoneTargetBisectionStep_width}
-\lean{ComputableAnalysis.monotoneBisectionIterate}
-\lean{ComputableAnalysis.monotoneTargetBisectionIterate}
-\lean{ComputableAnalysis.monotoneBisectionIterate_ordered}
-\lean{ComputableAnalysis.monotoneTargetBisectionIterate_ordered}
-\lean{ComputableAnalysis.monotoneTargetBisectionIterate_subinterval}
-\lean{ComputableAnalysis.monotoneTargetBisectionIterate_width}
-\lean{ComputableAnalysis.monotoneTargetBisectionIterate_reaches_of_positive_tolerance}
-\lean{ComputableAnalysis.monotoneTargetBisectionIterate_certificate}
-\lean{ComputableAnalysis.monotoneTargetBisectionIterate_width_le_of_power_budget}
-\lean{ComputableAnalysis.monotoneTargetBisectionIterate_width_le_one_div_succ}
-\lean{ComputableAnalysis.FiniteInverseSearchCertificate}
-\lean{ComputableAnalysis.FiniteInverseSearchCertificate.output_bracket}
-\lean{ComputableAnalysis.FiniteInverseSearchCertificate.output_width}
-\lean{ComputableAnalysis.finiteInverseSearchCertificate}
-\lean{ComputableAnalysis.monotoneBisectionIterate_preserves_target_bracket}
-\lean{ComputableAnalysis.monotoneTargetBisectionIterate_add}
-\lean{ComputableAnalysis.monotoneTargetBisectionIterate_later_subinterval}
-\lean{ComputableAnalysis.monotoneTargetBisectionIterate_tolerance_certificate}
-\lean{ComputableAnalysis.monotoneBisectionIterate_width}
-\lean{ComputableAnalysis.monotoneBisectionIterate_width_le_of_power_budget}
-\lean{ComputableAnalysis.FiniteInverseSearchCertificate.output_bracket}
-\lean{ComputableAnalysis.FiniteInverseSearchCertificate.output_width}
-\lean{ComputableAnalysis.finiteInverseSearchCertificate}
-\lean{ComputableAnalysis.affineHalf}
-\lean{ComputableAnalysis.affineHalfInitial}
-\lean{ComputableAnalysis.affineHalf_bisection_stage3}
-\lean{ComputableAnalysis.affineHalf_bisection_stage3_bracket}
-\lean{ComputableAnalysis.affineHalf_bisection_stage3_width}
-\lean{ComputableAnalysis.squareTarget}
-\lean{ComputableAnalysis.squareTargetInitial}
-\lean{ComputableAnalysis.squareTarget_bisection_stage4}
-\lean{ComputableAnalysis.squareTarget_bisection_stage4_bracket}
-\lean{ComputableAnalysis.squareTarget_bisection_stage4_width}
-\lean{ComputableAnalysis.cubeTarget}
-\lean{ComputableAnalysis.cubeTargetInitial}
-\lean{ComputableAnalysis.cubeTarget_bisection_stage4}
-\lean{ComputableAnalysis.cubeTarget_bisection_stage4_bracket}
-\lean{ComputableAnalysis.cubeTarget_bisection_stage4_width}
-\lean{ComputableAnalysis.cubeTarget_bisection_stage8}
-\lean{ComputableAnalysis.cubeTarget_bisection_stage8_bracket}
-\lean{ComputableAnalysis.cubeTarget_bisection_stage8_width}
-\lean{ComputableAnalysis.cubeTarget_bisection_stage16}
-\lean{ComputableAnalysis.cubeTarget_bisection_stage16_bracket}
-\lean{ComputableAnalysis.cubeTarget_bisection_stage16_width}
-\lean{ComputableAnalysis.cubeTarget_bisection_stage24}
-\lean{ComputableAnalysis.cubeTarget_bisection_stage24_bracket}
-\lean{ComputableAnalysis.cubeTarget_bisection_stage24_width}
-\lean{ComputableAnalysis.cubeRootInverseCertificate}
-\lean{ComputableAnalysis.cubeRootInverseCertificate_output}
-\lean{ComputableAnalysis.cubeRootInverseCertificate_output_bracket}
-\lean{ComputableAnalysis.cubeRootInverseCertificate_output_width}
-\lean{ComputableAnalysis.fourthTarget}
-\lean{ComputableAnalysis.fourthTargetInitial}
-\lean{ComputableAnalysis.fourthTarget_bisection_stage8}
-\lean{ComputableAnalysis.fourthTarget_bisection_stage8_bracket}
-\lean{ComputableAnalysis.fourthTarget_bisection_stage8_width}
-\lean{ComputableAnalysis.fourthTarget_bisection_stage16}
-\lean{ComputableAnalysis.fourthTarget_bisection_stage16_bracket}
-\lean{ComputableAnalysis.fourthTarget_bisection_stage16_width}
-\lean{ComputableAnalysis.fourthTarget_bisection_stage24}
-\lean{ComputableAnalysis.fourthTarget_bisection_stage24_bracket}
-\lean{ComputableAnalysis.fourthTarget_bisection_stage24_width}
-The cubic target \((x^3=2)\) now has a stage-eight rational trace
-\([161/128,323/256]\), with width \(1/256\), and a stage-sixteen trace
-\([41285/32768,82571/65536]\) with width \(1/65536\); both have certified
-endpoint comparisons.  These are finite inverse-search witnesses, not an
-attained cube root.
-The fourth-power target \((x^4=2)\) now has corresponding stage-eight and
-stage-sixteen traces, with widths \(1/256\) and \(1/65536\).  This extends the
-nonlinear inverse-search ladder without asserting an attained fourth root.
-Both traces now also reach stage 24, with width \(1/16777216\), and retain
-their exact endpoint bracket proofs.
-\lean{ComputableAnalysis.induction_arithmeticSum_eq}
-\lean{ComputableAnalysis.induction_arithmeticSum_stage5}
-\lean{ComputableAnalysis.induction_arithmeticSum_stage10}
-\lean{ComputableAnalysis.induction_arithmeticSum_stage20}
-\lean{ComputableAnalysis.induction_arithmeticSum_stage40}
-\lean{ComputableAnalysis.induction_arithmeticSum_stage80}
-\lean{ComputableAnalysis.induction_arithmeticSum_stage160}
-\lean{ComputableAnalysis.subsetCount_stage8}
-\lean{ComputableAnalysis.subsetCount_stage8_pow}
-\lean{ComputableAnalysis.subsetCount_stage8_certificate}
-\lean{ComputableAnalysis.subsetCount_stage10}
-\lean{ComputableAnalysis.subsetCount_stage10_pow}
-\lean{ComputableAnalysis.subsetCount_stage10_certificate}
-\lean{ComputableAnalysis.subsetCount_stage12}
-\lean{ComputableAnalysis.subsetCount_stage12_pow}
-\lean{ComputableAnalysis.subsetCount_stage12_certificate}
-\lean{ComputableAnalysis.subsetCount_stage16}
-\lean{ComputableAnalysis.subsetCount_stage16_pow}
-\lean{ComputableAnalysis.subsetCount_stage16_certificate}
-\lean{ComputableAnalysis.subsetCount_stage20}
-\lean{ComputableAnalysis.subsetCount_stage20_pow}
-\lean{ComputableAnalysis.subsetCount_stage20_certificate}
-\lean{ComputableAnalysis.subsetCount_stage32}
-\lean{ComputableAnalysis.subsetCount_stage32_pow}
-\lean{ComputableAnalysis.subsetCount_stage32_certificate}
-\lean{ComputableAnalysis.subsetCount_stage64}
-\lean{ComputableAnalysis.subsetCount_stage64_pow}
-\lean{ComputableAnalysis.subsetCount_stage64_certificate}
-\uses{def:function-on-interval,def:interval-regular}
-Fix an interval-regular monotone branch \(I\) on a rational source interval.
-In addition to monotonicity, it carries an effective inverse-separation
-certificate: at every requested scale, inputs separated by a stated positive
-rational amount have disjointly ordered output boxes, in the one orientation
-(nondecreasing or nonincreasing) chosen for the branch.  That orientation is
-required to agree with the monotonicity witness.  For every valid raw target
-that is explicitly enclosed by the endpoint-value boxes of \(I\), suppose we
-give a certified finite bisection search.  Lean then proves the branch-local
-assembly theorem
+Suppose $f$ is increasing and interval-continuous on $[a,b]$, and a
+positive separation bound $\sigma(d)$ is supplied:
 \[
-  \code{HasBisectionSearch}(I)
-\Longrightarrow \code{HasInverse}(I).
+ y-x\ge d>0\quad\Longrightarrow\quad f(y)-f(x)\ge\sigma(d)>0.
 \]
-This branch-local bisection assembly is the constructive core of benchmark
-item 79 (intermediate-value search); it is not a blanket classical IVT over an
-unrepresented completed real line.
-Thus, once a particular bisection/search is supplied for each computable
-target with a certified range witness, it gives a raw interval algorithm for
-the preimage.  Such a target is itself a valid raw real, and for every target
-stage it carries an explicit precision at which its output box lies between the
-correctly oriented endpoint-value boxes of \(I\).  The theorem does not obtain
-that finite search by a choice principle.
-Thus the inverse is another interval algorithm, not a choice of a point from
-a completed continuum.  Effective separation is essential: monotonicity alone
-does not give a usable finite inverse search for a function that may be
-arbitrarily flat.
-\end{theorem}
+Let a computed target $z$ be certified between $f(a)$ and $f(b)$.
+Use the two trisection points $u,v$ of the current rational bracket.
+Their images are separated by $\sigma(v-u)$.  Refine the value enclosures
+until either $z>f(u)$ or $z<f(v)$ is certified.  At least one strict
+inequality must become visible, even when the target equals one of the
+other values.  Keep $[u,b]$ in the first case and $[a,v]$ in the second.
 
-\begin{example}[Algebraic branches]
-\label{ex:algebraic-inverse-branches}
-\lean{ComputableAnalysis.squareOnUnit_invertible}
-\lean{ComputableAnalysis.squareOnUnitRationalTarget}
-\lean{ComputableAnalysis.sqrtOnUnitBisectionSearch}
-\lean{ComputableAnalysis.FirstYearCalculus.sqrtOnUnitBisectionSearch_stage_certificate}
-\lean{ComputableAnalysis.FirstYearCalculus.sqrtOnUnitBisectionSearch_nested_stage_certificate}
-\lean{ComputableAnalysis.sqrtOnUnitRepresentedTargetSearch}
-\lean{ComputableAnalysis.sqrtOnUnitRepresentedTargetSearch_stage_certificate}
-\lean{ComputableAnalysis.sqrtRaw_spec}
-\lean{ComputableAnalysis.sqrtOnUnit}
-\lean{ComputableAnalysis.sqrtOnUnit_intervalRegular}
-\lean{ComputableAnalysis.sqrtOnUnit_epsilonDeltaContinuous}
-\uses{thm:constructive-inverse-function}
-The first concrete forward package is squaring on \([0,1]\): its evaluator is
-the exact rational box \([r^2,r^2]\), it has a direct rational interval
-modulus, is nondecreasing, and has a nondecreasing effective-separation
-certificate.  Lean's \code{squareOnUnit\_invertible} packages these data.
-The existing nonnegative square-root bisection intervals
-isolate the solution of \(w^2=q\), are valid raw reals, and satisfy the
-algebraic specification.  For every exact rational target \(q\in[0,1]\),
-Lean packages this exact-target bisection as
-\code{sqrtOnUnitBisectionSearch}: it remains inside the source interval and
-its squared interval overlaps the target box.  The exact target box is also
-formally enclosed by the square map's endpoint boxes at every stage, so it is
-a genuine certified range input to the inverse interface.  Extending that
-finite search uniformly to every represented target on the unit range is the
-next inverse-function step; no inverse is asserted merely from monotonicity.
-Separately, Lean now packages the scheduled bisection evaluator itself as the
-interval-regular function \code{sqrtOnUnit}.  For an input interval of width
-at most \(1/(16(n+1)^2)\), its endpoint boxes, enlarged by certified bisection
-errors, enclose every point box and have width at most \(1/(n+1)\).  Thus
-\(\sqrt{\phantom{x}}\) on \([0,1]\) already satisfies the literal rational
-\(\varepsilon\)--\(\delta\) continuity predicate, without a topology import.
-General algebraic functions will use isolating boxes, separation, and
-bisection or subdivision to construct selected branches.
-The companion finite cube-root trace applies the same target search to
-\(x^3=2\) on \([1,2]\): stage four returns \([5/4,21/16]\), preserves the
-target bracket, and has width \(1/16\).  This supplies a second nonlinear
-inverse trace without introducing a completed cube-root value.
-\end{example}
+Each step preserves a range bracket and shrinks the input interval by a
+factor $2/3$.  Interval continuity proves that the resulting input
+computation maps to $z$.  Separation proves uniqueness.  This is a
+terminating inverse construction without a decision procedure for equality
+of computed numbers.  Squaring on $[0,1]$ has
+$\sigma(d)=d^2$; the angle chart in the next chapter has a linear bound.
 
-\begin{remark}[Continuous extension of represented functions]
-\label{rem:continuous-extension-of-function-representations}
-Rational names are the finite interface of the representation, not the
-intended mathematical domain.  A continuous representation with an effective
-modulus can later be extended from rational names to all computable real
-inputs; the complex analogue extends it to a specified open computable domain.
-Only functions equipped with the necessary continuity and domain certificates
-admit this extension.  The present chapters use the rational-name interface
-until that extension theorem is constructed.
-\end{remark}
+\section{Domains and equivalent descriptions}
+Functions agree only where both computations are defined.  A geometric
+chart, a series disk, and a positive algebraic branch may describe the same
+function on overlapping domains without being interchangeable everywhere.
+Finite chains of proved comparisons retain these domain restrictions.
 
-
-\begin{remark}[How the later elementary functions fit]
-\label{rem:elementary-functions-are-function-representations}
-\uses{def:real-fun-raw,def:function-on-interval}
-The elementary functions constructed later all use this same shape.
-Power-series arctangent has domain \([-1,1]\) and sends \((x,n)\) to an
-alternating-series interval.  The next chapter is planned to obtain the first
-sine and cosine branch by applying the preceding inverse theorem to geometric
-arctangent, recovering the bounded tangent slope, and evaluating the rational
-circle chart at that slope.  Its two coordinate projections are cosine and
-sine.  Exponential is
-represented by power-series, compound-interest, and inverse-log-integral
-stage algorithms.  Logarithm is a \code{FunctionOnInterval} on positive
-branches, defined by the integral of \(1/x\).  In every case, fixing a
-rational name in the stated domain leaves an interval sequence in the stage
-variable, and the validity proof is precisely the proof that this sequence is
-a raw real.
-\end{remark}
-
-\begin{theorem}[Interval regularity implies rational continuity]
-\label{thm:interval-regular-implies-epsilon-delta}
-\lean{ComputableAnalysis.IntervalRegularOn.epsilonDeltaContinuous}
-\uses{def:interval-regular}
-\leanok
-Every interval-regular function satisfies the literal rational
-\(\varepsilon\)-\(\delta\) predicate used elsewhere in the project.  For a
-positive rational \(\varepsilon\), Lean takes the finite stage
-\(n=\operatorname{den}(\varepsilon)+1\), so \(1/n\le\varepsilon\), and
-uses \(\delta=1/M(n)\).  The smallest rational interval containing two
-inputs within \(\delta\) has an image enclosure of width at most
-\(1/n\).  Since both point-value boxes are contained in that one enclosure,
-they are \code{NearAt} within \(\varepsilon\), including their individual
-width bounds.  This is a direct finite rational proof, with no topology or
-real-number completeness principle.
-\end{theorem}
-
-\begin{remark}[Holomorphic branch equivalence]\label{rem:holomorphic-branch-equivalence}
-\uses{def:function-agrees-on-overlap}
-For later complex analysis, holomorphic function representations will carry
-stronger domain data.  On that layer, overlap should be witnessed by a
-nonempty open region, such as a rational disk contained in the intersection of
-the domains.  The identity principle can then turn local agreement on such an
-overlap into a transitive branch-equivalence relation.
-\end{remark}
-
-\begin{remark}[Completeness is replaced by moduli]\label{rem:completeness-replaced-by-moduli}
-\uses{def:interval-regular}
-Classical compactness, uniform continuity, and existence of suprema are not
-used as black boxes.  The project records the finite data that those theorems
-usually hide: interval images, rates, nesting, and enclosure proofs.
-\end{remark}
-
-\section{Agent-facing formalization checklist}
-
-For a new theorem, use this order:
-
-\begin{verbatim}
-1. declare the rational or dense computational chart
-2. define one raw evaluator and its stage computation
-3. prove ordered boxes, validity, nesting, and shrinking width
-4. package the result as realRaw or complexRaw
-5. add one overlap edge to an existing representation
-6. state calculus claims through finite cell certificates
-\end{verbatim}
-
-The abstract layer should contain the certified handle and its spanning
-equivalence path; it should not force every implementation to compare with
-every other implementation. For functions, also record the domain at every
-evaluation. For complex functions, repeat the same discipline coordinatewise
-and use rational-complex boxes. If a proof needs a stronger classical theorem,
-replace it by the narrowest finite certificate that the application uses and
-label the unrestricted bridge as a separate frontier.
-
-\lean{ComputableAnalysis.RealRaw}
-\lean{ComputableAnalysis.RealRaw.Equiv}
-\lean{ComputableAnalysis.RealRaw.equiv_trans}
-\lean{ComputableAnalysis.RealRaw.prefixStabilize_valid}
-\lean{ComputableAnalysis.RealRaw.StageSchedule}
-\lean{ComputableAnalysis.RealRaw.equiv_of_schedule_equiv}
-\lean{ComputableAnalysis.ComplexRaw}
-\lean{ComputableAnalysis.ComplexRaw.mul_equiv}
-\lean{ComputableAnalysis.FunctionRaw}
-\leanok
+The rest of the book uses only the constructions just described: finite
+rational operations, enclosures, terminating refinement, and equivalence.
+When a new infinite process occurs, its finite future errors will be
+bounded explicitly.  No theorem identifying these computations with an
+ambient completed number system is required.

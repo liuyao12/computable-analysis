@@ -1,30 +1,248 @@
-\chapter{Differential Equations}\label{ch:differential-equations}
+\chapter{Linear ODEs and the Fundamental Matrix}
+\label{ch:differential-equations}
 
-An ODE is admitted through a finite evolution algorithm:
-\begin{verbatim}
-local evaluator + derivative/residual box + step budget -> shrinking evolution boxes
-\end{verbatim}
+A fundamental matrix is a reusable computation depending only on the
+coefficient matrix.  It propagates initial states, accumulates ordinary
+forcing, and propagates delta inputs.  We construct it from iterated finite
+integrals and factorial error bounds.
 
-\section{Local providers}
-The centered exponential supplies the first local initial-value certificate
-for \(y'=y, y(0)=1\). Rotation supplies the complex system for sine/cosine.
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_effectiveFTC}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_solvesSelfDerivative}
-\lean{ComputableAnalysis.RotationSeries.stableUniformRotationSinFunction_hasDerivativeOnInterval}
-\leanok
+\section{Coefficient data and finite norms}
+Fix a rational interval $[a,b]$.  The entries of $A(t)$ are supplied
+rational-input computations with interval-continuity certificates and a
+rational bound $\|A(t)\|\le M$.  Use the maximum norm for vectors and the
+maximum absolute row-sum norm for matrices; finite algebra proves
+$\|AB\|\le\|A\|\|B\|$ and $\|Av\|\le\|A\|\|v\|$.
 
-\section{Finite evolution}
-Peano--Baker evolution is finite ordered-word matrix algebra plus a remainder
-budget; zero-initial-value uniqueness is a local shrinking-box estimate.
-\begin{figure}[!htbp]\centering
+Polynomial matrices are the first examples.  Separated rational functions
+and the elementary computations of the preceding chapters provide others.
+A finite set of coefficient breakpoints is handled by solving on each
+piece and composing the resulting evolutions.
+
+\section{Peano--Baker prefixes}
+For rational $s,t\in[a,b]$, define
+\[
+ P_0(t,s)=I,\qquad P_{n+1}(t,s)=\int_s^t A(u)P_n(u,s)\,du,
+ \qquad \Phi_N(t,s)=\sum_{n=0}^NP_n(t,s).
+\]
+For fixed $n$ these are finite nested integral computations.  Their
+continuity data is obtained recursively from products and the
+bounded-integrand endpoint estimate.  If $A$ is a rational-polynomial
+matrix, all $P_n$ are computed by finite polynomial integration.
+Matrix multiplication is kept in the displayed order; matrices at distinct
+times are not assumed to commute.
+
+For $h=|t-s|$, induction using polynomial integration gives
+\[
+ \|P_n(t,s)\|\le\frac{(Mh)^n}{n!}.
+\]
+The argument works with oriented integrals in either time direction.
+If $z=M(b-a)$ and $N+2\ge2z$, every finite tail after $N$ is bounded by
+\[
+ \boxed{2\frac{z^{N+1}}{(N+1)!}.}
+\]
+Compute the finite prefix to an additional rational error budget and
+stabilize the resulting boxes.  This constructs the matrix computation
+$\Phi(t,s)$ uniformly on the interval.  A rational upper bound $B$ for
+$E(M(b-a))$ bounds every $\|\Phi(t,s)\|$.
+
+\begin{figure}[htbp]\centering
 \peanoBakerWordsAnimation
-\caption{Finite ordered words used by one Peano--Baker stage.}
-\label{fig:peano-baker-words}\end{figure}
-\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialRemainderCertificate}
-\lean{ComputableAnalysis.ScalarODE.FiniteMesh.sumUpTo_le_of_le}
-\leanok
+\caption{Ordered matrix products and their finite integral prefixes.}
+\end{figure}
 
-A general vector analytic provider remains a separate tail/stability target.
-Complex paths follow the same finite-partition rule.
-\lean{ComputableAnalysis.ComplexPathIntegral.polygonalIntegralRawEntire_valid}
-\leanok
+The finite recursion, with its uniform tails, gives
+\[
+ \Phi(t,s)=I+\int_s^t A(u)\Phi(u,s)\,du.
+\]
+The accumulation estimate therefore constructs its derivative:
+\[
+ \partial_t\Phi(t,s)=A(t)\Phi(t,s),\qquad\Phi(s,s)=I.
+\]
+No general differentiation-of-a-limit assertion has been used.
+
+\section{Uniqueness belongs to the integral construction}
+Suppose a bounded computed vector $w$ satisfies
+\[
+ w(t)=\int_s^t A(u)w(u)\,du.
+\]
+Starting with any rational bound $\|w\|\le C$, repeated substitution gives
+\[
+ \|w(t)\|\le C\frac{(M|t-s|)^n}{n!}
+\]
+for every integer $n$.  The right side tends to zero with an explicit
+factorial bound, so $w$ is equivalent to zero.
+
+For the solutions considered here, the integral identity is proved by
+construction.  We do not infer it from a bare equation at every rational
+point; a function hidden across a cut could satisfy such a pointwise
+equation and fail its integral identity.
+
+The same uniqueness argument gives, for all rational $s,u,t$,
+\[
+ \boxed{\Phi(t,u)\Phi(u,s)=\Phi(t,s).}
+\]
+Both sides have the same integral equation and initial value when regarded
+as functions of $t$.  The identity follows for every starting location by
+subtracting their integral equations there.  In particular
+$\Phi(s,t)$ is the inverse of $\Phi(t,s)$; no determinant inversion is
+needed to construct it.
+
+The endpoint estimate gives
+$\|\Phi(u,s)-I\|\le MB|u-s|$.  Together with composition it yields
+\[
+ \|\Phi(t,s)-\Phi(t,u)\|\le MB^2|s-u|.
+\]
+This supplies continuity in the source time as well as the target time,
+and permits computed times with domain enclosures.
+
+\section{Ordinary forcing and variation of constants}
+For a supplied interval-continuous forcing $r$, put
+\[
+ y(t)=\Phi(t,a)y_a+\int_a^t\Phi(t,s)r(s)\,ds.
+\]
+All entries of this integrand have the continuity and boundedness data just
+proved.  The finite integral recursions show
+\[
+ y(t)=y_a+\int_a^t\bigl(A(u)y(u)+r(u)\bigr)\,du.
+\]
+One verifies the double-integral rearrangement on finite subdivisions of
+the triangle $a\le s\le u\le t$.  The cells meeting its diagonal have
+total area bounded by a constant times $(b-a)\mesh(P)$; the integrands
+have rational bounds, and the other cells are finite iterated rectangles.
+This proves the needed interchange without a general measure-theoretic
+Fubini theorem.
+
+Accumulation gives $Dy=Ay+r$, and the preceding uniqueness estimate proves
+uniqueness among the certified integral solutions.  Thus the displayed
+formula is the solution computation, not a formula justified by an
+unconstructed classical solution.
+
+The same estimate controls numerical replacements.  If a proposed
+computation $\widetilde y$ has a certified integral identity with initial
+error at most $e$ and additional forcing (residual) bounded by $\rho$,
+then variation of constants gives
+\[
+ \|\widetilde y(t)-y(t)\|\le B\bigl(e+(b-a)\rho\bigr).
+\]
+A merely sampled residual would not suffice: its bound must hold on the
+cells, with the integral identity certified for that computation.
+
+\section{Delta inputs are finite state updates}
+For a finite list of impulse times $a<\tau_j<b$ and vectors $c_j$, solve
+\[
+ Dy=A(t)y+r(t)+\sum_jc_j\delta_{\tau_j}.
+\]
+Initially take the times rational.  For times away from the impulses the
+solution is
+\[
+ \boxed{y(t)=\Phi(t,a)y_a+\int_a^t\Phi(t,s)r(s)\,ds
+                  +\sum_{a<\tau_j<t}\Phi(t,\tau_j)c_j.}
+\]
+Its one-sided states satisfy
+$y(\tau_j+)=y(\tau_j-)+c_j$ because $\Phi(\tau_j,\tau_j)=I$.
+The piecewise integration-by-parts rule of Chapter~\ref{ch:impulses}
+proves exactly the displayed equation on tests.  The ordinary branches
+have the needed integration identities from their integral equations and
+the corresponding finite product rule with a smooth test.
+
+One computation evaluates the formula directly.  Another evolves to each
+impulse, adds its vector, and continues.  The composition law proves their
+equivalence.  A computed nonrational impulse location can also be used
+when ordering and separated evaluation times are supplied; one-sided
+states are retained instead of forcing an undecidable comparison at the
+location itself.
+
+Define the causal matrix kernel
+\[
+ G(t,s)=\begin{cases}0,&t<s,\\\Phi(t,s),&t>s.\end{cases}
+\]
+Its jump is $I$, and hence
+\[
+ \boxed{(D_t-A(t))G(t,s)=I\delta_s.}
+\]
+Each column is the response to a unit impulse in one state coordinate.
+This identity is the reason for including delta inputs with the fundamental
+matrix.
+
+For a rectangular pulse of width $\varepsilon$, after the pulse ends the
+response is $\varepsilon^{-1}\int_s^{s+\varepsilon}\Phi(t,u)c\,du$.
+The source-time bound gives its difference from $\Phi(t,s)c$ as at most
+$MB^2\|c\|\varepsilon/2$.  This is agreement between the state-update
+construction and narrowing ordinary forcing, not uniform convergence
+through a discontinuity.
+
+\section{Three explicit kernels}
+\subsection{The free second derivative}
+For the state $(y,y')$ and matrix
+$A=\left(\begin{smallmatrix}0&1\\0&0\end{smallmatrix}\right)$,
+\[
+ \Phi(t,s)=\begin{pmatrix}1&t-s\\0&1\end{pmatrix}.
+\]
+An impulse $(0,1)^{\mathsf T}$ gives $y=(t-s)_+$, so $D^2y=\delta_s$.
+The function $|t-s|$ solves the equation with $2\delta_s$ but differs
+from its zero-past solution by an affine function.  Initial data decides
+that homogeneous ambiguity.
+
+\subsection{The oscillator}
+For $y''+\pi^2y=0$,
+\[
+ \Phi(t,s)=
+ \begin{pmatrix}
+ C(t-s)&S(t-s)/\pi\\
+ -\pi S(t-s)&C(t-s)
+ \end{pmatrix}.
+\]
+Its entries, derivatives, and composition are already certified by the
+circle and FTC chapters.  The impulse in the velocity coordinate gives
+\[
+ g_s(t)=\begin{cases}0,&t<s,\\S(t-s)/\pi,&t>s,\end{cases}
+ \qquad (D^2+\pi^2)g_s=\delta_s.
+\]
+The position is continuous and the velocity jumps by $1$.  A position jump
+would instead introduce a derivative of delta into the second derivative.
+
+\subsection{A variable coefficient: the Airy equation}
+For $y''-ty=0$, substitution of $y=\sum a_nt^n$ gives
+\[
+ a_2=0,\qquad a_{n+3}=\frac{a_n}{(n+3)(n+2)}.
+\]
+Take $u(0)=1,u'(0)=0$ and $v(0)=0,v'(0)=1$.  Thus
+\[
+ u(t)=1+t^3/6+t^6/180+\cdots,\qquad
+ v(t)=t+t^4/12+t^7/504+\cdots.
+\]
+On $|t|\le R$, each of the three coefficient strands eventually has
+successive absolute-term ratio at most $1/2$, by taking
+$(n+3)(n+2)\ge2R^3$.  This gives geometric tail bounds; differentiated
+strands have the same property after increasing the index.  Thus $u,v$
+and their derivatives are actual series computations on every bounded
+interval.
+
+Coefficient multiplication proves $uv'-u'v=1$: its formal derivative is
+$uv''-u''v=0$, so all nonconstant coefficients vanish, and its constant
+coefficient is $1$.  Tails justify the identity for the computations.
+Consequently
+\[
+ g_s(t)=\begin{cases}
+ 0,&t<s,\\
+ u(s)v(t)-v(s)u(t),&t>s
+ \end{cases}
+\]
+is continuous at $s$ and its first derivative jumps by $1$.  Hence
+\[
+ (D^2-t)g_s=\delta_s.
+\]
+This constructs a variable-coefficient impulse response by rational
+recurrences and finite determinant algebra.  It is equivalent to the
+Peano--Baker computation by integral-equation uniqueness.
+
+\section{The FTC as the zero-coefficient case}
+When $A=0$, the fundamental matrix is $I$.  Ordinary forcing and the
+finite atoms give
+\[
+ y(t)-y(a)=\int_a^t r(s)\,ds+\sum_{a<\tau_j<t}c_j,
+\]
+with endpoints away from impulses.  Thus integration of a derivative is
+inversion of $D$, up to a constant; linear ODE evolution is inversion of
+$D-A$, up to a homogeneous solution.  Both are identities between explicit
+computations with initial data, finite updates, and shrinking errors.

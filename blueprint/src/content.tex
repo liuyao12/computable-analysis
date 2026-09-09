@@ -1,116 +1,59 @@
 \chapter*{Preface}
 \addcontentsline{toc}{chapter}{Preface}
 
-This project develops calculus from explicit finite computations.  A raw real
-is an algorithm
+This book develops calculus by constructing things: rational enclosures for
+numbers, geometric trigonometric values, rectangle integrals, secant
+computations of derivatives, power-series prefixes, and finite evolutions
+of linear systems.  Every infinite process comes with a proof that its
+finite computations agree and become arbitrarily accurate.
+
+The emphasis is on useful examples and reusable constructions, not on the
+largest possible classes of set-theoretic functions.  Rational inputs do
+not force rational outputs.  Continuity data permits evaluation on computed
+inputs without making a completed real line the foundation of the subject.
+An identity means equivalence of two computations, often obtained in very
+different ways.
+
+The first two chapters retain the interval and circle foundations.  The
+subsequent route is
 \[
-  n\longmapsto [a_n,b_n],\qquad a_n,b_n\in\Q,
+ \begin{gathered}
+ \text{independent rectangle integrals}
+ \ \longrightarrow\ \text{convex secant derivatives and the FTC}\\
+ \longrightarrow\ \text{series, elementary functions, and algebraic branches}\\
+ \longrightarrow\ \text{Fourier computations, jumps, and delta inputs}\\
+ \longrightarrow\ \text{fundamental matrices and an elliptic integral}.
+ \end{gathered}
 \]
-together with proofs that the intervals are ordered, nested, and shrink to
-arbitrary rational precision.  Independent algorithms are identified by
-finite overlap certificates.  The abstract real retains useful algorithms
-and a maintained tree of such equivalences; a raw algorithm stores none of
-them.
 
-The calculus route is
-\begin{verbatim}
-rational intervals -> circle/trigonometry -> integral -> effective FTC
-                   -> series/Fourier -> exponential/logarithm -> linear ODEs
-\end{verbatim}
-Every function is an explicit computation on its natural represented domain.
-The project adds one representative for each genuinely new computational
-pattern and transports routine scalar, sign, polynomial, and finite-piece
-variants.  It does not assert that every continuous function is integrable or
-import completeness of the standard real numbers.
+There is a reason for this order.  A function can be continuous and
+differentiable at every rational point while hiding a jump at an irrational
+cut.  The fundamental theorem must not mistake its pointwise derivative
+for all its increments.  Convex secant inequalities supply the missing
+interval control and construct the derivative itself.  Explicit jumps
+can subsequently be retained as delta inputs, rather than discarded.
 
-The integral chapter introduces rectangle algorithms and the endpoint-area
-question.  The effective-calculus chapter supplies the derivative bounds,
-width budgets, and stabilization theorem that answer it.  Native finite sums
-may be chosen independently at successive stages; the canonical FTC theorem
-proves shrinking and stabilizes them against the primitive endpoint
-computation rather than assuming they were already nested.
+The fundamental matrix then unifies accumulation and propagation.  An
+ordinary forcing term is integrated against it; an impulse is a finite
+state update propagated by the same matrix.  The ramp, the oscillator,
+the Airy equation, and an elliptic integral give concrete instances.
 
-\section*{\texorpdfstring{\(\pi\)}{Pi} scoreboard}
-\label{sec:pi-scoreboard}
-\lean{ComputableAnalysis.piCircleArea}
-\lean{ComputableAnalysis.piMachin}
-\leanok
-\input{pi-scoreboard-table.tex}
-
-\section*{Wiedijk's List of 100 Theorem Formalization Challenge}
-\noindent\href{https://www.cs.ru.nl/\%7Efreek/100/index.html}
-{Freek Wiedijk's original list of 100 theorems.}
-
-The project tracks only the sixteen entries whose content belongs to
-represented numbers, infinite processes, calculus, or function theory.
-Routine finite algebra, combinatorics, and elementary coordinate geometry are
-reused from Lean when needed.  A linked entry states the project's computable
-target; it does not silently claim a stronger classical theorem.
-
-\begin{center}
-\small
-\begin{tabular}{p{0.08\textwidth}p{0.42\textwidth}p{0.38\textwidth}}
-\textbf{No.} & \textbf{Theorem} & \textbf{Project target}\\
-\hline
-1 & \benchmarklink{ch-foundations}{rem:algebraic-numbers-sqrt-two}
-  {Irrationality of \(\sqrt2\)}
-  & computable square root and infinite descent\\
-2 & \benchmarklink{ch-algebra-fta}{thm:finite-box-polynomial-soundness}
-  {Fundamental Theorem of Algebra}
-  & finite complex root isolation/deflation frontier\\
-9 & \benchmarklink{ch-rational-circle-trigonometry}{thm:geometric-pi-validity}
-  {Area of a circle}
-  & rational area subdivision and pi equivalence\\
-14 & \benchmarklink{ch-infinite-series}{thm:basel-geometric-overlap}
-  {Euler's Basel sum}
-  & effective partial sums, tails, and geometric bridge\\
-15 & \benchmarklink{ch-integrals}{thm:convex-ftc}
-  {Fundamental Theorem of Integral Calculus}
-  & stabilized derivative-bound endpoint theorem\\
-17 & \benchmarklink{ch-rational-circle-trigonometry}{thm:finite-quarter-turn}
-  {de Moivre's formula}
-  & finite rational-complex rotations\\
-21 & \benchmarklink{ch-integrals}{thm:finite-green-rectangle}
-  {Green's theorem}
-  & finite polygon/rectangle identity and refinement frontier\\
-26 & \benchmarklink{ch-infinite-series}{thm:leibniz-arctan}
-  {Leibniz series for \(\pi\)}
-  & alternating rational series with explicit tail\\
-34 & \benchmarklink{ch-infinite-series}{thm:harmonic-dyadic-lower-bound}
-  {Divergence of the harmonic series}
-  & computable threshold for every rational height\\
-35 & \benchmarklink{ch-effective-calculus}{thm:finite-taylor-ftc-prefix}
-  {Taylor's theorem}
-  & finite identity with explicit remainder\\
-64 & \benchmarklink{ch-effective-calculus}{thm:finite-lhopital-interface}
-  {L'Hopital's rule}
-  & effective quotient/remainder frontier\\
-66 & \benchmarklink{ch-infinite-series}{thm:finite-geometric-series-interface}
-  {Sum of a geometric series}
-  & finite prefix and shrinking tail\\
-75 & \benchmarklink{ch-effective-calculus}{thm:finite-quadrature-mean-value}
-  {Mean Value Theorem}
-  & derivative/average enclosure without attained point\\
-76 & \benchmarklink{ch-infinite-series}{thm:finite-fourier-interface}
-  {Fourier series}
-  & finite transform plus effective reconstruction frontier\\
-79 & \benchmarklink{ch-foundations}{thm:constructive-inverse-function}
-  {Intermediate Value Theorem}
-  & gap-aware search; all-stage inverse branch frontier\\
-90 & \benchmarklink{ch-infinite-series}{thm:finite-stirling-certificate}
-  {Stirling's formula}
-  & requested-precision asymptotic certificate frontier\\
-\end{tabular}
-\end{center}
+All mathematical prerequisites needed for these constructions are developed
+in the text from finite rational algebra, with definitions, estimates, and
+proofs.  Theorems about unrestricted function or distribution spaces are
+not used to supply missing computations.  Conversely, a proved finite
+construction is not held back because a more general theory could also
+contain it.
 
 \clearpage
-
 \input{01-foundations.tex}
 \input{02-rational-circle-trigonometry.tex}
 \input{03-integrals.tex}
 \input{06-effective-calculus.tex}
 \input{04-infinite-series.tex}
 \input{05-exponential-logarithm.tex}
-\input{09-differential-equations.tex}
 \input{07-algebra-fta.tex}
+\input{10-fourier.tex}
+\input{11-impulses.tex}
+\input{09-differential-equations.tex}
 \input{08-roadmap.tex}

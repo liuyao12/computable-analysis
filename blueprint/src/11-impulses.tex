@@ -1,0 +1,199 @@
+\chapter{Corners, Jumps, and Delta Inputs}\label{ch:impulses}
+
+A derivative computation need not always return a pointwise function.
+At a corner, secant gaps need not shrink; at a jump, ordinary rational-point
+derivatives miss an increment.  We retain those increments by allowing
+finite atoms in addition to ordinary integrands.  The examples and their
+finite evaluation rules come first; no space of all measures or all
+distributions is required.
+
+\section{A delta is an evaluation computation}
+For a rational location $s$, define
+\[
+ \delta_s(\phi)=\phi(s).
+\]
+The input $\phi$ is a concrete test computation.  Continuous tests suffice
+for a delta; a differentiated delta will require the corresponding
+computed derivatives.  Compactly supported piecewise-polynomial tests,
+with the necessary matching derivatives at joins, supply a first family.
+They have finite bounds, moduli, and exact integrals.  For instance, on a
+rational interval $[a,b]$, use $((t-a)(b-t))^{k+1}$ and set it to zero
+outside: its first $k$ derivatives match at the joins.  Finite sums and
+translates give explicit probes of any requested finite derivative order.
+
+A finite signed collection of atoms is represented by a finite list
+$(s_j,c_j)$ and evaluates a test as $\sum_jc_j\phi(s_j)$.  Adding an
+ordinary integrable density $r$ gives the computation
+\[
+ T(\phi)=\int r(t)\phi(t)\,dt+\sum_jc_j\phi(s_j).
+\]
+Domain bounds and the integral construction for the displayed product are
+part of this concrete description.
+
+A computed location $s$ is also possible when the test has interval
+continuity: evaluate it on the shrinking location enclosures as in
+Chapter~\ref{ch:foundations}.  In particular, bisection of $x^2=2$ gives
+$\delta_{\sqrt2}(\phi)$ without asking a rational sample to equal
+$\sqrt2$.  This does not assert that a discontinuous step at an arbitrary
+computed location can be evaluated at every rational input.  Such a
+point evaluation requires a certified side or a separately chosen value
+at the jump.
+
+\section{Differentiating an explicitly joined function}
+Suppose $y$ is supplied on finitely many pieces, with FTC and
+integration-by-parts estimates for those branch computations.  Suppose its
+one-sided values are computed and its jumps at the joins are
+$c_j=y(s_j+)-y(s_j-)$.  For a compactly supported $C^1$ piecewise-polynomial
+test $\phi$, integration by parts on each piece gives
+\[
+ -\int y(t)\phi'(t)\,dt
+   =\int y'_{\mathrm{pieces}}(t)\phi(t)\,dt
+      +\sum_jc_j\phi(s_j).
+\]
+Interior boundary terms are exactly the jumps; outer boundary terms vanish.
+This proves the concrete derivative rule
+\[
+ \boxed{Dy=y'_{\mathrm{pieces}}+\sum_jc_j\delta_{s_j}.}
+\]
+Values assigned at the individual joins do not alter any of the integral
+computations: cells covering finitely many points have arbitrarily small
+total length and the functions have explicit local bounds.
+
+The requirement on each piece is an FTC certificate, not just a pointwise
+rational derivative.  Convex differences and the series constructions have
+already supplied such certificates.  The ODE constructions in the next
+chapter will supply further ones through integral equations.
+
+\section{The ramp, the step, and the absolute value}
+Write $H_s(t)=0$ for $t<s$ and $H_s(t)=1$ for $t>s$; choose a value at
+$s$ only when point evaluation there is requested.  The join formula gives
+\[
+ DH_s=\delta_s.
+\]
+The continuous ramp $R_s(t)=\max(0,t-s)$ has ordinary branch derivatives
+$0$ and $1$, with no value jump.  Hence
+\[
+ DR_s=H_s,\qquad D^2R_s=\delta_s,
+\]
+and
+\[
+ \boxed{D^2|t-s|=2\delta_s}
+\]
+by $|t-s|=2R_s(t)-(t-s)$.  The nonshrinking secant interval $[-1,1]$
+for $|t|$ is not a delta value.  Its width $2$ records the slope jump,
+which appears as an atom in the \emph{second} derivative.
+
+For smooth enough concrete tests, define
+\[
+ (DT)(\phi)=-T(\phi'),\qquad
+ (D^k\delta_s)(\phi)=(-1)^k\phi^{(k)}(s).
+\]
+This computes delta derivatives by ordinary test evaluation.  It does not
+require defining products of singular objects.  In particular, no product
+of two deltas is assigned a value here.
+
+\section{The original hidden jump, now accounted for}
+Let $\alpha$ be the positive root computation of $x^2=2$.  The two branch
+joins in
+\[
+ F(x)=S(x)+\mathbf1_{\{x^2>2\}}
+\]
+have increments $-1$ at $-\alpha$ and $+1$ at $\alpha$.  Rational point
+evaluation of its branches is decidable by the square comparison; the
+one-sided values are computed by continuity of $S$.  The derivative is
+therefore
+\[
+ DF=\pi C(x)\,dx+\delta_\alpha-\delta_{-\alpha}.
+\]
+On $[0,2]$ neither endpoint is an atom, and
+\[
+ \int_0^2 DF=\int_0^2\pi C(x)\,dx+1=1=F(2)-F(0).
+\]
+Here the notation for the integral means the ordinary integral plus the
+explicit finite sum of atoms strictly inside the endpoints.  Endpoints at
+atoms require a stated one-sided convention.  The missing increment has
+become a finite part of the data rather than a failure of the theorem.
+
+\section{Convex curvature measured by rational tents}
+There is a second route to atoms which uses the secant construction directly.
+For a rational polygonal test $\psi$ supported in $[a,b]$, with zero
+endpoint values and knots $a=x_0<\cdots<x_N=b$, put
+\[
+ s_i=\frac{f(x_{i+1})-f(x_i)}{x_{i+1}-x_i},\qquad
+ \mu_f(\psi)=\sum_{i=1}^{N-1}\psi(x_i)(s_i-s_{i-1}).
+\]
+Here $f$ is any supplied convex computation on a larger interval; it need
+not have a pointwise derivative.  Rearrangement gives
+\[
+ \mu_f(\psi)=\sum_i f(x_i)
+          (\text{slope of $\psi$ to the right}
+           -\text{slope of $\psi$ to the left}),
+\]
+including the endpoint jumps from and to zero slope.  Thus inserting a knot
+where $\psi$ is linear changes nothing.  The definition is independent of
+its polygonal description.
+
+Convexity gives $\mu_f(\psi)\ge0$ for $\psi\ge0$.  Outer secants give a
+rational bound $V$ for the total increase of the $s_i$, and hence
+\[
+ |\mu_f(\psi)|\le V\|\psi\|_\infty.
+\]
+Approximate a continuous test by rational polygonal tests with uniform
+error $2^{-n}$ and evaluate the finite expression to error $2^{-n}$.
+Enlarging by $(V+1)2^{-n}$ and taking finite intersections constructs
+$\mu_f(\phi)$.  Cross-overlap follows from the displayed norm bound.
+This is the curvature-measure computation associated with this particular
+convex function, not an abstract measure-existence assertion.
+
+For the tent of height $1$ with vertices $u<v<w$,
+\[
+ \mu_f(\tau)=\frac{f(w)-f(v)}{w-v}
+                  -\frac{f(v)-f(u)}{v-u}.
+\]
+In the symmetric case this is precisely the gap between the left and right
+derivative secants.  For $f(t)=|t-s|$ it is $2\tau(s)$; consequently
+$\mu_f=2\delta_s$ on all the test computations just constructed.
+
+\section{A finite second-order FTC}
+For rational $a<x<b$, let
+\[
+ G_{a,b}(x,t)=
+ \begin{cases}
+ (t-a)(b-x)/(b-a),&a\le t\le x,\\
+ (x-a)(b-t)/(b-a),&x\le t\le b,\\
+ 0,&\text{otherwise}.
+ \end{cases}
+\]
+This is a rational tent multiple as a function of $t$.  Substitution in
+the preceding finite formula gives
+\[
+ \boxed{f(x)=\frac{b-x}{b-a}f(a)+\frac{x-a}{b-a}f(b)
+                -\mu_f(G_{a,b}(x,\cdot)).}
+\]
+Thus the endpoint values and the curvature computation reconstruct $f$.
+The affine part is explicit.  At a corner this formula continues to work
+without a scalar derivative at the corner.
+
+For a compactly supported, globally $C^2$ piecewise-polynomial test,
+finite summation by parts also gives
+$\mu_f(\phi)=\int f\phi''$.  Indeed the polygonal interpolants produce
+centered second differences of the test; the twice-integrated increment
+bound for the test compares these with $h\phi''$ uniformly.  The bounded
+function $f$ contributes at most its bound times the total error.
+This identifies the curvature computation as $D^2f$ on these tests.
+The same proof applies to any supplied test with that twice-integrated
+increment identity and a uniform modulus for its second derivative;
+pointwise rational differentiability alone is not the required data.
+
+\section{Narrow pulses give an equivalent computation}
+For rational $\varepsilon>0$ let
+$p_{\varepsilon,s}=\varepsilon^{-1}\mathbf1_{[s,s+\varepsilon]}$.
+A test with Lipschitz bound $L$ satisfies
+\[
+ \left|\int p_{\varepsilon,s}(t)\phi(t)\,dt-\phi(s)\right|
+       \le L\varepsilon/2.
+\]
+The proof integrates the bound $L|t-s|$ on the pulse interval.  This is an
+explicit equivalence between two ways to evaluate a delta: point evaluation
+and narrowing ordinary rectangles.  It is convergence on tests, not
+pointwise convergence to an infinitely high function.

@@ -1,0 +1,115 @@
+\chapter{Fourier Computations and the Basel Sum}\label{ch:fourier}
+
+We need not begin with a space of arbitrary functions or a completeness
+statement about an orthogonal basis.  A finite trigonometric sum is a
+computation, and a positive finite kernel gives an explicit approximation
+bound.  One worked periodic function will then identify the reciprocal-square
+sum.
+
+\section{Finite orthogonality}
+Write $e_k(x)=E(i\pi kx)=C(kx)+iS(kx)$ for integer $k$.  The trigonometric
+FTC gives
+\[
+ \frac12\int_{-1}^1 e_k(x)\,dx
+ =\begin{cases}1,&k=0,\\0,&k\ne0.\end{cases}
+\]
+Products satisfy $e_ke_l=e_{k+l}$.  These identities determine integrals
+of every finite trigonometric polynomial by finite linear algebra.
+
+For a supplied period-$2$ continuous computation $f$, with a uniform
+continuity certificate on the periodic interval, define
+\[
+ \widehat f(k)=\frac12\int_{-1}^1f(x)e_{-k}(x)\,dx.
+\]
+Each coefficient is an ordinary integral computation.  The word periodic
+includes matching endpoint values and the continuity bound across that
+join; this data is checked for the particular functions used here.
+
+\section{A positive kernel with an explicit tail}
+For $N\ge1$, define
+\[
+ K_N(t)=\frac1N\left|\sum_{j=0}^{N-1}e_j(t)\right|^2
+       =\sum_{|k|<N}\left(1-\frac{|k|}{N}\right)e_k(t).
+\]
+The identity follows by counting pairs with a given difference.  Thus
+$K_N\ge0$ and $\frac12\int_{-1}^1K_N=1$.
+The finite geometric identity implies, for $0<|t|\le1$,
+\[
+ K_N(t)\le\frac1{N S(t/2)^2}\le\frac1{Nt^2}.
+\]
+For the last inequality, the midpoint identity makes $S$ concave on
+$[0,1]$, where $S\ge0$: its centered second difference is
+$2S(x)(C(h)-1)\le0$.  Rational Jensen inequalities on $[0,1/2]$ give
+$S(t/2)\ge t$ for $0\le t\le1$.
+
+The kernel computation
+\[
+ \sigma_N f(x)=\frac12\int_{-1}^1K_N(t)f(x-t)\,dt
+\]
+is also the finite trigonometric sum
+\[
+ \sum_{|k|<N}\left(1-\frac{|k|}{N}\right)\widehat f(k)e_k(x).
+\]
+This follows by expanding the finite kernel and shifting the integral;
+periodicity makes any interval of length $2$ equivalent to $[-1,1]$.
+The shift is justified by splitting at the finitely many period boundaries.
+
+Let $|f|\le B$, and choose rational $0<\delta\le1$ so that periodic
+arguments within $\delta$ have values within $\varepsilon$.  Split the
+kernel integral at $|t|=\delta$.  Positivity and normalization bound the
+near part by $\varepsilon$; the far part is at most
+$2B/(N\delta^2)$.  Hence
+\[
+ \boxed{|\sigma_N f(x)-f(x)|\le\varepsilon+\frac{2B}{N\delta^2}.}
+\]
+This constructs a uniform trigonometric approximation with a terminating
+precision schedule.  Computing the finitely many Fourier coefficients to
+additional error $\eta/(2N)$ gives at most $\eta$ further output error.
+
+\section{The periodic square}
+Let $f(x)=x^2$ on $[-1,1]$, extended with period $2$.  Its endpoints match,
+and it has periodic Lipschitz bound $2$, verified by splitting an increment
+at the join if necessary.  Two integrations by parts give
+\[
+ \widehat f(0)=\frac13,\qquad
+ \widehat f(k)=\frac{2(-1)^k}{\pi^2k^2}\quad(k\ne0).
+\]
+Here is the real calculation behind the coefficient: symmetry removes the
+sine term, and with $a=\pi k$,
+\[
+ \int_0^1x^2\cos(ax)\,dx
+ =-\frac2a\int_0^1x\sin(ax)\,dx
+ =\frac{2(-1)^k}{a^2}.
+\]
+All boundary terms are explicit geometric sine and cosine values.
+
+The series
+\[
+ F(x)=\frac13+\frac4{\pi^2}
+          \sum_{k=1}^{\infty}\frac{(-1)^kC(kx)}{k^2}
+\]
+has a uniform tail at most $4/(\pi^2N)$ after term $N$, by the earlier
+reciprocal-square tail.  It is therefore an independent continuous function
+computation.  Its Fejer sums are the same finite sums as those of $f$:
+termwise integration follows from the uniform tail, and finite
+orthogonality gives the coefficients.  The kernel estimate shows that
+these common sums converge to both $F$ and $f$.  Thus $F=f$.
+
+\begin{theorem}[Basel identity]\label{thm:basel-geometric-overlap}
+The reciprocal-square computation of Chapter~\ref{ch:infinite-series}
+satisfies
+\[
+ \boxed{\sum_{k=1}^{\infty}\frac1{k^2}=\frac{\pi^2}{6}.}
+\]
+\end{theorem}
+\begin{proof}
+At the rational endpoint $x=1$, $C(k)=(-1)^k$ and $f(1)=1$.  The proved
+series identity gives $1=1/3+(4/\pi^2)\sum_{k\ge1}1/k^2$.
+\end{proof}
+
+The chain of comparisons is now complete: rational circle areas define
+$\pi$; convex secants compute sine and cosine derivatives; the FTC computes
+Fourier coefficients; finite positive kernels identify a uniformly
+convergent series; evaluating it identifies an independently constructed
+number.  No Hilbert-space completeness or unrestricted Fourier convergence
+theorem was needed.

@@ -1,35 +1,287 @@
-\chapter{The FTC Bridge: Effective Calculus}\label{ch:effective-calculus}
+\chapter{Computing Derivatives and the Fundamental Theorem}
+\label{ch:effective-calculus}
 
-This chapter supplies the finite certificates consumed by the FTC contract; it
-is not a second integral theory or a universal completeness theorem.
-\begin{verbatim}
-primitive + derivative boxes + mesh -> finite telescope -> endpoint overlap
-\end{verbatim}
-\lean{ComputableAnalysis.DerivativeBoundFTC}
-\lean{ComputableAnalysis.ScheduledIntervalRegularOn}
-\leanok
+The derivative should be constructed from the function.  For convex
+functions, neighboring secants provide its lower and upper bounds.  The
+same ordering then bounds its integral by endpoint differences.  This
+chapter proves that connection without a mean value theorem.
 
-\section{Regression ladder}
-Affine functions close in one rectangle. The square is the representative
-polynomial derivative-bound schedule: \(\int_0^1x^2=1/3\). Its finite
-integral and endpoint evaluators overlap; other routine degrees are obtained
-by the generic monomial mechanism when needed.
-\lean{ComputableAnalysis.ExactFunction.affineFTCExact}
-\lean{ComputableAnalysis.Integral.squareIntegralEffectiveFTC_integral_equiv_one_third}
-\leanok
+\section{What pointwise rational differentiation misses}
+At a rational $x$, saying that $g(x)$ is a derivative means that, for every
+rational $\varepsilon>0$, all sufficiently small nonzero rational $h$
+satisfy
+\[
+ \left|\frac{f(x+h)-f(x)}h-g(x)\right|\le\varepsilon.
+\]
+The neighborhood can depend on $x$.  By itself this says nothing about
+nearby pairs on opposite sides of a missing cut.  For example
+\[
+ H(x)=\begin{cases}0,&x^2<2,\\1,&x^2>2\end{cases}\qquad(x\in\Q)
+\]
+is locally constant at every rational, yet $H(2)-H(0)=1$.  Its pointwise
+rational derivative is zero everywhere.  Adding $S(x)$ gives exactly the
+same failure for a function with pointwise derivative $\pi C(x)$.
 
-\section{Product and trigonometric transport}
-The product witness \(F(x)=x\arctan x\) is the first non-polynomial example.
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageFTC}
-\leanok
+There is no contradiction with the constructions of the preceding chapters:
+this $H$ has no interval continuity certificate across the cut.  More
+importantly, a derivative computation needs a reason why its finite
+approximations are enclosures, not just a collection of local guesses.
+Convexity provides that reason.
 
-The tangent-chart square integral is complete. The remaining \(\sin(\pi x)^2\)
-theorem is an all-depth geometric transport from nested-radical dyadic boxes
-to tangent witnesses, including the reciprocal-\(\pi\) normalization. It is
-an explicit finite-certificate target, not a missing classical existence proof.
-\lean{ComputableAnalysis.SinPiIntegral.ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_halfAngle_certificate_family}
-\leanok
+\section{Convexity is a finite interval condition}
+\begin{definition}
+A function computation is convex on a rational interval if
+\[
+ f((1-t)x+ty)\le(1-t)f(x)+tf(y)
+\]
+for rational $x,y$ in the interval and rational $0\le t\le1$.
+\end{definition}
+Writing $s(u,v)=(f(v)-f(u))/(v-u)$, the defining inequality gives
+\[
+ s(u,v)\le s(u,w)\le s(v,w)\qquad(u<v<w).
+\]
+Conversely these secant inequalities imply convexity by rearranging.
 
-New theorems add an evaluator, finite range/derivative estimate, stage
-schedule, validity proof, and one equivalence edge to the representation
-chain; pairwise equivalence of every implementation is unnecessary.
+On a smaller interval $[a,b]$ with outer rational points $A<a<b<B$,
+\[
+ s(A,a)\le s(x,y)\le s(b,B)\qquad(a\le x<y\le b).
+\]
+Coarse computations of the two outer slopes therefore give a rational
+Lipschitz bound for $f$ on $[a,b]$.  This is a finite proof of interval
+continuity, not a consequence of a real-variable convexity theorem.
+
+Midpoint convexity is already enough on a rational interval.  To prove
+Jensen's inequality for $n$ equally weighted entries, pad them with copies
+of their rational average to a list of length $2^k$.  Repeated midpoint
+inequalities apply to this list; cancel the padding terms.  Taking repeated
+copies of two entries gives every rational weight.
+
+\section{The derivative algorithm}
+Fix a rational $x$ and a positive rational $h_0$ with $x\pm h_0$ in the
+convexity interval.  Put $h_n=2^{-n}h_0$ and form
+\[
+ \ell_n=\frac{f(x)-f(x-h_n)}{h_n},\qquad
+ r_n=\frac{f(x+h_n)-f(x)}{h_n}.
+\]
+Secant ordering proves
+\[
+ \ell_n\le\ell_{n+1}\le r_{n+1}\le r_n.
+\]
+These endpoints are computed quantities.  To get a rational box, compute
+the three values at $x-h_n$, $x$, and $x+h_n$ to widths at most
+$\eta_n=h_n2^{-n-3}$.  Denote their enclosures by
+\[
+ [a_-,b_-],\qquad [a_0,b_0],\qquad [a_+,b_+].
+\]
+Set
+\[
+ B_n=\left[\frac{a_0-b_-}{h_n},\frac{b_+-a_0}{h_n}\right],
+ \qquad D_n=\bigcap_{j=0}^nB_j.
+\]
+All lower secant bounds are below all upper secant bounds, so these finite
+intersections are nonempty.  Moreover
+\[
+ \operatorname{width}(B_n)
+ \le r_n-\ell_n+2^{-n-1}.
+\]
+
+\begin{definition}[Computed derivative]\label{def:computed-derivative}
+When the gap
+\[
+ r_n-\ell_n=\frac{f(x+h_n)-2f(x)+f(x-h_n)}{h_n}
+\]
+shrinks to zero, the nested rational intervals $D_n$ define $Df(x)$.
+A precision request is answered by searching for a sufficiently narrow
+$D_n$.  The shrinking-gap proof establishes termination.
+\end{definition}
+
+Convexity alone does not promise termination.  For $f(x)=|x|$ at zero,
+the ideal brackets remain $[-1,1]$.  For $f(x)=x^2$, they are
+$[2x-h_n,2x+h_n]$, and the result is $Df(x)=2x$.
+
+\begin{proposition}[The computation is the usual derivative]
+For a convex function, shrinking secant gaps give a pointwise rational
+derivative equal to $Df(x)$.  Conversely any such derivative forces the
+gaps to shrink.
+\end{proposition}
+\begin{proof}
+For every rational $0<|t|\le h_n$, secant ordering brackets
+$(f(x+t)-f(x))/t$ between $\ell_n$ and $r_n$.  The computed derivative
+has the same bounds.  Their difference is therefore at most $r_n-\ell_n$.
+Conversely the two outer difference quotients approach any given derivative,
+so their difference shrinks.  This also proves that changing $h_0$ or
+refinement schedules gives an equivalent derivative computation.
+\end{proof}
+
+\section{The convex FTC}
+\begin{theorem}[Fundamental theorem for a computed convex derivative]
+\label{thm:convex-ftc}
+Let $f$ be convex on an interval containing $[a,b]$ in its interior.
+Suppose its derivative computation terminates at every rational point of
+$[a,b]$.  Then $Df$ has a monotone integral computation and
+\[
+ \boxed{\int_a^b Df(x)\,dx=f(b)-f(a).}
+\]
+\end{theorem}
+\begin{proof}
+Passing to arbitrarily narrow derivative brackets in the secant inequalities
+gives, for rational $x<y$,
+\[
+ Df(x)\le\frac{f(y)-f(x)}{y-x}\le Df(y).
+\]
+Thus $Df$ is nondecreasing.  On every rational partition $P$,
+\[
+ L_P(Df)\le f(b)-f(a)\le U_P(Df),
+\]
+by adding the primitive increments.  The gap is at most
+\[
+ \mesh(P)\bigl(Df(b)-Df(a)\bigr).
+\]
+The monotone integral of Chapter~\ref{ch:integrals} was constructed
+independently of $f$.  Its shrinking enclosures overlap the endpoint
+difference, proving equivalence.  Finite value-evaluation errors are
+accounted for by the additional $2\eta(b-a)$ bound from that chapter.
+\end{proof}
+
+Only finitely many derivative evaluations occur at any integration stage.
+Their individual terminating precision searches suffice; no uniform
+modulus of differentiability is assumed.  Endpoint variants use inner
+one-sided secants and explicitly supplied finite one-sided derivatives.
+One can alternatively prove the theorem on interior intervals and pass to
+endpoints with bounded-derivative error estimates.
+
+\begin{example}[An irrational corner is allowed]
+The rational-valued convex function $f(x)=\max(0,x^2-2)$ has
+\[
+ Df(x)=\begin{cases}0,&x^2<2,\\2x,&x^2>2\end{cases}
+\]
+at every rational point.  The branch comparison is decidable and never
+an equality.  On $[0,2]$, this derivative is monotone but not uniformly
+continuous.  Nevertheless
+\[
+ \int_0^2 Df(x)\,dx=2,
+\]
+and equal $N$-cell endpoint sums have gap $8/N$.  A hidden corner in a
+continuous convex primitive is harmless; a hidden jump in the primitive
+is not.  The latter violates the finite secant bounds across the cut.
+\end{example}
+
+\section{Differences of convex computations}
+If $f=u-v$ with two convex computations whose derivatives terminate, define
+$Df=Du-Dv$.  The pointwise derivative theorem shows independence of the
+chosen decomposition.  Linearity of the independent integral gives
+\[
+ \int_a^b Df=f(b)-f(a).
+\]
+Concave functions are included by negation.  Compatible finite pieces may
+be added by splitting the interval and cancelling matching endpoint values.
+
+A useful concrete certificate is that $f(x)+Kx^2$ is convex for a rational
+$K\ge0$.  It must be proved by finite inequalities or remainder bounds;
+a lower bound on a \emph{pointwise rational} second derivative alone does
+not imply it.
+
+\subsection{Polynomials need only the binomial identity}
+For $P(x)=\sum_{n=0}^d a_nx^n$ on $[-R,R]$, with rational $R\ge1$,
+the centered binomial identity bounds
+\[
+ |P(x+h)-2P(x)+P(x-h)|\le 2K h^2,
+ \qquad K=\sum_{n=2}^d |a_n|2^{n-1}R^{n-2},
+\]
+when $x\pm h$ remain in the interval.  Indeed only even powers of $h$
+occur, and their remaining powers are bounded by $R^{n-2}$.
+Thus $P+Kx^2$ is convex, its derivative gap is at most $4K|h|$, and the
+centered quotient identifies its derivative by the finite binomial formula.
+The computed derivative of $P$ is therefore $\sum_{n=1}^d n a_nx^{n-1}$.
+Applying the convex-difference FTC to $x^{n+1}/(n+1)$ gives
+\[
+ \int_a^b x^n\,dx=\frac{b^{n+1}-a^{n+1}}{n+1}.
+\]
+One uses a slightly larger interval for endpoint derivative bounds.  This
+establishes the polynomial integration used in the later remainder proofs.
+
+\section{The geometric sine passes the test}
+For $U(x)=S(x)+8x^2$, the addition formulas give
+\[
+ U(x+h)-2U(x)+U(x-h)
+ =16h^2-2S(x)(1-C(h)).
+\]
+The half-angle and chord bounds give $0\le1-C(h)\le8h^2$ for all
+rational $h$.  Hence
+\[
+ 0\le U(x+h)-2U(x)+U(x-h)\le32h^2.
+\]
+Midpoint convexity proves convexity; the upper bound makes its derivative
+gap at most $32|h|$.  Thus $DU$ is a valid computation everywhere and
+$DS=DU-16x$ is the actual derivative.
+
+The center of its ideal bracket, after subtracting $16x$, is
+\[
+ \frac{S(x+h)-S(x-h)}{2h}=C(x)\frac{S(h)}h.
+\]
+The small-angle estimate from Chapter~\ref{ch:rational-circle-trigonometry}
+identifies its value as $\pi C(x)$.  Applying the identical argument to
+$C(x)+8x^2$ gives
+\[
+ DS=\pi C,\qquad DC=-\pi S.
+\]
+Therefore
+\[
+ \int_a^b S(x)\,dx=\frac{C(a)-C(b)}\pi,\qquad
+ \int_a^b C(x)\,dx=\frac{S(b)-S(a)}\pi.
+\]
+In particular the independent sine-area computations give $1/\pi$ on
+$[0,1/2]$.  Differentiation, its termination proof, the identification of
+the derivative, and the integration theorem are four distinct arguments.
+
+\section{Products and integration by parts}
+For functions represented as differences of convex computations, with
+valid derivatives on the interval, let $V_f$ be the sum of the endpoint
+variations of the two monotone derivatives.  The finite FTC estimate gives
+\[
+ \sum_i|f(x_{i+1})-f(x_i)-Df(x_i)\Delta x_i|
+       \le\mesh(P)V_f.
+\]
+These functions also have rational Lipschitz and absolute bounds $L_f,B_f$.
+For two such functions, use the exact identity
+\[
+ \Delta(fg)=f(x_i)\Delta g+g(x_i)\Delta f+\Delta f\,\Delta g.
+\]
+Summing, the error in replacing the increments by left derivative samples
+is at most
+\[
+ \mesh(P)\bigl(B_fV_g+B_gV_f+L_fL_g(b-a)\bigr).
+\]
+The product integrands are integrable by their finite cell ranges.  Hence
+\[
+ \boxed{\int_a^b f\,Dg=f(b)g(b)-f(a)g(a)-\int_a^b g\,Df.}
+\]
+The ordinary pointwise product rule follows from the same finite identity.
+This proof does not use a mean-value point or assume the product is already
+equipped with its own convex decomposition.
+
+\section{Substitution and further integral identities}
+Suppose $\alpha$ is increasing, is a difference of convex computations
+with valid derivatives, and $g$ is interval-continuous on its image.
+The Stieltjes construction of Chapter~\ref{ch:integrals} has sums
+$\sum_i g(\alpha(x_i))\Delta\alpha_i$.  Replacing increments by
+$D\alpha(x_i)\Delta x_i$ changes the sum by at most
+$B_g\mesh(P)V_\alpha$.  Therefore
+\[
+ \int_{\alpha(a)}^{\alpha(b)}g(u)\,du
+   =\int_a^b g(\alpha(t))D\alpha(t)\,dt.
+\]
+Reversing orientation and splitting finitely many monotone pieces supplies
+the other versions used below.  Each substitution must bring its domain,
+endpoint, and increment estimates; a merely formal chain rule is not a
+substitute for them.
+
+For the angle chart, accumulation gives
+$DA(t)=1/(1+t^2)$; its decreasing derivative makes $A$ concave.  Product
+and substitution identities now apply to this same geometric computation.
+For example
+\[
+ \int_0^1\frac{t\,dt}{1+t^2}
+       =\frac12\int_1^2\frac{du}{u}.
+\]
+This motivates the logarithm construction, rather than presupposing it.

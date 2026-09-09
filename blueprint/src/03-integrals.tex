@@ -1,62 +1,153 @@
-\chapter{Integrals and the Fundamental Theorem}\label{ch:integrals}
+\chapter{Integral Computations}\label{ch:integrals}
 
-An integral is a rational-box algorithm, not an ambient area supplied by
-completeness:
-\begin{verbatim}
-partition -> certified cell ranges -> add rectangles -> nested shrinking boxes
-\end{verbatim}
-All subdivisions, crude or fast, are computations to be compared. Lebesgue
-measure and unrestricted measurable functions are outside scope.
+An integral is a new interval computation obtained by adding finite
+rectangles and controlling the error.  It is not defined through an
+antiderivative.  This independence is what will make the fundamental theorem
+an equivalence theorem rather than a convention.
 
-\section{Rectangles}\label{sec:integrals-ftc-contract}
-For \(a=x_0<\cdots<x_m=b\), cell boxes \([L_k,U_k]\) give
+\section{Partitions and cell enclosures}
+A rational tagged partition is
 \[
- \sum_k (x_{k+1}-x_k)L_k\leq\int_a^b f\leq
- \sum_k (x_{k+1}-x_k)U_k.
+ a=x_0<x_1<\cdots<x_N=b,\qquad
+ \xi_i\in[x_i,x_{i+1}]\cap\Q.
 \]
-Left, right, and trapezoid sums are finite interval identities.
-\begin{figure}[!htbp]\centering
+Its mesh is $\max_i(x_{i+1}-x_i)$.  If rational numbers $L_i,U_i$ bound all
+values of $g$ in the $i$th cell, form
+\[
+ B_P(g)=\left[\sum_i L_i\Delta x_i,\ \sum_i U_i\Delta x_i\right].
+\]
+The width is $\sum_i(U_i-L_i)\Delta x_i$.  A common refinement shows that
+any two sound cell-enclosure computations overlap: on each refined cell,
+a value at a rational sample is bounded by both corresponding parent
+ranges.  This argument uses only finitely many computed values and their
+order comparisons.
+
+\begin{definition}[An integral computation]\label{def:integral-computation}
+A supplied sequence of partitions and sound cell enclosures is an integral
+construction if its rectangle widths shrink to every positive rational
+tolerance.  Finite-prefix intersections of the $B_P(g)$ make a valid
+number computation, denoted $\int_a^b g$.
+\end{definition}
+
+Any two such constructions are equivalent, by their cross-overlap and
+shrinking widths.  Changing tags, using unequal subdivisions, or refining
+values faster than the mesh therefore does not change the integral.
+
+\section{Continuous functions: rectangles with a modulus}
+Suppose $g$ has the interval continuity certificate of
+Chapter~\ref{ch:foundations}.  For a desired tolerance $\eta$, choose mesh
+at most $\mu_g(\eta)$ and evaluate $g(\xi_i)$ in a box of width at most
+$\eta$.  Enlarge each sample box by $\eta$ on both sides.  These are sound
+cell ranges, and their integral width is at most
+\[
+ 3\eta(b-a).
+\]
+This constructs the integral of every function for which that finite data
+has been provided.  It does not derive the data from pointwise rational
+continuity or from an abstract compactness theorem.
+
+\begin{figure}[htbp]\centering
 \arctanRectangleEnclosureAnimation
-\caption{A finite lower/upper rectangle computation.}
-\label{fig:arctan-rectangle-enclosure}\end{figure}
-\lean{ComputableAnalysis.riemannTrapezoidInterval_eq_half_add_left_right}
-\lean{ComputableAnalysis.riemannTrapezoidInterval_overlap_of_samples}
-\leanok
+\caption{Cell ranges make finite rectangles into an integral computation.}
+\end{figure}
 
-\section{Validity and FTC}
-A valid raw has ordered nested boxes whose widths eventually fit every positive
-rational tolerance.  A Lipschitz or monotone/finite-turn certificate supplies
-this data; the project does not assert that every classical continuous function
-is integrable.
-\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.raw_valid}
-\lean{ComputableAnalysis.Integral.PiecewiseMonotoneConstructionFor}
-\lean{ComputableAnalysis.Integral.absOnUnit_piecewise_primitiveFTC}
-\leanok
+For the geometric angle chart, the earlier area bounds give
+\[
+ A(t)=\int_0^t\frac{du}{1+u^2}\qquad(0\le t\le1).
+\]
+This is a comparison with an already constructed number, not its definition.
 
-The effective FTC is finite telescoping:
-\begin{verbatim}
-derivative boxes -> cell bounds -> telescope primitive increments -> F(b)-F(a)
-\end{verbatim}
-\lean{ComputableAnalysis.DerivativeBoundFTC}
-\lean{ComputableAnalysis.ExactFunction.affineFTCExact}
-\lean{ComputableAnalysis.Integral.squareIntegralEffectiveFTC_integral_equiv_one_third}
-\leanok
+\section{Monotone functions: the total variation controls the error}
+Let $g$ be a nondecreasing rational-input computation on $[a,b]$.  Neither
+continuity nor a continuity modulus is assumed.  Its endpoint sums satisfy
+\begin{align*}
+ L_P&=\sum_i g(x_i)\Delta x_i,\\
+ U_P&=\sum_i g(x_{i+1})\Delta x_i,\\
+ U_P-L_P&\le\mesh(P)\bigl(g(b)-g(a)\bigr).
+\end{align*}
+The last inequality is finite telescoping.  Coarse endpoint computations
+give a rational upper bound $V$ for $g(b)-g(a)$.  If every endpoint value
+is evaluated to box width at most $\eta$, the rational upper--lower gap
+is at most
+\[
+ \mesh(P)V+2\eta(b-a).
+\]
+Thus monotonicity gives an integral algorithm even for a derivative with
+an undetected corner in its primitive.  Negation handles decreasing
+functions; finite sums and differences of these constructions are also
+integrable.  A finite partition into monotone pieces gives the same result.
 
-\section{Circle and sine}
-For \(\sin(\pi x)\) on \([0,1/2]\), rational endpoints are exact and each
-interior dyadic sample receives its own nested-radical box.
-\begin{figure}[!htbp]\centering
+\section{Finite rules for integrals}
+The rules below follow from rectangles and common refinements, before any
+FTC is used:
+\[
+ \int_a^c g=\int_a^b g+\int_b^c g,\qquad
+ \int_a^b(\alpha g+\beta h)=\alpha\int_a^b g+\beta\int_a^b h.
+\]
+For reversed endpoints define $\int_b^a g=-\int_a^b g$.
+If $|g|\le B$, then
+\[
+ \left|\int_u^v g\right|\le B|v-u|.
+\]
+If two integrands have a uniform difference bound $\varepsilon$, their
+integrals differ by at most $(b-a)\varepsilon$.  These estimates are
+proved first for every finite sum and then for the resulting boxes.
+
+Products are admitted when their supplied cell ranges shrink in total
+width.  For bounded factors with cell widths $w_i,z_i$ and absolute bounds
+$B,C$, the product cell width is at most $Bw_i+Cz_i$.  This proves closure
+under products for the integral constructions used here.
+
+An endpoint given by a number computation is handled by rational
+bracketing.  Moving either endpoint by at most $h$ changes the integral
+by at most $Bh$.  This is the required evaluation rule for variable
+endpoints; the bound and a domain enclosure are part of its data.
+
+\section{Accumulation computes a derivative locally}
+\label{sec:accumulation-derivative}
+Given an integral construction for $g$ on every subinterval, put
+$F(x)=\int_a^x g$.  If a neighborhood of a rational $x$ has
+$|g(t)-g(x)|\le\varepsilon$, finite sums give
+\[
+ |F(x+h)-F(x)-h g(x)|\le\varepsilon |h|
+\]
+whenever the segment from $x$ to $x+h$ stays in that neighborhood.  Thus
+at a rational continuity point of $g$, the difference quotients of $F$
+approximate $g(x)$ with the indicated error.
+
+For a nondecreasing $g$, adjacent integral averages are ordered, so $F$
+is convex.  Moreover
+\[
+ g(x-h)\le\frac{F(x)-F(x-h)}h\le g(x)
+ \le\frac{F(x+h)-F(x)}h\le g(x+h).
+\]
+The next chapter will turn precisely this sort of enclosure into a
+\emph{derivative computation}.  No unknown derivative value has to be
+postulated.
+
+\section{Changing the sampling coordinate}
+For increasing, interval-continuous $\alpha$ on a rational parameter
+interval, and interval-continuous $g$ on its image, form Stieltjes sums
+\[
+ \sum_i g(\alpha(\xi_i))
+          \bigl(\alpha(t_{i+1})-\alpha(t_i)\bigr).
+\]
+A modulus for $g\circ\alpha$ makes upper--lower errors at most its cell
+oscillation times the total increment $\alpha(v)-\alpha(u)$.  This is
+another explicit integral construction.  Image endpoints can be computed
+rather than rational: approximate the finitely many endpoints, using the
+bounded-integrand endpoint estimate above.  Common refinements then show
+that it computes $\int_{\alpha(u)}^{\alpha(v)}g$.
+
+For sine, take $\alpha(t)=2A(t)/\pi$ on $[0,1]$ and
+$g(\alpha(t))=2t/(1+t^2)$.  This compares the tangent-chart samples with
+the equal-angle samples without first differentiating the chart.
+
+\begin{figure}[htbp]\centering
 \intervalSineIntegralStageAnimation
-\caption{Dyadic cells and independently refined sine-value boxes.}
-\label{fig:interval-sine-integral-stage}\end{figure}
-The tangent chart gives a completed Riemann--Stieltjes route. The equal-dyadic
-candidate is executable; its remaining theorem is the all-depth geometric
-overlap with that chart, not a hidden completeness step.
-\lean{ComputableAnalysis.SinPiIntegral.dyadicNestedRadicalLeftSum}
-\lean{ComputableAnalysis.SinPiIntegral.canonicalDyadicCertificateSearchAt_certificate}
-\lean{ComputableAnalysis.SinPiIntegral.canonical_dyadic_search_of_halfAngle_certificate_family}
-\leanok
+\caption{Equal-angle sine samples and their rational value enclosures.}
+\end{figure}
 
-For a new integral, provide an evaluator, cell ranges or a modulus, nesting
-and shrinking, and an overlap with an independently useful computation.  An
-FTC theorem additionally provides a primitive and finite telescope.
+Ordinary substitution formulas containing $\alpha'$ will follow after
+we have constructed that derivative and proved the appropriate finite
+increment identity.  Sampling equivalence itself does not require them.
