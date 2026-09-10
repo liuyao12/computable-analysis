@@ -1,180 +1,303 @@
-\section{The FTC as an explicit finite-output theorem}
+\section{The FTC stated only with rational endpoint pairs}
 \label{sec:ftc-finite-output}
 
-The preceding theorem is mathematical, but its statement must still specify
-what is constructed and what proves termination.  We give that specification
-here.  This also states the theorem with an independently supplied derivative
-$g$: its conclusion is $\int_a^b g=f(b)-f(a)$, not merely an assertion
-that some unspecified derivative exists.
-
-\subsection{Orders, derivatives, and hypotheses}
-For raw computations $X_n=[x_n^-,x_n^+]$ and $Y_n=[y_n^-,y_n^+]$, use
+The literal objects are algorithms with two rational outputs:
 \[
- X\le Y\quad\Longleftrightarrow\quad
- x_n^-\le y_m^+\quad\text{for every }n,m\in\N.
+ f_n(x)=[f_n^-(x),f_n^+(x)],\qquad
+ g_n(x)=[g_n^-(x),g_n^+(x)].
 \]
-This is a predicate on rational endpoints.  It is compatible with arithmetic
-and equivalence: two computations are equivalent exactly when both orders
-hold.  Transitivity follows by choosing a sufficiently narrow intermediate
-box if a positive rational gap were to separate the other two.  No point
-in an infinite intersection is selected.  Bounds below use this order.
+Here $x$ is a permitted rational input and $n$ a natural-number stage.
+There is no scalar evaluation $f(x)$ or $g(x)$ in the definitions below.
+Fixing $x$ leaves a program in $n$, not an additional scalar output.
+The unindexed formulas earlier in the chapter describe the intended
+relations; this section gives their endpoint-only statements and proofs.
 
-For a function computation $f$, the notation $f'(x)=g(x)$ means the
-rational-input derivative relation
+\subsection{Validity, compatibility, and removing rational slack}
+Validity of an evaluator means that, for each permitted rational $x$,
+\[
+ f_n^-(x)\le f_m^-(x)\le f_m^+(x)\le f_n^+(x)\quad(n\le m),
+ \qquad
+ \forall\varepsilon\in\Q_{>0}\ \exists n,\quad
+ f_n^+(x)-f_n^-(x)<\varepsilon.
+\]
+The same requirements apply to $g$.  Two evaluators agree at a rational
+input precisely when
+\[
+ f_n^-(x)\le g_m^+(x),\qquad
+ g_m^-(x)\le f_n^+(x)\qquad\text{for every }n,m.
+\]
+These are comparisons between four rational numbers.  No common point
+of the infinitely many intervals is introduced.
+
+We repeatedly use the following rational fact.  If fixed rationals
+$r,s$ satisfy $r\le s+e_k$ for every $k$, where nonnegative rational
+errors $e_k$ become arbitrarily small, then $r\le s$.  Otherwise the
+positive rational gap $r-s$ determines a stage giving a contradiction.
+For finitely many valid evaluations, the sum of their widths can likewise
+be made smaller than any given rational tolerance by taking a common
+sufficiently large stage.  We call this \emph{removing rational slack}.
+It is not a completeness theorem.
+
+For example, suppose a fixed rational pair $[L,U]$ overlaps every
+$g_n(x)$.  This means
+\[
+ L\le g_n^+(x),\qquad g_n^-(x)\le U\quad\text{for all }n.
+\]
+It does not mean that every $g_n(x)$ is contained in $[L,U]$.
+If a second pair $[L',U']$ has the same property, then
+$L\le U'+(g_n^+(x)-g_n^-(x))$ for all $n$.  Removing slack proves
+$L\le U'$, and symmetrically $L'\le U$.  Thus the two pairs overlap.
+
+\subsection{A derivative relation with no scalar evaluations}
+All pair arithmetic in this subsection is finite rational interval
+arithmetic.  Define the residual pair $R_n(x,h)$ by its endpoints:
+\begin{align*}
+ R_n^-(x,h)&=f_n^-(x+h)-f_n^+(x)
+                   -\max(hg_n^-(x),hg_n^+(x)),\\
+ R_n^+(x,h)&=f_n^+(x+h)-f_n^-(x)
+                   -\min(hg_n^-(x),hg_n^+(x)).
+\end{align*}
+We say that the evaluator $g$ differentiates the evaluator $f$ at $x$ if
 \[
  \forall\varepsilon\in\Q_{>0}\ \exists\delta\in\Q_{>0}\ 
- \forall h\in\Q,\qquad
- 0<|h|<\delta\ \Longrightarrow\
- |f(x+h)-f(x)-h g(x)|\le\varepsilon |h|,
+ \forall h\in\Q,\quad
+ 0<|h|<\delta\ \Longrightarrow\ 
+ \exists n:\quad
+ -\varepsilon|h|\le R_n^-(x,h)\le R_n^+(x,h)\le\varepsilon|h|,
 \]
-with increments restricted to the declared domain.  This relation does not
-choose a derivative by an existence principle.  The secant algorithm
-constructs the candidate; its shrinking-gap proof proves validity, and
-the earlier secant sandwich proves this relation.  Uniqueness is proved
-by using any sufficiently small nonzero rational increment in the two
-relations and then taking arbitrarily small rational tolerances.
+with $x+h$ restricted to the domain.  Once the endpoint test holds, it
+holds at all later stages by nesting.  The stage is allowed to depend
+on $h$: precision must increase when division by a smaller increment
+amplifies the output widths.  This condition is neither a uniform
+stage requirement nor the assertion that a finite difference pair is
+identical to a derivative pair.
 
-Fix rational $A<a<b<B$.  Suppose $p,q$ are specified number-valued
-computations on the rational points of $[A,B]$, both convex in the finite
-rational sense.  For every rational $x\in[a,b]$, assume their centered
-secant gaps shrink to zero.  Explicitly, for $v=p$ and $v=q$, put
+Derivative uniqueness is also an endpoint theorem.  For two derivative
+evaluators choose an increment small enough for both residual estimates,
+and refine to a common stage.  The nonempty rational difference-quotient
+pair then lies within the prescribed rational tolerance of both derivative
+pairs.  Two fixed disjoint derivative pairs would have a positive rational
+gap; choosing the tolerance smaller than one quarter of that gap contradicts
+the estimates after refinement.  Consequently the derivative evaluators'
+pairs overlap at every pair of stages.  This argument uses only rational
+midpoints of finite intervals, not a derivative scalar.
+
+\subsection{Convexity and the derivative constructor}
+Fix rational $A<a<b<B$.  The evaluator $f$ is convex on $[A,B]$ when
 \[
- h_0(x)=\tfrac12\min(x-A,B-x),\qquad h_n(x)=2^{-n}h_0(x).
+ f_n^-((1-t)x+ty)
+       \le (1-t)f_m^+(x)+t f_k^+(y)
 \]
-The required shrinking statement is
+for every rational $x,y\in[A,B]$, rational $0\le t\le1$, and
+all stages $n,m,k$.  Convexity is a property proved about the evaluator;
+it need not hold separately for its two endpoint functions.
+
+At a rational $x\in[a,b]$, set
 \[
- \forall x\in[a,b]\cap\Q\ \forall\varepsilon\in\Q_{>0}\
- \exists n,\qquad
- \frac{v(x+h_n)-2v(x)+v(x-h_n)}{h_n}<\varepsilon.
+ h_0(x)=\tfrac12\min(x-A,B-x),\qquad h_j(x)=2^{-j}h_0(x).
 \]
-It proves termination of the rational-box precision search already
-specified in Definition~\ref{def:computed-derivative}.  The algorithm
-searches for a rational box width, not for an undecidable comparison of
-computed values.  The shrinking proof is not consulted at run time.
-No modulus uniform in $x$ is assumed.
+Search for a common stage $\nu_j$ at which the three output widths at
+$x-h_j,x,x+h_j$ are at most $h_j2^{-j-3}$.  Write those outputs as
+$[a_-,b_-],[a_0,b_0],[a_+,b_+]$, respectively, and set
+\[
+ B_j(x)=\left[\frac{a_0-b_-}{h_j},\frac{b_+-a_0}{h_j}\right],
+ \qquad
+ d_j(x)=\left[\max_{k\le j}B_k^-(x),\min_{k\le j}B_k^+(x)\right].
+\]
+The three value-width searches terminate by validity of $f$.
+Convexity, with rational weights chosen at the three secant endpoints,
+proves that every lower endpoint of a $B_j$ is at most every upper
+endpoint of a $B_k$.  Thus $d_j$ is a nonempty rational pair and the
+$d_j$ are nested.  No scalar derivative was used as a witness.
 
-Let $f$ be a specified computation with $f(x)\sim p(x)-q(x)$ on this
-domain.  Then $d(x)=Dp(x)-Dq(x)$ is a valid computed derivative of $f$.
-If $g$ is any other specified computation satisfying $f'(x)=g(x)$ at
-every rational $x\in[a,b]$, uniqueness gives $g(x)\sim d(x)$.  The
-following output theorem therefore applies to $g$ as well as to $d$.
+The constructor has the following explicit termination hypothesis:
+\[
+ \forall x\in[a,b]\cap\Q\ \forall\varepsilon\in\Q_{>0}\ 
+ \exists j,\qquad B_j^+(x)-B_j^-(x)<\varepsilon.
+\]
+Under it, $d$ is valid and differentiates $f$ in the residual-pair sense.
+Indeed convexity bounds every sufficiently short rational secant between
+the chosen outer secants, up to the finitely many evaluation widths.
+Choose $B_j$ narrower than a fraction of the requested tolerance, then
+refine the outputs at $x,x+h$ until the extra residual widths are smaller
+than that tolerance times $|h|$.  This proves the residual endpoint test.
 
-\begin{theorem}[Finite-output fundamental theorem]
+Conversely, if a valid supplied $g$ differentiates a convex $f$, apply its
+residual bounds to $h_j$ and $-h_j$ at a common refined stage.  They bound
+the refined secant gap by twice the slope tolerance plus the width of
+$g$ at $x$.  Returning to the stage $\nu_j$ adds at most $2^{-j-1}$:
+this is the sum of the four endpoint errors divided by $h_j$.
+First choose the slope tolerance, then $j$ sufficiently large and a
+sufficiently narrow $g$ output.  Removing the remaining refinement slack
+proves the displayed termination condition.  Derivative uniqueness
+identifies $d$ and $g$ by cross-stage overlap.
+
+\subsection{The finite secant inequalities}
+Under convexity and the derivative relation, for rational $u<v$,
+all derivative stages $k$, and all function stages $m$, one has
+\begin{align*}
+ (v-u)g_k^-(u)&\le f_m^+(v)-f_m^-(u),\\
+ f_m^-(v)-f_m^+(u)&\le(v-u)g_k^+(v).
+\end{align*}
+To prove these, compare a small secant at the appropriate endpoint with
+the secant from $u$ to $v$ using the endpoint convexity inequality.
+The residual-pair relation supplies the derivative comparison at refined
+stages.  Coarse endpoints can only weaken these bounds.  The residual
+tolerance and finitely many refined output widths can be made arbitrarily
+small, so removing rational slack gives exactly the two inequalities above.
+Applying both at arbitrarily fine function stages also gives
+\[
+ g_k^-(u)\le g_l^+(v)\qquad\text{for all }k,l.
+\]
+This is the endpoint-only meaning of a nondecreasing derivative evaluator.
+
+\subsection{An independent integral algorithm}
+The construction in this subsection needs only a valid $g$ satisfying the
+last monotonicity inequalities.  It does not read $f$.
+Put $L=b-a$ and compute the nonnegative rational
+\[
+ V=g_0^+(b)-g_0^-(a).
+\]
+For a positive rational $\varepsilon$, choose an integer $N\ge1$ with
+$LV/N\le\varepsilon/2$, and choose $0<\theta\le\varepsilon/(2L)$.
+At the equal partition $x_i=a+iL/N$, search for stages $k_i$ with
+\[
+ g_{k_i}(x_i)=[\alpha_i,\beta_i],\qquad \beta_i-\alpha_i\le\theta.
+\]
+Each cell range $[\alpha_i,\beta_{i+1}]$ overlaps every $g_m(t)$ for
+rational $x_i\le t\le x_{i+1}$, by monotonicity.  Output the rational pair
+\[
+ C(\varepsilon)=\left[
+    \frac LN\sum_{i=0}^{N-1}\alpha_i,
+    \frac LN\sum_{i=0}^{N-1}\beta_{i+1}\right].
+\]
+Its width has the \emph{exact finite identity}
+\[
+ C^+-C^-=\frac LN\left(\beta_N-\alpha_0
+                   +\sum_{i=1}^{N-1}(\beta_i-\alpha_i)\right)
+        \le\frac{LV}{N}+L\theta\le\varepsilon.
+\]
+Endpoint nesting gives $\beta_N-\alpha_0\le V$.  No differences
+of uncomputed scalars occur in this identity.
+
+Two different partitions' cell ranges overlap on every common refined
+cell: choose a rational sample there and apply the rational-slack lemma
+to its shrinking $g$ outputs.  Weighted addition proves that the two
+integral pairs overlap.  For $C_j=C(2^{-j})$, define
+\[
+ J_n=\left[\max_{j\le n}C_j^-,\min_{j\le n}C_j^+\right].
+\]
+Finite pairwise overlap proves $J_n^-\le J_n^+$, nesting is explicit,
+and $J_n^+-J_n^-\le2^{-n}$.  This is integral validity independently
+of a primitive.  The same common-refinement proof identifies this
+algorithm with any other sound shrinking cell-range integral algorithm.
+
+\begin{theorem}[Endpoint-only fundamental theorem]
 \label{thm:ftc-finite-output}
-Under the hypotheses just given, the independent cell-range integral
-construction produces a valid raw computation $J$ of $\int_a^b g$.
-For every stage of $J$ and every stage of the independently computed
-endpoint difference $f(b)-f(a)$, their rational intervals overlap.
-Consequently
+Let $f,g$ be valid rational-pair evaluators on the domains above.  Suppose
+$f$ satisfies the endpoint convexity inequalities and $g$ differentiates
+$f$ by the residual-pair relation.  The derivative constructor from $f$
+is valid and agrees with $g$.  The independent integral constructor from
+$g$ is valid.  Its outputs satisfy, for every $n,m\in\N$,
 \[
- \boxed{\int_a^b g(x)\,dx\sim f(b)-f(a).}
+ \boxed{J_n^-\le f_m^+(b)-f_m^-(a),\qquad
+        f_m^-(b)-f_m^+(a)\le J_n^+.}
 \]
-The construction below gives a terminating precision schedule and a
-finite bound for every tagged rational sum.
+Thus every integral-output pair overlaps every endpoint-difference pair
+\[
+ E_m=[f_m^-(b)-f_m^+(a),\ f_m^+(b)-f_m^-(a)].
+\]
+These two rational inequalities are the FTC conclusion.  An equality
+between unspecified scalar values is not part of the statement.
 \end{theorem}
+\begin{proof}
+Fix a finite partition used in an output $C_j$ and a function stage $s$.
+The finite secant inequalities give
+\[
+ C_j^-\le f_s^+(b)-f_s^-(a)
+          +\sum_{i=1}^{N-1}(f_s^+(x_i)-f_s^-(x_i)),
+\]
+and
+\[
+ f_s^-(b)-f_s^+(a)
+          -\sum_{i=1}^{N-1}(f_s^+(x_i)-f_s^-(x_i))\le C_j^+.
+\]
+\emph{Finite interval differences do not telescope exactly.}  The
+interior widths displayed here are the terms left after cancellation
+of equal rational endpoints.  For any fixed target stage $m$, take
+$s\ge m$.  The endpoint terms are then bounded by $E_m^+$ and $E_m^-$,
+respectively, and the finite sum of interior widths can be made smaller
+than every positive rational tolerance.  Removing slack gives
+$C_j^-\le E_m^+$ and $E_m^-\le C_j^+$.
+Taking the finite maximum and minimum over $j\le n$ proves the theorem.
+\end{proof}
 
-\subsection{Rational cell ranges and the error schedule}
-Put $L=b-a$.  Secant ordering proves that $Dp$ and $Dq$ are nondecreasing.
-Coarse enclosures of their four endpoint values give a rational $V\ge0$
-satisfying
+Both $E$ and $J$ have shrinking widths.  If their chosen widths add to
+at most $\eta$, their overlap shows that the rational pair
 \[
- V\ge Dp(b)-Dp(a)+Dq(b)-Dq(a).
+ [\min(J_n^-,E_m^-),\max(J_n^+,E_m^+)]
 \]
-For example, add the upper bounds at $b$ minus the lower bounds at $a$
-for the two computations.  This finite quantity is already nonnegative.
-Alternatively outer secants provide such a bound before evaluating the
-endpoint derivatives.
+has width at most $\eta$.  This is a further finite accuracy comparison
+between the two algorithms, not an extraction of a common limiting value.
 
-Choose a rational partition $P$ and compute, at every endpoint $x_i$,
+\subsection{Differences of convex evaluators}
+Let $p,q$ be convex pair evaluators with terminating derivative constructors
+$d^p,d^q$.  Supply $f$ whose outputs agree, by cross-stage overlap, with
 \[
- Dp(x_i)\in[\alpha_i^p,\beta_i^p],\qquad
- Dq(x_i)\in[\alpha_i^q,\beta_i^q]
+ [p_n^-(x)-q_n^+(x),\ p_n^+(x)-q_n^-(x)].
 \]
-to widths at most $\theta>0$.  The actual rational ranges used for $g$
-on the cell $[x_i,x_{i+1}]$ are
-\[
- l_i=\alpha_i^p-\beta_{i+1}^q,\qquad
- u_i=\beta_{i+1}^p-\alpha_i^q.
-\]
-Monotonicity and $g\sim Dp-Dq$ prove $l_i\le g(t)\le u_i$ for all
-rational $t$ in that cell.  Set
-\[
- J(P,\theta)=\left[\sum_i l_i\Delta x_i,\sum_i u_i\Delta x_i\right].
-\]
-Every endpoint of this interval is rational.  Finite telescoping gives
-\[
- \boxed{\operatorname{width}J(P,\theta)
-           \le\mesh(P)V+4\theta L.}
-\]
-The four error terms per cell are precisely the four derivative endpoint
-enclosures used above.  For one convex primitive alone, the constant is
-$2\theta L$ instead.
+The pairs
+$[d_n^{p,-}(x)-d_n^{q,+}(x),d_n^{p,+}(x)-d_n^{q,-}(x)]$
+define a derivative evaluator for $f$.  Any independently supplied
+derivative evaluator $g$ agrees with it by residual-pair uniqueness.
 
-For requested width $\varepsilon>0$, take an equal partition with integer
-$N$ satisfying $LV/N\le\varepsilon/4$, and take
-$\theta\le\varepsilon/(16L)$.  An integer meeting this condition is
-found by rational arithmetic; for $V=0$ any positive $N$ suffices.
-There are only $2(N+1)$ terminating derivative precision searches at this
-stage.  The resulting interval has width at most $\varepsilon/2$.
-Use $\varepsilon=2^{-n}$ successively and intersect the finitely many
-output intervals obtained so far.
-
-Those intersections are nonempty independently of any primitive endpoint:
-for two partitions, take their finite common refinement.  On each refined
-cell choose a rational sample.  Its computed value is bounded by both
-parent cell ranges; adding the inequalities shows that each lower sum is
-at most the other upper sum.  Thus the two rational intervals overlap.
-A finite family of pairwise overlapping rational intervals has nonempty
-intersection, by finite maxima and minima.  This proves integral validity
-without defining the integral through $f(b)-f(a)$.
-
-\subsection{The endpoint identity is a separate proof}
-For each cell, the convex secant inequalities give
+At partition endpoints compute derivative pairs
+$[\alpha_i^p,\beta_i^p]$ and $[\alpha_i^q,\beta_i^q]$, each of width
+at most $\theta$.  The cell ranges for $g$ are
 \[
- Dp(x_i)\Delta x_i\le p(x_{i+1})-p(x_i)
-                         \le Dp(x_{i+1})\Delta x_i,
+ [l_i,u_i]=[\alpha_i^p-\beta_{i+1}^q,
+                   \beta_{i+1}^p-\alpha_i^q].
 \]
-and similarly for $q$.  Subtract the second pair from the first, then
-apply the rational endpoint enclosures.  The result is
+They overlap every output $g_m(t)$ on the cell.  With equal mesh $L/N$,
+the same rational width identity for the two components gives
 \[
- l_i\Delta x_i\le f(x_{i+1})-f(x_i)\le u_i\Delta x_i.
+ \frac LN\sum_i(u_i-l_i)\le\frac{LV}{N}+2L\theta,
 \]
-Adding telescopes to $f(b)-f(a)$.  The raw-order definition shows that
-every enclosure of that difference overlaps $J(P,\theta)$, and hence
-every finite-prefix intersection of these intervals.  This proves the
-stated equivalence after, and separately from, integral validity.
-
-For any rational tag $\xi_i\in[x_i,x_{i+1}]$, monotone derivative ranges
-also give
+where
 \[
- \left|f(b)-f(a)-\sum_i g(\xi_i)\Delta x_i\right|
-                 \le\mesh(P)V.
+ V=(d_0^{p,+}(b)-d_0^{p,-}(a))
+      +(d_0^{q,+}(b)-d_0^{q,-}(a))
 \]
-Replacing the tags' values by rational numbers $r_i$ with proved errors
-$|r_i-g(\xi_i)|\le\eta$ yields the fully quantitative formula
+is a computable nonnegative rational.  Take $LV/N\le\varepsilon/2$
+and $\theta\le\varepsilon/(4L)$.  Common refinements and prefix
+intersections again construct valid integral pairs.  Apply the two
+convex secant inequalities and remove the finitely many interior widths
+of $p,q$, together with the endpoint comparison widths for $f$.
+The conclusion is exactly the same pair of boxed FTC inequalities.
+This corollary, rather than scalar evaluation of $p-q$, supports the
+trigonometric and other convex-difference constructions in the book.
+
+\subsection{The reverse direction uses the same endpoint language}
+Suppose $g$ is a valid nondecreasing evaluator.  Pointwise continuity at
+an interior rational $x$ means: for every positive rational $\varepsilon$
+there is a positive rational $\delta$ such that, whenever $|t-x|<\delta$,
 \[
- \boxed{\left|f(b)-f(a)-\sum_i r_i\Delta x_i\right|
-                     \le\mesh(P)V+\eta L.}
+ g_n^-(t)\le g_m^+(x)+\varepsilon,\qquad
+ g_m^-(x)\le g_n^+(t)+\varepsilon
+ \quad\text{for all }n,m.
 \]
-This permits a different evaluator for $g$, unrelated to the secant
-evaluator, once pointwise derivative uniqueness has identified it.
+Run the monotone integral algorithm with variable rational endpoint $x$
+to construct pairs $F_n(x)$.  Ordered finite rectangle averages prove
+the endpoint convexity inequalities for $F$.  To prove that $g$
+differentiates $F$, fix $x,h,\varepsilon$, use continuity to bound the
+oscillation of all cell outputs near $x$, and refine the two integral
+outputs and the output at $x$ until their remaining widths are less
+than the allotted fraction of $\varepsilon|h|$.  Finite additivity and
+these width bounds give the residual-pair test.  The derivative constructor
+therefore terminates and overlaps $g$ at all pairs of stages.
 
-\subsection{The reverse direction and the boundary of the theorem}
-If a supplied nondecreasing computation $g$ is continuous at each rational
-point of an interval, its monotone rectangle integral constructs
-$F(x)=\int_a^x g$.  Ordered cell averages prove convexity of $F$.
-At an interior rational $x$, its left and right secants lie between
-$g(x-h)$ and $g(x+h)$.  Pointwise continuity makes the gap shrink, so
-the secant derivative computation terminates and $DF(x)\sim g(x)$.
-Thus accumulation constructs a primitive as well as recovering an
-already supplied one.  One-sided endpoint versions require their
-explicit domain and endpoint conditions.
-
-The convex-difference hypothesis is a sufficient computational construction,
-not a claim that every useful function must be presented that way.
-Subsequent series and local integral constructions establish their own
-finite increment bounds and transfer their identities through proved
-errors.  A formal proof must retain these bounds, rather than infer an
-FTC from pointwise rational differentiation alone.  Explicit jumps are
-handled separately by their delta contributions; they are not silently
-admitted by the present theorem.
+This is a sufficient construction, not a universal requirement that every
+function be a difference of convex functions.  Later series and ODE
+constructions must likewise establish endpoint inequalities with their
+explicit finite errors.  Neither their proofs nor this theorem may
+introduce a scalar merely by suppressing a stage index.

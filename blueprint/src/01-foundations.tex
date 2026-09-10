@@ -1,10 +1,11 @@
 \chapter{Computable Numbers and Functions}\label{ch:foundations}
 
 A number will be a computation, not an already available point of a
-completed line.  The computation gives rational bounds, and a proof explains
-why they agree and how they become arbitrarily close.  Different computations
-of the same number remain worth keeping: an elementary construction can
-explain a quantity which a different construction computes more quickly.
+completed line.  Each stage returns two rational endpoints; a proof explains
+why these pairs are compatible and their widths become arbitrarily small.
+There is no additional scalar hidden between the endpoints.  Different
+computations remain worth keeping: a geometric construction can be
+compared with a faster series by rational overlap inequalities.
 
 The finite arithmetic used below is ordinary integer and rational arithmetic.
 Fractions are reduced by the Euclidean algorithm; finite sums, products,
@@ -35,7 +36,8 @@ whose intervals satisfy
 \]
 and whose widths become smaller than every positive rational tolerance.
 We also call such an algorithm a raw real.  No infinitely stored table of
-rational endpoints is allowed.
+rational endpoints is allowed, and no operation extracts a scalar from
+the algorithm.
 \end{definition}
 
 A request for precision $\varepsilon>0$ is answered by computing successive
@@ -45,8 +47,9 @@ be part of the algorithm's input.
 
 \begin{definition}[Equivalence]\label{def:raw-equiv}
 Two valid computations are equivalent when their intervals overlap at every
-stage.  We write $X\sim Y$, and use the usual equality sign in mathematical
-identities between their values.
+stage.  We write $X\sim Y$.  An equality sign between named computations
+elsewhere in the text denotes this proved compatibility, not equality of
+scalar values or equality of the algorithms.
 \end{definition}
 
 Same-stage overlap implies overlap at any two stages, by passing to their
@@ -55,10 +58,10 @@ intervals separated by a positive rational gap, a sufficiently narrow interval
 of a middle computation could not overlap both.  This proves transitivity
 using only finitely many rational comparisons.
 
-Equality is a theorem about computations, not a proposed decision algorithm.
-To show two values differ, disjoint finite enclosures suffice.  To show a
-value is positive, it suffices to find an enclosure with positive lower
-endpoint.  Such a witness is called a separation from zero.
+Equivalence is a theorem about computations, not a proposed decision algorithm.
+Disjoint finite outputs certify inequivalence.  Positivity of a computation
+means that some output has positive lower endpoint.  Such a witness is
+called a separation from zero; it is a finite rational comparison.
 
 \begin{definition}[Interval arithmetic]\label{def:raw-real-arithmetic}
 Addition and negation are computed by
@@ -70,23 +73,34 @@ $ac,ad,bc,bd$.  If an interval $[a,b]$ avoids zero, its reciprocal enclosure
 is $[1/b,1/a]$.
 \end{definition}
 
-These operations preserve inclusion.  If the factors have absolute bounds
-$B_X,B_Y$, the product width is at most
+These operations preserve inclusion.  If the input pairs have absolute
+endpoint bounds $B_X,B_Y$, the product width is at most
 \[
- B_X\operatorname{width}(Y)+B_Y\operatorname{width}(X).
+ B_X\operatorname{width}(Y_n)+B_Y\operatorname{width}(X_n).
 \]
-The bounds can be read from any initial enclosures.  If $|X|\ge c>0$ is
-certified, reciprocal widths are at most $c^{-2}\operatorname{width}(X)$
-once the intervals have that separation.  These estimates prove validity
+The bounds can be read from any initial outputs.  If later pairs stay at
+rational distance at least $c>0$ from zero, reciprocal widths are at most
+$c^{-2}\operatorname{width}(X_n)$.  These estimates prove validity
 and compatibility with equivalence.  In particular, division is available
-when a nonzero denominator has been certified, not by deciding an arbitrary
-computed value's equality with zero.
+once a denominator output avoids zero, not by deciding the equality of an
+unspecified scalar with zero.
 
-An inequality such as $|X-Y|\le r$ has an interval meaning: arbitrarily
-accurate enclosures certify the bound $r+\eta$ for each rational $\eta>0$.
-An assertion of containment in a closed rational interval can equivalently
-be phrased as overlap with that interval at every stage.  None of this
-requires choosing a point in an infinite intersection.
+Here are the literal endpoint predicates behind the abbreviated order
+notation.  For $X_n=[X_n^-,X_n^+]$ and $Y_m=[Y_m^-,Y_m^+]$,
+\[
+ X\le Y\quad\Longleftrightarrow\quad
+ X_n^-\le Y_m^+\quad\text{for all }n,m.
+\]
+A displayed bound $|X-Y|\le r$, for rational $r\ge0$, means
+\[
+ X_n^-\le Y_m^++r,\qquad Y_m^-\le X_n^++r
+ \quad\text{for all }n,m.
+\]
+These are predicates on algorithms, not comparisons of extracted numbers.
+A fixed pair $[a,b]$ bounds a computation when it overlaps every output.
+This does \emph{not} mean every finite output is contained in $[a,b]$.
+One can obtain containment in $[a-\eta,b+\eta]$ by requesting sufficiently
+small output width, for any positive rational $\eta$.
 
 \begin{proposition}[Finite-prefix stabilization]\label{prop:raw-prefix-stabilization}
 Suppose rational numbers $q_n$ and positive rational errors $e_n\to0$
@@ -131,7 +145,7 @@ $a^2\le q\le b^2$.  Bisect and retain the half whose squared endpoints
 still bracket $q$.  If the midpoint square equals $q$, return the exact
 constant interval thereafter.  At stage $n$ the width is at most
 $(b-a)2^{-n}$, and finite interval multiplication proves that the resulting
-computation squares to $q$.
+squared-output computation overlaps $[q,q]$ at every stage.
 
 For $\sqrt2$, the rational secant--tangent refinement gives another
 construction:
@@ -155,9 +169,10 @@ Also $a\le a'\le b'\le b$, and
  b'-a'=\frac{(b-a)(b^2-2)}{2b(a+b)}\le\frac{b-a}{2}.
 \]
 These identities prove validity.  The bisection and secant--tangent
-computations are equivalent because both retain the unique nonnegative
-solution, with uniqueness following from $(u-v)(u+v)=u^2-v^2$ and the
-positive lower bounds in this example.
+outputs overlap across all stages: disjoint nonnegative intervals cannot
+both have their squared endpoints bracket $2$.  Monotonicity of rational
+squaring proves this directly.  There is no need to select a common root
+before proving the computations equivalent.
 
 \begin{figure}[htbp]\centering
 \sqrtSecantTangentAnimation
@@ -166,8 +181,10 @@ positive lower bounds in this example.
 \end{figure}
 
 There is no rational whose square is $2$: in a reduced fraction $p/q$, the
-identity $p^2=2q^2$ would make both $p$ and $q$ even.  Thus this is a
-nonrational quantity constructed entirely by rational arithmetic.
+identity $p^2=2q^2$ would make both $p$ and $q$ even.  Thus no constant
+rational-pair computation $[r,r]$ is equivalent to this construction.
+This is the sense in which the construction is nonrational; its two
+outputs at every finite stage are rational.
 
 Square roots also compute lengths of rational vectors.  The finite identity
 \[
@@ -201,14 +218,15 @@ ordinary calculus.  The circle will define $\pi$ geometrically; rectangles,
 series, and Fourier sums will then supply different computations of it.
 
 \begin{remark}[Calculus as equivalence]\label{rem:calculus-as-equivalence}
-A great deal of calculus is the art of proving that independently constructed
-numbers are equivalent.  The fundamental formula
+The FTC compares an integral algorithm $J$ with an endpoint-difference
+algorithm $E$.  For a rational-input evaluator $f$, the latter returns
 \[
- \int_a^b f'(x)\,dx=f(b)-f(a)
+ E_m=[f_m^-(b)-f_m^+(a),\ f_m^+(b)-f_m^-(a)].
 \]
-turns an accumulation computation into an endpoint computation.  Its
-hypotheses must explain why local derivative information controls a whole
-rational interval; pointwise differentiation on the rationals alone does not.
+The theorem concludes $J_n^-\le E_m^+$ and $E_m^-\le J_n^+$ for all
+$n,m$, with validity of both algorithms.  This is the endpoint meaning
+of the familiar fundamental formula.  Its hypotheses must explain why
+local derivative information controls a whole rational interval.
 \end{remark}
 
 \section{Complex numbers}
@@ -222,7 +240,9 @@ Addition and multiplication are rational box operations, using
 \]
 For a denominator separated from zero use
 $z^{-1}=\overline z/( (\Re z)^2+(\Im z)^2)$ and the real reciprocal
-construction.  Finite rational coordinate bounds control all errors.
+construction.  Here the formula specifies operations on box algorithms,
+not evaluations at an uncomputed complex scalar.  Finite rational
+coordinate bounds control all errors.
 
 The same convention applies to vectors and matrices: finitely many number
 computations, with finite sums and products.  No additional completeness
@@ -232,40 +252,50 @@ principle appears when the number of coordinates increases.
 \label{rem:parameterized-constructions}
 
 \begin{definition}[Function computation]\label{def:real-fun-raw}
-A real-valued function computation consists of a declared domain of rational
-inputs and an algorithm
+A function computation has a declared domain of rational inputs and a
+terminating algorithm
 \[
- (x,n)\longmapsto [a_f(x,n),b_f(x,n)]
+ (x,n)\longmapsto f_n(x)=[f_n^-(x),f_n^+(x)]\in\Q\times\Q,
 \]
-which is a valid number computation at each permitted input $x$.
+with ordered, nested, arbitrarily narrow outputs for each permitted $x$.
 \end{definition}
 
-The outputs need not be rational.  In particular, $\sin(\pi x)$ will have
-rational inputs and computed outputs.  An algebraic, dyadic, or rational
-geometric chart may be a more natural first domain than all rationals;
-passing between charts requires an explicit comparison of computations.
+\textbf{Both outputs are rational.}  Fixing $x$ leaves the program
+$n\mapsto f_n(x)$; it does not produce an additional scalar $f(x)$.
+In particular the trigonometric evaluator will return $S_n(x)$, a rational
+pair, not a nonrational point value.  Familiar unindexed function formulas
+later in the text are mnemonics for relations between these evaluators.
+A foundational statement must give the stage-indexed endpoint relation;
+suppressing the stage index cannot supply an object for a proof.
+An algebraic, dyadic, or rational geometric chart may be a more natural
+first domain than all rationals; passing between charts requires an
+explicit comparison of outputs at every pair of stages.
 
 \begin{definition}[Interval continuity]\label{def:interval-regular}
 On a rational interval $[a,b]$, a continuity certificate supplies, for every
 positive rational $\varepsilon$, a positive rational $\mu(\varepsilon)$
-such that
+such that $|x-y|\le\mu(\varepsilon)$ implies
 \[
- |x-y|\le\mu(\varepsilon)\quad\Longrightarrow\quad
- |f(x)-f(y)|\le\varepsilon
+ f_n^-(x)\le f_m^+(y)+\varepsilon,\qquad
+ f_m^-(y)\le f_n^+(x)+\varepsilon
+ \quad\text{for every }n,m.
 \]
-for rational $x,y$ in that interval.  This is uniform continuity on the
-specified interval, with usable data.  A different interval may have a
-different certificate.
+Here $x,y$ are rational inputs in $[a,b]$.  A different interval may have
+a different certificate.  This definition contains no scalar evaluations.
 \end{definition}
 
-Together with point evaluation, this produces small output enclosures for
-small input intervals: evaluate at a rational sample and add the continuity
-error on both sides.  Conversely, shrinking interval-image bounds give
-this continuity certificate.  A finite grid and coarse value enclosures
-also give an absolute bound for $f$ on $[a,b]$.
+A narrow output at a rational sample, enlarged by the continuity tolerance,
+then overlaps every output at every input in a sufficiently small cell.
+These rational cell ranges are distinguished from containing every coarse
+output pair.  Refining the sample output and reducing the continuity
+tolerance produces arbitrarily narrow ranges.  Conversely such certified
+cell ranges supply continuity by removing rational width errors.  A finite
+grid and coarse output pairs also give an absolute endpoint bound in the
+sense of the displayed order predicates.
 
 This is stronger than continuity at each rational point.  We do not infer it
-from compactness.  For square roots, finite algebra gives
+from compactness.  For square roots, factoring differences of rational
+squares proves the endpoint relation abbreviated by
 \[
  |\sqrt{x}-\sqrt{y}|\le\sqrt{|x-y|}\qquad(x,y\ge0),
 \]
@@ -274,43 +304,47 @@ $y^k-x^k=(y-x)\sum_{j=0}^{k-1}y^{k-1-j}x^j$ and bound the finite sum on
 the interval.  Separated rational functions follow by the reciprocal bound.
 
 \begin{proposition}[Computed inputs]\label{prop:computed-inputs}
-An interval-continuous rational-input computation can be evaluated on a
-number computation known to stay in its interval.
+An interval-continuous rational-input evaluator and an input-pair program
+certified in its domain determine a new output-pair program.
 \end{proposition}
 \begin{proof}
-Intersect each input enclosure with $[a,b]$, choose a rational sample in
-that finite intersection, and request enough input precision that all its
-samples have outputs within the desired continuity tolerance.  Evaluate
-the sample to the remaining tolerance.  The resulting output boxes are
-compatible across input refinements and shrink.  Finite-prefix intersections
-make them nested.  Equivalent input computations give equivalent outputs
-by the same estimate.
+Intersect an input output with $[a,b]$ and choose a rational sample in that
+finite interval.  Request enough input precision for the continuity
+tolerance, then evaluate the sample to the remaining output-width budget.
+Enlarge by the continuity tolerance.  Nesting of the input pairs and the
+endpoint continuity inequalities prove pairwise compatibility of the
+resulting outputs.  Finite-prefix intersections make them nested, and
+the budgets prove shrinking widths.  Equivalent input programs give
+cross-stage overlap of the output programs by the same rational estimates.
 \end{proof}
 
-This is the precise meaning of an implicit continuation beyond rational
-inputs.  We have constructed an evaluation procedure, not postulated a
-function on a completed line.
+This constructs an operation on algorithms, not evaluation at a scalar
+input obtained by completing the rational line.
 
 \section{Inverting a monotone computation}
 \label{thm:constructive-inverse-function}
-Suppose $f$ is increasing and interval-continuous on $[a,b]$, and a
-positive separation bound $\sigma(d)$ is supplied:
+Suppose $f$ is increasing and interval-continuous on $[a,b]$, with a
+positive separation bound $\sigma(d)$: for rational $y-x\ge d>0$,
 \[
- y-x\ge d>0\quad\Longrightarrow\quad f(y)-f(x)\ge\sigma(d)>0.
+ f_n^+(y)-f_m^-(x)\ge\sigma(d)\quad\text{for all }n,m.
 \]
-Let a computed target $z$ be certified between $f(a)$ and $f(b)$.
-Use the two trisection points $u,v$ of the current rational bracket.
-Their images are separated by $\sigma(v-u)$.  Refine the value enclosures
-until either $z>f(u)$ or $z<f(v)$ is certified.  At least one strict
-inequality must become visible, even when the target equals one of the
-other values.  Keep $[u,b]$ in the first case and $[a,v]$ in the second.
+A target program $Z_n=[Z_n^-,Z_n^+]$ is in the endpoint range when
+\[
+ f_n^-(a)\le Z_m^+,\qquad Z_m^-\le f_n^+(b)\quad\text{for all }n,m.
+\]
+Use the two trisection points $u,v$ of the current rational input bracket.
+Refine until either $Z_n^->f_n^+(u)$ or $Z_n^+<f_n^-(v)$ is certified.
+The separation bound and shrinking widths prove that at least one of
+these finite tests succeeds.  This does not require deciding equality
+between the target program and either endpoint program.  Keep $[u,b]$
+in the first case and $[a,v]$ in the second.
 
-Each step preserves a range bracket and shrinks the input interval by a
-factor $2/3$.  Interval continuity proves that the resulting input
-computation maps to $z$.  Separation proves uniqueness.  This is a
-terminating inverse construction without a decision procedure for equality
-of computed numbers.  Squaring on $[0,1]$ has
-$\sigma(d)=d^2$; the angle chart in the next chapter has a linear bound.
+Each step preserves the endpoint-range inequalities and shrinks the input
+pair by a factor $2/3$.  The computed-input proposition constructs the
+corresponding output program; continuity proves that it overlaps the
+target at every pair of stages.  Separation proves uniqueness up to
+compatibility.  Squaring on $[0,1]$ has $\sigma(d)=d^2$; the later
+angle chart has a linear separation bound.
 
 \section{Domains and equivalent descriptions}
 Functions agree only where both computations are defined.  A geometric
@@ -319,7 +353,7 @@ function on overlapping domains without being interchangeable everywhere.
 Finite chains of proved comparisons retain these domain restrictions.
 
 The rest of the book uses only the constructions just described: finite
-rational operations, enclosures, terminating refinement, and equivalence.
-When a new infinite process occurs, its finite future errors will be
-bounded explicitly.  No theorem identifying these computations with an
-ambient completed number system is required.
+rational operations, endpoint pairs, terminating refinement, and
+cross-stage comparisons.  When a new infinite process occurs, its finite
+future errors must be bounded explicitly.  Removing a stage index in a
+familiar formula does not create a scalar on which a proof may rely.
