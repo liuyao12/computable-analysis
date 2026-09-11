@@ -3,19 +3,17 @@ import ComputableAnalysis.RotationTaylorBridge
 /-!
 # A fixed-schedule derivative of the factorial sine evaluator
 
-The executable derivative reads only sine interval outputs at x and x +/-
-1/(n+1), at the prescribed stage n. There is no precision search. A fixed
-quadratic correction supplies secant brackets on the whole chart. Cosine
-occurs in the proof of validity and equivalence, not in the algorithm.
-
-This is the factorial (radian-coordinate) representation. Identification
-with the sector-area / nested-radical representation is a separate theorem.
+The derivative reads only sine outputs at x and x plus or minus 1/(n+1),
+at prescribed stage n. There is no precision search. A fixed quadratic
+correction supplies secant brackets. Cosine occurs in the proof, not in
+the algorithm. This is the factorial radian-coordinate representation;
+identification with the geometric angle representation is separate.
 -/
 
 namespace ComputableAnalysis
 namespace FixedSchedule
 
-/-- Ordinary finite intersections; no numerical stopping condition. -/
+/-- Finite intersections with no numerical stopping condition. -/
 def prefix (B : Nat -> QInterval) : Nat -> QInterval
   | 0 => B 0
   | n + 1 => QInterval.intersection (prefix B n) (B (n + 1))
@@ -103,7 +101,7 @@ theorem prefix_equiv (B : Nat -> QInterval) (A : RealRaw)
   have ho := RealRaw.interval_order_of_valid A hA n
   exact ⟨Rat.le_trans hc.1 ho, Rat.le_trans ho hc.2⟩
 
-/-- The error bound is metadata proved about this schedule, not its input. -/
+/-- Bounds are proved about this schedule, not supplied as stopping criteria. -/
 def step (n : Nat) : Rat := 1 / ((n+1 : Nat) : Rat)
 
 theorem step_pos (n : Nat) : 0 < step n := by
@@ -118,8 +116,7 @@ theorem step_le_one (n : Nat) : step n <= 1 := by
   have hc := Rat.inv_mul_cancel ((n+1 : Nat) : Rat) (Rat.ne_of_gt hp)
   apply Rat.le_of_mul_le_mul_right (c := ((n+1 : Nat) : Rat))
   · unfold step
-    rw [Rat.div_def, Rat.one_mul, hc, Rat.one_mul]
-    exact hone
+    simpa only [Rat.div_def, Rat.one_mul, hc] using hone
   · exact hp
 
 open RotationSeries
@@ -146,7 +143,7 @@ private theorem half_pow_add (m n : Nat) :
       rw [show m+(n+1) = (m+n)+1 by omega, Rat.pow_succ, ih, Rat.pow_succ]
       grind [Rat.mul_assoc]
 
-/-- The existing factorial boxes already have more precision than 1/(n+1)^2. -/
+/-- The factorial boxes already have more precision than 1/(n+1)^2. -/
 theorem radius_le_step_sq (n : Nat) :
     uniformRotationTailRadius n <= step n * step n := by
   have hs : uniformRotationTailStart = 5 := by decide
@@ -179,8 +176,8 @@ theorem radius_le_step_sq (n : Nat) :
       Rat.mul_le_mul_of_nonneg_right hcoef hpow0
     _ <= step n * step n := by simpa [Rat.one_mul] using hsquare
 
-/-- These are the convex secants for sine + 50*x^2, after subtracting 100*x.
-The definition evaluates only sine, with fixed h_n and fixed source stage n. -/
+/-- Secants for sine + 50*x^2, after subtracting 100*x.
+Only sine is evaluated; both schedules are fixed in advance. -/
 def sineBracket (x : Rat) (n : Nat) : QInterval :=
   let h := step n
   let F := (sine x).compute n
@@ -212,13 +209,13 @@ private theorem center_secants {x : Rat} (hx : qabs x <= 1) (n : Nat) :
   have hp := step_pos n
   have hne := Rat.ne_of_gt hp
   have habs := qabs_eq_self_of_nonneg (Rat.le_of_lt hp)
+  have hcancel : x-step n+step n = x := by grind
   have hback := uniformRotationSinCenter_secant_error_le_thirty_four
-    (x := x-step n) (h := step n) hne hd.2.1 (by simpa using hd.1) n
+    (x := x-step n) (h := step n) hne hd.2.1 (by simpa only [hcancel] using hd.1) n
   have hforward := uniformRotationSinCenter_secant_error_le_thirty_four
     (x := x) (h := step n) hne hd.1 hd.2.2 n
   have hcos := (uniformRotationCenter_input_lipschitz
     (x-step n) x hd.2.1 hd.1 n).1
-  have hcancel : x-step n+step n = x := by grind
   rw [hcancel, habs] at hback
   rw [habs] at hforward
   have hdiff : x-step n-x = -(step n) := by grind
@@ -258,8 +255,8 @@ private theorem bracket_arithmetic (a b c d r h : Rat)
       rw [Rat.div_def]
       grind [Rat.mul_assoc, Rat.mul_comm]
     · exact hp
-  simp only [QInterval.ContainsInterval, QInterval.width]
-  rw [Rat.div_def] at *
+  dsimp only [QInterval.ContainsInterval, QInterval.width]
+  simp only [Rat.div_def] at *
   constructor
   · constructor <;> grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
   · grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
@@ -312,7 +309,7 @@ theorem sineDerivative_width_le {x : Rat} (hx : qabs x <= 1) (n : Nat) :
     ((sineDerivative x).compute n).width <= 204 / ((n+1 : Nat) : Rat) :=
   Rat.le_trans (prefix_width_le (sineBracket x) n) (sineBracket_width_le hx n)
 
-/-- The literal conclusion compares four rational endpoints at arbitrary stages. -/
+/-- Literal comparison of rational endpoints at arbitrary stages. -/
 theorem sineDerivative_output_overlap {x : Rat} (hx : qabs x <= 1) (n m : Nat) :
     QInterval.Overlaps ((sineDerivative x).compute n) ((cosine x).compute m) :=
   (RealRaw.compareAt_overlap_iff (sineDerivative x) (cosine x) n m).1
