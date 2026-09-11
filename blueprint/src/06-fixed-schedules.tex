@@ -1,0 +1,219 @@
+\section{A derivative algorithm with fixed schedules}
+\label{sec:fixed-schedule-derivative}
+
+We fix the computation first and prove its validity separately.  A stage
+must not mean ``keep refining until an error test succeeds.''  Choose
+explicit rational increments $h_n(x)>0$ tending to zero and explicit
+natural-number stages $\sigma(n,x)$, with $x\pm h_n(x)$ in the domain.
+Typical choices are $h_n=h_0/(n+1)$ and $\sigma(n,x)=(n+1)^2$; a
+particular evaluator may permit the simpler $\sigma(n,x)=n$.
+
+The notation $[E]_n$ means the two rational outputs of a specified
+composite expression at its prescribed stage.  It does not denote a scalar
+$E$, and it does not silently introduce a precision search.  For example,
+using ordinary stagewise subtraction,
+\[
+ [f(x)-f(y)]_n=
+ [f_n^-(x)-f_n^+(y),\ f_n^+(x)-f_n^-(y)].
+\]
+If a composite evaluator uses a different internal schedule, that schedule
+is stated as part of its definition.
+
+\begin{definition}[Fixed-schedule derivative evaluator]
+\label{def:computed-derivative}
+For a convex evaluator $f$, set, with $h=h_n(x)$ and $s=\sigma(n,x)$,
+\[
+ B_n^{h,\sigma}(x)=
+ \left[\frac{[f(x)-f(x-h)]_s^-}{h},
+       \frac{[f(x+h)-f(x)]_s^+}{h}\right],
+\]
+and compute the finite intersections
+\[
+ [D_{h,\sigma}f(x)]_n=
+ \left[\max_{j\le n}(B_j^{h,\sigma}(x))^-,
+       \min_{j\le n}(B_j^{h,\sigma}(x))^+\right].
+\]
+All loops have a length determined by $n$; there is no error-dependent
+stopping condition.  This defines an evaluator before asserting that its
+widths shrink.
+\end{definition}
+
+Endpoint convexity proves $(B_i^{h,\sigma})^-\le(B_j^{h,\sigma})^+$
+for every $i,j$.  Indeed a left secant at $x$ is below every right secant,
+by the three-point rational convexity inequality.  Coarse lower endpoints
+can only decrease the former, and coarse upper endpoints can only increase
+the latter.  Refining the finitely many evaluations in this proof and
+removing rational slack establishes the inequality at the originally fixed
+stages.  Thus every finite intersection is ordered, and nesting follows
+from finite maxima and minima.  Neither a derivative scalar nor an infinite
+intersection witness is used.
+
+\begin{theorem}[Validity for a specified schedule]
+\label{thm:fixed-schedule-derivative}
+Suppose the rational widths
+$\operatorname{width}B_n^{h,\sigma}(x)$ tend to zero for the specified
+convex evaluator and schedules.  Then $D_{h,\sigma}f$ is valid at $x$
+and differentiates $f$ in the endpoint-residual sense.  Any two successful
+schedules, including schedules used with equivalent source evaluators,
+produce derivative pairs overlapping at every pair of stages.
+\end{theorem}
+\begin{proof}
+The finite intersection has width no greater than the current bracket.
+For the derivative assertion fix a positive rational slope tolerance.
+Choose one outer bracket narrower than a fixed fraction of that tolerance.
+Convexity brackets every nonzero rational increment shorter than its $h_j$
+by the same outer secants.  A sufficiently late derivative output lies in
+that chosen bracket.  For the particular increment under consideration,
+refine the finitely many source outputs in the proof until their widths
+are smaller than the tolerance times the increment's absolute value.
+The resulting residual pair lies inside the prescribed rational error
+interval.  This establishes the derivative relation, whose witnessing
+stage may depend on the increment; it does not change the evaluator's
+fixed execution rule.  The endpoint proof of derivative uniqueness then
+gives the final assertion.
+\end{proof}
+
+Orderedness and termination of each finite stage must be distinguished from
+validity.  For the exact evaluator of $|x|$ at zero all these brackets are
+$[-1,1]$.  Every stage runs, but no shrinking-width theorem is true there.
+
+\subsection{Resolution of the source and size of the increment}
+Write $w_m(t)=f_m^+(t)-f_m^-(t)$, a rational number.  The relevant
+resolution budget is
+\[
+ \rho_n(x)=\frac{
+ w_{\sigma(n,x)}(x-h_n)+2w_{\sigma(n,x)}(x)
+                 +w_{\sigma(n,x)}(x+h_n)}{h_n}.
+\]
+Smaller increments amplify source uncertainty.  Validity of $f$ at each
+fixed input alone gives no rate at the moving inputs $x\pm h_n$.
+
+If an independently specified valid evaluator $g$ differentiates $f$,
+and $\rho_n(x)\to0$, then the brackets above shrink.  To prove this,
+apply the two residual estimates at $h_n$ and $-h_n$, at sufficiently
+refined proof-side stages.  Their secant gap is bounded by twice the
+slope tolerance and a derivative-output width.  Returning to the prescribed
+source stage adds at most $\rho_n(x)$.  Remove the arbitrarily small
+proof-side width and then reduce the tolerance.  Unlike an adaptive
+construction, an arbitrary fixed schedule does \emph{not} inherit
+convergence from differentiability without a resolution condition.
+
+For a concrete smooth computation one often proves
+\[
+ \operatorname{width}B_n^{h,\sigma}(x)
+       \le K h_n+\rho_n(x)
+\]
+by a finite second-difference identity.  The constant $K$ and the source
+width bound are theorems about that computation, not runtime inputs
+requesting an accuracy test.
+
+\begin{example}[Two schedules for the same noisy square]
+For $m\ge1$, take $f_m(t)=[t^2-m^{-2},t^2+m^{-2}]$ and use
+$\sigma(n)=n$.  Exact rational arithmetic gives
+\[
+ B_n^h(x)=
+ [2x-h_n-2/(n^2h_n),\ 2x+h_n+2/(n^2h_n)].
+\]
+For $h_n=1/n$ the width is $6/n$; for $h_n=1/n^2$ it is $4+2/n^2$.
+The latter brackets are already nested, so finite intersections do not
+repair their failure to shrink.  With the exact square evaluator both
+choices work.  The validity theorem therefore concerns the evaluator
+\emph{together with} its schedules.
+\end{example}
+
+A uniform source-width bound $w_m(t)\le C/(m+1)$ on the sampling interval
+can be paired with $h_n=h_0/(n+1)$ and
+$\sigma(n)=(n+1)^2$: the resolution budget is at most
+$4C/(h_0(n+1))$.  Higher polynomial schedules give correspondingly smaller
+errors.  These are predetermined integer formulas, not precision searches.
+
+\subsection{Correcting curvature without changing the principle}
+If the finite inequalities prove that $f+Kx^2$ is convex, use its secants
+and subtract the exact derivative $2Kx$.  With exact polynomial arithmetic
+the resulting bracket can be written directly as
+\[
+ \left[
+ \frac{[f(x)-f(x-h_n)]_{\sigma(n)}^-}{h_n}-Kh_n,
+ \quad
+ \frac{[f(x+h_n)-f(x)]_{\sigma(n)}^+}{h_n}+Kh_n
+ \right].
+\]
+This is convenient for sine on an interval crossing a change of curvature.
+The polynomial terms cancel before interval evaluation; separately evaluating
+equal occurrences would unnecessarily enlarge the pairs.
+
+\subsection{A closed factorial-series example}
+\label{sec:fixed-factorial-sine}
+The following is an alternative representation, constructed from finite
+polynomials rather than from inverse sector area.  Put $N=n+5$ and
+\[
+ s_n(t)=\sum_{j=0}^{N-1}\frac{(-1)^jt^{2j+1}}{(2j+1)!},\qquad
+ c_n(t)=\sum_{j=0}^{N-1}\frac{(-1)^jt^{2j}}{(2j)!},\qquad
+ r_n=4\frac{2^{2N}}{(2N)!}.
+\]
+These are rational numbers for rational $t$.  On $[-2,2]$ the pairs
+$[s_n(t)-r_n,s_n(t)+r_n]$ and $[c_n(t)-r_n,c_n(t)+r_n]$ are nested
+and shrinking.  The factorial-tail comparison proves nesting, not merely
+agreement with an externally supplied sine or cosine.  The series chapter
+gives the general finite-tail argument.
+
+For $h_n=1/(n+1)$ one has $r_n\le h_n^2$.  Indeed the tail-term ratio
+from index $10$ onward is at most $1/2$, so
+\[
+ r_n\le4\frac{2^{10}}{10!}\,2^{-2n}\le(n+1)^{-2}.
+\]
+The last inequality follows from $2^n\ge n+1$ by induction.
+
+Finite polynomial calculations on $|t|,|t+h|\le2$ give
+\[
+ \left|\frac{s_n(t+h)-s_n(t)}h-c_n(t)\right|\le34|h|,
+ \qquad |c_n(t)-c_n(u)|\le16|t-u|.
+\]
+For an elementary derivation, $s_n'=c_n$ is a coefficient identity.
+The absolute derivative polynomials are bounded by the finite exponential
+majorant at $2$, which is less than $8$: terms through degree four sum
+to $7$, and the remaining terms sum to at most $2/5$ by their ratio
+bound.  The polynomial FTC and its twice-integrated remainder give even
+smaller constants; the displayed conservative constants suffice here.
+This invokes only the previously proved finite polynomial identities.
+
+Consequently, for $|x|\le1$, each left and right center secant is within
+$50h_n$ of $c_n(x)$.  Define
+\[
+ B_n(x)=\left[
+ \frac{s_n(x)-s_n(x-h_n)-2r_n}{h_n}-50h_n,
+ \quad
+ \frac{s_n(x+h_n)-s_n(x)+2r_n}{h_n}+50h_n
+ \right].
+\]
+It uses only the sine pair evaluator, the fixed quadratic correction,
+and the same stage $n$.  No cosine evaluation occurs in its definition.
+The finite secant estimates prove that $B_n(x)$ contains the entire
+cosine pair $[c_n(x)-r_n,c_n(x)+r_n]$, since $h_n\le1$ and
+$2r_n/h_n\ge r_n$.  They also give
+\[
+ \operatorname{width}B_n(x)\le200h_n+4r_n/h_n\le204/(n+1).
+\]
+The prefix intersections contain the stage-$n$ cosine pair: later cosine
+pairs lie in earlier ones, so each is in all earlier $B_j$.  Thus the
+intersections are valid and overlap the cosine evaluator at every pair
+of stages.  The all-increment polynomial estimate and the factorial tails
+also give the endpoint derivative relation, not just convergence along
+one sequence of increments.
+
+This proves the derivative comparison for the radian-coordinate factorial
+representation.  In the book's normalized angle coordinate the intended
+identity is $D S=\pi C$.  Multiplication by the computed $\pi$ and
+evaluation on its shrinking rational input pairs require their own fixed
+schedules and domain bounds; identifying that representation with the
+geometric circle construction is a separate comparison.  A radian-series
+proof must not be advertised as completing that geometric comparison.
+
+\subsection{Using a fixed derivative in an integral}
+An integral stage may likewise prescribe a finite partition and the
+stages used for its derivative samples.  Its proof then bounds the mesh
+error and the finite sum of sample widths.  For example, a derivative
+width bound $C/(m+1)$ permits polynomial reindexing of those samples.
+No stopping test is required inside the derivative evaluator.  The
+endpoint-only FTC below identifies the resulting integral whenever the
+chosen rectangle schedule has a proved shrinking-width bound.
