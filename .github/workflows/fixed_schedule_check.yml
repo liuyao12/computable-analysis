@@ -14,28 +14,38 @@ jobs:
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v5
-      - name: Inspect the existing finite proof interfaces
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          files = {
-            'Basic.lean': ['def ValidCompute', 'def Valid', 'def WidthsShrinkToZero', 'def ShrinksToZero', 'def intersection', 'theorem equiv_of', 'def prefixStabilize'],
-            'RotationSeries.lean': ['def uniformRotationTailStart', 'def uniformRotationTailTerms', 'def uniformRotationTailMagnitude', 'def uniformRotationTailRadius', 'theorem uniformRotationBox', 'theorem uniformRotationExpRaw'],
-            'Series.lean': ['def halfDecayShift', 'theorem halfDecayShift_spec', 'theorem half_pow_le', 'theorem factorialTailTerm_le_geometric'],
-          }
-          for file, patterns in files.items():
-            lines = (Path('ComputableAnalysis') / file).read_text().splitlines()
-            for i, line in enumerate(lines):
-              if any(p in line for p in patterns):
-                print('\n###', file, i+1)
-                print('\n'.join(lines[i:i+24]))
-          PY
       - uses: leanprover/lean-action@v1
         with:
           auto-config: false
-          build: true
-          build-args: "ComputableAnalysis.RotationTaylorBridge"
+          build: false
           test: false
           lint: false
-      - name: Check explicit proof interfaces
-        run: lake env lean blueprint/checks/FixedScheduleProbe.lean
+      - name: Compile fixed-schedule derivative
+        run: |
+          set +e
+          lake build ComputableAnalysis.FixedScheduleSine > /tmp/fixed-proof.log 2>&1
+          result=$?
+          python - <<'PY'
+          from pathlib import Path
+          lines=Path('/tmp/fixed-proof.log').read_text().splitlines()
+          printing=False
+          for line in lines:
+            if 'FixedScheduleSine' in line or 'error:' in line or 'Build completed' in line:
+              printing=True
+            if printing:
+              print(line)
+          PY
+          exit "$result"
+      - name: Inspect theorem dependencies
+        run: |
+          cat > /tmp/fixed-audit.lean <<'EOF'
+          import ComputableAnalysis.FixedScheduleSine
+          open ComputableAnalysis FixedSchedule
+          #print axioms sineDerivative_valid
+          #print axioms sineDerivative_output_overlap
+          #check sineDerivative_width_le
+          #eval ((sineDerivative (1/2)).compute 4).width
+          EOF
+          lake env lean /tmp/fixed-audit.lean
+      - name: Audit the rational foundation
+        run: python blueprint/checks/check_foundation_imports.py
