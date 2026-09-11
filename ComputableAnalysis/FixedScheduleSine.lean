@@ -14,41 +14,41 @@ namespace ComputableAnalysis
 namespace FixedSchedule
 
 /-- Finite intersections with no numerical stopping condition. -/
-def prefix (B : Nat -> QInterval) : Nat -> QInterval
+def intersectPrefix (B : Nat -> QInterval) : Nat -> QInterval
   | 0 => B 0
-  | n + 1 => QInterval.intersection (prefix B n) (B (n + 1))
+  | n + 1 => QInterval.intersection (intersectPrefix B n) (B (n + 1))
 
 def prefixRaw (B : Nat -> QInterval) : RealRaw where
-  compute := prefix B
+  compute := intersectPrefix B
 
 theorem prefix_subset_current (B : Nat -> QInterval) (n : Nat) :
-    (B n).ContainsInterval (prefix B n) := by
+    (B n).ContainsInterval (intersectPrefix B n) := by
   cases n with
   | zero => exact ⟨Rat.le_refl, Rat.le_refl⟩
   | succ n =>
-      change (B (n+1)).lo <= max (prefix B n).lo (B (n+1)).lo ∧
-        min (prefix B n).hi (B (n+1)).hi <= (B (n+1)).hi
+      change (B (n+1)).lo <= max (intersectPrefix B n).lo (B (n+1)).lo ∧
+        min (intersectPrefix B n).hi (B (n+1)).hi <= (B (n+1)).hi
       constructor <;> grind
 
 theorem prefix_contains (B : Nat -> QInterval) (A : RealRaw)
     (hA : A.Valid)
     (hB : ∀ n, (B n).ContainsInterval (A.compute n)) (n : Nat) :
-    (prefix B n).ContainsInterval (A.compute n) := by
+    (intersectPrefix B n).ContainsInterval (A.compute n) := by
   induction n with
   | zero => exact hB 0
   | succ n ih =>
       have hn := hA.2.1 n (n+1) (Nat.le_succ n)
       have hb := hB (n+1)
-      change (prefix B n).lo <= (A.compute n).lo ∧
-        (A.compute n).hi <= (prefix B n).hi at ih
+      change (intersectPrefix B n).lo <= (A.compute n).lo ∧
+        (A.compute n).hi <= (intersectPrefix B n).hi at ih
       change (B (n+1)).lo <= (A.compute (n+1)).lo ∧
         (A.compute (n+1)).hi <= (B (n+1)).hi at hb
-      change max (prefix B n).lo (B (n+1)).lo <= (A.compute (n+1)).lo ∧
-        (A.compute (n+1)).hi <= min (prefix B n).hi (B (n+1)).hi
+      change max (intersectPrefix B n).lo (B (n+1)).lo <= (A.compute (n+1)).lo ∧
+        (A.compute (n+1)).hi <= min (intersectPrefix B n).hi (B (n+1)).hi
       constructor <;> grind
 
 theorem prefix_nested (B : Nat -> QInterval) {n m : Nat} (hnm : n <= m) :
-    (prefix B n).ContainsInterval (prefix B m) := by
+    (intersectPrefix B n).ContainsInterval (intersectPrefix B m) := by
   induction m with
   | zero =>
       have hn : n = 0 := by omega
@@ -59,14 +59,14 @@ theorem prefix_nested (B : Nat -> QInterval) {n m : Nat} (hnm : n <= m) :
       · subst n
         exact ⟨Rat.le_refl, Rat.le_refl⟩
       · have hold := ih (by omega)
-        change (prefix B n).lo <= (prefix B m).lo ∧
-          (prefix B m).hi <= (prefix B n).hi at hold
-        change (prefix B n).lo <= max (prefix B m).lo (B (m+1)).lo ∧
-          min (prefix B m).hi (B (m+1)).hi <= (prefix B n).hi
+        change (intersectPrefix B n).lo <= (intersectPrefix B m).lo ∧
+          (intersectPrefix B m).hi <= (intersectPrefix B n).hi at hold
+        change (intersectPrefix B n).lo <= max (intersectPrefix B m).lo (B (m+1)).lo ∧
+          min (intersectPrefix B m).hi (B (m+1)).hi <= (intersectPrefix B n).hi
         constructor <;> grind
 
 theorem prefix_width_le (B : Nat -> QInterval) (n : Nat) :
-    (prefix B n).width <= (B n).width := by
+    (intersectPrefix B n).width <= (B n).width := by
   have h := prefix_subset_current B n
   unfold QInterval.ContainsInterval QInterval.width at *
   grind
@@ -74,14 +74,14 @@ theorem prefix_width_le (B : Nat -> QInterval) (n : Nat) :
 theorem prefix_valid (B : Nat -> QInterval) (A : RealRaw)
     (hA : A.Valid) (hB : ∀ n, (B n).ContainsInterval (A.compute n))
     (hwidth : RealRaw.WidthsShrinkToZero B) : (prefixRaw B).Valid := by
-  have hordered (n : Nat) : (prefix B n).lo <= (prefix B n).hi := by
+  have hordered (n : Nat) : (intersectPrefix B n).lo <= (intersectPrefix B n).hi := by
     have hc := prefix_contains B A hA hB n
     have ha := RealRaw.interval_order_of_valid A hA n
     unfold QInterval.ContainsInterval at hc
     grind
   refine ⟨?_, ?_, ?_⟩
   · intro n
-    change 0 <= (prefix B n).width
+    change 0 <= (intersectPrefix B n).width
     unfold QInterval.width
     have ho := hordered n
     grind
@@ -152,11 +152,11 @@ theorem radius_le_step_sq (n : Nat) :
     rw [hs]
     omega
   have hg := RationalMajorant.factorialTailTerm_le_geometric_from_start
-    (C := (2 : Rat)) (N := 10) (by decide) (by decide) (2*n)
-  have hcoef : 4 * RationalMajorant.factorialTailTerm 2 10 <= 1 := by decide
-  have hpow0 : 0 <= ((1 : Rat)/2)^(2*n) := Rat.pow_nonneg (by decide)
+    (C := (2 : Rat)) (N := 10) (by decide) (by native_decide) (2*n)
+  have hcoef : 4 * RationalMajorant.factorialTailTerm 2 10 <= 1 := by native_decide
+  have hpow0 : 0 <= ((1 : Rat)/2)^(2*n) := Rat.pow_nonneg (by native_decide)
   have hmajor := RationalMajorant.half_pow_le_one_div_succ n
-  have hhalf0 : 0 <= ((1 : Rat)/2)^n := Rat.pow_nonneg (by decide)
+  have hhalf0 : 0 <= ((1 : Rat)/2)^n := Rat.pow_nonneg (by native_decide)
   have hp0 : 0 <= step n := Rat.le_of_lt (step_pos n)
   change ((1 : Rat)/2)^n <= step n at hmajor
   have hsquare : ((1 : Rat)/2)^(2*n) <= step n * step n := by
@@ -252,8 +252,8 @@ private theorem bracket_arithmetic (a b c d r h : Rat)
   have hd : r <= 2*r/h := by
     apply Rat.le_of_mul_le_mul_right (c := h)
     · have hm := Rat.mul_le_mul_of_nonneg_left hsmall hr
-      rw [Rat.div_def]
-      grind [Rat.mul_assoc, Rat.mul_comm]
+      have htwo : r*h <= 2*r := by grind [Rat.mul_one]
+      simpa only [Rat.div_def, Rat.mul_assoc, hc, Rat.mul_one] using htwo
     · exact hp
   dsimp only [QInterval.ContainsInterval, QInterval.width]
   simp only [Rat.div_def] at *
@@ -292,7 +292,7 @@ theorem sineBracket_width_le {x : Rat} (hx : qabs x <= 1) (n : Nat) :
     rw [Rat.div_def, Rat.div_def, Rat.one_mul]
   rw [heq]
   rw [Rat.div_def] at hw
-  grind [Rat.mul_assoc, Rat.mul_comm]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_one]
 
 theorem sineDerivative_valid {x : Rat} (hx : qabs x <= 1) :
     (sineDerivative x).Valid := by
