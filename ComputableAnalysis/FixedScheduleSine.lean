@@ -252,7 +252,8 @@ private theorem bracket_arithmetic (a b c d r h : Rat)
   have hd : r <= 2*r/h := by
     apply Rat.le_of_mul_le_mul_right (c := h)
     · have hm := Rat.mul_le_mul_of_nonneg_left hsmall hr
-      have htwo : r*h <= 2*r := by grind [Rat.mul_one]
+      simp only [Rat.mul_one] at hm
+      have htwo : r*h <= 2*r := by grind
       simpa only [Rat.div_def, Rat.mul_assoc, hc, Rat.mul_one] using htwo
     · exact hp
   dsimp only [QInterval.ContainsInterval, QInterval.width]
@@ -290,9 +291,12 @@ theorem sineBracket_width_le {x : Rat} (hx : qabs x <= 1) (n : Nat) :
   have heq : 204 / ((n+1 : Nat) : Rat) = 204*step n := by
     unfold step
     rw [Rat.div_def, Rat.div_def, Rat.one_mul]
+  have hmul : step n * step n * (step n)⁻¹ = step n := by
+    rw [Rat.mul_assoc, hc, Rat.mul_one]
+  rw [hmul] at hrdiv
   rw [heq]
   rw [Rat.div_def] at hw
-  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_one]
+  grind [Rat.mul_assoc, Rat.mul_comm]
 
 theorem sineDerivative_valid {x : Rat} (hx : qabs x <= 1) :
     (sineDerivative x).Valid := by
