@@ -1,0 +1,22 @@
+import ComputableAnalysis.RotationTaylorBridge
+open ComputableAnalysis
+open ComputableAnalysis.RotationSeries
+#check RealRaw.ValidCompute
+#check RealRaw.Valid
+#check RealRaw.WidthsShrinkToZero
+#check ShrinksToZero
+#check QInterval.Overlaps
+#check RealRaw.equiv_refl
+#check ComplexRaw.realPart_valid
+#check uniformRotationExpRaw_valid
+#check uniformRotationBox_nested
+#check uniformRotationBox_width
+#check uniformRotationTailRadius_nonneg
+#check uniformRotationTailRadius_le_geometric
+#check uniformRotationSinCenter_secant_error_le_thirty_four
+#check uniformRotationCenter_input_lipschitz
+#check Nat.succ_le_two_pow
+#check Nat.le_two_pow
+#check RationalMajorant.factorialTailTerm_le_geometric_from_start
+#check RationalMajorant.halfDecayShift_spec
+#print axioms uniformRotationSinCenter_secant_error_le_thirty_four

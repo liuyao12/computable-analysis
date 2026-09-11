@@ -1,0 +1,41 @@
+name: Fixed-schedule derivative proof check
+on:
+  push:
+    branches: [work/fixed-schedule-sine]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fixed-schedule-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+      - name: Inspect the existing finite proof interfaces
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          files = {
+            'Basic.lean': ['def ValidCompute', 'def Valid', 'def WidthsShrinkToZero', 'def ShrinksToZero', 'def intersection', 'theorem equiv_of', 'def prefixStabilize'],
+            'RotationSeries.lean': ['def uniformRotationTailStart', 'def uniformRotationTailTerms', 'def uniformRotationTailMagnitude', 'def uniformRotationTailRadius', 'theorem uniformRotationBox', 'theorem uniformRotationExpRaw'],
+            'Series.lean': ['def halfDecayShift', 'theorem halfDecayShift_spec', 'theorem half_pow_le', 'theorem factorialTailTerm_le_geometric'],
+          }
+          for file, patterns in files.items():
+            lines = (Path('ComputableAnalysis') / file).read_text().splitlines()
+            for i, line in enumerate(lines):
+              if any(p in line for p in patterns):
+                print('\n###', file, i+1)
+                print('\n'.join(lines[i:i+24]))
+          PY
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: true
+          build-args: "ComputableAnalysis.RotationTaylorBridge"
+          test: false
+          lint: false
+      - name: Check explicit proof interfaces
+        run: lake env lean blueprint/checks/FixedScheduleProbe.lean
