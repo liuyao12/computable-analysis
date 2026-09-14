@@ -4,10 +4,10 @@ import ComputableAnalysis.GeometricRotationODE
 /-!
 # Finite clock estimates for geometric sine differentiation
 
-All inputs and all selected interval endpoints are rational.  The clock is
+All inputs and all selected interval endpoints are rational. The clock is
 computed by the existing rectangle arctangent; no derivative theorem about
-sine or inverse functions is assumed.  Its exact tangent-increment identity
-reduces the estimates to rational algebra and elementary rectangle bounds.
+sine or inverse functions is assumed. Its tangent-increment identity reduces
+the estimates to rational algebra and elementary rectangle bounds.
 -/
 
 namespace ComputableAnalysis
@@ -89,11 +89,10 @@ private theorem tangent_increment_bounds
   rw [htEq]
   refine ⟨ht0, ?_, ?_, ?_⟩
   · simpa only [Rat.mul_one] using ht1
-  · simpa only [Rat.div_def] using ht2
+  · simpa only [Rat.div_def, Rat.one_mul] using ht2
   · rw [herrEq, qabs_neg, qabs_eq_self_of_nonneg herr0]
     simpa only [Rat.mul_one] using herr1
 
-/-- The kernel changes by at most twice the change of slope on [0,1]. -/
 theorem kernel_lipschitz {u v : Rat}
     (hu0 : 0 <= u) (hu1 : u <= 1) (hv0 : 0 <= v) (hv1 : v <= 1) :
     qabs (integralKernel v-integralKernel u) <= 2*qabs (v-u) := by
@@ -124,8 +123,6 @@ theorem kernel_lipschitz {u v : Rat}
   have hm := Rat.mul_le_mul_of_nonneg_left hfactor2 (qabs_nonneg (v-u))
   simpa only [Rat.mul_comm] using hm
 
-/-- Forward clock increments: the width error is explicitly retained.
-The second estimate is the lower stretching bound used for the inverse. -/
 private theorem clock_forward_bounds
     {u v a b : Rat} (hu0 : 0 <= u) (huv : u < v) (hv1 : v <= 1)
     (n : Nat)
@@ -160,6 +157,7 @@ private theorem clock_forward_bounds
       (arctanIntegralRectangleCompute v n).hi -
         (arctanIntegralRectangleCompute u n).lo at hover
   have htan := arctanIntegralRectangleCompute_tangent_box_contains ht.1 n
+  unfold QInterval.ContainsInterval at htan
   have ht1 : t <= 1 := by grind
   have hk := kernel_bounds ht.1 ht1
   have hlower := arctanIntegralRectangleCompute_input_mul_kernel_le_lower ht.1 n
@@ -177,7 +175,7 @@ private theorem clock_forward_bounds
     apply qabs_le_of_neg_le_le
     all_goals
       dsimp [w]
-      unfold QInterval.ContainsInterval QInterval.width at htan ⊢
+      unfold QInterval.width
       grind
   have htriangle := qabs_add_le (a-b-t) (t-d*integralKernel u)
   have hid : a-b-d*integralKernel u = (a-b-t)+(t-d*integralKernel u) := by grind
@@ -209,7 +207,8 @@ theorem clock_bounds
       (arctanIntegralRectangleCompute v n).width
     qabs (a-b-(v-u)*integralKernel u) <= 4*d*d+w ∧
       d <= 4*(qabs (a-b)+w) := by
-  rcases Rat.lt_trichotomy u v with huv | heq | hvu
+  have hcases : u < v ∨ u = v ∨ v < u := by grind
+  rcases hcases with huv | heq | hvu
   · have h := clock_forward_bounds hu0 huv hv1 n ha0 ha1 hb0 hb1
     have hd0 : 0 <= v-u := by grind
     have hsq0 := Rat.mul_nonneg hd0 hd0
@@ -234,7 +233,9 @@ theorem clock_bounds
     have hd0 : 0 <= u-v := by grind
     have hflip : v-u = -(u-v) := by grind
     have hba : b-a = -(a-b) := by grind
-    rw [hflip, qabs_neg, qabs_eq_self_of_nonneg hd0] at hk ⊢
+    have habsflip : qabs (v-u) = u-v := by
+      rw [hflip, qabs_neg, qabs_eq_self_of_nonneg hd0]
+    rw [habsflip] at hk
     have hid : a-b-(v-u)*integralKernel u =
         -(b-a-(u-v)*integralKernel v) +
         (u-v)*(integralKernel u-integralKernel v) := by grind
@@ -245,13 +246,15 @@ theorem clock_bounds
     rw [qabs_neg, qabs_mul, qabs_eq_self_of_nonneg hd0,
       hkflip, qabs_neg] at htri
     have hmul := Rat.mul_le_mul_of_nonneg_left hk hd0
+    dsimp only
+    rw [habsflip]
     constructor
-    · rw [← hflip, hid]
+    · rw [hid]
       have hh := h.1
       grind
     · have hs := h.2
       rw [hba, qabs_neg] at hs
-      dsimp only at hs ⊢
+      dsimp only at hs
       grind
 
 end GeometricSineSecant
