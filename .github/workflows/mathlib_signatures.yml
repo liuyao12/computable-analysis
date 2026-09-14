@@ -1,0 +1,34 @@
+name: Mathlib import signatures
+on:
+  push:
+    branches: [work/cosine-basepoint]
+    paths: ['.github/workflows/mathlib_signatures.yml']
+permissions:
+  contents: read
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/cache/restore@v5
+        with:
+          path: /tmp/comparison-mathlib
+          key: cosine-mathlib-51e6992efd06126df61a496bebf8f49482a4e129
+          fail-on-cache-miss: true
+      - name: Pack IR signatures and import metadata
+        run: |
+          python3 - <<'PY'
+          import pathlib,tarfile,collections
+          root=pathlib.Path('/tmp/comparison-mathlib')
+          files=[p for p in root.rglob('*') if p.is_file() and '/lib/lean/' in str(p)
+                 and (p.name.endswith('.ir.sig') or p.suffix in ['.extra','.ilean'])]
+          print(collections.Counter(p.suffix for p in files))
+          with tarfile.open('/tmp/mathlib-signatures.tar.gz','w:gz') as out:
+              for p in files:out.add(p,arcname=str(p.relative_to(root)),recursive=False)
+          print('Bytes',pathlib.Path('/tmp/mathlib-signatures.tar.gz').stat().st_size)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mathlib-signatures
+          path: /tmp/mathlib-signatures.tar.gz
+          retention-days: 2
+          compression-level: 0
