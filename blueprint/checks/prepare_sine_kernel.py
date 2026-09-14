@@ -1,8 +1,4 @@
-"""Replace native evaluation only in the local sine proof import closure.
-
-This script changes proof tactics, not mathematical definitions/statements.
-The CI job builds and audits the resulting sources before publishing changes.
-"""
+"""Prepare the local sine proof closure for a transitive kernel-only audit."""
 from pathlib import Path
 import re
 
@@ -12,6 +8,10 @@ text = entry.read_text()
 text = text.replace("(f (x+h)).compute n |>.lo <= a", "((f (x+h)).compute n).lo <= a")
 text = text.replace("∀ n c : _,", "∀ (n : Nat) (c : Rat),")
 text = text.replace("Rat.mul_one, Rat.natCast_one, step", "Rat.mul_one, step")
+text = text.replace(
+    "  simpa only [Rat.mul_one, step] using Rat.le_trans hr hm",
+    "  have hcast : ((1 : Nat) : Rat) = (1 : Rat) := by decide +kernel\n"
+    "  simpa only [Rat.mul_one, step, hcast] using Rat.le_trans hr hm")
 entry.write_text(text)
 
 seen = set()
@@ -33,3 +33,10 @@ def visit(path):
 
 visit(entry)
 print(f"Local dependency closure: {len(seen)} modules")
+
+for filename in ['IntegralIdentities.lean', 'ArctanGeometry.lean']:
+    lines=(root/'ComputableAnalysis'/filename).read_text().splitlines()
+    for i,line in enumerate(lines):
+        if re.match(r'^(?:def|structure|theorem) .*?(?:ArctanInverseBisection|arctanInverseBisection|tangentOnUnit|arctanIntegralRectangleCompute.*(?:difference|increment|secant|deriv|strict))',line):
+            count=70 if line.startswith('structure ') else 18
+            print(f'\nINTERFACE {filename}:{i+1}\n'+'\n'.join(lines[i:i+count]))
