@@ -14,25 +14,6 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v5
-      - name: Prepare source inspection artifact
-        run: |
-          tar -czf /tmp/cosine-ftc-sources.tar.gz ComputableAnalysis ComputableAnalysis.lean lean-toolchain lakefile.toml lake-manifest.json FORMALIZATION_GUIDE.md skills
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-          for name in ['Differential.lean', 'FTC.lean', 'Integral.lean', 'IntegralIdentities.lean', 'SinPiIntegral.lean', 'ArctanEffectiveFTC.lean', 'GeometricRotationODE.lean']:
-              p = Path('ComputableAnalysis') / name
-              if not p.exists(): continue
-              print('\nDECLARATIONS', name)
-              for i, line in enumerate(p.read_text().splitlines(), 1):
-                  if re.match(r'^(?:private )?(?:noncomputable )?(?:structure|def|theorem|abbrev|namespace) ', line):
-                      print(f'{i}: {line}')
-          PY
-      - uses: actions/upload-artifact@v4
-        with:
-          name: cosine-ftc-sources
-          path: /tmp/cosine-ftc-sources.tar.gz
-          retention-days: 3
       - uses: leanprover/lean-action@v1
         with:
           auto-config: false
@@ -53,6 +34,24 @@ jobs:
           else
             lake build ComputableAnalysis.NormalizedSineDerivative
           fi
+      - name: Export local proof environment
+        run: |
+          prefix=$(lean --print-prefix)
+          du -sh "$prefix" .lake/build/lib/lean
+          mkdir -p /tmp/lean-proof-runtime
+          cp -a "$prefix/bin" /tmp/lean-proof-runtime/
+          mkdir -p /tmp/lean-proof-runtime/lib
+          cp -a "$prefix/lib/lean" /tmp/lean-proof-runtime/lib/
+          find /tmp/lean-proof-runtime -type f \( -name '*.a' -o -name '*.ilean' -o -name '*.c' \) -delete
+          cp -a .lake/build/lib/lean /tmp/lean-proof-runtime/project
+          tar -czf /tmp/lean-proof-runtime.tar.gz -C /tmp lean-proof-runtime
+          ls -lh /tmp/lean-proof-runtime.tar.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cosine-ftc-proof-runtime
+          path: /tmp/lean-proof-runtime.tar.gz
+          retention-days: 1
+          compression-level: 0
       - uses: actions/cache/save@v5
         if: always()
         with:
