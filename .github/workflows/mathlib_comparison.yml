@@ -32,40 +32,27 @@ jobs:
           cd /tmp/comparison-mathlib
           test "$(git rev-parse HEAD)" = 51e6992efd06126df61a496bebf8f49482a4e129
           lake exe cache get Mathlib/Analysis/SpecialFunctions/Integrals/Basic.lean Mathlib/Tactic.lean
-      - name: Export comparison imports for local checked proof iteration
+          printf 'import Mathlib.Analysis.SpecialFunctions.Integrals.Basic\nimport Mathlib.Tactic\n#check integral_cos\n' > /tmp/MathlibCheck.lean
+          lake env lean /tmp/MathlibCheck.lean
+      - name: Export interpreter and shared-library artifacts
         run: |
           python3 - <<'PY'
-          import pathlib, tarfile
+          import pathlib, tarfile, collections
           root = pathlib.Path('/tmp/comparison-mathlib')
           paths = []
           for path in root.rglob('*'):
               if not path.is_file() or '.git' in path.parts: continue
-              if path.suffix == '.lean' or path.name in ['lean-toolchain','lake-manifest.json','lakefile.toml']:
+              if path.suffix in ['.ir','.so'] or path.name.endswith('.bc'):
                   paths.append(path)
-              elif '/lib/lean/' in str(path) and ('.olean' in path.name or path.suffix == '.so'):
-                  paths.append(path)
-          with tarfile.open('/tmp/mathlib-comparison.tar.gz','w:gz',compresslevel=3) as out:
+          print(collections.Counter(p.suffix for p in paths))
+          for path in paths[:30]: print(path.relative_to(root))
+          with tarfile.open('/tmp/mathlib-interpreter.tar.gz','w:gz',compresslevel=3) as out:
               for path in paths: out.add(path, arcname=str(path.relative_to(root)), recursive=False)
-          print('Packed', len(paths), 'files; bytes', pathlib.Path('/tmp/mathlib-comparison.tar.gz').stat().st_size)
+          print('Packed', len(paths), 'files; bytes', pathlib.Path('/tmp/mathlib-interpreter.tar.gz').stat().st_size)
           PY
-          split -b 300M /tmp/mathlib-comparison.tar.gz /tmp/comparison.part.
       - uses: actions/upload-artifact@v4
         with:
-          name: mathlib-comparison-aa
-          path: /tmp/comparison.part.aa
+          name: mathlib-interpreter
+          path: /tmp/mathlib-interpreter.tar.gz
           retention-days: 2
           compression-level: 0
-      - uses: actions/upload-artifact@v4
-        with:
-          name: mathlib-comparison-ab
-          path: /tmp/comparison.part.ab
-          retention-days: 2
-          compression-level: 0
-          if-no-files-found: ignore
-      - uses: actions/upload-artifact@v4
-        with:
-          name: mathlib-comparison-ac
-          path: /tmp/comparison.part.ac
-          retention-days: 2
-          compression-level: 0
-          if-no-files-found: ignore
