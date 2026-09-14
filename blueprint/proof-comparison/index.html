@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Two proofs of the cosine integral · Computable Analysis</title>
+<link rel="stylesheet" href="style.css"><script src="app.js" defer></script></head>
+<body>
+<header><nav><a href="../index.html">← Computable Analysis</a><span><a href="../dep_graph_document.html">Manuscript graph</a> <a href="summary.json">Measurements JSON</a></span></nav>
+<p class="eyebrow">PROOF COMPARISON / GEOMETRIC TRIGONOMETRY</p>
+<h1>One integral. Two proofs.</h1>
+<p class="intro">A concavity-based FTC argument and a direct finite-inequality argument, compared through their stored Lean proof terms—not their import lists.</p>
+<div class="statement"><div class="formula">∫<sub>a</sub><sup>b</sup> C(x) dx ≃ [S(b) − S(a)] / π</div><p>The same <code>IntegralCosineStatement</code>, the same cosine-sum program. Rational 0 ≤ a ≤ b ≤ ½; the existing inverse-arctangent provider B. Here S and C use the normalized angle.</p></div>
+<p id="provenance" class="muted">Loading the measured proof snapshot…</p><div id="checks" class="checks"></div>
+</header>
+<main>
+<section aria-labelledby="compare-title"><div class="section-head"><h2 id="compare-title">What the measurements say</h2><button id="toggle-metrics" type="button">More measurements</button></div>
+<div class="table-wrap"><table id="metrics"><thead><tr><th>Measurement</th><th class="direct-text">Direct inequalities</th><th class="ftc-text">Via FTC</th><th>What is counted</th></tr></thead><tbody></tbody></table></div>
+<p id="interpretation" class="note"></p>
+</section>
+<section id="graph-section" aria-labelledby="graph-title"><div class="section-head"><h2 id="graph-title">Dependency graph</h2><button id="fullscreen" type="button">Expand graph</button></div>
+<div class="toolbar"><div class="segmented" role="group" aria-label="Graph view"><button data-mode="overview" class="active">Proof overview</button><button data-mode="detail">Declaration neighborhood</button></div>
+<label>Route <select id="route"><option value="both">Both proofs</option><option value="direct">Direct path</option><option value="ftc">FTC path</option><option value="shared">Shared dependencies</option></select></label>
+<label><input id="companions" type="checkbox"> Show derivative consequences</label>
+<label id="depth-label" hidden>Depth <select id="depth"><option>1</option><option selected>2</option><option>3</option></select></label>
+<button id="zoom-in" type="button" aria-label="Zoom in">+</button><button id="zoom-out" type="button" aria-label="Zoom out">−</button><button id="fit" type="button">Fit</button></div>
+<div class="search-row"><label for="search">Find a declaration</label><input id="search" type="search" placeholder="e.g. sine_concave, integral_equiv_endpoint…" autocomplete="off"><div id="search-results" role="listbox"></div></div>
+<div class="legend"><span class="swatch shared">Shared</span><span class="swatch direct">Direct only</span><span class="swatch ftc">FTC only</span><span class="swatch auxiliary">Companion result</span><span>Arrows: prerequisite → user of that prerequisite</span></div>
+<p id="view-note" class="note"></p>
+<div class="graph-layout"><div id="canvas"><svg id="graph" role="img" aria-label="Interactive Lean dependency graph"><title>Two alternative proofs and their dependencies</title></svg><div id="graph-status" aria-live="polite"></div></div>
+<aside id="inspector" aria-label="Selected declaration"><h3>Inspect an actual proof edge</h3><p>Click a node to see its source, size, and references. Click an overview edge to see the exact chain of Lean declarations behind it.</p><p>Scroll to zoom; drag empty space to pan. Keyboard users can tab to every visible node.</p></aside></div>
+</section>
+<section class="methods" aria-labelledby="methods-title"><h2 id="methods-title">Reading the comparison correctly</h2>
+<details open><summary>Local cost, total cost, and shared foundations</summary><p>The final theorem is only the last step. “Project closure” includes the root and every transitively referenced project declaration, including compiler-generated helpers. Each declaration is counted once. “Exclusive” means it does not occur in the other proof’s closure; it is not a measure of mathematical independence from the common foundations. The shared arctangent, rational-circle, interval, and arithmetic infrastructure is visible rather than charged twice as new work.</p></details>
+<details><summary>Proof trees versus structural sharing</summary><p>Tree size counts <code>Lean.Expr</code> constructor occurrences with multiplicity, including implicit arguments, local binder types, and metadata; references to named constants are not unfolded. Distinct-subexpression size deduplicates structurally identical subexpressions within each stored body. Closure totals sum these sizes once per declaration, but do not deduplicate across declaration bodies. Neither number measures mathematical elegance or proof discovery difficulty. Native-computation certificates remain atomic references, not expanded arithmetic proofs.</p></details>
+<details><summary>Actual dependencies, contracted paths, and companion results</summary><p>The exporter reads constants referenced in both stored types and bodies, including opaque theorem bodies. The overview contracts paths through hidden nodes and removes redundant transitive edges. Every overview edge has an inspectable witness in the full reference graph; it is not a claim of a direct call. The declaration view shows direct reference edges and distinguishes body references from type-only references.</p><p>The computed sine derivative is a companion consequence of the same concavity and secant data. Its validity theorem is not itself a premise referenced by either final integral proof. Selecting “Show derivative consequences” displays these extra results separately, without adding them to either proof’s cost.</p></details>
+<details><summary>Source lines and kernel timing</summary><p>Source-line totals use the union of Lean-reported declaration ranges, excluding blank lines and nested comments. Overlapping ranges are counted once; synthetic declarations without ranges add no source lines. Counts depend on formatting.</p><p>Kernel timing synchronously checks only the final stored proof and compares its inferred type with the declared type, with all dependencies already loaded. Eleven trials follow a discarded warmup. It excludes imports, tactic elaboration, and recursively rechecking the prerequisite library. These small timings are environment-dependent, not end-to-end build benchmarks.</p></details>
+<details><summary>Verification and reproducibility</summary><p>The build runs the existing two-proof audit, compares the complete theorem types by definitional equality, checks forbidden transitive dependencies, and checks for <code>sorryAx</code>. The comparison exporter is tooling, not part of the mathematical foundation. Existing native-computation and standard Lean axioms remain visible in each proof’s trust report.</p><pre>lake build ComputableAnalysis.CosineFTC ComputableAnalysis.CosineIntegralViaFTC
+python3 blueprint/checks/check_two_cosine_proofs.py
+lake env lean blueprint/checks/ExportProofComparison.lean
+python3 blueprint/checks/build_proof_comparison.py</pre><p><a href="raw.json">Full extracted reference graph</a> · <a href="source-manifest.json">Source fingerprints</a> · <a href="ExportProofComparison.lean">Lean exporter</a></p><p>This page is a pinned proof snapshot, not a claim that every module in the repository builds. The feature audit and public root passed for the original proof commit; the separate <code>PiProofs.lean</code> CI target had source errors.</p></details>
+</section>
+</main><footer>Computable Analysis · One statement may have many named derivations. The graph records the derivations actually present in Lean.</footer>
+<div id="fatal" role="alert" hidden></div>
+</body></html>

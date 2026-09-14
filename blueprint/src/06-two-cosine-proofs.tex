@@ -1,0 +1,128 @@
+\chapter{One Cosine Integral, Two Checked Proofs}
+\label{ch:two-cosine-proofs}
+
+\begin{center}
+\href{proof-comparison/index.html}{\textbf{Open the measured proof comparison and interactive dependency graph}}
+\end{center}
+
+This chapter records two named Lean proofs of exactly the same proposition.
+The computation is fixed independently of either proof.  The interactive
+comparison extracts references from stored declaration types and bodies;
+it is not an import graph.  The manuscript graph below is a selected
+mathematical overview, while every edge in the interactive overview has
+an inspectable path through actual Lean references.
+
+\begin{definition}[The common cosine-integral statement]
+\label{def:cosine-comparison-statement}
+Let $B$ be the existing certified inverse-arctangent provider.  On rational
+$0\le a\le b\le1/2$, let $S,C$ be its geometric sine and cosine, with
+normalized angle.  Let $R_{k,n}$ be the existing cosine left rectangle sum
+on $k+1$ equal cells, evaluated at stage $n$, and set
+\[
+ I_n=\bigcap_{k=0}^{n}\operatorname{expand}
+       \left(R_{k,n},\frac{4000(b-a)^2}{k+1}\right).
+\]
+The common proposition is the equivalence of this integral program with
+$\operatorname{reciprocalPiRaw}(S(b)-S(a))$.
+Its Lean name is \code{CosineFTC.IntegralCosineStatement}.
+No integral endpoint, concavity, or derivative certificate is an additional
+hypothesis beyond the data already needed to define $S,C$.
+\end{definition}
+
+\begin{lemma}[The shared arctangent clock]
+\label{lem:cosine-comparison-clock}
+\leanok
+The rectangle computation of $\int_0^u(1+t^2)^{-1}\,dt$ is equivalent to
+the geometric arctangent computation.  The inverse provider computes the
+half-angle parameter satisfying $A(u)\simeq\pi x/2$.  Rational circle
+coordinates then compute $S,C$.  This foundation is shared by both proofs.
+\end{lemma}
+
+\begin{lemma}[Finite quadratic residual]
+\label{lem:cosine-comparison-residual}
+\uses{lem:cosine-comparison-clock}
+\leanok
+For a fixed positive rational increment $h$ in the chart, sufficiently
+late rational selections from the sine, cosine, and pi boxes satisfy
+$|s_1-s_0-hpc|\le4000h^2$.  This follows from rational circle and clock
+inequalities without invoking the normalized sine derivative or concave FTC.
+\end{lemma}
+
+\begin{theorem}[First proof: direct inequalities]
+\label{thm:cosine-comparison-direct}
+\uses{def:cosine-comparison-statement,lem:cosine-comparison-residual}
+\leanok
+The common cosine-integral statement holds.  The proof
+\code{CosineFTC.integral\_cosPi\_viaInequalities} telescopes finitely many
+rational sine increments, uses a shared reciprocal-pi corner, and transports
+the resulting bound to every pair of stages by nesting.  Finite
+intersections give the equivalence.
+\end{theorem}
+
+\begin{lemma}[Geometric supporting secants and concavity]
+\label{lem:cosine-comparison-concavity}
+\uses{lem:cosine-comparison-clock}
+\leanok
+Circle chords and tangent slopes give, for $x<y$,
+\[
+ \pi C(y)\preceq\frac{S(y)-S(x)}{y-x}\preceq\pi C(x).
+\]
+Removing arbitrary rational slack proves exact concavity of $S$ and
+$P=S/\pi$.  This argument uses neither a first nor a second derivative.
+The supporting secants for $P$ have slope computation $C$, with the proved
+conservative Lipschitz bound $32$.
+\end{lemma}
+
+\begin{theorem}[Companion: the constructed secant derivative]
+\label{thm:cosine-comparison-derivative}
+\uses{lem:cosine-comparison-concavity}
+\leanok
+For interior rational $x$, let $r=\min(x,1/2-x)$ and $h_k=r/(k+1)$.
+Intersect the outward forward/backward secant brackets for $k\le n$,
+all evaluated at stage $n$.  Concavity proves compatibility, and the
+quantitative slope bounds prove shrinking.  This sine-only derivative
+program is valid and equivalent to $\pi C(x)$.
+It is a companion consequence of the same certificate: its validity theorem
+is not itself a referenced premise of either final integral proof.
+\end{theorem}
+
+\begin{theorem}[General concave FTC]
+\label{thm:cosine-comparison-general-ftc}
+\leanok
+Exact concavity, valid supporting-slope computations, cross-stage secant
+bounds, and a proved Lipschitz bound suffice to compare finite derivative
+rectangle sums with primitive endpoints.  With relevant source widths at
+most $\tau$, the local rational estimate is
+\[
+ |F_n^-(y)-F_n^-(x)-hD_n^-(x)|\le Kh^2+(1+h)\tau.
+\]
+A common stage for finitely many samples, a finite telescope, and removal
+of rational slack establish the integral equivalence.  The certificate
+contains no assumed integral overlap or endpoint identity.
+\end{theorem}
+
+\begin{theorem}[Second proof: via concave FTC]
+\label{thm:cosine-comparison-ftc}
+\uses{def:cosine-comparison-statement,lem:cosine-comparison-concavity,thm:cosine-comparison-general-ftc}
+\leanok
+The identical common statement holds by
+\code{CosineFTC.integral\_cosPi\_viaFTC}.  Apply the general concave FTC
+to $P=S/\pi$ and $D=C$, then identify the endpoint difference by finite
+distributivity.  This proof neither calls the direct proof nor uses its
+quadratic-residual theorem.
+\end{theorem}
+
+\section{Quantitative comparison}
+The \href{proof-comparison/index.html}{interactive comparison} reports the
+final proof's stored expression size, the transitively referenced project
+declarations, shared and exclusive supporting material, source-range line
+counts, and a limited kernel recheck benchmark.  It distinguishes expanded
+expression-tree occurrences from structurally distinct subexpressions.
+Counts include generated helpers and implicit arguments.  They do not
+measure elegance, proof-discovery difficulty, or mathematical strength.
+
+The build verifies identical complete theorem types and the separation of
+the two proof paths.  Both share the earlier arctangent/area foundation.
+Axiom dependencies remain separately inspectable: absence of admitted
+proofs is not a claim that all upstream native computation was replaced by
+kernel-only arithmetic.  The web page pins its measured source revision.
