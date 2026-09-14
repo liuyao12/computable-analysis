@@ -8,6 +8,8 @@ on:
       - 'ComputableAnalysis.lean'
       - 'blueprint/checks/CosineFTCAudit.lean'
       - 'blueprint/checks/check_cosine_ftc.py'
+      - 'blueprint/checks/TwoCosineProofsAudit.lean'
+      - 'blueprint/checks/check_two_cosine_proofs.py'
       - '.github/workflows/cosine_ftc_check.yml'
       - 'lean-toolchain'
       - 'lakefile.toml'
@@ -40,12 +42,16 @@ jobs:
       - name: Build public import and cosine FTC
         run: lake build ComputableAnalysis
       - name: Check examples and transitive axiom dependencies
-        run: python3 blueprint/checks/check_cosine_ftc.py
+        run: |
+          python3 blueprint/checks/check_cosine_ftc.py
+          python3 blueprint/checks/check_two_cosine_proofs.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: cosine-ftc-axiom-audit
-          path: /tmp/cosine-ftc-audit.log
+          path: |
+            /tmp/cosine-ftc-audit.log
+            /tmp/two-cosine-proofs-audit.log
           retention-days: 30
       - uses: actions/cache/save@v5
         if: always()

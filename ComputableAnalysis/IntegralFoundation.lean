@@ -12,6 +12,7 @@ import ComputableAnalysis.FiniteSinePrefixFTC
 import ComputableAnalysis.PolynomialFTCValues
 import ComputableAnalysis.SinPiIntegral
 import ComputableAnalysis.CosineFTC
+import ComputableAnalysis.CosineIntegralViaFTC
 import ComputableAnalysis.TangentPullbackEffectiveFTC
 import ComputableAnalysis.StableRotationDerivative
 import ComputableAnalysis.FiniteLHopitalCertificate

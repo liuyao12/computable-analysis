@@ -158,5 +158,70 @@ def constructionFor (F : FunctionOnInterval)
   compute := (raw R radius).compute
   certificate := raw_valid hR hA hr hover
 
+/-- Intersect finitely many mesh enclosures at the current evaluation stage.
+Unlike `raw`, each fixed mesh may have a nonzero limiting width. -/
+def ofBoxes (C : Nat -> Nat -> QInterval) : RealRaw where
+  compute := fun n => intersectMeshes C n n
+
+private theorem intersect_lo_le {C : Nat -> Nat -> QInterval} (q n : Nat) (r : Rat)
+    (h : ∀ k, k <= n -> (C k q).lo <= r) :
+    (intersectMeshes C q n).lo <= r := by
+  induction n with
+  | zero => exact h 0 (Nat.le_refl 0)
+  | succ n ih =>
+      have hprev := ih (fun k hk => h k (by omega))
+      have hlast := h (n+1) (Nat.le_refl _)
+      change max (intersectMeshes C q n).lo (C (n+1) q).lo <= r
+      grind
+
+private theorem le_intersect_hi {C : Nat -> Nat -> QInterval} (q n : Nat) (r : Rat)
+    (h : ∀ k, k <= n -> r <= (C k q).hi) :
+    r <= (intersectMeshes C q n).hi := by
+  induction n with
+  | zero => exact h 0 (Nat.le_refl 0)
+  | succ n ih =>
+      have hprev := ih (fun k hk => h k (by omega))
+      have hlast := h (n+1) (Nat.le_refl _)
+      change r <= min (intersectMeshes C q n).hi (C (n+1) q).hi
+      grind
+
+/-- Compatibility, refinement, and a fixed-mesh width criterion suffice.
+In particular a convexity proof can supply compatibility without assuming
+that a derivative value already exists. -/
+theorem ofBoxes_valid {C : Nat -> Nat -> QInterval}
+    (compatible : ∀ k l q t, (C k q).lo <= (C l t).hi)
+    (nested : ∀ k q t, q <= t -> (C k q).ContainsInterval (C k t))
+    (small : ∀ eps : QPos, ∃ k N, ∀ n, N <= n -> (C k n).width <= eps.val) :
+    (ofBoxes C).Valid := by
+  have ordered (n : Nat) : ((ofBoxes C).compute n).lo <= ((ofBoxes C).compute n).hi := by
+    apply le_intersect_hi n n
+    intro l _hl
+    apply intersect_lo_le n n
+    intro k _hk
+    exact compatible k l n n
+  refine ⟨?_, ?_, ?_⟩
+  · intro n
+    have ho := ordered n
+    change 0 <= ((ofBoxes C).compute n).hi-((ofBoxes C).compute n).lo
+    grind
+  · intro n m hnm
+    have hh : ((ofBoxes C).compute n).ContainsInterval ((ofBoxes C).compute m) := by
+      apply intersectMeshes_contains_of_each
+      intro k hk
+      exact contains_trans (nested k n m hnm) (intersectMeshes_contains m (by omega : k <= m))
+    exact ⟨hh.1, ordered m, hh.2⟩
+  · intro eps
+    obtain ⟨k, N, hN⟩ := small eps
+    refine ⟨max k N, ?_⟩
+    intro n hn
+    exact Rat.le_trans (QInterval.width_le_of_contains (intersectMeshes_contains n (by omega : k <= n)))
+      (hN n (by omega))
+
+theorem ofBoxes_equiv {C : Nat -> Nat -> QInterval} {A : RealRaw}
+    (h : ∀ k q t, (C k q).Overlaps (A.compute t)) :
+    (ofBoxes C).Equiv A := by
+  intro n
+  exact (RealRaw.compareAt_overlap_iff _ _ n n).2 (intersectMeshes_overlap h n n n)
+
 end Integral.Dovetail
 end ComputableAnalysis

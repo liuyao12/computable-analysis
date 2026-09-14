@@ -1,43 +1,18 @@
 import ComputableAnalysis.GeometricSineFiniteBounds
 
-/-!
-# The normalized geometric sine derivative
-
-This statement uses the existing `sinPiRawOfArctan`, `cosPiRawOfArctan`, and
-`piCircleArea` computations verbatim. The inverse data B is exactly the data
-required by those definitions, not a differentiability assumption.
--/
-
+/-! Direct finite geometric inequalities. The statement below is a quadratic
+bound on positive increments, derived from rational circle/clock identities.
+It does not invoke a derivative, concavity, or FTC theorem. -/
 namespace ComputableAnalysis
-namespace GeometricSineDerivative
-
+namespace GeometricSineDirectBounds
 open ArctanGeometry IntegralIdentities SinPiIntegral
-open GeometricRotationODE GeometricSineSecant GeometricSineFiniteBounds
+open GeometricRotationODE GeometricSineSecant GeometricSineDerivative
+open GeometricSineFiniteBounds
 
-/-- The literal normalized derivative relation. Every rational selection
-from every sufficiently late sine, cosine, and pi output obeys the residual
-bound. In particular this covers all four corners of the pi-times-cosine
-product interval, not just one chosen approximation. -/
-def HasPiScaledDerivativeOnHalf (B : ArctanInverseBisection) : Prop :=
-  ∀ eps : QPos, ∃ delta : QPos, ∀ x h : Rat,
-    ∀ (hx : OnHalf x) (hxh : OnHalf (x+h)),
-    h ≠ 0 -> qabs h <= delta.val ->
-    ∃ N : Nat, ∀ n : Nat, N <= n -> ∀ a b c p : Rat,
-      ((sinPiRawOfArctan B (x+h) hxh).compute n).lo <= a ->
-      a <= ((sinPiRawOfArctan B (x+h) hxh).compute n).hi ->
-      ((sinPiRawOfArctan B x hx).compute n).lo <= b ->
-      b <= ((sinPiRawOfArctan B x hx).compute n).hi ->
-      ((cosPiRawOfArctan B x hx).compute n).lo <= c ->
-      c <= ((cosPiRawOfArctan B x hx).compute n).hi ->
-      (piCircleArea.compute n).lo <= p -> p <= (piCircleArea.compute n).hi ->
-      qabs (a-b-h*(p*c)) <= eps.val*qabs h
-
-/-- Explicit uniform step radius for the geometric sine derivative.
-Evaluation convergence is still pointwise in the rational input. -/
-theorem sinPi_derivative_explicit (B : ArctanInverseBisection) (eps : QPos) :
+theorem positive_increment_error (B : ArctanInverseBisection) :
   ∀ x h : Rat,
     ∀ (hx : OnHalf x) (hxh : OnHalf (x+h)),
-    h ≠ 0 -> qabs h <= eps.val/4000 ->
+    0 < h ->
     ∃ N : Nat, ∀ n : Nat, N <= n -> ∀ a b c p : Rat,
       ((sinPiRawOfArctan B (x+h) hxh).compute n).lo <= a ->
       a <= ((sinPiRawOfArctan B (x+h) hxh).compute n).hi ->
@@ -46,8 +21,10 @@ theorem sinPi_derivative_explicit (B : ArctanInverseBisection) (eps : QPos) :
       ((cosPiRawOfArctan B x hx).compute n).lo <= c ->
       c <= ((cosPiRawOfArctan B x hx).compute n).hi ->
       (piCircleArea.compute n).lo <= p -> p <= (piCircleArea.compute n).hi ->
-      qabs (a-b-h*(p*c)) <= eps.val*qabs h := by
-  intro x h hx hxh hh hsmall
+      qabs (a-b-h*(p*c)) <= 4000*h*h := by
+  intro x h hx hxh hp
+  have hh : h ≠ 0 := Rat.ne_of_gt hp
+  have habs : qabs h = h := qabs_eq_self_of_nonneg (Rat.le_of_lt hp)
   have hHpos : 0 < qabs h := qabs_pos_of_ne hh
   have hH0 := Rat.le_of_lt hHpos
   have hH1 : qabs h <= 1 := by
@@ -60,18 +37,16 @@ theorem sinPi_derivative_explicit (B : ArctanInverseBisection) (eps : QPos) :
       simp only [Rat.div_def] at hx1 hy1
       grind
   let eta : QPos :=
-    { val := min (qabs h/16) (eps.val*qabs h/64)
+    { val := h*h/64
       property := by
-        have h1 : 0 < qabs h/16 := by
-          rw [Rat.div_def]
-          exact Rat.mul_pos hHpos ((Rat.inv_pos).2 (by decide))
-        have h2 : 0 < eps.val*qabs h/64 := by
-          rw [Rat.div_def]
-          exact Rat.mul_pos (Rat.mul_pos eps.property hHpos)
-            ((Rat.inv_pos).2 (by decide))
-        grind }
-  have hetaH : eta.val <= qabs h/16 := by dsimp [eta]; grind
-  have hetaE : eta.val <= eps.val*qabs h/64 := by dsimp [eta]; grind
+        rw [Rat.div_def]
+        exact Rat.mul_pos (Rat.mul_pos hp hp) ((Rat.inv_pos).2 (by decide)) }
+  have hetaH : eta.val <= qabs h/16 := by
+    have hm := Rat.mul_le_mul_of_nonneg_right hH1 hH0
+    dsimp [eta]
+    rw [habs] at *
+    simp only [Rat.div_def] at *
+    grind
   let etaSlope : QPos :=
     { val := eta.val/4
       property := by
@@ -131,30 +106,17 @@ theorem sinPi_derivative_explicit (B : ArctanInverseBisection) (eps : QPos) :
     (Rat.le_refl : A.lo <= A.lo) hAo (Rat.le_refl : D.lo <= D.lo) hDo).2
   have hsine := sine_angle_residual hu.1 hu.2 hv.1 hv.2 n
     (Rat.le_refl : A.lo <= A.lo) hAo (Rat.le_refl : D.lo <= D.lo) hDo
-  have hp := pi_output_bounds n hp0 hp1
-  have hbound := finite_normalized_residual hu.1 hu.2 hp.1 hp.2 hH1
+  have hPi := pi_output_bounds n hp0 hp1
+  have hbound := finite_normalized_residual hu.1 hu.2 hPi.1 hPi.2 hH1
     (Rat.le_of_lt eta.property) hetaH (by grind : D.width+A.width <= 2*eta.val)
     hs1 hs0 hcs hangle1 hangle0 hclock hsine
-  have hquad1 := Rat.mul_le_mul_of_nonneg_right hsmall hH0
-  have hbudget : 1620*qabs h*qabs h+14*eta.val <= eps.val*qabs h := by
-    change qabs h <= eps.val/4000 at hsmall
-    have hquad := Rat.mul_le_mul_of_nonneg_right hsmall hH0
-    have hnonneg := Rat.mul_nonneg (Rat.le_of_lt eps.property) hH0
-    simp only [Rat.div_def] at hquad hetaE
+  have hbudget : 1620*qabs h*qabs h+14*eta.val <= 4000*h*h := by
+    have hs := Rat.mul_nonneg (Rat.le_of_lt hp) (Rat.le_of_lt hp)
+    dsimp [eta]
+    rw [habs]
+    simp only [Rat.div_def]
     grind
   exact Rat.le_trans hbound hbudget
 
-/-- The existing geometric sine has derivative pi times the existing
-geometric cosine, throughout its first-quadrant rational chart. -/
-theorem sinPi'_eq_pi_cosPi (B : ArctanInverseBisection) :
-    HasPiScaledDerivativeOnHalf B := by
-  intro eps
-  let delta : QPos :=
-    { val := eps.val/4000
-      property := by
-        rw [Rat.div_def]
-        exact Rat.mul_pos eps.property ((Rat.inv_pos).2 (by decide)) }
-  exact ⟨delta, sinPi_derivative_explicit B eps⟩
-
-end GeometricSineDerivative
+end GeometricSineDirectBounds
 end ComputableAnalysis

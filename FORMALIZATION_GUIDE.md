@@ -224,9 +224,22 @@ computation as a finite Stieltjes sum. A substitution theorem is then an
 equivalence between two explicit sum algorithms, not an appeal to a general
 completed-real change-of-variables theorem.
 
-Expose one evaluated theorem for the resulting integral. Keep FTC or chart
-arguments as reusable certificate transports; do not publish a second value
-theorem whose only distinction is the proof route used to obtain it.
+Keep one canonical computation and one canonical theorem statement. Distinct
+substantive proofs of that statement are welcome under descriptive names
+(such as `viaFTC` and `viaInequalities`), with identical hypotheses and
+conclusions. Keep the algorithms independent of which proof certifies them.
+Audit transitive declaration dependencies to distinguish independent arguments
+from aliases; `#print axioms` alone does not establish independence.
+
+The geometric cosine example now has both routes; see
+[the two-proof blueprint](blueprint/two-cosine-proofs.md). Exact concavity is
+proved geometrically before constructing its secant derivative. The new
+`ConcaveFTC` route retains old secants and meshes while refining their finite
+samples, so it requires no unproved uniform rate at moving sample points.
+Its local FTC estimate retains source interval widths before telescoping.
+Use this two-index fixed schedule when only pointwise validity is available;
+do not assert that a frozen one-index source schedule converges without a
+separate resolution theorem.
 
 ## Effective FTC provider checklist
 
