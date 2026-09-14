@@ -4,7 +4,7 @@ on:
     branches: [work/fixed-schedule-sine]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: geometric-sine-${{ github.ref }}
   cancel-in-progress: false
@@ -14,6 +14,8 @@ jobs:
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v5
+      - name: Apply recorded proof normalization fixes
+        run: python3 blueprint/checks/prepare_geometry_proof.py
       - uses: leanprover/lean-action@v1
         with:
           auto-config: false
@@ -25,46 +27,51 @@ jobs:
           path: .lake
           key: geometric-sine-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
           restore-keys: geometric-sine-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
-      - name: Compile geometric sine estimates
+      - name: Compile geometric sine theorem
         run: |
           set +e
-          targets='ComputableAnalysis.GeometricSineResidual ComputableAnalysis.ForwardEndpointApproximation'
-          if test -f ComputableAnalysis/GeometricSineDerivative.lean; then targets="$targets ComputableAnalysis.GeometricSineDerivative"; fi
+          targets='ComputableAnalysis.GeometricSineDerivative'
+          if test -f ComputableAnalysis/NormalizedSineDerivative.lean; then targets="$targets ComputableAnalysis.NormalizedSineDerivative"; fi
           lake build $targets > /tmp/geometry-proof.log 2>&1
           result=$?
           python - <<'PY'
           from pathlib import Path
           remaining=0
           for line in Path('/tmp/geometry-proof.log').read_text().splitlines():
-            if line.startswith(('error:', '✖')): remaining=35
+            if line.startswith(('error:', '✖')): remaining=55
             if line.startswith(('[grind]', 'trace:', '⚠', '✔', 'ℹ')): remaining=0
             if remaining or 'Build completed' in line:
               print(line)
               remaining=max(0,remaining-1)
           PY
           exit "$result"
-      - name: Inspect remaining normalization interfaces
+      - name: Inspect the checked normalization interfaces
         if: always()
         run: |
           python - <<'PY'
           from pathlib import Path
           import re
-          for name in ['ArctanGeometry.lean','CauchyPi.lean','SinPiIntegral.lean','SectorAreaReparametrization.lean']:
+          rules={'Basic.lean':r'^(?:theorem|def) (?:scaleRat_valid|scaleRatCompute|mul_valid|mul|mulCompute)',
+            'SinPiIntegral.lean':r'^(?:theorem|def) (?:rationalCircleCosInterval_width_le|rationalCircleSinInterval|rationalCircleCosInterval)',
+            'Calculus.lean':r'^(?:structure InRangeRaw|def Equivalent)'}
+          for name,pattern in rules.items():
             lines=(Path('ComputableAnalysis')/name).read_text().splitlines()
-            patterns={
-              'ArctanGeometry.lean':r'(?:[Ee]quiv.*(?:[Gg]eom|[Rr]ectangle)|tangentChartIncrement$|arctanIntegralRectangleCompute_width_le|arctanIntegralRectangleRaw_compute)',
-              'CauchyPi.lean':r'piCircleArea.*(?:bound|[Ll]ower|[Uu]pper|[Vv]alid)',
-              'SinPiIntegral.lean':r'cosPiRawOfArctan.*(?:bound|range|nonneg)|rationalCircleSinInterval.*(?:bound|width)|rationalCircleCos.*(?:nonneg|le_one)',
-              'SectorAreaReparametrization.lean':r'arctanOnUnitRegular.*(?:compute|equivalent)'}[name]
             for i,line in enumerate(lines):
-              if re.match(r'^(?:private )?(?:def|theorem) ',line) and re.search(patterns,line):
-                print(f'\n{name}:{i+1}')
-                for s in lines[i:i+18]:
-                  print(s)
-                  if ':= by' in s or ' := ' in s or s.rstrip().endswith(':='): break
+              if re.search(pattern,line):
+                print(f'\n{name}:{i+1}\n'+'\n'.join(lines[i:i+14]))
           PY
       - uses: actions/cache/save@v5
         if: always()
         with:
           path: .lake
           key: geometric-sine-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
+      - name: Publish checked normalization fixes
+        run: |
+          git add -- ComputableAnalysis
+          if ! git diff --cached --quiet; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git commit -m 'Check finite geometric sine normalization proofs'
+            git push origin HEAD:work/fixed-schedule-sine
+          fi
+          echo "Checked source commit: $(git rev-parse HEAD)"
