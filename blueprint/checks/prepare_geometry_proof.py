@@ -1,19 +1,22 @@
-"""Apply recorded proof-only edits before checking the geometric development.
-The workflow publishes them only after the entire target builds successfully.
-"""
+"""Apply recorded proof-only edits; publish only after the full build passes."""
 from pathlib import Path
 root = Path(__file__).resolve().parents[2]
+
+def replace_once(text, old, new):
+    return text if new and new in text else text.replace(old, new)
+
 p = root/'ComputableAnalysis/GeometricSineSecant.lean'
 s = p.read_text()
-s = s.replace('  unfold QInterval.ContainsInterval at htan\n', '  unfold QInterval.ContainsInterval at htan\n  dsimp only at htan\n')
-s = s.replace('  have habs : qabs (a-b-t) <= d*d+w := by\n',
-              '  have hdd0 : 0 <= d*d := Rat.mul_nonneg hd0 hd0\n  have habs : qabs (a-b-t) <= d*d+w := by\n')
-s = s.replace('    simp only [Rat.sub_self, qabs_zero, Rat.zero_mul, Rat.sub_zero, Rat.zero_add]\n',
-              '    have habs0 : qabs (0 : Rat) = 0 := by decide +kernel\n'
-              '    have hid : a-b-(u-u)*integralKernel u = a-b := by grind\n'
-              '    dsimp only\n'
-              '    rw [hid, Rat.sub_self, habs0]\n'
-              '    simp only [Rat.mul_zero, Rat.zero_add]\n')
+s = replace_once(s, '  unfold QInterval.ContainsInterval at htan\n',
+    '  unfold QInterval.ContainsInterval at htan\n  dsimp only at htan\n')
+s = replace_once(s, '  have habs : qabs (a-b-t) <= d*d+w := by\n',
+    '  have hdd0 : 0 <= d*d := Rat.mul_nonneg hd0 hd0\n  have habs : qabs (a-b-t) <= d*d+w := by\n')
+s = replace_once(s, '    simp only [Rat.sub_self, qabs_zero, Rat.zero_mul, Rat.sub_zero, Rat.zero_add]\n',
+    '    have habs0 : qabs (0 : Rat) = 0 := by decide +kernel\n'
+    '    have hid : a-b-(u-u)*integralKernel u = a-b := by grind\n'
+    '    dsimp only\n'
+    '    rw [hid, Rat.sub_self, habs0]\n'
+    '    simp only [Rat.mul_zero, Rat.zero_add]\n')
 s = s.replace('      dsimp only at hs\n', '')
 p.write_text(s)
 p = root/'ComputableAnalysis/GeometricSineResidual.lean'
@@ -21,4 +24,5 @@ s = p.read_text().replace('    simp only [Rat.sub_self, Rat.zero_mul, Rat.sub_ze
     '    have hz : qabs (0 : Rat) = 0 := by decide +kernel\n'
     '    simp only [Rat.sub_self, Rat.zero_mul, Rat.mul_zero, hz]\n'
     '    exact Rat.le_refl\n')
+s = s.replace('  dsimp only at ha hmul2\n', '')
 p.write_text(s)
