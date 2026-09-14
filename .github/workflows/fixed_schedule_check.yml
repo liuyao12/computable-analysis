@@ -2,11 +2,12 @@ name: Fixed-schedule derivative proof check
 on:
   push:
     branches: [work/fixed-schedule-sine]
+  pull_request:
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 concurrency:
-  group: fixed-schedule-${{ github.ref }}
+  group: sine-derivative-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   proof:
@@ -14,85 +15,16 @@ jobs:
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v5
-      - name: Inspect normalization interfaces
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          import re
-          for filename in ['SinPiIntegral.lean','SinPiSquareFTC.lean','SectorAreaReparametrization.lean']:
-            lines=(Path('ComputableAnalysis')/filename).read_text().splitlines()
-            print('\nMODULE',filename,'LINES',len(lines))
-            for i,line in enumerate(lines):
-              if re.match(r'^(?:def|theorem|structure) ',line) and re.search(r'[Dd]erivative|[Cc]onstruction|[Cc]oncrete|[Ss]inPi|[Cc]osPi|[Ss]mallAngle|[Aa]ddition|[Nn]ormalized',line):
-                block=[]
-                for s in lines[i:i+18]:
-                  block.append(s)
-                  if ':= by' in s or ' where' in s or ' := ' in s or s.endswith(':='): break
-                print(f'{i+1}: '+'\n'.join(block))
-          PY
-      - name: Prepare kernel-only proof sources
-        run: python blueprint/checks/prepare_sine_kernel.py
       - uses: leanprover/lean-action@v1
         with:
           auto-config: false
-          build: false
+          build: true
+          build-args: "ComputableAnalysis.SineDerivative"
           test: false
           lint: false
-      - name: Compile sine theorem
-        run: |
-          set +e
-          lake build ComputableAnalysis.SineDerivative > /tmp/sine-proof.log 2>&1
-          result=$?
-          python - <<'PY'
-          from pathlib import Path
-          lines=Path('/tmp/sine-proof.log').read_text().splitlines()
-          printing=False
-          for line in lines:
-            if line.startswith(('error:', '✖')): printing=True
-            if line.startswith(('⚠', '✔', 'ℹ')): printing=False
-            if printing or 'Build completed' in line or ('SineDerivative' in line and 'warning:' in line): print(line)
-          PY
-          exit "$result"
-      - name: Reject every nonstandard transitive axiom
-        run: |
-          cat > /tmp/sine-audit.lean <<'EOF'
-          import ComputableAnalysis.SineDerivative
-          open ComputableAnalysis FixedSchedule
-          example : HasEndpointDerivativeOn sine cosine 2 := sine_derivative_cosine
-          example : HasEndpointDerivativeOn sine sineDerivative 1 := sin'_eq_cos.1
-          example (x : Rat) (hx : qabs x <= 1) :
-              (sineDerivative x).Valid ∧ (sineDerivative x).Equiv (cosine x) :=
-            sin'_eq_cos.2 x hx
-          #print axioms sine_derivative_cosine
-          #print axioms sin'_eq_cos
-          #print axioms RotationSeries.uniformRotationSinOnTwo_hasDerivativeOnInterval
-          #print axioms RotationSeries.uniformRotationCosOnTwo_hasDerivativeOnInterval
-          EOF
-          lake env lean /tmp/sine-audit.lean > /tmp/sine-axioms.log
-          cat /tmp/sine-axioms.log
-          python - <<'PY'
-          from pathlib import Path
-          import re
-          text=Path('/tmp/sine-axioms.log').read_text()
-          audits=re.findall(r"'([^']+)' depends on axioms: \[([^\]]*)\]",text,re.S)
-          assert len(audits)==4, f'Expected four completed audits, found {len(audits)}'
-          allowed={'propext','Classical.choice','Quot.sound'}
-          for name,body in audits:
-            actual={s.strip() for s in body.split(',') if s.strip()}
-            assert actual<=allowed, f'{name}: prohibited axioms {actual-allowed}'
-            print('PASS:',name,'-- no sorryAx, native-evaluation axiom, or custom axiom')
-          PY
+      - name: Check theorem statements and transitive axioms
+        run: python3 blueprint/checks/check_sine_derivative.py --no-build
       - name: Audit the rational foundation
-        run: python blueprint/checks/check_foundation_imports.py
-      - name: Publish checked proof-tactic changes
-        run: |
-          test "${GITHUB_REF_NAME}" = 'work/fixed-schedule-sine'
-          git diff --stat
-          git add -- ComputableAnalysis
-          if ! git diff --cached --quiet; then
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git commit -m 'Kernel-check the sine proof closure without native or sorry axioms'
-            git push origin HEAD:work/fixed-schedule-sine
-          fi
-          echo "Checked source commit: $(git rev-parse HEAD)"
+        run: python3 blueprint/checks/check_foundation_imports.py
+      - name: Ensure the check did not rewrite tracked source
+        run: git diff --exit-code
