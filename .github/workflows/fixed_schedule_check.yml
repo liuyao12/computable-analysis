@@ -4,7 +4,7 @@ on:
     branches: [work/fixed-schedule-sine]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: fixed-schedule-${{ github.ref }}
   cancel-in-progress: true
@@ -14,40 +14,34 @@ jobs:
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v5
-      - name: Inspect trigonometric interfaces
+      - name: Inspect normalization interfaces
         run: |
           python - <<'PY'
           from pathlib import Path
           import re
-          root=Path('ComputableAnalysis')
-          print('MODULES:', ' '.join(p.stem for p in sorted(root.glob('*.lean'))))
-          for filename in ['RationalCircle.lean','Differential.lean','RotationDerivative.lean','RotationSeries.lean','Basic.lean']:
-            lines=(root/filename).read_text().splitlines()
-            pattern={'RationalCircle.lean':r'^(?:noncomputable )?(?:def|theorem|structure) .*?(?:sin|cos|quarterTurn|angle|normaliz|derivative|smallAngle|add)',
-                     'Differential.lean':r'^(?:def|structure|theorem) (?:HasDerivativeOnInterval|Endpoint|.*[Rr]esidual)',
-                     'RotationDerivative.lean':r'^(?:def|theorem) ',
-                     'RotationSeries.lean':r'^(?:def|theorem) .*?(?:sin|Sin|cos|Cos|[Ee]quiv|[Aa]dd)',
-                     'Basic.lean':r'^def (?:qabs|mul|scaleRat|NearAt)'}[filename]
+          for filename in ['SinPiIntegral.lean','SinPiSquareFTC.lean','SectorAreaReparametrization.lean']:
+            lines=(Path('ComputableAnalysis')/filename).read_text().splitlines()
+            print('\nMODULE',filename,'LINES',len(lines))
             for i,line in enumerate(lines):
-              if re.search(pattern,line):
+              if re.match(r'^(?:def|theorem|structure) ',line) and re.search(r'[Dd]erivative|[Cc]onstruction|[Cc]oncrete|[Ss]inPi|[Cc]osPi|[Ss]mallAngle|[Aa]ddition|[Nn]ormalized',line):
                 block=[]
-                for s in lines[i:i+16]:
+                for s in lines[i:i+18]:
                   block.append(s)
                   if ':= by' in s or ' where' in s or ' := ' in s or s.endswith(':='): break
-                print(f'\n{filename}:{i+1}\n'+'\n'.join(block))
+                print(f'{i+1}: '+'\n'.join(block))
           PY
+      - name: Prepare kernel-only proof sources
+        run: python blueprint/checks/prepare_sine_kernel.py
       - uses: leanprover/lean-action@v1
         with:
           auto-config: false
           build: false
           test: false
           lint: false
-      - name: Compile sine and cosine certificates
+      - name: Compile sine theorem
         run: |
           set +e
-          targets='ComputableAnalysis.FixedScheduleSine ComputableAnalysis.RotationDerivative'
-          if test -f ComputableAnalysis/SineDerivative.lean; then targets="$targets ComputableAnalysis.SineDerivative"; fi
-          lake build $targets > /tmp/sine-proof.log 2>&1
+          lake build ComputableAnalysis.SineDerivative > /tmp/sine-proof.log 2>&1
           result=$?
           python - <<'PY'
           from pathlib import Path
@@ -59,21 +53,46 @@ jobs:
             if printing or 'Build completed' in line or ('SineDerivative' in line and 'warning:' in line): print(line)
           PY
           exit "$result"
-      - name: Audit the checked derivative types
+      - name: Reject every nonstandard transitive axiom
         run: |
           cat > /tmp/sine-audit.lean <<'EOF'
-          import ComputableAnalysis.FixedScheduleSine
-          import ComputableAnalysis.RotationDerivative
-          open ComputableAnalysis RotationSeries FixedSchedule
-          #print HasDerivativeOnInterval
-          #print QInterval.NearAt
-          #print axioms uniformRotationSinOnTwo_hasDerivativeOnInterval
-          #print axioms sineDerivative_valid
-          #check QInterval.around_differenceQuotient_near_around
-          #check uniformRotation_tail_transport_budgets
-          #check uniformRotationTailMagnitude_le_quotientTolerance
-          #check sineDerivative_output_overlap
+          import ComputableAnalysis.SineDerivative
+          open ComputableAnalysis FixedSchedule
+          example : HasEndpointDerivativeOn sine cosine 2 := sine_derivative_cosine
+          example : HasEndpointDerivativeOn sine sineDerivative 1 := sin'_eq_cos.1
+          example (x : Rat) (hx : qabs x <= 1) :
+              (sineDerivative x).Valid ∧ (sineDerivative x).Equiv (cosine x) :=
+            sin'_eq_cos.2 x hx
+          #print axioms sine_derivative_cosine
+          #print axioms sin'_eq_cos
+          #print axioms RotationSeries.uniformRotationSinOnTwo_hasDerivativeOnInterval
+          #print axioms RotationSeries.uniformRotationCosOnTwo_hasDerivativeOnInterval
           EOF
-          lake env lean /tmp/sine-audit.lean
+          lake env lean /tmp/sine-audit.lean > /tmp/sine-axioms.log
+          cat /tmp/sine-axioms.log
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          text=Path('/tmp/sine-axioms.log').read_text()
+          audits=re.findall(r"'([^']+)' depends on axioms: \[([^\]]*)\]",text,re.S)
+          assert len(audits)==4, f'Expected four completed audits, found {len(audits)}'
+          allowed={'propext','Classical.choice','Quot.sound'}
+          for name,body in audits:
+            actual={s.strip() for s in body.split(',') if s.strip()}
+            assert actual<=allowed, f'{name}: prohibited axioms {actual-allowed}'
+            print('PASS:',name,'-- no sorryAx, native-evaluation axiom, or custom axiom')
+          PY
       - name: Audit the rational foundation
         run: python blueprint/checks/check_foundation_imports.py
+      - name: Publish checked proof-tactic changes
+        run: |
+          test "${GITHUB_REF_NAME}" = 'work/fixed-schedule-sine'
+          git diff --stat
+          git add -- ComputableAnalysis
+          if ! git diff --cached --quiet; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git commit -m 'Kernel-check the sine proof closure without native or sorry axioms'
+            git push origin HEAD:work/fixed-schedule-sine
+          fi
+          echo "Checked source commit: $(git rev-parse HEAD)"
