@@ -60,8 +60,9 @@ jobs:
           MATHLIB_NO_CACHE_ON_UPDATE: '1'
         run: |
           lake update
+          git diff --exit-code -- lake-manifest.json
           test "$(git -C .lake/packages/mathlib rev-parse HEAD)" = 51e6992efd06126df61a496bebf8f49482a4e129
-          lake exe cache get Mathlib/Analysis/SpecialFunctions/Integrals/Basic.lean Mathlib/Tactic.lean
+          lake exe cache get Mathlib.Analysis.SpecialFunctions.Integrals.Basic Mathlib.Tactic
       - name: Build actual comparison theorems
         working-directory: comparison
         run: |

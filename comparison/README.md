@@ -13,7 +13,7 @@ From the repository root:
 python3 comparison/checks/check_boundary.py
 cd comparison
 lake update
-lake exe cache get Mathlib/Analysis/SpecialFunctions/Integrals/Basic.lean Mathlib/Tactic.lean
+lake exe cache get Mathlib.Analysis.SpecialFunctions.Integrals.Basic Mathlib.Tactic
 lake build MathlibComparison
 lake env lean checks/ComparisonAudit.lean
 ```

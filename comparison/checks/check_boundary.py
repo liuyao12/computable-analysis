@@ -63,6 +63,10 @@ def check(root: Path) -> dict:
         raise ValueError('Comparison must import this repository, not a separate native copy')
     pin = reqs['mathlib'].get('rev','')
     if not re.fullmatch('[0-9a-f]{40}',pin): raise ValueError('Mathlib must have an immutable revision')
+    lock = json.loads((root/'comparison/lake-manifest.json').read_text())
+    locked = {p['name']:p for p in lock['packages']}
+    if locked['mathlib']['rev'] != pin or locked['ComputableAnalysis'].get('dir') != '..':
+        raise ValueError('The comparison lockfile disagrees with its package configuration')
     files = sorted((root/'ComputableAnalysis').rglob('*.lean')) + [root/'ComputableAnalysis.lean']
     edges = []
     for path in files:
