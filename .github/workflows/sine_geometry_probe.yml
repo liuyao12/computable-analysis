@@ -1,0 +1,43 @@
+name: Sine geometry interface inspection
+on:
+  push:
+    branches: [work/fixed-schedule-sine]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Read inverse and angle certificates
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          root=Path('ComputableAnalysis')
+          files={p.name:p.read_text().splitlines() for p in root.glob('*.lean')}
+          for filename,lines in files.items():
+            for i,line in enumerate(lines):
+              if re.match(r'structure (?:InverseBisectionSearch|IntervalRegularOn|ContinuousFunctionOnInterval)\b',line):
+                print('\nSTRUCTURE',filename,i+1)
+                for s in lines[i:i+100]:
+                  if s!=line and re.match(r'^(?:namespace|def|theorem|structure) ',s): break
+                  print(s)
+              if ': ArctanInverseBisection' in line or ':\n'==line:
+                print('\nINVERSE CONSTRUCTOR',filename,i+1,'\n'+'\n'.join(lines[max(0,i-12):i+5]))
+          for filename in ['ArctanGeometry.lean','ArctanEffectiveFTC.lean','IntegralIdentities.lean','Calculus.lean']:
+            lines=files[filename]
+            for i,line in enumerate(lines):
+              if not re.match(r'^(?:private )?(?:def|theorem|structure) ',line): continue
+              pattern={
+                'ArctanGeometry.lean':r'arctanIntegralRectangle.*(?:sub|difference|increment|derivative|Derivative|stretch|[Ll]ower|[Ss]ecant)|arctanGeom.*(?:equiv|[Ll]ipschitz)',
+                'ArctanEffectiveFTC.lean':r'(?:[Ss]ecant|[Rr]emainder|[Dd]erivative|increment|[Ll]ower)',
+                'IntegralIdentities.lean':r'(?:[Aa]rctan.*(?:[Dd]erivative|[Ss]ecant|[Ii]nverse|[Ll]ower)|[Tt]angent.*(?:[Dd]erivative|forward|[Ss]ource))',
+                'Calculus.lean':r'(?:preimage.*(?:forward|equiv)|forward.*preimage|applyRealRaw.*(?:equiv|overlap)|InverseBisectionSearch)'}[filename]
+              if re.search(pattern,line):
+                print('\nSIGNATURE',filename,i+1)
+                for j,s in enumerate(lines[i:i+24]):
+                  print(s)
+                  if ':= by' in s or ' where' in s or ' := ' in s or s.rstrip().endswith(':='): break
+          PY
