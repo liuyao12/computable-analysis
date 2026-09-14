@@ -1,0 +1,60 @@
+name: Cosine FTC proof check
+on:
+  push:
+    branches: [work/cosine-ftc]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: cosine-ftc-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - name: Prepare source inspection artifact
+        run: |
+          tar -czf /tmp/cosine-ftc-sources.tar.gz ComputableAnalysis ComputableAnalysis.lean lean-toolchain lakefile.toml lake-manifest.json FORMALIZATION_GUIDE.md skills
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          for name in ['Differential.lean', 'FTC.lean', 'Integral.lean', 'IntegralIdentities.lean', 'SinPiIntegral.lean', 'ArctanEffectiveFTC.lean', 'GeometricRotationODE.lean']:
+              p = Path('ComputableAnalysis') / name
+              if not p.exists(): continue
+              print('\nDECLARATIONS', name)
+              for i, line in enumerate(p.read_text().splitlines(), 1):
+                  if re.match(r'^(?:private )?(?:noncomputable )?(?:structure|def|theorem|abbrev|namespace) ', line):
+                      print(f'{i}: {line}')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cosine-ftc-sources
+          path: /tmp/cosine-ftc-sources.tar.gz
+          retention-days: 3
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+      - uses: actions/cache/restore@v5
+        with:
+          path: .lake
+          key: cosine-ftc-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            cosine-ftc-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+            geometric-sine-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+      - name: Check cosine FTC module
+        run: |
+          if test -f ComputableAnalysis/CosineFTC.lean; then
+            lake build ComputableAnalysis.CosineFTC
+          else
+            lake build ComputableAnalysis.NormalizedSineDerivative
+          fi
+      - uses: actions/cache/save@v5
+        if: always()
+        with:
+          path: .lake
+          key: cosine-ftc-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
