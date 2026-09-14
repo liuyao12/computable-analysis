@@ -41,8 +41,8 @@ private theorem sine_coordinate_residual
   by_cases heq : v-u = 0
   · have huv : v = u := by grind
     subst v
-    simp only [Rat.sub_self, Rat.zero_mul, Rat.sub_zero, qabs_zero,
-      Rat.mul_zero]
+    have hz : qabs (0 : Rat) = 0 := by decide +kernel
+    simp only [Rat.sub_self, Rat.zero_mul, Rat.mul_zero, hz]
     exact Rat.le_refl
   · have hcancel : u+(v-u) = v := by grind
     have h := pointIm_secant_error_le_twelve hu0 hu1
@@ -92,7 +92,6 @@ theorem sine_angle_residual
     ((2*pointRe u)*(a-b-(v-u)*integralKernel u))
   rw [qabs_mul, qabs_eq_self_of_nonneg h2c0] at htri
   rw [hid]
-  dsimp only at ha hmul2
   grind
 
 end GeometricSineSecant

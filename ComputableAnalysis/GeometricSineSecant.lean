@@ -158,6 +158,7 @@ private theorem clock_forward_bounds
         (arctanIntegralRectangleCompute u n).lo at hover
   have htan := arctanIntegralRectangleCompute_tangent_box_contains ht.1 n
   unfold QInterval.ContainsInterval at htan
+  dsimp only at htan
   have ht1 : t <= 1 := by grind
   have hk := kernel_bounds ht.1 ht1
   have hlower := arctanIntegralRectangleCompute_input_mul_kernel_le_lower ht.1 n
@@ -171,6 +172,7 @@ private theorem clock_forward_bounds
     exact Rat.le_trans hm hsq
   let w := (arctanIntegralRectangleCompute u n).width +
     (arctanIntegralRectangleCompute v n).width
+  have hdd0 : 0 <= d*d := Rat.mul_nonneg hd0 hd0
   have habs : qabs (a-b-t) <= d*d+w := by
     apply qabs_le_of_neg_le_le
     all_goals
@@ -223,7 +225,11 @@ theorem clock_bounds
     change 0 <= (arctanIntegralRectangleCompute u n).width at ho
     have hab : qabs (a-b) <= (arctanIntegralRectangleCompute u n).width := by
       apply qabs_le_of_neg_le_le <;> unfold QInterval.width <;> grind
-    simp only [Rat.sub_self, qabs_zero, Rat.zero_mul, Rat.sub_zero, Rat.zero_add]
+    have habs0 : qabs (0 : Rat) = 0 := by decide +kernel
+    have hid : a-b-(u-u)*integralKernel u = a-b := by grind
+    dsimp only
+    rw [hid, Rat.sub_self, habs0]
+    simp only [Rat.mul_zero, Rat.zero_add]
     constructor
     · grind
     · have hnonneg := qabs_nonneg (a-b)
@@ -254,7 +260,6 @@ theorem clock_bounds
       grind
     · have hs := h.2
       rw [hba, qabs_neg] at hs
-      dsimp only at hs
       grind
 
 end GeometricSineSecant
