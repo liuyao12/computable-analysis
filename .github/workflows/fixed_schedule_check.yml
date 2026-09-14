@@ -14,38 +14,66 @@ jobs:
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v5
+      - name: Inspect trigonometric interfaces
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          root=Path('ComputableAnalysis')
+          print('MODULES:', ' '.join(p.stem for p in sorted(root.glob('*.lean'))))
+          for filename in ['RationalCircle.lean','Differential.lean','RotationDerivative.lean','RotationSeries.lean','Basic.lean']:
+            lines=(root/filename).read_text().splitlines()
+            pattern={'RationalCircle.lean':r'^(?:noncomputable )?(?:def|theorem|structure) .*?(?:sin|cos|quarterTurn|angle|normaliz|derivative|smallAngle|add)',
+                     'Differential.lean':r'^(?:def|structure|theorem) (?:HasDerivativeOnInterval|Endpoint|.*[Rr]esidual)',
+                     'RotationDerivative.lean':r'^(?:def|theorem) ',
+                     'RotationSeries.lean':r'^(?:def|theorem) .*?(?:sin|Sin|cos|Cos|[Ee]quiv|[Aa]dd)',
+                     'Basic.lean':r'^def (?:qabs|mul|scaleRat|NearAt)'}[filename]
+            for i,line in enumerate(lines):
+              if re.search(pattern,line):
+                block=[]
+                for s in lines[i:i+16]:
+                  block.append(s)
+                  if ':= by' in s or ' where' in s or ' := ' in s or s.endswith(':='): break
+                print(f'\n{filename}:{i+1}\n'+'\n'.join(block))
+          PY
       - uses: leanprover/lean-action@v1
         with:
           auto-config: false
           build: false
           test: false
           lint: false
-      - name: Compile fixed-schedule derivative
+      - name: Compile sine and cosine certificates
         run: |
           set +e
-          lake build ComputableAnalysis.FixedScheduleSine > /tmp/fixed-proof.log 2>&1
+          targets='ComputableAnalysis.FixedScheduleSine ComputableAnalysis.RotationDerivative'
+          if test -f ComputableAnalysis/SineDerivative.lean; then targets="$targets ComputableAnalysis.SineDerivative"; fi
+          lake build $targets > /tmp/sine-proof.log 2>&1
           result=$?
           python - <<'PY'
           from pathlib import Path
-          lines=Path('/tmp/fixed-proof.log').read_text().splitlines()
+          lines=Path('/tmp/sine-proof.log').read_text().splitlines()
           printing=False
           for line in lines:
-            if 'FixedScheduleSine' in line or 'error:' in line or 'Build completed' in line:
-              printing=True
-            if printing:
-              print(line)
+            if line.startswith(('error:', '✖')): printing=True
+            if line.startswith(('⚠', '✔', 'ℹ')): printing=False
+            if printing or 'Build completed' in line or ('SineDerivative' in line and 'warning:' in line): print(line)
           PY
           exit "$result"
-      - name: Inspect theorem dependencies
+      - name: Audit the checked derivative types
         run: |
-          cat > /tmp/fixed-audit.lean <<'EOF'
+          cat > /tmp/sine-audit.lean <<'EOF'
           import ComputableAnalysis.FixedScheduleSine
-          open ComputableAnalysis FixedSchedule
+          import ComputableAnalysis.RotationDerivative
+          open ComputableAnalysis RotationSeries FixedSchedule
+          #print HasDerivativeOnInterval
+          #print QInterval.NearAt
+          #print axioms uniformRotationSinOnTwo_hasDerivativeOnInterval
           #print axioms sineDerivative_valid
-          #print axioms sineDerivative_output_overlap
-          #check sineDerivative_width_le
-          #eval ((sineDerivative (1/2)).compute 4).width
+          #check QInterval.around_differenceQuotient_near_around
+          #check uniformRotation_tail_transport_budgets
+          #check uniformRotationTailMagnitude_le_quotientTolerance
+          #check sineDerivative_output_overlap
           EOF
-          lake env lean /tmp/fixed-audit.lean
+          lake env lean /tmp/sine-audit.lean
       - name: Audit the rational foundation
         run: python blueprint/checks/check_foundation_imports.py
