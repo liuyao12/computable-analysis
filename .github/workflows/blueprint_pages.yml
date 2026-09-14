@@ -4,8 +4,13 @@ on:
   push:
     branches:
       - main
+      # Build preview artifacts here. The documentation-only publication
+      # workflow on main releases a specific verified snapshot.
+      - work/cosine-ftc
     paths:
       - "blueprint/**"
+      - "ComputableAnalysis/**"
+      - "lean-toolchain"
       - ".github/workflows/blueprint_pages.yml"
   pull_request:
     paths:
@@ -25,14 +30,31 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
-
       - uses: actions/setup-python@v6
         with:
           python-version: "3.x"
-
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+      - uses: actions/cache/restore@v5
+        with:
+          path: .lake
+          key: cosine-ftc-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            cosine-ftc-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+            geometric-sine-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+      - name: Check both proofs and their independence
+        run: |
+          lake build ComputableAnalysis.CosineFTC ComputableAnalysis.CosineIntegralViaFTC
+          python3 blueprint/checks/check_two_cosine_proofs.py
+      - name: Extract actual declaration dependencies and proof measurements
+        run: lake env lean blueprint/checks/ExportProofComparison.lean
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -46,20 +68,26 @@ jobs:
             texlive-latex-base \
             texlive-latex-extra \
             texlive-pictures
-
       - name: Install blueprint dependencies
         run: python -m pip install -r blueprint/requirements.txt
-
-      # The manuscript has no declaration links and is independent of a Lean build.
-      - name: Build blueprint web output
-        run: leanblueprint web
-
+      - name: Build blueprint and measured graph
+        run: |
+          leanblueprint web
+          python3 blueprint/checks/build_proof_comparison.py
+          python3 blueprint/checks/test_proof_comparison.py --manuscript
+      - name: Retain measurements and audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: proof-comparison-measurements
+          path: |
+            blueprint/web/proof-comparison
+            /tmp/two-cosine-proofs-audit.log
+          retention-days: 30
       - name: Configure Pages
         if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch)
         uses: actions/configure-pages@v5
         with:
           enablement: true
-
       - name: Upload Pages artifact
         if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch)
         uses: actions/upload-pages-artifact@v5
@@ -73,7 +101,31 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
-
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+      - name: Verify the live measured source revision
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import json, os, time, urllib.request
+          sha = os.environ['EXPECTED_SHA']
+          url = os.environ['PAGE_URL'].rstrip('/') + '/proof-comparison/summary.json?source=' + sha
+          last = None
+          for attempt in range(12):
+              try:
+                  with urllib.request.urlopen(url, timeout=20) as response:
+                      data = json.load(response)
+                  if data['sourceCommit'] == sha:
+                      print('Verified live proof graph and measurements at', url)
+                      print('Measured commit:', data['sourceCommit'])
+                      break
+                  last = data['sourceCommit']
+              except Exception as exc:
+                  last = str(exc)
+              time.sleep(5)
+          else:
+              raise SystemExit('Live page did not expose expected source revision: ' + str(last))
+          PY

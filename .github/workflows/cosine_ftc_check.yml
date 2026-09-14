@@ -1,0 +1,60 @@
+name: Cosine FTC proof check
+on:
+  push:
+    branches: [main, work/cosine-ftc]
+  pull_request:
+    paths:
+      - 'ComputableAnalysis/**'
+      - 'ComputableAnalysis.lean'
+      - 'blueprint/checks/CosineFTCAudit.lean'
+      - 'blueprint/checks/check_cosine_ftc.py'
+      - 'blueprint/checks/TwoCosineProofsAudit.lean'
+      - 'blueprint/checks/check_two_cosine_proofs.py'
+      - '.github/workflows/cosine_ftc_check.yml'
+      - 'lean-toolchain'
+      - 'lakefile.toml'
+      - 'lake-manifest.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: cosine-ftc-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+      - uses: actions/cache/restore@v5
+        with:
+          path: .lake
+          key: cosine-ftc-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            cosine-ftc-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+            geometric-sine-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+      - name: Build public import and cosine FTC
+        run: lake build ComputableAnalysis
+      - name: Check examples and transitive axiom dependencies
+        run: |
+          python3 blueprint/checks/check_cosine_ftc.py
+          python3 blueprint/checks/check_two_cosine_proofs.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cosine-ftc-axiom-audit
+          path: |
+            /tmp/cosine-ftc-audit.log
+            /tmp/two-cosine-proofs-audit.log
+          retention-days: 30
+      - uses: actions/cache/save@v5
+        if: always()
+        with:
+          path: .lake
+          key: cosine-ftc-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
