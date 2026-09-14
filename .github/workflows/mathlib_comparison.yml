@@ -1,0 +1,71 @@
+name: Optional Mathlib comparison
+on:
+  push:
+    branches: [work/cosine-basepoint]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mathlib-comparison-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  bridge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+      - uses: actions/cache@v5
+        with:
+          path: /tmp/comparison-mathlib
+          key: cosine-mathlib-51e6992efd06126df61a496bebf8f49482a4e129
+      - name: Prepare pinned comparison library, outside the project foundation
+        run: |
+          if ! test -d /tmp/comparison-mathlib/.git; then
+            git clone --depth 1 --branch v4.33.0-rc2 https://github.com/leanprover-community/mathlib4.git /tmp/comparison-mathlib
+          fi
+          cd /tmp/comparison-mathlib
+          test "$(git rev-parse HEAD)" = 51e6992efd06126df61a496bebf8f49482a4e129
+          lake exe cache get Mathlib/Analysis/SpecialFunctions/Integrals/Basic.lean Mathlib/Tactic.lean
+      - name: Export comparison imports for local checked proof iteration
+        run: |
+          python3 - <<'PY'
+          import pathlib, tarfile
+          root = pathlib.Path('/tmp/comparison-mathlib')
+          paths = []
+          for path in root.rglob('*'):
+              if not path.is_file() or '.git' in path.parts: continue
+              if path.suffix == '.lean' or path.name in ['lean-toolchain','lake-manifest.json','lakefile.toml']:
+                  paths.append(path)
+              elif '/lib/lean/' in str(path) and ('.olean' in path.name or path.suffix == '.so'):
+                  paths.append(path)
+          with tarfile.open('/tmp/mathlib-comparison.tar.gz','w:gz',compresslevel=3) as out:
+              for path in paths: out.add(path, arcname=str(path.relative_to(root)), recursive=False)
+          print('Packed', len(paths), 'files; bytes', pathlib.Path('/tmp/mathlib-comparison.tar.gz').stat().st_size)
+          PY
+          split -b 300M /tmp/mathlib-comparison.tar.gz /tmp/comparison.part.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mathlib-comparison-aa
+          path: /tmp/comparison.part.aa
+          retention-days: 2
+          compression-level: 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mathlib-comparison-ab
+          path: /tmp/comparison.part.ab
+          retention-days: 2
+          compression-level: 0
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mathlib-comparison-ac
+          path: /tmp/comparison.part.ac
+          retention-days: 2
+          compression-level: 0
+          if-no-files-found: ignore
