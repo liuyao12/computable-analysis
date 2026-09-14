@@ -1,0 +1,117 @@
+name: Publish verified proof blueprint
+
+# Documentation-only publication. This workflow does not merge or execute
+# the theorem branch: it publishes a specific already-checked static artifact.
+# Update both pinned values to publish a different verified build. The source
+# artifact must still be retained by GitHub Actions when this workflow runs.
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/publish_verified_blueprint.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-verified-proof-publication
+  cancel-in-progress: false
+
+env:
+  SOURCE_RUN: '34823285443'
+  SOURCE_SHA: '0fd66644960695cb44589ce6c6226375ca3c4c88'
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify the source build and proof-audit steps
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          base = 'https://api.github.com/repos/' + os.environ['GITHUB_REPOSITORY']
+          def get(path):
+              req = urllib.request.Request(base + path, headers={
+                  'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
+                  'Accept': 'application/vnd.github+json'})
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  return json.load(response)
+          run_id = os.environ['SOURCE_RUN']
+          run = get('/actions/runs/' + run_id)
+          assert run['head_sha'] == os.environ['SOURCE_SHA'], 'Wrong source commit'
+          assert run['name'] == 'Build blueprint pages', 'Wrong source workflow'
+          jobs = get('/actions/runs/' + run_id + '/jobs')['jobs']
+          build = next(j for j in jobs if j['name'] == 'build')
+          assert build['conclusion'] == 'success', 'Static build not verified'
+          steps = {s['name']: s['conclusion'] for s in build['steps']}
+          for step in ['Check both proofs and their independence',
+                       'Extract actual declaration dependencies and proof measurements',
+                       'Build blueprint and measured graph']:
+              assert steps[step] == 'success', 'Required verification did not pass: ' + step
+          print('Verified static artifact source', run['head_sha'])
+          PY
+      - uses: actions/download-artifact@v8
+        with:
+          name: github-pages
+          run-id: ${{ env.SOURCE_RUN }}
+          github-token: ${{ github.token }}
+          path: downloaded
+      - name: Inspect the static site snapshot
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, tarfile
+          with tarfile.open('downloaded/artifact.tar') as archive:
+              archive.extractall('site', filter='data')
+          root = pathlib.Path('site')
+          summary = json.loads((root/'proof-comparison/summary.json').read_text())
+          assert summary['sourceCommit'] == os.environ['SOURCE_SHA']
+          assert all(summary['verification'].values())
+          assert (root/'dep_graph_document.html').is_file()
+          assert 'proof-comparison/index.html' in (root/'index.html').read_text()
+          print('Validated static site and measured theorem source')
+          PY
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+  deploy:
+    needs: prepare
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Verify the live proof comparison
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          python3 - <<'PY'
+          import json, os, time, urllib.request
+          sha = os.environ['SOURCE_SHA']
+          url = os.environ['PAGE_URL'].rstrip('/') + '/proof-comparison/summary.json?source=' + sha
+          last = None
+          for attempt in range(12):
+              try:
+                  with urllib.request.urlopen(url, timeout=20) as response:
+                      data = json.load(response)
+                  if data['sourceCommit'] == sha:
+                      print('LIVE:', os.environ['PAGE_URL'].rstrip('/') + '/proof-comparison/')
+                      print('Verified measured source:', data['sourceCommit'])
+                      print('Direct and FTC project closures:', data['summary']['direct']['projectDeclarations'],
+                            data['summary']['ftc']['projectDeclarations'])
+                      break
+                  last = data['sourceCommit']
+              except Exception as exc:
+                  last = str(exc)
+              time.sleep(5)
+          else:
+              raise SystemExit('Live publication verification failed: ' + str(last))
+          PY
