@@ -37,19 +37,25 @@ jobs:
       - name: Export local proof environment
         run: |
           prefix=$(lean --print-prefix)
-          du -sh "$prefix" .lake/build/lib/lean
           mkdir -p /tmp/lean-proof-runtime
           cp -a "$prefix/bin" /tmp/lean-proof-runtime/
           mkdir -p /tmp/lean-proof-runtime/lib
           cp -a "$prefix/lib/lean" /tmp/lean-proof-runtime/lib/
+          find "$prefix/lib" -maxdepth 1 -name '*.so*' -exec cp -a {} /tmp/lean-proof-runtime/lib/ \;
           find /tmp/lean-proof-runtime -type f \( -name '*.a' -o -name '*.ilean' -o -name '*.c' \) -delete
           cp -a .lake/build/lib/lean /tmp/lean-proof-runtime/project
           tar -czf /tmp/lean-proof-runtime.tar.gz -C /tmp lean-proof-runtime
-          ls -lh /tmp/lean-proof-runtime.tar.gz
+          split -b 400M /tmp/lean-proof-runtime.tar.gz /tmp/runtime.part.
       - uses: actions/upload-artifact@v4
         with:
-          name: cosine-ftc-proof-runtime
-          path: /tmp/lean-proof-runtime.tar.gz
+          name: cosine-ftc-runtime-part-aa
+          path: /tmp/runtime.part.aa
+          retention-days: 1
+          compression-level: 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cosine-ftc-runtime-part-ab
+          path: /tmp/runtime.part.ab
           retention-days: 1
           compression-level: 0
       - uses: actions/cache/save@v5
