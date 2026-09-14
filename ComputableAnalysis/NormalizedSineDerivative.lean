@@ -155,17 +155,21 @@ def HasPiScaledDerivativeOnHalf (B : ArctanInverseBisection) : Prop :=
       (piCircleArea.compute n).lo <= p -> p <= (piCircleArea.compute n).hi ->
       qabs (a-b-h*(p*c)) <= eps.val*qabs h
 
-/-- The existing geometric sine has derivative pi times the existing
-geometric cosine, throughout its first-quadrant rational chart. -/
-theorem sinPi'_eq_pi_cosPi (B : ArctanInverseBisection) :
-    HasPiScaledDerivativeOnHalf B := by
-  intro eps
-  let delta : QPos :=
-    { val := eps.val/4000
-      property := by
-        rw [Rat.div_def]
-        exact Rat.mul_pos eps.property ((Rat.inv_pos).2 (by decide)) }
-  refine ⟨delta, ?_⟩
+/-- Explicit uniform step radius for the geometric sine derivative.
+Evaluation convergence is still pointwise in the rational input. -/
+theorem sinPi_derivative_explicit (B : ArctanInverseBisection) (eps : QPos) :
+  ∀ x h : Rat,
+    ∀ (hx : OnHalf x) (hxh : OnHalf (x+h)),
+    h ≠ 0 -> qabs h <= eps.val/4000 ->
+    ∃ N : Nat, ∀ n : Nat, N <= n -> ∀ a b c p : Rat,
+      ((sinPiRawOfArctan B (x+h) hxh).compute n).lo <= a ->
+      a <= ((sinPiRawOfArctan B (x+h) hxh).compute n).hi ->
+      ((sinPiRawOfArctan B x hx).compute n).lo <= b ->
+      b <= ((sinPiRawOfArctan B x hx).compute n).hi ->
+      ((cosPiRawOfArctan B x hx).compute n).lo <= c ->
+      c <= ((cosPiRawOfArctan B x hx).compute n).hi ->
+      (piCircleArea.compute n).lo <= p -> p <= (piCircleArea.compute n).hi ->
+      qabs (a-b-h*(p*c)) <= eps.val*qabs h := by
   intro x h hx hxh hh hsmall
   have hHpos : 0 < qabs h := qabs_pos_of_ne hh
   have hH0 := Rat.le_of_lt hHpos
@@ -262,6 +266,18 @@ theorem sinPi'_eq_pi_cosPi (B : ArctanInverseBisection) :
     simp only [Rat.div_def] at hquad hetaE
     grind
   exact Rat.le_trans hbound hbudget
+
+/-- The existing geometric sine has derivative pi times the existing
+geometric cosine, throughout its first-quadrant rational chart. -/
+theorem sinPi'_eq_pi_cosPi (B : ArctanInverseBisection) :
+    HasPiScaledDerivativeOnHalf B := by
+  intro eps
+  let delta : QPos :=
+    { val := eps.val/4000
+      property := by
+        rw [Rat.div_def]
+        exact Rat.mul_pos eps.property ((Rat.inv_pos).2 (by decide)) }
+  exact ⟨delta, sinPi_derivative_explicit B eps⟩
 
 end GeometricSineDerivative
 end ComputableAnalysis
