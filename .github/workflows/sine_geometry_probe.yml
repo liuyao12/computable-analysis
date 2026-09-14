@@ -1,43 +1,70 @@
-name: Sine geometry interface inspection
+name: Geometric sine derivative check
 on:
   push:
     branches: [work/fixed-schedule-sine]
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: geometric-sine-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-  inspect:
+  geometry:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v5
-      - name: Read inverse and angle certificates
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+      - uses: actions/cache/restore@v5
+        with:
+          path: .lake
+          key: geometric-sine-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: geometric-sine-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+      - name: Compile geometric sine estimates
+        run: |
+          set +e
+          targets='ComputableAnalysis.GeometricSineSecant'
+          if test -f ComputableAnalysis/GeometricSineDerivative.lean; then targets="$targets ComputableAnalysis.GeometricSineDerivative"; fi
+          lake build $targets > /tmp/geometry-proof.log 2>&1
+          result=$?
+          python - <<'PY'
+          from pathlib import Path
+          remaining=0
+          for line in Path('/tmp/geometry-proof.log').read_text().splitlines():
+            if line.startswith(('error:', '✖')): remaining=35
+            if line.startswith(('[grind]', 'trace:', '⚠', '✔', 'ℹ')): remaining=0
+            if remaining or 'Build completed' in line:
+              print(line)
+              remaining=max(0,remaining-1)
+          PY
+          exit "$result"
+      - name: Inspect remaining normalization interfaces
+        if: always()
         run: |
           python - <<'PY'
           from pathlib import Path
           import re
-          root=Path('ComputableAnalysis')
-          files={p.name:p.read_text().splitlines() for p in root.glob('*.lean')}
-          for filename,lines in files.items():
+          for name in ['ArctanGeometry.lean','CauchyPi.lean','SinPiIntegral.lean','SectorAreaReparametrization.lean']:
+            lines=(Path('ComputableAnalysis')/name).read_text().splitlines()
+            patterns={
+              'ArctanGeometry.lean':r'(?:[Ee]quiv.*(?:[Gg]eom|[Rr]ectangle)|tangentChartIncrement$|arctanIntegralRectangleCompute_width_le|arctanIntegralRectangleRaw_compute)',
+              'CauchyPi.lean':r'piCircleArea.*(?:bound|[Ll]ower|[Uu]pper|[Vv]alid)',
+              'SinPiIntegral.lean':r'cosPiRawOfArctan.*(?:bound|range|nonneg)|rationalCircleSinInterval.*(?:bound|width)|rationalCircleCos.*(?:nonneg|le_one)',
+              'SectorAreaReparametrization.lean':r'arctanOnUnitRegular.*(?:compute|equivalent)'}[name]
             for i,line in enumerate(lines):
-              if re.match(r'structure (?:InverseBisectionSearch|IntervalRegularOn|ContinuousFunctionOnInterval)\b',line):
-                print('\nSTRUCTURE',filename,i+1)
-                for s in lines[i:i+100]:
-                  if s!=line and re.match(r'^(?:namespace|def|theorem|structure) ',s): break
+              if re.match(r'^(?:private )?(?:def|theorem) ',line) and re.search(patterns,line):
+                print(f'\n{name}:{i+1}')
+                for s in lines[i:i+18]:
                   print(s)
-              if ': ArctanInverseBisection' in line or ':\n'==line:
-                print('\nINVERSE CONSTRUCTOR',filename,i+1,'\n'+'\n'.join(lines[max(0,i-12):i+5]))
-          for filename in ['ArctanGeometry.lean','ArctanEffectiveFTC.lean','IntegralIdentities.lean','Calculus.lean']:
-            lines=files[filename]
-            for i,line in enumerate(lines):
-              if not re.match(r'^(?:private )?(?:def|theorem|structure) ',line): continue
-              pattern={
-                'ArctanGeometry.lean':r'arctanIntegralRectangle.*(?:sub|difference|increment|derivative|Derivative|stretch|[Ll]ower|[Ss]ecant)|arctanGeom.*(?:equiv|[Ll]ipschitz)',
-                'ArctanEffectiveFTC.lean':r'(?:[Ss]ecant|[Rr]emainder|[Dd]erivative|increment|[Ll]ower)',
-                'IntegralIdentities.lean':r'(?:[Aa]rctan.*(?:[Dd]erivative|[Ss]ecant|[Ii]nverse|[Ll]ower)|[Tt]angent.*(?:[Dd]erivative|forward|[Ss]ource))',
-                'Calculus.lean':r'(?:preimage.*(?:forward|equiv)|forward.*preimage|applyRealRaw.*(?:equiv|overlap)|InverseBisectionSearch)'}[filename]
-              if re.search(pattern,line):
-                print('\nSIGNATURE',filename,i+1)
-                for j,s in enumerate(lines[i:i+24]):
-                  print(s)
-                  if ':= by' in s or ' where' in s or ' := ' in s or s.rstrip().endswith(':='): break
+                  if ':= by' in s or ' := ' in s or s.rstrip().endswith(':='): break
           PY
+      - uses: actions/cache/save@v5
+        if: always()
+        with:
+          path: .lake
+          key: geometric-sine-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
