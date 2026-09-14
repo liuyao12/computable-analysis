@@ -73,7 +73,7 @@ end QBox
 def IsApproxRootAt (coeffs : CPoly.Coeffs) (z : ComplexRaw) (n : Nat) : Prop :=
   let eps : QPos :=
     if hn : n = 0 then
-      { val := 1, property := by native_decide }
+      { val := 1, property := by decide +kernel }
     else
       { val := (1 / (n : Rat)), property := by
           rw [Rat.div_def, Rat.one_mul]
@@ -83,7 +83,7 @@ def IsApproxRootAt (coeffs : CPoly.Coeffs) (z : ComplexRaw) (n : Nat) : Prop :=
 def approxRootCheck (coeffs : CPoly.Coeffs) (z : ComplexRaw) (n : Nat) : Bool :=
   let eps : QPos :=
     if hn : n = 0 then
-      { val := 1, property := by native_decide }
+      { val := 1, property := by decide +kernel }
     else
       { val := (1 / (n : Rat)), property := by
           rw [Rat.div_def, Rat.one_mul]

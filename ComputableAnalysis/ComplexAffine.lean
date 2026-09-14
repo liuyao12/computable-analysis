@@ -181,8 +181,8 @@ theorem qcomplexLeftMul_imaginaryUnit_compute (z : ComplexRaw) (n : Nat) :
         hi := { re := -(z.compute n).lo.im, im := (z.compute n).hi.re } }) =
     { lo := { re := -(z.compute n).hi.im, im := (z.compute n).lo.re },
       hi := { re := -(z.compute n).lo.im, im := (z.compute n).hi.re } }
-  have h0 : (0 : Rat) <= 0 := by native_decide
-  have h1 : (0 : Rat) <= 1 := by native_decide
+  have h0 : (0 : Rat) <= 0 := by decide +kernel
+  have h1 : (0 : Rat) <= 1 := by decide +kernel
   simp only [QBox.add, QBox.scaleRat, QComplex.add, if_pos h0, if_pos h1,
     Rat.zero_mul, Rat.one_mul]
   congr 1 <;> congr 1 <;> exact Rat.zero_add _

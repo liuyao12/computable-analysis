@@ -22,7 +22,7 @@ theorem two_mul_leftPoint_zero_half_eq_leftPoint_zero_one
   by_cases hn : n = 0
   · subst n
     simp [leftPoint, mesh]
-    native_decide
+    decide +kernel
   · have hnrat : (n : Rat) ≠ 0 := by
       exact Rat.ne_of_gt ((Rat.natCast_pos).2 (Nat.pos_of_ne_zero hn))
     unfold leftPoint mesh
@@ -1166,7 +1166,7 @@ theorem unitMeshPath_le_one (n k : Nat) (hk : k <= n) :
       unfold unitMeshPath
       rw [Rat.div_def]
       simp
-      native_decide
+      decide +kernel
   | succ n =>
       unfold unitMeshPath
       rw [Rat.div_def]
@@ -2016,7 +2016,7 @@ theorem riemannTrapezoidInterval_eq_half_add_left_right
     intro k AL AR
     dsimp [stepL, stepR, stepT, QInterval.scaleByRat,
       QInterval.addInterval]
-    simp only [if_pos (by native_decide : (0 : Rat) <= 1 / 2)]
+    simp only [if_pos (by decide +kernel : (0 : Rat) <= 1 / 2)]
     grind [Rat.mul_assoc, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
       Rat.add_comm, Rat.add_left_comm]
   have hfold : forall (xs : List Nat) (AL AR : QInterval),
@@ -2057,7 +2057,7 @@ theorem riemannTrapezoidInterval_width_eq_half_add_left_right
           (riemannRightInterval g a b subdivisions prec).width) := by
   rw [riemannTrapezoidInterval_eq_half_add_left_right]
   rw [QInterval.scaleByRat_width_of_nonneg
-    (by native_decide : (0 : Rat) <= 1 / 2)]
+    (by decide +kernel : (0 : Rat) <= 1 / 2)]
   rw [QInterval.addInterval_width]
 
 /-! A shared tolerance for the two endpoint schedules is inherited by the
@@ -2073,7 +2073,7 @@ theorem riemannTrapezoidInterval_width_le_of_left_right_width_le
           (riemannRightInterval g a b subdivisions prec).width <= eps + eps := by
     grind
   have hscaled := Rat.mul_le_mul_of_nonneg_left hsum
-    (by native_decide : (0 : Rat) <= 1 / 2)
+    (by decide +kernel : (0 : Rat) <= 1 / 2)
   grind
 
 /-! Independent endpoint evaluators may be transported through the trapezoid
@@ -2102,7 +2102,7 @@ theorem riemannTrapezoidInterval_overlap_of_samples
       simp [mesh, hz]
   have hhalf : 0 <= mesh a b subdivisions / 2 := by
     rw [Rat.div_def]
-    exact Rat.mul_nonneg hmesh (by native_decide)
+    exact Rat.mul_nonneg hmesh (by decide +kernel)
   have hfold : forall (xs : List Nat),
       (forall k, k ∈ xs -> k < subdivisions) ->
       forall (accG accH : QInterval), QInterval.Overlaps accG accH ->
@@ -2560,7 +2560,7 @@ theorem riemannLeftInterval_half_eq_half_scale_unit
     dsimp [stepG, stepH]
     rw [hpoint k hk, mesh_zero_half_eq_half_mesh_zero_one]
     rw [QInterval.scaleByRat_add_mul_of_nonneg
-      (by native_decide : (0 : Rat) <= 1 / 2)]
+      (by decide +kernel : (0 : Rat) <= 1 / 2)]
     rw [hAB]
   have hfold : forall (xs : List Nat),
       (forall k, k ∈ xs -> k < subdivisions) -> forall A B,
@@ -2656,7 +2656,7 @@ private theorem midpoint_left {p r : Rat} (hpr : p <= r) :
       p * 2 <= p + r := by grind
       _ = ((p + r) * (2 : Rat)⁻¹) * 2 := by
         grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
-  · native_decide
+  · decide +kernel
 
 private theorem midpoint_right {p r : Rat} (hpr : p <= r) :
     (p + r) / 2 <= r := by
@@ -2666,7 +2666,7 @@ private theorem midpoint_right {p r : Rat} (hpr : p <= r) :
       ((p + r) * (2 : Rat)⁻¹) * 2 = p + r := by
         grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
       _ <= r * 2 := by grind
-  · native_decide
+  · decide +kernel
 
 private theorem midpoint_left_width (p r : Rat) :
     (p + r) / 2 - p = (r - p) / 2 := by
@@ -4994,7 +4994,7 @@ theorem rat_add_fold_le_length_mul {α : Type} (xs : List α) (term : α -> Rat)
       have hk : term k <= c := hterm k (by simp)
       simp only [List.length_cons]
       rw [Rat.natCast_add]
-      have hone : ((1 : Nat) : Rat) = 1 := by native_decide
+      have hone : ((1 : Nat) : Rat) = 1 := by decide +kernel
       rw [hone]
       calc
         (k :: xs).foldl (fun total j => total + term j) 0 =
@@ -5194,8 +5194,8 @@ theorem Refines.boundIntegralSum_overlaps_of_blockwise
     exact hcoarse i (List.mem_range.mp hi)
   · intro i hi
     exact hblock i (List.mem_range.mp hi)
-  · native_decide
-  · native_decide
+  · decide +kernel
+  · decide +kernel
   · simp [QInterval.Overlaps]
   · intro i hi
     exact hoverlap i (List.mem_range.mp hi)
@@ -5234,7 +5234,7 @@ theorem boundIntegralSum_width_nonneg_of_termwise {a b : Rat}
           simpa [List.foldl, Rat.zero_add] using hrest
     have h := hfold (List.range P.pieces) 0 (by
       intro k hk
-      exact hterm k (List.mem_range.mp hk)) (by native_decide)
+      exact hterm k (List.mem_range.mp hk)) (by decide +kernel)
     exact h
   have hzero : ({ lo := 0, hi := 0 } : QInterval).width = 0 := by
     unfold QInterval.width
@@ -8049,7 +8049,7 @@ theorem EffectiveModulusFor.local_expand_width_le
   have hnonneg : 0 <= (precisionAtStage n).val := by
     by_cases hn : n = 0
     · subst n
-      native_decide
+      decide +kernel
     · simp only [precisionAtStage, dif_neg hn]
       exact Rat.le_of_lt
         (one_div_nat_pos (Nat.pos_of_ne_zero hn))
@@ -8516,7 +8516,7 @@ def IntervalRegularOn.of_lipschitzOnIntervalNat
           (2 * (L : Rat)) /
             (((2 * L + 1) * (n + 1) : Nat) : Rat) := by
       have hscaled0 := Rat.mul_le_mul_of_nonneg_left hsmall
-        (Rat.mul_nonneg (by native_decide : (0 : Rat) ≤ 2) hL0)
+        (Rat.mul_nonneg (by decide +kernel : (0 : Rat) ≤ 2) hL0)
       simpa [Rat.div_def, Rat.mul_assoc] using hscaled0
     have hden :
         (2 * (L : Rat)) /
@@ -8542,7 +8542,7 @@ def IntervalRegularOn.of_lipschitzOnIntervalNat
         (f I.lo + (L : Rat) * I.width) -
           (f I.lo - (L : Rat) * I.width)
       have hnonneg : 0 <= (2 * (L : Rat)) * I.width :=
-        Rat.mul_nonneg (Rat.mul_nonneg (by native_decide) hL0) hwidth
+        Rat.mul_nonneg (Rat.mul_nonneg (by decide +kernel) hL0) hwidth
       grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul]
     · change
         (f I.lo + (L : Rat) * I.width) -
@@ -8598,7 +8598,7 @@ def IntervalRegularOn.of_lipschitzOnUnit
     IntervalRegularOn (FunctionOnInterval.exactRat f 0 1) :=
   IntervalRegularOn.of_lipschitzOnIntervalNat f 0 1 L
     (Integral.LipschitzOnIntervalNat.of_unit_subinterval f L
-      (by native_decide) (by native_decide) (by native_decide) hlip)
+      (by decide +kernel) (by decide +kernel) (by decide +kernel) hlip)
 /-! A single reusable bridge from a unit-chart Lipschitz estimate to the
 interval-regular evaluator on one of its rational subintervals.  This keeps
 piecewise constructions cellwise while reusing the global estimate; callers
@@ -8992,7 +8992,7 @@ def IntervalRegularOn.toEffectiveModulusFor
     have htarget :
         1 / (((n + 2 : Nat) : Rat)) <= (precisionAtStage n).val := by
       cases n with
-      | zero => native_decide
+      | zero => decide +kernel
       | succ n =>
           simp only [precisionAtStage, dif_neg (Nat.succ_ne_zero n)]
           calc
@@ -9063,7 +9063,7 @@ def ScheduledIntervalRegularOn.toEffectiveModulusFor
     have htarget :
         1 / (((n + 2 : Nat) : Rat)) <= (precisionAtStage n).val := by
       cases n with
-      | zero => native_decide
+      | zero => decide +kernel
       | succ n =>
           simp only [precisionAtStage, dif_neg (Nat.succ_ne_zero n)]
           calc
@@ -10061,7 +10061,7 @@ theorem intervalRegularDarbouxStage_width_nonneg_of_uniform_input_budget
         (fun j hj => hterms j (by simp [hj]))
         (Rat.add_nonneg hinit hk)
       exact hrest
-  have hsum := fold_nonneg (List.range pieces) 0 hterm (by native_decide)
+  have hsum := fold_nonneg (List.range pieces) 0 hterm (by decide +kernel)
   have hzero : ({ lo := 0, hi := 0 } : QInterval).width = 0 := by
     unfold QInterval.width
     grind
@@ -10758,7 +10758,7 @@ theorem nondecreasingDarbouxStage_width_nonneg
         (fun j hj => hterms j (by simp [hj]))
         (Rat.add_nonneg hinit hk)
       exact hrest
-  have hsum := fold_nonneg (List.range P.pieces) 0 hterm (by native_decide)
+  have hsum := fold_nonneg (List.range P.pieces) 0 hterm (by decide +kernel)
   have hzero : ({ lo := 0, hi := 0 } : QInterval).width = 0 := by
     unfold QInterval.width
     grind
@@ -12185,15 +12185,15 @@ def unitConstantMonotoneDarbouxSchedule :
       (FunctionOnInterval.exactRat (fun _ => (1 : Rat)) 0 1)
       (exactRat_constant_intervalRegularOn 1 0 1)
       (exactRat_constant_nondecreasing 1 0 1)
-      (by native_decide) where
+      (by decide +kernel) where
   pieces := fun _ => 1
   evalPrecision := fun _ => 0
   pieces_pos := by
     intro n
-    native_decide
+    decide +kernel
   input_budget := by
     intro n
-    native_decide
+    decide +kernel
   nested := by
     intro n m hnm
     simp [monotoneDarbouxScheduleCompute, nondecreasingDarbouxStage,
@@ -12208,13 +12208,13 @@ def unitConstantMonotoneDarbouxSchedule :
     intro n hn
     have hcell : (0 : Rat) ≤
         0 + (0 + 1) * ((1 - 0) / 1) - (0 + 0) := by
-      native_decide
+      decide +kernel
     have hwidth :
         (monotoneDarbouxScheduleCompute
           (FunctionOnInterval.exactRat (fun _ => (1 : Rat)) 0 1)
-          (by native_decide)
+          (by decide +kernel)
           (fun _ => 1) (fun _ => 0)
-          (by intro k; native_decide) n).width = 0 := by
+          (by intro k; decide +kernel) n).width = 0 := by
       simp [monotoneDarbouxScheduleCompute, nondecreasingDarbouxStage,
         nondecreasingDarbouxRange, FunctionOnInterval.exactRat,
         RationalPartition.uniform, RationalPartition.boundIntegralSum,
@@ -12237,13 +12237,13 @@ theorem unitConstantMonotoneDarbouxSchedule_integral_eq_one :
     (RealRaw.ofRat 1) n n).2
   have hcell : (0 : Rat) ≤
       0 + (0 + 1) * ((1 - 0) / 1) - (0 + 0) := by
-    native_decide
+    decide +kernel
   have hcompute :
       (monotoneDarbouxScheduleCompute
         (FunctionOnInterval.exactRat (fun _ => (1 : Rat)) 0 1)
-        (by native_decide)
+        (by decide +kernel)
         (fun _ => 1) (fun _ => 0)
-        (by intro k; native_decide) n) = { lo := 1, hi := 1 } := by
+        (by intro k; decide +kernel) n) = { lo := 1, hi := 1 } := by
     simp [monotoneDarbouxScheduleCompute, nondecreasingDarbouxStage,
       nondecreasingDarbouxRange, FunctionOnInterval.exactRat,
       RationalPartition.uniform, RationalPartition.boundIntegralSum,
@@ -12256,12 +12256,12 @@ theorem unitConstantMonotoneDarbouxSchedule_integral_eq_one :
   change QInterval.Overlaps
     (monotoneDarbouxScheduleCompute
       (FunctionOnInterval.exactRat (fun _ => (1 : Rat)) 0 1)
-      (by native_decide)
+      (by decide +kernel)
       (fun _ => 1) (fun _ => 0)
-      (by intro k; native_decide) n)
+      (by intro k; decide +kernel) n)
     { lo := 1, hi := 1 }
   rw [hcompute]
-  constructor <;> native_decide
+  constructor <;> decide +kernel
 
 theorem exactRat_affine_nondecreasing {r c a b : Rat} (hr : 0 <= r) :
     NondecreasingOnInterval
@@ -12476,10 +12476,10 @@ theorem unitMeshSquareIntegralRaw_equiv_affineMonotoneIntegral :
       (monotoneIntegralFor
         (FunctionOnInterval.exactRat (fun x : Rat => 2 * x + 0) 0 1)
         (affineMonotoneConstructionFor
-          (r := 2) (c := 0) (a := 0) (b := 1) (by native_decide))) := by
+          (r := 2) (c := 0) (a := 0) (b := 1) (by decide +kernel))) := by
   rw [affineMonotoneIntegralFor_eq_ofRat]
   · have hone :
-        ((1 : Rat) - 0) * (2 * (0 + 1) / 2 + 0) = 1 := by native_decide
+        ((1 : Rat) - 0) * (2 * (0 + 1) / 2 + 0) = 1 := by decide +kernel
     rw [hone]
     exact unitMeshSquareIntegralRaw_equiv_one
 
@@ -12838,7 +12838,7 @@ theorem piecewiseMonotoneIntegralFor_two_equiv
     exact RealRaw.equiv_trans hleft hmid hsum hassoc hzeroadd
   unfold piecewiseMonotoneIntegralFor
   simp only [hpieces]
-  have hrange : List.range 2 = [0, 1] := by native_decide
+  have hrange : List.range 2 = [0, 1] := by decide +kernel
   rw [hrange]
   simpa [RealRaw.zero, RealRaw.ofRat] using hfold
 
@@ -13875,7 +13875,7 @@ theorem exactCellOrderPreservation_of_boole
       · dsimp [q₁]
         have hdiv : 0 <= L / 4 := by
           rw [Rat.div_def]
-          exact Rat.mul_nonneg hL0 (by native_decide)
+          exact Rat.mul_nonneg hL0 (by decide +kernel)
         grind
       · dsimp [q₁, L]
         rw [Rat.div_def]
@@ -13886,7 +13886,7 @@ theorem exactCellOrderPreservation_of_boole
       · dsimp [q₂]
         have hdiv : 0 <= L / 2 := by
           rw [Rat.div_def]
-          exact Rat.mul_nonneg hL0 (by native_decide)
+          exact Rat.mul_nonneg hL0 (by decide +kernel)
         grind
       · dsimp [q₂, L]
         rw [Rat.div_def]
@@ -13896,10 +13896,10 @@ theorem exactCellOrderPreservation_of_boole
       constructor
       · dsimp [q₃]
         have hthreeL : 0 <= 3 * L :=
-          Rat.mul_nonneg (by native_decide) hL0
+          Rat.mul_nonneg (by decide +kernel) hL0
         have hdiv : 0 <= (3 * L) / 4 := by
           rw [Rat.div_def]
-          exact Rat.mul_nonneg hthreeL (by native_decide)
+          exact Rat.mul_nonneg hthreeL (by decide +kernel)
         grind
       · dsimp [q₃, L]
         rw [Rat.div_def]
@@ -13914,20 +13914,20 @@ theorem exactCellOrderPreservation_of_boole
         90 * c <= 7 * eval p + 32 * eval q₁ + 12 * eval q₂ +
           32 * eval q₃ + 7 * eval r := by
       have h7p := Rat.mul_le_mul_of_nonneg_left hp
-        (by native_decide : (0 : Rat) <= 7)
+        (by decide +kernel : (0 : Rat) <= 7)
       have h32q1 := Rat.mul_le_mul_of_nonneg_left h1
-        (by native_decide : (0 : Rat) <= 32)
+        (by decide +kernel : (0 : Rat) <= 32)
       have h12q2 := Rat.mul_le_mul_of_nonneg_left h2
-        (by native_decide : (0 : Rat) <= 12)
+        (by decide +kernel : (0 : Rat) <= 12)
       have h32q3 := Rat.mul_le_mul_of_nonneg_left h3
-        (by native_decide : (0 : Rat) <= 32)
+        (by decide +kernel : (0 : Rat) <= 32)
       have h7r := Rat.mul_le_mul_of_nonneg_left hr
-        (by native_decide : (0 : Rat) <= 7)
+        (by decide +kernel : (0 : Rat) <= 7)
       grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
         Rat.mul_assoc, Rat.mul_comm]
     have hscale : 0 <= L / 90 := by
       rw [Rat.div_def]
-      exact Rat.mul_nonneg hL0 (by native_decide)
+      exact Rat.mul_nonneg hL0 (by decide +kernel)
     rw [hboole]
     change L * c <=
       (L / 90) *
@@ -13955,7 +13955,7 @@ theorem exactCellOrderPreservation_of_boole
       · dsimp [q₁]
         have hdiv : 0 <= L / 4 := by
           rw [Rat.div_def]
-          exact Rat.mul_nonneg hL0 (by native_decide)
+          exact Rat.mul_nonneg hL0 (by decide +kernel)
         grind
       · dsimp [q₁, L]
         rw [Rat.div_def]
@@ -13966,7 +13966,7 @@ theorem exactCellOrderPreservation_of_boole
       · dsimp [q₂]
         have hdiv : 0 <= L / 2 := by
           rw [Rat.div_def]
-          exact Rat.mul_nonneg hL0 (by native_decide)
+          exact Rat.mul_nonneg hL0 (by decide +kernel)
         grind
       · dsimp [q₂, L]
         rw [Rat.div_def]
@@ -13976,10 +13976,10 @@ theorem exactCellOrderPreservation_of_boole
       constructor
       · dsimp [q₃]
         have hthreeL : 0 <= 3 * L :=
-          Rat.mul_nonneg (by native_decide) hL0
+          Rat.mul_nonneg (by decide +kernel) hL0
         have hdiv : 0 <= (3 * L) / 4 := by
           rw [Rat.div_def]
-          exact Rat.mul_nonneg hthreeL (by native_decide)
+          exact Rat.mul_nonneg hthreeL (by decide +kernel)
         grind
       · dsimp [q₃, L]
         rw [Rat.div_def]
@@ -13994,20 +13994,20 @@ theorem exactCellOrderPreservation_of_boole
         7 * eval p + 32 * eval q₁ + 12 * eval q₂ +
           32 * eval q₃ + 7 * eval r <= 90 * c := by
       have h7p := Rat.mul_le_mul_of_nonneg_left hp
-        (by native_decide : (0 : Rat) <= 7)
+        (by decide +kernel : (0 : Rat) <= 7)
       have h32q1 := Rat.mul_le_mul_of_nonneg_left h1
-        (by native_decide : (0 : Rat) <= 32)
+        (by decide +kernel : (0 : Rat) <= 32)
       have h12q2 := Rat.mul_le_mul_of_nonneg_left h2
-        (by native_decide : (0 : Rat) <= 12)
+        (by decide +kernel : (0 : Rat) <= 12)
       have h32q3 := Rat.mul_le_mul_of_nonneg_left h3
-        (by native_decide : (0 : Rat) <= 32)
+        (by decide +kernel : (0 : Rat) <= 32)
       have h7r := Rat.mul_le_mul_of_nonneg_left hr
-        (by native_decide : (0 : Rat) <= 7)
+        (by decide +kernel : (0 : Rat) <= 7)
       grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
         Rat.mul_assoc, Rat.mul_comm]
     have hscale : 0 <= L / 90 := by
       rw [Rat.div_def]
-      exact Rat.mul_nonneg hL0 (by native_decide)
+      exact Rat.mul_nonneg hL0 (by decide +kernel)
     rw [hboole]
     change (L / 90) *
         (7 * eval p + 32 * eval q₁ + 12 * eval q₂ +
@@ -14158,7 +14158,7 @@ private theorem not_strictly_separated_of_forward_equiv
             (I.function.compute a ha p).hi) / 6, by
           rw [Rat.div_def]
           exact Rat.mul_pos houtputGap
-            ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 6))⟩
+            ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 6))⟩
       let n : Nat := max (max N p) eps.val.den
       have hNn : N <= n := by
         dsimp [n]
@@ -14305,7 +14305,7 @@ private theorem not_strictly_separated_of_forward_equiv
       have hforwardStrict :
           ((I.forwardRealRaw x hx hxsource).compute n).hi <
             ((I.forwardRealRaw y hy hysource).compute n).lo := by
-        have hsix : (0 : Rat) < 6 := by native_decide
+        have hsix : (0 : Rat) < 6 := by decide +kernel
         have hbudget : eps.val + eps.val + eps.val + eps.val <
             (I.function.compute b hb p).lo -
               (I.function.compute a ha p).hi := by
@@ -14343,7 +14343,7 @@ private theorem not_strictly_separated_of_forward_equiv
             (I.function.compute b hb p).hi) / 6, by
           rw [Rat.div_def]
           exact Rat.mul_pos houtputGap
-            ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 6))⟩
+            ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 6))⟩
       let n : Nat := max (max N p) eps.val.den
       have hNn : N <= n := by
         dsimp [n]
@@ -14489,7 +14489,7 @@ private theorem not_strictly_separated_of_forward_equiv
       have hforwardStrict :
           ((I.forwardRealRaw y hy hysource).compute n).hi <
             ((I.forwardRealRaw x hx hxsource).compute n).lo := by
-        have hsix : (0 : Rat) < 6 := by native_decide
+        have hsix : (0 : Rat) < 6 := by decide +kernel
         have hbudget : eps.val + eps.val + eps.val + eps.val <
             (I.function.compute a ha p).lo -
               (I.function.compute b hb p).hi := by
@@ -14661,7 +14661,7 @@ theorem gapAwareTargetBisectionMidpointRange_ordered
     have hright : (0 : Rat) <=
         1 / ((F.regular.inputPrecision n : Nat) : Rat) := by
       rw [Rat.div_def]
-      exact Rat.mul_nonneg (by native_decide) hinv
+      exact Rat.mul_nonneg (by decide +kernel) hinv
     rw [Rat.sub_self]
     exact hright
   have hnonneg := (F.regular.output_width M hM n hwidth).1
@@ -15303,7 +15303,7 @@ theorem gapAwareTargetBisectionScheduledIterate_width_eq_div_pow_of_decided
         gapAwareTargetBisectionScheduledIterateWithProof, QInterval.width,
         Rat.div_def]
       have hone : (1 : Rat)⁻¹ = 1 := by
-        have h := Rat.mul_inv_cancel (1 : Rat) (by native_decide)
+        have h := Rat.mul_inv_cancel (1 : Rat) (by decide +kernel)
         simpa using h
       rw [hone, Rat.mul_one]
   | succ n ih =>
@@ -15538,7 +15538,7 @@ theorem gapAwareTargetBisectionAdaptiveIterate_width_eq_div_pow_of_decided
         gapAwareTargetBisectionAdaptiveIterateWithProof, QInterval.width,
         Rat.div_def]
       have hone : (1 : Rat)⁻¹ = 1 := by
-        have h := Rat.mul_inv_cancel (1 : Rat) (by native_decide)
+        have h := Rat.mul_inv_cancel (1 : Rat) (by decide +kernel)
         simpa using h
       rw [hone, Rat.mul_one]
   | succ n ih =>
@@ -15595,7 +15595,7 @@ theorem gapAwareTargetBisectionFixedIterate_width_eq_div_pow_of_decided
         gapAwareTargetBisectionFixedIterateWithProof, QInterval.width,
         Rat.div_def]
       have hone : (1 : Rat)⁻¹ = 1 := by
-        have h := Rat.mul_inv_cancel (1 : Rat) (by native_decide)
+        have h := Rat.mul_inv_cancel (1 : Rat) (by decide +kernel)
         simpa using h
       rw [hone, Rat.mul_one]
   | succ n ih =>

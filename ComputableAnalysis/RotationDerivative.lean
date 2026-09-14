@@ -29,8 +29,8 @@ private theorem rat_pow_add_for_derivative (q : Rat) (m n : Nat) :
 private theorem half_pow_twice_le_for_derivative (n : Nat) :
     ((1 : Rat) / 2) ^ (2 * n) <= ((1 : Rat) / 2) ^ n := by
   rw [show 2 * n = n + n by omega, rat_pow_add_for_derivative]
-  have hhalf0 : (0 : Rat) <= 1 / 2 := by native_decide
-  have hhalf1 : (1 : Rat) / 2 <= 1 := by native_decide
+  have hhalf0 : (0 : Rat) <= 1 / 2 := by decide +kernel
+  have hhalf1 : (1 : Rat) / 2 <= 1 := by decide +kernel
   have hpow0 : 0 <= ((1 : Rat) / 2) ^ n := Rat.pow_nonneg hhalf0
   have hpow1 : ((1 : Rat) / 2) ^ n <= 1 := by
     induction n with
@@ -54,7 +54,7 @@ private theorem half_pow_twice_le_for_derivative (n : Nat) :
 private theorem uniformRotationTailMagnitude_nonneg_for_derivative (n : Nat) :
     0 <= uniformRotationTailMagnitude n := by
   unfold uniformRotationTailMagnitude
-  exact RationalMajorant.factorialTailTerm_nonneg (by native_decide) _
+  exact RationalMajorant.factorialTailTerm_nonneg (by decide +kernel) _
 
 private theorem uniformRotationTailMagnitude_le_geometric_for_derivative
     (n : Nat) :
@@ -62,7 +62,7 @@ private theorem uniformRotationTailMagnitude_le_geometric_for_derivative
       uniformRotationTailMagnitude 0 * ((1 : Rat) / 2) ^ n := by
   have htail := RationalMajorant.factorialTailTerm_le_geometric_from_start
     (C := (2 : Rat)) (N := uniformRotationTailTerms 0)
-    (by native_decide) (uniform_rotation_tail_start_for_derivative 0) (2 * n)
+    (by decide +kernel) (uniform_rotation_tail_start_for_derivative 0) (2 * n)
   have hterms : uniformRotationTailTerms n = uniformRotationTailTerms 0 + 2 * n := by
     unfold uniformRotationTailTerms
     omega
@@ -75,7 +75,7 @@ private theorem uniformRotationTailMagnitude_le_geometric_for_derivative
     _ <= RationalMajorant.factorialTailTerm 2 (uniformRotationTailTerms 0) *
           ((1 : Rat) / 2) ^ n :=
       Rat.mul_le_mul_of_nonneg_left (half_pow_twice_le_for_derivative n)
-        (RationalMajorant.factorialTailTerm_nonneg (by native_decide) _)
+        (RationalMajorant.factorialTailTerm_nonneg (by decide +kernel) _)
 
 def uniformRotationQuotientTailTolerance (h : Rat) (hh : h ≠ 0) (n : Nat) : QPos :=
   { val := (precisionAtStage n).val * qabs h / 48
@@ -83,7 +83,7 @@ def uniformRotationQuotientTailTolerance (h : Rat) (hh : h ≠ 0) (n : Nat) : QP
       rw [Rat.div_def]
       exact Rat.mul_pos
         (Rat.mul_pos (precisionAtStage n).property (qabs_pos_of_ne hh))
-        ((Rat.inv_pos).2 (by native_decide)) }
+        ((Rat.inv_pos).2 (by decide +kernel)) }
 
 def uniformRotationQuotientPrecision (h : Rat) (hh : h ≠ 0) (n : Nat) : Nat :=
   RationalMajorant.halfDecayShift (uniformRotationTailMagnitude 0)
@@ -123,11 +123,11 @@ theorem uniformRotationSinDerivative_finite_error_le_half_precision
   have hsmall' : qabs h <= 1 / (((2 ^ shift : Nat) : Rat)) := by
     simpa [uniformRotationSinDerivativeStepPrecision, shift] using hsmall
   have hscaled : qabs h * 68 <= 1 / (((2 ^ shift : Nat) : Rat)) * 68 :=
-    Rat.mul_le_mul_of_nonneg_right hsmall' (by native_decide)
+    Rat.mul_le_mul_of_nonneg_right hsmall' (by decide +kernel)
   have hgeometric : (68 : Rat) * ((1 : Rat) / 2) ^ shift <=
       (precisionAtStage n).val := by
     simpa [shift] using RationalMajorant.halfDecayShift_spec
-      (by native_decide : (0 : Rat) <= 68) (precisionAtStage n)
+      (by decide +kernel : (0 : Rat) <= 68) (precisionAtStage n)
   have hsixtyEight : qabs h * 68 <= (precisionAtStage n).val := by
     calc
       qabs h * 68 <= 1 / (((2 ^ shift : Nat) : Rat)) * 68 := hscaled
@@ -141,7 +141,7 @@ theorem uniformRotationSinDerivative_finite_error_le_half_precision
       grind [Rat.mul_assoc, Rat.mul_comm]
     _ <= (precisionAtStage n).val / 2 :=
       Rat.mul_le_mul_of_nonneg_right hsixtyEight (Rat.le_of_lt
-        ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2)))
+        ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 2)))
 
 /-- A tail selected below `eps * |h| / 48` pays the three symmetric-box
 quotient budgets on the bounded rotation chart.  It is reused by both
@@ -171,7 +171,7 @@ theorem uniformRotation_tail_transport_budgets
         rw [Rat.div_def, Rat.div_def]
         exact Rat.mul_le_mul_of_nonneg_right
           (Rat.mul_le_mul_of_nonneg_left habs heps0)
-          (Rat.le_of_lt ((Rat.inv_pos).2 (by native_decide)))
+          (Rat.le_of_lt ((Rat.inv_pos).2 (by decide +kernel)))
       _ = eps.val / 12 := by
         rw [Rat.div_def]
         grind [Rat.mul_assoc, Rat.mul_comm]
@@ -181,14 +181,14 @@ theorem uniformRotation_tail_transport_budgets
         rw [Rat.div_def]
         grind [Rat.mul_assoc]
       _ <= 8 * (eps.val / 48) :=
-        Rat.mul_le_mul_of_nonneg_left htdiv (by native_decide)
+        Rat.mul_le_mul_of_nonneg_left htdiv (by decide +kernel)
       _ = eps.val / 6 := by
         rw [Rat.div_def]
         grind [Rat.mul_assoc, Rat.mul_comm]
   have hfour : 4 * t <= eps.val / 3 := by
     calc
       4 * t <= 4 * (eps.val / 12) :=
-        Rat.mul_le_mul_of_nonneg_left hsmall (by native_decide)
+        Rat.mul_le_mul_of_nonneg_left hsmall (by decide +kernel)
       _ = eps.val / 3 := by
         rw [Rat.div_def]
         grind [Rat.mul_assoc, Rat.mul_comm]
@@ -198,7 +198,7 @@ theorem uniformRotation_tail_transport_budgets
         rw [Rat.div_def]
         grind [Rat.mul_assoc]
       _ <= 16 * (eps.val / 48) :=
-        Rat.mul_le_mul_of_nonneg_left htdiv (by native_decide)
+        Rat.mul_le_mul_of_nonneg_left htdiv (by decide +kernel)
       _ = eps.val / 3 := by
         rw [Rat.div_def]
         grind [Rat.mul_assoc, Rat.mul_comm]
@@ -208,7 +208,7 @@ theorem uniformRotation_tail_transport_budgets
   have heightDirect : 8 * t <= eps.val := by
     calc
       8 * t <= 8 * (eps.val / 12) :=
-        Rat.mul_le_mul_of_nonneg_left hsmall (by native_decide)
+        Rat.mul_le_mul_of_nonneg_left hsmall (by decide +kernel)
       _ = eps.val * 2 / 3 := by
         rw [Rat.div_def]
         grind [Rat.mul_assoc, Rat.mul_comm]
@@ -248,7 +248,7 @@ def uniformRotationSinOnTwo_hasDerivativeOnInterval :
           grind [Rat.sub_eq_add_neg]
         _ <= qabs (x + h) + qabs x := qabs_sub_le _ _
         _ <= 2 + 2 := rat_add_le_add hqxh hqx
-        _ = 4 := by native_decide
+        _ = 4 := by decide +kernel
     let eps : QPos := precisionAtStage n
     let stage : Nat := uniformRotationQuotientPrecision h hh n
     have hstage : uniformRotationSinDerivativeEvalPrecision h n = stage := by
@@ -313,7 +313,7 @@ def uniformRotationSinOnTwo_hasDerivativeOnInterval :
       (uniformRotationTailRadius stage) h (qabs h * 34) eps hh
       (by
         unfold uniformRotationTailRadius
-        exact Rat.mul_nonneg (by native_decide)
+        exact Rat.mul_nonneg (by decide +kernel)
           (uniformRotationTailMagnitude_nonneg_for_derivative stage))
       hcenter hbudget hquotientWidth hderivativeWidth
 
@@ -326,7 +326,7 @@ private theorem qabs_signed_odd_factorial_for_cosine (n : Nat) :
   rw [Rat.div_def, qabs_mul]
   have hsign : qabs ((-1 : Rat) ^ (n + 1)) = 1 := by
     rw [RationalMajorant.qabs_pow_eq_pow_qabs]
-    have hminus : qabs (-1 : Rat) = 1 := by native_decide
+    have hminus : qabs (-1 : Rat) = 1 := by decide +kernel
     rw [hminus]
     induction n with
     | zero => rfl
@@ -369,22 +369,22 @@ private def cosinePrefixSecantData : (n : Nat) -> CosinePrefixSecantData n
           (fun x => LinearODE.RotationSystem.cosinePrefix x 1)
           (fun x => -LinearODE.RotationSystem.sinePrefix x (1 - 1)) :=
         { errorCoefficient := 0
-          errorCoefficient_nonneg := by native_decide
+          errorCoefficient_nonneg := by decide +kernel
           error_bound := by
             intro x h hh hx hxh
             have hcos : LinearODE.RotationSystem.cosinePrefix x 1 = 1 := by
               simpa [LinearODE.RotationSystem.cosinePrefix,
                 LinearODE.RotationSystem.cosineCoefficient, factorialRat, factorial] using
-                (show (0 : Rat) + 1 / 1 = 1 by native_decide)
+                (show (0 : Rat) + 1 / 1 = 1 by decide +kernel)
             have hcos' : LinearODE.RotationSystem.cosinePrefix (x + h) 1 = 1 := by
               simpa [LinearODE.RotationSystem.cosinePrefix,
                 LinearODE.RotationSystem.cosineCoefficient, factorialRat, factorial] using
-                (show (0 : Rat) + 1 / 1 = 1 by native_decide)
+                (show (0 : Rat) + 1 / 1 = 1 by decide +kernel)
             have hsin : LinearODE.RotationSystem.sinePrefix x (1 - 1) = 0 := by
               rfl
             rw [hcos, hcos', hsin]
             rw [Rat.sub_self, Rat.div_def, Rat.zero_mul]
-            have hzero : qabs (0 : Rat) = 0 := by native_decide
+            have hzero : qabs (0 : Rat) = 0 := by decide +kernel
             rw [show (0 : Rat) - -0 = 0 by grind [Rat.sub_eq_add_neg], hzero,
               Rat.mul_zero]
             exact Rat.le_refl
@@ -399,7 +399,7 @@ private def cosinePrefixSecantData : (n : Nat) -> CosinePrefixSecantData n
       let F := cosinePrefixSecantData (n + 1)
       let G := SecantDerivativeBound.scaleRat
         (((-1 : Rat) ^ (n + 1)) / factorialRat (2 * n + 1))
-        (normalizedMonomialSecantBound 2 (2 * n + 1) (by native_decide))
+        (normalizedMonomialSecantBound 2 (2 * n + 1) (by decide +kernel))
       let H := F.bound.add G
       have hsource :
           (fun x => LinearODE.RotationSystem.cosinePrefix x (n + 1) +
@@ -457,7 +457,7 @@ private def cosinePrefixSecantData : (n : Nat) -> CosinePrefixSecantData n
             · rw [← F.errorCoefficient_eq]
               exact F.bound.errorCoefficient_nonneg
             · exact Rat.mul_nonneg (qabs_nonneg _)
-                (powerSecantErrorBound_nonneg (by native_decide) _)
+                (powerSecantErrorBound_nonneg (by decide +kernel) _)
           error_bound := by
             intro x h hh hx hxh
             have hH := H.error_bound x h hh hx hxh
@@ -557,7 +557,7 @@ private theorem cosinePrefixSecantCoefficient_succ_le_exp (n : Nat) :
     cosinePrefixSecantCoefficient (n + 1) <=
       expTaylorPrefixSecantCoefficient (2 * n + 1) := by
   induction n with
-  | zero => native_decide
+  | zero => decide +kernel
   | succ n ih =>
       have hstep :
           cosinePrefixSecantCoefficient (n + 2) <=
@@ -573,7 +573,7 @@ private theorem cosinePrefixSecantCoefficient_succ_le_exp (n : Nat) :
             qabs (FormalPowerSeries.expCoeff (2 * n + 2)) *
               powerSecantErrorBound 2 (2 * n + 2 + 1) :=
           Rat.mul_nonneg (qabs_nonneg _)
-            (powerSecantErrorBound_nonneg (by native_decide) _)
+            (powerSecantErrorBound_nonneg (by decide +kernel) _)
         calc
           expTaylorPrefixSecantCoefficient (2 * n + 2) =
               expTaylorPrefixSecantCoefficient (2 * n + 2) + 0 := by
@@ -590,7 +590,7 @@ private theorem cosinePrefixSecantCoefficient_succ_le_exp (n : Nat) :
 private theorem cosinePrefixSecantCoefficient_le_thirty_four (n : Nat) :
     cosinePrefixSecantCoefficient n <= 34 := by
   cases n with
-  | zero => native_decide
+  | zero => decide +kernel
   | succ n =>
       exact Rat.le_trans (cosinePrefixSecantCoefficient_succ_le_exp n)
         (expTaylorPrefixSecantCoefficient_le_thirty_four _)
@@ -622,7 +622,7 @@ private def uniformRotationCosDerivativeEdgeMagnitude (n : Nat) : Rat :=
   RationalMajorant.factorialTailTerm 2 (uniformRotationTailTerms n - 1)
 
 private theorem uniformRotationTailStart_eq_five : uniformRotationTailStart = 5 := by
-  native_decide
+  decide +kernel
 
 private theorem rat_pow_add_for_cosine (q : Rat) (m n : Nat) :
     q ^ (m + n) = q ^ m * q ^ n := by
@@ -638,8 +638,8 @@ private theorem half_pow_twice_le_for_cosine (n : Nat) :
     ((1 : Rat) / 2) ^ (2 * n) <= ((1 : Rat) / 2) ^ n := by
   rw [show 2 * n = n + n by omega]
   rw [rat_pow_add_for_cosine]
-  have hhalf0 : (0 : Rat) <= 1 / 2 := by native_decide
-  have hhalf1 : (1 : Rat) / 2 <= 1 := by native_decide
+  have hhalf0 : (0 : Rat) <= 1 / 2 := by decide +kernel
+  have hhalf1 : (1 : Rat) / 2 <= 1 := by decide +kernel
   have hpow0 : 0 <= ((1 : Rat) / 2) ^ n := Rat.pow_nonneg hhalf0
   have hpow1 : ((1 : Rat) / 2) ^ n <= 1 := by
     induction n with
@@ -663,7 +663,7 @@ private theorem half_pow_twice_le_for_cosine (n : Nat) :
 private theorem uniformRotationCosDerivativeEdgeMagnitude_nonneg (n : Nat) :
     0 <= uniformRotationCosDerivativeEdgeMagnitude n := by
   unfold uniformRotationCosDerivativeEdgeMagnitude
-  exact RationalMajorant.factorialTailTerm_nonneg (by native_decide) _
+  exact RationalMajorant.factorialTailTerm_nonneg (by decide +kernel) _
 
 private theorem uniformRotationCosDerivativeEdgeMagnitude_le_geometric
     (n : Nat) :
@@ -671,10 +671,10 @@ private theorem uniformRotationCosDerivativeEdgeMagnitude_le_geometric
       uniformRotationCosDerivativeEdgeMagnitude 0 * ((1 : Rat) / 2) ^ n := by
   have hstart : (2 : Rat) <=
       (((uniformRotationTailTerms 0 - 1 + 1 : Nat) : Rat) / 2) := by
-    native_decide
+    decide +kernel
   have htail := RationalMajorant.factorialTailTerm_le_geometric_from_start
     (C := (2 : Rat)) (N := uniformRotationTailTerms 0 - 1)
-    (by native_decide) hstart (2 * n)
+    (by decide +kernel) hstart (2 * n)
   have hterms : uniformRotationTailTerms n - 1 =
       (uniformRotationTailTerms 0 - 1) + 2 * n := by
     unfold uniformRotationTailTerms
@@ -690,7 +690,7 @@ private theorem uniformRotationCosDerivativeEdgeMagnitude_le_geometric
     _ <= RationalMajorant.factorialTailTerm 2 (uniformRotationTailTerms 0 - 1) *
           ((1 : Rat) / 2) ^ n :=
       Rat.mul_le_mul_of_nonneg_left (half_pow_twice_le_for_cosine n)
-        (RationalMajorant.factorialTailTerm_nonneg (by native_decide) _)
+        (RationalMajorant.factorialTailTerm_nonneg (by decide +kernel) _)
 
 private theorem uniformRotationCosDerivative_edge_le
     {x : Rat} (hx : qabs x <= 2) (n : Nat) :
@@ -802,8 +802,8 @@ private theorem uniformRotationNegSinOnTwo_compute_around_for_cosine
   congr 1 <;> grind [Rat.sub_eq_add_neg]
 private theorem half_pow_le_one_for_cosine (n : Nat) :
     ((1 : Rat) / 2) ^ n <= 1 := by
-  have hhalf0 : (0 : Rat) <= 1 / 2 := by native_decide
-  have hhalf1 : (1 : Rat) / 2 <= 1 := by native_decide
+  have hhalf0 : (0 : Rat) <= 1 / 2 := by decide +kernel
+  have hhalf1 : (1 : Rat) / 2 <= 1 := by decide +kernel
   induction n with
   | zero =>
       rw [Rat.pow_zero]
@@ -822,7 +822,7 @@ private theorem half_pow_antitone_for_cosine {m n : Nat} (hnm : n <= m) :
   obtain ⟨d, hmd⟩ := Nat.exists_eq_add_of_le hnm
   rw [hmd, rat_pow_add_for_cosine]
   have hnonneg : 0 <= ((1 : Rat) / 2) ^ n :=
-    Rat.pow_nonneg (by native_decide)
+    Rat.pow_nonneg (by decide +kernel)
   calc
     ((1 : Rat) / 2) ^ n * ((1 : Rat) / 2) ^ d <=
         ((1 : Rat) / 2) ^ n * 1 :=
@@ -835,10 +835,10 @@ private theorem uniformRotationTailMagnitude_le_geometric_for_cosine
       uniformRotationTailMagnitude 0 * ((1 : Rat) / 2) ^ n := by
   have hstart : (2 : Rat) <=
       (((uniformRotationTailTerms 0 + 1 : Nat) : Rat) / 2) := by
-    native_decide
+    decide +kernel
   have htail := RationalMajorant.factorialTailTerm_le_geometric_from_start
     (C := (2 : Rat)) (N := uniformRotationTailTerms 0)
-    (by native_decide) hstart (2 * n)
+    (by decide +kernel) hstart (2 * n)
   have hterms : uniformRotationTailTerms n = uniformRotationTailTerms 0 + 2 * n := by
     unfold uniformRotationTailTerms
     rw [uniformRotationTailStart_eq_five]
@@ -852,7 +852,7 @@ private theorem uniformRotationTailMagnitude_le_geometric_for_cosine
     _ <= RationalMajorant.factorialTailTerm 2 (uniformRotationTailTerms 0) *
           ((1 : Rat) / 2) ^ n :=
       Rat.mul_le_mul_of_nonneg_left (half_pow_twice_le_for_cosine n)
-        (RationalMajorant.factorialTailTerm_nonneg (by native_decide) _)
+        (RationalMajorant.factorialTailTerm_nonneg (by decide +kernel) _)
 
 /-- The non-quotient tolerance reserved for the final sine term dropped by a
 finite cosine derivative. -/
@@ -861,7 +861,7 @@ def uniformRotationCosDerivativeEdgeTolerance (n : Nat) : QPos :=
     property := by
       rw [Rat.div_def]
       exact Rat.mul_pos (precisionAtStage n).property
-        ((Rat.inv_pos).2 (by native_decide)) }
+        ((Rat.inv_pos).2 (by decide +kernel)) }
 
 def uniformRotationCosDerivativeEdgePrecision (n : Nat) : Nat :=
   RationalMajorant.halfDecayShift (uniformRotationCosDerivativeEdgeMagnitude 0)
@@ -874,7 +874,7 @@ def uniformRotationCosQuotientTailTolerance
       rw [Rat.div_def]
       exact Rat.mul_pos
         (Rat.mul_pos (precisionAtStage n).property (qabs_pos_of_ne hh))
-        ((Rat.inv_pos).2 (by native_decide)) }
+        ((Rat.inv_pos).2 (by decide +kernel)) }
 
 def uniformRotationCosQuotientPrecision (h : Rat) (hh : h ≠ 0) (n : Nat) : Nat :=
   RationalMajorant.halfDecayShift (uniformRotationTailMagnitude 0)
@@ -897,7 +897,7 @@ private theorem uniformRotationCosDerivativeEvalPrecision_of_ne
 private theorem uniformRotationTailMagnitude_nonneg_for_cosine (n : Nat) :
     0 <= uniformRotationTailMagnitude n := by
   unfold uniformRotationTailMagnitude
-  exact RationalMajorant.factorialTailTerm_nonneg (by native_decide) _
+  exact RationalMajorant.factorialTailTerm_nonneg (by decide +kernel) _
 
 theorem uniformRotationTailMagnitude_le_cosQuotientTolerance
     (h : Rat) (hh : h ≠ 0) (n : Nat) :
@@ -958,11 +958,11 @@ theorem uniformRotationCosDerivative_finite_error_le_third_precision
   have hsmall' : qabs h <= 1 / (((2 ^ shift : Nat) : Rat)) := by
     simpa [uniformRotationCosDerivativeStepPrecision, shift] using hsmall
   have hscaled : qabs h * 102 <= 1 / (((2 ^ shift : Nat) : Rat)) * 102 :=
-    Rat.mul_le_mul_of_nonneg_right hsmall' (by native_decide)
+    Rat.mul_le_mul_of_nonneg_right hsmall' (by decide +kernel)
   have hgeometric : (102 : Rat) * ((1 : Rat) / 2) ^ shift <=
       (precisionAtStage n).val := by
     simpa [shift] using RationalMajorant.halfDecayShift_spec
-      (by native_decide : (0 : Rat) <= 102) (precisionAtStage n)
+      (by decide +kernel : (0 : Rat) <= 102) (precisionAtStage n)
   have hfull : qabs h * 102 <= (precisionAtStage n).val := by
     calc
       qabs h * 102 <= 1 / (((2 ^ shift : Nat) : Rat)) * 102 := hscaled
@@ -976,7 +976,7 @@ theorem uniformRotationCosDerivative_finite_error_le_third_precision
       grind [Rat.mul_assoc, Rat.mul_comm]
     _ <= (precisionAtStage n).val / 3 :=
       Rat.mul_le_mul_of_nonneg_right hfull (Rat.le_of_lt
-        ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 3)))
+        ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 3)))
 
 /-- The common-prefix cosine evaluator has derivative the common-prefix
 negative-sine evaluator on `[-2,2]`.  Its stage takes the maximum of a
@@ -1003,7 +1003,7 @@ def uniformRotationCosOnTwo_hasDerivativeOnInterval :
           grind [Rat.sub_eq_add_neg]
         _ <= qabs (x + h) + qabs x := qabs_sub_le _ _
         _ <= 2 + 2 := rat_add_le_add hqxh hqx
-        _ = 4 := by native_decide
+        _ = 4 := by decide +kernel
     let eps : QPos := precisionAtStage n
     let stage : Nat := uniformRotationCosDerivativeEvalPrecision h n
     have hstage : uniformRotationCosDerivativeEvalPrecision h n = stage := rfl
@@ -1023,7 +1023,7 @@ def uniformRotationCosOnTwo_hasDerivativeOnInterval :
       { val := eps.val / 2
         property := by
           rw [Rat.div_def]
-          exact Rat.mul_pos eps.property ((Rat.inv_pos).2 (by native_decide)) }
+          exact Rat.mul_pos eps.property ((Rat.inv_pos).2 (by decide +kernel)) }
     have htailHalf : uniformRotationTailMagnitude stage <=
         epsHalf.val * qabs h / 48 := by
       dsimp [epsHalf]
@@ -1109,7 +1109,7 @@ def uniformRotationCosOnTwo_hasDerivativeOnInterval :
       (qabs h * 34 + uniformRotationCosDerivativeEdgeMagnitude stage) eps hh
       (by
         unfold uniformRotationTailRadius
-        exact Rat.mul_nonneg (by native_decide)
+        exact Rat.mul_nonneg (by decide +kernel)
           (uniformRotationTailMagnitude_nonneg_for_cosine stage))
       (by simpa [Rat.sub_eq_add_neg] using hcenter)
       hbudget hquotientWidth hderivativeWidth

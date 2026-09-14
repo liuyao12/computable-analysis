@@ -437,7 +437,7 @@ theorem expCoeff_eq_of_hasFormalDerivative
     coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative hF
   have hexp0 : expCoeff 0 = 1 := by
     unfold expCoeff factorialRat factorial
-    native_decide
+    decide +kernel
   have hexpprimitive :=
     coeffsFromDerivativeAtZero_eq_of_hasFormalDerivative
       (F := expCoeff) expCoeff_hasFormalDerivative
@@ -459,7 +459,7 @@ theorem expCoeff_eq_of_selfDerivative
   funext n
   induction n with
   | zero =>
-      have hone : (1 : Rat)⁻¹ = 1 := by native_decide
+      have hone : (1 : Rat)⁻¹ = 1 := by decide +kernel
       simpa [expCoeff, factorialRat, factorial, Rat.div_def, hone] using hzero
   | succ n ih =>
       have hrec := congrFun hF n
@@ -510,7 +510,7 @@ theorem scaledExpCoeff_eq_of_scaledSelfDerivative
   funext n
   induction n with
   | zero =>
-      have hone : (1 : Rat)⁻¹ = 1 := by native_decide
+      have hone : (1 : Rat)⁻¹ = 1 := by decide +kernel
       simpa [scaledExpCoeff, factorialRat, factorial, Rat.div_def, hone] using hzero
   | succ n ih =>
       have hrec := congrFun hF n
@@ -631,7 +631,7 @@ theorem cosCoeff_eq_of_secondDerivative
   have hnegzero : (neg (derivative F)) 0 = 0 := by
     dsimp [neg]
     rw [hzero]
-    native_decide
+    decide +kernel
   exact (sinCosCoeff_eq_of_coupledDerivative
     (F := neg (derivative F)) (G := F) hneg hbase hnegzero hone).2
 
@@ -848,7 +848,7 @@ theorem sineTaylorIntegralPartial_eq_one_sub_cosineTaylorPartial_succ
   | zero =>
       simp [sineTaylorIntegralPartial, cosineTaylorPartial,
         cosineTaylorTerm, altSign, factorialRat, factorial]
-      native_decide
+      decide +kernel
   | succ n ih =>
       rw [sineTaylorIntegralPartial, cosineTaylorPartial, ih]
       have hfact := factorialRat_add_two n
@@ -1069,7 +1069,7 @@ theorem factorialTailRatio_le_half_from_start (C : Rat) (N k : Nat)
   have hND : (((N + 1 : Nat) : Rat)) <= D := by
     dsimp [D]
     exact_mod_cast (show N + 1 <= N + k + 1 by omega)
-  have hhalfNonneg : (0 : Rat) <= 1 / 2 := by native_decide
+  have hhalfNonneg : (0 : Rat) <= 1 / 2 := by decide +kernel
   have hhalf := Rat.mul_le_mul_of_nonneg_left hND hhalfNonneg
   have hscaled : (((N + 1 : Nat) : Rat) / 2) <= D / 2 := by
     simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm] using hhalf
@@ -1122,7 +1122,7 @@ theorem factorialTailStart_satisfies (C : Rat) :
     C <= (((factorialTailStart C + 1 : Nat) : Rat) / 2) := by
   have h := rat_le_num_natAbs_succ C
   unfold factorialTailStart
-  have htwopos : (0 : Rat) < 2 := by native_decide
+  have htwopos : (0 : Rat) < 2 := by decide +kernel
   have htwone : (2 : Rat) ≠ 0 := Rat.ne_of_gt htwopos
   apply Rat.le_of_mul_le_mul_right (c := (2 : Rat))
   · calc
@@ -1142,7 +1142,7 @@ theorem factorialTailStart_mono (C : Rat) (N k : Nat)
     C <= (((N + k + 1 : Nat) : Rat) / 2) := by
   have hND : (((N + 1 : Nat) : Rat)) <= ((N + k + 1 : Nat) : Rat) := by
     exact_mod_cast (show N + 1 <= N + k + 1 by omega)
-  have hhalfNonneg : (0 : Rat) <= 1 / 2 := by native_decide
+  have hhalfNonneg : (0 : Rat) <= 1 / 2 := by decide +kernel
   have h := Rat.mul_le_mul_of_nonneg_left hND hhalfNonneg
   have hscaled : (((N + 1 : Nat) : Rat) / 2) <=
       ((N + k + 1 : Nat) : Rat) / 2 := by
@@ -1166,7 +1166,7 @@ theorem factorialTailTerm_le_geometric_from_start {C : Rat} {N : Nat}
         _ <= (factorialTailTerm C N * ((1 : Rat) / 2) ^ k) * ((1 : Rat) / 2) :=
           Rat.mul_le_mul_of_nonneg_right
             (factorialTailTerm_le_geometric_from_start hC hstart k)
-            (by native_decide : (0 : Rat) <= 1 / 2)
+            (by decide +kernel : (0 : Rat) <= 1 / 2)
         _ = factorialTailTerm C N * ((1 : Rat) / 2) ^ (k + 1) := by
           rw [Rat.pow_succ]
           grind [Rat.mul_assoc]
@@ -1188,7 +1188,7 @@ theorem factorialTailPartial_bound {C : Rat} {N : Nat}
         grind
     _ <= geomTailBound (factorialTailTerm C N) ((1 : Rat) / 2) 0 :=
       geometric_tail_partial_bound (factorialTailTerm_nonneg hC N)
-        (by native_decide) (by native_decide)
+        (by decide +kernel) (by decide +kernel)
     _ = 2 * factorialTailTerm C N := by simp [geomTailBound]
 
 /-- A shifted factorial tail has an explicit geometric decay budget. -/
@@ -1203,7 +1203,7 @@ theorem factorialTailPartial_shifted_bound {C : Rat} {N : Nat}
     _ <= 2 * (factorialTailTerm C N * ((1 : Rat) / 2) ^ k) :=
       Rat.mul_le_mul_of_nonneg_left
         (factorialTailTerm_le_geometric_from_start hC hstart k)
-        (by native_decide : (0 : Rat) <= 2)
+        (by decide +kernel : (0 : Rat) <= 2)
     _ = 2 * factorialTailTerm C N * ((1 : Rat) / 2) ^ k := by
       grind [Rat.mul_assoc]
 
@@ -1251,7 +1251,7 @@ majorant, without an appeal to an ambient limit. -/
 theorem half_pow_eq_one_div_nat_two_pow (n : Nat) :
     ((1 : Rat) / 2) ^ n = 1 / (((2 ^ n : Nat) : Rat)) := by
   induction n with
-  | zero => native_decide
+  | zero => decide +kernel
   | succ n ih =>
       rw [Rat.pow_succ, ih, Nat.pow_succ, Rat.natCast_mul]
       rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.one_mul]
@@ -1341,7 +1341,7 @@ theorem factorialTailPartial_shifted_le_eps {C : Rat} (hC : 0 <= C)
   let bound : Rat := 2 * factorialTailTerm C (factorialTailStart C)
   have hbound : 0 <= bound := by
     dsimp [bound]
-    exact Rat.mul_nonneg (by native_decide)
+    exact Rat.mul_nonneg (by decide +kernel)
       (factorialTailTerm_nonneg hC _)
   calc
     factorialTailPartial C
@@ -1369,33 +1369,33 @@ theorem factorialTailPartial_two_le_eight (k : Nat) :
   by_cases hk : k <= 5
   · calc
       factorialTailPartial 2 0 k <= factorialTailPartial 2 0 5 :=
-        factorialTailPartial_mono (by native_decide) 0 k 5 hk
-      _ <= 8 := by native_decide
+        factorialTailPartial_mono (by decide +kernel) 0 k 5 hk
+      _ <= 8 := by decide +kernel
   · have hfive : 5 <= k := by omega
     obtain ⟨d, hd⟩ := Nat.exists_eq_add_of_le hfive
     rw [hd, factorialTailPartial_add]
     have htail := factorialTailPartial_bound_at_start (C := (2 : Rat))
-      (by native_decide) d
+      (by decide +kernel) d
     have htail' : factorialTailPartial 2 5 d <= (8 : Rat) / 15 := by
-      have hstart : factorialTailStart (2 : Rat) = 5 := by native_decide
+      have hstart : factorialTailStart (2 : Rat) = 5 := by decide +kernel
       rw [hstart] at htail
       calc
         factorialTailPartial 2 5 d <= 2 * factorialTailTerm 2 5 := htail
-        _ = (8 : Rat) / 15 := by native_decide
+        _ = (8 : Rat) / 15 := by decide +kernel
     calc
       factorialTailPartial 2 0 5 + factorialTailPartial 2 (0 + 5) d <=
           7 + (8 : Rat) / 15 := by
             apply rat_add_le_add
-            · native_decide
+            · decide +kernel
             · simpa using htail'
-      _ <= 8 := by native_decide
+      _ <= 8 := by decide +kernel
 
 /- Absolute value commutes with every natural rational power. -/
 theorem qabs_pow_eq_pow_qabs (x : Rat) : forall n : Nat,
     qabs (x ^ n) = qabs x ^ n
   | 0 => by
       have hzero : qabs (1 : Rat) = 1 := by
-        rw [qabs_eq_self_of_nonneg (by native_decide)]
+        rw [qabs_eq_self_of_nonneg (by decide +kernel)]
       simpa using hzero
   | n + 1 => by
       rw [Rat.pow_succ, qabs_mul, qabs_pow_eq_pow_qabs, Rat.pow_succ]
@@ -1427,11 +1427,11 @@ theorem sineTaylorTerm_qabs_le_factorialTailTerm
   rw [Rat.div_def, qabs_mul, qabs_mul]
   have hsign : qabs (FormalPowerSeries.altSign k) = 1 := by
     unfold FormalPowerSeries.altSign
-    split <;> native_decide
+    split <;> decide +kernel
   rw [hsign]
   have hpow : qabs (x ^ (2 * k + 1)) <=
       (2 : Rat) ^ (2 * k + 1) :=
-    qabs_pow_le_pow (by native_decide) hx _
+    qabs_pow_le_pow (by decide +kernel) hx _
   have hfactor : 0 <= (factorialRat (2 * k + 1))⁻¹ := by
     exact Rat.le_of_lt ((Rat.inv_pos).2 (factorialRat_pos _))
   have hqfactor : qabs (factorialRat (2 * k + 1))⁻¹ =
@@ -1454,7 +1454,7 @@ theorem sineTaylorTailPartial_qabs_le_factorialTailPartial
   induction k with
   | zero =>
       simp [sineTaylorTailPartial, factorialTailPartial]
-      native_decide
+      decide +kernel
   | succ k ih =>
       rw [sineTaylorTailPartial]
       have hterm := sineTaylorTerm_qabs_le_factorialTailTerm hx (N + k)
@@ -1463,7 +1463,7 @@ theorem sineTaylorTailPartial_qabs_le_factorialTailPartial
         factorialTailPartial]
       have hnonneg :
           0 <= factorialTailTerm 2 ((2 * N + 1) + (2 * k + 1)) :=
-        factorialTailTerm_nonneg (by native_decide) _
+        factorialTailTerm_nonneg (by decide +kernel) _
       calc
         qabs (sineTaylorTailPartial x N k +
             FormalPowerSeries.sineTaylorTerm x (N + k)) <=
@@ -1493,8 +1493,8 @@ theorem qabs_pow_sub_le_lipschitz {x y B : Rat}
   | zero =>
       have hdiff : x ^ 0 - y ^ 0 = (0 : Rat) := by
         rw [Rat.pow_zero, Rat.pow_zero]
-        native_decide
-      rw [hdiff, qabs_eq_self_of_nonneg (by native_decide)]
+        decide +kernel
+      rw [hdiff, qabs_eq_self_of_nonneg (by decide +kernel)]
       change (0 : Rat) <= qabs (x - y) * (0 : Rat) * B ^ 0
       rw [Rat.mul_zero, Rat.zero_mul]
       exact Rat.le_refl
@@ -1551,7 +1551,7 @@ theorem qabs_power_div_factorial_sub_le_two {x y : Rat}
       qabs (x - y) * 2 * factorialTailTerm 2 n := by
   have hpow := qabs_pow_sub_le_lipschitz
     (x := x) (y := y) (B := (2 : Rat))
-    (by native_decide) (by native_decide) hx hy (n + 1)
+    (by decide +kernel) (by decide +kernel) hx hy (n + 1)
   have hfacpos : 0 < factorialRat (n + 1) := factorialRat_pos _
   have hinv : 0 <= (factorialRat (n + 1))⁻¹ :=
     Rat.le_of_lt ((Rat.inv_pos).2 hfacpos)
@@ -1671,8 +1671,8 @@ theorem qabs_powerSecant_sub_powerDerivative_le
   | 0 => by
       simp only [powerSecant, powerDerivative, powerSecantErrorBound,
         Rat.mul_zero]
-      rw [show (0 : Rat) - 0 = 0 by native_decide,
-        qabs_eq_self_of_nonneg (by native_decide)]
+      rw [show (0 : Rat) - 0 = 0 by decide +kernel,
+        qabs_eq_self_of_nonneg (by decide +kernel)]
       exact Rat.le_refl
   | n + 1 => by
       have hpow := RationalMajorant.qabs_pow_sub_le_lipschitz
@@ -1915,7 +1915,7 @@ theorem expIntegratedPartial_eq_expPartial_sub_one (z : QComplex) (n : Nat) :
       have hzero : expTerm z 0 = QComplex.one := by
         simp [expTerm, QComplex.pow, factorialRat, factorial,
           QComplex.divRat, QComplex.one, Rat.div_def]
-        native_decide
+        decide +kernel
       simp [expIntegratedPartial, expPartial, hzero, QComplex.sub,
         QComplex.add, QComplex.neg, QComplex.zero, QComplex.one]
       grind
@@ -2120,7 +2120,7 @@ theorem sinIntegratedPartial_eq_one_sub_cosPartial (z : QComplex) (n : Nat) :
       have hzero : cosTerm z 0 = QComplex.one := by
         simp [cosTerm, sinSign, factorialRat, factorial, QComplex.pow,
           QComplex.divRat, QComplex.scaleRat, QComplex.one, Rat.div_def]
-        native_decide
+        decide +kernel
       simp [sinIntegratedPartial, cosPartial, hzero, QComplex.sub,
         QComplex.add, QComplex.neg, QComplex.zero, QComplex.one]
       grind
@@ -2227,7 +2227,7 @@ def cosBoxAt (z : QComplex) (eps : QPos) : QBox :=
 def expCompute (z : ComplexRaw) : Nat -> QBox :=
   fun n =>
     let eps : QPos := if hn : n = 0 then
-      { val := 1, property := by native_decide }
+      { val := 1, property := by decide +kernel }
     else
       { val := (1 / (n : Rat)), property := one_div_nat_pos (Nat.pos_of_ne_zero hn) }
     expBoxAt ((z.compute n).center) eps
@@ -2235,7 +2235,7 @@ def expCompute (z : ComplexRaw) : Nat -> QBox :=
 def sinCompute (z : ComplexRaw) : Nat -> QBox :=
   fun n =>
     let eps : QPos := if hn : n = 0 then
-      { val := 1, property := by native_decide }
+      { val := 1, property := by decide +kernel }
     else
       { val := (1 / (n : Rat)), property := one_div_nat_pos (Nat.pos_of_ne_zero hn) }
     sinBoxAt ((z.compute n).center) eps
@@ -2243,7 +2243,7 @@ def sinCompute (z : ComplexRaw) : Nat -> QBox :=
 def cosCompute (z : ComplexRaw) : Nat -> QBox :=
   fun n =>
     let eps : QPos := if hn : n = 0 then
-      { val := 1, property := by native_decide }
+      { val := 1, property := by decide +kernel }
     else
       { val := (1 / (n : Rat)), property := one_div_nat_pos (Nat.pos_of_ne_zero hn) }
     cosBoxAt ((z.compute n).center) eps

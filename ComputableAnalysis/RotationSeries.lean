@@ -117,14 +117,14 @@ theorem expTerm_imaginary_odd (T : Rat) (k : Nat) :
 keeps the complex-tail certificate below entirely in rational arithmetic. -/
 private theorem qabs_pow (x : Rat) : forall n : Nat, qabs (x ^ n) = qabs x ^ n
   | 0 => by
-      have hnot : ¬ ((1 : Rat) < 0) := by native_decide
+      have hnot : ¬ ((1 : Rat) < 0) := by decide +kernel
       simp [Rat.pow_zero, qabs, hnot]
   | n + 1 => by
       rw [Rat.pow_succ, qabs_mul, qabs_pow, Rat.pow_succ]
 
 private theorem qabs_neg_one_pow (n : Nat) : qabs ((-1 : Rat) ^ n) = 1 := by
   rw [qabs_pow]
-  have hneg : (-1 : Rat) < 0 := by native_decide
+  have hneg : (-1 : Rat) < 0 := by decide +kernel
   have habs : qabs (-1 : Rat) = 1 := by
     unfold qabs
     simp [hneg]
@@ -279,13 +279,13 @@ private theorem rotationTailRadius_drop_majorizes (T : Rat) (n : Nat) :
       rotationTailRadius T n - rotationTailRadius T (n + 1) := by
   have hnext := rotationTailMagnitude_next_le_quarter T n
   have hmag0 := rotationTailMagnitude_nonneg T n
-  have hquarter : ((1 : Rat) / 2) ^ 2 = (1 : Rat) / 4 := by native_decide
+  have hquarter : ((1 : Rat) / 2) ^ 2 = (1 : Rat) / 4 := by decide +kernel
   rw [hquarter] at hnext
   have hfour : 4 * rotationTailMagnitude T (n + 1) <= rotationTailMagnitude T n := by
     calc
       4 * rotationTailMagnitude T (n + 1) <=
           4 * (rotationTailMagnitude T n * ((1 : Rat) / 4)) :=
-        Rat.mul_le_mul_of_nonneg_left hnext (by native_decide)
+        Rat.mul_le_mul_of_nonneg_left hnext (by decide +kernel)
       _ = rotationTailMagnitude T n := by
         rw [Rat.div_def]
         grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
@@ -347,7 +347,7 @@ private theorem rotationTailMagnitude_middle_le (T : Rat) (n : Nat) :
         rotationTailMagnitude T n * ((1 : Rat) / 2) := by
       simpa [rotationTailMagnitude] using hhalf
     _ <= rotationTailMagnitude T n := by
-      have hhalf_le_one : (1 : Rat) / 2 <= 1 := by native_decide
+      have hhalf_le_one : (1 : Rat) / 2 <= 1 := by decide +kernel
       calc
         rotationTailMagnitude T n * ((1 : Rat) / 2) <=
             rotationTailMagnitude T n * 1 :=
@@ -460,7 +460,7 @@ private theorem rotationBox_ordered (T : Rat) (n : Nat) :
   have hmag0 := rotationTailMagnitude_nonneg T n
   rw [rotationBox_width, rotationBox_height]
   unfold rotationTailRadius
-  constructor <;> exact Rat.mul_nonneg (by native_decide) (Rat.mul_nonneg (by native_decide) hmag0)
+  constructor <;> exact Rat.mul_nonneg (by decide +kernel) (Rat.mul_nonneg (by decide +kernel) hmag0)
 
 private theorem rotationBox_nested_step (T : Rat) (n : Nat) :
     QBox.NestedIn (rotationBox T (n + 1)) (rotationBox T n) := by
@@ -507,8 +507,8 @@ private theorem rat_pow_add (q : Rat) (m n : Nat) :
 private theorem half_pow_twice_le (n : Nat) :
     ((1 : Rat) / 2) ^ (2 * n) <= ((1 : Rat) / 2) ^ n := by
   rw [show 2 * n = n + n by omega, rat_pow_add]
-  have hhalf0 : (0 : Rat) <= 1 / 2 := by native_decide
-  have hhalf1 : (1 : Rat) / 2 <= 1 := by native_decide
+  have hhalf0 : (0 : Rat) <= 1 / 2 := by decide +kernel
+  have hhalf1 : (1 : Rat) / 2 <= 1 := by decide +kernel
   have hpow0 : 0 <= ((1 : Rat) / 2) ^ n := Rat.pow_nonneg hhalf0
   have hpow1 : ((1 : Rat) / 2) ^ n <= 1 := by
     induction n with
@@ -559,7 +559,7 @@ private theorem rotationBox_width_le_geometric (T : Rat) (n : Nat) :
     2 * (4 * rotationTailMagnitude T n) = 8 * rotationTailMagnitude T n := by
       grind [Rat.mul_assoc]
     _ <= 8 * (rotationTailMagnitude T 0 * ((1 : Rat) / 2) ^ n) :=
-      Rat.mul_le_mul_of_nonneg_left htail (by native_decide)
+      Rat.mul_le_mul_of_nonneg_left htail (by decide +kernel)
     _ = (8 * rotationTailMagnitude T 0) * ((1 : Rat) / 2) ^ n := by
       grind [Rat.mul_assoc]
 
@@ -578,7 +578,7 @@ private theorem rotationBox_widths_shrink (T : Rat) :
   intro n hn
   have hbound0 : 0 <= bound := by
     dsimp [bound]
-    exact Rat.mul_nonneg (by native_decide) (rotationTailMagnitude_nonneg T 0)
+    exact Rat.mul_nonneg (by decide +kernel) (rotationTailMagnitude_nonneg T 0)
   have hwidth := rotationBox_width_le_geometric T n
   have hheight := rotationBox_height_le_geometric T n
   have hfactor : ((1 : Rat) / 2) ^ n <= ((1 : Rat) / 2) ^ N := by
@@ -587,8 +587,8 @@ private theorem rotationBox_widths_shrink (T : Rat) :
       dsimp [k]
       exact Nat.add_sub_of_le hn
     rw [← hNk, rat_pow_add]
-    have hhalf0 : (0 : Rat) <= 1 / 2 := by native_decide
-    have hhalf1 : (1 : Rat) / 2 <= 1 := by native_decide
+    have hhalf0 : (0 : Rat) <= 1 / 2 := by decide +kernel
+    have hhalf1 : (1 : Rat) / 2 <= 1 := by decide +kernel
     have hpow0 : 0 <= ((1 : Rat) / 2) ^ N := Rat.pow_nonneg hhalf0
     have hpow1 : ((1 : Rat) / 2) ^ k <= 1 := by
       induction k with
@@ -623,8 +623,8 @@ def rotationExpRate (T : Rat) : ComplexRaw.Rate (rotationBox T) :=
   .geometric 0
     (8 * rotationTailMagnitude T 0)
     ((1 : Rat) / 2)
-    (by native_decide)
-    (by native_decide)
+    (by decide +kernel)
+    (by decide +kernel)
     (fun n _ => ⟨rotationBox_width_le_geometric T n,
       rotationBox_height_le_geometric T n⟩)
 
@@ -691,16 +691,16 @@ def rotationCosRate (T : Rat) : RealRaw.Rate (rotationCosCompute T) :=
   .geometric 0
     (8 * rotationTailMagnitude T 0)
     ((1 : Rat) / 2)
-    (by native_decide)
-    (by native_decide)
+    (by decide +kernel)
+    (by decide +kernel)
     (fun n _ => rotationCosCompute_width_le_geometric T n)
 
 def rotationSinRate (T : Rat) : RealRaw.Rate (rotationSinCompute T) :=
   .geometric 0
     (8 * rotationTailMagnitude T 0)
     ((1 : Rat) / 2)
-    (by native_decide)
-    (by native_decide)
+    (by decide +kernel)
+    (by decide +kernel)
     (fun n _ => rotationSinCompute_width_le_geometric T n)
 
 /-- The power-series cosine coordinate at a rational input, as a certified
@@ -854,10 +854,10 @@ private theorem rotationPrefixDistance_zero (T U : Rat) :
   unfold rotationPrefixDistance
   change qabs ((0 : Rat) - 0) + qabs ((0 : Rat) - 0) = 0
   have hzero : qabs (0 : Rat) = 0 := by
-    rw [qabs_eq_self_of_nonneg (by native_decide)]
-  have hdiff : (0 : Rat) - 0 = 0 := by native_decide
+    rw [qabs_eq_self_of_nonneg (by decide +kernel)]
+  have hdiff : (0 : Rat) - 0 = 0 := by decide +kernel
   rw [hdiff, hzero]
-  native_decide
+  decide +kernel
 
 private theorem rotationPrefixDistance_succ_le (T U : Rat) (m : Nat) :
     rotationPrefixDistance T U (m + 1) <=
@@ -946,7 +946,7 @@ private theorem rotationPrefixDistance_le_sensitivity (T U : Rat)
           exact (Rat.mul_zero _).symm
   | 1 => by
       have hstep := rotationPrefixDistance_succ_le T U 0
-      have hinvOne : ((1 : Rat)⁻¹) = 1 := by native_decide
+      have hinvOne : ((1 : Rat)⁻¹) = 1 := by decide +kernel
       have hcosT : LinearODE.RotationSystem.cosineCoefficient T 0 = 1 := by
         simp [LinearODE.RotationSystem.cosineCoefficient, factorialRat, factorial,
           Rat.div_def, hinvOne]
@@ -957,8 +957,8 @@ private theorem rotationPrefixDistance_le_sensitivity (T U : Rat)
           LinearODE.RotationSystem.cosineCoefficient U 0) = 0 := by
         rw [hcosT, hcosU]
         have hzero : qabs (0 : Rat) = 0 := by
-          rw [qabs_eq_self_of_nonneg (by native_decide)]
-        rw [show (1 : Rat) - 1 = 0 by native_decide, hzero]
+          rw [qabs_eq_self_of_nonneg (by decide +kernel)]
+        rw [show (1 : Rat) - 1 = 0 by decide +kernel, hzero]
       have hsinT : LinearODE.RotationSystem.sineCoefficient T 0 = T := by
         simp [LinearODE.RotationSystem.sineCoefficient, factorialRat, factorial,
           Rat.div_def, hinvOne]
@@ -970,13 +970,13 @@ private theorem rotationPrefixDistance_le_sensitivity (T U : Rat)
         rw [hsinT, hsinU]
       rw [rotationPrefixDistance_zero, hcos, hsin, Rat.add_zero,
         Rat.zero_add] at hstep
-      have hsens : rotationPrefixSensitivity 1 = 2 := by native_decide
+      have hsens : rotationPrefixSensitivity 1 = 2 := by decide +kernel
       rw [hsens]
       calc
         rotationPrefixDistance T U 1 <= qabs (T - U) := hstep
         _ = qabs (T - U) * 1 := by rw [Rat.mul_one]
         _ <= qabs (T - U) * 2 :=
-          Rat.mul_le_mul_of_nonneg_left (by native_decide) (qabs_nonneg _)
+          Rat.mul_le_mul_of_nonneg_left (by decide +kernel) (qabs_nonneg _)
   | m + 2 => by
       have ih := rotationPrefixDistance_le_sensitivity T U hT hU (m + 1)
       have hstep := rotationPrefixDistance_succ_le T U (m + 1)
@@ -1013,8 +1013,8 @@ private theorem rotationPrefixSensitivity_le_sixteen (m : Nat) :
     2 * RationalMajorant.factorialTailPartial 2 0 (2 * m - 1) <= 2 * 8 :=
       Rat.mul_le_mul_of_nonneg_left
         (RationalMajorant.factorialTailPartial_two_le_eight (2 * m - 1))
-        (by native_decide)
-    _ = 16 := by native_decide
+        (by decide +kernel)
+    _ = 16 := by decide +kernel
 
 /- A common bounded-input factorial prefix is Lipschitz in its rational
 input.  The statement is still entirely finite: both sides refer only to a
@@ -1101,14 +1101,14 @@ private theorem uniform_rotation_tail_start (n : Nat) :
 private theorem uniformRotationTailMagnitude_nonneg (n : Nat) :
     0 <= uniformRotationTailMagnitude n := by
   unfold uniformRotationTailMagnitude
-  exact RationalMajorant.factorialTailTerm_nonneg (by native_decide) _
+  exact RationalMajorant.factorialTailTerm_nonneg (by decide +kernel) _
 
 private theorem uniformRotationTailMagnitude_next_le_quarter (n : Nat) :
     uniformRotationTailMagnitude (n + 1) <=
       uniformRotationTailMagnitude n * ((1 : Rat) / 2) ^ 2 := by
   have h := RationalMajorant.factorialTailTerm_le_geometric_from_start
     (C := (2 : Rat)) (N := uniformRotationTailTerms n)
-    (by native_decide) (uniform_rotation_tail_start n) 2
+    (by decide +kernel) (uniform_rotation_tail_start n) 2
   change RationalMajorant.factorialTailTerm 2 (uniformRotationTailTerms (n + 1)) <=
     RationalMajorant.factorialTailTerm 2 (uniformRotationTailTerms n) *
       ((1 : Rat) / 2) ^ 2
@@ -1124,14 +1124,14 @@ private theorem uniformRotationTailRadius_drop_majorizes (n : Nat) :
       uniformRotationTailRadius n - uniformRotationTailRadius (n + 1) := by
   have hnext := uniformRotationTailMagnitude_next_le_quarter n
   have hmag0 := uniformRotationTailMagnitude_nonneg n
-  have hquarter : ((1 : Rat) / 2) ^ 2 = (1 : Rat) / 4 := by native_decide
+  have hquarter : ((1 : Rat) / 2) ^ 2 = (1 : Rat) / 4 := by decide +kernel
   rw [hquarter] at hnext
   have hfour : 4 * uniformRotationTailMagnitude (n + 1) <=
       uniformRotationTailMagnitude n := by
     calc
       4 * uniformRotationTailMagnitude (n + 1) <=
           4 * (uniformRotationTailMagnitude n * ((1 : Rat) / 4)) :=
-        Rat.mul_le_mul_of_nonneg_left hnext (by native_decide)
+        Rat.mul_le_mul_of_nonneg_left hnext (by decide +kernel)
       _ = uniformRotationTailMagnitude n := by
         rw [Rat.div_def]
         grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
@@ -1163,7 +1163,7 @@ private theorem uniformRotationTailMagnitude_middle_le (n : Nat) :
     RationalMajorant.factorialTailTerm 2 (uniformRotationTailTerms n + 1) <=
       uniformRotationTailMagnitude n := by
   have hhalf := RationalMajorant.factorialTailTerm_succ_le_half
-    (by native_decide : (0 : Rat) <= 2) (uniformRotationTailTerms n)
+    (by decide +kernel : (0 : Rat) <= 2) (uniformRotationTailTerms n)
     (RationalMajorant.factorialTailRatio_le_half_from_start
       2 (uniformRotationTailTerms n) 0 (uniform_rotation_tail_start n))
   have hmag0 := uniformRotationTailMagnitude_nonneg n
@@ -1176,7 +1176,7 @@ private theorem uniformRotationTailMagnitude_middle_le (n : Nat) :
         uniformRotationTailMagnitude n * ((1 : Rat) / 2) := by
       simpa [uniformRotationTailMagnitude] using hhalf
     _ <= uniformRotationTailMagnitude n := by
-      have hhalf_le_one : (1 : Rat) / 2 <= 1 := by native_decide
+      have hhalf_le_one : (1 : Rat) / 2 <= 1 := by decide +kernel
       calc
         uniformRotationTailMagnitude n * ((1 : Rat) / 2) <=
             uniformRotationTailMagnitude n * 1 :=
@@ -1332,8 +1332,8 @@ private theorem uniformRotationBox_ordered (T : Rat) (n : Nat) :
   rw [uniformRotationBox_width, uniformRotationBox_height]
   unfold uniformRotationTailRadius
   constructor <;>
-    exact Rat.mul_nonneg (by native_decide)
-      (Rat.mul_nonneg (by native_decide) hmag0)
+    exact Rat.mul_nonneg (by decide +kernel)
+      (Rat.mul_nonneg (by decide +kernel) hmag0)
 
 private theorem uniformRotationBox_nested_step (T : Rat)
     (hT : qabs T <= 2) (n : Nat) :
@@ -1372,7 +1372,7 @@ theorem uniformRotationBox_contained_expand_of_input_near (T U eps : Rat)
       (QBox.expand (uniformRotationBox U n) (16 * eps)) := by
   have hcenter := uniformRotationCenter_input_lipschitz T U hT hU n
   have hfactor : 16 * qabs (T - U) <= 16 * eps :=
-    Rat.mul_le_mul_of_nonneg_left hnear (by native_decide)
+    Rat.mul_le_mul_of_nonneg_left hnear (by decide +kernel)
   have hreupper : (uniformRotationCenter T n).re -
       (uniformRotationCenter U n).re <= 16 * eps :=
     Rat.le_trans (self_le_qabs _) (Rat.le_trans hcenter.1 hfactor)
@@ -1423,7 +1423,7 @@ private theorem uniformRotationBox_width_eq_rotationBox_two (T : Rat) (n : Nat) 
     uniformRotationTailMagnitude rotationTailMagnitude
     uniformRotationTailTerms rotationTailTerms
     uniformRotationTailStart rotationTailStart
-  have hqabs : qabs (2 : Rat) = 2 := by native_decide
+  have hqabs : qabs (2 : Rat) = 2 := by decide +kernel
   rw [hqabs]
 
 private theorem uniformRotationBox_height_eq_rotationBox_two (T : Rat) (n : Nat) :
@@ -1433,7 +1433,7 @@ private theorem uniformRotationBox_height_eq_rotationBox_two (T : Rat) (n : Nat)
     uniformRotationTailMagnitude rotationTailMagnitude
     uniformRotationTailTerms rotationTailTerms
     uniformRotationTailStart rotationTailStart
-  have hqabs : qabs (2 : Rat) = 2 := by native_decide
+  have hqabs : qabs (2 : Rat) = 2 := by decide +kernel
   rw [hqabs]
 
 theorem uniformRotationBox_widths_shrink (T : Rat) :

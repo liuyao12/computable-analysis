@@ -252,7 +252,7 @@ theorem ftcErrorExact_cube_threeSquare_unit_of_pos
         grind [Rat.pow_succ]]
       exact Rat.mul_pos ((Rat.natCast_pos).2 hn)
         ((Rat.natCast_pos).2 hn)
-    exact Rat.mul_pos (by native_decide) hsq
+    exact Rat.mul_pos (by decide +kernel) hsq
   have hterm : 0 <= (3 * (n : Rat) - 1) / (2 * (n : Rat) ^ 2) := by
     rw [Rat.div_def]
     exact Rat.mul_nonneg hnum (Rat.le_of_lt ((Rat.inv_pos).2 hdenpos))
@@ -409,7 +409,7 @@ Each summand is evaluated at half the requested error, while the caller keeps
 the inner step schedule and both radius comparisons explicit. -/
 def halfQPos (eps : QPos) : QPos :=
   ⟨eps.val / 2, by
-    have htwo : (0 : Rat) < 2 := by native_decide
+    have htwo : (0 : Rat) < 2 := by decide +kernel
     rw [Rat.div_def]
     exact Rat.mul_pos eps.property ((Rat.inv_pos).2 htwo)⟩
 
@@ -453,7 +453,7 @@ def EffectiveDerivativeExact.add
             (Rat.add_le_add_left (c := half.val)).2 hDg'
       _ <= eps.val := by
         change eps.val * (2 : Rat)⁻¹ + eps.val * (2 : Rat)⁻¹ <= eps.val
-        have htwo : (2 : Rat)⁻¹ + (2 : Rat)⁻¹ = 1 := by native_decide
+        have htwo : (2 : Rat)⁻¹ + (2 : Rat)⁻¹ = 1 := by decide +kernel
         rw [← Rat.mul_add, htwo, Rat.mul_one]
         exact Rat.le_refl
 
@@ -929,7 +929,7 @@ def EffectiveFTCExact.addOfCommonSchedule
         rat_add_le_add hF' hG'
       _ <= eps.val := by
         change eps.val * (2 : Rat)⁻¹ + eps.val * (2 : Rat)⁻¹ <= eps.val
-        have htwo : (2 : Rat)⁻¹ + (2 : Rat)⁻¹ = 1 := by native_decide
+        have htwo : (2 : Rat)⁻¹ + (2 : Rat)⁻¹ = 1 := by decide +kernel
         rw [← Rat.mul_add, htwo, Rat.mul_one]
         exact Rat.le_refl
 
@@ -2098,7 +2098,7 @@ theorem scaleRat_differenceQuotient_of_pos
     grind [Rat.mul_assoc, Rat.mul_comm, Rat.sub_eq_add_neg]
   · exact by
       rw [Rat.div_def]
-      exact Rat.mul_nonneg (by native_decide)
+      exact Rat.mul_nonneg (by decide +kernel)
         (Rat.le_of_lt ((Rat.inv_pos).2 hpos))
 
 theorem nearAt_symm {I J : QInterval} {eps : QPos} :
@@ -2745,7 +2745,7 @@ def exactRatSquareDerivative (a b : Rat) :
           simpa [if_pos rfl] using hsmall
         calc
           qabs h <= 1 / (1 : Rat) := hsmall'
-          _ = (precisionAtStage 0).val := by native_decide
+          _ = (precisionAtStage 0).val := by decide +kernel
       · simpa [precisionAtStage, hn] using hsmall
     have hupper : h <= (precisionAtStage n).val :=
       Rat.le_trans (self_le_qabs h) hprecision
@@ -2767,7 +2767,7 @@ quotient, including for a negative rational step. -/
 theorem differenceQuotient_scaleRat_two (A B : QInterval) (h : Rat) :
     differenceQuotient (scaleRat 2 A) (scaleRat 2 B) h =
       scaleRat 2 (differenceQuotient A B h) := by
-  have htwo : (0 : Rat) <= 2 := by native_decide
+  have htwo : (0 : Rat) <= 2 := by decide +kernel
   by_cases hinv : 0 <= 1 / h
   · cases A
     cases B
@@ -2855,7 +2855,7 @@ theorem intervalNearAtPrecision_scaleRat_two
     intervalNearAtPrecision (QInterval.scaleRat 2 I) (QInterval.scaleRat 2 J) n := by
   unfold intervalNearAtPrecision QInterval.NearAt at hnear ⊢
   rcases hnear with ⟨hleft, hright, hwidthI, hwidthJ⟩
-  have htwo : (0 : Rat) <= 2 := by native_decide
+  have htwo : (0 : Rat) <= 2 := by decide +kernel
   unfold QInterval.scaleRat
   simp only [if_pos htwo]
   constructor
@@ -2919,12 +2919,12 @@ theorem precisionAtStage_scaleRat_two (n : Nat) :
       1 / (((n + 1 : Nat) : Rat))
     rw [Rat.natCast_mul]
     rw [Rat.div_def, Rat.inv_mul_rev]
-    have htwo : (2 : Rat) * (2 : Rat)⁻¹ = 1 := by native_decide
+    have htwo : (2 : Rat) * (2 : Rat)⁻¹ = 1 := by decide +kernel
     grind [Rat.mul_assoc, Rat.mul_comm]
   rw [hscaled]
   by_cases hn : n = 0
   · subst n
-    native_decide
+    decide +kernel
   · rw [precisionAtStage, dif_neg hn]
     exact one_div_nat_antitone_for_derivative_precision
       (Nat.pos_of_ne_zero hn) (Nat.succ_pos n) (Nat.le_succ n)

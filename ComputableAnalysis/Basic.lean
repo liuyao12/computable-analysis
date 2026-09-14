@@ -404,7 +404,7 @@ theorem combination_one (n : Nat) : combination n 1 = n := by
 theorem combination_two_rat (n : Nat) :
     (combination n 2 : Rat) = (n : Rat) * ((n : Rat) - 1) / 2 := by
   induction n with
-  | zero => native_decide
+  | zero => decide +kernel
   | succ n ih =>
       have hpascal : combination (n + 1) 2 =
           combination n 1 + combination n 2 := by
@@ -419,7 +419,7 @@ theorem combination_three_rat (n : Nat) :
     (combination n 3 : Rat) =
       (n : Rat) * ((n : Rat) - 1) * ((n : Rat) - 2) / 6 := by
   induction n with
-  | zero => native_decide
+  | zero => decide +kernel
   | succ n ih =>
       have hpascal : combination (n + 1) 3 =
           combination n 2 + combination n 3 := by
@@ -435,7 +435,7 @@ theorem combination_four_rat (n : Nat) :
       (n : Rat) * ((n : Rat) - 1) * ((n : Rat) - 2) *
         ((n : Rat) - 3) / 24 := by
   induction n with
-  | zero => native_decide
+  | zero => decide +kernel
   | succ n ih =>
       have hpascal : combination (n + 1) 4 =
           combination n 3 + combination n 4 := by
@@ -451,7 +451,7 @@ theorem combination_five_rat (n : Nat) :
       (n : Rat) * ((n : Rat) - 1) * ((n : Rat) - 2) *
         ((n : Rat) - 3) * ((n : Rat) - 4) / 120 := by
   induction n with
-  | zero => native_decide
+  | zero => decide +kernel
   | succ n ih =>
       have hpascal : combination (n + 1) 5 =
           combination n 4 + combination n 5 := by
@@ -468,7 +468,7 @@ theorem combination_six_rat (n : Nat) :
         ((n : Rat) - 3) * ((n : Rat) - 4) *
         ((n : Rat) - 5) / 720 := by
   induction n with
-  | zero => native_decide
+  | zero => decide +kernel
   | succ n ih =>
       have hpascal : combination (n + 1) 6 =
           combination n 5 + combination n 6 := by
@@ -485,7 +485,7 @@ theorem combination_seven_rat (n : Nat) :
         ((n : Rat) - 3) * ((n : Rat) - 4) * ((n : Rat) - 5) *
         ((n : Rat) - 6) / 5040 := by
   induction n with
-  | zero => native_decide
+  | zero => decide +kernel
   | succ n ih =>
       have hpascal : combination (n + 1) 7 =
           combination n 6 + combination n 7 := by
@@ -502,7 +502,7 @@ theorem combination_eight_rat (n : Nat) :
         ((n : Rat) - 3) * ((n : Rat) - 4) * ((n : Rat) - 5) *
         ((n : Rat) - 6) * ((n : Rat) - 7) / 40320 := by
   induction n with
-  | zero => native_decide
+  | zero => decide +kernel
   | succ n ih =>
       have hpascal : combination (n + 1) 8 =
           combination n 7 + combination n 8 := by
@@ -530,7 +530,7 @@ def factorizationCertificate60 : MultiplicativeCertificate 60 where
     intro p hp
     simp at hp
     rcases hp with rfl | rfl | rfl | rfl <;> omega
-  product_eq := by native_decide
+  product_eq := by decide +kernel
 
 def BasicPrime (p : Nat) : Prop :=
   2 <= p /\ forall d, d ∣ p -> d = 1 \/ d = p
@@ -1183,7 +1183,7 @@ def primeFactorizationCertificate60 : PrimeFactorCertificate 60 where
     · exact basicPrime_two
     · exact basicPrime_three
     · exact basicPrime_five
-  product_eq := by native_decide
+  product_eq := by decide +kernel
 
 /-! An explicit terminating Euclidean loop for the natural-number gcd. -/
 
@@ -1906,7 +1906,7 @@ theorem am_gm_rational_half {a b : Rat} :
   · have h := am_gm_square_bound a b
     grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
       Rat.pow_succ, Rat.mul_inv_cancel]
-  · native_decide
+  · decide +kernel
 
 theorem am_gm_rational_half_eq_iff {a b : Rat} :
     a * b = ((a + b) / 2) ^ 2 ↔ a = b := by
@@ -1936,11 +1936,11 @@ theorem am_gm_four {a b c d : Rat}
   have hx : 0 <= x := by
     dsimp [x]
     rw [Rat.div_def]
-    exact Rat.mul_nonneg (by grind) (by native_decide)
+    exact Rat.mul_nonneg (by grind) (by decide +kernel)
   have hy : 0 <= y := by
     dsimp [y]
     rw [Rat.div_def]
-    exact Rat.mul_nonneg (by grind) (by native_decide)
+    exact Rat.mul_nonneg (by grind) (by decide +kernel)
   have hab : a * b <= x ^ 2 := by
     simpa [x] using (am_gm_rational_half (a := a) (b := b))
   have hcd : c * d <= y ^ 2 := by
@@ -2994,7 +2994,7 @@ theorem anchorRebox_valid
       let half : QPos := ⟨eps.val / 2, by
         rw [Rat.div_def]
         exact Rat.mul_pos eps.property
-          ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))⟩
+          ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 2))⟩
       obtain ⟨Nc, hNc⟩ := hcandidate_shrinks half
       obtain ⟨Na, hNa⟩ := hanchor.2.2 half
       refine ⟨Nat.max Nc Na, ?_⟩
@@ -3115,11 +3115,11 @@ theorem overlapChainExpand_widths_shrink
   let half : QPos := ⟨eps.val / 2, by
     rw [Rat.div_def]
     exact Rat.mul_pos eps.property
-      ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))⟩
+      ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 2))⟩
   let quarter : QPos := ⟨eps.val / 4, by
     rw [Rat.div_def]
     exact Rat.mul_pos eps.property
-      ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 4))⟩
+      ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 4))⟩
   obtain ⟨Nc, hNc⟩ := hcandidate half
   obtain ⟨Nb, hNb⟩ := hbridge quarter
   refine ⟨Nat.max Nc Nb, ?_⟩
@@ -3132,7 +3132,7 @@ theorem overlapChainExpand_widths_shrink
         half.val + 2 * quarter.val := by
       exact rat_add_le_add (hNc n hcn)
         (Rat.mul_le_mul_of_nonneg_left (hNb n hbn)
-          (by native_decide : (0 : Rat) <= 2))
+          (by decide +kernel : (0 : Rat) <= 2))
     _ = eps.val := by
       dsimp [half, quarter]
       rw [Rat.div_def, Rat.div_def]
@@ -3334,11 +3334,11 @@ theorem prefixStabilize_valid
       let half : QPos := ⟨eps.val / 2, by
         rw [Rat.div_def]
         exact Rat.mul_pos eps.property
-          ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))⟩
+          ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 2))⟩
       let quarter : QPos := ⟨eps.val / 4, by
         rw [Rat.div_def]
         exact Rat.mul_pos eps.property
-          ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 4))⟩
+          ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 4))⟩
       obtain ⟨Nc, hNc⟩ := hcandidate_shrinks half
       obtain ⟨Nr, hNr⟩ := hradius_shrinks quarter
       refine ⟨Nat.max Nc Nr, ?_⟩
@@ -3359,7 +3359,7 @@ theorem prefixStabilize_valid
         _ <= half.val + 2 * quarter.val := by
           exact rat_add_le_add hcandidate_width
             (Rat.mul_le_mul_of_nonneg_left hradius_width
-              (by native_decide : (0 : Rat) <= 2))
+              (by decide +kernel : (0 : Rat) <= 2))
         _ = eps.val := by
           dsimp [half, quarter]
           rw [Rat.div_def, Rat.div_def]
@@ -3411,11 +3411,11 @@ theorem prefixStabilize_valid_of_future
       let half : QPos := ⟨eps.val / 2, by
         rw [Rat.div_def]
         exact Rat.mul_pos eps.property
-          ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))⟩
+          ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 2))⟩
       let quarter : QPos := ⟨eps.val / 4, by
         rw [Rat.div_def]
         exact Rat.mul_pos eps.property
-          ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 4))⟩
+          ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 4))⟩
       obtain ⟨Nc, hNc⟩ := hcandidate_shrinks half
       obtain ⟨Nr, hNr⟩ := hradius_shrinks quarter
       refine ⟨Nat.max Nc Nr, ?_⟩
@@ -3435,7 +3435,7 @@ theorem prefixStabilize_valid_of_future
         _ <= half.val + 2 * quarter.val := by
           exact rat_add_le_add hc
             (Rat.mul_le_mul_of_nonneg_left hr
-              (by native_decide : (0 : Rat) <= 2))
+              (by decide +kernel : (0 : Rat) <= 2))
         _ = eps.val := by
           dsimp [half, quarter]
           rw [Rat.div_def, Rat.div_def]
@@ -4851,7 +4851,7 @@ theorem conj_mul (z w : QComplex) :
     Rat.neg_neg, Rat.sub_eq_add_neg]
 
 theorem conj_one : conj one = one := by
-  native_decide
+  decide +kernel
 
 theorem conj_add (z w : QComplex) :
     conj (add z w) = add (conj z) (conj w) := by
@@ -4882,7 +4882,7 @@ theorem natPow_mul (z w : QComplex) (n : Nat) :
   induction n with
   | zero =>
       change QComplex.one = QComplex.mul QComplex.one QComplex.one
-      native_decide
+      decide +kernel
   | succ n ih =>
       rw [natPow_succ, ih, natPow_succ, natPow_succ]
       cases z
@@ -6463,11 +6463,11 @@ def ScaleRatCertifies (r : Rat) (x : RealRaw) : Prop :=
 
 private theorem half_pos {q : Rat} (hq : 0 < q) : 0 < q / 2 := by
   rw [Rat.div_def]
-  exact Rat.mul_pos hq ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))
+  exact Rat.mul_pos hq ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 2))
 
 private theorem add_halves (q : Rat) : q / 2 + q / 2 = q := by
   rw [Rat.div_def]
-  have hne : (2 : Rat) != 0 := by native_decide
+  have hne : (2 : Rat) != 0 := by decide +kernel
   grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm, Rat.mul_assoc,
     Rat.mul_comm, Rat.mul_inv_cancel]
 
@@ -6769,7 +6769,7 @@ theorem mulSelf_valid_of_nonneg_bounded {x : RealRaw}
         · exact square_mono_nonneg (by grind) hnested.2.2
     · intro eps
       have hdenPos : 0 < (2 : Rat) * B := by
-        exact Rat.mul_pos (by native_decide : (0 : Rat) < 2) hB
+        exact Rat.mul_pos (by decide +kernel : (0 : Rat) < 2) hB
       let scaled : QPos :=
         ⟨eps.val / ((2 : Rat) * B), by
           rw [Rat.div_def]
@@ -6918,7 +6918,7 @@ theorem mul_valid_of_nonneg_bounded {x y : RealRaw}
         dsimp [B]
         grind
       have htwoB : 0 < (2 : Rat) * B :=
-        Rat.mul_pos (by native_decide) hB
+        Rat.mul_pos (by decide +kernel) hB
       let delta : QPos :=
         ⟨eps.val / ((2 : Rat) * B), by
           rw [Rat.div_def]
@@ -7355,7 +7355,7 @@ theorem two_natscale_equiv_add_self (x : RealRaw) (hx : x.Valid) :
   change QInterval.Overlaps
     (scaleRatCompute (2 : Rat) x n) (addCompute x x n)
   simp [scaleRatCompute, addCompute,
-    (by native_decide : (0 : Rat) <= 2), QInterval.Overlaps]
+    (by decide +kernel : (0 : Rat) <= 2), QInterval.Overlaps]
   constructor <;> grind [Rat.add_comm]
 
 /-- Scaling a raw real by four agrees with adding two doubled copies. -/
@@ -7369,8 +7369,8 @@ theorem four_natscale_equiv_add_two_natscale (x : RealRaw) (hx : x.Valid) :
     (scaleRatCompute (4 : Rat) x n)
     (addCompute (scaleRat (2 : Rat) x) (scaleRat (2 : Rat) x) n)
   simp [scaleRat, scaleRatCompute, addCompute,
-    (by native_decide : (0 : Rat) <= 4),
-    (by native_decide : (0 : Rat) <= 2), QInterval.Overlaps]
+    (by decide +kernel : (0 : Rat) <= 4),
+    (by decide +kernel : (0 : Rat) <= 2), QInterval.Overlaps]
   constructor <;> grind [Rat.add_comm]
 
 theorem zero_add_equiv {x : RealRaw}
@@ -7766,11 +7766,11 @@ theorem cauchyStabilize_valid
       let half : QPos := ⟨eps.val / 2, by
         rw [Rat.div_def]
         exact Rat.mul_pos eps.property
-          ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))⟩
+          ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 2))⟩
       let quarter : QPos := ⟨eps.val / 4, by
         rw [Rat.div_def]
         exact Rat.mul_pos eps.property
-          ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 4))⟩
+          ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 4))⟩
       obtain ⟨Nc, hNc⟩ := hcandidate_shrinks half
       obtain ⟨Nr, hNr⟩ := hradius_shrinks quarter
       refine ⟨Nat.max Nc Nr, ?_⟩
@@ -7788,7 +7788,7 @@ theorem cauchyStabilize_valid
               (candidate.compute n).width + 2 * radius n := hwidthHeight.1
           _ <= half.val + 2 * quarter.val :=
             rat_add_le_add hc.1
-              (Rat.mul_le_mul_of_nonneg_left hr (by native_decide : (0 : Rat) <= 2))
+              (Rat.mul_le_mul_of_nonneg_left hr (by decide +kernel : (0 : Rat) <= 2))
           _ = eps.val := by
             dsimp [half, quarter]
             rw [Rat.div_def, Rat.div_def]
@@ -7800,7 +7800,7 @@ theorem cauchyStabilize_valid
               (candidate.compute n).height + 2 * radius n := hwidthHeight.2
           _ <= half.val + 2 * quarter.val :=
             rat_add_le_add hc.2
-              (Rat.mul_le_mul_of_nonneg_left hr (by native_decide : (0 : Rat) <= 2))
+              (Rat.mul_le_mul_of_nonneg_left hr (by decide +kernel : (0 : Rat) <= 2))
           _ = eps.val := by
             dsimp [half, quarter]
             rw [Rat.div_def, Rat.div_def]
@@ -7826,7 +7826,7 @@ theorem candidate_equiv_cauchyStabilize_of_future
 
 private theorem half_pos_complex {q : Rat} (hq : 0 < q) : 0 < q / 2 := by
   rw [Rat.div_def]
-  exact Rat.mul_pos hq ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))
+  exact Rat.mul_pos hq ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 2))
 
 private theorem add_halves_complex (q : Rat) : q / 2 + q / 2 = q := by
   rw [Rat.div_def]

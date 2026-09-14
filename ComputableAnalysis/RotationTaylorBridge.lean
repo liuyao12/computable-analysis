@@ -48,7 +48,7 @@ theorem trigCoefficient_closed (k : Nat) :
         ((-1 : Rat) ^ k) / factorialRat (2 * k + 1) /\
       FormalPowerSeries.cosCoeff (2 * k + 1) = 0 := by
   induction k with
-  | zero => native_decide
+  | zero => decide +kernel
   | succ k ih =>
       rcases ih with ⟨hsinEven, hcosEven, hsinOdd, hcosOdd⟩
       have hsinEven' : FormalPowerSeries.sinCoeff (2 * (k + 1)) = 0 := by
@@ -177,12 +177,12 @@ theorem uniformRotationSinCenter_secant_error
         (uniformRotationCenter x n).re) <=
       qabs h *
         (FinitePolynomial.taylorPrefixSecantBound 2
-          FormalPowerSeries.sinCoeff (by native_decide)
+          FormalPowerSeries.sinCoeff (by decide +kernel)
           (2 * (uniformRotationTailStart + n))).errorCoefficient := by
   let terms := 2 * (uniformRotationTailStart + n)
   have hfinite :=
     (FinitePolynomial.taylorPrefixSecantBound 2
-      FormalPowerSeries.sinCoeff (by native_decide) terms).error_bound
+      FormalPowerSeries.sinCoeff (by decide +kernel) terms).error_bound
       x h hh hx hxh
   have hshift := sinePrefixShift_eq_cosinePrefix x
     (uniformRotationTailStart + n)
@@ -216,7 +216,7 @@ private theorem qabs_signed_even_factorial (n : Nat) :
   rw [Rat.div_def, qabs_mul]
   have hsign : qabs ((-1 : Rat) ^ n) = 1 := by
     rw [RationalMajorant.qabs_pow_eq_pow_qabs]
-    have hminus : qabs (-1 : Rat) = 1 := by native_decide
+    have hminus : qabs (-1 : Rat) = 1 := by decide +kernel
     rw [hminus]
     induction n with
     | zero => rfl
@@ -261,7 +261,7 @@ private def sinePrefixSecantData : (n : Nat) -> SinePrefixSecantData n
       let F := sinePrefixSecantData n
       let G := SecantDerivativeBound.scaleRat
         (((-1 : Rat) ^ n) / factorialRat (2 * n))
-        (normalizedMonomialSecantBound 2 (2 * n) (by native_decide))
+        (normalizedMonomialSecantBound 2 (2 * n) (by decide +kernel))
       let H := F.bound.add G
       have hsource :
           (fun x => LinearODE.RotationSystem.sinePrefix x n +
@@ -304,7 +304,7 @@ private def sinePrefixSecantData : (n : Nat) -> SinePrefixSecantData n
             · rw [← F.errorCoefficient_eq]
               exact F.bound.errorCoefficient_nonneg
             · exact Rat.mul_nonneg (qabs_nonneg _)
-                (powerSecantErrorBound_nonneg (by native_decide) _)
+                (powerSecantErrorBound_nonneg (by decide +kernel) _)
           error_bound := by
             intro x h hh hx hxh
             have hH := H.error_bound x h hh hx hxh
@@ -362,7 +362,7 @@ private theorem sinePrefixSecantCoefficient_le_exp (n : Nat) :
             qabs (FormalPowerSeries.expCoeff (2 * n + 1)) *
               powerSecantErrorBound 2 (2 * n + 1 + 1) :=
           Rat.mul_nonneg (qabs_nonneg _)
-            (powerSecantErrorBound_nonneg (by native_decide) _)
+            (powerSecantErrorBound_nonneg (by decide +kernel) _)
         calc
           expTaylorPrefixSecantCoefficient (2 * n + 1) =
               expTaylorPrefixSecantCoefficient (2 * n + 1) + 0 := by

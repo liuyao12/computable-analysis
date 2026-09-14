@@ -75,13 +75,13 @@ namespace SecantDerivativeBound
 /-- Constants have zero finite-difference error. -/
 def constant (C c : Rat) : SecantDerivativeBound C (fun _x => c) (fun _x => 0) where
   errorCoefficient := 0
-  errorCoefficient_nonneg := by native_decide
+  errorCoefficient_nonneg := by decide +kernel
   error_bound := by
     intro x h _hh _hx _hxh
     have hzero : (((c - c) / h) - 0 : Rat) = 0 := by
       rw [Rat.sub_self, Rat.div_def, Rat.zero_mul]
       grind [Rat.sub_eq_add_neg]
-    rw [hzero, qabs_eq_self_of_nonneg (by native_decide), Rat.mul_zero]
+    rw [hzero, qabs_eq_self_of_nonneg (by decide +kernel), Rat.mul_zero]
     exact Rat.le_refl
 
 /-- Quantitative secant bounds are closed under finite addition. -/
@@ -174,10 +174,10 @@ def mul {C : Rat} {f df g dg : Rat -> Rat}
       · exact Rat.mul_nonneg hg0 F.errorCoefficient_nonneg
     · apply Rat.mul_nonneg
       · exact Rat.add_nonneg hdf0
-          (Rat.mul_nonneg (Rat.mul_nonneg (by native_decide) hC0)
+          (Rat.mul_nonneg (Rat.mul_nonneg (by decide +kernel) hC0)
             F.errorCoefficient_nonneg)
       · exact Rat.add_nonneg hdg0
-          (Rat.mul_nonneg (Rat.mul_nonneg (by native_decide) hC0)
+          (Rat.mul_nonneg (Rat.mul_nonneg (by decide +kernel) hC0)
             G.errorCoefficient_nonneg)
   error_bound := by
     intro x h hh hx hxh
@@ -270,7 +270,7 @@ def mul {C : Rat} {f df g dg : Rat -> Rat}
               (dgMajorant + 2 * C * G.errorCoefficient) :=
             Rat.mul_le_mul_of_nonneg_left hqg
               (Rat.add_nonneg hdf0
-                (Rat.mul_nonneg (Rat.mul_nonneg (by native_decide) hC0)
+                (Rat.mul_nonneg (Rat.mul_nonneg (by decide +kernel) hC0)
                   F.errorCoefficient_nonneg))
       calc
         qabs h * qabs qf * qabs qg = qabs h * (qabs qf * qabs qg) := by
@@ -534,7 +534,7 @@ def reciprocalCenteredSecantBound :
       (fun x => 1 / x) (fun x => -(1 / x ^ 2)) := by
   refine {
     errorCoefficient := 1
-    errorCoefficient_nonneg := by native_decide
+    errorCoefficient_nonneg := by decide +kernel
     error_bound := ?_ }
   intro x h hh hx hxh
   have hxlo : (1 : Rat) <= x := by
@@ -559,13 +559,13 @@ def reciprocalCenteredSecantBound :
     have hxsq : (1 : Rat) <= x ^ 2 := by
       rw [show x ^ 2 = x * x by simp [Rat.pow_succ]]
       calc
-        (1 : Rat) = 1 * 1 := by native_decide
-        _ <= x * 1 := Rat.mul_le_mul_of_nonneg_right hxlo (by native_decide)
+        (1 : Rat) = 1 * 1 := by decide +kernel
+        _ <= x * 1 := Rat.mul_le_mul_of_nonneg_right hxlo (by decide +kernel)
         _ <= x * x := Rat.mul_le_mul_of_nonneg_left hxlo (by grind)
     calc
-      (1 : Rat) = 1 * 1 := by native_decide
+      (1 : Rat) = 1 * 1 := by decide +kernel
       _ <= 1 * (x + h) := by
-        exact Rat.mul_le_mul_of_nonneg_left hxhlo (by native_decide)
+        exact Rat.mul_le_mul_of_nonneg_left hxhlo (by decide +kernel)
       _ <= x ^ 2 * (x + h) := by
         exact Rat.mul_le_mul_of_nonneg_right hxsq (Rat.le_of_lt hxhpos)
   have hinv_nonneg : 0 <= (x ^ 2 * (x + h))⁻¹ :=
@@ -610,7 +610,7 @@ def reciprocalOnOneTwo_hasDerivativeOnInterval :
       (FunctionOnInterval.exactRat (fun x => 1 / x) 1 2)
       (FunctionOnInterval.exactRat (fun x => -(1 / x ^ 2)) 1 2) :=
   CenteredSecantDerivativeBound.toHasDerivativeOnInterval
-    reciprocalCenteredSecantBound 1 2 (by native_decide) (by native_decide)
+    reciprocalCenteredSecantBound 1 2 (by decide +kernel) (by decide +kernel)
 
 /-! Transport the same certificate through the rational translation
 `x ↦ x + 1`.  This is the coordinate used by the logarithm integral on
@@ -649,7 +649,7 @@ def logTwoKernel_hasDerivativeOnInterval :
       (FunctionOnInterval.exactRat (fun x => 1 / (1 + x)) 0 1)
       (FunctionOnInterval.exactRat (fun x => -(1 / (1 + x) ^ 2)) 0 1) :=
   CenteredSecantDerivativeBound.toHasDerivativeOnInterval
-    logTwoKernelCenteredSecantBound 0 1 (by native_decide) (by native_decide)
+    logTwoKernelCenteredSecantBound 0 1 (by decide +kernel) (by decide +kernel)
 
 end CenteredSecantDerivativeBound
 
@@ -661,12 +661,12 @@ def normalizedMonomialSecantBound (C : Rat) (n : Nat) (hC1 : 1 <= C) :
   errorCoefficient := powerSecantErrorBound C (n + 1)
   errorCoefficient_nonneg :=
     powerSecantErrorBound_nonneg
-      (Rat.le_trans (by native_decide) hC1) _
+      (Rat.le_trans (by decide +kernel) hC1) _
   error_bound := by
     intro x h hh hx hxh
     exact qabs_normalized_power_differenceQuotient_sub_monomial_le
       (x := x) (h := h) (C := C) hh
-      (Rat.le_trans (by native_decide) hC1) hC1 hx hxh n
+      (Rat.le_trans (by decide +kernel) hC1) hC1 hx hxh n
 
 /-- Every normalized monomial has a two-sided rational interval derivative on
 any interval contained in `[-C,C]`, provided `C >= 1`.  The proof is the
@@ -779,7 +779,7 @@ def cubeSecantDerivativeBound (C : Rat) (hC1 : 1 <= C) :
     error_bound := ?_ }
   intro x h hh hx hxh
   have hbound := H.error_bound x h hh hx hxh
-  have hthree : (3 : Rat) * (3 : Rat)⁻¹ = 1 := by native_decide
+  have hthree : (3 : Rat) * (3 : Rat)⁻¹ = 1 := by decide +kernel
   simp only [Nat.reduceAdd] at hbound
   change qabs
       ((3 * ((x + h) ^ 3 / (3 : Rat)) -
@@ -811,7 +811,7 @@ interface, rather than by a separate hand-written quotient calculation. -/
 def expTaylorQuadraticSecantBound (C : Rat) (hC1 : 1 <= C) :
     SecantDerivativeBound C expTaylorQuadratic (fun x => 1 + x) := by
   change SecantDerivativeBound C (fun x => 1 + x + x * x / 2) (fun x => 1 + x)
-  have hinvone : ((1 : Rat)⁻¹) = 1 := by native_decide
+  have hinvone : ((1 : Rat)⁻¹) = 1 := by decide +kernel
   simpa [Rat.pow_succ, Rat.div_def, Rat.zero_add, Rat.mul_assoc, hinvone] using
     SecantDerivativeBound.add
       (SecantDerivativeBound.add
@@ -1482,7 +1482,7 @@ private theorem powerSecantErrorBound_two_closed (n : Nat) :
     powerSecantErrorBound 2 (n + 2) =
       ((n + 2 : Nat) : Rat) * ((n + 1 : Nat) : Rat) * (2 : Rat) ^ n := by
   induction n with
-  | zero => native_decide
+  | zero => decide +kernel
   | succ n ih =>
       rw [show n + 1 + 2 = (n + 2) + 1 by omega, powerSecantErrorBound, ih,
         Rat.pow_succ]
@@ -1532,7 +1532,7 @@ private theorem expTaylorPrefixSecantCoefficient_eq_factorialTailPartials
       2 + 2 * RationalMajorant.factorialTailPartial 2 0 n +
         2 * RationalMajorant.factorialTailPartial 2 1 n := by
   induction n with
-  | zero => native_decide
+  | zero => decide +kernel
   | succ n ih =>
       rw [show n + 1 + 2 = (n + 2) + 1 by omega,
         expTaylorPrefixSecantCoefficient, ih,
@@ -1549,13 +1549,13 @@ private theorem factorialTailPartial_two_one_le_eight (n : Nat) :
         RationalMajorant.factorialTailPartial 2 1 n := by
     simpa [Nat.add_comm] using hsplit
   have hone : RationalMajorant.factorialTailPartial 2 0 1 = 1 := by
-    native_decide
+    decide +kernel
   calc
     RationalMajorant.factorialTailPartial 2 1 n =
         0 + RationalMajorant.factorialTailPartial 2 1 n := by
           rw [Rat.zero_add]
     _ <= 1 + RationalMajorant.factorialTailPartial 2 1 n :=
-      rat_add_le_add (by native_decide) (Rat.le_refl)
+      rat_add_le_add (by decide +kernel) (Rat.le_refl)
     _ = RationalMajorant.factorialTailPartial 2 0 (n + 1) := by
       rw [hsplit', hone]
     _ <= 8 := RationalMajorant.factorialTailPartial_two_le_eight (n + 1)
@@ -1566,10 +1566,10 @@ factorial-series computation, not an appeal to a completed exponential. -/
 theorem expTaylorPrefixSecantCoefficient_le_thirty_four (terms : Nat) :
     expTaylorPrefixSecantCoefficient terms <= 34 := by
   cases terms with
-  | zero => native_decide
+  | zero => decide +kernel
   | succ terms =>
       cases terms with
-      | zero => native_decide
+      | zero => decide +kernel
       | succ n =>
           rw [show n + 1 + 1 = n + 2 by omega,
             expTaylorPrefixSecantCoefficient_eq_factorialTailPartials]
@@ -1582,10 +1582,10 @@ theorem expTaylorPrefixSecantCoefficient_le_thirty_four (terms : Nat) :
                 · exact Rat.le_refl
                 · exact Rat.mul_le_mul_of_nonneg_left
                     (RationalMajorant.factorialTailPartial_two_le_eight n)
-                    (by native_decide)
+                    (by decide +kernel)
               · exact Rat.mul_le_mul_of_nonneg_left
-                  (factorialTailPartial_two_one_le_eight n) (by native_decide)
-            _ = 34 := by native_decide
+                  (factorialTailPartial_two_one_le_eight n) (by decide +kernel)
+            _ = 34 := by decide +kernel
 
 /-- Every finite exponential Taylor prefix has a uniform, rational secant
 remainder on `[-2,2]`.  This is the finite bridge needed to pass from the
@@ -1604,13 +1604,13 @@ theorem expTaylorPrefix_secant_error_le_coefficient
         expTaylorDerivativePrefix, taylorDerivativePrefix,
         expTaylorPrefixSecantCoefficient]
       rw [Rat.add_zero, Rat.sub_self, Rat.div_def, Rat.zero_mul,
-        show (0 : Rat) - 0 = 0 by native_decide,
-        qabs_eq_self_of_nonneg (by native_decide), Rat.mul_zero]
+        show (0 : Rat) - 0 = 0 by decide +kernel,
+        qabs_eq_self_of_nonneg (by decide +kernel), Rat.mul_zero]
       exact Rat.le_refl
   | succ terms ih =>
       have hmono := qabs_normalized_power_differenceQuotient_sub_monomial_le
-        (x := x) (h := h) (C := (2 : Rat)) hh (by native_decide)
-          (by native_decide) hx hxh terms
+        (x := x) (h := h) (C := (2 : Rat)) hh (by decide +kernel)
+          (by decide +kernel) hx hxh terms
       have hdecomp :
           ((expTaylorPrefix (terms + 1) (x + h) -
               expTaylorPrefix (terms + 1) x) / h -

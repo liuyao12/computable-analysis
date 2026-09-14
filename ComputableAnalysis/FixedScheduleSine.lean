@@ -152,11 +152,11 @@ theorem radius_le_step_sq (n : Nat) :
     rw [hs]
     omega
   have hg := RationalMajorant.factorialTailTerm_le_geometric_from_start
-    (C := (2 : Rat)) (N := 10) (by decide) (by native_decide) (2*n)
-  have hcoef : 4 * RationalMajorant.factorialTailTerm 2 10 <= 1 := by native_decide
-  have hpow0 : 0 <= ((1 : Rat)/2)^(2*n) := Rat.pow_nonneg (by native_decide)
+    (C := (2 : Rat)) (N := 10) (by decide) (by decide +kernel) (2*n)
+  have hcoef : 4 * RationalMajorant.factorialTailTerm 2 10 <= 1 := by decide +kernel
+  have hpow0 : 0 <= ((1 : Rat)/2)^(2*n) := Rat.pow_nonneg (by decide +kernel)
   have hmajor := RationalMajorant.half_pow_le_one_div_succ n
-  have hhalf0 : 0 <= ((1 : Rat)/2)^n := Rat.pow_nonneg (by native_decide)
+  have hhalf0 : 0 <= ((1 : Rat)/2)^n := Rat.pow_nonneg (by decide +kernel)
   have hp0 : 0 <= step n := Rat.le_of_lt (step_pos n)
   change ((1 : Rat)/2)^n <= step n at hmajor
   have hsquare : ((1 : Rat)/2)^(2*n) <= step n * step n := by

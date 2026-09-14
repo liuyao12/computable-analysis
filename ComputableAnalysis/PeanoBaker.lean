@@ -307,9 +307,9 @@ theorem matrixColumnAbsSum_identity {dimension : Nat} (j : Fin dimension) :
         funext i
         by_cases h : i = j
         · rw [if_pos h]
-          native_decide
+          decide +kernel
         · rw [if_neg h]
-          native_decide]
+          decide +kernel]
   change finiteSum (fun i => if i = j then (1 : Rat) else 0) =
     (fun _ => (1 : Rat)) j
   exact finiteSum_ite_eq j (fun _ => (1 : Rat))
@@ -424,12 +424,12 @@ theorem matrixRowAbsSum_identity {dimension : Nat} (i : Fin dimension) :
         funext j
         by_cases h : i = j
         · rw [if_pos h, if_pos h.symm]
-          native_decide
+          decide +kernel
         · have h' : ¬ j = i := by
             intro hji
             exact h hji.symm
           rw [if_neg h, if_neg h']
-          native_decide
+          decide +kernel
       ]
   change finiteSum (fun j => if j = i then (1 : Rat) else 0) =
     (fun _ => (1 : Rat)) i
@@ -1900,7 +1900,7 @@ theorem chronologicalProduct_columnAbsSum_le_pow {dimension : Nat}
       matrixColumnAbsSum (chronologicalProduct B steps) j <= c ^ steps
   | 0, j => by
       rw [chronologicalProduct, matrixColumnAbsSum_identity, Rat.pow_zero]
-      native_decide
+      decide +kernel
   | steps + 1, j => by
       rw [chronologicalProduct]
       have hmul := matrixMul_columnAbsSum_le_of_column_bound
@@ -1941,7 +1941,7 @@ theorem ratProduct_nonneg (f : Nat -> Rat) (hf : forall n, 0 <= f n) :
     forall n, 0 <= ratProduct f n
   | 0 => by
       change (0 : Rat) <= 1
-      native_decide
+      decide +kernel
   | n + 1 => by
       rw [ratProduct]
       exact Rat.mul_nonneg (ratProduct_nonneg f hf n) (hf n)
@@ -1962,7 +1962,7 @@ theorem chronologicalProduct_rowAbsSum_le {dimension : Nat}
       matrixRowAbsSum (chronologicalProduct B steps) i <= ratProduct bound steps
   | 0, i => by
       rw [chronologicalProduct, matrixRowAbsSum_identity, ratProduct]
-      native_decide
+      decide +kernel
   | steps + 1, i => by
       rw [chronologicalProduct]
       have hmul := matrixMul_rowAbsSum_le
@@ -2021,7 +2021,7 @@ theorem chronologicalStepProduct_rowAbsSum_le {dimension : Nat}
         ratProduct (fun k => bound (start + k)) steps
   | start, 0, i => by
       rw [chronologicalStepProduct_zero, matrixRowAbsSum_identity, ratProduct]
-      native_decide
+      decide +kernel
   | start, steps + 1, i => by
       rw [chronologicalStepProduct_succ]
       have hmul := matrixMul_rowAbsSum_le
@@ -2303,7 +2303,7 @@ theorem orderedSimplexVolume_eq_closed (T : Rat) (degree : Nat) :
   | zero =>
       unfold orderedSimplexVolume factorialRat factorial
       rw [Rat.pow_zero]
-      native_decide
+      decide +kernel
   | succ degree ih =>
       rw [orderedSimplexVolume, ih, Rat.pow_succ,
         FormalPowerSeries.factorialRat_succ]
@@ -2337,7 +2337,7 @@ theorem constantPeanoBakerSimplexTerm_zero {dimension : Nat}
   have hscalar : T ^ 0 / factorialRat 0 = (1 : Rat) := by
     rw [Rat.pow_zero]
     unfold factorialRat factorial
-    native_decide
+    decide +kernel
   change matrixScale (T ^ 0 / factorialRat 0) (matrixIdentity dimension) =
     matrixIdentity dimension
   rw [hscalar, matrixScale_one]
@@ -2388,10 +2388,10 @@ theorem constantPeanoBakerSimplexPartial_add_two_eq_identity_add_scale_of_mul_se
       simp [constantPeanoBakerSimplexPartial,
         constantPeanoBakerSimplexTerm, matrixPow,
         matrixMul_identity_right, factorialRat, factorial]
-      have hone : (1 : Rat) / 1 = 1 := by native_decide
+      have hone : (1 : Rat) / 1 = 1 := by decide +kernel
       have hT : T / 1 = T := by
         have hinv : (1 : Rat)⁻¹ = 1 :=
-          Rat.inv_eq_of_mul_eq_one (by native_decide)
+          Rat.inv_eq_of_mul_eq_one (by decide +kernel)
         rw [Rat.div_def, hinv, Rat.mul_one]
       rw [hone, hT, matrixAdd_zero_left, matrixScale_one]
   | terms + 1 => by
@@ -2427,10 +2427,10 @@ def generator : RatMatrix 2 :=
 theorem generator_rowAbsSum (i : Fin 2) :
     matrixRowAbsSum generator i = 1 := by
   refine Fin.cases ?_ ?_ i
-  · native_decide
+  · decide +kernel
   · intro j
     refine Fin.cases ?_ ?_ j
-    · native_decide
+    · decide +kernel
     · intro k
       exact Fin.elim0 k
 
@@ -2445,10 +2445,10 @@ theorem affineGenerator_rowAbsSum_le (step : Rat) (i : Fin 2) :
 theorem generator_columnAbsSum (j : Fin 2) :
     matrixColumnAbsSum generator j = 1 := by
   refine Fin.cases ?_ ?_ j
-  · native_decide
+  · decide +kernel
   · intro i
     refine Fin.cases ?_ ?_ i
-    · native_decide
+    · decide +kernel
     · intro k
       exact Fin.elim0 k
 
@@ -2470,7 +2470,7 @@ theorem rotationChronologicalProduct_rowAbsSum_le (step : Rat) :
     (fun _ => matrixScale step generator) (1 + qabs step)
   · intro n j
     exact affineGenerator_rowAbsSum_le step j
-  · exact Rat.add_nonneg (by native_decide) (qabs_nonneg step)
+  · exact Rat.add_nonneg (by decide +kernel) (qabs_nonneg step)
 
 theorem rotationChronologicalProduct_columnAbsSum_le (step : Rat) :
     forall steps j,
@@ -2482,7 +2482,7 @@ theorem rotationChronologicalProduct_columnAbsSum_le (step : Rat) :
     (fun _ => matrixScale step generator) (1 + qabs step)
   · intro n i
     exact affineGenerator_columnAbsSum_le step i
-  · exact Rat.add_nonneg (by native_decide) (qabs_nonneg step)
+  · exact Rat.add_nonneg (by decide +kernel) (qabs_nonneg step)
 
 theorem rotationChronologicalProduct_stateAbsSum_le (step : Rat)
     (steps : Nat) (x : RatVector 2) :
@@ -2494,7 +2494,7 @@ theorem rotationChronologicalProduct_stateAbsSum_le (step : Rat)
     (fun _ => matrixScale step generator) (1 + qabs step)
   · intro n j
     exact affineGenerator_columnAbsSum_le step j
-  · exact Rat.add_nonneg (by native_decide) (qabs_nonneg step)
+  · exact Rat.add_nonneg (by decide +kernel) (qabs_nonneg step)
 
 /-- Squaring the rotation generator is minus the identity.  This is a closed
 finite rational matrix calculation. -/
@@ -2503,17 +2503,17 @@ theorem generator_square :
   funext i j
   refine Fin.cases ?_ ?_ i
   · refine Fin.cases ?_ ?_ j
-    · native_decide
+    · decide +kernel
     · intro j
       refine Fin.cases ?_ (fun j => Fin.elim0 j) j
-      native_decide
+      decide +kernel
   · intro i
     refine Fin.cases ?_ (fun i => Fin.elim0 i) i
     refine Fin.cases ?_ ?_ j
-    · native_decide
+    · decide +kernel
     · intro j
       refine Fin.cases ?_ (fun j => Fin.elim0 j) j
-      native_decide
+      decide +kernel
 
 /-- The matrix-power normalization of the preceding square identity. -/
 theorem generator_pow_two :
@@ -2855,7 +2855,7 @@ theorem chronologicalProduct_constant_square_zero_uniform_step
 theorem orderedIndexWords_length (steps : Nat) :
     (orderedIndexWords steps).length = 2 ^ steps := by
   induction steps with
-  | zero => native_decide
+  | zero => decide +kernel
   | succ steps ih =>
       rw [orderedIndexWords, List.length_append, List.length_map, ih]
       omega
@@ -3046,7 +3046,7 @@ theorem zeroInitialVolterra_iteration_le_eps {M T B : Rat}
   have hradiusNonneg :
       0 <= B * (2 * RationalMajorant.factorialTailTerm (M * T)
         (RationalMajorant.factorialTailStart (M * T))) := by
-    exact Rat.mul_nonneg hB (Rat.mul_nonneg (by native_decide) htermNonneg)
+    exact Rat.mul_nonneg hB (Rat.mul_nonneg (by decide +kernel) htermNonneg)
   calc
     B * RationalMajorant.factorialTailTerm (M * T)
         (RationalMajorant.factorialTailStart (M * T) + shift) <=
@@ -3085,7 +3085,7 @@ theorem zeroInitialVolterraIterationBound_eq_zero {M T B error : Rat}
       ⟨error / 2, by
         rw [Rat.div_def]
         exact Rat.mul_pos herrorPos
-          ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))⟩
+          ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 2))⟩
     have hiteration := hiterations
       (zeroInitialVolterraIterationShift M T B eps)
     have hsmall := zeroInitialVolterra_iteration_le_eps hM hT hB eps
@@ -3093,7 +3093,7 @@ theorem zeroInitialVolterraIterationBound_eq_zero {M T B error : Rat}
       exact Rat.le_trans hiteration hsmall
     have hstrict : error / 2 < error := by
       rw [Rat.div_def]
-      have hinv : (2 : Rat)⁻¹ < 1 := by native_decide
+      have hinv : (2 : Rat)⁻¹ < 1 := by decide +kernel
       calc
         error * (2 : Rat)⁻¹ < error * 1 :=
           Rat.mul_lt_mul_of_pos_left hinv herrorPos

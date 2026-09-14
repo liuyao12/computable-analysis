@@ -185,7 +185,7 @@ theorem uniformRotationCosOnTwo_epsilonDeltaContinuous :
     { val := eps.val / 16
       property := by
         rw [Rat.div_def]
-        exact Rat.mul_pos eps.property ((Rat.inv_pos).2 (by native_decide)) }
+        exact Rat.mul_pos eps.property ((Rat.inv_pos).2 (by decide +kernel)) }
   obtain ⟨n, hn⟩ := uniformRotationBoxes_widths_shrink_uniform eps
   refine ⟨delta, n, ?_⟩
   intro x y hx hy hclose
@@ -202,7 +202,7 @@ theorem uniformRotationCosOnTwo_epsilonDeltaContinuous :
   have hscale : 16 * delta.val = eps.val := by
     dsimp [delta]
     rw [Rat.div_def]
-    have hcancel : (16 : Rat) * (16 : Rat)⁻¹ = 1 := by native_decide
+    have hcancel : (16 : Rat) * (16 : Rat)⁻¹ = 1 := by decide +kernel
     grind [Rat.mul_assoc, Rat.mul_comm]
   have hxy := uniformRotationBox_contained_expand_of_input_near
     x y delta.val hqabsX hqabsY n hxyInput
@@ -224,7 +224,7 @@ theorem uniformRotationSinOnTwo_epsilonDeltaContinuous :
     { val := eps.val / 16
       property := by
         rw [Rat.div_def]
-        exact Rat.mul_pos eps.property ((Rat.inv_pos).2 (by native_decide)) }
+        exact Rat.mul_pos eps.property ((Rat.inv_pos).2 (by decide +kernel)) }
   obtain ⟨n, hn⟩ := uniformRotationBoxes_widths_shrink_uniform eps
   refine ⟨delta, n, ?_⟩
   intro x y hx hy hclose
@@ -241,7 +241,7 @@ theorem uniformRotationSinOnTwo_epsilonDeltaContinuous :
   have hscale : 16 * delta.val = eps.val := by
     dsimp [delta]
     rw [Rat.div_def]
-    have hcancel : (16 : Rat) * (16 : Rat)⁻¹ = 1 := by native_decide
+    have hcancel : (16 : Rat) * (16 : Rat)⁻¹ = 1 := by decide +kernel
     grind [Rat.mul_assoc, Rat.mul_comm]
   have hxy := uniformRotationBox_contained_expand_of_input_near
     x y delta.val hqabsX hqabsY n hxyInput

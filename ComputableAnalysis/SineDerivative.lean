@@ -27,7 +27,7 @@ def HasEndpointDerivativeOn (f df : Rat -> RealRaw) (R : Rat) : Prop :=
   ∀ eps : QPos, ∃ delta : QPos, ∀ x h : Rat,
     qabs x <= R -> qabs (x+h) <= R -> h ≠ 0 -> qabs h <= delta.val ->
     ∃ N : Nat, ∀ n : Nat, N <= n -> ∀ a b c : Rat,
-      (f (x+h)).compute n |>.lo <= a ->
+      ((f (x+h)).compute n).lo <= a ->
       a <= ((f (x+h)).compute n).hi ->
       ((f x).compute n).lo <= b -> b <= ((f x).compute n).hi ->
       ((df x).compute n).lo <= c -> c <= ((df x).compute n).hi ->
@@ -70,7 +70,8 @@ private theorem radius_shrinks :
   have hr := radius_le_step_sq n
   have hp := Rat.le_of_lt (step_pos n)
   have hm := Rat.mul_le_mul_of_nonneg_left (step_le_one n) hp
-  simpa only [Rat.mul_one, Rat.natCast_one, step] using Rat.le_trans hr hm
+  have hcast : ((1 : Nat) : Rat) = (1 : Rat) := by decide +kernel
+  simpa only [Rat.mul_one, step, hcast] using Rat.le_trans hr hm
 
 private theorem residual_budget {eps H r w : Rat}
     (heps : 0 < eps) (hH : 0 <= H)
@@ -96,7 +97,7 @@ it does not change the source evaluator or its fixed stage rule. -/
 private theorem sine_endpoint_derivative_of_center_enclosure
     (df : Rat -> RealRaw) (R : Rat) (hR : R <= 2)
     (w : Nat -> Rat) (hw : ShrinksToZero w)
-    (hencl : ∀ x : Rat, qabs x <= R -> ∀ n c : _,
+    (hencl : ∀ x : Rat, qabs x <= R -> ∀ (n : Nat) (c : Rat),
       ((df x).compute n).lo <= c -> c <= ((df x).compute n).hi ->
       qabs (c-(RotationSeries.uniformRotationCenter x n).re) <= w n) :
     HasEndpointDerivativeOn sine df R := by

@@ -35,7 +35,7 @@ theorem around_differenceQuotient_near_around_of_pos
     simpa using Rat.le_of_lt ((Rat.inv_pos).2 hpos)
   have htwoRdiv : 0 <= 2 * r / h := by
     rw [Rat.div_def]
-    exact Rat.mul_nonneg (Rat.mul_nonneg (by native_decide) hr)
+    exact Rat.mul_nonneg (Rat.mul_nonneg (by decide +kernel) hr)
       (Rat.le_of_lt ((Rat.inv_pos).2 hpos))
   have hEeps : E <= eps.val := by
     grind [Rat.sub_eq_add_neg]
