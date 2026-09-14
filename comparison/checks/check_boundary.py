@@ -56,7 +56,10 @@ def check(root: Path) -> dict:
     comparison_config = tomllib.loads((root/'comparison/lakefile.toml').read_text())
     if any(r['name'].lower() == 'mathlib' for r in root_config.get('require', [])):
         raise ValueError('The core package must not require Mathlib')
-    if (root/'lean-toolchain').read_text().strip() != (root/'comparison/lean-toolchain').read_text().strip():
+    # Elan accepts a leading v in release tags; Mathlib's cache requires its
+    # exact spelling. Compare normalized versions without changing core config.
+    normalize = lambda text: re.sub(r':v(?=\d)', ':', text.strip())
+    if normalize((root/'lean-toolchain').read_text()) != normalize((root/'comparison/lean-toolchain').read_text()):
         raise ValueError('The core and comparison toolchains must match')
     reqs = {r['name']:r for r in comparison_config['require']}
     if reqs['ComputableAnalysis'].get('path') != '..':
