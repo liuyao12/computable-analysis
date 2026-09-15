@@ -1,1 +1,36 @@
 .proof-controls{padding:12px 24px 16px;border-bottom:1px solid #d5ded7;font:14px/1.5 system-ui,sans-serif;background:#f7faf6}.proof-controls p{margin:8px 0}.proof-buttons{display:flex;gap:8px;flex-wrap:wrap}.proof-buttons button,#proof-edge-close{font:13px system-ui;padding:7px 12px;border:1px solid #b8c8bb;border-radius:4px;background:white;color:#243f2b;cursor:pointer}.proof-buttons button.active{background:#244b31;color:white}.proof-buttons button:focus-visible,.node:focus-visible{outline:3px solid #6693ce}.proof-note{font-size:12px;color:#506259}.proof-controls details{font-size:12px}.proof-controls summary{cursor:pointer;font-weight:600}.proof-table{overflow:auto}.proof-table table{border-collapse:collapse}.proof-table td,.proof-table th{padding:7px 12px;border-bottom:1px solid #d5ded7;text-align:left;font-variant-numeric:tabular-nums}.proof-source-links{display:grid;gap:6px;margin:6px 20px 16px 0;font:12px/1.4 ui-monospace,monospace;overflow-wrap:anywhere}.proof-edge-dialog{position:fixed;inset:8vh 8vw;background:white;z-index:1000;border:1px solid #9caf9e;box-shadow:0 12px 80px #16261c44;padding:25px;overflow:auto;font:13px/1.5 system-ui}.proof-edge-dialog li{overflow-wrap:anywhere;font-family:ui-monospace,monospace}.proof-edge-dialog[hidden]{display:none}#graph{min-height:650px;height:calc(100vh - 225px)}#Legend{display:none}.node{cursor:pointer}.dep-modal-container{z-index:1100}header{min-height:50px}.wrapper{max-width:none}.content{padding:0 12px}@media(max-width:700px){.proof-controls{padding:10px}#graph{min-height:570px;height:70vh}.proof-buttons{gap:5px}.proof-buttons button{font-size:11px;padding:6px 8px}.proof-edge-dialog{inset:3vh 3vw;padding:15px}}
+
+/* The blueprint's statement appears in one readable box, above the graph. */
+body.statement-open{overflow:hidden}
+div#statements{position:fixed;inset:0;width:100%;height:100%;background:rgba(23,32,38,.24);z-index:1200}
+#statements .dep-modal-container{position:fixed;inset:4vh 0 auto;width:min(960px,94vw);margin:0 auto;padding:0;z-index:1201}
+#statements .dep-modal-content{position:relative;max-height:90vh;overflow:auto;background:#fff;border:1px solid #64806b;border-radius:5px;padding:24px 28px;box-shadow:0 12px 44px #17202640;font:16px/1.65 Georgia,"Times New Roman",serif}
+#statements .dep-closebtn{position:sticky;float:right;top:0;right:0;width:32px;height:32px;padding:0;border:1px solid #d9e0dd;border-radius:3px;background:#fff;color:#2d4035;z-index:2;font:25px/1 system-ui;cursor:pointer}
+#statements .thm_thmheading{padding-right:32px;margin:0 0 14px;font:600 17px/1.5 system-ui}
+#statements .thm_thmcontent p{margin:10px 0}
+#statements .proof-source-links,#statements .thm>.lean_link{display:none}
+#statements .latex_link{display:inline-block;margin:10px 0;padding:0;font:13px system-ui;text-decoration:underline}
+.foundation-legend{display:flex;gap:10px 20px;flex-wrap:wrap;align-items:center;margin:14px 0 8px;font:12px/1.5 system-ui}
+.foundation-legend span{display:inline-flex;align-items:center;gap:7px}
+.foundation-legend i{display:inline-block;width:24px;height:15px;border:1px solid #758875;border-radius:2px}
+.fill-native{background:#f6fbf5}.fill-mathlib{background:#eee1fa}.fill-mixed{background:linear-gradient(90deg,#f6fbf5 45%,#eee1fa 55%)}
+.legend-help{color:#56635b}
+.bp-lean-panel{border-top:1px solid #dce2de;margin-top:18px;padding-top:16px;font:13px/1.55 system-ui}
+.foundation-badge{display:inline-block;padding:4px 9px;margin:0 0 8px;border:1px solid #c8d7c8;border-radius:3px;background:#f6fbf5;font-weight:600}
+.foundation-badge.mathlib{background:#eee1fa;border-color:#cfb6e3;color:#523568}
+.foundation-badge.mixed{background:linear-gradient(90deg,#f6fbf5,#eee1fa);border-color:#cfb6e3}
+.bp-note{color:#586861;font:12px/1.5 system-ui;margin:8px 0}
+.bp-lean-toolbar{display:flex;align-items:center;justify-content:space-between;margin:12px 0 8px;gap:12px}
+.bp-lean-toolbar h3{margin:0;font:600 15px system-ui}
+.bp-copy{border:1px solid #c5d1c9;border-radius:3px;padding:5px 12px;background:#fff;color:#2d4937;font:12px system-ui;cursor:pointer}
+.bp-declaration-label{display:block;font:12px system-ui;margin:6px 0 10px;color:#52645a}
+.bp-declaration-label select{display:block;max-width:100%;width:100%;font:12px ui-monospace,Consolas,monospace;margin-top:5px;padding:7px 9px;background:#fff;border:1px solid #cdd8d1;border-radius:3px;color:#26392d}
+#statements pre.bp-lean-code{margin:0 0 9px;padding:16px 18px;border:1px solid #d6dfd9;border-left:3px solid #64806b;border-radius:3px;background:#f7f9f7;color:#20392d;font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal;tab-size:2;max-height:40vh;overflow:auto}
+#statements pre.bp-lean-code code{font:inherit;white-space:inherit;background:none;padding:0}
+#statements a.bp-formal-source{color:#315e82;text-decoration:underline;font-size:12px}
+.bp-dependency-details{margin-top:14px;font:12px/1.6 system-ui}
+.bp-dependency-details summary{cursor:pointer;font-weight:600;color:#65417d}
+.bp-dependency-details li,.bp-dependency-name{font:11px/1.6 ui-monospace,Consolas,monospace;overflow-wrap:anywhere}
+.bp-dependency-details ol{padding-left:20px}
+#statements button:focus-visible,#statements a:focus-visible,#statements select:focus-visible{outline:3px solid #789cce;outline-offset:2px}
+@media(max-width:700px){#statements .dep-modal-container{inset:2vh 0 auto;width:96vw}#statements .dep-modal-content{padding:16px 15px;max-height:94vh;font-size:15px}#statements .thm_thmheading{font-size:15px}#statements pre.bp-lean-code{padding:11px;font-size:11px;max-height:43vh}.foundation-legend{gap:7px 12px;font-size:11px}.foundation-legend .legend-help{display:block;width:100%}.bp-declaration-label select{font-size:10px}}

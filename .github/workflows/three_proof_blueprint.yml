@@ -65,6 +65,7 @@ jobs:
           set -euo pipefail
           mkdir -p reports
           lake env lean checks/ThreeProofsAudit.lean | tee reports/three-proofs-audit.log
+          lake env lean checks/ExportBlueprintStatements.lean
       - name: Install blueprint tools
         run: |
           sudo apt-get update
@@ -74,6 +75,11 @@ jobs:
         run: |
           leanblueprint web
           python3 blueprint/checks/build_three_proof_graph.py
+          python3 blueprint/checks/enhance_blueprint_nodes.py
+      - name: Test Lean statement boxes and Mathlib Real shading
+        run: |
+          python -m pip install playwright
+          python3 blueprint/checks/test_statement_boxes.py
       - name: Retain verified sources and audit
         run: |
           git archive --format=tar.gz HEAD > /tmp/three-proof-sources.tar.gz
