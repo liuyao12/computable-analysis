@@ -1,0 +1,9 @@
+# case-id	route	declaration	foundation
+cosine-primitive	direct	ComputableAnalysis.CosinePrimitive.viaInequalities	native
+cosine-primitive	ftc	ComputableAnalysis.CosinePrimitive.viaFTC	native
+cosine-primitive	mathlib	ComputableAnalysis.CosinePrimitive.viaMathlib	mathlib
+cosine-validity	direct	ComputableAnalysis.CosinePrimitive.integral_valid_viaInequalities	native
+cosine-validity	ftc	ComputableAnalysis.CosinePrimitive.integral_valid_viaFTC	native
+cosine-validity	mathlib	ComputableAnalysis.CosinePrimitive.integral_valid_viaMathlib	mathlib
+sine-zero	direct	ComputableAnalysis.CosinePrimitive.S_zero	native
+sine-zero	mathlib	MathlibComparison.ProofBenchExamples.sine_zero_viaMathlib	mathlib

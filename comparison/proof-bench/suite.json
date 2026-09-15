@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "title": "Comparing computable calculus foundations",
+  "cases": {
+    "cosine-primitive": {"title": "Cosine primitive", "family": "calculus", "status": "measured", "contract": "For rational 0 ≤ t ≤ 1/2, the fixed cosine-sum program is equivalent to the separately computed S(t)/pi.", "obligation": "Endpoint identity; integral validity is measured separately.", "countInPortfolio": true},
+    "cosine-validity": {"title": "Cosine integral validity", "family": "calculus", "status": "measured", "contract": "The SAME integral program has ordered nested rational output boxes with widths tending to zero, for all rational t in the same chart.", "obligation": "Construction correctness. This is a second obligation of the cosine example, not a second independent integration example.", "countInPortfolio": true},
+    "sine-zero": {"title": "Sine at zero (calibration)", "family": "calibration", "status": "measured", "contract": "The closed native sine program at zero is equivalent to the constant-zero interval program.", "obligation": "A two-route calibration of reusable value bridges; excluded from the default calculus portfolio.", "countInPortfolio": false}
+  },
+  "roadmap": [
+    {"id": "polynomial-ftc", "title": "Polynomial FTC, uniformly in degree", "status": "planned", "contract": "Choose one coefficient-list polynomial evaluator and one fixed quadrature; compare direct finite sums, native FTC, and Mathlib after evaluation bridges.", "reason": "Checks whether FTC reuse amortizes; do not count each degree as an independent success."},
+    {"id": "rational-kernel", "title": "Arctangent kernel on arbitrary rational subintervals", "status": "planned", "contract": "The same rectangle program for 1/(1+x*x), with a denominator-apart certificate and rational endpoints.", "reason": "Reuses the arctangent bridge already established; keep that cost visible in cold and warm comparisons."},
+    {"id": "sine-derivative", "title": "The actual sine secant derivative", "status": "planned", "contract": "Validity and equivalence of the SAME fixed-schedule derivative program on the chart interior.", "reason": "Compare curvature and finite differences with Mathlib differentiation plus a secant-computation bridge."},
+    {"id": "algebraic-inverse", "title": "Square-root inverse and its derivative away from zero", "status": "planned", "contract": "A chosen rational-bisection square-root program; explicit positive lower bound on the domain.", "reason": "Tests algebraic branch selection, separation, and quantitative hypotheses."},
+    {"id": "trigonometric-addition", "title": "Global rational-angle addition identities", "status": "planned", "contract": "Fix the native rational-angle extension before comparing both coordinate identities.", "reason": "Tests reusable function bridges without additional integration machinery."},
+    {"id": "exp-integral", "title": "Exponential primitive", "status": "planned", "contract": "Same certified factorial-series exponential and fixed quadrature on rational bounded intervals.", "reason": "Tests a new special function and amortization beyond one trigonometric family."},
+    {"id": "complex-exponential", "title": "Computable complex exponential and rotation identity", "status": "planned", "contract": "Start with the existing rational-imaginary-input complex-box evaluator; explicitly separate extension to represented complex inputs.", "reason": "Tests complex arithmetic and the bridge to Mathlib's exponential without silently substituting it."},
+    {"id": "linear-ode", "title": "Linear ODE solution and uniqueness", "status": "planned", "contract": "One prescribed matrix/forcing representation, finite product or Peano–Baker evaluator, and explicit quantitative bounds.", "reason": "Tests engineering use: amortize fundamental-solution machinery across forcing terms, not across changed dynamics without justification."}
+  ]
+}
