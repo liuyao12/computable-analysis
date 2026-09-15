@@ -49,6 +49,17 @@ def main():
             assert modal.locator('.bp-node-navigation button').count()>0
             assert modal.locator('.bp-lean-code code').first.text_content().startswith(('theorem','def'))
             page.keyboard.press('Escape')
+        # Check every optional strategy equation as actual rendered LaTeX.
+        page.wait_for_function("window.MathJax && typeof window.MathJax.typesetPromise === 'function'",timeout=30000)
+        for label, item in detail.items():
+            if not item['strategy']['formula'] or label == 'lem:c3-native-exp': continue
+            page.locator('#graph .node').filter(has=page.locator('title',has_text=label)).click()
+            modal=page.locator('[id="'+label+'_modal"]')
+            relation=modal.locator('.bp-key-relation')
+            relation.locator('summary').click()
+            relation.locator('mjx-container').wait_for(state='visible',timeout=30000)
+            assert relation.locator('mjx-merror, [data-mjx-error]').count()==0, label
+            page.keyboard.press('Escape')
         page.locator('#graph .node').filter(has=page.locator('title',has_text='thm:c3-ftc')).click()
         page.screenshot(path=str(screenshots/'ftc-strategy-statements.png'),full_page=True)
         modal=page.locator('[id="thm:c3-ftc_modal"]')

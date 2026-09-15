@@ -11,7 +11,11 @@ addLeanPanel = function(modal,id) {
   strategy.append(element('strong',guide.role),element('p',guide.summary));
   if(guide.formula){
     const relation=element('details',undefined,'bp-key-relation');
-    relation.append(element('summary','Key relation (LaTeX)'),element('div','\\['+guide.formula+'\\]'));
+    // Standard MathJax TeX has no stmaryrd double-bracket commands.
+    // This affects explanatory LaTeX only, never the exact Lean snippets.
+    const formula=guide.formula.replaceAll('\\llbracket','\\lbrack\\!\\lbrack')
+      .replaceAll('\\rrbracket','\\rbrack\\!\\rbrack');
+    relation.append(element('summary','Key relation (LaTeX)'),element('div','\\['+formula+'\\]'));
     relation.ontoggle=()=>{if(relation.open&&window.MathJax?.typesetPromise)window.MathJax.typesetPromise([relation]).catch(()=>{});};
     strategy.append(relation);
   }
