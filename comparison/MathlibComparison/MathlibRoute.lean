@@ -1,8 +1,9 @@
 import MathlibComparison.TrigonometryBridge
 
 /-! The Mathlib-side integral calculation. This is deliberately separate
-from the still-required identification of the native quadrature program
-with Mathlib's interval integral. It is not labelled a third native proof. -/
+from the independent identification of the native quadrature program
+with Mathlib's interval integral in CosineIntegralBridge. The third proof
+combines this baseline with the value and quadrature bridges. -/
 namespace MathlibComparison
 
 /-- Mathlib's basepoint formula, with the normalized rational-angle scale. -/

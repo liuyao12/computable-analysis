@@ -1,130 +1,92 @@
 # Comparing the independent foundation with Mathlib
 
-This is a maintained, optional Lake package **inside the same repository**.
-It imports the native package by `path = ".."` and a pinned Mathlib revision.
-The native `ComputableAnalysis` package neither requires nor imports Mathlib.
-Installing or building this comparison is not required for native calculations.
+This optional Lake package lives inside the same repository. It imports the
+native package by `path = ".."` and a pinned Mathlib revision. The native
+package neither requires nor imports Mathlib.
 
-## Build
+## Build and audit
 
 From the repository root:
 
 ```sh
+lake build ComputableAnalysis.CosinePrimitive ComputableAnalysis.RotationSeries
 python3 comparison/checks/check_boundary.py
 cd comparison
 lake update
-lake exe cache get Mathlib.Analysis.SpecialFunctions.Integrals.Basic Mathlib.Tactic
+lake exe cache get Mathlib.Analysis.SpecialFunctions.Integrals.Basic Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds Mathlib.Tactic
 lake build MathlibComparison
 lake env lean checks/ComparisonAudit.lean
+mkdir -p reports
+lake env lean checks/ThreeProofsAudit.lean
 ```
 
-The comparison uses the same Lean toolchain as the native package and pins
-Mathlib to `51e6992efd06126df61a496bebf8f49482a4e129` (Lean 4.33.0-rc2).
-The root package's dependency configuration is unchanged. CI builds the actual
-comparison library and runs its audit, not just a sample Mathlib import.
+Mathlib is pinned to `51e6992efd06126df61a496bebf8f49482a4e129`, matching the
+native Lean 4.33.0-rc2 toolchain. CI builds the actual modules, not just a
+sample Mathlib import. The root dependency configuration is unchanged.
 
-## The three layers
+## Generic number interpretation
 
-`ComputableAnalysis/` remains the elementary rational-interval foundation.
-`comparison/MathlibComparison/` imports both that foundation and Mathlib.
-The comparison's proofs may use Mathlib's real completeness, calculus, and
-special functions; those uses must be visible and must not become premises
-of native proofs by a reverse import.
+`IntervalModel.lean` defines `Represents X r` to mean that every rational
+output interval of X contains the Mathlib real r. `RealModel.lean` proves
+unique representation for valid computations, preserves arithmetic, and
+identifies native equivalence and order with equality and order in Mathlib.
+Its current `denote` implementation uses a supremum in the comparison only.
+This does not turn arbitrary Mathlib reals into executable native programs.
 
-A theorem's hypotheses and target must be fixed before comparing proof sizes.
-Compare the mathematical meaning of the same native algorithm, not merely
-similar-looking formulas in different number types. The desired blueprint has
-one statement node and labelled alternative proof routes; the raw declaration
-reference graph is a separate audit view.
+## Value bridges
 
-## Checked correspondence for numbers
+`ArctanBridge.lean` compares the native rational rectangle computation with
+Mathlib's integral of the rational arctangent kernel. It identifies geometric
+arctangent, four times arctangent at one, circle-area pi, and reciprocal pi.
 
-`IntervalModel.lean` defines
+`TrigonometryBridge.lean` proves, for the original inverse provider data and
+all rational x in [0,1/2], that the original sine and cosine computations
+represent `Real.sin (Real.pi*x)` and `Real.cos (Real.pi*x)`. These are not new
+native definitions. The proof uses the inverse-clock residual, convergence
+of rational approximations, and double-arctangent coordinate identities.
+It does not use either native cosine-integral conclusion. The new basepoint
+statement instantiates the bridge with `ClosedArctanInverse.provider`.
+
+## Three proofs of one native statement
+
+`CosineIntegralBridge.lean` proves that the actual native quadrature represents
+Mathlib's interval integral. A Lipschitz bound controls each cell; finite
+additivity gives an error at most `4*t^2/m`, inside the native allowance
+`4000*t^2/m`. It does not invoke either native endpoint proof or a primitive
+formula. Every expanded mesh box, and hence each output intersection,
+contains the Mathlib integral.
+
+`MathlibComparison/CosinePrimitive.lean` combines this correspondence with
+the checked Mathlib primitive formula and sine/pi bridges. The results are:
 
 ```lean
-Represents (X : RealRaw) (r : ℝ) : Prop :=
-  ∀ n, ((X.compute n).lo : ℝ) ≤ r ∧ r ≤ ((X.compute n).hi : ℝ)
+ComputableAnalysis.CosinePrimitive.viaInequalities
+ComputableAnalysis.CosinePrimitive.viaFTC
+ComputableAnalysis.CosinePrimitive.viaMathlib
 ```
 
-`RealModel.lean` proves that every valid native raw computation represents a
-unique Mathlib real. Its noncomputable `denote X hX` uses a supremum **in the
-comparison only**. On valid computations:
+Their complete theorem types are identical. Each route also has an
+independently justified validity proof. The Mathlib result is exported only
+by this comparison package, never by the native import root.
 
-```lean
-X.Equiv Y ↔ denote X hX = denote Y hY
-X.Le Y ↔ denote X hX ≤ denote Y hY
-```
+## Blueprint and trust boundary
 
-The interpretation commutes with rational constants, addition, subtraction,
-multiplication, and rational scaling. This is a faithful interpretation of
-existing computations. It is not a claim of a computable evaluator for every
-Mathlib real, or that real completeness has been derived inside the native
-foundation. No universal inverse conversion is provided.
+The chapter `06-three-cosine-proofs.tex` presents arctangent, pi, S and C,
+then one theorem with three alternative proofs. The focused graph preserves
+normal blueprint statement modals, selects mathematical milestones, and
+retains route identity during contraction and reduction. A native
+factorial-series complex exponential on rational imaginary inputs is an
+optional companion, not a premise of these three proofs.
 
-## Checked special-function bridges
+`ThreeProofsAudit.lean` compares the complete theorem types and walks stored
+types and bodies. It checks native Mathlib-independence, forbids cross-proof
+reuse, requires the third route to use both kinds of bridges, and rejects
+transitive sorryAx. Existing upstream native-computation axioms remain in
+the audit. The graph builder checks every displayed reference witness,
+acyclicity, one common conclusion, and all Lean names in the new chapter.
 
-`ArctanBridge.lean` proves, by Mathlib integral order on each rational rectangle,
-that the native rectangle arctangent represents `Real.arctan`. The geometric
-arctangent bridge follows from the previously checked native equivalence.
-Four times the arctangent at one, `piCircleArea`, and `reciprocalPiRaw` are
-identified with Mathlib's pi and its reciprocal.
-
-`TrigonometryBridge.lean` proves, for the original inverse data
-`B : ArctanInverseBisection` and rational `0 ≤ x ≤ 1/2`:
-
-```lean
-sine_represents B x hx :
-  Represents (sinPiRawOfArctan B x hx) (Real.sin (Real.pi*(x:ℝ)))
-cosine_represents B x hx :
-  Represents (cosPiRawOfArctan B x hx) (Real.cos (Real.pi*(x:ℝ)))
-```
-
-These bridge the actual existing definitions, not replacements defined using
-Mathlib. The proof identifies the inverse arctangent parameter, then uses
-rational circle coordinates and Mathlib's double-angle/arctangent identities.
-It does not invoke either native cosine-integral conclusion or the normalized
-sine-derivative theorem. A closed native inverse provider can be substituted
-for B without changing the bridge; this package does not assume that unpushed
-closed-provider work is already part of the repository.
-
-## What is not yet a third proof
-
-`MathlibRoute.lean` proves the Mathlib-side formula
-
-```lean
-mathlib_cosine_primitive (t : ℝ) :
-  (∫ x in (0:ℝ)..t, Real.cos (Real.pi*x)) = Real.sin (Real.pi*t)/Real.pi
-```
-
-The remaining link is an independent identification of the **native finite-sum
-integral program** with this Mathlib interval integral. Pointwise sine/cosine
-bridges alone do not prove that link. Using a native endpoint theorem to
-identify that integral would make the proposed third proof circular as a
-comparison. Accordingly, this file is not registered as a third inhabitant
-of the native cosine-integral statement, and the live graph is not changed
-by this package addition.
-
-## Comparing costs fairly
-
-Report final proof-body size, transitive prerequisite sizes, and reused/shared
-material separately. The Mathlib route must charge its representation bridges
-as well as the native statement and its Mathlib lemmas. Also report cold and
-warm checking/elaboration separately from numerical runtime: noncomputable
-Mathlib real functions are not a timing substitute for interval evaluators.
-Record the toolchain, Mathlib revision, hypotheses, domains, and collected
-axioms. Axiom counts alone neither measure completeness use nor mathematical
-strength; the interpretation's use of a supremum is separately visible.
-
-## Audits
-
-`check_boundary.py` scans all native sources for reverse imports, checks that
-the root package has no Mathlib dependency, checks matching toolchains and
-an immutable comparison pin, and rejects new admitted/native-decision proofs
-in comparison production files.
-
-`ComparisonAudit.lean` exercises endpoint examples, inspects axiom dependencies
-of 15 comparison results, checks that the sine/cosine bridges do not borrow
-native derivative or integral conclusions, and checks native declaration
-bodies remain free of Mathlib dependencies even in the combined environment.
-Existing native-computation axioms inherited from the native library remain
-visible; no claim of kernel-only arithmetic throughout the old library is made.
+Proof measurements distinguish the final application from native, bridge,
+Mathlib and Lean/other prerequisites. They count generated helpers, and do
+not measure mathematical elegance or discovery difficulty. The current
+interpretation's use of a supremum is explicit; axiom counts alone do not
+measure completeness use. Numerical runtime is separate from proof cost.

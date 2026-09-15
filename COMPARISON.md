@@ -1,63 +1,49 @@
 # Comparison with Mathlib
 
-This project develops its own proof-oriented foundation for computable real
-and complex analysis. The native foundation remains rational interval
-algorithms, stage-indexed refinement, certified domains, and explicit
-implementation-equivalence proofs. It does not import Mathlib's real numbers.
+The native foundation consists of rational interval algorithms, refinement
+certificates, and implementation-equivalence proofs. It does not import
+Mathlib's real numbers. The optional [comparison package](comparison/README.md)
+imports both this same native package and a pinned compatible Mathlib.
 
-A maintained comparison package now lives in [comparison/](comparison/README.md).
-It imports both **this same native package** and a pinned compatible Mathlib.
-This is an explicit part of the repository, not a temporary external experiment.
-The native package does not depend on the comparison package, so native users
-do not have to install or build Mathlib.
+## One computational statement, three proofs
 
-## What the comparison proves
+The common statement is `ComputableAnalysis.CosinePrimitive.Statement`:
+for rational `0 <= t <= 1/2`, the independently computed cosine integral from
+zero to t is `RealRaw.Equiv` to `S(t)/pi`. Here pi is literally four times the
+native arctangent at one, and S and C use the closed native inverse provider.
+No caller-supplied inverse provider or bridge hypothesis remains.
 
-Every valid `RealRaw` has a unique interpretation as a Mathlib real. Native
-`RealRaw.Equiv` and `RealRaw.Le` are equivalent to equality and order of these
-interpretations; arithmetic is preserved. The comparison layer uses Mathlib
-completeness to construct this interpretation, without putting completeness
-into the independent foundation or claiming a computable reverse conversion
-for every Mathlib real.
+The three named proofs are `CosinePrimitive.viaInequalities`,
+`CosinePrimitive.viaFTC`, and `CosinePrimitive.viaMathlib`. The first two are
+native; the last is defined only in the optional comparison package.
 
-Checked special-function bridges identify the existing rectangle/geometric
-arctangent, pi and reciprocal pi, and the first-quadrant inverse-arctangent
-sine and cosine with Mathlib's definitions. The latter are proved for the
-same inverse-provider data required by the native functions; they do not
-replace the native algorithms or assume their comparison identities.
+The value bridges identify arctangent, pi, sine, and cosine with Mathlib's
+functions. The independent quadrature bridge integrates cellwise Lipschitz
+bounds and uses finite additivity to identify our actual cosine-sum program
+with Mathlib's interval integral. It does not borrow a native endpoint proof.
+The Mathlib primitive formula then supplies the third proof of exactly the
+same computational proposition, not a parallel result about different objects.
 
-The Mathlib-side cosine integral formula is checked. An independent bridge
-from the native quadrature program to Mathlib's interval integral is still
-needed before this can be counted as a third proof of the same native
-endpoint statement. Pointwise equality of integrands is not that bridge.
+Every valid RealRaw has a unique interpretation in Mathlib reals; equivalence
+and order are reflected by this interpretation. Its current implementation
+uses a supremum in the comparison layer. No universal computable reverse
+conversion from arbitrary Mathlib reals is claimed.
 
-## Compare the same proposition
+## Graph and measurements
 
-Fix the native domain, algorithm, and theorem statement. Native FTC,
-native finite inequalities, and a Mathlib route with proved representation
-bridges may then provide alternative terms of exactly that statement type.
-The blueprint should show one statement node, with labelled alternative
-proof routes converging on it. Keep the raw declaration-reference graph
-separate rather than creating artificial cycles between a statement and
-proof terms that mention it.
+The [three-proof blueprint](blueprint/three-proofs/README.md) has one theorem
+node with alternative proof routes converging on it. It uses ordinary
+blueprint theorem modals, with selected mathematical landmarks and hidden
+arithmetic helpers. Every contracted reference path is inspectable.
 
-Measure final proof size, prerequisites, shared material, and bridge costs
-separately. Measure numerical runtime separately from elaboration and kernel
-checking. State where Mathlib real completeness is used; axiom counts alone
-do not detect all uses of completeness or indicate mathematical strength.
-A short library application is not the whole cost of a comparison proof.
+The audit checks complete theorem-type equality, native Mathlib-independence,
+separation of the three proof routes, and absence of transitive sorryAx.
+Final proof-body size, native prerequisites, bridge declarations, Mathlib
+prerequisites, and Lean/other dependencies are reported separately. These
+counts are not measures of mathematical elegance or discovery difficulty.
+Axiom counts alone do not measure uses of completeness.
 
-A native theorem should still be evaluated by what its certificate supplies:
-
-```text
-domain -> stage algorithm -> validity -> finite estimate -> equivalence
-```
-
-The absence of a completed-real wrapper is not itself a defect. Conversely,
-a certificate for a particular native computation is not automatically a
-general classical theorem: its hypotheses and algorithm determine its scope.
-
-See [the build instructions and audit](comparison/README.md). The repository
-checks source boundaries and selected transitive theorem dependencies in the
-combined environment. The comparison package is permitted to import Mathlib;
-the native `ComputableAnalysis/` source tree is not.
+Native computable complex exponentials remain part of the project. The
+existing factorial-series complex-box computation at rational imaginary
+inputs is shown as an optional companion, not as Mathlib's exponential or
+as a premise of any of the three integral proofs.

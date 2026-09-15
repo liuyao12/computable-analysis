@@ -1,3 +1,4 @@
+import MathlibComparison.CosinePrimitive
 import MathlibComparison.RealModel
 import MathlibComparison.ArctanBridge
 import MathlibComparison.TrigonometryBridge
