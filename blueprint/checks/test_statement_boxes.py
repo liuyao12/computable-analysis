@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Browser regressions for standard blueprint boxes and route-sensitive Real fills."""
 from __future__ import annotations
-import argparse, functools, http.server, json, shutil, threading
+import argparse, functools, http.server, json, re, shutil, threading
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
@@ -36,14 +36,34 @@ def main():
         assert page.locator('#graph .node[data-foundation="mathlib"]').count()==6
         assert target().get_attribute('data-foundation')=='mixed'
         page.screenshot(path=str(args.screenshots/'dependency-backgrounds.png'),full_page=True)
-        # Every visible mathematical node must display a real Lean declaration.
+        def exact_code(record):
+            return (record['kind']+' '+record['name']+':\n'+record['type']+
+                (' :=\n'+record['value'] if record['value'] is not None else ''))
+        def assert_declaration_first(modal, record):
+            code=modal.locator('.bp-lean-code code')
+            assert code.text_content()==exact_code(record), record['name']
+            assert code.get_attribute('data-declaration')==record['name']
+            explanation=modal.locator('.bp-math-explanation')
+            assert not explanation.evaluate('(e)=>e.open')
+            assert not modal.locator('.thm_thmcontent').is_visible()
+            assert modal.locator('.bp-lean-panel').evaluate(
+                '(e)=>!!(e.compareDocumentPosition(e.parentElement.querySelector(".bp-math-explanation")) & Node.DOCUMENT_POSITION_FOLLOWING)')
+            bounds=modal.locator('.bp-lean-code').bounding_box()
+            assert 0 <= bounds['y'] < page.viewport_size['height']/2, bounds
+            assert modal.locator('.dep-modal-content').evaluate('(e)=>e.scrollTop')==0
+        def assert_plain_labels():
+            for item in page.locator('#graph .node text').all_text_contents():
+                assert not re.search(r'[=∫≃↔πⁱ₀ᵗ]|:=|[SCIA]\(', item), item
+        assert_plain_labels()
+        # Every node opens directly on exported Lean text, with prose collapsed.
         for label in source:
             if label=='lem:c3-native-exp':continue
             node(label).click()
             modal=page.locator('[id="'+label+'_modal"]')
             modal.wait_for(state='visible')
             assert modal.get_attribute('role')=='dialog'
-            assert modal.locator('.bp-lean-code code').inner_text().strip()
+            assert_declaration_first(modal, source[label]['declarations'][0])
+            modal.locator('.bp-math-explanation > summary').click()
             assert modal.locator('.thm_thmcontent').is_visible()
             assert modal.locator('.bp-formal-source').get_attribute('href').startswith('https://github.com/')
             page.keyboard.press('Escape')
@@ -55,7 +75,8 @@ def main():
         select=modal.locator('select[aria-label="Lean declaration"]')
         for name in ['viaInequalities','viaFTC','viaMathlib']:
             select.select_option('ComputableAnalysis.CosinePrimitive.'+name)
-            assert name in modal.locator('.bp-lean-code').inner_text()
+            record=next(d for d in source['thm:c3-primitive']['declarations'] if d['name'].endswith('.'+name))
+            assert modal.locator('.bp-lean-code code').text_content()==exact_code(record)
         select.select_option('ComputableAnalysis.CosinePrimitive.Statement')
         page.screenshot(path=str(args.screenshots/'lean-statement-box.png'),full_page=True)
         modal.locator('.dep-closebtn').click();assert not modal.is_visible()
@@ -65,6 +86,12 @@ def main():
             page.wait_for_function('(n)=>document.querySelectorAll("#graph .node").length===n',arg=count,timeout=30000)
             page.wait_for_timeout(150)
             assert target().get_attribute('data-foundation')==status,(route,status)
+            assert_plain_labels()
+            target().click();modal.wait_for(state='visible')
+            name=source['thm:c3-primitive']['anchors'][int(route)] if route in ['0','1','2'] else 'ComputableAnalysis.CosinePrimitive.Statement'
+            record=next(d for d in source['thm:c3-primitive']['declarations'] if d['name']==name)
+            assert_declaration_first(modal,record)
+            page.keyboard.press('Escape')
             if route in ['0','1']:
                 assert page.locator('#graph .node[data-foundation="mathlib"]').count()==0
             if route=='companions':assert node('lem:c3-native-exp').get_attribute('data-foundation')=='native'
@@ -74,7 +101,7 @@ def main():
         page.reload(wait_until='domcontentloaded')
         page.wait_for_function("document.querySelectorAll('#graph .node[data-foundation]').length===16",timeout=60000)
         target().click();modal.wait_for(state='visible')
-        assert modal.locator('.bp-lean-code').is_visible()
+        assert_declaration_first(modal,source['thm:c3-primitive']['declarations'][0])
         assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+2')
         bounds=modal.locator('.dep-modal-content').bounding_box()
         assert bounds['x']>=0 and bounds['x']+bounds['width']<=392
@@ -83,7 +110,7 @@ def main():
         browser.close()
     server.shutdown()
     (args.screenshots/'results.json').write_text(json.dumps({'passed':True,'javascriptErrors':errors,
-        'checked':'all node statements; source links; mathematical text; proof selector; native/Mathlib/mixed fills; keyboard/close; mobile'},indent=2))
-    print('PASS: Lean statement boxes, precise Real backgrounds, route-sensitive target, and mobile/keyboard interactions')
+        'checked':'verbatim exported Lean types; declaration-first viewport; collapsed LaTeX prose; plain node titles; proof selector; native/Mathlib/mixed fills; keyboard/close; mobile'},indent=2))
+    print('PASS: exact Lean statements shown first, no node equations, Real backgrounds, and mobile/keyboard interactions')
 
 if __name__=='__main__':main()

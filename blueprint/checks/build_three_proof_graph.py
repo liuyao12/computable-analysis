@@ -18,23 +18,23 @@ TARGET='thm:c3-primitive'
 # LaTeX label, short visual title, actual Lean declaration anchors.
 PICKS=[
  ('def:c3-intervals','Nested rational intervals',[N+'RealRaw.Valid',N+'RealRaw.Equiv']),
- ('def:c3-arctan','A(u): geometric arctangent',[N+'CosinePrimitive.A',N+'ArctanGeometry.arctanGeom']),
- ('def:c3-pi','Our π := 4 A(1)',[N+'CosinePrimitive.pi']),
- ('lem:c3-inverse','Closed inverse of A',[N+'ClosedArctanInverse.provider']),
- ('def:c3-trig','Our S(x) and C(x)\nrational circle coordinates',[N+'CosinePrimitive.S',N+'CosineFTC.cosine']),
- ('def:c3-integral','I(t): finite cosine sums',[N+'CosinePrimitive.integral']),
+ ('def:c3-arctan','Geometric arctangent',[N+'CosinePrimitive.A',N+'ArctanGeometry.arctanGeom']),
+ ('def:c3-pi','Arctangent definition of pi',[N+'CosinePrimitive.pi']),
+ ('lem:c3-inverse','Closed arctangent inverse',[N+'ClosedArctanInverse.provider']),
+ ('def:c3-trig','Native sine and cosine',[N+'CosinePrimitive.S',N+'CosineFTC.cosine']),
+ ('def:c3-integral','Cosine integral computation',[N+'CosinePrimitive.integral']),
  ('lem:c3-direct','Finite geometric inequalities',[N+'CosineFTC.fixedMesh_overlaps_endpoint']),
  ('lem:c3-concavity','Concavity and secant data',[N+'GeometricSineConcavity.primitiveDerivativeData']),
  ('thm:c3-ftc','Native concave FTC',[N+'ConcaveFTC.integral_equiv_endpoint']),
- ('def:c3-real','Interpretation in Mathlib ℝ',[M+'Represents']),
- ('def:c3-mexp','Mathlib complex exp\nand real sin / cos',['Complex.exp','Real.sin','Real.cos']),
- ('def:c3-mpi','Mathlib π: a cosine zero',['Real.pi']),
- ('lem:c3-values','Value bridges: π, S, C',[M+'sine_represents',M+'cosine_represents',M+'piCircleArea_represents']),
- ('lem:c3-quadrature','Quadrature ↔ Mathlib integral',[M+'cosine_integral_represents']),
+ ('def:c3-real','Mathlib real interpretation',[M+'Represents']),
+ ('def:c3-mexp','Mathlib exponential\nand trigonometry',['Complex.exp','Real.sin','Real.cos']),
+ ('def:c3-mpi','Mathlib definition of pi',['Real.pi']),
+ ('lem:c3-values','Special-function value bridges',[M+'sine_represents',M+'cosine_represents',M+'piCircleArea_represents']),
+ ('lem:c3-quadrature','Quadrature-to-integral bridge',[M+'cosine_integral_represents']),
  ('lem:c3-mftc','Mathlib cosine primitive',[M+'mathlib_cosine_primitive']),
- (TARGET,'∫₀ᵗ C(x) dx ≃ S(t) / π\nONE STATEMENT · THREE PROOFS',[
+ (TARGET,'Cosine primitive\nOne statement, three proofs',[
      N+'CosinePrimitive.viaInequalities',N+'CosinePrimitive.viaFTC',N+'CosinePrimitive.viaMathlib']),
- ('lem:c3-native-exp','Companion: native computable eⁱᵀ\nfactorial-series complex boxes',[N+'RotationSeries.rotationExpRaw_valid'])]
+ ('lem:c3-native-exp','Native complex exponential\nCompanion computation',[N+'RotationSeries.rotationExpRaw_valid'])]
 COLORS=['#a45032','#326493','#7755a0']
 
 

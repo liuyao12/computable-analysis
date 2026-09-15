@@ -113,7 +113,7 @@ def enhance(site: Path, report_path: Path, statement_path: Path):
         data['views'][key] = g.string()
     data['nodeDetails'] = details
     data['info']['nodeDisplay'] = {
-        'version': 2, 'statementSource': 'Lean elaborated types (Meta.ppExpr)',
+        'version': 3, 'statementFirst': True, 'nodeLabelStyle': 'short prose titles; no equations', 'statementSource': 'Lean elaborated types (Meta.ppExpr)',
         'mathlibRealRoot': 'Real',
         'dependencyRule': 'Transitive stored type/body references; proof alternatives classified separately',
         'nativeFill': NATIVE, 'mathlibRealFill': MATHLIB}
@@ -137,7 +137,7 @@ def enhance(site: Path, report_path: Path, statement_path: Path):
       <span><i class="fill-native"></i>No Mathlib ℝ dependency</span>
       <span><i class="fill-mathlib"></i>Depends on Mathlib ℝ</span>
       <span><i class="fill-mixed"></i>Depends on the chosen proof</span>
-      <span class="legend-help">Green borders still indicate checked statements. Click any node for its statement and Lean code.</span>
+      <span class="legend-help">Green borders still indicate checked statements. Click any node for its exact Lean statement; LaTeX explanation is optional.</span>
     </div>'''
     text = text.replace('<p class="proof-note">', legend + '<p class="proof-note">', 1)
     page.write_text(text)
