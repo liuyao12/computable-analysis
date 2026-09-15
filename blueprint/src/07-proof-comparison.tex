@@ -1,0 +1,72 @@
+\chapter{Comparing Proofs and Foundations}\label{ch:proof-comparison}
+
+\begin{center}
+\href{proof-bench/index.html}{\textbf{Open the proof-size laboratory}}
+\end{center}
+
+A short final theorem can be an application of a large pre-existing library.
+Conversely, a reusable general theorem should not be charged from scratch at
+every application. The comparison therefore fixes one computational statement
+and measures several named derivations, rather than equating source length,
+import count, and mathematical simplicity.
+
+\section{Contracts before measurements}
+Every case records its exact computation, rational domain, and hypotheses.
+The exporter checks that the complete Lean theorem types of its alternatives
+are definitionally equal. It rejects a proof that calls its alternative, a
+Mathlib dependency in a route marked native, and transitive admitted proofs.
+These checks do not replace reviewing the mathematical contract: an extra
+assumption may make a statement uninteresting even if every proof has it.
+
+The initial registry contains the three cosine endpoint proofs, the three
+validity proofs of that same quadrature program, and two proofs of the sine
+value at zero. This is \emph{one calculus example and one calibration}, not a
+corpus-wide finding about the simplest calculus foundation.
+
+\section{Three explicit accounting baselines}
+Let $D(p)$ contain the declaration $p$ and the transitive references in its
+stored type and body. Let $T$ be the union of statement-prerequisite closures
+for the matched alternatives, and $H$ the intersection of their full closures.
+We display the full cost $D(p)$, the cost beyond the stated objects
+$D(p)\setminus T$, and the route-specific cost $D(p)\setminus H$.
+The removed baseline is declared explicitly; it has not become mathematically
+free. Display-only companion declarations are not measurement roots.
+
+Each set is partitioned into the native project, comparison bridges, Mathlib,
+Lean/Std, and other dependencies. We report stored expression-tree occurrences
+and distinct subexpressions within each body, with type-expression sizes
+separate. Named constants are not unfolded; duplicate references to the same
+declaration do not charge its body twice. Native-computation certificates and
+numeric literals remain atomic references, so trust reports accompany sizes.
+Available source-range unions are a formatting-dependent diagnostic with
+explicit coverage, not a substitute for expression measurements.
+
+\section{Reuse over a corpus}
+For a route applied to ordered cases $p_1,\ldots,p_k$, the accumulated library
+is $U_k=\bigcup_{i\le k}D(p_i)$. Its incremental cost at case $k$ is
+$U_k\setminus U_{k-1}$. The final union is order-independent; marginal costs
+are not. The first live example accumulates cosine identity and validity,
+without counting them as two unrelated calculus examples.
+
+The predeclared next families are polynomial FTC uniformly in degree,
+arctangent-kernel integration on rational subintervals, the actual sine
+secant derivative, square-root inversion and differentiation away from zero,
+global rational-angle addition identities, exponential integration, computable
+complex exponential, and linear ODE solution/uniqueness. Their statuses remain
+planned until paired proofs and bridges pass the same gates. Varying a degree
+or endpoint must not manufacture a collection of apparently independent wins.
+
+\section{What a smaller footprint would establish}
+A smaller used formal library for a fixed contract is evidence of a narrower
+dependency footprint, not a proof of conceptual minimality. The native route
+uses explicit rational programs and finite invariants; Mathlib supplies much
+broader real analysis. The computational target representation also places
+bridge work on the Mathlib route, which is why bridge cost is separate.
+
+Both use the same Lean kernel. Avoiding the completed real type does not imply
+absence of ordinary Lean axioms or native-computation assumptions. Nor does
+reaching Mathlib's real type count how many mathematical completeness theorems
+are used. Compare domains, regularity hypotheses, effectiveness, theorem reuse,
+trust, and runtime alongside code size. Kernel timing, elaboration timing, and
+numerical execution timing are separate future measurements, not inferred
+from the expression counts on this page.

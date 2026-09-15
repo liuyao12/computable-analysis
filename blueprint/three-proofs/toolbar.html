@@ -1,0 +1,14 @@
+<section class="proof-controls" aria-label="Proof comparison controls">
+<p><strong>Same statement, three independently checked proofs.</strong> Rational 0 ≤ t ≤ ½. Click a broad node for its grouped, exact Lean declarations. Click an edge to inspect the actual reference path it abbreviates.</p>
+<div class="proof-buttons" role="group" aria-label="Select a proof route">
+<button data-view="all" class="active">All three routes</button><button data-view="0">Direct inequalities</button><button data-view="1">Native FTC</button><button data-view="2">Mathlib + bridges</button><button data-view="companions">Include native exponential</button><button id="proof-fit">Reset zoom</button>
+</div>
+<p class="proof-lanes-note">ℚ is the shared starting point. Native computations and Mathlib real numbers form separate foundations; the three proof lanes converge on one conclusion. Shared constructions are shown once. Syntax colors do not change the Lean text or its dependency backgrounds.</p>
+<p class="proof-note">Boxes are definitions; ellipses are selected lemmas and theorems. Arrows point from prerequisites toward their use. The three proof routes are alternatives, not joint requirements. Low-level arithmetic and generated helpers are hidden.</p>
+<details><summary>Measurements, trust boundary, and source revision</summary>
+<p>Source <code>SOURCE_SHA</code>. <span id="proof-checks"></span> Final-body counts measure only the last application. Closure counts include stored type/body references, each declaration once. Generated helpers are included. A Mathlib prerequisite is not charged as newly written code, nor treated as free. Timings from a different theorem are not reused.</p>
+<div class="proof-table"><table><thead><tr><th>Proof</th><th>Final body tree / shared nodes</th><th>Native declarations</th><th>Bridge declarations</th><th>Mathlib declarations</th><th>Lean / other</th><th>Axioms</th></tr></thead><tbody id="proof-metrics"></tbody></table></div>
+<p><a href="three-proofs/summary.json">Measurements and source fingerprints</a> · <a href="three-proofs/references.json.gz">Full reference graph (gzip)</a> · <a href="three-proofs/witnesses.json">Displayed edge witnesses</a> · <a href="ch-three-cosine-proofs.html">Read the blueprint chapter</a></p>
+<p>The native complex exponential is a separate computable program, currently certified here at rational imaginary inputs. It is not Mathlib's exponential and is not a premise of any of the three proofs.</p>
+</details></section>
+<div id="proof-edge-dialog" class="proof-edge-dialog" hidden><button id="proof-edge-close">Close</button><h2>Actual reference-path witnesses</h2><div id="proof-edge-content"></div></div>

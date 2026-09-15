@@ -1,0 +1,114 @@
+name: Three-proof blueprint
+on:
+  push:
+    branches: [work/cosine-basepoint]
+    paths:
+      - 'ComputableAnalysis/**'
+      - 'comparison/**'
+      - 'blueprint/**'
+      - '.github/workflows/three_proof_blueprint.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: three-proof-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+      - uses: actions/cache@v5
+        with:
+          path: .lake
+          key: three-proof-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            three-proof-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+            cosine-ftc-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+            geometric-sine-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+      - uses: actions/cache@v5
+        with:
+          path: comparison/.lake
+          key: comparison-package-${{ hashFiles('comparison/lean-toolchain', 'comparison/lakefile.toml') }}-${{ github.sha }}
+          restore-keys: |
+            comparison-package-${{ hashFiles('comparison/lean-toolchain', 'comparison/lakefile.toml') }}-
+      - name: Build native basepoint proofs and exponential companion
+        run: |
+          lake build ComputableAnalysis.CosinePrimitive ComputableAnalysis.RotationSeries ComputableAnalysis.TrigonometricReadback
+          python3 blueprint/checks/check_two_cosine_proofs.py
+          python3 comparison/checks/check_boundary.py
+      - name: Resolve pinned comparison imports
+        working-directory: comparison
+        env:
+          MATHLIB_NO_CACHE_ON_UPDATE: '1'
+        run: |
+          lake update
+          git diff --exit-code -- lake-manifest.json
+          test "$(git -C .lake/packages/mathlib rev-parse HEAD)" = 51e6992efd06126df61a496bebf8f49482a4e129
+          lake exe cache get Mathlib.Analysis.SpecialFunctions.Integrals.Basic Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds Mathlib.Tactic
+      - name: Build all three proofs in one environment
+        working-directory: comparison
+        run: lake build MathlibComparison MathlibComparison.ProofBenchExamples
+      - name: Check identical statement and independent proof routes
+        working-directory: comparison
+        run: |
+          set -euo pipefail
+          mkdir -p reports
+          lake env lean checks/ThreeProofsAudit.lean | tee reports/three-proofs-audit.log
+          lake env lean checks/ExportBlueprintStatements.lean
+          lake env lean checks/ExportProofBench.lean | tee reports/proof-bench-audit.log
+      - name: Install blueprint tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y graphviz libgraphviz-dev pkg-config poppler-utils ghostscript dvisvgm texlive-latex-base texlive-latex-extra texlive-pictures
+          python -m pip install -r blueprint/requirements.txt
+      - name: Render blueprint and test the three-route graph
+        run: |
+          leanblueprint web
+          python3 blueprint/checks/build_three_proof_graph.py
+          python3 blueprint/checks/enhance_blueprint_nodes.py
+          python3 blueprint/checks/add_proof_strategy.py
+          python3 blueprint/checks/audit_blueprint_definitions.py
+          python3 blueprint/checks/build_proof_bench.py
+          python3 blueprint/checks/test_proof_bench.py
+      - name: Test Lean statement boxes and Mathlib Real shading
+        run: |
+          python -m pip install playwright
+          node blueprint/checks/test_lean_highlight.cjs
+          python3 blueprint/checks/test_statement_boxes.py
+          python3 blueprint/checks/test_proof_bench_browser.py
+          python3 blueprint/checks/test_definition_panels.py
+      - name: Retain verified sources and audit
+        run: |
+          git archive --format=tar.gz HEAD > /tmp/three-proof-sources.tar.gz
+          python3 - <<'PY'
+          import json, os, pathlib
+          p = pathlib.Path('blueprint/web/three-proofs/summary.json')
+          data = json.loads(p.read_text())
+          assert data['sourceCommit'] == os.environ['GITHUB_SHA']
+          assert all(data['checks'].values())
+          print('Verified snapshot', data['sourceCommit'])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: three-proof-measurements
+          path: |
+            comparison/reports
+            blueprint/web/three-proofs
+            blueprint/web/proof-bench
+            /tmp/three-proof-sources.tar.gz
+          retention-days: 30
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: blueprint/web
+          retention-days: 7

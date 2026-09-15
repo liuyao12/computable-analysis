@@ -1,0 +1,20 @@
+
+/* A broad mathematical node contains a small, curated collection of statements. */
+#statements .bp-group-count{margin:0 0 9px;color:#53645a;font:12px/1.5 system-ui}
+#statements .bp-group-navigation{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 16px;padding:0;border:0;font:12px/1.5 system-ui}
+#statements .bp-group-link{color:#345e82;text-decoration:underline;text-underline-offset:3px}
+#statements .bp-group-heading{margin:18px 0 10px;color:#304c3c;font:600 14px/1.5 system-ui}
+#statements .bp-declaration-group:first-of-type .bp-group-heading{margin-top:0}
+#statements .bp-declaration-card{min-width:0;margin:0 0 14px;padding:12px;border:1px solid #cedccf;border-radius:4px;background:#fbfdfa}
+#statements .bp-declaration-card[data-foundation="mathlib"]{border-color:#d6c2e5;background:#fbf7fe}
+#statements .bp-declaration-card.selected-route{outline:2px solid #577897;outline-offset:1px}
+#statements .bp-declaration-card .bp-lean-toolbar{margin:0 0 8px}
+#statements .bp-declaration-card h4{min-width:0;margin:0;color:#304437;font:600 13px/1.5 ui-monospace,monospace;overflow-wrap:anywhere}
+#statements .bp-declaration-card pre.bp-lean-code{max-height:32vh;margin:0 0 8px;padding:12px;border-left-width:2px;font-size:12px}
+#statements .bp-declaration-card[data-foundation="mathlib"] pre.bp-lean-code{background:#f5f0fa;border-color:#ccb2df;color:#3d2b50}
+#statements .bp-card-footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font:11px/1.5 system-ui}
+#statements .bp-card-footer .foundation-badge{margin:0;padding:2px 7px;font-size:10px}
+#statements .bp-route-badge{padding:2px 7px;border:1px solid #8babc3;border-radius:3px;background:#eef4f8;color:#345777;font-size:10px}
+#statements .bp-declaration-card .bp-dependency-details{margin-top:8px}
+#statements .bp-companion-note{margin-bottom:0;font-size:11px}
+@media(max-width:700px){#statements .bp-group-navigation{gap:6px 12px;font-size:11px}#statements .bp-declaration-card{padding:9px}#statements .bp-declaration-card pre.bp-lean-code{padding:9px;font-size:11px;max-height:36vh}#statements .bp-declaration-card h4{font-size:12px}#statements .bp-declaration-card .bp-copy{flex-shrink:0}}

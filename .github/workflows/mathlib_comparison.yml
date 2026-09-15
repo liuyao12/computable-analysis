@@ -1,0 +1,85 @@
+name: Optional Mathlib comparison
+on:
+  push:
+    branches: [main, work/cosine-basepoint]
+    paths:
+      - 'comparison/**'
+      - 'ComputableAnalysis/**'
+      - 'ComputableAnalysis.lean'
+      - 'lakefile.toml'
+      - 'lake-manifest.json'
+      - 'lean-toolchain'
+      - '.github/workflows/mathlib_comparison.yml'
+  pull_request:
+    paths:
+      - 'comparison/**'
+      - 'ComputableAnalysis/**'
+      - 'ComputableAnalysis.lean'
+      - 'lakefile.toml'
+      - 'lake-manifest.json'
+      - 'lean-toolchain'
+      - '.github/workflows/mathlib_comparison.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mathlib-comparison-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  bridge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+      - uses: actions/cache/restore@v5
+        with:
+          path: .lake
+          key: cosine-ftc-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            cosine-ftc-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+            geometric-sine-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+      - uses: actions/cache@v5
+        with:
+          path: comparison/.lake
+          key: comparison-package-${{ hashFiles('comparison/lean-toolchain', 'comparison/lakefile.toml') }}-${{ github.sha }}
+          restore-keys: |
+            comparison-package-${{ hashFiles('comparison/lean-toolchain', 'comparison/lakefile.toml') }}-
+      - name: Check the one-way source boundary
+        run: |
+          set -euo pipefail
+          python3 comparison/checks/check_boundary.py | tee /tmp/comparison-boundary.json
+      - name: Resolve the pinned optional package
+        working-directory: comparison
+        env:
+          MATHLIB_NO_CACHE_ON_UPDATE: '1'
+        run: |
+          lake update
+          git diff --exit-code -- lake-manifest.json
+          test "$(git -C .lake/packages/mathlib rev-parse HEAD)" = 51e6992efd06126df61a496bebf8f49482a4e129
+          lake exe cache get Mathlib.Analysis.SpecialFunctions.Integrals.Basic Mathlib.Tactic
+      - name: Build actual comparison theorems
+        working-directory: comparison
+        run: |
+          set -euo pipefail
+          lake build MathlibComparison 2>&1 | tee /tmp/comparison-build.log
+      - name: Check examples and transitive dependencies
+        working-directory: comparison
+        run: |
+          set -euo pipefail
+          lake env lean checks/ComparisonAudit.lean 2>&1 | tee /tmp/comparison-audit.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mathlib-comparison-audit
+          path: |
+            /tmp/comparison-boundary.json
+            /tmp/comparison-build.log
+            /tmp/comparison-audit.log
+            comparison/lake-manifest.json
+          retention-days: 30

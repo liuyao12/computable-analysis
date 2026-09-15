@@ -1,0 +1,267 @@
+\chapter{One Cosine Primitive, Three Proofs}\label{ch:three-cosine-proofs}
+
+\begin{center}
+\href{cosine-primitive-graph.html}{\textbf{Open the focused three-proof dependency graph}}
+\end{center}
+
+The theorem occurs once. Three alternative derivations end at that node:
+finite inequalities, native concave FTC, and Mathlib integration with
+representation bridges. The graph selects mathematical milestones, not every
+helper declaration. A shared rational root branches into native interval
+computations and Mathlib real numbers. Three labeled proof lanes keep the
+arguments apart; genuine common constructions are shown once. All three
+complete Lean theorem types are checked to be definitionally identical.
+
+\begin{definition}[The shared rational numbers]\label{def:c3-rationals}
+\lean{Rat,Rat.num,Rat.den,Rat.normalize,Rat.add,Rat.mul}\leanok
+Both foundations start with Lean's exact rational type \code{Rat}, written
+$\mathbb{Q}$. It supplies normalized fractions and exact rational arithmetic.
+Our finite interval algorithms do not need Mathlib's completed real field.
+\end{definition}
+
+\begin{definition}[Mathlib's real-number construction]\label{def:c3-mreal}
+\uses{def:c3-rationals}
+\lean{Real,Real.ofCauchy,CauSeq.Completion.Cauchy,Real.cauchy,Real.mk,Real.mk_eq}\mathlibok
+Mathlib's real type is the Cauchy completion of these same rationals.
+\code{Real.mk} maps a rational Cauchy sequence to its real value, and
+\code{Real.mk\_eq} identifies equality with equivalence of representatives.
+This is distinct from the comparison interpretation below, which relates
+our nested intervals to an already constructed Mathlib real.
+\end{definition}
+
+\begin{definition}[Rational interval computations]\label{def:c3-intervals}
+\uses{def:c3-rationals}
+\lean{ComputableAnalysis.RealRaw.Valid,ComputableAnalysis.RealRaw.Equiv}\leanok
+A valid raw real is a program producing ordered nested rational intervals
+whose widths tend to zero. Equivalence means stagewise overlap. Arithmetic
+and finite intersections are rational computations; equivalence becomes
+transitive for valid representatives.
+\end{definition}
+
+\begin{definition}[Arctangent before trigonometry]\label{def:c3-arctan}
+\uses{def:c3-intervals}
+\lean{ComputableAnalysis.CosinePrimitive.A,ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRaw_equiv_arctanGeom}\leanok
+For $0\le u\le1$, use the geometric arctangent program $A(u)$, with its
+proved equivalence to the rational rectangle computation
+\[
+ A(u)\simeq\int_0^u\frac{dv}{1+v^2}.
+\]
+The integrand is rational; no sine or cosine is used to construct $A$.
+\end{definition}
+
+\begin{definition}[The arctangent presentation of pi]\label{def:c3-pi}
+\uses{def:c3-arctan}
+\lean{ComputableAnalysis.CosinePrimitive.pi,ComputableAnalysis.CosinePrimitive.pi_compute}\leanok
+Define the program $\pi:=4A(1)$. It agrees stage by stage with the existing
+circle-area presentation. The reciprocal computation is certified positive;
+other valid pi presentations can be transported through this equivalence.
+\end{definition}
+
+\begin{lemma}[The closed inverse provider]\label{lem:c3-inverse}
+\uses{def:c3-arctan}
+\lean{ComputableAnalysis.ClosedArctanInverse.provider}\leanok
+An explicit finite inverse search on the unit-slope chart computes, for
+rational $0\le x\le1/2$, a parameter $u(x)$ in $[0,1]$ with
+$A(u(x))\simeq2xA(1)$. No caller-supplied inverse provider remains.
+\end{lemma}
+\begin{proof}\leanok
+Rational bisection of a finite clock, widening, and prefix intersection give
+nested source boxes of width at most $56/2^n$. A finite forward-error estimate
+identifies their arctangent with the target. The grouped Lean declarations
+show the evaluator, range, convergence, and forward-equation certificates.
+\end{proof}
+
+\begin{definition}[Our sine and cosine]\label{def:c3-trig}
+\uses{lem:c3-inverse,def:c3-pi}
+\lean{ComputableAnalysis.CosinePrimitive.S,ComputableAnalysis.CosinePrimitive.C}\leanok
+Rational circle coordinates of the inverse parameter define
+\[
+ S(x)=\frac{2u(x)}{1+u(x)^2},\qquad C(x)=\frac{1-u(x)^2}{1+u(x)^2}.
+\]
+These formulas denote interval algorithms. The input is a rational normalized
+angle. Their agreement with conventional sine and cosine is a separate
+representation theorem, not their definition.
+\end{definition}
+
+\begin{definition}[The fixed cosine integral program]\label{def:c3-integral}
+\uses{def:c3-trig,def:c3-intervals}
+\lean{ComputableAnalysis.CosinePrimitive.integral}\leanok
+Let $R_{k,n}$ be the cosine left rectangle sum on $k+1$ equal cells, with
+samples evaluated at stage $n$. For rational $0\le t\le1/2$, define
+\[
+ I(t)_n=\bigcap_{k=0}^{n}
+ \operatorname{expand}\left(R_{k,n},\frac{4000t^2}{k+1}\right).
+\]
+The program reads cosine samples, not sine endpoints. Retaining old meshes
+allows each fixed finite sample set to converge without an assumed uniform
+rate for newly introduced inputs. The error constant is conservative.
+\end{definition}
+
+\begin{lemma}[Direct finite inequalities]\label{lem:c3-direct}
+\uses{def:c3-trig,def:c3-arctan}
+\lean{ComputableAnalysis.GeometricSineDirectBounds.positive_increment_error,ComputableAnalysis.CosineFTC.fixedMesh_overlaps_endpoint}\leanok
+For fixed positive rational $h$, sufficiently late rational selections satisfy
+$|s_1-s_0-hpc|\le4000h^2$. Finite telescoping and a reciprocal-pi corner
+compare each widened cosine sum with sine endpoints.
+\end{lemma}
+\begin{proof}\leanok
+Use rational circle and clock residual identities, not a derivative or FTC.
+Choose a common stage for finitely many cells; telescope rational selections
+and transport to arbitrary stages by nesting. The value $S(0)\simeq0$
+removes the lower endpoint in the basepoint statement.
+\end{proof}
+
+\begin{lemma}[Concavity and supporting secants]\label{lem:c3-concavity}
+\uses{def:c3-trig,def:c3-arctan}
+\lean{ComputableAnalysis.GeometricSineConcavity.primitive_concave,ComputableAnalysis.GeometricSineConcavity.primitiveDerivativeData}\leanok
+For $P=S/\pi$ and rational $x<y$ in the chart,
+\[
+ C(y)\preceq\frac{P(y)-P(x)}{y-x}\preceq C(x).
+\]
+The geometric proof supplies exact concavity and a Lipschitz constant $32$
+for the supporting slope computation. Neither derivative nor integral
+identities are assumed to prove curvature.
+\end{lemma}
+\begin{proof}\leanok
+Compare rational circle chords with tangent slopes, then use the arctangent
+clock inequalities. Remove arbitrary rational slack by validity and nesting.
+The same data proves a valid sine-only secant derivative at interior points;
+that companion theorem is not itself a premise of the FTC.
+\end{proof}
+
+\begin{theorem}[Native concave FTC]\label{thm:c3-ftc}
+\uses{def:c3-intervals}
+\lean{ComputableAnalysis.ConcaveFTC.integral_equiv_endpoint}\leanok
+A concave primitive with valid supporting secants and a quantitative slope
+bound has its derivative integral identified with its endpoint difference.
+The certificate contains no assumed integral equivalence.
+\end{theorem}
+\begin{proof}\leanok
+When the relevant source boxes have width at most $\tau$, the local estimate
+is $|F_n^-(y)-F_n^-(x)-hD_n^-(x)|\le Kh^2+(1+h)\tau$.
+For a fixed finite mesh, select a common stage, telescope, remove arbitrary
+positive slack, and intersect the resulting enclosures.
+\end{proof}
+
+\begin{definition}[Interpretation in Mathlib reals]\label{def:c3-real}
+\uses{def:c3-intervals,def:c3-mreal}
+\lean{MathlibComparison.Represents,MathlibComparison.equiv_of_represents}\leanok
+The optional comparison sets $\operatorname{Represents}(X,r)$ to mean that
+every rational output box of $X$ contains the Mathlib real $r$. Two programs
+representing the same value overlap at every stage. The current general
+interpretation uses a supremum in the comparison layer; the native algorithms
+do not acquire this dependency.
+\end{definition}
+
+\begin{definition}[Mathlib exponential and trigonometry]\label{def:c3-mexp}
+\uses{def:c3-mreal}
+\lean{Complex.exp,Real.sin,Real.cos}\mathlibok
+Mathlib constructs its complex exponential independently of our evaluator,
+then defines sine and cosine from exponentials. These are target functions
+of the representation bridge, not replacements for our programs.
+\end{definition}
+
+\begin{definition}[Mathlib pi]\label{def:c3-mpi}
+\uses{def:c3-mexp}
+\lean{Real.pi}\mathlibok
+Mathlib defines pi as twice a chosen cosine zero in $[1,2]$.
+The identity $\arctan(1)=\pi/4$ bridges this to our $4A(1)$ without
+unfolding that choice in every subsequent comparison.
+\end{definition}
+
+\begin{lemma}[Pi, sine, and cosine value bridges]\label{lem:c3-values}
+\uses{def:c3-real,def:c3-trig,def:c3-pi,def:c3-mexp,def:c3-mpi}
+\lean{MathlibComparison.piCircleArea_represents,MathlibComparison.sine_represents,MathlibComparison.cosine_represents}\leanok
+Our pi represents Mathlib pi. For every rational $x$ in the chart, $S(x)$
+represents $\operatorname{Real.sin}(\operatorname{Real.pi}\,x)$, while $C(x)$
+represents the corresponding Mathlib cosine.
+\end{lemma}
+\begin{proof}\leanok
+Compare arctangent rectangles with Mathlib's rational-kernel integral.
+Interpret the inverse through convergent rational approximations, then apply
+double-arctangent coordinate identities. Neither native endpoint proof is used.
+\end{proof}
+
+\begin{lemma}[The actual quadrature represents the Mathlib integral]\label{lem:c3-quadrature}
+\uses{lem:c3-values,def:c3-integral,def:c3-real}
+\lean{MathlibComparison.cosine_integral_represents}\leanok
+Our $I(t)$ represents Mathlib's interval integral of
+$g(x)=\operatorname{Real.cos}(\operatorname{Real.pi}\,x)$ from zero to $t$.
+\end{lemma}
+\begin{proof}\leanok
+Each finite rational-box sum contains the corresponding real sampled sum.
+The estimate $|g(x)-g(y)|\le4|x-y|$ bounds the rectangle error on $m$ cells
+by $4t^2/m$, below our radius $4000t^2/m$. Integrate bounds on each cell
+and add over the partition. No primitive theorem is used at this step.
+Every expanded enclosure, hence its finite intersection, contains the same
+Mathlib integral. This requires more than agreement at rational inputs alone.
+\end{proof}
+
+\begin{lemma}[Mathlib cosine primitive]\label{lem:c3-mftc}
+\uses{def:c3-mexp,def:c3-mpi}
+\lean{MathlibComparison.mathlib_cosine_primitive}\leanok
+For every Mathlib real $t$,
+\[
+ \int_0^t\operatorname{Real.cos}(\operatorname{Real.pi}\,x)\,dx
+ =\frac{\operatorname{Real.sin}(\operatorname{Real.pi}\,t)}{\operatorname{Real.pi}}.
+\]
+\end{lemma}
+\begin{proof}\leanok
+Apply Mathlib's cosine integral and linear change of variable. This becomes
+a proof of our computational statement only with both bridges above.
+\end{proof}
+
+\begin{theorem}[One basepoint statement]\label{thm:c3-primitive}
+\uses{def:c3-integral,def:c3-trig,def:c3-pi}
+\lean{ComputableAnalysis.CosinePrimitive.Statement}\leanok
+For rational $0\le t\le1/2$,
+\[
+ \boxed{\int_0^t C(x)\,dx\simeq\frac{S(t)}{\pi}.}
+\]
+The left side is the fixed cosine-sum program, not primitive evaluation.
+The right side independently multiplies sine by reciprocal pi.
+\end{theorem}
+\begin{proof}[Three alternative proofs]
+\lean{ComputableAnalysis.CosinePrimitive.viaInequalities,ComputableAnalysis.CosinePrimitive.viaFTC,ComputableAnalysis.CosinePrimitive.viaMathlib}\leanok
+\uses{lem:c3-direct,lem:c3-concavity,thm:c3-ftc,lem:c3-quadrature,lem:c3-values,lem:c3-mftc}
+\emph{Direct inequalities:} use the finite residual and telescope, then
+$S(0)\simeq0$. \emph{Native FTC:} instantiate the concave theorem with
+$P=S/\pi$ and $D=C$, and remove the lower endpoint.
+\emph{Mathlib:} combine the independent quadrature correspondence, primitive
+identity, and value bridges. Both sides represent the same real, so their
+rational boxes overlap.
+
+These are alternatives, not joint prerequisites. Stock blueprint metadata
+stores one proof attachment per statement; this block records their union,
+while the focused graph retains separate routes. The complete theorem types
+and proof separation are audited. The native routes have no Mathlib
+references; the third has an independent quadrature validity proof.
+\end{proof}
+
+\begin{lemma}[Companion: a native computable complex exponential]\label{lem:c3-native-exp}
+\uses{def:c3-intervals}
+\lean{ComputableAnalysis.RotationSeries.rotationExpRaw_valid}\leanok
+The project has a factorial-series complex-box computation for $e^{iT}$ at
+rational $T$, with proved validity and explicit tail bounds. It is native
+and computable, not Mathlib's exponential.
+\end{lemma}
+\begin{proof}\leanok
+Finite rational complex sums and factorial tail enclosures supply the
+certificate. This is not a premise of the three integral proofs. Extension
+to arbitrary represented complex inputs and identification with geometric
+trigonometry are separate tasks, not asserted here. The graph displays this
+companion only on request.
+\end{proof}
+
+\section{Display and quantitative comparison}
+The final application, native prerequisites, comparison bridges, and Mathlib
+prerequisites are measured separately. Stored types and proof bodies, not
+import lists, determine dependencies. Explicit shared constructions remain
+visible above the separate proof lanes; visual separation does not pretend
+that the mathematical foundations are disjoint.
+
+Each broad node opens grouped exact Lean declarations. Lexical syntax colors
+highlight keywords, declaration names, types, literals, and operators without
+changing a single character of the displayed or copied statement. Node and
+card backgrounds separately indicate dependence on Mathlib's real type.
+The one conclusion has three proof terms; only the third uses Mathlib reals.
