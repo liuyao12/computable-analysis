@@ -1,7 +1,7 @@
 name: Publish verified proof blueprint
 
-# Publish only the pinned proof-checked and browser-tested static artifact.
-# No theorem branch is merged and Pages permissions/protections are unchanged.
+# Publish only a pinned, proof-checked and browser-tested static artifact.
+# The theorem branch is not merged; Pages permissions/protections are unchanged.
 on:
   push:
     branches: [main]
@@ -16,15 +16,15 @@ concurrency:
   group: pages-verified-proof-publication
   cancel-in-progress: false
 env:
-  SOURCE_RUN: '34936578264'
-  SOURCE_SHA: '8903da391c3915ab17095d8f520b4f90d28aeb53'
+  SOURCE_RUN: '34945179551'
+  SOURCE_SHA: '5bfdda093c7e59d10ab0a687b2d077583081a6b7'
 
 jobs:
   prepare:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Verify source proofs, benchmark accounting, and browser regressions
+      - name: Verify proof builds, definition audit, and browser regressions
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -32,10 +32,10 @@ jobs:
           import json, os, time, urllib.request
           base = 'https://api.github.com/repos/' + os.environ['GITHUB_REPOSITORY']
           def get(path):
-              req = urllib.request.Request(base + path, headers={
+              request = urllib.request.Request(base + path, headers={
                   'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
                   'Accept': 'application/vnd.github+json'})
-              with urllib.request.urlopen(req, timeout=30) as response:
+              with urllib.request.urlopen(request, timeout=30) as response:
                   return json.load(response)
           run_id = os.environ['SOURCE_RUN']
           for attempt in range(180):
@@ -45,7 +45,7 @@ jobs:
               if run['status'] == 'completed':
                   break
               time.sleep(5)
-          assert run['conclusion'] == 'success', 'Source run must complete successfully'
+          assert run['conclusion'] == 'success', 'Source run must finish successfully'
           job = next(j for j in get('/actions/runs/' + run_id + '/jobs')['jobs'] if j['name'] == 'verify')
           assert job['conclusion'] == 'success'
           steps = {s['name']: s['conclusion'] for s in job['steps']}
@@ -55,7 +55,7 @@ jobs:
                        'Render blueprint and test the three-route graph',
                        'Test Lean statement boxes and Mathlib Real shading']:
               assert steps[step] == 'success', step
-          print('Verified independent proof roots, full size export, accounting tests, strategy panels and browser controls')
+          print('Verified proof roots, readback equations, independent definitions, graph bundles and browser tests')
           PY
       - uses: actions/download-artifact@v8
         with:
@@ -63,56 +63,58 @@ jobs:
           run-id: ${{ env.SOURCE_RUN }}
           github-token: ${{ github.token }}
           path: downloaded
-      - name: Inspect the benchmark and guided statements
+      - name: Inspect all bundles and the independent definitions
         run: |
           python3 - <<'PY'
           import json, os, pathlib, re, tarfile
           with tarfile.open('downloaded/artifact.tar') as archive:
               archive.extractall('site', filter='data')
           root = pathlib.Path('site')
-          summary = json.loads((root/'three-proofs/summary.json').read_text())
-          details = json.loads((root/'three-proofs/node-details.json').read_text())
-          exported = {d['name']: d for d in json.loads((root/'three-proofs/blueprint-statements.json').read_text())['declarations']}
-          bench = json.loads((root/'proof-bench/data.json').read_text())
+          def load(path): return json.loads((root/path).read_text())
+          summary = load('three-proofs/summary.json')
+          audit = load('three-proofs/definition-audit.json')
+          details = load('three-proofs/node-details.json')
+          exported = {d['name']: d for d in load('three-proofs/blueprint-statements.json')['declarations']}
+          bench = load('proof-bench/data.json')
           sha = os.environ['SOURCE_SHA']
-          assert summary['sourceCommit'] == bench['sourceCommit'] == sha
+          assert summary['sourceCommit'] == audit['sourceCommit'] == bench['sourceCommit'] == sha
           assert all(summary['checks'].values()) and all(bench['checks'].values())
+          assert audit['passed'] and audit['nodesAudited'] == len(details) == 19
+          assert audit['piUsesArctanNotCosine'] and audit['visibleAnchorsCovered']
+          assert audit['closedInverseRawHasNoPiEvaluator']
+          assert all(c['noEndpointTheorem'] and c['noMathlib'] for c in audit['definitions'])
           display = summary['nodeDisplay']
           assert display['version'] == 5 and display['groupedStatements'] and display['statementFirst']
           assert display['rationalRoot'] == 'Rat' and display['separateProofLanes']
           assert display['syntaxHighlighting'] == 'lossless Lean lexer'
-          assert display['strategyGuides'] and display['strategyNodes'] == len(details) == 19
           count = 0
           for item in details.values():
-              names = [name for g in item['groups'] for name in g['names']]
+              names = [name for group in item['groups'] for name in group['names']]
               assert names == [d['name'] for d in item['declarations']]
+              assert set(item['anchors']) <= set(names)
               assert set(item['strategy']['groups']) == {g['title'] for g in item['groups']}
-              assert item['strategy']['role'] and item['strategy']['summary']
               count += len(names)
               for d in item['declarations']:
                   assert all(d[k] == exported[d['name']][k] for k in ['name','kind','type','value'])
+                  assert d['ownerModule']
               assert not re.search(r'[=∫≃↔πⁱ₀ᵗ]|:=|[SCIA]\(', item['title'])
-          assert count == display['declarationOccurrences'] == 141
+          assert count == display['declarationOccurrences'] == 175
+          assert 'namespace' in details['def:c3-pi']['strategy']['summary']
+          assert 'return zero' in details['def:c3-trig']['strategy']['summary']
+          assert all(name in exported for name in audit['stageEquations'].values())
           target = details['thm:c3-primitive']
           assert target['classification'] == 'mixed'
           assert [bool(target['paths'][a]) for a in target['anchors']] == [False,False,True]
           assert len(bench['cases']) == 3
           assert sum(len(c['routes']) for c in bench['cases'].values()) == 8
-          assert set(bench['cases']['cosine-primitive']['routes']) == {'direct','ftc','mathlib'}
           for c in bench['cases'].values():
               for r in c['routes'].values():
                   assert 'sorryAx' not in r['axioms']
-                  for cost in r['sizes'].values():
-                      assert sum(o['declarations'] for o in cost['origins'].values()) == cost['declarations']
-                      assert sum(o['bodyDag'] for o in cost['origins'].values()) == cost['bodyDag']
-          assert len(bench['roadmap']) == 8 and all(c['status'] == 'planned' for c in bench['roadmap'])
-          assert all(p['order'] == ['cosine-primitive','cosine-validity'] for p in bench['portfolio'].values())
           graph = (root/'cosine-primitive-graph.html').read_text()
           assert graph.count('id="thm:c3-primitive_modal"') == 1
-          assert 'bp-strategy' in graph and 'bp-node-navigation' in graph
-          assert 'LeanSnippet.highlight(code)' in graph and 'proof-bench/' in graph
-          assert (root/'ch-proof-comparison.html').is_file()
-          assert 'proof-bench/' in (root/'index.html').read_text()
+          assert 'bp-provenance' in graph and 'bp-namespace' in graph
+          assert 'LeanSnippet.highlight(code)' in graph
+          assert (root/'ch-definition-audit.html').is_file()
           def redirect(path, target):
               path.parent.mkdir(parents=True, exist_ok=True)
               path.write_text('<!doctype html><html><head><meta charset="utf-8">'
@@ -121,7 +123,7 @@ jobs:
                   '<p>Open <a href="' + target + '">the updated dependency graph</a>.</p></body></html>')
           redirect(root/'proof-comparison/index.html', '../cosine-primitive-graph.html')
           redirect(root/'ch-two-cosine-proofs.html', 'ch-three-cosine-proofs.html')
-          print('Validated 141 guided Lean statements and eight measured proof declarations at', sha)
+          print('Validated 175 exact declarations, all 19 bundles, definition independence and unchanged proof roots:', sha)
           PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v5
@@ -138,7 +140,7 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify live strategies and proof-size laboratory
+      - name: Verify live definition audit and exact stages
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
@@ -147,36 +149,32 @@ jobs:
           sha = os.environ['SOURCE_SHA']
           base = os.environ['PAGE_URL'].rstrip('/')
           def get(path):
-              with urllib.request.urlopen(base+path+'?source='+sha,timeout=20) as response:
+              with urllib.request.urlopen(base+path+'?source='+sha, timeout=20) as response:
                   return json.load(response)
           last = None
           for attempt in range(12):
               try:
                   summary = get('/three-proofs/summary.json')
-                  bench = get('/proof-bench/data.json')
-                  assert summary['sourceCommit'] == bench['sourceCommit'] == sha
-                  assert all(summary['checks'].values()) and all(bench['checks'].values())
-                  assert summary['nodeDisplay']['strategyGuides']
-                  assert summary['nodeDisplay']['declarationOccurrences'] == 141
-                  assert len(bench['cases']) == 3
-                  assert sum(len(c['routes']) for c in bench['cases'].values()) == 8
+                  audit = get('/three-proofs/definition-audit.json')
                   details = get('/three-proofs/node-details.json')
-                  assert all(item['strategy']['summary'] for item in details.values())
+                  assert summary['sourceCommit'] == audit['sourceCommit'] == sha
+                  assert all(summary['checks'].values()) and audit['passed']
+                  assert summary['nodeDisplay']['declarationOccurrences'] == 175
+                  assert audit['nodesAudited'] == len(details) == 19
+                  assert 'namespace' in details['def:c3-pi']['strategy']['summary']
+                  assert 'return zero' in details['def:c3-trig']['strategy']['summary']
                   with urllib.request.urlopen(base+'/cosine-primitive-graph.html?source='+sha,timeout=20) as response:
                       graph = response.read().decode()
-                  assert 'bp-strategy' in graph and 'proof-bench/' in graph
+                  assert 'bp-provenance' in graph and 'bp-namespace' in graph
                   assert graph.count('id="thm:c3-primitive_modal"') == 1
-                  print('LIVE GRAPH:', base+'/cosine-primitive-graph.html')
-                  print('LIVE BENCHMARK:', base+'/proof-bench/')
+                  print('LIVE:', base+'/cosine-primitive-graph.html')
                   print('Verified source:', sha)
-                  for route, r in bench['cases']['cosine-primitive']['routes'].items():
-                      print(route, 'final tree/DAG:', r['finalBody']['bodyTree'], r['finalBody']['bodyDag'],
-                          'full declarations/body DAG:',r['sizes']['full']['declarations'],r['sizes']['full']['bodyDag'])
-                  print('Three matched obligations: one calculus example plus calibration; eight further families are explicitly planned')
+                  print('Audited nodes/reference paths:', audit['nodesAudited'], audit['edgeWitnessesAudited'])
+                  print('Independent pi and S/C definitions, chart restrictions, and literal stage equations are live')
                   break
               except Exception as exc:
                   last = str(exc)
                   time.sleep(5)
           else:
-              raise SystemExit('Live verification failed: '+str(last))
+              raise SystemExit('Live definition verification failed: '+str(last))
           PY
