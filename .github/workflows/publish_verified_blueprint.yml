@@ -1,7 +1,7 @@
 name: Publish verified proof blueprint
 
 # Publish only the pinned proof-checked and browser-tested static artifact.
-# The theorem branch is not merged; Pages permissions and protections stay unchanged.
+# No theorem branch is merged and Pages permissions/protections are unchanged.
 on:
   push:
     branches: [main]
@@ -16,15 +16,15 @@ concurrency:
   group: pages-verified-proof-publication
   cancel-in-progress: false
 env:
-  SOURCE_RUN: '34933412954'
-  SOURCE_SHA: 'f6864d667a7ff384127b47db2803d2afb36fd77c'
+  SOURCE_RUN: '34935879528'
+  SOURCE_SHA: '642facdb085dd8d11c03bc548437458fe25de5bd'
 
 jobs:
   prepare:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
-      - name: Verify source proofs, syntax preservation, and browser regressions
+      - name: Verify source proofs, benchmark accounting, and browser regressions
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -38,7 +38,7 @@ jobs:
               with urllib.request.urlopen(req, timeout=30) as response:
                   return json.load(response)
           run_id = os.environ['SOURCE_RUN']
-          for attempt in range(120):
+          for attempt in range(180):
               run = get('/actions/runs/' + run_id)
               assert run['head_sha'] == os.environ['SOURCE_SHA']
               assert run['name'] == 'Three-proof blueprint'
@@ -55,7 +55,7 @@ jobs:
                        'Render blueprint and test the three-route graph',
                        'Test Lean statement boxes and Mathlib Real shading']:
               assert steps[step] == 'success', step
-          print('Verified unchanged mathematical proofs, syntax text preservation, rational root, proof lanes and browser tests')
+          print('Verified independent proof roots, full size export, accounting tests, strategy panels and browser controls')
           PY
       - uses: actions/download-artifact@v8
         with:
@@ -63,7 +63,7 @@ jobs:
           run-id: ${{ env.SOURCE_RUN }}
           github-token: ${{ github.token }}
           path: downloaded
-      - name: Inspect syntax highlighting and rational foundations
+      - name: Inspect the benchmark and guided statements
         run: |
           python3 - <<'PY'
           import json, os, pathlib, re, tarfile
@@ -73,36 +73,46 @@ jobs:
           summary = json.loads((root/'three-proofs/summary.json').read_text())
           details = json.loads((root/'three-proofs/node-details.json').read_text())
           exported = {d['name']: d for d in json.loads((root/'three-proofs/blueprint-statements.json').read_text())['declarations']}
-          assert summary['sourceCommit'] == os.environ['SOURCE_SHA']
-          assert all(summary['checks'].values()) and len(summary['metrics']) == 3
+          bench = json.loads((root/'proof-bench/data.json').read_text())
+          sha = os.environ['SOURCE_SHA']
+          assert summary['sourceCommit'] == bench['sourceCommit'] == sha
+          assert all(summary['checks'].values()) and all(bench['checks'].values())
           display = summary['nodeDisplay']
           assert display['version'] == 5 and display['groupedStatements'] and display['statementFirst']
           assert display['rationalRoot'] == 'Rat' and display['separateProofLanes']
           assert display['syntaxHighlighting'] == 'lossless Lean lexer'
-          assert display['nodeCount'] == len(details) == 19
-          occurrences = 0
+          assert display['strategyGuides'] and display['strategyNodes'] == len(details) == 19
+          count = 0
           for item in details.values():
-              names = [name for group in item['groups'] for name in group['names']]
+              names = [name for g in item['groups'] for name in g['names']]
               assert names == [d['name'] for d in item['declarations']]
-              assert len(names) >= 3 and len(names) == len(set(names))
-              occurrences += len(names)
+              assert set(item['strategy']['groups']) == {g['title'] for g in item['groups']}
+              assert item['strategy']['role'] and item['strategy']['summary']
+              count += len(names)
               for d in item['declarations']:
                   assert all(d[k] == exported[d['name']][k] for k in ['name','kind','type','value'])
               assert not re.search(r'[=∫≃↔πⁱ₀ᵗ]|:=|[SCIA]\(', item['title'])
-          assert occurrences == display['declarationOccurrences']
-          assert details['def:c3-rationals']['classification'] == 'native'
-          assert details['def:c3-mreal']['classification'] == 'mathlib'
-          assert details['def:c3-rationals']['anchors'] == ['Rat']
+          assert count == display['declarationOccurrences'] == 141
           target = details['thm:c3-primitive']
           assert target['classification'] == 'mixed'
-          assert [bool(target['paths'][a]) for a in target['anchors']] == [False, False, True]
+          assert [bool(target['paths'][a]) for a in target['anchors']] == [False,False,True]
+          assert len(bench['cases']) == 3
+          assert sum(len(c['routes']) for c in bench['cases'].values()) == 8
+          assert set(bench['cases']['cosine-primitive']['routes']) == {'direct','ftc','mathlib'}
+          for c in bench['cases'].values():
+              for r in c['routes'].values():
+                  assert 'sorryAx' not in r['axioms']
+                  for cost in r['sizes'].values():
+                      assert sum(o['declarations'] for o in cost['origins'].values()) == cost['declarations']
+                      assert sum(o['bodyDag'] for o in cost['origins'].values()) == cost['bodyDag']
+          assert len(bench['roadmap']) == 8 and all(c['status'] == 'planned' for c in bench['roadmap'])
+          assert all(p['order'] == ['cosine-primitive','cosine-validity'] for p in bench['portfolio'].values())
           graph = (root/'cosine-primitive-graph.html').read_text()
           assert graph.count('id="thm:c3-primitive_modal"') == 1
-          assert 'LeanSnippet.highlight(code)' in graph
-          assert all(n in graph for n in ['cluster_direct','cluster_ftc','cluster_bridges'])
-          assert '.lean-keyword' in (root/'three-proofs/graph.css').read_text()
-          assert (root/'dep_graph_document.html').is_file()
-          assert 'cosine-primitive-graph.html' in (root/'index.html').read_text()
+          assert 'bp-strategy' in graph and 'bp-node-navigation' in graph
+          assert 'LeanSnippet.highlight(code)' in graph and 'proof-bench/' in graph
+          assert (root/'ch-proof-comparison.html').is_file()
+          assert 'proof-bench/' in (root/'index.html').read_text()
           def redirect(path, target):
               path.parent.mkdir(parents=True, exist_ok=True)
               path.write_text('<!doctype html><html><head><meta charset="utf-8">'
@@ -111,7 +121,7 @@ jobs:
                   '<p>Open <a href="' + target + '">the updated dependency graph</a>.</p></body></html>')
           redirect(root/'proof-comparison/index.html', '../cosine-primitive-graph.html')
           redirect(root/'ch-two-cosine-proofs.html', 'ch-three-cosine-proofs.html')
-          print('Validated', occurrences, 'highlighted grouped declarations at', summary['sourceCommit'])
+          print('Validated 141 guided Lean statements and eight measured proof declarations at', sha)
           PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v5
@@ -128,7 +138,7 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify live syntax colors, rational root, and three proof lanes
+      - name: Verify live strategies and proof-size laboratory
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
@@ -136,33 +146,33 @@ jobs:
           import json, os, time, urllib.request
           sha = os.environ['SOURCE_SHA']
           base = os.environ['PAGE_URL'].rstrip('/')
+          def get(path):
+              with urllib.request.urlopen(base+path+'?source='+sha,timeout=20) as response:
+                  return json.load(response)
           last = None
           for attempt in range(12):
               try:
-                  with urllib.request.urlopen(base+'/three-proofs/summary.json?source='+sha,timeout=20) as response:
-                      summary = json.load(response)
-                  assert summary['sourceCommit'] == sha and all(summary['checks'].values())
-                  display = summary['nodeDisplay']
-                  assert display['version'] == 5 and display['groupedStatements']
-                  assert display['rationalRoot'] == 'Rat' and display['separateProofLanes']
-                  with urllib.request.urlopen(base+'/three-proofs/node-details.json?source='+sha,timeout=20) as response:
-                      details = json.load(response)
-                  assert len(details) == 19
-                  assert details['def:c3-rationals']['classification'] == 'native'
-                  assert details['def:c3-mreal']['classification'] == 'mathlib'
-                  assert details['thm:c3-primitive']['classification'] == 'mixed'
+                  summary = get('/three-proofs/summary.json')
+                  bench = get('/proof-bench/data.json')
+                  assert summary['sourceCommit'] == bench['sourceCommit'] == sha
+                  assert all(summary['checks'].values()) and all(bench['checks'].values())
+                  assert summary['nodeDisplay']['strategyGuides']
+                  assert summary['nodeDisplay']['declarationOccurrences'] == 141
+                  assert len(bench['cases']) == 3
+                  assert sum(len(c['routes']) for c in bench['cases'].values()) == 8
+                  details = get('/three-proofs/node-details.json')
+                  assert all(item['strategy']['summary'] for item in details.values())
                   with urllib.request.urlopen(base+'/cosine-primitive-graph.html?source='+sha,timeout=20) as response:
                       graph = response.read().decode()
-                  assert 'LeanSnippet.highlight(code)' in graph
-                  assert all(n in graph for n in ['cluster_direct','cluster_ftc','cluster_bridges'])
+                  assert 'bp-strategy' in graph and 'proof-bench/' in graph
                   assert graph.count('id="thm:c3-primitive_modal"') == 1
-                  with urllib.request.urlopen(base+'/three-proofs/graph.css?source='+sha,timeout=20) as response:
-                      css = response.read().decode()
-                  assert '.lean-keyword' in css and '.lean-type' in css
-                  print('LIVE:', base+'/cosine-primitive-graph.html')
+                  print('LIVE GRAPH:', base+'/cosine-primitive-graph.html')
+                  print('LIVE BENCHMARK:', base+'/proof-bench/')
                   print('Verified source:', sha)
-                  print('Highlighted grouped declarations:', display['declarationOccurrences'])
-                  print('Rational root above both foundations; separate proof lanes; syntax and dependency colors live')
+                  for route, r in bench['cases']['cosine-primitive']['routes'].items():
+                      print(route, 'final tree/DAG:', r['finalBody']['bodyTree'], r['finalBody']['bodyDag'],
+                          'full declarations/body DAG:',r['sizes']['full']['declarations'],r['sizes']['full']['bodyDag'])
+                  print('Three matched obligations: one calculus example plus calibration; eight further families are explicitly planned')
                   break
               except Exception as exc:
                   last = str(exc)
