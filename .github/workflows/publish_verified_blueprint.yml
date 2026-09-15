@@ -16,8 +16,8 @@ concurrency:
   group: pages-verified-proof-publication
   cancel-in-progress: false
 env:
-  SOURCE_RUN: '34935879528'
-  SOURCE_SHA: '642facdb085dd8d11c03bc548437458fe25de5bd'
+  SOURCE_RUN: '34936578264'
+  SOURCE_SHA: '8903da391c3915ab17095d8f520b4f90d28aeb53'
 
 jobs:
   prepare:
