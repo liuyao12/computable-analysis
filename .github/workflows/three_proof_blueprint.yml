@@ -1,0 +1,54 @@
+name: Three-proof blueprint
+on:
+  push:
+    branches: [work/cosine-basepoint]
+    paths:
+      - 'ComputableAnalysis/**'
+      - 'comparison/**'
+      - 'blueprint/**'
+      - '.github/workflows/three_proof_blueprint.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: three-proof-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - name: Retain exact sources for reproducible checking
+        run: git archive --format=tar.gz HEAD > /tmp/three-proof-sources.tar.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: three-proof-sources
+          path: /tmp/three-proof-sources.tar.gz
+          retention-days: 7
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+      - uses: actions/cache/restore@v5
+        with:
+          path: .lake
+          key: three-proof-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            cosine-ftc-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+            geometric-sine-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+      - name: Build native proofs
+        run: lake build ComputableAnalysis.CosineFTC ComputableAnalysis.CosineIntegralViaFTC
+      - name: Check native proof separation
+        run: python3 blueprint/checks/check_two_cosine_proofs.py
+      - name: Build optional comparison when third proof is present
+        run: |
+          if test -f comparison/MathlibComparison/CosineIntegralBridge.lean; then
+            cd comparison
+            lake exe cache get Mathlib/Analysis/SpecialFunctions/Integrals/Basic.lean Mathlib/Tactic.lean
+            lake build
+            mkdir -p reports
+            lake env lean checks/ThreeProofsAudit.lean
+          fi
