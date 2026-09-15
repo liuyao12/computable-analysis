@@ -1,7 +1,7 @@
 name: Publish verified proof blueprint
 
-# Publish only the pinned, proof-checked and browser-tested static artifact.
-# The theorem branch is not merged; Pages permissions and protection stay unchanged.
+# Publish only the pinned proof-checked and browser-tested static artifact.
+# The theorem branch is not merged; Pages permissions and protections stay unchanged.
 on:
   push:
     branches: [main]
@@ -16,15 +16,15 @@ concurrency:
   group: pages-verified-proof-publication
   cancel-in-progress: false
 env:
-  SOURCE_RUN: '34928622556'
-  SOURCE_SHA: '694d18c803ee8ae5eb1ddf9531c7d8de4580a8d7'
+  SOURCE_RUN: '34933412954'
+  SOURCE_SHA: 'f6864d667a7ff384127b47db2803d2afb36fd77c'
 
 jobs:
   prepare:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Verify source proofs, exported groups, and browser regressions
+      - name: Verify source proofs, syntax preservation, and browser regressions
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -55,7 +55,7 @@ jobs:
                        'Render blueprint and test the three-route graph',
                        'Test Lean statement boxes and Mathlib Real shading']:
               assert steps[step] == 'success', step
-          print('Verified grouped exported declarations, unchanged proof checks, and desktop/mobile browser tests')
+          print('Verified unchanged mathematical proofs, syntax text preservation, rational root, proof lanes and browser tests')
           PY
       - uses: actions/download-artifact@v8
         with:
@@ -63,7 +63,7 @@ jobs:
           run-id: ${{ env.SOURCE_RUN }}
           github-token: ${{ github.token }}
           path: downloaded
-      - name: Inspect grouped statements and preserve old bookmarks
+      - name: Inspect syntax highlighting and rational foundations
         run: |
           python3 - <<'PY'
           import json, os, pathlib, re, tarfile
@@ -76,10 +76,12 @@ jobs:
           assert summary['sourceCommit'] == os.environ['SOURCE_SHA']
           assert all(summary['checks'].values()) and len(summary['metrics']) == 3
           display = summary['nodeDisplay']
-          assert display['version'] == 4 and display['groupedStatements'] and display['statementFirst']
-          assert display['nodeCount'] == len(details) == 17
+          assert display['version'] == 5 and display['groupedStatements'] and display['statementFirst']
+          assert display['rationalRoot'] == 'Rat' and display['separateProofLanes']
+          assert display['syntaxHighlighting'] == 'lossless Lean lexer'
+          assert display['nodeCount'] == len(details) == 19
           occurrences = 0
-          for label, item in details.items():
+          for item in details.values():
               names = [name for group in item['groups'] for name in group['names']]
               assert names == [d['name'] for d in item['declarations']]
               assert len(names) >= 3 and len(names) == len(set(names))
@@ -88,16 +90,17 @@ jobs:
                   assert all(d[k] == exported[d['name']][k] for k in ['name','kind','type','value'])
               assert not re.search(r'[=∫≃↔πⁱ₀ᵗ]|:=|[SCIA]\(', item['title'])
           assert occurrences == display['declarationOccurrences']
+          assert details['def:c3-rationals']['classification'] == 'native'
+          assert details['def:c3-mreal']['classification'] == 'mathlib'
+          assert details['def:c3-rationals']['anchors'] == ['Rat']
           target = details['thm:c3-primitive']
           assert target['classification'] == 'mixed'
           assert [bool(target['paths'][a]) for a in target['anchors']] == [False, False, True]
-          names = {d['name'] for d in target['declarations']}
-          assert set(target['anchors']).issubset(names)
-          assert 'ComputableAnalysis.CosinePrimitive.Statement' in names
           graph = (root/'cosine-primitive-graph.html').read_text()
           assert graph.count('id="thm:c3-primitive_modal"') == 1
-          assert 'declarationCard' in graph and 'bp-declaration-group' in graph
-          assert 'bp-math-explanation' in graph and 'foundation-legend' in graph
+          assert 'LeanSnippet.highlight(code)' in graph
+          assert all(n in graph for n in ['cluster_direct','cluster_ftc','cluster_bridges'])
+          assert '.lean-keyword' in (root/'three-proofs/graph.css').read_text()
           assert (root/'dep_graph_document.html').is_file()
           assert 'cosine-primitive-graph.html' in (root/'index.html').read_text()
           def redirect(path, target):
@@ -108,7 +111,7 @@ jobs:
                   '<p>Open <a href="' + target + '">the updated dependency graph</a>.</p></body></html>')
           redirect(root/'proof-comparison/index.html', '../cosine-primitive-graph.html')
           redirect(root/'ch-two-cosine-proofs.html', 'ch-three-cosine-proofs.html')
-          print('Validated', occurrences, 'grouped declaration cards at', summary['sourceCommit'])
+          print('Validated', occurrences, 'highlighted grouped declarations at', summary['sourceCommit'])
           PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v5
@@ -125,7 +128,7 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify live grouped Lean declarations
+      - name: Verify live syntax colors, rational root, and three proof lanes
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
@@ -139,21 +142,27 @@ jobs:
                   with urllib.request.urlopen(base+'/three-proofs/summary.json?source='+sha,timeout=20) as response:
                       summary = json.load(response)
                   assert summary['sourceCommit'] == sha and all(summary['checks'].values())
-                  assert summary['nodeDisplay']['version'] == 4 and summary['nodeDisplay']['groupedStatements']
+                  display = summary['nodeDisplay']
+                  assert display['version'] == 5 and display['groupedStatements']
+                  assert display['rationalRoot'] == 'Rat' and display['separateProofLanes']
                   with urllib.request.urlopen(base+'/three-proofs/node-details.json?source='+sha,timeout=20) as response:
                       details = json.load(response)
-                  assert len(details) == 17 and all(len(d['declarations']) >= 3 for d in details.values())
-                  target = details['thm:c3-primitive']
-                  assert target['classification'] == 'mixed'
-                  assert len(target['declarations']) == 7 and len(target['groups']) == 3
+                  assert len(details) == 19
+                  assert details['def:c3-rationals']['classification'] == 'native'
+                  assert details['def:c3-mreal']['classification'] == 'mathlib'
+                  assert details['thm:c3-primitive']['classification'] == 'mixed'
                   with urllib.request.urlopen(base+'/cosine-primitive-graph.html?source='+sha,timeout=20) as response:
                       graph = response.read().decode()
-                  assert 'declarationCard' in graph and 'bp-declaration-group' in graph
+                  assert 'LeanSnippet.highlight(code)' in graph
+                  assert all(n in graph for n in ['cluster_direct','cluster_ftc','cluster_bridges'])
                   assert graph.count('id="thm:c3-primitive_modal"') == 1
+                  with urllib.request.urlopen(base+'/three-proofs/graph.css?source='+sha,timeout=20) as response:
+                      css = response.read().decode()
+                  assert '.lean-keyword' in css and '.lean-type' in css
                   print('LIVE:', base+'/cosine-primitive-graph.html')
                   print('Verified source:', sha)
-                  print('Grouped declarations:', summary['nodeDisplay']['declarationOccurrences'])
-                  print('Every broad node opens several exact Lean statements; the graph and Real shading are retained')
+                  print('Highlighted grouped declarations:', display['declarationOccurrences'])
+                  print('Rational root above both foundations; separate proof lanes; syntax and dependency colors live')
                   break
               except Exception as exc:
                   last = str(exc)
