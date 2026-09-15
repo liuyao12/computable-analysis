@@ -1,13 +1,7 @@
 #!/usr/bin/env python3
-"""Add checked Lean statements and precise Real-dependency shading to blueprint nodes.
-
-Uses the existing reference export, not module names or route labels, to find
-transitive paths to Mathlib's actual root `Real` type. The one theorem sink has
-three alternative proof roots: its fill is mixed in the combined view, native
-for either native route, and shaded for the Mathlib route. No proof is changed.
-"""
+"""Grouped checked statements, lossless syntax color, and precise Real shading."""
 from __future__ import annotations
-import argparse, collections, csv, hashlib, json, re
+import argparse, collections, csv, hashlib, json
 from pathlib import Path
 import pygraphviz as pgv
 from bs4 import BeautifulSoup
@@ -47,7 +41,6 @@ def classify(flags):
 
 
 def load_groups():
-    """One explicit list, consumed by both the checked exporter and this view."""
     path = ROOT/'blueprint/three-proofs/node-groups.tsv'
     result = {}
     for row in csv.reader((line for line in path.read_text().splitlines()
@@ -81,13 +74,11 @@ def enhance(site: Path, report_path: Path, statement_path: Path):
     for label, title, anchors in PICKS:
         modal = soup.find(id=label + '_modal')
         assert modal is not None, label
-        # Keep graph landmarks fixed; show the explicitly curated constituent
-        # statements rather than a module dump or a one-at-a-time selector.
         sections = grouped[label]
         names = [name for group in sections.values() for name in group]
         records = []
         for name in names:
-            assert name in statements, f"Unexported grouped declaration: {name}"
+            assert name in statements, f'Unexported grouped declaration: {name}'
             d = dict(statements[name])
             assert name in nodes, name
             node = nodes[name]
@@ -97,6 +88,8 @@ def enhance(site: Path, report_path: Path, statement_path: Path):
                 url = 'https://github.com/liuyao12/computable-analysis/blob/' + data['info']['sourceCommit'] + '/comparison/'
             elif module.startswith('ComputableAnalysis'):
                 url = 'https://github.com/liuyao12/computable-analysis/blob/' + data['info']['sourceCommit'] + '/'
+            elif module.startswith(('Init.', 'Lean.', 'Std.')):
+                url = 'https://github.com/leanprover/lean4/blob/v' + data['info']['leanVersion'] + '/src/'
             else:
                 url = 'https://github.com/leanprover-community/mathlib4/blob/' + data['info']['mathlibCommit'] + '/'
             span = node['sourceRange']
@@ -131,21 +124,24 @@ def enhance(site: Path, report_path: Path, statement_path: Path):
         data['views'][key] = g.string()
     data['nodeDetails'] = details
     data['info']['nodeDisplay'] = {
-        'version': 4, 'groupedStatements': True, 'statementFirst': True, 'nodeLabelStyle': 'short prose titles; no equations', 'statementSource': 'Lean elaborated types (Meta.ppExpr)',
+        'version': 5, 'syntaxHighlighting': 'lossless Lean lexer', 'rationalRoot': 'Rat',
+        'separateProofLanes': True, 'groupedStatements': True, 'statementFirst': True,
+        'nodeLabelStyle': 'short prose titles; no equations', 'statementSource': 'Lean elaborated types (Meta.ppExpr)',
         'mathlibRealRoot': 'Real',
         'dependencyRule': 'Transitive stored type/body references; proof alternatives classified separately',
         'nativeFill': NATIVE, 'mathlibRealFill': MATHLIB,
-        'nodeCount': len(details),
+        'nodeCount': len(details), 'syntaxSource': 'blueprint/three-proofs/lean-highlight.js',
         'declarationOccurrences': sum(d['declarationCount'] for d in details.values()),
         'uniqueDeclarations': len({r['name'] for d in details.values() for r in d['declarations']}),
         'groupsSha256': hashlib.sha256((ROOT/'blueprint/three-proofs/node-groups.tsv').read_bytes()).hexdigest()}
     data['info']['sourceManifest']['blueprint/three-proofs/node-groups.tsv'] = data['info']['nodeDisplay']['groupsSha256']
-    # Assert the exact distinction the common theorem needs.
     target = details[TARGET]
     assert target['classification'] == 'mixed'
     assert not dependency_path('ComputableAnalysis.CosinePrimitive.Statement')
     assert [bool(target['paths'][a]) for a in target['anchors']] == [False, False, True]
-    for label, item in details.items():
+    assert details['def:c3-rationals']['classification'] == 'native'
+    assert details['def:c3-mreal']['classification'] == 'mathlib'
+    for item in details.values():
         for record in item['declarations']:
             path = record['realDependencyPath']
             if path:
@@ -154,18 +150,18 @@ def enhance(site: Path, report_path: Path, statement_path: Path):
         for anchor, path in item['paths'].items():
             if path:
                 assert path[0] == anchor and path[-1] == 'Real'
-                for user, dep in zip(path, path[1:]):
-                    assert dep in nodes[user]['refs']
+                assert all(dep in nodes[user]['refs'] for user, dep in zip(path, path[1:]))
     payload = json.dumps(data, separators=(',', ':')).replace('</', '<\\/')
     text = text[:start] + payload + text[old_payload_end:]
-    # Replace the controller, retaining the standard blueprint's modal markup.
     script_end = text.index('</script>', start)
-    text = text[:start+len(payload)] + ';\n' + (ROOT/'blueprint/three-proofs/graph.js').read_text() + text[script_end:]
+    text = (text[:start+len(payload)] + ';\n' +
+            (ROOT/'blueprint/three-proofs/lean-highlight.js').read_text() + '\n' +
+            (ROOT/'blueprint/three-proofs/graph.js').read_text() + text[script_end:])
     legend = '''<div class="foundation-legend" aria-label="Node background legend">
       <span><i class="fill-native"></i>No Mathlib ℝ dependency</span>
       <span><i class="fill-mathlib"></i>Depends on Mathlib ℝ</span>
       <span><i class="fill-mixed"></i>Depends on the chosen proof</span>
-      <span class="legend-help">Green borders still indicate checked statements. Click a broad node for its grouped Lean declarations; LaTeX explanation is optional.</span>
+      <span class="legend-help">Green borders indicate checked statements. Click a broad node for grouped, syntax-highlighted Lean declarations.</span>
     </div>'''
     text = text.replace('<p class="proof-note">', legend + '<p class="proof-note">', 1)
     page.write_text(text)
@@ -174,8 +170,9 @@ def enhance(site: Path, report_path: Path, statement_path: Path):
     (assets/'blueprint-statements.json').write_text(statement_path.read_text())
     (assets/'summary.json').write_text(json.dumps(data['info'], indent=2)+'\n')
     (assets/'graph.css').write_text((ROOT/'blueprint/three-proofs/graph.css').read_text() +
-                                     (ROOT/'blueprint/three-proofs/groups.css').read_text())
-    print('PASS: grouped checked Lean declarations, unchanged proof anchors, and per-declaration Real paths')
+                                     (ROOT/'blueprint/three-proofs/groups.css').read_text() +
+                                     (ROOT/'blueprint/three-proofs/lean-highlight.css').read_text())
+    print('PASS: grouped checked Lean declarations, shared rational root, separate proof lanes, and precise Real paths')
     print(json.dumps({k:v['classification'] for k,v in details.items()},indent=2))
 
 

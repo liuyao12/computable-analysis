@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Browser regressions for grouped verbatim Lean declarations and Real shading."""
+"""Browser regressions for lossless Lean highlighting, rational root and proof lanes."""
 from __future__ import annotations
 import argparse, functools, http.server, json, re, shutil, threading
 from pathlib import Path
@@ -19,9 +19,12 @@ def main():
     source=json.loads((args.site/'three-proofs/node-details.json').read_text())
     exported={d['name']:d for d in json.loads((args.site/'three-proofs/blueprint-statements.json').read_text())['declarations']}
     summary=json.loads((args.site/'three-proofs/summary.json').read_text())
-    assert summary['nodeDisplay']['version']==4 and summary['nodeDisplay']['groupedStatements']
+    display=summary['nodeDisplay']
+    assert display['version']==5 and display['groupedStatements']
+    assert display['rationalRoot']=='Rat' and display['separateProofLanes']
+    assert display['syntaxHighlighting']=='lossless Lean lexer'
     expected_occurrences=sum(len(d['declarations']) for d in source.values())
-    assert summary['nodeDisplay']['declarationOccurrences']==expected_occurrences
+    assert display['declarationOccurrences']==expected_occurrences
     for label,item in source.items():
         names=[name for g in item['groups'] for name in g['names']]
         assert len(names)>=3 and len(names)==len(set(names)),label
@@ -42,7 +45,7 @@ def main():
         page.on('pageerror',lambda e:errors.append(str(e)))
         url=f'http://127.0.0.1:{server.server_port}/cosine-primitive-graph.html'
         page.goto(url,wait_until='domcontentloaded')
-        page.wait_for_function("document.querySelectorAll('#graph .node[data-foundation]').length===16",timeout=60000)
+        page.wait_for_function("document.querySelectorAll('#graph .node[data-foundation]').length===18",timeout=60000)
         def node(label):return page.locator('#graph .node').filter(has=page.locator('title',has_text=label))
         def target():return node('thm:c3-primitive')
         def modal_for(label):return page.locator('[id="'+label+'_modal"]')
@@ -65,13 +68,20 @@ def main():
             for d in detail['declarations']:
                 card=card_for(modal,d['name'])
                 assert card.locator('code').text_content()==exact_code(d),d['name']
+                assert card.locator('code .lean-keyword').count()>=1
+                assert card.locator('code .lean-token').count()>=2
                 assert card.locator('code').get_attribute('data-declaration')==d['name']
                 assert card.get_attribute('data-foundation')==('mathlib' if d['realDependencyPath'] else 'native')
                 assert card.locator('.bp-formal-source').get_attribute('href')==d['sourceUrl']
                 assert card.locator('.bp-companion-note').count()==int(d['displayOnly'])
                 checked+=1
             return modal
-        # Every broad node exposes multiple exact declarations at once.
+        qbox=node('def:c3-rationals').bounding_box()
+        for label in ['def:c3-intervals','def:c3-mreal']:
+            assert qbox['y']+qbox['height']<node(label).bounding_box()['y'],label
+        for title in ['cluster_direct','cluster_ftc','cluster_bridges']:
+            assert page.locator('#graph .cluster').filter(has=page.locator('title',has_text=title)).count()==1
+        # All broad nodes expose multiple exact highlighted declarations at once.
         for label,detail in source.items():
             if label=='lem:c3-native-exp':continue
             assert node(label).get_attribute('data-foundation')==detail['classification'],label
@@ -82,8 +92,8 @@ def main():
             assert modal.locator('.thm_thmcontent').is_visible()
             page.keyboard.press('Escape');assert not modal.is_visible()
         assert_plain_labels()
-        assert page.locator('#graph .node[data-foundation="mathlib"]').count()==6
-        # The common proposition and all three proofs are present together.
+        page.screenshot(path=str(args.screenshots/'rational-root-proof-lanes.png'),full_page=True)
+        assert page.locator('#graph .node[data-foundation="mathlib"]').count()==7
         target().focus();page.keyboard.press('Enter');modal=inspect('thm:c3-primitive')
         stem='ComputableAnalysis.CosinePrimitive.'
         for short,status in [('Statement','native'),('viaInequalities','native'),('viaFTC','native'),('viaMathlib','mathlib')]:
@@ -92,14 +102,11 @@ def main():
         modal.locator('.bp-copy').first.click()
         expect(modal.locator('.bp-copy').first).to_have_text('Copied')
         assert page.evaluate('navigator.clipboard.readText()')==exact_code(first)
-        page.screenshot(path=str(args.screenshots/'grouped-proposition.png'),full_page=True)
+        page.screenshot(path=str(args.screenshots/'highlighted-proposition.png'),full_page=True)
         modal.locator('.bp-group-link').nth(1).click()
-        page.screenshot(path=str(args.screenshots/'three-proof-statements.png'),full_page=True)
+        page.screenshot(path=str(args.screenshots/'highlighted-three-proofs.png'),full_page=True)
         modal.locator('.dep-closebtn').click()
-        node('def:c3-trig').click();inspect('def:c3-trig')
-        page.screenshot(path=str(args.screenshots/'grouped-sine-cosine.png'),full_page=True)
-        page.keyboard.press('Escape')
-        for route,count,status in [('0',8,'native'),('1',9,'native'),('2',13,'mathlib'),('all',16,'mixed'),('companions',17,'mixed')]:
+        for route,count,status in [('0',9,'native'),('1',10,'native'),('2',15,'mathlib'),('all',18,'mixed'),('companions',19,'mixed')]:
             page.locator('[data-view="'+route+'"]').click()
             page.wait_for_function('(n)=>document.querySelectorAll("#graph .node[data-foundation]").length===n',arg=count,timeout=30000)
             page.wait_for_timeout(200)
@@ -116,19 +123,19 @@ def main():
             if route=='companions':
                 node('lem:c3-native-exp').click();inspect('lem:c3-native-exp');page.keyboard.press('Escape')
         page.locator('[data-view="all"]').click()
-        page.wait_for_function("document.querySelectorAll('#graph .node').length===16")
+        page.wait_for_function("document.querySelectorAll('#graph .node').length===18")
         page.locator('#graph .edge').first.click()
         assert page.locator('#proof-edge-dialog').is_visible()
         assert page.locator('#proof-edge-content li').count()>=2
         page.locator('#proof-edge-close').click()
         page.set_viewport_size({'width':390,'height':850})
         page.reload(wait_until='domcontentloaded')
-        page.wait_for_function("document.querySelectorAll('#graph .node[data-foundation]').length===16",timeout=60000)
+        page.wait_for_function("document.querySelectorAll('#graph .node[data-foundation]').length===18",timeout=60000)
         target().click();modal=inspect('thm:c3-primitive')
         assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+2')
         bounds=modal.locator('.dep-modal-content').bounding_box()
         assert bounds['x']>=0 and bounds['x']+bounds['width']<=392
-        page.screenshot(path=str(args.screenshots/'mobile-grouped-statements.png'),full_page=True)
+        page.screenshot(path=str(args.screenshots/'mobile-highlighted-statements.png'),full_page=True)
         modal.locator('.bp-group-link').nth(1).click()
         card_for(modal,stem+'viaMathlib').locator('.bp-copy').click()
         expect(card_for(modal,stem+'viaMathlib').locator('.bp-copy')).to_have_text('Copied')
@@ -140,7 +147,8 @@ def main():
     server.shutdown()
     (args.screenshots/'results.json').write_text(json.dumps({'passed':True,'javascriptErrors':errors,
         'groupedDeclarations':expected_occurrences,'cardsChecked':checked,
-        'checked':'all grouped cards match exported Lean text; no single-statement selector; group navigation and copy; individual Real badges; proof route highlighting; unchanged graph; keyboard/mobile'},indent=2))
-    print(f'PASS: {expected_occurrences} grouped declarations, exact exported code, copy/navigation, individual Real dependencies, and mobile')
+        'rationalRoot':True,'separateProofLanes':True,'syntaxHighlighting':True,
+        'checked':'all highlighted cards match exported text; lossless Copy; rational root above both foundations; separate proof clusters; precise Real shading; route filters; keyboard/mobile'},indent=2))
+    print(f'PASS: {expected_occurrences} grouped syntax-highlighted declarations, rational root, proof lanes, exact text and Copy, and mobile')
 
 if __name__=='__main__':main()

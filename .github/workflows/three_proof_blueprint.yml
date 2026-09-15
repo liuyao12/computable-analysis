@@ -79,6 +79,7 @@ jobs:
       - name: Test Lean statement boxes and Mathlib Real shading
         run: |
           python -m pip install playwright
+          node blueprint/checks/test_lean_highlight.cjs
           python3 blueprint/checks/test_statement_boxes.py
       - name: Retain verified sources and audit
         run: |
@@ -99,8 +100,6 @@ jobs:
             blueprint/web/three-proofs
             /tmp/three-proof-sources.tar.gz
           retention-days: 30
-      # Feature branches supply an audited static artifact. Publishing through
-      # github-pages is performed by the documentation-only workflow on main.
       - uses: actions/upload-pages-artifact@v5
         with:
           path: blueprint/web

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""A focused view of the *rendered blueprint*, not another statement database.
+"""A focused view of the rendered blueprint, not another statement database.
 
 Preserve plasTeX theorem modals and normal shape conventions. Contract actual
 stored references between selected mathematical landmarks. Keep route identity
@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse, collections, gzip, hashlib, html, json, os, re, shutil, subprocess
 from pathlib import Path
 import pygraphviz as pgv
+from proof_lanes import layout_graph
 
 ROOT=Path(__file__).resolve().parents[2]
 N='ComputableAnalysis.'
@@ -17,6 +18,8 @@ M='MathlibComparison.'
 TARGET='thm:c3-primitive'
 # LaTeX label, short visual title, actual Lean declaration anchors.
 PICKS=[
+ ('def:c3-rationals','Rational numbers (ℚ)',['Rat']),
+ ('def:c3-mreal','Mathlib real numbers',['Real','Real.ofCauchy']),
  ('def:c3-intervals','Nested rational intervals',[N+'RealRaw.Valid',N+'RealRaw.Equiv']),
  ('def:c3-arctan','Geometric arctangent',[N+'CosinePrimitive.A',N+'ArctanGeometry.arctanGeom']),
  ('def:c3-pi','Arctangent definition of pi',[N+'CosinePrimitive.pi']),
@@ -71,38 +74,13 @@ def find_edges(nodes,picks,route):
     g.add_nodes_from(k for k,_,_ in picks)
     for s,t in edges:g.add_edge(s,t)
     if not g.is_directed(): raise ValueError('Expected directed graph')
-    order=subprocess.run(['dot','-Tcanon'],input=g.string(),text=True,capture_output=True,check=True)
+    subprocess.run(['dot','-Tcanon'],input=g.string(),text=True,capture_output=True,check=True)
     reduced=g.tred()
     return [edges[(str(e[0]),str(e[1]))] for e in reduced.edges()]
 
 
 def dot_for(nodes,picks,edges,route=None):
-    g=pgv.AGraph(strict=True,directed=True,rankdir='TB',bgcolor='transparent',nodesep='.32',ranksep='.52')
-    g.node_attr.update(fontname='Arial',fontsize='12',margin='.15,.10',penwidth='1.6',style='filled',fillcolor='#f6fbf5',color='#467552')
-    g.edge_attr.update(arrowhead='vee',color='#89968f',arrowsize='.7')
-    included=set()
-    for k,title,aa in picks:
-        rr=set(i for a in aa for i in nodes[a]['routes'])
-        if route is not None and route not in rr:continue
-        included.add(k)
-        attrs={'label':title,'shape':'box' if k.startswith('def:') else 'ellipse'}
-        if k==TARGET:attrs.update(penwidth='2.7',fillcolor='#d4e9d1',fontsize='15')
-        if k=='lem:c3-native-exp':attrs.update(style='dashed,filled',fillcolor='#f7f4ef',color='#85735b')
-        g.add_node(k,**attrs)
-    grouped=collections.defaultdict(list)
-    for e in edges:
-        if e['source'] in included and e['target'] in included and (route is None or e['route']==route):
-            grouped[(e['source'],e['target'])].append(e)
-    for (s,t),ee in grouped.items():
-        rr=set(e['route'] for e in ee if e['route'] is not None)
-        attrs={'tooltip':'Click for actual reference-path witnesses'}
-        if len(rr)==1:attrs['color']=COLORS[next(iter(rr))]
-        if t==TARGET:
-            attrs['label']=' / '.join(['direct','native FTC','Mathlib'][i] for i in sorted(rr))
-            attrs['fontsize']='10';attrs['fontcolor']=attrs.get('color','#47534c')
-            attrs['penwidth']='2'
-        g.add_edge(s,t,**attrs)
-    return g.string()
+    return layout_graph(nodes,picks,edges,route)
 
 
 def main():
@@ -117,7 +95,6 @@ def main():
     for k,_,aa in PICKS:
         assert f'id="{k}_modal"' in text, f'Missing real blueprint modal {k}'
         for a in aa:assert a in nodes, f'Missing measured declaration {a}'
-    # Every Lean name in the new chapter must exist, not just the final proofs.
     tex=(ROOT/'blueprint/src/06-three-cosine-proofs.tex').read_text()
     for group in re.findall(r'\\lean\{([^}]+)\}',tex):
         for name in group.split(','):
@@ -134,7 +111,10 @@ def main():
         g=pgv.AGraph(string=dot)
         assert sum(str(n)==TARGET for n in g.nodes())==1
         assert not list(g.successors(TARGET)), 'The theorem is a sink, not an assumption of its proofs'
-        # Directed cycle check, independent of a visual Graphviz layout.
+        assert not list(g.predecessors('def:c3-rationals'))
+        assert g.has_edge('def:c3-rationals','def:c3-intervals')
+        if g.has_node('def:c3-mreal'):
+            assert g.has_edge('def:c3-rationals','def:c3-mreal')
         indegree={str(n):g.in_degree(n) for n in g.nodes()};todo=[n for n,d in indegree.items() if d==0];count=0
         while todo:
             n=todo.pop();count+=1
@@ -156,13 +136,13 @@ def main():
     (assets/'summary.json').write_text(json.dumps(info,indent=2)+'\n')
     with gzip.open(assets/'references.json.gz','wt') as out:json.dump(report,out,separators=(',',':'))
     (assets/'witnesses.json').write_text(json.dumps(edges+auxiliary,indent=2)+'\n')
-    # Enrich the genuine theorem modals with pinned, audited source references.
     for k,_,aa in PICKS:
         links=[]
         for a in aa:
             n=nodes[a];m=n['module'];p=m.replace('.','/')+'.lean'
             if m.startswith('MathlibComparison'):base=f'https://github.com/liuyao12/computable-analysis/blob/{sha}/comparison/'
             elif m.startswith('ComputableAnalysis'):base=f'https://github.com/liuyao12/computable-analysis/blob/{sha}/'
+            elif m.startswith(('Init.', 'Lean.', 'Std.')):base='https://github.com/leanprover/lean4/blob/v'+report['leanVersion']+'/src/'
             else:base='https://github.com/leanprover-community/mathlib4/blob/'+info['mathlibCommit']+'/'
             r=n['sourceRange'];url=base+p+(f"#L{r['start']}-L{r['end']}" if r else '')
             links.append(f'<a target="_blank" rel="noopener" href="{html.escape(url)}">{html.escape(a)}</a>')
@@ -181,12 +161,11 @@ def main():
     text=text.replace('</head>','<link rel="stylesheet" href="three-proofs/graph.css" /></head>',1)
     (args.site/'cosine-primitive-graph.html').write_text(text)
     shutil.copyfile(ROOT/'blueprint/three-proofs/graph.css',assets/'graph.css')
-    # Link from the normal, whole-manuscript graph, not only a separate app.
     original=source.read_text()
     link='<div style="padding:10px 20px"><a href="cosine-primitive-graph.html">Three proofs of one cosine primitive — focused blueprint graph</a></div>'
     source.write_text(original.replace('</header>','</header>'+link,1))
     assert 'cosine-primitive-graph.html' in (args.site/'index.html').read_text()
-    print('PASS: one shared sink; three acyclic routes; all displayed paths witnessed; all chapter Lean names audited')
+    print('PASS: common rational root, separate proof lanes, one shared sink, acyclic routes, and witnessed dependencies')
     print(json.dumps({k:v for k,v in info.items() if k not in ['sourceManifest','metrics']},indent=2))
 
 if __name__=='__main__':main()

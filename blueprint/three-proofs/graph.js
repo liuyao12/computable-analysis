@@ -43,9 +43,10 @@ function declarationCard(record, highlighted) {
   pre.tabIndex = 0;
   pre.setAttribute('aria-label', 'Exact Lean declaration: '+record.name);
   const code = element('code');
-  // These are the exported strings, not client-side paraphrases of the type.
+  // Syntax coloring wraps tokens but preserves every exported character.
   code.textContent = record.kind+' '+record.name+':\n'+record.type
     +(record.value !== null ? ' :=\n'+record.value : '');
+  LeanSnippet.highlight(code);
   code.dataset.declaration = record.name;
   pre.append(code); card.append(pre);
   copy.onclick = async () => {
@@ -80,7 +81,6 @@ function addLeanPanel(modal, id) {
   if (!item) return;
   const content=modal.querySelector('.dep-modal-content');
   content.querySelector('.bp-lean-panel')?.remove();
-  // Preserve the original blueprint text, but keep the formal declarations first.
   let explanation=content.querySelector(':scope > .bp-math-explanation');
   if (!explanation) {
     explanation=element('details',undefined,'bp-math-explanation');
@@ -115,8 +115,7 @@ function addLeanPanel(modal, id) {
     const section=element('section',undefined,'bp-declaration-group');
     section.id=id+'-group-'+index;
     section.dataset.group=group.title;
-    const title=element('h3',group.title+' ('+group.names.length+')','bp-group-heading');
-    section.append(title);
+    section.append(element('h3',group.title+' ('+group.names.length+')','bp-group-heading'));
     const link=element('a',group.title,'bp-group-link');
     link.href='#'+section.id;
     link.onclick=e=>{
@@ -132,7 +131,7 @@ function addLeanPanel(modal, id) {
     }
     panel.append(section);
   }
-  panel.append(element('p','Types are exported from Lean’s checked environment. Selected definition bodies are included; theorem proof bodies are omitted. All declarations stay visible together—no one-at-a-time selector.','bp-note'));
+  panel.append(element('p','Types are exported from Lean’s checked environment. Selected definition bodies are included; theorem proof bodies are omitted. Syntax highlighting preserves the displayed and copied text.','bp-note'));
   if (id==='thm:c3-primitive') {
     panel.append(element('p','The proposition and two native proofs are Mathlib-free. Only the Mathlib proof uses Mathlib’s reals; the background of each declaration records that distinction.','bp-note'));
   }

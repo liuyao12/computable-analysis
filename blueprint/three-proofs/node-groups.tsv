@@ -107,3 +107,15 @@ lem:c3-native-exp	Finite series and tail bounds	ComputableAnalysis.RotationSerie
 lem:c3-native-exp	Finite series and tail bounds	ComputableAnalysis.RotationSeries.rotationExpRate	yes
 lem:c3-native-exp	Computable exponential and validity	ComputableAnalysis.RotationSeries.rotationExpRaw	yes
 lem:c3-native-exp	Computable exponential and validity	ComputableAnalysis.RotationSeries.rotationExpRaw_valid	no
+def:c3-rationals	Rational numbers and coordinates	Rat	no
+def:c3-rationals	Rational numbers and coordinates	Rat.num	no
+def:c3-rationals	Rational numbers and coordinates	Rat.den	no
+def:c3-rationals	Exact rational arithmetic	Rat.normalize	no
+def:c3-rationals	Exact rational arithmetic	Rat.add	no
+def:c3-rationals	Exact rational arithmetic	Rat.mul	no
+def:c3-mreal	Cauchy completion of the rationals	Real	no
+def:c3-mreal	Cauchy completion of the rationals	Real.ofCauchy	no
+def:c3-mreal	Cauchy completion of the rationals	CauSeq.Completion.Cauchy	yes
+def:c3-mreal	Representatives and their equivalence	Real.cauchy	no
+def:c3-mreal	Representatives and their equivalence	Real.mk	yes
+def:c3-mreal	Representatives and their equivalence	Real.mk_eq	no

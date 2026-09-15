@@ -1,0 +1,10 @@
+/* Syntax colors are independent of the green/lavender foundation backgrounds. */
+#statements code.language-lean { color:#263445; }
+#statements .lean-keyword { color:#7833a1; font-weight:600; }
+#statements .lean-declaration { color:#185ba6; font-weight:600; }
+#statements .lean-type { color:#006b68; }
+#statements .lean-number { color:#1e6b35; }
+#statements .lean-string { color:#8b411c; }
+#statements .lean-comment { color:#626b75; font-style:italic; }
+#statements .lean-operator { color:#475275; }
+.proof-lanes-note { color:#53645a; font-size:12px; }
