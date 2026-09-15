@@ -1,21 +1,25 @@
-# Statement boxes and Mathlib real backgrounds
+# Grouped Lean statements in broad blueprint nodes
 
-The comparison build runs `ExportBlueprintStatements.lean` against exactly
-the Lean declaration names in the chapter. Clicking a node shows its
-mathematical statement, checked elaborated Lean type, and pinned source.
-Short foundational definitions show their actual bodies; theorem proofs
-are omitted. The common sink offers its definition and all three proof types.
+Each displayed node is a mathematical topic, not a single declaration.
+`node-groups.tsv` explicitly curates its definitions, certificates, supporting
+lemmas and conclusions. Every node has several statements. The exporter checks
+all names in Lean and exports the exact elaborated types; selected definition
+bodies are included, but theorem proof bodies are not.
 
-`enhance_blueprint_nodes.py` computes a reverse dependency closure from the
-root `Real` declaration in `Mathlib.Data.Real.Basic`. Lavender backgrounds
-indicate actual transitive type/body dependence on that type, not merely a
-Mathlib import or a namespace guess. Native nodes retain a pale green fill.
-The common statement has no such dependence. Its combined-view background
-is split because only one proof uses Mathlib reals; selecting a native proof
-removes the shading, and selecting Mathlib shades it fully. Each positive
-classification has an inspectable checked reference path to `Real`.
+The modal shows all declaration cards together in named groups, with group
+navigation, a copy button and a pinned source link for every card. There is no
+one-at-a-time declaration selector. Mathematical prose stays collapsed below
+the Lean cards. Short prose node titles and the focused graph are unchanged.
 
-Browser tests check every visible node's mathematical and Lean statements,
-source links, keyboard opening and closing, proof selection, route-sensitive
-backgrounds, and mobile layout. This changes presentation and audit tooling,
-not mathematical definitions or proofs.
+The single conclusion node includes the proposition, all three proof signatures,
+and the three validity results. Selecting a route highlights its proof card
+without hiding the alternatives. Each card has its own transitive Mathlib Real
+classification. In particular, the proposition and native proofs remain unshaded
+while the Mathlib proof card is shaded, even in the shared-node modal.
+
+Display-only companion declarations are labelled explicitly. The audit exports
+and checks them, but does not add them to any proof's measured dependency closure.
+The diagram's anchors, contracted proof paths, and route counts are unchanged.
+`test_statement_boxes.py` compares every displayed card with the checked export,
+tests the group links, exact copying, real-dependency badges, route highlighting,
+keyboard interactions, and the mobile layout.

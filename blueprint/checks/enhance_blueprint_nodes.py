@@ -7,7 +7,7 @@ three alternative proof roots: its fill is mixed in the combined view, native
 for either native route, and shaded for the Mathlib route. No proof is changed.
 """
 from __future__ import annotations
-import argparse, collections, json, re
+import argparse, collections, csv, hashlib, json, re
 from pathlib import Path
 import pygraphviz as pgv
 from bs4 import BeautifulSoup
@@ -46,11 +46,30 @@ def classify(flags):
     return 'mixed' if any(flags) and not all(flags) else 'mathlib' if any(flags) else 'native'
 
 
+def load_groups():
+    """One explicit list, consumed by both the checked exporter and this view."""
+    path = ROOT/'blueprint/three-proofs/node-groups.tsv'
+    result = {}
+    for row in csv.reader((line for line in path.read_text().splitlines()
+                           if line.strip() and not line.startswith('#')), delimiter='\t'):
+        assert len(row) == 4, row
+        label, title, name, body = row
+        assert body in ('yes', 'no')
+        sections = result.setdefault(label, {})
+        sections.setdefault(title, []).append(name)
+    assert set(result) == {label for label, _, _ in PICKS}
+    for label, sections in result.items():
+        names = [name for group in sections.values() for name in group]
+        assert len(names) >= 3 and len(names) == len(set(names)), label
+    return result
+
+
 def enhance(site: Path, report_path: Path, statement_path: Path):
     report = json.loads(report_path.read_text())
     nodes = {n['id']: n for n in report['nodes']}
     statements = {n['name']: n for n in json.loads(statement_path.read_text())['declarations']}
     dependency_path = real_dependency_paths(nodes)
+    grouped = load_groups()
     page = site / 'cosine-primitive-graph.html'
     text = page.read_text()
     marker = 'const proofGraphData='
@@ -62,18 +81,13 @@ def enhance(site: Path, report_path: Path, statement_path: Path):
     for label, title, anchors in PICKS:
         modal = soup.find(id=label + '_modal')
         assert modal is not None, label
-        # Include all declarations linked by the actual blueprint statement,
-        # plus the proof anchors used to construct the contracted graph.
-        linked = [a['href'].split('#doc/')[-1] for a in modal.select('a.lean_decl')]
-        names = list(dict.fromkeys(linked + anchors))
-        if label == TARGET:
-            names = ['ComputableAnalysis.CosinePrimitive.Statement'] + anchors
+        # Keep graph landmarks fixed; show the explicitly curated constituent
+        # statements rather than a module dump or a one-at-a-time selector.
+        sections = grouped[label]
+        names = [name for group in sections.values() for name in group]
         records = []
         for name in names:
-            # Some contraction anchors are subdefinitions of the explicitly
-            # printed chapter declarations; only checked exported text is shown.
-            if name not in statements:
-                continue
+            assert name in statements, f"Unexported grouped declaration: {name}"
             d = dict(statements[name])
             assert name in nodes, name
             node = nodes[name]
@@ -89,11 +103,15 @@ def enhance(site: Path, report_path: Path, statement_path: Path):
             d['sourceUrl'] = url + path + (f"#L{span['start']}-L{span['end']}" if span else '')
             d['realDependencyPath'] = dependency_path(name)
             d['typeUsesReal'] = any(dependency_path(ref) for ref in d['typeRefs'])
+            d['routes'] = node['routes']
+            d['displayOnly'] = not node['routes']
             records.append(d)
         assert records, f'No elaborated statement for {label}'
         paths = {a: dependency_path(a) for a in anchors}
         details[label] = {'title': title.replace('\n', ' '), 'anchors': anchors,
-            'declarations': records, 'paths': paths,
+            'declarations': records, 'groups': [
+                {'title': title, 'names': names} for title, names in sections.items()],
+            'declarationCount': len(records), 'paths': paths,
             'classification': classify([bool(paths[a]) for a in anchors])}
     for key, dot in data['views'].items():
         g = pgv.AGraph(string=dot)
@@ -113,16 +131,26 @@ def enhance(site: Path, report_path: Path, statement_path: Path):
         data['views'][key] = g.string()
     data['nodeDetails'] = details
     data['info']['nodeDisplay'] = {
-        'version': 3, 'statementFirst': True, 'nodeLabelStyle': 'short prose titles; no equations', 'statementSource': 'Lean elaborated types (Meta.ppExpr)',
+        'version': 4, 'groupedStatements': True, 'statementFirst': True, 'nodeLabelStyle': 'short prose titles; no equations', 'statementSource': 'Lean elaborated types (Meta.ppExpr)',
         'mathlibRealRoot': 'Real',
         'dependencyRule': 'Transitive stored type/body references; proof alternatives classified separately',
-        'nativeFill': NATIVE, 'mathlibRealFill': MATHLIB}
+        'nativeFill': NATIVE, 'mathlibRealFill': MATHLIB,
+        'nodeCount': len(details),
+        'declarationOccurrences': sum(d['declarationCount'] for d in details.values()),
+        'uniqueDeclarations': len({r['name'] for d in details.values() for r in d['declarations']}),
+        'groupsSha256': hashlib.sha256((ROOT/'blueprint/three-proofs/node-groups.tsv').read_bytes()).hexdigest()}
+    data['info']['sourceManifest']['blueprint/three-proofs/node-groups.tsv'] = data['info']['nodeDisplay']['groupsSha256']
     # Assert the exact distinction the common theorem needs.
     target = details[TARGET]
     assert target['classification'] == 'mixed'
     assert not dependency_path('ComputableAnalysis.CosinePrimitive.Statement')
     assert [bool(target['paths'][a]) for a in target['anchors']] == [False, False, True]
     for label, item in details.items():
+        for record in item['declarations']:
+            path = record['realDependencyPath']
+            if path:
+                assert path[0] == record['name'] and path[-1] == 'Real'
+                assert all(dep in nodes[user]['refs'] for user, dep in zip(path, path[1:]))
         for anchor, path in item['paths'].items():
             if path:
                 assert path[0] == anchor and path[-1] == 'Real'
@@ -137,7 +165,7 @@ def enhance(site: Path, report_path: Path, statement_path: Path):
       <span><i class="fill-native"></i>No Mathlib ℝ dependency</span>
       <span><i class="fill-mathlib"></i>Depends on Mathlib ℝ</span>
       <span><i class="fill-mixed"></i>Depends on the chosen proof</span>
-      <span class="legend-help">Green borders still indicate checked statements. Click any node for its exact Lean statement; LaTeX explanation is optional.</span>
+      <span class="legend-help">Green borders still indicate checked statements. Click a broad node for its grouped Lean declarations; LaTeX explanation is optional.</span>
     </div>'''
     text = text.replace('<p class="proof-note">', legend + '<p class="proof-note">', 1)
     page.write_text(text)
@@ -145,8 +173,9 @@ def enhance(site: Path, report_path: Path, statement_path: Path):
     (assets/'node-details.json').write_text(json.dumps(details, indent=2)+'\n')
     (assets/'blueprint-statements.json').write_text(statement_path.read_text())
     (assets/'summary.json').write_text(json.dumps(data['info'], indent=2)+'\n')
-    (assets/'graph.css').write_text((ROOT/'blueprint/three-proofs/graph.css').read_text())
-    print('PASS: checked Lean statements, transitive Mathlib Real shading, and proof-sensitive common sink')
+    (assets/'graph.css').write_text((ROOT/'blueprint/three-proofs/graph.css').read_text() +
+                                     (ROOT/'blueprint/three-proofs/groups.css').read_text())
+    print('PASS: grouped checked Lean declarations, unchanged proof anchors, and per-declaration Real paths')
     print(json.dumps({k:v['classification'] for k,v in details.items()},indent=2))
 
 

@@ -50,8 +50,23 @@ partial def treeSize (e : Expr) : StateM (Std.HashMap Expr Nat) Nat := do
   modify (·.insert e n)
   return n
 
+/-- Display-only declarations are audited and exported without adding them to
+any proof's measured closure. The group manifest is shared with the UI export. -/
+def displayedNames : IO (Array Name) := do
+  let text ← IO.FS.readFile "../blueprint/three-proofs/node-groups.tsv"
+  let mut result : Array Name := #[]
+  for rawLine in text.splitOn "\n" do
+    let line := rawLine.trimAscii.toString
+    if line.isEmpty || line.startsWith "#" then continue
+    let fields := line.splitOn "\t"
+    unless fields.length == 4 do
+      throw (IO.userError s!"Invalid blueprint group row: {line}")
+    result := result.push fields[2]!.toName
+  return result
+
 run_cmd do
   let env ← getEnv
+  let displayed ← displayedNames
   let infos ← roots.mapM fun n => match env.find? n with
     | some ci => pure ci
     | none => throwError "Missing root {n}"
@@ -101,11 +116,11 @@ run_cmd do
       ("native",toJson (counts.getD "native" 0)),("bridge",toJson (counts.getD "bridge" 0)),
       ("mathlib",toJson (counts.getD "mathlib" 0)),("leanOrOther",toJson (counts.getD "leanOrOther" 0)),
       ("axioms",toJson (axs.map Name.toString))]
-  for n in companions do
+  for n in companions ++ displayed do
     let axs ← collectAxioms n
     if axs.contains `sorryAx then throwError "Admitted proof in companion {n}"
   logInfo "PASS: all proof and companion axiom audits exclude sorryAx"
-  let all := closure env (roots ++ companions).toList
+  let all := closure env (roots ++ companions ++ displayed).toList
   let mut nodes : Array Json := #[]
   for n in all do
     let some ci := env.find? n | throwError "Missing reference {n}"

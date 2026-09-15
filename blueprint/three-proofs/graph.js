@@ -27,101 +27,117 @@ function closeStatement() {
   if (returnFocus?.isConnected) returnFocus.focus({preventScroll:true});
 }
 
-function addLeanPanel(modal, id) {
-  const item = proofGraphData.nodeDetails?.[id];
-  if (!item) return;
-  const content = modal.querySelector('.dep-modal-content');
-  content.querySelector('.bp-lean-panel')?.remove();
+function declarationCard(record, highlighted) {
+  const card = element('article', undefined, 'bp-declaration-card');
+  const status = record.realDependencyPath.length ? 'mathlib' : 'native';
+  card.dataset.declaration = record.name;
+  card.dataset.foundation = status;
+  if (highlighted) card.classList.add('selected-route');
+  const bar = element('div', undefined, 'bp-lean-toolbar');
+  bar.append(element('h4', record.name.split('.').pop()));
+  const copy = element('button', 'Copy', 'bp-copy');
+  copy.type = 'button';
+  copy.setAttribute('aria-label', 'Copy '+record.name);
+  bar.append(copy); card.append(bar);
+  const pre = element('pre', undefined, 'bp-lean-code');
+  pre.tabIndex = 0;
+  pre.setAttribute('aria-label', 'Exact Lean declaration: '+record.name);
+  const code = element('code');
+  // These are the exported strings, not client-side paraphrases of the type.
+  code.textContent = record.kind+' '+record.name+':\n'+record.type
+    +(record.value !== null ? ' :=\n'+record.value : '');
+  code.dataset.declaration = record.name;
+  pre.append(code); card.append(pre);
+  copy.onclick = async () => {
+    try { await navigator.clipboard.writeText(code.textContent); copy.textContent='Copied'; }
+    catch (_) {
+      const range=document.createRange(); range.selectNodeContents(code);
+      const selection=window.getSelection(); selection.removeAllRanges();
+      selection.addRange(range); copy.textContent='Selected';
+    }
+  };
+  const footer = element('div', undefined, 'bp-card-footer');
+  const source = element('a', 'Pinned Lean source', 'bp-formal-source');
+  source.href=record.sourceUrl; source.target='_blank'; source.rel='noopener';
+  footer.append(source, element('span', status==='mathlib'?'Uses Mathlib ℝ':'Mathlib-free', 'foundation-badge '+status));
+  if (highlighted) footer.append(element('span','Selected proof route','bp-route-badge'));
+  card.append(footer);
+  if (record.displayOnly) {
+    card.append(element('p', 'Supporting/companion result: not a prerequisite in the three measured proof closures.', 'bp-note bp-companion-note'));
+  }
+  if (record.realDependencyPath.length) {
+    const details=element('details',undefined,'bp-dependency-details');
+    details.append(element('summary','Mathlib ℝ dependency path'));
+    const list=element('ol');
+    for (const name of record.realDependencyPath) list.append(element('li',name));
+    details.append(list);card.append(details);
+  }
+  return card;
+}
 
-  // Keep the genuine blueprint prose, but make the checked Lean declaration
-  // the first thing a click reveals. Moving DOM nodes preserves LaTeX markup.
-  let explanation = content.querySelector(':scope > .bp-math-explanation');
+function addLeanPanel(modal, id) {
+  const item=proofGraphData.nodeDetails?.[id];
+  if (!item) return;
+  const content=modal.querySelector('.dep-modal-content');
+  content.querySelector('.bp-lean-panel')?.remove();
+  // Preserve the original blueprint text, but keep the formal declarations first.
+  let explanation=content.querySelector(':scope > .bp-math-explanation');
   if (!explanation) {
-    explanation = element('details', undefined, 'bp-math-explanation');
-    explanation.append(element('summary', 'Mathematical explanation (LaTeX)'));
+    explanation=element('details',undefined,'bp-math-explanation');
+    explanation.append(element('summary','Mathematical explanation (LaTeX)'));
     for (const child of [...content.children]) {
       if (!child.classList.contains('dep-closebtn')) explanation.append(child);
     }
     content.append(explanation);
-    explanation.ontoggle = () => {
+    explanation.ontoggle=()=>{
       if (explanation.open && window.MathJax?.typesetPromise) {
         window.MathJax.typesetPromise([explanation]).catch(()=>{});
       }
     };
   }
-  explanation.open = false;
-  let heading = content.querySelector(':scope > .bp-statement-heading');
+  explanation.open=false;
+  let heading=content.querySelector(':scope > .bp-statement-heading');
   if (!heading) {
-    heading = element('h2', undefined, 'bp-statement-heading');
-    content.insertBefore(heading, explanation);
+    heading=element('h2',undefined,'bp-statement-heading');
+    content.insertBefore(heading,explanation);
   }
-  heading.textContent = item.title;
-
-  const panel = element('section', undefined, 'bp-lean-panel');
-  panel.setAttribute('aria-label', 'Exact checked Lean declaration');
-  const bar = element('div', undefined, 'bp-lean-toolbar');
-  const title = element('h3', 'Exact Lean statement');
-  const copy = element('button', 'Copy', 'bp-copy');
-  copy.type = 'button';
-  bar.append(title, copy);
-  panel.append(bar);
-  const pre = element('pre', undefined, 'bp-lean-code');
-  pre.tabIndex = 0;
-  pre.setAttribute('aria-label', 'Lean declaration, exported from the checked environment');
-  const code = element('code'); pre.append(code);
-  const source = element('a', 'Open pinned Lean source', 'bp-formal-source');
-  source.target = '_blank'; source.rel = 'noopener';
-  let selected = item.declarations[0];
-  if (id === 'thm:c3-primitive' && ['0','1','2'].includes(view)) {
-    selected = item.declarations.find(d => d.name === item.anchors[Number(view)]) || selected;
-  }
-  function display(record) {
-    selected = record;
-    // No paraphrase, hand-written equation, or client-side rewriting of types.
-    code.textContent = record.kind+' '+record.name+':\n'+record.type
-      +(record.value !== null ? ' :=\n'+record.value : '');
-    code.dataset.declaration = record.name;
-    source.href = record.sourceUrl;
-    pre.scrollTop = 0;
-    copy.textContent = 'Copy';
-  }
-  if (item.declarations.length > 1) {
-    const label = element('label', 'Declaration', 'bp-declaration-label');
-    const select = element('select'); select.setAttribute('aria-label','Lean declaration');
-    for (const record of item.declarations) {
-      const option = element('option', record.name); option.value = record.name; select.append(option);
+  heading.textContent=item.title;
+  const panel=element('section',undefined,'bp-lean-panel');
+  panel.setAttribute('aria-label','Grouped exact Lean declarations');
+  panel.append(element('p',item.declarations.length+' checked Lean declarations, grouped by their role in this node.','bp-group-count'));
+  const navigation=element('nav',undefined,'bp-group-navigation');
+  navigation.setAttribute('aria-label','Declaration groups');
+  const byName=new Map(item.declarations.map(record=>[record.name,record]));
+  const selectedName=id==='thm:c3-primitive'&&['0','1','2'].includes(view)
+    ? item.anchors[Number(view)] : null;
+  panel.append(navigation);
+  for (const [index,group] of item.groups.entries()) {
+    const section=element('section',undefined,'bp-declaration-group');
+    section.id=id+'-group-'+index;
+    section.dataset.group=group.title;
+    const title=element('h3',group.title+' ('+group.names.length+')','bp-group-heading');
+    section.append(title);
+    const link=element('a',group.title,'bp-group-link');
+    link.href='#'+section.id;
+    link.onclick=e=>{
+      e.preventDefault();
+      content.scrollTop+=section.getBoundingClientRect().top-content.getBoundingClientRect().top-16;
+      section.querySelector('pre')?.focus({preventScroll:true});
+    };
+    navigation.append(link);
+    for (const name of group.names) {
+      const record=byName.get(name);
+      if (!record) throw new Error('Missing checked declaration: '+name);
+      section.append(declarationCard(record,name===selectedName));
     }
-    select.value = selected.name;
-    select.onchange = () => display(item.declarations.find(d=>d.name===select.value));
-    label.append(select); panel.append(label);
+    panel.append(section);
   }
-  copy.onclick = async () => {
-    try { await navigator.clipboard.writeText(code.textContent); copy.textContent='Copied'; }
-    catch (_) { const range=document.createRange(); range.selectNodeContents(code); const selection=window.getSelection(); selection.removeAllRanges(); selection.addRange(range); copy.textContent='Selected'; }
-  };
-  panel.append(pre,source);
-  panel.append(element('p', 'Type text exported from Lean’s checked environment. Short definition bodies are included; theorem proof bodies are omitted.', 'bp-note'));
-  const status = nodeStatus(id);
-  const labels = {native:'No Mathlib ℝ dependency', mathlib:'Depends on Mathlib ℝ', mixed:'Mathlib ℝ only in the third proof'};
-  panel.append(element('p', labels[status], 'foundation-badge '+status));
-  if (id === 'thm:c3-primitive') {
-    panel.append(element('p', 'The common proposition is defined once. Choose a proof declaration above to see its exact type; all three prove that same proposition.', 'bp-note'));
+  panel.append(element('p','Types are exported from Lean’s checked environment. Selected definition bodies are included; theorem proof bodies are omitted. All declarations stay visible together—no one-at-a-time selector.','bp-note'));
+  if (id==='thm:c3-primitive') {
+    panel.append(element('p','The proposition and two native proofs are Mathlib-free. Only the Mathlib proof uses Mathlib’s reals; the background of each declaration records that distinction.','bp-note'));
   }
-  const paths = Object.entries(item.paths).filter(([_,path])=>path.length);
-  if (paths.length) {
-    const details = element('details', undefined, 'bp-dependency-details');
-    details.append(element('summary','Why this node has a Mathlib ℝ background'));
-    details.append(element('p','These are actual transitive references in stored declaration types or bodies—not import-list guesses.'));
-    for (const [name,path] of paths) {
-      details.append(element('p',name,'bp-dependency-name'));
-      const list=element('ol'); for (const dep of path) list.append(element('li',dep));
-      details.append(list);
-    }
-    panel.append(details);
-  }
-  content.insertBefore(panel, explanation);
-  display(selected);
-  content.scrollTop = 0;
+  content.insertBefore(panel,explanation);
+  content.scrollTop=0;
 }
 
 function showNode() {
