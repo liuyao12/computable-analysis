@@ -1,4 +1,6 @@
 # Blueprint node	Section heading	Lean declaration	Include definition body (yes/no)
+def:c3-intervals	Definitions	ComputableAnalysis.QInterval	no
+def:c3-intervals	Definitions	ComputableAnalysis.RealRaw	no
 def:c3-intervals	Definitions	ComputableAnalysis.RealRaw.ValidCompute	yes
 def:c3-intervals	Definitions	ComputableAnalysis.RealRaw.Valid	yes
 def:c3-intervals	Definitions	ComputableAnalysis.RealRaw.Equiv	yes
@@ -9,6 +11,13 @@ def:c3-intervals	Equivalence and refinement	ComputableAnalysis.RealRaw.allStages
 def:c3-intervals	Equivalence and refinement	ComputableAnalysis.RealRaw.equiv_trans	no
 def:c3-arctan	Geometric and rectangle computations	ComputableAnalysis.CosinePrimitive.A	yes
 def:c3-arctan	Geometric and rectangle computations	ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRaw	yes
+def:c3-arctan	Geometric and rectangle computations	ComputableAnalysis.ArctanGeometry.arctanGeom	yes
+def:c3-arctan	Geometric and rectangle computations	ComputableAnalysis.ArctanGeometry.positiveLoopRaw	yes
+def:c3-arctan	Geometric and rectangle computations	ComputableAnalysis.ArctanGeometry.positiveLoopComputeAtStage	yes
+def:c3-arctan	Geometric and rectangle computations	ComputableAnalysis.ArctanGeometry.arctanAreaLoopInitial	yes
+def:c3-arctan	Geometric and rectangle computations	ComputableAnalysis.ArctanGeometry.arctanAreaLoopState	yes
+def:c3-arctan	Geometric and rectangle computations	ComputableAnalysis.ArctanGeometry.integralKernel	yes
+def:c3-arctan	Geometric and rectangle computations	ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute	yes
 def:c3-arctan	Validity and agreement	ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRaw_valid	no
 def:c3-arctan	Validity and agreement	ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRaw_equiv_arctanGeom	no
 def:c3-pi	Definitions	ComputableAnalysis.CosinePrimitive.pi	yes
@@ -17,25 +26,45 @@ def:c3-pi	Validity and identification	ComputableAnalysis.CosinePrimitive.pi_vali
 def:c3-pi	Validity and identification	ComputableAnalysis.CosinePrimitive.pi_compute	no
 def:c3-pi	Validity and identification	ComputableAnalysis.CosinePrimitive.inversePi_compute	no
 def:c3-pi	Validity and identification	ComputableAnalysis.CosinePrimitive.inversePi_valid	no
+def:c3-pi	Validity and identification	ComputableAnalysis.TrigonometricReadback.pi_definition	no
+def:c3-pi	Validity and identification	ComputableAnalysis.TrigonometricReadback.pi_initial	no
 lem:c3-inverse	Computation and provider	ComputableAnalysis.ClosedArctanInverse.raw	yes
 lem:c3-inverse	Computation and provider	ComputableAnalysis.ClosedArctanInverse.search	no
 lem:c3-inverse	Computation and provider	ComputableAnalysis.ClosedArctanInverse.provider	no
+lem:c3-inverse	Computation and provider	ComputableAnalysis.ClosedArctanInverse.locate	yes
+lem:c3-inverse	Computation and provider	ComputableAnalysis.ClosedArctanInverse.center	yes
+lem:c3-inverse	Computation and provider	ComputableAnalysis.ClosedArctanInverse.candidate	yes
+lem:c3-inverse	Computation and provider	ComputableAnalysis.ClosedArctanInverse.radius	yes
+lem:c3-inverse	Computation and provider	ComputableAnalysis.ClosedArctanInverse.stabilized	yes
 lem:c3-inverse	Range, convergence, and inverse equation	ComputableAnalysis.ClosedArctanInverse.raw_valid	no
 lem:c3-inverse	Range, convergence, and inverse equation	ComputableAnalysis.ClosedArctanInverse.raw_unit	no
 lem:c3-inverse	Range, convergence, and inverse equation	ComputableAnalysis.ClosedArctanInverse.raw_width	no
 lem:c3-inverse	Range, convergence, and inverse equation	ComputableAnalysis.ClosedArctanInverse.image_overlaps	no
 lem:c3-inverse	Range, convergence, and inverse equation	ComputableAnalysis.ClosedArctanInverse.center_residual	no
 lem:c3-inverse	Range, convergence, and inverse equation	ComputableAnalysis.ClosedArctanInverse.centers_close	no
+lem:c3-inverse	Range, convergence, and inverse equation	ComputableAnalysis.ClosedArctanInverse.provider_compute	no
+def:c3-trig	Closed sine and cosine	ComputableAnalysis.CosinePrimitive.Domain	yes
+def:c3-trig	Closed sine and cosine	ComputableAnalysis.GeometricSineDerivative.OnHalf	yes
 def:c3-trig	Closed sine and cosine	ComputableAnalysis.CosinePrimitive.S	yes
 def:c3-trig	Closed sine and cosine	ComputableAnalysis.CosinePrimitive.C	yes
 def:c3-trig	Closed sine and cosine	ComputableAnalysis.CosinePrimitive.S_valid	no
 def:c3-trig	Closed sine and cosine	ComputableAnalysis.CosinePrimitive.C_valid	no
+def:c3-trig	Underlying inverse-arctangent definitions	ComputableAnalysis.CosineFTC.sine	yes
+def:c3-trig	Underlying inverse-arctangent definitions	ComputableAnalysis.CosineFTC.cosine	yes
 def:c3-trig	Underlying inverse-arctangent definitions	ComputableAnalysis.SinPiIntegral.sinPiRawOfArctan	yes
 def:c3-trig	Underlying inverse-arctangent definitions	ComputableAnalysis.SinPiIntegral.cosPiRawOfArctan	yes
 def:c3-trig	Underlying inverse-arctangent definitions	ComputableAnalysis.SinPiIntegral.rationalCircleSin	yes
 def:c3-trig	Underlying inverse-arctangent definitions	ComputableAnalysis.SinPiIntegral.rationalCircleCos	yes
+def:c3-trig	Underlying inverse-arctangent definitions	ComputableAnalysis.IntegralIdentities.ArctanInverseBisection.tangentRaw	yes
+def:c3-trig	Underlying inverse-arctangent definitions	ComputableAnalysis.IntegralIdentities.ArctanInverseBisection.tangentAt	yes
+def:c3-trig	Underlying inverse-arctangent definitions	ComputableAnalysis.SinPiIntegral.rationalCircleSinInterval	yes
+def:c3-trig	Underlying inverse-arctangent definitions	ComputableAnalysis.SinPiIntegral.rationalCircleCosInterval	yes
 def:c3-trig	Underlying validity certificates	ComputableAnalysis.SinPiIntegral.sinPiRawOfArctan_valid	no
 def:c3-trig	Underlying validity certificates	ComputableAnalysis.SinPiIntegral.cosPiRawOfArctan_valid	no
+def:c3-trig	Underlying validity certificates	ComputableAnalysis.TrigonometricReadback.sine_stage	no
+def:c3-trig	Underlying validity certificates	ComputableAnalysis.TrigonometricReadback.cosine_stage	no
+def:c3-trig	Underlying validity certificates	ComputableAnalysis.TrigonometricReadback.sine_outside_chart	no
+def:c3-trig	Underlying validity certificates	ComputableAnalysis.TrigonometricReadback.cosine_outside_chart	no
 def:c3-integral	Program and finite meshes	ComputableAnalysis.CosinePrimitive.integral	yes
 def:c3-integral	Program and finite meshes	ComputableAnalysis.CosineFTC.fixedMesh	yes
 def:c3-integral	Program and finite meshes	ComputableAnalysis.CosineFTC.error	yes
@@ -47,6 +76,8 @@ def:c3-integral	Finite-sum and refinement certificates	ComputableAnalysis.Cosine
 def:c3-integral	Finite-sum and refinement certificates	ComputableAnalysis.Integral.Dovetail.raw_contains_mesh	no
 def:c3-integral	Finite-sum and refinement certificates	ComputableAnalysis.Integral.Dovetail.raw_valid	no
 def:c3-integral	Finite-sum and refinement certificates	ComputableAnalysis.Integral.Dovetail.raw_equiv_endpoint	no
+def:c3-integral	Finite-sum and refinement certificates	ComputableAnalysis.TrigonometricReadback.integral_stage	no
+def:c3-integral	Finite-sum and refinement certificates	ComputableAnalysis.TrigonometricReadback.integral_initial_half	no
 lem:c3-direct	Finite geometric estimates	ComputableAnalysis.GeometricSineFiniteBounds.finite_normalized_residual	no
 lem:c3-direct	Finite geometric estimates	ComputableAnalysis.GeometricSineDirectBounds.positive_increment_error	no
 lem:c3-direct	Telescoping and endpoint comparison	ComputableAnalysis.FiniteRiemannAlgebra.telescope_bound	no
@@ -117,6 +148,9 @@ lem:c3-mftc	Mathlib integration theorems	integral_cos	no
 lem:c3-mftc	Mathlib integration theorems	intervalIntegral.mul_integral_comp_mul_left	no
 lem:c3-mftc	Normalized primitive formula	MathlibComparison.mathlib_cosine_primitive	no
 thm:c3-primitive	One common proposition	ComputableAnalysis.CosinePrimitive.Statement	yes
+thm:c3-primitive	One common proposition	ComputableAnalysis.CosinePrimitive.endpoint	yes
+thm:c3-primitive	One common proposition	ComputableAnalysis.TrigonometricReadback.endpoint_definition	no
+thm:c3-primitive	One common proposition	ComputableAnalysis.TrigonometricReadback.endpoint_initial_half	no
 thm:c3-primitive	Three alternative proofs	ComputableAnalysis.CosinePrimitive.viaInequalities	no
 thm:c3-primitive	Three alternative proofs	ComputableAnalysis.CosinePrimitive.viaFTC	no
 thm:c3-primitive	Three alternative proofs	ComputableAnalysis.CosinePrimitive.viaMathlib	no

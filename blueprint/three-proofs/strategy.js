@@ -7,14 +7,20 @@ addLeanPanel = function(modal,id) {
   const item=proofGraphData.nodeDetails[id],guide=item.strategy;
   if(!guide)return;
   const panel=modal.querySelector('.bp-lean-panel');
+  for(const record of item.declarations){
+    const card=[...panel.querySelectorAll('.bp-declaration-card')].find(c=>c.dataset.declaration===record.name);
+    if(!card||!record.ownerModule)continue;
+    card.querySelector('.bp-card-footer').after(element('p','Namespace: '+(record.namespace||'(root)')+' · Source module: '+record.ownerModule,'bp-note bp-provenance'));
+    if(record.namespace==='ComputableAnalysis.CosinePrimitive' && ['A','pi','inversePi','S','C','integral','endpoint'].includes(record.name.split('.').pop()))
+      card.append(element('p','CosinePrimitive is a namespace, not a call to the primitive theorem. This definition is in the proof-independent data module.','bp-note bp-namespace'));
+    const note=card.querySelector('.bp-companion-note');
+    if(note)note.textContent='Shown for explanation; not referenced by name in the three measured proof closures. A definitionally identical underlying program may still be used.';
+  }
   const strategy=element('section',undefined,'bp-strategy');
   strategy.append(element('strong',guide.role),element('p',guide.summary));
   if(guide.formula){
     const relation=element('details',undefined,'bp-key-relation');
-    // Standard MathJax TeX has no stmaryrd double-bracket commands.
-    // This affects explanatory LaTeX only, never the exact Lean snippets.
-    const formula=guide.formula.replaceAll('\\llbracket','\\lbrack\\!\\lbrack')
-      .replaceAll('\\rrbracket','\\rbrack\\!\\rbrack');
+    const formula=guide.formula.replaceAll('\\llbracket','\\lbrack\\!\\lbrack').replaceAll('\\rrbracket','\\rbrack\\!\\rbrack');
     relation.append(element('summary','Key relation (LaTeX)'),element('div','\\['+formula+'\\]'));
     relation.ontoggle=()=>{if(relation.open&&window.MathJax?.typesetPromise)window.MathJax.typesetPromise([relation]).catch(()=>{});};
     strategy.append(relation);

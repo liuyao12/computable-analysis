@@ -20,11 +20,11 @@ TARGET='thm:c3-primitive'
 PICKS=[
  ('def:c3-rationals','Rational numbers (ℚ)',['Rat']),
  ('def:c3-mreal','Mathlib real numbers',['Real','Real.ofCauchy']),
- ('def:c3-intervals','Nested rational intervals',[N+'RealRaw.Valid',N+'RealRaw.Equiv']),
- ('def:c3-arctan','Geometric arctangent',[N+'CosinePrimitive.A',N+'ArctanGeometry.arctanGeom']),
+ ('def:c3-intervals','Nested rational intervals',[N+'RealRaw',N+'QInterval',N+'RealRaw.Valid',N+'RealRaw.Equiv']),
+ ('def:c3-arctan','Geometric arctangent',[N+'CosinePrimitive.A',N+'ArctanGeometry.arctanGeom',N+'ArctanGeometry.arctanIntegralRectangleRaw']),
  ('def:c3-pi','Arctangent definition of pi',[N+'CosinePrimitive.pi']),
  ('lem:c3-inverse','Closed arctangent inverse',[N+'ClosedArctanInverse.provider']),
- ('def:c3-trig','Native sine and cosine',[N+'CosinePrimitive.S',N+'CosineFTC.cosine']),
+ ('def:c3-trig','Native sine and cosine',[N+'CosinePrimitive.S',N+'CosinePrimitive.C',N+'CosineFTC.sine',N+'CosineFTC.cosine',N+'SinPiIntegral.sinPiRawOfArctan',N+'SinPiIntegral.cosPiRawOfArctan']),
  ('def:c3-integral','Cosine integral computation',[N+'CosinePrimitive.integral']),
  ('lem:c3-direct','Finite geometric inequalities',[N+'CosineFTC.fixedMesh_overlaps_endpoint']),
  ('lem:c3-concavity','Concavity and secant data',[N+'GeometricSineConcavity.primitiveDerivativeData']),
@@ -165,7 +165,7 @@ def main():
     link='<div style="padding:10px 20px"><a href="cosine-primitive-graph.html">Three proofs of one cosine primitive — focused blueprint graph</a></div>'
     source.write_text(original.replace('</header>','</header>'+link,1))
     assert 'cosine-primitive-graph.html' in (args.site/'index.html').read_text()
-    print('PASS: common rational root, separate proof lanes, one shared sink, acyclic routes, and witnessed dependencies')
+    print('PASS: one shared sink; three acyclic routes; all displayed paths witnessed; all chapter Lean names audited')
     print(json.dumps({k:v for k,v in info.items() if k not in ['sourceManifest','metrics']},indent=2))
 
 if __name__=='__main__':main()

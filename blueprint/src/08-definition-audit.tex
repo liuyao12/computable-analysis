@@ -1,0 +1,54 @@
+\chapter{Auditing Definitions and Declaration Bundles}\label{ch:definition-audit}
+
+\href{cosine-primitive-graph.html}{The focused graph} retains one mathematical
+conclusion and several declarations inside each broad node. A bundle is a
+presentation choice, not a newly defined Lean object or an axiom. Its original
+declaration names, source modules, and checked types remain visible.
+
+\section{A namespace is not an input}
+\code{ComputableAnalysis.CosinePrimitive.pi} is defined in
+\code{CosinePrimitiveData.lean} as four times geometric arctangent at one.
+The namespace \code{CosinePrimitive} does not refer to the primitive theorem.
+In particular, the same independently defined pi is supposed to occur in the
+endpoint statement. No cosine integral is used in its definition.
+
+The audit traverses the full stored declaration closures for $A$, pi, $S$,
+$C$, and the integral, and rejects any reference to the endpoint statement,
+the endpoint program, or its proof routes. The pi closure also excludes
+sine, cosine and the inverse provider. This is stronger than checking the
+spelling of the definition alone. The raw inverse uses arctangent rectangles;
+the provider also carries certificates mentioning earlier pi identities.
+Those certificate dependencies are not numerical calls to pi.
+
+\section{The exact first-quadrant algorithms}
+Let $U_n$ be the literal output of \code{ClosedArctanInverse.raw (2*x)} at
+stage $n$, and let $s(u)=2u/(1+u^2)$ and $c(u)=(1-u^2)/(1+u^2)$.
+The readback theorems \code{TrigonometricReadback.sine\_stage} and
+\code{TrigonometricReadback.cosine\_stage} are proved by reduction and state
+\[
+ S(x)_n=[s(U_n^-),s(U_n^+)],\qquad
+ C(x)_n=[c(U_n^+),c(U_n^-)].
+\]
+The cosine endpoint order is reversed. These statements have the hypothesis
+that $x$ is rational and $0\le x\le1/2$. The displayed wrappers return zero
+outside this chart; they are not the global trigonometric extensions.
+
+The literal integral stage reads only the fixed cosine sums and their
+rational error radii. At $t=1/2$ its initial box is $[-1000,2001/2]$; the
+separate endpoint program initially returns $[0,1/2]$. These concrete Lean
+checks demonstrate that the programs are not definitionally identical.
+Their eventual equality of represented values is the substantive theorem.
+
+\section{Machine checks on an AI-curated view}
+Each bundle's graph anchors must be among its displayed declarations. Arrows
+contract actual declaration-reference paths, and each path is checked.
+Anchors include the underlying sine and cosine constructors, not only wrapper
+names: the Mathlib value bridges must visibly depend on those native
+constructors. Definition readbacks and explanatory companions do not become
+prerequisites of the measured proof terms merely by being displayed.
+
+The \href{three-proofs/definition-audit.json}{definition and bundle audit}
+records the checked closures and paths. It is not a claim that a contracted
+graph is a minimal mathematical basis. Statement/type references and
+proof/definition references are both part of the exported declaration graph;
+a namespace prefix by itself is neither.

@@ -44,7 +44,7 @@ jobs:
             comparison-package-${{ hashFiles('comparison/lean-toolchain', 'comparison/lakefile.toml') }}-
       - name: Build native basepoint proofs and exponential companion
         run: |
-          lake build ComputableAnalysis.CosinePrimitive ComputableAnalysis.RotationSeries
+          lake build ComputableAnalysis.CosinePrimitive ComputableAnalysis.RotationSeries ComputableAnalysis.TrigonometricReadback
           python3 blueprint/checks/check_two_cosine_proofs.py
           python3 comparison/checks/check_boundary.py
       - name: Resolve pinned comparison imports
@@ -78,6 +78,7 @@ jobs:
           python3 blueprint/checks/build_three_proof_graph.py
           python3 blueprint/checks/enhance_blueprint_nodes.py
           python3 blueprint/checks/add_proof_strategy.py
+          python3 blueprint/checks/audit_blueprint_definitions.py
           python3 blueprint/checks/build_proof_bench.py
           python3 blueprint/checks/test_proof_bench.py
       - name: Test Lean statement boxes and Mathlib Real shading
@@ -86,6 +87,7 @@ jobs:
           node blueprint/checks/test_lean_highlight.cjs
           python3 blueprint/checks/test_statement_boxes.py
           python3 blueprint/checks/test_proof_bench_browser.py
+          python3 blueprint/checks/test_definition_panels.py
       - name: Retain verified sources and audit
         run: |
           git archive --format=tar.gz HEAD > /tmp/three-proof-sources.tar.gz
