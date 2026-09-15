@@ -1,9 +1,7 @@
 name: Publish verified proof blueprint
 
-# Documentation-only publication. This workflow does not merge or execute
-# the theorem branch: it publishes a specific already-checked static artifact.
-# Update both pinned values to publish a different verified build. The source
-# artifact must still be retained by GitHub Actions when this workflow runs.
+# Documentation-only publication of an already verified static artifact.
+# No theorem branch is merged and no Pages protection is changed.
 on:
   push:
     branches: [main]
@@ -21,14 +19,15 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  SOURCE_RUN: '34823285443'
-  SOURCE_SHA: '0fd66644960695cb44589ce6c6226375ca3c4c88'
+  SOURCE_RUN: '34921041583'
+  SOURCE_SHA: 'd456dfc21acdca882cdd3508cba473b2142e7638'
 
 jobs:
   prepare:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - name: Verify the source build and proof-audit steps
+      - name: Verify source proofs, audit, and blueprint build
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -44,16 +43,18 @@ jobs:
           run_id = os.environ['SOURCE_RUN']
           run = get('/actions/runs/' + run_id)
           assert run['head_sha'] == os.environ['SOURCE_SHA'], 'Wrong source commit'
-          assert run['name'] == 'Build blueprint pages', 'Wrong source workflow'
+          assert run['name'] == 'Three-proof blueprint', 'Wrong source workflow'
+          assert run['conclusion'] == 'success', 'Source run did not pass'
           jobs = get('/actions/runs/' + run_id + '/jobs')['jobs']
-          build = next(j for j in jobs if j['name'] == 'build')
-          assert build['conclusion'] == 'success', 'Static build not verified'
+          build = next(j for j in jobs if j['name'] == 'verify')
+          assert build['conclusion'] == 'success', 'Source build did not pass'
           steps = {s['name']: s['conclusion'] for s in build['steps']}
-          for step in ['Check both proofs and their independence',
-                       'Extract actual declaration dependencies and proof measurements',
-                       'Build blueprint and measured graph']:
-              assert steps[step] == 'success', 'Required verification did not pass: ' + step
-          print('Verified static artifact source', run['head_sha'])
+          for step in ['Build native basepoint proofs and exponential companion',
+                       'Build all three proofs in one environment',
+                       'Check identical statement and independent proof routes',
+                       'Render blueprint and test the three-route graph']:
+              assert steps[step] == 'success', 'Missing verification: ' + step
+          print('Verified proof and blueprint source:', run['head_sha'])
           PY
       - uses: actions/download-artifact@v8
         with:
@@ -61,24 +62,104 @@ jobs:
           run-id: ${{ env.SOURCE_RUN }}
           github-token: ${{ github.token }}
           path: downloaded
-      - name: Inspect the static site snapshot
+      - name: Inspect the static snapshot and preserve old bookmarks
         run: |
           python3 - <<'PY'
           import json, os, pathlib, tarfile
           with tarfile.open('downloaded/artifact.tar') as archive:
               archive.extractall('site', filter='data')
           root = pathlib.Path('site')
-          summary = json.loads((root/'proof-comparison/summary.json').read_text())
+          summary = json.loads((root/'three-proofs/summary.json').read_text())
           assert summary['sourceCommit'] == os.environ['SOURCE_SHA']
-          assert all(summary['verification'].values())
+          assert all(summary['checks'].values())
+          assert len(summary['metrics']) == 3
           assert (root/'dep_graph_document.html').is_file()
-          assert 'proof-comparison/index.html' in (root/'index.html').read_text()
-          print('Validated static site and measured theorem source')
+          assert (root/'ch-three-cosine-proofs.html').is_file()
+          assert 'cosine-primitive-graph.html' in (root/'index.html').read_text()
+          graph = (root/'cosine-primitive-graph.html').read_text()
+          assert graph.count('id="thm:c3-primitive_modal"') == 1
+          def redirect(path, target):
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_text('<!doctype html><html><head><meta charset="utf-8">'
+                  '<meta http-equiv="refresh" content="0;url=' + target + '">'
+                  '<title>Three proofs of one cosine primitive</title></head><body>'
+                  '<p>The updated blueprint is at <a href="' + target + '">'
+                  'Three proofs of one cosine primitive</a>.</p></body></html>')
+          redirect(root/'proof-comparison/index.html', '../cosine-primitive-graph.html')
+          redirect(root/'ch-two-cosine-proofs.html', 'ch-three-cosine-proofs.html')
+          print('Validated one target statement, three proofs, and source revision')
           PY
+      - name: Browser-test the actual rendered blueprint
+        run: |
+          python3 -m pip install playwright
+          python3 - <<'PY'
+          import shutil, subprocess, sys
+          if not any(shutil.which(n) for n in ['google-chrome','chromium','chromium-browser']):
+              subprocess.run([sys.executable,'-m','playwright','install','--with-deps','chromium'],check=True)
+          PY
+          python3 - <<'PY'
+          import functools, http.server, json, pathlib, shutil, threading
+          from playwright.sync_api import sync_playwright
+          root = pathlib.Path('site').resolve()
+          handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(root))
+          server = http.server.ThreadingHTTPServer(('127.0.0.1',0),handler)
+          threading.Thread(target=server.serve_forever,daemon=True).start()
+          base = 'http://127.0.0.1:' + str(server.server_port)
+          pathlib.Path('browser-report').mkdir(exist_ok=True)
+          with sync_playwright() as p:
+              executable = next((shutil.which(n) for n in ['google-chrome','chromium','chromium-browser'] if shutil.which(n)),None)
+              options = {'headless':True,'args':['--no-sandbox']}
+              if executable: options['executable_path'] = executable
+              browser = p.chromium.launch(**options)
+              page = browser.new_page(viewport={'width':1440,'height':1100})
+              errors = []
+              page.on('pageerror',lambda error: errors.append(str(error)))
+              page.goto(base+'/cosine-primitive-graph.html',wait_until='domcontentloaded')
+              page.wait_for_function("document.querySelectorAll('#graph .node').length === 16",timeout=60000)
+              page.screenshot(path='browser-report/desktop.png',full_page=True)
+              counts = {}
+              for key, expected in [('0',8),('1',9),('2',13),('companions',17),('all',16)]:
+                  page.locator('[data-view="'+key+'"]').click()
+                  page.wait_for_function('(n) => document.querySelectorAll("#graph .node").length === n',arg=expected,timeout=30000)
+                  page.wait_for_timeout(250)
+                  counts[key] = page.locator('#graph .node').count()
+                  assert page.locator('#graph .node').filter(has_text='thm:c3-primitive').count() == 1
+              target = page.locator('#graph .node').filter(has_text='thm:c3-primitive')
+              target.click()
+              modal = page.locator('[id="thm:c3-primitive_modal"]')
+              modal.wait_for(state='visible')
+              assert modal.locator('.proof-source-links a').count() == 3
+              assert 'd456dfc21acdca882cdd3508cba473b2142e7638' in modal.locator('.proof-source-links a').first.get_attribute('href')
+              page.keyboard.press('Escape')
+              page.locator('#graph .edge').first.click()
+              page.locator('#proof-edge-dialog').wait_for(state='visible')
+              assert page.locator('#proof-edge-content li').count() >= 2
+              page.locator('#proof-edge-close').click()
+              page.locator('#proof-fit').click()
+              page.set_viewport_size({'width':390,'height':850})
+              page.reload(wait_until='domcontentloaded')
+              page.wait_for_function("document.querySelectorAll('#graph .node').length === 16",timeout=60000)
+              page.screenshot(path='browser-report/mobile.png',full_page=True)
+              assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth + 2'), 'Mobile page overflows horizontally'
+              page.goto(base+'/proof-comparison/',wait_until='domcontentloaded')
+              page.wait_for_url('**/cosine-primitive-graph.html')
+              assert not errors, errors
+              pathlib.Path('browser-report/results.json').write_text(json.dumps({'routeNodeCounts':counts,'javascriptErrors':errors,'passed':True},indent=2))
+              print('PASS: three route filters, one theorem sink, proof source links, node/edge modals, mobile layout, and old bookmark redirect')
+              browser.close()
+          server.shutdown()
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: three-proof-browser-report
+          path: browser-report
+          retention-days: 30
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v5
         with:
           path: site
+          retention-days: 7
 
   deploy:
     needs: prepare
@@ -89,29 +170,33 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify the live proof comparison
+      - name: Verify the live shared-sink blueprint
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
           python3 - <<'PY'
           import json, os, time, urllib.request
           sha = os.environ['SOURCE_SHA']
-          url = os.environ['PAGE_URL'].rstrip('/') + '/proof-comparison/summary.json?source=' + sha
+          base = os.environ['PAGE_URL'].rstrip('/')
+          url = base + '/three-proofs/summary.json?source=' + sha
           last = None
           for attempt in range(12):
               try:
-                  with urllib.request.urlopen(url, timeout=20) as response:
+                  with urllib.request.urlopen(url,timeout=20) as response:
                       data = json.load(response)
-                  if data['sourceCommit'] == sha:
-                      print('LIVE:', os.environ['PAGE_URL'].rstrip('/') + '/proof-comparison/')
-                      print('Verified measured source:', data['sourceCommit'])
-                      print('Direct and FTC project closures:', data['summary']['direct']['projectDeclarations'],
-                            data['summary']['ftc']['projectDeclarations'])
-                      break
-                  last = data['sourceCommit']
+                  if data['sourceCommit'] != sha:
+                      raise ValueError('Unexpected source revision: '+data['sourceCommit'])
+                  assert all(data['checks'].values()) and len(data['metrics']) == 3
+                  with urllib.request.urlopen(base+'/cosine-primitive-graph.html?source='+sha,timeout=20) as response:
+                      graph = response.read().decode()
+                  assert graph.count('id="thm:c3-primitive_modal"') == 1
+                  print('LIVE:',base+'/cosine-primitive-graph.html')
+                  print('Verified measured source:',data['sourceCommit'])
+                  print('Three proof roots:',[m['proof'] for m in data['metrics']])
+                  break
               except Exception as exc:
                   last = str(exc)
-              time.sleep(5)
+                  time.sleep(5)
           else:
-              raise SystemExit('Live publication verification failed: ' + str(last))
+              raise SystemExit('Live publication verification failed: '+str(last))
           PY
