@@ -27,9 +27,29 @@ function showBundle(id){
  if(id==='thm:c3-primitive'){const a=node('a','Compare the size and dependencies of these proofs ↗','map-compare');a.href='proof-bench/';a.target='_top';panel.append(a);}
  const p=node('p','Proof snapshot '+model.proofSourceCommit.slice(0,12),'');p.id='map-status';panel.append(p);
 }
-function showEdge(raw){const [s,t]=raw.split('->');const paths=model.witnesses.filter(e=>e.source===s&&e.target===t&&(route==='all'||String(e.route)===route));const p=$('#map-detail');p.replaceChildren(node('span','VERIFIED REFERENCE PATH','role'),node('h2','Why this arrow is here'),node('p','An overview edge can pass through hidden declarations. Each step below is an actual stored reference, shown prerequisite first.','strategy'));
- for(const e of paths){p.append(node('h3',e.route===null?'Companion':['Direct','Native FTC','Mathlib'][e.route]));const list=node('ol',undefined,'edge-list');for(const name of e.witness)list.append(node('li',name));p.append(list);}
- if(!paths.length)p.append(node('p','No witness for this display edge.','map-missing'));
+function showEdge(raw){
+ const [s,t]=raw.split('->');
+ const paths=model.witnesses.filter(e=>e.source===s&&e.target===t&&
+   (e.kind==='statement'||route==='all'||String(e.route)===route));
+ const statement=paths.some(e=>e.kind==='statement'),proof=paths.some(e=>e.kind==='proof');
+ const panel=$('#map-detail');
+ panel.replaceChildren(node('span',statement?'USED IN THE STATEMENT':proof?'USED IN A PROOF':'CONSTRUCTING THE OBJECTS','role'),
+   node('h2',statement?'What the theorem is about':proof?'A step in the proof':'A definition dependency'));
+ panel.append(node('p',statement?
+   'These gray dashed arrows explain the objects occurring in the common proposition. Their paths unfold definitions only; no proof of the theorem is used. They remain visible in every proof route.':proof?
+   'This colored arrow records use in a proof or certificate body, not merely a reference in its theorem type. Intermediate declarations can be hidden by the bundle. It does not assert that this prerequisite is logically indispensable.':
+   'This neutral arrow belongs to the construction of an object or to the type of a declaration, rather than a chosen proof route.','strategy'));
+ for(const e of paths){
+  const label=e.kind==='statement'?({S:'Sine in the endpoint',C:'Cosine in the integral',pi:'The arctangent-defined pi',integral:'The integral computation'}[e.input]):
+    e.route===null?'Companion':['Direct','Native FTC','Mathlib'][e.route];
+  panel.append(node('h3',label));
+  if(e.note)panel.append(node('p',e.note,'strategy'));
+  const details=node('details'),list=node('ol',undefined,'edge-list');
+  details.append(node('summary','Exact declaration path'));
+  for(const name of e.witness)list.append(node('li',name));
+  details.append(list);panel.append(details);
+ }
+ if(!paths.length)panel.append(node('p','No witness for this display edge.','map-missing'));
 }
 function useBox(){svg?.setAttribute('viewBox',box.join(' '));}
 function zoom(f){box=[box[0]+box[2]*(1-f)/2,box[1]+box[3]*(1-f)/2,box[2]*f,box[3]*f];useBox();}

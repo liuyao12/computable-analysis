@@ -5,6 +5,7 @@ import argparse,hashlib,html,json,re,shutil,subprocess
 from pathlib import Path
 from bs4 import BeautifulSoup
 import pygraphviz as pgv
+from proof_semantics import prepare as separate_statement_and_proof
 ROOT=Path(__file__).resolve().parents[1]
 
 CHAPTERS=[('ch-foundations.html','01','Numbers and functions'),
@@ -124,6 +125,7 @@ def main():
     graphtext=(source/'cosine-primitive-graph.html').read_text()
     at=graphtext.index('const proofGraphData=')+len('const proofGraphData=')
     g,_=json.JSONDecoder().raw_decode(graphtext[at:]);sha=args.commit or g['info']['sourceCommit']
+    g=separate_statement_and_proof(g,ROOT/'comparison/reports/proof-bench-raw.json')
     book=site/'reading';book.mkdir(exist_ok=True)
     preserved=json.loads((ROOT/'book/preserved-chapters.json').read_text())
     for p,h in preserved['files'].items():assert hashlib.sha256((ROOT/p).read_bytes()).hexdigest()==h
@@ -147,7 +149,12 @@ def main():
         sv['role']='img'
         for node in sv.select('g.node'):
             title=node.find('title').get_text();node['data-node']=title;node['tabindex']='0';node['role']='button';node['aria-label']=g['nodeDetails'].get(title,{}).get('title',title)
-        for edge in sv.select('g.edge'):edge['data-edge']=edge.find('title').get_text();edge['tabindex']='0';edge['role']='button';edge['aria-label']='Inspect dependency path'
+        for edge in sv.select('g.edge'):
+            edge['data-edge']=edge.find('title').get_text();edge['tabindex']='0';edge['role']='button'
+            classes=edge.get('class',[])
+            kind='statement' if 'statement-edge' in classes else 'proof' if 'proof-edge' in classes else 'construction'
+            edge['data-edge-kind']=kind
+            edge['aria-label']='Inspect '+kind+' dependency path'
         (book/f'cosine-{view}.svg').write_text(str(sv));svgviews[view]=f'reading/cosine-{view}.svg'
     catalog={'thm:c3-primitive':{'id':'thm:c3-primitive','title':'The cosine primitive','checkedComparison':True,'status':'Three checked proofs of the same proposition','page':'cosine.html','views':svgviews}}
     protection={}
@@ -184,8 +191,8 @@ def main():
         nodes.append({'id':'conclusion','title':c['title'],'mathHtml':c['statement'],'text':'Original manuscript statement. A paired Lean proof comparison has not been registered for this theorem.'})
         if c['outline']:edges.append([f'step-{len(c["outline"])-1}','conclusion'])
         c['nodes']=nodes;c['edges']=edges
-    (book/'maps.json').write_text(json.dumps({'sourceCommit':sha,'proofSourceCommit':g['info']['sourceCommit'],'theorems':catalog,'bundles':g['nodeDetails'],'witnesses':g['witnesses'],'checks':g['info']['checks']},separators=(',',':')))
-    for file in ['book.css','book.js','graph.js','graph.html']:
+    (book/'maps.json').write_text(json.dumps({'sourceCommit':sha,'proofSourceCommit':g['info']['sourceCommit'],'theorems':catalog,'bundles':g['nodeDetails'],'witnesses':g['witnesses'],'edgeSemantics':g['info']['edgeSemantics'],'checks':g['info']['checks']},separators=(',',':')))
+    for file in ['book.css','book.js','graph.js','graph.html','proof-edges.css']:
         dest=site/'proof-map.html' if file=='graph.html' else book/file
         shutil.copyfile(ROOT/'book/assets'/file,dest)
     shutil.copyfile(ROOT/'blueprint/three-proofs/lean-highlight.js',book/'lean-highlight.js')
@@ -201,6 +208,7 @@ def main():
       'theoremMaps':len(catalog),'checkedPairedMaps':sum(c['checkedComparison'] for c in catalog.values()),
       'preservedFirstTwo':all(v['identicalMathematicalText'] for v in protection.values()),
       'noncomputableInventory':inv['nativeSourceNoncomputableCount'],'compilerAuditPresent':not audit.get('pending',False),
+      'edgeSemanticsVersion':1,
       'kind':'Mathematical reader; older detailed blueprint preserved under reference/.'}
     (book/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
     print(json.dumps(manifest,indent=2))
