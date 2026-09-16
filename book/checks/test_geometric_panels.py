@@ -5,7 +5,7 @@ from collections import Counter
 from fractions import Fraction as Q
 import hashlib,json,sys
 from PIL import Image
-from bs4 import BeautifulSoup
+import xml.etree.ElementTree as ET
 ROOT=Path(__file__).resolve().parents[2];SITE=ROOT/'blueprint/web'
 
 def verify():
@@ -27,12 +27,16 @@ def verify():
     for b in details.values():
         assert [n for g in b['groups'] for n in g['names']]==[d['name'] for d in b['declarations']]
     for view,file in maps['theorems']['thm:c3-primitive']['views'].items():
-        doc=BeautifulSoup((SITE/file).read_text(),'xml')
-        assert not doc.select('[data-node="lem:c3-inverse"]')
-        assert len(doc.select('[data-node="thm:c3-primitive"]'))==1
-        assert not any('Native' in x.get_text() for x in doc.select('g.node text') if 'exponential' not in x.get_text())
-        for e in doc.select('[data-edge]'):
-            a,b=e['data-edge'].split('->');assert a!=b
+        doc=ET.parse(SITE/file)
+        visible=[e for e in doc.iter() if e.get('data-node')]
+        assert not any(e.get('data-node')=='lem:c3-inverse' for e in visible)
+        assert sum(e.get('data-node')=='thm:c3-primitive' for e in visible)==1
+        for node in visible:
+            labels=[''.join(e.itertext()) for e in node.iter() if e.tag.rsplit('}',1)[-1]=='text']
+            assert not any('Native' in text for text in labels if 'exponential' not in text)
+        for e in doc.iter():
+            if not e.get('data-edge'):continue
+            a,b=e.get('data-edge').split('->');assert a!=b
             assert any(w['source']==a and w['target']==b for w in maps['witnesses'])
     path=SITE/'reading/animations';r=json.loads((path/'manifest.json').read_text())
     for n in ['arctan','concave']:
