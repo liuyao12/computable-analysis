@@ -1,0 +1,35 @@
+/* The persistent comparison belongs to the map, not a separate dashboard. */
+.graph-page{display:flex;flex-direction:column;height:100vh;height:100dvh}
+.map-header,.map-toolbar{flex-shrink:0}
+.graph-page .map-workspace{flex:1;min-height:0;height:auto}
+.pm-comparison{flex-shrink:0;padding:9px 20px 8px;border-bottom:1px solid var(--line);background:#faf9f5;font:12px/1.4 system-ui;max-height:48vh;overflow:auto}
+.pm-controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px 18px;margin-bottom:8px}
+.pm-controls>strong{font-weight:600;color:#536b59;font-size:11px}
+.pm-controls label{display:flex;align-items:center;gap:6px;font-size:10px;color:#748170}
+.pm-controls select{font:11px system-ui;border:1px solid #d7dfd2;border-radius:3px;background:#fff;padding:4px 7px;max-width:230px}
+.pm-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pm-card{background:#f0f4ed;border:1px solid #dce4d6;border-radius:4px;padding:7px 12px}
+.pm-card[data-pm-route=mathlib]{background:#f2edf8;border-color:#e0d5ea}
+.pm-card.pm-active{outline:2px solid #9caf99;outline-offset:-2px}
+.pm-card[data-pm-route=mathlib].pm-active{outline-color:#b3a0c5}
+.pm-card h2{font-size:11px;font-weight:500;margin:0 0 3px;color:#536653}
+.pm-numbers{font-size:11px;margin:0;line-height:1.5;font-variant-numeric:tabular-nums}
+.pm-numbers strong{font-size:17px;font-weight:600}
+.pm-numbers br{display:none}.pm-numbers br:after{content:' '}.pm-numbers .pm-loc{margin-left:18px}
+.pm-coverage{font-size:9px;margin:3px 0 0;color:#7d8977}
+.pm-more{margin-top:6px}.pm-more>summary{cursor:pointer;font-size:10px;color:#5d755b;padding:3px 0}
+.pm-table-scroll{overflow-x:auto;margin:8px 0;max-width:100%}
+.pm-table-scroll table{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums}
+.pm-table-scroll th,.pm-table-scroll td{padding:6px 9px;text-align:left;border-bottom:1px solid #e0e4da}
+.pm-table-scroll tbody th{font-weight:500}.pm-total{font-weight:600;background:#f0f3ed}
+.pm-method{font:10px/1.55 system-ui;color:#66755f;margin:8px 0;max-width:1150px}
+.pm-method a{margin-right:16px}.pm-error{color:#9b654a;font-size:11px;margin:6px}
+@media(max-width:720px){
+ .pm-comparison{padding:7px 9px;max-height:42vh}
+ .pm-controls{gap:5px 8px;margin-bottom:6px}.pm-controls>strong{display:none}
+ .pm-controls label{font-size:9px;gap:4px}.pm-controls select{font-size:10px;max-width:155px;padding:3px}
+ .pm-cards{gap:5px}.pm-card{padding:6px}.pm-card h2{font-size:9px;min-height:23px}
+ .pm-numbers{font-size:8px}.pm-numbers strong{font-size:13px}.pm-numbers br{display:block}
+ .pm-numbers .pm-loc{margin-left:0}.pm-coverage{font-size:8px;line-height:1.35}
+ .pm-more>summary{font-size:9px}.pm-table-scroll th,.pm-table-scroll td{min-width:95px}
+}

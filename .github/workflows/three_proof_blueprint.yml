@@ -114,6 +114,13 @@ jobs:
           python3 book/refine_cosine_map.py
           python3 book/checks/test_schedule_map.py
           python3 book/checks/schedule_browser.py
+      - name: Verify the inline comparison and Mathlib foundations
+        run: |
+          set -euo pipefail
+          (cd comparison && lake env lean checks/ExportMathlibMap.lean) | tee comparison/reports/mathlib-map.log
+          python3 book/expand_mathlib_map.py
+          python3 book/checks/test_mathlib_comparison.py
+          python3 book/checks/mathlib_comparison_browser.py
       - name: Verify the radical evaluator and product theorem
         run: |
           set -euo pipefail
