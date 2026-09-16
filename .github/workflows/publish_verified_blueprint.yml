@@ -1,7 +1,7 @@
 name: Publish verified proof blueprint
 
-# Documentation-only publication of the exact verified static artifact.
-# Does not merge mathematical source branches or alter Pages protections.
+# Publish only the exact checked artifact. Planned mathematical steps remain
+# explicitly unproved; this workflow does not merge theorem source branches.
 on:
   push:
     branches: [main]
@@ -16,14 +16,14 @@ concurrency:
   group: pages-verified-proof-publication
   cancel-in-progress: false
 env:
-  SOURCE_RUN: '35069758139'
-  SOURCE_SHA: 'e91fbeb82d15a2069f2f54a90ea80138b9e9e84c'
+  SOURCE_RUN: '35078085642'
+  SOURCE_SHA: 'f7f132a3e6637d778db537e1503f5106bdcc1a31'
 jobs:
   prepare:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Verify original proofs, inline comparison and Mathlib map checks
+      - name: Verify the source proof and reader tests
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -39,7 +39,7 @@ jobs:
               assert run['head_sha']==os.environ['SOURCE_SHA'] and run['name']=='Three-proof blueprint'
               if run['status']=='completed':break
               time.sleep(5)
-          assert run['conclusion']=='success','Refusing to publish an incomplete or failed build'
+          assert run['conclusion']=='success','Refusing to publish failed or incomplete verification'
           job=next(j for j in get('/actions/runs/'+rid+'/jobs')['jobs'] if j['name']=='verify')
           assert job['conclusion']=='success'
           steps={s['name']:s['conclusion'] for s in job['steps']}
@@ -52,9 +52,10 @@ jobs:
                        'Build and verify the mathematical reader',
                        'Verify the supplied-schedule lemmas and refined proof map',
                        'Verify the inline comparison and Mathlib foundations',
-                       'Verify the radical evaluator and product theorem']:
+                       'Verify the radical evaluator and product theorem',
+                       'Check the arithmetic boundary and publish the planned application']:
               assert steps[name]=='success',name
-          print('Verified old proofs, exact Mathlib declarations, reference witnesses, inline accounting, and browser/iframe tests')
+          print('Verified existing proofs plus arithmetic boundary, partial-proof status and reader tests')
           PY
       - uses: actions/download-artifact@v8
         with:
@@ -62,58 +63,44 @@ jobs:
           run-id: ${{ env.SOURCE_RUN }}
           github-token: ${{ github.token }}
           path: downloaded
-      - name: Inspect verified counts, foundation nodes and preserved proofs
+      - name: Inspect completed arithmetic and unproved analytic frontier
         run: |
           python3 - <<'PY'
           import hashlib,json,os,pathlib,tarfile,xml.etree.ElementTree as ET
           with tarfile.open('downloaded/artifact.tar') as t:t.extractall('site',filter='data')
           root=pathlib.Path('site')
-          def read(path):return json.loads((root/path).read_text())
+          def read(p):return json.loads((root/p).read_text())
           sha=os.environ['SOURCE_SHA'];m=read('reading/manifest.json');maps=read('reading/maps.json')
-          comp=read('reading/map-comparison.json');extra=read('reading/mathlib-expansion.json')
-          s=read('reading/schedule-proof-map.json');export=read('reading/mathlib-map-statements.json')
-          assert m['sourceCommit']==maps['sourceCommit']==comp['sourceCommit']==extra['sourceCommit']==m['proofSourceCommit']==sha
-          assert m['preservedFirstTwo'] and m['compilerAuditPresent']
-          assert m['chapters']==17 and m['theoremMaps']==13 and m['checkedPairedMaps']==1 and m['checkedSingleProofMaps']==1
-          assert all(maps['checks'].values()) and all(extra['checks'].values()) and all(export['checks'].values())
-          assert len(export['declarations'])==26 and len(extra['additionalBundles'])==4
-          assert extra['mathlibCommit']=='51e6992efd06126df61a496bebf8f49482a4e129'
-          assert comp['noNewMeasurementRoots'] and comp['codeLineLabel']=='Mapped source LOC'
-          rows=comp['cases']['identity']['routes'];routes=comp['routeOrder']
-          assert [rows[r]['costs']['full']['declarations'] for r in routes]==[5596,5674,42849]
-          assert [rows[r]['costs']['full']['codeLines'] for r in routes]==[8955,9124,81510]
-          for case in comp['cases'].values():
-              for r in case['routes'].values():
-                  for cost in r['costs'].values():
-                      assert cost['mappedDeclarations']+cost['unmappedDeclarations']==cost['declarations']
-                      assert sum(o['codeLines'] for o in cost['origins'].values())==cost['codeLines']
-                      assert sum(o['declarations'] for o in cost['origins'].values())==cost['declarations']
-          target='thm:c3-primitive';valid='lem:c3-construction-valid';ftc='thm:c3-mathlib-ftc'
-          assert maps['bundles'][target]['title']=='Cosine primitive'
-          assert s['noIntegrabilityPredicateIntroduced'] and s['mathlibValidityIsSeparate']
-          for view,path in maps['theorems'][target]['views'].items():
-              doc=ET.parse(root/path);nodes=[x.get('data-node') for x in doc.iter() if x.get('data-node')]
-              edges=[x.get('data-edge') for x in doc.iter() if x.get('data-edge')]
-              assert nodes.count(target)==1 and nodes.count(valid)==1
-              assert sum(x.get('data-edge-kind')=='statement' for x in doc.iter())==4
-              assert (ftc in nodes)==(view in ['all','2','companions'])
-              if ftc in nodes:
-                  assert ftc+'->lem:c3-mftc' in edges
-                  assert 'def:c3-mathlib-bochner->def:c3-mathlib-interval' in edges
-                  assert 'def:c3-mathlib-interval->'+ftc in edges
-              if view=='2':assert valid+'->'+target not in edges
-          assert hashlib.sha256((root/'proof-bench/data.json').read_bytes()).hexdigest()==extra['benchmarkSha256']==s['proofMetricsFileSha256']
-          html=(root/'proof-map.html').read_text()
-          assert 'reading/map-comparison.css' in html and 'reading/map-comparison.js' in html
-          assert 'Mapped source LOC' in comp['codeLineLabel']
-          assert 'id="the-chosen-schedule"' in (root/'cosine.html').read_text()
-          assert all(read('reading/dyadic-evaluation.json')['checks'].values())
-          for path,h in maps['dyadicEvaluation']['unchangedArtifacts'].items():
+          plan=read('reading/cartwright-plan.json');raw=read('reading/cartwright-arithmetic.json')
+          assert m['sourceCommit']==maps['sourceCommit']==plan['sourceCommit']==sha
+          assert m['preservedFirstTwo'] and m['compilerAuditPresent'] and m['theoremMaps']==14
+          assert m['checkedPairedMaps']==1 and m['checkedSingleProofMaps']==1 and m['partlyFormalizedPlans']==1
+          assert all(raw['checks'].values()) and all(maps['checks'].values())
+          assert len(raw['declarations'])==11 and len(raw['audits'])==2
+          assert all('sorryAx' not in a['axioms'] for a in raw['audits'])
+          assert not plan['finalIrrationalityProved'] and not plan['momentIdentityProved']
+          assert all(v is None for v in plan['plannedMiddleCosts'].values())
+          target='thm:cartwright-plan';entry=maps['theorems'][target]
+          assert entry['outlineGraph'] and not entry['checkedComparison'] and not entry.get('verifiedGraph',False)
+          for view,path in entry['views'].items():
+              svg=ET.parse(root/path);nodes=[e.get('data-node') for e in svg.iter() if e.get('data-node')]
+              assert len(nodes)==(11 if view=='all' else 9) and nodes.count(target)==1
+              assert sum(e.get('data-planned')=='false' for e in svg.iter())==2
+          for path,h in plan['unchangedArtifacts'].items():
               assert hashlib.sha256((root/path).read_bytes()).hexdigest()==h
-          native=read('reading/native-computability.json')
-          assert native['nativeNoncomputableClosureCheck'] and native['nativeMathlibFree'] and native['noSorryAx']
-          assert all(p['identicalMathematicalText'] for p in read('reading/preservation.json')['rendered'].values())
-          print('Validated inline declaration/LOC comparison, explicit source coverage, Bochner/interval/FTC nodes, and unchanged mathematical proofs')
+          for key,s in plan['metrics'].items():
+              assert s['mappedDeclarations']+s['unmappedDeclarations']==s['declarations']
+          assert plan['metrics']['sharedUnion']['declarations']<sum(plan['metrics'][k]['declarations'] for k in ['preparation','conclusion'])
+          assert 'not a completed formal proof' in (root/'cartwright.html').read_text()
+          assert 'data-proof-map="thm:cartwright-plan"' in (root/'cartwright.html').read_text()
+          assert 'cartwright.html' in (root/'cosine.html').read_text()
+          assert 'cartwright-costs' in (root/'reading/graph.js').read_text()
+          assert maps['bundles']['thm:c3-primitive']['title']=='Cosine primitive'
+          comparison=read('reading/map-comparison.json')
+          assert comparison['sourceCommit']==sha
+          assert 'thm:c3-mathlib-ftc' in maps['bundles']
+          assert all(a['identicalMathematicalText'] for a in read('reading/preservation.json')['rendered'].values())
+          print('Validated checked arithmetic, unmeasured planned middles, source coverage, preserved existing comparisons and chapters')
           PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v5
@@ -129,7 +116,7 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify the live inline comparison and Mathlib foundations
+      - name: Verify live arithmetic plan and truthful proof status
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
@@ -142,26 +129,23 @@ jobs:
           last=None
           for attempt in range(12):
               try:
-                  m=get('/reading/manifest.json');maps=get('/reading/maps.json')
-                  comp=get('/reading/map-comparison.json');extra=get('/reading/mathlib-expansion.json')
-                  assert m['sourceCommit']==maps['sourceCommit']==comp['sourceCommit']==extra['sourceCommit']==sha
+                  m=get('/reading/manifest.json');maps=get('/reading/maps.json');plan=get('/reading/cartwright-plan.json')
+                  raw=get('/reading/cartwright-arithmetic.json')
+                  assert m['sourceCommit']==maps['sourceCommit']==plan['sourceCommit']==sha
                   assert m['preservedFirstTwo'] and m['compilerAuditPresent']
-                  assert all(maps['checks'].values()) and all(extra['checks'].values())
-                  assert maps['bundles']['thm:c3-primitive']['title']=='Cosine primitive'
-                  assert 'thm:c3-mathlib-ftc' in maps['bundles']
-                  html=get('/proof-map.html',True)
-                  assert 'reading/map-comparison.js' in html and 'reading/map-comparison.css' in html
-                  assert 'mountProofMapComparison' in get('/reading/map-comparison.js',True)
-                  svg=get('/reading/cosine-2.svg',True)
-                  assert 'data-node="thm:c3-mathlib-ftc"' in svg and 'data-node="def:c3-mathlib-bochner"' in svg
-                  rows=comp['cases']['identity']['routes']
-                  assert [rows[r]['costs']['full']['declarations'] for r in comp['routeOrder']]==[5596,5674,42849]
-                  assert [rows[r]['costs']['full']['codeLines'] for r in comp['routeOrder']]==[8955,9124,81510]
-                  print('LIVE MAP:',base+'/proof-map.html?theorem=thm:c3-primitive')
+                  assert all(raw['checks'].values()) and len(raw['declarations'])==11
+                  assert not plan['finalIrrationalityProved'] and not plan['momentIdentityProved']
+                  assert all(v is None for v in plan['plannedMiddleCosts'].values())
+                  assert maps['theorems']['thm:cartwright-plan']['outlineGraph']
+                  html=get('/cartwright.html',True)
+                  assert 'not a completed formal proof' in html and 'data-proof-map="thm:cartwright-plan"' in html
+                  assert 'cartwright-costs' in get('/reading/graph.js',True)
+                  assert 'cartwright.html' in get('/cosine.html',True)
+                  print('LIVE CHAPTER:',base+'/cartwright.html')
+                  print('LIVE PLAN:',base+'/proof-map.html?theorem=thm:cartwright-plan')
                   print('Verified source:',sha)
-                  print('Visible inline comparison: 5596/5674/42849 declarations; 8955/9124/81510 mapped LOC, with source coverage')
-                  print('Expanded Mathlib branch: nonnegative Lebesgue integral, general Bochner integral, interval integral, FTC')
-                  print('Original proof terms, algorithms, chosen schedules and measured proof roots unchanged')
+                  print('Checked shared arithmetic:',plan['metrics'])
+                  print('Middle routes and pi-squared irrationality assembly are explicitly not yet proved or measured.')
                   break
               except Exception as e:
                   last=str(e);time.sleep(5)
