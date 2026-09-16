@@ -20,22 +20,57 @@ jobs:
           build: false
           test: false
           lint: false
-      - name: Export toolchain source interfaces for reproducible local verification
-        run: |
-          prefix=$(lean --print-prefix)
-          tar -czf /tmp/cartwright-toolchain-interfaces.tar.gz -C "$prefix" include src/lean/Lean/Compiler src/lean/Lean/Environment.lean src/lean/Lean/Setup.lean
-      - uses: actions/upload-artifact@v4
-        with:
-          name: cartwright-toolchain-interfaces
-          path: /tmp/cartwright-toolchain-interfaces.tar.gz
-          retention-days: 7
-      - uses: actions/cache/restore@v5
+      - uses: actions/cache@v5
         with:
           path: .lake
           key: cartwright-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
           restore-keys: |
+            cartwright-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
             three-proof-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
-      - name: Verify available Cartwright declarations
+      - uses: actions/cache@v5
+        with:
+          path: comparison/.lake
+          key: cartwright-comparison-${{ hashFiles('comparison/lean-toolchain', 'comparison/lakefile.toml') }}-${{ github.sha }}
+          restore-keys: |
+            cartwright-comparison-${{ hashFiles('comparison/lean-toolchain', 'comparison/lakefile.toml') }}-
+            comparison-package-${{ hashFiles('comparison/lean-toolchain', 'comparison/lakefile.toml') }}-
+      - name: Check exact reviewed sources and native boundary
         run: |
-          lake build ComputableAnalysis.CartwrightArithmetic
-          if test -f ComputableAnalysis/CartwrightMoments.lean; then lake build ComputableAnalysis.CartwrightMoments; fi
+          python3 - <<'PY'
+          import hashlib, json, pathlib, re
+          for name, expected in json.loads(pathlib.Path('book/cartwright-proof-sources.json').read_text()).items():
+              p = pathlib.Path(name)
+              assert hashlib.sha256(p.read_bytes()).hexdigest() == expected, name
+              if name.startswith('ComputableAnalysis/'):
+                  assert not re.search(r'(?m)^\s*(noncomputable|axiom)\b|\b(sorry|admit)\b', p.read_text()), name
+          print('Verified 19 source fingerprints; no new native admissions or noncomputable declarations')
+          PY
+          python3 comparison/checks/check_boundary.py
+      - name: Build both native proofs and construction certificates
+        run: lake build ComputableAnalysis.CartwrightDirect
+      - name: Resolve pinned Mathlib comparison
+        working-directory: comparison
+        env:
+          MATHLIB_NO_CACHE_ON_UPDATE: '1'
+        run: |
+          lake update
+          git diff --exit-code -- lake-manifest.json
+          test "$(git -C .lake/packages/mathlib rev-parse HEAD)" = 51e6992efd06126df61a496bebf8f49482a4e129
+          lake exe cache get Mathlib.Analysis.SpecialFunctions.Integrals.Basic Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds Mathlib.Tactic
+      - name: Build the third closed proof
+        working-directory: comparison
+        run: lake build MathlibComparison.Cartwright
+      - name: Audit exact theorem types and independent proof routes
+        working-directory: comparison
+        run: |
+          set -euo pipefail
+          mkdir -p reports
+          lake env lean checks/CartwrightAudit.lean | tee reports/cartwright-complete.log
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cartwright-proof-audit
+          path: |
+            comparison/reports/cartwright-complete.json
+            comparison/reports/cartwright-complete.log
+            book/cartwright-proof-sources.json
+          retention-days: 30

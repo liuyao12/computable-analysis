@@ -1,0 +1,21 @@
+{
+  "ComputableAnalysis/CartwrightArithmetic.lean": "883681c14b038d1ee779413ba46c9a84612305202e510aad5db4b1aa9f2ec97d",
+  "ComputableAnalysis/CartwrightClockBounds.lean": "8525314070c477cbcbce3ffda066c936dd46b0304001037531b3ee1385d2d7ee",
+  "ComputableAnalysis/CartwrightDerivativeBounds.lean": "850c38e48b7cf33884b3c1bf7e07e22a28163a07892bfc303ddd930297588686",
+  "ComputableAnalysis/CartwrightDirect.lean": "ad085c2f08c2168d051381bc9051e20f2e6ae9b589db6ba983864a048a813a23",
+  "ComputableAnalysis/CartwrightEvaluation.lean": "5acd4f92d09589d22f160ef3f345d7d6e5c29f7ba07472b57e8b1e6d6c6aba7e",
+  "ComputableAnalysis/CartwrightFiniteSums.lean": "afeb32b0eba043892e53ce11dadcfbf0e9a3f5aff5a49f1c75575a843c4b2e68",
+  "ComputableAnalysis/CartwrightIntegrationByParts.lean": "7693a9030f94ae6a027170a295fe1379ed263c4b23fd60b81cdee3466af8d4e0",
+  "ComputableAnalysis/CartwrightIrrationality.lean": "fe54c9dced991dda9b7cc134c8d98677926d4237aa174fda95bcd1610f2528ce",
+  "ComputableAnalysis/CartwrightMomentBounds.lean": "7f12eef7de93ac33ad1fc6085899009f04f22b8ba1a62707bed1231bc6f6333f",
+  "ComputableAnalysis/CartwrightMomentRecurrence.lean": "de9500f3cd619bf6010382f8d003fe640ea0e2d5ae55f7bc56d9fb5f777c2e81",
+  "ComputableAnalysis/CartwrightMoments.lean": "91a815b8368f2a27d4b4c15ebe0003cddc6b024a2360a3760665f9c7cea1f2b2",
+  "ComputableAnalysis/CartwrightTheorem.lean": "184524cb99a5bb07cbfb64249e4b11dcab258ed2177526af68e05f9d0559007d",
+  "ComputableAnalysis/FiniteFirstOrderCalculus.lean": "2773055cde362ce994e0211cb096041b6266c683892e1469c7dc1d4d4b2740a4",
+  "ComputableAnalysis/RationalErrorCalculus.lean": "302bad988cb086718b769872f7386a6c6522e3267ccd31489e9d123506368239",
+  "ComputableAnalysis/UniformGridFTC.lean": "0702b8a3b1964476f084cbee6fd5b8d2a518f2ffaa6da9b9cc3cfa03c99a963e",
+  "comparison/MathlibComparison/Cartwright.lean": "8c80e326a0cead23a42a66a8fb40e8ad5e81374aa4016078a406ba428c56f445",
+  "comparison/MathlibComparison/CartwrightAnalytic.lean": "696cc02d1692dfb7d837e85b1cfb7aec6f5514749e8313632d558ca2658a6d5a",
+  "comparison/MathlibComparison/CartwrightQuadrature.lean": "d09189040e9ec1439d974f884dcdb6dd61a0992c5902ed804bfe52fac1d9999d",
+  "comparison/checks/CartwrightAudit.lean": "8a49e2b9d206ae3ae60fc2c4d4c47c9fadd852c58f5dfcf45a8645c00bbb70ed"
+}
