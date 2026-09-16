@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reader regression: statement arrows persist; proof colors have distinct roles."""
+"""Reader regression: solid black definition arrows and a general integral bundle."""
 from pathlib import Path
 import functools, http.server, json, shutil, threading
 from playwright.sync_api import sync_playwright
@@ -25,16 +25,29 @@ def main():
         for route in ['all','0','1','2','all']:
             page.locator('[data-route="'+route+'"]').click()
             page.locator('#svg-holder[data-view="'+route+'"]').wait_for()
-            assert page.locator('[data-edge-kind="statement"]').count()==3
+            assert page.locator('[data-edge-kind="statement"]').count()==4
             assert page.locator('[data-node="thm:c3-primitive"]').count()==1
-            # The combined sine/cosine bundle shows both independent input paths.
+            assert page.locator('[data-node="def:c3-integrals"]').count()==1
             edge=page.locator('[data-edge="def:c3-trig->thm:c3-primitive"]')
             edge.dispatch_event('click')
             assert page.locator('#map-detail h2').text_content()=='What the theorem is about'
             assert page.locator('#map-detail h3').all_text_contents()==['Sine in the endpoint','Cosine in the integral']
             assert 'wrapper name C' in page.locator('#map-detail').text_content()
+            for path in page.locator('[data-edge-kind="statement"] path').all():
+                assert path.get_attribute('stroke')=='#202020'
+                assert path.get_attribute('stroke-dasharray') is None
             page.locator('[data-edge-kind="proof"]').first.dispatch_event('click')
             assert page.locator('#map-detail .role').text_content()=='USED IN A PROOF'
+        page.locator('[data-node="def:c3-integrals"]').dispatch_event('click')
+        assert page.locator('#map-detail h2').text_content()=='Integrals'
+        assert 'finite Riemann sums' in page.locator('#map-detail .math-body').text_content()
+        page.locator('.bundle-lean>summary').click()
+        assert page.locator('.lean-card').count()==5
+        assert 'Integral.Dovetail.raw' in page.locator('.lean-card code').all_text_contents()[1]
+        page.screenshot(path=str(reports/'general-integral-statements.png'),full_page=True)
+        assert page.locator('[data-edge="def:c3-integrals->thm:c3-ftc"]').count()==1
+        page.locator('[data-edge="def:c3-integrals->thm:c3-ftc"]').dispatch_event('click')
+        assert page.locator('#map-detail h3').text_content()=='Integral in the FTC statement'
         page.locator('[data-node="def:c3-intervals"]').dispatch_event('click')
         assert page.locator('#map-detail h2').text_content()=='Computable number'
         page.locator('.bundle-lean>summary').click()
@@ -48,15 +61,16 @@ def main():
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth+2')
         page.locator('[data-route="2"]').click()
         page.locator('#svg-holder[data-view="2"]').wait_for()
-        assert page.locator('[data-edge-kind="statement"]').count()==3
+        assert page.locator('[data-edge-kind="statement"]').count()==4
         page.screenshot(path=str(reports/'statement-arrows-mobile.png'),full_page=True)
         assert not errors,errors
         browser.close()
     server.shutdown()
     (reports/'edge-role-results.json').write_text(json.dumps({'passed':True,
-        'commonInputs':['S','C','pi','integral'],'visibleStatementArrows':3,
+        'commonInputs':['S','C','pi','integral','integrals'],'visibleStatementArrows':4,
+        'integralsBundle':True,'integralsUsedInFTCType':True,'solidBlackDefinitions':True,
         'everyProofRoute':True,'groupOrder':True,'mathlibShadingRetained':True,
         'javascriptErrors':errors},indent=2)+'\n')
-    print('PASS: statement links in every route, separate proof inspector, computable-number definition sequence, desktop/mobile')
+    print('PASS: solid black definition links in every route, general integrals before the FTC, separate proof inspector, desktop/mobile')
 
 if __name__=='__main__':main()

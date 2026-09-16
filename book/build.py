@@ -132,7 +132,7 @@ def main():
     legacy=soup(graphtext)
     for k,d in g['nodeDetails'].items():
         modal=legacy.find(id=k+'_modal');mathnode=modal.find(class_=lambda c:c and c.endswith('_thmcontent')) if modal else None
-        d['mathHtml']=str(clean(mathnode)) if mathnode else ''
+        d['mathHtml']=str(clean(mathnode)) if mathnode else d.get('mathHtml','')
     svgviews={}
     for view,dot in g['views'].items():
         gr=pgv.AGraph(string=dot)
@@ -152,9 +152,8 @@ def main():
         for edge in sv.select('g.edge'):
             edge['data-edge']=edge.find('title').get_text();edge['tabindex']='0';edge['role']='button'
             classes=edge.get('class',[])
-            kind='statement' if 'statement-edge' in classes else 'proof' if 'proof-edge' in classes else 'construction'
-            edge['data-edge-kind']=kind
-            edge['aria-label']='Inspect '+kind+' dependency path'
+            edge['data-edge-kind']='statement' if 'statement-edge' in classes else 'proof' if 'proof-edge' in classes else 'construction'
+            edge['aria-label']='Inspect '+edge['data-edge-kind']+' dependency'
         (book/f'cosine-{view}.svg').write_text(str(sv));svgviews[view]=f'reading/cosine-{view}.svg'
     catalog={'thm:c3-primitive':{'id':'thm:c3-primitive','title':'The cosine primitive','checkedComparison':True,'status':'Three checked proofs of the same proposition','page':'cosine.html','views':svgviews}}
     protection={}
@@ -208,7 +207,7 @@ def main():
       'theoremMaps':len(catalog),'checkedPairedMaps':sum(c['checkedComparison'] for c in catalog.values()),
       'preservedFirstTwo':all(v['identicalMathematicalText'] for v in protection.values()),
       'noncomputableInventory':inv['nativeSourceNoncomputableCount'],'compilerAuditPresent':not audit.get('pending',False),
-      'edgeSemanticsVersion':1,
+      'edgeSemanticsVersion':g['info']['edgeSemantics']['version'],
       'kind':'Mathematical reader; older detailed blueprint preserved under reference/.'}
     (book/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
     print(json.dumps(manifest,indent=2))

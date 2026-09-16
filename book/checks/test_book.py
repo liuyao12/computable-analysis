@@ -36,13 +36,14 @@ def main():
             assert f.exists(),(name,a['href'])
         assert not s.select('article .bp-lean-panel, article .proof-table')
     assert margins==12
-    w={(x['source'],x['target'],str(x['route']),x.get('kind')) for x in data['witnesses']}
     for view,path in maps['thm:c3-primitive']['views'].items():
         s=BeautifulSoup((SITE/path).read_text(),'html.parser')
         assert len(s.select('[data-node="thm:c3-primitive"]'))==1
         for edge in s.select('[data-edge]'):
             source,target=edge['data-edge'].split('->')
-            assert any((a,b)==(source,target) and (kind=='statement' or view in ['all','companions'] or c==view) for a,b,c,kind in w),(view,source,target)
+            assert any(e['source']==source and e['target']==target and
+                       (e.get('globalEdge') or e.get('kind')=='statement' or view in ['all','companions'] or str(e['route'])==view)
+                       for e in data['witnesses']),(view,source,target)
     for old in ['cosine-primitive-graph.html','proof-comparison/index.html','ch-three-cosine-proofs.html']:
         assert 'http-equiv="refresh"' in (SITE/old).read_text()
     assert (SITE/'reference/dep_graph_document.html').exists()

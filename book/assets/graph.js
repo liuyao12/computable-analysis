@@ -30,18 +30,18 @@ function showBundle(id){
 function showEdge(raw){
  const [s,t]=raw.split('->');
  const paths=model.witnesses.filter(e=>e.source===s&&e.target===t&&
-   (e.kind==='statement'||route==='all'||String(e.route)===route));
+   (e.kind==='statement'||e.globalEdge||route==='all'||String(e.route)===route));
  const statement=paths.some(e=>e.kind==='statement'),proof=paths.some(e=>e.kind==='proof');
  const panel=$('#map-detail');
  panel.replaceChildren(node('span',statement?'USED IN THE STATEMENT':proof?'USED IN A PROOF':'CONSTRUCTING THE OBJECTS','role'),
    node('h2',statement?'What the theorem is about':proof?'A step in the proof':'A definition dependency'));
  panel.append(node('p',statement?
-   'These gray dashed arrows explain the objects occurring in the common proposition. Their paths unfold definitions only; no proof of the theorem is used. They remain visible in every proof route.':proof?
+   'These solid black arrows explain the objects occurring in the common proposition. Their paths unfold definitions only; no proof of the theorem is used. They remain visible in every proof route.':proof?
    'This colored arrow records use in a proof or certificate body, not merely a reference in its theorem type. Intermediate declarations can be hidden by the bundle. It does not assert that this prerequisite is logically indispensable.':
    'This neutral arrow belongs to the construction of an object or to the type of a declaration, rather than a chosen proof route.','strategy'));
  for(const e of paths){
-  const label=e.kind==='statement'?({S:'Sine in the endpoint',C:'Cosine in the integral',pi:'The arctangent-defined pi',integral:'The integral computation'}[e.input]):
-    e.route===null?'Companion':['Direct','Native FTC','Mathlib'][e.route];
+  const label=e.kind==='statement'?({S:'Sine in the endpoint',C:'Cosine in the integral',pi:'The arctangent-defined pi',integral:'The cosine integral computation',integrals:'The general integral construction'}[e.input]):
+    e.typeEntry?'Integral in the FTC statement':e.globalEdge?'Construction':e.route===null?'Companion':['Direct','Native FTC','Mathlib'][e.route];
   panel.append(node('h3',label));
   if(e.note)panel.append(node('p',e.note,'strategy'));
   const details=node('details'),list=node('ol',undefined,'edge-list');
