@@ -1,7 +1,8 @@
 name: Publish verified proof blueprint
 
-# Publish only the exact checked artifact. Planned mathematical steps remain
-# explicitly unproved; this workflow does not merge theorem source branches.
+# Documentation-only publication. The source run materializes readable files
+# before rebuilding every proof. Verify both trigger and actual source SHAs.
+# No theorem branch is merged and Pages protections are unchanged.
 on:
   push:
     branches: [main]
@@ -16,14 +17,15 @@ concurrency:
   group: pages-verified-proof-publication
   cancel-in-progress: false
 env:
-  SOURCE_RUN: '35078085642'
-  SOURCE_SHA: 'f7f132a3e6637d778db537e1503f5106bdcc1a31'
+  SOURCE_RUN: '35121587005'
+  SOURCE_SHA: 'f630241adeae35fc06a5fd4921a4df6396e291d0'
+  TRIGGER_SHA: '6b0d89386074fd99ec422555169a539e8787ae80'
 jobs:
   prepare:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 65
     steps:
-      - name: Verify the source proof and reader tests
+      - name: Require the full proof and reader verification to succeed
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -31,31 +33,26 @@ jobs:
           import json,os,time,urllib.request
           base='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']
           def get(path):
-              req=urllib.request.Request(base+path,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
+              req=urllib.request.Request(base+path,headers={
+                  'Authorization':'Bearer '+os.environ['GH_TOKEN'],
+                  'Accept':'application/vnd.github+json'})
               with urllib.request.urlopen(req,timeout=30) as r:return json.load(r)
           rid=os.environ['SOURCE_RUN']
-          for attempt in range(180):
+          for attempt in range(240):
               run=get('/actions/runs/'+rid)
-              assert run['head_sha']==os.environ['SOURCE_SHA'] and run['name']=='Three-proof blueprint'
+              assert run['head_sha']==os.environ['TRIGGER_SHA']
+              assert run['name']=='Integral portfolio verification'
               if run['status']=='completed':break
-              time.sleep(5)
+              time.sleep(15)
           assert run['conclusion']=='success','Refusing to publish failed or incomplete verification'
           job=next(j for j in get('/actions/runs/'+rid+'/jobs')['jobs'] if j['name']=='verify')
           assert job['conclusion']=='success'
           steps={s['name']:s['conclusion'] for s in job['steps']}
-          for name in ['Build native basepoint proofs and exponential companion',
-                       'Build all three proofs in one environment',
-                       'Check identical statement and independent proof routes',
-                       'Render blueprint and test the three-route graph',
-                       'Test Lean statement boxes and Mathlib Real shading',
-                       'Audit the native computability boundary',
-                       'Build and verify the mathematical reader',
-                       'Verify the supplied-schedule lemmas and refined proof map',
-                       'Verify the inline comparison and Mathlib foundations',
-                       'Verify the radical evaluator and product theorem',
-                       'Check the arithmetic boundary and publish the planned application']:
-              assert steps[name]=='success',name
-          print('Verified existing proofs plus arithmetic boundary, partial-proof status and reader tests')
+          for step in ['Materialize and commit the exact reviewed source patch',
+                       'Verify all proofs, exact comparisons, mathematical maps and browser regressions',
+                       'Retain the exact source and verified publication manifest']:
+              assert steps[step]=='success',step
+          print('Source verification passed:',rid,'; actual source SHA will also be checked in the artifact')
           PY
       - uses: actions/download-artifact@v8
         with:
@@ -63,44 +60,68 @@ jobs:
           run-id: ${{ env.SOURCE_RUN }}
           github-token: ${{ github.token }}
           path: downloaded
-      - name: Inspect completed arithmetic and unproved analytic frontier
+      - name: Inspect the exact tested mathematics and comparisons
         run: |
           python3 - <<'PY'
           import hashlib,json,os,pathlib,tarfile,xml.etree.ElementTree as ET
-          with tarfile.open('downloaded/artifact.tar') as t:t.extractall('site',filter='data')
+          with tarfile.open('downloaded/artifact.tar') as archive:
+              archive.extractall('site',filter='data')
           root=pathlib.Path('site')
-          def read(p):return json.loads((root/p).read_text())
-          sha=os.environ['SOURCE_SHA'];m=read('reading/manifest.json');maps=read('reading/maps.json')
-          plan=read('reading/cartwright-plan.json');raw=read('reading/cartwright-arithmetic.json')
-          assert m['sourceCommit']==maps['sourceCommit']==plan['sourceCommit']==sha
-          assert m['preservedFirstTwo'] and m['compilerAuditPresent'] and m['theoremMaps']==14
-          assert m['checkedPairedMaps']==1 and m['checkedSingleProofMaps']==1 and m['partlyFormalizedPlans']==1
-          assert all(raw['checks'].values()) and all(maps['checks'].values())
-          assert len(raw['declarations'])==11 and len(raw['audits'])==2
-          assert all('sorryAx' not in a['axioms'] for a in raw['audits'])
-          assert not plan['finalIrrationalityProved'] and not plan['momentIdentityProved']
-          assert all(v is None for v in plan['plannedMiddleCosts'].values())
-          target='thm:cartwright-plan';entry=maps['theorems'][target]
-          assert entry['outlineGraph'] and not entry['checkedComparison'] and not entry.get('verifiedGraph',False)
-          for view,path in entry['views'].items():
-              svg=ET.parse(root/path);nodes=[e.get('data-node') for e in svg.iter() if e.get('data-node')]
-              assert len(nodes)==(11 if view=='all' else 9) and nodes.count(target)==1
-              assert sum(e.get('data-planned')=='false' for e in svg.iter())==2
-          for path,h in plan['unchangedArtifacts'].items():
-              assert hashlib.sha256((root/path).read_bytes()).hexdigest()==h
-          for key,s in plan['metrics'].items():
-              assert s['mappedDeclarations']+s['unmappedDeclarations']==s['declarations']
-          assert plan['metrics']['sharedUnion']['declarations']<sum(plan['metrics'][k]['declarations'] for k in ['preparation','conclusion'])
-          assert 'not a completed formal proof' in (root/'cartwright.html').read_text()
-          assert 'data-proof-map="thm:cartwright-plan"' in (root/'cartwright.html').read_text()
-          assert 'cartwright.html' in (root/'cosine.html').read_text()
-          assert 'cartwright-costs' in (root/'reading/graph.js').read_text()
-          assert maps['bundles']['thm:c3-primitive']['title']=='Cosine primitive'
-          comparison=read('reading/map-comparison.json')
-          assert comparison['sourceCommit']==sha
-          assert 'thm:c3-mathlib-ftc' in maps['bundles']
-          assert all(a['identicalMathematicalText'] for a in read('reading/preservation.json')['rendered'].values())
-          print('Validated checked arithmetic, unmeasured planned middles, source coverage, preserved existing comparisons and chapters')
+          read=lambda path:json.loads((root/path).read_text())
+          sha=os.environ['SOURCE_SHA']
+          provenance=read('reading/portfolio-publication.json')
+          assert provenance['sourceCommit']==sha
+          assert provenance['triggerCommit']==os.environ['TRIGGER_SHA']
+          assert str(provenance['sourceRun'])==os.environ['SOURCE_RUN']
+          assert provenance['allVerificationStepsPassed']
+          manifest=read('reading/manifest.json');maps=read('reading/maps.json')
+          audit=read('reading/integral-portfolio-audit.json')
+          comparison=read('reading/integral-portfolio-comparison.json')
+          cartwright=read('reading/cartwright-audit.json')
+          assert manifest['sourceCommit']==maps['sourceCommit']==audit['sourceCommit']==comparison['sourceCommit']==sha
+          assert manifest['proofSourceCommit']==sha
+          assert manifest['preservedFirstTwo'] and manifest['compilerAuditPresent']
+          assert manifest['cartwrightComplete'] and manifest['integralPortfolio']
+          assert manifest['chapters']==17 and manifest['checkedPairedMaps']==7
+          assert manifest['checkedSingleProofMaps']==1 and manifest['partlyFormalizedPlans']==0
+          assert all(audit['checks'].values()) and all(cartwright['checks'].values())
+          assert audit['families']==2 and len(audit['closedProofs'])==16
+          assert len(comparison['cases'])==8 and comparison['routeOrder']==['ftc','mathlib']
+          assert all('sorryAx' not in row['axioms'] for row in audit['closedProofs'])
+          keys=['thm:wallis-integrals','thm:wallis-product','thm:beta-integral','thm:beta-normalization']
+          for key in keys:
+              entry=maps['theorems'][key]
+              assert entry['checkedComparison'] and entry['verifiedGraph'] and entry['sink']==key
+              assert set(entry['views'])=={'all','1','2'}
+              assert entry['comparison']['url']=='reading/integral-portfolio-comparison.json'
+              for route,path in entry['views'].items():
+                  svg=ET.parse(root/path)
+                  nodes=[e.get('data-node') for e in svg.iter() if e.get('data-node')]
+                  assert nodes.count(key)==1,(key,route)
+                  if key.startswith('thm:beta'):
+                      assert not any('trig' in n or 'exp' in n for n in nodes),nodes
+          for path,expected in audit['unchangedArtifacts'].items():
+              assert hashlib.sha256((root/path).read_bytes()).hexdigest()==expected,path
+          for c in comparison['cases'].values():
+              assert set(c['routes'])=={'ftc','mathlib'}
+              for r in c['routes'].values():
+                  for cost in r['costs'].values():
+                      assert sum(o['declarations'] for o in cost['origins'].values())==cost['declarations']
+                      assert cost['mappedDeclarations']+cost['unmappedDeclarations']==cost['declarations']
+                      assert sum(o['codeLines'] for o in cost['origins'].values())==cost['codeLines']
+          chapter=(root/'integral-families.html').read_text()
+          for key in keys:assert 'data-proof-map="'+key+'"' in chapter
+          assert (root/'cartwright.html').is_file()
+          assert 'reading/map-comparison.js' in (root/'proof-map.html').read_text()
+          native=read('reading/native-computability.json')
+          assert native['nativeNoncomputableClosureCheck'] and native['nativeMathlibFree'] and native['noSorryAx']
+          assert all(r['identicalMathematicalText'] for r in read('reading/preservation.json')['rendered'].values())
+          examples=read('reading/integral-native-examples.json')
+          assert examples['execution']=='Compiled Lean definitions; exact rational outputs, no Mathlib or Python evaluator.'
+          print('Verified two new families, sixteen proof terms, four paired application maps, complete Cartwright, unchanged earlier artifacts')
+          for case in ['wallis-factorials','wallis-product','beta-factorials','beta-normalization']:
+              print(case,[(r,comparison['cases'][case]['routes'][r]['costs']['full']['declarations'],
+                  comparison['cases'][case]['routes'][r]['costs']['full']['codeLines']) for r in comparison['routeOrder']])
           PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v5
@@ -116,7 +137,7 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify live arithmetic plan and truthful proof status
+      - name: Verify the live theorem portfolio and proof comparisons
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
@@ -127,25 +148,30 @@ jobs:
               with urllib.request.urlopen(base+path+'?source='+sha,timeout=25) as r:
                   return r.read().decode() if text else json.load(r)
           last=None
-          for attempt in range(12):
+          for attempt in range(18):
               try:
-                  m=get('/reading/manifest.json');maps=get('/reading/maps.json');plan=get('/reading/cartwright-plan.json')
-                  raw=get('/reading/cartwright-arithmetic.json')
-                  assert m['sourceCommit']==maps['sourceCommit']==plan['sourceCommit']==sha
-                  assert m['preservedFirstTwo'] and m['compilerAuditPresent']
-                  assert all(raw['checks'].values()) and len(raw['declarations'])==11
-                  assert not plan['finalIrrationalityProved'] and not plan['momentIdentityProved']
-                  assert all(v is None for v in plan['plannedMiddleCosts'].values())
-                  assert maps['theorems']['thm:cartwright-plan']['outlineGraph']
-                  html=get('/cartwright.html',True)
-                  assert 'not a completed formal proof' in html and 'data-proof-map="thm:cartwright-plan"' in html
-                  assert 'cartwright-costs' in get('/reading/graph.js',True)
-                  assert 'cartwright.html' in get('/cosine.html',True)
-                  print('LIVE CHAPTER:',base+'/cartwright.html')
-                  print('LIVE PLAN:',base+'/proof-map.html?theorem=thm:cartwright-plan')
-                  print('Verified source:',sha)
-                  print('Checked shared arithmetic:',plan['metrics'])
-                  print('Middle routes and pi-squared irrationality assembly are explicitly not yet proved or measured.')
+                  p=get('/reading/portfolio-publication.json')
+                  m=get('/reading/manifest.json');maps=get('/reading/maps.json')
+                  audit=get('/reading/integral-portfolio-audit.json')
+                  comparison=get('/reading/integral-portfolio-comparison.json')
+                  assert p['sourceCommit']==m['sourceCommit']==maps['sourceCommit']==comparison['sourceCommit']==sha
+                  assert p['allVerificationStepsPassed'] and str(p['sourceRun'])==os.environ['SOURCE_RUN']
+                  assert m['preservedFirstTwo'] and m['cartwrightComplete'] and m['integralPortfolio']
+                  assert all(audit['checks'].values()) and len(audit['closedProofs'])==16
+                  chapter=get('/integral-families.html',True)
+                  for key in ['thm:wallis-integrals','thm:wallis-product','thm:beta-integral','thm:beta-normalization']:
+                      assert 'data-proof-map="'+key+'"' in chapter
+                      assert maps['theorems'][key]['checkedComparison']
+                      svg=get('/'+maps['theorems'][key]['views']['2'],True)
+                      assert 'data-node="'+key+'"' in svg
+                  assert 'integral-portfolio-comparison.json' in json.dumps(maps)
+                  print('LIVE CHAPTER:',base+'/integral-families.html')
+                  print('CARTWRIGHT:',base+'/cartwright.html')
+                  print('Verified readable source:',sha)
+                  for case in ['wallis-factorials','wallis-product','beta-factorials','beta-normalization']:
+                      print(case,[(r,comparison['cases'][case]['routes'][r]['costs']['full']['declarations'],
+                          comparison['cases'][case]['routes'][r]['costs']['full']['codeLines']) for r in comparison['routeOrder']])
+                  print('Both new families have matched native/Mathlib proofs; all four application maps and inline comparisons are live')
                   break
               except Exception as e:
                   last=str(e);time.sleep(5)
