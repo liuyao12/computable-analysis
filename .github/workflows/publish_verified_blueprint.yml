@@ -16,8 +16,8 @@ concurrency:
   group: pages-verified-proof-publication
   cancel-in-progress: false
 env:
-  SOURCE_RUN: '35053749396'
-  SOURCE_SHA: 'a8e603bab8f82117ea1c4a96a50c95eb6cb612f1'
+  SOURCE_RUN: '35054423207'
+  SOURCE_SHA: '9baafc08ab8008085f6ca386d217197207b1b8ad'
 jobs:
   prepare:
     runs-on: ubuntu-latest
