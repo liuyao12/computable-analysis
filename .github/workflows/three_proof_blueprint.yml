@@ -1,11 +1,14 @@
 name: Three-proof blueprint
 on:
   push:
-    branches: [work/cosine-basepoint]
+    branches: [work/cosine-basepoint, work/mathematical-book]
     paths:
       - 'ComputableAnalysis/**'
       - 'comparison/**'
       - 'blueprint/**'
+      - 'book/**'
+      - 'PROJECT.md'
+      - 'README.md'
       - '.github/workflows/three_proof_blueprint.yml'
   workflow_dispatch:
 permissions:
@@ -88,6 +91,17 @@ jobs:
           python3 blueprint/checks/test_statement_boxes.py
           python3 blueprint/checks/test_proof_bench_browser.py
           python3 blueprint/checks/test_definition_panels.py
+      - name: Audit the native computability boundary
+        working-directory: comparison
+        run: |
+          set -euo pipefail
+          lake env lean checks/ComputabilityAudit.lean | tee reports/native-computability.log
+      - name: Build and verify the mathematical reader
+        run: |
+          python3 book/checks/source_boundary.py
+          python3 book/build.py --commit "${{ github.sha }}"
+          python3 book/checks/test_book.py
+          python3 book/checks/browser.py
       - name: Retain verified sources and audit
         run: |
           git archive --format=tar.gz HEAD > /tmp/three-proof-sources.tar.gz
@@ -106,6 +120,7 @@ jobs:
             comparison/reports
             blueprint/web/three-proofs
             blueprint/web/proof-bench
+            blueprint/web/reading
             /tmp/three-proof-sources.tar.gz
           retention-days: 30
       - uses: actions/upload-pages-artifact@v5
