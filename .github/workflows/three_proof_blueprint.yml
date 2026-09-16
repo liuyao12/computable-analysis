@@ -129,6 +129,14 @@ jobs:
           python3 book/add_dyadic_demo.py
           python3 book/checks/test_dyadic_demo.py
           python3 book/checks/dyadic_browser.py
+      - name: Check the arithmetic boundary and publish the planned application
+        run: |
+          set -euo pipefail
+          lake build ComputableAnalysis.CartwrightArithmetic
+          lake env lean book/checks/ExportCartwrightArithmetic.lean | tee comparison/reports/cartwright-arithmetic.log
+          python3 book/add_cartwright_plan.py
+          python3 book/checks/test_cartwright_plan.py
+          python3 book/checks/cartwright_browser.py
       - name: Retain verified sources and audit
         run: |
           git archive --format=tar.gz HEAD > /tmp/three-proof-sources.tar.gz

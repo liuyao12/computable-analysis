@@ -1,0 +1,28 @@
+<h1 id="cartwright">An arithmetic proof with calculus in the middle</h1>
+<p class="lead">Construct an integer sequence, use cosine moments to bound it, then finish with finite arithmetic.</p>
+<p><strong>Development status.</strong> The denominator-clearing recurrence and the final integer obstruction below are checked in Lean. The weighted integral construction and its alternative evaluation proofs are the next tasks. This chapter is a proof plan with a verified arithmetic component, not a completed formal proof of irrationality.</p>
+<h2 id="preparation">Arithmetic before the integral</h2>
+<p>Define \(P_0(z)=P_1(z)=1\) and \(P_{n+2}(z)=(2n+3)P_{n+1}(z)-zP_n(z)\). At a rational input \(z=a/b\), denominators can be cleared without a general polynomial-degree argument. The integer recurrence</p>
+<div class="displaymath">\[K_0=1,\quad K_1=b,\quad K_{n+2}=(2n+3)bK_{n+1}-abK_n\]</div>
+<p>satisfies \(K_n=b^nP_n(a/b)\). Both the recurrence and this exact rational identity are now checked. They mention neither trigonometry nor computable real-number programs.</p>
+<h2 id="middle">What the calculus must supply</h2>
+<p>Write \(\lambda=\pi/2\) for the existing geometric pi, and independently construct</p>
+<div class="displaymath">\[J_n=\int_0^1(1-t^2)^n C(t/2)\,dt.\]</div>
+<p>The integrands are nonnegative and decreasing. The weighted samples need one explicitly successful joint subdivision/evaluation schedule, not a new predicate classifying all integrable functions. Polynomial weights between zero and one do not enlarge the cosine sample widths.</p>
+<p>The intended evaluation is</p>
+<div class="displaymath">\[\lambda^{2n+1}J_n\simeq 2^n n! P_n(\lambda^2),\qquad 0&lt;J_n\le1.\]</div>
+<p>Integration by parts twice yields the moment recurrence. A direct finite-sum proof and a Mathlib proof with value and quadrature bridges should establish the same computational statement. Those alternatives are planned, not yet measured. The current Mathlib pi-irrationality source already uses this moment family and integration-by-parts recurrence; its supporting private lemmas require an appropriate public comparison interface.</p>
+<p>Under the hypothetical equality \(\lambda^2=a/b\), the precise output needed by the arithmetic is</p>
+<div class="displaymath">\[0&lt;K_n,\qquad K_n\,2^n n!\le2a^n.\]</div>
+<p>The factor two uses \(0&lt;\lambda\le2\). The proof of these inequalities is the boundary between the analytic construction and the arithmetic consumer.</p>
+<h2 id="finish">Finite arithmetic after the integral</h2>
+<p>Choose the explicit index \(N=2a^2\), where \(a\) is a positive integer. The last \(a^2\) factors of \(N!\) give \(N!\ge(a^2)^{a^2}=a^N\). Also \(2^N&gt;2\). Consequently</p>
+<div class="displaymath">\[2a^N&lt;2^N N!.\]</div>
+<p>A positive integer \(K_N\) is at least one, so it cannot satisfy \(K_N2^NN!\le2a^N\). This finite contradiction is checked in Lean as a theorem about natural numbers and integers only. It makes no appeal to a limit, factorial asymptotics, or a completed real line.</p>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:cartwright-plan"><div class="theorem_thmheading"><span class="theorem_thmcaption">Planned application</span><span class="theorem_thmtitle">Irrationality of geometric pi squared</span></div><div class="theorem_thmcontent"><p>Once the moment construction and evaluation bridges are supplied, the arithmetic obstruction rules out every rational value of \(\lambda^2\), hence of \(\pi^2\).</p><p>The following map distinguishes checked arithmetic declarations from the proposed calculus steps. The assembled irrationality theorem is not yet present in the Lean development.</p></div></div>
+<h2 id="cost">Compare the changing middle, not three copies of the arithmetic</h2>
+<p>The arithmetic preparation and final consumer should be shared unchanged by all alternatives. Measure both the entire proof dependency union and the additional cost of each middle argument after those shared lemmas and the established cosine development are available.</p>
+<!-- ARITHMETIC_METRICS -->
+<p>These figures measure only the verified arithmetic component. A dash for a proposed calculus route is missing evidence, not a zero-cost proof. The complete moment and irrationality proof lengths cannot yet be compared.</p>
+<p>Two views are necessary. A <em>mathematical role</em> view shows calculus in the middle and arithmetic at the ends. An <em>actual dependency</em> view must still show that the final irrationality proof depends transitively on the chosen analytic argument. Factoring it through an arithmetic lemma does not erase those dependencies.</p>
+<p><a href="reading/cartwright-arithmetic.json">Checked declarations and dependency audit</a> · <a href="reading/cartwright-plan.json">Measured arithmetic and planned comparison</a> · <a href="cosine.html">Existing cosine comparison</a></p>
