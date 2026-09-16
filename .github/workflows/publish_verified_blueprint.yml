@@ -16,8 +16,8 @@ concurrency:
   group: pages-verified-proof-publication
   cancel-in-progress: false
 env:
-  SOURCE_RUN: '35046446613'
-  SOURCE_SHA: '278df0d026e356f7a708353793d16de95477e8ce'
+  SOURCE_RUN: '35049755258'
+  SOURCE_SHA: '8d73f090bcf2d1f505254803c9d1f8bc3ed19cc8'
 
 jobs:
   prepare:
@@ -57,7 +57,7 @@ jobs:
                        'Audit the native computability boundary',
                        'Build and verify the mathematical reader']:
               assert steps[step] == 'success', step
-          print('Verified native/Mathlib proof builds, computability audit and numerical execution, preservation, reader and browser tests')
+          print('Verified proofs, computability, preservation, statement/proof edge semantics and browser tests')
           PY
       - uses: actions/download-artifact@v8
         with:
@@ -68,7 +68,7 @@ jobs:
       - name: Inspect the exact tested reader artifact
         run: |
           python3 - <<'PY'
-          import json, os, pathlib, tarfile
+          import json, os, pathlib, tarfile, xml.etree.ElementTree as ET
           with tarfile.open('downloaded/artifact.tar') as archive:
               archive.extractall('site', filter='data')
           root = pathlib.Path('site')
@@ -95,16 +95,31 @@ jobs:
           assert all(maps['checks'].values()) and all(proof['checks'].values())
           assert sum(t['checkedComparison'] for t in maps['theorems'].values()) == 1
           assert len(maps['theorems']) == 12
+          semantics = maps['edgeSemantics']
+          assert manifest['edgeSemanticsVersion'] == semantics['version'] == 1
+          assert semantics['statementDefinitionsVerified'] and semantics['proofBodyEntryVerified']
+          assert semantics['oneAcyclicSinkInEveryView'] and semantics['unchangedProofTermsAndMetrics']
+          bundle = maps['bundles']['def:c3-intervals']
+          assert bundle['title'] == 'Computable number'
+          assert [g['title'] for g in bundle['groups']] == ['Rational intervals','A computable number','Equality, order and refinement']
+          edges = [e for e in maps['witnesses'] if e['kind'] == 'statement']
+          assert len(edges) == 4 and {e['input'] for e in edges} == {'S','C','pi','integral'}
+          assert all(e['witness'][-1] == 'ComputableAnalysis.CosinePrimitive.Statement' and e['route'] is None for e in edges)
           for view, path in maps['theorems']['thm:c3-primitive']['views'].items():
-              assert (root/path).read_text().count('data-node="thm:c3-primitive"') == 1
+              doc = ET.fromstring((root/path).read_text())
+              assert sum(e.get('data-node') == 'thm:c3-primitive' for e in doc.iter()) == 1
+              arrows = [e for e in doc.iter() if e.get('data-edge-kind') == 'statement']
+              assert len(arrows) == 3
+              assert {e.get('data-edge').split('->')[0] for e in arrows} == {'def:c3-trig','def:c3-pi','def:c3-integral'}
           home = (root/'index.html').read_text()
           assert 'Analysis by construction.' in home and 'reading/book.css' in home and 'theme-white.css' not in home
           assert 'data-proof-map="thm:c3-primitive"' in (root/'cosine.html').read_text()
           for path in ['reference/index.html','reference/dep_graph_document.html','proof-bench/index.html',
-                       'proof-map.html','ch-foundations.html','ch-circle-sphere.html']:
+                       'proof-map.html','ch-foundations.html','ch-circle-sphere.html','reading/proof-edges.css']:
               assert (root/path).is_file(),path
           assert 'http-equiv="refresh"' in (root/'cosine-primitive-graph.html').read_text()
-          print('Validated preserved chapters, mathematics-first reader, one three-route map, explicit editorial outlines, and native audit scope')
+          assert (root/'proof-bench/data.json').read_bytes() == (root/'reference/proof-bench/data.json').read_bytes()
+          print('Validated computable-number bundle, four statement inputs, neutral direct arrows in every proof route, preserved chapters and unchanged proof measurements')
           PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v5
@@ -121,7 +136,7 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify the live mathematical book and computational boundary
+      - name: Verify the live statement and proof arrows
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
@@ -136,21 +151,21 @@ jobs:
           for attempt in range(12):
               try:
                   manifest = get('/reading/manifest.json')
-                  audit = get('/reading/native-computability.json')
-                  preservation = get('/reading/preservation.json')
-                  assert manifest['sourceCommit'] == sha and manifest['compilerAuditPresent'] and manifest['preservedFirstTwo']
-                  assert manifest['checkedPairedMaps'] == 1 and manifest['theoremMaps'] == 12
-                  assert audit['nativeNoncomputableClosureCheck'] and audit['nativeMathlibFree'] and audit['noSorryAx']
-                  assert all(p['identicalMathematicalText'] for p in preservation['rendered'].values())
-                  assert 'Analysis by construction.' in get('/index.html',False)
-                  assert 'data-proof-map="thm:c3-primitive"' in get('/cosine.html',False)
-                  assert 'reading/graph.js' in get('/proof-map.html',False)
-                  print('LIVE BOOK:',base+'/')
-                  print('WORKED THEOREM:',base+'/cosine.html')
+                  maps = get('/reading/maps.json')
+                  assert manifest['sourceCommit'] == maps['sourceCommit'] == sha
+                  assert manifest['compilerAuditPresent'] and manifest['preservedFirstTwo']
+                  assert maps['edgeSemantics']['statementDefinitionsVerified']
+                  assert maps['edgeSemantics']['proofBodyEntryVerified']
+                  assert maps['bundles']['def:c3-intervals']['title'] == 'Computable number'
+                  statements = [e for e in maps['witnesses'] if e['kind'] == 'statement']
+                  assert {e['input'] for e in statements} == {'S','C','pi','integral'}
+                  for view in ['all','0','1','2']:
+                      svg = get('/reading/cosine-'+view+'.svg',False)
+                      assert svg.count('data-edge-kind="statement"') == 3
+                  assert 'proof-edges.css' in get('/proof-map.html',False)
+                  print('LIVE MAP:',base+'/proof-map.html?theorem=thm:c3-primitive')
                   print('Verified source:',sha)
-                  print('Original Chapters 1 and 2 preserved; 12 theorem margin maps; 1 checked three-route comparison')
-                  print('Native construction/proof roots audited:',len(audit['roots']))
-                  print('Historical native noncomputable declarations remain inventoried:',manifest['noncomputableInventory'])
+                  print('Computable number; interval/evaluator/equality sequence; four statement inputs on three neutral bundle arrows; colors reserved for proof use')
                   break
               except Exception as exc:
                   last = str(exc)
