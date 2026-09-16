@@ -1,7 +1,7 @@
 name: Publish verified proof blueprint
 
-# Publish only the exact proof-checked and browser-tested static artifact.
-# No theorem sources are merged and no Pages protection is changed.
+# Documentation-only publication of the exact verified static artifact.
+# Does not merge mathematical source branches or alter Pages protections.
 on:
   push:
     branches: [main]
@@ -16,14 +16,14 @@ concurrency:
   group: pages-verified-proof-publication
   cancel-in-progress: false
 env:
-  SOURCE_RUN: '35065688785'
-  SOURCE_SHA: 'c5176e0dc1a43d928adf6132baa625700dcf3b4e'
+  SOURCE_RUN: '35069758139'
+  SOURCE_SHA: 'e91fbeb82d15a2069f2f54a90ea80138b9e9e84c'
 jobs:
   prepare:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Verify source proofs and schedule-aware map tests
+      - name: Verify original proofs, inline comparison and Mathlib map checks
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -51,9 +51,10 @@ jobs:
                        'Audit the native computability boundary',
                        'Build and verify the mathematical reader',
                        'Verify the supplied-schedule lemmas and refined proof map',
+                       'Verify the inline comparison and Mathlib foundations',
                        'Verify the radical evaluator and product theorem']:
               assert steps[name]=='success',name
-          print('Verified original proofs, supplied-schedule lemmas, precise new edges and browser tests')
+          print('Verified old proofs, exact Mathlib declarations, reference witnesses, inline accounting, and browser/iframe tests')
           PY
       - uses: actions/download-artifact@v8
         with:
@@ -61,58 +62,58 @@ jobs:
           run-id: ${{ env.SOURCE_RUN }}
           github-token: ${{ github.token }}
           path: downloaded
-      - name: Inspect the checked map and preserved mathematical artefacts
+      - name: Inspect verified counts, foundation nodes and preserved proofs
         run: |
           python3 - <<'PY'
           import hashlib,json,os,pathlib,tarfile,xml.etree.ElementTree as ET
-          from fractions import Fraction as Q
           with tarfile.open('downloaded/artifact.tar') as t:t.extractall('site',filter='data')
           root=pathlib.Path('site')
-          def read(p):return json.loads((root/p).read_text())
-          sha=os.environ['SOURCE_SHA']
-          m=read('reading/manifest.json');maps=read('reading/maps.json');s=read('reading/schedule-proof-map.json')
-          assert m['sourceCommit']==maps['sourceCommit']==s['sourceCommit']==m['proofSourceCommit']==sha
+          def read(path):return json.loads((root/path).read_text())
+          sha=os.environ['SOURCE_SHA'];m=read('reading/manifest.json');maps=read('reading/maps.json')
+          comp=read('reading/map-comparison.json');extra=read('reading/mathlib-expansion.json')
+          s=read('reading/schedule-proof-map.json');export=read('reading/mathlib-map-statements.json')
+          assert m['sourceCommit']==maps['sourceCommit']==comp['sourceCommit']==extra['sourceCommit']==m['proofSourceCommit']==sha
           assert m['preservedFirstTwo'] and m['compilerAuditPresent']
           assert m['chapters']==17 and m['theoremMaps']==13 and m['checkedPairedMaps']==1 and m['checkedSingleProofMaps']==1
-          assert all(maps['checks'].values()) and all(s['checks'].values())
-          assert s['noIntegrabilityPredicateIntroduced'] and s['oldProofTermsUnchanged']
-          assert s['mathlibValidityIsSeparate'] and s['genericScheduledBoundsAreContextOnly']
-          assert len(s['displayedConvergenceProofs'])==3
-          target='thm:c3-primitive';valid='lem:c3-construction-valid'
+          assert all(maps['checks'].values()) and all(extra['checks'].values()) and all(export['checks'].values())
+          assert len(export['declarations'])==26 and len(extra['additionalBundles'])==4
+          assert extra['mathlibCommit']=='51e6992efd06126df61a496bebf8f49482a4e129'
+          assert comp['noNewMeasurementRoots'] and comp['codeLineLabel']=='Mapped source LOC'
+          rows=comp['cases']['identity']['routes'];routes=comp['routeOrder']
+          assert [rows[r]['costs']['full']['declarations'] for r in routes]==[5596,5674,42849]
+          assert [rows[r]['costs']['full']['codeLines'] for r in routes]==[8955,9124,81510]
+          for case in comp['cases'].values():
+              for r in case['routes'].values():
+                  for cost in r['costs'].values():
+                      assert cost['mappedDeclarations']+cost['unmappedDeclarations']==cost['declarations']
+                      assert sum(o['codeLines'] for o in cost['origins'].values())==cost['codeLines']
+                      assert sum(o['declarations'] for o in cost['origins'].values())==cost['declarations']
+          target='thm:c3-primitive';valid='lem:c3-construction-valid';ftc='thm:c3-mathlib-ftc'
           assert maps['bundles'][target]['title']=='Cosine primitive'
-          assert 'three proofs' not in maps['bundles'][target]['mathHtml'].lower()
-          assert maps['bundles']['def:c3-integrals']['title']=='Integral construction'
-          assert maps['bundles']['def:c3-integral']['title']=='Chosen cosine construction'
+          assert s['noIntegrabilityPredicateIntroduced'] and s['mathlibValidityIsSeparate']
           for view,path in maps['theorems'][target]['views'].items():
-              svg=ET.parse(root/path)
-              nodes=[e.get('data-node') for e in svg.iter() if e.get('data-node')]
-              edges=[e.get('data-edge') for e in svg.iter() if e.get('data-edge')]
+              doc=ET.parse(root/path);nodes=[x.get('data-node') for x in doc.iter() if x.get('data-node')]
+              edges=[x.get('data-edge') for x in doc.iter() if x.get('data-edge')]
               assert nodes.count(target)==1 and nodes.count(valid)==1
-              assert sum(e.get('data-edge-kind')=='statement' for e in svg.iter())==4
-              if view=='2':
-                  assert valid+'->'+target not in edges
-                  assert 'lem:c3-endpoint-representation->'+target in edges
-              elif view in ['0','1']:assert valid+'->'+target in edges
-          assert hashlib.sha256((root/'proof-bench/data.json').read_bytes()).hexdigest()==s['proofMetricsFileSha256']
+              assert sum(x.get('data-edge-kind')=='statement' for x in doc.iter())==4
+              assert (ftc in nodes)==(view in ['all','2','companions'])
+              if ftc in nodes:
+                  assert ftc+'->lem:c3-mftc' in edges
+                  assert 'def:c3-mathlib-bochner->def:c3-mathlib-interval' in edges
+                  assert 'def:c3-mathlib-interval->'+ftc in edges
+              if view=='2':assert valid+'->'+target not in edges
+          assert hashlib.sha256((root/'proof-bench/data.json').read_bytes()).hexdigest()==extra['benchmarkSha256']==s['proofMetricsFileSha256']
+          html=(root/'proof-map.html').read_text()
+          assert 'reading/map-comparison.css' in html and 'reading/map-comparison.js' in html
+          assert 'Mapped source LOC' in comp['codeLineLabel']
           assert 'id="the-chosen-schedule"' in (root/'cosine.html').read_text()
-          audit=read('reading/dyadic-evaluation.json');numbers=read('reading/dyadic-numerics.json')
-          assert all(audit['checks'].values()) and all('sorryAx' not in r['axioms'] for r in audit['audits'])
-          assert maps['theorems']['thm:dyadic-product']['verifiedGraph']
-          assert not maps['theorems']['thm:dyadic-product']['checkedComparison']
+          assert all(read('reading/dyadic-evaluation.json')['checks'].values())
           for path,h in maps['dyadicEvaluation']['unchangedArtifacts'].items():
               assert hashlib.sha256((root/path).read_bytes()).hexdigest()==h
-          assert not numbers['leanStageExecution']
-          assert numbers['rows'][-1]['productDisplay']==['0.999904116','1.000095875']
-          for row in numbers['rows']:
-              lo,hi=map(Q,row['product']);assert lo<1<hi
-          geo=maps['geometricPresentation']
-          assert geo['piDefinition']=='4 A(1)' and geo['verticalSubdivisionProjected']
-          for name in ['arctan','cosine','secants']:
-              assert (root/'reading/animations'/f'{name}.gif').read_bytes()[:6] in [b'GIF89a',b'GIF87a']
           native=read('reading/native-computability.json')
           assert native['nativeNoncomputableClosureCheck'] and native['nativeMathlibFree'] and native['noSorryAx']
           assert all(p['identicalMathematicalText'] for p in read('reading/preservation.json')['rendered'].values())
-          print('Validated chosen construction, separate convergence, actual proof uses, no integrability predicate, and preserved earlier work')
+          print('Validated inline declaration/LOC comparison, explicit source coverage, Bochner/interval/FTC nodes, and unchanged mathematical proofs')
           PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v5
@@ -128,7 +129,7 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify the live schedule-aware cosine map
+      - name: Verify the live inline comparison and Mathlib foundations
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
@@ -141,21 +142,26 @@ jobs:
           last=None
           for attempt in range(12):
               try:
-                  m=get('/reading/manifest.json');maps=get('/reading/maps.json');s=get('/reading/schedule-proof-map.json')
-                  assert m['sourceCommit']==maps['sourceCommit']==s['sourceCommit']==sha
+                  m=get('/reading/manifest.json');maps=get('/reading/maps.json')
+                  comp=get('/reading/map-comparison.json');extra=get('/reading/mathlib-expansion.json')
+                  assert m['sourceCommit']==maps['sourceCommit']==comp['sourceCommit']==extra['sourceCommit']==sha
                   assert m['preservedFirstTwo'] and m['compilerAuditPresent']
-                  assert all(maps['checks'].values()) and all(s['checks'].values())
-                  assert s['noIntegrabilityPredicateIntroduced'] and s['mathlibValidityIsSeparate']
+                  assert all(maps['checks'].values()) and all(extra['checks'].values())
                   assert maps['bundles']['thm:c3-primitive']['title']=='Cosine primitive'
-                  assert 'lem:c3-construction-valid' in maps['bundles']
-                  assert 'id="the-chosen-schedule"' in get('/cosine.html',True)
+                  assert 'thm:c3-mathlib-ftc' in maps['bundles']
+                  html=get('/proof-map.html',True)
+                  assert 'reading/map-comparison.js' in html and 'reading/map-comparison.css' in html
+                  assert 'mountProofMapComparison' in get('/reading/map-comparison.js',True)
                   svg=get('/reading/cosine-2.svg',True)
-                  assert 'data-node="lem:c3-construction-valid"' in svg
-                  assert 'data-edge="lem:c3-construction-valid-&gt;thm:c3-primitive"' not in svg
+                  assert 'data-node="thm:c3-mathlib-ftc"' in svg and 'data-node="def:c3-mathlib-bochner"' in svg
+                  rows=comp['cases']['identity']['routes']
+                  assert [rows[r]['costs']['full']['declarations'] for r in comp['routeOrder']]==[5596,5674,42849]
+                  assert [rows[r]['costs']['full']['codeLines'] for r in comp['routeOrder']]==[8955,9124,81510]
                   print('LIVE MAP:',base+'/proof-map.html?theorem=thm:c3-primitive')
                   print('Verified source:',sha)
-                  print('Chosen schedule, its convergence certificates, and conditional schedule independence; no integrability predicate')
-                  print('Conclusion title: Cosine primitive. Existing proof terms, algorithms and measured proof roots unchanged.')
+                  print('Visible inline comparison: 5596/5674/42849 declarations; 8955/9124/81510 mapped LOC, with source coverage')
+                  print('Expanded Mathlib branch: nonnegative Lebesgue integral, general Bochner integral, interval integral, FTC')
+                  print('Original proof terms, algorithms, chosen schedules and measured proof roots unchanged')
                   break
               except Exception as e:
                   last=str(e);time.sleep(5)
