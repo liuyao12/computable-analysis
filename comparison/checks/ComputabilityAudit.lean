@@ -5,7 +5,9 @@ import Lean
 
 /-! Checked separately from Mathlib. A noncomputable tag is not the same as
 an axiom or a classical proof. Check actual native declaration closures,
-report external tags, then require concrete evaluations to compile and run. -/
+report external tags, then require concrete evaluations to compile and run.
+External tags may describe core-library data or proof declarations; this tool
+does not infer their erased runtime role from syntactic reachability alone. -/
 namespace ComputabilityAudit
 open Lean Elab Command
 set_option maxRecDepth 100000
@@ -66,7 +68,7 @@ run_cmd do
   IO.FS.writeFile "reports/native-computability.json" ((Json.mkObj [
     ("nativeNoncomputableClosureCheck",toJson true),("nativeMathlibFree",toJson true),
     ("noSorryAx",toJson true),("roots",toJson rows),
-    ("scope",toJson "Declared native roots: stored type/body closure. External proof tags and axioms reported separately. Compiled smoke evaluations follow.")]).compress ++ "\n")
+    ("scope",toJson "Selected native roots: stored type/body closure. External library tags and axioms are reported, not classified as proof-only or erased runtime dependencies. Compiled smoke evaluations follow.")]).compress ++ "\n")
   logInfo "PASS: native numerical roots and two native proofs have no native noncomputable declaration dependency"
 
 end ComputabilityAudit

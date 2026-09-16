@@ -29,9 +29,17 @@ with Mathlib's objects and proves the same propositions, not look-alike formulas
 
 The historical native source still contains 16 noncomputable helpers. They are
 inventoried as migration debt, not silently promoted to the computational API.
-The new audit checks selected native declaration closures, reports proof-only
-external tags and axioms, and runs compiled numerical smoke tests. It is not a
-claim that every historical file already meets the stricter goal.
+The audit checks selected native declaration closures, reports external library
+tags and axioms, and runs compiled numerical smoke tests. It is not a claim
+that every historical file already meets the stricter goal.
+
+External noncomputable tags are not all proof-only: the report includes both
+classical proof dependencies and core-library declarations. A stored-reference
+graph is not an erased executable call graph. The current checks establish the
+stated native boundary and compiled evaluations, not the stronger claim that
+there is no noncomputable metadata anywhere in the full Lean dependency closure.
+Those stronger dependency questions must be audited rather than inferred from
+the absence of the keyword in project source.
 
 ## Work with the sources
 
