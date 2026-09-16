@@ -26,7 +26,9 @@ def main():
             page.locator('.bundle-lean>summary').click()
             assert page.locator('.lean-card').count()==37
             assert 'ClosedArctanInverse' in page.locator('.lean-card code').first.text_content()
-        for label,name in [('def:c3-arctan','arctan'),('def:c3-integrals','concave')]:
+        page.locator('[data-route="all"]').click()
+        page.locator('#svg-holder[data-view="all"]').wait_for()
+        for label,name in [('def:c3-arctan','arctan'),('thm:c3-primitive','cosine'),('lem:c3-concavity','secants'),('def:c3-integrals','cosine')]:
             page.locator('[data-node="'+label+'"]').dispatch_event('click')
             img=page.locator('.math-animation img');img.wait_for()
             page.wait_for_function("document.querySelector('.math-animation img').naturalWidth === 800")
@@ -37,7 +39,7 @@ def main():
             page.wait_for_timeout(700)
             page.screenshot(path=str(out/(name+'-panel.png')),full_page=True)
         page.locator('.formal-boundary>summary').click()
-        assert 'not yet been formalized' in page.locator('.formal-boundary').text_content()
+        assert 'already includes increasing and decreasing' in page.locator('.formal-boundary').text_content()
         page.emulate_media(reduced_motion='reduce')
         page.locator('[data-node="def:c3-arctan"]').dispatch_event('click')
         assert page.locator('.math-animation img').get_attribute('src').endswith('.png')
@@ -45,11 +47,18 @@ def main():
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth+2')
         page.screenshot(path=str(out/'mobile-arctan.png'),full_page=True)
         page.goto(base+'cosine.html',wait_until='domcontentloaded');page.wait_for_selector('[data-animation]')
-        assert page.locator('[data-animation] img').get_attribute('src').endswith('.png')
-        page.locator('[data-animation-toggle]').click()
-        assert page.locator('[data-animation] img').get_attribute('src').endswith('.gif')
+        assert page.locator('[data-animation]').count()==2
+        for name in ['arctan','cosine']:
+            figure=page.locator('[data-animation="'+name+'"]')
+            assert figure.locator('img').get_attribute('src').endswith('.png')
+            figure.locator('[data-animation-toggle]').click()
+            assert figure.locator('img').get_attribute('src').endswith('.gif')
+        assert page.locator('.numerical-bounds tbody tr').count()==4
+        assert '0.2755015' in page.locator('.numerical-bounds').text_content()
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth+2')
+        page.screenshot(path=str(out/'cosine-chapter-mobile.png'),full_page=True)
         assert not errors,errors
         browser.close()
-    server.shutdown();(out/'results.json').write_text(json.dumps({'passed':True,'realGifs':2,'inverseFolded':True,'exactDeclarations':37,'reducedMotion':True,'mobile':True,'formalizationBoundaryVisible':True,'javascriptErrors':errors},indent=2)+'\n')
+    server.shutdown();(out/'results.json').write_text(json.dumps({'passed':True,'realGifs':3,'verticalProjection':True,'independentCosineNumerics':True,'monotoneIntegration':True,'secantDifferentiation':True,'inverseFolded':True,'exactDeclarations':37,'reducedMotion':True,'mobile':True,'formalizationBoundaryVisible':True,'javascriptErrors':errors},indent=2)+'\n')
     print('PASS: geometric GIFs and static posters, pause/play, reduced motion, inverse bundle, explicit status, and mobile')
 if __name__=='__main__':main()

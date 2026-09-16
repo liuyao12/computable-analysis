@@ -1,18 +1,22 @@
-"""Mathematical reading views; checked statements and graph witnesses are retained.
-The concave-only construction is explicitly distinguished from the old, more
- general quadrature engine. No claim is made that a renamed bundle changes
-Lean theorem hypotheses or proves a new quadrature representation edge.
+"""Mathematical reader panels; preserve all checked declarations and witnesses.
+Integration uses monotonicity; differentiation uses convexity/concavity and
+shrinking secant widths. Illustrations do not replace the Lean programs.
 """
 from __future__ import annotations
 from collections import Counter, defaultdict
 from copy import deepcopy
 import pygraphviz as pgv
+from numerical_examples import example, table_html
 INVERSE='lem:c3-inverse'; TRIG='def:c3-trig'; INTEGRALS='def:c3-integrals'
 
 
 def arctan_text():
     return r'''<p>For a rational parameter \(0\le u\le1\), put</p>
     <div class="displaymath">\[P(u)=\left(\frac{1-u^2}{1+u^2},\frac{2u}{1+u^2}\right).\]</div>
+    <p>Subdivide the vertical segment from \((0,0)\) to \((0,u)\) into
+    equal parts \(v_j=ju/n\). Draw each ray from \((-1,0)\) through
+    \((0,v_j)\) to the circle: its second intersection is \(P(v_j)\).
+    Equal vertical steps generally do not give equal-angle arcs.</p>
     <p>The shaded sector runs from \((1,0)\) to \(P(u)\), about the origin.
     Its area computation is \(A(u)\). It is defined geometrically, before a
     general integral or trigonometric function.</p>
@@ -47,25 +51,46 @@ def trig_text():
     outside it; that totalization is not a global trigonometric definition.</p>'''
 
 
-def concave_text():
-    return r'''<p><strong>Here the integral is introduced only for concave functions.</strong>
-    Let \(g\) be a computable concave function on a rational interval
-    \([a,b]\), with a supplied rational Lipschitz bound \(K\).
-    The estimate is part of the input; it is not obtained by noncomputable choice.</p>
-    <p>For a dyadic subdivision with cell width \(h\), define the lower
-    chord sum and upper midpoint sum:</p>
+def monotone_text():
+    return r'''<p><strong>For integration, assume the integrand is increasing or decreasing.</strong>
+    No concavity, derivative or Lipschitz bound is needed. Let \(f\) be a
+    computable monotone function on a rational interval \([a,b]\). For
+    \(x_i=a+ih\), \(h=(b-a)/m\), increasing functions give</p>
     <div class="displaymath">\[
-    L_h=\sum_i \frac h2\bigl(g(x_i)+g(x_{i+1})\bigr),\qquad
-    U_h=\sum_i h\,g\!\left(\frac{x_i+x_{i+1}}2\right).
+      h\sum_{i=0}^{m-1}f(x_i)\ \preceq\ \int_a^b f(x)\,dx
+      \ \preceq\ h\sum_{i=1}^{m}f(x_i).
     \]</div>
-    <p>Concavity orders these finite Riemann sums and gives monotone refinement.
-    The Lipschitz estimate bounds their gap by
-    \(K(b-a)h/2\). Rational evaluation errors are enclosed separately.
-    Intersect the finite output enclosures while reevaluating retained meshes;
-    their shrinking widths define \(\int_a^b g\). No primitive is used.</p>
-    <p>In the animation, supporting line segments illustrate the upper areas.
-    Their areas equal the midpoint rectangles; computing a derivative is not
-    required for the midpoint sum.</p>'''
+    <p>For decreasing functions, the right-endpoint sum is the lower bound
+    and the left-endpoint sum is the upper bound. In either case the gap
+    between exact endpoint sums is \(h\lvert f(b)-f(a)\rvert\).</p>
+    <p>In these finite Riemann sums, use lower rational evaluations in the lower sum
+    and upper evaluations in the upper sum. Keep both indices: dyadic mesh level
+    \(k\), with \(m=2^k\), and evaluation stage \(q\). At output stage \(n\), reevaluate the
+    meshes \(k\le n\) at stage \(n\), and intersect the resulting intervals.
+    This is a fixed finite schedule, not a search until a tolerance is met.
+    Refining samples on a retained mesh controls evaluation error; refining
+    the mesh controls the monotone rectangle gap.</p>
+    <p>The animation uses the decreasing function \(C\), so it reads right
+    endpoints for lower rectangles and left endpoints for upper rectangles.
+    It never substitutes the proposed primitive to obtain the integral.</p>'''
+
+
+def derivative_text():
+    return r'''<p><strong>Convexity or concavity belongs to the derivative construction.</strong>
+    For a concave function \(f\) and positive rational \(h\), enclose its
+    derivative, when it exists, between the right and left secants:</p>
+    <div class="displaymath">\[
+    \frac{f(x+h)-f(x)}{h}\ \preceq\ f'(x)\ \preceq\
+    \frac{f(x)-f(x-h)}{h}.
+    \]</div>
+    <p>For a convex function, reverse the two bounds. Compute both secants
+    using rational enclosures and a predetermined step/evaluation schedule.
+    Evaluation uncertainty is divided by \(h\), so its schedule must account
+    for this amplification.</p>
+    <p>One must also prove that the resulting secant gap shrinks to zero.
+    Convexity alone does not remove corners, as \(f(x)=|x|\) at zero shows.
+    The quadratic animation illustrates the construction; the exact sine
+    declarations below provide the data used in this theorem.</p>'''
 
 
 def apply(data):
@@ -84,21 +109,28 @@ def apply(data):
     trig['title']='Sine and cosine';trig['mathHtml']=trig_text()
     arctan=details['def:c3-arctan'];arctan['mathHtml']=arctan_text()
     arctan['strategy']['role']='Geometric area before trigonometry'
-    arctan['strategy']['summary']='The sector area A(u) is enclosed by finite rational chord and tangent polygons. The GIF fixes u=2/3 rather than illustrating only the special value at one.'
-    arctan['illustration']=dict(id='arctan',alt='The circle sector A(u), with u two thirds. Inner chord triangles and outer tangent quadrilaterals refine.',caption='u = 2/3. The shaded sector is A(u); the rational inner and outer bounds refine.')
+    arctan['strategy']['summary']='Subdivide the vertical segment 0 to u equally, project every point from (-1,0), then enclose the sector by rational polygons. The GIF uses u=2/3.'
+    arctan['illustration']=dict(id='arctan',alt='Equal subdivisions of the vertical segment from zero to u, each projected from minus one onto the circle. Inner and outer polygons enclose A(u).',caption='u = 2/3. Gold marks subdivide the vertical segment; blue rays project each mark to the circle. These are equal parameter steps, not equal angles.')
     pi=details['def:c3-pi'];pi['title']='Pi from the sector area'
     pi['mathHtml']=r'''<p>At \(u=1\), the point is \(P(1)=(0,1)\): the sector is a quarter of the unit disk. Define</p><div class="displaymath">\[\boxed{\pi:=4A(1).}\]</div><p>This is the same arctangent-based computation used in the theorem. It is defined before the cosine integral and does not call that theorem.</p>'''
-    integral=details[INTEGRALS];integral['title']='Integrals of concave functions';integral['mathHtml']=concave_text()
-    integral['illustration']=dict(id='concave',alt='A concave quadratic enclosed by chord and midpoint-area sums on successively finer dyadic meshes.',caption='A concave example: g(x)=1−x²/2. Chord areas increase and midpoint areas decrease.')
+    integral=details[INTEGRALS];integral['title']='Integrals of monotone functions';integral['mathHtml']=monotone_text()
+    cosine_illustration=dict(id='cosine',alt='The decreasing cosine C enclosed by right lower and left upper endpoint rectangles, with separate integral and sine-over-pi bounds.',caption='At t = 1/3, decreasing-function rectangles enclose the integral. A separate circle-coordinate evaluation encloses S(t)/π. Neither numerical side calls the other.')
+    integral['illustration']=cosine_illustration
     integral['formalizationBoundary']=(
-        'This is the restricted mathematical construction being introduced, not a new claim about the old Lean API. '
-        'The exact declarations below implement the more general finite-enclosure engine already used by the three cosine proofs. '
-        'They do not require concavity of their integrand. The chord/midpoint constructor and its agreement with the existing cosine quadrature '
-        'have not yet been formalized here. Concavity of a primitive in the FTC is a different hypothesis.')
-    integral['strategy']['role']='Concavity gives lower and upper area sums'
-    integral['strategy']['summary']='The animation concerns the concave integrand g. The existing FTC certificate instead concerns a primitive F; those hypotheses must not be conflated.'
+        'The native library already includes increasing and decreasing Darboux constructions. '
+        'The checked declarations in this bundle expose the general finite-enclosure engine used by the existing proofs. '
+        'The numerical illustration uses its own rational-polygon evaluation schedule, not the literal output stages of that Lean program. '
+        'The three proof terms and the original cosine quadrature definition are unchanged.')
+    integral['strategy']['role']='Monotonicity orders the endpoint rectangles'
+    integral['strategy']['summary']='Increasing or decreasing integrands give lower and upper rectangle sums. Convexity or concavity is instead used to construct derivatives from secants.'
+    derivative=details['lem:c3-concavity'];derivative['mathHtml']=derivative_text()+derivative.get('mathHtml','')
+    derivative['illustration']=dict(id='secants',alt='Right and left secants of a concave quadratic converge to its derivative at one half.',caption='Derivative construction for a concave quadratic: right and left secant slopes approach −1/2. This illustration is not a new sine definition.')
+    derivative['strategy']['role']='Concavity orders secants; shrinking widths give the derivative'
     ftc=details['thm:c3-ftc'];ftc['title']='FTC for a concave primitive'
-    ftc['mathHtml']+=r'''<p>Here the concavity hypothesis belongs to the primitive \(F\), not to its derivative \(D\). It must not be read as a certificate that the integrand \(D\) is concave.</p>'''
+    ftc['mathHtml']+=r'''<p>Concavity belongs to the primitive \(F\). Its derivative is decreasing, which is the relevant condition for monotone integration; no concavity of that derivative is required.</p>'''
+    theorem=details['thm:c3-primitive'];theorem['illustration']=cosine_illustration
+    theorem['mathHtml']+=table_html([example(n)[0] for n in [8,32,128,512]])
+    theorem['mathHtml']+='<p>These are independent rational numerical bounds illustrating the theorem, not outputs of its literal Lean stage programs and not a proof by numerical agreement.</p>'
     after=Counter((d['name'],d['type'],str(d.get('value'))) for b in details.values() for d in b['declarations'])
     assert before==after,'Folding must preserve all exact declaration text'
     edges=[]
@@ -140,9 +172,11 @@ def apply(data):
         assert count==len(indegree),'Folding introduced a cycle'
         data['views'][view]=graph.string()
     data['info']['geometricPresentation']={
-        'version':1,'inverseFoldedInto':TRIG,'exactDeclarationCardsPreserved':True,
+        'version':2,'inverseFoldedInto':TRIG,'exactDeclarationCardsPreserved':True,
         'arctanParameter':'2/3','piDefinition':'4 A(1)',
-        'integralExposition':'Concave integrands with an explicit Lipschitz bound',
-        'concaveOnlyLeanConstructorImplemented':False,
+        'integralExposition':'Increasing or decreasing integrands',
+        'derivativeExposition':'Convex or concave functions with shrinking secant widths',
+        'verticalSubdivisionProjected':True,'independentCosineNumerics':True,
+        'numericDriverIsLeanStageExecution':False,
         'originalTheoremProgramsAndProofsUnchanged':True}
     return data

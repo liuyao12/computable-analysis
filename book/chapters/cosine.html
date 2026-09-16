@@ -1,10 +1,11 @@
+<link rel="stylesheet" href="reading/proof-edges.css">
 <h1 id="cosine-primitive">A first meeting of geometry and calculus</h1>
 <p class="lead">A primitive should be a theorem about two independent computations—not a new name for the answer. The cosine integral gives a small, complete example.</p>
 <h2 id="the-clock">An angle is an area computation</h2>
 <p>We keep the order of the geometric chapters. Rational polygons give the geometric arctangent \(A\); rational lower and upper rectangles give an equivalent computation:</p>
 <div class="displaymath">\[ A(u)\simeq\int_0^u\frac{dv}{1+v^2},\qquad 0\le u\le1. \]</div>
 <p>These are two ways to compute the same number, not two names for identical finite outputs. We fix the normalization \(\pi=4A(1)\) before introducing the integral below. No cosine integral enters this definition of \(\pi\).</p>
-<figure class="math-animation" data-animation="arctan"><img src="reading/animations/arctan.gif" alt="The sector A(u) at u two thirds, enclosed by refining rational polygons." width="800" height="640"><figcaption>The geometric clock A(u), at u=2/3. At u=1 its sector is a quarter disk, hence π=4A(1).</figcaption><button type="button" data-animation-toggle>Pause animation</button></figure>
+<figure class="math-animation" data-animation="arctan"><img src="reading/animations/arctan.gif" alt="Equal vertical subdivisions projected from minus one to the circle, with rational polygon area bounds." width="800" height="640"><figcaption>Subdivide the vertical segment from 0 to u equally, then project every mark from (−1,0) to the circle. Here u=2/3. At u=1 its sector is a quarter disk, hence π=4A(1).</figcaption><button type="button" data-animation-toggle>Pause animation</button></figure>
 <h2 id="the-coordinates">From the clock to a point on the circle</h2>
 <p>For rational \(0\le x\le\tfrac12\), the closed inverse construction computes \(u(x)\) in the unit interval with</p>
 <div class="displaymath">\[ A(u(x))\simeq 2xA(1). \]</div>
@@ -12,6 +13,10 @@
 <div class="displaymath">\[ S(x)=\frac{2u(x)}{1+u(x)^2},\qquad C(x)=\frac{1-u(x)^2}{1+u(x)^2}. \]</div>
 <p>The argument is a normalized angle: a half-unit is a quarter-turn. In the comparison with conventional trigonometry, \(S(x)\) corresponds to \(\sin(\pi x)\), not \(\sin x\). The functions in this particular theorem are restricted to the displayed chart; the zero-valued totalizations outside it are not global trigonometric extensions.</p>
 <h2 id="independent-integral">An independently computed integral</h2>
+<p>For our purposes, introduce integration for <strong>increasing or decreasing functions</strong>. The two endpoint rectangle sums bound the area; their exact gap is \(h|f(b)-f(a)|\). No concavity, derivative or Lipschitz assumption is needed for this construction. Rational evaluation errors are enclosed separately, on a fixed finite schedule of retained meshes and sample refinements.</p>
+<p>On the present chart, \(C\) is decreasing. Thus, with \(x_i=ih\) and \(h=t/m\),</p>
+<div class="displaymath">\[h\sum_{i=1}^{m} C(x_i)\ \preceq\ \int_0^t C(x)\,dx\ \preceq\ h\sum_{i=0}^{m-1} C(x_i).\]</div>
+<p>The existing three Lean proofs use the independently defined quadrature program described next; the monotone-rectangle illustration is not a replacement for its literal output schedule.</p>
 <p>Divide \([0,t]\) into \(m\) equal cells and add the left-endpoint cosine rectangles. Evaluate every cosine value by its own rational enclosure. A finite geometric estimate supplies a rational allowance for the error made by replacing the curve with these rectangles.</p>
 <p>A finer mesh and a finer function evaluation do different jobs. Retaining a fixed mesh while improving its finitely many samples lets us separate them. Taking finite intersections of the resulting enclosures produces a valid integral computation \(I(t)\). Its numerical instructions read cosine values, never the proposed sine endpoint.</p>
 <div class="theorem_thmwrapper theorem-style-plain" id="thm:c3-primitive">
@@ -19,11 +24,15 @@
 <div class="theorem_thmcontent"><p>For every rational \(t\) with \(0\le t\le\tfrac12\), the independent integral and endpoint computations agree:</p>
 <div class="displaymath">\[ \boxed{I(t)=\int_0^t C(x)\,dx\;\simeq\;\frac{S(t)}{\pi}.} \]</div>
 <p>The equality denotes equivalence of valid rational-enclosure programs. It does not say that their stage outputs or their instructions are identical.</p></div></div>
+<h2 id="numerical-comparison">Watching both computations converge</h2>
+<figure class="math-animation" data-animation="cosine"><img src="reading/animations/cosine.gif" alt="Lower right and upper left rectangles enclose the integral of decreasing C. Independent endpoint bounds appear underneath." width="800" height="640"><figcaption>At t = 1/3, refine the monotone rectangle sums and independently compute S(t)/π from circle coordinates. Neither side is computed from the other.</figcaption><button type="button" data-animation-toggle>Pause animation</button></figure>
+<div class="numeric-scroll"><table class="numerical-bounds"><caption>Independent bounds at t = 1/3. Decimal endpoints are rounded outwards.</caption><thead><tr><th>Cells</th><th>Rectangle bounds for ∫ C</th><th>Independent bounds for S(t)/π</th></tr></thead><tbody><tr><td>8</td><td>[0.2648514, 0.2856888]</td><td>[0.2756605, 0.2756700]</td></tr><tr><td>32</td><td>[0.2730355, 0.2782442]</td><td>[0.2756642, 0.2756648]</td></tr><tr><td>128</td><td>[0.2750118, 0.2763140]</td><td>[0.2756644, 0.2756645]</td></tr><tr><td>512</td><td>[0.2755015, 0.2758272]</td><td>[0.2756644, 0.2756645]</td></tr></tbody></table></div>
+<p>Every displayed interval endpoint is rounded outwards. The numerical driver uses exact rational polygon bounds for the area clock, bounded inversion and rational circle coordinates, not a floating-point trigonometric library. These are illustrative rational enclosures, <strong>not executions of the literal Lean stage programs</strong>. Their numerical agreement illustrates the theorem; it does not replace its proof.</p>
 <h2 id="three-arguments">Three arguments, one proposition</h2>
 <h3>Direct finite inequalities</h3>
 <p>Compare a small circle chord with its angular increment. For a fixed rational step \(h\), the resulting sine increment differs from \(h\pi C(x)\) by at most a constant times \(h^2\), once the finite samples are sufficiently precise. Choose a common stage for a fixed finite mesh and telescope the rational sine increments. The sum of the cell errors tends to zero with the mesh. Nesting then gives overlap at every pair of output stages.</p>
 <h3>Through concavity and the fundamental theorem</h3>
-<p>Put \(P=S/\pi\). The geometric chord inequalities first prove supporting-secant bounds</p>
+<p>Here <strong>concavity is used to construct the derivative</strong>, not to define the integral. Put \(P=S/\pi\). The geometric chord inequalities first prove supporting-secant bounds</p>
 <div class="displaymath">\[ C(y)\preceq\frac{P(y)-P(x)}{y-x}\preceq C(x),\qquad x&lt;y. \]</div>
 <p>They establish concavity without assuming a derivative. Quantitative control of these secants gives the data required by the native fundamental theorem. Applying that theorem identifies the cosine integral with \(P(t)-P(0)\). The independently proved value \(S(0)\simeq0\) removes the lower endpoint.</p>
 <h3>Through Mathlib, with both bridges</h3>

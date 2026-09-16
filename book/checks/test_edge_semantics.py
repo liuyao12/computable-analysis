@@ -52,7 +52,7 @@ def verify(site=ROOT/'blueprint/web'):
             assert STATEMENT not in e['witness']
             assert e['witness'][-2] in nodes[e['witness'][-1]]['bodyRefs']
     generic=data['bundles'][INTEGRALS]
-    assert generic['title']=='Integrals of concave functions' and len(generic['declarations'])==5
+    assert generic['title']=='Integrals of monotone functions' and len(generic['declarations'])==5
     assert INTEGRAL_RAW in generic['anchors']
     original=data['bundles']['def:c3-integral']
     assert set(d['name'] for d in generic['declarations']).isdisjoint(d['name'] for d in original['declarations'])
