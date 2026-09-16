@@ -1,7 +1,7 @@
 name: Publish verified proof blueprint
 
-# Documentation-only publication of a pinned, fully tested reader artifact.
-# No theorem branch is merged and Pages protections are unchanged.
+# Documentation-only publication of an already proof-checked and browser-tested
+# artifact. Does not merge the theorem branch or change Pages protections.
 on:
   push:
     branches: [main]
@@ -16,48 +16,36 @@ concurrency:
   group: pages-verified-proof-publication
   cancel-in-progress: false
 env:
-  SOURCE_RUN: '35051403013'
-  SOURCE_SHA: 'a820519ff50fa0870cd81c6e8529a3f8798291bc'
-
+  SOURCE_RUN: '35053749396'
+  SOURCE_SHA: 'a8e603bab8f82117ea1c4a96a50c95eb6cb612f1'
 jobs:
   prepare:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Verify mathematics, computational boundary, preserved chapters and reader tests
+      - name: Verify proofs, mathematical images, declaration preservation and browser tests
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           python3 - <<'PY'
           import json, os, time, urllib.request
-          base = 'https://api.github.com/repos/' + os.environ['GITHUB_REPOSITORY']
+          base='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']
           def get(path):
-              req = urllib.request.Request(base + path, headers={
-                  'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
-                  'Accept': 'application/vnd.github+json'})
-              with urllib.request.urlopen(req, timeout=30) as response:
-                  return json.load(response)
-          run_id = os.environ['SOURCE_RUN']
+              req=urllib.request.Request(base+path,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
+              with urllib.request.urlopen(req,timeout=30) as r:return json.load(r)
+          rid=os.environ['SOURCE_RUN']
           for attempt in range(180):
-              run = get('/actions/runs/' + run_id)
-              assert run['head_sha'] == os.environ['SOURCE_SHA']
-              assert run['name'] == 'Three-proof blueprint'
-              if run['status'] == 'completed':
-                  break
+              run=get('/actions/runs/'+rid)
+              assert run['head_sha']==os.environ['SOURCE_SHA'] and run['name']=='Three-proof blueprint'
+              if run['status']=='completed':break
               time.sleep(5)
-          assert run['conclusion'] == 'success', 'Source run must pass all gates before publication'
-          job = next(j for j in get('/actions/runs/' + run_id + '/jobs')['jobs'] if j['name'] == 'verify')
-          assert job['conclusion'] == 'success'
-          steps = {s['name']: s['conclusion'] for s in job['steps']}
-          for step in ['Build native basepoint proofs and exponential companion',
-                       'Build all three proofs in one environment',
-                       'Check identical statement and independent proof routes',
-                       'Render blueprint and test the three-route graph',
-                       'Test Lean statement boxes and Mathlib Real shading',
-                       'Audit the native computability boundary',
-                       'Build and verify the mathematical reader']:
-              assert steps[step] == 'success', step
-          print('Verified proof and reader tests, solid black arrows, and general integrals before the FTC')
+          assert run['conclusion']=='success','Refusing to publish a failed or incomplete source build'
+          job=next(j for j in get('/actions/runs/'+rid+'/jobs')['jobs'] if j['name']=='verify')
+          assert job['conclusion']=='success'
+          steps={s['name']:s['conclusion'] for s in job['steps']}
+          for name in ['Build native basepoint proofs and exponential companion','Build all three proofs in one environment','Check identical statement and independent proof routes','Render blueprint and test the three-route graph','Test Lean statement boxes and Mathlib Real shading','Audit the native computability boundary','Build and verify the mathematical reader']:
+              assert steps[name]=='success',name
+          print('Verified all mathematical, proof, preservation, illustration and browser checks')
           PY
       - uses: actions/download-artifact@v8
         with:
@@ -65,75 +53,50 @@ jobs:
           run-id: ${{ env.SOURCE_RUN }}
           github-token: ${{ github.token }}
           path: downloaded
-      - name: Inspect the exact tested reader artifact
+      - name: Inspect the exact geometric reader artifact
         run: |
           python3 - <<'PY'
-          import json, os, pathlib, tarfile, xml.etree.ElementTree as ET
-          with tarfile.open('downloaded/artifact.tar') as archive:
-              archive.extractall('site', filter='data')
-          root = pathlib.Path('site')
-          def read(path): return json.loads((root/path).read_text())
-          sha = os.environ['SOURCE_SHA']
-          manifest = read('reading/manifest.json')
-          audit = read('reading/native-computability.json')
-          boundary = read('reading/native-source-boundary.json')
-          preservation = read('reading/preservation.json')
-          maps = read('reading/maps.json')
-          proof = read('three-proofs/summary.json')
-          assert manifest['sourceCommit'] == manifest['proofSourceCommit'] == proof['sourceCommit'] == sha
-          assert manifest['preservedFirstTwo'] and manifest['compilerAuditPresent']
-          assert manifest['chapters'] == 17 and manifest['theoremMaps'] == 12 and manifest['checkedPairedMaps'] == 1
-          assert audit['nativeNoncomputableClosureCheck'] and audit['nativeMathlibFree'] and audit['noSorryAx']
-          assert len(audit['roots']) == 8 and all(not r['nativeNoncomputableDependencies'] for r in audit['roots'])
-          assert boundary['noNewNativeNoncomputables'] and boundary['chaptersPreserved']
-          assert boundary['nativeSourceNoncomputableCount'] == 16
-          assert len(preservation['rendered']) == 2
-          assert all(r['identicalMathematicalText'] and r['originalTextHash'] == r['readerTextHash'] for r in preservation['rendered'].values())
-          assert preservation['sources']['files'] == {
-              'blueprint/src/01-foundations.tex':'8654db7f985b149c4afad6e8251c4a758c462f648dcbfb2e0fc3d6636b5e5897',
-              'blueprint/src/02-circle-sphere.tex':'e0243bdc3827fc0c0fa1deae5a8b58b55c43328f8e17eeb4ec63523e756cea31'}
-          assert all(maps['checks'].values()) and all(proof['checks'].values())
-          assert sum(t['checkedComparison'] for t in maps['theorems'].values()) == 1
-          semantics = maps['edgeSemantics']
-          assert manifest['edgeSemanticsVersion'] == semantics['version'] == 2
-          for key in ['statementDefinitionsVerified','proofBodyEntryVerified','oneAcyclicSinkInEveryView',
-                      'unchangedProofTermsAndMetrics','integralsUsedInFTCType',
-                      'naturalRankConstrainedLayout','solidBlackDefinitionArrows']:
-              assert semantics[key],key
-          assert maps['bundles']['def:c3-intervals']['title'] == 'Computable number'
-          generic = maps['bundles']['def:c3-integrals']
-          assert generic['title'] == 'Integrals' and len(generic['declarations']) == 5
-          assert generic['mathHtml'] and generic['classification'] == 'native'
-          exported = {d['name']:d for d in read('three-proofs/blueprint-statements.json')['declarations']}
-          for d in generic['declarations']:
-              assert all(d[k] == exported[d['name']][k] for k in ['name','kind','type','value'])
-          statements = [e for e in maps['witnesses'] if e['kind'] == 'statement']
-          assert {e['input'] for e in statements} == {'S','C','pi','integral','integrals'}
-          assert all(e['witness'][-1] == 'ComputableAnalysis.CosinePrimitive.Statement' for e in statements)
-          for view, path in maps['theorems']['thm:c3-primitive']['views'].items():
-              doc = ET.fromstring((root/path).read_text())
-              assert sum(e.get('data-node') == 'thm:c3-primitive' for e in doc.iter()) == 1
-              assert sum(e.get('data-node') == 'def:c3-integrals' for e in doc.iter()) == 1
-              arrows = [e for e in doc.iter() if e.get('data-edge-kind') == 'statement']
-              assert len(arrows) == 4
-              assert {e.get('data-edge').split('->')[0] for e in arrows} == {'def:c3-trig','def:c3-pi','def:c3-integral','def:c3-integrals'}
-              for edge in arrows:
-                  for line in edge.iter():
-                      if line.tag.endswith('path'):
-                          assert line.get('stroke') == '#202020' and not line.get('stroke-dasharray')
-              if view in ['all','1','companions']:
-                  assert any(e.get('data-edge') == 'def:c3-integrals->thm:c3-ftc' for e in doc.iter())
-          assert (root/'proof-bench/data.json').read_bytes() == (root/'reference/proof-bench/data.json').read_bytes()
-          assert 'data-proof-map="thm:c3-primitive"' in (root/'cosine.html').read_text()
-          assert 'http-equiv="refresh"' in (root/'cosine-primitive-graph.html').read_text()
-          print('Validated black definition arrows, exact generic integral statements, FTC type edge, and unchanged mathematics')
+          import hashlib,json,os,pathlib,tarfile,xml.etree.ElementTree as ET
+          from fractions import Fraction as Q
+          with tarfile.open('downloaded/artifact.tar') as t:t.extractall('site',filter='data')
+          root=pathlib.Path('site')
+          def read(p):return json.loads((root/p).read_text())
+          m=read('reading/manifest.json');g=read('reading/maps.json');a=read('reading/animations/manifest.json')
+          assert m['sourceCommit']==g['sourceCommit']==m['proofSourceCommit']==os.environ['SOURCE_SHA']
+          assert m['preservedFirstTwo'] and m['compilerAuditPresent']
+          assert m['chapters']==17 and m['theoremMaps']==12 and m['checkedPairedMaps']==1
+          assert all(g['checks'].values())
+          b=g['bundles'];assert 'lem:c3-inverse' not in b and b['def:c3-trig']['title']=='Sine and cosine'
+          assert len(b['def:c3-trig']['declarations'])==37
+          assert 'ComputableAnalysis.ClosedArctanInverse.provider' in b['def:c3-trig']['anchors']
+          assert g['geometricPresentation']['piDefinition']=='4 A(1)'
+          assert g['geometricPresentation']['originalTheoremProgramsAndProofsUnchanged']
+          assert g['geometricPresentation']['concaveOnlyLeanConstructorImplemented'] is False
+          assert 'not yet been formalized' in b['def:c3-integrals']['formalizationBoundary']
+          assert b['def:c3-arctan']['illustration']['id']=='arctan'
+          assert b['def:c3-integrals']['illustration']['id']=='concave'
+          for name in ['arctan','concave']:
+              for suffix in ['gif','png']:
+                  p=root/'reading/animations'/f'{name}.{suffix}'
+                  assert hashlib.sha256(p.read_bytes()).hexdigest()==a['files'][p.name]
+                  if suffix=='gif':assert p.read_bytes()[:6] in [b'GIF89a',b'GIF87a'] and p.stat().st_size>10000
+          assert all(Q(r['u'])==Q(2,3) for r in a['arctan'])
+          for r in a['concave']:assert Q(r['lower'])<=Q(5,6)<=Q(r['upper'])
+          for view,p in g['theorems']['thm:c3-primitive']['views'].items():
+              doc=ET.fromstring((root/p).read_text());nodes=[x.get('data-node') for x in doc.iter() if x.get('data-node')]
+              assert 'lem:c3-inverse' not in nodes and nodes.count('thm:c3-primitive')==1
+              assert sum(x.get('data-edge-kind')=='statement' for x in doc.iter())==4
+          native=read('reading/native-computability.json')
+          assert native['nativeNoncomputableClosureCheck'] and native['nativeMathlibFree'] and native['noSorryAx']
+          assert all(x['identicalMathematicalText'] for x in read('reading/preservation.json')['rendered'].values())
+          assert (root/'proof-bench/data.json').read_bytes()==(root/'reference/proof-bench/data.json').read_bytes()
+          print('Validated two genuine GIFs, pi normalization, folded inverse, exact cards and explicit concave-construction status')
           PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v5
         with:
           path: site
           retention-days: 7
-
   deploy:
     needs: prepare
     runs-on: ubuntu-latest
@@ -143,45 +106,36 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify the live integral bundle and solid definition arrows
+      - name: Verify live animations and geometric panels
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
           python3 - <<'PY'
-          import json, os, time, urllib.request, xml.etree.ElementTree as ET
-          sha = os.environ['SOURCE_SHA']
-          base = os.environ['PAGE_URL'].rstrip('/')
-          def get(path, parse=True):
-              with urllib.request.urlopen(base+path+'?source='+sha,timeout=20) as response:
-                  return json.load(response) if parse else response.read().decode()
-          last = None
+          import json,os,time,urllib.request
+          sha=os.environ['SOURCE_SHA'];base=os.environ['PAGE_URL'].rstrip('/')
+          def get(path,binary=False):
+              with urllib.request.urlopen(base+path+'?source='+sha,timeout=25) as r:
+                  return r.read() if binary else json.load(r)
+          last=None
           for attempt in range(12):
               try:
-                  manifest = get('/reading/manifest.json')
-                  maps = get('/reading/maps.json')
-                  assert manifest['sourceCommit'] == maps['sourceCommit'] == sha
-                  assert manifest['compilerAuditPresent'] and manifest['preservedFirstTwo']
-                  assert maps['edgeSemantics']['version'] == 2
-                  assert maps['edgeSemantics']['solidBlackDefinitionArrows'] and maps['edgeSemantics']['integralsUsedInFTCType']
-                  assert maps['bundles']['def:c3-integrals']['title'] == 'Integrals'
-                  for view in ['all','0','1','2']:
-                      svg = ET.fromstring(get('/reading/cosine-'+view+'.svg',False))
-                      assert sum(e.get('data-node') == 'def:c3-integrals' for e in svg.iter()) == 1
-                      arrows = [e for e in svg.iter() if e.get('data-edge-kind') == 'statement']
-                      assert len(arrows) == 4
-                      for edge in arrows:
-                          for line in edge.iter():
-                              if line.tag.endswith('path'):
-                                  assert line.get('stroke') == '#202020' and not line.get('stroke-dasharray')
-                      if view in ['all','1']:
-                          assert any(e.get('data-edge') == 'def:c3-integrals->thm:c3-ftc' for e in svg.iter())
+                  m=get('/reading/manifest.json');g=get('/reading/maps.json')
+                  assert m['sourceCommit']==g['sourceCommit']==sha
+                  assert m['preservedFirstTwo'] and m['compilerAuditPresent'] and all(g['checks'].values())
+                  assert 'lem:c3-inverse' not in g['bundles']
+                  assert g['bundles']['def:c3-trig']['title']=='Sine and cosine'
+                  assert g['geometricPresentation']['piDefinition']=='4 A(1)'
+                  assert g['geometricPresentation']['concaveOnlyLeanConstructorImplemented'] is False
+                  for name in ['arctan','concave']:
+                      image=get('/reading/animations/'+name+'.gif',True)
+                      assert image[:6] in [b'GIF89a',b'GIF87a'] and len(image)>10000
+                  assert b'data-animation="arctan"' in get('/cosine.html',True)
                   print('LIVE MAP:',base+'/proof-map.html?theorem=thm:c3-primitive')
+                  print('LIVE CHAPTER:',base+'/cosine.html')
                   print('Verified source:',sha)
-                  print('Solid black definition arrows; explicit Integrals node used by the FTC and the common theorem; proof colors preserved')
+                  print('Two GIFs; generic u=2/3 sector; pi=4A(1); inverse folded; original proofs unchanged; concave-only Lean restriction explicitly not claimed')
                   break
-              except Exception as exc:
-                  last = str(exc)
-                  time.sleep(5)
-          else:
-              raise SystemExit('Live reader verification failed: '+str(last))
+              except Exception as e:
+                  last=str(e);time.sleep(5)
+          else:raise SystemExit('Live check failed: '+str(last))
           PY
