@@ -1,7 +1,7 @@
 name: Publish verified proof blueprint
 
-# Publish an already checked static artifact. This does not merge theorem
-# sources, bypass proof/browser gates, or change Pages protections.
+# Publish only the exact proof-checked and browser-tested static artifact.
+# No theorem sources are merged and no Pages protection is changed.
 on:
   push:
     branches: [main]
@@ -16,14 +16,14 @@ concurrency:
   group: pages-verified-proof-publication
   cancel-in-progress: false
 env:
-  SOURCE_RUN: '35059551987'
-  SOURCE_SHA: '73b7a2312ad40c96885b4bf2e23e00be493edb8a'
+  SOURCE_RUN: '35065688785'
+  SOURCE_SHA: 'c5176e0dc1a43d928adf6132baa625700dcf3b4e'
 jobs:
   prepare:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Verify original proofs and the new radical theorem and browser tests
+      - name: Verify source proofs and schedule-aware map tests
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -39,7 +39,7 @@ jobs:
               assert run['head_sha']==os.environ['SOURCE_SHA'] and run['name']=='Three-proof blueprint'
               if run['status']=='completed':break
               time.sleep(5)
-          assert run['conclusion']=='success','Refusing to publish incomplete or failed source verification'
+          assert run['conclusion']=='success','Refusing to publish an incomplete or failed build'
           job=next(j for j in get('/actions/runs/'+rid+'/jobs')['jobs'] if j['name']=='verify')
           assert job['conclusion']=='success'
           steps={s['name']:s['conclusion'] for s in job['steps']}
@@ -50,9 +50,10 @@ jobs:
                        'Test Lean statement boxes and Mathlib Real shading',
                        'Audit the native computability boundary',
                        'Build and verify the mathematical reader',
+                       'Verify the supplied-schedule lemmas and refined proof map',
                        'Verify the radical evaluator and product theorem']:
               assert steps[name]=='success',name
-          print('Verified old three-proof comparison, radical value bridge, product theorem, numerical separation and browser tests')
+          print('Verified original proofs, supplied-schedule lemmas, precise new edges and browser tests')
           PY
       - uses: actions/download-artifact@v8
         with:
@@ -60,7 +61,7 @@ jobs:
           run-id: ${{ env.SOURCE_RUN }}
           github-token: ${{ github.token }}
           path: downloaded
-      - name: Inspect the exact checked artifact and unchanged old comparisons
+      - name: Inspect the checked map and preserved mathematical artefacts
         run: |
           python3 - <<'PY'
           import hashlib,json,os,pathlib,tarfile,xml.etree.ElementTree as ET
@@ -69,47 +70,49 @@ jobs:
           root=pathlib.Path('site')
           def read(p):return json.loads((root/p).read_text())
           sha=os.environ['SOURCE_SHA']
-          manifest=read('reading/manifest.json');maps=read('reading/maps.json')
+          m=read('reading/manifest.json');maps=read('reading/maps.json');s=read('reading/schedule-proof-map.json')
+          assert m['sourceCommit']==maps['sourceCommit']==s['sourceCommit']==m['proofSourceCommit']==sha
+          assert m['preservedFirstTwo'] and m['compilerAuditPresent']
+          assert m['chapters']==17 and m['theoremMaps']==13 and m['checkedPairedMaps']==1 and m['checkedSingleProofMaps']==1
+          assert all(maps['checks'].values()) and all(s['checks'].values())
+          assert s['noIntegrabilityPredicateIntroduced'] and s['oldProofTermsUnchanged']
+          assert s['mathlibValidityIsSeparate'] and s['genericScheduledBoundsAreContextOnly']
+          assert len(s['displayedConvergenceProofs'])==3
+          target='thm:c3-primitive';valid='lem:c3-construction-valid'
+          assert maps['bundles'][target]['title']=='Cosine primitive'
+          assert 'three proofs' not in maps['bundles'][target]['mathHtml'].lower()
+          assert maps['bundles']['def:c3-integrals']['title']=='Integral construction'
+          assert maps['bundles']['def:c3-integral']['title']=='Chosen cosine construction'
+          for view,path in maps['theorems'][target]['views'].items():
+              svg=ET.parse(root/path)
+              nodes=[e.get('data-node') for e in svg.iter() if e.get('data-node')]
+              edges=[e.get('data-edge') for e in svg.iter() if e.get('data-edge')]
+              assert nodes.count(target)==1 and nodes.count(valid)==1
+              assert sum(e.get('data-edge-kind')=='statement' for e in svg.iter())==4
+              if view=='2':
+                  assert valid+'->'+target not in edges
+                  assert 'lem:c3-endpoint-representation->'+target in edges
+              elif view in ['0','1']:assert valid+'->'+target in edges
+          assert hashlib.sha256((root/'proof-bench/data.json').read_bytes()).hexdigest()==s['proofMetricsFileSha256']
+          assert 'id="the-chosen-schedule"' in (root/'cosine.html').read_text()
           audit=read('reading/dyadic-evaluation.json');numbers=read('reading/dyadic-numerics.json')
-          assert manifest['sourceCommit']==maps['sourceCommit']==numbers['sourceCommit']==sha
-          assert manifest['proofSourceCommit']==sha and manifest['preservedFirstTwo'] and manifest['compilerAuditPresent']
-          assert manifest['chapters']==17 and manifest['theoremMaps']==13
-          assert manifest['checkedPairedMaps']==1 and manifest['checkedSingleProofMaps']==1
-          assert all(maps['checks'].values()) and all(audit['checks'].values())
-          assert all('sorryAx' not in r['axioms'] for r in audit['audits'])
-          assert len(audit['declarations'])==28
-          target='thm:dyadic-product';entry=maps['theorems'][target]
-          assert entry['verifiedGraph'] and not entry['checkedComparison'] and entry['sink']==target
-          assert maps['theorems']['thm:c3-primitive']['checkedComparison']
-          edges=[e for e in maps['witnesses'] if e.get('map')==target]
-          assert len(edges)==17 and sum(e['kind']=='statement' for e in edges)==3
-          svg=ET.parse(root/entry['views']['all'])
-          nodes=[e.get('data-node') for e in svg.iter() if e.get('data-node')]
-          assert len(nodes)==12 and nodes.count(target)==1 and 'def:c3-integrals' in nodes
-          assert 'lem:dyadic-identities' in nodes and 'lem:dyadic-values' in nodes
-          for path,expected in maps['dyadicEvaluation']['unchangedArtifacts'].items():
-              assert hashlib.sha256((root/path).read_bytes()).hexdigest()==expected,path
-          assert not numbers['leanStageExecution'] and not maps['dyadicEvaluation']['illustrationIsLeanStageExecution']
-          assert len(numbers['rows'])==6
+          assert all(audit['checks'].values()) and all('sorryAx' not in r['axioms'] for r in audit['audits'])
+          assert maps['theorems']['thm:dyadic-product']['verifiedGraph']
+          assert not maps['theorems']['thm:dyadic-product']['checkedComparison']
+          for path,h in maps['dyadicEvaluation']['unchangedArtifacts'].items():
+              assert hashlib.sha256((root/path).read_bytes()).hexdigest()==h
+          assert not numbers['leanStageExecution']
+          assert numbers['rows'][-1]['productDisplay']==['0.999904116','1.000095875']
           for row in numbers['rows']:
               lo,hi=map(Q,row['product']);assert lo<1<hi
-              for key in ['pi','integral','product']:
-                  a,b=map(Q,row[key]);da,db=map(Q,row[key+'Display']);assert da<=a<=b<=db
-          assert numbers['rows'][-1]['cells']==8192
-          assert numbers['rows'][-1]['productDisplay']==['0.999904116','1.000095875']
-          chapter=(root/'dyadic-integral.html').read_text()
-          assert 'data-proof-map="thm:dyadic-product"' in chapter and '0.999904116' in chapter
-          assert 'not the literal stage outputs' in chapter
-          assert 'dyadic-integral.html' in (root/'cosine.html').read_text()
-          geometric=maps['geometricPresentation']
-          assert geometric['piDefinition']=='4 A(1)' and geometric['verticalSubdivisionProjected']
-          assert geometric['integralExposition']=='Increasing or decreasing integrands'
+          geo=maps['geometricPresentation']
+          assert geo['piDefinition']=='4 A(1)' and geo['verticalSubdivisionProjected']
           for name in ['arctan','cosine','secants']:
               assert (root/'reading/animations'/f'{name}.gif').read_bytes()[:6] in [b'GIF89a',b'GIF87a']
           native=read('reading/native-computability.json')
           assert native['nativeNoncomputableClosureCheck'] and native['nativeMathlibFree'] and native['noSorryAx']
-          assert all(r['identicalMathematicalText'] for r in read('reading/preservation.json')['rendered'].values())
-          print('Validated separate checked product map, exact identities, independent numerical factors, preserved original graphs and chapter sources')
+          assert all(p['identicalMathematicalText'] for p in read('reading/preservation.json')['rendered'].values())
+          print('Validated chosen construction, separate convergence, actual proof uses, no integrability predicate, and preserved earlier work')
           PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v5
@@ -125,7 +128,7 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify the live radical product and identity map
+      - name: Verify the live schedule-aware cosine map
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
@@ -138,26 +141,21 @@ jobs:
           last=None
           for attempt in range(12):
               try:
-                  manifest=get('/reading/manifest.json');maps=get('/reading/maps.json')
-                  audit=get('/reading/dyadic-evaluation.json');numbers=get('/reading/dyadic-numerics.json')
-                  assert manifest['sourceCommit']==maps['sourceCommit']==numbers['sourceCommit']==sha
-                  assert manifest['preservedFirstTwo'] and manifest['compilerAuditPresent']
-                  assert all(maps['checks'].values()) and all(audit['checks'].values())
-                  assert manifest['theoremMaps']==13 and manifest['checkedPairedMaps']==1 and manifest['checkedSingleProofMaps']==1
-                  target='thm:dyadic-product';entry=maps['theorems'][target]
-                  assert entry['verifiedGraph'] and not entry['checkedComparison']
-                  assert numbers['rows'][-1]['productDisplay']==['0.999904116','1.000095875']
-                  assert not numbers['leanStageExecution']
-                  page=get('/dyadic-integral.html',True)
-                  assert 'data-proof-map="thm:dyadic-product"' in page and '0.999904116' in page
-                  assert 'entry.verifiedGraph' in get('/reading/graph.js',True)
-                  assert 'dyadic-integral.html' in get('/cosine.html',True)
-                  print('LIVE CHAPTER:',base+'/dyadic-integral.html')
-                  print('LIVE MAP:',base+'/proof-map.html?theorem=thm:dyadic-product')
+                  m=get('/reading/manifest.json');maps=get('/reading/maps.json');s=get('/reading/schedule-proof-map.json')
+                  assert m['sourceCommit']==maps['sourceCommit']==s['sourceCommit']==sha
+                  assert m['preservedFirstTwo'] and m['compilerAuditPresent']
+                  assert all(maps['checks'].values()) and all(s['checks'].values())
+                  assert s['noIntegrabilityPredicateIntroduced'] and s['mathlibValidityIsSeparate']
+                  assert maps['bundles']['thm:c3-primitive']['title']=='Cosine primitive'
+                  assert 'lem:c3-construction-valid' in maps['bundles']
+                  assert 'id="the-chosen-schedule"' in get('/cosine.html',True)
+                  svg=get('/reading/cosine-2.svg',True)
+                  assert 'data-node="lem:c3-construction-valid"' in svg
+                  assert 'data-edge="lem:c3-construction-valid-&gt;thm:c3-primitive"' not in svg
+                  print('LIVE MAP:',base+'/proof-map.html?theorem=thm:c3-primitive')
                   print('Verified source:',sha)
-                  print('Geometric pi times radical cosine integral on [0,1/2]; separate checked identity bridge and product theorem')
-                  print('Independent illustrative product at 8192 cells:',numbers['rows'][-1]['productDisplay'])
-                  print('Original three proof routes preserved; numerical table is not literal Lean stage execution')
+                  print('Chosen schedule, its convergence certificates, and conditional schedule independence; no integrability predicate')
+                  print('Conclusion title: Cosine primitive. Existing proof terms, algorithms and measured proof roots unchanged.')
                   break
               except Exception as e:
                   last=str(e);time.sleep(5)
