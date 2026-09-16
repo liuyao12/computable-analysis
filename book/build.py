@@ -133,6 +133,10 @@ def main():
     for k,d in g['nodeDetails'].items():
         modal=legacy.find(id=k+'_modal');mathnode=modal.find(class_=lambda c:c and c.endswith('_thmcontent')) if modal else None
         d['mathHtml']=str(clean(mathnode)) if mathnode else d.get('mathHtml','')
+    from geometric_panels import apply as geometric_presentation
+    from illustrations import build as build_illustrations
+    g=geometric_presentation(g)
+    build_illustrations(book/"animations")
     svgviews={}
     for view,dot in g['views'].items():
         gr=pgv.AGraph(string=dot)
@@ -190,7 +194,7 @@ def main():
         nodes.append({'id':'conclusion','title':c['title'],'mathHtml':c['statement'],'text':'Original manuscript statement. A paired Lean proof comparison has not been registered for this theorem.'})
         if c['outline']:edges.append([f'step-{len(c["outline"])-1}','conclusion'])
         c['nodes']=nodes;c['edges']=edges
-    (book/'maps.json').write_text(json.dumps({'sourceCommit':sha,'proofSourceCommit':g['info']['sourceCommit'],'theorems':catalog,'bundles':g['nodeDetails'],'witnesses':g['witnesses'],'edgeSemantics':g['info']['edgeSemantics'],'checks':g['info']['checks']},separators=(',',':')))
+    (book/'maps.json').write_text(json.dumps({'sourceCommit':sha,'proofSourceCommit':g['info']['sourceCommit'],'theorems':catalog,'bundles':g['nodeDetails'],'witnesses':g['witnesses'],'edgeSemantics':g['info']['edgeSemantics'],'geometricPresentation':g['info']['geometricPresentation'],'checks':g['info']['checks']},separators=(',',':')))
     for file in ['book.css','book.js','graph.js','graph.html','proof-edges.css']:
         dest=site/'proof-map.html' if file=='graph.html' else book/file
         shutil.copyfile(ROOT/'book/assets'/file,dest)
@@ -208,6 +212,7 @@ def main():
       'preservedFirstTwo':all(v['identicalMathematicalText'] for v in protection.values()),
       'noncomputableInventory':inv['nativeSourceNoncomputableCount'],'compilerAuditPresent':not audit.get('pending',False),
       'edgeSemanticsVersion':g['info']['edgeSemantics']['version'],
+      'geometricPresentation':g['info']['geometricPresentation'],
       'kind':'Mathematical reader; older detailed blueprint preserved under reference/.'}
     (book/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
     print(json.dumps(manifest,indent=2))

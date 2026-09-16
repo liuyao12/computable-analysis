@@ -73,8 +73,8 @@ jobs:
       - name: Install blueprint tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y graphviz libgraphviz-dev pkg-config poppler-utils ghostscript dvisvgm texlive-latex-base texlive-latex-extra texlive-pictures
-          python -m pip install -r blueprint/requirements.txt
+          sudo apt-get install -y graphviz libgraphviz-dev pkg-config poppler-utils ghostscript dvisvgm texlive-latex-base texlive-latex-extra texlive-pictures fonts-dejavu-core
+          python -m pip install -r blueprint/requirements.txt Pillow
       - name: Render blueprint and test the three-route graph
         run: |
           leanblueprint web
@@ -104,6 +104,8 @@ jobs:
           python3 book/checks/test_edge_semantics.py
           python3 book/checks/browser.py
           python3 book/checks/test_graph_roles_browser.py
+          python3 book/checks/test_geometric_panels.py
+          python3 book/checks/geometric_browser.py
       - name: Retain verified sources and audit
         run: |
           git archive --format=tar.gz HEAD > /tmp/three-proof-sources.tar.gz

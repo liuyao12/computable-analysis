@@ -39,7 +39,7 @@ def main():
             page.locator('[data-edge-kind="proof"]').first.dispatch_event('click')
             assert page.locator('#map-detail .role').text_content()=='USED IN A PROOF'
         page.locator('[data-node="def:c3-integrals"]').dispatch_event('click')
-        assert page.locator('#map-detail h2').text_content()=='Integrals'
+        assert page.locator('#map-detail h2').text_content()=='Integrals of concave functions'
         assert 'finite Riemann sums' in page.locator('#map-detail .math-body').text_content()
         page.locator('.bundle-lean>summary').click()
         assert page.locator('.lean-card').count()==5

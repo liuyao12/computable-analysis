@@ -11,14 +11,16 @@ function showBundle(id){
  if(!entry.checkedComparison){const d=entry.nodes.find(x=>x.id===id);panel.append(node('span','EDITORIAL READING OUTLINE','role'),node('h2',d.title));if(d.mathHtml){const body=node('div',undefined,'math-body');body.innerHTML=d.mathHtml;panel.append(body);latex(body);}panel.append(node('p',d.text,'strategy'),node('p','This map explains the manuscript argument. It is not an extracted Lean dependency graph. No Mathlib comparison is registered for this statement yet.','map-missing'));if(id==='conclusion'&&entry.proofIdea){const details=node('details');details.append(node('summary','Original proof idea'));const div=node('div',undefined,'math-body');div.innerHTML=entry.proofIdea;details.append(div);details.ontoggle=()=>{if(details.open)latex(div);};panel.append(details);}return;}
  const d=model.bundles[id];if(!d)return;
  panel.append(node('span',d.strategy?.role||'MATHEMATICAL BUNDLE','role'),node('h2',d.title));
+ if(d.illustration)panel.append(illustration(d.illustration));
  if(d.mathHtml){const div=node('div',undefined,'math-body');div.innerHTML=d.mathHtml;panel.append(div);latex(div);}
  if(d.strategy?.summary)panel.append(node('p',d.strategy.summary,'strategy'));
+ if(d.formalizationBoundary){const boundary=node('details',undefined,'formal-boundary');boundary.append(node('summary','Scope of the checked Lean declarations'),node('p',d.formalizationBoundary));panel.append(boundary);}
  const details=node('details',undefined,'bundle-lean');details.append(node('summary',`Exact Lean statements (${d.declarations.length})`));
  for(const group of d.groups){const section=node('section',undefined,'lean-group');section.append(node('h3',group.title));
   if(d.strategy?.groups[group.title])section.append(node('p',d.strategy.groups[group.title],'strategy'));
   for(const name of group.names){const dec=d.declarations.find(x=>x.name===name);if(!dec)continue;
    const card=node('div',undefined,'lean-card'+(dec.realDependencyPath?.length?' mathlib':''));
-   const top=node('div',undefined,'card-top'),label=node('span',dec.realDependencyPath?.length?'Uses Mathlib’s real':'Native / no Mathlib-real reference'),copy=node('button','Copy');top.append(label,copy);card.append(top);
+   const top=node('div',undefined,'card-top'),label=node('span',dec.realDependencyPath?.length?'Uses Mathlib’s real':'No Mathlib-real reference'),copy=node('button','Copy');top.append(label,copy);card.append(top);
    const pre=node('pre'),code=node('code',leanText(dec));pre.append(code);card.append(pre);window.LeanSnippet?.highlight(code);
    copy.onclick=async()=>{try{await navigator.clipboard.writeText(code.textContent);copy.textContent='Copied';setTimeout(()=>copy.textContent='Copy',1000);}catch{copy.textContent='Select text to copy';}};
    const a=node('a','Pinned Lean source ↗','source');a.href=dec.sourceUrl;a.target='_blank';a.rel='noopener';card.append(a,node('p',dec.ownerModule||'', 'module'));section.append(card);
@@ -41,7 +43,7 @@ function showEdge(raw){
    'This neutral arrow belongs to the construction of an object or to the type of a declaration, rather than a chosen proof route.','strategy'));
  for(const e of paths){
   const label=e.kind==='statement'?({S:'Sine in the endpoint',C:'Cosine in the integral',pi:'The arctangent-defined pi',integral:'The cosine integral computation',integrals:'The general integral construction'}[e.input]):
-    e.typeEntry?'Integral in the FTC statement':e.globalEdge?'Construction':e.route===null?'Companion':['Direct','Native FTC','Mathlib'][e.route];
+    e.typeEntry?'Integral in the FTC statement':e.globalEdge?'Construction':e.route===null?'Companion':['Direct','Concave FTC','Mathlib'][e.route];
   panel.append(node('h3',label));
   if(e.note)panel.append(node('p',e.note,'strategy'));
   const details=node('details'),list=node('ol',undefined,'edge-list');
@@ -75,3 +77,13 @@ async function init(){try{const r=await fetch('reading/maps.json');if(!r.ok)thro
 }catch(e){fail(e);}}
 function fail(e){$('#map-detail').replaceChildren(node('p',e.message,'graph-error'));console.error(e);}
 init();
+
+function illustration(info){
+ const f=node('figure',undefined,'math-animation'),img=node('img');
+ const still='reading/animations/'+info.id+'.png',gif='reading/animations/'+info.id+'.gif';
+ let playing=!matchMedia('(prefers-reduced-motion: reduce)').matches;
+ img.src=playing?gif:still;img.alt=info.alt;img.width=800;img.height=640;img.decoding='async';
+ const control=node('button',playing?'Pause animation':'Play animation');control.type='button';control.setAttribute('aria-pressed',String(playing));
+ control.onclick=()=>{playing=!playing;img.src=playing?gif:still;control.textContent=playing?'Pause animation':'Play animation';control.setAttribute('aria-pressed',String(playing));};
+ f.append(img,node('figcaption',info.caption),control);return f;
+}

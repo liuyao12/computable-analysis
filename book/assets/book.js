@@ -11,3 +11,10 @@ document.querySelectorAll('[data-proof-map]').forEach(link=>link.addEventListene
 document.querySelector('#close-proof')?.addEventListener('click',closeProof);
 dialog?.addEventListener('cancel',()=>{frame.src='about:blank';opener?.focus();});
 window.addEventListener('message',e=>{if(e.origin===location.origin&&e.source===frame.contentWindow&&e.data==='close-proof-map')closeProof();});
+
+document.querySelectorAll('[data-animation]').forEach(figure=>{
+ const id=figure.dataset.animation,img=figure.querySelector('img'),button=figure.querySelector('[data-animation-toggle]');
+ let playing=!matchMedia('(prefers-reduced-motion: reduce)').matches;
+ function apply(){img.src='reading/animations/'+id+(playing?'.gif':'.png');button.textContent=playing?'Pause animation':'Play animation';button.setAttribute('aria-pressed',String(playing));}
+ button.onclick=()=>{playing=!playing;apply();};apply();
+});

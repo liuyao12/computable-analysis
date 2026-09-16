@@ -7,3 +7,5 @@
 #map-canvas .statement-edge:hover path{stroke:#202020;stroke-width:2.1px}
 #map-canvas .proof-edge:hover path{stroke-width:2.7px}
 #map-detail>details{margin:14px 0}#map-detail>details>summary{font-size:11px;cursor:pointer;color:var(--green)}
+
+.math-animation{margin:18px 0 22px}.math-animation img{display:block;width:100%;height:auto;border:1px solid #dfe4da;border-radius:4px}.math-animation figcaption{font:11px/1.5 system-ui;color:#72826d;margin:7px 0}.math-animation button{font-size:11px;padding:5px 8px;margin-top:5px}.formal-boundary{margin:18px 0;border-top:1px solid #ddd;padding-top:12px}.formal-boundary summary{font:12px system-ui;cursor:pointer}.formal-boundary p{font:12px/1.6 system-ui;color:#7c715d}.reader .math-animation{max-width:620px;margin:25px auto}.reader .math-animation figcaption{font-size:12px}
