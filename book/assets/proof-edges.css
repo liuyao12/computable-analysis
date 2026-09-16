@@ -1,0 +1,9 @@
+/* Edge roles are independent of Mathlib-real node-background shading. */
+.map-legend{flex-wrap:wrap;gap:5px 10px;max-width:calc(100% - 28px)}
+.map-legend em{display:inline-block;width:17px;border-top:2px solid;vertical-align:middle;margin-right:5px}
+.map-legend .statement-line{border-color:#202020;border-top-style:solid}
+.map-legend .direct-line{border-color:#a45032}.map-legend .ftc-line{border-color:#326493}
+.map-legend .mathlib-line{border-color:#7755a0}
+#map-canvas .statement-edge:hover path{stroke:#202020;stroke-width:2.1px}
+#map-canvas .proof-edge:hover path{stroke-width:2.7px}
+#map-detail>details{margin:14px 0}#map-detail>details>summary{font-size:11px;cursor:pointer;color:var(--green)}
