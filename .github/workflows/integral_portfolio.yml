@@ -1,0 +1,101 @@
+name: Integral portfolio verification
+
+# Materialize the validated source patch as readable files, then independently
+# compile and audit all mathematics. A payload is neither a proof nor a binary.
+on:
+  push:
+    branches: [work/integral-portfolio]
+    paths:
+      - '.github/workflows/integral_portfolio.yml'
+      - '.github/payloads/**'
+      - '.github/scripts/materialize_integral_portfolio.py'
+      - 'ComputableAnalysis/**'
+      - 'comparison/**'
+      - 'book/**'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: integral-portfolio-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: work/integral-portfolio
+          fetch-depth: 0
+      - name: Materialize and commit the exact reviewed source patch
+        run: python3 .github/scripts/materialize_integral_portfolio.py
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+      - uses: actions/cache@v5
+        with:
+          path: .lake
+          key: integral-portfolio-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ env.SOURCE_SHA }}
+          restore-keys: |
+            integral-portfolio-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+            three-proof-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+            cosine-ftc-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+            geometric-sine-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+      - uses: actions/cache@v5
+        with:
+          path: comparison/.lake
+          key: integral-comparison-${{ hashFiles('comparison/lean-toolchain', 'comparison/lakefile.toml') }}-${{ env.SOURCE_SHA }}
+          restore-keys: |
+            integral-comparison-${{ hashFiles('comparison/lean-toolchain', 'comparison/lakefile.toml') }}-
+            comparison-package-${{ hashFiles('comparison/lean-toolchain', 'comparison/lakefile.toml') }}-
+      - name: Install mathematical reader and browser prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y graphviz libgraphviz-dev pkg-config poppler-utils ghostscript dvisvgm texlive-latex-base texlive-latex-extra texlive-pictures fonts-dejavu-core
+          python -m pip install -r blueprint/requirements.txt Pillow playwright
+          if ! command -v google-chrome >/dev/null && ! command -v chromium >/dev/null; then
+            python -m playwright install --with-deps chromium
+          fi
+      - name: Verify all proofs, exact comparisons, mathematical maps and browser regressions
+        run: |
+          set -euo pipefail
+          bash book/checks/verify_integral_portfolio.sh | tee /tmp/integral-portfolio-verification.log
+      - name: Retain the exact source and verified publication manifest
+        run: |
+          git archive --format=tar.gz "$SOURCE_SHA" > /tmp/integral-portfolio-sources.tar.gz
+          python3 - <<'PY'
+          import json,os,pathlib,subprocess
+          site=pathlib.Path('blueprint/web/reading')
+          manifest=json.loads((site/'manifest.json').read_text())
+          audit=json.loads((site/'integral-portfolio-audit.json').read_text())
+          assert manifest['sourceCommit']==os.environ['SOURCE_SHA']
+          assert all(audit['checks'].values())
+          assert subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()==os.environ['SOURCE_SHA']
+          out={'sourceCommit':os.environ['SOURCE_SHA'],'triggerCommit':os.environ['GITHUB_SHA'],
+            'sourceRun':os.environ['GITHUB_RUN_ID'],'allVerificationStepsPassed':True,
+            'newFamilies':['Wallis cosine powers','integer beta integrals'],
+            'previousCartwrightFormalizationIncluded':True}
+          (site/'portfolio-publication.json').write_text(json.dumps(out,indent=2)+'\n')
+          print(json.dumps(out,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integral-portfolio-verification
+          path: |
+            comparison/reports
+            blueprint/web/reading
+            /tmp/integral-portfolio-verification.log
+            /tmp/integral-portfolio-sources.tar.gz
+          retention-days: 30
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: blueprint/web
+          retention-days: 7
