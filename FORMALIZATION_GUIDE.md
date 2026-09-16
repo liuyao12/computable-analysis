@@ -375,3 +375,63 @@ git diff --check
 For blueprint changes, run the declaration checker and `leanblueprint web`.
 After pushing, confirm Lean CI and the Pages deployment rather than assuming a
 successful local render is already live.
+
+## Weighted cosine moments and an arithmetic application
+
+`Cartwright.lean` exports `CartwrightMoments.evaluation_viaFinite`,
+`evaluation_viaFTC`, `piSquared_viaFinite`, and `piSquared_viaFTC`.
+`MathlibComparison.Cartwright` adds the corresponding `viaMathlib` results.
+The complete theorem types are checked to agree across each family.
+
+The moment computation itself is in `CartwrightMoments.lean`, with convergence
+provided by `MonotoneSampleIntegral` for its explicit uniform sample-error
+certificate. Its dyadic mesh/evaluation diagonal is justified quantitatively;
+it is not assumed from pointwise validity. Positivity is proved independently
+in `CartwrightMomentBounds` before the recurrence is evaluated.
+
+`FiniteSampleCalculus.Model` is a bounded local quadratic-remainder certificate;
+its product construction and `chosen_samples_FTC` are reusable for concrete
+polynomial/special-function clients with a separately proved mesh comparison.
+Do not apply the concave-primitive theorem to a general polynomial product
+without a curvature proof. The Cartwright FTC route instead supplies the actual
+product/remainder data for its primitive. The direct route uses the separate
+`FiniteSummationByParts` identities and remainder accumulation, without calling
+that FTC or constructing the composite-primitive model.
+
+Both native routes share local trigonometric bounds and finite algebra. The
+Mathlib route independently identifies the same native quadrature with its
+interval integral by monotone rectangles, then uses Mathlib FTC/integration by
+parts. It does not borrow a native moment recurrence or a ready-made irrationality
+theorem. All routes use the same `CartwrightArithmetic` integer contradiction.
+The optional exporter `comparison/checks/ExportCartwright.lean` audits these
+boundaries and measures actual stored-reference closures, not import lists.
+
+## Reusable integral families after Cartwright
+
+`ComputableAnalysis.IntegralApplications` exports closed Wallis and integer-beta
+applications. The optional `MathlibComparison.IntegralApplications` gives proofs
+of the identical native propositions, not look-alike real-only identities.
+
+The Wallis computation samples powers of the existing quarter-turn cosine.
+Its prescribed mesh/evaluation diagonal has a proved uniform error bound;
+monotonicity and sample convergence establish validity before the recurrence.
+`Wallis.FactorialStatement` and `Wallis.ProductBoundsStatement` reuse one
+arithmetic endpoint recurrence with either the native or Mathlib analytic laws.
+
+The beta computation has exact rational polynomial samples and generally one
+turn. `RationalLipschitzIntegral` takes a supplied finite Lipschitz bound, gives
+an explicit dyadic radius, and proves prefix-intersection validity. Do not
+assert global monotonicity of x^m(1-x)^n. Its factorial and density-normalization
+statements are uniformly quantified in both natural parameters. The normalizer
+is a rational recurrence, not the reciprocal of the integral evaluator.
+
+The native product/power derivative models use explicit finite remainders;
+they do not assume arbitrary composite primitives are convex or concave.
+No native integrability predicate or noncomputable numerical choice is added.
+Every comparison first proves the actual quadrature corresponds to Mathlib's
+integral, without using its proposed evaluation.
+
+Run `checks/ExportIntegralPortfolio.lean` in the comparison package to audit
+complete types, actual dependencies, convergence/evaluation separation, and
+costs. Count these as two families. The four applications and their internal
+recurrences are reusable obligations, not independent successes per parameter.

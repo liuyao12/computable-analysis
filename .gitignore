@@ -1,2 +1,9 @@
 /.lake
 /.venv
+
+# Reproducible reports and build products, not theorem source.
+__pycache__/
+*.pyc
+/comparison/.lake/
+/comparison/reports/
+/blueprint/web/
