@@ -16,8 +16,8 @@ concurrency:
   group: pages-verified-proof-publication
   cancel-in-progress: false
 env:
-  SOURCE_RUN: '35054423207'
-  SOURCE_SHA: '9baafc08ab8008085f6ca386d217197207b1b8ad'
+  SOURCE_RUN: '35056741522'
+  SOURCE_SHA: '289b4936bbbe54fe1e6a8fddd207959ce43fc475'
 jobs:
   prepare:
     runs-on: ubuntu-latest
@@ -69,19 +69,34 @@ jobs:
           b=g['bundles'];assert 'lem:c3-inverse' not in b and b['def:c3-trig']['title']=='Sine and cosine'
           assert len(b['def:c3-trig']['declarations'])==37
           assert 'ComputableAnalysis.ClosedArctanInverse.provider' in b['def:c3-trig']['anchors']
-          assert g['geometricPresentation']['piDefinition']=='4 A(1)'
-          assert g['geometricPresentation']['originalTheoremProgramsAndProofsUnchanged']
-          assert g['geometricPresentation']['concaveOnlyLeanConstructorImplemented'] is False
-          assert 'not yet been formalized' in b['def:c3-integrals']['formalizationBoundary']
-          assert b['def:c3-arctan']['illustration']['id']=='arctan'
-          assert b['def:c3-integrals']['illustration']['id']=='concave'
-          for name in ['arctan','concave']:
+          info=g['geometricPresentation']
+          assert info['version']==2 and info['piDefinition']=='4 A(1)'
+          assert info['originalTheoremProgramsAndProofsUnchanged']
+          assert info['verticalSubdivisionProjected'] and info['independentCosineNumerics']
+          assert info['numericDriverIsLeanStageExecution'] is False
+          assert info['integralExposition']=='Increasing or decreasing integrands'
+          assert b['def:c3-integrals']['title']=='Integrals of monotone functions'
+          for label,name in [('def:c3-arctan','arctan'),('def:c3-integrals','cosine'),('thm:c3-primitive','cosine'),('lem:c3-concavity','secants')]:
+              assert b[label]['illustration']['id']==name
+          for name in ['arctan','cosine','secants']:
               for suffix in ['gif','png']:
                   p=root/'reading/animations'/f'{name}.{suffix}'
                   assert hashlib.sha256(p.read_bytes()).hexdigest()==a['files'][p.name]
                   if suffix=='gif':assert p.read_bytes()[:6] in [b'GIF89a',b'GIF87a'] and p.stat().st_size>10000
-          assert all(Q(r['u'])==Q(2,3) for r in a['arctan'])
-          for r in a['concave']:assert Q(r['lower'])<=Q(5,6)<=Q(r['upper'])
+          assert not (root/'reading/animations/concave.gif').exists()
+          for r in a['arctan']:
+              n=r['subarcs'];u=Q(r['u']);assert u==Q(2,3)
+              vertical=[list(map(Q,p)) for p in r['verticalPoints']]
+              assert vertical==[[Q(0),j*u/n] for j in range(n+1)]
+              for (_,v),(x,y) in zip(vertical,[list(map(Q,p)) for p in r['projectedPoints']]):
+                  assert x*x+y*y==1 and y==v*(x+1)
+          for r in a['cosine']+a['cosineTable']:
+              assert max(Q(r['lower']),Q(r['endpointLower']))<=min(Q(r['upper']),Q(r['endpointUpper']))
+          last=a['cosineTable'][-1]
+          assert last['cells']==512 and last['lowerDisplay']=='0.2755015' and last['upperDisplay']=='0.2758272'
+          chapter=(root/'cosine.html').read_text()
+          assert 'data-animation="cosine"' in chapter and '0.2755015' in chapter
+          assert 'not executions of the literal Lean stage programs' in chapter
           for view,p in g['theorems']['thm:c3-primitive']['views'].items():
               doc=ET.fromstring((root/p).read_text());nodes=[x.get('data-node') for x in doc.iter() if x.get('data-node')]
               assert 'lem:c3-inverse' not in nodes and nodes.count('thm:c3-primitive')==1
@@ -90,7 +105,7 @@ jobs:
           assert native['nativeNoncomputableClosureCheck'] and native['nativeMathlibFree'] and native['noSorryAx']
           assert all(x['identicalMathematicalText'] for x in read('reading/preservation.json')['rendered'].values())
           assert (root/'proof-bench/data.json').read_bytes()==(root/'reference/proof-bench/data.json').read_bytes()
-          print('Validated two genuine GIFs, pi normalization, folded inverse, exact cards and explicit concave-construction status')
+          print('Validated three GIFs, exact vertical projections, independent cosine bounds, monotone integration, secant derivatives and unchanged proofs')
           PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v5
@@ -111,7 +126,7 @@ jobs:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
           python3 - <<'PY'
-          import json,os,time,urllib.request
+          import hashlib,json,os,time,urllib.request
           sha=os.environ['SOURCE_SHA'];base=os.environ['PAGE_URL'].rstrip('/')
           def get(path,binary=False):
               with urllib.request.urlopen(base+path+'?source='+sha,timeout=25) as r:
@@ -119,21 +134,26 @@ jobs:
           last=None
           for attempt in range(12):
               try:
-                  m=get('/reading/manifest.json');g=get('/reading/maps.json')
+                  m=get('/reading/manifest.json');g=get('/reading/maps.json');a=get('/reading/animations/manifest.json')
                   assert m['sourceCommit']==g['sourceCommit']==sha
                   assert m['preservedFirstTwo'] and m['compilerAuditPresent'] and all(g['checks'].values())
                   assert 'lem:c3-inverse' not in g['bundles']
                   assert g['bundles']['def:c3-trig']['title']=='Sine and cosine'
-                  assert g['geometricPresentation']['piDefinition']=='4 A(1)'
-                  assert g['geometricPresentation']['concaveOnlyLeanConstructorImplemented'] is False
-                  for name in ['arctan','concave']:
+                  info=g['geometricPresentation']
+                  assert info['piDefinition']=='4 A(1)' and info['verticalSubdivisionProjected']
+                  assert info['integralExposition']=='Increasing or decreasing integrands'
+                  assert info['independentCosineNumerics'] and not info['numericDriverIsLeanStageExecution']
+                  for name in ['arctan','cosine','secants']:
                       image=get('/reading/animations/'+name+'.gif',True)
                       assert image[:6] in [b'GIF89a',b'GIF87a'] and len(image)>10000
-                  assert b'data-animation="arctan"' in get('/cosine.html',True)
+                      assert hashlib.sha256(image).hexdigest()==a['files'][name+'.gif']
+                  chapter=get('/cosine.html',True)
+                  assert b'data-animation="arctan"' in chapter and b'data-animation="cosine"' in chapter
+                  assert b'0.2755015' in chapter and b'0.2756644' in chapter
                   print('LIVE MAP:',base+'/proof-map.html?theorem=thm:c3-primitive')
-                  print('LIVE CHAPTER:',base+'/cosine.html')
+                  print('LIVE CHAPTER:',base+'/cosine.html#numerical-comparison')
                   print('Verified source:',sha)
-                  print('Two GIFs; generic u=2/3 sector; pi=4A(1); inverse folded; original proofs unchanged; concave-only Lean restriction explicitly not claimed')
+                  print('Three GIFs; vertical subdivision and projections; independent cosine bounds; monotone integration; convex/concave secant derivatives; original proofs unchanged')
                   break
               except Exception as e:
                   last=str(e);time.sleep(5)
