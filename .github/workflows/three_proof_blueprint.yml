@@ -106,6 +106,14 @@ jobs:
           python3 book/checks/test_graph_roles_browser.py
           python3 book/checks/test_geometric_panels.py
           python3 book/checks/geometric_browser.py
+      - name: Verify the radical evaluator and product theorem
+        run: |
+          set -euo pipefail
+          lake build ComputableAnalysis.DyadicCosinePrimitive
+          lake env lean book/checks/ExportDyadicEvaluation.lean | tee comparison/reports/dyadic-evaluation.log
+          python3 book/add_dyadic_demo.py
+          python3 book/checks/test_dyadic_demo.py
+          python3 book/checks/dyadic_browser.py
       - name: Retain verified sources and audit
         run: |
           git archive --format=tar.gz HEAD > /tmp/three-proof-sources.tar.gz

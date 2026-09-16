@@ -8,7 +8,7 @@ function leanText(d){let t=d.kind+' '+d.name+' : '+d.type;if(d.value!==null&&d.v
 function showBundle(id){
  selected=id;document.querySelectorAll('[data-node]').forEach(n=>n.classList.toggle('selected',n.dataset.node===id));
  const panel=$('#map-detail');panel.replaceChildren();
- if(!entry.checkedComparison){const d=entry.nodes.find(x=>x.id===id);panel.append(node('span','EDITORIAL READING OUTLINE','role'),node('h2',d.title));if(d.mathHtml){const body=node('div',undefined,'math-body');body.innerHTML=d.mathHtml;panel.append(body);latex(body);}panel.append(node('p',d.text,'strategy'),node('p','This map explains the manuscript argument. It is not an extracted Lean dependency graph. No Mathlib comparison is registered for this statement yet.','map-missing'));if(id==='conclusion'&&entry.proofIdea){const details=node('details');details.append(node('summary','Original proof idea'));const div=node('div',undefined,'math-body');div.innerHTML=entry.proofIdea;details.append(div);details.ontoggle=()=>{if(details.open)latex(div);};panel.append(details);}return;}
+ if(!(entry.checkedComparison||entry.verifiedGraph)){const d=entry.nodes.find(x=>x.id===id);panel.append(node('span','EDITORIAL READING OUTLINE','role'),node('h2',d.title));if(d.mathHtml){const body=node('div',undefined,'math-body');body.innerHTML=d.mathHtml;panel.append(body);latex(body);}panel.append(node('p',d.text,'strategy'),node('p','This map explains the manuscript argument. It is not an extracted Lean dependency graph. No Mathlib comparison is registered for this statement yet.','map-missing'));if(id==='conclusion'&&entry.proofIdea){const details=node('details');details.append(node('summary','Original proof idea'));const div=node('div',undefined,'math-body');div.innerHTML=entry.proofIdea;details.append(div);details.ontoggle=()=>{if(details.open)latex(div);};panel.append(details);}return;}
  const d=model.bundles[id];if(!d)return;
  panel.append(node('span',d.strategy?.role||'MATHEMATICAL BUNDLE','role'),node('h2',d.title));
  if(d.illustration)panel.append(illustration(d.illustration));
@@ -32,6 +32,7 @@ function showBundle(id){
 function showEdge(raw){
  const [s,t]=raw.split('->');
  const paths=model.witnesses.filter(e=>e.source===s&&e.target===t&&
+   (entry.verifiedGraph?e.map===entry.id:!e.map)&&
    (e.kind==='statement'||e.globalEdge||route==='all'||String(e.route)===route));
  const statement=paths.some(e=>e.kind==='statement'),proof=paths.some(e=>e.kind==='proof');
  const panel=$('#map-detail');
@@ -42,8 +43,8 @@ function showEdge(raw){
    'This colored arrow records use in a proof or certificate body, not merely a reference in its theorem type. Intermediate declarations can be hidden by the bundle. It does not assert that this prerequisite is logically indispensable.':
    'This neutral arrow belongs to the construction of an object or to the type of a declaration, rather than a chosen proof route.','strategy'));
  for(const e of paths){
-  const label=e.kind==='statement'?({S:'Sine in the endpoint',C:'Cosine in the integral',pi:'The arctangent-defined pi',integral:'The cosine integral computation',integrals:'The general integral construction'}[e.input]):
-    e.typeEntry?'Integral in the FTC statement':e.globalEdge?'Construction':e.route===null?'Companion':['Direct','Concave FTC','Mathlib'][e.route];
+  const label=e.label||(e.kind==='statement'?({S:'Sine in the endpoint',C:'Cosine in the integral',pi:'The arctangent-defined pi',integral:'The cosine integral computation',integrals:'The general integral construction'}[e.input]):
+    e.typeEntry?'Integral in the FTC statement':e.globalEdge?'Construction':e.route===null?'Companion':(entry.routeNames||['Direct','Concave FTC','Mathlib'])[e.route]);
   panel.append(node('h3',label));
   if(e.note)panel.append(node('p',e.note,'strategy'));
   const details=node('details'),list=node('ol',undefined,'edge-list');
@@ -64,12 +65,13 @@ function attach(){svg=$('#svg-holder svg');initialBox=svg.getAttribute('viewBox'
  svg.addEventListener('pointermove',e=>{if(!drag)return;const r=svg.getBoundingClientRect(),scale=Math.max(box[2]/r.width,box[3]/r.height);box=[drag.box[0]-(e.clientX-drag.x)*scale,drag.box[1]-(e.clientY-drag.y)*scale,...drag.box.slice(2)];useBox();});
  for(const ev of ['pointerup','pointercancel'])svg.addEventListener(ev,()=>{drag=null;svg.classList.remove('dragging');});
 }
-async function render(){const ticket=++request;if(entry.checkedComparison){const r=await fetch(entry.views[route]);if(!r.ok)throw Error('Could not load graph');const text=await r.text();if(ticket!==request)return;$('#svg-holder').innerHTML=text;}else{
+async function render(){const ticket=++request;if(entry.checkedComparison||entry.verifiedGraph){const r=await fetch(entry.views[route]);if(!r.ok)throw Error('Could not load graph');const text=await r.text();if(ticket!==request)return;$('#svg-holder').innerHTML=text;}else{
  const s=se('svg',{viewBox:`0 0 480 ${entry.nodes.length*160+50}`,'aria-label':'Editorial mathematical outline'});const defs=se('defs',{}),marker=se('marker',{id:'arrow',viewBox:'0 0 10 10',refX:8,refY:5,markerWidth:5,markerHeight:5,orient:'auto'});marker.append(se('path',{d:'M0,0L10,5L0,10Z',fill:'#89968f'}));defs.append(marker);s.append(defs);
  entry.nodes.forEach((n,i)=>{if(i)s.append(se('path',{d:`M240 ${i*160-45} L240 ${i*160+15}`,stroke:'#89968f','stroke-dasharray':'4 3','marker-end':'url(#arrow)'}));const g=se('g',{'data-node':n.id,tabindex:0,role:'button','aria-label':n.title,class:'node concept-node',transform:`translate(75,${i*160+20})`});g.append(se('rect',{width:330,height:94,rx:5}));const words=n.title.split(' '),lines=[''];for(const word of words){if((lines.at(-1)+' '+word).length>34)lines.push('');lines[lines.length-1]+=(lines.at(-1)?' ':'')+word;}lines.forEach((t,j)=>g.append(se('text',{x:165,y:43+j*19},t)));s.append(g);});$('#svg-holder').replaceChildren(s);
- }attach();$('#svg-holder').dataset.view=route;showBundle(entry.checkedComparison?'thm:c3-primitive':'conclusion');}
+ }attach();$('#svg-holder').dataset.view=route;showBundle(entry.checkedComparison||entry.verifiedGraph?(entry.sink||'thm:c3-primitive'):'conclusion');}
 async function init(){try{const r=await fetch('reading/maps.json');if(!r.ok)throw Error('No proof map data');model=await r.json();const id=new URLSearchParams(location.search).get('theorem')||'thm:c3-primitive';entry=model.theorems[id];if(!entry)throw Error('This theorem does not yet have a registered map. Return to the chapter.');$('#map-title').textContent=entry.title;$('#map-subtitle').textContent=entry.status;$('#return-text').href=entry.page+'#'+entry.id; if(window.parent!==window)$('#return-text').onclick=e=>{e.preventDefault();window.parent.postMessage('close-proof-map',location.origin);}; document.title=entry.title+' · Proof map';
- if(!entry.checkedComparison){for(const b of document.querySelectorAll('[data-route]'))b.hidden=true;document.querySelector('.map-legend').replaceChildren(node('span','Editorial arrows · not a checked dependency claim'));}
+ if(!entry.checkedComparison&&!entry.verifiedGraph){for(const b of document.querySelectorAll('[data-route]'))b.hidden=true;document.querySelector('.map-legend').replaceChildren(node('span','Editorial arrows · not a checked dependency claim'));}
+ if(entry.verifiedGraph&&!entry.checkedComparison){for(const b of document.querySelectorAll('[data-route]'))b.hidden=true;document.querySelector('.map-legend').replaceChildren(node('span','Black: definitions'),node('span','Blue: proof use'),node('span','Green nodes: no Mathlib real'));}
  for(const b of document.querySelectorAll('[data-route]'))b.onclick=()=>{route=b.dataset.route;document.querySelectorAll('[data-route]').forEach(x=>x.classList.toggle('active',x===b));render().catch(fail);};
  $('#zoom-in').onclick=()=>zoom(.76);$('#zoom-out').onclick=()=>zoom(1/.76);$('#reset-map').onclick=fit;
  window.addEventListener('keydown',e=>{if(e.key==='Escape'&&window.parent!==window)window.parent.postMessage('close-proof-map',location.origin);});
