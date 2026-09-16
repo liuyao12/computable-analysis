@@ -19,15 +19,19 @@ def main():
         page.on('pageerror',lambda e:errors.append(str(e)))
         page.goto(base,wait_until='domcontentloaded');page.wait_for_selector('article .chapter-pair')
         page.screenshot(path=str(reports/'book-desktop.png'),full_page=True)
-        for chapter in ['ch-foundations.html','ch-circle-sphere.html','cosine.html']:
+        chapters = [f.name for f in site.glob('ch-*.html') if 'class="reader"' in f.read_text()] + ['cosine.html']
+        for chapter in chapters:
             page.goto(base+chapter,wait_until='domcontentloaded')
+            page.wait_for_function("window.MathJax && window.MathJax.startup && window.MathJax.startup.promise",timeout=60000)
+            page.evaluate("() => MathJax.startup.promise")
             page.wait_for_selector('mjx-container',timeout=60000)
             assert page.locator('mjx-merror,[data-mjx-error]').count()==0,chapter
-            assert page.locator('[data-proof-map]').count()>=1
+            if chapter in ['ch-foundations.html','ch-circle-sphere.html','cosine.html']:
+                assert page.locator('[data-proof-map]').count()>=1
         link=page.locator('[data-proof-map="thm:c3-primitive"]');link.scroll_into_view_if_needed();link.click()
         page.locator('#proof-dialog').wait_for(state='visible')
         frame=page.frame_locator('#proof-frame');frame.locator('[data-node="thm:c3-primitive"]').wait_for(timeout=30000)
-        assert not frame.locator('.bundle-lean').get_attribute('open')
+        assert frame.locator('.bundle-lean').get_attribute('open') is None
         assert frame.locator('#map-detail .math-body').count()==1
         frame.locator('.bundle-lean>summary').click()
         assert frame.locator('.lean-card').count()>=4
