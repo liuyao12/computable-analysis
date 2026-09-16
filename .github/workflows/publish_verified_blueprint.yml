@@ -1,7 +1,7 @@
 name: Publish verified proof blueprint
 
-# Publish only a pinned, proof-checked and browser-tested static artifact.
-# The theorem branch is not merged; Pages permissions/protections are unchanged.
+# Documentation-only publication of the fully verified mathematical reader.
+# No theorem branch is merged and Pages protections are unchanged.
 on:
   push:
     branches: [main]
@@ -16,15 +16,15 @@ concurrency:
   group: pages-verified-proof-publication
   cancel-in-progress: false
 env:
-  SOURCE_RUN: '34945179551'
-  SOURCE_SHA: '5bfdda093c7e59d10ab0a687b2d077583081a6b7'
+  SOURCE_RUN: '35046446613'
+  SOURCE_SHA: '278df0d026e356f7a708353793d16de95477e8ce'
 
 jobs:
   prepare:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Verify proof builds, definition audit, and browser regressions
+      - name: Verify mathematics, computational boundary, preserved chapters and reader tests
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -32,10 +32,10 @@ jobs:
           import json, os, time, urllib.request
           base = 'https://api.github.com/repos/' + os.environ['GITHUB_REPOSITORY']
           def get(path):
-              request = urllib.request.Request(base + path, headers={
+              req = urllib.request.Request(base + path, headers={
                   'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
                   'Accept': 'application/vnd.github+json'})
-              with urllib.request.urlopen(request, timeout=30) as response:
+              with urllib.request.urlopen(req, timeout=30) as response:
                   return json.load(response)
           run_id = os.environ['SOURCE_RUN']
           for attempt in range(180):
@@ -45,7 +45,7 @@ jobs:
               if run['status'] == 'completed':
                   break
               time.sleep(5)
-          assert run['conclusion'] == 'success', 'Source run must finish successfully'
+          assert run['conclusion'] == 'success', 'Source run must pass all gates before publication'
           job = next(j for j in get('/actions/runs/' + run_id + '/jobs')['jobs'] if j['name'] == 'verify')
           assert job['conclusion'] == 'success'
           steps = {s['name']: s['conclusion'] for s in job['steps']}
@@ -53,9 +53,11 @@ jobs:
                        'Build all three proofs in one environment',
                        'Check identical statement and independent proof routes',
                        'Render blueprint and test the three-route graph',
-                       'Test Lean statement boxes and Mathlib Real shading']:
+                       'Test Lean statement boxes and Mathlib Real shading',
+                       'Audit the native computability boundary',
+                       'Build and verify the mathematical reader']:
               assert steps[step] == 'success', step
-          print('Verified proof roots, readback equations, independent definitions, graph bundles and browser tests')
+          print('Verified native/Mathlib proof builds, computability audit and numerical execution, preservation, reader and browser tests')
           PY
       - uses: actions/download-artifact@v8
         with:
@@ -63,67 +65,46 @@ jobs:
           run-id: ${{ env.SOURCE_RUN }}
           github-token: ${{ github.token }}
           path: downloaded
-      - name: Inspect all bundles and the independent definitions
+      - name: Inspect the exact tested reader artifact
         run: |
           python3 - <<'PY'
-          import json, os, pathlib, re, tarfile
+          import json, os, pathlib, tarfile
           with tarfile.open('downloaded/artifact.tar') as archive:
               archive.extractall('site', filter='data')
           root = pathlib.Path('site')
-          def load(path): return json.loads((root/path).read_text())
-          summary = load('three-proofs/summary.json')
-          audit = load('three-proofs/definition-audit.json')
-          details = load('three-proofs/node-details.json')
-          exported = {d['name']: d for d in load('three-proofs/blueprint-statements.json')['declarations']}
-          bench = load('proof-bench/data.json')
+          def read(path): return json.loads((root/path).read_text())
           sha = os.environ['SOURCE_SHA']
-          assert summary['sourceCommit'] == audit['sourceCommit'] == bench['sourceCommit'] == sha
-          assert all(summary['checks'].values()) and all(bench['checks'].values())
-          assert audit['passed'] and audit['nodesAudited'] == len(details) == 19
-          assert audit['piUsesArctanNotCosine'] and audit['visibleAnchorsCovered']
-          assert audit['closedInverseRawHasNoPiEvaluator']
-          assert all(c['noEndpointTheorem'] and c['noMathlib'] for c in audit['definitions'])
-          display = summary['nodeDisplay']
-          assert display['version'] == 5 and display['groupedStatements'] and display['statementFirst']
-          assert display['rationalRoot'] == 'Rat' and display['separateProofLanes']
-          assert display['syntaxHighlighting'] == 'lossless Lean lexer'
-          count = 0
-          for item in details.values():
-              names = [name for group in item['groups'] for name in group['names']]
-              assert names == [d['name'] for d in item['declarations']]
-              assert set(item['anchors']) <= set(names)
-              assert set(item['strategy']['groups']) == {g['title'] for g in item['groups']}
-              count += len(names)
-              for d in item['declarations']:
-                  assert all(d[k] == exported[d['name']][k] for k in ['name','kind','type','value'])
-                  assert d['ownerModule']
-              assert not re.search(r'[=∫≃↔πⁱ₀ᵗ]|:=|[SCIA]\(', item['title'])
-          assert count == display['declarationOccurrences'] == 175
-          assert 'namespace' in details['def:c3-pi']['strategy']['summary']
-          assert 'return zero' in details['def:c3-trig']['strategy']['summary']
-          assert all(name in exported for name in audit['stageEquations'].values())
-          target = details['thm:c3-primitive']
-          assert target['classification'] == 'mixed'
-          assert [bool(target['paths'][a]) for a in target['anchors']] == [False,False,True]
-          assert len(bench['cases']) == 3
-          assert sum(len(c['routes']) for c in bench['cases'].values()) == 8
-          for c in bench['cases'].values():
-              for r in c['routes'].values():
-                  assert 'sorryAx' not in r['axioms']
-          graph = (root/'cosine-primitive-graph.html').read_text()
-          assert graph.count('id="thm:c3-primitive_modal"') == 1
-          assert 'bp-provenance' in graph and 'bp-namespace' in graph
-          assert 'LeanSnippet.highlight(code)' in graph
-          assert (root/'ch-definition-audit.html').is_file()
-          def redirect(path, target):
-              path.parent.mkdir(parents=True, exist_ok=True)
-              path.write_text('<!doctype html><html><head><meta charset="utf-8">'
-                  '<meta http-equiv="refresh" content="0;url=' + target + '">'
-                  '<title>Three proofs of one cosine primitive</title></head><body>'
-                  '<p>Open <a href="' + target + '">the updated dependency graph</a>.</p></body></html>')
-          redirect(root/'proof-comparison/index.html', '../cosine-primitive-graph.html')
-          redirect(root/'ch-two-cosine-proofs.html', 'ch-three-cosine-proofs.html')
-          print('Validated 175 exact declarations, all 19 bundles, definition independence and unchanged proof roots:', sha)
+          manifest = read('reading/manifest.json')
+          audit = read('reading/native-computability.json')
+          boundary = read('reading/native-source-boundary.json')
+          preservation = read('reading/preservation.json')
+          maps = read('reading/maps.json')
+          proof = read('three-proofs/summary.json')
+          assert manifest['sourceCommit'] == manifest['proofSourceCommit'] == proof['sourceCommit'] == sha
+          assert manifest['preservedFirstTwo'] and manifest['compilerAuditPresent']
+          assert manifest['chapters'] == 17 and manifest['theoremMaps'] == 12 and manifest['checkedPairedMaps'] == 1
+          assert audit['nativeNoncomputableClosureCheck'] and audit['nativeMathlibFree'] and audit['noSorryAx']
+          assert len(audit['roots']) == 8 and all(not r['nativeNoncomputableDependencies'] for r in audit['roots'])
+          assert boundary['noNewNativeNoncomputables'] and boundary['chaptersPreserved']
+          assert boundary['nativeSourceNoncomputableCount'] == 16
+          assert len(preservation['rendered']) == 2
+          assert all(r['identicalMathematicalText'] and r['originalTextHash'] == r['readerTextHash'] for r in preservation['rendered'].values())
+          assert preservation['sources']['files'] == {
+              'blueprint/src/01-foundations.tex':'8654db7f985b149c4afad6e8251c4a758c462f648dcbfb2e0fc3d6636b5e5897',
+              'blueprint/src/02-circle-sphere.tex':'e0243bdc3827fc0c0fa1deae5a8b58b55c43328f8e17eeb4ec63523e756cea31'}
+          assert all(maps['checks'].values()) and all(proof['checks'].values())
+          assert sum(t['checkedComparison'] for t in maps['theorems'].values()) == 1
+          assert len(maps['theorems']) == 12
+          for view, path in maps['theorems']['thm:c3-primitive']['views'].items():
+              assert (root/path).read_text().count('data-node="thm:c3-primitive"') == 1
+          home = (root/'index.html').read_text()
+          assert 'Analysis by construction.' in home and 'reading/book.css' in home and 'theme-white.css' not in home
+          assert 'data-proof-map="thm:c3-primitive"' in (root/'cosine.html').read_text()
+          for path in ['reference/index.html','reference/dep_graph_document.html','proof-bench/index.html',
+                       'proof-map.html','ch-foundations.html','ch-circle-sphere.html']:
+              assert (root/path).is_file(),path
+          assert 'http-equiv="refresh"' in (root/'cosine-primitive-graph.html').read_text()
+          print('Validated preserved chapters, mathematics-first reader, one three-route map, explicit editorial outlines, and native audit scope')
           PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v5
@@ -140,7 +121,7 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify live definition audit and exact stages
+      - name: Verify the live mathematical book and computational boundary
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
@@ -148,33 +129,32 @@ jobs:
           import json, os, time, urllib.request
           sha = os.environ['SOURCE_SHA']
           base = os.environ['PAGE_URL'].rstrip('/')
-          def get(path):
-              with urllib.request.urlopen(base+path+'?source='+sha, timeout=20) as response:
-                  return json.load(response)
+          def get(path, parse=True):
+              with urllib.request.urlopen(base+path+'?source='+sha,timeout=20) as response:
+                  return json.load(response) if parse else response.read().decode()
           last = None
           for attempt in range(12):
               try:
-                  summary = get('/three-proofs/summary.json')
-                  audit = get('/three-proofs/definition-audit.json')
-                  details = get('/three-proofs/node-details.json')
-                  assert summary['sourceCommit'] == audit['sourceCommit'] == sha
-                  assert all(summary['checks'].values()) and audit['passed']
-                  assert summary['nodeDisplay']['declarationOccurrences'] == 175
-                  assert audit['nodesAudited'] == len(details) == 19
-                  assert 'namespace' in details['def:c3-pi']['strategy']['summary']
-                  assert 'return zero' in details['def:c3-trig']['strategy']['summary']
-                  with urllib.request.urlopen(base+'/cosine-primitive-graph.html?source='+sha,timeout=20) as response:
-                      graph = response.read().decode()
-                  assert 'bp-provenance' in graph and 'bp-namespace' in graph
-                  assert graph.count('id="thm:c3-primitive_modal"') == 1
-                  print('LIVE:', base+'/cosine-primitive-graph.html')
-                  print('Verified source:', sha)
-                  print('Audited nodes/reference paths:', audit['nodesAudited'], audit['edgeWitnessesAudited'])
-                  print('Independent pi and S/C definitions, chart restrictions, and literal stage equations are live')
+                  manifest = get('/reading/manifest.json')
+                  audit = get('/reading/native-computability.json')
+                  preservation = get('/reading/preservation.json')
+                  assert manifest['sourceCommit'] == sha and manifest['compilerAuditPresent'] and manifest['preservedFirstTwo']
+                  assert manifest['checkedPairedMaps'] == 1 and manifest['theoremMaps'] == 12
+                  assert audit['nativeNoncomputableClosureCheck'] and audit['nativeMathlibFree'] and audit['noSorryAx']
+                  assert all(p['identicalMathematicalText'] for p in preservation['rendered'].values())
+                  assert 'Analysis by construction.' in get('/index.html',False)
+                  assert 'data-proof-map="thm:c3-primitive"' in get('/cosine.html',False)
+                  assert 'reading/graph.js' in get('/proof-map.html',False)
+                  print('LIVE BOOK:',base+'/')
+                  print('WORKED THEOREM:',base+'/cosine.html')
+                  print('Verified source:',sha)
+                  print('Original Chapters 1 and 2 preserved; 12 theorem margin maps; 1 checked three-route comparison')
+                  print('Native construction/proof roots audited:',len(audit['roots']))
+                  print('Historical native noncomputable declarations remain inventoried:',manifest['noncomputableInventory'])
                   break
               except Exception as exc:
                   last = str(exc)
                   time.sleep(5)
           else:
-              raise SystemExit('Live definition verification failed: '+str(last))
+              raise SystemExit('Live reader verification failed: '+str(last))
           PY
