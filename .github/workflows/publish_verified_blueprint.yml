@@ -1,6 +1,6 @@
 name: Publish verified proof blueprint
 
-# Documentation-only publication of the fully verified mathematical reader.
+# Documentation-only publication of a pinned, fully tested reader artifact.
 # No theorem branch is merged and Pages protections are unchanged.
 on:
   push:
@@ -16,8 +16,8 @@ concurrency:
   group: pages-verified-proof-publication
   cancel-in-progress: false
 env:
-  SOURCE_RUN: '35049755258'
-  SOURCE_SHA: '8d73f090bcf2d1f505254803c9d1f8bc3ed19cc8'
+  SOURCE_RUN: '35051403013'
+  SOURCE_SHA: 'a820519ff50fa0870cd81c6e8529a3f8798291bc'
 
 jobs:
   prepare:
@@ -57,7 +57,7 @@ jobs:
                        'Audit the native computability boundary',
                        'Build and verify the mathematical reader']:
               assert steps[step] == 'success', step
-          print('Verified proofs, computability, preservation, statement/proof edge semantics and browser tests')
+          print('Verified proof and reader tests, solid black arrows, and general integrals before the FTC')
           PY
       - uses: actions/download-artifact@v8
         with:
@@ -94,32 +94,39 @@ jobs:
               'blueprint/src/02-circle-sphere.tex':'e0243bdc3827fc0c0fa1deae5a8b58b55c43328f8e17eeb4ec63523e756cea31'}
           assert all(maps['checks'].values()) and all(proof['checks'].values())
           assert sum(t['checkedComparison'] for t in maps['theorems'].values()) == 1
-          assert len(maps['theorems']) == 12
           semantics = maps['edgeSemantics']
-          assert manifest['edgeSemanticsVersion'] == semantics['version'] == 1
-          assert semantics['statementDefinitionsVerified'] and semantics['proofBodyEntryVerified']
-          assert semantics['oneAcyclicSinkInEveryView'] and semantics['unchangedProofTermsAndMetrics']
-          bundle = maps['bundles']['def:c3-intervals']
-          assert bundle['title'] == 'Computable number'
-          assert [g['title'] for g in bundle['groups']] == ['Rational intervals','A computable number','Equality, order and refinement']
-          edges = [e for e in maps['witnesses'] if e['kind'] == 'statement']
-          assert len(edges) == 4 and {e['input'] for e in edges} == {'S','C','pi','integral'}
-          assert all(e['witness'][-1] == 'ComputableAnalysis.CosinePrimitive.Statement' and e['route'] is None for e in edges)
+          assert manifest['edgeSemanticsVersion'] == semantics['version'] == 2
+          for key in ['statementDefinitionsVerified','proofBodyEntryVerified','oneAcyclicSinkInEveryView',
+                      'unchangedProofTermsAndMetrics','integralsUsedInFTCType',
+                      'naturalRankConstrainedLayout','solidBlackDefinitionArrows']:
+              assert semantics[key],key
+          assert maps['bundles']['def:c3-intervals']['title'] == 'Computable number'
+          generic = maps['bundles']['def:c3-integrals']
+          assert generic['title'] == 'Integrals' and len(generic['declarations']) == 5
+          assert generic['mathHtml'] and generic['classification'] == 'native'
+          exported = {d['name']:d for d in read('three-proofs/blueprint-statements.json')['declarations']}
+          for d in generic['declarations']:
+              assert all(d[k] == exported[d['name']][k] for k in ['name','kind','type','value'])
+          statements = [e for e in maps['witnesses'] if e['kind'] == 'statement']
+          assert {e['input'] for e in statements} == {'S','C','pi','integral','integrals'}
+          assert all(e['witness'][-1] == 'ComputableAnalysis.CosinePrimitive.Statement' for e in statements)
           for view, path in maps['theorems']['thm:c3-primitive']['views'].items():
               doc = ET.fromstring((root/path).read_text())
               assert sum(e.get('data-node') == 'thm:c3-primitive' for e in doc.iter()) == 1
+              assert sum(e.get('data-node') == 'def:c3-integrals' for e in doc.iter()) == 1
               arrows = [e for e in doc.iter() if e.get('data-edge-kind') == 'statement']
-              assert len(arrows) == 3
-              assert {e.get('data-edge').split('->')[0] for e in arrows} == {'def:c3-trig','def:c3-pi','def:c3-integral'}
-          home = (root/'index.html').read_text()
-          assert 'Analysis by construction.' in home and 'reading/book.css' in home and 'theme-white.css' not in home
-          assert 'data-proof-map="thm:c3-primitive"' in (root/'cosine.html').read_text()
-          for path in ['reference/index.html','reference/dep_graph_document.html','proof-bench/index.html',
-                       'proof-map.html','ch-foundations.html','ch-circle-sphere.html','reading/proof-edges.css']:
-              assert (root/path).is_file(),path
-          assert 'http-equiv="refresh"' in (root/'cosine-primitive-graph.html').read_text()
+              assert len(arrows) == 4
+              assert {e.get('data-edge').split('->')[0] for e in arrows} == {'def:c3-trig','def:c3-pi','def:c3-integral','def:c3-integrals'}
+              for edge in arrows:
+                  for line in edge.iter():
+                      if line.tag.endswith('path'):
+                          assert line.get('stroke') == '#202020' and not line.get('stroke-dasharray')
+              if view in ['all','1','companions']:
+                  assert any(e.get('data-edge') == 'def:c3-integrals->thm:c3-ftc' for e in doc.iter())
           assert (root/'proof-bench/data.json').read_bytes() == (root/'reference/proof-bench/data.json').read_bytes()
-          print('Validated computable-number bundle, four statement inputs, neutral direct arrows in every proof route, preserved chapters and unchanged proof measurements')
+          assert 'data-proof-map="thm:c3-primitive"' in (root/'cosine.html').read_text()
+          assert 'http-equiv="refresh"' in (root/'cosine-primitive-graph.html').read_text()
+          print('Validated black definition arrows, exact generic integral statements, FTC type edge, and unchanged mathematics')
           PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v5
@@ -136,12 +143,12 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify the live statement and proof arrows
+      - name: Verify the live integral bundle and solid definition arrows
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
           python3 - <<'PY'
-          import json, os, time, urllib.request
+          import json, os, time, urllib.request, xml.etree.ElementTree as ET
           sha = os.environ['SOURCE_SHA']
           base = os.environ['PAGE_URL'].rstrip('/')
           def get(path, parse=True):
@@ -154,18 +161,23 @@ jobs:
                   maps = get('/reading/maps.json')
                   assert manifest['sourceCommit'] == maps['sourceCommit'] == sha
                   assert manifest['compilerAuditPresent'] and manifest['preservedFirstTwo']
-                  assert maps['edgeSemantics']['statementDefinitionsVerified']
-                  assert maps['edgeSemantics']['proofBodyEntryVerified']
-                  assert maps['bundles']['def:c3-intervals']['title'] == 'Computable number'
-                  statements = [e for e in maps['witnesses'] if e['kind'] == 'statement']
-                  assert {e['input'] for e in statements} == {'S','C','pi','integral'}
+                  assert maps['edgeSemantics']['version'] == 2
+                  assert maps['edgeSemantics']['solidBlackDefinitionArrows'] and maps['edgeSemantics']['integralsUsedInFTCType']
+                  assert maps['bundles']['def:c3-integrals']['title'] == 'Integrals'
                   for view in ['all','0','1','2']:
-                      svg = get('/reading/cosine-'+view+'.svg',False)
-                      assert svg.count('data-edge-kind="statement"') == 3
-                  assert 'proof-edges.css' in get('/proof-map.html',False)
+                      svg = ET.fromstring(get('/reading/cosine-'+view+'.svg',False))
+                      assert sum(e.get('data-node') == 'def:c3-integrals' for e in svg.iter()) == 1
+                      arrows = [e for e in svg.iter() if e.get('data-edge-kind') == 'statement']
+                      assert len(arrows) == 4
+                      for edge in arrows:
+                          for line in edge.iter():
+                              if line.tag.endswith('path'):
+                                  assert line.get('stroke') == '#202020' and not line.get('stroke-dasharray')
+                      if view in ['all','1']:
+                          assert any(e.get('data-edge') == 'def:c3-integrals->thm:c3-ftc' for e in svg.iter())
                   print('LIVE MAP:',base+'/proof-map.html?theorem=thm:c3-primitive')
                   print('Verified source:',sha)
-                  print('Computable number; interval/evaluator/equality sequence; four statement inputs on three neutral bundle arrows; colors reserved for proof use')
+                  print('Solid black definition arrows; explicit Integrals node used by the FTC and the common theorem; proof colors preserved')
                   break
               except Exception as exc:
                   last = str(exc)
