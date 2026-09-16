@@ -1,11 +1,14 @@
 name: Three-proof blueprint
 on:
   push:
-    branches: [work/cosine-basepoint]
+    branches: [work/cosine-basepoint, work/mathematical-book]
     paths:
       - 'ComputableAnalysis/**'
       - 'comparison/**'
       - 'blueprint/**'
+      - 'book/**'
+      - 'PROJECT.md'
+      - 'README.md'
       - '.github/workflows/three_proof_blueprint.yml'
   workflow_dispatch:
 permissions:
@@ -70,8 +73,8 @@ jobs:
       - name: Install blueprint tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y graphviz libgraphviz-dev pkg-config poppler-utils ghostscript dvisvgm texlive-latex-base texlive-latex-extra texlive-pictures
-          python -m pip install -r blueprint/requirements.txt
+          sudo apt-get install -y graphviz libgraphviz-dev pkg-config poppler-utils ghostscript dvisvgm texlive-latex-base texlive-latex-extra texlive-pictures fonts-dejavu-core
+          python -m pip install -r blueprint/requirements.txt Pillow
       - name: Render blueprint and test the three-route graph
         run: |
           leanblueprint web
@@ -88,6 +91,52 @@ jobs:
           python3 blueprint/checks/test_statement_boxes.py
           python3 blueprint/checks/test_proof_bench_browser.py
           python3 blueprint/checks/test_definition_panels.py
+      - name: Audit the native computability boundary
+        working-directory: comparison
+        run: |
+          set -euo pipefail
+          lake env lean checks/ComputabilityAudit.lean | tee reports/native-computability.log
+      - name: Build and verify the mathematical reader
+        run: |
+          python3 book/checks/source_boundary.py
+          python3 book/build.py --commit "${{ github.sha }}"
+          python3 book/checks/test_book.py
+          python3 book/checks/test_edge_semantics.py
+          python3 book/checks/browser.py
+          python3 book/checks/test_graph_roles_browser.py
+          python3 book/checks/test_geometric_panels.py
+          python3 book/checks/geometric_browser.py
+      - name: Verify the supplied-schedule lemmas and refined proof map
+        run: |
+          set -euo pipefail
+          lake build ComputableAnalysis.IntegralSchedules
+          (cd comparison && lake env lean checks/ExportScheduleMap.lean) | tee comparison/reports/schedule-map.log
+          python3 book/refine_cosine_map.py
+          python3 book/checks/test_schedule_map.py
+          python3 book/checks/schedule_browser.py
+      - name: Verify the inline comparison and Mathlib foundations
+        run: |
+          set -euo pipefail
+          (cd comparison && lake env lean checks/ExportMathlibMap.lean) | tee comparison/reports/mathlib-map.log
+          python3 book/expand_mathlib_map.py
+          python3 book/checks/test_mathlib_comparison.py
+          python3 book/checks/mathlib_comparison_browser.py
+      - name: Verify the radical evaluator and product theorem
+        run: |
+          set -euo pipefail
+          lake build ComputableAnalysis.DyadicCosinePrimitive
+          lake env lean book/checks/ExportDyadicEvaluation.lean | tee comparison/reports/dyadic-evaluation.log
+          python3 book/add_dyadic_demo.py
+          python3 book/checks/test_dyadic_demo.py
+          python3 book/checks/dyadic_browser.py
+      - name: Check the arithmetic boundary and publish the planned application
+        run: |
+          set -euo pipefail
+          lake build ComputableAnalysis.CartwrightArithmetic
+          lake env lean book/checks/ExportCartwrightArithmetic.lean | tee comparison/reports/cartwright-arithmetic.log
+          python3 book/add_cartwright_plan.py
+          python3 book/checks/test_cartwright_plan.py
+          python3 book/checks/cartwright_browser.py
       - name: Retain verified sources and audit
         run: |
           git archive --format=tar.gz HEAD > /tmp/three-proof-sources.tar.gz
@@ -106,6 +155,7 @@ jobs:
             comparison/reports
             blueprint/web/three-proofs
             blueprint/web/proof-bench
+            blueprint/web/reading
             /tmp/three-proof-sources.tar.gz
           retention-days: 30
       - uses: actions/upload-pages-artifact@v5

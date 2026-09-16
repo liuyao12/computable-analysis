@@ -1,0 +1,21 @@
+{
+  "scope": "Historical native source inventory, not an approved public API",
+  "entries": [
+    {"file":"ComputableAnalysis/AlgebraicNumbers.lean","line":199,"declaration":"noncomputable def add (z w : AlgebraicComplex)"},
+    {"file":"ComputableAnalysis/AlgebraicNumbers.lean","line":208,"declaration":"noncomputable def neg (z : AlgebraicComplex)"},
+    {"file":"ComputableAnalysis/AlgebraicNumbers.lean","line":218,"declaration":"noncomputable def mul (z w : AlgebraicComplex)"},
+    {"file":"ComputableAnalysis/Calculus.lean","line":4343,"declaration":"noncomputable def InsertionChain.refines {a b : Rat}"},
+    {"file":"ComputableAnalysis/Calculus.lean","line":4355,"declaration":"noncomputable def InsertionChain.commonRefinement {a b : Rat}"},
+    {"file":"ComputableAnalysis/Calculus.lean","line":4365,"declaration":"noncomputable def commonRefinementOfPartitions {a b : Rat}"},
+    {"file":"ComputableAnalysis/Calculus.lean","line":12535,"declaration":"noncomputable def ofMonotone {F : FunctionOnInterval}"},
+    {"file":"ComputableAnalysis/Calculus.lean","line":12581,"declaration":"noncomputable def ofNondecreasing {F : FunctionOnInterval}"},
+    {"file":"ComputableAnalysis/FiniteFTCIntervalRegular.lean","line":1565,"declaration":"noncomputable def monomialPrimitiveEndpointDifference"},
+    {"file":"ComputableAnalysis/FiniteFTCIntervalRegular.lean","line":2679,"declaration":"noncomputable def squarePrimitiveEndpointDifference (a b : Rat) : RealRaw :="},
+    {"file":"ComputableAnalysis/IntegralIdentities.lean","line":1070,"declaration":"noncomputable def ofMonotone"},
+    {"file":"ComputableAnalysis/IntegralIdentities.lean","line":5878,"declaration":"noncomputable def coordinateTimesArctanForwardTwoStageGeneralDefiniteIdentity :"},
+    {"file":"ComputableAnalysis/IntegralIdentities.lean","line":7190,"declaration":"noncomputable def arctanGeomUnitRectangleGeneralDefiniteIdentity :"},
+    {"file":"ComputableAnalysis/MonotonicityConvexity.lean","line":594,"declaration":"noncomputable def toRealFunRaw {F : RealFunRaw} {a b : Rat}"},
+    {"file":"ComputableAnalysis/PiProofs.lean","line":15368,"declaration":"noncomputable def piFromArctanGeomUnitRectangleGeneralDefiniteIdentity :"},
+    {"file":"ComputableAnalysis/SinPiIntegral.lean","line":6751,"declaration":"noncomputable def canonicalDyadicCertificateSearchAt_sound"}
+  ]
+}

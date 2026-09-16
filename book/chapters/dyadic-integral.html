@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="reading/proof-edges.css">
+<h1 id="dyadic-evaluation">A cosine integral made of radicals</h1>
+<p class="lead">Compute π from geometric area, compute the integral from square roots, and watch their product approach one.</p>
+<h2 id="normalization">Keep the normalization explicit</h2>
+<p>Our existing functions use \(S(x)=\sin(\pi x)\) and \(C(x)=\cos(\pi x)\) on the quarter-turn chart \(0\le x\le\tfrac12\). The relevant product is therefore</p>
+<div class="displaymath">\[\pi\int_0^{1/2}C(x)\,dx=1.\]</div>
+<p>The upper endpoint is \(1/2\), not \(1\). Extending the usual normalized cosine to a full half-turn would give zero integral on \([0,1]\). To display a unit integration interval instead, put \(c(t)=C(t/2)\); the same identity becomes \((\pi/2)\int_0^1 c(t)\,dt=1\). No definition of \(C\) is silently changed.</p>
+<h2 id="dyadic-values">The dyadic values need no numerical π</h2>
+<p>On this chart the positive half-angle identities give</p>
+<div class="displaymath">\[ C(x/2)=\sqrt{\frac{1+C(x)}2},\qquad S(x/2)=\sqrt{\frac{1-C(x)}2}.\]</div>
+<p>Start with the exact endpoint coordinates, then use halving and addition or reflection to construct every dyadic circle point. For example,</p>
+<div class="displaymath">\[C(1/4)=\frac{\sqrt2}{2},\quad C(1/8)=\frac{\sqrt{2+\sqrt2}}2,\quad C(3/8)=\frac{\sqrt{2-\sqrt2}}2.\]</div>
+<p>Square roots are computed by rational enclosures. The numerical instructions do not call π, arctangent or inverse arctangent. Those appear in the proof identifying the radical values with our original arctangent-defined functions.</p>
+<p>The checked Lean evaluator uses the equivalent half-angle recurrence for the circle slope, \(u\mapsto u/(1+\sqrt{1+u^2})\), followed by finite rotation products. Its dyadic-value theorem covers every numerator, not only repeated halving of the first angle. The direct square-root recursion used by the numerical table below is a separate illustrative implementation of the same identities.</p>
+<h2 id="independent-factors">Two independent numerical factors</h2>
+<p>Let \(N=2^d\), \(h=1/(2N)\), and \(x_j=jh\). Since \(C\) decreases on this chart, use right-endpoint lower rectangles and left-endpoint upper rectangles:</p>
+<div class="displaymath">\[L_N=h\sum_{j=1}^{N} C(x_j),\qquad U_N=h\sum_{j=0}^{N-1} C(x_j).\]</div>
+<p>The exact-value gap telescopes to \(U_N-L_N=1/(2N)\). Rational errors in square-root evaluation are enclosed separately. Independently, the geometric sector polygons enclose \(\pi=4A(1)\) by \([p_N^-,p_N^+]\). Multiplying nonnegative interval bounds gives</p>
+<div class="displaymath">\[\pi\int_0^{1/2}C(x)\,dx\ \in\ [p_N^-L_N^-,\ p_N^+U_N^+].\]</div>
+<p>Neither the cosine sample routine nor the rectangle sum receives π as input. In particular, the product is not set to one, and the integral is not obtained by division by π.</p>
+<!-- DYADIC_TABLE -->
+<p>These outward-rounded rational enclosures are generated from geometric polygon bounds and integer-square-root bounds. They illustrate the theorem, but are not the literal stage outputs of the Lean evaluator. The checked radical quadrature has a more conservative error allowance and a different evaluation schedule.</p>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:dyadic-product">
+<div class="theorem_thmheading"><span class="theorem_thmcaption">Theorem</span><span class="theorem_thmtitle">Geometric π times radical quadrature</span></div>
+<div class="theorem_thmcontent"><p>Let \(I_{\rm rad}\) be the separately defined, valid dyadic cosine quadrature whose sample programs use nested radicals. Then</p><div class="displaymath">\[\boxed{\pi I_{\rm rad}\simeq1.}\]</div><p>The π program is the geometric arctangent presentation \(4A(1)\). The proof first identifies the radical sample programs with \(C\), transports the quadrature, and uses the cosine primitive identity and the endpoint sine values.</p></div></div>
+<h2 id="graph-semantics">Definitions form the statement; identities justify the substitution</h2>
+<p>The map beside this theorem includes <strong>Dyadic trigonometric identities</strong> and <strong>Dyadic values agree</strong>. Black arrows mark the programs needed to state the proposition. Colored arrows mark uses in its proof. The theorem that the radical evaluator agrees with \(C\) is a proof step, not an additional definition of \(C\).</p>
+<p>This is a new computational corollary and its evaluation bridge, not a fourth proof of the original basepoint proposition. <a href="cosine.html">The original three-proof comparison</a> and its measured proof bodies remain unchanged. The new map uses checked Lean declarations and witnessed reference paths; it does not add a false half-angle dependency to any of those old proofs.</p>
