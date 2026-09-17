@@ -1,12 +1,13 @@
 name: Publish verified proof blueprint
 
-# Documentation-only publication. The source run materializes readable files
-# before rebuilding every proof. Verify both trigger and actual source SHAs.
-# No theorem branch is merged and Pages protections are unchanged.
+# Keep the checked mathematics snapshot immutable. Apply and test a separately
+# versioned reader edition before Pages publication. No theorem branch is merged.
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/publish_verified_blueprint.yml']
+    paths:
+      - '.github/workflows/publish_verified_blueprint.yml'
+      - '.github/reader-edition/**'
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,36 +24,36 @@ env:
 jobs:
   prepare:
     runs-on: ubuntu-latest
-    timeout-minutes: 65
+    timeout-minutes: 25
     steps:
-      - name: Require the full proof and reader verification to succeed
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Require the pinned mathematical verification
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           python3 - <<'PY'
-          import json,os,time,urllib.request
+          import json,os,urllib.request
           base='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']
           def get(path):
               req=urllib.request.Request(base+path,headers={
                   'Authorization':'Bearer '+os.environ['GH_TOKEN'],
                   'Accept':'application/vnd.github+json'})
               with urllib.request.urlopen(req,timeout=30) as r:return json.load(r)
-          rid=os.environ['SOURCE_RUN']
-          for attempt in range(240):
-              run=get('/actions/runs/'+rid)
-              assert run['head_sha']==os.environ['TRIGGER_SHA']
-              assert run['name']=='Integral portfolio verification'
-              if run['status']=='completed':break
-              time.sleep(15)
-          assert run['conclusion']=='success','Refusing to publish failed or incomplete verification'
+          rid=os.environ['SOURCE_RUN'];run=get('/actions/runs/'+rid)
+          assert run['head_sha']==os.environ['TRIGGER_SHA']
+          assert run['name']=='Integral portfolio verification'
+          assert run['status']=='completed' and run['conclusion']=='success'
           job=next(j for j in get('/actions/runs/'+rid+'/jobs')['jobs'] if j['name']=='verify')
           assert job['conclusion']=='success'
           steps={s['name']:s['conclusion'] for s in job['steps']}
-          for step in ['Materialize and commit the exact reviewed source patch',
+          for name in ['Materialize and commit the exact reviewed source patch',
                        'Verify all proofs, exact comparisons, mathematical maps and browser regressions',
                        'Retain the exact source and verified publication manifest']:
-              assert steps[step]=='success',step
-          print('Source verification passed:',rid,'; actual source SHA will also be checked in the artifact')
+              assert steps[name]=='success',name
+          print('Verified unchanged mathematical snapshot:',os.environ['SOURCE_SHA'])
           PY
       - uses: actions/download-artifact@v8
         with:
@@ -60,69 +61,49 @@ jobs:
           run-id: ${{ env.SOURCE_RUN }}
           github-token: ${{ github.token }}
           path: downloaded
-      - name: Inspect the exact tested mathematics and comparisons
+      - name: Validate and unpack the exact proof artifact
         run: |
           python3 - <<'PY'
-          import hashlib,json,os,pathlib,tarfile,xml.etree.ElementTree as ET
-          with tarfile.open('downloaded/artifact.tar') as archive:
-              archive.extractall('site',filter='data')
-          root=pathlib.Path('site')
-          read=lambda path:json.loads((root/path).read_text())
-          sha=os.environ['SOURCE_SHA']
-          provenance=read('reading/portfolio-publication.json')
-          assert provenance['sourceCommit']==sha
-          assert provenance['triggerCommit']==os.environ['TRIGGER_SHA']
-          assert str(provenance['sourceRun'])==os.environ['SOURCE_RUN']
-          assert provenance['allVerificationStepsPassed']
-          manifest=read('reading/manifest.json');maps=read('reading/maps.json')
+          import hashlib,json,os,pathlib,tarfile
+          with tarfile.open('downloaded/artifact.tar') as t:t.extractall('site',filter='data')
+          root=pathlib.Path('site');read=lambda f:json.loads((root/f).read_text())
+          sha=os.environ['SOURCE_SHA'];p=read('reading/portfolio-publication.json')
+          assert p['sourceCommit']==sha and p['triggerCommit']==os.environ['TRIGGER_SHA']
+          assert str(p['sourceRun'])==os.environ['SOURCE_RUN'] and p['allVerificationStepsPassed']
+          m=read('reading/manifest.json');maps=read('reading/maps.json')
           audit=read('reading/integral-portfolio-audit.json')
           comparison=read('reading/integral-portfolio-comparison.json')
-          cartwright=read('reading/cartwright-audit.json')
-          assert manifest['sourceCommit']==maps['sourceCommit']==audit['sourceCommit']==comparison['sourceCommit']==sha
-          assert manifest['proofSourceCommit']==sha
-          assert manifest['preservedFirstTwo'] and manifest['compilerAuditPresent']
-          assert manifest['cartwrightComplete'] and manifest['integralPortfolio']
-          assert manifest['chapters']==17 and manifest['checkedPairedMaps']==7
-          assert manifest['checkedSingleProofMaps']==1 and manifest['partlyFormalizedPlans']==0
-          assert all(audit['checks'].values()) and all(cartwright['checks'].values())
-          assert audit['families']==2 and len(audit['closedProofs'])==16
-          assert len(comparison['cases'])==8 and comparison['routeOrder']==['ftc','mathlib']
-          assert all('sorryAx' not in row['axioms'] for row in audit['closedProofs'])
-          keys=['thm:wallis-integrals','thm:wallis-product','thm:beta-integral','thm:beta-normalization']
-          for key in keys:
-              entry=maps['theorems'][key]
-              assert entry['checkedComparison'] and entry['verifiedGraph'] and entry['sink']==key
-              assert set(entry['views'])=={'all','1','2'}
-              assert entry['comparison']['url']=='reading/integral-portfolio-comparison.json'
-              for route,path in entry['views'].items():
-                  svg=ET.parse(root/path)
-                  nodes=[e.get('data-node') for e in svg.iter() if e.get('data-node')]
-                  assert nodes.count(key)==1,(key,route)
-                  if key.startswith('thm:beta'):
-                      assert not any('trig' in n or 'exp' in n for n in nodes),nodes
-          for path,expected in audit['unchangedArtifacts'].items():
-              assert hashlib.sha256((root/path).read_bytes()).hexdigest()==expected,path
-          for c in comparison['cases'].values():
-              assert set(c['routes'])=={'ftc','mathlib'}
-              for r in c['routes'].values():
-                  for cost in r['costs'].values():
-                      assert sum(o['declarations'] for o in cost['origins'].values())==cost['declarations']
-                      assert cost['mappedDeclarations']+cost['unmappedDeclarations']==cost['declarations']
-                      assert sum(o['codeLines'] for o in cost['origins'].values())==cost['codeLines']
-          chapter=(root/'integral-families.html').read_text()
-          for key in keys:assert 'data-proof-map="'+key+'"' in chapter
-          assert (root/'cartwright.html').is_file()
-          assert 'reading/map-comparison.js' in (root/'proof-map.html').read_text()
-          native=read('reading/native-computability.json')
-          assert native['nativeNoncomputableClosureCheck'] and native['nativeMathlibFree'] and native['noSorryAx']
+          assert m['sourceCommit']==m['proofSourceCommit']==maps['sourceCommit']==audit['sourceCommit']==comparison['sourceCommit']==sha
+          assert m['preservedFirstTwo'] and m['cartwrightComplete'] and m['integralPortfolio']
+          assert m['checkedPairedMaps']==7 and m['checkedSingleProofMaps']==1
+          assert all(audit['checks'].values()) and len(audit['closedProofs'])==16
+          assert all(read('reading/cartwright-audit.json')['checks'].values())
+          assert all('sorryAx' not in r['axioms'] for r in audit['closedProofs'])
+          for f,h in audit['unchangedArtifacts'].items():assert hashlib.sha256((root/f).read_bytes()).hexdigest()==h,f
           assert all(r['identicalMathematicalText'] for r in read('reading/preservation.json')['rendered'].values())
-          examples=read('reading/integral-native-examples.json')
-          assert examples['execution']=='Compiled Lean definitions; exact rational outputs, no Mathlib or Python evaluator.'
-          print('Verified two new families, sixteen proof terms, four paired application maps, complete Cartwright, unchanged earlier artifacts')
-          for case in ['wallis-factorials','wallis-product','beta-factorials','beta-normalization']:
-              print(case,[(r,comparison['cases'][case]['routes'][r]['costs']['full']['declarations'],
-                  comparison['cases'][case]['routes'][r]['costs']['full']['codeLines']) for r in comparison['routeOrder']])
+          print('PASS: native/Mathlib results, source revision, chapter preservation and earlier comparison artifacts')
           PY
+      - name: Install reader-only rendering prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-dejavu-core
+          python -m pip install beautifulsoup4 Pillow playwright
+          if ! command -v google-chrome && ! command -v chromium; then
+            python -m playwright install --with-deps chromium
+          fi
+      - name: Restore the catalogue, publish the title and regenerate the scaled illustration
+        run: python3 .github/reader-edition/analysis_edition.py --site site --revision "$GITHUB_SHA"
+      - name: Check exact bounds, rendering, navigation, mobile and preserved proof data
+        run: python3 .github/reader-edition/test_edition.py --site site --report reader-edition-tests
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reader-edition-validation
+          path: |
+            reader-edition-tests
+            site/reading/analysis-edition.json
+            site/reading/cosine-half-interval.json
+          retention-days: 14
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v5
         with:
@@ -137,43 +118,51 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify the live theorem portfolio and proof comparisons
+      - name: Verify the live title, homepage teaser, chapter catalogue and fixed-scale GIF
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
           python3 - <<'PY'
-          import json,os,time,urllib.request
-          sha=os.environ['SOURCE_SHA'];base=os.environ['PAGE_URL'].rstrip('/')
-          def get(path,text=False):
-              with urllib.request.urlopen(base+path+'?source='+sha,timeout=25) as r:
-                  return r.read().decode() if text else json.load(r)
+          import hashlib,json,os,time,urllib.request
+          revision=os.environ['GITHUB_SHA'];base=os.environ['PAGE_URL'].rstrip('/')
+          def get(path,binary=False):
+              with urllib.request.urlopen(base+path+'?edition='+revision,timeout=25) as r:
+                  return r.read() if binary else json.load(r)
           last=None
           for attempt in range(18):
               try:
-                  p=get('/reading/portfolio-publication.json')
-                  m=get('/reading/manifest.json');maps=get('/reading/maps.json')
-                  audit=get('/reading/integral-portfolio-audit.json')
-                  comparison=get('/reading/integral-portfolio-comparison.json')
-                  assert p['sourceCommit']==m['sourceCommit']==maps['sourceCommit']==comparison['sourceCommit']==sha
-                  assert p['allVerificationStepsPassed'] and str(p['sourceRun'])==os.environ['SOURCE_RUN']
-                  assert m['preservedFirstTwo'] and m['cartwrightComplete'] and m['integralPortfolio']
-                  assert all(audit['checks'].values()) and len(audit['closedProofs'])==16
-                  chapter=get('/integral-families.html',True)
-                  for key in ['thm:wallis-integrals','thm:wallis-product','thm:beta-integral','thm:beta-normalization']:
-                      assert 'data-proof-map="'+key+'"' in chapter
-                      assert maps['theorems'][key]['checkedComparison']
-                      svg=get('/'+maps['theorems'][key]['views']['2'],True)
-                      assert 'data-node="'+key+'"' in svg
-                  assert 'integral-portfolio-comparison.json' in json.dumps(maps)
-                  print('LIVE CHAPTER:',base+'/integral-families.html')
-                  print('CARTWRIGHT:',base+'/cartwright.html')
-                  print('Verified readable source:',sha)
-                  for case in ['wallis-factorials','wallis-product','beta-factorials','beta-normalization']:
-                      print(case,[(r,comparison['cases'][case]['routes'][r]['costs']['full']['declarations'],
-                          comparison['cases'][case]['routes'][r]['costs']['full']['codeLines']) for r in comparison['routeOrder']])
-                  print('Both new families have matched native/Mathlib proofs; all four application maps and inline comparisons are live')
+                  report=get('/reading/analysis-edition.json')
+                  assert report['documentationRevision']==revision
+                  assert report['proofSourceCommit']==os.environ['SOURCE_SHA']
+                  assert report['title']=='Computable Analysis'
+                  assert report['subtitle']=='An alternative foundation to Calculus'
+                  assert report['homeTeaser'] and report['chapterOneCatalogue']
+                  assert report['proofDeclarationsAndEdgesUnchanged'] and not report['newLeanProofsClaimed']
+                  home=get('/index.html',True).decode()
+                  chapter=get('/ch-foundations.html',True).decode()
+                  catalogue=get('/pi-computations.html',True).decode()
+                  assert '<em>Analysis</em>' in home and 'An alternative foundation to Calculus' in home
+                  assert 'id="pi-computations"' in home and report['formula'] in home
+                  assert 'ch-foundations.html#pi-computations' in home
+                  assert chapter.count('class="pi-formula-card"')==10
+                  assert catalogue.count('class="pi-formula-card"')==10
+                  assert 'C(x)' not in catalogue
+                  a=report['cosineAnimation']
+                  assert a['fixedEndpoint'] and a['upperLimit']=='1/2'
+                  assert a['xPixelsPerUnit']==a['yPixelsPerUnit']==300
+                  image=get('/reading/animations/cosine.gif',True)
+                  assert image[:6] in [b'GIF89a',b'GIF87a']
+                  assert hashlib.sha256(image).hexdigest()==a['gifSha256']
+                  assert get('/reading/manifest.json')['proofSourceCommit']==os.environ['SOURCE_SHA']
+                  print('LIVE HOME:',base+'/index.html#pi-computations')
+                  print('LIVE CHAPTER:',base+'/ch-foundations.html#pi-computations')
+                  print('LIVE CATALOGUE:',base+'/pi-computations.html')
+                  print('Title: Computable Analysis — An alternative foundation to Calculus')
+                  print('Documentation revision:',revision)
+                  print('Mathematical proof source unchanged:',os.environ['SOURCE_SHA'])
+                  print('Cosine quadrature: fixed [0,1/2]; equal axis scales; exact outward-rounded numerical illustrations')
                   break
               except Exception as e:
                   last=str(e);time.sleep(5)
-          else:raise SystemExit('Live verification failed: '+str(last))
+          else:raise SystemExit('Live publication verification failed: '+str(last))
           PY
