@@ -1,6 +1,6 @@
 name: Publish verified proof blueprint
 
-# Immutable verified mathematics plus a separately tested reader edition.
+# Immutable verified mathematics plus separately tested reader passes.
 # No theorem branch is merged; existing Pages protections are unchanged.
 on:
   push:
@@ -103,6 +103,10 @@ jobs:
         run: python3 .github/reader-edition/pi_patterns.py --site site --revision "$GITHUB_SHA"
       - name: Verify coefficient recurrences, independent logarithm bounds and final rendering
         run: python3 .github/reader-edition/test_pi_patterns.py --site site --report reader-edition-tests
+      - name: Group the arctangent computations under one flashcard
+        run: python3 .github/reader-edition/group_arctan.py --site site --revision "$GITHUB_SHA"
+      - name: Verify grouped formulas, fragment navigation and desktop and mobile rendering
+        run: python3 .github/reader-edition/test_arctan_group.py --site site --report reader-edition-tests
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -114,6 +118,7 @@ jobs:
             site/reading/catalogue-placement.json
             site/reading/pi-flashcards-calculation.json
             site/reading/pi-patterns.json
+            site/reading/arctan-group.json
           retention-days: 14
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v5
@@ -129,7 +134,7 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify live Newton pattern, Machin and the three logarithm computations
+      - name: Verify the live arctangent group and unchanged numerical comparisons
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
@@ -145,11 +150,18 @@ jobs:
               try:
                   report=get('/reading/analysis-edition.json');placement=get('/reading/catalogue-placement.json')
                   numbers=get('/reading/pi-flashcards-calculation.json');patterns=get('/reading/pi-patterns.json')
-                  assert report['documentationRevision']==placement['documentationRevision']==numbers['documentationRevision']==patterns['documentationRevision']==revision
+                  group=get('/reading/arctan-group.json')
+                  assert report['documentationRevision']==placement['documentationRevision']==numbers['documentationRevision']==patterns['documentationRevision']==group['documentationRevision']==revision
                   assert report['proofSourceCommit']==os.environ['SOURCE_SHA']
                   assert report['title']=='Computable Analysis' and report['subtitle']=='An alternative foundation to Calculus'
                   assert not report['homeTeaser'] and report['chapterOneCatalogue']
-                  assert report['formulaCount']==11 and report['catalogueImmediatelyAfterHeading']
+                  assert report['formulaCount']==placement['formulaCount']==group['flashcardCount']==7
+                  assert report['underlyingRepresentationCount']==group['underlyingRepresentationCount']==11
+                  assert report['arctangentGrouped'] and report['catalogueImmediatelyAfterHeading']
+                  assert group['mainFormula']==r'\pi=4\arctan(1)'
+                  assert group['methods']==['pi-geometry','pi-arctan-integral','pi-leibniz','pi-brouncker','pi-machin']
+                  assert group['originalFormulasRetained'] and group['machinUsesArctanOnly']
+                  assert group['oldMethodFragmentsPreserved'] and group['proofDataAndNumericsUnchanged']
                   assert report['newtonFactored'] and report['machinCard']
                   assert patterns['logarithmMethods']==['local-taylor','symmetric-log','machin']
                   assert not patterns['usesNumericalPi'] and not patterns['usesNumericalLog']
@@ -169,8 +181,11 @@ jobs:
                   assert '<em>Analysis</em>' in home and 'An alternative foundation to Calculus' in home
                   assert 'class="pi-teaser"' not in home and 'class="pi-formula-card"' not in home
                   assert 'ch-foundations.html#pi-computations' in home
-                  assert chapter.count('class="pi-formula-card"')==11 and 'id="pi-cosine"' not in chapter
-                  assert 'id="pi-machin"' in chapter and '<h3>Machin</h3>' in chapter
+                  assert chapter.count('class="pi-formula-card"')==7 and 'id="pi-cosine"' not in chapter
+                  assert chapter.count('class="pi-computation-method"')==5
+                  assert '<h3>Arctangent</h3>' in chapter and group['mainFormula'] in chapter
+                  assert 'Ways to compute arctan(1)' in chapter
+                  assert 'id="pi-machin"' in chapter and '<h4>Machin</h4>' in chapter
                   assert r'\frac{i\pi}{2}=\operatorname{Log}(i)' in chapter
                   assert r'1\cdot1\cdot3' in chapter and r'(1/2)^7' in chapter
                   assert 'Three ways to compute Log(i)' in chapter
@@ -183,8 +198,8 @@ jobs:
                   image=get('/reading/animations/cosine.gif',True)
                   assert hashlib.sha256(image).hexdigest()==a['gifSha256']
                   assert get('/reading/manifest.json')['proofSourceCommit']==os.environ['SOURCE_SHA']
-                  print('LIVE CHAPTER:',base+'/ch-foundations.html#pi-computations')
-                  print('Eleven flashcards: visible Newton factors, Machin, three branch-consistent logarithm algorithms')
+                  print('LIVE GROUP:',base+'/ch-foundations.html#pi-arctan')
+                  print('Seven flashcards; geometric, quadrature, Leibniz, Brouncker and Machin methods grouped under pi = 4 arctan(1)')
                   print('Documentation revision:',revision)
                   print('Mathematical proof source unchanged:',os.environ['SOURCE_SHA'])
                   break
