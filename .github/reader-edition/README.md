@@ -1,41 +1,46 @@
 # Computable Analysis reader edition
 
 The title is **Computable _Analysis_**, with subtitle **An alternative foundation
-to Calculus**. The home page directly displays the cosine-quadrature teaser
-`1/pi = integral_0^(1/2) cos(pi*x) dx`, with no C wrapper notation, and links
-to the ten-entry pi catalogue restored in Chapter 1 and its own reader page.
-The catalogue is a preview, not a claim that every native equivalence is proved.
-It reconstructs the formulas; it does not claim to recover the old image file.
+to Calculus**. The pi catalogue's canonical location is now Chapter 1, immediately
+under **1.2.2 Other examples**, following the square-root example. It contains
+nine formulas. Cosine quadrature is reserved for the worked comparison, and is
+not duplicated in the gallery or as a home-page teaser. The home navigation
+points to the chapter. The former `pi-computations.html` bookmark redirects there.
 
-This publication overlay is deliberately separate from the checked theorem
-source. The Pages workflow requires the completed integral-portfolio verification
-and validates its exact source revision before applying the reader edition.
-The new documentation revision is stored in `reading/analysis-edition.json`;
-all original proof-source revisions, declaration text, dependency witnesses,
-proof-map SVGs, measurement JSONs and reference pages are retained. The old
-animation manifest remains the record of that previous snapshot; the current
-cosine illustration and hashes are in `reading/cosine-half-interval.json` and
-the edition record. No Lean proof is added or reclassified by this update.
+The catalogue reconstructs the mathematical formulas, not the original image.
+It is a preview, not a claim that every native equivalence has been proved.
+The original chapter mathematics is retained; only the Other examples heading
+and the placement/content of the added gallery change.
 
-The corrected cosine GIF keeps the upper endpoint at 1/2 throughout, with 300
-pixels per unit on both axes. Dyadic endpoint rectangles are evaluated from
-positive half-angle square-root intervals. Geometric pi is evaluated independently
-from rational inner/outer sector polygons, then reciprocated. Only raster
-positions use floating point. Displayed bounds use exact rational arithmetic and
-outward rounding. These are illustrative Python computations, NOT executions of
-the literal Lean output schedules. The GIF, poster, table, chapter caption and
-proof-panel captions use the same endpoint and provenance.
+This reader overlay is separate from the checked theorem source. Pages requires
+the completed integral-portfolio verification and checks its exact source SHA.
+The baseline edition pass and its tests still run first; the final placement
+pass and tests then apply the requested chapter organization. Publication never
+skips the proof-data preservation, numerical bounds or browser gates.
 
-Reproduction over the verified artifact:
+The cosine GIF stays in the worked comparison: fixed endpoint 1/2, equal x/y
+scales, rational nested-radical sample bounds, and independently computed geometric
+reciprocal bounds. It and the worked chapter's mathematical content remain
+unchanged by the placement pass. The illustration is not literal Lean output.
+
+Reproduce over the verified proof artifact:
 
 ```sh
 python .github/reader-edition/analysis_edition.py --site site --revision REVISION
 python .github/reader-edition/test_edition.py --site site --report reader-edition-tests
+python .github/reader-edition/place_catalogue.py --site site --revision REVISION
+python .github/reader-edition/test_placement.py --site site --report reader-edition-tests
 ```
 
-The full tests require a browser with MathJax CDN access. They test mathematical
-rendering (including the continued fraction), the home-to-Chapter-1 link, all ten
-formula cards, title italics, mobile layout, image pause/play and reduced motion,
-fixed-axis-scale metadata, exact numerical bounds, an existing proof-map popup,
-and preservation of the checked proof artifacts. Publication stops on failure
-and checks live HTTP content and GIF hashes after deployment.
+`reading/analysis-edition.json` describes the final edition;
+`reading/catalogue-placement.json` records placement and preservation checks.
+Original proof revisions, exact declaration text, dependency witnesses, graph
+SVGs and measurement JSONs remain unchanged. The original animation manifest
+remains historical; current cosine metadata is in `cosine-half-interval.json`.
+No new Lean result is claimed by these documentation updates.
+
+The final tests check DOM order under Other examples, absence of the cosine
+card/teaser, all nine mathematical formula renderings, desktop/mobile layout,
+home navigation, old-page redirect, and preservation of the worked comparison,
+proof data and exact GIF bytes. Live HTTP checks repeat the essential assertions
+and verify the deployment revision and animation hash after publication.

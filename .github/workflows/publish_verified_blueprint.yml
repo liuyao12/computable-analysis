@@ -91,10 +91,14 @@ jobs:
           if ! command -v google-chrome && ! command -v chromium; then
             python -m playwright install --with-deps chromium
           fi
-      - name: Restore the catalogue, publish the title and regenerate the scaled illustration
+      - name: Build the reader title and scaled worked illustration
         run: python3 .github/reader-edition/analysis_edition.py --site site --revision "$GITHUB_SHA"
       - name: Check exact bounds, rendering, navigation, mobile and preserved proof data
         run: python3 .github/reader-edition/test_edition.py --site site --report reader-edition-tests
+      - name: Place the pi catalogue in Chapter 1 Other examples
+        run: python3 .github/reader-edition/place_catalogue.py --site site --revision "$GITHUB_SHA"
+      - name: Test final placement and cosine exclusion
+        run: python3 .github/reader-edition/test_placement.py --site site --report reader-edition-tests
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -103,6 +107,7 @@ jobs:
             reader-edition-tests
             site/reading/analysis-edition.json
             site/reading/cosine-half-interval.json
+            site/reading/catalogue-placement.json
           retention-days: 14
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v5
@@ -118,7 +123,7 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify the live title, homepage teaser, chapter catalogue and fixed-scale GIF
+      - name: Verify live Chapter 1 placement and preserved worked comparison
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
@@ -132,21 +137,29 @@ jobs:
           for attempt in range(18):
               try:
                   report=get('/reading/analysis-edition.json')
-                  assert report['documentationRevision']==revision
+                  placement=get('/reading/catalogue-placement.json')
+                  assert report['documentationRevision']==placement['documentationRevision']==revision
                   assert report['proofSourceCommit']==os.environ['SOURCE_SHA']
                   assert report['title']=='Computable Analysis'
                   assert report['subtitle']=='An alternative foundation to Calculus'
-                  assert report['homeTeaser'] and report['chapterOneCatalogue']
+                  assert not report['homeTeaser'] and report['chapterOneCatalogue']
+                  assert report['formulaCount']==9 and report['catalogueImmediatelyAfterHeading']
+                  assert not report['cosineQuadratureInCatalogue'] and report['workedComparisonContentUnchanged']
+                  assert placement['proofDataAndCosineAnimationUnchanged']
                   assert report['proofDeclarationsAndEdgesUnchanged'] and not report['newLeanProofsClaimed']
                   home=get('/index.html',True).decode()
                   chapter=get('/ch-foundations.html',True).decode()
                   catalogue=get('/pi-computations.html',True).decode()
+                  worked=get('/cosine.html',True).decode()
                   assert '<em>Analysis</em>' in home and 'An alternative foundation to Calculus' in home
-                  assert 'id="pi-computations"' in home and report['formula'] in home
+                  assert 'class="pi-teaser"' not in home and 'class="pi-formula-card"' not in home
                   assert 'ch-foundations.html#pi-computations' in home
-                  assert chapter.count('class="pi-formula-card"')==10
-                  assert catalogue.count('class="pi-formula-card"')==10
-                  assert 'C(x)' not in catalogue
+                  assert chapter.count('class="pi-formula-card"')==9 and 'id="pi-cosine"' not in chapter
+                  h=chapter.index('id="rem:sources-of-raw-reals"')
+                  g=chapter.index('id="pi-computations"')
+                  assert h<g and 'Other examples' in chapter[h:g]
+                  assert '0;url=ch-foundations.html#pi-computations' in catalogue
+                  assert 'data-animation="cosine"' in worked
                   a=report['cosineAnimation']
                   assert a['fixedEndpoint'] and a['upperLimit']=='1/2'
                   assert a['xPixelsPerUnit']==a['yPixelsPerUnit']==300
@@ -154,13 +167,10 @@ jobs:
                   assert image[:6] in [b'GIF89a',b'GIF87a']
                   assert hashlib.sha256(image).hexdigest()==a['gifSha256']
                   assert get('/reading/manifest.json')['proofSourceCommit']==os.environ['SOURCE_SHA']
-                  print('LIVE HOME:',base+'/index.html#pi-computations')
                   print('LIVE CHAPTER:',base+'/ch-foundations.html#pi-computations')
-                  print('LIVE CATALOGUE:',base+'/pi-computations.html')
-                  print('Title: Computable Analysis — An alternative foundation to Calculus')
+                  print('Nine pi examples immediately under Other examples; cosine remains in worked comparison')
                   print('Documentation revision:',revision)
                   print('Mathematical proof source unchanged:',os.environ['SOURCE_SHA'])
-                  print('Cosine quadrature: fixed [0,1/2]; equal axis scales; exact outward-rounded numerical illustrations')
                   break
               except Exception as e:
                   last=str(e);time.sleep(5)
