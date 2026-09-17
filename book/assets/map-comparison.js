@@ -1,9 +1,9 @@
 /* Paired theorem costs beside the graph, independent of selected display nodes. */
 'use strict';
 window.ProofMapComparison = (() => {
-  const names={direct:'Direct inequalities',ftc:'Concave FTC',mathlib:'Mathlib + bridges'};
+  let names={direct:'Direct inequalities',ftc:'Concave FTC',mathlib:'Mathlib + bridges'};
   const origins={native:'Computable-analysis',bridge:'Comparison bridges',mathlib:'Mathlib',lean:'Lean / Std',other:'Other dependencies'};
-  let data,panel,active='all';
+  let data,panel,config,active='all';
   const el=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
   const fmt=n=>Number(n).toLocaleString('en-US');
   const query=s=>panel.querySelector(s);
@@ -38,14 +38,14 @@ window.ProofMapComparison = (() => {
     row(body,'Total at this baseline',data.routeOrder.map(r=>{const s=c.routes[r].costs[base];return fmt(s.declarations)+' / '+fmt(s.codeLines);}), 'pm-total');
     row(body,'Declarations without source coverage',data.routeOrder.map(r=>fmt(c.routes[r].costs[base].unmappedDeclarations)));
     table.append(head,body);scroll.append(table);detail.append(scroll);
-    const baseline={full:'Full transitive type/body dependencies, including the objects in the statement.',
+    const baseline=(data.baselineDescriptions||{full:'Full transitive type/body dependencies, including the objects in the statement.',
       'statement-free':`The statement’s prerequisite union (${fmt(c.baselines.statementDeclarations)} declarations) is treated as already available.`,
-      'shared-free':`The common prerequisite intersection (${fmt(c.baselines.sharedDeclarations)} declarations) is treated as already available.`}[base];
+      'shared-free':`The common prerequisite intersection (${fmt(c.baselines.sharedDeclarations)} declarations) is treated as already available.`})[base];
     detail.append(el('p',baseline+' Each referenced declaration is counted once. Source LOC unions overlapping ranges and excludes blank lines and comments. It includes supporting definitions and proof scripts, not only the final theorem.','pm-method'));
     detail.append(el('p','LOC is partial where compiler source ranges or source files are unavailable; “unmapped” is not zero work. Generated helpers are included in declaration counts. These measurements do not rank conceptual simplicity, and an import count is not used as a substitute.','pm-method'));
     if(query('#pm-case').value==='combined')detail.append(el('p','Identity plus convergence is one calculus example with two obligations. Dependencies shared by those obligations are charged once.','pm-method'));
     const links=el('p',undefined,'pm-method');
-    for(const [href,text] of [['proof-bench/','Full comparison protocol'],['reading/map-comparison.json','Exact values and source coverage']]){
+    for(const [href,text] of [['proof-bench/','Full comparison protocol'],[config.url,'Exact values and source coverage']]){
       const a=el('a',text);a.href=href;a.target='_blank';a.rel='noopener';links.append(a,document.createTextNode('  '));
     }
     links.append(document.createTextNode('Source '+data.sourceCommit.slice(0,12)));detail.append(links);setRoute(active);
@@ -54,21 +54,21 @@ window.ProofMapComparison = (() => {
     for(const e of panel.querySelectorAll('[data-pm-route]'))e.classList.toggle('pm-active',route!=='all'&&e.dataset.pmRoute===['direct','ftc','mathlib'][Number(route)]);
   }
   async function init(model,entry){
-    if(entry.id!=='thm:c3-primitive'||!model.mapComparison)return;
+    config=entry.comparison||(entry.id==='thm:c3-primitive'?model.mapComparison:null);if(!config)return;
     panel=el('section',undefined,'pm-comparison');panel.id='proof-comparison';panel.setAttribute('aria-label','Declaration and source line comparison');
     document.querySelector('.map-toolbar').after(panel);
     try{
-      const response=await fetch(model.mapComparison.url);if(!response.ok)throw Error('HTTP '+response.status);
-      data=await response.json();if(data.sourceCommit!==model.sourceCommit)throw Error('Different source revisions; reload the page.');
+      const response=await fetch(config.url);if(!response.ok)throw Error('HTTP '+response.status);
+      data=await response.json();if(data.routeLabels)names=data.routeLabels;if(data.sourceCommit!==model.sourceCommit)throw Error('Different source revisions; reload the page.');
       const controls=el('div',undefined,'pm-controls');controls.append(el('strong','Proof comparison'));
-      controls.append(select('pm-case','Obligation',[
+      controls.append(select('pm-case','Obligation',data.caseOptions||[
         ['identity','Endpoint identity'],['validity','Convergence certificate'],['combined','Identity + convergence']]));
-      controls.append(select('pm-baseline','Count',[
+      controls.append(select('pm-baseline','Count',data.baselineOptions||[
         ['full','Full used library'],['statement-free','Beyond statement prerequisites'],['shared-free','Beyond shared prerequisites']]));
-      const cards=el('div',undefined,'pm-cards');
+      const cards=el('div',undefined,'pm-cards');cards.style.gridTemplateColumns='repeat('+data.routeOrder.length+',minmax(0,1fr))';
       const more=el('details',undefined,'pm-more');more.id='pm-more';more.append(el('summary','Breakdown, source coverage, and counting method'));
       const breakdown=el('div');breakdown.id='pm-breakdown';more.append(breakdown);
-      panel.append(controls,cards,more);draw();
+      panel.append(controls,cards,more);if(config.defaultCase)query('#pm-case').value=config.defaultCase;draw();
     }catch(e){panel.replaceChildren(el('p','Comparison unavailable: '+e.message+'. No cached numbers are substituted.','pm-error'));}
   }
   return {init,setRoute};

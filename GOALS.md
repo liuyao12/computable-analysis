@@ -223,3 +223,24 @@ Before publishing:
 3. render the blueprint web output;
 4. inspect changed files for `sorry`/`admit` and stale legacy links;
 5. commit, push to `main`, and confirm both Lean CI and GitHub Pages.
+
+## Checked weighted-cosine arithmetic application
+
+`import ComputableAnalysis.Cartwright` supplies two native derivations of the
+uniform weighted-cosine moment evaluation and irrationality of the original
+geometric pi squared. The optional `MathlibComparison.Cartwright` supplies a
+third derivation of the identical native statements. See
+`book/CARTWRIGHT_COMPLETE.md` for the constructed moment program, its successful
+joint schedule, the arithmetic boundary, and the actual independence audit.
+These are closed proofs, not uninhabited analytic providers.
+
+### Paired Wallis and beta integral applications
+
+Completed in the integral-portfolio continuation: uniform Wallis factorial
+integrals and rational Wallis-product bounds for geometric pi; integer-beta
+factorial integrals and polynomial density normalization. Each has a closed
+native FTC proof and a Mathlib proof of the same computational proposition.
+The independently validated schedules, exact declaration maps, and cumulative
+post-Cartwright costs are exported by `ExportIntegralPortfolio.lean`.
+The supported entry points are `ComputableAnalysis.IntegralApplications` and,
+only in the optional comparison workspace, `MathlibComparison.IntegralApplications`.

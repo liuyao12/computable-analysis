@@ -1,0 +1,43 @@
+<link rel="stylesheet" href="reading/proof-edges.css">
+<h1 id="cartwright">Arithmetic with calculus in the middle</h1>
+<p class="lead">A family of independently computed cosine integrals turns an integer recurrence into a proof that geometric π squared is irrational.</p>
+<h2 id="integer-start">Begin with a finite recurrence</h2>
+<p>Define the integer polynomials by \(P_0(z)=P_1(z)=1\) and</p>
+<div class="displaymath">\[P_{n+2}(z)=(2n+3)P_{n+1}(z)-zP_n(z).\]</div>
+<p>For integers \(a,b\), denominator clearing is itself an integer algorithm:</p>
+<div class="displaymath">\[K_0=1,\quad K_1=b,\quad K_{n+2}=(2n+3)bK_{n+1}-abK_n.\]</div>
+<p>A finite induction proves \(K_n=b^nP_n(a/b)\), when \(b\ne0\). These constructions and that identity use only integer and rational arithmetic. They do not ask for the value of an integral.</p>
+<h2 id="the-moments">Construct the moments before evaluating them</h2>
+<p>Keep our geometric normalization \(\pi=4A(1)\), and put \(\lambda=\pi/2\). On \([0,1]\), the cosine is \(c(t)=C(t/2)\). For every natural number \(n\), construct</p>
+<div class="displaymath">\[J_n=\int_0^1(1-t^2)^n c(t)\,dt.\]</div>
+<p>The integrand is nonnegative and decreasing. Its rational weight multiplies the rational-coordinate samples of the original inverse-arctangent cosine. It introduces no new trigonometric function and no nonrational integration endpoint.</p>
+<p>The chosen stage \(k\) uses a dyadic mesh of depth \(k\) and evaluation stage \(k\). This choice is justified, not inferred from pointwise convergence. The proof separates a mesh error of at most \(2^{-k}\) from the accumulated evaluation uncertainty. Widen the sampled mean by \(113\,2^{-k}\), intersect its retained predecessors, and intersect with \([0,1]\). The resulting moment program is valid, with</p>
+<div class="displaymath">\[\operatorname{width}((J_n)_k)\le226\,2^{-k}.\]</div>
+<p>This bound holds for every \(n\). The implementation is a terminating construction with a proved schedule, not a claim of an optimized numerical algorithm. Neither the moment recurrence nor the proposed evaluation is used to prove its convergence.</p>
+<p>Monotone sample bounds give, independently,</p>
+<div class="displaymath">\[0&lt;\frac1{16}\left(\frac{15}{16}\right)^n\le J_n\le1.\]</div>
+<h2 id="calculus-middle">The calculus in the middle</h2>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:cartwright-moments"><div class="theorem_thmheading"><span class="theorem_thmcaption">Theorem</span><span class="theorem_thmtitle">Weighted cosine evaluation</span></div><div class="theorem_thmcontent"><p>For every \(n\in\mathbb N\), the independently constructed moment and polynomial computations satisfy</p><div class="displaymath">\[\boxed{\lambda^{2n+1}J_n\simeq2^n n!\,P_n(\lambda^2).}\]</div></div></div>
+<p>The common intermediate laws are \(\lambda J_0=1\), \(\lambda^2J_1=2J_0\), and</p>
+<div class="displaymath">\[\lambda^2J_{n+2}=2(n+2)(2n+3)J_{n+1}-4(n+2)(n+1)J_n.\]</div>
+<p>After these analytic laws are established, scaling and the finite polynomial recurrence prove the evaluation by induction. The three formal derivations use the same moment program and have identical complete theorem types.</p>
+<h3>Finite summation by parts</h3>
+<p>For rational samples, expand the exact identity \(\Delta(fg)=f\,\Delta g+g\,\Delta f+\Delta f\,\Delta g\). Sum over a finite dyadic partition. Control the two increment-replacement errors and the quadratic cross-increment term, then refine. This route uses the local sine/cosine estimates but does not invoke the general FTC or the composite-primitive certificate.</p>
+<h3>A reusable quantitative FTC</h3>
+<p>The native FTC takes explicit local derivative bounds, not a completed real-line existence theorem. Polynomial products and the sine/cosine increment estimates certify the derivative of</p>
+<div class="displaymath">\[F_n(t)=\lambda(1-t^2)^{n+2}s(t)-2(n+2)t(1-t^2)^{n+1}c(t).\]</div>
+<p>Its derivative is the linear combination of weighted cosines in the recurrence. Applying the general finite-sample FTC and the endpoint bounds proves the law. The intermediate product need not itself be concave: this step uses the explicitly proved product/remainder certificates, not an unsupported application of the earlier concave-primitive theorem.</p>
+<h3>Mathlib and the quadrature bridge</h3>
+<p>The optional comparison first identifies these very sampled moments with Mathlib interval integrals. Integral order and finite additivity establish that bridge without an antiderivative. Mathlib's FTC and two integrations by parts then prove the moment laws. The final recurrence induction and arithmetic consumer are the same native declarations used by the other routes. No existing theorem of irrationality or transcendence of π is invoked.</p>
+<h2 id="arithmetic-finish">Return to finite arithmetic</h2>
+<p>Suppose \(\lambda^2=a/b\), with positive integers \(a,b\). The evaluation and the independent bounds imply</p>
+<div class="displaymath">\[0&lt;K_n,\qquad K_n\,2^n n!\le2a^n.\]</div>
+<p>That is all the arithmetic consumer needs. Choose the explicit index \(N=2a^2\). A finite factorial estimate gives \(2a^N&lt;2^N N!\), whereas the positive integer \(K_N\) is at least one. The inequalities contradict each other.</p>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:cartwright-irrationality"><div class="theorem_thmheading"><span class="theorem_thmcaption">Theorem</span><span class="theorem_thmtitle">Irrationality of geometric π squared</span></div><div class="theorem_thmcontent"><p>The square of the original geometric π computation is not equivalent to any constant rational program:</p><div class="displaymath">\[\boxed{\forall r\in\mathbb Q,\quad \pi^2\not\simeq r.}\]</div><p>Every displayed proof is closed: no unproved moment law, successful-schedule provider, or analytic estimate remains as a hypothesis.</p></div></div>
+<p>The integer-obstruction lemma has no integral or computable-number dependency. The final instantiated irrationality proof still depends on the calculus that supplied its bounds. The map distinguishes those two statements rather than coloring the whole conclusion as calculus-free.</p>
+<h2 id="cost">Compare the middle and the whole proof</h2>
+<!-- CARTWRIGHT_COMPARISON -->
+<p>The map's comparison panel switches between the analytic laws, the uniform moment evaluation, and the full irrationality theorem. It also shows the additional cost beyond the already established matching cosine proof and shared arithmetic. Costs are dependency unions, not sums that charge shared lemmas repeatedly.</p>
+<p>LOC means available declaration-source ranges with overlapping lines counted once and comments/blank lines removed. Missing source ranges are reported, not assigned a fictitious zero cost. Stored expressions, source LOC, numerical runtime and conceptual simplicity measure different things. The finite and FTC routes share local estimates and arithmetic; “alternative” does not mean that their entire foundations are disjoint.</p>
+<p>The optional Mathlib route uses Mathlib reals only in its analytic middle and representation bridges. The native routes contain no Mathlib declarations or native-owned noncomputable dependencies. Collected proof axioms, including inherited native-computation certificates, remain visible in the audit. This is not a claim that all inherited proof checking is kernel-only.</p>
+<p><a href="reading/cartwright-comparison.json">Exact costs and source coverage</a> · <a href="reading/cartwright-audit.json">Type equality and dependency audit</a> · <a href="cosine.html">The preceding cosine example</a></p>
