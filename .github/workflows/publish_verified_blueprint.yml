@@ -99,6 +99,10 @@ jobs:
         run: python3 .github/reader-edition/place_catalogue.py --site site --revision "$GITHUB_SHA"
       - name: Test exact series terms, logarithm enclosures and rendered flashcards
         run: python3 .github/reader-edition/test_placement.py --site site --report reader-edition-tests
+      - name: Expose Newton patterns and add Machin and alternative logarithm computations
+        run: python3 .github/reader-edition/pi_patterns.py --site site --revision "$GITHUB_SHA"
+      - name: Verify coefficient recurrences, independent logarithm bounds and final rendering
+        run: python3 .github/reader-edition/test_pi_patterns.py --site site --report reader-edition-tests
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -109,6 +113,7 @@ jobs:
             site/reading/cosine-half-interval.json
             site/reading/catalogue-placement.json
             site/reading/pi-flashcards-calculation.json
+            site/reading/pi-patterns.json
           retention-days: 14
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v5
@@ -124,7 +129,7 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify live expanded flashcards and unchanged worked comparisons
+      - name: Verify live Newton pattern, Machin and the three logarithm computations
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
@@ -139,32 +144,36 @@ jobs:
           for attempt in range(18):
               try:
                   report=get('/reading/analysis-edition.json');placement=get('/reading/catalogue-placement.json')
-                  numbers=get('/reading/pi-flashcards-calculation.json')
-                  assert report['documentationRevision']==placement['documentationRevision']==numbers['documentationRevision']==revision
+                  numbers=get('/reading/pi-flashcards-calculation.json');patterns=get('/reading/pi-patterns.json')
+                  assert report['documentationRevision']==placement['documentationRevision']==numbers['documentationRevision']==patterns['documentationRevision']==revision
                   assert report['proofSourceCommit']==os.environ['SOURCE_SHA']
                   assert report['title']=='Computable Analysis' and report['subtitle']=='An alternative foundation to Calculus'
                   assert not report['homeTeaser'] and report['chapterOneCatalogue']
-                  assert report['formulaCount']==10 and report['catalogueImmediatelyAfterHeading']
-                  assert report['newtonBinomialCard'] and report['logContinuationCard'] and report['expandedSeries']
+                  assert report['formulaCount']==11 and report['catalogueImmediatelyAfterHeading']
+                  assert report['newtonFactored'] and report['machinCard']
+                  assert patterns['logarithmMethods']==['local-taylor','symmetric-log','machin']
+                  assert not patterns['usesNumericalPi'] and not patterns['usesNumericalLog']
+                  assert not patterns['leanStageExecution'] and not patterns['newLeanProofsClaimed']
                   assert not report['cosineQuadratureInCatalogue'] and report['workedComparisonContentUnchanged']
                   assert placement['proofDataAndCosineAnimationUnchanged']
                   assert report['proofDeclarationsAndEdgesUnchanged'] and not report['newLeanProofsClaimed']
-                  assert not numbers['usesNumericalPi'] and not numbers['leanStageExecution']
+                  assert patterns['originalChapterOutsideGalleryUnchanged']
                   assert numbers['newtonIntegratedTerms'][:4]==['1/2','-1/48','-1/1280','-1/14336']
-                  for row in numbers['rows']:
-                      n=row['termsPerStep'];assert Q(row['radius'])==Q(4,(n+1)*2**n)
-                      for name in ['real','imaginary']:
-                          lo,hi=map(Q,row[name+'Box']);a,b=map(Q,row[name+'Display']);assert a<=lo<=hi<=b
-                  assert numbers['rows'][-1]['imaginaryDisplay']==['1.570796326794','1.570796326795']
+                  assert len(patterns['comparisons'])==15
+                  for row in patterns['comparisons']:
+                      lo,hi=map(Q,row['imaginaryBox']);a,b=map(Q,row['imaginaryDisplay']);assert a<=lo<=hi<=b
+                      mantissa,e=row['radiusDisplay'].split(' × 10^')
+                      assert Q(mantissa)*Q(10)**int(e)>=Q(row['radius'])
                   home=get('/index.html',True).decode();chapter=get('/ch-foundations.html',True).decode()
                   catalogue=get('/pi-computations.html',True).decode();worked=get('/cosine.html',True).decode()
                   assert '<em>Analysis</em>' in home and 'An alternative foundation to Calculus' in home
                   assert 'class="pi-teaser"' not in home and 'class="pi-formula-card"' not in home
                   assert 'ch-foundations.html#pi-computations' in home
-                  assert chapter.count('class="pi-formula-card"')==10 and 'id="pi-cosine"' not in chapter
-                  assert 'id="pi-logarithm"' in chapter and '<h3>Newton</h3>' in chapter
+                  assert chapter.count('class="pi-formula-card"')==11 and 'id="pi-cosine"' not in chapter
+                  assert 'id="pi-machin"' in chapter and '<h3>Machin</h3>' in chapter
                   assert r'\frac{i\pi}{2}=\operatorname{Log}(i)' in chapter
-                  assert r'\frac1{14336}' in chapter and r'\frac5{589824}' in chapter
+                  assert r'1\cdot1\cdot3' in chapter and r'(1/2)^7' in chapter
+                  assert 'Three ways to compute Log(i)' in chapter
                   h=chapter.index('id="rem:sources-of-raw-reals"');g=chapter.index('id="pi-computations"')
                   assert h<g and 'Other examples' in chapter[h:g]
                   assert '0;url=ch-foundations.html#pi-computations' in catalogue
@@ -175,7 +184,7 @@ jobs:
                   assert hashlib.sha256(image).hexdigest()==a['gifSha256']
                   assert get('/reading/manifest.json')['proofSourceCommit']==os.environ['SOURCE_SHA']
                   print('LIVE CHAPTER:',base+'/ch-foundations.html#pi-computations')
-                  print('Ten expanded flashcards: Newton binomial series and specified Log(i) continuation; cosine remains in worked comparison')
+                  print('Eleven flashcards: visible Newton factors, Machin, three branch-consistent logarithm algorithms')
                   print('Documentation revision:',revision)
                   print('Mathematical proof source unchanged:',os.environ['SOURCE_SHA'])
                   break
