@@ -1,27 +1,36 @@
 # Computable Analysis reader edition
 
-The title is **Computable _Analysis_**, with subtitle **An alternative foundation
-to Calculus**. The pi catalogue's canonical location is now Chapter 1, immediately
-under **1.2.2 Other examples**, following the square-root example. It contains
-nine formulas. Cosine quadrature is reserved for the worked comparison, and is
-not duplicated in the gallery or as a home-page teaser. The home navigation
-points to the chapter. The former `pi-computations.html` bookmark redirects there.
+The canonical pi flashcards are in Chapter 1, immediately under **1.2.2 Other
+examples**, after the square-root example. The ten cards include **Newton** and
+**Complex logarithm**. Cosine quadrature remains in the worked comparison, not
+in this gallery or a home-page teaser. The old catalogue URL redirects to the
+chapter. The title remains **Computable _Analysis_**, with subtitle **An
+alternative foundation to Calculus**.
 
-The catalogue reconstructs the mathematical formulas, not the original image.
-It is a preview, not a claim that every native equivalence has been proved.
-The original chapter mathematics is retained; only the Other examples heading
-and the placement/content of the added gallery change.
+`pi_flashcards.py` spells out early terms rather than hiding the numerical
+pattern in summation/product notation. The Newton card evaluates the integrated
+binomial series at 1/2, in modern unit-circle normalization. The historical
+links lead to Newton's own account and notebook; no priority claim about the
+first pi series is made. The logarithm card reads `i*pi/2 = Log(i)` and expands
+to a calculation along the four rational steps of the straight segment 1 to i.
+Both the real and imaginary enclosures are computed by exact rational arithmetic;
+the error is at most `4 / ((N+1)*2^N)`. No numerical pi or logarithm library
+value is supplied to that computation. The table is an illustration, NOT
+extracted Lean output or a newly checked Lean continuation theorem.
 
-This reader overlay is separate from the checked theorem source. Pages requires
-the completed integral-portfolio verification and checks its exact source SHA.
-The baseline edition pass and its tests still run first; the final placement
-pass and tests then apply the requested chapter organization. Publication never
-skips the proof-data preservation, numerical bounds or browser gates.
+The Gaussian expansion is only integrated on a fixed finite interval. It is
+not incorrectly integrated term by term over the whole real line; improper
+tails remain a separate obligation. The chapter-wide preview notice continues
+to distinguish these mathematical identities from completed equivalence proofs.
 
-The cosine GIF stays in the worked comparison: fixed endpoint 1/2, equal x/y
-scales, rational nested-radical sample bounds, and independently computed geometric
-reciprocal bounds. It and the worked chapter's mathematical content remain
-unchanged by the placement pass. The illustration is not literal Lean output.
+This reader overlay is separate from the pinned verified mathematics snapshot.
+The baseline reader pass/tests run before the placement/flashcard pass/tests.
+The source revision, declarations, dependency witnesses, proof-map SVGs,
+comparison metrics and reference pages are unchanged. Original Chapter 1 text
+is preserved outside the added gallery and the renamed Other examples heading.
+The existing equal-axis-scale cosine GIF, numerical data and worked comparison
+are protected by hashes. The separate proof source revision is not overwritten
+by the documentation revision.
 
 Reproduce over the verified proof artifact:
 
@@ -32,15 +41,8 @@ python .github/reader-edition/place_catalogue.py --site site --revision REVISION
 python .github/reader-edition/test_placement.py --site site --report reader-edition-tests
 ```
 
-`reading/analysis-edition.json` describes the final edition;
-`reading/catalogue-placement.json` records placement and preservation checks.
-Original proof revisions, exact declaration text, dependency witnesses, graph
-SVGs and measurement JSONs remain unchanged. The original animation manifest
-remains historical; current cosine metadata is in `cosine-half-interval.json`.
-No new Lean result is claimed by these documentation updates.
-
-The final tests check DOM order under Other examples, absence of the cosine
-card/teaser, all nine mathematical formula renderings, desktop/mobile layout,
-home navigation, old-page redirect, and preservation of the worked comparison,
-proof data and exact GIF bytes. Live HTTP checks repeat the essential assertions
-and verify the deployment revision and animation hash after publication.
+Publication requires the full earlier proof verification, exact finite-term and
+continuation-path checks, outward-rounded enclosure checks, all expanded-card
+MathJax rendering, mobile layouts, legacy navigation, and unchanged artifacts.
+The deployed HTML and calculation JSON are fetched and checked after Pages
+reports success. No new native or Mathlib equivalence is claimed by this update.
