@@ -1,0 +1,174 @@
+% Mathematical construction and formalization targets. This file does not
+% register any new checked Lean theorem or alter a numerical Lean evaluator.
+\section{Continue the logarithm from one to $i$}
+\label{sec:logarithm-continuation}
+
+The exponential connects real growth with rotation. The logarithm makes the
+reverse connection: continuing its local computation to the rational complex
+point $i$ supplies another computation of the geometric constant $\pi$.
+The continuation algorithm must not use that constant to choose its values.
+
+\subsection{A local computation and its tail}
+For a rational complex input $w$, start with
+\[
+ \ell_N(w)=\sum_{r=1}^N\frac{(-1)^{r+1}w^r}{r}.
+\]
+If $|w|\le q<1$, with a supplied rational $q$, the omitted tail is at most
+\[
+ \frac{q^{N+1}}{(N+1)(1-q)}.
+\]
+This gives rational boxes for the local function $\ell(w)$. Its agreement
+with $L(1+w)$ for real $-1<w<1$ follows by integrating the finite geometric
+identity for $1/(1+w)$ and retaining its remainder. Thus the series is a
+new representation of the existing logarithm, not a replacement for its
+reciprocal-integral definition.
+
+At a nonzero rational complex centre $z$, an increment $h$ satisfying
+$|h/z|<1$ changes the continued logarithm by $\ell(h/z)$. The local
+identity $\ell'(w)=1/(1+w)$, with its uniform finite remainder bound,
+justifies this update. Starting from the value zero at one, a finite chain
+of such steps computes a specified continuation. The path is part of the
+construction; one must not silently identify continuations winding differently
+around zero.
+
+\subsection{Four explicit steps, with no trigonometric input}
+Use the straight segment $\gamma(t)=1-t+it$, $0\le t\le1$, subdivided at
+four equal rational steps:
+\[
+ z_0=1,\quad z_1=\frac{3+i}{4},\quad z_2=\frac{1+i}{2},\quad
+ z_3=\frac{1+3i}{4},\quad z_4=i.
+\]
+For $w_j=(z_{j+1}-z_j)/z_j$, the four local inputs are
+\[
+ w_0=\frac{-1+i}{4},\qquad
+ w_1=\frac{-1+2i}{5},\qquad
+ w_2=\frac{i}{2},\qquad
+ w_3=\frac{1+2i}{5}.
+\]
+Their squared moduli are $1/8,1/5,1/4,1/5$. In particular every step admits
+the same rational bound $q=1/2$. The path stays apart from zero because
+$|\gamma(t)|^2=(1-t)^2+t^2\ge1/2$.
+
+Define the endpoint continuation by summing the four local increments:
+\[
+ \mathcal L_\gamma(i)=\sum_{j=0}^3\ell(w_j),\qquad
+ \pi_{\log}=2\operatorname{Im}\mathcal L_\gamma(i).
+\]
+This is a definition of an independent computation, before identifying its
+value with geometric $\pi$. Its finite approximation and error radius are
+\[
+ p_N=2\operatorname{Im}\sum_{j=0}^3\ell_N(w_j),\qquad
+ R_N=\frac{8}{(N+1)2^N}.
+\]
+The rational interval $[p_N-R_N,p_N+R_N]$ encloses $\pi_{\log}$.
+Taking the finite intersections of these intervals for $1\le n\le N$
+gives nested outputs with widths at most $2R_N$. Compatibility and shrinking
+follow from the geometric tail estimates themselves, without using geometric
+$\pi$ as an anchor or assuming the desired identification.
+
+Everything in these finite instructions is rational complex arithmetic.
+There is no call to arctangent, trigonometry, a pre-existing complex logarithm,
+or an evaluator for $\pi$. Evaluating all four prefixes gives the following
+outward-rounded rational enclosures (the numerical calculation is not yet
+an extracted Lean program):
+\[
+\begin{array}{c|c}
+ N&\hbox{enclosure of }\pi_{\log}\\\hline
+ 8 &[3.137914622420,\ 3.144859066866]\\
+ 16&[3.141584712311,\ 3.141599073525]\\
+ 32&[3.141592653527,\ 3.141592653641]\\
+ 64&[3.141592653589,\ 3.141592653590]
+\end{array}
+\]
+The fixed decimal display eventually hides further improvement of the exact
+rational bounds; it is not the precision used to generate them.
+
+\subsection{Identify the result with geometric area}
+Each local series is compared with the integral of the reciprocal along
+its segment by the finite geometric remainder identity. Adding the four
+comparisons gives
+\[
+ \mathcal L_\gamma(i)
+ =\int_0^1\frac{-1+i}{1-t+it}\,dt
+ =\int_0^1\frac{2t-1+i}{(1-t)^2+t^2}\,dt.
+\]
+The complex expression means two real computations, not an assumed general
+contour-integral operator. Their rational denominators are bounded below
+by $1/2$. The real integrand is increasing, while the imaginary integrand
+is increasing up to $1/2$ and decreasing thereafter, so the existing monotone
+and finite-piece constructions are appropriate.
+
+The real part cancels under $t\mapsto1-t$. In the imaginary part the rational
+linear substitution $u=2t-1$ gives
+\[
+ \operatorname{Im}\mathcal L_\gamma(i)
+ =\int_{-1}^{1}\frac{du}{1+u^2}
+ =2\int_0^1\frac{du}{1+u^2}
+ \simeq2A(1).
+\]
+Consequently the intended equivalence is
+\[
+ \boxed{\mathcal L_\gamma(i)\simeq 2iA(1)=\frac{i\pi}{2},\qquad
+        \pi_{\log}\simeq4A(1)=\pi.}
+\]
+The arctangent computation is used in this identification proof, not by the
+new evaluator. No general homotopy or winding-number theorem is required
+for this particular path. Agreement after a finite subdivision is a useful
+first continuation theorem; comparison of paths with different winding belongs
+to the later complex-path chapter.
+
+\subsection{The exponential and the circle are part of the same story}
+The factorial exponential and the continued logarithm should be compared
+locally before invoking geometric $\pi$. The local inverse identity and
+finite multiplication give
+\[
+ E(\ell(w))\simeq1+w,\qquad
+ E(\mathcal L_\gamma(i))\simeq\prod_{j=0}^3(1+w_j)=i.
+\]
+The final product telescopes because $1+w_j=z_{j+1}/z_j$. It is exact rational
+complex algebra. Combined with the geometric identification, this yields
+$E(i\pi/2)\simeq i$ without defining either side through the other.
+
+The fuller trigonometric connection is the equality, on the existing chart,
+\[
+ E(i\pi x)\simeq C(x)+iS(x).
+\]
+Both coordinates must be identified with the original inverse-arctangent
+constructions, not just assigned their names. One useful proof compares the
+factorial exponential with the rational circle path
+\[
+ P(u)=\frac{1-u^2+2iu}{1+u^2}.
+\]
+Both $E(2iA(u))$ and $P(u)$ have initial value one and satisfy
+$Y'=2iY/(1+u^2)$. The quantitative finite uniqueness argument already described
+above identifies them. Alternatively compare their normalized rotation
+systems on a bounded rational interval. In either route, composition at the
+computed input $A(u)$ uses its quantitative continuity bounds.
+
+This makes real growth, complex rotation and phase computations aspects of
+one computational calculus. The same continuation interface can later support
+complex powers $E(\alpha\mathcal L_\gamma(z))$, with the path and separation
+conditions retained as explicit input data.
+
+\subsection{Formalization and comparison targets}
+The new continuation construction above is a mathematical specification and
+an exact-rational numerical example. It is not yet registered as a checked
+Lean development. The required native results are local series validity,
+finite continuation and subdivision agreement, local exponential inversion,
+and identification with the rational path integral and geometric arctangent.
+They should reuse the existing logarithm, exponential, complex-box and
+finite-integral machinery rather than create parallel foundations.
+
+The paired endpoint target is the equivalence of the same $\pi_{\log}$
+program with the original geometric $\pi$. The native proof follows the
+finite reciprocal-integral calculation. The optional Mathlib proof must
+first identify the local series and its branch continuation with Mathlib's
+logarithm, then use its value at $i$. Calling its ready-made logarithm is
+not an implementation of our continuation algorithm.
+
+The bundled proof map should therefore distinguish the rational local-series
+and continuation definitions, the exponential inverse and trigonometric
+bridges, the geometric arctangent branch, and the optional Mathlib comparison.
+The geometric $\pi$ node belongs to the equivalence statement and its proof,
+not to the numerical-definition path for $\pi_{\log}$. Declaration and LOC
+comparisons must include those bridges and report reuse of earlier chapters.
