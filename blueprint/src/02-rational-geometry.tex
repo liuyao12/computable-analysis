@@ -1,0 +1,175 @@
+% The opening is computation first, followed by its geometric interpretation.
+% Checked declarations are attached by the reader's rational-geometry pass.
+Area, length, and volume can be computed before defining an integral of a
+function. We begin with a concrete rational interval computation. We then
+establish the elementary rules of area and identify the computation with the
+quarter-circle. Throughout this chapter, the order of vertices determines
+orientation; area and volume retain that orientation.
+
+\section{A quarter-circle computation}
+\label{thm:rational-circle-pythagorean}
+Put
+\[
+ P(u)=\left(\frac{1-u^2}{1+u^2},\frac{2u}{1+u^2}\right),
+ \qquad u_j=\frac{j}{2^n}\quad(0\le j\le2^n).
+\]
+All these coordinates are rational, and expansion gives
+$P_1(u)^2+P_2(u)^2=1$. The endpoints are $(1,0)$ and $(0,1)$.
+The chords and endpoint tangents in the picture motivate the two expressions
+\[
+ \ell(u,v)=\frac{(v-u)(1+uv)}{(1+u^2)(1+v^2)},
+ \qquad h(u,v)=\frac{v-u}{1+uv}.
+\]
+For now, regard them simply as rational formulas. Define a raw computation by
+\[
+ Q_n=\left[
+   \sum_{j=0}^{2^n-1}\ell(u_j,u_{j+1}),
+   \sum_{j=0}^{2^n-1}h(u_j,u_{j+1})
+ \right].
+\]
+Its first stages are $Q_0=[1/2,1]$ and $Q_1=[7/10,5/6]$.
+The existing midpoint-update program computes exactly these sums; no new
+schedule or numerical definition of $\pi$ is being substituted.
+
+\paragraph{Validity of the computation.}\label{thm:quarter-circle-raw}
+Finite refinement increases the lower sum and decreases the upper sum.
+Furthermore
+\[
+ h(u,v)-\ell(u,v)=
+ \frac{(v-u)^3}{(1+uv)(1+u^2)(1+v^2)}.
+\]
+On the chosen mesh each denominator is at least one. Summing the cell gaps
+therefore gives
+\[
+ 0\le Q_n^+-Q_n^-\le2^n(2^{-n})^3=4^{-n}.
+\]
+Thus the intervals are ordered, nested, and arbitrarily narrow: $Q$ is a
+valid raw computable number. This conclusion uses finite rational formulas,
+not an area or integral theorem.
+
+\begin{figure}[htbp]\centering
+\rationalCircleSubdivisionAnimation
+\caption{A rational computation, whose geometric interpretation will follow.}
+\label{fig:rational-parameter-line}
+\end{figure}
+
+\section{Area from ordered rational vectors}
+\label{sec:rational-area}
+A point or vector is a pair of rational numbers. The area of the
+parallelogram spanned by the ordered vectors $u,v$ is
+\[
+ \omega(u,v)=u_1v_2-u_2v_1.
+\]
+This is the normalized alternating bilinear rule: it is additive and
+rationally homogeneous in each input, vanishes when the two inputs agree,
+and has $\omega((1,0),(0,1))=1$. Conversely those rules determine the
+formula uniquely by expansion in the coordinate basis. We construct this
+rule and prove its characterization; no new global axiom is introduced.
+
+The area of the ordered triangle is
+\[
+ A[p,q,r]=\frac12\omega(q-p,r-p).
+\]
+A degenerate triangle has area zero. Exchanging two vertices reverses area;
+a cyclic change of its three vertices preserves it. For every rational
+point $o$, expansion gives the subdivision identity
+\[
+ A[p,q,r]=A[o,q,r]+A[p,o,r]+A[p,q,o].
+\]
+No condition that $o$ lies inside the triangle is needed: orientation handles
+the cancellations.
+
+For a rational affine map $x\mapsto Mx+b$, the transformation law is
+\[
+ A[Mp+b,Mq+b,Mr+b]=\det(M)A[p,q,r].
+\]
+Translations and proper rigid motions preserve area; reflections reverse it.
+A homothety of ratio $s$ multiplies area by $s^2$. These assertions follow
+from finite algebra, without lengths, angles, square roots, or trigonometry.
+
+\section{Polygons and the choice of starting vertex}
+\label{sec:rational-polygons}
+A rational polygon is a cyclic sequence of rational points. In a stored list
+$P=(p_0,\ldots,p_{N-1})$, the last vertex is joined back to the first;
+there is no preferred first vertex and no assumption of simplicity or convexity.
+Define
+\[
+ A(P)=\frac12\sum_{j=0}^{N-1}\omega(p_j,p_{j+1}),
+ \qquad p_N=p_0.
+\]
+The empty list has area zero. Reversing the cycle reverses its area.
+
+\paragraph{Theorem: a fan from any starting vertex.}
+\label{thm:rational-polygon-fans}
+For any rational point $o$,
+\[
+ \boxed{A(P)=\sum_{j=0}^{N-1}A[o,p_j,p_{j+1}].}
+\]
+In particular, take $o=p_0$. The first and last terms vanish, leaving
+\[
+ A(P)=\sum_{j=1}^{N-2}A[p_0,p_j,p_{j+1}].
+\]
+Choosing any other starting vertex gives the same result. More generally,
+both the fan point and the place where the cyclic list starts may be changed
+independently, without changing the computed rational number.
+
+The proof is cancellation of the radial edges: each $\omega(o,p_j)$ occurs
+once with each sign. The boundary terms remain. For a convex polygon this
+is an ordinary triangulation. For other cycles it is an oriented triangle
+sum; the triangles need not be disjoint or remain inside the polygon.
+Self-crossing cycles therefore retain multiplicity rather than measuring
+the union of the regions they trace. This distinction requires no change to
+the formula or to the starting-vertex theorem.
+
+\subsection{The same convention for volume}
+For rational vectors in three dimensions put
+$\Omega(u,v,w)=\det(u,v,w)$. The volume of the ordered tetrahedron is
+\[
+ V[p,q,r,s]=\frac16\Omega(q-p,r-p,s-p).
+\]
+Exchanging two vertices reverses volume, subdivision through any point is
+additive with the displayed orientations, and a homothety of ratio $c$
+multiplies volume by $c^3$. These computations precede the solid comparisons
+later in this chapter. Spatial face areas and segment lengths may require
+square roots; planar polygon area and tetrahedral volume do not.
+
+\section{The geometric meaning of the computation}
+\label{thm:geometric-pi-validity}
+Return to the opening picture. The inner polygon has the origin followed by
+the consecutive points $P(u_0),\ldots,P(u_{2^n})$. The outer polygon inserts
+between consecutive circle points the intersection of their tangent lines
+$P(u_j)\cdot z=1$ and $P(u_{j+1})\cdot z=1$.
+These intersections are rational. Both boundary cycles have the positive
+orientation shown in the picture.
+
+\paragraph{Theorem: the interval endpoints are polygon areas.}
+\label{thm:quarter-circle-polygons}
+At every stage, not merely in the limit,
+\[
+ \boxed{Q_n=[A(P_n^-),A(P_n^+)].}
+\]
+Either polygon area can be computed from a fan at any starting vertex, or
+indeed from any rational fan point. Its rational value is unchanged.
+The proof identifies the triangle and tangent-cell formulas with the
+already defined boundary-area computation.
+
+The chords lie inside the quarter-disk and the tangent half-planes contain
+it. Thus these are inscribed and circumscribed polygons. Their proved area
+gap tends to zero. This is the area computation of the quarter-circle:
+we have first constructed a number and then justified what its bounds measure.
+No general area function on arbitrary regions is required.
+
+Define $\pi=4Q$. The same construction on $[0,t]$ gives sector area $A(t)$,
+so $Q=A(1)$. Finite polygon bounds give $2<\pi<4$, and rational coordinate
+scaling gives the disk-area computation $\pi R^2$. For later use,
+\[
+ \frac{v-u}{1+v^2}\le A(v)-A(u)\le\frac{v-u}{1+u^2}
+ \qquad(0\le u<v\le1).
+\]
+In particular $(v-u)/2\le A(v)-A(u)\le v-u$. These are geometric bounds;
+the later integral constructions are unchanged and are not being redefined
+as areas in this revision.
+
+The sphere and cylinder arguments below are coordinate reconstructions in
+the spirit of Archimedes' exhaustion, not transcriptions of his proofs.
+The historical references remain at the end of the chapter.

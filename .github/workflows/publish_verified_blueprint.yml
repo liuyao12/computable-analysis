@@ -1,6 +1,6 @@
 name: Publish verified proof blueprint
 
-# Immutable verified mathematics plus separately tested reader passes.
+# Immutable verified mathematics plus checked supplementary finite geometry.
 # No theorem branch is merged; existing Pages protections are unchanged.
 on:
   push:
@@ -8,6 +8,12 @@ on:
     paths:
       - '.github/workflows/publish_verified_blueprint.yml'
       - '.github/reader-edition/**'
+      - 'ComputableAnalysis/RationalGeometry.lean'
+      - 'ComputableAnalysis/QuarterCircleGeometry.lean'
+      - 'ComputableAnalysis/GeometryFoundation.lean'
+      - 'book/checks/ExportRationalGeometry.lean'
+      - 'blueprint/src/02-rational-geometry.tex'
+      - 'blueprint/src/02-circle-sphere.tex'
   workflow_dispatch:
 permissions:
   contents: read
@@ -24,7 +30,7 @@ env:
 jobs:
   prepare:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -83,10 +89,40 @@ jobs:
           assert all(r['identicalMathematicalText'] for r in read('reading/preservation.json')['rendered'].values())
           print('PASS: proof results, source revision, chapter preservation and previous comparisons')
           PY
+      - name: Materialize the exact geometry proof inputs
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin "$SOURCE_SHA"
+          mkdir -p geometry-base geometry-reports
+          git archive "$SOURCE_SHA" | tar -x -C geometry-base
+          cmp lean-toolchain geometry-base/lean-toolchain
+          for name in RationalGeometry QuarterCircleGeometry GeometryFoundation; do
+            cp "ComputableAnalysis/$name.lean" "geometry-base/ComputableAnalysis/$name.lean"
+          done
+          cp book/checks/ExportRationalGeometry.lean geometry-base/book/checks/ExportRationalGeometry.lean
+          git diff --check
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+      - uses: actions/cache@v5
+        with:
+          path: geometry-base/.lake
+          key: rational-geometry-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            rational-geometry-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+      - name: Check finite geometry and its exact quarter-circle bridge
+        run: |
+          set -euo pipefail
+          (cd geometry-base && lake build ComputableAnalysis.GeometryFoundation) | tee geometry-reports/build.log
+          (cd geometry-base && lake env lean book/checks/ExportRationalGeometry.lean) | tee geometry-reports/audit.log
+          cp geometry-base/geometry-reports/rational-geometry.json geometry-reports/
       - name: Install reader-only rendering prerequisites
         run: |
           sudo apt-get update
-          sudo apt-get install -y fonts-dejavu-core
+          sudo apt-get install -y fonts-dejavu-core graphviz
           python -m pip install beautifulsoup4 Pillow playwright
           if ! command -v google-chrome && ! command -v chromium; then
             python -m playwright install --with-deps chromium
@@ -107,18 +143,24 @@ jobs:
         run: python3 .github/reader-edition/group_arctan.py --site site --revision "$GITHUB_SHA"
       - name: Verify grouped formulas, fragment navigation and desktop and mobile rendering
         run: python3 .github/reader-edition/test_arctan_group.py --site site --report reader-edition-tests
+      - name: Build the computation-first geometry chapter and checked maps
+        run: python3 .github/reader-edition/rational_geometry.py --site site --revision "$GITHUB_SHA" --audit geometry-reports/rational-geometry.json
+      - name: Verify geometry statements, stage values, maps and rendering
+        run: python3 .github/reader-edition/test_rational_geometry.py --site site --report reader-edition-tests
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: reader-edition-validation
           path: |
             reader-edition-tests
+            geometry-reports
             site/reading/analysis-edition.json
             site/reading/cosine-half-interval.json
             site/reading/catalogue-placement.json
             site/reading/pi-flashcards-calculation.json
             site/reading/pi-patterns.json
             site/reading/arctan-group.json
+            site/reading/rational-geometry-edition.json
           retention-days: 14
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v5
@@ -134,7 +176,7 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify the live arctangent group and unchanged numerical comparisons
+      - name: Verify the live geometry chapter and preserved comparisons
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
@@ -168,7 +210,6 @@ jobs:
                   assert not patterns['leanStageExecution'] and not patterns['newLeanProofsClaimed']
                   assert not report['cosineQuadratureInCatalogue'] and report['workedComparisonContentUnchanged']
                   assert placement['proofDataAndCosineAnimationUnchanged']
-                  assert report['proofDeclarationsAndEdgesUnchanged'] and not report['newLeanProofsClaimed']
                   assert patterns['originalChapterOutsideGalleryUnchanged']
                   assert numbers['newtonIntegratedTerms'][:4]==['1/2','-1/48','-1/1280','-1/14336']
                   assert len(patterns['comparisons'])==15
@@ -198,10 +239,28 @@ jobs:
                   image=get('/reading/animations/cosine.gif',True)
                   assert hashlib.sha256(image).hexdigest()==a['gifSha256']
                   assert get('/reading/manifest.json')['proofSourceCommit']==os.environ['SOURCE_SHA']
-                  print('LIVE GROUP:',base+'/ch-foundations.html#pi-arctan')
-                  print('Seven flashcards; geometric, quadrature, Leibniz, Brouncker and Machin methods grouped under pi = 4 arctan(1)')
-                  print('Documentation revision:',revision)
-                  print('Mathematical proof source unchanged:',os.environ['SOURCE_SHA'])
+                  geometry=get('/reading/rational-geometry-edition.json');audit=get('/reading/rational-geometry.json')
+                  assert geometry['documentationRevision']==geometry['newProofSourceCommit']==revision
+                  assert geometry['baseProofSourceCommit']==os.environ['SOURCE_SHA']
+                  assert all(audit['checks'].values()) and all(geometry['checks'].values())
+                  assert geometry['integralDefinitionsUnchanged'] and geometry['chapterOneUnchanged']
+                  assert geometry['earlierTheoremEntriesUnchanged']
+                  assert len(audit['declarations'])==49 and len(audit['audits'])==24
+                  assert all('sorryAx' not in r['axioms'] for r in audit['audits'])
+                  page=get('/ch-circle-sphere.html',True).decode();maps=get('/reading/maps.json')
+                  headings=['A quarter-circle computation','Area from ordered rational vectors',
+                    'Polygons and the choice of starting vertex','The geometric meaning of the computation',
+                    'Circumference and sector length']
+                  positions=[page.index(x) for x in headings];assert positions==sorted(positions)
+                  for target in geometry['newTheoremMaps']:
+                      assert 'data-proof-map="'+target+'"' in page
+                      assert maps['theorems'][target]['verifiedGraph']
+                      assert maps['theorems'][target]['proofSourceCommit']==revision
+                  assert maps['proofSourceCommit']==os.environ['SOURCE_SHA']
+                  print('LIVE CHAPTER:',base+'/ch-circle-sphere.html')
+                  print('Checked geometry source:',revision)
+                  print('Computation first; cyclic polygon fans; exact quarter-circle stage areas; integral definitions unchanged')
+                  print('Earlier mathematical comparison source:',os.environ['SOURCE_SHA'])
                   break
               except Exception as e:
                   last=str(e);time.sleep(5)
