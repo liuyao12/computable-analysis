@@ -1,0 +1,35 @@
+name: Taylor Gamma compiler support
+on:
+  push:
+    branches: [work/taylor-stirling-gamma]
+    paths: ['.github/workflows/taylor_gamma_runtime.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compiler:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+      - name: Retain exact compiler development support
+        run: |
+          set -euo pipefail
+          lean --version
+          PREFIX=$(lean --print-prefix)
+          test -f "$PREFIX/include/lean/lean.h"
+          mkdir -p compiler-support
+          cp -r "$PREFIX/include" compiler-support/
+          lean --version > compiler-support/version.txt
+          tar -czf compiler-support.tar.gz -C compiler-support .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compiler-development-support
+          path: compiler-support.tar.gz
+          retention-days: 7
