@@ -1,0 +1,18 @@
+/* Book identity and navigation; the notebook retains its two-column workspace. */
+:root{--paper:#faf9f5;--ink:#27382f;--muted:#758176;--line:#dedfd5;--accent:#315e48;--light:#edf2eb;--header-height:65px}
+.topbar{background:var(--paper);flex-wrap:wrap;justify-content:flex-start;gap:16px 24px;padding-top:17px;padding-bottom:17px}
+.topbar .brand{font:23px/1.3 Georgia,'Times New Roman',serif;letter-spacing:-.6px;font-weight:normal}.brand em{font-weight:normal}
+.topbar .local-nav{margin-left:auto;display:flex;gap:20px}
+.book-menu{position:relative;margin:0;padding:0;border:0;font:12px/1.5 system-ui,sans-serif}
+.book-menu>summary{font:12px/1.5 system-ui,sans-serif;border:1px solid var(--line);border-radius:4px;padding:6px 12px;list-style:revert}
+.book-menu[open]>summary{margin-bottom:0}
+.topbar #fm-book-contents{display:block;position:absolute;top:calc(100% + 12px);left:-8px;width:280px;max-height:calc(100dvh - var(--header-height) - 24px);overflow:auto;padding:20px;background:var(--paper);border:1px solid var(--line);box-shadow:0 12px 35px #233c2d22}
+#fm-book-contents a{display:flex;gap:10px;padding:8px;white-space:normal;color:var(--muted);text-decoration:none;border-radius:3px;font:12px/1.5 system-ui,sans-serif}
+#fm-book-contents a span{color:#929a90;font-size:10px}#fm-book-contents a.current{color:var(--accent);background:var(--light)}
+#fm-book-contents .nav-label{display:block;font:9px/1.5 system-ui;text-transform:uppercase;letter-spacing:.13em;margin:18px 8px 9px;color:var(--muted)}
+#fm-book-contents .nav-label:first-child{margin-top:0}#fm-book-contents details{margin:0;padding:0;border:0}#fm-book-contents summary{padding:8px;font:12px/1.5 system-ui}
+.reading-progress{top:var(--header-height)}.lab-sticky{top:calc(var(--header-height) + 24px);max-height:calc(100dvh - var(--header-height) - 44px)}
+html{scroll-padding-top:calc(var(--header-height) + 24px)}.book-return{font:13px/1.7 system-ui;margin:30px 0}
+@media(max-width:1000px){.topbar .local-nav{width:100%;margin:0;gap:22px}.topbar .book-menu{margin-left:auto}.topbar{gap:12px 20px}.topbar #fm-book-contents{left:auto;right:0}}
+@media(max-width:800px){.topbar{flex-direction:row;align-items:center}.topbar .brand{font-size:21px}.lab-sticky{position:static;max-height:none}.topbar .local-nav{font-size:12px}.lab-column:target{scroll-margin-top:calc(var(--header-height) + 15px)}}
+@media print{.book-return{display:none}}

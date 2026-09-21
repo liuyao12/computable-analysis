@@ -8,6 +8,7 @@ on:
     paths:
       - '.github/workflows/publish_verified_blueprint.yml'
       - '.github/reader-edition/**'
+      - 'book/fundamental-matrix/**'
       - 'ComputableAnalysis/RationalGeometry.lean'
       - 'ComputableAnalysis/QuarterCircleGeometry.lean'
       - 'ComputableAnalysis/GeometryFoundation.lean'
@@ -147,6 +148,15 @@ jobs:
         run: python3 .github/reader-edition/rational_geometry.py --site site --revision "$GITHUB_SHA" --audit geometry-reports/rational-geometry.json
       - name: Verify geometry statements, stage values, maps and rendering
         run: python3 .github/reader-edition/test_rational_geometry.py --site site --report reader-edition-tests
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install the Fundamental Matrix build-only dependency
+        run: npm install --prefix book/fundamental-matrix --ignore-scripts --no-audit --no-fund
+      - name: Add the Fundamental Matrix reader page and book links
+        run: python3 .github/reader-edition/fundamental_matrix.py --site site --revision "$GITHUB_SHA"
+      - name: Check exact matrix iteration, preservation, links and notebook rendering
+        run: python3 .github/reader-edition/test_fundamental_matrix.py --site site --report reader-edition-tests
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -161,6 +171,7 @@ jobs:
             site/reading/pi-patterns.json
             site/reading/arctan-group.json
             site/reading/rational-geometry-edition.json
+            site/reading/fundamental-matrix-edition.json
           retention-days: 14
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v5
@@ -257,6 +268,16 @@ jobs:
                       assert maps['theorems'][target]['verifiedGraph']
                       assert maps['theorems'][target]['proofSourceCommit']==revision
                   assert maps['proofSourceCommit']==os.environ['SOURCE_SHA']
+                  fundamental=get('/reading/fundamental-matrix-edition.json')
+                  assert fundamental['documentationRevision']==revision
+                  assert fundamental['proofSourceCommit']==os.environ['SOURCE_SHA']
+                  assert not fundamental['newLeanProofsClaimed'] and not fundamental['leanSourceModified']
+                  assert all(fundamental['checks'].values())
+                  fundamental_html=get('/fundamental-matrix.html',True)
+                  assert hashlib.sha256(fundamental_html).hexdigest()==fundamental['pageSha256']
+                  assert 'fundamental-matrix.html' in home
+                  assert 'fundamental-matrix.html' in get('/ch-differential-equations.html',True).decode()
+                  print('LIVE PAGE:',base+'/fundamental-matrix.html')
                   print('LIVE CHAPTER:',base+'/ch-circle-sphere.html')
                   print('Checked geometry source:',revision)
                   print('Computation first; cyclic polygon fans; exact quarter-circle stage areas; integral definitions unchanged')

@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Discover the fundamental matrix through Picard iteration: one convergent construction for linear differential equations, variable coefficients and forcing. Four worked examples and an exact-rational interactive notebook.">
+<title>Fundamental Matrix — from Picard iteration to every linear initial-value problem</title>
+<style>/*__STYLE__*/</style>
+</head>
+<body>
+<a class="skip" href="#iteration">Skip to the mathematics</a>
+<header class="topbar">
+  <a class="brand" href="#top">Fundamental Matrix</a>
+  <nav aria-label="Chapters">
+    <a href="#iteration">Iteration</a><a href="#matrix">The matrix</a><a href="#forcing">Forcing</a><a href="#examples">Examples</a><a href="#convergence">Convergence</a>
+  </nav>
+</header>
+<div class="reading-progress" aria-hidden="true"><span id="progress"></span></div>
+<main id="top" class="layout">
+<article>
+  <section class="hero" data-scene="exponential">
+    <p class="eyebrow">Differential equations / one construction</p>
+    <h1>Fundamental<br>Matrix</h1>
+    <p class="dek">Start with Picard iteration. Build one matrix. Reuse it for every initial state and every forcing term.</p>
+    <p class="intro">A linear differential equation need not be a puzzle about which substitution to try. Repeated integration gives a common construction, whether the coefficients are constant or variable, whether there is a forcing term or not.</p>
+    <p class="reading-note">The examples at the right follow the text. Change the number of iterations and watch a solution emerge.</p>
+    <a class="mobile-lab-link" href="#lab">Open the interactive notebook ↓</a>
+  </section>
+
+  <section id="iteration" data-scene="exponential">
+    <p class="eyebrow">01 / The starting point</p>
+    <h2>Integrate. Substitute. Repeat.</h2>
+    <p>Begin with an initial-value problem, not with a proposed answer:</p>
+    \[x'(t)=f(t,x(t)),\qquad x(t_0)=x_0.\]
+    <p>Its integral form suggests its own approximation scheme:</p>
+    \[\begin{aligned}
+      x^{[0]}(t)&=x_0,\\
+      x^{[n+1]}(t)&=x_0+\int_{t_0}^{t}f(s,x^{[n]}(s))\,ds.
+    \end{aligned}\]
+    <p>Each step uses the previous approximate path to compute a better one. This is <strong>Picard iteration</strong>. For a continuous right-hand side that is locally Lipschitz in the state variable, with a locally uniform constant in time, the iteration works on a sufficiently small interval around the initial time.<a class="ref" href="#ref1">[1]</a></p>
+    <h3>The exponential is an output</h3>
+    <p>For \(y'=y\), \(y(0)=1\), start with the constant function \(1\):</p>
+    \[\begin{aligned}
+      y^{[0]}(t)&=1,\\
+      y^{[1]}(t)&=1+t,\\
+      y^{[2]}(t)&=1+t+\frac{t^2}{2},\\
+      y^{[n]}(t)&=\sum_{k=0}^{n}\frac{t^k}{k!}.
+    \end{aligned}\]
+    <p>The exponential series appears without being guessed. We will do the same with matrices, and with a forcing term already present.</p>
+    <p class="prompt">Try it: increase \(N\) in the notebook. The solid curve is the actual \(N\)-th Picard iterate, not a numerical time-stepping solution.</p>
+  </section>
+
+  <section id="matrix" data-scene="scalar">
+    <p class="eyebrow">02 / What linearity gives us</p>
+    <h2>Compute every initial state at once.</h2>
+    <p>Now take a finite-dimensional linear system</p>
+    \[x'(t)=A(t)x(t)+b(t),\qquad x(t_0)=x_0.\]
+    <p>Assume that the matrix \(A\) and vector \(b\) are continuous on an interval \(I\). Its iteration is still just</p>
+    \[x^{[n+1]}(t)=x_0+\int_{t_0}^{t}\bigl(A(s)x^{[n]}(s)+b(s)\bigr)\,ds.\]
+    <p>First collect the terms multiplying the initial vector. They do not depend on the forcing. For a starting time \(s\), define</p>
+    \[P_0(t,s)=I_d,\qquad P_{n+1}(t,s)=\int_s^t A(u)P_n(u,s)\,du.\]
+    <p>The partial sums are exactly the matrix versions of the Picard iterates:</p>
+    \[U_N(t,s)=\sum_{n=0}^{N}P_n(t,s).\]
+    <p>Writing out two terms makes the order visible:</p>
+    \[U(t,s)=I_d+\int_s^t A(u)\,du+\int_s^t\int_s^u A(u)A(v)\,dv\,du+\cdots.\]
+    <p>For forward time, the later matrix stands on the left. Matrix multiplication cannot usually be reordered. This ordered integral expansion is called the <strong>Peano–Baker series</strong>.<a class="ref" href="#ref2">[2]</a> The object it constructs is the fundamental matrix, normalized at \(s\):</p>
+    \[\partial_t U(t,s)=A(t)U(t,s),\qquad U(s,s)=I_d.\]
+    <p>Its \(j\)-th column is the solution starting at the \(j\)-th coordinate vector. Multiplying by \(x_0\) therefore gives the homogeneous solution for <em>any</em> initial vector.</p>
+    <details>
+      <summary>When does an ordinary matrix exponential suffice?</summary>
+      <p>If \(A\) is constant, then \(P_n(t,s)=A^n(t-s)^n/n!\), so \(U(t,s)=e^{(t-s)A}\). More generally, if \(A(u)A(v)=A(v)A(u)\) for every pair of times, the ordered simplex is one of \(n!\) interchangeable parts of the integration cube. Consequently,</p>
+      \[P_n(t,s)=\frac{1}{n!}\left(\int_s^t A(u)\,du\right)^n,\qquad U(t,s)=\exp\!\left(\int_s^t A(u)\,du\right).\]
+      <p>The scalar case always commutes. The noncommuting example below shows why the condition matters for matrices.</p>
+    </details>
+    <div class="aside-note"><strong>Two times, not one elapsed time.</strong> The notation \(U(t,s)\) remembers both the arrival time and the departure time. With variable coefficients, it generally cannot be replaced by \(U(t-s,0)\).</div>
+  </section>
+
+  <section id="forcing" data-scene="scalar">
+    <p class="eyebrow">03 / Forcing is already in the iteration</p>
+    <h2>Let each contribution travel forward.</h2>
+    <p>A contribution \(b(s)\,ds\) enters at time \(s\). After that, it is transported by the same matrix \(U(t,s)\). Adding all these contributions gives</p>
+    \[\int_{t_0}^{t}U(t,s)b(s)\,ds.\]
+    <p>This is not a new ansatz. It is what the forcing terms in Picard iteration become when they are collected according to their time of entry.</p>
+    <details>
+      <summary>See the regrouping directly</summary>
+      <p>Write \((Kh)(t)=\int_{t_0}^{t}A(s)h(s)\,ds\) and \(q(t)=\int_{t_0}^{t}b(s)\,ds\). Regard \(x_0\) as a constant function. The exact finite iteration is</p>
+      \[x^{[N]}=\sum_{k=0}^{N}K^k x_0+\sum_{k=0}^{N-1}K^kq.\]
+      <p>The second sum is empty when \(N=0\). Reversing the order of integration on each finite simplex gives</p>
+      \[(K^kq)(t)=\int_{t_0}^{t}P_k(t,s)b(s)\,ds.\]
+      <p>Letting \(N\) grow produces the forcing integral above. The convergence estimate below justifies passing to the limit. Backward time follows with oriented integrals.</p>
+    </details>
+    <div class="theorem" id="theorem">
+      <p class="eyebrow">The main theorem</p>
+      <h3>One formula for every linear initial-value problem.</h3>
+      <p>Let \(A:I\to\mathbb R^{d\times d}\) and \(b:I\to\mathbb R^d\) be continuous on an interval, and let \(t_0\in I\). The series \(U=\sum_{n\ge0}P_n\) converges uniformly on compact time intervals. The unique solution is</p>
+      \[\boxed{x(t)=U(t,t_0)x_0+\int_{t_0}^{t}U(t,s)b(s)\,ds.}\]
+      <p>All of the dependence on the coefficients is in \(U\). The initial state and forcing can be changed without changing that matrix.</p>
+    </div>
+    <p>The formula is often presented under the name “variation of constants.” Here it is a consequence of repeated integration, not a separate solving technique.<a class="ref" href="#ref1">[1]</a><a class="ref" href="#ref2">[2]</a></p>
+    <details>
+      <summary>Even forcing can be put inside a matrix</summary>
+      <p>Adjoin the constant coordinate \(1\):</p>
+      \[z=\begin{pmatrix}x\\1\end{pmatrix},\qquad \widehat A(t)=\begin{pmatrix}A(t)&b(t)\\0&0\end{pmatrix},\qquad z'=\widehat A(t)z.\]
+      <p>The very same matrix iteration now gives</p>
+      \[\widehat U(t,s)=\begin{pmatrix}U(t,s)&\displaystyle\int_s^t U(t,r)b(r)\,dr\\0&1\end{pmatrix}.\]
+      <p>This is also how the notebook is implemented. For each example it caches the polynomial terms of an augmented fundamental matrix. Changing the initial state, or scaling the fixed forcing profile, only changes the vector it multiplies.</p>
+    </details>
+    <details>
+      <summary>Why it really is a fundamental matrix</summary>
+      <p>Uniqueness gives the composition law and its inverse:</p>
+      \[U(t,r)U(r,s)=U(t,s),\qquad U(t,s)^{-1}=U(s,t).\]
+      <p>Thus the columns remain independent. If \(X(t)=U(t,t_0)\), the familiar one-time notation is recovered as \(U(t,s)=X(t)X(s)^{-1}\). The two-time construction does not require finding that inverse first.</p>
+    </details>
+  </section>
+
+  <section id="examples" data-scene="scalar">
+    <p class="eyebrow">04 / Worked example 1</p>
+    <h2>A variable coefficient and a forcing term.</h2>
+    \[y'=2ty+2t,\qquad y(0)=a.\]
+    <p>Here \(A(t)=2t\), so the recursion immediately gives</p>
+    \[P_n(t,s)=\frac{(t^2-s^2)^n}{n!},\qquad U(t,s)=e^{t^2-s^2}.\]
+    <p>The complete solution is therefore</p>
+    \[\begin{aligned}
+      y(t)&=a e^{t^2}+\int_0^t e^{t^2-s^2}\,2s\,ds\\
+          &=(a+1)e^{t^2}-1.
+    \end{aligned}\]
+    <p>The direct iterates make the same answer visible term by term:</p>
+    \[y^{[N]}(t)=(a+1)\sum_{k=0}^{N}\frac{t^{2k}}{k!}-1.\]
+    <p>No integrating factor had to be chosen. In the notebook, the forcing control replaces \(2t\) by \(\lambda\,2t\); the answer becomes \((a+\lambda)e^{t^2}-\lambda\).</p>
+  </section>
+
+  <section id="oscillator" data-scene="oscillator">
+    <p class="eyebrow">05 / Worked example 2</p>
+    <h2>The oscillator, including resonance.</h2>
+    <p>A second-order equation is a first-order system with two coordinates:</p>
+    \[y''+y=g(t),\qquad x=\begin{pmatrix}y\\y'\end{pmatrix},\quad A=\begin{pmatrix}0&1\\-1&0\end{pmatrix},\quad b=\begin{pmatrix}0\\g\end{pmatrix}.\]
+    <p>Now \(A^2=-I_2\). Repeated integration gives \(P_n(t,s)=A^n(t-s)^n/n!\), so the even and odd terms collect into</p>
+    \[U(t,s)=\begin{pmatrix}\cos(t-s)&\sin(t-s)\\-\sin(t-s)&\cos(t-s)\end{pmatrix}.\]
+    <p>With \(y(0)=a\) and \(y'(0)=c\), the general formula reads</p>
+    \[y(t)=a\cos t+c\sin t+\int_0^t\sin(t-s)g(s)\,ds.\]
+    <p>For zero initial data, two very different-looking cases use exactly the same integral:</p>
+    \[\begin{aligned}
+      g(t)=1&\quad\Longrightarrow\quad y(t)=1-\cos t,\\
+      g(t)=\cos t&\quad\Longrightarrow\quad y(t)=\frac{t}{2}\sin t.
+    \end{aligned}\]
+    <p>The second is the resonant response. There is no exceptional rule about multiplying a guessed particular solution by \(t\): that factor comes out of the integral.</p>
+    <p class="prompt">The notebook uses constant forcing \(g(t)=\lambda\), so that every finite iterate remains an exactly computed rational polynomial.</p>
+  </section>
+
+  <section id="ordered" data-scene="triangular">
+    <p class="eyebrow">06 / Worked example 3</p>
+    <h2>When the order matters—and the series stops.</h2>
+    <p>Take a genuinely noncommuting family:</p>
+    \[A(t)=\begin{pmatrix}0&1&0\\0&0&t\\0&0&0\end{pmatrix}.\]
+    <p>In fact \([A(u),A(v)]=(v-u)E_{13}\), where \(E_{13}\) has a single \(1\) in position \((1,3)\). Every product of three of these matrices vanishes. Thus only two integrations survive:</p>
+    \[P_1(t,0)=\begin{pmatrix}0&t&0\\0&0&t^2/2\\0&0&0\end{pmatrix},\qquad P_2(t,0)=\begin{pmatrix}0&0&t^3/6\\0&0&0\\0&0&0\end{pmatrix}.\]
+    \[U(t,0)=\begin{pmatrix}1&t&t^3/6\\0&1&t^2/2\\0&0&1\end{pmatrix}.\]
+    <p>Contrast this with the tempting but incorrect replacement:</p>
+    \[\exp\!\left(\int_0^t A(s)\,ds\right)=\begin{pmatrix}1&t&t^3/4\\0&1&t^2/2\\0&0&1\end{pmatrix}.\]
+    <p>The \((1,3)\)-entry is wrong. Ordered integration is not notation for an ordinary exponential.</p>
+    <h3>The forcing still needs no new method</h3>
+    <p>For \(x(0)=0\) and \(b(t)=(0,0,1)^{\mathsf T}\), the same iteration gives</p>
+    \[x^{[1]}=\begin{pmatrix}0\\0\\t\end{pmatrix},\qquad x^{[2]}=\begin{pmatrix}0\\t^3/3\\t\end{pmatrix},\qquad x^{[3]}=\begin{pmatrix}t^4/12\\t^3/3\\t\end{pmatrix}.\]
+    <p>The third iterate is already the exact solution. In the homogeneous notebook example, \(N=2\) is enough; turning on forcing can require one more iteration.</p>
+  </section>
+
+  <section id="airy" data-scene="airy">
+    <p class="eyebrow">07 / Worked example 4</p>
+    <h2>An equation that makes its own special functions.</h2>
+    <p>For \(y''=ty\), the system matrix is</p>
+    \[A(t)=\begin{pmatrix}0&1\\t&0\end{pmatrix}.\]
+    <p>Its first two ordered terms are</p>
+    \[P_1(t,0)=\begin{pmatrix}0&t\\t^2/2&0\end{pmatrix},\qquad P_2(t,0)=\begin{pmatrix}t^3/6&0\\0&t^3/3\end{pmatrix}.\]
+    <p>The higher terms build two normalized solutions:</p>
+    \[\begin{aligned}
+      u(t)&=1+\frac{t^3}{6}+\frac{t^6}{180}+\frac{t^9}{12960}+\cdots,\\
+      v(t)&=t+\frac{t^4}{12}+\frac{t^7}{504}+\frac{t^{10}}{45360}+\cdots.
+    \end{aligned}\]
+    <p>They satisfy \((u(0),u'(0))=(1,0)\) and \((v(0),v'(0))=(0,1)\). Thus</p>
+    \[U(t,0)=\begin{pmatrix}u(t)&v(t)\\u'(t)&v'(t)\end{pmatrix}.\]
+    <p>This is Airy’s equation.<a class="ref" href="#ref3">[3]</a> The usual \(\operatorname{Ai}\) and \(\operatorname{Bi}\) are another choice of basis; they need not be known in advance. The iteration constructs the functions that the equation needs.</p>
+    <h3>Add any continuous forcing</h3>
+    <p>Since \((uv'-u'v)'=u(tv)-(tu)v=0\), the Wronskian is \(1\). The same formula for \(y''=ty+g(t)\) now becomes</p>
+    \[y(t)=a\,u(t)+c\,v(t)+\int_0^t\bigl(v(t)u(s)-u(t)v(s)\bigr)g(s)\,ds.\]
+    <p>For \(g=1\) and zero initial data, the iteration gives a third explicitly convergent series:</p>
+    \[w(t)=\frac{t^2}{2}+\frac{t^5}{40}+\frac{t^8}{2240}+\frac{t^{11}}{246400}+\cdots.\]
+    <p>Indeed, substituting \(y=\sum c_nt^n\) into \(y''=ty+1\) gives \(c_2=1/2\) and</p>
+    \[c_{n+2}=\frac{c_{n-1}}{(n+1)(n+2)}\quad(n\ge1).\]
+    <p>Changing the initial coefficients produces \(u\) and \(v\) in the homogeneous case. “Solving” here means constructing and evaluating a convergent answer, not necessarily expressing it with a fixed list of elementary functions.</p>
+  </section>
+
+  <section id="higher-order" data-scene="airy">
+    <p class="eyebrow">08 / The scope of “every linear ODE”</p>
+    <h2>Higher order only changes the matrix.</h2>
+    <p>For an equation already in normal form,</p>
+    \[y^{(m)}+a_{m-1}(t)y^{(m-1)}+\cdots+a_0(t)y=g(t),\]
+    <p>set \(x=(y,y',\ldots,y^{(m-1)})^{\mathsf T}\). Then</p>
+    \[A(t)=\begin{pmatrix}0&1&0&\cdots&0\\0&0&1&\cdots&0\\\vdots&\vdots&\vdots&\ddots&\vdots\\0&0&0&\cdots&1\\-a_0&-a_1&-a_2&\cdots&-a_{m-1}\end{pmatrix},\qquad b(t)=\begin{pmatrix}0\\0\\\vdots\\0\\g(t)\end{pmatrix}.\]
+    <p>Nothing else changes. For a non-unit leading coefficient, first divide by it on an interval where it does not vanish. The theorem does not promise continuation through a singular coefficient, nor does it assert that arbitrary boundary conditions are consistent.</p>
+  </section>
+
+  <section id="convergence" data-scene="airy">
+    <p class="eyebrow">09 / Why the construction works</p>
+    <h2>The factorial does the work.</h2>
+    <p>Choose a submultiplicative matrix norm. If \(\|A(t)\|\le M\) throughout an interval of length \(L\), repeated integration gives</p>
+    \[\|P_n(t,s)\|\le\frac{(M|t-s|)^n}{n!}\le\frac{(ML)^n}{n!}.\]
+    <p>Each new integration contributes an extra denominator. The series therefore converges uniformly on the interval, with</p>
+    \[\|U(t,s)-U_N(t,s)\|\le\sum_{n=N+1}^{\infty}\frac{(ML)^n}{n!}.\]
+    <p>There is no requirement that \(ML&lt;1\). This is the advantage of keeping the iterated integral estimate, rather than demanding that one Picard step be a contraction.<a class="ref" href="#ref2">[2]</a></p>
+    <h3>A finite, rational tail bound</h3>
+    <p>Put \(z=ML\). Whenever \(N+2&gt;z\), successive omitted terms have ratio at most \(z/(N+2)\), so</p>
+    \[\sum_{n=N+1}^{\infty}\frac{z^n}{n!}\le\frac{z^{N+1}}{(N+1)!}\,\frac{1}{1-z/(N+2)}.\]
+    <p>For smaller \(N\), add finitely many omitted terms until this ratio bound applies. Rational \(M,L\) give a rational bound without needing to evaluate an exponential.</p>
+    <details>
+      <summary>Existence and uniqueness from the same estimate</summary>
+      <p>Uniform convergence permits integration of the sum in the recursive identity, giving \(U(t,s)=I_d+\int_s^t A(r)U(r,s)\,dr\). The fundamental theorem of calculus then gives \(\partial_tU=AU\).</p>
+      <p>If two solutions have the same initial value, their difference \(d\) satisfies \(d(t)=\int_{t_0}^t A(s)d(s)\,ds\). On a compact interval let \(D=\sup\|d\|\). Iterating this equality gives, for every \(n\),</p>
+      \[\|d(t)\|\le D\frac{(ML)^n}{n!}.\]
+      <p>The right side tends to zero, so \(d=0\). For the forced formula, differentiating the integral gives \(b(t)+A(t)\int_{t_0}^tU(t,s)b(s)\,ds\), and its initial value is zero. This finishes the proof for the full system.</p>
+    </details>
+    <details>
+      <summary>The bound used in the notebook</summary>
+      <p>On \([0,T]\), let \(\|A(t)\|_\infty\le M\), \(\|b(t)\|_\infty\le B\), and \(\|x_0\|_\infty=R\). If \(M&gt;0\), the full Picard iterate satisfies</p>
+      \[\sup_{0\le t\le T}\|x(t)-x^{[N]}(t)\|_\infty\le\left(R+\frac{B}{M}\right)\sum_{n=N+1}^{\infty}\frac{(MT)^n}{n!}.\]
+      <p>This follows by bounding successive differences, starting with \(\|x^{[1]}(t)-x^{[0]}(t)\|\le(MR+B)t\). The displayed bound is rounded upward. For a terminating series, it bounds the actual remaining polynomial directly. If the exact polynomial residual is zero, it reports zero truncation error.</p>
+      <p>If \(M=0\), the first iterate is exact and the zeroth has error at most \(BT\). These are mathematical truncation bounds; they do not enclose the floating-point conversion and rendering used to draw the curves.</p>
+    </details>
+    <div class="aside-note"><strong>Construction versus computation.</strong> In these examples, polynomial matrix multiplication and integration use exact rational coefficients. For more general computable coefficients, evaluating the integrals also needs a suitable representation and controlled integration errors. Continuity of unspecified input functions alone is not a numerical input format.</div>
+    <p class="closing">One iteration. One fundamental matrix. Constant coefficients, variable coefficients and forcing are not separate subjects—they are different instances of the same construction.</p>
+  </section>
+
+  <footer id="sources" class="sources">
+    <p class="eyebrow">Sources & computation</p>
+    <p id="ref1"><strong>[1]</strong> Bassam Bamieh, <a href="https://arxiv.org/abs/2204.06104" target="_blank" rel="noopener">A Tutorial on Solution Properties of State Space Models of Dynamical Systems</a> (2022). A unified treatment of Picard iteration, Volterra operators and solution formulas.</p>
+    <p id="ref2"><strong>[2]</strong> Michael Baake and Ulrike Schlägel, <a href="https://arxiv.org/abs/1011.1775" target="_blank" rel="noopener">The Peano–Baker Series</a> (2011; revised preprint 2025). Ordered integrals, convergence and explicit examples.</p>
+    <p id="ref3"><strong>[3]</strong> NIST Digital Library of Mathematical Functions, <a href="https://dlmf.nist.gov/9.2" target="_blank" rel="noopener">§9.2, Airy’s differential equation</a>. Standard Airy bases and normalizations.</p>
+    <p class="technical-note">The derivations and worked computations are included on the page. The interactive core uses reduced BigInt fractions; only plotting uses floating point. Equations are native MathML compiled from LaTeX. No network requests, external fonts or numerical ODE solver are required. This is an expository notebook, not a claim of a completed Lean formalization.</p>
+  </footer>
+</article>
+
+<aside class="lab-column" id="lab" aria-label="Interactive Picard iteration notebook">
+  <div class="lab-sticky">
+    <div class="lab-heading"><span class="eyebrow">Interactive notebook</span><label class="follow-label"><input id="follow" type="checkbox" checked> Follow the text</label></div>
+    <label for="model" class="sr-only">Equation</label>
+    <select id="model">
+      <option value="exponential">Picard makes the exponential</option>
+      <option value="scalar">Variable coefficient + forcing</option>
+      <option value="oscillator">Forced oscillator</option>
+      <option value="triangular">Noncommuting, finite series</option>
+      <option value="airy">Airy equation + forcing</option>
+    </select>
+    <div id="model-equation" class="model-equation"></div>
+    <div class="view-controls">
+      <label for="component">Plot <select id="component"></select></label>
+      <span id="reference-label">Dashed: closed-form solution</span>
+    </div>
+    <svg id="plot" viewBox="0 0 520 290" role="img" aria-label="The selected Picard approximation compared with a reference solution"></svg>
+    <div class="legend"><span><i class="line current"></i>Current iterate</span><span><i class="line previous"></i>Previous iterates</span><span><i class="line reference"></i>Reference</span></div>
+    <div class="slider-row"><label for="iterations">Picard iterations <strong id="n-label">4</strong></label><div class="step-buttons"><button id="minus" type="button" aria-label="One fewer iteration">−</button><button id="plus" type="button" aria-label="One more iteration">+</button></div></div>
+    <input id="iterations" type="range" min="0" max="36" value="4" aria-label="Number of Picard iterations">
+    <div class="time-row"><label for="time">Inspect time <strong id="time-label">1</strong></label><input id="time" type="range" min="0" max="100" value="65" aria-label="Inspection time as a fraction of the displayed interval"></div>
+    <div class="metrics" aria-live="polite"><div><span id="value-name">Value of the iterate</span><strong id="value">—</strong></div><div><span>Uniform truncation bound</span><strong id="bound">—</strong></div></div>
+    <p id="bound-note" class="small-note">For every time in the displayed interval; all state coordinates.</p>
+    <details class="lab-details" id="data-details">
+      <summary>Change the initial state or forcing</summary>
+      <div id="initial-controls" class="initial-controls"></div>
+      <label class="force-control" for="force">Forcing amplitude <strong id="force-label">0</strong><input id="force" type="range" min="-2" max="2" step="1" value="0"></label>
+      <p id="forcing-description" class="small-note"></p>
+      <button id="reset" type="button" class="reset">Reset this example</button>
+    </details>
+    <details class="lab-details">
+      <summary>The exact polynomial behind the curve</summary>
+      <div id="polynomial" class="polynomial"></div><p id="poly-note" class="small-note"></p>
+      <div class="matrix-label">The homogeneous block of the partial sum, at the inspection time</div>
+      <div id="matrix-value" class="matrix-value"></div>
+      <p class="small-note">The matrix shown is an approximation. It is independent of the initial state and forcing amplitude.</p>
+    </details>
+    <p class="lab-footnote">Exact rational iteration · floating-point drawing<br>No Runge–Kutta or time-step simulation is hidden here.</p>
+  </div>
+</aside>
+</main>
+
+<template id="eq-exponential">\[y'=y,\qquad y(0)=a\]</template>
+<template id="eq-scalar">\[y'=2ty+2\lambda t,\qquad y(0)=a\]</template>
+<template id="eq-oscillator">\[y''+y=\lambda\]</template>
+<template id="eq-triangular">\[x'=A(t)x+\lambda e_3\]</template>
+<template id="eq-airy">\[y''=ty+\lambda\]</template>
+
+<script>/*__ENGINE__*/</script>
+<script>/*__APP__*/</script>
+</body>
+</html>

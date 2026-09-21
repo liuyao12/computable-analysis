@@ -1,0 +1,8 @@
+{
+  "name": "fundamental-matrix-notebook",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Picard iteration and fundamental matrices: exact-rational interactive exposition",
+  "scripts": {"build": "node build.cjs", "test": "node test.cjs"},
+  "devDependencies": {"mathjax-full": "3.2.1"}
+}
