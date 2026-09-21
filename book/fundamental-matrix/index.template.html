@@ -3,297 +3,279 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Discover the fundamental matrix through Picard iteration: one convergent construction for linear differential equations, variable coefficients and forcing. Nonlinear examples, four linear worked examples, and an interactive notebook.">
-<title>Fundamental Matrix — from Picard iteration to every linear initial-value problem</title>
+<meta name="description" content="A step-by-step introduction to Picard iteration and the fundamental matrix, through second-order differential equations, variable coefficients and forcing.">
+<title>Fundamental Matrix — Second-order equations, step by step</title>
 <style>/*__STYLE__*/</style>
 </head>
 <body>
 <a class="skip" href="#iteration">Skip to the mathematics</a>
-<header class="topbar">
-  <a class="brand" href="#top">Fundamental Matrix</a>
-  <nav aria-label="Chapters">
-    <a href="#iteration">Iteration</a><a href="#nonlinear">Nonlinear examples</a><a href="#matrix">The matrix</a><a href="#forcing">Forcing</a><a href="#examples">Examples</a><a href="#convergence">Convergence</a>
+<header class="topbar"><a class="brand" href="#top">Fundamental Matrix</a><a href="#contents">On this page ↓</a></header>
+<main id="top">
+<article>
+<header class="hero">
+  <p class="eyebrow">Differential equations / successive approximation</p>
+  <h1>Fundamental Matrix</h1>
+  <p class="subtitle">Second-order equations, step by step.</p>
+  <p class="lead">How can a differential equation produce its own solution, without our first guessing the answer?</p>
+  <p>We will start with position and acceleration. Repeated integration will produce two familiar functions, then two less familiar ones. Only after we have used those solutions will we put them into a matrix.</p>
+  <p>The aim is to solve equations of the form</p>
+  \[y''+p(t)y'+q(t)y=g(t),\]
+  <p>using one construction for the coefficients, the initial conditions and the forcing. A nonlinear example will show which part of the construction does not depend on linearity.</p>
+  <nav id="contents" aria-label="On this page">
+    <a href="#iteration">1. Turn acceleration into position</a>
+    <a href="#oscillator">2. Let cosine and sine emerge</a>
+    <a href="#nonlinear">3. Try the same idea without linearity</a>
+    <a href="#airy">4. Let the coefficient vary</a>
+    <a href="#matrix">5. Put two solutions into a matrix</a>
+    <a href="#forcing">6. Add a forcing term</a>
+    <a href="#convergence">7. Why the iteration converges</a>
   </nav>
 </header>
-<div class="reading-progress" aria-hidden="true"><span id="progress"></span></div>
-<main id="top" class="layout">
-<article>
-  <section class="hero" data-scene="exponential">
-    <p class="eyebrow">Differential equations / one construction</p>
-    <h1>Fundamental<br>Matrix</h1>
-    <p class="dek">Start with Picard iteration. Build one matrix. Reuse it for every initial state and every forcing term.</p>
-    <p class="intro">Picard iteration begins before linearity enters. Work through two nonlinear equations, then see how linearity turns the same repeated integration into a reusable matrix—whether the coefficients are constant or variable, with or without forcing.</p>
-    <p class="reading-note">The examples at the right follow the text. Change the number of iterations and watch a solution emerge.</p>
-    <a class="mobile-lab-link" href="#lab">Open the interactive notebook ↓</a>
-  </section>
 
-  <section id="iteration" data-scene="exponential">
-    <p class="eyebrow">01 / The starting point</p>
-    <h2>Integrate. Substitute. Repeat.</h2>
-    <p>Begin with an initial-value problem, not with a proposed answer:</p>
-    \[x'(t)=f(t,x(t)),\qquad x(t_0)=x_0.\]
-    <p>Its integral form suggests its own approximation scheme:</p>
+<section id="iteration">
+  <p class="eyebrow">1 / The basic instruction</p>
+  <h2>Turn acceleration into position.</h2>
+  <p>For the moment, suppose the equation gives acceleration as a function of time and position:</p>
+  \[\begin{gathered}y''(t)=F(t,y(t)),\\y(0)=a,\qquad y'(0)=b.\end{gathered}\]
+  <p>Integrating once gives velocity. Integrating again gives position. These two integrations can be written together:</p>
+  \[\boxed{y(t)=a+bt+\int_0^t(t-s)F(s,y(s))\,ds.}\]
+  <p>The term \(a+bt\) is the motion with the prescribed initial position and velocity but no acceleration. The integral is the correction supplied by the equation.</p>
+  <p><strong>Why the factor \(t-s\)?</strong> An acceleration contribution at time \(s\) changes the velocity, and that change acts for the remaining time \(t-s\). Algebraically, differentiating \(\int_0^t(t-s)h(s)\,ds\) once gives \(\int_0^t h(s)\,ds\), and differentiating again gives \(h(t)\). Both initial values of this integral are zero.</p>
+  <p>There is still an unknown function inside the integral. Instead of solving for it at once, put in an approximate function and repeat:</p>
+  \[\begin{aligned}
+    y^{[0]}(t)&=a+bt,\\
+    y^{[n+1]}(t)&=a+bt\\&\quad+\int_0^t(t-s)F(s,y^{[n]}(s))\,ds.
+  \end{aligned}\]
+  <p>This is <strong>successive approximation</strong>, or Picard iteration of the integral equation. The superscript \([n]\) labels an approximation; it is not a derivative. Every approximation already has the correct initial position and velocity.</p>
+  <div class="takeaway"><strong>The instruction is simple:</strong> use the current approximate position to calculate an acceleration, then integrate twice to obtain the next approximate position.</div>
+</section>
+
+<section id="oscillator">
+  <p class="eyebrow">2 / A familiar equation, without a guessed solution</p>
+  <h2>Let cosine and sine emerge.</h2>
+  <p>Take</p>
+  \[y''=-y,\qquad y(0)=1,\quad y'(0)=0.\]
+  <p>Start with \(y^{[0]}=1\). The equation then prescribes the constant acceleration \(-1\), so the first improved position is</p>
+  \[y^{[1]}(t)=1-\int_0^t(t-s)\,ds=1-\frac{t^2}{2}.\]
+  <p>Now use this new position to calculate the acceleration:</p>
+  \[\begin{aligned}
+    y^{[2]}(t)
+      &=1-\int_0^t(t-s)\left(1-\frac{s^2}{2}\right)ds\\
+      &=1-\frac{t^2}{2}+\frac{t^4}{24}.
+  \end{aligned}\]
+  <p>The next step gives</p>
+  \[y^{[3]}(t)=1-\frac{t^2}{2!}+\frac{t^4}{4!}-\frac{t^6}{6!}.\]
+  <p>All these integrations use the same elementary identity:</p>
+  \[\int_0^t(t-s)s^k\,ds=\frac{t^{k+2}}{(k+1)(k+2)}.\]
+  <p>Thus each step appends the next even power, with its factorial denominator and alternating sign. The limit is</p>
+  \[u(t)=1-\frac{t^2}{2!}+\frac{t^4}{4!}-\cdots=\cos t.\]
+  <p>The name comes at the end of the calculation. We did not have to recognize cosine before starting.</p>
+  <h3>Change only the initial motion.</h3>
+  <p>Keep the equation, but start with \(y(0)=0\) and \(y'(0)=1\). This time the initial approximation is \(t\), and the same calculation gives</p>
+  \[t,\qquad t-\frac{t^3}{3!},\qquad t-\frac{t^3}{3!}+\frac{t^5}{5!},\quad\ldots\]
+  <p>The limit is \(v(t)=\sin t\). We now have two solutions with two useful initial conditions:</p>
+  \[\begin{array}{c|cc}
+      &\text{initial position}&\text{initial velocity}\\\hline
+    u&1&0\\
+    v&0&1
+  \end{array}\]
+  <p>For initial position \(a\) and velocity \(b\), their combination \(au+bv\) satisfies both the equation and the initial conditions. Uniqueness therefore gives</p>
+  \[\boxed{y(t)=a\cos t+b\sin t.}\]
+  <p>There are two ideas here: iteration constructs the solutions; <em>linearity</em> allows us to combine them. We will keep those ideas separate.</p>
+</section>
+
+<section id="nonlinear">
+  <p class="eyebrow">3 / What survives without linearity?</p>
+  <h2>We can still integrate and substitute.</h2>
+  <p>Replace the equation by</p>
+  \[y''=y^2,\qquad y(0)=1,\quad y'(0)=0.\]
+  <p>The iteration is now</p>
+  \[\begin{aligned}y^{[0]}&=1,\\y^{[n+1]}(t)&=1+\int_0^t(t-s)\bigl(y^{[n]}(s)\bigr)^2\,ds.\end{aligned}\]
+  <p>Its first step gives \(y^{[1]}=1+t^2/2\). To obtain the second, square that polynomial:</p>
+  \[\left(1+\frac{s^2}{2}\right)^2=1+s^2+\frac{s^4}{4}.\]
+  <p>Integrate its three terms using the same identity as before:</p>
+  \[\boxed{y^{[2]}(t)=1+\frac{t^2}{2}+\frac{t^4}{12}+\frac{t^6}{120}.}\]
+  <p>At the next step, the low-degree terms become:</p>
+  \[y^{[3]}(t)=1+\frac{t^2}{2}+\frac{t^4}{12}+\frac{t^6}{72}+\cdots.\]
+  <details id="nonlinear-polynomial"><summary>The complete third polynomial</summary>
     \[\begin{aligned}
-      x^{[0]}(t)&=x_0,\\
-      x^{[n+1]}(t)&=x_0+\int_{t_0}^{t}f(s,x^{[n]}(s))\,ds.
+      y^{[3]}(t)&=1+\frac{t^2}{2}+\frac{t^4}{12}+\frac{t^6}{72}\\
+      &\quad+\frac{t^8}{560}+\frac{11t^{10}}{64800}\\
+      &\quad+\frac{t^{12}}{95040}+\frac{t^{14}}{2620800}.
     \end{aligned}\]
-    <p>Each step uses the previous approximate path to compute a better one. This is <strong>Picard iteration</strong>. For a continuous right-hand side that is locally Lipschitz in the state variable, with a locally uniform constant in time, the iteration works on a sufficiently small interval around the initial time.<a class="ref" href="#ref1">[1]</a></p>
-    <h3>The exponential is an output</h3>
-    <p>For \(y'=y\), \(y(0)=1\), start with the constant function \(1\):</p>
-    \[\begin{aligned}
-      y^{[0]}(t)&=1,\\
-      y^{[1]}(t)&=1+t,\\
-      y^{[2]}(t)&=1+t+\frac{t^2}{2},\\
-      y^{[n]}(t)&=\sum_{k=0}^{n}\frac{t^k}{k!}.
-    \end{aligned}\]
-    <p>The exponential series appears without being guessed. First try two nonlinear equations. Then repeat the construction with matrices, and with a forcing term already present.</p>
-    <p class="prompt">Try it: increase \(N\) in the notebook. The solid curve is the actual \(N\)-th Picard iterate, not a numerical time-stepping solution.</p>
-  </section>
+    <p>The dots above stand for four further terms in a finite polynomial, not a Taylor-series remainder.</p>
+  </details>
+  <p>Notice what happened to the coefficient of \(t^6\): it changed from \(1/120\) to \(1/72\). Unlike the cosine example, a Picard step can <em>correct an existing coefficient</em>, not just append a new one. Picard iterates are not, in general, Taylor truncations.</p>
+  <details id="nonlinear-convergence">
+    <summary>Why do these particular iterates converge?</summary>
+    <p>On \(0\le t\le1/2\), the iteration sends every continuous function with values in \([1,2]\) to another such function: its output lies between \(1\) and \(1+2t^2\le3/2\).</p>
+    <p>For \(r,s\in[1,2]\), we have \(|r^2-s^2|\le4|r-s|\). If \(\mathcal T\) denotes this iteration, then</p>
+    \[\begin{aligned}\|\mathcal T f-\mathcal T h\|_\infty
+       &\le4\frac{(1/2)^2}{2}\|f-h\|_\infty\\
+       &=\frac12\|f-h\|_\infty.\end{aligned}\]
+    <p>Successive differences therefore decrease geometrically. The iterates converge uniformly to a function satisfying the integral equation, hence the differential equation and its initial conditions. This is a local argument; it does not assert existence for all time.</p>
+  </details>
+  <p>But the second idea from the oscillator example has failed. If \(y''=y^2\), then \((2y)''=2y^2\), whereas \((2y)^2=4y^2\). Multiplying a solution by two no longer gives a solution.</p>
+  <div class="takeaway"><strong>Picard iteration does not need linearity.</strong> A fundamental matrix uses the additional fact that solutions of a homogeneous linear equation can be added and scaled.</div>
+</section>
 
-  <!--__NONLINEAR_EXAMPLES__-->
+<section id="airy">
+  <span id="examples" class="anchor-alias"></span>
+  <p class="eyebrow">4 / A variable coefficient</p>
+  <h2>Let the equation make its own functions.</h2>
+  <p>Return to a linear equation, but let its coefficient change with time:</p>
+  \[y''=ty.\]
+  <p>We again construct \(u\) from initial values \((1,0)\), and \(v\) from \((0,1)\). The only change in the instruction is the extra factor \(s\):</p>
+  \[\begin{aligned}
+    u^{[n+1]}(t)&=1+\int_0^t(t-s)s\,u^{[n]}(s)\,ds,\\
+    v^{[n+1]}(t)&=t+\int_0^t(t-s)s\,v^{[n]}(s)\,ds.
+  \end{aligned}\]
+  <p>Starting from \(u^{[0]}=1\) and \(v^{[0]}=t\), the first steps are</p>
+  \[\begin{aligned}
+    u^{[1]}&=1+\frac{t^3}{6},\\
+    u^{[2]}&=1+\frac{t^3}{6}+\frac{t^6}{180},\\
+    v^{[1]}&=t+\frac{t^4}{12},\\
+    v^{[2]}&=t+\frac{t^4}{12}+\frac{t^7}{504}.
+  \end{aligned}\]
+  <p>For example, the new term in \(u^{[2]}\) is obtained by integrating \(s(s^3/6)\) twice:</p>
+  \[\int_0^t(t-s)\frac{s^4}{6}\,ds=\frac{t^6}{180}.\]
+  <p>Continuing gives</p>
+  \[\begin{aligned}
+    u(t)&=1+\frac{t^3}{6}+\frac{t^6}{180}+\frac{t^9}{12960}+\cdots,\\
+    v(t)&=t+\frac{t^4}{12}+\frac{t^7}{504}+\frac{t^{10}}{45360}+\cdots.
+  \end{aligned}\]
+  <p>This is Airy’s equation. Its usual named solutions, \(\operatorname{Ai}\) and \(\operatorname{Bi}\), are different linear combinations of these two normalized solutions.<a class="ref" href="#ref-airy">[1]</a> We do not need those names or their prior definitions to carry out the construction.</p>
+  <p>Just as for the oscillator, the solution with initial values \((a,b)\) is \(au+bv\). What changed was the pair of functions—not the method or the way initial conditions enter.</p>
+</section>
 
-  <section id="matrix" data-scene="scalar">
-    <p class="eyebrow">02 / What linearity gives us</p>
-    <h2>Compute every initial state at once.</h2>
-    <p>Now take a finite-dimensional linear system</p>
-    \[x'(t)=A(t)x(t)+b(t),\qquad x(t_0)=x_0.\]
-    <p>Assume that the matrix \(A\) and vector \(b\) are continuous on an interval \(I\). Its iteration is still just</p>
-    \[x^{[n+1]}(t)=x_0+\int_{t_0}^{t}\bigl(A(s)x^{[n]}(s)+b(s)\bigr)\,ds.\]
-    <p>First collect the terms multiplying the initial vector. They do not depend on the forcing. For a starting time \(s\), define</p>
-    \[P_0(t,s)=I_d,\qquad P_{n+1}(t,s)=\int_s^t A(u)P_n(u,s)\,du.\]
-    <p>The partial sums are exactly the matrix versions of the Picard iterates:</p>
-    \[U_N(t,s)=\sum_{n=0}^{N}P_n(t,s).\]
-    <p>Writing out two terms makes the order visible:</p>
-    \[U(t,s)=I_d+\int_s^t A(u)\,du+\int_s^t\int_s^u A(u)A(v)\,dv\,du+\cdots.\]
-    <p>For forward time, the later matrix stands on the left. Matrix multiplication cannot usually be reordered. This ordered integral expansion is called the <strong>Peano–Baker series</strong>.<a class="ref" href="#ref2">[2]</a> The object it constructs is the fundamental matrix, normalized at \(s\):</p>
-    \[\partial_t U(t,s)=A(t)U(t,s),\qquad U(s,s)=I_d.\]
-    <p>Its \(j\)-th column is the solution starting at the \(j\)-th coordinate vector. Multiplying by \(x_0\) therefore gives the homogeneous solution for <em>any</em> initial vector.</p>
-    <details>
-      <summary>When does an ordinary matrix exponential suffice?</summary>
-      <p>If \(A\) is constant, then \(P_n(t,s)=A^n(t-s)^n/n!\), so \(U(t,s)=e^{(t-s)A}\). More generally, if \(A(u)A(v)=A(v)A(u)\) for every pair of times, the ordered simplex is one of \(n!\) interchangeable parts of the integration cube. Consequently,</p>
-      \[P_n(t,s)=\frac{1}{n!}\left(\int_s^t A(u)\,du\right)^n,\qquad U(t,s)=\exp\!\left(\int_s^t A(u)\,du\right).\]
-      <p>The scalar case always commutes. The noncommuting example below shows why the condition matters for matrices.</p>
-    </details>
-    <div class="aside-note"><strong>Two times, not one elapsed time.</strong> The notation \(U(t,s)\) remembers both the arrival time and the departure time. With variable coefficients, it generally cannot be replaced by \(U(t-s,0)\).</div>
-  </section>
+<section id="matrix">
+  <p class="eyebrow">5 / The reason for the title</p>
+  <h2>Put two solutions into a matrix.</h2>
+  <p>Now consider the homogeneous equation</p>
+  \[y''+p(t)y'+q(t)y=0.\]
+  <p>Assume \(p\) and \(q\) are continuous on an interval containing \(0\). As before, let \(u\) and \(v\) be the solutions with initial values \((1,0)\) and \((0,1)\). Arrange their positions in the first row and their velocities in the second:</p>
+  \[X(t)=\begin{pmatrix}u(t)&v(t)\\u'(t)&v'(t)\end{pmatrix}.\]
+  <p>Our chosen initial conditions say that \(X(0)=I_2\), the identity matrix.</p>
+  <p>Then one multiplication gives both position and velocity:</p>
+  \[\begin{pmatrix}y(t)\\y'(t)\end{pmatrix}
+      =X(t)\begin{pmatrix}a\\b\end{pmatrix}.\]
+  <p>This is the <strong>normalized fundamental matrix</strong>. Its first column answers “what happens to unit initial position?” Its second answers “what happens to unit initial velocity?” There are four entries, but only two independent solutions.</p>
+  <p>For the oscillator, it is simply</p>
+  \[X(t)=\begin{pmatrix}\cos t&\sin t\\-\sin t&\cos t\end{pmatrix}.\]
+  <h3>The same integration idea constructs the whole matrix.</h3>
+  <p>To include the \(y'\) term without introducing another solving trick, keep position and velocity together. Write</p>
+  \[x=\begin{pmatrix}y\\y'\end{pmatrix},\qquad
+    A(t)=\begin{pmatrix}0&1\\-q(t)&-p(t)\end{pmatrix}.\]
+  <p>The second-order equation is exactly \(x'=A(t)x\). Integrate once and substitute repeatedly, now for both columns at once:</p>
+  \[\begin{aligned}X_0(t)&=I_2,\\X_{n+1}(t)&=I_2+\int_0^t A(s)X_n(s)\,ds.\end{aligned}\]
+  <p>The first two steps are</p>
+  \[\begin{aligned}
+    X_1(t)&=I_2+\int_0^t A(s)\,ds,\\
+    X_2(t)&=I_2+\int_0^t A(s)\,ds\\
+      &\quad+\int_0^t A(s)\int_0^s A(r)\,dr\,ds.
+  \end{aligned}\]
+  <p>Continuing gives the <strong>Peano–Baker series</strong>.<a class="ref" href="#ref-peano">[2]</a> It is just the result of repeatedly substituting the matrix integral equation into itself. Matrix products stay in their displayed order: for variable coefficients, matrices evaluated at different times need not commute.</p>
+  <p class="note">This matrix iteration and the twice-integrated scalar iteration construct the same solutions, but their finite stages need not agree. One round here updates position and velocity together; one round earlier substituted directly into a formula for position.</p>
+  <details id="independence">
+    <summary>Why do the two columns remain independent?</summary>
+    <p>The determinant is the Wronskian \(W=uv'-u'v\). Using the differential equation gives</p>
+    \[W'=uv''-u''v=-pW,\qquad W(0)=1.\]
+    <p>Direct differentiation checks the solution</p>
+    \[W(t)=\exp\!\left(-\int_0^t p(r)\,dr\right)\ne0.\]
+    <p>Thus \(X(t)\) is invertible throughout the coefficient interval. In particular, when \(p=0\), as in both of our linear examples, \(W=1\).</p>
+  </details>
+</section>
 
-  <section id="forcing" data-scene="scalar">
-    <p class="eyebrow">03 / Forcing is already in the iteration</p>
-    <h2>Let each contribution travel forward.</h2>
-    <p>A contribution \(b(s)\,ds\) enters at time \(s\). After that, it is transported by the same matrix \(U(t,s)\). Adding all these contributions gives</p>
-    \[\int_{t_0}^{t}U(t,s)b(s)\,ds.\]
-    <p>This is not a new ansatz. It is what the forcing terms in Picard iteration become when they are collected according to their time of entry.</p>
-    <details>
-      <summary>See the regrouping directly</summary>
-      <p>Write \((Kh)(t)=\int_{t_0}^{t}A(s)h(s)\,ds\) and \(q(t)=\int_{t_0}^{t}b(s)\,ds\). Regard \(x_0\) as a constant function. The exact finite iteration is</p>
-      \[x^{[N]}=\sum_{k=0}^{N}K^k x_0+\sum_{k=0}^{N-1}K^kq.\]
-      <p>The second sum is empty when \(N=0\). Reversing the order of integration on each finite simplex gives</p>
-      \[(K^kq)(t)=\int_{t_0}^{t}P_k(t,s)b(s)\,ds.\]
-      <p>Letting \(N\) grow produces the forcing integral above. The convergence estimate below justifies passing to the limit. Backward time follows with oriented integrals.</p>
-    </details>
-    <div class="theorem" id="theorem">
-      <p class="eyebrow">The main theorem</p>
-      <h3>One formula for every linear initial-value problem.</h3>
-      <p>Let \(A:I\to\mathbb R^{d\times d}\) and \(b:I\to\mathbb R^d\) be continuous on an interval, and let \(t_0\in I\). The series \(U=\sum_{n\ge0}P_n\) converges uniformly on compact time intervals. The unique solution is</p>
-      \[\boxed{x(t)=U(t,t_0)x_0+\int_{t_0}^{t}U(t,s)b(s)\,ds.}\]
-      <p>All of the dependence on the coefficients is in \(U\). The initial state and forcing can be changed without changing that matrix.</p>
-    </div>
-    <p>The formula is often presented under the name “variation of constants.” Here it is a consequence of repeated integration, not a separate solving technique.<a class="ref" href="#ref1">[1]</a><a class="ref" href="#ref2">[2]</a></p>
-    <details>
-      <summary>Even forcing can be put inside a matrix</summary>
-      <p>Adjoin the constant coordinate \(1\):</p>
-      \[z=\begin{pmatrix}x\\1\end{pmatrix},\qquad \widehat A(t)=\begin{pmatrix}A(t)&b(t)\\0&0\end{pmatrix},\qquad z'=\widehat A(t)z.\]
-      <p>The very same matrix iteration now gives</p>
-      \[\widehat U(t,s)=\begin{pmatrix}U(t,s)&\displaystyle\int_s^t U(t,r)b(r)\,dr\\0&1\end{pmatrix}.\]
-      <p>This is also how the notebook is implemented. For each example it caches the polynomial terms of an augmented fundamental matrix. Changing the initial state, or scaling the fixed forcing profile, only changes the vector it multiplies.</p>
-    </details>
-    <details>
-      <summary>Why it really is a fundamental matrix</summary>
-      <p>Uniqueness gives the composition law and its inverse:</p>
-      \[U(t,r)U(r,s)=U(t,s),\qquad U(t,s)^{-1}=U(s,t).\]
-      <p>Thus the columns remain independent. If \(X(t)=U(t,t_0)\), the familiar one-time notation is recovered as \(U(t,s)=X(t)X(s)^{-1}\). The two-time construction does not require finding that inverse first.</p>
-    </details>
-  </section>
-
-  <section id="examples" data-scene="scalar">
-    <p class="eyebrow">04 / Worked example 1</p>
-    <h2>A variable coefficient and a forcing term.</h2>
-    \[y'=2ty+2t,\qquad y(0)=a.\]
-    <p>Here \(A(t)=2t\), so the recursion immediately gives</p>
-    \[P_n(t,s)=\frac{(t^2-s^2)^n}{n!},\qquad U(t,s)=e^{t^2-s^2}.\]
-    <p>The complete solution is therefore</p>
-    \[\begin{aligned}
-      y(t)&=a e^{t^2}+\int_0^t e^{t^2-s^2}\,2s\,ds\\
-          &=(a+1)e^{t^2}-1.
-    \end{aligned}\]
-    <p>The direct iterates make the same answer visible term by term:</p>
-    \[y^{[N]}(t)=(a+1)\sum_{k=0}^{N}\frac{t^{2k}}{k!}-1.\]
-    <p>No integrating factor had to be chosen. In the notebook, the forcing control replaces \(2t\) by \(\lambda\,2t\); the answer becomes \((a+\lambda)e^{t^2}-\lambda\).</p>
-  </section>
-
-  <section id="oscillator" data-scene="oscillator">
-    <p class="eyebrow">05 / Worked example 2</p>
-    <h2>The oscillator, including resonance.</h2>
-    <p>A second-order equation is a first-order system with two coordinates:</p>
-    \[y''+y=g(t),\qquad x=\begin{pmatrix}y\\y'\end{pmatrix},\quad A=\begin{pmatrix}0&1\\-1&0\end{pmatrix},\quad b=\begin{pmatrix}0\\g\end{pmatrix}.\]
-    <p>Now \(A^2=-I_2\). Repeated integration gives \(P_n(t,s)=A^n(t-s)^n/n!\), so the even and odd terms collect into</p>
-    \[U(t,s)=\begin{pmatrix}\cos(t-s)&\sin(t-s)\\-\sin(t-s)&\cos(t-s)\end{pmatrix}.\]
-    <p>With \(y(0)=a\) and \(y'(0)=c\), the general formula reads</p>
-    \[y(t)=a\cos t+c\sin t+\int_0^t\sin(t-s)g(s)\,ds.\]
-    <p>For zero initial data, two very different-looking cases use exactly the same integral:</p>
-    \[\begin{aligned}
-      g(t)=1&\quad\Longrightarrow\quad y(t)=1-\cos t,\\
-      g(t)=\cos t&\quad\Longrightarrow\quad y(t)=\frac{t}{2}\sin t.
-    \end{aligned}\]
-    <p>The second is the resonant response. There is no exceptional rule about multiplying a guessed particular solution by \(t\): that factor comes out of the integral.</p>
-    <p class="prompt">The notebook uses constant forcing \(g(t)=\lambda\), so that every finite iterate remains an exactly computed rational polynomial.</p>
-  </section>
-
-  <section id="ordered" data-scene="triangular">
-    <p class="eyebrow">06 / Worked example 3</p>
-    <h2>When the order matters—and the series stops.</h2>
-    <p>Take a genuinely noncommuting family:</p>
-    \[A(t)=\begin{pmatrix}0&1&0\\0&0&t\\0&0&0\end{pmatrix}.\]
-    <p>In fact \([A(u),A(v)]=(v-u)E_{13}\), where \(E_{13}\) has a single \(1\) in position \((1,3)\). Every product of three of these matrices vanishes. Thus only two integrations survive:</p>
-    \[P_1(t,0)=\begin{pmatrix}0&t&0\\0&0&t^2/2\\0&0&0\end{pmatrix},\qquad P_2(t,0)=\begin{pmatrix}0&0&t^3/6\\0&0&0\\0&0&0\end{pmatrix}.\]
-    \[U(t,0)=\begin{pmatrix}1&t&t^3/6\\0&1&t^2/2\\0&0&1\end{pmatrix}.\]
-    <p>Contrast this with the tempting but incorrect replacement:</p>
-    \[\exp\!\left(\int_0^t A(s)\,ds\right)=\begin{pmatrix}1&t&t^3/4\\0&1&t^2/2\\0&0&1\end{pmatrix}.\]
-    <p>The \((1,3)\)-entry is wrong. Ordered integration is not notation for an ordinary exponential.</p>
-    <h3>The forcing still needs no new method</h3>
-    <p>For \(x(0)=0\) and \(b(t)=(0,0,1)^{\mathsf T}\), the same iteration gives</p>
-    \[x^{[1]}=\begin{pmatrix}0\\0\\t\end{pmatrix},\qquad x^{[2]}=\begin{pmatrix}0\\t^3/3\\t\end{pmatrix},\qquad x^{[3]}=\begin{pmatrix}t^4/12\\t^3/3\\t\end{pmatrix}.\]
-    <p>The third iterate is already the exact solution. In the homogeneous notebook example, \(N=2\) is enough; turning on forcing can require one more iteration.</p>
-  </section>
-
-  <section id="airy" data-scene="airy">
-    <p class="eyebrow">07 / Worked example 4</p>
-    <h2>An equation that makes its own special functions.</h2>
-    <p>For \(y''=ty\), the system matrix is</p>
-    \[A(t)=\begin{pmatrix}0&1\\t&0\end{pmatrix}.\]
-    <p>Its first two ordered terms are</p>
-    \[P_1(t,0)=\begin{pmatrix}0&t\\t^2/2&0\end{pmatrix},\qquad P_2(t,0)=\begin{pmatrix}t^3/6&0\\0&t^3/3\end{pmatrix}.\]
-    <p>The higher terms build two normalized solutions:</p>
-    \[\begin{aligned}
-      u(t)&=1+\frac{t^3}{6}+\frac{t^6}{180}+\frac{t^9}{12960}+\cdots,\\
-      v(t)&=t+\frac{t^4}{12}+\frac{t^7}{504}+\frac{t^{10}}{45360}+\cdots.
-    \end{aligned}\]
-    <p>They satisfy \((u(0),u'(0))=(1,0)\) and \((v(0),v'(0))=(0,1)\). Thus</p>
-    \[U(t,0)=\begin{pmatrix}u(t)&v(t)\\u'(t)&v'(t)\end{pmatrix}.\]
-    <p>This is Airy’s equation.<a class="ref" href="#ref3">[3]</a> The usual \(\operatorname{Ai}\) and \(\operatorname{Bi}\) are another choice of basis; they need not be known in advance. The iteration constructs the functions that the equation needs.</p>
-    <h3>Add any continuous forcing</h3>
-    <p>Since \((uv'-u'v)'=u(tv)-(tu)v=0\), the Wronskian is \(1\). The same formula for \(y''=ty+g(t)\) now becomes</p>
-    \[y(t)=a\,u(t)+c\,v(t)+\int_0^t\bigl(v(t)u(s)-u(t)v(s)\bigr)g(s)\,ds.\]
-    <p>For \(g=1\) and zero initial data, the iteration gives a third explicitly convergent series:</p>
-    \[w(t)=\frac{t^2}{2}+\frac{t^5}{40}+\frac{t^8}{2240}+\frac{t^{11}}{246400}+\cdots.\]
-    <p>Indeed, substituting \(y=\sum c_nt^n\) into \(y''=ty+1\) gives \(c_2=1/2\) and</p>
-    \[c_{n+2}=\frac{c_{n-1}}{(n+1)(n+2)}\quad(n\ge1).\]
-    <p>Changing the initial coefficients produces \(u\) and \(v\) in the homogeneous case. “Solving” here means constructing and evaluating a convergent answer, not necessarily expressing it with a fixed list of elementary functions.</p>
-  </section>
-
-  <section id="higher-order" data-scene="airy">
-    <p class="eyebrow">08 / The scope of “every linear ODE”</p>
-    <h2>Higher order only changes the matrix.</h2>
-    <p>For an equation already in normal form,</p>
-    \[y^{(m)}+a_{m-1}(t)y^{(m-1)}+\cdots+a_0(t)y=g(t),\]
-    <p>set \(x=(y,y',\ldots,y^{(m-1)})^{\mathsf T}\). Then</p>
-    \[A(t)=\begin{pmatrix}0&1&0&\cdots&0\\0&0&1&\cdots&0\\\vdots&\vdots&\vdots&\ddots&\vdots\\0&0&0&\cdots&1\\-a_0&-a_1&-a_2&\cdots&-a_{m-1}\end{pmatrix},\qquad b(t)=\begin{pmatrix}0\\0\\\vdots\\0\\g(t)\end{pmatrix}.\]
-    <p>Nothing else changes. For a non-unit leading coefficient, first divide by it on an interval where it does not vanish. The theorem does not promise continuation through a singular coefficient, nor does it assert that arbitrary boundary conditions are consistent.</p>
-  </section>
-
-  <section id="convergence" data-scene="airy">
-    <p class="eyebrow">09 / Why the construction works</p>
-    <h2>The factorial does the work.</h2>
-    <p>Choose a submultiplicative matrix norm. If \(\|A(t)\|\le M\) throughout an interval of length \(L\), repeated integration gives</p>
-    \[\|P_n(t,s)\|\le\frac{(M|t-s|)^n}{n!}\le\frac{(ML)^n}{n!}.\]
-    <p>Each new integration contributes an extra denominator. The series therefore converges uniformly on the interval, with</p>
-    \[\|U(t,s)-U_N(t,s)\|\le\sum_{n=N+1}^{\infty}\frac{(ML)^n}{n!}.\]
-    <p>There is no requirement that \(ML&lt;1\). This is the advantage of keeping the iterated integral estimate, rather than demanding that one Picard step be a contraction.<a class="ref" href="#ref2">[2]</a></p>
-    <h3>A finite, rational tail bound</h3>
-    <p>Put \(z=ML\). Whenever \(N+2&gt;z\), successive omitted terms have ratio at most \(z/(N+2)\), so</p>
-    \[\sum_{n=N+1}^{\infty}\frac{z^n}{n!}\le\frac{z^{N+1}}{(N+1)!}\,\frac{1}{1-z/(N+2)}.\]
-    <p>For smaller \(N\), add finitely many omitted terms until this ratio bound applies. Rational \(M,L\) give a rational bound without needing to evaluate an exponential.</p>
-    <details>
-      <summary>Existence and uniqueness from the same estimate</summary>
-      <p>Uniform convergence permits integration of the sum in the recursive identity, giving \(U(t,s)=I_d+\int_s^t A(r)U(r,s)\,dr\). The fundamental theorem of calculus then gives \(\partial_tU=AU\).</p>
-      <p>If two solutions have the same initial value, their difference \(d\) satisfies \(d(t)=\int_{t_0}^t A(s)d(s)\,ds\). On a compact interval let \(D=\sup\|d\|\). Iterating this equality gives, for every \(n\),</p>
-      \[\|d(t)\|\le D\frac{(ML)^n}{n!}.\]
-      <p>The right side tends to zero, so \(d=0\). For the forced formula, differentiating the integral gives \(b(t)+A(t)\int_{t_0}^tU(t,s)b(s)\,ds\), and its initial value is zero. This finishes the proof for the full system.</p>
-    </details>
-    <details>
-      <summary>The bound used in the notebook</summary>
-      <p>On \([0,T]\), let \(\|A(t)\|_\infty\le M\), \(\|b(t)\|_\infty\le B\), and \(\|x_0\|_\infty=R\). If \(M&gt;0\), the full Picard iterate satisfies</p>
-      \[\sup_{0\le t\le T}\|x(t)-x^{[N]}(t)\|_\infty\le\left(R+\frac{B}{M}\right)\sum_{n=N+1}^{\infty}\frac{(MT)^n}{n!}.\]
-      <p>This follows by bounding successive differences, starting with \(\|x^{[1]}(t)-x^{[0]}(t)\|\le(MR+B)t\). The displayed bound is rounded upward. For a terminating series, it bounds the actual remaining polynomial directly. If the exact polynomial residual is zero, it reports zero truncation error.</p>
-      <p>If \(M=0\), the first iterate is exact and the zeroth has error at most \(BT\). These are mathematical truncation bounds; they do not enclose the floating-point conversion and rendering used to draw the curves.</p>
-    </details>
-    <div class="aside-note"><strong>A solution need not be an elementary expression.</strong> The integral series defines the solution even when its terms have no elementary antiderivatives. In the polynomial examples, every finite iterate can be calculated explicitly. The convergence estimates explain why those finite expressions approach the required solution.</div>
-    <p class="closing">Picard iteration is the common starting point. For linear equations, it produces one fundamental matrix: constant coefficients, variable coefficients and forcing become instances of the same construction.</p>
-  </section>
-
-  <footer id="sources" class="sources">
-    <p class="eyebrow">Sources & computation</p>
-    <p id="ref1"><strong>[1]</strong> Bassam Bamieh, <a href="https://arxiv.org/abs/2204.06104" target="_blank" rel="noopener">A Tutorial on Solution Properties of State Space Models of Dynamical Systems</a> (2022). A unified treatment of Picard iteration, Volterra operators and solution formulas.</p>
-    <p id="ref2"><strong>[2]</strong> Michael Baake and Ulrike Schlägel, <a href="https://arxiv.org/abs/1011.1775" target="_blank" rel="noopener">The Peano–Baker Series</a> (2011; revised preprint 2025). Ordered integrals, convergence and explicit examples.</p>
-    <p id="ref3"><strong>[3]</strong> NIST Digital Library of Mathematical Functions, <a href="https://dlmf.nist.gov/9.2" target="_blank" rel="noopener">§9.2, Airy’s differential equation</a>. Standard Airy bases and normalizations.</p>
-    <p class="technical-note">The solid curves are genuine Picard iterates, computed by polynomial multiplication and integration with exact rational coefficients. The dashed curves are independent reference solutions (a longer series for the Airy example). Decimal displays and drawings use floating point; the stated error bounds concern the mathematical iterates.</p>
-  </footer>
-</article>
-
-<aside class="lab-column" id="lab" aria-label="Interactive Picard iteration notebook">
-  <div class="lab-sticky">
-    <div class="lab-heading"><span class="eyebrow">Interactive notebook</span><label class="follow-label"><input id="follow" type="checkbox" checked> Follow the text</label></div>
-    <label for="model" class="sr-only">Equation</label>
-    <select id="model">
-      <option value="exponential">Picard makes the exponential</option>
-      <option value="growth">Nonlinear: quadratic growth</option>
-      <option value="saturation">Nonlinear: saturation</option>
-      <option value="scalar">Variable coefficient + forcing</option>
-      <option value="oscillator">Forced oscillator</option>
-      <option value="triangular">Noncommuting, finite series</option>
-      <option value="airy">Airy equation + forcing</option>
-    </select>
-    <div id="model-equation" class="model-equation"></div>
-    <div class="view-controls">
-      <label for="component">Plot <select id="component"></select></label>
-      <span id="reference-label">Dashed: closed-form solution</span>
-    </div>
-    <svg id="plot" viewBox="0 0 520 290" role="img" aria-label="The selected Picard approximation compared with a reference solution"></svg>
-    <div class="legend"><span><i class="line current"></i>Current iterate</span><span><i class="line previous"></i>Previous iterates</span><span><i class="line reference"></i>Reference</span></div>
-    <div class="slider-row"><label for="iterations">Picard iterations <strong id="n-label">4</strong></label><div class="step-buttons"><button id="minus" type="button" aria-label="One fewer iteration">−</button><button id="plus" type="button" aria-label="One more iteration">+</button></div></div>
-    <input id="iterations" type="range" min="0" max="36" value="4" aria-label="Number of Picard iterations">
-    <div class="time-row"><label for="time">Inspect time <strong id="time-label">1</strong></label><input id="time" type="range" min="0" max="100" value="65" aria-label="Inspection time as a fraction of the displayed interval"></div>
-    <div class="metrics" aria-live="polite"><div><span id="value-name">Value of the iterate</span><strong id="value">—</strong></div><div><span>Uniform truncation bound</span><strong id="bound">—</strong></div></div>
-    <p id="bound-note" class="small-note">For every time in the displayed interval; all state coordinates.</p>
-    <details class="lab-details" id="data-details">
-      <summary>Change the initial state or forcing</summary>
-      <div id="initial-controls" class="initial-controls"></div>
-      <label class="force-control" for="force">Forcing amplitude <strong id="force-label">0</strong><input id="force" type="range" min="-2" max="2" step="1" value="0"></label>
-      <p id="forcing-description" class="small-note"></p>
-      <button id="reset" type="button" class="reset">Reset this example</button>
-    </details>
-    <details class="lab-details">
-      <summary>The exact polynomial behind the curve</summary>
-      <div id="polynomial" class="polynomial"></div><p id="poly-note" class="small-note"></p>
-      <div id="matrix-panel"><div class="matrix-label">The homogeneous block of the partial sum, at the inspection time</div>
-      <div id="matrix-value" class="matrix-value"></div>
-      <p class="small-note">The matrix shown is an approximation. It is independent of the initial state and forcing amplitude.</p></div>
-    </details>
-    <p class="lab-footnote">Exact polynomial iteration · floating-point drawing</p>
+<section id="forcing">
+  <p class="eyebrow">6 / The same equation, with an input</p>
+  <h2>Add a forcing term.</h2>
+  <p>Suppose now that</p>
+  \[\begin{gathered}y''+p(t)y'+q(t)y=g(t),\\y(0)=a,\qquad y'(0)=b.\end{gathered}\]
+  <p>Nothing prevents us from putting the forcing into Picard iteration from the beginning. With the position-and-velocity notation of Section 5 and \(e_2=(0,1)^{\mathsf T}\), it is just</p>
+  \[\begin{aligned}x_{n+1}(t)&=x(0)+\int_0^t A(s)x_n(s)\,ds\\&\quad+e_2\int_0^t g(s)\,ds,\end{aligned}\]
+  <p>starting with the constant vector \(x_0(t)=x(0)=(a,b)^{\mathsf T}\). Adding the forcing changes only what is placed under the integral. When \(u\) and \(v\) have already been constructed, we can also organize the answer so as to reuse them.</p>
+  <h3>First ask what a unit change in velocity does.</h3>
+  <p>Let \(k(t,s)\) be the homogeneous solution which starts at time \(s\) with zero position and unit velocity:</p>
+  \[k(s,s)=0,\qquad \partial_t k(s,s)=1.\]
+  <p>These two conditions determine its linear combination of \(u\) and \(v\):</p>
+  \[k(t,s)=\frac{u(s)v(t)-v(s)u(t)}{W(s)},\]
+  <p>where \(W(s)=u(s)v'(s)-u'(s)v(s)\) is the Wronskian from Section 5.</p>
+  <p>Check the conditions: at \(t=s\) the numerator is zero; its derivative in \(t\) is \(W(s)\). For a fixed departure time \(s\), the function solves the homogeneous equation because it is a linear combination of \(u(t)\) and \(v(t)\).</p>
+  <p>A forcing contribution \(g(s)\,ds\) changes the velocity at time \(s\). Its later contribution to position is \(k(t,s)g(s)\,ds\). Add the contributions from all departure times:</p>
+  <div class="theorem" id="theorem">
+    <p class="eyebrow">The solution formula</p>
+    <p>For continuous \(p,q,g\) on an interval containing \(0\), the unique solution is</p>
+    \[\begin{aligned}y(t)&=a\,u(t)+b\,v(t)\\&\quad+\int_0^t k(t,s)g(s)\,ds.\end{aligned}\]
+    <p>The first two terms account for the initial motion. The integral accounts for the forcing. The same \(u,v\) serve every choice of \(a,b,g\).</p>
   </div>
-</aside>
+  <p>The interpretation suggests the answer, but it is also easy to verify. Put \(w(t)=\int_0^t k(t,s)g(s)\,ds\). Since \(k(t,t)=0\), differentiation gives</p>
+  \[\begin{aligned}
+    w'(t)&=\int_0^t \partial_t k(t,s)g(s)\,ds,\\
+    w''(t)&=g(t)+\int_0^t \partial_t^2 k(t,s)g(s)\,ds.
+  \end{aligned}\]
+  <p>It follows that \(w''+pw'+qw=g\), with \(w(0)=w'(0)=0\). This proves the forcing part of the formula directly; there is no need to introduce unknown variable coefficients in a proposed solution.<a class="ref" href="#ref-picard">[3]</a></p>
+  <h3>Return to the oscillator.</h3>
+  <p>Here \(u=\cos t\), \(v=\sin t\), and \(W=1\). The response to unit velocity at time \(s\) is</p>
+  \[\begin{aligned}k(t,s)&=\cos s\sin t-\sin s\cos t\\&=\sin(t-s).\end{aligned}\]
+  <p>Thus</p>
+  \[\begin{aligned}y(t)&=a\cos t+b\sin t\\&\quad+\int_0^t\sin(t-s)g(s)\,ds.\end{aligned}\]
+  <p>For zero initial data and constant forcing, \(g=1\), the integral is</p>
+  \[y(t)=\int_0^t\sin(t-s)\,ds=1-\cos t.\]
+  <p>For \(g(s)=\cos s\), use the product-to-sum identity inside the <em>same</em> integral:</p>
+  \[\begin{aligned}
+    y(t)&=\frac12\int_0^t\bigl[\sin t+\sin(t-2s)\bigr]ds\\
+        &=\frac{t}{2}\sin t.
+  \end{aligned}\]
+  <p>The second sine term integrates to zero. This is resonance, but no exceptional rule was needed: the factor \(t\) emerged from the integral.</p>
+  <h3>Return to the variable coefficient.</h3>
+  <p>For \(y''=ty+1\) with zero initial data, we can either use the \(u,v\) of Section 4 in the forcing formula, or carry out the original iteration with the forcing already included:</p>
+  \[\begin{aligned}w^{[0]}&=0,\\w^{[n+1]}(t)&=\int_0^t(t-s)\bigl(s\,w^{[n]}(s)+1\bigr)\,ds.\end{aligned}\]
+  <p>The first three steps give</p>
+  \[\begin{aligned}
+    w^{[1]}&=\frac{t^2}{2},\\
+    w^{[2]}&=\frac{t^2}{2}+\frac{t^5}{40},\\
+    w^{[3]}&=\frac{t^2}{2}+\frac{t^5}{40}+\frac{t^8}{2240}.
+  \end{aligned}\]
+  <p>The forcing formula is a way to organize and reuse this construction, not a separate method for a different class of equations.</p>
+  <details id="two-times">
+    <summary>Where is the fundamental matrix in the forcing formula?</summary>
+    <p>The matrix taking position and velocity from time \(s\) to time \(t\) is</p>
+    \[U(t,s)=X(t)X(s)^{-1}.\]
+    <p>Its upper-right entry is exactly \(k(t,s)\): it gives the position resulting from initial state \((0,1)\) at time \(s\). With \(e_2=(0,1)^{\mathsf T}\), the position-and-velocity formula is</p>
+    \[x(t)=X(t)x(0)+\int_0^t U(t,s)e_2\,g(s)\,ds.\]
+    <p>Alternatively, construct \(U(t,s)\) by the same matrix iteration starting at \(s\); this requires no matrix inversion. For variable coefficients, the departure time matters: generally \(U(t,s)\ne X(t-s)\).</p>
+  </details>
+</section>
+
+<section id="convergence">
+  <p class="eyebrow">7 / From approximations to a solution</p>
+  <h2>Repeated integration supplies the factorials.</h2>
+  <p>For the oscillator, we saw factorial denominators appear explicitly. The same mechanism controls the general linear equation, even when the integrals do not simplify.</p>
+  <p>Write the successive matrix terms as</p>
+  \[\begin{aligned}P_0&=I_2,\\P_{n+1}(t)&=\int_0^t A(s)P_n(s)\,ds.\end{aligned}\]
+  <p>The matrix iterate \(X_N\) is \(P_0+\cdots+P_N\). On a compact interval containing \(0\), choose \(M\) with \(\|A(t)\|\le M\), using a submultiplicative matrix norm normalized by \(\|I_2\|=1\). Induction gives</p>
+  \[\|P_n(t)\|\le\frac{M^n|t|^n}{n!}.\]
+  <p>For example, integrating the bound \(M^n s^n/n!\) and multiplying by \(M\) produces exactly the next bound \(M^{n+1}t^{n+1}/(n+1)!\) for \(t\ge0\). Reversing the integration direction gives the same estimate with \(|t|\).</p>
+  <p>The exponential majorant shows that the matrix series converges uniformly on every such compact interval. Substituting its sum into the integral equation gives \(X'=AX\) and \(X(0)=I_2\). The iterates therefore construct actual solutions, not merely formal power series.<a class="ref" href="#ref-peano">[2]</a></p>
+  <details id="uniqueness">
+    <summary>Why is the solution unique?</summary>
+    <p>The difference \(d\) of two state-vector solutions with the same initial value satisfies \(d(t)=\int_0^t A(s)d(s)\,ds\). On a compact interval with \(|t|\le T\), let \(D=\sup\|d(t)\|\). Repeated substitution gives</p>
+    \[\|d(t)\|\le D\frac{(MT)^n}{n!}\quad\text{for every }n.\]
+    <p>The right-hand side tends to zero, so \(d=0\). This also proves uniqueness for the forced equation, since the forcing cancels when the two solutions are subtracted.</p>
+  </details>
+  <p>For a nonlinear equation, one instead needs control of how \(F(t,y)\) changes with \(y\), and of where the iterates stay. That is why the nonlinear example included an explicit interval and a Lipschitz estimate. The linear theorem has no finite-time blow-up inside an interval on which its coefficients remain continuous.</p>
+  <p class="note">We placed the initial time at \(0\) only to keep notation light. Any initial time works, with the integration limits changed accordingly. An equation with a non-unit leading coefficient can first be divided by it on an interval where it is nonzero. Singular points and boundary-value problems require separate consideration.</p>
+  <div class="closing"><p><strong>What to remember.</strong> Integrate the equation, substitute the previous approximation, and repeat. For a linear second-order equation, two starting motions give two reusable solutions. Their positions and velocities form the fundamental matrix; their response to a unit velocity change supplies the forcing integral.</p></div>
+</section>
+
+<footer id="sources" class="sources">
+  <h2>Further reading</h2>
+  <p id="ref-airy"><strong>[1]</strong> NIST Digital Library of Mathematical Functions, <a href="https://dlmf.nist.gov/9.2">§9.2, Airy’s differential equation</a>. Standard solutions and their initial values.</p>
+  <p id="ref-peano"><strong>[2]</strong> Michael Baake and Ulrike Schlägel, <a href="https://arxiv.org/abs/1011.1775">The Peano–Baker series</a>. The matrix expansion, its convergence and examples.</p>
+  <p id="ref-picard"><strong>[3]</strong> Bassam Bamieh, <a href="https://arxiv.org/abs/2204.06104">A Tutorial on Solution Properties of State Space Models of Dynamical Systems</a>. Picard iteration and solution operators in a common framework.</p>
+  <p><a href="#top">Back to the beginning ↑</a></p>
+</footer>
+</article>
 </main>
-
-<template id="eq-exponential">\[y'=y,\qquad y(0)=a\]</template>
-<template id="eq-growth">\[y'=y^2,\qquad y(0)=1\]</template>
-<template id="eq-saturation">\[y'=1-y^2,\qquad y(0)=0\]</template>
-<template id="eq-scalar">\[y'=2ty+2\lambda t,\qquad y(0)=a\]</template>
-<template id="eq-oscillator">\[y''+y=\lambda\]</template>
-<template id="eq-triangular">\[x'=A(t)x+\lambda e_3\]</template>
-<template id="eq-airy">\[y''=ty+\lambda\]</template>
-
-<script>/*__ENGINE__*/</script>
-<script>/*__NONLINEAR__*/</script>
-<script>/*__APP__*/</script>
 </body>
 </html>

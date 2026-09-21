@@ -1,63 +1,70 @@
 # Fundamental Matrix
 
-A standalone, classical exposition hosted at `fundamental-matrix.html` within
-the Computable Analysis site. The book home page, contents and Differential
-Equations chapter link into it. The page itself contains no project branding,
-book menu, foundational prerequisites or formalization-status discussion.
+A standalone classical essay at `fundamental-matrix.html`, hosted by the
+Computable Analysis project and linked from its home, contents and Differential
+Equations chapter. The page itself has no project branding or formalization
+status discussion.
 
-Picard iteration is the starting point. Two nonlinear examples come before the
-matrix construction:
+## Pedagogical progression
 
-- `y' = y^2`, `y(0) = 1`: exact polynomial iterates, coefficient stabilization,
-  uniform convergence before the singularity, and finite-time blow-up.
-- `y' = 1-y^2`, `y(0) = 0`: exact polynomial iterates converging to tanh, with
-  increasing even and decreasing odd iterates bracketing the answer on [0,1].
+The exposition stays with second-order equations. It starts by integrating
+acceleration twice, including the initial position and velocity, and works out
+successive approximations explicitly before introducing matrix notation:
 
-The text distinguishes Picard polynomials from Taylor truncations and explains
-why nonlinear solution maps do not generally give a reusable fundamental
-matrix. It then retains the normalized matrix, forcing integral, higher-order
-reduction, factorial convergence estimate and four linear worked examples.
+1. `y'' = -y`: integrations produce cosine and sine; two initial motions give
+   two reusable solutions.
+2. `y'' = y^2`: a nonlinear comparison with the first three complete polynomial
+   iterates and a local convergence argument. Existing coefficients change;
+   Picard iteration is not generally Taylor truncation.
+3. `y'' = ty`: the same integrations construct two normalized Airy solutions.
+4. `y'' + p(t)y' + q(t)y = 0`: place the two solutions and their velocities in
+   a 2-by-2 fundamental matrix, then derive its Picard/Peano–Baker iteration.
+5. Add forcing in the same iteration. Derive the unit-velocity response kernel,
+   check the forcing formula, and work out the constant and resonant oscillator
+   responses and `y'' = ty + 1`.
+6. Explain factorial convergence and uniqueness, with optional proof details.
 
-The interactive notebook follows the text on desktop and sits in document flow
-on mobile. Linear examples reuse cached augmented matrix terms. Nonlinear
-examples have fixed initial data and no matrix display; their degree grows as
-2^N-1, so the slider stops at seven iterations instead of 36. The two nonlinear
-uniform bounds are explained in the text: the increasing endpoint error for
-quadratic growth, and the gap between adjacent bounding iterates for saturation.
+The twice-integrated scalar iteration and the first-order state-vector
+iteration are explicitly distinguished: they have the same solution but need
+not have identical finite-stage numbering. For the general damped equation,
+the kernel includes the Wronskian denominator.
 
-## Source and build
+## Presentation and build
 
-`index.template.html` contains the main LaTeX exposition and an include marker
-for `nonlinear.html`. `build.cjs` compiles their equations to native MathML and
-inlines `style.css`, `engine.js`, `nonlinear.js`, and `app.js`. `site.css` and
-`site.js` measure the standalone navigation height without adding a book shell.
+The published page is a single reading column. There are no plots, sliders,
+model selectors, scroll-following, numerical dashboards, or runtime scripts.
+The essential calculations are always visible. Native HTML disclosures contain
+only supplementary proofs. All text and equations work with JavaScript disabled.
 
-`engine.js` is the unchanged exact rational linear matrix engine.
-`nonlinear.js` extends the same notebook interface with polynomial squaring and
-integration; it does not approximate nonlinear equations with a fixed matrix.
-All polynomial coefficients and error bounds use reduced BigInt rationals.
-Floating point is used for drawing and decimal display only. Mathematical
-bounds do not include those rendering errors.
+`index.template.html` contains the complete exposition in authored LaTeX.
+`style.css` controls the static page. `build.cjs` compiles the equations to native
+MathML with the existing pinned build dependency, mathjax-full 3.2.1, and inlines
+the CSS. No font files are copied.
 
-The build-only dependency remains mathjax-full 3.2.1. The resulting page needs
-no external runtime assets and includes no font files.
+The older notebook sources (`app.js`, `engine.js`, `nonlinear.js`, `nonlinear.html`,
+`site.css`, and `site.js`) are retained as unshipped development history; they
+are not included by the essay builder or the publication integration. The
+exact polynomial engine is still used by the build-time algebra tests.
 
 ```sh
 npm install --prefix book/fundamental-matrix --ignore-scripts --no-audit --no-fund
-npm test --prefix book/fundamental-matrix
+node book/fundamental-matrix/test-second-order.cjs
 python .github/reader-edition/fundamental_matrix.py --site site --revision REVISION
 python .github/reader-edition/test_fundamental_matrix.py --site site --report reader-edition-tests
 ```
 
-`test.cjs` checks the unchanged linear engine. `test-nonlinear.cjs` checks exact
-polynomial recurrences, displayed coefficients, initial values, coefficient
-stabilization, and separately labelled sampled reference/error consistency.
-Browser checks cover all seven examples, nonlinear iteration limits, hidden
-matrix/initial-state controls, scroll-following, native MathML, no project
-branding, incoming book links, and four viewport widths.
+`test-second-order.cjs` checks the monomial integration rule, oscillator and
+Airy iterates, all coefficients of the nonlinear third iterate, the nonlinear
+contraction constant, forced examples, and the different scalar/matrix stage
+numbering using exact rational arithmetic. These are finite regression tests,
+not a formalization of the analytic convergence theorems.
 
-Publication still runs through the existing verified reader workflow. Existing
-reader changes are delimited incoming links; stripping those additions recovers
-the original bytes. Proof data and Lean sources are unchanged. The publication
-manifest records the documentation revision separately from the existing proof
-source; no additional formalized theorem is claimed.
+The publication tests check incoming links, original-byte preservation outside
+delimited additions, idempotent integration, mathematical typesetting, five
+viewport widths, ordinary anchor navigation, proof disclosures, and operation
+with JavaScript disabled. Screenshots and reports are retained in the existing
+reader-edition-validation artifact.
+
+The existing verified publication workflow and all Lean sources remain
+unchanged. The metadata keeps the documentation revision separate from the
+previously verified proof-source snapshot; no new Lean theorem is claimed.
