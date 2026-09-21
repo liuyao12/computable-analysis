@@ -1,0 +1,34 @@
+name: Elementary calculus verification
+on:
+  push:
+    branches: [work/elementary-calculus]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+      - name: Fresh native Taylor, concrete quadrature, and prior application checks
+        run: python3 book/checks/verify_taylor.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: elementary-calculus-verification
+          path: |
+            .lake/taylor-check/logs
+            .lake/taylor-check/build.json
+            reports/taylor-ftc-audit.json
+          include-hidden-files: true
+          retention-days: 30

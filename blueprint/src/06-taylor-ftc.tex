@@ -1,0 +1,44 @@
+\section{Taylor approximation from the endpoint FTC}
+\label{sec:taylor-from-ftc}
+A Taylor polynomial is a finite approximation, not an assumption that the
+function equals an infinite series.  Work on a certified rational chart and
+let $F_0=f$, with local derivative certificates $F_k'=F_{k+1}$ through a
+specified finite order.  Fix rational $a<b$ in that chart and form
+\[
+ G_n(t)=\sum_{k=0}^{n}\frac{(b-t)^k}{k!}F_k(t).
+\]
+The finite product rule cancels every term except
+\[
+ G_n'(t)=\frac{(b-t)^n}{n!}F_{n+1}(t).
+\]
+Thus the already constructed endpoint FTC gives
+\[
+ \boxed{f(b)=\sum_{k=0}^{n}\frac{(b-a)^k}{k!}F_k(a)
+       +\frac1{n!}\int_a^b(b-t)^nF_{n+1}(t)\,dt.}
+\]
+The remainder integral is a separately supplied quadrature, with its own
+finite mesh comparison; it is not defined by the displayed difference.
+
+If $|F_{n+1}|\le M$, comparison with the polynomial weight gives
+\[
+ \boxed{\left|f(b)-\sum_{k=0}^{n}\frac{(b-a)^k}{k!}F_k(a)\right|
+       \le\frac{M(b-a)^{n+1}}{(n+1)!}.}
+\]
+Finite errors in the computed coefficients add
+$\sum_{k=0}^n\eta_k|b-a|^k$ when $\eta_k$ bounds the error in $F_k(a)/k!$.
+This does not assert convergence as $n$ grows without further derivative or
+coefficient estimates.
+
+For example, $f(x)=1/(2-x)$ on $[0,1]$ has
+$F_k(x)=k!/(2-x)^{k+1}$.  Its independently computed remainder is
+\[
+ (n+1)\int_0^1\frac{(1-x)^n}{(2-x)^{n+2}}\,dx=2^{-n-1},
+\]
+while its Taylor polynomial at the endpoint is
+$1/2+1/4+\cdots+2^{-n-1}=1-2^{-n-1}$.
+The integral's validity uses a rational Lipschitz estimate, before the
+Taylor theorem identifies its value.
+
+The current checked native interface uses local quadratic-remainder models
+on $[0,1]$, with arbitrary rational subintervals.  Transport to another
+coordinate chart requires the corresponding derivative certificates.
