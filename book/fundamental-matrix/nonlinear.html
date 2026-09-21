@@ -1,0 +1,56 @@
+  <section id="nonlinear" data-scene="growth">
+    <p class="eyebrow">01a / Before linearity</p>
+    <h2>A nonlinear equation, worked out by integration.</h2>
+    <p>Nothing in Picard iteration requires the equation to be linear. To see what changes, try quadratic growth:</p>
+    \[y'=y^2,\qquad y(0)=1.\]
+    <p>Write \(p_n=y^{[n]}\). Start with \(p_0=1\), square the previous polynomial, and integrate:</p>
+    \[p_{n+1}(t)=1+\int_0^t p_n(s)^2\,ds.\]
+    <p>The first iterations can be done entirely by hand:</p>
+    \[\begin{aligned}
+      p_0(t)&=1,\\
+      p_1(t)&=1+t,\\
+      p_2(t)&=1+t+t^2+\frac{t^3}{3},\\
+      p_3(t)&=1+t+t^2+t^3+\frac{2t^4}{3}+\frac{t^5}{3}+\frac{t^6}{9}+\frac{t^7}{63}.
+    \end{aligned}\]
+    <p>Every further iterate is again a polynomial. More explicitly, if \(p_n(t)=\sum_{j\ge0}c_j^{[n]}t^j\), with zero coefficients beyond its degree, then</p>
+    \[c_0^{[n+1]}=1,\qquad c_{k+1}^{[n+1]}=\frac{1}{k+1}\sum_{j=0}^{k}c_j^{[n]}c_{k-j}^{[n]}.\]
+    <p>The limit is \(y(t)=1/(1-t)\): differentiating verifies the equation and initial value. But <strong>a Picard iterate is not a Taylor truncation</strong>. For instance, \(p_2\) has a cubic term with coefficient \(1/3\), not \(1\). Low-order coefficients settle into their final values as the iteration proceeds.</p>
+    <details>
+      <summary>A direct convergence proof—and a genuine obstruction</summary>
+      <p>The coefficient recurrence proves inductively that \(0\le c_j^{[n]}\le1\) for every \(j\), and that \(c_j^{[n]}=1\) for \(0\le j\le n\). Consequently, for \(0\le t\le T&lt;1\),</p>
+      \[0\le\frac{1}{1-t}-p_n(t)\le\sum_{j=n+1}^{\infty}t^j\le\frac{T^{n+1}}{1-T}.\]
+      <p>This proves uniform convergence on every such interval. The same coefficient estimate gives absolute uniform convergence on \([-T,T]\). The degree, however, is \(2^n-1\), not \(n\).</p>
+      <p>At \(t=1\), the solution really becomes infinite even though the right-hand side \(y^2\) is smooth everywhere. A nonlinear initial-value problem need not have a finite solution for all time. The notebook stays on \([0,3/4]\).</p>
+      <p>For its displayed bound, the notebook uses the sharper endpoint error. On forward time, \(0\le p_n\le y\), and for \(n\ge1\), \((y-p_n)'=y^2-p_{n-1}^2\ge0\). Hence the largest error on \([0,T]\) is exactly \(1/(1-T)-p_n(T)\). The case \(n=0\) is immediate.</p>
+    </details>
+    <p class="prompt">Try \(N=2\), then \(N=3\). Open the polynomial panel to see the newly produced terms—not just the coefficients that already agree with the limit.</p>
+  </section>
+
+  <section id="saturation" data-scene="saturation">
+    <p class="eyebrow">01b / A contrasting nonlinear example</p>
+    <h2>Growth that slows down.</h2>
+    <p>A change of sign produces a bounded solution:</p>
+    \[y'=1-y^2,\qquad y(0)=0.\]
+    <p>The iteration is still substitution followed by integration:</p>
+    \[p_0(t)=0,\qquad p_{n+1}(t)=t-\int_0^t p_n(s)^2\,ds.\]
+    \[\begin{aligned}
+      p_1(t)&=t,\\
+      p_2(t)&=t-\frac{t^3}{3},\\
+      p_3(t)&=t-\frac{t^3}{3}+\frac{2t^5}{15}-\frac{t^7}{63}.
+    \end{aligned}\]
+    <p>The limit is \(\tanh t=(e^{2t}-1)/(e^{2t}+1)\), which satisfies the equation for every real \(t\) and approaches \(1\) as \(t\to+\infty\). The nonlinear term now opposes growth. The iterates shown here converge on \([0,1]\); global existence of the solution is not, by itself, a claim about convergence of these particular iterates on arbitrarily long intervals.</p>
+    <details>
+      <summary>Alternating bounds, without knowing the answer first</summary>
+      <p>On \([0,1]\), the integral operator \(\mathcal T p=t-\int_0^t p(s)^2\,ds\) maps \(0\le p(t)\le t\) back into the same range, since</p>
+      \[0\le t-\frac{t^3}{3}\le(\mathcal T p)(t)\le t.\]
+      <p>It reverses pointwise order in this range. Starting from \(p_0=0\) and \(p_1=t\) therefore gives</p>
+      \[p_0\le p_2\le p_4\le\cdots\le p_5\le p_3\le p_1.\]
+      <p>Successive gaps satisfy</p>
+      \[|p_{n+1}(t)-p_n(t)|\le2\int_0^t|p_n(s)-p_{n-1}(s)|\,ds,\]
+      <p>because all the values lie in \([0,1]\). Since \(|p_1(t)-p_0(t)|=t\), induction gives</p>
+      \[|p_n(t)-p_{n-1}(t)|\le\frac{2^{n-1}t^n}{n!}\qquad(n\ge1).\]
+      <p>The increasing even iterates and decreasing odd iterates thus have the same uniform limit. Passing to the limit in the integral equation gives a solution, which can then be identified with \(\tanh t\). Each adjacent pair encloses it.</p>
+      <p>The gap between adjacent iterates is nondecreasing in \(t\): differentiate their difference and use their fixed order. Thus the notebook bounds the error uniformly on \([0,1]\) by \(|p_n(1)-p_{n-1}(1)|\). This bound uses only the two polynomials, not a numerical value of \(\tanh\).</p>
+    </details>
+    <div class="aside-note"><strong>What is special about the linear case?</strong> Picard iteration handles both of these nonlinear equations. What it does not generally produce is a single matrix that transports every initial value. For example, quadratic growth with initial value \(a\) gives \(a/(1-at)\), not \(a\) times the solution starting from \(1\). Linearity is precisely what allows the reusable fundamental matrix below.</div>
+  </section>

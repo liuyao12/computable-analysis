@@ -1,56 +1,63 @@
 # Fundamental Matrix
 
-An interactive reader page in **Computable Analysis**, published at
-`fundamental-matrix.html` alongside the existing chapters. It is linked from
-book navigation, the home page, and Chapter 14 (Differential equations), with
-return links and a keyboard-accessible book contents menu.
+A standalone, classical exposition hosted at `fundamental-matrix.html` within
+the Computable Analysis site. The book home page, contents and Differential
+Equations chapter link into it. The page itself contains no project branding,
+book menu, foundational prerequisites or formalization-status discussion.
 
-The narrative starts with Picard iteration and derives the normalized
-fundamental matrix, the forcing integral, higher-order reduction, and a
-factorial convergence estimate. Worked examples cover a forced scalar equation
-with variable coefficient, the oscillator and resonance, a noncommuting
-triangular system with a terminating series, and Airy's equation with forcing.
+Picard iteration is the starting point. Two nonlinear examples come before the
+matrix construction:
 
-The right-hand notebook follows the text on desktop and sits in document flow
-on mobile. It reuses cached augmented matrix terms when the initial state or
-forcing amplitude changes. Coefficients, integrals and tail estimates use
-reduced BigInt rationals. Floating-point conversion is limited to rendering and
-decimal display. The rational bounds cover series truncation, not drawing error.
+- `y' = y^2`, `y(0) = 1`: exact polynomial iterates, coefficient stabilization,
+  uniform convergence before the singularity, and finite-time blow-up.
+- `y' = 1-y^2`, `y(0) = 0`: exact polynomial iterates converging to tanh, with
+  increasing even and decreasing odd iterates bracketing the answer on [0,1].
+
+The text distinguishes Picard polynomials from Taylor truncations and explains
+why nonlinear solution maps do not generally give a reusable fundamental
+matrix. It then retains the normalized matrix, forcing integral, higher-order
+reduction, factorial convergence estimate and four linear worked examples.
+
+The interactive notebook follows the text on desktop and sits in document flow
+on mobile. Linear examples reuse cached augmented matrix terms. Nonlinear
+examples have fixed initial data and no matrix display; their degree grows as
+2^N-1, so the slider stops at seven iterations instead of 36. The two nonlinear
+uniform bounds are explained in the text: the increasing endpoint error for
+quadratic growth, and the gap between adjacent bounding iterates for saturation.
 
 ## Source and build
 
-- `index.template.html`: mathematical text and authored LaTeX.
-- `engine.js`: exact rational polynomial matrix engine, also usable in Node.
-- `app.js`: notebook controls, SVG plotting and scroll-following examples.
-- `style.css`: original two-column exposition layout.
-- `site.css`, `site.js`: book identity, contents menu and measured header height.
-- `build.cjs`: compile LaTeX to native MathML and inline the notebook assets.
-- `test.cjs`: exact algebraic regressions and separately labelled sampled checks.
+`index.template.html` contains the main LaTeX exposition and an include marker
+for `nonlinear.html`. `build.cjs` compiles their equations to native MathML and
+inlines `style.css`, `engine.js`, `nonlinear.js`, and `app.js`. `site.css` and
+`site.js` measure the standalone navigation height without adding a book shell.
 
-The only build dependency is pinned to `mathjax-full` 3.2.1. The generated page
-has no external runtime dependencies and includes no font files.
+`engine.js` is the unchanged exact rational linear matrix engine.
+`nonlinear.js` extends the same notebook interface with polynomial squaring and
+integration; it does not approximate nonlinear equations with a fixed matrix.
+All polynomial coefficients and error bounds use reduced BigInt rationals.
+Floating point is used for drawing and decimal display only. Mathematical
+bounds do not include those rendering errors.
+
+The build-only dependency remains mathjax-full 3.2.1. The resulting page needs
+no external runtime assets and includes no font files.
 
 ```sh
 npm install --prefix book/fundamental-matrix --ignore-scripts --no-audit --no-fund
-node book/fundamental-matrix/test.cjs
+npm test --prefix book/fundamental-matrix
 python .github/reader-edition/fundamental_matrix.py --site site --revision REVISION
 python .github/reader-edition/test_fundamental_matrix.py --site site --report reader-edition-tests
 ```
 
-The integration step runs after the existing checked reader stages in
-`.github/workflows/publish_verified_blueprint.yml`. It records the documentation
-revision separately from the verified proof-source commit. Existing reader
-files receive only delimited navigation or introductory links. Removing those
-additions recovers their original bytes; all pre-existing proof data, reference
-files and assets remain byte-identical. A preservation manifest is published at
-`reading/fundamental-matrix-edition.json`.
+`test.cjs` checks the unchanged linear engine. `test-nonlinear.cjs` checks exact
+polynomial recurrences, displayed coefficients, initial values, coefficient
+stabilization, and separately labelled sampled reference/error consistency.
+Browser checks cover all seven examples, nonlinear iteration limits, hidden
+matrix/initial-state controls, scroll-following, native MathML, no project
+branding, incoming book links, and four viewport widths.
 
-Tests cover the exact matrix recurrence, initial values, agreement with direct
-Picard iteration, terminating and forced examples, outward error display, all
-local links, MathML, keyboard contents navigation, scroll-following, and desktop
-and mobile rendering. Sampled comparisons with independent reference functions
-are consistency tests, not proofs of uniform bounds.
-
-This is an expository page and executable illustration. It adds no Lean theorem,
-proof-map badge, or claim that the general fundamental-matrix theorem has been
-formalized in the project. No Lean source or existing proof claim is changed.
+Publication still runs through the existing verified reader workflow. Existing
+reader changes are delimited incoming links; stripping those additions recovers
+the original bytes. Proof data and Lean sources are unchanged. The publication
+manifest records the documentation revision separately from the existing proof
+source; no additional formalized theorem is claimed.

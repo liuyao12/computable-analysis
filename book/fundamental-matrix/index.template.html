@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Discover the fundamental matrix through Picard iteration: one convergent construction for linear differential equations, variable coefficients and forcing. Four worked examples and an exact-rational interactive notebook.">
+<meta name="description" content="Discover the fundamental matrix through Picard iteration: one convergent construction for linear differential equations, variable coefficients and forcing. Nonlinear examples, four linear worked examples, and an interactive notebook.">
 <title>Fundamental Matrix — from Picard iteration to every linear initial-value problem</title>
 <style>/*__STYLE__*/</style>
 </head>
@@ -12,7 +12,7 @@
 <header class="topbar">
   <a class="brand" href="#top">Fundamental Matrix</a>
   <nav aria-label="Chapters">
-    <a href="#iteration">Iteration</a><a href="#matrix">The matrix</a><a href="#forcing">Forcing</a><a href="#examples">Examples</a><a href="#convergence">Convergence</a>
+    <a href="#iteration">Iteration</a><a href="#nonlinear">Nonlinear examples</a><a href="#matrix">The matrix</a><a href="#forcing">Forcing</a><a href="#examples">Examples</a><a href="#convergence">Convergence</a>
   </nav>
 </header>
 <div class="reading-progress" aria-hidden="true"><span id="progress"></span></div>
@@ -22,7 +22,7 @@
     <p class="eyebrow">Differential equations / one construction</p>
     <h1>Fundamental<br>Matrix</h1>
     <p class="dek">Start with Picard iteration. Build one matrix. Reuse it for every initial state and every forcing term.</p>
-    <p class="intro">A linear differential equation need not be a puzzle about which substitution to try. Repeated integration gives a common construction, whether the coefficients are constant or variable, whether there is a forcing term or not.</p>
+    <p class="intro">Picard iteration begins before linearity enters. Work through two nonlinear equations, then see how linearity turns the same repeated integration into a reusable matrix—whether the coefficients are constant or variable, with or without forcing.</p>
     <p class="reading-note">The examples at the right follow the text. Change the number of iterations and watch a solution emerge.</p>
     <a class="mobile-lab-link" href="#lab">Open the interactive notebook ↓</a>
   </section>
@@ -46,9 +46,11 @@
       y^{[2]}(t)&=1+t+\frac{t^2}{2},\\
       y^{[n]}(t)&=\sum_{k=0}^{n}\frac{t^k}{k!}.
     \end{aligned}\]
-    <p>The exponential series appears without being guessed. We will do the same with matrices, and with a forcing term already present.</p>
+    <p>The exponential series appears without being guessed. First try two nonlinear equations. Then repeat the construction with matrices, and with a forcing term already present.</p>
     <p class="prompt">Try it: increase \(N\) in the notebook. The solid curve is the actual \(N\)-th Picard iterate, not a numerical time-stepping solution.</p>
   </section>
+
+  <!--__NONLINEAR_EXAMPLES__-->
 
   <section id="matrix" data-scene="scalar">
     <p class="eyebrow">02 / What linearity gives us</p>
@@ -225,8 +227,8 @@
       <p>This follows by bounding successive differences, starting with \(\|x^{[1]}(t)-x^{[0]}(t)\|\le(MR+B)t\). The displayed bound is rounded upward. For a terminating series, it bounds the actual remaining polynomial directly. If the exact polynomial residual is zero, it reports zero truncation error.</p>
       <p>If \(M=0\), the first iterate is exact and the zeroth has error at most \(BT\). These are mathematical truncation bounds; they do not enclose the floating-point conversion and rendering used to draw the curves.</p>
     </details>
-    <div class="aside-note"><strong>Construction versus computation.</strong> In these examples, polynomial matrix multiplication and integration use exact rational coefficients. For more general computable coefficients, evaluating the integrals also needs a suitable representation and controlled integration errors. Continuity of unspecified input functions alone is not a numerical input format.</div>
-    <p class="closing">One iteration. One fundamental matrix. Constant coefficients, variable coefficients and forcing are not separate subjects—they are different instances of the same construction.</p>
+    <div class="aside-note"><strong>A solution need not be an elementary expression.</strong> The integral series defines the solution even when its terms have no elementary antiderivatives. In the polynomial examples, every finite iterate can be calculated explicitly. The convergence estimates explain why those finite expressions approach the required solution.</div>
+    <p class="closing">Picard iteration is the common starting point. For linear equations, it produces one fundamental matrix: constant coefficients, variable coefficients and forcing become instances of the same construction.</p>
   </section>
 
   <footer id="sources" class="sources">
@@ -234,7 +236,7 @@
     <p id="ref1"><strong>[1]</strong> Bassam Bamieh, <a href="https://arxiv.org/abs/2204.06104" target="_blank" rel="noopener">A Tutorial on Solution Properties of State Space Models of Dynamical Systems</a> (2022). A unified treatment of Picard iteration, Volterra operators and solution formulas.</p>
     <p id="ref2"><strong>[2]</strong> Michael Baake and Ulrike Schlägel, <a href="https://arxiv.org/abs/1011.1775" target="_blank" rel="noopener">The Peano–Baker Series</a> (2011; revised preprint 2025). Ordered integrals, convergence and explicit examples.</p>
     <p id="ref3"><strong>[3]</strong> NIST Digital Library of Mathematical Functions, <a href="https://dlmf.nist.gov/9.2" target="_blank" rel="noopener">§9.2, Airy’s differential equation</a>. Standard Airy bases and normalizations.</p>
-    <p class="technical-note">The derivations and worked computations are included on the page. The interactive core uses reduced BigInt fractions; only plotting uses floating point. Equations are native MathML compiled from LaTeX. No network requests, external fonts or numerical ODE solver are required. This is an expository notebook, not a claim of a completed Lean formalization.</p>
+    <p class="technical-note">The solid curves are genuine Picard iterates, computed by polynomial multiplication and integration with exact rational coefficients. The dashed curves are independent reference solutions (a longer series for the Airy example). Decimal displays and drawings use floating point; the stated error bounds concern the mathematical iterates.</p>
   </footer>
 </article>
 
@@ -244,6 +246,8 @@
     <label for="model" class="sr-only">Equation</label>
     <select id="model">
       <option value="exponential">Picard makes the exponential</option>
+      <option value="growth">Nonlinear: quadratic growth</option>
+      <option value="saturation">Nonlinear: saturation</option>
       <option value="scalar">Variable coefficient + forcing</option>
       <option value="oscillator">Forced oscillator</option>
       <option value="triangular">Noncommuting, finite series</option>
@@ -271,22 +275,25 @@
     <details class="lab-details">
       <summary>The exact polynomial behind the curve</summary>
       <div id="polynomial" class="polynomial"></div><p id="poly-note" class="small-note"></p>
-      <div class="matrix-label">The homogeneous block of the partial sum, at the inspection time</div>
+      <div id="matrix-panel"><div class="matrix-label">The homogeneous block of the partial sum, at the inspection time</div>
       <div id="matrix-value" class="matrix-value"></div>
-      <p class="small-note">The matrix shown is an approximation. It is independent of the initial state and forcing amplitude.</p>
+      <p class="small-note">The matrix shown is an approximation. It is independent of the initial state and forcing amplitude.</p></div>
     </details>
-    <p class="lab-footnote">Exact rational iteration · floating-point drawing<br>No Runge–Kutta or time-step simulation is hidden here.</p>
+    <p class="lab-footnote">Exact polynomial iteration · floating-point drawing</p>
   </div>
 </aside>
 </main>
 
 <template id="eq-exponential">\[y'=y,\qquad y(0)=a\]</template>
+<template id="eq-growth">\[y'=y^2,\qquad y(0)=1\]</template>
+<template id="eq-saturation">\[y'=1-y^2,\qquad y(0)=0\]</template>
 <template id="eq-scalar">\[y'=2ty+2\lambda t,\qquad y(0)=a\]</template>
 <template id="eq-oscillator">\[y''+y=\lambda\]</template>
 <template id="eq-triangular">\[x'=A(t)x+\lambda e_3\]</template>
 <template id="eq-airy">\[y''=ty+\lambda\]</template>
 
 <script>/*__ENGINE__*/</script>
+<script>/*__NONLINEAR__*/</script>
 <script>/*__APP__*/</script>
 </body>
 </html>

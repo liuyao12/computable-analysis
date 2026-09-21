@@ -19,8 +19,9 @@ function convert(tex,display){
   count++;return mml;
 }
 let html=fs.readFileSync(path.join(__dirname,'index.template.html'),'utf8');
+html=html.replace('<!--__NONLINEAR_EXAMPLES__-->',()=>fs.readFileSync(path.join(__dirname,'nonlinear.html'),'utf8'));
 html=html.replace(/\\\[([\s\S]*?)\\\]/g,(_,s)=>convert(s,true));
 html=html.replace(/\\\(([\s\S]*?)\\\)/g,(_,s)=>convert(s,false));
-for(const [marker,file] of [['STYLE','style.css'],['ENGINE','engine.js'],['APP','app.js']])html=html.replace(`/*__${marker}__*/`,()=>fs.readFileSync(path.join(__dirname,file),'utf8'));
+for(const [marker,file] of [['STYLE','style.css'],['ENGINE','engine.js'],['NONLINEAR','nonlinear.js'],['APP','app.js']])html=html.replace(`/*__${marker}__*/`,()=>fs.readFileSync(path.join(__dirname,file),'utf8'));
 const dest=process.argv[2]||path.join(__dirname,'..','fundamental-matrix.html');
 fs.writeFileSync(dest,html);console.log(`Built ${dest}; ${count} equations, ${Buffer.byteLength(html)} bytes.`);

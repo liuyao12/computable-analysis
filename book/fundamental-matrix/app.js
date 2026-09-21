@@ -10,6 +10,9 @@
     const version=++modelVersion;
     state.id=id;cache=E.build(id);const m=cache.model;
     if(defaults){state.initial=[...m.initial];state.force=m.force;state.N=m.N;state.component=0;$('time').value=65;}
+    state.N=Math.min(state.N,m.maxN||36);
+    $('iterations').max=m.maxN||36;
+    $('data-details').hidden=!!m.nonlinear;$('matrix-panel').hidden=!!m.nonlinear;
     $('model').value=id;$('iterations').value=state.N;$('force').value=state.force;
     $('force').disabled=id==='exponential';
     $('model-equation').innerHTML=$('eq-'+id).innerHTML;
@@ -77,22 +80,23 @@
     const prev=[];for(let k=Math.max(0,N-3);k<N;k++)prev.push(E.solutionPolynomials(cache,k,state.initial,state.force)[component]);
     draw(x[component],prev,E.reference(m,state.initial,state.force),t.number());
     $('n-label').textContent=N;$('time-label').textContent=fmt(t.number(),3);$('force-label').textContent=state.force;
-    $('minus').disabled=N===0;$('plus').disabled=N===36;
+    $('minus').disabled=N===0;$('plus').disabled=N===(m.maxN||36);
     $('value-name').textContent=`${m.labels[component]} at t = ${fmt(t.number(),3)}`;
     $('value').textContent='≈ '+fmt(E.evaluate(x[component],t).number());
     $('bound').innerHTML=up.zero?'0 <small>(exact)</small>':`≤ ${up.mantissa}${up.exponent===0?'':` × 10<sup>${up.exponent}</sup>`}`;
     $('bound-note').textContent=up.zero?'The polynomial residual is identically zero: this iterate is the exact solution.':`For every t in [0, ${fmt(m.T.number(),3)}], all coordinates. A conservative exact-series bound, rounded upward; drawing errors are not included.`;
+    if(m.nonlinear)$('bound-note').textContent=E.nonlinearBoundNote(m.id,N);
     const p=mathPolynomial(x[component],m.labels[component],N);$('polynomial').innerHTML=p.html;
     $('poly-note').textContent=(p.total>p.shown?`First ${p.shown} of ${p.total} nonzero terms shown. `:'All terms shown. ')+`N counts Picard iterations, not polynomial degree (here ${x[component].length-1}).`;
-    $('matrix-value').innerHTML=matrixMarkup(cache.sums[N],t);
+    $('matrix-value').innerHTML=m.nonlinear?'':matrixMarkup(cache.sums[N],t);
   }
   $('model').addEventListener('change',()=>{$('follow').checked=false;loadModel($('model').value);});
-  $('iterations').addEventListener('input',()=>{state.N=Number($('iterations').value);queue();});
+  $('iterations').addEventListener('input',()=>{state.N=Math.max(0,Math.min(cache.model.maxN||36,Number($('iterations').value)));queue();});
   $('time').addEventListener('input',queue);
   $('component').addEventListener('change',()=>{state.component=Number($('component').value);queue();});
   $('force').addEventListener('input',()=>{state.force=Number($('force').value);queue();});
   $('minus').addEventListener('click',()=>{state.N=Math.max(0,state.N-1);$('iterations').value=state.N;queue();});
-  $('plus').addEventListener('click',()=>{state.N=Math.min(36,state.N+1);$('iterations').value=state.N;queue();});
+  $('plus').addEventListener('click',()=>{state.N=Math.min(cache.model.maxN||36,state.N+1);$('iterations').value=state.N;queue();});
   $('reset').addEventListener('click',()=>loadModel(state.id));
   const chapters=[...document.querySelectorAll('section[data-scene]')];
   let scrollPending=false;

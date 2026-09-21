@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Add an expository ODE page without altering the verified proof snapshot."""
+"""Publish a standalone classical ODE exposition within the existing reader site."""
 from __future__ import annotations
 import argparse, hashlib, json, re, subprocess
 from pathlib import Path
@@ -32,16 +32,15 @@ def main():
         if not path.is_file():
             raise SystemExit(f'Missing reader input: {path}')
     proof_manifest = json.loads((site / 'reading/manifest.json').read_text())
-    # All existing bytes are recorded. Root reader HTML receives only delimited
-    # additions; proof reports, assets, and reference pages are byte-preserved.
+    # Existing reader HTML receives only delimited incoming links. Proof reports,
+    # reference pages, and assets remain byte-identical.
     before = {str(p.relative_to(site)): (hashlib.sha256(ADDITION.sub('', p.read_text()).encode()).hexdigest() if p.parent == site and p.suffix == '.html' else digest(p)) for p in site.rglob('*')
               if p.is_file() and p.name not in [PAGE, 'fundamental-matrix-edition.json']}
     changed = []
     for path in sorted(site.glob('*.html')):
         if path.name == PAGE:
             continue
-        original = path.read_text()
-        original = ADDITION.sub('', original)
+        original = ADDITION.sub('', path.read_text())
         match = NAV.search(original)
         if not match:
             continue
@@ -50,37 +49,25 @@ def main():
         pos = match.start() + (anchor.end() if anchor else nav.rfind('</nav>'))
         text = original[:pos] + marked(ENTRY) + original[pos:]
         if path == home:
-            snippet = '<section id="fundamental-matrix-link" class="fm-reader-link"><h2>Fundamental Matrix</h2><p>Picard iteration builds one solution operator for linear differential equations, with variable coefficients and forcing. Work through the examples in an exact-rational interactive notebook.</p><p><a href="fundamental-matrix.html">Read the page →</a></p></section>'
+            snippet = '<section id="fundamental-matrix-link" class="fm-reader-link"><h2>Fundamental Matrix</h2><p>A standalone introduction to Picard iteration: nonlinear growth and saturation, followed by one solution operator for linear equations with variable coefficients and forcing.</p><p><a href="fundamental-matrix.html">Read the interactive page →</a></p></section>'
             text = text.replace('</article>', marked(snippet) + '</article>', 1)
         if path == ode:
-            snippet = '<aside class="fm-reader-link"><p><a href="fundamental-matrix.html"><strong>Fundamental Matrix — an interactive exposition</strong></a></p><p>Begin with Picard iteration; obtain the general solution, forcing term and worked examples from the same construction. The notebook is an explanatory companion to this chapter, not a new Lean verification claim.</p></aside>'
+            snippet = '<aside class="fm-reader-link"><p><a href="fundamental-matrix.html"><strong>Fundamental Matrix — an interactive exposition</strong></a></p><p>Begin with explicit nonlinear Picard iterates; then obtain the linear solution, forcing term and worked examples from the same construction.</p></aside>'
             text = re.sub(r'(<h1\b[^>]*>[\s\S]*?</h1>)', lambda m: m[0] + marked(snippet), text, count=1)
         path.write_text(text)
         changed.append(str(path.relative_to(site)))
     assert PAGE in home.read_text() and PAGE in ode.read_text()
     subprocess.run(['node', str(SOURCE / 'build.cjs'), str(site.resolve() / PAGE)], check=True)
     page = (site / PAGE).read_text()
-    nav_match = NAV.search(home.read_text())
-    assert nav_match, 'The book navigation must remain available.'
-    nav = BeautifulSoup(nav_match.group(), 'html.parser').nav
-    nav['id'] = 'fm-book-contents'
-    nav['aria-label'] = 'Computable Analysis book contents'
-    for a in nav.select('a.current'):
-        a['class'] = [c for c in a.get('class', []) if c != 'current']
-        a.attrs.pop('aria-current', None)
-    current = nav.find('a', href=PAGE)
-    current['class'] = ['current']
-    current['aria-current'] = 'page'
-    for parent in current.parents:
-        if parent.name == 'details':
-            parent['open'] = ''
-    header = '<header class="topbar"><a class="brand" href="index.html">Computable <em>Analysis</em></a><details class="book-menu"><summary>Contents</summary>' + str(nav) + '</details><nav class="local-nav" aria-label="On this page"><a href="#iteration">Iteration</a><a href="#matrix">The matrix</a><a href="#forcing">Forcing</a><a href="#examples">Examples</a><a href="#convergence">Convergence</a></nav></header>'
-    page = re.sub(r'<header class="topbar">[\s\S]*?</header>', lambda _: header, page, count=1)
-    page = re.sub(r'<title>[\s\S]*?</title>', '<title>Fundamental Matrix · Computable Analysis</title>', page, count=1)
-    page = page.replace('Differential equations / one construction', 'Computable Analysis / Differential equations')
-    page = page.replace('<footer id="sources"', '<p class="book-return"><a href="ch-differential-equations.html">← Differential equations chapter</a> · <a href="index.html">Book contents</a></p><footer id="sources"', 1)
+    # Keep the authored title and in-page navigation. Hosting in the book does
+    # not add project branding, proof-status text, or a book contents menu.
     page = page.replace('</head>', '<style>' + (SOURCE / 'site.css').read_text() + '</style></head>', 1)
     page = page.replace('</body>', '<script>' + (SOURCE / 'site.js').read_text() + '</script></body>', 1)
+    assert 'computable analysis' not in page.lower()
+    assert 'computable-analysis' not in page.lower()
+    document = BeautifulSoup(page, 'html.parser')
+    assert document.select_one('.brand')['href'] == '#top'
+    assert document.select_one('#nonlinear') and document.select_one('#saturation')
     (site / PAGE).write_text(page)
     for name, sha in before.items():
         path = site / name
@@ -93,16 +80,18 @@ def main():
         'documentationRevision': args.revision,
         'proofSourceCommit': proof_manifest['proofSourceCommit'],
         'newLeanProofsClaimed': False, 'leanSourceModified': False,
+        'standalonePresentation': True, 'nonlinearExamples': ['growth', 'saturation'],
         'sourceDirectory': 'book/fundamental-matrix',
-        'arithmetic': 'Exact BigInt rational polynomial matrix iteration',
+        'arithmetic': 'Exact BigInt rational polynomial Picard iteration',
         'changedReaderPages': changed, 'originalFileHashes': before,
         'pageSha256': digest(site / PAGE),
         'checks': {'originalBytesOutsideMarkedAdditionsPreserved': True,
                    'proofSnapshotPreserved': True, 'homeLinked': True,
-                   'differentialEquationsChapterLinked': True}
+                   'differentialEquationsChapterLinked': True,
+                   'standalonePresentation': True, 'nonlinearExamplesIncluded': True}
     }
     (site / 'reading/fundamental-matrix-edition.json').write_text(json.dumps(report, indent=2) + '\n')
-    print(f'Integrated {PAGE}; linked from {len(changed)} reader pages; proof data preserved.')
+    print(f'Integrated standalone {PAGE}; linked from {len(changed)} reader pages; proof data preserved.')
 
 if __name__ == '__main__':
     main()
