@@ -1,0 +1,12 @@
+import ComputableAnalysis.AlgebraicODE.Tests
+
+#print axioms ComputableAnalysis.AlgebraicODE.Expr.evalRaw_valid
+#print axioms ComputableAnalysis.AlgebraicODE.Expr.evalRaw_equiv
+#print axioms ComputableAnalysis.AlgebraicODE.Expr.evalRaw_ofRat
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.polynomial_classification
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.polynomial_equation
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.radical_euler
+#print axioms ComputableAnalysis.AlgebraicODE.Painleve.affine_classification
+#print axioms ComputableAnalysis.AlgebraicODE.Painleve.simple_pole_classification
+#print axioms ComputableAnalysis.AlgebraicODE.Painleve.poleSolution
+#print axioms ComputableAnalysis.AlgebraicODE.Tests.negativePole_represented

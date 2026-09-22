@@ -123,3 +123,11 @@ Add a theorem when it contributes a new evaluator, domain, quantitative
 estimate, convergence certificate, or representation edge. Reuse finite
 algebra and combinatorics. Keep one representative of a routine family, and
 derive scalar, sign, degree, and finite-piece variants by transport.
+
+## Fuchs–Painlevé subproject
+
+Import `ComputableAnalysis.AlgebraicODE` for polynomial differential residuals,
+Euler–Fuchs polynomial coefficient classification, and Painlevé II algebraic
+seeds with actual interval derivative certificates. The
+[subproject ledger and comparison research](docs/FUCHS_PAINLEVE.md) separates
+checked results from the open general classification. No Mathlib reals are used.

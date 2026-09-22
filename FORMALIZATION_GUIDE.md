@@ -375,3 +375,12 @@ the all-degree arctangent polynomial order obligation. Verification and
 elaborated dependency separation are recorded by `scripts/check_leibniz.lean`.
 No new canonical π, general integration operator, Basel or Fourier result
 is introduced by this benchmark.
+
+## Algebraic ODE boundary
+
+`AlgebraicODE.Expr` evaluates residuals on valid `ComplexRaw` inputs and respects
+overlap equivalence. A residual alone does not certify a derivative. Use
+`Painleve.AlgebraicSolutionOn` to package both finite-difference certificates,
+the ODE, and a nonzero algebraic relation for one rational interval evaluator.
+`Fuchs.radical_euler` assumes the differentiated curve identity; it does not
+construct or differentiate a branch. See [scope and audit](docs/FUCHS_PAINLEVE.md).
