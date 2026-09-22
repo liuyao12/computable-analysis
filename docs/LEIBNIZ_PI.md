@@ -90,7 +90,12 @@ complete transitive project-declaration closures are written to
 The public source-import closure contains only project modules and
 `Init.Grind.Ordered.Rat`, with no Mathlib dependency.
 
-The reader publication adds only a static dependency note to the existing
-series chapter. It retains the pinned manuscript, cosine, Cartwright, Wallis,
+The reader publication adds a dependency note and a linked interactive mathematical
+map of the two native proofs and Mathlib’s Abel-limit proof. Its 17 source-linked
+bundles emphasize mathematical arguments, with route filters and an accessible
+reading outline. Arrows summarize dependencies across intermediate lemmas; this
+curated graph is distinct from the complete elaborated native declaration audit.
+The Mathlib sources are pinned to `338b8c00bd151fa07a0350cc17442e6eeda734e8`. It retains the pinned manuscript, cosine, Cartwright, Wallis,
 beta, theorem-map data, and existing pages, and identifies the new proof source
-separately. No interactive dependency graph or multi-π UI is added.
+separately. The graph changes the reader presentation only; it adds no new Lean theorem
+or translation between the native and Mathlib π objects.

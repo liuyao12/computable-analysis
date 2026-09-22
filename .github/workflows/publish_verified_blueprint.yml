@@ -193,6 +193,10 @@ jobs:
           lake build ComputableAnalysis.AlgebraicODE.Tests | tee algebraic-ode-reports/build.log
           lake env lean scripts/check_algebraic_ode.lean | tee algebraic-ode-reports/axioms.log
           python3 .github/reader-edition/algebraic_ode.py --site site --revision "$GITHUB_SHA" --audit algebraic-ode-reports/axioms.log
+      - name: Add the bundled mathematical comparison of all three Leibniz proofs
+        run: python3 .github/reader-edition/leibniz_graph.py --site site --revision "$GITHUB_SHA"
+      - name: Verify proof routes, source links, preservation and responsive graph interaction
+        run: python3 .github/reader-edition/test_leibniz_graph.py --site site --report reader-edition-tests
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -204,6 +208,7 @@ jobs:
             algebraic-ode-reports
             site/reading/algebraic-ode-edition.json
             site/reading/leibniz-benchmark.json
+            site/reading/leibniz-graph-publication.json
             site/reading/leibniz-dependency-closure.txt
             site/reading/analysis-edition.json
             site/reading/cosine-half-interval.json
@@ -321,7 +326,13 @@ jobs:
                   leibniz=get('/reading/leibniz-benchmark.json')
                   assert leibniz['proofSourceCommit']==revision
                   assert leibniz['independentProofPaths'] and leibniz['allPreviousContentPreserved']
-                  assert not leibniz['interactiveGraphAdded']
+                  assert leibniz['interactiveGraphAdded']
+                  graph=get('/reading/leibniz-graph-publication.json')
+                  assert graph['documentationRevision']==revision
+                  assert all(graph['checks'].values()) and graph['bundleCount']==17
+                  assert not graph['newLeanProofsClaimed']
+                  for name,expected in graph['artifactHashes'].items():
+                      assert hashlib.sha256(get('/'+name,True)).hexdigest()==expected,name
                   series=get('/ch-infinite-series.html',True)
                   assert hashlib.sha256(series).hexdigest()==leibniz['pageSha256']
                   assert b'id="leibniz-geometric-benchmark"' in series

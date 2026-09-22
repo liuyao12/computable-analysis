@@ -1,0 +1,511 @@
+{
+  "title": "Three proofs of the Leibniz formula",
+  "caRevision": "6b4d28951f677607f19c260ef739358daad54b2e",
+  "mathlibRevision": "338b8c00bd151fa07a0350cc17442e6eeda734e8",
+  "edgeSemantics": "Curated mathematical dependencies; a bundle may combine several intermediate lemmas. This is not a complete declaration graph.",
+  "routes": [
+    {
+      "id": 0,
+      "name": "Computational",
+      "description": "Finite estimates and geometric exhaustion"
+    },
+    {
+      "id": 1,
+      "name": "Taylor / FTC",
+      "description": "Polynomial primitives and integral order"
+    },
+    {
+      "id": 2,
+      "name": "Mathlib",
+      "description": "Power series and Abel’s endpoint theorem"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "rational",
+      "title": "Rational interval foundation",
+      "subtitle": "Explicit enclosures and shrinking widths",
+      "tag": "Shared foundation",
+      "routes": [
+        0,
+        1
+      ],
+      "col": 0,
+      "row": 0,
+      "span": 2,
+      "body": "Rational arithmetic, finite sums and explicit error bounds suffice to describe a real value by increasingly precise intervals. Agreement is proved by comparing valid enclosures. Both native routes stay inside this foundation.",
+      "refs": [
+        {
+          "label": "RealRaw",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/Basic.lean#L2719"
+        }
+      ],
+      "formula": "Exact ℚ arithmetic · certified convergence"
+    },
+    {
+      "id": "reals",
+      "title": "Completed real & complex numbers",
+      "subtitle": "Completeness, limits and infinite sums",
+      "tag": "Mathlib foundation",
+      "routes": [
+        2
+      ],
+      "col": 2,
+      "row": 0,
+      "span": 1,
+      "body": "Mathlib works with its completed real numbers and the complex numbers built from them. Its proof uses topological limits and infinite sums, including an existence theorem for the limit of an alternating series.",
+      "refs": [
+        {
+          "label": "Real",
+          "url": "https://github.com/leanprover-community/mathlib4/blob/338b8c00bd151fa07a0350cc17442e6eeda734e8/Mathlib/Data/Real/Basic.lean"
+        },
+        {
+          "label": "Real.tendsto_sum_pi_div_four",
+          "url": "https://github.com/leanprover-community/mathlib4/blob/338b8c00bd151fa07a0350cc17442e6eeda734e8/Mathlib/Analysis/Real/Pi/Leibniz.lean"
+        }
+      ],
+      "formula": "ℝ and ℂ"
+    },
+    {
+      "id": "geometry",
+      "title": "Geometric arctangent & π",
+      "subtitle": "Rational rectangle bounds and exhaustion",
+      "tag": "Shared mathematics",
+      "routes": [
+        0,
+        1
+      ],
+      "col": 0,
+      "row": 1,
+      "span": 1,
+      "body": "The geometric construction encloses the arctangent area A(1) by rational lower and upper bounds. Refinement makes their gap vanish. The existing canonical π is exactly four times this geometric value; neither route defines π by its series.",
+      "refs": [
+        {
+          "label": "four_arctanGeom_one_compute_eq_piCircleArea_compute",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/ArctanGeometry.lean#L6540"
+        },
+        {
+          "label": "arctanIntegralRectangleRaw_equiv_arctanGeom",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/ArctanGeometry.lean#L4877"
+        }
+      ],
+      "formula": "π = 4A(1)"
+    },
+    {
+      "id": "finite",
+      "title": "Finite geometric algebra",
+      "subtitle": "Even and odd polynomials bracket the kernel",
+      "tag": "Shared mathematics",
+      "routes": [
+        0,
+        1
+      ],
+      "col": 1,
+      "row": 1,
+      "span": 1,
+      "body": "Finite geometric division gives the polynomial plus an exact signed remainder. On 0 ≤ x ≤ 1 the denominator is positive, so consecutive even and odd partial polynomials bracket 1/(1+x²). This is finite algebra and does not assume convergence of the kernel series at x = 1.",
+      "refs": [
+        {
+          "label": "one_div_one_add_square_eq_partial_add_remainder",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/Taylor.lean#L1168"
+        },
+        {
+          "label": "finite_geometric_identity",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/ArctanTaylorRemainder.lean#L39"
+        }
+      ],
+      "formula": "1/(1+x²) = Pₙ(x) + (−1)ⁿ⁺¹x²ⁿ⁺²/(1+x²)"
+    },
+    {
+      "id": "log",
+      "title": "Complex logarithm & trigonometry",
+      "subtitle": "Series for log; arctan as an inverse of tan",
+      "tag": "Mathlib analysis",
+      "routes": [
+        2
+      ],
+      "col": 2,
+      "row": 1,
+      "span": 1,
+      "body": "The complex arctangent is expressed using complex logarithms. Logarithmic Taylor series produce its power series; restriction to the real axis gives the real expansion. Real trigonometry also supplies continuity of arctan and the endpoint identity arctan(1) = π/4.",
+      "refs": [
+        {
+          "label": "Complex.hasSum_arctan",
+          "url": "https://github.com/leanprover-community/mathlib4/blob/338b8c00bd151fa07a0350cc17442e6eeda734e8/Mathlib/Analysis/SpecialFunctions/Complex/Arctan.lean"
+        },
+        {
+          "label": "Real.arctan_one",
+          "url": "https://github.com/leanprover-community/mathlib4/blob/338b8c00bd151fa07a0350cc17442e6eeda734e8/Mathlib/Analysis/SpecialFunctions/Trigonometric/Arctan.lean"
+        }
+      ],
+      "formula": "arctan(1) = π/4"
+    },
+    {
+      "id": "alternating",
+      "title": "Alternating enclosures",
+      "subtitle": "Adjacent sums differ by the next term",
+      "tag": "Shared mathematics",
+      "routes": [
+        0,
+        1
+      ],
+      "col": 0,
+      "row": 2,
+      "span": 1,
+      "body": "The magnitudes 1/(2k+1) decrease to zero with an explicit rate. Adjacent alternating sums bound all later sums, giving valid rational intervals. The first omitted term also supplies the classical remainder bound for every inclusive partial sum.",
+      "refs": [
+        {
+          "label": "interval_remainder",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/AlternatingRemainder.lean#L9"
+        },
+        {
+          "label": "leibnizRaw_valid",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/LeibnizPi.lean#L44"
+        }
+      ],
+      "formula": "sₙ = Σₖ₌₀ⁿ (−1)ᵏ/(2k+1)"
+    },
+    {
+      "id": "primitive",
+      "title": "Polynomial primitives",
+      "subtitle": "Finite differences certify the power rule",
+      "tag": "Taylor / FTC",
+      "routes": [
+        1
+      ],
+      "col": 1,
+      "row": 2,
+      "span": 1,
+      "body": "Each monomial has the primitive x^(m+1)/(m+1), with a quantitative finite-difference error bound. Addition and rational scaling assemble these primitive certificates for every finite arctangent polynomial.",
+      "refs": [
+        {
+          "label": "kernelPrimitiveSecantBound",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/ArctanTaylorRemainder.lean#L61"
+        }
+      ],
+      "formula": "∫₀¹ x²ᵏ dx = 1/(2k+1)"
+    },
+    {
+      "id": "power",
+      "title": "Arctangent power series",
+      "subtitle": "An identity strictly inside the unit interval",
+      "tag": "Mathlib analysis",
+      "routes": [
+        2
+      ],
+      "col": 2,
+      "row": 2,
+      "span": 1,
+      "body": "For |x| < 1, the infinite series of odd powers sums to arctan(x). This alone does not permit substituting x = 1: the endpoint is outside this theorem’s hypotheses. Abel’s theorem supplies that missing step.",
+      "refs": [
+        {
+          "label": "Real.hasSum_arctan",
+          "url": "https://github.com/leanprover-community/mathlib4/blob/338b8c00bd151fa07a0350cc17442e6eeda734e8/Mathlib/Analysis/SpecialFunctions/Complex/Arctan.lean"
+        }
+      ],
+      "formula": "arctan x = Σₖ≥₀ (−1)ᵏx²ᵏ⁺¹/(2k+1)"
+    },
+    {
+      "id": "mesh",
+      "title": "Finite rectangle estimates",
+      "subtitle": "Compare polynomial sums with exact primitives",
+      "tag": "Computational",
+      "routes": [
+        0
+      ],
+      "col": 0,
+      "row": 3,
+      "span": 1,
+      "body": "On each rational cell, finite algebra bounds the difference between a polynomial rectangle sum and the corresponding primitive difference. Summing over a finite partition gives an explicit error controlled by its mesh. No derivative or FTC certificate enters this route.",
+      "refs": [
+        {
+          "label": "kernelPartial_rightRectangle_error_bound",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/Taylor.lean#L1081"
+        },
+        {
+          "label": "kernelPartialRightRectangleSum_error_bound",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/PiProofs.lean#L1303"
+        }
+      ],
+      "formula": "rectangle sum = finite primitive sum + bounded error"
+    },
+    {
+      "id": "order",
+      "title": "FTC and integral order",
+      "subtitle": "Subdivision removes the finite-difference error",
+      "tag": "Taylor / FTC",
+      "routes": [
+        1
+      ],
+      "col": 1,
+      "row": 3,
+      "span": 1,
+      "body": "If a polynomial derivative is bounded above or below on a rational cell, its primitive increment obeys the corresponding integral inequality. Repeated subdivision halves the error; an explicit decay bound removes it. This holds for every polynomial degree.",
+      "refs": [
+        {
+          "label": "integral_lower",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/FiniteSecantIntegralOrder.lean#L56"
+        },
+        {
+          "label": "exactCellOrder",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/FiniteSecantIntegralOrder.lean#L77"
+        },
+        {
+          "label": "kernelPartial_exactCellOrder",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/ArctanTaylorRemainder.lean#L89"
+        }
+      ],
+      "formula": "f ≤ g  ⇒  ∫f ≤ ∫g"
+    },
+    {
+      "id": "limit",
+      "title": "The alternating series converges",
+      "subtitle": "Existence of a real limit L",
+      "tag": "Mathlib analysis",
+      "routes": [
+        2
+      ],
+      "col": 2,
+      "row": 3,
+      "span": 1,
+      "body": "Monotonicity of 1/(2k+1) and convergence to zero give a real limit L for the alternating partial sums. This identifies an existing limit but does not yet identify its value as π/4.",
+      "refs": [
+        {
+          "label": "Antitone.tendsto_alternating_series_of_tendsto_zero",
+          "url": "https://github.com/leanprover-community/mathlib4/blob/338b8c00bd151fa07a0350cc17442e6eeda734e8/Mathlib/Analysis/Real/Pi/Leibniz.lean"
+        }
+      ],
+      "formula": "Σₖ<n (−1)ᵏ/(2k+1) → L"
+    },
+    {
+      "id": "overlap",
+      "title": "Vanishing error & exhaustion",
+      "subtitle": "Finite estimates identify the geometric value",
+      "tag": "Computational",
+      "routes": [
+        0
+      ],
+      "col": 0,
+      "row": 4,
+      "span": 1,
+      "body": "Choose a sufficiently fine rational mesh for each polynomial degree. Its explicit error tends to zero. The polynomial brackets then compare the alternating intervals with the geometric rectangle intervals, proving that both enclose the same value.",
+      "refs": [
+        {
+          "label": "leibnizEqualsRectangleRawAtOne_finiteRiemannBridge",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/PiProofs.lean#L10201"
+        }
+      ],
+      "formula": "alternating enclosures agree with A(1)"
+    },
+    {
+      "id": "bounds",
+      "title": "Integrate the polynomial brackets",
+      "subtitle": "Squeeze the arctangent area between sums",
+      "tag": "Taylor / FTC",
+      "routes": [
+        1
+      ],
+      "col": 1,
+      "row": 4,
+      "span": 1,
+      "body": "Apply integral order to the finite geometric bounds on each rational cell. The polynomial integrals are the alternating sums of odd reciprocals. Summing the cells brackets the geometric arctangent area between consecutive sums, whose separation tends to zero.",
+      "refs": [
+        {
+          "label": "leibnizEqArea_of_kernelPartialExactCellOrderPreservation",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/PiProofs.lean#L14953"
+        }
+      ],
+      "formula": "consecutive odd-reciprocal sums bracket A(1)"
+    },
+    {
+      "id": "abel",
+      "title": "Abel’s endpoint theorem",
+      "subtitle": "Pass from the interior power series to x = 1",
+      "tag": "Mathlib analysis",
+      "routes": [
+        2
+      ],
+      "col": 2,
+      "row": 4,
+      "span": 1,
+      "body": "Abel’s theorem transfers the sum L of the alternating coefficient series to the limit of its power series as the real argument tends to 1 from below. Substituting x² and multiplying by x produces the odd-power arctangent series.",
+      "refs": [
+        {
+          "label": "tendsto_tsum_powerSeries_nhdsWithin_lt",
+          "url": "https://github.com/leanprover-community/mathlib4/blob/338b8c00bd151fa07a0350cc17442e6eeda734e8/Mathlib/Analysis/Complex/AbelLimit.lean"
+        },
+        {
+          "label": "Real.tendsto_sum_pi_div_four",
+          "url": "https://github.com/leanprover-community/mathlib4/blob/338b8c00bd151fa07a0350cc17442e6eeda734e8/Mathlib/Analysis/Real/Pi/Leibniz.lean"
+        }
+      ],
+      "formula": "limₓ→₁⁻ Σₖ≥₀ (−1)ᵏx²ᵏ⁺¹/(2k+1) = L"
+    },
+    {
+      "id": "computational",
+      "title": "Leibniz: computational proof",
+      "subtitle": "Multiply the common geometric value by four",
+      "tag": "Conclusion",
+      "routes": [
+        0
+      ],
+      "col": 0,
+      "row": 5,
+      "span": 1,
+      "body": "The alternating computation and the canonical geometric π are equivalent. Together with alternating-prefix bounds this also gives |Sₙ − π| ≤ 4/(2n+3), for every inclusive partial sum Sₙ. The proof does not use the FTC comparison.",
+      "refs": [
+        {
+          "label": "pi_eq_leibniz",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/LeibnizPi.lean#L142"
+        },
+        {
+          "label": "leibniz_stagewise_overlap",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/LeibnizPi.lean#L136"
+        },
+        {
+          "label": "pi_leibniz_remainder",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/LeibnizPi.lean#L129"
+        }
+      ],
+      "formula": "π ≃ 4(1 − 1/3 + 1/5 − ⋯)"
+    },
+    {
+      "id": "taylor",
+      "title": "Leibniz: Taylor / FTC proof",
+      "subtitle": "The same canonical π, a separate comparison",
+      "tag": "Conclusion",
+      "routes": [
+        1
+      ],
+      "col": 1,
+      "row": 5,
+      "span": 1,
+      "body": "The integrated brackets prove agreement with geometric π. The explanatory corollaries express A(1) as its finite Taylor sum plus Rₙ, with |Rₙ| ≤ 1/(2n+3). These remainder statements follow from this route’s equality; they are not prerequisites of that equality.",
+      "refs": [
+        {
+          "label": "pi_eq_leibniz_taylor",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/LeibnizPiTaylor.lean#L23"
+        },
+        {
+          "label": "arctan_taylor_integrated",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/LeibnizPiTaylor.lean#L38"
+        },
+        {
+          "label": "arctan_taylor_remainder_bound",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/LeibnizPiTaylor.lean#L57"
+        }
+      ],
+      "formula": "A(1) = sₙ + Rₙ;  |Rₙ| ≤ 1/(2n+3)"
+    },
+    {
+      "id": "mathlib",
+      "title": "Leibniz: Mathlib proof",
+      "subtitle": "Continuity identifies the endpoint limit",
+      "tag": "Conclusion",
+      "routes": [
+        2
+      ],
+      "col": 2,
+      "row": 5,
+      "span": 1,
+      "body": "Inside the interval the power series equals arctan. Continuity and uniqueness of limits identify L = arctan(1) = π/4. Mathlib’s theorem states convergence of finite partial sums to π/4 in its real numbers. It is an analogous theorem in a different foundation; this comparison does not add a formal translation between the two π objects.",
+      "refs": [
+        {
+          "label": "Real.tendsto_sum_pi_div_four",
+          "url": "https://github.com/leanprover-community/mathlib4/blob/338b8c00bd151fa07a0350cc17442e6eeda734e8/Mathlib/Analysis/Real/Pi/Leibniz.lean"
+        }
+      ],
+      "formula": "Σₖ<n (−1)ᵏ/(2k+1) → π/4"
+    }
+  ],
+  "edges": [
+    {
+      "source": "rational",
+      "target": "geometry"
+    },
+    {
+      "source": "rational",
+      "target": "finite"
+    },
+    {
+      "source": "rational",
+      "target": "alternating"
+    },
+    {
+      "source": "geometry",
+      "target": "mesh"
+    },
+    {
+      "source": "geometry",
+      "target": "bounds"
+    },
+    {
+      "source": "finite",
+      "target": "mesh"
+    },
+    {
+      "source": "finite",
+      "target": "primitive"
+    },
+    {
+      "source": "finite",
+      "target": "bounds"
+    },
+    {
+      "source": "alternating",
+      "target": "computational"
+    },
+    {
+      "source": "alternating",
+      "target": "taylor"
+    },
+    {
+      "source": "mesh",
+      "target": "overlap"
+    },
+    {
+      "source": "overlap",
+      "target": "computational"
+    },
+    {
+      "source": "primitive",
+      "target": "order"
+    },
+    {
+      "source": "order",
+      "target": "bounds"
+    },
+    {
+      "source": "bounds",
+      "target": "taylor"
+    },
+    {
+      "source": "reals",
+      "target": "log"
+    },
+    {
+      "source": "reals",
+      "target": "limit"
+    },
+    {
+      "source": "log",
+      "target": "power"
+    },
+    {
+      "source": "log",
+      "target": "mathlib"
+    },
+    {
+      "source": "power",
+      "target": "abel"
+    },
+    {
+      "source": "limit",
+      "target": "abel"
+    },
+    {
+      "source": "abel",
+      "target": "mathlib"
+    }
+  ]
+}
