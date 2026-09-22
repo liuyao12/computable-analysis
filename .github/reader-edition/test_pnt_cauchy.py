@@ -65,9 +65,9 @@ def main():
                 page.evaluate('scrollTo(0,0)')
                 page.screenshot(path=str(a.report / f'cauchy-page-{width}.png'), full_page=True)
                 page.locator('a[href="ch-complex-paths.html"]').first.click()
-                page.wait_for_url('**/ch-complex-paths.html')
+                page.wait_for_url('**/ch-complex-paths.html', wait_until='domcontentloaded')
                 page.locator('#cauchy-arctan a').click()
-                page.wait_for_url('**/cauchy-arctan.html')
+                page.wait_for_url('**/cauchy-arctan.html', wait_until='domcontentloaded')
                 assert not errors, errors
                 results.append(dict(width=width, noHorizontalOverflow=True, sourceDisclosure=True, chapterRoundTrip=True))
                 page.close()
