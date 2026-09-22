@@ -10,3 +10,16 @@ import ComputableAnalysis.AlgebraicODE.Tests
 #print axioms ComputableAnalysis.AlgebraicODE.Painleve.simple_pole_classification
 #print axioms ComputableAnalysis.AlgebraicODE.Painleve.poleSolution
 #print axioms ComputableAnalysis.AlgebraicODE.Tests.negativePole_represented
+
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.residual_split
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.indicial_obstruction
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.coeff_isSolution
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.solution_unique
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.resonance_compatibility
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.truncation_residual
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Laguerre.polynomial_exact_degree
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Laguerre.differential_equation
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Laguerre.firstDerivativeCertificate
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Laguerre.secondDerivativeCertificate
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Laguerre.algebraic_relation
+#print axioms ComputableAnalysis.AlgebraicODE.Tests.resonant_no_nonzero_leading

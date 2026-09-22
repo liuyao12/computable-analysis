@@ -13,7 +13,19 @@ EXPECTED = ['Expr.evalRaw_valid', 'Expr.evalRaw_equiv', 'Expr.evalRaw_ofRat',
             'Fuchs.polynomial_classification', 'Fuchs.polynomial_equation',
             'Fuchs.radical_euler', 'Painleve.affine_classification',
             'Painleve.simple_pole_classification', 'Painleve.poleSolution',
-            'Tests.negativePole_represented']
+            'Tests.negativePole_represented',
+            'Fuchs.Frobenius.Equation.residual_split',
+            'Fuchs.Frobenius.Equation.indicial_obstruction',
+            'Fuchs.Frobenius.Equation.coeff_isSolution',
+            'Fuchs.Frobenius.Equation.solution_unique',
+            'Fuchs.Frobenius.Equation.resonance_compatibility',
+            'Fuchs.Frobenius.Equation.truncation_residual',
+            'Fuchs.Laguerre.polynomial_exact_degree',
+            'Fuchs.Laguerre.differential_equation',
+            'Fuchs.Laguerre.firstDerivativeCertificate',
+            'Fuchs.Laguerre.secondDerivativeCertificate',
+            'Fuchs.Laguerre.algebraic_relation',
+            'Tests.resonant_no_nonzero_leading']
 
 def sha(data):
     return hashlib.sha256(data).hexdigest()
@@ -33,7 +45,7 @@ def install(site, revision, audit):
     for name in ['index.html', 'ch-differential-equations.html']:
         original = before[name].decode()
         assert MARKER not in original and '</article>' in original
-        addition = MARKER + '<section class="fm-reader-link"><h2>Fuchs–Painlevé</h2><p>Algebraic differential equations on the computable-analysis foundation: checked Euler–Fuchs coefficients and Painlevé II algebraic seeds.</p><p><a href="fuchs-painleve.html">Read the subproject and formalization comparisons →</a></p></section>' + MARKER
+        addition = MARKER + '<section class="fm-reader-link"><h2>Fuchs–Painlevé</h2><p>Algebraic differential equations on the computable-analysis foundation: formal Frobenius recurrences, certified Laguerre polynomials, and Painlevé II algebraic seeds.</p><p><a href="fuchs-painleve.html">Read the subproject and formalization comparisons →</a></p></section>' + MARKER
         updated = original.replace('</article>', addition + '</article>', 1)
         assert updated.replace(addition, '', 1) == original
         (site / name).write_text(updated)

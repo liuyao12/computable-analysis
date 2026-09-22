@@ -1,4 +1,5 @@
 import ComputableAnalysis.AlgebraicODE
+import ComputableAnalysis.AlgebraicODE.FrobeniusTests
 
 namespace ComputableAnalysis.AlgebraicODE.Tests
 open Painleve
