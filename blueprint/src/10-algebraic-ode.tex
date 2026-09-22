@@ -1,0 +1,136 @@
+\chapter{Fuchs--Painlev\'e Algebraic Differential Equations}
+\label{ch:algebraic-ode}
+
+\section{Scope and foundation}
+
+This subproject uses the project's rational interval algorithms, computable
+complex values, and explicit finite-difference derivative certificates.
+There is no Mathlib real-number dependency. The first checked milestone
+concerns the Euler--Fuchs equation and Painlev\'e I and II; the general
+Fuchs--Painlev\'e classification remains a research goal.
+
+\begin{definition}[Polynomial differential residuals]
+\label{def:algebraic-ode-residual}
+A finite expression in $x,y,y',y''$, with rational constants, addition,
+negation and multiplication, can be evaluated over rational numbers,
+rational complex numbers, or raw computable complex algorithms.
+An algebraic relation in $x,y$ includes a rational evaluation witness proving
+that its polynomial is not identically zero.
+\lean{ComputableAnalysis.AlgebraicODE.Expr}
+\lean{ComputableAnalysis.AlgebraicODE.AlgebraicRelation}
+\leanok
+\end{definition}
+
+\begin{theorem}[Represented residual semantics]
+\label{thm:algebraic-ode-runtime}
+Evaluating a polynomial expression at valid raw inputs yields a valid raw
+output and respects overlap equivalence. At exact rational inputs its
+runtime is the exact rational evaluation at every stage.
+This is a residual theorem: derivative certificates remain separate.
+\lean{ComputableAnalysis.AlgebraicODE.Expr.evalRaw_valid}
+\lean{ComputableAnalysis.AlgebraicODE.Expr.evalRaw_equiv}
+\lean{ComputableAnalysis.AlgebraicODE.Expr.evalRaw_ofRat}
+\leanok
+\end{theorem}
+
+\section{Euler--Fuchs polynomial solutions}
+
+\begin{theorem}[Coefficient classification]
+\label{thm:fuchs-polynomial-classification}
+For $xy'=r y$ and a finite rational polynomial $p=\sum_k c_kx^k$,
+the coefficient equations are $(k-r)c_k=0$ for every $k$.
+They hold exactly when each nonzero coefficient has $k=r$, and imply
+$x p'(x)=r p(x)$ under the existing executable polynomial derivative.
+In particular, a nonzero polynomial solution forces $r$ to be a
+nonnegative integer.
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.polynomial_classification}
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.polynomial_equation}
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.exponent_of_nonzero_polynomial}
+\leanok
+\end{theorem}
+
+For a radical relation $y^n=x^m$, the checked algebraic elimination derives
+$nxy'=my$ from the differentiated relation, provided $y\ne0$ and $n\ne0$.
+It does not construct a branch or prove implicit differentiation.
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.radical_euler}
+\leanok
+
+\section{Painlev\'e equations and algebraic seeds}
+
+We use the DLMF convention
+\[
+  \mathrm{P_I}: y''=6y^2+x,\qquad
+  \mathrm{P_{II}}(\alpha): y''=2y^3+xy+\alpha.
+\]
+PI has no rational constant solution. For PII, the only rational affine
+solution is $y=0$, at $\alpha=0$.
+\lean{ComputableAnalysis.AlgebraicODE.Painleve.first_no_constant}
+\lean{ComputableAnalysis.AlgebraicODE.Painleve.affine_classification}
+\leanok
+
+\begin{theorem}[Simple-pole classification and analytic certificates]
+\label{thm:painleve-simple-pole}
+On the punctured rational line, $y=c/x$, with
+$y'=-c/x^2$ and $y''=2c/x^3$, satisfies PII exactly when
+\[
+  \alpha=-c,\qquad c\in\{0,1,-1\}.
+\]
+On every positive rational interval the constructed solution package
+contains both two-sided finite-difference derivative certificates, the ODE
+identity, and the nonzero algebraic relation $xy-c=0$ for the same evaluator.
+The represented-complex residual also vanishes at every nonzero rational
+input. Thus these are checked algebraic seeds, not merely assigned jets.
+\lean{ComputableAnalysis.AlgebraicODE.Painleve.simple_pole_classification}
+\lean{ComputableAnalysis.AlgebraicODE.Painleve.poleSolution}
+\lean{ComputableAnalysis.AlgebraicODE.Tests.negativePole_represented}
+\leanok
+\end{theorem}
+
+The sign symmetry and the Riccati reduction at $\alpha=1/2$ are checked
+algebraic identities. The latter explicitly assumes differentiated Riccati
+data. Arbitrary-degree polynomial, rational, and algebraic solution
+classifications have not yet been proved.
+
+\section{Existing work and next milestones}
+
+A search of public web and GitHub results on 22 September 2026 did not
+locate an inspectable formalization of the Fuchs--Painlev\'e algebraic-solution
+classification. This is a search result, not a nonexistence claim.
+
+\begin{itemize}
+\item \href{https://users-cs.au.dk/spitters/Picard.pdf}
+{Makarov and Spitters: the Picard algorithm in Coq} uses constructive
+exact reals from CoRN/MathClasses, with
+\href{https://github.com/EvgenyMakarov/corn/tree/master/ode}{public ODE source}.
+It is the closest foundation-level comparison, although its completion and
+function-space approach differs from our finite interval certificates.
+\item \href{https://isa-afp.org/entries/Ordinary_Differential_Equations.html}
+{Isabelle AFP: Ordinary Differential Equations} provides existence,
+uniqueness, flows, and associated verified numerical algorithms. It is a
+substantial comparison for analytic ODE specifications, with a different
+number foundation.
+\item \href{https://cfhp.univ-lille.fr/files/students/Master-2026-Coqodi.pdf}
+{Solving Differential Equations in Rocq} is a spring 2026 research proposal
+that explicitly includes Painlev\'e I among target examples. It concerns
+validated numerical approximation; the proposal is not evidence of a
+completed implementation or algebraic classification.
+\item \href{https://arxiv.org/abs/2408.15180}
+{Mason--Stothers and its corollaries in Lean 4} supplies an adjacent
+comparison for polynomial derivative and degree arguments. It is not a
+Painlev\'e formalization.
+\item \href{https://dlmf.nist.gov/32}{DLMF Chapter 32} supplies the equation
+and seed conventions, rather than machine-checked proofs.
+\end{itemize}
+
+Next milestones are normalized polynomial/rational differential arithmetic,
+certified algebraic branches and Puiseux charts, regular-singular Fuchs
+theory, and a separate first-order Fuchs criterion development. Painlev\'e
+work will next address pole/degree obstructions, B\"acklund transformations,
+and rational-solution classification for PII, before III--VI and their
+parameter-dependent algebraic solutions. Analytic continuation, monodromy,
+and the general algebraic classification are open.
+
+The new modules add no custom axioms or proof placeholders. Exact
+classification proofs use standard Lean logical axioms; raw validity and
+derivative packages inherit the foundation's existing native-decision
+dependencies, exposed by the subproject's axiom audit.

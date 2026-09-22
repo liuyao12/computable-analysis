@@ -236,3 +236,11 @@ the all-degree arctangent polynomial order obligation. Verification and
 elaborated dependency separation are recorded by `scripts/check_leibniz.lean`.
 No new canonical π, general integration operator, Basel or Fourier result
 is introduced by this benchmark.
+
+## Fuchs–Painlevé algebraic ODE subproject
+
+See [the subproject ledger](docs/FUCHS_PAINLEVE.md). The first milestone checks
+Euler–Fuchs polynomial coefficients and PII simple-pole/affine candidates, with
+finite-difference certificates for the pole solutions. Next are rational
+differential algebra, certified algebraic branches, Fuchs singularity criteria,
+and Painlevé classification. General algebraic-solution classification is open.
