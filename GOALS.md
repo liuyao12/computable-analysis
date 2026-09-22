@@ -313,3 +313,17 @@ value, complex charts, general computable parameters, continuation from
 arbitrary initial data, and exhaustion of movable singularities. The global
 Painlevé property and algebraic-solution classifications are not proved.
 See `docs/FUCHS_PAINLEVE.md` for theorem names and exact scope.
+## PNT+ rectangle residue route
+
+`PDE.CauchyContour` checks literal oriented pole pullbacks, enclosure of all
+common-partition tagged sums, valid complex boxes of height at most `16/2^n`,
+and `raw_equiv_twoPiI` against the existing geometric π. Translation and
+nonzero rational dilation preserve the pole pullback. It imports only
+`CauchyPi` and finite rational-complex algebra from `HolomorphicJet`.
+
+See [the PNT+ source map and native obligations](docs/PNT_CAUCHY_ARCTAN.md).
+PNT+'s rectangle theorem for finite simple poles is an external Mathlib
+reference. Its explicit Cauchy derivative formula uses a separate circle
+integral theorem. General native residue transport, regular-part removal
+and the Cauchy integral formula are not claimed by this normalization.
+The focused audit is `scripts/check_cauchy_arctan.lean`.

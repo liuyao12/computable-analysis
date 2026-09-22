@@ -463,3 +463,17 @@ two-sided double-pole bounds. The original-equation jet identity is algebraic;
 a derivative adapter for the reconstructed value is still needed. Do not
 promote these local rational charts to a global Painlevé property, a complex
 continuation theorem, or an algebraic-solution classification.
+## Square-pole normalization and the PNT+ reference
+
+`PDE.CauchyContour` checks literal oriented pole pullbacks, enclosure of all
+common-partition tagged sums, valid complex boxes of height at most `16/2^n`,
+and `raw_equiv_twoPiI` against the existing geometric π. Translation and
+nonzero rational dilation preserve the pole pullback. It imports only
+`CauchyPi` and finite rational-complex algebra from `HolomorphicJet`.
+
+See [the PNT+ source map and native obligations](docs/PNT_CAUCHY_ARCTAN.md).
+PNT+'s rectangle theorem for finite simple poles is an external Mathlib
+reference. Its explicit Cauchy derivative formula uses a separate circle
+integral theorem. General native residue transport, regular-part removal
+and the Cauchy integral formula are not claimed by this normalization.
+The focused audit is `scripts/check_cauchy_arctan.lean`.

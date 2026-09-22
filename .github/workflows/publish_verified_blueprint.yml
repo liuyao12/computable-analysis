@@ -23,6 +23,11 @@ on:
       - 'docs/FUCHS_PAINLEVE.md'
       - 'ComputableAnalysis/PiProofs.lean'
       - 'ComputableAnalysis/LeibnizPi*.lean'
+      - 'ComputableAnalysis/PDE/CauchyContour.lean'
+      - 'ComputableAnalysis/HolomorphicJet.lean'
+      - 'scripts/check_cauchy_arctan.lean'
+      - 'docs/PNT_CAUCHY_ARCTAN.md'
+      - 'blueprint/src/13-complex-paths.tex'
       - 'ComputableAnalysis/AlternatingRemainder.lean'
       - 'ComputableAnalysis/ArctanTaylorRemainder.lean'
       - 'ComputableAnalysis/FiniteSecantIntegralOrder.lean'
@@ -210,6 +215,14 @@ jobs:
         run: python3 .github/reader-edition/leibniz_graph.py --site site --revision "$GITHUB_SHA"
       - name: Verify proof routes, source links, preservation and responsive graph interaction
         run: python3 .github/reader-edition/test_leibniz_graph.py --site site --report reader-edition-tests
+      - name: Check and publish the arctangent Cauchy normalization and PNT+ comparison
+        run: |
+          set -euo pipefail
+          mkdir -p cauchy-reports
+          lake build ComputableAnalysis.PDE.CauchyContour | tee cauchy-reports/build.log
+          lake env lean scripts/check_cauchy_arctan.lean | tee cauchy-reports/audit.log
+          python3 .github/reader-edition/pnt_cauchy.py --site site --revision "$GITHUB_SHA" --audit cauchy-reports/audit.log --closure tmp/cauchy-arctan-closure.txt
+          python3 .github/reader-edition/test_pnt_cauchy.py --site site --report reader-edition-tests
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -219,6 +232,8 @@ jobs:
             geometry-reports
             leibniz-reports
             algebraic-ode-reports
+            cauchy-reports
+            site/reading/cauchy-arctan-publication.json
             site/reading/algebraic-ode-edition.json
             site/reading/leibniz-benchmark.json
             site/reading/leibniz-graph-publication.json
@@ -365,6 +380,14 @@ jobs:
                   assert hashlib.sha256(algebraic_html).hexdigest()==algebraic['pageSha256']
                   assert 'fuchs-painleve.html' in home
                   assert 'fuchs-painleve.html' in get('/ch-differential-equations.html',True).decode()
+                  cauchy=get('/reading/cauchy-arctan-publication.json')
+                  assert cauchy['nativeProofRevision']==revision and all(cauchy['checks'].values())
+                  assert not cauchy['mathlibDependency'] and not cauchy['nativeGeneralResidueTheorem']
+                  assert not cauchy['nativeCauchyFormula']
+                  for name,expected in cauchy['artifactHashes'].items():
+                      assert hashlib.sha256(get('/'+name,True)).hexdigest()==expected,name
+                  assert hashlib.sha256(get('/ch-complex-paths.html',True)).hexdigest()==cauchy['chapterSha256']
+                  print('LIVE CAUCHY:',base+'/cauchy-arctan.html')
                   print('LIVE FUCHS-PAINLEVE:',base+'/fuchs-painleve.html')
                   print('LIVE TRANSMUTATION:',base+'/leibniz-transmutation.html')
                   print('LIVE LEIBNIZ:',base+'/ch-infinite-series.html#leibniz-geometric-benchmark')

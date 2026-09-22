@@ -88,6 +88,46 @@ Both sides are now specified computations with independent truncation and
 quadrature errors.  We have proved the identity for the supplied chart,
 not invoked it to manufacture a chart from unverified pointwise data.
 
+\section{Arctangent normalizes the Cauchy pole}
+\label{sec:cauchy-arctan}
+There is a direct rectangle route to the same normalization. Split the
+counterclockwise boundary of $[-1,1]^2$ into eight affine half-edges.
+On the right side, $z=1+iu$ gives
+\[
+ \frac{dz}{z}=\frac{u+i}{1+u^2}\,du.
+\]
+Pair opposite parameter signs and rotate through the four sides. The real
+parts cancel exactly, leaving $8i/(1+u^2)$ on $[0,1]$. Our rational boxes
+enclose every tagged sum on the common partition and have imaginary width
+at most $16/2^n$. Thus the checked square computation satisfies
+\[
+ \oint_{\partial[-1,1]^2}\frac{dz}{z}=8iA(1)=2\pi i,
+\]
+with the original geometric $\pi$. This is
+\texttt{PDE.CauchyContour.raw\_equiv\_twoPiI}; translation and rational
+nonzero dilation preserve its pole pullback.
+
+PNT+ formalizes the corresponding rectangle argument in Mathlib:
+arctangent and logarithm side primitives normalize the pole, while
+Mathlib's rectangle Cauchy theorem removes the regular part. Its checked
+finite residue theorem concerns simple poles with no boundary poles.
+Applying that theorem to
+\[
+ \frac{F(z)}{z-p}=
+ \frac{F(z)-F(p)}{z-p}+\frac{F(p)}{z-p}
+\]
+gives the Cauchy value formula once the divided difference is extended
+holomorphically across $p$. PNT+'s explicitly named derivative formula
+uses a separate Mathlib circle-integral theorem. These are external
+formal references, not imports into our foundation.
+
+The native square normalization is checked. General native contour
+transport, regular-part removal and the Cauchy integral formula still
+require their explicit subdivision, local chart and convergence bridges.
+The adjacent general contour descriptions give the mathematical program,
+not additional checked declarations supplied by this normalization.
+See the source ledger \texttt{docs/PNT\_CAUCHY\_ARCTAN.md}.
+
 \section{Known poles and finite residues}
 Suppose near a specified point $s$ the computation has a proved description
 \[
