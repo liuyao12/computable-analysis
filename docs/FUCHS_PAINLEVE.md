@@ -105,6 +105,40 @@ polynomial. The equation agrees with [DLMF 18.8, row 8](https://dlmf.nist.gov/18
 with `b=α+1`. Its origin is regular singular, but infinity is irregular: this
 is a **local** Fuchs–Frobenius application, not a globally Fuchsian equation.
 
+## Checked effective convergence
+
+`FrobeniusConvergence.lean` handles an indicial root `r` with nonnegative
+gap `A = 2*r - 1 + p₀`. Since `I(r+n)=n*(n+A)`, all positive recurrence
+denominators are at least `n²`. This includes the larger rational root and
+repeated roots. Define the computable bound
+
+```
+R = 1 + (|r|+1) * sum(abs(p coefficients)) + sum(abs(q coefficients)).
+```
+
+`Equation.coeff_growth` derives `|cₙ| ≤ |c₀|*R^n` from the recurrence. For
+rational inputs `R*|x| ≤ 1/2`, `Equation.factorRaw` computes
+`[Sₙ - 2|c₀|/2^n, Sₙ + 2|c₀|/2^n]`, where `Sₙ` has the first `n` terms.
+`factorRaw_valid` proves orderedness, nesting, and arbitrary rational
+precision; `factorRaw_contains_prefix` proves that every later partial sum
+is enclosed. The width is exactly `4|c₀|/2^n`; `factorRaw_precision` gives
+an executable precision schedule from the existing `halfDecayShift`.
+
+The reusable foundation `GeometricPowerSeries.lean` handles arbitrary signed
+coefficient streams with geometric growth, and proves same-stage overlap
+for two nonnegative radius choices about the same prefix. Such overlap
+identifies a represented value only when both evaluators are valid.
+
+Regressions instantiate the repeated-root modified Bessel equation, a
+signed nonterminating recurrence, negative inputs, and a zero leading
+coefficient. For the Bessel example the certified radius is `1/6`, and the
+box at `x=1/8`, stage 12 has width `1/1024`.
+
+This is convergence of the **Frobenius factor**, not an analytic ODE solution
+certificate. Analytic derivatives, a branch of `x^r`, and the smaller
+nonresonant root with negative root gap remain future work. The bound is
+conservative and makes no optimal-radius claim.
+
 ## Lean 4 comparison, inspected 2026-09-22
 
 Comparison here means Lean 4 theorem statements and proof architecture.
@@ -122,8 +156,10 @@ Our new `indicial_obstruction`, `coeff_isSolution`, and `solution_unique`
 provide concrete theorem-level comparison points with Ripple. Our current
 operator has order two, normalized leading coefficient `x²`, and rational
 polynomial data; Ripple's inspected construction covers higher-order
-polynomial operators and additional convergence results. Our general
-convergence and nonintegral branch construction remain missing. Our terminating
+polynomial operators and additional convergence results. Our new
+`coeff_growth` and `factorRaw_valid` cover nonnegative root gap with explicit
+rational boxes; convergence for other roots, analytic differentiation, and
+nonintegral branch construction remain missing. Our terminating
 Laguerre family instead uses finite rational evaluation and the project's
 existing finite-difference certificates, with no infinite-series limit needed.
 
@@ -151,8 +187,9 @@ equations or with Fuchsian groups.
 2. **Algebraic branches.** Strengthen the existing algebraic-function layer
    with nonzero defining polynomials, selected branches, root separation,
    quantitative implicit derivatives, and certified Puiseux charts.
-3. **Fuchs.** Extend the checked second-order formal Frobenius construction to
-   convergence bounds, certified nonintegral branches, resonant logarithmic
+3. **Fuchs.** Extend the checked second-order Frobenius convergence theorem to
+   the remaining nonresonant roots and analytic derivative certificates; add
+   certified nonintegral branches, resonant logarithmic
    solutions and more general local operators. Separately state
    and prove the first-order Fuchs criterion with its precise singularity
    hypotheses. General algebraic-solution/finite-monodromy statements require

@@ -254,9 +254,17 @@ vanishing. `Fuchs.Laguerre` constructs every natural-degree terminating solution
 of `xy''+(b-x)y'+my=0` for rational `b>0`, with exact degree when `y(0)≠0`,
 a pointwise equation and both interval derivative certificates, plus a nonzero
 algebraic graph relation. This is local regular-singular theory; Laguerre is
-irregular at infinity. General Frobenius convergence, logarithmic resonant
-solutions, branches for nonintegral exponents, and global algebraic-solution
-classification remain open. Painlevé results are unchanged.
+irregular at infinity.
+
+Checked convergence: if the rational indicial root satisfies
+`0 ≤ 2*r - 1 + p₀`, `FrobeniusConvergence` derives a geometric coefficient
+bound from the recurrence and constructs valid nested rational boxes for
+`Σ cₙ*xⁿ` on the explicit disk `R*|x| ≤ 1/2`. The boxes contain every later
+finite prefix and have width `4*|c₀|/2^n`, with a computable precision schedule.
+The reusable foundation is `GeometricPowerSeries`. Analytic differentiation
+of this evaluator, convergence for smaller nonresonant roots, logarithmic
+resonant solutions, branches for nonintegral exponents, and global
+algebraic-solution classification remain open. Painlevé results are unchanged.
 
 ## Historical geometric Leibniz reconstruction
 

@@ -398,8 +398,17 @@ Use `resonance_compatibility` when this condition fails.
 polynomial evaluator and finite-difference calculus. A same-cutoff derivative
 requires the explicit first-omitted-coefficient zero hypothesis. The all-degree
 Laguerre construction supplies this via termination and proves the unmultiplied
-ODE even at zero. General formal solutions have no convergence or branch
-certificate yet. Compare the corresponding Lean 4 statements in Ripple as
+ODE even at zero.
+
+Use `GeometricPowerSeries.geometricRaw` (in namespace `FormalPowerSeries`)
+for rational power series satisfying `|cₙ| ≤ M*R^n`. Its validity theorem
+requires `M,R ≥ 0` and `R*|x| ≤ 1/2`. Each box contains all later finite
+prefixes, and `geometricRaw_precision` supplies a width schedule; width alone
+is not a validity proof. `FrobeniusConvergence.coeff_growth` (under
+`Fuchs.Frobenius.Equation`) derives the needed coefficient bound when the
+indicial root has nonnegative root gap, then `factorRaw_valid` certifies the
+factor evaluator. This adds neither analytic derivative certificates nor a
+branch of `x^r`. Compare the corresponding Lean 4 statements in Ripple as
 recorded in `docs/FUCHS_PAINLEVE.md`; do not import its Mathlib real foundation.
 
 ## Finite transmutation
