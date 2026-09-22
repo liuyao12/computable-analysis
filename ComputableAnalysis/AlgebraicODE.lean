@@ -4,3 +4,4 @@ import ComputableAnalysis.AlgebraicODE.Painleve
 import ComputableAnalysis.AlgebraicODE.Frobenius
 import ComputableAnalysis.AlgebraicODE.Laguerre
 import ComputableAnalysis.AlgebraicODE.FrobeniusConvergence
+import ComputableAnalysis.AlgebraicODE.FuchsGrowth

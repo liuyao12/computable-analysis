@@ -385,6 +385,26 @@ the ODE, and a nonzero algebraic relation for one rational interval evaluator.
 `Fuchs.radical_euler` assumes the differentiated curve identity; it does not
 construct or differentiate a branch. See [scope and audit](docs/FUCHS_PAINLEVE.md).
 
+### Differential growth from finite steps
+
+Use `LinearGrowth.LinearSolution` (namespace `LinearODE`) for rational matrix
+systems whose values are valid component `RealRaw` algorithms. Its local
+residual condition has a strictly positive rational step radius on each
+closed annulus and a precision stage depending on the step. Keep solution
+growth out of that interface: `LinearSolution.moderate_growth` derives it
+from a coefficient column bound. `NormBound` uses the nearest-to-zero vector
+in each box; do not require every coarse enclosure to fit inside the final
+norm bound. `normBound_exact` checks the singleton interpretation, and
+`normBound_from_initial_boxes` computes an admissible outer constant.
+`LinearSolution.ofExact` and `.constant` construct concrete local solutions.
+
+`Fuchs.Growth` applies this to the real-coordinate scaled jet `(y,z*y')`.
+The current theorem is forward growth along rational rays with polynomial
+regular coefficients. Do not label it the full Fuchs equivalence or silently
+identify the differential-system interface with an arbitrary holomorphic
+solution. The proof uses rational subdivisions and polynomial weights;
+introducing an ambient completed real line is unnecessary.
+
 ### Frobenius and finite polynomial semantics
 
 Reuse `FormalPowerSeriesAlgebra` for finite Cauchy products, shifted Euler

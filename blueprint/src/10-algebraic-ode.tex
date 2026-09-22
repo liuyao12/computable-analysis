@@ -33,6 +33,79 @@ This is a residual theorem: derivative certificates remain separate.
 \leanok
 \end{theorem}
 
+\section{Forward Fuchs growth without completed reals}
+
+\begin{definition}[Local differential solution on rational boxes]
+\label{def:fuchs-local-solution}
+For a rational matrix function $A(t)$ on $0<t\le R$, a solution gives valid
+component interval algorithms $Y(t)$. For every closed rational interval
+$[a,b]\subset(0,R]$ and positive rational $\varepsilon$, it gives a strictly
+positive rational step radius and a step-dependent precision stage. For
+all sufficiently refined box samples $v$ at $x$ and $w$ at $x+h$,
+\[
+ \|w-v-hA(x)v\|_1\le\varepsilon|h|.
+\]
+No growth bound is part of this definition. A represented norm bound $M$
+means that each stage box meets the rational norm ball of radius $M$;
+the nearest-to-zero vector tests this using finite rational arithmetic.
+\lean{ComputableAnalysis.LinearODE.LinearSolution}
+\lean{ComputableAnalysis.LinearODE.NormBound}
+\lean{ComputableAnalysis.LinearODE.normBound_exact}
+\leanok
+\end{definition}
+
+\begin{theorem}[Polynomial growth from a simple matrix pole]
+\label{thm:fuchs-matrix-growth}
+Suppose $t\sum_i|A_{ij}(t)|\le N$ for every column and $0<t\le R$, with
+$N$ a natural number. Every local differential solution satisfies
+\[
+ \|Y(a)\|_1\le\frac{b^N M}{a^N},\qquad 0<a\le b\le R,
+\]
+where $M$ is computed as the sum of absolute endpoints of the stage-zero
+component boxes at $b$. Thus the outer constant requires no supremum.
+\lean{ComputableAnalysis.LinearODE.normBound_from_initial_boxes}
+\lean{ComputableAnalysis.LinearODE.LinearSolution.moderate_growth}
+\leanok
+\end{theorem}
+
+The proof uses the finite polynomial inequality
+$s^N(t+N(t-s))\le t^{N+1}$ for $0\le s\le t$, an explicit finite rational
+mesh, and elimination of an arbitrary rational error budget. No completed
+real line, integral, logarithm or exponential is introduced.
+\lean{ComputableAnalysis.LinearODE.weighted_step_factor}
+\leanok
+
+\begin{theorem}[Forward Fuchs theorem along a rational ray]
+\label{thm:fuchs-ray-growth}
+Let $p,q$ be complex rational polynomials, and let $z=td$ for a fixed
+nonzero rational complex direction. The scaled jet $Y=(y,zy')$ of
+$z^2y''+zp(z)y'+q(z)y=0$ has matrix
+\[
+ A(t)=\frac1t\begin{pmatrix}0&1\\-q(td)&1-p(td)\end{pmatrix}.
+\]
+A Horner absolute-coefficient estimate supplies an integer $N$ satisfying
+the preceding column bound. Every solution of this certified differential
+system therefore has polynomial growth along the ray.
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.Growth.companion_apply}
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.Growth.rayMatrix_pole_bound}
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.Growth.fuchs_ray_moderate}
+\leanok
+\end{theorem}
+
+The reciprocal example $y=1/t$ for $p=2,q=0$ is constructed from the
+existing finite-difference derivative certificate; its bound is $4/a^4$
+for $0<a\le1$. A non-singleton Bessel-factor evaluator also gives a
+constant solution of $Y'=0$. These exercise the solution definition
+independently of the growth conclusion.
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.Growth.reciprocal_moderate}
+\lean{ComputableAnalysis.AlgebraicODE.Tests.besselConstant_growth}
+\leanok
+
+This is the forward implication for polynomial regular coefficients on
+rational rays. A general holomorphic-solution adapter, uniform sector bounds,
+arbitrary holomorphic coefficient germs, and the converse criterion remain
+open. It is independent of the formal Frobenius construction below.
+
 \section{Euler--Fuchs polynomial solutions}
 
 \begin{theorem}[Coefficient classification]

@@ -34,3 +34,17 @@ import ComputableAnalysis.AlgebraicODE.Tests
 #print axioms ComputableAnalysis.FormalPowerSeries.geometricRaw_valid
 #print axioms ComputableAnalysis.FormalPowerSeries.geometricRaw_contains_prefix
 #print axioms ComputableAnalysis.FormalPowerSeries.geometricRaw_equiv
+
+#print axioms ComputableAnalysis.LinearODE.normBound_exact
+#print axioms ComputableAnalysis.LinearODE.normBound_from_initial_boxes
+#print axioms ComputableAnalysis.LinearODE.weighted_step_factor
+#print axioms ComputableAnalysis.LinearODE.LinearSolution.fuchs_growth
+#print axioms ComputableAnalysis.LinearODE.LinearSolution.moderate_growth
+#print axioms ComputableAnalysis.LinearODE.LinearSolution.constant
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Growth.companion_apply
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Growth.rayMatrix_pole_bound
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Growth.fuchs_ray_growth
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Growth.fuchs_ray_moderate
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Growth.reciprocalSolution
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Growth.reciprocal_moderate
+#print axioms ComputableAnalysis.AlgebraicODE.Tests.besselConstant_growth

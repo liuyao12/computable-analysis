@@ -39,6 +39,22 @@ EXPECTED = ['ComputableAnalysis.AlgebraicODE.' + n for n in EXPECTED] + [
     'ComputableAnalysis.FormalPowerSeries.geometricRaw_equiv',
 ]
 
+EXPECTED += [
+    'ComputableAnalysis.LinearODE.normBound_exact',
+    'ComputableAnalysis.LinearODE.normBound_from_initial_boxes',
+    'ComputableAnalysis.LinearODE.weighted_step_factor',
+    'ComputableAnalysis.LinearODE.LinearSolution.fuchs_growth',
+    'ComputableAnalysis.LinearODE.LinearSolution.moderate_growth',
+    'ComputableAnalysis.LinearODE.LinearSolution.constant',
+    'ComputableAnalysis.AlgebraicODE.Fuchs.Growth.companion_apply',
+    'ComputableAnalysis.AlgebraicODE.Fuchs.Growth.rayMatrix_pole_bound',
+    'ComputableAnalysis.AlgebraicODE.Fuchs.Growth.fuchs_ray_growth',
+    'ComputableAnalysis.AlgebraicODE.Fuchs.Growth.fuchs_ray_moderate',
+    'ComputableAnalysis.AlgebraicODE.Fuchs.Growth.reciprocalSolution',
+    'ComputableAnalysis.AlgebraicODE.Fuchs.Growth.reciprocal_moderate',
+    'ComputableAnalysis.AlgebraicODE.Tests.besselConstant_growth',
+]
+
 def sha(data):
     return hashlib.sha256(data).hexdigest()
 
@@ -57,7 +73,7 @@ def install(site, revision, audit):
     for name in ['index.html', 'ch-differential-equations.html']:
         original = before[name].decode()
         assert MARKER not in original and '</article>' in original
-        addition = MARKER + '<section class="fm-reader-link"><h2>Fuchs–Painlevé</h2><p>Algebraic differential equations on the computable-analysis foundation: formal Frobenius recurrences, convergent factor computations, certified Laguerre polynomials, and Painlevé II algebraic seeds.</p><p><a href="fuchs-painleve.html">Read the subproject and formalization comparisons →</a></p></section>' + MARKER
+        addition = MARKER + '<section class="fm-reader-link"><h2>Fuchs–Painlevé</h2><p>Algebraic differential equations on the computable-analysis foundation: forward Fuchs growth bounds, formal Frobenius recurrences, convergent factor computations, certified Laguerre polynomials, and Painlevé II algebraic seeds.</p><p><a href="fuchs-painleve.html">Read the subproject and formalization comparisons →</a></p></section>' + MARKER
         updated = original.replace('</article>', addition + '</article>', 1)
         assert updated.replace(addition, '', 1) == original
         (site / name).write_text(updated)

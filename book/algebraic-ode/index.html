@@ -6,8 +6,22 @@
 </style></head><body><main>
 <nav aria-label="Book"><a href="index.html">← Computable Analysis</a><a href="ch-differential-equations.html">Differential equations</a><a href="#comparisons">Related formalizations</a></nav>
 <header><span class="eyebrow">Algebraic differential equations · Linear and nonlinear theories</span>
-<h1>Fuchs–Painlevé</h1><p class="lead">Algebraic solutions, built on computable numbers and certified finite differences.</p>
+<h1>Fuchs–Painlevé</h1><p class="lead">Regular-singular growth and algebraic solutions, proved with rational interval computations.</p>
 <p>This subproject uses the book’s rational interval algorithms and represented complex values. It has no Mathlib dependency. The general classification remains open.</p></header>
+<section id="fuchs-growth"><h2>Fuchs: coefficient bounds imply solution growth</h2>
+<div class="equation">z²y″ + zp(z)y′ + q(z)y = 0<br>Y = (y, zy′), &emsp; z = td</div>
+<p>For complex rational polynomials p and q and a fixed nonzero rational complex direction d, the scaled jet satisfies a first-order system with matrix t⁻¹[[0, 1], [−q(td), 1−p(td)]]. Its column sums have a computed bound N/t, where N is a natural number obtained from the polynomial coefficients and an outer radius R.</p>
+<p>Every solution of this system, certified by local finite differences on rational intervals away from zero, has polynomial growth toward the singularity:</p>
+<div class="equation">‖Y(a)‖₁ ≤ bᴺ M / aᴺ, &emsp; 0 &lt; a ≤ b ≤ R.</div>
+<p>The constant M comes from a single computed box at the outer endpoint b. The solution definition contains no growth bound. Its values may be non-rational: they are the same valid rational interval algorithms used in Chapter 1.</p>
+<h3>Where the analytic content lives</h3>
+<p>On each closed rational interval [a,b] away from zero, a positive rational step radius and an output-precision schedule certify</p>
+<div class="equation">‖w − v − hA(x)v‖₁ ≤ ε|h|.</div>
+<p>Here v and w are any rational samples in sufficiently refined boxes at x and x+h. The precision may depend on h. This gives the local differential equation independently of the desired growth conclusion.</p>
+<p>The proof subdivides [a,b] into finitely many inward steps. The polynomial inequality sᴺ(t+N(t−s)) ≤ tᴺ⁺¹ absorbs the coefficient bound. Summing the remaining rational errors and making their budget arbitrarily small yields the theorem. No completed real line, complex-analytic library, exponential, logarithm, or integral is needed.</p>
+<p>Lean checks a genuine pole example: y=1/t solves t²y″+2ty′=0, and the general theorem gives ‖(y,ty′)‖₁≤4/a⁴ on 0&lt;a≤1. This bound is deliberately conservative. A second example uses a non-singleton series evaluator as a constant solution of Y′=0.</p>
+<p class="note">This is the forward growth implication along rational rays for polynomial regular coefficients. The converse Fuchs criterion, sector-uniform bounds, arbitrary holomorphic coefficients, and a general bridge from holomorphic second-order solutions to the certified scaled-jet system remain open. It is independent of the Frobenius recurrence below.</p>
+<p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/AlgebraicODE/FuchsGrowth.lean">Read the forward Fuchs theorem</a> · <a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/LinearGrowth.lean">Finite-step proof and solution definition</a> · <a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/AlgebraicODE/FuchsGrowthExamples.lean">Reciprocal example</a></p></section>
 <section><h2>Euler–Fuchs: a coefficient obstruction</h2>
 <div class="equation">x y′ = r y &emsp; ⟹ &emsp; (k − r)c<sub>k</sub> = 0</div>
 <p>For a finite rational polynomial y = Σ c<sub>k</sub>x<sup>k</sup>, the coefficient equations hold exactly when every nonzero coefficient has degree k = r. We prove that this certificate implies the evaluated differential identity using the existing polynomial derivative. A nonzero polynomial solution therefore forces r to be a nonnegative integer.</p>
@@ -51,7 +65,7 @@
 <li><a href="https://leanprover-community.github.io/mathlib4_docs/Mathlib/Analysis/ODE/ExistUnique.html">Mathlib ODE existence and uniqueness</a>. Compare solution interfaces, derivative semantics and hypotheses.</li>
 <li><a href="https://github.com/seewoo5/lean-poly-abc">Mason–Stothers in Lean 4</a>. Compare polynomial derivatives, Wronskians, degree bounds and algebraic nonexistence arguments.</li></ul>
 <p>These comparisons do not introduce a Mathlib dependency. Coq/Rocq and Isabelle references are background only; the full ledger records the search limits.</p></section>
-<section><h2>The remaining programme</h2><p>Next are analytic derivative certificates and convergence for the remaining nonresonant roots, certified algebraic branches and Puiseux charts, resonant logarithmic solutions, and a separate first-order Fuchs criterion development. For PII, the next targets are pole and degree obstructions, Bäcklund transformations and rational-solution classification.</p>
+<section><h2>The remaining programme</h2><p>Next for Fuchs are a general holomorphic-solution bridge, uniform sector bounds and the converse criterion. The Frobenius work still needs analytic derivative certificates and convergence for the remaining nonresonant roots, certified algebraic branches and Puiseux charts, resonant logarithmic solutions, and a separate first-order Fuchs criterion development. For PII, the next targets are pole and degree obstructions, Bäcklund transformations and rational-solution classification.</p>
 <p>General algebraic-solution classification, PI algebraic nonexistence, monodromy, and PIII–PVI are not proved in this milestone. Formal residuals and conditional jet identities are kept distinct from analytic solutions.</p>
 <p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/docs/FUCHS_PAINLEVE.md">Full theorem ledger, search record and development plan</a></p></section>
 <footer>Import <code>ComputableAnalysis.AlgebraicODE</code>.<br>The new proofs add no custom axioms or placeholders. Analytic certificates inherit the foundation’s existing native-decision dependencies.<br><a href="https://github.com/liuyao12/computable-analysis/commit/__REVISION__">Verified source revision</a></footer>

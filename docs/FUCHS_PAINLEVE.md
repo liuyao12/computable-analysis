@@ -5,6 +5,74 @@ work. Import `ComputableAnalysis.AlgebraicODE`. It uses this repository's
 `Rat`, `QComplex`, `ComplexRaw`, overlap equivalence, and two-sided rational
 finite-difference certificates. There is no Mathlib dependency or Mathlib real.
 
+## Checked forward Fuchs growth theorem
+
+`LinearGrowth` proves a solution-behavior theorem without completing the
+rationals. `LinearSolution A R` gives valid component interval algorithms at
+rational `0<t≤R`. On each rational `[a,b]⊆(0,R]`, it supplies a positive
+rational step radius and a step-dependent output precision such that all
+samples `v,w` from sufficiently refined endpoint boxes satisfy
+
+\[
+ \|w-v-hA(x)v\|_1\le\varepsilon |h|.
+\]
+
+This is the uniform effective local ODE condition. **No growth estimate is a
+field of the solution.** The precision depends on `h`, so non-singleton
+interval outputs are allowed. `LinearSolution.constant` constructs an actual
+solution from any valid raw constant with a supplied width schedule; the
+regression uses the nonterminating Bessel-factor evaluator at `1/8`.
+
+If every column of the rational matrix satisfies
+`t Σᵢ|Aᵢⱼ(t)|≤N`, then `LinearSolution.fuchs_growth` proves
+
+\[
+ \|Y(a)\|_1\le \frac{b^N M}{a^N},\qquad 0<a\le b\le R,
+\]
+
+from an outer norm bound `M`. `moderate_growth` obtains `M` by computing
+stage-zero boxes at `b`, so every solution has such a bound. Formally,
+`NormBound V M` means that every stage box meets the closed rational norm
+ball of radius `M`, tested by its nearest-to-zero vector. It does not demand
+that the entire coarse box fit in that ball. For singleton computations,
+`normBound_exact` proves this is precisely the ordinary rational norm bound.
+
+The proof uses a finite inward mesh and the polynomial inequality
+`s^N(t+N(t-s))≤t^(N+1)` for `0≤s≤t`. An arbitrary rational error budget is
+removed by rational order reasoning. There is no completed real line,
+limit object, exponential, logarithm, integral, compactness, or complex
+analytic library in this argument.
+
+For complex rational polynomials `p,q`, `Fuchs.Growth` treats
+
+\[
+ z^2 y''+zp(z)y'+q(z)y=0,\qquad Y=(y,zy'),\qquad
+ \frac{dY}{dt}=\frac1t
+ \begin{pmatrix}0&1\\-q(td)&1-p(td)\end{pmatrix}Y
+\]
+
+along `z=td` for a fixed nonzero rational complex direction `d`.
+`companion_apply` verifies the real-coordinate matrix identity.
+`polynomial_eval_bound` supplies the coefficient estimate, and
+`fuchs_ray_moderate` proves polynomial growth for every solution of this
+scaled-jet differential system. Its natural exponent is computed by a
+rational ceiling of `2+P(R|d|₁)+Q(R|d|₁)`, where `P,Q` are the Horner
+absolute-coefficient bounds. The conservative exponent need not be sharp.
+`reciprocalSolution` constructs `y=1/t`, `ty'=-1/t`, for `p=2,q=0` using the
+existing reciprocal finite-difference theorem; `reciprocal_moderate` applies
+the general theorem to obtain `‖Y(a)‖₁≤4/a⁴` for `0<a≤1`.
+
+This is the **forward implication on rational rays for polynomial regular
+coefficients**, not the full equivalence usually called Fuchs's criterion.
+The solution interface certifies the scaled first-order differential system
+directly. A general translation from an independently packaged holomorphic
+second-order solution is not yet formalized. Neither arbitrary holomorphic
+coefficient germs, uniform sector bounds, a fundamental solution basis, nor
+the converse from moderate growth to pole-order bounds is claimed. The
+forward theorem is independent of the Frobenius coefficient construction.
+A classical comparison is Schnell's [D-modules notes, Lecture 20,
+Theorem 20.4](https://www.math.stonybrook.edu/~cschnell/pdf/notes/d-modules.pdf).
+
 ## Checked first milestone
 
 The convention is the one in [DLMF §32.2](https://dlmf.nist.gov/32.2):
@@ -174,11 +242,11 @@ are retained only as background references.
 
 ## Development plan and open theorems
 
-“Fuchs” includes two distinct directions. We start with the Euler member of
-regular-singular linear equations, but reserve a separate development for
-Fuchs's first-order algebraic differential-equation criterion underlying
-the Painlevé classification. Neither is identified with Picard–Fuchs period
-equations or with Fuchsian groups.
+The present Fuchs target is the linear regular-singularity criterion: its
+forward growth implication is checked above, while its converse remains
+open. The distinct first-order algebraic differential-equation criterion
+associated with Fuchs and Painlevé is reserved for a separate development.
+Neither is identified with Picard–Fuchs period equations or Fuchsian groups.
 
 1. **Algebraic differential calculus.** Add normalized finite multivariate
    polynomial and rational-function arithmetic, coefficient reflection,
@@ -187,7 +255,9 @@ equations or with Fuchsian groups.
 2. **Algebraic branches.** Strengthen the existing algebraic-function layer
    with nonzero defining polynomials, selected branches, root separation,
    quantitative implicit derivatives, and certified Puiseux charts.
-3. **Fuchs.** Extend the checked second-order Frobenius convergence theorem to
+3. **Fuchs.** Extend the checked forward rational-ray growth theorem to
+   uniform sector estimates and a general holomorphic-solution adapter, then
+   prove the converse criterion. Extend the checked second-order Frobenius convergence theorem to
    the remaining nonresonant roots and analytic derivative certificates; add
    certified nonintegral branches, resonant logarithmic
    solutions and more general local operators. Separately state

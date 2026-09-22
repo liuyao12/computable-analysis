@@ -65,6 +65,13 @@ first. For a continuous theorem, add component interval integration and an
 explicit factorial-tail schedule; the finite core alone does not prove
 continuous Picard--Lindelof.
 
+For growth near a singularity, use `LinearGrowth.LinearSolution` (namespace
+`LinearODE`). It specifies local ODE residuals on refined rational boxes;
+`moderate_growth` proves a polynomial bound from a `1/t` column estimate.
+The definition must not contain that growth conclusion. `Fuchs.Growth`
+provides the polynomial-coefficient rational-ray application; general
+holomorphic adapters and the converse criterion remain separate work.
+
 ## Pi as an integration suite
 
 Use `PiProofs.PiCoverageBridge` only to register an end-to-end independent
