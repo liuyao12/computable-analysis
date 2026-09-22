@@ -212,3 +212,34 @@ neither invokes the other's comparison theorem.
 \end{verbatim}
 This records dependencies only; no interactive graph or additional
 canonical definition of $\pi$ is introduced.
+
+\subsection{Leibniz's geometric transmutation}
+
+A modern finite reconstruction of Leibniz's transmutation method starts with
+$(X-1)^2+Y^2=1$ and the tangent intercept $t$, where
+$X=2t^2/(1+t^2)$ and $Y=2t/(1+t^2)$. Transmutation and rectangle complementation
+give $A(1)=1-\tfrac12\int_0^1X(t)\,dt$. Finite geometric division and quadrature
+of powers give the alternating odd-denominator series. This reconstructs the
+transmutation version, rather than claiming to transcribe his earliest
+moment-based proof (Horváth, 1983, pp.~78--81).
+
+\begin{theorem}[Finite transmutation of the circle]
+\lean{ComputableAnalysis.LeibnizTransmutation.geometric_polygon_transmutation}
+\lean{ComputableAnalysis.LeibnizTransmutation.transmutation_error_bound}
+\lean{ComputableAnalysis.LeibnizTransmutation.circle_transmutation}
+\lean{ComputableAnalysis.pi_eq_leibniz_transmutation}
+\leanok
+For a rational cell $[p,r]$, let
+$T=(r-p)(X(p)+X(r))/2$ and
+$E=(r-p)^3/(2(1+p^2)(1+r^2))$.
+The geometric sector lower increment is exactly $(r-p)-T/2-E$.
+On the dyadic mesh, $0\leq\sum E\leq\tfrac12 4^{-n}$.
+The resulting represented identity is $A(1)\simeq1-J/2$, with $J$ the
+certified rectangle computation of $X$. Consequently geometric $\pi$ is
+equivalent to the existing Leibniz computation.
+\end{theorem}
+
+The geometric bridge uses only finite rational areas and explicit errors.
+Power quadrature reuses the polynomial FTC infrastructure. The checked
+closure contains the new transmutation identities and neither previous
+Leibniz equality nor the previous rectangle-to-geometry comparison.

@@ -1,8 +1,8 @@
 {
-  "title": "Three proofs of the Leibniz formula",
+  "title": "Four routes to the Leibniz formula",
   "caRevision": "6b4d28951f677607f19c260ef739358daad54b2e",
   "mathlibRevision": "338b8c00bd151fa07a0350cc17442e6eeda734e8",
-  "edgeSemantics": "Curated mathematical dependencies; a bundle may combine several intermediate lemmas. This is not a complete declaration graph.",
+  "edgeSemantics": "Curated mathematical dependencies, with source-linked bundles. Native route separation is checked against elaborated proof terms. Display arrows summarize the mathematics; they are not exported declaration-by-declaration witnesses. Mathlib proves an analogous statement in its own real numbers; no representation bridge is claimed.",
   "routes": [
     {
       "id": 0,
@@ -18,6 +18,11 @@
       "id": 2,
       "name": "Mathlib",
       "description": "Power series and Abel’s endpoint theorem"
+    },
+    {
+      "id": 3,
+      "name": "Geometric transmutation",
+      "description": "Leibniz’s geometric method, reconstructed finitely"
     }
   ],
   "nodes": [
@@ -28,12 +33,13 @@
       "tag": "Shared foundation",
       "routes": [
         0,
-        1
+        1,
+        3
       ],
       "col": 0,
       "row": 0,
-      "span": 2,
-      "body": "Rational arithmetic, finite sums and explicit error bounds suffice to describe a real value by increasingly precise intervals. Agreement is proved by comparing valid enclosures. Both native routes stay inside this foundation.",
+      "span": 3,
+      "body": "Rational arithmetic, finite sums and explicit error bounds suffice to describe a real value by increasingly precise intervals. Agreement is proved by comparing valid enclosures. All three native routes stay inside this foundation.",
       "refs": [
         {
           "label": "RealRaw",
@@ -50,7 +56,7 @@
       "routes": [
         2
       ],
-      "col": 2,
+      "col": 3,
       "row": 0,
       "span": 1,
       "body": "Mathlib works with its completed real numbers and the complex numbers built from them. Its proof uses topological limits and infinite sums, including an existence theorem for the limit of an alternating series.",
@@ -73,7 +79,8 @@
       "tag": "Shared mathematics",
       "routes": [
         0,
-        1
+        1,
+        3
       ],
       "col": 0,
       "row": 1,
@@ -98,11 +105,12 @@
       "tag": "Shared mathematics",
       "routes": [
         0,
-        1
+        1,
+        3
       ],
       "col": 1,
       "row": 1,
-      "span": 1,
+      "span": 2,
       "body": "Finite geometric division gives the polynomial plus an exact signed remainder. On 0 ≤ x ≤ 1 the denominator is positive, so consecutive even and odd partial polynomials bracket 1/(1+x²). This is finite algebra and does not assume convergence of the kernel series at x = 1.",
       "refs": [
         {
@@ -124,7 +132,7 @@
       "routes": [
         2
       ],
-      "col": 2,
+      "col": 3,
       "row": 1,
       "span": 1,
       "body": "The complex arctangent is expressed using complex logarithms. Logarithmic Taylor series produce its power series; restriction to the real axis gives the real expansion. Real trigonometry also supplies continuity of arctan and the endpoint identity arctan(1) = π/4.",
@@ -147,7 +155,8 @@
       "tag": "Shared mathematics",
       "routes": [
         0,
-        1
+        1,
+        3
       ],
       "col": 0,
       "row": 2,
@@ -171,12 +180,13 @@
       "subtitle": "Finite differences certify the power rule",
       "tag": "Taylor / FTC",
       "routes": [
-        1
+        1,
+        3
       ],
       "col": 1,
       "row": 2,
       "span": 1,
-      "body": "Each monomial has the primitive x^(m+1)/(m+1), with a quantitative finite-difference error bound. Addition and rational scaling assemble these primitive certificates for every finite arctangent polynomial.",
+      "body": "Each monomial has the primitive x^(m+1)/(m+1), with a quantitative finite-difference error bound. Addition and rational scaling assemble these primitive certificates for every finite arctangent polynomial. The reconstruction shares this quadrature of powers; its new geometric bridge does not use calculus.",
       "refs": [
         {
           "label": "kernelPrimitiveSecantBound",
@@ -193,7 +203,7 @@
       "routes": [
         2
       ],
-      "col": 2,
+      "col": 3,
       "row": 2,
       "span": 1,
       "body": "For |x| < 1, the infinite series of odd powers sums to arctan(x). This alone does not permit substituting x = 1: the endpoint is outside this theorem’s hypotheses. Abel’s theorem supplies that missing step.",
@@ -235,7 +245,8 @@
       "subtitle": "Subdivision removes the finite-difference error",
       "tag": "Taylor / FTC",
       "routes": [
-        1
+        1,
+        3
       ],
       "col": 1,
       "row": 3,
@@ -265,7 +276,7 @@
       "routes": [
         2
       ],
-      "col": 2,
+      "col": 3,
       "row": 3,
       "span": 1,
       "body": "Monotonicity of 1/(2k+1) and convergence to zero give a real limit L for the alternating partial sums. This identifies an existing limit but does not yet identify its value as π/4.",
@@ -303,7 +314,8 @@
       "subtitle": "Squeeze the arctangent area between sums",
       "tag": "Taylor / FTC",
       "routes": [
-        1
+        1,
+        3
       ],
       "col": 1,
       "row": 4,
@@ -325,7 +337,7 @@
       "routes": [
         2
       ],
-      "col": 2,
+      "col": 3,
       "row": 4,
       "span": 1,
       "body": "Abel’s theorem transfers the sum L of the alternating coefficient series to the limit of its power series as the real argument tends to 1 from below. Substituting x² and multiplying by x produces the odd-power arctangent series.",
@@ -367,7 +379,7 @@
           "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/LeibnizPi.lean#L129"
         }
       ],
-      "formula": "π ≃ 4(1 − 1/3 + 1/5 − ⋯)"
+      "formula": "π = 4(1 − ⅓ + ⅕ − ⅐ + ⋯)"
     },
     {
       "id": "taylor",
@@ -395,7 +407,7 @@
           "url": "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/LeibnizPiTaylor.lean#L57"
         }
       ],
-      "formula": "A(1) = sₙ + Rₙ;  |Rₙ| ≤ 1/(2n+3)"
+      "formula": "π = 4(1 − ⅓ + ⅕ − ⅐ + ⋯)"
     },
     {
       "id": "mathlib",
@@ -405,7 +417,7 @@
       "routes": [
         2
       ],
-      "col": 2,
+      "col": 3,
       "row": 5,
       "span": 1,
       "body": "Inside the interval the power series equals arctan. Continuity and uniqueness of limits identify L = arctan(1) = π/4. Mathlib’s theorem states convergence of finite partial sums to π/4 in its real numbers. It is an analogous theorem in a different foundation; this comparison does not add a formal translation between the two π objects.",
@@ -416,6 +428,110 @@
         }
       ],
       "formula": "Σₖ<n (−1)ᵏ/(2k+1) → π/4"
+    },
+    {
+      "id": "tangent",
+      "title": "Circle and tangent intercept",
+      "subtitle": "A rational parameter on the circle",
+      "tag": "Geometric transmutation",
+      "routes": [
+        3
+      ],
+      "col": 2,
+      "row": 2,
+      "span": 1,
+      "body": "On the circle centred at (1,0), X(t)=2t²/(1+t²) and Y(t)=2t/(1+t²). The radius-normal tangent passes through (0,t), since Y(t)t=X(t). The endpoint t=0 is vertical; uniqueness is not asserted there.",
+      "formula": "(X − 1)² + Y² = 1",
+      "refs": [
+        {
+          "label": "Circle equation",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/LeibnizTransmutation.lean#L25"
+        },
+        {
+          "label": "Tangent intercept",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/LeibnizTransmutation.lean#L33"
+        }
+      ]
+    },
+    {
+      "id": "transmutation",
+      "title": "Finite transmutation of area",
+      "subtitle": "Trapezoids, triangles and complements",
+      "tag": "Geometric transmutation",
+      "routes": [
+        3
+      ],
+      "col": 2,
+      "row": 3,
+      "span": 1,
+      "body": "Split each trapezoid into an endpoint rectangle difference and an intercept moment. Sum to telescope the rectangles. On the circle, replacing the secant moment by its tangent-intercept trapezoid has the exact correction E=(r−p)³/[2(1+p²)(1+r²)]. Rectangle complementation then gives the sector identity.",
+      "formula": "sectorLower = Δt − T/2 − E",
+      "refs": [
+        {
+          "label": "Finite trapezoid identity",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/FiniteTransmutation.lean#L16"
+        },
+        {
+          "label": "Complement identity",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/FiniteTransmutation.lean#L23"
+        },
+        {
+          "label": "Exact sector cell",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/LeibnizTransmutation.lean#L95"
+        }
+      ]
+    },
+    {
+      "id": "geometric_bridge",
+      "title": "The circle becomes a rational area",
+      "subtitle": "Certified overlap at every stage",
+      "tag": "Geometric transmutation",
+      "routes": [
+        3
+      ],
+      "col": 2,
+      "row": 4,
+      "span": 1,
+      "body": "Complemented endpoint rectangles bracket each geometric increment. The finite sums therefore overlap the existing geometric area computation at every stage. The exact polygon identity also has total correction at most ½·4⁻ⁿ. This is the new geometric bridge; it does not use the old rectangle-to-geometry comparison.",
+      "formula": "A(1) ≃ 1 − ½∫₀¹ X(t) dt",
+      "refs": [
+        {
+          "label": "Geometric overlap",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/LeibnizTransmutation.lean#L272"
+        },
+        {
+          "label": "Vanishing correction",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/LeibnizTransmutation.lean#L397"
+        },
+        {
+          "label": "Represented transmutation",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/LeibnizTransmutation.lean#L305"
+        }
+      ]
+    },
+    {
+      "id": "historical",
+      "title": "Leibniz: geometric reconstruction",
+      "subtitle": "Transmutation + quadrature of powers",
+      "tag": "Geometric transmutation",
+      "routes": [
+        3
+      ],
+      "col": 2,
+      "row": 5,
+      "span": 1,
+      "body": "The finite geometric expansion of X and the shared all-degree polynomial quadrature identify its area with 2(⅓−⅕+⅐−⋯). Its complement gives the Leibniz computation of geometric π. The final theorem uses the new transmutation bridge, not either earlier equality. This is a modern finite reconstruction of Leibniz’s later transmutation method, not a verbatim original proof.",
+      "formula": "π = 4(1 − ⅓ + ⅕ − ⅐ + ⋯)",
+      "refs": [
+        {
+          "label": "Final theorem",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/LeibnizTransmutation.lean#L462"
+        },
+        {
+          "label": "Transformed integral series",
+          "url": "https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/LeibnizTransmutation.lean#L434"
+        }
+      ]
     }
   ],
   "edges": [
@@ -506,6 +622,34 @@
     {
       "source": "abel",
       "target": "mathlib"
+    },
+    {
+      "source": "geometry",
+      "target": "tangent"
+    },
+    {
+      "source": "tangent",
+      "target": "transmutation"
+    },
+    {
+      "source": "rational",
+      "target": "transmutation"
+    },
+    {
+      "source": "transmutation",
+      "target": "geometric_bridge"
+    },
+    {
+      "source": "geometric_bridge",
+      "target": "historical"
+    },
+    {
+      "source": "bounds",
+      "target": "historical"
+    },
+    {
+      "source": "alternating",
+      "target": "historical"
     }
   ]
 }

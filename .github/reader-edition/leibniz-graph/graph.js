@@ -1,64 +1,34 @@
 'use strict';
-(async function () {
-  const root = document.getElementById('graph');
-  const panel = document.getElementById('detail-content');
-  const NS = 'http://www.w3.org/2000/svg';
-  const model = JSON.parse(document.getElementById('graph-data').textContent);
-  const byId = new Map(model.nodes.map(n => [n.id, n]));
-  let route = 'all', selected = null;
-  const el = (tag, text, cls) => { const e = document.createElement(tag); if (text !== undefined) e.textContent = text; if (cls) e.className = cls; return e; };
-  const svgEl = (tag, attrs, text) => { const e = document.createElementNS(NS, tag); Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k,v)); if (text !== undefined) e.textContent = text; return e; };
-  const family = n => n.routes.length > 1 ? 'shared' : ['native','ftc','mathlib'][n.routes[0]];
-  const wrap = (s, length) => { const lines = ['']; for (const w of s.split(' ')) { if ((lines.at(-1)+' '+w).length > length && lines.at(-1)) lines.push(''); lines[lines.length-1] += (lines.at(-1) ? ' ' : '')+w; } return lines; };
-  const visible = () => model.nodes.filter(n => route === 'all' || n.routes.includes(Number(route)));
-  function highlight() {
-    const ancestors = new Set();
-    function visit(id) { if (ancestors.has(id)) return; ancestors.add(id); model.edges.filter(e => e.target===id).forEach(e => visit(e.source)); }
-    if (selected) visit(selected);
-    root.querySelectorAll('.node').forEach(g => { g.classList.toggle('selected',g.dataset.node===selected); g.classList.toggle('dim',Boolean(selected)&&!ancestors.has(g.dataset.node)); g.setAttribute('aria-pressed',String(g.dataset.node===selected)); });
-    root.querySelectorAll('.edge').forEach(p => { const on=ancestors.has(p.dataset.source)&&ancestors.has(p.dataset.target); p.classList.toggle('dim',Boolean(selected)&&!on); p.classList.toggle('active',Boolean(selected)&&on); });
-  }
-  function select(id, scroll=false) {
-    selected=id; const n=byId.get(id); panel.replaceChildren(el('p',n.tag,'eyebrow'),el('h2',n.title),el('p',n.formula,'formula'),el('p',n.body));
-    for (const [heading,edges,key] of [['Builds on',model.edges.filter(e=>e.target===id),'source'],['Used to establish',model.edges.filter(e=>e.source===id),'target']]) {
-      if (!edges.length) continue; const section=el('div',undefined,'dependencies'); section.append(el('h3',heading));
-      for (const edge of edges) { const target=byId.get(edge[key]); const button=el('button',target.title); button.onclick=()=>{ if(route!=='all'&&!target.routes.includes(Number(route))) setRoute('all'); select(target.id); }; section.append(button); }
-      panel.append(section);
-    }
-    const sources=el('details',undefined,'source-detail'); sources.append(el('summary','Supporting Lean sources')); const list=el('ul',undefined,'source-list');
-    for (const ref of n.refs) { const li=el('li'); const a=el('a',ref.label+' ↗'); a.href=ref.url; a.target='_blank'; a.rel='noopener'; li.append(a); list.append(li); } sources.append(list); panel.append(sources);
-    highlight();
-    if (scroll && innerWidth <=760) document.getElementById('bundle-details').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
-  }
-  function render() {
-    const nodes=visible(); const single=route!=='all'; const pos=new Map();
-    const width=single?410:960; const gap=single?126:133; const height=single?nodes.length*gap+28:6*gap+35;
-    nodes.forEach((n,i)=>pos.set(n.id,{x:single?27:18+n.col*318,y:single?14+i*gap:30+n.row*gap,w:single?350:(n.span===2?606:288),h:104}));
-    root.classList.toggle('single',single);
-    const svg=svgEl('svg',{viewBox:`0 0 ${width} ${height}`,role:'group','aria-label':single?model.routes[Number(route)].name+' mathematical dependencies':'Three mathematical proof routes'});
-    const defs=svgEl('defs',{}); const marker=svgEl('marker',{id:'arrow',viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:6,markerHeight:6,orient:'auto-start-reverse'}); marker.append(svgEl('path',{d:'M0 0 L10 5 L0 10 z',fill:'#82958a'})); defs.append(marker); svg.append(defs);
-    if (!single) model.routes.forEach((r,i)=>svg.append(svgEl('text',{x:24+i*318,y:16,class:'lane-title'},r.name.toUpperCase())));
-    for (const [i,e] of model.edges.entries()) {
-      const a=pos.get(e.source),b=pos.get(e.target); if (!a||!b)continue;
-      const ax=a.x+a.w/2,ay=a.y+a.h+1,bx=b.x+b.w/2,by=b.y-3;
-      let path;
-      if(by-ay<gap-10) path=`M${ax} ${ay} C${ax} ${ay+14} ${bx} ${by-14} ${bx} ${by}`;
-      else { const side=(i%2===0?1:-1); const channel=side===1?Math.max(a.x+a.w,b.x+b.w)+7:Math.min(a.x,b.x)-7; path=`M${ax} ${ay} L${ax} ${ay+9} L${channel} ${ay+9} L${channel} ${by-10} L${bx} ${by-10} L${bx} ${by}`; }
-      svg.append(svgEl('path',{d:path,class:'edge '+family(byId.get(e.target)),'data-source':e.source,'data-target':e.target,'marker-end':'url(#arrow)'}));
-    }
-    for (const n of nodes) {
-      const p=pos.get(n.id); const g=svgEl('g',{class:'node'+(n.tag==='Conclusion'?' result':''),'data-node':n.id,'data-family':family(n),transform:`translate(${p.x} ${p.y})`,role:'button',tabindex:0,'aria-label':n.title+': '+n.subtitle,'aria-pressed':'false'});
-      g.append(svgEl('rect',{width:p.w,height:p.h,rx:7})); g.append(svgEl('text',{x:14,y:20,class:'tag'},n.tag.toUpperCase()));
-      const titles=wrap(n.title,p.w>400?60:33); titles.forEach((t,j)=>g.append(svgEl('text',{x:14,y:43+j*19,class:'title'},t)));
-      const subtitles=wrap(n.subtitle,p.w>400?75:43); subtitles.forEach((t,j)=>g.append(svgEl('text',{x:14,y:titles.length>1?80+j*14:68+j*14,class:'subtitle'},t)));
-      g.append(svgEl('text',{x:p.w-21,y:21,class:'open-mark'},'+'));
-      g.addEventListener('click',()=>select(n.id,true)); g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(n.id,true);}});svg.append(g);
-    }
-    root.replaceChildren(svg); highlight();
-  }
-  function setRoute(value) { route=value; selected=null; document.querySelectorAll('[data-route]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.route===route)));render();document.getElementById('graph-scroll').scrollTo(0,0);document.getElementById('map-help').textContent=route==='all'?'Read arrows from premises to conclusions. Shared bundles feed both native routes.':'One route, including its shared prerequisites. Select a bundle for its mathematical contents.'; }
-  document.querySelectorAll('[data-route]').forEach(b=>b.onclick=()=>{setRoute(b.dataset.route);select(route==='all'?'computational':['computational','taylor','mathlib'][Number(route)]);});
-  document.getElementById('reset-selection').onclick=()=>{selected=null;highlight();panel.replaceChildren(el('p','Explore the argument','eyebrow'),el('h2','Select a mathematical bundle'),el('p','Select any node to highlight the ideas it builds on and read its explanation. Use the route buttons to follow one proof at a time.'));};
-  window.addEventListener('beforeprint',()=>{document.getElementById('reading-outline').open=true;});
-  render();
-})();
+const model=JSON.parse(document.querySelector('#graph-data').textContent),NS='http://www.w3.org/2000/svg';
+const colors=['#a45032','#326493','#7755a0','#397858'];
+const $=s=>document.querySelector(s);let route='all',svg,box,initialBox,drag;
+function el(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;}
+function se(tag,attrs,text){const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,v);if(text!==undefined)n.textContent=text;return n;}
+function showBundle(id){const d=model.nodes.find(n=>n.id===id);document.querySelectorAll('[data-node]').forEach(n=>{n.classList.toggle('selected',n.dataset.node===id);n.setAttribute('aria-pressed',String(n.dataset.node===id));});
+ const p=$('#map-detail');p.replaceChildren(el('span',d.tag.toUpperCase(),'role'),el('h2',d.title),el('p',d.formula,'formula'),el('p',d.body,'strategy'));
+ const details=el('details'),list=el('ul',undefined,'source-list');details.append(el('summary','Formal sources ('+d.refs.length+')'));
+ for(const r of d.refs){const li=el('li'),a=el('a',r.label+' ↗');a.href=r.url;a.target='_blank';a.rel='noopener';li.append(a);list.append(li);}details.append(list);p.append(details);
+ if(d.routes.includes(2))p.append(el('p','This branch uses Mathlib’s completed real numbers. The graph does not claim a formal bridge to our interval programs.','native-boundary'));
+ if(id==='historical'){const a=el('a','Read the historical reconstruction →');a.href='leibniz-transmutation.html';p.append(a);}
+}
+function showEdge(e){const a=model.nodes.find(n=>n.id===e.source),b=model.nodes.find(n=>n.id===e.target),p=$('#map-detail');p.replaceChildren(el('span','MATHEMATICAL DEPENDENCY','role'),el('h2',a.title+' → '+b.title),el('p','This arrow summarizes how the prerequisite bundle contributes to the argument. Its source references are available in the two bundles; it is not an extracted declaration-path witness.','strategy'));
+ for(const d of [a,b]){const bt=el('button','Open '+d.title);bt.onclick=()=>showBundle(d.id);p.append(bt);}if(e.target==='historical'&&e.source==='bounds')p.append(el('p','Power integration is shared with the Taylor/FTC route. The geometric comparison is supplied by finite transmutation.'));
+}
+function useBox(){svg.setAttribute('viewBox',box.join(' '));}function fit(){box=[...initialBox];useBox();}function zoom(f){box=[box[0]+box[2]*(1-f)/2,box[1]+box[3]*(1-f)/2,box[2]*f,box[3]*f];useBox();}
+function render(){const ns=model.nodes.filter(n=>route==='all'||n.routes.includes(+route)),ids=new Set(ns.map(n=>n.id)),es=model.edges.filter(e=>ids.has(e.source)&&ids.has(e.target));const positions=new Map();
+ if(route==='all'){for(const n of ns)positions.set(n.id,{x:25+n.col*285,y:40+n.row*122,w:260+(n.span-1)*285,h:82});initialBox=[0,0,1165,760];}
+ else{for(let row=0;row<6;row++){const rn=ns.filter(n=>n.row===row);rn.forEach((n,i)=>positions.set(n.id,{x:25+i*295,y:35+row*122,w:270,h:82}));}const cols=Math.max(...[0,1,2,3,4,5].map(r=>ns.filter(n=>n.row===r).length));initialBox=[0,0,cols*295+25,755];}
+ svg=se('svg',{'aria-label':'Mathematical dependencies of the Leibniz proofs',role:'group'});const defs=se('defs',{});for(let i=0;i<4;i++){const m=se('marker',{id:'arrow-'+i,viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:5,markerHeight:5,orient:'auto'});m.append(se('path',{d:'M0 0L10 5L0 10z',fill:colors[i]}));defs.append(m);}svg.append(defs);
+ for(const e of es){const a=positions.get(e.source),b=positions.get(e.target),common=model.nodes.find(n=>n.id===e.source).routes.filter(r=>model.nodes.find(n=>n.id===e.target).routes.includes(r));const rs=route==='all'?common:[+route];const g=se('g',{class:'edge','data-edge':e.source+'->'+e.target,tabindex:0,role:'button','aria-label':'Inspect dependency'});const x=a.x+a.w/2,y=a.y+a.h,X=b.x+b.w/2,Y=b.y-3;let d;
+ if(Y-y<80)d=`M${x} ${y}C${x} ${y+18} ${X} ${Y-18} ${X} ${Y}`;
+ else{const channel=(a.x<=b.x?Math.min(a.x,b.x)-10:Math.max(a.x+a.w,b.x+b.w)+10);d=`M${x} ${y}L${x} ${y+10}L${channel} ${y+10}L${channel} ${Y-10}L${X} ${Y-10}L${X} ${Y}`;}
+ rs.forEach((r,i)=>g.append(se('path',{d,transform:`translate(${(i-(rs.length-1)/2)*2},0)`,fill:'none',stroke:colors[r],'stroke-width':1.3,'marker-end':`url(#arrow-${r})`})));
+ g.append(se('path',{d,fill:'none',class:'hit'}));g.onclick=()=>showEdge(e);g.onkeydown=x=>{if(x.key==='Enter'||x.key===' '){x.preventDefault();showEdge(e);}};svg.append(g);}
+ for(const n of ns){const p=positions.get(n.id),g=se('g',{class:'node','data-node':n.id,'data-family':n.routes.includes(2)?'mathlib':'native',transform:`translate(${p.x},${p.y})`,role:'button',tabindex:0,'aria-label':n.title,'aria-pressed':'false'});g.append(se('rect',{width:p.w,height:p.h,rx:5}));const words=n.title.split(' '),lines=[''];for(const w of words){if((lines.at(-1)+' '+w).length>(p.w>300?60:29))lines.push('');lines[lines.length-1]+=(lines.at(-1)?' ':'')+w;}lines.forEach((t,i)=>g.append(se('text',{x:p.w/2,y:lines.length===1?33:25+i*18},t)));g.append(se('text',{x:p.w/2,y:65,class:'subtitle'},n.subtitle));g.onclick=()=>showBundle(n.id);g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showBundle(n.id);}};svg.append(g);}
+ $('#svg-holder').replaceChildren(svg);fit();svg.onwheel=e=>{e.preventDefault();zoom(Math.exp(e.deltaY*.001));};svg.onpointerdown=e=>{if(e.target.closest('[data-node],[data-edge]'))return;drag={x:e.clientX,y:e.clientY,box:[...box]};svg.setPointerCapture(e.pointerId);};svg.onpointermove=e=>{if(!drag)return;const r=svg.getBoundingClientRect(),scale=Math.max(box[2]/r.width,box[3]/r.height);box=[drag.box[0]-(e.clientX-drag.x)*scale,drag.box[1]-(e.clientY-drag.y)*scale,...drag.box.slice(2)];useBox();};for(const ev of ['pointerup','pointercancel'])svg.addEventListener(ev,()=>drag=null);
+ showBundle(({0:'computational',1:'taylor',2:'mathlib',3:'historical'})[route]||'historical');
+}
+function setRoute(r){route=r;document.querySelectorAll('[data-route]').forEach(b=>{b.classList.toggle('active',b.dataset.route===r);b.setAttribute('aria-pressed',String(b.dataset.route===r));});render();}
+for(const b of document.querySelectorAll('[data-route]'))b.onclick=()=>setRoute(b.dataset.route);
+$('#zoom-in').onclick=()=>zoom(.76);$('#zoom-out').onclick=()=>zoom(1/.76);$('#reset-map').onclick=fit;
+const requested=new URLSearchParams(location.search).get('route');setRoute(['0','1','2','3'].includes(requested)?requested:'all');

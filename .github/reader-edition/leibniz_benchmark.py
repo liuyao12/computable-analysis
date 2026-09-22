@@ -57,6 +57,7 @@ for every degree. They yield
 <p>The reusable components are alternating-prefix bounds, finite geometric
 division, certified interval convergence, and finite-difference integral order.
 </p>
+<p><a href="leibniz-transmutation.html">Leibniz’s geometric transmutation: historical reconstruction and checked proof →</a></p>
 <p><a href="SOURCELeibnizPi.lean">Computational theorem</a> ·
 <a href="SOURCELeibnizPiTaylor.lean">FTC theorem and remainder</a> ·
 <a href="reading/leibniz-dependency-closure.txt">Elaborated dependency closure</a></p>

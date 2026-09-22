@@ -23,6 +23,10 @@ on:
       - 'ComputableAnalysis/ArctanTaylorRemainder.lean'
       - 'ComputableAnalysis/FiniteSecantIntegralOrder.lean'
       - 'scripts/check_leibniz.lean'
+      - 'scripts/check_leibniz_transmutation.lean'
+      - 'ComputableAnalysis/FiniteTransmutation.lean'
+      - 'ComputableAnalysis/LeibnizTransmutation.lean'
+      - 'docs/LEIBNIZ_TRANSMUTATION.md'
       - 'ComputableAnalysis/RationalGeometry.lean'
       - 'ComputableAnalysis/QuarterCircleGeometry.lean'
       - 'ComputableAnalysis/GeometryFoundation.lean'
@@ -177,15 +181,18 @@ jobs:
           key: leibniz-${{ hashFiles('lean-toolchain', 'lake-manifest.json', 'ComputableAnalysis/**/*.lean') }}
           restore-keys: |
             leibniz-
-      - name: Check the two Leibniz proofs and their dependency separation
+      - name: Check the Leibniz proofs, transmutation and dependency separation
         run: |
           set -euo pipefail
           mkdir -p leibniz-reports
           lake build ComputableAnalysis ComputableAnalysisBlueprint checkdecls | tee leibniz-reports/build.log
           lake env lean scripts/check_leibniz.lean | tee leibniz-reports/proofs.log
+          lake env lean scripts/check_leibniz_transmutation.lean | tee leibniz-reports/transmutation.log
           lake env .lake/packages/checkdecls/.lake/build/bin/checkdecls blueprint/lean_decls | tee leibniz-reports/declarations.log
           python3 blueprint/checks/check_foundation_imports.py | tee leibniz-reports/imports.log
           python3 blueprint/checks/check_special_function_identities.py | tee leibniz-reports/identities.log
+      - name: Publish the checked geometric transmutation reconstruction
+        run: python3 .github/reader-edition/leibniz_transmutation.py --site site --revision "$GITHUB_SHA" --audit leibniz-reports/transmutation.log --closure tmp/leibniz-transmutation-closure.txt
       - name: Add only the checked Leibniz dependency note
         run: python3 .github/reader-edition/leibniz_benchmark.py --site site --revision "$GITHUB_SHA" --audit leibniz-reports/proofs.log --closure tmp/leibniz-dependency-closure.txt
       - name: Check and publish the Fuchs-Painleve subproject
@@ -195,7 +202,7 @@ jobs:
           lake build ComputableAnalysis.AlgebraicODE.Tests | tee algebraic-ode-reports/build.log
           lake env lean scripts/check_algebraic_ode.lean | tee algebraic-ode-reports/axioms.log
           python3 .github/reader-edition/algebraic_ode.py --site site --revision "$GITHUB_SHA" --audit algebraic-ode-reports/axioms.log
-      - name: Add the bundled mathematical comparison of all three Leibniz proofs
+      - name: Add the bundled mathematical comparison of four Leibniz proof routes
         run: python3 .github/reader-edition/leibniz_graph.py --site site --revision "$GITHUB_SHA"
       - name: Verify proof routes, source links, preservation and responsive graph interaction
         run: python3 .github/reader-edition/test_leibniz_graph.py --site site --report reader-edition-tests
@@ -211,6 +218,8 @@ jobs:
             site/reading/algebraic-ode-edition.json
             site/reading/leibniz-benchmark.json
             site/reading/leibniz-graph-publication.json
+            site/reading/leibniz-transmutation.json
+            site/reading/leibniz-transmutation-closure.txt
             site/reading/leibniz-dependency-closure.txt
             site/reading/analysis-edition.json
             site/reading/cosine-half-interval.json
@@ -331,8 +340,14 @@ jobs:
                   assert leibniz['interactiveGraphAdded']
                   graph=get('/reading/leibniz-graph-publication.json')
                   assert graph['documentationRevision']==revision
-                  assert all(graph['checks'].values()) and graph['bundleCount']==17
-                  assert not graph['newLeanProofsClaimed']
+                  assert all(graph['checks'].values()) and graph['bundleCount']==21
+                  assert graph['newLeanProofsClaimed'] and graph['cosinePrimitiveViewerPattern']
+                  transmutation=get('/reading/leibniz-transmutation.json')
+                  assert transmutation['proofSourceCommit']==revision
+                  assert transmutation['modernReconstruction'] and transmutation['powerQuadratureShared']
+                  assert not transmutation['mathlibDependency'] and not transmutation['geometricBridgeUsesCalculus']
+                  for name,expected in transmutation['artifactHashes'].items():
+                      assert hashlib.sha256(get('/'+name,True)).hexdigest()==expected,name
                   for name,expected in graph['artifactHashes'].items():
                       assert hashlib.sha256(get('/'+name,True)).hexdigest()==expected,name
                   series=get('/ch-infinite-series.html',True)
@@ -347,6 +362,7 @@ jobs:
                   assert 'fuchs-painleve.html' in home
                   assert 'fuchs-painleve.html' in get('/ch-differential-equations.html',True).decode()
                   print('LIVE FUCHS-PAINLEVE:',base+'/fuchs-painleve.html')
+                  print('LIVE TRANSMUTATION:',base+'/leibniz-transmutation.html')
                   print('LIVE LEIBNIZ:',base+'/ch-infinite-series.html#leibniz-geometric-benchmark')
                   print('LIVE PAGE:',base+'/fundamental-matrix.html')
                   print('LIVE CHAPTER:',base+'/ch-circle-sphere.html')

@@ -401,3 +401,13 @@ Laguerre construction supplies this via termination and proves the unmultiplied
 ODE even at zero. General formal solutions have no convergence or branch
 certificate yet. Compare the corresponding Lean 4 statements in Ripple as
 recorded in `docs/FUCHS_PAINLEVE.md`; do not import its Mathlib real foundation.
+
+## Finite transmutation
+
+For geometric change-of-area arguments, reuse the finite trapezoid and
+rectangle-complement identities in `FiniteTransmutation`. The benchmark
+`LeibnizTransmutation` replaces tangent infinitesimals with an exact cubic
+cell correction and sums its explicit error. Its geometry bridge is separate
+from power quadrature, which reuses polynomial FTC. Run
+`lake env lean scripts/check_leibniz_transmutation.lean` to audit that distinction.
+See [the historical reconstruction](docs/LEIBNIZ_TRANSMUTATION.md).

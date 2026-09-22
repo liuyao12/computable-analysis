@@ -21,12 +21,12 @@ def main():
     args=p.parse_args();site=args.site.resolve();out=args.report;out.mkdir(parents=True,exist_ok=True)
     report=json.loads((site/'reading/leibniz-graph-publication.json').read_text())
     model=json.loads((site/'reading/leibniz-graph.json').read_text());graph.validate(model)
-    assert all(report['checks'].values()) and not report['newLeanProofsClaimed']
+    assert all(report['checks'].values()) and report['newLeanProofsClaimed'] and report['cosinePrimitiveViewerPattern']
     assert graph.digest(site/'ch-infinite-series.html')==report['chapterSha256']
     for name,sha in {**report['artifactHashes'],**report['protectedArtifactHashes']}.items():assert graph.digest(site/name)==sha,name
     assert graph.install(site,report['documentationRevision'])==report
     document=BeautifulSoup((site/graph.PAGE).read_text(),'html.parser')
-    assert len(document.select('.reading article'))==17
+    assert len(document.select('.reading article'))==21
     for a in document.select('a[href]'):
         href=urlsplit(a['href'])
         if not href.scheme and href.path:assert (site/href.path).is_file(),a['href']
@@ -47,13 +47,13 @@ def main():
                 page.on('pageerror',lambda e:errors.append(str(e)))
                 page.on('request',lambda r:external.append(r.url) if not r.url.startswith(origin) else None)
                 page.goto(origin+'/'+graph.PAGE,wait_until='networkidle')
-                assert page.locator('.node').count()==17
-                assert page.locator('.edge').count()==22
+                assert page.locator('.node').count()==21
+                assert page.locator('.edge').count()==29
                 assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1'),width
                 # Labels must fit within the actual rendered node rectangles.
                 assert page.locator('.node').evaluate_all('nodes => nodes.every(n => {const r=n.querySelector("rect").getBBox();return [...n.querySelectorAll("text")].every(t=>{const b=t.getBBox();return b.x>=0 && b.y>=0 && b.x+b.width<=r.width && b.y+b.height<=r.height;});})'),f'Clipped node text at {width}'
                 if width==1440:page.screenshot(path=str(out/'leibniz-graph-desktop.png'),full_page=True)
-                for route,sink in [('0','computational'),('1','taylor'),('2','mathlib')]:
+                for route,sink in [('0','computational'),('1','taylor'),('2','mathlib'),('3','historical')]:
                     page.locator(f'button[data-route="{route}"]').click()
                     expected=[n for n in model['nodes'] if int(route) in n['routes']]
                     assert page.locator('.node').count()==len(expected)
@@ -61,18 +61,24 @@ def main():
                     if route!='2':assert page.locator('.node[data-family="mathlib"]').count()==0
                     # Each bundle opens an explanation and pinned source links.
                     for n in expected:
-                        page.locator(f'.node[data-node="{n["id"]}"]').click()
-                        assert page.locator('#detail-content h2').inner_text()==n['title']
-                        assert page.locator('#detail-content .source-list a').count()==len(n['refs'])
+                        page.locator(f'.node[data-node="{n["id"]}"]').focus();page.keyboard.press('Enter')
+                        assert page.locator('#map-detail h2').inner_text()==n['title']
+                        assert page.locator('#map-detail .source-list a').count()==len(n['refs'])
                     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1')
                 page.locator('button[data-route="all"]').click()
                 node=page.locator('.node[data-node="finite"]');node.focus();page.keyboard.press('Enter')
-                assert page.locator('#detail-content h2').inner_text()=='Finite geometric algebra'
+                assert page.locator('#map-detail h2').inner_text()=='Finite geometric algebra'
                 if width==1440:page.screenshot(path=str(out/'leibniz-graph-bundle.png'),full_page=True)
-                page.locator('#reset-selection').click();assert page.locator('.node.selected').count()==0
+                before=page.locator('#svg-holder svg').get_attribute('viewBox');page.locator('#zoom-in').click();assert page.locator('#svg-holder svg').get_attribute('viewBox')!=before
+                page.locator('#reset-map').click();assert page.locator('#svg-holder svg').get_attribute('viewBox')==before
+                edge=page.locator('.edge').first;edge.focus();page.keyboard.press('Enter');assert page.locator('#map-detail .role').inner_text()=='MATHEMATICAL DEPENDENCY'
                 page.locator('button[data-route="1"]').click()
                 if width==390:
                     page.evaluate('scrollTo(0,0)');page.screenshot(path=str(out/'leibniz-graph-mobile.png'),full_page=True)
+                page.goto(origin+'/leibniz-transmutation.html',wait_until='networkidle')
+                assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1'),width
+                assert page.locator('img').evaluate('(i)=>i.complete && i.naturalWidth>0')
+                if width in [1440,390]:page.screenshot(path=str(out/f'leibniz-transmutation-{width}.png'),full_page=True)
                 page.close()
             context=browser.new_context(java_script_enabled=False,viewport={'width':390,'height':844})
             page=context.new_page();page.goto(origin+'/'+graph.PAGE)
@@ -82,8 +88,8 @@ def main():
     finally:server.shutdown()
     assert not errors,errors
     assert not external,external
-    checks=dict(artifactHashes=True,priorProofMapsPreserved=True,chapterOutsideDiagramPreserved=True,idempotentPublication=True,allThreeRoutes=True,allBundlesSelectable=True,keyboardSelection=True,nodeTextFits=True,fiveViewportWidths=True,noExternalRuntimeDependencies=True,noJavaScriptOutline=True)
+    checks=dict(artifactHashes=True,priorProofMapsPreserved=True,chapterOutsideDiagramPreserved=True,idempotentPublication=True,allFourRoutes=True,zoomAndFit=True,edgeSelection=True,allBundlesSelectable=True,keyboardSelection=True,nodeTextFits=True,fiveViewportWidths=True,noExternalRuntimeDependencies=True,noJavaScriptOutline=True)
     (out/'leibniz-graph-tests.json').write_text(json.dumps(checks,indent=2)+'\n')
-    print('PASS: preservation, 17 bundles, 3 proof routes, keyboard access, source links and five viewport widths')
+    print('PASS: preservation, 21 bundles, 4 proof routes, keyboard access, source links and five viewport widths')
 
 if __name__=='__main__':main()

@@ -257,3 +257,11 @@ algebraic graph relation. This is local regular-singular theory; Laguerre is
 irregular at infinity. General Frobenius convergence, logarithmic resonant
 solutions, branches for nonintegral exponents, and global algebraic-solution
 classification remain open. Painlevé results are unchanged.
+
+## Historical geometric Leibniz reconstruction
+
+`LeibnizTransmutation` now supplies `pi_eq_leibniz_transmutation`, using a
+new finite geometric bridge and shared polynomial quadrature. The reusable
+finite area identities live in `FiniteTransmutation`. See
+[the reconstruction and historical scope](docs/LEIBNIZ_TRANSMUTATION.md).
+The dedicated dependency audit is `scripts/check_leibniz_transmutation.lean`.
