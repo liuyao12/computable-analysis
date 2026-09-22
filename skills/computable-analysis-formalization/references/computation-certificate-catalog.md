@@ -72,6 +72,16 @@ The definition must not contain that growth conclusion. `Fuchs.Growth`
 provides the polynomial-coefficient rational-ray application; general
 holomorphic adapters and the converse criterion remain separate work.
 
+## Local nonlinear pole charts
+
+`GeometricSeriesCalculus` certifies derivatives of rapidly convergent series
+by finite differences of arbitrary raw-box samples. Keep the precision
+step-dependent. `CauchyProductEstimate` proves the finite convolution error.
+`Painleve.Pole` combines these with a derived Laurent recurrence to prove
+regular-factor derivative certificates, a shrinking nonlinear PI residual,
+and double-pole bounds for the reconstructed value. The singular-coordinate
+derivative adapter and global movable-singularity theorem remain open.
+
 ## Pi as an integration suite
 
 Use `PiProofs.PiCoverageBridge` only to register an end-to-end independent

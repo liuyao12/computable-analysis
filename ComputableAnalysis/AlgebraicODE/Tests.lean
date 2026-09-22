@@ -1,3 +1,4 @@
+import ComputableAnalysis.AlgebraicODE.PainlevePoleTests
 import ComputableAnalysis.AlgebraicODE
 import ComputableAnalysis.AlgebraicODE.FrobeniusTests
 import ComputableAnalysis.AlgebraicODE.FuchsGrowthExamples

@@ -55,6 +55,29 @@ EXPECTED += [
     'ComputableAnalysis.AlgebraicODE.Tests.besselConstant_growth',
 ]
 
+EXPECTED += [
+    'ComputableAnalysis.FormalPowerSeries.geometricRaw_hasBoxDerivative',
+    'ComputableAnalysis.FormalPowerSeries.cauchy_prefix_error',
+    'ComputableAnalysis.AlgebraicODE.Painleve.Laurent.leading_coefficient',
+    'ComputableAnalysis.AlgebraicODE.Painleve.Laurent.resonance_obstruction',
+    'ComputableAnalysis.AlgebraicODE.Painleve.Laurent.coeff_isSolution',
+    'ComputableAnalysis.AlgebraicODE.Painleve.Laurent.solution_unique',
+    'ComputableAnalysis.AlgebraicODE.Painleve.Laurent.coeff_growth',
+    'ComputableAnalysis.AlgebraicODE.Painleve.Laurent.factorRaw_valid',
+    'ComputableAnalysis.AlgebraicODE.Painleve.Pole.factor_valid',
+    'ComputableAnalysis.AlgebraicODE.Painleve.Pole.firstDerivative_valid',
+    'ComputableAnalysis.AlgebraicODE.Painleve.Pole.secondDerivative_valid',
+    'ComputableAnalysis.AlgebraicODE.Painleve.Pole.factor_derivative',
+    'ComputableAnalysis.AlgebraicODE.Painleve.Pole.factor_secondDerivative',
+    'ComputableAnalysis.AlgebraicODE.Painleve.Pole.equation_error',
+    'ComputableAnalysis.AlgebraicODE.Painleve.Pole.equation',
+    'ComputableAnalysis.AlgebraicODE.Painleve.Pole.value_valid',
+    'ComputableAnalysis.AlgebraicODE.Painleve.Pole.double_pole_bounds',
+    'ComputableAnalysis.AlgebraicODE.Painleve.Pole.original_equation_identity',
+    'ComputableAnalysis.AlgebraicODE.Tests.quadratic_forcing_obstruction',
+    'ComputableAnalysis.AlgebraicODE.Tests.painleve_box_equation',
+]
+
 def sha(data):
     return hashlib.sha256(data).hexdigest()
 
@@ -73,7 +96,7 @@ def install(site, revision, audit):
     for name in ['index.html', 'ch-differential-equations.html']:
         original = before[name].decode()
         assert MARKER not in original and '</article>' in original
-        addition = MARKER + '<section class="fm-reader-link"><h2>Fuchs–Painlevé</h2><p>Algebraic differential equations on the computable-analysis foundation: forward Fuchs growth bounds, formal Frobenius recurrences, convergent factor computations, certified Laguerre polynomials, and Painlevé II algebraic seeds.</p><p><a href="fuchs-painleve.html">Read the subproject and formalization comparisons →</a></p></section>' + MARKER
+        addition = MARKER + '<section class="fm-reader-link"><h2>Fuchs–Painlevé</h2><p>Algebraic differential equations on the computable-analysis foundation: forward Fuchs growth bounds, formal Frobenius recurrences, convergent factor computations, certified Laguerre polynomials, Painlevé I local pole charts with certified derivatives, and Painlevé II algebraic seeds.</p><p><a href="fuchs-painleve.html">Read the subproject and formalization comparisons →</a></p></section>' + MARKER
         updated = original.replace('</article>', addition + '</article>', 1)
         assert updated.replace(addition, '', 1) == original
         (site / name).write_text(updated)

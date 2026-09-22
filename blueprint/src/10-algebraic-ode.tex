@@ -128,6 +128,87 @@ It does not construct a branch or prove implicit differentiation.
 \lean{ComputableAnalysis.AlgebraicODE.Fuchs.radical_euler}
 \leanok
 
+\section{Painlev\'e I: effective local pole charts}
+
+Put $s=x-p$ in $y''=6y^2+x$ and seek
+$y=s^{-2}\sum_{n\ge0}c_ns^n$. The pole position $p$ is free.
+
+\begin{theorem}[Nonlinear resonance and the Laurent construction]
+\label{thm:painleve-laurent}
+The independent differential residual forces every nonzero double-pole
+leading coefficient to be one. It then forces
+$c_1=c_2=c_3=0$, $c_4=-p/10$, $c_5=-1/6$. The resonant coefficient
+$c_6=q$ is free, and for $n\ge7$,
+\[
+ (n-6)(n+1)c_n=6\sum_{k=1}^{n-1}c_kc_{n-k}.
+\]
+For rational $p,q$, a terminating rational algorithm supplies the unique
+formal Laurent solution with these parameters. With $R=1+6|p|+6|q|$,
+its coefficients satisfy $|c_n|\le R^n$.
+For the general forcing $y''=6y^2+f(s)$, resonance requires $f_2=0$.
+\lean{ComputableAnalysis.AlgebraicODE.Painleve.Laurent.leading_coefficient}
+\lean{ComputableAnalysis.AlgebraicODE.Painleve.Laurent.resonance_obstruction}
+\lean{ComputableAnalysis.AlgebraicODE.Painleve.Laurent.coeff_isSolution}
+\lean{ComputableAnalysis.AlgebraicODE.Painleve.Laurent.solution_unique}
+\lean{ComputableAnalysis.AlgebraicODE.Painleve.Laurent.coeff_growth}
+\leanok
+\end{theorem}
+
+\begin{theorem}[Derivative semantics for rapidly convergent series]
+\label{thm:geometric-box-derivative}
+If $|a_n|\le M(1/8)^n$, $M\ge0$, the actual geometric-tail interval
+algorithms for the series and its coefficient derivative satisfy a
+finite-difference certificate on rational $[-1,1]$. For every rational
+$\varepsilon>0$, the step radius is $\varepsilon/(4(M+1))$ and a computed
+stage depending on $\varepsilon,h$ makes every endpoint and derivative
+box selection satisfy $|w-v-hd|\le\varepsilon|h|$.
+A product of two length-$N$ prefixes differs from the length-$N$
+Cauchy convolution by at most $M^2 2^{-N}$ under the same coefficient bounds.
+\lean{ComputableAnalysis.FormalPowerSeries.geometricRaw_hasBoxDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.cauchy_prefix_error}
+\leanok
+\end{theorem}
+
+\begin{theorem}[Computed regularized PI equation and double-pole bounds]
+\label{thm:painleve-pole-chart}
+Set $\rho=1/(64R)$ and $U(t)=\sum c_n\rho^nt^n$.
+For rational $|t|\le1$, the factor and its first two derivatives are valid
+raw interval computations of stage width $4\,2^{-n}$. Their finite-difference
+certificates are proved, not assumed from formal differentiation.
+Every selection $u,v,w$ from the three stage-$n$ boxes satisfies
+\[
+ |t^2w-4tv+6u-6u^2-p\rho^4t^4-\rho^5t^5|\le146\,2^{-n}.
+\]
+For nonzero $t$, the reconstructed value $Y=U/(\rho t)^2$ has valid boxes;
+at every stage $n\ge2$,
+\[
+ \tfrac12\le(\rho t)^2\operatorname{lo}(Y_n)
+ \le(\rho t)^2\operatorname{hi}(Y_n)\le\tfrac32.
+\]
+\lean{ComputableAnalysis.AlgebraicODE.Painleve.Pole.factor_valid}
+\lean{ComputableAnalysis.AlgebraicODE.Painleve.Pole.firstDerivative_valid}
+\lean{ComputableAnalysis.AlgebraicODE.Painleve.Pole.secondDerivative_valid}
+\lean{ComputableAnalysis.AlgebraicODE.Painleve.Pole.factor_derivative}
+\lean{ComputableAnalysis.AlgebraicODE.Painleve.Pole.factor_secondDerivative}
+\lean{ComputableAnalysis.AlgebraicODE.Painleve.Pole.equation_error}
+\lean{ComputableAnalysis.AlgebraicODE.Painleve.Pole.equation}
+\lean{ComputableAnalysis.AlgebraicODE.Painleve.Pole.value_valid}
+\lean{ComputableAnalysis.AlgebraicODE.Painleve.Pole.double_pole_bounds}
+\leanok
+\end{theorem}
+
+An exact algebraic jet identity checks the change back to the original PI
+equation. Transporting the derivative certificates through that singular
+coordinate change is still an analytic obligation. These rational local
+charts do not assert complex continuation, exhaustion of movable
+singularities, the global Painlev\'e property, or algebraicity of the solutions.
+The generic quadratic forcing $f(s)=s^2$ is excluded by the checked resonance
+obstruction. No completed real type is added.
+\lean{ComputableAnalysis.AlgebraicODE.Painleve.Pole.original_equation_identity}
+\lean{ComputableAnalysis.AlgebraicODE.Tests.quadratic_forcing_obstruction}
+\lean{ComputableAnalysis.AlgebraicODE.Tests.painleve_box_equation}
+\leanok
+
 \section{Painlev\'e equations and algebraic seeds}
 
 We use the DLMF convention
@@ -269,7 +350,8 @@ Coq/Rocq and Isabelle work is background, not the direct comparison benchmark.
 Next are analytic differentiation, convergence for the remaining nonresonant
 roots, certified algebraic branches and
 Puiseux charts, and resonant logarithmic solutions. Painlev\'e work remains
-separate: pole/degree obstructions, B\"acklund transformations and rational
+separate: transport from the regular factor to its pole value, complex
+continuation and exhaustion of movable singularities, then pole/degree obstructions, B\"acklund transformations and rational
 solution classification for PII, followed by III--VI. Global monodromy and
 the general algebraic classification remain open.
 

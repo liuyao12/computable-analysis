@@ -48,3 +48,24 @@ import ComputableAnalysis.AlgebraicODE.Tests
 #print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Growth.reciprocalSolution
 #print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Growth.reciprocal_moderate
 #print axioms ComputableAnalysis.AlgebraicODE.Tests.besselConstant_growth
+
+#print axioms ComputableAnalysis.FormalPowerSeries.geometricRaw_hasBoxDerivative
+#print axioms ComputableAnalysis.FormalPowerSeries.cauchy_prefix_error
+#print axioms ComputableAnalysis.AlgebraicODE.Painleve.Laurent.leading_coefficient
+#print axioms ComputableAnalysis.AlgebraicODE.Painleve.Laurent.resonance_obstruction
+#print axioms ComputableAnalysis.AlgebraicODE.Painleve.Laurent.coeff_isSolution
+#print axioms ComputableAnalysis.AlgebraicODE.Painleve.Laurent.solution_unique
+#print axioms ComputableAnalysis.AlgebraicODE.Painleve.Laurent.coeff_growth
+#print axioms ComputableAnalysis.AlgebraicODE.Painleve.Laurent.factorRaw_valid
+#print axioms ComputableAnalysis.AlgebraicODE.Painleve.Pole.factor_valid
+#print axioms ComputableAnalysis.AlgebraicODE.Painleve.Pole.firstDerivative_valid
+#print axioms ComputableAnalysis.AlgebraicODE.Painleve.Pole.secondDerivative_valid
+#print axioms ComputableAnalysis.AlgebraicODE.Painleve.Pole.factor_derivative
+#print axioms ComputableAnalysis.AlgebraicODE.Painleve.Pole.factor_secondDerivative
+#print axioms ComputableAnalysis.AlgebraicODE.Painleve.Pole.equation_error
+#print axioms ComputableAnalysis.AlgebraicODE.Painleve.Pole.equation
+#print axioms ComputableAnalysis.AlgebraicODE.Painleve.Pole.value_valid
+#print axioms ComputableAnalysis.AlgebraicODE.Painleve.Pole.double_pole_bounds
+#print axioms ComputableAnalysis.AlgebraicODE.Painleve.Pole.original_equation_identity
+#print axioms ComputableAnalysis.AlgebraicODE.Tests.quadratic_forcing_obstruction
+#print axioms ComputableAnalysis.AlgebraicODE.Tests.painleve_box_equation

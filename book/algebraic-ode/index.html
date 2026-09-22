@@ -6,7 +6,7 @@
 </style></head><body><main>
 <nav aria-label="Book"><a href="index.html">← Computable Analysis</a><a href="ch-differential-equations.html">Differential equations</a><a href="#comparisons">Related formalizations</a></nav>
 <header><span class="eyebrow">Algebraic differential equations · Linear and nonlinear theories</span>
-<h1>Fuchs–Painlevé</h1><p class="lead">Regular-singular growth and algebraic solutions, proved with rational interval computations.</p>
+<h1>Fuchs–Painlevé</h1><p class="lead">Regular-singular growth, local movable poles, and algebraic solutions, proved with rational interval computations.</p>
 <p>This subproject uses the book’s rational interval algorithms and represented complex values. It has no Mathlib dependency. The general classification remains open.</p></header>
 <section id="fuchs-growth"><h2>Fuchs: coefficient bounds imply solution growth</h2>
 <div class="equation">z²y″ + zp(z)y′ + q(z)y = 0<br>Y = (y, zy′), &emsp; z = td</div>
@@ -49,6 +49,22 @@
 <p>The checked equation holds at every rational input, including zero. Both derivative certificates are constructed on bounded rational intervals, and the same polynomial evaluator satisfies the nonzero algebraic relation y − P(x) = 0. The finite Taylor evaluator is proved equal to the existing Horner polynomial evaluator.</p>
 <p>This is the <a href="https://dlmf.nist.gov/18.8">Laguerre equation</a> with b = α + 1, normalized by y(0) = c₀. It has a regular singularity at zero and an irregular singularity at infinity, so it is a local Fuchs–Frobenius application.</p>
 <p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/AlgebraicODE/Laguerre.lean">Read the all-degree construction and derivative certificates</a></p></section>
+<section id="painleve-poles"><h2>Painlevé I: local movable poles</h2>
+<div class="equation">y″ = 6y² + x, &emsp; s = x − p<br>y = s⁻² − (p/10)s² − (1/6)s³ + q s⁴ + ⋯</div>
+<p>The pole position p and the resonant coefficient q are free rational parameters. Starting from the differential equation, Lean derives the Laurent recurrence, checks its compatibility at the resonant index, and proves that the coefficient algorithm gives the unique formal expansion for these parameters.</p>
+<p>Compatibility has content: for the more general equation y″=6y²+f(s), a double-pole Laurent expansion requires the quadratic coefficient of f to vanish. A regression proof rejects f(s)=s².</p>
+<h3>From a formal expansion to computed derivatives</h3>
+<p>With R=1+6|p|+6|q|, the coefficients satisfy |cₙ|≤Rⁿ. Set ρ=1/(64R), s=ρt, and U(t)=Σcₙρⁿtⁿ. On rational |t|≤1, the factor U and its first two derivatives are valid nested interval algorithms, each with stage width 4/2ⁿ.</p>
+<p>The derivative theorem controls actual box samples: for each rational ε&gt;0, sufficiently small nonzero h and a computed precision depending on h, all endpoint samples v,w and derivative samples d satisfy |w−v−hd|≤ε|h|. This proves the differential meaning of the coefficient shifts.</p>
+<p>A finite convolution estimate then proves the nonlinear equation. For any samples u,v,w from the stage-n boxes of U,U′,U″,</p>
+<div class="equation">|t²w − 4tv + 6u − 6u² − pρ⁴t⁴ − ρ⁵t⁵|<br>≤ 146 · 2⁻ⁿ.</div>
+<p>A positive rational error request gives an explicit stage. These proofs use finite sums, finite differences, and the interval computations of Chapter 1. No completed real-number type or complex-analytic library is introduced.</p>
+<h3>The pole is genuine</h3>
+<p>For Y=U/(ρt)² and every stage n≥2, Lean proves</p>
+<div class="equation">½ ≤ (ρt)² lo(Yₙ) ≤ (ρt)² hi(Yₙ) ≤ 3/2,<br>0 &lt; |t| ≤ 1.</div>
+<p>The computation therefore has a double pole at the freely supplied position p. An exact algebraic identity checks the change of jet coordinates back to the original PI equation.</p>
+<p class="note">The derivative certificates are for the regular factor U. Transporting them to Y through the singular coordinate change remains open. These rational local charts do not yet establish complex continuation, cover arbitrary initial data, or exclude every other movable singularity. The global <a href="https://dlmf.nist.gov/32.2">Painlevé property</a>, which excludes movable branch points, is not claimed. These PI charts are not asserted to be algebraic solutions.</p>
+<p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/AlgebraicODE/PainlevePole.lean">Computed factors, derivative certificates and pole bounds</a> · <a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/AlgebraicODE/PainleveLaurent.lean">Laurent recurrence and convergence bound</a> · <a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/GeometricSeriesCalculus.lean">Reusable series calculus</a> · <a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/AlgebraicODE/PainlevePoleTests.lean">PI regression proofs</a></p></section>
 <section><h2>Painlevé: equations and algebraic seeds</h2>
 <div class="equation">P<sub>I</sub>: y″ = 6y² + x<br>P<sub>II</sub>(α): y″ = 2y³ + xy + α</div>
 <p>In the <a href="https://dlmf.nist.gov/32.2">DLMF convention</a>, PI has no rational constant solution. For PII, the only rational affine solution is y = 0 at α = 0.</p>
@@ -65,7 +81,7 @@
 <li><a href="https://leanprover-community.github.io/mathlib4_docs/Mathlib/Analysis/ODE/ExistUnique.html">Mathlib ODE existence and uniqueness</a>. Compare solution interfaces, derivative semantics and hypotheses.</li>
 <li><a href="https://github.com/seewoo5/lean-poly-abc">Mason–Stothers in Lean 4</a>. Compare polynomial derivatives, Wronskians, degree bounds and algebraic nonexistence arguments.</li></ul>
 <p>These comparisons do not introduce a Mathlib dependency. Coq/Rocq and Isabelle references are background only; the full ledger records the search limits.</p></section>
-<section><h2>The remaining programme</h2><p>Next for Fuchs are a general holomorphic-solution bridge, uniform sector bounds and the converse criterion. The Frobenius work still needs analytic derivative certificates and convergence for the remaining nonresonant roots, certified algebraic branches and Puiseux charts, resonant logarithmic solutions, and a separate first-order Fuchs criterion development. For PII, the next targets are pole and degree obstructions, Bäcklund transformations and rational-solution classification.</p>
+<section><h2>The remaining programme</h2><p>Next for Fuchs are a general holomorphic-solution bridge, uniform sector bounds and the converse criterion. The Frobenius work still needs analytic derivative certificates and convergence for the remaining nonresonant roots, certified algebraic branches and Puiseux charts, resonant logarithmic solutions, and a separate first-order Fuchs criterion development. For PI, the next steps are the singular-coordinate derivative adapter, complex charts, and continuation and exhaustion toward the global Painlevé property. For PII, the next targets are pole and degree obstructions, Bäcklund transformations and rational-solution classification.</p>
 <p>General algebraic-solution classification, PI algebraic nonexistence, monodromy, and PIII–PVI are not proved in this milestone. Formal residuals and conditional jet identities are kept distinct from analytic solutions.</p>
 <p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/docs/FUCHS_PAINLEVE.md">Full theorem ledger, search record and development plan</a></p></section>
 <footer>Import <code>ComputableAnalysis.AlgebraicODE</code>.<br>The new proofs add no custom axioms or placeholders. Analytic certificates inherit the foundation’s existing native-decision dependencies.<br><a href="https://github.com/liuyao12/computable-analysis/commit/__REVISION__">Verified source revision</a></footer>
