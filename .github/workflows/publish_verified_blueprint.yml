@@ -9,6 +9,12 @@ on:
       - '.github/workflows/publish_verified_blueprint.yml'
       - '.github/reader-edition/**'
       - 'book/fundamental-matrix/**'
+      - 'book/algebraic-ode/**'
+      - 'ComputableAnalysis/AlgebraicODE*'
+      - 'ComputableAnalysis/AlgebraicODE/**'
+      - 'ComputableAnalysis/DifferentialReciprocal.lean'
+      - 'scripts/check_algebraic_ode.lean'
+      - 'docs/FUCHS_PAINLEVE.md'
       - 'ComputableAnalysis/PiProofs.lean'
       - 'ComputableAnalysis/LeibnizPi*.lean'
       - 'ComputableAnalysis/AlternatingRemainder.lean'
@@ -180,6 +186,13 @@ jobs:
           python3 blueprint/checks/check_special_function_identities.py | tee leibniz-reports/identities.log
       - name: Add only the checked Leibniz dependency note
         run: python3 .github/reader-edition/leibniz_benchmark.py --site site --revision "$GITHUB_SHA" --audit leibniz-reports/proofs.log --closure tmp/leibniz-dependency-closure.txt
+      - name: Check and publish the Fuchs-Painleve subproject
+        run: |
+          set -euo pipefail
+          mkdir -p algebraic-ode-reports
+          lake build ComputableAnalysis.AlgebraicODE.Tests | tee algebraic-ode-reports/build.log
+          lake env lean scripts/check_algebraic_ode.lean | tee algebraic-ode-reports/axioms.log
+          python3 .github/reader-edition/algebraic_ode.py --site site --revision "$GITHUB_SHA" --audit algebraic-ode-reports/axioms.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -188,6 +201,8 @@ jobs:
             reader-edition-tests
             geometry-reports
             leibniz-reports
+            algebraic-ode-reports
+            site/reading/algebraic-ode-edition.json
             site/reading/leibniz-benchmark.json
             site/reading/leibniz-dependency-closure.txt
             site/reading/analysis-edition.json
@@ -310,6 +325,15 @@ jobs:
                   series=get('/ch-infinite-series.html',True)
                   assert hashlib.sha256(series).hexdigest()==leibniz['pageSha256']
                   assert b'id="leibniz-geometric-benchmark"' in series
+                  algebraic=get('/reading/algebraic-ode-edition.json')
+                  assert algebraic['proofSourceCommit']==revision
+                  assert algebraic['allPreviousContentPreserved'] and not algebraic['generalClassificationProved']
+                  assert not algebraic['mathlibDependency'] and len(algebraic['auditedDeclarations'])==10
+                  algebraic_html=get('/fuchs-painleve.html',True)
+                  assert hashlib.sha256(algebraic_html).hexdigest()==algebraic['pageSha256']
+                  assert 'fuchs-painleve.html' in home
+                  assert 'fuchs-painleve.html' in get('/ch-differential-equations.html',True).decode()
+                  print('LIVE FUCHS-PAINLEVE:',base+'/fuchs-painleve.html')
                   print('LIVE LEIBNIZ:',base+'/ch-infinite-series.html#leibniz-geometric-benchmark')
                   print('LIVE PAGE:',base+'/fundamental-matrix.html')
                   print('LIVE CHAPTER:',base+'/ch-circle-sphere.html')
