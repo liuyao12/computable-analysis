@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import http.server
 import json
+import shutil
 import threading
 from functools import partial
 from pathlib import Path
@@ -28,6 +29,8 @@ def main():
     assert len(upstream) == 7
     assert all('/blob/' + report['pntRevision'] + '/' in url for url in upstream)
     assert soup.select_one('#remaining') and soup.select_one('#native details')
+    assert soup.select_one('#rectangle-primitive')
+    assert 'piecewise monotone' in soup.select_one('#rectangle-primitive').get_text()
     for el in soup.select('a[href]'):
         href = el['href']
         if not href.startswith(('https:', '#')):
@@ -42,7 +45,11 @@ def main():
     results = []
     try:
         with sync_playwright() as pw:
-            browser = pw.chromium.launch(headless=True)
+            options = dict(headless=True)
+            executable = shutil.which('google-chrome') or shutil.which('chromium') or shutil.which('chromium-browser')
+            if executable:
+                options['executable_path'] = executable
+            browser = pw.chromium.launch(**options)
             for width, height in [(1440, 1000), (390, 844)]:
                 page = browser.new_page(viewport=dict(width=width, height=height), device_scale_factor=1)
                 errors = []

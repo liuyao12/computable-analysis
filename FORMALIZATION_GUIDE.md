@@ -477,3 +477,10 @@ reference. Its explicit Cauchy derivative formula uses a separate circle
 integral theorem. General native residue transport, regular-part removal
 and the Cauchy integral formula are not claimed by this normalization.
 The focused audit is `scripts/check_cauchy_arctan.lean`.
+
+The selected contour interface starts with rational rectangles and supplied
+piecewise monotonicity certificates for the real and imaginary **side
+pullbacks**, using the existing piecewise real integral machinery. Finite
+assemblies remain available under addition and subtraction. Integrability
+certificates and interior analyticity certificates have separate roles;
+the general rectangle adapter and residue transfer are still open.

@@ -30,6 +30,42 @@ It invokes Mathlib's circle-integral derivative formula directly. It does
 below is a mathematical consequence of the simple-pole theorem, not a
 claim that PNT+ exports a separate rectangle formula declaration by that name.
 
+## Rectangle-first contour interface
+
+For this route, rational rectangles suffice as contour primitives. Parameterize
+each oriented side from a to b by `z(t)=a+t(b-a)` on `[0,1]`, and integrate
+the two real components of `G(t)=F(z(t))*(b-a)`. The orientation and side
+length belong to this pullback, not to an after-the-fact sign convention.
+
+A useful initial class supplies a finite partition on which each component
+of G is monotone, computable endpoint value boxes, and rational range bounds.
+For a monotone piece of length L, range width V, maximum mesh δ and endpoint
+box widths at most η, the Darboux gap is at most `δ*V+2*L*η`. Finite assembly
+adds the budgets. Start with supplied rational breakpoints; for an irrational
+turn, use shrinking rational brackets and a range bound on the remaining
+central cell. Reuse `FinitePiecewiseRectangles`,
+`Integral.PiecewiseMonotoneConstructionFor` in `Calculus`, and
+`TurningPointIntegral`; do not postulate a universal integral.
+
+For the rational pole kernel, the horizontal-side components reduce (up to
+constant factors) to `x/(x²+y²)` and `y/(x²+y²)` with fixed nonzero rational y.
+Their monotonicity splits are explicitly `x=±|y|` and `x=0`; vertical sides
+are analogous. Thus the class fits the arctangent normalization directly.
+
+Permit finite sums of certified integrals so regular-part subtraction does
+not require automatically discovering a new monotonicity partition for a
+sum. Products and new quotients still need their own enclosure certificates.
+
+Separate **integrability certificates on the four sides** from **complex
+analyticity certificates in the region away from supplied poles**. The first
+constructs the integral; the second proves Cauchy and residue identities.
+For example, the side pullbacks of `conj(z)` have affine real and imaginary
+components, but its counterclockwise rectangle integral is `2i*area`, not
+zero. Piecewise monotonicity alone cannot prove a Cauchy theorem.
+
+This is the selected design direction, not a claim that a generic rectangle
+adapter is already formalized. The existing polygonal interfaces are retained.
+
 ## The native arctangent normalization
 
 Reuse the existing rational square contour work in

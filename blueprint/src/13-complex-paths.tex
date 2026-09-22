@@ -88,6 +88,27 @@ Both sides are now specified computations with independent truncation and
 quadrature errors.  We have proved the identity for the supplied chart,
 not invoked it to manufacture a chart from unverified pointwise data.
 
+\section{Rectangles as contour primitives}
+For the residue route it suffices to begin with rational rectangles.
+On an oriented side from $a$ to $b$, integrate the real and imaginary
+components of $F(a+t(b-a))(b-a)$ on $[0,1]$. Supply finite monotonicity
+partitions and rational range bounds for these two real functions.
+On a monotone piece of length $L$, range width $V$, mesh size at most
+$\delta$, and endpoint value boxes of width at most $\eta$, endpoint
+rectangles have gap at most $\delta V+2L\eta$. Add these budgets over the
+pieces and sides. A non-rational turn may instead have a shrinking rational
+bracket and a bound on its central range. Existing piecewise and turning-point
+integral constructions supply this pattern.
+
+These data construct integrals. Complex analyticity is a separate local
+certificate needed for Cauchy cancellation and residues: even $\bar z$
+has monotone affine side components, while
+$\oint_{\partial\Omega}\bar z\,dz=2i\,\mathrm{area}(\Omega)$.
+Finite sums of certified side integrals allow regular-part subtraction
+without searching anew for the monotonicity intervals of a sum. This is
+the proposed rectangle interface; the checked example below is the square
+pole normalization. Existing polygonal constructions are retained.
+
 \section{Arctangent normalizes the Cauchy pole}
 \label{sec:cauchy-arctan}
 There is a direct rectangle route to the same normalization. Split the
