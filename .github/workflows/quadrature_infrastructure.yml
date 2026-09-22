@@ -1,0 +1,31 @@
+name: Quadrature infrastructure verification
+on:
+  push:
+    branches: [work/quadrature-infrastructure-cleanup]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+      - name: Fresh native build, old clients, and semantic regressions
+        run: python3 book/checks/verify_quadrature.py --with-applications --with-taylor
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: quadrature-infrastructure-verification
+          path: .lake/quadrature-fresh
+          include-hidden-files: true
+          retention-days: 30

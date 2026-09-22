@@ -33,6 +33,7 @@ points:
 | --- | --- |
 | raw and abstract represented numbers | `ComputableAnalysis.Basic` |
 | rational circle and trigonometry | `ComputableAnalysis.CircleFoundation` |
+| particular tagged-quadrature certificates | `ComputableAnalysis.QuadratureAdapters` |
 | finite integrals and endpoint identities | `ComputableAnalysis.IntegralFoundation` |
 | effective derivatives, MVT, and FTC | `ComputableAnalysis.EffectiveCalculusFoundation` |
 | power series and Fourier certificates | `ComputableAnalysis.SeriesFoundation` |
@@ -103,68 +104,51 @@ not re-exported by the canonical root.
 - Finite Peano--Baker products, discrete Duhamel sums, and factorial-tail
   estimates provide the linear-ODE core.
 
-## Active frontier
+## Active frontier: finish the elementary infrastructure
 
-Work in dependency order. Do not add routine examples while an earlier bridge
-is open.
+The current priority is ordinary, finite-valued single-variable calculus.
+Develop reusable constructors and rules; use routine calculations as disposable
+tests against a fixed library. Preserve the geometric circle/trigonometric
+computations and the specially selected mathematical comparisons.
 
-1. **Inverse-arctangent source edge / computable IVT frontier.** Construct a finite inverse plan for
-   `arctanOnUnitRegular` (its interval regularity, fixed-gap separation, and
-   denominator-selected gap-aware separation are checked), and its normalized
-   targets have executable (1/(16(n+1))) width schedules.  A sound midpoint
-   kernel may retain its parent when its finite target and midpoint boxes
-   overlap.  The local third-case fact is checked: non-separation certifies
-   that the midpoint forward box overlaps the target box.  A total plan still
-   needs a certified small source bracket whose target and forward stages stay
-   synchronized across outputs; it must not claim that strict left/right
-   comparisons are available at every midpoint.  The conservative kernel now
-   has the fixed-stage finite-IVT invariant: every iterate retains its
-   oriented endpoint bracket around the target box, including a central
-   overlap; each normalized arctangent target supplies the initial full-chart
-   bracket.  The explicit arctangent interval-image formula also turns each
-   such endpoint bracket into a whole-bracket image enclosure of the target;
-   this uses endpoint coherence, not an assumed global image-monotonicity
-   axiom, and therefore applies to every fixed finite bisection iterate.
-   At each finite depth the checked dichotomy is now explicit:
-   either all decisions were strict and the bracket has dyadic width, or a
-   rational midpoint forward box overlaps the target.  For each fixed source
-   interval, the arctangent rectangle-image boxes now also refine across
-   output stages, and a later witnessed image--target overlap transports to
-   the earlier enclosing stage on both sides.  The finite theorem now returns
-   a dyadically narrow rational source box with an overlapping arctangent
-   image at every chosen depth (using the final strict bracket or the central
-   rational midpoint).  The literal finite search now keeps those outcomes
-   distinct, with a checked invariant: it either retains an endpoint bracket
-   or stops at a concrete midpoint-overlap witness; the canonical arctangent
-   branch lifts either outcome to a checked forward-image/target overlap.
-   The remaining work is
-   to synchronize these fixed-stage brackets
-   across output stages and prove their source widths shrink.  Then lift rational chart
-   addition to bounded `RealRaw` slopes;
-   prove that the nested-radical table has normalized angle `k / 2^n`; and use
-   constructive inverse uniqueness to inhabit
-   `DyadicHalfAngleTangentEquivalenceFamily`.  The remaining stage-box proof
-   must supply simultaneous strict rational margins: a circle witness lies
-   inside the nested-radical sine box and its half-angle box lies inside the
-   inverse box.  Plain `RealRaw.Equiv` alone does not imply this same-stage
-   enclosure.  Its `sine_equiv` theorem already transports every equal-dyadic
-   sine sample, including zero.  Do not add matching-stage searches,
-   certificate families, or parity-specific public wrappers.
-2. **Squared sine.** Derive the two square-sum edges from the same tangent
-   representation family and the checked tangent-square FTC: public dyadic
-   squares to nested radicals, then nested radicals to the normalized
-   tangent-square anchor.  The anchor's validity and conditional `1/4` value
-   are checked.  These are downstream consequences of item 1, not a second
-   finite-search problem.  The canonical chain stabilizer then gives the
-   public value.
-3. **Fourier series.** Complete effective reconstruction for one genuinely
-   infinite, nontrivial class with explicit coefficient and tail schedules.
-4. **Linear ODEs.** Lift finite Peano--Baker/Duhamel algebra to interval-valued
-   simplex computations with a uniform factorial-tail certificate, then prove
-   uniqueness.
-5. **Complex special functions.** Treat special functions as complex-variable
-   computations from the start, adding one representative per new evaluator
-   or analytic estimate.
+1. **Integral meaning and assembly.** The new quantitative tagged-dyadic
+   certificate preserves the relation between a supplied integrand and a valid
+   number computation. Monotone-sample and rational-Lipschitz adapters are
+   implemented. Finish the effective-FTC adapter, oriented interval transports,
+   splitting, and change-of-variable comparisons before general migration.
+   Legacy numerical validity alone is not an integral certificate.
+2. **Local calculus and Taylor.** Reuse `TaylorFTC` from the elementary-calculus
+   branch; do not restart its arbitrary-order weighted-FTC proof. Complete
+   arbitrary rational-chart transport and composable derivative certificates,
+   including computed-input composition and the required error allocation.
+3. **Elementary functions.** Consolidate bounded exponential, positive-interval
+   logarithm, their inverse identities, and full geometric trigonometry with
+   correct normalization and agreement at chart joins. Close concrete provider
+   instances rather than introducing another family of obligations.
+4. **Certified equations and optimization.** Build reusable refinement,
+   uniqueness and error-estimation rules from the completed calculus. Specific
+   objectives or elementary integral evaluations are acceptance tests, not
+   automatic new library modules.
+5. **Independent comparison and release.** Prove the same complete native
+   propositions in the optional Mathlib workspace, with all representation
+   bridges and hypotheses explicit. Repair the known broad `PiProofs` build
+   failure before claiming a full release; focused verification is separate.
+
+### Existing inverse work must be reused
+
+`ClosedArctanInverse.search` and `provider` supply a concrete normalized
+arctangent inverse with validity, domain containment and forward equivalence.
+The previous roadmap's request to construct this canonical instance is obsolete.
+That does not automatically discharge every older gap-aware or dyadic-table
+provider: identify the exact declaration and hypotheses before migrating one.
+The dyadic radical representation and squared-sine transport obligations in the
+formalization guide must not be relabeled complete merely from the inverse's
+existence, nor should they trigger another duplicate inverse algorithm.
+
+Fourier reconstruction, general linear ODE solution constructors, Gamma,
+Stirling, singular functions and PDEs remain independent subsequent directions.
+Their interface records and finite algebra are not advertised as complete
+analytic solutions, and they are not prerequisites for finishing this core.
 
 ## Effective FTC contract
 
@@ -244,3 +228,17 @@ The independently validated schedules, exact declaration maps, and cumulative
 post-Cartwright costs are exported by `ExportIntegralPortfolio.lean`.
 The supported entry points are `ComputableAnalysis.IntegralApplications` and,
 only in the optional comparison workspace, `MathlibComparison.IntegralApplications`.
+
+## Current infrastructure cleanup
+
+The quantitative tagged-dyadic quadrature certificate in
+`QuadratureCertificate.lean` preserves integral meaning separately from number
+validity. `QuadratureAdapters.lean` connects the existing rational-Lipschitz and
+monotone sample algorithms to it. Legacy wrappers remain for compatibility;
+general interval/partition/FTC adapter migration is not yet complete.
+
+Routine calculations are disposable acceptance tests against unchanged native
+sources. Retain reusable rules and a small set of specification regressions,
+not every generated proof. See `FORMALIZATION_GUIDE.md` and
+`book/checks/run_disposable_lean.py`. No new Mathlib comparison or complete
+first-year-calculus release is asserted by this cleanup.

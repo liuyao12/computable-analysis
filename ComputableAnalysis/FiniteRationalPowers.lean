@@ -1,4 +1,4 @@
-import ComputableAnalysis.PowerSeries
+import ComputableAnalysis.Basic
 
 /-! Finite power identities used by the shared algebra of the moment argument. -/
 namespace ComputableAnalysis.FiniteRationalPowers

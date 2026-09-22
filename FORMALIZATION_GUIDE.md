@@ -22,6 +22,65 @@ Foundation modules are import surfaces, not renaming namespaces. Refer to a
 declaration by the name in its subject module; do not add an `effective...`
 alias merely because a theorem is re-exported by a broader foundation.
 
+## Infrastructure first; calculations are disposable tests
+
+The permanent deliverable is reusable mathematics and executable constructors,
+not a catalogue of completed exercises. Keep specially interesting applications
+and their genuine alternative proofs; otherwise formalize a calculation in a
+temporary module against a fixed library revision. If it needs a reusable rule,
+review that addition separately, then retry with the library fixed. Do not pass a
+test by adding the problem's conclusion to a provider record.
+
+After a successful test, discard its proof unless it is deliberately retained
+for reproducibility, comparison, or a previous-defect regression. A short record
+of the problem, source hash, library hash, compiler result, and dependency audit
+records the test; it is not a reproducible proof archive. Small specification
+regressions belong in `book/checks/`, never in the native import surfaces.
+
+`book/checks/run_disposable_lean.py` checks named result roots, refuses admitted
+proofs and Mathlib dependencies, checks that native source did not change during
+the test, and removes the temporary module. Supply `--discard-input` to remove
+the original generated file as well. Only the logical axioms `propext`,
+`Classical.choice`, and `Quot.sound` are accepted by this runner. This is a tool
+for trusted agent-generated tests, not a security sandbox or a proof that a
+poorly chosen theorem statement expresses the intended exercise.
+
+## An integral needs meaning as well as numerical validity
+
+`RealRaw.Valid` certifies a number, not its interpretation as an integral. The
+legacy `Integral.ConstructionFor F` stores no relation to F; the older
+`Integral.Construction` uses F in a left-sum formula but its number-validity
+certificate does not by itself require spatial refinement. A permanently coarse
+left rule can compute a perfectly valid wrong number. Existing concrete value
+proofs retain their stronger evidence and are not invalidated by this observation.
+
+For the supported quantitative dyadic routes, use
+`ComputableAnalysis.QuadratureAdapters`. `Quadrature.Certificate f a b value`
+keeps validity and selected samples together with a bound against **all tagged
+sums** on each fixed dyadic mesh. The spatial bound decreases with mesh size;
+evaluation precision is refined after that finite mesh and its tags are fixed.
+Different valid representations, selected samples, and schedules are allowed.
+
+The reusable operations are `Certificate.equiv_of_pointwise`, `congr_function`,
+`add`, `scale` (including negative coefficients), and `zero_interval`.
+`value_of_exact_rule` identifies a separately certified output when a finite
+quadrature rule is exact. `ofRationalLipschitz` and `ofMonotoneSamples` certify
+existing unit-interval algorithms without changing their numerical instructions.
+`Quadrature.ConstructionFor` preserves the semantic evidence for an existing
+`FunctionOnInterval`; `toLegacy` is an explicit forgetful adapter, not a converse.
+
+This is a sufficient certificate for particular computations, not a universal
+integrability predicate or a claim that every integral has an O(mesh) estimate.
+The general certificate accepts ordered rational endpoints. The supplied concrete
+adapters currently use the unit interval. General oriented-interval transport,
+arbitrary-partition comparisons, the effective-FTC adapter, splitting and
+substitution migrations remain separate tasks. Do not replace an existing FTC
+constructor by an unrelated new evaluator merely to obtain a new type.
+
+The reusable dyadic mesh and fixed-finite-sample comparison results no longer
+import trigonometry. Historical declaration namespaces are retained for source
+compatibility; actual owner modules, not names alone, determine dependencies.
+
 ## The four layers
 
 1. **Finite evaluator.** At stage `n`, compute a rational interval or complex
