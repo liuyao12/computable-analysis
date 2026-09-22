@@ -50,6 +50,9 @@ def main():
                 assert page.locator('.node').count()==21
                 assert page.locator('.edge').count()==29
                 assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1'),width
+                assert page.evaluate('document.querySelector(".map-header").getBoundingClientRect().bottom <= document.querySelector(".map-toolbar").getBoundingClientRect().top+1'),width
+                assert page.evaluate('document.querySelector("#svg-holder").getBoundingClientRect().bottom <= document.querySelector(".map-legend").getBoundingClientRect().top+1'),width
+                assert page.locator('.map-header a').evaluate('(a)=>a.getBoundingClientRect().bottom <= a.parentElement.getBoundingClientRect().bottom'),width
                 # Labels must fit within the actual rendered node rectangles.
                 assert page.locator('.node').evaluate_all('nodes => nodes.every(n => {const r=n.querySelector("rect").getBBox();return [...n.querySelectorAll("text")].every(t=>{const b=t.getBBox();return b.x>=0 && b.y>=0 && b.x+b.width<=r.width && b.y+b.height<=r.height;});})'),f'Clipped node text at {width}'
                 if width==1440:page.screenshot(path=str(out/'leibniz-graph-desktop.png'),full_page=True)
@@ -83,12 +86,13 @@ def main():
             context=browser.new_context(java_script_enabled=False,viewport={'width':390,'height':844})
             page=context.new_page();page.goto(origin+'/'+graph.PAGE)
             page.locator('#reading-outline>summary').click();assert page.locator('#outline-mathlib').is_visible()
+            page.screenshot(path=str(out/'leibniz-graph-no-javascript.png'),full_page=True)
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1')
             context.close();browser.close()
     finally:server.shutdown()
     assert not errors,errors
     assert not external,external
-    checks=dict(artifactHashes=True,priorProofMapsPreserved=True,chapterOutsideDiagramPreserved=True,idempotentPublication=True,allFourRoutes=True,zoomAndFit=True,edgeSelection=True,allBundlesSelectable=True,keyboardSelection=True,nodeTextFits=True,fiveViewportWidths=True,noExternalRuntimeDependencies=True,noJavaScriptOutline=True)
+    checks=dict(artifactHashes=True,priorProofMapsPreserved=True,chapterOutsideDiagramPreserved=True,idempotentPublication=True,allFourRoutes=True,zoomAndFit=True,edgeSelection=True,allBundlesSelectable=True,keyboardSelection=True,nodeTextFits=True,fiveViewportWidths=True,headerAndLegendDoNotOverlap=True,noExternalRuntimeDependencies=True,noJavaScriptOutline=True)
     (out/'leibniz-graph-tests.json').write_text(json.dumps(checks,indent=2)+'\n')
     print('PASS: preservation, 21 bundles, 4 proof routes, keyboard access, source links and five viewport widths')
 
