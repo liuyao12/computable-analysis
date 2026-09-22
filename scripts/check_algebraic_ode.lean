@@ -23,3 +23,14 @@ import ComputableAnalysis.AlgebraicODE.Tests
 #print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Laguerre.secondDerivativeCertificate
 #print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Laguerre.algebraic_relation
 #print axioms ComputableAnalysis.AlgebraicODE.Tests.resonant_no_nonzero_leading
+
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.indicial_lower_bound
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.coeff_growth
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.factorRaw_valid
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.factorRaw_precision
+#print axioms ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.factorRaw_contains_prefix
+#print axioms ComputableAnalysis.AlgebraicODE.Tests.besselZero_factor_valid
+#print axioms ComputableAnalysis.AlgebraicODE.Tests.signedSeries_factor_valid
+#print axioms ComputableAnalysis.FormalPowerSeries.geometricRaw_valid
+#print axioms ComputableAnalysis.FormalPowerSeries.geometricRaw_contains_prefix
+#print axioms ComputableAnalysis.FormalPowerSeries.geometricRaw_equiv

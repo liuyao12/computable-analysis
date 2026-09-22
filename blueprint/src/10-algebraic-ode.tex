@@ -125,6 +125,35 @@ zero indicial coefficient cannot silently construct the desired solution.
 \lean{ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.resonance_compatibility}
 \leanok
 
+\begin{theorem}[Effective convergence for nonnegative root gap]
+\label{thm:frobenius-convergence}
+Suppose $I(r)=0$ and $A=2r-1+p_0\ge0$. Put
+\[
+ R=1+(|r|+1)\sum_j|p_j|+\sum_j|q_j|.
+\]
+Then $I(r+n)=n(n+A)\ge n^2$ for positive $n$, and the constructed
+coefficients satisfy $|c_n|\le |c_0|R^n$. For rational $x$ with
+$R|x|\le 1/2$, let $S_n(x)=\sum_{k<n}c_kx^k$. The literal boxes
+\[
+ [S_n(x)-2|c_0|2^{-n},\ S_n(x)+2|c_0|2^{-n}]
+\]
+are ordered and nested, contain all later finite partial sums, and have
+width $4|c_0|2^{-n}$. A requested positive rational width has an explicit
+computation stage. Thus the Frobenius factor is a valid represented value.
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.indicial_lower_bound}
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.coeff_growth}
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.factorRaw_valid}
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.factorRaw_contains_prefix}
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.factorRaw_precision}
+\leanok
+\end{theorem}
+
+The reusable geometric-tail evaluator works for signed series. This theorem
+includes larger rational roots and repeated roots; it does not construct
+$x^r$, certify analytic differentiation, or cover smaller roots with negative
+gap. For the modified Bessel equation $x^2y''+xy'-x^2y=0$, it certifies
+$|x|\le1/6$; twelve terms at $x=1/8$ give width $1/1024$.
+
 \begin{theorem}[Terminating Laguerre algebraic solutions]
 \label{thm:laguerre-polynomial}
 For every natural $m$, rational $b>0$, and initial value $c_0$, the recurrence
@@ -164,7 +193,8 @@ provides adjacent polynomial derivative and degree arguments. No public Lean 4
 Painlev\'e algebraic-solution classification was located in the bounded search.
 Coq/Rocq and Isabelle work is background, not the direct comparison benchmark.
 
-Next are general Frobenius convergence, certified algebraic branches and
+Next are analytic differentiation, convergence for the remaining nonresonant
+roots, certified algebraic branches and
 Puiseux charts, and resonant logarithmic solutions. Painlev\'e work remains
 separate: pole/degree obstructions, B\"acklund transformations and rational
 solution classification for PII, followed by III--VI. Global monodromy and

@@ -25,7 +25,19 @@ EXPECTED = ['Expr.evalRaw_valid', 'Expr.evalRaw_equiv', 'Expr.evalRaw_ofRat',
             'Fuchs.Laguerre.firstDerivativeCertificate',
             'Fuchs.Laguerre.secondDerivativeCertificate',
             'Fuchs.Laguerre.algebraic_relation',
-            'Tests.resonant_no_nonzero_leading']
+            'Tests.resonant_no_nonzero_leading',
+            'Fuchs.Frobenius.Equation.indicial_lower_bound',
+            'Fuchs.Frobenius.Equation.coeff_growth',
+            'Fuchs.Frobenius.Equation.factorRaw_valid',
+            'Fuchs.Frobenius.Equation.factorRaw_precision',
+            'Fuchs.Frobenius.Equation.factorRaw_contains_prefix',
+            'Tests.besselZero_factor_valid',
+            'Tests.signedSeries_factor_valid']
+EXPECTED = ['ComputableAnalysis.AlgebraicODE.' + n for n in EXPECTED] + [
+    'ComputableAnalysis.FormalPowerSeries.geometricRaw_valid',
+    'ComputableAnalysis.FormalPowerSeries.geometricRaw_contains_prefix',
+    'ComputableAnalysis.FormalPowerSeries.geometricRaw_equiv',
+]
 
 def sha(data):
     return hashlib.sha256(data).hexdigest()
@@ -35,7 +47,7 @@ def install(site, revision, audit):
     log = audit.read_text()
     assert 'error:' not in log and 'sorryAx' not in log
     for name in EXPECTED:
-        assert "'ComputableAnalysis.AlgebraicODE." + name + "' depends on axioms:" in log, name
+        assert "'" + name + "' depends on axioms:" in log, name
     before = {str(p.relative_to(site)): p.read_bytes() for p in site.rglob('*') if p.is_file()}
     assert PAGE not in before
     page = (ROOT / 'book/algebraic-ode/index.html').read_text().replace('__REVISION__', revision)
@@ -45,7 +57,7 @@ def install(site, revision, audit):
     for name in ['index.html', 'ch-differential-equations.html']:
         original = before[name].decode()
         assert MARKER not in original and '</article>' in original
-        addition = MARKER + '<section class="fm-reader-link"><h2>Fuchs–Painlevé</h2><p>Algebraic differential equations on the computable-analysis foundation: formal Frobenius recurrences, certified Laguerre polynomials, and Painlevé II algebraic seeds.</p><p><a href="fuchs-painleve.html">Read the subproject and formalization comparisons →</a></p></section>' + MARKER
+        addition = MARKER + '<section class="fm-reader-link"><h2>Fuchs–Painlevé</h2><p>Algebraic differential equations on the computable-analysis foundation: formal Frobenius recurrences, convergent factor computations, certified Laguerre polynomials, and Painlevé II algebraic seeds.</p><p><a href="fuchs-painleve.html">Read the subproject and formalization comparisons →</a></p></section>' + MARKER
         updated = original.replace('</article>', addition + '</article>', 1)
         assert updated.replace(addition, '', 1) == original
         (site / name).write_text(updated)
