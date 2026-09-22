@@ -1,5 +1,6 @@
 import ComputableAnalysis.FiniteRationalPowers
-import ComputableAnalysis.ClockTrigonometry
+import ComputableAnalysis.DyadicMesh
+import ComputableAnalysis.IntervalSelections
 
 /-! Elementary error bookkeeping for rational samples. These predicates do
 not introduce a completed number type or numerical choice of a limit. -/
@@ -186,7 +187,18 @@ theorem equiv_of_close {X Y : RealRaw} (hX : X.Valid) (hY : Y.Valid)
     (x y : Seq) (hx : ∀ q, IntervalSelections.InBox (x q) (X.compute q))
     (hy : ∀ q, IntervalSelections.InBox (y q) (Y.compute q))
     (h : Close x y) : X.Equiv Y :=
-  ClockTrigonometry.equiv_of_samples hX hY x y hx hy h
+  by
+    have bounds := IntervalSelections.expanded_overlaps_of_selected_error
+      hY hX y x hy hx 0 (by
+        intro eps
+        obtain ⟨N,hN⟩ := h eps
+        refine ⟨N,fun q hq => ?_⟩
+        simpa only [Rat.zero_add] using hN q hq)
+    intro n
+    apply (RealRaw.compareAt_overlap_iff X Y n n).2
+    have hn := bounds n n
+    simp only [QInterval.expand,QInterval.Overlaps] at hn ⊢
+    constructor <;> grind only
 
 theorem close_of_pointwise {x y : Seq} (h : ∀ q, x q=y q) : Close x y := by
   have he : x=y := funext h

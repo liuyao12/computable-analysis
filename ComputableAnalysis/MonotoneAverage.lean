@@ -1,4 +1,4 @@
-import ComputableAnalysis.ClosedArctanInverse
+import ComputableAnalysis.DyadicMesh
 import ComputableAnalysis.IntervalSelections
 
 /-! Finite dyadic endpoint sums. There is no integral or chosen limiting value

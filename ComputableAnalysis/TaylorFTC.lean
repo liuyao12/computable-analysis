@@ -1,5 +1,6 @@
 import ComputableAnalysis.FiniteSamplePowers
 import ComputableAnalysis.TaylorCancellation
+import ComputableAnalysis.PowerSeries
 
 /-!
 # Taylor's formula from the existing finite-sample FTC
