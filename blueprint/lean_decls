@@ -760,3 +760,12 @@ Nat.gcd
 Nat.gcd_dvd_left
 Nat.gcd_dvd_right
 Nat.gcd_rec
+ComputableAnalysis.pi_eq_leibniz
+ComputableAnalysis.pi_eq_leibniz_taylor
+ComputableAnalysis.leibniz_stagewise_overlap
+ComputableAnalysis.Series.AlternatingRaw.interval_remainder
+ComputableAnalysis.FinitePolynomial.SecantDerivativeBound.exactCellOrder
+ComputableAnalysis.Taylor.ArctanKernel.finite_geometric_identity
+ComputableAnalysis.Taylor.ArctanKernel.kernelPartial_exactCellOrder
+ComputableAnalysis.arctan_taylor_integrated
+ComputableAnalysis.arctan_taylor_remainder_bound

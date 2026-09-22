@@ -362,3 +362,16 @@ git diff --check
 For blueprint changes, run the declaration checker and `leanblueprint web`.
 After pushing, confirm Lean CI and the Pages deployment rather than assuming a
 successful local render is already live.
+
+## Leibniz benchmark for geometric π
+
+`ComputableAnalysis.pi_eq_leibniz` in `LeibnizPi.lean` retains
+`piCircleArea` as the canonical geometric value. `LeibnizPiTaylor` supplies
+the separate polynomial-FTC proof. Reuse `Series.AlternatingRaw.interval_remainder`
+for an inclusive prefix's first-omitted-term bound, and
+`FinitePolynomial.SecantDerivativeBound.exactCellOrder` for exact integral
+order from quantitative finite differences on `[0,1]`. The latter closes
+the all-degree arctangent polynomial order obligation. Verification and
+elaborated dependency separation are recorded by `scripts/check_leibniz.lean`.
+No new canonical π, general integration operator, Basel or Fourier result
+is introduced by this benchmark.

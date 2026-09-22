@@ -1,4 +1,5 @@
 import ComputableAnalysis
+import ComputableAnalysis.LeibnizPiTaylor
 import ComputableAnalysis.SinPiSquareFTC
 import ComputableAnalysis.IntegralIdentities
 import ComputableAnalysis.SeriesFoundation

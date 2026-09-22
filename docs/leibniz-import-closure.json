@@ -1,0 +1,48 @@
+{
+  "roots": [
+    "ComputableAnalysis.LeibnizPi",
+    "ComputableAnalysis.LeibnizPiTaylor"
+  ],
+  "projectModules": [
+    "ComputableAnalysis.AbelianIntegrals",
+    "ComputableAnalysis.AlgebraicFunctions",
+    "ComputableAnalysis.AlternatingRemainder",
+    "ComputableAnalysis.ArctanGeometry",
+    "ComputableAnalysis.ArctanPresentations",
+    "ComputableAnalysis.ArctanTaylorRemainder",
+    "ComputableAnalysis.Basic",
+    "ComputableAnalysis.Calculus",
+    "ComputableAnalysis.ComplexAffine",
+    "ComputableAnalysis.ComplexInterval",
+    "ComputableAnalysis.ComplexMultiplication",
+    "ComputableAnalysis.ComplexPolynomial",
+    "ComputableAnalysis.Differential",
+    "ComputableAnalysis.DirichletSeries",
+    "ComputableAnalysis.Elementary",
+    "ComputableAnalysis.ElementaryFunctions",
+    "ComputableAnalysis.Exp",
+    "ComputableAnalysis.Extension",
+    "ComputableAnalysis.FTC",
+    "ComputableAnalysis.FinitePolynomialCalculus",
+    "ComputableAnalysis.FiniteSecantIntegralOrder",
+    "ComputableAnalysis.FunctionDomains",
+    "ComputableAnalysis.IntegralIdentities",
+    "ComputableAnalysis.LeibnizPi",
+    "ComputableAnalysis.LeibnizPiTaylor",
+    "ComputableAnalysis.Logarithm",
+    "ComputableAnalysis.Nilakantha",
+    "ComputableAnalysis.PeanoBaker",
+    "ComputableAnalysis.Pi",
+    "ComputableAnalysis.PiProofs",
+    "ComputableAnalysis.Polynomial",
+    "ComputableAnalysis.PowerSeries",
+    "ComputableAnalysis.RationalCircle",
+    "ComputableAnalysis.ScalarODEUniqueness",
+    "ComputableAnalysis.Series",
+    "ComputableAnalysis.Taylor"
+  ],
+  "externalImports": [
+    "Init.Grind.Ordered.Rat"
+  ],
+  "kind": "source imports; proof dependency closure is audited separately"
+}

@@ -7,6 +7,7 @@ import ComputableAnalysis.IntegralIdentities
 import ComputableAnalysis.Logarithm
 import ComputableAnalysis.Nilakantha
 import ComputableAnalysis.Taylor
+import ComputableAnalysis.ArctanTaylorRemainder
 
 /-!
 # Proof targets for the four pi algorithms
@@ -6028,13 +6029,32 @@ theorem leibnizRectangleKernelCellBoundsAtOneUpToFive :
     LeibnizRectangleKernelCellBoundsAtOneUpTo 5 :=
   ⟨evenKernelCellBoundsAtOne_le_five, oddKernelCellBoundsAtOne_le_five⟩
 
+/-- The polynomial FTC certificate proves every finite checkpoint symbolically. -/
+theorem leibnizRectangleKernelCellBoundsAtOneUpTo_all (N : Nat) :
+    LeibnizRectangleKernelCellBoundsAtOneUpTo N := by
+  constructor
+  · intro n _
+    exact evenKernelCellBounds_of_cellBound
+      (evenKernelCellBound_of_exactCellOrderPreservation
+        (Taylor.ArctanKernel.kernelPartial_exactCellOrder (2*n))
+        (evenKernelPointwiseCellBound_even n))
+      (ArctanGeometry.arctanAreaLoopState_intervals_unit
+        (x := (1:Rat)) (by decide) (by decide) n)
+  · intro n _
+    exact oddKernelCellBounds_of_unitCellBound
+      (oddKernelUnitCellBound_of_exactCellOrderPreservation
+        (Taylor.ArctanKernel.kernelPartial_exactCellOrder (2*n+1))
+        (oddKernelPointwiseCellBound_odd n))
+      (ArctanGeometry.arctanAreaLoopState_intervals_unit
+        (x := (1:Rat)) (by decide) (by decide) (n+1))
+
 theorem leibnizRectangleKernelCellBoundsAtOneUpToTwelve :
-    LeibnizRectangleKernelCellBoundsAtOneUpTo 12 := by
-  constructor <;> native_decide
+    LeibnizRectangleKernelCellBoundsAtOneUpTo 12 :=
+  leibnizRectangleKernelCellBoundsAtOneUpTo_all 12
 
 theorem leibnizRectangleKernelCellBoundsAtOneUpToFifteen :
-    LeibnizRectangleKernelCellBoundsAtOneUpTo 15 := by
-  constructor <;> native_decide
+    LeibnizRectangleKernelCellBoundsAtOneUpTo 15 :=
+  leibnizRectangleKernelCellBoundsAtOneUpTo_all 15
 
 theorem leibnizRectangleKernelCellBoundsAtOneUpToFourteen :
     LeibnizRectangleKernelCellBoundsAtOneUpTo 14 :=
@@ -10460,8 +10480,9 @@ private theorem arctan_neg_equiv_neg_arctan_of_neg
           (arctan (-x)).compute n := by
       rw [ArctanValidity.arctan_compute_nonneg (-x) hneg0 n]
       rw [hqabsx, hqabsnegx]
-    unfold RealRaw.negCompute QInterval.neg
+    unfold RealRaw.negCompute
     rw [hpositive]
+    rfl
   rw [← hstage]
   exact (RealRaw.compareAt_overlap_iff (arctan x) (arctan x) n n).1
     (RealRaw.equiv_refl (arctan x) hvalid n)
@@ -12550,40 +12571,40 @@ theorem piFromArctanIntegralFor_equiv_piCircleArea_of_monotoneDefiniteIdentityFo
     (piFromArctanIntegralFor_equiv_piCircleArea_of_definiteIdentityFor
       primitive I.toDefiniteIdentityFor hendpoint)
 
-/-- Domain-aware effective-FTC route to the arctangent-integral pi
+/- Domain-aware effective-FTC route to the arctangent-integral pi
 equivalence.  The conclusion uses the `ConstructionFor` integral produced by
 the FTC certificate, not the older point-Riemann wrapper. -/
-/-- Domain-aware effective-FTC route using packaged endpoint-schedule
+/- Domain-aware effective-FTC route using packaged endpoint-schedule
 agreement. -/
-/-- Effective-FTC route where the endpoint schedule is supplied as a cofinal
+/- Effective-FTC route where the endpoint schedule is supplied as a cofinal
 monotone stage schedule. -/
-/-- Static-dyadic specialization of the domain-aware effective-FTC route to
+/- Static-dyadic specialization of the domain-aware effective-FTC route to
 the arctangent-integral pi equivalence. -/
-/-- Static-dyadic effective-FTC route using packaged endpoint-schedule
+/- Static-dyadic effective-FTC route using packaged endpoint-schedule
 agreement. -/
-/-- Static-dyadic effective-FTC route where the endpoint schedule is supplied
+/- Static-dyadic effective-FTC route where the endpoint schedule is supplied
 as a cofinal monotone stage schedule. -/
-/-- Candidate-derivative FTC route to the domain-aware arctangent-integral pi
+/- Candidate-derivative FTC route to the domain-aware arctangent-integral pi
 equivalence. -/
-/-- Candidate-derivative FTC route using packaged endpoint-schedule
+/- Candidate-derivative FTC route using packaged endpoint-schedule
 agreement. -/
-/-- Candidate-derivative FTC route where the endpoint schedule is supplied as
+/- Candidate-derivative FTC route where the endpoint schedule is supplied as
 a cofinal monotone stage schedule. -/
-/-- Curvature FTC route to the domain-aware arctangent-integral pi
+/- Curvature FTC route to the domain-aware arctangent-integral pi
 equivalence.  Unlike the convex-only route, this also covers concave
 primitives such as the arctangent branch on `[0,1]`. -/
-/-- Curvature FTC route using packaged endpoint-schedule agreement. -/
-/-- Curvature FTC route where the endpoint schedule is supplied as a cofinal
+/- Curvature FTC route using packaged endpoint-schedule agreement. -/
+/- Curvature FTC route where the endpoint schedule is supplied as a cofinal
 monotone stage schedule. -/
-/-- Convex FTC route to the domain-aware arctangent-integral pi equivalence. -/
-/-- Convex FTC route using packaged endpoint-schedule agreement. -/
-/-- Convex FTC route where the endpoint schedule is supplied as a cofinal
+/- Convex FTC route to the domain-aware arctangent-integral pi equivalence. -/
+/- Convex FTC route using packaged endpoint-schedule agreement. -/
+/- Convex FTC route where the endpoint schedule is supplied as a cofinal
 monotone stage schedule. -/
-/-- Concave FTC route to the domain-aware arctangent-integral pi
+/- Concave FTC route to the domain-aware arctangent-integral pi
 equivalence.  This is the curvature specialization naturally matched to the
 arctangent primitive on `[0,1]`. -/
-/-- Concave FTC route using packaged endpoint-schedule agreement. -/
-/-- Concave FTC route where the endpoint schedule is supplied as a cofinal
+/- Concave FTC route using packaged endpoint-schedule agreement. -/
+/- Concave FTC route where the endpoint schedule is supplied as a cofinal
 monotone stage schedule.  This is the schedule-facing form of the route
 naturally matched to the arctangent primitive on `[0,1]`. -/
 theorem piFromArctanIntegralUnitAtOne_equiv_piCircleArea_of_geom_agreement

@@ -19,3 +19,16 @@ Diagrams that are not coordinate plots, such as the Peano--Baker word tiles,
 do not have an axis-aspect requirement.  After changing a generator, rerun it
 to update both its GIF and its static PNG fallback, then visually inspect the
 PNG before publishing.
+
+# Leibniz benchmark
+
+```sh
+lake build ComputableAnalysis.LeibnizPiTaylor
+lake env lean scripts/check_leibniz.lean
+```
+
+The focused check verifies all-stage theorem signatures, rejects unfinished
+proof dependencies, prints inherited axioms, and checks that the computational
+and FTC proofs use different comparison certificates. Full project-declaration
+closures are written to `tmp/leibniz-dependency-closure.txt`. See
+`docs/LEIBNIZ_PI.md` for the whole-library and blueprint verification commands.

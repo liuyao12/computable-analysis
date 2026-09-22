@@ -1,6 +1,6 @@
 name: Publish verified proof blueprint
 
-# Immutable verified mathematics plus checked supplementary finite geometry.
+# Pinned mathematics plus checked finite geometry and the Leibniz benchmark.
 # No theorem branch is merged; existing Pages protections are unchanged.
 on:
   push:
@@ -9,6 +9,12 @@ on:
       - '.github/workflows/publish_verified_blueprint.yml'
       - '.github/reader-edition/**'
       - 'book/fundamental-matrix/**'
+      - 'ComputableAnalysis/PiProofs.lean'
+      - 'ComputableAnalysis/LeibnizPi*.lean'
+      - 'ComputableAnalysis/AlternatingRemainder.lean'
+      - 'ComputableAnalysis/ArctanTaylorRemainder.lean'
+      - 'ComputableAnalysis/FiniteSecantIntegralOrder.lean'
+      - 'scripts/check_leibniz.lean'
       - 'ComputableAnalysis/RationalGeometry.lean'
       - 'ComputableAnalysis/QuarterCircleGeometry.lean'
       - 'ComputableAnalysis/GeometryFoundation.lean'
@@ -31,7 +37,7 @@ env:
 jobs:
   prepare:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -157,6 +163,23 @@ jobs:
         run: python3 .github/reader-edition/fundamental_matrix.py --site site --revision "$GITHUB_SHA"
       - name: Check exact matrix iteration, preservation, links and notebook rendering
         run: python3 .github/reader-edition/test_fundamental_matrix.py --site site --report reader-edition-tests
+      - uses: actions/cache@v5
+        with:
+          path: .lake
+          key: leibniz-${{ hashFiles('lean-toolchain', 'lake-manifest.json', 'ComputableAnalysis/**/*.lean') }}
+          restore-keys: |
+            leibniz-
+      - name: Check the two Leibniz proofs and their dependency separation
+        run: |
+          set -euo pipefail
+          mkdir -p leibniz-reports
+          lake build ComputableAnalysis ComputableAnalysisBlueprint checkdecls | tee leibniz-reports/build.log
+          lake env lean scripts/check_leibniz.lean | tee leibniz-reports/proofs.log
+          lake env .lake/packages/checkdecls/.lake/build/bin/checkdecls blueprint/lean_decls | tee leibniz-reports/declarations.log
+          python3 blueprint/checks/check_foundation_imports.py | tee leibniz-reports/imports.log
+          python3 blueprint/checks/check_special_function_identities.py | tee leibniz-reports/identities.log
+      - name: Add only the checked Leibniz dependency note
+        run: python3 .github/reader-edition/leibniz_benchmark.py --site site --revision "$GITHUB_SHA" --audit leibniz-reports/proofs.log --closure tmp/leibniz-dependency-closure.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -164,6 +187,9 @@ jobs:
           path: |
             reader-edition-tests
             geometry-reports
+            leibniz-reports
+            site/reading/leibniz-benchmark.json
+            site/reading/leibniz-dependency-closure.txt
             site/reading/analysis-edition.json
             site/reading/cosine-half-interval.json
             site/reading/catalogue-placement.json
@@ -277,6 +303,14 @@ jobs:
                   assert hashlib.sha256(fundamental_html).hexdigest()==fundamental['pageSha256']
                   assert 'fundamental-matrix.html' in home
                   assert 'fundamental-matrix.html' in get('/ch-differential-equations.html',True).decode()
+                  leibniz=get('/reading/leibniz-benchmark.json')
+                  assert leibniz['proofSourceCommit']==revision
+                  assert leibniz['independentProofPaths'] and leibniz['allPreviousContentPreserved']
+                  assert not leibniz['interactiveGraphAdded']
+                  series=get('/ch-infinite-series.html',True)
+                  assert hashlib.sha256(series).hexdigest()==leibniz['pageSha256']
+                  assert b'id="leibniz-geometric-benchmark"' in series
+                  print('LIVE LEIBNIZ:',base+'/ch-infinite-series.html#leibniz-geometric-benchmark')
                   print('LIVE PAGE:',base+'/fundamental-matrix.html')
                   print('LIVE CHAPTER:',base+'/ch-circle-sphere.html')
                   print('Checked geometry source:',revision)

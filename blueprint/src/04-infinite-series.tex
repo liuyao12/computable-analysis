@@ -153,3 +153,62 @@ for arbitrary rational-point solutions.
 This example will reappear in the construction of an elliptic integral.
 It also illustrates how a recurrence can supply a special function, while
 an algebraic identity identifies what the computation evaluates.
+
+\section{Alternative computations of $\pi$}\label{sec:alternative-pi-computations}
+
+The canonical constant remains the geometric exhaustion value
+$\pi=4A(1)$, represented by \texttt{piCircleArea}.  Its first elementary
+alternative computation is
+\[
+  \pi=4\left(1-\frac13+\frac15-\cdots\right).
+\]
+For the inclusive prefix $S_N=4\sum_{k=0}^{N}(-1)^k/(2k+1)$, the certified
+remainder is $|S_N-\pi|\leq 4/(2N+3)$.  The interval theorem holds for every
+$N$ and every independently chosen geometric approximation stage.
+
+\begin{theorem}[Leibniz computation of geometric $\pi$]
+\label{thm:leibniz-geometric-benchmark}
+\lean{ComputableAnalysis.pi_eq_leibniz}
+\lean{ComputableAnalysis.pi_eq_leibniz_taylor}
+\lean{ComputableAnalysis.leibniz_stagewise_overlap}
+\leanok
+The certified alternating rational computation \texttt{leibnizRaw} is
+ equivalent to the existing geometric $\pi$.
+\end{theorem}
+
+\begin{proof}
+There are two checked dependency paths.  The computational path uses finite
+rational rectangle-sum invariants, an explicit vanishing mesh error, and the
+geometric exhaustion comparison.  The FTC path starts from finite geometric
+division,
+\[
+ \frac{1}{1+x^2}=\sum_{k=0}^{N}(-1)^k x^{2k}
+       +(-1)^{N+1}\frac{x^{2N+2}}{1+x^2}.
+\]
+Quantitative monomial primitive certificates and finite midpoint subdivision
+prove exact integral order for every polynomial degree.  Integrating the
+consecutive polynomial bounds gives $A(1)=\sum_{k=0}^{N}(-1)^k/(2k+1)+R_N$
+with $|R_N|\leq 1/(2N+3)$.  Multiplication by four gives the stated result.
+The two proofs share finite rational algebra and the geometric definition;
+neither invokes the other's comparison theorem.
+\end{proof}
+
+\lean{ComputableAnalysis.Series.AlternatingRaw.interval_remainder}
+\lean{ComputableAnalysis.FinitePolynomial.SecantDerivativeBound.exactCellOrder}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.finite_geometric_identity}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartial_exactCellOrder}
+\lean{ComputableAnalysis.arctan_taylor_integrated}
+\lean{ComputableAnalysis.arctan_taylor_remainder_bound}
+\leanok
+
+\begin{verbatim}
+                   Leibniz theorem
+                 /                 \
+       interval invariant       arctan expansion
+               |                       |
+     geometric exhaustion     finite geometric identity
+               |                       |
+          geometric pi           FTC + remainder
+\end{verbatim}
+This records dependencies only; no interactive graph or additional
+canonical definition of $\pi$ is introduced.
