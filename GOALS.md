@@ -264,7 +264,9 @@ finite prefix and have width `4*|c₀|/2^n`, with a computable precision schedul
 The reusable foundation is `GeometricPowerSeries`. Analytic differentiation
 of this evaluator, convergence for smaller nonresonant roots, logarithmic
 resonant solutions, branches for nonintegral exponents, and global
-algebraic-solution classification remain open. Painlevé results are unchanged.
+algebraic-solution classification remain open. The later Painlevé milestone
+below adds a reusable series derivative theorem, not yet adapted to this
+Frobenius interface.
 
 ## Historical geometric Leibniz reconstruction
 
@@ -290,3 +292,24 @@ Open: general holomorphic-solution adapter, sector-uniform bounds, arbitrary
 holomorphic regular coefficients, and the converse Fuchs criterion. This
 forward growth theorem does not assert a full solution basis or an
 algebraic-solution classification. See `docs/FUCHS_PAINLEVE.md` for exact scope.
+
+## Painlevé I: computable local double poles
+
+Checked: an independent Laurent residual forces leading coefficient one and
+resonance compatibility. For every rational pole position `p` and free
+resonant coefficient `q`, the terminating coefficient algorithm is the unique
+formal solution and satisfies an explicit geometric majorant. Scaling by
+`ρ=1/(64(1+6|p|+6|q|))` yields valid interval computations for the regular
+factor and its first two derivatives on rational `|t|≤1`.
+
+The new `GeometricSeriesCalculus` certifies derivatives by finite differences
+on arbitrary box samples. `CauchyProductEstimate` controls finite convolution
+errors. Together they prove the regularized nonlinear PI equation with
+residual at most `146/2ⁿ`. The reconstructed value has certified double-pole
+bounds at every nonzero local coordinate. No completed real type is added.
+
+Open: transporting these derivative certificates to the reconstructed pole
+value, complex charts, general computable parameters, continuation from
+arbitrary initial data, and exhaustion of movable singularities. The global
+Painlevé property and algebraic-solution classifications are not proved.
+See `docs/FUCHS_PAINLEVE.md` for theorem names and exact scope.

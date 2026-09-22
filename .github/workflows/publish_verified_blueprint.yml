@@ -16,6 +16,8 @@ on:
       - 'ComputableAnalysis/FormalPowerSeriesAlgebra.lean'
       - 'ComputableAnalysis/FormalPowerSeriesPolynomial.lean'
       - 'ComputableAnalysis/GeometricPowerSeries.lean'
+      - 'ComputableAnalysis/GeometricSeriesCalculus.lean'
+      - 'ComputableAnalysis/CauchyProductEstimate.lean'
       - 'ComputableAnalysis/LinearGrowth.lean'
       - 'scripts/check_algebraic_ode.lean'
       - 'docs/FUCHS_PAINLEVE.md'
@@ -358,7 +360,7 @@ jobs:
                   algebraic=get('/reading/algebraic-ode-edition.json')
                   assert algebraic['proofSourceCommit']==revision
                   assert algebraic['allPreviousContentPreserved'] and not algebraic['generalClassificationProved']
-                  assert not algebraic['mathlibDependency'] and len(algebraic['auditedDeclarations'])==45
+                  assert not algebraic['mathlibDependency'] and len(algebraic['auditedDeclarations'])==65
                   algebraic_html=get('/fuchs-painleve.html',True)
                   assert hashlib.sha256(algebraic_html).hexdigest()==algebraic['pageSha256']
                   assert 'fuchs-painleve.html' in home

@@ -440,3 +440,26 @@ cell correction and sums its explicit error. Its geometry bridge is separate
 from power quadrature, which reuses polynomial FTC. Run
 `lake env lean scripts/check_leibniz_transmutation.lean` to audit that distinction.
 See [the historical reconstruction](docs/LEIBNIZ_TRANSMUTATION.md).
+
+## Differentiating rapidly convergent series and local PI charts
+
+Use `GeometricSeriesCalculus.geometricRaw_hasBoxDerivative` (namespace
+`FormalPowerSeries`) for coefficient bounds `|cₙ|≤M(1/8)ⁿ` on rational
+`|x|≤1`. It certifies all sufficiently refined endpoint and derivative box
+samples using the positive step radius `ε/(4(M+1))` and a precision stage
+that depends on the nonzero step. Do not replace that dependency by a fixed
+precision as the step tends to zero. `coefficientShift_growth` and
+`coefficientShift_unit_growth` control derived coefficient streams.
+
+Use `CauchyProductEstimate.cauchy_prefix_error` for a finite product of
+prefixes; its triangle-versus-rectangle error is bounded by `M²/2ᴺ` under
+rapid coefficient bounds. No infinite-sum rearrangement is assumed.
+
+`Painleve.Laurent` derives its nonlinear recurrence from the independent
+residual and checks the resonant index separately. `Painleve.Pole` uses a
+conservative rational scale to certify both factor derivatives and the
+regularized PI equation on actual box samples. Its reconstructed value has
+two-sided double-pole bounds. The original-equation jet identity is algebraic;
+a derivative adapter for the reconstructed value is still needed. Do not
+promote these local rational charts to a global Painlevé property, a complex
+continuation theorem, or an algebraic-solution classification.

@@ -73,6 +73,91 @@ forward theorem is independent of the Frobenius coefficient construction.
 A classical comparison is Schnell's [D-modules notes, Lecture 20,
 Theorem 20.4](https://www.math.stonybrook.edu/~cschnell/pdf/notes/d-modules.pdf).
 
+## Checked Painlevé I local pole charts
+
+The next nonlinear milestone concerns movable singularities. In the
+[DLMF definition](https://dlmf.nist.gov/32.2), the Painlevé property excludes
+movable branch points. Constructing pole charts is a local step toward this
+property; it does not prove that they exhaust the singularities of arbitrary
+solutions.
+
+Put `s=x-p` and seek `y=s⁻² Σ cₙsⁿ` in `y''=6y²+x`. The independently
+defined differential residual forces the leading coefficient to be one and
+then gives
+
+\[
+ c_1=c_2=c_3=0,\quad c_4=-p/10,\quad c_5=-1/6,\quad c_6=q,
+ \qquad
+ (n-6)(n+1)c_n=6\sum_{k=1}^{n-1}c_kc_{n-k}\quad(n\ge7).
+\]
+
+The resonance at `n=6` leaves `q` free. For the more general forcing
+`y''=6y²+f(s)`, the same coefficient calculation requires `f₂=0`.
+`Tests.quadratic_forcing_obstruction` rejects `f(s)=s²`; thus compatibility
+is a proved constraint, not an assumption hidden in the solver.
+
+`Painleve.Laurent.coeff_isSolution` and `solution_unique` prove existence
+and uniqueness of the formal Laurent coefficients for supplied rational
+`p,q`. With `R=1+6|p|+6|q|`, `coeff_growth` proves `|cₙ|≤Rⁿ`. The proof
+controls the nonlinear convolution and divides only by the positive
+recurrence denominator at `n≥7`.
+
+For the analytic computation, put `ρ=1/(64R)`, `s=ρt`, and
+`U(t)=Σ cₙρⁿtⁿ`. On rational `|t|≤1`, `Painleve.Pole` computes valid raw
+interval algorithms for `U`, `U'`, and `U''`. Each has stage width `4/2ⁿ`.
+These are actual derivative certificates: for each positive rational `ε`,
+nonzero step `h` with `|h|≤ε/8`, and endpoints in `[-1,1]`, a computed
+stage depending on `ε,h` makes **every** selection of endpoint samples
+`v,w` and derivative sample `d` satisfy
+
+\[
+ |w-v-hd|\le\varepsilon|h|.
+\]
+
+The reusable `GeometricSeriesCalculus.geometricRaw_hasBoxDerivative`
+(in namespace `FormalPowerSeries`) proves this from
+`|aₙ|≤M(1/8)ⁿ`, with step radius `ε/(4(M+1))`.
+`CauchyProductEstimate.cauchy_prefix_error` bounds the difference between
+a product of finite prefixes and its triangular convolution by `M²/2ᴺ`.
+Both proofs use finite sums and rational bounds; neither introduces a
+completed real type or interchanges unspecified infinite limits.
+
+For **arbitrary samples** `u,v,w` from the three actual stage-`n` boxes,
+`Painleve.Pole.equation_error` proves
+
+\[
+ \left|t^2w-4tv+6u-6u^2-p\rho^4t^4-\rho^5t^5\right|
+ \le146\,2^{-n}.
+\]
+
+`equation` supplies the precision stage for any requested rational error.
+This is the regularized nonlinear PI equation with certified derivatives,
+not just a formal coefficient identity. The independently reconstructed
+value `Y=U/(ρt)²` has valid boxes, and `double_pole_bounds` proves at every
+stage `n≥2`, for `0<|t|≤1`,
+
+\[
+ \frac12\le (\rho t)^2\operatorname{lo}(Y_n)
+ \le (\rho t)^2\operatorname{hi}(Y_n)\le\frac32.
+\]
+
+Thus the local computation has a genuine double pole at the freely supplied
+rational position `p`. The expansion starts
+`y=s⁻²-(p/10)s²-(1/6)s³+q s⁴+…`.
+`original_equation_identity` checks the exact algebraic change of jet
+coordinates back to `y''=6y²+x`.
+
+**Scope:** derivative certificates are for the regular factor in the scaled
+rational coordinate. Transporting them to the reconstructed `Y` via the
+singular coordinate change is still an analytic adapter obligation; the jet
+identity alone is not that proof. Complex-domain charts, arbitrary computable
+parameters, continuation from arbitrary initial data, uniqueness among
+analytic solutions, and exclusion of every other movable singularity remain
+open. These PI charts are not asserted to be algebraic solutions. No global
+Painlevé property or algebraic-solution classification is claimed. The
+importance of convergence and exhaustion beyond a formal Laurent test is
+explained in [Joshi and Halburd's notes](https://www.homepages.ucl.ac.uk/~ucahrha/Publications/Pond-97.pdf).
+
 ## Checked first milestone
 
 The convention is the one in [DLMF §32.2](https://dlmf.nist.gov/32.2):
@@ -264,7 +349,10 @@ Neither is identified with Picard–Fuchs period equations or Fuchsian groups.
    and prove the first-order Fuchs criterion with its precise singularity
    hypotheses. General algebraic-solution/finite-monodromy statements require
    analytic continuation and monodromy infrastructure still absent here.
-4. **Painlevé I and II.** Prove no rational/algebraic solutions for PI;
+4. **Painlevé I and II.** Transport the checked regular-factor derivatives to
+   the reconstructed pole value, extend to complex charts and computable
+   parameters, and prove continuation/exhaustion toward the global Painlevé
+   property. Separately prove no rational/algebraic solutions for PI;
    for PII develop pole/degree obstructions, Bäcklund transformations and
    rational-solution constructions at integer parameters, followed by the
    converse/classification and the algebraic-versus-rational bridge.
@@ -289,7 +377,10 @@ solutions at exponent `1/2`, instantiate the derivative-bearing interval
 packages, and connect `-1/x` to the represented-complex equation at every
 nonzero rational input. Frobenius regressions cover a repeated indicial root,
 a genuine resonance obstruction, two terminating Laguerre polynomials,
-and both derivative certificates on an interval containing zero.
+and both derivative certificates on an interval containing zero. PI regressions
+check a free resonant coefficient, reject quadratic forcing, exercise both
+sides of the pole, and bound the nonlinear residual for arbitrary stage-12
+box samples.
 
 The new modules contain no `sorry`, `admit`, custom axioms, or `native_decide`
 calls (regression computations use kernel-checked `decide`). The exact classification and exact-input runtime bridges print only
