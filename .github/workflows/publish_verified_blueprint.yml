@@ -26,6 +26,10 @@ on:
       - 'ComputableAnalysis/PDE/CauchyContour.lean'
       - 'ComputableAnalysis/HolomorphicJet.lean'
       - 'scripts/check_cauchy_arctan.lean'
+      - 'scripts/check_cauchy_taylor.lean'
+      - 'ComputableAnalysis/CauchyTaylor*.lean'
+      - 'ComputableAnalysis/CertifiedComplexApproximation.lean'
+      - 'docs/CAUCHY_TAYLOR.md'
       - 'docs/PNT_CAUCHY_ARCTAN.md'
       - 'blueprint/src/13-complex-paths.tex'
       - 'ComputableAnalysis/AlternatingRemainder.lean'
@@ -219,8 +223,11 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p cauchy-reports
-          lake build ComputableAnalysis.PDE.CauchyContour | tee cauchy-reports/build.log
+          lake build ComputableAnalysis.PDE.CauchyContour ComputableAnalysis.CauchyTaylorExamples | tee cauchy-reports/build.log
           lake env lean scripts/check_cauchy_arctan.lean | tee cauchy-reports/audit.log
+          lake env lean scripts/check_cauchy_taylor.lean | tee cauchy-reports/taylor-audit.log
+          cp cauchy-reports/taylor-audit.log site/reading/cauchy-taylor-audit.log
+          cp tmp/cauchy-taylor-closure.txt site/reading/cauchy-taylor-closure.txt
           python3 .github/reader-edition/pnt_cauchy.py --site site --revision "$GITHUB_SHA" --audit cauchy-reports/audit.log --closure tmp/cauchy-arctan-closure.txt
           python3 .github/reader-edition/test_pnt_cauchy.py --site site --report reader-edition-tests
       - uses: actions/upload-artifact@v4

@@ -231,3 +231,29 @@ The next chapters use two different ways to replenish local bounds:
 parameter integrals supply new majorants in right half-planes, while
 linear equations supply new evolution bounds away from their coefficient
 singularities.  Both can be connected to these local contour computations.
+
+
+\section{Exact series equality from certified Cauchy data}
+The checked reconstruction theorem is conditional on a certified Cauchy
+representation and convergence of its boundary moments.  For a rational
+center $a$, a positive rational radius $R$, and rational complex $z$ with
+$|z-a|^2<R^2$, the independent series computation agrees exactly with the
+supplied function computation:
+\[
+ F(z)\;\equiv\;\mathrm{series}(z).
+\]
+The Lean declaration is
+\texttt{ComputableAnalysis.CauchyTaylor.Disk.eq\_series}; its real and
+imaginary component declarations conclude \texttt{RealRaw.Equiv}.
+The internal proof expands each finite Cauchy kernel geometrically, proves a
+Euclidean disk error estimate, and stabilizes the resulting rational boxes.
+It does not read the function evaluator at runtime.
+
+This is not yet a general Taylor theorem from complex differentiability.
+Constructing the Cauchy and moment certificates, identifying the moments
+with derivatives divided by factorials, and extending the input theorem to
+represented complex points remain open.  The certified radius need not be
+maximal, and the boundary is excluded.  The reciprocal example proves exact
+geometric-series equality on the full unit disk, including points outside
+the smaller coordinate diamond. No general polygon integral is needed for
+this checked conditional step.

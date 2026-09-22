@@ -9,6 +9,7 @@ import ComputableAnalysis.FirstYearCalculus
 import ComputableAnalysis.DifferentialEquationsFoundation
 import ComputableAnalysis.ComplexPathIntegral
 import ComputableAnalysis.PDE.CauchyContour
+import ComputableAnalysis.CauchyTaylorExamples
 import ComputableAnalysis.EffectiveFourierTail
 import ComputableAnalysis.FiniteDeflationExample
 import ComputableAnalysis.FiniteFTAConcreteCertificate

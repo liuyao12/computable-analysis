@@ -21,6 +21,12 @@ def install(site, revision, audit, closure):
     assert 'PASS: square-pole normalization, all-tag enclosure, geometry and explicit rate' in log
     assert 'PASS: no Mathlib module in the import closure; no sorryAx' in log
     assert not re.search(r'\berror:|^AUDIT.*sorryAx', log, re.M)
+    taylor_log = (site / 'reading/cauchy-taylor-audit.log').read_text()
+    assert 'PASS: exact Cauchy-series equality' in taylor_log
+    assert 'PASS: no Mathlib module in the import closure; no sorryAx' in taylor_log
+    assert not re.search(r'\berror:|^AUDIT.*sorryAx', taylor_log, re.M)
+    taylor_names = (site / 'reading/cauchy-taylor-closure.txt').read_text().splitlines()
+    assert 'ComputableAnalysis.CauchyTaylor.Disk.eq_series' in taylor_names
     names = closure.read_text().splitlines()
     for name in ['density_exact', 'raw_equiv_twoPiI', 'taggedSum_enclosed']:
         assert 'ComputableAnalysis.PDE.CauchyContour.' + name in names
@@ -53,6 +59,11 @@ def install(site, revision, audit, closure):
         nativeGeneralResidueTheorem=False, nativeCauchyFormula=False,
         upstreamDerivativeFormulaUsesSeparateMathlibCircleTheorem=True,
         mathlibDependency=False, newPiDefinition=False,
+        nativeConditionalCauchySeriesEquality=True,
+        nativeHolomorphicTaylorTheorem=False,
+        nativeTaylorCoefficientDerivativeIdentification=False,
+        nativeTaylorRepresentedInputs=False,
+        cauchyTaylorClosureSize=len(taylor_names),
         projectClosureSize=len(names), artifactHashes={p: digest(site / p) for p in outputs[:3]},
         chapterSha256=digest(chapter), chapterBeforeSha256=hashlib.sha256(original.encode()).hexdigest(),
         protectedArtifactHashes=protected,

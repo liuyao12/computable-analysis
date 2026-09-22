@@ -1,5 +1,15 @@
 # Computable Analysis: Canonical Roadmap
 
+**Exact Cauchy-series equality (2026-09-22).**
+`CauchyTaylor.Disk.eq_series` proves `ComplexRaw.Equiv` throughout a certified
+rational open disk; the real and imaginary component theorems use
+`RealRaw.Equiv`. The series computation is independent of the supplied
+function evaluator. Its hypotheses are a quantitative Cauchy representation
+and convergent boundary moments. This is not yet Taylor's theorem from an
+effective complex derivative: deriving the Cauchy formula, identifying the
+moments with derivatives/factorials, and extending to represented inputs
+remain open. See [the precise scope](docs/CAUCHY_TAYLOR.md).
+
 ## Aim
 
 Build a usable foundation for calculus and elementary function theory from

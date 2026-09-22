@@ -20,6 +20,10 @@ def main():
     report = json.loads((a.site / 'reading/cauchy-arctan-publication.json').read_text())
     assert all(report['checks'].values())
     assert not report['nativeGeneralResidueTheorem'] and not report['nativeCauchyFormula']
+    assert report['nativeConditionalCauchySeriesEquality']
+    assert not report['nativeHolomorphicTaylorTheorem']
+    assert not report['nativeTaylorCoefficientDerivativeIdentification']
+    assert not report['nativeTaylorRepresentedInputs']
     assert not report['mathlibDependency'] and not report['newPiDefinition']
     for name, sha in (report['protectedArtifactHashes'] | report['artifactHashes']).items():
         assert hashlib.sha256((a.site / name).read_bytes()).hexdigest() == sha, name
@@ -29,6 +33,10 @@ def main():
     assert len(upstream) == 7
     assert all('/blob/' + report['pntRevision'] + '/' in url for url in upstream)
     assert soup.select_one('#remaining') and soup.select_one('#native details')
+    assert soup.select_one('#taylor-equality')
+    assert 'RealRaw.Equiv' in soup.select_one('#taylor-equality').get_text()
+    assert 'not yet the general holomorphic Taylor theorem' in soup.select_one('#taylor-equality').get_text()
+    assert 'PASS: exact Cauchy-series equality' in (a.site / 'reading/cauchy-taylor-audit.log').read_text()
     assert soup.select_one('#rectangle-primitive')
     assert 'piecewise monotone' in soup.select_one('#rectangle-primitive').get_text()
     for el in soup.select('a[href]'):
@@ -60,6 +68,8 @@ def main():
                 page.locator('summary').click()
                 assert page.locator('details').get_attribute('open') is not None
                 assert page.locator('details pre').is_visible()
+                page.locator('#taylor-equality').scroll_into_view_if_needed()
+                page.locator('#taylor-equality').screenshot(path=str(a.report / f'cauchy-taylor-{width}.png'))
                 page.locator('#dependencies').scroll_into_view_if_needed()
                 page.screenshot(path=str(a.report / f'cauchy-map-{width}.png'), full_page=False)
                 page.evaluate('scrollTo(0,0)')
