@@ -1,5 +1,6 @@
 import ComputableAnalysis.AlgebraicODE
 import ComputableAnalysis.AlgebraicODE.FrobeniusTests
+import ComputableAnalysis.AlgebraicODE.FuchsGrowthExamples
 
 namespace ComputableAnalysis.AlgebraicODE.Tests
 open Painleve
@@ -53,5 +54,32 @@ example (p : List Rat) (h : Fuchs.PolynomialSolution (1 / 2) p) :
       rw [hk] at hs
       have hhalf : ¬ (1 : Rat) ≤ 1 / 2 := by decide +kernel
       exact hhalf hs
+
+/-- A non-singleton series evaluator can be used directly as a constant
+solution; its precision schedule refines according to the rational step. -/
+def besselConstantSolution (R : Rat) :
+    LinearODE.LinearSolution (fun _ => (fun _ _ => 0 : LinearODE.RatMatrix 1)) R :=
+  LinearODE.LinearSolution.constant (besselZero.factorRaw 0 1 (1/8))
+    (besselZero_factor_valid _ (by decide +kernel))
+    (RationalMajorant.halfDecayShift 4) (by
+      intro eps n hn
+      have hv := besselZero_factor_valid (1/8) (by decide +kernel)
+      have hnest := hv.2.1 _ n hn
+      have hw := QInterval.width_le_of_contains ⟨hnest.1, hnest.2.2⟩
+      apply Rat.le_trans hw
+      have hp := besselZero.factorRaw_precision 0 1 (1/8) eps
+      have he : (4 : Rat)*qabs 1 = 4 := by decide +kernel
+      simpa only [he] using hp) R
+
+theorem besselConstant_growth {a : Rat} (ha : 0 < a) (ha1 : a ≤ 1) :
+    LinearODE.NormBound ((besselConstantSolution 1).value a)
+      (LinearODE.normCeiling ((besselConstantSolution 1).value 1) 0) := by
+  have hg := (besselConstantSolution 1).moderate_growth 0
+    (by intro t ht htR j; simp [LinearODE.matrixColumnAbsSum, LinearODE.finiteSum, qabs]; grind)
+    ha ha1 (Rat.le_refl (a := 1))
+  simpa [Rat.div_def, show (1 : Rat)⁻¹ = 1 by decide +kernel] using hg
+
+example : (((besselConstantSolution 1).value (1/2) 0).compute 4).width = 1/4 := by
+  decide +kernel
 
 end ComputableAnalysis.AlgebraicODE.Tests

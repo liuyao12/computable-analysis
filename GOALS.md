@@ -273,3 +273,20 @@ new finite geometric bridge and shared polynomial quadrature. The reusable
 finite area identities live in `FiniteTransmutation`. See
 [the reconstruction and historical scope](docs/LEIBNIZ_TRANSMUTATION.md).
 The dedicated dependency audit is `scripts/check_leibniz_transmutation.lean`.
+
+## Fuchs: solution growth without completed reals
+
+Checked: `LinearODE.LinearSolution.moderate_growth` derives an explicit
+polynomial bound from a local finite-difference ODE condition and a `1/t`
+column bound. The initial constant is computed from the outer endpoint's
+stage-zero boxes. `Fuchs.Growth.fuchs_ray_moderate` instantiates this for
+second-order Fuchs form with complex rational polynomial coefficients and
+a fixed rational complex ray. The proof uses finite rational meshes and
+polynomial weights. A reciprocal solution and a non-singleton series-valued
+constant exercise the solution interface. No growth bound is assumed as a
+solution field; no real-number completion or Mathlib is added.
+
+Open: general holomorphic-solution adapter, sector-uniform bounds, arbitrary
+holomorphic regular coefficients, and the converse Fuchs criterion. This
+forward growth theorem does not assert a full solution basis or an
+algebraic-solution classification. See `docs/FUCHS_PAINLEVE.md` for exact scope.
