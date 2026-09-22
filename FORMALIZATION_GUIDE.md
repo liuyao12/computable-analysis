@@ -384,3 +384,20 @@ overlap equivalence. A residual alone does not certify a derivative. Use
 the ODE, and a nonzero algebraic relation for one rational interval evaluator.
 `Fuchs.radical_euler` assumes the differentiated curve identity; it does not
 construct or differentiate a branch. See [scope and audit](docs/FUCHS_PAINLEVE.md).
+
+### Frobenius and finite polynomial semantics
+
+Reuse `FormalPowerSeriesAlgebra` for finite Cauchy products, shifted Euler
+operators, and rational coefficient streams. `Fuchs.Frobenius.Equation.residual`
+is defined independently of its coefficient solver; `residual_split` derives
+the triangular recurrence. The solver is total as rational code, but its
+solution theorem requires every positive-index indicial denominator nonzero.
+Use `resonance_compatibility` when this condition fails.
+
+`FormalPowerSeriesPolynomial` connects truncations to the existing Horner
+polynomial evaluator and finite-difference calculus. A same-cutoff derivative
+requires the explicit first-omitted-coefficient zero hypothesis. The all-degree
+Laguerre construction supplies this via termination and proves the unmultiplied
+ODE even at zero. General formal solutions have no convergence or branch
+certificate yet. Compare the corresponding Lean 4 statements in Ripple as
+recorded in `docs/FUCHS_PAINLEVE.md`; do not import its Mathlib real foundation.

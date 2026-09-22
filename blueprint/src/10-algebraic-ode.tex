@@ -91,44 +91,84 @@ algebraic identities. The latter explicitly assumes differentiated Riccati
 data. Arbitrary-degree polynomial, rational, and algebraic solution
 classifications have not yet been proved.
 
-\section{Existing work and next milestones}
+\section{Formal Frobenius construction}
 
-A search of public web and GitHub results on 22 September 2026 did not
-locate an inspectable formalization of the Fuchs--Painlev\'e algebraic-solution
-classification. This is a search result, not a nonexistence claim.
+For rational polynomial coefficients $p,q$, consider the local form
+\[
+ x^2y''+xp(x)y'+q(x)y=0,\qquad I(s)=s(s-1)+p_0s+q_0.
+\]
+The rational exponent $r$ is a formal shift. Finite Cauchy products and
+shifted Euler operators define the residual independently of its solver.
 
-\begin{itemize}
-\item \href{https://users-cs.au.dk/spitters/Picard.pdf}
-{Makarov and Spitters: the Picard algorithm in Coq} uses constructive
-exact reals from CoRN/MathClasses, with
-\href{https://github.com/EvgenyMakarov/corn/tree/master/ode}{public ODE source}.
-It is the closest foundation-level comparison, although its completion and
-function-space approach differs from our finite interval certificates.
-\item \href{https://isa-afp.org/entries/Ordinary_Differential_Equations.html}
-{Isabelle AFP: Ordinary Differential Equations} provides existence,
-uniqueness, flows, and associated verified numerical algorithms. It is a
-substantial comparison for analytic ODE specifications, with a different
-number foundation.
-\item \href{https://cfhp.univ-lille.fr/files/students/Master-2026-Coqodi.pdf}
-{Solving Differential Equations in Rocq} is a spring 2026 research proposal
-that explicitly includes Painlev\'e I among target examples. It concerns
-validated numerical approximation; the proposal is not evidence of a
-completed implementation or algebraic classification.
-\item \href{https://arxiv.org/abs/2408.15180}
-{Mason--Stothers and its corollaries in Lean 4} supplies an adjacent
-comparison for polynomial derivative and degree arguments. It is not a
-Painlev\'e formalization.
-\item \href{https://dlmf.nist.gov/32}{DLMF Chapter 32} supplies the equation
-and seed conventions, rather than machine-checked proofs.
-\end{itemize}
+\begin{theorem}[Indicial obstruction and nonresonant construction]
+\label{thm:frobenius-formal}
+Coefficient extraction gives
+\[
+ I(r+n)c_n+\sum_{k<n}\bigl((r+k)p_{n-k}+q_{n-k}\bigr)c_k=0.
+\]
+A nonzero $c_0$ forces $I(r)=0$. If $I(r)=0$ and $I(r+n)\ne0$ for every
+positive integer $n$, a terminating rational coefficient algorithm constructs
+the unique formal solution with prescribed $c_0$. Every finite prefix has
+zero residual coefficients below its cutoff. No analytic convergence or
+branch of $x^r$ is asserted by this formal theorem.
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.residual_split}
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.indicial_obstruction}
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.coeff_isSolution}
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.solution_unique}
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.truncation_residual}
+\leanok
+\end{theorem}
 
-Next milestones are normalized polynomial/rational differential arithmetic,
-certified algebraic branches and Puiseux charts, regular-singular Fuchs
-theory, and a separate first-order Fuchs criterion development. Painlev\'e
-work will next address pole/degree obstructions, B\"acklund transformations,
-and rational-solution classification for PII, before III--VI and their
-parameter-dependent algebraic solutions. Analytic continuation, monodromy,
-and the general algebraic classification are open.
+At a resonant index, the lower contribution must vanish. For example,
+$x^2y''+xy=0$ at exponent zero forces $c_0=0$ at degree one; division by a
+zero indicial coefficient cannot silently construct the desired solution.
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.Frobenius.Equation.resonance_compatibility}
+\leanok
+
+\begin{theorem}[Terminating Laguerre algebraic solutions]
+\label{thm:laguerre-polynomial}
+For every natural $m$, rational $b>0$, and initial value $c_0$, the recurrence
+\[
+ c_{n+1}=\frac{(n-m)c_n}{(n+1)(n+b)}
+\]
+terminates above degree $m$ and gives a polynomial solving
+$xy''+(b-x)y'+my=0$ at every rational input, including zero.
+If $c_0\ne0$, its degree is exactly $m$. Both two-sided finite-difference
+derivative certificates are constructed on every supplied bounded rational
+interval, and the same evaluator satisfies the nonzero graph relation
+$y-P(x)=0$. This is local regular-singular theory at zero; infinity is
+irregular for the Laguerre equation.
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.Laguerre.polynomial_exact_degree}
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.Laguerre.differential_equation}
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.Laguerre.firstDerivativeCertificate}
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.Laguerre.secondDerivativeCertificate}
+\lean{ComputableAnalysis.AlgebraicODE.Fuchs.Laguerre.algebraic_relation}
+\leanok
+\end{theorem}
+
+\section{Lean 4 comparison and next milestones}
+
+\href{https://github.com/zinan-huang/Ripple/tree/e9ce148d3975f9e75bb9724e01ec763ad9b368a9/Ripple/Number/Frobenius}
+{Ripple's Lean 4 Frobenius development} is the closest linear comparison.
+Its indicial obstruction, formal nonresonant solution, and uniqueness can be
+compared directly to our statements. Ripple also supplies higher-order and
+analytic-convergence results beyond the current general construction here.
+It uses Mathlib's real numbers; our construction uses rational coefficients
+and finite interval certificates. The pinned source was inspected, not
+independently rebuilt.
+
+\href{https://leanprover-community.github.io/mathlib4_docs/Mathlib/Analysis/ODE/ExistUnique.html}
+{Mathlib's ODE existence and uniqueness} provides interface comparisons;
+\href{https://github.com/seewoo5/lean-poly-abc}{Mason--Stothers in Lean 4}
+provides adjacent polynomial derivative and degree arguments. No public Lean 4
+Painlev\'e algebraic-solution classification was located in the bounded search.
+Coq/Rocq and Isabelle work is background, not the direct comparison benchmark.
+
+Next are general Frobenius convergence, certified algebraic branches and
+Puiseux charts, and resonant logarithmic solutions. Painlev\'e work remains
+separate: pole/degree obstructions, B\"acklund transformations and rational
+solution classification for PII, followed by III--VI. Global monodromy and
+the general algebraic classification remain open.
 
 The new modules add no custom axioms or proof placeholders. Exact
 classification proofs use standard Lean logical axioms; raw validity and

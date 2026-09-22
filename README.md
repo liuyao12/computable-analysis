@@ -127,7 +127,8 @@ derive scalar, sign, degree, and finite-piece variants by transport.
 ## Fuchs–Painlevé subproject
 
 Import `ComputableAnalysis.AlgebraicODE` for polynomial differential residuals,
-Euler–Fuchs polynomial coefficient classification, and Painlevé II algebraic
-seeds with actual interval derivative certificates. The
+Euler–Fuchs coefficient classification, formal nonresonant Frobenius solutions,
+all-degree terminating Laguerre polynomials with both derivative certificates,
+and Painlevé II algebraic seeds. The
 [subproject ledger and comparison research](docs/FUCHS_PAINLEVE.md) separates
 checked results from the open general classification. No Mathlib reals are used.

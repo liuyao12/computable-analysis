@@ -46,31 +46,95 @@ General non-rational algebraic branches still need branch, denominator-apartness
 and derivative certificates. In particular, `radical_euler` does not construct
 a root or prove implicit differentiation.
 
-## Research comparison, checked 2026-09-22
+## Checked Frobenius and Laguerre milestone
 
-I did not locate a public, inspectable formalization of the Fuchs–Painlevé
-algebraic-solution classification in the searches below. This is a bounded
-search result, not a claim that none exists.
+The linear and nonlinear developments are separate. The new linear theorem
+covers the local regular-singular form
 
-| Project or source | Verified status | Useful comparison |
-|---|---|---|
-| [CoRN/MathClasses Picard algorithm](https://users-cs.au.dk/spitters/Picard.pdf), Makarov and Spitters; [public ODE source](https://github.com/EvgenyMakarov/corn/tree/master/ode) | Published constructive Picard–Lindelöf development, with Coq files for Picard iteration, integration, and Banach fixed points | Closest foundation-level comparison: efficient constructive exact reals and explicit correctness hypotheses. Its completion/function-space machinery differs from our finite interval certificate route; it does not classify Painlevé algebraic solutions. |
-| [Isabelle AFP: Ordinary Differential Equations](https://isa-afp.org/entries/Ordinary_Differential_Equations.html), Fabian Immler and Johannes Hölzl | Existing formal ODE development: Picard–Lindelöf, flows, linear ODEs; associated verified numerical enclosure sessions | Existence/uniqueness and numerical enclosure specification. Its HOL analysis foundation differs from our rational-interval foundation. It is not a Fuchs/Painlevé algebraic-solution classification. |
-| [Solving Differential Equations in Rocq](https://cfhp.univ-lille.fr/files/students/Master-2026-Coqodi.pdf), Bréhard/Pous/Brisebarre, spring 2026 | Research/internship proposal explicitly lists Painlevé I among planned examples | Closest topical lead for validated computations. The document proposes error-bounded ODE approximation using Interval and ApproxModels; it is not evidence of a completed implementation or an algebraic classification. |
-| [Mason–Stothers and corollaries in Lean 4](https://arxiv.org/abs/2408.15180), Baek and Lee | Paper reports formal proofs integrated into Mathlib | Polynomial degree/derivative arguments and algebraic nonexistence proofs; compare proof organization without importing its real analysis. This is adjacent algebra, not a Painlevé formalization. |
-| [DLMF Chapter 32](https://dlmf.nist.gov/32) | Mathematical reference, not a proof-assistant project | Equation conventions, rational seeds, Bäcklund transformations, and later comparison targets |
+\[
+x^2y''+xp(x)y'+q(x)y=0,\qquad
+I(s)=s(s-1)+p_0s+q_0,
+\]
 
-Searches covered web queries combining Fuchs/Fuchsian/Painlevé/Painleve with
-Lean, Coq/Rocq, Isabelle, formalization, and formal verification; GitHub
-repository search for Painleve and Coqodi; and code queries for Painleve in
-Lean, Coq, and Isabelle, accented Painlevé in Lean, and Fuchsian in Lean.
-Returned matches concerning Fuchsian *groups*, Painlevé removability, and
-Painlevé–Gullstrand coordinates do not address these differential equations.
-Computer-algebra and numerical Painlevé packages also appeared, but their
-existence is not evidence of a kernel-checked mathematical formalization.
-GitHub indexing and search coverage are incomplete. ApproxModels was linked
-by the Rocq proposal; its repository could not be inspected through the web
-fetch because the host denied access.
+where `p,q` are finite rational polynomials. For a rational formal exponent
+`r` and leading coefficient `c0`, `Fuchs.Frobenius.Equation.coeff` is a
+terminating rational algorithm for every requested coefficient. The operator
+residual is defined independently, using finite Cauchy products and shifted
+Euler operators. Coefficient extraction proves
+
+\[
+I(r+n)c_n+\sum_{k<n}((r+k)p_{n-k}+q_{n-k})c_k=0.
+\]
+
+| Checked result | Declaration under `Fuchs.Frobenius.Equation` |
+|---|---|
+| Derive the recurrence from the formal operator | `residual_split` |
+| A solution with nonzero leading term requires `I(r)=0` | `indicial_obstruction` |
+| Construct a formal solution if `I(r)=0` and `I(r+n)≠0` for every `n>0` | `coeff_isSolution` |
+| Uniqueness for the specified leading coefficient | `solution_unique`, `solution_iff_coeff` |
+| A zero recurrence denominator requires the lower contribution to vanish | `resonance_compatibility` |
+| Every polynomial prefix has zero residual coefficients below its cutoff | `truncation_residual` |
+
+These are **formal coefficient theorems**, not a general analytic Frobenius
+convergence theorem. The rational exponent is a formal shift; no branch of
+`x^r` is chosen. The total coefficient code uses rational division, but no
+correctness theorem drops the nonzero-denominator hypotheses. The regression
+`Tests.resonant_no_nonzero_leading` shows why: `x²y''+xy=0` at exponent zero
+forces `c0=0` at the resonant degree one.
+
+A complete analytic polynomial application is the normalized Laguerre family
+
+\[
+xy''+(b-x)y'+my=0,\qquad b\in\mathbb Q_{>0},\quad m\in\mathbb N.
+\]
+
+Its coefficients satisfy
+`c(n+1)=(n-m)c(n)/((n+1)(n+b))`. We prove termination above degree `m` for
+all `m`, and exact degree `m` when `c0≠0`. `Fuchs.Laguerre.differential_equation`
+proves the unmultiplied equation at every rational input, including zero.
+`firstDerivativeCertificate` and `secondDerivativeCertificate` certify both
+derivatives on any supplied rational interval inside a rational box `[-C,C]`,
+`C≥1`. `algebraic_relation` connects that same evaluator to the nonzero graph
+polynomial `y-P(x)`. The finite Taylor evaluator is proved equal to the
+existing Horner list evaluator by `FormalPowerSeries.eval_truncation`.
+
+Examples with `c0=1` are `1-2x+x²/2` for `(m,b)=(2,1)` and
+`1-3x/2+x²/2-x³/24` for `(m,b)=(3,2)`. This normalization fixes the value at
+zero; it is not the conventional normalization of every generalized Laguerre
+polynomial. The equation agrees with [DLMF 18.8, row 8](https://dlmf.nist.gov/18.8)
+with `b=α+1`. Its origin is regular singular, but infinity is irregular: this
+is a **local** Fuchs–Frobenius application, not a globally Fuchsian equation.
+
+## Lean 4 comparison, inspected 2026-09-22
+
+Comparison here means Lean 4 theorem statements and proof architecture.
+Coq/Rocq and Isabelle developments are background only, not the benchmark.
+No public Lean 4 Painlevé algebraic-solution classification was located in the
+bounded search. This is not a claim that none exists.
+
+| Lean 4 project | Source inspected and comparison |
+|---|---|
+| [Ripple Frobenius](https://github.com/zinan-huang/Ripple/tree/e9ce148d3975f9e75bb9724e01ec763ad9b368a9/Ripple/Number/Frobenius) | Closest linear comparison. `Indicial.lean` defines shifted Euler operators and proves `indicial_root_of_leading_vanish`. `Substitution.lean` proves `frobeniusSolution_is_solution` under indicial-root and nonresonance hypotheses, uniqueness, and convergence/analyticity under further quantitative hypotheses. Lean/Mathlib 4.30.0; explicitly uses `ℝ`. Source inspected, not independently rebuilt. |
+| [Mathlib ODE existence and uniqueness](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Analysis/ODE/ExistUnique.html) | Compare derivative semantics, hypotheses and theorem interfaces. Its normed-space and classical-real foundation is not imported here. |
+| [Mason–Stothers in Lean 4](https://github.com/seewoo5/lean-poly-abc) | Adjacent algebra comparison: polynomial derivatives, Wronskians, degree bounds and nonexistence arguments. Mason–Stothers and polynomial FLT are integrated into Mathlib. This is not a Painlevé classification. |
+
+Our new `indicial_obstruction`, `coeff_isSolution`, and `solution_unique`
+provide concrete theorem-level comparison points with Ripple. Our current
+operator has order two, normalized leading coefficient `x²`, and rational
+polynomial data; Ripple's inspected construction covers higher-order
+polynomial operators and additional convergence results. Our general
+convergence and nonintegral branch construction remain missing. Our terminating
+Laguerre family instead uses finite rational evaluation and the project's
+existing finite-difference certificates, with no infinite-series limit needed.
+
+Searches included public web and GitHub queries for Fuchs/Fuchsian/Frobenius,
+regular-singular ODEs, and Painleve/Painlevé in Lean. The indexed Painlevé
+matches concerned unrelated removability theorems; Fuchsian-group matches do
+not formalize the requested ODE results. Indexing and repository coverage are
+incomplete. The earlier [CoRN Picard work](https://users-cs.au.dk/spitters/Picard.pdf),
+[Isabelle AFP ODE development](https://isa-afp.org/entries/Ordinary_Differential_Equations.html),
+and [Rocq numerical proposal](https://cfhp.univ-lille.fr/files/students/Master-2026-Coqodi.pdf)
+are retained only as background references.
 
 ## Development plan and open theorems
 
@@ -87,8 +151,9 @@ equations or with Fuchsian groups.
 2. **Algebraic branches.** Strengthen the existing algebraic-function layer
    with nonzero defining polynomials, selected branches, root separation,
    quantitative implicit derivatives, and certified Puiseux charts.
-3. **Fuchs.** Develop regular-singular local equations, indicial polynomials,
-   resonances, Frobenius recurrences and convergence bounds. Separately state
+3. **Fuchs.** Extend the checked second-order formal Frobenius construction to
+   convergence bounds, certified nonintegral branches, resonant logarithmic
+   solutions and more general local operators. Separately state
    and prove the first-order Fuchs criterion with its precise singularity
    hypotheses. General algebraic-solution/finite-monodromy statements require
    analytic continuation and monodromy infrastructure still absent here.
@@ -115,10 +180,12 @@ lake env lean scripts/check_algebraic_ode.lean
 Regression proofs check both pole signs, reject residue `2`, exclude polynomial
 solutions at exponent `1/2`, instantiate the derivative-bearing interval
 packages, and connect `-1/x` to the represented-complex equation at every
-nonzero rational input.
+nonzero rational input. Frobenius regressions cover a repeated indicial root,
+a genuine resonance obstruction, two terminating Laguerre polynomials,
+and both derivative certificates on an interval containing zero.
 
 The new modules contain no `sorry`, `admit`, custom axioms, or `native_decide`
-calls. The exact classification and exact-input runtime bridges print only
+calls (regression computations use kernel-checked `decide`). The exact classification and exact-input runtime bridges print only
 standard Lean logical axioms. Generic raw multiplication validity and the
 analytic derivative packages inherit existing foundation `native_decide`
 axioms; the audit prints these dependencies explicitly. Computable evaluators

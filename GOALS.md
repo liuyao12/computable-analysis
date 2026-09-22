@@ -244,3 +244,16 @@ Euler–Fuchs polynomial coefficients and PII simple-pole/affine candidates, wit
 finite-difference certificates for the pole solutions. Next are rational
 differential algebra, certified algebraic branches, Fuchs singularity criteria,
 and Painlevé classification. General algebraic-solution classification is open.
+
+## Fuchs: formal Frobenius and terminating algebraic solutions
+
+Checked: for `x²y''+xp(x)y'+q(x)y=0` with rational polynomial coefficients,
+the indicial obstruction, derived coefficient recurrence, nonresonant formal
+existence and uniqueness, resonance compatibility, and finite-prefix residual
+vanishing. `Fuchs.Laguerre` constructs every natural-degree terminating solution
+of `xy''+(b-x)y'+my=0` for rational `b>0`, with exact degree when `y(0)≠0`,
+a pointwise equation and both interval derivative certificates, plus a nonzero
+algebraic graph relation. This is local regular-singular theory; Laguerre is
+irregular at infinity. General Frobenius convergence, logarithmic resonant
+solutions, branches for nonintegral exponents, and global algebraic-solution
+classification remain open. Painlevé results are unchanged.
