@@ -12,9 +12,8 @@ open DirichletSeries
   have hl := alternating_decreasing b (2*n) b_nonneg (fun k=>b_antitone (by omega))
   have hh := alternating_decreasing b (2*n+1) b_nonneg (fun k=>b_antitone (by omega))
   have hc : leibnizRaw.compute n = {lo:=4*B (2*n), hi:=4*B (2*n+1)} := by
-    change ({lo:=4*(Series.AlternatingRaw.leibnizAlternatingRaw.interval n).lo,
-      hi:=4*(Series.AlternatingRaw.leibnizAlternatingRaw.interval n).hi} : QInterval) = _
-    rw [Series.AlternatingRaw.interval_eq_endpoints]; rfl
+    exact congrArg (fun I : QInterval => ({lo := 4*I.lo, hi := 4*I.hi} : QInterval))
+      (Series.AlternatingRaw.interval_eq_endpoints Series.AlternatingRaw.leibnizAlternatingRaw n)
   have hz : b 0=1 := by simp [b, Series.leibnizTerm, Rat.div_def]; grind only
   rw [hz] at hl hh
   rw [hc]; dsimp [B]; grind only

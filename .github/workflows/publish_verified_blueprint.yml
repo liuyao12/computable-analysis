@@ -102,12 +102,15 @@ jobs:
               assert steps[name]=='success',name
           print('Verified unchanged mathematical snapshot:',os.environ['SOURCE_SHA'])
           PY
-      - uses: actions/download-artifact@v8
+      - name: Restore the hash-checked pinned reader archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 .github/reader-edition/reader_base.py
+      - uses: actions/upload-artifact@v4
         with:
-          name: github-pages
-          run-id: ${{ env.SOURCE_RUN }}
-          github-token: ${{ github.token }}
-          path: downloaded
+          name: verified-reader-base
+          path: downloaded/artifact.tar
+          retention-days: 90
       - name: Validate and unpack the exact proof artifact
         run: |
           python3 - <<'PY'
