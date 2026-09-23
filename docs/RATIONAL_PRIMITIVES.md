@@ -6,8 +6,8 @@ linear pole blocks, with arbitrary positive multiplicities**. It computes the
 partial fractions, a positive pole-free neighborhood, and valid elementary
 evaluators, then proves the original quotient is their interval derivative.
 The algebraic integration algorithm now also supports arbitrary computable-real
-coefficients. Its analytic realization and the analytic trigonometric
-corollary remain open. All proofs use the project's own
+coefficients. Concrete logarithm/arctangent derivatives with computable coefficients are
+also checked; full finite assembly and the trigonometric corollary remain open. All proofs use the project's own
 rational-interval foundation; no Mathlib real or complex numbers are used.
 
 ## Factorization can be assumed as input
@@ -76,7 +76,62 @@ FTA remains relevant to obtaining a factorization from an arbitrary input
 polynomial. It is independent of this integration algorithm. What is still
 missing is an analytic evaluator and actual `HasDerivativeOnInterval` for the
 computed formulas with general computable coefficients. In particular, the
-quadratic arctangent/logarithm atoms are not yet analytically assembled.
+quadratic base atoms below now have concrete certificates, but are not yet
+assembled through the full formula compiler.
+
+## Concrete logarithm and arctangent certificates
+
+`ComputableLogarithmChart` builds the local logarithm series with an arbitrary
+computable complex slope \(m\). A finite interval bound \(M>0\) determines
+\(r=1/(2M)\). On \(|t|\le r\), the candidates are the finite sums
+\[
+ L_n(mt)=\sum_{k=1}^n\frac{(-1)^{k+1}(mt)^k}{k},
+ \qquad K_m(t)=\frac{m}{1+mt}.
+\]
+Both real coordinates are certified interval computations. The finite secant
+estimate bounds the error by
+\(2M^2|h|+8M2^{-n}\). A separate coefficient perturbation estimate controls
+replacement of the computable slope by rational samples. A common sampling
+stage retains the algebraic relationships between derived coefficients.
+`widthStage` searches rational interval endpoints; validity proves termination
+without supplying a noncomputable runtime precision oracle.
+
+`Coefficient.hasDerivative` constructs `HasDerivativeOnInterval` for both
+coordinates, with precision depending on the secant step. `weightedHasDerivative`
+does the same for arbitrary computable constant multiples, from explicit
+weighted finite sums. No derivative or chain-rule hypothesis is supplied.
+
+For a computable pole \(a\) and rational center \(c\), a successful finite
+reciprocal test supplies \(m=(c-a)^{-1}\). `simplePole_derivative_equiv`
+identifies the real-coordinate derivative with the independently evaluated
+\((x-a)^{-1}\) wherever the chart and target reciprocal certificates apply.
+For a purely imaginary slope \(is\), `arctan_valueSample` proves that the
+imaginary candidates at even stages are exactly the standard arctangent
+Taylor sums. `arctan_derivative_equiv` identifies their derivative with
+\(s/(1+s^2(x-c)^2)\).
+
+For quadratics, the concrete interface uses
+\[
+ Q(x)=(x-a)^2+b^2,\qquad b\ne0,\qquad
+ m=\frac{c-a-ib}{Q(c)}.
+\]
+Twice the real coordinate gives a local logarithm primitive with derivative
+\(2(x-a)/Q(x)\); multiplying the imaginary coordinate by \(-1/b\) gives
+one with derivative \(1/Q(x)\). The `quadraticLog_derivative_equiv` and
+`quadraticArctan_derivative_equiv` theorems compare those derivative computations
+to the original coefficient evaluator. They require successful finite inversions
+of \(Q(c)\), \(b\), and \(Q(x)\), and chart membership. These are concrete
+local log-series charts; global branch identities are not asserted.
+
+`ComputablePrimitiveDerivativeExamples` checks the irrational pole
+\(a=\sqrt2\), the arctangent scale \(s=\sqrt2\), and the quadratic
+\(Q(x)=(x-\sqrt2)^2+(\sqrt2)^2\). Each has an actual interval derivative
+certificate and a reciprocal/kernel identification at \(x=1/16\).
+
+The formal factorization interface instead takes \((x-a)^2+B\) with a
+positive computable \(B\). Supplying and verifying a width \(b\) with
+\(b^2=B\), then assembling all repeated-factor terms with computable
+coefficients, remains work for the complete compiler theorem.
 
 ## Precise target
 
@@ -269,6 +324,7 @@ Run:
 ```sh
 lake build ComputableAnalysis.RationalPrimitiveExamples
 lake env lean scripts/check_rational_primitives.lean
+lake env lean scripts/check_computable_primitive_runtime.lean
 ```
 
 The audit accepts only Lean's standard `propext`, `Classical.choice`, and
@@ -281,12 +337,12 @@ constructors themselves are executable finite rational algorithms.
 1. Construct a certified factorization of an arbitrary input polynomial when
    it is not supplied. Partial fractions from supplied computable-real linear
    and positive quadratic factors are already computed and checked.
-2. Realize the remaining quadratic logarithm/arctangent atoms as valid
-   interval computations with actual finite-difference derivative certificates.
-3. Extend analytic assembly to arbitrary computable coefficients, including
-   irrational linear poles. The new coefficient-general theorem establishes
-   formal-derivative equivalence; rational linear pole sums already have
-   actual `HasDerivativeOnInterval` certificates.
+2. Connect the positive quadratic constant in the factorization interface to
+   a certified width for the concrete quadratic base primitives.
+3. Assemble the computable-coefficient polynomial, reciprocal-power, and
+   quadratic recurrence terms with the new concrete logarithm/arctangent
+   certificates. Irrational simple poles and quadratic base terms now have
+   actual `HasDerivativeOnInterval` certificates; the full formula does not yet.
 4. Identify the two angle charts with the established sine and cosine
    evaluators, then prove the chain rule and overlap gluing.
 

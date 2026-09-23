@@ -9,6 +9,33 @@ run_cmd do
     if mod.toString.startsWith "Mathlib" then
       throwError "Unexpected Mathlib import: {mod}"
   for root in [
+      ``ComputableAnalysis.ComputableCoefficient.widthStage_spec,
+      ``ComputableAnalysis.PrimitiveLogarithmEstimates.prefix_lipschitz,
+      ``ComputableAnalysis.PrimitiveLogarithmEstimates.kernel_lipschitz,
+      ``ComputableAnalysis.PrimitiveLogarithmEstimates.prefix_affine_secant,
+      ``ComputableAnalysis.ComputableLogarithmChart.Coefficient.value_valid,
+      ``ComputableAnalysis.ComputableLogarithmChart.Coefficient.derivative_valid,
+      ``ComputableAnalysis.ComputableLogarithmChart.Coefficient.hasDerivative,
+      ``ComputableAnalysis.ComputableLogarithmChart.simplePole_hasDerivative,
+      ``ComputableAnalysis.ComputableLogarithmChart.simplePole_derivative_equiv,
+      ``ComputableAnalysis.ComputableLogarithmChart.arctan_hasDerivative,
+      ``ComputableAnalysis.ComputableLogarithmChart.arctan_derivative_equiv,
+      ``ComputableAnalysis.ComputableLogarithmChart.arctan_valueSample,
+      ``ComputableAnalysis.ComputableLogarithmChart.Coefficient.weightedValue_valid,
+      ``ComputableAnalysis.ComputableLogarithmChart.Coefficient.weightedDerivative_valid,
+      ``ComputableAnalysis.ComputableLogarithmChart.Coefficient.weightedHasDerivative,
+      ``ComputableAnalysis.ComputableLogarithmChart.quadraticLog_hasDerivative,
+      ``ComputableAnalysis.ComputableLogarithmChart.quadraticLog_derivative_equiv,
+      ``ComputableAnalysis.ComputableLogarithmChart.quadraticArctan_hasDerivative,
+      ``ComputableAnalysis.ComputableLogarithmChart.quadraticArctan_derivative_equiv,
+      ``ComputableAnalysis.ComputablePrimitiveDerivativeExamples.irrationalPole_hasDerivative,
+      ``ComputableAnalysis.ComputablePrimitiveDerivativeExamples.irrationalPole_derivative_is_reciprocal,
+      ``ComputableAnalysis.ComputablePrimitiveDerivativeExamples.irrationalArctan_hasDerivative,
+      ``ComputableAnalysis.ComputablePrimitiveDerivativeExamples.irrationalArctan_derivative_is_kernel,
+      ``ComputableAnalysis.ComputablePrimitiveDerivativeExamples.irrationalArctan_series,
+      ``ComputableAnalysis.ComputablePrimitiveDerivativeExamples.irrationalQuadratic_hasDerivative,
+      ``ComputableAnalysis.ComputablePrimitiveDerivativeExamples.irrationalQuadratic_derivative_is_reciprocal,
+
       ``ComputableAnalysis.ComputableCoefficient.Value.equiv_of_samples,
       ``ComputableAnalysis.ComputableCoefficient.Expr.realize,
       ``ComputableAnalysis.ComputableCoefficient.Expr.realize_equiv,
@@ -91,6 +118,7 @@ run_cmd do
   logInfo "PASS: rational primitive algebra; domain-preserving circle pullback; no Mathlib, native-decision axioms, or unfinished proofs; standard Lean logical axioms only."
   logInfo "ANALYTIC: every rational polynomial on every rational interval; every rationally split denominator near each permitted rational center; executable partial fractions and elementary evaluators, with actual derivative certificates."
   logInfo "FACTORIZATION: supplied computable-real linear and positive quadratic factors; interval-certified separation; computed partial fractions and represented formal-derivative equivalence; irrational regression checked."
+  logInfo "CONCRETE: computable-coefficient logarithm and arctangent finite secant certificates; weighted quadratic base primitives; irrational pole and quadratic reciprocal bridges."
   logInfo "SCOPE: factorization existence, analytic assembly for computable coefficients, and represented trigonometric transport remain open."
 
 #print axioms ComputableAnalysis.RationalPrimitiveFormula.Decomposition.primitive_correct

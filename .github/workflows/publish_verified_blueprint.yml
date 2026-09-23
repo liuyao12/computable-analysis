@@ -13,6 +13,18 @@ on:
       - 'ComputableAnalysis/RationalPartialFractions.lean'
       - 'ComputableAnalysis/RationalQuadraticDivision.lean'
       - 'ComputableAnalysis/RationalFactoredPrimitives.lean'
+      - 'ComputableAnalysis/ComputableArctangentSeries.lean'
+      - 'ComputableAnalysis/ComputableCoefficientApproximation.lean'
+      - 'ComputableAnalysis/ComputableLogarithmChart.lean'
+      - 'ComputableAnalysis/ComputableLogarithmDerivative.lean'
+      - 'ComputableAnalysis/ComputableLogarithmPrimitives.lean'
+      - 'ComputableAnalysis/ComputablePrimitiveDerivativeExamples.lean'
+      - 'ComputableAnalysis/ComputableQuadraticPrimitives.lean'
+      - 'ComputableAnalysis/ComputableWeightedLogarithm.lean'
+      - 'ComputableAnalysis/ComputableWeightedLogarithmDerivative.lean'
+      - 'ComputableAnalysis/Logarithm.lean'
+      - 'ComputableAnalysis/PrimitiveLogarithmEstimates.lean'
+      - 'ComputableAnalysis/Series.lean'
       - 'ComputableAnalysis/ComputableCoefficient.lean'
       - 'ComputableAnalysis/ComputableFactoredAlgebra.lean'
       - 'ComputableAnalysis/ComputablePrimitiveFormula.lean'
@@ -22,6 +34,7 @@ on:
       - 'ComputableAnalysis/RationalExpressionNormalization.lean'
       - 'ComputableAnalysis/TrigonometricRationalization.lean'
       - 'scripts/check_rational_primitives.lean'
+      - 'scripts/check_computable_primitive_runtime.lean'
       - 'docs/RATIONAL_PRIMITIVES.md'
       - 'book/fundamental-matrix/**'
       - 'book/cosine-square/**'
@@ -278,6 +291,7 @@ jobs:
           mkdir -p rational-primitives-reports
           lake build ComputableAnalysis.RationalPrimitiveExamples | tee rational-primitives-reports/build.log
           lake env lean scripts/check_rational_primitives.lean | tee rational-primitives-reports/audit.log
+          lake env lean scripts/check_computable_primitive_runtime.lean | tee rational-primitives-reports/runtime.log
           python3 .github/reader-edition/rational_primitives.py --site site --revision "$GITHUB_SHA" --audit rational-primitives-reports/audit.log
           python3 .github/reader-edition/test_rational_primitives.py --site site --report reader-edition-tests
       - name: Materialize the pinned squared-cosine proof foundation

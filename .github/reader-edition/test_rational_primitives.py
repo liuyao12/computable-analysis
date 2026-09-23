@@ -28,6 +28,8 @@ def main():
     assert report['factorizationToFormalPrimitiveProved']
     assert report['computableRealCoefficientFormalPrimitivesProved']
     assert report['irrationalCoefficientRegressionProved']
+    assert report['computableLogarithmArctangentDerivativesProved']
+    assert report['computableQuadraticBasePrimitivesProved']
     assert report['analyticRepeatedLinearPolePrimitivesProved']
     assert report['analyticRationallySplitLocalPrimitivesProved']
     assert not report['generalAnalyticTheoremProved'] and not report['mathlibDependency']
@@ -35,7 +37,7 @@ def main():
                       ('reading/rational-primitives-audit.log', 'auditSha256')]:
         assert hashlib.sha256((args.site / file).read_bytes()).hexdigest() == report[key]
     soup = BeautifulSoup((args.site / report['page']).read_text(), 'html.parser')
-    assert 'The general analytic theorem remains open.' in soup.get_text()
+    assert 'The full rational-function primitive theorem remains open.' in soup.get_text()
     assert len(soup.select('#status li')) == 4
     assert not soup.select('sup, sub')
     for link in soup.select('a[href]'):

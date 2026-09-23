@@ -10,7 +10,7 @@
 <nav aria-label="Book"><a href="index.html">Computable Analysis</a><a href="ch-integrals.html">Integrals</a><a href="#status">Proof status</a></nav>
 <header><span class="eyebrow">Finite integration algorithms</span><h1>Elementary primitives</h1>
 <p class="lead">Rational functions, repeated poles, and the half-angle route from trigonometry to rational algebra.</p>
-<p class="note"><strong>The general analytic theorem remains open.</strong> The checked results now include complete local elementary primitives for rationally split denominators, alongside computed partial fractions and formal integration from linear/quadratic factorizations with arbitrary computable-real coefficients and a domain-preserving rational circle substitution. They use the project’s own foundation, with no Mathlib dependency.</p></header>
+<p class="note"><strong>The full rational-function primitive theorem remains open.</strong> The checked results now include concrete logarithm and arctangent derivatives with computable coefficients, complete local elementary primitives for rationally split denominators, alongside computed partial fractions and formal integration from linear/quadratic factorizations with arbitrary computable-real coefficients and a domain-preserving rational circle substitution. They use the project’s own foundation, with no Mathlib dependency.</p></header>
 <section><h2>The theorem we want</h2>
 <p>On an interval with an explicit positive lower bound for its denominator, every rational function should have an elementary primitive:</p>
 <div class="math">\[F'(x)=\frac{p(x)}{q(x)},\qquad |q(x)|\geq\delta>0.\]</div>
@@ -43,6 +43,15 @@
 <p><code>simplePole_hasDerivative</code> is an actual <code>HasDerivativeOnInterval</code> certificate. Its only hypothesis is that the center avoids the pole. Runtime precision depends on the step, so division by an arbitrarily small step does not amplify an unaccounted box error. Both sides of every rational pole are covered.</p>
 <p><code>HasDerivativeOnInterval.add</code> also combines independently scheduled derivative certificates on a common interval. A checked polynomial-plus-logarithm example exercises this rule; no matching-schedule assumptions are required.</p>
 <p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/RationalPrimitivePolynomial.lean">Polynomial certificate</a> · <a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/RationalPrimitiveLogarithm.lean">Logarithm certificates</a></p></section>
+<section><h2>Logarithm and arctangent with irrational coefficients</h2>
+<p>The concrete derivative lemmas are now checked. They construct valid interval computations from finite logarithm sums and prove their secant error bounds. Rational endpoint searches choose the coefficient precision. The same construction supports arbitrary computable constant multiples.</p>
+<div class="math">\[L_n(mt)=\sum_{k=1}^n\frac{(-1)^{k+1}(mt)^k}{k},\qquad K_m(t)=\frac{m}{1+mt}.\]</div>
+<p>The real coordinate with \(m=(c-a)^{-1}\) gives a local logarithm primitive for \(1/(x-a)\), including irrational poles. For \(m=is\), the imaginary candidates are proved to be the usual arctangent Taylor sums, with derivative \(s/(1+s^2(x-c)^2)\).</p>
+<p>For \(Q(x)=(x-a)^2+b^2\), finite reciprocal certificates for \(Q(c)\), \(b\), and \(Q(x)\) identify the two weighted chart derivatives:</p>
+<div class="math">\[m=\frac{c-a-ib}{Q(c)},\qquad \bigl(2\operatorname{Re}L(m(x-c))\bigr)'=\frac{2(x-a)}{Q(x)},\]</div>
+<div class="math">\[\left(-\frac1b\operatorname{Im}L(m(x-c))\right)'=\frac1{Q(x)}.\]</div>
+<p>These are actual <code>HasDerivativeOnInterval</code> certificates and equivalences with the independent reciprocal evaluator. Checked examples use \(a=b=\sqrt2\). They are local log-series charts; no global branch identity is assumed. Connecting the factorization API’s positive constant to a certified width and assembling every repeated-factor term remain to be done.</p>
+<p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/ComputableLogarithmDerivative.lean">Finite derivative proof</a> · <a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/ComputableQuadraticPrimitives.lean">Quadratic base primitives</a> · <a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/ComputablePrimitiveDerivativeExamples.lean">Irrational derivative examples</a></p></section>
 <section><h2>From factorization to an actual primitive</h2>
 <p>For every rational numerator and every denominator given as distinct rational linear factors with arbitrary multiplicities, the complete local construction is checked. Synthetic division computes the partial-fraction coefficients; no partial-fraction identity is assumed.</p>
 <div class="math">\[q(x)=\prod_{i=1}^k(x-a_i)^{m_i},\qquad q(z)\ne0,\qquad r=\min(1,|z-a_1|/2,\ldots,|z-a_k|/2)>0.\]</div>
@@ -68,8 +77,8 @@
 <p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/RationalPrimitiveExamples.lean">Regression proofs</a> · <a href="reading/rational-primitives-audit.log">Axiom and import audit</a></p></section>
 <section id="status"><h2>What remains to prove</h2>
 <ol><li>Obtain certified linear/quadratic factors from an arbitrary polynomial when no factorization is supplied. Computation of partial fractions from supplied computable-real factors is now checked.</li>
-<li>Construct the quadratic logarithm/arctangent evaluators and their actual interval derivative certificates.</li>
-<li>Extend the analytic assembly to arbitrary computable coefficients, including irrational linear poles.</li>
+<li>Connect a positive quadratic constant to a certified width for the now-checked quadratic base primitives.</li>
+<li>Assemble all computable-coefficient polynomial, reciprocal-power, and quadratic recurrence terms with the concrete logarithm/arctangent certificates. Irrational simple poles and quadratic base terms are checked.</li>
 <li>Connect the two circle charts to represented sine and cosine, then prove derivative transport and overlap gluing.</li></ol>
 <p>The existing general <code>ComputableFTA</code> is a target proposition, not a proved factorization theorem available to close the first step. This page does not claim that either requested general analytic theorem has been formalized.</p>
 <p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/docs/RATIONAL_PRIMITIVES.md">Exact scope, formulas, and remaining obligations</a></p></section>

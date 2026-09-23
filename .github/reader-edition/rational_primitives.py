@@ -10,6 +10,33 @@ ROOT = Path(__file__).resolve().parents[2]
 PAGE = 'rational-primitives.html'
 MARKER = '<!-- rational-primitives -->'
 EXPECTED = [
+    'ComputableCoefficient.widthStage_spec',
+    'PrimitiveLogarithmEstimates.prefix_lipschitz',
+    'PrimitiveLogarithmEstimates.kernel_lipschitz',
+    'PrimitiveLogarithmEstimates.prefix_affine_secant',
+    'ComputableLogarithmChart.Coefficient.value_valid',
+    'ComputableLogarithmChart.Coefficient.derivative_valid',
+    'ComputableLogarithmChart.Coefficient.hasDerivative',
+    'ComputableLogarithmChart.simplePole_hasDerivative',
+    'ComputableLogarithmChart.simplePole_derivative_equiv',
+    'ComputableLogarithmChart.arctan_hasDerivative',
+    'ComputableLogarithmChart.arctan_derivative_equiv',
+    'ComputableLogarithmChart.arctan_valueSample',
+    'ComputableLogarithmChart.Coefficient.weightedValue_valid',
+    'ComputableLogarithmChart.Coefficient.weightedDerivative_valid',
+    'ComputableLogarithmChart.Coefficient.weightedHasDerivative',
+    'ComputableLogarithmChart.quadraticLog_hasDerivative',
+    'ComputableLogarithmChart.quadraticLog_derivative_equiv',
+    'ComputableLogarithmChart.quadraticArctan_hasDerivative',
+    'ComputableLogarithmChart.quadraticArctan_derivative_equiv',
+    'ComputablePrimitiveDerivativeExamples.irrationalPole_hasDerivative',
+    'ComputablePrimitiveDerivativeExamples.irrationalPole_derivative_is_reciprocal',
+    'ComputablePrimitiveDerivativeExamples.irrationalArctan_hasDerivative',
+    'ComputablePrimitiveDerivativeExamples.irrationalArctan_derivative_is_kernel',
+    'ComputablePrimitiveDerivativeExamples.irrationalArctan_series',
+    'ComputablePrimitiveDerivativeExamples.irrationalQuadratic_hasDerivative',
+    'ComputablePrimitiveDerivativeExamples.irrationalQuadratic_derivative_is_reciprocal',
+
     'ComputableCoefficient.Value.equiv_of_samples',
     'ComputableCoefficient.Expr.realize',
     'ComputableCoefficient.Expr.realize_equiv',
@@ -99,7 +126,7 @@ def install(site, revision, audit):
     assert PAGE not in before
     page = (ROOT / 'book/rational-primitives/index.html').read_text().replace('__REVISION__', revision)
     assert '__REVISION__' not in page
-    assert 'The general analytic theorem remains open.' in page
+    assert 'The full rational-function primitive theorem remains open.' in page
     assert 'MathJax' in page and '<sup>' not in page and '<sub>' not in page
     (site / PAGE).write_text(page)
     additions = {}
@@ -108,7 +135,7 @@ def install(site, revision, audit):
         assert MARKER not in original and '</article>' in original
         addition = (MARKER + '<section class="fm-reader-link"><h2>Elementary primitives</h2>'
                     '<p>Checked elementary primitives for rationally split denominators and circle substitution; '
-                    'the general analytic theorem remains open.</p>'
+                    'the full rational-function primitive theorem remains open.</p>'
                     '<p><a href="rational-primitives.html">Read the proofs and remaining obligations</a>'
                     '</p></section>' + MARKER)
         (site / name).write_text(original.replace('</article>', addition + '</article>', 1))
@@ -131,6 +158,8 @@ def install(site, revision, audit):
               'factorizationToFormalPrimitiveProved': True,
               'computableRealCoefficientFormalPrimitivesProved': True,
               'irrationalCoefficientRegressionProved': True,
+              'computableLogarithmArctangentDerivativesProved': True,
+              'computableQuadraticBasePrimitivesProved': True,
               'analyticRepeatedLinearPolePrimitivesProved': True,
               'analyticRationallySplitLocalPrimitivesProved': True, 'mathlibDependency': False,
               'changedReaderPages': list(additions)}

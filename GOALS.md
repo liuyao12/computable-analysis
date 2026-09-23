@@ -1,5 +1,18 @@
 # Computable Analysis: Canonical Roadmap
 
+**Concrete derivatives with computable coefficients (2026-09-23).**
+`ComputableLogarithmChart.Coefficient.hasDerivative` and
+`weightedHasDerivative` construct actual finite secant certificates for local
+logarithm charts and computable constant multiples. The simple-pole bridge
+identifies the derivative with the independently evaluated reciprocal, including
+irrational poles. The arctangent candidates are the usual odd Taylor sums.
+`ComputableQuadraticPrimitives` supplies the logarithm and normalized angle
+base primitives for \(Q(x)=(x-a)^2+b^2\), using arbitrary computable coefficients
+and finite reciprocal certificates for nonzero \(b\). Their derivatives are
+proved equivalent to \(2(x-a)/Q(x)\) and \(1/Q(x)\). Irrational examples are
+checked. The full finite assembly, the bridge from a supplied positive
+quadratic constant to its width, and sine/cosine transport remain unfinished.
+
 **Computable coefficients in factored integration (2026-09-23).**
 `ComputableFactoredAlgebra.FactoredRational` accepts numerator, leading,
 linear, and quadratic coefficients built from arbitrary certified `Real`

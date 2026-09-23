@@ -3,7 +3,7 @@
 
 The target theorem states that a rational function on an interval whose
 denominator is uniformly apart from zero has an elementary primitive.
-Arbitrary certified computable-real coefficients are allowed. The general analytic theorem remains open;
+Arbitrary certified computable-real coefficients are allowed. The full rational-function primitive theorem remains open;
 the checked results include complete local analytic primitives for rationally
 split denominators, computed formal primitives with computable coefficients,
 and a domain-preserving circle substitution.
@@ -151,6 +151,38 @@ normalized logarithms handle simple poles. Restrict all atoms to the common
 interval and synchronize rational scaling and finite addition. The computed
 partial-fraction identity identifies the derivative with the original quotient.
 \end{proof}
+
+
+\begin{theorem}[Concrete logarithm and arctangent derivative certificates]
+\label{thm:computable-elementary-derivatives}
+\lean{ComputableAnalysis.ComputableLogarithmChart.Coefficient.hasDerivative,
+ComputableAnalysis.ComputableLogarithmChart.Coefficient.weightedHasDerivative,
+ComputableAnalysis.ComputableLogarithmChart.simplePole_derivative_equiv,
+ComputableAnalysis.ComputableLogarithmChart.arctan_valueSample,
+ComputableAnalysis.ComputableLogarithmChart.quadraticLog_derivative_equiv,
+ComputableAnalysis.ComputableLogarithmChart.quadraticArctan_derivative_equiv}
+\leanok
+Local logarithm series with arbitrary computable complex slopes, and arbitrary
+computable constant multiples, have actual finite secant derivative certificates.
+The real-coordinate simple-pole derivative agrees with the original reciprocal
+evaluator, including irrational poles. Pure imaginary slopes give the standard
+arctangent Taylor candidates. For $Q(x)=(x-a)^2+b^2$ and $b\ne0$, weighted real
+and imaginary coordinates have derivatives $2(x-a)/Q(x)$ and $1/Q(x)$,
+respectively, on their computed rational charts, given successful reciprocal
+certificates for $Q(c)$, $b$, and $Q(x)$.
+\end{theorem}
+\begin{proof}\leanok
+Search rational interval widths to approximate each coefficient, retaining a
+common sampling stage for all arithmetic expressions. On $|mt|\le1/2$, the
+finite logarithm secant error is at most $2M^2|h|+8M2^{-n}$, where $M$ bounds
+the slope. A finite Lipschitz estimate controls coefficient perturbations.
+Stabilize the shrinking rational boxes and synchronize their widths with the
+secant step. Exact rational identities identify the derivative with the original
+coefficient arithmetic. Irrational pole, scale, and quadratic examples use the
+existing bisection computation of $\sqrt2$.
+\end{proof}
+The positive constant in the formal factor API still needs to be connected to
+a certified width $b$; the full repeated-factor assembly remains open.
 
 \begin{theorem}[Rational circle pullback]
 \label{thm:rational-circle-pullback}
