@@ -107,3 +107,14 @@ residual. The monomial-prefix alignment in `shift_prefix` avoids passing to
 an unspecified limit. The companion's discrete Wronskian supplies strict
 separation, but identifying its approximants with an existing special-function
 computation and proving irrationality require further theorems.
+
+## Real zeta above one
+
+`ZetaReal.zeta` is a concrete constructor on represented real inputs with a
+finite `AboveOne` certificate. Route real input through the existing adaptive
+interval-function application. Its rational core uses two finite cutoffs:
+binomial degree and Dirichlet index. `rectangle_outer_tail` and
+`rectangle_inner_tail` certify those errors; `dirichlet_convergence` connects
+the valid finite sums with the output. `zeta_integer_equiv` is the independent
+integer compatibility theorem. This route does not consume an assumed
+rational-power extension interface. The separate log–exp bridge remains open.
