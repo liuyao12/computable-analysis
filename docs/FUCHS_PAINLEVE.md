@@ -388,3 +388,10 @@ standard Lean logical axioms. Generic raw multiplication validity and the
 analytic derivative packages inherit existing foundation `native_decide`
 axioms; the audit prints these dependencies explicitly. Computable evaluators
 do not imply an axiom-free metatheory.
+
+## Number-theoretic application: Apéry
+
+The [Apéry milestone](APERY.md) derives the zeta(3) Picard–Fuchs equation
+from integer binomial sums, certifies its local series and three derivatives,
+and checks the companion approximants’ exact positive increments. The zeta
+identification and irrationality proof remain open.

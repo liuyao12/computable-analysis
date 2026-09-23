@@ -344,3 +344,19 @@ pullbacks**, using the existing piecewise real integral machinery. Finite
 assemblies remain available under addition and subtraction. Integrability
 certificates and interior analyticity certificates have separate roles;
 the general rectangle adapter and residue transfer are still open.
+
+## Apéry: differential equation with arithmetic content
+
+Checked: the independent integer binomial sums satisfy Apéry's recurrence by
+an explicit finite telescoping certificate. Their generating series solves
+`theta^3-t(34theta^3+51theta^2+27theta+5)+t^2(theta+1)^3`.
+On the rational chart `t=x/4096`, `|x|<=1`, actual series and first-three-
+derivative computations are valid, certify finite differences, and satisfy
+the ordinary differential equation with residual at most `24/2^N`.
+The companion has forcing `6t`, and its Casoratian proves exact strictly
+positive increments of `B_n/A_n`. See `docs/APERY.md`.
+
+Open: identification with the independently computed zeta(3), denominator
+control, sharper approximation/growth bounds, and the resulting irrationality
+proof. K3 geometry and the period identification are explanatory context,
+not formalized results. No algebraicity of the generating function is claimed.

@@ -1,3 +1,4 @@
+import ComputableAnalysis.Apery
 import ComputableAnalysis.AlgebraicODE
 import ComputableAnalysis.AlgebraicODE.Tests
 import ComputableAnalysis.CalculusFoundation

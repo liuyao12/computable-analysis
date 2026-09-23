@@ -494,3 +494,21 @@ pullbacks**, using the existing piecewise real integral machinery. Finite
 assemblies remain available under addition and subtraction. Integrability
 certificates and interior analyticity certificates have separate roles;
 the general rectangle adapter and residue transfer are still open.
+
+### Arithmetic generating functions and Apéry
+
+`Apery.Binomial` defines integer binomial sums independently of any ODE and
+proves their recurrence by an explicit telescoping certificate. Treat the
+finite-support boundary separately before cancelling factors. Integrality
+must come from an integer construction or a separate theorem; a rational
+recurrence alone does not establish it.
+
+`Apery.DifferentialEquation` defines the Euler operator independently, checks
+its ordinary derivative expansion, and uses the existing rapid-series
+calculus for three successive actual derivatives. Its residual proof aligns
+finite prefixes of different lengths under monomial shifts; every aligned
+prefix remains in the same stage box. This gives a uniform residual budget
+without invoking completed reals. `Apery.Companion` proves the inhomogeneous
+forcing and the discrete Wronskian. Keep identification with `zetaNatRaw 3`,
+denominator estimates, and irrationality as distinct obligations; no target
+limit is encoded into the companion's definition.

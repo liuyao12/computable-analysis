@@ -12,6 +12,9 @@ on:
       - 'book/algebraic-ode/**'
       - 'ComputableAnalysis/AlgebraicODE*'
       - 'ComputableAnalysis/AlgebraicODE/**'
+      - 'ComputableAnalysis/Apery*'
+      - 'ComputableAnalysis/Apery/**'
+      - 'docs/APERY.md'
       - 'ComputableAnalysis/DifferentialReciprocal.lean'
       - 'ComputableAnalysis/FormalPowerSeriesAlgebra.lean'
       - 'ComputableAnalysis/FormalPowerSeriesPolynomial.lean'
@@ -212,7 +215,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p algebraic-ode-reports
-          lake build ComputableAnalysis.AlgebraicODE.Tests | tee algebraic-ode-reports/build.log
+          lake build ComputableAnalysis.AlgebraicODE.Tests ComputableAnalysis.Apery.Tests | tee algebraic-ode-reports/build.log
           lake env lean scripts/check_algebraic_ode.lean | tee algebraic-ode-reports/axioms.log
           python3 .github/reader-edition/algebraic_ode.py --site site --revision "$GITHUB_SHA" --audit algebraic-ode-reports/axioms.log
       - name: Add the bundled mathematical comparison of four Leibniz proof routes
@@ -382,7 +385,7 @@ jobs:
                   algebraic=get('/reading/algebraic-ode-edition.json')
                   assert algebraic['proofSourceCommit']==revision
                   assert algebraic['allPreviousContentPreserved'] and not algebraic['generalClassificationProved']
-                  assert not algebraic['mathlibDependency'] and len(algebraic['auditedDeclarations'])==65
+                  assert not algebraic['mathlibDependency'] and len(algebraic['auditedDeclarations'])==82
                   algebraic_html=get('/fuchs-painleve.html',True)
                   assert hashlib.sha256(algebraic_html).hexdigest()==algebraic['pageSha256']
                   assert 'fuchs-painleve.html' in home
