@@ -1,5 +1,19 @@
 # Computable Analysis: Canonical Roadmap
 
+**Analytic primitive lemmas (2026-09-23).**
+`RationalPrimitivePolynomial.hasDerivative` constructs an actual
+`HasDerivativeOnInterval` for every rational polynomial on every rational
+interval, using exactly the coefficient primitive from the formal compiler.
+`RationalPrimitiveLogarithm.simplePole_hasDerivative` constructs the logarithm
+primitive of \(1/(x-a)\) near every rational \(z\ne a\), with explicit positive
+radius \(|z-a|/2\). The underlying logarithm series is valid, its derivative
+is the exact reciprocal, and affine charts include both signs. Neither result
+assumes an analytic derivative certificate. `HasDerivativeOnInterval.add`
+now automatically synchronizes different step and runtime schedules.
+General algebraic decomposition,
+analytic assembly of all partial fractions, and the represented trigonometric
+corollary remain open.
+
 **Rational primitive algebra (2026-09-23).**
 `RationalPrimitiveFormula` computes and checks formal primitives of supplied
 rational linear/quadratic partial fractions of arbitrary multiplicity.

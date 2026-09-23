@@ -10,7 +10,7 @@
 <nav aria-label="Book"><a href="index.html">Computable Analysis</a><a href="ch-integrals.html">Integrals</a><a href="#status">Proof status</a></nav>
 <header><span class="eyebrow">Finite integration algorithms</span><h1>Elementary primitives</h1>
 <p class="lead">Rational functions, repeated poles, and the half-angle route from trigonometry to rational algebra.</p>
-<p class="note"><strong>The general analytic theorem remains open.</strong> The checked results are a formal primitive algorithm for supplied rational partial fractions and a domain-preserving rational circle substitution. They use the project’s own foundation, with no Mathlib dependency.</p></header>
+<p class="note"><strong>The general analytic theorem remains open.</strong> The checked results now include actual polynomial and local logarithm derivative certificates, alongside formal integration of supplied partial fractions and a domain-preserving rational circle substitution. They use the project’s own foundation, with no Mathlib dependency.</p></header>
 <section><h2>The theorem we want</h2>
 <p>On an interval with an explicit positive lower bound for its denominator, every rational function should have an elementary primitive:</p>
 <div class="math">\[F'(x)=\frac{p(x)}{q(x)},\qquad |q(x)|\geq\delta>0.\]</div>
@@ -24,6 +24,15 @@
 <p>The linear part of the numerator gives \((A/2)\log Q\) at a simple pole and \(-A/(2mQ^m)\) at higher orders. All remaining steps are finite rational arithmetic.</p>
 <p><code>quadraticPrimitive_correct</code> proves the recurrence’s formal derivative identity for every multiplicity. <code>Decomposition.primitive_correct</code> proves the corresponding identity for every supplied rational partial-fraction decomposition. The computed formula retains its pointwise domain.</p>
 <p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/RationalPrimitiveFormula.lean">Read the finite integration proof</a></p></section>
+<section><h2>Actual analytic primitives</h2>
+<p>For every finite rational coefficient list, <code>RationalPrimitivePolynomial.hasDerivative</code> proves that the coefficient primitive has the original polynomial as its two-sided interval derivative, on any rational interval:</p>
+<div class="math">\[P(x)=\sum_{j=0}^d c_jx^j,\qquad F(x)=\sum_{j=0}^d\frac{c_j}{j+1}x^{j+1},\qquad F'=P.\]</div>
+<p>The logarithm series is also a valid interval computation. Its quadratic remainder estimate gives the exact reciprocal derivative of \(\log(1+x)\) on \([-1/2,1/2]\). Rational affine changes of variable support both positive and negative slopes.</p>
+<p>For any rational pole \(a\) and rational center \(z\ne a\), the algorithm chooses \(r=|z-a|/2>0\) and constructs</p>
+<div class="math">\[F_{a,z}(x)=\log\!\left(\frac{x-a}{z-a}\right),\qquad F'_{a,z}(x)=\frac1{x-a},\qquad z-r\le x\le z+r.\]</div>
+<p><code>simplePole_hasDerivative</code> is an actual <code>HasDerivativeOnInterval</code> certificate. Its only hypothesis is that the center avoids the pole. Runtime precision depends on the step, so division by an arbitrarily small step does not amplify an unaccounted box error. Both sides of every rational pole are covered.</p>
+<p><code>HasDerivativeOnInterval.add</code> also combines independently scheduled derivative certificates on a common interval. A checked polynomial-plus-logarithm example exercises this rule; no matching-schedule assumptions are required.</p>
+<p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/RationalPrimitivePolynomial.lean">Polynomial certificate</a> · <a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/RationalPrimitiveLogarithm.lean">Logarithm certificates</a></p></section>
 <section><h2>Why sine and cosine reduce to the same problem</h2>
 <p>The tangent-half-angle substitution \(t=\tan(\theta/2)\) gives</p>
 <div class="math">\[\sin\theta=\frac{2t}{1+t^2},\qquad \cos\theta=\frac{1-t^2}{1+t^2},\qquad d\theta=\frac{2}{1+t^2}\,dt.\]</div>
@@ -40,8 +49,8 @@
 <p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/RationalPrimitiveExamples.lean">Regression proofs</a> · <a href="reading/rational-primitives-audit.log">Axiom and import audit</a></p></section>
 <section id="status"><h2>What remains to prove</h2>
 <ol><li>Construct partial fractions for arbitrary rational denominators over represented real algebraic constants. The current normal forms use rational constants only.</li>
-<li>Evaluate the elementary formulas with valid rational interval algorithms and explicit precision schedules.</li>
-<li>Prove analytic differentiation soundness through <code>HasDerivativeOnInterval</code>. A formal differentiation rule alone is insufficient.</li>
+<li>Extend the polynomial and local logarithm evaluators to all remaining elementary terms, including represented algebraic constants.</li>
+<li>Assemble analytic differentiation soundness for the entire partial-fraction compiler, including sums, repeated poles, and quadratic terms.</li>
 <li>Connect the two circle charts to the existing represented sine and cosine functions, then prove derivative transport and overlap gluing.</li></ol>
 <p>The existing general <code>ComputableFTA</code> is a target proposition, not a proved factorization theorem available to close the first step. This page does not claim that either requested general analytic theorem has been formalized.</p>
 <p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/docs/RATIONAL_PRIMITIVES.md">Exact scope, formulas, and remaining obligations</a></p></section>

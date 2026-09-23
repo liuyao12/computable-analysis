@@ -10,6 +10,15 @@ ROOT = Path(__file__).resolve().parents[2]
 PAGE = 'rational-primitives.html'
 MARKER = '<!-- rational-primitives -->'
 EXPECTED = [
+    'HasDerivativeOnInterval.add',
+    'RationalPrimitiveExamples.polynomialPlusLog_hasDerivative',
+    'RationalPrimitivePolynomial.hasDerivative',
+    'RationalPrimitiveLogarithm.hasDerivative',
+    'RationalPrimitiveLogarithm.affineHasDerivative',
+    'RationalPrimitiveLogarithm.simplePole_hasDerivative',
+    'RationalPrimitiveLogarithm.poleRadius_pos',
+    'RationalPrimitiveExamples.negativePole_hasDerivative',
+    'RationalPrimitiveExamples.polynomial_hasDerivative',
     'RationalExpressionNormalization.compile_correct',
     'RationalPrimitiveFormula.quadraticPrimitive_correct',
     'RationalPrimitiveFormula.NormalForm.primitive_correct',
@@ -53,7 +62,7 @@ def install(site, revision, audit):
         original = before[name].decode()
         assert MARKER not in original and '</article>' in original
         addition = (MARKER + '<section class="fm-reader-link"><h2>Elementary primitives</h2>'
-                    '<p>Checked finite partial-fraction integration and rational circle substitution; '
+                    '<p>Checked polynomial and local logarithm primitives, finite partial fractions, and circle substitution; '
                     'the general analytic theorem remains open.</p>'
                     '<p><a href="rational-primitives.html">Read the proofs and remaining obligations</a>'
                     '</p></section>' + MARKER)
@@ -69,7 +78,9 @@ def install(site, revision, audit):
               'pageSha256': sha((site / PAGE).read_bytes()), 'auditSha256': sha(log.encode()),
               'auditedDeclarations': EXPECTED, 'allPreviousContentPreserved': True,
               'generalAnalyticTheoremProved': False, 'formalPartialFractionIntegrationProved': True,
-              'domainPreservingRationalizationProved': True, 'mathlibDependency': False,
+              'domainPreservingRationalizationProved': True,
+              'analyticPolynomialPrimitivesProved': True,
+              'analyticSimplePoleLocalPrimitivesProved': True, 'mathlibDependency': False,
               'changedReaderPages': list(additions)}
     (site / 'reading/rational-primitives-edition.json').write_text(json.dumps(report, indent=2) + '\n')
     print('PASS: rational primitive supplement; every prior reader byte preserved')

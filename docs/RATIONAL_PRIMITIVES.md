@@ -67,6 +67,48 @@ positive quadratic constants. Thus their existence is **not** a valid
 additional assumption for *every* rational function. General input requires
 the algebraic-constant extension and a decomposition algorithm.
 
+## Analytic polynomial and logarithm primitives
+
+`RationalPrimitivePolynomial.hasDerivative` realizes the formal polynomial
+primitive by exact rational boxes and proves its two-sided interval derivative
+on **every rational interval**, for an arbitrary finite coefficient list.
+`primitiveSum_zero` identifies the analytic evaluator with the compiler's
+literal coefficient primitive.
+
+`RationalPrimitiveLogarithm.hasDerivative` proves
+\[
+\frac{d}{dx}\log(1+x)=\frac1{1+x},\qquad -\frac12\le x\le\frac12.
+\]
+The logarithm is the real part of the project's stabilized Taylor series,
+with validity and geometric widths. A finite quadratic remainder estimate is
+converted to `HasDerivativeOnInterval`; its evaluation stage depends on the
+step, paying explicitly for uncertainty after division by that step. The
+geometric derivative boxes contain the **exact rational reciprocal**.
+
+`affineHasDerivative` handles every nonzero rational slope, of either sign.
+For arbitrary rational \(a,z\) with \(z\ne a\), put \(r=|z-a|/2\).
+`poleRadius_pos` and `simplePole_hasDerivative` construct
+\[
+F_{a,z}(x)=\log\left(\frac{x-a}{z-a}\right),\quad
+F'_{a,z}(x)=\frac1{x-a},\quad x\in[z-r,z+r].
+\]
+The argument of the logarithm is positive on this interval, on either side
+of the pole. The only supplied hypothesis is \(z\ne a\), not a derivative,
+limit, partial-fraction identity, or branch certificate. This is a local
+normalized logarithm; agreement of additive constants on larger overlaps
+is not asserted here.
+
+`HasDerivativeOnInterval.add` now combines any two derivative certificates
+on a common interval, even when both their original schedules differ.
+Nestedness allows refinement to the larger runtime stage; three times the
+original tolerance pays for refinement, and finer requested precisions pay
+for addition. The product of the two natural step precisions synchronizes
+step bounds, including zero-precision edge cases. The checked polynomial
+plus logarithm example exercises this automatic synchronization.
+
+These results close the polynomial and simple-logarithm analytic atoms. They
+do not yet provide analytic soundness for every constructor of `Formula`.
+
 ## Why the trigonometric corollary follows
 
 On a half-angle chart, set \(t=\tan(\theta/2)\). Then
@@ -128,7 +170,7 @@ constructors themselves are executable finite rational algorithms.
 
 1. Construct real algebraic factorization and partial fractions for arbitrary
    nonzero rational denominators; extend the finite algebra to those constants.
-2. Realize each elementary formula by valid `RealRaw` interval computations,
+2. Extend the checked polynomial and local logarithm realizations to every elementary formula by valid `RealRaw` interval computations,
    with explicit width schedules and denominator/branch separation.
 3. Prove analytic differentiation soundness of the formula compiler using
    `HasDerivativeOnInterval`, including synchronized sums and compositions.

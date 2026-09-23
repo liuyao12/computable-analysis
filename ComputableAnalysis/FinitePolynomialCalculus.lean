@@ -75,13 +75,13 @@ namespace SecantDerivativeBound
 /-- Constants have zero finite-difference error. -/
 def constant (C c : Rat) : SecantDerivativeBound C (fun _x => c) (fun _x => 0) where
   errorCoefficient := 0
-  errorCoefficient_nonneg := by native_decide
+  errorCoefficient_nonneg := by decide +kernel
   error_bound := by
     intro x h _hh _hx _hxh
     have hzero : (((c - c) / h) - 0 : Rat) = 0 := by
       rw [Rat.sub_self, Rat.div_def, Rat.zero_mul]
       grind [Rat.sub_eq_add_neg]
-    rw [hzero, qabs_eq_self_of_nonneg (by native_decide), Rat.mul_zero]
+    rw [hzero, qabs_eq_self_of_nonneg (by decide +kernel), Rat.mul_zero]
     exact Rat.le_refl
 
 /-- Quantitative secant bounds are closed under finite addition. -/
@@ -534,7 +534,7 @@ def reciprocalCenteredSecantBound :
       (fun x => 1 / x) (fun x => -(1 / x ^ 2)) := by
   refine {
     errorCoefficient := 1
-    errorCoefficient_nonneg := by native_decide
+    errorCoefficient_nonneg := by decide +kernel
     error_bound := ?_ }
   intro x h hh hx hxh
   have hxlo : (1 : Rat) <= x := by
@@ -559,13 +559,13 @@ def reciprocalCenteredSecantBound :
     have hxsq : (1 : Rat) <= x ^ 2 := by
       rw [show x ^ 2 = x * x by simp [Rat.pow_succ]]
       calc
-        (1 : Rat) = 1 * 1 := by native_decide
-        _ <= x * 1 := Rat.mul_le_mul_of_nonneg_right hxlo (by native_decide)
+        (1 : Rat) = 1 * 1 := by decide +kernel
+        _ <= x * 1 := Rat.mul_le_mul_of_nonneg_right hxlo (by decide +kernel)
         _ <= x * x := Rat.mul_le_mul_of_nonneg_left hxlo (by grind)
     calc
-      (1 : Rat) = 1 * 1 := by native_decide
+      (1 : Rat) = 1 * 1 := by decide +kernel
       _ <= 1 * (x + h) := by
-        exact Rat.mul_le_mul_of_nonneg_left hxhlo (by native_decide)
+        exact Rat.mul_le_mul_of_nonneg_left hxhlo (by decide +kernel)
       _ <= x ^ 2 * (x + h) := by
         exact Rat.mul_le_mul_of_nonneg_right hxsq (Rat.le_of_lt hxhpos)
   have hinv_nonneg : 0 <= (x ^ 2 * (x + h))⁻¹ :=
@@ -661,12 +661,12 @@ def normalizedMonomialSecantBound (C : Rat) (n : Nat) (hC1 : 1 <= C) :
   errorCoefficient := powerSecantErrorBound C (n + 1)
   errorCoefficient_nonneg :=
     powerSecantErrorBound_nonneg
-      (Rat.le_trans (by native_decide) hC1) _
+      (Rat.le_trans (by decide +kernel) hC1) _
   error_bound := by
     intro x h hh hx hxh
     exact qabs_normalized_power_differenceQuotient_sub_monomial_le
       (x := x) (h := h) (C := C) hh
-      (Rat.le_trans (by native_decide) hC1) hC1 hx hxh n
+      (Rat.le_trans (by decide +kernel) hC1) hC1 hx hxh n
 
 /-- Every normalized monomial has a two-sided rational interval derivative on
 any interval contained in `[-C,C]`, provided `C >= 1`.  The proof is the

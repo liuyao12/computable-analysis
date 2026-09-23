@@ -1251,7 +1251,7 @@ majorant, without an appeal to an ambient limit. -/
 theorem half_pow_eq_one_div_nat_two_pow (n : Nat) :
     ((1 : Rat) / 2) ^ n = 1 / (((2 ^ n : Nat) : Rat)) := by
   induction n with
-  | zero => native_decide
+  | zero => decide +kernel
   | succ n ih =>
       rw [Rat.pow_succ, ih, Nat.pow_succ, Rat.natCast_mul]
       rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.one_mul]
@@ -1395,7 +1395,7 @@ theorem qabs_pow_eq_pow_qabs (x : Rat) : forall n : Nat,
     qabs (x ^ n) = qabs x ^ n
   | 0 => by
       have hzero : qabs (1 : Rat) = 1 := by
-        rw [qabs_eq_self_of_nonneg (by native_decide)]
+        rw [qabs_eq_self_of_nonneg (by decide +kernel)]
       simpa using hzero
   | n + 1 => by
       rw [Rat.pow_succ, qabs_mul, qabs_pow_eq_pow_qabs, Rat.pow_succ]
@@ -1493,8 +1493,8 @@ theorem qabs_pow_sub_le_lipschitz {x y B : Rat}
   | zero =>
       have hdiff : x ^ 0 - y ^ 0 = (0 : Rat) := by
         rw [Rat.pow_zero, Rat.pow_zero]
-        native_decide
-      rw [hdiff, qabs_eq_self_of_nonneg (by native_decide)]
+        decide +kernel
+      rw [hdiff, qabs_eq_self_of_nonneg (by decide +kernel)]
       change (0 : Rat) <= qabs (x - y) * (0 : Rat) * B ^ 0
       rw [Rat.mul_zero, Rat.zero_mul]
       exact Rat.le_refl
@@ -1671,8 +1671,8 @@ theorem qabs_powerSecant_sub_powerDerivative_le
   | 0 => by
       simp only [powerSecant, powerDerivative, powerSecantErrorBound,
         Rat.mul_zero]
-      rw [show (0 : Rat) - 0 = 0 by native_decide,
-        qabs_eq_self_of_nonneg (by native_decide)]
+      rw [show (0 : Rat) - 0 = 0 by decide +kernel,
+        qabs_eq_self_of_nonneg (by decide +kernel)]
       exact Rat.le_refl
   | n + 1 => by
       have hpow := RationalMajorant.qabs_pow_sub_le_lipschitz

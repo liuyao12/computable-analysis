@@ -1,3 +1,6 @@
+import ComputableAnalysis.DifferentialSynchronizedSum
+import ComputableAnalysis.RationalPrimitivePolynomial
+import ComputableAnalysis.RationalPrimitiveLogarithm
 import ComputableAnalysis.RationalPrimitiveFormula
 import ComputableAnalysis.TrigonometricRationalization
 
@@ -103,6 +106,29 @@ theorem onePlusCosine_pullback (t : Rat) :
   simp only [Expr.eval, one_add_cosine, if_neg hj, Option.map_some,
     Rat.div_def, Rat.one_mul]
   rw [hi]
+
+
+/-- The logarithm chart is analytic on the negative side of its pole too. -/
+def negativePole_hasDerivative :
+    HasDerivativeOnInterval (RationalPrimitiveLogarithm.simplePolePrimitive 0 (-1) (by decide))
+      (FunctionOnInterval.exactRat (fun x => 1 / (x - 0))
+        (-1 - RationalPrimitiveLogarithm.poleRadius 0 (-1))
+        (-1 + RationalPrimitiveLogarithm.poleRadius 0 (-1))) :=
+  RationalPrimitiveLogarithm.simplePole_hasDerivative 0 (-1) (by decide)
+
+/-- The compiler's coefficient primitive now has an analytic certificate. -/
+def polynomial_hasDerivative :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat (Polynomial.eval (polynomialPrimitive [1, -2, 3])) (-2) 3)
+      (FunctionOnInterval.exactRat (Polynomial.eval [1, -2, 3]) (-2) 3) :=
+  RationalPrimitivePolynomial.hasDerivative [1, -2, 3] (-2) 3
+
+
+/-- A polynomial and a logarithm use different runtime schedules. The
+unconditional sum rule synchronizes them, with no schedule hypotheses. -/
+def polynomialPlusLog_hasDerivative :=
+  (RationalPrimitivePolynomial.hasDerivative [1] (-(1 / 2)) (1 / 2)).add
+    RationalPrimitiveLogarithm.hasDerivative rfl rfl
 
 end RationalPrimitiveExamples
 end ComputableAnalysis

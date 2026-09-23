@@ -2919,12 +2919,12 @@ theorem precisionAtStage_scaleRat_two (n : Nat) :
       1 / (((n + 1 : Nat) : Rat))
     rw [Rat.natCast_mul]
     rw [Rat.div_def, Rat.inv_mul_rev]
-    have htwo : (2 : Rat) * (2 : Rat)⁻¹ = 1 := by native_decide
+    have htwo : (2 : Rat) * (2 : Rat)⁻¹ = 1 := by decide +kernel
     grind [Rat.mul_assoc, Rat.mul_comm]
   rw [hscaled]
   by_cases hn : n = 0
   · subst n
-    native_decide
+    decide +kernel
   · rw [precisionAtStage, dif_neg hn]
     exact one_div_nat_antitone_for_derivative_precision
       (Nat.pos_of_ne_zero hn) (Nat.succ_pos n) (Nat.le_succ n)

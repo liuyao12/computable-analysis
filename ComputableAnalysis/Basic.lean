@@ -6463,11 +6463,11 @@ def ScaleRatCertifies (r : Rat) (x : RealRaw) : Prop :=
 
 private theorem half_pos {q : Rat} (hq : 0 < q) : 0 < q / 2 := by
   rw [Rat.div_def]
-  exact Rat.mul_pos hq ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))
+  exact Rat.mul_pos hq ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 2))
 
 private theorem add_halves (q : Rat) : q / 2 + q / 2 = q := by
   rw [Rat.div_def]
-  have hne : (2 : Rat) != 0 := by native_decide
+  have hne : (2 : Rat) != 0 := by decide +kernel
   grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm, Rat.mul_assoc,
     Rat.mul_comm, Rat.mul_inv_cancel]
 
@@ -7766,11 +7766,11 @@ theorem cauchyStabilize_valid
       let half : QPos := ⟨eps.val / 2, by
         rw [Rat.div_def]
         exact Rat.mul_pos eps.property
-          ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))⟩
+          ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 2))⟩
       let quarter : QPos := ⟨eps.val / 4, by
         rw [Rat.div_def]
         exact Rat.mul_pos eps.property
-          ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 4))⟩
+          ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 4))⟩
       obtain ⟨Nc, hNc⟩ := hcandidate_shrinks half
       obtain ⟨Nr, hNr⟩ := hradius_shrinks quarter
       refine ⟨Nat.max Nc Nr, ?_⟩
@@ -7788,7 +7788,7 @@ theorem cauchyStabilize_valid
               (candidate.compute n).width + 2 * radius n := hwidthHeight.1
           _ <= half.val + 2 * quarter.val :=
             rat_add_le_add hc.1
-              (Rat.mul_le_mul_of_nonneg_left hr (by native_decide : (0 : Rat) <= 2))
+              (Rat.mul_le_mul_of_nonneg_left hr (by decide +kernel : (0 : Rat) <= 2))
           _ = eps.val := by
             dsimp [half, quarter]
             rw [Rat.div_def, Rat.div_def]
@@ -7800,7 +7800,7 @@ theorem cauchyStabilize_valid
               (candidate.compute n).height + 2 * radius n := hwidthHeight.2
           _ <= half.val + 2 * quarter.val :=
             rat_add_le_add hc.2
-              (Rat.mul_le_mul_of_nonneg_left hr (by native_decide : (0 : Rat) <= 2))
+              (Rat.mul_le_mul_of_nonneg_left hr (by decide +kernel : (0 : Rat) <= 2))
           _ = eps.val := by
             dsimp [half, quarter]
             rw [Rat.div_def, Rat.div_def]

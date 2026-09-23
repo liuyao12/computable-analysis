@@ -4,8 +4,8 @@
 The target theorem states that a rational function on an interval whose
 denominator is uniformly apart from zero has an elementary primitive.
 Algebraic constants are allowed. The general analytic theorem remains open;
-the checked results here are finite formal-derivative identities and a
-domain-preserving circle substitution.
+the checked results include analytic polynomial and local logarithm
+primitives, finite formal-derivative identities, and a domain-preserving circle substitution.
 
 \begin{theorem}[Supplied partial fractions]
 \label{thm:rational-primitive-formula}
@@ -29,6 +29,53 @@ This is a statement about formal differentiation, not a derivative
 certificate for a represented elementary evaluator.
 \end{proof}
 
+\begin{theorem}[Analytic polynomial primitives]
+\label{thm:rational-polynomial-primitive-analytic}
+\lean{ComputableAnalysis.RationalPrimitivePolynomial.hasDerivative}
+\leanok
+Every rational polynomial has its termwise coefficient primitive as a
+represented two-sided primitive on every rational interval.
+\end{theorem}
+\begin{proof}\leanok
+Finite addition of normalized monomial secant bounds supplies an explicit
+step modulus. Exact rational boxes have zero runtime width.
+\end{proof}
+
+\begin{theorem}[Analytic local logarithm primitives]
+\label{thm:rational-logarithm-primitive-analytic}
+\lean{ComputableAnalysis.RationalPrimitiveLogarithm.simplePole_hasDerivative,
+ComputableAnalysis.RationalPrimitiveLogarithm.poleRadius_pos}
+\leanok
+For rational \(a,z\) with \(z\ne a\), the positive radius
+\(r=|z-a|/2\) defines a chart on which
+\[
+ F_{a,z}(x)=\log\left(\frac{x-a}{z-a}\right),\qquad
+ F'_{a,z}(x)=\frac1{x-a}.
+\]
+The theorem constructs \texttt{HasDerivativeOnInterval}, with no analytic
+certificate supplied among its hypotheses.
+\end{theorem}
+\begin{proof}\leanok
+Restrict the stabilized logarithm Taylor series to the real axis. Its finite
+quadratic remainder and geometric box widths give the derivative, with a
+step-dependent runtime precision. Its derivative boxes contain the exact
+reciprocal. Rational affine charts, of either sign, give the displayed result.
+\end{proof}
+
+\begin{theorem}[Addition without schedule hypotheses]
+\label{thm:rational-primitive-sum-analytic}
+\lean{ComputableAnalysis.HasDerivativeOnInterval.add}
+\leanok
+Two represented derivative certificates on a common interval can be added,
+with no compatibility assumptions on their original precision schedules.
+\end{theorem}
+\begin{proof}\leanok
+Refine both runtime stages to their maximum. Nestedness controls the error
+of independently shrinking near intervals by three times the original
+tolerance. Multiply the natural step precisions and spend finer tolerances
+on refinement and addition.
+\end{proof}
+
 \begin{theorem}[Rational circle pullback]
 \label{thm:rational-circle-pullback}
 \lean{ComputableAnalysis.TrigonometricRationalization.Expr.pullback_correct,
@@ -50,6 +97,6 @@ original poles are not filled by cancellation.
 \end{proof}
 
 Two antipodal charts cover the rational circle. General algebraic partial
-fractions, interval-valued elementary realizations, analytic differentiation,
+fractions, the remaining elementary realizations and their analytic assembly,
 and transport through the represented angle charts are still needed for the
 full rational-primitive theorem and its trigonometric corollary.
