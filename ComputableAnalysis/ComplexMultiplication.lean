@@ -846,7 +846,7 @@ theorem positiveInv_compute_ordered {x : RealRaw} {N n : Nat}
   · simp [positiveInv, positiveInvCompute, hn]
     change 0 <= 1 / (x.compute N).lo
     rw [Rat.div_def]
-    exact Rat.le_of_lt (Rat.mul_pos (by native_decide) ((Rat.inv_pos).2 hpos))
+    exact Rat.le_of_lt (Rat.mul_pos (by decide +kernel) ((Rat.inv_pos).2 hpos))
   · simp [positiveInv, positiveInvCompute, hn]
     change (QInterval.inv (x.compute n)).lo <=
       (QInterval.inv (x.compute n)).hi
@@ -876,7 +876,7 @@ theorem positiveInv_compute_nested {x : RealRaw} {N n m : Nat}
         1 / (x.compute m).lo <= 1 / (x.compute N).lo
       constructor
       · rw [Rat.div_def]
-        exact Rat.le_of_lt (Rat.mul_pos (by native_decide) ((Rat.inv_pos).2 hmh))
+        exact Rat.le_of_lt (Rat.mul_pos (by decide +kernel) ((Rat.inv_pos).2 hmh))
       · apply QInterval.one_div_le_one_div_of_pos
           hpos hN.1
   · have hNn : N <= n := by omega
@@ -952,11 +952,11 @@ theorem positiveInv_equiv_of_stages {x : RealRaw} {N M : Nat}
       constructor
       · exact (by
           rw [Rat.div_def]
-          exact Rat.le_of_lt (Rat.mul_pos (by native_decide)
+          exact Rat.le_of_lt (Rat.mul_pos (by decide +kernel)
             ((Rat.inv_pos).2 hMpos)))
       · exact (by
           rw [Rat.div_def]
-          exact Rat.le_of_lt (Rat.mul_pos (by native_decide)
+          exact Rat.le_of_lt (Rat.mul_pos (by decide +kernel)
             ((Rat.inv_pos).2 hNpos)))
     · have hMn : M <= n := by omega
       have hMn' := hx.2.1 M n hMn
@@ -976,7 +976,7 @@ theorem positiveInv_equiv_of_stages {x : RealRaw} {N M : Nat}
         1 / (x.compute n).hi ≤ 1 / (x.compute N).lo
       constructor
       · rw [Rat.div_def]
-        exact Rat.le_of_lt (Rat.mul_pos (by native_decide)
+        exact Rat.le_of_lt (Rat.mul_pos (by decide +kernel)
           ((Rat.inv_pos).2 hnpos))
       · have hnN' := hx.2.1 n N (by omega)
         exact QInterval.one_div_le_one_div_of_pos hNpos
@@ -1004,7 +1004,7 @@ theorem positiveInv_equiv_of_stages {x : RealRaw} {N M : Nat}
         exact QInterval.one_div_le_one_div_of_pos hMpos
           (Rat.le_trans (interval_order_of_valid x hx M) hnM'.2.2)
       · rw [Rat.div_def]
-        exact Rat.le_of_lt (Rat.mul_pos (by native_decide)
+        exact Rat.le_of_lt (Rat.mul_pos (by decide +kernel)
           ((Rat.inv_pos).2 hnpos))
     · have hMn : M <= n := by omega
       have hnpos : 0 < (x.compute n).lo := by
@@ -1037,10 +1037,10 @@ theorem positiveInv_equiv_of_input {x y : RealRaw} {N : Nat}
   · simp [positiveInv, positiveInvCompute, hn, QInterval.Overlaps]
     constructor
     · rw [Rat.div_def]
-      exact Rat.le_of_lt (Rat.mul_pos (by native_decide)
+      exact Rat.le_of_lt (Rat.mul_pos (by decide +kernel)
         ((Rat.inv_pos).2 hYpos))
     · rw [Rat.div_def]
-      exact Rat.le_of_lt (Rat.mul_pos (by native_decide)
+      exact Rat.le_of_lt (Rat.mul_pos (by decide +kernel)
         ((Rat.inv_pos).2 hXpos))
   · have hNn : N <= n := by omega
     have hXn := hx.2.1 N n hNn
@@ -1089,7 +1089,7 @@ theorem positiveInv_mul_self_equiv_one {x : RealRaw} {N : Nat}
         1 / (x.compute N).lo <= 1 / (x.compute N).lo := by
       constructor
       · rw [Rat.div_def]
-        exact Rat.le_of_lt (Rat.mul_pos (by native_decide)
+        exact Rat.le_of_lt (Rat.mul_pos (by decide +kernel)
           ((Rat.inv_pos).2 hpos))
       · exact Rat.le_refl
     have hprod := QBox.mulRealInterval_contains
@@ -1282,7 +1282,7 @@ theorem mul_valid {x y : RealRaw}
   have hBpos : 0 < B := by
     dsimp [B]
     grind
-  have hdenpos : 0 < (4 : Rat) * B := Rat.mul_pos (by native_decide) hBpos
+  have hdenpos : 0 < (4 : Rat) * B := Rat.mul_pos (by decide +kernel) hBpos
   let delta : QPos := ⟨eps.val / ((4 : Rat) * B), by
     rw [Rat.div_def]
     exact Rat.mul_pos eps.property ((Rat.inv_pos).2 hdenpos)⟩
@@ -1353,7 +1353,7 @@ theorem mul_valid {x y : RealRaw}
       2 * B * ((x.compute n).width + (y.compute n).width) <=
           2 * B * (2 * delta.val) :=
         Rat.mul_le_mul_of_nonneg_left hsum (by
-          exact Rat.le_of_lt (Rat.mul_pos (by native_decide) hBpos))
+          exact Rat.le_of_lt (Rat.mul_pos (by decide +kernel) hBpos))
       _ = eps.val := by
         dsimp [delta]
         rw [Rat.div_def]
@@ -1595,7 +1595,7 @@ theorem mul_valid {z w : ComplexRaw}
     dsimp [B]
     grind
   have height : 0 < (8 : Rat) * B :=
-    Rat.mul_pos (by native_decide) hBpos
+    Rat.mul_pos (by decide +kernel) hBpos
   let delta : QPos := ⟨eps.val / ((8 : Rat) * B), by
     rw [Rat.div_def]
     exact Rat.mul_pos eps.property ((Rat.inv_pos).2 height)⟩

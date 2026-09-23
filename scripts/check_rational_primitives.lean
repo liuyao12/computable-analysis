@@ -9,6 +9,22 @@ run_cmd do
     if mod.toString.startsWith "Mathlib" then
       throwError "Unexpected Mathlib import: {mod}"
   for root in [
+      ``ComputableAnalysis.ComputableCoefficient.Value.equiv_of_samples,
+      ``ComputableAnalysis.ComputableCoefficient.Expr.realize,
+      ``ComputableAnalysis.ComputableCoefficient.Expr.realize_equiv,
+      ``ComputableAnalysis.ComputableFactoredAlgebra.shadow_normalForm,
+      ``ComputableAnalysis.ComputableFactoredAlgebra.Formula.sample_formalDerivative,
+      ``ComputableAnalysis.ComputableFactoredAlgebra.requirements_sufficient,
+      ``ComputableAnalysis.ComputableFactoredAlgebra.certifyFactors,
+      ``ComputableAnalysis.ComputableFactoredAlgebra.primitive_correct,
+      ``ComputableAnalysis.ComputableFactoredAlgebra.FactoredRational.primitive_correct,
+      ``ComputableAnalysis.ComputablePrimitiveExamples.factors_checked,
+      ``ComputableAnalysis.ComputablePrimitiveExamples.derivative_computes,
+      ``ComputableAnalysis.ComputablePrimitiveExamples.integrand_computes,
+      ``ComputableAnalysis.ComputablePrimitiveExamples.irrational_primitive_correct,
+      ``ComputableAnalysis.ComputablePrimitiveExamples.zero_inverse_rejected,
+      ``ComputableAnalysis.ComputablePrimitiveExamples.duplicate_irrational_pole_rejected,
+
       ``ComputableAnalysis.RationalFactoredPrimitives.generalQuadratic_value,
       ``ComputableAnalysis.RationalQuadraticDivision.divide_identity,
       ``ComputableAnalysis.RationalQuadraticDivision.norm_pos,
@@ -74,8 +90,8 @@ run_cmd do
     logInfo m!"CHECKED {root}"
   logInfo "PASS: rational primitive algebra; domain-preserving circle pullback; no Mathlib, native-decision axioms, or unfinished proofs; standard Lean logical axioms only."
   logInfo "ANALYTIC: every rational polynomial on every rational interval; every rationally split denominator near each permitted rational center; executable partial fractions and elementary evaluators, with actual derivative certificates."
-  logInfo "FACTORIZATION: supplied rational linear and irreducible quadratic factors; arbitrary multiplicities; partial fractions computed, formal primitive correctness proved."
-  logInfo "SCOPE: general algebraic factorization, quadratic analytic assembly, and represented trigonometric transport remain open."
+  logInfo "FACTORIZATION: supplied computable-real linear and positive quadratic factors; interval-certified separation; computed partial fractions and represented formal-derivative equivalence; irrational regression checked."
+  logInfo "SCOPE: factorization existence, analytic assembly for computable coefficients, and represented trigonometric transport remain open."
 
 #print axioms ComputableAnalysis.RationalPrimitiveFormula.Decomposition.primitive_correct
 #print axioms ComputableAnalysis.TrigonometricRationalization.Expr.pullback_correct

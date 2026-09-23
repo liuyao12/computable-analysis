@@ -1,5 +1,19 @@
 # Computable Analysis: Canonical Roadmap
 
+**Computable coefficients in factored integration (2026-09-23).**
+`ComputableFactoredAlgebra.FactoredRational` accepts numerator, leading,
+linear, and quadratic coefficients built from arbitrary certified `Real`
+parameters. `certifyFactors` uses finite rational interval tests for positive
+quadratic constants and separated residual denominators; it does not decide
+real equality. Partial fractions and logarithm/arctangent formulas are
+computed. `primitive_correct` proves `RealRaw.Equiv` between the represented
+formal derivative and the original factored rational function. An example
+uses the repository's square-root bisection for irrational numerator and
+factor coefficients. No FTA, decomposition, or derivative law is assumed.
+The analytic assembly for these general coefficients and trigonometric
+transport remain unfinished; the actual analytic theorem below still has
+rational linear factors as its scope.
+
 **Euler’s sine-product proof (2026-09-23).**
 The isolated [Mathlib companion](book/euler-proof/README.md) proves the Basel
 identity from the sine product with a uniform finite-product remainder and
@@ -8,19 +22,6 @@ audit excludes prior zeta evaluations and the native Basel proof. This is a
 checked Mathlib proof, not a new native `RealRaw.Equiv` theorem. A native
 sine-product certificate and the extension to all $\zeta(2m)$ remain open.
 
-**Integration from a supplied factorization (2026-09-23).**
-`RationalFactoredPrimitives.Factorization` records rational linear and
-irreducible quadratic factors, arbitrary multiplicities, a nonzero leading
-coefficient, the factorization identity, and a decidable noncollision check.
-`Factorization.decomposition` computes the partial fractions;
-`Factorization.primitive_correct` verifies the formal derivative of the
-resulting elementary formula. `RationalQuadraticDivision` supplies exact
-centered division and inversion of the residual denominator modulo a positive
-quadratic, entirely in rational arithmetic. No FTA axiom or partial-fraction
-identity is assumed. Quadratic analytic realization is still unfinished.
-For arbitrary rational denominators, FTA supplies factors with real algebraic
-coefficients, not necessarily rational ones; that coefficient extension is
-still needed for the unrestricted theorem.
 
 **Analytic primitives for rationally split denominators (2026-09-23).**
 `RationalPrimitiveAssembly.splitPrimitive` constructs an elementary evaluator

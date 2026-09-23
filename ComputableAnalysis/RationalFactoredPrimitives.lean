@@ -5,8 +5,8 @@ import ComputableAnalysis.RationalQuadraticDivision
 
 Factorization is input data, not a new axiom or a partial-fraction assumption.
 The partial fractions and formal elementary primitive are computed. Factors
-currently have rational coefficients; a general real algebraic factorization
-needs the represented algebraic-coefficient extension.
+in this specialization have rational coefficients. Arbitrary computable-real
+coefficients are supported in `ComputableFactoredPrimitives`.
 -/
 
 namespace ComputableAnalysis
@@ -206,7 +206,7 @@ def decomposition (fs : List Factor) (p : List Rat) (hf : Admissible fs) :
     exact normalForm_identity fs p hf x hn
 
 /-- The factorization interface: exact rational data plus its checked identity.
-FTA can eventually provide this interface over represented algebraic coefficients;
+The general computable-coefficient interface is `ComputableFactoredAlgebra.FactoredRational`;
 no FTA axiom is introduced by accepting factorization as an explicit input. -/
 structure Factorization (f : RatFun) where
   factors : List Factor

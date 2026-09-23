@@ -9,9 +9,9 @@ correctness theorem is a *formal derivative identity*. This file neither
 constructs partial fractions for an arbitrary denominator nor realizes the
 formulas as interval-valued functions with analytic derivative certificates.
 
-All coefficients here are rational. Algebraic centers and quadratic constants
-are needed for general rational input, and require a further represented
-algebraic-number layer. No completed real numbers are used.
+This module is the rational specialization. `ComputablePrimitiveFormula`
+supports arbitrary certified computable-real coefficients. No completed real
+numbers are used.
 -/
 
 namespace ComputableAnalysis

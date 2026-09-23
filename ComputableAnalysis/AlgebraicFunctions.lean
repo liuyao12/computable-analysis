@@ -125,7 +125,7 @@ def SatisfiesEquation (f : Raw) : Prop :=
     let Z := QBox.point z
     let W := f.branch.compute z hz n
     let eps : QPos := if hn : n = 0 then
-      { val := 1, property := by native_decide }
+      { val := 1, property := by decide +kernel }
     else
       { val := (1 / (n : Rat)), property := one_div_nat_pos (Nat.pos_of_ne_zero hn) }
     QBox.Overlaps (BiPoly.evalBox f.equation Z W) (QBox.zeroAround eps)
@@ -174,7 +174,7 @@ def sqrtDomain (q : Rat) : Prop := ¬ q < 0
 
 def sqrtStageEps (n : Nat) : QPos :=
   if hn : n = 0 then
-    { val := 1, property := by native_decide }
+    { val := 1, property := by decide +kernel }
   else
     { val := (1 / (n : Rat)), property := by
         rw [Rat.div_def, Rat.one_mul]
@@ -259,7 +259,7 @@ private theorem sqrtUpperBound_nonneg {q : Rat} (hq : 0 <= q) :
   unfold sqrtUpperBound maxRat
   by_cases hle : (1 : Rat) <= q
   case pos => simp [hle, hq]
-  case neg => simpa [hle] using (by native_decide : (0 : Rat) <= 1)
+  case neg => simpa [hle] using (by decide +kernel : (0 : Rat) <= 1)
 
 private theorem sqrtUpperBound_sq_ge {q : Rat} (hq : 0 <= q) :
     q <= sq (sqrtUpperBound q) := by
@@ -296,10 +296,10 @@ private theorem midpoint_le_hi {I : QInterval} (h : I.lo <= I.hi) :
     (I.lo + I.hi) / 2 <= (2 * I.hi) / 2 := by
       rw [Rat.div_def, Rat.div_def]
       exact Rat.mul_le_mul_of_nonneg_right h2b
-        (Rat.le_of_lt ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2)))
+        (Rat.le_of_lt ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 2)))
     _ = I.hi := by
       rw [Rat.div_def]
-      have hne : (2 : Rat) != 0 := by native_decide
+      have hne : (2 : Rat) != 0 := by decide +kernel
       grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
 private theorem lo_le_midpoint {I : QInterval} (h : I.lo <= I.hi) :
@@ -309,12 +309,12 @@ private theorem lo_le_midpoint {I : QInterval} (h : I.lo <= I.hi) :
   calc
     I.lo = (2 * I.lo) / 2 := by
       rw [Rat.div_def]
-      have hne : (2 : Rat) != 0 := by native_decide
+      have hne : (2 : Rat) != 0 := by decide +kernel
       grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
     _ <= (I.lo + I.hi) / 2 := by
       rw [Rat.div_def, Rat.div_def]
       exact Rat.mul_le_mul_of_nonneg_right h2a
-        (Rat.le_of_lt ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2)))
+        (Rat.le_of_lt ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 2)))
 
 private theorem midpoint_nonneg {I : QInterval}
     (hlo : 0 <= I.lo) (hle : I.lo <= I.hi) :
@@ -668,7 +668,7 @@ theorem sqrtApproxOnDomain_width_le_nat_over_succ
     exact (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
   have hone_den_nonneg : 0 <= 1 / (((2 ^ fuel : Nat) : Rat)) := by
     rw [Rat.div_def]
-    exact Rat.le_of_lt (Rat.mul_pos (by native_decide : (0 : Rat) < 1)
+    exact Rat.le_of_lt (Rat.mul_pos (by decide +kernel : (0 : Rat) < 1)
       ((Rat.inv_pos).2 hden_pos))
   have hone :
       (1 / (((2 ^ fuel : Nat) : Rat))) <=

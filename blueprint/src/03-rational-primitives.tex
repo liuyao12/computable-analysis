@@ -3,12 +3,40 @@
 
 The target theorem states that a rational function on an interval whose
 denominator is uniformly apart from zero has an elementary primitive.
-Algebraic constants are allowed. The general analytic theorem remains open;
+Arbitrary certified computable-real coefficients are allowed. The general analytic theorem remains open;
 the checked results include complete local analytic primitives for rationally
-split denominators, finite formal-derivative identities for quadratic terms,
+split denominators, computed formal primitives with computable coefficients,
 and a domain-preserving circle substitution.
 
-\begin{theorem}[Supplied factorization, computed partial fractions]
+
+
+\begin{theorem}[Formal integration with computable-real coefficients]
+\label{thm:computable-factored-primitives}
+\lean{ComputableAnalysis.ComputableFactoredAlgebra.primitive_correct, ComputableAnalysis.ComputableFactoredAlgebra.FactoredRational.primitive_correct}
+\leanok
+Given a denominator as linear and positive quadratic blocks, with arbitrary
+certified computable-real coefficients and finite interval separation
+certificates, the algorithm computes partial fractions and an elementary
+formula. At a certified domain point, its represented formal derivative is
+equivalent to the original factored rational function. The numerator and
+leading coefficient may also be computable reals. No factorization theorem
+or partial-fraction identity is assumed. This is a formal-derivative result;
+analytic realization for general computable coefficients remains open.
+\end{theorem}
+
+\begin{proof}
+Arithmetic expressions retain the original valid interval algorithms as
+parameters. Finite rational sampling proves the division and recurrence
+identities, and shared samples prove overlap of the resulting shrinking
+interval computations. Positivity and apartness are certified with rational
+endpoint comparisons, not decisions of equality of computable reals. The
+closed regression uses $r=\sqrt{2}$ in
+\[
+  \frac{1+rx}{(x-r)((x-r/2)^2+r)^2}.
+\]
+\end{proof}
+
+\begin{theorem}[Rational specialization: supplied factorization]
 \label{thm:factored-rational-primitive-formula}
 \lean{ComputableAnalysis.RationalFactoredPrimitives.Factorization.decomposition,
 ComputableAnalysis.RationalFactoredPrimitives.Factorization.primitive_correct}
@@ -144,7 +172,7 @@ normalization. The reciprocal of \(p/q\) is stored as \(q^2/(pq)\), so the
 original poles are not filled by cancellation.
 \end{proof}
 
-Two antipodal charts cover the rational circle. General algebraic partial
-fractions, the remaining elementary realizations and their analytic assembly,
+Two antipodal charts cover the rational circle. Factorization existence,
+the remaining elementary realizations and their analytic assembly,
 and transport through the represented angle charts are still needed for the
 full rational-primitive theorem and its trigonometric corollary.

@@ -26,6 +26,8 @@ def main():
     assert report['automaticRationalLinearPartialFractionsProved']
     assert report['automaticRationalQuadraticPartialFractionsProved']
     assert report['factorizationToFormalPrimitiveProved']
+    assert report['computableRealCoefficientFormalPrimitivesProved']
+    assert report['irrationalCoefficientRegressionProved']
     assert report['analyticRepeatedLinearPolePrimitivesProved']
     assert report['analyticRationallySplitLocalPrimitivesProved']
     assert not report['generalAnalyticTheoremProved'] and not report['mathlibDependency']

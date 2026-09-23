@@ -1,3 +1,4 @@
+import ComputableAnalysis.ComputablePrimitiveExamples
 import ComputableAnalysis.RationalFactoredPrimitives
 import ComputableAnalysis.RationalPrimitiveAssembly
 import ComputableAnalysis.RationalPrimitivePowers

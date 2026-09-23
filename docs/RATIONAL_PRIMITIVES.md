@@ -5,8 +5,9 @@ The checked analytic theorem now constructs local elementary primitives for
 linear pole blocks, with arbitrary positive multiplicities**. It computes the
 partial fractions, a positive pole-free neighborhood, and valid elementary
 evaluators, then proves the original quotient is their interval derivative.
-The general theorem, including algebraic factors and the analytic
-trigonometric corollary, remains open. All proofs use the project's own
+The algebraic integration algorithm now also supports arbitrary computable-real
+coefficients. Its analytic realization and the analytic trigonometric
+corollary remain open. All proofs use the project's own
 rational-interval foundation; no Mathlib real or complex numbers are used.
 
 ## Factorization can be assumed as input
@@ -25,13 +26,29 @@ checks this normalization for every rational quadratic with negative
 discriminant, including a negative leading coefficient. Repeated equal factors are
 grouped into one block.
 
-The new `RationalFactoredPrimitives.Factorization` is an explicit checked input,
-not an axiom asserting FTA. For rational factor coefficients,
-`Factorization.decomposition` computes every partial-fraction coefficient,
-and `Factorization.primitive_correct` checks the resulting formula's formal
-derivative. The input contains a factorization identity and a decidable
-noncollision check; it does not contain a partial-fraction identity, an
-antiderivative, or a derivative certificate.
+`ComputableFactoredAlgebra.FactoredRational` accepts this factored form with
+**arbitrary certified computable-real coefficients**, including transcendental
+coefficients. Each coefficient is an arithmetic expression whose parameters
+are the project's `Real` interval algorithms. The numerator and leading
+coefficient use the same representation. No algebraicity restriction is
+imposed when factorization is supplied.
+
+`certifyFactors` checks positivity and residual-denominator separation using
+rational interval endpoints at a supplied precision. A failed check means the
+certificate is insufficient; it does not assert equality or zero. Repeated
+identical factors must be grouped into a single block. `primitive` computes
+every partial-fraction coefficient and its elementary formula.
+`FactoredRational.primitive_correct` proves raw-computation equivalence between
+the formula's represented formal derivative and the original factored
+rational function, at certified domain points and successful evaluation
+precisions. These evaluations return valid shrinking interval computations,
+not rational stand-ins for the coefficients.
+
+The proof checks arithmetic identities for all sufficiently fine rational
+samples of the coefficient boxes, then transfers them to `RealRaw.Equiv`.
+It neither selects completed-real values nor assumes a partial-fraction
+identity. `RationalFactoredPrimitives.Factorization` remains the exact rational
+specialization with a factorization identity for an existing `RatFun`.
 
 For quadratic division, write \(y=x-a\), \(Q=y^2+b\), and reduce the numerator
 and residual denominator to \(u_1y+u_0\) and \(v_1y+v_0\). Their quotient
@@ -45,26 +62,32 @@ The algorithm subtracts this contribution, divides out one copy of \(Q\),
 and repeats. The norm positivity and every division identity are proved.
 No square-root evaluator is required for this algebraic step.
 
-This rational-coefficient interface is intentionally narrower than a general
-FTA factorization. For example,
+The irrational regression uses the existing bisection computation of
+\(r=\sqrt{2}\), with integrand
 \[
-x^4+1=(x^2+\sqrt2\,x+1)(x^2-\sqrt2\,x+1)
+\frac{1+rx}{(x-r)\bigl((x-r/2)^2+r\bigr)^2}.
 \]
-needs irrational factor coefficients. The unrestricted theorem will require
-represented algebraic coefficients even when factorization is supplied.
-The analytic quadratic atoms also remain to be realized; formal derivative
-correctness is not yet an actual quadratic primitive certificate.
+Lean checks factor certificates, successful evaluation of the generated
+coefficients and formal derivative at zero, and equivalence with the original
+quotient. Zero reciprocals and duplicate irrational pole blocks are rejected.
+The strict axiom audit includes these closed examples.
+
+FTA remains relevant to obtaining a factorization from an arbitrary input
+polynomial. It is independent of this integration algorithm. What is still
+missing is an analytic evaluator and actual `HasDerivativeOnInterval` for the
+computed formulas with general computable coefficients. In particular, the
+quadratic arctangent/logarithm atoms are not yet analytically assembled.
 
 ## Precise target
 
-For rational polynomials \(p,q\), on a rational interval \([a,b]\) equipped
+For polynomials \(p,q\) with certified computable-real coefficients, on a rational interval \([a,b]\) equipped
 with an explicit certificate \(|q(x)|\geq\delta>0\), construct an elementary
 formula \(F\), a valid interval evaluator for it, and a finite-difference
 certificate for
 \[
 F'(x)=\frac{p(x)}{q(x)}.
 \]
-Elementary formulas may use real algebraic constants, rational operations,
+Elementary formulas may use certified computable-real constants, arithmetic operations,
 logarithms of absolute values, and arctangents. Restricting all constants in
 the answer to rational numbers would be too strong: already
 \(1/(x^2-2)\) naturally requires \(\sqrt{2}\). A denominator may also have
@@ -255,12 +278,15 @@ constructors themselves are executable finite rational algorithms.
 
 ## Remaining work before the general theorem can be claimed
 
-1. Construct real algebraic factorization and partial fractions for arbitrary
-   nonzero rational denominators; extend the finite algebra to those constants.
-2. Extend the checked polynomial, logarithm, and reciprocal-power realizations to quadratic and algebraic elementary formulas by valid `RealRaw` interval computations,
-   with explicit width schedules and denominator/branch separation.
-3. Prove analytic differentiation soundness of the formula compiler using
-   `HasDerivativeOnInterval`, for quadratic and algebraic atoms and their compositions. Rational linear pole sums are already assembled.
+1. Construct a certified factorization of an arbitrary input polynomial when
+   it is not supplied. Partial fractions from supplied computable-real linear
+   and positive quadratic factors are already computed and checked.
+2. Realize the remaining quadratic logarithm/arctangent atoms as valid
+   interval computations with actual finite-difference derivative certificates.
+3. Extend analytic assembly to arbitrary computable coefficients, including
+   irrational linear poles. The new coefficient-general theorem establishes
+   formal-derivative equivalence; rational linear pole sums already have
+   actual `HasDerivativeOnInterval` certificates.
 4. Identify the two angle charts with the established sine and cosine
    evaluators, then prove the chain rule and overlap gluing.
 

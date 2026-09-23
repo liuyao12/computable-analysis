@@ -10,19 +10,22 @@
 <nav aria-label="Book"><a href="index.html">Computable Analysis</a><a href="ch-integrals.html">Integrals</a><a href="#status">Proof status</a></nav>
 <header><span class="eyebrow">Finite integration algorithms</span><h1>Elementary primitives</h1>
 <p class="lead">Rational functions, repeated poles, and the half-angle route from trigonometry to rational algebra.</p>
-<p class="note"><strong>The general analytic theorem remains open.</strong> The checked results now include complete local elementary primitives for rationally split denominators, alongside computed partial fractions and formal integration from rational linear/quadratic factorizations and a domain-preserving rational circle substitution. They use the project’s own foundation, with no Mathlib dependency.</p></header>
+<p class="note"><strong>The general analytic theorem remains open.</strong> The checked results now include complete local elementary primitives for rationally split denominators, alongside computed partial fractions and formal integration from linear/quadratic factorizations with arbitrary computable-real coefficients and a domain-preserving rational circle substitution. They use the project’s own foundation, with no Mathlib dependency.</p></header>
 <section><h2>The theorem we want</h2>
 <p>On an interval with an explicit positive lower bound for its denominator, every rational function should have an elementary primitive:</p>
 <div class="math">\[F'(x)=\frac{p(x)}{q(x)},\qquad |q(x)|\geq\delta>0.\]</div>
-<p>The answer may use real algebraic constants, rational operations, logarithms of absolute values, and arctangents. Algebraic constants matter: even \(1/(x^2-2)\) naturally introduces \(\sqrt2\). Higher-degree algebraic roots need not have radical expressions.</p>
+<p>The answer may use certified computable-real constants, arithmetic operations, logarithms of absolute values, and arctangents. Algebraic constants matter: even \(1/(x^2-2)\) naturally introduces \(\sqrt2\). Higher-degree algebraic roots need not have radical expressions.</p>
 <p>A primitive belongs to a pole-free interval. A complex version additionally needs logarithm branches; it does not promise a single-valued primitive throughout a punctured plane.</p></section>
 <section><h2>Factorization can be supplied</h2>
 <p>The fundamental theorem of algebra is needed to obtain factors for an arbitrary denominator. Once the factorization is supplied and checked, the integration algorithm does not need FTA:</p>
 <div class="math">\[q(x)=c\prod_i(x-a_i)^{m_i}\prod_j\bigl((x-u_j)^2+v_j\bigr)^{n_j},\qquad c\ne0,\quad v_j>0.\]</div>
-<p><code>RationalFactoredPrimitives.Factorization</code> now accepts rational factor data, arbitrary multiplicities, a nonzero leading coefficient, the factorization identity, and a decidable check that distinct blocks do not collide. It computes the partial fractions and checks the elementary formula’s formal derivative. Neither the partial fractions nor an antiderivative are assumed.</p>
-<p>Quadratic coefficients are computed by division modulo the quadratic. For a residual denominator \(v_1y+v_0\) modulo \(y^2+b\), the inverse uses the positive rational norm \(v_0^2+bv_1^2\). This step needs no square-root evaluator.</p>
-<p>General FTA factors may have irrational algebraic coefficients: \(x^4+1=(x^2+\sqrt2\,x+1)(x^2-\sqrt2\,x+1)\). Extending the coefficient representation and proving the quadratic analytic evaluators are still required for the unrestricted theorem.</p>
-<p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/RationalFactoredPrimitives.lean">Factorization interface and computed primitive</a> · <a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/RationalQuadraticDivision.lean">Quadratic division proof</a></p></section>
+<p><code>ComputableFactoredAlgebra.FactoredRational</code> accepts arbitrary certified computable-real coefficients in the numerator, leading coefficient, and factors. Irrational and transcendental coefficients are supported. <code>certifyFactors</code> uses finite rational interval bounds to certify positive quadratic constants and separated residual denominators. It does not test real equality.</p>
+<p>The algorithm computes every partial-fraction coefficient and the elementary formula. <code>primitive_correct</code> proves that the represented formal derivative is equivalent to the original factored quotient. Every successful coefficient evaluation carries a validity proof for its shrinking rational intervals. A failed interval test requests better separation evidence; it does not classify a coefficient as zero.</p>
+<p>For a residual denominator \(v_1y+v_0\) modulo \(y^2+b\), inversion uses the positive computable norm \(v_0^2+bv_1^2\). Rational sampling verifies the finite arithmetic identities and transfers them to equivalence of the original interval computations.</p>
+<p>A checked example uses the repository’s bisection computation of \(r=\sqrt2\):</p>
+<div class="math">\[\frac{1+rx}{(x-r)\bigl((x-r/2)^2+r\bigr)^2}.\]</div>
+<p>Its factor checks, generated coefficient evaluations, and formal-derivative equivalence at zero are verified by Lean. Zero reciprocals and duplicate irrational pole blocks are rejected. The actual analytic derivative theorem for these general coefficients remains unfinished.</p>
+<p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/ComputableFactoredPrimitives.lean">Computable-coefficient theorem</a> · <a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/ComputableCoefficient.lean">Certified coefficient arithmetic</a> · <a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/ComputablePrimitiveExamples.lean">Irrational regression proofs</a></p></section>
 <section><h2>What repeated poles contribute</h2>
 <p>After polynomial division and real algebraic factorization, partial fractions reduce the problem to a polynomial and terms of these forms:</p>
 <div class="math">\[\frac{c}{(x-a)^m},\qquad \frac{A(x-a)+B}{((x-a)^2+b)^m},\qquad b>0.\]</div>
@@ -64,10 +67,10 @@
 <p>These examples are checked at the formal-derivative level. Further regressions preserve undefined reciprocals and verify that the half-angle pullback of \(1/(1+\cos\theta)\) is one on the first chart.</p>
 <p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/RationalPrimitiveExamples.lean">Regression proofs</a> · <a href="reading/rational-primitives-audit.log">Axiom and import audit</a></p></section>
 <section id="status"><h2>What remains to prove</h2>
-<ol><li>Construct partial fractions for arbitrary rational denominators over represented real algebraic constants. The current normal forms use rational constants only.</li>
-<li>Construct the remaining quadratic elementary evaluators and extend coefficients to represented algebraic constants.</li>
-<li>Extend the completed rational linear-pole assembly to quadratic and algebraic terms.</li>
-<li>Connect the two circle charts to the existing represented sine and cosine functions, then prove derivative transport and overlap gluing.</li></ol>
+<ol><li>Obtain certified linear/quadratic factors from an arbitrary polynomial when no factorization is supplied. Computation of partial fractions from supplied computable-real factors is now checked.</li>
+<li>Construct the quadratic logarithm/arctangent evaluators and their actual interval derivative certificates.</li>
+<li>Extend the analytic assembly to arbitrary computable coefficients, including irrational linear poles.</li>
+<li>Connect the two circle charts to represented sine and cosine, then prove derivative transport and overlap gluing.</li></ol>
 <p>The existing general <code>ComputableFTA</code> is a target proposition, not a proved factorization theorem available to close the first step. This page does not claim that either requested general analytic theorem has been formalized.</p>
 <p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/docs/RATIONAL_PRIMITIVES.md">Exact scope, formulas, and remaining obligations</a></p></section>
 <footer>The new proofs use only Lean’s standard logical axioms; the audit rejects unfinished proofs, custom axioms, and native-decision axioms. The finite constructors are executable.<br><a href="https://github.com/liuyao12/computable-analysis/commit/__REVISION__">Verified source revision</a></footer>

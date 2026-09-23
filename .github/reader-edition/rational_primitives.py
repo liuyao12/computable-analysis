@@ -10,6 +10,22 @@ ROOT = Path(__file__).resolve().parents[2]
 PAGE = 'rational-primitives.html'
 MARKER = '<!-- rational-primitives -->'
 EXPECTED = [
+    'ComputableCoefficient.Value.equiv_of_samples',
+    'ComputableCoefficient.Expr.realize',
+    'ComputableCoefficient.Expr.realize_equiv',
+    'ComputableFactoredAlgebra.shadow_normalForm',
+    'ComputableFactoredAlgebra.Formula.sample_formalDerivative',
+    'ComputableFactoredAlgebra.requirements_sufficient',
+    'ComputableFactoredAlgebra.certifyFactors',
+    'ComputableFactoredAlgebra.primitive_correct',
+    'ComputableFactoredAlgebra.FactoredRational.primitive_correct',
+    'ComputablePrimitiveExamples.factors_checked',
+    'ComputablePrimitiveExamples.derivative_computes',
+    'ComputablePrimitiveExamples.integrand_computes',
+    'ComputablePrimitiveExamples.irrational_primitive_correct',
+    'ComputablePrimitiveExamples.zero_inverse_rejected',
+    'ComputablePrimitiveExamples.duplicate_irrational_pole_rejected',
+
     'RationalFactoredPrimitives.generalQuadratic_value',
     'RationalQuadraticDivision.divide_identity',
     'RationalQuadraticDivision.norm_pos',
@@ -76,7 +92,7 @@ def install(site, revision, audit):
     log = audit.read_text()
     assert 'error:' not in log and 'sorryAx' not in log
     assert 'PASS: rational primitive algebra;' in log
-    assert 'general algebraic factorization, quadratic analytic assembly, and represented trigonometric transport remain open' in log
+    assert 'factorization existence, analytic assembly for computable coefficients, and represented trigonometric transport remain open' in log
     for name in EXPECTED:
         assert 'CHECKED ComputableAnalysis.' + name + '\n' in log, name
     before = {str(p.relative_to(site)): p.read_bytes() for p in site.rglob('*') if p.is_file()}
@@ -113,6 +129,8 @@ def install(site, revision, audit):
               'automaticRationalLinearPartialFractionsProved': True,
               'automaticRationalQuadraticPartialFractionsProved': True,
               'factorizationToFormalPrimitiveProved': True,
+              'computableRealCoefficientFormalPrimitivesProved': True,
+              'irrationalCoefficientRegressionProved': True,
               'analyticRepeatedLinearPolePrimitivesProved': True,
               'analyticRationallySplitLocalPrimitivesProved': True, 'mathlibDependency': False,
               'changedReaderPages': list(additions)}
