@@ -20,6 +20,12 @@ when adding or reviewing mathematics.
   derivative identity should apply to every valid represented real in its
   domain, without asking for monotonicity breaks. Keep genuine domain, pole,
   branch, and constructive existence hypotheses when necessary.
+- State closed-form integration results as definite-integral identities
+  \(\int_a^x f(t)\,dt \simeq F(x)-F(a)\), or as a base-point-normalized
+  expression at \(x\). Do not introduce a separate formal notion of primitive
+  or indefinite integral. Certify the entire segment between the endpoints:
+  the formula must not cross a singularity, and endpoint checks alone do not
+  suffice. A derivative identity is an intermediate step for this task.
 - Finite estimates, formal differentiation, rational-input identities, and
   uninstantiated certificate interfaces are intermediate results when an exact
   real-input theorem is requested. Prove the connecting lemmas before claiming

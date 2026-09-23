@@ -50,6 +50,39 @@ symbolic differentiation, or an uninstantiated certificate interface merely
 because those are the current APIs. If a bridge is missing, identify and prove
 it; report intermediate progress as such until the exact theorem is established.
 
+### State integration formulas as definite integrals
+
+Do not introduce a separate formal notion of primitive or indefinite integral.
+Requests for a closed-form primitive mean a definite-integral identity with an
+explicit base point. The public theorem has the shape
+\[
+  \int_a^x f(t)\,dt \simeq G_a(x),
+  \qquad G_a(a) \simeq 0,
+\]
+or equivalently
+\[
+  \int_a^x f(t)\,dt \simeq F(x)-F(a).
+\]
+Here the integral and the displayed expression are valid raw-real computations,
+and \(\simeq\) is `RealRaw.Equiv`. Construct the integral and prove this exact
+identity; a derivative identity alone does not complete an integration theorem.
+
+Require the entire segment between \(a\) and \(x\), including its endpoints,
+to lie in a certified domain where the integrand is defined and integrable and
+the displayed expression uses valid branches. For rational expressions, give
+the necessary denominator-apart evidence throughout that segment; checking
+only the endpoints is insufficient. Use the oriented integral when
+\(x<a\). Do not extend an endpoint formula across a singularity or combine
+components separated by poles. Internal monotone subdivisions and coordinate
+charts still belong in the proof and must agree where they overlap.
+
+Derivative lemmas and elementary expression construction remain useful proof
+steps. Existing identifiers or historical progress notes containing `Primitive`
+or “primitive” do not establish a separate public mathematical notion; their
+integration-facing results must be packaged as the definite-integral identities
+above. This convention applies in particular to rational functions and rational
+functions of sine and cosine.
+
 **Trigonometric primitive formulas and finite substitution (2026-09-23).**
 `ComputableTrigonometricRationalization.RepresentedFactorization.primitive_correct`
 computes an elementary formula for every rational sine/cosine expression with

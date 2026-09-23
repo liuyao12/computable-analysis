@@ -16,6 +16,14 @@ separate from the raw interval computation.
 
 ## Exact public statements
 
+State closed-form results as \(\int_a^x f(t)\,dt \simeq F(x)-F(a)\),
+or a base-point-normalized expression at \(x\). Do not define a separate
+primitive or indefinite-integral notion. Certify definedness, integrability,
+denominator separation where needed, and valid branches on the entire segment
+between \(a\) and \(x\). Endpoint definedness alone does not permit integration
+across a pole. Use the oriented integral for reversed endpoints. See the
+[definite-integral convention](../../../FORMALIZATION_GUIDE.md#state-integration-formulas-as-definite-integrals).
+
 Monotone pieces, rational partitions, and turning-point brackets are proof and
 construction data. Package them beneath the public exact integral identity,
 and prove the refinement or equivalence results needed for independence of
@@ -28,7 +36,7 @@ machinery. See the [governing policy](../../../FORMALIZATION_GUIDE.md#computable
 
 | Shape of the integrand | Construct | Typical proof obligation |
 | --- | --- | --- |
-| Exact derivative of a checked primitive | `EffectiveDerivativeBoundFTC` then `Integral.effectiveFTCConstructionFor` | Prove finite derivative bounds, interval-domain validity, and the endpoint bridge |
+| Checked identity \(F\prime=f\) | `EffectiveDerivativeBoundFTC` then `Integral.effectiveFTCConstructionFor` | Prove finite derivative bounds, interval-domain validity, and the endpoint bridge |
 | Monotone on one rational interval | `MonotoneConstructionFor` or `NondecreasingConstructionFor` | Prove the declared order and the rectangle-width schedule |
 | Rational-Lipschitz on `[0,1]` | `IntegralIdentities.LipschitzDyadic` | Prove a rational Lipschitz constant and the dyadic error bound |
 | Monotone on finitely many rational pieces | `PiecewiseMonotoneConstructionFor` | Prove order independently on every piece and combine their boxes |
@@ -40,10 +48,10 @@ denominators stay apart from zero and where a branch or sign condition holds.
 Use an interval evaluator rather than endpoint samples when the function is
 inexact.
 
-For the primitive route, wrap the derivative evaluator with
+For the derivative-to-integral route, wrap the derivative evaluator with
 `FunctionOnInterval.ofRealFunRaw`.  The theorem
 `Integral.effectiveFTCIntegral_equiv_endpointDifference` then identifies the
-constructed domain-aware integral with the primitive endpoint difference.
+constructed domain-aware integral with the endpoint difference.
 The canonical non-polynomial client is
 `Integral.arctanEffectiveFTCIntegral_equiv_arctanGeom_one`; it supplies only
 the finite arctangent certificate and endpoint interpretation.  The squared

@@ -37,13 +37,16 @@ rational step when necessary. Keep a coefficient identity for a formal power
 series distinct from an analytic derivative theorem for the corresponding
 boxed function.
 
-For a checked primitive, use `EffectiveDerivativeBoundFTC`, then
+For a definite-integral identity from a checked derivative formula, use
+`EffectiveDerivativeBoundFTC`, then
 `FunctionOnInterval.ofRealFunRaw` and
 `Integral.effectiveFTCConstructionFor`.  The public endpoint theorem is
 `Integral.effectiveFTCIntegral_equiv_endpointDifference`.  Use
 `Integral.DefiniteIdentityFor` or a dedicated finite comparison when a
-different construction already exists.  A familiar primitive is a proposal
-to check, not an integral table entry.
+different construction already exists. Certify the whole integration segment,
+including pole avoidance and valid branches, and state the result with an
+explicit base point and endpoint difference. Do not introduce a separate
+primitive notion; see the [definite-integral convention](../../../FORMALIZATION_GUIDE.md#state-integration-formulas-as-definite-integrals).
 
 ## Series, exponential, and logarithm
 

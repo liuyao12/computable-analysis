@@ -64,7 +64,7 @@ for any definite-integral task, especially one with non-rational breakpoints.
 | One computable number | `RealRaw` and `QInterval` | Valid boxes, a width modulus, and equivalence when comparing definitions |
 | Rational function on an interval | `FunctionDomains` | A denominator-apart certificate on the whole interval |
 | Continuity of a boxed function | `IntervalRegularOn` | A literal rational epsilon-delta modulus |
-| Derivative or textbook primitive | `Differential`, `EffectiveCalculusFoundation` | Finite-difference enclosure and a particular endpoint bridge |
+| Derivative or closed-form definite integral | `Differential`, `EffectiveCalculusFoundation` | Finite-difference enclosure and a particular endpoint bridge |
 | Definite integral | `IntegralFoundation` plus the integral reference | A construction for this function, not a general existence assertion |
 | Turning point or irrational split | `TurningPointIntegral` | Shrinking rational brackets and a central range estimate |
 | Power series or a tail | `PowerSeries`, `Series`, `ExpProofs` | A rational tail majorant and a rate |
@@ -73,6 +73,15 @@ for any definite-integral task, especially one with non-rational breakpoints.
 
 ## Treat integrals as particular computations
 
+Interpret a request for a primitive as an exact definite-integral identity
+\(\int_a^x f(t)\,dt \simeq F(x)-F(a)\), or a normalized expression
+\(G_a(x)\) with \(G_a(a)\simeq 0\). Do not introduce a separate primitive
+or indefinite-integral notion. Certify the entire segment between the base
+point and the variable endpoint, with no singularity crossing and valid
+branches throughout. Checking only endpoints, or proving only the derivative
+formula, does not establish this theorem. See the
+[definite-integral convention](../../FORMALIZATION_GUIDE.md#state-integration-formulas-as-definite-integrals).
+
 Construct a definite integral only after identifying why that integrand can be
 controlled. Use one of the concrete routes in the integral reference:
 monotone rectangles, a rational-Lipschitz Darboux estimate, a fixed rational
@@ -80,8 +89,8 @@ partition, a shrinking non-rational turning-point bracket, or a direct
 finite change-of-variables comparison. Supply a separate completion theorem
 that connects the runtime boxes to the intended integral value.
 
-When a primitive is known, construct `EffectiveDerivativeBoundFTC`, restrict
-the certified derivative with `FunctionOnInterval.ofRealFunRaw`, and publish
+When a derivative formula is proved, construct `EffectiveDerivativeBoundFTC`,
+restrict the certified derivative with `FunctionOnInterval.ofRealFunRaw`, and publish
 `Integral.effectiveFTCConstructionFor`.  The endpoint theorem is
 `Integral.effectiveFTCIntegral_equiv_endpointDifference`; do not stop at the
 internal stabilized raw evaluator.
