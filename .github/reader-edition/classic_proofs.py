@@ -34,9 +34,9 @@ def install(site,revision,euler_audit,source_file=None):
     assert leibniz['mathlibProofRevision']==MATHLIB
     euler=json.loads(euler_audit.read_text())
     assert euler['mathlibRevision']==EULER_MATHLIB and all(euler['checks'].values())
-    assert len(euler['declarations'])==7 and euler['dependencyCount']>0
+    assert len(euler['declarations'])==15 and euler['allPositiveEvenValuesProved'] and euler['dependencyCount']>0
     for name,h in euler['sourceHashes'].items():assert digest(ROOT/'book/euler-proof'/name)==h,name
-    assert {r['name'] for r in euler['declarations']} >= {'EulerBasel.hasSum_reciprocal_squares','EulerBasel.coefficient_error'}
+    assert {r['name'] for r in euler['declarations']} >= {'EulerBasel.hasSum_reciprocal_squares','EulerBasel.coefficient_error','EulerEven.hasSum_even_zeta','EulerEven.hasSum_four','EulerEven.hasSum_six','EulerEven.hasSum_eight'}
     for row in euler['declarations']:assert set(row['axioms'])<= {'propext','Classical.choice','Quot.sound'}
     before={str(p.relative_to(site)):digest(p) for p in site.rglob('*') if p.is_file()}
     repo=f'https://github.com/liuyao12/computable-analysis/blob/{revision}/'
@@ -82,6 +82,7 @@ def install(site,revision,euler_audit,source_file=None):
     shutil.copyfile(SOURCE/'classics.js',site/'reading/classics.js')
     shutil.copyfile(euler_audit,site/'reading/euler-proofs.json')
     shutil.copyfile(euler_audit.with_name('dependencies.txt'),site/'reading/euler-dependencies.txt')
+    shutil.copyfile(euler_audit.with_name('general-dependencies.txt'),site/'reading/euler-general-dependencies.txt')
     after={str(p.relative_to(site)):digest(p) for p in site.rglob('*') if p.is_file()}
     changed={p:dict(before=h,after=after[p]) for p,h in before.items() if h!=after[p]}
     assert all(p.endswith('.html') for p in changed)
@@ -90,7 +91,7 @@ def install(site,revision,euler_audit,source_file=None):
       pages=[p for p,t in LINKS],changedArtifacts=changed,
       protectedArtifacts={p:h for p,h in before.items() if p not in changed},
       artifacts={p:h for p,h in after.items() if p not in before or p in changed},
-      checks=dict(cartwrightAlreadyProved=True,cartwrightThreeCheckedRoutesPreserved=True,leibnizComparisonPreserved=True,baselNativeAudited=True,mathlibSourcePinned=True,eulerProofAudited=True),
+      checks=dict(cartwrightAlreadyProved=True,cartwrightThreeCheckedRoutesPreserved=True,leibnizComparisonPreserved=True,baselNativeAudited=True,mathlibSourcePinned=True,eulerProofAudited=True,allEvenZetaValuesAudited=True),
       newLeanProofsClaimed=True,eulerMathlibRevision=EULER_MATHLIB,baselCrossFoundationBridgeChecked=False)
     (site/'reading/classic-proofs-edition.json').write_text(json.dumps(report,indent=2)+'\n')
     print(f'PASS: four classical examples in {len(navigation)} sidebars; preserved checked comparisons and pinned Basel source')

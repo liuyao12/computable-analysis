@@ -43,11 +43,20 @@ def main():
     assert not re.search(r'<(?:sup|sub)\b',(site/'basel.html').read_text())
     euler=json.loads((site/'reading/euler-proofs.json').read_text())
     assert euler['mathlibRevision']==EULER_MATHLIB and all(euler['checks'].values())
-    assert len(euler['declarations'])==7
+    assert len(euler['declarations'])==15 and euler['allPositiveEvenValuesProved']
     deps=(site/'reading/euler-dependencies.txt').read_text().splitlines()
     assert len(deps)==euler['dependencyCount']
     assert 'Real.tendsto_euler_sin_prod' in deps and 'EulerBasel.coefficient_error' in deps
     assert not any('hasSum_zeta' in name or 'bernoulliFourier' in name for name in deps)
+    general=(site/'reading/euler-general-dependencies.txt').read_text().splitlines()
+    assert len(general)==euler['generalDependencyCount']
+    for required in ['EulerEven.hasSum_even_zeta','EulerEven.doubleTerm_summable','EulerEven.cotangentSeries_eq_bernoulli','Complex.tendsto_euler_sin_prod','tendsto_logDeriv_euler_sin_div']:
+        assert required in general,required
+    assert 'EulerBasel.total_eq' not in general
+    assert not any('fourier' in name.lower() or 'hasSum_zeta' in name for name in general)
+    euler_page=BeautifulSoup((site/'euler.html').read_text(),'html.parser')
+    assert euler_page.select_one('#even-values') and euler_page.select_one('#bernoulli') and euler_page.select_one('#examples')
+    assert 'hasSum_even_zeta' in euler_page.get_text()
     assert 'euler.html' in (site/'basel.html').read_text()
     assert not re.search(r'<(?:sup|sub)\b',(site/'euler.html').read_text())
     if a.static_only:

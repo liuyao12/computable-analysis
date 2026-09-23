@@ -5,6 +5,8 @@ from pathlib import Path
 REVISION = '51e6992efd06126df61a496bebf8f49482a4e129'
 ARCHIVE_SHA256 = '0d44640e4a47b76187c0d6d31800a2e8c05001629c75010cff4c21031f5fa8b3'
 SOURCE = Path(__file__).resolve().parent
+MODULES = ['EulerBasel', 'EulerSeries', 'EulerCotangent', 'EulerEvenZeta']
+LEAN_FILES = [name + '.lean' for name in MODULES] + ['CheckEuler.lean']
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -33,19 +35,20 @@ def main():
         (work / '.euler-mathlib-revision').write_text(REVISION)
     assert (work / '.euler-mathlib-revision').read_text() == REVISION
     assert (work / 'lean-toolchain').read_bytes() == (SOURCE / 'lean-toolchain').read_bytes()
-    for name in ['EulerBasel.lean', 'CheckEuler.lean']:
+    for name in LEAN_FILES:
         shutil.copyfile(SOURCE / name, work / name)
-    imports = [line.removeprefix('import ') for line in (SOURCE / 'EulerBasel.lean').read_text().splitlines() if line.startswith('import ')]
+    imports = sorted({line.removeprefix('import ') for name in LEAN_FILES for line in (SOURCE / name).read_text().splitlines() if line.startswith('import Mathlib.')})
     # A missing remote cache object is recoverable: lake builds it below.
     subprocess.run(['lake', 'exe', 'cache', 'get', *[name.replace('.', '/') + '.lean' for name in imports]], cwd=work, check=False)
     subprocess.run(['lake', 'build', *imports], cwd=work, check=True)
-    subprocess.run(['lake', 'env', 'lean', '-o', '.lake/build/lib/lean/EulerBasel.olean', 'EulerBasel.lean'], cwd=work, check=True)
+    for name in MODULES:
+        subprocess.run(['lake', 'env', 'lean', '-o', f'.lake/build/lib/lean/{name}.olean', name + '.lean'], cwd=work, check=True)
     subprocess.run(['lake', 'env', 'lean', 'CheckEuler.lean'], cwd=work, check=True)
     report.mkdir(parents=True, exist_ok=True)
-    for name in ['proofs.json', 'dependencies.txt']:
+    for name in ['proofs.json', 'dependencies.txt', 'general-dependencies.txt']:
         shutil.copyfile(work / 'euler-reports' / name, report / name)
     audit = json.loads((report / 'proofs.json').read_text())
-    audit['sourceHashes'] = {name: hashlib.sha256((SOURCE / name).read_bytes()).hexdigest() for name in ['EulerBasel.lean', 'CheckEuler.lean', 'lean-toolchain', 'verify.py']}
+    audit['sourceHashes'] = {name: hashlib.sha256((SOURCE / name).read_bytes()).hexdigest() for name in LEAN_FILES + ['lean-toolchain', 'verify.py']}
     audit['mathlibArchiveSha256'] = ARCHIVE_SHA256
     (report / 'proofs.json').write_text(json.dumps(audit, indent=2) + '\n')
 

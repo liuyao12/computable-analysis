@@ -14,13 +14,16 @@ The analytic assembly for these general coefficients and trigonometric
 transport remain unfinished; the actual analytic theorem below still has
 rational linear factors as its scope.
 
-**Euler’s sine-product proof (2026-09-23).**
-The isolated [Mathlib companion](book/euler-proof/README.md) proves the Basel
-identity from the sine product with a uniform finite-product remainder and
-an explicit quadratic coefficient-error bound. Its elaborated-dependency
-audit excludes prior zeta evaluations and the native Basel proof. This is a
-checked Mathlib proof, not a new native `RealRaw.Equiv` theorem. A native
-sine-product certificate and the extension to all $\zeta(2m)$ remain open.
+**All positive even zeta values via Euler’s sine product (2026-09-23).**
+The isolated [Mathlib companion](book/euler-proof/README.md) now proves
+$\zeta(2m)=(-1)^{m+1}B_{2m}(2\pi)^{2m}/(2(2m)!)$ for every $m\ge1$.
+The proof uses the justified logarithmic derivative of the sine product,
+an absolutely convergent double series, and uniqueness of power-series
+coefficients to identify the Bernoulli generating function. Its dependency
+audit excludes Fourier theory, previous zeta evaluations, and the earlier
+Basel evaluation. Specializations at $4$, $6$, and $8$ are checked too.
+This is a Mathlib result; a native interval sine-product certificate and
+cross-foundation bridge remain open.
 
 
 **Analytic primitives for rationally split denominators (2026-09-23).**
@@ -70,7 +73,7 @@ Finite Leibniz-square rearrangements supply an explicit rational error budget.
 The finite Euler sieve proves prime unboundedness assuming irrationality of
 $\pi^2$. Irrationality is already proved in the pinned published Cartwright
 development; importing that theorem and connecting its implementation to this
-newer source version remains open. The general even-value formulas also remain open. The elaborated-dependency audit excludes the existing Euclid infinitude
+newer source version remains open. The general even-value formulas remain open in the native foundation; the separate Euler/Mathlib companion now proves them. The elaborated-dependency audit excludes the existing Euclid infinitude
 proof from this route. See [the mathematical proof and precise scope](docs/BASEL.md).
 
 **Exact Cauchy-series equality (2026-09-22).**

@@ -1,12 +1,12 @@
 <h1 id="euler">Euler’s sine-product proof</h1>
-<p class="lead">Euler’s insight survives intact: the quadratic term of the sine product determines the sum of reciprocal squares. A uniform finite-product estimate makes the coefficient comparison rigorous.</p>
-\[\boxed{\sum_{k=1}^{\infty}\frac{1}{k^2}=\frac{\pi^2}{6}.}\]
-<p>This is a new, checked Lean proof using Mathlib’s sine-product theorem. It is independent of the <a href="basel.html#mathlib">Bernoulli–Fourier evaluation</a> and of our <a href="basel.html#native">native finite-rearrangement proof</a>. The proof runs in a separate Mathlib package; it does not yet supply an Euler-product proof in the project’s rational-interval foundation.</p>
+<p class="lead">Euler’s sine product determines every positive even zeta value. The Basel case follows from a finite-product remainder; the general theorem follows from a justified logarithmic derivative and coefficient comparison.</p>
+\[\boxed{\zeta(2m)=\frac{(-1)^{m+1}B_{2m}(2\pi)^{2m}}{2(2m)!}}\qquad(m\ge1).\]
+<p>This is a checked Lean proof for every positive integer \(m\), using Mathlib’s sine-product theorem and its locally uniform logarithmic derivative. Here \(B_{2m}\) denotes a Bernoulli number and \(\zeta(2m)=\sum_{k=1}^{\infty}k^{-2m}\). It is independent of the <a href="basel.html#mathlib">Bernoulli–Fourier evaluation</a> and of our <a href="basel.html#native">native finite-rearrangement proof</a>. The proof runs in a separate Mathlib package; it does not yet supply an Euler-product proof in the project’s rational-interval foundation.</p>
 <h2 id="gap">What has to be justified?</h2>
 <p>Knowing the zeros of sine does not by itself determine the function: multiplication by a nonvanishing factor preserves those zeros. Even after the product identity has been proved, an infinite product cannot simply be expanded like a polynomial without controlling its remainder.</p>
 \[\frac{\sin(\pi x)}{\pi x}=\prod_{k=1}^{\infty}\left(1-\frac{x^2}{k^2}\right).\]
 <p>We justify these two steps separately: use a proved sine-product identity, then extract its quadratic coefficient by an explicit inequality. No differentiation of an infinite product is needed for the Basel case.</p>
-<h2 id="finite">Start with a finite product</h2>
+<h2 id="finite">The Basel case: start with a finite product</h2>
 <p>For a finite family with \(0\le a_k\le1\), set \(A=\sum_k a_k\). Induction proves</p>
 \[0\le\prod_k(1-a_k)-(1-A)\le\frac{A^2}{2}.\]
 <p>If \(R\) is the current remainder, adjoining a factor gives the exact identity \(R_{\mathrm{new}}=(1-a)R+aA\). Nonnegativity and the upper bound follow using only finite algebra and inequalities.</p>
@@ -28,12 +28,32 @@
 \[\boxed{\left|S-\frac{\pi^2}{6}\right|\le\left(2+\frac{\pi^4}{100}\right)x^2.}\]
 <p>Take \(x=1/((\pi+1)(n+1))\) and let \(n\) grow. The right side tends to zero, so \(S=\pi^2/6\). Euler’s coefficient comparison is now a consequence of two controlled remainders.</p>
 <p><a href="__REPO__book/euler-proof/EulerBasel.lean">Lean: <code>coefficient_error</code> and <code>hasSum_reciprocal_squares</code></a> · <a href="__EULER_MATHLIB__Mathlib/Analysis/Complex/Trigonometric.lean#L876">Mathlib: <code>Real.sin_bound</code></a></p>
+<h2 id="even-values">Every positive even value</h2>
+<p>For the general case, differentiate the sine product logarithmically. Mathlib proves local uniform convergence away from the integers and justifies convergence of the logarithmic derivatives. This gives the cotangent partial-fraction expansion, without a Fourier or zeta-value theorem.</p>
+\[\pi\cot(\pi z)-\frac1z=\sum_{k=1}^{\infty}\left(\frac1{z-k}+\frac1{z+k}\right).\]
+<p>Expand each paired fraction geometrically. To exchange the two sums, the new proof establishes the summable bound</p>
+\[\left|\frac{(1+(-1)^r)z^r}{k^{r+2}}\right|\le\frac{2|z|^r}{k^2}\qquad(k\ge1,\ |z|&lt;1).\]
+<p>Define the convergent series</p>
+\[A_r=\sum_{k=1}^{\infty}\frac1{k^{r+2}},\qquad Q(z)=\sum_{r=0}^{\infty}(1+(-1)^r)A_rz^r.\]
+<p>The checked sum interchange gives</p>
+\[\pi z\cot(\pi z)=1-z^2Q(z)\qquad(0&lt;|z|&lt;1).\]
+<p>Thus the coefficient of \(z^{2m}\) on the right is \(-2\zeta(2m)\). Both the analytic identity and the coefficient extraction are formalized.</p>
+<p><a href="__REPO__book/euler-proof/EulerCotangent.lean">Lean: the double-series bound and cotangent identity</a> · <a href="__EULER_MATHLIB__Mathlib/Analysis/SpecialFunctions/Trigonometric/Cotangent.lean">Mathlib: local uniform convergence and logarithmic derivatives</a></p>
+<h2 id="bernoulli">Identify the Bernoulli coefficients</h2>
+<p>Set \(w=2\pi i z\). The exponential formula for cotangent gives</p>
+\[\pi z\cot(\pi z)=\frac{w}{e^w-1}+\frac w2.\]
+<p>The Bernoulli numbers are characterized algebraically by their formal generating function:</p>
+\[\left(\sum_{j=0}^{\infty}\frac{B_j}{j!}w^j\right)(e^w-1)=w.\]
+<p>Our proof transports the analytic identity to an equality of formal power series using uniqueness of convergent power-series coefficients. It then uses the Bernoulli generating identity and cancellation in the formal power-series ring. Comparing the coefficient of \(z^{2m}\) proves the boxed formula for every \(m\ge1\).</p>
+<p><a href="__REPO__book/euler-proof/EulerSeries.lean">Lean: absolute convergence and coefficient uniqueness</a> · <a href="__REPO__book/euler-proof/EulerEvenZeta.lean">Lean: <code>cotangentSeries_eq_bernoulli</code> and <code>hasSum_even_zeta</code></a></p>
+<h2 id="examples">Checked special cases</h2>
+\[\begin{aligned}
+\zeta(2)&amp;=\frac{\pi^2}{6},&amp;\zeta(4)&amp;=\frac{\pi^4}{90},\\
+\zeta(6)&amp;=\frac{\pi^6}{945},&amp;\zeta(8)&amp;=\frac{\pi^8}{9450}.
+\end{aligned}\]
+<p>The latter three identities are checked specializations of the general theorem, with the Bernoulli numbers evaluated by their finite recurrence. The earlier Basel proof remains available independently.</p>
 <h2 id="checked">What is checked?</h2>
-<p>The final theorem is unconditional. The audit follows actual elaborated proof dependencies and requires the finite-product bound, sine-product theorem, and coefficient-error theorem. It rejects previous zeta evaluations, the native Basel proof, unfinished proofs, and custom axioms. The permitted axioms are Mathlib’s usual <code>propext</code>, <code>Classical.choice</code>, and <code>Quot.sound</code>.</p>
-<p><a href="reading/euler-proofs.json">Checked theorem statements and audit</a> · <a href="reading/euler-dependencies.txt">Complete elaborated dependency list</a> · <a href="__REPO__book/euler-proof/README.md">Source and reproduction instructions</a></p>
-<h2 id="next">Toward every even zeta value</h2>
-<p>The natural extension is to control higher coefficients of the same product. With the required convergence and differentiation estimates, its logarithmic derivative would give</p>
-\[\pi x\cot(\pi x)=1-2\sum_{m=1}^{\infty}\zeta(2m)x^{2m}\qquad(0&lt;|x|&lt;1).\]
-<p>Comparison with the Bernoulli expansion then yields</p>
-\[\zeta(2m)=\frac{(-1)^{m+1}B_{2m}(2\pi)^{2m}}{2(2m)!}\qquad(m\ge1).\]
-<p>This extension is a roadmap, not a theorem of the new package. The checked result here is the Basel case. A native version also needs an interval-level sine-product theorem and its connection to geometric \(\pi\). The separate <a href="basel.html#mathlib">Mathlib Fourier proof</a> already covers all positive even arguments.</p>
+<p>The general theorem is unconditional. Its audit follows actual elaborated proof dependencies and requires the sine product, justified logarithmic derivative, double-series summability, coefficient comparison, and Bernoulli generating identity. It rejects Fourier dependencies, previous zeta evaluations, the earlier Basel evaluation, unfinished proofs, and custom axioms. The permitted axioms are Mathlib’s usual <code>propext</code>, <code>Classical.choice</code>, and <code>Quot.sound</code>.</p>
+<p><a href="reading/euler-proofs.json">Checked theorem statements and audit</a> · <a href="reading/euler-general-dependencies.txt">General theorem’s elaborated dependencies</a> · <a href="reading/euler-dependencies.txt">Combined dependency list</a> · <a href="__REPO__book/euler-proof/README.md">Source and reproduction instructions</a></p>
+<h2 id="next">The remaining foundation work</h2>
+<p>All positive even Dirichlet-series values are proved in this separate Mathlib package. A native version still needs an interval-level sine-product theorem and its connection to geometric \(\pi\). The <a href="basel.html#mathlib">Mathlib Fourier route</a> gives the same general formula through a different proof. No cross-foundation equivalence or general Weierstrass factorization theorem is claimed here.</p>

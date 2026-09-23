@@ -1,8 +1,9 @@
-# Euler’s sine-product proof of Basel
+# Euler’s sine-product proof of all positive even zeta values
 
 This isolated Mathlib companion proves
-$\sum_{k=1}^{\infty} k^{-2}=\pi^2/6$ by Euler’s sine-product route.
-It supplies the missing coefficient argument with explicit remainder bounds.
+$\zeta(2m)=(-1)^{m+1}B_{2m}(2\pi)^{2m}/(2(2m)!)$ for every $m\ge1$.
+It also retains the earlier independent Basel coefficient argument with
+explicit remainder bounds.
 It does **not** import the native interval foundation or change its dependencies.
 
 For finite factors $0\le a_k\le1$, `product_remainder` proves
@@ -18,6 +19,23 @@ The analytic input is Mathlib’s `Real.tendsto_euler_sin_prod`, whose proof use
 weighted cosine integrals and concentration, independently of its
 Bernoulli–Fourier evaluation of zeta. General Weierstrass factorization is not
 used. The zero set alone is not assumed to imply the sine-product identity.
+
+## General coefficient argument
+
+`EulerSeries.lean` supplies an absolute scalar power-series representation on
+the unit disk, its algebra, and coefficient uniqueness.
+`EulerCotangent.lean` uses Mathlib's justified logarithmic derivative of the
+sine product. The double-series majorant
+$|(1+(-1)^r)z^r/k^{r+2}|\le2|z|^r/k^2$ justifies exchanging the sums.
+The result identifies the regularized cotangent series, whose coefficient at
+$2m$ is $-2\zeta(2m)$.
+
+`EulerEvenZeta.lean` transports the exponential cotangent identity to formal
+power series. The purely algebraic Bernoulli generating identity and
+cancellation identify every coefficient. The public theorem is
+`EulerEven.hasSum_even_zeta`, with the sole hypothesis `0 < m`.
+`hasSum_four`, `hasSum_six`, and `hasSum_eight` check concrete specializations.
+No previous zeta evaluation or Fourier theorem is used.
 
 ## Reproduce
 
@@ -35,18 +53,19 @@ The source archive hash is pinned in `verify.py`; the complete dependency
 manifest is supplied by that pinned archive. Existing work directories must
 carry the matching revision marker. No global Mathlib installation is needed.
 
-`CheckEuler.lean` traverses elaborated types and proof terms. It requires the
-finite-product, sine-product, and coefficient-error theorems in the final
-proof; it rejects pre-existing zeta evaluations, the native Basel proof, and
-all axioms except `propext`, `Classical.choice`, and `Quot.sound`.
-The report records theorem statements, axioms, source hashes, and the full
-transitive dependency list. It is a dependency audit, not a proof-size ranking.
+`CheckEuler.lean` traverses elaborated types and proof terms for both the
+Basel proof and the general theorem. The latter must use the sine product,
+locally uniform logarithmic derivative, double-series summability, coefficient
+uniqueness and Bernoulli generating identity. It rejects Fourier dependencies,
+pre-existing zeta evaluations, the earlier Basel evaluation, and all axioms
+except `propext`, `Classical.choice`, and `Quot.sound`.
+The report records theorem statements, axioms, source hashes, and separate
+transitive dependency lists. It is a dependency audit, not a proof-size ranking.
 
 ## Scope
 
-The checked result is the Basel case in Mathlib’s real numbers. The native
-project already has an independent Basel theorem by finite Leibniz-square
-rearrangements. A native Euler route still needs a quantitative interval
-sine-product theorem and a bridge to geometric $\pi$; this companion does not
-provide that bridge. Higher coefficients, all $\zeta(2m)$, and a general
-Weierstrass factorization theorem are not claimed here.
+All positive even Dirichlet-series values are checked in Mathlib's real
+numbers. The native project has an independent Basel theorem by finite
+Leibniz-square rearrangements. A native Euler route still needs a quantitative
+interval sine-product theorem and a bridge to geometric $\pi$; this companion
+does not provide that bridge. General Weierstrass factorization is not claimed.

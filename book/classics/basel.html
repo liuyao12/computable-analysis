@@ -13,7 +13,7 @@
 <h2 id="euler">Euler’s product, made rigorous</h2>
 <p>A separate checked proof now derives the Basel identity from the sine product. Its key estimate is uniform in the number of factors:</p>
 \[0\le\prod_{k=1}^{N}\left(1-\frac{x^2}{k^2}\right)-\left(1-x^2\sum_{k=1}^{N}\frac1{k^2}\right)\le2x^4\qquad(0\le x\le1).\]
-<p>This controls the coefficient comparison after the product limit is taken. The new proof uses Mathlib’s sine-product theorem and avoids its Fourier evaluation. <a href="euler.html">Read Euler’s rigorous proof and its Lean audit.</a></p>
+<p>This controls the coefficient comparison after the product limit is taken. The new proof uses Mathlib’s sine-product theorem and avoids its Fourier evaluation. <a href="euler.html">Read Euler’s rigorous proof, now extended to every positive even zeta value.</a></p>
 <h2 id="mathlib">The Mathlib proof: Bernoulli Fourier series</h2>
 <p>Mathlib takes a broader route. It computes the Fourier coefficients of the Bernoulli polynomials by a derivative recurrence, proves summability, and reconstructs their periodic extensions. At the endpoint, this gives the general even-zeta formula; specializing to \(2\) yields <code>hasSum_zeta_two</code>.</p>
 <p>For the Basel case, the periodic polynomial is \(B_2(x)=x^2-x+1/6\). Its Fourier expansion is</p>

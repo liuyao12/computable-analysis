@@ -305,7 +305,9 @@ jobs:
       - uses: actions/cache@v5
         with:
           path: euler-mathlib
-          key: euler-mathlib-51e6992efd06126df61a496bebf8f49482a4e129-v1
+          key: euler-mathlib-51e6992efd06126df61a496bebf8f49482a4e129-v2
+          restore-keys: |
+            euler-mathlib-51e6992efd06126df61a496bebf8f49482a4e129-
       - name: Check Euler's sine-product proof and its elaborated dependencies
         run: |
           set -euo pipefail
@@ -430,7 +432,8 @@ jobs:
                   assert classics['documentationRevision']==revision and all(classics['checks'].values())
                   euler=get('/reading/euler-proofs.json')
                   assert euler['mathlibRevision']==classics['eulerMathlibRevision'] and all(euler['checks'].values())
-                  for path in ['reading/euler-proofs.json','reading/euler-dependencies.txt']:
+                  assert euler['allPositiveEvenValuesProved'] and len(euler['declarations'])==15
+                  for path in ['reading/euler-proofs.json','reading/euler-dependencies.txt','reading/euler-general-dependencies.txt']:
                       assert hashlib.sha256(get('/'+path,True)).hexdigest()==classics['artifacts'][path]
                   def final_hash(path,previous):
                       for edition in [square,classics]:
