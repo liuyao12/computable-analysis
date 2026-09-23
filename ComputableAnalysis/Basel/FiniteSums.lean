@@ -167,4 +167,31 @@ theorem triangle_swap (f : Nat → Nat → Rat) (n : Nat) :
   apply sumBelow_congr; intro i hi
   simp only [show d+1-1-i=d-i by omega, show d-(d-i)=i by omega]
 
+/-- Close rational samples in arbitrarily fine refinements establish
+interval equivalence directly, without taking a limit in a completed field. -/
+ theorem equiv_of_close_lower_refinements {x y : RealRaw} (hx : x.Valid) (hy : y.Valid)
+    (hclose : ∀ stage (eps : QPos), ∃ i j, stage≤i ∧ stage≤j ∧
+      qabs ((x.compute i).lo-(y.compute j).lo)≤eps.val) : x.Equiv y := by
+  intro stage
+  apply (RealRaw.compareAt_overlap_iff x y stage stage).2
+  constructor
+  · apply Classical.byContradiction; intro h
+    have hg : 0<(x.compute stage).lo-(y.compute stage).hi := by grind only
+    let eps : QPos := ⟨((x.compute stage).lo-(y.compute stage).hi)/2, by grind only [Rat.div_def]⟩
+    obtain ⟨i,j,hi,hj,hb⟩ := hclose stage eps
+    have hn := hx.2.1 stage i hi
+    have hm := hy.2.1 stage j hj
+    have ha := self_le_qabs ((x.compute i).lo-(y.compute j).lo)
+    dsimp [eps] at hb
+    grind only [Rat.div_def]
+  · apply Classical.byContradiction; intro h
+    have hg : 0<(y.compute stage).lo-(x.compute stage).hi := by grind only
+    let eps : QPos := ⟨((y.compute stage).lo-(x.compute stage).hi)/2, by grind only [Rat.div_def]⟩
+    obtain ⟨i,j,hi,hj,hb⟩ := hclose stage eps
+    have hn := hx.2.1 stage i hi
+    have hm := hy.2.1 stage j hj
+    have ha := neg_qabs_le_self ((x.compute i).lo-(y.compute j).lo)
+    dsimp [eps] at hb
+    grind only [Rat.div_def]
+
 end ComputableAnalysis.Basel
