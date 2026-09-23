@@ -8,6 +8,12 @@ on:
     paths:
       - '.github/workflows/publish_verified_blueprint.yml'
       - '.github/reader-edition/**'
+      - 'book/rational-primitives/**'
+      - 'ComputableAnalysis/RationalPrimitive*.lean'
+      - 'ComputableAnalysis/RationalExpressionNormalization.lean'
+      - 'ComputableAnalysis/TrigonometricRationalization.lean'
+      - 'scripts/check_rational_primitives.lean'
+      - 'docs/RATIONAL_PRIMITIVES.md'
       - 'book/fundamental-matrix/**'
       - 'book/algebraic-ode/**'
       - 'book/zeta-real/**'
@@ -254,12 +260,22 @@ jobs:
           lake env lean scripts/check_zeta_real.lean | tee zeta-reports/axioms.log
           python3 .github/reader-edition/zeta_real.py --site site --revision "$GITHUB_SHA" --audit zeta-reports/axioms.log
           python3 .github/reader-edition/test_zeta_real.py --site site --report reader-edition-tests
+      - name: Verify and publish finite rational primitive algebra
+        run: |
+          set -euo pipefail
+          mkdir -p rational-primitives-reports
+          lake build ComputableAnalysis.RationalPrimitiveExamples | tee rational-primitives-reports/build.log
+          lake env lean scripts/check_rational_primitives.lean | tee rational-primitives-reports/audit.log
+          python3 .github/reader-edition/rational_primitives.py --site site --revision "$GITHUB_SHA" --audit rational-primitives-reports/audit.log
+          python3 .github/reader-edition/test_rational_primitives.py --site site --report reader-edition-tests
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: reader-edition-validation
           path: |
             reader-edition-tests
+            rational-primitives-reports
+            site/reading/rational-primitives-edition.json
             geometry-reports
             leibniz-reports
             algebraic-ode-reports

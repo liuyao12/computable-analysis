@@ -17,3 +17,5 @@ Worked finite examples and historical benchmark adapters remain importable
 from their own modules, but are intentionally not re-exported here.  A new
 client should start from this file or from the narrower chapter foundations.
 -/
+
+import ComputableAnalysis.RationalPrimitiveExamples

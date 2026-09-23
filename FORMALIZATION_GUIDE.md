@@ -1,5 +1,17 @@
 # Formalization Guide
 
+**Rational primitive algebra (2026-09-23).**
+`RationalPrimitiveFormula` computes and checks formal primitives of supplied
+rational linear/quadratic partial fractions of arbitrary multiplicity.
+`TrigonometricRationalization` compiles every rational circle expression and
+its half-angle Jacobian to `RatFun`, preserving all undefined cases. Two
+charts cover the rational circle. The general analytic theorem is still open:
+algebraic partial-fraction construction, represented elementary evaluators,
+finite-difference differentiation soundness, and angle-chart transport remain.
+See [the exact theorem ledger](docs/RATIONAL_PRIMITIVES.md); do not promote
+`formalDerivative` identities to `HasDerivativeOnInterval` certificates.
+
+
 
 **Basel and the Euler sieve (2026-09-22).**
 `ComputableAnalysis.Basel.RealZeta` exports the unconditional identity

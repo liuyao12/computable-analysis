@@ -10,6 +10,35 @@ def derivative : List Rat -> List Rat
   | [] => []
   | _ :: cs => cs.zipIdx.map (fun (c, i) => ((i + 1 : Nat) : Rat) * c)
 
+/-- The zero-constant formal antiderivative of a rational polynomial.
+Coefficient `c_i` is shifted to degree `i+1` and divided by `i+1`; hence the
+construction is finite and executable over rationals. -/
+def primitive (coeffs : List Rat) : List Rat :=
+  0 :: coeffs.zipIdx.map
+    (fun (c, i) => c / (((i + 1 : Nat) : Rat)))
+
+private theorem derivative_primitive_aux (coeffs : List Rat) (index : Nat) :
+    (((coeffs.zipIdx index).map
+        (fun (c, i) => c / (((i + 1 : Nat) : Rat)))).zipIdx index).map
+      (fun (c, i) => (((i + 1 : Nat) : Rat)) * c) = coeffs := by
+  induction coeffs generalizing index with
+  | nil => simp
+  | cons coefficient rest ih =>
+      simp only [List.zipIdx, List.map_cons]
+      congr 1
+      · have hne : (((index + 1 : Nat) : Rat)) ≠ 0 :=
+          Rat.ne_of_gt ((Rat.natCast_pos).2 (Nat.succ_pos index))
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      · exact ih (index + 1)
+
+/-- Formal differentiation is a left inverse of the executable rational
+polynomial primitive. -/
+theorem derivative_primitive (coeffs : List Rat) :
+    derivative (primitive coeffs) = coeffs := by
+  unfold derivative primitive
+  exact derivative_primitive_aux coeffs 0
+
 /-- Executable pointwise evaluation of the formal derivative list.  The
 coefficient index is carried explicitly so the construction remains a finite
 natural-number recursion. -/

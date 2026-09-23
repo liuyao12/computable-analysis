@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Elementary primitives · Computable Analysis</title>
+<style>
+:root{color-scheme:light;--ink:#243330;--green:#1d6355;--line:#d5ddd7}*{box-sizing:border-box}body{margin:0;background:#faf9f5;color:var(--ink);font:18px/1.75 Georgia,serif}main{max-width:850px;margin:auto;padding:48px 26px 90px}a{color:var(--green);text-underline-offset:3px}nav{font:14px/1.5 system-ui,sans-serif;display:flex;gap:24px;flex-wrap:wrap}header{padding:48px 0 28px;border-bottom:1px solid var(--line)}h1{font-size:clamp(36px,7vw,58px);font-weight:500;line-height:1.12;letter-spacing:-1px;margin:16px 0 22px}h2{font-size:28px;font-weight:500;margin:42px 0 14px}.eyebrow{font:12px/1.5 system-ui,sans-serif;text-transform:uppercase;letter-spacing:2px;color:var(--green)}.lead{font-size:22px;line-height:1.55}.note{border-left:3px solid var(--green);padding:6px 0 6px 22px}.math{overflow-x:auto;padding:8px 0}code{font:14px/1.6 ui-monospace,monospace;overflow-wrap:anywhere}li{margin:12px 0}footer{border-top:1px solid var(--line);margin-top:48px;padding-top:22px;font:14px/1.65 system-ui,sans-serif}@media(max-width:500px){main{padding:26px 20px 55px}header{padding-top:30px}}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],processEscapes:true},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body><main>
+<nav aria-label="Book"><a href="index.html">Computable Analysis</a><a href="ch-integrals.html">Integrals</a><a href="#status">Proof status</a></nav>
+<header><span class="eyebrow">Finite integration algorithms</span><h1>Elementary primitives</h1>
+<p class="lead">Rational functions, repeated poles, and the half-angle route from trigonometry to rational algebra.</p>
+<p class="note"><strong>The general analytic theorem remains open.</strong> The checked results are a formal primitive algorithm for supplied rational partial fractions and a domain-preserving rational circle substitution. They use the project’s own foundation, with no Mathlib dependency.</p></header>
+<section><h2>The theorem we want</h2>
+<p>On an interval with an explicit positive lower bound for its denominator, every rational function should have an elementary primitive:</p>
+<div class="math">\[F'(x)=\frac{p(x)}{q(x)},\qquad |q(x)|\geq\delta>0.\]</div>
+<p>The answer may use real algebraic constants, rational operations, logarithms of absolute values, and arctangents. Algebraic constants matter: even \(1/(x^2-2)\) naturally introduces \(\sqrt2\). Higher-degree algebraic roots need not have radical expressions.</p>
+<p>A primitive belongs to a pole-free interval. A complex version additionally needs logarithm branches; it does not promise a single-valued primitive throughout a punctured plane.</p></section>
+<section><h2>What repeated poles contribute</h2>
+<p>After polynomial division and real algebraic factorization, partial fractions reduce the problem to a polynomial and terms of these forms:</p>
+<div class="math">\[\frac{c}{(x-a)^m},\qquad \frac{A(x-a)+B}{((x-a)^2+b)^m},\qquad b>0.\]</div>
+<p>Linear poles integrate to logarithms or reciprocal powers. For positive quadratics, put \(u=x-a\), \(Q=u^2+b\), and \(I_m=\int Q^{-m}\,dx\). One arctangent starts a terminating recurrence:</p>
+<div class="math">\[I_1=\frac1{\sqrt b}\arctan\frac{u}{\sqrt b},\qquad I_{m+1}=\frac{u}{2mbQ^m}+\frac{2m-1}{2mb}I_m.\]</div>
+<p>The linear part of the numerator gives \((A/2)\log Q\) at a simple pole and \(-A/(2mQ^m)\) at higher orders. All remaining steps are finite rational arithmetic.</p>
+<p><code>quadraticPrimitive_correct</code> proves the recurrence’s formal derivative identity for every multiplicity. <code>Decomposition.primitive_correct</code> proves the corresponding identity for every supplied rational partial-fraction decomposition. The computed formula retains its pointwise domain.</p>
+<p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/RationalPrimitiveFormula.lean">Read the finite integration proof</a></p></section>
+<section><h2>Why sine and cosine reduce to the same problem</h2>
+<p>The tangent-half-angle substitution \(t=\tan(\theta/2)\) gives</p>
+<div class="math">\[\sin\theta=\frac{2t}{1+t^2},\qquad \cos\theta=\frac{1-t^2}{1+t^2},\qquad d\theta=\frac{2}{1+t^2}\,dt.\]</div>
+<p>Every rational expression in the two coordinates therefore becomes a rational integrand, including the change-of-variable factor. Lean checks that finite statement for every expression and every rational chart input.</p>
+<p>An antipodal chart uses \(u=-\cot(\theta/2)\), negates both circle coordinates, and has the same positive Jacobian. Two charts cover every rational point of the circle. Turning this into the analytic trigonometric corollary still requires the represented angle identities, a chain rule, and compatible constants on chart overlaps.</p>
+<p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/TrigonometricRationalization.lean">Read the universal rationalization and chart-cover proofs</a></p></section>
+<section><h2>Poles survive the compiler</h2>
+<p>Algebraic simplification must not silently enlarge a function’s domain. The expression \(1/(1/x)\) remains undefined at zero, even though its value elsewhere is \(x\). So does \(0\cdot(1/x)\).</p>
+<p>The compiler inverts \(p/q\) as \(q^2/(pq)\), retaining the original denominator as a guard. <code>compile_correct</code> proves equality of partial evaluations, and <code>pullback_defined_iff</code> proves that the circle substitution neither removes nor adds an integrand pole on the chart.</p></section>
+<section><h2>Checked examples</h2>
+<div class="math">\[\int\frac{dx}{x(x-1)}=\log|x-1|-\log|x|+C.\]</div>
+<div class="math">\[\int\frac{dx}{(1+x^2)^2}=\frac{x}{2(1+x^2)}+\frac12\arctan x+C.\]</div>
+<p>These examples are checked at the formal-derivative level. Further regressions preserve undefined reciprocals and verify that the half-angle pullback of \(1/(1+\cos\theta)\) is one on the first chart.</p>
+<p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/RationalPrimitiveExamples.lean">Regression proofs</a> · <a href="reading/rational-primitives-audit.log">Axiom and import audit</a></p></section>
+<section id="status"><h2>What remains to prove</h2>
+<ol><li>Construct partial fractions for arbitrary rational denominators over represented real algebraic constants. The current normal forms use rational constants only.</li>
+<li>Evaluate the elementary formulas with valid rational interval algorithms and explicit precision schedules.</li>
+<li>Prove analytic differentiation soundness through <code>HasDerivativeOnInterval</code>. A formal differentiation rule alone is insufficient.</li>
+<li>Connect the two circle charts to the existing represented sine and cosine functions, then prove derivative transport and overlap gluing.</li></ol>
+<p>The existing general <code>ComputableFTA</code> is a target proposition, not a proved factorization theorem available to close the first step. This page does not claim that either requested general analytic theorem has been formalized.</p>
+<p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/docs/RATIONAL_PRIMITIVES.md">Exact scope, formulas, and remaining obligations</a></p></section>
+<footer>The new proofs use only Lean’s standard logical axioms; the audit rejects unfinished proofs, custom axioms, and native-decision axioms. The finite constructors are executable.<br><a href="https://github.com/liuyao12/computable-analysis/commit/__REVISION__">Verified source revision</a></footer>
+</main></body></html>

@@ -1,0 +1,55 @@
+\section{Elementary primitives: the finite reduction}
+\label{sec:rational-primitives}
+
+The target theorem states that a rational function on an interval whose
+denominator is uniformly apart from zero has an elementary primitive.
+Algebraic constants are allowed. The general analytic theorem remains open;
+the checked results here are finite formal-derivative identities and a
+domain-preserving circle substitution.
+
+\begin{theorem}[Supplied partial fractions]
+\label{thm:rational-primitive-formula}
+\lean{ComputableAnalysis.RationalPrimitiveFormula.Decomposition.primitive_correct}
+\leanok
+Given a certified decomposition with rational coefficients into a polynomial,
+linear poles and positive quadratic poles, the finite primitive algorithm
+returns a formula whose formal derivative is the input rational function at
+every permitted rational input.
+\end{theorem}
+\begin{proof}\leanok
+For \(Q=(x-a)^2+b\), \(b>0\), repeated quadratic poles reduce by
+\[
+ I_1=\frac1{\sqrt b}\arctan\frac{x-a}{\sqrt b},\qquad
+ I_{m+1}=\frac{x-a}{2mbQ^m}+\frac{2m-1}{2mb}I_m.
+\]
+Linear numerators reduce to logarithms and reciprocal powers of \(Q\).
+Linear poles give logarithms or reciprocal powers of \(x-a\); polynomial
+coefficients integrate termwise. Induction checks the finite identities.
+This is a statement about formal differentiation, not a derivative
+certificate for a represented elementary evaluator.
+\end{proof}
+
+\begin{theorem}[Rational circle pullback]
+\label{thm:rational-circle-pullback}
+\lean{ComputableAnalysis.TrigonometricRationalization.Expr.pullback_correct,
+ComputableAnalysis.TrigonometricRationalization.Expr.pullback_defined_iff}
+\leanok
+Every rational expression in two circle coordinates pulls back to a rational
+function under
+\[
+ s=\frac{2t}{1+t^2},\qquad c=\frac{1-t^2}{1+t^2},
+ \qquad J=\frac2{1+t^2}.
+\]
+The computed rational function equals the expression times \(J\), and is
+defined exactly when the original expression at those coordinates is defined.
+\end{theorem}
+\begin{proof}\leanok
+Structural induction on rational expressions and domain-preserving polynomial
+normalization. The reciprocal of \(p/q\) is stored as \(q^2/(pq)\), so the
+original poles are not filled by cancellation.
+\end{proof}
+
+Two antipodal charts cover the rational circle. General algebraic partial
+fractions, interval-valued elementary realizations, analytic differentiation,
+and transport through the represented angle charts are still needed for the
+full rational-primitive theorem and its trigonometric corollary.
