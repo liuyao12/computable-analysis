@@ -7,7 +7,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
-from classic_proofs import LINKS,MATHLIB,MATHLIB_HASH,EULER_MATHLIB
+from classic_proofs import LINKS,MATHLIB,MATHLIB_HASH,EULER_MATHLIB,SHOWCASE_PAGES
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('--site',required=True,type=Path);p.add_argument('--report',required=True,type=Path);p.add_argument('--static-only',action='store_true');a=p.parse_args()
@@ -33,6 +33,19 @@ def main():
             if not u.scheme and u.path:
                 target=site/u.path
                 assert target.is_file() or (target/'index.html').is_file(),el['href']
+    assert report['pages']==SHOWCASE_PAGES
+    for name in SHOWCASE_PAGES:
+        doc=BeautifulSoup((site/name).read_text(),'html.parser')
+        headings=doc.article.select('h2[id]')
+        assert [h['id'] for h in headings[:2]]==['setup','theorem'],name
+        statements=doc.select('.showcase-statement')
+        assert len(statements)==1 and statements[0].select_one('p'),name
+        assert len(statements[0].get_text().split())>=25,name
+        assert not statements[0].select('code,sup,sub'),name
+        ids=[node['id'] for node in doc.select('[id]')]
+        assert len(ids)==len(set(ids)),(name,'duplicate anchors')
+        for anchor in ['setup','theorem']:
+            assert doc.select_one(f'.on-this-page a[href="#{anchor}"]'),(name,anchor)
     for name in ['fuchs.html','painleve.html']:
         doc=BeautifulSoup((site/name).read_text(),'html.parser')
         assert 'Differential equations' in doc.select_one('#book-nav').get_text()
@@ -79,9 +92,10 @@ def main():
             browser=pw.chromium.launch(**opts)
             for width in [1440,390,320]:
                 page=browser.new_page(viewport={'width':width,'height':1000});page.on('pageerror',lambda e:errors.append(str(e)))
-                for name in [href for href,_ in LINKS]+['cosine.html']:
+                for name in SHOWCASE_PAGES:
                     page.goto(base+name,wait_until='networkidle');page.evaluate('() => MathJax.startup.promise')
                     assert page.locator('mjx-merror,[data-mjx-error]').count()==0,(name,width)
+                    assert page.locator('.showcase-statement mjx-container').count()>0,(name,'statement math')
                     assert page.locator('#book-nav a[href="cartwright.html"] mjx-container').count()==1,(name,'navigation math')
                     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+2'),(name,width)
                     if name=='basel.html':

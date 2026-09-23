@@ -1,7 +1,14 @@
 <h1 id="basel">The Basel problem</h1>
 <p class="lead">Finite rearrangements, Euler’s sine product, and Fourier series: three routes to the sum of reciprocal squares.</p>
-\[\boxed{\sum_{n=1}^{\infty}\frac1{n^2}=\frac{\pi^2}{6}.}\]
-<p>The native theorem identifies the independently computed reciprocal-square series with geometric \(\pi^2/6\). It also identifies the value of our real-input zeta function at \(2\). Both results are unconditional.</p>
+<h2 id="setup">Setup</h2>
+<p>Let \(\pi\) be the circle constant obtained from geometric exhaustion. Sum the reciprocal squares of the first \(N\) positive integers:</p>
+\[S_N=\sum_{n=1}^{N}\frac{1}{n^2}.\]
+<section class="showcase-statement" aria-labelledby="theorem"><h2 id="theorem">Theorem — Basel</h2>
+<p>As \(N\) tends to infinity, these partial sums converge to one sixth of the square of the circle constant:</p>
+\[\lim_{N\to\infty}S_N=\frac{\pi^2}{6}.\]
+<p>Equivalently, the zeta value at \(2\) is \(\zeta(2)=\pi^2/6\).</p>
+</section>
+<p>The native formalization proves this identification for the independently computed reciprocal-square series and for our real-input zeta function. Both results are unconditional.</p>
 <h2 id="native">The native proof: square finite Leibniz sums</h2>
 <p>For \(N\ge1\), write</p>
 \[B_N=\sum_{k=0}^{N-1}\frac{(-1)^k}{2k+1},\qquad H_N=\sum_{k=0}^{N-1}\frac1{2k+1},\qquad M_N=\sum_{k=0}^{N-1}\frac1{(2k+1)^2}.\]
