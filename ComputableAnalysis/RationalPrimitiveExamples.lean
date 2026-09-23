@@ -1,3 +1,4 @@
+import ComputableAnalysis.TrigonometricPrimitiveExamples
 import ComputableAnalysis.ComputablePrimitiveDerivativeExamples
 import ComputableAnalysis.ComputablePrimitiveExamples
 import ComputableAnalysis.RationalFactoredPrimitives

@@ -1,5 +1,17 @@
 # Computable Analysis: Canonical Roadmap
 
+**Trigonometric primitive formulas and finite substitution (2026-09-23).**
+`ComputableTrigonometricRationalization.RepresentedFactorization.primitive_correct`
+computes an elementary formula for every rational sine/cosine expression with
+arbitrary computable coefficients, given a certified factorization of the
+half-angle pullback denominator. It proves represented equivalence of the
+formal angle derivative with the original expression. Both circle charts
+preserve undefined divisions. `PrimitiveChangeOfVariables` supplies the
+finite chain-rule error proof and conversion to `HasDerivativeOnInterval`,
+including zero finite inner increments. This is not yet the full interval
+primitive corollary: the rational formula assembly and the instantiation of
+the finite composition certificate for the represented angle evaluator remain.
+
 **Concrete derivatives with computable coefficients (2026-09-23).**
 `ComputableLogarithmChart.Coefficient.hasDerivative` and
 `weightedHasDerivative` construct actual finite secant certificates for local

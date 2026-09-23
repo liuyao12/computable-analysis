@@ -332,6 +332,72 @@ The audit accepts only Lean's standard `propext`, `Classical.choice`, and
 native-decision axioms, and checks the import closure for Mathlib. The
 constructors themselves are executable finite rational algorithms.
 
+## Primitive formula theorem for rational sine/cosine expressions
+
+The universal elementary-expression theorem is now
+`ComputableTrigonometricRationalization.RepresentedFactorization.primitive_correct`.
+For an expression \(R\) in sine and cosine, put
+\[
+ t=\frac{\sin x}{1+\cos x},\qquad
+ q(t)=\frac{2}{1+t^2}\,
+ R\!\left(\frac{2t}{1+t^2},\frac{1-t^2}{1+t^2}\right).
+\]
+The compiler constructs the numerator and denominator of \(q\), preserving
+its domain. Coefficients are the original computable-real algorithms, not
+rational replacements. Given a certified factorization of that denominator,
+the existing partial-fraction algorithm computes an elementary formula \(P\).
+The finite chain identity is
+\[
+ \frac{d}{dx}P(t)=P'(t)\frac{1+t^2}{2}
+ =R\!\left(\frac{2t}{1+t^2},\frac{1-t^2}{1+t^2}\right).
+\]
+Here the displayed differentiation is the **elementary-expression calculus**.
+`halfAngle_derivative` derives its chain factor from the circle relation and
+the sine/cosine derivative rules, rather than assuming a tangent derivative
+identity. `primitive_correct` proves `RealRaw.Equiv` between successful
+evaluations of the resulting formal angle derivative and the original
+expression. The factorization supplies no partial fractions or primitive law.
+The nonzero domains and interval evaluation certificates are explicit.
+
+`RepresentedFactorization` accepts equality of the factored quotient with the
+compiled pullback using `RealRaw.Equiv`. This is essential for algebraic roots:
+rational approximations to \(\sqrt2\) do not square to \(2\) exactly. The
+simpler `Factorization` interface proves its polynomial identity by common
+samples, and `asRepresented` embeds that special case into the general result.
+Neither interface assumes a primitive law. Original expression domains and
+factor denominator domains are both explicit in the theorem.
+
+The antipodal chart applies the same theorem to the expression with both
+coordinates negated; its Jacobian has the same sign. A checked irrational
+example uses \(R(s,c)=\sqrt2/(1+c)\). At \(t=1/16\), the formal derivative is
+proved equivalent to the original square-root computation multiplied by
+\(257/512\). Regressions retain both a genuine pole in the antipodal chart
+and the undefined value of \(0\cdot(1/\sin x)\) at a sine zero.
+
+### What change of variables is available?
+
+`PrimitiveChangeOfVariables` extracts the focused finite composition proof
+from the workspace's `DifferentialComposition` development, with all closed
+rational checks verified by the kernel. Given finite inner and outer witnesses,
+it proves the exact error decomposition
+\[
+ \frac{F_1-F_0}{h}-D_FD_g
+ =\frac{F_1-F_0-D_F(g_1-g_0)}{h}
+  +D_F\left(\frac{g_1-g_0}{h}-D_g\right).
+\]
+An outer derivative bound and two explicit error budgets bound the result.
+The rule works when \(g_1=g_0\). The certificate constructors also require
+membership of the witnesses in the actual composite boxes and width bounds;
+they then produce a concrete `HasDerivativeOnInterval` certificate. These
+membership and approximation obligations are not a supplied derivative law.
+
+**The full interval primitive corollary is not yet proved.** In particular,
+the universal formula theorem above does not supply the composite box
+membership, precision schedules, or angle-evaluator identification. Instantiating
+the finite change-of-variables certificate with the completed rational primitive
+assembly and the represented half-angle map remains necessary. No general
+substitution theorem for arbitrary represented functions is being asserted.
+
 ## Remaining work before the general theorem can be claimed
 
 1. Construct a certified factorization of an arbitrary input polynomial when
@@ -343,8 +409,10 @@ constructors themselves are executable finite rational algorithms.
    quadratic recurrence terms with the new concrete logarithm/arctangent
    certificates. Irrational simple poles and quadratic base terms now have
    actual `HasDerivativeOnInterval` certificates; the full formula does not yet.
-4. Identify the two angle charts with the established sine and cosine
-   evaluators, then prove the chain rule and overlap gluing.
+4. Instantiate the checked finite chain-rule certificate for the represented
+   half-angle map and primitive evaluator, identify both angle charts with the
+   established sine/cosine computations, and handle overlap constants. The
+   universal elementary-expression primitive theorem is now checked.
 
 General `ComputableFTA` in `FTA.lean` is currently a target proposition, not a
 theorem available to discharge the first obligation. Defining formal

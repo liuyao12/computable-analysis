@@ -208,3 +208,53 @@ Two antipodal charts cover the rational circle. Factorization existence,
 the remaining elementary realizations and their analytic assembly,
 and transport through the represented angle charts are still needed for the
 full rational-primitive theorem and its trigonometric corollary.
+
+\begin{theorem}[Elementary-expression primitives in sine and cosine]
+\label{thm:trigonometric-primitive-formula}
+\lean{ComputableAnalysis.ComputableTrigonometricRationalization.RepresentedFactorization.primitive_correct,
+ComputableAnalysis.ComputableTrigonometricRationalization.Expr.pullback_defined_iff,
+ComputableAnalysis.ComputableTrigonometricRationalization.halfAngle_derivative,
+ComputableAnalysis.TrigonometricPrimitiveExamples.derivative_is_expected}
+\leanok
+For every rational expression in sine and cosine with arbitrary computable-real
+coefficients, a certified linear/quadratic factorization of the half-angle
+pullback denominator determines an elementary formula whose represented formal
+angle derivative agrees with the original expression, whenever the finite
+coefficient evaluations and domain certificates succeed. The primitive formula
+and all partial-fraction coefficients are computed.
+\end{theorem}
+\begin{proof}\leanok
+The compiler retains all denominator guards. Set
+\[
+ q(t)=\frac2{1+t^2}R\left(\frac{2t}{1+t^2},\frac{1-t^2}{1+t^2}\right).
+\]
+Integrate this factored rational expression using the checked finite recurrence.
+The circle relation and sine/cosine derivative rules give the formal factor
+$t'=(1+t^2)/2$, which cancels the pullback Jacobian. Common rational samples
+transport the identity to equivalence of the original computable coefficient
+algorithms. Factorization identities involving algebraic roots are transported
+by raw-real equivalence, without requiring their finite rational samples to
+satisfy the same polynomial identities. The opposite chart negates both circle coordinates and preserves
+the same Jacobian.
+\end{proof}
+
+\begin{theorem}[Finite primitive change of variables]
+\label{thm:primitive-finite-change-of-variables}
+\lean{ComputableAnalysis.PrimitiveChangeOfVariables.FiniteSecantCompositionDerivativeOnInterval.toHasDerivativeOnInterval,
+ComputableAnalysis.TrigonometricPrimitiveExamples.zero_inner_increment}
+\leanok
+Finite inner and outer secant models, a bound for the outer derivative,
+explicit error budgets, composite-box membership, and width bounds construct
+an actual two-sided interval derivative certificate for the composite.
+A zero finite inner increment is permitted.
+\end{theorem}
+\begin{proof}\leanok
+Split the composite error into the outer linearization residual divided by
+the physical step and the outer derivative times the inner secant error.
+Pay for each with half the requested error, then apply the existing
+finite-model derivative theorem.
+\end{proof}
+The formal angle identity is proved for all expressions, but the composite
+box membership and schedules have not yet been constructed for all their
+primitive evaluators. Thus the full interval trigonometric primitive theorem
+remains open.

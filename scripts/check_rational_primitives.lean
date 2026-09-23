@@ -9,6 +9,30 @@ run_cmd do
     if mod.toString.startsWith "Mathlib" then
       throwError "Unexpected Mathlib import: {mod}"
   for root in [
+      ``ComputableAnalysis.ComputableTrigonometricRationalization.Factorization.asRepresented,
+      ``ComputableAnalysis.ComputableTrigonometricRationalization.Expr.pullback_angle_correct,
+      ``ComputableAnalysis.ComputableTrigonometricRationalization.RepresentedFactorization.primitive_correct,
+
+      ``ComputableAnalysis.ComputableTrigonometricRationalization.Expr.shadow_compile,
+      ``ComputableAnalysis.ComputableTrigonometricRationalization.Expr.pullback_correct,
+      ``ComputableAnalysis.ComputableTrigonometricRationalization.Expr.pullback_defined_iff,
+      ``ComputableAnalysis.ComputableTrigonometricRationalization.Expr.antipodal_pullback_correct,
+      ``ComputableAnalysis.ComputableTrigonometricRationalization.jacobian_cancel,
+      ``ComputableAnalysis.ComputableTrigonometricRationalization.halfAngle_derivative,
+      ``ComputableAnalysis.ComputableTrigonometricRationalization.Factorization.primitive_sample_correct,
+      ``ComputableAnalysis.ComputableTrigonometricRationalization.Factorization.primitive_correct,
+      ``ComputableAnalysis.PrimitiveChangeOfVariables.rationalCompositionSecant_error_le,
+      ``ComputableAnalysis.PrimitiveChangeOfVariables.FiniteCompositionDerivativeOnInterval.toHasDerivativeOnInterval,
+      ``ComputableAnalysis.PrimitiveChangeOfVariables.FiniteSecantCompositionDerivativeOnInterval.toHasDerivativeOnInterval,
+      ``ComputableAnalysis.TrigonometricPrimitiveExamples.factors_checked,
+      ``ComputableAnalysis.TrigonometricPrimitiveExamples.derivative_computes,
+      ``ComputableAnalysis.TrigonometricPrimitiveExamples.value_computes,
+      ``ComputableAnalysis.TrigonometricPrimitiveExamples.irrational_primitive_correct,
+      ``ComputableAnalysis.TrigonometricPrimitiveExamples.derivative_is_expected,
+      ``ComputableAnalysis.TrigonometricPrimitiveExamples.zero_times_cosecant_stays_undefined,
+      ``ComputableAnalysis.TrigonometricPrimitiveExamples.antipodal_pole_retained,
+      ``ComputableAnalysis.TrigonometricPrimitiveExamples.zero_inner_increment,
+
       ``ComputableAnalysis.ComputableCoefficient.widthStage_spec,
       ``ComputableAnalysis.PrimitiveLogarithmEstimates.prefix_lipschitz,
       ``ComputableAnalysis.PrimitiveLogarithmEstimates.kernel_lipschitz,
@@ -119,6 +143,7 @@ run_cmd do
   logInfo "ANALYTIC: every rational polynomial on every rational interval; every rationally split denominator near each permitted rational center; executable partial fractions and elementary evaluators, with actual derivative certificates."
   logInfo "FACTORIZATION: supplied computable-real linear and positive quadratic factors; interval-certified separation; computed partial fractions and represented formal-derivative equivalence; irrational regression checked."
   logInfo "CONCRETE: computable-coefficient logarithm and arctangent finite secant certificates; weighted quadratic base primitives; irrational pole and quadratic reciprocal bridges."
+  logInfo "TRIGONOMETRIC: universal computable-coefficient elementary formula theorem from supplied half-angle denominator factorization; formal angle derivative equivalence and guarded antipodal charts. Finite chain-rule certificates are proved separately; their instantiation for the full angle evaluator remains open."
   logInfo "SCOPE: factorization existence, analytic assembly for computable coefficients, and represented trigonometric transport remain open."
 
 #print axioms ComputableAnalysis.RationalPrimitiveFormula.Decomposition.primitive_correct

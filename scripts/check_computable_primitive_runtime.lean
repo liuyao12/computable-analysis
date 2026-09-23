@@ -1,3 +1,4 @@
+import ComputableAnalysis.TrigonometricPrimitiveExamples
 import ComputableAnalysis.ComputablePrimitiveDerivativeExamples
 
 /-! Runtime smoke check: termination proofs must erase to executable rational
@@ -21,3 +22,11 @@ open ComputablePrimitiveDerivativeExamples
     unless fine.width < coarse.width do
       throw (IO.userError (name ++ ": boxes failed to narrow"))
     IO.println ("PASS: " ++ name ++ " executable nested narrowing boxes")
+
+#eval do
+  let I := (TrigonometricPrimitiveExamples.derivative?.get
+    TrigonometricPrimitiveExamples.derivative_computes).real.compute 2
+  let J := TrigonometricPrimitiveExamples.expected.real.compute 2
+  unless I.lo ≤ J.hi && J.lo ≤ I.hi do
+    throw (IO.userError "irrational trigonometric formula failed runtime overlap")
+  IO.println "PASS: irrational trigonometric primitive formal derivative matches expected boxes"

@@ -10,6 +10,30 @@ ROOT = Path(__file__).resolve().parents[2]
 PAGE = 'rational-primitives.html'
 MARKER = '<!-- rational-primitives -->'
 EXPECTED = [
+    'ComputableTrigonometricRationalization.Factorization.asRepresented',
+    'ComputableTrigonometricRationalization.Expr.pullback_angle_correct',
+    'ComputableTrigonometricRationalization.RepresentedFactorization.primitive_correct',
+
+    'ComputableTrigonometricRationalization.Expr.shadow_compile',
+    'ComputableTrigonometricRationalization.Expr.pullback_correct',
+    'ComputableTrigonometricRationalization.Expr.pullback_defined_iff',
+    'ComputableTrigonometricRationalization.Expr.antipodal_pullback_correct',
+    'ComputableTrigonometricRationalization.jacobian_cancel',
+    'ComputableTrigonometricRationalization.halfAngle_derivative',
+    'ComputableTrigonometricRationalization.Factorization.primitive_sample_correct',
+    'ComputableTrigonometricRationalization.Factorization.primitive_correct',
+    'PrimitiveChangeOfVariables.rationalCompositionSecant_error_le',
+    'PrimitiveChangeOfVariables.FiniteCompositionDerivativeOnInterval.toHasDerivativeOnInterval',
+    'PrimitiveChangeOfVariables.FiniteSecantCompositionDerivativeOnInterval.toHasDerivativeOnInterval',
+    'TrigonometricPrimitiveExamples.factors_checked',
+    'TrigonometricPrimitiveExamples.derivative_computes',
+    'TrigonometricPrimitiveExamples.value_computes',
+    'TrigonometricPrimitiveExamples.irrational_primitive_correct',
+    'TrigonometricPrimitiveExamples.derivative_is_expected',
+    'TrigonometricPrimitiveExamples.zero_times_cosecant_stays_undefined',
+    'TrigonometricPrimitiveExamples.antipodal_pole_retained',
+    'TrigonometricPrimitiveExamples.zero_inner_increment',
+
     'ComputableCoefficient.widthStage_spec',
     'PrimitiveLogarithmEstimates.prefix_lipschitz',
     'PrimitiveLogarithmEstimates.kernel_lipschitz',
@@ -160,6 +184,9 @@ def install(site, revision, audit):
               'irrationalCoefficientRegressionProved': True,
               'computableLogarithmArctangentDerivativesProved': True,
               'computableQuadraticBasePrimitivesProved': True,
+              'trigonometricElementaryFormulaTheoremProved': True,
+              'finitePrimitiveChangeOfVariablesProved': True,
+              'trigonometricIntervalPrimitiveTheoremProved': False,
               'analyticRepeatedLinearPolePrimitivesProved': True,
               'analyticRationallySplitLocalPrimitivesProved': True, 'mathlibDependency': False,
               'changedReaderPages': list(additions)}
