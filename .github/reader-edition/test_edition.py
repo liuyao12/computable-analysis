@@ -38,8 +38,21 @@ def main():
     assert animation['upperLimit']=='1/2' and animation['fixedEndpoint']
     assert animation['xPixelsPerUnit']==animation['yPixelsPerUnit']==300
     assert 2*animation['plotWidthPixels']==animation['plotHeightPixels']
-    gif=site/'reading/animations/cosine.gif';assert Image.open(gif).n_frames==6
+    gif=site/'reading/animations/cosine.gif';assert Image.open(gif).n_frames==4
     assert hashlib.sha256(gif.read_bytes()).hexdigest()==animation['gifSha256']
+    circle=info['circleAnimation']
+    assert [r['stage'] for r in circle['frames']]==[1,2,3,4]
+    historical=json.loads((site/'reading/animations/manifest.json').read_text())
+    for row in circle['frames']:
+        assert row['subarcs']==2**row['stage']
+        original=next(r for r in historical['arctan'] if r['subarcs']==row['subarcs'])
+        assert {k:v for k,v in row.items() if k!='stage'}==original
+    for name,metadata in [('arctan',circle),('cosine',animation)]:
+        for suffix,key in [('gif','gifSha256'),('png','posterSha256')]:
+            path=site/f'reading/animations/{name}.{suffix}'
+            assert hashlib.sha256(path.read_bytes()).hexdigest()==metadata[key]
+            im=Image.open(path);assert im.size==(800,640)
+            if suffix=='gif':assert im.n_frames==4
     for row in animation['frames']+animation['table']:
         assert row==example(row['depth']) and row['upperLimit']=='1/2'
         lo,hi=map(Q,[row['lower'],row['upper']]);pl,ph=map(Q,[row['reciprocalLower'],row['reciprocalUpper']])

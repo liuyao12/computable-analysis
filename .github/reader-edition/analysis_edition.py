@@ -11,7 +11,8 @@ from functools import lru_cache
 from math import isqrt
 from pathlib import Path
 from bs4 import BeautifulSoup
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
+from cosine_illustrations import label as render_label, make_circle_animation
 
 TITLE = 'Computable Analysis'
 SUBTITLE = 'An alternative foundation to Calculus'
@@ -107,21 +108,19 @@ def table(rows):
 def make_animation(out):
     """Fixed [0,1/2], equal pixel scales, refining sample bounds, not a moving t."""
     out.mkdir(parents=True,exist_ok=True)
-    fontbase=Path('/usr/share/fonts/truetype/dejavu');scale=2
-    def font(size,serif=False):
-        return ImageFont.truetype(str(fontbase/('DejaVuSerif.ttf' if serif else 'DejaVuSans.ttf')),size*scale)
+    scale=2
     frames=[];rows=[];xy=lambda x,y:(148+300*float(x),422-300*float(y))
-    for d in range(1,7):
+    for d in range(1,5):
         row=example(d);rows.append(row);samples=grid(d);n=1<<d
         im=Image.new('RGB',(1600,1280),'#faf9f5');draw=ImageDraw.Draw(im)
-        def text(x,y,t,size=16,color='#27382f',serif=False):draw.text((x*scale,y*scale),t,font=font(size,serif),fill=color)
+        def text(x,y,t,size=16,color='#27382f',serif=False):render_label(im,x,y,t,size,color,serif)
         def line(points,color,width=1):draw.line([(int(x*scale),int(y*scale)) for x,y in points],fill=color,width=width*scale)
         def poly(points,color):draw.polygon([(int(x*scale),int(y*scale)) for x,y in points],fill=color)
         text(30,24,'Cosine quadrature',27,serif=True)
-        text(30,68,'Fixed interval [0, 1/2] · equal x and y scales · dyadic refinement',16,color='#758176')
+        text(30,68,r'Fixed interval $[0, 1/2]$ · equal $x$ and $y$ scales · dyadic refinement',16,color='#758176')
         for tick in [Q(0),Q(1,4),Q(1,2),Q(3,4),Q(1)]:
             x,y=xy(0,tick);line([(x-5,y),(x+150,y)],'#e2e5db')
-            text(x-51,y-11,{'0':'0','1/4':'1/4','1/2':'1/2','3/4':'3/4','1':'1'}[str(tick)],13)
+            text(x-51,y-11,'$'+str(tick)+'$',13)
         for j in range(n):
             a,b=Q(j,2*n),Q(j+1,2*n);l=samples[j+1][0];u=samples[j][1]
             poly([xy(a,0),xy(a,l),xy(b,l),xy(b,0)],'#dce8d7')
@@ -133,24 +132,24 @@ def make_animation(out):
             draw.ellipse(((x-r)*scale,(y-r)*scale,(x+r)*scale,(y+r)*scale),fill='#27382f')
         line([xy(0,0),xy(Q(11,20),0)],'#7a877b',1);line([xy(0,0),xy(0,Q(21,20))],'#7a877b',1)
         for tick,label in [(Q(0),'0'),(Q(1,4),'1/4'),(Q(1,2),'1/2')]:
-            x,y=xy(tick,0);line([(x,y),(x,y+5)],'#7a877b');text(x-12,y+13,label,13)
-        text(317,428,'x',16);text(149,96,'y',16)
-        text(362,145,'y = cos(πx)',24,serif=True)
-        text(362,196,'Upper endpoint: 1/2',17)
-        text(362,228,f'{n} equal cells; h = 1/{2*n}',17)
+            x,y=xy(tick,0);line([(x,y),(x,y+5)],'#7a877b');text(x-12,y+13,'$'+label+'$',13)
+        text(317,428,'$x$',16);text(149,96,'$y$',16)
+        text(362,145,r'$y = \cos(\pi x)$',24,serif=True)
+        text(362,196,r'Upper endpoint: $1/2$',17)
+        text(362,228,rf'$n = {d}$; ${n}$ cells; $h = 1/{2*n}$',17)
         text(362,273,'Right endpoints: lower sum',16,color='#456d55')
         text(362,306,'Left endpoints: upper sum',16,color='#a87a46')
-        text(362,357,'1 unit = 300 pixels on both axes',14,color='#758176')
+        text(362,357,r'$1$ unit = $300$ pixels on both axes',14,color='#758176')
         text(30,486,'Rectangle bounds for the integral',17)
-        text(30,515,'['+', '.join(row['integralDisplay'])+']',23,color='#456d55')
-        text(438,486,'Geometric 1/π, independently',17)
-        text(438,521,'['+', '.join(row['reciprocalDisplay'])+']',17)
-        text(30,579,'The sample evaluator uses nested radicals; geometric π uses polygon areas.',15,color='#758176')
+        text(30,515,'$['+', '.join(row['integralDisplay'])+']$',23,color='#456d55')
+        text(438,486,r'Geometric $1/\pi$, independently',17)
+        text(438,521,'$['+', '.join(row['reciprocalDisplay'])+']$',17)
+        text(30,579,r'The sample evaluator uses nested radicals; geometric $\pi$ uses polygon areas.',15,color='#758176')
         text(30,607,'Illustrative rational bounds, not literal Lean output stages.',14,color='#758176')
         frames.append(im.resize((800,640),Image.Resampling.LANCZOS))
     palette=frames[0].quantize(colors=192)
     indexed=[im.quantize(palette=palette,dither=Image.Dither.NONE) for im in frames]
-    indexed[0].save(out/'cosine.gif',save_all=True,append_images=indexed[1:],duration=[1600]*5+[2800],loop=0,disposal=2,optimize=False)
+    indexed[0].save(out/'cosine.gif',save_all=True,append_images=indexed[1:],duration=[1600]*3+[2800],loop=0,disposal=2,optimize=False)
     frames[2].save(out/'cosine.png')
     return dict(upperLimit='1/2',fixedEndpoint=True,xPixelsPerUnit=300,yPixelsPerUnit=300,
                 plotWidthPixels=150,plotHeightPixels=300,frames=rows,
@@ -173,6 +172,7 @@ def main():
     semantic_before=json.dumps({'witnesses':maps['witnesses'],'theorems':maps['theorems'],
        'declarations':{k:b['declarations'] for k,b in maps['bundles'].items()}},sort_keys=True)
     animation=make_animation(reading/'animations')
+    circle_animation=make_circle_animation(reading/'animations')
     (reading/'cosine-half-interval.json').write_text(json.dumps(animation,indent=2)+'\n')
     (reading/'analysis-edition.css').write_text(CSS)
     updated=[]
@@ -221,8 +221,9 @@ def main():
             assert re.sub(r'\s+',' ',original.get_text(' ',strip=True))==original_foundation
         if p.name=='cosine.html':
             figure=doc.select_one('[data-animation="cosine"]');figure['class']=['math-animation','equal-scale-animation']
-            figure.figcaption.string='Fixed upper limit 1/2. Equal x/y scale; right lower and left upper rectangles refine at dyadic sample points. The geometric reciprocal is evaluated independently.'
+            figure.figcaption.string=r'Fixed upper limit \(1/2\). Equal \(x\)/\(y\) scale; right lower and left upper rectangles refine at dyadic sample points. The geometric reciprocal is evaluated independently.'
             figure.img['alt']='Equal-scale cosine plot on [0,1/2] with dyadic rectangle bounds and independent geometric reciprocal bounds.'
+            doc.select_one('[data-animation="arctan"] figcaption').string=r'Subdivide the vertical segment from \(0\) to \(u\) equally, then project every mark from \((-1,0)\) to the circle. Here \(u=2/3\); stage \(n\) has \(2^n\) subdivisions. At \(u=1\) its sector is a quarter disk, hence \(\pi=4A(1)\).'
             old=figure.find_next_sibling('div',class_='numeric-scroll');assert old
             old.replace_with(parse(table(animation['table'])).div)
         p.write_text(str(doc));updated.append(p.name)
@@ -251,7 +252,7 @@ def main():
     record=dict(title=TITLE,subtitle=SUBTITLE,documentationRevision=args.revision,proofSourceCommit=PROOF_SHA,
        chapterOneCatalogue=True,homeTeaser=True,formula=r'\frac1\pi=\int_0^{1/2}\cos(\pi x)\,dx',
        originalChapterOneTextPreserved=True,proofDeclarationsAndEdgesUnchanged=True,newLeanProofsClaimed=False,
-       updatedReaderPages=updated,protectedArtifacts=protected,cosineAnimation=animation,
+       updatedReaderPages=updated,protectedArtifacts=protected,cosineAnimation=animation,circleAnimation=circle_animation,
        originalImageRecovered=False)
     (reading/'analysis-edition.json').write_text(json.dumps(record,indent=2)+'\n')
     print('PASS: Computable Analysis; home teaser; Chapter 1 gallery; fixed half-interval/equal-scale GIF; proof data unchanged')

@@ -170,7 +170,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y fonts-dejavu-core graphviz
-          python -m pip install beautifulsoup4 Pillow playwright
+          python -m pip install beautifulsoup4 Pillow playwright matplotlib
           if ! command -v google-chrome && ! command -v chromium; then
             python -m playwright install --with-deps chromium
           fi
@@ -358,6 +358,11 @@ jobs:
                   assert a['xPixelsPerUnit']==a['yPixelsPerUnit']==300
                   image=get('/reading/animations/cosine.gif',True)
                   assert hashlib.sha256(image).hexdigest()==a['gifSha256']
+                  circle=report['circleAnimation']
+                  assert [r['stage'] for r in circle['frames']]==[1,2,3,4]
+                  for name,meta in [('arctan',circle),('cosine',a)]:
+                      for suffix,key in [('gif','gifSha256'),('png','posterSha256')]:
+                          assert hashlib.sha256(get('/reading/animations/'+name+'.'+suffix,True)).hexdigest()==meta[key]
                   assert get('/reading/manifest.json')['proofSourceCommit']==os.environ['SOURCE_SHA']
                   geometry=get('/reading/rational-geometry-edition.json');audit=get('/reading/rational-geometry.json')
                   assert geometry['documentationRevision']==geometry['newProofSourceCommit']==revision
