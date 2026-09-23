@@ -1,0 +1,83 @@
+#!/usr/bin/env python3
+"""Test published navigation, preserved proof data and source-linked comparisons."""
+import argparse,hashlib,json,re,shutil,threading
+from functools import partial
+from http.server import SimpleHTTPRequestHandler,ThreadingHTTPServer
+from pathlib import Path
+from urllib.parse import urlsplit
+from bs4 import BeautifulSoup
+from playwright.sync_api import sync_playwright
+from classic_proofs import LINKS,MATHLIB,MATHLIB_HASH
+
+def main():
+    p=argparse.ArgumentParser();p.add_argument('--site',required=True,type=Path);p.add_argument('--report',required=True,type=Path);p.add_argument('--static-only',action='store_true');a=p.parse_args()
+    site=a.site.resolve();a.report.mkdir(parents=True,exist_ok=True)
+    report=json.loads((site/'reading/classic-proofs-edition.json').read_text())
+    assert all(report['checks'].values()) and not report['newLeanProofsClaimed']
+    assert report['mathlib']['revision']==MATHLIB and report['mathlib']['sha256']==MATHLIB_HASH
+    for name,digest in {**report['protectedArtifacts'],**report['artifacts']}.items():
+        assert hashlib.sha256((site/name).read_bytes()).hexdigest()==digest,name
+    for name in report['navigationPages']:
+        doc=BeautifulSoup((site/name).read_text(),'html.parser');nav=doc.select_one('#book-nav')
+        for href,label in LINKS:
+            matches=[el for el in nav.select('a[href]') if el['href'] in [href,'../'+href]]
+            assert len(matches)==1 and matches[0].get_text()==label,(name,href)
+            assert (site/name).parent.joinpath(matches[0]['href']).resolve().is_file(),(name,href)
+        assert 'Worked examples' in nav.get_text()
+    for name in ['cartwright.html','leibniz.html','basel.html']:
+        doc=BeautifulSoup((site/name).read_text(),'html.parser')
+        assert len(doc.select('#book-nav a.current'))==1
+        assert doc.select_one('#book-nav a.current')['href']==name
+        for el in doc.select('article a[href]'):
+            u=urlsplit(el['href'])
+            if not u.scheme and u.path:
+                target=site/u.path
+                assert target.is_file() or (target/'index.html').is_file(),el['href']
+    cart=json.loads((site/'reading/cartwright-audit.json').read_text())
+    assert cart['finalIrrationalityProved'] and all(cart['checks'].values())
+    zeta=json.loads((site/'reading/zeta-real-edition.json').read_text())
+    assert zeta['piSquaredIrrationalityPublished'] and not zeta['piSquaredIrrationalityIntegrated']
+    basel=BeautifulSoup((site/'basel.html').read_text(),'html.parser')
+    assert len(basel.select('[data-classic-proof]'))==6
+    assert 'hasSum_zeta_two' in basel.get_text()
+    assert not re.search(r'<(?:sup|sub)\b',(site/'basel.html').read_text())
+    if a.static_only:
+        print('PASS: three sidebar entries, active state, source links, preserved audits and honest theorem status');return
+    class Quiet(SimpleHTTPRequestHandler):
+        def log_message(self,*args):pass
+    server=ThreadingHTTPServer(('127.0.0.1',0),partial(Quiet,directory=str(site)))
+    threading.Thread(target=server.serve_forever,daemon=True).start();base=f'http://127.0.0.1:{server.server_port}/';errors=[]
+    try:
+        with sync_playwright() as pw:
+            opts=dict(headless=True,args=['--no-sandbox']);exe=shutil.which('google-chrome') or shutil.which('chromium')
+            if exe:opts['executable_path']=exe
+            browser=pw.chromium.launch(**opts)
+            for width in [1440,390,320]:
+                page=browser.new_page(viewport={'width':width,'height':1000});page.on('pageerror',lambda e:errors.append(str(e)))
+                for name in ['cartwright.html','leibniz.html','basel.html','cosine.html']:
+                    page.goto(base+name,wait_until='networkidle');page.evaluate('() => MathJax.startup.promise')
+                    assert page.locator('mjx-merror,[data-mjx-error]').count()==0,(name,width)
+                    assert page.locator('#book-nav a[href="cartwright.html"] mjx-container').count()==1,(name,'navigation math')
+                    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+2'),(name,width)
+                    if name=='basel.html':
+                        for route in ['native','mathlib']:
+                            page.locator(f'[data-classic-route="{route}"]').click()
+                            assert page.locator('[data-classic-proof]:visible').count()==3
+                            assert page.locator(f'[data-classic-proof="{route}"]:visible').count()==3
+                        page.locator('[data-classic-route="all"]').click();assert page.locator('[data-classic-proof]:visible').count()==6
+                    if width in [1440,390] and name!='cosine.html':
+                        page.evaluate('window.scrollTo({top:0,behavior:"instant"})');page.screenshot(path=str(a.report/f'classics-{Path(name).stem}-{width}.png'),full_page=True)
+                page.close()
+            page=browser.new_page(viewport={'width':1440,'height':1000})
+            page.goto(base+'basel.html?route=mathlib',wait_until='networkidle');assert page.locator('[data-classic-proof="native"]:visible').count()==0
+            page.goto(base+'cartwright.html',wait_until='networkidle')
+            page.locator('[data-proof-map="thm:cartwright-irrationality"]').click()
+            page.frame_locator('#proof-frame').locator('[data-node="thm:cartwright-irrationality"]').wait_for(timeout=30000)
+            page.goto(base+'leibniz-proofs.html',wait_until='networkidle')
+            assert page.locator('body').inner_text().count('Mathlib')>0
+            browser.close()
+    finally:server.shutdown()
+    assert not errors,errors
+    (a.report/'classic-proofs-browser.json').write_text(json.dumps(dict(passed=True,revision=report['documentationRevision'],widths=[1440,390,320],navigationMath=True,baselRoutes=True,cartwrightViewer=True,leibnizViewerPreserved=True),indent=2)+'\n')
+    print('PASS: desktop/mobile navigation, LaTeX, Basel route controls and preserved Cartwright/Leibniz viewers')
+if __name__=='__main__':main()

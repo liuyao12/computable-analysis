@@ -76,8 +76,14 @@ $$
 \forall N\in\mathbb N,\ \exists p>N,\ p\text{ prime}.
 $$
 
-**Irrationality of $\pi^2$ remains a hypothesis.** Irrationality of $\pi$ alone
-is insufficient. The general formulas for $\zeta(2n)$ beyond Basel remain open.
+**Irrationality of $\pi^2$ is already formalized** in the [published Cartwright
+development](https://liuyao12.github.io/computable-analysis/cartwright.html),
+with finite, FTC, and Mathlib comparison routes at the pinned reader source.
+It remains a hypothesis of this newer Basel application because the earlier
+Cartwright theorem and its implementation connection have not been integrated
+into this source version. This is an integration gap, not an unproved
+irrationality theorem. Irrationality of $\pi$ alone is insufficient. The
+general formulas for $\zeta(2n)$ beyond Basel remain open.
 
 ## Verification
 

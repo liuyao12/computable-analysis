@@ -49,7 +49,7 @@ def install(site, revision, audit):
               'allPreviousContentPreserved': True,
               'changedReaderPages': list(additions),
               'previousFileHashes': {name: sha(data) for name, data in before.items()},
-              'baselProved': True, 'primesFromPiSquaredIrrationality': True, 'piSquaredIrrationalityProved': False, 'realInputsAboveOne': True, 'logExpBridgeProved': False, 'analyticContinuationProved': False, 'mathlibDependency': False}
+              'baselProved': True, 'primesFromPiSquaredIrrationality': True, 'piSquaredIrrationalityIntegrated': False, 'piSquaredIrrationalityPublished': True, 'realInputsAboveOne': True, 'logExpBridgeProved': False, 'analyticContinuationProved': False, 'mathlibDependency': False}
     (site / 'reading/zeta-real-edition.json').write_text(json.dumps(report, indent=2) + '\n')
     print('PASS: checked real-domain zeta supplement; every prior reader byte preserved')
 

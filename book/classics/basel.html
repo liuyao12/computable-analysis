@@ -1,0 +1,33 @@
+<h1 id="basel">The Basel problem</h1>
+<p class="lead">Finite rearrangements or Fourier series: two routes to the sum of reciprocal squares.</p>
+\[\boxed{\sum_{n=1}^{\infty}\frac1{n^2}=\frac{\pi^2}{6}.}\]
+<p>The native theorem identifies the independently computed reciprocal-square series with geometric \(\pi^2/6\). It also identifies the value of our real-input zeta function at \(2\). Both results are unconditional.</p>
+<h2 id="native">The native proof: square finite Leibniz sums</h2>
+<p>For \(N\ge1\), write</p>
+\[B_N=\sum_{k=0}^{N-1}\frac{(-1)^k}{2k+1},\qquad H_N=\sum_{k=0}^{N-1}\frac1{2k+1},\qquad M_N=\sum_{k=0}^{N-1}\frac1{(2k+1)^2}.\]
+<p>Expand \(B_N^2\) as a finite double sum. Partial fractions and alternating-prefix bounds compare the square and triangular regions of summation, giving</p>
+\[|2B_N^2-M_N|\le\frac{2H_N}{N}.\]
+<p>Next separate the odd and even terms of the reciprocal-square series. The explicit comparison schedule is</p>
+\[\left|\sum_{k=1}^{2m^2}\frac1{k^2}-\frac83 B_{2m^2}^{\,2}\right|\le\frac{16}{m}\qquad(m\ge1).\]
+<p>The bound tends to zero. The <a href="leibniz.html">checked Leibniz identity</a> then gives \((8/3)(\pi/4)^2=\pi^2/6\). Every rearrangement is finite; convergence is supplied by the displayed rational error bounds. The proof implements the finite rearrangement approach discussed by <a href="https://doi.org/10.4169/college.math.j.44.3.171">Benko and Molokach</a>.</p>
+<h2 id="mathlib">The Mathlib proof: Bernoulli Fourier series</h2>
+<p>Mathlib takes a broader route. It computes the Fourier coefficients of the Bernoulli polynomials by a derivative recurrence, proves summability, and reconstructs their periodic extensions. At the endpoint, this gives the general even-zeta formula; specializing to \(2\) yields <code>hasSum_zeta_two</code>.</p>
+<p>For the Basel case, the periodic polynomial is \(B_2(x)=x^2-x+1/6\). Its Fourier expansion is</p>
+\[B_2(x)=\frac1{\pi^2}\sum_{n=1}^{\infty}\frac{\cos(2\pi n x)}{n^2}\qquad(0\le x\le1).\]
+<p>Evaluation at \(x=0\) gives the answer. Mathlib’s formal sum is indexed by natural numbers including \(0\); the zero-index term is zero under its total division convention, so it agrees with the series displayed above.</p>
+<h2 id="comparison">Compare the proof routes</h2>
+<p>Read each column from top to bottom. The source links identify the mathematical steps.</p>
+<nav class="classic-route-controls" aria-label="Basel proof route"><button data-classic-route="all" aria-pressed="true">Both proofs</button><button data-classic-route="native" aria-pressed="false">Native</button><button data-classic-route="mathlib" aria-pressed="false">Mathlib</button></nav>
+<div class="classic-proof-grid">
+<section data-classic-proof="native"><p class="classic-tag">Native · finite estimates</p><h3>Start with Leibniz</h3><p>Alternating rational sums compute the geometric circle constant.</p><a href="__NATIVE__LeibnizPi.lean">Leibniz identity</a></section>
+<section data-classic-proof="mathlib"><p class="classic-tag">Mathlib · Fourier theory</p><h3>Compute the coefficients</h3><p>The derivative recurrence determines the Fourier coefficients of Bernoulli polynomials.</p><a href="__MATHLIB__Mathlib/NumberTheory/ZetaValues.lean#L224">Coefficient recurrence</a></section>
+<section data-classic-proof="native"><h3>Control finite rearrangements</h3><p>Compare square and triangular double sums; then split the reciprocal squares into odd and even terms.</p><a href="__NATIVE__Basel/Bounds.lean">Finite square estimate</a> · <a href="__NATIVE__Basel/ZetaEstimate.lean">Error schedule</a></section>
+<section data-classic-proof="mathlib"><h3>Recover the periodic function</h3><p>Summable Fourier coefficients reconstruct the periodic Bernoulli function, giving the even-zeta formula.</p><a href="__MATHLIB__Mathlib/NumberTheory/ZetaValues.lean#L318">Fourier reconstruction</a></section>
+<section data-classic-proof="native"><h3>Identify the interval programs</h3><p>The rational error schedule proves <code>RealRaw.Equiv</code> for the series and geometric square computations.</p><a href="__NATIVE__Basel/Proof.lean">Basel theorem</a> · <a href="__NATIVE__Basel/RealZeta.lean">Real-input zeta bridge</a></section>
+<section data-classic-proof="mathlib"><h3>Specialize the general formula</h3><p>The even-zeta theorem at \(2\) gives a <code>HasSum</code> statement in Mathlib’s real numbers.</p><a href="__MATHLIB__Mathlib/NumberTheory/ZetaValues.lean#L453">Basel theorem</a></section>
+</div>
+<p class="classic-scope">This diagram is a comparison of source-linked mathematical steps. The native proof is checked by the repository’s Lean audit; the Mathlib column is a reading of its pinned published source. It is not an extracted dependency graph or a newly checked bridge between the two foundations. No proof-size or runtime ranking is inferred from the number of boxes.</p>
+<h2 id="irrationality">Where irrationality enters</h2>
+<p>Basel does not need the irrationality of \(\pi^2\). The later Euler-sieve argument uses it to rule out a finite exhaustive list of primes.</p>
+<p><a href="cartwright.html">Irrationality of geometric \(\pi^2\) is already formalized</a> in the published Cartwright development, with finite, FTC, and Mathlib comparison routes. The newer Basel module currently keeps irrationality as a hypothesis: its source version has not yet incorporated that earlier theorem and the connection between the two implementations. This is an integration gap, not an absent irrationality proof.</p>
+<p><a href="zeta-real.html#basel">Basel and the Euler-sieve application</a> · <a href="reading/zeta-real-axioms.log">Native theorem audit</a> · <a href="__REPO__docs/BASEL.md">Native proof and reproduction</a> · <a href="reading/classic-proofs-edition.json">Publication and source record</a></p>

@@ -94,8 +94,9 @@ where $B_{2n}$ is a Bernoulli number
 ([DLMF 25.6.2](https://dlmf.nist.gov/25.6.E2)). It is not yet proved here.
 The case $\zeta(2)=\pi^2/6$ is now proved by `Basel.eulerBasel`, including
 compatibility with this real-domain function. The finite Euler sieve also proves
-prime unboundedness conditional on irrationality of $\pi^2$; that irrationality
-proof remains open. See [the Basel proof and its arithmetic application](BASEL.md).
+prime unboundedness conditional on irrationality of $\pi^2$. The published
+Cartwright development already proves irrationality; connecting that earlier
+theorem to this source version remains open. See [the Basel proof and its arithmetic application](BASEL.md).
 
 ## Boundary
 

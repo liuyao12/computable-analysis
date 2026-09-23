@@ -30,7 +30,7 @@ def main():
     assert not soup.select('sup, sub')
     assert not any(c in soup.get_text() for c in 'ζπΣ₀₁₂ₖᵏ⁻≤≥ε')
     assert report['baselProved'] and report['primesFromPiSquaredIrrationality']
-    assert not report['piSquaredIrrationalityProved']
+    assert report['piSquaredIrrationalityPublished'] and not report['piSquaredIrrationalityIntegrated']
     assert 'Basel is proved' in soup.select_one('#basel').get_text()
     assert 'not yet proved in the project' in soup.select_one('#euler').get_text()
     for link in soup.select('a[href]'):

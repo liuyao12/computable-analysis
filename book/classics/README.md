@@ -1,0 +1,24 @@
+# Classical proof pages
+
+The publication pass adds sidebar entries for the already checked Cartwright
+irrationality theorem, the Leibniz series, and the Basel problem. It preserves
+the Cartwright declaration graph, audit, and size comparison, and the existing
+four-route Leibniz viewer.
+
+The Basel comparison is a mathematical outline with pinned source links.
+The native theorem is checked by the existing Basel audit. The Mathlib column
+is inspected against `Mathlib/NumberTheory/ZetaValues.lean` at
+`338b8c00bd151fa07a0350cc17442e6eeda734e8`; the publisher verifies the complete
+source hash and its cited declarations. This pass adds no Lean theorem,
+Mathlib compilation, cross-foundation bridge, or proof-size measurement.
+
+Irrationality of $\pi^2$ is already proved in the published Cartwright snapshot
+`f630241adeae35fc06a5fd4921a4df6396e291d0`. The newer Basel/Euler-sieve source
+still has an explicit irrationality hypothesis. Its integration with the
+earlier Cartwright theorem is a separate obligation. The reader and roadmap
+must distinguish that integration gap from the existence of the proof.
+
+Run `classic_proofs.py` after the cosine-square publication pass, followed by
+`test_classic_proofs.py`, as specified in the publication workflow. The tests
+check every sidebar entry, active navigation, mathematical rendering, mobile
+layout, route controls, old proof viewers, and preservation of prior audits.

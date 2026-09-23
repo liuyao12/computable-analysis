@@ -30,8 +30,9 @@ formalized application.
 $\zeta(2)=\pi^2/6$ for geometric $\pi$, including the real-input zeta function.
 Finite Leibniz-square rearrangements supply an explicit rational error budget.
 The finite Euler sieve proves prime unboundedness assuming irrationality of
-$\pi^2$. That irrationality proof and the general even-value formulas remain
-open. The elaborated-dependency audit excludes the existing Euclid infinitude
+$\pi^2$. Irrationality is already proved in the pinned published Cartwright
+development; importing that theorem and connecting its implementation to this
+newer source version remains open. The general even-value formulas also remain open. The elaborated-dependency audit excludes the existing Euclid infinitude
 proof from this route. See [the mathematical proof and precise scope](docs/BASEL.md).
 
 **Exact Cauchy-series equality (2026-09-22).**

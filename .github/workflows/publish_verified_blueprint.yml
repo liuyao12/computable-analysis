@@ -16,6 +16,7 @@ on:
       - 'docs/RATIONAL_PRIMITIVES.md'
       - 'book/fundamental-matrix/**'
       - 'book/cosine-square/**'
+      - 'book/classics/**'
       - 'book/algebraic-ode/**'
       - 'book/zeta-real/**'
       - 'ComputableAnalysis/ZetaReal*'
@@ -291,6 +292,10 @@ jobs:
         run: python3 .github/reader-edition/cosine_square_edition.py --site site --revision "$GITHUB_SHA" --audit cosine-square-reports/proofs.json
       - name: Verify squared-cosine proofs, animations, routes, links and mobile rendering
         run: python3 .github/reader-edition/test_cosine_square.py --site site --report reader-edition-tests
+      - name: Expose classical examples and verify the pinned Mathlib Basel source
+        run: python3 .github/reader-edition/classic_proofs.py --site site --revision "$GITHUB_SHA"
+      - name: Verify classical navigation and proof comparisons in the browser
+        run: python3 .github/reader-edition/test_classic_proofs.py --site site --report reader-edition-tests
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -300,6 +305,7 @@ jobs:
             rational-primitives-reports
             site/reading/rational-primitives-edition.json
             cosine-square-reports
+            site/reading/classic-proofs-edition.json
             site/reading/cosine-square-edition.json
             site/reading/cosine-square-proofs.json
             geometry-reports
@@ -399,12 +405,19 @@ jobs:
                   square=get('/reading/cosine-square-edition.json')
                   assert square['documentationRevision']==square['proofRevision']==revision
                   assert all(square['checks'].values())
+                  classics=get('/reading/classic-proofs-edition.json')
+                  assert classics['documentationRevision']==revision and all(classics['checks'].values())
                   def final_hash(path,previous):
-                      change=square['changedArtifacts'].get(path)
-                      if change:
-                          assert change['before']==previous,path
-                          return change['after']
+                      for edition in [square,classics]:
+                          change=edition['changedArtifacts'].get(path)
+                          if change:
+                              assert change['before']==previous,path
+                              previous=change['after']
                       return previous
+                  for path in classics['pages']:
+                      assert hashlib.sha256(get('/'+path,True)).hexdigest()==classics['artifacts'][path]
+                  for path in ['cartwright.html','leibniz.html','basel.html']:
+                      assert ('href="'+path+'"') in home
                   assert 'The cosine-square integral' in worked
                   for name,meta in [('cosine-square',square['rectangleAnimation']),('cosine-square-symmetry',square['symmetryAnimation'])]:
                       for suffix,digest in meta['hashes'].items():
@@ -485,7 +498,7 @@ jobs:
                   assert zeta['proofSourceCommit']==revision and zeta['realInputsAboveOne']
                   assert zeta['allPreviousContentPreserved'] and len(zeta['auditedDeclarations'])==33
                   assert zeta['baselProved'] and zeta['primesFromPiSquaredIrrationality']
-                  assert not zeta['piSquaredIrrationalityProved']
+                  assert zeta['piSquaredIrrationalityPublished'] and not zeta['piSquaredIrrationalityIntegrated']
                   assert not zeta['mathlibDependency'] and not zeta['logExpBridgeProved'] and not zeta['analyticContinuationProved']
                   assert hashlib.sha256(get('/zeta-real.html',True)).hexdigest()==final_hash('zeta-real.html',zeta['pageSha256'])
                   assert hashlib.sha256(get('/reading/zeta-real-axioms.log',True)).hexdigest()==zeta['auditSha256']

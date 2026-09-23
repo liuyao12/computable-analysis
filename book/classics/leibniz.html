@@ -1,0 +1,21 @@
+<h1 id="leibniz">The Leibniz series</h1>
+<p class="lead">One geometric circle constant, three native proof routes, and a comparison with Mathlib.</p>
+\[\boxed{\frac\pi4=1-\frac13+\frac15-\frac17+\cdots.}\]
+<p>Here \(\pi\) starts with the Archimedean circle construction. The series is a different interval computation; identifying the two is a theorem.</p>
+<h2 id="finite-sums">Finite sums and a usable error bound</h2>
+<p>Put \(S_N=4\sum_{k=0}^N(-1)^k/(2k+1)\). Alternating upper and lower sums enclose the answer, with the checked estimate</p>
+\[|S_N-\pi|\le\frac4{2N+3}.\]
+<p>The formal statement compares rational enclosures at every independently chosen geometric stage. It separates the series computation, its validity, and its agreement with geometric \(\pi\).</p>
+<h2 id="native-routes">Three native routes</h2>
+<div class="classic-cards">
+<section><h3>Finite rectangle comparison</h3><p>Finite rational identities and a mesh-error estimate connect the alternating sums to geometric exhaustion. The proof does not use the Taylor/FTC comparison theorem.</p><p><a href="__NATIVE__LeibnizPi.lean">Computation, remainder, and geometric identification</a></p></section>
+<section><h3>Polynomial FTC</h3><p>Integrate a finite geometric identity, using certified monomial primitives:</p>\[\frac1{1+x^2}=\sum_{k=0}^N(-1)^k x^{2k}+(-1)^{N+1}\frac{x^{2N+2}}{1+x^2}.\]<p>Integral order bounds the remainder by \(1/(2N+3)\) on \([0,1]\).</p><p><a href="__NATIVE__LeibnizPiTaylor.lean">The FTC proof</a></p></section>
+<section><h3>Geometric transmutation</h3><p>A finite geometric area identity supplies a third route. Its analytic and geometric dependencies are distinguished in the existing proof map.</p><p><a href="leibniz-transmutation.html">Read the transmutation construction</a></p></section>
+</div>
+<h2 id="mathlib">Comparison with Mathlib</h2>
+<p>Mathlib’s <code>Real.tendsto_sum_pi_div_four</code> starts with the arctangent power series inside its disk of convergence. Abel’s endpoint theorem extends the identity to the boundary point \(1\). The result states convergence of finite sums in Mathlib’s real numbers.</p>
+<p>Our native routes use rational boxes and explicit finite error estimates. Mathlib reuses its general theory of real and complex power series. These are different formal routes to the displayed identity; the existing map describes their mathematical dependencies without asserting a checked representation bridge between the two real-number foundations.</p>
+<p class="classic-action"><a href="leibniz-proofs.html">Explore all four proof routes ↗</a></p>
+<p><a href="__MATHLIB__Mathlib/Analysis/Real/Pi/Leibniz.lean">Pinned Mathlib source</a> · <a href="reading/leibniz-dependency-closure.txt">Native elaborated dependency audit</a> · <a href="ch-infinite-series.html#leibniz-geometric-benchmark">The series chapter</a></p>
+<h2 id="basel-next">From Leibniz to Basel</h2>
+<p>Squaring a finite Leibniz sum and controlling its rearrangement leads to the reciprocal-square series. That is the route used in our <a href="basel.html">Basel proof</a>.</p>
