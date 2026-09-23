@@ -247,6 +247,7 @@ jobs:
           python3 .github/reader-edition/test_pnt_cauchy.py --site site --report reader-edition-tests
       - name: Verify and publish the real-domain zeta construction
         run: |
+          set -euo pipefail
           mkdir -p zeta-reports
           lake build ComputableAnalysis.ZetaReal.Tests ComputableAnalysis.Basel.RealZeta | tee zeta-reports/build.log
           lake env lean scripts/check_basel.lean | tee zeta-reports/basel-dependencies.log
