@@ -1,5 +1,13 @@
 # Formalization Guide
 
+**Euler’s sine-product proof (2026-09-23).**
+The isolated [Mathlib companion](book/euler-proof/README.md) proves the Basel
+identity from the sine product with a uniform finite-product remainder and
+an explicit quadratic coefficient-error bound. Its elaborated-dependency
+audit excludes prior zeta evaluations and the native Basel proof. This is a
+checked Mathlib proof, not a new native `RealRaw.Equiv` theorem. A native
+sine-product certificate and the extension to all $\zeta(2m)$ remain open.
+
 **Analytic primitives for rationally split denominators (2026-09-23).**
 `RationalPrimitiveAssembly.splitPrimitive` constructs an elementary evaluator
 and an actual `HasDerivativeOnInterval` for every rational numerator and

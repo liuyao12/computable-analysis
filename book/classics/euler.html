@@ -1,0 +1,39 @@
+<h1 id="euler">Euler’s sine-product proof</h1>
+<p class="lead">Euler’s insight survives intact: the quadratic term of the sine product determines the sum of reciprocal squares. A uniform finite-product estimate makes the coefficient comparison rigorous.</p>
+\[\boxed{\sum_{k=1}^{\infty}\frac{1}{k^2}=\frac{\pi^2}{6}.}\]
+<p>This is a new, checked Lean proof using Mathlib’s sine-product theorem. It is independent of the <a href="basel.html#mathlib">Bernoulli–Fourier evaluation</a> and of our <a href="basel.html#native">native finite-rearrangement proof</a>. The proof runs in a separate Mathlib package; it does not yet supply an Euler-product proof in the project’s rational-interval foundation.</p>
+<h2 id="gap">What has to be justified?</h2>
+<p>Knowing the zeros of sine does not by itself determine the function: multiplication by a nonvanishing factor preserves those zeros. Even after the product identity has been proved, an infinite product cannot simply be expanded like a polynomial without controlling its remainder.</p>
+\[\frac{\sin(\pi x)}{\pi x}=\prod_{k=1}^{\infty}\left(1-\frac{x^2}{k^2}\right).\]
+<p>We justify these two steps separately: use a proved sine-product identity, then extract its quadratic coefficient by an explicit inequality. No differentiation of an infinite product is needed for the Basel case.</p>
+<h2 id="finite">Start with a finite product</h2>
+<p>For a finite family with \(0\le a_k\le1\), set \(A=\sum_k a_k\). Induction proves</p>
+\[0\le\prod_k(1-a_k)-(1-A)\le\frac{A^2}{2}.\]
+<p>If \(R\) is the current remainder, adjoining a factor gives the exact identity \(R_{\mathrm{new}}=(1-a)R+aA\). Nonnegativity and the upper bound follow using only finite algebra and inequalities.</p>
+<p>Now put</p>
+\[S_N=\sum_{k=1}^{N}\frac1{k^2},\qquad P_N(x)=\prod_{k=1}^{N}\left(1-\frac{x^2}{k^2}\right).\]
+<p>The telescoping comparison \(1/k^2\le2/k-2/(k+1)\) gives \(0\le S_N\le2\). Consequently, for \(0\le x\le1\),</p>
+\[\boxed{0\le P_N(x)-(1-x^2S_N)\le2x^4.}\]
+<p>The bound is uniform in \(N\). This is the crucial replacement for discarding unspecified higher-order terms.</p>
+<p><a href="__REPO__book/euler-proof/EulerBasel.lean">Lean: <code>product_remainder</code> and <code>product_quadratic_bound</code></a></p>
+<h2 id="product">Supply the sine-product identity</h2>
+<p>Mathlib proves the product formula by a recurrence for weighted cosine integrals, followed by a concentration argument related to Wallis’ formula. This supplies the analytic identity without appealing to a previously evaluated reciprocal-square sum. General Weierstrass factorization is not required for this route.</p>
+<p>Write \(S=\sum_{k=1}^{\infty}1/k^2\); ordinary series convergence does not assume its value. Fix \(0&lt;x\le1\) and pass to the limit in the finite estimate:</p>
+\[0\le\frac{\sin(\pi x)}{\pi x}-(1-x^2S)\le2x^4.\]
+<p><a href="__EULER_MATHLIB__Mathlib/Analysis/SpecialFunctions/Trigonometric/EulerSineProd.lean">Mathlib: <code>Real.tendsto_euler_sin_prod</code></a> · <a href="__REPO__book/euler-proof/EulerBasel.lean">Lean: <code>infinite_product_bound</code></a></p>
+<h2 id="coefficient">Compare coefficients with an error bound</h2>
+<p>The independently proved sine estimate is</p>
+\[\left|\sin t-\left(t-\frac{t^3}{6}\right)\right|\le\frac{|t|^5}{100}\qquad(|t|\le1).\]
+<p>Combine this with the product estimate and divide by the positive quadratic factor. For \(0&lt;x\le1\) and \(\pi x\le1\), Lean proves</p>
+\[\boxed{\left|S-\frac{\pi^2}{6}\right|\le\left(2+\frac{\pi^4}{100}\right)x^2.}\]
+<p>Take \(x=1/((\pi+1)(n+1))\) and let \(n\) grow. The right side tends to zero, so \(S=\pi^2/6\). Euler’s coefficient comparison is now a consequence of two controlled remainders.</p>
+<p><a href="__REPO__book/euler-proof/EulerBasel.lean">Lean: <code>coefficient_error</code> and <code>hasSum_reciprocal_squares</code></a> · <a href="__EULER_MATHLIB__Mathlib/Analysis/Complex/Trigonometric.lean#L876">Mathlib: <code>Real.sin_bound</code></a></p>
+<h2 id="checked">What is checked?</h2>
+<p>The final theorem is unconditional. The audit follows actual elaborated proof dependencies and requires the finite-product bound, sine-product theorem, and coefficient-error theorem. It rejects previous zeta evaluations, the native Basel proof, unfinished proofs, and custom axioms. The permitted axioms are Mathlib’s usual <code>propext</code>, <code>Classical.choice</code>, and <code>Quot.sound</code>.</p>
+<p><a href="reading/euler-proofs.json">Checked theorem statements and audit</a> · <a href="reading/euler-dependencies.txt">Complete elaborated dependency list</a> · <a href="__REPO__book/euler-proof/README.md">Source and reproduction instructions</a></p>
+<h2 id="next">Toward every even zeta value</h2>
+<p>The natural extension is to control higher coefficients of the same product. With the required convergence and differentiation estimates, its logarithmic derivative would give</p>
+\[\pi x\cot(\pi x)=1-2\sum_{m=1}^{\infty}\zeta(2m)x^{2m}\qquad(0&lt;|x|&lt;1).\]
+<p>Comparison with the Bernoulli expansion then yields</p>
+\[\zeta(2m)=\frac{(-1)^{m+1}B_{2m}(2\pi)^{2m}}{2(2m)!}\qquad(m\ge1).\]
+<p>This extension is a roadmap, not a theorem of the new package. The checked result here is the Basel case. A native version also needs an interval-level sine-product theorem and its connection to geometric \(\pi\). The separate <a href="basel.html#mathlib">Mathlib Fourier proof</a> already covers all positive even arguments.</p>

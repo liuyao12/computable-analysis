@@ -1,5 +1,5 @@
 <h1 id="basel">The Basel problem</h1>
-<p class="lead">Finite rearrangements or Fourier series: two routes to the sum of reciprocal squares.</p>
+<p class="lead">Finite rearrangements, Euler’s sine product, and Fourier series: three routes to the sum of reciprocal squares.</p>
 \[\boxed{\sum_{n=1}^{\infty}\frac1{n^2}=\frac{\pi^2}{6}.}\]
 <p>The native theorem identifies the independently computed reciprocal-square series with geometric \(\pi^2/6\). It also identifies the value of our real-input zeta function at \(2\). Both results are unconditional.</p>
 <h2 id="native">The native proof: square finite Leibniz sums</h2>
@@ -10,6 +10,10 @@
 <p>Next separate the odd and even terms of the reciprocal-square series. The explicit comparison schedule is</p>
 \[\left|\sum_{k=1}^{2m^2}\frac1{k^2}-\frac83 B_{2m^2}^{\,2}\right|\le\frac{16}{m}\qquad(m\ge1).\]
 <p>The bound tends to zero. The <a href="leibniz.html">checked Leibniz identity</a> then gives \((8/3)(\pi/4)^2=\pi^2/6\). Every rearrangement is finite; convergence is supplied by the displayed rational error bounds. The proof implements the finite rearrangement approach discussed by <a href="https://doi.org/10.4169/college.math.j.44.3.171">Benko and Molokach</a>.</p>
+<h2 id="euler">Euler’s product, made rigorous</h2>
+<p>A separate checked proof now derives the Basel identity from the sine product. Its key estimate is uniform in the number of factors:</p>
+\[0\le\prod_{k=1}^{N}\left(1-\frac{x^2}{k^2}\right)-\left(1-x^2\sum_{k=1}^{N}\frac1{k^2}\right)\le2x^4\qquad(0\le x\le1).\]
+<p>This controls the coefficient comparison after the product limit is taken. The new proof uses Mathlib’s sine-product theorem and avoids its Fourier evaluation. <a href="euler.html">Read Euler’s rigorous proof and its Lean audit.</a></p>
 <h2 id="mathlib">The Mathlib proof: Bernoulli Fourier series</h2>
 <p>Mathlib takes a broader route. It computes the Fourier coefficients of the Bernoulli polynomials by a derivative recurrence, proves summability, and reconstructs their periodic extensions. At the endpoint, this gives the general even-zeta formula; specializing to \(2\) yields <code>hasSum_zeta_two</code>.</p>
 <p>For the Basel case, the periodic polynomial is \(B_2(x)=x^2-x+1/6\). Its Fourier expansion is</p>

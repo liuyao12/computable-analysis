@@ -8,7 +8,8 @@ SOURCE=ROOT/'book/classics'
 MATHLIB='338b8c00bd151fa07a0350cc17442e6eeda734e8'
 MATHLIB_PATH='Mathlib/NumberTheory/ZetaValues.lean'
 MATHLIB_HASH='27aa982f5c473d7e8c6e6030ead08ffce081a7ff616b2acd9130d04772f8c672'
-LINKS=[('cartwright.html',r'Irrationality of \(\pi^2\)'),('leibniz.html','The Leibniz series'),('basel.html','The Basel problem')]
+EULER_MATHLIB='51e6992efd06126df61a496bebf8f49482a4e129'
+LINKS=[('cartwright.html',r'Irrationality of \(\pi^2\)'),('leibniz.html','The Leibniz series'),('basel.html','The Basel problem'),('euler.html','Euler’s sine product')]
 def digest(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def verify_mathlib(source_file=None):
     url=f'https://raw.githubusercontent.com/leanprover-community/mathlib4/{MATHLIB}/{MATHLIB_PATH}'
@@ -17,7 +18,7 @@ def verify_mathlib(source_file=None):
     names=['bernoulliFourierCoeff_recurrence','bernoulliFourierCoeff_eq','hasSum_zeta_nat','hasSum_zeta_two']
     for name in names:assert ('theorem '+name) in data.decode()
     return dict(revision=MATHLIB,path=MATHLIB_PATH,sha256=MATHLIB_HASH,declarations=names,verification='Pinned source inspection; no new Mathlib compilation or cross-foundation bridge claimed')
-def install(site,revision,source_file=None):
+def install(site,revision,euler_audit,source_file=None):
     assert re.fullmatch('[0-9a-f]{40}',revision)
     assert not (site/'reading/classic-proofs-edition.json').exists()
     mathlib=verify_mathlib(source_file)
@@ -31,15 +32,21 @@ def install(site,revision,source_file=None):
     assert zeta['baselProved']
     leibniz=json.loads((site/'reading/leibniz-graph-publication.json').read_text())
     assert leibniz['mathlibProofRevision']==MATHLIB
+    euler=json.loads(euler_audit.read_text())
+    assert euler['mathlibRevision']==EULER_MATHLIB and all(euler['checks'].values())
+    assert len(euler['declarations'])==7 and euler['dependencyCount']>0
+    for name,h in euler['sourceHashes'].items():assert digest(ROOT/'book/euler-proof'/name)==h,name
+    assert {r['name'] for r in euler['declarations']} >= {'EulerBasel.hasSum_reciprocal_squares','EulerBasel.coefficient_error'}
+    for row in euler['declarations']:assert set(row['axioms'])<= {'propext','Classical.choice','Quot.sound'}
     before={str(p.relative_to(site)):digest(p) for p in site.rglob('*') if p.is_file()}
     repo=f'https://github.com/liuyao12/computable-analysis/blob/{revision}/'
     native=repo+'ComputableAnalysis/'
     ml=f'https://github.com/leanprover-community/mathlib4/blob/{MATHLIB}/'
     template=(site/'cosine.html').read_text()
-    for name,title in [('leibniz','The Leibniz series'),('basel','The Basel problem')]:
+    for name,title in [('leibniz','The Leibniz series'),('basel','The Basel problem'),('euler','Euler’s sine-product proof')]:
         doc=BeautifulSoup(template,'html.parser');doc.title.string=title+' · Computable Analysis'
         doc.select_one('meta[name="documentation-revision"]')['content']=revision
-        page=(SOURCE/(name+'.html')).read_text().replace('__NATIVE__',native).replace('__MATHLIB__',ml).replace('__REPO__',repo)
+        page=(SOURCE/(name+'.html')).read_text().replace('__NATIVE__',native).replace('__MATHLIB__',ml).replace('__REPO__',repo).replace('__EULER_MATHLIB__',f'https://github.com/leanprover-community/mathlib4/blob/{EULER_MATHLIB}/')
         doc.article.clear()
         for node in list(BeautifulSoup(page,'html.parser').contents):doc.article.append(node)
         toc=doc.select_one('.on-this-page')
@@ -66,13 +73,15 @@ def install(site,revision,source_file=None):
         for href,title in LINKS:
             a=BeautifulSoup(f'<a class="classic-navigation" href="{prefix+href}">{title}</a>','html.parser').a
             marker.insert_before(a)
-        if p.name in ['cartwright.html','leibniz.html','basel.html']:
+        if p.name in [href for href,_ in LINKS]:
             for a in nav.select('a.current'):a['class']=[c for c in a.get('class',[]) if c!='current'];a.attrs.pop('aria-current',None)
             active=nav.select_one(f'a[href="{prefix+p.name}"]');active['class']=active.get('class',[])+['current'];active['aria-current']='page'
         updated=original[:match.start()]+str(nav)+original[match.end():]
         p.write_text(updated);navigation.append(str(p.relative_to(site)))
     shutil.copyfile(SOURCE/'classics.css',site/'reading/classics.css')
     shutil.copyfile(SOURCE/'classics.js',site/'reading/classics.js')
+    shutil.copyfile(euler_audit,site/'reading/euler-proofs.json')
+    shutil.copyfile(euler_audit.with_name('dependencies.txt'),site/'reading/euler-dependencies.txt')
     after={str(p.relative_to(site)):digest(p) for p in site.rglob('*') if p.is_file()}
     changed={p:dict(before=h,after=after[p]) for p,h in before.items() if h!=after[p]}
     assert all(p.endswith('.html') for p in changed)
@@ -81,10 +90,10 @@ def install(site,revision,source_file=None):
       pages=[p for p,t in LINKS],changedArtifacts=changed,
       protectedArtifacts={p:h for p,h in before.items() if p not in changed},
       artifacts={p:h for p,h in after.items() if p not in before or p in changed},
-      checks=dict(cartwrightAlreadyProved=True,cartwrightThreeCheckedRoutesPreserved=True,leibnizComparisonPreserved=True,baselNativeAudited=True,mathlibSourcePinned=True),
-      newLeanProofsClaimed=False,baselCrossFoundationBridgeChecked=False)
+      checks=dict(cartwrightAlreadyProved=True,cartwrightThreeCheckedRoutesPreserved=True,leibnizComparisonPreserved=True,baselNativeAudited=True,mathlibSourcePinned=True,eulerProofAudited=True),
+      newLeanProofsClaimed=True,eulerMathlibRevision=EULER_MATHLIB,baselCrossFoundationBridgeChecked=False)
     (site/'reading/classic-proofs-edition.json').write_text(json.dumps(report,indent=2)+'\n')
-    print(f'PASS: three classical examples in {len(navigation)} sidebars; preserved checked comparisons and pinned Basel source')
+    print(f'PASS: four classical examples in {len(navigation)} sidebars; preserved checked comparisons and pinned Basel source')
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--site',required=True,type=Path);p.add_argument('--revision',required=True);p.add_argument('--mathlib-source',type=Path)
-    a=p.parse_args();install(a.site,a.revision,a.mathlib_source)
+    p=argparse.ArgumentParser();p.add_argument('--site',required=True,type=Path);p.add_argument('--revision',required=True);p.add_argument('--mathlib-source',type=Path);p.add_argument('--euler-audit',required=True,type=Path)
+    a=p.parse_args();install(a.site,a.revision,a.euler_audit,a.mathlib_source)

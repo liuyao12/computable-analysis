@@ -19,6 +19,7 @@ on:
       - 'book/fundamental-matrix/**'
       - 'book/cosine-square/**'
       - 'book/classics/**'
+      - 'book/euler-proof/**'
       - 'book/algebraic-ode/**'
       - 'book/zeta-real/**'
       - 'ComputableAnalysis/ZetaReal*'
@@ -294,8 +295,17 @@ jobs:
         run: python3 .github/reader-edition/cosine_square_edition.py --site site --revision "$GITHUB_SHA" --audit cosine-square-reports/proofs.json
       - name: Verify squared-cosine proofs, animations, routes, links and mobile rendering
         run: python3 .github/reader-edition/test_cosine_square.py --site site --report reader-edition-tests
+      - uses: actions/cache@v5
+        with:
+          path: euler-mathlib
+          key: euler-mathlib-51e6992efd06126df61a496bebf8f49482a4e129-v1
+      - name: Check Euler's sine-product proof and its elaborated dependencies
+        run: |
+          set -euo pipefail
+          mkdir -p euler-reports
+          python3 book/euler-proof/verify.py --work-dir euler-mathlib --report euler-reports | tee euler-reports/build.log
       - name: Expose classical examples and verify the pinned Mathlib Basel source
-        run: python3 .github/reader-edition/classic_proofs.py --site site --revision "$GITHUB_SHA"
+        run: python3 .github/reader-edition/classic_proofs.py --site site --revision "$GITHUB_SHA" --euler-audit euler-reports/proofs.json
       - name: Verify classical navigation and proof comparisons in the browser
         run: python3 .github/reader-edition/test_classic_proofs.py --site site --report reader-edition-tests
       - uses: actions/upload-artifact@v4
@@ -307,6 +317,8 @@ jobs:
             rational-primitives-reports
             site/reading/rational-primitives-edition.json
             cosine-square-reports
+            euler-reports
+            site/reading/euler-proofs.json
             site/reading/classic-proofs-edition.json
             site/reading/cosine-square-edition.json
             site/reading/cosine-square-proofs.json
@@ -409,6 +421,10 @@ jobs:
                   assert all(square['checks'].values())
                   classics=get('/reading/classic-proofs-edition.json')
                   assert classics['documentationRevision']==revision and all(classics['checks'].values())
+                  euler=get('/reading/euler-proofs.json')
+                  assert euler['mathlibRevision']==classics['eulerMathlibRevision'] and all(euler['checks'].values())
+                  for path in ['reading/euler-proofs.json','reading/euler-dependencies.txt']:
+                      assert hashlib.sha256(get('/'+path,True)).hexdigest()==classics['artifacts'][path]
                   def final_hash(path,previous):
                       for edition in [square,classics]:
                           change=edition['changedArtifacts'].get(path)
@@ -418,7 +434,7 @@ jobs:
                       return previous
                   for path in classics['pages']:
                       assert hashlib.sha256(get('/'+path,True)).hexdigest()==classics['artifacts'][path]
-                  for path in ['cartwright.html','leibniz.html','basel.html']:
+                  for path in ['cartwright.html','leibniz.html','basel.html','euler.html']:
                       assert ('href="'+path+'"') in home
                   assert 'The cosine-square integral' in worked
                   for name,meta in [('cosine-square',square['rectangleAnimation']),('cosine-square-symmetry',square['symmetryAnimation'])]:

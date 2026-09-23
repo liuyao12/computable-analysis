@@ -1,7 +1,7 @@
 # Classical proof pages
 
 The publication pass adds sidebar entries for the already checked Cartwright
-irrationality theorem, the Leibniz series, and the Basel problem. It preserves
+irrationality theorem, the Leibniz series, the Basel problem, and Euler’s sine-product proof. It preserves
 the Cartwright declaration graph, audit, and size comparison, and the existing
 four-route Leibniz viewer.
 
@@ -9,8 +9,9 @@ The Basel comparison is a mathematical outline with pinned source links.
 The native theorem is checked by the existing Basel audit. The Mathlib column
 is inspected against `Mathlib/NumberTheory/ZetaValues.lean` at
 `338b8c00bd151fa07a0350cc17442e6eeda734e8`; the publisher verifies the complete
-source hash and its cited declarations. This pass adds no Lean theorem,
-Mathlib compilation, cross-foundation bridge, or proof-size measurement.
+source hash and its cited declarations. The Euler page is additionally backed by the separately compiled and audited
+[Mathlib companion](../euler-proof/README.md), which uses its own compatible
+pin. No cross-foundation bridge or proof-size measurement is claimed.
 
 Irrationality of $\pi^2$ is already proved in the published Cartwright snapshot
 `f630241adeae35fc06a5fd4921a4df6396e291d0`. The newer Basel/Euler-sieve source

@@ -7,13 +7,13 @@ from pathlib import Path
 from urllib.parse import urlsplit
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
-from classic_proofs import LINKS,MATHLIB,MATHLIB_HASH
+from classic_proofs import LINKS,MATHLIB,MATHLIB_HASH,EULER_MATHLIB
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('--site',required=True,type=Path);p.add_argument('--report',required=True,type=Path);p.add_argument('--static-only',action='store_true');a=p.parse_args()
     site=a.site.resolve();a.report.mkdir(parents=True,exist_ok=True)
     report=json.loads((site/'reading/classic-proofs-edition.json').read_text())
-    assert all(report['checks'].values()) and not report['newLeanProofsClaimed']
+    assert all(report['checks'].values()) and report['newLeanProofsClaimed']
     assert report['mathlib']['revision']==MATHLIB and report['mathlib']['sha256']==MATHLIB_HASH
     for name,digest in {**report['protectedArtifacts'],**report['artifacts']}.items():
         assert hashlib.sha256((site/name).read_bytes()).hexdigest()==digest,name
@@ -24,7 +24,7 @@ def main():
             assert len(matches)==1 and matches[0].get_text()==label,(name,href)
             assert (site/name).parent.joinpath(matches[0]['href']).resolve().is_file(),(name,href)
         assert 'Worked examples' in nav.get_text()
-    for name in ['cartwright.html','leibniz.html','basel.html']:
+    for name in [href for href,_ in LINKS]:
         doc=BeautifulSoup((site/name).read_text(),'html.parser')
         assert len(doc.select('#book-nav a.current'))==1
         assert doc.select_one('#book-nav a.current')['href']==name
@@ -41,8 +41,17 @@ def main():
     assert len(basel.select('[data-classic-proof]'))==6
     assert 'hasSum_zeta_two' in basel.get_text()
     assert not re.search(r'<(?:sup|sub)\b',(site/'basel.html').read_text())
+    euler=json.loads((site/'reading/euler-proofs.json').read_text())
+    assert euler['mathlibRevision']==EULER_MATHLIB and all(euler['checks'].values())
+    assert len(euler['declarations'])==7
+    deps=(site/'reading/euler-dependencies.txt').read_text().splitlines()
+    assert len(deps)==euler['dependencyCount']
+    assert 'Real.tendsto_euler_sin_prod' in deps and 'EulerBasel.coefficient_error' in deps
+    assert not any('hasSum_zeta' in name or 'bernoulliFourier' in name for name in deps)
+    assert 'euler.html' in (site/'basel.html').read_text()
+    assert not re.search(r'<(?:sup|sub)\b',(site/'euler.html').read_text())
     if a.static_only:
-        print('PASS: three sidebar entries, active state, source links, preserved audits and honest theorem status');return
+        print('PASS: four sidebar entries, active state, source links, preserved audits and honest theorem status');return
     class Quiet(SimpleHTTPRequestHandler):
         def log_message(self,*args):pass
     server=ThreadingHTTPServer(('127.0.0.1',0),partial(Quiet,directory=str(site)))
@@ -54,7 +63,7 @@ def main():
             browser=pw.chromium.launch(**opts)
             for width in [1440,390,320]:
                 page=browser.new_page(viewport={'width':width,'height':1000});page.on('pageerror',lambda e:errors.append(str(e)))
-                for name in ['cartwright.html','leibniz.html','basel.html','cosine.html']:
+                for name in [href for href,_ in LINKS]+['cosine.html']:
                     page.goto(base+name,wait_until='networkidle');page.evaluate('() => MathJax.startup.promise')
                     assert page.locator('mjx-merror,[data-mjx-error]').count()==0,(name,width)
                     assert page.locator('#book-nav a[href="cartwright.html"] mjx-container').count()==1,(name,'navigation math')
@@ -78,6 +87,6 @@ def main():
             browser.close()
     finally:server.shutdown()
     assert not errors,errors
-    (a.report/'classic-proofs-browser.json').write_text(json.dumps(dict(passed=True,revision=report['documentationRevision'],widths=[1440,390,320],navigationMath=True,baselRoutes=True,cartwrightViewer=True,leibnizViewerPreserved=True),indent=2)+'\n')
+    (a.report/'classic-proofs-browser.json').write_text(json.dumps(dict(passed=True,revision=report['documentationRevision'],widths=[1440,390,320],navigationMath=True,baselRoutes=True,eulerAudited=True,cartwrightViewer=True,leibnizViewerPreserved=True),indent=2)+'\n')
     print('PASS: desktop/mobile navigation, LaTeX, Basel route controls and preserved Cartwright/Leibniz viewers')
 if __name__=='__main__':main()
