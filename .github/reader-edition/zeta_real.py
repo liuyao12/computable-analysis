@@ -11,6 +11,8 @@ PAGE = 'zeta-real.html'
 MARKER = '<!-- zeta-real -->'
 EXPECTED = ['ComputableAnalysis.ZetaReal.coefficient_step', 'ComputableAnalysis.ZetaReal.magnitude_decay', 'ComputableAnalysis.ZetaReal.moment_bound', 'ComputableAnalysis.ZetaReal.rectangle_outer_tail', 'ComputableAnalysis.ZetaReal.rectangle_inner_tail', 'ComputableAnalysis.ZetaReal.outerBudget_dyadic_shrinks', 'ComputableAnalysis.ZetaReal.approx_cauchy', 'ComputableAnalysis.ZetaReal.raw_valid', 'ComputableAnalysis.ZetaReal.continuous', 'ComputableAnalysis.ZetaReal.domainReal_inChart', 'ComputableAnalysis.ZetaReal.zeta_valid', 'ComputableAnalysis.ZetaReal.zeta_equiv', 'ComputableAnalysis.ZetaReal.raw_chart_equiv', 'ComputableAnalysis.ZetaReal.binomial_equation', 'ComputableAnalysis.ZetaReal.binomial_unique', 'ComputableAnalysis.ZetaReal.rectangle_dirichlet', 'ComputableAnalysis.ZetaReal.dirichletRaw_valid', 'ComputableAnalysis.ZetaReal.inversePowerRaw_valid', 'ComputableAnalysis.ZetaReal.inversePowerRaw_enclosure', 'ComputableAnalysis.ZetaReal.dirichlet_convergence', 'ComputableAnalysis.ZetaReal.zeta_integer_equiv', 'ComputableAnalysis.ZetaReal.zeta_three_equiv', 'ComputableAnalysis.ZetaReal.Tests.threeHalves_coefficient', 'ComputableAnalysis.ZetaReal.Tests.threeHalves_rectangle', 'ComputableAnalysis.ZetaReal.Tests.delayedThree_same_zeta']
 
+EXPECTED += ['ComputableAnalysis.Basel.leibniz_square_error', 'ComputableAnalysis.Basel.zeta_leibniz_square_budget', 'ComputableAnalysis.Basel.eulerBasel', 'ComputableAnalysis.Basel.EulerSieve.sieve_cons', 'ComputableAnalysis.Basel.EulerSieve.sieve_error', 'ComputableAnalysis.Basel.zetaTwo_equiv_finiteEulerProduct', 'ComputableAnalysis.Basel.prime_unbounded_of_piSquare_irrational', 'ComputableAnalysis.Basel.real_zeta_two_equiv_piSquaredOverSix']
+
 def sha(data):
     return hashlib.sha256(data).hexdigest()
 
@@ -47,7 +49,7 @@ def install(site, revision, audit):
               'allPreviousContentPreserved': True,
               'changedReaderPages': list(additions),
               'previousFileHashes': {name: sha(data) for name, data in before.items()},
-              'realInputsAboveOne': True, 'logExpBridgeProved': False, 'analyticContinuationProved': False, 'mathlibDependency': False}
+              'baselProved': True, 'primesFromPiSquaredIrrationality': True, 'piSquaredIrrationalityProved': False, 'realInputsAboveOne': True, 'logExpBridgeProved': False, 'analyticContinuationProved': False, 'mathlibDependency': False}
     (site / 'reading/zeta-real-edition.json').write_text(json.dumps(report, indent=2) + '\n')
     print('PASS: checked real-domain zeta supplement; every prior reader byte preserved')
 

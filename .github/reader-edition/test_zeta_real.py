@@ -21,7 +21,7 @@ def main():
     assert report['realInputsAboveOne'] and report['allPreviousContentPreserved']
     assert not report['mathlibDependency'] and not report['logExpBridgeProved']
     assert not report['analyticContinuationProved']
-    assert len(report['auditedDeclarations']) == 25
+    assert len(report['auditedDeclarations']) == 33
     assert hashlib.sha256((a.site / report['page']).read_bytes()).hexdigest() == report['pageSha256']
     assert hashlib.sha256((a.site / 'reading/zeta-real-axioms.log').read_bytes()).hexdigest() == report['auditSha256']
     soup = BeautifulSoup((a.site / report['page']).read_text(), 'html.parser')
@@ -29,6 +29,9 @@ def main():
     assert len(soup.select('#checked tbody tr')) == 5
     assert not soup.select('sup, sub')
     assert not any(c in soup.get_text() for c in 'ζπΣ₀₁₂ₖᵏ⁻≤≥ε')
+    assert report['baselProved'] and report['primesFromPiSquaredIrrationality']
+    assert not report['piSquaredIrrationalityProved']
+    assert 'Basel is proved' in soup.select_one('#basel').get_text()
     assert 'not yet proved in the project' in soup.select_one('#euler').get_text()
     for link in soup.select('a[href]'):
         href = link['href']

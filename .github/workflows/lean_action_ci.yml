@@ -24,6 +24,6 @@ jobs:
         with:
           auto-config: false
           build: true
-          build-args: "ComputableAnalysis ComputableAnalysis.PiProofs ComputableAnalysis.Basel.Primes"
+          build-args: "ComputableAnalysis ComputableAnalysis.PiProofs ComputableAnalysis.Basel.RealZeta"
           test: false
           lint: false

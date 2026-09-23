@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Zeta for real exponents · Computable Analysis</title><style>
-:root{color-scheme:light;--ink:#243330;--green:#1d6355;--line:#d5ddd7}*{box-sizing:border-box}body{margin:0;background:#faf9f5;color:var(--ink);font:18px/1.75 Georgia,serif}main{max-width:850px;margin:auto;padding:48px 26px 90px}a{color:var(--green);text-underline-offset:3px}nav{font:14px/1.5 system-ui,sans-serif;display:flex;gap:24px;flex-wrap:wrap}header{padding:56px 0 28px;border-bottom:1px solid var(--line)}h1{font-size:clamp(36px,7vw,62px);font-weight:500;line-height:1.1;letter-spacing:-1.5px;margin:16px 0 22px}h2{font-size:28px;font-weight:500;margin:48px 0 14px}h3{font-size:21px;font-weight:500}.eyebrow{font:12px/1.5 system-ui,sans-serif;text-transform:uppercase;letter-spacing:2px;color:var(--green)}.lead{font-size:22px;line-height:1.55}.equation{font-size:25px;text-align:center;padding:20px 10px;line-height:1.8;font-style:italic}.note{border-left:3px solid var(--green);padding:5px 0 5px 22px}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:17px}th,td{text-align:left;padding:13px 16px;border-bottom:1px solid var(--line)}th{font:13px system-ui,sans-serif;text-transform:uppercase;letter-spacing:1px}code{font:14px/1.6 ui-monospace,monospace;overflow-wrap:anywhere}li{margin:12px 0}footer{border-top:1px solid var(--line);margin-top:50px;padding-top:22px;font:14px/1.65 system-ui,sans-serif}@media(max-width:500px){main{padding:26px 20px 55px}header{padding-top:32px}.equation{font-size:21px}th,td{padding:10px}}
+:root{color-scheme:light;--ink:#243330;--green:#1d6355;--line:#d5ddd7}*{box-sizing:border-box}body{margin:0;background:#faf9f5;color:var(--ink);font:18px/1.75 Georgia,serif}main{max-width:850px;margin:auto;padding:48px 26px 90px}a{color:var(--green);text-underline-offset:3px}nav{font:14px/1.5 system-ui,sans-serif;display:flex;gap:24px;flex-wrap:wrap}header{padding:56px 0 28px;border-bottom:1px solid var(--line)}h1{font-size:clamp(36px,7vw,62px);font-weight:500;line-height:1.1;letter-spacing:-1.5px;margin:16px 0 22px}h2{font-size:28px;font-weight:500;margin:48px 0 14px}h3{font-size:21px;font-weight:500}.eyebrow{font:12px/1.5 system-ui,sans-serif;text-transform:uppercase;letter-spacing:2px;color:var(--green)}.lead{font-size:22px;line-height:1.55}.equation{overflow-x:auto;font-size:25px;text-align:center;padding:20px 10px;line-height:1.8;font-style:italic}.note{border-left:3px solid var(--green);padding:5px 0 5px 22px}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:17px}th,td{text-align:left;padding:13px 16px;border-bottom:1px solid var(--line)}th{font:13px system-ui,sans-serif;text-transform:uppercase;letter-spacing:1px}code{font:14px/1.6 ui-monospace,monospace;overflow-wrap:anywhere}li{margin:12px 0}footer{border-top:1px solid var(--line);margin-top:50px;padding-top:22px;font:14px/1.65 system-ui,sans-serif}@media(max-width:500px){main{padding:26px 20px 55px}header{padding-top:32px}.equation{font-size:21px}th,td{padding:10px}}
 
 .formula{overflow-x:auto;padding:18px 0;font:20px/1.8 Georgia,serif}.formula p{margin:8px 0}pre{overflow:auto;padding:18px;background:#f0f1eb;font:14px/1.7 ui-monospace,monospace}
 
@@ -41,11 +41,31 @@ mjx-container[display="true"]{overflow-x:auto;overflow-y:hidden;padding:6px 0}.f
 <tr><td><code>zeta_integer_equiv</code></td><td>Agreement with the earlier evaluator at all integers \(n\ge2\).</td></tr>
 <tr><td><code>zeta_three_equiv</code></td><td>Compatibility with the existing \(\zeta(3)\) target.</td></tr>
 </tbody></table></div><p>A nonintegral regression checks \(c_2(3/2)=3/8\) and \(R(3/2,3,2)=171/128\). The latter is a finite approximation, not a claimed enclosure for \(\zeta(3/2)\).</p></section>
-<section id="euler"><h2>Euler’s even values remain open</h2><p>The classical formula is</p>
-<div class="formula">\[
- \zeta(2n)=\frac{(2\pi)^{2n}\lvert B_{2n}\rvert}{2(2n)!},\qquad n\ge1,
-\]</div>
-<p>where \(B_{2n}\) is a Bernoulli number; see <a href="https://dlmf.nist.gov/25.6.E2">DLMF, equation 25.6.2</a>. This formula is not yet proved in the project. Even \(\zeta(2)=\pi^2/6\) remains an open target in <a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/Basel.lean">the Basel module</a>: both sides have valid evaluators, but their equivalence still needs a proof. The available certificate interfaces describe the missing evidence; they do not supply it.</p></section>
+<section id="basel"><h2>Basel and infinitely many primes</h2>
+<p><strong>Basel is proved</strong> for our geometric \(\pi\) and the real-domain zeta function:</p>
+<div class="equation">\[\zeta(2)=\sum_{k=1}^{\infty}\frac1{k^2}=\frac{\pi^2}{6}.\]</div>
+<p>The proof uses finite rational sums and the previously checked Leibniz formula. Write
+\(B_N=\sum_{k=0}^{N-1}(-1)^k/(2k+1)\),
+\(H_N=\sum_{k=0}^{N-1}1/(2k+1)\), and
+\(M_N=\sum_{k=0}^{N-1}1/(2k+1)^2\).
+Diagonal and triangular rearrangements of a finite square give</p>
+<div class="equation">\[\left|2B_N^2-M_N\right|\le\frac{2H_N}{N}\qquad(N\ge1).\]</div>
+<p>The odd/even split then yields an explicit schedule:</p>
+<div class="equation">\[\left|\sum_{k=1}^{2m^2}\frac1{k^2}-\frac83 B_{2m^2}^{\,2}\right|\le\frac{16}{m}\qquad(m\ge1).\]</div>
+<p>These are checked finite inequalities. They establish equivalence of the existing interval computations; no completed real line or new complex analysis is introduced. The route is a finite reconstruction of <a href="https://doi.org/10.4169/college.math.j.44.3.171">Benko and Molokach’s rearrangement proof</a>.</p>
+<h3>The number-theoretic application</h3>
+<p>For a finite list \(P\) of distinct primes, put
+\(c_P=\prod_{p\in P}(1-p^{-2})\), and let \(S_P(N)\) sum \(k^{-2}\) over the integers \(1\le k\le N\) divisible by none of those primes. The formalization proves</p>
+<div class="equation">\[S_{\{p\}\cup P}(N)=S_P(N)-p^{-2}S_P(\lfloor N/p\rfloor),\]</div>
+<p>and an explicit bound \(\lvert S_P(N)-c_P\sum_{k=1}^N k^{-2}\rvert\le K_P/(N+1)\), with
+\(K_{\varnothing}=0\) and \(K_{\{p\}\cup P}=(p+1)K_P+2p\).
+If \(P\) contained every prime, then \(S_P(N)=1\) for \(N\ge1\), forcing \(\zeta(2)=1/c_P\) to be rational.</p>
+<p class="note"><strong>Checked implication:</strong> if \(\pi^2\) is irrational, then for every natural bound there is a larger prime. Basel and the Euler-product argument are proved; <strong>irrationality of \(\pi^2\) remains an explicit hypothesis</strong>. Irrationality of \(\pi\) alone would not suffice. The dependency audit confirms that this proof uses the Euler sieve and does not invoke the existing Euclid infinitude theorem.</p>
+<p>Lean sources: <a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/Basel/Proof.lean">Basel</a>, <a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/Basel/RealZeta.lean">real-input compatibility</a>, <a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/Basel/Primes.lean">prime infinitude implication</a>, and <a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/scripts/check_basel.lean">dependency audit</a>.</p>
+</section>
+<section id="euler"><h2>Beyond Basel: Euler’s even values</h2><p>The classical general formula is</p>
+<div class="equation">\[\zeta(2n)=\frac{(2\pi)^{2n}|B_{2n}|}{2(2n)!},\qquad n\ge1.\]</div>
+<p>Here \(B_{2n}\) is a Bernoulli number; see <a href="https://dlmf.nist.gov/25.6.E2">DLMF, equation 25.6.2</a>. The general formula is not yet proved in the project. The case \(n=1\) is now the proved Basel theorem above.</p></section>
 <section id="boundary"><h2>The current boundary</h2><p>This is a reference construction, with coarse bounds and no claim of numerical efficiency near one. Powers are constructed by the convergent binomial series. A separate proof equating that computation to \(\exp(-s\log n)\), parameter derivatives, Euler products, and analytic continuation remain open. The differential equation above is a formal coefficient theorem, not an analytic derivative theorem.</p><p>The construction uses the existing rational interval foundation. It adds no completed-real type, Mathlib dependency, or new axiom. The published audit records inherited foundational dependencies, including existing native-decision certificates. Identifying Apéry’s rational approximants with \(\zeta(3)\) remains a separate task.</p></section>
 <footer><p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/ZetaReal/Compatibility.lean">Public Lean theorems</a> · <a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/docs/ZETA_REAL.md">Construction and proof map</a> · <a href="reading/zeta-real-axioms.log">Axiom audit</a></p><p>Verified source: <code>__REVISION__</code></p></footer>
 </main></body></html>
