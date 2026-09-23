@@ -37,3 +37,7 @@ run_cmd do
 
 #print axioms ComputableAnalysis.RationalPrimitiveFormula.Decomposition.primitive_correct
 #print axioms ComputableAnalysis.TrigonometricRationalization.Expr.pullback_correct
+
+#check ComputableAnalysis.RationalPrimitiveFormula.Decomposition.primitive_correct
+#check ComputableAnalysis.TrigonometricRationalization.Expr.pullback_correct
+#check ComputableAnalysis.TrigonometricRationalization.rational_circle_chart_cover
