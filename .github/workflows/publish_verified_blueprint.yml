@@ -44,6 +44,9 @@ on:
       - 'book/fundamental-matrix/**'
       - 'book/cosine-square/**'
       - 'book/classics/**'
+      - 'ComputableAnalysis/ComplexAnalysis/**'
+      - 'ComputableAnalysis/ComplexAnalysis.lean'
+      - 'scripts/check_polygonal_cauchy.lean'
       - 'book/euler-proof/**'
       - 'book/algebraic-ode/**'
       - 'book/zeta-real/**'
@@ -332,8 +335,14 @@ jobs:
           set -euo pipefail
           mkdir -p euler-reports
           python3 book/euler-proof/verify.py --work-dir euler-mathlib --report euler-reports | tee euler-reports/build.log
+      - name: Check polygonal Cauchy theory and local residues
+        run: |
+          set -euo pipefail
+          mkdir -p polygonal-cauchy-reports
+          lake build ComputableAnalysis.ComplexAnalysis | tee polygonal-cauchy-reports/build.log
+          lake env lean scripts/check_polygonal_cauchy.lean | tee polygonal-cauchy-reports/audit.log
       - name: Expose classical examples and verify the pinned Mathlib Basel source
-        run: python3 .github/reader-edition/classic_proofs.py --site site --revision "$GITHUB_SHA" --euler-audit euler-reports/proofs.json
+        run: python3 .github/reader-edition/classic_proofs.py --site site --revision "$GITHUB_SHA" --euler-audit euler-reports/proofs.json --cauchy-audit polygonal-cauchy-reports/audit.log
       - name: Verify classical navigation and proof comparisons in the browser
         run: python3 .github/reader-edition/test_classic_proofs.py --site site --report reader-edition-tests
       - uses: actions/upload-artifact@v4
@@ -342,6 +351,7 @@ jobs:
           name: reader-edition-validation
           path: |
             reader-edition-tests
+            polygonal-cauchy-reports
             rational-primitives-reports
             site/reading/rational-primitives-edition.json
             cosine-square-reports

@@ -1,5 +1,18 @@
 # Computable Analysis: Canonical Roadmap
 
+**Polygonal Cauchy foundation (2026-09-23).**
+`ComplexAnalysis` proves finite triangle cancellation, valid computed Cauchy
+contours from explicit local complex-affine approximation data, and a local
+simple-pole residue identity on positive rational squares. The pole
+normalization uses actual sampled pullbacks and the existing arctangent and
+geometric circle computation. Residues may be arbitrary valid represented
+complex values. Concrete nonconstant polynomial clients are checked.
+General derivative-to-model construction, partition agreement, punctured
+polygon transport, higher-order residues, Cauchy value/derivative formulas,
+and analytic continuation remain open. Fuchs and Painlevé remain partial.
+See [the precise theorem ledger](docs/POLYGONAL_CAUCHY.md).
+
+
 **Trigonometric primitive formulas and finite substitution (2026-09-23).**
 `ComputableTrigonometricRationalization.RepresentedFactorization.primitive_correct`
 computes an elementary formula for every rational sine/cosine expression with

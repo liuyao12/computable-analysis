@@ -257,3 +257,34 @@ maximal, and the boundary is excluded.  The reciprocal example proves exact
 geometric-series equality on the full unit disk, including points outside
 the smaller coordinate diamond. No general polygon integral is needed for
 this checked conditional step.
+
+
+\section{Checked polygonal Cauchy computations}
+\label{sec:polygonal-cauchy-checked}
+The new native module \texttt{ComplexAnalysis} proves finite subdivision
+cancellation on arbitrary rational triangles. A local complex-affine error
+of at most $M2^{-d_n}/(n+1)$ on each triangle of a depth-$d_n$ refinement,
+where $d_n\ge n$, gives an oriented midpoint-sum bound $MP/(n+1)$.
+The actual sample boxes must shrink too. The resulting contour program is
+valid and equivalent to zero. Finite triangle collections are supported;
+no estimate is required inside an omitted hole.
+
+The arctangent square normalization also supports a local simple-pole
+identity. For a positive rational square centered at $a$, arbitrary valid
+represented residue $\rho$, and a regular part $g$ with the stated local
+approximation data,
+\[
+ \oint_{\partial S}\left(\frac{\rho}{z-a}+g(z)\right)\,dz
+ \simeq2\pi i\rho.
+\]
+The two computations are constructed separately: sampled reciprocal
+pullbacks for the pole and certified triangle quadratures for the regular
+part. The family $\rho/(z-a)+z^2$ is instantiated.
+
+These results do not yet supply a general derivative-to-model adapter,
+arbitrary-partition agreement, punctured-polygon residue transport,
+higher-order poles, or the removable divided-difference construction needed
+for Cauchy's value formula. In particular, they do not complete Fuchs's
+criterion or Painlev\'e's classification. The reader follows
+$y''+z^{-1}y'+y=0$ as a motivating second-order example; the contour
+formalization itself is independent of the equation's order.

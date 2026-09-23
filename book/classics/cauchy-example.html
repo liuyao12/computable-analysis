@@ -1,0 +1,21 @@
+<aside class="cauchy-example" aria-label="Interactive motivating example">
+<div class="example-sticky">
+<p class="classic-tag">One equation throughout</p>
+<h2>The Bessel example</h2>
+<div class="example-equation">\[p(z)=1/z,\qquad q(z)=1.\]</div>
+<div class="example-tabs" role="group" aria-label="View of the motivating example">
+<button type="button" data-example-view="coefficients" aria-pressed="true">Coefficients</button><button type="button" data-example-view="triangles" aria-pressed="false">Cancellation</button><button type="button" data-example-view="contour" aria-pressed="false">Pole contour</button><button type="button" data-example-view="solutions" aria-pressed="false">Continuation</button>
+</div>
+<label class="example-follow"><input type="checkbox" id="example-follow" checked> Follow the narrative</label>
+<svg id="cauchy-plot" role="img" aria-labelledby="cauchy-plot-title cauchy-plot-description" viewBox="0 0 330 280"><title id="cauchy-plot-title">A rational square around the coefficient pole</title><desc id="cauchy-plot-description">Change the half-side and the mesh to explore the same differential equation.</desc></svg>
+<div id="example-controls">
+<label>Square half-side <output id="radius-label">1.00</output><input id="example-radius" type="range" min="0.25" max="1.5" step="0.25" value="1"></label>
+<label id="mesh-control">Subdivision depth <output id="mesh-label">2</output><input id="example-mesh" type="range" min="0" max="5" step="1" value="2"></label>
+<label id="orientation-control">Orientation<select id="example-orientation"><option value="1">Counterclockwise</option><option value="-1">Clockwise</option></select></label>
+<label id="circuit-control" hidden>Progress around the square <output id="circuit-label">0%</output><input id="example-circuit" type="range" min="0" max="100" step="1" value="0"></label>
+</div>
+<div id="example-readout" aria-live="polite"></div>
+<p id="example-caption"></p>
+<p class="example-note">Interactive values use floating-point arithmetic. The linked Lean proofs use rational boxes and certified errors.</p>
+<noscript>Enable JavaScript to adjust the contour. The mathematical statements and proof links remain available in the main text.</noscript>
+</div></aside>
