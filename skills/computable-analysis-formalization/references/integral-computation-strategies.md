@@ -14,6 +14,16 @@ not as evidence that an arbitrary integrand is integrable. Keep an endpoint
 identity, a change-of-variables comparison, or another semantic bridge
 separate from the raw interval computation.
 
+## Exact public statements
+
+Monotone pieces, rational partitions, and turning-point brackets are proof and
+construction data. Package them beneath the public exact integral identity,
+and prove the refinement or equivalence results needed for independence of
+internal choices. Keep genuine integrability and domain evidence when it
+cannot be derived. A caller should not have to choose the breaks for a familiar
+integral formula, or for a global derivative theorem whose proof uses this
+machinery. See the [governing policy](../../../FORMALIZATION_GUIDE.md#computable-foundations-exact-mathematical-theorems).
+
 ## Select a construction
 
 | Shape of the integrand | Construct | Typical proof obligation |
@@ -107,7 +117,8 @@ equivalence theorem to be identified.
 - Prove every width factor is nonnegative before multiplying inequalities.
 - Check the zero-width and positive-width cases separately when dividing by
   `width(B)`.
-- Keep the actual rate in the public theorem or completion schedule.
+- Retain the actual rate in a quantitative theorem or completion certificate;
+  expose the exact integral identity without incidental precision parameters.
 - Document whether the result is a checked endpoint theorem, a reusable
   construction interface, or a remaining target.
 

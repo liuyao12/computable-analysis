@@ -1,5 +1,55 @@
 # Formalization Guide
 
+## Computable foundations, exact mathematical theorems
+
+This is the repository-wide rule for choosing interfaces and deciding when a
+formalization is complete.
+
+The foundation layer is computable. Construct values with rational interval
+algorithms and prove validity using explicit error bounds, convergence rates,
+separation bounds, and finite estimates. Do not introduce Mathlib's real
+numbers or an abstract completion to bypass these obligations. Computable
+irrational inputs and coefficients are first-class inputs, not exceptions.
+
+The mathematical layer states exact results over valid represented reals.
+Equality of real values means `RealRaw.Equiv` between valid raw computations;
+it does not require literal equality of programs or their finite-stage boxes.
+Package validity and quantitative certificates so callers can use the exact
+theorem without reconstructing its error analysis. Keep the quantitative
+lemmas available for computational use.
+
+For example, the intended public shape of the sine derivative theorem is
+\[
+  D\sin(x) \simeq \cos(x)
+  \qquad\text{for every valid represented real }x,
+\]
+where \(\simeq\) denotes `RealRaw.Equiv`. This is a specification of the theorem
+shape, not a claim that a particular derivative API is already implemented.
+The proof must connect the derivative construction to the value of cosine.
+A rational-input secant estimate or a formal differentiation identity is an
+intermediate lemma; it is not the requested theorem for all represented real
+inputs. Prove the required real-input evaluation bridges and invariance under
+equivalent input representations.
+
+Integration may be constructed on monotone pieces and assembled across
+rational partitions or shrinking brackets around irrational turning points.
+Those choices belong in the construction and proof. Prove the refinement,
+partition-independence, or overlap-agreement results needed to expose an exact
+integral identity without making callers choose the internal breaks. Likewise,
+a global derivative identity should not ask callers for monotonicity pieces
+or local charts that the proof can construct and reconcile internally.
+
+Retain genuine mathematical domain hypotheses: validity, integrability or its
+constructive evidence when it cannot be derived, pole avoidance, branch
+restrictions, and explicitly supplied factorization data where required.
+Hiding implementation choices means constructing or packaging the needed
+evidence, not dropping it or assuming the desired conclusion. State the full
+intended domain first, then use rational intervals and local certificates
+inside the proof. Do not weaken a requested exact theorem to rational inputs,
+symbolic differentiation, or an uninstantiated certificate interface merely
+because those are the current APIs. If a bridge is missing, identify and prove
+it; report intermediate progress as such until the exact theorem is established.
+
 **Trigonometric primitive formulas and finite substitution (2026-09-23).**
 `ComputableTrigonometricRationalization.RepresentedFactorization.primitive_correct`
 computes an elementary formula for every rational sine/cosine expression with

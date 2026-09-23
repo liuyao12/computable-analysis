@@ -5,9 +5,14 @@ description: Formalize calculus, elementary-function, integral, series, inverse-
 
 # Computable Analysis Formalization
 
-Build a theorem as a checked computation with rational interval output. Keep a
-mathematical result separate from the code that evaluates it, the certificate
-that makes the evaluator valid, and any proof that two evaluators agree.
+Build computable foundations with rational interval algorithms and explicit
+error certificates; expose exact mathematical theorems over valid represented
+reals using `RealRaw.Equiv`. Follow the
+[governing policy](../../FORMALIZATION_GUIDE.md#computable-foundations-exact-mathematical-theorems).
+Package internal bounds, precision schedules, and partitions beneath the public
+theorem, proving the agreement and representation-invariance bridges needed to
+do so. Symbolic differentiation or a rational-input certificate alone does not
+complete a requested exact theorem for represented real inputs.
 
 Read [FORMALIZATION_GUIDE.md](../../FORMALIZATION_GUIDE.md) before choosing an
 interface. Read [references/computation-certificate-catalog.md](references/computation-certificate-catalog.md)
@@ -29,8 +34,10 @@ for any definite-integral task, especially one with non-rational breakpoints.
 
 ## Follow the certificate workflow
 
-1. State the scientific or calculus claim on a rational closed interval, with
-   all domain, sign, orientation, and branch hypotheses explicit.
+1. State the exact scientific or calculus claim on its full intended domain,
+   including computable irrational inputs and coefficients. Keep genuine
+   domain and branch hypotheses explicit; choose rational intervals or charts
+   internally for the proof.
 2. Choose a computation route from the certificate catalog. Prefer an existing
    concrete constructor to a new general abstraction.
 3. Define a literal evaluator returning rational boxes. Make its stage
@@ -44,8 +51,10 @@ for any definite-integral task, especially one with non-rational breakpoints.
 6. State the function-specific semantic bridge: an endpoint identity, a
    range enclosure, a comparison with an independently valid raw evaluator,
    or a finite recurrence. Do not silently promote an interface to a theorem.
-7. Publish the friendly mathematical theorem only after the preceding
-   certificates are checked.
+7. Prove and publish the exact theorem on the intended represented-real
+   domain, with representation invariance and any partition or chart agreement
+   required to hide internal choices. Construct missing bridges rather than
+   stopping at a formal identity or an uninstantiated certificate interface.
 
 ## Choose the narrowest useful route
 

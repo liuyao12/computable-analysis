@@ -23,6 +23,14 @@ an imported topology.
 
 ## Finite derivatives and endpoint formulas
 
+The target for a requested derivative identity is an exact theorem over valid
+represented real inputs, using `RealRaw.Equiv` and the genuine mathematical
+domain. The finite certificates below support that proof. Prove any missing
+real-input evaluation and representation-invariance bridges; do not treat
+formal differentiation or a rational-input certificate as the completed
+real-input theorem. Internal charts and monotonicity breaks should be resolved
+inside the proof. See the [governing policy](../../../FORMALIZATION_GUIDE.md#computable-foundations-exact-mathematical-theorems).
+
 Use `HasDerivativeOnInterval` or `HasForwardDerivativeAt` for rational
 finite-difference certificates. Let evaluator precision depend on the
 rational step when necessary. Keep a coefficient identity for a formal power
