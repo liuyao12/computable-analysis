@@ -1,3 +1,4 @@
+import ComputableAnalysis.Apery.Tests
 import ComputableAnalysis
 import ComputableAnalysis.LeibnizPiTaylor
 import ComputableAnalysis.LeibnizTransmutation

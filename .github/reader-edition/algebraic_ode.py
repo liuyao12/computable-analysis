@@ -78,6 +78,26 @@ EXPECTED += [
     'ComputableAnalysis.AlgebraicODE.Tests.painleve_box_equation',
 ]
 
+EXPECTED += [
+    'ComputableAnalysis.Apery.number_integral',
+    'ComputableAnalysis.Apery.term_telescopes',
+    'ComputableAnalysis.Apery.number_recurrence',
+    'ComputableAnalysis.Apery.number_growth',
+    'ComputableAnalysis.Apery.number_equation',
+    'ComputableAnalysis.Apery.coefficients_equation',
+    'ComputableAnalysis.Apery.operator_ordinary',
+    'ComputableAnalysis.Apery.value_valid',
+    'ComputableAnalysis.Apery.value_derivative',
+    'ComputableAnalysis.Apery.equation_error',
+    'ComputableAnalysis.Apery.equation',
+    'ComputableAnalysis.Apery.companion_recurrence',
+    'ComputableAnalysis.Apery.companion_equation',
+    'ComputableAnalysis.Apery.casoratian',
+    'ComputableAnalysis.Apery.number_ge_one',
+    'ComputableAnalysis.Apery.approximant_difference',
+    'ComputableAnalysis.Apery.approximant_increasing',
+]
+
 def sha(data):
     return hashlib.sha256(data).hexdigest()
 
@@ -96,7 +116,7 @@ def install(site, revision, audit):
     for name in ['index.html', 'ch-differential-equations.html']:
         original = before[name].decode()
         assert MARKER not in original and '</article>' in original
-        addition = MARKER + '<section class="fm-reader-link"><h2>Fuchs–Painlevé</h2><p>Algebraic differential equations on the computable-analysis foundation: forward Fuchs growth bounds, formal Frobenius recurrences, convergent factor computations, certified Laguerre polynomials, Painlevé I local pole charts with certified derivatives, and Painlevé II algebraic seeds.</p><p><a href="fuchs-painleve.html">Read the subproject and formalization comparisons →</a></p></section>' + MARKER
+        addition = MARKER + '<section class="fm-reader-link"><h2>Fuchs–Painlevé</h2><p>Algebraic differential equations on the computable-analysis foundation: forward Fuchs growth bounds, formal Frobenius recurrences, convergent factor computations, certified Laguerre polynomials, Painlevé I local pole charts with certified derivatives, Painlevé II algebraic seeds, and Apéry’s zeta(3) differential equation and arithmetic approximants.</p><p><a href="fuchs-painleve.html">Read the subproject and formalization comparisons →</a></p></section>' + MARKER
         updated = original.replace('</article>', addition + '</article>', 1)
         assert updated.replace(addition, '', 1) == original
         (site / name).write_text(updated)

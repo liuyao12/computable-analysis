@@ -1,3 +1,4 @@
+import ComputableAnalysis.Apery
 import ComputableAnalysis.AlgebraicODE.Tests
 
 #print axioms ComputableAnalysis.AlgebraicODE.Expr.evalRaw_valid
@@ -69,3 +70,21 @@ import ComputableAnalysis.AlgebraicODE.Tests
 #print axioms ComputableAnalysis.AlgebraicODE.Painleve.Pole.original_equation_identity
 #print axioms ComputableAnalysis.AlgebraicODE.Tests.quadratic_forcing_obstruction
 #print axioms ComputableAnalysis.AlgebraicODE.Tests.painleve_box_equation
+
+#print axioms ComputableAnalysis.Apery.number_integral
+#print axioms ComputableAnalysis.Apery.term_telescopes
+#print axioms ComputableAnalysis.Apery.number_recurrence
+#print axioms ComputableAnalysis.Apery.number_growth
+#print axioms ComputableAnalysis.Apery.number_equation
+#print axioms ComputableAnalysis.Apery.coefficients_equation
+#print axioms ComputableAnalysis.Apery.operator_ordinary
+#print axioms ComputableAnalysis.Apery.value_valid
+#print axioms ComputableAnalysis.Apery.value_derivative
+#print axioms ComputableAnalysis.Apery.equation_error
+#print axioms ComputableAnalysis.Apery.equation
+#print axioms ComputableAnalysis.Apery.companion_recurrence
+#print axioms ComputableAnalysis.Apery.companion_equation
+#print axioms ComputableAnalysis.Apery.casoratian
+#print axioms ComputableAnalysis.Apery.number_ge_one
+#print axioms ComputableAnalysis.Apery.approximant_difference
+#print axioms ComputableAnalysis.Apery.approximant_increasing

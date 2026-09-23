@@ -96,3 +96,14 @@ blueprint chapter, `GOALS.md`, and `FORMALIZATION_GUIDE.md` when a new
 checked public capability is added. State an actual convergence-rate theorem
 where the construction has one. Run the no-import/no-placeholder audit before
 publishing.
+
+## Arithmetic differential equations
+
+For a generating function such as Apéry's, start with an independent finite
+integer construction, then prove its recurrence by finite telescoping.
+`Apery` connects that arithmetic proof to an independently defined Euler
+operator, ordinary derivative certificates, and an explicit boxed ODE
+residual. The monomial-prefix alignment in `shift_prefix` avoids passing to
+an unspecified limit. The companion's discrete Wronskian supplies strict
+separation, but identifying its approximants with an existing special-function
+computation and proving irrationality require further theorems.
