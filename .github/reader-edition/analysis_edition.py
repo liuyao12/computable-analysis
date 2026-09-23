@@ -220,6 +220,8 @@ def main():
             original=parse(str(doc.article));original.select_one('#pi-computations').decompose()
             assert re.sub(r'\s+',' ',original.get_text(' ',strip=True))==original_foundation
         if p.name=='cosine.html':
+            doc.title.string='The cosine primitive · '+TITLE
+            doc.select_one('h1#cosine-primitive').string='The cosine primitive'
             figure=doc.select_one('[data-animation="cosine"]');figure['class']=['math-animation','equal-scale-animation']
             figure.figcaption.string=r'Fixed upper limit \(1/2\). Equal \(x\)/\(y\) scale; right lower and left upper rectangles refine at dyadic sample points. The geometric reciprocal is evaluated independently.'
             figure.img['alt']='Equal-scale cosine plot on [0,1/2] with dyadic rectangle bounds and independent geometric reciprocal bounds.'
