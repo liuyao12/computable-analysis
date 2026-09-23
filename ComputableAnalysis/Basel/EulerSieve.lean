@@ -10,7 +10,7 @@ def free : List Nat → Nat → Prop
   | p::ps, k => ¬p∣k ∧ free ps k
 instance freeDecidable : (ps : List Nat) → (k : Nat) → Decidable (free ps k)
   | [], _ => isTrue trivial
-  | p::ps, k => @instDecidableAnd _ _ (inferInstance) (freeDecidable ps k)
+  | _p::ps, k => @instDecidableAnd _ _ (inferInstance) (freeDecidable ps k)
 
 def weight (k : Nat) : Rat := 1/((k:Rat)*(k:Rat))
 def term (ps : List Nat) (k : Nat) : Rat := if free ps k then weight k else 0

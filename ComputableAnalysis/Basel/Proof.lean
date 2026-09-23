@@ -12,8 +12,8 @@ open DirichletSeries
   have hl := alternating_decreasing b (2*n) b_nonneg (fun k=>b_antitone (by omega))
   have hh := alternating_decreasing b (2*n+1) b_nonneg (fun k=>b_antitone (by omega))
   have hc : leibnizRaw.compute n = {lo:=4*B (2*n), hi:=4*B (2*n+1)} := by
-    change {lo:=4*(Series.AlternatingRaw.leibnizAlternatingRaw.interval n).lo,
-      hi:=4*(Series.AlternatingRaw.leibnizAlternatingRaw.interval n).hi} = _
+    change ({lo:=4*(Series.AlternatingRaw.leibnizAlternatingRaw.interval n).lo,
+      hi:=4*(Series.AlternatingRaw.leibnizAlternatingRaw.interval n).hi} : QInterval) = _
     rw [Series.AlternatingRaw.interval_eq_endpoints]; rfl
   have hz : b 0=1 := by simp [b, Series.leibnizTerm, Rat.div_def]; grind only
   rw [hz] at hl hh
@@ -30,10 +30,9 @@ open DirichletSeries
   have hl : (leibnizRaw.compute n).lo=4*B (2*n) := by
     change 4*(Series.AlternatingRaw.leibnizAlternatingRaw.interval n).lo = _
     rw [Series.AlternatingRaw.interval_eq_endpoints]; rfl
-  change (if (0:Rat)≤1/6 then (1/6)*((leibnizRaw*leibnizRaw).compute n).lo
-    else (1/6)*((leibnizRaw*leibnizRaw).compute n).hi) = _
+  dsimp only [piSquaredOverSixRaw, RealRaw.scaleRat, RealRaw.scaleRatCompute]
   rw [if_pos (by grind only [Rat.div_def]), hc]
-  simp only []
+  change (1/6)*((leibnizRaw.compute n).lo*(leibnizRaw.compute n).lo)=_
   rw [hl]; grind only [Rat.div_def]
 
 /-- The reciprocal-square series equals the square of the Leibniz

@@ -1,5 +1,4 @@
-import ComputableAnalysis.Basel.Proof
-import ComputableAnalysis.Basel.EulerBounds
+import ComputableAnalysis.Basel.Primes
 import ComputableAnalysis.ZetaReal.Tests
 import ComputableAnalysis.Apery.Tests
 import ComputableAnalysis

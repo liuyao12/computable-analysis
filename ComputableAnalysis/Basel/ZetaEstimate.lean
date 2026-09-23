@@ -16,8 +16,7 @@ open FormalPowerSeries DirichletSeries
       simp only [zetaTwoTerm, b, Series.leibnizTerm, Rat.div_def, Rat.one_mul, Rat.inv_mul_rev]
     have he : zetaTwoTerm (2*n+1)=(1/4)*zetaTwoTerm n := by
       simp only [zetaTwoTerm, Rat.natCast_add, Rat.natCast_mul]
-      have hh : (2:Rat)*(n:Rat)+1+1=2*((n:Rat)+1) := by grind only
-      simp only [hh, Rat.div_def, Rat.inv_mul_rev]
+      simp only [Rat.div_def, Rat.inv_mul_rev]
       grind only
     rw [hm, ho, he]; grind only
 

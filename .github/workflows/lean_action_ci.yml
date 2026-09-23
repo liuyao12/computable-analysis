@@ -24,6 +24,6 @@ jobs:
         with:
           auto-config: false
           build: true
-          build-args: "ComputableAnalysis ComputableAnalysis.PiProofs ComputableAnalysis.Basel.Proof ComputableAnalysis.Basel.EulerProduct"
+          build-args: "ComputableAnalysis ComputableAnalysis.PiProofs ComputableAnalysis.Basel.Primes"
           test: false
           lint: false
