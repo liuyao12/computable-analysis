@@ -1,7 +1,16 @@
 <h1 id="euler">Euler’s sine-product proof</h1>
 <p class="lead">Euler’s sine product determines every positive even zeta value. The Basel case follows from a finite-product remainder; the general theorem follows from a justified logarithmic derivative and coefficient comparison.</p>
-\[\boxed{\zeta(2m)=\frac{(-1)^{m+1}B_{2m}(2\pi)^{2m}}{2(2m)!}}\qquad(m\ge1).\]
-<p>This is a checked Lean proof for every positive integer \(m\), using Mathlib’s sine-product theorem and its locally uniform logarithmic derivative. Here \(B_{2m}\) denotes a Bernoulli number and \(\zeta(2m)=\sum_{k=1}^{\infty}k^{-2m}\). It is independent of the <a href="basel.html#mathlib">Bernoulli–Fourier evaluation</a> and of our <a href="basel.html#native">native finite-rearrangement proof</a>. The proof runs in a separate Mathlib package; it does not yet supply an Euler-product proof in the project’s rational-interval foundation.</p>
+<h2 id="setup">Setup</h2>
+<p>Write \(\pi\) for the circle constant and \(\zeta(s)=\sum_{k=1}^{\infty}k^{-s}\) for \(s&gt;1\). Define the rational Bernoulli numbers by \(B_0=1\) and the recurrence</p>
+\[\sum_{j=0}^{n}\binom{n+1}{j}B_j=0\qquad(n\ge1).\]
+<section class="showcase-statement" aria-labelledby="theorem"><h2 id="theorem">Theorem — Euler’s even zeta values</h2>
+<p>For every positive integer \(m\), the sum of the reciprocal \(2m\)-th powers of the positive integers is the following rational multiple of \(\pi^{2m}\):</p>
+\[\zeta(2m)=\frac{(-1)^{m+1}B_{2m}(2\pi)^{2m}}{2(2m)!}.\]
+<p>The sine-product identity used in the proof holds for every complex number \(z\):</p>
+\[\sin(\pi z)=\pi z\prod_{k=1}^{\infty}\left(1-\frac{z^2}{k^2}\right).\]
+<p>The finite products converge uniformly on every compact subset of the complex plane.</p>
+</section>
+<p>The checked Lean proof uses Mathlib’s sine-product theorem and its locally uniform logarithmic derivative. It is independent of the <a href="basel.html#mathlib">Bernoulli–Fourier evaluation</a> and of our <a href="basel.html#native">native finite-rearrangement proof</a>. It runs in a separate Mathlib package; the Euler-product proof has not yet been transferred to the project’s rational-interval foundation.</p>
 <h2 id="gap">What has to be justified?</h2>
 <p>Knowing the zeros of sine does not by itself determine the function: multiplication by a nonvanishing factor preserves those zeros. Even after the product identity has been proved, an infinite product cannot simply be expanded like a polynomial without controlling its remainder.</p>
 \[\frac{\sin(\pi x)}{\pi x}=\prod_{k=1}^{\infty}\left(1-\frac{x^2}{k^2}\right).\]

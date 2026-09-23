@@ -1,11 +1,14 @@
 <header><p class="classic-tag">Differential equations · Singularities and growth</p><h1>Fuchs’s theorem</h1><p class="lead">A condition on the coefficients determines how solutions behave near a singular point.</p></header>
-<h2 id="theorem">The classical theorem</h2>
-<p>Consider a second-order linear equation near a point \(a\), with coefficients meromorphic there:</p>
+<h2 id="setup">Setup</h2>
+<p>Fix a complex point \(a\). Let \(p\) and \(q\) be meromorphic near \(a\), with no other singularities in a sufficiently small punctured disk, and consider</p>
 <div class="displaymath">\[y''+p(z)y'+q(z)y=0.\]</div>
-<p>Fuchs’s criterion says that the singularity is regular exactly when</p>
+<p>A solution has <em>moderate growth</em> at \(a\) if, on each fixed branch and each closed angular subsector of finite opening, there are constants \(C&gt;0\) and a nonnegative integer \(N\) such that \(|y(z)|\le C|z-a|^{-N}\) for all sufficiently small \(|z-a|&gt;0\). The constants may depend on the solution, branch, and subsector.</p>
+<section class="showcase-statement" aria-labelledby="theorem"><h2 id="theorem">Theorem — Fuchs’s criterion</h2>
+<p>Every local solution has moderate growth at \(a\) if and only if both coefficient functions</p>
 <div class="displaymath">\[(z-a)p(z)\quad\text{and}\quad(z-a)^2q(z)\]</div>
-<p>extend holomorphically across \(a\). The content is the connection to solutions: on a fixed branch in a sector, every solution has at most polynomial growth toward the singularity. Frobenius theory constructs local solutions from convergent power series multiplied by powers, with logarithmic terms when needed.</p>
-<p>Thus the pole-order test predicts actual behavior; regularity is not merely the name of a coefficient condition. See <a href="https://dlmf.nist.gov/2.7.i">Fuchs–Frobenius theory in the DLMF</a>.</p>
+<p>extend holomorphically across \(a\). Equivalently, the first-derivative coefficient has at most a simple pole and the zeroth-order coefficient has at most a double pole.</p>
+</section>
+<p>This includes ordinary points. When \(a\) is singular, the solution-growth condition says that it is a <em>regular singular point</em>. Thus the theorem connects a test on coefficients to actual solution behavior. Frobenius theory further constructs solutions from convergent power series, powers, and, when needed, logarithms. See <a href="https://dlmf.nist.gov/2.7.i">Fuchs–Frobenius theory in the DLMF</a>.</p>
 <h2 id="checked">What our formalization proves</h2>
 <p><strong>The forward growth theorem is checked.</strong> For polynomial coefficients in the scaled equation</p>
 <div class="displaymath">\[z^2y''+zp(z)y'+q(z)y=0,\]</div>

@@ -1,7 +1,14 @@
 <h1 id="leibniz">The Leibniz series</h1>
 <p class="lead">One geometric circle constant, three native proof routes, and a comparison with Mathlib.</p>
-\[\boxed{\frac\pi4=1-\frac13+\frac15-\frac17+\cdots.}\]
-<p>Here \(\pi\) starts with the Archimedean circle construction. The series is a different interval computation; identifying the two is a theorem.</p>
+<h2 id="setup">Setup</h2>
+<p>Let \(\pi\) be the circle constant obtained from geometric exhaustion. For each nonnegative integer \(N\), form the rational partial sum</p>
+\[S_N=4\sum_{k=0}^{N}\frac{(-1)^k}{2k+1}.\]
+<section class="showcase-statement" aria-labelledby="theorem"><h2 id="theorem">Theorem — Leibniz</h2>
+<p>The partial sums converge to the geometric circle constant. More precisely, for every nonnegative integer \(N\), their error is at most four times the first omitted denominator’s reciprocal:</p>
+\[|S_N-\pi|\le\frac{4}{2N+3}.\]
+<p>Consequently, the alternating sum of the reciprocals of the positive odd integers equals one quarter of the circle constant:</p>
+\[\frac{\pi}{4}=\sum_{k=0}^{\infty}\frac{(-1)^k}{2k+1}.\]
+</section>
 <h2 id="finite-sums">Finite sums and a usable error bound</h2>
 <p>Put \(S_N=4\sum_{k=0}^N(-1)^k/(2k+1)\). Alternating upper and lower sums enclose the answer, with the checked estimate</p>
 \[|S_N-\pi|\le\frac4{2N+3}.\]

@@ -23,3 +23,16 @@ Run `classic_proofs.py` after the cosine-square publication pass, followed by
 `test_classic_proofs.py`, as specified in the publication workflow. The tests
 check every sidebar entry, active navigation, mathematical rendering, mobile
 layout, route controls, old proof viewers, and preservation of prior audits.
+
+Every sidebar showcase begins with the minimum setup, followed immediately by
+an explicit theorem statement in natural language. State domains, quantifiers,
+hypotheses, and conclusions; use LaTeX for mathematical notation. Proof routes,
+formalization status, implementation details, and measurements follow the
+statement. In particular, distinguish the classical Fuchs and Painlevé theorems
+from the parts currently checked in this project.
+
+The page sources here follow this structure directly. Introductions for the
+pinned cosine, Cartwright, and integral-family pages are maintained in
+`statements/` and installed by the final publication pass, preserving their
+existing proof anchors and audit artifacts. The browser checks cover all eight
+showcases at desktop and mobile widths.

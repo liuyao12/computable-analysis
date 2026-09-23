@@ -12,6 +12,7 @@ EULER_MATHLIB='51e6992efd06126df61a496bebf8f49482a4e129'
 LINKS=[('cartwright.html',r'Irrationality of \(\pi^2\)'),('leibniz.html','The Leibniz series'),('basel.html','The Basel problem'),('euler.html','Euler’s sine product')]
 ODE_LINKS=[('fuchs.html', 'Fuchs’s theorem'), ('painleve.html', 'Painlevé’s classification')]
 LINKS += ODE_LINKS
+SHOWCASE_PAGES = ['cosine.html', 'integral-families.html'] + [href for href, _ in LINKS]
 def digest(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def verify_mathlib(source_file=None):
     url=f'https://raw.githubusercontent.com/leanprover-community/mathlib4/{MATHLIB}/{MATHLIB_PATH}'
@@ -61,6 +62,35 @@ def install(site,revision,euler_audit,source_file=None):
         footer=doc.select_one('.chapter-footer a')
         if footer:footer['href']=repo+'book/classics/'+name+'.html';footer.string='Source '+revision[:8]+' ↗'
         (site/(name+'.html')).write_text(str(doc))
+    # Pinned reader pages retain their proof anchors and audited comparison data.
+    # Their editable introductions live here, alongside the other showcase sources.
+    for fragment in sorted((SOURCE/'statements').glob('*.html')):
+        path=site/fragment.name
+        doc=BeautifulSoup(path.read_text(),'html.parser')
+        lead=doc.article.select_one('.lead')
+        if fragment.name=='cosine.html':
+            for node in list(lead.next_siblings):
+                if getattr(node,'name',None)=='h2':break
+                node.extract()
+        elif fragment.name=='cartwright.html':
+            for node in doc.article.find_all(string=True):
+                if 'π' in node:node.replace_with(str(node).replace('π squared',r'\(\pi^2\)').replace('π',r'\(\pi\)'))
+        cursor=lead
+        for node in list(BeautifulSoup(fragment.read_text(),'html.parser').contents):
+            cursor.insert_after(node);cursor=node
+        doc.select_one('meta[name="documentation-revision"]')['content']=revision
+        path.write_text(str(doc))
+    for name in SHOWCASE_PAGES:
+        path=site/name;doc=BeautifulSoup(path.read_text(),'html.parser')
+        assert doc.select_one('.showcase-statement') and doc.select_one('#setup')
+        toc=doc.select_one('.on-this-page')
+        if toc:
+            toc.clear()
+            for heading in doc.article.select('h2[id]'):
+                a=doc.new_tag('a',href='#'+heading['id']);a.string=heading.get_text();toc.append(a)
+        if not doc.select_one('link[href="reading/classics.css"]'):
+            doc.head.append(doc.new_tag('link',rel='stylesheet',href='reading/classics.css'))
+        path.write_text(str(doc))
     navigation=[]
     for p in site.rglob('*.html'):
         if 'reference' in p.parts:continue
@@ -93,7 +123,7 @@ def install(site,revision,euler_audit,source_file=None):
     assert all(p.endswith('.html') for p in changed)
     report=dict(documentationRevision=revision,cartwrightProofRevision=audit['sourceCommit'],
       nativeSeriesProofRevision=revision,mathlib=mathlib,navigationPages=navigation,
-      pages=[p for p,t in LINKS],changedArtifacts=changed,
+      pages=SHOWCASE_PAGES,changedArtifacts=changed,
       protectedArtifacts={p:h for p,h in before.items() if p not in changed},
       artifacts={p:h for p,h in after.items() if p not in before or p in changed},
       checks=dict(cartwrightAlreadyProved=True,cartwrightThreeCheckedRoutesPreserved=True,leibnizComparisonPreserved=True,baselNativeAudited=True,mathlibSourcePinned=True,eulerProofAudited=True,allEvenZetaValuesAudited=True),

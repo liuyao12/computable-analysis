@@ -1,10 +1,14 @@
 <header><p class="classic-tag">Differential equations · Nonlinear classification</p><h1>Painlevé’s classification</h1><p class="lead">Which nonlinear differential equations avoid branching at singularities whose locations depend on the initial conditions?</p></header>
-<h2 id="theorem">The classical theorem</h2>
-<p>Consider the class</p>
-<div class="displaymath">\[y''=R(x,y,y'),\]</div>
-<p>where \(R\) is rational in \(y,y'\) and locally analytic in \(x\). The <em>Painlevé property</em> excludes movable branch points: branching singularities whose locations vary with the initial conditions. Movable poles are allowed.</p>
-<p>The Painlevé–Gambier classification gives fifty canonical forms under specified locally analytic changes of the independent variable and Möbius transformations of the dependent variable. They reduce to linear equations, elliptic-function cases, or the six Painlevé families \(\mathrm{P_I},\ldots,\mathrm{P_{VI}}\). The six families are the remaining nonlinear cases after these reductions, not the whole fifty-form list. <a href="https://dlmf.nist.gov/32.2.i">Precise scope and equations in the DLMF</a>.</p>
-<p>This is a classification of equations. Classifying their algebraic or rational solutions is a further, distinct problem.</p>
+<h2 id="setup">Setup</h2>
+<p>Consider nonlinear second-order equations \(y''=R(x,y,y')\), where \(R\) is rational in \(y,y'\) and locally analytic in \(x\) away from isolated fixed singularities. The <em>Painlevé property</em> means that every solution is free of branch points whose locations depend on its initial conditions. Movable poles and isolated essential singularities are allowed by this definition.</p>
+<p>Identify equations under locally invertible changes</p>
+<div class="displaymath">\[X=\phi(x),\qquad Y=\frac{a(x)y+b(x)}{c(x)y+d(x)},\]</div>
+<p>with locally analytic coefficients, \(\phi'(x)\ne0\), and \(a(x)d(x)-b(x)c(x)\ne0\).</p>
+<section class="showcase-statement" aria-labelledby="theorem"><h2 id="theorem">Theorem — Painlevé–Gambier classification</h2>
+<p>Every equation in this class with the Painlevé property is locally equivalent, under these changes, to an equation in the classical list of fifty canonical forms. Conversely, the forms in that list have the Painlevé property.</p>
+<p>Each canonical form reduces to a linear equation, is solvable in elliptic functions, or reduces to one of the six Painlevé families \(\mathrm{P_I},\ldots,\mathrm{P_{VI}}\). Thus the six families exhaust the cases remaining after these reductions.</p>
+</section>
+<p>Here “fifty” counts canonical forms, including parameter families, rather than fifty individual equations. <a href="https://dlmf.nist.gov/32.2.i">The DLMF gives the six equations, the equivalence, and references for the canonical list</a>. This classifies equations; classifying their algebraic or rational solutions is a separate problem.</p>
 <h2 id="checked">What our formalization proves</h2>
 <p><strong>Local movable-pole constructions for \(\mathrm{P_I}\) are checked.</strong> For</p>
 <div class="displaymath">\[y''=6y^2+x,\qquad s=x-p,\]</div>

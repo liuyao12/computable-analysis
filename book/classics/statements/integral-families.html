@@ -1,0 +1,14 @@
+<h2 id="setup">Setup</h2>
+<p>Let \(\pi\) be the geometric circle constant and put \(c(t)=\cos(\pi t/2)\) on \([0,1]\). For nonnegative integers \(m,n\), define</p>
+\[W_n=\int_0^1c(t)^n\,dt,\qquad B_{m,n}=\int_0^1t^m(1-t)^n\,dt.\]
+<p>Both integrals are constructed by refining rational sample sums. Let \(R_0=1\) and, for positive integers \(n\), let</p>
+\[R_n=\prod_{k=1}^{n}\frac{(2k)^2}{(2k-1)(2k+1)}.\]
+<section class="showcase-statement" aria-labelledby="theorem"><h2 id="theorem">Theorems — Wallis and beta integrals</h2>
+<p>For every nonnegative integer \(n\), the even and odd cosine-power integrals have these exact factorial values:</p>
+\[W_{2n}=\frac{(2n)!}{4^n(n!)^2},\qquad W_{2n+1}=\frac{2\cdot4^n(n!)^2}{\pi(2n+1)!}.\]
+<p>The finite Wallis products enclose the circle constant, for every nonnegative integer \(n\):</p>
+\[2R_n\le\pi\le2R_n\frac{2n+2}{2n+1}.\]
+<p>In particular, \(R_n\) converges to \(\pi/2\). For every pair of nonnegative integers \(m,n\), including zero exponents, the beta integral is</p>
+\[B_{m,n}=\frac{m!n!}{(m+n+1)!}.\]
+<p>Consequently, multiplying its integrand by \((m+n+1)!/(m!n!)\) gives a polynomial density with integral one.</p>
+</section>
