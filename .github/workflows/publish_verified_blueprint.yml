@@ -10,6 +10,8 @@ on:
       - '.github/reader-edition/**'
       - 'book/rational-primitives/**'
       - 'ComputableAnalysis/RationalPrimitive*.lean'
+      - 'ComputableAnalysis/RationalPartialFractions.lean'
+      - 'ComputableAnalysis/DifferentialSynchronizedSum.lean'
       - 'ComputableAnalysis/RationalExpressionNormalization.lean'
       - 'ComputableAnalysis/TrigonometricRationalization.lean'
       - 'scripts/check_rational_primitives.lean'

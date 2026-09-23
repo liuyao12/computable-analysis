@@ -4,8 +4,9 @@
 The target theorem states that a rational function on an interval whose
 denominator is uniformly apart from zero has an elementary primitive.
 Algebraic constants are allowed. The general analytic theorem remains open;
-the checked results include analytic polynomial and local logarithm
-primitives, finite formal-derivative identities, and a domain-preserving circle substitution.
+the checked results include complete local analytic primitives for rationally
+split denominators, finite formal-derivative identities for quadratic terms,
+and a domain-preserving circle substitution.
 
 \begin{theorem}[Supplied partial fractions]
 \label{thm:rational-primitive-formula}
@@ -74,6 +75,31 @@ Refine both runtime stages to their maximum. Nestedness controls the error
 of independently shrinking near intervals by three times the original
 tolerance. Multiply the natural step precisions and spend finer tolerances
 on refinement and addition.
+\end{proof}
+
+\begin{theorem}[Computed partial fractions and analytic assembly]
+\label{thm:rational-split-primitive-analytic}
+\lean{ComputableAnalysis.RationalPartialFractions.decomposition,
+ComputableAnalysis.RationalPrimitiveAssembly.splitPrimitive,
+ComputableAnalysis.RationalPrimitiveAssembly.radius_pos,
+ComputableAnalysis.RationalPrimitiveAssembly.denominator_near}
+\leanok
+Let \(q(x)=\prod_i(x-a_i)^{m_i}\), where the rational pole centers are distinct
+and the positive multiplicities are arbitrary. For every rational polynomial
+\(p\) and rational \(z\) with \(q(z)\ne0\), the algorithm computes an elementary
+primitive of \(p/q\) on \([z-r,z+r]\), with
+\[
+ r=\min(1,|z-a_1|/2,\ldots,|z-a_k|/2)>0.
+\]
+It returns a valid interval evaluator, an elementary syntax witness tied to
+that evaluator, and an actual \texttt{HasDerivativeOnInterval} certificate.
+\end{theorem}
+\begin{proof}\leanok
+Repeated synthetic division computes every partial-fraction coefficient.
+Finite reciprocal-coordinate secant estimates handle repeated linear poles;
+normalized logarithms handle simple poles. Restrict all atoms to the common
+interval and synchronize rational scaling and finite addition. The computed
+partial-fraction identity identifies the derivative with the original quotient.
 \end{proof}
 
 \begin{theorem}[Rational circle pullback]

@@ -10,6 +10,22 @@ ROOT = Path(__file__).resolve().parents[2]
 PAGE = 'rational-primitives.html'
 MARKER = '<!-- rational-primitives -->'
 EXPECTED = [
+    'HasDerivativeOnInterval.scale',
+    'HasDerivativeOnInterval.linearCombination',
+    'RationalPrimitivePowers.hasDerivative',
+    'RationalPrimitivePowers.weighted_hasDerivative',
+    'RationalPartialFractions.decomposition',
+    'RationalPartialFractions.ofFactorization',
+    'RationalPrimitiveAssembly.radius_pos',
+    'RationalPrimitiveAssembly.denominator_near',
+    'RationalPrimitiveAssembly.splitPrimitive',
+    'RationalPrimitiveAssembly.ofFactorization',
+    'RationalPrimitiveExamples.automaticMixed_coefficients',
+    'RationalPrimitiveExamples.negativeTriplePole_hasDerivative',
+    'RationalPrimitiveExamples.automaticMixed_hasDerivative',
+    'RationalPrimitiveExamples.automaticMixed_elementary',
+    'RationalPrimitiveExamples.automaticMixed_radius',
+
     'HasDerivativeOnInterval.add',
     'RationalPrimitiveExamples.polynomialPlusLog_hasDerivative',
     'RationalPrimitivePolynomial.hasDerivative',
@@ -47,7 +63,7 @@ def install(site, revision, audit):
     log = audit.read_text()
     assert 'error:' not in log and 'sorryAx' not in log
     assert 'PASS: rational primitive algebra;' in log
-    assert 'general decomposition and analytic realization remain open' in log
+    assert 'general algebraic factorization, quadratic analytic assembly, and represented trigonometric transport remain open' in log
     for name in EXPECTED:
         assert 'CHECKED ComputableAnalysis.' + name + '\n' in log, name
     before = {str(p.relative_to(site)): p.read_bytes() for p in site.rglob('*') if p.is_file()}
@@ -62,7 +78,7 @@ def install(site, revision, audit):
         original = before[name].decode()
         assert MARKER not in original and '</article>' in original
         addition = (MARKER + '<section class="fm-reader-link"><h2>Elementary primitives</h2>'
-                    '<p>Checked polynomial and local logarithm primitives, finite partial fractions, and circle substitution; '
+                    '<p>Checked elementary primitives for rationally split denominators and circle substitution; '
                     'the general analytic theorem remains open.</p>'
                     '<p><a href="rational-primitives.html">Read the proofs and remaining obligations</a>'
                     '</p></section>' + MARKER)
@@ -80,7 +96,10 @@ def install(site, revision, audit):
               'generalAnalyticTheoremProved': False, 'formalPartialFractionIntegrationProved': True,
               'domainPreservingRationalizationProved': True,
               'analyticPolynomialPrimitivesProved': True,
-              'analyticSimplePoleLocalPrimitivesProved': True, 'mathlibDependency': False,
+              'analyticSimplePoleLocalPrimitivesProved': True,
+              'automaticRationalLinearPartialFractionsProved': True,
+              'analyticRepeatedLinearPolePrimitivesProved': True,
+              'analyticRationallySplitLocalPrimitivesProved': True, 'mathlibDependency': False,
               'changedReaderPages': list(additions)}
     (site / 'reading/rational-primitives-edition.json').write_text(json.dumps(report, indent=2) + '\n')
     print('PASS: rational primitive supplement; every prior reader byte preserved')

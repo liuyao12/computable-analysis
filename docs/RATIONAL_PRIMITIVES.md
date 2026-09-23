@@ -1,10 +1,13 @@
 # Elementary primitives of rational and trigonometric rational functions
 
-The requested general analytic theorem is **not yet proved**. The checked
-addition is the finite integration algorithm for supplied rational partial
-fractions, together with a domain-preserving rationalization of every rational
-expression in circle coordinates. It imports only the project's polynomial
-and rational foundation; no Mathlib real or complex numbers are used.
+The checked analytic theorem now constructs local elementary primitives for
+**every rational numerator and every denominator supplied as distinct rational
+linear pole blocks, with arbitrary positive multiplicities**. It computes the
+partial fractions, a positive pole-free neighborhood, and valid elementary
+evaluators, then proves the original quotient is their interval derivative.
+The general theorem, including algebraic factors and the analytic
+trigonometric corollary, remains open. All proofs use the project's own
+rational-interval foundation; no Mathlib real or complex numbers are used.
 
 ## Precise target
 
@@ -109,6 +112,44 @@ plus logarithm example exercises this automatic synchronization.
 These results close the polynomial and simple-logarithm analytic atoms. They
 do not yet provide analytic soundness for every constructor of `Formula`.
 
+## Automatic partial fractions and analytic assembly
+
+`RationalPartialFractions.removePole` computes the coefficient at each pole
+by evaluation and removes it by synthetic division. Iteration handles all
+multiplicities, then processes the remaining distinct pole blocks.
+`decomposition` proves the resulting identity and domain regularity for every
+numerator. `ofFactorization` accepts a checked rational linear factorization
+of a `RatFun`, including a nonunit leading coefficient. It does not assume a
+partial-fraction identity.
+
+`RationalPrimitivePowers.hasDerivative` proves the reciprocal-power primitive
+on any rational interval with an explicit lower bound for the distance to its
+pole. Negative-side intervals and negative coefficients are supported.
+Automatic addition and scaling choose the required precision schedules.
+
+For poles \(a_i\) and a permitted rational center \(z\), the assembly chooses
+\[
+r=\min\bigl(1,|z-a_1|/2,\ldots,|z-a_k|/2\bigr)>0.
+\]
+`radius_pos` and `denominator_near` prove this is a nondegenerate pole-free
+interval. `RationalPrimitiveAssembly.splitPrimitive` constructs a
+`PrimitiveOn` containing a valid function, an `Elementary` witness for that
+actual evaluator, and a `HasDerivativeOnInterval` whose target is the
+original quotient. The witness permits only polynomial and reciprocal-power
+atoms, normalized logarithms, scaling, addition, and restriction. It does not
+classify arbitrary interval algorithms as elementary.
+
+A regression computes, rather than assumes, the decomposition
+\[
+\frac{1+2x}{x^2(x-1)^3}
+=-\frac1{x^2}-\frac5x+\frac3{(x-1)^3}
+ -\frac4{(x-1)^2}+\frac5{x-1}.
+\]
+`automaticMixed_hasDerivative` assembles its analytic primitive around
+\(z=2\), on \([3/2,5/2]\), and `automaticMixed_elementary` certifies the
+resulting evaluator. This is a complete local theorem for rationally split
+denominators, not a factorization theorem for arbitrary denominators.
+
 ## Why the trigonometric corollary follows
 
 On a half-angle chart, set \(t=\tan(\theta/2)\). Then
@@ -170,10 +211,10 @@ constructors themselves are executable finite rational algorithms.
 
 1. Construct real algebraic factorization and partial fractions for arbitrary
    nonzero rational denominators; extend the finite algebra to those constants.
-2. Extend the checked polynomial and local logarithm realizations to every elementary formula by valid `RealRaw` interval computations,
+2. Extend the checked polynomial, logarithm, and reciprocal-power realizations to quadratic and algebraic elementary formulas by valid `RealRaw` interval computations,
    with explicit width schedules and denominator/branch separation.
 3. Prove analytic differentiation soundness of the formula compiler using
-   `HasDerivativeOnInterval`, including synchronized sums and compositions.
+   `HasDerivativeOnInterval`, for quadratic and algebraic atoms and their compositions. Rational linear pole sums are already assembled.
 4. Identify the two angle charts with the established sine and cosine
    evaluators, then prove the chain rule and overlap gluing.
 

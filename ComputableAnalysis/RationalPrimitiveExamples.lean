@@ -1,3 +1,6 @@
+import ComputableAnalysis.RationalPrimitiveAssembly
+import ComputableAnalysis.RationalPrimitivePowers
+import ComputableAnalysis.RationalPartialFractions
 import ComputableAnalysis.DifferentialSynchronizedSum
 import ComputableAnalysis.RationalPrimitivePolynomial
 import ComputableAnalysis.RationalPrimitiveLogarithm
@@ -129,6 +132,49 @@ unconditional sum rule synchronizes them, with no schedule hypotheses. -/
 def polynomialPlusLog_hasDerivative :=
   (RationalPrimitivePolynomial.hasDerivative [1] (-(1 / 2)) (1 / 2)).add
     RationalPrimitiveLogarithm.hasDerivative rfl rfl
+
+
+/-- Pole blocks with both nontrivial multiplicities and different centers. -/
+def mixedRepeatedPoles : List RationalPartialFractions.Pole := [⟨0, 1⟩, ⟨1, 2⟩]
+
+theorem mixedRepeatedPoles_admissible : RationalPartialFractions.Admissible mixedRepeatedPoles := by
+  decide +kernel
+
+def automaticMixedDecomposition :=
+  RationalPartialFractions.decomposition mixedRepeatedPoles [1, 2] mixedRepeatedPoles_admissible
+
+/-- Independently specified coefficients for `(1+2*x)/(x^2*(x-1)^3)`. -/
+theorem automaticMixed_coefficients :
+    (automaticMixedDecomposition.normalForm.terms.map fun t => match t with
+      | .linear c a n => some (c, a, n)
+      | .quadratic _ _ _ _ _ => none) =
+    [some ((-1 : Rat), (0 : Rat), 1), some (-5, 0, 0),
+      some (3, 1, 2), some (-4, 1, 1), some (5, 1, 0)] := by
+  decide +kernel
+
+/-- Negative coefficients and a negative-side denominator are both supported. -/
+def negativeTriplePole_hasDerivative :=
+  RationalPrimitivePowers.weighted_hasDerivative (-3) 0 (-2) (-1) unitRadius
+    (by
+      intro x hx
+      change (-2 : Rat) <= x ∧ x <= -1 at hx
+      change (1 : Rat) <= qabs (x - 0)
+      have hn : x - 0 <= 0 := by grind
+      rw [qabs_eq_neg_of_nonpos hn]
+      grind) 1
+
+/-- All coefficients, all elementary evaluators, and the analytic derivative
+are constructed by the algorithm on the interval around the center two. -/
+def automaticMixedPrimitive := RationalPrimitiveAssembly.splitPrimitive
+  mixedRepeatedPoles [1, 2] mixedRepeatedPoles_admissible 2 (by decide +kernel)
+
+def automaticMixed_hasDerivative := automaticMixedPrimitive.derivative
+
+theorem automaticMixed_elementary : RationalPrimitiveAssembly.Elementary
+    automaticMixedPrimitive.function := automaticMixedPrimitive.elementary
+
+theorem automaticMixed_radius : RationalPrimitiveAssembly.radius 2 mixedRepeatedPoles = 1 / 2 := by
+  decide +kernel
 
 end RationalPrimitiveExamples
 end ComputableAnalysis

@@ -23,6 +23,9 @@ def main():
     assert report['domainPreservingRationalizationProved']
     assert report['analyticPolynomialPrimitivesProved']
     assert report['analyticSimplePoleLocalPrimitivesProved']
+    assert report['automaticRationalLinearPartialFractionsProved']
+    assert report['analyticRepeatedLinearPolePrimitivesProved']
+    assert report['analyticRationallySplitLocalPrimitivesProved']
     assert not report['generalAnalyticTheoremProved'] and not report['mathlibDependency']
     for file, key in [(report['page'], 'pageSha256'),
                       ('reading/rational-primitives-audit.log', 'auditSha256')]:

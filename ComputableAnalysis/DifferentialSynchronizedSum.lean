@@ -1,4 +1,5 @@
 import ComputableAnalysis.FiniteDerivativeLimit
+import ComputableAnalysis.PowerSeries
 
 /-!
 # Addition of independently scheduled represented derivatives
@@ -151,6 +152,29 @@ def add {f g df dg : FunctionOnInterval}
     (by rw [F.same_lower, G.same_lower]; exact hlo)
     (by rw [F.same_upper, G.same_upper]; exact hhi)
     rfl rfl (fun n => 2 * (n + 1)) precisionAtStage_scaleRat_two
+
+
+/-- Rational scaling chooses its own precision budget; callers supply only
+the scalar and the derivative certificate. -/
+def scale (r : Rat) {f df : FunctionOnInterval} (D : HasDerivativeOnInterval f df) :
+    HasDerivativeOnInterval (FunctionOnInterval.scaleRat r f)
+      (FunctionOnInterval.scaleRat r df) := by
+  let inner := fun n => 2 ^ RationalMajorant.halfDecayShift (qabs r) (precisionAtStage n)
+  apply D.scaleRat inner
+  intro n
+  have hn : inner n ≠ 0 := Nat.ne_of_gt (Nat.pow_pos (by decide))
+  rw [precisionAtStage, dif_neg hn]
+  change qabs r * (1 / (((2 ^ RationalMajorant.halfDecayShift (qabs r)
+    (precisionAtStage n) : Nat) : Rat))) <= _
+  rw [← RationalMajorant.half_pow_eq_one_div_nat_two_pow]
+  exact RationalMajorant.halfDecayShift_spec (qabs_nonneg r) (precisionAtStage n)
+
+/-- Finite linear combinations of primitives need no precision-schedule
+hypotheses. -/
+def linearCombination (r s : Rat) {f g df dg : FunctionOnInterval}
+    (F : HasDerivativeOnInterval f df) (G : HasDerivativeOnInterval g dg)
+    (hlo : f.lower = g.lower) (hhi : f.upper = g.upper) :=
+  (F.scale r).add (G.scale s) hlo hhi
 
 end HasDerivativeOnInterval
 end ComputableAnalysis

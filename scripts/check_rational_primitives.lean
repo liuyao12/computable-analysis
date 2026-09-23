@@ -9,6 +9,22 @@ run_cmd do
     if mod.toString.startsWith "Mathlib" then
       throwError "Unexpected Mathlib import: {mod}"
   for root in [
+      ``ComputableAnalysis.HasDerivativeOnInterval.scale,
+      ``ComputableAnalysis.HasDerivativeOnInterval.linearCombination,
+      ``ComputableAnalysis.RationalPrimitivePowers.hasDerivative,
+      ``ComputableAnalysis.RationalPrimitivePowers.weighted_hasDerivative,
+      ``ComputableAnalysis.RationalPartialFractions.decomposition,
+      ``ComputableAnalysis.RationalPartialFractions.ofFactorization,
+      ``ComputableAnalysis.RationalPrimitiveAssembly.radius_pos,
+      ``ComputableAnalysis.RationalPrimitiveAssembly.denominator_near,
+      ``ComputableAnalysis.RationalPrimitiveAssembly.splitPrimitive,
+      ``ComputableAnalysis.RationalPrimitiveAssembly.ofFactorization,
+      ``ComputableAnalysis.RationalPrimitiveExamples.automaticMixed_coefficients,
+      ``ComputableAnalysis.RationalPrimitiveExamples.negativeTriplePole_hasDerivative,
+      ``ComputableAnalysis.RationalPrimitiveExamples.automaticMixed_hasDerivative,
+      ``ComputableAnalysis.RationalPrimitiveExamples.automaticMixed_elementary,
+      ``ComputableAnalysis.RationalPrimitiveExamples.automaticMixed_radius,
+
       ``ComputableAnalysis.HasDerivativeOnInterval.add,
       ``ComputableAnalysis.RationalPrimitiveExamples.polynomialPlusLog_hasDerivative,
       ``ComputableAnalysis.RationalPrimitivePolynomial.hasDerivative,
@@ -44,8 +60,8 @@ run_cmd do
         throwError "Unexpected axiom in {root}: {ax}"
     logInfo m!"CHECKED {root}"
   logInfo "PASS: rational primitive algebra; domain-preserving circle pullback; no Mathlib, native-decision axioms, or unfinished proofs; standard Lean logical axioms only."
-  logInfo "ANALYTIC: every rational polynomial on every rational interval; every rational simple pole on an explicit neighborhood of each permitted rational center."
-  logInfo "SCOPE: formal derivatives of supplied rational partial fractions; general decomposition and analytic realization remain open."
+  logInfo "ANALYTIC: every rational polynomial on every rational interval; every rationally split denominator near each permitted rational center; executable partial fractions and elementary evaluators, with actual derivative certificates."
+  logInfo "SCOPE: general algebraic factorization, quadratic analytic assembly, and represented trigonometric transport remain open."
 
 #print axioms ComputableAnalysis.RationalPrimitiveFormula.Decomposition.primitive_correct
 #print axioms ComputableAnalysis.TrigonometricRationalization.Expr.pullback_correct
