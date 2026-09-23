@@ -9,6 +9,19 @@ run_cmd do
     if mod.toString.startsWith "Mathlib" then
       throwError "Unexpected Mathlib import: {mod}"
   for root in [
+      ``ComputableAnalysis.RationalFactoredPrimitives.generalQuadratic_value,
+      ``ComputableAnalysis.RationalQuadraticDivision.divide_identity,
+      ``ComputableAnalysis.RationalQuadraticDivision.norm_pos,
+      ``ComputableAnalysis.RationalQuadraticDivision.nextNumerator_identity,
+      ``ComputableAnalysis.RationalQuadraticDivision.remove_identity,
+      ``ComputableAnalysis.RationalFactoredPrimitives.normalForm_identity,
+      ``ComputableAnalysis.RationalFactoredPrimitives.decomposition,
+      ``ComputableAnalysis.RationalFactoredPrimitives.Factorization.decomposition,
+      ``ComputableAnalysis.RationalFactoredPrimitives.Factorization.primitive_correct,
+      ``ComputableAnalysis.RationalPrimitiveExamples.mixedQuadratic_coefficients,
+      ``ComputableAnalysis.RationalPrimitiveExamples.duplicateQuadratic_rejected,
+      ``ComputableAnalysis.RationalPrimitiveExamples.factoredQuadraticExample_primitive,
+
       ``ComputableAnalysis.HasDerivativeOnInterval.scale,
       ``ComputableAnalysis.HasDerivativeOnInterval.linearCombination,
       ``ComputableAnalysis.RationalPrimitivePowers.hasDerivative,
@@ -61,6 +74,7 @@ run_cmd do
     logInfo m!"CHECKED {root}"
   logInfo "PASS: rational primitive algebra; domain-preserving circle pullback; no Mathlib, native-decision axioms, or unfinished proofs; standard Lean logical axioms only."
   logInfo "ANALYTIC: every rational polynomial on every rational interval; every rationally split denominator near each permitted rational center; executable partial fractions and elementary evaluators, with actual derivative certificates."
+  logInfo "FACTORIZATION: supplied rational linear and irreducible quadratic factors; arbitrary multiplicities; partial fractions computed, formal primitive correctness proved."
   logInfo "SCOPE: general algebraic factorization, quadratic analytic assembly, and represented trigonometric transport remain open."
 
 #print axioms ComputableAnalysis.RationalPrimitiveFormula.Decomposition.primitive_correct

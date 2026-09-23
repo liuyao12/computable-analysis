@@ -8,6 +8,20 @@ audit excludes prior zeta evaluations and the native Basel proof. This is a
 checked Mathlib proof, not a new native `RealRaw.Equiv` theorem. A native
 sine-product certificate and the extension to all $\zeta(2m)$ remain open.
 
+**Integration from a supplied factorization (2026-09-23).**
+`RationalFactoredPrimitives.Factorization` records rational linear and
+irreducible quadratic factors, arbitrary multiplicities, a nonzero leading
+coefficient, the factorization identity, and a decidable noncollision check.
+`Factorization.decomposition` computes the partial fractions;
+`Factorization.primitive_correct` verifies the formal derivative of the
+resulting elementary formula. `RationalQuadraticDivision` supplies exact
+centered division and inversion of the residual denominator modulo a positive
+quadratic, entirely in rational arithmetic. No FTA axiom or partial-fraction
+identity is assumed. Quadratic analytic realization is still unfinished.
+For arbitrary rational denominators, FTA supplies factors with real algebraic
+coefficients, not necessarily rational ones; that coefficient extension is
+still needed for the unrestricted theorem.
+
 **Analytic primitives for rationally split denominators (2026-09-23).**
 `RationalPrimitiveAssembly.splitPrimitive` constructs an elementary evaluator
 and an actual `HasDerivativeOnInterval` for every rational numerator and

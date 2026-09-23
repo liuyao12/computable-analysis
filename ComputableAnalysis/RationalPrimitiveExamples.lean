@@ -1,3 +1,4 @@
+import ComputableAnalysis.RationalFactoredPrimitives
 import ComputableAnalysis.RationalPrimitiveAssembly
 import ComputableAnalysis.RationalPrimitivePowers
 import ComputableAnalysis.RationalPartialFractions
@@ -175,6 +176,61 @@ theorem automaticMixed_elementary : RationalPrimitiveAssembly.Elementary
 
 theorem automaticMixed_radius : RationalPrimitiveAssembly.radius 2 mixedRepeatedPoles = 1 / 2 := by
   decide +kernel
+
+/-- A repeated quadratic, a simple linear pole, and a distinct shifted
+quadratic exercise inversion of a nonconstant residual denominator. -/
+def mixedQuadraticFactors : List RationalFactoredPrimitives.Factor :=
+  [.quadratic 0 ⟨2, by decide⟩ 1, .linear 0 0, .quadratic 1 ⟨3, by decide⟩ 0]
+
+theorem mixedQuadratic_admissible : RationalFactoredPrimitives.Admissible mixedQuadraticFactors := by
+  decide +kernel
+
+def mixedQuadraticDecomposition := RationalFactoredPrimitives.decomposition
+  mixedQuadraticFactors [1, 2, 3] mixedQuadratic_admissible
+
+/-- The independently specified exact coefficients are checked by the kernel. -/
+theorem mixedQuadratic_coefficients :
+    (mixedQuadraticDecomposition.normalForm.terms.map fun t => match t with
+      | .linear c a n => (false, c, (0 : Rat), a, (0 : Rat), n)
+      | .quadratic A B a b n => (true, A, B, a, b.val, n)) =
+    [(true, (3/4 : Rat), (-1/2 : Rat), (0 : Rat), (2 : Rat), 1),
+      (true, 1/6, 2/3, 0, 2, 0), (false, 1/16, 0, 0, 0, 0),
+      (true, -11/48, -7/16, 1, 3, 0)] := by
+  decide +kernel
+
+/-- Duplicate blocks must be merged into a single multiplicity. This is a
+checked algebraic condition, not a hidden division by zero. -/
+theorem duplicateQuadratic_rejected :
+    ¬RationalFactoredPrimitives.Admissible
+      [.quadratic 0 unitRadius 0, .quadratic 0 unitRadius 1] := by
+  decide +kernel
+
+/-- The public factorization interface handles a nonunit leading coefficient. -/
+def factoredQuadraticExample : RatFun := ⟨[1, 2, 3], [-12, 12, -12, 12, -3, 3]⟩
+
+def factoredQuadraticExample_factorization :
+    RationalFactoredPrimitives.Factorization factoredQuadraticExample where
+  factors := [.linear 1 0, .quadratic 0 ⟨2, by decide⟩ 1]
+  leading := 3
+  leading_ne_zero := by decide
+  admissible := by decide +kernel
+  identity := by
+    intro x
+    change Polynomial.eval [-12, 12, -12, 12, -3, 3] x =
+      3 * Polynomial.eval (RationalFactoredPrimitives.denominator
+        [.linear 1 0, .quadratic 0 ⟨2, by decide⟩ 1]) x
+    rw [RationalFactoredPrimitives.denominator_cons_eval,
+      RationalFactoredPrimitives.denominator_cons_eval]
+    simp only [RationalFactoredPrimitives.denominator,
+      RationalFactoredPrimitives.Factor.value,
+      RationalFactoredPrimitives.Factor.multiplicity,
+      Polynomial.eval, List.foldr, quadratic, Rat.pow_succ, Rat.pow_zero]
+    grind
+
+theorem factoredQuadraticExample_primitive (x : Rat) (hx : factoredQuadraticExample.DefinedAt x) :
+    factoredQuadraticExample_factorization.decomposition.normalForm.primitive.formalDerivative x =
+      factoredQuadraticExample.evalOnDomain x hx :=
+  factoredQuadraticExample_factorization.primitive_correct x hx
 
 end RationalPrimitiveExamples
 end ComputableAnalysis

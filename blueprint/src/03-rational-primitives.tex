@@ -8,6 +8,28 @@ the checked results include complete local analytic primitives for rationally
 split denominators, finite formal-derivative identities for quadratic terms,
 and a domain-preserving circle substitution.
 
+\begin{theorem}[Supplied factorization, computed partial fractions]
+\label{thm:factored-rational-primitive-formula}
+\lean{ComputableAnalysis.RationalFactoredPrimitives.Factorization.decomposition,
+ComputableAnalysis.RationalFactoredPrimitives.Factorization.primitive_correct}
+\leanok
+Given a checked factorization with rational coefficients into linear and
+irreducible quadratic blocks, the algorithm computes the partial fractions
+and an elementary formula whose formal derivative is the original quotient
+at every permitted rational input. Multiplicities are arbitrary.
+\end{theorem}
+\begin{proof}\leanok
+Linear blocks use synthetic division. For a quadratic \(y^2+b\), the
+nonzero residual denominator \(v_1y+v_0\) has inverse
+\((-v_1y+v_0)/(v_0^2+bv_1^2)\) modulo that quadratic. Positivity of the
+rational norm gives exact division. Remove each repeated factor in turn,
+then apply the checked finite integration recurrences.
+\end{proof}
+This theorem assumes factorization as data, not FTA as an axiom. FTA would
+supply algebraic, not necessarily rational, coefficients in general. The
+quadratic conclusions here are formal identities; their represented analytic
+realization remains separate.
+
 \begin{theorem}[Supplied partial fractions]
 \label{thm:rational-primitive-formula}
 \lean{ComputableAnalysis.RationalPrimitiveFormula.Decomposition.primitive_correct}

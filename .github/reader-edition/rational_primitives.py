@@ -10,6 +10,19 @@ ROOT = Path(__file__).resolve().parents[2]
 PAGE = 'rational-primitives.html'
 MARKER = '<!-- rational-primitives -->'
 EXPECTED = [
+    'RationalFactoredPrimitives.generalQuadratic_value',
+    'RationalQuadraticDivision.divide_identity',
+    'RationalQuadraticDivision.norm_pos',
+    'RationalQuadraticDivision.nextNumerator_identity',
+    'RationalQuadraticDivision.remove_identity',
+    'RationalFactoredPrimitives.normalForm_identity',
+    'RationalFactoredPrimitives.decomposition',
+    'RationalFactoredPrimitives.Factorization.decomposition',
+    'RationalFactoredPrimitives.Factorization.primitive_correct',
+    'RationalPrimitiveExamples.mixedQuadratic_coefficients',
+    'RationalPrimitiveExamples.duplicateQuadratic_rejected',
+    'RationalPrimitiveExamples.factoredQuadraticExample_primitive',
+
     'HasDerivativeOnInterval.scale',
     'HasDerivativeOnInterval.linearCombination',
     'RationalPrimitivePowers.hasDerivative',
@@ -98,6 +111,8 @@ def install(site, revision, audit):
               'analyticPolynomialPrimitivesProved': True,
               'analyticSimplePoleLocalPrimitivesProved': True,
               'automaticRationalLinearPartialFractionsProved': True,
+              'automaticRationalQuadraticPartialFractionsProved': True,
+              'factorizationToFormalPrimitiveProved': True,
               'analyticRepeatedLinearPolePrimitivesProved': True,
               'analyticRationallySplitLocalPrimitivesProved': True, 'mathlibDependency': False,
               'changedReaderPages': list(additions)}

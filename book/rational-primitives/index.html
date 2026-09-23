@@ -10,12 +10,19 @@
 <nav aria-label="Book"><a href="index.html">Computable Analysis</a><a href="ch-integrals.html">Integrals</a><a href="#status">Proof status</a></nav>
 <header><span class="eyebrow">Finite integration algorithms</span><h1>Elementary primitives</h1>
 <p class="lead">Rational functions, repeated poles, and the half-angle route from trigonometry to rational algebra.</p>
-<p class="note"><strong>The general analytic theorem remains open.</strong> The checked results now include complete local elementary primitives for rationally split denominators, alongside formal integration of quadratic partial fractions and a domain-preserving rational circle substitution. They use the project’s own foundation, with no Mathlib dependency.</p></header>
+<p class="note"><strong>The general analytic theorem remains open.</strong> The checked results now include complete local elementary primitives for rationally split denominators, alongside computed partial fractions and formal integration from rational linear/quadratic factorizations and a domain-preserving rational circle substitution. They use the project’s own foundation, with no Mathlib dependency.</p></header>
 <section><h2>The theorem we want</h2>
 <p>On an interval with an explicit positive lower bound for its denominator, every rational function should have an elementary primitive:</p>
 <div class="math">\[F'(x)=\frac{p(x)}{q(x)},\qquad |q(x)|\geq\delta>0.\]</div>
 <p>The answer may use real algebraic constants, rational operations, logarithms of absolute values, and arctangents. Algebraic constants matter: even \(1/(x^2-2)\) naturally introduces \(\sqrt2\). Higher-degree algebraic roots need not have radical expressions.</p>
 <p>A primitive belongs to a pole-free interval. A complex version additionally needs logarithm branches; it does not promise a single-valued primitive throughout a punctured plane.</p></section>
+<section><h2>Factorization can be supplied</h2>
+<p>The fundamental theorem of algebra is needed to obtain factors for an arbitrary denominator. Once the factorization is supplied and checked, the integration algorithm does not need FTA:</p>
+<div class="math">\[q(x)=c\prod_i(x-a_i)^{m_i}\prod_j\bigl((x-u_j)^2+v_j\bigr)^{n_j},\qquad c\ne0,\quad v_j>0.\]</div>
+<p><code>RationalFactoredPrimitives.Factorization</code> now accepts rational factor data, arbitrary multiplicities, a nonzero leading coefficient, the factorization identity, and a decidable check that distinct blocks do not collide. It computes the partial fractions and checks the elementary formula’s formal derivative. Neither the partial fractions nor an antiderivative are assumed.</p>
+<p>Quadratic coefficients are computed by division modulo the quadratic. For a residual denominator \(v_1y+v_0\) modulo \(y^2+b\), the inverse uses the positive rational norm \(v_0^2+bv_1^2\). This step needs no square-root evaluator.</p>
+<p>General FTA factors may have irrational algebraic coefficients: \(x^4+1=(x^2+\sqrt2\,x+1)(x^2-\sqrt2\,x+1)\). Extending the coefficient representation and proving the quadratic analytic evaluators are still required for the unrestricted theorem.</p>
+<p><a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/RationalFactoredPrimitives.lean">Factorization interface and computed primitive</a> · <a href="https://github.com/liuyao12/computable-analysis/blob/__REVISION__/ComputableAnalysis/RationalQuadraticDivision.lean">Quadratic division proof</a></p></section>
 <section><h2>What repeated poles contribute</h2>
 <p>After polynomial division and real algebraic factorization, partial fractions reduce the problem to a polynomial and terms of these forms:</p>
 <div class="math">\[\frac{c}{(x-a)^m},\qquad \frac{A(x-a)+B}{((x-a)^2+b)^m},\qquad b>0.\]</div>

@@ -11,6 +11,8 @@ on:
       - 'book/rational-primitives/**'
       - 'ComputableAnalysis/RationalPrimitive*.lean'
       - 'ComputableAnalysis/RationalPartialFractions.lean'
+      - 'ComputableAnalysis/RationalQuadraticDivision.lean'
+      - 'ComputableAnalysis/RationalFactoredPrimitives.lean'
       - 'ComputableAnalysis/DifferentialSynchronizedSum.lean'
       - 'ComputableAnalysis/RationalExpressionNormalization.lean'
       - 'ComputableAnalysis/TrigonometricRationalization.lean'

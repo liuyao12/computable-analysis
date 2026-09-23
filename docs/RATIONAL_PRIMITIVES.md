@@ -9,6 +9,52 @@ The general theorem, including algebraic factors and the analytic
 trigonometric corollary, remains open. All proofs use the project's own
 rational-interval foundation; no Mathlib real or complex numbers are used.
 
+## Factorization can be assumed as input
+
+Yes: FTA is needed to establish existence of a factorization for an arbitrary
+denominator, but it is not needed inside the integration algorithm once a
+factorization is supplied. The real form is
+\[
+q(x)=c\prod_i(x-a_i)^{m_i}
+      \prod_j\bigl((x-u_j)^2+v_j\bigr)^{n_j},
+\qquad c\ne0,\quad v_j>0.
+\]
+A quadratic with negative discriminant has this form after completing the
+square and extracting its leading coefficient. `generalQuadratic_value`
+checks this normalization for every rational quadratic with negative
+discriminant, including a negative leading coefficient. Repeated equal factors are
+grouped into one block.
+
+The new `RationalFactoredPrimitives.Factorization` is an explicit checked input,
+not an axiom asserting FTA. For rational factor coefficients,
+`Factorization.decomposition` computes every partial-fraction coefficient,
+and `Factorization.primitive_correct` checks the resulting formula's formal
+derivative. The input contains a factorization identity and a decidable
+noncollision check; it does not contain a partial-fraction identity, an
+antiderivative, or a derivative certificate.
+
+For quadratic division, write \(y=x-a\), \(Q=y^2+b\), and reduce the numerator
+and residual denominator to \(u_1y+u_0\) and \(v_1y+v_0\). Their quotient
+modulo \(Q\) is \(Ay+B\), where
+\[
+D=v_0^2+bv_1^2>0,\qquad
+A=\frac{u_1v_0-u_0v_1}{D},\qquad
+B=\frac{bu_1v_1+u_0v_0}{D}.
+\]
+The algorithm subtracts this contribution, divides out one copy of \(Q\),
+and repeats. The norm positivity and every division identity are proved.
+No square-root evaluator is required for this algebraic step.
+
+This rational-coefficient interface is intentionally narrower than a general
+FTA factorization. For example,
+\[
+x^4+1=(x^2+\sqrt2\,x+1)(x^2-\sqrt2\,x+1)
+\]
+needs irrational factor coefficients. The unrestricted theorem will require
+represented algebraic coefficients even when factorization is supplied.
+The analytic quadratic atoms also remain to be realized; formal derivative
+correctness is not yet an actual quadratic primitive certificate.
+
 ## Precise target
 
 For rational polynomials \(p,q\), on a rational interval \([a,b]\) equipped
