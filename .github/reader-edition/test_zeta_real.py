@@ -62,6 +62,8 @@ def main():
                 page.evaluate('() => MathJax.startup.promise')
                 assert page.locator('mjx-container').count() >= 35
                 assert page.locator('mjx-merror').count() == 0
+                assert page.locator('#basel mjx-container[display="true"]').evaluate_all(
+                    '(els) => els.every(e => e.querySelector("mjx-math").getBoundingClientRect().width <= e.clientWidth)')
                 assert page.locator('#euler mjx-container[display="true"]').count() == 1
                 assert page.title().startswith('Zeta for real exponents')
                 assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), width

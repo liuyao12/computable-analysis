@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Zeta for real exponents · Computable Analysis</title><style>
-:root{color-scheme:light;--ink:#243330;--green:#1d6355;--line:#d5ddd7}*{box-sizing:border-box}body{margin:0;background:#faf9f5;color:var(--ink);font:18px/1.75 Georgia,serif}main{max-width:850px;margin:auto;padding:48px 26px 90px}a{color:var(--green);text-underline-offset:3px}nav{font:14px/1.5 system-ui,sans-serif;display:flex;gap:24px;flex-wrap:wrap}header{padding:56px 0 28px;border-bottom:1px solid var(--line)}h1{font-size:clamp(36px,7vw,62px);font-weight:500;line-height:1.1;letter-spacing:-1.5px;margin:16px 0 22px}h2{font-size:28px;font-weight:500;margin:48px 0 14px}h3{font-size:21px;font-weight:500}.eyebrow{font:12px/1.5 system-ui,sans-serif;text-transform:uppercase;letter-spacing:2px;color:var(--green)}.lead{font-size:22px;line-height:1.55}.equation{overflow-x:auto;font-size:25px;text-align:center;padding:20px 10px;line-height:1.8;font-style:italic}.note{border-left:3px solid var(--green);padding:5px 0 5px 22px}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:17px}th,td{text-align:left;padding:13px 16px;border-bottom:1px solid var(--line)}th{font:13px system-ui,sans-serif;text-transform:uppercase;letter-spacing:1px}code{font:14px/1.6 ui-monospace,monospace;overflow-wrap:anywhere}li{margin:12px 0}footer{border-top:1px solid var(--line);margin-top:50px;padding-top:22px;font:14px/1.65 system-ui,sans-serif}@media(max-width:500px){main{padding:26px 20px 55px}header{padding-top:32px}.equation{font-size:21px}th,td{padding:10px}}
+:root{color-scheme:light;--ink:#243330;--green:#1d6355;--line:#d5ddd7}*{box-sizing:border-box}body{margin:0;background:#faf9f5;color:var(--ink);font:18px/1.75 Georgia,serif}main{max-width:850px;margin:auto;padding:48px 26px 90px}a{color:var(--green);text-underline-offset:3px}nav{font:14px/1.5 system-ui,sans-serif;display:flex;gap:24px;flex-wrap:wrap}header{padding:56px 0 28px;border-bottom:1px solid var(--line)}h1{font-size:clamp(36px,7vw,62px);font-weight:500;line-height:1.1;letter-spacing:-1.5px;margin:16px 0 22px}h2{font-size:28px;font-weight:500;margin:48px 0 14px}h3{font-size:21px;font-weight:500}.eyebrow{font:12px/1.5 system-ui,sans-serif;text-transform:uppercase;letter-spacing:2px;color:var(--green)}.lead{font-size:22px;line-height:1.55}.equation{overflow-x:auto;font-size:25px;text-align:center;padding:20px 10px;line-height:1.8;font-style:italic}.note{border-left:3px solid var(--green);padding:5px 0 5px 22px}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:17px}th,td{text-align:left;padding:13px 16px;border-bottom:1px solid var(--line)}th{font:13px system-ui,sans-serif;text-transform:uppercase;letter-spacing:1px}code{font:14px/1.6 ui-monospace,monospace;overflow-wrap:anywhere}li{margin:12px 0}footer{border-top:1px solid var(--line);margin-top:50px;padding-top:22px;font:14px/1.65 system-ui,sans-serif}@media(max-width:500px){main{padding:26px 20px 55px}header{padding-top:32px}.equation{font-size:16px;padding:12px 0}th,td{padding:10px}}
 
 .formula{overflow-x:auto;padding:18px 0;font:20px/1.8 Georgia,serif}.formula p{margin:8px 0}pre{overflow:auto;padding:18px;background:#f0f1eb;font:14px/1.7 ui-monospace,monospace}
 
@@ -50,13 +50,13 @@ mjx-container[display="true"]{overflow-x:auto;overflow-y:hidden;padding:6px 0}.f
 \(M_N=\sum_{k=0}^{N-1}1/(2k+1)^2\).
 Diagonal and triangular rearrangements of a finite square give</p>
 <div class="equation">\[\left|2B_N^2-M_N\right|\le\frac{2H_N}{N}\qquad(N\ge1).\]</div>
-<p>The odd/even split then yields an explicit schedule:</p>
-<div class="equation">\[\left|\sum_{k=1}^{2m^2}\frac1{k^2}-\frac83 B_{2m^2}^{\,2}\right|\le\frac{16}{m}\qquad(m\ge1).\]</div>
+<p>The odd/even split then yields an explicit schedule for \(m\ge1\):</p>
+<div class="equation">\[\left|\sum_{k=1}^{2m^2}\frac1{k^2}-\frac83 B_{2m^2}^{\,2}\right|\le\frac{16}{m}.\]</div>
 <p>These are checked finite inequalities. They establish equivalence of the existing interval computations; no completed real line or new complex analysis is introduced. The route is a finite reconstruction of <a href="https://doi.org/10.4169/college.math.j.44.3.171">Benko and Molokach’s rearrangement proof</a>.</p>
 <h3>The number-theoretic application</h3>
 <p>For a finite list \(P\) of distinct primes, put
 \(c_P=\prod_{p\in P}(1-p^{-2})\), and let \(S_P(N)\) sum \(k^{-2}\) over the integers \(1\le k\le N\) divisible by none of those primes. The formalization proves</p>
-<div class="equation">\[S_{\{p\}\cup P}(N)=S_P(N)-p^{-2}S_P(\lfloor N/p\rfloor),\]</div>
+<div class="equation">\[\begin{aligned}S_{\{p\}\cup P}(N)&=S_P(N)\\&\quad-p^{-2}S_P(\lfloor N/p\rfloor).\end{aligned}\]</div>
 <p>and an explicit bound \(\lvert S_P(N)-c_P\sum_{k=1}^N k^{-2}\rvert\le K_P/(N+1)\), with
 \(K_{\varnothing}=0\) and \(K_{\{p\}\cup P}=(p+1)K_P+2p\).
 If \(P\) contained every prime, then \(S_P(N)=1\) for \(N\ge1\), forcing \(\zeta(2)=1/c_P\) to be rational.</p>
