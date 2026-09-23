@@ -1,3 +1,4 @@
+import ComputableAnalysis.ZetaReal.Tests
 import ComputableAnalysis.Apery.Tests
 import ComputableAnalysis
 import ComputableAnalysis.LeibnizPiTaylor

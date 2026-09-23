@@ -360,3 +360,19 @@ Open: identification with the independently computed zeta(3), denominator
 control, sharper approximation/growth bounds, and the resulting irrationality
 proof. K3 geometry and the period identification are explanatory context,
 not formalized results. No algebraicity of the generating function is claimed.
+
+## Zeta: represented real exponents greater than one
+
+Checked: `ZetaReal.zeta` computes a valid represented real for every input with
+a finite box strictly above 1. Binomial power polynomials, finite Dirichlet
+rectangles, uniform coefficient and moment estimates, terminating cutoff
+searches, and explicit Lipschitz bounds supply the construction.
+`dirichlet_convergence` proves effective convergence of the finite Dirichlet
+sums; `zeta_equiv` proves representation independence across selected charts.
+`zeta_integer_equiv` recovers every existing integer zeta, including ζ(3).
+See `docs/ZETA_REAL.md` for the formulas and public theorem boundary.
+
+Open: efficient numerical schedules, the binomial-to-log–exp bridge,
+parameter derivatives, Euler product, continuation, and the Apéry-to-ζ(3)
+identification. The coefficient differential equation is formal; it is not
+advertised as an analytic derivative theorem.
