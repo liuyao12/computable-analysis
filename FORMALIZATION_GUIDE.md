@@ -515,7 +515,7 @@ limit is encoded into the companion's definition.
 
 ### Real-exponent zeta by finite Dirichlet rectangles
 
-Use `ComputableAnalysis.ZetaReal` for `zeta(s)` on represented `s>1`.
+Use `ComputableAnalysis.ZetaReal` for $\zeta(s)$ on represented $s>1$.
 `AboveOne` records a finite separating input box. The constructor searches for
 that box and selects a chart, then calls `ContinuousFunctionOnInterval.applyReal`.
 Do not replace this adapter with same-stage substitution.
@@ -526,6 +526,15 @@ ODE. `rectangle_dirichlet`, `inversePowerRaw_enclosure`, and
 independent compatibility with the earlier integer Dirichlet evaluator.
 For changes to schedules preserve the two finite tail inequalities and prove
 `RealRaw.Equiv`; chart and implementation independence are already checked.
-The algorithm is a reference construction, with coarse bounds near 1.
+The algorithm is a reference construction, with coarse bounds near one.
 See `docs/ZETA_REAL.md`. Identifying the binomial powers with log–exp powers,
 analytic derivatives, and continuation requires additional proofs.
+
+### Mathematical notation in documents
+
+Write all mathematical notation in LaTeX, including inline expressions. Use
+`\(...\)` and `\[...\]` in HTML readers with the established MathJax renderer,
+and math delimiters supported by Markdown or TeX in source documents. Do not
+use Unicode formulas or HTML superscripts/subscripts as substitutes. Literal
+Lean declarations and API names remain code. Verify actual typesetting and
+mobile layout before publication.
