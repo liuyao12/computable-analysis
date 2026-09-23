@@ -10,6 +10,8 @@ MATHLIB_PATH='Mathlib/NumberTheory/ZetaValues.lean'
 MATHLIB_HASH='27aa982f5c473d7e8c6e6030ead08ffce081a7ff616b2acd9130d04772f8c672'
 EULER_MATHLIB='51e6992efd06126df61a496bebf8f49482a4e129'
 LINKS=[('cartwright.html',r'Irrationality of \(\pi^2\)'),('leibniz.html','The Leibniz series'),('basel.html','The Basel problem'),('euler.html','Euler’s sine product')]
+ODE_LINKS=[('fuchs.html', 'Fuchs’s theorem'), ('painleve.html', 'Painlevé’s classification')]
+LINKS += ODE_LINKS
 def digest(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def verify_mathlib(source_file=None):
     url=f'https://raw.githubusercontent.com/leanprover-community/mathlib4/{MATHLIB}/{MATHLIB_PATH}'
@@ -43,7 +45,7 @@ def install(site,revision,euler_audit,source_file=None):
     native=repo+'ComputableAnalysis/'
     ml=f'https://github.com/leanprover-community/mathlib4/blob/{MATHLIB}/'
     template=(site/'cosine.html').read_text()
-    for name,title in [('leibniz','The Leibniz series'),('basel','The Basel problem'),('euler','Euler’s sine-product proof')]:
+    for name,title in [('leibniz','The Leibniz series'),('basel','The Basel problem'),('euler','Euler’s sine-product proof'),('fuchs','Fuchs’s theorem'),('painleve','Painlevé’s classification')]:
         doc=BeautifulSoup(template,'html.parser');doc.title.string=title+' · Computable Analysis'
         doc.select_one('meta[name="documentation-revision"]')['content']=revision
         page=(SOURCE/(name+'.html')).read_text().replace('__NATIVE__',native).replace('__MATHLIB__',ml).replace('__REPO__',repo).replace('__EULER_MATHLIB__',f'https://github.com/leanprover-community/mathlib4/blob/{EULER_MATHLIB}/')
@@ -71,6 +73,9 @@ def install(site,revision,euler_audit,source_file=None):
         for span in nav.select('.nav-label'):
             if span.get_text()=='A worked comparison':span.string='Worked examples'
         for href,title in LINKS:
+            if href == 'fuchs.html':
+                label=BeautifulSoup('<span class="nav-label">Differential equations</span>','html.parser').span
+                marker.insert_before(label)
             a=BeautifulSoup(f'<a class="classic-navigation" href="{prefix+href}">{title}</a>','html.parser').a
             marker.insert_before(a)
         if p.name in [href for href,_ in LINKS]:
@@ -94,7 +99,7 @@ def install(site,revision,euler_audit,source_file=None):
       checks=dict(cartwrightAlreadyProved=True,cartwrightThreeCheckedRoutesPreserved=True,leibnizComparisonPreserved=True,baselNativeAudited=True,mathlibSourcePinned=True,eulerProofAudited=True,allEvenZetaValuesAudited=True),
       newLeanProofsClaimed=True,eulerMathlibRevision=EULER_MATHLIB,baselCrossFoundationBridgeChecked=False)
     (site/'reading/classic-proofs-edition.json').write_text(json.dumps(report,indent=2)+'\n')
-    print(f'PASS: four classical examples in {len(navigation)} sidebars; preserved checked comparisons and pinned Basel source')
+    print(f'PASS: classical examples and differential-equation theorems in {len(navigation)} sidebars; preserved checked comparisons and pinned Basel source')
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--site',required=True,type=Path);p.add_argument('--revision',required=True);p.add_argument('--mathlib-source',type=Path);p.add_argument('--euler-audit',required=True,type=Path)
     a=p.parse_args();install(a.site,a.revision,a.euler_audit,a.mathlib_source)

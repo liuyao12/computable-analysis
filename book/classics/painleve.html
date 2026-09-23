@@ -1,0 +1,19 @@
+<header><p class="classic-tag">Differential equations · Nonlinear classification</p><h1>Painlevé’s classification</h1><p class="lead">Which nonlinear differential equations avoid branching at singularities whose locations depend on the initial conditions?</p></header>
+<h2 id="theorem">The classical theorem</h2>
+<p>Consider the class</p>
+<div class="displaymath">\[y''=R(x,y,y'),\]</div>
+<p>where \(R\) is rational in \(y,y'\) and locally analytic in \(x\). The <em>Painlevé property</em> excludes movable branch points: branching singularities whose locations vary with the initial conditions. Movable poles are allowed.</p>
+<p>The Painlevé–Gambier classification gives fifty canonical forms under specified locally analytic changes of the independent variable and Möbius transformations of the dependent variable. They reduce to linear equations, elliptic-function cases, or the six Painlevé families \(\mathrm{P_I},\ldots,\mathrm{P_{VI}}\). The six families are the remaining nonlinear cases after these reductions, not the whole fifty-form list. <a href="https://dlmf.nist.gov/32.2.i">Precise scope and equations in the DLMF</a>.</p>
+<p>This is a classification of equations. Classifying their algebraic or rational solutions is a further, distinct problem.</p>
+<h2 id="checked">What our formalization proves</h2>
+<p><strong>Local movable-pole constructions for \(\mathrm{P_I}\) are checked.</strong> For</p>
+<div class="displaymath">\[y''=6y^2+x,\qquad s=x-p,\]</div>
+<p>the formal expansion begins</p>
+<div class="displaymath">\[y=s^{-2}-\frac{p}{10}s^2-\frac16s^3+qs^4+\cdots.\]</div>
+<p>The pole location \(p\) and coefficient \(q\) are free rational parameters. We prove the recurrence, resonance compatibility, coefficient bounds, and convergence. The regular factor has certified first and second derivatives and satisfies a quantitative form of the transformed nonlinear equation. The reconstructed value has a genuine double pole.</p>
+<p>For \(\mathrm{P_{II}}\), we also classify affine candidates and the restricted family \(y=c/x\), with derivative certificates for the constructed pole solutions.</p>
+<p class="classic-scope"><strong>Remaining scope:</strong> these local constructions do not prove the global Painlevé property, cover every initial condition, or establish the exhaustive Painlevé–Gambier classification. Transport of the regular-factor derivatives through the singular coordinate change for \(\mathrm{P_I}\) is also still open.</p>
+<p class="classic-action"><a href="fuchs-painleve.html#painleve-poles">Local pole construction and checked estimates →</a></p>
+<p><a href="__NATIVE__AlgebraicODE/PainleveLaurent.lean">Lean Laurent recurrence</a> · <a href="__NATIVE__AlgebraicODE/PainlevePole.lean">Lean computed pole charts</a> · <a href="__NATIVE__AlgebraicODE/Painleve.lean">Restricted solution classifications</a></p>
+<h2 id="nearby">A broader theme</h2>
+<p>These results describe which kinds of behavior an equation permits: controlled growth, algebraic solutions, movable poles, or branching. <a href="fuchs.html#nearby">Schwarz, Sturm, and Kovacic</a> give three further directions, from elementary oscillation theory to classifications of equations with explicitly constructible solutions.</p>
