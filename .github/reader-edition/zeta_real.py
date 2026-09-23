@@ -30,7 +30,7 @@ def install(site, revision, audit):
     for name in ['index.html', 'ch-transforms-zeta.html']:
         original = before[name].decode()
         assert MARKER not in original and '</article>' in original
-        addition = MARKER + '<section class="fm-reader-link"><h2>Zeta for real exponents</h2><p>A checked interval computation on the whole real half-line s &gt; 1: finite Dirichlet sums, uniform tail estimates, adaptive real inputs, and agreement with every earlier integer zeta value.</p><p><a href="zeta-real.html">Read the construction and checked boundary →</a></p></section>' + MARKER
+        addition = MARKER + r'<section class="fm-reader-link"><h2>Zeta for real exponents</h2><p>A checked interval computation on the whole real half-line \(s&gt;1\): finite Dirichlet sums, uniform tail estimates, adaptive real inputs, and agreement with every earlier integer zeta value.</p><p><a href="zeta-real.html">Read the construction and checked boundary →</a></p></section>' + MARKER
         updated = original.replace('</article>', addition + '</article>', 1)
         assert updated.replace(addition, '', 1) == original
         (site / name).write_text(updated)

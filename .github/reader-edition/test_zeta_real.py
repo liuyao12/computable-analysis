@@ -27,11 +27,14 @@ def main():
     soup = BeautifulSoup((a.site / report['page']).read_text(), 'html.parser')
     assert 'not an analytic derivative theorem' in soup.select_one('#boundary').get_text()
     assert len(soup.select('#checked tbody tr')) == 5
+    assert not soup.select('sup, sub')
+    assert not any(c in soup.get_text() for c in 'ζπΣ₀₁₂ₖᵏ⁻≤≥ε')
+    assert 'not yet proved in the project' in soup.select_one('#euler').get_text()
     for link in soup.select('a[href]'):
         href = link['href']
         if href.startswith('https://github.com/'):
             assert '/blob/' + report['proofSourceCommit'] + '/' in href
-        elif not href.startswith('#'):
+        elif not href.startswith(('#', 'https:')):
             assert (a.site / href.split('#')[0]).is_file(), href
     for name in report['changedReaderPages']:
         assert 'href="zeta-real.html"' in (a.site / name).read_text()
@@ -52,6 +55,11 @@ def main():
                 errors = []
                 page.on('pageerror', lambda e: errors.append(str(e)))
                 page.goto(f'http://127.0.0.1:{server.server_port}/zeta-real.html', wait_until='networkidle')
+                page.wait_for_function('window.MathJax && MathJax.startup && MathJax.startup.promise', timeout=60000)
+                page.evaluate('() => MathJax.startup.promise')
+                assert page.locator('mjx-container').count() >= 35
+                assert page.locator('mjx-merror').count() == 0
+                assert page.locator('#euler mjx-container[display="true"]').count() == 1
                 assert page.title().startswith('Zeta for real exponents')
                 assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), width
                 assert not errors
@@ -64,7 +72,7 @@ def main():
             browser.close()
     finally:
         server.shutdown()
-    print('PASS: zeta reader hashes, proof boundary, links, and desktop/mobile layout')
+    print('PASS: zeta reader hashes, rendered LaTeX, Euler boundary, links, and desktop/mobile layout')
 
 
 if __name__ == '__main__':
