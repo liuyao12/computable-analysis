@@ -32,8 +32,9 @@ theorem real_zeta_two_equiv_piSquaredOverSix :
   have hi := ZetaReal.zeta_integer_equiv 0
   have hzero : ((0:Nat):Rat)+2=2 := by grind only
   simp only [hzero] at hi
-  have hz := RealRaw.equiv_trans (ZetaReal.zeta _ _).valid
-    (zetaNatRaw_validCompute 2 (by omega)) baselSeriesRaw_valid hi zetaNatTwo_equiv
+  have hn : (zetaNatRaw 2).Valid := zetaNatRaw_validCompute 2 (by omega)
+  have hz : (ZetaReal.zeta (Real.ofRat 2) (by exact ⟨0,by decide⟩)).preferred.Equiv zetaTwoRaw :=
+    RealRaw.equiv_trans (ZetaReal.zeta _ _).valid hn baselSeriesRaw_valid hi zetaNatTwo_equiv
   exact RealRaw.equiv_trans (ZetaReal.zeta _ _).valid baselSeriesRaw_valid
     geometricPiSquaredOverSixRaw_valid hz eulerBasel
 
