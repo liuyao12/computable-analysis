@@ -1,0 +1,23 @@
+<header><p class="classic-tag">Differential equations · Singularities and growth</p><h1>Fuchs’s theorem</h1><p class="lead">A condition on the coefficients determines how solutions behave near a singular point.</p></header>
+<h2 id="theorem">The classical theorem</h2>
+<p>Consider a second-order linear equation near a point \(a\), with coefficients meromorphic there:</p>
+<div class="displaymath">\[y''+p(z)y'+q(z)y=0.\]</div>
+<p>Fuchs’s criterion says that the singularity is regular exactly when</p>
+<div class="displaymath">\[(z-a)p(z)\quad\text{and}\quad(z-a)^2q(z)\]</div>
+<p>extend holomorphically across \(a\). The content is the connection to solutions: on a fixed branch in a sector, every solution has at most polynomial growth toward the singularity. Frobenius theory constructs local solutions from convergent power series multiplied by powers, with logarithmic terms when needed.</p>
+<p>Thus the pole-order test predicts actual behavior; regularity is not merely the name of a coefficient condition. See <a href="https://dlmf.nist.gov/2.7.i">Fuchs–Frobenius theory in the DLMF</a>.</p>
+<h2 id="checked">What our formalization proves</h2>
+<p><strong>The forward growth theorem is checked.</strong> For polynomial coefficients in the scaled equation</p>
+<div class="displaymath">\[z^2y''+zp(z)y'+q(z)y=0,\]</div>
+<p>a certified solution along a fixed rational complex ray has a computed polynomial bound toward the origin. With the scaled jet \(Y=(y,zy')\), suitable computed \(N\) and an outer-endpoint bound \(M\) give</p>
+<div class="displaymath">\[\lVert Y(a)\rVert_1\le\frac{b^N M}{a^N},\qquad 0&lt;a\le b.\]</div>
+<p>Here \(a,b\) are positive ray parameters. The definition of solution requires finite-difference derivative estimates; it does not assume this growth bound. The proof uses rational interval computations.</p>
+<p>We also prove the nonresonant formal Frobenius recurrence, a convergence certificate for the larger rational indicial root, and all-degree Laguerre polynomial solutions.</p>
+<p class="classic-scope"><strong>Remaining scope:</strong> the full converse, general complex-sector theory, and a complete treatment of logarithmic branches are not yet formalized.</p>
+<p class="classic-action"><a href="fuchs-painleve.html#fuchs-growth">Growth proof and computed estimates →</a> · <a href="fuchs-painleve.html#convergence">Frobenius convergence →</a></p>
+<p><a href="__NATIVE__AlgebraicODE/FuchsGrowth.lean">Lean growth theorem</a> · <a href="__NATIVE__AlgebraicODE/FrobeniusConvergence.lean">Lean convergence theorem</a></p>
+<h2 id="nearby">Further theorems in this direction</h2>
+<p><strong>Schwarz’s classification</strong> determines the Gauss hypergeometric equations with finite monodromy, equivalently with an algebraic basis of solutions. It turns local differential-equation data into a classification of algebraic functions. <a href="https://math.uchicago.edu/~drinfeld/Hypergeometric_motives/Beukers-Heckman.pdf">Hypergeometric monodromy and the classification</a>.</p>
+<p><strong>Sturm’s separation and comparison theorems</strong> describe the zeros of real second-order linear equations: independent solutions have interlacing zeros, and coefficient inequalities control oscillation. This is a more elementary direction with direct geometric content. <a href="https://ocw.mit.edu/courses/18-034-honors-differential-equations-spring-2009/resources/mit18_034s09_lec09/">MIT’s separation and comparison lecture</a>.</p>
+<p><strong>Kovacic’s algorithm</strong> decides whether a second-order linear equation with rational-function coefficients has a nonzero Liouvillian solution, built using algebraic extensions, integrals, and exponentials of integrals. A negative result rules out that entire class of solutions. <a href="https://doi.org/10.1016/S0747-7171(86)80010-4">Kovacic’s original paper</a>.</p>
+<p class="classic-scope">These are candidate developments, not claims of completed formalizations in this project.</p>

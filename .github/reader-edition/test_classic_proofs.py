@@ -33,6 +33,13 @@ def main():
             if not u.scheme and u.path:
                 target=site/u.path
                 assert target.is_file() or (target/'index.html').is_file(),el['href']
+    for name in ['fuchs.html','painleve.html']:
+        doc=BeautifulSoup((site/name).read_text(),'html.parser')
+        assert 'Differential equations' in doc.select_one('#book-nav').get_text()
+        assert doc.select_one('#theorem') and doc.select_one('#checked') and doc.select_one('#nearby')
+        assert 'Remaining scope:' in doc.article.get_text()
+        assert not re.search(r'<(?:sup|sub)\b',str(doc.article))
+    assert 'do not prove the global Painlevé property' in (site/'painleve.html').read_text()
     cart=json.loads((site/'reading/cartwright-audit.json').read_text())
     assert cart['finalIrrationalityProved'] and all(cart['checks'].values())
     zeta=json.loads((site/'reading/zeta-real-edition.json').read_text())
@@ -60,7 +67,7 @@ def main():
     assert 'euler.html' in (site/'basel.html').read_text()
     assert not re.search(r'<(?:sup|sub)\b',(site/'euler.html').read_text())
     if a.static_only:
-        print('PASS: four sidebar entries, active state, source links, preserved audits and honest theorem status');return
+        print('PASS: six sidebar entries, active state, source links, preserved audits and honest theorem status');return
     class Quiet(SimpleHTTPRequestHandler):
         def log_message(self,*args):pass
     server=ThreadingHTTPServer(('127.0.0.1',0),partial(Quiet,directory=str(site)))
