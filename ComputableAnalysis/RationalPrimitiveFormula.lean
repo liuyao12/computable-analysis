@@ -17,6 +17,36 @@ algebraic-number layer. No completed real numbers are used.
 namespace ComputableAnalysis
 namespace RationalPrimitiveFormula
 
+/-- The zero-constant formal antiderivative of a rational polynomial.
+Coefficient `c_i` is shifted to degree `i+1` and divided by `i+1`; hence the
+construction is finite and executable over rationals. -/
+def polynomialPrimitive (coeffs : List Rat) : List Rat :=
+  0 :: coeffs.zipIdx.map
+    (fun (c, i) => c / (((i + 1 : Nat) : Rat)))
+
+private theorem derivative_polynomialPrimitive_aux (coeffs : List Rat) (index : Nat) :
+    (((coeffs.zipIdx index).map
+        (fun (c, i) => c / (((i + 1 : Nat) : Rat)))).zipIdx index).map
+      (fun (c, i) => (((i + 1 : Nat) : Rat)) * c) = coeffs := by
+  induction coeffs generalizing index with
+  | nil => simp
+  | cons coefficient rest ih =>
+      simp only [List.zipIdx, List.map_cons]
+      congr 1
+      · have hne : (((index + 1 : Nat) : Rat)) ≠ 0 :=
+          Rat.ne_of_gt ((Rat.natCast_pos).2 (Nat.succ_pos index))
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      · exact ih (index + 1)
+
+/-- Formal differentiation is a left inverse of the executable rational
+polynomial primitive. -/
+theorem derivative_polynomialPrimitive (coeffs : List Rat) :
+    Polynomial.derivative (polynomialPrimitive coeffs) = coeffs := by
+  unfold Polynomial.derivative polynomialPrimitive
+  exact derivative_polynomialPrimitive_aux coeffs 0
+
+
 def quadratic (a b x : Rat) : Rat := (x - a) * (x - a) + b
 
 theorem quadratic_pos (a x : Rat) (b : QPos) : 0 < quadratic a b.val x := by
@@ -203,7 +233,7 @@ def NormalForm.eval (f : NormalForm) (x : Rat) : Rat :=
   Polynomial.eval f.polynomial x + sumTerms x f.terms
 
 def NormalForm.primitive (f : NormalForm) : Formula :=
-  .add (.polynomial (Polynomial.primitive f.polynomial)) (primitiveTerms f.terms)
+  .add (.polynomial (polynomialPrimitive f.polynomial)) (primitiveTerms f.terms)
 
 theorem NormalForm.primitive_regular (f : NormalForm) (x : Rat)
     (hx : ∀ t ∈ f.terms, t.RegularAt x) : f.primitive.RegularAt x := by
@@ -219,9 +249,9 @@ theorem NormalForm.primitive_regular (f : NormalForm) (x : Rat)
 theorem NormalForm.primitive_correct (f : NormalForm) (x : Rat)
     (hx : ∀ t ∈ f.terms, t.RegularAt x) :
     f.primitive.formalDerivative x = f.eval x := by
-  change Polynomial.eval (Polynomial.derivative (Polynomial.primitive f.polynomial)) x +
+  change Polynomial.eval (Polynomial.derivative (polynomialPrimitive f.polynomial)) x +
     (primitiveTerms f.terms).formalDerivative x = _
-  rw [Polynomial.derivative_primitive, primitiveTerms_correct f.terms x hx]
+  rw [derivative_polynomialPrimitive, primitiveTerms_correct f.terms x hx]
   rfl
 
 /-- A supplied decomposition, not an assertion that all rational functions
