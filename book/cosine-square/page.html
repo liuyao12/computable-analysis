@@ -1,0 +1,68 @@
+<h1 id="cosine-square">The cosine-square integral</h1>
+<p class="lead">A rectangle computation, a symmetry, and a primitive. Two proofs identify the same computed area.</p>
+<div class="displaymath square-result">\[\boxed{\int_0^{1/2}\cos^2(\pi x)\,dx=\frac14.}\]</div>
+<p>The geometric starting point is the Archimedean circle construction. Squaring its cosine coordinate gives a small example where geometry and the fundamental theorem of calculus explain the same numerical answer in different ways.</p>
+<p class="square-proof-links"><a href="#symmetry">The symmetry proof</a> · <a href="#ftc">The FTC proof</a> · <a href="cosine-square-proofs.html">Explore the two proof routes ↗</a></p>
+
+<h2 id="the-clock">From the circle to the integrand</h2>
+<p>The rational circle point is
+\[P(u)=\left(\frac{1-u^2}{1+u^2},\frac{2u}{1+u^2}\right).\]
+Polygon areas define the angle clock and geometric \(\pi\). A closed rational search inverts that clock; the first coordinate supplies \(C(x)=\cos(\pi x)\). Thus the function to integrate is \(f(x)=C(x)^2\), decreasing from \(1\) to \(0\) on \([0,1/2]\).</p>
+<p>The coordinate identities come from this construction. In particular, reflection exchanges the cosine and sine coordinates, and their squares add to \(1\). <a href="ch-circle-sphere.html">The geometric construction</a> develops these ingredients before this example.</p>
+
+<h2 id="numerical-comparison">Compute the area first</h2>
+<p>At stage \(n\), divide the half interval into \(2^n\) cells. Evaluate and square the cosine at rational grid points. Right rectangles give a lower area and left rectangles an upper area; refining the mesh closes the gap.</p>
+<figure class="math-animation equal-scale-animation" data-animation="cosine-square"><img src="reading/animations/cosine-square.gif" width="800" height="640" alt="Four stages of lower and upper rectangle sums for the squared cosine on the half interval."/><figcaption>Stages \(n=1,2,3,4\) use \(2^n\) cells. Both axes use the same scale. The curve is \(\cos^2(\pi x)\).</figcaption><button type="button" data-animation-toggle>Pause animation</button></figure>
+__TABLE__
+<p>The figure and table use outward-rounded nested-radical sample enclosures. The Lean program evaluates the original rational-circle cosine, squares each sample, adds a proved error allowance, and intersects successive enclosures. Its validity and shrinking-width proof use monotonicity and evaluation-error bounds; neither value proof is an input to the program.</p>
+
+<h2 id="symmetry">Proof one: the reflected areas fill a rectangle</h2>
+<p>Reflect the graph in the vertical line \(x=1/4\). The reflected height is
+\[
+f\!\left(\frac12-x\right)=\sin^2(\pi x),\qquad
+f(x)+f\!\left(\frac12-x\right)=1.
+\]
+Reflection preserves area, so the two integrals agree. Their sum is the area of the rectangle of width \(1/2\) and height \(1\). Writing the original integral as \(I\),</p>
+<div class="displaymath">\[2I=\frac12,\qquad I=\frac14.\]</div>
+<figure class="math-animation equal-scale-animation" data-animation="cosine-square-symmetry"><img src="reading/animations/cosine-square-symmetry.gif" width="800" height="640" alt="Reflect the squared-cosine area horizontally, then turn its copy vertically to fill the complementary area of a rectangle."/><figcaption>The reflected copy has the same area. Turning that copy vertically places it above the original curve; together they fill the rectangle.</figcaption><button type="button" data-animation-toggle>Pause animation</button></figure>
+<p>The formal proof makes this a finite-sum argument. Reflection pairs a left sample with a right sample. The circle identity cancels their squared heights; the remaining endpoint gap and rational evaluation error have explicit bounds tending to zero. No primitive is used to evaluate this integral.</p>
+<p class="square-source"><a href="cosine-square-proofs.html?route=symmetry">Follow the symmetry dependencies ↗</a> · <a href="__SYMMETRY_SOURCE__">Lean proof</a></p>
+
+<h2 id="ftc">Proof two: differentiate a primitive</h2>
+<p>Use
+\[
+F(x)=\frac{x}{2}+\frac{\sin(\pi x)\cos(\pi x)}{2\pi}
+     =\frac{x}{2}+\frac{\sin(2\pi x)}{4\pi}.
+\]
+The product rule and the derivative formulas give
+\[
+F'(x)=\frac12+\frac{\cos^2(\pi x)-\sin^2(\pi x)}2
+     =\cos^2(\pi x).
+\]
+The endpoint product vanishes at both ends, hence the fundamental theorem gives
+\[
+\int_0^{1/2}\cos^2(\pi x)\,dx
+=F\!\left(\frac12\right)-F(0)=\frac14.
+\]</p>
+<p>In Lean, the product rule constructs a quantitative derivative certificate for this primitive. A finite FTC telescopes its increments along a fixed mesh; the certified comparison with the chosen rectangle computation then lets that mesh refine. This proof uses the derivative and endpoint calculations, and does not invoke the symmetry evaluation of the integral.</p>
+<p class="square-source"><a href="cosine-square-proofs.html?route=ftc">Follow the FTC dependencies ↗</a> · <a href="__FTC_SOURCE__">Lean proof</a></p>
+
+<h2 id="mean-square">Why the square matters</h2>
+<p>Squaring measures the size of an oscillation without cancellation. The average squared height on this quarter period is
+\[
+\frac{1}{1/2}\int_0^{1/2}\cos^2(\pi x)\,dx=\frac12.
+\]
+The other quarters have the same squared area. A sinusoid of amplitude \(a\) therefore has mean square \(a^2/2\) and root-mean-square amplitude \(|a|/\sqrt2\). This is the normalization behind signal energy and many Fourier calculations.</p>
+
+<h2 id="checked-result">What Lean checks</h2>
+<p>The two exported theorems have exactly the same conclusion: the actual integral program is equivalent to the rational constant \(1/4\). The computation’s validity and an explicit width bound are proved separately.</p>
+<pre class="square-lean">CosineSquare.integral.Valid
+
+CosineSquare.integral_via_symmetry :
+  CosineSquare.integral.Equiv (RealRaw.ofRat (1 / 4))
+
+CosineSquare.integral_via_FTC :
+  CosineSquare.integral.Equiv (RealRaw.ofRat (1 / 4))</pre>
+<p>The dependency audit checks both proof routes, their common numerical program, and the absence of unfinished proofs or Mathlib imports. Both routes share the geometric construction and trigonometric identities. The RMS application above is explanatory context; the checked target here is the squared-cosine integral.</p>
+<p><a href="cosine-square-proofs.html">Interactive proof map</a> · <a href="reading/cosine-square-proofs.json">Theorem statements and dependency audit</a> · <a href="__PACKAGE_SOURCE__">Reproduce the Lean checks</a></p>
+<details class="square-background"><summary>Supporting result: the cosine primitive</summary><p>The original theorem for \(\int C(x)\,dx\) remains available as supporting mathematics, together with its earlier proof comparison. <a href="cosine-primitive.html">Read the cosine primitive</a>.</p></details>

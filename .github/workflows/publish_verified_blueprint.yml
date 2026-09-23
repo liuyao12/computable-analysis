@@ -15,6 +15,7 @@ on:
       - 'scripts/check_rational_primitives.lean'
       - 'docs/RATIONAL_PRIMITIVES.md'
       - 'book/fundamental-matrix/**'
+      - 'book/cosine-square/**'
       - 'book/algebraic-ode/**'
       - 'book/zeta-real/**'
       - 'ComputableAnalysis/ZetaReal*'
@@ -268,6 +269,28 @@ jobs:
           lake env lean scripts/check_rational_primitives.lean | tee rational-primitives-reports/audit.log
           python3 .github/reader-edition/rational_primitives.py --site site --revision "$GITHUB_SHA" --audit rational-primitives-reports/audit.log
           python3 .github/reader-edition/test_rational_primitives.py --site site --report reader-edition-tests
+      - name: Materialize the pinned squared-cosine proof foundation
+        run: |
+          mkdir -p cosine-square-base cosine-square-reports
+          git archive "$SOURCE_SHA" | tar -x -C cosine-square-base
+          cp book/cosine-square/ComputableAnalysis/*.lean cosine-square-base/ComputableAnalysis/
+          cp book/cosine-square/Check.lean cosine-square-base/CosineSquareCheck.lean
+      - uses: actions/cache@v5
+        with:
+          path: cosine-square-base/.lake
+          key: cosine-square-${{ env.SOURCE_SHA }}-${{ hashFiles('book/cosine-square/**/*.lean') }}
+          restore-keys: |
+            cosine-square-${{ env.SOURCE_SHA }}-
+      - name: Check both squared-cosine proofs and their actual dependencies
+        run: |
+          set -euo pipefail
+          (cd cosine-square-base && lake build ComputableAnalysis.CosineSquareSymmetry ComputableAnalysis.CosineSquareFTC) | tee cosine-square-reports/build.log
+          (cd cosine-square-base && lake env lean CosineSquareCheck.lean) | tee cosine-square-reports/audit.log
+          cp cosine-square-base/cosine-square-reports/proofs.json cosine-square-reports/
+      - name: Replace the worked example with the checked cosine-square integral
+        run: python3 .github/reader-edition/cosine_square_edition.py --site site --revision "$GITHUB_SHA" --audit cosine-square-reports/proofs.json
+      - name: Verify squared-cosine proofs, animations, routes, links and mobile rendering
+        run: python3 .github/reader-edition/test_cosine_square.py --site site --report reader-edition-tests
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -276,6 +299,9 @@ jobs:
             reader-edition-tests
             rational-primitives-reports
             site/reading/rational-primitives-edition.json
+            cosine-square-reports
+            site/reading/cosine-square-edition.json
+            site/reading/cosine-square-proofs.json
             geometry-reports
             leibniz-reports
             algebraic-ode-reports
@@ -369,7 +395,21 @@ jobs:
                   h=chapter.index('id="rem:sources-of-raw-reals"');g=chapter.index('id="pi-computations"')
                   assert h<g and 'Other examples' in chapter[h:g]
                   assert '0;url=ch-foundations.html#pi-computations' in catalogue
-                  assert 'data-animation="cosine"' in worked
+                  assert 'data-animation="cosine-square"' in worked
+                  square=get('/reading/cosine-square-edition.json')
+                  assert square['documentationRevision']==square['proofRevision']==revision
+                  assert all(square['checks'].values())
+                  def final_hash(path,previous):
+                      change=square['changedArtifacts'].get(path)
+                      if change:
+                          assert change['before']==previous,path
+                          return change['after']
+                      return previous
+                  assert 'The cosine-square integral' in worked
+                  for name,meta in [('cosine-square',square['rectangleAnimation']),('cosine-square-symmetry',square['symmetryAnimation'])]:
+                      for suffix,digest in meta['hashes'].items():
+                          assert hashlib.sha256(get('/reading/animations/'+name+'.'+suffix,True)).hexdigest()==digest
+                  assert 'The cosine primitive' in get('/cosine-primitive.html',True).decode()
                   a=report['cosineAnimation'];assert a['fixedEndpoint'] and a['upperLimit']=='1/2'
                   assert a['xPixelsPerUnit']==a['yPixelsPerUnit']==300
                   image=get('/reading/animations/cosine.gif',True)
@@ -404,7 +444,7 @@ jobs:
                   assert not fundamental['newLeanProofsClaimed'] and not fundamental['leanSourceModified']
                   assert all(fundamental['checks'].values())
                   fundamental_html=get('/fundamental-matrix.html',True)
-                  assert hashlib.sha256(fundamental_html).hexdigest()==fundamental['pageSha256']
+                  assert hashlib.sha256(fundamental_html).hexdigest()==final_hash('fundamental-matrix.html',fundamental['pageSha256'])
                   assert 'fundamental-matrix.html' in home
                   assert 'fundamental-matrix.html' in get('/ch-differential-equations.html',True).decode()
                   leibniz=get('/reading/leibniz-benchmark.json')
@@ -420,18 +460,18 @@ jobs:
                   assert transmutation['modernReconstruction'] and transmutation['powerQuadratureShared']
                   assert not transmutation['mathlibDependency'] and not transmutation['geometricBridgeUsesCalculus']
                   for name,expected in transmutation['artifactHashes'].items():
-                      assert hashlib.sha256(get('/'+name,True)).hexdigest()==expected,name
+                      assert hashlib.sha256(get('/'+name,True)).hexdigest()==final_hash(name,expected),name
                   for name,expected in graph['artifactHashes'].items():
-                      assert hashlib.sha256(get('/'+name,True)).hexdigest()==expected,name
+                      assert hashlib.sha256(get('/'+name,True)).hexdigest()==final_hash(name,expected),name
                   series=get('/ch-infinite-series.html',True)
-                  assert hashlib.sha256(series).hexdigest()==leibniz['pageSha256']
+                  assert hashlib.sha256(series).hexdigest()==final_hash('ch-infinite-series.html',leibniz['pageSha256'])
                   assert b'id="leibniz-geometric-benchmark"' in series
                   algebraic=get('/reading/algebraic-ode-edition.json')
                   assert algebraic['proofSourceCommit']==revision
                   assert algebraic['allPreviousContentPreserved'] and not algebraic['generalClassificationProved']
                   assert not algebraic['mathlibDependency'] and len(algebraic['auditedDeclarations'])==82
                   algebraic_html=get('/fuchs-painleve.html',True)
-                  assert hashlib.sha256(algebraic_html).hexdigest()==algebraic['pageSha256']
+                  assert hashlib.sha256(algebraic_html).hexdigest()==final_hash('fuchs-painleve.html',algebraic['pageSha256'])
                   assert 'fuchs-painleve.html' in home
                   assert 'fuchs-painleve.html' in get('/ch-differential-equations.html',True).decode()
                   cauchy=get('/reading/cauchy-arctan-publication.json')
@@ -439,15 +479,15 @@ jobs:
                   assert not cauchy['mathlibDependency'] and not cauchy['nativeGeneralResidueTheorem']
                   assert not cauchy['nativeCauchyFormula']
                   for name,expected in cauchy['artifactHashes'].items():
-                      assert hashlib.sha256(get('/'+name,True)).hexdigest()==expected,name
-                  assert hashlib.sha256(get('/ch-complex-paths.html',True)).hexdigest()==cauchy['chapterSha256']
+                      assert hashlib.sha256(get('/'+name,True)).hexdigest()==final_hash(name,expected),name
+                  assert hashlib.sha256(get('/ch-complex-paths.html',True)).hexdigest()==final_hash('ch-complex-paths.html',cauchy['chapterSha256'])
                   zeta=get('/reading/zeta-real-edition.json')
                   assert zeta['proofSourceCommit']==revision and zeta['realInputsAboveOne']
                   assert zeta['allPreviousContentPreserved'] and len(zeta['auditedDeclarations'])==33
                   assert zeta['baselProved'] and zeta['primesFromPiSquaredIrrationality']
                   assert not zeta['piSquaredIrrationalityProved']
                   assert not zeta['mathlibDependency'] and not zeta['logExpBridgeProved'] and not zeta['analyticContinuationProved']
-                  assert hashlib.sha256(get('/zeta-real.html',True)).hexdigest()==zeta['pageSha256']
+                  assert hashlib.sha256(get('/zeta-real.html',True)).hexdigest()==final_hash('zeta-real.html',zeta['pageSha256'])
                   assert hashlib.sha256(get('/reading/zeta-real-axioms.log',True)).hexdigest()==zeta['auditSha256']
                   assert 'zeta-real.html' in home and 'zeta-real.html' in get('/ch-transforms-zeta.html',True).decode()
                   print('LIVE ZETA:',base+'/zeta-real.html')

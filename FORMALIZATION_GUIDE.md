@@ -11,6 +11,18 @@ finite-difference differentiation soundness, and angle-chart transport remain.
 See [the exact theorem ledger](docs/RATIONAL_PRIMITIVES.md); do not promote
 `formalDerivative` identities to `HasDerivativeOnInterval` certificates.
 
+**Squared-cosine showcase (2026-09-23).**
+The reader now evaluates $\int_0^{1/2}\cos^2(\pi x)\,dx=1/4$ by two
+unconditional Lean proofs of the same rational interval program. One uses
+finite reflected sums and the circle identity; the other constructs the
+product primitive and applies the finite FTC. Validity and an explicit
+width bound are established independently of the value. The source and
+reproduction instructions are in [the checked reader proof package](book/cosine-square/README.md).
+This package extends the pinned published foundation; it is built and audited
+separately from the current root import. The earlier cosine primitive remains
+supporting mathematics. The RMS discussion is explanatory, not an additional
+formalized application.
+
 
 
 **Basel and the Euler sieve (2026-09-22).**
