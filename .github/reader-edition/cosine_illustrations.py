@@ -89,14 +89,14 @@ def circle_frame(stage):
         ImageDraw.Draw(d).ellipse(((q[0]-4)*SCALE,(q[1]-4)*SCALE,(q[0]+4)*SCALE,(q[1]+4)*SCALE),fill=GREEN)
     text(d,(O[0]-15,O[1]+15),'$0$',16);text(d,(start[0]-5,start[1]+15),'$1$',16)
     text(d,(54,445),'$(-1,0)$',16);text(d,(top[0]-6,top[1]-30),'$u$',18,GOLD)
-    text(d,(end[0]+13,end[1]-17),'$P(u)$',20)
+    text(d,(end[0]+13,end[1]-42),
+         r'$P(u)=\left(\frac{1-u^2}{1+u^2},\,\frac{2u}{1+u^2}\right)$',20)
     text(d,(485,351),'$A(u)$','math',GREEN)
     text(d,(33,489),rf'$n = {stage}$    $u = 2/3$    Equally spaced on the vertical segment',18)
     line(d,[(34,532),(67,532)],GREEN,3);text(d,(79,520),'Inner area  $'+directed(lower)+'$',18)
     line(d,[(34,565),(67,565)],GOLD,3);text(d,(79,553),'Outer area  $'+directed(upper,upper=True)+'$',18)
     text(d,(456,520),r'$\mathrm{Inner} \leq A(u) \leq \mathrm{outer}$',18)
     text(d,(456,553),'Gap  $'+directed(upper-lower,upper=True)+'$',18,MUTED)
-    text(d,(33,605),r'$P(u) = ((1-u^2)/(1+u^2),\, 2u/(1+u^2))$',16,MUTED)
     return im,{'stage':stage,'subarcs':n,'u':str(u),'point':[str(v) for v in P],'lower':str(lower),'upper':str(upper),
       'verticalPoints':[[str(Q(0)),str(v)] for v in grid],
       'projectedPoints':[[str(c) for c in point(v)] for v in grid],
