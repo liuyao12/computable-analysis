@@ -22,8 +22,12 @@ def main():
             for member in tar.getmembers():
                 if not member.name.startswith(prefix) or member.name == prefix: continue
                 member.name = member.name[len(prefix):]
-                if member.issym() or member.islnk() or '..' in Path(member.name).parts:
+                if member.islnk() or '..' in Path(member.name).parts:
                     raise ValueError('Unexpected archive member')
+                if member.issym():
+                    target = (work / member.name).parent / member.linkname
+                    if not target.resolve().is_relative_to(work):
+                        raise ValueError('Archive link escapes the work directory')
                 tar.extract(member, work)
         archive.unlink()
         (work / '.euler-mathlib-revision').write_text(REVISION)
