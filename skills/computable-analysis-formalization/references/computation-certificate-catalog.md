@@ -142,3 +142,17 @@ bound. `Basel.Primes` derives prime unboundedness from irrationality of
 $\pi^2$ through this sieve. Retain that irrationality hypothesis until it is
 proved; do not replace this route with the existing Euclidean infinitude theorem.
 Run `scripts/check_basel.lean` to check the elaborated dependency separation.
+
+
+## Polygonal complex contours
+
+Use `ComplexAnalysis.Cauchy` for actual midpoint contour computations on
+rational triangles and finite triangle collections. `CauchyData` requires
+executable refinement/evaluation schedules, shrinking sample boxes, and local
+complex-affine approximations; it does not assume a contour identity.
+`ComplexAnalysis.Residue` combines regular-part cancellation with the
+arctangent-normalized square pole for represented complex residues. The
+concrete family is the sum of a simple pole and a quadratic polynomial.
+General derivative adapters, arbitrary-partition agreement, punctured-polygon
+transport, higher-order residues, and Cauchy value/derivative formulas remain
+separate obligations. See `docs/POLYGONAL_CAUCHY.md` before claiming scope.

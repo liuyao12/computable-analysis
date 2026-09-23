@@ -34,5 +34,13 @@ from the parts currently checked in this project.
 The page sources here follow this structure directly. Introductions for the
 pinned cosine, Cartwright, and integral-family pages are maintained in
 `statements/` and installed by the final publication pass, preserving their
-existing proof anchors and audit artifacts. The browser checks cover all eight
+existing proof anchors and audit artifacts. The browser checks cover all nine
 showcases at desktop and mobile widths.
+
+The polygonal complex-analysis page carries a persistent Bessel example beside
+the narrative on desktop and after the first theorem on narrow screens. Its
+four views illustrate coefficient scaling, triangle cancellation, a square
+pole contour, and a logarithmic solution branch. The browser calculations are
+illustrations; the page states the exact scope of the checked Lean results.
+The publication pass requires `--cauchy-audit`, produced by
+`lake env lean scripts/check_polygonal_cauchy.lean`, and publishes that audit.

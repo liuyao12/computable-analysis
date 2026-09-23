@@ -38,7 +38,7 @@ def main():
         doc=BeautifulSoup((site/name).read_text(),'html.parser')
         headings=doc.article.select('h2[id]')
         assert [h['id'] for h in headings[:2]]==['setup','theorem'],name
-        statements=doc.select('.showcase-statement')
+        statements=doc.select('.showcase-statement:not(.secondary-statement)')
         assert len(statements)==1 and statements[0].select_one('p'),name
         assert len(statements[0].get_text().split())>=25,name
         assert not statements[0].select('code,sup,sub'),name
@@ -80,7 +80,7 @@ def main():
     assert 'euler.html' in (site/'basel.html').read_text()
     assert not re.search(r'<(?:sup|sub)\b',(site/'euler.html').read_text())
     if a.static_only:
-        print('PASS: six sidebar entries, active state, source links, preserved audits and honest theorem status');return
+        print('PASS: showcase sidebar entries, active state, source links, preserved audits and honest theorem status');return
     class Quiet(SimpleHTTPRequestHandler):
         def log_message(self,*args):pass
     server=ThreadingHTTPServer(('127.0.0.1',0),partial(Quiet,directory=str(site)))
@@ -98,6 +98,35 @@ def main():
                     assert page.locator('.showcase-statement mjx-container').count()>0,(name,'statement math')
                     assert page.locator('#book-nav a[href="cartwright.html"] mjx-container').count()==1,(name,'navigation math')
                     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+2'),(name,width)
+                    if name=='complex-analysis.html':
+                        assert page.locator('.cauchy-example').count()==1
+                        if width==1440:
+                            reader=page.locator('main.reader').bounding_box()
+                            example=page.locator('.cauchy-example').bounding_box()
+                            assert example['x']>=reader['x']+reader['width'],(name,'side panel')
+                        else:
+                            assert page.locator('article > .cauchy-example').count()==1
+                        for mode in ['coefficients','triangles','contour','solutions']:
+                            page.locator(f'[data-example-view="{mode}"]').click()
+                            page.wait_for_function('(m)=>document.querySelector(".cauchy-example").dataset.mode===m',arg=mode)
+                            page.wait_for_function('document.querySelectorAll("#example-readout mjx-container").length>0')
+                            assert page.locator('mjx-merror,[data-mjx-error]').count()==0,(name,mode)
+                        page.locator('#example-circuit').evaluate('(e)=>{e.value="100";e.dispatchEvent(new Event("input",{bubbles:true}));}')
+                        page.wait_for_function('document.querySelector("#circuit-label").textContent==="100%"')
+                        vals=page.evaluate("""() => {
+                          const a=window.CauchyExample;
+                          const f=z=>({x:z.x/(z.x*z.x+z.y*z.y),y:-z.y/(z.x*z.x+z.y*z.y)});
+                          const small=a.quadrature(a.square(.25),32,f);
+                          const large=a.quadrature(a.square(1.5),32,f);
+                          const reversed=a.quadrature(a.square(1).reverse(),32,f);
+                          return {small,large,reversed,j:a.bessel({x:1,y:0}).j,half:a.continuedArgument({x:-1,y:0},-1,.5),full:a.continuedArgument({x:1,y:0},-1,1)};
+                        }""")
+                        assert abs(vals['half']+3.141592653589793)<1e-12 and abs(vals['full']+2*3.141592653589793)<1e-12
+                        assert abs(vals['small']['y']-vals['large']['y'])<1e-12
+                        assert abs(vals['small']['y']+vals['reversed']['y'])<1e-12
+                        assert abs(vals['small']['y']-2*3.141592653589793)<.001
+                        assert abs(vals['j']['x']-.7651976865579666)<1e-12 and abs(vals['j']['y'])<1e-12
+                        page.locator('[data-example-view="coefficients"]').click()
                     if name=='basel.html':
                         for route in ['native','mathlib']:
                             page.locator(f'[data-classic-route="{route}"]').click()

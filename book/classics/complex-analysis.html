@@ -1,0 +1,51 @@
+<header><p class="classic-tag">Foundation in progress · Polygonal contours</p><h1>Cauchy’s theory, by finite computation</h1><p class="lead">Local complex-linear approximations cancel around small triangles. Arctangent determines what remains around a pole.</p></header>
+<h2 id="setup" data-example="coefficients">Setup: a function, a polygon, a local model</h2>
+<p>The example alongside this page is Bessel’s equation of order zero:</p>
+\[y''+p(z)y'+q(z)y=0,\qquad p(z)=\frac1z,\quad q(z)=1.\]
+<p>Its only finite coefficient singularity is the origin. Multiplying the coefficients by the appropriate powers gives \(zp(z)=1\) and \(z^2q(z)=z^2\), both regular there. We will follow this one equation while constructing tools for general complex functions and systems of any finite dimension.</p>
+<p>For the checked contour theorem, take a finite oriented collection of rational triangles and a complex function whose values are valid rational-box computations. At stage \(n\), subdivide each triangle to depth \(d_n\ge n\), sharing every edge sample. The selected function boxes have both widths at most \(1/(n+1)\). On every small triangle, suppose the sampled function at every rational point of the filled triangle admits a complex-affine approximation \(A+Bz\) with error at most</p>
+\[\frac{M}{n+1}\,2^{-d_n},\qquad M\ge0.\]
+<p>The coefficients of the local approximation may vary between triangles and stages. The mesh and evaluation schedules are executable data. These are local approximation hypotheses; no contour identity is assumed.</p>
+<section class="showcase-statement" aria-labelledby="theorem"><h2 id="theorem">Theorem — Computed polygonal Cauchy cancellation</h2>
+<p>For every function and finite triangle collection satisfying this setup, the contour computation is valid and represents zero. If \(P\) is the sum of the original triangle perimeters in the coordinate-sum norm and \(S_n\) is the oriented midpoint sum, then</p>
+\[\lVert S_n\rVert_1\le\frac{MP}{n+1},\qquad \oint_{\partial\mathcal T}f(z)\,dz\simeq0.\]
+<p>Shared interior edges cancel. Thus only the boundary of the triangle collection contributes, with the reverse orientation on boundaries of holes. No approximation is required inside an omitted hole.</p>
+</section>
+<p class="classic-scope">This theorem is checked from the displayed effective local data. Deriving those data automatically from a general represented complex derivative, and proving agreement with arbitrary tagged partitions, remain separate obligations.</p>
+<h2 id="triangles" data-example="triangles">Why triangles remove the regular part</h2>
+<p>A complex-affine function has zero midpoint sum around a triangle. Replace a function locally by such a model. Only the remainder contributes. Subdivision halves edge lengths and local first-order errors while quadrupling the number of triangles; their product stays controlled. Making the first-order error arbitrarily small forces the contour value to vanish.</p>
+<p>For the common quadratic estimate, halving the diameter divides the local error by four. The total error then halves at each refinement:</p>
+\[\lVert S_n\rVert_1\le M P\,2^{-n}.\]
+<p>The Lean development proves this for arbitrary rational triangles, then for finite triangle collections. It includes an instantiated nonconstant example, \(f(z)=z^2\). Conjugation \(f(z)=\overline z\) provides a useful contrast: around the unit right triangle its integral is \(i\). A real-linear approximation is not enough; the linear term must be multiplication by one complex number.</p>
+<h2 id="arctangent" data-example="contour">Arctangent measures one turn around a pole</h2>
+<p>Take the counterclockwise square centered at \(a\), with positive rational half-side \(r\). Split its four sides into eight affine half-edges. Pulling back \(dz/(z-a)\), the real parts cancel in pairs and the imaginary parts add:</p>
+\[\oint_{\partial S}\frac{dz}{z-a}=8i\int_0^1\frac{du}{1+u^2}=2\pi i.\]
+<p>Here \(\pi\) is the existing geometric circle computation. The integral on the right is the existing arctangent rectangle computation. No circle contour or new definition of \(\pi\) is needed. Translation and positive dilation cancel in the rational pullback algebra.</p>
+<p>Change the square’s size, reverse its orientation, or refine its sample mesh in the side example. The numerical sums illustrate the effect; the formal theorem supplies rational enclosures and an explicit error rate. Independently implemented midpoint and left-endpoint samplings represent the same value.</p>
+<h2 id="residue" data-example="contour">A local residue theorem</h2>
+<p>Let \(\rho\) be any valid represented complex number, including an irrational one. Suppose the regular part \(g\) has the above local approximation data on the two triangles filling the square. On its boundary, consider</p>
+\[f(z)=\frac{\rho}{z-a}+g(z).\]
+<section class="showcase-statement secondary-statement" aria-labelledby="residue-theorem"><h3 id="residue-theorem">Theorem — A simple pole on a rational square</h3><p>The computed contour is valid and equals the residue multiplied by one positive turn:</p>
+\[\oint_{\partial S}f(z)\,dz\simeq2\pi i\rho.\]
+<p>The value is unchanged by equivalent representations of \(\rho\), the certified tag algorithm, or a different certified regular part.</p></section>
+<p>This checked theorem uses a supplied simple-pole decomposition and split quadrature: the pole and regular part are integrated separately. The runtime combines actual sampled reciprocal pullbacks with actual regular-part contour computations; it does not return the proposed answer by definition. The nonconstant family \(\rho/(z-a)+z^2\) instantiates it for every rational square and every valid represented residue.</p>
+<p>In our motivating equation, \(p(z)=1/z\) has residue \(1\), so its square contour integral is \(2\pi i\). The coefficient \(q(z)=1\) contributes zero. This explains what the contour detects in the coefficients; it does not yet prove the full behavior of the equation’s solutions.</p>
+<h2 id="cauchy-formula" data-example="contour">From a local residue to Cauchy’s formula</h2>
+<p>The next bridge is to justify the regular part in</p>
+\[\frac{f(\zeta)}{\zeta-a}=\frac{f(a)}{\zeta-a}+\frac{f(\zeta)-f(a)}{\zeta-a}.\]
+<p>The divided difference must extend across the center with certified local complex-linear approximations. Once that construction is proved, the local residue theorem yields Cauchy’s value formula. Iterating the argument should provide derivative formulas and coefficient bounds.</p>
+<p class="classic-scope">This extension and the general Cauchy value formula are targets, not completed formalizations. Likewise, finite triangle cancellation is available, but the full geometric adapter from an arbitrary punctured polygon to finitely many small pole squares remains to be built. Higher-order principal parts and general winding numbers also remain open.</p>
+<h2 id="bessel" data-example="solutions">What the example asks of the foundation</h2>
+<p>Classically, one solution of our fixed equation is</p>
+\[J_0(z)=\sum_{k=0}^{\infty}\frac{(-1)^k z^{2k}}{4^k(k!)^2}.\]
+<p>A second local solution, on a chosen logarithm branch, is</p>
+\[Y_*(z)=J_0(z)\log z-\sum_{k=1}^{\infty}\frac{(-1)^k H_k z^{2k}}{4^k(k!)^2},\qquad H_k=\sum_{j=1}^{k}\frac1j.\]
+<p>After one positive circuit, the logarithm changes by \(2\pi i\), so \(Y_*\) changes by \(2\pi iJ_0\). The side example follows this continuation. Its floating-point series are an illustration; these complex solution branches and their monodromy are not yet certified by the Lean development. The classical formulas follow the <a href="https://dlmf.nist.gov/10.2.E1">Bessel equation</a> and its <a href="https://dlmf.nist.gov/10.8.E2">logarithmic solution expansion</a>.</p>
+<p>For the formalization we use finite-dimensional systems. With \(U=(y,zy')\), this particular equation becomes</p>
+\[zU'=\begin{pmatrix}0&amp;1\\-z^2&amp;0\end{pmatrix}U.\]
+<p>The contour layer has no dependence on the order of an equation. Matrix integration acts componentwise. The second-order equation is the presentation’s running example, while continuation, coefficient estimates, and later regular-singularity results must be built for general systems.</p>
+<h2 id="checked" data-example="coefficients">Checked scope and next obligations</h2>
+<p><strong>Checked:</strong> finite edge reversal and triangle subdivision; local-affine error estimates; valid represented Cauchy computations on triangles and finite triangle collections; sampled square-pole normalization by arctangent; the local simple-pole residue identity with represented residues; and concrete polynomial examples.</p>
+<p><strong>Still required:</strong> general derivative-to-local-model constructors; arbitrary-partition agreement; punctured-domain contour transport; higher-order residue terms; the removable divided-difference construction; Cauchy value and derivative formulas; represented-input Taylor reconstruction; and analytic continuation for general systems.</p>
+<p><a href="__NATIVE__ComplexAnalysis/Cauchy.lean">Cauchy proofs</a> · <a href="__NATIVE__ComplexAnalysis/Residue.lean">Local residue proof</a> · <a href="__NATIVE__ComplexAnalysis/ResidueExamples.lean">Instantiated examples</a> · <a href="reading/polygonal-cauchy-audit.log">Dependency and axiom audit</a></p>
+<p>The full <a href="fuchs.html">Fuchs criterion</a> and <a href="painleve.html">Painlevé–Gambier classification</a> remain development targets. This foundation does not change their status.</p>
