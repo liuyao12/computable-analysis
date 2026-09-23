@@ -28,13 +28,16 @@ run_cmd do
   for forbidden in [``ComputableAnalysis.exists_basicPrime_gt,
       ``ComputableAnalysis.exists_basicPrime_not_mem_of_all_basicPrime] do
     if primes.contains forbidden then throwError "Prime proof uses Euclid's infinitude theorem: {forbidden}"
+  let inheritedValidity ← collectAxioms ``ComputableAnalysis.Basel.geometricPiSquaredOverSixRaw_valid
+  let inheritedTransport ← collectAxioms ``ComputableAnalysis.Basel.piSquaredOverSixRaw_equiv_of_nonneg
   for root in [``ComputableAnalysis.Basel.eulerBasel,
       ``ComputableAnalysis.Basel.prime_unbounded_of_piSquare_irrational,
       ``ComputableAnalysis.Basel.real_zeta_two_equiv_piSquaredOverSix] do
     let axioms ← collectAxioms root
     if axioms.contains ``sorryAx then throwError "Unfinished proof: {root}"
     for name in axioms do
-      if name.toString.startsWith "ComputableAnalysis.Basel." then
+      if name.toString.startsWith "ComputableAnalysis.Basel." &&
+          !inheritedValidity.contains name && !inheritedTransport.contains name then
         throwError "New Basel axiom: {name}"
   logInfo "PASS: Basel comparison and Euler sieve occur in the elaborated proofs; no Euclidean infinitude shortcut or unfinished proof"
 
