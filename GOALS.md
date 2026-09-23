@@ -1,5 +1,15 @@
 # Computable Analysis: Canonical Roadmap
 
+
+**Basel and the Euler sieve (2026-09-22).**
+`ComputableAnalysis.Basel.RealZeta` exports the unconditional identity
+$\zeta(2)=\pi^2/6$ for geometric $\pi$, including the real-input zeta function.
+Finite Leibniz-square rearrangements supply an explicit rational error budget.
+The finite Euler sieve proves prime unboundedness assuming irrationality of
+$\pi^2$. That irrationality proof and the general even-value formulas remain
+open. The elaborated-dependency audit excludes the existing Euclid infinitude
+proof from this route. See [the mathematical proof and precise scope](docs/BASEL.md).
+
 **Exact Cauchy-series equality (2026-09-22).**
 `CauchyTaylor.Disk.eq_series` proves `ComplexRaw.Equiv` throughout a certified
 rational open disk; the real and imaginary component theorems use

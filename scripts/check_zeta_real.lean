@@ -1,3 +1,4 @@
+import ComputableAnalysis.Basel.RealZeta
 import ComputableAnalysis.ZetaReal.Tests
 
 #print axioms ComputableAnalysis.ZetaReal.coefficient_step
@@ -25,3 +26,12 @@ import ComputableAnalysis.ZetaReal.Tests
 #print axioms ComputableAnalysis.ZetaReal.Tests.threeHalves_coefficient
 #print axioms ComputableAnalysis.ZetaReal.Tests.threeHalves_rectangle
 #print axioms ComputableAnalysis.ZetaReal.Tests.delayedThree_same_zeta
+
+#print axioms ComputableAnalysis.Basel.leibniz_square_error
+#print axioms ComputableAnalysis.Basel.zeta_leibniz_square_budget
+#print axioms ComputableAnalysis.Basel.eulerBasel
+#print axioms ComputableAnalysis.Basel.EulerSieve.sieve_cons
+#print axioms ComputableAnalysis.Basel.EulerSieve.sieve_error
+#print axioms ComputableAnalysis.Basel.zetaTwo_equiv_finiteEulerProduct
+#print axioms ComputableAnalysis.Basel.prime_unbounded_of_piSquare_irrational
+#print axioms ComputableAnalysis.Basel.real_zeta_two_equiv_piSquaredOverSix

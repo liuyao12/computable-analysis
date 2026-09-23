@@ -14,6 +14,9 @@ on:
       - 'ComputableAnalysis/ZetaReal*'
       - 'ComputableAnalysis/ZetaReal/**'
       - 'scripts/check_zeta_real.lean'
+      - 'scripts/check_basel.lean'
+      - 'ComputableAnalysis/Basel/**'
+      - 'docs/BASEL.md'
       - 'docs/ZETA_REAL.md'
       - 'blueprint/src/16-transforms-zeta.tex'
       - 'ComputableAnalysis/AlgebraicODE*'
@@ -102,12 +105,15 @@ jobs:
               assert steps[name]=='success',name
           print('Verified unchanged mathematical snapshot:',os.environ['SOURCE_SHA'])
           PY
-      - uses: actions/download-artifact@v8
+      - name: Restore the hash-checked pinned reader archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 .github/reader-edition/reader_base.py
+      - uses: actions/upload-artifact@v4
         with:
-          name: github-pages
-          run-id: ${{ env.SOURCE_RUN }}
-          github-token: ${{ github.token }}
-          path: downloaded
+          name: verified-reader-base
+          path: downloaded/artifact.tar
+          retention-days: 90
       - name: Validate and unpack the exact proof artifact
         run: |
           python3 - <<'PY'
@@ -241,8 +247,10 @@ jobs:
           python3 .github/reader-edition/test_pnt_cauchy.py --site site --report reader-edition-tests
       - name: Verify and publish the real-domain zeta construction
         run: |
+          set -euo pipefail
           mkdir -p zeta-reports
-          lake build ComputableAnalysis.ZetaReal.Tests | tee zeta-reports/build.log
+          lake build ComputableAnalysis.ZetaReal.Tests ComputableAnalysis.Basel.RealZeta | tee zeta-reports/build.log
+          lake env lean scripts/check_basel.lean | tee zeta-reports/basel-dependencies.log
           lake env lean scripts/check_zeta_real.lean | tee zeta-reports/axioms.log
           python3 .github/reader-edition/zeta_real.py --site site --revision "$GITHUB_SHA" --audit zeta-reports/axioms.log
           python3 .github/reader-edition/test_zeta_real.py --site site --report reader-edition-tests
@@ -414,7 +422,9 @@ jobs:
                   assert hashlib.sha256(get('/ch-complex-paths.html',True)).hexdigest()==cauchy['chapterSha256']
                   zeta=get('/reading/zeta-real-edition.json')
                   assert zeta['proofSourceCommit']==revision and zeta['realInputsAboveOne']
-                  assert zeta['allPreviousContentPreserved'] and len(zeta['auditedDeclarations'])==25
+                  assert zeta['allPreviousContentPreserved'] and len(zeta['auditedDeclarations'])==33
+                  assert zeta['baselProved'] and zeta['primesFromPiSquaredIrrationality']
+                  assert not zeta['piSquaredIrrationalityProved']
                   assert not zeta['mathlibDependency'] and not zeta['logExpBridgeProved'] and not zeta['analyticContinuationProved']
                   assert hashlib.sha256(get('/zeta-real.html',True)).hexdigest()==zeta['pageSha256']
                   assert hashlib.sha256(get('/reading/zeta-real-axioms.log',True)).hexdigest()==zeta['auditSha256']

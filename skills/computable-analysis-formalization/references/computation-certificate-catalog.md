@@ -118,3 +118,16 @@ binomial degree and Dirichlet index. `rectangle_outer_tail` and
 the valid finite sums with the output. `zeta_integer_equiv` is the independent
 integer compatibility theorem. This route does not consume an assumed
 rational-power extension interface. The separate log–exp bridge remains open.
+
+
+## Basel and finite Euler products
+
+Import `ComputableAnalysis.Basel.RealZeta` for the proved Basel identity and its
+compatibility with the public real-input zeta function. `Basel.FiniteSums`
+supplies finite triangular/square reindexing and alternating bounds;
+`Basel.ZetaEstimate` supplies the explicit reciprocal-square/Leibniz budget.
+`Basel.EulerSieve` and `Basel.EulerBounds` give finite prime sieving and its error
+bound. `Basel.Primes` derives prime unboundedness from irrationality of
+$\pi^2$ through this sieve. Retain that irrationality hypothesis until it is
+proved; do not replace this route with the existing Euclidean infinitude theorem.
+Run `scripts/check_basel.lean` to check the elaborated dependency separation.

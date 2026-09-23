@@ -233,12 +233,51 @@ Agreement with the integer evaluator does not prove Euler's even-value formula
 \[
  \zeta(2n)=\frac{(2\pi)^{2n}|B_{2n}|}{2(2n)!},\qquad n\ge1.
 \]
-This remains open, including $\zeta(2)=\pi^2/6$: the Basel module supplies
-valid algorithms for both sides and certificate interfaces for their missing
-comparison, not the comparison proof itself.
+The general formula remains open, but its first case is now proved.
+
+\begin{theorem}[Basel and the conditional Euler proof of prime infinitude]
+\label{thm:basel-primes}
+\lean{ComputableAnalysis.Basel.eulerBasel, ComputableAnalysis.Basel.real_zeta_two_equiv_piSquaredOverSix, ComputableAnalysis.Basel.prime_unbounded_of_piSquare_irrational}
+\leanok
+The reciprocal-square computation and the real-domain zeta computation at $2$
+are equivalent to $\pi^2/6$, for geometric $\pi$. If $\pi^2$ is irrational,
+there is a prime greater than every given natural bound.
+\end{theorem}
+\begin{proof}
+\leanok
+Put $B_N=\sum_{k<N}(-1)^k/(2k+1)$, $H_N=\sum_{k<N}1/(2k+1)$, and
+$M_N=\sum_{k<N}1/(2k+1)^2$. Partial fractions, finite diagonal rearrangements,
+and alternating-sum bounds prove
+\[
+ |2B_N^2-M_N|\le 2H_N/N.
+\]
+The odd/even split and the reciprocal-square tail estimate imply
+\[
+ \left|\sum_{k=1}^{2m^2}k^{-2}-\frac83 B_{2m^2}^{\,2}\right|\le16/m.
+\]
+This gives equivalence of the interval computations; the existing geometric
+Leibniz theorem completes Basel. No completed real line is involved.
+
+For a finite list $P$ of distinct primes, let $S_P(N)$ sum reciprocal squares
+of the positive integers up to $N$ divisible by none of the primes in $P$, and
+$c_P=\prod_{p\in P}(1-p^{-2})$. Finite sieving proves
+\[
+ S_{p::P}(N)=S_P(N)-p^{-2}S_P(\lfloor N/p\rfloor),\qquad
+ \left|S_P(N)-c_P\sum_{k=1}^N k^{-2}\right|\le\frac{K_P}{N+1},
+\]
+where $K_{\varnothing}=0$ and $K_{p::P}=(p+1)K_P+2p$.
+An exhaustive list would give $S_P(N)=1$ and hence rational $\zeta(2)=1/c_P$,
+contradicting Basel and the stated irrationality hypothesis. The proof uses
+finite prime factorization, not the Euclidean infinitude theorem.
+\end{proof}
+
+Irrationality of $\pi^2$ remains a separate proof obligation. The finite Basel
+argument adapts \href{https://doi.org/10.4169/college.math.j.44.3.171}{Benko and
+Molokach's rearrangement proof}; the formal error bounds supply the limiting
+steps.
 
 The reference evaluator is not optimized for speed near $s=1$. Its identification
-with $E(-sL(n))$, parameter derivatives, Euler products, and continuation remain
+with $E(-sL(n))$, parameter derivatives, general Euler products, and continuation remain
 additional proof obligations. The following continuation discussion is a
 mathematical construction plan, not a claim that those Lean certificates are
 already available.

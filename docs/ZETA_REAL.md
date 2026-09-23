@@ -92,18 +92,17 @@ $$
 
 where $B_{2n}$ is a Bernoulli number
 ([DLMF 25.6.2](https://dlmf.nist.gov/25.6.E2)). It is not yet proved here.
-Even $\zeta(2)=\pi^2/6$ remains an open target in
-[`Basel.lean`](../ComputableAnalysis/Basel.lean): both sides have valid
-computations, but no unconditional equivalence proof. Its certificate
-interfaces describe the missing evidence; they do not supply it. Integer
-compatibility in `ZetaReal` does not establish these closed forms.
+The case $\zeta(2)=\pi^2/6$ is now proved by `Basel.eulerBasel`, including
+compatibility with this real-domain function. The finite Euler sieve also proves
+prime unboundedness conditional on irrationality of $\pi^2$; that irrationality
+proof remains open. See [the Basel proof and its arithmetic application](BASEL.md).
 
 ## Boundary
 
 The reference evaluator has deliberately coarse bounds and is not optimized
 for numerical speed, especially near $s=1$. A bridge from the binomial power
-computation to $\exp(-s\log n)$, parameter derivatives, the Euler product,
-analytic continuation, Euler's even-value formulas, and the Apéry
+computation to $\exp(-s\log n)$, parameter derivatives, the general Euler product,
+analytic continuation, Euler's even-value formulas beyond Basel, and the Apéry
 approximant-to-$\zeta(3)$ identification remain open. No complex half-plane
 or continuation result is claimed here.
 
