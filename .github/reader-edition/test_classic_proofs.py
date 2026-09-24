@@ -127,6 +127,40 @@ def main():
                         assert abs(vals['small']['y']-2*3.141592653589793)<.001
                         assert abs(vals['j']['x']-.7651976865579666)<1e-12 and abs(vals['j']['y'])<1e-12
                         page.locator('[data-example-view="coefficients"]').click()
+                    if name=='arctan-taylor.html':
+                        assert report['checks']['arctanTaylorAudited']
+                        if width==1440:
+                            reader=page.locator('main.reader').bounding_box()
+                            panel=page.locator('.arctan-example').bounding_box()
+                            assert panel['x']>=reader['x']+reader['width']
+                        else:assert page.locator('article > .arctan-example').count()==1
+                        for mode in ['graph','sequence','plane']:
+                            page.locator(f'[data-arctan-mode="{mode}"]').click()
+                            page.wait_for_function('(m)=>window.ArctanExample.mode===m',arg=mode)
+                            page.wait_for_function('document.querySelectorAll("#arctan-readout mjx-container").length>0')
+                        for value,kind in [('0.5','inside'),('1','boundary'),('1.05','outside'),('-1','boundary')]:
+                            page.locator(f'[data-arctan-x="{value}"]').click()
+                            assert page.locator('.arctan-example').get_attribute('data-kind')==kind
+                        numbers=page.evaluate("""()=>{const a=ArctanExample;return {
+                          inside:Math.abs(a.partial(.5,12)-Math.atan(.5)),
+                          boundary:Math.abs(a.partial(1,120)-Math.PI/4),
+                          odd:a.partial(-.5,12)+a.partial(.5,12),
+                          step:a.partial(1.05,41)-a.partial(1.05,40),
+                          term:a.term(1.05,40),
+                          outside:Math.abs(a.partial(1.5,40)-Math.atan(1.5))
+                        }}""")
+                        assert numbers['inside']<=.5**25/25+1e-15
+                        assert numbers['boundary']<=1/241+1e-15
+                        assert abs(numbers['odd'])<1e-15
+                        assert abs(numbers['step']-numbers['term'])<1e-12
+                        assert numbers['outside']>100000
+                        assert page.locator('mjx-merror,[data-mjx-error]').count()==0
+                        if width==1440:
+                            page.locator('#arctan-follow').check()
+                            page.locator('#singularities').scroll_into_view_if_needed()
+                            page.wait_for_function('window.ArctanExample.mode==="plane"')
+                        page.locator('[data-arctan-x="0.5"]').click()
+                        page.locator('[data-arctan-mode="graph"]').click()
                     if name=='basel.html':
                         for route in ['native','mathlib']:
                             page.locator(f'[data-classic-route="{route}"]').click()
@@ -146,6 +180,6 @@ def main():
             browser.close()
     finally:server.shutdown()
     assert not errors,errors
-    (a.report/'classic-proofs-browser.json').write_text(json.dumps(dict(passed=True,revision=report['documentationRevision'],widths=[1440,390,320],navigationMath=True,baselRoutes=True,eulerAudited=True,cartwrightViewer=True,leibnizViewerPreserved=True),indent=2)+'\n')
+    (a.report/'classic-proofs-browser.json').write_text(json.dumps(dict(passed=True,revision=report['documentationRevision'],widths=[1440,390,320],navigationMath=True,baselRoutes=True,eulerAudited=True,arctanTaylorAudited=True,arctanModes=True,arctanNarrativeFollow=True,cartwrightViewer=True,leibnizViewerPreserved=True),indent=2)+'\n')
     print('PASS: desktop/mobile navigation, LaTeX, Basel route controls and preserved Cartwright/Leibniz viewers')
 if __name__=='__main__':main()

@@ -47,6 +47,9 @@ on:
       - 'ComputableAnalysis/ComplexAnalysis/**'
       - 'ComputableAnalysis/ComplexAnalysis.lean'
       - 'scripts/check_polygonal_cauchy.lean'
+      - 'ComputableAnalysis/ArctanTaylorBoundary.lean'
+      - 'ComputableAnalysis/ArctanTaylorConvergence.lean'
+      - 'scripts/check_arctan_taylor.lean'
       - 'book/euler-proof/**'
       - 'book/algebraic-ode/**'
       - 'book/zeta-real/**'
@@ -341,8 +344,14 @@ jobs:
           mkdir -p polygonal-cauchy-reports
           lake build ComputableAnalysis.ComplexAnalysis | tee polygonal-cauchy-reports/build.log
           lake env lean scripts/check_polygonal_cauchy.lean | tee polygonal-cauchy-reports/audit.log
+      - name: Check arctangent Taylor convergence and divergence
+        run: |
+          set -euo pipefail
+          mkdir -p arctan-taylor-reports
+          lake build ComputableAnalysis.ArctanTaylorConvergence | tee arctan-taylor-reports/build.log
+          lake env lean scripts/check_arctan_taylor.lean | tee arctan-taylor-reports/audit.log
       - name: Expose classical examples and verify the pinned Mathlib Basel source
-        run: python3 .github/reader-edition/classic_proofs.py --site site --revision "$GITHUB_SHA" --euler-audit euler-reports/proofs.json --cauchy-audit polygonal-cauchy-reports/audit.log
+        run: python3 .github/reader-edition/classic_proofs.py --site site --revision "$GITHUB_SHA" --euler-audit euler-reports/proofs.json --cauchy-audit polygonal-cauchy-reports/audit.log --arctan-audit arctan-taylor-reports/audit.log
       - name: Verify classical navigation and proof comparisons in the browser
         run: python3 .github/reader-edition/test_classic_proofs.py --site site --report reader-edition-tests
       - uses: actions/upload-artifact@v4
@@ -352,6 +361,7 @@ jobs:
           path: |
             reader-edition-tests
             polygonal-cauchy-reports
+            arctan-taylor-reports
             rational-primitives-reports
             site/reading/rational-primitives-edition.json
             cosine-square-reports
@@ -459,6 +469,9 @@ jobs:
                   assert all(square['checks'].values())
                   classics=get('/reading/classic-proofs-edition.json')
                   assert classics['documentationRevision']==revision and all(classics['checks'].values())
+                  assert classics['checks']['arctanTaylorAudited'] and 'arctan-taylor.html' in classics['pages']
+                  for path in ['reading/arctan-example.js','reading/arctan-example.css','reading/arctan-taylor-audit.log']:
+                      assert hashlib.sha256(get('/'+path,True)).hexdigest()==classics['artifacts'][path]
                   euler=get('/reading/euler-proofs.json')
                   assert euler['mathlibRevision']==classics['eulerMathlibRevision'] and all(euler['checks'].values())
                   assert euler['allPositiveEvenValuesProved'] and len(euler['declarations'])==15

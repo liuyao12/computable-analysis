@@ -1,5 +1,15 @@
 # Computable Analysis: Canonical Roadmap
 
+**Arctangent function-theory showcase (2026-09-23).**
+`ArctanTaylor.convergence_iff` classifies convergence of the ordinary Taylor
+partial sums for every rational input: exactly the closed unit interval.
+`geometric_converges` reuses the independent series-to-geometric-arctangent
+bridge; `not_converges` excludes every represented limit outside the interval.
+The new reader centers function theory and real-variable Taylor behavior.
+Arbitrary represented inputs and the general Cauchy-to-Taylor chain remain
+explicit obligations. See [the theorem ledger](docs/ARCTAN_TAYLOR.md).
+
+
 **Polygonal Cauchy foundation (2026-09-23).**
 `ComplexAnalysis` proves finite triangle cancellation, valid computed Cauchy
 contours from explicit local complex-affine approximation data, and a local
