@@ -157,7 +157,7 @@ def main():
                         assert page.locator('mjx-merror,[data-mjx-error]').count()==0
                         if width==1440:
                             page.locator('#arctan-follow').check()
-                            page.locator('#singularities').scroll_into_view_if_needed()
+                            page.locator('#singularities').evaluate('(e)=>window.scrollTo({top:e.getBoundingClientRect().top+scrollY-120,behavior:"instant"})')
                             page.wait_for_function('window.ArctanExample.mode==="plane"')
                         page.locator('[data-arctan-x="0.5"]').click()
                         page.locator('[data-arctan-mode="graph"]').click()

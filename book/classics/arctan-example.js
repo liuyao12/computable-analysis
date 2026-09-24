@@ -57,7 +57,7 @@
   [input,terms].forEach(e=>e.addEventListener('input',render));
   const headings=[...document.querySelectorAll('article [data-arctan-view]')];let pending=false;
   window.addEventListener('scroll',()=>{if(pending||!follow.checked||innerWidth<=1050)return;pending=true;requestAnimationFrame(()=>{pending=false;let h=headings[0];for(const x of headings)if(x.getBoundingClientRect().top<innerHeight*.45)h=x;if(h&&h.dataset.arctanView!==mode)choose(h.dataset.arctanView);});},{passive:true});
-  const media=matchMedia('(max-width:1050px)'),page=document.querySelector('.page'),anchor=document.querySelector('article > .showcase-statement');
+  const media=matchMedia('(max-width:1050px)'),page=document.querySelector('.page'),anchor=document.querySelector('article > .classic-scope');
   function place(){if(media.matches)anchor.after(panel);else page.append(panel);}media.addEventListener('change',place);place();render();
   window.ArctanExample={partial,term,get mode(){return mode;}};
 })();
