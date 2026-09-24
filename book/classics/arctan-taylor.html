@@ -9,6 +9,7 @@
 <p>Inside this interval the remainder satisfies</p>
 \[|A(x)-S_N(x)|\le\frac{|x|^{2N+1}}{2N+1}.\]
 </section>
+<p>Changing the expansion point changes its reach: <a href="#center-one">at \(1\), the radius is \(\sqrt{2}\)</a>, as we can prove without computing any coefficients.</p>
 <p class="classic-scope">The Lean development checks the convergence/divergence classification for every rational input, with convergence to the independently constructed geometric arctangent. The displayed classical statement includes irrational inputs; the extension of this classifier to arbitrary represented inputs remains to be supplied. The <a href="https://dlmf.nist.gov/4.24">DLMF records the arctangent expansion</a>.</p>
 <h2 id="finite" data-arctan-view="graph">A finite identity starts the proof</h2>
 <p>No interchange of infinite sums and integrals is necessary. Finite division gives</p>
@@ -32,6 +33,29 @@
 \[A'(z)=\frac1{1+z^2}=\frac1{(z-i)(z+i)}.\]
 <p>Both are distance \(1\) from the expansion point. The arctangent germ has logarithmic branch points there; these are not poles of arctangent itself. The <a href="https://dlmf.nist.gov/4.23">logarithmic representation</a> exhibits these branch points. Its Taylor series at the origin therefore has radius \(1\), even though the real function continues smoothly past both real endpoints.</p>
 <p>This is what the Cauchy–Taylor foundation should ultimately explain: local coefficient estimates and continuation describe the reach of an expansion. For this particular series, finite remainder estimates and the term obstruction already prove the real convergence boundary. The general complex singularity argument is explanatory context, not a completed theorem in the current formalization.</p>
+<h2 id="center-one" data-arctan-view="shift">Move the center to \(1\): the radius is \(\sqrt{2}\)</h2>
+<section class="showcase-statement secondary-statement" aria-labelledby="center-one-theorem"><h3 id="center-one-theorem">Theorem — A radius without coefficients</h3>
+<p>The Taylor series of arctangent centered at \(1\) has radius of convergence exactly \(\sqrt{2}\). It converges to arctangent for every real \(x\) with \(|x-1|<\sqrt{2}\), and diverges when \(|x-1|>\sqrt{2}\). This radius argument alone makes no assertion about the two real boundary points.</p>
+\[R=|1-i|=|1+i|=\sqrt{2}.\]
+</section>
+<p>In particular, the new series converges at \(x=2\), since \(|2-1|=1<\sqrt{2}\), although the series centered at the origin diverges there.</p>
+<p>We can prove this without evaluating a single Taylor coefficient. Only the derivative and the geometry of its singularities enter.</p>
+<h3>The lower bound: construct the function throughout the disk</h3>
+<p>Let \(D=\{z:|z-1|<\sqrt{2}\}\) and \(g(z)=1/(1+z^2)\). The only zeros of its denominator are \(i\) and \(-i\), both on the boundary of \(D\). Thus \(g\) is holomorphic throughout this convex disk.</p>
+<p>Cauchy’s theorem for triangles makes integrals of \(g\) independent of polygonal path inside \(D\). Define</p>
+\[F(z)=A(1)+\int_{[1,z]}\frac{dw}{1+w^2},\qquad z\in D.\]
+<p>Here \([1,z]\) is the straight segment. Triangle cancellation allows the final segment to be varied locally, giving \(F'(z)=g(z)\). On the real interval in \(D\), this function agrees with real arctangent: their derivatives agree and their values agree at \(1\). We do not need to evaluate even that initial value.</p>
+<p>The Cauchy–Taylor theorem now implies that the Taylor series at \(1\) converges to \(F\) on every smaller concentric disk. Every point of \(D\) lies in such a disk, so</p>
+\[R\ge\sqrt{2}.\]
+<p>This step is compatible with polygonal contours. Given \(|z-1|<r<s<\sqrt{2}\), choose a convex polygon enclosing the closed disk of radius \(r\) whose boundary stays inside the disk of radius \(s\). The polygonal Cauchy formula and its finite geometric-kernel remainder give Taylor convergence at \(z\). No integration over a circle, and no explicit coefficient formula for arctangent, is needed.</p>
+<h3>The upper bound: a larger Taylor disk is impossible</h3>
+<p>Suppose instead that \(R>\sqrt{2}\), and let \(T\) be the sum of that Taylor series on \(|z-1|<R\). A power-series sum is holomorphic inside its convergence disk. Near \(1\), it equals \(F\), hence</p>
+\[(1+z^2)T'(z)=1.\]
+<p>The function \(H(z)=(1+z^2)T'(z)-1\) is holomorphic on the entire larger disk and vanishes near \(1\). The identity theorem makes it zero everywhere on that disk. But \(i\) is now an interior point, and substitution gives</p>
+\[(1+i^2)T'(i)=1,\qquad 0=1,\]
+<p>a contradiction. Thus \(R\le\sqrt{2}\), proving equality. The poles belong to the derivative; no claim that arctangent itself has poles is needed.</p>
+<p>In the side illustration, compare a smaller disk, the critical disk, and a larger disk. The crosses stay fixed while the center has moved from the origin to \(1\). A larger disk would contain a point where the displayed differential identity cannot hold.</p>
+<p class="classic-scope"><strong>Formalization status.</strong> This is a classical mathematical proof, not a newly checked Lean theorem. Completing it in our foundation requires polygonal path independence and differentiation of the displayed integral, the Cauchy-to-Taylor bridge, holomorphy of power-series sums, and the identity theorem on represented complex inputs. The existing rational-input Lean classifier concerns the series centered at the origin. See the <a href="https://dlmf.nist.gov/1.9">DLMF’s Cauchy theory</a> and <a href="https://dlmf.nist.gov/1.10">Taylor and analytic-continuation results</a> for the classical analytic ingredients.</p>
 <h2 id="continue" data-arctan-view="graph">The function continues beyond this Taylor series</h2>
 <p>For positive \(x\), the addition formula gives</p>
 \[\arctan x=\frac\pi4+\arctan\!\left(\frac{x-1}{x+1}\right).\]

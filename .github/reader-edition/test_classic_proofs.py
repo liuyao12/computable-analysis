@@ -134,10 +134,23 @@ def main():
                             panel=page.locator('.arctan-example').bounding_box()
                             assert panel['x']>=reader['x']+reader['width']
                         else:assert page.locator('article > .arctan-example').count()==1
-                        for mode in ['graph','sequence','plane']:
+                        for mode in ['graph','sequence','plane','shift']:
                             page.locator(f'[data-arctan-mode="{mode}"]').click()
                             page.wait_for_function('(m)=>window.ArctanExample.mode===m',arg=mode)
                             page.wait_for_function('document.querySelectorAll("#arctan-readout mjx-container").length>0')
+                        assert page.locator('#center-one-theorem').count()==1
+                        assert 'not a newly checked Lean theorem' in page.locator('article').inner_text()
+                        assert page.locator('#arctan-controls').is_hidden()
+                        assert page.locator('#arctan-input-presets').is_hidden()
+                        for disk in ['inner','critical','outer']:
+                            page.locator(f'[data-arctan-disk="{disk}"]').click()
+                            assert page.locator('.arctan-example').get_attribute('data-radius-state')==disk
+                        geometry=page.evaluate('()=>["inner","critical","outer"].map(ArctanExample.diskGeometry)')
+                        assert geometry[0]['radius']<geometry[0]['poleDistance']
+                        assert abs(geometry[1]['radius']**2-2)<1e-14
+                        assert not geometry[1]['polesInside'] and geometry[2]['polesInside']
+                        assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+2')
+                        page.locator('[data-arctan-mode="graph"]').click()
                         for value,kind in [('0.5','inside'),('1','boundary'),('1.05','outside'),('-1','boundary')]:
                             page.locator(f'[data-arctan-x="{value}"]').click()
                             assert page.locator('.arctan-example').get_attribute('data-kind')==kind
@@ -159,8 +172,10 @@ def main():
                             page.locator('#arctan-follow').check()
                             page.locator('#singularities').evaluate('(e)=>window.scrollTo({top:e.getBoundingClientRect().top+scrollY-120,behavior:"instant"})')
                             page.wait_for_function('window.ArctanExample.mode==="plane"')
-                        page.locator('[data-arctan-x="0.5"]').click()
+                            page.locator('#center-one').evaluate('(e)=>window.scrollTo({top:e.getBoundingClientRect().top+scrollY-120,behavior:"instant"})')
+                            page.wait_for_function('window.ArctanExample.mode==="shift"')
                         page.locator('[data-arctan-mode="graph"]').click()
+                        page.locator('[data-arctan-x="0.5"]').click()
                     if name=='basel.html':
                         for route in ['native','mathlib']:
                             page.locator(f'[data-classic-route="{route}"]').click()
@@ -180,6 +195,6 @@ def main():
             browser.close()
     finally:server.shutdown()
     assert not errors,errors
-    (a.report/'classic-proofs-browser.json').write_text(json.dumps(dict(passed=True,revision=report['documentationRevision'],widths=[1440,390,320],navigationMath=True,baselRoutes=True,eulerAudited=True,arctanTaylorAudited=True,arctanModes=True,arctanNarrativeFollow=True,cartwrightViewer=True,leibnizViewerPreserved=True),indent=2)+'\n')
+    (a.report/'classic-proofs-browser.json').write_text(json.dumps(dict(passed=True,revision=report['documentationRevision'],widths=[1440,390,320],navigationMath=True,baselRoutes=True,eulerAudited=True,arctanTaylorAudited=True,arctanModes=True,arctanCenterOne=True,arctanNarrativeFollow=True,cartwrightViewer=True,leibnizViewerPreserved=True),indent=2)+'\n')
     print('PASS: desktop/mobile navigation, LaTeX, Basel route controls and preserved Cartwright/Leibniz viewers')
 if __name__=='__main__':main()
