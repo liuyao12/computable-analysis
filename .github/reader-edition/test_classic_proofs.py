@@ -93,7 +93,7 @@ def main():
             for width in [1440,390,320]:
                 page=browser.new_page(viewport={'width':width,'height':1000});page.on('pageerror',lambda e:errors.append(str(e)))
                 for name in SHOWCASE_PAGES:
-                    page.goto(base+name,wait_until='networkidle');page.evaluate('() => MathJax.startup.promise')
+                    page.goto(base+name,wait_until='networkidle');page.wait_for_function('window.MathJax && MathJax.startup && MathJax.startup.promise');page.evaluate('() => MathJax.startup.promise')
                     assert page.locator('mjx-merror,[data-mjx-error]').count()==0,(name,width)
                     assert page.locator('.showcase-statement mjx-container').count()>0,(name,'statement math')
                     assert page.locator('#book-nav a[href="cartwright.html"] mjx-container').count()==1,(name,'navigation math')
