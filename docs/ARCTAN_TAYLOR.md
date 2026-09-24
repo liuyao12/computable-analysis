@@ -56,6 +56,22 @@ It visualizes finite partial sums; no finite plot is used to establish
 convergence or divergence. It reports a theoretical error bound, and does not
 report a tiny rounded browser difference as an exact zero error.
 
+## Changing the center without computing coefficients
+
+The reader also gives a classical proof that the Taylor series centered at
+\(1\) has radius \(\sqrt{2}\). On the convex open disk avoiding \(\pm i\),
+polygonal path independence constructs the integral of \(1/(1+z^2)\),
+normalized to the existing arctangent value at \(1\). Cauchy–Taylor gives the lower bound.
+For the upper bound, a hypothetical sum on a larger disk would satisfy
+\((1+z^2)T'(z)=1\) throughout that disk by the identity theorem; evaluation
+at \(i\) is impossible. The proof does not compute Taylor coefficients and
+does not decide convergence at real boundary points.
+
+This is mathematical exposition, not an additional Lean result. The analytic
+bridges on arbitrary represented complex inputs remain to be formalized.
+The new geometric interaction draws disks centered at \(1\) and the fixed
+singularities. It does not numerically generate a Taylor expansion at \(1\).
+
 ## Verification
 
 Build `ComputableAnalysis.ArctanTaylorConvergence`, then run

@@ -9,7 +9,34 @@
   const path=(points,color,width=2)=>`<polyline points="${points.map(p=>p.join(',')).join(' ')}" stroke="${color}" stroke-width="${width}" fill="none"/>`;
   const line=(x1,y1,x2,y2,color='var(--line)',dash='')=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" ${dash?`stroke-dasharray="${dash}"`:''}/>`;
   function math(html){const mine=++revision;queue=queue.then(async()=>{if(mine!==revision)return;if(window.MathJax?.startup?.promise)await MathJax.startup.promise;if(window.MathJax?.typesetClear)MathJax.typesetClear([out]);out.innerHTML=html;if(window.MathJax?.typesetPromise)await MathJax.typesetPromise([out]);}).catch(e=>{out.textContent='Mathematical rendering unavailable.';console.error(e);});}
+  let selectedDisk='critical';
+  function diskGeometry(which){const radius={inner:1.1,critical:Math.SQRT2,outer:1.7}[which];return {radius,poleDistance:Math.hypot(1,1),polesInside:radius>Math.SQRT2};}
+  function renderShift(){
+    const g=diskGeometry(selectedDisk),sx=t=>112+52*t,sy=t=>130-52*t;
+    let svg='<title id="arctan-plot-title">A Taylor disk centered at one</title><desc id="arctan-plot-description">Both derivative poles lie on the critical circle. The dotted radii connect the new center to those poles. Choose a larger disk to put the poles in its interior.</desc>';
+    svg+=`<circle data-critical-disk cx="${sx(1)}" cy="130" r="${52*Math.SQRT2}" fill="var(--green)" opacity=".07"/>`;
+    svg+=line(15,130,315,130)+line(sx(0),15,sx(0),245);
+    svg+=`<circle cx="${sx(1)}" cy="130" r="${52*Math.SQRT2}" fill="none" stroke="var(--green)" stroke-dasharray="4 4"/><circle data-trial-disk cx="${sx(1)}" cy="130" r="${52*g.radius}" fill="none" stroke="var(--purple)" stroke-width="2"/>`;
+    [1,-1].forEach(t=>{svg+=line(sx(1),130,sx(0),sy(t),'var(--green)','3 3');svg+=line(sx(-.065),sy(t-.065),sx(.065),sy(t+.065),'var(--purple)')+line(sx(-.065),sy(t+.065),sx(.065),sy(t-.065),'var(--purple)');});
+    svg+=`<circle cx="${sx(1)}" cy="130" r="4" fill="var(--green)"/><text x="${sx(1)+8}" y="149">center</text><text x="252" y="148">real axis</text><text x="120" y="24">imaginary axis</text>`;
+    plot.innerHTML=svg;
+    panel.querySelectorAll('[data-arctan-disk]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.arctanDisk===selectedDisk)));
+    $('arctan-status').dataset.kind=g.polesInside?'outside':'inside';
+    $('arctan-status').textContent={inner:'Every smaller disk is free of poles',critical:'The nearest poles lie on the boundary',outer:'A larger Taylor disk would contain poles'}[selectedDisk];
+    $('arctan-caption').textContent={inner:'Cauchy–Taylor gives convergence on every smaller disk. Its radius can approach the critical radius as closely as desired.',critical:'The two equal distances determine the radius. The open critical disk contains neither pole; this picture does not decide convergence at individual boundary points.',outer:'At either cross, the holomorphic identity required of a Taylor sum would read zero equals one. The larger disk is impossible.'}[selectedDisk];
+    const rho=selectedDisk==='critical'?'\\sqrt{2}':tex(g.radius);
+    math(`<p>\\(a=1,\\qquad \\rho=${rho}\\)</p><p>\\(|1-i|=|1+i|=\\sqrt{2}\\)</p><p>\\(R=\\sqrt{2}\\)</p><p class="example-note">The radius follows without computing a Taylor coefficient. This geometric proof is not yet formalized in Lean.</p>`);
+    panel.dataset.mode=mode;panel.dataset.kind='radius';panel.dataset.radiusState=selectedDisk;
+  }
   function render(){
+    const shifted=mode==='shift';
+    $('arctan-example-title').textContent=shifted?'Move the expansion point':'Watch the Taylor sums';
+    $('arctan-radius-controls').hidden=!shifted;
+    $('arctan-controls').hidden=shifted;
+    $('arctan-input-presets').hidden=shifted;
+    panel.querySelector('.arctan-legend').hidden=shifted||mode==='plane';
+    if(shifted){renderShift();return;}
+
     const x=Number(input.value),n=Number(terms.value),sum=partial(x,n),value=Math.atan(x),error=Math.abs(sum-value),r=Math.abs(x);
     $('arctan-input-label').textContent=x.toFixed(2);$('arctan-terms-label').textContent=n;
     panel.querySelectorAll('[data-arctan-x]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.arctanX)===x)));
@@ -54,10 +81,11 @@
   function choose(m,manual=false){mode=m;if(manual)follow.checked=false;panel.querySelectorAll('[data-arctan-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.arctanMode===mode)));render();}
   panel.querySelectorAll('[data-arctan-mode]').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.arctanMode,true)));
   panel.querySelectorAll('[data-arctan-x]').forEach(b=>b.addEventListener('click',()=>{input.value=b.dataset.arctanX;render();}));
+  panel.querySelectorAll('[data-arctan-disk]').forEach(b=>b.addEventListener('click',()=>{selectedDisk=b.dataset.arctanDisk;render();}));
   [input,terms].forEach(e=>e.addEventListener('input',render));
   const headings=[...document.querySelectorAll('article [data-arctan-view]')];let pending=false;
   window.addEventListener('scroll',()=>{if(pending||!follow.checked||innerWidth<=1050)return;pending=true;requestAnimationFrame(()=>{pending=false;let h=headings[0];for(const x of headings)if(x.getBoundingClientRect().top<innerHeight*.45)h=x;if(h&&h.dataset.arctanView!==mode)choose(h.dataset.arctanView);});},{passive:true});
   const media=matchMedia('(max-width:1050px)'),page=document.querySelector('.page'),anchor=document.querySelector('article > .classic-scope');
   function place(){if(media.matches)anchor.after(panel);else page.append(panel);}media.addEventListener('change',place);place();render();
-  window.ArctanExample={partial,term,get mode(){return mode;}};
+  window.ArctanExample={partial,term,diskGeometry,get mode(){return mode;}};
 })();
