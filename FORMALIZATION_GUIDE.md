@@ -1,5 +1,15 @@
 # Formalization Guide
 
+**Arctangent function-theory showcase (2026-09-23).**
+`ArctanTaylor.convergence_iff` classifies convergence of the ordinary Taylor
+partial sums for every rational input: exactly the closed unit interval.
+`geometric_converges` reuses the independent series-to-geometric-arctangent
+bridge; `not_converges` excludes every represented limit outside the interval.
+The new reader centers function theory and real-variable Taylor behavior.
+Arbitrary represented inputs and the general Cauchy-to-Taylor chain remain
+explicit obligations. See [the theorem ledger](docs/ARCTAN_TAYLOR.md).
+
+
 **Polygonal Cauchy foundation (2026-09-23).**
 `ComplexAnalysis` proves finite triangle cancellation, valid computed Cauchy
 contours from explicit local complex-affine approximation data, and a local
@@ -62,6 +72,17 @@ inside the proof. Do not weaken a requested exact theorem to rational inputs,
 symbolic differentiation, or an uninstantiated certificate interface merely
 because those are the current APIs. If a bridge is missing, identify and prove
 it; report intermediate progress as such until the exact theorem is established.
+
+### Point-set topology boundary
+
+The user permits abstract point-set topology from Mathlib when the selected
+imports and their transitive dependencies do not introduce Mathlib real or
+complex numbers. This is an exception to the earlier blanket import ban.
+Audit the actual pinned dependency closure before adding an import. Keep
+number computations, analytic estimates, and contour algorithms on the
+project foundation. Mathlib's standard `Path` uses the real unit interval;
+continue using finite polygonal paths unless a permitted replacement is
+constructed. No Mathlib topology import is introduced by the arctangent work.
 
 ### State integration formulas as definite integrals
 

@@ -24,8 +24,10 @@ jobs:
         with:
           auto-config: false
           build: true
-          build-args: "ComputableAnalysis ComputableAnalysis.PiProofs ComputableAnalysis.Basel.RealZeta"
+          build-args: "ComputableAnalysis ComputableAnalysis.PiProofs ComputableAnalysis.Basel.RealZeta ComputableAnalysis.ArctanTaylorConvergence"
           test: false
           lint: false
       - name: Audit the Basel and Euler proof dependencies
         run: lake env lean scripts/check_basel.lean
+      - name: Audit arctangent Taylor convergence and divergence
+        run: lake env lean scripts/check_arctan_taylor.lean

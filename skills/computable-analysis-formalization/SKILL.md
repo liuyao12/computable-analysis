@@ -22,11 +22,15 @@ for any definite-integral task, especially one with non-rational breakpoints.
 
 ## Keep the foundation boundary
 
-- Import only project modules. Do not import `Mathlib`, `Std`, or `Batteries`.
+- Use project modules for the analytic foundation. The user permits abstract
+  Mathlib point-set topology only after auditing its transitive imports to
+  exclude Mathlib real and complex numbers. This supersedes the earlier
+  blanket Mathlib ban; it does not authorize Mathlib real analysis.
 - Use rational numbers, finite lists, natural recursion, and explicitly stated
   rational inequalities.
 - Do not appeal to a completed real number, compactness, least upper bounds,
-  topology, or an unstated choice of a real point.
+  or an unstated choice of a real point to bypass the computable estimates.
+  Abstract topology is permitted under the import boundary above.
 - Represent a non-rational value by a `RealRaw` interval algorithm and prove
   `RealRaw.Valid` before consuming it as a computation.
 - Prove equality of implementations with `RealRaw.Equiv`, not by treating raw
