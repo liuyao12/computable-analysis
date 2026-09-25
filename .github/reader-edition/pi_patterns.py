@@ -74,6 +74,44 @@ def approximation(method,n):
         imaginaryDisplay=[outward(total[1]-radius),outward(total[1]+radius,True)],
         radiusDisplay=error_label(radius))
 
+def log_one_approximation(n):
+    if n<1: raise ValueError('Positive term count required')
+    q=(Q(1,5),Q(2,5));square=mul(q,q);p=q;total=(Q(0),Q(0))
+    for k in range(n):
+        c=Q(2,2*k+1);total=add(total,(c*p[0],c*p[1]));p=mul(p,square)
+    value=4*total[1];radius=Q(5,(2*n+1)*5**n)
+    return dict(terms=n,logReal=str(total[0]),logImaginary=str(total[1]),
+        pi=str(value),radius=str(radius),box=[str(value-radius),str(value+radius)],
+        display=[outward(value-radius),outward(value+radius,True)])
+
+def log_one_record():
+    return dict(argument=['1','1'],seriesInput=['1/5','2/5'],
+        branch='Log(1)=0 on the right half-plane; straight segment to 1+i',
+        rows=[log_one_approximation(n) for n in (4,8,16,32)],
+        usesNumericalPi=False,usesNumericalLog=False,usesNumericalArctan=False,
+        newLeanProofsClaimed=False)
+
+def check_log_one(r):
+    q=(Q(1,5),Q(2,5))
+    assert div(add(ONE,q),(1-q[0],-q[1]))==(Q(1),Q(1))
+    assert q[0]**2+q[1]**2==Q(1,5)<Q(1,4)
+    for row in r['rows']:
+        n=row['terms'];v=Q(row['pi']);bound=Q(row['radius'])
+        assert bound==8*Q(1,2)*Q(1,5)**n/((2*n+1)*(1-Q(1,5)))
+        assert v==2*Q(approximation('symmetric-log',n)['imaginary'])
+        # Compare independently computed Machin enclosures; not a proof of the tail.
+        independent=approximation('machin',n)
+        assert max(v-bound,2*Q(independent['imaginaryBox'][0]))<=min(v+bound,2*Q(independent['imaginaryBox'][1]))
+        assert list(map(Q,row['box']))==[v-bound,v+bound]
+        assert Q(row['display'][0])<=v-bound<=v+bound<=Q(row['display'][1])
+        later=log_one_approximation(n+1)
+        assert abs(v-Q(later['pi']))<=bound+Q(later['radius'])
+
+def log_one_fragment(r):
+    rows=''.join('<tr><td>\\('+str(x['terms'])+'\\)</td><td>\\(['+',\\;'.join(x['display'])+']\\)</td><td>\\(\\frac{5}{'+str(2*x['terms']+1)+r'\cdot5^{'+str(x['terms'])+'}}\\)</td></tr>' for x in r['rows'])
+    table='<div class="pi-calculation-scroll"><table class="log-one-table"><caption>Rational enclosures of \\(\\pi\\)</caption><thead><tr><th>\\(N\\)</th><th>Enclosure</th><th>Error bound</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+    return (Path(__file__).resolve().parents[2]/'book/pi-log-one-plus-i.html').read_text().replace('__LOG_ONE_TABLE__',table)
+
 def newton_data(count=8):
     a=Q(1,2);out=[]
     for k in range(1,count+1):
@@ -87,6 +125,7 @@ def record():
     return dict(version=2,formulaCount=11,newtonFactored=True,machinCard=True,
         branch='Principal value at i, obtained from Log(1)=0 with no extra winding',
         logarithmMethods=['local-taylor','symmetric-log','machin'],
+        logOnePlusI=log_one_record(),
         comparisons=[approximation(m,n) for n in (4,8,16,32,64)
             for m in ('local-taylor','symmetric-log','machin')],
         newtonTerms=newton_data(),usesNumericalPi=False,usesNumericalLog=False,
@@ -96,6 +135,7 @@ def record():
 
 def check_arithmetic(r):
     assert r==record()
+    check_log_one(r['logOnePlusI'])
     product=ONE
     for w in TAYLOR_INPUTS:
         assert w[0]**2+w[1]**2<=Q(1,4)
@@ -183,8 +223,10 @@ def install(site,revision):
     newton=gallery.select_one('#pi-segment');newton.select_one('.formula').replace_with(parse(formula(NEWTON_MAIN)).div)
     newton.select_one('.pi-formula-details').replace_with(parse('<details class="pi-formula-details"><summary>Coefficient pattern and tail bound</summary>'+NEWTON_DETAIL+'</details>').details)
     gallery.select_one('#pi-leibniz').insert_after(machin_card())
-    log=gallery.select_one('#pi-logarithm');log.select_one('p').string='One branch, several independently evaluated series.'
+    log=gallery.select_one('#pi-logarithm');log.select_one('p').string='The imaginary part of a logarithm computes an angle.'
+    log.select_one('p').insert_after(parse(formula(r'\pi=4\,\operatorname{Im}\operatorname{Log}(1+i).')).div)
     log.select_one('.pi-formula-details').replace_with(parse('<details class="pi-formula-details"><summary>Three ways to compute Log(i)</summary>'+log_methods(r)+'</details>').details)
+    log.select_one('.pi-formula-details').insert_before(parse(log_one_fragment(r['logOnePlusI'])).details)
     style=doc.new_tag('style',id='pi-pattern-style');style.string=CSS;doc.head.append(style)
     assert len(gallery.select('.pi-formula-card'))==11
     assert doc.find(id='rem:sources-of-raw-reals').find_next_sibling()==gallery

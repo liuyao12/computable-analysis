@@ -44,6 +44,7 @@ on:
       - 'book/fundamental-matrix/**'
       - 'book/cosine-square/**'
       - 'book/classics/**'
+      - 'book/pi-log-one-plus-i.html'
       - 'ComputableAnalysis/ComplexAnalysis/**'
       - 'ComputableAnalysis/ComplexAnalysis.lean'
       - 'scripts/check_polygonal_cauchy.lean'
@@ -435,6 +436,9 @@ jobs:
                   assert group['originalFormulasRetained'] and group['machinUsesArctanOnly']
                   assert group['oldMethodFragmentsPreserved'] and group['proofDataAndNumericsUnchanged']
                   assert report['newtonFactored'] and report['machinCard']
+                  assert len(patterns['logOnePlusI']['rows'])==4
+                  assert not patterns['logOnePlusI']['usesNumericalPi'] and not patterns['logOnePlusI']['newLeanProofsClaimed']
+                  assert 'id="pi-log-one-plus-i"' in get('/ch-foundations.html',True).decode()
                   assert patterns['logarithmMethods']==['local-taylor','symmetric-log','machin']
                   assert not patterns['usesNumericalPi'] and not patterns['usesNumericalLog']
                   assert not patterns['leanStageExecution'] and not patterns['newLeanProofsClaimed']

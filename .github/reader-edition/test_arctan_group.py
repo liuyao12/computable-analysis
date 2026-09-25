@@ -81,6 +81,9 @@ def browser(site,out,offline=False):
             visit(key)
             page.wait_for_function('document.querySelector("#pi-arctan > details").open')
             assert page.locator('#'+key).is_visible()
+        visit('pi-log-one-plus-i')
+        page.wait_for_function('document.querySelector("#pi-log-one-plus-i").open')
+        assert page.locator('#pi-log-one-plus-i .log-one-table').is_visible()
         visit('pi-arctan')
         assert page.locator('#pi-arctan > details').get_attribute('open') is None
         page.evaluate('location.hash="pi-machin"')

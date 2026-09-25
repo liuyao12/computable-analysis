@@ -15,6 +15,10 @@ def check(site):
     assert len(gallery.select('.pi-formula-card'))==11 and not gallery.select('#pi-cosine')
     assert chapter.find(id='rem:sources-of-raw-reals').find_next_sibling()==gallery
     assert 'Three ways to compute Log(i)' in gallery.select_one('#pi-logarithm').get_text()
+    assert gallery.select_one('#pi-log-one-plus-i')
+    assert len(gallery.select('#pi-log-one-plus-i .log-one-table tbody tr'))==4
+    assert not gallery.select('#pi-log-one-plus-i sup,#pi-log-one-plus-i sub')
+    assert not r['logOnePlusI']['usesNumericalPi'] and not r['logOnePlusI']['newLeanProofsClaimed']
     assert r['logarithmMethods']==['local-taylor','symmetric-log','machin']
     assert r['newtonFactored'] and r['machinCard'] and not r['usesNumericalPi'] and not r['newLeanProofsClaimed']
     for text in [r'1\cdot1\cdot3',r'2\cdot4\cdot6',r'(1/2)^7',r'2^{3k+1}k!']:
@@ -58,9 +62,9 @@ def browser_test(site,out,offline=False):
         if not offline:
             page.wait_for_function('window.MathJax && MathJax.startup && MathJax.startup.promise',timeout=60000)
             page.evaluate('() => MathJax.startup.promise')
-        for viewport in [{'width':1500,'height':1050},{'width':390,'height':850}]:
-            page.set_viewport_size(viewport);label='desktop' if viewport['width']>400 else 'mobile'
-            for card in ['pi-segment','pi-machin','pi-logarithm']:
+        for viewport in [{'width':1500,'height':1050},{'width':390,'height':850},{'width':320,'height':850}]:
+            page.set_viewport_size(viewport);label=str(viewport['width'])
+            for card in ['pi-segment','pi-machin','pi-logarithm','pi-log-one-plus-i']:
                 page.locator('#'+card+' details').evaluate_all('(els)=>els.forEach(e=>e.open=true)')
                 if not offline:page.evaluate('() => MathJax.typesetPromise([document.querySelector("#pi-computations")])')
                 page.locator('#'+card).scroll_into_view_if_needed()
@@ -74,7 +78,7 @@ def browser_test(site,out,offline=False):
         assert not errors,errors;browser.close()
     server.shutdown()
     (out/'pi-pattern-tests.json').write_text(json.dumps(dict(passed=True,formulaCount=11,newtonFactored=True,machin=True,
-        logarithmMethods=3,mathematicalRendering=not offline,structuralOnlyBrowser=offline,mobile=True,errors=errors),indent=2)+'\n')
+        logarithmMethods=3,logOnePlusI=True,mathematicalRendering=not offline,structuralOnlyBrowser=offline,mobile=True,errors=errors),indent=2)+'\n')
 
 def main():
     ap=argparse.ArgumentParser();ap.add_argument('--site',type=Path,required=True);ap.add_argument('--report',type=Path,default=Path('reader-edition-tests'));ap.add_argument('--structural-only',action='store_true');a=ap.parse_args()
