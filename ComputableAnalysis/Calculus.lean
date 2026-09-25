@@ -13353,9 +13353,8 @@ theorem piecewiseMonotoneCandidateValue_ofNondecreasing_equiv
 def ExistsPiecewiseMonotoneCandidateFor (F : FunctionOnInterval) : Prop :=
   Nonempty (PiecewiseMonotoneCandidateFor F)
 
-/-- Project-facing name for the general definite integral interface:
-construct the integral on monotone pieces and sum over a finite rational
-partition. -/
+/-- A finite-piece candidate interface. Its numerical certificates alone
+do not establish whole-cell containment for the stated integrand. -/
 abbrev GeneralCandidateFor (F : FunctionOnInterval) :=
   PiecewiseMonotoneCandidateFor F
 
@@ -13368,7 +13367,7 @@ theorem generalCandidateValue_valid (F : FunctionOnInterval)
     (generalCandidateValue F c).Valid :=
   piecewiseMonotoneCandidateValue_valid F c
 
-/-! The general finite-piece integral is also available through the common
+/-! The general finite-piece candidate is also available through the common
 `CandidateFor` interface.  This is only a representation bridge: the
 finite monotone partition and all cell certificates remain explicit inputs. -/
 def generalConstructionFor (F : FunctionOnInterval)
@@ -13380,18 +13379,18 @@ theorem generalConstructionFor_compute_eq (F : FunctionOnInterval)
     (c : GeneralCandidateFor F) :
     (generalConstructionFor F c).compute = (generalCandidateValue F c).compute := rfl
 
-theorem integralFor_generalConstructionFor_valid (F : FunctionOnInterval)
+theorem candidateValue_generalConstructionFor_valid (F : FunctionOnInterval)
     (c : GeneralCandidateFor F) :
     (Integral.candidateValue F (generalConstructionFor F c)).Valid :=
   Integral.candidateValue_valid F (generalConstructionFor F c)
 
-theorem integralFor_generalConstructionFor_equiv (F : FunctionOnInterval)
+theorem candidateValue_generalConstructionFor_equiv (F : FunctionOnInterval)
     (c : GeneralCandidateFor F) :
     (Integral.candidateValue F (generalConstructionFor F c)).Equiv
       (generalCandidateValue F c) := by
   exact RealRaw.equiv_refl _ (generalCandidateValue_valid F c)
 
-/-- The public general-integral alias agrees with the original monotone
+/-- The general candidate alias agrees with the original monotone
 construction on a one-piece partition. -/
 theorem generalCandidateValue_ofMonotone_equiv
     {F : FunctionOnInterval}
@@ -13404,7 +13403,7 @@ theorem generalCandidateValue_ofMonotone_equiv
     piecewiseMonotoneCandidateValue_ofMonotone_equiv
       (F := F) c hinterval
 
-/-- The public general-integral alias agrees with the preferred
+/-- The general candidate alias agrees with the preferred
 nondecreasing construction on a one-piece partition. -/
 theorem generalCandidateValue_ofNondecreasing_equiv
     {F : FunctionOnInterval}

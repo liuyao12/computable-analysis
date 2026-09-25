@@ -65,7 +65,7 @@ def install(site, revision):
     report = {'revision': revision, 'nativeModules': len(inventory['files']),
               'supersededChapterHashes': superseded,
               'supersessionReason': 'User-requested replacement of integral definitions by whole-chunk enclosures; earlier stage preservation reports describe their pinned source.',
-              'directLogarithmBridgeProved': False, 'generalCauchyRectangleBridgeProved': False,
+              'directReciprocalSegmentProved': True, 'directLogarithmBridgeProved': False, 'generalCauchyRectangleBridgeProved': False,
               'artifacts': {name: hashlib.sha256((site/name).read_bytes()).hexdigest() for name in changed},
               'checks': {'wholeChunkConvention': True, 'candidatesDistinguished': True}}
     (site/'reading/integral-enclosures-edition.json').write_text(json.dumps(report, indent=2)+'\n')

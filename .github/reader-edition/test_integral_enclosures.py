@@ -18,7 +18,7 @@ def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--site', type=Path, required=True); ap.add_argument('--report', type=Path, required=True)
     a = ap.parse_args(); site = a.site.resolve(); a.report.mkdir(parents=True, exist_ok=True)
     data = json.loads((site/'reading/integral-enclosures-edition.json').read_text())
-    assert all(data['checks'].values())
+    assert all(data['checks'].values()) and data['directReciprocalSegmentProved']
     assert not data['directLogarithmBridgeProved'] and not data['generalCauchyRectangleBridgeProved']
     inventory = json.loads((site/'reading/integral-inventory.json').read_text())
     assert len(inventory['files']) == data['nativeModules']

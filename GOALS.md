@@ -505,7 +505,9 @@ advertised as an analytic derivative theorem.
 
 The preferred integral API retains whole-cell range evidence. Legacy valid
 number and sampled-sum wrappers are now explicitly candidates. The original
-subinterval-copy defect and empty complex first stage are repaired. See
+subinterval-copy defect and empty complex first stage are repaired. The
+reciprocal on the unit vertical segment now has a direct nested-rectangle
+construction with a proved exact coordinate-width rate. See
 [the audit and source inventory](docs/INTEGRAL_ENCLOSURES.md).
 
 Remaining bridges: direct contour rectangles to the existing midpoint Cauchy

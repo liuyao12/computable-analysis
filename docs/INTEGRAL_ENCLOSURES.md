@@ -45,6 +45,11 @@ useful after a proved comparison to the enclosure sums.
   starting with one chunk. The old empty first stage forced zero even on an
   open segment. Constant open paths now have a validity certificate; the
   square-polynomial evaluator has a whole-box soundness theorem.
+- `VerticalReciprocalIntegral` now constructs the reciprocal integral on the
+  upward unit segment directly. It proves coordinate monotonicity, whole-chunk
+  containment, reciprocal semantics, nested dyadic sums, validity, and the exact
+  coordinate widths \(2^{-n-1}\). No logarithm value or parametrized integral
+  appears in its construction.
 - The polynomial complex endpoint calculation is now named
   `polygonalPolynomialEndpointRaw`. Finite cancellation is preserved; a
   rectangle-integral interpretation needs a separate FTC bridge.
@@ -87,8 +92,8 @@ statements are retained. The corresponding native values are now named `quadratu
 whole-chunk contour rectangles is a separate missing bridge; neither is
 silently relabelled as a proof of that bridge. The general Cauchy integral
 formula, the generic Cauchy-to-Taylor bridge, and general abelian integration
-remain open. The logarithm evaluation at the end of the vertical unit segment
-likewise still needs its exact comparison to the direct contour construction.
+remain open. The direct reciprocal integral on the vertical unit segment is now constructed;
+its exact comparison to the logarithm evaluator remains open.
 
 Historical Lean snapshots under `book/` compile against their pinned source
 and keep their historical interfaces. They are proof comparisons, not new
@@ -194,3 +199,4 @@ unclassified native module or a reintroduced weak public integral interface.
 | [ZetaReal/Series.lean](../ComputableAnalysis/ZetaReal/Series.lean) | `finite` |
 | [ZetaReal/Tests.lean](../ComputableAnalysis/ZetaReal/Tests.lean) | `support` |
 | [ComplexAnalysis/Examples.lean](../ComputableAnalysis/ComplexAnalysis/Examples.lean) | `conditional` |
+| [VerticalReciprocalIntegral.lean](../ComputableAnalysis/VerticalReciprocalIntegral.lean) | `enclosure` |

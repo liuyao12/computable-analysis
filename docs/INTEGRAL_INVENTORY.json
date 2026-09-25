@@ -1281,87 +1281,79 @@
           "declaration": "piecewiseMonotoneCellIntegral_valid"
         },
         {
-          "line": 13383,
-          "declaration": "integralFor_generalConstructionFor_valid"
-        },
-        {
-          "line": 13388,
-          "declaration": "integralFor_generalConstructionFor_equiv"
-        },
-        {
-          "line": 13629,
+          "line": 13628,
           "declaration": "ExactCellOrderPreservation.integral_average_between_bounds"
         },
         {
-          "line": 13660,
+          "line": 13659,
           "declaration": "ExactCellOrderPreservation.integral_average_overlaps_bounds"
         },
         {
-          "line": 13700,
+          "line": 13699,
           "declaration": "quadratureWeightSum"
         },
         {
-          "line": 13706,
+          "line": 13705,
           "declaration": "quadratureEvalSum"
         },
         {
-          "line": 13713,
+          "line": 13712,
           "declaration": "quadratureWeightSum_mul_le_quadratureEvalSum"
         },
         {
-          "line": 13763,
+          "line": 13762,
           "declaration": "quadratureEvalSum_le_quadratureWeightSum_mul"
         },
         {
-          "line": 13816,
+          "line": 13815,
           "declaration": "exactCellOrderPreservation_of_positive_quadrature"
         },
         {
-          "line": 16042,
+          "line": 16041,
           "declaration": "nonincreasingDarbouxScheduleCompute"
         },
         {
-          "line": 16051,
+          "line": 16050,
           "declaration": "NonincreasingDarbouxSchedule"
         },
         {
-          "line": 16074,
+          "line": 16073,
           "declaration": "nonincreasingDarbouxScheduledSchedule_widths_shrink_of_budget"
         },
         {
-          "line": 16099,
+          "line": 16098,
           "declaration": "NonincreasingDarbouxSchedule.ofScheduledEndpointOrderedOfBudget"
         },
         {
-          "line": 16130,
+          "line": 16129,
           "declaration": "NonincreasingDarbouxSchedule.ofDyadicEndpointOrderedOfBudget"
         },
         {
-          "line": 16171,
+          "line": 16170,
           "declaration": "NonincreasingDarbouxSchedule.ofAutomaticEndpointOrdered"
         },
         {
-          "line": 16209,
+          "line": 16208,
           "declaration": "nonincreasingDarbouxScheduleRaw"
         },
         {
-          "line": 16219,
+          "line": 16218,
           "declaration": "nonincreasingDarbouxScheduleRaw_valid"
         },
         {
-          "line": 16253,
+          "line": 16252,
           "declaration": "nonincreasingDarbouxScheduleConstructionFor"
         },
         {
-          "line": 16287,
+          "line": 16286,
           "declaration": "nonincreasingDarbouxScheduleIntegralFor"
         },
         {
-          "line": 16295,
+          "line": 16294,
           "declaration": "nonincreasingDarbouxScheduleIntegralFor_valid"
         },
         {
-          "line": 16303,
+          "line": 16302,
           "declaration": "nonincreasingDarbouxScheduleIntegralFor_width_le_of_tolerance"
         }
       ]
@@ -4928,12 +4920,13 @@
         {
           "line": 691,
           "declaration": "TurningBracketIntegralCompletion"
-        },
-        {
-          "line": 784,
-          "declaration": "integralFor_equiv_anchor"
         }
       ]
+    },
+    {
+      "path": "ComputableAnalysis/VerticalReciprocalIntegral.lean",
+      "role": "enclosure",
+      "declarations": []
     },
     {
       "path": "ComputableAnalysis/WiedijkScoreboard.lean",

@@ -1,3 +1,4 @@
+import ComputableAnalysis.VerticalReciprocalIntegral
 import ComputableAnalysis.IntegralEnclosureExamples
 import ComputableAnalysis.ComplexIntegralEnclosure
 
@@ -39,3 +40,16 @@ example : rotateRange ⟨⟨1,-3⟩,⟨2,-1⟩⟩ = ⟨⟨1,1⟩,⟨3,2⟩⟩ :=
 #print axioms ComplexPathIntegral.zSquared_sound
 #print axioms ComplexPathIntegral.constant_vertical_value
 #print axioms ComplexPathIntegral.constantPolygonalIntegralCertificate
+
+example : VerticalReciprocalIntegral.raw.Valid := VerticalReciprocalIntegral.raw_valid
+example (n : Nat) :
+    (VerticalReciprocalIntegral.raw.compute n).width = (1/2 : Rat)^(n+1) ∧
+    (VerticalReciprocalIntegral.raw.compute n).height = (1/2 : Rat)^(n+1) :=
+  VerticalReciprocalIntegral.unit_widths n
+example : VerticalReciprocalIntegral.raw.compute 0 =
+    ⟨⟨0,1/2⟩,⟨1/2,1⟩⟩ := by native_decide
+#print axioms VerticalReciprocalIntegral.range_contains
+#print axioms VerticalReciprocalIntegral.valueAt_reciprocal
+#print axioms VerticalReciprocalIntegral.chunk_contains
+#print axioms VerticalReciprocalIntegral.raw_valid
+#print axioms VerticalReciprocalIntegral.unit_widths

@@ -47,6 +47,7 @@ on:
       - 'book/pi-log-one-plus-i.html'
       - 'ComputableAnalysis/IntegralEnclosure*.lean'
       - 'ComputableAnalysis/ComplexIntegralEnclosure.lean'
+      - 'ComputableAnalysis/VerticalReciprocalIntegral.lean'
       - 'ComputableAnalysis/ComplexPathIntegral.lean'
       - 'ComputableAnalysis/FiniteComplexPathCertificate.lean'
       - 'docs/INTEGRAL_*'
