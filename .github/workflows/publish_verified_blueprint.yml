@@ -203,6 +203,8 @@ jobs:
         with:
           auto-config: false
           build: false
+          # Toolchain setup must not reserve CI cache keys before proofs build.
+          use-github-cache: false
           test: false
           lint: false
       - uses: actions/cache@v5
@@ -254,12 +256,17 @@ jobs:
         run: python3 .github/reader-edition/fundamental_matrix.py --site site --revision "$GITHUB_SHA"
       - name: Check exact matrix iteration, preservation, links and notebook rendering
         run: python3 .github/reader-edition/test_fundamental_matrix.py --site site --report reader-edition-tests
-      - uses: actions/cache@v5
+      # Reuse compatible Lean CI artifacts and save completed proofs before
+      # reader checks, so a presentation failure does not discard the build.
+      - name: Restore native proof build
+        id: native_cache
+        uses: actions/cache/restore@v5
         with:
-          path: .lake
-          key: leibniz-${{ hashFiles('lean-toolchain', 'lake-manifest.json', 'ComputableAnalysis/**/*.lean') }}
+          path: ./.lake
+          key: native-proofs-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ hashFiles('ComputableAnalysis.lean', 'ComputableAnalysis/**/*.lean') }}
           restore-keys: |
-            leibniz-
+            native-proofs-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+            lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-
       - name: Check the Leibniz proofs, transmutation and dependency separation
         run: |
           set -euo pipefail
@@ -270,6 +277,12 @@ jobs:
           lake env .lake/packages/checkdecls/.lake/build/bin/checkdecls blueprint/lean_decls | tee leibniz-reports/declarations.log
           python3 blueprint/checks/check_foundation_imports.py | tee leibniz-reports/imports.log
           python3 blueprint/checks/check_special_function_identities.py | tee leibniz-reports/identities.log
+      - name: Preserve the successful native proof build
+        if: steps.native_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: ./.lake
+          key: ${{ steps.native_cache.outputs.cache-primary-key }}
       - name: Publish the checked geometric transmutation reconstruction
         run: python3 .github/reader-edition/leibniz_transmutation.py --site site --revision "$GITHUB_SHA" --audit leibniz-reports/transmutation.log --closure tmp/leibniz-transmutation-closure.txt
       - name: Add only the checked Leibniz dependency note
@@ -361,6 +374,8 @@ jobs:
           lake env lean scripts/check_arctan_taylor.lean | tee arctan-taylor-reports/audit.log
       - name: Expose classical examples and verify the pinned Mathlib Basel source
         run: python3 .github/reader-edition/classic_proofs.py --site site --revision "$GITHUB_SHA" --euler-audit euler-reports/proofs.json --cauchy-audit polygonal-cauchy-reports/audit.log --arctan-audit arctan-taylor-reports/audit.log
+      - name: Prepare the enclosure page before checking incoming links
+        run: python3 .github/reader-edition/integral_enclosures.py --site site --revision "$GITHUB_SHA" --page-only
       - name: Verify classical navigation and proof comparisons in the browser
         run: python3 .github/reader-edition/test_classic_proofs.py --site site --report reader-edition-tests
       - name: Verify and publish whole-chunk integral constructions

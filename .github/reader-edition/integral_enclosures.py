@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 
 ROOT = Path(__file__).resolve().parents[2]
 
-def install(site, revision):
+def install(site, revision, page_only=False):
     assert re.fullmatch('[0-9a-f]{40}', revision)
     inventory = json.loads((ROOT/'docs/INTEGRAL_INVENTORY.json').read_text())
     repo = f'https://github.com/liuyao12/computable-analysis/blob/{revision}/'
@@ -24,9 +24,10 @@ def install(site, revision):
     if kicker: kicker.string = 'FOUNDATION'
     for selected in doc.select('#book-nav a.current'):
         selected['class'] = [c for c in selected.get('class', []) if c != 'current']
+        selected.attrs.pop('aria-current', None)
     nav = doc.select_one('#book-nav')
     link = doc.new_tag('a', href='integral-enclosures.html'); link.string = 'How integrals are constructed'
-    link['class'] = ['current']; nav.append(link)
+    link['class'] = ['current']; link['aria-current'] = 'page'; nav.append(link)
     toc = doc.select_one('.on-this-page')
     if toc:
         toc.clear()
@@ -37,6 +38,9 @@ def install(site, revision):
     if not doc.select_one('link[href="reading/classics.css"]'):
         doc.head.append(doc.new_tag('link', rel='stylesheet', href='reading/classics.css'))
     (site/'integral-enclosures.html').write_text(str(doc))
+    if page_only:
+        print('Prepared enclosure page for incoming reader links')
+        return
     changed = ['integral-enclosures.html']
     superseded = {name: hashlib.sha256((site/name).read_bytes()).hexdigest()
                   for name in ['ch-integrals.html', 'ch-complex-paths.html']}
@@ -72,5 +76,5 @@ def install(site, revision):
     print('Published enclosure convention for', len(inventory['files']), 'native modules')
 
 if __name__ == '__main__':
-    ap = argparse.ArgumentParser(); ap.add_argument('--site', type=Path, required=True); ap.add_argument('--revision', required=True)
-    a = ap.parse_args(); install(a.site, a.revision)
+    ap = argparse.ArgumentParser(); ap.add_argument('--site', type=Path, required=True); ap.add_argument('--revision', required=True); ap.add_argument('--page-only', action='store_true')
+    a = ap.parse_args(); install(a.site, a.revision, a.page_only)
