@@ -449,13 +449,15 @@ Integral.effectiveFTCConstructionFor
 Integral.effectiveFTCIntegral_equiv_endpointDifference
 ```
 
-For a public integral, certify `dF.Valid` and its domain on `[a,b]`, then use
-`FunctionOnInterval.ofRealFunRaw` and `Integral.effectiveFTCConstructionFor`.
-The raw stabilizer remains the internal value computation; clients should
-normally retain its ranges using `enclosureRealizationOfEffectiveFTC`.
+For a public enclosure integral, certify `dF.Valid` and its domain on
+\([a,b]\), then use `Integral.enclosureRealizationOfEffectiveFTC`. This retains
+the whole-cell ranges and their exact endpoint comparison. The raw stabilizer
+remains an internal value computation; `Integral.effectiveFTCConstructionFor`
+is the numerical-candidate compatibility adapter.
 
 When an endpoint identity itself must be packaged, use
-`Integral.DefiniteIdentityFor`. Pass a certified endpoint computation to the
+`Integral.EndpointComparisonFor`; that comparison alone does not define an
+integral. Pass a certified endpoint computation to the
 direct constructor for the relevant FTC certificate. Endpoint-agreement and
 stage-schedule conversion lemmas belong in `FTC`; duplicating one adapter for
 every certificate subtype is not part of the public integral API.

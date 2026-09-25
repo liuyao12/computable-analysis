@@ -40,10 +40,10 @@ boxed function.
 For a definite-integral identity from a checked derivative formula, use
 `EffectiveDerivativeBoundFTC`, then
 `FunctionOnInterval.ofRealFunRaw` and
-`Integral.effectiveFTCConstructionFor`.  The public endpoint theorem is
-`Integral.effectiveFTCIntegral_equiv_endpointDifference`.  Use
-`Integral.EndpointComparisonFor` or a dedicated finite comparison when a
-different construction already exists. Certify the whole integration segment,
+`Integral.enclosureRealizationOfEffectiveFTC`, retaining its whole-cell plan
+and endpoint `agreement`. Use `Integral.EndpointComparisonFor` or a dedicated
+finite comparison when another certified enclosure construction already exists;
+an endpoint comparison alone is not an integral construction. Certify the whole integration segment,
 including pole avoidance and valid branches, and state the result with an
 explicit base point and endpoint difference. Do not introduce a separate
 primitive notion; see the [definite-integral convention](../../../FORMALIZATION_GUIDE.md#state-integration-formulas-as-definite-integrals).

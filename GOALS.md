@@ -302,8 +302,8 @@ is open.
 
 ## Effective FTC contract
 
-For a primitive computation `F`, derivative computation `dF`, and rational
-endpoints `a ≤ b`, a provider supplies:
+For a function computation `F`, derivative computation `dF`, and rational
+endpoints \(a \le b\), a provider supplies:
 
 1. domains for `F` and `dF`;
 2. finite rational partitions;
@@ -313,8 +313,9 @@ endpoints `a ≤ b`, a provider supplies:
 6. a valid endpoint-difference computation.
 
 The library forms finite bounded sums, proves their widths shrink, stabilizes
-them against the endpoint computation, and returns an
-`Integral.ConstructionFor` whose integral is equivalent to `F(b) - F(a)`. No
+them against the endpoint computation, and uses
+`Integral.enclosureRealizationOfEffectiveFTC` to retain the whole-cell ranges
+and the exact comparison with \(F(b)-F(a)\). No
 theorem that every continuous function is integrable is needed for this
 workflow.
 

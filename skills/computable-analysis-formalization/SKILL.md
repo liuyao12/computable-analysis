@@ -109,9 +109,10 @@ that connects the runtime boxes to the intended integral value.
 
 When a derivative formula is proved, construct `EffectiveDerivativeBoundFTC`,
 restrict the certified derivative with `FunctionOnInterval.ofRealFunRaw`, and publish
-`Integral.effectiveFTCConstructionFor`.  The endpoint theorem is
-`Integral.effectiveFTCIntegral_equiv_endpointDifference`; do not stop at the
-internal stabilized raw evaluator.
+`Integral.enclosureRealizationOfEffectiveFTC`. Its `agreement` field packages
+the endpoint comparison, while its `plan` retains the whole-cell range evidence.
+The older `Integral.effectiveFTCConstructionFor` exposes a numerical candidate
+only; do not stop at that adapter or the internal stabilized raw evaluator.
 
 Do not introduce a universal integral merely because a function is bounded,
 continuous, or pointwise defined. Record a reusable pattern only when every
