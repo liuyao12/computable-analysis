@@ -500,3 +500,18 @@ Open: efficient numerical schedules, the binomial-to-log–exp bridge,
 parameter derivatives, Euler product, continuation, and the Apéry-to-$\zeta(3)$
 identification. The coefficient differential equation is formal; it is not
 advertised as an analytic derivative theorem.
+
+## Integral enclosure audit (2026-09-25)
+
+The preferred integral API retains whole-cell range evidence. Legacy valid
+number and sampled-sum wrappers are now explicitly candidates. The original
+subinterval-copy defect and empty complex first stage are repaired. The
+reciprocal on the unit vertical segment now has a direct nested-rectangle
+construction with a proved exact coordinate-width rate. See
+[the audit and source inventory](docs/INTEGRAL_ENCLOSURES.md).
+
+Remaining bridges: direct contour rectangles to the existing midpoint Cauchy
+computation and square-pole computation; the reciprocal vertical segment to
+the logarithm evaluator; generic Cauchy-to-Taylor and abelian integration.
+These are not supplied by numerical validity, finite endpoint cancellation,
+or an uninstantiated representation record.

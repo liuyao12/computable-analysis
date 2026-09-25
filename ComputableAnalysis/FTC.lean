@@ -338,19 +338,19 @@ theorem riemannComputeOfEffectiveFTC_eq_integralPlan
 theorem integral_compute_eq_riemannComputeOfEffectiveFTC
     {F dF : RealFunRaw} {a b : Rat}
     (h : EffectiveFTC F dF a b)
-    (c : Integral.Construction dF a b)
+    (c : Integral.SampleConstruction dF a b)
     (hplan : c.plan = integralPlanOfEffectiveFTC h) :
-    (Integral.integral dF a b c).compute =
+    (Integral.sampleValue dF a b c).compute =
       riemannComputeOfEffectiveFTC h := by
   funext n
-  simp [Integral.integral, Integral.Certificate.realRaw,
+  simp [Integral.sampleValue, Integral.Certificate.realRaw,
     Integral.Raw.toRealRaw, Integral.Raw.compute, Integral.algorithm,
     riemannComputeOfEffectiveFTC, integralPlanOfEffectiveFTC, hplan]
 
 theorem integral_valid_of_construction
     {f : RealFunRaw} {a b : Rat}
-    (c : Integral.Construction f a b) :
-    (Integral.integral f a b c).Valid := by
+    (c : Integral.SampleConstruction f a b) :
+    (Integral.sampleValue f a b c).Valid := by
   have hv := c.certificate.valid
   change RealRaw.ValidCompute (Integral.algorithm f a b c.plan).compute at hv
   exact hv
@@ -519,14 +519,14 @@ the same finite-stage schedule. -/
 theorem effectiveFTC_integral_equiv_scheduledEndpoint
     {F dF : RealFunRaw} {a b : Rat}
     (h : EffectiveFTC F dF a b)
-    (c : Integral.Construction dF a b)
+    (c : Integral.SampleConstruction dF a b)
     (hplan : c.plan = integralPlanOfEffectiveFTC h) :
-    (Integral.integral dF a b c).Equiv (endpointRawOfEffectiveFTC h) := by
+    (Integral.sampleValue dF a b c).Equiv (endpointRawOfEffectiveFTC h) := by
   apply RealRaw.sameStageOverlap_equiv
   intro n
   have hgood := h.good (requestedPrecision n)
   apply (RealRaw.compareAt_overlap_iff
-    (Integral.integral dF a b c) (endpointRawOfEffectiveFTC h) n n).2
+    (Integral.sampleValue dF a b c) (endpointRawOfEffectiveFTC h) n n).2
   rw [integral_compute_eq_riemannComputeOfEffectiveFTC h c hplan]
   exact hgood.1
 
@@ -542,9 +542,9 @@ theorem staticDyadicEffectiveFTC_equiv_endpoint
 theorem staticDyadicEffectiveFTC_integral_equiv_scheduledEndpoint
     {F dF : RealFunRaw} {a b : Rat}
     (h : StaticDyadicEffectiveFTC F dF a b)
-    (c : Integral.Construction dF a b)
+    (c : Integral.SampleConstruction dF a b)
     (hplan : c.plan = integralPlanOfStaticDyadicEffectiveFTC h) :
-    (Integral.integral dF a b c).Equiv
+    (Integral.sampleValue dF a b c).Equiv
       (endpointRawOfEffectiveFTC h.toEffectiveFTC) := by
   apply effectiveFTC_integral_equiv_scheduledEndpoint h.toEffectiveFTC c
   rw [← integralPlanOfStaticDyadicEffectiveFTC_eq_toEffectiveFTC h]
@@ -561,7 +561,7 @@ function `F`. -/
 theorem effectiveFTC_definiteIntegralEqualsEndpoint
     {F dF : RealFunRaw} {a b : Rat}
     (h : EffectiveFTC F dF a b)
-    (c : Integral.Construction dF a b)
+    (c : Integral.SampleConstruction dF a b)
     (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b))
     (hplan : c.plan = integralPlanOfEffectiveFTC h)
     (hscheduledEndpoint : (endpointRawOfEffectiveFTC h).Valid)
@@ -581,7 +581,7 @@ agreement. -/
 theorem effectiveFTC_definiteIntegralEqualsEndpoint_of_endpointAgreement
     {F dF : RealFunRaw} {a b : Rat}
     (h : EffectiveFTC F dF a b)
-    (c : Integral.Construction dF a b)
+    (c : Integral.SampleConstruction dF a b)
     (hplan : c.plan = integralPlanOfEffectiveFTC h)
     (endpoint :
       EndpointScheduleAgreement F a b (endpointRawOfEffectiveFTC h)) :
@@ -603,7 +603,7 @@ bridge, so callers need not manually unpack an `EndpointScheduleAgreement`.
 theorem effectiveFTC_definiteIntegralEqualsEndpoint_of_stageSchedule
     {F dF : RealFunRaw} {a b : Rat}
     (h : EffectiveFTC F dF a b)
-    (c : Integral.Construction dF a b)
+    (c : Integral.SampleConstruction dF a b)
     (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b))
     (hplan : c.plan = integralPlanOfEffectiveFTC h)
     (sigma : RealRaw.StageSchedule)
@@ -619,7 +619,7 @@ theorem effectiveFTC_definiteIntegralEqualsEndpoint_of_stageSchedule
 theorem staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint
     {F dF : RealFunRaw} {a b : Rat}
     (h : StaticDyadicEffectiveFTC F dF a b)
-    (c : Integral.Construction dF a b)
+    (c : Integral.SampleConstruction dF a b)
     (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b))
     (hplan : c.plan = integralPlanOfStaticDyadicEffectiveFTC h)
     (hscheduledEndpoint : (endpointRawOfEffectiveFTC h.toEffectiveFTC).Valid)
@@ -639,7 +639,7 @@ agreement. -/
 theorem staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint_of_endpointAgreement
     {F dF : RealFunRaw} {a b : Rat}
     (h : StaticDyadicEffectiveFTC F dF a b)
-    (c : Integral.Construction dF a b)
+    (c : Integral.SampleConstruction dF a b)
     (hplan : c.plan = integralPlanOfStaticDyadicEffectiveFTC h)
     (endpoint :
       EndpointScheduleAgreement F a b

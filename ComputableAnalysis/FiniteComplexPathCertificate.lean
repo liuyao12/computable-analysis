@@ -22,7 +22,7 @@ def polygonalLeftSumRawEntire
     (f : FunctionRaw) (hEntire : forall z, f.domain z)
     (vertices : List QComplex) (evalPrecision : Nat -> Nat) : ComplexRaw where
   compute := fun n =>
-    polygonalLeftSumEntire f hEntire vertices n (evalPrecision n)
+    polygonalLeftSumEntire f hEntire vertices (2 ^ n) (evalPrecision n)
 
 structure PolygonalLeftSumCertificate
     (f : FunctionRaw) (hEntire : forall z, f.domain z)
@@ -68,26 +68,8 @@ theorem constantClosedPolygonalLeftSumCertificate
       (start :: (vertices ++ [start])) evalPrecision := by
   apply PolygonalLeftSumCertificate.of_stage_eq_point QComplex.zero
   intro n
-  cases n with
-  | zero =>
-      have hzero : forall xs : List QComplex,
-          polygonalLeftSumEntire (FunctionRaw.exact (fun _ => c))
-            (by intro z; change True; trivial) xs 0 (evalPrecision 0) =
-            QBox.zero := by
-        intro xs
-        induction xs with
-        | nil => rfl
-        | cons x xs ih =>
-            cases xs with
-            | nil => rfl
-            | cons y ys =>
-                simp [polygonalLeftSumEntire, segmentLeftSumEntire,
-                  segmentLeftSum, QBox.zero, QBox.add, QBox.point,
-                  QComplex.zero, QComplex.add, ih] <;> grind
-      exact hzero _
-  | succ n =>
-      exact polygonalLeftSum_constant_closed c start vertices (n + 1)
-        (Nat.succ_pos n) (evalPrecision (n + 1))
+  exact polygonalLeftSum_constant_closed c start vertices (2 ^ n)
+    (Nat.two_pow_pos n) (evalPrecision n)
 
 theorem polygonalLeftSumRawEntire_valid
     {f : FunctionRaw} {hEntire : forall z, f.domain z}
@@ -119,9 +101,8 @@ structure PolygonalLeftSumIntegralOverlapCertificate
       ((polygonalIntegralRawEntire boxFunction vertices).compute n)
 
 /-! Open paths expose a small but important initialization boundary: both raw
-evaluators return the zero box at stage zero.  The following interface records
-their genuine positive-stage agreement without pretending that an arbitrary
-open-path displacement overlaps the zero initialization. -/
+evaluators now start with one chunk. This legacy successor-stage interface
+remains available; the constant open-path theorem below covers every stage. -/
 
 structure PolygonalLeftSumIntegralPositiveStageAgreement
     (f : FunctionRaw) (hEntire : forall z, f.domain z)
@@ -145,16 +126,16 @@ def constantPolygonalLeftSumIntegralPositiveStageAgreement
   let anchor := polygonalConstantDifferentialDisplacement c start vertices
   refine { anchor := anchor, left_succ := ?_, interval_succ := ?_ }
   · intro n
-    exact polygonalLeftSum_constant c start vertices (n + 1)
-      (Nat.succ_pos n) (evalPrecision (n + 1))
+    exact polygonalLeftSum_constant c start vertices (2 ^ (n + 1))
+      (Nat.two_pow_pos (n + 1)) (evalPrecision (n + 1))
   · intro n
     exact polygonalIntegralBoxEntire_constant c start vertices
-      (n + 1) (Nat.succ_pos n)
+      (2 ^ (n + 1)) (Nat.two_pow_pos (n + 1))
 
 theorem PolygonalLeftSumIntegralOverlapCertificate.of_stage_eq_point
     {f : FunctionRaw} {hEntire : forall z, f.domain z}
     {boxFunction : EntireBoxFunctionRaw} {vertices : List QComplex}
-    {evalPrecision : Nat -> Nat} (anchor : QComplex)
+    {evalPrecision : Nat -> Nat} (anchor : QComplex) (hsound : boxFunction.Sound)
     (hleft : forall n,
       (polygonalLeftSumRawEntire f hEntire vertices evalPrecision).compute n =
         QBox.point anchor)
@@ -165,7 +146,7 @@ theorem PolygonalLeftSumIntegralOverlapCertificate.of_stage_eq_point
       evalPrecision := by
   refine
     { left_sum := PolygonalLeftSumCertificate.of_stage_eq_point anchor hleft
-      interval_integral := PolygonalIntegralCertificate.of_stage_eq_point anchor
+      interval_integral := PolygonalIntegralCertificate.of_stage_eq_point anchor hsound
         hinterval
       overlap := ?_ }
   intro n
@@ -238,61 +219,26 @@ theorem constantClosedPolygonalLeftSumIntegralOverlapCertificate
       (FunctionRaw.exact (fun _ => c))
       (by intro z; change True; trivial) (constantBoxFunction c)
       (start :: (vertices ++ [start])) evalPrecision := by
-  have hleft : forall n,
-      (polygonalLeftSumRawEntire (FunctionRaw.exact (fun _ => c))
-        (by intro z; change True; trivial)
-        (start :: (vertices ++ [start])) evalPrecision).compute n =
-        QBox.point QComplex.zero := by
-    intro n
-    cases n with
-    | zero =>
-        have hzero : forall xs : List QComplex,
-            polygonalLeftSumEntire (FunctionRaw.exact (fun _ => c))
-              (by intro z; change True; trivial) xs 0 (evalPrecision 0) =
-              QBox.zero := by
-          intro xs
-          induction xs with
-          | nil => rfl
-          | cons x xs ih =>
-              cases xs with
-              | nil => rfl
-              | cons y ys =>
-                  simp [polygonalLeftSumEntire, segmentLeftSumEntire,
-                    segmentLeftSum, QBox.zero, QBox.add, QBox.point,
-                    QComplex.zero, QComplex.add, ih] <;> grind
-        exact hzero _
-    | succ n =>
-        exact polygonalLeftSum_constant_closed c start vertices (n + 1)
-          (Nat.succ_pos n) (evalPrecision (n + 1))
-  have hinterval : forall n,
-      (polygonalIntegralRawEntire (constantBoxFunction c)
-        (start :: (vertices ++ [start]))).compute n =
-        QBox.point QComplex.zero := by
-    intro n
-    cases n with
-    | zero =>
-        have hzero : forall xs : List QComplex,
-            polygonalIntegralBoxEntire (constantBoxFunction c) xs 0 =
-              QBox.zero := by
-          intro xs
-          induction xs with
-          | nil => rfl
-          | cons x xs ih =>
-              cases xs with
-              | nil => rfl
-              | cons y ys =>
-                  rw [polygonalIntegralBoxEntire]
-                  rw [ih]
-                  simp [polygonalIntegralBoxEntire, segmentIntegralBoxEntire,
-                    subsegmentIntegralBox, constantBoxFunction, QBox.zero,
-                    QBox.add, QBox.point, QComplex.zero, QComplex.add] <;>
-                    grind
-        exact hzero _
-    | succ n =>
-        exact polygonalIntegralBoxEntire_constant_closed c start vertices
-          (n + 1) (Nat.succ_pos n)
-  exact PolygonalLeftSumIntegralOverlapCertificate.of_stage_eq_point
-    QComplex.zero hleft hinterval
+  apply PolygonalLeftSumIntegralOverlapCertificate.of_stage_eq_point
+    QComplex.zero (constantBoxFunction_sound c)
+  · intro n
+    exact polygonalLeftSum_constant_closed c start vertices (2 ^ n)
+      (Nat.two_pow_pos n) (evalPrecision n)
+  · intro n
+    exact polygonalIntegralBoxEntire_constant_closed c start vertices (2 ^ n)
+      (Nat.two_pow_pos n)
+
+/-- Open paths now have the same valid enclosure computation at stage zero
+as at every later stage; no zero-chunk initialization is used. -/
+theorem constantPolygonalIntegralCertificate
+    (c start : QComplex) (vertices : List QComplex) :
+    PolygonalIntegralCertificate (constantBoxFunction c) (start :: vertices) := by
+  apply PolygonalIntegralCertificate.of_stage_eq_point
+    (polygonalConstantDifferentialDisplacement c start vertices)
+    (constantBoxFunction_sound c)
+  intro n
+  exact polygonalIntegralBoxEntire_constant c start vertices (2 ^ n)
+    (Nat.two_pow_pos n)
 
 /-! The direct finite exactness theorem for a closed polygonal path. -/
 theorem finiteConstantDifferentialExactness_closed

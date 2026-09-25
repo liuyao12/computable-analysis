@@ -7,7 +7,7 @@ A mesh depth and evaluation precision are computed separately. On each
 leaf triangle, the error is at most `epsilon * 2^(-depth)`. The first-order
 error, perimeter, and number of cells scale respectively by `1/2`, `1/2`,
 and `4`, so their product is independent of depth. Taking epsilon to zero
-proves an exact contour identity. A Lipschitz derivative is not required.
+proves an exact quadrature identity. A Lipschitz derivative is not required.
 -/
 namespace ComputableAnalysis.ComplexAnalysis
 open QComplex
@@ -39,7 +39,7 @@ theorem Triangle.first_order_bound (t : Triangle) (f : QComplex → QComplex)
 
 /-- Executable analytic data: meshes may refine arbitrarily slowly or
 quickly; the error schedule controls both function evaluation and the local
-first-order remainder. No assertion about contour integrals is assumed. -/
+first-order remainder. No assertion about quadrature integrals is assumed. -/
 structure CauchyData (t : Triangle) (F : QComplex → ComplexRaw) where
   depth : Nat → Nat
   precision : Nat → QComplex → Nat
@@ -53,7 +53,7 @@ structure CauchyData (t : Triangle) (F : QComplex → ComplexRaw) where
   models : ∀ n, t.FirstOrderModels (sample F precision n)
     (CertifiedComplexApproximation.rate bound n) (depth n)
 
-def CauchyData.contour {t : Triangle} {F : QComplex → ComplexRaw}
+def CauchyData.quadrature {t : Triangle} {F : QComplex → ComplexRaw}
     (c : CauchyData t F) : ComplexRaw :=
   CertifiedComplexApproximation.raw (fun n => t.sum (sample F c.precision n) (c.depth n))
     (c.bound*t.perimeter)
@@ -78,22 +78,22 @@ private theorem CauchyData.zero_enclosed {t : Triangle} {F : QComplex → Comple
   rw [add_neg_self_cert] at h
   exact h
 
-theorem CauchyData.contour_valid {t : Triangle} {F : QComplex → ComplexRaw}
-    (c : CauchyData t F) : c.contour.Valid :=
+theorem CauchyData.quadrature_valid {t : Triangle} {F : QComplex → ComplexRaw}
+    (c : CauchyData t F) : c.quadrature.Valid :=
   CertifiedComplexApproximation.valid (Rat.mul_nonneg c.bound_nonneg t.perimeter_nonneg)
     (ComplexRaw.ofQComplex_valid zero) c.zero_enclosed
 
 /-- Exact Cauchy theorem for an effective uniform first-order modulus. -/
 theorem CauchyData.cauchy {t : Triangle} {F : QComplex → ComplexRaw}
-    (c : CauchyData t F) : c.contour.Equiv (ComplexRaw.ofQComplex zero) :=
+    (c : CauchyData t F) : c.quadrature.Equiv (ComplexRaw.ofQComplex zero) :=
   CertifiedComplexApproximation.equiv_anchor (Rat.mul_nonneg c.bound_nonneg t.perimeter_nonneg)
     (ComplexRaw.ofQComplex_valid zero) c.zero_enclosed
 
 /-- A common represented value, independently of mesh and sample choices. -/
 theorem CauchyData.independent {t : Triangle} {F G : QComplex → ComplexRaw}
-    (c : CauchyData t F) (d : CauchyData t G) : c.contour.Equiv d.contour :=
-  ComplexRaw.equiv_trans c.contour_valid (ComplexRaw.ofQComplex_valid zero)
-    d.contour_valid c.cauchy (ComplexRaw.equiv_symm d.cauchy)
+    (c : CauchyData t F) (d : CauchyData t G) : c.quadrature.Equiv d.quadrature :=
+  ComplexRaw.equiv_trans c.quadrature_valid (ComplexRaw.ofQComplex_valid zero)
+    d.quadrature_valid c.cauchy (ComplexRaw.equiv_symm d.cauchy)
 
 /-- Quantitative quadratic models instantiate the general first-order API. -/
 theorem Triangle.models_first_order (t : Triangle) (f : QComplex → QComplex)
@@ -182,7 +182,7 @@ structure ChainData (triangles : List Triangle) (F : QComplex → ComplexRaw) wh
   models : ∀ n t, t ∈ triangles → t.FirstOrderModels (sample F precision n)
     (CertifiedComplexApproximation.rate bound n) (depth n)
 
-def ChainData.contour {ts : List Triangle} {F : QComplex → ComplexRaw}
+def ChainData.quadrature {ts : List Triangle} {F : QComplex → ComplexRaw}
     (c : ChainData ts F) : ComplexRaw :=
   CertifiedComplexApproximation.raw (fun n => chainSum ts (sample F c.precision n) (c.depth n))
     (c.bound*chainPerimeter ts)
@@ -204,13 +204,13 @@ private theorem ChainData.encloses_zero {ts : List Triangle} {F : QComplex → C
   rw [add_neg_self_cert] at h
   exact h
 
-theorem ChainData.contour_valid {ts : List Triangle} {F : QComplex → ComplexRaw}
-    (c : ChainData ts F) : c.contour.Valid :=
+theorem ChainData.quadrature_valid {ts : List Triangle} {F : QComplex → ComplexRaw}
+    (c : ChainData ts F) : c.quadrature.Valid :=
   CertifiedComplexApproximation.valid (Rat.mul_nonneg c.bound_nonneg (chainPerimeter_nonneg ts))
     (ComplexRaw.ofQComplex_valid zero) c.encloses_zero
 
 theorem ChainData.cauchy {ts : List Triangle} {F : QComplex → ComplexRaw}
-    (c : ChainData ts F) : c.contour.Equiv (ComplexRaw.ofQComplex zero) :=
+    (c : ChainData ts F) : c.quadrature.Equiv (ComplexRaw.ofQComplex zero) :=
   CertifiedComplexApproximation.equiv_anchor (Rat.mul_nonneg c.bound_nonneg (chainPerimeter_nonneg ts))
     (ComplexRaw.ofQComplex_valid zero) c.encloses_zero
 

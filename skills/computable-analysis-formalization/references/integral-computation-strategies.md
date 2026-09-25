@@ -9,8 +9,9 @@ its validity and rate certificate, and a theorem identifying that evaluator
 with the displayed integral or endpoint expression.
 
 Start with `ComputableAnalysis.Calculus`. Use
-`Integral.ConstructionFor` as an interface for a particular construction,
-not as evidence that an arbitrary integrand is integrable. Keep an endpoint
+`Integral.EnclosureConstructionFor` for a particular whole-cell sum, and
+`Integral.EnclosureRealizationFor` for a certified alternate evaluator.
+`Integral.CandidateFor` records numerical validity only. Keep an endpoint
 identity, a change-of-variables comparison, or another semantic bridge
 separate from the raw interval computation.
 
@@ -36,10 +37,10 @@ machinery. See the [governing policy](../../../FORMALIZATION_GUIDE.md#computable
 
 | Shape of the integrand | Construct | Typical proof obligation |
 | --- | --- | --- |
-| Checked identity \(F\prime=f\) | `EffectiveDerivativeBoundFTC` then `Integral.effectiveFTCConstructionFor` | Prove finite derivative bounds, interval-domain validity, and the endpoint bridge |
-| Monotone on one rational interval | `MonotoneConstructionFor` or `NondecreasingConstructionFor` | Prove the declared order and the rectangle-width schedule |
+| Checked identity \(F\prime=f\) | `EffectiveDerivativeBoundFTC` then `Integral.enclosureRealizationOfEffectiveFTC` | Prove finite derivative bounds, interval-domain validity, and the endpoint bridge |
+| Monotone on one rational interval | `MonotoneCandidateFor` or `NondecreasingCandidateFor` | Prove the declared order and the rectangle-width schedule |
 | Rational-Lipschitz on `[0,1]` | `IntegralIdentities.LipschitzDyadic` | Prove a rational Lipschitz constant and the dyadic error bound |
-| Monotone on finitely many rational pieces | `PiecewiseMonotoneConstructionFor` | Prove order independently on every piece and combine their boxes |
+| Monotone on finitely many rational pieces | `PiecewiseMonotoneCandidateFor` | Prove order independently on every piece and combine their boxes |
 | Finite monotone decomposition with non-rational turns | `TurningPointBracket` plus `TurningBracketIntegralCandidate` | Supply one shrinking rational bracket per turn, monotone-piece certificates, and a range bound for every gap |
 | Substitution, symmetry, or integration by parts | A literal finite mesh comparison | Prove the finite algebra and error terms; do not cite a future general theorem |
 
@@ -72,7 +73,7 @@ unresolved gaps.
    stagewise rational bracket `[ell_n, r_n]`; prove `raw.Valid`, containment
    in `[a,b]`, and shrinking width.
 3. At stage `n`, construct every outer integral on the rational endpoints
-   selected by its adjacent brackets.  Supply `MonotoneConstructionFor` for
+   selected by its adjacent brackets.  Supply `MonotoneCandidateFor` for
    each restricted `FunctionOnInterval`; these constructions may depend on
    `n`.
 4. Choose a fixed rational value interval `B=[L,U]` for every unresolved
@@ -141,3 +142,13 @@ equivalence theorem to be identified.
 - Reusing monotonicity across the unresolved bracket.
 - Presenting a finite integration-by-parts or substitution identity as a
   general theorem before its partition-error argument exists.
+
+## Direct complex chunks
+
+Subdivide the actual polygonal segment. Enclose all value rectangles on each
+chunk, multiply by its oriented complex displacement, and sum. Multiplication
+by the upward unit direction rotates the rectangle and swaps which corners
+supply its bounds. No real-parameter derivative is part of this definition.
+A coordinate substitution or sampled contour rule needs a finite comparison
+with these sums. Soundness and convergence are separate obligations;
+`PolygonalIntegralCertificate` now records both.

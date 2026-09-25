@@ -77,6 +77,20 @@ for any definite-integral task, especially one with non-rational breakpoints.
 
 ## Treat integrals as particular computations
 
+Use whole-chunk outer enclosures as the defining finite sums. Prove the
+particular function's coordinate monotonicity or range bounds, then multiply
+by chunk lengths or finite complex displacements. Pointwise samples alone
+are not ranges. Geometrically subdivide straight complex segments; a real
+parameter is optional comparison data, not their integral definition.
+
+`Integral.EnclosureConstructionFor` retains the real range proofs;
+`EnclosureRealizationFor` permits an endpoint or accelerated evaluator only
+after its enclosure comparison. `CandidateFor` and `SampleConstruction`
+certify numerical values only. Never promote them by validity alone. Read
+[the native integral audit](../../docs/INTEGRAL_ENCLOSURES.md) when migrating
+a legacy client.
+
+
 Interpret a request for a primitive as an exact definite-integral identity
 \(\int_a^x f(t)\,dt \simeq F(x)-F(a)\), or a normalized expression
 \(G_a(x)\) with \(G_a(a)\simeq 0\). Do not introduce a separate primitive

@@ -1,7 +1,7 @@
 import ComputableAnalysis.ComplexAnalysis.Polygon
 
 /-! Concrete analytic certificates: the Cauchy theorem has nonconstant
-clients and does not consume an assumed contour-vanishing certificate. -/
+clients and does not consume an assumed quadrature-vanishing certificate. -/
 namespace ComputableAnalysis.ComplexAnalysis
 open QComplex
 
@@ -106,7 +106,7 @@ def Triangle.squareCertificate (t : Triangle) : t.Certificate squareRaw where
     exact t.square_models n
 
 theorem square_cauchy (t : Triangle) :
-    (t.contour squareRaw t.squareCertificate.precision t.squareCertificate.error).Equiv
+    (t.quadrature squareRaw t.squareCertificate.precision t.squareCertificate.error).Equiv
       (ComplexRaw.ofQComplex zero) := t.cauchy squareRaw t.squareCertificate
 
 /-- Any valid represented constant, including an irrational complex value. -/

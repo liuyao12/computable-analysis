@@ -1,6 +1,9 @@
 <details class="pi-formula-details" id="pi-log-one-plus-i"><summary>Arctangent inside a complex logarithm</summary>
-<p>Use the branch of the logarithm with \(\operatorname{Log}(1)=0\) on the right half-plane. Along the straight segment \(z(t)=1+it\), where \(0\le t\le1\),</p>
-<div class="formula">\[\frac{dz}{z}=\frac{i\,dt}{1+it}=\frac{t+i}{1+t^2}\,dt.\]</div>
+<p>Subdivide the upward segment from \(1\) to \(1+i\) directly. On a chunk from \(1+ia\) to \(1+ib\), where \(0\le a\le b\le1\), the two coordinates of the reciprocal decrease. Its outer value rectangle is</p>
+<div class="formula">\[B_{a,b}=\left[\frac1{1+b^2},\frac1{1+a^2}\right]+i\left[-\frac{b}{1+b^2},-\frac{a}{1+a^2}\right].\]</div>
+<p>Multiply by the chunk displacement \(i(b-a)\), then add the contribution rectangles. Dyadic subdivision makes them nested; at level \(n\), each coordinate width is \(2^{-n-1}\). These rectangles define this contour integral. The endpoint coordinates label the chunks; no parametrized-curve integral is assumed.</p>
+<p>Once constructed, identify the value using the logarithm branch with \(\operatorname{Log}(1)=0\) on the right half-plane. The finite identity</p>
+<div class="formula">\[\frac{i}{1+it}=\frac{t+i}{1+t^2}\]</div>
 <p>Taking real and imaginary parts of the same integral gives</p>
 <div class="formula">\[\begin{aligned}\operatorname{Log}(1+i)&=\int_{[1,1+i]}\frac{dz}{z}\\&=\int_0^1\frac{t\,dt}{1+t^2}+i\int_0^1\frac{dt}{1+t^2}\\&=\frac12\log 2+\frac{i\pi}{4}.\end{aligned}\]</div>
 <p>Thus the arctangent integral gives \(\pi/4\), and</p>
@@ -17,6 +20,6 @@
 <p>The following intervals are computed with exact rational arithmetic, then rounded outwards. No numerical value of \(\pi\), logarithm, or arctangent is supplied to the computation.</p>
 __LOG_ONE_TABLE__
 <p>This uses one of the two symmetric series in the existing \(\operatorname{Log}(i)\) computation below. Their imaginary parts agree term by term, so the finite approximations to \(\pi\) agree exactly after scaling. The single-series formula computes that same angle with one symmetric-series evaluation.</p>
-<p class="pi-calculation-status">Mathematical derivation and an executable rational computation; this new logarithm-to-geometric-arctangent identity has not yet been checked as an end-to-end Lean theorem. Existing proof audits are unchanged.</p>
+<p class="pi-calculation-status">Mathematical derivation and an executable rational computation; this new logarithm-to-geometric-arctangent identity has not yet been checked as an end-to-end Lean theorem. The direct reciprocal-segment enclosure, nesting, and exact width bound are now checked in Lean; the logarithm comparison remains open; see the <a href="integral-enclosures.html">integral audit</a>.</p>
 <p><a href="https://dlmf.nist.gov/4.2#i">Logarithm branches and contour definition</a> · <a href="https://dlmf.nist.gov/4.6">Logarithm series</a> · <a href="arctan-taylor.html">Where the arctangent Taylor series converges</a></p>
 </details>

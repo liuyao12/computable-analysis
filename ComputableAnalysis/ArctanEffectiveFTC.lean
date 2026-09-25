@@ -831,14 +831,14 @@ def arctanKernelOnUnit : FunctionOnInterval :=
     (by intro _x _hx; trivial) (RealFunRaw.exact_valid _)
 
 def arctanEffectiveFTCConstruction :
-    Integral.ConstructionFor arctanKernelOnUnit := by
+    Integral.CandidateFor arctanKernelOnUnit := by
   unfold arctanKernelOnUnit
   exact Integral.effectiveFTCConstructionFor arctanEffectiveFTCData
     (RealFunRaw.exact_valid _) (by intro _x _hx; trivial)
     arctanEffectiveFTCEndpointValid
 
 theorem arctanEffectiveFTCIntegral_equiv_endpointDifference :
-    (Integral.integralFor arctanKernelOnUnit
+    (Integral.candidateValue arctanKernelOnUnit
       arctanEffectiveFTCConstruction).Equiv
       (endpointDifferenceRaw arctanPrimitiveRaw 0 1
         arctanEffectiveFTCEndpointValid) := by
@@ -853,7 +853,7 @@ non-polynomial FTC conclusion: the rectangle integral of the rational kernel
 is the quarter-turn angle, without introducing a standard real number. -/
 
 theorem arctanEffectiveFTCIntegral_equiv_arctanGeom_one :
-    (Integral.integralFor arctanKernelOnUnit
+    (Integral.candidateValue arctanKernelOnUnit
       arctanEffectiveFTCConstruction).Equiv
       (ArctanGeometry.arctanGeom (1 : Rat)) := by
   have hprimitive : arctanPrimitiveRaw.Valid := arctanPrimitiveRaw_valid
@@ -921,9 +921,9 @@ theorem arctanEffectiveFTCIntegral_equiv_arctanGeom_one :
         (x := (1 : Rat)) (by native_decide) (by native_decide)) n
     constructor <;> grind [Rat.sub_eq_add_neg]
   have hI :
-      (Integral.integralFor arctanKernelOnUnit
+      (Integral.candidateValue arctanKernelOnUnit
         arctanEffectiveFTCConstruction).Valid :=
-    Integral.integralFor_valid _ _
+    Integral.candidateValue_valid _ _
   have hsubValid :
       ((arctanPrimitiveRaw.apply hprimitive (1 : Rat) hone) -
           (arctanPrimitiveRaw.apply hprimitive (0 : Rat) hzero)).Valid := by
@@ -944,7 +944,7 @@ theorem arctanEffectiveFTCIntegral_equiv_arctanGeom_one :
     ArctanGeometry.arctanGeom_valid_on_unit
       (x := (1 : Rat)) (by native_decide) (by native_decide)
   have hIToSub :
-      (Integral.integralFor arctanKernelOnUnit
+      (Integral.candidateValue arctanKernelOnUnit
         arctanEffectiveFTCConstruction).Equiv
         ((arctanPrimitiveRaw.apply hprimitive (1 : Rat) hone) -
           (arctanPrimitiveRaw.apply hprimitive (0 : Rat) hzero)) :=

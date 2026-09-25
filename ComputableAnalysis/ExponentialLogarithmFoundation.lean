@@ -33,7 +33,7 @@ theorem effectiveFTC_exp_on_unit :
 /-- The stabilized unit-exponential integral is the power-series value at one
 minus the rational value at zero. -/
 theorem integral_exp_on_unit_eq_exp_one_sub_one :
-    (Integral.integralFor ExpProofs.uniformExpOnUnit
+    (Integral.candidateValue ExpProofs.uniformExpOnUnit
       ExpProofs.uniformExpOnUnitStabilizedConstruction).Equiv
       ((expPowerSeries (1 : Rat)) - RealRaw.ofRat 1) :=
   ExpProofs.uniformExpOnUnitStabilizedIntegral_equiv_powerSeries_one_sub_one

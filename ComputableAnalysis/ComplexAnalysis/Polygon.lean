@@ -5,8 +5,8 @@ import ComputableAnalysis.Series
 /-!
 # Polygonal quadrature and finite Cauchy cancellation
 
-The contour evaluator reads actual midpoint samples. Four-way subdivision
-cancels interior edges exactly. No contour integral or vanishing conclusion
+The quadrature evaluator reads actual midpoint samples. Four-way subdivision
+cancels interior edges exactly. No quadrature integral or vanishing conclusion
 is a field of the local analytic certificate.
 -/
 namespace ComputableAnalysis.ComplexAnalysis
@@ -213,17 +213,17 @@ theorem Triangle.perimeter_nonneg (t : Triangle) : 0 ≤ t.perimeter := by
   unfold Triangle.perimeter
   grind only
 
-/-- A computable contour samples a represented function at rational points.
+/-- A computable quadrature samples a represented function at rational points.
 The precision selector is executable data, not a choice extracted from Prop. -/
 def sample (F : QComplex → ComplexRaw) (precision : Nat → QComplex → Nat)
     (n : Nat) (z : QComplex) : QComplex := ((F z).compute (precision n z)).center
 
-def Triangle.contour (t : Triangle) (F : QComplex → ComplexRaw)
+def Triangle.quadrature (t : Triangle) (F : QComplex → ComplexRaw)
     (precision : Nat → QComplex → Nat) (E : Rat) : ComplexRaw :=
   CertifiedComplexApproximation.raw (fun n => t.sum (sample F precision n) n) (E*t.perimeter)
 
 /-- The analytic hypothesis concerns local affine remainders of the actual
-samples, not contour sums. Irrational function values are permitted. -/
+samples, not quadrature sums. Irrational function values are permitted. -/
 structure Triangle.Certificate (t : Triangle) (F : QComplex → ComplexRaw) where
   precision : Nat → QComplex → Nat
   error : Rat
@@ -252,27 +252,27 @@ private theorem Triangle.encloses_zero (t : Triangle) (F : QComplex → ComplexR
   rw [add_neg_self_cert] at h
   exact h
 
-theorem Triangle.contour_valid (t : Triangle) (F : QComplex → ComplexRaw)
-    (c : t.Certificate F) : (t.contour F c.precision c.error).Valid :=
+theorem Triangle.quadrature_valid (t : Triangle) (F : QComplex → ComplexRaw)
+    (c : t.Certificate F) : (t.quadrature F c.precision c.error).Valid :=
   CertifiedComplexApproximation.valid (Rat.mul_nonneg c.error_nonneg t.perimeter_nonneg)
     (ComplexRaw.ofQComplex_valid zero) (t.encloses_zero F c)
 
 /-- Exact computed Cauchy theorem, derived from local analytic error data. -/
 theorem Triangle.cauchy (t : Triangle) (F : QComplex → ComplexRaw)
     (c : t.Certificate F) :
-    (t.contour F c.precision c.error).Equiv (ComplexRaw.ofQComplex zero) :=
+    (t.quadrature F c.precision c.error).Equiv (ComplexRaw.ofQComplex zero) :=
   CertifiedComplexApproximation.equiv_anchor (Rat.mul_nonneg c.error_nonneg t.perimeter_nonneg)
     (ComplexRaw.ofQComplex_valid zero) (t.encloses_zero F c)
 
 /-- Internal choices of evaluation precision and error majorants do not
-change the represented contour value. -/
-theorem Triangle.contour_independent (t : Triangle) (F G : QComplex → ComplexRaw)
+change the represented quadrature value. -/
+theorem Triangle.quadrature_independent (t : Triangle) (F G : QComplex → ComplexRaw)
     (c : t.Certificate F) (d : t.Certificate G) :
-    (t.contour F c.precision c.error).Equiv (t.contour G d.precision d.error) :=
-  ComplexRaw.equiv_trans (t.contour_valid F c) (ComplexRaw.ofQComplex_valid zero)
-    (t.contour_valid G d) (t.cauchy F c) (ComplexRaw.equiv_symm (t.cauchy G d))
+    (t.quadrature F c.precision c.error).Equiv (t.quadrature G d.precision d.error) :=
+  ComplexRaw.equiv_trans (t.quadrature_valid F c) (ComplexRaw.ofQComplex_valid zero)
+    (t.quadrature_valid G d) (t.cauchy F c) (ComplexRaw.equiv_symm (t.cauchy G d))
 
-/-- A concrete check: conjugation does not satisfy the holomorphic contour
+/-- A concrete check: conjugation does not satisfy the holomorphic quadrature
 conclusion on the unit right triangle. -/
 def unitTriangle : Triangle := ⟨zero, one, ⟨0,1⟩⟩
 

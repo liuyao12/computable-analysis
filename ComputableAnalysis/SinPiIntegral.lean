@@ -3420,12 +3420,12 @@ def ArctanSinPiConstruction.onHalf
 
 def ArctanSinPiConstruction.halfIntegral
     (S : ArctanSinPiConstruction)
-    (c : Integral.Construction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2)) : RealRaw :=
-  Integral.integral S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2) c
+    (c : Integral.SampleConstruction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2)) : RealRaw :=
+  Integral.sampleValue S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2) c
 
 theorem ArctanSinPiConstruction.halfIntegral_valid
     (S : ArctanSinPiConstruction)
-    (c : Integral.Construction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2)) :
+    (c : Integral.SampleConstruction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2)) :
     (S.halfIntegral c).Valid := by
   exact FTC.integral_valid_of_construction c
 
@@ -3439,7 +3439,7 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_endpoint_of_staticFTC
     (F : RealFunRaw)
     (h : StaticDyadicEffectiveFTC F S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2))
-    (c : Integral.Construction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2))
+    (c : Integral.SampleConstruction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2))
     (hplan : c.plan = FTC.integralPlanOfStaticDyadicEffectiveFTC h)
     (endpoint : FTC.EndpointScheduleAgreement F 0 ((1 : Rat) / 2)
       (FTC.endpointRawOfEffectiveFTC h.toEffectiveFTC)) :
@@ -3458,7 +3458,7 @@ structure HalfIntegralReciprocalPiCertificate
   primitive : RealFunRaw
   ftc : StaticDyadicEffectiveFTC primitive S.onHalf.toRealFunRaw
     0 ((1 : Rat) / 2)
-  integral : Integral.Construction S.onHalf.toRealFunRaw
+  integral : Integral.SampleConstruction S.onHalf.toRealFunRaw
     0 ((1 : Rat) / 2)
   integral_plan : integral.plan = FTC.integralPlanOfStaticDyadicEffectiveFTC ftc
   endpoint : FTC.EndpointScheduleAgreement primitive 0 ((1 : Rat) / 2)
@@ -3669,7 +3669,7 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_canonicalSineEndpointIntegral
     (S : ArctanSinPiConstruction)
     (h : StaticDyadicEffectiveFTC S.canonicalPrimitive
       S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2))
-    (c : Integral.Construction S.onHalf.toRealFunRaw
+    (c : Integral.SampleConstruction S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2))
     (hplan : c.plan = FTC.integralPlanOfStaticDyadicEffectiveFTC h)
     (endpoint : FTC.EndpointScheduleAgreement S.canonicalPrimitive
@@ -3686,7 +3686,7 @@ structure CanonicalHalfIntegralReciprocalPiCertificate
   ftc : StaticDyadicEffectiveFTC
     S.canonicalPrimitive S.onHalf.toRealFunRaw
     0 ((1 : Rat) / 2)
-  integral : Integral.Construction S.onHalf.toRealFunRaw
+  integral : Integral.SampleConstruction S.onHalf.toRealFunRaw
     0 ((1 : Rat) / 2)
   integral_plan : integral.plan = FTC.integralPlanOfStaticDyadicEffectiveFTC ftc
   endpoint : FTC.EndpointScheduleAgreement
@@ -3703,7 +3703,7 @@ def CanonicalHalfIntegralReciprocalPiCertificate.ofTangentEndpoints
     (ftc : StaticDyadicEffectiveFTC
       S.canonicalPrimitive S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2))
-    (integral : Integral.Construction S.onHalf.toRealFunRaw
+    (integral : Integral.SampleConstruction S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2))
     (integral_plan : integral.plan =
       FTC.integralPlanOfStaticDyadicEffectiveFTC ftc)
@@ -4549,13 +4549,13 @@ def tangentPullbackDensityOnUnit : FunctionOnInterval :=
 density.  Every stage is a finite rational Darboux computation; no completed
 real integral is imported or used. -/
 def tangentPullbackIntegral : RealRaw :=
-  Integral.integralFor tangentPullbackDensityOnUnit
+  Integral.candidateValue tangentPullbackDensityOnUnit
     (IntegralIdentities.LipschitzDyadic.construction
       tangentPullbackDensity 20 tangentPullbackDensity_lipschitz_on_unit)
 
 theorem tangentPullbackIntegral_valid :
     tangentPullbackIntegral.Valid := by
-  exact Integral.integralFor_valid tangentPullbackDensityOnUnit
+  exact Integral.candidateValue_valid tangentPullbackDensityOnUnit
     (IntegralIdentities.LipschitzDyadic.construction
       tangentPullbackDensity 20 tangentPullbackDensity_lipschitz_on_unit)
 
@@ -4896,7 +4896,7 @@ work a single transport theorem rather than a second copy of the value proof.
 -/
 theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_tangentChart
     (S : ArctanSinPiConstruction)
-    (c : Integral.Construction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2))
+    (c : Integral.SampleConstruction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2))
     (htransport : (S.halfIntegral c).Equiv tangentChartIntegral) :
     (S.halfIntegral c).Equiv reciprocalPiRaw := by
   exact RealRaw.equiv_trans (S.halfIntegral_valid c)
@@ -4910,7 +4910,7 @@ an opaque real-number equality: a future proof may establish it by transporting
 the finitely many cells and their rational endpoint bounds. -/
 structure ArctanSinPiConstruction.TangentChartTransport
     (S : ArctanSinPiConstruction)
-    (c : Integral.Construction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2)) where
+    (c : Integral.SampleConstruction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2)) where
   stage_overlap : forall n,
     QInterval.Overlaps
       ((S.halfIntegral c).compute n)
@@ -4924,7 +4924,7 @@ upper bounds can be filled by the finite tangent-chart calculation. -/
 
 structure ArctanSinPiConstruction.TangentChartCommonWitness
     (S : ArctanSinPiConstruction)
-    (c : Integral.Construction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2)) where
+    (c : Integral.SampleConstruction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2)) where
   witness : Nat -> Rat
   sine_lo_le : forall n,
     ((S.halfIntegral c).compute n).lo <= witness n
@@ -4937,7 +4937,7 @@ structure ArctanSinPiConstruction.TangentChartCommonWitness
 
 theorem ArctanSinPiConstruction.TangentChartCommonWitness.to_transport
     {S : ArctanSinPiConstruction}
-    {c : Integral.Construction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2)}
+    {c : Integral.SampleConstruction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2)}
     (h : S.TangentChartCommonWitness c) :
     S.TangentChartTransport c where
   stage_overlap := by
@@ -4949,7 +4949,7 @@ theorem ArctanSinPiConstruction.TangentChartCommonWitness.to_transport
 
 theorem ArctanSinPiConstruction.TangentChartTransport.equivalent
     {S : ArctanSinPiConstruction}
-    {c : Integral.Construction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2)}
+    {c : Integral.SampleConstruction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2)}
     (h : S.TangentChartTransport c) :
     (S.halfIntegral c).Equiv tangentChartIntegral := by
   intro n
@@ -4958,14 +4958,14 @@ theorem ArctanSinPiConstruction.TangentChartTransport.equivalent
 
 theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_transport
     (S : ArctanSinPiConstruction)
-    (c : Integral.Construction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2))
+    (c : Integral.SampleConstruction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2))
     (h : S.TangentChartTransport c) :
     (S.halfIntegral c).Equiv reciprocalPiRaw :=
   S.halfIntegral_equiv_reciprocalPi_of_tangentChart c h.equivalent
 
 theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_commonWitness
     (S : ArctanSinPiConstruction)
-    (c : Integral.Construction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2))
+    (c : Integral.SampleConstruction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2))
     (h : S.TangentChartCommonWitness c) :
     (S.halfIntegral c).Equiv reciprocalPiRaw :=
   S.halfIntegral_equiv_reciprocalPi_of_transport c h.to_transport
@@ -4981,7 +4981,7 @@ theorem ArctanSinPiConstruction.tangentChartTransport_of_staticFTC
     (F : RealFunRaw)
     (h : StaticDyadicEffectiveFTC F S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2))
-    (c : Integral.Construction S.onHalf.toRealFunRaw
+    (c : Integral.SampleConstruction S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2))
     (hplan : c.plan = FTC.integralPlanOfStaticDyadicEffectiveFTC h)
     (endpoint : FTC.EndpointScheduleAgreement F 0 ((1 : Rat) / 2)
@@ -5202,16 +5202,16 @@ def halfIntegral
     (C : FunctionRawConstruction)
     (hdefined : forall x, 0 <= x -> x <= (1 : Rat) / 2 ->
       C.sinFunctionRaw.definedAt (2 * x))
-    (c : Integral.Construction
+    (c : Integral.SampleConstruction
       (sinPiOnHalf C hdefined).toRealFunRaw 0 ((1 : Rat) / 2)) : RealRaw :=
-  Integral.integral
+  Integral.sampleValue
     (sinPiOnHalf C hdefined).toRealFunRaw 0 ((1 : Rat) / 2) c
 
 theorem halfIntegral_valid
     (C : FunctionRawConstruction)
     (hdefined : forall x, 0 <= x -> x <= (1 : Rat) / 2 ->
       C.sinFunctionRaw.definedAt (2 * x))
-    (c : Integral.Construction
+    (c : Integral.SampleConstruction
       (sinPiOnHalf C hdefined).toRealFunRaw 0 ((1 : Rat) / 2)) :
     (halfIntegral C hdefined c).Valid := by
   exact FTC.integral_valid_of_construction c
@@ -5228,10 +5228,10 @@ theorem halfIntegral_equiv_of_dyadic_sample_replacement
     (C : FunctionRawConstruction)
     (hdefined : forall x, 0 <= x -> x <= (1 : Rat) / 2 ->
       C.sinFunctionRaw.definedAt (2 * x))
-    (c : Integral.Construction
+    (c : Integral.SampleConstruction
       (sinPiOnHalf C hdefined).toRealFunRaw 0 ((1 : Rat) / 2))
     (g : RealFunRaw)
-    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (cg : Integral.SampleConstruction g 0 ((1 : Rat) / 2))
     (hplan : c.plan = cg.plan)
     (hsamples : forall n k,
       k < (c.plan n).subdivisions ->
@@ -5242,7 +5242,7 @@ theorem halfIntegral_equiv_of_dyadic_sample_replacement
         (leftPoint 0 ((1 : Rat) / 2) (c.plan n).subdivisions k)
         (c.plan n).evalPrecision) :
     (halfIntegral C hdefined c).Equiv
-      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+      (Integral.sampleValue g 0 ((1 : Rat) / 2) cg) := by
   exact Integral.integral_equiv_of_plan_and_samples c cg hplan hsamples
 
 /-- The interval-overlap version of dyadic sample replacement.
@@ -5255,10 +5255,10 @@ theorem halfIntegral_equiv_of_dyadic_sample_overlap
     (C : FunctionRawConstruction)
     (hdefined : forall x, 0 <= x -> x <= (1 : Rat) / 2 ->
       C.sinFunctionRaw.definedAt (2 * x))
-    (c : Integral.Construction
+    (c : Integral.SampleConstruction
       (sinPiOnHalf C hdefined).toRealFunRaw 0 ((1 : Rat) / 2))
     (g : RealFunRaw)
-    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (cg : Integral.SampleConstruction g 0 ((1 : Rat) / 2))
     (hplan : c.plan = cg.plan)
     (hsamples : forall n k,
       k < (c.plan n).subdivisions ->
@@ -5272,7 +5272,7 @@ theorem halfIntegral_equiv_of_dyadic_sample_overlap
             (c.plan n).subdivisions k)
           (c.plan n).evalPrecision)) :
     (halfIntegral C hdefined c).Equiv
-      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+      (Integral.sampleValue g 0 ((1 : Rat) / 2) cg) := by
   exact Integral.integral_equiv_of_plan_and_sample_overlaps
     (by native_decide : (0 : Rat) <= (1 : Rat) / 2)
     c cg hplan hsamples
@@ -6263,10 +6263,10 @@ the finite facts an evaluator implementer must provide at the sampled points.
 The proof is entirely stagewise and uses the fixed equal-dyadic plan. -/
 theorem ArctanSinPiConstruction.halfIntegral_equiv_of_canonical_nestedRadical_search
     (S : ArctanSinPiConstruction)
-    (pub : Integral.Construction S.onHalf.toRealFunRaw
+    (pub : Integral.SampleConstruction S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2))
     (g : RealFunRaw)
-    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (cg : Integral.SampleConstruction g 0 ((1 : Rat) / 2))
     (hdyadic : pub.plan = Integral.staticDyadicPlan)
     (hplan : pub.plan = cg.plan)
     (hevaluator : forall n k,
@@ -6283,7 +6283,7 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_of_canonical_nestedRadical_se
             Integral.staticDyadicSubdivisions] using hk))
         (dyadicNestedRadicalStageSinAt n k) m = some u) :
     (S.halfIntegral pub).Equiv
-      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+      (Integral.sampleValue g 0 ((1 : Rat) / 2) cg) := by
   apply Integral.integral_equiv_of_plan_and_sample_overlaps
     (by native_decide : (0 : Rat) <= (1 : Rat) / 2)
     pub cg hplan
@@ -6316,10 +6316,10 @@ the stagewise overlap is used; this is useful when the geometric proof is
 more naturally stated as an induction on the nested-radical table. -/
 theorem ArctanSinPiConstruction.halfIntegral_equiv_of_nestedRadical_semantics
     (S : ArctanSinPiConstruction)
-    (pub : Integral.Construction S.onHalf.toRealFunRaw
+    (pub : Integral.SampleConstruction S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2))
     (g : RealFunRaw)
-    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (cg : Integral.SampleConstruction g 0 ((1 : Rat) / 2))
     (hdyadic : pub.plan = Integral.staticDyadicPlan)
     (hplan : pub.plan = cg.plan)
     (hevaluator : forall n k,
@@ -6337,7 +6337,7 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_of_nestedRadical_semantics
               Integral.staticDyadicSubdivisions] using hk))).Equiv
         { compute := fun _ => dyadicNestedRadicalStageSinAt n k }) :
     (S.halfIntegral pub).Equiv
-      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+      (Integral.sampleValue g 0 ((1 : Rat) / 2) cg) := by
   apply Integral.integral_equiv_of_plan_and_sample_overlaps
     (by native_decide : (0 : Rat) <= (1 : Rat) / 2)
     pub cg hplan
@@ -6362,10 +6362,10 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_of_nestedRadical_semantics
 
 theorem ArctanSinPiConstruction.halfIntegral_equiv_of_precisionAware_nestedRadical_semantics
     (S : ArctanSinPiConstruction)
-    (pub : Integral.Construction S.onHalf.toRealFunRaw
+    (pub : Integral.SampleConstruction S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2))
     (g : RealFunRaw)
-    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (cg : Integral.SampleConstruction g 0 ((1 : Rat) / 2))
     (hdyadic : pub.plan = Integral.staticDyadicPlan)
     (hplan : pub.plan = cg.plan)
     (hevaluator : forall n k,
@@ -6381,7 +6381,7 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_of_precisionAware_nestedRadic
         (dyadicHalfDomain hk)).Equiv
         (dyadicNestedRadicalSampleRaw n k)) :
     (S.halfIntegral pub).Equiv
-      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+      (Integral.sampleValue g 0 ((1 : Rat) / 2) cg) := by
   apply Integral.integral_equiv_of_plan_and_sample_overlaps
     (by native_decide : (0 : Rat) <= (1 : Rat) / 2)
     pub cg hplan
@@ -7052,10 +7052,10 @@ theorem canonical_dyadic_search_of_halfAngle_certificate_family
 
 theorem ArctanSinPiConstruction.halfIntegral_equiv_of_halfAngle_certificate_family
     (S : ArctanSinPiConstruction)
-    (pub : Integral.Construction S.onHalf.toRealFunRaw
+    (pub : Integral.SampleConstruction S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2))
     (g : RealFunRaw)
-    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (cg : Integral.SampleConstruction g 0 ((1 : Rat) / 2))
     (hdyadic : pub.plan = Integral.staticDyadicPlan)
     (hplan : pub.plan = cg.plan)
     (hevaluator : forall n k,
@@ -7071,7 +7071,7 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_of_halfAngle_certificate_fami
     (hcertificate : forall (n k : Nat) (hk : k < 2 ^ n),
       0 < k -> CanonicalDyadicHalfAngleCertificate S.inverse n k hk) :
     (S.halfIntegral pub).Equiv
-      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+      (Integral.sampleValue g 0 ((1 : Rat) / 2) cg) := by
   apply S.halfIntegral_equiv_of_canonical_nestedRadical_search
     pub g cg hdyadic hplan hevaluator
   intro n k hk
@@ -7087,10 +7087,10 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_of_halfAngle_certificate_fami
 
 theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_halfAngle_certificate_family
     (S : ArctanSinPiConstruction)
-    (pub : Integral.Construction S.onHalf.toRealFunRaw
+    (pub : Integral.SampleConstruction S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2))
     (g : RealFunRaw)
-    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (cg : Integral.SampleConstruction g 0 ((1 : Rat) / 2))
     (hdyadic : pub.plan = Integral.staticDyadicPlan)
     (hplan : pub.plan = cg.plan)
     (hevaluator : forall n k,
@@ -7105,7 +7105,7 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_halfAngle_cer
       RealRaw.zero)
     (hcertificate : forall (n k : Nat) (hk : k < 2 ^ n),
       0 < k -> CanonicalDyadicHalfAngleCertificate S.inverse n k hk)
-    (hintegral : (Integral.integral g 0 ((1 : Rat) / 2) cg).Equiv
+    (hintegral : (Integral.sampleValue g 0 ((1 : Rat) / 2) cg).Equiv
       reciprocalPiRaw) :
     (S.halfIntegral pub).Equiv reciprocalPiRaw := by
   exact RealRaw.equiv_trans
@@ -8794,10 +8794,10 @@ contract deliberately exposes only the facts needed by the dyadic integral.
 -/
 structure DyadicNestedRadicalRoute
     (S : ArctanSinPiConstruction)
-    (pub : Integral.Construction S.onHalf.toRealFunRaw
+    (pub : Integral.SampleConstruction S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2)) where
   evaluator : RealFunRaw
-  integral : Integral.Construction evaluator
+  integral : Integral.SampleConstruction evaluator
     0 ((1 : Rat) / 2)
   dyadic_plan : pub.plan = Integral.staticDyadicPlan
   same_plan : pub.plan = integral.plan
@@ -8820,10 +8820,10 @@ table, while the inverse-chart search supplies a rational witness in the
 public sine box and that table box. -/
 structure DyadicNestedRadicalRouteSearchData
     (S : ArctanSinPiConstruction)
-    (pub : Integral.Construction S.onHalf.toRealFunRaw
+    (pub : Integral.SampleConstruction S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2)) where
   evaluator : RealFunRaw
-  integral : Integral.Construction evaluator
+  integral : Integral.SampleConstruction evaluator
     0 ((1 : Rat) / 2)
   dyadic_plan : pub.plan = Integral.staticDyadicPlan
   same_plan : pub.plan = integral.plan
@@ -8859,7 +8859,7 @@ structure DyadicNestedRadicalRouteSearchData
 
 def DyadicNestedRadicalRouteSearchData.toRoute
     {S : ArctanSinPiConstruction}
-    {pub : Integral.Construction S.onHalf.toRealFunRaw
+    {pub : Integral.SampleConstruction S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2)}
     (d : DyadicNestedRadicalRouteSearchData S pub) :
     DyadicNestedRadicalRoute S pub where
@@ -8878,11 +8878,11 @@ def DyadicNestedRadicalRouteSearchData.toRoute
 
 theorem DyadicNestedRadicalRoute.public_equiv_evaluator
     {S : ArctanSinPiConstruction}
-    {pub : Integral.Construction S.onHalf.toRealFunRaw
+    {pub : Integral.SampleConstruction S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2)}
     (route : DyadicNestedRadicalRoute S pub) :
     (S.halfIntegral pub).Equiv
-      (Integral.integral route.evaluator 0 ((1 : Rat) / 2) route.integral) := by
+      (Integral.sampleValue route.evaluator 0 ((1 : Rat) / 2) route.integral) := by
   exact Integral.integral_equiv_of_plan_and_sample_overlaps
     (by native_decide : (0 : Rat) <= (1 : Rat) / 2)
     pub route.integral route.same_plan route.sample_overlap
@@ -8894,22 +8894,22 @@ with the uneven tangent-chart computation. -/
 
 theorem DyadicNestedRadicalRoute.integral_equiv_reciprocalPi
     {S : ArctanSinPiConstruction}
-    {pub : Integral.Construction S.onHalf.toRealFunRaw
+    {pub : Integral.SampleConstruction S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2)}
     (route : DyadicNestedRadicalRoute S pub)
     (htransport : S.TangentChartTransport pub) :
-    (Integral.integral route.evaluator 0 ((1 : Rat) / 2)
+    (Integral.sampleValue route.evaluator 0 ((1 : Rat) / 2)
       route.integral).Equiv reciprocalPiRaw := by
   have hroute := route.public_equiv_evaluator
   have hpublic := htransport.equivalent
   have hnested := FTC.integral_valid_of_construction route.integral
   have hpubvalid := S.halfIntegral_valid pub
   have hroute' :
-      (Integral.integral route.evaluator 0 ((1 : Rat) / 2)
+      (Integral.sampleValue route.evaluator 0 ((1 : Rat) / 2)
         route.integral).Equiv (S.halfIntegral pub) :=
     RealRaw.equiv_symm hroute
   have hnestedChart :
-      (Integral.integral route.evaluator 0 ((1 : Rat) / 2)
+      (Integral.sampleValue route.evaluator 0 ((1 : Rat) / 2)
         route.integral).Equiv tangentChartIntegral :=
     RealRaw.equiv_trans hnested hpubvalid tangentChartIntegral_valid
       hroute' hpublic
@@ -8918,11 +8918,11 @@ theorem DyadicNestedRadicalRoute.integral_equiv_reciprocalPi
 
 theorem DyadicNestedRadicalRouteSearchData.integral_equiv_reciprocalPi
     {S : ArctanSinPiConstruction}
-    {pub : Integral.Construction S.onHalf.toRealFunRaw
+    {pub : Integral.SampleConstruction S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2)}
     (d : DyadicNestedRadicalRouteSearchData S pub)
     (htransport : S.TangentChartTransport pub) :
-    (Integral.integral d.evaluator 0 ((1 : Rat) / 2)
+    (Integral.sampleValue d.evaluator 0 ((1 : Rat) / 2)
       d.integral).Equiv reciprocalPiRaw := by
   exact d.toRoute.integral_equiv_reciprocalPi htransport
 
@@ -8950,7 +8950,7 @@ structure HalfIntegralFTCCertificate
   endpoint_valid :
     RealRaw.ValidCompute
       (endpointDifferenceCompute primitive 0 ((1 : Rat) / 2))
-  integral : Integral.Construction
+  integral : Integral.SampleConstruction
     (sinPiOnHalf C hdefined).toRealFunRaw 0 ((1 : Rat) / 2)
   /-- The integral is computed by the project's fixed equal-dyadic plan. -/
   integral_plan : integral.plan = Integral.staticDyadicPlan
@@ -8992,7 +8992,7 @@ theorem halfIntegral_equiv_reciprocalPi_of_FTC
 
 /-- Preferred-API version of the same final assembly.  Once the sine evaluator
 has an interval-regularity proof, a monotone Darboux schedule supplies the
-equal-mesh integral directly through `ConstructionFor`; the remaining FTC and
+equal-mesh integral directly through `CandidateFor`; the remaining FTC and
 endpoint facts are ordinary `RealRaw.Equiv` certificates. -/
 theorem ArctanSinPiConstruction.monotoneScheduleIntegral_equiv_reciprocalPi
     (S : ArctanSinPiConstruction)
@@ -9173,10 +9173,10 @@ theorem DyadicHalfAngleTangentEquivalenceFamily.sine_equiv
 
 theorem ArctanSinPiConstruction.halfIntegral_equiv_of_overlap_family
     (S : ArctanSinPiConstruction)
-    (pub : Integral.Construction S.onHalf.toRealFunRaw
+    (pub : Integral.SampleConstruction S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2))
     (g : RealFunRaw)
-    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (cg : Integral.SampleConstruction g 0 ((1 : Rat) / 2))
     (hdyadic : pub.plan = Integral.staticDyadicPlan)
     (hplan : pub.plan = cg.plan)
     (hevaluator : forall n k,
@@ -9195,7 +9195,7 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_of_overlap_family
           (dyadicTangentBoxAt S.inverse precision n k hk))
         ((dyadicNestedRadicalTableAt precision n k).1)) :
     (S.halfIntegral pub).Equiv
-      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+      (Integral.sampleValue g 0 ((1 : Rat) / 2) cg) := by
   apply S.halfIntegral_equiv_of_precisionAware_nestedRadical_semantics
     pub g cg hdyadic hplan hevaluator
   intro n k hk
@@ -9204,10 +9204,10 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_of_overlap_family
 
 theorem ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificate_family
     (S : ArctanSinPiConstruction)
-    (pub : Integral.Construction S.onHalf.toRealFunRaw
+    (pub : Integral.SampleConstruction S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2))
     (g : RealFunRaw)
-    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (cg : Integral.SampleConstruction g 0 ((1 : Rat) / 2))
     (hdyadic : pub.plan = Integral.staticDyadicPlan)
     (hplan : pub.plan = cg.plan)
     (hevaluator : forall n k,
@@ -9219,7 +9219,7 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificate_family
         dyadicNestedRadicalStageSinAt n k)
     (family : DyadicNestedRadicalBranchCertificateFamily S.inverse) :
     (S.halfIntegral pub).Equiv
-      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+      (Integral.sampleValue g 0 ((1 : Rat) / 2) cg) := by
   apply S.halfIntegral_equiv_of_overlap_family
     pub g cg hdyadic hplan hevaluator family.endpoint_zero
   intro n k hk hpos precision
@@ -9227,10 +9227,10 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificate_family
 
 theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_branch_certificate_family
     (S : ArctanSinPiConstruction)
-    (pub : Integral.Construction S.onHalf.toRealFunRaw
+    (pub : Integral.SampleConstruction S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2))
     (g : RealFunRaw)
-    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (cg : Integral.SampleConstruction g 0 ((1 : Rat) / 2))
     (hdyadic : pub.plan = Integral.staticDyadicPlan)
     (hplan : pub.plan = cg.plan)
     (hevaluator : forall n k,
@@ -9242,7 +9242,7 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_branch_certif
         dyadicNestedRadicalStageSinAt n k)
     (family : DyadicNestedRadicalBranchCertificateFamily S.inverse)
     (hintegral :
-      (Integral.integral g 0 ((1 : Rat) / 2) cg).Equiv reciprocalPiRaw) :
+      (Integral.sampleValue g 0 ((1 : Rat) / 2) cg).Equiv reciprocalPiRaw) :
     (S.halfIntegral pub).Equiv reciprocalPiRaw := by
   exact RealRaw.equiv_trans
     (S.halfIntegral_valid pub)
@@ -9254,10 +9254,10 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_branch_certif
 
 theorem ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificates
     (S : ArctanSinPiConstruction)
-    (pub : Integral.Construction S.onHalf.toRealFunRaw
+    (pub : Integral.SampleConstruction S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2))
     (g : RealFunRaw)
-    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (cg : Integral.SampleConstruction g 0 ((1 : Rat) / 2))
     (hdyadic : pub.plan = Integral.staticDyadicPlan)
     (hplan : pub.plan = cg.plan)
     (hevaluator : forall n k,
@@ -9285,7 +9285,7 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificates
       (hupper : 2 ^ n < k) (hk : k < 2 ^ (n + 1)),
       DyadicReflectedHalfAngleCertificate S.inverse precision n k hupper hk) :
     (S.halfIntegral pub).Equiv
-      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+      (Integral.sampleValue g 0 ((1 : Rat) / 2) cg) := by
   apply S.halfIntegral_equiv_of_overlap_family
     pub g cg hdyadic hplan hevaluator ht0
   intro n k hk hpos precision
@@ -9297,10 +9297,10 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificates
 
 theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_branch_certificates
     (S : ArctanSinPiConstruction)
-    (pub : Integral.Construction S.onHalf.toRealFunRaw
+    (pub : Integral.SampleConstruction S.onHalf.toRealFunRaw
       0 ((1 : Rat) / 2))
     (g : RealFunRaw)
-    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (cg : Integral.SampleConstruction g 0 ((1 : Rat) / 2))
     (hdyadic : pub.plan = Integral.staticDyadicPlan)
     (hplan : pub.plan = cg.plan)
     (hevaluator : forall n k,
@@ -9328,7 +9328,7 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_branch_certif
       (hupper : 2 ^ n < k) (hk : k < 2 ^ (n + 1)),
       DyadicReflectedHalfAngleCertificate S.inverse precision n k hupper hk)
     (hintegral :
-      (Integral.integral g 0 ((1 : Rat) / 2) cg).Equiv reciprocalPiRaw) :
+      (Integral.sampleValue g 0 ((1 : Rat) / 2) cg).Equiv reciprocalPiRaw) :
     (S.halfIntegral pub).Equiv reciprocalPiRaw := by
   have hpub := S.halfIntegral_equiv_of_branch_certificates
     pub g cg hdyadic hplan hevaluator ht0 zero_overlap

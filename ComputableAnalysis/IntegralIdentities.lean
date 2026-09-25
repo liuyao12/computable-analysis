@@ -104,12 +104,12 @@ theorem toRealFunRaw_stageSchedule_sample_overlap
 theorem integral_equiv_of_stageSchedule
     (F : FunctionOnInterval) (sigma : RealRaw.StageSchedule)
     (hab : F.lower <= F.upper)
-    (cf : Integral.Construction F.toRealFunRaw F.lower F.upper)
-    (cg : Integral.Construction
+    (cf : Integral.SampleConstruction F.toRealFunRaw F.lower F.upper)
+    (cg : Integral.SampleConstruction
       (F.stageSchedule sigma).toRealFunRaw F.lower F.upper)
     (hplan : cf.plan = cg.plan) :
-    (Integral.integral F.toRealFunRaw F.lower F.upper cf).Equiv
-      (Integral.integral (F.stageSchedule sigma).toRealFunRaw
+    (Integral.sampleValue F.toRealFunRaw F.lower F.upper cf).Equiv
+      (Integral.sampleValue (F.stageSchedule sigma).toRealFunRaw
         F.lower F.upper cg) := by
   apply Integral.integral_equiv_of_plan_and_sample_overlaps hab cf cg hplan
   intro n k hk
@@ -172,7 +172,7 @@ def effectiveFTCStabilizedConstructionFor
       ((endpointDifferenceRaw primitive.toRealFunRaw integrand.lower
         integrand.upper agreement.endpoint_valid).compute n).width <= radius n)
     (hradius_shrinks : ShrinksToZero radius) :
-    Integral.ConstructionFor integrand where
+    Integral.CandidateFor integrand where
   compute := (FTC.effectiveFTCStabilizedRaw h radius).compute
   certificate := by
     simpa [RealRaw.Valid] using
@@ -193,7 +193,7 @@ def effectiveFTCStabilizedIntegralFor
       ((endpointDifferenceRaw primitive.toRealFunRaw integrand.lower
         integrand.upper agreement.endpoint_valid).compute n).width <= radius n)
     (hradius_shrinks : ShrinksToZero radius) : RealRaw :=
-  Integral.integralFor integrand
+  Integral.candidateValue integrand
     (effectiveFTCStabilizedConstructionFor h agreement radius hriemann hwidth
       hradius hradius_shrinks)
 
@@ -213,7 +213,7 @@ theorem effectiveFTCStabilizedIntegralFor_valid
     (hradius_shrinks : ShrinksToZero radius) :
     (effectiveFTCStabilizedIntegralFor h agreement radius hriemann hwidth
       hradius hradius_shrinks).Valid := by
-  exact Integral.integralFor_valid integrand
+  exact Integral.candidateValue_valid integrand
     (effectiveFTCStabilizedConstructionFor h agreement radius hriemann hwidth
       hradius hradius_shrinks)
 
@@ -241,22 +241,22 @@ theorem effectiveFTCStabilizedIntegralFor_equiv_endpointDifference
 
 namespace Integral
 
-/-- A definite-integral identity for the domain-aware `ConstructionFor`
+/-- A definite-integral identity for the domain-aware `CandidateFor`
 interface.  This is the version used by hand-built interval constructions,
 where the raw computation is already a valid integral on the whole
 `FunctionOnInterval` but is not necessarily presented as the generic
-left-Riemann `Integral.Construction` plan. -/
-structure DefiniteIdentityFor
+left-Riemann `Integral.SampleConstruction` plan. -/
+structure EndpointComparisonFor
     (integrand primitive : FunctionOnInterval) where
   same_lower : primitive.lower = integrand.lower
   same_upper : primitive.upper = integrand.upper
-  construction : Integral.ConstructionFor integrand
+  construction : Integral.CandidateFor integrand
   endpoint_valid :
     RealRaw.ValidCompute
       (endpointDifferenceCompute
         primitive.toRealFunRaw integrand.lower integrand.upper)
   equivalent :
-    (Integral.integralFor integrand construction).Equiv
+    (Integral.candidateValue integrand construction).Equiv
       (endpointDifferenceRaw
         primitive.toRealFunRaw integrand.lower integrand.upper
         endpoint_valid)
@@ -265,21 +265,21 @@ structure DefiniteIdentityFor
 only provide a valid domain-aware computation and an explicit endpoint
 equivalence; it does not need to pass through one of the derivative-bound
 specializations below. -/
-def DefiniteIdentityFor.ofConstruction
+def EndpointComparisonFor.ofConstruction
     {integrand primitive : FunctionOnInterval}
     (same_lower : primitive.lower = integrand.lower)
     (same_upper : primitive.upper = integrand.upper)
-    (construction : Integral.ConstructionFor integrand)
+    (construction : Integral.CandidateFor integrand)
     (endpoint_valid :
       RealRaw.ValidCompute
         (endpointDifferenceCompute
           primitive.toRealFunRaw integrand.lower integrand.upper))
     (equivalent :
-      (Integral.integralFor integrand construction).Equiv
+      (Integral.candidateValue integrand construction).Equiv
         (endpointDifferenceRaw
           primitive.toRealFunRaw integrand.lower integrand.upper
           endpoint_valid)) :
-    DefiniteIdentityFor integrand primitive where
+    EndpointComparisonFor integrand primitive where
   same_lower := same_lower
   same_upper := same_upper
   construction := construction
@@ -290,11 +290,11 @@ def DefiniteIdentityFor.ofConstruction
 and the endpoint computation are proved separately against the same raw
 representative.  It performs only the representation-safe transitivity
 step; the anchor itself remains explicit proof data. -/
-def DefiniteIdentityFor.ofConstructionAndAnchor
+def EndpointComparisonFor.ofConstructionAndAnchor
     {integrand primitive : FunctionOnInterval}
     (same_lower : primitive.lower = integrand.lower)
     (same_upper : primitive.upper = integrand.upper)
-    (construction : Integral.ConstructionFor integrand)
+    (construction : Integral.CandidateFor integrand)
     (endpoint_valid :
       RealRaw.ValidCompute
         (endpointDifferenceCompute
@@ -302,36 +302,36 @@ def DefiniteIdentityFor.ofConstructionAndAnchor
     (anchor : RealRaw)
     (anchor_valid : anchor.Valid)
     (integral_anchor :
-      (Integral.integralFor integrand construction).Equiv anchor)
+      (Integral.candidateValue integrand construction).Equiv anchor)
     (endpoint_anchor :
       (endpointDifferenceRaw
         primitive.toRealFunRaw integrand.lower integrand.upper endpoint_valid).Equiv
         anchor) :
-    DefiniteIdentityFor integrand primitive where
+    EndpointComparisonFor integrand primitive where
   same_lower := same_lower
   same_upper := same_upper
   construction := construction
   endpoint_valid := endpoint_valid
   equivalent := by
     exact RealRaw.equiv_trans
-      (Integral.integralFor_valid integrand construction)
+      (Integral.candidateValue_valid integrand construction)
       anchor_valid
       (by simpa [endpointDifferenceRaw, RealRaw.Valid] using endpoint_valid)
       integral_anchor
       (RealRaw.equiv_symm endpoint_anchor)
 
-namespace DefiniteIdentityFor
+namespace EndpointComparisonFor
 
 theorem integral_valid
     {integrand primitive : FunctionOnInterval}
-    (I : DefiniteIdentityFor integrand primitive) :
-    (Integral.integralFor integrand I.construction).Valid :=
-  Integral.integralFor_valid integrand I.construction
+    (I : EndpointComparisonFor integrand primitive) :
+    (Integral.candidateValue integrand I.construction).Valid :=
+  Integral.candidateValue_valid integrand I.construction
 
 theorem endpoint_formula
     {integrand primitive : FunctionOnInterval}
-    (I : DefiniteIdentityFor integrand primitive) :
-    (Integral.integralFor integrand I.construction).Equiv
+    (I : EndpointComparisonFor integrand primitive) :
+    (Integral.candidateValue integrand I.construction).Equiv
       (endpointDifferenceRaw
         primitive.toRealFunRaw integrand.lower integrand.upper
         I.endpoint_valid) :=
@@ -339,7 +339,7 @@ theorem endpoint_formula
 
 theorem endpoint_raw_valid
     {integrand primitive : FunctionOnInterval}
-    (I : DefiniteIdentityFor integrand primitive) :
+    (I : EndpointComparisonFor integrand primitive) :
     (endpointDifferenceRaw
       primitive.toRealFunRaw integrand.lower integrand.upper
       I.endpoint_valid).Valid := by
@@ -351,14 +351,14 @@ rational singleton or another special-function raw); this theorem then
 transports the definite integral to that anchor. -/
 theorem integral_equiv_of_endpoint_anchor
     {integrand primitive : FunctionOnInterval}
-    (I : DefiniteIdentityFor integrand primitive)
+    (I : EndpointComparisonFor integrand primitive)
     {anchor : RealRaw}
     (hanchor_valid : anchor.Valid)
     (hendpoint :
       (endpointDifferenceRaw
         primitive.toRealFunRaw integrand.lower integrand.upper
         I.endpoint_valid).Equiv anchor) :
-    (Integral.integralFor integrand I.construction).Equiv anchor := by
+    (Integral.candidateValue integrand I.construction).Equiv anchor := by
   exact RealRaw.equiv_trans
     I.integral_valid
     I.endpoint_raw_valid
@@ -370,19 +370,19 @@ theorem integral_equiv_of_endpoint_anchor
 identity by an equivalent construction. -/
 def transportConstruction
     {integrand primitive : FunctionOnInterval}
-    (I : DefiniteIdentityFor integrand primitive)
-    (construction' : Integral.ConstructionFor integrand)
+    (I : EndpointComparisonFor integrand primitive)
+    (construction' : Integral.CandidateFor integrand)
     (hconstruction :
-      (Integral.integralFor integrand construction').Equiv
-        (Integral.integralFor integrand I.construction)) :
-    DefiniteIdentityFor integrand primitive where
+      (Integral.candidateValue integrand construction').Equiv
+        (Integral.candidateValue integrand I.construction)) :
+    EndpointComparisonFor integrand primitive where
   same_lower := I.same_lower
   same_upper := I.same_upper
   construction := construction'
   endpoint_valid := I.endpoint_valid
   equivalent := by
     exact RealRaw.equiv_trans
-      (Integral.integralFor_valid integrand construction')
+      (Integral.candidateValue_valid integrand construction')
       I.integral_valid
       I.endpoint_raw_valid
       hconstruction
@@ -392,9 +392,9 @@ def transportConstruction
 primitive have equivalent integral raw reals. -/
 theorem integral_equiv_integral
     {integrand primitive : FunctionOnInterval}
-    (I J : DefiniteIdentityFor integrand primitive) :
-    (Integral.integralFor integrand I.construction).Equiv
-      (Integral.integralFor integrand J.construction) := by
+    (I J : EndpointComparisonFor integrand primitive) :
+    (Integral.candidateValue integrand I.construction).Equiv
+      (Integral.candidateValue integrand J.construction) := by
   exact RealRaw.equiv_trans
     I.integral_valid
     I.endpoint_raw_valid
@@ -412,9 +412,9 @@ telescoping. -/
 theorem integral_add_equiv_of_endpoint_additive
     {integrandAB primitiveAB integrandBC primitiveBC integrandAC primitiveAC :
       FunctionOnInterval}
-    (Iab : DefiniteIdentityFor integrandAB primitiveAB)
-    (Ibc : DefiniteIdentityFor integrandBC primitiveBC)
-    (Iac : DefiniteIdentityFor integrandAC primitiveAC)
+    (Iab : EndpointComparisonFor integrandAB primitiveAB)
+    (Ibc : EndpointComparisonFor integrandBC primitiveBC)
+    (Iac : EndpointComparisonFor integrandAC primitiveAC)
     (hendpoint :
       ((endpointDifferenceRaw primitiveAB.toRealFunRaw
           integrandAB.lower integrandAB.upper Iab.endpoint_valid) +
@@ -422,12 +422,12 @@ theorem integral_add_equiv_of_endpoint_additive
           integrandBC.lower integrandBC.upper Ibc.endpoint_valid)).Equiv
           (endpointDifferenceRaw primitiveAC.toRealFunRaw
             integrandAC.lower integrandAC.upper Iac.endpoint_valid)) :
-    ((Integral.integralFor integrandAB Iab.construction) +
-      (Integral.integralFor integrandBC Ibc.construction)).Equiv
-        (Integral.integralFor integrandAC Iac.construction) := by
+    ((Integral.candidateValue integrandAB Iab.construction) +
+      (Integral.candidateValue integrandBC Ibc.construction)).Equiv
+        (Integral.candidateValue integrandAC Iac.construction) := by
   have hsum_integral_valid :
-      ((Integral.integralFor integrandAB Iab.construction) +
-        (Integral.integralFor integrandBC Ibc.construction)).Valid :=
+      ((Integral.candidateValue integrandAB Iab.construction) +
+        (Integral.candidateValue integrandBC Ibc.construction)).Valid :=
     RealRaw.add_valid Iab.integral_valid Ibc.integral_valid
   have hsum_endpoint_valid :
       ((endpointDifferenceRaw primitiveAB.toRealFunRaw
@@ -436,8 +436,8 @@ theorem integral_add_equiv_of_endpoint_additive
           integrandBC.lower integrandBC.upper Ibc.endpoint_valid)).Valid :=
     RealRaw.add_valid Iab.endpoint_raw_valid Ibc.endpoint_raw_valid
   have hintegral_to_endpoint :
-      ((Integral.integralFor integrandAB Iab.construction) +
-        (Integral.integralFor integrandBC Ibc.construction)).Equiv
+      ((Integral.candidateValue integrandAB Iab.construction) +
+        (Integral.candidateValue integrandBC Ibc.construction)).Equiv
           ((endpointDifferenceRaw primitiveAB.toRealFunRaw
               integrandAB.lower integrandAB.upper Iab.endpoint_valid) +
             (endpointDifferenceRaw primitiveBC.toRealFunRaw
@@ -447,8 +447,8 @@ theorem integral_add_equiv_of_endpoint_additive
       Ibc.integral_valid Ibc.endpoint_raw_valid
       Iab.equivalent Ibc.equivalent
   have hintegral_to_ac_endpoint :
-      ((Integral.integralFor integrandAB Iab.construction) +
-        (Integral.integralFor integrandBC Ibc.construction)).Equiv
+      ((Integral.candidateValue integrandAB Iab.construction) +
+        (Integral.candidateValue integrandBC Ibc.construction)).Equiv
           (endpointDifferenceRaw primitiveAC.toRealFunRaw
             integrandAC.lower integrandAC.upper Iac.endpoint_valid) :=
     RealRaw.equiv_trans
@@ -468,9 +468,9 @@ If the endpoint difference of `H` is the sum of the endpoint differences of
 theorem integral_equiv_add_of_endpoint_add
     {integrandF primitiveF integrandG primitiveG integrandH primitiveH :
       FunctionOnInterval}
-    (IF : DefiniteIdentityFor integrandF primitiveF)
-    (IG : DefiniteIdentityFor integrandG primitiveG)
-    (IH : DefiniteIdentityFor integrandH primitiveH)
+    (IF : EndpointComparisonFor integrandF primitiveF)
+    (IG : EndpointComparisonFor integrandG primitiveG)
+    (IH : EndpointComparisonFor integrandH primitiveH)
     (hendpoint :
       (endpointDifferenceRaw primitiveH.toRealFunRaw
         integrandH.lower integrandH.upper IH.endpoint_valid).Equiv
@@ -478,9 +478,9 @@ theorem integral_equiv_add_of_endpoint_add
               integrandF.lower integrandF.upper IF.endpoint_valid) +
             (endpointDifferenceRaw primitiveG.toRealFunRaw
               integrandG.lower integrandG.upper IG.endpoint_valid))) :
-    (Integral.integralFor integrandH IH.construction).Equiv
-      ((Integral.integralFor integrandF IF.construction) +
-        (Integral.integralFor integrandG IG.construction)) :=
+    (Integral.candidateValue integrandH IH.construction).Equiv
+      ((Integral.candidateValue integrandF IF.construction) +
+        (Integral.candidateValue integrandG IG.construction)) :=
   RealRaw.equiv_symm
     (integral_add_equiv_of_endpoint_additive
       IF IG IH (RealRaw.equiv_symm hendpoint))
@@ -493,17 +493,17 @@ This is the scalar analogue of
 theorem integral_scaleRat_equiv_of_endpoint_scaleRat
     {integrand primitive scaledIntegrand scaledPrimitive : FunctionOnInterval}
     {r : Rat}
-    (I : DefiniteIdentityFor integrand primitive)
-    (J : DefiniteIdentityFor scaledIntegrand scaledPrimitive)
+    (I : EndpointComparisonFor integrand primitive)
+    (J : EndpointComparisonFor scaledIntegrand scaledPrimitive)
     (hendpoint :
       (endpointDifferenceRaw scaledPrimitive.toRealFunRaw
         scaledIntegrand.lower scaledIntegrand.upper J.endpoint_valid).Equiv
         (RealRaw.scaleRat r
           (endpointDifferenceRaw primitive.toRealFunRaw
             integrand.lower integrand.upper I.endpoint_valid))) :
-    (Integral.integralFor scaledIntegrand J.construction).Equiv
+    (Integral.candidateValue scaledIntegrand J.construction).Equiv
       (RealRaw.scaleRat r
-        (Integral.integralFor integrand I.construction)) := by
+        (Integral.candidateValue integrand I.construction)) := by
   have hscaled_endpoint_valid :
       (RealRaw.scaleRat r
         (endpointDifferenceRaw primitive.toRealFunRaw
@@ -511,10 +511,10 @@ theorem integral_scaleRat_equiv_of_endpoint_scaleRat
     RealRaw.scaleRat_valid I.endpoint_raw_valid
   have hscaled_integral_valid :
       (RealRaw.scaleRat r
-        (Integral.integralFor integrand I.construction)).Valid :=
+        (Integral.candidateValue integrand I.construction)).Valid :=
     RealRaw.scaleRat_valid I.integral_valid
   have hintegral_to_scaled_endpoint :
-      (Integral.integralFor scaledIntegrand J.construction).Equiv
+      (Integral.candidateValue scaledIntegrand J.construction).Equiv
         (RealRaw.scaleRat r
           (endpointDifferenceRaw primitive.toRealFunRaw
             integrand.lower integrand.upper I.endpoint_valid)) :=
@@ -536,31 +536,31 @@ endpoint difference, it remains only to prove the endpoint differences are
 ordered. -/
 theorem integral_le_of_endpoint_le
     {integrandF primitiveF integrandG primitiveG : FunctionOnInterval}
-    (IF : DefiniteIdentityFor integrandF primitiveF)
-    (IG : DefiniteIdentityFor integrandG primitiveG)
+    (IF : EndpointComparisonFor integrandF primitiveF)
+    (IG : EndpointComparisonFor integrandG primitiveG)
     (hendpoint :
       (endpointDifferenceRaw primitiveF.toRealFunRaw
         integrandF.lower integrandF.upper IF.endpoint_valid).Le
         (endpointDifferenceRaw primitiveG.toRealFunRaw
           integrandG.lower integrandG.upper IG.endpoint_valid)) :
-    (Integral.integralFor integrandF IF.construction).Le
-      (Integral.integralFor integrandG IG.construction) := by
+    (Integral.candidateValue integrandF IF.construction).Le
+      (Integral.candidateValue integrandG IG.construction) := by
   have hleft :
-      (Integral.integralFor integrandF IF.construction).Le
+      (Integral.candidateValue integrandF IF.construction).Le
         (endpointDifferenceRaw primitiveF.toRealFunRaw
           integrandF.lower integrandF.upper IF.endpoint_valid) :=
     RealRaw.le_of_equiv IF.integral_valid IF.endpoint_raw_valid IF.equivalent
   have hright :
       (endpointDifferenceRaw primitiveG.toRealFunRaw
         integrandG.lower integrandG.upper IG.endpoint_valid).Le
-        (Integral.integralFor integrandG IG.construction) :=
+        (Integral.candidateValue integrandG IG.construction) :=
     RealRaw.le_of_equiv IG.endpoint_raw_valid IG.integral_valid
       (RealRaw.equiv_symm IG.equivalent)
   exact RealRaw.le_trans IG.endpoint_raw_valid
     (RealRaw.le_trans IF.endpoint_raw_valid hleft hendpoint)
     hright
 
-end DefiniteIdentityFor
+end EndpointComparisonFor
 
 /-- Data for a constructive integration-by-parts identity on one rational
 interval.
@@ -578,14 +578,14 @@ structure IntegrationByPartsCertificate
   same_upper_left : product.upper = left.upper
   same_lower_right : product.lower = right.lower
   same_upper_right : product.upper = right.upper
-  left_construction : Integral.ConstructionFor left
-  right_construction : Integral.ConstructionFor right
+  left_construction : Integral.CandidateFor left
+  right_construction : Integral.CandidateFor right
   endpoint_valid :
     RealRaw.ValidCompute
       (endpointDifferenceCompute product.toRealFunRaw product.lower product.upper)
   paired_sum_equiv :
-    ((Integral.integralFor left left_construction) +
-      (Integral.integralFor right right_construction)).Equiv
+    ((Integral.candidateValue left left_construction) +
+      (Integral.candidateValue right right_construction)).Equiv
         (endpointDifferenceRaw product.toRealFunRaw product.lower product.upper
           endpoint_valid)
 
@@ -594,14 +594,14 @@ namespace IntegrationByPartsCertificate
 theorem left_integral_valid
     {left right product : FunctionOnInterval}
     (C : IntegrationByPartsCertificate left right product) :
-    (Integral.integralFor left C.left_construction).Valid :=
-  Integral.integralFor_valid left C.left_construction
+    (Integral.candidateValue left C.left_construction).Valid :=
+  Integral.candidateValue_valid left C.left_construction
 
 theorem right_integral_valid
     {left right product : FunctionOnInterval}
     (C : IntegrationByPartsCertificate left right product) :
-    (Integral.integralFor right C.right_construction).Valid :=
-  Integral.integralFor_valid right C.right_construction
+    (Integral.candidateValue right C.right_construction).Valid :=
+  Integral.candidateValue_valid right C.right_construction
 
 theorem endpoint_raw_valid
     {left right product : FunctionOnInterval}
@@ -617,34 +617,34 @@ then justified by the checked interval cancellation laws. -/
 theorem left_integral_equiv_endpoint_sub_right
     {left right product : FunctionOnInterval}
     (C : IntegrationByPartsCertificate left right product) :
-    (Integral.integralFor left C.left_construction).Equiv
+    (Integral.candidateValue left C.left_construction).Equiv
       ((endpointDifferenceRaw product.toRealFunRaw product.lower product.upper
         C.endpoint_valid) -
-        (Integral.integralFor right C.right_construction)) := by
+        (Integral.candidateValue right C.right_construction)) := by
   have hleft := C.left_integral_valid
   have hright := C.right_integral_valid
   have hendpoint := C.endpoint_raw_valid
   have hsum :
-      ((Integral.integralFor left C.left_construction) +
-        (Integral.integralFor right C.right_construction)).Valid :=
+      ((Integral.candidateValue left C.left_construction) +
+        (Integral.candidateValue right C.right_construction)).Valid :=
     RealRaw.add_valid hleft hright
   have hsumSub :
-      (((Integral.integralFor left C.left_construction) +
-        (Integral.integralFor right C.right_construction)) -
-        (Integral.integralFor right C.right_construction)).Valid :=
+      (((Integral.candidateValue left C.left_construction) +
+        (Integral.candidateValue right C.right_construction)) -
+        (Integral.candidateValue right C.right_construction)).Valid :=
     RealRaw.sub_valid hsum hright
   have hendpointSub :
       ((endpointDifferenceRaw product.toRealFunRaw product.lower product.upper
         C.endpoint_valid) -
-        (Integral.integralFor right C.right_construction)).Valid :=
+        (Integral.candidateValue right C.right_construction)).Valid :=
     RealRaw.sub_valid hendpoint hright
   have hsubtract :
-      (((Integral.integralFor left C.left_construction) +
-        (Integral.integralFor right C.right_construction)) -
-        (Integral.integralFor right C.right_construction)).Equiv
+      (((Integral.candidateValue left C.left_construction) +
+        (Integral.candidateValue right C.right_construction)) -
+        (Integral.candidateValue right C.right_construction)).Equiv
           ((endpointDifferenceRaw product.toRealFunRaw product.lower product.upper
             C.endpoint_valid) -
-            (Integral.integralFor right C.right_construction)) :=
+            (Integral.candidateValue right C.right_construction)) :=
     RealRaw.sub_equiv hsum hendpoint hright hright C.paired_sum_equiv
       (RealRaw.equiv_refl _ hright)
   exact RealRaw.equiv_trans hleft hsumSub hendpointSub
@@ -657,46 +657,46 @@ the two valid integral raws. -/
 theorem right_integral_equiv_endpoint_sub_left
     {left right product : FunctionOnInterval}
     (C : IntegrationByPartsCertificate left right product) :
-    (Integral.integralFor right C.right_construction).Equiv
+    (Integral.candidateValue right C.right_construction).Equiv
       ((endpointDifferenceRaw product.toRealFunRaw product.lower product.upper
         C.endpoint_valid) -
-        (Integral.integralFor left C.left_construction)) := by
+        (Integral.candidateValue left C.left_construction)) := by
   have hleft := C.left_integral_valid
   have hright := C.right_integral_valid
   have hendpoint := C.endpoint_raw_valid
   have hsum :
-      ((Integral.integralFor left C.left_construction) +
-        (Integral.integralFor right C.right_construction)).Valid :=
+      ((Integral.candidateValue left C.left_construction) +
+        (Integral.candidateValue right C.right_construction)).Valid :=
     RealRaw.add_valid hleft hright
   have hsumComm :
-      ((Integral.integralFor right C.right_construction) +
-        (Integral.integralFor left C.left_construction)).Valid :=
+      ((Integral.candidateValue right C.right_construction) +
+        (Integral.candidateValue left C.left_construction)).Valid :=
     RealRaw.add_valid hright hleft
   have hsumSub :
-      (((Integral.integralFor right C.right_construction) +
-        (Integral.integralFor left C.left_construction)) -
-        (Integral.integralFor left C.left_construction)).Valid :=
+      (((Integral.candidateValue right C.right_construction) +
+        (Integral.candidateValue left C.left_construction)) -
+        (Integral.candidateValue left C.left_construction)).Valid :=
     RealRaw.sub_valid hsumComm hleft
   have hendpointSub :
       ((endpointDifferenceRaw product.toRealFunRaw product.lower product.upper
         C.endpoint_valid) -
-        (Integral.integralFor left C.left_construction)).Valid :=
+        (Integral.candidateValue left C.left_construction)).Valid :=
     RealRaw.sub_valid hendpoint hleft
   have hpairedComm :
-      ((Integral.integralFor right C.right_construction) +
-        (Integral.integralFor left C.left_construction)).Equiv
+      ((Integral.candidateValue right C.right_construction) +
+        (Integral.candidateValue left C.left_construction)).Equiv
           (endpointDifferenceRaw product.toRealFunRaw product.lower product.upper
             C.endpoint_valid) :=
     RealRaw.equiv_trans hsumComm hsum hendpoint
       (RealRaw.add_comm_equiv _ _ hright hleft)
       C.paired_sum_equiv
   have hsubtract :
-      (((Integral.integralFor right C.right_construction) +
-        (Integral.integralFor left C.left_construction)) -
-        (Integral.integralFor left C.left_construction)).Equiv
+      (((Integral.candidateValue right C.right_construction) +
+        (Integral.candidateValue left C.left_construction)) -
+        (Integral.candidateValue left C.left_construction)).Equiv
           ((endpointDifferenceRaw product.toRealFunRaw product.lower product.upper
             C.endpoint_valid) -
-            (Integral.integralFor left C.left_construction)) :=
+            (Integral.candidateValue left C.left_construction)) :=
     RealRaw.sub_equiv hsumComm hendpoint hleft hleft hpairedComm
       (RealRaw.equiv_refl _ hleft)
   exact RealRaw.equiv_trans hright hsumSub hendpointSub
@@ -707,43 +707,43 @@ end IntegrationByPartsCertificate
 
 /-- A definite-integral identity whose integral side is explicitly supplied by
 a monotone-integral construction. -/
-structure MonotoneDefiniteIdentityFor
+structure MonotoneEndpointComparisonFor
     (integrand primitive : FunctionOnInterval) where
   same_lower : primitive.lower = integrand.lower
   same_upper : primitive.upper = integrand.upper
-  construction : Integral.MonotoneConstructionFor integrand
+  construction : Integral.MonotoneCandidateFor integrand
   endpoint_valid :
     RealRaw.ValidCompute
       (endpointDifferenceCompute
         primitive.toRealFunRaw integrand.lower integrand.upper)
   equivalent :
-    (Integral.monotoneIntegralFor integrand construction).Equiv
+    (Integral.monotoneCandidateValue integrand construction).Equiv
       (endpointDifferenceRaw
         primitive.toRealFunRaw integrand.lower integrand.upper
         endpoint_valid)
 
-namespace MonotoneDefiniteIdentityFor
+namespace MonotoneEndpointComparisonFor
 
-def toDefiniteIdentityFor
+def toEndpointComparisonFor
     {integrand primitive : FunctionOnInterval}
-    (I : MonotoneDefiniteIdentityFor integrand primitive) :
-    DefiniteIdentityFor integrand primitive where
+    (I : MonotoneEndpointComparisonFor integrand primitive) :
+    EndpointComparisonFor integrand primitive where
   same_lower := I.same_lower
   same_upper := I.same_upper
   construction := I.construction.construction
   endpoint_valid := I.endpoint_valid
   equivalent := by
-    simpa [Integral.monotoneIntegralFor] using I.equivalent
+    simpa [Integral.monotoneCandidateValue] using I.equivalent
 
 theorem integral_valid
     {integrand primitive : FunctionOnInterval}
-    (I : MonotoneDefiniteIdentityFor integrand primitive) :
-    (Integral.monotoneIntegralFor integrand I.construction).Valid :=
-  Integral.monotoneIntegralFor_valid integrand I.construction
+    (I : MonotoneEndpointComparisonFor integrand primitive) :
+    (Integral.monotoneCandidateValue integrand I.construction).Valid :=
+  Integral.monotoneCandidateValue_valid integrand I.construction
 
 theorem endpoint_raw_valid
     {integrand primitive : FunctionOnInterval}
-    (I : MonotoneDefiniteIdentityFor integrand primitive) :
+    (I : MonotoneEndpointComparisonFor integrand primitive) :
     (endpointDifferenceRaw
       primitive.toRealFunRaw integrand.lower integrand.upper
       I.endpoint_valid).Valid := by
@@ -751,21 +751,21 @@ theorem endpoint_raw_valid
 
 theorem endpoint_formula
     {integrand primitive : FunctionOnInterval}
-    (I : MonotoneDefiniteIdentityFor integrand primitive) :
-    (Integral.monotoneIntegralFor integrand I.construction).Equiv
+    (I : MonotoneEndpointComparisonFor integrand primitive) :
+    (Integral.monotoneCandidateValue integrand I.construction).Equiv
       (endpointDifferenceRaw
         primitive.toRealFunRaw integrand.lower integrand.upper
         I.endpoint_valid) :=
   I.equivalent
 
 /-- Monotone-facing version of
-`DefiniteIdentityFor.integral_add_equiv_of_endpoint_additive`. -/
+`EndpointComparisonFor.integral_add_equiv_of_endpoint_additive`. -/
 theorem integral_add_equiv_of_endpoint_additive
     {integrandAB primitiveAB integrandBC primitiveBC integrandAC primitiveAC :
       FunctionOnInterval}
-    (Iab : MonotoneDefiniteIdentityFor integrandAB primitiveAB)
-    (Ibc : MonotoneDefiniteIdentityFor integrandBC primitiveBC)
-    (Iac : MonotoneDefiniteIdentityFor integrandAC primitiveAC)
+    (Iab : MonotoneEndpointComparisonFor integrandAB primitiveAB)
+    (Ibc : MonotoneEndpointComparisonFor integrandBC primitiveBC)
+    (Iac : MonotoneEndpointComparisonFor integrandAC primitiveAC)
     (hendpoint :
       ((endpointDifferenceRaw primitiveAB.toRealFunRaw
           integrandAB.lower integrandAB.upper Iab.endpoint_valid) +
@@ -773,23 +773,23 @@ theorem integral_add_equiv_of_endpoint_additive
           integrandBC.lower integrandBC.upper Ibc.endpoint_valid)).Equiv
           (endpointDifferenceRaw primitiveAC.toRealFunRaw
             integrandAC.lower integrandAC.upper Iac.endpoint_valid)) :
-    ((Integral.monotoneIntegralFor integrandAB Iab.construction) +
-      (Integral.monotoneIntegralFor integrandBC Ibc.construction)).Equiv
-        (Integral.monotoneIntegralFor integrandAC Iac.construction) := by
-  simpa [MonotoneDefiniteIdentityFor.toDefiniteIdentityFor,
-    Integral.monotoneIntegralFor] using
-    DefiniteIdentityFor.integral_add_equiv_of_endpoint_additive
-      Iab.toDefiniteIdentityFor Ibc.toDefiniteIdentityFor
-      Iac.toDefiniteIdentityFor hendpoint
+    ((Integral.monotoneCandidateValue integrandAB Iab.construction) +
+      (Integral.monotoneCandidateValue integrandBC Ibc.construction)).Equiv
+        (Integral.monotoneCandidateValue integrandAC Iac.construction) := by
+  simpa [MonotoneEndpointComparisonFor.toEndpointComparisonFor,
+    Integral.monotoneCandidateValue] using
+    EndpointComparisonFor.integral_add_equiv_of_endpoint_additive
+      Iab.toEndpointComparisonFor Ibc.toEndpointComparisonFor
+      Iac.toEndpointComparisonFor hendpoint
 
 /-- Monotone-facing version of
-`DefiniteIdentityFor.integral_equiv_add_of_endpoint_add`. -/
+`EndpointComparisonFor.integral_equiv_add_of_endpoint_add`. -/
 theorem integral_equiv_add_of_endpoint_add
     {integrandF primitiveF integrandG primitiveG integrandH primitiveH :
       FunctionOnInterval}
-    (IF : MonotoneDefiniteIdentityFor integrandF primitiveF)
-    (IG : MonotoneDefiniteIdentityFor integrandG primitiveG)
-    (IH : MonotoneDefiniteIdentityFor integrandH primitiveH)
+    (IF : MonotoneEndpointComparisonFor integrandF primitiveF)
+    (IG : MonotoneEndpointComparisonFor integrandG primitiveG)
+    (IH : MonotoneEndpointComparisonFor integrandH primitiveH)
     (hendpoint :
       (endpointDifferenceRaw primitiveH.toRealFunRaw
         integrandH.lower integrandH.upper IH.endpoint_valid).Equiv
@@ -797,84 +797,84 @@ theorem integral_equiv_add_of_endpoint_add
               integrandF.lower integrandF.upper IF.endpoint_valid) +
             (endpointDifferenceRaw primitiveG.toRealFunRaw
               integrandG.lower integrandG.upper IG.endpoint_valid))) :
-    (Integral.monotoneIntegralFor integrandH IH.construction).Equiv
-      ((Integral.monotoneIntegralFor integrandF IF.construction) +
-        (Integral.monotoneIntegralFor integrandG IG.construction)) := by
-  simpa [MonotoneDefiniteIdentityFor.toDefiniteIdentityFor,
-    Integral.monotoneIntegralFor] using
-    DefiniteIdentityFor.integral_equiv_add_of_endpoint_add
-      IF.toDefiniteIdentityFor IG.toDefiniteIdentityFor
-      IH.toDefiniteIdentityFor hendpoint
+    (Integral.monotoneCandidateValue integrandH IH.construction).Equiv
+      ((Integral.monotoneCandidateValue integrandF IF.construction) +
+        (Integral.monotoneCandidateValue integrandG IG.construction)) := by
+  simpa [MonotoneEndpointComparisonFor.toEndpointComparisonFor,
+    Integral.monotoneCandidateValue] using
+    EndpointComparisonFor.integral_equiv_add_of_endpoint_add
+      IF.toEndpointComparisonFor IG.toEndpointComparisonFor
+      IH.toEndpointComparisonFor hendpoint
 
 /-- Monotone-facing version of
-`DefiniteIdentityFor.integral_scaleRat_equiv_of_endpoint_scaleRat`. -/
+`EndpointComparisonFor.integral_scaleRat_equiv_of_endpoint_scaleRat`. -/
 theorem integral_scaleRat_equiv_of_endpoint_scaleRat
     {integrand primitive scaledIntegrand scaledPrimitive : FunctionOnInterval}
     {r : Rat}
-    (I : MonotoneDefiniteIdentityFor integrand primitive)
-    (J : MonotoneDefiniteIdentityFor scaledIntegrand scaledPrimitive)
+    (I : MonotoneEndpointComparisonFor integrand primitive)
+    (J : MonotoneEndpointComparisonFor scaledIntegrand scaledPrimitive)
     (hendpoint :
       (endpointDifferenceRaw scaledPrimitive.toRealFunRaw
         scaledIntegrand.lower scaledIntegrand.upper J.endpoint_valid).Equiv
         (RealRaw.scaleRat r
           (endpointDifferenceRaw primitive.toRealFunRaw
             integrand.lower integrand.upper I.endpoint_valid))) :
-    (Integral.monotoneIntegralFor scaledIntegrand J.construction).Equiv
+    (Integral.monotoneCandidateValue scaledIntegrand J.construction).Equiv
       (RealRaw.scaleRat r
-        (Integral.monotoneIntegralFor integrand I.construction)) := by
-  simpa [MonotoneDefiniteIdentityFor.toDefiniteIdentityFor,
-    Integral.monotoneIntegralFor] using
-    DefiniteIdentityFor.integral_scaleRat_equiv_of_endpoint_scaleRat
-      I.toDefiniteIdentityFor J.toDefiniteIdentityFor hendpoint
+        (Integral.monotoneCandidateValue integrand I.construction)) := by
+  simpa [MonotoneEndpointComparisonFor.toEndpointComparisonFor,
+    Integral.monotoneCandidateValue] using
+    EndpointComparisonFor.integral_scaleRat_equiv_of_endpoint_scaleRat
+      I.toEndpointComparisonFor J.toEndpointComparisonFor hendpoint
 
 /-- Monotone-facing version of
-`DefiniteIdentityFor.integral_le_of_endpoint_le`. -/
+`EndpointComparisonFor.integral_le_of_endpoint_le`. -/
 theorem integral_le_of_endpoint_le
     {integrandF primitiveF integrandG primitiveG : FunctionOnInterval}
-    (IF : MonotoneDefiniteIdentityFor integrandF primitiveF)
-    (IG : MonotoneDefiniteIdentityFor integrandG primitiveG)
+    (IF : MonotoneEndpointComparisonFor integrandF primitiveF)
+    (IG : MonotoneEndpointComparisonFor integrandG primitiveG)
     (hendpoint :
       (endpointDifferenceRaw primitiveF.toRealFunRaw
         integrandF.lower integrandF.upper IF.endpoint_valid).Le
         (endpointDifferenceRaw primitiveG.toRealFunRaw
           integrandG.lower integrandG.upper IG.endpoint_valid)) :
-    (Integral.monotoneIntegralFor integrandF IF.construction).Le
-      (Integral.monotoneIntegralFor integrandG IG.construction) := by
-  simpa [MonotoneDefiniteIdentityFor.toDefiniteIdentityFor,
-    Integral.monotoneIntegralFor] using
-    DefiniteIdentityFor.integral_le_of_endpoint_le
-      IF.toDefiniteIdentityFor IG.toDefiniteIdentityFor hendpoint
+    (Integral.monotoneCandidateValue integrandF IF.construction).Le
+      (Integral.monotoneCandidateValue integrandG IG.construction) := by
+  simpa [MonotoneEndpointComparisonFor.toEndpointComparisonFor,
+    Integral.monotoneCandidateValue] using
+    EndpointComparisonFor.integral_le_of_endpoint_le
+      IF.toEndpointComparisonFor IG.toEndpointComparisonFor hendpoint
 
-end MonotoneDefiniteIdentityFor
+end MonotoneEndpointComparisonFor
 
 /-- A definite-integral identity whose integral side is supplied by the public
 general integral interface: a finite sum over monotone pieces. -/
-structure GeneralDefiniteIdentityFor
+structure GeneralEndpointComparisonFor
     (integrand primitive : FunctionOnInterval) where
   same_lower : primitive.lower = integrand.lower
   same_upper : primitive.upper = integrand.upper
-  construction : Integral.GeneralConstructionFor integrand
+  construction : Integral.GeneralCandidateFor integrand
   endpoint_valid :
     RealRaw.ValidCompute
       (endpointDifferenceCompute
         primitive.toRealFunRaw integrand.lower integrand.upper)
   equivalent :
-    (Integral.generalIntegralFor integrand construction).Equiv
+    (Integral.generalCandidateValue integrand construction).Equiv
       (endpointDifferenceRaw
         primitive.toRealFunRaw integrand.lower integrand.upper
         endpoint_valid)
 
-namespace GeneralDefiniteIdentityFor
+namespace GeneralEndpointComparisonFor
 
 theorem integral_valid
     {integrand primitive : FunctionOnInterval}
-    (I : GeneralDefiniteIdentityFor integrand primitive) :
-    (Integral.generalIntegralFor integrand I.construction).Valid :=
-  Integral.generalIntegralFor_valid integrand I.construction
+    (I : GeneralEndpointComparisonFor integrand primitive) :
+    (Integral.generalCandidateValue integrand I.construction).Valid :=
+  Integral.generalCandidateValue_valid integrand I.construction
 
 theorem endpoint_raw_valid
     {integrand primitive : FunctionOnInterval}
-    (I : GeneralDefiniteIdentityFor integrand primitive) :
+    (I : GeneralEndpointComparisonFor integrand primitive) :
     (endpointDifferenceRaw
       primitive.toRealFunRaw integrand.lower integrand.upper
       I.endpoint_valid).Valid := by
@@ -882,8 +882,8 @@ theorem endpoint_raw_valid
 
 theorem endpoint_formula
     {integrand primitive : FunctionOnInterval}
-    (I : GeneralDefiniteIdentityFor integrand primitive) :
-    (Integral.generalIntegralFor integrand I.construction).Equiv
+    (I : GeneralEndpointComparisonFor integrand primitive) :
+    (Integral.generalCandidateValue integrand I.construction).Equiv
       (endpointDifferenceRaw
         primitive.toRealFunRaw integrand.lower integrand.upper
         I.endpoint_valid) :=
@@ -892,19 +892,19 @@ theorem endpoint_formula
 /-- Forget that the integral was built by the public general construction and
 view it through the ordinary domain-aware definite-integral identity
 interface. -/
-def toDefiniteIdentityFor
+def toEndpointComparisonFor
     {integrand primitive : FunctionOnInterval}
-    (I : GeneralDefiniteIdentityFor integrand primitive) :
-    DefiniteIdentityFor integrand primitive where
+    (I : GeneralEndpointComparisonFor integrand primitive) :
+    EndpointComparisonFor integrand primitive where
   same_lower := I.same_lower
   same_upper := I.same_upper
   construction :=
-    { compute := (Integral.generalIntegralFor integrand I.construction).compute
+    { compute := (Integral.generalCandidateValue integrand I.construction).compute
       certificate := by
         simpa [RealRaw.Valid] using I.integral_valid }
   endpoint_valid := I.endpoint_valid
   equivalent := by
-    change (Integral.generalIntegralFor integrand I.construction).Equiv
+    change (Integral.generalCandidateValue integrand I.construction).Equiv
       (endpointDifferenceRaw
         primitive.toRealFunRaw integrand.lower integrand.upper
         I.endpoint_valid)
@@ -914,19 +914,19 @@ def toDefiniteIdentityFor
 identity by an equivalent general construction. -/
 def transportConstruction
     {integrand primitive : FunctionOnInterval}
-    (I : GeneralDefiniteIdentityFor integrand primitive)
-    (construction' : Integral.GeneralConstructionFor integrand)
+    (I : GeneralEndpointComparisonFor integrand primitive)
+    (construction' : Integral.GeneralCandidateFor integrand)
     (hconstruction :
-      (Integral.generalIntegralFor integrand construction').Equiv
-        (Integral.generalIntegralFor integrand I.construction)) :
-    GeneralDefiniteIdentityFor integrand primitive where
+      (Integral.generalCandidateValue integrand construction').Equiv
+        (Integral.generalCandidateValue integrand I.construction)) :
+    GeneralEndpointComparisonFor integrand primitive where
   same_lower := I.same_lower
   same_upper := I.same_upper
   construction := construction'
   endpoint_valid := I.endpoint_valid
   equivalent := by
     exact RealRaw.equiv_trans
-      (Integral.generalIntegralFor_valid integrand construction')
+      (Integral.generalCandidateValue_valid integrand construction')
       I.integral_valid
       I.endpoint_raw_valid
       hconstruction
@@ -935,21 +935,21 @@ def transportConstruction
 /-- Promote an ordinary domain-aware definite-integral identity to the public
 general-integral interface when a general construction computes an equivalent
 raw real. -/
-def ofDefiniteIdentityFor
+def ofEndpointComparisonFor
     {integrand primitive : FunctionOnInterval}
-    (I : DefiniteIdentityFor integrand primitive)
-    (construction : Integral.GeneralConstructionFor integrand)
+    (I : EndpointComparisonFor integrand primitive)
+    (construction : Integral.GeneralCandidateFor integrand)
     (hconstruction :
-      (Integral.generalIntegralFor integrand construction).Equiv
-        (Integral.integralFor integrand I.construction)) :
-    GeneralDefiniteIdentityFor integrand primitive where
+      (Integral.generalCandidateValue integrand construction).Equiv
+        (Integral.candidateValue integrand I.construction)) :
+    GeneralEndpointComparisonFor integrand primitive where
   same_lower := I.same_lower
   same_upper := I.same_upper
   construction := construction
   endpoint_valid := I.endpoint_valid
   equivalent := by
     exact RealRaw.equiv_trans
-      (Integral.generalIntegralFor_valid integrand construction)
+      (Integral.generalCandidateValue_valid integrand construction)
       I.integral_valid
       I.endpoint_raw_valid
       hconstruction
@@ -959,9 +959,9 @@ def ofDefiniteIdentityFor
 primitive have equivalent general-integral raw reals. -/
 theorem integral_equiv_integral
     {integrand primitive : FunctionOnInterval}
-    (I J : GeneralDefiniteIdentityFor integrand primitive) :
-    (Integral.generalIntegralFor integrand I.construction).Equiv
-      (Integral.generalIntegralFor integrand J.construction) := by
+    (I J : GeneralEndpointComparisonFor integrand primitive) :
+    (Integral.generalCandidateValue integrand I.construction).Equiv
+      (Integral.generalCandidateValue integrand J.construction) := by
   exact RealRaw.equiv_trans
     I.integral_valid
     I.endpoint_raw_valid
@@ -970,13 +970,13 @@ theorem integral_equiv_integral
     (RealRaw.equiv_symm J.equivalent)
 
 /-- General-integral version of
-`DefiniteIdentityFor.integral_add_equiv_of_endpoint_additive`. -/
+`EndpointComparisonFor.integral_add_equiv_of_endpoint_additive`. -/
 theorem integral_add_equiv_of_endpoint_additive
     {integrandAB primitiveAB integrandBC primitiveBC integrandAC primitiveAC :
       FunctionOnInterval}
-    (Iab : GeneralDefiniteIdentityFor integrandAB primitiveAB)
-    (Ibc : GeneralDefiniteIdentityFor integrandBC primitiveBC)
-    (Iac : GeneralDefiniteIdentityFor integrandAC primitiveAC)
+    (Iab : GeneralEndpointComparisonFor integrandAB primitiveAB)
+    (Ibc : GeneralEndpointComparisonFor integrandBC primitiveBC)
+    (Iac : GeneralEndpointComparisonFor integrandAC primitiveAC)
     (hendpoint :
       ((endpointDifferenceRaw primitiveAB.toRealFunRaw
           integrandAB.lower integrandAB.upper Iab.endpoint_valid) +
@@ -984,26 +984,26 @@ theorem integral_add_equiv_of_endpoint_additive
           integrandBC.lower integrandBC.upper Ibc.endpoint_valid)).Equiv
           (endpointDifferenceRaw primitiveAC.toRealFunRaw
             integrandAC.lower integrandAC.upper Iac.endpoint_valid)) :
-    ((Integral.generalIntegralFor integrandAB Iab.construction) +
-      (Integral.generalIntegralFor integrandBC Ibc.construction)).Equiv
-        (Integral.generalIntegralFor integrandAC Iac.construction) := by
-  have h := DefiniteIdentityFor.integral_add_equiv_of_endpoint_additive
-    Iab.toDefiniteIdentityFor Ibc.toDefiniteIdentityFor
-    Iac.toDefiniteIdentityFor hendpoint
+    ((Integral.generalCandidateValue integrandAB Iab.construction) +
+      (Integral.generalCandidateValue integrandBC Ibc.construction)).Equiv
+        (Integral.generalCandidateValue integrandAC Iac.construction) := by
+  have h := EndpointComparisonFor.integral_add_equiv_of_endpoint_additive
+    Iab.toEndpointComparisonFor Ibc.toEndpointComparisonFor
+    Iac.toEndpointComparisonFor hendpoint
   change (RealRaw.add
-      (Integral.generalIntegralFor integrandAB Iab.construction)
-      (Integral.generalIntegralFor integrandBC Ibc.construction)).Equiv
-    (Integral.generalIntegralFor integrandAC Iac.construction)
+      (Integral.generalCandidateValue integrandAB Iab.construction)
+      (Integral.generalCandidateValue integrandBC Ibc.construction)).Equiv
+    (Integral.generalCandidateValue integrandAC Iac.construction)
   exact h
 
 /-- General-integral version of
-`DefiniteIdentityFor.integral_equiv_add_of_endpoint_add`. -/
+`EndpointComparisonFor.integral_equiv_add_of_endpoint_add`. -/
 theorem integral_equiv_add_of_endpoint_add
     {integrandF primitiveF integrandG primitiveG integrandH primitiveH :
       FunctionOnInterval}
-    (IF : GeneralDefiniteIdentityFor integrandF primitiveF)
-    (IG : GeneralDefiniteIdentityFor integrandG primitiveG)
-    (IH : GeneralDefiniteIdentityFor integrandH primitiveH)
+    (IF : GeneralEndpointComparisonFor integrandF primitiveF)
+    (IG : GeneralEndpointComparisonFor integrandG primitiveG)
+    (IH : GeneralEndpointComparisonFor integrandH primitiveH)
     (hendpoint :
       (endpointDifferenceRaw primitiveH.toRealFunRaw
         integrandH.lower integrandH.upper IH.endpoint_valid).Equiv
@@ -1011,91 +1011,91 @@ theorem integral_equiv_add_of_endpoint_add
               integrandF.lower integrandF.upper IF.endpoint_valid) +
             (endpointDifferenceRaw primitiveG.toRealFunRaw
               integrandG.lower integrandG.upper IG.endpoint_valid))) :
-    (Integral.generalIntegralFor integrandH IH.construction).Equiv
-      ((Integral.generalIntegralFor integrandF IF.construction) +
-        (Integral.generalIntegralFor integrandG IG.construction)) := by
-  have h := DefiniteIdentityFor.integral_equiv_add_of_endpoint_add
-    IF.toDefiniteIdentityFor IG.toDefiniteIdentityFor
-    IH.toDefiniteIdentityFor hendpoint
-  change (Integral.generalIntegralFor integrandH IH.construction).Equiv
+    (Integral.generalCandidateValue integrandH IH.construction).Equiv
+      ((Integral.generalCandidateValue integrandF IF.construction) +
+        (Integral.generalCandidateValue integrandG IG.construction)) := by
+  have h := EndpointComparisonFor.integral_equiv_add_of_endpoint_add
+    IF.toEndpointComparisonFor IG.toEndpointComparisonFor
+    IH.toEndpointComparisonFor hendpoint
+  change (Integral.generalCandidateValue integrandH IH.construction).Equiv
     (RealRaw.add
-      (Integral.generalIntegralFor integrandF IF.construction)
-      (Integral.generalIntegralFor integrandG IG.construction))
+      (Integral.generalCandidateValue integrandF IF.construction)
+      (Integral.generalCandidateValue integrandG IG.construction))
   exact h
 
 /-- General-integral version of
-`DefiniteIdentityFor.integral_scaleRat_equiv_of_endpoint_scaleRat`. -/
+`EndpointComparisonFor.integral_scaleRat_equiv_of_endpoint_scaleRat`. -/
 theorem integral_scaleRat_equiv_of_endpoint_scaleRat
     {integrand primitive scaledIntegrand scaledPrimitive : FunctionOnInterval}
     {r : Rat}
-    (I : GeneralDefiniteIdentityFor integrand primitive)
-    (J : GeneralDefiniteIdentityFor scaledIntegrand scaledPrimitive)
+    (I : GeneralEndpointComparisonFor integrand primitive)
+    (J : GeneralEndpointComparisonFor scaledIntegrand scaledPrimitive)
     (hendpoint :
       (endpointDifferenceRaw scaledPrimitive.toRealFunRaw
         scaledIntegrand.lower scaledIntegrand.upper J.endpoint_valid).Equiv
         (RealRaw.scaleRat r
           (endpointDifferenceRaw primitive.toRealFunRaw
             integrand.lower integrand.upper I.endpoint_valid))) :
-    (Integral.generalIntegralFor scaledIntegrand J.construction).Equiv
+    (Integral.generalCandidateValue scaledIntegrand J.construction).Equiv
       (RealRaw.scaleRat r
-        (Integral.generalIntegralFor integrand I.construction)) := by
-  have h := DefiniteIdentityFor.integral_scaleRat_equiv_of_endpoint_scaleRat
-    I.toDefiniteIdentityFor J.toDefiniteIdentityFor hendpoint
-  change (Integral.generalIntegralFor scaledIntegrand J.construction).Equiv
+        (Integral.generalCandidateValue integrand I.construction)) := by
+  have h := EndpointComparisonFor.integral_scaleRat_equiv_of_endpoint_scaleRat
+    I.toEndpointComparisonFor J.toEndpointComparisonFor hendpoint
+  change (Integral.generalCandidateValue scaledIntegrand J.construction).Equiv
     (RealRaw.scaleRat r
-      (Integral.generalIntegralFor integrand I.construction))
+      (Integral.generalCandidateValue integrand I.construction))
   exact h
 
 /-- General-integral version of
-`DefiniteIdentityFor.integral_le_of_endpoint_le`. -/
+`EndpointComparisonFor.integral_le_of_endpoint_le`. -/
 theorem integral_le_of_endpoint_le
     {integrandF primitiveF integrandG primitiveG : FunctionOnInterval}
-    (IF : GeneralDefiniteIdentityFor integrandF primitiveF)
-    (IG : GeneralDefiniteIdentityFor integrandG primitiveG)
+    (IF : GeneralEndpointComparisonFor integrandF primitiveF)
+    (IG : GeneralEndpointComparisonFor integrandG primitiveG)
     (hendpoint :
       (endpointDifferenceRaw primitiveF.toRealFunRaw
         integrandF.lower integrandF.upper IF.endpoint_valid).Le
         (endpointDifferenceRaw primitiveG.toRealFunRaw
           integrandG.lower integrandG.upper IG.endpoint_valid)) :
-    (Integral.generalIntegralFor integrandF IF.construction).Le
-      (Integral.generalIntegralFor integrandG IG.construction) := by
-  have h := DefiniteIdentityFor.integral_le_of_endpoint_le
-    IF.toDefiniteIdentityFor IG.toDefiniteIdentityFor hendpoint
-  change (Integral.generalIntegralFor integrandF IF.construction).Le
-    (Integral.generalIntegralFor integrandG IG.construction)
+    (Integral.generalCandidateValue integrandF IF.construction).Le
+      (Integral.generalCandidateValue integrandG IG.construction) := by
+  have h := EndpointComparisonFor.integral_le_of_endpoint_le
+    IF.toEndpointComparisonFor IG.toEndpointComparisonFor hendpoint
+  change (Integral.generalCandidateValue integrandF IF.construction).Le
+    (Integral.generalCandidateValue integrandG IG.construction)
   exact h
 
 /-- Promote a one-piece monotone endpoint identity to the public general
 integral interface. -/
 noncomputable def ofMonotone
     {integrand primitive : FunctionOnInterval}
-    (I : MonotoneDefiniteIdentityFor integrand primitive)
+    (I : MonotoneEndpointComparisonFor integrand primitive)
     (hinterval : integrand.lower <= integrand.upper) :
-    GeneralDefiniteIdentityFor integrand primitive where
+    GeneralEndpointComparisonFor integrand primitive where
   same_lower := I.same_lower
   same_upper := I.same_upper
   construction :=
-    Integral.PiecewiseMonotoneConstructionFor.ofMonotone
+    Integral.PiecewiseMonotoneCandidateFor.ofMonotone
       I.construction hinterval
   endpoint_valid := I.endpoint_valid
   equivalent := by
     have hgeneral :
-        (Integral.generalIntegralFor integrand
-          (Integral.PiecewiseMonotoneConstructionFor.ofMonotone
+        (Integral.generalCandidateValue integrand
+          (Integral.PiecewiseMonotoneCandidateFor.ofMonotone
             I.construction hinterval)).Equiv
-          (Integral.monotoneIntegralFor integrand I.construction) :=
-      Integral.generalIntegralFor_ofMonotone_equiv
+          (Integral.monotoneCandidateValue integrand I.construction) :=
+      Integral.generalCandidateValue_ofMonotone_equiv
         I.construction hinterval
     exact RealRaw.equiv_trans
-      (Integral.generalIntegralFor_valid integrand
-        (Integral.PiecewiseMonotoneConstructionFor.ofMonotone
+      (Integral.generalCandidateValue_valid integrand
+        (Integral.PiecewiseMonotoneCandidateFor.ofMonotone
           I.construction hinterval))
       I.integral_valid
       I.endpoint_raw_valid
       hgeneral
       I.equivalent
 
-end GeneralDefiniteIdentityFor
+end GeneralEndpointComparisonFor
 
 /-- Package the scheduled Riemann algorithm from an `EffectiveFTC` certificate
 as a domain-aware integral construction. -/
@@ -1104,7 +1104,7 @@ def constructionFor_of_effectiveFTC
     (h : EffectiveFTC primitive.toRealFunRaw integrand.toRealFunRaw
       integrand.lower integrand.upper)
     (hvalid : (FTC.riemannRawOfEffectiveFTC h).Valid) :
-    Integral.ConstructionFor integrand where
+    Integral.CandidateFor integrand where
   compute := FTC.riemannComputeOfEffectiveFTC h
   certificate := by
     simpa [RealRaw.Valid, FTC.riemannRawOfEffectiveFTC] using hvalid
@@ -1132,21 +1132,21 @@ def definiteIdentityFor_of_effectiveFTC
       (FTC.endpointRawOfEffectiveFTC h).Equiv
         (endpointDifferenceRaw
           primitive.toRealFunRaw integrand.lower integrand.upper hendpoint)) :
-    DefiniteIdentityFor integrand primitive where
+    EndpointComparisonFor integrand primitive where
   same_lower := same_lower
   same_upper := same_upper
   construction := constructionFor_of_effectiveFTC h hriemann
   endpoint_valid := hendpoint
   equivalent := by
     have hbridge :
-        (Integral.integralFor integrand
+        (Integral.candidateValue integrand
           (constructionFor_of_effectiveFTC h hriemann)).Equiv
             (FTC.endpointRawOfEffectiveFTC h) := by
-      simpa [Integral.integralFor, constructionFor_of_effectiveFTC,
+      simpa [Integral.candidateValue, constructionFor_of_effectiveFTC,
         FTC.riemannRawOfEffectiveFTC] using
         FTC.effectiveFTC_equiv_endpoint h
     exact RealRaw.equiv_trans
-      (Integral.integralFor_valid integrand
+      (Integral.candidateValue_valid integrand
         (constructionFor_of_effectiveFTC h hriemann))
       hscheduledEndpoint
       hendpoint
@@ -1160,7 +1160,7 @@ def constructionFor_of_staticDyadicEffectiveFTC
     (h : StaticDyadicEffectiveFTC primitive.toRealFunRaw integrand.toRealFunRaw
       integrand.lower integrand.upper)
     (hvalid : (FTC.riemannRawOfEffectiveFTC h.toEffectiveFTC).Valid) :
-    Integral.ConstructionFor integrand :=
+    Integral.CandidateFor integrand :=
   constructionFor_of_effectiveFTC h.toEffectiveFTC hvalid
 
 /-- Domain-aware definite-integral identity produced by a static-dyadic
@@ -1181,7 +1181,7 @@ def definiteIdentityFor_of_staticDyadicEffectiveFTC
       (FTC.endpointRawOfEffectiveFTC h.toEffectiveFTC).Equiv
         (endpointDifferenceRaw
           primitive.toRealFunRaw integrand.lower integrand.upper hendpoint)) :
-    DefiniteIdentityFor integrand primitive :=
+    EndpointComparisonFor integrand primitive :=
   definiteIdentityFor_of_effectiveFTC
     same_lower same_upper h.toEffectiveFTC
     hriemann hscheduledEndpoint hendpoint hendpoint_equiv
@@ -1204,7 +1204,7 @@ def constructionFor_of_twoStageCandidateDerivativeFTC_stabilized
       ((endpointDifferenceRaw primitive.toRealFunRaw integrand.lower integrand.upper
         hendpoint).compute n).width <= radius n)
     (hradius_shrinks : ShrinksToZero radius) :
-    Integral.ConstructionFor integrand where
+    Integral.CandidateFor integrand where
   compute := (h.stabilizedRaw hendpoint radius).compute
   certificate := by
     simpa [TwoStageCandidateDerivativeFTC.stabilizedRaw, RealRaw.Valid] using
@@ -1222,7 +1222,7 @@ def constructionFor_of_derivativeBoundFTC
     (h : DerivativeBoundFTC primitive.toRealFunRaw integrand.toRealFunRaw
       integrand.lower integrand.upper)
     (hvalid : h.boundedIntegralRaw.Valid) :
-    Integral.ConstructionFor integrand where
+    Integral.CandidateFor integrand where
   compute := h.boundedIntegralCompute
   certificate := by
     simpa [RealRaw.Valid, DerivativeBoundFTC.boundedIntegralRaw] using hvalid
@@ -1251,20 +1251,20 @@ def definiteIdentityFor_of_derivativeBoundFTC
       h.endpointRaw.Equiv
         (endpointDifferenceRaw
           primitive.toRealFunRaw integrand.lower integrand.upper hendpoint)) :
-    DefiniteIdentityFor integrand primitive where
+    EndpointComparisonFor integrand primitive where
   same_lower := same_lower
   same_upper := same_upper
   construction := constructionFor_of_derivativeBoundFTC h hbounded
   endpoint_valid := hendpoint
   equivalent := by
     have hbridge :
-        (Integral.integralFor integrand
+        (Integral.candidateValue integrand
           (constructionFor_of_derivativeBoundFTC h hbounded)).Equiv
             h.endpointRaw := by
-      simpa [Integral.integralFor, constructionFor_of_derivativeBoundFTC,
+      simpa [Integral.candidateValue, constructionFor_of_derivativeBoundFTC,
         DerivativeBoundFTC.boundedIntegralRaw] using h.equiv_endpoint
     exact RealRaw.equiv_trans
-      (Integral.integralFor_valid integrand
+      (Integral.candidateValue_valid integrand
         (constructionFor_of_derivativeBoundFTC h hbounded))
       hscheduledEndpoint
       hendpoint
@@ -1278,7 +1278,7 @@ def constructionFor_of_candidateDerivativeFTC
     (h : CandidateDerivativeFTC primitive.toRealFunRaw integrand.toRealFunRaw
       integrand.lower integrand.upper)
     (hvalid : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid) :
-    Integral.ConstructionFor integrand :=
+    Integral.CandidateFor integrand :=
   constructionFor_of_derivativeBoundFTC h.toDerivativeBoundFTC hvalid
 
 /-- Turn a candidate-derivative FTC certificate into the domain-aware
@@ -1299,7 +1299,7 @@ def definiteIdentityFor_of_candidateDerivativeFTC
       h.toDerivativeBoundFTC.endpointRaw.Equiv
         (endpointDifferenceRaw
           primitive.toRealFunRaw integrand.lower integrand.upper hendpoint)) :
-    DefiniteIdentityFor integrand primitive :=
+    EndpointComparisonFor integrand primitive :=
   definiteIdentityFor_of_derivativeBoundFTC
     same_lower same_upper h.toDerivativeBoundFTC
     hbounded hscheduledEndpoint hendpoint hendpoint_equiv
@@ -1314,7 +1314,7 @@ def constructionFor_of_curvatureFTC
     (h : CurvatureFTCCertificate primitive.toRealFunRaw integrand.toRealFunRaw
       integrand.lower integrand.upper)
     (hvalid : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid) :
-    Integral.ConstructionFor integrand :=
+    Integral.CandidateFor integrand :=
   constructionFor_of_derivativeBoundFTC h.toDerivativeBoundFTC hvalid
 
 /-- Turn a curvature FTC certificate into the domain-aware definite-integral
@@ -1335,7 +1335,7 @@ def definiteIdentityFor_of_curvatureFTC
       h.toDerivativeBoundFTC.endpointRaw.Equiv
         (endpointDifferenceRaw
           primitive.toRealFunRaw integrand.lower integrand.upper hendpoint)) :
-    DefiniteIdentityFor integrand primitive :=
+    EndpointComparisonFor integrand primitive :=
   definiteIdentityFor_of_derivativeBoundFTC
     same_lower same_upper h.toDerivativeBoundFTC
     hbounded hscheduledEndpoint hendpoint hendpoint_equiv
@@ -1345,7 +1345,7 @@ def constructionFor_of_convexFTC
     (h : ConvexFTCCertificate primitive.toRealFunRaw integrand.toRealFunRaw
       integrand.lower integrand.upper)
     (hvalid : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid) :
-    Integral.ConstructionFor integrand :=
+    Integral.CandidateFor integrand :=
   constructionFor_of_curvatureFTC h.toCurvatureFTCCertificate hvalid
 
 def definiteIdentityFor_of_convexFTC
@@ -1364,7 +1364,7 @@ def definiteIdentityFor_of_convexFTC
       h.toDerivativeBoundFTC.endpointRaw.Equiv
         (endpointDifferenceRaw
           primitive.toRealFunRaw integrand.lower integrand.upper hendpoint)) :
-    DefiniteIdentityFor integrand primitive :=
+    EndpointComparisonFor integrand primitive :=
   definiteIdentityFor_of_curvatureFTC
     same_lower same_upper h.toCurvatureFTCCertificate
     hbounded hscheduledEndpoint hendpoint hendpoint_equiv
@@ -1374,7 +1374,7 @@ def constructionFor_of_concaveFTC
     (h : ConcaveFTCCertificate primitive.toRealFunRaw integrand.toRealFunRaw
       integrand.lower integrand.upper)
     (hvalid : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid) :
-    Integral.ConstructionFor integrand :=
+    Integral.CandidateFor integrand :=
   constructionFor_of_curvatureFTC h.toCurvatureFTCCertificate hvalid
 
 def definiteIdentityFor_of_concaveFTC
@@ -1393,7 +1393,7 @@ def definiteIdentityFor_of_concaveFTC
       h.toDerivativeBoundFTC.endpointRaw.Equiv
         (endpointDifferenceRaw
           primitive.toRealFunRaw integrand.lower integrand.upper hendpoint)) :
-    DefiniteIdentityFor integrand primitive :=
+    EndpointComparisonFor integrand primitive :=
   definiteIdentityFor_of_curvatureFTC
     same_lower same_upper h.toCurvatureFTCCertificate
     hbounded hscheduledEndpoint hendpoint hendpoint_equiv
@@ -1572,7 +1572,7 @@ abbrev arctanKernelIntervalAtOne : FunctionOnInterval :=
 `∫_0^x dt / (1 + t^2)`, for rational `x` in `[0, 1]`. -/
 def arctanIntegralRectangleConstruction
     (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
-    Integral.ConstructionFor (arctanKernelInterval x) where
+    Integral.CandidateFor (arctanKernelInterval x) where
   compute := ArctanGeometry.arctanIntegralRectangleCompute x
   certificate := by
     have hvalid := ArctanGeometry.arctanIntegralRectangleRaw_valid hx0 hx1
@@ -1584,13 +1584,13 @@ def arctanIntegralRectangleConstruction
 for the arctangent kernel on `[0, x]`, with `0 <= x <= 1`. -/
 def arctanIntegralRectangleFor
     (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) : RealRaw :=
-  Integral.integralFor (arctanKernelInterval x)
+  Integral.candidateValue (arctanKernelInterval x)
     (arctanIntegralRectangleConstruction x hx0 hx1)
 
 theorem arctanIntegralRectangleFor_valid
     (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
     (arctanIntegralRectangleFor x hx0 hx1).Valid :=
-  Integral.integralFor_valid (arctanKernelInterval x)
+  Integral.candidateValue_valid (arctanKernelInterval x)
     (arctanIntegralRectangleConstruction x hx0 hx1)
 
 theorem arctanIntegralRectangleFor_compute_eq
@@ -1640,7 +1640,7 @@ def arctanKernelInterval_monotone (x : Rat) :
 monotone integral for rational `x` in `[0,1]`. -/
 def arctanIntegralRectangleMonotoneConstruction
     (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
-    Integral.MonotoneConstructionFor (arctanKernelInterval x) where
+    Integral.MonotoneCandidateFor (arctanKernelInterval x) where
   monotone := arctanKernelInterval_monotone x
   construction := arctanIntegralRectangleConstruction x hx0 hx1
 
@@ -1648,13 +1648,13 @@ def arctanIntegralRectangleMonotoneConstruction
 throughout the rational unit branch. -/
 def arctanIntegralRectangleMonotoneFor
     (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) : RealRaw :=
-  Integral.monotoneIntegralFor (arctanKernelInterval x)
+  Integral.monotoneCandidateValue (arctanKernelInterval x)
     (arctanIntegralRectangleMonotoneConstruction x hx0 hx1)
 
 theorem arctanIntegralRectangleMonotoneFor_valid
     (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
     (arctanIntegralRectangleMonotoneFor x hx0 hx1).Valid :=
-  Integral.monotoneIntegralFor_valid (arctanKernelInterval x)
+  Integral.monotoneCandidateValue_valid (arctanKernelInterval x)
     (arctanIntegralRectangleMonotoneConstruction x hx0 hx1)
 
 theorem arctanIntegralRectangleMonotoneFor_compute_eq
@@ -1686,7 +1686,7 @@ theorem arctanIntegralRectangleFor_equiv_arctanGeom
     (ArctanGeometry.arctanIntegralRectangleRaw x)
     (ArctanGeometry.arctanGeom x) n n).1
       (ArctanGeometry.arctanIntegralRectangleRaw_equiv_arctanGeom hx0 n)
-  simpa [arctanIntegralRectangleFor, Integral.integralFor,
+  simpa [arctanIntegralRectangleFor, Integral.candidateValue,
     arctanIntegralRectangleConstruction,
     ArctanGeometry.arctanIntegralRectangleRaw] using hover
 
@@ -5801,7 +5801,7 @@ theorem coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_equiv_re
 /-- The public integral construction for the positive product derivative,
 computed by the stabilized finite bounded-sum evaluator. -/
 def coordinateTimesArctanForwardTwoStageConstruction :
-    Integral.ConstructionFor coordinateTimesArctanIntegralRectangleDerivativeOnUnit :=
+    Integral.CandidateFor coordinateTimesArctanIntegralRectangleDerivativeOnUnit :=
   Integral.constructionFor_of_twoStageCandidateDerivativeFTC_stabilized
     coordinateTimesArctanForwardTwoStageFTC
     coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid
@@ -5813,7 +5813,7 @@ def coordinateTimesArctanForwardTwoStageConstruction :
 /-- The stabilized bounded-sum construction through the monotone integral
 API. -/
 def coordinateTimesArctanForwardTwoStageMonotoneConstruction :
-    Integral.MonotoneConstructionFor
+    Integral.MonotoneCandidateFor
       coordinateTimesArctanIntegralRectangleDerivativeOnUnit where
   monotone := coordinateTimesArctanIntegralRectangleDerivativeOnUnit_monotone
   construction := coordinateTimesArctanForwardTwoStageConstruction
@@ -5821,19 +5821,19 @@ def coordinateTimesArctanForwardTwoStageMonotoneConstruction :
 /-- The public monotone integral raw computed from finite stabilized
 derivative-bound sums. -/
 def coordinateTimesArctanForwardTwoStageMonotoneIntegral : RealRaw :=
-  Integral.monotoneIntegralFor coordinateTimesArctanIntegralRectangleDerivativeOnUnit
+  Integral.monotoneCandidateValue coordinateTimesArctanIntegralRectangleDerivativeOnUnit
     coordinateTimesArctanForwardTwoStageMonotoneConstruction
 
 theorem coordinateTimesArctanForwardTwoStageMonotoneIntegral_valid :
     coordinateTimesArctanForwardTwoStageMonotoneIntegral.Valid :=
-  Integral.monotoneIntegralFor_valid
+  Integral.monotoneCandidateValue_valid
     coordinateTimesArctanIntegralRectangleDerivativeOnUnit
     coordinateTimesArctanForwardTwoStageMonotoneConstruction
 
 /-- The primitive endpoint formula now follows from the actual stabilized
 finite bounded-sum integral construction. -/
 def coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity :
-    Integral.MonotoneDefiniteIdentityFor
+    Integral.MonotoneEndpointComparisonFor
       coordinateTimesArctanIntegralRectangleDerivativeOnUnit
       coordinateTimesArctanIntegralRectangleOnUnit where
   same_lower := rfl
@@ -5842,9 +5842,9 @@ def coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity :
   endpoint_valid := coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid
   equivalent := by
     have hleft :
-        (Integral.monotoneIntegralFor coordinateTimesArctanIntegralRectangleDerivativeOnUnit
+        (Integral.monotoneCandidateValue coordinateTimesArctanIntegralRectangleDerivativeOnUnit
           coordinateTimesArctanForwardTwoStageMonotoneConstruction).Valid :=
-      Integral.monotoneIntegralFor_valid coordinateTimesArctanIntegralRectangleDerivativeOnUnit
+      Integral.monotoneCandidateValue_valid coordinateTimesArctanIntegralRectangleDerivativeOnUnit
         coordinateTimesArctanForwardTwoStageMonotoneConstruction
     have hrect : ArctanGeometry.arctanIntegralRectangleRawAtOne.Valid :=
       ArctanGeometry.arctanIntegralRectangleRawAtOne_valid
@@ -5854,7 +5854,7 @@ def coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity :
       simpa [endpointDifferenceRaw, RealRaw.Valid] using
         coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid
     have hleftrect :
-        (Integral.monotoneIntegralFor coordinateTimesArctanIntegralRectangleDerivativeOnUnit
+        (Integral.monotoneCandidateValue coordinateTimesArctanIntegralRectangleDerivativeOnUnit
           coordinateTimesArctanForwardTwoStageMonotoneConstruction).Equiv
           ArctanGeometry.arctanIntegralRectangleRawAtOne := by
       change (coordinateTimesArctanForwardTwoStageFTC.boundedIntegralRaw.prefixStabilize
@@ -5868,18 +5868,18 @@ def coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity :
 /-- The stabilized bounded-sum identity through the ordinary definite
 integral interface. -/
 def coordinateTimesArctanForwardTwoStageDefiniteIdentity :
-    Integral.DefiniteIdentityFor
+    Integral.EndpointComparisonFor
       coordinateTimesArctanIntegralRectangleDerivativeOnUnit
       coordinateTimesArctanIntegralRectangleOnUnit :=
-  coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity.toDefiniteIdentityFor
+  coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity.toEndpointComparisonFor
 
 /-- The stabilized bounded-sum identity through the public finite-piece
 monotone integral interface. -/
 noncomputable def coordinateTimesArctanForwardTwoStageGeneralDefiniteIdentity :
-    Integral.GeneralDefiniteIdentityFor
+    Integral.GeneralEndpointComparisonFor
       coordinateTimesArctanIntegralRectangleDerivativeOnUnit
       coordinateTimesArctanIntegralRectangleOnUnit :=
-  Integral.GeneralDefiniteIdentityFor.ofMonotone
+  Integral.GeneralEndpointComparisonFor.ofMonotone
     coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity
     (by native_decide)
 
@@ -6521,20 +6521,20 @@ theorem arctanIntegralRectangleMonotoneFunctionAgreement :
 version of the integral route currently proved by rectangle sums: it only asks
 for integral constructions on inputs `0 <= x <= 1`. -/
 def arctanIntegralUnit
-    (x : Rat) (c : Integral.ConstructionFor (arctanKernelInterval x)) :
+    (x : Rat) (c : Integral.CandidateFor (arctanKernelInterval x)) :
     RealRaw :=
-  Integral.integralFor (arctanKernelInterval x) c
+  Integral.candidateValue (arctanKernelInterval x) c
 
 def ArctanIntegralUnitComputes
     (x : Rat) (_hx0 : 0 <= x) (_hx1 : x <= 1)
     (arctanBranch : RealRaw) : Prop :=
-  Exists fun c : Integral.ConstructionFor (arctanKernelInterval x) =>
+  Exists fun c : Integral.CandidateFor (arctanKernelInterval x) =>
     (arctanIntegralUnit x c).Equiv arctanBranch
 
 structure ArctanIntegralUnitData where
   constructionAt :
     forall x, 0 <= x -> x <= 1 ->
-      Integral.ConstructionFor (arctanKernelInterval x)
+      Integral.CandidateFor (arctanKernelInterval x)
 
 def arctanIntegralUnitFunctionRaw
     (data : ArctanIntegralUnitData) : PartialRealFunRaw where
@@ -6559,7 +6559,7 @@ theorem arctanIntegralUnitFunctionRaw_valid
   intro x hx
   change RealRaw.ValidCompute
     ((arctanIntegralUnit x (data.constructionAt x hx.1 hx.2)).compute)
-  exact Integral.integralFor_valid (arctanKernelInterval x)
+  exact Integral.candidateValue_valid (arctanKernelInterval x)
     (data.constructionAt x hx.1 hx.2)
 
 def ArctanIntegralUnitGeomFunctionAgreement
@@ -6653,7 +6653,7 @@ theorem arctanIntegralRectangleMonotoneUnit_equiv_arctanGeom
         (ArctanGeometry.arctanGeom x) := by
   simpa [arctanIntegralUnit, arctanIntegralRectangleMonotoneUnitData,
     arctanIntegralRectangleMonotoneFor,
-    Integral.monotoneIntegralFor] using
+    Integral.monotoneCandidateValue] using
     arctanIntegralRectangleMonotoneFor_equiv_arctanGeom x hx0 hx1
 
 theorem arctanIntegralRectangleMonotoneUnitFunctionAgreement :
@@ -7007,10 +7007,10 @@ theorem arctanGeomOnUnit_endpointDifference_equiv_arctanGeom_one :
     arctanGeom_one_sub_zero_equiv
 
 /-- The verified rectangle-sum construction for
-`∫_0^1 dt / (1 + t^2)`, packaged as a `ConstructionFor` on the arctangent
+`∫_0^1 dt / (1 + t^2)`, packaged as a `CandidateFor` on the arctangent
 kernel interval. -/
 def arctanIntegralRectangleConstructionAtOne :
-    Integral.ConstructionFor arctanKernelIntervalAtOne where
+    Integral.CandidateFor arctanKernelIntervalAtOne where
   compute := ArctanGeometry.arctanIntegralRectangleComputeAtOne
   certificate := by
     change RealRaw.ValidCompute
@@ -7020,12 +7020,12 @@ def arctanIntegralRectangleConstructionAtOne :
 /-- The domain-aware integral raw real supplied by the rectangle construction
 for the arctangent kernel on `[0, 1]`. -/
 def arctanIntegralRectangleForAtOne : RealRaw :=
-  Integral.integralFor arctanKernelIntervalAtOne
+  Integral.candidateValue arctanKernelIntervalAtOne
     arctanIntegralRectangleConstructionAtOne
 
 theorem arctanIntegralRectangleForAtOne_valid :
     arctanIntegralRectangleForAtOne.Valid :=
-  Integral.integralFor_valid arctanKernelIntervalAtOne
+  Integral.candidateValue_valid arctanKernelIntervalAtOne
     arctanIntegralRectangleConstructionAtOne
 
 theorem arctanIntegralRectangleForAtOne_compute_eq (n : Nat) :
@@ -7067,18 +7067,18 @@ def arctanKernelIntervalAtOne_monotone :
 
 /-- The rectangle construction for `∫_0^1 dx/(1+x^2)` as a monotone integral. -/
 def arctanIntegralRectangleMonotoneConstructionAtOne :
-    Integral.MonotoneConstructionFor arctanKernelIntervalAtOne where
+    Integral.MonotoneCandidateFor arctanKernelIntervalAtOne where
   monotone := arctanKernelIntervalAtOne_monotone
   construction := arctanIntegralRectangleConstructionAtOne
 
 /-- The monotone-integral packaging of the rectangle arctangent computation. -/
 def arctanIntegralRectangleMonotoneForAtOne : RealRaw :=
-  Integral.monotoneIntegralFor arctanKernelIntervalAtOne
+  Integral.monotoneCandidateValue arctanKernelIntervalAtOne
     arctanIntegralRectangleMonotoneConstructionAtOne
 
 theorem arctanIntegralRectangleMonotoneForAtOne_valid :
     arctanIntegralRectangleMonotoneForAtOne.Valid :=
-  Integral.monotoneIntegralFor_valid arctanKernelIntervalAtOne
+  Integral.monotoneCandidateValue_valid arctanKernelIntervalAtOne
     arctanIntegralRectangleMonotoneConstructionAtOne
 
 theorem arctanIntegralRectangleMonotoneForAtOne_compute_eq (n : Nat) :
@@ -7109,7 +7109,7 @@ theorem arctanIntegralRectangleForAtOne_equiv_arctanGeom_one :
       ArctanGeometry.arctanIntegralRectangleRawAtOne
       (ArctanGeometry.arctanGeom (1 : Rat)) n n).1
         (ArctanGeometry.arctanIntegralRectangleRawAtOne_equiv_arctanGeom_one n)
-    simpa [arctanIntegralRectangleForAtOne, Integral.integralFor,
+    simpa [arctanIntegralRectangleForAtOne, Integral.candidateValue,
       arctanIntegralRectangleConstructionAtOne,
       ArctanGeometry.arctanIntegralRectangleRawAtOne] using hover
 
@@ -7117,9 +7117,9 @@ theorem arctanIntegralRectangleForAtOne_equiv_arctanGeom_one :
 verified midpoint construction of `∫_0^1 dx/(1+x^2)` computes the endpoint
 difference of the geometric arctangent primitive. -/
 def arctanGeomUnitRectangleDefiniteIdentity :
-    Integral.DefiniteIdentityFor
+    Integral.EndpointComparisonFor
       (oneOverOnePlusSquareOnInterval 0 1) arctanGeomOnUnit :=
-  Integral.DefiniteIdentityFor.ofConstruction rfl rfl
+  Integral.EndpointComparisonFor.ofConstruction rfl rfl
     arctanIntegralRectangleConstructionAtOne
     arctanGeomOnUnit_endpointDifference_valid (by
     have hleft : arctanIntegralRectangleForAtOne.Valid :=
@@ -7132,7 +7132,7 @@ def arctanGeomUnitRectangleDefiniteIdentity :
           arctanGeomOnUnit_endpointDifference_valid).Valid := by
       simpa [endpointDifferenceRaw, RealRaw.Valid] using
         arctanGeomOnUnit_endpointDifference_valid
-    change (Integral.integralFor arctanKernelIntervalAtOne
+    change (Integral.candidateValue arctanKernelIntervalAtOne
       arctanIntegralRectangleConstructionAtOne).Equiv
       (endpointDifferenceRaw arctanGeomOnUnit.toRealFunRaw 0 1
         arctanGeomOnUnit_endpointDifference_valid)
@@ -7144,7 +7144,7 @@ def arctanGeomUnitRectangleDefiniteIdentity :
 /-- The same unit arctangent endpoint identity, but with the integral side
 explicitly packaged as a monotone integral for the decreasing kernel. -/
 def arctanGeomUnitRectangleMonotoneDefiniteIdentity :
-    Integral.MonotoneDefiniteIdentityFor
+    Integral.MonotoneEndpointComparisonFor
       (oneOverOnePlusSquareOnInterval 0 1) arctanGeomOnUnit where
   same_lower := rfl
   same_upper := rfl
@@ -7169,7 +7169,7 @@ def arctanGeomUnitRectangleMonotoneDefiniteIdentity :
       RealRaw.equiv_trans hleft hrect hgeom
         arctanIntegralRectangleMonotoneForAtOne_equiv_rectangleForAtOne
         arctanIntegralRectangleForAtOne_equiv_arctanGeom_one
-    change (Integral.integralFor arctanKernelIntervalAtOne
+    change (Integral.candidateValue arctanKernelIntervalAtOne
       arctanIntegralRectangleMonotoneConstructionAtOne.construction).Equiv
       (endpointDifferenceRaw arctanGeomOnUnit.toRealFunRaw 0 1
         arctanGeomOnUnit_endpointDifference_valid)
@@ -7179,18 +7179,18 @@ def arctanGeomUnitRectangleMonotoneDefiniteIdentity :
         arctanGeomOnUnit_endpointDifference_equiv_arctanGeom_one)
 
 /-- The monotone rectangle endpoint identity, forgetting the monotonicity
-certificate and viewed through the ordinary `DefiniteIdentityFor` interface. -/
-def arctanGeomUnitRectangleMonotoneDefiniteIdentityFor :
-    Integral.DefiniteIdentityFor
+certificate and viewed through the ordinary `EndpointComparisonFor` interface. -/
+def arctanGeomUnitRectangleMonotoneEndpointComparisonFor :
+    Integral.EndpointComparisonFor
       (oneOverOnePlusSquareOnInterval 0 1) arctanGeomOnUnit :=
-  arctanGeomUnitRectangleMonotoneDefiniteIdentity.toDefiniteIdentityFor
+  arctanGeomUnitRectangleMonotoneDefiniteIdentity.toEndpointComparisonFor
 
 /-- The same unit arctangent endpoint identity, now viewed through the public
 piecewise-monotone/general integral interface. -/
 noncomputable def arctanGeomUnitRectangleGeneralDefiniteIdentity :
-    Integral.GeneralDefiniteIdentityFor
+    Integral.GeneralEndpointComparisonFor
       (oneOverOnePlusSquareOnInterval 0 1) arctanGeomOnUnit :=
-  Integral.GeneralDefiniteIdentityFor.ofMonotone
+  Integral.GeneralEndpointComparisonFor.ofMonotone
     arctanGeomUnitRectangleMonotoneDefiniteIdentity
     (by native_decide)
 
@@ -7199,9 +7199,9 @@ identity.  This is a small sanity check for the generic transport lemma:
 changing the construction by an equivalent integral preserves the endpoint
 identity. -/
 def arctanGeomUnitRectangleMonotoneTransportedDefiniteIdentity :
-    Integral.DefiniteIdentityFor
+    Integral.EndpointComparisonFor
       (oneOverOnePlusSquareOnInterval 0 1) arctanGeomOnUnit :=
-  Integral.DefiniteIdentityFor.transportConstruction
+  Integral.EndpointComparisonFor.transportConstruction
     arctanGeomUnitRectangleDefiniteIdentity
     arctanIntegralRectangleMonotoneConstructionAtOne.construction
     (by
@@ -7213,26 +7213,26 @@ def arctanGeomUnitRectangleMonotoneTransportedDefiniteIdentity :
 /-- The ordinary and monotone rectangle endpoint identities have equivalent
 integral raw reals. -/
 theorem arctanGeomUnitRectangleMonotoneDefiniteIdentity_equiv_rectangle :
-    (Integral.integralFor
+    (Integral.candidateValue
       (oneOverOnePlusSquareOnInterval 0 1)
-      arctanGeomUnitRectangleMonotoneDefiniteIdentityFor.construction).Equiv
-      (Integral.integralFor
+      arctanGeomUnitRectangleMonotoneEndpointComparisonFor.construction).Equiv
+      (Integral.candidateValue
         (oneOverOnePlusSquareOnInterval 0 1)
         arctanGeomUnitRectangleDefiniteIdentity.construction) :=
-  Integral.DefiniteIdentityFor.integral_equiv_integral
-    arctanGeomUnitRectangleMonotoneDefiniteIdentityFor
+  Integral.EndpointComparisonFor.integral_equiv_integral
+    arctanGeomUnitRectangleMonotoneEndpointComparisonFor
     arctanGeomUnitRectangleDefiniteIdentity
 
 /-- The theorem target for the integral arctangent comparison on `[0, x]`.
 It says that the integral of `1 / (1 + t^2)` computes the chosen arctangent
 branch. -/
 abbrev ArctanIntegralConstruction (x : Rat) :=
-  Integral.Construction
+  Integral.SampleConstruction
     (oneOverOnePlusSquareOnInterval 0 x).toRealFunRaw 0 x
 
 def arctanIntegral (x : Rat)
     (c : ArctanIntegralConstruction x) : RealRaw :=
-  Integral.integral
+  Integral.sampleValue
     (oneOverOnePlusSquareOnInterval 0 x).toRealFunRaw 0 x c
 
 theorem arctanIntegral_valid (x : Rat)
@@ -7241,12 +7241,12 @@ theorem arctanIntegral_valid (x : Rat)
   by
     simpa [arctanIntegral] using FTC.integral_valid_of_construction c
 
-/-- The legacy `Integral.Construction` wrapper uses exact point evaluations of
+/-- The legacy `Integral.SampleConstruction` wrapper uses exact point evaluations of
 `1/(1+x^2)`.  Hence every scheduled left-Riemann sum is a point interval. -/
 theorem arctanIntegral_compute_width_zero (x : Rat)
     (c : ArctanIntegralConstruction x) (n : Nat) :
     ((arctanIntegral x c).compute n).width = 0 := by
-  simpa [arctanIntegral, Integral.integral, Integral.Certificate.realRaw,
+  simpa [arctanIntegral, Integral.sampleValue, Integral.Certificate.realRaw,
     Integral.Raw.toRealRaw, Integral.Raw.compute, Integral.algorithm] using
     riemannLeftInterval_point_width_zero
       (oneOverOnePlusSquareOnInterval 0 x).toRealFunRaw
@@ -7257,7 +7257,7 @@ theorem arctanIntegral_compute_width_zero (x : Rat)
 
 /-- Consequently, a valid old-style `arctanIntegral` construction has no
 stage-to-stage refinement: all of its intervals are equal.  This records why
-the newer `ConstructionFor` interface is the meaningful arctangent-integral
+the newer `CandidateFor` interface is the meaningful arctangent-integral
 route in the scoreboard. -/
 theorem arctanIntegral_stages_constant (x : Rat)
     (c : ArctanIntegralConstruction x) (n m : Nat) :
@@ -8351,7 +8351,7 @@ structure ReciprocalTailCompactification
   fold_agrees : forall x, 0 < x -> x <= 1 ->
     compactDensity x = kernel x +
       (1 / (x * x)) * kernel (1 / x)
-  construction : Integral.ConstructionFor
+  construction : Integral.CandidateFor
     (FunctionOnInterval.exactRat compactDensity 0 1)
 
 namespace ReciprocalTailCompactification
@@ -8361,14 +8361,14 @@ even full-line integral. -/
 def compactIntegral
     {kernel compactDensity : Rat -> Rat}
     (C : ReciprocalTailCompactification kernel compactDensity) : RealRaw :=
-  Integral.integralFor (FunctionOnInterval.exactRat compactDensity 0 1)
+  Integral.candidateValue (FunctionOnInterval.exactRat compactDensity 0 1)
     C.construction
 
 theorem compactIntegral_valid
     {kernel compactDensity : Rat -> Rat}
     (C : ReciprocalTailCompactification kernel compactDensity) :
     C.compactIntegral.Valid :=
-  Integral.integralFor_valid _ C.construction
+  Integral.candidateValue_valid _ C.construction
 
 /-- The projective full-line integral defined by reciprocal-tail folding. -/
 def fullLineIntegral
@@ -8413,7 +8413,7 @@ theorem cauchyReciprocalTailDensity_fold_agrees
 rectangle bracket for `1 / (1+x^2)`.  This is a cellwise rational scaling,
 not a new arctangent representation. -/
 def cauchyReciprocalTailConstruction :
-    Integral.ConstructionFor
+    Integral.CandidateFor
       (FunctionOnInterval.exactRat cauchyReciprocalTailDensity 0 1) where
   compute := RealRaw.scaleRatCompute 2 arctanIntegralRectangleForAtOne
   certificate := by
@@ -8448,7 +8448,7 @@ theorem cauchyFullLineIntegral_compute_eq_four_rectangle (n : Nat) :
     ReciprocalTailCompactification.fullLineIntegral,
     ReciprocalTailCompactification.compactIntegral,
     cauchyReciprocalTailCompactification,
-    cauchyReciprocalTailConstruction, Integral.integralFor,
+    cauchyReciprocalTailConstruction, Integral.candidateValue,
     RealRaw.scaleRat, RealRaw.scaleRatCompute]
   grind [Rat.mul_assoc]
 
@@ -8481,7 +8481,7 @@ def symmetricCauchyKernelInterval : FunctionOnInterval :=
 the certified positive unit-branch rectangle computation.  The monotonicity
 certificate is genuinely increasing: `x ↦ 1 / (1 + x^2)` rises on `[-1,0]`. -/
 private def symmetricCauchyNegativePiece :
-    Integral.MonotoneConstructionFor
+    Integral.MonotoneCandidateFor
       (symmetricCauchyKernelInterval.restrict (-1) 0 (by native_decide)
         (by native_decide) (by native_decide)) where
   monotone := MonotoneOnInterval.ofNondecreasing (by
@@ -8505,7 +8505,7 @@ private def symmetricCauchyNegativePiece :
 /-- The positive half of the symmetric Cauchy kernel, using the usual
 decreasing unit-branch rectangle computation. -/
 private def symmetricCauchyPositivePiece :
-    Integral.MonotoneConstructionFor
+    Integral.MonotoneCandidateFor
       (symmetricCauchyKernelInterval.restrict 0 1 (by native_decide)
         (by native_decide) (by native_decide)) where
   monotone := MonotoneOnInterval.ofNonincreasing (by
@@ -8526,7 +8526,7 @@ private def symmetricCauchyPositivePiece :
 integral.  The partition `[-1,0,1]` makes the increasing/decreasing split
 explicit instead of hiding it in an evenness argument. -/
 def symmetricCauchyTwoPieceConstruction :
-    Integral.GeneralConstructionFor symmetricCauchyKernelInterval where
+    Integral.GeneralCandidateFor symmetricCauchyKernelInterval where
   pieces := 2
   positive := by decide
   point
@@ -8564,12 +8564,12 @@ def symmetricCauchyTwoPieceConstruction :
 /-- The bounded Cauchy integral assembled by the public finite
 piecewise-monotone integral operator. -/
 def symmetricCauchyPiecewiseIntegral : RealRaw :=
-  Integral.generalIntegralFor symmetricCauchyKernelInterval
+  Integral.generalCandidateValue symmetricCauchyKernelInterval
     symmetricCauchyTwoPieceConstruction
 
 theorem symmetricCauchyPiecewiseIntegral_valid :
     symmetricCauchyPiecewiseIntegral.Valid :=
-  Integral.generalIntegralFor_valid symmetricCauchyKernelInterval
+  Integral.generalCandidateValue_valid symmetricCauchyKernelInterval
     symmetricCauchyTwoPieceConstruction
 
 /-- The two monotone pieces are both the reflected unit-branch rectangle
@@ -14113,17 +14113,17 @@ def reciprocalQuarticMinusOneUnitOnInterval : FunctionOnInterval where
 quartic density.  Unlike the earlier unconstrained placeholder interface, its
 computation is visibly the finite left-cell Lipschitz bracket defined above. -/
 def reciprocalQuarticMinusOneUnitDyadicConstruction :
-    Integral.ConstructionFor reciprocalQuarticMinusOneUnitOnInterval where
+    Integral.CandidateFor reciprocalQuarticMinusOneUnitOnInterval where
   compute := reciprocalQuarticMinusOneUnitDyadicCompute
   certificate := reciprocalQuarticMinusOneUnitDyadicRaw_valid
 
 def reciprocalQuarticMinusOneUnitDyadicIntegral : RealRaw :=
-  Integral.integralFor reciprocalQuarticMinusOneUnitOnInterval
+  Integral.candidateValue reciprocalQuarticMinusOneUnitOnInterval
     reciprocalQuarticMinusOneUnitDyadicConstruction
 
 theorem reciprocalQuarticMinusOneUnitDyadicIntegral_valid :
     reciprocalQuarticMinusOneUnitDyadicIntegral.Valid :=
-  Integral.integralFor_valid reciprocalQuarticMinusOneUnitOnInterval
+  Integral.candidateValue_valid reciprocalQuarticMinusOneUnitOnInterval
     reciprocalQuarticMinusOneUnitDyadicConstruction
 
 theorem reciprocalQuarticMinusOneUnitDyadicIntegral_compute_eq (stage : Nat) :
@@ -14142,19 +14142,19 @@ theorem reciprocalQuarticMinusOneUnitDensity_eq_affineCompact (t : Rat) :
 [-1,1].  Its finite cell expression is the affine unit construction above,
 with the exact rational Jacobian already included in the integrand. -/
 def reciprocalQuarticMinusOneCompactDyadicConstruction :
-    Integral.ConstructionFor
+    Integral.CandidateFor
       (reciprocalQuarticMinusOneCompactOnInterval (-1) 1) where
   compute := reciprocalQuarticMinusOneUnitDyadicCompute
   certificate := reciprocalQuarticMinusOneUnitDyadicRaw_valid
 
 def reciprocalQuarticMinusOneCompactDyadicIntegral : RealRaw :=
-  Integral.integralFor
+  Integral.candidateValue
     (reciprocalQuarticMinusOneCompactOnInterval (-1) 1)
     reciprocalQuarticMinusOneCompactDyadicConstruction
 
 theorem reciprocalQuarticMinusOneCompactDyadicIntegral_valid :
     reciprocalQuarticMinusOneCompactDyadicIntegral.Valid :=
-  Integral.integralFor_valid
+  Integral.candidateValue_valid
     (reciprocalQuarticMinusOneCompactOnInterval (-1) 1)
     reciprocalQuarticMinusOneCompactDyadicConstruction
 
@@ -14507,22 +14507,22 @@ after the rational compactification of the line; a future route must therefore
 provide an integral construction for this particular function, rather than an
 unconstrained raw real. -/
 def reciprocalQuarticMinusOneCompactIntegral
-    (construction : Integral.ConstructionFor
+    (construction : Integral.CandidateFor
       (reciprocalQuarticMinusOneCompactOnInterval (-1) 1)) : RealRaw :=
-  Integral.integralFor (reciprocalQuarticMinusOneCompactOnInterval (-1) 1)
+  Integral.candidateValue (reciprocalQuarticMinusOneCompactOnInterval (-1) 1)
     construction
 
 theorem reciprocalQuarticMinusOneCompactIntegral_valid
-    (construction : Integral.ConstructionFor
+    (construction : Integral.CandidateFor
       (reciprocalQuarticMinusOneCompactOnInterval (-1) 1)) :
     (reciprocalQuarticMinusOneCompactIntegral construction).Valid :=
-  Integral.integralFor_valid _ construction
+  Integral.candidateValue_valid _ construction
 
 /-- The theorem-facing obligation for the compactified clean reciprocal
 quartic integral.  The required equality is now tied to a construction for
 the actual compact density on `[-1,1]`. -/
 def ReciprocalQuarticMinusOneProjectiveAgreement
-    (construction : Integral.ConstructionFor
+    (construction : Integral.CandidateFor
       (reciprocalQuarticMinusOneCompactOnInterval (-1) 1)) : Prop :=
   (reciprocalQuarticMinusOneCompactIntegral construction).Equiv
     reciprocalQuarticMinusOneExpectedPi
@@ -14532,7 +14532,7 @@ pullback and compact interval integrand are formalized above.  What remains is
 an analytic certificate that a concrete integral construction for that density
 computes the expected pi value. -/
 structure ReciprocalQuarticMinusOneProjectiveRoute where
-  compactConstruction : Integral.ConstructionFor
+  compactConstruction : Integral.CandidateFor
     (reciprocalQuarticMinusOneCompactOnInterval (-1) 1)
   computes_expected :
     ReciprocalQuarticMinusOneProjectiveAgreement compactConstruction
@@ -14718,7 +14718,7 @@ structure AbelianTrigIntegralRepresentations where
   cosine_agrees_with_arctanInverse :
     ComputableAnalysis.cos.agreesWithAbelianInverseRep arctanInverse
   ellipticDifferential : AbelianIntegral.DifferentialRaw
-  ellipticIntegral : AbelianIntegral.Raw
+  ellipticIntegral : AbelianIntegral.ValueCandidate
 
 /-!
 ## Generic finite Lipschitz--Darboux integrals on the unit interval
@@ -14728,7 +14728,7 @@ The following constructor exposes the part of that argument which is not
 specific to a circle or a quartic density.  Given only a rational Lipschitz
 bound on `[0,1]`, it produces nested rational lower and upper rectangle sums.
 Thus it is an actual raw integral algorithm, rather than a postulated
-`ConstructionFor` certificate.
+`CandidateFor` certificate.
 -/
 
 namespace LipschitzDyadic
@@ -15803,7 +15803,7 @@ theorem raw_natScale_equiv
 exact rational kernel that its rectangles evaluate. -/
 def construction (f : Rat -> Rat) (L : Nat)
     (hlip : Integral.LipschitzOnUnit f (L : Rat)) :
-    Integral.ConstructionFor (FunctionOnInterval.exactRat f 0 1) where
+    Integral.CandidateFor (FunctionOnInterval.exactRat f 0 1) where
   compute := compute f L
   certificate := raw_valid hlip
 
@@ -15825,16 +15825,16 @@ def affineIdentity_lipschitz_on_unit :
 /-- A concrete nonconstant raw integral produced by the generic
 Lipschitz--Darboux constructor. -/
 def affineIdentityLipschitzConstruction :
-    Integral.ConstructionFor
+    Integral.CandidateFor
       (FunctionOnInterval.exactRat (fun x : Rat => x) 0 1) :=
   LipschitzDyadic.construction (fun x : Rat => x) 1
     affineIdentity_lipschitz_on_unit
 
 theorem affineIdentityLipschitzConstruction_valid :
-    (Integral.integralFor
+    (Integral.candidateValue
       (FunctionOnInterval.exactRat (fun x : Rat => x) 0 1)
       affineIdentityLipschitzConstruction).Valid := by
-  exact Integral.integralFor_valid _ _
+  exact Integral.candidateValue_valid _ _
 
 theorem affineIdentity_uniformLeftEndpointSum_eq
     {n : Nat} (hn : 0 < n) :
@@ -15902,7 +15902,7 @@ theorem affineIdentity_uniformRightEndpointSum_eq
     Rat.pow_succ, Rat.mul_inv_cancel]
 
 theorem affineIdentityLipschitz_integral_equiv_half :
-    (Integral.integralFor
+    (Integral.candidateValue
       (FunctionOnInterval.exactRat (fun x : Rat => x) 0 1)
       affineIdentityLipschitzConstruction).Equiv
       (RealRaw.ofRat (1 / 2)) := by
@@ -15945,7 +15945,7 @@ theorem affineIdentityLipschitz_integral_equiv_half :
       · exact Rat.mul_pos (by native_decide) ((Rat.natCast_pos).2 hn)) hr.2
 
 /-! The same affine integral is now given its elementary quadratic primitive.
-This is a concrete FTC instance for the generic `DefiniteIdentityFor` API:
+This is a concrete FTC instance for the generic `EndpointComparisonFor` API:
 the rectangle computation is unchanged, while the endpoint computation is
 the exact rational difference of `x^2 / 2`. -/
 def affineIdentityQuadraticPrimitive : FunctionOnInterval :=
@@ -16001,10 +16001,10 @@ theorem affineIdentityQuadraticPrimitive_endpoint_equiv_half :
   exact ⟨Rat.le_refl, Rat.le_refl⟩
 
 def affineIdentityQuadraticDefiniteIdentity :
-    Integral.DefiniteIdentityFor
+    Integral.EndpointComparisonFor
       (FunctionOnInterval.exactRat (fun x : Rat => x) 0 1)
       affineIdentityQuadraticPrimitive :=
-  Integral.DefiniteIdentityFor.ofConstruction rfl rfl
+  Integral.EndpointComparisonFor.ofConstruction rfl rfl
     affineIdentityLipschitzConstruction
     affineIdentityQuadraticPrimitive_endpoint_valid (by
   have hendpoint :
@@ -16015,7 +16015,7 @@ def affineIdentityQuadraticDefiniteIdentity :
   have hhalf : (RealRaw.ofRat (1 / 2)).Valid := by
     exact RealRaw.ofRat_valid _
   exact RealRaw.equiv_trans
-        (Integral.integralFor_valid
+        (Integral.candidateValue_valid
           (FunctionOnInterval.exactRat (fun x : Rat => x) 0 1)
           affineIdentityLipschitzConstruction)
         hhalf
@@ -16025,20 +16025,20 @@ def affineIdentityQuadraticDefiniteIdentity :
           affineIdentityQuadraticPrimitive_endpoint_equiv_half))
 
 def arctanKernelLipschitzConstruction :
-    Integral.ConstructionFor
+    Integral.CandidateFor
       (FunctionOnInterval.exactRat
         (fun x : Rat => 1 / (1 + x * x)) 0 1) :=
   LipschitzDyadic.construction (fun x : Rat => 1 / (1 + x * x)) 2
     oneOverOnePlusSquare_lipschitz_on_unit
 
 def arctanKernelLipschitzIntegral : RealRaw :=
-  Integral.integralFor
+  Integral.candidateValue
     (FunctionOnInterval.exactRat (fun x : Rat => 1 / (1 + x * x)) 0 1)
     arctanKernelLipschitzConstruction
 
 theorem arctanKernelLipschitzIntegral_valid :
     arctanKernelLipschitzIntegral.Valid :=
-  Integral.integralFor_valid
+  Integral.candidateValue_valid
     (FunctionOnInterval.exactRat (fun x : Rat => 1 / (1 + x * x)) 0 1)
     arctanKernelLipschitzConstruction
 

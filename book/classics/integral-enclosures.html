@@ -1,0 +1,26 @@
+<header><p class="classic-tag">Foundation · Particular functions, certified rectangles</p><h1>Integrals from whole chunks</h1><p class="lead">Prove how a particular function varies on each chunk. Enclose that variation, multiply by the chunk displacement, and add.</p></header>
+<h2 id="construction">The construction</h2>
+<p>At a chosen precision, every input has a value interval or rectangle. Over a whole chunk, compute an outer enclosure of those value boxes. Monotonicity can identify its bounds from the endpoints; otherwise use a proved range estimate for this function.</p>
+<section class="showcase-statement"><h3>What defines the integral</h3><p>Subdivide the domain, certify the whole-chunk ranges, and form the finite enclosing sums. Prove nesting, or justify finite intersections, and prove that their widths shrink to every positive rational tolerance. These boxes define the integral of this function on this domain.</p></section>
+<p>For real chunks of lengths \(h_j\ge0\), the sum is</p>
+\[\left[\sum_j h_jL_j,\ \sum_j h_jU_j\right].\]
+<p>For oriented complex chunks with displacements \(\Delta z_j\), it is</p>
+\[I_n=\sum_j B_{n,j}\Delta z_j.\]
+<p>A straight segment is subdivided directly in the plane. Parametrized formulas are later comparisons between explicit computations. A point sample by itself is not a bound over the chunk.</p>
+<h2 id="vertical">The vertical reciprocal segment</h2>
+<p>Move upward from \(1\) to \(1+i\). On a chunk from \(1+ia\) to \(1+ib\), with \(0\le a\le b\le1\), both coordinates of the reciprocal decrease. Its outer rectangle is</p>
+\[B_{a,b}=\left[\frac{1}{1+b^2},\frac{1}{1+a^2}\right]+i\left[-\frac{b}{1+b^2},-\frac{a}{1+a^2}\right].\]
+<p>Multiply by \(i(b-a)\). Rotation keeps a rectangle, but its lower and upper corners must be reordered:</p>
+\[i([A,B]+i[C,D])=[-D,-C]+i[A,B].\]
+<p>Add these contribution rectangles over the dyadic chunks. They are nested, and telescoping the coordinate variations gives</p>
+\[\operatorname{width}_{\mathrm{Re}} I_n=\operatorname{width}_{\mathrm{Im}} I_n=2^{-n-1}.\]
+<p>This construction, its whole-chunk bounds, nesting, and exact coordinate widths are checked in <code>VerticalReciprocalIntegral</code>. It constructs the value without using a logarithm. Identifying it with \(\operatorname{Log}(1+i)\) is a separate theorem. The <a href="ch-foundations.html#pi-log-one-plus-i">logarithm computation of \(\pi\)</a> explains that identification mathematically; its end-to-end Lean proof remains open.</p>
+<h2 id="formalization">What the formalization now distinguishes</h2>
+<p>The native real enclosure interface retains the partition, the bounds over each whole cell, and the literal sum. Increasing, decreasing, and interval-range schedules supply these data. The arctangent derivative-bound FTC has a checked instance retaining its local ranges.</p>
+<p>The complex polygonal certificate now requires soundness of the function's box evaluator. Every stage has a positive dyadic number of chunks. The constant open-segment construction is checked, including a nonzero first stage; rotation and whole-box soundness for the square function are checked too. The nonconstant reciprocal example above now has its own proved direct construction.</p>
+<p>Older records that could attach any valid number to an integrand are explicitly numerical candidates. Restricting a domain now requires a computation for that smaller domain. Polynomial endpoint cancellation, finite Gaussian prefixes, sampled abelian differentials, and supplied Cauchy quadrature data retain their actual scope.</p>
+<p>The midpoint Cauchy and square-pole computations have checked convergence and comparison results. Their agreement with independently refined direct contour rectangles remains a separate bridge. The new interface does not silently complete that bridge, general abelian integration, or the Cauchy integral formula.</p>
+<h2 id="audit">Repository audit</h2>
+<p>The inventory includes __MODULE_COUNT__ native modules, covering real and complex sums, FTC, monotone and turning-point methods, improper-integral comparisons, polynomial and Gaussian prefixes, Fourier and ODE consumers, and Cauchy/Taylor interfaces. Each entry records its role and integration-related declarations.</p>
+<p><a href="__REPO__docs/INTEGRAL_ENCLOSURES.md">Read the source audit</a> · <a href="reading/integral-inventory.json">Inspect the declaration inventory</a> · <a href="__REPO__ComputableAnalysis/IntegralEnclosure.lean">Real enclosure interface</a> · <a href="__REPO__ComputableAnalysis/ComplexIntegralEnclosure.lean">Complex chunk proofs</a></p>
+<p><a href="ch-integrals.html">Real integral computations</a> · <a href="ch-complex-paths.html">Complex paths</a> · <a href="complex-analysis.html">Cauchy computations and remaining bridges</a></p>

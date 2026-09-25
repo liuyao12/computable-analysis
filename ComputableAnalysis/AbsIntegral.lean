@@ -67,7 +67,7 @@ theorem absOnUnit_right_nondecreasing :
   rw [absRat_eq_self_of_nonneg hx.1, absRat_eq_self_of_nonneg hy.1]
   exact hxy
 
-def absOnUnit_left : MonotoneConstructionFor
+def absOnUnit_left : MonotoneCandidateFor
     (absOnUnit.restrict (-1) 0 (by native_decide) (by native_decide)
       (by native_decide)) where
   monotone := MonotoneOnInterval.ofNonincreasing absOnUnit_left_nondecreasing
@@ -75,7 +75,7 @@ def absOnUnit_left : MonotoneConstructionFor
     { compute := (RealRaw.ofRat (1 / 2)).compute
       certificate := RealRaw.ofRat_valid (1 / 2) }
 
-def absOnUnit_right : MonotoneConstructionFor
+def absOnUnit_right : MonotoneCandidateFor
     (absOnUnit.restrict 0 1 (by native_decide) (by native_decide)
       (by native_decide)) where
   monotone := MonotoneOnInterval.ofNondecreasing absOnUnit_right_nondecreasing
@@ -83,7 +83,7 @@ def absOnUnit_right : MonotoneConstructionFor
     { compute := (RealRaw.ofRat (1 / 2)).compute
       certificate := RealRaw.ofRat_valid (1 / 2) }
 
-def absOnUnit_piecewise : PiecewiseMonotoneConstructionFor absOnUnit where
+def absOnUnit_piecewise : PiecewiseMonotoneCandidateFor absOnUnit where
   pieces := 2
   positive := by native_decide
   point := absPartitionPoint
@@ -286,7 +286,7 @@ theorem absOnUnit_piecewise_cell_primitiveFTC :
           omega
 
 theorem absOnUnit_piecewise_primitiveFTC :
-    (generalIntegralFor absOnUnit absOnUnit_piecewise).Equiv
+    (generalCandidateValue absOnUnit absOnUnit_piecewise).Equiv
       (RealRaw.ofRat 1) := by
   have hneg : inDomainInterval (-1 : Rat) 1 (-1) := by
     constructor <;> native_decide
@@ -351,7 +351,7 @@ theorem absOnUnit_piecewise_primitiveFTC :
       absOnUnit_piecewise, absPartitionPoint] using
       (RealRaw.equiv_refl (v2 - v0) (RealRaw.sub_valid hv2 hv0))
   have hpiece :=
-    piecewiseMonotoneIntegralFor_equiv_totalPrimitiveEndpointDifference_of_telescope
+    piecewiseMonotoneCandidateValue_equiv_totalPrimitiveEndpointDifference_of_telescope
       absPrimitiveOnUnit absOnUnit absOnUnit_piecewise absPrimitivePointMem
       absOnUnit_piecewise_cell_primitiveFTC hvalues htransport htotal
   have hnegEval : v0.Equiv (RealRaw.ofRat (absPrimitiveRat (-1))) := by
@@ -380,37 +380,37 @@ theorem absOnUnit_piecewise_primitiveFTC :
     (RealRaw.sub_valid hv2 hv0)
     (RealRaw.sub_valid hposRat hnegRat) hone hsubTotal harithTotal
   have hpiece' :
-      (generalIntegralFor absOnUnit absOnUnit_piecewise).Equiv
+      (generalCandidateValue absOnUnit absOnUnit_piecewise).Equiv
         (piecewisePrimitiveTotalEndpointDifference absPrimitiveOnUnit absOnUnit
           absOnUnit_piecewise absPrimitivePointMem) := by
-    simpa [generalIntegralFor] using hpiece
+    simpa [generalCandidateValue] using hpiece
   have htotalOne' :
       (piecewisePrimitiveTotalEndpointDifference absPrimitiveOnUnit absOnUnit
         absOnUnit_piecewise absPrimitivePointMem).Equiv (RealRaw.ofRat 1) := by
     simpa [piecewisePrimitiveTotalEndpointDifference, absPrimitiveOnUnit,
       absOnUnit_piecewise, absPartitionPoint, v0, v1, v2] using htotalOne
   exact RealRaw.equiv_trans
-    (generalIntegralFor_valid absOnUnit absOnUnit_piecewise)
+    (generalCandidateValue_valid absOnUnit absOnUnit_piecewise)
     (piecewisePrimitiveTotalEndpointDifference_valid absPrimitiveOnUnit absOnUnit
       absOnUnit_piecewise absPrimitivePointMem)
     hone hpiece' htotalOne'
 
 theorem absOnUnit_piecewise_integral_valid :
-    (generalIntegralFor absOnUnit absOnUnit_piecewise).Valid :=
-  generalIntegralFor_valid absOnUnit absOnUnit_piecewise
+    (generalCandidateValue absOnUnit absOnUnit_piecewise).Valid :=
+  generalCandidateValue_valid absOnUnit absOnUnit_piecewise
 
 theorem absOnUnit_piecewise_integral_two_equiv :
-    (generalIntegralFor absOnUnit absOnUnit_piecewise).Equiv
+    (generalCandidateValue absOnUnit absOnUnit_piecewise).Equiv
       (piecewiseMonotoneCellIntegral absOnUnit absOnUnit_piecewise
         0 (by native_decide) +
         piecewiseMonotoneCellIntegral absOnUnit absOnUnit_piecewise
         1 (by native_decide)) := by
-  simpa [generalIntegralFor] using
-    (piecewiseMonotoneIntegralFor_two_equiv
+  simpa [generalCandidateValue] using
+    (piecewiseMonotoneCandidateValue_two_equiv
       absOnUnit absOnUnit_piecewise (by native_decide))
 
 theorem absOnUnit_piecewise_integral_equiv_one :
-    (generalIntegralFor absOnUnit absOnUnit_piecewise).Equiv
+    (generalCandidateValue absOnUnit absOnUnit_piecewise).Equiv
       (RealRaw.ofRat 1) := by
   apply RealRaw.sameStageOverlap_equiv
   intro n
@@ -420,7 +420,7 @@ theorem absOnUnit_piecewise_integral_equiv_one :
   have h1 : piecewiseMonotoneCellIntegral absOnUnit absOnUnit_piecewise
       1 (by native_decide) = RealRaw.ofRat (1 / 2) := by
     rfl
-  unfold generalIntegralFor piecewiseMonotoneIntegralFor
+  unfold generalCandidateValue piecewiseMonotoneCandidateValue
   change
     (List.foldl
       (fun acc k =>

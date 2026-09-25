@@ -41,7 +41,7 @@ theorem ofRat_sub_ofRat_equiv (p q : Rat) :
 def piecewisePrimitiveEndpointDifference
     (P : FunctionOnInterval)
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F)
+    (c : PiecewiseMonotoneCandidateFor F)
     (hP : forall i, i <= c.pieces ->
       inDomainInterval P.lower P.upper (c.point i))
     (k : Nat) (hk : k < c.pieces) : RealRaw :=
@@ -52,7 +52,7 @@ def piecewisePrimitiveEndpointDifference
 
 theorem piecewisePrimitiveEndpointDifference_valid
     (P F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F)
+    (c : PiecewiseMonotoneCandidateFor F)
     (hP : forall i, i <= c.pieces ->
       inDomainInterval P.lower P.upper (c.point i))
     (k : Nat) (hk : k < c.pieces) :
@@ -72,7 +72,7 @@ theorem piecewisePrimitiveEndpointDifference_valid
 
 def piecewisePrimitiveEndpointDifferenceList
     (P F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F)
+    (c : PiecewiseMonotoneCandidateFor F)
     (hP : forall i, i <= c.pieces ->
       inDomainInterval P.lower P.upper (c.point i)) : List RealRaw :=
   (List.range c.pieces).map (fun k =>
@@ -82,7 +82,7 @@ def piecewisePrimitiveEndpointDifferenceList
 
 theorem piecewisePrimitiveEndpointDifferenceList_length
     (P F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F)
+    (c : PiecewiseMonotoneCandidateFor F)
     (hP : forall i, i <= c.pieces ->
       inDomainInterval P.lower P.upper (c.point i)) :
     (piecewisePrimitiveEndpointDifferenceList P F c hP).length = c.pieces := by
@@ -90,7 +90,7 @@ theorem piecewisePrimitiveEndpointDifferenceList_length
 
 def piecewisePrimitiveTotalEndpointDifference
     (P F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F)
+    (c : PiecewiseMonotoneCandidateFor F)
     (hP : forall i, i <= c.pieces ->
       inDomainInterval P.lower P.upper (c.point i)) : RealRaw :=
   P.raw.evalRaw (c.point c.pieces)
@@ -100,7 +100,7 @@ def piecewisePrimitiveTotalEndpointDifference
 
 theorem piecewisePrimitiveTotalEndpointDifference_valid
     (P F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F)
+    (c : PiecewiseMonotoneCandidateFor F)
     (hP : forall i, i <= c.pieces ->
       inDomainInterval P.lower P.upper (c.point i)) :
     (piecewisePrimitiveTotalEndpointDifference P F c hP).Valid := by
@@ -122,9 +122,9 @@ The finite proof is the same transport/telescope argument as the integrand
 endpoint API, but its endpoint lists are evaluated by `P` rather than `F`.
 All representation changes are explicit premises.
 -/
-theorem piecewiseMonotoneIntegralFor_equiv_totalPrimitiveEndpointDifference_of_telescope
+theorem piecewiseMonotoneCandidateValue_equiv_totalPrimitiveEndpointDifference_of_telescope
     (P F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F)
+    (c : PiecewiseMonotoneCandidateFor F)
     (hP : forall i, i <= c.pieces ->
       inDomainInterval P.lower P.upper (c.point i))
     (hcell : forall k (hk : k < c.pieces),
@@ -138,7 +138,7 @@ theorem piecewiseMonotoneIntegralFor_equiv_totalPrimitiveEndpointDifference_of_t
         (rawAdjacentDifferenceList (first :: rest)))
     (htotal : (rawLast first rest - first).Equiv
       (piecewisePrimitiveTotalEndpointDifference P F c hP)) :
-    (piecewiseMonotoneIntegralFor F c).Equiv
+    (piecewiseMonotoneCandidateValue F c).Equiv
       (piecewisePrimitiveTotalEndpointDifference P F c hP) := by
   let cell : Nat -> RealRaw := fun k =>
     if hk : k < c.pieces then piecewiseMonotoneCellIntegral F c k hk
@@ -169,9 +169,9 @@ theorem piecewiseMonotoneIntegralFor_equiv_totalPrimitiveEndpointDifference_of_t
     simp [cell, List.mem_range.1 hk]
     exact piecewiseMonotoneCellIntegral_valid F c k (List.mem_range.1 hk)
   have hsum := finiteRawSum_equiv_of_forall hlist hcell_valid hendpoint
-  have hintegral := piecewiseMonotoneIntegralFor_equiv_finiteRawSum F c
+  have hintegral := piecewiseMonotoneCandidateValue_equiv_finiteRawSum F c
   have hintegral_endpoint := RealRaw.equiv_trans
-    (piecewiseMonotoneIntegralFor_valid F c)
+    (piecewiseMonotoneCandidateValue_valid F c)
     (finiteRawSum_valid _ hcell_valid)
     (finiteRawSum_valid _ hendpoint) hintegral hsum
   have hadjacent : forall x,
@@ -186,14 +186,14 @@ theorem piecewiseMonotoneIntegralFor_equiv_totalPrimitiveEndpointDifference_of_t
   have hsub : (rawLast first rest - first).Valid :=
     RealRaw.sub_valid hlast hfirst
   have hintegral_adjacent := RealRaw.equiv_trans
-    (piecewiseMonotoneIntegralFor_valid F c)
+    (piecewiseMonotoneCandidateValue_valid F c)
     (finiteRawSum_valid _ hendpoint)
     (finiteRawSum_valid _ hadjacent) hintegral_endpoint htransport_sum
   have hintegral_last := RealRaw.equiv_trans
-    (piecewiseMonotoneIntegralFor_valid F c)
+    (piecewiseMonotoneCandidateValue_valid F c)
     (finiteRawSum_valid _ hadjacent) hsub hintegral_adjacent htel
   exact RealRaw.equiv_trans
-    (piecewiseMonotoneIntegralFor_valid F c) hsub
+    (piecewiseMonotoneCandidateValue_valid F c) hsub
     (piecewisePrimitiveTotalEndpointDifference_valid P F c hP)
     hintegral_last htotal
 

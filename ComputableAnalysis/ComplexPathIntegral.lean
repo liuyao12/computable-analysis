@@ -5,8 +5,8 @@ import ComputableAnalysis.ComplexMultiplication
 # Complex path integrals over polygonal paths
 
 This file is the first computational layer for complex line integrals.  It
-uses only rational complex sample points and finite left Riemann sums along
-straight segments.
+uses rational complex chunks and sums of whole-chunk range rectangles.
+Point-sampled sums are retained only as finite quadrature helpers.
 -/
 
 namespace ComputableAnalysis
@@ -186,10 +186,29 @@ sample alone is not an upper or lower bound. -/
 structure EntireBoxFunctionRaw where
   point : FunctionRaw
   boxCompute : QBox -> QBox
+  rangePrecision : QBox -> Nat := fun _ => 0
 
 def constantBoxFunction (c : QComplex) : EntireBoxFunctionRaw where
   point := FunctionRaw.exact (fun _ => c)
   boxCompute := fun _ => QBox.point c
+
+/-- Soundness of a particular entire box evaluator. Every chosen point-value
+rectangle on an input box lies inside the computed outer enclosure. This is
+independent of the eventual integral's nesting and width certificate. -/
+structure EntireBoxFunctionRaw.Sound (f : EntireBoxFunctionRaw) : Prop where
+  entire : ∀ z, f.point.domain z
+  valid : f.point.Valid
+  range : ∀ (B : QBox) (z : QComplex) (hz : f.point.domain z),
+    B.lo ≤ z → z ≤ B.hi →
+    (f.point.compute z hz (f.rangePrecision B)).NestedIn (f.boxCompute B)
+
+theorem constantBoxFunction_sound (c : QComplex) :
+    (constantBoxFunction c).Sound := by
+  constructor
+  · intro z; trivial
+  · intro z hz; exact ComplexRaw.ofQComplex_valid c
+  · intro B z hz hlo hhi
+    exact ⟨QComplex.le_refl _, QComplex.le_refl _⟩
 
 /-! Finite endpoint algebra for polygonal paths. -/
 
@@ -533,28 +552,27 @@ theorem polygonalPolynomialPrimitiveTo_closed
     QComplex.sub, QComplex.add, QComplex.neg, QComplex.zero]
   constructor <;> grind
 
-/-! An exact finite polynomial path integral is useful when the differential is
-already presented by its primitive coefficients.  It is a rational-complex
-algorithm at every stage; no limiting path construction is involved. -/
-def polygonalPolynomialIntegralRaw
+/-! Finite polynomial endpoint computation. Agreement with the whole-chunk
+integral requires a separate FTC comparison; validity alone is not that proof. -/
+def polygonalPolynomialEndpointRaw
     (coefficients : List QComplex) (start : QComplex)
     (vertices : List QComplex) : ComplexRaw :=
   ComplexRaw.ofQComplex
     (polygonalPolynomialPrimitiveTo coefficients start vertices)
 
-theorem polygonalPolynomialIntegralRaw_valid
+theorem polygonalPolynomialEndpointRaw_valid
     (coefficients : List QComplex) (start : QComplex)
     (vertices : List QComplex) :
-    (polygonalPolynomialIntegralRaw coefficients start vertices).Valid := by
+    (polygonalPolynomialEndpointRaw coefficients start vertices).Valid := by
   exact ComplexRaw.ofQComplex_valid _
 
-theorem polygonalPolynomialIntegralRaw_equiv_endpoint
+theorem polygonalPolynomialEndpointRaw_equiv_endpoint
     (coefficients : List QComplex) (start endpoint : QComplex)
     (vertices : List QComplex) :
-    (polygonalPolynomialIntegralRaw coefficients start (vertices ++ [endpoint])).Equiv
+    (polygonalPolynomialEndpointRaw coefficients start (vertices ++ [endpoint])).Equiv
       (ComplexRaw.ofQComplex
         (polynomialPrimitiveIncrement coefficients start endpoint)) := by
-  rw [polygonalPolynomialIntegralRaw,
+  rw [polygonalPolynomialEndpointRaw,
     polygonalPolynomialPrimitiveTo_append_endpoint]
   exact ComplexRaw.equiv_refl _ (ComplexRaw.ofQComplex_valid _)
 
@@ -562,34 +580,34 @@ theorem polygonalPolynomialIntegralRaw_equiv_endpoint
 intermediate vertex.  This is the path-integral form of additivity: it is an
 exact rational identity for polynomial differentials, with no completed path
 or limiting integral involved. -/
-theorem polygonalPolynomialIntegralRaw_split_at
+theorem polygonalPolynomialEndpointRaw_split_at
     (coefficients : List QComplex) (start middle : QComplex)
     (pre suf : List QComplex) :
-    (polygonalPolynomialIntegralRaw coefficients start
+    (polygonalPolynomialEndpointRaw coefficients start
       (pre ++ [middle] ++ suf)).Equiv
       (ComplexRaw.ofQComplex
         (QComplex.add
           (polygonalPolynomialPrimitiveTo coefficients start (pre ++ [middle]))
           (polygonalPolynomialPrimitiveTo coefficients middle suf))) := by
-  rw [polygonalPolynomialIntegralRaw, polygonalPolynomialPrimitiveTo_split_at]
+  rw [polygonalPolynomialEndpointRaw, polygonalPolynomialPrimitiveTo_split_at]
   exact ComplexRaw.equiv_refl _ (ComplexRaw.ofQComplex_valid _)
 
-theorem polygonalPolynomialIntegralRaw_split_at_add
+theorem polygonalPolynomialEndpointRaw_split_at_add
     (coefficients : List QComplex) (start middle : QComplex)
     (pre suf : List QComplex) :
-    (polygonalPolynomialIntegralRaw coefficients start
+    (polygonalPolynomialEndpointRaw coefficients start
       (pre ++ [middle] ++ suf)).Equiv
       (ComplexRaw.add
-        (polygonalPolynomialIntegralRaw coefficients start (pre ++ [middle]))
-        (polygonalPolynomialIntegralRaw coefficients middle suf)) := by
+        (polygonalPolynomialEndpointRaw coefficients start (pre ++ [middle]))
+        (polygonalPolynomialEndpointRaw coefficients middle suf)) := by
   intro n
   apply (ComplexRaw.compareAt_overlap_iff
-    (polygonalPolynomialIntegralRaw coefficients start
+    (polygonalPolynomialEndpointRaw coefficients start
       (pre ++ [middle] ++ suf))
     (ComplexRaw.add
-      (polygonalPolynomialIntegralRaw coefficients start (pre ++ [middle]))
-      (polygonalPolynomialIntegralRaw coefficients middle suf)) n n).2
-  rw [polygonalPolynomialIntegralRaw,
+      (polygonalPolynomialEndpointRaw coefficients start (pre ++ [middle]))
+      (polygonalPolynomialEndpointRaw coefficients middle suf)) n n).2
+  rw [polygonalPolynomialEndpointRaw,
     polygonalPolynomialPrimitiveTo_split_at]
   change QBox.Overlaps
     (QBox.point
@@ -605,12 +623,12 @@ theorem polygonalPolynomialIntegralRaw_split_at_add
   unfold QBox.Overlaps
   exact ⟨QComplex.le_refl _, QComplex.le_refl _⟩
 
-theorem polygonalPolynomialIntegralRaw_closed_equiv_zero
+theorem polygonalPolynomialEndpointRaw_closed_equiv_zero
     (coefficients : List QComplex) (start : QComplex)
     (vertices : List QComplex) :
-    (polygonalPolynomialIntegralRaw coefficients start
+    (polygonalPolynomialEndpointRaw coefficients start
       (vertices ++ [start])).Equiv (ComplexRaw.ofQComplex QComplex.zero) := by
-  rw [polygonalPolynomialIntegralRaw, polygonalPolynomialPrimitiveTo_closed]
+  rw [polygonalPolynomialEndpointRaw, polygonalPolynomialPrimitiveTo_closed]
   exact ComplexRaw.equiv_refl _ (ComplexRaw.ofQComplex_valid _)
 
 /-- A point on the straight segment from `a` to `b`, with parameter `k/n`. -/
@@ -619,7 +637,7 @@ def segmentPoint (a b : QComplex) (n : Nat) (k : Nat) : QComplex :=
     (QComplex.scaleRat ((k : Rat) * (1 / (n : Rat)))
       (QComplex.sub b a))
 
-/-- The infinitesimal step `dz = (b-a)/n` for the segment from `a` to `b`. -/
+/-- The finite oriented displacement of one of the equal chunks. -/
 def segmentStep (a b : QComplex) (n : Nat) : QComplex :=
   QComplex.scaleRat (1 / (n : Rat)) (QComplex.sub b a)
 
@@ -843,14 +861,14 @@ theorem polygonalIntegralBoxEntire_constant_closed
 
 /-- A raw complex algorithm for a polygonal path integral.
 
-At stage `n`, it boxes each of the `n` subsegments of every path segment,
+At stage `n`, it boxes each of the `2^n` subsegments of every path segment,
 evaluates the integrand by interval arithmetic on each subsegment box, and
 adds the resulting `f(z) dz` boxes.  The output is an enclosure, not a left
 sum being treated as a lower bound. -/
 def polygonalIntegralRawEntire
     (f : EntireBoxFunctionRaw)
     (vertices : List QComplex) : ComplexRaw where
-  compute := fun n => polygonalIntegralBoxEntire f vertices n
+  compute := fun n => polygonalIntegralBoxEntire f vertices (2 ^ n)
 
 /-- The finite certificate needed to promote a polygonal box computation to a
 computable complex raw.  The three fields are exactly the project's
@@ -860,21 +878,23 @@ met.  The certificate deliberately leaves those estimates as explicit finite
 data rather than deriving them from completed-real convergence. -/
 structure PolygonalIntegralCertificate
     (f : EntireBoxFunctionRaw) (vertices : List QComplex) where
-  ordered : forall n, (polygonalIntegralBoxEntire f vertices n).Ordered
+  sound : f.Sound
+  ordered : forall n, (polygonalIntegralBoxEntire f vertices (2 ^ n)).Ordered
   nested : forall n m, n <= m ->
-    QBox.NestedIn (polygonalIntegralBoxEntire f vertices m)
-      (polygonalIntegralBoxEntire f vertices n)
+    QBox.NestedIn (polygonalIntegralBoxEntire f vertices (2 ^ m))
+      (polygonalIntegralBoxEntire f vertices (2 ^ n))
   widths_shrink : ComplexRaw.WidthsShrinkToZero
-    (polygonalIntegralBoxEntire f vertices)
+    (fun n => polygonalIntegralBoxEntire f vertices (2 ^ n))
 
 theorem PolygonalIntegralCertificate.of_stage_eq_point
     {f : EntireBoxFunctionRaw} {vertices : List QComplex}
-    (anchor : QComplex)
-    (hcompute : forall n, polygonalIntegralBoxEntire f vertices n =
+    (anchor : QComplex) (hsound : f.Sound)
+    (hcompute : forall n, polygonalIntegralBoxEntire f vertices (2 ^ n) =
       QBox.point anchor) :
     PolygonalIntegralCertificate f vertices := by
   refine
-    { ordered := ?_
+    { sound := hsound
+      ordered := ?_
       nested := ?_
       widths_shrink := ?_ }
   · intro n
@@ -886,6 +906,7 @@ theorem PolygonalIntegralCertificate.of_stage_eq_point
   · intro eps
     refine ⟨0, ?_⟩
     intro n hn
+    dsimp only
     rw [hcompute n]
     simp [QBox.point, QBox.width, QBox.height] <;> grind
 
@@ -896,7 +917,7 @@ theorem polygonalIntegralRawEntire_valid
   refine ⟨?_, ?_, certificate.widths_shrink⟩
   · intro n
     exact (QBox.ordered_iff_width_height_nonneg
-      (polygonalIntegralBoxEntire f vertices n)).1
+      (polygonalIntegralBoxEntire f vertices (2 ^ n))).1
       (certificate.ordered n)
   · intro n m hnm
     have hnest := certificate.nested n m hnm
@@ -906,8 +927,8 @@ theorem PolygonalIntegralCertificate.precision_witness
     {f : EntireBoxFunctionRaw} {vertices : List QComplex}
     (certificate : PolygonalIntegralCertificate f vertices) (eps : QPos) :
     ∃ N : Nat, ∀ n : Nat, N <= n ->
-      (polygonalIntegralBoxEntire f vertices n).width <= eps.val /\
-      (polygonalIntegralBoxEntire f vertices n).height <= eps.val := by
+      (polygonalIntegralBoxEntire f vertices (2 ^ n)).width <= eps.val /\
+      (polygonalIntegralBoxEntire f vertices (2 ^ n)).height <= eps.val := by
   exact certificate.widths_shrink eps
 
 def zero : QComplex := QComplex.zero
@@ -971,23 +992,23 @@ def cauchyCheckUnitSquareZCubedPlusTwoZ (n : Nat) : Bool :=
 #eval! (zSquaredUnitSquareSegmentBoxes 10).map
   (QBox.compactDecimal 12)
 #eval! QBox.compactDecimal 12 (zSquaredUnitSquareLeftSum 10)
+#eval! zSquaredUnitSquareRaw.compactDecimalAt 12 3
+#eval! cauchyCheckUnitSquareZSquared 3
+#eval! zSquaredUnitSquareRaw.compactDecimalAt 12 7
+#eval! cauchyCheckUnitSquareZSquared 7
 #eval! zSquaredUnitSquareRaw.compactDecimalAt 12 10
 #eval! cauchyCheckUnitSquareZSquared 10
-#eval! zSquaredUnitSquareRaw.compactDecimalAt 12 100
-#eval! cauchyCheckUnitSquareZSquared 100
-#eval! zSquaredUnitSquareRaw.compactDecimalAt 12 1000
-#eval! cauchyCheckUnitSquareZSquared 1000
 
 #eval! (zCubedPlusTwoZUnitSquareSegmentBoxes 10).map
   (QBox.compactDecimal 12)
 #eval! QBox.compactDecimal 12
   (zCubedPlusTwoZUnitSquareLeftSum 10)
+#eval! zCubedPlusTwoZUnitSquareRaw.compactDecimalAt 12 3
+#eval! cauchyCheckUnitSquareZCubedPlusTwoZ 3
+#eval! zCubedPlusTwoZUnitSquareRaw.compactDecimalAt 12 7
+#eval! cauchyCheckUnitSquareZCubedPlusTwoZ 7
 #eval! zCubedPlusTwoZUnitSquareRaw.compactDecimalAt 12 10
 #eval! cauchyCheckUnitSquareZCubedPlusTwoZ 10
-#eval! zCubedPlusTwoZUnitSquareRaw.compactDecimalAt 12 100
-#eval! cauchyCheckUnitSquareZCubedPlusTwoZ 100
-#eval! zCubedPlusTwoZUnitSquareRaw.compactDecimalAt 12 1000
-#eval! cauchyCheckUnitSquareZCubedPlusTwoZ 1000
 
 end ComplexPathIntegral
 

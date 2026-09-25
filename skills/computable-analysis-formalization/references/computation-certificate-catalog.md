@@ -42,7 +42,7 @@ For a definite-integral identity from a checked derivative formula, use
 `FunctionOnInterval.ofRealFunRaw` and
 `Integral.effectiveFTCConstructionFor`.  The public endpoint theorem is
 `Integral.effectiveFTCIntegral_equiv_endpointDifference`.  Use
-`Integral.DefiniteIdentityFor` or a dedicated finite comparison when a
+`Integral.EndpointComparisonFor` or a dedicated finite comparison when a
 different construction already exists. Certify the whole integration segment,
 including pole avoidance and valid branches, and state the result with an
 explicit base point and endpoint difference. Do not introduce a separate

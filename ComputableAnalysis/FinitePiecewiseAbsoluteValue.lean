@@ -38,7 +38,7 @@ theorem absoluteValueRight_nondecreasing :
   exact hxy
 
 def absoluteValueLeftConstruction :
-    MonotoneConstructionFor absoluteValueLeft where
+    MonotoneCandidateFor absoluteValueLeft where
   monotone := MonotoneOnInterval.ofNonincreasing
     absoluteValueLeft_nonincreasing
   construction :=
@@ -46,7 +46,7 @@ def absoluteValueLeftConstruction :
       certificate := RealRaw.ofRat_valid (1 / 2) }
 
 def absoluteValueRightConstruction :
-    MonotoneConstructionFor absoluteValueRight where
+    MonotoneCandidateFor absoluteValueRight where
   monotone := MonotoneOnInterval.ofNondecreasing
     absoluteValueRight_nondecreasing
   construction :=
@@ -54,7 +54,7 @@ def absoluteValueRightConstruction :
       certificate := RealRaw.ofRat_valid (1 / 2) }
 
 def absoluteValuePiecewise :
-    PiecewiseMonotoneConstructionFor absoluteValueOnUnit where
+    PiecewiseMonotoneCandidateFor absoluteValueOnUnit where
   pieces := 2
   positive := by native_decide
   point
@@ -91,7 +91,7 @@ def absoluteValuePiecewise :
             omega
 
 theorem absoluteValuePiecewise_integral_equiv_one :
-    (piecewiseMonotoneIntegralFor absoluteValueOnUnit
+    (piecewiseMonotoneCandidateValue absoluteValueOnUnit
       absoluteValuePiecewise).Equiv (RealRaw.ofRat 1) := by
   have hleft :
       piecewiseMonotoneCellIntegral absoluteValueOnUnit
@@ -120,10 +120,10 @@ theorem absoluteValuePiecewise_integral_equiv_one :
       { lo := 1, hi := 1 }
     simp [QInterval.addInterval, QInterval.Overlaps]
     exact ⟨by native_decide, by native_decide⟩
-  have hpiece := piecewiseMonotoneIntegralFor_two_equiv
+  have hpiece := piecewiseMonotoneCandidateValue_two_equiv
     absoluteValueOnUnit absoluteValuePiecewise (by native_decide)
   exact RealRaw.equiv_trans
-    (piecewiseMonotoneIntegralFor_valid absoluteValueOnUnit
+    (piecewiseMonotoneCandidateValue_valid absoluteValueOnUnit
       absoluteValuePiecewise)
     (RealRaw.add_valid
       (piecewiseMonotoneCellIntegral_valid absoluteValueOnUnit
