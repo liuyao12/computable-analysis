@@ -27,7 +27,7 @@ numbers.
 The integral is over the concrete interval `[a,b]`; equality means
 `RealRaw.Equiv`, i.e. interval overlap at every requested precision. -/
 def FTCStepAt (F dF : RealFunRaw) (a b : Rat) : Prop :=
-  Exists fun c : Integral.Construction dF a b =>
+  Exists fun c : Integral.SampleConstruction dF a b =>
   Exists fun hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b) =>
     DefiniteIntegralEqualsEndpointDifference F dF a b c hendpoint
 
@@ -1427,10 +1427,10 @@ def orientedKernelInterval (x : Rat) : FunctionOnInterval :=
     arctanKernelOnInterval x 0
 
 structure KernelIntegralAt (x : Rat) where
-  construction : Integral.ConstructionFor (orientedKernelInterval x)
+  construction : Integral.CandidateFor (orientedKernelInterval x)
 
 def positiveKernelIntegralRaw (x : Rat) (c : KernelIntegralAt x) : RealRaw :=
-  Integral.integralFor (orientedKernelInterval x) c.construction
+  Integral.candidateValue (orientedKernelInterval x) c.construction
 
 def kernelIntegralRaw (x : Rat) (c : KernelIntegralAt x) : RealRaw :=
   if 0 <= x then
@@ -1441,7 +1441,7 @@ def kernelIntegralRaw (x : Rat) (c : KernelIntegralAt x) : RealRaw :=
 theorem positiveKernelIntegralRaw_valid
     (x : Rat) (c : KernelIntegralAt x) :
     (positiveKernelIntegralRaw x c).Valid :=
-  Integral.integralFor_valid (orientedKernelInterval x) c.construction
+  Integral.candidateValue_valid (orientedKernelInterval x) c.construction
 
 theorem kernelIntegralRaw_valid
     (x : Rat) (c : KernelIntegralAt x) :

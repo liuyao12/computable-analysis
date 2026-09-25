@@ -344,13 +344,13 @@ def tangentSquareDensityOnUnit : FunctionOnInterval :=
   FunctionOnInterval.exactRat tangentSquareDensity 0 1
 
 def tangentSquareIntegral : RealRaw :=
-  Integral.integralFor tangentSquareDensityOnUnit
+  Integral.candidateValue tangentSquareDensityOnUnit
     (IntegralIdentities.LipschitzDyadic.construction
       tangentSquareDensity 64 tangentSquareDensity_lipschitz_on_unit)
 
 theorem tangentSquareIntegral_valid :
     tangentSquareIntegral.Valid := by
-  exact Integral.integralFor_valid tangentSquareDensityOnUnit
+  exact Integral.candidateValue_valid tangentSquareDensityOnUnit
     (IntegralIdentities.LipschitzDyadic.construction
       tangentSquareDensity 64 tangentSquareDensity_lipschitz_on_unit)
 

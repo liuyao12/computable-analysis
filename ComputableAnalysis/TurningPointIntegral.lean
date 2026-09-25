@@ -448,9 +448,9 @@ structure SingleTurnIntegralCandidate (F : FunctionOnInterval) where
   valueRange_ordered : 0 <= valueRange.width
   valueRange_abs_bound : exists M, IntervalAbsBound valueRange M
   leftConstruction :
-    forall n, MonotoneConstructionFor (turning.leftRestriction n)
+    forall n, MonotoneCandidateFor (turning.leftRestriction n)
   rightConstruction :
-    forall n, MonotoneConstructionFor (turning.rightRestriction n)
+    forall n, MonotoneCandidateFor (turning.rightRestriction n)
   middle_encloses :
     forall n x
       (hx : inDomainInterval (turning.left n) (turning.right n) x)
@@ -464,12 +464,12 @@ structure SingleTurnIntegralCandidate (F : FunctionOnInterval) where
   left_widths_shrink :
     RealRaw.WidthsShrinkToZero
       (fun n =>
-        (monotoneIntegralFor (turning.leftRestriction n)
+        (monotoneCandidateValue (turning.leftRestriction n)
           (leftConstruction n)).compute n)
   right_widths_shrink :
     RealRaw.WidthsShrinkToZero
       (fun n =>
-        (monotoneIntegralFor (turning.rightRestriction n)
+        (monotoneCandidateValue (turning.rightRestriction n)
           (rightConstruction n)).compute n)
 
 /-- The public name emphasizes that this is one reusable turning-bracket
@@ -483,12 +483,12 @@ namespace SingleTurnIntegralCandidate
 
 def leftBox {F : FunctionOnInterval}
     (C : SingleTurnIntegralCandidate F) (n : Nat) : QInterval :=
-  (monotoneIntegralFor (C.turning.leftRestriction n)
+  (monotoneCandidateValue (C.turning.leftRestriction n)
     (C.leftConstruction n)).compute n
 
 def rightBox {F : FunctionOnInterval}
     (C : SingleTurnIntegralCandidate F) (n : Nat) : QInterval :=
-  (monotoneIntegralFor (C.turning.rightRestriction n)
+  (monotoneCandidateValue (C.turning.rightRestriction n)
     (C.rightConstruction n)).compute n
 
 def middleBox {F : FunctionOnInterval}
@@ -512,13 +512,13 @@ def raw {F : FunctionOnInterval}
 theorem leftBox_width_nonneg {F : FunctionOnInterval}
     (C : SingleTurnIntegralCandidate F) (n : Nat) :
     0 <= (C.leftBox n).width :=
-  (monotoneIntegralFor_valid (C.turning.leftRestriction n)
+  (monotoneCandidateValue_valid (C.turning.leftRestriction n)
     (C.leftConstruction n)).1 n
 
 theorem rightBox_width_nonneg {F : FunctionOnInterval}
     (C : SingleTurnIntegralCandidate F) (n : Nat) :
     0 <= (C.rightBox n).width :=
-  (monotoneIntegralFor_valid (C.turning.rightRestriction n)
+  (monotoneCandidateValue_valid (C.turning.rightRestriction n)
     (C.rightConstruction n)).1 n
 
 theorem middleBox_width_nonneg {F : FunctionOnInterval}
@@ -757,14 +757,14 @@ theorem stabilizedRaw_equiv_anchor {F : FunctionOnInterval}
     completion.candidate_equiv_anchor completion.anchor_width_le_radius
 
 /-- Expose a completed finite-turn computation through the standard
-`ConstructionFor` interface.  The construction reads the stabilized raw
+`CandidateFor` interface.  The construction reads the stabilized raw
 algorithm, while its validity is inherited from the explicit finite-turn
 completion certificate.  No universal piecewise-integrability theorem is
 introduced here: the function-specific anchor remains part of the input. -/
 def constructionFor {F : FunctionOnInterval}
     {C : SingleTurnIntegralCandidate F}
     (completion : SingleTurnIntegralCompletion C) :
-    Integral.ConstructionFor F where
+    Integral.CandidateFor F where
   compute := completion.stabilizedRaw.compute
   certificate := completion.stabilizedRaw_valid
 
@@ -773,18 +773,18 @@ theorem constructionFor_compute_eq {F : FunctionOnInterval}
     (completion : SingleTurnIntegralCompletion C) :
     completion.constructionFor.compute = completion.stabilizedRaw.compute := rfl
 
-theorem integralFor_valid {F : FunctionOnInterval}
+theorem candidateValue_valid {F : FunctionOnInterval}
     {C : SingleTurnIntegralCandidate F}
     (completion : SingleTurnIntegralCompletion C) :
-    (Integral.integralFor F completion.constructionFor).Valid :=
-  Integral.integralFor_valid F completion.constructionFor
+    (Integral.candidateValue F completion.constructionFor).Valid :=
+  Integral.candidateValue_valid F completion.constructionFor
 
 /- The standard public integral retains the completion's certified anchor.
    This is the final representation bridge for a finite-turn candidate. -/
 theorem integralFor_equiv_anchor {F : FunctionOnInterval}
     {C : SingleTurnIntegralCandidate F}
     (completion : SingleTurnIntegralCompletion C) :
-    (Integral.integralFor F completion.constructionFor).Equiv
+    (Integral.candidateValue F completion.constructionFor).Equiv
       completion.anchor := by
   change completion.stabilizedRaw.Equiv completion.anchor
   exact completion.stabilizedRaw_equiv_anchor

@@ -84,6 +84,31 @@ project foundation. Mathlib's standard `Path` uses the real unit interval;
 continue using finite polygonal paths unless a permitted replacement is
 constructed. No Mathlib topology import is introduced by the arctangent work.
 
+### Whole-chunk enclosures define each integral
+
+Begin with the particular integrand and domain. On each chunk, certify an
+outer enclosure of the function's value rectangles throughout that chunk.
+Proved increasing or decreasing behavior selects endpoint bounds; otherwise
+use an explicit function-specific range estimate. Multiply the range by the
+real length or the finite oriented complex displacement, and sum. Prove
+nesting (or justified intersection) and shrinking widths. Point samples,
+validity of an unrelated number, and endpoint formulas alone are insufficient.
+
+Straight complex segments are subdivided geometrically. Do not define their
+integrals by first postulating a parametrized real integral. A pullback may
+subsequently compare two finite constructions. Keep rotation, orientation,
+whole-domain pole avoidance, and approximation error explicit.
+
+Use `Integral.EnclosureConstructionFor` for direct real enclosure sums and
+`Integral.EnclosureRealizationFor` for a computation compared with shrinking
+whole-cell sums. `enclosureRealizationOfEffectiveFTC` retains the local range
+proofs already present in a derivative-bound FTC certificate. The old
+`CandidateFor`, `SampleConstruction`, and monotone-candidate wrappers only
+package numerical computations: they do not themselves establish integrability.
+For complex sums, `PolygonalIntegralCertificate` additionally requires
+`EntireBoxFunctionRaw.Sound`; a positive mesh is required from the first stage.
+See [the complete native-source audit](docs/INTEGRAL_ENCLOSURES.md).
+
 ### State integration formulas as definite integrals
 
 Do not introduce a separate formal notion of primitive or indefinite integral.
@@ -427,7 +452,7 @@ Integral.effectiveFTCIntegral_equiv_endpointDifference
 For a public integral, certify `dF.Valid` and its domain on `[a,b]`, then use
 `FunctionOnInterval.ofRealFunRaw` and `Integral.effectiveFTCConstructionFor`.
 The raw stabilizer remains the internal value computation; clients should
-normally expose the resulting `ConstructionFor`.
+normally retain its ranges using `enclosureRealizationOfEffectiveFTC`.
 
 When an endpoint identity itself must be packaged, use
 `Integral.DefiniteIdentityFor`. Pass a certified endpoint computation to the
@@ -439,9 +464,9 @@ These theorems do not assume the native finite sums are already nested. The
 older `FTC.effectiveFTCStabilizedRaw_valid` route is compatibility API for
 existing `EffectiveFTC` clients and is not the preferred foundation.
 
-For algebra on certified integrals, reuse
-`Integral.Construction.addOfCommonPlan` and
-`Integral.Construction.scaleRat`; their corresponding `integral_*_equiv`
+For algebra on sampled candidates, reuse
+`Integral.SampleConstruction.addOfCommonPlan` and
+`Integral.SampleConstruction.scaleRat`; their corresponding `integral_*_equiv`
 theorems transport the result. Addition requires a shared finite plan, making
 the exact rectangle identity explicit instead of hiding a resampling step.
 

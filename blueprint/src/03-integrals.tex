@@ -5,6 +5,14 @@ rectangles and controlling the error.  It is not defined through an
 antiderivative.  This independence is what will make the fundamental theorem
 an equivalence theorem rather than a convention.
 
+\paragraph{Formalization boundary.}
+The native interface now retains the partition and the whole-cell value
+bounds in \texttt{Integral.EnclosureConstructionFor}. Its range proofs
+are separate from nesting and convergence. A valid numerical candidate
+without those bounds is not an integral construction. Endpoint and series
+computations require a comparison with the same enclosure sums. The
+arctangent derivative-bound construction supplies such a comparison.
+
 \section{Partitions and cell enclosures}
 A rational tagged partition is
 \[

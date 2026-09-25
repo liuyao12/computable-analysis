@@ -1,3 +1,4 @@
+import ComputableAnalysis.ComplexIntegralEnclosure
 import ComputableAnalysis.ArctanTaylorBoundary
 import ComputableAnalysis.ComplexAnalysis
 import ComputableAnalysis.ZetaReal

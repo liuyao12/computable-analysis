@@ -11,7 +11,7 @@ normalized by arctangent. The regular part is computed by two triangle
 contours. The coefficient is an arbitrary valid represented complex number.
 
 This is a local simple-pole theorem. It does not assert a general residue
-theorem for unspecified meromorphic functions or unspecified contour transport.
+theorem for unspecified meromorphic functions or unspecified quadrature transport.
 -/
 namespace ComputableAnalysis.ComplexAnalysis
 open QComplex
@@ -44,12 +44,12 @@ structure Square.Regular (s : Square) (g : QComplex → ComplexRaw) where
   lower : CauchyData s.lower g
   upper : CauchyData s.upper g
 
-def Square.Regular.contour {s : Square} {g : QComplex → ComplexRaw}
-    (h : s.Regular g) : ComplexRaw := ComplexRaw.add h.lower.contour h.upper.contour
+def Square.Regular.quadrature {s : Square} {g : QComplex → ComplexRaw}
+    (h : s.Regular g) : ComplexRaw := ComplexRaw.add h.lower.quadrature h.upper.quadrature
 
 theorem Square.Regular.valid {s : Square} {g : QComplex → ComplexRaw}
-    (h : s.Regular g) : h.contour.Valid :=
-  ComplexRaw.add_valid h.lower.contour_valid h.upper.contour_valid
+    (h : s.Regular g) : h.quadrature.Valid :=
+  ComplexRaw.add_valid h.lower.quadrature_valid h.upper.quadrature_valid
 
 private theorem raw_add_zero (z : ComplexRaw) (hz : z.Valid) :
     (ComplexRaw.add z (ComplexRaw.ofQComplex zero)).Equiv z := by
@@ -61,43 +61,43 @@ private theorem raw_add_zero (z : ComplexRaw) (hz : z.Valid) :
   constructor <;> constructor <;> grind only
 
 theorem Square.Regular.cauchy {s : Square} {g : QComplex → ComplexRaw}
-    (h : s.Regular g) : h.contour.Equiv (ComplexRaw.ofQComplex zero) := by
+    (h : s.Regular g) : h.quadrature.Equiv (ComplexRaw.ofQComplex zero) := by
   have he := ComplexRaw.add_equiv h.lower.cauchy h.upper.cauchy
   exact ComplexRaw.equiv_trans h.valid
     (ComplexRaw.add_valid (ComplexRaw.ofQComplex_valid zero) (ComplexRaw.ofQComplex_valid zero))
     (ComplexRaw.ofQComplex_valid zero) he (raw_add_zero _ (ComplexRaw.ofQComplex_valid zero))
 
 /-- Represented values of a supplied simple-pole decomposition. The domain
-requires actual separation from the pole, including on contour segments. -/
+requires actual separation from the pole, including on quadrature segments. -/
 def simplePoleValue (s : Square) (rho : ComplexRaw) (g : QComplex → ComplexRaw)
     (z : QComplex) (_hz : normSq (sub z s.center) ≠ 0) : ComplexRaw :=
   ComplexRaw.add (ComplexRaw.qcomplexLeftMul (inverse (sub z s.center)) rho) (g z)
 
 /-- A split quadrature: sampled singular pullbacks and sampled regular
 triangles, never an evaluator defined to be the predicted residue value. -/
-def Square.residueContour (s : Square) (rho : ComplexRaw)
+def Square.residueQuadrature (s : Square) (rho : ComplexRaw)
     {g : QComplex → ComplexRaw} (regular : s.Regular g) (tags : SquarePole.Sampling) : ComplexRaw :=
-  ComplexRaw.add (ComplexRaw.mul rho (SquarePole.contour s.center s.radius tags)) regular.contour
+  ComplexRaw.add (ComplexRaw.mul rho (SquarePole.quadrature s.center s.radius tags)) regular.quadrature
 
-theorem Square.residueContour_valid (s : Square) (rho : ComplexRaw) (hrho : rho.Valid)
+theorem Square.residueQuadrature_valid (s : Square) (rho : ComplexRaw) (hrho : rho.Valid)
     {g : QComplex → ComplexRaw} (regular : s.Regular g) (tags : SquarePole.Sampling) :
-    (s.residueContour rho regular tags).Valid :=
+    (s.residueQuadrature rho regular tags).Valid :=
   ComplexRaw.add_valid (ComplexRaw.mul_valid hrho
-    (SquarePole.contour_valid s.center s.radius (Rat.ne_of_gt s.positive) tags)) regular.valid
+    (SquarePole.quadrature_valid s.center s.radius (Rat.ne_of_gt s.positive) tags)) regular.valid
 
 /-- Exact local simple-pole residue identity with arbitrary represented
 complex residue. The only analytic input on the regular part is local
-first-order approximation data; its contour value is proved, not assumed. -/
+first-order approximation data; its quadrature value is proved, not assumed. -/
 theorem Square.residue (s : Square) (rho : ComplexRaw) (hrho : rho.Valid)
     {g : QComplex → ComplexRaw} (regular : s.Regular g) (tags : SquarePole.Sampling) :
-    (s.residueContour rho regular tags).Equiv (ComplexRaw.mul rho PDE.CauchyContour.twoPiI) := by
+    (s.residueQuadrature rho regular tags).Equiv (ComplexRaw.mul rho PDE.CauchyContour.twoPiI) := by
   have hp := ComplexRaw.mul_equiv hrho hrho
-    (SquarePole.contour_valid s.center s.radius (Rat.ne_of_gt s.positive) tags)
+    (SquarePole.quadrature_valid s.center s.radius (Rat.ne_of_gt s.positive) tags)
     PDE.CauchyContour.twoPiI_valid (ComplexRaw.equiv_refl rho hrho)
-    (SquarePole.contour_equiv_twoPiI s.center s.radius (Rat.ne_of_gt s.positive) tags)
+    (SquarePole.quadrature_equiv_twoPiI s.center s.radius (Rat.ne_of_gt s.positive) tags)
   have h := ComplexRaw.add_equiv hp regular.cauchy
   have hv := ComplexRaw.mul_valid hrho PDE.CauchyContour.twoPiI_valid
-  exact ComplexRaw.equiv_trans (s.residueContour_valid rho hrho regular tags)
+  exact ComplexRaw.equiv_trans (s.residueQuadrature_valid rho hrho regular tags)
     (ComplexRaw.add_valid hv (ComplexRaw.ofQComplex_valid zero)) hv h (raw_add_zero _ hv)
 
 /-- Changing the residue representation and both internal integration
@@ -106,16 +106,16 @@ theorem Square.residue_independent (s : Square) (rho sigma : ComplexRaw)
     (hrho : rho.Valid) (hsigma : sigma.Valid) (he : rho.Equiv sigma)
     {g h : QComplex → ComplexRaw} (rg : s.Regular g) (rh : s.Regular h)
     (tags other : SquarePole.Sampling) :
-    (s.residueContour rho rg tags).Equiv (s.residueContour sigma rh other) := by
+    (s.residueQuadrature rho rg tags).Equiv (s.residueQuadrature sigma rh other) := by
   have hm := ComplexRaw.mul_equiv hrho hsigma
     PDE.CauchyContour.twoPiI_valid PDE.CauchyContour.twoPiI_valid he
     (ComplexRaw.equiv_refl _ PDE.CauchyContour.twoPiI_valid)
-  exact ComplexRaw.equiv_trans (s.residueContour_valid rho hrho rg tags)
+  exact ComplexRaw.equiv_trans (s.residueQuadrature_valid rho hrho rg tags)
     (ComplexRaw.mul_valid hrho PDE.CauchyContour.twoPiI_valid)
-    (s.residueContour_valid sigma hsigma rh other) (s.residue rho hrho rg tags)
+    (s.residueQuadrature_valid sigma hsigma rh other) (s.residue rho hrho rg tags)
     (ComplexRaw.equiv_trans (ComplexRaw.mul_valid hrho PDE.CauchyContour.twoPiI_valid)
       (ComplexRaw.mul_valid hsigma PDE.CauchyContour.twoPiI_valid)
-      (s.residueContour_valid sigma hsigma rh other) hm
+      (s.residueQuadrature_valid sigma hsigma rh other) hm
       (ComplexRaw.equiv_symm (s.residue sigma hsigma rh other)))
 
 end ComputableAnalysis.ComplexAnalysis

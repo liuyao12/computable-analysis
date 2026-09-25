@@ -44,7 +44,7 @@ box widths at most η, the Darboux gap is at most `δ*V+2*L*η`. Finite assembly
 adds the budgets. Start with supplied rational breakpoints; for an irrational
 turn, use shrinking rational brackets and a range bound on the remaining
 central cell. Reuse `FinitePiecewiseRectangles`,
-`Integral.PiecewiseMonotoneConstructionFor` in `Calculus`, and
+`Integral.PiecewiseMonotoneCandidateFor` in `Calculus`, and
 `TurningPointIntegral`; do not postulate a universal integral.
 
 For the rational pole kernel, the horizontal-side components reduce (up to

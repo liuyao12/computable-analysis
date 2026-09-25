@@ -31,3 +31,7 @@ jobs:
         run: lake env lean scripts/check_basel.lean
       - name: Audit arctangent Taylor convergence and divergence
         run: lake env lean scripts/check_arctan_taylor.lean
+      - name: Audit whole-chunk integral constructions
+        run: |
+          python3 scripts/audit_integral_enclosures.py
+          lake env lean scripts/check_integral_enclosures.lean

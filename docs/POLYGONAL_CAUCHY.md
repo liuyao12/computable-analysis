@@ -5,7 +5,7 @@ complete Fuchs’s criterion or Painlevé–Gambier classification.
 
 The public import is `ComputableAnalysis.ComplexAnalysis`. Its objects are
 rational complex points, finite oriented triangles, and `ComplexRaw` interval
-computations. No Mathlib real or complex numbers are imported. The contour
+computations. No Mathlib real or complex numbers are imported. The quadrature
 layer does not depend on the order of a differential equation.
 
 ## Checked statements
@@ -26,7 +26,7 @@ the mesh depth \(d_n\ge n\) and each leaf’s uniform approximation error is at 
 \]
 where \(P\) is the sum of the original triangle perimeters. The constructor
 intersects widened boxes around actual computed sums. It does not define the
-contour to be zero. No contour-vanishing assertion is a certificate field.
+quadrature to be zero. No quadrature-vanishing assertion is a certificate field.
 A quadratic-remainder specialization gives the geometric estimate
 \(MP2^{-n}\) and instantiates the general interface. The polynomial
 \(z^2\) is a concrete, nonconstant client.
@@ -35,7 +35,7 @@ A quadratic-remainder specialization gives the geometric estimate
 foundation surface, retaining only its arctangent period layer. Its evaluator
 uses literal transformed reciprocal pullbacks, supplied rational tags, and
 finite-prefix stabilization. Midpoints and left endpoints are distinct
-instantiations. `contour_equiv_twoPiI` identifies both with the pre-existing
+instantiations. `quadrature_equiv_twoPiI` identifies both with the pre-existing
 geometric circle computation:
 \[
   \oint_{\partial S}\frac{dz}{z-a}\simeq2\pi i.
@@ -49,7 +49,7 @@ its split quadrature satisfies
   \oint_{\partial S}\left(\frac{\rho}{z-a}+g(z)\right)\,dz
   \simeq2\pi i\rho.
 \]
-The contour is a positive rational square centered at the pole. The
+The quadrature is a positive rational square centered at the pole. The
 regular-part quadratures may choose independent internal schedules;
 `Square.triangulate` proves finite diagonal cancellation for a common mesh.
 `Square.residue_independent` proves agreement under equivalent residue

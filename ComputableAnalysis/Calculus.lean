@@ -2834,25 +2834,25 @@ nested, and shrinking for the integrand at hand. -/
 def staticDyadicAlgorithm (f : RealFunRaw) (a b : Rat) : Raw :=
   algorithm f a b staticDyadicPlan
 
-/-- The explicit data needed to construct an integral as a computable
-real.  The public object is still `integral`; this structure just stores the
-algorithmic choices and the proof that they work. -/
-structure Construction (f : RealFunRaw) (a b : Rat) where
+/-- A valid sampled-sum candidate. Validity of a sampled computation alone
+is not a certificate that it encloses an integral. A whole-cell range proof
+and a shrinking quadrature error are separate obligations. -/
+structure SampleConstruction (f : RealFunRaw) (a b : Rat) where
   plan : Nat -> Plan
   certificate : Certificate (algorithm f a b plan)
 
-/-- The constructive integral operator. -/
-def integral (f : RealFunRaw) (a b : Rat) (c : Construction f a b) : RealRaw :=
+/-- The value of a sampled-sum candidate; no integrability assertion. -/
+def sampleValue (f : RealFunRaw) (a b : Rat) (c : SampleConstruction f a b) : RealRaw :=
   Certificate.realRaw c.certificate
 
-namespace Construction
+namespace SampleConstruction
 
 theorem addAlgorithm_compute_of_common_plan
     {f g : RealFunRaw} {a b : Rat}
-    (cf : Construction f a b) (cg : Construction g a b)
+    (cf : SampleConstruction f a b) (cg : SampleConstruction g a b)
     (hplan : cf.plan = cg.plan) :
     (algorithm (RealFunRaw.add f g) a b cf.plan).compute =
-      ((integral f a b cf) + (integral g a b cg)).compute := by
+      ((sampleValue f a b cf) + (sampleValue g a b cg)).compute := by
   funext n
   change riemannLeftInterval (RealFunRaw.add f g) a b
       (cf.plan n).subdivisions (cf.plan n).evalPrecision =
@@ -2863,22 +2863,22 @@ theorem addAlgorithm_compute_of_common_plan
         (cg.plan n).subdivisions (cg.plan n).evalPrecision)
   rw [riemannLeftInterval_add, hplan]
 
-/-! Addition of certified integral computations with a common finite plan.
+/-! Addition of certified sampled-sum computations with a common finite plan.
 
 The resulting construction runs the pointwise sum evaluator on exactly the
 same samples.  Its certificate is inherited from raw-real addition through
 the exact finite rectangle identity `riemannLeftInterval_add`; no uniqueness
-of limits or completed integral space is used. -/
+of limits or completed integration space is used. -/
 def addOfCommonPlan
     {f g : RealFunRaw} {a b : Rat}
-    (cf : Construction f a b) (cg : Construction g a b)
+    (cf : SampleConstruction f a b) (cg : SampleConstruction g a b)
     (hplan : cf.plan = cg.plan) :
-    Construction (RealFunRaw.add f g) a b where
+    SampleConstruction (RealFunRaw.add f g) a b where
   plan := cf.plan
   certificate := by
-    have hf : (integral f a b cf).Valid := cf.certificate.valid
-    have hg : (integral g a b cg).Valid := cg.certificate.valid
-    have hsum : ((integral f a b cf) + (integral g a b cg)).Valid :=
+    have hf : (sampleValue f a b cf).Valid := cf.certificate.valid
+    have hg : (sampleValue g a b cg).Valid := cg.certificate.valid
+    have hsum : ((sampleValue f a b cf) + (sampleValue g a b cg)).Valid :=
       RealRaw.add_valid hf hg
     apply Certificate.ofValid
     unfold Raw.Valid
@@ -2887,77 +2887,77 @@ def addOfCommonPlan
 
 theorem scaleRatAlgorithm_compute
     {f : RealFunRaw} {a b : Rat} (hab : a <= b)
-    (r : Rat) (cf : Construction f a b) :
+    (r : Rat) (cf : SampleConstruction f a b) :
     (algorithm (RealFunRaw.scaleRat r f) a b cf.plan).compute =
-      (RealRaw.scaleRat r (integral f a b cf)).compute := by
+      (RealRaw.scaleRat r (sampleValue f a b cf)).compute := by
   funext n
   change riemannLeftInterval (RealFunRaw.scaleRat r f) a b
       (cf.plan n).subdivisions (cf.plan n).evalPrecision =
-    RealRaw.scaleRatCompute r (integral f a b cf) n
+    RealRaw.scaleRatCompute r (sampleValue f a b cf) n
   rw [riemannLeftInterval_scale r f a b hab]
   rfl
 
-/-! Rational scaling of a certified integral computation on an ordered
+/-! Rational scaling of a certified sampled-sum computation on an ordered
 interval.  The plan is unchanged, including its evaluation precision; the
 finite rectangle identity handles both scalar signs and the certificate is
 transported from `RealRaw.scaleRat`. -/
 def scaleRat
     {f : RealFunRaw} {a b : Rat} (hab : a <= b)
-    (r : Rat) (cf : Construction f a b) :
-    Construction (RealFunRaw.scaleRat r f) a b where
+    (r : Rat) (cf : SampleConstruction f a b) :
+    SampleConstruction (RealFunRaw.scaleRat r f) a b where
   plan := cf.plan
   certificate := by
-    have hf : (integral f a b cf).Valid := cf.certificate.valid
-    have hscaled : (RealRaw.scaleRat r (integral f a b cf)).Valid :=
+    have hf : (sampleValue f a b cf).Valid := cf.certificate.valid
+    have hscaled : (RealRaw.scaleRat r (sampleValue f a b cf)).Valid :=
       RealRaw.scaleRat_valid hf
     apply Certificate.ofValid
     unfold Raw.Valid
     rw [scaleRatAlgorithm_compute hab r cf]
     exact hscaled
 
-end Construction
+end SampleConstruction
 
-/-! The construction-level integral is exactly additive when its two inputs
+/-! The construction-level sampled value is exactly additive when its two inputs
 share a finite sampling plan.  This theorem packages both existence of the
 sum construction and its representation edge. -/
 theorem integral_add_equiv_of_common_plan
     {f g : RealFunRaw} {a b : Rat}
-    (cf : Construction f a b) (cg : Construction g a b)
+    (cf : SampleConstruction f a b) (cg : SampleConstruction g a b)
     (hplan : cf.plan = cg.plan) :
-    (integral (RealFunRaw.add f g) a b
-      (Construction.addOfCommonPlan cf cg hplan)).Equiv
-        ((integral f a b cf) + (integral g a b cg)) := by
+    (sampleValue (RealFunRaw.add f g) a b
+      (SampleConstruction.addOfCommonPlan cf cg hplan)).Equiv
+        ((sampleValue f a b cf) + (sampleValue g a b cg)) := by
   have hvalid :
-      (integral (RealFunRaw.add f g) a b
-        (Construction.addOfCommonPlan cf cg hplan)).Valid :=
-    (Construction.addOfCommonPlan cf cg hplan).certificate.valid
+      (sampleValue (RealFunRaw.add f g) a b
+        (SampleConstruction.addOfCommonPlan cf cg hplan)).Valid :=
+    (SampleConstruction.addOfCommonPlan cf cg hplan).certificate.valid
   apply RealRaw.equiv_of_compute_eq hvalid
-  exact Construction.addAlgorithm_compute_of_common_plan cf cg hplan
+  exact SampleConstruction.addAlgorithm_compute_of_common_plan cf cg hplan
 
-/-! The construction-level integral commutes with every rational scalar on
+/-! The construction-level sampled value commutes with every rational scalar on
 an ordered interval. -/
 theorem integral_scaleRat_equiv
     {f : RealFunRaw} {a b : Rat} (hab : a <= b)
-    (r : Rat) (cf : Construction f a b) :
-    (integral (RealFunRaw.scaleRat r f) a b
-      (Construction.scaleRat hab r cf)).Equiv
-        (RealRaw.scaleRat r (integral f a b cf)) := by
+    (r : Rat) (cf : SampleConstruction f a b) :
+    (sampleValue (RealFunRaw.scaleRat r f) a b
+      (SampleConstruction.scaleRat hab r cf)).Equiv
+        (RealRaw.scaleRat r (sampleValue f a b cf)) := by
   have hvalid :
-      (integral (RealFunRaw.scaleRat r f) a b
-        (Construction.scaleRat hab r cf)).Valid :=
-    (Construction.scaleRat hab r cf).certificate.valid
+      (sampleValue (RealFunRaw.scaleRat r f) a b
+        (SampleConstruction.scaleRat hab r cf)).Valid :=
+    (SampleConstruction.scaleRat hab r cf).certificate.valid
   apply RealRaw.equiv_of_compute_eq hvalid
-  exact Construction.scaleRatAlgorithm_compute hab r cf
+  exact SampleConstruction.scaleRatAlgorithm_compute hab r cf
 
-/-- Two integral constructions with the same plan represent the same raw
-integral when their integrand enclosures agree at every finite sample read by
+/-- Two sampled-sum constructions with the same plan represent the same raw
+value when their integrand enclosures agree at every finite sample read by
 that plan.  This is the formal reason a dyadic-only special-function
-evaluator can replace a general evaluator inside the equal-dyadic integral:
+evaluator can replace a general evaluator inside the equal-dyadic sampled computation:
 the replacement need not be defined by the same algorithm away from the
 sample grid. -/
 theorem integral_equiv_of_plan_and_samples
     {f g : RealFunRaw} {a b : Rat}
-    (cf : Construction f a b) (cg : Construction g a b)
+    (cf : SampleConstruction f a b) (cg : SampleConstruction g a b)
     (hplan : cf.plan = cg.plan)
     (hsamples : forall n k,
       k < (cf.plan n).subdivisions ->
@@ -2965,15 +2965,15 @@ theorem integral_equiv_of_plan_and_samples
         (cf.plan n).evalPrecision =
         g.compute (leftPoint a b (cf.plan n).subdivisions k)
         (cf.plan n).evalPrecision) :
-    (integral f a b cf).Equiv (integral g a b cg) := by
+    (sampleValue f a b cf).Equiv (sampleValue g a b cg) := by
   apply RealRaw.sameStageOverlap_equiv
   intro n
   apply (RealRaw.compareAt_overlap_iff
-    (integral f a b cf) (integral g a b cg) n n).2
+    (sampleValue f a b cf) (sampleValue g a b cg) n n).2
   have hcompute :
-      (integral f a b cf).compute n =
-        (integral g a b cg).compute n := by
-    unfold integral Certificate.realRaw Raw.toRealRaw algorithm
+      (sampleValue f a b cf).compute n =
+        (sampleValue g a b cg).compute n := by
+    unfold sampleValue Certificate.realRaw Raw.toRealRaw algorithm
     rw [← hplan]
     apply riemannLeftInterval_congr_of_samples
     intro k hk
@@ -2981,7 +2981,7 @@ theorem integral_equiv_of_plan_and_samples
   rw [hcompute]
   unfold QInterval.Overlaps
   have hwidth := cg.certificate.width_nonneg n
-  change 0 <= ((integral g a b cg).compute n).width at hwidth
+  change 0 <= ((sampleValue g a b cg).compute n).width at hwidth
   grind [QInterval.width]
 
 /-- The interval-valued sample-transport theorem for equal-dyadic integrals.
@@ -2993,7 +2993,7 @@ This is the intended interface for replacing the arctangent-backed sine
 evaluator by a separately implemented nested-radical evaluator. -/
 theorem integral_equiv_of_plan_and_sample_overlaps
     {f g : RealFunRaw} {a b : Rat} (hab : a <= b)
-    (cf : Construction f a b) (cg : Construction g a b)
+    (cf : SampleConstruction f a b) (cg : SampleConstruction g a b)
     (hplan : cf.plan = cg.plan)
     (hsamples : forall n k,
       k < (cf.plan n).subdivisions ->
@@ -3004,12 +3004,12 @@ theorem integral_equiv_of_plan_and_sample_overlaps
         (g.compute
           (leftPoint a b (cf.plan n).subdivisions k)
           (cf.plan n).evalPrecision)) :
-    (integral f a b cf).Equiv (integral g a b cg) := by
+    (sampleValue f a b cf).Equiv (sampleValue g a b cg) := by
   apply RealRaw.sameStageOverlap_equiv
   intro n
   apply (RealRaw.compareAt_overlap_iff
-    (integral f a b cf) (integral g a b cg) n n).2
-  unfold integral Certificate.realRaw Raw.toRealRaw algorithm
+    (sampleValue f a b cf) (sampleValue g a b cg) n n).2
+  unfold sampleValue Certificate.realRaw Raw.toRealRaw algorithm
   rw [← hplan]
   exact riemannLeftInterval_overlap_of_samples f g a b hab
     (cf.plan n).subdivisions (cf.plan n).evalPrecision
@@ -3019,7 +3019,7 @@ theorem integral_equiv_of_plan_and_sample_overlaps
 def constantFunRaw (c : Rat) : RealFunRaw :=
   RealFunRaw.exact (fun _ => c)
 
-/-- The exact linear primitive `x ↦ c*x`, used for the constant-integral
+/-- The exact linear primitive `x ↦ c*x`, used for the constant-sum
 sanity check. -/
 def linearPrimitiveFunRaw (c : Rat) : RealFunRaw :=
   RealFunRaw.exact (fun x => c * x)
@@ -3043,10 +3043,10 @@ theorem constant_algorithm_compute
   simp [Raw.compute, algorithm, constantPlan]
   exact riemannLeftInterval_constant_one c a b 0
 
-/-- The exact one-cell constant-integrand algorithm is a valid integral
+/-- The exact one-cell constant-integrand algorithm is a valid sampled value
 construction on every rational interval. -/
 def constantConstruction (c a b : Rat) :
-    Construction (constantFunRaw c) a b where
+    SampleConstruction (constantFunRaw c) a b where
   plan := constantPlan
   certificate := by
     refine ⟨?_, ?_, ?_⟩
@@ -3066,33 +3066,33 @@ def constantConstruction (c a b : Rat) :
 
 theorem constantIntegral_compute
     (c a b : Rat) (n : Nat) :
-    (integral (constantFunRaw c) a b (constantConstruction c a b)).compute n =
+    (sampleValue (constantFunRaw c) a b (constantConstruction c a b)).compute n =
       { lo := (b - a) * c, hi := (b - a) * c } := by
-  simp [integral, Certificate.realRaw, Raw.toRealRaw, constantConstruction,
+  simp [sampleValue, Certificate.realRaw, Raw.toRealRaw, constantConstruction,
     constant_algorithm_compute]
 
 theorem constantIntegral_valid (c a b : Rat) :
-    (integral (constantFunRaw c) a b (constantConstruction c a b)).Valid :=
+    (sampleValue (constantFunRaw c) a b (constantConstruction c a b)).Valid :=
   (constantConstruction c a b).certificate.valid
 
 /-- Constant integrals respect pointwise addition. -/
 theorem constantIntegral_add_equiv (c d a b : Rat) :
-    (integral (constantFunRaw (c + d)) a b
+    (sampleValue (constantFunRaw (c + d)) a b
       (constantConstruction (c + d) a b)).Equiv
         { compute := RealRaw.addCompute
-            (integral (constantFunRaw c) a b
+            (sampleValue (constantFunRaw c) a b
               (constantConstruction c a b))
-            (integral (constantFunRaw d) a b
+            (sampleValue (constantFunRaw d) a b
               (constantConstruction d a b)) } := by
   apply RealRaw.sameStageOverlap_equiv
   intro n
   apply (RealRaw.compareAt_overlap_iff _ _ n n).2
   change QInterval.Overlaps
-    ((integral (constantFunRaw (c + d)) a b
+    ((sampleValue (constantFunRaw (c + d)) a b
       (constantConstruction (c + d) a b)).compute n)
     (RealRaw.addCompute
-      (integral (constantFunRaw c) a b (constantConstruction c a b))
-      (integral (constantFunRaw d) a b (constantConstruction d a b)) n)
+      (sampleValue (constantFunRaw c) a b (constantConstruction c a b))
+      (sampleValue (constantFunRaw d) a b (constantConstruction d a b)) n)
   rw [constantIntegral_compute]
   unfold RealRaw.addCompute
   rw [constantIntegral_compute c a b n, constantIntegral_compute d a b n]
@@ -3103,19 +3103,19 @@ theorem constantIntegral_add_equiv (c d a b : Rat) :
 
 /-- Constant integrals respect rational scalar multiplication. -/
 theorem constantIntegral_scaleRat_equiv (r c a b : Rat) :
-    (integral (constantFunRaw (r * c)) a b
+    (sampleValue (constantFunRaw (r * c)) a b
       (constantConstruction (r * c) a b)).Equiv
         { compute := RealRaw.scaleRatCompute r
-            (integral (constantFunRaw c) a b
+            (sampleValue (constantFunRaw c) a b
               (constantConstruction c a b)) } := by
   apply RealRaw.sameStageOverlap_equiv
   intro n
   apply (RealRaw.compareAt_overlap_iff _ _ n n).2
   change QInterval.Overlaps
-    ((integral (constantFunRaw (r * c)) a b
+    ((sampleValue (constantFunRaw (r * c)) a b
       (constantConstruction (r * c) a b)).compute n)
     (RealRaw.scaleRatCompute r
-      (integral (constantFunRaw c) a b (constantConstruction c a b)) n)
+      (sampleValue (constantFunRaw c) a b (constantConstruction c a b)) n)
   rw [constantIntegral_compute]
   unfold RealRaw.scaleRatCompute
   rw [constantIntegral_compute c a b n]
@@ -3130,22 +3130,22 @@ theorem constantIntegral_scaleRat_equiv (r c a b : Rat) :
 
 /-- Constant integrals are additive on adjacent rational intervals. -/
 theorem constantIntegral_adjacent_additive (k a b c : Rat) :
-    (integral (constantFunRaw k) a c
+    (sampleValue (constantFunRaw k) a c
       (constantConstruction k a c)).Equiv
         { compute := RealRaw.addCompute
-            (integral (constantFunRaw k) a b
+            (sampleValue (constantFunRaw k) a b
               (constantConstruction k a b))
-            (integral (constantFunRaw k) b c
+            (sampleValue (constantFunRaw k) b c
               (constantConstruction k b c)) } := by
   apply RealRaw.sameStageOverlap_equiv
   intro n
   apply (RealRaw.compareAt_overlap_iff _ _ n n).2
   change QInterval.Overlaps
-    ((integral (constantFunRaw k) a c
+    ((sampleValue (constantFunRaw k) a c
       (constantConstruction k a c)).compute n)
     (RealRaw.addCompute
-      (integral (constantFunRaw k) a b (constantConstruction k a b))
-      (integral (constantFunRaw k) b c (constantConstruction k b c)) n)
+      (sampleValue (constantFunRaw k) a b (constantConstruction k a b))
+      (sampleValue (constantFunRaw k) b c (constantConstruction k b c)) n)
   rw [constantIntegral_compute]
   unfold RealRaw.addCompute
   rw [constantIntegral_compute k a b n, constantIntegral_compute k b c n]
@@ -3159,35 +3159,35 @@ the left and right sides may differ; equality is interval-overlap equivalence
 of the resulting computable reals. -/
 def Linear : Prop :=
   forall (f g : RealFunRaw) (a b : Rat)
-    (cf : Construction f a b)
-    (cg : Construction g a b)
-    (cadd : Construction (RealFunRaw.add f g) a b)
+    (cf : SampleConstruction f a b)
+    (cg : SampleConstruction g a b)
+    (cadd : SampleConstruction (RealFunRaw.add f g) a b)
     (_hsum : RealRaw.ValidCompute
-      (RealRaw.addCompute (integral f a b cf) (integral g a b cg))),
-      (integral (RealFunRaw.add f g) a b cadd).Equiv
-        { compute := RealRaw.addCompute (integral f a b cf) (integral g a b cg) }
+      (RealRaw.addCompute (sampleValue f a b cf) (sampleValue g a b cg))),
+      (sampleValue (RealFunRaw.add f g) a b cadd).Equiv
+        { compute := RealRaw.addCompute (sampleValue f a b cf) (sampleValue g a b cg) }
 
 /-- Rational scalar compatibility. -/
 def CompatibleWithScaleRat : Prop :=
   forall (r : Rat) (f : RealFunRaw) (a b : Rat)
-    (cf : Construction f a b)
-    (cscale : Construction (RealFunRaw.scaleRat r f) a b)
+    (cf : SampleConstruction f a b)
+    (cscale : SampleConstruction (RealFunRaw.scaleRat r f) a b)
     (_hscale : RealRaw.ValidCompute
-      (RealRaw.scaleRatCompute r (integral f a b cf))),
-      (integral (RealFunRaw.scaleRat r f) a b cscale).Equiv
-        { compute := RealRaw.scaleRatCompute r (integral f a b cf) }
+      (RealRaw.scaleRatCompute r (sampleValue f a b cf))),
+      (sampleValue (RealFunRaw.scaleRat r f) a b cscale).Equiv
+        { compute := RealRaw.scaleRatCompute r (sampleValue f a b cf) }
 
 /-- Compatibility with adjoining intervals:
-`integral a c f = integral a b f + integral b c f`. -/
+`sampleValue a c f = sampleValue a b f + sampleValue b c f`. -/
 def AdditiveOnAdjacentIntervals : Prop :=
   forall (f : RealFunRaw) (a b c : Rat)
-    (cab : Construction f a b)
-    (cbc : Construction f b c)
-    (cac : Construction f a c)
+    (cab : SampleConstruction f a b)
+    (cbc : SampleConstruction f b c)
+    (cac : SampleConstruction f a c)
     (_hsum : RealRaw.ValidCompute
-      (RealRaw.addCompute (integral f a b cab) (integral f b c cbc))),
-      (integral f a c cac).Equiv
-        { compute := RealRaw.addCompute (integral f a b cab) (integral f b c cbc) }
+      (RealRaw.addCompute (sampleValue f a b cab) (sampleValue f b c cbc))),
+      (sampleValue f a c cac).Equiv
+        { compute := RealRaw.addCompute (sampleValue f a b cab) (sampleValue f b c cbc) }
 
 end Integral
 
@@ -3198,7 +3198,7 @@ right effective continuity and boundedness hypotheses, one should be able to
 choose plans whose interval sums form a valid `RealRaw`.  The exact
 hypotheses will be sharpened as the continuity layer matures. -/
 def Integral.ExistsConstruction (f : RealFunRaw) (a b : Rat) : Prop :=
-  Nonempty (Integral.Construction f a b)
+  Nonempty (Integral.SampleConstruction f a b)
 
 def endpointDifferenceInterval (F : RealFunRaw) (a b : Rat) (prec : Nat) : QInterval :=
   let A := F.compute a prec
@@ -3332,9 +3332,9 @@ Equality of computable reals is `RealRaw.Equiv`: at every common computation sta
 the two rational intervals overlap. -/
 def DefiniteIntegralEqualsEndpointDifference
     (F dF : RealFunRaw) (a b : Rat)
-    (c : Integral.Construction dF a b)
+    (c : Integral.SampleConstruction dF a b)
     (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b)) : Prop :=
-  (Integral.integral dF a b c).Equiv
+  (Integral.sampleValue dF a b c).Equiv
     (endpointDifferenceRaw F a b hendpoint)
 
 /-- The computable-number conclusion of FTC.
@@ -7367,28 +7367,26 @@ end FunctionOnInterval
 
 namespace Integral
 
-/-- Project-facing integral construction for a partial function on a whole
-rational interval.
+/-- A valid numerical candidate associated with an interval function.
 
-The interface is intentionally proof-relevant: a concrete construction must
-supply its own finite computation and `RealRaw.ValidCompute` certificate.
-Concrete Lipschitz--Darboux and monotone constructions live in the integral
-identity modules; this structure does not assert a universal integrability
-theorem for every interval-regular function. -/
-structure ConstructionFor (F : FunctionOnInterval) where
+The function parameter is a label only: these two fields do NOT prove a
+whole-cell range bound, quadrature convergence, or an integral identity.
+Use `Integral.EnclosureConstructionFor` for an integral with that evidence.
+Concrete legacy clients retain their separate rectangle or FTC proofs. -/
+structure CandidateFor (F : FunctionOnInterval) where
   compute : Nat -> QInterval
   certificate : RealRaw.ValidCompute compute
 
-def integralFor (F : FunctionOnInterval) (c : ConstructionFor F) : RealRaw where
+def candidateValue (F : FunctionOnInterval) (c : CandidateFor F) : RealRaw where
   compute := c.compute
 
-theorem integralFor_compute_eq (F : FunctionOnInterval)
-    (c : ConstructionFor F) (n : Nat) :
-    (integralFor F c).compute n = c.compute n := rfl
+theorem candidateValue_compute_eq (F : FunctionOnInterval)
+    (c : CandidateFor F) (n : Nat) :
+    (candidateValue F c).compute n = c.compute n := rfl
 
-theorem integralFor_valid (F : FunctionOnInterval)
-    (c : ConstructionFor F) :
-    (integralFor F c).Valid :=
+theorem candidateValue_valid (F : FunctionOnInterval)
+    (c : CandidateFor F) :
+    (candidateValue F c).Valid :=
   c.certificate
 
 /-- The domain-aware integral construction produced by the canonical
@@ -7398,14 +7396,14 @@ The provider supplies pointwise validity and interval-domain coverage for the
 derivative evaluator.  The FTC certificate supplies the finite partitions,
 derivative boxes, endpoint control, and shrinking widths.  Prefix
 stabilization then provides the `ValidCompute` field required by
-`ConstructionFor`; clients do not need to repeat that boilerplate. -/
+`CandidateFor`; clients do not need to repeat that boilerplate. -/
 def effectiveFTCConstructionFor
     {F dF : RealFunRaw} {a b : Rat}
     (h : EffectiveDerivativeBoundFTC F dF a b)
     (hdF : dF.Valid)
     (hdomain : forall x, inDomainInterval a b x -> dF.domain x)
     (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b)) :
-    ConstructionFor (FunctionOnInterval.ofRealFunRaw dF a b hdomain hdF) where
+    CandidateFor (FunctionOnInterval.ofRealFunRaw dF a b hdomain hdF) where
   compute := (h.stabilizedBoundedIntegralRaw hendpoint).compute
   certificate := h.stabilizedBoundedIntegralRaw_valid hendpoint
 
@@ -7417,7 +7415,7 @@ theorem effectiveFTCIntegral_equiv_endpointDifference
     (hdF : dF.Valid)
     (hdomain : forall x, inDomainInterval a b x -> dF.domain x)
     (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b)) :
-    (integralFor (FunctionOnInterval.ofRealFunRaw dF a b hdomain hdF)
+    (candidateValue (FunctionOnInterval.ofRealFunRaw dF a b hdomain hdF)
       (effectiveFTCConstructionFor
         h hdF hdomain hendpoint)).Equiv
       (endpointDifferenceRaw F a b hendpoint) := by
@@ -7426,7 +7424,7 @@ theorem effectiveFTCIntegral_equiv_endpointDifference
 /-! A reusable anchor-free constructor.  A candidate evaluator need not first
 be related to a completed or independently named real: finite future
 containment plus shrinking radii already supplies the nesting certificate
-required by `ConstructionFor`. -/
+required by `CandidateFor`. -/
 def constructionFor_of_future_containment
     (F : FunctionOnInterval) (candidate : RealRaw) (radius : Nat -> Rat)
     (hcandidate_ordered : forall n, 0 <= (candidate.compute n).width)
@@ -7435,7 +7433,7 @@ def constructionFor_of_future_containment
       (QInterval.expand (candidate.compute k) (radius k)).ContainsInterval
         (candidate.compute n))
     (hradius_shrinks : ShrinksToZero radius) :
-    ConstructionFor F where
+    CandidateFor F where
   compute := (RealRaw.prefixStabilize candidate radius).compute
   certificate := RealRaw.prefixStabilize_valid_of_future
     hcandidate_ordered hcandidate_shrinks hfuture hradius_shrinks
@@ -7449,7 +7447,7 @@ theorem constructionFor_of_future_containment_integral_equiv_candidate
         (candidate.compute n))
     (hradius_shrinks : ShrinksToZero radius) :
     candidate.Equiv
-      (integralFor F
+      (candidateValue F
         (constructionFor_of_future_containment F candidate radius
           hcandidate_ordered hcandidate_shrinks hfuture hradius_shrinks)) := by
   exact RealRaw.candidate_equiv_prefixStabilize_of_future
@@ -7951,11 +7949,11 @@ theorem stabilizedRaw_equiv_endpointDifference
 end TwoStageCandidateDerivativeFTC
 
 def Integral.ExistsConstructionFor (F : FunctionOnInterval) : Prop :=
-  Nonempty (Integral.ConstructionFor F)
+  Nonempty (Integral.CandidateFor F)
 
 theorem integral_construction_proves_well_defined_for
     {F : FunctionOnInterval}
-    (c : Integral.ConstructionFor F) :
+    (c : Integral.CandidateFor F) :
     Integral.ExistsConstructionFor F :=
   ⟨c⟩
 
@@ -11720,7 +11718,7 @@ def intervalRegularDarbouxScheduleConstructionFor
     {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
     {hinterval : F.lower <= F.upper}
     (s : IntervalRegularDarbouxSchedule F hregular hinterval) :
-    Integral.ConstructionFor F where
+    Integral.CandidateFor F where
   compute := (intervalRegularDarbouxScheduleRaw s).compute
   certificate := intervalRegularDarbouxScheduleRaw_valid s
 
@@ -11728,7 +11726,7 @@ def intervalRegularDarbouxScheduleIntegralFor
     {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
     {hinterval : F.lower <= F.upper}
     (s : IntervalRegularDarbouxSchedule F hregular hinterval) : RealRaw :=
-  Integral.integralFor F (intervalRegularDarbouxScheduleConstructionFor s)
+  Integral.candidateValue F (intervalRegularDarbouxScheduleConstructionFor s)
 
 theorem intervalRegularDarbouxScheduleIntegralFor_precision_witness
     {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
@@ -11744,7 +11742,7 @@ theorem intervalRegularDarbouxScheduleIntegralFor_valid
     {hinterval : F.lower <= F.upper}
     (s : IntervalRegularDarbouxSchedule F hregular hinterval) :
     (intervalRegularDarbouxScheduleIntegralFor s).Valid :=
-  Integral.integralFor_valid F (intervalRegularDarbouxScheduleConstructionFor s)
+  Integral.candidateValue_valid F (intervalRegularDarbouxScheduleConstructionFor s)
 
 /-! The public integral constructor preserves the schedule's finite width
 budget.  This is the general consumer-facing form; specialized schedules can
@@ -12107,13 +12105,13 @@ def MonotoneDarbouxSchedule.ofAutomaticLinearPrecision
 /-- Convert a certified monotone Darboux schedule into the public integral
 construction interface.  The executable computation is exactly the schedule's
 equal-mesh endpoint sum; the schedule validity theorem supplies the
-`RealRaw.ValidCompute` certificate required by `ConstructionFor`. -/
+`RealRaw.ValidCompute` certificate required by `CandidateFor`. -/
 def monotoneDarbouxScheduleConstructionFor
     {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
     {hmonotone : NondecreasingOnInterval F}
     {hinterval : F.lower <= F.upper}
     (s : MonotoneDarbouxSchedule F hregular hmonotone hinterval) :
-    Integral.ConstructionFor F where
+    Integral.CandidateFor F where
   compute := (monotoneDarbouxScheduleRaw s).compute
   certificate := monotoneDarbouxScheduleRaw_valid s
 
@@ -12131,7 +12129,7 @@ def monotoneDarbouxScheduleIntegralFor
     {hmonotone : NondecreasingOnInterval F}
     {hinterval : F.lower <= F.upper}
     (s : MonotoneDarbouxSchedule F hregular hmonotone hinterval) : RealRaw :=
-  Integral.integralFor F (monotoneDarbouxScheduleConstructionFor s)
+  Integral.candidateValue F (monotoneDarbouxScheduleConstructionFor s)
 
 theorem monotoneDarbouxScheduleIntegralFor_valid
     {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
@@ -12139,7 +12137,7 @@ theorem monotoneDarbouxScheduleIntegralFor_valid
     {hinterval : F.lower <= F.upper}
     (s : MonotoneDarbouxSchedule F hregular hmonotone hinterval) :
     (monotoneDarbouxScheduleIntegralFor s).Valid :=
-  Integral.integralFor_valid F (monotoneDarbouxScheduleConstructionFor s)
+  Integral.candidateValue_valid F (monotoneDarbouxScheduleConstructionFor s)
 
 /-! Expose the monotone schedule's finite width budget at the public integral
 interface.  The monotonicity proof controls the cell ranges; this theorem
@@ -12157,16 +12155,18 @@ theorem monotoneDarbouxScheduleIntegralFor_width_le_of_tolerance
   change ((monotoneDarbouxScheduleRaw s).compute n).width <= eps
   exact monotoneDarbouxScheduleRaw_width_le_of_tolerance s n eps hbudget
 
-/-- The first-class integral object for monotone interval functions.
+/-- Legacy packaging of monotonicity and a numerical candidate.
 
-The intended construction is by lower and upper endpoint sums on a static
+There is no field connecting the candidate to its integrand. Specific
+clients must supply that connection. The intended construction is by lower
+and upper endpoint sums on a static
 dyadic mesh, with width controlled by total variation times mesh size.  The
 present structure separates that monotonicity certificate from the resulting
-valid `ConstructionFor`, so later proofs can build the construction while
+valid `CandidateFor`, so later proofs can build the construction while
 downstream calculus can already use the interface. -/
-structure MonotoneConstructionFor (F : FunctionOnInterval) where
+structure MonotoneCandidateFor (F : FunctionOnInterval) where
   monotone : MonotoneOnInterval F
-  construction : ConstructionFor F
+  construction : CandidateFor F
 
 theorem exactRat_constant_nondecreasing (c a b : Rat) :
     NondecreasingOnInterval
@@ -12283,8 +12283,8 @@ theorem exactRat_affine_nonincreasing {r c a b : Rat} (hr : r <= 0) :
     (Rat.add_le_add_left (c := c)).2
       (by grind [Rat.mul_neg, Rat.neg_mul] : r * y <= r * x)
 
-def constantMonotoneConstructionFor (c a b : Rat) :
-    MonotoneConstructionFor
+def constantMonotoneCandidateFor (c a b : Rat) :
+    MonotoneCandidateFor
       (FunctionOnInterval.exactRat (fun _ => c) a b) where
   monotone := MonotoneOnInterval.ofNondecreasing
     (exactRat_constant_nondecreasing c a b)
@@ -12292,72 +12292,70 @@ def constantMonotoneConstructionFor (c a b : Rat) :
     { compute := (RealRaw.ofRat ((b - a) * c)).compute
       certificate := RealRaw.ofRat_valid ((b - a) * c) }
 
-namespace MonotoneConstructionFor
+namespace MonotoneCandidateFor
 
 def restrict {F : FunctionOnInterval}
-    (c : MonotoneConstructionFor F)
+    (c : MonotoneCandidateFor F)
     {a b : Rat}
-    (hlo : F.lower <= a) (hab : a <= b) (hhi : b <= F.upper) :
-    MonotoneConstructionFor (F.restrict a b hlo hab hhi) where
+    (hlo : F.lower <= a) (hab : a <= b) (hhi : b <= F.upper)
+    (restricted : CandidateFor (F.restrict a b hlo hab hhi)) :
+    MonotoneCandidateFor (F.restrict a b hlo hab hhi) where
   monotone := c.monotone.restrict hlo hab hhi
-  construction :=
-    { compute := c.construction.compute
-      certificate := c.construction.certificate }
+  construction := restricted
 
-end MonotoneConstructionFor
+end MonotoneCandidateFor
 
 /-- The preferred first case for integrals: a certified nondecreasing
 function together with its valid integral construction. -/
-structure NondecreasingConstructionFor (F : FunctionOnInterval) where
+structure NondecreasingCandidateFor (F : FunctionOnInterval) where
   nondecreasing : NondecreasingOnInterval F
-  construction : ConstructionFor F
+  construction : CandidateFor F
 
-namespace NondecreasingConstructionFor
+namespace NondecreasingCandidateFor
 
-def toMonotoneConstructionFor {F : FunctionOnInterval}
-    (c : NondecreasingConstructionFor F) :
-    MonotoneConstructionFor F where
+def toMonotoneCandidateFor {F : FunctionOnInterval}
+    (c : NondecreasingCandidateFor F) :
+    MonotoneCandidateFor F where
   monotone := MonotoneOnInterval.ofNondecreasing c.nondecreasing
   construction := c.construction
 
 def restrict {F : FunctionOnInterval}
-    (c : NondecreasingConstructionFor F)
+    (c : NondecreasingCandidateFor F)
     {a b : Rat}
-    (hlo : F.lower <= a) (hab : a <= b) (hhi : b <= F.upper) :
-    NondecreasingConstructionFor (F.restrict a b hlo hab hhi) where
+    (hlo : F.lower <= a) (hab : a <= b) (hhi : b <= F.upper)
+    (restricted : CandidateFor (F.restrict a b hlo hab hhi)) :
+    NondecreasingCandidateFor (F.restrict a b hlo hab hhi) where
   nondecreasing := c.nondecreasing.restrict hlo hab hhi
-  construction :=
-    { compute := c.construction.compute
-      certificate := c.construction.certificate }
+  construction := restricted
 
-end NondecreasingConstructionFor
+end NondecreasingCandidateFor
 
-def monotoneIntegralFor (F : FunctionOnInterval)
-    (c : MonotoneConstructionFor F) : RealRaw :=
-  integralFor F c.construction
+def monotoneCandidateValue (F : FunctionOnInterval)
+    (c : MonotoneCandidateFor F) : RealRaw :=
+  candidateValue F c.construction
 
-theorem monotoneIntegralFor_valid (F : FunctionOnInterval)
-    (c : MonotoneConstructionFor F) :
-    (monotoneIntegralFor F c).Valid :=
-  integralFor_valid F c.construction
+theorem monotoneCandidateValue_valid (F : FunctionOnInterval)
+    (c : MonotoneCandidateFor F) :
+    (monotoneCandidateValue F c).Valid :=
+  candidateValue_valid F c.construction
 
 theorem constantMonotoneIntegralFor_eq_ofRat (c a b : Rat) :
-    monotoneIntegralFor
+    monotoneCandidateValue
       (FunctionOnInterval.exactRat (fun _ => c) a b)
-      (constantMonotoneConstructionFor c a b) =
+      (constantMonotoneCandidateFor c a b) =
       RealRaw.ofRat ((b - a) * c) := by
   rfl
 
-def ExistsMonotoneConstructionFor (F : FunctionOnInterval) : Prop :=
-  Nonempty (MonotoneConstructionFor F)
+def ExistsMonotoneCandidateFor (F : FunctionOnInterval) : Prop :=
+  Nonempty (MonotoneCandidateFor F)
 
-theorem exists_constantMonotoneConstructionFor (c a b : Rat) :
-    ExistsMonotoneConstructionFor
+theorem exists_constantMonotoneCandidateFor (c a b : Rat) :
+    ExistsMonotoneCandidateFor
       (FunctionOnInterval.exactRat (fun _ => c) a b) := by
-  exact ⟨constantMonotoneConstructionFor c a b⟩
+  exact ⟨constantMonotoneCandidateFor c a b⟩
 
-def affineMonotoneConstructionFor {r c a b : Rat} (hr : 0 <= r) :
-    MonotoneConstructionFor
+def affineMonotoneCandidateFor {r c a b : Rat} (hr : 0 <= r) :
+    MonotoneCandidateFor
       (FunctionOnInterval.exactRat (fun x => r * x + c) a b) where
   monotone := MonotoneOnInterval.ofNondecreasing
     (exactRat_affine_nondecreasing hr)
@@ -12368,8 +12366,8 @@ def affineMonotoneConstructionFor {r c a b : Rat} (hr : 0 <= r) :
       certificate := RealRaw.ofRat_valid
         ((b - a) * (r * (a + b) / 2 + c)) }
 
-def affineMonotoneConstructionFor_of_nonpos {r c a b : Rat} (hr : r <= 0) :
-    MonotoneConstructionFor
+def affineMonotoneCandidateFor_of_nonpos {r c a b : Rat} (hr : r <= 0) :
+    MonotoneCandidateFor
       (FunctionOnInterval.exactRat (fun x => r * x + c) a b) where
   monotone := MonotoneOnInterval.ofNonincreasing
     (exactRat_affine_nonincreasing hr)
@@ -12380,16 +12378,16 @@ def affineMonotoneConstructionFor_of_nonpos {r c a b : Rat} (hr : r <= 0) :
       certificate := RealRaw.ofRat_valid
         ((b - a) * (r * (a + b) / 2 + c)) }
 
-theorem exists_affineMonotoneConstructionFor {r c a b : Rat} (hr : 0 <= r) :
-    ExistsMonotoneConstructionFor
+theorem exists_affineMonotoneCandidateFor {r c a b : Rat} (hr : 0 <= r) :
+    ExistsMonotoneCandidateFor
       (FunctionOnInterval.exactRat (fun x => r * x + c) a b) := by
-  exact ⟨affineMonotoneConstructionFor hr⟩
+  exact ⟨affineMonotoneCandidateFor hr⟩
 
-theorem exists_affineMonotoneConstructionFor_of_nonpos
+theorem exists_affineMonotoneCandidateFor_of_nonpos
     {r c a b : Rat} (hr : r <= 0) :
-    ExistsMonotoneConstructionFor
+    ExistsMonotoneCandidateFor
       (FunctionOnInterval.exactRat (fun x => r * x + c) a b) := by
-  exact ⟨affineMonotoneConstructionFor_of_nonpos hr⟩
+  exact ⟨affineMonotoneCandidateFor_of_nonpos hr⟩
 
 /-! The first nonconstant adjacent-interval additivity theorem.  The affine
 construction is an exact rational endpoint formula, so the proof is finite
@@ -12397,85 +12395,85 @@ ring algebra followed by raw-interval overlap. -/
 
 theorem affineMonotoneIntegralFor_adjacent_additive
     {r c a b d : Rat} (hr : 0 <= r) :
-    (monotoneIntegralFor
+    (monotoneCandidateValue
       (FunctionOnInterval.exactRat (fun x => r * x + c) a d)
-      (affineMonotoneConstructionFor (r := r) (c := c) (a := a) (b := d) hr)).Equiv
+      (affineMonotoneCandidateFor (r := r) (c := c) (a := a) (b := d) hr)).Equiv
       { compute := RealRaw.addCompute
-          (monotoneIntegralFor
+          (monotoneCandidateValue
             (FunctionOnInterval.exactRat (fun x => r * x + c) a b)
-            (affineMonotoneConstructionFor (r := r) (c := c) (a := a) (b := b) hr))
-          (monotoneIntegralFor
+            (affineMonotoneCandidateFor (r := r) (c := c) (a := a) (b := b) hr))
+          (monotoneCandidateValue
             (FunctionOnInterval.exactRat (fun x => r * x + c) b d)
-            (affineMonotoneConstructionFor (r := r) (c := c) (a := b) (b := d) hr)) } := by
+            (affineMonotoneCandidateFor (r := r) (c := c) (a := b) (b := d) hr)) } := by
   apply RealRaw.sameStageOverlap_equiv
   intro n
   apply (RealRaw.compareAt_overlap_iff _ _ n n).2
   change QInterval.Overlaps
-    ((monotoneIntegralFor
+    ((monotoneCandidateValue
       (FunctionOnInterval.exactRat (fun x => r * x + c) a d)
-      (affineMonotoneConstructionFor (r := r) (c := c) (a := a) (b := d) hr)).compute n)
+      (affineMonotoneCandidateFor (r := r) (c := c) (a := a) (b := d) hr)).compute n)
     (RealRaw.addCompute
-      (monotoneIntegralFor
+      (monotoneCandidateValue
         (FunctionOnInterval.exactRat (fun x => r * x + c) a b)
-        (affineMonotoneConstructionFor (r := r) (c := c) (a := a) (b := b) hr))
-      (monotoneIntegralFor
+        (affineMonotoneCandidateFor (r := r) (c := c) (a := a) (b := b) hr))
+      (monotoneCandidateValue
         (FunctionOnInterval.exactRat (fun x => r * x + c) b d)
-        (affineMonotoneConstructionFor (r := r) (c := c) (a := b) (b := d) hr)) n)
-  simp [monotoneIntegralFor, integralFor, affineMonotoneConstructionFor,
+        (affineMonotoneCandidateFor (r := r) (c := c) (a := b) (b := d) hr)) n)
+  simp [monotoneCandidateValue, candidateValue, affineMonotoneCandidateFor,
     RealRaw.ofRat, RealRaw.addCompute, QInterval.Overlaps]
   constructor <;> grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc,
     Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 
 theorem affineMonotoneIntegralFor_of_nonpos_adjacent_additive
     {r c a b d : Rat} (hr : r <= 0) :
-    (monotoneIntegralFor
+    (monotoneCandidateValue
       (FunctionOnInterval.exactRat (fun x => r * x + c) a d)
-      (affineMonotoneConstructionFor_of_nonpos
+      (affineMonotoneCandidateFor_of_nonpos
         (r := r) (c := c) (a := a) (b := d) hr)).Equiv
       { compute := RealRaw.addCompute
-          (monotoneIntegralFor
+          (monotoneCandidateValue
             (FunctionOnInterval.exactRat (fun x => r * x + c) a b)
-            (affineMonotoneConstructionFor_of_nonpos
+            (affineMonotoneCandidateFor_of_nonpos
               (r := r) (c := c) (a := a) (b := b) hr))
-          (monotoneIntegralFor
+          (monotoneCandidateValue
             (FunctionOnInterval.exactRat (fun x => r * x + c) b d)
-            (affineMonotoneConstructionFor_of_nonpos
+            (affineMonotoneCandidateFor_of_nonpos
               (r := r) (c := c) (a := b) (b := d) hr)) } := by
   apply RealRaw.sameStageOverlap_equiv
   intro n
   apply (RealRaw.compareAt_overlap_iff _ _ n n).2
   change QInterval.Overlaps
-    ((monotoneIntegralFor
+    ((monotoneCandidateValue
       (FunctionOnInterval.exactRat (fun x => r * x + c) a d)
-      (affineMonotoneConstructionFor_of_nonpos
+      (affineMonotoneCandidateFor_of_nonpos
         (r := r) (c := c) (a := a) (b := d) hr)).compute n)
     (RealRaw.addCompute
-      (monotoneIntegralFor
+      (monotoneCandidateValue
         (FunctionOnInterval.exactRat (fun x => r * x + c) a b)
-        (affineMonotoneConstructionFor_of_nonpos
+        (affineMonotoneCandidateFor_of_nonpos
           (r := r) (c := c) (a := a) (b := b) hr))
-      (monotoneIntegralFor
+      (monotoneCandidateValue
         (FunctionOnInterval.exactRat (fun x => r * x + c) b d)
-        (affineMonotoneConstructionFor_of_nonpos
+        (affineMonotoneCandidateFor_of_nonpos
           (r := r) (c := c) (a := b) (b := d) hr)) n)
-  simp [monotoneIntegralFor, integralFor,
-    affineMonotoneConstructionFor_of_nonpos, RealRaw.ofRat,
+  simp [monotoneCandidateValue, candidateValue,
+    affineMonotoneCandidateFor_of_nonpos, RealRaw.ofRat,
     RealRaw.addCompute, QInterval.Overlaps]
   constructor <;> grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc,
     Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 
 theorem affineMonotoneIntegralFor_eq_ofRat {r c a b : Rat} (hr : 0 <= r) :
-    monotoneIntegralFor
+    monotoneCandidateValue
       (FunctionOnInterval.exactRat (fun x => r * x + c) a b)
-      (affineMonotoneConstructionFor hr) =
+      (affineMonotoneCandidateFor hr) =
       RealRaw.ofRat ((b - a) * (r * (a + b) / 2 + c)) := by
   rfl
 
 theorem unitMeshSquareIntegralRaw_equiv_affineMonotoneIntegral :
     unitMeshSquareIntegralRaw.Equiv
-      (monotoneIntegralFor
+      (monotoneCandidateValue
         (FunctionOnInterval.exactRat (fun x : Rat => 2 * x + 0) 0 1)
-        (affineMonotoneConstructionFor
+        (affineMonotoneCandidateFor
           (r := 2) (c := 0) (a := 0) (b := 1) (by native_decide))) := by
   rw [affineMonotoneIntegralFor_eq_ofRat]
   · have hone :
@@ -12485,32 +12483,32 @@ theorem unitMeshSquareIntegralRaw_equiv_affineMonotoneIntegral :
 
 theorem affineMonotoneIntegralFor_of_nonpos_eq_ofRat
     {r c a b : Rat} (hr : r <= 0) :
-    monotoneIntegralFor
+    monotoneCandidateValue
       (FunctionOnInterval.exactRat (fun x => r * x + c) a b)
-      (affineMonotoneConstructionFor_of_nonpos hr) =
+      (affineMonotoneCandidateFor_of_nonpos hr) =
       RealRaw.ofRat ((b - a) * (r * (a + b) / 2 + c)) := by
   rfl
 
-def nondecreasingIntegralFor (F : FunctionOnInterval)
-    (c : NondecreasingConstructionFor F) : RealRaw :=
-  integralFor F c.construction
+def nondecreasingCandidateValue (F : FunctionOnInterval)
+    (c : NondecreasingCandidateFor F) : RealRaw :=
+  candidateValue F c.construction
 
-theorem nondecreasingIntegralFor_valid (F : FunctionOnInterval)
-    (c : NondecreasingConstructionFor F) :
-    (nondecreasingIntegralFor F c).Valid :=
-  integralFor_valid F c.construction
+theorem nondecreasingCandidateValue_valid (F : FunctionOnInterval)
+    (c : NondecreasingCandidateFor F) :
+    (nondecreasingCandidateValue F c).Valid :=
+  candidateValue_valid F c.construction
 
-theorem nondecreasingIntegralFor_eq_monotoneIntegralFor
-    (F : FunctionOnInterval) (c : NondecreasingConstructionFor F) :
-    nondecreasingIntegralFor F c =
-      monotoneIntegralFor F c.toMonotoneConstructionFor := rfl
+theorem nondecreasingCandidateValue_eq_monotoneCandidateValue
+    (F : FunctionOnInterval) (c : NondecreasingCandidateFor F) :
+    nondecreasingCandidateValue F c =
+      monotoneCandidateValue F c.toMonotoneCandidateFor := rfl
 
-def ExistsNondecreasingConstructionFor (F : FunctionOnInterval) : Prop :=
-  Nonempty (NondecreasingConstructionFor F)
+def ExistsNondecreasingCandidateFor (F : FunctionOnInterval) : Prop :=
+  Nonempty (NondecreasingCandidateFor F)
 
 /-- A piecewise-monotone integral plan: split an interval into finitely many
 rational subintervals and supply a monotone construction on each piece. -/
-structure PiecewiseMonotoneConstructionFor (F : FunctionOnInterval) where
+structure PiecewiseMonotoneCandidateFor (F : FunctionOnInterval) where
   pieces : Nat
   positive : 0 < pieces
   point : Nat -> Rat
@@ -12522,20 +12520,20 @@ structure PiecewiseMonotoneConstructionFor (F : FunctionOnInterval) where
     forall i j, i <= j -> j <= pieces -> point i <= point j
   construction :
     forall k (hk : k < pieces),
-      MonotoneConstructionFor
+      MonotoneCandidateFor
         (F.restrict (point k) (point (k + 1))
           (point_mem k (Nat.le_of_lt hk)).1
           (point_mono k (k + 1) (Nat.le_succ k) (Nat.succ_le_of_lt hk))
           (point_mem (k + 1) (Nat.succ_le_of_lt hk)).2)
 
-namespace PiecewiseMonotoneConstructionFor
+namespace PiecewiseMonotoneCandidateFor
 
 /-- Promote one monotone integral construction to the general piecewise
 interface by using the one-cell partition `[lower, upper]`. -/
 noncomputable def ofMonotone {F : FunctionOnInterval}
-    (c : MonotoneConstructionFor F)
+    (c : MonotoneCandidateFor F)
     (hinterval : F.lower <= F.upper) :
-    PiecewiseMonotoneConstructionFor F where
+    PiecewiseMonotoneCandidateFor F where
   pieces := 1
   positive := by decide
   point
@@ -12575,41 +12573,43 @@ noncomputable def ofMonotone {F : FunctionOnInterval}
         Rat.le_refl
         hinterval
         Rat.le_refl
+        { compute := c.construction.compute
+          certificate := c.construction.certificate }
 
 /-- Promote the preferred nondecreasing integral construction to the general
 piecewise interface. -/
 noncomputable def ofNondecreasing {F : FunctionOnInterval}
-    (c : NondecreasingConstructionFor F)
+    (c : NondecreasingCandidateFor F)
     (hinterval : F.lower <= F.upper) :
-    PiecewiseMonotoneConstructionFor F :=
-  ofMonotone c.toMonotoneConstructionFor hinterval
+    PiecewiseMonotoneCandidateFor F :=
+  ofMonotone c.toMonotoneCandidateFor hinterval
 
-end PiecewiseMonotoneConstructionFor
+end PiecewiseMonotoneCandidateFor
 
 /-- The integral raw real for a single monotone piece of a piecewise-monotone
 construction. -/
 def piecewiseMonotoneCellIntegral (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F)
+    (c : PiecewiseMonotoneCandidateFor F)
     (k : Nat) (hk : k < c.pieces) : RealRaw :=
-  monotoneIntegralFor _ (c.construction k hk)
+  monotoneCandidateValue _ (c.construction k hk)
 
 /-! The finite cell list follows the same `List.range` order as the public
 fold.  Each entry still carries its cell-index proof locally, while the list
 shape remains directly compatible with finite fold algebra. -/
 def piecewiseMonotoneCellList (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) : List RealRaw :=
+    (c : PiecewiseMonotoneCandidateFor F) : List RealRaw :=
   (List.range c.pieces).map (fun k =>
     if hk : k < c.pieces then
       piecewiseMonotoneCellIntegral F c k hk
     else RealRaw.zero)
 
 theorem piecewiseMonotoneCellList_length (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) :
+    (c : PiecewiseMonotoneCandidateFor F) :
     (piecewiseMonotoneCellList F c).length = c.pieces := by
   simp [piecewiseMonotoneCellList]
 
 theorem piecewiseMonotoneCellList_ne_nil (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) :
+    (c : PiecewiseMonotoneCandidateFor F) :
     piecewiseMonotoneCellList F c ≠ [] := by
   intro hnil
   have hlength := congrArg List.length hnil
@@ -12618,13 +12618,13 @@ theorem piecewiseMonotoneCellList_ne_nil (F : FunctionOnInterval)
   omega
 
 theorem piecewiseMonotoneCellIntegral_valid (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F)
+    (c : PiecewiseMonotoneCandidateFor F)
     (k : Nat) (hk : k < c.pieces) :
   (piecewiseMonotoneCellIntegral F c k hk).Valid :=
-  monotoneIntegralFor_valid _ (c.construction k hk)
+  monotoneCandidateValue_valid _ (c.construction k hk)
 
 theorem piecewiseMonotoneCellList_valid (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) :
+    (c : PiecewiseMonotoneCandidateFor F) :
     forall x, x ∈ piecewiseMonotoneCellList F c -> x.Valid := by
   intro x hx
   rcases List.mem_map.1 hx with ⟨k, _hk, rfl⟩
@@ -12633,13 +12633,13 @@ theorem piecewiseMonotoneCellList_valid (F : FunctionOnInterval)
   exact piecewiseMonotoneCellIntegral_valid F c k hk
 
 theorem piecewiseMonotoneCellList_finiteRawSum_valid
-    (F : FunctionOnInterval) (c : PiecewiseMonotoneConstructionFor F) :
+    (F : FunctionOnInterval) (c : PiecewiseMonotoneCandidateFor F) :
     (finiteRawSum (piecewiseMonotoneCellList F c)).Valid :=
   finiteRawSum_valid _ (piecewiseMonotoneCellList_valid F c)
 
 /-- Sum the monotone-piece integrals over the finite rational partition. -/
-def piecewiseMonotoneIntegralFor (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) : RealRaw :=
+def piecewiseMonotoneCandidateValue (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneCandidateFor F) : RealRaw :=
   (List.range c.pieces).foldl
     (fun acc k => acc +
       if hk : k < c.pieces then
@@ -12647,9 +12647,9 @@ def piecewiseMonotoneIntegralFor (F : FunctionOnInterval)
       else RealRaw.zero)
     (RealRaw.ofRat 0)
 
-theorem piecewiseMonotoneIntegralFor_valid (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) :
-    (piecewiseMonotoneIntegralFor F c).Valid := by
+theorem piecewiseMonotoneCandidateValue_valid (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneCandidateFor F) :
+    (piecewiseMonotoneCandidateValue F c).Valid := by
   let step : RealRaw -> Nat -> RealRaw :=
     fun acc k =>
       acc + if hk : k < c.pieces then
@@ -12676,7 +12676,7 @@ theorem piecewiseMonotoneIntegralFor_valid (F : FunctionOnInterval)
     | cons k ks ih =>
         intro acc hacc
         simpa [List.foldl] using ih (step acc k) (hstep acc k hacc)
-  simpa [piecewiseMonotoneIntegralFor, step] using
+  simpa [piecewiseMonotoneCandidateValue, step] using
     hfold (List.range c.pieces) (RealRaw.ofRat 0) (by
     simpa [RealRaw.Valid, RealRaw.ofRat] using RealRaw.ofRat_valid 0)
 
@@ -12684,14 +12684,14 @@ theorem piecewiseMonotoneIntegralFor_valid (F : FunctionOnInterval)
 piecewise fold.  This is the quantitative form needed before a separate
 stage schedule proves that the common bound shrinks to zero. -/
 
-theorem piecewiseMonotoneIntegralFor_compute_width_le_of_forall
+theorem piecewiseMonotoneCandidateValue_compute_width_le_of_forall
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) (n : Nat) (bound : Rat)
+    (c : PiecewiseMonotoneCandidateFor F) (n : Nat) (bound : Rat)
     (hbound : forall k (hk : k < c.pieces),
       ((piecewiseMonotoneCellIntegral F c k hk).compute n).width <= bound) :
-    ((piecewiseMonotoneIntegralFor F c).compute n).width <=
+    ((piecewiseMonotoneCandidateValue F c).compute n).width <=
       (c.pieces : Rat) * bound := by
-  unfold piecewiseMonotoneIntegralFor
+  unfold piecewiseMonotoneCandidateValue
   rw [rawFold_compute_width_eq_foldl]
   rw [RationalPartition.addInterval_fold_width]
   have hterm : forall k, k ∈ List.range c.pieces ->
@@ -12716,20 +12716,20 @@ theorem piecewiseMonotoneIntegralFor_compute_width_le_of_forall
 This is the quantitative assembly lemma used when each monotone cell has its
 own effective integral algorithm but all cells are asked for one final
 tolerance. -/
-theorem piecewiseMonotoneIntegralFor_precision_witness_of_common_cell_budget
+theorem piecewiseMonotoneCandidateValue_precision_witness_of_common_cell_budget
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) (eps : QPos)
+    (c : PiecewiseMonotoneCandidateFor F) (eps : QPos)
     (hcell : ∃ N : Nat, ∀ n, N <= n ->
       ∀ k (hk : k < c.pieces),
         ((piecewiseMonotoneCellIntegral F c k hk).compute n).width <=
           eps.val / (c.pieces : Rat)) :
     ∃ N : Nat, ∀ n, N <= n ->
-      ((piecewiseMonotoneIntegralFor F c).compute n).width <= eps.val := by
+      ((piecewiseMonotoneCandidateValue F c).compute n).width <= eps.val := by
   rcases hcell with ⟨N, hN⟩
   refine ⟨N, ?_⟩
   intro n hn
   apply Rat.le_trans
-    (piecewiseMonotoneIntegralFor_compute_width_le_of_forall F c n
+    (piecewiseMonotoneCandidateValue_compute_width_le_of_forall F c n
       (eps.val / (c.pieces : Rat)) (by
         intro k hk
         exact hN n hn k hk))
@@ -12741,15 +12741,15 @@ theorem piecewiseMonotoneIntegralFor_precision_witness_of_common_cell_budget
     Rat.mul_assoc, Rat.mul_inv_cancel _ hp, Rat.mul_one]
   exact Rat.le_refl
 
-theorem piecewiseMonotoneIntegralFor_compute_width_le_of_bounds
+theorem piecewiseMonotoneCandidateValue_compute_width_le_of_bounds
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) (n : Nat)
+    (c : PiecewiseMonotoneCandidateFor F) (n : Nat)
     (bound : Nat -> Rat)
     (hbound : forall k (hk : k < c.pieces),
       ((piecewiseMonotoneCellIntegral F c k hk).compute n).width <= bound k) :
-    ((piecewiseMonotoneIntegralFor F c).compute n).width <=
+    ((piecewiseMonotoneCandidateValue F c).compute n).width <=
       (List.range c.pieces).foldl (fun total k => total + bound k) 0 := by
-  unfold piecewiseMonotoneIntegralFor
+  unfold piecewiseMonotoneCandidateValue
   rw [rawFold_compute_width_eq_foldl]
   rw [RationalPartition.addInterval_fold_width]
   have hterm : forall k, k ∈ List.range c.pieces ->
@@ -12772,9 +12772,9 @@ theorem piecewiseMonotoneIntegralFor_compute_width_le_of_bounds
 
 /-! The heterogeneous form lets each cell carry its own rational error
 budget.  The only global obligation is the finite sum of those budgets. -/
-theorem piecewiseMonotoneIntegralFor_precision_witness_of_cell_budgets
+theorem piecewiseMonotoneCandidateValue_precision_witness_of_cell_budgets
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) (eps : QPos)
+    (c : PiecewiseMonotoneCandidateFor F) (eps : QPos)
     (bound : Nat -> Rat)
     (hcell : ∃ N : Nat, ∀ n, N <= n ->
       ∀ k (hk : k < c.pieces),
@@ -12783,12 +12783,12 @@ theorem piecewiseMonotoneIntegralFor_precision_witness_of_cell_budgets
     (hsum : (List.range c.pieces).foldl
       (fun total k => total + bound k) 0 <= eps.val) :
     ∃ N : Nat, ∀ n, N <= n ->
-      ((piecewiseMonotoneIntegralFor F c).compute n).width <= eps.val := by
+      ((piecewiseMonotoneCandidateValue F c).compute n).width <= eps.val := by
   rcases hcell with ⟨N, hN⟩
   refine ⟨N, ?_⟩
   intro n hn
   exact Rat.le_trans
-    (piecewiseMonotoneIntegralFor_compute_width_le_of_bounds F c n bound
+    (piecewiseMonotoneCandidateValue_compute_width_le_of_bounds F c n bound
       (by
         intro k hk
         exact hN n hn k hk))
@@ -12797,11 +12797,11 @@ theorem piecewiseMonotoneIntegralFor_precision_witness_of_cell_budgets
 /-! The two-cell case is the first reusable finite assembly law.  It exposes
 the piecewise fold as the sum of its two certified cell integrals, up to the
 interval-representative equivalence. -/
-theorem piecewiseMonotoneIntegralFor_two_equiv
+theorem piecewiseMonotoneCandidateValue_two_equiv
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F)
+    (c : PiecewiseMonotoneCandidateFor F)
     (hpieces : c.pieces = 2) :
-    (piecewiseMonotoneIntegralFor F c).Equiv
+    (piecewiseMonotoneCandidateValue F c).Equiv
       (piecewiseMonotoneCellIntegral F c 0 (by omega) +
         piecewiseMonotoneCellIntegral F c 1 (by omega)) := by
   have h0 : (piecewiseMonotoneCellIntegral F c 0 (by omega)).Valid :=
@@ -12836,7 +12836,7 @@ theorem piecewiseMonotoneIntegralFor_two_equiv
         (piecewiseMonotoneCellIntegral F c 0 (by omega) +
           piecewiseMonotoneCellIntegral F c 1 (by omega)) := by
     exact RealRaw.equiv_trans hleft hmid hsum hassoc hzeroadd
-  unfold piecewiseMonotoneIntegralFor
+  unfold piecewiseMonotoneCandidateValue
   simp only [hpieces]
   have hrange : List.range 2 = [0, 1] := by native_decide
   rw [hrange]
@@ -12845,10 +12845,10 @@ theorem piecewiseMonotoneIntegralFor_two_equiv
 /-! The arbitrary finite version of the two-cell assembly law.  The public
 piecewise fold and the canonical finite raw sum differ only by parenthesizing
 addition; the proof is a finite induction and introduces no limiting object. -/
-theorem piecewiseMonotoneIntegralFor_equiv_finiteRawSum
+theorem piecewiseMonotoneCandidateValue_equiv_finiteRawSum
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) :
-    (piecewiseMonotoneIntegralFor F c).Equiv
+    (c : PiecewiseMonotoneCandidateFor F) :
+    (piecewiseMonotoneCandidateValue F c).Equiv
       (finiteRawSum (piecewiseMonotoneCellList F c)) := by
   let cell : Nat -> RealRaw := fun k =>
     if hk : k < c.pieces then
@@ -12936,31 +12936,31 @@ theorem piecewiseMonotoneIntegralFor_equiv_finiteRawSum
     exact RealRaw.equiv_trans hleft
       (RealRaw.add_valid hzero hsum) hsum hresult
       (RealRaw.zero_add_equiv hsum)
-  simpa [piecewiseMonotoneIntegralFor, piecewiseMonotoneCellList,
+  simpa [piecewiseMonotoneCandidateValue, piecewiseMonotoneCellList,
     cell, step, RealRaw.zero] using hclean
 
 /-! A client may substitute another finite evaluator list for the canonical
 cell list.  The supplied list equivalence is the explicit representation edge
 between the two implementations; the finite sum then transports it to the
 assembled integral. -/
-theorem piecewiseMonotoneIntegralFor_equiv_of_finiteRawListEquiv
+theorem piecewiseMonotoneCandidateValue_equiv_of_finiteRawListEquiv
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F)
+    (c : PiecewiseMonotoneCandidateFor F)
     (xs : List RealRaw)
     (hxs : ∀ x, x ∈ xs -> x.Valid)
     (hlist : FiniteRawListEquiv
       (piecewiseMonotoneCellList F c) xs) :
-    (piecewiseMonotoneIntegralFor F c).Equiv (finiteRawSum xs) := by
+    (piecewiseMonotoneCandidateValue F c).Equiv (finiteRawSum xs) := by
   have hcanonical : ∀ x, x ∈ piecewiseMonotoneCellList F c -> x.Valid :=
     piecewiseMonotoneCellList_valid F c
   have hsum : (finiteRawSum (piecewiseMonotoneCellList F c)).Equiv
       (finiteRawSum xs) :=
     finiteRawSum_equiv_of_forall hlist hcanonical hxs
   exact RealRaw.equiv_trans
-    (piecewiseMonotoneIntegralFor_valid F c)
+    (piecewiseMonotoneCandidateValue_valid F c)
     (finiteRawSum_valid _ hcanonical)
     (finiteRawSum_valid _ hxs)
-    (piecewiseMonotoneIntegralFor_equiv_finiteRawSum F c)
+    (piecewiseMonotoneCandidateValue_equiv_finiteRawSum F c)
     hsum
 
 /-! A cell endpoint difference is the raw subtraction of the two endpoint
@@ -12969,7 +12969,7 @@ pointwise validity; no global real-valued function or completeness principle
 is involved. -/
 def piecewiseMonotoneEndpointDifference
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F)
+    (c : PiecewiseMonotoneCandidateFor F)
     (k : Nat) (hk : k < c.pieces) : RealRaw :=
   (F.raw.evalRaw (c.point (k + 1))
       (F.defined_on (c.point (k + 1))
@@ -12980,7 +12980,7 @@ def piecewiseMonotoneEndpointDifference
 
 theorem piecewiseMonotoneEndpointDifference_valid
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F)
+    (c : PiecewiseMonotoneCandidateFor F)
     (k : Nat) (hk : k < c.pieces) :
     (piecewiseMonotoneEndpointDifference F c k hk).Valid := by
   let hx := c.point_mem k (Nat.le_of_lt hk)
@@ -12998,7 +12998,7 @@ theorem piecewiseMonotoneEndpointDifference_valid
 
 def piecewiseMonotoneEndpointDifferenceList
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) : List RealRaw :=
+    (c : PiecewiseMonotoneCandidateFor F) : List RealRaw :=
   (List.range c.pieces).map (fun k =>
     if hk : k < c.pieces then
       piecewiseMonotoneEndpointDifference F c k hk
@@ -13006,7 +13006,7 @@ def piecewiseMonotoneEndpointDifferenceList
 
 theorem piecewiseMonotoneEndpointDifferenceList_length
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) :
+    (c : PiecewiseMonotoneCandidateFor F) :
     (piecewiseMonotoneEndpointDifferenceList F c).length = c.pieces := by
   simp [piecewiseMonotoneEndpointDifferenceList]
 
@@ -13015,7 +13015,7 @@ by an arbitrary caller-supplied list.  Its adjacent differences are exactly
 the cell endpoint differences, by finite list algebra. -/
 def piecewiseMonotoneEndpointValueList
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) : List RealRaw :=
+    (c : PiecewiseMonotoneCandidateFor F) : List RealRaw :=
   (List.range (c.pieces + 1)).map (fun k =>
     if hk : k <= c.pieces then
       F.raw.evalRaw (c.point k)
@@ -13024,7 +13024,7 @@ def piecewiseMonotoneEndpointValueList
 
 theorem piecewiseMonotoneEndpointValueList_valid
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) :
+    (c : PiecewiseMonotoneCandidateFor F) :
     forall x, x ∈ piecewiseMonotoneEndpointValueList F c -> x.Valid := by
   intro x hx
   rcases List.mem_map.1 hx with ⟨k, hk, rfl⟩
@@ -13037,7 +13037,7 @@ theorem piecewiseMonotoneEndpointValueList_valid
 
 theorem piecewiseMonotoneEndpointValueList_adjacent
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) :
+    (c : PiecewiseMonotoneCandidateFor F) :
     rawAdjacentDifferenceList (piecewiseMonotoneEndpointValueList F c) =
       piecewiseMonotoneEndpointDifferenceList F c := by
   unfold piecewiseMonotoneEndpointValueList
@@ -13052,7 +13052,7 @@ theorem piecewiseMonotoneEndpointValueList_adjacent
 
 theorem piecewiseMonotoneEndpointDifferenceList_valid
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) :
+    (c : PiecewiseMonotoneCandidateFor F) :
     forall x, x ∈ piecewiseMonotoneEndpointDifferenceList F c -> x.Valid := by
   intro x hx
   rcases List.mem_map.1 hx with ⟨k, hk, rfl⟩
@@ -13062,7 +13062,7 @@ theorem piecewiseMonotoneEndpointDifferenceList_valid
 
 theorem piecewiseMonotoneEndpointDifferenceList_equiv_canonicalAdjacent
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) :
+    (c : PiecewiseMonotoneCandidateFor F) :
     FiniteRawListEquiv
       (piecewiseMonotoneEndpointDifferenceList F c)
       (rawAdjacentDifferenceList (piecewiseMonotoneEndpointValueList F c)) := by
@@ -13072,17 +13072,17 @@ theorem piecewiseMonotoneEndpointDifferenceList_equiv_canonicalAdjacent
 
 structure PiecewiseMonotoneEndpointFTCFor
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) where
+    (c : PiecewiseMonotoneCandidateFor F) where
   cell_endpoint_equiv :
     forall k (hk : k < c.pieces),
       (piecewiseMonotoneCellIntegral F c k hk).Equiv
         (piecewiseMonotoneEndpointDifference F c k hk)
 
-theorem piecewiseMonotoneIntegralFor_equiv_endpointDifferenceList
+theorem piecewiseMonotoneCandidateValue_equiv_endpointDifferenceList
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F)
+    (c : PiecewiseMonotoneCandidateFor F)
     (h : PiecewiseMonotoneEndpointFTCFor F c) :
-    (piecewiseMonotoneIntegralFor F c).Equiv
+    (piecewiseMonotoneCandidateValue F c).Equiv
       (finiteRawSum (piecewiseMonotoneEndpointDifferenceList F c)) := by
   let cell : Nat -> RealRaw := fun k =>
     if hk : k < c.pieces then
@@ -13126,9 +13126,9 @@ theorem piecewiseMonotoneIntegralFor_equiv_endpointDifferenceList
     simp [endpoint, List.mem_range.1 hk]
     exact piecewiseMonotoneEndpointDifference_valid F c k (List.mem_range.1 hk)
   have hsum := finiteRawSum_equiv_of_forall hlist hcell hendpoint
-  have hintegral := piecewiseMonotoneIntegralFor_equiv_finiteRawSum F c
-  have hleft : (piecewiseMonotoneIntegralFor F c).Valid :=
-    piecewiseMonotoneIntegralFor_valid F c
+  have hintegral := piecewiseMonotoneCandidateValue_equiv_finiteRawSum F c
+  have hleft : (piecewiseMonotoneCandidateValue F c).Valid :=
+    piecewiseMonotoneCandidateValue_valid F c
   have hmiddle :
       (finiteRawSum ((List.range c.pieces).map cell)).Valid :=
     finiteRawSum_valid _ hcell
@@ -13141,7 +13141,7 @@ theorem piecewiseMonotoneIntegralFor_equiv_endpointDifferenceList
 
 def piecewiseMonotoneTotalEndpointDifference
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) : RealRaw :=
+    (c : PiecewiseMonotoneCandidateFor F) : RealRaw :=
   F.raw.evalRaw (c.point c.pieces)
       (F.defined_on (c.point c.pieces)
         (c.point_mem c.pieces (Nat.le_refl _))) -
@@ -13151,7 +13151,7 @@ def piecewiseMonotoneTotalEndpointDifference
 
 theorem piecewiseMonotoneTotalEndpointDifference_valid
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) :
+    (c : PiecewiseMonotoneCandidateFor F) :
     (piecewiseMonotoneTotalEndpointDifference F c).Valid := by
   let hx := c.point_mem 0 (Nat.zero_le _)
   let hy := c.point_mem c.pieces (Nat.le_refl _)
@@ -13171,9 +13171,9 @@ telescoping theorem.  The explicit list-transport hypothesis is the finite
 geometric bookkeeping still required to identify the interval's endpoint
 evaluators with adjacent entries; the theorem itself contains no completeness
 or limiting argument. -/
-theorem piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_telescope
+theorem piecewiseMonotoneCandidateValue_equiv_totalEndpointDifference_of_telescope
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F)
+    (c : PiecewiseMonotoneCandidateFor F)
     (h : PiecewiseMonotoneEndpointFTCFor F c)
     {first : RealRaw} {rest : List RealRaw}
     (hvalues : forall x, x ∈ first :: rest -> x.Valid)
@@ -13183,7 +13183,7 @@ theorem piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_telescope
         (rawAdjacentDifferenceList (first :: rest)))
     (htotal : (rawLast first rest - first).Equiv
       (piecewiseMonotoneTotalEndpointDifference F c)) :
-    (piecewiseMonotoneIntegralFor F c).Equiv
+    (piecewiseMonotoneCandidateValue F c).Equiv
       (piecewiseMonotoneTotalEndpointDifference F c) := by
   have hendpoint : forall x,
       x ∈ piecewiseMonotoneEndpointDifferenceList F c -> x.Valid := by
@@ -13208,10 +13208,10 @@ theorem piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_telescope
   have hsub : (rawLast first rest - first).Valid :=
     RealRaw.sub_valid hlast hfirst
   have htotal_valid := piecewiseMonotoneTotalEndpointDifference_valid F c
-  have hcell := piecewiseMonotoneIntegralFor_equiv_endpointDifferenceList F c h
-  have hintegral := piecewiseMonotoneIntegralFor_valid F c
+  have hcell := piecewiseMonotoneCandidateValue_equiv_endpointDifferenceList F c h
+  have hintegral := piecewiseMonotoneCandidateValue_valid F c
   have hintegral_adjacent :
-      (piecewiseMonotoneIntegralFor F c).Equiv
+      (piecewiseMonotoneCandidateValue F c).Equiv
         (finiteRawSum (rawAdjacentDifferenceList (first :: rest))) :=
     RealRaw.equiv_trans hintegral hsum_endpoint hsum_adjacent hcell
       htransport_sum
@@ -13226,16 +13226,16 @@ theorem piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_telescope
 still choose the endpoint representation and prove the final endpoint-value
 transport, but the adjacent-difference list transport is discharged by the
 canonical finite identity above. -/
-theorem piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_canonical_telescope
+theorem piecewiseMonotoneCandidateValue_equiv_totalEndpointDifference_of_canonical_telescope
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F)
+    (c : PiecewiseMonotoneCandidateFor F)
     (h : PiecewiseMonotoneEndpointFTCFor F c)
     {first : RealRaw} {rest : List RealRaw}
     (hvalues : forall x, x ∈ first :: rest -> x.Valid)
     (hcanonical : first :: rest = piecewiseMonotoneEndpointValueList F c)
     (htotal : (rawLast first rest - first).Equiv
       (piecewiseMonotoneTotalEndpointDifference F c)) :
-    (piecewiseMonotoneIntegralFor F c).Equiv
+    (piecewiseMonotoneCandidateValue F c).Equiv
       (piecewiseMonotoneTotalEndpointDifference F c) := by
   have htransport :
       FiniteRawListEquiv
@@ -13243,7 +13243,7 @@ theorem piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_canonical_
         (rawAdjacentDifferenceList (first :: rest)) := by
     rw [hcanonical]
     exact piecewiseMonotoneEndpointDifferenceList_equiv_canonicalAdjacent F c
-  exact piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_telescope
+  exact piecewiseMonotoneCandidateValue_equiv_totalEndpointDifference_of_telescope
     F c h hvalues htransport htotal
 
 /-! The final endpoint transport is also finite list algebra.  When the
@@ -13251,7 +13251,7 @@ canonical endpoint list is used, its first and last entries are the endpoint
 evaluators of `F`; no separate telescope certificate is needed. -/
 theorem piecewiseMonotoneCanonicalEndpointDifference_equiv_totalEndpointDifference
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F) {first : RealRaw} {rest : List RealRaw}
+    (c : PiecewiseMonotoneCandidateFor F) {first : RealRaw} {rest : List RealRaw}
     (hcanonical : first :: rest = piecewiseMonotoneEndpointValueList F c) :
     (rawLast first rest - first).Equiv
       (piecewiseMonotoneTotalEndpointDifference F c) := by
@@ -13287,11 +13287,11 @@ theorem piecewiseMonotoneCanonicalEndpointDifference_equiv_totalEndpointDifferen
 
 /-! With canonical endpoint values, the piecewise finite FTC now needs only
 the cell endpoint certificates. -/
-theorem piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_canonical_values
+theorem piecewiseMonotoneCandidateValue_equiv_totalEndpointDifference_of_canonical_values
     (F : FunctionOnInterval)
-    (c : PiecewiseMonotoneConstructionFor F)
+    (c : PiecewiseMonotoneCandidateFor F)
     (h : PiecewiseMonotoneEndpointFTCFor F c) :
-    (piecewiseMonotoneIntegralFor F c).Equiv
+    (piecewiseMonotoneCandidateValue F c).Equiv
       (piecewiseMonotoneTotalEndpointDifference F c) := by
   let first : RealRaw := F.raw.evalRaw (c.point 0)
     (F.defined_on (c.point 0) (c.point_mem 0 (Nat.zero_le _)))
@@ -13316,114 +13316,114 @@ theorem piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_canonical_
         (rawAdjacentDifferenceList (first :: rest)) := by
     rw [hcanonical]
     exact piecewiseMonotoneEndpointDifferenceList_equiv_canonicalAdjacent F c
-  exact piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_telescope
+  exact piecewiseMonotoneCandidateValue_equiv_totalEndpointDifference_of_telescope
     F c h hvalues htransport htotal
 
 /-- A one-piece promotion from a monotone construction computes the same raw
 integral as the original monotone construction. -/
-theorem piecewiseMonotoneIntegralFor_ofMonotone_equiv
+theorem piecewiseMonotoneCandidateValue_ofMonotone_equiv
     {F : FunctionOnInterval}
-    (c : MonotoneConstructionFor F)
+    (c : MonotoneCandidateFor F)
     (hinterval : F.lower <= F.upper) :
-    (piecewiseMonotoneIntegralFor F
-      (PiecewiseMonotoneConstructionFor.ofMonotone c hinterval)).Equiv
-        (monotoneIntegralFor F c) := by
-  simpa [piecewiseMonotoneIntegralFor, piecewiseMonotoneCellIntegral,
-    PiecewiseMonotoneConstructionFor.ofMonotone,
-    MonotoneConstructionFor.restrict, monotoneIntegralFor, integralFor,
+    (piecewiseMonotoneCandidateValue F
+      (PiecewiseMonotoneCandidateFor.ofMonotone c hinterval)).Equiv
+        (monotoneCandidateValue F c) := by
+  simpa [piecewiseMonotoneCandidateValue, piecewiseMonotoneCellIntegral,
+    PiecewiseMonotoneCandidateFor.ofMonotone,
+    MonotoneCandidateFor.restrict, monotoneCandidateValue, candidateValue,
     RealRaw.zero] using
     (RealRaw.zero_add_equiv
-      (monotoneIntegralFor_valid F c))
+      (monotoneCandidateValue_valid F c))
 
 /-- The preferred nondecreasing one-piece promotion is compatible with the
 general piecewise-monotone integral. -/
-theorem piecewiseMonotoneIntegralFor_ofNondecreasing_equiv
+theorem piecewiseMonotoneCandidateValue_ofNondecreasing_equiv
     {F : FunctionOnInterval}
-    (c : NondecreasingConstructionFor F)
+    (c : NondecreasingCandidateFor F)
     (hinterval : F.lower <= F.upper) :
-    (piecewiseMonotoneIntegralFor F
-      (PiecewiseMonotoneConstructionFor.ofNondecreasing c hinterval)).Equiv
-        (nondecreasingIntegralFor F c) := by
-  simpa [PiecewiseMonotoneConstructionFor.ofNondecreasing,
-    NondecreasingConstructionFor.toMonotoneConstructionFor,
-    nondecreasingIntegralFor, monotoneIntegralFor] using
-    (piecewiseMonotoneIntegralFor_ofMonotone_equiv
-      (F := F) c.toMonotoneConstructionFor hinterval)
+    (piecewiseMonotoneCandidateValue F
+      (PiecewiseMonotoneCandidateFor.ofNondecreasing c hinterval)).Equiv
+        (nondecreasingCandidateValue F c) := by
+  simpa [PiecewiseMonotoneCandidateFor.ofNondecreasing,
+    NondecreasingCandidateFor.toMonotoneCandidateFor,
+    nondecreasingCandidateValue, monotoneCandidateValue] using
+    (piecewiseMonotoneCandidateValue_ofMonotone_equiv
+      (F := F) c.toMonotoneCandidateFor hinterval)
 
-def ExistsPiecewiseMonotoneConstructionFor (F : FunctionOnInterval) : Prop :=
-  Nonempty (PiecewiseMonotoneConstructionFor F)
+def ExistsPiecewiseMonotoneCandidateFor (F : FunctionOnInterval) : Prop :=
+  Nonempty (PiecewiseMonotoneCandidateFor F)
 
 /-- Project-facing name for the general definite integral interface:
 construct the integral on monotone pieces and sum over a finite rational
 partition. -/
-abbrev GeneralConstructionFor (F : FunctionOnInterval) :=
-  PiecewiseMonotoneConstructionFor F
+abbrev GeneralCandidateFor (F : FunctionOnInterval) :=
+  PiecewiseMonotoneCandidateFor F
 
-def generalIntegralFor (F : FunctionOnInterval)
-    (c : GeneralConstructionFor F) : RealRaw :=
-  piecewiseMonotoneIntegralFor F c
+def generalCandidateValue (F : FunctionOnInterval)
+    (c : GeneralCandidateFor F) : RealRaw :=
+  piecewiseMonotoneCandidateValue F c
 
-theorem generalIntegralFor_valid (F : FunctionOnInterval)
-    (c : GeneralConstructionFor F) :
-    (generalIntegralFor F c).Valid :=
-  piecewiseMonotoneIntegralFor_valid F c
+theorem generalCandidateValue_valid (F : FunctionOnInterval)
+    (c : GeneralCandidateFor F) :
+    (generalCandidateValue F c).Valid :=
+  piecewiseMonotoneCandidateValue_valid F c
 
 /-! The general finite-piece integral is also available through the common
-`ConstructionFor` interface.  This is only a representation bridge: the
+`CandidateFor` interface.  This is only a representation bridge: the
 finite monotone partition and all cell certificates remain explicit inputs. -/
 def generalConstructionFor (F : FunctionOnInterval)
-    (c : GeneralConstructionFor F) : Integral.ConstructionFor F where
-  compute := (generalIntegralFor F c).compute
-  certificate := generalIntegralFor_valid F c
+    (c : GeneralCandidateFor F) : Integral.CandidateFor F where
+  compute := (generalCandidateValue F c).compute
+  certificate := generalCandidateValue_valid F c
 
 theorem generalConstructionFor_compute_eq (F : FunctionOnInterval)
-    (c : GeneralConstructionFor F) :
-    (generalConstructionFor F c).compute = (generalIntegralFor F c).compute := rfl
+    (c : GeneralCandidateFor F) :
+    (generalConstructionFor F c).compute = (generalCandidateValue F c).compute := rfl
 
 theorem integralFor_generalConstructionFor_valid (F : FunctionOnInterval)
-    (c : GeneralConstructionFor F) :
-    (Integral.integralFor F (generalConstructionFor F c)).Valid :=
-  Integral.integralFor_valid F (generalConstructionFor F c)
+    (c : GeneralCandidateFor F) :
+    (Integral.candidateValue F (generalConstructionFor F c)).Valid :=
+  Integral.candidateValue_valid F (generalConstructionFor F c)
 
 theorem integralFor_generalConstructionFor_equiv (F : FunctionOnInterval)
-    (c : GeneralConstructionFor F) :
-    (Integral.integralFor F (generalConstructionFor F c)).Equiv
-      (generalIntegralFor F c) := by
-  exact RealRaw.equiv_refl _ (generalIntegralFor_valid F c)
+    (c : GeneralCandidateFor F) :
+    (Integral.candidateValue F (generalConstructionFor F c)).Equiv
+      (generalCandidateValue F c) := by
+  exact RealRaw.equiv_refl _ (generalCandidateValue_valid F c)
 
 /-- The public general-integral alias agrees with the original monotone
 construction on a one-piece partition. -/
-theorem generalIntegralFor_ofMonotone_equiv
+theorem generalCandidateValue_ofMonotone_equiv
     {F : FunctionOnInterval}
-    (c : MonotoneConstructionFor F)
+    (c : MonotoneCandidateFor F)
     (hinterval : F.lower <= F.upper) :
-    (generalIntegralFor F
-      (PiecewiseMonotoneConstructionFor.ofMonotone c hinterval)).Equiv
-        (monotoneIntegralFor F c) := by
-  simpa [generalIntegralFor] using
-    piecewiseMonotoneIntegralFor_ofMonotone_equiv
+    (generalCandidateValue F
+      (PiecewiseMonotoneCandidateFor.ofMonotone c hinterval)).Equiv
+        (monotoneCandidateValue F c) := by
+  simpa [generalCandidateValue] using
+    piecewiseMonotoneCandidateValue_ofMonotone_equiv
       (F := F) c hinterval
 
 /-- The public general-integral alias agrees with the preferred
 nondecreasing construction on a one-piece partition. -/
-theorem generalIntegralFor_ofNondecreasing_equiv
+theorem generalCandidateValue_ofNondecreasing_equiv
     {F : FunctionOnInterval}
-    (c : NondecreasingConstructionFor F)
+    (c : NondecreasingCandidateFor F)
     (hinterval : F.lower <= F.upper) :
-    (generalIntegralFor F
-      (PiecewiseMonotoneConstructionFor.ofNondecreasing c hinterval)).Equiv
-        (nondecreasingIntegralFor F c) := by
-  simpa [generalIntegralFor] using
-    piecewiseMonotoneIntegralFor_ofNondecreasing_equiv
+    (generalCandidateValue F
+      (PiecewiseMonotoneCandidateFor.ofNondecreasing c hinterval)).Equiv
+        (nondecreasingCandidateValue F c) := by
+  simpa [generalCandidateValue] using
+    piecewiseMonotoneCandidateValue_ofNondecreasing_equiv
       (F := F) c hinterval
 
 /-! Publicly expose the finite-piece FTC endpoint theorem through the
 project-facing general-integral name.  The hypotheses remain deliberately
 finite: the caller supplies the endpoint transport certificate for the chosen
 rational partition. -/
-theorem generalIntegralFor_equiv_totalEndpointDifference_of_telescope
+theorem generalCandidateValue_equiv_totalEndpointDifference_of_telescope
     (F : FunctionOnInterval)
-    (c : GeneralConstructionFor F)
+    (c : GeneralCandidateFor F)
     (h : PiecewiseMonotoneEndpointFTCFor F c)
     {first : RealRaw} {rest : List RealRaw}
     (hvalues : forall x, x ∈ first :: rest -> x.Valid)
@@ -13433,81 +13433,81 @@ theorem generalIntegralFor_equiv_totalEndpointDifference_of_telescope
         (rawAdjacentDifferenceList (first :: rest)))
     (htotal : (rawLast first rest - first).Equiv
       (piecewiseMonotoneTotalEndpointDifference F c)) :
-    (generalIntegralFor F c).Equiv
+    (generalCandidateValue F c).Equiv
       (piecewiseMonotoneTotalEndpointDifference F c) := by
-  simpa [generalIntegralFor] using
-    piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_telescope
+  simpa [generalCandidateValue] using
+    piecewiseMonotoneCandidateValue_equiv_totalEndpointDifference_of_telescope
       F c h hvalues htransport htotal
 
 /-! Project-facing canonical form: a finite piecewise-monotone integral reaches
 its endpoint difference from the cellwise FTC certificates alone. -/
-theorem generalIntegralFor_equiv_totalEndpointDifference_of_canonical_values
+theorem generalCandidateValue_equiv_totalEndpointDifference_of_canonical_values
     (F : FunctionOnInterval)
-    (c : GeneralConstructionFor F)
+    (c : GeneralCandidateFor F)
     (h : PiecewiseMonotoneEndpointFTCFor F c) :
-    (generalIntegralFor F c).Equiv
+    (generalCandidateValue F c).Equiv
       (piecewiseMonotoneTotalEndpointDifference F c) := by
-  simpa [generalIntegralFor] using
-    piecewiseMonotoneIntegralFor_equiv_totalEndpointDifference_of_canonical_values
+  simpa [generalCandidateValue] using
+    piecewiseMonotoneCandidateValue_equiv_totalEndpointDifference_of_canonical_values
       F c h
 
-abbrev ExistsGeneralConstructionFor (F : FunctionOnInterval) : Prop :=
-  ExistsPiecewiseMonotoneConstructionFor F
+abbrev ExistsGeneralCandidateFor (F : FunctionOnInterval) : Prop :=
+  ExistsPiecewiseMonotoneCandidateFor F
 
 /-- Domain-aware linearity target for the eventual integral operator. -/
 def LinearFor : Prop :=
   forall (F G H : FunctionOnInterval)
     (_hadd : F.PointwiseAdd G H)
-    (cF : ConstructionFor F)
-    (cG : ConstructionFor G)
-    (cH : ConstructionFor H)
+    (cF : CandidateFor F)
+    (cG : CandidateFor G)
+    (cH : CandidateFor H)
     (_hsum : RealRaw.ValidCompute
-      (RealRaw.addCompute (integralFor F cF) (integralFor G cG))),
-      (integralFor H cH).Equiv
-        { compute := RealRaw.addCompute (integralFor F cF) (integralFor G cG) }
+      (RealRaw.addCompute (candidateValue F cF) (candidateValue G cG))),
+      (candidateValue H cH).Equiv
+        { compute := RealRaw.addCompute (candidateValue F cF) (candidateValue G cG) }
 
 /-- Domain-aware rational scalar compatibility target. -/
 def CompatibleWithScaleRatFor : Prop :=
   forall (r : Rat) (F G : FunctionOnInterval)
     (_hscaleFun : F.PointwiseScaleRat r G)
-    (cF : ConstructionFor F)
-    (cG : ConstructionFor G)
+    (cF : CandidateFor F)
+    (cG : CandidateFor G)
     (_hscale : RealRaw.ValidCompute
-      (RealRaw.scaleRatCompute r (integralFor F cF))),
-      (integralFor G cG).Equiv
-        { compute := RealRaw.scaleRatCompute r (integralFor F cF) }
+      (RealRaw.scaleRatCompute r (candidateValue F cF))),
+      (candidateValue G cG).Equiv
+        { compute := RealRaw.scaleRatCompute r (candidateValue F cF) }
 
 /-- Domain-aware adjacent-interval additivity target. -/
 def AdditiveOnAdjacentIntervalsFor : Prop :=
   forall (F : FunctionOnInterval) (a b c : Rat)
     (ha : F.lower <= a) (hab : a <= b) (hbc : b <= c) (hc : c <= F.upper)
-    (cab : ConstructionFor
+    (cab : CandidateFor
       (F.restrict a b ha hab (Rat.le_trans hbc hc)))
-    (cbc : ConstructionFor
+    (cbc : CandidateFor
       (F.restrict b c (Rat.le_trans ha hab) hbc hc))
-    (cac : ConstructionFor
+    (cac : CandidateFor
       (F.restrict a c ha (Rat.le_trans hab hbc) hc))
     (_hsum : RealRaw.ValidCompute
       (RealRaw.addCompute
-        (integralFor (F.restrict a b ha hab (Rat.le_trans hbc hc)) cab)
-        (integralFor (F.restrict b c (Rat.le_trans ha hab) hbc hc) cbc))),
-      (integralFor (F.restrict a c ha (Rat.le_trans hab hbc) hc) cac).Equiv
+        (candidateValue (F.restrict a b ha hab (Rat.le_trans hbc hc)) cab)
+        (candidateValue (F.restrict b c (Rat.le_trans ha hab) hbc hc) cbc))),
+      (candidateValue (F.restrict a c ha (Rat.le_trans hab hbc) hc) cac).Equiv
         { compute := RealRaw.addCompute
-            (integralFor (F.restrict a b ha hab (Rat.le_trans hbc hc)) cab)
-            (integralFor (F.restrict b c (Rat.le_trans ha hab) hbc hc) cbc) }
+            (candidateValue (F.restrict a b ha hab (Rat.le_trans hbc hc)) cab)
+            (candidateValue (F.restrict b c (Rat.le_trans ha hab) hbc hc) cbc) }
 
 /-- Domain-aware order-preservation target for the eventual integral operator:
 pointwise order of integrands should imply order of their integrals. -/
 def OrderPreservingFor : Prop :=
   forall (F G : FunctionOnInterval)
     (_hle : F.PointwiseLe G)
-    (cF : ConstructionFor F)
-    (cG : ConstructionFor G),
-      (integralFor F cF).Le (integralFor G cG)
+    (cF : CandidateFor F)
+    (cG : CandidateFor G),
+      (candidateValue F cF).Le (candidateValue G cG)
 
 /-- Bundle of the basic algebra laws expected of the domain-aware integral.
 
-The individual fields stay proposition-shaped because `ConstructionFor` is an
+The individual fields stay proposition-shaped because `CandidateFor` is an
 arbitrary valid raw algorithm.  Concrete integral constructors, such as the
 monotone and piecewise-monotone constructors, should provide this package once
 their finite-sum comparison proofs are available. -/
@@ -13521,64 +13521,64 @@ structure BasicPropertiesFor where
 def PiecewiseMonotoneLinearFor : Prop :=
   forall (F G H : FunctionOnInterval)
     (_hadd : F.PointwiseAdd G H)
-    (cF : PiecewiseMonotoneConstructionFor F)
-    (cG : PiecewiseMonotoneConstructionFor G)
-    (cH : PiecewiseMonotoneConstructionFor H)
+    (cF : PiecewiseMonotoneCandidateFor F)
+    (cG : PiecewiseMonotoneCandidateFor G)
+    (cH : PiecewiseMonotoneCandidateFor H)
     (_hsum : RealRaw.ValidCompute
       (RealRaw.addCompute
-        (piecewiseMonotoneIntegralFor F cF)
-        (piecewiseMonotoneIntegralFor G cG))),
-      (piecewiseMonotoneIntegralFor H cH).Equiv
+        (piecewiseMonotoneCandidateValue F cF)
+        (piecewiseMonotoneCandidateValue G cG))),
+      (piecewiseMonotoneCandidateValue H cH).Equiv
         { compute := RealRaw.addCompute
-            (piecewiseMonotoneIntegralFor F cF)
-            (piecewiseMonotoneIntegralFor G cG) }
+            (piecewiseMonotoneCandidateValue F cF)
+            (piecewiseMonotoneCandidateValue G cG) }
 
 /-- Rational scalar compatibility target for the piecewise-monotone integral
 operator. -/
 def PiecewiseMonotoneCompatibleWithScaleRatFor : Prop :=
   forall (r : Rat) (F G : FunctionOnInterval)
     (_hscaleFun : F.PointwiseScaleRat r G)
-    (cF : PiecewiseMonotoneConstructionFor F)
-    (cG : PiecewiseMonotoneConstructionFor G)
+    (cF : PiecewiseMonotoneCandidateFor F)
+    (cG : PiecewiseMonotoneCandidateFor G)
     (_hscale : RealRaw.ValidCompute
-      (RealRaw.scaleRatCompute r (piecewiseMonotoneIntegralFor F cF))),
-      (piecewiseMonotoneIntegralFor G cG).Equiv
+      (RealRaw.scaleRatCompute r (piecewiseMonotoneCandidateValue F cF))),
+      (piecewiseMonotoneCandidateValue G cG).Equiv
         { compute := RealRaw.scaleRatCompute r
-            (piecewiseMonotoneIntegralFor F cF) }
+            (piecewiseMonotoneCandidateValue F cF) }
 
 /-- Adjacent-interval additivity target for the piecewise-monotone integral
 operator. -/
 def PiecewiseMonotoneAdditiveOnAdjacentIntervalsFor : Prop :=
   forall (F : FunctionOnInterval) (a b c : Rat)
     (ha : F.lower <= a) (hab : a <= b) (hbc : b <= c) (hc : c <= F.upper)
-    (cab : PiecewiseMonotoneConstructionFor
+    (cab : PiecewiseMonotoneCandidateFor
       (F.restrict a b ha hab (Rat.le_trans hbc hc)))
-    (cbc : PiecewiseMonotoneConstructionFor
+    (cbc : PiecewiseMonotoneCandidateFor
       (F.restrict b c (Rat.le_trans ha hab) hbc hc))
-    (cac : PiecewiseMonotoneConstructionFor
+    (cac : PiecewiseMonotoneCandidateFor
       (F.restrict a c ha (Rat.le_trans hab hbc) hc))
     (_hsum : RealRaw.ValidCompute
       (RealRaw.addCompute
-        (piecewiseMonotoneIntegralFor
+        (piecewiseMonotoneCandidateValue
           (F.restrict a b ha hab (Rat.le_trans hbc hc)) cab)
-        (piecewiseMonotoneIntegralFor
+        (piecewiseMonotoneCandidateValue
           (F.restrict b c (Rat.le_trans ha hab) hbc hc) cbc))),
-      (piecewiseMonotoneIntegralFor
+      (piecewiseMonotoneCandidateValue
         (F.restrict a c ha (Rat.le_trans hab hbc) hc) cac).Equiv
         { compute := RealRaw.addCompute
-            (piecewiseMonotoneIntegralFor
+            (piecewiseMonotoneCandidateValue
               (F.restrict a b ha hab (Rat.le_trans hbc hc)) cab)
-            (piecewiseMonotoneIntegralFor
+            (piecewiseMonotoneCandidateValue
               (F.restrict b c (Rat.le_trans ha hab) hbc hc) cbc) }
 
 /-- Order-preservation target for the piecewise-monotone integral operator. -/
 def PiecewiseMonotoneOrderPreservingFor : Prop :=
   forall (F G : FunctionOnInterval)
     (_hle : F.PointwiseLe G)
-    (cF : PiecewiseMonotoneConstructionFor F)
-    (cG : PiecewiseMonotoneConstructionFor G),
-      (piecewiseMonotoneIntegralFor F cF).Le
-        (piecewiseMonotoneIntegralFor G cG)
+    (cF : PiecewiseMonotoneCandidateFor F)
+    (cG : PiecewiseMonotoneCandidateFor G),
+      (piecewiseMonotoneCandidateValue F cF).Le
+        (piecewiseMonotoneCandidateValue G cG)
 
 /-- Bundle of the basic algebra laws for the intended general integral:
 define on monotone pieces, then sum over a finite rational partition. -/
@@ -16255,30 +16255,30 @@ def nonincreasingDarbouxScheduleConstructionFor
     {hmonotone : NonincreasingOnInterval F}
     {hinterval : F.lower <= F.upper}
     (s : NonincreasingDarbouxSchedule F hregular hmonotone hinterval) :
-    Integral.ConstructionFor F where
+    Integral.CandidateFor F where
   compute := (nonincreasingDarbouxScheduleRaw s).compute
   certificate := nonincreasingDarbouxScheduleRaw_valid s
 
 /-! Promote the automatic schedules to the generic monotone-piece interface.
 These adapters are the intended entry point when a certified piece is later
 assembled into a finite-turn integral. -/
-def MonotoneConstructionFor.ofAutomaticEndpointOrderedNondecreasing
+def MonotoneCandidateFor.ofAutomaticEndpointOrderedNondecreasing
     {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
     (hF : EndpointOrderedNondecreasingOnInterval F)
     {hinterval : F.lower <= F.upper} (lengthBound : Nat)
     (hLength : F.upper - F.lower <= (lengthBound : Rat)) :
-    MonotoneConstructionFor F where
+    MonotoneCandidateFor F where
   monotone := MonotoneOnInterval.ofNondecreasing hF.toNondecreasing
   construction := monotoneDarbouxScheduleConstructionFor
     (MonotoneDarbouxSchedule.ofAutomaticEndpointOrdered
       hregular hF (hinterval := hinterval) lengthBound hLength)
 
-def MonotoneConstructionFor.ofAutomaticEndpointOrderedNonincreasing
+def MonotoneCandidateFor.ofAutomaticEndpointOrderedNonincreasing
     {F : FunctionOnInterval} (hregular : IntervalRegularOn F)
     (hF : EndpointOrderedNonincreasingOnInterval F)
     {hinterval : F.lower <= F.upper} (lengthBound : Nat)
     (hLength : F.upper - F.lower <= (lengthBound : Rat)) :
-    MonotoneConstructionFor F where
+    MonotoneCandidateFor F where
   monotone := MonotoneOnInterval.ofNonincreasing hF.toNonincreasing
   construction := nonincreasingDarbouxScheduleConstructionFor
     (NonincreasingDarbouxSchedule.ofAutomaticEndpointOrdered
@@ -16290,7 +16290,7 @@ def nonincreasingDarbouxScheduleIntegralFor
     {hinterval : F.lower <= F.upper}
     (s : NonincreasingDarbouxSchedule F hregular hmonotone hinterval) :
     RealRaw :=
-  Integral.integralFor F (nonincreasingDarbouxScheduleConstructionFor s)
+  Integral.candidateValue F (nonincreasingDarbouxScheduleConstructionFor s)
 
 theorem nonincreasingDarbouxScheduleIntegralFor_valid
     {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
@@ -16298,7 +16298,7 @@ theorem nonincreasingDarbouxScheduleIntegralFor_valid
     {hinterval : F.lower <= F.upper}
     (s : NonincreasingDarbouxSchedule F hregular hmonotone hinterval) :
     (nonincreasingDarbouxScheduleIntegralFor s).Valid :=
-  Integral.integralFor_valid F (nonincreasingDarbouxScheduleConstructionFor s)
+  Integral.candidateValue_valid F (nonincreasingDarbouxScheduleConstructionFor s)
 
 theorem nonincreasingDarbouxScheduleIntegralFor_width_le_of_tolerance
     {F : FunctionOnInterval} {hregular : IntervalRegularOn F}

@@ -9289,13 +9289,13 @@ theorem uniformExpOnSymmetricUnitStabilized_equiv_endpointDifference :
     exact Rat.le_refl
 
 def uniformExpOnSymmetricUnitStabilizedConstruction :
-    Integral.ConstructionFor uniformExpOnSymmetricUnit where
+    Integral.CandidateFor uniformExpOnSymmetricUnit where
   compute := uniformExpOnSymmetricUnitStabilized.compute
   certificate := by
     simpa [RealRaw.Valid] using uniformExpOnSymmetricUnitStabilized_valid
 
 theorem uniformExpOnSymmetricUnitStabilizedIntegral_equiv_endpointDifference :
-    (Integral.integralFor uniformExpOnSymmetricUnit
+    (Integral.candidateValue uniformExpOnSymmetricUnit
       uniformExpOnSymmetricUnitStabilizedConstruction).Equiv
       (endpointDifferenceRaw uniformExpOnSymmetricUnitRealFunRaw (-1) 1
         uniformExpOnSymmetricUnit_endpointDifferenceValid) := by
@@ -9365,13 +9365,13 @@ theorem uniformExpOnUnitStabilized_equiv_endpointDifference :
     exact Rat.le_refl
 
 def uniformExpOnUnitStabilizedConstruction :
-    Integral.ConstructionFor uniformExpOnUnit where
+    Integral.CandidateFor uniformExpOnUnit where
   compute := uniformExpOnUnitStabilized.compute
   certificate := by
     simpa [RealRaw.Valid] using uniformExpOnUnitStabilized_valid
 
 theorem uniformExpOnUnitStabilizedIntegral_equiv_endpointDifference :
-    (Integral.integralFor uniformExpOnUnit
+    (Integral.candidateValue uniformExpOnUnit
       uniformExpOnUnitStabilizedConstruction).Equiv
       (endpointDifferenceRaw uniformExpOnUnitRealFunRaw 0 1
         uniformExpOnUnit_endpointDifferenceValid) := by
@@ -9381,7 +9381,7 @@ theorem uniformExpOnUnitStabilizedIntegral_equiv_endpointDifference :
   exact uniformExpOnUnitStabilized_equiv_endpointDifference
 
 theorem uniformExpOnUnitStabilizedIntegral_equiv_exp_endpoint_subtraction :
-    (Integral.integralFor uniformExpOnUnit
+    (Integral.candidateValue uniformExpOnUnit
       uniformExpOnUnitStabilizedConstruction).Equiv
       ((uniformExpOnUnitRealFunRaw.apply uniformExpOnUnitRealFunRaw_valid
           (1 : Rat) (by constructor <;> native_decide)) -
@@ -9395,9 +9395,9 @@ theorem uniformExpOnUnitStabilizedIntegral_equiv_exp_endpoint_subtraction :
   have hdiff := endpointDifferenceRaw_equiv_sub_apply
     hF hzero hone uniformExpOnUnit_endpointDifferenceValid
   have hintegral :
-      (Integral.integralFor uniformExpOnUnit
+      (Integral.candidateValue uniformExpOnUnit
         uniformExpOnUnitStabilizedConstruction).Valid :=
-    Integral.integralFor_valid uniformExpOnUnit
+    Integral.candidateValue_valid uniformExpOnUnit
       uniformExpOnUnitStabilizedConstruction
   have hendpoint :
       (endpointDifferenceRaw uniformExpOnUnitRealFunRaw 0 1
@@ -9419,7 +9419,7 @@ theorem uniformExpOnUnitStabilizedIntegral_equiv_exp_endpoint_subtraction :
 the common-prefix endpoints can be replaced by the canonical factorial
 series endpoints through the maintained equivalence chain. -/
 theorem uniformExpOnUnitStabilizedIntegral_equiv_powerSeries_endpoint_subtraction :
-    (Integral.integralFor uniformExpOnUnit
+    (Integral.candidateValue uniformExpOnUnit
       uniformExpOnUnitStabilizedConstruction).Equiv
       ((expPowerSeries (1 : Rat)) - (expPowerSeries (0 : Rat))) := by
   let hF := uniformExpOnUnitRealFunRaw_valid
@@ -9458,9 +9458,9 @@ theorem uniformExpOnUnitStabilizedIntegral_equiv_powerSeries_endpoint_subtractio
   have hintegralSub :=
     uniformExpOnUnitStabilizedIntegral_equiv_exp_endpoint_subtraction
   have hintegral :
-      (Integral.integralFor uniformExpOnUnit
+      (Integral.candidateValue uniformExpOnUnit
         uniformExpOnUnitStabilizedConstruction).Valid :=
-    Integral.integralFor_valid uniformExpOnUnit
+    Integral.candidateValue_valid uniformExpOnUnit
       uniformExpOnUnitStabilizedConstruction
   have huniformSub := RealRaw.sub_valid huniformOne huniformZero
   have hseriesSub := RealRaw.sub_valid hseriesOne hseriesZero
@@ -9473,7 +9473,7 @@ the certified exponential evaluator is `exp(1) - 1`, where both terms are
 still computable interval representations. -/
 
 theorem uniformExpOnUnitStabilizedIntegral_equiv_powerSeries_one_sub_one :
-    (Integral.integralFor uniformExpOnUnit
+    (Integral.candidateValue uniformExpOnUnit
       uniformExpOnUnitStabilizedConstruction).Equiv
       ((expPowerSeries (1 : Rat)) - RealRaw.ofRat 1) := by
   have hseriesOne : (expPowerSeries (1 : Rat)).Valid :=
@@ -9499,7 +9499,7 @@ theorem uniformExpOnUnitStabilizedIntegral_equiv_powerSeries_one_sub_one :
       ((expPowerSeries (1 : Rat)) - RealRaw.ofRat 1).Valid :=
     RealRaw.sub_valid hseriesOne hone
   exact RealRaw.equiv_trans
-    (Integral.integralFor_valid uniformExpOnUnit
+    (Integral.candidateValue_valid uniformExpOnUnit
       uniformExpOnUnitStabilizedConstruction)
     hsubValid hnormalizedValid
     uniformExpOnUnitStabilizedIntegral_equiv_powerSeries_endpoint_subtraction
@@ -9511,7 +9511,7 @@ the first user-facing non-polynomial integral identity in the ODE route:
 the integral is still a `RealRaw`, and the familiar notation is only a proved
 representation edge. -/
 theorem uniformExpOnSymmetricUnitStabilizedIntegral_equiv_exp_endpoint_subtraction :
-    (Integral.integralFor uniformExpOnSymmetricUnit
+    (Integral.candidateValue uniformExpOnSymmetricUnit
       uniformExpOnSymmetricUnitStabilizedConstruction).Equiv
       ((uniformExpOnSymmetricUnitRealFunRaw.apply
           uniformExpOnSymmetricUnitRealFunRaw_valid (1 : Rat)
@@ -9529,9 +9529,9 @@ theorem uniformExpOnSymmetricUnitStabilizedIntegral_equiv_exp_endpoint_subtracti
   have hdiff := endpointDifferenceRaw_equiv_sub_apply
     hF hminus hplus hendpoint
   have hintegral :
-      (Integral.integralFor uniformExpOnSymmetricUnit
+      (Integral.candidateValue uniformExpOnSymmetricUnit
         uniformExpOnSymmetricUnitStabilizedConstruction).Valid :=
-    Integral.integralFor_valid uniformExpOnSymmetricUnit
+    Integral.candidateValue_valid uniformExpOnSymmetricUnit
       uniformExpOnSymmetricUnitStabilizedConstruction
   have hendpoint :
       (endpointDifferenceRaw uniformExpOnSymmetricUnitRealFunRaw (-1) 1
@@ -9555,7 +9555,7 @@ representation.  This is the representation-chain step needed by later ODE
 and logarithm arguments: the integral theorem is independent of which
 certified exponential evaluator is preferred. -/
 theorem uniformExpOnSymmetricUnitStabilizedIntegral_equiv_powerSeries_endpoint_subtraction :
-    (Integral.integralFor uniformExpOnSymmetricUnit
+    (Integral.candidateValue uniformExpOnSymmetricUnit
       uniformExpOnSymmetricUnitStabilizedConstruction).Equiv
       ((expPowerSeries (1 : Rat)) - (expPowerSeries (-1 : Rat))) := by
   let hF := uniformExpOnSymmetricUnitRealFunRaw_valid
@@ -9594,9 +9594,9 @@ theorem uniformExpOnSymmetricUnitStabilizedIntegral_equiv_powerSeries_endpoint_s
   have hintegralSub :=
     uniformExpOnSymmetricUnitStabilizedIntegral_equiv_exp_endpoint_subtraction
   have hintegral :
-      (Integral.integralFor uniformExpOnSymmetricUnit
+      (Integral.candidateValue uniformExpOnSymmetricUnit
         uniformExpOnSymmetricUnitStabilizedConstruction).Valid :=
-    Integral.integralFor_valid uniformExpOnSymmetricUnit
+    Integral.candidateValue_valid uniformExpOnSymmetricUnit
       uniformExpOnSymmetricUnitStabilizedConstruction
   have huniformSub := RealRaw.sub_valid huniformPlus huniformMinus
   have hseriesSub := RealRaw.sub_valid hseriesPlus hseriesMinus

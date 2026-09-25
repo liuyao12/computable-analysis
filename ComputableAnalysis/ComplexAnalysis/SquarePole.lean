@@ -76,7 +76,7 @@ def candidate (center : QComplex) (r : Rat) (s : Sampling) : ComplexRaw where
 /-- The certified rectangle width is a literal rational error radius. -/
 def radius (n : Nat) : Rat := (CauchyContour.raw.compute n).height
 
-def contour (center : QComplex) (r : Rat) (s : Sampling) : ComplexRaw :=
+def quadrature (center : QComplex) (r : Rat) (s : Sampling) : ComplexRaw :=
   ComplexRaw.cauchyStabilize (candidate center r s) radius
 
 theorem sample_enclosed (center : QComplex) (r : Rat) (hr : r ≠ 0)
@@ -112,8 +112,8 @@ theorem radius_shrinks : ShrinksToZero radius := by
   obtain ⟨N, hN⟩ := CauchyContour.raw_valid.2.2 eps
   exact ⟨N, fun n hn => (hN n hn).2⟩
 
-theorem contour_valid (center : QComplex) (r : Rat) (hr : r ≠ 0)
-    (s : Sampling) : (contour center r s).Valid := by
+theorem quadrature_valid (center : QComplex) (r : Rat) (hr : r ≠ 0)
+    (s : Sampling) : (quadrature center r s).Valid := by
   apply ComplexRaw.cauchyStabilize_valid
     (fun _ => QComplex.le_refl _) _ (candidate_future center r hr s) radius_shrinks
   intro eps
@@ -124,58 +124,58 @@ theorem contour_valid (center : QComplex) (r : Rat) (hr : r ≠ 0)
     (sample center r s n).im - (sample center r s n).im ≤ eps.val
   constructor <;> grind
 
-theorem contour_compute_zero (center : QComplex) (r : Rat) (s : Sampling) :
-    (contour center r s).compute 0 =
+theorem quadrature_compute_zero (center : QComplex) (r : Rat) (s : Sampling) :
+    (quadrature center r s).compute 0 =
       QBox.expand (QBox.point (sample center r s 0)) (radius 0) := rfl
 
-theorem contour_compute_succ (center : QComplex) (r : Rat) (s : Sampling) (n : Nat) :
-    (contour center r s).compute (n + 1) =
-      QBox.intersection ((contour center r s).compute n)
+theorem quadrature_compute_succ (center : QComplex) (r : Rat) (s : Sampling) (n : Nat) :
+    (quadrature center r s).compute (n + 1) =
+      QBox.intersection ((quadrature center r s).compute n)
         (QBox.expand (QBox.point (sample center r s (n + 1))) (radius (n + 1))) := rfl
 
-theorem contour_encloses_sample (center : QComplex) (r : Rat) (hr : r ≠ 0)
+theorem quadrature_encloses_sample (center : QComplex) (r : Rat) (hr : r ≠ 0)
     (s : Sampling) (n : Nat) :
-    (QBox.point (sample center r s n)).NestedIn ((contour center r s).compute n) :=
+    (QBox.point (sample center r s n)).NestedIn ((quadrature center r s).compute n) :=
   ComplexRaw.cauchyStabilize_contains_current (candidate_future center r hr s) n
 
-theorem contour_contains_period (center : QComplex) (r : Rat) (hr : r ≠ 0)
+theorem quadrature_contains_period (center : QComplex) (r : Rat) (hr : r ≠ 0)
     (s : Sampling) (n : Nat) :
-    (CauchyContour.raw.compute n).NestedIn ((contour center r s).compute n) := by
+    (CauchyContour.raw.compute n).NestedIn ((quadrature center r s).compute n) := by
   apply ComplexRaw.cauchyStabilize_contains_external (external := CauchyContour.raw.compute)
     (fun k n hkn => QBox.nested_trans
       (ComplexRaw.valid_nestedIn CauchyContour.raw_valid hkn)
       (period_in_expanded_candidate center r hr s k)) n n (Nat.le_refl n)
 
-theorem contour_equiv_period (center : QComplex) (r : Rat) (hr : r ≠ 0)
-    (s : Sampling) : (contour center r s).Equiv CauchyContour.raw := by
+theorem quadrature_equiv_period (center : QComplex) (r : Rat) (hr : r ≠ 0)
+    (s : Sampling) : (quadrature center r s).Equiv CauchyContour.raw := by
   intro n
   apply (ComplexRaw.compareAt_overlap_iff _ _ n n).2
-  have hc := contour_contains_period center r hr s n
+  have hc := quadrature_contains_period center r hr s n
   have ho := ComplexRaw.valid_ordered CauchyContour.raw_valid n
   exact ⟨QComplex.le_trans hc.1 ho, QComplex.le_trans ho hc.2⟩
 
-theorem contour_equiv_twoPiI (center : QComplex) (r : Rat) (hr : r ≠ 0)
-    (s : Sampling) : (contour center r s).Equiv CauchyContour.twoPiI :=
-  ComplexRaw.equiv_trans (contour_valid center r hr s) CauchyContour.raw_valid
-    CauchyContour.twoPiI_valid (contour_equiv_period center r hr s)
+theorem quadrature_equiv_twoPiI (center : QComplex) (r : Rat) (hr : r ≠ 0)
+    (s : Sampling) : (quadrature center r s).Equiv CauchyContour.twoPiI :=
+  ComplexRaw.equiv_trans (quadrature_valid center r hr s) CauchyContour.raw_valid
+    CauchyContour.twoPiI_valid (quadrature_equiv_period center r hr s)
     CauchyContour.raw_equiv_twoPiI
 
 /-- Translation, nonzero rational dilation, and the certified tag algorithm
-may all change independently without changing the contour value. -/
-theorem contour_independent (c d : QComplex) (r t : Rat) (hr : r ≠ 0) (ht : t ≠ 0)
-    (s v : Sampling) : (contour c r s).Equiv (contour d t v) :=
-  ComplexRaw.equiv_trans (contour_valid c r hr s) CauchyContour.raw_valid
-    (contour_valid d t ht v) (contour_equiv_period c r hr s)
-    (ComplexRaw.equiv_symm (contour_equiv_period d t ht v))
+may all change independently without changing the quadrature value. -/
+theorem quadrature_independent (c d : QComplex) (r t : Rat) (hr : r ≠ 0) (ht : t ≠ 0)
+    (s v : Sampling) : (quadrature c r s).Equiv (quadrature d t v) :=
+  ComplexRaw.equiv_trans (quadrature_valid c r hr s) CauchyContour.raw_valid
+    (quadrature_valid d t ht v) (quadrature_equiv_period c r hr s)
+    (ComplexRaw.equiv_symm (quadrature_equiv_period d t ht v))
 
-theorem contour_widths_bound (center : QComplex) (r : Rat) (s : Sampling) (n : Nat) :
-    ((contour center r s).compute n).width ≤ 32 / (((2 ^ n : Nat) : Rat)) ∧
-      ((contour center r s).compute n).height ≤ 32 / (((2 ^ n : Nat) : Rat)) := by
-  have hc : ((contour center r s).compute n).NestedIn
+theorem quadrature_widths_bound (center : QComplex) (r : Rat) (s : Sampling) (n : Nat) :
+    ((quadrature center r s).compute n).width ≤ 32 / (((2 ^ n : Nat) : Rat)) ∧
+      ((quadrature center r s).compute n).height ≤ 32 / (((2 ^ n : Nat) : Rat)) := by
+  have hc : ((quadrature center r s).compute n).NestedIn
       (QBox.expand (QBox.point (sample center r s n)) (radius n)) := by
     cases n with
     | zero => exact ⟨QComplex.le_refl _, QComplex.le_refl _⟩
-    | succ n => rw [contour_compute_succ]; exact QBox.intersection_contained_right _ _
+    | succ n => rw [quadrature_compute_succ]; exact QBox.intersection_contained_right _ _
   have hw := QBox.width_height_le_of_nested hc
   have hp := CauchyContour.raw_height_geometric n
   simp only [QBox.expand, QBox.point, QBox.width, QBox.height, radius] at hw

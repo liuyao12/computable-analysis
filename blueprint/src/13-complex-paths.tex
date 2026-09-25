@@ -8,16 +8,32 @@ actually used, rather than first postulating an arbitrary holomorphic
 function on an arbitrary open set.
 
 \section{Integrating on a segment}
-For rational complex endpoints $p,q$, define
+Subdivide the actual oriented segment into finite chunks with endpoints
+$z_j,z_{j+1}$. For each chunk, certify a rational rectangle $B_j$
+containing the function's value rectangles throughout that chunk. Form
 \[
- \int_{[p,q]}F(z)\,dz
- =(q-p)\int_0^1 F(p+t(q-p))\,dt.
+ I_P=\sum_j B_j(z_{j+1}-z_j).
 \]
-The right side consists of two real integral computations.  A polygonal
-path is a finite list of such segments, and its integral is their sum.
-Its length has a rational upper bound obtained from coordinate differences.
-If two integrands differ by at most $\eta$ on the path of length at most
-$L$, their integrals differ by at most $L\eta$.
+Refine the chunks and their value enclosures, proving that the integral
+rectangles are nested (or have justified finite intersections) and that
+both coordinate widths tend to zero. This defines the integral of the
+particular function on this segment. No parametrization is needed.
+
+For a vertical upward chunk the displacement is $ih$ with $h\ge0$.
+Rotation preserves rectangular shape, but exchanges the bounds:
+\[
+ i\bigl([a,b]+i[c,d]\bigr)=[-d,-c]+i[a,b].
+\]
+Coordinate monotonicity can identify each bound from endpoint rectangles;
+otherwise a proved whole-chunk interval estimate supplies it. Polygonal
+paths concatenate these finite sums. Parametrized formulas are subsequent
+comparisons between explicit computations, not the initial definition.
+
+The native box certificate requires a sound range evaluator and starts
+with one chunk, not an empty partition. Constant open paths are checked.
+The later midpoint-based Cauchy computation has its own proved convergence
+and cancellation; its agreement with this direct enclosure construction
+is a separate formalization obligation.
 
 In a single series disk, the primitive
 \[
@@ -90,9 +106,10 @@ not invoked it to manufacture a chart from unverified pointwise data.
 
 \section{Rectangles as contour primitives}
 For the residue route it suffices to begin with rational rectangles.
-On an oriented side from $a$ to $b$, integrate the real and imaginary
-components of $F(a+t(b-a))(b-a)$ on $[0,1]$. Supply finite monotonicity
-partitions and rational range bounds for these two real functions.
+On each oriented side, subdivide the segment geometrically and enclose
+the real and imaginary value coordinates throughout each chunk. Supply
+finite monotonicity partitions or rational range bounds, then multiply
+by each chunk displacement and add the resulting rectangles.
 On a monotone piece of length $L$, range width $V$, mesh size at most
 $\delta$, and endpoint value boxes of width at most $\eta$, endpoint
 rectangles have gap at most $\delta V+2L\eta$. Add these budgets over the

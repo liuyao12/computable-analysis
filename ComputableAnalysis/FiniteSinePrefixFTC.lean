@@ -1180,7 +1180,7 @@ theorem sineTaylorPrefixThreeSquareEffectiveFTCStabilized_equiv_value :
 
 /-! Domain-aware client of the canonical effective-FTC constructor.  This is
 the representative path that users should copy: certify the raw integrand on
-its rational interval, obtain an `Integral.ConstructionFor`, and invoke the
+its rational interval, obtain an `Integral.CandidateFor`, and invoke the
 endpoint theorem. -/
 
 def sineTaylorPrefixThreeSquareIntegrand : FunctionOnInterval :=
@@ -1189,7 +1189,7 @@ def sineTaylorPrefixThreeSquareIntegrand : FunctionOnInterval :=
     (RealFunRaw.exact_valid _)
 
 def sineTaylorPrefixThreeSquareEffectiveFTCConstruction :
-    Integral.ConstructionFor sineTaylorPrefixThreeSquareIntegrand := by
+    Integral.CandidateFor sineTaylorPrefixThreeSquareIntegrand := by
   unfold sineTaylorPrefixThreeSquareIntegrand
   exact Integral.effectiveFTCConstructionFor
     sineTaylorPrefixThreeSquareEffectiveFTCData
@@ -1197,7 +1197,7 @@ def sineTaylorPrefixThreeSquareEffectiveFTCConstruction :
     sineTaylorPrefixThreeSquareEffectiveFTCEndpointValid
 
 theorem sineTaylorPrefixThreeSquareEffectiveFTCConstruction_equiv_endpointDifference :
-    (Integral.integralFor sineTaylorPrefixThreeSquareIntegrand
+    (Integral.candidateValue sineTaylorPrefixThreeSquareIntegrand
       sineTaylorPrefixThreeSquareEffectiveFTCConstruction).Equiv
       (endpointDifferenceRaw sineTaylorPrefixThreeSquarePrimitiveRaw 0
         ((1 : Rat) / 2)
@@ -1210,13 +1210,13 @@ theorem sineTaylorPrefixThreeSquareEffectiveFTCConstruction_equiv_endpointDiffer
       sineTaylorPrefixThreeSquareEffectiveFTCEndpointValid)
 
 theorem sineTaylorPrefixThreeSquareEffectiveFTCConstruction_equiv_value :
-    (Integral.integralFor sineTaylorPrefixThreeSquareIntegrand
+    (Integral.candidateValue sineTaylorPrefixThreeSquareIntegrand
       sineTaylorPrefixThreeSquareEffectiveFTCConstruction).Equiv
       (RealRaw.ofRat (6389 / 161280)) := by
   have hintegral :
-      (Integral.integralFor sineTaylorPrefixThreeSquareIntegrand
+      (Integral.candidateValue sineTaylorPrefixThreeSquareIntegrand
         sineTaylorPrefixThreeSquareEffectiveFTCConstruction).Valid :=
-    Integral.integralFor_valid _ _
+    Integral.candidateValue_valid _ _
   have hendpoint :
       (endpointDifferenceRaw sineTaylorPrefixThreeSquarePrimitiveRaw 0
         ((1 : Rat) / 2)

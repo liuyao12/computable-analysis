@@ -18,11 +18,11 @@ run_cmd do
   for mod in env.header.moduleNames do
     if mod.toString.startsWith "Mathlib" then throwError "Unexpected Mathlib import: {mod}"
   let roots := [``Triangle.subdivide, ``Triangle.cauchy_bound, ``Triangle.cauchy,
-    ``Triangle.first_order_bound, ``CauchyData.cauchy, ``CauchyData.contour_valid,
-    ``ChainData.cauchy, ``ChainData.contour_valid, ``Square.triangulate,
-    ``Square.residue, ``Square.residueContour_valid, ``Square.residue_independent,
-    ``SquarePole.contour_equiv_twoPiI, ``SquarePole.contour_independent,
-    ``SquarePole.contour_widths_bound, ``square_cauchy,
+    ``Triangle.first_order_bound, ``CauchyData.cauchy, ``CauchyData.quadrature_valid,
+    ``ChainData.cauchy, ``ChainData.quadrature_valid, ``Square.triangulate,
+    ``Square.residue, ``Square.residueQuadrature_valid, ``Square.residue_independent,
+    ``SquarePole.quadrature_equiv_twoPiI, ``SquarePole.quadrature_independent,
+    ``SquarePole.quadrature_widths_bound, ``square_cauchy,
     ``quadratic_simple_pole_residue, ``quadratic_tags_agree, ``conjugation_nonzero]
   for root in roots do
     let axioms ← collectAxioms root
@@ -41,4 +41,4 @@ run_cmd do
 
 #eval (List.range 4).map (fun n => (n, unitTriangle.sum squareFunction n))
 #eval (List.range 4).map (fun n => (n, unitTriangle.sum (fun z => ⟨z.re,-z.im⟩) n))
-#eval (List.range 3).map (fun n => (n, (SquarePole.contour QComplex.zero 1 SquarePole.midpoints).compute n))
+#eval (List.range 3).map (fun n => (n, (SquarePole.quadrature QComplex.zero 1 SquarePole.midpoints).compute n))

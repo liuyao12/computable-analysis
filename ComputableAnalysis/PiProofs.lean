@@ -167,7 +167,7 @@ theorem rectangleKernelIntegralRaw_equiv_rectangleRaw_nonnegativeUnit
       (rectangleKernelIntegralAtNonnegativeUnit x hx0 hx1)).compute n)
   simp [Taylor.ArctanComparison.kernelIntegralRaw,
     Taylor.ArctanComparison.positiveKernelIntegralRaw,
-    rectangleKernelIntegralAtNonnegativeUnit, Integral.integralFor, hx0]
+    rectangleKernelIntegralAtNonnegativeUnit, Integral.candidateValue, hx0]
   exact ⟨hle, hle⟩
 
 theorem arctanGeom_equiv_rectangleKernelIntegral_nonnegativeUnit
@@ -12358,19 +12358,19 @@ theorem piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
   exact hover
 
 theorem piFromArctanIntegralFor_equiv_piCircleArea_of_geom_agreement
-    (c : Integral.ConstructionFor
+    (c : Integral.CandidateFor
       (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1))
     (hgeom :
-      (Integral.integralFor
+      (Integral.candidateValue
         (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1) c).Equiv
         (ArctanGeometry.arctanGeom (1 : Rat))) :
     (IntegralIdentities.PiFromArctanIntegral
-      (Integral.integralFor
+      (Integral.candidateValue
         (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1) c)).Equiv
         piCircleArea := by
   have hscaled :
       (IntegralIdentities.PiFromArctanIntegral
-        (Integral.integralFor
+        (Integral.candidateValue
           (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1) c)).Equiv
           ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) := by
     unfold IntegralIdentities.PiFromArctanIntegral
@@ -12378,13 +12378,13 @@ theorem piFromArctanIntegralFor_equiv_piCircleArea_of_geom_agreement
   intro n
   have hover := (RealRaw.compareAt_overlap_iff
       (IntegralIdentities.PiFromArctanIntegral
-        (Integral.integralFor
+        (Integral.candidateValue
           (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1) c))
       ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) n n).1
     (hscaled n)
   apply (RealRaw.compareAt_overlap_iff
     (IntegralIdentities.PiFromArctanIntegral
-      (Integral.integralFor
+      (Integral.candidateValue
         (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1) c))
     piCircleArea n n).2
   rw [← four_arctanGeom_one_compute_eq_piCircleArea_compute n]
@@ -12392,22 +12392,22 @@ theorem piFromArctanIntegralFor_equiv_piCircleArea_of_geom_agreement
 
 theorem piFromArctanIntegralFor_equiv_piCircleArea_of_definiteIdentityFor
     (primitive : FunctionOnInterval)
-    (I : Integral.DefiniteIdentityFor
+    (I : Integral.EndpointComparisonFor
       (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1) primitive)
     (hendpoint :
       (endpointDifferenceRaw primitive.toRealFunRaw 0 1 I.endpoint_valid).Equiv
         (ArctanGeometry.arctanGeom (1 : Rat))) :
     (IntegralIdentities.PiFromArctanIntegral
-      (Integral.integralFor
+      (Integral.candidateValue
         (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
         I.construction)).Equiv piCircleArea := by
   have hintegralEndpoint :
-      (Integral.integralFor
+      (Integral.candidateValue
         (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
         I.construction).Equiv
         (endpointDifferenceRaw primitive.toRealFunRaw 0 1 I.endpoint_valid) := by
     change
-      (Integral.integralFor
+      (Integral.candidateValue
         (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
         I.construction).Equiv
       (endpointDifferenceRaw primitive.toRealFunRaw
@@ -12427,12 +12427,12 @@ theorem piFromArctanIntegralFor_equiv_piCircleArea_of_definiteIdentityFor
     ArctanGeometry.arctanGeom_valid_on_unit
       (by native_decide) (by native_decide)
   have hgeom :
-      (Integral.integralFor
+      (Integral.candidateValue
         (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
         I.construction).Equiv
         (ArctanGeometry.arctanGeom (1 : Rat)) :=
     RealRaw.equiv_trans
-      (Integral.integralFor_valid
+      (Integral.candidateValue_valid
         (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
         I.construction)
       hendpointValid
@@ -12443,26 +12443,26 @@ theorem piFromArctanIntegralFor_equiv_piCircleArea_of_definiteIdentityFor
     I.construction hgeom
 
 /-- Public-general-integral version of the arctangent-integral pi route.
-This consumes an endpoint identity whose integral side is `generalIntegralFor`,
+This consumes an endpoint identity whose integral side is `generalCandidateValue`,
 the finite sum over monotone pieces. -/
-theorem piFromArctanGeneralIntegralFor_equiv_piCircleArea_of_generalDefiniteIdentityFor
+theorem piFromArctanGeneralIntegralFor_equiv_piCircleArea_of_generalEndpointComparisonFor
     (primitive : FunctionOnInterval)
-    (I : Integral.GeneralDefiniteIdentityFor
+    (I : Integral.GeneralEndpointComparisonFor
       (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1) primitive)
     (hendpoint :
       (endpointDifferenceRaw primitive.toRealFunRaw 0 1 I.endpoint_valid).Equiv
         (ArctanGeometry.arctanGeom (1 : Rat))) :
     (IntegralIdentities.PiFromArctanIntegral
-      (Integral.generalIntegralFor
+      (Integral.generalCandidateValue
         (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
         I.construction)).Equiv piCircleArea := by
   have hintegralEndpoint :
-      (Integral.generalIntegralFor
+      (Integral.generalCandidateValue
         (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
         I.construction).Equiv
         (endpointDifferenceRaw primitive.toRealFunRaw 0 1 I.endpoint_valid) := by
     change
-      (Integral.generalIntegralFor
+      (Integral.generalCandidateValue
         (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
         I.construction).Equiv
       (endpointDifferenceRaw primitive.toRealFunRaw
@@ -12482,12 +12482,12 @@ theorem piFromArctanGeneralIntegralFor_equiv_piCircleArea_of_generalDefiniteIden
     ArctanGeometry.arctanGeom_valid_on_unit
       (by native_decide) (by native_decide)
   have hgeom :
-      (Integral.generalIntegralFor
+      (Integral.generalCandidateValue
         (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
         I.construction).Equiv
         (ArctanGeometry.arctanGeom (1 : Rat)) :=
     RealRaw.equiv_trans
-      (Integral.generalIntegralFor_valid
+      (Integral.generalCandidateValue_valid
         (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
         I.construction)
       hendpointValid
@@ -12496,7 +12496,7 @@ theorem piFromArctanGeneralIntegralFor_equiv_piCircleArea_of_generalDefiniteIden
       hendpoint
   have hscaled :
       (IntegralIdentities.PiFromArctanIntegral
-        (Integral.generalIntegralFor
+        (Integral.generalCandidateValue
           (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
           I.construction)).Equiv
           ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) := by
@@ -12505,14 +12505,14 @@ theorem piFromArctanGeneralIntegralFor_equiv_piCircleArea_of_generalDefiniteIden
   intro n
   have hover := (RealRaw.compareAt_overlap_iff
       (IntegralIdentities.PiFromArctanIntegral
-        (Integral.generalIntegralFor
+        (Integral.generalCandidateValue
           (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
           I.construction))
       ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) n n).1
     (hscaled n)
   apply (RealRaw.compareAt_overlap_iff
     (IntegralIdentities.PiFromArctanIntegral
-      (Integral.generalIntegralFor
+      (Integral.generalCandidateValue
         (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
         I.construction))
     piCircleArea n n).2
@@ -12520,59 +12520,59 @@ theorem piFromArctanGeneralIntegralFor_equiv_piCircleArea_of_generalDefiniteIden
   exact hover
 
 /-- Public-general-integral pi route obtained from an ordinary
-`DefiniteIdentityFor` plus an equivalent general construction.  This is the
+`EndpointComparisonFor` plus an equivalent general construction.  This is the
 adapter used when an FTC proof first produces a domain-aware endpoint identity
 for a concrete construction, and a separate monotone-piece construction is
 known to compute the same raw integral. -/
 theorem piFromArctanGeneralIntegralFor_equiv_piCircleArea_of_definiteIdentityFor_generalConstruction
     (primitive : FunctionOnInterval)
-    (I : Integral.DefiniteIdentityFor
+    (I : Integral.EndpointComparisonFor
       (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1) primitive)
     (construction :
-      Integral.GeneralConstructionFor
+      Integral.GeneralCandidateFor
         (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1))
     (hconstruction :
-      (Integral.generalIntegralFor
+      (Integral.generalCandidateValue
         (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
         construction).Equiv
-        (Integral.integralFor
+        (Integral.candidateValue
           (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
           I.construction))
     (hendpoint :
       (endpointDifferenceRaw primitive.toRealFunRaw 0 1 I.endpoint_valid).Equiv
         (ArctanGeometry.arctanGeom (1 : Rat))) :
     (IntegralIdentities.PiFromArctanIntegral
-      (Integral.generalIntegralFor
+      (Integral.generalCandidateValue
         (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
         construction)).Equiv piCircleArea :=
-  piFromArctanGeneralIntegralFor_equiv_piCircleArea_of_generalDefiniteIdentityFor
+  piFromArctanGeneralIntegralFor_equiv_piCircleArea_of_generalEndpointComparisonFor
     primitive
-    (Integral.GeneralDefiniteIdentityFor.ofDefiniteIdentityFor
+    (Integral.GeneralEndpointComparisonFor.ofEndpointComparisonFor
       I construction hconstruction)
     hendpoint
 
 /-- Domain-aware monotone definite-integral route to the arctangent-integral
 pi equivalence.  This consumes a monotone-integral endpoint identity directly,
 then forgets the monotonicity certificate through
-`MonotoneDefiniteIdentityFor.toDefiniteIdentityFor`. -/
-theorem piFromArctanIntegralFor_equiv_piCircleArea_of_monotoneDefiniteIdentityFor
+`MonotoneEndpointComparisonFor.toEndpointComparisonFor`. -/
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_monotoneEndpointComparisonFor
     (primitive : FunctionOnInterval)
-    (I : Integral.MonotoneDefiniteIdentityFor
+    (I : Integral.MonotoneEndpointComparisonFor
       (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1) primitive)
     (hendpoint :
       (endpointDifferenceRaw primitive.toRealFunRaw 0 1 I.endpoint_valid).Equiv
         (ArctanGeometry.arctanGeom (1 : Rat))) :
     (IntegralIdentities.PiFromArctanIntegral
-      (Integral.monotoneIntegralFor
+      (Integral.monotoneCandidateValue
         (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
         I.construction)).Equiv piCircleArea := by
-  simpa [Integral.MonotoneDefiniteIdentityFor.toDefiniteIdentityFor,
-    Integral.monotoneIntegralFor] using
+  simpa [Integral.MonotoneEndpointComparisonFor.toEndpointComparisonFor,
+    Integral.monotoneCandidateValue] using
     (piFromArctanIntegralFor_equiv_piCircleArea_of_definiteIdentityFor
-      primitive I.toDefiniteIdentityFor hendpoint)
+      primitive I.toEndpointComparisonFor hendpoint)
 
 /- Domain-aware effective-FTC route to the arctangent-integral pi
-equivalence.  The conclusion uses the `ConstructionFor` integral produced by
+equivalence.  The conclusion uses the `CandidateFor` integral produced by
 the FTC certificate, not the older point-Riemann wrapper. -/
 /- Domain-aware effective-FTC route using packaged endpoint-schedule
 agreement. -/
@@ -12608,7 +12608,7 @@ arctangent primitive on `[0,1]`. -/
 monotone stage schedule.  This is the schedule-facing form of the route
 naturally matched to the arctangent primitive on `[0,1]`. -/
 theorem piFromArctanIntegralUnitAtOne_equiv_piCircleArea_of_geom_agreement
-    (c : Integral.ConstructionFor
+    (c : Integral.CandidateFor
       (IntegralIdentities.arctanKernelInterval (1 : Rat)))
     (hgeom :
       (IntegralIdentities.arctanIntegralUnit (1 : Rat) c).Equiv
@@ -12617,7 +12617,7 @@ theorem piFromArctanIntegralUnitAtOne_equiv_piCircleArea_of_geom_agreement
       (IntegralIdentities.arctanIntegralUnit (1 : Rat) c)).Equiv
         piCircleArea := by
   have hgeom' :
-      (Integral.integralFor
+      (Integral.candidateValue
         (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1) c).Equiv
         (ArctanGeometry.arctanGeom (1 : Rat)) := by
     simpa [IntegralIdentities.arctanIntegralUnit,
@@ -15263,7 +15263,7 @@ theorem piFromArctanIntegralRectangleUnitAtOne_valid :
   unfold piFromArctanIntegralRectangleUnitAtOne
     IntegralIdentities.PiFromArctanIntegral
   apply RealRaw.natScale_valid
-  exact Integral.integralFor_valid
+  exact Integral.candidateValue_valid
     (IntegralIdentities.arctanKernelInterval (1 : Rat))
     (IntegralIdentities.arctanIntegralRectangleUnitData.constructionAt
       (1 : Rat) (by native_decide) (by native_decide))
@@ -15292,7 +15292,7 @@ theorem piCircleArea_equiv_piFromArctanIntegralRectangleUnitAtOne :
 
 def piFromArctanGeomUnitRectangleDefiniteIdentity : RealRaw :=
   IntegralIdentities.PiFromArctanIntegral
-    (Integral.integralFor
+    (Integral.candidateValue
       (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
       IntegralIdentities.arctanGeomUnitRectangleDefiniteIdentity.construction)
 
@@ -15302,7 +15302,7 @@ theorem piFromArctanGeomUnitRectangleDefiniteIdentity_valid :
     IntegralIdentities.PiFromArctanIntegral
   exact RealRaw.scaleRat_valid_of_nonneg
     (by native_decide : (0 : Rat) <= 4)
-    (Integral.integralFor_valid
+    (Integral.candidateValue_valid
       (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
       IntegralIdentities.arctanGeomUnitRectangleDefiniteIdentity.construction)
 
@@ -15343,7 +15343,7 @@ theorem piFromArctanIntegralRectangleUnitAtOne_equiv_geomUnitDefiniteIdentity :
 the rectangle arctangent integral. -/
 def piFromArctanGeomUnitRectangleMonotoneDefiniteIdentity : RealRaw :=
   IntegralIdentities.PiFromArctanIntegral
-    (Integral.monotoneIntegralFor
+    (Integral.monotoneCandidateValue
       (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
       IntegralIdentities.arctanGeomUnitRectangleMonotoneDefiniteIdentity.construction)
 
@@ -15353,13 +15353,13 @@ theorem piFromArctanGeomUnitRectangleMonotoneDefiniteIdentity_valid :
     IntegralIdentities.PiFromArctanIntegral
   exact RealRaw.scaleRat_valid_of_nonneg
     (by native_decide : (0 : Rat) <= 4)
-    (Integral.monotoneIntegralFor_valid
+    (Integral.monotoneCandidateValue_valid
       (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
       IntegralIdentities.arctanGeomUnitRectangleMonotoneDefiniteIdentity.construction)
 
 theorem piFromArctanGeomUnitRectangleMonotoneDefiniteIdentity_equiv_piCircleArea :
     piFromArctanGeomUnitRectangleMonotoneDefiniteIdentity.Equiv piCircleArea :=
-  piFromArctanIntegralFor_equiv_piCircleArea_of_monotoneDefiniteIdentityFor
+  piFromArctanIntegralFor_equiv_piCircleArea_of_monotoneEndpointComparisonFor
     IntegralIdentities.arctanGeomOnUnit
     IntegralIdentities.arctanGeomUnitRectangleMonotoneDefiniteIdentity
     IntegralIdentities.arctanGeomOnUnit_endpointDifference_equiv_arctanGeom_one
@@ -15389,7 +15389,7 @@ identity for the rectangle arctangent integral. -/
 noncomputable def piFromArctanGeomUnitRectangleGeneralDefiniteIdentity :
     RealRaw :=
   IntegralIdentities.PiFromArctanIntegral
-    (Integral.generalIntegralFor
+    (Integral.generalCandidateValue
       (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
       IntegralIdentities.arctanGeomUnitRectangleGeneralDefiniteIdentity.construction)
 
@@ -15399,13 +15399,13 @@ theorem piFromArctanGeomUnitRectangleGeneralDefiniteIdentity_valid :
     IntegralIdentities.PiFromArctanIntegral
   exact RealRaw.scaleRat_valid_of_nonneg
     (by native_decide : (0 : Rat) <= 4)
-    (Integral.generalIntegralFor_valid
+    (Integral.generalCandidateValue_valid
       (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
       IntegralIdentities.arctanGeomUnitRectangleGeneralDefiniteIdentity.construction)
 
 theorem piFromArctanGeomUnitRectangleGeneralDefiniteIdentity_equiv_piCircleArea :
     piFromArctanGeomUnitRectangleGeneralDefiniteIdentity.Equiv piCircleArea :=
-  piFromArctanGeneralIntegralFor_equiv_piCircleArea_of_generalDefiniteIdentityFor
+  piFromArctanGeneralIntegralFor_equiv_piCircleArea_of_generalEndpointComparisonFor
     IntegralIdentities.arctanGeomOnUnit
     IntegralIdentities.arctanGeomUnitRectangleGeneralDefiniteIdentity
     IntegralIdentities.arctanGeomOnUnit_endpointDifference_equiv_arctanGeom_one

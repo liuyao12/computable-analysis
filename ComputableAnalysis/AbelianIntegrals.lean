@@ -1,11 +1,15 @@
 import ComputableAnalysis.AlgebraicFunctions
 
 /-!
-# Abelian integrals
+# Abelian differential quadrature candidates
 
 This file keeps abelian integrals close to their computational meaning:
 evaluate an algebraic differential on rational sample points and add a
 Riemann sum with explicit choices for subdivision and evaluation precision.
+These are finite quadrature candidates. Neither point-sample validity nor the
+path/branch metadata supplies whole-chunk range enclosures; this module does
+not yet construct an abelian integral. Parametrized formulas are comparison
+targets, not the definition of integration on a segment.
 -/
 
 namespace ComputableAnalysis
@@ -234,7 +238,7 @@ def PullbackAgreementAt (omega : DifferentialEvalRaw) (gamma : ParametrizationRa
 
 /-- A constructive segment integral.  Given the requested output precision, it
 chooses a Riemann plan and computes the corresponding interval sum. -/
-structure SegmentIntegralRaw where
+structure SegmentSumCandidate where
   differential : DifferentialEvalRaw
   start : QComplex
   stop : QComplex
@@ -244,7 +248,7 @@ structure SegmentIntegralRaw where
     forall k : Fin (plan eps).subdivisions,
       differential.domain (Segment.leftPoint start stop (plan eps).subdivisions k.val)
 
-namespace SegmentIntegralRaw
+namespace SegmentSumCandidate
 
 def fromSegment (omega : DifferentialEvalRaw) (s : SegmentRaw)
     (plan : Nat -> RiemannPlan)
@@ -252,33 +256,33 @@ def fromSegment (omega : DifferentialEvalRaw) (s : SegmentRaw)
       (eps : Nat) ->
       forall k : Fin (plan eps).subdivisions,
         omega.domain (Segment.leftPoint s.start s.stop (plan eps).subdivisions k.val)) :
-    SegmentIntegralRaw where
+    SegmentSumCandidate where
   differential := omega
   start := s.start
   stop := s.stop
   plan := plan
   domain := domain
 
-def compute (I : SegmentIntegralRaw) (eps : Nat) : QBox :=
+def compute (I : SegmentSumCandidate) (eps : Nat) : QBox :=
   let p := I.plan eps
   riemannSegmentSum I.differential I.start I.stop p.subdivisions (I.domain eps) p.evalPrecision
 
-def Valid (I : SegmentIntegralRaw) : Prop :=
+def Valid (I : SegmentSumCandidate) : Prop :=
   ComplexRaw.Valid { compute := I.compute }
 
-def toComplexRaw (I : SegmentIntegralRaw) : ComplexRaw where
+def toComplexRaw (I : SegmentSumCandidate) : ComplexRaw where
   compute := I.compute
 
-theorem toComplexRaw_valid (I : SegmentIntegralRaw) (h : I.Valid) :
+theorem toComplexRaw_valid (I : SegmentSumCandidate) (h : I.Valid) :
     ComplexRaw.Valid I.toComplexRaw :=
   h
 
-end SegmentIntegralRaw
+end SegmentSumCandidate
 
 /-- The concrete certificate that a constructive Riemann-sum algorithm really
 produces a computable complex number: ordered boxes, nesting, and coordinate
 widths that shrink to zero. -/
-structure RiemannSumCertificate (I : SegmentIntegralRaw) where
+structure RiemannSumCertificate (I : SegmentSumCandidate) where
   ordered :
     forall eps, (I.compute eps).Ordered
   nested :
@@ -287,19 +291,19 @@ structure RiemannSumCertificate (I : SegmentIntegralRaw) where
 
 namespace RiemannSumCertificate
 
-theorem valid {I : SegmentIntegralRaw} (cert : RiemannSumCertificate I) : I.Valid :=
+theorem valid {I : SegmentSumCandidate} (cert : RiemannSumCertificate I) : I.Valid :=
   ⟨fun eps => (QBox.ordered_iff_width_height_nonneg (I.compute eps)).1 (cert.ordered eps),
     fun eps delta h =>
       let hnest := cert.nested eps delta h
       ⟨hnest.1.1, hnest.2.1, hnest.1.2, hnest.2.2⟩,
     cert.widths_shrink⟩
 
-def complexRaw {I : SegmentIntegralRaw} (_cert : RiemannSumCertificate I) : ComplexRaw :=
+def complexRaw {I : SegmentSumCandidate} (_cert : RiemannSumCertificate I) : ComplexRaw :=
   I.toComplexRaw
 
-theorem complexRaw_valid {I : SegmentIntegralRaw} (cert : RiemannSumCertificate I) :
+theorem complexRaw_valid {I : SegmentSumCandidate} (cert : RiemannSumCertificate I) :
     ComplexRaw.Valid (complexRaw cert) :=
-  SegmentIntegralRaw.toComplexRaw_valid I cert.valid
+  SegmentSumCandidate.toComplexRaw_valid I cert.valid
 
 end RiemannSumCertificate
 
@@ -309,37 +313,37 @@ For a constructively continuous differential evaluator, suitable effective
 Riemann plans should come with a `RiemannSumCertificate`, hence produce a
 `ComplexRaw`.  The estimates that construct this certificate are the main work
 still to prove. -/
-def HasEffectiveRiemannSum (I : SegmentIntegralRaw)
+def HasEffectiveSampleValue (I : SegmentSumCandidate)
     (cont : ConstructiveContinuous) : Prop :=
   cont.function = I.differential -> Nonempty (RiemannSumCertificate I)
 
 /-- A raw abelian integral representation.  The value algorithm should be built
 from constructive Riemann sums; the surrounding data records the branch,
 differential, base point, and chosen paths. -/
-structure Raw where
+structure ValueCandidate where
   differential : DifferentialEvalRaw
   basePoint : QComplex
   pathsTo : QComplex -> PathRaw
   value : FunctionRaw
 
-namespace Raw
+namespace ValueCandidate
 
-def domain (I : Raw) : QComplex -> Prop := I.value.domain
+def domain (I : ValueCandidate) : QComplex -> Prop := I.value.domain
 
-def evalRaw (I : Raw) (z : QComplex) (hz : I.domain z) : ComplexRaw :=
+def evalRaw (I : ValueCandidate) (z : QComplex) (hz : I.domain z) : ComplexRaw :=
   I.value.evalRaw z hz
 
-def Valid (I : Raw) : Prop :=
+def Valid (I : ValueCandidate) : Prop :=
   forall z hz, ComplexRaw.Valid (I.evalRaw z hz)
 
-def AgreeOnCommonDomain (I J : Raw) : Prop :=
+def AgreeOnCommonDomain (I J : ValueCandidate) : Prop :=
   FunctionRaw.AgreeOnCommonDomain I.value J.value
 
-end Raw
+end ValueCandidate
 
 /-- A named representation of an inverse to an abelian integral. -/
 structure InverseRepresentation where
-  integral : Raw
+  integral : ValueCandidate
   inverse : FunctionRaw
   branchDomain : QComplex -> Prop
 

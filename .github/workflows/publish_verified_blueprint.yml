@@ -45,6 +45,13 @@ on:
       - 'book/cosine-square/**'
       - 'book/classics/**'
       - 'book/pi-log-one-plus-i.html'
+      - 'ComputableAnalysis/IntegralEnclosure*.lean'
+      - 'ComputableAnalysis/ComplexIntegralEnclosure.lean'
+      - 'ComputableAnalysis/ComplexPathIntegral.lean'
+      - 'ComputableAnalysis/FiniteComplexPathCertificate.lean'
+      - 'docs/INTEGRAL_*'
+      - 'scripts/check_integral_enclosures.lean'
+      - 'scripts/audit_integral_enclosures.py'
       - 'ComputableAnalysis/ComplexAnalysis/**'
       - 'ComputableAnalysis/ComplexAnalysis.lean'
       - 'scripts/check_polygonal_cauchy.lean'
@@ -355,12 +362,22 @@ jobs:
         run: python3 .github/reader-edition/classic_proofs.py --site site --revision "$GITHUB_SHA" --euler-audit euler-reports/proofs.json --cauchy-audit polygonal-cauchy-reports/audit.log --arctan-audit arctan-taylor-reports/audit.log
       - name: Verify classical navigation and proof comparisons in the browser
         run: python3 .github/reader-edition/test_classic_proofs.py --site site --report reader-edition-tests
+      - name: Verify and publish whole-chunk integral constructions
+        run: |
+          set -euo pipefail
+          mkdir -p integral-enclosure-reports
+          python3 scripts/audit_integral_enclosures.py
+          lake env lean scripts/check_integral_enclosures.lean | tee integral-enclosure-reports/axioms.log
+          if grep -q sorryAx integral-enclosure-reports/axioms.log; then exit 1; fi
+          python3 .github/reader-edition/integral_enclosures.py --site site --revision "$GITHUB_SHA"
+          python3 .github/reader-edition/test_integral_enclosures.py --site site --report reader-edition-tests
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: reader-edition-validation
           path: |
             reader-edition-tests
+            integral-enclosure-reports
             polygonal-cauchy-reports
             arctan-taylor-reports
             rational-primitives-reports
@@ -506,6 +523,11 @@ jobs:
                   for name,meta in [('arctan',circle),('cosine',a)]:
                       for suffix,key in [('gif','gifSha256'),('png','posterSha256')]:
                           assert hashlib.sha256(get('/reading/animations/'+name+'.'+suffix,True)).hexdigest()==meta[key]
+                  enclosure=get('/reading/integral-enclosures-edition.json')
+                  assert enclosure['revision']==revision and all(enclosure['checks'].values())
+                  assert not enclosure['directLogarithmBridgeProved']
+                  for path,digest in enclosure['artifacts'].items():
+                      assert hashlib.sha256(get('/'+path,True)).hexdigest()==digest
                   assert get('/reading/manifest.json')['proofSourceCommit']==os.environ['SOURCE_SHA']
                   geometry=get('/reading/rational-geometry-edition.json');audit=get('/reading/rational-geometry.json')
                   assert geometry['documentationRevision']==geometry['newProofSourceCommit']==revision

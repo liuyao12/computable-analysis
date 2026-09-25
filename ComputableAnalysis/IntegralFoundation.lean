@@ -1,3 +1,4 @@
+import ComputableAnalysis.IntegralEnclosureExamples
 import ComputableAnalysis.CircleFoundation
 import ComputableAnalysis.Calculus
 import ComputableAnalysis.IdentityInverse
@@ -67,9 +68,9 @@ telescope.  No completeness or completed real-valued integral is involved. -/
 theorem effectiveIntegral_add_of_endpoint_additive
     {integrandAB primitiveAB integrandBC primitiveBC integrandAC primitiveAC :
       FunctionOnInterval}
-    (Iab : DefiniteIdentityFor integrandAB primitiveAB)
-    (Ibc : DefiniteIdentityFor integrandBC primitiveBC)
-    (Iac : DefiniteIdentityFor integrandAC primitiveAC)
+    (Iab : EndpointComparisonFor integrandAB primitiveAB)
+    (Ibc : EndpointComparisonFor integrandBC primitiveBC)
+    (Iac : EndpointComparisonFor integrandAC primitiveAC)
     (hendpoint :
       ((endpointDifferenceRaw primitiveAB.toRealFunRaw
           integrandAB.lower integrandAB.upper Iab.endpoint_valid) +
@@ -77,10 +78,10 @@ theorem effectiveIntegral_add_of_endpoint_additive
           integrandBC.lower integrandBC.upper Ibc.endpoint_valid)).Equiv
           (endpointDifferenceRaw primitiveAC.toRealFunRaw
             integrandAC.lower integrandAC.upper Iac.endpoint_valid)) :
-    ((Integral.integralFor integrandAB Iab.construction) +
-      (Integral.integralFor integrandBC Ibc.construction)).Equiv
-        (Integral.integralFor integrandAC Iac.construction) := by
-  exact DefiniteIdentityFor.integral_add_equiv_of_endpoint_additive
+    ((Integral.candidateValue integrandAB Iab.construction) +
+      (Integral.candidateValue integrandBC Ibc.construction)).Equiv
+        (Integral.candidateValue integrandAC Iac.construction) := by
+  exact EndpointComparisonFor.integral_add_equiv_of_endpoint_additive
     Iab Ibc Iac hendpoint
 
 /-! Rational scaling is transported in exactly the same way: the scaled
@@ -90,18 +91,18 @@ change. -/
 theorem effectiveIntegral_scaleRat_of_endpoint_scaleRat
     {integrand primitive scaledIntegrand scaledPrimitive : FunctionOnInterval}
     {r : Rat}
-    (I : DefiniteIdentityFor integrand primitive)
-    (J : DefiniteIdentityFor scaledIntegrand scaledPrimitive)
+    (I : EndpointComparisonFor integrand primitive)
+    (J : EndpointComparisonFor scaledIntegrand scaledPrimitive)
     (hendpoint :
       (endpointDifferenceRaw scaledPrimitive.toRealFunRaw
         scaledIntegrand.lower scaledIntegrand.upper J.endpoint_valid).Equiv
         (RealRaw.scaleRat r
           (endpointDifferenceRaw primitive.toRealFunRaw
             integrand.lower integrand.upper I.endpoint_valid))) :
-    (Integral.integralFor scaledIntegrand J.construction).Equiv
+    (Integral.candidateValue scaledIntegrand J.construction).Equiv
       (RealRaw.scaleRat r
-        (Integral.integralFor integrand I.construction)) := by
-  exact DefiniteIdentityFor.integral_scaleRat_equiv_of_endpoint_scaleRat
+        (Integral.candidateValue integrand I.construction)) := by
+  exact EndpointComparisonFor.integral_scaleRat_equiv_of_endpoint_scaleRat
     I J hendpoint
 
 /-! Order is likewise an endpoint fact once the two FTC identities are known.
@@ -109,15 +110,15 @@ The result is an order relation between raw interval algorithms, not an
 appeal to an order-complete real field. -/
 theorem effectiveIntegral_le_of_endpoint_le
     {integrandF primitiveF integrandG primitiveG : FunctionOnInterval}
-    (IF : DefiniteIdentityFor integrandF primitiveF)
-    (IG : DefiniteIdentityFor integrandG primitiveG)
+    (IF : EndpointComparisonFor integrandF primitiveF)
+    (IG : EndpointComparisonFor integrandG primitiveG)
     (hendpoint :
       (endpointDifferenceRaw primitiveF.toRealFunRaw
         integrandF.lower integrandF.upper IF.endpoint_valid).Le
         (endpointDifferenceRaw primitiveG.toRealFunRaw
           integrandG.lower integrandG.upper IG.endpoint_valid)) :
-    (Integral.integralFor integrandF IF.construction).Le
-      (Integral.integralFor integrandG IG.construction) := by
-  exact DefiniteIdentityFor.integral_le_of_endpoint_le IF IG hendpoint
+    (Integral.candidateValue integrandF IF.construction).Le
+      (Integral.candidateValue integrandG IG.construction) := by
+  exact EndpointComparisonFor.integral_le_of_endpoint_le IF IG hendpoint
 
 end ComputableAnalysis.Integral

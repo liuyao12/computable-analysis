@@ -19,22 +19,22 @@ namespace Integral
 
 structure IntervalRegularIntegralCertificate (F : FunctionOnInterval) where
   regular : IntervalRegularOn F
-  construction : ConstructionFor F
+  construction : CandidateFor F
 
 def raw (F : FunctionOnInterval)
     (certificate : IntervalRegularIntegralCertificate F) : RealRaw :=
-  integralFor F certificate.construction
+  candidateValue F certificate.construction
 
 theorem raw_valid (F : FunctionOnInterval)
     (certificate : IntervalRegularIntegralCertificate F) :
     (raw F certificate).Valid := by
-  exact integralFor_valid F certificate.construction
+  exact candidateValue_valid F certificate.construction
 
 def exactRat_constant (c a b : Rat) :
     IntervalRegularIntegralCertificate
       (FunctionOnInterval.exactRat (fun _ => c) a b) where
   regular := exactRat_constant_intervalRegularOn c a b
-  construction := (constantMonotoneConstructionFor c a b).construction
+  construction := (constantMonotoneCandidateFor c a b).construction
 
 theorem exactRat_constant_evalIntervalsNested (c a b : Rat) :
     IntervalRegularOn.EvalIntervalsNested
@@ -240,7 +240,7 @@ def exactRat_affine_unitSlope (r c a b : Rat)
     IntervalRegularIntegralCertificate
       (FunctionOnInterval.exactRat (fun x => r * x + c) a b) where
   regular := exactRat_affine_intervalRegularOn_of_unit_slope r c a b hr0 hr1
-  construction := (affineMonotoneConstructionFor hr0).construction
+  construction := (affineMonotoneCandidateFor hr0).construction
 
 theorem exactRat_affine_unitSlope_raw_eq_ofRat
     (r c a b : Rat) (hr0 : 0 <= r) (hr1 : r <= 1) :
@@ -338,9 +338,9 @@ def exactRat_affine_signed_unitSlope (r c a b : Rat)
     r c a b hrneg hrpos
   construction := by
     by_cases hr : 0 <= r
-    · exact (affineMonotoneConstructionFor hr).construction
+    · exact (affineMonotoneCandidateFor hr).construction
     · have hrle : r <= 0 := by grind
-      exact (affineMonotoneConstructionFor_of_nonpos hrle).construction
+      exact (affineMonotoneCandidateFor_of_nonpos hrle).construction
 
 theorem exactRat_affine_signed_unitSlope_raw_eq_ofRat
     (r c a b : Rat) (hrneg : -1 <= r) (hrpos : r <= 1) :
@@ -466,9 +466,9 @@ def exactRat_affine_integral_certificate
   regular := exactRat_affine_intervalRegularOn r c a b hab
   construction := by
     by_cases hr : 0 <= r
-    · exact (affineMonotoneConstructionFor hr).construction
+    · exact (affineMonotoneCandidateFor hr).construction
     · have hrle : r <= 0 := by grind
-      exact (affineMonotoneConstructionFor_of_nonpos hrle).construction
+      exact (affineMonotoneCandidateFor_of_nonpos hrle).construction
 
 theorem exactRat_affine_integral_raw_eq_ofRat
     (r c a b : Rat) (hab : a <= b) :
@@ -955,10 +955,10 @@ theorem exactRat_square_integral_raw_equiv_square_endpoint :
     (RealRaw.equiv_symm hendpoint)
 
 def exactRat_square_definiteIdentity :
-    Integral.DefiniteIdentityFor
+    Integral.EndpointComparisonFor
       (FunctionOnInterval.exactRat (fun x : Rat => x * x) 0 1)
       squarePrimitiveOnUnit :=
-  Integral.DefiniteIdentityFor.ofConstruction rfl rfl
+  Integral.EndpointComparisonFor.ofConstruction rfl rfl
     exactRat_square_integral_certificate.construction
     squarePrimitiveOnUnit_endpoint_valid (by
       change (Integral.raw
@@ -1407,7 +1407,7 @@ theorem exactRat_zero_integral_raw_equiv_one :
           (ArctanGeometry.arctanAreaLoopState 1 stage).intervals = 1 := by
     rw [huniform]
     exact uniformLeftEndpointSum_const_one_of_pos hn
-  unfold Integral.raw Integral.integralFor exactRat_pow_integral_certificate
+  unfold Integral.raw Integral.candidateValue exactRat_pow_integral_certificate
   change QInterval.Overlaps
     (IntegralIdentities.LipschitzDyadic.compute (fun x : Rat => x ^ 0) 0 stage)
     { lo := 1, hi := 1 }
@@ -1430,7 +1430,7 @@ theorem exactRat_one_integral_raw_equiv_half :
   apply RealRaw.sameStageOverlap_equiv
   intro stage
   apply (RealRaw.compareAt_overlap_iff _ _ stage stage).2
-  unfold Integral.raw Integral.integralFor exactRat_pow_integral_certificate
+  unfold Integral.raw Integral.candidateValue exactRat_pow_integral_certificate
   change QInterval.Overlaps
     (IntegralIdentities.LipschitzDyadic.compute (fun x : Rat => x ^ 1) 1 stage)
     { lo := 1 / 2, hi := 1 / 2 }
@@ -1519,20 +1519,20 @@ theorem exactRat_pow_nondecreasing_on_unit (n : Nat) :
   exact hpow n
 
 def exactRat_pow_monotoneConstructionFor (n : Nat) :
-    MonotoneConstructionFor
+    MonotoneCandidateFor
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1) where
   monotone := MonotoneOnInterval.ofNondecreasing
     (exactRat_pow_nondecreasing_on_unit n)
   construction := (exactRat_pow_integral_certificate n).construction
 
-theorem exactRat_pow_monotoneIntegralFor_valid (n : Nat) :
-    (monotoneIntegralFor
+theorem exactRat_pow_monotoneCandidateValue_valid (n : Nat) :
+    (monotoneCandidateValue
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1)
       (exactRat_pow_monotoneConstructionFor n)).Valid := by
-  exact monotoneIntegralFor_valid _ _
+  exact monotoneCandidateValue_valid _ _
 
-theorem exactRat_pow_monotoneIntegralFor_eq_dyadicRaw (n : Nat) :
-    monotoneIntegralFor
+theorem exactRat_pow_monotoneCandidateValue_eq_dyadicRaw (n : Nat) :
+    monotoneCandidateValue
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1)
       (exactRat_pow_monotoneConstructionFor n) =
     Integral.raw
@@ -1550,7 +1550,7 @@ theorem exactRat_pow_integral_raw_compute_width (n stage : Nat) :
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1)
       (exactRat_pow_integral_certificate n)).compute stage).width =
       (2 * (n : Rat)) * (1 / (((2 ^ stage : Nat) : Rat))) := by
-  unfold Integral.raw Integral.integralFor exactRat_pow_integral_certificate
+  unfold Integral.raw Integral.candidateValue exactRat_pow_integral_certificate
   exact IntegralIdentities.LipschitzDyadic.compute_width n stage
 
 /-! The normalized monomial primitive is also available as one generic
@@ -2083,10 +2083,10 @@ theorem exactRat_pow_integral_raw_equiv_pow_endpoint (k : Nat) :
     (RealRaw.equiv_symm hendpoint)
 
 def exactRat_pow_definiteIdentity (k : Nat) :
-    Integral.DefiniteIdentityFor
+    Integral.EndpointComparisonFor
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ k) 0 1)
       (powPrimitiveOnUnit k) :=
-  Integral.DefiniteIdentityFor.ofConstruction rfl rfl
+  Integral.EndpointComparisonFor.ofConstruction rfl rfl
     (exactRat_pow_integral_certificate k).construction
     (powPrimitiveOnUnit_endpoint_valid k) (by
       change (Integral.raw

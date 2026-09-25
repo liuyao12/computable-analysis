@@ -992,14 +992,14 @@ theorem logTwoSquareMeshWeightedSum_eq_uniformLeftEndpoint
 pullback.  It has literal finite Lipschitz--Darboux boxes and does not use a
 substitution axiom. -/
 def logTwoSquarePullbackIntegral : RealRaw :=
-  Integral.integralFor
+  Integral.candidateValue
     (FunctionOnInterval.exactRat logTwoSquarePullback 0 1)
     (IntegralIdentities.LipschitzDyadic.construction logTwoSquarePullback 2
       logTwoSquarePullback_lipschitz_on_unit)
 
 theorem logTwoSquarePullbackIntegral_valid :
     logTwoSquarePullbackIntegral.Valid :=
-  Integral.integralFor_valid
+  Integral.candidateValue_valid
     (FunctionOnInterval.exactRat logTwoSquarePullback 0 1)
     (IntegralIdentities.LipschitzDyadic.construction logTwoSquarePullback 2
       logTwoSquarePullback_lipschitz_on_unit)
@@ -1013,14 +1013,14 @@ theorem logTwoSquarePullbackIntegral_compute_eq (stage : Nat) :
 integration-by-parts strip.  It uses the same finite Lipschitz--Darboux
 algorithm as the square pullback, with its sharper unit Lipschitz constant. -/
 def arctanLogKernelIntegral : RealRaw :=
-  Integral.integralFor
+  Integral.candidateValue
     (FunctionOnInterval.exactRat arctanLogKernel 0 1)
     (IntegralIdentities.LipschitzDyadic.construction arctanLogKernel 1
       arctanLogKernel_lipschitz_on_unit)
 
 theorem arctanLogKernelIntegral_valid :
     arctanLogKernelIntegral.Valid :=
-  Integral.integralFor_valid
+  Integral.candidateValue_valid
     (FunctionOnInterval.exactRat arctanLogKernel 0 1)
     (IntegralIdentities.LipschitzDyadic.construction arctanLogKernel 1
       arctanLogKernel_lipschitz_on_unit)
@@ -1035,14 +1035,14 @@ theorem arctanLogKernelIntegral_compute_eq (stage : Nat) :
 arctangent integral: the later finite Fubini/product-derivative proof is what
 will identify it with \(\int_0^1\arctan(x)\,dx\). -/
 def arctanComplementKernelIntegral : RealRaw :=
-  Integral.integralFor
+  Integral.candidateValue
     (FunctionOnInterval.exactRat arctanComplementKernel 0 1)
     (IntegralIdentities.LipschitzDyadic.construction arctanComplementKernel 3
       arctanComplementKernel_lipschitz_on_unit)
 
 theorem arctanComplementKernelIntegral_valid :
     arctanComplementKernelIntegral.Valid :=
-  Integral.integralFor_valid
+  Integral.candidateValue_valid
     (FunctionOnInterval.exactRat arctanComplementKernel 0 1)
     (IntegralIdentities.LipschitzDyadic.construction arctanComplementKernel 3
       arctanComplementKernel_lipschitz_on_unit)
@@ -1195,14 +1195,14 @@ function-facing side is the already certified monotone
 the comparison below are the explicit bridge between those two descriptions;
 no general Fubini or integral-linearity axiom is used. -/
 def arctanIntegralTriangleConstruction :
-    Integral.ConstructionFor IntegralIdentities.arctanIntegralRectangleOnUnit where
+    Integral.CandidateFor IntegralIdentities.arctanIntegralRectangleOnUnit where
   compute := arctanKernelTriangleRaw.compute
   certificate := arctanKernelTriangleRaw_valid
 
 /-- The monotonicity certificate accompanying the direct triangular
 construction of the unit arctangent integral. -/
 def arctanIntegralTriangleMonotoneConstruction :
-    Integral.MonotoneConstructionFor IntegralIdentities.arctanIntegralRectangleOnUnit where
+    Integral.MonotoneCandidateFor IntegralIdentities.arctanIntegralRectangleOnUnit where
   monotone := IntegralIdentities.arctanIntegralRectangleOnUnit_monotone
   construction := arctanIntegralTriangleConstruction
 
@@ -1211,11 +1211,11 @@ def arctanIntegralTriangleMonotoneConstruction :
 is the triangular kernel sum; `arctanIntegralTriangle_compute_eq` exposes
 that fact without unfolding the integral interface. -/
 def arctanIntegralTriangle : RealRaw :=
-  Integral.monotoneIntegralFor IntegralIdentities.arctanIntegralRectangleOnUnit
+  Integral.monotoneCandidateValue IntegralIdentities.arctanIntegralRectangleOnUnit
     arctanIntegralTriangleMonotoneConstruction
 
 theorem arctanIntegralTriangle_valid : arctanIntegralTriangle.Valid :=
-  Integral.monotoneIntegralFor_valid IntegralIdentities.arctanIntegralRectangleOnUnit
+  Integral.monotoneCandidateValue_valid IntegralIdentities.arctanIntegralRectangleOnUnit
     arctanIntegralTriangleMonotoneConstruction
 
 theorem arctanIntegralTriangle_compute_eq (stage : Nat) :
@@ -2233,7 +2233,7 @@ theorem logTwoDarbouxRaw_valid : logTwoDarbouxRaw.Valid := by
 existence interface, its boxes are the finite rectangles in
 `logTwoDarbouxCompute`. -/
 def logTwoDarbouxConstruction :
-    Integral.ConstructionFor (FunctionOnInterval.exactRat logTwoKernel 0 1) :=
+    Integral.CandidateFor (FunctionOnInterval.exactRat logTwoKernel 0 1) :=
   IntegralIdentities.LipschitzDyadic.construction logTwoKernel 1
     logTwoKernel_lipschitz
 
@@ -2241,11 +2241,11 @@ def logTwoDarbouxConstruction :
 kernel.  Its agreement with `logTwoSeries` is proved later as an explicit
 finite mesh comparison, rather than hidden in this definition. -/
 def logTwoReciprocalIntegral : RealRaw :=
-  Integral.integralFor (FunctionOnInterval.exactRat logTwoKernel 0 1)
+  Integral.candidateValue (FunctionOnInterval.exactRat logTwoKernel 0 1)
     logTwoDarbouxConstruction
 
 theorem logTwoReciprocalIntegral_valid : logTwoReciprocalIntegral.Valid :=
-  Integral.integralFor_valid (FunctionOnInterval.exactRat logTwoKernel 0 1)
+  Integral.candidateValue_valid (FunctionOnInterval.exactRat logTwoKernel 0 1)
     logTwoDarbouxConstruction
 
 theorem logTwoReciprocalIntegral_compute_eq (stage : Nat) :

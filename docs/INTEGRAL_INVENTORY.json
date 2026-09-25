@@ -1,0 +1,4959 @@
+{
+  "scope": "Native ComputableAnalysis source; finite helpers and import-only consumers included. Historical proof snapshots under book are not reinterpreted as current APIs.",
+  "files": [
+    {
+      "path": "ComputableAnalysis/AbelianIntegrals.lean",
+      "role": "conditional",
+      "declarations": [
+        {
+          "line": 178,
+          "declaration": "riemannSegmentSum"
+        },
+        {
+          "line": 195,
+          "declaration": "RiemannPlan"
+        },
+        {
+          "line": 209,
+          "declaration": "pulledbackRiemannSum"
+        },
+        {
+          "line": 285,
+          "declaration": "RiemannSumCertificate"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/AbsIntegral.lean",
+      "role": "comparison",
+      "declarations": [
+        {
+          "line": 398,
+          "declaration": "absOnUnit_piecewise_integral_valid"
+        },
+        {
+          "line": 402,
+          "declaration": "absOnUnit_piecewise_integral_two_equiv"
+        },
+        {
+          "line": 412,
+          "declaration": "absOnUnit_piecewise_integral_equiv_one"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/AlgebraicODE/FrobeniusTests.lean",
+      "role": "support",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/AlgebraicODE/Fuchs.lean",
+      "role": "support",
+      "declarations": [
+        {
+          "line": 96,
+          "declaration": "nonintegral_polynomial_zero"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/AlgebraicODE/Tests.lean",
+      "role": "support",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/Apery/Binomial.lean",
+      "role": "finite",
+      "declarations": [
+        {
+          "line": 96,
+          "declaration": "number_integral"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/Apery/Tests.lean",
+      "role": "support",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/ArctanEffectiveFTC.lean",
+      "role": "comparison",
+      "declarations": [
+        {
+          "line": 666,
+          "declaration": "arctanFTC_riemann_width_le"
+        },
+        {
+          "line": 840,
+          "declaration": "arctanEffectiveFTCIntegral_equiv_endpointDifference"
+        },
+        {
+          "line": 855,
+          "declaration": "arctanEffectiveFTCIntegral_equiv_arctanGeom_one"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/ArctanGeometry.lean",
+      "role": "enclosure",
+      "declarations": [
+        {
+          "line": 89,
+          "declaration": "integralKernel"
+        },
+        {
+          "line": 95,
+          "declaration": "integralKernel_chartAddParameter"
+        },
+        {
+          "line": 106,
+          "declaration": "integralLowerStep"
+        },
+        {
+          "line": 110,
+          "declaration": "integralUpperStep"
+        },
+        {
+          "line": 115,
+          "declaration": "integralLowerStep_chartAddParameter_eq"
+        },
+        {
+          "line": 140,
+          "declaration": "integralUpperStep_chartAddParameter_eq"
+        },
+        {
+          "line": 165,
+          "declaration": "chartAdd_integralLowerStep_le"
+        },
+        {
+          "line": 220,
+          "declaration": "integralUpperStep_le_chartAdd"
+        },
+        {
+          "line": 471,
+          "declaration": "integralCellInterval"
+        },
+        {
+          "line": 477,
+          "declaration": "integralKernel_pos"
+        },
+        {
+          "line": 482,
+          "declaration": "integralKernel_le_one"
+        },
+        {
+          "line": 493,
+          "declaration": "integralUpperStep_nonneg"
+        },
+        {
+          "line": 499,
+          "declaration": "integralLowerStep_nonneg"
+        },
+        {
+          "line": 505,
+          "declaration": "integralUpperStep_left_subcell_le"
+        },
+        {
+          "line": 513,
+          "declaration": "integralUpperStep_le_width"
+        },
+        {
+          "line": 533,
+          "declaration": "integralKernel_antitone_nonneg"
+        },
+        {
+          "line": 547,
+          "declaration": "integralLowerStep_le_integralUpperStep"
+        },
+        {
+          "line": 556,
+          "declaration": "integralLowerStep_refine"
+        },
+        {
+          "line": 577,
+          "declaration": "integralUpperStep_refine"
+        },
+        {
+          "line": 823,
+          "declaration": "integralLowerStep_le_geometricLowerStep"
+        },
+        {
+          "line": 859,
+          "declaration": "integralLowerStep_le_geometricUpperStep"
+        },
+        {
+          "line": 874,
+          "declaration": "geometricLowerStep_le_integralUpperStep"
+        },
+        {
+          "line": 910,
+          "declaration": "geometricUpperStep_le_integralUpperStep"
+        },
+        {
+          "line": 978,
+          "declaration": "integralCellInterval_contains_geometricCellInterval"
+        },
+        {
+          "line": 986,
+          "declaration": "integralCellInterval_overlaps_geometricCellInterval"
+        },
+        {
+          "line": 1100,
+          "declaration": "integralLowerSum"
+        },
+        {
+          "line": 1104,
+          "declaration": "integralUpperSum"
+        },
+        {
+          "line": 1120,
+          "declaration": "integralSumInterval"
+        },
+        {
+          "line": 1194,
+          "declaration": "integralUpperSum_le_chartAddIntervals"
+        },
+        {
+          "line": 1215,
+          "declaration": "chartAddIntervals_integralSum_contains"
+        },
+        {
+          "line": 1478,
+          "declaration": "integralLowerSum_le_geometricLowerSum"
+        },
+        {
+          "line": 1492,
+          "declaration": "integralLowerSum_le_geometricUpperSum"
+        },
+        {
+          "line": 1506,
+          "declaration": "geometricLowerSum_le_integralUpperSum"
+        },
+        {
+          "line": 1520,
+          "declaration": "geometricUpperSum_le_integralUpperSum"
+        },
+        {
+          "line": 1548,
+          "declaration": "integralLowerSum_le_integralUpperSum"
+        },
+        {
+          "line": 1562,
+          "declaration": "integralLowerSum_nonneg"
+        },
+        {
+          "line": 1577,
+          "declaration": "integralUpperSum_nonneg"
+        },
+        {
+          "line": 1595,
+          "declaration": "integralUpperSum_le_intervalLength"
+        },
+        {
+          "line": 1618,
+          "declaration": "intervalLength_mul_integralKernel_right_le_integralLowerSum"
+        },
+        {
+          "line": 1652,
+          "declaration": "integralLowerStep_zero_right"
+        },
+        {
+          "line": 1656,
+          "declaration": "integralLowerSum_eq_zero_of_covers_point"
+        },
+        {
+          "line": 1722,
+          "declaration": "integralLowerSum_append"
+        },
+        {
+          "line": 1735,
+          "declaration": "integralUpperSum_append"
+        },
+        {
+          "line": 1774,
+          "declaration": "integralLowerSum_le_append_of_nonnegative"
+        },
+        {
+          "line": 1790,
+          "declaration": "integralLowerSum_le_integralUpperSum_of_covers"
+        },
+        {
+          "line": 1906,
+          "declaration": "integralSumInterval_overlaps_of_covers"
+        },
+        {
+          "line": 1920,
+          "declaration": "integralLowerSum_le_geometricUpperSum_of_covers"
+        },
+        {
+          "line": 2036,
+          "declaration": "geometricLowerSum_le_integralUpperSum_of_covers"
+        },
+        {
+          "line": 2153,
+          "declaration": "integralLowerSum_le_geometricUpperSum_of_covers_right"
+        },
+        {
+          "line": 2176,
+          "declaration": "geometricLowerSum_le_integralUpperSum_of_covers_right"
+        },
+        {
+          "line": 2199,
+          "declaration": "integralSumInterval_overlaps_geometricSumInterval_of_covers"
+        },
+        {
+          "line": 2213,
+          "declaration": "integralBracketInterval_overlaps_geometricSumInterval_of_covers"
+        },
+        {
+          "line": 2230,
+          "declaration": "integralSumInterval_ordered"
+        },
+        {
+          "line": 2323,
+          "declaration": "integralCellWidth_le_two_square"
+        },
+        {
+          "line": 2339,
+          "declaration": "integralSumInterval_width_le_two_squareSum"
+        },
+        {
+          "line": 2368,
+          "declaration": "integralSumInterval_contains_geometricSumInterval"
+        },
+        {
+          "line": 2377,
+          "declaration": "integralSumInterval_overlaps_geometricSumInterval"
+        },
+        {
+          "line": 2666,
+          "declaration": "refineAux_integralLowerSum_mono"
+        },
+        {
+          "line": 2709,
+          "declaration": "refineAux_integralUpperSum_anti"
+        },
+        {
+          "line": 2816,
+          "declaration": "refineAreaLoopState_integralSumInterval_refines"
+        },
+        {
+          "line": 3072,
+          "declaration": "arctanIntegralRectangle_dyadicSquareMesh"
+        },
+        {
+          "line": 3078,
+          "declaration": "arctanIntegralRectangleAtOne_dyadicSquareMesh"
+        },
+        {
+          "line": 3103,
+          "declaration": "chartAddAreaLoop_integralSum_width_le"
+        },
+        {
+          "line": 3152,
+          "declaration": "chartAddAreaLoop_integralSum_width_le_of_rightProduct_le_half"
+        },
+        {
+          "line": 3180,
+          "declaration": "chartAdd_refineAux_integralSum_refines"
+        },
+        {
+          "line": 3315,
+          "declaration": "arctanAreaLoop_integralSum_contains_geometricSum"
+        },
+        {
+          "line": 3323,
+          "declaration": "arctanAreaLoop_integralSum_overlaps_geometricSum"
+        },
+        {
+          "line": 3332,
+          "declaration": "arctanAreaLoop_integralSum_ordered"
+        },
+        {
+          "line": 3339,
+          "declaration": "arctanAreaLoop_integralSum_step_refines"
+        },
+        {
+          "line": 3348,
+          "declaration": "arctanAreaLoop_integralSum_refines_add"
+        },
+        {
+          "line": 3409,
+          "declaration": "arctanAreaLoop_integralSum_contains_positiveLoop"
+        },
+        {
+          "line": 3416,
+          "declaration": "arctanAreaLoop_integralSum_overlaps_positiveLoop"
+        },
+        {
+          "line": 3474,
+          "declaration": "arctanIntegralRectangleCompute"
+        },
+        {
+          "line": 3479,
+          "declaration": "arctanIntegralRectangleCompute_lower_nonnegative"
+        },
+        {
+          "line": 3488,
+          "declaration": "arctanIntegralRectangleCompute_upper_le_input"
+        },
+        {
+          "line": 3498,
+          "declaration": "arctanIntegralRectangleCompute_input_mul_kernel_le_lower"
+        },
+        {
+          "line": 3512,
+          "declaration": "arctanIntegralRectangleCompute_input_sub_lower_le_cube"
+        },
+        {
+          "line": 3552,
+          "declaration": "arctanIntegralRectangleCompute_tangent_box_contains"
+        },
+        {
+          "line": 3564,
+          "declaration": "arctanIntegralRectangleCompute_zero_lower"
+        },
+        {
+          "line": 3581,
+          "declaration": "arctanIntegralRectangleCompute_zero_upper"
+        },
+        {
+          "line": 3598,
+          "declaration": "arctanIntegralRectangleCompute_zero_tangent_quotient_contains"
+        },
+        {
+          "line": 3658,
+          "declaration": "arctanIntegralRectangleCompute_lower_le_upper_of_le"
+        },
+        {
+          "line": 3689,
+          "declaration": "chartAddAreaLoop_integralSum_contains"
+        },
+        {
+          "line": 3769,
+          "declaration": "arctanIntegralRectangleRaw"
+        },
+        {
+          "line": 3772,
+          "declaration": "arctanIntegralRectangleCompute_ordered"
+        },
+        {
+          "line": 3778,
+          "declaration": "arctanIntegralRectangleCompute_step_refines"
+        },
+        {
+          "line": 3785,
+          "declaration": "arctanIntegralRectangleCompute_nested"
+        },
+        {
+          "line": 3816,
+          "declaration": "arctanIntegralRectangleComputeAtOne"
+        },
+        {
+          "line": 3819,
+          "declaration": "arctanIntegralRectangleRawAtOne"
+        },
+        {
+          "line": 3822,
+          "declaration": "arctanIntegralRectangleComputeAtOne_ordered"
+        },
+        {
+          "line": 3828,
+          "declaration": "arctanIntegralRectangleComputeAtOne_step_refines"
+        },
+        {
+          "line": 3835,
+          "declaration": "arctanIntegralRectangleComputeAtOne_nested"
+        },
+        {
+          "line": 3927,
+          "declaration": "arctanIntegralRectangleCompute_width_le_four_div_succ"
+        },
+        {
+          "line": 3967,
+          "declaration": "arctanIntegralRectangleCompute_width_le_sixteenth_input_precision"
+        },
+        {
+          "line": 4014,
+          "declaration": "arctanIntegralRectangleCompute_kernel_half_lower"
+        },
+        {
+          "line": 4033,
+          "declaration": "arctanIntegralRectangleCompute_boxes_strictly_separated"
+        },
+        {
+          "line": 4383,
+          "declaration": "arctanIntegralRectangleCompute_width_le_eps_of_precision"
+        },
+        {
+          "line": 4421,
+          "declaration": "arctanIntegralRectangleCompute_widthsShrink"
+        },
+        {
+          "line": 4464,
+          "declaration": "arctanIntegralRectangleRaw_valid"
+        },
+        {
+          "line": 4516,
+          "declaration": "arctanIntegralRectangleRaw_equiv_chartAddAreaLoopRaw"
+        },
+        {
+          "line": 4679,
+          "declaration": "arctanIntegralRectangleComputeAtOne_width_le_four_div_succ"
+        },
+        {
+          "line": 4714,
+          "declaration": "arctanIntegralRectangleComputeAtOne_widthsShrink"
+        },
+        {
+          "line": 4753,
+          "declaration": "arctanIntegralRectangleRawAtOne_valid"
+        },
+        {
+          "line": 4877,
+          "declaration": "arctanIntegralRectangleRaw_equiv_arctanGeom"
+        },
+        {
+          "line": 5139,
+          "declaration": "halfChartCoordinate_scale_mul_integralKernel"
+        },
+        {
+          "line": 5378,
+          "declaration": "arctanIntegralRectangleCompute_tangentChart_quotient_contains"
+        },
+        {
+          "line": 5482,
+          "declaration": "integralKernel_sub_tangentChartScale_le_step"
+        },
+        {
+          "line": 5554,
+          "declaration": "arctanIntegralRectangleCompute_tangentChart_quotient_kernel_contains"
+        },
+        {
+          "line": 5795,
+          "declaration": "arctanIntegralRectangleRaw_forward_difference_equiv_tangentChartIncrement"
+        },
+        {
+          "line": 5844,
+          "declaration": "arctanIntegralRectangleCompute_forward_lower_sub_upper_le_step"
+        },
+        {
+          "line": 6019,
+          "declaration": "arctanIntegralRectangleRawAtOne_equiv_arctanGeom_one"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/ArctanRectanglePi.lean",
+      "role": "enclosure",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/ArctanTaylorConvergence.lean",
+      "role": "comparison",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/ArctanTaylorRemainder.lean",
+      "role": "comparison",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/Blueprint.lean",
+      "role": "support",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/Calculus.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 143,
+          "declaration": "riemannLeftExact"
+        },
+        {
+          "line": 147,
+          "declaration": "riemannLeftInterval"
+        },
+        {
+          "line": 161,
+          "declaration": "riemannRightInterval"
+        },
+        {
+          "line": 171,
+          "declaration": "riemannTrapezoidInterval"
+        },
+        {
+          "line": 186,
+          "declaration": "riemannLeftInterval_congr_of_samples"
+        },
+        {
+          "line": 230,
+          "declaration": "riemannLeftInterval_overlap_of_samples"
+        },
+        {
+          "line": 309,
+          "declaration": "riemannRightInterval_congr_of_samples"
+        },
+        {
+          "line": 348,
+          "declaration": "riemannRightInterval_overlap_of_samples"
+        },
+        {
+          "line": 1249,
+          "declaration": "unitMeshSquareIntegralRaw"
+        },
+        {
+          "line": 1276,
+          "declaration": "unitMeshSquareIntegralRaw_valid"
+        },
+        {
+          "line": 1299,
+          "declaration": "unitMeshSquareIntegralRaw_equiv_one"
+        },
+        {
+          "line": 1311,
+          "declaration": "unitMeshSquareIntegralRaw_lower_eq_left_sum"
+        },
+        {
+          "line": 1341,
+          "declaration": "riemannLeftInterval_point_fold_eq"
+        },
+        {
+          "line": 1365,
+          "declaration": "riemannLeftInterval_point_eq"
+        },
+        {
+          "line": 1375,
+          "declaration": "riemannLeftInterval_point_width_zero"
+        },
+        {
+          "line": 1991,
+          "declaration": "riemannTrapezoidInterval_eq_half_add_left_right"
+        },
+        {
+          "line": 2052,
+          "declaration": "riemannTrapezoidInterval_width_eq_half_add_left_right"
+        },
+        {
+          "line": 2065,
+          "declaration": "riemannTrapezoidInterval_width_le_of_left_right_width_le"
+        },
+        {
+          "line": 2083,
+          "declaration": "riemannTrapezoidInterval_overlap_of_samples"
+        },
+        {
+          "line": 2177,
+          "declaration": "riemannTrapezoidInterval_congr_of_samples"
+        },
+        {
+          "line": 2219,
+          "declaration": "riemannRightInterval_add"
+        },
+        {
+          "line": 2272,
+          "declaration": "riemannLeftInterval_add"
+        },
+        {
+          "line": 2325,
+          "declaration": "riemannLeftInterval_scale_of_nonneg"
+        },
+        {
+          "line": 2373,
+          "declaration": "riemannLeftInterval_scale_of_neg"
+        },
+        {
+          "line": 2421,
+          "declaration": "riemannLeftInterval_scale"
+        },
+        {
+          "line": 2438,
+          "declaration": "riemannRightInterval_scale_of_nonneg"
+        },
+        {
+          "line": 2485,
+          "declaration": "riemannRightInterval_scale_of_neg"
+        },
+        {
+          "line": 2540,
+          "declaration": "riemannLeftInterval_half_eq_half_scale_unit"
+        },
+        {
+          "line": 2923,
+          "declaration": "integral_add_equiv_of_common_plan"
+        },
+        {
+          "line": 2939,
+          "declaration": "integral_scaleRat_equiv"
+        },
+        {
+          "line": 2958,
+          "declaration": "integral_equiv_of_plan_and_samples"
+        },
+        {
+          "line": 2994,
+          "declaration": "integral_equiv_of_plan_and_sample_overlaps"
+        },
+        {
+          "line": 3031,
+          "declaration": "riemannLeftInterval_constant_one"
+        },
+        {
+          "line": 3067,
+          "declaration": "constantIntegral_compute"
+        },
+        {
+          "line": 3074,
+          "declaration": "constantIntegral_valid"
+        },
+        {
+          "line": 3079,
+          "declaration": "constantIntegral_add_equiv"
+        },
+        {
+          "line": 3105,
+          "declaration": "constantIntegral_scaleRat_equiv"
+        },
+        {
+          "line": 3132,
+          "declaration": "constantIntegral_adjacent_additive"
+        },
+        {
+          "line": 3200,
+          "declaration": "Integral.ExistsConstruction"
+        },
+        {
+          "line": 3333,
+          "declaration": "DefiniteIntegralEqualsEndpointDifference"
+        },
+        {
+          "line": 3406,
+          "declaration": "riemannLeftExact_constant_one"
+        },
+        {
+          "line": 3434,
+          "declaration": "riemannLeftExact_affine_closed"
+        },
+        {
+          "line": 3457,
+          "declaration": "riemannLeftExact_affine_error_of_pos"
+        },
+        {
+          "line": 3471,
+          "declaration": "riemannLeftExact_doubleId_of_pos"
+        },
+        {
+          "line": 3523,
+          "declaration": "riemannLeftExact_threeSquare_unit_of_pos"
+        },
+        {
+          "line": 4859,
+          "declaration": "boundIntegralTerm"
+        },
+        {
+          "line": 5027,
+          "declaration": "boundIntegralSum"
+        },
+        {
+          "line": 5037,
+          "declaration": "Refines.boundIntegralSum_eq_indexBlockFold"
+        },
+        {
+          "line": 5075,
+          "declaration": "Refines.boundIntegralSum_contains_of_blockwise"
+        },
+        {
+          "line": 5133,
+          "declaration": "Refines.boundIntegralSum_overlaps_of_blockwise"
+        },
+        {
+          "line": 5206,
+          "declaration": "boundIntegralSum_width_nonneg_of_termwise"
+        },
+        {
+          "line": 5246,
+          "declaration": "boundIntegralSum_contains_of_termwise"
+        },
+        {
+          "line": 5268,
+          "declaration": "boundIntegralSum_overlaps_of_termwise"
+        },
+        {
+          "line": 5338,
+          "declaration": "uniform_boundIntegralSum_width_le"
+        },
+        {
+          "line": 5391,
+          "declaration": "uniform_boundIntegralSum_width_le_indexed"
+        },
+        {
+          "line": 5478,
+          "declaration": "boundIntegralSum_contains_endpointDifference"
+        },
+        {
+          "line": 5504,
+          "declaration": "boundIntegralSum_overlaps_endpointDifference"
+        },
+        {
+          "line": 5700,
+          "declaration": "boundedIntegralInterval"
+        },
+        {
+          "line": 5717,
+          "declaration": "boundedIntegralCompute"
+        },
+        {
+          "line": 5727,
+          "declaration": "boundedIntegralRaw"
+        },
+        {
+          "line": 5737,
+          "declaration": "boundedIntegralRaw_width_le_of_tolerance"
+        },
+        {
+          "line": 5749,
+          "declaration": "boundedIntegralRaw_precision_witness"
+        },
+        {
+          "line": 5765,
+          "declaration": "boundedIntegralRaw_widths_shrink"
+        },
+        {
+          "line": 5953,
+          "declaration": "EffectiveDerivativeBoundFTC.boundedIntegralRaw_equiv_endpointDifference"
+        },
+        {
+          "line": 6007,
+          "declaration": "EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw"
+        },
+        {
+          "line": 6016,
+          "declaration": "EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_width_le"
+        },
+        {
+          "line": 6029,
+          "declaration": "EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_valid"
+        },
+        {
+          "line": 6043,
+          "declaration": "EffectiveDerivativeBoundFTC.stabilizedBoundedIntegralRaw_equiv_endpointDifference"
+        },
+        {
+          "line": 6184,
+          "declaration": "integralRaw"
+        },
+        {
+          "line": 6194,
+          "declaration": "integral_equiv_endpoint"
+        },
+        {
+          "line": 6207,
+          "declaration": "integral_equiv_canonical_endpoint"
+        },
+        {
+          "line": 6264,
+          "declaration": "boundedIntegralInterval"
+        },
+        {
+          "line": 6295,
+          "declaration": "boundedIntegralCompute"
+        },
+        {
+          "line": 6305,
+          "declaration": "boundedIntegralRaw"
+        },
+        {
+          "line": 6455,
+          "declaration": "boundedIntegralInterval"
+        },
+        {
+          "line": 6488,
+          "declaration": "boundedIntegralCompute"
+        },
+        {
+          "line": 6498,
+          "declaration": "boundedIntegralRaw"
+        },
+        {
+          "line": 7412,
+          "declaration": "effectiveFTCIntegral_equiv_endpointDifference"
+        },
+        {
+          "line": 7441,
+          "declaration": "constructionFor_of_future_containment_integral_equiv_candidate"
+        },
+        {
+          "line": 7866,
+          "declaration": "boundedIntegralRaw_equiv_endpointDifference"
+        },
+        {
+          "line": 7951,
+          "declaration": "Integral.ExistsConstructionFor"
+        },
+        {
+          "line": 7954,
+          "declaration": "integral_construction_proves_well_defined_for"
+        },
+        {
+          "line": 8475,
+          "declaration": "Integral.LipschitzOnIntervalNat"
+        },
+        {
+          "line": 8484,
+          "declaration": "Integral.LipschitzOnIntervalNat.of_unit_subinterval"
+        },
+        {
+          "line": 9764,
+          "declaration": "intervalRegularDarbouxRange"
+        },
+        {
+          "line": 9777,
+          "declaration": "intervalRegularDarbouxRange_contains_point_value"
+        },
+        {
+          "line": 9799,
+          "declaration": "intervalRegularDarbouxRange_width_le"
+        },
+        {
+          "line": 9820,
+          "declaration": "intervalRegularDarbouxStage"
+        },
+        {
+          "line": 9847,
+          "declaration": "intervalRegularDarbouxStage_contains_of_evalIntervalsNested"
+        },
+        {
+          "line": 9873,
+          "declaration": "intervalRegularDarbouxStage_contains_of_cellwise"
+        },
+        {
+          "line": 9896,
+          "declaration": "intervalRegularDarbouxStage_overlaps_of_cellwise"
+        },
+        {
+          "line": 9915,
+          "declaration": "intervalRegularDarbouxStage_overlaps_of_cellwise_ordered_samples"
+        },
+        {
+          "line": 9945,
+          "declaration": "intervalRegularDarbouxStage_overlaps_leftEndpointSamples"
+        },
+        {
+          "line": 9977,
+          "declaration": "intervalRegularDarbouxStage_width_le_of_uniform_input_budget"
+        },
+        {
+          "line": 9998,
+          "declaration": "intervalRegularDarbouxStage_width_nonneg_of_uniform_input_budget"
+        },
+        {
+          "line": 10080,
+          "declaration": "nondecreasingDarbouxRange"
+        },
+        {
+          "line": 10091,
+          "declaration": "nondecreasingDarbouxRange_width_nonneg"
+        },
+        {
+          "line": 10110,
+          "declaration": "nondecreasingDarbouxRange_overlaps_point_value"
+        },
+        {
+          "line": 10138,
+          "declaration": "nonincreasingDarbouxRange"
+        },
+        {
+          "line": 10147,
+          "declaration": "nonincreasingDarbouxRange_width_nonneg"
+        },
+        {
+          "line": 10162,
+          "declaration": "nonincreasingDarbouxRange_width_le_of_intervalRegular"
+        },
+        {
+          "line": 10199,
+          "declaration": "nonincreasingDarbouxRange_overlaps_point_value"
+        },
+        {
+          "line": 10221,
+          "declaration": "endpointOrderedNonincreasingDarbouxRange_contains_point_value"
+        },
+        {
+          "line": 10246,
+          "declaration": "nonincreasingDarbouxStage"
+        },
+        {
+          "line": 10251,
+          "declaration": "nonincreasingDarbouxStage_width_nonneg"
+        },
+        {
+          "line": 10270,
+          "declaration": "nonincreasingDarbouxStage_overlaps_rightEndpointSamples"
+        },
+        {
+          "line": 10336,
+          "declaration": "nonincreasingDarbouxStage_width_le_of_uniform_input_budget"
+        },
+        {
+          "line": 10361,
+          "declaration": "nonincreasingDarbouxStage_contains_of_precision"
+        },
+        {
+          "line": 10400,
+          "declaration": "endpointOrderedNonincreasingDarbouxStage_contains_uniform_double"
+        },
+        {
+          "line": 10511,
+          "declaration": "nonincreasingDarbouxDyadicStage"
+        },
+        {
+          "line": 10518,
+          "declaration": "nonincreasingDarbouxDyadicStage_width_le_of_input_budget"
+        },
+        {
+          "line": 10532,
+          "declaration": "nonincreasingDarbouxDyadicStage_width_le_of_input_budget_and_tolerance"
+        },
+        {
+          "line": 10547,
+          "declaration": "endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_stage"
+        },
+        {
+          "line": 10578,
+          "declaration": "endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_stage_of_precision_mono"
+        },
+        {
+          "line": 10609,
+          "declaration": "endpointOrderedNonincreasingDarbouxDyadicStage_contains_of_scheduled_stage"
+        },
+        {
+          "line": 10648,
+          "declaration": "endpointOrderedNondecreasingDarbouxRange_contains_point_value"
+        },
+        {
+          "line": 10675,
+          "declaration": "nondecreasingDarbouxRange_width_le_of_intervalRegular"
+        },
+        {
+          "line": 10714,
+          "declaration": "nondecreasingDarbouxStage_width_nonneg"
+        },
+        {
+          "line": 10774,
+          "declaration": "nondecreasingDarbouxStage"
+        },
+        {
+          "line": 10779,
+          "declaration": "exactRat_nondecreasingDarbouxStage_stage_independent"
+        },
+        {
+          "line": 10791,
+          "declaration": "nondecreasingDarbouxStage_contains_of_precision"
+        },
+        {
+          "line": 10831,
+          "declaration": "endpointOrderedNondecreasingDarbouxStage_contains_uniform_double"
+        },
+        {
+          "line": 10942,
+          "declaration": "nondecreasingDarbouxDyadicStage"
+        },
+        {
+          "line": 10953,
+          "declaration": "endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage"
+        },
+        {
+          "line": 10988,
+          "declaration": "endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_stage_of_precision_mono"
+        },
+        {
+          "line": 11018,
+          "declaration": "endpointOrderedNondecreasingDarbouxDyadicStage_contains_of_scheduled_stage"
+        },
+        {
+          "line": 11057,
+          "declaration": "endpointOrderedNondecreasingDarbouxStage_contains_leftEndpointSamples"
+        },
+        {
+          "line": 11104,
+          "declaration": "nondecreasingDarbouxStage_overlaps_of_cellwise"
+        },
+        {
+          "line": 11155,
+          "declaration": "nondecreasingDarbouxStage_overlaps_leftEndpointSamples"
+        },
+        {
+          "line": 11189,
+          "declaration": "nondecreasingDarbouxStage_width_le_of_uniform_input_budget"
+        },
+        {
+          "line": 11210,
+          "declaration": "nondecreasingDarbouxStage_width_le_of_uniform_input_budget_and_tolerance"
+        },
+        {
+          "line": 11231,
+          "declaration": "nondecreasingDarbouxDyadicStage_width_le_of_input_budget"
+        },
+        {
+          "line": 11245,
+          "declaration": "nondecreasingDarbouxDyadicStage_width_le_of_input_budget_and_tolerance"
+        },
+        {
+          "line": 11267,
+          "declaration": "intervalRegularDarbouxScheduleCompute"
+        },
+        {
+          "line": 11277,
+          "declaration": "IntervalRegularDarbouxSchedule"
+        },
+        {
+          "line": 11484,
+          "declaration": "intervalRegularDarbouxSchedule_widths_shrink_of_budget"
+        },
+        {
+          "line": 11513,
+          "declaration": "intervalRegularDarbouxSchedule_linear_precision_budget"
+        },
+        {
+          "line": 11542,
+          "declaration": "IntervalRegularDarbouxSchedule.ofAutomaticPieces"
+        },
+        {
+          "line": 11599,
+          "declaration": "IntervalRegularDarbouxSchedule.ofAutomaticLinearPrecision"
+        },
+        {
+          "line": 11627,
+          "declaration": "intervalRegularDarbouxScheduleRaw"
+        },
+        {
+          "line": 11635,
+          "declaration": "intervalRegularDarbouxScheduleRaw_valid"
+        },
+        {
+          "line": 11657,
+          "declaration": "intervalRegularDarbouxScheduleRaw_precision_witness"
+        },
+        {
+          "line": 11666,
+          "declaration": "intervalRegularDarbouxScheduleRaw_width_le_of_tolerance"
+        },
+        {
+          "line": 11685,
+          "declaration": "intervalRegularDarbouxScheduleRaw_linear_width_le"
+        },
+        {
+          "line": 11717,
+          "declaration": "intervalRegularDarbouxScheduleConstructionFor"
+        },
+        {
+          "line": 11725,
+          "declaration": "intervalRegularDarbouxScheduleIntegralFor"
+        },
+        {
+          "line": 11731,
+          "declaration": "intervalRegularDarbouxScheduleIntegralFor_precision_witness"
+        },
+        {
+          "line": 11740,
+          "declaration": "intervalRegularDarbouxScheduleIntegralFor_valid"
+        },
+        {
+          "line": 11750,
+          "declaration": "intervalRegularDarbouxScheduleIntegralFor_width_le_of_tolerance"
+        },
+        {
+          "line": 11768,
+          "declaration": "monotoneDarbouxScheduleCompute"
+        },
+        {
+          "line": 11777,
+          "declaration": "MonotoneDarbouxSchedule"
+        },
+        {
+          "line": 11803,
+          "declaration": "MonotoneDarbouxSchedule.ofDyadicEndpointOrdered"
+        },
+        {
+          "line": 11837,
+          "declaration": "nondecreasingDarbouxDyadicSchedule_widths_shrink_of_budget"
+        },
+        {
+          "line": 11863,
+          "declaration": "MonotoneDarbouxSchedule.ofDyadicEndpointOrderedOfBudget"
+        },
+        {
+          "line": 11886,
+          "declaration": "nondecreasingDarbouxScheduledSchedule_widths_shrink_of_budget"
+        },
+        {
+          "line": 11911,
+          "declaration": "MonotoneDarbouxSchedule.ofScheduledEndpointOrderedOfBudget"
+        },
+        {
+          "line": 11945,
+          "declaration": "MonotoneDarbouxSchedule.ofAutomaticEndpointOrdered"
+        },
+        {
+          "line": 11964,
+          "declaration": "monotoneDarbouxScheduleRaw"
+        },
+        {
+          "line": 11973,
+          "declaration": "monotoneDarbouxScheduleRaw_valid"
+        },
+        {
+          "line": 12007,
+          "declaration": "monotoneDarbouxScheduleRaw_width_le_of_tolerance"
+        },
+        {
+          "line": 12027,
+          "declaration": "monotoneDarbouxSchedule_widths_shrink_of_budget"
+        },
+        {
+          "line": 12057,
+          "declaration": "monotoneDarbouxSchedule_linear_precision_budget"
+        },
+        {
+          "line": 12068,
+          "declaration": "MonotoneDarbouxSchedule.ofAutomaticLinearPrecision"
+        },
+        {
+          "line": 12109,
+          "declaration": "monotoneDarbouxScheduleConstructionFor"
+        },
+        {
+          "line": 12118,
+          "declaration": "monotoneDarbouxScheduleConstructionFor_compute"
+        },
+        {
+          "line": 12127,
+          "declaration": "monotoneDarbouxScheduleIntegralFor"
+        },
+        {
+          "line": 12134,
+          "declaration": "monotoneDarbouxScheduleIntegralFor_valid"
+        },
+        {
+          "line": 12146,
+          "declaration": "monotoneDarbouxScheduleIntegralFor_width_le_of_tolerance"
+        },
+        {
+          "line": 12183,
+          "declaration": "unitConstantMonotoneDarbouxSchedule"
+        },
+        {
+          "line": 12230,
+          "declaration": "unitConstantMonotoneDarbouxSchedule_integral_eq_one"
+        },
+        {
+          "line": 12342,
+          "declaration": "constantMonotoneIntegralFor_eq_ofRat"
+        },
+        {
+          "line": 12396,
+          "declaration": "affineMonotoneIntegralFor_adjacent_additive"
+        },
+        {
+          "line": 12427,
+          "declaration": "affineMonotoneIntegralFor_of_nonpos_adjacent_additive"
+        },
+        {
+          "line": 12465,
+          "declaration": "affineMonotoneIntegralFor_eq_ofRat"
+        },
+        {
+          "line": 12472,
+          "declaration": "unitMeshSquareIntegralRaw_equiv_affineMonotoneIntegral"
+        },
+        {
+          "line": 12484,
+          "declaration": "affineMonotoneIntegralFor_of_nonpos_eq_ofRat"
+        },
+        {
+          "line": 12591,
+          "declaration": "piecewiseMonotoneCellIntegral"
+        },
+        {
+          "line": 12620,
+          "declaration": "piecewiseMonotoneCellIntegral_valid"
+        },
+        {
+          "line": 13383,
+          "declaration": "integralFor_generalConstructionFor_valid"
+        },
+        {
+          "line": 13388,
+          "declaration": "integralFor_generalConstructionFor_equiv"
+        },
+        {
+          "line": 13629,
+          "declaration": "ExactCellOrderPreservation.integral_average_between_bounds"
+        },
+        {
+          "line": 13660,
+          "declaration": "ExactCellOrderPreservation.integral_average_overlaps_bounds"
+        },
+        {
+          "line": 13700,
+          "declaration": "quadratureWeightSum"
+        },
+        {
+          "line": 13706,
+          "declaration": "quadratureEvalSum"
+        },
+        {
+          "line": 13713,
+          "declaration": "quadratureWeightSum_mul_le_quadratureEvalSum"
+        },
+        {
+          "line": 13763,
+          "declaration": "quadratureEvalSum_le_quadratureWeightSum_mul"
+        },
+        {
+          "line": 13816,
+          "declaration": "exactCellOrderPreservation_of_positive_quadrature"
+        },
+        {
+          "line": 16042,
+          "declaration": "nonincreasingDarbouxScheduleCompute"
+        },
+        {
+          "line": 16051,
+          "declaration": "NonincreasingDarbouxSchedule"
+        },
+        {
+          "line": 16074,
+          "declaration": "nonincreasingDarbouxScheduledSchedule_widths_shrink_of_budget"
+        },
+        {
+          "line": 16099,
+          "declaration": "NonincreasingDarbouxSchedule.ofScheduledEndpointOrderedOfBudget"
+        },
+        {
+          "line": 16130,
+          "declaration": "NonincreasingDarbouxSchedule.ofDyadicEndpointOrderedOfBudget"
+        },
+        {
+          "line": 16171,
+          "declaration": "NonincreasingDarbouxSchedule.ofAutomaticEndpointOrdered"
+        },
+        {
+          "line": 16209,
+          "declaration": "nonincreasingDarbouxScheduleRaw"
+        },
+        {
+          "line": 16219,
+          "declaration": "nonincreasingDarbouxScheduleRaw_valid"
+        },
+        {
+          "line": 16253,
+          "declaration": "nonincreasingDarbouxScheduleConstructionFor"
+        },
+        {
+          "line": 16287,
+          "declaration": "nonincreasingDarbouxScheduleIntegralFor"
+        },
+        {
+          "line": 16295,
+          "declaration": "nonincreasingDarbouxScheduleIntegralFor_valid"
+        },
+        {
+          "line": 16303,
+          "declaration": "nonincreasingDarbouxScheduleIntegralFor_width_le_of_tolerance"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/CalculusFoundation.lean",
+      "role": "support",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/CauchyPi.lean",
+      "role": "comparison",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/CauchyTaylor.lean",
+      "role": "conditional",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/CauchyTaylorCoefficients.lean",
+      "role": "conditional",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/CauchyTaylorExamples.lean",
+      "role": "conditional",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/CauchyTaylorKernel.lean",
+      "role": "finite",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/ComplexAnalysis/Cauchy.lean",
+      "role": "conditional",
+      "declarations": [
+        {
+          "line": 56,
+          "declaration": "CauchyData.quadrature"
+        },
+        {
+          "line": 81,
+          "declaration": "CauchyData.quadrature_valid"
+        },
+        {
+          "line": 185,
+          "declaration": "ChainData.quadrature"
+        },
+        {
+          "line": 207,
+          "declaration": "ChainData.quadrature_valid"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/ComplexAnalysis/Examples.lean",
+      "role": "conditional",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/ComplexAnalysis/Polygon.lean",
+      "role": "conditional",
+      "declarations": [
+        {
+          "line": 221,
+          "declaration": "Triangle.quadrature"
+        },
+        {
+          "line": 255,
+          "declaration": "Triangle.quadrature_valid"
+        },
+        {
+          "line": 269,
+          "declaration": "Triangle.quadrature_independent"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/ComplexAnalysis/Residue.lean",
+      "role": "conditional",
+      "declarations": [
+        {
+          "line": 47,
+          "declaration": "Square.Regular.quadrature"
+        },
+        {
+          "line": 78,
+          "declaration": "Square.residueQuadrature"
+        },
+        {
+          "line": 82,
+          "declaration": "Square.residueQuadrature_valid"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/ComplexAnalysis/ResidueExamples.lean",
+      "role": "conditional",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/ComplexAnalysis/SquarePole.lean",
+      "role": "conditional",
+      "declarations": [
+        {
+          "line": 79,
+          "declaration": "quadrature"
+        },
+        {
+          "line": 115,
+          "declaration": "quadrature_valid"
+        },
+        {
+          "line": 127,
+          "declaration": "quadrature_compute_zero"
+        },
+        {
+          "line": 131,
+          "declaration": "quadrature_compute_succ"
+        },
+        {
+          "line": 136,
+          "declaration": "quadrature_encloses_sample"
+        },
+        {
+          "line": 141,
+          "declaration": "quadrature_contains_period"
+        },
+        {
+          "line": 149,
+          "declaration": "quadrature_equiv_period"
+        },
+        {
+          "line": 157,
+          "declaration": "quadrature_equiv_twoPiI"
+        },
+        {
+          "line": 165,
+          "declaration": "quadrature_independent"
+        },
+        {
+          "line": 171,
+          "declaration": "quadrature_widths_bound"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/ComplexIntegralEnclosure.lean",
+      "role": "enclosure",
+      "declarations": [
+        {
+          "line": 25,
+          "declaration": "subsegmentIntegralBox_contains_point_box"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/ComplexLogarithmApproximation.lean",
+      "role": "support",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/ComplexPathIntegral.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 780,
+          "declaration": "subsegmentIntegralBox"
+        },
+        {
+          "line": 784,
+          "declaration": "segmentIntegralBoxEntire"
+        },
+        {
+          "line": 797,
+          "declaration": "polygonalIntegralBoxEntire"
+        },
+        {
+          "line": 805,
+          "declaration": "segmentIntegralBoxEntire_constant"
+        },
+        {
+          "line": 822,
+          "declaration": "polygonalIntegralBoxEntire_constant"
+        },
+        {
+          "line": 855,
+          "declaration": "polygonalIntegralBoxEntire_constant_closed"
+        },
+        {
+          "line": 868,
+          "declaration": "polygonalIntegralRawEntire"
+        },
+        {
+          "line": 879,
+          "declaration": "PolygonalIntegralCertificate"
+        },
+        {
+          "line": 889,
+          "declaration": "PolygonalIntegralCertificate.of_stage_eq_point"
+        },
+        {
+          "line": 913,
+          "declaration": "polygonalIntegralRawEntire_valid"
+        },
+        {
+          "line": 926,
+          "declaration": "PolygonalIntegralCertificate.precision_witness"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/Differential.lean",
+      "role": "support",
+      "declarations": [
+        {
+          "line": 774,
+          "declaration": "riemannLeftExact_affine_substitution"
+        },
+        {
+          "line": 833,
+          "declaration": "riemannLeftExact_scale"
+        },
+        {
+          "line": 860,
+          "declaration": "riemannLeftExact_add"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/EffectiveCalculusFoundation.lean",
+      "role": "support",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/EffectiveFourierSeries.lean",
+      "role": "conditional",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/EffectiveFourierTail.lean",
+      "role": "conditional",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/Elementary.lean",
+      "role": "support",
+      "declarations": [
+        {
+          "line": 143,
+          "declaration": "LogFromIntegralInv"
+        },
+        {
+          "line": 180,
+          "declaration": "LogIntegralAgreesWithInverseExp"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/ElementaryFunctions.lean",
+      "role": "support",
+      "declarations": [
+        {
+          "line": 384,
+          "declaration": "InverseLogIntegral"
+        },
+        {
+          "line": 389,
+          "declaration": "agreesWithInverseLogIntegral"
+        },
+        {
+          "line": 392,
+          "declaration": "eulerLimitAgreesWithInverseLogIntegral"
+        },
+        {
+          "line": 407,
+          "declaration": "PowerSeriesIntegralInverseEstimate"
+        },
+        {
+          "line": 410,
+          "declaration": "EulerIntegralInverseEstimate"
+        },
+        {
+          "line": 425,
+          "declaration": "eInverseLogIntegralRaw"
+        },
+        {
+          "line": 446,
+          "declaration": "LogIntegralInverseBranch"
+        },
+        {
+          "line": 494,
+          "declaration": "fromLogIntegral"
+        },
+        {
+          "line": 501,
+          "declaration": "logFromIntegral"
+        },
+        {
+          "line": 506,
+          "declaration": "expFromLogIntegral"
+        },
+        {
+          "line": 509,
+          "declaration": "eFromLogIntegralBranchRaw"
+        },
+        {
+          "line": 513,
+          "declaration": "eFromLogIntegralBranchRaw_valid"
+        },
+        {
+          "line": 520,
+          "declaration": "FromLogIntegralOnInterval"
+        },
+        {
+          "line": 556,
+          "declaration": "PowerSeriesLogIntegralInverseComparison"
+        },
+        {
+          "line": 569,
+          "declaration": "powerSeries_equiv_logIntegralInverse_on_interval"
+        },
+        {
+          "line": 588,
+          "declaration": "powerSeries_equiv_logIntegralInverse_on_interval_of_directMesh"
+        },
+        {
+          "line": 603,
+          "declaration": "powerSeries_equiv_logIntegralInverse_on_interval_of_volterra"
+        },
+        {
+          "line": 619,
+          "declaration": "EulerProductIntegralEstimate"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/ExpProofs.lean",
+      "role": "comparison",
+      "declarations": [
+        {
+          "line": 9207,
+          "declaration": "selectedStageCandidateDerivativeFTC_boundedIntegral_widthsShrink"
+        },
+        {
+          "line": 9232,
+          "declaration": "uniformExpOnSymmetricUnit_boundedIntegral_widthsShrink"
+        },
+        {
+          "line": 9245,
+          "declaration": "uniformExpOnSymmetricUnit_boundedIntegral_equiv_endpointDifference"
+        },
+        {
+          "line": 9297,
+          "declaration": "uniformExpOnSymmetricUnitStabilizedIntegral_equiv_endpointDifference"
+        },
+        {
+          "line": 9373,
+          "declaration": "uniformExpOnUnitStabilizedIntegral_equiv_endpointDifference"
+        },
+        {
+          "line": 9383,
+          "declaration": "uniformExpOnUnitStabilizedIntegral_equiv_exp_endpoint_subtraction"
+        },
+        {
+          "line": 9421,
+          "declaration": "uniformExpOnUnitStabilizedIntegral_equiv_powerSeries_endpoint_subtraction"
+        },
+        {
+          "line": 9475,
+          "declaration": "uniformExpOnUnitStabilizedIntegral_equiv_powerSeries_one_sub_one"
+        },
+        {
+          "line": 9513,
+          "declaration": "uniformExpOnSymmetricUnitStabilizedIntegral_equiv_exp_endpoint_subtraction"
+        },
+        {
+          "line": 9557,
+          "declaration": "uniformExpOnSymmetricUnitStabilizedIntegral_equiv_powerSeries_endpoint_subtraction"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/ExponentialLogarithmFoundation.lean",
+      "role": "support",
+      "declarations": [
+        {
+          "line": 35,
+          "declaration": "integral_exp_on_unit_eq_exp_one_sub_one"
+        },
+        {
+          "line": 43,
+          "declaration": "log_two_series_eq_reciprocal_integral"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/FTC.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 98,
+          "declaration": "riemannComputeOfEffectiveFTC"
+        },
+        {
+          "line": 114,
+          "declaration": "riemannRawOfEffectiveFTC"
+        },
+        {
+          "line": 304,
+          "declaration": "integralPlanOfEffectiveFTC"
+        },
+        {
+          "line": 312,
+          "declaration": "integralPlanOfStaticDyadicEffectiveFTC"
+        },
+        {
+          "line": 320,
+          "declaration": "integralPlanOfStaticDyadicEffectiveFTC_eq_toEffectiveFTC"
+        },
+        {
+          "line": 329,
+          "declaration": "riemannComputeOfEffectiveFTC_eq_integralPlan"
+        },
+        {
+          "line": 338,
+          "declaration": "integral_compute_eq_riemannComputeOfEffectiveFTC"
+        },
+        {
+          "line": 350,
+          "declaration": "integral_valid_of_construction"
+        },
+        {
+          "line": 380,
+          "declaration": "effectiveFTC_riemannRaw_widths_shrink"
+        },
+        {
+          "line": 432,
+          "declaration": "effectiveFTC_riemannRaw_equiv_endpointDifference_of_endpointAgreement"
+        },
+        {
+          "line": 519,
+          "declaration": "effectiveFTC_integral_equiv_scheduledEndpoint"
+        },
+        {
+          "line": 542,
+          "declaration": "staticDyadicEffectiveFTC_integral_equiv_scheduledEndpoint"
+        },
+        {
+          "line": 561,
+          "declaration": "effectiveFTC_definiteIntegralEqualsEndpoint"
+        },
+        {
+          "line": 581,
+          "declaration": "effectiveFTC_definiteIntegralEqualsEndpoint_of_endpointAgreement"
+        },
+        {
+          "line": 603,
+          "declaration": "effectiveFTC_definiteIntegralEqualsEndpoint_of_stageSchedule"
+        },
+        {
+          "line": 619,
+          "declaration": "staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint"
+        },
+        {
+          "line": 639,
+          "declaration": "staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint_of_endpointAgreement"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/FiniteComplexPathCertificate.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 92,
+          "declaration": "PolygonalLeftSumIntegralOverlapCertificate"
+        },
+        {
+          "line": 107,
+          "declaration": "PolygonalLeftSumIntegralPositiveStageAgreement"
+        },
+        {
+          "line": 119,
+          "declaration": "constantPolygonalLeftSumIntegralPositiveStageAgreement"
+        },
+        {
+          "line": 135,
+          "declaration": "PolygonalLeftSumIntegralOverlapCertificate.of_stage_eq_point"
+        },
+        {
+          "line": 156,
+          "declaration": "PolygonalLeftSumIntegralOverlapCertificate.leftRaw"
+        },
+        {
+          "line": 164,
+          "declaration": "PolygonalLeftSumIntegralOverlapCertificate.intervalRaw"
+        },
+        {
+          "line": 172,
+          "declaration": "PolygonalLeftSumIntegralOverlapCertificate.leftRaw_valid"
+        },
+        {
+          "line": 181,
+          "declaration": "PolygonalLeftSumIntegralOverlapCertificate.intervalRaw_valid"
+        },
+        {
+          "line": 190,
+          "declaration": "PolygonalLeftSumIntegralOverlapCertificate.equiv"
+        },
+        {
+          "line": 202,
+          "declaration": "PolygonalLeftSumIntegralOverlapCertificate.equiv_of_interval_anchor"
+        },
+        {
+          "line": 215,
+          "declaration": "constantClosedPolygonalLeftSumIntegralOverlapCertificate"
+        },
+        {
+          "line": 233,
+          "declaration": "constantPolygonalIntegralCertificate"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/FiniteFTCIntervalRegular.lean",
+      "role": "enclosure",
+      "declarations": [
+        {
+          "line": 20,
+          "declaration": "IntervalRegularIntegralCertificate"
+        },
+        {
+          "line": 45,
+          "declaration": "exactRat_constant_darbouxStage_nested"
+        },
+        {
+          "line": 449,
+          "declaration": "exactRat_affine_darbouxStage_nested"
+        },
+        {
+          "line": 462,
+          "declaration": "exactRat_affine_integral_certificate"
+        },
+        {
+          "line": 473,
+          "declaration": "exactRat_affine_integral_raw_eq_ofRat"
+        },
+        {
+          "line": 486,
+          "declaration": "exactRat_affine_integral_raw_valid"
+        },
+        {
+          "line": 492,
+          "declaration": "exactRat_affine_integral_raw_equiv_ofRat"
+        },
+        {
+          "line": 596,
+          "declaration": "exactRat_square_darbouxStage_nested_unit"
+        },
+        {
+          "line": 654,
+          "declaration": "exactRat_square_integral_certificate"
+        },
+        {
+          "line": 662,
+          "declaration": "exactRat_square_integral_raw_valid"
+        },
+        {
+          "line": 668,
+          "declaration": "stableSquare_integral_certificate"
+        },
+        {
+          "line": 677,
+          "declaration": "stableSquare_integral_raw_valid"
+        },
+        {
+          "line": 867,
+          "declaration": "exactRat_square_integral_raw_equiv_one_third"
+        },
+        {
+          "line": 923,
+          "declaration": "exactRat_square_integral_raw_equiv_square_endpoint"
+        },
+        {
+          "line": 971,
+          "declaration": "stableSquare_integral_raw_equiv_one_third"
+        },
+        {
+          "line": 1086,
+          "declaration": "exactRat_cube_darbouxStage_nested_unit"
+        },
+        {
+          "line": 1335,
+          "declaration": "exactRat_pow_darbouxStage_nested_unit"
+        },
+        {
+          "line": 1347,
+          "declaration": "exactRat_pow_nondecreasingDarbouxStage_stage_independent"
+        },
+        {
+          "line": 1355,
+          "declaration": "exactRat_pow_integral_certificate"
+        },
+        {
+          "line": 1386,
+          "declaration": "exactRat_zero_integral_raw_equiv_one"
+        },
+        {
+          "line": 1425,
+          "declaration": "exactRat_one_integral_raw_equiv_half"
+        },
+        {
+          "line": 1495,
+          "declaration": "exactRat_pow_integral_raw_valid"
+        },
+        {
+          "line": 1548,
+          "declaration": "exactRat_pow_integral_raw_compute_width"
+        },
+        {
+          "line": 1982,
+          "declaration": "exactRat_pow_integral_raw_equiv_one_div_succ"
+        },
+        {
+          "line": 2051,
+          "declaration": "exactRat_pow_integral_raw_equiv_pow_endpoint"
+        },
+        {
+          "line": 2148,
+          "declaration": "exactRat_cube_integral_certificate"
+        },
+        {
+          "line": 2156,
+          "declaration": "exactRat_cube_integral_raw_valid"
+        },
+        {
+          "line": 2162,
+          "declaration": "stableCube_integral_certificate"
+        },
+        {
+          "line": 2171,
+          "declaration": "stableCube_integral_raw_valid"
+        },
+        {
+          "line": 2358,
+          "declaration": "exactRat_cube_integral_raw_equiv_one_fourth"
+        },
+        {
+          "line": 2668,
+          "declaration": "squareIntegralPrimitiveRaw"
+        },
+        {
+          "line": 2671,
+          "declaration": "squareIntegralDerivativeRaw"
+        },
+        {
+          "line": 2692,
+          "declaration": "squareIntegralPartitionOf"
+        },
+        {
+          "line": 2696,
+          "declaration": "squareIntegralBound"
+        },
+        {
+          "line": 2700,
+          "declaration": "squareIntegralBound_width"
+        },
+        {
+          "line": 2722,
+          "declaration": "squareIntegralDerivativeBound"
+        },
+        {
+          "line": 2745,
+          "declaration": "squareIntegralEffectiveFTCData"
+        },
+        {
+          "line": 2882,
+          "declaration": "squareIntegralEffectiveFTC_equiv_endpoint"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/FiniteGaussianIntegral.lean",
+      "role": "finite",
+      "declarations": [
+        {
+          "line": 16,
+          "declaration": "gaussianEvenIntegralPrefix"
+        },
+        {
+          "line": 22,
+          "declaration": "gaussianEvenIntegralPrefix_zero"
+        },
+        {
+          "line": 29,
+          "declaration": "gaussianEvenIntegralPrefix_succ"
+        },
+        {
+          "line": 38,
+          "declaration": "gaussianEvenIntegralPrefix_term_difference"
+        },
+        {
+          "line": 46,
+          "declaration": "gaussianEvenIntegralTerm"
+        },
+        {
+          "line": 54,
+          "declaration": "gaussianEvenIntegralAlternatingRaw"
+        },
+        {
+          "line": 65,
+          "declaration": "gaussianEvenIntegralAlternatingRaw_valid"
+        },
+        {
+          "line": 77,
+          "declaration": "gaussianEvenIntegralTerm_abs_le_factorialTailTerm"
+        },
+        {
+          "line": 187,
+          "declaration": "gaussianEvenIntegralTerm_abs_eq_scaled_factorialTailTerm"
+        },
+        {
+          "line": 230,
+          "declaration": "gaussianEvenIntegralTerm_abs_decreasing"
+        },
+        {
+          "line": 301,
+          "declaration": "gaussianEvenIntegralTerm_abs_shrinks_unit_radius"
+        },
+        {
+          "line": 412,
+          "declaration": "gaussianEvenIntegralUnitRadiusAlternatingRaw"
+        },
+        {
+          "line": 419,
+          "declaration": "gaussianEvenIntegralUnitRadiusAlternatingRaw_valid"
+        },
+        {
+          "line": 425,
+          "declaration": "gaussianEvenIntegralTailMajorant"
+        },
+        {
+          "line": 434,
+          "declaration": "gaussianEvenIntegralTailMajorant_le_factorialTailPartial"
+        },
+        {
+          "line": 455,
+          "declaration": "gaussianEvenIntegralUnitRadiusStage"
+        },
+        {
+          "line": 465,
+          "declaration": "gaussianEvenIntegralTailMajorant_unit_radius_le_eps"
+        },
+        {
+          "line": 503,
+          "declaration": "gaussianEvenIntegralPrefix_succ_eq_term"
+        },
+        {
+          "line": 510,
+          "declaration": "gaussianEvenIntegralPrefix_remainder_abs_le"
+        },
+        {
+          "line": 545,
+          "declaration": "gaussianEvenIntegralPrefix_interval"
+        },
+        {
+          "line": 552,
+          "declaration": "gaussianEvenIntegralPrefix_interval_contains"
+        },
+        {
+          "line": 572,
+          "declaration": "gaussianEvenIntegralPrefix_interval_width"
+        },
+        {
+          "line": 579,
+          "declaration": "gaussianEvenIntegralPrefix_interval_ordered"
+        },
+        {
+          "line": 593,
+          "declaration": "gaussianEvenIntegralTailMajorant_mono"
+        },
+        {
+          "line": 616,
+          "declaration": "gaussianEvenIntegralPrefix_interval_contains_future"
+        },
+        {
+          "line": 625,
+          "declaration": "gaussianEvenIntegralPrefix_stage_four"
+        },
+        {
+          "line": 629,
+          "declaration": "gaussianEvenIntegralPrefix_stage_six"
+        },
+        {
+          "line": 633,
+          "declaration": "gaussianEvenIntegralPrefix_stage_eight"
+        },
+        {
+          "line": 639,
+          "declaration": "gaussianEvenIntegralPrefix_stage_ten"
+        },
+        {
+          "line": 643,
+          "declaration": "gaussianEvenIntegralPrefix_stage_twelve"
+        },
+        {
+          "line": 648,
+          "declaration": "gaussianEvenIntegralPrefix_stage_twelve_minus_ten"
+        },
+        {
+          "line": 661,
+          "declaration": "gaussianTaylorProductIntegralSum"
+        },
+        {
+          "line": 667,
+          "declaration": "gaussianTaylorProductIntegralSum_factorized"
+        },
+        {
+          "line": 681,
+          "declaration": "gaussianTaylorProductIntegralSum_stage_four_unit_square"
+        },
+        {
+          "line": 691,
+          "declaration": "gaussianTaylorProductIntegralNestedSum3D"
+        },
+        {
+          "line": 699,
+          "declaration": "gaussianTaylorProductIntegralNestedSum3D_factorized"
+        },
+        {
+          "line": 714,
+          "declaration": "gaussianTaylorProductIntegralNestedSum3D_stage_four_unit_cube"
+        },
+        {
+          "line": 727,
+          "declaration": "gaussianTaylorProductIntegralNestedSum"
+        },
+        {
+          "line": 732,
+          "declaration": "gaussianTaylorProductIntegralNestedSum_factorized"
+        },
+        {
+          "line": 742,
+          "declaration": "gaussianTaylorProductIntegralNestedSum_nonneg"
+        },
+        {
+          "line": 755,
+          "declaration": "gaussianEvenIntegralPrefix_stage_six_minus_four"
+        },
+        {
+          "line": 762,
+          "declaration": "gaussianEvenIntegralPrefix_stage_four_nonnegative"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/FiniteNBallVolume.lean",
+      "role": "finite",
+      "declarations": [
+        {
+          "line": 684,
+          "declaration": "finiteProductIntegralNestedSum"
+        },
+        {
+          "line": 694,
+          "declaration": "finiteProductIntegralSum"
+        },
+        {
+          "line": 706,
+          "declaration": "finiteProductIntegralFactorProduct"
+        },
+        {
+          "line": 715,
+          "declaration": "finiteProductIntegralSum_eq_factorProduct"
+        },
+        {
+          "line": 730,
+          "declaration": "finiteProductIntegralNestedSum_factorized"
+        },
+        {
+          "line": 751,
+          "declaration": "finiteProductIntegralSum2D"
+        },
+        {
+          "line": 758,
+          "declaration": "finiteProductIntegralSum2D_factorized"
+        },
+        {
+          "line": 786,
+          "declaration": "finiteProductIntegralSum2D_nonneg"
+        },
+        {
+          "line": 808,
+          "declaration": "finiteProductIntegralNestedSum_nonneg"
+        },
+        {
+          "line": 845,
+          "declaration": "repeatIntegralAxis"
+        },
+        {
+          "line": 849,
+          "declaration": "finiteProductIntegralFactorProduct_repeat_axis"
+        },
+        {
+          "line": 864,
+          "declaration": "finiteProductIntegralNestedSum_repeat_axis_factorized"
+        },
+        {
+          "line": 878,
+          "declaration": "finiteProductIntegralSum2D_weighted_stage"
+        },
+        {
+          "line": 885,
+          "declaration": "finiteProductIntegralNestedSum_two_factor"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/FinitePiecewiseAbsoluteValue.lean",
+      "role": "comparison",
+      "declarations": [
+        {
+          "line": 93,
+          "declaration": "absoluteValuePiecewise_integral_equiv_one"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/FinitePiecewiseRectangles.lean",
+      "role": "enclosure",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/FinitePolynomialCalculus.lean",
+      "role": "finite",
+      "declarations": [
+        {
+          "line": 981,
+          "declaration": "finiteMonomialIntegralSum"
+        },
+        {
+          "line": 991,
+          "declaration": "integratedTaylorPrefix_endpointDifference_eq_finiteMonomialIntegralSum"
+        },
+        {
+          "line": 1004,
+          "declaration": "finiteMonomialIntegralSum_succ"
+        },
+        {
+          "line": 1017,
+          "declaration": "finiteMonomialIntegralSum_add"
+        },
+        {
+          "line": 1032,
+          "declaration": "finiteMonomialIntegralSum_scale"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/FiniteQuadratureMeanValue.lean",
+      "role": "finite",
+      "declarations": [
+        {
+          "line": 17,
+          "declaration": "finiteQuadrature_average_between_bounds"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/FiniteSecantIntegralOrder.lean",
+      "role": "finite",
+      "declarations": [
+        {
+          "line": 56,
+          "declaration": "integral_lower"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/FiniteSineIntegral.lean",
+      "role": "finite",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/FiniteSinePrefixFTC.lean",
+      "role": "comparison",
+      "declarations": [
+        {
+          "line": 31,
+          "declaration": "sineTaylorPrefixOneIntegralCertificate"
+        },
+        {
+          "line": 41,
+          "declaration": "sineTaylorPrefixOneIntegralRaw"
+        },
+        {
+          "line": 44,
+          "declaration": "sineTaylorPrefixOneIntegralRaw_valid"
+        },
+        {
+          "line": 48,
+          "declaration": "sineTaylorPrefixOneIntegralRaw_equiv_one_eighth"
+        },
+        {
+          "line": 469,
+          "declaration": "sineTaylorPrefixThreeEffectiveFTC_boundedIntegral_equiv_endpointDifference"
+        },
+        {
+          "line": 1118,
+          "declaration": "sineTaylorPrefixThreeSquareEffectiveFTC_boundedIntegral_equiv_endpointDifference"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/FirstYearCalculus.lean",
+      "role": "support",
+      "declarations": [
+        {
+          "line": 129,
+          "declaration": "exp_integral_inverse_consistency"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/GeometryFoundation.lean",
+      "role": "support",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/IntegralEnclosure.lean",
+      "role": "enclosure",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/IntegralEnclosureExamples.lean",
+      "role": "enclosure",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/IntegralFoundation.lean",
+      "role": "support",
+      "declarations": [
+        {
+          "line": 37,
+          "declaration": "nonincreasingDarbouxSchedule_precision_witness"
+        },
+        {
+          "line": 52,
+          "declaration": "monotoneDarbouxSchedule_precision_witness"
+        },
+        {
+          "line": 68,
+          "declaration": "effectiveIntegral_add_of_endpoint_additive"
+        },
+        {
+          "line": 91,
+          "declaration": "effectiveIntegral_scaleRat_of_endpoint_scaleRat"
+        },
+        {
+          "line": 111,
+          "declaration": "effectiveIntegral_le_of_endpoint_le"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/IntegralIdentities.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 104,
+          "declaration": "integral_equiv_of_stageSchedule"
+        },
+        {
+          "line": 182,
+          "declaration": "effectiveFTCStabilizedIntegralFor"
+        },
+        {
+          "line": 200,
+          "declaration": "effectiveFTCStabilizedIntegralFor_valid"
+        },
+        {
+          "line": 220,
+          "declaration": "effectiveFTCStabilizedIntegralFor_equiv_endpointDifference"
+        },
+        {
+          "line": 325,
+          "declaration": "integral_valid"
+        },
+        {
+          "line": 352,
+          "declaration": "integral_equiv_of_endpoint_anchor"
+        },
+        {
+          "line": 393,
+          "declaration": "integral_equiv_integral"
+        },
+        {
+          "line": 412,
+          "declaration": "integral_add_equiv_of_endpoint_additive"
+        },
+        {
+          "line": 468,
+          "declaration": "integral_equiv_add_of_endpoint_add"
+        },
+        {
+          "line": 493,
+          "declaration": "integral_scaleRat_equiv_of_endpoint_scaleRat"
+        },
+        {
+          "line": 537,
+          "declaration": "integral_le_of_endpoint_le"
+        },
+        {
+          "line": 594,
+          "declaration": "left_integral_valid"
+        },
+        {
+          "line": 600,
+          "declaration": "right_integral_valid"
+        },
+        {
+          "line": 617,
+          "declaration": "left_integral_equiv_endpoint_sub_right"
+        },
+        {
+          "line": 657,
+          "declaration": "right_integral_equiv_endpoint_sub_left"
+        },
+        {
+          "line": 738,
+          "declaration": "integral_valid"
+        },
+        {
+          "line": 763,
+          "declaration": "integral_add_equiv_of_endpoint_additive"
+        },
+        {
+          "line": 787,
+          "declaration": "integral_equiv_add_of_endpoint_add"
+        },
+        {
+          "line": 811,
+          "declaration": "integral_scaleRat_equiv_of_endpoint_scaleRat"
+        },
+        {
+          "line": 832,
+          "declaration": "integral_le_of_endpoint_le"
+        },
+        {
+          "line": 869,
+          "declaration": "integral_valid"
+        },
+        {
+          "line": 960,
+          "declaration": "integral_equiv_integral"
+        },
+        {
+          "line": 974,
+          "declaration": "integral_add_equiv_of_endpoint_additive"
+        },
+        {
+          "line": 1001,
+          "declaration": "integral_equiv_add_of_endpoint_add"
+        },
+        {
+          "line": 1028,
+          "declaration": "integral_scaleRat_equiv_of_endpoint_scaleRat"
+        },
+        {
+          "line": 1051,
+          "declaration": "integral_le_of_endpoint_le"
+        },
+        {
+          "line": 1423,
+          "declaration": "constant_integral_equiv_endpoint"
+        },
+        {
+          "line": 1573,
+          "declaration": "arctanIntegralRectangleConstruction"
+        },
+        {
+          "line": 1585,
+          "declaration": "arctanIntegralRectangleFor"
+        },
+        {
+          "line": 1590,
+          "declaration": "arctanIntegralRectangleFor_valid"
+        },
+        {
+          "line": 1596,
+          "declaration": "arctanIntegralRectangleFor_compute_eq"
+        },
+        {
+          "line": 1601,
+          "declaration": "arctanIntegralRectangleFor_equiv_raw"
+        },
+        {
+          "line": 1641,
+          "declaration": "arctanIntegralRectangleMonotoneConstruction"
+        },
+        {
+          "line": 1649,
+          "declaration": "arctanIntegralRectangleMonotoneFor"
+        },
+        {
+          "line": 1654,
+          "declaration": "arctanIntegralRectangleMonotoneFor_valid"
+        },
+        {
+          "line": 1660,
+          "declaration": "arctanIntegralRectangleMonotoneFor_compute_eq"
+        },
+        {
+          "line": 1668,
+          "declaration": "arctanIntegralRectangleMonotoneFor_equiv_rectangleFor"
+        },
+        {
+          "line": 1677,
+          "declaration": "arctanIntegralRectangleFor_equiv_arctanGeom"
+        },
+        {
+          "line": 1693,
+          "declaration": "arctanIntegralRectangleMonotoneFor_equiv_arctanGeom"
+        },
+        {
+          "line": 1712,
+          "declaration": "arctanIntegralRectangleFunctionRaw"
+        },
+        {
+          "line": 1717,
+          "declaration": "arctanIntegralRectangleRepresentation"
+        },
+        {
+          "line": 1722,
+          "declaration": "arctanIntegralRectangleFunctionRaw_valid"
+        },
+        {
+          "line": 1734,
+          "declaration": "arctanIntegralRectangleOnUnit"
+        },
+        {
+          "line": 1751,
+          "declaration": "arctanIntegralRectangleTangentChartOnHalf"
+        },
+        {
+          "line": 1781,
+          "declaration": "arctanIntegralRectangleTangentChartOnHalf_compute"
+        },
+        {
+          "line": 1964,
+          "declaration": "arctanIntegralRectangleTangentChartOnHalf_forwardDerivativeAtZero"
+        },
+        {
+          "line": 2100,
+          "declaration": "arctanIntegralRectangleOnUnit_forwardDerivativeAt"
+        },
+        {
+          "line": 2406,
+          "declaration": "arctanIntegralRectangleOnUnit_forwardDerivativeAtZero"
+        },
+        {
+          "line": 2553,
+          "declaration": "arctanIntegralRectangleOnUnit_hasDerivative"
+        },
+        {
+          "line": 2764,
+          "declaration": "arctanIntegralRectangleOnUnit_nondecreasing"
+        },
+        {
+          "line": 2777,
+          "declaration": "arctanIntegralRectangleOnUnit_monotone"
+        },
+        {
+          "line": 2787,
+          "declaration": "arctanIntegralRectangleOnUnit_effectiveInverseSeparation"
+        },
+        {
+          "line": 2807,
+          "declaration": "arctanIntegralRectangleOnUnit_near_of_qabs_le"
+        },
+        {
+          "line": 2921,
+          "declaration": "arctanIntegralRectangleOnUnit_epsilonDeltaContinuous"
+        },
+        {
+          "line": 2937,
+          "declaration": "arctanIntegralRectangleOnUnit_effectiveModulus"
+        },
+        {
+          "line": 2999,
+          "declaration": "arctanIntegralRectangleOnUnit_bounds"
+        },
+        {
+          "line": 3020,
+          "declaration": "coordinateTimesArctanIntegralRectangleOnUnit"
+        },
+        {
+          "line": 3028,
+          "declaration": "coordinateTimesArctanIntegralRectangleOnUnit_compute"
+        },
+        {
+          "line": 3041,
+          "declaration": "coordinateTimesArctanIntegralRectangleOnUnit_compute_of_nonneg"
+        },
+        {
+          "line": 3064,
+          "declaration": "coordinateTimesArctanIntegralRectangleOnUnit_nondecreasing"
+        },
+        {
+          "line": 3088,
+          "declaration": "coordinateTimesArctanIntegralRectangleOnUnit_monotone"
+        },
+        {
+          "line": 3095,
+          "declaration": "coordinateTimesArctanIntegralRectangleOnUnit_toRealFunRaw_compute_zero"
+        },
+        {
+          "line": 3113,
+          "declaration": "coordinateTimesArctanIntegralRectangleOnUnit_toRealFunRaw_compute_one"
+        },
+        {
+          "line": 3133,
+          "declaration": "coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_compute_eq"
+        },
+        {
+          "line": 3157,
+          "declaration": "coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid"
+        },
+        {
+          "line": 3173,
+          "declaration": "coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_equiv_arctanGeom_one"
+        },
+        {
+          "line": 3214,
+          "declaration": "coordinateTimesArctanIntegralRectangleOnUnit_zero_differenceQuotient_compute_eq"
+        },
+        {
+          "line": 3257,
+          "declaration": "coordinateTimesArctanIntegralRectangleDerivativeRaw"
+        },
+        {
+          "line": 3265,
+          "declaration": "coordinateTimesArctanIntegralRectangleDerivativeRaw_valid"
+        },
+        {
+          "line": 3274,
+          "declaration": "coordinateTimesArctanIntegralRectangleDerivativeRaw_compute"
+        },
+        {
+          "line": 3297,
+          "declaration": "coordinateTimesArctanIntegralRectangleDerivativeOnUnit"
+        },
+        {
+          "line": 3314,
+          "declaration": "coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute"
+        },
+        {
+          "line": 3331,
+          "declaration": "coordinateTimesArctanIntegralRectangleDerivativeOnUnit_range"
+        },
+        {
+          "line": 3378,
+          "declaration": "coordinateTimesArctanIntegralRectangleDerivativeOnUnit_nonneg_bounded"
+        },
+        {
+          "line": 3396,
+          "declaration": "coordinate_integralKernel_nondecreasing_on_unit"
+        },
+        {
+          "line": 3460,
+          "declaration": "coordinate_integralKernel_lipschitz_on_unit"
+        },
+        {
+          "line": 3527,
+          "declaration": "coordinateTimesArctanIntegralRectangleDerivativeOnUnit_nondecreasing"
+        },
+        {
+          "line": 3552,
+          "declaration": "coordinateTimesArctanIntegralRectangleDerivativeOnUnit_monotone"
+        },
+        {
+          "line": 3561,
+          "declaration": "coordinateTimesArctanIntegralRectangleDerivativeOnUnit_near_of_qabs_le"
+        },
+        {
+          "line": 3696,
+          "declaration": "coordinateTimesArctanIntegralRectangleDerivativeOnUnit_epsilonDeltaContinuous"
+        },
+        {
+          "line": 3739,
+          "declaration": "coordinateTimesArctanIntegralRectangleDerivativeOnUnit_effectiveModulus"
+        },
+        {
+          "line": 4025,
+          "declaration": "coordinateTimesArctanIntegralRectangleOnUnit_forwardDerivativeAt"
+        },
+        {
+          "line": 4125,
+          "declaration": "coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_enclosure"
+        },
+        {
+          "line": 4180,
+          "declaration": "coordinateTimesArctanIntegralRectangleOnUnit_forward_common_secant_value_enclosure"
+        },
+        {
+          "line": 4275,
+          "declaration": "coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_explicit_uniform_range_enclosure"
+        },
+        {
+          "line": 4457,
+          "declaration": "coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_range_enclosure"
+        },
+        {
+          "line": 4534,
+          "declaration": "coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_uniform_range_enclosure"
+        },
+        {
+          "line": 4974,
+          "declaration": "coordinateTimesArctanForwardFTCRiemann_width_le"
+        },
+        {
+          "line": 5103,
+          "declaration": "coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative"
+        },
+        {
+          "line": 5782,
+          "declaration": "coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_equiv_rectangleAtOne"
+        },
+        {
+          "line": 5823,
+          "declaration": "coordinateTimesArctanForwardTwoStageMonotoneIntegral"
+        },
+        {
+          "line": 5827,
+          "declaration": "coordinateTimesArctanForwardTwoStageMonotoneIntegral_valid"
+        },
+        {
+          "line": 5888,
+          "declaration": "coordinateTimesArctanForwardTwoStageMonotoneIntegral_equiv_arctanGeom_one"
+        },
+        {
+          "line": 5909,
+          "declaration": "four_coordinateTimesArctanForwardTwoStageMonotoneIntegral_equiv_four_arctanGeom_one"
+        },
+        {
+          "line": 5918,
+          "declaration": "coordinateTimesArctanIntegralRectangleOnUnit_forwardDerivativeAtZero"
+        },
+        {
+          "line": 6009,
+          "declaration": "arctanIntegralRectangleMeshBoxes"
+        },
+        {
+          "line": 6024,
+          "declaration": "arctanIntegralRectangleMeshBoxes_weaklyOrdered"
+        },
+        {
+          "line": 6035,
+          "declaration": "arctanIntegralRectangleMeshBoxes_width_le_eps"
+        },
+        {
+          "line": 6049,
+          "declaration": "arctanIntegralRectangleMeshSamples"
+        },
+        {
+          "line": 6055,
+          "declaration": "arctanIntegralRectangleMeshSamples_mem"
+        },
+        {
+          "line": 6068,
+          "declaration": "arctanIntegralRectangleMeshSamples_sub_lower_le_boxWidth"
+        },
+        {
+          "line": 6078,
+          "declaration": "arctanIntegralRectangleMeshSamples_upper_sub_le_boxWidth"
+        },
+        {
+          "line": 6088,
+          "declaration": "arctanIntegralRectangleMeshSamples_sub_lower_le_eps"
+        },
+        {
+          "line": 6102,
+          "declaration": "arctanIntegralRectangleMeshSamples_upper_sub_le_eps"
+        },
+        {
+          "line": 6115,
+          "declaration": "arctanIntegralRectangleMeshSamples_step_nonnegative"
+        },
+        {
+          "line": 6124,
+          "declaration": "arctanIntegralRectangleMeshSamples_zero"
+        },
+        {
+          "line": 6138,
+          "declaration": "arctanIntegralRectangleMeshSamples_endpoint_le_one"
+        },
+        {
+          "line": 6158,
+          "declaration": "arctanIntegralRectangleMeshSamples_endpointDifference_le_one"
+        },
+        {
+          "line": 6169,
+          "declaration": "arctanIntegralRectangleMeshSamples_cornerBound"
+        },
+        {
+          "line": 6182,
+          "declaration": "arctanIntegralRectangleMeshSamples_cornerBound_le_one_div"
+        },
+        {
+          "line": 6206,
+          "declaration": "arctanIntegralRectangleMeshSamples_cornerBound_le_eps"
+        },
+        {
+          "line": 6223,
+          "declaration": "arctanIntegralRectangleMeshIntegrationByPartsSum"
+        },
+        {
+          "line": 6235,
+          "declaration": "arctanIntegralRectangleMeshIntegrationByParts_finite_identity"
+        },
+        {
+          "line": 6261,
+          "declaration": "arctanIntegralRectangleMeshIntegrationByParts_endpoint_bracket"
+        },
+        {
+          "line": 6294,
+          "declaration": "arctanIntegralRectangleMeshIntegrationByParts_endpoint_bracket_le_eps"
+        },
+        {
+          "line": 6480,
+          "declaration": "arctanIntegralRectangleFunctionAgreement"
+        },
+        {
+          "line": 6491,
+          "declaration": "arctanIntegralRectangleMonotoneFunctionRaw"
+        },
+        {
+          "line": 6498,
+          "declaration": "arctanIntegralRectangleMonotoneRepresentation"
+        },
+        {
+          "line": 6503,
+          "declaration": "arctanIntegralRectangleMonotoneFunctionRaw_valid"
+        },
+        {
+          "line": 6511,
+          "declaration": "arctanIntegralRectangleMonotoneFunctionAgreement"
+        },
+        {
+          "line": 6523,
+          "declaration": "arctanIntegralUnit"
+        },
+        {
+          "line": 6528,
+          "declaration": "ArctanIntegralUnitComputes"
+        },
+        {
+          "line": 6534,
+          "declaration": "ArctanIntegralUnitData"
+        },
+        {
+          "line": 6539,
+          "declaration": "arctanIntegralUnitFunctionRaw"
+        },
+        {
+          "line": 6549,
+          "declaration": "arctanIntegralUnitRepresentation"
+        },
+        {
+          "line": 6555,
+          "declaration": "arctanIntegralUnitFunctionRaw_valid"
+        },
+        {
+          "line": 6565,
+          "declaration": "ArctanIntegralUnitGeomFunctionAgreement"
+        },
+        {
+          "line": 6571,
+          "declaration": "arctanIntegralUnit_equiv_arctanGeom_of_functionAgreement"
+        },
+        {
+          "line": 6585,
+          "declaration": "arctanIntegralUnitComputes_arctanGeom_of_functionAgreement"
+        },
+        {
+          "line": 6595,
+          "declaration": "arctanIntegralUnitGeomAgreement_one_of_functionAgreement"
+        },
+        {
+          "line": 6606,
+          "declaration": "arctanIntegralRectangleUnitData"
+        },
+        {
+          "line": 6609,
+          "declaration": "arctanIntegralRectangleUnit_equiv_arctanGeom"
+        },
+        {
+          "line": 6619,
+          "declaration": "arctanIntegralRectangleUnitFunctionAgreement"
+        },
+        {
+          "line": 6628,
+          "declaration": "arctanIntegralRectangleUnitComputes"
+        },
+        {
+          "line": 6635,
+          "declaration": "arctanIntegralRectangleUnitComputes_one"
+        },
+        {
+          "line": 6644,
+          "declaration": "arctanIntegralRectangleMonotoneUnitData"
+        },
+        {
+          "line": 6648,
+          "declaration": "arctanIntegralRectangleMonotoneUnit_equiv_arctanGeom"
+        },
+        {
+          "line": 6659,
+          "declaration": "arctanIntegralRectangleMonotoneUnitFunctionAgreement"
+        },
+        {
+          "line": 6668,
+          "declaration": "arctanIntegralRectangleMonotoneUnitComputes"
+        },
+        {
+          "line": 6675,
+          "declaration": "arctanIntegralRectangleMonotoneUnitComputes_one"
+        },
+        {
+          "line": 7012,
+          "declaration": "arctanIntegralRectangleConstructionAtOne"
+        },
+        {
+          "line": 7022,
+          "declaration": "arctanIntegralRectangleForAtOne"
+        },
+        {
+          "line": 7026,
+          "declaration": "arctanIntegralRectangleForAtOne_valid"
+        },
+        {
+          "line": 7031,
+          "declaration": "arctanIntegralRectangleForAtOne_compute_eq"
+        },
+        {
+          "line": 7037,
+          "declaration": "arctanIntegralRectangleForAtOne_width_le_four_div_succ"
+        },
+        {
+          "line": 7043,
+          "declaration": "arctanIntegralRectangleForAtOne_equiv_raw"
+        },
+        {
+          "line": 7069,
+          "declaration": "arctanIntegralRectangleMonotoneConstructionAtOne"
+        },
+        {
+          "line": 7075,
+          "declaration": "arctanIntegralRectangleMonotoneForAtOne"
+        },
+        {
+          "line": 7079,
+          "declaration": "arctanIntegralRectangleMonotoneForAtOne_valid"
+        },
+        {
+          "line": 7084,
+          "declaration": "arctanIntegralRectangleMonotoneForAtOne_compute_eq"
+        },
+        {
+          "line": 7091,
+          "declaration": "arctanIntegralRectangleMonotoneForAtOne_equiv_rectangleForAtOne"
+        },
+        {
+          "line": 7100,
+          "declaration": "arctanIntegralRectangleForAtOne_equiv_arctanGeom_one"
+        },
+        {
+          "line": 7229,
+          "declaration": "ArctanIntegralConstruction"
+        },
+        {
+          "line": 7233,
+          "declaration": "arctanIntegral"
+        },
+        {
+          "line": 7238,
+          "declaration": "arctanIntegral_valid"
+        },
+        {
+          "line": 7246,
+          "declaration": "arctanIntegral_compute_width_zero"
+        },
+        {
+          "line": 7262,
+          "declaration": "arctanIntegral_stages_constant"
+        },
+        {
+          "line": 7272,
+          "declaration": "ArctanIntegralComputes"
+        },
+        {
+          "line": 7279,
+          "declaration": "ArctanIntegralGeomAgreement"
+        },
+        {
+          "line": 7288,
+          "declaration": "ArctanIntegralData"
+        },
+        {
+          "line": 7291,
+          "declaration": "arctanIntegralFunctionRaw"
+        },
+        {
+          "line": 7297,
+          "declaration": "arctanIntegralRepresentation"
+        },
+        {
+          "line": 7303,
+          "declaration": "ArctanIntegralGeomFunctionAgreement"
+        },
+        {
+          "line": 7309,
+          "declaration": "arctanIntegral_equiv_arctanGeom_of_functionAgreement"
+        },
+        {
+          "line": 7322,
+          "declaration": "arctanIntegralGeomAgreement_one_of_functionAgreement"
+        },
+        {
+          "line": 7331,
+          "declaration": "PiFromArctanIntegral"
+        },
+        {
+          "line": 7335,
+          "declaration": "PiFromArctanIntegralAgrees"
+        },
+        {
+          "line": 7342,
+          "declaration": "ArctanIntegralPiRoute"
+        },
+        {
+          "line": 7367,
+          "declaration": "cauchyProjectiveFoldDensity_eq_two_integralKernel"
+        },
+        {
+          "line": 7386,
+          "declaration": "cauchyIntegralKernel_reciprocal_pullback"
+        },
+        {
+          "line": 7480,
+          "declaration": "cauchyReciprocalIntegralSum_overlaps"
+        },
+        {
+          "line": 7558,
+          "declaration": "cauchyReciprocalReversedIntegralSum_eq"
+        },
+        {
+          "line": 7595,
+          "declaration": "cauchyReciprocalReversedIntegralSum_overlaps"
+        },
+        {
+          "line": 7829,
+          "declaration": "cauchyIntegralCellWidth_le_two_square"
+        },
+        {
+          "line": 7848,
+          "declaration": "cauchyIntegralSumInterval_width_le_two_squareSum"
+        },
+        {
+          "line": 7885,
+          "declaration": "cauchyTailDyadicIntervals_integral_width_le_dyadic"
+        },
+        {
+          "line": 7920,
+          "declaration": "cauchyIntegralSumInterval_width_append"
+        },
+        {
+          "line": 7932,
+          "declaration": "cauchyIntegralUpperSum_le_span"
+        },
+        {
+          "line": 8102,
+          "declaration": "cauchyReciprocalTailDyadicIntervals_integral_width_le"
+        },
+        {
+          "line": 8196,
+          "declaration": "cauchySplitDyadicIntervals_integral_width_le"
+        },
+        {
+          "line": 8361,
+          "declaration": "compactIntegral"
+        },
+        {
+          "line": 8367,
+          "declaration": "compactIntegral_valid"
+        },
+        {
+          "line": 8374,
+          "declaration": "fullLineIntegral"
+        },
+        {
+          "line": 8379,
+          "declaration": "fullLineIntegral_valid"
+        },
+        {
+          "line": 8398,
+          "declaration": "integralKernel_even"
+        },
+        {
+          "line": 8438,
+          "declaration": "cauchyFullLineIntegral"
+        },
+        {
+          "line": 8441,
+          "declaration": "cauchyFullLineIntegral_valid"
+        },
+        {
+          "line": 8444,
+          "declaration": "cauchyFullLineIntegral_compute_eq_four_rectangle"
+        },
+        {
+          "line": 8459,
+          "declaration": "cauchyFullLineIntegral_width_le_sixteen_div_succ"
+        },
+        {
+          "line": 8566,
+          "declaration": "symmetricCauchyPiecewiseIntegral"
+        },
+        {
+          "line": 8570,
+          "declaration": "symmetricCauchyPiecewiseIntegral_valid"
+        },
+        {
+          "line": 8578,
+          "declaration": "symmetricCauchyPiecewiseIntegral_equiv_two_rectangle"
+        },
+        {
+          "line": 8614,
+          "declaration": "symmetricCauchyPiecewiseIntegral_compute_width_le_eight_div_succ"
+        },
+        {
+          "line": 8674,
+          "declaration": "piSymmetricCauchyPiecewiseIntegral"
+        },
+        {
+          "line": 8677,
+          "declaration": "piSymmetricCauchyPiecewiseIntegral_valid"
+        },
+        {
+          "line": 8682,
+          "declaration": "piSymmetricCauchyPiecewiseIntegral_compute_width_le_sixteen_div_succ"
+        },
+        {
+          "line": 8732,
+          "declaration": "shiftedCauchyKernel_minus_one_eq_integralKernel"
+        },
+        {
+          "line": 10069,
+          "declaration": "projectiveCompactDyadicCauchyTail_integral_width_le"
+        },
+        {
+          "line": 10199,
+          "declaration": "projectiveCompactDyadicCauchyTail_integral_width_le_dyadic"
+        },
+        {
+          "line": 10500,
+          "declaration": "projectiveCompactDyadicCauchyCore_integral_width_le"
+        },
+        {
+          "line": 10565,
+          "declaration": "projectiveCompactDyadicCauchyAssembly_integral_width_le"
+        },
+        {
+          "line": 11036,
+          "declaration": "projectiveCompact_lipschitzLowerCell_le_integralUpperStep"
+        },
+        {
+          "line": 11078,
+          "declaration": "projectiveCompact_integralLowerStep_le_lipschitzUpperCell"
+        },
+        {
+          "line": 11183,
+          "declaration": "projectiveCompactLipschitzLowerSum_le_integralUpperSum"
+        },
+        {
+          "line": 11209,
+          "declaration": "projectiveCompactIntegralLowerSum_le_lipschitzUpperSum"
+        },
+        {
+          "line": 11237,
+          "declaration": "projectiveCompactLipschitzSum_overlaps_integralSum"
+        },
+        {
+          "line": 11262,
+          "declaration": "projectiveCompactSymmetricIntegralSum"
+        },
+        {
+          "line": 12079,
+          "declaration": "projectiveCompactSymmetricLipschitzSum_overlaps_integralSum"
+        },
+        {
+          "line": 12359,
+          "declaration": "reciprocalQuarticMinusOneUnitLeftRiemann"
+        },
+        {
+          "line": 12362,
+          "declaration": "reciprocalQuarticMinusOneUnitLeftRiemann_eq_finite_sum"
+        },
+        {
+          "line": 14120,
+          "declaration": "reciprocalQuarticMinusOneUnitDyadicIntegral"
+        },
+        {
+          "line": 14124,
+          "declaration": "reciprocalQuarticMinusOneUnitDyadicIntegral_valid"
+        },
+        {
+          "line": 14129,
+          "declaration": "reciprocalQuarticMinusOneUnitDyadicIntegral_compute_eq"
+        },
+        {
+          "line": 14150,
+          "declaration": "reciprocalQuarticMinusOneCompactDyadicIntegral"
+        },
+        {
+          "line": 14155,
+          "declaration": "reciprocalQuarticMinusOneCompactDyadicIntegral_valid"
+        },
+        {
+          "line": 14161,
+          "declaration": "reciprocalQuarticMinusOneCompactDyadicIntegral_compute_eq"
+        },
+        {
+          "line": 14170,
+          "declaration": "reciprocalQuarticMinusOneCompactDyadicIntegral_width"
+        },
+        {
+          "line": 14454,
+          "declaration": "reciprocalQuarticMinusOneCompactDyadicIntegral_equiv_cauchyFullLine"
+        },
+        {
+          "line": 14509,
+          "declaration": "reciprocalQuarticMinusOneCompactIntegral"
+        },
+        {
+          "line": 14515,
+          "declaration": "reciprocalQuarticMinusOneCompactIntegral_valid"
+        },
+        {
+          "line": 14544,
+          "declaration": "projectiveIntegral"
+        },
+        {
+          "line": 14547,
+          "declaration": "projectiveIntegral_valid"
+        },
+        {
+          "line": 14640,
+          "declaration": "reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_integralKernel"
+        },
+        {
+          "line": 14713,
+          "declaration": "AbelianTrigIntegralRepresentations"
+        },
+        {
+          "line": 15904,
+          "declaration": "affineIdentityLipschitz_integral_equiv_half"
+        },
+        {
+          "line": 16034,
+          "declaration": "arctanKernelLipschitzIntegral"
+        },
+        {
+          "line": 16039,
+          "declaration": "arctanKernelLipschitzIntegral_valid"
+        },
+        {
+          "line": 16045,
+          "declaration": "arctanKernelLipschitzIntegral_compute_eq"
+        },
+        {
+          "line": 16049,
+          "declaration": "arctanKernelLipschitzIntegral_width"
+        },
+        {
+          "line": 16057,
+          "declaration": "arctanKernel_rightEndpointSum_eq_integralLowerSum"
+        },
+        {
+          "line": 16100,
+          "declaration": "arctanKernelLipschitzIntegral_equiv_rectangleForAtOne"
+        },
+        {
+          "line": 16112,
+          "declaration": "arctanKernelLipschitzIntegral_equiv_arctanGeom_one"
+        },
+        {
+          "line": 16122,
+          "declaration": "arctanKernelLipschitzIntegral_equiv_halfQuarterTurn"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/IntegrationByPartsPi.lean",
+      "role": "comparison",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/LeibnizPi.lean",
+      "role": "comparison",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/LeibnizPiTaylor.lean",
+      "role": "comparison",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/LeibnizTransmutation.lean",
+      "role": "comparison",
+      "declarations": [
+        {
+          "line": 196,
+          "declaration": "transmutedIntegralRaw"
+        },
+        {
+          "line": 286,
+          "declaration": "transmutedIntegralRaw_compute"
+        },
+        {
+          "line": 298,
+          "declaration": "transmutedIntegralRaw_valid"
+        },
+        {
+          "line": 338,
+          "declaration": "transmutedIntegralRaw_width"
+        },
+        {
+          "line": 434,
+          "declaration": "transmuted_integral_series"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/Logarithm.lean",
+      "role": "comparison",
+      "declarations": [
+        {
+          "line": 454,
+          "declaration": "logTwo_rightRiemann_term_as_oneOverX"
+        },
+        {
+          "line": 994,
+          "declaration": "logTwoSquarePullbackIntegral"
+        },
+        {
+          "line": 1000,
+          "declaration": "logTwoSquarePullbackIntegral_valid"
+        },
+        {
+          "line": 1007,
+          "declaration": "logTwoSquarePullbackIntegral_compute_eq"
+        },
+        {
+          "line": 1015,
+          "declaration": "arctanLogKernelIntegral"
+        },
+        {
+          "line": 1021,
+          "declaration": "arctanLogKernelIntegral_valid"
+        },
+        {
+          "line": 1028,
+          "declaration": "arctanLogKernelIntegral_compute_eq"
+        },
+        {
+          "line": 1037,
+          "declaration": "arctanComplementKernelIntegral"
+        },
+        {
+          "line": 1043,
+          "declaration": "arctanComplementKernelIntegral_valid"
+        },
+        {
+          "line": 1050,
+          "declaration": "arctanComplementKernelIntegral_compute_eq"
+        },
+        {
+          "line": 1087,
+          "declaration": "arctanKernelTriangleCandidate_overlaps_complementKernelIntegral"
+        },
+        {
+          "line": 1106,
+          "declaration": "arctanKernelTriangleCandidate_equiv_complementKernelIntegral"
+        },
+        {
+          "line": 1118,
+          "declaration": "arctanKernelTriangleStabilizationRadius_eq_complementKernelIntegral_width"
+        },
+        {
+          "line": 1127,
+          "declaration": "arctanKernelTriangleStabilizationRadius_covers_complementKernelIntegral"
+        },
+        {
+          "line": 1182,
+          "declaration": "arctanKernelTriangleRaw_equiv_complementKernelIntegral"
+        },
+        {
+          "line": 1197,
+          "declaration": "arctanIntegralTriangleConstruction"
+        },
+        {
+          "line": 1204,
+          "declaration": "arctanIntegralTriangleMonotoneConstruction"
+        },
+        {
+          "line": 1213,
+          "declaration": "arctanIntegralTriangle"
+        },
+        {
+          "line": 1217,
+          "declaration": "arctanIntegralTriangle_valid"
+        },
+        {
+          "line": 1221,
+          "declaration": "arctanIntegralTriangle_compute_eq"
+        },
+        {
+          "line": 1227,
+          "declaration": "arctanIntegralTriangle_compute_width_le"
+        },
+        {
+          "line": 1236,
+          "declaration": "arctanIntegralTriangle_equiv_complementKernelIntegral"
+        },
+        {
+          "line": 1249,
+          "declaration": "arctanStripIntegrals_add_compute_eq_arctanKernel"
+        },
+        {
+          "line": 1276,
+          "declaration": "arctanStripIntegrals_add_equiv_arctanKernelIntegral"
+        },
+        {
+          "line": 1360,
+          "declaration": "arctanIntegralTriangle_add_logKernelIntegral_equiv_productIntegral"
+        },
+        {
+          "line": 1403,
+          "declaration": "logTwoSquarePullbackIntegral_compute_eq_two_arctanLogKernelIntegral"
+        },
+        {
+          "line": 1421,
+          "declaration": "logTwoSquarePullbackIntegral_width"
+        },
+        {
+          "line": 1431,
+          "declaration": "two_arctanLogKernelIntegral_compute_width"
+        },
+        {
+          "line": 1440,
+          "declaration": "logTwoSquarePullbackIntegral_contains_weightedMesh"
+        },
+        {
+          "line": 1527,
+          "declaration": "logTwoSquareStieltjesCandidate_overlaps_pullbackIntegral"
+        },
+        {
+          "line": 1573,
+          "declaration": "logTwoSquareStieltjesCandidate_equiv_pullbackIntegral"
+        },
+        {
+          "line": 1584,
+          "declaration": "logTwoSquareStieltjesStabilizationRadius_covers_pullbackIntegral"
+        },
+        {
+          "line": 1619,
+          "declaration": "logTwoSquareStieltjesRaw_equiv_pullbackIntegral"
+        },
+        {
+          "line": 2211,
+          "declaration": "logTwoDarbouxCompute"
+        },
+        {
+          "line": 2214,
+          "declaration": "logTwoDarbouxCompute_width"
+        },
+        {
+          "line": 2225,
+          "declaration": "logTwoDarbouxRaw"
+        },
+        {
+          "line": 2228,
+          "declaration": "logTwoDarbouxRaw_valid"
+        },
+        {
+          "line": 2235,
+          "declaration": "logTwoDarbouxConstruction"
+        },
+        {
+          "line": 2243,
+          "declaration": "logTwoReciprocalIntegral"
+        },
+        {
+          "line": 2247,
+          "declaration": "logTwoReciprocalIntegral_valid"
+        },
+        {
+          "line": 2251,
+          "declaration": "logTwoReciprocalIntegral_compute_eq"
+        },
+        {
+          "line": 2387,
+          "declaration": "logTwoSquareStieltjesRaw_equiv_reciprocalIntegral"
+        },
+        {
+          "line": 2403,
+          "declaration": "logTwoSquarePullbackIntegral_equiv_reciprocalIntegral"
+        },
+        {
+          "line": 2416,
+          "declaration": "two_arctanLogKernelIntegral_equiv_logTwoReciprocalIntegral"
+        },
+        {
+          "line": 2661,
+          "declaration": "logTwoRightRiemann"
+        },
+        {
+          "line": 2668,
+          "declaration": "logTwo_rightRiemann_term"
+        },
+        {
+          "line": 2708,
+          "declaration": "logTwoKernelRightRiemann"
+        },
+        {
+          "line": 2716,
+          "declaration": "logTwoKernelRightRiemann_eq_logTwoRightRiemann"
+        },
+        {
+          "line": 2724,
+          "declaration": "harmonicSum_double_sub_eq_logTwoRightRiemann"
+        },
+        {
+          "line": 2744,
+          "declaration": "logTwoLo_eq_logTwoRightRiemann"
+        },
+        {
+          "line": 2752,
+          "declaration": "logTwoLo_eq_logTwoKernelRightRiemann"
+        },
+        {
+          "line": 2935,
+          "declaration": "logTwoRightRiemann_nonnegative"
+        },
+        {
+          "line": 2940,
+          "declaration": "logTwoRightRiemann_le_one"
+        },
+        {
+          "line": 2958,
+          "declaration": "logTwoDarbouxCompute_contains_dyadicSeriesLower"
+        },
+        {
+          "line": 2969,
+          "declaration": "logTwoDarbouxCompute_nested"
+        },
+        {
+          "line": 2997,
+          "declaration": "logTwoSeries_equiv_logTwoReciprocalIntegral"
+        },
+        {
+          "line": 3032,
+          "declaration": "two_arctanLogKernelIntegral_equiv_logTwoSeries"
+        },
+        {
+          "line": 3065,
+          "declaration": "piTriangleLogSeries_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral"
+        },
+        {
+          "line": 3179,
+          "declaration": "piTriangleLogReciprocalIntegral"
+        },
+        {
+          "line": 3182,
+          "declaration": "piTriangleLogReciprocalIntegral_valid"
+        },
+        {
+          "line": 3193,
+          "declaration": "piTriangleLogReciprocalIntegral_compute_width_le"
+        },
+        {
+          "line": 3228,
+          "declaration": "piTriangleLogReciprocalIntegralRate"
+        },
+        {
+          "line": 3244,
+          "declaration": "piTriangleLogSquareSubstitutionIntegral"
+        },
+        {
+          "line": 3248,
+          "declaration": "piTriangleLogSquareSubstitutionIntegral_valid"
+        },
+        {
+          "line": 3258,
+          "declaration": "piTriangleLogSquareSubstitutionIntegral_compute_width_le"
+        },
+        {
+          "line": 3280,
+          "declaration": "piTriangleLogSquareSubstitutionIntegralRate"
+        },
+        {
+          "line": 3290,
+          "declaration": "piTriangleLogSquareSubstitutionIntegral_equiv_piTriangleLogReciprocalIntegral"
+        },
+        {
+          "line": 3310,
+          "declaration": "piTriangleLogReciprocalIntegral_equiv_piTriangleLogSeries"
+        },
+        {
+          "line": 3327,
+          "declaration": "piTriangleLogReciprocalIntegral_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral"
+        },
+        {
+          "line": 3342,
+          "declaration": "piTriangleLogReciprocalIntegral_equiv_four_arctanGeom_one"
+        },
+        {
+          "line": 3357,
+          "declaration": "piTriangleLogSquareSubstitutionIntegral_equiv_four_arctanGeom_one"
+        },
+        {
+          "line": 3385,
+          "declaration": "triangle_equiv_complementKernelIntegral"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/LogarithmicPi.lean",
+      "role": "comparison",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/PDE/CauchyContour.lean",
+      "role": "conditional",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/PeanoBaker.lean",
+      "role": "finite",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/PiComplex.lean",
+      "role": "support",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/PiProofs.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 137,
+          "declaration": "rectangleKernelIntegralAtNonnegativeUnit"
+        },
+        {
+          "line": 146,
+          "declaration": "rectangleKernelIntegralRaw_equiv_rectangleRaw_nonnegativeUnit"
+        },
+        {
+          "line": 173,
+          "declaration": "arctanGeom_equiv_rectangleKernelIntegral_nonnegativeUnit"
+        },
+        {
+          "line": 194,
+          "declaration": "arctanGeom_one_equiv_rectangleKernelIntegral"
+        },
+        {
+          "line": 308,
+          "declaration": "endpoints_eq_kernelPartialIntegralBetween"
+        },
+        {
+          "line": 383,
+          "declaration": "positiveRaw_compute_eq_kernelPartialIntegralInterval"
+        },
+        {
+          "line": 632,
+          "declaration": "arctan_compute_nonnegative_eq_kernelPartialIntegralInterval"
+        },
+        {
+          "line": 893,
+          "declaration": "endpoints_eq_kernelPartialIntegral"
+        },
+        {
+          "line": 931,
+          "declaration": "hi_eq_kernelPartialIntegral_even"
+        },
+        {
+          "line": 935,
+          "declaration": "lo_eq_kernelPartialIntegral_odd_succ"
+        },
+        {
+          "line": 960,
+          "declaration": "leibnizSeries_compute_eq_kernelPartialIntegralInterval"
+        },
+        {
+          "line": 1237,
+          "declaration": "arctanIntegralRectangleRawAtOne_compute_eq_raw_one"
+        },
+        {
+          "line": 1241,
+          "declaration": "arctanIntegralRectangleRawAtOne_equiv_raw_one"
+        },
+        {
+          "line": 1284,
+          "declaration": "kernelPartialIntegralSum"
+        },
+        {
+          "line": 1451,
+          "declaration": "LeibnizRectanglePointwiseIntegralBridgeAtOne"
+        },
+        {
+          "line": 1455,
+          "declaration": "LeibnizRectanglePointwiseUnitIntegralBridgeAtOne"
+        },
+        {
+          "line": 1616,
+          "declaration": "kernelPartialIntegralBetween_two_boole"
+        },
+        {
+          "line": 1819,
+          "declaration": "monomialIntegralTwo"
+        },
+        {
+          "line": 1835,
+          "declaration": "monomialIntegralFour"
+        },
+        {
+          "line": 1853,
+          "declaration": "monomialIntegralSix"
+        },
+        {
+          "line": 1872,
+          "declaration": "kernelPartialIntegralThree_eq_average"
+        },
+        {
+          "line": 1904,
+          "declaration": "quadratureEvalSum_kernelPartial_three_eq_affine"
+        },
+        {
+          "line": 1923,
+          "declaration": "kernelPartialIntegralThree_newtonCotes"
+        },
+        {
+          "line": 2102,
+          "declaration": "monomialIntegralEight"
+        },
+        {
+          "line": 2119,
+          "declaration": "kernelPartialIntegralFour_eq_average"
+        },
+        {
+          "line": 2155,
+          "declaration": "quadratureEvalSum_kernelPartial_four_eq_affine"
+        },
+        {
+          "line": 2175,
+          "declaration": "kernelPartialIntegralFour_newtonCotes"
+        },
+        {
+          "line": 2321,
+          "declaration": "uniformCellBounds_of_pointwiseIntegralBridge"
+        },
+        {
+          "line": 2326,
+          "declaration": "unitUniformCellBounds_of_pointwiseUnitIntegralBridge"
+        },
+        {
+          "line": 2331,
+          "declaration": "integralKernel_le_one"
+        },
+        {
+          "line": 2351,
+          "declaration": "integralLowerStep_le_kernelPartialIntegralBetween_zero"
+        },
+        {
+          "line": 2370,
+          "declaration": "kernelPartialIntegralBetween_two_lowerStep"
+        },
+        {
+          "line": 2488,
+          "declaration": "kernelPartialIntegralBetween_one_le_integralUpperStep"
+        },
+        {
+          "line": 2709,
+          "declaration": "kernelPartialIntegralBetween_three_le_integralUpperStep_on_unit"
+        },
+        {
+          "line": 2882,
+          "declaration": "kernelPartialIntegralBetween_four_lowerStep"
+        },
+        {
+          "line": 3091,
+          "declaration": "kernelPartialIntegralBetween_five_le_integralUpperStep_on_unit"
+        },
+        {
+          "line": 3343,
+          "declaration": "kernelPartialIntegralBetween_six_lowerStep"
+        },
+        {
+          "line": 3645,
+          "declaration": "kernelPartialIntegralBetween_seven_le_integralUpperStep_on_unit"
+        },
+        {
+          "line": 3986,
+          "declaration": "kernelPartialIntegralBetween_eight_lowerStep"
+        },
+        {
+          "line": 4375,
+          "declaration": "kernelPartialIntegralBetween_nine_le_integralUpperStep_on_unit"
+        },
+        {
+          "line": 4818,
+          "declaration": "kernelPartialIntegralBetween_ten_lowerStep"
+        },
+        {
+          "line": 5313,
+          "declaration": "kernelPartialIntegralBetween_eleven_le_integralUpperStep_on_unit"
+        },
+        {
+          "line": 6065,
+          "declaration": "integralLowerSum_le_kernelPartialIntegralSum"
+        },
+        {
+          "line": 6078,
+          "declaration": "kernelPartialIntegralSum_le_integralUpperSum"
+        },
+        {
+          "line": 6091,
+          "declaration": "refineAux_kernelPartialIntegralSum"
+        },
+        {
+          "line": 6118,
+          "declaration": "refineAreaLoopState_kernelPartialIntegralSum"
+        },
+        {
+          "line": 6127,
+          "declaration": "iterateAreaLoopState_kernelPartialIntegralSum"
+        },
+        {
+          "line": 6147,
+          "declaration": "arctanAreaLoopState_one_kernelPartialIntegralSum"
+        },
+        {
+          "line": 6160,
+          "declaration": "arctanAreaLoopState_kernelPartialIntegralSum"
+        },
+        {
+          "line": 6218,
+          "declaration": "integralLowerSum_le_kernelPartialRightRectangleSum_even"
+        },
+        {
+          "line": 6241,
+          "declaration": "kernelPartialRightRectangleSum_odd_le_integralUpperSum"
+        },
+        {
+          "line": 6353,
+          "declaration": "pointwiseIntegralBridgeAtOne_iff_uniformCellBounds"
+        },
+        {
+          "line": 6361,
+          "declaration": "pointwiseUnitIntegralBridgeAtOne_iff_unitUniformCellBounds"
+        },
+        {
+          "line": 6369,
+          "declaration": "pointwiseUnitIntegralBridgeAtOne_of_unitCellOrderPreservation"
+        },
+        {
+          "line": 6385,
+          "declaration": "cellBounds_of_pointwiseIntegralBridge"
+        },
+        {
+          "line": 6391,
+          "declaration": "cellBounds_of_pointwiseUnitIntegralBridge"
+        },
+        {
+          "line": 6573,
+          "declaration": "kernelBounds_of_pointwiseIntegralBridge"
+        },
+        {
+          "line": 6578,
+          "declaration": "kernelBounds_of_pointwiseUnitIntegralBridge"
+        },
+        {
+          "line": 6772,
+          "declaration": "leibnizEqualsRectangleRawAtOne_of_pointwiseIntegralBridge"
+        },
+        {
+          "line": 6778,
+          "declaration": "leibnizEqualsRectangleRawAtOne_of_pointwiseUnitIntegralBridge"
+        },
+        {
+          "line": 10201,
+          "declaration": "leibnizEqualsRectangleRawAtOne_finiteRiemannBridge"
+        },
+        {
+          "line": 10416,
+          "declaration": "arctanEqualsRectangleRaw_finiteRiemannBridge"
+        },
+        {
+          "line": 10450,
+          "declaration": "arctanEqualsGeom_finiteRiemannBridge"
+        },
+        {
+          "line": 10516,
+          "declaration": "arctanEqualsGeom_finiteRiemannBridge_on_unit"
+        },
+        {
+          "line": 10563,
+          "declaration": "arctanPowerSeriesGeomAgreement_finiteRiemannBridge"
+        },
+        {
+          "line": 10588,
+          "declaration": "powerSeriesEqualsRectangleKernelAt_finiteRiemannBridge"
+        },
+        {
+          "line": 12194,
+          "declaration": "four_arctanSeries_one_equiv_piCircleArea_of_pointwiseIntegralBridge"
+        },
+        {
+          "line": 12200,
+          "declaration": "four_arctanSeries_one_equiv_piCircleArea_of_pointwiseUnitIntegralBridge"
+        },
+        {
+          "line": 12307,
+          "declaration": "piCircleArea_equiv_four_arctanSeries_one_of_pointwiseIntegralBridge"
+        },
+        {
+          "line": 12313,
+          "declaration": "piCircleArea_equiv_four_arctanSeries_one_of_pointwiseUnitIntegralBridge"
+        },
+        {
+          "line": 12333,
+          "declaration": "piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement"
+        },
+        {
+          "line": 12360,
+          "declaration": "piFromArctanIntegralFor_equiv_piCircleArea_of_geom_agreement"
+        },
+        {
+          "line": 12393,
+          "declaration": "piFromArctanIntegralFor_equiv_piCircleArea_of_definiteIdentityFor"
+        },
+        {
+          "line": 12448,
+          "declaration": "piFromArctanGeneralIntegralFor_equiv_piCircleArea_of_generalEndpointComparisonFor"
+        },
+        {
+          "line": 12527,
+          "declaration": "piFromArctanGeneralIntegralFor_equiv_piCircleArea_of_definiteIdentityFor_generalConstruction"
+        },
+        {
+          "line": 12558,
+          "declaration": "piFromArctanIntegralFor_equiv_piCircleArea_of_monotoneEndpointComparisonFor"
+        },
+        {
+          "line": 12610,
+          "declaration": "piFromArctanIntegralUnitAtOne_equiv_piCircleArea_of_geom_agreement"
+        },
+        {
+          "line": 12630,
+          "declaration": "piFromArctanIntegralUnitAtOne_equiv_piCircleArea_of_functionAgreement"
+        },
+        {
+          "line": 12645,
+          "declaration": "piFromArctanIntegral_equiv_piCircleArea_of_effectiveFTC"
+        },
+        {
+          "line": 12685,
+          "declaration": "piFromArctanIntegral_equiv_piCircleArea_of_staticDyadicEffectiveFTC"
+        },
+        {
+          "line": 12720,
+          "declaration": "exists_piFromArctanIntegral_equiv_piCircleArea"
+        },
+        {
+          "line": 12730,
+          "declaration": "arctanIntegralPiRoute_of_geom_agreement"
+        },
+        {
+          "line": 12739,
+          "declaration": "piFromArctanIntegral_equiv_piCircleArea_of_function_agreement"
+        },
+        {
+          "line": 12751,
+          "declaration": "arctanIntegralPiRoute_of_function_agreement"
+        },
+        {
+          "line": 14852,
+          "declaration": "piMachin_equiv_piCircleArea_finiteRiemannBridge"
+        },
+        {
+          "line": 14934,
+          "declaration": "leibnizEqArea_of_pointwiseIntegralBridge"
+        },
+        {
+          "line": 14940,
+          "declaration": "leibnizEqArea_of_pointwiseUnitIntegralBridge"
+        },
+        {
+          "line": 15023,
+          "declaration": "four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea"
+        },
+        {
+          "line": 15081,
+          "declaration": "piTriangleLogReciprocalIntegral_equiv_piCircleArea"
+        },
+        {
+          "line": 15094,
+          "declaration": "piTriangleLogSquareSubstitutionIntegral_equiv_piCircleArea"
+        },
+        {
+          "line": 15103,
+          "declaration": "four_arctanIntegralRectangleForAtOne_equiv_piCircleArea"
+        },
+        {
+          "line": 15132,
+          "declaration": "cauchyFullLineIntegral_equiv_piCircleArea"
+        },
+        {
+          "line": 15149,
+          "declaration": "piSymmetricCauchyPiecewiseIntegral_equiv_four_arctanIntegralRectangleForAtOne"
+        },
+        {
+          "line": 15182,
+          "declaration": "piSymmetricCauchyPiecewiseIntegral_equiv_piCircleArea"
+        },
+        {
+          "line": 15195,
+          "declaration": "four_arctanIntegralRectangleMonotoneForAtOne_equiv_piCircleArea"
+        },
+        {
+          "line": 15228,
+          "declaration": "piFromArctanIntegralRectangleUnitAtOne"
+        },
+        {
+          "line": 15236,
+          "declaration": "piFromArctanIntegralRectangleUnitAtOne_compute_eq_four_rectangle"
+        },
+        {
+          "line": 15245,
+          "declaration": "piFromArctanIntegralRectangleUnitAtOne_width_le_sixteen_div_succ"
+        },
+        {
+          "line": 15261,
+          "declaration": "piFromArctanIntegralRectangleUnitAtOne_valid"
+        },
+        {
+          "line": 15271,
+          "declaration": "piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea"
+        },
+        {
+          "line": 15288,
+          "declaration": "piCircleArea_equiv_piFromArctanIntegralRectangleUnitAtOne"
+        },
+        {
+          "line": 15336,
+          "declaration": "piFromArctanIntegralRectangleUnitAtOne_equiv_geomUnitDefiniteIdentity"
+        },
+        {
+          "line": 16955,
+          "declaration": "piTriangleLogSquareStieltjes_equiv_piTriangleLogReciprocalIntegral"
+        },
+        {
+          "line": 17116,
+          "declaration": "arctanIntegral"
+        },
+        {
+          "line": 17161,
+          "declaration": "triangleLogReciprocalIntegral"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/Playground.lean",
+      "role": "support",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/PolynomialFTCValues.lean",
+      "role": "comparison",
+      "declarations": [
+        {
+          "line": 7,
+          "declaration": "squareIntegralEffectiveFTC_endpoint_equiv_one_third"
+        },
+        {
+          "line": 57,
+          "declaration": "squareIntegralEffectiveFTC_integral_equiv_one_third"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/PowerSeries.lean",
+      "role": "finite",
+      "declarations": [
+        {
+          "line": 811,
+          "declaration": "sineTaylorIntegralPartial"
+        },
+        {
+          "line": 817,
+          "declaration": "cosineTaylorIntegralPartial"
+        },
+        {
+          "line": 823,
+          "declaration": "cosineTaylorIntegralPartial_eq_sineTaylorPartial"
+        },
+        {
+          "line": 841,
+          "declaration": "sineTaylorIntegralPartial_eq_one_sub_cosineTaylorPartial_succ"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/PrimitivePiecewiseFTC.lean",
+      "role": "conditional",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/QuarterCircleGeometry.lean",
+      "role": "finite",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/RationalCircle.lean",
+      "role": "finite",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/RationalGeometry.lean",
+      "role": "finite",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/ReciprocalQuarticPi.lean",
+      "role": "comparison",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/SectorAreaReparametrization.lean",
+      "role": "comparison",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/SectorAreaRotation.lean",
+      "role": "comparison",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/SeriesFoundation.lean",
+      "role": "support",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/SinPiIntegral.lean",
+      "role": "comparison",
+      "declarations": [
+        {
+          "line": 3421,
+          "declaration": "ArctanSinPiConstruction.halfIntegral"
+        },
+        {
+          "line": 3426,
+          "declaration": "ArctanSinPiConstruction.halfIntegral_valid"
+        },
+        {
+          "line": 3437,
+          "declaration": "ArctanSinPiConstruction.halfIntegral_equiv_endpoint_of_staticFTC"
+        },
+        {
+          "line": 3456,
+          "declaration": "HalfIntegralReciprocalPiCertificate"
+        },
+        {
+          "line": 3470,
+          "declaration": "ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi"
+        },
+        {
+          "line": 3638,
+          "declaration": "canonicalSineEndpointIntegral"
+        },
+        {
+          "line": 3646,
+          "declaration": "canonicalSineEndpointIntegral_valid"
+        },
+        {
+          "line": 3654,
+          "declaration": "canonicalSineEndpointIntegral_equiv_reciprocalPi"
+        },
+        {
+          "line": 3668,
+          "declaration": "ArctanSinPiConstruction.halfIntegral_equiv_canonicalSineEndpointIntegral"
+        },
+        {
+          "line": 3684,
+          "declaration": "CanonicalHalfIntegralReciprocalPiCertificate"
+        },
+        {
+          "line": 3701,
+          "declaration": "CanonicalHalfIntegralReciprocalPiCertificate.ofTangentEndpoints"
+        },
+        {
+          "line": 3729,
+          "declaration": "ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_canonical"
+        },
+        {
+          "line": 4384,
+          "declaration": "tangentPullback_riemannLeftExact_eq_uniformLeftEndpointSum"
+        },
+        {
+          "line": 4394,
+          "declaration": "tangentPullback_riemannLeftExact_stage_error_le"
+        },
+        {
+          "line": 4551,
+          "declaration": "tangentPullbackIntegral"
+        },
+        {
+          "line": 4556,
+          "declaration": "tangentPullbackIntegral_valid"
+        },
+        {
+          "line": 4562,
+          "declaration": "tangentPullbackIntegral_compute"
+        },
+        {
+          "line": 4572,
+          "declaration": "tangentPullbackIntegral_contains_uniformLeftEndpointSum"
+        },
+        {
+          "line": 4583,
+          "declaration": "tangentPullbackIntegral_left_sum_error_le"
+        },
+        {
+          "line": 4602,
+          "declaration": "tangentPullbackIntegral_equiv_one"
+        },
+        {
+          "line": 4637,
+          "declaration": "tangentPullbackIntegral_bounds"
+        },
+        {
+          "line": 4657,
+          "declaration": "positiveTangentPullbackIntegral"
+        },
+        {
+          "line": 4692,
+          "declaration": "tangentPullbackIntegral_contains_one"
+        },
+        {
+          "line": 4700,
+          "declaration": "positiveTangentPullbackIntegral_valid"
+        },
+        {
+          "line": 4760,
+          "declaration": "positiveTangentPullbackIntegral_equiv_one"
+        },
+        {
+          "line": 4783,
+          "declaration": "positiveTangentPullbackIntegral_bounds"
+        },
+        {
+          "line": 4815,
+          "declaration": "tangentChartIntegral"
+        },
+        {
+          "line": 4818,
+          "declaration": "tangentChartIntegral_valid"
+        },
+        {
+          "line": 4825,
+          "declaration": "tangentChartIntegral_equiv_reciprocalPi"
+        },
+        {
+          "line": 4863,
+          "declaration": "sinPiStieltjesIntegral"
+        },
+        {
+          "line": 4866,
+          "declaration": "sinPiStieltjesIntegral_valid"
+        },
+        {
+          "line": 4870,
+          "declaration": "sinPiStieltjesIntegral_equiv_reciprocalPi"
+        },
+        {
+          "line": 4881,
+          "declaration": "computableSinPiHalfIntegral"
+        },
+        {
+          "line": 4884,
+          "declaration": "computableSinPiHalfIntegral_valid"
+        },
+        {
+          "line": 4888,
+          "declaration": "computableSinPiHalfIntegral_equiv_reciprocalPi"
+        },
+        {
+          "line": 4897,
+          "declaration": "ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_tangentChart"
+        },
+        {
+          "line": 4959,
+          "declaration": "ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_transport"
+        },
+        {
+          "line": 4966,
+          "declaration": "ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_commonWitness"
+        },
+        {
+          "line": 5201,
+          "declaration": "halfIntegral"
+        },
+        {
+          "line": 5210,
+          "declaration": "halfIntegral_valid"
+        },
+        {
+          "line": 5227,
+          "declaration": "halfIntegral_equiv_of_dyadic_sample_replacement"
+        },
+        {
+          "line": 5254,
+          "declaration": "halfIntegral_equiv_of_dyadic_sample_overlap"
+        },
+        {
+          "line": 6264,
+          "declaration": "ArctanSinPiConstruction.halfIntegral_equiv_of_canonical_nestedRadical_search"
+        },
+        {
+          "line": 6317,
+          "declaration": "ArctanSinPiConstruction.halfIntegral_equiv_of_nestedRadical_semantics"
+        },
+        {
+          "line": 6363,
+          "declaration": "ArctanSinPiConstruction.halfIntegral_equiv_of_precisionAware_nestedRadical_semantics"
+        },
+        {
+          "line": 7053,
+          "declaration": "ArctanSinPiConstruction.halfIntegral_equiv_of_halfAngle_certificate_family"
+        },
+        {
+          "line": 7088,
+          "declaration": "ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_halfAngle_certificate_family"
+        },
+        {
+          "line": 8270,
+          "declaration": "dyadicNestedRadicalDarbouxSum"
+        },
+        {
+          "line": 8347,
+          "declaration": "dyadicDarbouxCell_refines_of_endpoint_monotone"
+        },
+        {
+          "line": 8388,
+          "declaration": "dyadicDarbouxCell_refines_of_coarse_endpoint_containment"
+        },
+        {
+          "line": 8425,
+          "declaration": "dyadicNestedRadicalDarbouxSum_contains_leftSum"
+        },
+        {
+          "line": 8436,
+          "declaration": "dyadicNestedRadicalDarbouxSum_width_nonneg"
+        },
+        {
+          "line": 8626,
+          "declaration": "dyadicNestedRadicalIntegralRaw"
+        },
+        {
+          "line": 8629,
+          "declaration": "dyadicNestedRadicalIntegralRaw_valid"
+        },
+        {
+          "line": 8634,
+          "declaration": "dyadicNestedRadicalIntegralRaw_widths_shrink"
+        },
+        {
+          "line": 8639,
+          "declaration": "dyadicNestedRadicalIntegralRaw_equiv_of_overlap"
+        },
+        {
+          "line": 8733,
+          "declaration": "dyadicNestedRadicalIntegralRaw_stabilized"
+        },
+        {
+          "line": 8737,
+          "declaration": "dyadicNestedRadicalIntegralRaw_stabilized_width_le"
+        },
+        {
+          "line": 8746,
+          "declaration": "dyadicNestedRadicalIntegralRaw_stabilized_valid_of_overlap"
+        },
+        {
+          "line": 8763,
+          "declaration": "dyadicNestedRadicalIntegralRaw_stabilized_equiv_reciprocalPi_of_overlap"
+        },
+        {
+          "line": 8785,
+          "declaration": "dyadicNestedRadicalIntegralRaw_stabilized_equiv_reciprocalPi_of_commonWitness"
+        },
+        {
+          "line": 8895,
+          "declaration": "DyadicNestedRadicalRoute.integral_equiv_reciprocalPi"
+        },
+        {
+          "line": 8919,
+          "declaration": "DyadicNestedRadicalRouteSearchData.integral_equiv_reciprocalPi"
+        },
+        {
+          "line": 8944,
+          "declaration": "HalfIntegralFTCCertificate"
+        },
+        {
+          "line": 8961,
+          "declaration": "halfIntegral_equiv_endpoint"
+        },
+        {
+          "line": 8976,
+          "declaration": "halfIntegral_equiv_reciprocalPi_of_FTC"
+        },
+        {
+          "line": 8997,
+          "declaration": "ArctanSinPiConstruction.monotoneScheduleIntegral_equiv_reciprocalPi"
+        },
+        {
+          "line": 9039,
+          "declaration": "ArctanSinPiConstruction.monotoneScheduleIntegral_equiv_reciprocalPi_of_tangent_nondecreasing"
+        },
+        {
+          "line": 9174,
+          "declaration": "ArctanSinPiConstruction.halfIntegral_equiv_of_overlap_family"
+        },
+        {
+          "line": 9205,
+          "declaration": "ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificate_family"
+        },
+        {
+          "line": 9228,
+          "declaration": "ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_branch_certificate_family"
+        },
+        {
+          "line": 9255,
+          "declaration": "ArctanSinPiConstruction.halfIntegral_equiv_of_branch_certificates"
+        },
+        {
+          "line": 9298,
+          "declaration": "ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_of_branch_certificates"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/SinPiSquareFTC.lean",
+      "role": "comparison",
+      "declarations": [
+        {
+          "line": 346,
+          "declaration": "tangentSquareIntegral"
+        },
+        {
+          "line": 351,
+          "declaration": "tangentSquareIntegral_valid"
+        },
+        {
+          "line": 357,
+          "declaration": "tangentSquareIntegral_compute"
+        },
+        {
+          "line": 1713,
+          "declaration": "tangentSquareFTC_riemann_width_le"
+        },
+        {
+          "line": 1847,
+          "declaration": "tangentSquareEffectiveIntegralRaw"
+        },
+        {
+          "line": 1985,
+          "declaration": "tangentSquareEffectiveIntegralRaw_equiv_endpoint"
+        },
+        {
+          "line": 2144,
+          "declaration": "tangentSquareEffectiveIntegralRaw_equiv_endpointAnchor"
+        },
+        {
+          "line": 2164,
+          "declaration": "tangentSquareEffectiveIntegralReboxed"
+        },
+        {
+          "line": 2168,
+          "declaration": "tangentSquareEffectiveIntegralReboxed_valid"
+        },
+        {
+          "line": 2176,
+          "declaration": "tangentSquareEffectiveIntegralReboxed_equiv_anchor"
+        },
+        {
+          "line": 2182,
+          "declaration": "tangentSquareEffectiveIntegralRaw_equiv_reboxed"
+        },
+        {
+          "line": 2301,
+          "declaration": "TangentSquareEffectiveFTCData.integralRaw"
+        },
+        {
+          "line": 2309,
+          "declaration": "TangentSquareEffectiveFTCData.integral_equiv_endpoint"
+        },
+        {
+          "line": 2325,
+          "declaration": "TangentSquareEffectiveFTCData.integral_equiv_halfQuarterTurn"
+        },
+        {
+          "line": 2353,
+          "declaration": "tangentSquareEffectiveFTC_integral_equiv_halfQuarterTurn"
+        },
+        {
+          "line": 2363,
+          "declaration": "normalizedTangentSquareEffectiveFTCIntegralRaw"
+        },
+        {
+          "line": 2366,
+          "declaration": "normalizedTangentSquareEffectiveFTCIntegralRaw_valid"
+        },
+        {
+          "line": 2371,
+          "declaration": "normalizedTangentSquareEffectiveFTCIntegralRaw_equiv_quarter"
+        },
+        {
+          "line": 3147,
+          "declaration": "dyadicNestedRadicalSquareIntegralRaw"
+        },
+        {
+          "line": 3150,
+          "declaration": "dyadicNestedRadicalSquareIntegralRaw_widths_shrink"
+        },
+        {
+          "line": 3157,
+          "declaration": "dyadicNestedRadicalSquareIntegralRaw_equiv_of_overlap"
+        },
+        {
+          "line": 3253,
+          "declaration": "dyadicNestedRadicalSquareIntegralRaw_stabilized"
+        },
+        {
+          "line": 3258,
+          "declaration": "dyadicNestedRadicalSquareIntegralRaw_stabilized_width_le"
+        },
+        {
+          "line": 3267,
+          "declaration": "dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_overlap"
+        },
+        {
+          "line": 3277,
+          "declaration": "dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_anchor_of_overlap"
+        },
+        {
+          "line": 4089,
+          "declaration": "dyadicPublicSquareIntegralRaw"
+        },
+        {
+          "line": 4112,
+          "declaration": "dyadicPublicSquareIntegralRaw_widths_shrink"
+        },
+        {
+          "line": 4129,
+          "declaration": "dyadicPublicSquareIntegralRaw_chainStabilized"
+        },
+        {
+          "line": 4136,
+          "declaration": "dyadicPublicSquareIntegralRaw_chainStabilized_width_le"
+        },
+        {
+          "line": 4146,
+          "declaration": "dyadicPublicSquareIntegralRaw_chainStabilized_valid"
+        },
+        {
+          "line": 4158,
+          "declaration": "dyadicPublicSquareIntegralRaw_chainStabilized_equiv_anchor"
+        },
+        {
+          "line": 4167,
+          "declaration": "dyadicPublicSquareIntegralRaw_chainStabilized_equiv_value"
+        },
+        {
+          "line": 4695,
+          "declaration": "sinPiSquareScheduledMonotoneIntegral"
+        },
+        {
+          "line": 4709,
+          "declaration": "sinPiSquareScheduledMonotoneIntegral_valid"
+        },
+        {
+          "line": 4724,
+          "declaration": "sinPiSquareScheduledMonotoneIntegral_equiv_value"
+        },
+        {
+          "line": 4751,
+          "declaration": "sinPiSquareMonotoneIntegral"
+        },
+        {
+          "line": 4764,
+          "declaration": "sinPiSquareMonotoneIntegral_valid"
+        },
+        {
+          "line": 4778,
+          "declaration": "sinPiSquareMonotoneIntegral_equiv_value"
+        },
+        {
+          "line": 4820,
+          "declaration": "SinPiSquareEffectiveFTCData.integralRaw"
+        },
+        {
+          "line": 4830,
+          "declaration": "SinPiSquareEffectiveFTCData.integral_equiv_endpoint"
+        },
+        {
+          "line": 4845,
+          "declaration": "SinPiSquareEffectiveFTCData.integral_equiv_public_chainStabilized"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/TangentPullbackEffectiveFTC.lean",
+      "role": "comparison",
+      "declarations": [
+        {
+          "line": 290,
+          "declaration": "tangentPullbackEffectiveFTC_equiv_positiveIntegral"
+        },
+        {
+          "line": 309,
+          "declaration": "tangentPullbackEffectiveFTC_equiv_dyadicIntegral"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/Taylor.lean",
+      "role": "conditional",
+      "declarations": [
+        {
+          "line": 116,
+          "declaration": "kernelTermIntegralAtOne"
+        },
+        {
+          "line": 121,
+          "declaration": "kernelTermIntegralBetween"
+        },
+        {
+          "line": 127,
+          "declaration": "kernelPartialIntegralAtOne"
+        },
+        {
+          "line": 133,
+          "declaration": "kernelPartialIntegralBetween"
+        },
+        {
+          "line": 155,
+          "declaration": "kernelPartialIntegralAtOne_odd_succ"
+        },
+        {
+          "line": 168,
+          "declaration": "kernelPartialIntegralAtOne_even_succ"
+        },
+        {
+          "line": 181,
+          "declaration": "kernelPartialIntegralBetween_zero_odd_succ"
+        },
+        {
+          "line": 196,
+          "declaration": "kernelPartialIntegralBetween_zero_even_succ"
+        },
+        {
+          "line": 216,
+          "declaration": "kernelPartialIntegralBetween_half_even_odd_gap"
+        },
+        {
+          "line": 223,
+          "declaration": "kernelPartialIntegralBetween_half_even_odd_gap_width"
+        },
+        {
+          "line": 241,
+          "declaration": "kernelPartialIntegralBetween_half_even_odd_gap_le_one_div"
+        },
+        {
+          "line": 267,
+          "declaration": "kernelPartialIntegralBetween_half_alternating_enclosure"
+        },
+        {
+          "line": 302,
+          "declaration": "kernelPartialIntegralBetween_unit_alternating_enclosure"
+        },
+        {
+          "line": 364,
+          "declaration": "kernelPartialIntegralBetween_unit_interval"
+        },
+        {
+          "line": 368,
+          "declaration": "kernelPartialIntegralBetween_unit_interval_ordered"
+        },
+        {
+          "line": 378,
+          "declaration": "kernelPartialIntegralBetween_unit_interval_width_le"
+        },
+        {
+          "line": 399,
+          "declaration": "kernelTermIntegralBetween_zero_one"
+        },
+        {
+          "line": 407,
+          "declaration": "kernelPartialIntegralBetween_zero_one"
+        },
+        {
+          "line": 416,
+          "declaration": "kernelTermIntegralAtOne_eq_signedLeibniz"
+        },
+        {
+          "line": 430,
+          "declaration": "kernelPartialIntegralAtOne_eq_series_partialSum"
+        },
+        {
+          "line": 444,
+          "declaration": "kernelPartialIntegralAtOneRawInterval"
+        },
+        {
+          "line": 448,
+          "declaration": "kernelPartialIntegralAtOneRaw"
+        },
+        {
+          "line": 451,
+          "declaration": "kernelPartialIntegralAtOneRawInterval_width_eq"
+        },
+        {
+          "line": 464,
+          "declaration": "kernelPartialIntegralAtOneRaw_valid"
+        },
+        {
+          "line": 513,
+          "declaration": "kernelPartialIntegralAtOneRaw_width_eq_reciprocal"
+        },
+        {
+          "line": 522,
+          "declaration": "kernelPartialIntegralAtOneRaw_width_le_of_budget"
+        },
+        {
+          "line": 528,
+          "declaration": "kernelPartialIntegralAtOneRaw_reaches_of_positive_tolerance"
+        },
+        {
+          "line": 536,
+          "declaration": "kernelPartialIntegralAtOneRaw_compute_eq"
+        },
+        {
+          "line": 541,
+          "declaration": "kernelPartialIntegralAtOneRaw_compute_eq_kernel"
+        },
+        {
+          "line": 556,
+          "declaration": "kernelPartialIntegralAtOneRaw_equiv_leibnizAlternatingRaw"
+        },
+        {
+          "line": 591,
+          "declaration": "kernelTermIntegralBetween_split"
+        },
+        {
+          "line": 602,
+          "declaration": "kernelPartialIntegralBetween_split"
+        },
+        {
+          "line": 785,
+          "declaration": "monomialIntegralBetween_endpoint_bounds"
+        },
+        {
+          "line": 834,
+          "declaration": "monomialIntegralBetween_endpoint_error_le"
+        },
+        {
+          "line": 898,
+          "declaration": "kernelTermIntegralBetween_nonneg_even"
+        },
+        {
+          "line": 921,
+          "declaration": "kernelTermIntegralBetween_nonpos_odd"
+        },
+        {
+          "line": 946,
+          "declaration": "kernelPartialIntegralBetween_odd_succ_le_even"
+        },
+        {
+          "line": 955,
+          "declaration": "kernelPartialIntegralBetween_odd_le_even_succ"
+        },
+        {
+          "line": 964,
+          "declaration": "kernelPartialIntegralBetween_unit_interval_width_shrinks"
+        },
+        {
+          "line": 1429,
+          "declaration": "KernelIntegralAt"
+        },
+        {
+          "line": 1432,
+          "declaration": "positiveKernelIntegralRaw"
+        },
+        {
+          "line": 1435,
+          "declaration": "kernelIntegralRaw"
+        },
+        {
+          "line": 1441,
+          "declaration": "positiveKernelIntegralRaw_valid"
+        },
+        {
+          "line": 1446,
+          "declaration": "kernelIntegralRaw_valid"
+        },
+        {
+          "line": 1455,
+          "declaration": "KernelIntegralData"
+        },
+        {
+          "line": 1461,
+          "declaration": "PowerSeriesEqualsKernelIntegral"
+        },
+        {
+          "line": 1468,
+          "declaration": "GeometryEqualsKernelIntegral"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/TurningPointIntegral.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 300,
+          "declaration": "MultiTurnIntegralCompletion"
+        },
+        {
+          "line": 445,
+          "declaration": "SingleTurnIntegralCandidate"
+        },
+        {
+          "line": 479,
+          "declaration": "TurningBracketIntegralCandidate"
+        },
+        {
+          "line": 681,
+          "declaration": "SingleTurnIntegralCompletion"
+        },
+        {
+          "line": 691,
+          "declaration": "TurningBracketIntegralCompletion"
+        },
+        {
+          "line": 784,
+          "declaration": "integralFor_equiv_anchor"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/WiedijkScoreboard.lean",
+      "role": "support",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/ZetaReal/Moments.lean",
+      "role": "finite",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/ZetaReal/Series.lean",
+      "role": "finite",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/ZetaReal/Tests.lean",
+      "role": "support",
+      "declarations": []
+    }
+  ]
+}
