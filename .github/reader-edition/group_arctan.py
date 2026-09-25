@@ -27,8 +27,8 @@ SCRIPT = '''
   function reveal(){
     let key;try{key=decodeURIComponent(location.hash.slice(1));}catch(_){return;}
     const target=document.getElementById(key);
-    if(!target||!target.closest('#pi-arctan .pi-computation-method'))return;
-    for(let p=target.parentElement;p;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true;
+    if(!target||!target.closest('#pi-arctan .pi-computation-method, #pi-log-one-plus-i'))return;
+    for(let p=target;p;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true;
     requestAnimationFrame(()=>target.scrollIntoView({block:'start'}));
   }
   window.addEventListener('hashchange',reveal);
@@ -65,6 +65,7 @@ def install(site: Path,revision: str):
     for card,new_id in zip(cards,METHODS):
         card.extract();card.name='section';card['id']=new_id;card['class']=['pi-computation-method']
         card.h3.name='h4';panel.append(card)
+    group.find(id='pi-arctan-integral').append(parse('<p><a href="#pi-log-one-plus-i">Why this integral is the imaginary part of a logarithm</a></p>').p)
     assert len(grid.select(':scope > .pi-formula-card'))==7
     assert len(group.select('.pi-computation-method'))==5
     assert formulas(gallery)==formula_before+Counter({r'\['+TITLE_FORMULA+r'\]':1})

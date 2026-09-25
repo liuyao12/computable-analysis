@@ -1,0 +1,22 @@
+<details class="pi-formula-details" id="pi-log-one-plus-i"><summary>Arctangent inside a complex logarithm</summary>
+<p>Use the branch of the logarithm with \(\operatorname{Log}(1)=0\) on the right half-plane. Along the straight segment \(z(t)=1+it\), where \(0\le t\le1\),</p>
+<div class="formula">\[\frac{dz}{z}=\frac{i\,dt}{1+it}=\frac{t+i}{1+t^2}\,dt.\]</div>
+<p>Taking real and imaginary parts of the same integral gives</p>
+<div class="formula">\[\begin{aligned}\operatorname{Log}(1+i)&=\int_{[1,1+i]}\frac{dz}{z}\\&=\int_0^1\frac{t\,dt}{1+t^2}+i\int_0^1\frac{dt}{1+t^2}\\&=\frac12\log 2+\frac{i\pi}{4}.\end{aligned}\]</div>
+<p>Thus the arctangent integral gives \(\pi/4\), and</p>
+<div class="formula">\[\pi=4\,\operatorname{Im}\operatorname{Log}(1+i).\]</div>
+<p>The segment stays in the right half-plane, so its logarithm has no ambiguity from winding around zero. This explains why the logarithm and arctangent computations belong together: the reciprocal kernel on a complex segment contains both the real logarithm and the real arctangent.</p>
+<h4>A computation using one symmetric series</h4>
+<p>Move the logarithm argument into a rapidly convergent local series:</p>
+<div class="formula">\[q=\frac{(1+i)-1}{(1+i)+1}=\frac{1+2i}{5},\qquad |q|^2=\frac15.\]</div>
+<div class="formula">\[H(q)=2\sum_{k=0}^{\infty}\frac{q^{2k+1}}{2k+1}=\operatorname{Log}\frac{1+q}{1-q}=\operatorname{Log}(1+i).\]</div>
+<p>The branch is fixed throughout: for \(|q|<1\), the quotient \((1+q)/(1-q)\) lies in the right half-plane, and both expressions vanish at \(q=0\). The identity follows by differentiating there and comparing that initial value.</p>
+<div class="formula">\[P_N=8\,\operatorname{Im}\sum_{k=0}^{N-1}\frac{q^{2k+1}}{2k+1}.\]</div>
+<p>All terms are Gaussian rationals. Since \(|q|\le1/2\) and \(|q|^2=1/5\), the geometric tail gives, for \(N\ge1\),</p>
+<div class="formula">\[\begin{aligned}|\pi-P_N|&\le8\sum_{k=N}^{\infty}\frac{|q|^{2k+1}}{2k+1}\\&\le\frac{4}{2N+1}\sum_{k=N}^{\infty}5^{-k}\\&=\frac{5}{(2N+1)5^N}.\end{aligned}\]</div>
+<p>The following intervals are computed with exact rational arithmetic, then rounded outwards. No numerical value of \(\pi\), logarithm, or arctangent is supplied to the computation.</p>
+__LOG_ONE_TABLE__
+<p>This uses one of the two symmetric series in the existing \(\operatorname{Log}(i)\) computation below. Their imaginary parts agree term by term, so the finite approximations to \(\pi\) agree exactly after scaling. The single-series formula computes that same angle with one symmetric-series evaluation.</p>
+<p class="pi-calculation-status">Mathematical derivation and an executable rational computation; this new logarithm-to-geometric-arctangent identity has not yet been checked as an end-to-end Lean theorem. Existing proof audits are unchanged.</p>
+<p><a href="https://dlmf.nist.gov/4.2#i">Logarithm branches and contour definition</a> · <a href="https://dlmf.nist.gov/4.6">Logarithm series</a> · <a href="arctan-taylor.html">Where the arctangent Taylor series converges</a></p>
+</details>
