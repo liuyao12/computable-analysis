@@ -1,3 +1,8 @@
+> **Historical source copy.** This directory is outside the current native build.
+> Its older integral interfaces are retained as historical source, not supported
+> definitions of integration. Use the [current enclosure convention](../docs/INTEGRAL_ENCLOSURES.md)
+> and the active modules in [`ComputableAnalysis`](../ComputableAnalysis).
+
 # Computable Analysis
 
 *calculus without the completeness of the real numbers*

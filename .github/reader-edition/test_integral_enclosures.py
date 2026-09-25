@@ -22,6 +22,8 @@ def main():
     assert not data['directLogarithmBridgeProved'] and not data['generalCauchyRectangleBridgeProved']
     inventory = json.loads((site/'reading/integral-inventory.json').read_text())
     assert len(inventory['files']) == data['nativeModules']
+    assert len(inventory['auxiliaryFiles']) == data['auxiliaryModules']
+    assert '__AUXILIARY_COUNT__' not in (site/'integral-enclosures.html').read_text()
     for name, digest in data['artifacts'].items():
         assert hashlib.sha256((site/name).read_bytes()).hexdigest() == digest, name
     for name in ['ch-integrals.html', 'ch-complex-paths.html']:
