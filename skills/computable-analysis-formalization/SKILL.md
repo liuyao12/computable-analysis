@@ -20,6 +20,27 @@ to route a new task. Read
 [references/integral-computation-strategies.md](references/integral-computation-strategies.md)
 for any definite-integral task, especially one with non-rational breakpoints.
 
+## Methods belong in the skill
+
+Choosing how to compute a definite integral or an infinite series is a
+formalization strategy. Keep that choice here and in the strategy references,
+not in a universal Lean definition of integration or infinite summation.
+For a particular example, define its finite computation and prove its range
+or tail bounds, validity, and agreement with the intended expression.
+
+Reuse proved finite arithmetic, enclosure, and convergence lemmas. A Lean
+record may conveniently bundle the data already needed by such a proof; it
+is optional proof organization, not the meaning of every integral or series.
+Do not make an existing certificate record a mandatory public interface, or
+add a new structure merely to encode a recipe. Prefer a concrete worked
+construction before extracting shared proof data justified by actual reuse.
+
+Consult [integral strategies](references/integral-computation-strategies.md)
+for whole-chunk ranges, geometric complex segments, and comparisons, and
+[series strategies](references/series-computation-strategies.md) for finite
+prefixes, tail control, and comparisons. The strategy is guidance; every
+mathematical bound and claimed equivalence still needs a Lean proof.
+
 ## Keep the foundation boundary
 
 - Use project modules for the analytic foundation. The user permits abstract
@@ -107,10 +128,11 @@ partition, a shrinking non-rational turning-point bracket, or a direct
 finite change-of-variables comparison. Supply a separate completion theorem
 that connects the runtime boxes to the intended integral value.
 
-When a derivative formula is proved, construct `EffectiveDerivativeBoundFTC`,
-restrict the certified derivative with `FunctionOnInterval.ofRealFunRaw`, and publish
+For a derivative-bound FTC proof, `EffectiveDerivativeBoundFTC` and
+`FunctionOnInterval.ofRealFunRaw` can supply the data for
 `Integral.enclosureRealizationOfEffectiveFTC`. Its `agreement` field packages
-the endpoint comparison, while its `plan` retains the whole-cell range evidence.
+the endpoint comparison, while its `plan` retains the whole-cell ranges. This
+is an available proof package, not a required definition for every example.
 The older `Integral.effectiveFTCConstructionFor` exposes a numerical candidate
 only; do not stop at that adapter or the internal stabilized raw evaluator.
 

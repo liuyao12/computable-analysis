@@ -2,18 +2,17 @@
 
 ## Scope
 
-Use this reference to formalize one definite integral as a finite rational
-algorithm. The project does not define a global integral operator for all
-bounded or continuous functions. A completed result is a specific evaluator,
-its validity and rate certificate, and a theorem identifying that evaluator
-with the displayed integral or endpoint expression.
+Use this reference to choose and formalize a finite rational computation for
+one definite integral. The method is skill guidance, not a universal Lean
+definition. Define the particular enclosure sums, prove their whole-chunk
+range bounds and convergence, and prove any claimed endpoint or alternative
+computation agrees with them.
 
-Start with `ComputableAnalysis.Calculus`. Use
-`Integral.EnclosureConstructionFor` for a particular whole-cell sum, and
-`Integral.EnclosureRealizationFor` for a certified alternate evaluator.
-`Integral.CandidateFor` records numerical validity only. Keep an endpoint
-identity, a change-of-variables comparison, or another semantic bridge
-separate from the raw interval computation.
+Reusable lemmas may handle interval arithmetic, refinement, monotonicity,
+and finite error estimates. Existing enclosure records can package these
+proofs when convenient; do not require every example to instantiate one or
+add a new record just to encode a method. Numerical validity alone does not
+connect a computed value to the integrand.
 
 ## Exact public statements
 
@@ -35,14 +34,16 @@ machinery. See the [governing policy](../../../FORMALIZATION_GUIDE.md#computable
 
 ## Select a construction
 
-| Shape of the integrand | Construct | Typical proof obligation |
+| Shape of the integrand | Method to try | Required mathematical evidence |
 | --- | --- | --- |
-| Checked identity \(F\prime=f\) | `EffectiveDerivativeBoundFTC` then `Integral.enclosureRealizationOfEffectiveFTC` | Prove finite derivative bounds, interval-domain validity, and the endpoint bridge |
-| Monotone on one rational interval | `MonotoneCandidateFor` or `NondecreasingCandidateFor` | Prove the declared order and the rectangle-width schedule |
-| Rational-Lipschitz on `[0,1]` | `IntegralIdentities.LipschitzDyadic` | Prove a rational Lipschitz constant and the dyadic error bound |
-| Monotone on finitely many rational pieces | `PiecewiseMonotoneCandidateFor` | Prove order independently on every piece and combine their boxes |
-| Finite monotone decomposition with non-rational turns | `TurningPointBracket` plus `TurningBracketIntegralCandidate` | Supply one shrinking rational bracket per turn, monotone-piece certificates, and a range bound for every gap |
-| Substitution, symmetry, or integration by parts | A literal finite mesh comparison | Prove the finite algebra and error terms; do not cite a future general theorem |
+| Monotone on one interval | Endpoint range bounds on each whole chunk | Coordinate order, enclosure of inexact endpoint values, and a shrinking upper/lower gap |
+| A rational Lipschitz bound | Pad each sample by the cell oscillation bound | The bound holds throughout every cell, with an explicit mesh and evaluation-error schedule |
+| Finitely many monotone pieces | Add the enclosing sums for the pieces | Coverage, orientation, local order, and combined error bounds |
+| Non-rational turning points | Shrinking rational brackets plus outer monotone pieces | A range bound on every unresolved gap and a quantitative bound on its contribution |
+| A known derivative identity \(F'=f\) | Whole-cell derivative bounds and finite telescoping | A checked FTC comparison with \(F(b)-F(a)\), on the entire certified domain |
+| Substitution, symmetry, or integration by parts | Compare literal finite sums | The finite identity, domain and orientation conditions, and errors tending to zero |
+| A straight complex segment | Geometric subdivision and value rectangles times displacements | Whole-chunk coordinate bounds, rectangle multiplication bounds, and shrinking enclosing sums |
+| An improper endpoint or unbounded domain | Finite-domain enclosing sums plus a tail allowance | A proved cutoff-dependent remainder bound and a schedule for both errors |
 
 Use the exact expression of the integrand in every construction. State where
 denominators stay apart from zero and where a branch or sign condition holds.
@@ -96,12 +97,12 @@ unresolved gaps.
    available. It yields the sharper estimate
    `[-K*(r_n-ell_n), K*(r_n-ell_n)]` for that gap.
 
-These seven steps build a numerical candidate. They do not yet prove that the
-candidate boxes enclose an intended integral. Finish with
-`TurningBracketIntegralCompletion`: give a valid anchor raw value, prove the
-candidate is equivalent to that anchor, and give the stated anchor radius
-schedule. The resulting `stabilizedRaw` has a checked validity proof while
-its runtime still reads only the finite pieces belonging to that bracket.
+These steps build a numerical candidate; the whole-chunk evidence and
+comparison still have to be proved. One available stabilization route is
+`TurningBracketIntegralCompletion`: supply an independently justified valid
+anchor, prove the candidate agrees with it, and give its radius schedule.
+The resulting `stabilizedRaw` retains the finite piece computation. A direct
+nesting and validity proof is another route; the record is not obligatory.
 
 ## Prove the missing semantic comparison
 
@@ -148,7 +149,7 @@ equivalence theorem to be identified.
 Subdivide the actual polygonal segment. Enclose all value rectangles on each
 chunk, multiply by its oriented complex displacement, and sum. Multiplication
 by the upward unit direction rotates the rectangle and swaps which corners
-supply its bounds. No real-parameter derivative is part of this definition.
+supply its bounds. The construction needs no real-parameter derivative.
 A coordinate substitution or sampled contour rule needs a finite comparison
 with these sums. Soundness and convergence are separate obligations;
 `PolygonalIntegralCertificate` now records both.

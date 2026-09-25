@@ -109,6 +109,16 @@ For complex sums, `PolygonalIntegralCertificate` additionally requires
 `EntireBoxFunctionRaw.Sound`; a positive mesh is required from the first stage.
 See [the complete native-source audit](docs/INTEGRAL_ENCLOSURES.md).
 
+### Computation methods are skill guidance
+
+The choice of a method for a definite integral or an infinite series belongs
+in the [formalization skill](skills/computable-analysis-formalization/SKILL.md#methods-belong-in-the-skill)
+and its strategy references. Lean defines the particular finite computation
+and proves the bounds, convergence, and agreement theorems for it. Reusable
+lemmas and optional records of proof data support those proofs; no single
+record or universal integral or infinite-sum operator is required to express
+all examples. A method described in the skill is not itself a proved theorem.
+
 ### State integration formulas as definite integrals
 
 Do not introduce a separate formal notion of primitive or indefinite integral.
