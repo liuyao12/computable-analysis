@@ -499,12 +499,16 @@ jobs:
                   assert euler['allPositiveEvenValuesProved'] and len(euler['declarations'])==15
                   for path in ['reading/euler-proofs.json','reading/euler-dependencies.txt','reading/euler-general-dependencies.txt']:
                       assert hashlib.sha256(get('/'+path,True)).hexdigest()==classics['artifacts'][path]
+                  enclosure=get('/reading/integral-enclosures-edition.json')
                   def final_hash(path,previous):
                       for edition in [square,classics]:
                           change=edition['changedArtifacts'].get(path)
                           if change:
                               assert change['before']==previous,path
                               previous=change['after']
+                      if path in enclosure['supersededChapterHashes']:
+                          assert enclosure['supersededChapterHashes'][path]==previous,path
+                          previous=enclosure['artifacts'][path]
                       return previous
                   for path in classics['pages']:
                       assert hashlib.sha256(get('/'+path,True)).hexdigest()==classics['artifacts'][path]
@@ -524,8 +528,8 @@ jobs:
                   for name,meta in [('arctan',circle),('cosine',a)]:
                       for suffix,key in [('gif','gifSha256'),('png','posterSha256')]:
                           assert hashlib.sha256(get('/reading/animations/'+name+'.'+suffix,True)).hexdigest()==meta[key]
-                  enclosure=get('/reading/integral-enclosures-edition.json')
                   assert enclosure['revision']==revision and all(enclosure['checks'].values())
+                  assert enclosure['directReciprocalSegmentProved']
                   assert not enclosure['directLogarithmBridgeProved']
                   for path,digest in enclosure['artifacts'].items():
                       assert hashlib.sha256(get('/'+path,True)).hexdigest()==digest
@@ -608,7 +612,7 @@ jobs:
                   print('LIVE PAGE:',base+'/fundamental-matrix.html')
                   print('LIVE CHAPTER:',base+'/ch-circle-sphere.html')
                   print('Checked geometry source:',revision)
-                  print('Computation first; cyclic polygon fans; exact quarter-circle stage areas; integral definitions unchanged')
+                  print('Earlier geometry stage preserved its integral definitions; current whole-chunk convention verified separately')
                   print('Earlier mathematical comparison source:',os.environ['SOURCE_SHA'])
                   break
               except Exception as e:
