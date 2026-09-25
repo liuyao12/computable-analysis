@@ -50,6 +50,9 @@ primitive notion; see the [definite-integral convention](../../../FORMALIZATION_
 
 ## Series, exponential, and logarithm
 
+Choose the method using [series computation strategies](series-computation-strategies.md).
+The entries below are reusable proof tools, not a required definition of every sum.
+
 Use `PowerSeries`, `Series`, and `ExpProofs` for a finite prefix plus a
 rational tail majorant. State a rate in terms of the public raw evaluator.
 Use raw-real equivalence to relate series, Euler products, or other
