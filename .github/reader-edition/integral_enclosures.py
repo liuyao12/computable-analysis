@@ -18,7 +18,7 @@ def install(site, revision):
     meta = doc.select_one('meta[name="documentation-revision"]')
     if meta: meta['content'] = revision
     source = (ROOT/'book/classics/integral-enclosures.html').read_text()
-    source = source.replace('__REPO__', repo).replace('__MODULE_COUNT__', str(len(inventory['files'])))
+    source = source.replace('__REPO__', repo).replace('__MODULE_COUNT__', str(len(inventory['files']))).replace('__AUXILIARY_COUNT__', str(len(inventory['auxiliaryFiles'])))
     doc.article.clear(); doc.article.append(BeautifulSoup(source, 'html.parser'))
     kicker = doc.select_one('.chapter-kicker')
     if kicker: kicker.string = 'FOUNDATION'
@@ -62,7 +62,7 @@ def install(site, revision):
                     break
         (site/name).write_text(str(page)); changed.append(name)
     (site/'reading/integral-inventory.json').write_text(json.dumps(inventory, indent=2)+'\n')
-    report = {'revision': revision, 'nativeModules': len(inventory['files']),
+    report = {'revision': revision, 'nativeModules': len(inventory['files']), 'auxiliaryModules': len(inventory['auxiliaryFiles']),
               'supersededChapterHashes': superseded,
               'supersessionReason': 'User-requested replacement of integral definitions by whole-chunk enclosures; earlier stage preservation reports describe their pinned source.',
               'directReciprocalSegmentProved': True, 'directLogarithmBridgeProved': False, 'generalCauchyRectangleBridgeProved': False,

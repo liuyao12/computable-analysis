@@ -5,6 +5,7 @@ This is a source/schema audit; Lean separately checks the mathematical proofs.
 import argparse
 import json
 import re
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -40,13 +41,22 @@ def main():
             assert row['declarations'] == decls, f'Stale declaration index: {rel}'
         count += 1
     assert count == len(indexed), 'Inventory refers to missing source'
+    auxiliary = {row['path']: row for row in inventory['auxiliaryFiles']}
+    assert len(auxiliary) == len(inventory['auxiliaryFiles'])
+    tracked = subprocess.check_output(['git', 'ls-files', '*.lean'], cwd=ROOT, text=True).splitlines()
+    expected = {name for name in tracked if not name.startswith('ComputableAnalysis/')
+                and WORDS.search((ROOT / name).read_text())}
+    assert set(auxiliary) == expected, f'Unreviewed or stale auxiliary sources: {set(auxiliary) ^ expected}'
+    for row in auxiliary.values():
+        assert row['role'] in {'historical-copy', 'pinned-proof', 'audit-helper', 'library-entry'}
+
     core = (ROOT / 'ComputableAnalysis/ComplexPathIntegral.lean').read_text()
     assert 'sound : f.Sound' in core
     assert 'polygonalIntegralBoxEntire f vertices (2 ^ n)' in core
     assert 'compute := fun n => polygonalIntegralBoxEntire f vertices n' not in core
     if args.update_lines:
         INDEX.write_text(json.dumps(inventory, indent=2) + '\n')
-    print(f'PASS: {count} native modules classified; no obsolete weak integral APIs')
+    print(f'PASS: {count} native and {len(auxiliary)} auxiliary modules classified; no obsolete weak native integral APIs')
 
 
 if __name__ == '__main__':

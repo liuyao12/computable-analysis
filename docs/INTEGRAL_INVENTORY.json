@@ -1,5 +1,5 @@
 {
-  "scope": "Native ComputableAnalysis source; finite helpers and import-only consumers included. Historical proof snapshots under book are not reinterpreted as current APIs.",
+  "scope": "All tracked Lean integration-related sources: active native modules, audit helpers, library entry point, pinned proof snapshots, and historical embedded copies. Historical sources retain their original interfaces and are not current APIs.",
   "files": [
     {
       "path": "ComputableAnalysis/AbelianIntegrals.lean",
@@ -4947,6 +4947,136 @@
       "path": "ComputableAnalysis/ZetaReal/Tests.lean",
       "role": "support",
       "declarations": []
+    }
+  ],
+  "auxiliaryFiles": [
+    {
+      "path": ".circumference-scope-prv0VC/ComputableAnalysis/PiProofs.lean",
+      "role": "historical-copy"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis.lean",
+      "role": "historical-copy"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/AbelianIntegrals.lean",
+      "role": "historical-copy"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/ArctanGeometry.lean",
+      "role": "historical-copy"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/Calculus.lean",
+      "role": "historical-copy"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/ComplexPathIntegral.lean",
+      "role": "historical-copy"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/Elementary.lean",
+      "role": "historical-copy"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/ElementaryFunctions.lean",
+      "role": "historical-copy"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/ExpProofs.lean",
+      "role": "historical-copy"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/FTC.lean",
+      "role": "historical-copy"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/FirstYearCalculus.lean",
+      "role": "historical-copy"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/IntegralIdentities.lean",
+      "role": "historical-copy"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/Logarithm.lean",
+      "role": "historical-copy"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/PeanoBaker.lean",
+      "role": "historical-copy"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/PiProofs.lean",
+      "role": "historical-copy"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/Playground.lean",
+      "role": "historical-copy"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/PowerSeries.lean",
+      "role": "historical-copy"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/Taylor.lean",
+      "role": "historical-copy"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/TurningPointIntegral.lean",
+      "role": "historical-copy"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/MembershipCheck.lean",
+      "role": "historical-copy"
+    },
+    {
+      "path": "ComputableAnalysis.lean",
+      "role": "library-entry"
+    },
+    {
+      "path": "book/checks/ExportRationalGeometry.lean",
+      "role": "audit-helper"
+    },
+    {
+      "path": "book/cosine-square/Check.lean",
+      "role": "pinned-proof"
+    },
+    {
+      "path": "book/cosine-square/ComputableAnalysis/CosineSquareData.lean",
+      "role": "pinned-proof"
+    },
+    {
+      "path": "book/cosine-square/ComputableAnalysis/CosineSquareFTC.lean",
+      "role": "pinned-proof"
+    },
+    {
+      "path": "book/cosine-square/ComputableAnalysis/CosineSquareSymmetry.lean",
+      "role": "pinned-proof"
+    },
+    {
+      "path": "scripts/check_algebraic_ode.lean",
+      "role": "audit-helper"
+    },
+    {
+      "path": "scripts/check_arctan_taylor.lean",
+      "role": "audit-helper"
+    },
+    {
+      "path": "scripts/check_integral_enclosures.lean",
+      "role": "audit-helper"
+    },
+    {
+      "path": "scripts/check_leibniz.lean",
+      "role": "audit-helper"
+    },
+    {
+      "path": "scripts/check_leibniz_transmutation.lean",
+      "role": "audit-helper"
+    },
+    {
+      "path": "scripts/check_polygonal_cauchy.lean",
+      "role": "audit-helper"
     }
   ]
 }
