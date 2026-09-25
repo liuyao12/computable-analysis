@@ -1,0 +1,2130 @@
+{
+  "sourceRevision": "a23d1af2272199f5525a074d974155c24727c0f6",
+  "purpose": "Source coverage for a family-level review of theorem contracts; not a proof checker or declaration-by-declaration semantic certification.",
+  "files": [
+    {
+      "path": ".circumference-scope-prv0VC/ComputableAnalysis/PiProofs.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "5f05d01c2cde6c643f2142dd47117c55ca4f2470e39ec072418d82de0de419a8"
+    },
+    {
+      "path": ".circumference-scope-prv0VC/ComputableAnalysis/RationalCircle.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "1d5ca783fa35f3001fb97ccb03fc0114bded4fd6a153e15847fd5ef790e328c3"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "a2ccc2d1cfbe42ee8bf60cf0615d32763e08b72108643adf8d5bb5cc7d3ff04b"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/AbelianIntegrals.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "a6536f6457a782206c638ad2fb4f7c2bae648212e3d88c6be776f5ea7af36112"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/Algebraic.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "2e363bfa87ea4b72c10ce484f4764dd0b88e5de5e714c4ac3d645db77512dfad"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/AlgebraicFunctions.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "b38378933cba18a614b89f48775d5a2e8561011017cd7e5fce02ca8cca030924"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/AlgebraicNumbers.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "58318f1f7b1182ec13fc27a05cf03a7d43af0582e6d0a47f758150f6110a7f00"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/ArctanGeometry.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "098a4de55009e7e7a029d84adb31ccdc1b8f456b3769bcc5563eacba7e3c91c6"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/ArctanPresentations.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "1c22f0038e0a0f3d90de1ee2bb8f9d67e1869e040dd6e9429b70a978324b4369"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/Basel.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "b47869b8d8ce0b9f112e9f49aac80686663592120e7fbb0ffe339862529efb47"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/Basic.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "bf4c6e5c65815394993746df12c4ab66c9dc485fb0225cf26241b852a2170484"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/Calculus.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "b32441cd8663ee7e7623cc09c4c46b7a56df0c75651a9a47042df0dcbdf9e063"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/ComplexInterval.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "dfa9b946c56658949179163153c4a840e2d8574fe9dc9dc467cac161635c4ce5"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/ComplexPathIntegral.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "c8034b17e0bff60ed89e608f3c9045f25093484537b0fa4a2c94b0dcde10c5c4"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/ComplexPolynomial.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "ded7dc8d38f60492d9e705bdeee9d0321bb4d7b31f15adb6e31fba465b410b25"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/Differential.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "282f3df29e5317f1758afe03f01bf9a37460bcae14c6a3fd2ab7055a7e205181"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/DirichletSeries.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "5d3c687d81e43b977ddeefdc8717646cc802e01ac396486c2e139a9cbbc082aa"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/Elementary.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "6c355520ac6a7faab303e04d5e1ad76729fff8b4952f465c08a5958d31c9384c"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/ElementaryFunctions.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "e860693bb3de982a8f24bdb8c0e24a1fa31b415fc71e358cdbc70455afe46225"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/Exp.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "b5340f5b99fca515549fdddcf2b1dc82bcb35e5cdb79dbf0bcef7ffe9b0548f5"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/ExpProofs.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "5c09d109d1478ea1d5c7de3e328463529ce6052d659b3eba997a853264674aa0"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/Extension.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "50df482a3f4c43aa09cfbd6bb9ce5dd2be635034228a2986c2545c413279dfa1"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/FTA.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "fce8ee9a690f8901e89b7081ae182477c48ee55abc46da84fd8e87babb9860c5"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/FTC.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "c168913a6e844d645597568dbbc1b14fcd6ec09e3bf35e78a8efca29b22dabb5"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/FirstYearCalculus.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "608b48a444219d30ccabbaf0074fb3cc1161b994c7a6b55fb8ee54592f9c252b"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/FunctionDomains.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "b7e8070a9503c7518a4c02f02b14b91a960e2691d98257b449081e947ef8f9bb"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/GaussSeventeen.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "c4a7ae09d0123d7eee1fdf57881a4484e85cc7eef35dd420694e8b830b92440a"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/IntegralIdentities.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "c4a9c2caa3e4ccc53d283333afba690391169b5bce45381505ef9d71820d97c9"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/Logarithm.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "49881a2ff1eda35bd0c1d841b1cd09908e6fbc4ae6a0dc7d06b6500921a53565"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/MonotonicityConvexity.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "f9f66aca0a77beb1184c9d4a66e05e9616aeccda9d02cd66d317c3ff370108ec"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/Nilakantha.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "03af7e02f600da1eb48bc65e39082e7e6a69c1bc9d799b2b23a31f0301f95bd1"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/PeanoBaker.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "032d61f7856c0d8e90671e85042d1893c498aee97c0d3b3adec23bb625ce7fb7"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/Pi.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "3555490fd90dcf655122cdfa04972e2a13494ea58293c76726a79edef1f2316c"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/PiProofs.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "bde0ddb1eb14a605e6336c111bd13733373c4ce7792cd4ea6409e644dd96b176"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/Playground.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "bcc10996f0bd0edce295d9bfe606a0e393c855541c8cdb5000e3122c642b59ad"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/Polynomial.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "2643c966773640a995b1dd52822f8348922936461eddf5fea846a4addbde92a0"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/PowerSeries.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "2f9cb3101d64121a181e3223db9110669acc82f115ab4f2eb6923fe9fe97b55c"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/RationalCircle.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "c7621439dd3103a54ffd3ce737ebbacda08552569cbc23a3373a77ffa1acc9b3"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/Series.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "fc48b95f8fb8d1ad040e16d0c825b6c8b54cabc0c4fbd9fdc840e8c7f6ba0c2d"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/Taylor.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "63e368373fcd8ff672493161be780e64ed72339bed832bfc2ac2fcd56b51ecee"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/TrigSpecialValues.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "b62ef791ff9f754a9c048afd8cc14b5c0042444c8b31e01551b29dea8f245900"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/ComputableAnalysis/TurningPointIntegral.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "9ed0a8c75cd1cc9e265bf20aba79fc705b2d33db5445b2a91aa1d73d0dc9a9ff"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/Main.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "2e01f37b728222eb4e8d08dd7c2a3f2eea6dc60ec60de779a0d76c28f23371cf"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/MembershipCheck.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "0661fa259ce147b3be25a919de68541f4ad7e897bc87a45cb0490b65dae02c45"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/PiProofsRepairCheck.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "e004ff273b91649f7193a0b044c8ad605d0f310e35b2767d7e470410ba7ed642"
+    },
+    {
+      "path": ".ibp-publish-aQ5y02/tmp/TestAdjacentNorm.lean",
+      "scope": "historical",
+      "area": "historical",
+      "sha256": "17f49273026ccaa0aa9a003ba046b0c07584e844901589c24468bbebe543c42d"
+    },
+    {
+      "path": "ComputableAnalysis.lean",
+      "scope": "support",
+      "area": "support",
+      "sha256": "349f2bf647073cb6807f9cc1f1f05546a2fbf7882cfa95d2ecb8d79c6df72861"
+    },
+    {
+      "path": "ComputableAnalysis/AbelianIntegrals.lean",
+      "scope": "native",
+      "area": "contours-cauchy",
+      "sha256": "9d258b834f48a5774b9fa7adc9c6168d6414890402ecc4b815857459a605de8a"
+    },
+    {
+      "path": "ComputableAnalysis/AbsIntegral.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "667c447cc134083a9a71b29abc7813e702f5180482f91fd981c126dc7f6197ec"
+    },
+    {
+      "path": "ComputableAnalysis/Algebraic.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "4b1cc1e67fa4fbe34b0d8d01c326a6b6ed24d72226f6aee731ebd15bd5fca0c9"
+    },
+    {
+      "path": "ComputableAnalysis/AlgebraicFoundation.lean",
+      "scope": "native",
+      "area": "entry-points-ledgers",
+      "sha256": "afec9786be4294c5f951d04d16a88696e47c7cef02abc0063d5ba7ed9869e894"
+    },
+    {
+      "path": "ComputableAnalysis/AlgebraicFunctions.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "6fe7bffdd15abcb60fac9c9b188df896047f4dd3d80f799cff7adecd4ec41d3c"
+    },
+    {
+      "path": "ComputableAnalysis/AlgebraicNumbers.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "6c278d3f700e2a7a3ea5dbc74eceed6246a925160bb0989907a8c62bf0279abe"
+    },
+    {
+      "path": "ComputableAnalysis/AlgebraicODE.lean",
+      "scope": "native",
+      "area": "algebraic-odes",
+      "sha256": "71c1f1fa6c70559e29c28c7c6223dcd1b4f621f68529bb842fa95e5312f53a75"
+    },
+    {
+      "path": "ComputableAnalysis/AlgebraicODE/Expressions.lean",
+      "scope": "native",
+      "area": "algebraic-odes",
+      "sha256": "638fd31fb8f3605c925d6a86f8f4ab4df5783cdc9045debf54b1ac4b6ef234d5"
+    },
+    {
+      "path": "ComputableAnalysis/AlgebraicODE/Frobenius.lean",
+      "scope": "native",
+      "area": "algebraic-odes",
+      "sha256": "143799698b0748436e15a0c457c06ca27ad67f55daa06e76233832907bc22a37"
+    },
+    {
+      "path": "ComputableAnalysis/AlgebraicODE/FrobeniusConvergence.lean",
+      "scope": "native",
+      "area": "algebraic-odes",
+      "sha256": "52f4dadbfd69fdc8943d33f66fd29a6ab3cc851b466bd0f77f30abc803d11e9f"
+    },
+    {
+      "path": "ComputableAnalysis/AlgebraicODE/FrobeniusTests.lean",
+      "scope": "native",
+      "area": "algebraic-odes",
+      "sha256": "6ae4561754ccde51ce6d733962cefcd96474be73b92338082be4d050b92b89c5"
+    },
+    {
+      "path": "ComputableAnalysis/AlgebraicODE/Fuchs.lean",
+      "scope": "native",
+      "area": "algebraic-odes",
+      "sha256": "ae17ed2a760f4b3d933f9ab59f2f2162a81208cf0c7d5caf24f3e24e3bd94261"
+    },
+    {
+      "path": "ComputableAnalysis/AlgebraicODE/FuchsGrowth.lean",
+      "scope": "native",
+      "area": "algebraic-odes",
+      "sha256": "8358f1b946a3a576ccf0b1e16c23950b3a611849eca67de1ab8af78f8577dd55"
+    },
+    {
+      "path": "ComputableAnalysis/AlgebraicODE/FuchsGrowthExamples.lean",
+      "scope": "native",
+      "area": "algebraic-odes",
+      "sha256": "03bcc47bcd3c1a062753e29b20ec43d7e9602064f32894ac674428629d95cbd5"
+    },
+    {
+      "path": "ComputableAnalysis/AlgebraicODE/Laguerre.lean",
+      "scope": "native",
+      "area": "algebraic-odes",
+      "sha256": "3dc999811a790ec9ae5a9586b7d91d6a2ee9b7c1c3e1ac74e1c23c9617d51bd7"
+    },
+    {
+      "path": "ComputableAnalysis/AlgebraicODE/Painleve.lean",
+      "scope": "native",
+      "area": "algebraic-odes",
+      "sha256": "6ae75f0b4ca6aa009c1db452a55fb1cb428596fc9da01d9b6fd23631b665364d"
+    },
+    {
+      "path": "ComputableAnalysis/AlgebraicODE/PainleveLaurent.lean",
+      "scope": "native",
+      "area": "algebraic-odes",
+      "sha256": "7418bbd1e6f93318497ea8d48a024562bc3b07dd91600c490f87acd485c21a3c"
+    },
+    {
+      "path": "ComputableAnalysis/AlgebraicODE/PainlevePole.lean",
+      "scope": "native",
+      "area": "algebraic-odes",
+      "sha256": "71564751bff2db98ebb796b1e13756382e725c8ef137e3e9ff7ce86b0f70b99f"
+    },
+    {
+      "path": "ComputableAnalysis/AlgebraicODE/PainlevePoleTests.lean",
+      "scope": "native",
+      "area": "algebraic-odes",
+      "sha256": "1fd20847746b59d8c4e43d647fea7f2ad4b00cf32c0700d256cc820edf4edec4"
+    },
+    {
+      "path": "ComputableAnalysis/AlgebraicODE/PolynomialRelation.lean",
+      "scope": "native",
+      "area": "algebraic-odes",
+      "sha256": "a5c83d18ad0e4dd7b9e55cd7b98898ea38e9a64ebb34b3d8338143fd2c1b50d6"
+    },
+    {
+      "path": "ComputableAnalysis/AlgebraicODE/Tests.lean",
+      "scope": "native",
+      "area": "algebraic-odes",
+      "sha256": "5b07d7e72935da506bd6c804ecc2e252f2dc946aa7d372873f08e3fafec72378"
+    },
+    {
+      "path": "ComputableAnalysis/AlternatingRemainder.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "af6f51d11627399ecf66659ff8a2790ab6f280c88e2cc49700244a0e7b62d583"
+    },
+    {
+      "path": "ComputableAnalysis/Apery.lean",
+      "scope": "native",
+      "area": "apery",
+      "sha256": "2c21a0aa0e942d92d233e7414c5b9fec53a58eafec1aed78ee9f8d52d6c9bce3"
+    },
+    {
+      "path": "ComputableAnalysis/Apery/Binomial.lean",
+      "scope": "native",
+      "area": "apery",
+      "sha256": "8477b51e27d8d08697e8ead31b01e722207b6d34169b88f560b4fecdb29649c4"
+    },
+    {
+      "path": "ComputableAnalysis/Apery/Companion.lean",
+      "scope": "native",
+      "area": "apery",
+      "sha256": "d2506ed65c5de3f700586cf3a46fa68afc3dc131abde6f81a2897d6715d9a88d"
+    },
+    {
+      "path": "ComputableAnalysis/Apery/DifferentialEquation.lean",
+      "scope": "native",
+      "area": "apery",
+      "sha256": "05ba7104f558f982ea2f564a8d6abfec52d5d912093e48a8b2f008618e634492"
+    },
+    {
+      "path": "ComputableAnalysis/Apery/Tests.lean",
+      "scope": "native",
+      "area": "apery",
+      "sha256": "1bef04efa6272422a8918679cdf8980d2100c0145b19f0b34dc126f1a2682fba"
+    },
+    {
+      "path": "ComputableAnalysis/ArctanEffectiveFTC.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "224408fa60208cb1761679fa0118edac15438dcb45aea3ee02238601968e3c1c"
+    },
+    {
+      "path": "ComputableAnalysis/ArctanGeometry.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "7bca8ecf42ace5e58a7d182596ce5561824e750885df656b4c7160da117e7ca9"
+    },
+    {
+      "path": "ComputableAnalysis/ArctanPresentations.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "1c22f0038e0a0f3d90de1ee2bb8f9d67e1869e040dd6e9429b70a978324b4369"
+    },
+    {
+      "path": "ComputableAnalysis/ArctanRectanglePi.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "d39d03defbfd21d709c6c996e71c04e66efbaf6b13a437a6b72cf6d6730fc4a5"
+    },
+    {
+      "path": "ComputableAnalysis/ArctanTaylorBoundary.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "df15d5427344a2ba43c6cb440eef97013538bad75a169725f891f4978aa76df0"
+    },
+    {
+      "path": "ComputableAnalysis/ArctanTaylorConvergence.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "26c3aae4e65f93afe043f99b20f20604e76322a9884f2e4d3d073abc46911040"
+    },
+    {
+      "path": "ComputableAnalysis/ArctanTaylorRemainder.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "0e241ef4a2fd380f1a3a92113205d17531fb96878026f5bfdad64c6692708a37"
+    },
+    {
+      "path": "ComputableAnalysis/Basel.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "b17bf52b75553ed8c63c2c45ac7418ce2995ff61e67792c057626fbcc363580e"
+    },
+    {
+      "path": "ComputableAnalysis/Basel/Bounds.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "b58afb0f9742b35bdb637ef9a1675ae0b3cbb5131f102f57a7fe8ba3b0748097"
+    },
+    {
+      "path": "ComputableAnalysis/Basel/EulerBounds.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "02f7e769f78c8a9b68569c9787ad7484bf51f6578390de9ed3f6b36f732490cc"
+    },
+    {
+      "path": "ComputableAnalysis/Basel/EulerProduct.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "06efce736f9068e74de6faffcd48924ddab5c582d6ab91bdbf9051eb1a1a9989"
+    },
+    {
+      "path": "ComputableAnalysis/Basel/EulerSieve.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "f9fa8ff9bdef29fea0a8864f75c8d7c239b7c3fe73a0b1d3a4ff21f2423d4202"
+    },
+    {
+      "path": "ComputableAnalysis/Basel/FiniteSums.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "1e31987623932f8b931969d0d543cf2f9eab669d012b84c2e8896d06c893ee03"
+    },
+    {
+      "path": "ComputableAnalysis/Basel/LeibnizSquare.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "26ba2fd29699148a63ec388e8e5e7fda7dfa62065d9f8e3c27e963c58bfa584d"
+    },
+    {
+      "path": "ComputableAnalysis/Basel/PrimeCriterion.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "656e3e6fe7088600ff50b0a8ad313e3de5a994d8f71f44d417172544b41dcba2"
+    },
+    {
+      "path": "ComputableAnalysis/Basel/Primes.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "bab079296398ac5e10aeaab43aba68b05b2b52a02b19f53d66c968ecc0ff5e46"
+    },
+    {
+      "path": "ComputableAnalysis/Basel/Proof.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "61cd8df917bb2418f240a9933e1425ef3d6f9fdb0be1c192918c78bc5ee4c909"
+    },
+    {
+      "path": "ComputableAnalysis/Basel/RealZeta.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "d39457055f1ed8c5069b5ec5f1de84da0da4062e8c303484f8455bce22c45ae6"
+    },
+    {
+      "path": "ComputableAnalysis/Basel/ZetaEstimate.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "1033aef4f2e1131e75bdc96a28c30e5654a6a16a0d25fe493a26c1c12e4bd276"
+    },
+    {
+      "path": "ComputableAnalysis/Basic.lean",
+      "scope": "native",
+      "area": "representations",
+      "sha256": "4183ad4ea24a9dd47bc5bf80665d6712c25640bd05364d5322fe0c05a93f2196"
+    },
+    {
+      "path": "ComputableAnalysis/Blueprint.lean",
+      "scope": "native",
+      "area": "entry-points-ledgers",
+      "sha256": "d9c6be116617226c8be7cd9842782c0439832fd83c04cd6157b2ce08eace2632"
+    },
+    {
+      "path": "ComputableAnalysis/Calculus.lean",
+      "scope": "native",
+      "area": "real-local-calculus",
+      "sha256": "5ae63df87bf014f12393ff91d6f8ca969d5a70309d9402695049391ca83ea7a7"
+    },
+    {
+      "path": "ComputableAnalysis/CalculusFoundation.lean",
+      "scope": "native",
+      "area": "entry-points-ledgers",
+      "sha256": "2180159d28654f55d539ef032169349b1e16281a92728e6d89c90c1e3bb7209c"
+    },
+    {
+      "path": "ComputableAnalysis/CauchyPi.lean",
+      "scope": "native",
+      "area": "contours-cauchy",
+      "sha256": "39ccf2d75f23a8c146c8545b67fd9f56aa5fb034c7431264354ea7c7c9ad6a79"
+    },
+    {
+      "path": "ComputableAnalysis/CauchyProductEstimate.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "47a5cd39bb106dbf6e5a0698d50334586dc785c2a02741e14960fcd5d809c621"
+    },
+    {
+      "path": "ComputableAnalysis/CauchyTaylor.lean",
+      "scope": "native",
+      "area": "contours-cauchy",
+      "sha256": "02a5918cad1a5d022ad2a24cbed0b1efb06b23e85cb83eb295c987e8336d659e"
+    },
+    {
+      "path": "ComputableAnalysis/CauchyTaylorCoefficients.lean",
+      "scope": "native",
+      "area": "contours-cauchy",
+      "sha256": "2eef20880c5a94b49c56444e3635221012b2ae615c2c0e6e4f2b9cff84a6e810"
+    },
+    {
+      "path": "ComputableAnalysis/CauchyTaylorDisk.lean",
+      "scope": "native",
+      "area": "contours-cauchy",
+      "sha256": "d095324d069541dffab457d8edaed2b6ca1ba70c2096f4f9f0055840875bb99e"
+    },
+    {
+      "path": "ComputableAnalysis/CauchyTaylorExamples.lean",
+      "scope": "native",
+      "area": "contours-cauchy",
+      "sha256": "344cc5827e88086c6e44fedee2fa566edf8f337274596a72ae37d392a1968870"
+    },
+    {
+      "path": "ComputableAnalysis/CauchyTaylorKernel.lean",
+      "scope": "native",
+      "area": "contours-cauchy",
+      "sha256": "b3cb761030692e481802e40f18273f28d1638235a927e702d2a1cae3299a515c"
+    },
+    {
+      "path": "ComputableAnalysis/CertifiedComplexApproximation.lean",
+      "scope": "native",
+      "area": "complex-local-calculus",
+      "sha256": "f89727b92632bf8781a0a41afcd236d3ee81d2f1619d7f079dc05db172179075"
+    },
+    {
+      "path": "ComputableAnalysis/CircleFoundation.lean",
+      "scope": "native",
+      "area": "entry-points-ledgers",
+      "sha256": "243041e34823177ade99d81f70281ff661fee3d62d75030f1974d6d5eb2522de"
+    },
+    {
+      "path": "ComputableAnalysis/CircumferenceBridge.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "197b39cbfed097276103d37c2a8edd7b441af110c86ef390a928c91c9716bbdc"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexAffine.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "94d6b3d9c4bd206ea67b0a8eddd8ec0ac87081ce48ce2cf39634774bafdd63af"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexAnalysis.lean",
+      "scope": "native",
+      "area": "contours-cauchy",
+      "sha256": "86436c3e6025d54473d304c0e217592def670e7d8d739b7aa15d639b3dc438a2"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexAnalysis/Cauchy.lean",
+      "scope": "native",
+      "area": "contours-cauchy",
+      "sha256": "48d7e8e284b35d98cc22fc90b84516218a36888db05c2a111db5ec2c2d2aeaba"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexAnalysis/Examples.lean",
+      "scope": "native",
+      "area": "contours-cauchy",
+      "sha256": "1cf51286472bace5194f10268ebd58e0bc512d352972bbcf041342188d1b8156"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexAnalysis/Polygon.lean",
+      "scope": "native",
+      "area": "contours-cauchy",
+      "sha256": "0a65be9b9855c5a67bfda0fd1901e777b51b4815441454e2068387bbd7ac781d"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexAnalysis/Residue.lean",
+      "scope": "native",
+      "area": "contours-cauchy",
+      "sha256": "4ae0a3f9b46a739beba67b4413d50c727ce0fcd179f73b180f5266d4a868da1b"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexAnalysis/ResidueExamples.lean",
+      "scope": "native",
+      "area": "contours-cauchy",
+      "sha256": "69bf0aede00bd9b5aa8f2e7564acb9eb55e98322b5290fe8b31e8635fb41a928"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexAnalysis/SquarePole.lean",
+      "scope": "native",
+      "area": "contours-cauchy",
+      "sha256": "32eb3c12cb5e5a83220ad49070458f3c1d00ab4982e99cfeacf7be0b830f107e"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexCircleBridge.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "803bf7540972dbd08a1a67a1727753fa5f45994594dd7d2d4c955a6b8a016f03"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexExponentialApproximation.lean",
+      "scope": "native",
+      "area": "complex-local-calculus",
+      "sha256": "5fc1dc7132b22b72a9419c5158041e32bb422ef993565aed29c362631990bf50"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexIntegralEnclosure.lean",
+      "scope": "native",
+      "area": "contours-cauchy",
+      "sha256": "cabc50652f4fa8908cce87abb57abe4ae010590d635786dd083e4d09bfa38f0b"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexInterval.lean",
+      "scope": "native",
+      "area": "representations",
+      "sha256": "426fe42be86ef94ca1d8d0f20bca7ac39bd11c34c8068d1f8a89836cc0d097a1"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexLogarithmApproximation.lean",
+      "scope": "native",
+      "area": "complex-local-calculus",
+      "sha256": "bb6ccb4ba171679477eb3bca93595545b2c13da29f2fcc52840c720f18749b33"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexLogarithmCompletedSecant.lean",
+      "scope": "native",
+      "area": "complex-local-calculus",
+      "sha256": "7050c58f9fa9f114a38a7b4d5b0585a94c7f7d5f9cb1e30c3345ba7555360bab"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexLogarithmJet.lean",
+      "scope": "native",
+      "area": "complex-local-calculus",
+      "sha256": "802470ebf205a5d560a548eee1a2d89506980ea97f32eca12bd41c043528a57a"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexLogarithmSecant.lean",
+      "scope": "native",
+      "area": "complex-local-calculus",
+      "sha256": "b33f2bbc67ffa0e4301ce2caf5d64b4ae1b28cfb45b2fe246f87d6cc32f10591"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexMultiplication.lean",
+      "scope": "native",
+      "area": "representations",
+      "sha256": "8646f627f7a9884c2a492ac21c44fc99dccfa7a5e05192ff58bf6fe387a1d196"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexPathIntegral.lean",
+      "scope": "native",
+      "area": "contours-cauchy",
+      "sha256": "5d5d98ff6e638efbc68d42f140167aa366a2071dab9b6b7a967eb73e9b8bd366"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexPolynomial.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "ded7dc8d38f60492d9e705bdeee9d0321bb4d7b31f15adb6e31fba465b410b25"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexPowerCalculus.lean",
+      "scope": "native",
+      "area": "complex-local-calculus",
+      "sha256": "6c9d35baa10b534b590489da428070b543df8588fa1291ae2434f221830f2221"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexReciprocalCalculus.lean",
+      "scope": "native",
+      "area": "complex-local-calculus",
+      "sha256": "81e663ee65f1dc332f8089e4f588b62818ed32007e1fea955176e00cfe3d1ca8"
+    },
+    {
+      "path": "ComputableAnalysis/ComplexSecantCalculus.lean",
+      "scope": "native",
+      "area": "complex-local-calculus",
+      "sha256": "787a533a50c76e750d6bff92a539959608f78212034e293a593afd13cd80caba"
+    },
+    {
+      "path": "ComputableAnalysis/ComputableArctangentSeries.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "98812179da7065734e39e4eccc0321cef2b94cd1271d2725a9802aa9afe4f642"
+    },
+    {
+      "path": "ComputableAnalysis/ComputableCoefficient.lean",
+      "scope": "native",
+      "area": "representations",
+      "sha256": "8d554a0a0fdf3132f6586c4794cad40d63a2dc59e92a38856c8c89bcdcf8fe3f"
+    },
+    {
+      "path": "ComputableAnalysis/ComputableCoefficientApproximation.lean",
+      "scope": "native",
+      "area": "representations",
+      "sha256": "d89dde6254f8c1d10fdb3a21b6bd3e62f97f4e20bc04a07139f0dd6fd4945880"
+    },
+    {
+      "path": "ComputableAnalysis/ComputableFactoredAlgebra.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "99bf4844ca8f2a548d8d3a3af9fd1241d59e3301564ae6f30f0d406ee2cef058"
+    },
+    {
+      "path": "ComputableAnalysis/ComputableFactoredPrimitives.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "b0c397f56f17255248535f9767f405193502fcd2324a22ffba6cc32842f88921"
+    },
+    {
+      "path": "ComputableAnalysis/ComputableLogarithmChart.lean",
+      "scope": "native",
+      "area": "elementary-functions",
+      "sha256": "db297e30ba21b1aec8d5c2a351b8176e6d8d6048d823892439a342f4a263a32a"
+    },
+    {
+      "path": "ComputableAnalysis/ComputableLogarithmDerivative.lean",
+      "scope": "native",
+      "area": "real-local-calculus",
+      "sha256": "cadbe624a0d1d21c71ddb186b9aad13fc5e652dd9f83da4631ab1e8415d1d0f7"
+    },
+    {
+      "path": "ComputableAnalysis/ComputableLogarithmPrimitives.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "9f38aefee24a0c313e2f57579bec1edd7fc08fa33acd6260c787a2f6359ca47b"
+    },
+    {
+      "path": "ComputableAnalysis/ComputablePrimitiveDerivativeExamples.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "6b4b59465b6d673ce01b1a363ab02b49ef01654c6e89a867962a8df6a94c16f9"
+    },
+    {
+      "path": "ComputableAnalysis/ComputablePrimitiveExamples.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "1eac9a13b8b48dff89ebaf51d0ac0811fb9f72f6d8d1ef90ae68bd3abd1cd9d7"
+    },
+    {
+      "path": "ComputableAnalysis/ComputablePrimitiveFormula.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "27e47eec12b8f2e5b05e6ddf29a36661a6cd2f53b0005fdf486b5305e2e0c835"
+    },
+    {
+      "path": "ComputableAnalysis/ComputableQuadraticPrimitives.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "ea071d5bcb293a98d887ac1d45354715558d3ab83b871d7f1c62101ad77a5db3"
+    },
+    {
+      "path": "ComputableAnalysis/ComputableTrigonometricRationalization.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "c54e5118eb563976deeefb4657b9c4b44e6300b848597076010d2b3fdfa374b3"
+    },
+    {
+      "path": "ComputableAnalysis/ComputableWeightedLogarithm.lean",
+      "scope": "native",
+      "area": "elementary-functions",
+      "sha256": "f5ba2f25a68b14e188e63d1c969c0ea6c1ee710a6e6479c82bdd6499e82fa01c"
+    },
+    {
+      "path": "ComputableAnalysis/ComputableWeightedLogarithmDerivative.lean",
+      "scope": "native",
+      "area": "real-local-calculus",
+      "sha256": "94904fe3fa265c013e8be0b355dc2afdbccd3478075c9272586b2e7225a1182e"
+    },
+    {
+      "path": "ComputableAnalysis/Differential.lean",
+      "scope": "native",
+      "area": "real-local-calculus",
+      "sha256": "59828969f91d04ef5a2edd09c505a0cc0c99086d8d53697de2f28f15ea73891d"
+    },
+    {
+      "path": "ComputableAnalysis/DifferentialEquationsFoundation.lean",
+      "scope": "native",
+      "area": "entry-points-ledgers",
+      "sha256": "16322290664ec90c24b9a6b558e783f7e6977bf895e7214e9977ba880ffefa9b"
+    },
+    {
+      "path": "ComputableAnalysis/DifferentialReciprocal.lean",
+      "scope": "native",
+      "area": "real-local-calculus",
+      "sha256": "b6421aa73be7b73eb803f01c6451536ab02352eeb0fde704a82d3c0fa94aee90"
+    },
+    {
+      "path": "ComputableAnalysis/DifferentialSynchronizedSum.lean",
+      "scope": "native",
+      "area": "real-local-calculus",
+      "sha256": "be8263af41fa55abe141ff62dc8e94161958380af6c6dd72db2fcf48c12b0ead"
+    },
+    {
+      "path": "ComputableAnalysis/DirichletSeries.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "6b109a76f614b10cfc79cf8322a077d7f48bd54f533c6bf375ab84fea06c098d"
+    },
+    {
+      "path": "ComputableAnalysis/EffectiveCalculusFoundation.lean",
+      "scope": "native",
+      "area": "entry-points-ledgers",
+      "sha256": "2f8d343f422eac416a17164167946c7ee5c800fdd6f1df7964049be499a14552"
+    },
+    {
+      "path": "ComputableAnalysis/EffectiveFourierSeries.lean",
+      "scope": "native",
+      "area": "fourier",
+      "sha256": "32f3522c50b9d38035db6f2250f9838c7ce9e4594d07a84a7c90365148e41cce"
+    },
+    {
+      "path": "ComputableAnalysis/EffectiveFourierTail.lean",
+      "scope": "native",
+      "area": "fourier",
+      "sha256": "67bfe4c28c7137a4c713c9abd6bb6cb0ae1484ffd0f5e5287649b937decefe7f"
+    },
+    {
+      "path": "ComputableAnalysis/Elementary.lean",
+      "scope": "native",
+      "area": "elementary-functions",
+      "sha256": "6c355520ac6a7faab303e04d5e1ad76729fff8b4952f465c08a5958d31c9384c"
+    },
+    {
+      "path": "ComputableAnalysis/ElementaryFunctions.lean",
+      "scope": "native",
+      "area": "elementary-functions",
+      "sha256": "f0520d46fcdb27cadcc22547672b850d5574484ff05b12affc83031539f8159f"
+    },
+    {
+      "path": "ComputableAnalysis/Exp.lean",
+      "scope": "native",
+      "area": "elementary-functions",
+      "sha256": "d944e0d94298812ffe70deb840693cbf6578bd9dc9880b418501000b44b38509"
+    },
+    {
+      "path": "ComputableAnalysis/ExpProofs.lean",
+      "scope": "native",
+      "area": "elementary-functions",
+      "sha256": "8e6192bbf65c1a9b0132268f174fed82c21a11471b3f2af4382d323e0eda88c8"
+    },
+    {
+      "path": "ComputableAnalysis/ExponentialLogarithmFoundation.lean",
+      "scope": "native",
+      "area": "entry-points-ledgers",
+      "sha256": "cc65eea524c65bbee9407eb2b08a85f98c61df903d1f277c161c066f5561b6aa"
+    },
+    {
+      "path": "ComputableAnalysis/Extension.lean",
+      "scope": "native",
+      "area": "representations",
+      "sha256": "50df482a3f4c43aa09cfbd6bb9ce5dd2be635034228a2986c2545c413279dfa1"
+    },
+    {
+      "path": "ComputableAnalysis/FTA.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "a65ed9c879ca7a374f5d5e551840370f70dbf6cf6c7b895af6d1687c37ed6c28"
+    },
+    {
+      "path": "ComputableAnalysis/FTC.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "d59732a339d2a503f5f1627cb26f1d6aed2f19be6a9530238e7f96ed96cbd8be"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteAMGMExample.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "2b528ecb87f11607e291deca9e4e4edfb1b9452057e68d018eb537ec6795e0a1"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteAMGMInterface.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "4c12e44de8cfd4189a7dbe72a78d3fccc1c5c2aca39c08c7b83f25cee52458ab"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteBertrandCertificate.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "ee7640c9b19ac13b43a76a8bed5e62d10c04b37405a3742a0d091d5fb610115d"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteBezoutCertificate.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "c00310a97ed84132d9aa5f380c1e6058d28ced2e8eafacacb3de428041d3c7ab"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteBisection.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "b337dfd84e576b7ef19c65e9e3a172c91d12a54c61090847c3f8c1c9ed97cc05"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteBisectionCertificate.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "f012d2e171a79581eedec2ecec614834d48dde3e06abc5b89c1eb09220898fad"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteBisectionIteration.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "4da2789d1b8facc3dc9d2c3106e89ac794a6eea06cbddc24ef4e43f634df3703"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteCauchySchwarzExample.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "cb58e4bb4b0160e8e3acf61edb629e04b2824138f3ef4089e61b7fc3594d7e2b"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteCauchySchwarzFourExample.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "c92ee7977eed213bb82fd6a9a9d4ad489d82b76e1b52a5192fe554eb84ad698c"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteCauchySchwarzInterface.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "e31133346eab2b165266c64a894cf77ad833d31904a38bac68849ca634b13af0"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteCauchySchwarzList.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "1e50db07e31ecad76598456d691838d008fdb108289bb837a004c741fadf8b00"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteCauchySchwarzSixExample.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "b56a615bc59e89809434c32e785f7eb61e995f80b9aec385f8ebb6ac68818f51"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteCauchySchwarzThreeExample.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "cacb4e05ba7a8ad65c87a9ec74792123996fdd6cf8f1886c4b98cc7b72db7c8d"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteComplexPathCertificate.lean",
+      "scope": "native",
+      "area": "contours-cauchy",
+      "sha256": "b07e12a20aa33674ae9a2fe291feb4736dae4e512d4c20dcecec671232eacf19"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteComplexTriangleExample.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "3eb1b4a39b21a5ea02d9f87b84fb7a2928802453883314f2e02ea23304a728c9"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteCoordinateInequality.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "59c9d87b62bfb50b3762ea57d8b0f741967e47251d6ee1a1e065c0ca42a6af93"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteCubeRootBisectionExample.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "f0122d5c8084db26f894e699fe7fde2322924f2f47f828db6e08d7f40a2bafb4"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteCubeRootCertificate.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "bd962f8739b7fe31efeae0ffc42d10cee727148abf4921926e6ceb1732c94ab3"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteCubicMVTExample.lean",
+      "scope": "native",
+      "area": "real-local-calculus",
+      "sha256": "e0e3096d9188d4694c483b061593d6d5545461de5a4d49edcce27d4d05e82653"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteDecimalDivisibility.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "aced9813f41f897ff436582847fbef12b5285c83e377adfc81544bb277077b4b"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteDecimalExample.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "260d24cf00dfeb54d73d578bc5ae21ec0fcd153200e15edec11b73e9f25adb5d"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteDeflationChain.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "2022896278809fdd77b692d2501fcce89ed7674293d3ed74e7284a299b77f398"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteDeflationExample.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "642091ffe7a113b0f0c687102baa069256496610df24508473ebef24fcaeb30d"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteDerivativeLimit.lean",
+      "scope": "native",
+      "area": "real-local-calculus",
+      "sha256": "959741b7cc88f5664f3fb33d2b05371af219c406c5bb6d9350b2413b0f28fb7e"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteDescartesInterface.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "fd59e7df180262622cd97b12fa5b5af1199a9f56ac1358a713570b16f31a6c6a"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteDigitDivisibilityInterface.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "4fe7c3ff813801801dd222ee865fe6be2170667d438032e2a7416d3052c156e4"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteDyadicAMGM.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "31b963ff6c2f1aa5a8f7def4ea13925e5251ee07ae59cf68f469a767d449c4dd"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteDyadicAMGMExample.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "d8534f6adb45cf0e06ef7e2ad529df42e4ffe04838f29a9cad812d4661332a67"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteEuclideanGcdInterface.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "fbe17ce73f87fbc4c6763a0640a09eb7d1c8d23e4d9d9f42f7b703cb8bf769ea"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteExponentialTaylor.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "f104e2f88d67b84d0cf231d7bc8393939dc0a121fa99137b05c0dcfdda23e144"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteFTABoundary.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "aa30898fa09912e9db79a00a0791695e56ebd76b4b1c79832b40ed25be716d51"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteFTAConcreteCertificate.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "43d36f5bda5b78f1a606474c77e170e231846981db54cf5ac2a8856365343a1b"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteFTAIsolationExample.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "daf4ed45c7fb96fec9c9896496fa0ef63a17bf450122cbb4eecb4f6232b99bd1"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteFTARootExclusion.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "4967a1c054cd81a1e0592008ea8307e80271211e101d0bb240bf3a03897bb621"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteFTASubdivision.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "028c46fd4c35ba25380e33d7b138543176031348215d943540e82f499411baeb"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteFTCIntervalRegular.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "2778222afcb6386bd92409d8278cf175cfb935a96fa4dd9c923b98a77d5f1775"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteFourierCertificate.lean",
+      "scope": "native",
+      "area": "fourier",
+      "sha256": "8ac86159a97bb6dd5f3d16ba68af974cdd11d02254269b5d3769a509dfc5c7e4"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteFourierEnergy.lean",
+      "scope": "native",
+      "area": "fourier",
+      "sha256": "7bc3f1fcd1f718efa8b8f710d3c167f2fb97de086ea8d1ae84244852181d2596"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteFourierFoundation.lean",
+      "scope": "native",
+      "area": "entry-points-ledgers",
+      "sha256": "ce924dadef84159af0c60b76704275c0a35aea1d561fcd73493de088596a9fc9"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteFourierGeometric.lean",
+      "scope": "native",
+      "area": "fourier",
+      "sha256": "51a611d73f0e67e35000b74dd8a0f9c892977bf2f49366a59450256614678f1d"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteFourierOrthogonality.lean",
+      "scope": "native",
+      "area": "fourier",
+      "sha256": "6ae8d3264a713828c305c968627e3a8f76082d238ee0c8f06ba3338798ef53e5"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteFourthRootBisectionExample.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "454507c8177e6ec270f878f709f4b999a59ce6df66c9c7f7a22a2a807e05d869"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteGaussianIntegral.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "0bfcf030df4a7105060c3445c15c5f774bcf36d71c5a7321cec5ab96a277a456"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteGcdSecondExample.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "69ec5eef90c0aa61fc8e745a9169f89f4391178b6bed78193117c4865c668fdb"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteGeometricSeriesInterface.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "3f2b7a8f6e93494dc03af986f7b6d828b6efcfda780fc5e104ba1867c829849e"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteInductionExample.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "a9017f7fd0b45f80c42ffc13aa2ca87cec598e6049922ebbfe04b712c4e1b19a"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteInverseSearchInterface.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "e9ae7882f7850317b98b2be05064e39d485b5f4092bee011b1bfbeeb878bb65f"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteLHopitalCertificate.lean",
+      "scope": "native",
+      "area": "real-local-calculus",
+      "sha256": "139911d1a6c917ba2ed896251f9dc351a69827fb0f2e3271d070b7082e4d92df"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteMonotoneSequenceExample.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "d65f12e21b2ed079553e8eddd825346e62946e2867ad081b0f6dcff7afcccf5d"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteMonotoneSequenceInterface.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "7f39ab06b8523996443e96a48623fde51fa1ce3a8f0576c50f26d9c9e9e80e83"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteNBallVolume.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "17f940e13e24a31c12014e621ba24ea1e2fc7cc5c5b01dc563d9eb5d6a7fbbe1"
+    },
+    {
+      "path": "ComputableAnalysis/FinitePascalExample.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "0c38991cbb8eb2545c4eca0a166155475a5ae471c6723cc00865452db9792d89"
+    },
+    {
+      "path": "ComputableAnalysis/FinitePellCertificate.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "3e8fd5fb9d8d1791cbb627a29181ca35af30057e5684639a2fa17bdbbbb21393"
+    },
+    {
+      "path": "ComputableAnalysis/FinitePiecewiseAbsoluteValue.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "6a91782eceeb22f54b615e142fcfcadd1788fb5018b53b68e01dd957f9f3a6c3"
+    },
+    {
+      "path": "ComputableAnalysis/FinitePiecewiseRectangles.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "f30f986863e94b9c500328b429b06bf7affa76e4436127d6b4e03a685e9de09e"
+    },
+    {
+      "path": "ComputableAnalysis/FinitePolynomialCalculus.lean",
+      "scope": "native",
+      "area": "real-local-calculus",
+      "sha256": "189a94377bf960841df134d8424e161a576ef018ed8b1b37b9153ca6b94c25de"
+    },
+    {
+      "path": "ComputableAnalysis/FinitePrimeFactorExample.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "6a9e62601b5e16434a49b2298708c36da8078796786c10aaff8c7dc2c3fd4177"
+    },
+    {
+      "path": "ComputableAnalysis/FinitePrimeInfinitude.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "048a34a1d298741830651bd113f855c379cb667c69d31d986ec2e7dd45f3221e"
+    },
+    {
+      "path": "ComputableAnalysis/FinitePrimeIntervalInterface.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "993239a8dcb41119dd94c2d21829e3fd334ec5e4c03b018b73550d8fb4e67f6f"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteQuadraticRootInterval.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "9d9d7234f91ad384f3f68e514abe7268e2c85a09b3319975cf22b7e38f39ba20"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteQuadratureMeanValue.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "f4d64073bc317e19935bde4c8dd816285d6c78918c0ca8f72c20d7d661a216c9"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteQuinticBoundaryExample.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "4a2ecb13f236cbe3e99cf87d1372775c5cf1946df36fdec63c2affdb2e50c17b"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteQuinticDeflationExample.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "6f373afa82e10dea4611b3b3a4434664e89ee997106195853a673937f72b308b"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteRationalCodeExample.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "bc4156e256e4ea047c86e8219c560cf211b4ec5bee2b842ae9e690bbe3c764dc"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteRotationQuarterTurnExample.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "e6800a7baff4a044731671eee34447aa581e2571f3696a4c86fbacf31307db3b"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteSecantIntegralOrder.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "063dc04080af8c6bf7d42b0db3b9dc80a3bc992532057e45ea49ca0a1ae63710"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteSineIntegral.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "bd7496b01123b4cddbd365f5746ab7bc498f9d1c30ed0f5b129ec2a7f9708705"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteSinePrefixFTC.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "f463c22c1a56383d26ae14dd2dd976b8da92f9969b23d58c4064211ec1fe550f"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteSqrtTwoBisectionExample.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "8ab93441200d0d3c4a368ea8b58e38a71262b28e48aa3025c47c1ff2e1e7b598"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteSquareRootBisectionExample.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "f1ea973eeb794b5ed903ea5bfed793a6f8ef42be2145665454f808c1403c190a"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteSubsetCountExample.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "eb94f400a07c734f829320a0fceb5a7d571c86722294ce91c85a73757baebb2a"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteTaylorFTCInterface.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "559c8a018feb02eb217271fb70820270493b6bb02ecef4e2a6268d26e8c621a6"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteTransmutation.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "a78bb6b58bcfbb460748ec2545955c49da6f646816f15a7d95c070c7e08d1239"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteTriangleCertificate.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "58a1b001af800adaf66bc261bc9c6361b7bdeb76915364ac7c73e5a7c5103cd4"
+    },
+    {
+      "path": "ComputableAnalysis/FirstYearCalculus.lean",
+      "scope": "native",
+      "area": "entry-points-ledgers",
+      "sha256": "e57b8562efd33eae4067387be3bdc9c7919f9cb4a1f7de87ce24c24f570d90d6"
+    },
+    {
+      "path": "ComputableAnalysis/FormalPowerSeriesAlgebra.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "67c6f4c79163a48249adad5a8133c45eb1e9e91ee4cd3fde4cd88fbbf7d529ac"
+    },
+    {
+      "path": "ComputableAnalysis/FormalPowerSeriesPolynomial.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "7465231c7ac447d8dd14ee457320e5fd613bf94f273d2fece41b1541bb7a327c"
+    },
+    {
+      "path": "ComputableAnalysis/FunctionDomains.lean",
+      "scope": "native",
+      "area": "representations",
+      "sha256": "295c2373af2a945e4800f2cf761ccc910980b7e58fd574d260629250566a37bc"
+    },
+    {
+      "path": "ComputableAnalysis/FunctionFoundation.lean",
+      "scope": "native",
+      "area": "entry-points-ledgers",
+      "sha256": "6fd574944a5c383c101baa63186e4666a16e4627ef46b2f95e36415e1053013c"
+    },
+    {
+      "path": "ComputableAnalysis/GeometricPiRotation.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "1bd513606873ac378a5b3c0317b35c8ed2b8489119ae4287ce976ff5ec13c4f1"
+    },
+    {
+      "path": "ComputableAnalysis/GeometricPowerSeries.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "d3b59402c1648747f23ab32012bb06f9cbf67b943518d992224cf8714809ee7d"
+    },
+    {
+      "path": "ComputableAnalysis/GeometricRotationODE.lean",
+      "scope": "native",
+      "area": "odes",
+      "sha256": "f615de1b2c92549fe788a67d2b73acc7e99b0bcd8b63752f162ecfd948953fa4"
+    },
+    {
+      "path": "ComputableAnalysis/GeometricSeriesCalculus.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "fce7b0363c6f0d862bb0a927394e076f002bf2812acb93436fe335a9700f1735"
+    },
+    {
+      "path": "ComputableAnalysis/GeometryFoundation.lean",
+      "scope": "native",
+      "area": "entry-points-ledgers",
+      "sha256": "72aeaf9d3e0c1c3de0112ee9c3c2080bf9fbcfbe042828540758f4702e26d5df"
+    },
+    {
+      "path": "ComputableAnalysis/HolomorphicJet.lean",
+      "scope": "native",
+      "area": "complex-local-calculus",
+      "sha256": "98cb360614371f17eccdb62197960fd71920ff9334abec7341a3756a37ebdc74"
+    },
+    {
+      "path": "ComputableAnalysis/IdentityInverse.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "9803d5e9055a70c83695b1b874fca8ef23cfe7bacc0c7afad0dda964e1488411"
+    },
+    {
+      "path": "ComputableAnalysis/IntegralEnclosure.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "76c4105064c9f812f3eeafdd40c221a8b8d426a1d55a03203d0e151f4a56d387"
+    },
+    {
+      "path": "ComputableAnalysis/IntegralEnclosureExamples.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "cce017a5a913504b08a776f993606e186ef022d3664e60c40deeaeb6c7d7637b"
+    },
+    {
+      "path": "ComputableAnalysis/IntegralFoundation.lean",
+      "scope": "native",
+      "area": "entry-points-ledgers",
+      "sha256": "833f3a2e4d097c5ad53a851d6cbebada41aac2d39ee24cf9afc192abe9ee093e"
+    },
+    {
+      "path": "ComputableAnalysis/IntegralIdentities.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "0b56ddabfb242e06422514cafdb56ee9fce861f8d5f5678d86052aa027a1689d"
+    },
+    {
+      "path": "ComputableAnalysis/IntegrationByPartsPi.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "4f9602c40e22f0deaff18c5458bc7dd140706143f742222d0e2c99673eb6d657"
+    },
+    {
+      "path": "ComputableAnalysis/IntervalQuotient.lean",
+      "scope": "native",
+      "area": "representations",
+      "sha256": "f598599ce7b242998eeb8d51f1861b009a691a5fea4b1d61dd8168d34098ed9f"
+    },
+    {
+      "path": "ComputableAnalysis/IrrationalSqrt.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "c21fab27abdcd6f5574059271bd1f7b9ea58237d34c94cce34882620c3ae1a36"
+    },
+    {
+      "path": "ComputableAnalysis/LeibnizPi.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "1e3485adc2cbf76d1dea57a556713be756a629d36cadaffca080226a590fbdf0"
+    },
+    {
+      "path": "ComputableAnalysis/LeibnizPiTaylor.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "75eaaee288d1c9640d66897947a38ca7a3ae628e86b31ccb9af862d33d60f354"
+    },
+    {
+      "path": "ComputableAnalysis/LeibnizTransmutation.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "e09b1e095a4fab32d489fa4dcbbfb8a715595ab6c95862e94064d37c494caa24"
+    },
+    {
+      "path": "ComputableAnalysis/LinearGrowth.lean",
+      "scope": "native",
+      "area": "odes",
+      "sha256": "69e50f9e71220ddb876edcc48281483f25a7ac1a1197723d070679a3567a2132"
+    },
+    {
+      "path": "ComputableAnalysis/Logarithm.lean",
+      "scope": "native",
+      "area": "elementary-functions",
+      "sha256": "fcc70426156843ec16c4c73e6c23c2d680fcb01900ca55b53efcc498ac5a28de"
+    },
+    {
+      "path": "ComputableAnalysis/LogarithmicPi.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "1b440ce6579030ab5743501cbbb62f8135f35df9e3a01e860922495fb364fc93"
+    },
+    {
+      "path": "ComputableAnalysis/MonotonicityConvexity.lean",
+      "scope": "native",
+      "area": "real-local-calculus",
+      "sha256": "4b73a3ac0529a6b41ef7e3d54c9edad9fd5f99ae5cd7c1d35c67907599dcd158"
+    },
+    {
+      "path": "ComputableAnalysis/Nilakantha.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "03af7e02f600da1eb48bc65e39082e7e6a69c1bc9d799b2b23a31f0301f95bd1"
+    },
+    {
+      "path": "ComputableAnalysis/PDE/CauchyContour.lean",
+      "scope": "native",
+      "area": "contours-cauchy",
+      "sha256": "845f413589afe3e09689733c527fff8c8b4212f26acf1f26cc4360c997979518"
+    },
+    {
+      "path": "ComputableAnalysis/PeanoBaker.lean",
+      "scope": "native",
+      "area": "odes",
+      "sha256": "7c0bb5e8cdffd39bb56d8c811fd9a29e76d8dea4bc4bc5bce6947d1206c61b5f"
+    },
+    {
+      "path": "ComputableAnalysis/Pi.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "3555490fd90dcf655122cdfa04972e2a13494ea58293c76726a79edef1f2316c"
+    },
+    {
+      "path": "ComputableAnalysis/PiComplex.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "77aee3bca60dbdd64fc5d30ecd2ef6295d30d69371f50789154a7c31d59f8d07"
+    },
+    {
+      "path": "ComputableAnalysis/PiProofs.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "9db9f18f3c093912c48aae7f50ab46a320947798f93f439990eaa9235ad1ff2b"
+    },
+    {
+      "path": "ComputableAnalysis/Playground.lean",
+      "scope": "native",
+      "area": "entry-points-ledgers",
+      "sha256": "bcc10996f0bd0edce295d9bfe606a0e393c855541c8cdb5000e3122c642b59ad"
+    },
+    {
+      "path": "ComputableAnalysis/Polynomial.lean",
+      "scope": "native",
+      "area": "finite-algebra-number-theory",
+      "sha256": "0e09c7d95e05fcc9344835f251a03a4c7fea99d65cfc57928ff9506b5ed8b2cb"
+    },
+    {
+      "path": "ComputableAnalysis/PolynomialDescartes.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "616342122766dee430bb959d149d881dc8d734841444869c305a257a3f1afb11"
+    },
+    {
+      "path": "ComputableAnalysis/PolynomialFTCValues.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "96ede0436626b32bfb393802386e9d2c9746026de6e9e0b9380d51840c7d87b2"
+    },
+    {
+      "path": "ComputableAnalysis/PolynomialHolomorphicChart.lean",
+      "scope": "native",
+      "area": "complex-local-calculus",
+      "sha256": "298853d24eeeff82f83ae09655e890adf2ab0ed2f3587f69e49c79a29113e6c9"
+    },
+    {
+      "path": "ComputableAnalysis/PolynomialMeanValue.lean",
+      "scope": "native",
+      "area": "real-local-calculus",
+      "sha256": "0d787ae419a8962a164a207672b56c27ff39fcecc98d0e39c59dc4767a61277e"
+    },
+    {
+      "path": "ComputableAnalysis/PowerSeries.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "3c9f3e54b4c77701deee4ac6fbcee26c0290d5202006389e84de8097922b7a16"
+    },
+    {
+      "path": "ComputableAnalysis/PrimitiveChangeOfVariables.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "9bad49902d439aceec98db67edaabc782dc65de44d50a582a5329f5806f8982c"
+    },
+    {
+      "path": "ComputableAnalysis/PrimitiveLogarithmEstimates.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "4430588bef71632bec2d8b83b01390791c2c8f15355416ebf217de897fca5c4b"
+    },
+    {
+      "path": "ComputableAnalysis/PrimitivePiecewiseFTC.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "8674b837056fd58a2c143ab391f6b9f799bfce373af6e2a2b2804ea0eeefa253"
+    },
+    {
+      "path": "ComputableAnalysis/PtolemyLengthCore.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "d220dd4a88be4c612c9174a541b3ac39d6fc74b4713ee1835a2e79020b7c8960"
+    },
+    {
+      "path": "ComputableAnalysis/QuarterCircleGeometry.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "c9016e5a28056ba13c93de0fc237b6569493e214a9e1fcb384696eaa3e96e2a0"
+    },
+    {
+      "path": "ComputableAnalysis/RationalCircle.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "076e26cf113a3b60bb90c290a7fa240bf08283ed538df83fa0beef4ca436c51c"
+    },
+    {
+      "path": "ComputableAnalysis/RationalExpressionNormalization.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "a62bbca8fb7910c8908f0a1b0edd179893244c4462bd03df377af7767396bf17"
+    },
+    {
+      "path": "ComputableAnalysis/RationalFactoredPrimitives.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "7be002f0ab495d85346ba0a3a86c6e2828bde27abef25c0ddd5e59d5d10adf4a"
+    },
+    {
+      "path": "ComputableAnalysis/RationalGeometry.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "a271bfb9352c9da1223c027785450c848d019bbbcdbaa7e5c0f7291b285c2aa6"
+    },
+    {
+      "path": "ComputableAnalysis/RationalPartialFractions.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "cdb048039070f771c0ee7de8b4b3f4729331fd816065ce217ac7f443ce9ae47e"
+    },
+    {
+      "path": "ComputableAnalysis/RationalPrimitiveAssembly.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "bc9730ebed5e3b251e7f2b4cfd451d868752881974c9a92abe344acbb3eb72d3"
+    },
+    {
+      "path": "ComputableAnalysis/RationalPrimitiveExamples.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "90b4a063a14605808a661151b648c1211882a89f769a0d90f7a9b8626d2161e4"
+    },
+    {
+      "path": "ComputableAnalysis/RationalPrimitiveFormula.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "d6fa92f671d0e6dc3c7fba1b60af565f72e6c2924e0a34d0367d311352ffc540"
+    },
+    {
+      "path": "ComputableAnalysis/RationalPrimitiveLogarithm.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "9dba13e044174257dc3e1090df070d48748de9a5b75c39aadf272b79fefcd305"
+    },
+    {
+      "path": "ComputableAnalysis/RationalPrimitivePolynomial.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "a7cccd377423b2699e4aec791f95586503c0fa333555af3dfcaa61d4e4acc945"
+    },
+    {
+      "path": "ComputableAnalysis/RationalPrimitivePowers.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "f0cc545c0731cfe23cd0f871c96fc626d0b500c8dd0d8c2bc97b25472671838c"
+    },
+    {
+      "path": "ComputableAnalysis/RationalQuadraticDivision.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "f589c64330acd290bb3164ade8d418b4f051a1c6ec025c4fd8cbcb4ba9d9ff56"
+    },
+    {
+      "path": "ComputableAnalysis/RationalRootSearch.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "6f22635b4cc7d03889f0fd554b13bc9dc64446b3ed1cf389c74c1d7b1e6ccf1c"
+    },
+    {
+      "path": "ComputableAnalysis/ReciprocalQuarticPi.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "e76fbddcbf14aa3b7e02aeb7efe04902e695dd0822a7aeb7c855a37ef80e3204"
+    },
+    {
+      "path": "ComputableAnalysis/RepresentedHolomorphicJet.lean",
+      "scope": "native",
+      "area": "complex-local-calculus",
+      "sha256": "7a3d5eda6d5499c518bb62132e795a67772f243ab2456eee5c720518c148d593"
+    },
+    {
+      "path": "ComputableAnalysis/RotationCalculus.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "d0c80c6f886b3022d3246138f315fb99818bbbc3821b8377fa7381556b52eb53"
+    },
+    {
+      "path": "ComputableAnalysis/RotationDerivative.lean",
+      "scope": "native",
+      "area": "real-local-calculus",
+      "sha256": "7773b45af321bd0895302e17420c2d300abfa2f135013d9e2e85b92a66273456"
+    },
+    {
+      "path": "ComputableAnalysis/RotationInitialValues.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "33aaffd95dd3331fdd08575562f6d9308acd15689b78e9df8248d9c1d52aa09f"
+    },
+    {
+      "path": "ComputableAnalysis/RotationLift.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "046d393be574d90bf4aea5fb22a6b3c1823b814d9fab997f648ab5ac9aa9be4f"
+    },
+    {
+      "path": "ComputableAnalysis/RotationPeanoBakerBridge.lean",
+      "scope": "native",
+      "area": "odes",
+      "sha256": "36ca42656e745a9e8c0f4f087eb6e025b286a3fe83f3d0be1a69e0d541606dc1"
+    },
+    {
+      "path": "ComputableAnalysis/RotationSeries.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "cfb872a81a3a143d9d1f53676367a4b2758660e0542e4953eb8e3561785901ba"
+    },
+    {
+      "path": "ComputableAnalysis/RotationTaylorBridge.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "c4c9e33139d0033fb61f7e3c9d89c4d6a00fd9b6e70227d38b0ef8cc0025e8d0"
+    },
+    {
+      "path": "ComputableAnalysis/ScalarODEUniqueness.lean",
+      "scope": "native",
+      "area": "odes",
+      "sha256": "c0d9ec7d9cdad87874d8372ad2ffa7030158eda864c4ca80252d3734704e6f73"
+    },
+    {
+      "path": "ComputableAnalysis/SectorAreaReparametrization.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "bafbd4d83d8cf53d20e623fb3721fe5111dccf24031f6c03b2b58aed1047e7b0"
+    },
+    {
+      "path": "ComputableAnalysis/SectorAreaRotation.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "7cb7bbc2cecfc93a24cf64a2d1c6d839240308798aecb878f4a202946baec7a5"
+    },
+    {
+      "path": "ComputableAnalysis/Series.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "6827251114b551efc83b88e4d377d1f67e023106f9eaa99bfab89bd83f84cf23"
+    },
+    {
+      "path": "ComputableAnalysis/SeriesFoundation.lean",
+      "scope": "native",
+      "area": "entry-points-ledgers",
+      "sha256": "2a0ec4b09dee977eba0479e804a2f1959a332cb38523550c5f9040d67827d510"
+    },
+    {
+      "path": "ComputableAnalysis/SinPiIntegral.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "e6ce5e24de3b8c3206c1c1d766a707fd7b5afff1b576803c53ec5a4e742e59d4"
+    },
+    {
+      "path": "ComputableAnalysis/SinPiSquareFTC.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "bef7d8dbce58bcfc6be30959f361ff2bdc1183e3eeaaaef2549c3c1ef9a5ed0f"
+    },
+    {
+      "path": "ComputableAnalysis/SqrtTwoDescent.lean",
+      "scope": "native",
+      "area": "roots-inverses",
+      "sha256": "36c270886dc9e5c075eda1f3a3469c9318e44f09b451bdf508b9372b7076389f"
+    },
+    {
+      "path": "ComputableAnalysis/StableRotationDerivative.lean",
+      "scope": "native",
+      "area": "real-local-calculus",
+      "sha256": "b855ee8b3dbb80a34e690efd2a7094b1cf651de6ea1789d991cb221d15a9eb62"
+    },
+    {
+      "path": "ComputableAnalysis/TangentPullbackEffectiveFTC.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "6663339766334b3313c4dfdfbad65ba6a07eb73b97b1bd6ef9df72fc31327f51"
+    },
+    {
+      "path": "ComputableAnalysis/Taylor.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "cc876e7dbdef4312d483a5d716c90402e917d3a617cbe97311eaae68df12190c"
+    },
+    {
+      "path": "ComputableAnalysis/TrigSpecialValues.lean",
+      "scope": "native",
+      "area": "circle-geometry",
+      "sha256": "03fe6abcfc7d957a9973cebcd8fa96ff61b4f86c20132abdb0a834d65f0ddf7c"
+    },
+    {
+      "path": "ComputableAnalysis/TrigonometricPrimitiveExamples.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "486ca08c9ba8a66ca7c5b3c01a7d5f7f113d94effcbb9e9330219fcb9aaae9d5"
+    },
+    {
+      "path": "ComputableAnalysis/TrigonometricPrimitiveFormula.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "eef882a07e475c0b0285076e3786020a9975f4ba46bd8eefc83e074f74768d5f"
+    },
+    {
+      "path": "ComputableAnalysis/TrigonometricRationalization.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "3eba02f6899ea56c52e4989c9f539e952f203963b426e29aaf563ffa8419b84d"
+    },
+    {
+      "path": "ComputableAnalysis/TrigonometricRepresentedFactorization.lean",
+      "scope": "native",
+      "area": "rational-function-calculus",
+      "sha256": "7a857369621bed152719487ab9d23891604257f64d4c199fef7446a1c89ccb35"
+    },
+    {
+      "path": "ComputableAnalysis/TurningPointIntegral.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "32319436c701dcde2a6b22c575bd8fb8324c63d9b3886b60f694979c6c7c8790"
+    },
+    {
+      "path": "ComputableAnalysis/VerticalReciprocalIntegral.lean",
+      "scope": "native",
+      "area": "contours-cauchy",
+      "sha256": "95340b86a0dedab9842285d1f4606c1983e12c36f9f5e5ea94494a3b0ed8ca79"
+    },
+    {
+      "path": "ComputableAnalysis/WiedijkScoreboard.lean",
+      "scope": "native",
+      "area": "entry-points-ledgers",
+      "sha256": "c0c997e24a54b8ea5c44a2d5ee4591c5826c7e0cc5d832e43137524703b61546"
+    },
+    {
+      "path": "ComputableAnalysis/ZetaReal.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "9b315abd72b1cb85e86232a79ae8bb64a1931d9a0e5018e53bceed44e0aa4f94"
+    },
+    {
+      "path": "ComputableAnalysis/ZetaReal/Approximation.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "f28030506bfaf2c2651e6e9ad0d1ddc53910294aaf24b2b40a26cae6975f4d8c"
+    },
+    {
+      "path": "ComputableAnalysis/ZetaReal/Binomial.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "bc6bb55fbc0821b56c615aa770be06d6bc542505091198ab06971ae9d39f7764"
+    },
+    {
+      "path": "ComputableAnalysis/ZetaReal/Charts.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "d288d87ab5a41c429a948f5b2ea108d59a119a55e14827109837a08efec5468a"
+    },
+    {
+      "path": "ComputableAnalysis/ZetaReal/Compatibility.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "a8cf07d0380eb43e48c657031b26dce510fd6666c7374183e41877bd15b97234"
+    },
+    {
+      "path": "ComputableAnalysis/ZetaReal/Continuity.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "c76d41aa03475bc2d63337e45e038acca49cf59cc9770296f157e814a3f56a85"
+    },
+    {
+      "path": "ComputableAnalysis/ZetaReal/Dirichlet.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "ec887652f9934917af10160dd0970fe56251f4715b4fbd9d75d4aa5eb229624e"
+    },
+    {
+      "path": "ComputableAnalysis/ZetaReal/Moments.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "7bde9b85d2a104754cd0c9354a70d9645d94b82523022d6595dc54a97bb89eed"
+    },
+    {
+      "path": "ComputableAnalysis/ZetaReal/Rectangles.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "68e0fbada2989c02334f5951057be97f8640ab63af608741ef34c081839216b6"
+    },
+    {
+      "path": "ComputableAnalysis/ZetaReal/Schedule.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "7d7c6100fff165e421b5984455827b78839e19f9d5675ac9bc14d0b38efe94b5"
+    },
+    {
+      "path": "ComputableAnalysis/ZetaReal/Series.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "9560ca209dc03f3e2ee7e09c79bd7a8b06bd11cd7aabf91a15b131bccf875bfb"
+    },
+    {
+      "path": "ComputableAnalysis/ZetaReal/Tests.lean",
+      "scope": "native",
+      "area": "zeta-basel",
+      "sha256": "b9d24230e1b3b38ece76c7ca81144b8a1d296f265fe6c8d86ea0ddacdec0b8f5"
+    },
+    {
+      "path": "Main.lean",
+      "scope": "support",
+      "area": "support",
+      "sha256": "2e01f37b728222eb4e8d08dd7c2a3f2eea6dc60ec60de779a0d76c28f23371cf"
+    },
+    {
+      "path": "book/checks/ExportRationalGeometry.lean",
+      "scope": "companion",
+      "area": "companion",
+      "sha256": "6365251d0ac3e8dc51ef88e3bade43f6c3e76a27d6b83caf77a92d4ef61d8f3a"
+    },
+    {
+      "path": "book/cosine-square/Check.lean",
+      "scope": "companion",
+      "area": "companion",
+      "sha256": "075ebee4e2c8e28003c52911140da91b7656c42b30efd9760a0584199e473820"
+    },
+    {
+      "path": "book/cosine-square/ComputableAnalysis/CosineSquareData.lean",
+      "scope": "companion",
+      "area": "companion",
+      "sha256": "7b2f40aae47a27fde5c0404871b81f967a67eafb22c06855a66f4aaac99f54c1"
+    },
+    {
+      "path": "book/cosine-square/ComputableAnalysis/CosineSquareFTC.lean",
+      "scope": "companion",
+      "area": "companion",
+      "sha256": "f97c43ec7033ad639ab2a96567ab71cc3ae0d76a2ab4a0f20b9db181514245ac"
+    },
+    {
+      "path": "book/cosine-square/ComputableAnalysis/CosineSquareSymmetry.lean",
+      "scope": "companion",
+      "area": "companion",
+      "sha256": "38c8ac85efce64f72530576a5024ec91c2f87f5d215ffe5f7e0d59244d990eaf"
+    },
+    {
+      "path": "book/euler-proof/CheckEuler.lean",
+      "scope": "companion",
+      "area": "companion",
+      "sha256": "4b81dcff2812a5e992e51be287e060f477d6cbf464480c6f52c06a68c765e3ae"
+    },
+    {
+      "path": "book/euler-proof/EulerBasel.lean",
+      "scope": "companion",
+      "area": "companion",
+      "sha256": "affd1c71ba1b0c7054a2b37bef92954155f069d1c3356dc39f4833e5399b813a"
+    },
+    {
+      "path": "book/euler-proof/EulerCotangent.lean",
+      "scope": "companion",
+      "area": "companion",
+      "sha256": "704fdae15e7b0becf12614fdb026f325d7106197f5cf079b3e02173aabbe5d24"
+    },
+    {
+      "path": "book/euler-proof/EulerEvenZeta.lean",
+      "scope": "companion",
+      "area": "companion",
+      "sha256": "967d27f82af02ada8a7b0158209ff947947e43264b60ac0858887df6892d9a49"
+    },
+    {
+      "path": "book/euler-proof/EulerSeries.lean",
+      "scope": "companion",
+      "area": "companion",
+      "sha256": "a95b894f45ff7c59e7c046166b6900a3e18e6ca263c53dcd64d9fef656a2ee04"
+    },
+    {
+      "path": "scripts/check_algebraic_ode.lean",
+      "scope": "support",
+      "area": "support",
+      "sha256": "80659325c2dd19e3ec50d738c1d8990b7529d1d7b2ba55e46f0cc19d62fc3948"
+    },
+    {
+      "path": "scripts/check_arctan_taylor.lean",
+      "scope": "support",
+      "area": "support",
+      "sha256": "860146900b0da20a3d2c97506ca34a557a60c65167debd9b7425e64f2905c1d1"
+    },
+    {
+      "path": "scripts/check_basel.lean",
+      "scope": "support",
+      "area": "support",
+      "sha256": "98cedfd0a54c94f6c95f8939afdf044e345231666cdcb1d47581f807737115d9"
+    },
+    {
+      "path": "scripts/check_cauchy_arctan.lean",
+      "scope": "support",
+      "area": "support",
+      "sha256": "46ab24aa30bf2c932457e15dfe3d8101dfbd01f879403407bbe88ae72a4e7ba3"
+    },
+    {
+      "path": "scripts/check_cauchy_taylor.lean",
+      "scope": "support",
+      "area": "support",
+      "sha256": "7df3cebd43b06a5a0e98d58c6a728bdc7c7f2299f5cb2df0b444a7e1ac9825e6"
+    },
+    {
+      "path": "scripts/check_computable_primitive_runtime.lean",
+      "scope": "support",
+      "area": "support",
+      "sha256": "b0ca53a38779906b3986688ebf6977dde1afe31146ef1a4b0a69fca203b9bd7b"
+    },
+    {
+      "path": "scripts/check_integral_enclosures.lean",
+      "scope": "support",
+      "area": "support",
+      "sha256": "b9d12c82669828ed61deab51427d647292c29dd03e54a7d9daa2e84660c904d9"
+    },
+    {
+      "path": "scripts/check_leibniz.lean",
+      "scope": "support",
+      "area": "support",
+      "sha256": "bbaaacd7859e3c056d6d7449c6ddcc68c5dc397595fe80484debb74f66fce587"
+    },
+    {
+      "path": "scripts/check_leibniz_transmutation.lean",
+      "scope": "support",
+      "area": "support",
+      "sha256": "d15853fcb1c1f608ba3db9861f66a4f02f0e3a2a1c3920759e20b91edf29e2da"
+    },
+    {
+      "path": "scripts/check_polygonal_cauchy.lean",
+      "scope": "support",
+      "area": "support",
+      "sha256": "fe3ffa6fc251135573b2b870e107d5336b8f4b162cf675923695f72b2488e9d8"
+    },
+    {
+      "path": "scripts/check_rational_primitives.lean",
+      "scope": "support",
+      "area": "support",
+      "sha256": "cb1530ead85bd4064ebcb8ea7140fca7b0971de288f60aff2b98b11db817ad8c"
+    },
+    {
+      "path": "scripts/check_zeta_real.lean",
+      "scope": "support",
+      "area": "support",
+      "sha256": "04909669eeb2ef4f2dc182678b46614d11be294e350bc3212e0f95bd07b18a2b"
+    }
+  ]
+}

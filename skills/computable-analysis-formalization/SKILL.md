@@ -20,6 +20,22 @@ to route a new task. Read
 [references/integral-computation-strategies.md](references/integral-computation-strategies.md)
 for any definite-integral task, especially one with non-rational breakpoints.
 
+## Start with the theorem contract
+
+The project favors laws about supplied, justified constructions over the
+search for maximally general existence conditions. Decide whether the task
+asks for a construction, a conditional law, or a comparison. State the supplied
+objects, their mathematical evidence, and the new conclusion before choosing
+an interface. A proved conditional law is complete on its stated domain even
+when no universal constructor is available. A record declaration is not a proof.
+
+For a concrete application, construct the required evidence. Do not put the
+requested conclusion into a certificate and call its projection the theorem.
+Preserve genuine domain and branch restrictions, represented-input scope,
+and the distinction between existence of a valid name and an executable
+constructor. Use [theorem-contract strategies](references/theorem-contract-strategies.md)
+when choosing the scope of a new result or reviewing an existing interface.
+
 ## Methods belong in the skill
 
 Choosing how to compute a definite integral or an infinite series is a
@@ -59,12 +75,17 @@ mathematical bound and claimed equivalence still needs a Lean proof.
 
 ## Follow the certificate workflow
 
+Use these steps for a concrete construction. For a conditional law, supplied
+objects and certificates replace the corresponding construction steps; prove
+the estimates and consequences needed for the new conclusion.
+
 1. State the exact scientific or calculus claim on its full intended domain,
-   including computable irrational inputs and coefficients. Keep genuine
+   including arbitrary valid represented inputs and coefficients. Keep genuine
    domain and branch hypotheses explicit; choose rational intervals or charts
    internally for the proof.
-2. Choose a computation route from the certificate catalog. Prefer an existing
-   concrete constructor to a new general abstraction.
+2. For a construction, choose a computation route from the certificate catalog.
+   For a conditional law, retain the supplied evidence and prove the new
+   consequence; do not require a universal constructor first.
 3. Define a literal evaluator returning rational boxes. Make its stage
    computation inspectable by reduction or by a theorem describing it.
 4. Prove its local algebra: ordered endpoints, inclusions, finite-sum
@@ -76,10 +97,10 @@ mathematical bound and claimed equivalence still needs a Lean proof.
 6. State the function-specific semantic bridge: an endpoint identity, a
    range enclosure, a comparison with an independently valid raw evaluator,
    or a finite recurrence. Do not silently promote an interface to a theorem.
-7. Prove and publish the exact theorem on the intended represented-real
-   domain, with representation invariance and any partition or chart agreement
-   required to hide internal choices. Construct missing bridges rather than
-   stopping at a formal identity or an uninstantiated certificate interface.
+7. Prove the stated conclusion on its full intended domain, with representation
+   invariance and any agreement needed to hide internal choices. Report a
+   conditional law as such. For a requested concrete identity, construct its
+   missing bridges; an uninstantiated interface is not its proof.
 
 ## Choose the narrowest useful route
 

@@ -50,7 +50,9 @@ polynomials and intersects certified rational boxes. It does not call `f` or
 use `f` as the runtime answer. The error estimates are proof dependencies;
 the public conclusion is exact `Equiv`.
 
-The remaining obligations for the theorem originally requested are:
+The conditional reconstruction theorem above is complete at its stated scope.
+Under the [project principle](CONSTRUCTION_FIRST_AUDIT.md), the following are
+separate steps toward the stronger Taylor theorem originally requested:
 
 1. Define the effective complex-differentiability certificate and construct
    the Cauchy representation and moment certificates from it.

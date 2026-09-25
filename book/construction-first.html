@@ -1,0 +1,29 @@
+<section id="construction-first">
+  <style>#construction-first table{min-width:0;width:100%;table-layout:fixed}#construction-first th,#construction-first td{overflow-wrap:break-word;padding:.65rem .45rem}</style>
+  <h2>General laws about particular constructions</h2>
+  <p>Begin with objects whose constructions and mathematical properties have been justified. Then prove what follows from those properties. A useful general theorem need not wait for a theorem producing every possible input under the weakest possible conditions.</p>
+  <blockquote><p>Given the constructed objects and the stated evidence about them, the conclusion follows.</p></blockquote>
+  <p>Here, “constructed” means more than giving something a name. A number needs valid approximations; a function needs a domain; a derivative, integral, root, or solution needs a proof connecting its computation to that role. The conclusion must add something to the supplied evidence.</p>
+  <div class="wide-table"><table>
+    <thead><tr><th>Task</th><th>What the proof establishes</th><th>What remains separate</th></tr></thead>
+    <tbody>
+      <tr><td>Construct an object</td><td>A particular computation has the required mathematical properties.</td><td>A universal construction for every classical input.</td></tr>
+      <tr><td>Prove a general law</td><td>Supplied objects and their proved properties imply a new conclusion.</td><td>The existence of every object to which the law could apply.</td></tr>
+      <tr><td>Compare constructions</td><td>Independent computations give the same value or function.</td><td>An identity already included among the hypotheses.</td></tr>
+    </tbody>
+  </table></div>
+  <p>A conditional theorem is a completed theorem on its stated domain. For a concrete application, we must still construct the objects and prove the hypotheses. Writing down an interface containing the desired conclusion does not prove that conclusion.</p>
+
+  <h3>A solution can be studied before a general solver exists</h3>
+  <p>The checked linear-system growth theorem starts with a supplied solution, valid vector approximations, and a local estimate certifying its differential equation. If the matrix satisfies a column-sum bound \(\lVert tA(t)\rVert_1\le N\), it derives, for rational \(0&lt;a\le b\le R\),</p>
+  <div class="formula">\[\lVert y(b)\rVert_1\le M\quad\Longrightarrow\quad\lVert y(a)\rVert_1\le \frac{b^N M}{a^N}.\]</div>
+  <p>The growth bound is a conclusion, not part of the supplied solution data. This theorem does not require a universal ODE solver, and it does not claim the full complex Fuchs classification.</p>
+
+  <h3>A representation can support another representation</h3>
+  <p>The checked Cauchy-series theorem starts with a certified Cauchy-kernel representation and convergent boundary moments. It constructs an independent power-series computation and proves equality at rational complex points inside the certified disk. Deriving that Cauchy representation from complex differentiability is another theorem. The supplied representation is not already a Taylor expansion.</p>
+
+  <h3>Methods belong in the formalization skill</h3>
+  <p>Whole-chunk rectangles, alternating brackets, tail estimates, bisection, and finite differential models are methods to choose when formalizing an example. Their finite algorithms and proofs belong in Lean. A reusable record may organize the evidence, but it is not a compulsory definition of every integral, sum, or solution.</p>
+  <p>We retain exact theorem statements, genuine domain and branch restrictions, and agreement between representations. We retain proved existence theorems too. The change is in how we choose the next useful result: a law with explicit, usable hypotheses can stand on its own.</p>
+  <p><a href="__REPO__docs/CONSTRUCTION_FIRST_AUDIT.md">Read the project-wide contract audit</a> · <a href="reading/construction-first-inventory.json">Inspect its source inventory</a> · <a href="__REPO__skills/computable-analysis-formalization/SKILL.md">Consult the formalization skill</a></p>
+</section>

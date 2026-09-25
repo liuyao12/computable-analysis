@@ -45,6 +45,8 @@ on:
       - 'book/cosine-square/**'
       - 'book/classics/**'
       - 'book/pi-log-one-plus-i.html'
+      - 'book/construction-first.html'
+      - 'docs/CONSTRUCTION_FIRST_*'
       - 'ComputableAnalysis/IntegralEnclosure*.lean'
       - 'ComputableAnalysis/ComplexIntegralEnclosure.lean'
       - 'ComputableAnalysis/VerticalReciprocalIntegral.lean'
@@ -387,12 +389,18 @@ jobs:
           if grep -q sorryAx integral-enclosure-reports/axioms.log; then exit 1; fi
           python3 .github/reader-edition/integral_enclosures.py --site site --revision "$GITHUB_SHA"
           python3 .github/reader-edition/test_integral_enclosures.py --site site --report reader-edition-tests
+      - name: Publish the construction-first principle and source-review scope
+        run: |
+          python3 .github/reader-edition/construction_first.py --site site --revision "$GITHUB_SHA"
+          python3 .github/reader-edition/test_construction_first.py --site site --report reader-edition-tests
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: reader-edition-validation
           path: |
             reader-edition-tests
+            site/reading/construction-first-edition.json
+            site/reading/construction-first-inventory.json
             integral-enclosure-reports
             polygonal-cauchy-reports
             arctan-taylor-reports
@@ -548,6 +556,14 @@ jobs:
                   assert not enclosure['directLogarithmBridgeProved']
                   for path,digest in enclosure['artifacts'].items():
                       assert hashlib.sha256(get('/'+path,True)).hexdigest()==digest
+                  principle=get('/reading/construction-first-edition.json')
+                  assert principle['documentationRevision']==revision
+                  assert not principle['newLeanTheoremsClaimed'] and not principle['leanStatementsChanged']
+                  for path,digest in principle['artifacts'].items():
+                      assert hashlib.sha256(get('/'+path,True)).hexdigest()==digest,path
+                  review=get('/reading/construction-first-inventory.json')
+                  assert principle['reviewedSourceRevision']==review['sourceRevision']
+                  assert principle['nativeModules']+principle['otherSourceFiles']==len(review['files'])
                   assert get('/reading/manifest.json')['proofSourceCommit']==os.environ['SOURCE_SHA']
                   geometry=get('/reading/rational-geometry-edition.json');audit=get('/reading/rational-geometry.json')
                   assert geometry['documentationRevision']==geometry['newProofSourceCommit']==revision

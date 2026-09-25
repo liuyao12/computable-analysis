@@ -1,5 +1,41 @@
 # Formalization Guide
 
+## Construct the objects; prove their laws
+
+This is the project's organizing principle. General theorems may say: given
+constructions of the objects in the statement, with proved validity and the
+stated mathematical properties, the conclusion follows. Proving that such
+objects can be constructed under broadly applicable or minimal hypotheses is
+a separate theorem, not a prerequisite for proving the conditional law.
+
+Formal definability alone is insufficient: a raw evaluator needs validity,
+a represented function needs its domain and invariance, and a derivative,
+integral, root, or solution needs evidence of that mathematical role. State
+these hypotheses explicitly and identify what the conclusion adds. A record
+that already contains the desired conclusion is an interface or transport
+package, not an independent proof of that conclusion.
+
+Keep three tasks distinct: construct particular objects; prove laws about
+supplied objects; prove comparisons between constructions. A completed
+conditional law need not solve the first task for every possible input.
+For a requested concrete example, however, construct its required evidence;
+do not replace the example by an assumption of its result. Keep proved
+existence theorems and the full stated domains of existing results.
+
+Choose sufficient hypotheses that support a useful finite proof. Do not seek
+the most general existence criteria as a default milestone. Methods belong
+in the formalization skill; finite algorithms, mathematical predicates, and
+proofs belong in Lean. Reusable proof-data records are optional. Internal
+precision choices may be bundled or hidden after their agreement is proved;
+genuine domain, branch, convergence, and solution assumptions remain visible.
+
+This principle applies equally to algebra, geometry, limits and series,
+calculus, function theory, ODEs, and PDEs. The previous exactness and
+computable-foundation rules remain in force. See the
+[project-wide contract audit](docs/CONSTRUCTION_FIRST_AUDIT.md) for the source
+coverage, concrete examples, and the distinction between conditional laws
+and unsupported interfaces.
+
 **Arctangent function-theory showcase (2026-09-23).**
 `ArctanTaylor.convergence_iff` classifies convergence of the ordinary Taylor
 partial sums for every rational input: exactly the closed unit interval.
@@ -11,8 +47,8 @@ explicit obligations. See [the theorem ledger](docs/ARCTAN_TAYLOR.md).
 
 
 **Polygonal Cauchy foundation (2026-09-23).**
-`ComplexAnalysis` proves finite triangle cancellation, valid computed Cauchy
-contours from explicit local complex-affine approximation data, and a local
+`ComplexAnalysis` proves finite triangle cancellation, valid Cauchy
+quadrature computations from explicit local complex-affine approximation data, and a local
 simple-pole residue identity on positive rational squares. The pole
 normalization uses actual sampled pullbacks and the existing arctangent and
 geometric circle computation. Residues may be arbitrary valid represented
@@ -31,8 +67,11 @@ formalization is complete.
 The foundation layer is computable. Construct values with rational interval
 algorithms and prove validity using explicit error bounds, convergence rates,
 separation bounds, and finite estimates. Do not introduce Mathlib's real
-numbers or an abstract completion to bypass these obligations. Computable
-irrational inputs and coefficients are first-class inputs, not exceptions.
+numbers or an abstract completion to bypass these obligations. Arbitrary valid
+represented inputs and coefficients, including irrational ones, are allowed.
+`RealRaw.compute` is a function, not a computability certificate. Preserve
+executable algorithms for executable inputs; inspect numerical witness
+selection before calling an existential result an executable constructor.
 
 The mathematical layer states exact results over valid represented reals.
 Equality of real values means `RealRaw.Equiv` between valid raw computations;

@@ -1,5 +1,20 @@
 # Computable Analysis: Canonical Roadmap
 
+## Guiding priority: laws about constructed objects
+
+Develop useful laws for supplied, mathematically justified constructions and
+instantiate them in concrete examples. Universal existence and weakest-
+hypothesis characterizations are separate research goals, not default gates
+for every theorem. Track construction, conditional law, and comparison results
+separately. A conditional law can be complete while a stronger classical
+existence theorem remains open; an uninstantiated record alone proves neither.
+
+Retain the exact scope of established results and the obligations of requested
+examples. The older milestone notes below describe their own statements;
+they should not be read as a requirement to generalize every constructor.
+See [the contract audit](docs/CONSTRUCTION_FIRST_AUDIT.md) and the governing
+[project principle](FORMALIZATION_GUIDE.md#construct-the-objects-prove-their-laws).
+
 **Arctangent function-theory showcase (2026-09-23).**
 `ArctanTaylor.convergence_iff` classifies convergence of the ordinary Taylor
 partial sums for every rational input: exactly the closed unit interval.
@@ -11,8 +26,8 @@ explicit obligations. See [the theorem ledger](docs/ARCTAN_TAYLOR.md).
 
 
 **Polygonal Cauchy foundation (2026-09-23).**
-`ComplexAnalysis` proves finite triangle cancellation, valid computed Cauchy
-contours from explicit local complex-affine approximation data, and a local
+`ComplexAnalysis` proves finite triangle cancellation, valid Cauchy
+quadrature computations from explicit local complex-affine approximation data, and a local
 simple-pole residue identity on positive rational squares. The pole
 normalization uses actual sampled pullbacks and the existing arctangent and
 geometric circle computation. Residues may be arbitrary valid represented
@@ -137,8 +152,9 @@ remain open. See [the precise scope](docs/CAUCHY_TAYLOR.md).
 ## Aim
 
 Build a usable foundation for calculus and elementary function theory from
-explicit rational computations, without importing a completed real-number,
-topological, or measure-theoretic foundation.
+explicit rational computations, without importing a completed real-number
+or measure-theoretic foundation. Abstract point-set topology is permitted
+within the governing import boundary.
 
 A theorem is in scope when its infinite process is represented by finite data
 at every stage and the Lean proof supplies the quantitative certificate that
