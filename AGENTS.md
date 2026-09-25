@@ -6,12 +6,20 @@ Read [the governing formalization policy](FORMALIZATION_GUIDE.md#computable-foun
 and the [formalization skill](skills/computable-analysis-formalization/SKILL.md)
 when adding or reviewing mathematics.
 
+- Prefer general laws about supplied, justified constructions. Prove their
+  consequences from explicit validity, domain, convergence, derivative, or
+  solution evidence; broad existence criteria are a separate task. A proved
+  conditional law is complete at its stated scope. For a requested concrete
+  example, construct its evidence. Do not assume the desired conclusion inside
+  a record and advertise its projection as a new mathematical theorem.
 - Keep the foundation computable: rational interval algorithms, validity
   proofs, explicit errors, bounds, and convergence schedules. Do not use
   Mathlib's real numbers or abstract completion shortcuts.
 - State public mathematical theorems as exact identities over valid represented
-  reals, using `RealRaw.Equiv` for equality of values. Support computable
-  irrational inputs and coefficients. Prove representation invariance.
+  reals, using `RealRaw.Equiv` for equality of values. Quantify over arbitrary
+  valid represented inputs and coefficients, including irrational ones.
+  Preserve executable algorithms for executable inputs; a raw function type
+  alone is not a computability certificate. Prove representation invariance.
 - Construct and package quantitative proof data beneath the exact theorem.
   Keep estimates available, but do not require callers to choose internal
   precision schedules, monotone partitions, turning-point brackets, or charts.

@@ -1,9 +1,19 @@
 # Computable Analysis
 
+The organizing principle is **construct the objects; prove their laws**.
+General theorems can start from supplied constructions with proved validity
+and mathematical properties. A useful conditional law need not wait for a
+universal existence theorem or the weakest possible sufficient conditions.
+Concrete examples still require their constructions, and no hypothesis may
+silently assume the conclusion. Methods live in the formalization skill;
+finite algorithms and their proofs live in Lean. See the
+[project-wide contract audit](docs/CONSTRUCTION_FIRST_AUDIT.md).
+
 Proof-oriented calculus from explicit rational interval algorithms.
 
 This project develops real and complex function theory without importing a
-completed real-number, topology, or measure-theory foundation. A quantity is
+completed real-number or measure-theory foundation. Abstract point-set topology
+is permitted only within the audited import boundary. A quantity is
 computed by finite rational boxes; Lean proves that the boxes are coherent,
 shrink to arbitrary precision, and agree with alternative computations.
 
@@ -78,12 +88,12 @@ endpoint computation; prefix stabilization then supplies nestedness. It does
 not assume a completed real line or that independently selected finite sums
 were already nested.
 
-`Integral.effectiveFTCConstructionFor` packages that output as a
-domain-aware integral of `FunctionOnInterval.ofRealFunRaw dF a b ...`.
-`Integral.effectiveFTCIntegral_equiv_endpointDifference` is the user-facing
-FTC theorem: the resulting integral equals the primitive endpoint difference.
-The arctangent kernel `1/(1+x^2)` is the canonical non-polynomial client of
-this route; it no longer carries a parallel local stabilization pipeline.
+`Integral.enclosureRealizationOfEffectiveFTC` can package the whole-cell
+ranges and their proved endpoint comparison for the specified derivative.
+The older `Integral.effectiveFTCConstructionFor` exposes a numerical candidate,
+not the range evidence by itself. These are optional proof packages for a
+particular FTC argument. The arctangent kernel \(1/(1+x^2)\) is a checked
+non-polynomial client of this route.
 
 The main active application is the equal-dyadic computation of `sin(pi*x)` on
 `[0,1/2]`. Its direct nested-radical half-angle tangent is now a valid
