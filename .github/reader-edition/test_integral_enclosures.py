@@ -33,6 +33,8 @@ def main():
     assert 'The right side consists of two real integral computations' not in text
     doc = BeautifulSoup((site/'integral-enclosures.html').read_text(), 'html.parser')
     assert doc.select_one('#vertical') and doc.select_one('#formalization')
+    current = doc.select('#book-nav a[aria-current="page"]')
+    assert len(current) == 1 and current[0]['href'] == 'integral-enclosures.html'
     assert not doc.select('sup, sub')
     server = ThreadingHTTPServer(('127.0.0.1', 0), partial(Quiet, directory=str(site)))
     threading.Thread(target=server.serve_forever, daemon=True).start()
