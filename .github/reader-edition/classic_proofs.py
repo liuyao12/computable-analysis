@@ -21,7 +21,7 @@ def verify_mathlib(source_file=None):
     names=['bernoulliFourierCoeff_recurrence','bernoulliFourierCoeff_eq','hasSum_zeta_nat','hasSum_zeta_two']
     for name in names:assert ('theorem '+name) in data.decode()
     return dict(revision=MATHLIB,path=MATHLIB_PATH,sha256=MATHLIB_HASH,declarations=names,verification='Pinned source inspection; no new Mathlib compilation or cross-foundation bridge claimed')
-def install(site,revision,euler_audit,cauchy_audit,arctan_audit,source_file=None):
+def install(site,revision,euler_audit,cauchy_audit,arctan_audit,holomorphic_audit,source_file=None):
     assert re.fullmatch('[0-9a-f]{40}',revision)
     assert not (site/'reading/classic-proofs-edition.json').exists()
     mathlib=verify_mathlib(source_file)
@@ -49,6 +49,10 @@ def install(site,revision,euler_audit,cauchy_audit,arctan_audit,source_file=None
     assert 'PASS: arctangent Taylor convergence and divergence' in arctan_log
     assert 'PASS: no Mathlib imports or sorryAx in arctangent audit' in arctan_log
     assert not re.search(r'\berror:', arctan_log)
+    holomorphic_log=holomorphic_audit.read_text()
+    assert 'PASS: holomorphic witnesses, representation transport, no Mathlib imports or sorryAx.' in holomorphic_log
+    assert len(re.findall(r'^AUDIT ', holomorphic_log, re.M)) == 8
+    assert not re.search(r'\berror:|sorryAx[^.]', holomorphic_log)
     before={str(p.relative_to(site)):digest(p) for p in site.rglob('*') if p.is_file()}
     repo=f'https://github.com/liuyao12/computable-analysis/blob/{revision}/'
     native=repo+'ComputableAnalysis/'
@@ -135,6 +139,7 @@ def install(site,revision,euler_audit,cauchy_audit,arctan_audit,source_file=None
     for asset in ['cauchy-example.css','cauchy-example.js','arctan-example.css','arctan-example.js']:
         shutil.copyfile(SOURCE/asset,site/'reading'/asset)
     shutil.copyfile(arctan_audit,site/'reading/arctan-taylor-audit.log')
+    shutil.copyfile(holomorphic_audit,site/'reading/holomorphic-audit.log')
     shutil.copyfile(cauchy_audit,site/'reading/polygonal-cauchy-audit.log')
     shutil.copyfile(SOURCE/'classics.css',site/'reading/classics.css')
     shutil.copyfile(SOURCE/'classics.js',site/'reading/classics.js')
@@ -149,10 +154,10 @@ def install(site,revision,euler_audit,cauchy_audit,arctan_audit,source_file=None
       pages=SHOWCASE_PAGES,changedArtifacts=changed,
       protectedArtifacts={p:h for p,h in before.items() if p not in changed},
       artifacts={p:h for p,h in after.items() if p not in before or p in changed},
-      checks=dict(cartwrightAlreadyProved=True,cartwrightThreeCheckedRoutesPreserved=True,leibnizComparisonPreserved=True,baselNativeAudited=True,mathlibSourcePinned=True,eulerProofAudited=True,allEvenZetaValuesAudited=True,polygonalCauchyAudited=True,arctanTaylorAudited=True),
+      checks=dict(cartwrightAlreadyProved=True,cartwrightThreeCheckedRoutesPreserved=True,leibnizComparisonPreserved=True,baselNativeAudited=True,mathlibSourcePinned=True,eulerProofAudited=True,allEvenZetaValuesAudited=True,polygonalCauchyAudited=True,arctanTaylorAudited=True,holomorphicWitnessesAudited=True),
       newLeanProofsClaimed=True,eulerMathlibRevision=EULER_MATHLIB,baselCrossFoundationBridgeChecked=False)
     (site/'reading/classic-proofs-edition.json').write_text(json.dumps(report,indent=2)+'\n')
     print(f'PASS: classical examples and differential-equation theorems in {len(navigation)} sidebars; preserved checked comparisons and pinned Basel source')
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--site',required=True,type=Path);p.add_argument('--revision',required=True);p.add_argument('--mathlib-source',type=Path);p.add_argument('--euler-audit',required=True,type=Path);p.add_argument('--cauchy-audit',required=True,type=Path);p.add_argument('--arctan-audit',required=True,type=Path)
-    a=p.parse_args();install(a.site,a.revision,a.euler_audit,a.cauchy_audit,a.arctan_audit,a.mathlib_source)
+    p=argparse.ArgumentParser();p.add_argument('--site',required=True,type=Path);p.add_argument('--revision',required=True);p.add_argument('--mathlib-source',type=Path);p.add_argument('--euler-audit',required=True,type=Path);p.add_argument('--cauchy-audit',required=True,type=Path);p.add_argument('--arctan-audit',required=True,type=Path);p.add_argument('--holomorphic-audit',required=True,type=Path)
+    a=p.parse_args();install(a.site,a.revision,a.euler_audit,a.cauchy_audit,a.arctan_audit,a.holomorphic_audit,a.mathlib_source)

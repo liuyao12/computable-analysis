@@ -532,3 +532,13 @@ computation and square-pole computation; the reciprocal vertical segment to
 the logarithm evaluator; generic Cauchy-to-Taylor and abelian integration.
 These are not supplied by numerical validity, finite endpoint cancellation,
 or an uninstantiated representation record.
+
+## Represented holomorphic functions (2026-09-26)
+
+Checked: an open-domain interface with a represented complex derivative,
+explicit first-order error radii and derivative-continuity moduli; exact
+representation transport; affine and square examples at arbitrary valid
+represented inputs. See [scope and remaining adapters](docs/HOLOMORPHIC_FUNCTIONS.md).
+The next function-theory bridge is from these local data to the uniform
+estimates needed by specific rectangular Cauchy computations. No universal
+polygon-integral constructor or weakest-hypothesis theorem is required first.

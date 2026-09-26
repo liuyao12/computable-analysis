@@ -59,6 +59,16 @@ and analytic continuation remain open. Fuchs and Painlevé remain partial.
 See [the precise theorem ledger](docs/POLYGONAL_CAUCHY.md).
 
 
+## Working holomorphicity
+
+`FunctionTheory.Holomorphic` supplies a represented complex derivative and
+its local continuity moduli, alongside first-order error radii and an open
+domain. This intentionally uses stronger data than bare pointwise complex
+differentiability. Affine maps with represented coefficients and the square
+map have constructed witnesses. See [the exact scope](docs/HOLOMORPHIC_FUNCTIONS.md)
+and [the holomorphic-functions skill](skills/holomorphic-functions/SKILL.md).
+No Cauchy or Taylor conclusion is part of the definition.
+
 ## Computable foundations, exact mathematical theorems
 
 This is the repository-wide rule for choosing interfaces and deciding when a

@@ -35,3 +35,5 @@ jobs:
         run: |
           python3 scripts/audit_integral_enclosures.py
           lake env lean scripts/check_integral_enclosures.lean
+      - name: Audit holomorphic witnesses and derivative continuity
+        run: lake env lean scripts/check_holomorphic.lean

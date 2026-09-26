@@ -7,6 +7,31 @@ the local bounds are supplied data.  We prove the integral identities
 actually used, rather than first postulating an arbitrary holomorphic
 function on an arbitrary open set.
 
+\section{A supplied continuous complex derivative}
+Our working holomorphic functions have an open domain, represented value and
+derivative computations, and explicit local moduli. For every positive
+rational $\varepsilon$, a positive rational $\delta$ controls the remainder:
+\[
+ \|z-a\|_\infty\le H\le\delta
+ \quad\Longrightarrow\quad
+ \|f(z)-f(a)-d(a)(z-a)\|_\infty\le\varepsilon H.
+\]
+Here $H$ is positive rational and
+$\|u\|_\infty=\max(|\Re u|,|\Im u|)$. A separate local modulus controls
+$\|d(z)-d(a)\|_\infty$. All inputs are valid represented complex values;
+domain membership and values respect representation equivalence.
+
+This deliberately supplies more data than bare pointwise differentiability.
+It assumes no contour or Taylor identity. The checked constructors
+\texttt{FunctionTheory.affine\_holomorphic} and
+\texttt{FunctionTheory.square\_holomorphic} cover $cz+b$ with arbitrary
+represented coefficients and $z^2$, respectively. For the latter, the
+remainder is $(z-a)^2$, bounded by $2H^2$; both the derivative-error and
+derivative-continuity radii can be $\varepsilon/2$. Transport of the derivative
+estimate between equivalent base-point and derivative representations is
+proved. Uniform rectangle estimates and the later Cauchy bridges remain
+separate obligations.
+
 \section{Integrating on a segment}
 Subdivide the actual oriented segment into finite chunks with endpoints
 $z_j,z_{j+1}$. For each chunk, certify a rational rectangle $B_j$
