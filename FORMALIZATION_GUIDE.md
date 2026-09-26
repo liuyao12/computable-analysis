@@ -69,6 +69,13 @@ map have constructed witnesses. See [the exact scope](docs/HOLOMORPHIC_FUNCTIONS
 and [the holomorphic-functions skill](skills/holomorphic-functions/SKILL.md).
 No Cauchy or Taylor conclusion is part of the definition.
 
+Continuation methods belong in the
+[analytic-continuation skill](skills/analytic-continuation/SKILL.md).
+For a concrete function, construct local branches along the chosen route,
+prove their agreement on overlap neighborhoods, and prove the requested
+terminal comparison. Path independence and loop branch changes are separate
+conclusions; neither is built into the meaning of a valid function.
+
 ## Computable foundations, exact mathematical theorems
 
 This is the repository-wide rule for choosing interfaces and deciding when a

@@ -542,3 +542,14 @@ represented inputs. See [scope and remaining adapters](docs/HOLOMORPHIC_FUNCTION
 The next function-theory bridge is from these local data to the uniform
 estimates needed by specific rectangular Cauchy computations. No universal
 polygon-integral constructor or weakest-hypothesis theorem is required first.
+
+## Analytic continuation as a function-specific method
+
+Presentation priority: arctangent beyond one Taylor disk; logarithm and its
+square-loop period; square root and its branch switch. Retain Bessel's
+logarithmic companion as a later ODE application. The
+[continuation skill](skills/analytic-continuation/SKILL.md) separates local
+holomorphicity, overlap agreement, route coverage, and terminal comparison.
+These are proposed continuation showcases; this documentation change adds
+no Lean continuation theorem. Existing local estimates and contour periods
+are prerequisites, not substitutes for the connecting proofs.
