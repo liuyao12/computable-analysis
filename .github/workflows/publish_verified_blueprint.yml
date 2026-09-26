@@ -57,6 +57,10 @@ on:
       - 'scripts/audit_integral_enclosures.py'
       - 'ComputableAnalysis/ComplexAnalysis/**'
       - 'ComputableAnalysis/ComplexAnalysis.lean'
+      - 'ComputableAnalysis/Holomorphic*.lean'
+      - 'scripts/check_holomorphic.lean'
+      - 'skills/holomorphic-functions/**'
+      - 'docs/HOLOMORPHIC_FUNCTIONS.md'
       - 'scripts/check_polygonal_cauchy.lean'
       - 'ComputableAnalysis/ArctanTaylorBoundary.lean'
       - 'ComputableAnalysis/ArctanTaylorConvergence.lean'
@@ -374,8 +378,14 @@ jobs:
           mkdir -p arctan-taylor-reports
           lake build ComputableAnalysis.ArctanTaylorConvergence | tee arctan-taylor-reports/build.log
           lake env lean scripts/check_arctan_taylor.lean | tee arctan-taylor-reports/audit.log
+      - name: Check represented holomorphic functions and derivative continuity
+        run: |
+          set -euo pipefail
+          mkdir -p holomorphic-reports
+          lake build ComputableAnalysis.HolomorphicExamples | tee holomorphic-reports/build.log
+          lake env lean scripts/check_holomorphic.lean | tee holomorphic-reports/audit.log
       - name: Expose classical examples and verify the pinned Mathlib Basel source
-        run: python3 .github/reader-edition/classic_proofs.py --site site --revision "$GITHUB_SHA" --euler-audit euler-reports/proofs.json --cauchy-audit polygonal-cauchy-reports/audit.log --arctan-audit arctan-taylor-reports/audit.log
+        run: python3 .github/reader-edition/classic_proofs.py --site site --revision "$GITHUB_SHA" --euler-audit euler-reports/proofs.json --cauchy-audit polygonal-cauchy-reports/audit.log --arctan-audit arctan-taylor-reports/audit.log --holomorphic-audit holomorphic-reports/audit.log
       - name: Prepare the enclosure page before checking incoming links
         run: python3 .github/reader-edition/integral_enclosures.py --site site --revision "$GITHUB_SHA" --page-only
       - name: Verify classical navigation and proof comparisons in the browser
@@ -403,6 +413,7 @@ jobs:
             site/reading/construction-first-inventory.json
             integral-enclosure-reports
             polygonal-cauchy-reports
+            holomorphic-reports
             arctan-taylor-reports
             rational-primitives-reports
             site/reading/rational-primitives-edition.json
@@ -514,6 +525,9 @@ jobs:
                   assert all(square['checks'].values())
                   classics=get('/reading/classic-proofs-edition.json')
                   assert classics['documentationRevision']==revision and all(classics['checks'].values())
+                  assert classics['checks']['holomorphicWitnessesAudited']
+                  assert 'id="holomorphic"' in get('/complex-analysis.html',True).decode()
+                  assert hashlib.sha256(get('/reading/holomorphic-audit.log',True)).hexdigest()==classics['artifacts']['reading/holomorphic-audit.log']
                   assert classics['checks']['arctanTaylorAudited'] and 'arctan-taylor.html' in classics['pages']
                   for path in ['reading/arctan-example.js','reading/arctan-example.css','reading/arctan-taylor-audit.log']:
                       assert hashlib.sha256(get('/'+path,True)).hexdigest()==classics['artifacts'][path]

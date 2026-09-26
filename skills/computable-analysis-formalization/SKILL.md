@@ -102,6 +102,11 @@ the estimates and consequences needed for the new conclusion.
    conditional law as such. For a requested concrete identity, construct its
    missing bridges; an uninstantiated interface is not its proof.
 
+For complex differentiability and holomorphicity, use the
+[holomorphic-functions skill](../holomorphic-functions/SKILL.md). It supplies
+the local derivative and derivative-continuity workflow; formal jets alone
+do not establish these properties.
+
 ## Choose the narrowest useful route
 
 | Task shape | Start with | Required extra evidence |

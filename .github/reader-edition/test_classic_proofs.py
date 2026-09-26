@@ -33,11 +33,14 @@ def main():
             if not u.scheme and u.path:
                 target=site/u.path
                 assert target.is_file() or (target/'index.html').is_file(),el['href']
+    assert report['checks']['holomorphicWitnessesAudited']
+    assert 'square_holomorphic' in (site/'reading/holomorphic-audit.log').read_text()
     assert report['pages']==SHOWCASE_PAGES
     for name in SHOWCASE_PAGES:
         doc=BeautifulSoup((site/name).read_text(),'html.parser')
         headings=doc.article.select('h2[id]')
-        assert [h['id'] for h in headings[:2]]==['setup','theorem'],name
+        expected = ['holomorphic','setup','theorem'] if name=='complex-analysis.html' else ['setup','theorem']
+        assert [h['id'] for h in headings[:len(expected)]]==expected,name
         statements=doc.select('.showcase-statement:not(.secondary-statement)')
         assert len(statements)==1 and statements[0].select_one('p'),name
         assert len(statements[0].get_text().split())>=25,name
@@ -99,6 +102,8 @@ def main():
                     assert page.locator('#book-nav a[href="cartwright.html"] mjx-container').count()==1,(name,'navigation math')
                     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+2'),(name,width)
                     if name=='complex-analysis.html':
+                        assert page.locator('#holomorphic-foundation mjx-container').count()>=12
+                        assert page.locator('#holomorphic-foundation a[href="reading/holomorphic-audit.log"]').count()==1
                         assert page.locator('.cauchy-example').count()==1
                         if width==1440:
                             reader=page.locator('main.reader').bounding_box()

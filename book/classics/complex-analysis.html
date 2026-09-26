@@ -1,5 +1,24 @@
 <header><p class="classic-tag">Foundation in progress · Polygonal contours</p><h1>Cauchy’s theory, by finite computation</h1><p class="lead">Local complex-linear approximations cancel around small triangles. Arctangent determines what remains around a pole.</p></header>
 <p class="classic-action">For a real-variable showcase of this function theory, see <a href="arctan-taylor.html">where the Taylor series of arctangent converges—and where it stops</a>.</p>
+<section id="holomorphic-foundation">
+<h2 id="holomorphic">Holomorphic functions: the working definition</h2>
+<p>We supply a function on an open domain together with a continuous complex derivative. Both are computations by shrinking rational rectangles. Their values and the domain must be independent of the chosen valid representation of an input.</p>
+<p>At each point \(a\), and for every positive rational error \(\varepsilon\), supply a positive rational radius \(\delta\). Whenever a domain point \(z\) and a positive rational bound \(H\) satisfy</p>
+\[\|z-a\|_\infty\le H\le\delta,\]
+<p>the first-order error must satisfy</p>
+\[\|f(z)-f(a)-d(a)(z-a)\|_\infty\le\varepsilon H.\]
+<p>Here \(\|u\|_\infty=\max(|\Re u|,|\Im u|)\): a bound means that both coordinates lie in a rational interval. No square root or imported real-number foundation is needed. The estimate must hold in every complex direction, at arbitrary represented inputs.</p>
+<p>We also supply continuity data for the derivative: a positive rational radius \(\eta\) for which</p>
+\[\|z-a\|_\infty\le\eta\quad\Longrightarrow\quad\|d(z)-d(a)\|_\infty\le\varepsilon.\]
+<p>This asks for more explicit data than the classical pointwise definition. We choose these useful sufficient hypotheses directly; equivalence with the weakest classical definition is a separate theorem. Computability of a function alone supplies neither a derivative nor a continuity proof for that derivative.</p>
+<h3>Two constructed examples</h3>
+<p><strong>Affine functions.</strong> For \(f(z)=cz+b\), with any valid represented complex coefficients, the derivative is \(c\). The first-order remainder and derivative variation are exactly zero.</p>
+<p><strong>The square function.</strong> For \(f(z)=z^2\), the derivative is \(2z\), and the finite identity</p>
+\[f(z)-f(a)-2a(z-a)=(z-a)^2\]
+<p>gives a remainder bound \(2H^2\). Choosing \(\delta=\varepsilon/2\) proves the derivative estimate. The same radius controls the variation of the derivative. These are checked constructions at represented inputs, including irrational ones.</p>
+<p class="classic-scope">Checked: the definition, the two examples, their derivative continuity, and transport of derivative estimates between equivalent representations. Existing formal jets are not yet all connected to this interface. Constructing uniform rectangle estimates and the Cauchy–Taylor bridges remains further work; no contour formula is assumed in the definition.</p>
+<p><a href="__REPO__ComputableAnalysis/Holomorphic.lean">Definition and representation laws</a> · <a href="__REPO__ComputableAnalysis/HolomorphicExamples.lean">Checked examples</a> · <a href="__REPO__skills/holomorphic-functions/SKILL.md">Skill for proving specific functions holomorphic</a> · <a href="reading/holomorphic-audit.log">Proof audit</a></p>
+</section>
 <p class="classic-scope">Integration convention: subdivide the geometric segment, enclose the function over each whole chunk, multiply by its finite complex displacement, and add the rectangles. The checked Cauchy results below concern a specified midpoint computation and its error bounds. Agreement with independently refined whole-chunk rectangles remains a separate bridge. See <a href="integral-enclosures.html">the integral construction and audit</a>.</p>
 <h2 id="setup" data-example="coefficients">Setup: a function, a polygon, a local model</h2>
 <p>The example alongside this page is Bessel’s equation of order zero:</p>
