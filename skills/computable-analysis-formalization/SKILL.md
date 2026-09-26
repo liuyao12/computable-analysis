@@ -107,6 +107,11 @@ For complex differentiability and holomorphicity, use the
 the local derivative and derivative-continuity workflow; formal jets alone
 do not establish these properties.
 
+For continuation of a particular complex function, use the
+[analytic-continuation skill](../analytic-continuation/SKILL.md). Prove the
+local functions, their overlap agreement, and the requested terminal branch
+comparison; a universal continuation operator is not a prerequisite.
+
 ## Choose the narrowest useful route
 
 | Task shape | Start with | Required extra evidence |

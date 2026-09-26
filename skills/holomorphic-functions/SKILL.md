@@ -111,3 +111,8 @@ Run `lake build ComputableAnalysis.HolomorphicExamples` and
 repository checks. Inspect the hypotheses and report which functions now
 have actual witnesses; a newly declared interface alone is not a completed
 example.
+
+For continuation beyond one local domain, use the
+[analytic-continuation skill](../analytic-continuation/SKILL.md). It guides
+construction of function-specific overlap comparisons and route coverage;
+holomorphicity alone is not a completed continuation algorithm.

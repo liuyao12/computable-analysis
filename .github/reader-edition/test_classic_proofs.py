@@ -39,7 +39,7 @@ def main():
     for name in SHOWCASE_PAGES:
         doc=BeautifulSoup((site/name).read_text(),'html.parser')
         headings=doc.article.select('h2[id]')
-        expected = ['holomorphic','setup','theorem'] if name=='complex-analysis.html' else ['setup','theorem']
+        expected = ['holomorphic','analytic-continuation','setup','theorem'] if name=='complex-analysis.html' else ['setup','theorem']
         assert [h['id'] for h in headings[:len(expected)]]==expected,name
         statements=doc.select('.showcase-statement:not(.secondary-statement)')
         assert len(statements)==1 and statements[0].select_one('p'),name
