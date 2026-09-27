@@ -105,6 +105,32 @@ theorem merely to complete one example. Retain useful finite concatenation,
 reversal, and equivalence lemmas when there is actual reuse. A broader theorem
 may later express laws about these supplied constructions.
 
+## Monodromy for differential equations
+
+Use the [chapter definition](../../book/classics/monodromy-section.html):
+monodromy sends an initial solution germ to the terminal germ at the same
+base point. A germ is defined by agreement on a neighborhood, not by a
+single value. For a homogeneous linear system, prove continuation preserves
+linear combinations and that reversing the route gives the inverse.
+Do not assume local existence, uniqueness, or the solution-space dimension
+merely from the equation's order.
+
+Fix the ordered basis and use solution vectors as columns of \(\Phi\).
+Identify the constant matrix by proving \(\Phi^\gamma\simeq\Phi M_\gamma\)
+throughout a base-point neighborhood. Changing basis to \(\Phi C\) changes
+the matrix to \(C^{-1}M_\gamma C\). With \(\eta\star\gamma\) meaning
+\(\gamma\) first and \(\eta\) second, composition has order
+\(M_{\eta\star\gamma}=M_\eta M_\gamma\); check this convention before
+multiplying computed transitions. Prove these laws when claimed.
+
+A supplied loop computation is enough for its own terminal comparison.
+Claim a representation of the fundamental group only after constructing
+continuation for its stated class of loops and proving independence of
+charts and homotopy invariance. Regular singularity need not mean trivial
+monodromy, and trivial monodromy need not make a singularity removable.
+Keep this operator distinct from the monodromy theorem about single-valued
+continuation on a simply connected domain.
+
 ## Validation and reporting
 
 Build the new Lean module and its concrete client. Audit the elaborated

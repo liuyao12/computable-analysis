@@ -1,0 +1,35 @@
+<section id="monodromy-section">
+<h2 id="monodromy">Monodromy: returning with a different solution</h2>
+<p>The evolution above takes place on a real interval. In a complex domain, continuation can return to the same point along a loop and produce a different local solution. Monodromy records this change.</p>
+<h3>Setup: local solutions and loops</h3>
+<p>Let \(U\) be a connected open complex domain on which the coefficients of</p>
+\[y''+p(z)y'+q(z)y=0\]
+<p>are holomorphic, and fix an ordinary point \(a\in U\). A <em>solution germ at \(a\)</em> is a local holomorphic solution, with two representatives identified when they agree throughout some neighborhood of \(a\). Agreement means equality of represented values, not equality of their algorithms. A germ contains local function information, not just one value. The local existence and uniqueness theorem identifies these solution germs with the initial data \((y(a),y'(a))\), giving a two-dimensional complex vector space \(V_a\).</p>
+<div class="monodromy-definition">
+<h3>Definition — monodromy along a loop</h3>
+<p>Let \(\gamma\) be a loop in \(U\), starting and ending at \(a\). When continuation of solution germs along this loop is constructed and proved unique, its <em>monodromy operator</em> sends each initial germ to the terminal germ:</p>
+\[T_\gamma:V_a\longrightarrow V_a,\qquad [y]_a\longmapsto[y^\gamma]_a.\]
+<p>For a linear equation, continuation preserves linear combinations, and reversing the loop reverses continuation. Consequently \(T_\gamma\) is an invertible linear map. These are consequences of continuation and uniqueness; returning to the same point alone does not imply \(T_\gamma=I\).</p>
+</div>
+<h3>A matrix in a chosen basis</h3>
+<p>Choose two independent local solutions and place their state vectors in columns:</p>
+\[\Phi(z)=\begin{pmatrix}y_1(z)&amp;y_2(z)\\y_1'(z)&amp;y_2'(z)\end{pmatrix}.\]
+<p>The <em>monodromy matrix</em> is the constant invertible matrix characterized, on a neighborhood of the base point, by</p>
+\[\Phi^\gamma(z)=\Phi(z)M_\gamma.\]
+<p>Thus continuation of a solution with coefficient column \(c\) gives coefficient column \(M_\gamma c\). Replacing the basis by \(\widetilde\Phi=\Phi C\), for a constant invertible \(C\), changes the matrix to</p>
+\[\widetilde M_\gamma=C^{-1}M_\gamma C.\]
+<p>The operator is intrinsic to the equation, base point, and loop; its displayed matrix depends on the basis. Everything here extends to a system \(Y'=A(z)Y\) of any finite dimension, with a fundamental matrix whose columns are independent vector solutions.</p>
+<h3>Loops, composition, and the monodromy group</h3>
+<p>Use \(\eta\star\gamma\) to mean following \(\gamma\) first, then \(\eta\). Unique continuation gives</p>
+\[M_{\eta\star\gamma}=M_\eta M_\gamma,\qquad M_{\gamma^{-1}}=M_\gamma^{-1}.\]
+<p>The further homotopy-invariance theorem says that deforming a loop within \(U\), with the base point fixed, leaves its monodromy unchanged. Once that theorem and continuation along all loops are available, the operators give the <em>monodromy representation</em></p>
+\[\rho:\pi_1(U,a)\longrightarrow\operatorname{GL}(V_a),\qquad [\gamma]\longmapsto T_\gamma.\]
+<p>Here \(\pi_1(U,a)\) is the group of based loops modulo such deformations, with the composition convention above. The image of \(\rho\) is the <em>monodromy group</em>. A single computed loop operator does not establish this whole representation. The related <em>monodromy theorem</em> says that a germ which can be continued along every path in a simply connected domain has a single-valued holomorphic continuation there; that is a theorem, not part of the definition.</p>
+<h3>The running Bessel example</h3>
+<p>For \(p(z)=1/z\) and \(q(z)=1\), use the basis \((J_0,Y_*)\), where \(J_0\) is entire and \(Y_*=J_0\operatorname{Log}z+H(z)\), with \(H\) entire. This normalization differs from the standard \(Y_0\). A counterclockwise circuit around the origin gives</p>
+\[J_0\longmapsto J_0,\qquad Y_*\longmapsto Y_*+2\pi iJ_0,\]
+\[M_\gamma=\begin{pmatrix}1&amp;2\pi i\\0&amp;1\end{pmatrix},\qquad M_\gamma^k=\begin{pmatrix}1&amp;2k\pi i\\0&amp;1\end{pmatrix}\quad(k\in\mathbb Z).\]
+<p>The regular singular point has nontrivial monodromy: regular singularity controls growth and does not require solutions to return unchanged. Conversely, trivial monodromy need not make a singularity removable: \(y=1/z\) solves \(y'=-y/z\) and returns unchanged around its pole.</p>
+<p><a href="complex-analysis.html#bessel">Follow the Bessel circuit in the interactive example</a> · <a href="fuchs.html">Fuchs’s criterion and solution growth</a>. Classical references: <a href="https://people.sissa.it/~dubrovin/fismat_web.pdf">Dubrovin’s lectures on monodromy of linear systems</a>, <a href="https://dlmf.nist.gov/15.17#v">monodromy groups</a>, and <a href="https://dlmf.nist.gov/10.11">Bessel continuation formulas</a>.</p>
+<p class="classic-scope"><strong>Definition and classical consequences; not new Lean continuation theorems.</strong> In our foundation, first construct the local represented solutions, prove agreement on open overlaps along the chosen route, and identify the terminal basis by exact represented identities. Solution-space dimension, invertibility, independence of chart choices, and homotopy invariance require their corresponding analytic proofs. The <a href="__REPO__skills/analytic-continuation/SKILL.md">continuation skill</a> records those obligations.</p>
+</section>

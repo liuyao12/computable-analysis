@@ -95,6 +95,76 @@ $\|\Phi(u,s)-I\|\le MB|u-s|$.  Together with composition it yields
 This supplies continuity in the source time as well as the target time,
 and permits computed times with domain enclosures.
 
+\section{Monodromy of a complex differential equation}
+\label{sec:ode-monodromy}
+
+For a complex equation, returning to the same point need not return the
+same local solution. Let $U$ be a connected open domain where the
+coefficients of $y''+p(z)y'+q(z)y=0$ are holomorphic, and fix $a\in U$.
+A solution germ at $a$ is a local holomorphic solution, with representatives
+identified when they agree on a neighborhood of $a$. Equality here means
+equality of represented values. The local existence and uniqueness theorem
+identifies the solution space $V_a$ with initial data $(y(a),y'(a))$.
+
+For a loop $\gamma$ in $U$ based at $a$, once continuation of solution germs
+along it has been constructed and proved unique, define its
+\emph{monodromy operator} by
+\[
+ T_\gamma:V_a\longrightarrow V_a,\qquad [y]_a\longmapsto[y^\gamma]_a.
+\]
+Linearity follows from preservation of linear combinations; invertibility
+follows from reversing continuation. These facts require proofs about
+continuation, not merely that the route closes.
+
+Choose independent local solutions and form the fundamental matrix
+\[
+ \Phi(z)=\begin{pmatrix}y_1(z)&y_2(z)\\y_1'(z)&y_2'(z)\end{pmatrix}.
+\]
+The constant invertible \emph{monodromy matrix} is characterized near $a$ by
+\[
+ \Phi^\gamma=\Phi M_\gamma.
+\]
+It sends a coefficient column $c$ to $M_\gamma c$. A constant change of
+basis $\widetilde\Phi=\Phi C$ gives
+$\widetilde M_\gamma=C^{-1}M_\gamma C$.
+The same definition applies to $Y'=A(z)Y$ in any finite dimension.
+
+Write $\eta\star\gamma$ for following $\gamma$ first and $\eta$ second.
+Unique continuation gives
+\[
+ M_{\eta\star\gamma}=M_\eta M_\gamma,\qquad
+ M_{\gamma^{-1}}=M_\gamma^{-1}.
+\]
+After continuation along all loops and homotopy invariance have been proved,
+these operators define the \emph{monodromy representation}
+$\rho:\pi_1(U,a)\to\operatorname{GL}(V_a)$; its image is the
+\emph{monodromy group}. Here the fundamental group consists of based loops
+modulo continuous deformations fixing the base point, with the stated
+composition convention. The separate \emph{monodromy theorem} says that a
+germ continuable along every path in a simply connected domain has a
+single-valued holomorphic continuation there.
+
+For Bessel's equation $z^2y''+zy'+z^2y=0$, use the local basis
+$(J_0,Y_*)$, with $Y_*=J_0\operatorname{Log}z+H$ and $H$ entire.
+This companion is not the standard $Y_0$. A positive circuit about the
+origin fixes $J_0$ and adds $2\pi iJ_0$ to $Y_*$, giving
+\[
+ M_\gamma=\begin{pmatrix}1&2\pi i\\0&1\end{pmatrix},\qquad
+ M_\gamma^k=\begin{pmatrix}1&2k\pi i\\0&1\end{pmatrix}
+ \quad(k\in\mathbb Z).
+\]
+Regular singularity controls growth, without requiring trivial monodromy.
+Conversely, the solution $1/z$ of $y'=-y/z$ returns unchanged around its
+pole: trivial monodromy does not imply removability.
+
+\paragraph{Formalization boundary.}
+This section supplies definitions and classical consequences, not new Lean
+continuation theorems. Construct local represented solutions and prove open
+overlap agreement, route coverage, and the terminal comparison first.
+Solution-space dimension, reversibility, and homotopy invariance retain
+their analytic proof obligations. The analytic-continuation skill records
+the procedure; the live reader includes the Bessel circuit illustration.
+
 \section{Ordinary forcing and variation of constants}
 For a supplied interval-continuous forcing $r$, put
 \[

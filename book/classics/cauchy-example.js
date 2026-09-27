@@ -98,8 +98,9 @@
         const arg=continuedArgument(z,sign,t);
         const b=bessel(z),value=add(mul(b.j,C(Math.log(Math.hypot(z.x,z.y)),arg)),b.regular);
         drawing+=`<circle cx="${x(z.x)}" cy="${y(z.y)}" r="5" fill="var(--purple)"/>`;
-        html=`<p>\\(\\arg z\\approx ${fmt(arg)}\\)</p><p>\\(Y_*(z)\\approx ${texComplex(value)}\\)</p><p>\\(\\Delta Y_*=${sign<0?'-':''}2\\pi iJ_0\\)</p>`;
-        caption='The marker returns to its start after a circuit, but the continued logarithmic solution acquires the displayed multiple of the regular solution.';
+        html=`<p>Full-circuit monodromy:</p><p>\\(M_\\gamma=\\begin{pmatrix}1&${sign<0?'-':''}2\\pi i\\\\0&1\\end{pmatrix}\\)</p>`;
+        html+=`<p>\\(\\arg z\\approx ${fmt(arg)}\\)</p><p>\\(Y_*(z)\\approx ${texComplex(value)}\\)</p>`;
+        caption='The matrix uses the ordered basis of the regular and logarithmic solutions, with solution state vectors as columns. Reversing orientation inverts the matrix.';
       }
     }
     plot.innerHTML=drawing;$('example-caption').textContent=caption;
