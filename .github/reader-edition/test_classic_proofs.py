@@ -132,6 +132,24 @@ def main():
                         assert abs(vals['small']['y']-2*3.141592653589793)<.001
                         assert abs(vals['j']['x']-.7651976865579666)<1e-12 and abs(vals['j']['y'])<1e-12
                         page.locator('[data-example-view="coefficients"]').click()
+                    if name=='road-to-fuchs.html':
+                        for mode in ['patches','circuit','growth']:
+                            page.locator(f'[data-story-view="{mode}"]').click()
+                            page.wait_for_function('(m)=>window.FuchsStory.mode===m',arg=mode)
+                            page.wait_for_function('document.querySelectorAll("#story-readout mjx-container").length>0')
+                        assert page.locator('#story-growth-controls').is_visible()
+                        values=page.evaluate('()=>[-1,1].map(sign=>[0,1,2].map(t=>FuchsStory.continuedLog(t,sign)))')
+                        for sign,turns in zip([-1,1],values):
+                            for k,value in enumerate(turns):
+                                assert value['z']==[1,0] and abs(value['re'])<1e-12
+                                assert abs(value['im']-sign*k*2*3.141592653589793)<1e-12
+                        page.locator('[data-story-view="circuit"]').click()
+                        page.locator('#story-progress').evaluate('(e)=>{e.value="200";e.dispatchEvent(new Event("input",{bubbles:true}));}')
+                        page.locator('#story-orientation').select_option('-1')
+                        page.wait_for_function('MathJax.startup.document.getMathItemsWithin(document.querySelector("#story-readout")).some(x=>x.math.includes("12.5664"))')
+                        assert page.locator('mjx-merror,[data-mjx-error]').count()==0
+                        assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+2')
+                        page.locator('[data-story-view="patches"]').click()
                     if name=='arctan-taylor.html':
                         assert report['checks']['arctanTaylorAudited']
                         if width==1440:

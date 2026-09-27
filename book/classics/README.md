@@ -62,3 +62,11 @@ section in `blueprint/src/09-differential-equations.tex`. This is exposition
 and a formalization target, not a new audited Lean theorem. The Cauchy page
 links to the definition and its existing side example displays the matrix
 for either orientation.
+
+
+`road-to-fuchs.html` follows one logarithm equation through local series,
+open-overlap agreement, a square circuit, monodromy, moderate growth, scaled
+systems, and Frobenius's construction to the precise scalar Fuchs criterion.
+The companion `fuchs-story` assets illustrate local rectangles, continued
+branches in either orientation, and radial growth. This is a guided classical
+narrative with explicit formalization boundaries, not a new Lean proof.

@@ -566,3 +566,14 @@ or completed continuation proofs. Construct local solutions, overlap identities,
 route coverage, and the terminal comparison before claiming a specific
 monodromy theorem; representation of the fundamental group also requires
 homotopy invariance. The continuation skill now records these conventions.
+
+
+### Guided route from a local logarithm to Fuchs
+
+The reader now follows \(zy''+y'=0\) from a concrete local series through
+open-overlap agreement and a square circuit, then explains monodromy,
+moderate growth, the scaled state \((y,zy')\), indicial exponents, and
+Frobenius series before stating Fuchs's criterion. The side illustration
+shows local patches, branch return, and radial growth. This is explanatory
+mathematics and a roadmap, not newly checked Lean continuation or Fuchs
+proofs; the outstanding represented-input bridges remain explicit.
