@@ -1,0 +1,18 @@
+<aside class="cauchy-example fuchs-story-example" aria-label="Follow the logarithm equation">
+<div class="example-sticky">
+<p class="classic-tag">Keep one equation in view</p><h2>A logarithm on the move</h2>
+<div class="example-equation">\[p(z)=1/z,\qquad q(z)=0.\]</div>
+<div class="example-tabs" role="group" aria-label="Story illustration">
+<button type="button" data-story-view="patches" aria-pressed="true">Local patches</button><button type="button" data-story-view="circuit" aria-pressed="false">Return map</button><button type="button" data-story-view="growth" aria-pressed="false">Approach zero</button>
+</div>
+<label class="example-follow"><input id="story-follow" type="checkbox" checked> Follow the narrative</label>
+<svg id="story-plot" role="img" viewBox="0 0 330 280" aria-labelledby="story-plot-title story-plot-desc"><title id="story-plot-title">Overlapping neighborhoods along a square</title><desc id="story-plot-desc">Move along the square to see local logarithm charts and the branch accumulated along the route.</desc></svg>
+<div id="story-route-controls">
+<label>Travel around the square <output id="story-progress-label">0%</output><input id="story-progress" type="range" min="0" max="200" step="1" value="0"></label>
+<label>Direction<select id="story-orientation"><option value="1">Counterclockwise</option><option value="-1">Clockwise</option></select></label>
+</div>
+<div id="story-growth-controls" hidden><label>Distance from the origin <output id="story-radius-label">1.000</output><input id="story-radius" type="range" min="0" max="100" step="1" value="0"></label><p>Move right to approach zero on the positive real axis. Compare the logarithm with a power and the irregular example from the text.</p></div>
+<div id="story-readout" aria-live="polite"></div><p id="story-caption"></p>
+<p class="example-note">Illustration using floating-point arithmetic. Displayed branches use explicit formulas; the Lean continuation and overlap proofs remain to be constructed.</p>
+<noscript>The main text contains all definitions and claims. JavaScript enables the moving illustration.</noscript>
+</div></aside>
