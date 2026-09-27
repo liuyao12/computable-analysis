@@ -22,6 +22,9 @@
 <section id="continuation-examples">
 <h2 id="analytic-continuation">Analytic continuation, one function at a time</h2>
 <p>Start with a local function and its branch normalization. Construct successive local functions along a chosen route and prove that neighboring constructions agree on open overlap neighborhoods. A proof can use explicit formulas, separated algebraic roots, local series, or particular definite integrals. No universal continuation algorithm is required.</p>
+<h3 id="monodromy">Monodromy names the effect of going around a loop</h3>
+<p>A <em>germ at a point</em> is a local holomorphic function, identifying representatives that agree on some neighborhood of that point. If a germ can be continued uniquely around a loop, its terminal germ at the same base point is its <em>monodromy image</em>. For a family of germs closed under continuation along the loop and its reverse, this gives a permutation of the germs. It need not fix each germ: logarithm translates branches, and square root exchanges two branches.</p>
+<p>For a homogeneous linear differential equation, the solution germs form a vector space, and monodromy is an invertible linear operator. Choosing a basis gives a monodromy matrix. The <a href="ch-differential-equations.html#monodromy">differential-equations chapter defines the operator, its matrix, and the monodromy group</a>, separating these notions from the homotopy-invariance theorem.</p>
 <p>These are the examples we should build around, in presentation order.</p>
 <h3>Arctangent: moving beyond one Taylor disk</h3>
 <p>Continue the branch with \(A(0)=0\) along the real axis to \(2\). Its original Taylor series fails there, but the function remains regular. Moving the center to \(1\) gives the classical radius \(\sqrt{2}\), set by the branch points \(\pm i\). This makes continuation useful before introducing loops or several branches. See the <a href="arctan-taylor.html">existing Taylor showcase</a> and the <a href="https://dlmf.nist.gov/4.23#i">classical branch structure</a>.</p>
@@ -81,10 +84,14 @@
 \[J_0(z)=\sum_{k=0}^{\infty}\frac{(-1)^k z^{2k}}{4^k(k!)^2}.\]
 <p>A second local solution, on a chosen logarithm branch, is</p>
 \[Y_*(z)=J_0(z)\log z-\sum_{k=1}^{\infty}\frac{(-1)^k H_k z^{2k}}{4^k(k!)^2},\qquad H_k=\sum_{j=1}^{k}\frac1j.\]
-<p>After one positive circuit, the logarithm changes by \(2\pi i\), so \(Y_*\) changes by \(2\pi iJ_0\). The side example follows this continuation. Its floating-point series are an illustration; these complex solution branches and their monodromy are not yet certified by the Lean development. The classical formulas follow the <a href="https://dlmf.nist.gov/10.2.E1">Bessel equation</a> and its <a href="https://dlmf.nist.gov/10.8.E2">logarithmic solution expansion</a>.</p>
+<p>After one positive circuit, the logarithm changes by \(2\pi i\), so \(Y_*\) changes by \(2\pi iJ_0\). The side example follows this continuation and displays its monodromy matrix. Its floating-point series are an illustration; these complex solution branches and their monodromy are not yet certified by the Lean development. The classical formulas follow the <a href="https://dlmf.nist.gov/10.2.E1">Bessel equation</a> and its <a href="https://dlmf.nist.gov/10.8.E2">logarithmic solution expansion</a>.</p>
 <p>For the formalization we use finite-dimensional systems. With \(U=(y,zy')\), this particular equation becomes</p>
 \[zU'=\begin{pmatrix}0&amp;1\\-z^2&amp;0\end{pmatrix}U.\]
 <p>The contour layer has no dependence on the order of an equation. Matrix integration acts componentwise. The second-order equation is the presentation’s running example, while continuation, coefficient estimates, and later regular-singularity results must be built for general systems.</p>
+<p>With solution state vectors as columns, our matrix convention gives</p>
+\[\Phi=\begin{pmatrix}J_0&amp;Y_*\\J_0'&amp;Y_*'\end{pmatrix},\qquad
+\Phi^\gamma=\Phi\begin{pmatrix}1&amp;2\pi i\\0&amp;1\end{pmatrix}.\]
+<p>This is the <a href="ch-differential-equations.html#monodromy">monodromy matrix</a> for one counterclockwise circuit. Reversing the circuit changes the upper-right entry to \(-2\pi i\). The identity is between local solution germs near the starting point, not merely their sampled values there.</p>
 <h2 id="checked" data-example="coefficients">Checked scope and next obligations</h2>
 <p><strong>Checked:</strong> finite edge reversal and triangle subdivision; local-affine error estimates; valid represented Cauchy computations on triangles and finite triangle collections; sampled square-pole normalization by arctangent; the local simple-pole residue identity with represented residues; and concrete polynomial examples.</p>
 <p><strong>Still required:</strong> general derivative-to-local-model constructors; arbitrary-partition agreement; punctured-domain contour transport; higher-order residue terms; the removable divided-difference construction; Cauchy value and derivative formulas; represented-input Taylor reconstruction; and analytic continuation for general systems.</p>

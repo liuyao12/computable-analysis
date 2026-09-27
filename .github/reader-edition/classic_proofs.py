@@ -21,6 +21,26 @@ def verify_mathlib(source_file=None):
     names=['bernoulliFourierCoeff_recurrence','bernoulliFourierCoeff_eq','hasSum_zeta_nat','hasSum_zeta_two']
     for name in names:assert ('theorem '+name) in data.decode()
     return dict(revision=MATHLIB,path=MATHLIB_PATH,sha256=MATHLIB_HASH,declarations=names,verification='Pinned source inspection; no new Mathlib compilation or cross-foundation bridge claimed')
+def install_monodromy(site,revision,repo):
+    # The chapter comes from a pinned reader artifact. Insert the maintained
+    # monodromy exposition without replacing its existing proof text or anchors.
+    ode_path=site/'ch-differential-equations.html'
+    ode=BeautifulSoup(ode_path.read_text(),'html.parser')
+    assert not ode.select_one('#monodromy')
+    forcing=next(h for h in ode.article.select('h2') if 'Ordinary forcing' in h.get_text())
+    fragment=(SOURCE/'monodromy-section.html').read_text().replace('__REPO__',repo)
+    forcing.insert_before(BeautifulSoup(fragment,'html.parser'))
+    toc=ode.select_one('.on-this-page')
+    if toc:
+        entry=ode.new_tag('a',href='#monodromy');entry.string='Monodromy'
+        anchor=toc.select_one('a[href="#'+forcing['id']+'"]')
+        if anchor:anchor.insert_before(entry)
+        else:toc.append(entry)
+    if not ode.select_one('link[href="reading/classics.css"]'):
+        ode.head.append(ode.new_tag('link',rel='stylesheet',href='reading/classics.css'))
+    ode.select_one('meta[name="documentation-revision"]')['content']=revision
+    ode_path.write_text(str(ode))
+
 def install(site,revision,euler_audit,cauchy_audit,arctan_audit,holomorphic_audit,source_file=None):
     assert re.fullmatch('[0-9a-f]{40}',revision)
     assert not (site/'reading/classic-proofs-edition.json').exists()
@@ -85,6 +105,7 @@ def install(site,revision,euler_audit,cauchy_audit,arctan_audit,holomorphic_audi
         footer=doc.select_one('.chapter-footer a')
         if footer:footer['href']=repo+'book/classics/'+name+'.html';footer.string='Source '+revision[:8]+' ↗'
         (site/(name+'.html')).write_text(str(doc))
+    install_monodromy(site,revision,repo)
     # Pinned reader pages retain their proof anchors and audited comparison data.
     # Their editable introductions live here, alongside the other showcase sources.
     for fragment in sorted((SOURCE/'statements').glob('*.html')):

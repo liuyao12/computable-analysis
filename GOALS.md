@@ -553,3 +553,16 @@ holomorphicity, overlap agreement, route coverage, and terminal comparison.
 These are proposed continuation showcases; this documentation change adds
 no Lean continuation theorem. Existing local estimates and contour periods
 are prerequisites, not substitutes for the connecting proofs.
+
+
+### Monodromy in the differential-equations chapter
+
+Define monodromy on solution germs, its basis-dependent matrix, and the
+monodromy group in the reader and chapter manuscript. Use columns of a
+fundamental matrix, \(\Phi^\gamma=\Phi M_\gamma\), throughout; the Bessel
+illustration now displays the matrix for both loop orientations. These are
+mathematical definitions and classical consequences, not new Lean declarations
+or completed continuation proofs. Construct local solutions, overlap identities,
+route coverage, and the terminal comparison before claiming a specific
+monodromy theorem; representation of the fundamental group also requires
+homotopy invariance. The continuation skill now records these conventions.
