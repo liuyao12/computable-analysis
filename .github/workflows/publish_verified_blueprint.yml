@@ -44,6 +44,7 @@ on:
       - 'book/fundamental-matrix/**'
       - 'book/cosine-square/**'
       - 'book/classics/**'
+      - 'book/chapters/**'
       - 'book/pi-log-one-plus-i.html'
       - 'book/construction-first.html'
       - 'docs/CONSTRUCTION_FIRST_*'
