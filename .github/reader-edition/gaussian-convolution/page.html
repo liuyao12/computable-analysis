@@ -42,6 +42,9 @@ body{margin:0;background:#fafbf7;color:#24362d;font:18px/1.7 Georgia,serif}main{
 
 <section id="gaussian"><h2>The Gaussian identities to construct next</h2><span class="status planned">Targets</span>
 <p>The working-tree Gaussian program already contains rational bounded quadrature, tail estimates and a valid full-line candidate. Connecting that candidate to justified compact integrals and their exhaustion remains an explicit obligation. Its normalization must be proved against the existing geometric \(\pi\).</p>
+<p>A direct normalization route uses the rational slope substitution \(y=tx\) on a triangle. For \(I_R=\int_{-R}^R e^{-x^2}\,dx\), the identity to formalize is</p>
+<div class="formula">\[I_R^2\simeq4\int_0^1\frac{1-e^{-(1+t^2)R^2}}{1+t^2}\,dt.\]</div>
+<p>The established arctangent normalization then gives \(0\le\pi-I_R^2\le4e^{-R^2}\le4/R^2\) for \(R&gt;0\). A finite double-sum comparison must justify the triangular substitution and its degenerate origin edge. This bounded identity is a proof plan, not yet a checked theorem.</p>
 <p>With arbitrary valid represented parameters and \(a&gt;0\), the central closed-form target is</p>
 <div class="formula">\[\int_{-\infty}^{\infty}e^{-ax^2+bx+c}\,dx\simeq\sqrt{\frac\pi a}\,e^{c+b^2/(4a)}.\]</div>
 <p>Certified affine substitution then supports shifted and scaled variants. Polynomial-weighted tails and integration by parts give the moment formulas. Completing the square in a justified convolution should prove the heat semigroup law:</p>

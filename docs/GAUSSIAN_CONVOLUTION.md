@@ -107,11 +107,24 @@ domain evidence. Equality in the public results will be `RealRaw.Equiv`
 (or the complex counterpart), independent of internal schedules.
 
 1. Establish compact Gaussian integral witnesses and the supplied full-line
-   exhaustion, then compare the square of its value with geometric \(\pi\).
-   A finite double-sum product followed by a certified radial change of
-   variables is one route. The origin and the square-versus-disk boundary
-   both need explicit error bounds; writing a polar-coordinate identity is
-   not that proof.
+   exhaustion, then use a rational slope substitution to identify its square.
+   Put \(I_R=\int_{-R}^{R}e^{-x^2}\,dx\). Splitting the positive square
+   into two triangles and substituting \(y=tx\) on one triangle gives the
+   bounded identity to formalize:
+   \[
+     I_R^2\simeq
+       4\int_0^1\frac{1-e^{-(1+t^2)R^2}}{1+t^2}\,dt.
+   \]
+   The existing arctangent normalization then gives the bound
+   \[
+     0\le\pi-I_R^2\le4e^{-R^2}\le\frac4{R^2}\quad(R>0).
+   \]
+   The last inequality uses the exponential reciprocal-square domination.
+   The map \((x,t)\mapsto(x,xt)\) is polynomial and its Jacobian is \(x\).
+   The required proof compares literal finite double sums, controls the
+   diagonal and the degenerate edge at the origin, and certifies the inner
+   exponential endpoint integral. These comparisons are still targets;
+   the displayed change of variables is not yet a Lean theorem.
 2. Prove affine substitution on those justified integrals. Completing the
    square should then give, for \(a>0\),
    \[
