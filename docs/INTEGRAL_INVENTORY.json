@@ -3710,6 +3710,11 @@
       "declarations": []
     },
     {
+      "path": "ComputableAnalysis/NBallGaussian.lean",
+      "role": "support",
+      "declarations": []
+    },
+    {
       "path": "ComputableAnalysis/PDE/CauchyContour.lean",
       "role": "conditional",
       "declarations": []

@@ -1,0 +1,63 @@
+\chapter{Ball Volumes and the Gamma Connection}\label{ch:n-ball-gamma}
+
+\section{An exact represented formula}
+Write
+\[
+ M_n(p,R)=c_np^{\lfloor n/2\rfloor}R^n,\qquad
+ c_0=1,\quad c_1=2,\quad c_{n+2}=\frac{2c_n}{n+2}.
+\]
+The existing finite volume model proves its recurrence and enclosure bounds.
+The new endpoint evaluator extends this computation to supplied valid
+representations of arbitrary nonnegative inputs, including irrational radii.
+Its hypotheses require nonnegative lower endpoints at every stage.
+
+\begin{theorem}[Represented ball formula]
+\label{thm:n-ball-represented}
+The endpoint evaluation of $M_n$ is valid for every natural dimension and
+every pair of valid nonnegative interval presentations. Replacing either
+presentation by an equivalent valid nonnegative presentation preserves its
+value under \texttt{RealRaw.Equiv}.
+\lean{ComputableAnalysis.NBallRaw.volume_valid, ComputableAnalysis.NBallRaw.volume_equiv}
+\leanok
+\end{theorem}
+
+This is a theorem about the formula. Identifying that formula with geometric
+ball volume remains a separate task. The validity proof inherits a native
+computation of the fixed rational fact $0<2$ from the existing multiplication
+foundation; the publication records that dependency explicitly.
+
+\begin{theorem}[Half-step coefficient cancellation]
+\label{thm:n-ball-gamma-coefficients}
+Define $g_0=1$, $g_1=1/2$, and $g_{n+2}=(n+2)g_n/2$. Then
+$c_ng_n=1$ and $M_n(p,R)g_n=p^{\lfloor n/2\rfloor}R^n$.
+\lean{ComputableAnalysis.nBallCoeff_mul_gammaHalfCoeff, ComputableAnalysis.nBallVolumeModel_gamma}
+\leanok
+\end{theorem}
+
+\section{Finite progress toward Gaussian normalization}
+\begin{theorem}[Square, triangles, and diagonal]
+\label{thm:gaussian-square-diagonal}
+For any finite list of rational cell masses,
+\[
+ (\sum_i a_i)^2=2\sum_{i<j}a_ia_j+\sum_i a_i^2.
+\]
+If $0\le a_i\le\delta$, then $\sum_i a_i^2\le\delta\sum_i a_i$.
+\lean{ComputableAnalysis.gaussian_square_split, ComputableAnalysis.gaussian_diagonal_bound}
+\leanok
+\end{theorem}
+The diagonal estimate supports the bounded slope substitution described in
+Chapter~\ref{ch:gaussian-convolution}; it does not prove that substitution.
+
+\section{Geometric and analytic targets}
+Construct the Gamma integral and its recurrence with explicit endpoint and
+tail estimates. Normalize the Gaussian independently against geometric $\pi$.
+Then compare Cartesian products with radial shells to justify
+\[
+ \pi^{n/2}\simeq nV_n(1)\int_0^\infty e^{-r^2}r^{n-1}\,dr
+ \simeq V_n(1)\Gamma(n/2+1),\qquad n\ge1.
+\]
+This should establish $V_n(R)\simeq\pi^{n/2}R^n/\Gamma(n/2+1)$.
+The independent coefficient cancellation above is not yet this integral or
+geometric theorem. The separate reader page supplies a rational interval
+calculator, tested against Lean evaluations, and explains these remaining
+bridges. No Mathlib real numbers enter the construction.

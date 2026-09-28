@@ -1,5 +1,5 @@
 {
-  "sourceRevision": "e680822ff674117711c07cf09c527118627726b8",
+  "sourceRevision": "d34d017d26c82dc795a5008afca99a1c2db6df13",
   "purpose": "Source coverage for a family-level review of theorem contracts; not a proof checker or declaration-by-declaration semantic certification.",
   "files": [
     {
@@ -282,7 +282,7 @@
       "path": "ComputableAnalysis.lean",
       "scope": "support",
       "area": "support",
-      "sha256": "bba8f846f6f0b5caa8c2628b3b6c3211c9aef0e62960a1e451a510df8fa2044e"
+      "sha256": "0c145e5dd0fa60b242cf8aa8ce924cec2acc9ac0d702ceefdc73d0d9cde20bb4"
     },
     {
       "path": "ComputableAnalysis/AbelianIntegrals.lean",
@@ -1278,7 +1278,7 @@
       "path": "ComputableAnalysis/FiniteNBallVolume.lean",
       "scope": "native",
       "area": "integration",
-      "sha256": "17f940e13e24a31c12014e621ba24ea1e2fc7cc5c5b01dc563d9eb5d6a7fbbe1"
+      "sha256": "5b1274bedd21f729d51bc3550d6ddb38dcbdd32a156b4531133ba0c726b2d3f8"
     },
     {
       "path": "ComputableAnalysis/FinitePascalExample.lean",
@@ -1585,6 +1585,12 @@
       "scope": "native",
       "area": "real-local-calculus",
       "sha256": "4b73a3ac0529a6b41ef7e3d54c9edad9fd5f99ae5cd7c1d35c67907599dcd158"
+    },
+    {
+      "path": "ComputableAnalysis/NBallGaussian.lean",
+      "scope": "native",
+      "area": "ball formula and Gaussian finite sums",
+      "sha256": "0e45b11748bf7505baf1df780d788fbcceb8109fea6efcaad4ec1f30b8ee7a53"
     },
     {
       "path": "ComputableAnalysis/Nilakantha.lean",
@@ -2185,6 +2191,12 @@
       "scope": "support",
       "area": "support",
       "sha256": "d15853fcb1c1f608ba3db9861f66a4f02f0e3a2a1c3920759e20b91edf29e2da"
+    },
+    {
+      "path": "scripts/check_n_ball.lean",
+      "scope": "support",
+      "area": "ball formula and Gaussian finite sums",
+      "sha256": "2d0916012238a72d2f9737067277546c1c819d6c7d7222c6fe05380570fe9a51"
     },
     {
       "path": "scripts/check_polygonal_cauchy.lean",

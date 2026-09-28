@@ -15,7 +15,7 @@ application. The law's conclusion must not be smuggled into the hypotheses.
 ## What was reviewed
 
 The [inventory](CONSTRUCTION_FIRST_INVENTORY.json) covers every tracked Lean
-source in the published development: 288 native modules and 79 other files
+source in the published development: 289 native modules and 80 other files
 (16 entry points/checking scripts, 17 companion files, and 46 historical files).
 Every source is assigned an area and bound to its content hash. Entry points,
 theorem ledgers, representative theorem hypotheses and proof-data records,
@@ -206,3 +206,17 @@ The new general theorems have rational finite scope. Gaussian normalization,
 continuous convolution and a CLT are explicitly left to their analytic
 comparison proofs. The check script includes exact moment regressions and
 the axiom audit. The canonical entry point adds only this finite module.
+
+### Ball formula and Gamma coefficient follow-up
+
+`NBallGaussian` constructs a represented polynomial evaluator and derives its
+validity and `RealRaw.Equiv` invariance from valid nonnegative input boxes.
+Upper bounds are inferred internally; there is no assumed volume identity.
+Its half-step Gamma sequence is rational coefficient algebra, with no claim
+that it is an improper integral. The two Gaussian sum theorems retain and bound
+the finite diagonal. Geometric volume, Gamma integrals, and Gaussian
+normalization remain explicit open bridges. The validity theorem inherits the
+existing native rational check of positivity of two in `Basic.lean`; the axiom
+audit records it. `FiniteNBallVolume` only changes the fixed rational base
+proofs used by its general coefficient nonnegativity theorem, removing their
+native evaluator dependencies.

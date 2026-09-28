@@ -1051,7 +1051,7 @@ theorem nBallCoeff_nonneg : ∀ n, 0 <= nBallCoeff n := by
     intro k
     induction k with
     | zero =>
-        native_decide
+        simp [nBallCoeff] <;> grind
     | succ k ih =>
         have hindex : 2 * (k + 1) = 2 * k + 2 := by omega
         rw [hindex, nBallCoeff_succ_two]
@@ -1060,14 +1060,14 @@ theorem nBallCoeff_nonneg : ∀ n, 0 <= nBallCoeff n := by
           grind
         have hfactor : 0 <= (2 : Rat) / ((2 * k : Nat) + 2) := by
           rw [Rat.div_def]
-          exact Rat.mul_nonneg (by native_decide)
+          exact Rat.mul_nonneg (by grind)
             (Rat.le_of_lt ((Rat.inv_pos).2 hden))
         exact Rat.mul_nonneg hfactor ih
   have hodd : ∀ k, 0 <= nBallCoeff (2 * k + 1) := by
     intro k
     induction k with
     | zero =>
-        native_decide
+        simp [nBallCoeff] <;> grind
     | succ k ih =>
         have hindex : 2 * (k + 1) + 1 = (2 * k + 1) + 2 := by omega
         rw [hindex, nBallCoeff_succ_two]
@@ -1076,7 +1076,7 @@ theorem nBallCoeff_nonneg : ∀ n, 0 <= nBallCoeff n := by
           grind
         have hfactor : 0 <= (2 : Rat) / ((2 * k + 1 : Nat) + 2) := by
           rw [Rat.div_def]
-          exact Rat.mul_nonneg (by native_decide)
+          exact Rat.mul_nonneg (by grind)
             (Rat.le_of_lt ((Rat.inv_pos).2 hden))
         exact Rat.mul_nonneg hfactor ih
   intro n

@@ -619,3 +619,14 @@ moments and Gaussian convolution stability, then transport the finite
 replacement estimate to represented integral actions. Smooth-test CLT
 convergence and pointwise density convergence are separate targets. See
 [the detailed theorem contracts](docs/GAUSSIAN_CONVOLUTION.md).
+
+## Ball formulas, Gamma coefficients, and Gaussian diagonal control
+
+`NBallGaussian` proves validity and representation invariance of the ball-volume
+formula on supplied valid nonnegative interval presentations, including
+irrational radii. It also proves reciprocal half-step coefficient recurrences
+and the finite square-to-triangles identity with a diagonal error bound.
+The separate reader calculator compares exact rational outputs against 213 Lean
+fixtures. Geometric volume, Gaussian normalization, and Gamma improper-integral
+bridges remain open. Formula validity inherits the existing native rational
+check in the multiplication foundation; see [the precise scope](docs/N_BALL_GAMMA.md).

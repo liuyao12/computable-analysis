@@ -222,3 +222,11 @@ The check file exercises exact distributions, function-action commutativity
 and associativity, moment cancellation, and the cubic replacement interface.
 It prints the axioms of the general theorems. Concrete runtime regressions
 use `native_decide`; the general convolution and replacement proofs do not.
+
+## Follow-up: ball volumes and Gamma
+
+The [separate volume page](N_BALL_GAMMA.md) records the new represented formula
+validity and invariance theorems and the rational interval calculator.
+`gaussian_square_split` and `gaussian_diagonal_bound` now prove the finite
+square-to-triangle decomposition, including a bound on its retained diagonal.
+The slope substitution and Gaussian normalization are still unproved.

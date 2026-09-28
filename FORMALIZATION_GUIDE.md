@@ -881,3 +881,14 @@ continuous convolution nor a central limit theorem follows without an
 integral comparison. The exact Gaussian, represented-parameter, and CLT
 obligations are recorded in [the Gaussian program](docs/GAUSSIAN_CONVOLUTION.md).
 Use `scripts/check_finite_convolution.lean` for runtime and axiom checks.
+
+## Ball formulas, Gamma coefficients, and Gaussian diagonal control
+
+`NBallGaussian` proves validity and representation invariance of the ball-volume
+formula on supplied valid nonnegative interval presentations, including
+irrational radii. It also proves reciprocal half-step coefficient recurrences
+and the finite square-to-triangles identity with a diagonal error bound.
+The separate reader calculator compares exact rational outputs against 213 Lean
+fixtures. Geometric volume, Gaussian normalization, and Gamma improper-integral
+bridges remain open. Formula validity inherits the existing native rational
+check in the multiplication foundation; see [the precise scope](docs/N_BALL_GAMMA.md).
