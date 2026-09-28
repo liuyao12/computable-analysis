@@ -62,6 +62,16 @@ try:
             assert not page.locator('mjx-merror').count()
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
             assert not errors, errors
+            # Large exact expressions and boundary enclosures must scroll
+            # within their formula containers, including on a narrow screen.
+            page.locator('#dimension').fill('64')
+            page.locator('#radius').fill('10')
+            page.get_by_role('button', name='Compute', exact=True).click()
+            page.wait_for_function('document.querySelectorAll("#result mjx-container").length >= 4')
+            assert not page.locator('mjx-merror').count()
+            assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+            page.get_by_role('button', name='Five dimensions', exact=True).click()
+            page.wait_for_function('document.querySelectorAll("#result mjx-container").length >= 4')
             page.screenshot(path=str(a.report / f'n-ball-{width}.png'), full_page=True)
             page.locator('nav a[href="gaussian-convolution.html"]').click()
             page.wait_for_url('**/gaussian-convolution.html')

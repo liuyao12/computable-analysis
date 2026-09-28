@@ -16,7 +16,7 @@ application. The law's conclusion must not be smuggled into the hypotheses.
 
 The [inventory](CONSTRUCTION_FIRST_INVENTORY.json) covers every tracked Lean
 source in the published development: 289 native modules and 80 other files
-(16 entry points/checking scripts, 17 companion files, and 46 historical files).
+(17 entry points/checking scripts, 17 companion files, and 46 historical files).
 Every source is assigned an area and bound to its content hash. Entry points,
 theorem ledgers, representative theorem hypotheses and proof-data records,
 and concrete applications were reviewed across the areas below.
