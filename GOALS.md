@@ -601,3 +601,21 @@ The audit checks its independence from the product-rule local value proof.
 This is an extension of the documented pinned foundation, not a claim that
 these declarations are exports of the current root library; no Taylor-series
 exponential bridge is claimed.
+
+## Gaussian convolution and central limit program
+
+The new `FiniteConvolution` module constructs convolution on finite rational
+probability kernels. Checked results include preservation of mass, action
+commutativity and associativity, addition of means and variances, function
+convolution composition, quadratic moment cancellation, and the quantitative
+rescaled replacement bound
+\(nC|r|^3(\rho_3(K)+\rho_3(L))\). The theorem consumes local cubic
+remainder estimates and derives the action comparison by finite telescoping.
+It does not assume the resulting comparison in a certificate.
+
+The remaining program is to certify Gaussian compact and exhaustion
+semantics, identify its mass with \(\sqrt\pi\), prove affine variants,
+moments and Gaussian convolution stability, then transport the finite
+replacement estimate to represented integral actions. Smooth-test CLT
+convergence and pointwise density convergence are separate targets. See
+[the detailed theorem contracts](docs/GAUSSIAN_CONVOLUTION.md).

@@ -8,6 +8,11 @@ on:
     paths:
       - '.github/workflows/publish_verified_blueprint.yml'
       - '.github/reader-edition/**'
+      - 'ComputableAnalysis/FiniteConvolution.lean'
+      - 'ComputableAnalysis/FiniteApproximateIdentity.lean'
+      - 'scripts/check_finite_convolution.lean'
+      - 'docs/GAUSSIAN_CONVOLUTION.md'
+      - 'blueprint/src/11-gaussian-convolution.tex'
       - 'book/rational-primitives/**'
       - 'ComputableAnalysis/RationalPrimitive*.lean'
       - 'ComputableAnalysis/RationalPartialFractions.lean'
@@ -167,6 +172,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 .github/reader-edition/reader_base.py
+      - name: Check and publish finite convolution and the Gaussian program
+        run: |
+          set -euo pipefail
+          mkdir -p gaussian-convolution-reports
+          lake build ComputableAnalysis.FiniteConvolution | tee gaussian-convolution-reports/build.log
+          lake env lean scripts/check_finite_convolution.lean | tee gaussian-convolution-reports/audit.log
+          python3 .github/reader-edition/gaussian_convolution.py --site site --revision "$GITHUB_SHA" --audit gaussian-convolution-reports/audit.log
       - uses: actions/upload-artifact@v4
         with:
           name: verified-reader-base
@@ -409,6 +421,8 @@ jobs:
         with:
           name: reader-edition-validation
           path: |
+            gaussian-convolution-reports
+            site/reading/gaussian-convolution.json
             reader-edition-tests
             site/reading/construction-first-edition.json
             site/reading/construction-first-inventory.json
@@ -460,6 +474,31 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+      - name: Verify the live convolution theorem page
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,os,time,urllib.request
+          base=os.environ['PAGE_URL'].rstrip('/')
+          revision=os.environ['GITHUB_SHA']
+          for attempt in range(18):
+              try:
+                  def get(path):
+                      with urllib.request.urlopen(base+'/'+path+'?revision='+revision,timeout=25) as r:
+                          return r.read()
+                  report=json.loads(get('reading/gaussian-convolution.json'))
+                  assert report['proofSourceCommit']==revision
+                  assert report['finiteRationalScope'] and not report['mathlibDependency']
+                  assert not report['continuousCLTProved'] and not report['gaussianNormalizationProved']
+                  for path,expected in report['artifactHashes'].items():
+                      assert hashlib.sha256(get(path)).hexdigest()==expected,path
+                  print('PASS: live convolution proofs and explicit remaining Gaussian targets')
+                  break
+              except Exception:
+                  if attempt==17: raise
+                  time.sleep(10)
+          PY
       - name: Verify the live geometry chapter and preserved comparisons
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}

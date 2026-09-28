@@ -11,6 +11,7 @@ import ComputableAnalysis.CalculusFoundation
 import ComputableAnalysis.AlgebraicFoundation
 import ComputableAnalysis.WiedijkScoreboard
 import ComputableAnalysis.RationalPrimitiveExamples
+import ComputableAnalysis.FiniteConvolution
 
 /-!
 # Computable Analysis

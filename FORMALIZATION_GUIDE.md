@@ -868,3 +868,16 @@ with a separately defined power-series exponential. Audit local value-proof
 independence precisely; shared global continuity bounds and chart assembly
 are not independent proof foundations. Reproduce this package against its
 pinned base using its README rather than assuming root-library exports.
+
+## Gaussian convolution and quantitative replacement
+
+`FiniteConvolution` constructs finite probability convolution and proves
+action commutativity, associativity, mean and variance addition, and the
+function-action composition law. Equal first two moments cancel quadratic
+probes. `scaled_convolutionPower_cubic_bound` derives the explicit error
+\(nC|r|^3(\rho_3(K)+\rho_3(L))\) from supplied pointwise cubic remainders
+at every translation. These are checked finite rational results; neither
+continuous convolution nor a central limit theorem follows without an
+integral comparison. The exact Gaussian, represented-parameter, and CLT
+obligations are recorded in [the Gaussian program](docs/GAUSSIAN_CONVOLUTION.md).
+Use `scripts/check_finite_convolution.lean` for runtime and axiom checks.

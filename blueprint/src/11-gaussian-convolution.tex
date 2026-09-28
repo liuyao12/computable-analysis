@@ -1,0 +1,84 @@
+\chapter{Gaussian Integrals and Convolution}\label{ch:gaussian-convolution}
+
+\section{Finite convolution and moments}
+
+For positive rational weights of total mass one, form the list of all
+pairwise sums of sample points and multiply their weights. If
+$A_K(h)=\sum_i p_i h(x_i)$, the exact finite identity is
+\[
+ A_{K*L}(h)=\sum_i p_i\sum_jq_jh(x_i+y_j).
+\]
+Finite interchange proves commutativity and associativity of these actions,
+without identifying different list encodings. Means and variances satisfy
+\[
+ \mu_{K*L}=\mu_K+\mu_L,\qquad v_{K*L}=v_K+v_L,
+ \qquad v_{K^{*n}}=nv_K.
+\]
+The function action $T_Kh(x)=\sum_i p_i h(x-x_i)$ satisfies
+$T_{K*L}h=T_K(T_Lh)$.
+
+\begin{theorem}[Finite convolution laws]
+\label{thm:finite-convolution-laws}
+The pairwise-sum construction preserves nonnegative weights and mass one.
+Its actions are commutative and associative, and the moment and function
+identities above hold for every supplied finite probability kernel.
+\lean{ComputableAnalysis.WeightedPoint.action_convolution, ComputableAnalysis.WeightedPoint.action_convolution_comm, ComputableAnalysis.WeightedPoint.action_convolution_assoc, ComputableAnalysis.FiniteProbabilityKernel.variance_convolution, ComputableAnalysis.FiniteProbabilityKernel.variance_convolutionPower, ComputableAnalysis.FiniteProbabilityKernel.convolveFunction_convolution}
+\leanok
+\end{theorem}
+
+\section{A quantitative replacement step}
+
+Write $\rho_3(K)=\sum_i p_i|x_i|^3$. Equal first and second moments imply
+equal actions on every quadratic polynomial. This cancels the first three
+terms in a local quadratic approximation; only the remainder contributes.
+
+\begin{theorem}[Finite rescaled convolution comparison]
+\label{thm:finite-convolution-replacement}
+Let $K,L$ have equal first and second moments. Suppose rational $r,C$ and
+quadratics $P_z$ satisfy
+\[
+ |h(z+rx)-P_z(x)|\le C|r|^3|x|^3
+\]
+on both finite supports for every rational $z$. Then
+\[
+ \left|A_{K^{*n}}(h(r\,\cdot))-A_{L^{*n}}(h(r\,\cdot))\right|
+ \le nC|r|^3\bigl(\rho_3(K)+\rho_3(L)\bigr).
+\]
+\lean{ComputableAnalysis.FiniteProbabilityKernel.quadratic_action_eq, ComputableAnalysis.FiniteProbabilityKernel.cubic_replacement_bound, ComputableAnalysis.FiniteProbabilityKernel.convolutionPower_replacement_bound, ComputableAnalysis.FiniteProbabilityKernel.scaled_convolutionPower_cubic_bound}
+\leanok
+\end{theorem}
+
+For $n=m^2$ and $r=1/m$, the coefficient is $C/m$. This theorem is finite
+and rational. It assumes the stated remainder estimate, not differentiability,
+and does not yet assert convergence to a Gaussian.
+
+\section{Gaussian and central limit targets}
+
+The existing Gaussian work supplies bounded quadrature comparisons,
+reciprocal-square tail domination, and a valid full-line candidate with
+width at most $16/(n+1)$. The candidate's compact integral witnesses and
+exhaustion semantics still need a public comparison proof. Its identification
+with $\sqrt\pi$ is also a target. The desired variants include, for $a>0$,
+\[
+ \int_{-\infty}^{\infty}e^{-ax^2+bx+c}\,dx
+ \simeq\sqrt{\frac\pi a}\,e^{c+b^2/(4a)},
+ \qquad G_s*G_t\simeq G_{s+t},
+ \qquad G_t(x)=\frac{e^{-x^2/(4t)}}{\sqrt{4\pi t}}.
+\]
+These are not checked consequences of raw validity. They require justified
+integrals, finite change-of-variables comparisons and tail bounds, with
+arbitrary valid represented parameters and representation invariance.
+
+For a nonnegative density $f$ of mass one, mean zero and variance one, put
+$f_n(x)=\sqrt n\,f^{*n}(\sqrt n x)$. The first central limit target is
+\[
+ \int h(x)f_n(x)\,dx\longrightarrow
+ \int h(x)\frac{e^{-x^2/2}}{\sqrt{2\pi}}\,dx
+\]
+for smooth bounded test functions. Pointwise convergence of densities is a
+stronger, separate target. A supplied third absolute moment and cubic Taylor
+remainder should yield an explicit rate through the checked replacement
+theorem. The remaining work is continuous quadrature transport, Gaussian
+stability and moments, and represented scaling. For the finite-variance
+version, a second-moment tail modulus supplies the truncation schedule.
+No measure-space or completed-real construction is required by this plan.
