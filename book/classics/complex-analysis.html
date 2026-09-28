@@ -1,4 +1,18 @@
 <header><p class="classic-tag">Foundation in progress · Polygonal contours</p><h1>Cauchy’s theory, by finite computation</h1><p class="lead">Local complex-linear approximations cancel around small triangles. Arctangent determines what remains around a pole.</p></header>
+<h2 id="setup" data-example="coefficients">Setup: a function, a polygon, a local model</h2>
+<p>For the checked contour theorem, take a finite oriented collection of rational triangles and a complex function whose values are valid rational-box computations. At stage \(n\), subdivide each triangle to depth \(d_n\ge n\), sharing every edge sample. The selected function boxes have both widths at most \(1/(n+1)\). On every small triangle, suppose the sampled function at every rational point of the filled triangle admits a complex-affine approximation \(A+Bz\) with error at most</p>
+\[\frac{M}{n+1}\,2^{-d_n},\qquad M\ge0.\]
+<p>The coefficients of the local approximation may vary between triangles and stages. The mesh and evaluation schedules are executable data. These are local approximation hypotheses; no contour identity is assumed.</p>
+<section class="showcase-statement" aria-labelledby="theorem"><h2 id="theorem">Theorem — Computed polygonal Cauchy cancellation</h2>
+<p>For every function and finite triangle collection satisfying this setup, the contour computation is valid and represents zero. If \(P\) is the sum of the original triangle perimeters in the coordinate-sum norm and \(S_n\) is the oriented midpoint sum, then</p>
+\[\lVert S_n\rVert_1\le\frac{MP}{n+1},\qquad \oint_{\partial\mathcal T}f(z)\,dz\simeq0.\]
+<p>Shared interior edges cancel. Thus only the boundary of the triangle collection contributes, with the reverse orientation on boundaries of holes. No approximation is required inside an omitted hole.</p>
+</section>
+<p class="classic-scope">This theorem is checked from the displayed effective local data. Deriving those data automatically from a general represented complex derivative, and proving agreement with arbitrary tagged partitions, remain separate obligations.</p>
+<p>The example alongside this page is Bessel’s equation of order zero:</p>
+\[y''+p(z)y'+q(z)y=0,\qquad p(z)=\frac1z,\quad q(z)=1.\]
+<p>Its only finite coefficient singularity is the origin. Multiplying the coefficients by the appropriate powers gives \(zp(z)=1\) and \(z^2q(z)=z^2\), both regular there. We will follow this one equation while constructing tools for general complex functions and systems of any finite dimension.</p>
+
 <p class="classic-action">For a real-variable showcase of this function theory, see <a href="arctan-taylor.html">where the Taylor series of arctangent converges—and where it stops</a>.</p>
 <section id="holomorphic-foundation">
 <h2 id="holomorphic">Holomorphic functions: the working definition</h2>
@@ -19,7 +33,7 @@
 <p class="classic-scope">Checked: the definition, the two examples, their derivative continuity, and transport of derivative estimates between equivalent representations. Existing formal jets are not yet all connected to this interface. Constructing uniform rectangle estimates and the Cauchy–Taylor bridges remains further work; no contour formula is assumed in the definition.</p>
 <p><a href="__REPO__ComputableAnalysis/Holomorphic.lean">Definition and representation laws</a> · <a href="__REPO__ComputableAnalysis/HolomorphicExamples.lean">Checked examples</a> · <a href="__REPO__skills/holomorphic-functions/SKILL.md">Skill for proving specific functions holomorphic</a> · <a href="reading/holomorphic-audit.log">Proof audit</a></p>
 </section>
-<p class="classic-action"><a href="road-to-fuchs.html">Follow a solution around a singularity: the guided route to Fuchs →</a></p>
+<p class="classic-action"><a href="ch-differential-equations.html#continuation-to-fuchs">Follow a solution around a singularity: the guided route to Fuchs →</a></p>
 <section id="continuation-examples">
 <h2 id="analytic-continuation">Analytic continuation, one function at a time</h2>
 <p>Start with a local function and its branch normalization. Construct successive local functions along a chosen route and prove that neighboring constructions agree on open overlap neighborhoods. A proof can use explicit formulas, separated algebraic roots, local series, or particular definite integrals. No universal continuation algorithm is required.</p>
@@ -44,19 +58,7 @@
 <p>The <a href="__REPO__skills/analytic-continuation/SKILL.md">analytic-continuation skill</a> records this workflow, and its <a href="__REPO__skills/analytic-continuation/references/examples.md">example guide</a> links the existing proof pieces and missing connections. Agreement at a single point is insufficient; agreement on the relevant open overlap is the connecting proof. Crossing a chosen branch cut need not cross a singularity, and returning to the starting point need not return the initial branch.</p>
 </section>
 <p class="classic-scope">Integration convention: subdivide the geometric segment, enclose the function over each whole chunk, multiply by its finite complex displacement, and add the rectangles. The checked Cauchy results below concern a specified midpoint computation and its error bounds. Agreement with independently refined whole-chunk rectangles remains a separate bridge. See <a href="integral-enclosures.html">the integral construction and audit</a>.</p>
-<h2 id="setup" data-example="coefficients">Setup: a function, a polygon, a local model</h2>
-<p>The example alongside this page is Bessel’s equation of order zero:</p>
-\[y''+p(z)y'+q(z)y=0,\qquad p(z)=\frac1z,\quad q(z)=1.\]
-<p>Its only finite coefficient singularity is the origin. Multiplying the coefficients by the appropriate powers gives \(zp(z)=1\) and \(z^2q(z)=z^2\), both regular there. We will follow this one equation while constructing tools for general complex functions and systems of any finite dimension.</p>
-<p>For the checked contour theorem, take a finite oriented collection of rational triangles and a complex function whose values are valid rational-box computations. At stage \(n\), subdivide each triangle to depth \(d_n\ge n\), sharing every edge sample. The selected function boxes have both widths at most \(1/(n+1)\). On every small triangle, suppose the sampled function at every rational point of the filled triangle admits a complex-affine approximation \(A+Bz\) with error at most</p>
-\[\frac{M}{n+1}\,2^{-d_n},\qquad M\ge0.\]
-<p>The coefficients of the local approximation may vary between triangles and stages. The mesh and evaluation schedules are executable data. These are local approximation hypotheses; no contour identity is assumed.</p>
-<section class="showcase-statement" aria-labelledby="theorem"><h2 id="theorem">Theorem — Computed polygonal Cauchy cancellation</h2>
-<p>For every function and finite triangle collection satisfying this setup, the contour computation is valid and represents zero. If \(P\) is the sum of the original triangle perimeters in the coordinate-sum norm and \(S_n\) is the oriented midpoint sum, then</p>
-\[\lVert S_n\rVert_1\le\frac{MP}{n+1},\qquad \oint_{\partial\mathcal T}f(z)\,dz\simeq0.\]
-<p>Shared interior edges cancel. Thus only the boundary of the triangle collection contributes, with the reverse orientation on boundaries of holes. No approximation is required inside an omitted hole.</p>
-</section>
-<p class="classic-scope">This theorem is checked from the displayed effective local data. Deriving those data automatically from a general represented complex derivative, and proving agreement with arbitrary tagged partitions, remain separate obligations.</p>
+
 <h2 id="triangles" data-example="triangles">Why triangles remove the regular part</h2>
 <p>A complex-affine function has zero midpoint sum around a triangle. Replace a function locally by such a model. Only the remainder contributes. Subdivision halves edge lengths and local first-order errors while quadrupling the number of triangles; their product stays controlled. Making the first-order error arbitrarily small forces the contour value to vanish.</p>
 <p>For the common quadratic estimate, halving the diameter divides the local error by four. The total error then halves at each refinement:</p>

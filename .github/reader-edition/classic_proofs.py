@@ -5,12 +5,13 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 ROOT=Path(__file__).resolve().parents[2]
 SOURCE=ROOT/'book/classics'
+CHAPTER_SOURCE=ROOT/'book/chapters/differential-equations'
 MATHLIB='338b8c00bd151fa07a0350cc17442e6eeda734e8'
 MATHLIB_PATH='Mathlib/NumberTheory/ZetaValues.lean'
 MATHLIB_HASH='27aa982f5c473d7e8c6e6030ead08ffce081a7ff616b2acd9130d04772f8c672'
 EULER_MATHLIB='51e6992efd06126df61a496bebf8f49482a4e129'
 LINKS=[('cartwright.html',r'Irrationality of \(\pi^2\)'),('leibniz.html','The Leibniz series'),('basel.html','The Basel problem'),('euler.html','Euler’s sine product'),('arctan-taylor.html','Arctangent and Taylor series')]
-ODE_LINKS=[('complex-analysis.html', 'Polygonal Cauchy theory'), ('road-to-fuchs.html', 'The road to Fuchs'), ('fuchs.html', 'Fuchs’s theorem'), ('painleve.html', 'Painlevé’s classification')]
+ODE_LINKS=[('complex-analysis.html', 'Polygonal Cauchy theory'), ('fuchs.html', 'Fuchs’s theorem'), ('painleve.html', 'Painlevé’s classification')]
 LINKS += ODE_LINKS
 SHOWCASE_PAGES = ['cosine.html', 'integral-families.html'] + [href for href, _ in LINKS]
 def digest(p):return hashlib.sha256(p.read_bytes()).hexdigest()
@@ -29,17 +30,44 @@ def install_monodromy(site,revision,repo):
     assert not ode.select_one('#monodromy')
     forcing=next(h for h in ode.article.select('h2') if 'Ordinary forcing' in h.get_text())
     fragment=(SOURCE/'monodromy-section.html').read_text().replace('__REPO__',repo)
+    story=BeautifulSoup((CHAPTER_SOURCE/'continuation.html').read_text().replace('__REPO__',repo),'html.parser')
+    forcing.insert_before(story)
     forcing.insert_before(BeautifulSoup(fragment,'html.parser'))
     toc=ode.select_one('.on-this-page')
     if toc:
-        entry=ode.new_tag('a',href='#monodromy');entry.string='Monodromy'
-        anchor=toc.select_one('a[href="#'+forcing['id']+'"]')
-        if anchor:anchor.insert_before(entry)
-        else:toc.append(entry)
+        toc.clear()
+        for heading in ode.article.select('h2[id],#continuation-story h3[id]'):
+            entry=ode.new_tag('a',href='#'+heading['id']);entry.string=heading.get_text()
+            if heading.name=='h3':entry['class']=['chapter-subsection']
+            toc.append(entry)
+    ode.body['class']=ode.body.get('class',[])+['cauchy-page','fuchs-chapter-page']
+    rail=ode.new_tag('aside',attrs={'class':'chapter-rail','aria-label':'Chapter navigation and example'})
+    if toc:
+        contents=ode.new_tag('details',attrs={'class':'chapter-contents'})
+        summary=ode.new_tag('summary');summary.string='Contents of this chapter';contents.append(summary)
+        contents.append(toc.extract());rail.append(contents)
+    rail.append(BeautifulSoup((CHAPTER_SOURCE/'fuchs-story-example.html').read_text(),'html.parser'))
+    ode.select_one('.page').append(rail)
+    for asset in ['cauchy-example.css','fuchs-story.css']:
+        ode.head.append(ode.new_tag('link',rel='stylesheet',href='reading/'+asset))
+    ode.head.append(ode.new_tag('script',src='reading/fuchs-story.js',defer=''))
+    for asset in ['fuchs-story.css','fuchs-story.js']:
+        shutil.copyfile(CHAPTER_SOURCE/asset,site/'reading'/asset)
     if not ode.select_one('link[href="reading/classics.css"]'):
         ode.head.append(ode.new_tag('link',rel='stylesheet',href='reading/classics.css'))
     ode.select_one('meta[name="documentation-revision"]')['content']=revision
     ode_path.write_text(str(ode))
+
+def redirect_story(site):
+    old_ids=re.findall(r'id="continuation-([^" ]+)"', (CHAPTER_SOURCE/'continuation.html').read_text())
+    redirects={key:'continuation-'+key for key in old_ids if key not in ['story','to-fuchs']}
+    destination='ch-differential-equations.html#continuation-to-fuchs'
+    legacy='<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Continue in the textbook</title>'
+    legacy+='<link rel="canonical" href="'+destination+'"><script>const sections='+json.dumps(redirects)+';'
+    legacy+='const key=location.hash.slice(1);location.replace("ch-differential-equations.html#"+(sections[key]||"continuation-to-fuchs"));</script></head>'
+    legacy+='<body><p>The guided story is now part of the differential-equations chapter. <a href="'+destination+'">Continue reading in the textbook.</a></p></body></html>'
+    (site/'road-to-fuchs.html').write_text(legacy)
+
 
 def install(site,revision,euler_audit,cauchy_audit,arctan_audit,holomorphic_audit,source_file=None):
     assert re.fullmatch('[0-9a-f]{40}',revision)
@@ -78,7 +106,7 @@ def install(site,revision,euler_audit,cauchy_audit,arctan_audit,holomorphic_audi
     native=repo+'ComputableAnalysis/'
     ml=f'https://github.com/leanprover-community/mathlib4/blob/{MATHLIB}/'
     template=(site/'cosine.html').read_text()
-    for name,title in [('leibniz','The Leibniz series'),('basel','The Basel problem'),('euler','Euler’s sine-product proof'),('road-to-fuchs','From a local solution to Fuchs’s theorem'),('fuchs','Fuchs’s theorem'),('painleve','Painlevé’s classification'),('complex-analysis','Polygonal Cauchy theory'),('arctan-taylor','Arctangent: where Taylor stops')]:
+    for name,title in [('leibniz','The Leibniz series'),('basel','The Basel problem'),('euler','Euler’s sine-product proof'),('fuchs','Fuchs’s theorem'),('painleve','Painlevé’s classification'),('complex-analysis','Polygonal Cauchy theory'),('arctan-taylor','Arctangent: where Taylor stops')]:
         doc=BeautifulSoup(template,'html.parser');doc.title.string=title+' · Computable Analysis'
         doc.select_one('meta[name="documentation-revision"]')['content']=revision
         page=(SOURCE/(name+'.html')).read_text().replace('__NATIVE__',native).replace('__MATHLIB__',ml).replace('__REPO__',repo).replace('__EULER_MATHLIB__',f'https://github.com/leanprover-community/mathlib4/blob/{EULER_MATHLIB}/')
@@ -95,12 +123,6 @@ def install(site,revision,euler_audit,cauchy_audit,arctan_audit,holomorphic_audi
             doc.select_one('.page').append(BeautifulSoup((SOURCE/'cauchy-example.html').read_text(),'html.parser'))
             doc.head.append(doc.new_tag('link',rel='stylesheet',href='reading/cauchy-example.css'))
             doc.head.append(doc.new_tag('script',src='reading/cauchy-example.js',defer=''))
-        if name=='road-to-fuchs':
-            doc.body['class']=doc.body.get('class',[])+['cauchy-page','fuchs-story-page']
-            doc.select_one('.page').append(BeautifulSoup((SOURCE/'fuchs-story-example.html').read_text(),'html.parser'))
-            for asset in ['cauchy-example.css','fuchs-story.css']:
-                doc.head.append(doc.new_tag('link',rel='stylesheet',href='reading/'+asset))
-            doc.head.append(doc.new_tag('script',src='reading/fuchs-story.js',defer=''))
         if name=='arctan-taylor':
             doc.body['class']=doc.body.get('class',[])+['cauchy-page','arctan-page']
             doc.select_one('.page').append(BeautifulSoup((SOURCE/'arctan-example.html').read_text(),'html.parser'))
@@ -112,6 +134,7 @@ def install(site,revision,euler_audit,cauchy_audit,arctan_audit,holomorphic_audi
         if footer:footer['href']=repo+'book/classics/'+name+'.html';footer.string='Source '+revision[:8]+' ↗'
         (site/(name+'.html')).write_text(str(doc))
     install_monodromy(site,revision,repo)
+    redirect_story(site)
     # Pinned reader pages retain their proof anchors and audited comparison data.
     # Their editable introductions live here, alongside the other showcase sources.
     for fragment in sorted((SOURCE/'statements').glob('*.html')):
@@ -153,7 +176,7 @@ def install(site,revision,euler_audit,cauchy_audit,arctan_audit,holomorphic_audi
         for span in nav.select('.nav-label'):
             if span.get_text()=='A worked comparison':span.string='Worked examples'
         for href,title in LINKS:
-            if href in ['arctan-taylor.html','road-to-fuchs.html']:
+            if href in ['arctan-taylor.html','fuchs.html']:
                 label=BeautifulSoup('<span class="nav-label">'+('Function theory' if href=='arctan-taylor.html' else 'Differential equations')+'</span>','html.parser').span
                 marker.insert_before(label)
             a=BeautifulSoup(f'<a class="classic-navigation" href="{prefix+href}">{title}</a>','html.parser').a
@@ -163,7 +186,7 @@ def install(site,revision,euler_audit,cauchy_audit,arctan_audit,holomorphic_audi
             active=nav.select_one(f'a[href="{prefix+p.name}"]');active['class']=active.get('class',[])+['current'];active['aria-current']='page'
         updated=original[:match.start()]+str(nav)+original[match.end():]
         p.write_text(updated);navigation.append(str(p.relative_to(site)))
-    for asset in ['cauchy-example.css','cauchy-example.js','arctan-example.css','arctan-example.js','fuchs-story.css','fuchs-story.js']:
+    for asset in ['cauchy-example.css','cauchy-example.js','arctan-example.css','arctan-example.js']:
         shutil.copyfile(SOURCE/asset,site/'reading'/asset)
     shutil.copyfile(arctan_audit,site/'reading/arctan-taylor-audit.log')
     shutil.copyfile(holomorphic_audit,site/'reading/holomorphic-audit.log')

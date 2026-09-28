@@ -1,16 +1,17 @@
-<header><p class="classic-tag">A guided route through function theory</p><h1>From a local solution to Fuchs’s theorem</h1><p class="lead">A logarithm is enough to begin. Follow one solution around a missing point, then ask what happens as we approach that point.</p></header>
+<section id="continuation-story">
+<header><p class="classic-tag">Differential equations · Guided development</p><h2 id="continuation-to-fuchs">From a local solution to Fuchs’s theorem</h2><p class="lead">A logarithm is enough to begin. Follow one solution around a missing point, then ask what happens as we approach that point.</p></header>
 <p>A differential equation gives local instructions. To understand a singularity, we must learn how those instructions fit together beyond one neighborhood. Our route has three questions: can we keep going, what returns after a circuit, and how large can a solution become? Analytic continuation, monodromy, and Fuchs’s criterion answer these different questions.</p>
-<p class="classic-scope">This page tells the classical mathematical story and the constructive route we intend to formalize. It does not announce new Lean continuation or Fuchs theorems. The <a href="#our-foundation">closing section</a> separates the existing proof pieces from the missing connections.</p>
-<h2 id="setup" data-story="patches">1. Begin where the equation is ordinary</h2>
+<p class="classic-scope">This section tells the classical mathematical story and the constructive route we intend to formalize. It does not announce new Lean continuation or Fuchs theorems. The <a href="#continuation-our-foundation">closing section</a> separates the existing proof pieces from the missing connections.</p>
+<h3 id="continuation-setup" data-story="patches">Begin where the equation is ordinary</h3>
 <p>Keep one equation in view:</p>
 \[y''+\frac1z y'=0,\qquad y(1)=0,\quad y'(1)=1.\]
 <p>The coefficients are perfectly regular near \(1\), but the coefficient \(1/z\) has a pole at \(0\). That point is missing from the domain of the normalized equation. Multiplying by \(z\) gives \(zy''+y'=0\); writing it this way does not restore the usual initial-value problem at the origin, because its leading coefficient vanishes there.</p>
 <p>The useful observation is \((zy')'=0\). Our initial data suggest \(zy'=1\), hence \(y'=1/z\). We expect a logarithm, but the name of a function is not yet a computation or a proof. We will construct the local function first, then discover how its branches fit.</p>
-<section class="showcase-statement" aria-labelledby="theorem"><h2 id="theorem">Our first destination: one complete circuit</h2>
+<section class="showcase-statement" aria-labelledby="continuation-theorem"><h3 id="continuation-theorem">Our first destination: one complete circuit</h3>
 <p>Let \(L\) be the local solution near \(1\) with \(L(1)=0\) and \(L'(z)=1/z\). It can be analytically continued counterclockwise along the boundary of the square with corners \(\pm1\pm i\), starting at \(1\). On returning, its terminal germ is \(L+2\pi i\). More generally, the solution \(u+vL\), for arbitrary complex constants \(u,v\), returns as \(u+vL+2\pi i v\).</p>
 \[L^{\gamma}(z)=L(z)+2\pi i\quad\text{near }1.\]
 <p>This is a classical result to construct in our foundation. It compares functions on a neighborhood, not just two numerical outputs at the endpoint.</p></section>
-<h2 id="local-series" data-story="patches">2. A small series gives an actual local solution</h2>
+<h3 id="continuation-local-series" data-story="patches">A small series gives an actual local solution</h3>
 <p>At a nonzero center \(c\), write \(z=c(1+w)\). The geometric series computes \(1/(1+w)\); dividing its coefficients by the new exponents suggests</p>
 \[\ell(w)=\sum_{n=1}^{\infty}\frac{(-1)^{n+1}}n w^n,\qquad
 L_{c,b}(z)=b+\ell\!\left(\frac{z-c}{c}\right).\]
@@ -19,7 +20,7 @@ L_{c,b}(z)=b+\ell\!\left(\frac{z-c}{c}\right).\]
 \[\left|\ell(w)-\sum_{n=1}^{N}\frac{(-1)^{n+1}}n w^n\right|
 \le\frac{q^{N+1}}{(N+1)(1-q)}.\]
 <p>With rational \(q\), this tells a rational-box algorithm how many terms suffice. Derivative estimates need their own remainder bounds, so formal differentiation alone is not the final analytic proof. This is the local <a href="https://dlmf.nist.gov/4.6">logarithm series</a> doing a concrete job.</p>
-<h2 id="overlaps" data-story="patches">3. Uniqueness lets us move the center</h2>
+<h3 id="continuation-overlaps" data-story="patches">Uniqueness lets us move the center</h3>
 <p>The first series cannot cover a neighborhood containing the origin. There is no reason, however, to insist on keeping its center at \(1\). Choose a nearby center \(d\) and set its initial value to \(L_{c,b}(d)\). The new local construction has the same derivative as the old one and the same value at \(d\).</p>
 <p>Why does that make it the same function on the overlap? We need a local comparison theorem: on a rectangle, a holomorphic function with zero derivative is constant. A quantitative version can use finite telescoping along horizontal and vertical segments, with proved uniform error control. Applying it to the difference establishes agreement on a smaller open rectangle around \(d\). This lemma must be proved; agreement at one point by itself would be insufficient.</p>
 <p>Now cover the chosen square route by finitely many small overlapping rectangles, all separated from the origin. Continue the construction from one to the next, carrying the exact represented value at each new center. We have extended a function beyond its original series without defining it across its singularity. This chain of local functions is <a href="https://dlmf.nist.gov/1.10#ii">analytic continuation along the route</a>.</p>
@@ -29,7 +30,7 @@ L_{c,b}(z)=b+\ell\!\left(\frac{z-c}{c}\right).\]
 \[\left\|\frac{z-c}{c}\right\|_1\le\frac12.\]
 <p>Thus the same geometric tail bound works in every local chart. This is finite rational geometry and an explicit series estimate; no compactness argument is needed to find the cover.</p></details>
 <p>The side illustration shows three neighboring rectangles at a time. They are neighborhoods in the complex plane, not just samples on a line. Their overlap is what allows us to compare local functions.</p>
-<h2 id="return" data-story="circuit">4. The point returns; the local function can change</h2>
+<h3 id="continuation-return" data-story="circuit">The point returns; the local function can change</h3>
 <p>After a complete circuit, we are near \(1\) again. The continued logarithm still has derivative \(1/z\). Its difference from the original logarithm is therefore a constant. Determining that constant is a new calculation.</p>
 <p>For each particular horizontal or vertical piece, prove that the change of the local solution equals the integral of its derivative, computed from whole-chunk enclosures. These increments telescope. Our arctangent-based square-period calculation then identifies their total:</p>
 \[\text{sum of the oriented reciprocal increments}=2\pi i.\]
@@ -38,13 +39,13 @@ L_{c,b}(z)=b+\ell\!\left(\frac{z-c}{c}\right).\]
 \[\Phi(z)=\begin{pmatrix}1&amp;L(z)\\0&amp;1/z\end{pmatrix},\qquad
 \Phi^\gamma=\Phi M_\gamma,\qquad M_\gamma=\begin{pmatrix}1&amp;2\pi i\\0&amp;1\end{pmatrix}.\]
 <p>The matrix records a change of solution, not an error accumulated by a numerical method. Reverse the circuit and its off-diagonal entry changes sign. The <a href="ch-differential-equations.html#monodromy">monodromy chapter section</a> explains basis changes and the additional homotopy theorem needed to pass from chosen loops to the fundamental group.</p>
-<h2 id="growth" data-story="growth">5. Going around is different from going inward</h2>
+<h3 id="continuation-growth" data-story="growth">Going around is different from going inward</h3>
 <p>Our logarithm changes after a circuit, but grows slowly when we approach the origin on a fixed branch. For positive \(r\) tending to zero, \(|\log r|\) grows more slowly than any negative power \(r^{-\varepsilon}\), with \(\varepsilon&gt;0\). On a sector with bounded argument, its imaginary part is bounded too. Branching has not produced uncontrolled growth.</p>
 <p>This suggests the property we actually want to understand. A solution has <em>moderate growth</em> if, on each fixed branch and each closed angular subsector of finite opening, there are \(C&gt;0\) and an integer \(N\ge0\) such that</p>
 \[|y(z)|\le C|z|^{-N}\qquad\text{for sufficiently small }|z|&gt;0.\]
 <p>The constants may depend on the solution, branch, and subsector. We do not ask for one bound over arbitrarily many turns of a logarithm. Nor do we ask for boundedness: a pole may have moderate growth.</p>
 <p>Contrast \(y'=-y/z^2\), whose solution \(e^{1/z}\) is single-valued on the punctured plane. It can be continued around the origin and returns unchanged, yet along the positive real axis it exceeds every power bound. <strong>Continuation and even trivial monodromy do not imply moderate growth.</strong> This is why Fuchs’s theorem supplies a genuinely new conclusion.</p>
-<h2 id="scaling" data-story="growth">6. Why the coefficient test has those particular powers</h2>
+<h3 id="continuation-scaling" data-story="growth">Why the coefficient test has those particular powers</h3>
 <p>Return to a general second-order equation near the origin:</p>
 \[y''+p(z)y'+q(z)y=0.\]
 <p>A derivative of \(z^\rho\) introduces one additional factor \(1/z\). To compare a solution and its derivative at the same scale, use the state \(X=(y,zy')^{\mathsf T}\). A direct calculation gives</p>
@@ -52,7 +53,7 @@ L_{c,b}(z)=b+\ell\!\left(\frac{z-c}{c}\right).\]
 \qquad P(z)=zp(z),\quad Q(z)=z^2q(z).\]
 <p>This explains the simple-pole and double-pole thresholds. If \(P,Q\) extend holomorphically across zero, the scaled system has a bounded coefficient matrix there. On a fixed ray, a finite evolution estimate over each halving of the radius gives a uniform amplification factor \(K\ge1\). After \(m\) halvings the bound is \(K^m\), while the inverse radius is proportional to \(2^m\). Choosing an integer \(N\) with \(K\le2^N\) converts this into a power bound.</p>
 <p>That is the mechanism behind the forward growth theorem. Turning a ray estimate into a statement on sectors still needs controlled angular continuation. The origin is never an ordinary initial point; the scaling tells us how to estimate solutions while staying away from it.</p>
-<h2 id="powers">7. Powers predict the first terms</h2>
+<h3 id="continuation-powers">Powers predict the first terms</h3>
 <p>Freeze the scaled coefficients at zero: \(P_0=P(0)\) and \(Q_0=Q(0)\). The resulting Euler equation has the same form at every scale. Try \(y=z^\rho\). Substitution reduces the differential equation to the <em>indicial equation</em></p>
 \[I(\rho)=\rho(\rho-1)+P_0\rho+Q_0=0.\]
 <p>The exponents are a consequence of balancing the lowest-order terms. On a chosen branch, \(z^\rho=\exp(\rho\operatorname{Log}z)\). A positive turn changes it by the multiplier \(e^{2\pi i\rho}\). Powers therefore explain another basic kind of monodromy.</p>
@@ -60,7 +61,7 @@ L_{c,b}(z)=b+\ell\!\left(\frac{z-c}{c}\right).\]
 \[\lim_{\varepsilon\to0}\frac{z^{\rho+\varepsilon}-z^\rho}{\varepsilon}
 =z^\rho\operatorname{Log}z\]
 <p>on a fixed local branch. This explains why logarithms appear when power solutions coalesce; it is a motivation, not a substitute for the convergence and independence proofs.</p>
-<h2 id="frobenius">8. Frobenius corrects the model</h2>
+<h3 id="continuation-frobenius">Frobenius corrects the model</h3>
 <p>The actual coefficients need not be constant after scaling. Seek a correction</p>
 \[y(z)=z^\rho\sum_{n=0}^{\infty}a_nz^n,\qquad a_0\ne0.\]
 <p>Substitution determines each new coefficient from earlier ones. The factor multiplying \(a_n\) is \(I(\rho+n)\): this is where the indicial equation continues to control the calculation. When the two exponents differ by no integer, the construction gives two independent power-times-series solutions. In resonant cases, one solution may need a logarithmic term; for distinct exponents its coefficient can be zero, so resonance does not always force a logarithm.</p>
@@ -68,9 +69,9 @@ L_{c,b}(z)=b+\ell\!\left(\frac{z-c}{c}\right).\]
 <p>Bessel’s equation of order zero now becomes a natural next example:</p>
 \[z^2y''+zy'+z^2y=0.\]
 <p>Its scaled coefficients are \(P=1\), \(Q=z^2\), so it has the same repeated indicial exponent as our logarithm equation. The regular solution becomes \(J_0\); the logarithmic companion becomes \(J_0\operatorname{Log}z+H\), with \(H\) entire under the normalization used here. Its return matrix has the same shape. The <a href="complex-analysis.html#bessel">existing Bessel illustration</a> shows this next stage.</p>
-<h2 id="fuchs">9. Fuchs turns a coefficient test into a theorem about every solution</h2>
+<h3 id="continuation-fuchs">Fuchs turns a coefficient test into a theorem about every solution</h3>
 <p>Assume \(p,q\) are meromorphic near zero, with no coefficient singularities in a sufficiently small punctured disk. We now have two descriptions: a condition on coefficients and a growth condition on actual continued solutions.</p>
-<section class="showcase-statement secondary-statement" aria-labelledby="fuchs-criterion"><h3 id="fuchs-criterion">Fuchs’s criterion</h3><p>Every local solution has moderate growth at zero, in the branchwise sector sense above, if and only if \(zp(z)\) and \(z^2q(z)\) extend holomorphically across zero.</p>
+<section class="showcase-statement secondary-statement" aria-labelledby="continuation-fuchs-criterion"><h4 id="continuation-fuchs-criterion">Fuchs’s criterion</h4><p>Every local solution has moderate growth at zero, in the branchwise sector sense above, if and only if \(zp(z)\) and \(z^2q(z)\) extend holomorphically across zero.</p>
 \[\text{moderate growth of every solution}
 \quad\Longleftrightarrow\quad
 zp(z),\ z^2q(z)\text{ extend holomorphically at }0.\]</section>
@@ -78,7 +79,7 @@ zp(z),\ z^2q(z)\text{ extend holomorphically at }0.\]</section>
 <p>The same scalar criterion in order \(n\), for</p>
 \[y^{(n)}+a_1(z)y^{(n-1)}+\cdots+a_n(z)y=0,\]
 <p>requires \(z^ja_j(z)\) to extend holomorphically for every \(1\le j\le n\). The presentation uses order two, but local continuation and matrix transport should be developed for arbitrary finite-dimensional systems. For systems, a simple pole in the displayed coefficient matrix is sufficient for regular singularity; necessity in that form depends on the choice of frame. The scalar criterion above has the precise converse. See <a href="https://armj.math.stonybrook.edu/html-articles/Files-2015-2024/15-14/">Tanny and Yakovenko on regularity and Fuchsian scalar equations</a>.</p>
-<h2 id="our-foundation">10. What this asks of our foundation</h2>
+<h3 id="continuation-our-foundation">What this asks of our foundation</h3>
 <p>The first complete target is the logarithm circuit, with actual local evaluators, derivative proofs, overlap agreement, and an exact terminal comparison. Rectangular neighborhoods and one prescribed square route suffice. Rational boxes carry the values; finite estimates carry convergence. We do not need to construct a completed real field, a universal contour integral, or a general monodromy theorem to establish that example.</p>
 <p>For later equations, extract the reusable local existence and uniqueness arguments and continue their solutions through a supplied finite chain. To prove Fuchs’s theorem in full, add convergence and spanning for the local solution forms, sector growth control, and the converse. These are substantial analytic results, even when their estimates are expressed entirely in our computable foundation.</p>
 <ul>
@@ -87,3 +88,4 @@ zp(z),\ z^2q(z)\text{ extend holomorphically at }0.\]</section>
 <li><strong>Later:</strong> the general continuation machinery, full Frobenius bases including logarithmic cases, and the complete branchwise sector equivalence in Fuchs’s criterion.</li>
 </ul>
 <p>The <a href="__REPO__skills/analytic-continuation/SKILL.md">analytic-continuation skill</a> guides these function-specific constructions. The story begins with a logarithm because it already contains the local computation, the overlap argument, the changed branch, and the mild growth that the general theorem will explain.</p>
+</section>

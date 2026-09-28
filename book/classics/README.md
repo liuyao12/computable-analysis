@@ -64,9 +64,10 @@ links to the definition and its existing side example displays the matrix
 for either orientation.
 
 
-`road-to-fuchs.html` follows one logarithm equation through local series,
-open-overlap agreement, a square circuit, monodromy, moderate growth, scaled
-systems, and Frobenius's construction to the precise scalar Fuchs criterion.
-The companion `fuchs-story` assets illustrate local rectangles, continued
-branches in either orientation, and radial growth. This is a guided classical
-narrative with explicit formalization boundaries, not a new Lean proof.
+The guided continuation narrative belongs to the main differential-equations
+chapter. Its source and side illustration live in
+`book/chapters/differential-equations/`; the former standalone URL redirects
+into that chapter, preserving section links. Special theorem pages should
+open with a brief proper setup and the precise statement. Motivating stories
+and extended conceptual development belong in the textbook, with links from
+the theorem page after its statement.

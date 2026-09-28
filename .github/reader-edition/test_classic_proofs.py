@@ -33,13 +33,20 @@ def main():
             if not u.scheme and u.path:
                 target=site/u.path
                 assert target.is_file() or (target/'index.html').is_file(),el['href']
+    chapter=BeautifulSoup((site/'ch-differential-equations.html').read_text(),'html.parser')
+    assert chapter.select_one('article #continuation-story #continuation-fuchs-criterion')
+    chapter_ids=[node['id'] for node in chapter.select('[id]')]
+    assert len(chapter_ids)==len(set(chapter_ids)), 'duplicate chapter anchors'
+    assert chapter.select_one('.chapter-contents a[href="#continuation-to-fuchs"]')
+    assert not chapter.select_one('#book-nav a[href="road-to-fuchs.html"]')
+    assert 'ch-differential-equations.html#continuation-to-fuchs' in (site/'road-to-fuchs.html').read_text()
     assert report['checks']['holomorphicWitnessesAudited']
     assert 'square_holomorphic' in (site/'reading/holomorphic-audit.log').read_text()
     assert report['pages']==SHOWCASE_PAGES
     for name in SHOWCASE_PAGES:
         doc=BeautifulSoup((site/name).read_text(),'html.parser')
         headings=doc.article.select('h2[id]')
-        expected = ['holomorphic','analytic-continuation','setup','theorem'] if name=='complex-analysis.html' else ['setup','theorem']
+        expected = ['setup','theorem']
         assert [h['id'] for h in headings[:len(expected)]]==expected,name
         statements=doc.select('.showcase-statement:not(.secondary-statement)')
         assert len(statements)==1 and statements[0].select_one('p'),name
@@ -95,7 +102,7 @@ def main():
             browser=pw.chromium.launch(**opts)
             for width in [1440,390,320]:
                 page=browser.new_page(viewport={'width':width,'height':1000});page.on('pageerror',lambda e:errors.append(str(e)))
-                for name in SHOWCASE_PAGES:
+                for name in SHOWCASE_PAGES+['ch-differential-equations.html']:
                     page.goto(base+name,wait_until='networkidle');page.wait_for_function('window.MathJax && MathJax.startup && MathJax.startup.promise');page.evaluate('() => MathJax.startup.promise')
                     assert page.locator('mjx-merror,[data-mjx-error]').count()==0,(name,width)
                     assert page.locator('.showcase-statement mjx-container').count()>0,(name,'statement math')
@@ -132,7 +139,12 @@ def main():
                         assert abs(vals['small']['y']-2*3.141592653589793)<.001
                         assert abs(vals['j']['x']-.7651976865579666)<1e-12 and abs(vals['j']['y'])<1e-12
                         page.locator('[data-example-view="coefficients"]').click()
-                    if name=='road-to-fuchs.html':
+                    if name=='ch-differential-equations.html':
+                        if width==1440:
+                            assert page.locator('.chapter-rail .fuchs-story-example').is_hidden()
+                        else:
+                            assert page.locator('#continuation-story > .fuchs-story-example').count()==1
+                        page.locator('#continuation-to-fuchs').scroll_into_view_if_needed()
                         for mode in ['patches','circuit','growth']:
                             page.locator(f'[data-story-view="{mode}"]').click()
                             page.wait_for_function('(m)=>window.FuchsStory.mode===m',arg=mode)
@@ -209,6 +221,9 @@ def main():
                         page.evaluate('window.scrollTo({top:0,behavior:"instant"})');page.screenshot(path=str(a.report/f'classics-{Path(name).stem}-{width}.png'),full_page=True)
                 page.close()
             page=browser.new_page(viewport={'width':1440,'height':1000})
+            page.goto(base+'road-to-fuchs.html#growth',wait_until='domcontentloaded')
+            page.wait_for_url('**/ch-differential-equations.html#continuation-growth')
+            assert page.locator('#continuation-growth').count()==1
             page.goto(base+'basel.html?route=mathlib',wait_until='networkidle');assert page.locator('[data-classic-proof="native"]:visible').count()==0
             page.goto(base+'cartwright.html',wait_until='networkidle')
             page.locator('[data-proof-map="thm:cartwright-irrationality"]').click()

@@ -577,3 +577,13 @@ Frobenius series before stating Fuchs's criterion. The side illustration
 shows local patches, branch return, and radial growth. This is explanatory
 mathematics and a roadmap, not newly checked Lean continuation or Fuchs
 proofs; the outstanding represented-input bridges remain explicit.
+
+
+### Textbook narrative and theorem shortcuts
+
+The continuation-to-Fuchs story is now a section of the main differential-
+equations chapter, with its interactive example and chapter navigation.
+The former standalone story URL redirects there. Theorem shortcut pages
+start with a brief proper setup and the precise statement; extended
+motivation belongs in the main textbook. This changes presentation and
+navigation only, with no new mathematical or Lean claims.

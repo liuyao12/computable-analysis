@@ -73,8 +73,14 @@
   [progress,orientation,radius].forEach(e=>e.addEventListener('input',render));
   const headings=[...document.querySelectorAll('article [data-story]')];let waiting=false;
   window.addEventListener('scroll',()=>{if(waiting||!follow.checked||innerWidth<=1050)return;waiting=true;requestAnimationFrame(()=>{waiting=false;let chosen=headings[0];for(const h of headings)if(h.getBoundingClientRect().top<innerHeight*.45)chosen=h;if(chosen&&chosen.dataset.story!==mode)choose(chosen.dataset.story);});},{passive:true});
-  const page=document.querySelector('.page'),anchor=document.querySelector('article > .showcase-statement'),media=matchMedia('(max-width:1050px)');
-  function place(){if(media.matches)anchor.after(panel);else page.append(panel);}
-  media.addEventListener('change',place);place();render();
+  const story=$('continuation-story'),rail=document.querySelector('.chapter-rail');
+  const anchor=story.querySelector('.showcase-statement'),media=matchMedia('(max-width:1050px)');
+  function visibility(){
+    const rect=story.getBoundingClientRect();
+    panel.hidden=!media.matches&&(rect.bottom<100||rect.top>innerHeight);
+  }
+  function place(){if(media.matches)anchor.after(panel);else rail.append(panel);visibility();}
+  media.addEventListener('change',place);
+  window.addEventListener('scroll',visibility,{passive:true});place();render();
   window.FuchsStory={square,continuedLog,get mode(){return mode;}};
 })();
