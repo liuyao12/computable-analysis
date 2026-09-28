@@ -27,10 +27,17 @@ monotonicity, and endpoint enclosure. `NBallGaussian` adds:
 - `NBallRaw.volume_equiv`: equivalent valid nonnegative input presentations
   give equivalent outputs, using `RealRaw.Equiv`.
 
-The nonnegative-box hypothesis is explicit: this API expects a presentation
-already using nonnegative endpoints; it does not silently clamp a presentation
-whose early boxes cross zero. Validity and representation invariance establish
-the formula's mathematical value, not its role as a geometric volume.
+The public `NBallRaw.value` wrapper removes the internal nonnegative-box
+restriction. `nonnegativePart` clips each endpoint below at zero;
+`nonnegativePart_valid` proves validity for every valid input, and
+`nonnegativePart_equiv_self` proves exact agreement with the input whenever
+its represented value is nonnegative, using `RealRaw.Le`. Early intervals
+may cross zero. `value_valid` and `value_equiv` now quantify over arbitrary
+valid presentations. `value_compute_of_nonnegative` identifies the public
+evaluator with the original endpoint computation on already nonnegative boxes.
+Negative inputs are totalized by their nonnegative parts; the physical radius
+domain remains nonnegative. These theorems establish the formula's value,
+not its role as a geometric volume.
 
 The browser uses exact integer fractions and the literal `piMachin.compute`
 recursion. It chooses a refinement stage adaptively and rounds lower decimal
@@ -42,7 +49,7 @@ Tests also check refinement, all supported coefficient identities, zero radius,
 invalid inputs, large dimensions, and outward rounding.
 
 General coefficient, enclosure, representation-invariance, and triangle proofs
-use only the standard logical axioms. `NBallRaw.volume_valid` also inherits
+use only the standard logical axioms. `NBallRaw.volume_valid` and `NBallRaw.value_valid` also inherit
 `RealRaw.mul_valid_of_nonneg_bounded`'s existing `native_decide` proof of the
 fixed rational fact \(0<2\) in `Basic.lean`. Its exact axiom name is recorded
 in the publication report. Runtime examples use `native_decide`; no `sorryAx`

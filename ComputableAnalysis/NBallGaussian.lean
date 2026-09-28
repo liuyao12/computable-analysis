@@ -168,5 +168,100 @@ theorem volume_equiv (n : Nat) (p p' r r' : RealRaw)
   exact ⟨nBallVolumeModel_mono n (hpn k) hpov.1 (hrn k) hrov.1,
     nBallVolumeModel_mono n (hpn' k) hpov.2 (hrn' k) hrov.2⟩
 
+
+private def clip (q : Rat) : Rat := if q < 0 then 0 else q
+
+private theorem clip_mono {a b : Rat} (h : a ≤ b) : clip a ≤ clip b := by
+  grind [clip]
+
+/-- Internal nonnegative reboxing. Early boxes may straddle zero. -/
+def nonnegativePart (x : RealRaw) : RealRaw where
+  compute k := ⟨clip (x.compute k).lo, clip (x.compute k).hi⟩
+
+theorem nonnegativePart_valid (x : RealRaw) (hx : x.Valid) :
+    (nonnegativePart x).Valid := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro k
+    have h := clip_mono (RealRaw.interval_order_of_valid x hx k)
+    change 0 ≤ clip (x.compute k).hi - clip (x.compute k).lo
+    grind
+  · intro k l hkl
+    have h := hx.2.1 k l hkl
+    exact ⟨clip_mono h.1, clip_mono h.2.1, clip_mono h.2.2⟩
+  · intro eps
+    obtain ⟨N,hN⟩ := hx.2.2 eps
+    refine ⟨N, fun k hk => ?_⟩
+    have h := hN k hk
+    have ho := RealRaw.interval_order_of_valid x hx k
+    change clip (x.compute k).hi - clip (x.compute k).lo ≤ eps.val
+    unfold QInterval.width at h
+    grind [clip]
+
+private theorem nonnegativePart_nonneg (x : RealRaw) (k : Nat) :
+    0 ≤ ((nonnegativePart x).compute k).lo := by
+  change 0 ≤ clip (x.compute k).lo
+  grind [clip]
+
+theorem nonnegativePart_equiv (x y : RealRaw) (hx : x.Valid) (hy : y.Valid)
+    (hxy : x.Equiv y) : (nonnegativePart x).Equiv (nonnegativePart y) := by
+  intro k
+  have h := (RealRaw.compareAt_overlap_iff x y k k).1
+    (RealRaw.sameStageOverlap_of_equiv hx hy hxy k)
+  apply (RealRaw.compareAt_overlap_iff _ _ k k).2
+  exact ⟨clip_mono h.1, clip_mono h.2⟩
+
+/-- Reboxing preserves every nonnegative represented value, even when some
+lower endpoints are negative. The hypothesis is exact order, not box shape. -/
+theorem nonnegativePart_equiv_self (x : RealRaw) (hx : x.Valid)
+    (hn : (RealRaw.ofRat 0).Le x) : (nonnegativePart x).Equiv x := by
+  intro k
+  have ho := RealRaw.interval_order_of_valid x hx k
+  have hn' : 0 ≤ (x.compute k).hi := hn 0 k
+  apply (RealRaw.compareAt_overlap_iff _ _ k k).2
+  change clip (x.compute k).lo ≤ (x.compute k).hi ∧
+    (x.compute k).lo ≤ clip (x.compute k).hi
+  grind [clip]
+
+/-- Public formula evaluator. Internal reboxing preserves nonnegative values;
+negative inputs are totalized by taking their nonnegative parts. -/
+def value (n : Nat) (p r : RealRaw) : RealRaw :=
+  volume n (nonnegativePart p) (nonnegativePart r)
+
+
+/-- On already nonnegative boxes, the public evaluator is exactly the finite
+endpoint algorithm, not merely an equivalent alternative. -/
+theorem value_compute_of_nonnegative (n : Nat) (p r : RealRaw)
+    (hp : p.Valid) (hr : r.Valid) (k : Nat)
+    (hpn : 0 ≤ (p.compute k).lo) (hrn : 0 ≤ (r.compute k).lo) :
+    (value n p r).compute k =
+      nBallVolumeModelInterval n (p.compute k) (r.compute k) := by
+  have hpo := RealRaw.interval_order_of_valid p hp k
+  have hro := RealRaw.interval_order_of_valid r hr k
+  have hpl : ¬ (p.compute k).lo < 0 := by grind
+  have hph : ¬ (p.compute k).hi < 0 := by grind
+  have hrl : ¬ (r.compute k).lo < 0 := by grind
+  have hrh : ¬ (r.compute k).hi < 0 := by grind
+  simp only [value, volume, nonnegativePart, clip,
+    if_neg hpl, if_neg hph, if_neg hrl, if_neg hrh]
+
+/-- Every valid presentation is accepted; no sign restriction on its boxes. -/
+theorem value_valid (n : Nat) (p r : RealRaw) (hp : p.Valid) (hr : r.Valid) :
+    (value n p r).Valid :=
+  volume_valid n _ _ (nonnegativePart_valid p hp) (nonnegativePart_valid r hr)
+    (nonnegativePart_nonneg p) (nonnegativePart_nonneg r)
+
+/-- Representation invariance on the entire public input domain. -/
+theorem value_equiv (n : Nat) (p p' r r' : RealRaw)
+    (hp : p.Valid) (hp' : p'.Valid) (hr : r.Valid) (hr' : r'.Valid)
+    (hpp : p.Equiv p') (hrr : r.Equiv r') :
+    (value n p r).Equiv (value n p' r') :=
+  volume_equiv n _ _ _ _
+    (nonnegativePart_valid p hp) (nonnegativePart_valid p' hp')
+    (nonnegativePart_valid r hr) (nonnegativePart_valid r' hr')
+    (nonnegativePart_nonneg p) (nonnegativePart_nonneg p')
+    (nonnegativePart_nonneg r) (nonnegativePart_nonneg r')
+    (nonnegativePart_equiv p p' hp hp' hpp)
+    (nonnegativePart_equiv r r' hr hr' hrr)
+
 end NBallRaw
 end ComputableAnalysis

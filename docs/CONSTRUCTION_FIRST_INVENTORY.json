@@ -1,5 +1,5 @@
 {
-  "sourceRevision": "d34d017d26c82dc795a5008afca99a1c2db6df13",
+  "sourceRevision": "e10a73fac23d00f777c1cdf6777da05f7165b0df",
   "purpose": "Source coverage for a family-level review of theorem contracts; not a proof checker or declaration-by-declaration semantic certification.",
   "files": [
     {
@@ -1590,7 +1590,7 @@
       "path": "ComputableAnalysis/NBallGaussian.lean",
       "scope": "native",
       "area": "ball formula and Gaussian finite sums",
-      "sha256": "0e45b11748bf7505baf1df780d788fbcceb8109fea6efcaad4ec1f30b8ee7a53"
+      "sha256": "2db99fa8ef7619d741aed002cde0fd862ba0d5690f6efc0b6debd67f07168527"
     },
     {
       "path": "ComputableAnalysis/Nilakantha.lean",
@@ -2196,7 +2196,7 @@
       "path": "scripts/check_n_ball.lean",
       "scope": "support",
       "area": "ball formula and Gaussian finite sums",
-      "sha256": "2d0916012238a72d2f9737067277546c1c819d6c7d7222c6fe05380570fe9a51"
+      "sha256": "2c15269fd1be560d9b87d26d82c27813387d117544e42ec93e5bb6337a46841f"
     },
     {
       "path": "scripts/check_polygonal_cauchy.lean",

@@ -210,7 +210,9 @@ the axiom audit. The canonical entry point adds only this finite module.
 ### Ball formula and Gamma coefficient follow-up
 
 `NBallGaussian` constructs a represented polynomial evaluator and derives its
-validity and `RealRaw.Equiv` invariance from valid nonnegative input boxes.
+validity and `RealRaw.Equiv` invariance from arbitrary valid presentations.
+Internal endpoint clipping is proved to preserve every nonnegative value;
+callers need not reshape early boxes crossing zero.
 Upper bounds are inferred internally; there is no assumed volume identity.
 Its half-step Gamma sequence is rational coefficient algebra, with no claim
 that it is an improper integral. The two Gaussian sum theorems retain and bound

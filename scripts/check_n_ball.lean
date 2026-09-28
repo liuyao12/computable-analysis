@@ -10,6 +10,11 @@ open ComputableAnalysis
 #print axioms NBallRaw.volume_valid
 #print axioms NBallRaw.volume_equiv
 #print axioms nBallVolumeModelInterval_contains
+#print axioms NBallRaw.nonnegativePart_valid
+#print axioms NBallRaw.nonnegativePart_equiv_self
+#print axioms NBallRaw.value_compute_of_nonnegative
+#print axioms NBallRaw.value_valid
+#print axioms NBallRaw.value_equiv
 
 example : gammaHalfCoeff 7 = 105 / 16 := by native_decide
 example : nBallCoeff 7 = 16 / 105 := by native_decide

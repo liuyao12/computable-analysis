@@ -9,15 +9,17 @@ Write
 The existing finite volume model proves its recurrence and enclosure bounds.
 The new endpoint evaluator extends this computation to supplied valid
 representations of arbitrary nonnegative inputs, including irrational radii.
-Its hypotheses require nonnegative lower endpoints at every stage.
+Internal reboxing clips negative endpoints at zero, preserving every
+nonnegative represented value. Early input intervals may cross zero.
 
 \begin{theorem}[Represented ball formula]
 \label{thm:n-ball-represented}
 The endpoint evaluation of $M_n$ is valid for every natural dimension and
-every pair of valid nonnegative interval presentations. Replacing either
-presentation by an equivalent valid nonnegative presentation preserves its
+every pair of valid input presentations, with negative values totalized by
+their nonnegative parts. Replacing either presentation by an equivalent
+valid presentation preserves its
 value under \texttt{RealRaw.Equiv}.
-\lean{ComputableAnalysis.NBallRaw.volume_valid, ComputableAnalysis.NBallRaw.volume_equiv}
+\lean{ComputableAnalysis.NBallRaw.value_valid, ComputableAnalysis.NBallRaw.value_equiv, ComputableAnalysis.NBallRaw.nonnegativePart_equiv_self, ComputableAnalysis.NBallRaw.value_compute_of_nonnegative}
 \leanok
 \end{theorem}
 

@@ -17,7 +17,10 @@ def install(site, revision, audit, tests):
     required = ['nBallCoeff_mul_gammaHalfCoeff', 'nBallVolumeModel_gamma',
                 'gaussian_square_split', 'gaussian_diagonal_bound',
                 'NBallRaw.volume_valid', 'NBallRaw.volume_equiv',
-                'nBallVolumeModelInterval_contains']
+                'nBallVolumeModelInterval_contains',
+                'NBallRaw.nonnegativePart_valid', 'NBallRaw.nonnegativePart_equiv_self',
+                'NBallRaw.value_compute_of_nonnegative',
+                'NBallRaw.value_valid', 'NBallRaw.value_equiv']
     assert 'error:' not in log and 'sorryAx' not in log
     axioms = {}
     base = {'propext', 'Classical.choice', 'Quot.sound'}
@@ -28,7 +31,7 @@ def install(site, revision, audit, tests):
                           r"' depends on axioms: \[([^]]*)\]", log)
         assert match, name
         axioms[name] = re.findall(r'[\w.]+', match[1])
-        allowed = base | ({native} if name == 'NBallRaw.volume_valid' else set())
+        allowed = base | ({native} if name in {'NBallRaw.volume_valid', 'NBallRaw.value_valid'} else set())
         assert set(axioms[name]) <= allowed, (name, axioms[name])
     runtime = json.loads(tests.read_text())
     assert runtime['passed'] and runtime['leanFixtures'] == 213
@@ -69,7 +72,7 @@ def install(site, revision, audit, tests):
     report = dict(proofSourceCommit=revision, checkedTheorems=required, axioms=axioms,
                   sourceHashes=closure, mathlibDependency=False,
                   representedFormulaValidity=True, representationInvariance=True,
-                  nonnegativeInputBoxesRequired=True, geometricVolumeBridgeProved=False,
+                  nonnegativeInputBoxesRequired=False, geometricVolumeBridgeProved=False,
                   gammaIntegralBridgeProved=False, gaussianNormalizationProved=False,
                   verifiedJavaScript=False, runtimeTests=runtime,
                   allPreviousContentPreserved=True,

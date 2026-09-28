@@ -623,8 +623,8 @@ convergence and pointwise density convergence are separate targets. See
 ## Ball formulas, Gamma coefficients, and Gaussian diagonal control
 
 `NBallGaussian` proves validity and representation invariance of the ball-volume
-formula on supplied valid nonnegative interval presentations, including
-irrational radii. It also proves reciprocal half-step coefficient recurrences
+formula on arbitrary valid presentations of nonnegative values, including
+irrational radii and early boxes crossing zero; reboxing is internal. It also proves reciprocal half-step coefficient recurrences
 and the finite square-to-triangles identity with a diagonal error bound.
 The separate reader calculator compares exact rational outputs against 213 Lean
 fixtures. Geometric volume, Gaussian normalization, and Gamma improper-integral
