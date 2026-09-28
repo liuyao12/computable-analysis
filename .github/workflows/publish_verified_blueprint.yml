@@ -172,13 +172,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 .github/reader-edition/reader_base.py
-      - name: Check and publish finite convolution and the Gaussian program
-        run: |
-          set -euo pipefail
-          mkdir -p gaussian-convolution-reports
-          lake build ComputableAnalysis.FiniteConvolution | tee gaussian-convolution-reports/build.log
-          lake env lean scripts/check_finite_convolution.lean | tee gaussian-convolution-reports/audit.log
-          python3 .github/reader-edition/gaussian_convolution.py --site site --revision "$GITHUB_SHA" --audit gaussian-convolution-reports/audit.log
       - uses: actions/upload-artifact@v4
         with:
           name: verified-reader-base
@@ -416,6 +409,13 @@ jobs:
         run: |
           python3 .github/reader-edition/construction_first.py --site site --revision "$GITHUB_SHA"
           python3 .github/reader-edition/test_construction_first.py --site site --report reader-edition-tests
+      - name: Check and publish finite convolution and the Gaussian program
+        run: |
+          set -euo pipefail
+          mkdir -p gaussian-convolution-reports
+          lake build ComputableAnalysis.FiniteConvolution | tee gaussian-convolution-reports/build.log
+          lake env lean scripts/check_finite_convolution.lean | tee gaussian-convolution-reports/audit.log
+          python3 .github/reader-edition/gaussian_convolution.py --site site --revision "$GITHUB_SHA" --audit gaussian-convolution-reports/audit.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
