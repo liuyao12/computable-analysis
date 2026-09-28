@@ -117,19 +117,23 @@ def graph_html(revision):
        'Square rational-circle samples on a dyadic mesh. A proved error bound, prefix intersection, and range clipping produce valid nested intervals. The program does not use its eventual value.',source('CosineSquareData.lean')),
       ('symmetry','Reflection','Pair the left and right cells',r'\(f(x)+f(1/2-x)=1\)',
        'Finite reflection reverses the grid. The Pythagorean identity cancels the paired squared heights, up to explicit sample error.',source('CosineSquareSymmetry.lean')),
-      ('ftc','Derivative certificate','Build the product primitive',r'\(F(x)=x/2+S(x)C(x)/(2\pi)\)',
+      ('ftc','Derivative certificate','Build the endpoint formula',r'\(F(x)=x/2+S(x)C(x)/(2\pi)\)',
        'The sine and cosine derivative certificates combine by the product rule. Rational algebra and the circle identity give the squared-cosine derivative.',source('CosineSquareFTC.lean')),
       ('symmetry','Finite error bound','The paired area is one half',r'\(2I=1/2\)',
        'The endpoint rectangle gap and the evaluation error tend to zero. The selected sums approach the rational target without any primitive.',source('CosineSquareSymmetry.lean')),
-      ('ftc','Finite FTC','Telescope, then evaluate the endpoints',r'\(I=F(1/2)-F(0)\)',
-       'Telescope the primitive increments on each fixed mesh, compare with the independently chosen sums, and let the mesh refine. The endpoint product tends to zero.',source('CosineSquareFTC.lean')),
-      ('shared','Same checked conclusion','The actual integral computes one quarter',r'\(I\simeq 1/4\)',
-       'Both exported proofs establish <code>RealRaw.Equiv</code> for exactly the same valid integral evaluator. The audit checks that neither value proof depends on the other.',source('CosineSquareData.lean'))]
+      ('ftc','Finite FTC','Telescope to a variable endpoint',r'\(I(x)=F(x)-F(0)\)',
+       'Telescope the primitive increments on each fixed mesh, compare with the independently chosen sums, and let the mesh refine. Restrict to every partial cell and extend across periods.',source('TrigSquareVariable.lean')),
+      ('euler','Exponential law','Integrate a supplied rotation equation',r'\(\int_a^b E(t)\,dt=(E(b)-E(a))/(i\omega)\)',
+       'The real and imaginary derivative equations yield endpoint models. Finite FTC identifies justified quadrature with the endpoint difference; solution uniqueness characterizes the geometric exponential.',source('ImaginaryExponentialIntegral.lean')),
+      ('euler','Euler identity','Reduce the squares to a doubled-angle exponential',r'\(\cos^2\theta=(1+\operatorname{Re}e^{2i\theta})/2\)',
+       'Integrate the doubled-angle exponential and add the constant term. The local value proof is audited independently of the product-rule square model.',source('TrigSquareVariable.lean')),
+      ('shared','Arbitrary endpoints','Assemble charts and extend to represented reals',r'\(\int_0^x\cos^2(\pi t)\,dt=x/2+\sin(2\pi x)/(4\pi)\)',
+       'Product-rule and Euler routes prove the general formula; complementing rectangles proves sine-squared. A proved continuous extension handles all valid real endpoints and respects their representations. Symmetry additionally explains the half-interval corollary.',source('TrigSquareGlobal.lean'))]
     parts=[]
     for route,tag,title,formula,body,href in nodes:
         attrs='data-common="true"' if route=='shared' else f'data-proof-route="{route}"'
         parts.append(f'<article class="{route}" {attrs}><p class="step">{tag}</p><h3>{title}</h3><div class="math">{formula}</div><p>{body}</p><p class="refs"><a href="{href}">Pinned Lean source ↗</a></p></article>')
-    return '''<h1>Two proofs of the cosine-square integral</h1><p class="lead">One independently defined interval program; two checked evaluations.</p><nav class="square-map-routes" aria-label="Proof route"><button data-square-route="all" aria-pressed="true">Both proofs</button><button data-square-route="symmetry" aria-pressed="false">Symmetry</button><button data-square-route="ftc" aria-pressed="false">FTC</button></nav><div class="square-flow">'''+''.join(parts)+'''</div><p class="square-map-note">Read each route from top to bottom. These are mathematical dependency bundles; the complete elaborated declaration dependencies are in the audit. The FTC uses complementary-angle geometry to establish the cosine derivative, but does not use the symmetry evaluation of the integral.</p><p><a href="reading/cosine-square-proofs.json">Theorem types, axioms, and both dependency closures</a> · <a href="cosine.html">Back to the worked example</a></p>'''
+    return '''<h1>General formulas and a geometric corollary</h1><p class="lead">Product-rule and Euler proofs for arbitrary endpoints; a symmetry proof for the half interval.</p><nav class="square-map-routes" aria-label="Proof route"><button data-square-route="all" aria-pressed="true">All routes</button><button data-square-route="symmetry" aria-pressed="false">Symmetry</button><button data-square-route="ftc" aria-pressed="false">Product rule</button><button data-square-route="euler" aria-pressed="false">Euler</button></nav><div class="square-flow">'''+''.join(parts)+'''</div><p class="square-map-note">Read each route from top to bottom. These are mathematical dependency bundles; the complete elaborated declaration dependencies are in the audit. The FTC uses complementary-angle geometry to establish the cosine derivative, but does not use the symmetry evaluation of the integral.</p><p><a href="reading/cosine-square-proofs.json">Theorem types, axioms, and the audited dependency closures</a> · <a href="cosine.html">Back to the worked example</a></p>'''
 
 def install(site,revision,audit_path):
     assert re.fullmatch('[0-9a-f]{40}',revision)
@@ -151,7 +155,7 @@ def install(site,revision,audit_path):
     rectangle=rectangles(anim);reflection=symmetry(anim)
     tab,rows=table()
     page=(SOURCE/'page.html').read_text().replace('__TABLE__',tab)
-    for key,file in [('__SYMMETRY_SOURCE__','ComputableAnalysis/CosineSquareSymmetry.lean'),('__FTC_SOURCE__','ComputableAnalysis/CosineSquareFTC.lean'),('__PACKAGE_SOURCE__','README.md')]:page=page.replace(key,source_link(revision,file))
+    for key,file in [('__SYMMETRY_SOURCE__','ComputableAnalysis/CosineSquareSymmetry.lean'),('__FTC_SOURCE__','ComputableAnalysis/CosineSquareFTC.lean'),('__PACKAGE_SOURCE__','README.md'),('__GLOBAL_SOURCE__','ComputableAnalysis/TrigSquareGlobal.lean'),('__VARIABLE_SOURCE__','ComputableAnalysis/TrigSquareVariable.lean'),('__EXP_SOURCE__','ComputableAnalysis/ImaginaryExponentialIntegral.lean'),('__EULER_SOURCE__','ComputableAnalysis/TrigSquareEuler.lean')]:page=page.replace(key,source_link(revision,file))
     doc=BeautifulSoup(old,'html.parser');doc.title.string=TITLE+' · Computable Analysis'
     doc.select_one('meta[name="documentation-revision"]')['content']=revision
     footer=doc.select_one('.chapter-footer a')
@@ -162,7 +166,7 @@ def install(site,revision,audit_path):
     toc=doc.select_one('.on-this-page')
     if toc:
         toc.clear()
-        for id,title in [('the-clock','The circle coordinates'),('numerical-comparison','The computation'),('symmetry','Proof by symmetry'),('ftc','Proof by FTC'),('mean-square','Mean-square amplitude'),('checked-result','Checked formalization')]:
+        for id,title in [('the-clock','The circle coordinates'),('all-endpoints','Arbitrary endpoints'),('corollaries','Half-integer corollaries'),('euler','Euler proof'),('numerical-comparison','The computation'),('symmetry','Proof by symmetry'),('ftc','Proof by FTC'),('mean-square','Mean-square amplitude'),('checked-result','Checked formalization')]:
             a=doc.new_tag('a',href='#'+id);a.string=title;toc.append(a)
     worked.write_text(str(doc))
     graph=BeautifulSoup(str(doc),'html.parser');graph.title.string='Cosine-square integral · Proof routes';graph.article.clear()
@@ -189,13 +193,14 @@ def install(site,revision,audit_path):
     changed={name:{'before':sha,'after':current.get(name)} for name,sha in original.items() if current.get(name)!=sha}
     protected={name:sha for name,sha in original.items() if name not in changed}
     report=dict(documentationRevision=revision,proofRevision=revision,baseProofRevision=PROOF_SHA,
-      target=r'\int_0^{1/2}\cos^2(\pi x)\,dx=\frac{1}{4}',newLeanProofsClaimed=True,
+      target=r'\int_0^x\cos^2(\pi t)\,dt=x/2+\sin(2\pi x)/(4\pi)',
+      companionTarget=r'\int_0^x\sin^2(\pi t)\,dt=x/2-\sin(2\pi x)/(4\pi)',newLeanProofsClaimed=True,
       checkedTheorems=[d['name'] for d in audit['declarations']],checks=audit['checks'],
       rectangleAnimation=rectangle,symmetryAnimation=reflection,illustrationTable=rows,
       previousCosinePrimitive='cosine-primitive.html',changedArtifacts=changed,protectedArtifacts=protected,
       artifacts={name:sha for name,sha in current.items() if name not in original or name in changed})
     (out/'cosine-square-edition.json').write_text(json.dumps(report,indent=2)+'\n')
-    print('PASS: checked cosine-square showcase, both proof routes, animations and preserved support theorem')
+    print('PASS: checked cosine-square showcase, general endpoint proofs, Euler route, animations and preserved support theorem')
     return report
 
 if __name__=='__main__':

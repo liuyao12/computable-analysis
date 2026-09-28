@@ -6,4 +6,4 @@ function selectRoute(route){
  const url=new URL(location.href);if(route==='all')url.searchParams.delete('route');else url.searchParams.set('route',route);history.replaceState(null,'',url);
 }
 for(const b of controls)b.addEventListener('click',()=>selectRoute(b.dataset.squareRoute));
-const requested=new URLSearchParams(location.search).get('route');selectRoute(['symmetry','ftc'].includes(requested)?requested:'all');
+const requested=new URLSearchParams(location.search).get('route');selectRoute(['symmetry','ftc','euler'].includes(requested)?requested:'all');

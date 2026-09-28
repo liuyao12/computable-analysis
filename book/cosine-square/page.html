@@ -1,14 +1,28 @@
 <h1 id="cosine-square">The cosine-square integral</h1>
-<p class="lead">A rectangle computation, a symmetry, and a primitive. Two proofs identify the same computed area.</p>
-<div class="displaymath square-result">\[\boxed{\int_0^{1/2}\cos^2(\pi x)\,dx=\frac14.}\]</div>
-<p>The geometric starting point is the Archimedean circle construction. Squaring its cosine coordinate gives a small example where geometry and the fundamental theorem of calculus explain the same numerical answer in different ways.</p>
-<p class="square-proof-links"><a href="#symmetry">The symmetry proof</a> · <a href="#ftc">The FTC proof</a> · <a href="cosine-square-proofs.html">Explore the two proof routes ↗</a></p>
-
+<p class="lead">Cosine-squared and sine-squared, integrated from zero to any real endpoint. The quarter-area result is a corollary.</p>
+<div class="displaymath square-result">\[\boxed{\begin{aligned}
+\int_0^x\cos^2(\pi t)\,dt&amp;=\frac{x}{2}+\frac{\sin(2\pi x)}{4\pi},\\
+\int_0^x\sin^2(\pi t)\,dt&amp;=\frac{x}{2}-\frac{\sin(2\pi x)}{4\pi}.
+\end{aligned}}\]</div>
+<p>These identities hold for every real \(x\), with the usual signed orientation when \(x&lt;0\). The formal statements quantify over every valid represented real, including irrational endpoints. Both integrands are defined everywhere, so there are no singularities to exclude.</p>
+<p class="square-proof-links"><a href="#ftc">Product-rule proof</a> · <a href="#euler">Euler proof</a> · <a href="#corollaries">Half-integer corollaries</a> · <a href="cosine-square-proofs.html">Explore the proof routes ↗</a></p>
 <h2 id="the-clock">From the circle to the integrand</h2>
 <p>The rational circle point is
 \[P(u)=\left(\frac{1-u^2}{1+u^2},\frac{2u}{1+u^2}\right).\]
 Polygon areas define the angle clock and geometric \(\pi\). A closed rational search inverts that clock; the first coordinate supplies \(C(x)=\cos(\pi x)\). Thus the function to integrate is \(f(x)=C(x)^2\), decreasing from \(1\) to \(0\) on \([0,1/2]\).</p>
 <p>The coordinate identities come from this construction. In particular, reflection exchanges the cosine and sine coordinates, and their squares add to \(1\). <a href="ch-circle-sphere.html">The geometric construction</a> develops these ingredients before this example.</p>
+
+<h2 id="all-endpoints">From local rectangles to arbitrary endpoints</h2>
+<p>First compute the integral on a variable part of a quarter-turn chart. With the internal coordinate \(u=2t\), the local endpoint formula is
+\[P(u)=\frac{u}{2}+\frac{\sin(\pi u/2)\cos(\pi u/2)}{\pi},\qquad 0\le u\le1.\]
+The local integral is independently defined by scaled rectangle sums. On successive charts, the squared cosine alternates between squared cosine and squared sine; the circle identity complements each rectangle. A proved equality of complete-cell integrals permits their finite sum to be compressed. Signed complete cells plus the last partial cell give the integral at every rational endpoint.</p>
+<p>For a represented real endpoint, the program evaluates these rational-endpoint integrals at successive rational approximations. A proved uniform bound controls the change in value when the endpoint changes. The closed-form expression is evaluated separately from the geometric circle coordinates. Both extensions have shrinking rational enclosures, agree with their rational-input values, and respect equality of represented inputs. No caller supplies a partition, a period index, or an internal precision schedule.</p>
+<p>Only rational approximations are assigned a period index. The construction does not require deciding which side of a period boundary an arbitrary real lies on; the formulas are proved to agree at those boundaries.</p>
+
+<h2 id="corollaries">Half-integer values are corollaries</h2>
+<p>Substitute \(x=n/2\), where \(n\in\mathbb Z\). The oscillating term vanishes, giving
+\[\int_0^{n/2}\cos^2(\pi t)\,dt=\int_0^{n/2}\sin^2(\pi t)\,dt=\frac n4.\]
+In particular, both integrals from \(0\) to \(1/2\) equal \(1/4\). The following pictures illustrate this special case. Its symmetry proof gives an additional geometric explanation.</p>
 
 <h2 id="numerical-comparison">Compute the area first</h2>
 <p>At stage \(n\), divide the half interval into \(2^n\) cells. Evaluate and square the cosine at rational grid points. Right rectangles give a lower area and left rectangles an upper area; refining the mesh closes the gap.</p>
@@ -16,7 +30,7 @@ Polygon areas define the angle clock and geometric \(\pi\). A closed rational se
 __TABLE__
 <p>The figure and table use outward-rounded nested-radical sample enclosures. The Lean program evaluates the original rational-circle cosine, squares each sample, adds a proved error allowance, and intersects successive enclosures. Its validity and shrinking-width proof use monotonicity and evaluation-error bounds; neither value proof is an input to the program.</p>
 
-<h2 id="symmetry">Proof one: the reflected areas fill a rectangle</h2>
+<h2 id="symmetry">A geometric proof of the half-interval corollary</h2>
 <p>Reflect the graph in the vertical line \(x=1/4\). The reflected height is
 \[
 f\!\left(\frac12-x\right)=\sin^2(\pi x),\qquad
@@ -28,7 +42,7 @@ Reflection preserves area, so the two integrals agree. Their sum is the area of 
 <p>The formal proof makes this a finite-sum argument. Reflection pairs a left sample with a right sample. The circle identity cancels their squared heights; the remaining endpoint gap and rational evaluation error have explicit bounds tending to zero. No primitive is used to evaluate this integral.</p>
 <p class="square-source"><a href="cosine-square-proofs.html?route=symmetry">Follow the symmetry dependencies ↗</a> · <a href="__SYMMETRY_SOURCE__">Lean proof</a></p>
 
-<h2 id="ftc">Proof two: differentiate a primitive</h2>
+<h2 id="ftc">First general proof: the product rule</h2>
 <p>Use
 \[
 F(x)=\frac{x}{2}+\frac{\sin(\pi x)\cos(\pi x)}{2\pi}
@@ -39,13 +53,26 @@ The product rule and the derivative formulas give
 F'(x)=\frac12+\frac{\cos^2(\pi x)-\sin^2(\pi x)}2
      =\cos^2(\pi x).
 \]
-The endpoint product vanishes at both ends, hence the fundamental theorem gives
+The fundamental theorem gives the formula at every endpoint:
 \[
-\int_0^{1/2}\cos^2(\pi x)\,dx
-=F\!\left(\frac12\right)-F(0)=\frac14.
+\int_0^x\cos^2(\pi t)\,dt=F(x)-F(0)=\frac{x}{2}+\frac{\sin(2\pi x)}{4\pi}.
 \]</p>
-<p>In Lean, the product rule constructs a quantitative derivative certificate for this primitive. A finite FTC telescopes its increments along a fixed mesh; the certified comparison with the chosen rectangle computation then lets that mesh refine. This proof uses the derivative and endpoint calculations, and does not invoke the symmetry evaluation of the integral.</p>
-<p class="square-source"><a href="cosine-square-proofs.html?route=ftc">Follow the FTC dependencies ↗</a> · <a href="__FTC_SOURCE__">Lean proof</a></p>
+<p>In Lean, the product rule constructs a quantitative derivative certificate for this primitive. A finite FTC telescopes its increments along a fixed mesh; the certified comparison with the chosen rectangle computation then lets that mesh refine. The local argument is restricted to every variable partial cell and then assembled and extended as above. Subtracting the cosine-square rectangles from the constant-height rectangles gives the sine-square formula. This value proof does not invoke the symmetry evaluation.</p>
+<p class="square-source"><a href="cosine-square-proofs.html?route=ftc">Follow the FTC dependencies ↗</a> · <a href="__VARIABLE_SOURCE__">Lean proof</a></p>
+
+<h2 id="euler">Second general proof: integrate the exponential</h2>
+<p>Euler’s identity gives the power-reduction formulas
+\[\cos^2\theta=\frac{1+\operatorname{Re}e^{2i\theta}}2,
+\qquad \sin^2\theta=\frac{1-\operatorname{Re}e^{2i\theta}}2.\]
+The prerequisite is the exponential integration law. For a nonzero constant frequency \(\omega\),
+\[E'(t)=i\omega E(t)\quad\Longrightarrow\quad
+\int_a^b E(t)\,dt=\frac{E(b)-E(a)}{i\omega}.\]
+Indeed, writing \(E=R+iI\) gives \(I'=\omega R\) and \(R'=-\omega I\). Thus the real and imaginary integrals are respectively the endpoint differences of \(I/\omega\) and \(-R/\omega\). Applying this with \(\omega=2\pi\) gives
+\[\int_0^x\operatorname{Re}e^{2\pi i t}\,dt=\frac{\sin(2\pi x)}{2\pi},\]
+and adding or subtracting half of this expression from \(x/2\) proves both formulas.</p>
+<p>The checked exponential construction here is differential: the geometric circle coordinates solve the rotation equation with initial value \(1\), and a proved uniqueness theorem identifies every supplied solution with those coordinates. The squared circle point supplies the doubled angle. The proof does not assume Euler’s identity or an integral formula in a certificate, and it does not claim a new bridge to a power-series exponential.</p>
+<p>Lean first proves the exponential integration law for supplied derivative models and justified quadrature samples, including an exact represented-value version. It then applies that law to the geometric exponential on each variable chart. The audit checks that this local value proof does not depend on the product-rule square model or its integral evaluation. The global proofs share the chart construction, continuity bounds, and representation-invariant extension.</p>
+<p class="square-source"><a href="cosine-square-proofs.html?route=euler">Follow the Euler dependencies ↗</a> · <a href="__EXP_SOURCE__">Exponential integration and uniqueness</a> · <a href="__EULER_SOURCE__">Euler construction</a></p>
 
 <h2 id="mean-square">Why the square matters</h2>
 <p>Squaring measures the size of an oscillation without cancellation. The average squared height on this quarter period is
@@ -55,14 +82,17 @@ The endpoint product vanishes at both ends, hence the fundamental theorem gives
 The other quarters have the same squared area. A sinusoid of amplitude \(a\) therefore has mean square \(a^2/2\) and root-mean-square amplitude \(|a|/\sqrt2\). This is the normalization behind signal energy and many Fourier calculations.</p>
 
 <h2 id="checked-result">What Lean checks</h2>
-<p>The two exported theorems have exactly the same conclusion: the actual integral program is equivalent to the rational constant \(1/4\). The computation’s validity and an explicit width bound are proved separately.</p>
-<pre class="square-lean">CosineSquare.integral.Valid
+<p>The main statements equate the assembled rectangle integral with the independently evaluated closed form for every valid represented endpoint. The sine-square integral is computed by complementing the rectangle sums. Validity, agreement of equivalent endpoint representations, and half-integer corollaries are checked separately.</p>
+<pre class="square-lean">cosine_definite_integral (x : RealRaw) (hx : x.Valid) :
+  (cosineIntegral x).Equiv (cosineClosedForm x)
 
-CosineSquare.integral_via_symmetry :
-  CosineSquare.integral.Equiv (RealRaw.ofRat (1 / 4))
+sine_definite_integral (x : RealRaw) (hx : x.Valid) :
+  (sineIntegral x).Equiv (sineClosedForm x)
 
-CosineSquare.integral_via_FTC :
-  CosineSquare.integral.Equiv (RealRaw.ofRat (1 / 4))</pre>
-<p>The dependency audit checks both proof routes, their common numerical program, and the absence of unfinished proofs or Mathlib imports. Both routes share the geometric construction and trigonometric identities. The RMS application above is explanatory context; the checked target here is the squared-cosine integral.</p>
-<p><a href="cosine-square-proofs.html">Interactive proof map</a> · <a href="reading/cosine-square-proofs.json">Theorem statements and dependency audit</a> · <a href="__PACKAGE_SOURCE__">Reproduce the Lean checks</a></p>
+cosine_half_integer (n : Int) :
+  (cosineIntegral (RealRaw.ofRat ((n : Rat) / 2))).Equiv
+    (RealRaw.ofRat ((n : Rat) / 4))</pre>
+<p>The same general conclusions also have proofs named <code>cosine_definite_integral_via_Euler</code> and <code>sine_definite_integral_via_Euler</code>. These are function-specific integral constructions, justified by their rectangle sums, finite FTC, and endpoint continuity; numerical validity alone is not their integral specification. All public equalities are <code>RealRaw.Equiv</code>.</p>
+<p>The audit rejects unfinished proofs and Mathlib imports and records the complete inherited axiom lists. This package extends a pinned foundation snapshot, as documented in its reproduction instructions; it is not an assumed export of the current root library. The RMS application above remains explanatory context.</p>
+<p><a href="__GLOBAL_SOURCE__">General Lean theorems</a> · <a href="cosine-square-proofs.html">Interactive proof map</a> · <a href="reading/cosine-square-proofs.json">Theorem statements and dependency audit</a> · <a href="__PACKAGE_SOURCE__">Reproduce the Lean checks</a></p>
 <details class="square-background"><summary>Supporting result: the cosine primitive</summary><p>The original theorem for \(\int C(x)\,dx\) remains available as supporting mathematics, together with its earlier proof comparison. <a href="cosine-primitive.html">Read the cosine primitive</a>.</p></details>

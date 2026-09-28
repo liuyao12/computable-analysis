@@ -346,10 +346,10 @@ jobs:
           key: cosine-square-${{ env.SOURCE_SHA }}-${{ hashFiles('book/cosine-square/**/*.lean') }}
           restore-keys: |
             cosine-square-${{ env.SOURCE_SHA }}-
-      - name: Check both squared-cosine proofs and their actual dependencies
+      - name: Check general squared-trigonometric formulas and their proof dependencies
         run: |
           set -euo pipefail
-          (cd cosine-square-base && lake build ComputableAnalysis.CosineSquareSymmetry ComputableAnalysis.CosineSquareFTC) | tee cosine-square-reports/build.log
+          (cd cosine-square-base && lake build ComputableAnalysis.CosineSquareSymmetry ComputableAnalysis.TrigSquareGlobal) | tee cosine-square-reports/build.log
           (cd cosine-square-base && lake env lean CosineSquareCheck.lean) | tee cosine-square-reports/audit.log
           cp cosine-square-base/cosine-square-reports/proofs.json cosine-square-reports/
       - name: Replace the worked example with the checked cosine-square integral

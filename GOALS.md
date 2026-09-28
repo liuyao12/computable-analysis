@@ -587,3 +587,17 @@ The former standalone story URL redirects there. Theorem shortcut pages
 start with a brief proper setup and the precise statement; extended
 motivation belongs in the main textbook. This changes presentation and
 navigation only, with no new mathematical or Lean claims.
+
+
+### Squared trigonometric integrals at arbitrary endpoints
+
+The pinned worked-example package `book/cosine-square` now proves the exact
+cosine-square and sine-square definite-integral formulas for every valid
+represented real endpoint, with orientation for negative endpoints and
+representation invariance. The half-integer values are derived corollaries.
+A second local value proof uses a proved imaginary-exponential integration
+law and a differential characterization of Euler's circle construction.
+The audit checks its independence from the product-rule local value proof.
+This is an extension of the documented pinned foundation, not a claim that
+these declarations are exports of the current root library; no Taylor-series
+exponential bridge is claimed.

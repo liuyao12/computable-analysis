@@ -849,3 +849,22 @@ and math delimiters supported by Markdown or TeX in source documents. Do not
 use Unicode formulas or HTML superscripts/subscripts as substitutes. Literal
 Lean declarations and API names remain code. Verify actual typesetting and
 mobile layout before publication.
+
+
+### Variable-endpoint squared-trigonometric worked example
+
+For the example in `book/cosine-square`, lead with the exact formula for
+\(\int_0^x\cos^2(\pi t)\,dt\) and its sine-square companion at arbitrary
+valid represented endpoints. Values at \(x=n/2\) are corollaries. Keep the
+literal local rectangle membership proofs, complete-cell agreement, and
+represented-endpoint extension with its invariance proofs; validity alone
+does not establish the integral interpretation. Period indices belong only
+to rational samples, never to a presumed decision procedure for real floor.
+
+The Euler route first proves exponential integration for supplied rotation
+ODE solutions, then constructs and uniquely characterizes the geometric
+solution. Distinguish this differential characterization from identification
+with a separately defined power-series exponential. Audit local value-proof
+independence precisely; shared global continuity bounds and chart assembly
+are not independent proof foundations. Reproduce this package against its
+pinned base using its README rather than assuming root-library exports.

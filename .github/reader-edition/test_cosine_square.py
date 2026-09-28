@@ -30,7 +30,14 @@ def main():
     assert doc.h1.get_text()==TITLE and len(doc.select('figure.math-animation'))==2
     assert doc.select_one('#symmetry') and doc.select_one('#ftc') and doc.select_one('#mean-square')
     assert 'first meeting' not in doc.get_text().lower()
-    assert '3 checked routes' not in doc.get_text()
+    assert doc.select_one('#all-endpoints') and doc.select_one('#corollaries') and doc.select_one('#euler')
+    assert 'sine_definite_integral' in doc.get_text() and 'cosine_half_integer' in doc.get_text()
+    for name in ['cosine_definite_integral','sine_definite_integral']:
+        typ=checked['ComputableAnalysis.TrigSquareGlobal.'+name]
+        assert 'x : ComputableAnalysis.RealRaw' in typ and 'x.Valid' in typ
+        assert typ==checked['ComputableAnalysis.TrigSquareGlobal.'+name+'_via_Euler']
+    assert 'ComputableAnalysis.ImaginaryExponentialIntegral.realEndpointModel' in audit['eulerLocalClosure']
+    assert 'ComputableAnalysis.CosineSquare.primitiveModel' not in audit['eulerLocalClosure']
     assert not doc.select('[data-proof-map="thm:c3-primitive"]')
     old=BeautifulSoup((site/'cosine-primitive.html').read_text(),'html.parser')
     assert old.h1.get_text()=='The cosine primitive'
@@ -88,12 +95,12 @@ def main():
                             figure.locator('button').click();assert img.get_attribute('src').endswith('.gif')
                             figure.locator('button').click();assert img.get_attribute('src').endswith('.png')
                     else:
-                        for route in ['symmetry','ftc']:
+                        for route in ['symmetry','ftc','euler']:
                             page.locator(f'[data-square-route="{route}"]').click()
                             assert page.locator('[data-proof-route]:visible').count()==2
                             assert page.locator(f'[data-proof-route="{route}"]:visible').count()==2
                         page.locator('[data-square-route="all"]').click()
-                        assert page.locator('[data-proof-route]:visible').count()==4
+                        assert page.locator('[data-proof-route]:visible').count()==6
                     if width in [1440,390]:
                         page.evaluate('window.scrollTo({top:0,behavior:"instant"})')
                         page.screenshot(path=str(out/f'{Path(f).stem}-{width}.png'),full_page=True)
