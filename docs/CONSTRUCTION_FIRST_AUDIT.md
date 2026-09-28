@@ -15,8 +15,8 @@ application. The law's conclusion must not be smuggled into the hypotheses.
 ## What was reviewed
 
 The [inventory](CONSTRUCTION_FIRST_INVENTORY.json) covers every tracked Lean
-source in the published development: 286 native modules and 78 other files
-(15 entry points/checking scripts, 17 companion files, and 46 historical files).
+source in the published development: 288 native modules and 79 other files
+(16 entry points/checking scripts, 17 companion files, and 46 historical files).
 Every source is assigned an area and bound to its content hash. Entry points,
 theorem ledgers, representative theorem hypotheses and proof-data records,
 and concrete applications were reviewed across the areas below.
@@ -191,3 +191,18 @@ first-order approximation and derivative continuity explicitly, while the
 affine and square examples construct both witnesses on arbitrary represented
 inputs. This is not a derivation of derivative continuity from bare pointwise
 differentiability. The existing publication workflow checks these witnesses.
+
+## Finite probability convolution extension
+
+`FiniteApproximateIdentity` constructs finite positive rational kernels and
+proves weighted-action error estimates. Its mass and positivity fields
+justify finite averaging; they do not assert continuous integrability.
+`FiniteConvolution` computes pairwise sums and product weights, derives
+normalization and moment laws, cancels quadratic actions for equal first two
+moments, and telescopes a supplied pointwise remainder bound through repeated
+convolution. The action comparison is proved, not assumed in a record.
+
+The new general theorems have rational finite scope. Gaussian normalization,
+continuous convolution and a CLT are explicitly left to their analytic
+comparison proofs. The check script includes exact moment regressions and
+the axiom audit. The canonical entry point adds only this finite module.

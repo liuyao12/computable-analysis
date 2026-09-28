@@ -1827,6 +1827,11 @@
       ]
     },
     {
+      "path": "ComputableAnalysis/FiniteApproximateIdentity.lean",
+      "role": "finite",
+      "declarations": []
+    },
+    {
       "path": "ComputableAnalysis/FiniteComplexPathCertificate.lean",
       "role": "mixed",
       "declarations": [
@@ -1879,6 +1884,11 @@
           "declaration": "constantPolygonalIntegralCertificate"
         }
       ]
+    },
+    {
+      "path": "ComputableAnalysis/FiniteConvolution.lean",
+      "role": "finite",
+      "declarations": []
     },
     {
       "path": "ComputableAnalysis/FiniteFTCIntervalRegular.lean",
@@ -5084,6 +5094,10 @@
     },
     {
       "path": "scripts/check_arctan_taylor.lean",
+      "role": "audit-helper"
+    },
+    {
+      "path": "scripts/check_finite_convolution.lean",
       "role": "audit-helper"
     },
     {

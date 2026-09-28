@@ -1,5 +1,5 @@
 {
-  "sourceRevision": "b92e72fc757835791392795f1fd968772c1a6f2b",
+  "sourceRevision": "e680822ff674117711c07cf09c527118627726b8",
   "purpose": "Source coverage for a family-level review of theorem contracts; not a proof checker or declaration-by-declaration semantic certification.",
   "files": [
     {
@@ -282,7 +282,7 @@
       "path": "ComputableAnalysis.lean",
       "scope": "support",
       "area": "support",
-      "sha256": "5acb33ee683c8feb8cacc16160cc6c5e3f4db3fa92a58ee6b9814cf448762bd6"
+      "sha256": "bba8f846f6f0b5caa8c2628b3b6c3211c9aef0e62960a1e451a510df8fa2044e"
     },
     {
       "path": "ComputableAnalysis/AbelianIntegrals.lean",
@@ -975,6 +975,12 @@
       "sha256": "4c12e44de8cfd4189a7dbe72a78d3fccc1c5c2aca39c08c7b83f25cee52458ab"
     },
     {
+      "path": "ComputableAnalysis/FiniteApproximateIdentity.lean",
+      "scope": "native",
+      "area": "finite probability",
+      "sha256": "32b0d1c0a05c32b87b641cea35af3db5a44550e1b3730bc5fbf4a4e2f89960a4"
+    },
+    {
       "path": "ComputableAnalysis/FiniteBertrandCertificate.lean",
       "scope": "native",
       "area": "finite-algebra-number-theory",
@@ -1051,6 +1057,12 @@
       "scope": "native",
       "area": "circle-geometry",
       "sha256": "3eb1b4a39b21a5ea02d9f87b84fb7a2928802453883314f2e02ea23304a728c9"
+    },
+    {
+      "path": "ComputableAnalysis/FiniteConvolution.lean",
+      "scope": "native",
+      "area": "finite probability",
+      "sha256": "e2d42b1514b3e8ea8287736e67a34f104b70ae3d46b853fe22347bef76c4e2c5"
     },
     {
       "path": "ComputableAnalysis/FiniteCoordinateInequality.lean",
@@ -2143,6 +2155,12 @@
       "scope": "support",
       "area": "support",
       "sha256": "b0ca53a38779906b3986688ebf6977dde1afe31146ef1a4b0a69fca203b9bd7b"
+    },
+    {
+      "path": "scripts/check_finite_convolution.lean",
+      "scope": "support",
+      "area": "support",
+      "sha256": "ff1723d6ee877fd1e137168a0004a7f678810e39d9ba0189cceaf97923fcfc2e"
     },
     {
       "path": "scripts/check_holomorphic.lean",
