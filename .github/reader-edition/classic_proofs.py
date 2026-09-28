@@ -136,16 +136,13 @@ def install(site,revision,euler_audit,cauchy_audit,arctan_audit,holomorphic_audi
     install_monodromy(site,revision,repo)
     redirect_story(site)
     # Pinned reader pages retain their proof anchors and audited comparison data.
-    # Their editable introductions live here, alongside the other showcase sources.
+    # Their editable introductions live here, except cosine.html, whose complete
+    # theorem and introduction are owned by book/cosine-square/page.html.
     for fragment in sorted((SOURCE/'statements').glob('*.html')):
         path=site/fragment.name
         doc=BeautifulSoup(path.read_text(),'html.parser')
         lead=doc.article.select_one('.lead')
-        if fragment.name=='cosine.html':
-            for node in list(lead.next_siblings):
-                if getattr(node,'name',None)=='h2':break
-                node.extract()
-        elif fragment.name=='cartwright.html':
+        if fragment.name=='cartwright.html':
             for node in doc.article.find_all(string=True):
                 if 'π' in node:node.replace_with(str(node).replace('π squared',r'\(\pi^2\)').replace('π',r'\(\pi\)'))
         cursor=lead

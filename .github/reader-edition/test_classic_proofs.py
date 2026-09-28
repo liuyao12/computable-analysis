@@ -52,6 +52,12 @@ def main():
         assert len(statements)==1 and statements[0].select_one('p'),name
         assert len(statements[0].get_text().split())>=25,name
         assert not statements[0].select('code,sup,sub'),name
+        if name=='cosine.html':
+            assert r'\int_0^x\cos^2' in statements[0].get_text()
+            assert r'\int_0^x\sin^2' in statements[0].get_text()
+            assert doc.select_one('a[href="rational-primitives.html#trigonometric-closed-form"]')
+            general=BeautifulSoup((site/'rational-primitives.html').read_text(),'html.parser')
+            assert general.select_one('#trigonometric-closed-form')
         ids=[node['id'] for node in doc.select('[id]')]
         assert len(ids)==len(set(ids)),(name,'duplicate anchors')
         for anchor in ['setup','theorem']:
