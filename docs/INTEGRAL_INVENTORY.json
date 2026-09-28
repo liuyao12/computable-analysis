@@ -5055,6 +5055,30 @@
       "role": "pinned-proof"
     },
     {
+      "path": "book/cosine-square/ComputableAnalysis/ImaginaryExponentialIntegral.lean",
+      "role": "pinned-proof"
+    },
+    {
+      "path": "book/cosine-square/ComputableAnalysis/SineSquareData.lean",
+      "role": "pinned-proof"
+    },
+    {
+      "path": "book/cosine-square/ComputableAnalysis/SineSquareFTC.lean",
+      "role": "pinned-proof"
+    },
+    {
+      "path": "book/cosine-square/ComputableAnalysis/TrigSquareEuler.lean",
+      "role": "pinned-proof"
+    },
+    {
+      "path": "book/cosine-square/ComputableAnalysis/TrigSquareGlobal.lean",
+      "role": "pinned-proof"
+    },
+    {
+      "path": "book/cosine-square/ComputableAnalysis/TrigSquareVariable.lean",
+      "role": "pinned-proof"
+    },
+    {
       "path": "scripts/check_algebraic_ode.lean",
       "role": "audit-helper"
     },

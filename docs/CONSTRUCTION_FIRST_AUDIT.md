@@ -15,8 +15,8 @@ application. The law's conclusion must not be smuggled into the hypotheses.
 ## What was reviewed
 
 The [inventory](CONSTRUCTION_FIRST_INVENTORY.json) covers every tracked Lean
-source in the published development: 284 native modules and 70 other files
-(14 entry points/checking scripts, 10 companion files, and 46 historical files).
+source in the published development: 286 native modules and 78 other files
+(15 entry points/checking scripts, 17 companion files, and 46 historical files).
 Every source is assigned an area and bound to its content hash. Entry points,
 theorem ledgers, representative theorem hypotheses and proof-data records,
 and concrete applications were reviewed across the areas below.
@@ -137,7 +137,7 @@ can be used.
   scope choice and must be stated. Existential proofs of valid names do not
   automatically yield executable constructors; inspect computational witness
   dependencies separately from classical reasoning in proofs.
-- The 46 historical files retain their source status. The 10 companion files
+- The 46 historical files retain their source status. The 17 companion files
   include the isolated Mathlib Euler development and pinned comparison proofs.
   Their existence does not add a native represented-value theorem or a
   cross-foundation agreement proof.
@@ -162,3 +162,32 @@ Future refactoring should be driven by a concrete application: remove a
 redundant wrapper when it obscures a proof, and derive missing evidence when
 the application needs it. It should not be driven by maximizing the generality
 of sufficient conditions.
+
+
+### Squared-trigonometric companion update
+
+The review was extended to the seven new companion modules and the revised
+checker in source revision `b92e72fc`. The rational partial-cell computations
+contain literal cosine-square and sine-square rectangle sums. Complete-cell
+agreement justifies signed periodic assembly. The represented-endpoint adapter
+requires a proved uniform bound, constructs shrinking enclosures, and proves
+rational agreement and representation invariance; it is not an integral-law
+record. Exact public value theorems compare the assembled quadrature with an
+independent geometric endpoint evaluator for arbitrary valid represented reals.
+
+The exponential law assumes supplied finite derivative models and proved
+quadrature comparison, not the desired integral equality. Its concrete Euler
+instance proves the rotation equations, initial value, and uniqueness. The
+second local value proof avoids the first square derivative model; global
+bounds and assembly are shared. No identification with an independent
+power-series exponential is claimed. These remain pinned companion proofs,
+with their kernel audit and inherited axioms reported separately, rather than
+new exports of the native root library.
+
+The source-coverage refresh also accounts for three already-published
+holomorphic source/checker files and their root import. Their contract was
+reviewed without changing their mathematics: the interface supplies
+first-order approximation and derivative continuity explicitly, while the
+affine and square examples construct both witnesses on arbitrary represented
+inputs. This is not a derivation of derivative continuity from bare pointwise
+differentiability. The existing publication workflow checks these witnesses.

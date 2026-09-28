@@ -1,5 +1,5 @@
 {
-  "sourceRevision": "a23d1af2272199f5525a074d974155c24727c0f6",
+  "sourceRevision": "b92e72fc757835791392795f1fd968772c1a6f2b",
   "purpose": "Source coverage for a family-level review of theorem contracts; not a proof checker or declaration-by-declaration semantic certification.",
   "files": [
     {
@@ -282,7 +282,7 @@
       "path": "ComputableAnalysis.lean",
       "scope": "support",
       "area": "support",
-      "sha256": "349f2bf647073cb6807f9cc1f1f05546a2fbf7882cfa95d2ecb8d79c6df72861"
+      "sha256": "5acb33ee683c8feb8cacc16160cc6c5e3f4db3fa92a58ee6b9814cf448762bd6"
     },
     {
       "path": "ComputableAnalysis/AbelianIntegrals.lean",
@@ -1467,6 +1467,18 @@
       "sha256": "72aeaf9d3e0c1c3de0112ee9c3c2080bf9fbcfbe042828540758f4702e26d5df"
     },
     {
+      "path": "ComputableAnalysis/Holomorphic.lean",
+      "scope": "native",
+      "area": "contours-cauchy",
+      "sha256": "3548a9f28f06a19bdc7018f6f4cff0ea92c37b0bf99ad56be0f0c278c71da3f6"
+    },
+    {
+      "path": "ComputableAnalysis/HolomorphicExamples.lean",
+      "scope": "native",
+      "area": "contours-cauchy",
+      "sha256": "cc731fd328c377e119a18d57cd867bf64219cd2eb82f596e4f7c1108d103dcf3"
+    },
+    {
       "path": "ComputableAnalysis/HolomorphicJet.lean",
       "scope": "native",
       "area": "complex-local-calculus",
@@ -2004,7 +2016,7 @@
       "path": "book/cosine-square/Check.lean",
       "scope": "companion",
       "area": "companion",
-      "sha256": "075ebee4e2c8e28003c52911140da91b7656c42b30efd9760a0584199e473820"
+      "sha256": "0092d5000688430d693cef300a9317154fa86a192631eb15c0e0af692d77eedb"
     },
     {
       "path": "book/cosine-square/ComputableAnalysis/CosineSquareData.lean",
@@ -2023,6 +2035,48 @@
       "scope": "companion",
       "area": "companion",
       "sha256": "38c8ac85efce64f72530576a5024ec91c2f87f5d215ffe5f7e0d59244d990eaf"
+    },
+    {
+      "path": "book/cosine-square/ComputableAnalysis/ImaginaryExponentialIntegral.lean",
+      "scope": "companion",
+      "area": "companion",
+      "sha256": "72ef31925d0da1875a9f5716eafd4f70f53e93a3f4690f9cf71ddbad4bb4bffc"
+    },
+    {
+      "path": "book/cosine-square/ComputableAnalysis/RationalLipschitzLift.lean",
+      "scope": "companion",
+      "area": "companion",
+      "sha256": "71793288f1c3614e9e5c631d5e88c5ae957e4dc00203aa3fb75fdcff5b1239ec"
+    },
+    {
+      "path": "book/cosine-square/ComputableAnalysis/SineSquareData.lean",
+      "scope": "companion",
+      "area": "companion",
+      "sha256": "db532223fdb299d30a9eeb033ba8cc0e531a84d025f990d6d5e56882f4807db8"
+    },
+    {
+      "path": "book/cosine-square/ComputableAnalysis/SineSquareFTC.lean",
+      "scope": "companion",
+      "area": "companion",
+      "sha256": "a6dc1bd3dd30a038a540ab4469469ca1e1486823af19556e407ffb620bc90fb5"
+    },
+    {
+      "path": "book/cosine-square/ComputableAnalysis/TrigSquareEuler.lean",
+      "scope": "companion",
+      "area": "companion",
+      "sha256": "db9eba8abe738469c1773f8a06041d3460102cf212f38008b18e7821ac8eb27a"
+    },
+    {
+      "path": "book/cosine-square/ComputableAnalysis/TrigSquareGlobal.lean",
+      "scope": "companion",
+      "area": "companion",
+      "sha256": "4c556d2fc2a81e567626e16685a8c4833c9f919e4c664630678d99dcf49cec85"
+    },
+    {
+      "path": "book/cosine-square/ComputableAnalysis/TrigSquareVariable.lean",
+      "scope": "companion",
+      "area": "companion",
+      "sha256": "dc970ba64483ad43873cae9183ee292f42d912af21a8f2a59d763154453428fa"
     },
     {
       "path": "book/euler-proof/CheckEuler.lean",
@@ -2089,6 +2143,12 @@
       "scope": "support",
       "area": "support",
       "sha256": "b0ca53a38779906b3986688ebf6977dde1afe31146ef1a4b0a69fca203b9bd7b"
+    },
+    {
+      "path": "scripts/check_holomorphic.lean",
+      "scope": "support",
+      "area": "support",
+      "sha256": "fe67cd0b82aaca4fb76e738225bcb3f2e744befa1777c27079ac1f4ed11f5e62"
     },
     {
       "path": "scripts/check_integral_enclosures.lean",

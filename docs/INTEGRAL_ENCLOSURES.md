@@ -95,7 +95,7 @@ formula, the generic Cauchy-to-Taylor bridge, and general abelian integration
 remain open. The direct reciprocal integral on the vertical unit segment is now constructed;
 its exact comparison to the logarithm evaluator remains open.
 
-The inventory also records 32 tracked auxiliary Lean files: the library entry
+The inventory also records 38 tracked auxiliary Lean files: the library entry
 point, audit helpers, pinned proof files, and the older embedded copies under
 `.circumference-scope-prv0VC/` and `.ibp-publish-aQ5y02/`. These embedded copies
 are outside the active build; their READMEs now identify their historical status.
