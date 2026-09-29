@@ -1,15 +1,42 @@
-<header><p class="classic-tag">Function theory · Examples and construction methods</p><h1>Analytic continuation</h1><p class="lead">Local agreement determines a function. A route determines how its germ travels. Singularities determine where that journey can stop.</p></header>
-<h2 id="setup">Start with a local function</h2>
-<p>A germ remembers a holomorphic function on a neighborhood, with two representatives identified when they agree on a smaller neighborhood. A value at one point does not specify a germ: many different holomorphic functions take that value. Continuation connects local functions by proving equality on open overlaps.</p>
-<p>This chapter separates mathematical explanations from checked Lean results. The identity theorem and the examples below explain the intended mathematics; the <a href="#checked">proof ledger</a> identifies the foundations already formalized in rational-box computations.</p>
+<header><p class="classic-tag">Function theory · Local knowledge and global uniqueness</p><h1>Analytic continuation</h1><p class="lead">Two holomorphic functions agree in a tiny neighborhood. How can that determine their agreement everywhere?</p></header>
+<h2 id="setup">A small patch determines the whole function</h2>
+<p>For arbitrary functions, agreement on a small patch tells us little about what happens elsewhere. For holomorphic functions, it determines everything on the connected domain they share. A function known locally can therefore have at most one holomorphic extension to that domain. This rigidity is the starting point of analytic continuation.</p>
+<p>A <em>germ</em> records that local function: two representatives describe the same germ when they agree on a neighborhood. The surprise is how far this modest local knowledge reaches.</p>
 <section class="showcase-statement" aria-labelledby="theorem">
-<h2 id="theorem">The identity theorem: the limit point must be inside</h2>
-<p>Let \(D\) be a connected open domain, and let \(f\) and \(g\) be holomorphic on \(D\). If they agree at distinct points \(z_n\in D\) with \(z_n\to a\) and <strong>\(a\in D\)</strong>, then they agree throughout \(D\). Equivalently, a holomorphic function that is not identically zero on a connected domain has no accumulation point of zeros in that domain.</p>
-<p class="classic-scope">Mathematical statement. Its general proof for our represented holomorphic interface remains open; the affine case is checked.</p>
+<h2 id="theorem">Local agreement forces global agreement</h2>
+<p>Let \(f\) and \(g\) be holomorphic on the same connected open domain \(D\). If they agree on a nonempty open neighborhood in \(D\), then they agree throughout \(D\). The domain need not be simply connected. This is the identity theorem in the form that gives uniqueness of analytic extension.</p>
+<p class="classic-scope">Mathematical target. The general theorem for our represented holomorphic interface remains open; the affine germ comparison is checked. The <a href="#checked">proof ledger</a> separates the current constructions from this target.</p>
 </section>
-<h3>The test case: \(\sin(1/z)\)</h3>
+<h2 id="logarithm-puzzle">But what about the logarithm?</h2>
+<p>Start near the positive real axis with the logarithm normalized by \(L(1)=0\). Travel from \(1\) to \(-1\), first along an upper semicircle, then along a lower semicircle. The continued logarithms reach different values:</p>
+\[L_{\mathrm{above}}(-1)=\pi i,\qquad L_{\mathrm{below}}(-1)=-\pi i.\]
+<p>They agreed at the start, yet disagree at the end. Where did the identity theorem stop applying?</p>
+<p>The two continued branches are not holomorphic functions on one common connected domain containing both comparison neighborhoods. Each can be defined on a suitable slit plane, but their common domain can be disconnected: they agree on the component containing the positive real axis and differ on the component containing the negative real axis.</p>
+<details><summary>Two explicit domains that expose the issue</summary>
+<p>Choose one logarithm with \(-\pi/2\lt \arg z\lt 3\pi/2\), cutting along the negative imaginary ray, and the other with \(-3\pi/2\lt \arg z\lt \pi/2\), cutting along the positive imaginary ray. Their intersection is</p>
+\[\{\Re z>0\}\;\cup\;\{\Re z\lt 0\}.\]
+<p>On the right half-plane the branches agree. On the left half-plane the upper branch exceeds the lower one by \(2\pi i\). Each slit domain is connected, but their intersection is not. Thus there is no contradiction with the identity theorem. See <a href="https://dlmf.nist.gov/4.2#i">the logarithm’s branches</a>.</p>
+</details>
+<p>This distinguishes two questions. <strong>Uniqueness:</strong> two existing holomorphic extensions on the same connected domain must agree if they start with the same germ. <strong>Existence of one global branch:</strong> continuation along different paths might return different germs. Simple connectedness enters the monodromy theorem addressing that second question, together with the hypothesis of continuation along every path.</p>
+<h2 id="chain-reaction">Why agreement spreads: a chain reaction</h2>
+<p>Suppose the functions agree near a point \(a\). All their derivatives there agree, so their Taylor series agree. Each series converges throughout every disk centered at \(a\) contained in the holomorphic domain. Agreement therefore spreads from the small starting patch to that whole disk.</p>
+<p>Move the center inside this disk and repeat. Overlapping disks carry agreement along a route to any point of a connected open domain. In our computable foundation, the route needs a justified finite cover with rational safety margins and certified series estimates. The mathematical reason for propagation is local rigidity, not simple connectedness.</p>
+<p>The guaranteed Taylor disk is a disk contained in the domain. The series may extend farther if the chosen domain has an artificial boundary; its exact radius is governed by genuine obstructions to that germ. We should not confuse the boundary of one displayed domain with the nearest singularity.</p>
+<p>The usual local proof factors a nonzero Taylor expansion as</p>
+\[h(z)=(z-a)^m\bigl(c_m+(z-a)q(z)\bigr),\qquad c_m\ne0.\]
+<p>A sufficiently small neighborhood keeps the factor in parentheses away from zero. Hence a zero is isolated unless the whole local series vanishes. The set of points where the germ vanishes is then open and closed relative to the connected domain, which is another way to express the chain reaction. For our formalization, coefficient separation and tail estimates must justify the radius. See <a href="https://people.math.harvard.edu/~ctm/home/text/class/harvard/213a/25/html/home/course/course.pdf">McMullen’s treatment of isolated zeros and uniqueness</a>.</p>
+<h2 id="less-information">How little agreement is enough?</h2>
+<h3>A line segment already determines the derivatives</h3>
+<p>We do not need an open patch to get started. Agreement on a real interval inside the domain gives agreement of all derivatives there, because the functions are holomorphic. Any straight-line interval works. For a nonzero complex direction \(v\),</p>
+\[\left.\frac{d^m}{dt^m}f(a+tv)\right|_{t=0}=v^m f^{(m)}(a).\]
+<p>Thus the one-dimensional restriction determines the complex Taylor coefficients. Its center must be an interior point of the common domain; boundary values require additional arguments.</p>
+<h3>Even a convergent sequence suffices</h3>
+<p>Let \(z_n\) be distinct points of \(D\), with \(z_n\to a\in D\), where \(f(z_n)=g(z_n)\). Set \(h=f-g\). Continuity first gives \(h(a)=0\). The difference quotients along the sequence then give \(h'(a)=0\). Once all lower Taylor coefficients vanish, the next one satisfies</p>
+\[\frac{h^{(m)}(a)}{m!}=\lim_{n\to\infty}\frac{h(z_n)}{(z_n-a)^m}=0.\]
+<p>Discard a term equal to \(a\), if present. Inductively every coefficient vanishes, so the functions agree near \(a\); the chain reaction takes care of the rest of \(D\). This is exact determination. A certified numerical derivative algorithm additionally needs convergence and error bounds, since division by a shrinking displacement amplifies uncertainty.</p>
+<h3 id="accumulating-zeros">The crucial example: \(\sin(1/z)\)</h3>
 \[f(z)=\sin(1/z),\qquad D=\mathbb C\setminus\{0\},\qquad z_n=\frac1{n\pi}\quad(n\ge1).\]
-<p>Every \(z_n\) is in the domain and \(f(z_n)=0\). These distinct zeros tend to \(0\), but <strong>\(0\notin D\)</strong>. The function is not identically zero: \(f(2/\pi)=1\). Thus the example explains the interior-point hypothesis, rather than contradicting the theorem. The zeros are isolated within the punctured plane.</p>
+<p>At every \(z_n\), the function agrees with the zero function. These distinct points converge to \(0\), yet \(f\) is not identically zero: \(f(2/\pi)=1\). The missing hypothesis is precisely <strong>\(0\notin D\)</strong>. The zeros have no accumulation point inside the punctured plane.</p>
 <div class="continuation-lab" id="zero-lab">
 <h3>Zeros approaching an excluded point</h3>
 <p>The hollow endpoint is outside the domain. Adding zeros never moves that endpoint into it.</p>
@@ -17,13 +44,9 @@
 <svg id="zero-plot" viewBox="0 0 640 110" role="img" aria-label="Positive zeros of sine of one over z accumulate at the excluded origin"></svg>
 <p class="classic-scope">Finite floating-point illustration. The displayed zero locations come from the exact formula above.</p>
 </div>
-<p>If a holomorphic extension through \(0\) existed, those same zeros would now accumulate at an interior point. The identity theorem would force the extension to vanish near \(0\), although \(\sin(1/z)\) also takes the value \(1\) at points approaching \(0\). This rules out the extension. The example appears in <a href="https://web.math.ku.dk/noter/filer/koman-12.pdf">the University of Copenhagen complex-analysis notes</a>.</p>
-<h3>Why zeros are locally isolated</h3>
-<p>For a convergent expansion at an interior point, take the first nonzero coefficient, if there is one:</p>
-\[f(z)=(z-a)^m\bigl(c_m+(z-a)h(z)\bigr),\qquad c_m\ne0.\]
-<p>On a sufficiently small disk, the term in parentheses stays away from zero. If \(m\ge1\), the only zero there is \(a\); if \(m=0\), there are no zeros there. If zeros instead accumulate at \(a\), every Taylor coefficient must vanish, so the function vanishes on a neighborhood. The set of points where its germ is zero is both open and closed relative to the connected domain, giving the global conclusion. Apply this to \(f-g\) for the two-function statement. See <a href="https://people.math.harvard.edu/~ctm/home/text/class/harvard/213a/25/html/home/course/course.pdf">McMullen’s complex-analysis notes</a>.</p>
-<p>In the computable proof, a supplied positive coefficient-separation bound and a certified tail estimate must produce the zero-free radius. Finding the first nonzero coefficient of an arbitrary represented series is not a decision procedure we may silently assume. We must also reconstruct local series from our derivative-based holomorphic witnesses before using this argument for every such witness.</p>
-<p>Connectedness matters too. On two disjoint disks, a holomorphic function can be zero on one disk and one on the other. Agreement propagates through the component containing the accumulation point. Likewise, two charts can agree on one component of their overlap and disagree on another.</p>
+<p>There cannot be a holomorphic extension through \(0\). The identity theorem would force such an extension to vanish near \(0\), although</p>
+\[f\!\left(\frac1{\pi/2+2\pi n}\right)=1\]
+<p>at points approaching \(0\). This makes the interior-accumulation requirement visible. See <a href="https://web.math.ku.dk/noter/filer/koman-12.pdf">the Copenhagen complex-analysis notes</a>. Connectedness also matters: on two disjoint disks a holomorphic function can be zero on one and one on the other.</p>
 <h2 id="loops">What changes after a loop?</h2>
 <p>Continue a germ around a counterclockwise loop about the origin and compare the terminal germ on a neighborhood of the starting point. The following comparisons concern entire local functions, not just a coincident endpoint value.</p>
 <div class="continuation-table"><table><thead><tr><th>Initial function</th><th>After one positive turn</th><th>Obstruction at the origin</th></tr></thead><tbody>
@@ -43,7 +66,7 @@
 </div>
 <p>Trivial monodromy does not make a singularity removable. For \(\sin(1/z)\), the Laurent expansion</p>
 \[\sin(1/z)=\frac1z-\frac1{3!z^3}+\frac1{5!z^5}-\cdots\]
-<p>has infinitely many negative powers. The singularity is essential, even though the function is single-valued throughout the punctured plane. Its accumulating zeros are the identity-theorem example above. The <a href="https://dlmf.nist.gov/1.10#iii">Laurent classification</a> distinguishes this from a pole and a removable singularity.</p>
+<p>has infinitely many negative powers. The singularity is essential, even though the function is single-valued throughout the punctured plane. Its accumulating zeros are the <a href="#accumulating-zeros">identity-theorem example above</a>. The <a href="https://dlmf.nist.gov/1.10#iii">Laurent classification</a> distinguishes this from a pole and a removable singularity.</p>
 <p>A useful contrast is \(\sin z/z\): its apparent singularity at zero is removable, with extension value \(1\). For arctangent, the derivative \(1/(1+z^2)\) is single-valued, while the continued function gains \(\pi\) around \(i\) and loses \(\pi\) around \(-i\). The <a href="complex-analysis.html#analytic-continuation">earlier examples</a> give the normalizations and current proof pieces.</p>
 <h2 id="methods">Several ways to continue the same germ</h2>
 <h3 id="taylor-chains">Overlapping Taylor disks</h3>
@@ -73,6 +96,7 @@
 <p>The functional equation \(F(z)=z+F(z^2)\) does not overcome the obstruction: when \(|z|>1\), the transformed argument still lies outside the known disk. A continuation method needs a genuine overlap with a known chart. Divergence of a series at boundary points alone would not prove a natural boundary; the radial unboundedness argument above supplies the obstruction.</p>
 <h2 id="checked">Checked foundations and what remains</h2>
 <p><strong>Checked:</strong> represented germs; derivative uniqueness; local holomorphic gluing; actual finite chart chains; finite homotopy invariance from local transport laws; and the affine analytic client. We now also construct a global evaluator from supplied locally coherent charts, prove its representation invariance and holomorphicity, and reflect holomorphic charts and their overlap comparisons. These are exact represented-input results.</p>
-<p><strong>Still needed for general monodromy:</strong> the identity theorem for arbitrary represented holomorphic maps, comparison and local stability of arbitrary continuation chains, and a quantitative subdivision of continuous homotopies. The realization theorem now handles supplied coherent chart selection; obtaining that selection from general pathwise continuation remains part of the analytic work.</p>
+<p><strong>The main uniqueness target:</strong> prove the identity theorem on a connected open domain for arbitrary represented holomorphic functions. Simple connectedness is not a hypothesis of this theorem.</p>
+<p><strong>Still needed for the separate general monodromy theorem:</strong> the identity theorem for arbitrary represented holomorphic maps, comparison and local stability of arbitrary continuation chains, and a quantitative subdivision of continuous homotopies. The realization theorem now handles supplied coherent chart selection; obtaining that selection from general pathwise continuation remains part of the analytic work.</p>
 <p>The monodromy theorem assumes the starting germ can be continued along every path in the domain. Simple connectedness then removes route dependence. The examples and method explanations on this page do not claim new Lean proofs of logarithm or square-root monodromy, complex Gamma continuation, the identity theorem, or the natural-boundary example.</p>
 <p><a href="__REPO__docs/ANALYTIC_CONTINUATION.md">Exact proof ledger</a> · <a href="__REPO__ComputableAnalysis/Continuation/Realization.lean">Global evaluator construction</a> · <a href="__REPO__ComputableAnalysis/Continuation/Reflection.lean">Reflected charts and overlaps</a> · <a href="reading/continuation-audit.log">Dependency audit</a></p>

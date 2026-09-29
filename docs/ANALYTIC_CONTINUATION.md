@@ -1,14 +1,27 @@
 # Analytic continuation: checked foundation and remaining theorem
 
-The intended monodromy statement is conditional on pathwise continuation:
-start with a local holomorphic germ at a base point in a connected open domain.
-If that germ can be continued along every path in the domain, simple
-connectedness makes its terminal germ independent of the path and yields a
-single-valued holomorphic extension. Simple connectedness alone does not
-supply continuation across a singularity. Uniqueness of two already existing
-global extensions is an identity-theorem consequence of connectedness.
+The primary uniqueness target is the identity theorem: two holomorphic
+functions on the **same connected open domain** that agree on a nonempty
+open neighborhood agree everywhere on that domain. Simple connectedness is
+not required. Agreement on a line interval or at distinct points accumulating
+at an interior point also suffices. For \(\sin(1/z)\), the accumulation point
+of the zeros lies outside the domain.
 
-**The full theorem for arbitrary holomorphic germs is not yet proved.**
+Logarithm continued above and below the origin is the apparent counterexample
+to explain first. Suitable slit-plane branches agree on the right component
+of their intersection and differ on the left component. Their intersection
+is disconnected, so the identity theorem does not propagate between those
+components. Taylor reconstruction and overlapping disks explain how agreement
+propagates when the common domain is connected.
+
+The monodromy theorem is a separate existence/path-independence statement:
+if a starting germ can be continued along every path in a simply connected
+domain, its terminal germ is independent of the route and gives a global
+holomorphic extension. Neither pathwise continuation nor extension across
+singularities follows from simple connectedness alone.
+
+**The general identity theorem and the full analytic monodromy theorem are
+not yet proved.**
 The new foundation proves the finite transport argument, represented germ
 algebra, derivative uniqueness, and local holomorphic gluing. It also supplies
 actual chart-chain semantics and a fully instantiated affine client. The

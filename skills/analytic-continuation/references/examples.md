@@ -10,6 +10,19 @@ theorems, not claims that the full constructions are already checked. The source
 the published baseline at this revision; inspect the working checkout for
 subsequent proofs before reporting current coverage.
 
+## Narrative: rigidity before construction
+
+Begin with the identity theorem for neighborhood agreement on the same
+connected open domain. The logarithm continued above and below zero gives
+an apparent counterexample: branches with argument ranges
+\((-\pi/2,3\pi/2)\) and \((-3\pi/2,\pi/2)\) agree on the right
+half-plane and differ on the left. Their common domain is disconnected.
+Then explain overlapping Taylor disks, agreement on a line interval, and
+agreement on a sequence accumulating at an interior point. Use
+\(\sin(1/z)\) to test that last hypothesis. Simple connectedness belongs
+to the later monodromy/existence question, not uniqueness of two given
+extensions on a connected domain.
+
 ## Arctangent: one Taylor series is not the whole function
 
 Start with the germ \(A(0)=0\), \(A'(z)=1/(1+z^2)\). Highlight moving from

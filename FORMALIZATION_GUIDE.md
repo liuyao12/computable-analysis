@@ -34,6 +34,13 @@ claims; each links the actual checked results and remaining bridges.
 
 ## Analytic continuation and finite monodromy
 
+Separate uniqueness of two supplied holomorphic extensions on the same
+connected open domain (the identity theorem) from constructing one global
+branch by pathwise continuation (the monodromy theorem). Only the latter
+uses simple connectedness. The reader leads with local agreement, the
+logarithm's disconnected-overlap puzzle, Taylor propagation, line/sequence
+agreement, and the excluded accumulation point of \(\sin(1/z)\).
+
 Use `ComputableAnalysis.Continuation` for represented germs, derivative
 uniqueness, local gluing, actual finite chart chains, and finite geometric
 homotopies. `Transport.homotopy_invariant` derives global agreement from local

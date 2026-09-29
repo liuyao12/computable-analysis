@@ -2,6 +2,12 @@
 
 ## Analytic-continuation foundation
 
+The main uniqueness target is the identity theorem on the same connected
+open domain; simple connectedness is not needed. Monodromy is the separate
+path-independence/existence question. The chapter follows local rigidity,
+logarithm's apparent counterexample, Taylor propagation, line agreement,
+sequence agreement, and \(\sin(1/z)\)'s excluded accumulation point.
+
 Checked: represented germ equivalence, derivative uniqueness, local holomorphic
 gluing, finite chart chains with whole-segment coverage, geometric triangle
 homotopies, and the local-transport-to-monodromy implication. Affine germs

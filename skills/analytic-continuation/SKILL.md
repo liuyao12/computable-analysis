@@ -28,6 +28,22 @@ inside the holomorphic domain, and conclusions propagate within a connected
 component. In particular, the zeros of \(\sin(1/z)\) accumulating at the
 excluded origin do not force the function to vanish.
 
+## Uniqueness on a connected domain
+
+The main uniqueness problem is the identity theorem, not the monodromy
+theorem. For two already existing holomorphic functions, require the same
+connected open domain and initial neighborhood agreement. Do not add simple
+connectedness. For the stronger sequence version, retain distinct points and
+an accumulation point inside the common domain. Logarithm branches reached
+above and below zero illustrate why agreement on one component of a
+disconnected overlap does not determine another component.
+
+For exposition, start with local-to-global rigidity, then this apparent
+logarithm counterexample, Taylor propagation through overlapping disks,
+line agreement, sequence agreement, and finally \(\sin(1/z)\). Distinguish
+exact derivative determination from an executable numerical derivative
+algorithm with error and convergence bounds.
+
 ## General monodromy tasks
 
 When the request is a general monodromy theorem, use the checked
