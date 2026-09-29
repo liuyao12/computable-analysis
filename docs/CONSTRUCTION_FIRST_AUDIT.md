@@ -15,8 +15,8 @@ application. The law's conclusion must not be smuggled into the hypotheses.
 ## What was reviewed
 
 The [inventory](CONSTRUCTION_FIRST_INVENTORY.json) covers every tracked Lean
-source in the published development: 296 native modules and 81 other files
-(18 entry points/checking scripts, 17 companion files, and 46 historical files).
+source in the published development: 326 native modules and 82 other files
+(19 entry points/checking scripts, 17 companion files, and 46 historical files).
 Every source is assigned an area and bound to its content hash. Entry points,
 theorem ledgers, representative theorem hypotheses and proof-data records,
 and concrete applications were reviewed across the areas below.
@@ -54,8 +54,8 @@ also support other areas. They are source counts, not theorem-completion scores.
 | Roots and inverses | 29 | Bisection, exclusion, deflation, and supplied-root formulas are good examples of separate constructors and laws. Removing a supplied root is a complete algebraic operation, not an FTA existence proof. Keep separation and branch evidence explicit. |
 | Circle and geometry | 28 | Finite rational geometry, circle computations, rotations, and equivalence proofs supply concrete objects. Keep orientation and domain hypotheses, and distinguish a geometric comparison from a named representation target. |
 | Real local calculus | 14 | Finite secant estimates and derivative certificates support laws about given differentiable computations. A general law may consume those certificates. A requested derivative of a named function still requires their construction and the appropriate represented-input bridge. |
-| Integration | 22 | Whole-chunk sums and particular FTC comparisons fit directly. Enclosure records are optional proof organization. Candidate validity is not integrand semantics; endpoint comparisons are not independent integration arguments. |
-| Series | 20 | Finite prefixes, alternating brackets, majorants, and comparison bounds fit. `RationalSeriesCertificate` is one sufficient construction pattern. Its one-step refinement condition is not a necessary definition of every convergent series; other stage choices and methods remain available. |
+| Integration | 47 | Whole-chunk sums and particular FTC comparisons fit directly. Enclosure records are optional proof organization. Candidate validity is not integrand semantics; endpoint comparisons are not independent integration arguments. |
+| Series | 25 | Finite prefixes, alternating brackets, majorants, and comparison bounds fit. `RationalSeriesCertificate` is one sufficient construction pattern. Its one-step refinement condition is not a necessary definition of every convergent series; other stage choices and methods remain available. |
 | Fourier computations | 6 | `EffectiveFourierTailCertificate` derives a valid computation from finite future-tail bounds. This is a substantive conditional result. Sample and coefficient records do not establish a general Fourier reconstruction theorem for arbitrary functions. |
 | Elementary functions | 7 | Construct particular exponential, logarithm, and inverse computations and prove their relationships. Keep branch and inverse data where needed. Records collecting already-proved identities organize an application; they do not discover those identities. |
 | Rational-function calculus | 25 | Supplied factorizations are legitimate hypotheses of partial-fraction and formula-compiler laws. Factorization existence is separate. A formal derivative identity still needs its analytic interpretation before it can be advertised as a definite-integral evaluation. |
@@ -226,9 +226,19 @@ native evaluator dependencies.
 
 ## Improper power tests
 
-The new compact witnesses prove actual whole-cell bounds and tightness for
-integer power functions. Improper candidates supply those compact witnesses
-and explicit truncation bounds; natural-exponent series convergence is derived
-from the cell theorem. The integer scope and the unproved arbitrary-real
-exponent bridge are explicit in `docs/POWER_IMPROPER.md`. Conditional uniqueness
-is proved from bounds and convergence, never assumed as a certificate field.
+The native power package now covers arbitrary valid represented-real exponents.
+Finite polynomial witnesses, reflection, and reciprocal substitution construct
+actual finite-interval integrals. A finite binomial endpoint inequality supplies
+improper limits with exact reciprocal values; no completed zeta series is a
+premise. Positivity and monotonicity then justify finite sum–integral comparison.
+The full convergence classifications, including critical divergence, and
+representation invariance are proved. “Compact” denotes a finite closed rational
+interval away from zero; no topological compactness theorem is used.
+
+The new 28-root audit uses only standard logical axioms and no ambient reals or
+complexes. Its 19 runtime groups exercise noninteger and irrational cases and
+finite bounds; they do not benchmark the conservative general series constructor.
+The earlier 28-root/34-group integer audit remains in place. Exact scope,
+including rational finite endpoints and separate Gaussian/Gamma work, is recorded
+in `docs/POWER_IMPROPER.md`. Conditional uniqueness is proved, never assumed as
+a certificate field.

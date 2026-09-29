@@ -560,6 +560,63 @@
       "declarations": []
     },
     {
+      "path": "ComputableAnalysis/BinomialCompactBounds.lean",
+      "role": "mixed",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/BinomialEndpointBounds.lean",
+      "role": "mixed",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/BinomialEndpointChart.lean",
+      "role": "mixed",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/BinomialIntegral.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 46,
+          "declaration": "canonicalIntegral"
+        },
+        {
+          "line": 54,
+          "declaration": "canonicalIntegral_hasIntegral"
+        },
+        {
+          "line": 80,
+          "declaration": "canonicalIntegral_closedForm"
+        },
+        {
+          "line": 100,
+          "declaration": "canonicalIntegral_equiv"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/BinomialParameter.lean",
+      "role": "support",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/BinomialPowerOrder.lean",
+      "role": "mixed",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/BinomialPowerPolynomial.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 128,
+          "declaration": "coefficient_integral_shift"
+        }
+      ]
+    },
+    {
       "path": "ComputableAnalysis/Blueprint.lean",
       "role": "support",
       "declarations": []
@@ -2391,9 +2448,97 @@
       ]
     },
     {
+      "path": "ComputableAnalysis/GeometricIntegral.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 11,
+          "declaration": "integralCoefficient"
+        },
+        {
+          "line": 15,
+          "declaration": "integralCoefficient_bound"
+        },
+        {
+          "line": 33,
+          "declaration": "integral_prefix"
+        },
+        {
+          "line": 66,
+          "declaration": "geometricIntegral"
+        },
+        {
+          "line": 70,
+          "declaration": "geometricIntegral_valid"
+        },
+        {
+          "line": 95,
+          "declaration": "geometricIntegral_bounds"
+        },
+        {
+          "line": 347,
+          "declaration": "geometricIntegral_hasIntegral"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/GeometricSequence.lean",
+      "role": "mixed",
+      "declarations": []
+    },
+    {
       "path": "ComputableAnalysis/GeometryFoundation.lean",
       "role": "support",
       "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/GlobalBinomialChart.lean",
+      "role": "mixed",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/GlobalBinomialIdentity.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 107,
+          "declaration": "Chart.integral_equiv"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/GlobalBinomialIntegral.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 26,
+          "declaration": "Chart.integralPolynomial"
+        },
+        {
+          "line": 32,
+          "declaration": "Chart.integral"
+        },
+        {
+          "line": 56,
+          "declaration": "Chart.integralPolynomial_external"
+        },
+        {
+          "line": 77,
+          "declaration": "Chart.integral_valid"
+        },
+        {
+          "line": 95,
+          "declaration": "Chart.integral_contains"
+        },
+        {
+          "line": 115,
+          "declaration": "Chart.hasIntegral"
+        },
+        {
+          "line": 131,
+          "declaration": "Chart.integral_stage_bounds"
+        }
+      ]
     },
     {
       "path": "ComputableAnalysis/HarmonicImproperBounds.lean",
@@ -2467,6 +2612,32 @@
         {
           "line": 29,
           "declaration": "finite_integral_comparison"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/IntegralConstantComparison.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 7,
+          "declaration": "HasIntegral.lower_const"
+        },
+        {
+          "line": 22,
+          "declaration": "HasIntegral.upper_const"
+        },
+        {
+          "line": 37,
+          "declaration": "HasIntegral.nonneg"
+        },
+        {
+          "line": 45,
+          "declaration": "HasIntegral.lower_real"
+        },
+        {
+          "line": 60,
+          "declaration": "HasIntegral.upper_real"
         }
       ]
     },
@@ -3471,6 +3642,20 @@
       ]
     },
     {
+      "path": "ComputableAnalysis/IntegralUniformApproximation.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 91,
+          "declaration": "hasIntegral_of_uniform_approximation"
+        },
+        {
+          "line": 197,
+          "declaration": "HasIntegral.exactRat_onInterval"
+        }
+      ]
+    },
+    {
       "path": "ComputableAnalysis/IntegrationByPartsPi.lean",
       "role": "comparison",
       "declarations": []
@@ -3508,6 +3693,21 @@
         {
           "line": 434,
           "declaration": "transmuted_integral_series"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/LipschitzRectangleBounds.lean",
+      "role": "mixed",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/LocalIntegralOrder.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 32,
+          "declaration": "integral_lower_of_local_error"
         }
       ]
     },
@@ -4276,6 +4476,96 @@
       ]
     },
     {
+      "path": "ComputableAnalysis/PolynomialIntegralComparison.lean",
+      "role": "finite",
+      "declarations": [
+        {
+          "line": 7,
+          "declaration": "polynomial_integral_bound"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/PolynomialIntegralWitness.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 67,
+          "declaration": "truncate_integral"
+        },
+        {
+          "line": 93,
+          "declaration": "polynomial_hasIntegral"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/PowerCompactIntegral.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 30,
+          "declaration": "compact_hasIntegral"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/PowerDivergence.lean",
+      "role": "mixed",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/PowerImproperAtZero.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 131,
+          "declaration": "zeroIntegral"
+        },
+        {
+          "line": 159,
+          "declaration": "zero_hasIntegralLimit"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/PowerImproperDivergence.lean",
+      "role": "mixed",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/PowerInfinityIntegral.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 44,
+          "declaration": "infinityCompact_hasIntegral"
+        },
+        {
+          "line": 90,
+          "declaration": "infinityIntegral"
+        },
+        {
+          "line": 117,
+          "declaration": "infinity_hasIntegralLimit"
+        },
+        {
+          "line": 146,
+          "declaration": "infinityIntegral_equiv"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/PowerIntegralOrder.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 35,
+          "declaration": "integral_nonneg"
+        }
+      ]
+    },
+    {
       "path": "ComputableAnalysis/PowerSeries.lean",
       "role": "finite",
       "declarations": [
@@ -4294,6 +4584,16 @@
         {
           "line": 841,
           "declaration": "sineTaylorIntegralPartial_eq_one_sub_cosineTaylorPartial_succ"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/PowerSeriesFinite.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 78,
+          "declaration": "finite_integral_comparison"
         }
       ]
     },
@@ -4318,9 +4618,52 @@
       "declarations": []
     },
     {
+      "path": "ComputableAnalysis/RealPowerIntegralTest.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 14,
+          "declaration": "zeroDyadic_hasIntegralLimit"
+        },
+        {
+          "line": 35,
+          "declaration": "infinityDyadic_hasIntegralLimit"
+        },
+        {
+          "line": 112,
+          "declaration": "series_integral_test"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/RealPowerSeries.lean",
+      "role": "mixed",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/ReciprocalPolynomialIntegral.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 159,
+          "declaration": "reciprocal_polynomial_hasIntegral"
+        }
+      ]
+    },
+    {
       "path": "ComputableAnalysis/ReciprocalQuarticPi.lean",
       "role": "comparison",
       "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/ReflectedPolynomialIntegral.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 37,
+          "declaration": "reflected_polynomial_hasIntegral"
+        }
+      ]
     },
     {
       "path": "ComputableAnalysis/SectorAreaReparametrization.lean",
@@ -5224,6 +5567,10 @@
     },
     {
       "path": "scripts/check_power_improper.lean",
+      "role": "audit-helper"
+    },
+    {
+      "path": "scripts/check_real_power_integrals.lean",
       "role": "audit-helper"
     }
   ]

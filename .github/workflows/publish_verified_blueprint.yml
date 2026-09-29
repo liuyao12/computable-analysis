@@ -11,10 +11,17 @@ on:
       - 'ComputableAnalysis/FiniteConvolution.lean'
       - 'ComputableAnalysis/NBallGaussian.lean'
       - 'ComputableAnalysis/IntegerPower*.lean'
+      - 'ComputableAnalysis/*Binomial*.lean'
+      - 'ComputableAnalysis/Power*.lean'
+      - 'ComputableAnalysis/RealPower*.lean'
+      - 'ComputableAnalysis/*Integral*.lean'
+      - 'ComputableAnalysis/RealParameterSample.lean'
+      - 'ComputableAnalysis/GeometricSequence.lean'
       - 'ComputableAnalysis/HarmonicImproperBounds.lean'
       - 'ComputableAnalysis/ImproperIntegralBounds.lean'
       - 'ComputableAnalysis/IntegralRectangleSpecification.lean'
       - 'scripts/check_power_improper.lean'
+      - 'scripts/check_real_power_integrals.lean'
       - 'docs/POWER_IMPROPER.md'
       - 'ComputableAnalysis/FiniteNBallVolume.lean'
       - 'scripts/check_n_ball.lean'
@@ -440,8 +447,9 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p power-improper-reports
-          lake build ComputableAnalysis.HarmonicImproperBounds | tee power-improper-reports/build.log
+          lake build ComputableAnalysis.RealPowerIntegralTest ComputableAnalysis.AlgebraicFunctions | tee power-improper-reports/build.log
           lake env lean scripts/check_power_improper.lean | tee power-improper-reports/audit.log
+          lake env lean scripts/check_real_power_integrals.lean | tee -a power-improper-reports/audit.log
           python3 .github/reader-edition/power_improper.py --site site --revision "$GITHUB_SHA" --audit power-improper-reports/audit.log
       - uses: actions/upload-artifact@v4
         if: always()
@@ -534,8 +542,9 @@ jobs:
                   power=json.loads(get('reading/power-improper.json'))
                   assert power['proofSourceCommit']==revision and power['explicitStageBounds']
                   assert power['naturalSeriesConvergenceClassification'] and not power['mathlibDependency']
-                  assert not power['arbitraryRealExponentTestProved']
-                  assert len(power['auditedTheorems'])==28 and power['regressionGroups']==34
+                  assert power['arbitraryRealExponentTestProved'] and power['nonintegerZeroToOneCaseProved']
+                  assert power['realSeriesConvergenceClassification'] and not power['compactnessTheoremUsed']
+                  assert len(power['auditedTheorems'])==56 and power['regressionGroups']==53
                   for path,expected in power['artifactHashes'].items():
                       assert hashlib.sha256(get(path)).hexdigest()==expected,path
                   print('LIVE POWER INTEGRALS:',base+'/power-improper.html')

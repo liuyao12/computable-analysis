@@ -282,7 +282,7 @@
       "path": "ComputableAnalysis.lean",
       "scope": "support",
       "area": "support",
-      "sha256": "56515d66130eb0b48c85f3ffb6e03c1600ce1d033bbb1f0aa5dcf1d6ca774e4a"
+      "sha256": "10e474313bbcb3b1c75648e94eb295089cd6027ac48141f18d22745ed26565df"
     },
     {
       "path": "ComputableAnalysis/AbelianIntegrals.lean",
@@ -564,7 +564,49 @@
       "path": "ComputableAnalysis/Basic.lean",
       "scope": "native",
       "area": "representations",
-      "sha256": "4183ad4ea24a9dd47bc5bf80665d6712c25640bd05364d5322fe0c05a93f2196"
+      "sha256": "09340cf534beda1aba766425b0af7675782fc6d72b7247da1521ab92c30f5cde"
+    },
+    {
+      "path": "ComputableAnalysis/BinomialCompactBounds.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "858441cde3b687375fca307827c87e91ac84c8b3a887b6ffd5863558592df991"
+    },
+    {
+      "path": "ComputableAnalysis/BinomialEndpointBounds.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "b6d330b38705e1f3db1706981a099e46d1b956e07bea9b593c7b50db5ca4685e"
+    },
+    {
+      "path": "ComputableAnalysis/BinomialEndpointChart.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "0e02bf38c827afe31348d7c78eb8f5c8e3805d0a5b8f254ced2bae96ca7decb3"
+    },
+    {
+      "path": "ComputableAnalysis/BinomialIntegral.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "0d43bc6ee4abc16458461cec9178e4c49022cbd04ab0c8931e2b8716453ddabc"
+    },
+    {
+      "path": "ComputableAnalysis/BinomialParameter.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "dca90d250849fd15424e1a04adc656fdecba4f0fea962ce852b39b68db049009"
+    },
+    {
+      "path": "ComputableAnalysis/BinomialPowerOrder.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "3c0854a14d7149ae5d2177b5e0ce66658f6e7dc3d653e5f2e1a592d72a9dd8f4"
+    },
+    {
+      "path": "ComputableAnalysis/BinomialPowerPolynomial.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "cd387a2f78041f8b7666415b475b148841b65dbb467246982fc87de6b95b4316"
     },
     {
       "path": "ComputableAnalysis/Blueprint.lean",
@@ -1449,6 +1491,12 @@
       "sha256": "6fd574944a5c383c101baa63186e4666a16e4627ef46b2f95e36415e1053013c"
     },
     {
+      "path": "ComputableAnalysis/GeometricIntegral.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "78bb0640e8f6e49d6c672557d48321be6878e4564f38328319daedd131019bc4"
+    },
+    {
       "path": "ComputableAnalysis/GeometricPiRotation.lean",
       "scope": "native",
       "area": "circle-geometry",
@@ -1467,6 +1515,12 @@
       "sha256": "f615de1b2c92549fe788a67d2b73acc7e99b0bcd8b63752f162ecfd948953fa4"
     },
     {
+      "path": "ComputableAnalysis/GeometricSequence.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "eb730829f29ef2de448981eeb1ef83bae95d1524f714c83d0a5753724f29974d"
+    },
+    {
       "path": "ComputableAnalysis/GeometricSeriesCalculus.lean",
       "scope": "native",
       "area": "series",
@@ -1477,6 +1531,24 @@
       "scope": "native",
       "area": "entry-points-ledgers",
       "sha256": "72aeaf9d3e0c1c3de0112ee9c3c2080bf9fbcfbe042828540758f4702e26d5df"
+    },
+    {
+      "path": "ComputableAnalysis/GlobalBinomialChart.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "7e9047d549d1a13d32f61191f5c231ef0d443888f5ee4ef092f4238f6487e71f"
+    },
+    {
+      "path": "ComputableAnalysis/GlobalBinomialIdentity.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "0a7daa497e1d25370c4d81d8c52e4771f9557fe0ada16fe29c17576d82108758"
+    },
+    {
+      "path": "ComputableAnalysis/GlobalBinomialIntegral.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "2c02c5907fcecd65ce16abc4ef8451894c4245762149e4c703df8ba4f888d853"
     },
     {
       "path": "ComputableAnalysis/HarmonicImproperBounds.lean",
@@ -1539,6 +1611,12 @@
       "sha256": "bc23c844e758d107ac549a6baf28ecc262b8ef1e8c0ac6a2b03f0ab4fb4373bf"
     },
     {
+      "path": "ComputableAnalysis/IntegralConstantComparison.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "a4125422142b1d691b8bff4fbd0ae3b828e44f42eea317ccd4efb25345577cf6"
+    },
+    {
       "path": "ComputableAnalysis/IntegralEnclosure.lean",
       "scope": "native",
       "area": "integration",
@@ -1567,6 +1645,12 @@
       "scope": "native",
       "area": "function-specific improper power integrals",
       "sha256": "6e8f277e423863c8cf3b467046361e0670d0693db97b2e0c07c4abc212c53424"
+    },
+    {
+      "path": "ComputableAnalysis/IntegralUniformApproximation.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "ac272787fc3af4de49b133ac7a2b378c31a9e133d9e2e0a3f25eae594a5b47d8"
     },
     {
       "path": "ComputableAnalysis/IntegrationByPartsPi.lean",
@@ -1609,6 +1693,18 @@
       "scope": "native",
       "area": "odes",
       "sha256": "69e50f9e71220ddb876edcc48281483f25a7ac1a1197723d070679a3567a2132"
+    },
+    {
+      "path": "ComputableAnalysis/LipschitzRectangleBounds.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "ae8f907ad365bb7aa62c00f6f0ef0b38426ecee8d95f982bfc4cb776f619ea0a"
+    },
+    {
+      "path": "ComputableAnalysis/LocalIntegralOrder.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "944adeed17f3493025993b42e3dbaa53d3274643e8e5865610a03cfc31909a62"
     },
     {
       "path": "ComputableAnalysis/Logarithm.lean",
@@ -1701,16 +1797,70 @@
       "sha256": "298853d24eeeff82f83ae09655e890adf2ab0ed2f3587f69e49c79a29113e6c9"
     },
     {
+      "path": "ComputableAnalysis/PolynomialIntegralComparison.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "4c7b6176a2ac511787dea16a5c8ab0afad33bbc3c5ef439680b1035fa1fdc826"
+    },
+    {
+      "path": "ComputableAnalysis/PolynomialIntegralWitness.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "1cda13c02a9cdd8228acbbb5de747d2f7990e4104f263bf5cc7dace888d360b4"
+    },
+    {
       "path": "ComputableAnalysis/PolynomialMeanValue.lean",
       "scope": "native",
       "area": "real-local-calculus",
       "sha256": "0d787ae419a8962a164a207672b56c27ff39fcecc98d0e39c59dc4767a61277e"
     },
     {
+      "path": "ComputableAnalysis/PowerCompactIntegral.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "f4a3ced7296499a32ebc501b4b888d934b0a308f38ac52fe84dd4377c961e39b"
+    },
+    {
+      "path": "ComputableAnalysis/PowerDivergence.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "c4f0527c7edfbd5b4deefc8f23e7313c05b2b1fe4f0ae928d0c57761ff64230d"
+    },
+    {
+      "path": "ComputableAnalysis/PowerImproperAtZero.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "ba97aff418b97f68f194128c6df8cf83c04b333a97645b21a2ffb76ceb9faf0a"
+    },
+    {
+      "path": "ComputableAnalysis/PowerImproperDivergence.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "31f19db63020e8d74d2837db03f68c5826827398b80f310766a3a0cf67dd7d02"
+    },
+    {
+      "path": "ComputableAnalysis/PowerInfinityIntegral.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "c33ac9dd08d827c88e07e57a665f3af098bd31f6c579b1ee50ab9b88d49d3dd2"
+    },
+    {
+      "path": "ComputableAnalysis/PowerIntegralOrder.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "5abeba2009e0db808fccf13b389576f39e4a3ae8c285ee5438f51ade4d951e02"
+    },
+    {
       "path": "ComputableAnalysis/PowerSeries.lean",
       "scope": "native",
       "area": "series",
       "sha256": "3c9f3e54b4c77701deee4ac6fbcee26c0290d5202006389e84de8097922b7a16"
+    },
+    {
+      "path": "ComputableAnalysis/PowerSeriesFinite.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "9ab80b9c2ea1d0589de0adeb59713f6a1f0335ff1b7c26a4a9d7c2f50e3f7e5a"
     },
     {
       "path": "ComputableAnalysis/PrimitiveChangeOfVariables.lean",
@@ -1821,10 +1971,40 @@
       "sha256": "6f22635b4cc7d03889f0fd554b13bc9dc64446b3ed1cf389c74c1d7b1e6ccf1c"
     },
     {
+      "path": "ComputableAnalysis/RealParameterSample.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "a82cd1ca11a24ae6855d07d77caee95f63ec10d0ab9febf87a7fb8715c9419fd"
+    },
+    {
+      "path": "ComputableAnalysis/RealPowerIntegralTest.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "bce4ea69f6bc63bb5e166797fef34491855ec09391c55e94b338e786a15c533b"
+    },
+    {
+      "path": "ComputableAnalysis/RealPowerSeries.lean",
+      "scope": "native",
+      "area": "series",
+      "sha256": "27200a1c3fb76481be7b6ccbded297b8b20e0b00f7dad8a66ef69516895eb529"
+    },
+    {
+      "path": "ComputableAnalysis/ReciprocalPolynomialIntegral.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "a0518e1296020ce64e1d354e7f0506c90af9f3a31ee3b70370d8849674e80843"
+    },
+    {
       "path": "ComputableAnalysis/ReciprocalQuarticPi.lean",
       "scope": "native",
       "area": "circle-geometry",
       "sha256": "e76fbddcbf14aa3b7e02aeb7efe04902e695dd0822a7aeb7c855a37ef80e3204"
+    },
+    {
+      "path": "ComputableAnalysis/ReflectedPolynomialIntegral.lean",
+      "scope": "native",
+      "area": "integration",
+      "sha256": "dfbcc6ec6d9b615f8c98ccd29552a3f2cc615b8911b2732de0af20c253f3bbb1"
     },
     {
       "path": "ComputableAnalysis/RepresentedHolomorphicJet.lean",
@@ -2028,7 +2208,7 @@
       "path": "ComputableAnalysis/ZetaReal/Dirichlet.lean",
       "scope": "native",
       "area": "zeta-basel",
-      "sha256": "ec887652f9934917af10160dd0970fe56251f4715b4fbd9d75d4aa5eb229624e"
+      "sha256": "921531e1c73cf95ea501b1365def138cc8120c106fae7b27f0e60f003ed0a6f9"
     },
     {
       "path": "ComputableAnalysis/ZetaReal/Moments.lean",
@@ -2257,6 +2437,12 @@
       "scope": "support",
       "area": "support",
       "sha256": "cb1530ead85bd4064ebcb8ea7140fca7b0971de288f60aff2b98b11db817ad8c"
+    },
+    {
+      "path": "scripts/check_real_power_integrals.lean",
+      "scope": "support",
+      "area": "integration",
+      "sha256": "2f9f34b94dea21b89c46871f53765f20ab9be740deb766810daabb5d2d84ee53"
     },
     {
       "path": "scripts/check_zeta_real.lean",

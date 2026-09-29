@@ -14,6 +14,7 @@ import ComputableAnalysis.RationalPrimitiveExamples
 import ComputableAnalysis.FiniteConvolution
 import ComputableAnalysis.NBallGaussian
 import ComputableAnalysis.HarmonicImproperBounds
+import ComputableAnalysis.RealPowerIntegralTest
 
 /-!
 # Computable Analysis

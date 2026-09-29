@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Publish audited integer power tests while preserving the existing reader."""
+"""Publish audited represented-real power tests while preserving the existing reader."""
 import argparse
 import hashlib
 import json
@@ -15,17 +15,17 @@ def install(site, revision, audit):
     assert re.fullmatch(r'[0-9a-f]{40}', revision)
     log = audit.read_text()
     assert 'error:' not in log and 'sorryAx' not in log
-    required = re.findall(r'^#print axioms (\S+)', Path('scripts/check_power_improper.lean').read_text(), re.M)
-    assert len(required) == 28
+    required = re.findall(r'^#print axioms (\S+)', Path('scripts/check_power_improper.lean').read_text()+'\n'+Path('scripts/check_real_power_integrals.lean').read_text(), re.M)
+    assert len(required) == 56
     axioms = {}
     for name in required:
-        full = 'ComputableAnalysis.' + (name if name.startswith('Integral.') else 'IntegerPowerIntegral.' + name)
+        full = name if name.startswith('ComputableAnalysis.') else 'ComputableAnalysis.' + (name if name.startswith('Integral.') else 'IntegerPowerIntegral.' + name)
         m = re.search("'" + re.escape(full) + r"' depends on axioms: \[([^]]*)\]", log)
         assert m, full
         axioms[full] = re.findall(r'[\w.]+', m[1])
         assert set(axioms[full]) <= {'propext', 'Classical.choice', 'Quot.sound'}, full
-    assert 'POWER_TESTS|34|passed' in log
-    pending = ['ComputableAnalysis.HarmonicImproperBounds']
+    assert 'POWER_TESTS|34|passed' in log and 'REAL_POWER_TESTS|19|passed' in log
+    pending = ['ComputableAnalysis.RealPowerIntegralTest']
     closure = {}
     while pending:
         module = pending.pop()
@@ -38,13 +38,15 @@ def install(site, revision, audit):
                 pending.append(dep)
             else:
                 assert dep == 'Init.Grind.Ordered.Rat', dep
-    assert len(closure) == 9, closure
+    assert 'ComputableAnalysis.ZetaReal.Dirichlet' not in closure
+    assert 'ComputableAnalysis.ZetaReal.Charts' not in closure
     protected = {str(p.relative_to(site)): digest(p.read_bytes()) for p in site.rglob('*') if p.is_file()}
     template = Path(__file__).with_name('power-improper') / 'page.html'
     page = template.read_text().replace('__SOURCE__',
         'https://github.com/liuyao12/computable-analysis/blob/' + revision).replace('__REVISION__', revision[:12])
     assert 'MathJax' in page and '<sup>' not in page and '<sub>' not in page
-    assert 'remains unfinished' in page and 'Not yet proved' in page
+    assert 'Checked for every represented-real exponent' in page
+    assert 'not a compactness theorem' in page and 'conservative' in page
     assert '__SOURCE__' not in page and '__REVISION__' not in page
     files = {'power-improper.html': page.encode(), 'reading/power-improper-audit.log': audit.read_bytes()}
     for name, data in files.items():
@@ -54,14 +56,17 @@ def install(site, revision, audit):
         target.write_bytes(data)
     assert all(digest((site / p).read_bytes()) == h for p, h in protected.items())
     report = dict(proofSourceCommit=revision, auditedTheorems=axioms, sourceHashes=closure,
-        exponentScope='integer improper integrals; natural exponent series',
-        arbitraryRealExponentTestProved=False, nonintegerZeroToOneCaseProved=False,
+        exponentScope='arbitrary valid represented-real exponents; rational finite endpoints',
+        arbitraryRealExponentTestProved=True, nonintegerZeroToOneCaseProved=True,
+        representedEndpointExtensionProved=False, generalSeriesEfficiencyClaimed=False,
+        compactnessTheoremUsed=False, completedZetaDependency=False,
         compactLogarithmConstructionAdded=False, mathlibDependency=False,
         compactIntegralWitnesses=True, explicitStageBounds=True, finiteIntegralComparison=True,
-        naturalSeriesConvergenceClassification=True, regressionGroups=34,
+        naturalSeriesConvergenceClassification=True, realSeriesConvergenceClassification=True,
+        regressionGroups=53, newRealExponentRegressionGroups=19,
         allPreviousContentPreserved=True, artifactHashes={n:digest(d) for n,d in files.items()})
     (site / 'reading/power-improper.json').write_text(json.dumps(report, indent=2)+'\n')
-    print('PASS: 28 theorem audits, 34 regression groups, native import closure, preserved reader')
+    print('PASS: 56 theorem audits, 53 regression groups, native import closure, preserved reader')
 
 
 if __name__ == '__main__':

@@ -892,3 +892,16 @@ The separate reader calculator compares exact rational outputs against 213 Lean
 fixtures. Geometric volume, Gaussian normalization, and Gamma improper-integral
 bridges remain open. Formula validity inherits the existing native rational
 check in the multiplication foundation; see [the precise scope](docs/N_BALL_GAMMA.md).
+
+
+## Represented-real power integral test
+
+`RealPowerIntegralTest` now gives exact improper power values and convergence
+classifications for arbitrary valid represented-real exponents: the zero-end
+integral converges exactly for \(p<1\), the infinity-end integral and the series
+exactly for \(p>1\). Finite rational endpoint witnesses, reciprocal substitution,
+explicit endpoint errors, finite sum–integral comparisons, and representation
+invariance are proved in the native foundation. No compactness theorem or
+completed zeta series is used. The general series constructor is executable
+but deliberately conservative; fast numerical evaluation is not claimed.
+See [the exact scope and verification commands](docs/POWER_IMPROPER.md).

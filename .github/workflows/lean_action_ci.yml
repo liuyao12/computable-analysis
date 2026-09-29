@@ -28,7 +28,9 @@ jobs:
           test: false
           lint: false
       - name: Audit improper power integrals and the series test
-        run: lake env lean scripts/check_power_improper.lean
+        run: |
+          lake env lean scripts/check_power_improper.lean
+          lake env lean scripts/check_real_power_integrals.lean
       - name: Audit the Basel and Euler proof dependencies
         run: lake env lean scripts/check_basel.lean
       - name: Audit arctangent Taylor convergence and divergence

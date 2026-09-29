@@ -260,9 +260,29 @@ The corresponding theorems are in \texttt{IntegerPowerIntegral},
 \texttt{IntegerPowerImproper}, \texttt{IntegerPowerAtZero},
 \texttt{HarmonicImproperBounds}, and \texttt{IntegerPowerSeries}.
 
-\paragraph{Explicit remaining scope.}
-The requested theorem for arbitrary represented-real exponents is unfinished.
-In particular, the range \(0<p<1\) still needs the positive-base real-power
-construction and its compact integration law. The critical divergence proof
-uses lower rectangles; it does not claim a new compact logarithm evaluator.
-This addition does not complete Gaussian normalization or the Gamma integral.
+\section{Checked represented-real power tests}
+The exponent now ranges over every valid represented real. Independent
+binomial computations and finite polynomial integrals construct actual
+finite-interval witnesses. ``Compact'' means a finite closed interval away
+from zero; no compactness theorem or abstract completion is introduced.
+Reflection and a proved reciprocal substitution give the finite integration
+identities. Uniform finite coefficient bounds then yield endpoint control,
+without using a completed zeta series.
+\[
+\int_0^1 x^{-p}\,dx\simeq\frac1{1-p}\ (p<1),\qquad
+\int_1^\infty x^{-p}\,dx\simeq\frac1{p-1}\ (p>1).
+\]
+On the fixed dyadic exhaustions, finite represented limits exist exactly for
+\(p<1\) at zero and \(p>1\) at infinity. Finite harmonic rectangles prove the
+opposite cases, including equality. The series classification is
+\[
+\bigl(\exists I\text{ represented},\ \sum_{k=1}^N k^{-p}\longrightarrow I\bigr)
+\iff p>1.
+\]
+The series computation, its stage bounds, uniqueness, and exponent
+representation invariance are proved. Its general-purpose truncation bounds
+are conservative; numerical efficiency is a separate question.
+The public roots are in \texttt{RealPowerIntegralTest}, with finite comparison
+in \texttt{PowerSeriesFinite} and the sum in \texttt{RealPowerSeries}.
+The finite endpoints are rational. A logarithm comparison, Gaussian
+normalization, and the Gamma integral remain separate results.

@@ -3411,11 +3411,11 @@ theorem prefixStabilize_valid_of_future
       let half : QPos := ⟨eps.val / 2, by
         rw [Rat.div_def]
         exact Rat.mul_pos eps.property
-          ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))⟩
+          ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 2))⟩
       let quarter : QPos := ⟨eps.val / 4, by
         rw [Rat.div_def]
         exact Rat.mul_pos eps.property
-          ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 4))⟩
+          ((Rat.inv_pos).2 (by decide +kernel : (0 : Rat) < 4))⟩
       obtain ⟨Nc, hNc⟩ := hcandidate_shrinks half
       obtain ⟨Nr, hNr⟩ := hradius_shrinks quarter
       refine ⟨Nat.max Nc Nr, ?_⟩
@@ -3435,7 +3435,7 @@ theorem prefixStabilize_valid_of_future
         _ <= half.val + 2 * quarter.val := by
           exact rat_add_le_add hc
             (Rat.mul_le_mul_of_nonneg_left hr
-              (by native_decide : (0 : Rat) <= 2))
+              (by decide +kernel : (0 : Rat) <= 2))
         _ = eps.val := by
           dsimp [half, quarter]
           rw [Rat.div_def, Rat.div_def]
