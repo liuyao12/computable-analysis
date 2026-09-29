@@ -1,5 +1,5 @@
 {
-  "sourceRevision": "0c5fc396116c21d3e73cc4db62f24d478da4ac17",
+  "sourceRevision": "0e4e5fd54cb9c201137a711f7ff34ff229dfe67f",
   "purpose": "Source coverage for a family-level review of theorem contracts; not a proof checker or declaration-by-declaration semantic certification.",
   "files": [
     {
