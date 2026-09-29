@@ -1,5 +1,15 @@
 # Computable Analysis: Canonical Roadmap
 
+## Analytic-continuation foundation
+
+Checked: represented germ equivalence, derivative uniqueness, local holomorphic
+gluing, finite chart chains with whole-segment coverage, geometric triangle
+homotopies, and the local-transport-to-monodromy implication. Affine germs
+instantiate the analytic local system with arbitrary represented coefficients.
+The full theorem for arbitrary holomorphic germs remains open: general identity,
+chain comparison/local stability, continuous-homotopy subdivision, and global
+realization still need their bridges. See [the exact ledger](docs/ANALYTIC_CONTINUATION.md).
+
 ## Integral and series skills in the reader
 
 The Skills navigation follows the chapters and contains real integrals,

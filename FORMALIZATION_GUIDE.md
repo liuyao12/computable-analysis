@@ -30,6 +30,22 @@ comparison evidence, and agreement of different constructions remain separate
 tasks. The new skill pages are construction guidance, not new Lean theorem
 claims; each links the actual checked results and remaining bridges.
 
+## Analytic continuation and finite monodromy
+
+Use `ComputableAnalysis.Continuation` for represented germs, derivative
+uniqueness, local gluing, actual finite chart chains, and finite geometric
+homotopies. `Transport.homotopy_invariant` derives global agreement from local
+stationary, inverse, and triangle laws; never assume global uniqueness as a
+record field. `GermSystem` must realize its transports by actual holomorphic
+chart chains. Its fibers may be a specified continuable family, not every germ.
+
+`FiniteSimplyConnected` is a finite polygonal presentation, not an automatic
+replacement for a requested topological simply connected domain. The general
+identity theorem, analytic-chain comparison, homotopy subdivision, and global
+evaluator realization remain explicit obligations in
+[the continuation ledger](docs/ANALYTIC_CONTINUATION.md). Affine germs provide
+a checked concrete client. No general analytic monodromy theorem is claimed.
+
 ## Construct the objects; prove their laws
 
 This is the project's organizing principle. General theorems may say: given

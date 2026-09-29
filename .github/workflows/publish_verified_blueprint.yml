@@ -84,6 +84,10 @@ on:
       - 'ComputableAnalysis/ComplexAnalysis/**'
       - 'ComputableAnalysis/ComplexAnalysis.lean'
       - 'ComputableAnalysis/Holomorphic*.lean'
+      - 'ComputableAnalysis/Continuation.lean'
+      - 'ComputableAnalysis/Continuation/**'
+      - 'scripts/check_continuation.lean'
+      - 'docs/ANALYTIC_CONTINUATION.md'
       - 'scripts/check_holomorphic.lean'
       - 'skills/holomorphic-functions/**'
       - 'docs/HOLOMORPHIC_FUNCTIONS.md'
@@ -412,6 +416,27 @@ jobs:
           mkdir -p holomorphic-reports
           lake build ComputableAnalysis.HolomorphicExamples | tee holomorphic-reports/build.log
           lake env lean scripts/check_holomorphic.lean | tee holomorphic-reports/audit.log
+      - name: Check analytic continuation foundations
+        run: |
+          set -euo pipefail
+          mkdir -p continuation-reports
+          lake build ComputableAnalysis.Continuation ComputableAnalysis.Blueprint | tee continuation-reports/build.log
+          lake env lean scripts/check_continuation.lean | tee continuation-reports/audit.log
+          lake exe checkdecls blueprint/lean_decls | tee continuation-reports/declarations.log
+          cp continuation-reports/audit.log site/reading/continuation-audit.log
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib
+          root=pathlib.Path('.')
+          audit=pathlib.Path('site/reading/continuation-audit.log')
+          assert 'PASS: continuation foundations' in audit.read_text()
+          sources=[*root.glob('ComputableAnalysis/Continuation/*.lean'),root/'ComputableAnalysis/Continuation.lean',root/'scripts/check_continuation.lean']
+          report=dict(documentationRevision=os.environ['GITHUB_SHA'],fullAnalyticMonodromyProved=False,
+            checked=['germs','derivative uniqueness','local gluing','chart chains','finite monodromy','affine germ system'],
+            remaining=['general identity theorem','chain uniqueness and local stability','continuous homotopy subdivision','global realization'],
+            auditSha256=hashlib.sha256(audit.read_bytes()).hexdigest(),
+            sourceHashes={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in sources})
+          pathlib.Path('site/reading/continuation-foundation.json').write_text(json.dumps(report,indent=2)+'\n')
+          PY
       - name: Expose classical examples and verify the pinned Mathlib Basel source
         run: python3 .github/reader-edition/classic_proofs.py --site site --revision "$GITHUB_SHA" --euler-audit euler-reports/proofs.json --cauchy-audit polygonal-cauchy-reports/audit.log --arctan-audit arctan-taylor-reports/audit.log --holomorphic-audit holomorphic-reports/audit.log
       - name: Prepare the enclosure page before checking incoming links
@@ -476,6 +501,8 @@ jobs:
             site/reading/construction-first-inventory.json
             integral-enclosure-reports
             polygonal-cauchy-reports
+            continuation-reports
+            site/reading/continuation-foundation.json
             holomorphic-reports
             arctan-taylor-reports
             rational-primitives-reports
@@ -659,6 +686,11 @@ jobs:
                   classics=get('/reading/classic-proofs-edition.json')
                   assert classics['documentationRevision']==revision and all(classics['checks'].values())
                   assert classics['checks']['holomorphicWitnessesAudited']
+                  continuation=get('/reading/continuation-foundation.json')
+                  assert continuation['documentationRevision']==revision
+                  assert not continuation['fullAnalyticMonodromyProved']
+                  assert hashlib.sha256(get('/reading/continuation-audit.log',True)).hexdigest()==continuation['auditSha256']
+                  assert 'id="continuation-foundation"' in get('/complex-analysis.html',True).decode()
                   assert 'id="holomorphic"' in get('/complex-analysis.html',True).decode()
                   assert hashlib.sha256(get('/reading/holomorphic-audit.log',True)).hexdigest()==classics['artifacts']['reading/holomorphic-audit.log']
                   assert classics['checks']['arctanTaylorAudited'] and 'arctan-taylor.html' in classics['pages']

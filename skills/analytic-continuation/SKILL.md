@@ -17,6 +17,23 @@ this skill is not an implemented theorem. For a requested example, construct
 its local evidence; do not ask the caller to supply the desired continuation
 or final monodromy identity.
 
+## General monodromy tasks
+
+When the request is a general monodromy theorem, use the checked
+[continuation foundation](../../ComputableAnalysis/Continuation.lean) and
+[precise scope ledger](../../docs/ANALYTIC_CONTINUATION.md). The earlier advice
+to avoid a general path theory for one example does not restrict such a request.
+Germs, derivative uniqueness, local gluing, finite chart chains, and the
+finite transport theorem are now available. The affine client proves its own
+local identity theorem and realizes every transport by actual charts.
+
+Do not identify `FiniteSimplyConnected` with arbitrary continuous simple
+connectedness without a subdivision bridge. Do not supply the local transport
+laws for general holomorphic germs without proving analytic uniqueness and
+chain comparison. Pathwise continuation is a genuine hypothesis; for a
+specific function, construct it. The checked gluing theorem requires an
+actual represented map with local models, not merely an abstract germ section.
+
 ## Specify the continuation problem
 
 Fix an initial **local function**, its domain, and its branch normalization.

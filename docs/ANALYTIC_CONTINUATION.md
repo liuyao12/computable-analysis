@@ -1,0 +1,138 @@
+# Analytic continuation: checked foundation and remaining theorem
+
+The intended monodromy statement is conditional on pathwise continuation:
+start with a local holomorphic germ at a base point in a connected open domain.
+If that germ can be continued along every path in the domain, simple
+connectedness makes its terminal germ independent of the path and yields a
+single-valued holomorphic extension. Simple connectedness alone does not
+supply continuation across a singularity. Uniqueness of two already existing
+global extensions is an identity-theorem consequence of connectedness.
+
+**The full theorem for arbitrary holomorphic germs is not yet proved.**
+The new foundation proves the finite transport argument, represented germ
+algebra, derivative uniqueness, and local holomorphic gluing. It also supplies
+actual chart-chain semantics and a fully instantiated affine client. The
+remaining analytic and geometric bridges below are not assumed away.
+
+## What is now checked
+
+| Layer | Result and scope | Source |
+| --- | --- | --- |
+| Represented neighborhoods | Coordinate bounds, triangle inequality, rational-radius restriction; arbitrary valid complex inputs | `Continuation/Neighborhood.lean` |
+| Germs | Equality on an open neighborhood is an equivalence relation; it respects represented base points and implies value equality; equality is local | `Continuation/Germ.lean` |
+| Derivatives | Complex derivative uniqueness on open domains; transfer across neighborhood equality; equality of derivatives of equal germs | `Continuation/Derivative.lean` |
+| Local gluing | A supplied represented map with supplied local holomorphic models is holomorphic; derivative and continuity radii are constructed | `Continuation/Gluing.lean` |
+| Actual continuation | A finite chain contains holomorphic charts, whole-segment coverage, and neighborhood agreement; concatenation preserves this property | `Continuation/Chain.lean` |
+| Domain geometry | Vertices and interpolation parameters may be irrational; convexity constructs routes and finite triangle contractions | `Continuation/Domain.lean` |
+| Finite homotopy | Stationary steps, backtracking, triangle moves, and composition; contractions are geometric data, independent of functions | `Continuation/FinitePath.lean` |
+| Finite monodromy | Local stationary, inverse, and triangle transport laws imply invariance under finite fillings and a unique parallel extension | `Continuation/Transport.lean` |
+| Analytic interpretation | Transports realized by actual chart chains give path-independent terminal germs and exact represented endpoint values | `Continuation/Monodromy.lean` |
+| Concrete client | Affine germ equality determines both represented coefficients; the entire affine family supplies every local transport law and actual chart chains | `Continuation/Affine.lean` |
+
+The public import is `ComputableAnalysis.Continuation`. No Mathlib module is
+imported. The finite algebra uses shared rational samples inside interval
+boxes, and the derivative proof uses positive rational displacements; neither
+uses an ambient completed field or a compactness argument.
+
+## Exact statements, rather than endpoint-only comparisons
+
+A local germ consists of a holomorphic map near a valid represented base
+point. For some positive rational radius, two representatives must agree at
+**every valid represented point** in that neighborhood, and both maps must
+be defined there. Equality at one point is insufficient.
+
+The derivative theorem proves
+
+\[
+D f(a)\simeq d\quad\text{and}\quad D f(a)\simeq e
+\quad\Longrightarrow\quad d\simeq e.
+\]
+
+Its proof compares the two first-order remainders at a small rational real
+displacement, cancels the positive displacement, and makes the remaining
+coordinate bound arbitrarily small. The holomorphic derivative definition
+still controls all complex directions. Neighborhood equality transports the
+entire derivative modulus, rather than merely identifying formal jets.
+
+The gluing theorem uses actual local charts for an independently supplied
+represented map. Near each base point it compares neighboring derivative
+computations with the derivative in one fixed chart, then transfers that
+chart's continuity estimate. It does **not** yet construct a global evaluator
+from an arbitrary abstract germ section.
+
+For transport, the local triangle law has the form
+
+\[
+T_{bc}(T_{ab}(s))\simeq T_{ac}(s).
+\]
+
+The finite monodromy proof inducts on stationary, backtracking, and triangle
+moves to derive
+
+\[
+T_p(s)\simeq T_q(s)
+\]
+
+for supplied finite homotopies. Neither this global path independence nor
+uniqueness is a field of the transport structure. A chosen route supplies a
+parallel section; its uniqueness follows from finite path induction. The
+same uniqueness argument compares two parallel sections using a connecting
+path without requiring simple connectedness.
+
+`GermSystem` connects these transports to actual holomorphic chart chains.
+Its fibers are a **specified family of continuable germs**, not all germs at
+an arbitrary point: a generic germ can encounter a singularity along an edge.
+The affine instance constructs the local data. The general analytic instance
+remains to be constructed.
+
+## What remains before the full analytic monodromy theorem
+
+1. **General analytic uniqueness.** Prove an identity theorem for the existing
+   represented `FunctionTheory.Holomorphic` interface. The affine identity
+   theorem is checked, but not the theorem for arbitrary holomorphic maps.
+   A Cauchy/Taylor route still needs reconstruction from holomorphicity at
+   arbitrary represented inputs, coefficient uniqueness, and the local
+   zero/identity argument. The current Cauchy/Taylor disk result assumes a
+   Cauchy representation and evaluates at rational complex inputs; it cannot
+   be cited as this missing bridge.
+2. **Uniqueness and local stability of actual chart chains.** Use analytic
+   uniqueness to compare different chains along the same route, then derive
+   the local inverse and triangle laws for the reachable germs of a supplied
+   initial germ. Construct the finite charts and their neighborhoods from
+   the supplied continuation data. Do not replace these proofs by giving a
+   `GermSystem` the desired laws as unexplained fields.
+3. **Continuous homotopy to finite filling.** `FiniteSimplyConnected` describes
+   a finite polygonal presentation. It is not silently identified with
+   arbitrary topological simple connectedness. Prove a finite subdivision
+   theorem for a supplied homotopy with suitable quantitative domain/cover
+   control. The convex-domain constructor is checked; a general homotopy-cover
+   algorithm and its termination are not. No universal effective Lebesgue
+   number follows merely from pointwise moduli.
+4. **Global realization for the resulting germ section.** Construct an
+   executable represented evaluator and local models for the path-independent
+   section, including representation invariance and local precision budgets.
+   Then the checked gluing theorem yields holomorphicity. Route functions,
+   chart selections, and evaluation functions must be supplied by executable
+   implementations when a computable constructor is claimed.
+
+Continuation along every path is a genuine hypothesis of the monodromy
+statement, not something that every starting germ satisfies. For a concrete
+function one must construct that evidence on the requested domain. No
+logarithm, square-root, arctangent, or Bessel monodromy identity is newly
+claimed by this foundation.
+
+## Verification
+
+```sh
+lake build ComputableAnalysis.Continuation
+lake env lean scripts/check_continuation.lean
+lake build ComputableAnalysis ComputableAnalysis.Blueprint
+lake exe checkdecls blueprint/lean_decls
+```
+
+The dedicated audit checks the elaborated theorem dependencies, rejects
+unfinished proofs, Mathlib imports, and new axioms, and exposes one inherited
+`Basic` native-decision certificate explicitly. The new modules introduce no
+native-decision axioms. A runtime regression transports an affine chart over
+a two-edge polygonal route and checks its exact endpoint box. The theorem
+regressions retain arbitrary represented coefficients and base points.
