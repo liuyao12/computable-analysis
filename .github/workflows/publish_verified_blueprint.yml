@@ -569,7 +569,7 @@ jobs:
                       assert hashlib.sha256(get(path)).hexdigest()==digest,path
                   for path in report['navigationPages']:
                       page=get(path).decode()
-                      assert page.count('construction-skill-navigation')==3,path
+                      assert page.count('construction-skill-navigation')==len(report['skills']),path
                       assert page.index('later-chapters') < page.index('construction-skill-label'),path
                   print('PASS: live function skills, source downloads, hashes, and reader navigation')
                   break
