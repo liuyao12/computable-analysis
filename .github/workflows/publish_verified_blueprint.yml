@@ -431,8 +431,8 @@ jobs:
           assert 'PASS: continuation foundations' in audit.read_text()
           sources=[*root.glob('ComputableAnalysis/Continuation/*.lean'),root/'ComputableAnalysis/Continuation.lean',root/'scripts/check_continuation.lean']
           report=dict(documentationRevision=os.environ['GITHUB_SHA'],fullAnalyticMonodromyProved=False,
-            checked=['germs','derivative uniqueness','local gluing','chart chains','finite monodromy','affine germ system'],
-            remaining=['general identity theorem','chain uniqueness and local stability','continuous homotopy subdivision','global realization'],
+            checked=['germs','derivative uniqueness','local gluing','chart chains','finite monodromy','affine germ system','coherent chart realization','reflected charts and overlaps'],
+            remaining=['general identity theorem','chain uniqueness and local stability','continuous homotopy subdivision','coherent chart selection from pathwise continuation'],
             auditSha256=hashlib.sha256(audit.read_bytes()).hexdigest(),
             sourceHashes={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in sources})
           pathlib.Path('site/reading/continuation-foundation.json').write_text(json.dumps(report,indent=2)+'\n')
@@ -564,7 +564,7 @@ jobs:
                   report=json.loads(get('reading/construction-skills.json'))
                   assert report['documentationRevision']==revision
                   assert not report['newLeanTheoremsClaimed']
-                  assert len(report['skills'])==3
+                  assert {r['skill'] for r in report['skills']}=={'real-integrals','complex-path-integrals','series','holomorphic-functions','analytic-continuation'}
                   for path,digest in report['artifacts'].items():
                       assert hashlib.sha256(get(path)).hexdigest()==digest,path
                   for path in report['navigationPages']:
@@ -691,6 +691,7 @@ jobs:
                   assert not continuation['fullAnalyticMonodromyProved']
                   assert hashlib.sha256(get('/reading/continuation-audit.log',True)).hexdigest()==continuation['auditSha256']
                   assert 'id="continuation-foundation"' in get('/complex-analysis.html',True).decode()
+                  assert 'id="zero-lab"' in get('/analytic-continuation.html',True).decode()
                   assert 'id="holomorphic"' in get('/complex-analysis.html',True).decode()
                   assert hashlib.sha256(get('/reading/holomorphic-audit.log',True)).hexdigest()==classics['artifacts']['reading/holomorphic-audit.log']
                   assert classics['checks']['arctanTaylorAudited'] and 'arctan-taylor.html' in classics['pages']

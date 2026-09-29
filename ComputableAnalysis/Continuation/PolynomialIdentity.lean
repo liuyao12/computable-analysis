@@ -12,6 +12,7 @@ inductive PolynomialExpr where
   | neg : PolynomialExpr → PolynomialExpr
   | mul : PolynomialExpr → PolynomialExpr → PolynomialExpr
   | scale : Rat → PolynomialExpr → PolynomialExpr
+  | conj : PolynomialExpr → PolynomialExpr
 
 namespace PolynomialExpr
 
@@ -22,6 +23,7 @@ def raw (v : Nat → ComplexRaw) : PolynomialExpr → ComplexRaw
   | .neg a => ComplexRaw.neg (a.raw v)
   | .mul a b => ComplexRaw.mul (a.raw v) (b.raw v)
   | .scale r a => scaleRat r (a.raw v)
+  | .conj a => ComplexRaw.conj (a.raw v)
 
 def rational (v : Nat → QComplex) : PolynomialExpr → QComplex
   | .var n => v n
@@ -30,6 +32,7 @@ def rational (v : Nat → QComplex) : PolynomialExpr → QComplex
   | .neg a => QComplex.neg (a.rational v)
   | .mul a b => QComplex.mul (a.rational v) (b.rational v)
   | .scale r a => QComplex.scaleRat r (a.rational v)
+  | .conj a => QComplex.conj (a.rational v)
 
 theorem contains (e : PolynomialExpr) (v : Nat → ComplexRaw)
     (p : Nat → QComplex) (n : Nat)
@@ -46,6 +49,8 @@ theorem contains (e : PolynomialExpr) (v : Nat → ComplexRaw)
         ⟨Rat.neg_le_neg h1,Rat.neg_le_neg h2⟩⟩
   | mul a b ha hb => exact QBox.mul_contains ha.1 ha.2 hb.1 hb.2
   | scale r a ha => exact QBox.scaleRat_contains ha.1 ha.2
+  | conj a ha =>
+      exact ⟨⟨ha.1.1,Rat.neg_le_neg ha.2.2⟩,⟨ha.2.1,Rat.neg_le_neg ha.1.2⟩⟩
 
 theorem identity (e g : PolynomialExpr) (v : Nat → ComplexRaw)
     (hv : ∀ i, (v i).Valid) (he : ∀ p, e.rational p = g.rational p) :

@@ -30,5 +30,23 @@
     "status": "Construction programme; Gaussian normalization and Gamma bridges remain open",
     "example": "gaussian-convolution.html",
     "source": "skills/real-integrals/references/gaussian-gamma-integrals.md"
+  },
+  {
+    "page": "skill-holomorphic-functions-methods.html",
+    "title": "Holomorphicity methods",
+    "summary": "Choose a method from the function’s construction, then prove its quantitative and overlap obligations.",
+    "status": "Method guide; checked adapters and unproved general bridges are distinguished",
+    "example": "analytic-continuation.html#methods",
+    "source": "skills/holomorphic-functions/references/methods.md",
+    "parent": "skill-holomorphic-functions.html"
+  },
+  {
+    "page": "skill-analytic-continuation-methods.html",
+    "title": "Continuation methods",
+    "summary": "Choose a method from the function’s construction, then prove its quantitative and overlap obligations.",
+    "status": "Method guide; checked adapters and unproved general bridges are distinguished",
+    "example": "analytic-continuation.html#methods",
+    "source": "skills/analytic-continuation/references/methods.md",
+    "parent": "skill-analytic-continuation.html"
   }
 ]

@@ -2,13 +2,15 @@
 
 ## Integral and series skills
 
-The reader's Skills section follows the chapters and presents three guides:
+The reader's Skills section follows the chapters and presents the integral and series guides:
 [real integrals](skills/real-integrals/SKILL.md),
 [complex path integrals](skills/complex-path-integrals/SKILL.md), and
 [series](skills/series/SKILL.md). Each distinguishes specification, computation,
 and comparison. Particular-function recipes are supporting examples, with
-explicit estimates and checked boundaries. The three skills are maintained
+explicit estimates and checked boundaries. These skills are maintained
 source files, rendered directly as reader pages and available to download.
+The holomorphic-function and analytic-continuation skills are also exposed
+there, with supporting guides for their different construction methods.
 
 All proposed integration theories must include the elementary integral of a
 piecewise-constant function along a continuous piecewise-linear path:
@@ -41,10 +43,15 @@ chart chains. Its fibers may be a specified continuable family, not every germ.
 
 `FiniteSimplyConnected` is a finite polygonal presentation, not an automatic
 replacement for a requested topological simply connected domain. The general
-identity theorem, analytic-chain comparison, homotopy subdivision, and global
-evaluator realization remain explicit obligations in
+identity theorem, analytic-chain comparison, homotopy subdivision, and coherent
+chart selection from pathwise continuation remain explicit obligations in
 [the continuation ledger](docs/ANALYTIC_CONTINUATION.md). Affine germs provide
-a checked concrete client. No general analytic monodromy theorem is claimed.
+a checked concrete client. `Realization.holomorphic` now constructs a global
+represented evaluator from supplied locally coherent charts, proving its
+representation invariance and holomorphicity. `Holomorphic.reflect` and
+`AgreeAt.reflect` construct reflected open charts and overlap comparisons;
+the Schwarz boundary-seam theorem is not claimed. No general analytic
+monodromy theorem is claimed.
 
 ## Construct the objects; prove their laws
 

@@ -121,11 +121,11 @@ def make_page(template, body, title, name, revision, row=None):
         meta = doc.new_tag('meta', attrs={'name': 'documentation-revision'})
         doc.head.append(meta)
     meta['content'] = revision
-    doc.select_one('meta[name="description"]')['content'] = 'Real integrals, complex path integrals, and series: construction, estimates, and proof status.'
+    doc.select_one('meta[name="description"]')['content'] = 'Integrals, series, holomorphic functions, and analytic continuation: constructions and proof status.'
     for link in doc.select('#book-nav a.current'):
         link['class'] = [c for c in link.get('class', []) if c != 'current']
         link.attrs.pop('aria-current', None)
-    active_name = name if row is None or 'skill' in row else 'skill-real-integrals.html'
+    active_name = name if row is None or 'skill' in row else row.get('parent', 'skill-real-integrals.html')
     active = doc.select_one(f'#book-nav a[href="{active_name}"]')
     assert active
     active['class'] = active.get('class', []) + ['current']
@@ -176,7 +176,7 @@ def install(site, revision):
     body = (SOURCE / 'index.html').read_text().replace('__CARDS__', ''.join(cards)).replace('__REPO__', f'https://github.com/liuyao12/computable-analysis/blob/{revision}/')
     (site / OVERVIEW).write_text(make_page(template, body, 'Skills', OVERVIEW, revision))
     (site / 'reading/construction-skills.css').write_bytes((SOURCE / 'skills.css').read_bytes())
-    print('Installed real-integral, complex-integral, and series skills after the chapters')
+    print('Installed construction skills after the chapters')
 
 
 def finalize(site, revision):

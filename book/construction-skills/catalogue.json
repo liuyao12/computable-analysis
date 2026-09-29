@@ -25,5 +25,23 @@
     "status": "Construction guide; convergence and closed-form identification require separate evidence",
     "example": "arctan-taylor.html",
     "source": "skills/series/SKILL.md"
+  },
+  {
+    "skill": "holomorphic-functions",
+    "page": "skill-holomorphic-functions.html",
+    "title": "Holomorphic functions",
+    "summary": "Choose finite remainder estimates, series, integrals, local equations, or reflected charts and construct the required evidence.",
+    "status": "Construction guide; affine, square, reflection, and coherent-chart realization are checked",
+    "example": "analytic-continuation.html#theorem",
+    "source": "skills/holomorphic-functions/SKILL.md"
+  },
+  {
+    "skill": "analytic-continuation",
+    "page": "skill-analytic-continuation.html",
+    "title": "Analytic continuation",
+    "summary": "Continue a germ by Taylor chains, functional equations, reflection, or local uniqueness, proving overlap agreement along the route.",
+    "status": "Construction guide; general identity and monodromy theorems remain open",
+    "example": "analytic-continuation.html",
+    "source": "skills/analytic-continuation/SKILL.md"
   }
 ]

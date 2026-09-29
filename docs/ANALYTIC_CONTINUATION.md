@@ -13,6 +13,8 @@ The new foundation proves the finite transport argument, represented germ
 algebra, derivative uniqueness, and local holomorphic gluing. It also supplies
 actual chart-chain semantics and a fully instantiated affine client. The
 remaining analytic and geometric bridges below are not assumed away.
+A new realization constructor handles supplied locally coherent chart selection,
+and reflection preserves holomorphic open charts and their overlaps.
 
 ## What is now checked
 
@@ -22,6 +24,8 @@ remaining analytic and geometric bridges below are not assumed away.
 | Germs | Equality on an open neighborhood is an equivalence relation; it respects represented base points and implies value equality; equality is local | `Continuation/Germ.lean` |
 | Derivatives | Complex derivative uniqueness on open domains; transfer across neighborhood equality; equality of derivatives of equal germs | `Continuation/Derivative.lean` |
 | Local gluing | A supplied represented map with supplied local holomorphic models is holomorphic; derivative and continuity radii are constructed | `Continuation/Gluing.lean` |
+| Coherent-chart realization | A total chart selector with local germ coherence yields an actual represented evaluator, representation invariance, holomorphicity, and comparison with other realizations | `Continuation/Realization.lean` |
+| Reflected charts | Conjugate input and output; transport the derivative, continuity radii, and open-overlap agreement | `Continuation/Reflection.lean` |
 | Actual continuation | A finite chain contains holomorphic charts, whole-segment coverage, and neighborhood agreement; concatenation preserves this property | `Continuation/Chain.lean` |
 | Domain geometry | Vertices and interpolation parameters may be irrational; convexity constructs routes and finite triangle contractions | `Continuation/Domain.lean` |
 | Finite homotopy | Stationary steps, backtracking, triangle moves, and composition; contractions are geometric data, independent of functions | `Continuation/FinitePath.lean` |
@@ -57,8 +61,14 @@ entire derivative modulus, rather than merely identifying formal jets.
 The gluing theorem uses actual local charts for an independently supplied
 represented map. Near each base point it compares neighboring derivative
 computations with the derivative in one fixed chart, then transfers that
-chart's continuity estimate. It does **not** yet construct a global evaluator
-from an arbitrary abstract germ section.
+chart's continuity estimate. `Realization.holomorphic` now constructs the evaluator itself from a total
+chart selector, domain evidence, rational neighborhood radii, and local germ
+coherence. Evaluation selects the chart at the input and uses that chart's
+boxes. Representation invariance is derived from local agreement even when
+equivalent inputs select different charts. The selector is data, not a
+classically chosen quotient representative or a domain-membership decision.
+This completes realization for such supplied coherent charts. An arbitrary
+abstract germ section still needs executable selection and local stability.
 
 For transport, the local triangle law has the form
 
@@ -108,12 +118,14 @@ remains to be constructed.
    control. The convex-domain constructor is checked; a general homotopy-cover
    algorithm and its termination are not. No universal effective Lebesgue
    number follows merely from pointwise moduli.
-4. **Global realization for the resulting germ section.** Construct an
-   executable represented evaluator and local models for the path-independent
-   section, including representation invariance and local precision budgets.
-   Then the checked gluing theorem yields holomorphicity. Route functions,
-   chart selections, and evaluation functions must be supplied by executable
-   implementations when a computable constructor is claimed.
+4. **Coherent chart selection from pathwise continuation.** The evaluator,
+   representation invariance, and holomorphicity are now constructed by
+   `Realization.holomorphic` once a total locally coherent chart selector is
+   supplied. Derive that selector and its neighborhood radii from the
+   path-independent continuation section. This is tied to local stability in
+   step 2, not a missing global gluing law. Route functions, chart selections,
+   and evaluation functions must have executable implementations when a
+   computable constructor is claimed.
 
 Continuation along every path is a genuine hypothesis of the monodromy
 statement, not something that every starting germ satisfies. For a concrete
@@ -136,3 +148,20 @@ unfinished proofs, Mathlib imports, and new axioms, and exposes one inherited
 native-decision axioms. A runtime regression transports an affine chart over
 a two-edge polygonal route and checks its exact endpoint box. The theorem
 regressions retain arbitrary represented coefficients and base points.
+
+## Function-specific methods and examples
+
+The reader now has a separate analytic-continuation chapter. Its identity
+example is \(\sin(1/z)\): zeros \(1/(n\pi)\) accumulate at the excluded
+origin, not at an interior point of its holomorphic domain. The identity
+theorem must retain both its interior-point and connectedness hypotheses.
+The general identity theorem, complex sine-composition chart, zero sequence,
+and natural-boundary example are not yet formalized here.
+
+The holomorphicity and continuation skills now distinguish direct remainder
+estimates, series, local equations, functional equations, and reflection.
+`Holomorphic.reflect` and `AgreeAt.reflect` prove the reflected open-chart
+and overlap steps. Holomorphicity across the boundary seam in the full
+Schwarz principle remains unproved. The reader also explains Gamma's
+recurrence and a lacunary natural boundary; these are mathematical examples
+and construction recipes, not new Lean theorem claims.

@@ -1,0 +1,78 @@
+<header><p class="classic-tag">Function theory · Examples and construction methods</p><h1>Analytic continuation</h1><p class="lead">Local agreement determines a function. A route determines how its germ travels. Singularities determine where that journey can stop.</p></header>
+<h2 id="setup">Start with a local function</h2>
+<p>A germ remembers a holomorphic function on a neighborhood, with two representatives identified when they agree on a smaller neighborhood. A value at one point does not specify a germ: many different holomorphic functions take that value. Continuation connects local functions by proving equality on open overlaps.</p>
+<p>This chapter separates mathematical explanations from checked Lean results. The identity theorem and the examples below explain the intended mathematics; the <a href="#checked">proof ledger</a> identifies the foundations already formalized in rational-box computations.</p>
+<section class="showcase-statement" aria-labelledby="theorem">
+<h2 id="theorem">The identity theorem: the limit point must be inside</h2>
+<p>Let \(D\) be a connected open domain, and let \(f\) and \(g\) be holomorphic on \(D\). If they agree at distinct points \(z_n\in D\) with \(z_n\to a\) and <strong>\(a\in D\)</strong>, then they agree throughout \(D\). Equivalently, a holomorphic function that is not identically zero on a connected domain has no accumulation point of zeros in that domain.</p>
+<p class="classic-scope">Mathematical statement. Its general proof for our represented holomorphic interface remains open; the affine case is checked.</p>
+</section>
+<h3>The test case: \(\sin(1/z)\)</h3>
+\[f(z)=\sin(1/z),\qquad D=\mathbb C\setminus\{0\},\qquad z_n=\frac1{n\pi}\quad(n\ge1).\]
+<p>Every \(z_n\) is in the domain and \(f(z_n)=0\). These distinct zeros tend to \(0\), but <strong>\(0\notin D\)</strong>. The function is not identically zero: \(f(2/\pi)=1\). Thus the example explains the interior-point hypothesis, rather than contradicting the theorem. The zeros are isolated within the punctured plane.</p>
+<div class="continuation-lab" id="zero-lab">
+<h3>Zeros approaching an excluded point</h3>
+<p>The hollow endpoint is outside the domain. Adding zeros never moves that endpoint into it.</p>
+<label for="zero-count">Number of positive zeros shown</label><input id="zero-count" type="range" min="4" max="80" value="12" step="1"><output id="zero-readout" aria-live="polite"></output>
+<svg id="zero-plot" viewBox="0 0 640 110" role="img" aria-label="Positive zeros of sine of one over z accumulate at the excluded origin"></svg>
+<p class="classic-scope">Finite floating-point illustration. The displayed zero locations come from the exact formula above.</p>
+</div>
+<p>If a holomorphic extension through \(0\) existed, those same zeros would now accumulate at an interior point. The identity theorem would force the extension to vanish near \(0\), although \(\sin(1/z)\) also takes the value \(1\) at points approaching \(0\). This rules out the extension. The example appears in <a href="https://web.math.ku.dk/noter/filer/koman-12.pdf">the University of Copenhagen complex-analysis notes</a>.</p>
+<h3>Why zeros are locally isolated</h3>
+<p>For a convergent expansion at an interior point, take the first nonzero coefficient, if there is one:</p>
+\[f(z)=(z-a)^m\bigl(c_m+(z-a)h(z)\bigr),\qquad c_m\ne0.\]
+<p>On a sufficiently small disk, the term in parentheses stays away from zero. If \(m\ge1\), the only zero there is \(a\); if \(m=0\), there are no zeros there. If zeros instead accumulate at \(a\), every Taylor coefficient must vanish, so the function vanishes on a neighborhood. The set of points where its germ is zero is both open and closed relative to the connected domain, giving the global conclusion. Apply this to \(f-g\) for the two-function statement. See <a href="https://people.math.harvard.edu/~ctm/home/text/class/harvard/213a/25/html/home/course/course.pdf">McMullen’s complex-analysis notes</a>.</p>
+<p>In the computable proof, a supplied positive coefficient-separation bound and a certified tail estimate must produce the zero-free radius. Finding the first nonzero coefficient of an arbitrary represented series is not a decision procedure we may silently assume. We must also reconstruct local series from our derivative-based holomorphic witnesses before using this argument for every such witness.</p>
+<p>Connectedness matters too. On two disjoint disks, a holomorphic function can be zero on one disk and one on the other. Agreement propagates through the component containing the accumulation point. Likewise, two charts can agree on one component of their overlap and disagree on another.</p>
+<h2 id="loops">What changes after a loop?</h2>
+<p>Continue a germ around a counterclockwise loop about the origin and compare the terminal germ on a neighborhood of the starting point. The following comparisons concern entire local functions, not just a coincident endpoint value.</p>
+<div class="continuation-table"><table><thead><tr><th>Initial function</th><th>After one positive turn</th><th>Obstruction at the origin</th></tr></thead><tbody>
+<tr><td>\(1/z\)</td><td>The same germ</td><td>A pole</td></tr>
+<tr><td>\(L(z)=\log z,\ L(1)=0\)</td><td>\(L+2\pi i\)</td><td>A logarithmic branch point</td></tr>
+<tr><td>\(S(z)^2=z,\ S(1)=1\)</td><td>\(-S\); two turns restore \(S\)</td><td>An algebraic branch point</td></tr>
+<tr><td>\(\exp(\alpha L(z))\)</td><td>\(e^{2\pi i\alpha}\exp(\alpha L(z))\)</td><td>Finite order for rational noninteger \(\alpha\); infinite order for real irrational \(\alpha\)</td></tr>
+<tr><td>\(\sin(1/z)\)</td><td>The same germ</td><td>An isolated essential singularity</td></tr>
+</tbody></table></div>
+<p>The logarithm and power comparisons follow from tracking the continued logarithm, with the stated normalization; see <a href="https://dlmf.nist.gov/4.2">DLMF’s logarithms and powers</a>. A branch cut selects one displayed branch. Crossing that cut is not the same as crossing a singularity.</p>
+<div class="continuation-lab" id="loop-lab">
+<h3>Follow the germ, rather than reset its branch</h3>
+<label for="loop-function">Function</label><select id="loop-function"><option value="log">Logarithm</option><option value="sqrt">Square root</option><option value="reciprocal">Reciprocal</option></select>
+<label for="loop-angle">Progress around the origin</label><input id="loop-angle" type="range" min="0" max="720" value="360" step="1">
+<p>Input path on the left; continued value on the right.</p><svg id="loop-plot" viewBox="0 0 640 250" role="img" aria-label="A circular input path and its continued function value"></svg><output id="loop-readout" aria-live="polite"></output>
+<p class="classic-scope">Floating-point illustration with an unwrapped angle. It is not a certified chart-chain computation.</p>
+</div>
+<p>Trivial monodromy does not make a singularity removable. For \(\sin(1/z)\), the Laurent expansion</p>
+\[\sin(1/z)=\frac1z-\frac1{3!z^3}+\frac1{5!z^5}-\cdots\]
+<p>has infinitely many negative powers. The singularity is essential, even though the function is single-valued throughout the punctured plane. Its accumulating zeros are the identity-theorem example above. The <a href="https://dlmf.nist.gov/1.10#iii">Laurent classification</a> distinguishes this from a pole and a removable singularity.</p>
+<p>A useful contrast is \(\sin z/z\): its apparent singularity at zero is removable, with extension value \(1\). For arctangent, the derivative \(1/(1+z^2)\) is single-valued, while the continued function gains \(\pi\) around \(i\) and loses \(\pi\) around \(-i\). The <a href="complex-analysis.html#analytic-continuation">earlier examples</a> give the normalizations and current proof pieces.</p>
+<h2 id="methods">Several ways to continue the same germ</h2>
+<h3 id="taylor-chains">Overlapping Taylor disks</h3>
+<p>Choose a new center inside a certified convergence disk, re-expand there, and prove agreement on the overlap. Repeat along the route, keeping a positive safety margin from each disk boundary. The transported coefficients are</p>
+\[b_k=\sum_{n\ge k}\binom nk a_nh^{n-k}.\]
+<p>Finite binomial identities and explicit tails must justify this formula. A formal jet is insufficient. Arctangent continued along the real axis beyond its original Taylor disk is the first example; the function can remain regular after one particular series stops converging. See the <a href="skill-analytic-continuation.html">continuation skill</a> and <a href="arctan-taylor.html">Taylor showcase</a>.</p>
+<h3 id="functional-equations">A functional equation supplies another chart</h3>
+<p>Start with Gamma’s integral on \(\Re z>0\). Its recurrence transports the known function to a larger domain:</p>
+\[\Gamma(z+1)=z\Gamma(z),\qquad
+\Gamma(z)=\frac{\Gamma(z+m)}{z(z+1)\cdots(z+m-1)},\quad\Re(z+m)>0.\]
+<p>The shift moves the numerator into the known half-plane. Denominator separation gives a holomorphic chart away from the nonpositive integers; repeating the recurrence proves agreement between different shifts. Those excluded points are poles, so the continuation is meromorphic on the plane. The original function must be retained: the recurrence alone also permits multiplication by one-periodic factors. These are the <a href="https://dlmf.nist.gov/5.5#i">Gamma recurrence</a> and <a href="https://dlmf.nist.gov/5.2#i">continuation and poles</a>, with a connection to our <a href="n-ball-volume.html">Gamma and ball-volume page</a>. Complex Gamma charts remain to be formalized.</p>
+<h3 id="schwarz-reflection">Schwarz reflection across a real interval</h3>
+<p>Suppose a function is holomorphic above an open real interval, extends continuously to the interval, and takes real values there. Below it, define</p>
+\[F(z)=\overline{f(\overline z)}.\]
+<p>This is the reflected chart. The Schwarz reflection principle also proves holomorphicity <em>on the interval itself</em>, joining the two sides. Logarithm near a positive real interval is a useful example. Boundary continuity and real values are essential hypotheses of this version; a formula below the axis alone does not establish the seam. See the <a href="https://dlmf.nist.gov/1.10#ii">reflection principle</a>.</p>
+<p>We now check reflection of an open holomorphic chart, its derivative and continuity radii, and its overlap comparisons. The general boundary-seam argument is still open. A particular real-coefficient series across the interval can prove both sides and the seam directly, without waiting for a general reflection theorem.</p>
+<h3>Separated roots and local differential equations</h3>
+<p>For an algebraic function, track a root in a separated box and prove local uniqueness there. That uniqueness supplies overlap agreement. For an ODE, construct a local solution and use its proved uniqueness on successive overlaps. These methods need not first derive every chart from a Taylor theorem. The <a href="skill-holomorphic-functions.html">holomorphic-function skill</a> compares direct series, finite remainder estimates, real partial derivatives, integrals, reflected charts, and local equations.</p>
+<h2 id="natural-boundary">An entire circle can block continuation</h2>
+\[F(z)=\sum_{k=0}^{\infty}z^{2^k}=z+z^2+z^4+z^8+\cdots,\qquad |z|<1.\]
+<p>Inside any smaller disk \(|z|\le r<1\), a simple computable tail bound is</p>
+\[\left|\sum_{k=N}^{\infty}z^{2^k}\right|\le
+\frac{r^{2^N}}{1-r^{2^N}}.\]
+<p>Indeed, \(2^{N+j}\ge(j+1)2^N\), so a geometric tail bounds the omitted terms. Now take a dyadic root of unity \(\zeta\), with \(\zeta^{2^m}=1\). Along \(z=r\zeta\), every term after the finite prefix is positive real:</p>
+\[F(r\zeta)=\sum_{k\lt m}r^{2^k}\zeta^{2^k}+\sum_{k\ge m}r^{2^k}.\]
+<p>As \(r\) increases to \(1\), any fixed number of terms in the second sum approach that number. The prefix stays bounded, so the real part is unbounded. A holomorphic extension through \(\zeta\) would be locally bounded, which is impossible. Dyadic roots are dense on the unit circle; any open arc contains one. Thus no boundary point admits direct holomorphic extension: the circle is a <em>natural boundary</em>. This series is also discussed in <a href="https://doi.org/10.1016/j.jmaa.2020.124541">research on power series and Dirichlet series</a>.</p>
+<p>The functional equation \(F(z)=z+F(z^2)\) does not overcome the obstruction: when \(|z|>1\), the transformed argument still lies outside the known disk. A continuation method needs a genuine overlap with a known chart. Divergence of a series at boundary points alone would not prove a natural boundary; the radial unboundedness argument above supplies the obstruction.</p>
+<h2 id="checked">Checked foundations and what remains</h2>
+<p><strong>Checked:</strong> represented germs; derivative uniqueness; local holomorphic gluing; actual finite chart chains; finite homotopy invariance from local transport laws; and the affine analytic client. We now also construct a global evaluator from supplied locally coherent charts, prove its representation invariance and holomorphicity, and reflect holomorphic charts and their overlap comparisons. These are exact represented-input results.</p>
+<p><strong>Still needed for general monodromy:</strong> the identity theorem for arbitrary represented holomorphic maps, comparison and local stability of arbitrary continuation chains, and a quantitative subdivision of continuous homotopies. The realization theorem now handles supplied coherent chart selection; obtaining that selection from general pathwise continuation remains part of the analytic work.</p>
+<p>The monodromy theorem assumes the starting germ can be continued along every path in the domain. Simple connectedness then removes route dependence. The examples and method explanations on this page do not claim new Lean proofs of logarithm or square-root monodromy, complex Gamma continuation, the identity theorem, or the natural-boundary example.</p>
+<p><a href="__REPO__docs/ANALYTIC_CONTINUATION.md">Exact proof ledger</a> · <a href="__REPO__ComputableAnalysis/Continuation/Realization.lean">Global evaluator construction</a> · <a href="__REPO__ComputableAnalysis/Continuation/Reflection.lean">Reflected charts and overlaps</a> · <a href="reading/continuation-audit.log">Dependency audit</a></p>

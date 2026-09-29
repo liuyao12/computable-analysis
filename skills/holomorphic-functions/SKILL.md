@@ -37,6 +37,14 @@ using `RealRaw.Le`. It means
 It does not require early output boxes to fit inside that rectangle.
 `Small.congr` transports the bound between valid equivalent representations.
 
+## Choose the proof method
+
+Use [the method guide](references/methods.md) to choose finite algebra,
+composition, direct series, real partial derivatives, particular integrals,
+ODEs, reflected charts, or local gluing. It records the quantitative evidence
+and current Lean boundary for each route. Methods remain skill guidance;
+they are not a mandatory hierarchy of integrand or function classes.
+
 ## Construct the evidence
 
 1. Implement the value and proposed derivative with rational boxes; prove
@@ -106,6 +114,8 @@ rectangle. Construct any uniform local approximation and whole-edge enclosure
 data needed by a particular Cauchy application. Prefer those specific
 rectangular computations over a universal polygon-integral operator.
 
+## Proof sources and checks
+
 Run `lake build ComputableAnalysis.HolomorphicExamples` and
 `lake env lean scripts/check_holomorphic.lean`, plus the affected client and
 repository checks. Inspect the hypotheses and report which functions now
@@ -116,3 +126,7 @@ For continuation beyond one local domain, use the
 [analytic-continuation skill](../analytic-continuation/SKILL.md). It guides
 construction of function-specific overlap comparisons and route coverage;
 holomorphicity alone is not a completed continuation algorithm.
+
+For reflected charts and coherent-chart realization, also run
+`lake build ComputableAnalysis.Continuation` and
+`lake env lean scripts/check_continuation.lean`.

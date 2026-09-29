@@ -7,13 +7,17 @@ gluing, finite chart chains with whole-segment coverage, geometric triangle
 homotopies, and the local-transport-to-monodromy implication. Affine germs
 instantiate the analytic local system with arbitrary represented coefficients.
 The full theorem for arbitrary holomorphic germs remains open: general identity,
-chain comparison/local stability, continuous-homotopy subdivision, and global
-realization still need their bridges. See [the exact ledger](docs/ANALYTIC_CONTINUATION.md).
+chain comparison/local stability, continuous-homotopy subdivision, and coherent
+chart selection from pathwise continuation still need their bridges.
+Global realization from supplied coherent charts and reflection of open
+holomorphic charts and overlap evidence are now checked. The reader adds
+identity-theorem examples, monodromy comparisons, and a natural boundary;
+those general analytic example proofs and the Schwarz seam remain open. See [the exact ledger](docs/ANALYTIC_CONTINUATION.md).
 
 ## Integral and series skills in the reader
 
 The Skills navigation follows the chapters and contains real integrals,
-complex path integrals, and series. Their pages are generated from maintained
+complex path integrals, series, holomorphic functions, and analytic continuation. Their pages are generated from maintained
 `SKILL.md` files, with direct downloads. Rational, trigonometric, power, and
 Gaussian/Gamma constructions are supporting examples within the real-integral
 guide. The elementary integration baseline remains piecewise-constant data

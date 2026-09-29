@@ -17,6 +17,17 @@ this skill is not an implemented theorem. For a requested example, construct
 its local evidence; do not ask the caller to supply the desired continuation
 or final monodromy identity.
 
+## Choose the continuation method
+
+Use [continuation methods](references/methods.md) for chains of Taylor
+expansions, functional equations, Schwarz reflection, separated algebraic
+branches, and local ODE solutions. The guide gives the overlap, coverage,
+and quantitative obligations and separates checked adapters from strategies.
+Use the identity theorem only at its proved scope: accumulation must occur
+inside the holomorphic domain, and conclusions propagate within a connected
+component. In particular, the zeros of \(\sin(1/z)\) accumulating at the
+excluded origin do not force the function to vanish.
+
 ## General monodromy tasks
 
 When the request is a general monodromy theorem, use the checked
@@ -31,8 +42,10 @@ Do not identify `FiniteSimplyConnected` with arbitrary continuous simple
 connectedness without a subdivision bridge. Do not supply the local transport
 laws for general holomorphic germs without proving analytic uniqueness and
 chain comparison. Pathwise continuation is a genuine hypothesis; for a
-specific function, construct it. The checked gluing theorem requires an
-actual represented map with local models, not merely an abstract germ section.
+specific function, construct it. `Realization.holomorphic` now constructs the global evaluator from a total
+selection of locally coherent charts. Obtaining such locally coherent chart
+selection from arbitrary path continuations remains an obligation; a bare
+abstract germ section does not supply executable selection.
 
 ## Specify the continuation problem
 
@@ -148,7 +161,7 @@ monodromy, and trivial monodromy need not make a singularity removable.
 Keep this operator distinct from the monodromy theorem about single-valued
 continuation on a simply connected domain.
 
-## Validation and reporting
+## Proof sources and checks
 
 Build the new Lean module and its concrete client. Audit the elaborated
 proof/import dependencies for unfinished proofs and forbidden foundations.

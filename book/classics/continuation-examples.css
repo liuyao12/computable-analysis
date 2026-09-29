@@ -1,0 +1,6 @@
+.continuation-lab{margin:2rem 0;padding:1.25rem;border:1px solid #ccd4ce;border-radius:6px;background:#f4f7f4}
+.continuation-lab h3{margin-top:0}.continuation-lab label{display:block;margin:.8rem 0 .35rem;font:600 .9rem system-ui,sans-serif}
+.continuation-lab input[type=range]{display:block;width:100%;accent-color:#527866}.continuation-lab select{max-width:100%;padding:.45rem;background:#fff;color:#283c31;border:1px solid #87978c;border-radius:3px;font:inherit}
+.continuation-lab output{display:block;min-height:2.2em;margin:.8rem 0;overflow-x:auto}.continuation-lab svg{width:100%;height:auto;display:block}
+.continuation-lab .axis{stroke:#98a59b;stroke-width:1}.continuation-lab .guide{stroke:#c8d1c9;fill:none}.continuation-lab .trace{stroke:#547d69;stroke-width:2;fill:none}.continuation-lab .point{fill:#bd683e}.continuation-lab .zero{fill:#547d69;stroke:#f4f7f4;stroke-width:1}.continuation-lab .excluded{fill:#f4f7f4;stroke:#bd683e;stroke-width:2}
+.continuation-table{overflow-x:auto;margin:1.5rem 0}.continuation-table table{border-collapse:collapse;width:100%;font-size:.93em}.continuation-table th,.continuation-table td{text-align:left;vertical-align:top;padding:.7rem;border-bottom:1px solid #d5dcd6;min-width:9rem}.continuation-table th{font-family:system-ui,sans-serif;font-size:.9em}

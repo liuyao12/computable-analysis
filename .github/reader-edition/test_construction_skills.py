@@ -39,7 +39,7 @@ def check(site):
     for name in pages:
         doc = BeautifulSoup((site / name).read_text(), 'html.parser')
         current = doc.select('#book-nav a[aria-current="page"]')
-        active = 'skill-real-integrals.html' if name in [r['page'] for r in catalogue(examples=True)] else name
+        active = next((r.get('parent', 'skill-real-integrals.html') for r in catalogue(examples=True) if r['page'] == name), name)
         assert len(current) == 1 and current[0]['href'] == active, name
         ids = [n['id'] for n in doc.select('[id]')]
         assert len(ids) == len(set(ids)), name
@@ -61,7 +61,7 @@ def check(site):
         assert MATH.findall(source.read_text()) == MATH.findall(doc.article.get_text()), row['source']
         assert doc.select_one('.construction-skill-proof summary')
         assert doc.select_one('.construction-skill-links a[download]')
-    print('PASS: three skills and their examples, exact downloads, preserved TeX, local links, and visible navigation on', len(report['navigationPages']), 'pages')
+    print('PASS: construction skills and their examples, exact downloads, preserved TeX, local links, and visible navigation on', len(report['navigationPages']), 'pages')
 
 
 def browser_check(site, output):

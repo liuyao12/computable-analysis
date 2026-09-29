@@ -1,6 +1,8 @@
 # Examples to highlight
 
-The presentation order is arctangent, logarithm, then square root. The first
+The identity-theorem example is now \(\sin(1/z)\), with zeros accumulating
+at an excluded boundary point. For continuation, the presentation order is
+arctangent, logarithm, then square root. The first
 explains why continuation matters even for real-variable functions; the next
 two distinguish additive and finite branch changes. Bessel's equation is a
 later differential-equation application. These are proposed continuation
@@ -115,3 +117,18 @@ After building their matching modules, the existing audit commands are:
 A new continuation example needs its own proof audit covering the local
 holomorphicity, overlap, coverage, and terminal comparison theorems. Passing
 these adjacent checks does not supply that missing theorem.
+
+## Accumulation and natural boundaries
+
+Use \(\sin(1/z)\) primarily to explain why the accumulation point in the
+identity theorem must belong to the holomorphic domain. Its zeros
+\(z_n=1/(n\pi)\) approach the excluded origin. The function is not
+identically zero. Its trivial monodromy and essential singularity are a
+secondary comparison, not the main reason for the example.
+
+The lacunary series \(\sum_{k\ge0}z^{2^k}\) illustrates an entire natural
+boundary. Prove radial unboundedness at dyadic roots of unity, then use their
+density; mere divergence of the defining series on the boundary does not
+suffice. Neither example yet has its full Lean proof in this foundation.
+See [the method guide](methods.md) for the quantitative obligations and
+Gamma recurrence and Schwarz-reflection examples.

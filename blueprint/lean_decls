@@ -1128,3 +1128,8 @@ ComputableAnalysis.Continuation.Transport.parallel_unique_on_path
 ComputableAnalysis.Continuation.Transport.section_unique
 ComputableAnalysis.Continuation.GermSystem.terminal_germ_independent
 ComputableAnalysis.Continuation.Affine.coefficients_of_germ
+ComputableAnalysis.Continuation.Realization.holomorphic
+ComputableAnalysis.Continuation.Realization.unique
+ComputableAnalysis.Continuation.Affine.realized_holomorphic
+ComputableAnalysis.FunctionTheory.Holomorphic.reflect
+ComputableAnalysis.Continuation.AgreeAt.reflect

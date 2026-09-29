@@ -33,6 +33,10 @@ def main():
             if not u.scheme and u.path:
                 target=site/u.path
                 assert target.is_file() or (target/'index.html').is_file(),el['href']
+    continuation=BeautifulSoup((site/'analytic-continuation.html').read_text(),'html.parser')
+    source=Path(__file__).resolve().parents[2]/'book/classics/analytic-continuation.html'
+    math_pattern=r'\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\)'
+    assert re.findall(math_pattern,source.read_text())==re.findall(math_pattern,continuation.article.get_text()), 'continuation TeX lost during HTML parsing'
     chapter=BeautifulSoup((site/'ch-differential-equations.html').read_text(),'html.parser')
     assert chapter.select_one('article #continuation-story #continuation-fuchs-criterion')
     chapter_ids=[node['id'] for node in chapter.select('[id]')]
@@ -114,6 +118,19 @@ def main():
                     assert page.locator('.showcase-statement mjx-container').count()>0,(name,'statement math')
                     assert page.locator('#book-nav a[href="cartwright.html"] mjx-container').count()==1,(name,'navigation math')
                     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+2'),(name,width)
+                    if name=='analytic-continuation.html':
+                        assert page.locator('#zero-lab').count()==1
+                        for mode,angle,re,im in [('sqrt',360,-1,0),('sqrt',720,1,0),('log',360,0,2*3.141592653589793),('reciprocal',360,1,0)]:
+                            page.select_option('#loop-function',mode)
+                            page.locator('#loop-angle').evaluate('(e,v)=>{e.value=v;e.dispatchEvent(new Event("input",{bubbles:true}));}',str(angle))
+                            point=page.locator('#loop-plot')
+                            assert abs(float(point.get_attribute('data-value-real'))-re)<1e-10
+                            assert abs(float(point.get_attribute('data-value-imag'))-im)<1e-10
+                        page.locator('#zero-count').evaluate('(e)=>{e.value="64";e.dispatchEvent(new Event("input",{bubbles:true}));}')
+                        assert page.locator('#zero-plot .zero').count()==64
+                        assert page.locator('#zero-plot .excluded').count()==1
+                        page.wait_for_function('document.querySelector("#zero-readout").textContent.includes("64") && document.querySelectorAll("#zero-readout mjx-container").length>0')
+                        assert page.locator('mjx-merror,[data-mjx-error]').count()==0
                     if name=='complex-analysis.html':
                         assert page.locator('#holomorphic-foundation mjx-container').count()>=12
                         assert page.locator('#holomorphic-foundation a[href="reading/holomorphic-audit.log"]').count()==1

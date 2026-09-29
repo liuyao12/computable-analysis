@@ -20,7 +20,8 @@ run_cmd do
       ``Affine.coefficients_of_germ, ``Affine.endpoint_independent,
       ``GermSystem.run_along, ``GermSystem.terminal_germ_independent,
       ``GermSystem.terminal_value_independent, ``GermSystem.terminal_from_equal_germs,
-      ``Affine.germSystem] do
+      ``Affine.germSystem, ``Realization.map, ``Realization.holomorphic, ``Realization.unique,
+      ``Affine.realized_holomorphic, ``Holomorphic.reflect, ``AgreeAt.reflect] do
     let axioms ← collectAxioms name
     for ax in axioms do
       unless [``propext, ``Quot.sound, ``Classical.choice].contains ax ||
@@ -67,3 +68,10 @@ example : (((Affine.transport wholePlane).run route seed).localFunction a2.val).
     (((Affine.transport wholePlane).run
       ((wholePlane.simplyConnectedOfConvex wholePlane_convex).route a0 a2) seed).localFunction a2.val).value :=
   Affine.endpoint_independent wholePlane (wholePlane.simplyConnectedOfConvex wholePlane_convex) _ _ seed
+
+-- Executable realizations and reflected charts; the imaginary sign matters.
+#guard (seed.realized.eval (ComplexRaw.ofQComplex ⟨1,1⟩)).compute 0 == QBox.point ⟨2,2⟩
+#guard (seed.chart.reflect.eval (ComplexRaw.ofQComplex ⟨1,1⟩)).compute 0 == QBox.point ⟨4,2⟩
+example : Holomorphic seed.realized := seed.realized_holomorphic
+example : Holomorphic seed.chart.reflect := (seed.localFunction a0.val).holomorphic.reflect
+example (f : FunctionTheory.Map) (h : Holomorphic f) : Holomorphic f.reflect := h.reflect

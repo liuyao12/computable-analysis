@@ -372,6 +372,40 @@ provide a checked client for arbitrary represented coefficients.
 
 This does not yet prove general analytic monodromy. The identity theorem for
 arbitrary holomorphic maps, comparison of arbitrary continuation chains,
-subdivision of continuous homotopies, and realization of the resulting global
-germ section remain necessary bridges. Simple connectedness does not by
+subdivision of continuous homotopies, and locally coherent chart selection
+from the resulting germ section remain necessary bridges. Simple connectedness does not by
 itself assert continuation along every path.
+
+
+\subsection{Realization and reflected charts}
+A total selector of locally coherent holomorphic charts now gives an actual
+represented evaluator: select the chart at the input and evaluate that chart.
+Local coherence proves representation invariance, and the gluing theorem
+constructs its derivative and continuity radii. No quotient representative
+or decision of domain membership is needed. Deriving coherent selection from
+arbitrary pathwise continuation remains separate.
+
+Reflection of both input and output is also checked:
+\[
+ f^*(z)=\overline{f(\overline z)},\qquad
+ (f^*)'(z)=\overline{f'(\overline z)}.
+\]
+The reflected open chart preserves the supplied rational radii; reflection
+also preserves germ agreement. The general Schwarz theorem across a real
+boundary interval still needs its seam proof.
+
+\subsection{The identity theorem needs an interior accumulation point}
+On the connected domain $D=\mathbb C\setminus\{0\}$, the function
+$f(z)=\sin(1/z)$ has zeros $z_n=1/(n\pi)$ for $n\ge1$. They accumulate
+at zero, which is outside $D$. Thus the example does not contradict the
+identity theorem: zeros of a nonzero holomorphic function cannot accumulate
+inside its connected domain. This general identity theorem remains a target
+for the represented holomorphic interface. The reader develops the local
+factorization argument, connectedness, and the distinct obstructions of
+poles, branch points, essential singularities, and natural boundaries.
+
+Continuation methods belong in the skills: certified Taylor recentering,
+functional equations with denominator separation, Schwarz reflection,
+separated algebraic roots, and local ODE uniqueness. The new chapter gives
+Gamma recurrence and the natural boundary of $\sum_{k\ge0}z^{2^k}$ as
+mathematical examples, not newly checked Lean identities.
