@@ -1,0 +1,201 @@
+#!/usr/bin/env python3
+"""Render function-specific skill sources and expose them in the book navigation.
+
+Install before the reader editions record their HTML hashes. Finalize after all
+editions so the publication record describes the actual delivered pages.
+"""
+import argparse
+import hashlib
+import html
+import json
+import os
+import re
+from pathlib import Path
+from urllib.parse import urlsplit
+
+import markdown
+from bs4 import BeautifulSoup
+
+ROOT = Path(__file__).resolve().parents[2]
+SOURCE = ROOT / 'book/construction-skills'
+NAV = re.compile(r'<nav\b[^>]*\bid=["\']book-nav["\'][^>]*>[\s\S]*?</nav>')
+MATH = re.compile(r'\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\)')
+OVERVIEW = 'construction-skills.html'
+
+
+def catalogue():
+    rows = json.loads((SOURCE / 'catalogue.json').read_text())
+    assert len({r['page'] for r in rows}) == len(rows)
+    for row in rows:
+        assert re.fullmatch(r'[a-z0-9-]+', row['skill'])
+        assert re.fullmatch(r'skill-[a-z0-9-]+\.html', row['page'])
+        assert (ROOT / 'skills' / row['skill'] / 'SKILL.md').is_file()
+    return rows
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def render_skill(row, revision):
+    source = ROOT / 'skills' / row['skill'] / 'SKILL.md'
+    text = source.read_text()
+    assert text.startswith('---\n')
+    body = text.split('---', 2)[2]
+    formulas = []
+
+    def protect(match):
+        formulas.append(match.group())
+        return f'CONSTRUCTIONMATHPLACEHOLDER{len(formulas)-1}END'
+
+    rendered = markdown.markdown(MATH.sub(protect, body), extensions=['fenced_code', 'tables'])
+    for i, formula in enumerate(formulas):
+        rendered = rendered.replace(f'CONSTRUCTIONMATHPLACEHOLDER{i}END', html.escape(formula))
+    doc = BeautifulSoup(rendered, 'html.parser')
+    pages = {f"skills/{r['skill']}/SKILL.md": r['page'] for r in catalogue()}
+    pages.update({'docs/POWER_IMPROPER.md': 'power-improper.html',
+                  'docs/GAUSSIAN_CONVOLUTION.md': 'gaussian-convolution.html',
+                  'docs/N_BALL_GAMMA.md': 'n-ball-volume.html',
+                  'docs/RATIONAL_PRIMITIVES.md': 'rational-primitives.html',
+                  'book/cosine-square/page.html': 'cosine.html'})
+    for link in doc.select('a[href]'):
+        href = link['href']
+        if urlsplit(href).scheme or href.startswith('#'):
+            continue
+        path, _, fragment = href.partition('#')
+        resolved = (source.parent / path).resolve()
+        relative = str(resolved.relative_to(ROOT))
+        assert resolved.is_file(), (source, href)
+        link['href'] = pages.get(relative, f'https://github.com/liuyao12/computable-analysis/blob/{revision}/{relative}')
+        if fragment and relative not in pages:
+            link['href'] += '#' + fragment
+    for p in doc.select('p'):
+        if p.get_text().strip().startswith(r'\['):
+            p['class'] = ['formula']
+    for i, heading in enumerate(doc.select('h2')):
+        heading['id'] = 'step-' + str(i+1)
+    proof = next((h for h in doc.select('h2') if h.get_text() == 'Proof sources and checks'), None)
+    if proof:
+        details = doc.new_tag('details', attrs={'class': 'construction-skill-proof'})
+        summary = doc.new_tag('summary')
+        summary.string = 'Proof sources and verification'
+        details.append(summary)
+        for sibling in list(proof.next_siblings):
+            details.append(sibling.extract())
+        proof.replace_with(details)
+    return str(doc)
+
+
+def add_navigation(path, site, rows):
+    original = path.read_text()
+    match = NAV.search(original)
+    if not match:
+        return False
+    nav = BeautifulSoup(match.group(), 'html.parser').nav
+    assert not nav.select('.construction-skill-navigation, .construction-skill-label'), path
+    links = [(OVERVIEW, 'Choose a construction')] + [(r['page'], r['title']) for r in rows]
+    section = BeautifulSoup('<span class="nav-label construction-skill-label">Construction skills</span>', 'html.parser')
+    for target, title in links:
+        href = os.path.relpath(site / target, path.parent).replace(os.sep, '/')
+        link = section.new_tag('a', href=href, attrs={'class': 'construction-skill-navigation'})
+        link.string = title
+        section.append(link)
+    for node in reversed(list(section.contents)):
+        nav.insert(0, node.extract())
+    updated = original[:match.start()] + str(nav) + original[match.end():]
+    # Only the existing navigation may change; preserve all other bytes.
+    assert NAV.sub('', updated, count=1) == NAV.sub('', original, count=1)
+    path.write_text(updated)
+    return True
+
+
+def make_page(template, body, title, name, revision, row=None):
+    doc = BeautifulSoup(template, 'html.parser')
+    doc.title.string = title + ' · Computable Analysis'
+    meta = doc.select_one('meta[name="documentation-revision"]')
+    if not meta:
+        meta = doc.new_tag('meta', attrs={'name': 'documentation-revision'})
+        doc.head.append(meta)
+    meta['content'] = revision
+    doc.select_one('meta[name="description"]')['content'] = 'Function-specific integral construction, error estimates, and proof status.'
+    for link in doc.select('#book-nav a.current'):
+        link['class'] = [c for c in link.get('class', []) if c != 'current']
+        link.attrs.pop('aria-current', None)
+    active = doc.select_one(f'#book-nav a[href="{name}"]')
+    assert active
+    active['class'] = active.get('class', []) + ['current']
+    active['aria-current'] = 'page'
+    main = doc.select_one('main.reader')
+    assert main
+    main.clear()
+    main.append(BeautifulSoup('<div class="chapter-kicker">CONSTRUCTION SKILLS</div>', 'html.parser'))
+    article = doc.new_tag('article', attrs={'class': 'construction-skill'})
+    article.append(BeautifulSoup(body, 'html.parser'))
+    main.append(article)
+    if row:
+        intro = BeautifulSoup('<p class="lead">' + html.escape(row['summary']) + '</p><p class="construction-skill-status">' + html.escape(row['status']) + '</p>', 'html.parser')
+        article.h1.insert_after(intro)
+        links = BeautifulSoup(f'<div class="construction-skill-links"><a href="reading/skills/{row["skill"]}/SKILL.md" download>Download SKILL.md</a><a href="https://github.com/liuyao12/computable-analysis/blob/{revision}/skills/{row["skill"]}/SKILL.md">View source skill</a><a href="{row["example"]}">Worked example and proof status</a></div>', 'html.parser')
+        article.select_one('.construction-skill-status').insert_after(links)
+    toc = doc.select_one('.on-this-page')
+    if toc:
+        toc.clear()
+        for heading in article.select('h2[id]'):
+            link = doc.new_tag('a', href='#' + heading['id'])
+            link.string = heading.get_text()
+            toc.append(link)
+    main.append(BeautifulSoup(f'<footer class="chapter-footer"><a href="{OVERVIEW}">Construction skills</a><a href="https://github.com/liuyao12/computable-analysis/tree/{revision}/skills">Skill sources · {revision[:12]}</a></footer>', 'html.parser'))
+    doc.head.append(doc.new_tag('link', rel='stylesheet', href='reading/construction-skills.css'))
+    assert not doc.select('article sup, article sub')
+    return str(doc)
+
+
+def install(site, revision):
+    rows = catalogue()
+    assert not (site / OVERVIEW).exists(), 'Construction skills already installed'
+    for path in sorted(site.rglob('*.html')):
+        if 'reference' not in path.relative_to(site).parts:
+            add_navigation(path, site, rows)
+    template = (site / 'programme.html').read_text()
+    cards = []
+    for row in rows:
+        cards.append(f'<section class="construction-skill-card"><h3><a href="{row["page"]}">{html.escape(row["title"])}</a></h3><p>{html.escape(row["summary"])}</p><p class="construction-skill-status">{html.escape(row["status"])}</p><a href="{row["page"]}">Read the construction →</a></section>')
+        body = render_skill(row, revision)
+        (site / row['page']).write_text(make_page(template, body, row['title'], row['page'], revision, row))
+        target = site / 'reading/skills' / row['skill'] / 'SKILL.md'
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes((ROOT / 'skills' / row['skill'] / 'SKILL.md').read_bytes())
+    body = (SOURCE / 'index.html').read_text().replace('__CARDS__', ''.join(cards)).replace('__REPO__', f'https://github.com/liuyao12/computable-analysis/blob/{revision}/')
+    (site / OVERVIEW).write_text(make_page(template, body, 'Construction skills', OVERVIEW, revision))
+    (site / 'reading/construction-skills.css').write_bytes((SOURCE / 'skills.css').read_bytes())
+    print('Installed four function-specific skills and visible book navigation')
+
+
+def finalize(site, revision):
+    rows = catalogue()
+    pages = [OVERVIEW] + [r['page'] for r in rows]
+    navigation = []
+    for path in sorted(site.rglob('*.html')):
+        if 'reference' in path.relative_to(site).parts:
+            continue
+        doc = BeautifulSoup(path.read_text(), 'html.parser')
+        if doc.select_one('#book-nav'):
+            assert len(doc.select('#book-nav .construction-skill-navigation')) == len(pages), path
+            navigation.append(str(path.relative_to(site)))
+    files = pages + ['reading/construction-skills.css'] + [f'reading/skills/{r["skill"]}/SKILL.md' for r in rows]
+    report = dict(documentationRevision=revision, newLeanTheoremsClaimed=False,
+                  functionSpecificSkills=rows, navigationPages=navigation,
+                  sourceHashes={f'skills/{r["skill"]}/SKILL.md': digest(ROOT / 'skills' / r['skill'] / 'SKILL.md') for r in rows},
+                  artifacts={p: digest(site / p) for p in files})
+    (site / 'reading/construction-skills.json').write_text(json.dumps(report, indent=2) + '\n')
+    print('Recorded final skills, downloads, and navigation in', len(navigation), 'reader pages')
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--site', type=Path, required=True)
+    parser.add_argument('--revision', required=True)
+    parser.add_argument('--finalize', action='store_true')
+    args = parser.parse_args()
+    assert re.fullmatch(r'[0-9a-f]{40}', args.revision)
+    (finalize if args.finalize else install)(args.site, args.revision)

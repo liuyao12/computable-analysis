@@ -1,0 +1,13 @@
+.construction-skill-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:28px 0}
+.construction-skill-card{padding:20px 22px;border:1px solid #d5d9cb;background:#f1f4ed;border-radius:3px}
+.construction-skill-card h3{margin:0 0 12px;font-size:23px;line-height:1.25}
+.construction-skill-card p{margin:10px 0;font-size:16px;line-height:1.65}
+.construction-skill-status,.construction-skill-note{font-size:14px!important;line-height:1.65;color:#606e61}
+.construction-skill-links{display:flex;flex-wrap:wrap;gap:10px 22px;margin:22px 0;font:13px/1.7 system-ui,sans-serif}
+.construction-skill-proof{margin-top:36px;padding:16px 20px;border:1px solid #d5d9cb;background:#f7f7f0}
+.construction-skill-proof summary{cursor:pointer;font:600 14px/1.7 system-ui,sans-serif}
+.construction-skill-proof code,.construction-skill-proof a,article.construction-skill code{overflow-wrap:anywhere}
+.construction-skill-proof pre{overflow-x:auto;max-width:100%}
+article.construction-skill .formula{overflow-x:auto;max-width:100%}
+#book-nav .construction-skill-label{color:#49674d}
+@media(max-width:720px){.construction-skill-grid{grid-template-columns:1fr}.construction-skill-card{padding:16px 18px}}

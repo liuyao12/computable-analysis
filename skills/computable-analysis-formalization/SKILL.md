@@ -5,6 +5,14 @@ description: Formalize calculus, elementary-function, integral, series, inverse-
 
 # Computable Analysis Formalization
 
+For a function-specific integral, start with the mathematical construction
+skill: [rational functions](../rational-function-integrals/SKILL.md),
+[trigonometric functions](../trigonometric-integrals/SKILL.md),
+[improper powers](../improper-power-integrals/SKILL.md), or
+[Gaussian and Gamma integrals](../gaussian-gamma-integrals/SKILL.md).
+Use this skill for their shared formalization obligations. The reader exposes
+the function-specific skills directly in its left navigation.
+
 Build computable foundations with rational interval algorithms and explicit
 error certificates; expose exact mathematical theorems over valid represented
 reals using `RealRaw.Equiv`. Follow the
@@ -129,11 +137,18 @@ comparison; a universal continuation operator is not a prerequisite.
 
 ## Treat integrals as particular computations
 
-Use whole-chunk outer enclosures as the defining finite sums. Prove the
-particular function's coordinate monotonicity or range bounds, then multiply
-by chunk lengths or finite complex displacements. Pointwise samples alone
-are not ranges. Geometrically subdivide straight complex segments; a real
-parameter is optional comparison data, not their integral definition.
+Piecewise-constant functions along continuous piecewise-linear paths provide
+the shared elementary integral: sum each constant times its displacement.
+Prove invariance under common refinement and changes at finitely many
+breakpoints. Every proposed theory must agree with this finite construction.
+This is a baseline, not a requirement that every function admit the same
+approximation scheme.
+
+Whole-chunk outer enclosures are one sufficient construction route. Prove
+the particular function's coordinate monotonicity or range bounds before
+multiplying by chunk lengths or complex displacements. Pointwise samples
+alone are not ranges. Other constructions need their own justified comparison
+with the integral laws; numerical validity does not supply it.
 
 `Integral.EnclosureConstructionFor` retains the real range proofs;
 `EnclosureRealizationFor` permits an endpoint or accelerated evaluator only

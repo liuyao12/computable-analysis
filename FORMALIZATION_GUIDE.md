@@ -1,5 +1,36 @@
 # Formalization Guide
 
+## Function-specific construction skills
+
+Use the reader's Construction skills section to choose a mathematical route:
+[rational functions](skills/rational-function-integrals/SKILL.md),
+[trigonometric functions](skills/trigonometric-integrals/SKILL.md),
+[improper powers](skills/improper-power-integrals/SKILL.md), and
+[Gaussian and Gamma integrals](skills/gaussian-gamma-integrals/SKILL.md).
+Each skill gives a finite computation, error analysis, comparison obligations,
+and the current checked boundary. The skills are maintained source files,
+rendered directly as reader pages and available to download.
+
+All proposed integration theories must include the elementary integral of a
+piecewise-constant function along a continuous piecewise-linear path:
+\[
+\int_\gamma f\,dz\simeq\sum_i c_i(z_{i+1}-z_i).
+\]
+Use a common subdivision for path vertices and integrand jumps. Constants
+describe the trace along open path pieces; values at finitely many partition
+points do not change the integral. A trace that takes different values on
+repeated visits to the same point is path data, not automatically a
+single-valued function on the plane. Prove refinement, orientation, linearity,
+and interval addition for the finite construction before using it as a
+comparison. Constants and vertices may be arbitrary valid represented complex
+numbers; rational data are a useful executable example, not the full domain.
+
+This baseline does not make uniform step approximation a compulsory definition
+for every integral. Existence for other functions, uniqueness under supplied
+comparison evidence, and agreement of different constructions remain separate
+tasks. The new skill pages are construction guidance, not new Lean theorem
+claims; each links the actual checked results and remaining bridges.
+
 ## Construct the objects; prove their laws
 
 This is the project's organizing principle. General theorems may say: given

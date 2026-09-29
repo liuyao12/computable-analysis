@@ -1,0 +1,18 @@
+<h1>Construction skills</h1>
+<p class="lead">Choose a function. See how to compute its integral, bound the error, and prove what the computation means.</p>
+<p>These are the mathematical recipes behind the examples. Each page is rendered from a maintained <code>SKILL.md</code> file, so the reader and the reusable instructions share one source. The construction comes first; proof sources and verification commands are available alongside it.</p>
+<h2 id="functions">Start with the function</h2>
+<div class="construction-skill-grid">__CARDS__</div>
+<h2 id="baseline">A common elementary starting point</h2>
+<p>Every integration theory here should support piecewise-constant functions along continuous piecewise-linear paths. On a common subdivision of the path and the function's jumps, the elementary value is</p>
+<div class="formula">\[I_\gamma(f)=\sum_i c_i\bigl(z_{i+1}-z_i\bigr).\]</div>
+<p>Splitting a piece with the same constant leaves the value unchanged by finite cancellation. Reversing the path changes its sign. Values at the finitely many breakpoints do not affect it. The constants and vertices may be represented complex numbers; rational inputs give exact finite examples.</p>
+<p>The constants describe the function along the path pieces. On a path that revisits a point, a single-valued function on the plane must give compatible values on repeated visits. More general values along a parametrized path should be described as such.</p>
+<h2 id="comparison">From an elementary computation to another function</h2>
+<p>For a straight piece with displacement \(\Delta z_i\), a proved whole-piece estimate \(|f(z)-c_i|\le\varepsilon_i\) suggests the comparison</p>
+<div class="formula">\[\left|\int_\gamma f(z)\,dz-\sum_i c_i\Delta z_i\right|\le\sum_i\varepsilon_i|\Delta z_i|.\]</div>
+<p>The integral's comparison law must be justified before using this as an error certificate. Rational bounds on displacement lengths are enough. Shrinking the right-hand side can prove agreement and uniqueness; it is one sufficient route, not a restriction that every possible integrand must satisfy.</p>
+<p>The function-specific skills explain how to get those bounds or use another justified construction: pole separation, monotonicity, Taylor remainders, branch charts, and endpoint allowances. They distinguish proved results from work still needed.</p>
+<h2 id="use">Read, reuse, and check</h2>
+<p>Open a function's page from the left column to follow its construction. Each page links its source skill file and the relevant worked example. The general <a href="__REPO__skills/computable-analysis-formalization/SKILL.md">formalization skill</a> supplies shared proof obligations; the <a href="programme.html">project principles</a> explain the foundation.</p>
+<p class="construction-skill-note">These pages expose construction methods. They do not announce new Lean proofs. In particular, the Gaussian, Gamma, and geometric-volume identifications remain separate proof tasks.</p>

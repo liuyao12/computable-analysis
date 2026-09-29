@@ -1,5 +1,21 @@
 # Repository guidelines
 
+## Function-specific construction skills
+
+For integral constructions, select the relevant function's skill before the
+general formalization workflow: [rational functions](skills/rational-function-integrals/SKILL.md),
+[trigonometric functions](skills/trigonometric-integrals/SKILL.md),
+[improper powers](skills/improper-power-integrals/SKILL.md), or
+[Gaussian and Gamma integrals](skills/gaussian-gamma-integrals/SKILL.md).
+These are mathematical construction guides, showcased in the reader's
+Construction skills navigation; they are not hidden implementation notes.
+
+Piecewise-constant functions on piecewise-linear paths are the common
+elementary baseline. Every proposed integration theory must recover their
+finite sum of constants times displacements, with subdivision and finite
+breakpoint-value invariance. This does not require every other integrand to
+be constructed by a particular approximation scheme.
+
 ## Computable foundations and exact theorems
 
 Read [the governing formalization policy](FORMALIZATION_GUIDE.md#computable-foundations-exact-mathematical-theorems)
