@@ -15,8 +15,8 @@ application. The law's conclusion must not be smuggled into the hypotheses.
 ## What was reviewed
 
 The [inventory](CONSTRUCTION_FIRST_INVENTORY.json) covers every tracked Lean
-source in the published development: 289 native modules and 80 other files
-(17 entry points/checking scripts, 17 companion files, and 46 historical files).
+source in the published development: 296 native modules and 81 other files
+(18 entry points/checking scripts, 17 companion files, and 46 historical files).
 Every source is assigned an area and bound to its content hash. Entry points,
 theorem ledgers, representative theorem hypotheses and proof-data records,
 and concrete applications were reviewed across the areas below.
@@ -222,3 +222,13 @@ existing native rational check of positivity of two in `Basic.lean`; the axiom
 audit records it. `FiniteNBallVolume` only changes the fixed rational base
 proofs used by its general coefficient nonnegativity theorem, removing their
 native evaluator dependencies.
+
+
+## Improper power tests
+
+The new compact witnesses prove actual whole-cell bounds and tightness for
+integer power functions. Improper candidates supply those compact witnesses
+and explicit truncation bounds; natural-exponent series convergence is derived
+from the cell theorem. The integer scope and the unproved arbitrary-real
+exponent bridge are explicit in `docs/POWER_IMPROPER.md`. Conditional uniqueness
+is proved from bounds and convergence, never assumed as a certificate field.

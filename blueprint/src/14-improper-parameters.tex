@@ -225,3 +225,44 @@ It is not a convergent infinite series at that input.  Use it when its
 finite bound meets the requested precision; otherwise use bounded
 quadrature with tails or the convergent series.  The standard asymptotic
 formula appears in \href{https://dlmf.nist.gov/7.12}{DLMF, Section 7.12}.
+
+
+\section{Checked integer power tests}
+\label{sec:integer-power-tests}
+For \(p=k+2\), \(k\in\mathbb N\), the compact cell inequalities
+\[
+(b-a)b^{-p}\le\frac{a^{1-p}-b^{1-p}}{p-1}\le(b-a)a^{-p}
+\]
+are proved by finite power factorization on every positive rational segment.
+Summing telescopes, and uniform endpoint rectangles have arbitrarily small gap.
+The actual improper computation at \(R_n=n+1\) is
+\[
+\left[\frac{1-R_n^{1-p}}{p-1},\frac1{p-1}\right],
+\qquad \operatorname{width}\le\frac1{n+1}.
+\]
+Each truncation has a separately constructed compact-integral witness; every
+later rational truncation lies in this interval. Uniqueness gives the exact
+represented-value identity. A separate monomial argument proves
+\(\int_0^1x^k\,dx\simeq1/(k+1)\).
+Reciprocal powers diverge at zero, and monomial powers diverge at infinity,
+with explicit finite lower bounds. For the critical reciprocal function,
+geometric cells have lower area \(1/2\) each, proving divergence at both ends.
+
+For \(S_N=\sum_{j=1}^N j^{-p}\), the same compact cell theorem proves
+\[
+\int_{N+1}^{M+1}x^{-p}\,dx\le S_M-S_N\le\int_N^M x^{-p}\,dx.
+\]
+It constructs nested series boxes
+\([S_N,S_N+N^{1-p}/(p-1)]\). The harmonic estimate
+\(S_{2^{2T}}\ge T\) and the constant case prove that a represented sum exists
+exactly for \(p\ge2\) on the natural-exponent domain.
+The corresponding theorems are in \texttt{IntegerPowerIntegral},
+\texttt{IntegerPowerImproper}, \texttt{IntegerPowerAtZero},
+\texttt{HarmonicImproperBounds}, and \texttt{IntegerPowerSeries}.
+
+\paragraph{Explicit remaining scope.}
+The requested theorem for arbitrary represented-real exponents is unfinished.
+In particular, the range \(0<p<1\) still needs the positive-base real-power
+construction and its compact integration law. The critical divergence proof
+uses lower rectangles; it does not claim a new compact logarithm evaluator.
+This addition does not complete Gaussian normalization or the Gamma integral.

@@ -10,6 +10,12 @@ on:
       - '.github/reader-edition/**'
       - 'ComputableAnalysis/FiniteConvolution.lean'
       - 'ComputableAnalysis/NBallGaussian.lean'
+      - 'ComputableAnalysis/IntegerPower*.lean'
+      - 'ComputableAnalysis/HarmonicImproperBounds.lean'
+      - 'ComputableAnalysis/ImproperIntegralBounds.lean'
+      - 'ComputableAnalysis/IntegralRectangleSpecification.lean'
+      - 'scripts/check_power_improper.lean'
+      - 'docs/POWER_IMPROPER.md'
       - 'ComputableAnalysis/FiniteNBallVolume.lean'
       - 'scripts/check_n_ball.lean'
       - 'docs/N_BALL_GAMMA.md'
@@ -430,11 +436,20 @@ jobs:
           node .github/reader-edition/test_n_ball.cjs n-ball-reports/audit.log | tee n-ball-reports/tests.json
           python3 .github/reader-edition/n_ball.py --site site --revision "$GITHUB_SHA" --audit n-ball-reports/audit.log --tests n-ball-reports/tests.json
           python3 .github/reader-edition/test_n_ball_browser.py --site site --report reader-edition-tests
+      - name: Check and publish function-specific improper power integrals
+        run: |
+          set -o pipefail
+          mkdir -p power-improper-reports
+          lake build ComputableAnalysis.HarmonicImproperBounds | tee power-improper-reports/build.log
+          lake env lean scripts/check_power_improper.lean | tee power-improper-reports/audit.log
+          python3 .github/reader-edition/power_improper.py --site site --revision "$GITHUB_SHA" --audit power-improper-reports/audit.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: reader-edition-validation
           path: |
+            power-improper-reports
+            site/reading/power-improper.json
             n-ball-reports
             site/reading/n-ball.json
             gaussian-convolution-reports
@@ -516,7 +531,15 @@ jobs:
                   assert ball['runtimeTests']['leanFixtures']==213
                   for path,expected in ball['artifactHashes'].items():
                       assert hashlib.sha256(get(path)).hexdigest()==expected,path
-                  print('LIVE BALL VOLUMES:',base+'/n-ball-volume.html')
+                  power=json.loads(get('reading/power-improper.json'))
+                  assert power['proofSourceCommit']==revision and power['explicitStageBounds']
+                  assert power['naturalSeriesConvergenceClassification'] and not power['mathlibDependency']
+                  assert not power['arbitraryRealExponentTestProved']
+                  assert len(power['auditedTheorems'])==28 and power['regressionGroups']==34
+                  for path,expected in power['artifactHashes'].items():
+                      assert hashlib.sha256(get(path)).hexdigest()==expected,path
+                  print('LIVE POWER INTEGRALS:',base+'/power-improper.html')
+                  print('LIVE BALL VOLUMES:' ,base+'/n-ball-volume.html')
                   print('PASS: live convolution proofs and explicit remaining Gaussian targets')
                   break
               except Exception:

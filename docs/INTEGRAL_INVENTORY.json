@@ -2396,6 +2396,81 @@
       "declarations": []
     },
     {
+      "path": "ComputableAnalysis/HarmonicImproperBounds.lean",
+      "role": "mixed",
+      "declarations": []
+    },
+    {
+      "path": "ComputableAnalysis/ImproperIntegralBounds.lean",
+      "role": "conditional",
+      "declarations": [
+        {
+          "line": 17,
+          "declaration": "HasIntegralLimit"
+        },
+        {
+          "line": 23,
+          "declaration": "HasIntegralLimit.unique"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/IntegerPowerAtZero.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 30,
+          "declaration": "monomial_hasIntegral"
+        },
+        {
+          "line": 65,
+          "declaration": "zero_hasIntegralLimit"
+        },
+        {
+          "line": 84,
+          "declaration": "zero_exact_of_hasIntegralLimit"
+        },
+        {
+          "line": 124,
+          "declaration": "zero_reciprocal_not_hasIntegralLimit"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/IntegerPowerImproper.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 119,
+          "declaration": "infinity_hasIntegralLimit"
+        },
+        {
+          "line": 146,
+          "declaration": "infinity_exact_of_hasIntegralLimit"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/IntegerPowerIntegral.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 137,
+          "declaration": "compact_hasIntegral"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/IntegerPowerSeries.lean",
+      "role": "mixed",
+      "declarations": [
+        {
+          "line": 29,
+          "declaration": "finite_integral_comparison"
+        }
+      ]
+    },
+    {
       "path": "ComputableAnalysis/IntegralEnclosure.lean",
       "role": "enclosure",
       "declarations": []
@@ -3366,6 +3441,32 @@
         {
           "line": 16122,
           "declaration": "arctanKernelLipschitzIntegral_equiv_halfQuarterTurn"
+        }
+      ]
+    },
+    {
+      "path": "ComputableAnalysis/IntegralRectangleSpecification.lean",
+      "role": "conditional",
+      "declarations": [
+        {
+          "line": 73,
+          "declaration": "HasIntegral"
+        },
+        {
+          "line": 101,
+          "declaration": "HasIntegral.unique"
+        },
+        {
+          "line": 106,
+          "declaration": "HasIntegral.congr"
+        },
+        {
+          "line": 142,
+          "declaration": "HasIntegral.ftc_exact"
+        },
+        {
+          "line": 149,
+          "declaration": "ExactCellOrderPreservation.hasIntegral"
         }
       ]
     },
@@ -5119,6 +5220,10 @@
     },
     {
       "path": "scripts/check_polygonal_cauchy.lean",
+      "role": "audit-helper"
+    },
+    {
+      "path": "scripts/check_power_improper.lean",
       "role": "audit-helper"
     }
   ]

@@ -282,7 +282,7 @@
       "path": "ComputableAnalysis.lean",
       "scope": "support",
       "area": "support",
-      "sha256": "0c145e5dd0fa60b242cf8aa8ce924cec2acc9ac0d702ceefdc73d0d9cde20bb4"
+      "sha256": "56515d66130eb0b48c85f3ffb6e03c1600ce1d033bbb1f0aa5dcf1d6ca774e4a"
     },
     {
       "path": "ComputableAnalysis/AbelianIntegrals.lean",
@@ -1479,6 +1479,12 @@
       "sha256": "72aeaf9d3e0c1c3de0112ee9c3c2080bf9fbcfbe042828540758f4702e26d5df"
     },
     {
+      "path": "ComputableAnalysis/HarmonicImproperBounds.lean",
+      "scope": "native",
+      "area": "function-specific improper power integrals",
+      "sha256": "1f8bbb18e7d23e821c7bd6e247ff96ca0debd6bd40f352f35dc89f38ebc5aa1b"
+    },
+    {
       "path": "ComputableAnalysis/Holomorphic.lean",
       "scope": "native",
       "area": "contours-cauchy",
@@ -1503,6 +1509,36 @@
       "sha256": "9803d5e9055a70c83695b1b874fca8ef23cfe7bacc0c7afad0dda964e1488411"
     },
     {
+      "path": "ComputableAnalysis/ImproperIntegralBounds.lean",
+      "scope": "native",
+      "area": "function-specific improper power integrals",
+      "sha256": "566de8b04523dbc356beb593ff82e2e1371014b2ddc0cbd39a16ce83381ef8ac"
+    },
+    {
+      "path": "ComputableAnalysis/IntegerPowerAtZero.lean",
+      "scope": "native",
+      "area": "function-specific improper power integrals",
+      "sha256": "8d875a8339551d73edf56cc3025743f928edf3a1f7260de59c1fdab0669369a2"
+    },
+    {
+      "path": "ComputableAnalysis/IntegerPowerImproper.lean",
+      "scope": "native",
+      "area": "function-specific improper power integrals",
+      "sha256": "7a266856730285ae06c933ecb52084ede93836fbc69f18aaed2464bb805c30ba"
+    },
+    {
+      "path": "ComputableAnalysis/IntegerPowerIntegral.lean",
+      "scope": "native",
+      "area": "function-specific improper power integrals",
+      "sha256": "dd731d3d8a040caae7551ad6386e0b68edbc0ba892b23e2b91916a2bc313a3e5"
+    },
+    {
+      "path": "ComputableAnalysis/IntegerPowerSeries.lean",
+      "scope": "native",
+      "area": "function-specific improper power integrals",
+      "sha256": "bc23c844e758d107ac549a6baf28ecc262b8ef1e8c0ac6a2b03f0ab4fb4373bf"
+    },
+    {
       "path": "ComputableAnalysis/IntegralEnclosure.lean",
       "scope": "native",
       "area": "integration",
@@ -1525,6 +1561,12 @@
       "scope": "native",
       "area": "integration",
       "sha256": "0b56ddabfb242e06422514cafdb56ee9fce861f8d5f5678d86052aa027a1689d"
+    },
+    {
+      "path": "ComputableAnalysis/IntegralRectangleSpecification.lean",
+      "scope": "native",
+      "area": "function-specific improper power integrals",
+      "sha256": "6e8f277e423863c8cf3b467046361e0670d0693db97b2e0c07c4abc212c53424"
     },
     {
       "path": "ComputableAnalysis/IntegrationByPartsPi.lean",
@@ -2203,6 +2245,12 @@
       "scope": "support",
       "area": "support",
       "sha256": "fe3ffa6fc251135573b2b870e107d5336b8f4b162cf675923695f72b2488e9d8"
+    },
+    {
+      "path": "scripts/check_power_improper.lean",
+      "scope": "support",
+      "area": "improper integral theorem audit",
+      "sha256": "c2550f2dd3bfc14b752a0ae8287678e1148322cc2a9e05f4bfaf166dc0f7f751"
     },
     {
       "path": "scripts/check_rational_primitives.lean",
