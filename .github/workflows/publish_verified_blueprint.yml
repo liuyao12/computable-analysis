@@ -441,21 +441,6 @@ jobs:
         run: python3 .github/reader-edition/classic_proofs.py --site site --revision "$GITHUB_SHA" --euler-audit euler-reports/proofs.json --cauchy-audit polygonal-cauchy-reports/audit.log --arctan-audit arctan-taylor-reports/audit.log --holomorphic-audit holomorphic-reports/audit.log
       - name: Prepare the enclosure page before checking incoming links
         run: python3 .github/reader-edition/integral_enclosures.py --site site --revision "$GITHUB_SHA" --page-only
-      - name: Verify classical navigation and proof comparisons in the browser
-        run: python3 .github/reader-edition/test_classic_proofs.py --site site --report reader-edition-tests
-      - name: Verify and publish whole-chunk integral constructions
-        run: |
-          set -euo pipefail
-          mkdir -p integral-enclosure-reports
-          python3 scripts/audit_integral_enclosures.py
-          lake env lean scripts/check_integral_enclosures.lean | tee integral-enclosure-reports/axioms.log
-          if grep -q sorryAx integral-enclosure-reports/axioms.log; then exit 1; fi
-          python3 .github/reader-edition/integral_enclosures.py --site site --revision "$GITHUB_SHA"
-          python3 .github/reader-edition/test_integral_enclosures.py --site site --report reader-edition-tests
-      - name: Publish the construction-first principle and source-review scope
-        run: |
-          python3 .github/reader-edition/construction_first.py --site site --revision "$GITHUB_SHA"
-          python3 .github/reader-edition/test_construction_first.py --site site --report reader-edition-tests
       - name: Check and publish finite convolution and the Gaussian program
         run: |
           set -euo pipefail
@@ -472,6 +457,21 @@ jobs:
           node .github/reader-edition/test_n_ball.cjs n-ball-reports/audit.log | tee n-ball-reports/tests.json
           python3 .github/reader-edition/n_ball.py --site site --revision "$GITHUB_SHA" --audit n-ball-reports/audit.log --tests n-ball-reports/tests.json
           python3 .github/reader-edition/test_n_ball_browser.py --site site --report reader-edition-tests
+      - name: Verify classical navigation and proof comparisons in the browser
+        run: python3 .github/reader-edition/test_classic_proofs.py --site site --report reader-edition-tests
+      - name: Verify and publish whole-chunk integral constructions
+        run: |
+          set -euo pipefail
+          mkdir -p integral-enclosure-reports
+          python3 scripts/audit_integral_enclosures.py
+          lake env lean scripts/check_integral_enclosures.lean | tee integral-enclosure-reports/axioms.log
+          if grep -q sorryAx integral-enclosure-reports/axioms.log; then exit 1; fi
+          python3 .github/reader-edition/integral_enclosures.py --site site --revision "$GITHUB_SHA"
+          python3 .github/reader-edition/test_integral_enclosures.py --site site --report reader-edition-tests
+      - name: Publish the construction-first principle and source-review scope
+        run: |
+          python3 .github/reader-edition/construction_first.py --site site --revision "$GITHUB_SHA"
+          python3 .github/reader-edition/test_construction_first.py --site site --report reader-edition-tests
       - name: Check and publish function-specific improper power integrals
         run: |
           set -o pipefail
