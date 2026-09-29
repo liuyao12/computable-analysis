@@ -1120,7 +1120,6 @@ ComputableAnalysis.PowerIntegral.series_integral_test
 ComputableAnalysis.BinomialPower.integrated_endpoint_error_le_cutoff
 ComputableAnalysis.BinomialPower.Global.canonical_nonneg
 ComputableAnalysis.FormalPowerSeries.reciprocal_polynomial_hasIntegral
-
 ComputableAnalysis.FunctionTheory.HasDerivativeAt.unique
 ComputableAnalysis.Continuation.AgreeAt.trans
 ComputableAnalysis.Continuation.LocalModels.holomorphic
