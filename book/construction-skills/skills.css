@@ -8,6 +8,6 @@
 .construction-skill-proof summary{cursor:pointer;font:600 14px/1.7 system-ui,sans-serif}
 .construction-skill-proof code,.construction-skill-proof a,article.construction-skill code{overflow-wrap:anywhere}
 .construction-skill-proof pre{overflow-x:auto;max-width:100%}
-article.construction-skill .formula{overflow-x:auto;max-width:100%}
+article.construction-skill .formula,article.construction-skill mjx-container[display="true"]{overflow-x:auto;max-width:100%}
 #book-nav .construction-skill-label{color:#49674d}
 @media(max-width:720px){.construction-skill-grid{grid-template-columns:1fr}.construction-skill-card{padding:16px 18px}}
