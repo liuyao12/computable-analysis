@@ -120,12 +120,12 @@ def main():
                     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+2'),(name,width)
                     if name=='analytic-continuation.html':
                         assert page.locator('#zero-lab').count()==1
-                        for mode,angle,re,im in [('sqrt',360,-1,0),('sqrt',720,1,0),('log',360,0,2*3.141592653589793),('reciprocal',360,1,0)]:
+                        for mode,angle,expected_real,expected_imag in [('sqrt',360,-1,0),('sqrt',720,1,0),('log',360,0,2*3.141592653589793),('reciprocal',360,1,0)]:
                             page.select_option('#loop-function',mode)
                             page.locator('#loop-angle').evaluate('(e,v)=>{e.value=v;e.dispatchEvent(new Event("input",{bubbles:true}));}',str(angle))
                             point=page.locator('#loop-plot')
-                            assert abs(float(point.get_attribute('data-value-real'))-re)<1e-10
-                            assert abs(float(point.get_attribute('data-value-imag'))-im)<1e-10
+                            assert abs(float(point.get_attribute('data-value-real'))-expected_real)<1e-10
+                            assert abs(float(point.get_attribute('data-value-imag'))-expected_imag)<1e-10
                         page.locator('#zero-count').evaluate('(e)=>{e.value="64";e.dispatchEvent(new Event("input",{bubbles:true}));}')
                         assert page.locator('#zero-plot .zero').count()==64
                         assert page.locator('#zero-plot .excluded').count()==1
