@@ -1,14 +1,12 @@
 # Repository guidelines
 
-## Function-specific construction skills
+## Integral and series skills
 
-For integral constructions, select the relevant function's skill before the
-general formalization workflow: [rational functions](skills/rational-function-integrals/SKILL.md),
-[trigonometric functions](skills/trigonometric-integrals/SKILL.md),
-[improper powers](skills/improper-power-integrals/SKILL.md), or
-[Gaussian and Gamma integrals](skills/gaussian-gamma-integrals/SKILL.md).
-These are mathematical construction guides, showcased in the reader's
-Construction skills navigation; they are not hidden implementation notes.
+For constructions, use the [real-integral skill](skills/real-integrals/SKILL.md),
+[complex-path-integral skill](skills/complex-path-integrals/SKILL.md), or
+[series skill](skills/series/SKILL.md) before the general formalization workflow.
+The reader showcases these three guides after the chapters. Particular-function
+recipes are supporting examples within the guides.
 
 Piecewise-constant functions on piecewise-linear paths are the common
 elementary baseline. Every proposed integration theory must recover their

@@ -455,7 +455,7 @@ jobs:
           lake env lean scripts/check_power_improper.lean | tee power-improper-reports/audit.log
           lake env lean scripts/check_real_power_integrals.lean | tee -a power-improper-reports/audit.log
           python3 .github/reader-edition/power_improper.py --site site --revision "$GITHUB_SHA" --audit power-improper-reports/audit.log
-      - name: Verify function-specific skills and their reader navigation
+      - name: Verify integral and series skills and their reader navigation
         run: |
           python3 .github/reader-edition/construction_skills.py --site site --revision "$GITHUB_SHA" --finalize
           python3 .github/reader-edition/test_construction_skills.py --site site --report reader-edition-tests/construction-skills
@@ -537,13 +537,13 @@ jobs:
                   report=json.loads(get('reading/construction-skills.json'))
                   assert report['documentationRevision']==revision
                   assert not report['newLeanTheoremsClaimed']
-                  assert len(report['functionSpecificSkills'])==4
+                  assert len(report['skills'])==3
                   for path,digest in report['artifacts'].items():
                       assert hashlib.sha256(get(path)).hexdigest()==digest,path
                   for path in report['navigationPages']:
                       page=get(path).decode()
-                      assert page.count('construction-skill-navigation')==5,path
-                      assert 'Construction skills' in page,path
+                      assert page.count('construction-skill-navigation')==3,path
+                      assert page.index('later-chapters') < page.index('construction-skill-label'),path
                   print('PASS: live function skills, source downloads, hashes, and reader navigation')
                   break
               except Exception:

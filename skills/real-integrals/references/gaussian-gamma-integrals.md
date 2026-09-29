@@ -1,15 +1,10 @@
----
-name: gaussian-gamma-integrals
-description: Develop function-specific Gaussian and Gamma integral constructions from certified finite integrals and endpoint bounds, keeping Gaussian normalization, Gamma identities, and geometric ball-volume comparisons as separate proof obligations.
----
-
 # Gaussian and Gamma integrals
 
 These are construction routes with unfinished analytic bridges. Read the
-[Gaussian progress report](../../docs/GAUSSIAN_CONVOLUTION.md) and
-[Gamma and ball-volume report](../../docs/N_BALL_GAMMA.md) before reporting
+[Gaussian progress report](../../../docs/GAUSSIAN_CONVOLUTION.md) and
+[Gamma and ball-volume report](../../../docs/N_BALL_GAMMA.md) before reporting
 checked scope. Follow the
-[shared formalization policy](../../FORMALIZATION_GUIDE.md#computable-foundations-exact-mathematical-theorems).
+[shared formalization policy](../../../FORMALIZATION_GUIDE.md#computable-foundations-exact-mathematical-theorems).
 
 ## Gaussian: separate the finite interval from the tail
 
@@ -21,7 +16,7 @@ error is at most \(2R\delta\), once the finite-integral comparison is proved.
 
 The positive exponential series gives \(e^{x^2}\ge x^2\), hence
 \(e^{-x^2}\le x^{-2}\) for \(x\ge1\). A justified comparison with the
-[power integral](../improper-power-integrals/SKILL.md) yields a two-sided
+[power integral](improper-power-integrals.md) yields a two-sided
 omitted-tail allowance \(2/R\). Allocate the total budget explicitly:
 
 \[
@@ -79,12 +74,12 @@ dimension from its boundary sphere's dimension.
 
 ## Proof sources and checks
 
-Inspect [NBallGaussian](../../ComputableAnalysis/NBallGaussian.lean) for the
+Inspect [NBallGaussian](../../../ComputableAnalysis/NBallGaussian.lean) for the
 checked finite coefficient and diagonal lemmas, and the reports above for
 their limitations. Check the actual source before reusing any older Gaussian
 candidate. Do not treat a recurrence audit or numerical regression as a proof
 of the Gaussian or Gamma integral.
 
 For a newly completed bridge, run the focused Lean build and axiom audit from
-the [formalization skill](../computable-analysis-formalization/SKILL.md), then
+the [formalization skill](../../computable-analysis-formalization/SKILL.md), then
 update the reader's proof status to match exactly what was proved.

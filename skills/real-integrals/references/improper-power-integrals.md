@@ -1,14 +1,9 @@
----
-name: improper-power-integrals
-description: Construct improper integrals of real powers with arbitrary represented exponents, explicit endpoint bounds, and finite sum–integral comparisons; use for power tails, endpoint singularities, and the p-series test.
----
-
 # Powers and improper endpoints
 
 Keep three computations separate: the power function, the finite-interval
 integral, and the improper limit. Follow the
-[shared formalization policy](../../FORMALIZATION_GUIDE.md#computable-foundations-exact-mathematical-theorems)
-and the [checked power-integral guide](../../docs/POWER_IMPROPER.md).
+[shared formalization policy](../../../FORMALIZATION_GUIDE.md#computable-foundations-exact-mathematical-theorems)
+and the [checked power-integral guide](../../../docs/POWER_IMPROPER.md).
 
 ## Establish the finite integral first
 
@@ -70,9 +65,9 @@ Retain the sharper integer algorithms when they apply.
 
 ## Proof sources and checks
 
-Use [RealPowerIntegralTest](../../ComputableAnalysis/RealPowerIntegralTest.lean),
-[the finite endpoint proof](../../ComputableAnalysis/BinomialEndpointBounds.lean),
-and [the independent series construction](../../ComputableAnalysis/RealPowerSeries.lean).
+Use [RealPowerIntegralTest](../../../ComputableAnalysis/RealPowerIntegralTest.lean),
+[the finite endpoint proof](../../../ComputableAnalysis/BinomialEndpointBounds.lean),
+and [the independent series construction](../../../ComputableAnalysis/RealPowerSeries.lean).
 Run `lake env lean scripts/check_real_power_integrals.lean` and
 `lake env lean scripts/check_power_improper.lean` after relevant changes.
 

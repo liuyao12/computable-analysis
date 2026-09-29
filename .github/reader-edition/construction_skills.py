@@ -23,13 +23,14 @@ MATH = re.compile(r'\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\)')
 OVERVIEW = 'construction-skills.html'
 
 
-def catalogue():
-    rows = json.loads((SOURCE / 'catalogue.json').read_text())
+def catalogue(examples=False):
+    rows = json.loads((SOURCE / ('examples.json' if examples else 'catalogue.json')).read_text())
     assert len({r['page'] for r in rows}) == len(rows)
     for row in rows:
-        assert re.fullmatch(r'[a-z0-9-]+', row['skill'])
+        if not examples:
+            assert re.fullmatch(r'[a-z0-9-]+', row['skill'])
         assert re.fullmatch(r'skill-[a-z0-9-]+\.html', row['page'])
-        assert (ROOT / 'skills' / row['skill'] / 'SKILL.md').is_file()
+        assert (ROOT / row['source']).is_file()
     return rows
 
 
@@ -38,10 +39,9 @@ def digest(path):
 
 
 def render_skill(row, revision):
-    source = ROOT / 'skills' / row['skill'] / 'SKILL.md'
+    source = ROOT / row['source']
     text = source.read_text()
-    assert text.startswith('---\n')
-    body = text.split('---', 2)[2]
+    body = text.split('---', 2)[2] if text.startswith('---\n') else text
     formulas = []
 
     def protect(match):
@@ -52,11 +52,12 @@ def render_skill(row, revision):
     for i, formula in enumerate(formulas):
         rendered = rendered.replace(f'CONSTRUCTIONMATHPLACEHOLDER{i}END', html.escape(formula))
     doc = BeautifulSoup(rendered, 'html.parser')
-    pages = {f"skills/{r['skill']}/SKILL.md": r['page'] for r in catalogue()}
+    pages = {r['source']: r['page'] for r in catalogue() + catalogue(examples=True)}
     pages.update({'docs/POWER_IMPROPER.md': 'power-improper.html',
                   'docs/GAUSSIAN_CONVOLUTION.md': 'gaussian-convolution.html',
                   'docs/N_BALL_GAMMA.md': 'n-ball-volume.html',
                   'docs/RATIONAL_PRIMITIVES.md': 'rational-primitives.html',
+                  'docs/POLYGONAL_CAUCHY.md': 'complex-analysis.html',
                   'book/cosine-square/page.html': 'cosine.html'})
     for link in doc.select('a[href]'):
         href = link['href']
@@ -93,15 +94,18 @@ def add_navigation(path, site, rows):
         return False
     nav = BeautifulSoup(match.group(), 'html.parser').nav
     assert not nav.select('.construction-skill-navigation, .construction-skill-label'), path
-    links = [(OVERVIEW, 'Choose a construction')] + [(r['page'], r['title']) for r in rows]
-    section = BeautifulSoup('<span class="nav-label construction-skill-label">Construction skills</span>', 'html.parser')
+    links = [(r['page'], r['title']) for r in rows]
+    section = BeautifulSoup('<a class="nav-label construction-skill-label">Skills</a>', 'html.parser')
+    section.a['href'] = os.path.relpath(site / OVERVIEW, path.parent).replace(os.sep, '/')
     for target, title in links:
         href = os.path.relpath(site / target, path.parent).replace(os.sep, '/')
         link = section.new_tag('a', href=href, attrs={'class': 'construction-skill-navigation'})
         link.string = title
         section.append(link)
+    chapters = nav.select_one(".later-chapters")
+    assert chapters is not None, (path, "missing chapter navigation")
     for node in reversed(list(section.contents)):
-        nav.insert(0, node.extract())
+        chapters.insert_after(node.extract())
     updated = original[:match.start()] + str(nav) + original[match.end():]
     # Only the existing navigation may change; preserve all other bytes.
     assert NAV.sub('', updated, count=1) == NAV.sub('', original, count=1)
@@ -117,25 +121,28 @@ def make_page(template, body, title, name, revision, row=None):
         meta = doc.new_tag('meta', attrs={'name': 'documentation-revision'})
         doc.head.append(meta)
     meta['content'] = revision
-    doc.select_one('meta[name="description"]')['content'] = 'Function-specific integral construction, error estimates, and proof status.'
+    doc.select_one('meta[name="description"]')['content'] = 'Real integrals, complex path integrals, and series: construction, estimates, and proof status.'
     for link in doc.select('#book-nav a.current'):
         link['class'] = [c for c in link.get('class', []) if c != 'current']
         link.attrs.pop('aria-current', None)
-    active = doc.select_one(f'#book-nav a[href="{name}"]')
+    active_name = name if row is None or 'skill' in row else 'skill-real-integrals.html'
+    active = doc.select_one(f'#book-nav a[href="{active_name}"]')
     assert active
     active['class'] = active.get('class', []) + ['current']
     active['aria-current'] = 'page'
     main = doc.select_one('main.reader')
     assert main
     main.clear()
-    main.append(BeautifulSoup('<div class="chapter-kicker">CONSTRUCTION SKILLS</div>', 'html.parser'))
+    main.append(BeautifulSoup('<div class="chapter-kicker">SKILLS</div>', 'html.parser'))
     article = doc.new_tag('article', attrs={'class': 'construction-skill'})
     article.append(BeautifulSoup(body, 'html.parser'))
     main.append(article)
     if row:
         intro = BeautifulSoup('<p class="lead">' + html.escape(row['summary']) + '</p><p class="construction-skill-status">' + html.escape(row['status']) + '</p>', 'html.parser')
         article.h1.insert_after(intro)
-        links = BeautifulSoup(f'<div class="construction-skill-links"><a href="reading/skills/{row["skill"]}/SKILL.md" download>Download SKILL.md</a><a href="https://github.com/liuyao12/computable-analysis/blob/{revision}/skills/{row["skill"]}/SKILL.md">View source skill</a><a href="{row["example"]}">Worked example and proof status</a></div>', 'html.parser')
+        download = 'reading/' + row['source']
+        label = 'SKILL.md' if 'skill' in row else 'example notes'
+        links = BeautifulSoup(f'<div class="construction-skill-links"><a href="{download}" download>Download {label}</a><a href="https://github.com/liuyao12/computable-analysis/blob/{revision}/{row["source"]}">View source</a><a href="{row["example"]}">Worked example and proof status</a></div>', 'html.parser')
         article.select_one('.construction-skill-status').insert_after(links)
     toc = doc.select_one('.on-this-page')
     if toc:
@@ -144,7 +151,7 @@ def make_page(template, body, title, name, revision, row=None):
             link = doc.new_tag('a', href='#' + heading['id'])
             link.string = heading.get_text()
             toc.append(link)
-    main.append(BeautifulSoup(f'<footer class="chapter-footer"><a href="{OVERVIEW}">Construction skills</a><a href="https://github.com/liuyao12/computable-analysis/tree/{revision}/skills">Skill sources · {revision[:12]}</a></footer>', 'html.parser'))
+    main.append(BeautifulSoup(f'<footer class="chapter-footer"><a href="{OVERVIEW}">Skills</a><a href="https://github.com/liuyao12/computable-analysis/tree/{revision}/skills">Skill sources · {revision[:12]}</a></footer>', 'html.parser'))
     doc.head.append(doc.new_tag('link', rel='stylesheet', href='reading/construction-skills.css'))
     assert not doc.select('article sup, article sub')
     return str(doc)
@@ -160,32 +167,34 @@ def install(site, revision):
     cards = []
     for row in rows:
         cards.append(f'<section class="construction-skill-card"><h3><a href="{row["page"]}">{html.escape(row["title"])}</a></h3><p>{html.escape(row["summary"])}</p><p class="construction-skill-status">{html.escape(row["status"])}</p><a href="{row["page"]}">Read the construction →</a></section>')
+    for row in rows + catalogue(examples=True):
         body = render_skill(row, revision)
         (site / row['page']).write_text(make_page(template, body, row['title'], row['page'], revision, row))
-        target = site / 'reading/skills' / row['skill'] / 'SKILL.md'
+        target = site / 'reading' / row['source']
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes((ROOT / 'skills' / row['skill'] / 'SKILL.md').read_bytes())
+        target.write_bytes((ROOT / row['source']).read_bytes())
     body = (SOURCE / 'index.html').read_text().replace('__CARDS__', ''.join(cards)).replace('__REPO__', f'https://github.com/liuyao12/computable-analysis/blob/{revision}/')
-    (site / OVERVIEW).write_text(make_page(template, body, 'Construction skills', OVERVIEW, revision))
+    (site / OVERVIEW).write_text(make_page(template, body, 'Skills', OVERVIEW, revision))
     (site / 'reading/construction-skills.css').write_bytes((SOURCE / 'skills.css').read_bytes())
-    print('Installed four function-specific skills and visible book navigation')
+    print('Installed real-integral, complex-integral, and series skills after the chapters')
 
 
 def finalize(site, revision):
     rows = catalogue()
-    pages = [OVERVIEW] + [r['page'] for r in rows]
+    all_rows = rows + catalogue(examples=True)
+    pages = [OVERVIEW] + [r['page'] for r in all_rows]
     navigation = []
     for path in sorted(site.rglob('*.html')):
         if 'reference' in path.relative_to(site).parts:
             continue
         doc = BeautifulSoup(path.read_text(), 'html.parser')
         if doc.select_one('#book-nav'):
-            assert len(doc.select('#book-nav .construction-skill-navigation')) == len(pages), path
+            assert len(doc.select('#book-nav .construction-skill-navigation')) == len(rows), path
             navigation.append(str(path.relative_to(site)))
-    files = pages + ['reading/construction-skills.css'] + [f'reading/skills/{r["skill"]}/SKILL.md' for r in rows]
+    files = pages + ['reading/construction-skills.css'] + ['reading/' + r['source'] for r in all_rows]
     report = dict(documentationRevision=revision, newLeanTheoremsClaimed=False,
-                  functionSpecificSkills=rows, navigationPages=navigation,
-                  sourceHashes={f'skills/{r["skill"]}/SKILL.md': digest(ROOT / 'skills' / r['skill'] / 'SKILL.md') for r in rows},
+                  skills=rows, constructionExamples=catalogue(examples=True), navigationPages=navigation,
+                  sourceHashes={r['source']: digest(ROOT / r['source']) for r in all_rows},
                   artifacts={p: digest(site / p) for p in files})
     (site / 'reading/construction-skills.json').write_text(json.dumps(report, indent=2) + '\n')
     print('Recorded final skills, downloads, and navigation in', len(navigation), 'reader pages')

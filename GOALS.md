@@ -1,14 +1,13 @@
 # Computable Analysis: Canonical Roadmap
 
-## Function-specific construction skills in the reader
+## Integral and series skills in the reader
 
-The Construction skills navigation showcases rational functions, trigonometric
-functions, improper powers, and Gaussian/Gamma integrals. Their reader pages
-are generated from maintained `skills/*/SKILL.md` files, with direct downloads,
-construction estimates, and explicit checked/open boundaries. The shared
-elementary baseline is piecewise-constant data on piecewise-linear paths;
-these skills concern the other functions built and compared with that baseline.
-This documentation milestone adds no new Lean theorem or Gaussian/Gamma claim.
+The Skills navigation follows the chapters and contains real integrals,
+complex path integrals, and series. Their pages are generated from maintained
+`SKILL.md` files, with direct downloads. Rational, trigonometric, power, and
+Gaussian/Gamma constructions are supporting examples within the real-integral
+guide. The elementary integration baseline remains piecewise-constant data
+on piecewise-linear paths. This documentation adds no new Lean theorem.
 
 ## Guiding priority: laws about constructed objects
 

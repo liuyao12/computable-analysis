@@ -1,0 +1,34 @@
+[
+  {
+    "page": "skill-rational-integrals.html",
+    "title": "Rational functions",
+    "summary": "Separate the poles, enclose each piece, and justify the logarithm or arctangent formula.",
+    "status": "Checked examples; general assembly remains partial",
+    "example": "rational-primitives.html",
+    "source": "skills/real-integrals/references/rational-function-integrals.md"
+  },
+  {
+    "page": "skill-trigonometric-integrals.html",
+    "title": "Trigonometric functions",
+    "summary": "Use circle-coordinate bounds, turning-point brackets, and agreement across periods.",
+    "status": "Cosine-square example checked; broader recipes require their bridges",
+    "example": "cosine.html",
+    "source": "skills/real-integrals/references/trigonometric-integrals.md"
+  },
+  {
+    "page": "skill-improper-powers.html",
+    "title": "Powers and improper endpoints",
+    "summary": "Build the finite integral first, budget the omitted endpoint, then compare finite sums.",
+    "status": "Power tests checked for arbitrary represented-real exponents",
+    "example": "power-improper.html",
+    "source": "skills/real-integrals/references/improper-power-integrals.md"
+  },
+  {
+    "page": "skill-gaussian-gamma.html",
+    "title": "Gaussian and Gamma integrals",
+    "summary": "Control the finite interval and both tails; keep normalization and geometry as separate comparisons.",
+    "status": "Construction programme; Gaussian normalization and Gamma bridges remain open",
+    "example": "gaussian-convolution.html",
+    "source": "skills/real-integrals/references/gaussian-gamma-integrals.md"
+  }
+]

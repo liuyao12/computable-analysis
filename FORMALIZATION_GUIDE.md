@@ -1,15 +1,14 @@
 # Formalization Guide
 
-## Function-specific construction skills
+## Integral and series skills
 
-Use the reader's Construction skills section to choose a mathematical route:
-[rational functions](skills/rational-function-integrals/SKILL.md),
-[trigonometric functions](skills/trigonometric-integrals/SKILL.md),
-[improper powers](skills/improper-power-integrals/SKILL.md), and
-[Gaussian and Gamma integrals](skills/gaussian-gamma-integrals/SKILL.md).
-Each skill gives a finite computation, error analysis, comparison obligations,
-and the current checked boundary. The skills are maintained source files,
-rendered directly as reader pages and available to download.
+The reader's Skills section follows the chapters and presents three guides:
+[real integrals](skills/real-integrals/SKILL.md),
+[complex path integrals](skills/complex-path-integrals/SKILL.md), and
+[series](skills/series/SKILL.md). Each distinguishes specification, computation,
+and comparison. Particular-function recipes are supporting examples, with
+explicit estimates and checked boundaries. The three skills are maintained
+source files, rendered directly as reader pages and available to download.
 
 All proposed integration theories must include the elementary integral of a
 piecewise-constant function along a continuous piecewise-linear path:

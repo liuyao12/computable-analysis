@@ -1,14 +1,9 @@
----
-name: trigonometric-integrals
-description: Construct definite integrals of trigonometric functions and rational expressions in sine and cosine, with certified angle charts, whole-cell bounds, turning points, and periodic endpoint transport.
----
-
 # Trigonometric functions
 
 Specify the angle convention first. The reader's circle coordinates use
 \(\cos(\pi x)\) and \(\sin(\pi x)\). Preserve that normalization when applying
 derivative, substitution, or period formulas. Follow the
-[shared formalization policy](../../FORMALIZATION_GUIDE.md#computable-foundations-exact-mathematical-theorems).
+[shared formalization policy](../../../FORMALIZATION_GUIDE.md#computable-foundations-exact-mathematical-theorems).
 
 ## Construct the finite approximation
 
@@ -49,7 +44,7 @@ can reduce the expression to a rational function, but it needs a proved
 change-of-variable comparison, chart orientation, and coverage. Split and
 compare charts where the substitution has a pole. Algebraic substitution alone
 is not a definite-integral theorem. Continue with the
-[rational-function skill](../rational-function-integrals/SKILL.md).
+[rational-function skill](rational-function-integrals.md).
 
 ## Arbitrary endpoints and periodicity
 
@@ -67,12 +62,12 @@ over every valid represented endpoint in its genuine domain.
 
 ## Proof sources and checks
 
-Read the maintained [cosine-square exposition](../../book/cosine-square/page.html)
-and [rational/trigonometric progress report](../../docs/RATIONAL_PRIMITIVES.md).
+Read the maintained [cosine-square exposition](../../../book/cosine-square/page.html)
+and [rational/trigonometric progress report](../../../docs/RATIONAL_PRIMITIVES.md).
 The cosine-square page links its pinned checked source; the general rational
 trigonometric assembly has a different, incomplete proof status.
 
 Check interval bounds, shrinking turning-point errors, period-boundary agreement,
 and representation invariance. Run the relevant theorem audits using the
-[formalization skill](../computable-analysis-formalization/SKILL.md). Do not
+[formalization skill](../../computable-analysis-formalization/SKILL.md). Do not
 extend the checked cosine-square result to a whole family without its bridges.

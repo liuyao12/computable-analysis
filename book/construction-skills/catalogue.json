@@ -1,34 +1,29 @@
 [
   {
-    "skill": "rational-function-integrals",
-    "page": "skill-rational-integrals.html",
-    "title": "Rational functions",
-    "summary": "Separate the poles, enclose each piece, and justify the logarithm or arctangent formula.",
-    "status": "Checked examples; general assembly remains partial",
-    "example": "rational-primitives.html"
+    "skill": "real-integrals",
+    "page": "skill-real-integrals.html",
+    "title": "Real integrals",
+    "summary": "Specify the integral laws, then construct finite enclosures and justified improper limits for the function at hand.",
+    "status": "Construction guide; each example records its own checked scope",
+    "example": "power-improper.html",
+    "source": "skills/real-integrals/SKILL.md"
   },
   {
-    "skill": "trigonometric-integrals",
-    "page": "skill-trigonometric-integrals.html",
-    "title": "Trigonometric functions",
-    "summary": "Use circle-coordinate bounds, turning-point brackets, and agreement across periods.",
-    "status": "Cosine-square example checked; broader recipes require their bridges",
-    "example": "cosine.html"
+    "skill": "complex-path-integrals",
+    "page": "skill-complex-integrals.html",
+    "title": "Complex path integrals",
+    "summary": "Integrate along paths using constants times displacements, with linearity, path addition, and quantitative comparisons.",
+    "status": "Construction guide; finite geometric computations and semantic bridges are distinguished",
+    "example": "complex-analysis.html",
+    "source": "skills/complex-path-integrals/SKILL.md"
   },
   {
-    "skill": "improper-power-integrals",
-    "page": "skill-improper-powers.html",
-    "title": "Powers and improper endpoints",
-    "summary": "Build the finite integral first, budget the omitted endpoint, then compare finite sums.",
-    "status": "Power tests checked for arbitrary represented-real exponents",
-    "example": "power-improper.html"
-  },
-  {
-    "skill": "gaussian-gamma-integrals",
-    "page": "skill-gaussian-gamma.html",
-    "title": "Gaussian and Gamma integrals",
-    "summary": "Control the finite interval and both tails; keep normalization and geometry as separate comparisons.",
-    "status": "Construction programme; Gaussian normalization and Gamma bridges remain open",
-    "example": "gaussian-convolution.html"
+    "skill": "series",
+    "page": "skill-series.html",
+    "title": "Series",
+    "summary": "Define a sum through its ordered partial sums and compute it with finite tail estimates and explicit error budgets.",
+    "status": "Construction guide; convergence and closed-form identification require separate evidence",
+    "example": "arctan-taylor.html",
+    "source": "skills/series/SKILL.md"
   }
 ]

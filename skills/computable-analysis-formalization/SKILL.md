@@ -5,13 +5,11 @@ description: Formalize calculus, elementary-function, integral, series, inverse-
 
 # Computable Analysis Formalization
 
-For a function-specific integral, start with the mathematical construction
-skill: [rational functions](../rational-function-integrals/SKILL.md),
-[trigonometric functions](../trigonometric-integrals/SKILL.md),
-[improper powers](../improper-power-integrals/SKILL.md), or
-[Gaussian and Gamma integrals](../gaussian-gamma-integrals/SKILL.md).
-Use this skill for their shared formalization obligations. The reader exposes
-the function-specific skills directly in its left navigation.
+For integrals or sums, start with [real integrals](../real-integrals/SKILL.md),
+[complex path integrals](../complex-path-integrals/SKILL.md), or
+[series](../series/SKILL.md). Use this skill for their shared formalization
+obligations. The reader exposes the three guides after the chapters; particular
+functions are examples inside them.
 
 Build computable foundations with rational interval algorithms and explicit
 error certificates; expose exact mathematical theorems over valid represented

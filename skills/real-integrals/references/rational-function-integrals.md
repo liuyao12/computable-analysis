@@ -1,13 +1,8 @@
----
-name: rational-function-integrals
-description: Construct and compare definite integrals of rational functions on certified pole-free real intervals or complex paths, using finite range bounds, partial fractions, and justified logarithm or arctangent branches.
----
-
 # Rational functions
 
 Start with the actual quotient and its domain. A supplied factorization is useful
 input; finding a factorization is a separate problem. Read the
-[shared formalization policy](../../FORMALIZATION_GUIDE.md#computable-foundations-exact-mathematical-theorems)
+[shared formalization policy](../../../FORMALIZATION_GUIDE.md#computable-foundations-exact-mathematical-theorems)
 and retain arbitrary valid represented coefficients and endpoints in the requested theorem.
 
 ## Construct the finite approximation
@@ -54,7 +49,7 @@ Use polynomial division and partial fractions when a factorization is supplied.
 Handle repeated poles and quadratic factors explicitly. For each logarithm or
 arctangent term, certify a branch over the full integration route. A loop may
 cross local branch charts even though it avoids poles: transport the branch with
-the [analytic-continuation skill](../analytic-continuation/SKILL.md).
+the [analytic-continuation skill](../../analytic-continuation/SKILL.md).
 
 Prove the definite-integral identity with its base point and orientation.
 A formal derivative of the generated expression is an intermediate result;
@@ -63,15 +58,15 @@ whose content is the desired endpoint agreement.
 
 ## Proof sources and checks
 
-Read [the rational-function progress report](../../docs/RATIONAL_PRIMITIVES.md)
+Read [the rational-function progress report](../../../docs/RATIONAL_PRIMITIVES.md)
 before choosing an existing bridge. It distinguishes finite partial fractions,
 analytic atom certificates, and the still-incomplete general assembly.
-[VerticalReciprocalIntegral](../../ComputableAnalysis/VerticalReciprocalIntegral.lean)
+[VerticalReciprocalIntegral](../../../ComputableAnalysis/VerticalReciprocalIntegral.lean)
 is a direct complex range-box computation; raw validity alone is not a universal
 path-integral theorem.
 
 Audit the concrete result on its stated domain, including irrational inputs,
 denominator separation, orientation, and representation invariance. Use the
-[formalization skill](../computable-analysis-formalization/SKILL.md) for the Lean
+[formalization skill](../../computable-analysis-formalization/SKILL.md) for the Lean
 verification procedure. This skill describes a construction method; it adds no
 new checked theorem by itself.
