@@ -20,6 +20,20 @@ def differentiable (p : PolynomialFunction) : DifferentiableOn p.map where
   derivative_congr := fun ha hb _ _ he => p.diff.map.eval_congr ha hb
     (p.diff.entire _) (p.diff.entire _) he
 
+/-- The quotient foundation supplies the full polynomial holomorphic interface.
+Derivative continuity follows from differentiability of the formal derivative. -/
+def quotientHolomorphic (p : PolynomialFunction) : Holomorphic p.map :=
+  p.differentiable.holomorphic
+    { radius := fun _ _ _ => ⟨1,by decide⟩
+      inside := fun _ _ _ z _ _ => p.entire z }
+    (ContinuousOn.ofAtPoint fun a ha hpa =>
+      (p.diff.differentiable.continuous.atPoint a ha (p.diff.entire a)).restrict
+        (fun z _ => p.diff.entire z) hpa)
+
+/-- Its derivative computation is exactly the formal derivative evaluator. -/
+theorem quotientHolomorphic_derivative (p : PolynomialFunction) (a : ComplexRaw) :
+    p.quotientHolomorphic.derivative a = p.diff.map.eval a := rfl
+
 def iteratedDerivativeContinuation (p : PolynomialFunction) (n : Nat) (a : ComplexRaw) (ha : a.Valid) :
     DerivativeAt (p.iteratedDiff n).map a ((p.iteratedDiff (n+1)).map.eval a) :=
   (p.iteratedDiff n).derivativeContinuation a ha

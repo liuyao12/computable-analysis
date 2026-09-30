@@ -16,7 +16,8 @@ run_cmd do
       ``derivativeAt_constant, ``derivativeAt_identity, ``DerivativeAt.add, ``DerivativeAt.mul,
       ``DerivativeAt.comp, ``DifferentiableOn.continuous, ``DifferentiableOn.holomorphic,
       ``DerivativeAt.realRestriction, ``PolynomialFunction.derivativeContinuation,
-      ``PolynomialFunction.differentiable, ``PolynomialFunction.iteratedDerivativeContinuation,
+      ``PolynomialFunction.differentiable, ``PolynomialFunction.quotientHolomorphic,
+      ``PolynomialFunction.quotientHolomorphic_derivative, ``PolynomialFunction.iteratedDerivativeContinuation,
       ``PolynomialFunction.continuation_derivative_equiv, ``PolynomialFunction.realDerivativeContinuation,
       ``PolynomialFunction.realDifferentiable, ``PolynomialFunction.ofRealCoefficients,
       ``RealFunctionTheory.Small.congr, ``RealFunctionTheory.Small.sub_self,
@@ -172,3 +173,8 @@ example (a : ComplexRaw) (ha : a.Valid) :
 
 example (f : FunctionTheory.Map) (a b d : ComplexRaw) (h : DerivativeAt f a d)
     (hb : b.Valid) (hab : a.Equiv b) : DerivativeAt f b d := h.congrPoint hb hab
+
+-- Polynomial derivative continuity is derived from the next polynomial's differentiability.
+example (p : PolynomialFunction) : Holomorphic p.map := p.quotientHolomorphic
+example (p : PolynomialFunction) : ContinuousOn p.map.domain p.quotientHolomorphic.derivative :=
+  p.quotientHolomorphic.continuousDerivative

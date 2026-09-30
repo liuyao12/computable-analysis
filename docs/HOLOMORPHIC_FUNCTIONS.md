@@ -106,6 +106,9 @@ complex coefficients and inputs. `realDerivativeContinuation` gives the real
 part of its restriction to arbitrary represented real inputs;
 `ofRealCoefficients` accepts certified represented real coefficients, including
 irrational ones. These are actual derivative witnesses, not formal jet data.
+`quotientHolomorphic` constructs the full polynomial holomorphic interface
+from the new foundation: derivative continuity follows from differentiability
+of the next polynomial. Its derivative evaluator is literally `diff.map.eval`.
 Their derivative values agree with the existing analytic polynomial client,
 and the audit identifies the square derivative used by the Fuchs example.
 The early convex FTC can retain its secant-bracket proof; this new foundation

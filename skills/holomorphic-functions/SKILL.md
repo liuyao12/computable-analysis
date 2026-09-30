@@ -84,6 +84,8 @@ evidence. Local continuity rules need only continuity at the relevant center.
 For a polynomial, use `derivativeContinuation`, `differentiable`, or
 `iteratedDerivativeContinuation` in
 [`DerivativeContinuationPolynomial`](../../ComputableAnalysis/DerivativeContinuationPolynomial.lean).
+`quotientHolomorphic` also constructs the full polynomial holomorphic witness;
+derivative continuity comes from differentiability of the next polynomial.
 Real inputs use `realDerivativeContinuation`; `ofRealCoefficients` accepts
 certified irrational coefficients. A reciprocal or infinite series still needs
 its own quotient computation, validity, factorization, and continuity proof.
