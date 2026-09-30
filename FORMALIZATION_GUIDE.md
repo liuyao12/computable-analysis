@@ -163,6 +163,28 @@ witnesses. `HasDerivativeAt.continuous` derives continuity at one point from
 its derivative remainder estimate, without derivative continuity or an open
 domain. `Holomorphic.continuous` assembles those witnesses throughout its domain.
 
+## Derivative as a continuous divided difference
+
+`DerivativeDefinition` makes the derivative at a valid represented point
+\(a\) the center value of a supplied quotient computation \(Q_a\):
+\[
+ f(y)-f(a)\simeq(y-a)Q_a(y),\qquad Q_a(a)\simeq d.
+\]
+The quotient is valid and representation invariant on the function's domain,
+and continuous at \(a\) in the exact-value sense above. For a nonzero
+displacement this factorization characterizes the usual divided difference.
+At the center it avoids division and any equality test on represented values.
+`FunctionTheory.DerivativeAt` and `RealFunctionTheory.DerivativeAt` use this
+same definition. `DifferentiableOn` supplies a derivative at every valid domain
+point; it does not assume continuity of the derivative function.
+
+Use `DerivativeContinuation` for proved sum, product, chain, representation
+transport, and remainder bridges. Use `DerivativeContinuationPolynomial` for
+actual polynomial quotient extensions and their real restrictions at arbitrary
+represented inputs and coefficients. Keep continuity of the derivative as a
+separate obligation where needed. A reverse constructor from every arbitrary
+`HasDerivativeAt` to a computed quotient extension is still open.
+
 ## Working holomorphicity
 
 `FunctionTheory.Holomorphic` supplies a represented complex derivative and

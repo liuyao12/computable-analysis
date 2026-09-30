@@ -1,5 +1,6 @@
 import Lean
-import ComputableAnalysis.HolomorphicPolynomial
+import ComputableAnalysis.DerivativeContinuationPolynomial
+import ComputableAnalysis.AlgebraicODE.FuchsContinuation
 
 open Lean Elab Command
 open ComputableAnalysis FunctionTheory
@@ -9,7 +10,16 @@ run_cmd do
   for mod in env.header.moduleNames do
     if mod.toString.startsWith "Mathlib" then
       throwError "Unexpected Mathlib import: {mod}"
-  for name in [``RealFunctionTheory.Small.congr, ``RealFunctionTheory.Small.sub_self,
+  for name in [``ContinuousAt.add, ``ContinuousAt.mul, ``ContinuousAt.comp, ``ContinuousAt.restrict,
+      ``DerivativeAt.toEstimate, ``DerivativeAt.continuous, ``DerivativeAt.unique,
+      ``DerivativeAt.congrPoint, ``DerivativeAt.congrDerivative, ``DerivativeAt.congrMap,
+      ``derivativeAt_constant, ``derivativeAt_identity, ``DerivativeAt.add, ``DerivativeAt.mul,
+      ``DerivativeAt.comp, ``DifferentiableOn.continuous, ``DifferentiableOn.holomorphic,
+      ``DerivativeAt.realRestriction, ``PolynomialFunction.derivativeContinuation,
+      ``PolynomialFunction.differentiable, ``PolynomialFunction.iteratedDerivativeContinuation,
+      ``PolynomialFunction.continuation_derivative_equiv, ``PolynomialFunction.realDerivativeContinuation,
+      ``PolynomialFunction.realDifferentiable, ``PolynomialFunction.ofRealCoefficients,
+      ``RealFunctionTheory.Small.congr, ``RealFunctionTheory.Small.sub_self,
       ``RealFunctionTheory.ContinuousAt.congrPoint, ``RealFunctionTheory.ContinuousAt.congrEval,
       ``RealFunctionTheory.ContinuousOn.atPoint, ``RealFunctionTheory.ContinuousOn.ofAtPoint,
       ``RealFunctionTheory.ContinuousOn.congrEval, ``RealFunctionTheory.continuousOn_identity,
@@ -118,3 +128,47 @@ example (f : FunctionTheory.Map) (a b : ComplexRaw)
     (h : ContinuousAt f.domain f.eval a) (hb : b.Valid) (hab : a.Equiv b) :
     ContinuousAt f.domain f.eval b :=
   h.congrPoint hb hab f.domain_congr f.valid f.eval_congr
+
+-- Quotient-extension derivatives at arbitrary represented inputs and coefficients.
+example (cs : List Continuation.Point) (a : ComplexRaw) (ha : a.Valid) (n : Nat) :
+    DerivativeAt ((PolynomialFunction.ofCoefficients cs).iteratedDiff n).map a
+      (((PolynomialFunction.ofCoefficients cs).iteratedDiff (n+1)).map.eval a) :=
+  (PolynomialFunction.ofCoefficients cs).iteratedDerivativeContinuation n a ha
+
+example (cs : List ComputableAnalysis.Real) (a : RealRaw) (ha : a.Valid) :
+    RealFunctionTheory.DerivativeAt (PolynomialFunction.ofRealCoefficients cs).map.realRestriction a
+      ((PolynomialFunction.ofRealCoefficients cs).diff.map.eval (ComplexRaw.ofRealRaw a)).realPart :=
+  (PolynomialFunction.ofRealCoefficients cs).realDerivativeContinuation a ha
+
+-- The actual quotient computation has a value at its center; no equality test.
+def cubicExtension := cubic.derivativeContinuation input (ComplexRaw.ofQComplex_valid _)
+#guard (cubicExtension.quotient input).compute 0 == QBox.point ⟨-4,2⟩
+#guard (cubicExtension.quotient ComplexRaw.zero).compute 0 == QBox.point ⟨-2,0⟩
+#guard 0 < (cubicExtension.quotient_continuous.delta ⟨1/100,by decide +kernel⟩).val
+example : (cubicExtension.quotient input).Equiv (cubic.diff.map.eval input) :=
+  cubicExtension.value_at
+example : (ComplexRaw.sub (cubic.map.eval ComplexRaw.zero) (cubic.map.eval input)).Equiv
+    (ComplexRaw.mul (ComplexRaw.sub ComplexRaw.zero input) (cubicExtension.quotient ComplexRaw.zero)) :=
+  cubicExtension.factorization ComplexRaw.zero (ComplexRaw.ofQComplex_valid _) (cubic.entire _)
+
+-- Chain rule on explicit quotient computations, including the center.
+def squarePolynomial : PolynomialFunction := .mul .input .input
+def affinePolynomial : PolynomialFunction := .add
+  (.mul (.constant (coefficient 2 1)) .input) (.constant (coefficient 1 (-1)))
+def affineExtension := affinePolynomial.derivativeContinuation input (ComplexRaw.ofQComplex_valid _)
+def chainExtension := affineExtension.comp (squarePolynomial.derivativeContinuation (affinePolynomial.map.eval input)
+  (affinePolynomial.map.valid input (ComplexRaw.ofQComplex_valid _) (affinePolynomial.entire _)))
+#guard (chainExtension.quotient input).compute 0 == QBox.point ⟨4,12⟩
+#guard (chainExtension.quotient ComplexRaw.zero).compute 0 == QBox.point ⟨5,5⟩
+
+-- New quotient evidence identifies the derivative used by the existing Fuchs client.
+example (a : ComplexRaw) (ha : a.Valid) :
+    (squarePolynomial.diff.map.eval a).Equiv (square_holomorphic.derivative a) := by
+  let h := (squarePolynomial.derivativeContinuation a ha).congrMap
+    (g := square) (fun _ => ⟨fun _ => True.intro,fun _ => ⟨True.intro,True.intro⟩⟩)
+    (fun z hz _ => ComplexRaw.equiv_refl _ (ComplexRaw.mul_valid hz hz))
+  exact h.toEstimate.unique square_holomorphic.openDomain
+    (square_holomorphic.atPoint a ha True.intro)
+
+example (f : FunctionTheory.Map) (a b d : ComplexRaw) (h : DerivativeAt f a d)
+    (hb : b.Valid) (hab : a.Equiv b) : DerivativeAt f b d := h.congrPoint hb hab

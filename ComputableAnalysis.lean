@@ -1,6 +1,6 @@
 import ComputableAnalysis.RepresentedContinuity
 import ComputableAnalysis.Continuation
-import ComputableAnalysis.HolomorphicPolynomial
+import ComputableAnalysis.DerivativeContinuationPolynomial
 import ComputableAnalysis.VerticalReciprocalIntegral
 import ComputableAnalysis.ComplexIntegralEnclosure
 import ComputableAnalysis.ArctanTaylorBoundary

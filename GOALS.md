@@ -27,6 +27,24 @@ rational-ray growth theorem through exact scaled-jet comparisons. General
 Frobenius branch construction, uniform ray adapters, sector continuation,
 and fundamental-matrix monodromy remain open.
 
+## Continuous quotient derivative foundation (2026-09-30)
+
+Real and complex derivatives now have a common exact specification: a
+representation-invariant divided difference, continuous at its center, with
+\(f(y)-f(a)\simeq(y-a)Q_a(y)\) and \(Q_a(a)\simeq d\).
+Constructed constants, identity, sum/product/chain rules, all represented
+polynomials and their iterated derivatives, and real restrictions. Center,
+derivative, and evaluator transport are checked. The quotient proves the
+existing quantitative remainder law and identifies the derivative in the
+Fuchs square client. Open-domain complex uniqueness is a theorem.
+Derivative continuity stays separate; supplied extra evidence upgrades the
+construction to the existing holomorphic interface.
+
+The general reverse remainder-to-quotient constructor remains open, as do
+reciprocal, exponential, sine/cosine, logarithm, and root quotient adapters.
+No completed real/complex system or compactness is used. See the
+[construction scope](docs/HOLOMORPHIC_FUNCTIONS.md#derivative-as-a-continuous-divided-difference).
+
 ## Represented-value continuity (2026-09-30)
 
 `RepresentedContinuity` provides real and complex continuity at a point and

@@ -24,6 +24,21 @@
 <p><a href="__REPO__ComputableAnalysis/RepresentedContinuity.lean">Real and complex continuity interfaces and representation proofs</a> · <a href="__REPO__ComputableAnalysis/HolomorphicCalculus.lean">Differentiability implies continuity</a></p>
 </section>
 
+<section id="derivative-continuation">
+<h2 id="derivative-foundation">The derivative fills the missing quotient value</h2>
+<p>At a point \(a\), compute a divided difference \(Q_a\) satisfying</p>
+\[f(y)-f(a)\simeq(y-a)Q_a(y),\qquad Q_a(a)\simeq f'(a).\]
+<p>The quotient is continuous at \(a\). Away from \(a\), the factorization characterizes the ordinary difference quotient. At \(a\), it gives the derivative without dividing by zero or testing equality of represented numbers. We use the same definition for real and complex functions. Differentiability throughout a domain means this construction at each point; continuity of the derivative itself is a separate property.</p>
+<p>For the square function, the quotient is particularly simple:</p>
+\[Q_a(y)=y+a,\qquad Q_a(a)=2a.\]
+<p>Constants and identity have constant quotients. The proved sum, product, and chain rules construct quotients for finite formulas:</p>
+\[Q^{fg}_a(y)=Q^f_a(y)g(y)+f(a)Q^g_a(y),\qquad Q^{g\circ f}_a(y)=Q^g_{f(a)}(f(y))Q^f_a(y).\]
+<p>These rules establish every finite polynomial and each successive derivative at arbitrary represented inputs, with arbitrary represented coefficients. Real restrictions are checked too. Equivalent interval representations and equivalent evaluators preserve the derivative construction.</p>
+<p>Quotient continuity proves the earlier first-order remainder estimate. With a separately supplied open domain and continuous derivative, these constructions enter the holomorphic interface below. The quotient definition itself uses neither compactness nor a completed number system. The early convex FTC retains its secant-bracket proof.</p>
+<p class="classic-scope">The construction from every arbitrary remainder witness back to a computed quotient remains open. Reciprocal, exponential, sine, cosine, logarithm, and root quotient adapters still need their function-specific proofs. Value algorithms and formal derivative formulas are useful inputs to those proofs.</p>
+<p><a href="__REPO__ComputableAnalysis/DerivativeDefinition.lean">Real and complex definition</a> · <a href="__REPO__ComputableAnalysis/DerivativeContinuation.lean">Proved calculus and representation laws</a> · <a href="__REPO__ComputableAnalysis/DerivativeContinuationPolynomial.lean">Polynomial and real constructions</a></p>
+</section>
+
 <section id="holomorphic-foundation">
 <h2 id="holomorphic">Holomorphic functions: the working definition</h2>
 <p>We supply a function on an open domain together with a continuous complex derivative. Both are computations by shrinking rational rectangles. Their values and the domain must be independent of the chosen valid representation of an input.</p>

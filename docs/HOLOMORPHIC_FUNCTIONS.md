@@ -2,8 +2,8 @@
 
 The working notion supplies a function and a **continuous complex derivative**
 on an open domain. We choose sufficient data for the intended function theory;
-we do not first prove the broadest existence criterion. The weaker local
-first-order condition is separately available as `HasDerivativeAt`.
+we do not first prove the broadest existence criterion. The pointwise derivative foundation is `DerivativeAt`, a continuous divided
+difference. Its proved remainder consequence remains available as `HasDerivativeAt`.
 
 For every valid represented point \(a\), supply a valid derivative value
 \(d(a)\). For every positive rational \(\varepsilon\), supply a positive
@@ -58,6 +58,64 @@ The real identity and arbitrary valid represented constants have constructed
 witnesses. `HasDerivativeAt.continuous` derives continuity at one point from
 its derivative remainder estimate, without derivative continuity or an open
 domain. `Holomorphic.continuous` assembles those witnesses throughout its domain.
+
+## Derivative as a continuous divided difference
+
+`DerivativeDefinition` makes the derivative at a valid represented point
+\(a\) the center value of a supplied quotient computation \(Q_a\):
+\[
+ f(y)-f(a)\simeq(y-a)Q_a(y),\qquad Q_a(a)\simeq d.
+\]
+The quotient is valid and representation invariant on the function's domain,
+and continuous at \(a\) in the exact-value sense above. For a nonzero
+displacement this factorization characterizes the usual divided difference.
+At the center it avoids division and any equality test on represented values.
+`FunctionTheory.DerivativeAt` and `RealFunctionTheory.DerivativeAt` use this
+same definition. `DifferentiableOn` supplies a derivative at every valid domain
+point; it does not assume continuity of the derivative function.
+
+`PointwiseContinuity` constructs local sum, product, and composition laws.
+`DerivativeContinuation` uses these to construct actual quotient extensions:
+\[
+ Q^{f+g}_a(y)=Q^f_a(y)+Q^g_a(y),
+\]
+\[
+ Q^{fg}_a(y)=Q^f_a(y)g(y)+f(a)Q^g_a(y),\qquad
+ Q^{g\circ f}_a(y)=Q^g_{f(a)}(f(y))Q^f_a(y).
+\]
+Constants and identity have literal zero and one quotients. Sums and products
+use the intersection domain; composition uses the inverse-image domain.
+`congrPoint`, `congrDerivative`, and `congrMap` preserve the construction under
+equivalent center names, derivative names, and evaluators with equivalent domains.
+Derivative uniqueness is proved on supplied open complex domains, rather than
+assumed as a field. Differentiability also proves continuity of the function
+at the point.
+
+The bridge `DerivativeAt.toEstimate` proves the existing `HasDerivativeAt`
+remainder law: subtracting \(d(y-a)\) gives
+\((y-a)(Q_a(y)-d)\), and quotient continuity controls the second factor.
+`DifferentiableOn.holomorphic` then enters the existing holomorphic interface
+when an open domain and continuity of the derivative are separately supplied.
+The reverse construction from every arbitrary remainder witness to a computed
+quotient extension has **not** been proved. The two interfaces are not yet
+advertised as equivalent.
+
+`DerivativeContinuationPolynomial` constructs the quotient extension for every
+finite polynomial, every iterated derivative, and arbitrary valid represented
+complex coefficients and inputs. `realDerivativeContinuation` gives the real
+part of its restriction to arbitrary represented real inputs;
+`ofRealCoefficients` accepts certified represented real coefficients, including
+irrational ones. These are actual derivative witnesses, not formal jet data.
+Their derivative values agree with the existing analytic polynomial client,
+and the audit identifies the square derivative used by the Fuchs example.
+The early convex FTC can retain its secant-bracket proof; this new foundation
+does not add a derivative-continuity hypothesis to that theorem.
+
+The next concrete extensions are reciprocal quotients on separated domains,
+then exponential, sine, and cosine quotients from series with certified tails.
+Logarithm and square-root quotients need their stated branch domains. Existing
+value evaluators or formal derivative formulas alone do not discharge these
+construction obligations.
 
 ## Checked constructions
 
@@ -187,7 +245,7 @@ Cauchy-to-Taylor bridge retain their previous obligations. Rectangular grids
 can be the working geometry without a universal contour-integral operator.
 
 Run `lake env lean scripts/check_holomorphic.lean` after building
-`ComputableAnalysis.HolomorphicPolynomial`. The audit checks the import
+`ComputableAnalysis.DerivativeContinuationPolynomial`. The audit checks the import
 closure and proof dependencies, and
 executes polynomial derivatives, a complex affine composition, and positive
 error radii. It rejects unapproved axioms as well as unfinished proofs.

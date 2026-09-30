@@ -17,8 +17,18 @@ Our working notion supplies an open domain, a represented function and its
 complex derivative, local derivative-error radii, and continuity moduli for
 the derivative. It deliberately asks for more data than the classical
 pointwise definition. Do not spend the task proving equivalence with the
-weakest definition unless requested. `HasDerivativeAt` is the underlying
-first-order property and does not itself assume derivative continuity.
+weakest definition unless requested. `DerivativeAt` is the pointwise derivative foundation: construct a valid,
+representation-invariant quotient \(Q_a\), continuous at the center, with
+\[
+ f(y)-f(a)\simeq(y-a)Q_a(y),\qquad Q_a(a)\simeq d.
+\]
+Use [`DerivativeDefinition`](../../ComputableAnalysis/DerivativeDefinition.lean)
+for this contract. It needs no equality decision or division at the center.
+`DerivativeAt.toEstimate` proves the older `HasDerivativeAt` remainder law.
+Neither pointwise interface assumes continuity of the derivative function.
+`DifferentiableOn.holomorphic` upgrades the quotient foundation when the open
+domain and derivative continuity are supplied separately. The reverse
+constructor for every arbitrary remainder witness remains open.
 
 The domain and evaluator must respect `ComplexRaw.Equiv`. Prove validity for
 all valid represented inputs in the domain, including irrational inputs and
@@ -64,6 +74,19 @@ and current Lean boundary for each route. Methods remain skill guidance;
 they are not a mandatory hierarchy of integrand or function classes.
 
 ## Reuse checked calculus
+
+For quotient extensions, use `DerivativeAt.add`, `mul`, and `comp` in
+[`DerivativeContinuation`](../../ComputableAnalysis/DerivativeContinuation.lean).
+The pointwise chain rule is `inner.comp outer`; its outer center is the inner
+value. `congrPoint`, `congrDerivative`, and `congrMap` transport actual quotient
+evidence. Local continuity rules need only continuity at the relevant center.
+
+For a polynomial, use `derivativeContinuation`, `differentiable`, or
+`iteratedDerivativeContinuation` in
+[`DerivativeContinuationPolynomial`](../../ComputableAnalysis/DerivativeContinuationPolynomial.lean).
+Real inputs use `realDerivativeContinuation`; `ofRealCoefficients` accepts
+certified irrational coefficients. A reciprocal or infinite series still needs
+its own quotient computation, validity, factorization, and continuity proof.
 
 For a finite polynomial with arbitrary represented coefficients, use
 `PolynomialFunction.ofCoefficients`, `hasDerivative`, and

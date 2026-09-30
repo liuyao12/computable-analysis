@@ -26,6 +26,35 @@ Real constants and identity have constructed witnesses. A derivative estimate
 at a single complex point proves continuity there without requiring continuity
 of the derivative or openness of the domain.
 
+\section{Derivatives as continuous divided differences}
+For a real or complex represented function, supply a valid,
+representation-invariant computation $Q_a$ satisfying
+\[
+ f(y)-f(a)\simeq(y-a)Q_a(y),\qquad Q_a(a)\simeq d,
+\]
+and continuous at $a$. This characterizes the quotient away from the center
+and gives its value at the center without division or an equality decision.
+Differentiability throughout a domain does not require continuity of the
+derivative function. For $f(y)=y^2$, take $Q_a(y)=y+a$.
+
+Pointwise continuity laws prove the sum, product, and chain constructions:
+\[
+ Q^{fg}_a(y)=Q^f_a(y)g(y)+f(a)Q^g_a(y),\qquad
+ Q^{g\circ f}_a(y)=Q^g_{f(a)}(f(y))Q^f_a(y).
+\]
+Constants, identity, every finite represented-coefficient polynomial, and all
+iterated polynomial derivatives have actual quotient extensions. Restricting
+to real inputs and taking real parts supplies real derivative witnesses.
+Equivalent centers, derivative names, and evaluators preserve the construction.
+Uniqueness on supplied open complex domains is proved, not assumed.
+
+Subtracting $d(y-a)$ leaves $(y-a)(Q_a(y)-d)$, so quotient continuity proves
+the existing first-order remainder law. Additional open-domain and
+derivative-continuity evidence enters the holomorphic interface below.
+A general reverse constructor from arbitrary remainder witnesses has not
+been proved. Reciprocal and elementary-series quotient adapters remain open;
+formal derivative formulas and value evaluators alone do not provide them.
+
 \section{A supplied continuous complex derivative}
 Our working holomorphic functions have an open domain, represented value and
 derivative computations, and explicit local moduli. For every positive

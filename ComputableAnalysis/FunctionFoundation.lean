@@ -1,4 +1,4 @@
-import ComputableAnalysis.RepresentedContinuity
+import ComputableAnalysis.DerivativeDefinition
 import ComputableAnalysis.Basic
 import ComputableAnalysis.ComplexInterval
 import ComputableAnalysis.FunctionDomains

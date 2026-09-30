@@ -101,6 +101,12 @@ def install(site,revision,euler_audit,cauchy_audit,arctan_audit,holomorphic_audi
     assert 'PASS: holomorphic witnesses, representation transport, no Mathlib imports or sorryAx.' in holomorphic_log
     holomorphic_names=set(re.findall(r'^AUDIT ([^:]+):', holomorphic_log, re.M))
     assert {
+      'ComputableAnalysis.FunctionTheory.DerivativeAt.toEstimate',
+      'ComputableAnalysis.FunctionTheory.DerivativeAt.congrPoint',
+      'ComputableAnalysis.FunctionTheory.DerivativeAt.congrMap',
+      'ComputableAnalysis.FunctionTheory.DerivativeAt.comp',
+      'ComputableAnalysis.FunctionTheory.PolynomialFunction.realDerivativeContinuation',
+      'ComputableAnalysis.FunctionTheory.PolynomialFunction.iteratedDerivativeContinuation',
       'ComputableAnalysis.FunctionTheory.Holomorphic.continuous',
       'ComputableAnalysis.FunctionTheory.Holomorphic.add',
       'ComputableAnalysis.FunctionTheory.Holomorphic.mul',

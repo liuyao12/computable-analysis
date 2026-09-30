@@ -7,6 +7,14 @@ implemented. Each route must eventually supply the existing represented
 
 ## Finite algebra and composition
 
+For pointwise derivatives, construct the continuous divided difference in
+`DerivativeAt`. Constant and identity quotients are literal constants; the
+sum, product, and chain rules construct the others. The product quotient is
+\(Q^f_a(y)g(y)+f(a)Q^g_a(y)\), and the composition quotient is
+\(Q^g_{f(a)}(f(y))Q^f_a(y)\). Continuity at the center suffices.
+`PolynomialFunction.derivativeContinuation` and its iterated and real
+restriction constructors already provide this evidence.
+
 For polynomials, use `PolynomialFunction.ofCoefficients` or finite
 `PolynomialFunction` expressions. Their `holomorphic`, `hasDerivative`, and
 `iterated_hasDerivative` constructors cover arbitrary represented coefficients
@@ -41,7 +49,11 @@ With \(h=z-a\), prove the finite binomial identity and bound
 \[
 f(a+h)-f(a)-f'(a)h.
 \]
-Bound the differentiated series' variation separately. A factorial or
+For the quotient foundation, sum the finite divided-difference polynomials
+with a certified tail uniform near the center, prove the exact factorization,
+and prove continuity at the center. Convergence of the value series alone
+does not justify this passage. Bound the differentiated series' variation
+separately when upgrading to the existing holomorphic interface. A factorial or
 geometric majorant with an executable cutoff is sufficient; first proving
 that every holomorphic function has a Taylor expansion is unnecessary.
 For arbitrary represented centers, transfer finite polynomial identities to
