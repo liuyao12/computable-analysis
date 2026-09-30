@@ -1,6 +1,6 @@
 import ComputableAnalysis.RepresentedContinuity
 import ComputableAnalysis.Continuation
-import ComputableAnalysis.DerivativeContinuationPolynomial
+import ComputableAnalysis.HolomorphicFoundation
 import ComputableAnalysis.VerticalReciprocalIntegral
 import ComputableAnalysis.ComplexIntegralEnclosure
 import ComputableAnalysis.ArctanTaylorBoundary
@@ -17,6 +17,10 @@ import ComputableAnalysis.FiniteConvolution
 import ComputableAnalysis.NBallGaussian
 import ComputableAnalysis.HarmonicImproperBounds
 import ComputableAnalysis.RealPowerIntegralTest
+
+import ComputableAnalysis.GammaInteger
+import ComputableAnalysis.ZetaIntegerBounds
+import ComputableAnalysis.ZeroIsolation
 
 /-!
 # Computable Analysis

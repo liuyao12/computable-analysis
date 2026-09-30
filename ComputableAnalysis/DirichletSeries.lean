@@ -934,7 +934,7 @@ theorem zetaNatInterval_width_nonneg (p : Nat) (n : Nat) :
   unfold zetaNatTailBound
   by_cases hn0 : n = 0
   · simp [hn0]
-    native_decide
+    decide +kernel
   · simp [hn0]
     exact Rat.le_of_lt (by
       rw [Rat.div_def, Rat.one_mul]
@@ -975,9 +975,9 @@ theorem zetaNatInterval_nested
                 | zero => simp
                 | succ p ih =>
                     rw [Rat.pow_succ, ih]
-                    native_decide
+                    decide +kernel
               rw [hpow]
-              native_decide
+              decide +kernel
       · exact zetaNatUpper_le_of_le p hp (Nat.pos_of_ne_zero hn0) hnm
 
 theorem zetaNatWidthsShrinkToZero (p : Nat) :

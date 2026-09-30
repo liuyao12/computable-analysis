@@ -41,6 +41,8 @@ jobs:
           lake env lean scripts/check_integral_enclosures.lean
       - name: Audit holomorphic witnesses and derivative continuity
         run: lake env lean scripts/check_holomorphic.lean
+      - name: Audit zeta Gamma and reflected zero foundations
+        run: lake env lean scripts/check_zeta_gamma.lean
       - name: Audit continuation foundations and blueprint declarations
         run: |
           lake build ComputableAnalysis.Continuation ComputableAnalysis.Blueprint

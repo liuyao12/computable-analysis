@@ -1,6 +1,6 @@
 ---
 name: analytic-continuation
-description: Formalize analytic continuation of a specific represented function along a specified route in this repository, proving local holomorphicity, overlap agreement, and any claimed endpoint or branch change. Use for logarithm, arctangent, algebraic branches, or local ODE solutions; not for an automatic continuation oracle or numerical plots alone.
+description: Formalize analytic continuation of a specific represented function along a specified route in this repository, proving local holomorphicity, overlap agreement, and any claimed endpoint or branch change. Use for logarithm, arctangent, algebraic branches, local ODE solutions, or certified zero-counting applications; not for an automatic continuation oracle or numerical plots alone.
 ---
 
 # Analytic continuation of a specific function
@@ -27,6 +27,14 @@ Use the identity theorem only at its proved scope: accumulation must occur
 inside the holomorphic domain, and conclusions propagate within a connected
 component. In particular, the zeros of \(\sin(1/z)\) accumulating at the
 excluded origin do not force the function to vanish.
+
+## Certified zeros after continuation
+
+For a finite-height zeta theorem or another claim about every zero in a region,
+use [certified zero counting](references/certified-zero-counting.md). Construct
+the function, certify whole contour segments, prove the argument principle,
+and separate the total count from exact root location. The checked reflection
+and uniqueness implication does not supply an actual zero count.
 
 ## Uniqueness on a connected domain
 
@@ -99,8 +107,10 @@ construct it. If using a search, prove its termination from the available
 quantitative data. If a next chart cannot be justified, report the obstruction
 or missing lemma; do not assume every germ continues along every proposed route.
 
-Construct valid local evaluators, derivatives, and derivative-continuity
-moduli as required by `FunctionTheory.Holomorphic`. Choose the method for the
+Construct valid local evaluators and quotient derivatives for
+`FunctionTheory.HolomorphicOn`. Existing continuation clients use the stronger
+legacy `Holomorphic` interface and still require their separate derivative-
+continuity evidence. Choose the method for the
 function: an algebraic branch with root separation, a local series with tail
 bounds, a normalized definite-integral computation, or a proved local ODE
 solution. A finite jet or a continuous root-tracking picture is insufficient.

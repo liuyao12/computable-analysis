@@ -1,23 +1,24 @@
 ---
 name: holomorphic-functions
-description: Prove that a specific represented complex function is holomorphic in this repository, supplying a complex derivative, rational error radii, and derivative continuity. Use for function-theory constructions and analytic adapters, not merely formal jet algebra.
+description: Prove that a specific represented complex function is holomorphic in this repository, supplying a complex derivative, rational quotient-continuity radii on an open domain. Use for function-theory constructions and analytic adapters, not merely formal jet algebra.
 ---
 
 # Proving specific functions holomorphic
 
 Read the [formalization policy](../../FORMALIZATION_GUIDE.md#computable-foundations-exact-mathematical-theorems)
-and use the existing computable-analysis foundation. The checked interface is
-[`FunctionTheory.Holomorphic`](../../ComputableAnalysis/Holomorphic.lean).
+and use the existing computable-analysis foundation. The primary checked interface is
+`FunctionTheory.HolomorphicOn` in
+[`DerivativeDefinition`](../../ComputableAnalysis/DerivativeDefinition.lean); its calculus is
+[`HolomorphicFoundation`](../../ComputableAnalysis/HolomorphicFoundation.lean).
 The worked constructions are in
 [`HolomorphicExamples.lean`](../../ComputableAnalysis/HolomorphicExamples.lean).
 
 ## Choose the mathematical contract
 
-Our working notion supplies an open domain, a represented function and its
-complex derivative, local derivative-error radii, and continuity moduli for
-the derivative. It deliberately asks for more data than the classical
-pointwise definition. Do not spend the task proving equivalence with the
-weakest definition unless requested. `DerivativeAt` is the pointwise derivative foundation: construct a valid,
+Use an open domain and a computed complex derivative at every valid point.
+Continuity of the derivative across centers is a separate property, not a
+field of `HolomorphicOn`. The old `Holomorphic` record remains available for
+clients that need its additional derivative-continuity evidence. `DerivativeAt` is the pointwise derivative foundation: construct a valid,
 representation-invariant quotient \(Q_a\), continuous at the center, with
 \[
  f(y)-f(a)\simeq(y-a)Q_a(y),\qquad Q_a(a)\simeq d.
@@ -26,8 +27,10 @@ Use [`DerivativeDefinition`](../../ComputableAnalysis/DerivativeDefinition.lean)
 for this contract. It needs no equality decision or division at the center.
 `DerivativeAt.toEstimate` proves the older `HasDerivativeAt` remainder law.
 Neither pointwise interface assumes continuity of the derivative function.
-`DifferentiableOn.holomorphic` upgrades the quotient foundation when the open
-domain and derivative continuity are supplied separately. The reverse
+`HolomorphicOn` combines `DifferentiableOn` with an open domain. Its sum,
+product, and composition constructors need no derivative-continuity hypothesis.
+`HolomorphicOn.toLegacy` upgrades to the older interface when that extra
+evidence is supplied. The reverse
 constructor for every arbitrary remainder witness remains open.
 
 The domain and evaluator must respect `ComplexRaw.Equiv`. Prove validity for

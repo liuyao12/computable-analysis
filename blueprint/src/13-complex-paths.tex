@@ -514,3 +514,29 @@ functional equations with denominator separation, Schwarz reflection,
 separated algebraic roots, and local ODE uniqueness. The new chapter gives
 Gamma recurrence and the natural boundary of $\sum_{k\ge0}z^{2^k}$ as
 mathematical examples, not newly checked Lean identities.
+
+
+\section{Zeta, Gamma, and certified zero counts}
+The primary contract \texttt{HolomorphicOn} supplies quotient derivatives on an
+open domain; derivative continuity is separate data for legacy clients.
+The first special-function laws now prove, for integers \(p\ge2\),
+\[
+ 1+2^{-p}\le\zeta(p)\le2,\qquad\zeta(p)\ne0,
+ \qquad p\le q\Longrightarrow\zeta(q)\le\zeta(p).
+\]
+For positive-integer Gamma values, actual Gauss products satisfy
+\[
+ G_{m,n}=\frac{n!n^{m+1}}{\prod_{j=0}^{n}(m+1+j)}
+ =m!\prod_{j=1}^{m+1}\frac{n}{n+j},\qquad
+ G_{m,n}\le m!\le G_{m,n}+\frac{m!(m+1)^2}{n+1}.
+\]
+Finite intersections give a valid nested computation with exact factorial
+limit. This does not yet identify an arbitrary-parameter Euler integral.
+
+Reflection and uniqueness prove an exact critical-line implication: a supplied
+zero in a reflection-stable isolating region, together with function symmetry
+and uniqueness of the root there, has \(\Re\rho\simeq1/2\).
+The general argument principle, complex zeta continuation and symmetry, and
+actual certified zero counts remain open. An approximate root list supplies
+none of those missing conclusions. The maintained zero-counting skill records
+the contour, multiplicity, isolation, and completeness obligations.

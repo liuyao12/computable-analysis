@@ -1122,7 +1122,7 @@ theorem factorialTailStart_satisfies (C : Rat) :
     C <= (((factorialTailStart C + 1 : Nat) : Rat) / 2) := by
   have h := rat_le_num_natAbs_succ C
   unfold factorialTailStart
-  have htwopos : (0 : Rat) < 2 := by native_decide
+  have htwopos : (0 : Rat) < 2 := by decide +kernel
   have htwone : (2 : Rat) ≠ 0 := Rat.ne_of_gt htwopos
   apply Rat.le_of_mul_le_mul_right (c := (2 : Rat))
   · calc

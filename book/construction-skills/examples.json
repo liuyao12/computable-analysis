@@ -34,7 +34,7 @@
   {
     "page": "skill-holomorphic-functions-methods.html",
     "title": "Holomorphicity methods",
-    "summary": "Choose a method from the function’s construction, then prove its quantitative and overlap obligations.",
+    "summary": "Choose a method from the function\u2019s construction, then prove its quantitative and overlap obligations.",
     "status": "Method guide; checked adapters and unproved general bridges are distinguished",
     "example": "analytic-continuation.html#methods",
     "source": "skills/holomorphic-functions/references/methods.md",
@@ -43,10 +43,19 @@
   {
     "page": "skill-analytic-continuation-methods.html",
     "title": "Continuation methods",
-    "summary": "Choose a method from the function’s construction, then prove its quantitative and overlap obligations.",
+    "summary": "Choose a method from the function\u2019s construction, then prove its quantitative and overlap obligations.",
     "status": "Method guide; checked adapters and unproved general bridges are distinguished",
     "example": "analytic-continuation.html#methods",
     "source": "skills/analytic-continuation/references/methods.md",
+    "parent": "skill-analytic-continuation.html"
+  },
+  {
+    "page": "skill-certified-zero-counting.html",
+    "title": "Certified zero counting",
+    "summary": "Prove a contour count, isolate every root, and use symmetry for exact location.",
+    "status": "Argument-principle guide; the exact reflection/uniqueness implication is checked; complex zeta counts remain open",
+    "example": "complex-analysis.html#certified-zeta-zeros",
+    "source": "skills/analytic-continuation/references/certified-zero-counting.md",
     "parent": "skill-analytic-continuation.html"
   }
 ]

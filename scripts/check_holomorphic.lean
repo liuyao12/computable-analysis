@@ -1,5 +1,5 @@
 import Lean
-import ComputableAnalysis.DerivativeContinuationPolynomial
+import ComputableAnalysis.HolomorphicFoundation
 import ComputableAnalysis.AlgebraicODE.FuchsContinuation
 
 open Lean Elab Command
@@ -10,7 +10,9 @@ run_cmd do
   for mod in env.header.moduleNames do
     if mod.toString.startsWith "Mathlib" then
       throwError "Unexpected Mathlib import: {mod}"
-  for name in [``ContinuousAt.add, ``ContinuousAt.mul, ``ContinuousAt.comp, ``ContinuousAt.restrict,
+  for name in [``HolomorphicOn.continuous, ``HolomorphicOn.toLegacy, ``HolomorphicOn.add,
+      ``HolomorphicOn.mul, ``HolomorphicOn.comp, ``HolomorphicOn.derivative_unique,
+      ``PolynomialFunction.holomorphicOn, ``ContinuousAt.add, ``ContinuousAt.mul, ``ContinuousAt.comp, ``ContinuousAt.restrict,
       ``DerivativeAt.toEstimate, ``DerivativeAt.continuous, ``DerivativeAt.unique,
       ``DerivativeAt.congrPoint, ``DerivativeAt.congrDerivative, ``DerivativeAt.congrMap,
       ``derivativeAt_constant, ``derivativeAt_identity, ``DerivativeAt.add, ``DerivativeAt.mul,
@@ -178,3 +180,8 @@ example (f : FunctionTheory.Map) (a b d : ComplexRaw) (h : DerivativeAt f a d)
 example (p : PolynomialFunction) : Holomorphic p.map := p.quotientHolomorphic
 example (p : PolynomialFunction) : ContinuousOn p.map.domain p.quotientHolomorphic.derivative :=
   p.quotientHolomorphic.continuousDerivative
+
+-- The primary holomorphicity contract has no derivative-continuity hypothesis.
+example (p : PolynomialFunction) : HolomorphicOn p.map := p.holomorphicOn
+example (f g : FunctionTheory.Map) (hf : HolomorphicOn f) (hg : HolomorphicOn g) :
+    HolomorphicOn (g.comp f) := hg.comp hf

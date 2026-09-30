@@ -724,3 +724,23 @@ invariance are proved in the native foundation. No compactness theorem or
 completed zeta series is used. The general series constructor is executable
 but deliberately conservative; fast numerical evaluation is not claimed.
 See [the exact scope and verification commands](docs/POWER_IMPROPER.md).
+
+
+## Zeta/Gamma function theory and certified zeros
+
+The primary open-domain derivative contract is now `HolomorphicOn`; algebra,
+composition, function continuity, and polynomial witnesses are checked without
+requiring derivative continuity. Legacy continuation/ODE clients retain their
+stronger interface and explicit extra evidence.
+
+First concrete results: exact integer-zeta bounds, monotonicity and nonvanishing;
+Gauss-product Gamma computations at positive integers with proved factorial
+limits; exact reflected-root location from genuine uniqueness evidence.
+See [the scope audit](docs/FUNCTION_THEORY_ZETA_GAMMA.md).
+
+Next: represented complex series and reciprocal neighborhoods; complex zeta
+on its initial half-plane; Gamma on a full parameter domain with justified
+improper integral/limit comparisons; continuation and completed-zeta symmetry;
+Cauchy and argument-principle bridges with actual multiplicity counts; then
+certified isolating contours and completeness up to a specified height.
+No finite-height critical-line zero theorem is yet claimed.

@@ -187,10 +187,12 @@ separate obligation where needed. A reverse constructor from every arbitrary
 
 ## Working holomorphicity
 
-`FunctionTheory.Holomorphic` supplies a represented complex derivative and
-its local continuity moduli, alongside first-order error radii and an open
-domain. This intentionally uses stronger data than bare pointwise complex
-differentiability. Affine maps with represented coefficients and the square
+Use `FunctionTheory.HolomorphicOn` for an open domain and a quotient derivative
+at every point. `HolomorphicFoundation` constructs continuity of the function,
+sums, products, composition, and derivative uniqueness at this scope, without
+requiring continuity of the derivative. The older `FunctionTheory.Holomorphic`
+interface keeps derivative continuity for existing clients; `toLegacy` requires
+that evidence explicitly. Affine maps with represented coefficients and the square
 map have constructed witnesses. `HolomorphicCalculus` now constructs
 continuity, sums, products, and compositions with their genuine open domains.
 `HolomorphicPolynomial` connects formal differentiation, all iterated
@@ -1037,3 +1039,10 @@ invariance are proved in the native foundation. No compactness theorem or
 completed zeta series is used. The general series constructor is executable
 but deliberately conservative; fast numerical evaluation is not claimed.
 See [the exact scope and verification commands](docs/POWER_IMPROPER.md).
+
+
+For zeta/Gamma and finite-region zero theorems, follow the
+[function-theory scope audit](docs/FUNCTION_THEORY_ZETA_GAMMA.md) and
+[certified zero-counting guide](skills/analytic-continuation/references/certified-zero-counting.md).
+Separate contour computation, the argument-principle theorem, complete root
+counting, and exact critical-line location. None follows from approximate roots.

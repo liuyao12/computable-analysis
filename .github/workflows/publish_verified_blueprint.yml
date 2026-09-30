@@ -102,6 +102,11 @@ on:
       - 'ComputableAnalysis/ZetaReal*'
       - 'ComputableAnalysis/ZetaReal/**'
       - 'scripts/check_zeta_real.lean'
+      - 'scripts/check_zeta_gamma.lean'
+      - 'ComputableAnalysis/GammaInteger.lean'
+      - 'ComputableAnalysis/ZetaIntegerBounds.lean'
+      - 'ComputableAnalysis/ZeroIsolation.lean'
+      - 'docs/FUNCTION_THEORY_ZETA_GAMMA.md'
       - 'scripts/check_basel.lean'
       - 'ComputableAnalysis/Basel/**'
       - 'docs/BASEL.md'
@@ -415,21 +420,38 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p holomorphic-reports
-          lake build ComputableAnalysis.DerivativeContinuationPolynomial | tee holomorphic-reports/build.log
+          lake build ComputableAnalysis.HolomorphicFoundation | tee holomorphic-reports/build.log
           lake env lean scripts/check_holomorphic.lean | tee holomorphic-reports/audit.log
           python3 - <<'PYREPORT'
           import hashlib,json,os,pathlib
           root=pathlib.Path('.')
           audit=pathlib.Path('holomorphic-reports/audit.log')
-          sources=[root/f'ComputableAnalysis/{name}.lean' for name in ['RepresentedContinuity','PointwiseContinuity','DerivativeDefinition','DerivativeContinuation','RealDerivativeContinuation','DerivativeContinuationPolynomial','Holomorphic','HolomorphicExamples','HolomorphicCalculus','HolomorphicPolynomial']]
+          sources=[root/f'ComputableAnalysis/{name}.lean' for name in ['RepresentedContinuity','PointwiseContinuity','DerivativeDefinition','DerivativeContinuation','RealDerivativeContinuation','DerivativeContinuationPolynomial','HolomorphicFoundation','Holomorphic','HolomorphicExamples','HolomorphicCalculus','HolomorphicPolynomial']]
           sources.append(root/'scripts/check_holomorphic.lean')
           report=dict(documentationRevision=os.environ['GITHUB_SHA'],generalIdentityTheoremProved=False,
             generalCauchyFromHolomorphicityProved=False,
-            checked=['derivative as continuous quotient extension','pointwise quotient algebra and chain rule','quotient-extension representation invariance','exact remainder bridge','represented real polynomial quotient extensions','represented real and complex pointwise continuity','domain continuity from pointwise witnesses','continuity representation transport','differentiability implies pointwise continuity','function continuity','sum rule','product rule','chain rule with inverse-image domain','derivative continuity','equivalent evaluator transfer','represented-coefficient polynomials','iterated polynomial derivatives','polynomial ODE residual comparison'],
+            checked=['primary holomorphicity without derivative continuity','open-domain quotient calculus and derivative uniqueness','derivative as continuous quotient extension','pointwise quotient algebra and chain rule','quotient-extension representation invariance','exact remainder bridge','represented real polynomial quotient extensions','represented real and complex pointwise continuity','domain continuity from pointwise witnesses','continuity representation transport','differentiability implies pointwise continuity','function continuity','sum rule','product rule','chain rule with inverse-image domain','derivative continuity','equivalent evaluator transfer','represented-coefficient polynomials','iterated polynomial derivatives','polynomial ODE residual comparison'],
             remaining=['arbitrary remainder-witness to quotient-extension construction','reciprocal and rational maps','represented complex series','Cauchy reconstruction from holomorphicity','general identity and analytic monodromy','general Frobenius branches and sector adapters'],
             auditSha256=hashlib.sha256(audit.read_bytes()).hexdigest(),
             sourceHashes={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in sources})
           pathlib.Path('site/reading/holomorphic-calculus.json').write_text(json.dumps(report,indent=2)+'\n')
+          PYREPORT
+      - name: Check zeta Gamma limits and exact reflected zero location
+        run: |
+          set -euo pipefail
+          mkdir -p zeta-gamma-reports
+          lake build ComputableAnalysis.GammaInteger ComputableAnalysis.ZetaIntegerBounds ComputableAnalysis.ZeroIsolation | tee zeta-gamma-reports/build.log
+          lake env lean scripts/check_zeta_gamma.lean | tee zeta-gamma-reports/audit.log
+          cp zeta-gamma-reports/audit.log site/reading/zeta-gamma-audit.log
+          python3 - <<'PYREPORT'
+          import hashlib,json,os,pathlib
+          sources=[pathlib.Path(p) for p in ['ComputableAnalysis/GammaInteger.lean','ComputableAnalysis/ZetaIntegerBounds.lean','ComputableAnalysis/ZeroIsolation.lean','ComputableAnalysis/DirichletSeries.lean','ComputableAnalysis/PowerSeries.lean','scripts/check_zeta_gamma.lean','docs/FUNCTION_THEORY_ZETA_GAMMA.md','skills/analytic-continuation/references/certified-zero-counting.md']]
+          audit=pathlib.Path('zeta-gamma-reports/audit.log')
+          report=dict(documentationRevision=os.environ['GITHUB_SHA'],complexZetaConstructed=False,generalGammaConstructed=False,argumentPrincipleProved=False,finiteHeightCriticalLineTheoremProved=False,
+            checked=['integer zeta exact bounds and nonvanishing','integer zeta antitonicity','real zeta integer compatibility','actual Gauss finite-product cancellation','Gamma integer nested enclosures and explicit convergence','Gamma integer exact factorial limit','exact critical-line location from reflection and root uniqueness'],
+            remaining=['represented complex Dirichlet series','Gamma general parameters and Euler-integral comparison','critical-strip continuation and completed zeta symmetry','actual argument principle and multiplicity count','certified isolating rectangles and global completeness'],
+            auditSha256=hashlib.sha256(audit.read_bytes()).hexdigest(),sourceHashes={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in sources})
+          pathlib.Path('site/reading/zeta-gamma-foundation.json').write_text(json.dumps(report,indent=2)+'\n')
           PYREPORT
       - name: Check analytic continuation foundations
         run: |
@@ -518,6 +540,9 @@ jobs:
             polygonal-cauchy-reports
             continuation-reports
             site/reading/continuation-foundation.json
+            zeta-gamma-reports
+            site/reading/zeta-gamma-foundation.json
+            site/reading/zeta-gamma-audit.log
             holomorphic-reports
             site/reading/holomorphic-calculus.json
             arctan-taylor-reports
@@ -709,6 +734,12 @@ jobs:
                   assert 'polynomial ODE residual comparison' in calculus['checked']
                   assert hashlib.sha256(get('/reading/holomorphic-audit.log',True)).hexdigest()==calculus['auditSha256']
                   assert 'id="function-theory-audit"' in get('/complex-analysis.html',True).decode()
+                  zeta_gamma=get('/reading/zeta-gamma-foundation.json')
+                  assert zeta_gamma['documentationRevision']==revision
+                  assert not zeta_gamma['argumentPrincipleProved'] and not zeta_gamma['finiteHeightCriticalLineTheoremProved']
+                  assert hashlib.sha256(get('/reading/zeta-gamma-audit.log',True)).hexdigest()==zeta_gamma['auditSha256']
+                  assert 'id="certified-zeta-zeros"' in get('/complex-analysis.html',True).decode()
+                  assert 'Prove completeness' in get('/skill-certified-zero-counting.html',True).decode()
                   continuation=get('/reading/continuation-foundation.json')
                   assert continuation['documentationRevision']==revision
                   assert not continuation['fullAnalyticMonodromyProved']

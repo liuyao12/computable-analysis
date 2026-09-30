@@ -1,9 +1,10 @@
 # Holomorphic functions from represented computations
 
-The working notion supplies a function and a **continuous complex derivative**
-on an open domain. We choose sufficient data for the intended function theory;
-we do not first prove the broadest existence criterion. The pointwise derivative foundation is `DerivativeAt`, a continuous divided
-difference. Its proved remainder consequence remains available as `HasDerivativeAt`.
+The primary notion is `FunctionTheory.HolomorphicOn`: an open domain and a
+computed complex derivative at each valid point. The derivative is defined
+through a continuous divided difference. Continuity of the derivative as a
+function of its center is separate evidence. The older `Holomorphic` interface
+retains that extra field for existing contour, continuation, and ODE clients.
 
 For every valid represented point \(a\), supply a valid derivative value
 \(d(a)\). For every positive rational \(\varepsilon\), supply a positive
@@ -22,7 +23,7 @@ control without dividing by an uncertain represented displacement.
 
 The domain has supplied positive rational neighborhoods. Function values,
 domain membership, and derivative values respect equivalent valid input
-representations. A separate local continuity modulus bounds
+representations. For legacy clients, a separate local continuity modulus bounds
 \(\|d(z)-d(a)\|_\infty\) by \(\varepsilon\) on a supplied neighborhood.
 Neither a contour identity nor power-series representation is assumed.
 
@@ -227,8 +228,9 @@ a separate substantial task rather than a hidden assumption of these skills.
 
 ## Boundaries
 
-This interface deliberately includes derivative continuity data. No theorem
-equating it with bare pointwise classical holomorphicity is claimed. A
+The legacy interface includes derivative continuity data. `HolomorphicOn`
+does not. No reverse promotion of every legacy remainder witness to a computed
+quotient is claimed. A
 computable function need not be differentiable. Even when differentiable,
 its derivative is not automatically supplied by the evaluator. A raw function
 type does not establish Type-2 computability; executable concrete evaluators
@@ -248,7 +250,7 @@ Cauchy-to-Taylor bridge retain their previous obligations. Rectangular grids
 can be the working geometry without a universal contour-integral operator.
 
 Run `lake env lean scripts/check_holomorphic.lean` after building
-`ComputableAnalysis.DerivativeContinuationPolynomial`. The audit checks the import
+`ComputableAnalysis.HolomorphicFoundation`. The audit checks the import
 closure and proof dependencies, and
 executes polynomial derivatives, a complex affine composition, and positive
 error radii. It rejects unapproved axioms as well as unfinished proofs.
@@ -259,3 +261,13 @@ this is not a claim of a newly axiom-free foundation.
 
 The [holomorphic-functions skill](../skills/holomorphic-functions/SKILL.md)
 contains the function-specific proof strategies.
+
+## Zeta, Gamma, and certified zero location
+
+See the [function-theory audit and zeta/Gamma programme](FUNCTION_THEORY_ZETA_GAMMA.md).
+`ZetaIntegerBounds` proves exact bounds, antitonicity, and nonvanishing for the
+integer Dirichlet computations. `GammaInteger` computes the actual Gauss finite
+products with shrinking error bounds and proves their factorial limit.
+`ZeroIsolation` proves that reflection symmetry and root uniqueness force exact
+membership on the critical line. It does not establish any particular zeta
+zero, zero count, or finite-height Riemann-hypothesis theorem.

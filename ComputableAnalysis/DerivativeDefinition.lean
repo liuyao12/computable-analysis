@@ -37,6 +37,11 @@ structure DifferentiableOn (f : Map) where
   derivative_congr : ∀ {a b}, a.Valid → b.Valid → f.domain a → f.domain b →
     a.Equiv b → (derivative a).Equiv (derivative b)
 
+/-- Holomorphicity: a computed complex derivative at every point of an open domain.
+Continuity of the derivative is deliberately not a defining field. -/
+structure HolomorphicOn (f : Map) extends DifferentiableOn f where
+  openDomain : OpenDomain f
+
 end ComputableAnalysis.FunctionTheory
 
 namespace ComputableAnalysis.RealFunctionTheory

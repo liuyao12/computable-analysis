@@ -3,7 +3,7 @@
 These are function-specific proof routes. They are not additional definitions
 of holomorphicity and do not assert generic constructors that have not been
 implemented. Each route must eventually supply the existing represented
-`Map` and `Holomorphic` evidence, with arbitrary valid inputs in its domain.
+`Map` and `HolomorphicOn` evidence, with arbitrary valid inputs in its domain.
 
 ## Finite algebra and composition
 
@@ -23,10 +23,10 @@ by the ODE interface. Direct remainder identities remain useful for tighter
 function-specific radii; the square and affine examples are checked.
 For a rational expression, find a strictly positive rational denominator margin on that
 whole neighborhood before division. For sums, products, and compositions
-of supplied holomorphic maps, use
-`Holomorphic.add`, `mul`, and `comp` from `HolomorphicCalculus`. These
-construct derivative estimates, derivative continuity, and the correct open
-domains. Composition uses the inverse-image domain and computes local image
+of supplied holomorphic maps, use `HolomorphicOn.add`, `mul`, and `comp`
+from `HolomorphicFoundation`. These construct quotient derivatives and the
+correct open domains. The older `HolomorphicCalculus` rules also retain
+separately supplied derivative continuity for legacy clients. Composition uses the inverse-image domain and computes local image
 control. `Holomorphic.continuous` derives continuity of the original function;
 `Holomorphic.congr` changes to an equivalent evaluator on the same domain.
 
@@ -53,7 +53,7 @@ For the quotient foundation, sum the finite divided-difference polynomials
 with a certified tail uniform near the center, prove the exact factorization,
 and prove continuity at the center. Convergence of the value series alone
 does not justify this passage. Bound the differentiated series' variation
-separately when upgrading to the existing holomorphic interface. A factorial or
+separately when a legacy client needs derivative continuity. A factorial or
 geometric majorant with an executable cutoff is sufficient; first proving
 that every holomorphic function has a Taylor expansion is unnecessary.
 For arbitrary represented centers, transfer finite polynomial identities to
