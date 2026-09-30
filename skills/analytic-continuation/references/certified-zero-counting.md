@@ -81,3 +81,13 @@ which uses interval arithmetic, critical-line root information, and Turing's
 method for completeness. It is a reference for certification, not an imported
 argument-principle theorem or an assertion that our repository has proved the
 same result.
+
+## Proof sources and checks
+
+The exact reflection and uniqueness implication is in
+[ZeroIsolation](../../../ComputableAnalysis/ZeroIsolation.lean). Run
+`lake env lean scripts/check_zeta_gamma.lean` to check its dependency audit
+and the initial zeta/Gamma constructions. The
+[function-theory ledger](../../../docs/FUNCTION_THEORY_ZETA_GAMMA.md) records
+the remaining analytic and counting bridges. These checks do not certify
+any specific zeta-zero region yet.
