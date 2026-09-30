@@ -23,11 +23,20 @@ quotient, nor a theorem that bare derivative values already certify continuity.
 | --- | --- | --- |
 | Continuity and derivatives | Exact arithmetic/order laws; quotient continuity; real and complex polynomial calculus | Quotient construction from an arbitrary old remainder witness |
 | Holomorphicity | Open-domain quotient derivatives; algebra and composition; arbitrary represented polynomial inputs and coefficients | Reciprocal and general represented complex-series constructors |
-| Contours and Taylor series | Quantitative polygonal cancellation; supplied Cauchy data; rational-input Taylor comparison | Cauchy's formula from the primary holomorphicity contract; full represented-input reconstruction |
+| Contours and Taylor series | Quantitative polygonal cancellation; supplied Cauchy data; rational-input Taylor comparison | Function-specific contour identities and full represented-input reconstruction; a general Cauchy constructor is optional |
 | Continuation and ODEs | Supplied local germs and overlap laws; affine identity theorem; finite transport; polynomial residuals | General identity theorem and path-to-chart subdivision; analytic Frobenius factors |
 | Argument principle | No general zero-count theorem yet | Constructive isolated zeros, multiplicities, contour identity, and equality with actual zero counts |
 
 No imported completed real or complex number system closes these gaps.
+General Cauchy–Goursat is not a required bridge for these applications. Skills
+select concrete series estimates, factorization, local logarithms, finite
+cancellation, or justified deformations; the selected proof must establish
+the actual requested identity or count. General-purpose constructors remain
+optional directions rather than prerequisites.
+
+The reader's [zeta-zero exposition](../book/classics/zeta-zeros.html) connects
+continuation, exact isolation, and the explicit prime-counting formula. Its
+classical formulas and hypothetical wave model do not add Lean zero theorems.
 
 ## First exact zeta results
 
@@ -97,8 +106,8 @@ neither the critical-line conclusion nor an argument-principle identity. It
 **does not prove that a particular zeta isolating region exists**.
 
 A complete finite-height theorem must construct the complex function and its
-symmetry, certify nonvanishing on entire contour segments, prove the argument
-principle, isolate each root, and equate the sum of local counts with the global
+symmetry, certify nonvanishing on entire contour segments, prove the argument-principle count for the selected function and region,
+isolate each root, and equate the sum of local counts with the global
 count. Boundary heights and multiplicities must be explicit. A floating-point
 list of roots cannot establish completeness or exact equality. Rigorous interval
 computation with proved analytic bounds can be part of a proof: the work of

@@ -11,7 +11,7 @@ MATHLIB_PATH='Mathlib/NumberTheory/ZetaValues.lean'
 MATHLIB_HASH='27aa982f5c473d7e8c6e6030ead08ffce081a7ff616b2acd9130d04772f8c672'
 EULER_MATHLIB='51e6992efd06126df61a496bebf8f49482a4e129'
 LINKS=[('cartwright.html',r'Irrationality of \(\pi^2\)'),('leibniz.html','The Leibniz series'),('basel.html','The Basel problem'),('euler.html','Euler’s sine product'),('arctan-taylor.html','Arctangent and Taylor series')]
-ODE_LINKS=[('complex-analysis.html', 'Polygonal Cauchy theory'), ('analytic-continuation.html', 'Analytic continuation'), ('fuchs.html', 'Fuchs’s theorem'), ('painleve.html', 'Painlevé’s classification')]
+ODE_LINKS=[('complex-analysis.html', 'Polygonal Cauchy theory'), ('analytic-continuation.html', 'Analytic continuation'), ('zeta-zeros.html', 'Riemann zeta zeros'), ('fuchs.html', 'Fuchs’s theorem'), ('painleve.html', 'Painlevé’s classification')]
 LINKS += ODE_LINKS
 SHOWCASE_PAGES = ['cosine.html', 'integral-families.html'] + [href for href, _ in LINKS]
 def digest(p):return hashlib.sha256(p.read_bytes()).hexdigest()
@@ -122,7 +122,7 @@ def install(site,revision,euler_audit,cauchy_audit,arctan_audit,holomorphic_audi
     native=repo+'ComputableAnalysis/'
     ml=f'https://github.com/leanprover-community/mathlib4/blob/{MATHLIB}/'
     template=(site/'cosine.html').read_text()
-    for name,title in [('leibniz','The Leibniz series'),('basel','The Basel problem'),('euler','Euler’s sine-product proof'),('fuchs','Fuchs’s theorem'),('painleve','Painlevé’s classification'),('complex-analysis','Polygonal Cauchy theory'),('analytic-continuation','Analytic continuation'),('arctan-taylor','Arctangent: where Taylor stops')]:
+    for name,title in [('leibniz','The Leibniz series'),('basel','The Basel problem'),('euler','Euler’s sine-product proof'),('fuchs','Fuchs’s theorem'),('painleve','Painlevé’s classification'),('complex-analysis','Polygonal Cauchy theory'),('analytic-continuation','Analytic continuation'),('zeta-zeros','Why the zeros of zeta matter'),('arctan-taylor','Arctangent: where Taylor stops')]:
         doc=BeautifulSoup(template,'html.parser');doc.title.string=title+' · Computable Analysis'
         doc.select_one('meta[name="documentation-revision"]')['content']=revision
         page=(SOURCE/(name+'.html')).read_text().replace('__NATIVE__',native).replace('__MATHLIB__',ml).replace('__REPO__',repo).replace('__EULER_MATHLIB__',f'https://github.com/leanprover-community/mathlib4/blob/{EULER_MATHLIB}/')
@@ -144,6 +144,11 @@ def install(site,revision,euler_audit,cauchy_audit,arctan_audit,holomorphic_audi
             if kicker:kicker.string='Function theory'
             doc.head.append(doc.new_tag('link',rel='stylesheet',href='reading/continuation-examples.css'))
             doc.head.append(doc.new_tag('script',src='reading/continuation-examples.js',defer=''))
+        if name=='zeta-zeros':
+            kicker=doc.select_one('.chapter-kicker')
+            if kicker:kicker.string='Function theory'
+            doc.head.append(doc.new_tag('link',rel='stylesheet',href='reading/zeta-waves.css'))
+            doc.head.append(doc.new_tag('script',src='reading/zeta-waves.js',defer=''))
         if name=='arctan-taylor':
             doc.body['class']=doc.body.get('class',[])+['cauchy-page','arctan-page']
             doc.select_one('.page').append(BeautifulSoup((SOURCE/'arctan-example.html').read_text(),'html.parser'))
@@ -204,7 +209,7 @@ def install(site,revision,euler_audit,cauchy_audit,arctan_audit,holomorphic_audi
             active=nav.select_one(f'a[href="{prefix+p.name}"]');active['class']=active.get('class',[])+['current'];active['aria-current']='page'
         updated=original[:match.start()]+str(nav)+original[match.end():]
         p.write_text(updated);navigation.append(str(p.relative_to(site)))
-    for asset in ['cauchy-example.css','cauchy-example.js','arctan-example.css','arctan-example.js','continuation-examples.css','continuation-examples.js']:
+    for asset in ['cauchy-example.css','cauchy-example.js','arctan-example.css','arctan-example.js','continuation-examples.css','continuation-examples.js','zeta-waves.css','zeta-waves.js']:
         shutil.copyfile(SOURCE/asset,site/'reading'/asset)
     shutil.copyfile(arctan_audit,site/'reading/arctan-taylor-audit.log')
     shutil.copyfile(holomorphic_audit,site/'reading/holomorphic-audit.log')

@@ -6,7 +6,6 @@ from http.server import SimpleHTTPRequestHandler,ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
 from bs4 import BeautifulSoup
-from playwright.sync_api import sync_playwright
 from classic_proofs import LINKS,MATHLIB,MATHLIB_HASH,EULER_MATHLIB,SHOWCASE_PAGES
 
 def main():
@@ -37,6 +36,13 @@ def main():
     source=Path(__file__).resolve().parents[2]/'book/classics/analytic-continuation.html'
     math_pattern=r'\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\)'
     assert re.findall(math_pattern,source.read_text())==re.findall(math_pattern,continuation.article.get_text()), 'continuation TeX lost during HTML parsing'
+    zero_page=BeautifulSoup((site/'zeta-zeros.html').read_text(),'html.parser')
+    zero_source=Path(__file__).resolve().parents[2]/'book/classics/zeta-zeros.html'
+    assert re.findall(math_pattern,zero_source.read_text())==re.findall(math_pattern,zero_page.article.get_text()), 'zeta exposition TeX lost'
+    assert zero_page.select_one('#wave-beta') and zero_page.select_one('#wave-gamma')
+    assert 'hypothetical' in zero_page.select_one('.zeta-wave').get_text()
+    assert 'No finite-height critical-line theorem is claimed here' in zero_page.get_text()
+    assert zero_page.select_one('a[href="skill-certified-zero-counting.html"]')
     chapter=BeautifulSoup((site/'ch-differential-equations.html').read_text(),'html.parser')
     assert chapter.select_one('article #continuation-story #continuation-fuchs-criterion')
     chapter_ids=[node['id'] for node in chapter.select('[id]')]
@@ -103,6 +109,7 @@ def main():
         print('PASS: showcase sidebar entries, active state, source links, preserved audits and honest theorem status');return
     class Quiet(SimpleHTTPRequestHandler):
         def log_message(self,*args):pass
+    from playwright.sync_api import sync_playwright
     server=ThreadingHTTPServer(('127.0.0.1',0),partial(Quiet,directory=str(site)))
     threading.Thread(target=server.serve_forever,daemon=True).start();base=f'http://127.0.0.1:{server.server_port}/';errors=[]
     try:
@@ -131,6 +138,22 @@ def main():
                         assert page.locator('#zero-plot .excluded').count()==1
                         page.wait_for_function('document.querySelector("#zero-readout").textContent.includes("64") && document.querySelectorAll("#zero-readout mjx-container").length>0')
                         assert page.locator('mjx-merror,[data-mjx-error]').count()==0
+                    if name=='zeta-zeros.html':
+                        assert page.locator('#wave-plot .wave').count()==1
+                        assert page.locator('#wave-plot .envelope').count()==2
+                        page.locator('#wave-beta').evaluate('(e)=>{e.value="0.75";e.dispatchEvent(new Event("input",{bubbles:true}));}')
+                        page.locator('#wave-gamma').evaluate('(e)=>{e.value="25";e.dispatchEvent(new Event("input",{bubbles:true}));}')
+                        page.wait_for_function('document.querySelector("#wave-plot").dataset.beta==="0.75" && document.querySelector("#wave-plot").dataset.gamma==="25"')
+                        page.wait_for_function('document.querySelector("#wave-readout").textContent.includes("0.75") && document.querySelectorAll("#wave-readout mjx-container").length>0')
+                        values=page.evaluate('()=>{const a=ZetaWaves;return {atOrigin:a.pair(.5,14,0),quarter:a.normalized(.5,14,Math.PI/28),flat:a.envelope(.5,14,5)/a.envelope(.5,14,1),growth:a.envelope(.75,25,5)/a.envelope(.75,25,1)}}')
+                        assert abs(values['atOrigin']+1/(.25+196))<1e-14
+                        assert abs(values['quarter']+28/(.25+196))<1e-14
+                        assert abs(values['flat']-1)<1e-14
+                        assert abs(values['growth']-2.718281828459045)<1e-12
+                        assert page.locator('mjx-merror,[data-mjx-error]').count()==0
+                        assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+2')
+                        page.locator('#wave-beta').evaluate('(e)=>{e.value="0.5";e.dispatchEvent(new Event("input",{bubbles:true}));}')
+                        page.locator('#wave-gamma').evaluate('(e)=>{e.value="14";e.dispatchEvent(new Event("input",{bubbles:true}));}')
                     if name=='complex-analysis.html':
                         assert page.locator('#holomorphic-foundation mjx-container').count()>=12
                         assert page.locator('#holomorphic-foundation a[href="reading/holomorphic-audit.log"]').count()==1

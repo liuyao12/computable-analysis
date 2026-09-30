@@ -32,8 +32,10 @@ excluded origin do not force the function to vanish.
 
 For a finite-height zeta theorem or another claim about every zero in a region,
 use [certified zero counting](references/certified-zero-counting.md). Construct
-the function, certify whole contour segments, prove the argument principle,
-and separate the total count from exact root location. The checked reflection
+the function, certify whole contour segments, prove its actual contour-to-zero
+count identity by the selected function-specific construction,
+and separate the total count from exact root location. General Cauchy–Goursat
+is an optional method, not a mandatory preceding theorem. The checked reflection
 and uniqueness implication does not supply an actual zero count.
 
 ## Uniqueness on a connected domain

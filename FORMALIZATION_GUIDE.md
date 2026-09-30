@@ -203,6 +203,16 @@ remain open. See [the exact scope](docs/HOLOMORPHIC_FUNCTIONS.md)
 and [the holomorphic-functions skill](skills/holomorphic-functions/SKILL.md).
 No Cauchy or Taylor conclusion is part of the definition.
 
+General Cauchy–Goursat is not a prerequisite for a particular function or
+contour. General analytic methods belong in skills: choose a direct series,
+local factorization, explicit logarithm, finite cancellation, or a justified
+function-specific deformation, then prove the required identities and bounds.
+Keep reusable conditional lemmas, but do not make a universal existence theorem
+a gate to an application. A zero-counting skill must prove its contour count
+equals the actual interior multiplicity count; calling a numerical winding
+computation an argument principle does not supply that bridge.
+
+
 Continuation methods belong in the
 [analytic-continuation skill](skills/analytic-continuation/SKILL.md).
 For a concrete function, construct local branches along the chosen route,

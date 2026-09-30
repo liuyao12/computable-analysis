@@ -21,6 +21,25 @@ Specify the height, boundary exclusions, disjoint isolating regions, and
 whether zeros are counted with multiplicity. For meromorphic functions,
 account for poles explicitly.
 
+## Choose a proof for this function and region
+
+Do not require a general Cauchy–Goursat theorem before starting. The skill
+selects simpler checked laws and proves the bridges for the supplied function
+and contour. Useful routes include explicit local factorizations with
+nonvanishing regular factors, constructed logarithms on local patches, and
+finite contour cancellation with certified coverage.
+
+A polynomial comparison is another route: construct a polynomial with an
+actual root count, certify the entire comparison boundary, and justify a
+zero-free boundary deformation. Prove that this particular deformation
+preserves the actual interior multiplicity count. Boundary winding invariance
+alone does not establish that interior interpretation. Do not invoke an
+unproved general Rouché theorem, or assume count equality in a comparison
+record. A direct factorization route must also exclude omitted roots.
+
+The method is skill guidance; its analytic and counting identities are
+mathematical obligations, not projections of assumed certificates.
+
 ## Certify the whole contour
 
 On every complete segment, compute value enclosures with an explicit error

@@ -741,6 +741,17 @@ See [the scope audit](docs/FUNCTION_THEORY_ZETA_GAMMA.md).
 Next: represented complex series and reciprocal neighborhoods; complex zeta
 on its initial half-plane; Gamma on a full parameter domain with justified
 improper integral/limit comparisons; continuation and completed-zeta symmetry;
-Cauchy and argument-principle bridges with actual multiplicity counts; then
+function-specific contour and argument-principle constructions with actual
+multiplicity counts, selected by the zero-counting skill; then
 certified isolating contours and completeness up to a specified height.
 No finite-height critical-line zero theorem is yet claimed.
+
+## Pedagogy of zeta zeros
+
+The reader now follows Euler's product, a paired-series continuation into the
+strip, completed-function symmetry, certified contour counting and unique
+isolation, and the explicit formula connecting zeros to prime powers. A finite
+wave model illustrates frequency and amplitude without claiming a zero
+computation or a certified prime-counting remainder. General Cauchy–Goursat is
+an optional skill route, not a prerequisite. The classical formulas and
+construction recipes remain distinct from checked repository theorems.
