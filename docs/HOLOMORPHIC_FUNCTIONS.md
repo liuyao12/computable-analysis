@@ -53,6 +53,84 @@ computations are executable. `HasDerivativeAt.congrPoint` and
 `congrDerivative` preserve the same quantitative law under equivalent valid
 representations of the base point and derivative.
 
+## Completed calculus rules
+
+`HolomorphicCalculus` now constructs continuity of the function itself and
+holomorphic sums, products, and compositions. The sum and product use the
+intersection of the original domains. The composition uses exactly
+\[
+D_{g\circ f}=\{z\in D_f:f(z)\in D_g\}.
+\]
+Its open-domain radius combines the inner domain radius with a continuity
+radius that keeps the image inside the outer domain. No decision procedure
+for domain membership or nonzero values is introduced.
+
+The derivative rules are actual `HasDerivativeAt` witnesses, including their
+rational error radii:
+\[
+(f+g)'=f'+g',\qquad (fg)'=f'g+fg',\qquad (g\circ f)'=(g'\circ f)f'.
+\]
+The derivative's continuity is proved separately by the corresponding
+continuity rules. `Holomorphic.congr` transfers the construction to an
+independently supplied equivalent evaluator on the same domain.
+
+For a derivative value bounded by a positive rational \(B\), the unit-error
+radius gives
+\[
+\|f(z)-f(a)\|_\infty\le (1+2B)H.
+\]
+`valueBound` reads \(B\) from the first valid box. Product remainders use
+this bound on both increments, and the chain rule uses it to control the
+outer increment. All choices are finite rational computations on supplied
+data; no compactness, abstract completion, or Cauchy representation is used.
+The radii can differ between equivalent representations; their derivative
+values and mathematical laws agree.
+
+## Polynomials and differential equations
+
+`HolomorphicPolynomial` constructs polynomials with arbitrary represented
+complex coefficients by finite sums and products. `ofCoefficients` agrees
+literally with Horner evaluation, and `ofCoefficients_congr` proves
+independence from both input and coefficient representations.
+
+The formal expression `diff` is connected to the actual derivative by
+`derivative_equiv` and `hasDerivative`. Every iterated `diff` is again a
+holomorphic polynomial, and `iterated_hasDerivative` certifies each successive
+step. In particular, `derivative_holomorphic` supplies the derivative-map
+witness required by the continuation/ODE interface; it is no longer a
+separate hand proof for every polynomial example.
+
+For polynomial coefficients \(A,B,C\), `secondOrder_equiv` identifies the
+computed polynomial expression
+\[
+A(z)p''(z)+B(z)p'(z)+C(z)p(z)
+\]
+with the existing `Continuation.secondOrderResidual` of actual derivatives.
+The residual expression is holomorphic. Its vanishing is a separate equation
+to prove, not an assumed field or an automatic consequence of holomorphicity.
+
+## Function-theory audit and next direction
+
+| Component | Checked scope | Remaining bridge |
+| --- | --- | --- |
+| Basic differential calculus | Continuity, sums, products, compositions, equivalent evaluators | Reciprocal and general rational-map constructor |
+| Polynomials | Arbitrary represented coefficients and inputs; every iterated derivative; ODE residual comparison | General series cannot be inferred from finite polynomial proofs |
+| Complex exponential and local logarithm | Existing rational-input series, jets, and finite secant estimates | Represented-input evaluators and `Holomorphic` witnesses |
+| Polygonal Cauchy cancellation | Supplied effective local models and sampled quadrature | Uniform model construction from local derivative data and integral comparison |
+| Cauchy–Taylor reconstruction | Supplied quantitative Cauchy representation at rational complex inputs | Cauchy formula from holomorphicity, represented inputs, and identification with derivatives |
+| Continuation | Germs, derivative comparison, gluing, actual chart chains, finite transport | General identity theorem, arbitrary chain comparison, and analytic monodromy |
+| Fuchs applications | Concrete entire solution and rational-ray growth comparison | General complex Frobenius branches, uniform ray/sector adapters, solution existence and uniqueness |
+
+The basic algebraic calculus and polynomial derivative components are complete
+at their stated scopes. **The full function-theory program is not complete.**
+The next useful direction is a direct represented complex-series constructor:
+reuse finite polynomial calculus, prove value and differentiated tails and a
+local remainder estimate, and instantiate exponential and sine before general
+Frobenius factors. This route does not require finishing the general Cauchy
+formula first. Reciprocal neighborhoods then support rational functions and
+the intended \(\sin(1/z)\) example. The Cauchy/identity-theorem route remains
+a separate substantial task rather than a hidden assumption of these skills.
+
 ## Boundaries
 
 This interface deliberately includes derivative continuity data. No theorem
@@ -64,10 +142,10 @@ and moduli must be preserved in constructions. Continuity is proved, not
 assumed decidable.
 
 The existing `HolomorphicJet` and `RepresentedHolomorphicJet` records remain
-algebraic data. They have not all been upgraded into witnesses. Generic
-polynomial, rational, logarithm, exponential, sum, product, and composition
-adapters are further work. The affine and square examples are fully
-instantiated at represented inputs.
+algebraic data. They have not all been upgraded into witnesses. Polynomial,
+sum, product, and composition adapters are now checked.
+Rational, logarithm, and exponential adapters remain further work. The
+affine and square examples remain independent concrete witnesses.
 
 In particular, the current pointwise moduli do not supply a uniform rectangle
 mesh automatically. Derivative-to-contour constructors, whole-chunk integral
@@ -75,9 +153,12 @@ agreement, Cauchy's value and higher-derivative formulas, and a general
 Cauchy-to-Taylor bridge retain their previous obligations. Rectangular grids
 can be the working geometry without a universal contour-integral operator.
 
-Run `lake env lean scripts/check_holomorphic.lean` after building the example
-module. The audit checks the import closure and proof dependencies, and
-executes the square evaluator and radius computation. No Mathlib module or
+Run `lake env lean scripts/check_holomorphic.lean` after building
+`ComputableAnalysis.HolomorphicPolynomial`. The audit checks the import
+closure and proof dependencies, and
+executes polynomial derivatives, a complex affine composition, and positive
+error radii. It rejects unapproved axioms as well as unfinished proofs.
+No Mathlib module or
 `sorryAx` occurs. The printed dependency list includes inherited foundational
 axioms, including an existing native-decision fact for positivity of one half;
 this is not a claim of a newly axiom-free foundation.

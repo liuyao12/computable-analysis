@@ -30,7 +30,24 @@
 <p><strong>The square function.</strong> For \(f(z)=z^2\), the derivative is \(2z\), and the finite identity</p>
 \[f(z)-f(a)-2a(z-a)=(z-a)^2\]
 <p>gives a remainder bound \(2H^2\). Choosing \(\delta=\varepsilon/2\) proves the derivative estimate. The same radius controls the variation of the derivative. These are checked constructions at represented inputs, including irrational ones.</p>
-<p class="classic-scope">Checked: the definition, the two examples, their derivative continuity, and transport of derivative estimates between equivalent representations. Existing formal jets are not yet all connected to this interface. Constructing uniform rectangle estimates and the Cauchy–Taylor bridges remains further work; no contour formula is assumed in the definition.</p>
+<h3 id="function-calculus">Calculus rules we can now reuse</h3>
+<p>From supplied holomorphic functions, we now construct holomorphic sums, products, and compositions, with actual derivative estimates and continuity moduli:</p>
+\[(f+g)'=f'+g',\qquad (fg)'=f'g+fg',\qquad (g\circ f)'=(g'\circ f)f'.\]
+<p>Sums and products are defined on the intersection of the two domains. A composition is defined exactly where the inner function is defined and its value belongs to the outer domain:</p>
+\[D_{g\circ f}=\{z\in D_f:f(z)\in D_g\}.\]
+<p>The chain rule computes a neighborhood whose image stays inside the outer domain. A bound read from a finite derivative box and the first-order estimate also prove continuity of the original function. These are rational computations with validity proofs; no compactness argument is used.</p>
+<h3 id="polynomial-calculus">Polynomials, repeated derivatives, and equations</h3>
+<p>Every finite polynomial with arbitrary represented complex coefficients now has a holomorphic witness. Its formal derivative agrees with its actual analytic derivative, and this remains true at every successive order. Horner evaluation respects changes in both coefficient and input representations.</p>
+<p>For example, the checked computation</p>
+\[p(z)=1-2z^2+z^3\]
+<p>at \(z=1+i\) gives</p>
+\[p(1+i)=-1-2i,\quad p'(1+i)=-4+2i,\quad p''(1+i)=2+6i,\quad p'''=6,\quad p^{(4)}=0.\]
+<p>For polynomial coefficients \(A,B,C\), the computed expression \(Ap''+Bp'+Cp\) is holomorphic and agrees with the analytic residual used in the differential-equation chapter. Showing that it vanishes remains the particular equation to prove. Polynomial applications no longer need separate hand constructions of their derivative maps.</p>
+<p><a href="__REPO__ComputableAnalysis/HolomorphicCalculus.lean">Checked calculus rules</a> · <a href="__REPO__ComputableAnalysis/HolomorphicPolynomial.lean">Polynomial derivatives and ODE comparison</a></p>
+<h3 id="function-theory-audit">What is finished, and what comes next</h3>
+<p>The basic algebraic calculus and polynomial components are complete at their stated scopes. The full function-theory program remains open. Reciprocal and represented complex-series constructors, Cauchy's formula from holomorphicity, the general identity theorem, and general Frobenius/sector continuation still need proofs.</p>
+<p>The existing Cauchy–Taylor result starts from a supplied quantitative Cauchy representation at rational complex inputs. It does not yet reconstruct Taylor series from an arbitrary holomorphic witness. The next construction direction is direct complex series with value tails, differentiated tails, and remainder estimates, beginning with exponential and sine. That can proceed independently of the general Cauchy formula.</p>
+<p><a href="__REPO__docs/HOLOMORPHIC_FUNCTIONS.md">Component-by-component audit</a> · <a href="reading/holomorphic-calculus.json">Published proof scope and source hashes</a></p>
 <p><a href="__REPO__ComputableAnalysis/Holomorphic.lean">Definition and representation laws</a> · <a href="__REPO__ComputableAnalysis/HolomorphicExamples.lean">Checked examples</a> · <a href="__REPO__skills/holomorphic-functions/SKILL.md">Skill for proving specific functions holomorphic</a> · <a href="reading/holomorphic-audit.log">Proof audit</a></p>
 </section>
 <p class="classic-action"><a href="ch-differential-equations.html#continuation-to-fuchs">Follow a solution around a singularity: the guided route to Fuchs →</a></p>

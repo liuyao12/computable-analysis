@@ -7,12 +7,20 @@ implemented. Each route must eventually supply the existing represented
 
 ## Finite algebra and composition
 
-For polynomials, derive a finite remainder identity and bound it on a rational
-neighborhood. The square and affine examples are checked. For a rational
-expression, find a strictly positive rational denominator margin on that
-whole neighborhood before division. For a composition, construct a local
-image enclosure inside the outer domain, then combine the two remainder
-estimates; evaluating the derivative formula alone is insufficient.
+For polynomials, use `PolynomialFunction.ofCoefficients` or finite
+`PolynomialFunction` expressions. Their `holomorphic`, `hasDerivative`, and
+`iterated_hasDerivative` constructors cover arbitrary represented coefficients
+and inputs. `derivative_holomorphic` supplies the derivative-map witness needed
+by the ODE interface. Direct remainder identities remain useful for tighter
+function-specific radii; the square and affine examples are checked.
+For a rational expression, find a strictly positive rational denominator margin on that
+whole neighborhood before division. For sums, products, and compositions
+of supplied holomorphic maps, use
+`Holomorphic.add`, `mul`, and `comp` from `HolomorphicCalculus`. These
+construct derivative estimates, derivative continuity, and the correct open
+domains. Composition uses the inverse-image domain and computes local image
+control. `Holomorphic.continuous` derives continuity of the original function;
+`Holomorphic.congr` changes to an equivalent evaluator on the same domain.
 
 Keep the coordinate product constant:
 \[
@@ -21,8 +29,9 @@ Keep the coordinate product constant:
 For \(\sin(1/z)\), first separate \(z\) from zero on a neighborhood,
 construct reciprocal bounds, and use a certified complex sine chart on its
 image. Its zeros \(1/(n\pi)\) approach an excluded point; they do not establish
-local equality with zero anywhere in the punctured plane. General rational
-and composition adapters are still to be proved in this interface.
+local equality with zero anywhere in the punctured plane. The general
+reciprocal/rational adapter and sine chart still need to be
+constructed; the composition rule is now available.
 
 ## Direct power series
 

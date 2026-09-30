@@ -99,7 +99,15 @@ def install(site,revision,euler_audit,cauchy_audit,arctan_audit,holomorphic_audi
     assert not re.search(r'\berror:', arctan_log)
     holomorphic_log=holomorphic_audit.read_text()
     assert 'PASS: holomorphic witnesses, representation transport, no Mathlib imports or sorryAx.' in holomorphic_log
-    assert len(re.findall(r'^AUDIT ', holomorphic_log, re.M)) == 8
+    holomorphic_names=set(re.findall(r'^AUDIT ([^:]+):', holomorphic_log, re.M))
+    assert {
+      'ComputableAnalysis.FunctionTheory.Holomorphic.continuous',
+      'ComputableAnalysis.FunctionTheory.Holomorphic.add',
+      'ComputableAnalysis.FunctionTheory.Holomorphic.mul',
+      'ComputableAnalysis.FunctionTheory.Holomorphic.comp',
+      'ComputableAnalysis.FunctionTheory.PolynomialFunction.iterated_hasDerivative',
+      'ComputableAnalysis.FunctionTheory.PolynomialFunction.secondOrder_equiv'
+    } <= holomorphic_names
     assert not re.search(r'\berror:|sorryAx[^.]', holomorphic_log)
     before={str(p.relative_to(site)):digest(p) for p in site.rglob('*') if p.is_file()}
     repo=f'https://github.com/liuyao12/computable-analysis/blob/{revision}/'

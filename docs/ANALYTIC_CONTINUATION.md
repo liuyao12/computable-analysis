@@ -120,7 +120,9 @@ The distinctions below are mathematical obligations, not missing imports.
   on the original domain. `AgreeAt.derivative` proves equality on a smaller
   neighborhood, using half the supplied agreement radius. Iterating it
   requires holomorphicity of the derivative; that extra evidence is not
-  inferred from the current first-order interface.
+  inferred from the current first-order interface. For finite polynomials,
+  `PolynomialFunction.derivative_holomorphic` now constructs that evidence
+  uniformly, and every iterated polynomial derivative is checked.
 - `secondOrderResidual_congr` compares the actual values of
   \(Ay''+By'+Cy\) for equal germs, with arbitrary valid represented complex
   coefficient values. It does not assume the equation or its uniqueness.

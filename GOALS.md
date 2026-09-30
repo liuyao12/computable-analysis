@@ -27,6 +27,23 @@ rational-ray growth theorem through exact scaled-jet comparisons. General
 Frobenius branch construction, uniform ray adapters, sector continuation,
 and fundamental-matrix monodromy remain open.
 
+## Function-theory audit (2026-09-29)
+
+Completed the missing algebraic calculus: function continuity, sum/product/chain
+rules, derivative continuity, correct intersection and inverse-image domains,
+and equivalent-evaluator transfer. Arbitrary represented-coefficient
+polynomials now have actual derivatives of every order, Horner and coefficient
+representation comparisons, and compatibility with the analytic ODE residual.
+The focused proof audit rejects new axioms and exercises non-real inputs,
+four successive polynomial derivatives, and an affine composition.
+
+This closes the basic calculus and polynomial components, not the entire
+function-theory program. Reciprocal and represented complex-series adapters,
+Cauchy's formula from holomorphicity, general identity/monodromy, and general
+Frobenius/sector applications remain open. The next construction direction is
+represented complex series with differentiated-tail and remainder estimates,
+starting with exponential and sine. See [the audited boundary](docs/HOLOMORPHIC_FUNCTIONS.md).
+
 ## Integral and series skills in the reader
 
 The Skills navigation follows the chapters and contains real integrals,

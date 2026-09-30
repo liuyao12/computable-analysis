@@ -1,5 +1,5 @@
 import ComputableAnalysis.Continuation
-import ComputableAnalysis.HolomorphicExamples
+import ComputableAnalysis.HolomorphicPolynomial
 import ComputableAnalysis.VerticalReciprocalIntegral
 import ComputableAnalysis.ComplexIntegralEnclosure
 import ComputableAnalysis.ArctanTaylorBoundary

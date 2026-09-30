@@ -45,6 +45,22 @@ ODEs, reflected charts, or local gluing. It records the quantitative evidence
 and current Lean boundary for each route. Methods remain skill guidance;
 they are not a mandatory hierarchy of integrand or function classes.
 
+## Reuse checked calculus
+
+For a finite polynomial with arbitrary represented coefficients, use
+`PolynomialFunction.ofCoefficients`, `hasDerivative`, and
+`iterated_hasDerivative` from
+[`HolomorphicPolynomial`](../../ComputableAnalysis/HolomorphicPolynomial.lean).
+For existing holomorphic maps, use `Holomorphic.add`, `mul`, and `comp` from
+[`HolomorphicCalculus`](../../ComputableAnalysis/HolomorphicCalculus.lean).
+They construct the error radii, derivative continuity, and domain evidence.
+Composition retains the inverse-image domain. `Holomorphic.congr` transfers
+the proof to an equivalent evaluator on the same domain.
+
+`PolynomialFunction.derivative_holomorphic` supplies the derivative-map
+witness used by the ODE interface. This construction does not prove that the
+derivative of every arbitrary `Holomorphic` witness is holomorphic.
+
 ## Construct the evidence
 
 1. Implement the value and proposed derivative with rational boxes; prove
@@ -116,7 +132,7 @@ rectangular computations over a universal polygon-integral operator.
 
 ## Proof sources and checks
 
-Run `lake build ComputableAnalysis.HolomorphicExamples` and
+Run `lake build ComputableAnalysis.HolomorphicPolynomial` and
 `lake env lean scripts/check_holomorphic.lean`, plus the affected client and
 repository checks. Inspect the hypotheses and report which functions now
 have actual witnesses; a newly declared interface alone is not a completed

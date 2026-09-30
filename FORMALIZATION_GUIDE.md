@@ -136,7 +136,13 @@ See [the precise theorem ledger](docs/POLYGONAL_CAUCHY.md).
 its local continuity moduli, alongside first-order error radii and an open
 domain. This intentionally uses stronger data than bare pointwise complex
 differentiability. Affine maps with represented coefficients and the square
-map have constructed witnesses. See [the exact scope](docs/HOLOMORPHIC_FUNCTIONS.md)
+map have constructed witnesses. `HolomorphicCalculus` now constructs
+continuity, sums, products, and compositions with their genuine open domains.
+`HolomorphicPolynomial` connects formal differentiation, all iterated
+polynomial derivatives, and polynomial ODE residuals to actual analytic
+derivatives at arbitrary represented inputs and coefficients. General
+reciprocal, complex-series, Cauchy-reconstruction, and identity-theorem bridges
+remain open. See [the exact scope](docs/HOLOMORPHIC_FUNCTIONS.md)
 and [the holomorphic-functions skill](skills/holomorphic-functions/SKILL.md).
 No Cauchy or Taylor conclusion is part of the definition.
 

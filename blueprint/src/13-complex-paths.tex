@@ -32,6 +32,29 @@ estimate between equivalent base-point and derivative representations is
 proved. Uniform rectangle estimates and the later Cauchy bridges remain
 separate obligations.
 
+\subsection{Reusable differential calculus and polynomial applications}
+The sum, product, and chain rules now construct full holomorphic witnesses:
+\[
+ (f+g)'=f'+g',\qquad (fg)'=f'g+fg',\qquad
+ (g\circ f)'=(g'\circ f)f'.
+\]
+Sums and products use intersection domains; compositions use
+$\{z\in D_f:f(z)\in D_g\}$. The chain rule constructs local image control
+from the inner derivative estimate. A finite input box bounds the derivative,
+and its unit-error radius supplies a local linear bound from the base point. This proves
+continuity of the function without compactness. Derivative continuity is
+proved by the corresponding continuity calculus.
+
+Polynomials with arbitrary represented complex coefficients are evaluated by
+Horner's rule. Formal differentiation is proved to agree with actual analytic
+derivatives, and every successive polynomial derivative is holomorphic.
+For polynomial coefficients $A,B,C$, the polynomial expression
+$Ap''+Bp'+Cp$ agrees with the existing second-order analytic residual.
+Vanishing remains an equation to prove. The general reciprocal and complex
+series adapters, Cauchy's formula from holomorphicity, and the general
+identity theorem remain open. Direct represented series with differentiated
+tails are the next construction direction.
+
 \section{Integrating on a segment}
 Subdivide the actual oriented segment into finite chunks with endpoints
 $z_j,z_{j+1}$. For each chunk, certify a rational rectangle $B_j$
