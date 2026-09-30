@@ -59,7 +59,8 @@ def check(site):
         assert report['sourceHashes'][str(source.relative_to(ROOT))] == hashlib.sha256(source.read_bytes()).hexdigest()
         doc = BeautifulSoup((site / row['page']).read_text(), 'html.parser')
         assert MATH.findall(source.read_text()) == MATH.findall(doc.article.get_text()), row['source']
-        assert doc.select_one('.construction-skill-proof summary')
+        assert any(h.get_text() == 'Proof sources and checks' for h in doc.article.select('h2'))
+        assert not doc.article.select('details, .lead, .construction-skill-status')
         assert doc.select_one('.construction-skill-links a[download]')
     print('PASS: construction skills and their examples, exact downloads, preserved TeX, local links, and visible navigation on', len(report['navigationPages']), 'pages')
 
@@ -96,10 +97,6 @@ def browser_check(site, output):
                         assert link.is_visible(), (name, width)
                     if width < 720:
                         page.locator('#menu-button').click()
-                    if name != OVERVIEW:
-                        page.locator('.construction-skill-proof summary').click()
-                        assert page.locator('.construction-skill-proof[open]').count() == 1
-                        assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+2'), (name, width, 'proof sources')
                     page.screenshot(path=str(output / f'{Path(name).stem}-{width}.png'), full_page=True)
                 page.goto(f'http://127.0.0.1:{server.server_port}/{OVERVIEW}', wait_until='networkidle')
                 if width < 720:
@@ -111,7 +108,7 @@ def browser_check(site, output):
         assert not errors, errors
     finally:
         server.shutdown()
-    print('PASS: desktop/mobile navigation, active state, formulas, and expandable proof sources')
+    print('PASS: desktop/mobile navigation, active state, formulas, and Markdown skill pages')
 
 
 if __name__ == '__main__':

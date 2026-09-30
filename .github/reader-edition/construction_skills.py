@@ -75,15 +75,6 @@ def render_skill(row, revision):
             p['class'] = ['formula']
     for i, heading in enumerate(doc.select('h2')):
         heading['id'] = 'step-' + str(i+1)
-    proof = next((h for h in doc.select('h2') if h.get_text() == 'Proof sources and checks'), None)
-    if proof:
-        details = doc.new_tag('details', attrs={'class': 'construction-skill-proof'})
-        summary = doc.new_tag('summary')
-        summary.string = 'Proof sources and verification'
-        details.append(summary)
-        for sibling in list(proof.next_siblings):
-            details.append(sibling.extract())
-        proof.replace_with(details)
     return str(doc)
 
 
@@ -133,17 +124,11 @@ def make_page(template, body, title, name, revision, row=None):
     main = doc.select_one('main.reader')
     assert main
     main.clear()
-    main.append(BeautifulSoup('<div class="chapter-kicker">SKILLS</div>', 'html.parser'))
+    if row is None:
+        main.append(BeautifulSoup('<div class="chapter-kicker">SKILLS</div>', 'html.parser'))
     article = doc.new_tag('article', attrs={'class': 'construction-skill'})
     article.append(BeautifulSoup(body, 'html.parser'))
     main.append(article)
-    if row:
-        intro = BeautifulSoup('<p class="lead">' + html.escape(row['summary']) + '</p><p class="construction-skill-status">' + html.escape(row['status']) + '</p>', 'html.parser')
-        article.h1.insert_after(intro)
-        download = 'reading/' + row['source']
-        label = 'SKILL.md' if 'skill' in row else 'example notes'
-        links = BeautifulSoup(f'<div class="construction-skill-links"><a href="{download}" download>Download {label}</a><a href="https://github.com/liuyao12/computable-analysis/blob/{revision}/{row["source"]}">View source</a><a href="{row["example"]}">Worked example and proof status</a></div>', 'html.parser')
-        article.select_one('.construction-skill-status').insert_after(links)
     toc = doc.select_one('.on-this-page')
     if toc:
         toc.clear()
@@ -151,7 +136,10 @@ def make_page(template, body, title, name, revision, row=None):
             link = doc.new_tag('a', href='#' + heading['id'])
             link.string = heading.get_text()
             toc.append(link)
-    main.append(BeautifulSoup(f'<footer class="chapter-footer"><a href="{OVERVIEW}">Skills</a><a href="https://github.com/liuyao12/computable-analysis/tree/{revision}/skills">Skill sources · {revision[:12]}</a></footer>', 'html.parser'))
+    if row:
+        main.append(BeautifulSoup(f'<footer class="chapter-footer construction-skill-links"><a href="reading/{row["source"]}" download>Download Markdown</a><a href="https://github.com/liuyao12/computable-analysis/blob/{revision}/{row["source"]}">View source</a></footer>', 'html.parser'))
+    else:
+        main.append(BeautifulSoup(f'<footer class="chapter-footer"><a href="https://github.com/liuyao12/computable-analysis/tree/{revision}/skills">Skill sources · {revision[:12]}</a></footer>', 'html.parser'))
     doc.head.append(doc.new_tag('link', rel='stylesheet', href='reading/construction-skills.css'))
     assert not doc.select('article sup, article sub')
     return str(doc)
