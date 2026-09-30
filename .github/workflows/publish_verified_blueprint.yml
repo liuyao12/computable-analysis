@@ -308,9 +308,11 @@ jobs:
         with:
           path: ./.lake
           key: native-proofs-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ hashFiles('ComputableAnalysis.lean', 'ComputableAnalysis/**/*.lean') }}
+          # CI saves its successful build before later audits. Prefer that
+          # newer build over a publication cache from an older source revision.
           restore-keys: |
-            native-proofs-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
             lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-
+            native-proofs-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
       - name: Check the Leibniz proofs, transmutation and dependency separation
         run: |
           set -euo pipefail
