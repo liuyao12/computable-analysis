@@ -1,70 +1,69 @@
-<header><p class="classic-tag">Function theory · Primes, continuation, and exact zeros</p><h1>Why the zeros of zeta matter</h1><p class="lead">Start with a sum over all integers. Find the primes inside it. Then follow the same function until its zeros become visible.</p></header>
+<header><p class="classic-tag">Function theory · Approximation and exact proof</p><h1>How can a zeta zero be exactly on the line?</h1><p class="lead">We can compute only enclosures. Yet those enclosures can prove an exact statement: a particular zero has real part precisely \(\tfrac12\). The equality comes from symmetry and uniqueness.</p></header>
 
-<h2 id="setup">The primes are already in the function</h2>
-<p>For \(\Re s>1\), two descriptions agree:</p>
-<p class="formula">\[\zeta(s)=\sum_{n=1}^{\infty}n^{-s}=\prod_{p\ \mathrm{prime}}(1-p^{-s})^{-1},\qquad n^{-s}=e^{-s\log n}.\]</p>
-<p>Expand each factor as a geometric series. Choosing a power of each prime chooses an integer, and unique factorization says each integer appears exactly once. Finite products make this arithmetic visible; absolute convergence justifies the limit. See the <a href="https://dlmf.nist.gov/25.2#iv">Euler product</a>.</p>
-<p>Analytic continuation makes the connection less mysterious: the local function already encodes the primes, and any extension on the same connected domain must agree with it. Yet uniqueness does not tell us how to extract the primes, how accurately nearby values determine distant ones, or why <em>zeros</em> are the useful data. Those are the questions this page follows.</p>
+<h2 id="setup">A decimal answer cannot settle equality</h2>
+<p>Suppose a computation places a suspected zero very close to the critical line \(\Re s=\tfrac12\). Even an enclosure a million digits narrow permits a nonzero displacement. A small value of \(\zeta(s)\) also does not, by itself, prove that a zero exists nearby.</p>
+<p>There is a way past this difficulty. We use approximate evaluations to prove strict inequalities and an exact integer count. Then a mathematical symmetry forces the root onto the line. We never need to decide equality by comparing two decimal expansions.</p>
 
 <section class="showcase-statement" aria-labelledby="theorem">
-<h2 id="theorem">The question: exactly on the critical line?</h2>
-<p>The nontrivial zeros lie in the critical strip. The Riemann hypothesis asserts that every one of them lies on its middle line:</p>
-<p class="formula">\[\zeta(\rho)=0,\quad 0<\Re\rho<1\quad\Longrightarrow\quad\Re\rho=\frac12.\]</p>
-<p>This is a conjecture about exact equality for every zero. A large finite list, however accurately computed, cannot prove the assertion for all heights. Even a finite-height theorem needs a proof that no zeros were omitted. <a href="https://dlmf.nist.gov/25.10#i">Classical zero distribution</a>.</p>
+<h2 id="theorem">One root, together with its reflection</h2>
+<p>Suppose a function has a proved reflection symmetry, and a reflection-invariant region contains exactly one zero, counted with multiplicity. The reflected zero belongs to the same region. Uniqueness makes these two zeros equal, so that zero lies exactly on the reflection's fixed line.</p>
+<p class="formula">\[R(s)=1-\overline s,\qquad f(R(s))=\overline{f(s)},\qquad N_B=1\quad\Longrightarrow\quad\rho=R(\rho)\quad\Longrightarrow\quad\Re\rho=\frac12.\]</p>
+<p>The region can have appreciable width. It is the unique-root proof, together with symmetry, that establishes equality.</p>
 </section>
 
-<h2 id="continuation">Reach the strip by an actual computation</h2>
-<p>The original series does not converge at the nontrivial zeros. Continuing the function means supplying a new computation and proving agreement where both computations work. One useful entry into the strip is to pair adjacent terms:</p>
-<p class="formula">\[\eta(s)=\sum_{k=1}^{\infty}\big((2k-1)^{-s}-(2k)^{-s}\big),\qquad\zeta(s)=\frac{\eta(s)}{1-2^{1-s}}.\]</p>
-<p>For \(\sigma=\Re s>0\), integrate the derivative of \(t^{-s}\) over each unit interval. The paired tail after \(K\ge1\) terms has the concrete bound</p>
-<p class="formula">\[\left|\sum_{k>K}\big((2k-1)^{-s}-(2k)^{-s}\big)\right|\le\frac{|s|}{\sigma}(2K)^{-\sigma}.\]</p>
-<p>On a chosen parameter rectangle, replace \(\sigma\) by its positive lower bound and \(|s|\) by a computed upper bound. This gives an executable precision schedule. Differentiated terms need their own tails, with logarithmic factors, to establish holomorphicity directly. Rearrangement on \(\Re s>1\) proves overlap agreement. The denominator is nonzero throughout \(0<\Re s<1\); on its other zeros a quotient alone is not a definition. See the <a href="https://dlmf.nist.gov/25.2.E3">alternating continuation formula</a>.</p>
-<p class="classic-scope">This is a construction recipe to formalize, not a new Lean theorem. It needs specific series and derivative estimates; a general Cauchy–Goursat theorem is not a prerequisite.</p>
+<h2 id="symmetry">The symmetry we need for zeta</h2>
+<p>It is convenient to use the completed function</p>
+<p class="formula">\[\xi(s)=\frac12s(s-1)\pi^{-s/2}\Gamma(s/2)\zeta(s).\]</p>
+<p>Its functional equation, together with conjugation, gives</p>
+<p class="formula">\[\xi(1-s)=\xi(s),\qquad \xi(\overline s)=\overline{\xi(s)},\qquad \xi(1-\overline s)=\overline{\xi(s)}.\]</p>
+<p>In the open critical strip the normalizing factors are nonzero, so zeros of \(\xi\) and \(\zeta\) coincide, with their multiplicities. These classical facts require proofs for the constructed functions in our foundation. See the <a href="https://dlmf.nist.gov/25.4">completed function and functional equation</a>.</p>
+<p>Write a zero as \(\rho=\beta+i\gamma\). Its reflected companion is \(1-\beta+i\gamma\): the same height, on the opposite side of the middle line. Symmetry alone allows two distinct off-line roots. A proof that there is room for only one root removes that possibility.</p>
 
-<h2 id="symmetry">Why the middle line is special</h2>
-<p>Gamma supplies the normalization that makes the functional equation a reflection:</p>
-<p class="formula">\[\xi(s)=\frac12s(s-1)\pi^{-s/2}\Gamma(s/2)\zeta(s),\qquad\xi(s)=\xi(1-s).\]</p>
-<p>After the removable values are filled, \(\xi\) is entire. The factors cancel the pole and the negative even zeros of zeta; its zeros are precisely the nontrivial ones. Conjugation gives a second symmetry. Thus a hypothetical off-line zero generally comes with three companions:</p>
-<p class="formula">\[\rho,\quad\overline\rho,\quad1-\rho,\quad1-\overline\rho.\]</p>
-<p>Symmetry permits off-line pairs; it does not force them onto the line. On the line, the two reflections coincide in pairs. The negative even zeros \(-2,-4,\ldots\) are called trivial because the functional equation explains them explicitly. They are outside the Riemann hypothesis. <a href="https://dlmf.nist.gov/25.4">Completed function and reflection formulas</a>.</p>
+<h2 id="isolation">An enclosing rectangle turns symmetry into equality</h2>
+<p>Choose rational bounds \(0< a< \tfrac12\) and \(0< t_-< t_+\), and use the open rectangle</p>
+<p class="formula">\[B=\left\{s:\frac12-a< \Re s< \frac12+a,\quad t_-< \Im s< t_+\right\}.\]</p>
+<p>This rectangle stays inside the strip and is invariant under \(R\). A genuine zero count \(N_B=1\) proves existence and uniqueness, and also simplicity. Take its zero \(\rho\). The symmetry proves that \(R(\rho)\) is another zero in \(B\). Therefore</p>
+<p class="formula">\[\beta+i\gamma=1-\beta+i\gamma,\qquad 2\beta=1,\qquad \beta=\frac12.\]</p>
+<p>Every step after the count is exact algebra. Approximation locates the height and verifies the count; it is never used to replace “very close” with “equal.”</p>
 
-<h2 id="counting">Seeing a zero and counting every zero are different tasks</h2>
-<p>A small value can suggest where to search. A sign change of a justified real-valued critical-line function can prove a zero there. Neither excludes another zero elsewhere in the strip.</p>
-<p>For a positively oriented contour \(C\) on which the constructed \(\xi\) never vanishes, the argument principle relates a boundary computation to the number inside, with multiplicity:</p>
-<p class="formula">\[N(C)=\frac{1}{2\pi i}\oint_C\frac{\xi'(s)}{\xi(s)}\,ds=\frac{\Delta_C\arg\xi}{2\pi}.\]</p>
-<p>The image of the contour winds around the origin. Near a zero, a proved local factorization \(f(s)=(s-\rho)^m g(s)\), with \(g\ne0\), gives \(f'/f=m/(s-\rho)+g'/g\). The pole term contributes its multiplicity. Constructing the regular logarithms and cancelling their contributions on the chosen region connects winding to actual roots. A rounded integral near an integer does not establish that connection.</p>
-<p>Our <a href="skill-certified-zero-counting.html">zero-counting skill</a> should choose the shortest justified route for the particular function and contour: local factorization and finite cancellation, or a proved zero-free deformation to a function whose roots are already counted. Whole edges need nonvanishing bounds, including the gaps between samples. Every comparison, integral, and multiplicity identity still needs proof.</p>
+<h2 id="counting">How approximate values prove an exact count</h2>
+<p>Let \(C\) be the positively oriented boundary of \(B\). For a holomorphic function with no zeros on \(C\), a justified argument-principle identity gives</p>
+<p class="formula">\[N_B=\frac{1}{2\pi i}\oint_C\frac{\xi'(s)}{\xi(s)}\,ds.\]</p>
+<p>The left side is the actual number of zeros, with multiplicity, hence a nonnegative integer. Suppose a certified enclosure of the right side proves</p>
+<p class="formula">\[\frac34< N_B< \frac54.\]</p>
+<p>Only one integer fits. Thus \(N_B=1\) exactly, although the integral was computed approximately. The displayed interval is illustrative; it is not a computation for an actual zeta rectangle.</p>
+<p>There are three separate proof obligations. First, compute values and derivatives with justified error bounds. Second, exclude zero on <em>every point</em> of the contour: endpoint samples alone do not suffice. For example, a whole-edge enclosure can separate its image from the origin, or a supplied variation bound can control the gaps between samples. Third, prove that the computed contour value equals the actual multiplicity count. A rounded number near one establishes none of these obligations on its own.</p>
+<p>One can instead enclose the contour image by a polygon and prove a deformation that avoids the origin. Its winding number is an exact integer, but its connection to actual zeros still needs proof. The <a href="skill-certified-zero-counting.html">zero-counting skill</a> selects concrete local factorizations, logarithms and cancellation, or a justified comparison for the function and contour at hand. A general Cauchy–Goursat theorem is an optional route.</p>
 
-<h2 id="exact-line">How a finite computation can prove exact location</h2>
-<p>Choose a rectangle invariant under \(s\mapsto1-\overline s\). Suppose a genuine count proves it contains exactly one simple root. Reflection gives a root in the same rectangle, so uniqueness forces</p>
-<p class="formula">\[\rho=1-\overline\rho\quad\Longrightarrow\quad\Re\rho=\frac12.\]</p>
-<p>This is an exact algebraic conclusion. No decimal approximation to the real part is being upgraded to equality. The repository already proves this conditional reflection-and-uniqueness implication for represented roots. To certify all zeros below a height, disjoint isolating rectangles must exhaust the global count, and boundary exclusions must be proved. <a href="__NATIVE__ZeroIsolation.lean">Checked implication</a>.</p>
-<p>Other rigorous methods combine certified critical-line roots with Turing completeness checks; <a href="https://arxiv.org/abs/2004.09765">Platt and Trudgian</a> give a substantial example. Rigorous computation is a proof when its bounds and completeness argument are justified.</p>
+<h2 id="signs">A simpler way to prove there is a zero on the line</h2>
+<p>The symmetry makes the following function exactly real-valued for real \(t\):</p>
+<p class="formula">\[\Xi(t)=\xi\left(\frac12+it\right),\qquad \overline{\Xi(t)}=\Xi(t).\]</p>
+<p>Now evaluate it at two rational heights. If rigorous rational enclosures establish, for example,</p>
+<p class="formula">\[\Xi(t_-)\in[L_-,U_-],\quad U_-< 0,\qquad \Xi(t_+)\in[L_+,U_+],\quad 0< L_+,\]</p>
+<p>then the signs are exact. Continuity and a justified root-existence construction give some \(t_*\) strictly between the endpoints with \(\Xi(t_*)=0\). Its corresponding zeta zero is \(\tfrac12+it_*\), on the line by construction. There is no approximate real part to correct.</p>
+<p>This establishes a line zero. To identify it with the unique zero in a chosen rectangle, supply the enclosing rectangle's uniqueness proof. To produce a computable number for its height, supply a shrinking isolation schedule and prove convergence and the zero equation. Bisection is a useful strategy when its progress is justified; an undecided midpoint sign cannot silently be treated as a decided equality.</p>
+<p>Practical work often uses the real-valued Hardy function \(Z(t)\), which differs from \(\zeta(\tfrac12+it)\) by a nonzero phase factor. The same sign-certificate idea applies. <a href="https://dlmf.nist.gov/25.10#i">Critical-line functions</a>.</p>
 
-<h2 id="prime-powers">Why zeros appear when we recover the primes</h2>
-<p>Taking a logarithmic derivative of the Euler product turns prime factors into prime-power coefficients:</p>
-<p class="formula">\[-\frac{\zeta'(s)}{\zeta(s)}=\sum_{p}\sum_{k\ge1}(\log p)p^{-ks}=\sum_{n\ge1}\frac{\Lambda(n)}{n^s},\qquad\Re s>1.\]</p>
-<p>Here \(\Lambda(p^k)=\log p\), and all other coefficients vanish. Write \(\psi(x)=\sum_{n\le x}\Lambda(n)\), and let \(\psi_0\) take the average of the two limits at a jump. The inversion kernel \(x^s/s\) converts these coefficients into the staircase. Moving its integration contour encounters a pole at each zeta zero. A zero of multiplicity \(m\) contributes \(-m x^\rho/\rho\).</p>
-<p class="formula">\[\psi_0(x)=x-\lim_{T\to\infty}\sum_{|\Im\rho|\le T}\frac{x^\rho}{\rho}-\log(2\pi)-\frac12\log(1-x^{-2}),\qquad x>1.\]</p>
-<p>The sum counts multiplicities and is ordered symmetrically by height; it is not absolutely convergent. The pole at \(s=1\) supplies \(x\); the other terms come from nontrivial zeros, the origin, and trivial zeros. This is the classical explicit formula, with contour limits and tails to justify. <a href="https://terrytao.wordpress.com/2021/02/12/246b-notes-4-the-riemann-zeta-function-and-the-prime-number-theorem/">Derivation and inversion</a>.</p>
+<h2 id="nearby">Why an almost-zero and symmetry are insufficient</h2>
+<p>Here is an elementary model, not a zeta computation. Fix rational \(t_0>0\) and \(\delta>0\), and put</p>
+<p class="formula">\[c=\frac12+it_0,\qquad F_\delta(s)=(s-c)^2-\delta^2=(s-c-\delta)(s-c+\delta).\]</p>
+<p>It has the same reflection-conjugation symmetry: \(R(s)-c=-\overline{s-c}\), so \(F_\delta(R(s))=\overline{F_\delta(s)}\). Its two roots are \(c-\delta\) and \(c+\delta\). Both lie off the line, however small \(\delta\) is. Moreover, \(F_\delta(c)=-\delta^2\) is arbitrarily small although the point on the line is not a root.</p>
+<p>A symmetric rectangle enclosing both roots has count two. Reflection exchanges them, so uniqueness is unavailable. If \(\delta=0\), the center is instead a double root on the line, also with count two. The count two alone does not distinguish these possibilities; the count one certificate does.</p>
 
-<h2 id="waves">One zero pair: frequency and amplitude</h2>
-<p>For \(\rho=\beta+i\gamma\), combine its term with the conjugate term. Ordinary complex arithmetic gives</p>
-<p class="formula">\[-\frac{x^\rho}{\rho}-\frac{x^{\overline\rho}}{\overline\rho}=-\frac{2x^\beta}{\beta^2+\gamma^2}\big(\beta\cos(\gamma\log x)+\gamma\sin(\gamma\log x)\big).\]</p>
-<p>The height \(\gamma\) sets the frequency in \(\log x\); the real part \(\beta\) sets the growth scale \(x^\beta\). This is the quantitative content missing from uniqueness alone. Under the Riemann hypothesis, each pair has the square-root scale. Controlling the entire sum still requires bounds for all heights. Classically, the hypothesis is equivalent to \(\psi(x)=x+O(x^{1/2+\varepsilon})\) for every \(\varepsilon>0\). <a href="https://dlmf.nist.gov/25.16#i">Prime-counting estimates</a>.</p>
+<h2 id="certificate">What a certificate for one particular zero contains</h2>
+<ol>
+<li>A constructed continuation of zeta on the entire chosen region, and a proved completed-function symmetry and zero correspondence.</li>
+<li>A rational symmetric rectangle, with rigorous nonvanishing bounds on its whole boundary.</li>
+<li>A convergent contour computation or winding construction, with its proved identity as the actual multiplicity count and an enclosure forcing that count to be one.</li>
+<li>The exact reflection-and-uniqueness deduction. A shrinking isolation construction additionally supplies a represented root and its height to arbitrary precision.</li>
+</ol>
+<p>These are checkable pieces of mathematical evidence. A table of decimal roots is useful for proposing the rectangles, but the certificate is what proves the exact statement about each root.</p>
 
-<section class="zeta-wave" aria-labelledby="wave-heading">
-<h3 id="wave-heading">Explore a hypothetical conjugate pair</h3>
-<p>Divide the pair's contribution by \(\sqrt{x}\). Move its real part to see the envelope change. These are hypothetical parameters, not computed zeta zeros; an off-line pair would also require its reflected companions.</p>
-<div class="zeta-controls"><label for="wave-beta"><span>Real part \(\beta\)</span><input id="wave-beta" type="range" min="0.5" max="0.85" step="0.05" value="0.5"></label><label for="wave-gamma"><span>Height \(\gamma\)</span><input id="wave-gamma" type="range" min="5" max="40" step="1" value="14"></label></div>
-<div id="wave-readout" class="zeta-readout" aria-live="polite"></div>
-<p class="zeta-axis">Vertical: pair contribution divided by \(\sqrt{x}\). Horizontal: \(u=\log x\), from \(\log2\) to \(\log1000\).</p>
-<svg id="wave-plot" viewBox="0 0 640 240" role="img" aria-label="Oscillation of a hypothetical conjugate zero pair with its positive and negative amplitude envelopes"></svg>
-<p id="wave-scale" class="zeta-readout"></p>
-<p class="classic-scope">The curve uses floating-point arithmetic to illustrate the displayed finite formula. It is neither a prime-counting approximation with a certified remainder nor a zero-location certificate.</p>
-</section>
+<h2 id="all-zeros">One zero and all zeros below a height</h2>
+<p>Repeating an individual certificate proves the result for each certified rectangle. To assert that <em>every</em> zero below a chosen height lies on the line, also exclude any omitted zeros. Disjoint rectangles whose counts exhaust a justified global count provide one route; critical-line sign certificates combined with a Turing completeness argument provide another. Boundary zeros and multiplicities must be accounted for.</p>
+<p><a href="https://arxiv.org/abs/2004.09765">Platt and Trudgian's rigorous finite-height verification</a> illustrates interval arithmetic together with completeness. The extra counting argument is essential to the word “every.” It is unnecessary when the claim concerns only a particular certified zero.</p>
 
-<h2 id="checked">Our next constructions</h2>
-<p>The checked foundation supplies quotient derivatives and polynomial calculus, integer-zeta comparison laws, positive-integer Gamma Gauss limits, and the exact reflection implication. Complex zeta, general-parameter Gamma, their symmetry, actual contour counts, and the explicit formula above remain construction tasks. No finite-height critical-line theorem is claimed here.</p>
-<p>For each task, the skill selects a computation, proves its local derivative or tail bounds, establishes overlap agreement, and proves the needed contour identity. General Cauchy–Goursat is an optional route, not a gate every application must pass.</p>
-<p><a href="complex-analysis.html#zeta-gamma">Checked zeta/Gamma results</a> · <a href="skill-certified-zero-counting.html">Certified zero-counting skill</a> · <a href="analytic-continuation.html">Local knowledge and global uniqueness</a> · <a href="__REPO__docs/FUNCTION_THEORY_ZETA_GAMMA.md">Detailed proof scope</a></p>
+<h2 id="checked">What is checked here, and what remains to construct</h2>
+<p>The repository proves the exact conditional reflection-and-uniqueness implication for valid represented roots, including the deduction of the real part \(\tfrac12\). See <a href="__NATIVE__ZeroIsolation.lean">the checked zero-isolation proof</a>. Exact equality there is equality of represented values, expressed by <code>RealRaw.Equiv</code>.</p>
+<p>The complex zeta construction, completed-function symmetry, actual contour-count identities, and specific isolating rectangles remain to be supplied. This page explains the certificate strategy; it does not certify an actual zeta zero yet. No finite-height critical-line theorem is claimed here.</p>
+<p><a href="skill-certified-zero-counting.html">Certified zero-counting skill</a> · <a href="complex-analysis.html#zeta-gamma">Checked function-theory foundation</a> · <a href="analytic-continuation.html">Continuation and uniqueness</a> · <a href="__REPO__docs/FUNCTION_THEORY_ZETA_GAMMA.md">Detailed proof scope</a></p>

@@ -748,10 +748,11 @@ No finite-height critical-line zero theorem is yet claimed.
 
 ## Pedagogy of zeta zeros
 
-The reader now follows Euler's product, a paired-series continuation into the
-strip, completed-function symmetry, certified contour counting and unique
-isolation, and the explicit formula connecting zeros to prime powers. A finite
-wave model illustrates frequency and amplitude without claiming a zero
-computation or a certified prime-counting remainder. General Cauchy–Goursat is
-an optional skill route, not a prerequisite. The classical formulas and
-construction recipes remain distinct from checked repository theorems.
+The reader explains exact critical-line certification for a particular zero:
+proved reflection symmetry and a symmetric rectangle with actual multiplicity
+count one force exact equality with the reflected root. Rigorous approximate
+computations establish strict bounds and an integer count, not equality of
+decimal expansions. A separate sign-certificate route establishes a line zero;
+uniqueness identifies it, and global completeness is an additional obligation
+only for claims about all zeros below a height. The checked conditional
+implication is distinguished from the still-open concrete zeta certificates.

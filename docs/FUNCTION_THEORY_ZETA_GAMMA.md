@@ -34,9 +34,11 @@ cancellation, or justified deformations; the selected proof must establish
 the actual requested identity or count. General-purpose constructors remain
 optional directions rather than prerequisites.
 
-The reader's [zeta-zero exposition](../book/classics/zeta-zeros.html) connects
-continuation, exact isolation, and the explicit prime-counting formula. Its
-classical formulas and hypothetical wave model do not add Lean zero theorems.
+The reader's [zeta-zero exposition](../book/classics/zeta-zeros.html) explains
+how rigorous approximate evaluations can prove an exact integer count, and how
+reflection plus unique isolation forces a zero exactly onto the critical line.
+It also separates critical-line sign certificates from uniqueness and global
+completeness. It does not add a certificate for an actual zeta zero.
 
 ## First exact zeta results
 

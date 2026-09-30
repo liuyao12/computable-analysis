@@ -122,7 +122,7 @@ def install(site,revision,euler_audit,cauchy_audit,arctan_audit,holomorphic_audi
     native=repo+'ComputableAnalysis/'
     ml=f'https://github.com/leanprover-community/mathlib4/blob/{MATHLIB}/'
     template=(site/'cosine.html').read_text()
-    for name,title in [('leibniz','The Leibniz series'),('basel','The Basel problem'),('euler','Euler’s sine-product proof'),('fuchs','Fuchs’s theorem'),('painleve','Painlevé’s classification'),('complex-analysis','Polygonal Cauchy theory'),('analytic-continuation','Analytic continuation'),('zeta-zeros','Why the zeros of zeta matter'),('arctan-taylor','Arctangent: where Taylor stops')]:
+    for name,title in [('leibniz','The Leibniz series'),('basel','The Basel problem'),('euler','Euler’s sine-product proof'),('fuchs','Fuchs’s theorem'),('painleve','Painlevé’s classification'),('complex-analysis','Polygonal Cauchy theory'),('analytic-continuation','Analytic continuation'),('zeta-zeros','How can a zeta zero be exactly on the line?'),('arctan-taylor','Arctangent: where Taylor stops')]:
         doc=BeautifulSoup(template,'html.parser');doc.title.string=title+' · Computable Analysis'
         doc.select_one('meta[name="documentation-revision"]')['content']=revision
         page=(SOURCE/(name+'.html')).read_text().replace('__NATIVE__',native).replace('__MATHLIB__',ml).replace('__REPO__',repo).replace('__EULER_MATHLIB__',f'https://github.com/leanprover-community/mathlib4/blob/{EULER_MATHLIB}/')
@@ -147,8 +147,6 @@ def install(site,revision,euler_audit,cauchy_audit,arctan_audit,holomorphic_audi
         if name=='zeta-zeros':
             kicker=doc.select_one('.chapter-kicker')
             if kicker:kicker.string='Function theory'
-            doc.head.append(doc.new_tag('link',rel='stylesheet',href='reading/zeta-waves.css'))
-            doc.head.append(doc.new_tag('script',src='reading/zeta-waves.js',defer=''))
         if name=='arctan-taylor':
             doc.body['class']=doc.body.get('class',[])+['cauchy-page','arctan-page']
             doc.select_one('.page').append(BeautifulSoup((SOURCE/'arctan-example.html').read_text(),'html.parser'))
@@ -209,7 +207,7 @@ def install(site,revision,euler_audit,cauchy_audit,arctan_audit,holomorphic_audi
             active=nav.select_one(f'a[href="{prefix+p.name}"]');active['class']=active.get('class',[])+['current'];active['aria-current']='page'
         updated=original[:match.start()]+str(nav)+original[match.end():]
         p.write_text(updated);navigation.append(str(p.relative_to(site)))
-    for asset in ['cauchy-example.css','cauchy-example.js','arctan-example.css','arctan-example.js','continuation-examples.css','continuation-examples.js','zeta-waves.css','zeta-waves.js']:
+    for asset in ['cauchy-example.css','cauchy-example.js','arctan-example.css','arctan-example.js','continuation-examples.css','continuation-examples.js']:
         shutil.copyfile(SOURCE/asset,site/'reading'/asset)
     shutil.copyfile(arctan_audit,site/'reading/arctan-taylor-audit.log')
     shutil.copyfile(holomorphic_audit,site/'reading/holomorphic-audit.log')
