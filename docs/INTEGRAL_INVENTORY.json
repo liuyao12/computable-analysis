@@ -2448,6 +2448,11 @@
       ]
     },
     {
+      "path": "ComputableAnalysis/GammaInteger.lean",
+      "role": "support",
+      "declarations": []
+    },
+    {
       "path": "ComputableAnalysis/GeometricIntegral.lean",
       "role": "mixed",
       "declarations": [
