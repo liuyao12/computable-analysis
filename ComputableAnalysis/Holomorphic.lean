@@ -1,4 +1,4 @@
-import ComputableAnalysis.ComplexMultiplication
+import ComputableAnalysis.RepresentedContinuity
 
 /-!
 # Holomorphic represented functions
@@ -17,44 +17,6 @@ their function types alone are not computability certificates.
 namespace ComputableAnalysis.FunctionTheory
 
 open ComplexRaw
-
-/-- Exact closed coordinate bound, not a bound on an arbitrarily early box.
-For valid inputs this says both represented coordinates lie in `[-r,r]`. -/
-def Small (z : ComplexRaw) (r : Rat) : Prop :=
-  (RealRaw.ofRat (-r)).Le z.realPart ∧ z.realPart.Le (RealRaw.ofRat r) ∧
-  (RealRaw.ofRat (-r)).Le z.imagPart ∧ z.imagPart.Le (RealRaw.ofRat r)
-
-theorem Small.congr {z w : ComplexRaw} {r : Rat}
-    (hz : z.Valid) (hw : w.Valid) (hzw : z.Equiv w) (h : Small z r) :
-    Small w r := by
-  have hr := ComplexRaw.realPart_equiv hzw
-  have hi := ComplexRaw.imagPart_equiv hzw
-  have hzr := realPart_valid hz
-  have hwr := realPart_valid hw
-  have hzi := imagPart_valid hz
-  have hwi := imagPart_valid hw
-  exact ⟨RealRaw.le_trans hzr h.1 (RealRaw.le_of_equiv hzr hwr hr),
-    RealRaw.le_trans hzr (RealRaw.le_of_equiv hwr hzr (RealRaw.equiv_symm hr)) h.2.1,
-    RealRaw.le_trans hzi h.2.2.1 (RealRaw.le_of_equiv hzi hwi hi),
-    RealRaw.le_trans hzi (RealRaw.le_of_equiv hwi hzi (RealRaw.equiv_symm hi)) h.2.2.2⟩
-
-theorem Small.zero {r : Rat} (hr : 0 ≤ r) : Small ComplexRaw.zero r := by
-  constructor
-  · intro n m; change -r ≤ 0; grind
-  constructor
-  · intro n m; exact hr
-  constructor
-  · intro n m; change -r ≤ 0; grind
-  · intro n m; exact hr
-
-theorem Small.mono {z : ComplexRaw} {r s : Rat}
-    (h : Small z r) (hrs : r ≤ s) : Small z s := by
-  rcases h with ⟨h1,h2,h3,h4⟩
-  refine ⟨?_, ?_, ?_, ?_⟩
-  · intro n m; exact Rat.le_trans (Rat.neg_le_neg hrs) (h1 n m)
-  · intro n m; exact Rat.le_trans (h2 n m) hrs
-  · intro n m; exact Rat.le_trans (Rat.neg_le_neg hrs) (h3 n m)
-  · intro n m; exact Rat.le_trans (h4 n m) hrs
 
 /-- A partial represented map; its values and domain respect equivalence.
 The total evaluator's behavior outside the stated domain is irrelevant. -/
@@ -96,12 +58,6 @@ structure HasDerivativeAt (f : Map) (a d : ComplexRaw) where
   estimate : ∀ (eps H : QPos) (z : ComplexRaw), z.Valid → f.domain z →
     H.val ≤ (delta eps).val → Small (sub z a) H.val →
     Small (remainder f a d z) (eps.val * H.val)
-
-/-- Supplied local continuity moduli on a represented domain. -/
-structure ContinuousOn (domain : ComplexRaw → Prop) (g : ComplexRaw → ComplexRaw) where
-  delta : ∀ a, a.Valid → domain a → QPos → QPos
-  estimate : ∀ a ha hfa (eps : QPos) z, z.Valid → domain z →
-    Small (sub z a) (delta a ha hfa eps).val → Small (sub (g z) (g a)) eps.val
 
 /-- Our working holomorphic interface supplies a continuous complex derivative.
 This is deliberately stronger data than bare pointwise differentiability;

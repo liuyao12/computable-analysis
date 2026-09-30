@@ -125,7 +125,8 @@ comparison; a universal continuation operator is not a prerequisite.
 | Exact rational algebra or polynomial identity | `Basic`, `Algebraic`, `Polynomial` | Exact equality or finite factorization |
 | One computable number | `RealRaw` and `QInterval` | Valid boxes, a width modulus, and equivalence when comparing definitions |
 | Rational function on an interval | `FunctionDomains` | A denominator-apart certificate on the whole interval |
-| Continuity of a boxed function | `IntervalRegularOn` | A literal rational epsilon-delta modulus |
+| Continuity at a represented point or on a represented domain | `RepresentedContinuity` | `ContinuousAt` or `ContinuousOn`, using represented arithmetic/order and point-dependent rational radii |
+| Uniform finite estimates for a boxed interval function | `IntervalRegularOn` | A literal rational epsilon-delta modulus |
 | Derivative or closed-form definite integral | `Differential`, `EffectiveCalculusFoundation` | Finite-difference enclosure and a particular endpoint bridge |
 | Definite integral | `IntegralFoundation` plus the integral reference | A construction for this function, not a general existence assertion |
 | Turning point or irrational split | `TurningPointIntegral` | Shrinking rational brackets and a central range estimate |

@@ -14,6 +14,16 @@
 <p>Its only finite coefficient singularity is the origin. Multiplying the coefficients by the appropriate powers gives \(zp(z)=1\) and \(z^2q(z)=z^2\), both regular there. We will follow this one equation while constructing tools for general complex functions and systems of any finite dimension.</p>
 
 <p class="classic-action">For a real-variable showcase of this function theory, see <a href="arctan-taylor.html">where the Taylor series of arctangent converges—and where it stops</a>.</p>
+<section id="represented-continuity">
+<h2 id="continuity">Continuity at a point and on a domain</h2>
+<p>For a valid represented real point \(a\) in the domain \(D\), continuity supplies a positive rational radius \(\delta\) for every positive rational tolerance \(\varepsilon\), such that every valid represented domain point \(y\) satisfies</p>
+\[|y-a|\le\delta\quad\Longrightarrow\quad|f(y)-f(a)|\le\varepsilon.\]
+<p>These are arithmetic and order statements about represented values. The output bound means \(-\varepsilon\le f(y)-f(a)\le\varepsilon\). For a complex function we use the same law with \(\|u\|_\infty=\max(|\Re u|,|\Im u|)\).</p>
+<p>Continuity on \(D\) supplies this witness at every valid point of \(D\). The radius can depend on the point; a common radius for the whole domain is additional uniform continuity data. Equivalent input representations and equivalent function evaluators preserve the law.</p>
+<p>Interval computations justify the inequalities underneath. A common output stage is not part of the definition. A derivative estimate at just one point now proves continuity there; holomorphicity supplies those witnesses throughout its domain.</p>
+<p><a href="__REPO__ComputableAnalysis/RepresentedContinuity.lean">Real and complex continuity interfaces and representation proofs</a> · <a href="__REPO__ComputableAnalysis/HolomorphicCalculus.lean">Differentiability implies continuity</a></p>
+</section>
+
 <section id="holomorphic-foundation">
 <h2 id="holomorphic">Holomorphic functions: the working definition</h2>
 <p>We supply a function on an open domain together with a continuous complex derivative. Both are computations by shrinking rational rectangles. Their values and the domain must be independent of the chosen valid representation of an input.</p>

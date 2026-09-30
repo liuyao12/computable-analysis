@@ -9,7 +9,14 @@ run_cmd do
   for mod in env.header.moduleNames do
     if mod.toString.startsWith "Mathlib" then
       throwError "Unexpected Mathlib import: {mod}"
-  for name in [``Small.congr, ``HasDerivativeAt.congrPoint,
+  for name in [``RealFunctionTheory.Small.congr, ``RealFunctionTheory.Small.sub_self,
+      ``RealFunctionTheory.ContinuousAt.congrPoint, ``RealFunctionTheory.ContinuousAt.congrEval,
+      ``RealFunctionTheory.ContinuousOn.atPoint, ``RealFunctionTheory.ContinuousOn.ofAtPoint,
+      ``RealFunctionTheory.ContinuousOn.congrEval, ``RealFunctionTheory.continuousOn_identity,
+      ``RealFunctionTheory.continuousOn_constant,
+      ``ContinuousAt.congrPoint, ``ContinuousAt.congrEval,
+      ``ContinuousOn.atPoint, ``ContinuousOn.ofAtPoint, ``ContinuousOn.congrEval,
+      ``continuousOn_identity, ``HasDerivativeAt.continuous, ``Small.congr, ``HasDerivativeAt.congrPoint,
       ``HasDerivativeAt.congrDerivative, ``affine_remainder,
       ``affine_holomorphic, ``square_remainder, ``Small.mul, ``square_holomorphic,
       ``small_valueBound, ``HasDerivativeAt.local_bound, ``Holomorphic.continuous,
@@ -79,3 +86,35 @@ def inner_holo := affine_holomorphic (coefficient 2 1).val (coefficient 1 (-1)).
 #guard ((square_holomorphic.comp inner_holo).derivative input).compute 0 == QBox.point ⟨4,12⟩
 #guard 0 < (((square_holomorphic.comp inner_holo).atPoint input
   (ComplexRaw.ofQComplex_valid _) ⟨True.intro,True.intro⟩).delta ⟨1/100,by decide +kernel⟩).val
+
+-- A derivative at just one point suffices for continuity at that point.
+example (f : FunctionTheory.Map) (a d : ComplexRaw) (h : HasDerivativeAt f a d) :
+    ContinuousAt f.domain f.eval a := h.continuous
+
+-- Pointwise and whole-domain interfaces share the same exact-value law.
+example (f : FunctionTheory.Map) (h : Holomorphic f)
+    (a : ComplexRaw) (ha : a.Valid) (hDa : f.domain a) :
+    ContinuousAt f.domain f.eval a := h.continuous.atPoint a ha hDa
+
+-- Real identity and arbitrary represented constants: no rational-input restriction.
+example (D : RealRaw → Prop) (a : RealRaw) (ha : a.Valid) (hDa : D a) :
+    RealFunctionTheory.ContinuousAt D (fun x => x) a :=
+  (RealFunctionTheory.continuousOn_identity D).atPoint a ha hDa
+
+example (D : RealRaw → Prop) (c : RealRaw) (hc : c.Valid) :
+    RealFunctionTheory.ContinuousOn D (fun _ => c) :=
+  RealFunctionTheory.continuousOn_constant D c hc
+
+-- An independent evaluator, with wider finite boxes, keeps continuity.
+example : RealFunctionTheory.ContinuousOn (fun _ => True)
+    (fun x => (x + x) - x) :=
+  (RealFunctionTheory.continuousOn_identity (fun _ => True)).congrEval
+    (fun _ hx _ => hx)
+    (fun _ hx _ => RealRaw.sub_valid (RealRaw.add_valid hx hx) hx)
+    (fun _ hx _ => RealRaw.equiv_symm (RealRaw.add_sub_cancel_left_equiv hx hx))
+
+-- Input-name transport uses the map's genuine domain and evaluator invariance.
+example (f : FunctionTheory.Map) (a b : ComplexRaw)
+    (h : ContinuousAt f.domain f.eval a) (hb : b.Valid) (hab : a.Equiv b) :
+    ContinuousAt f.domain f.eval b :=
+  h.congrPoint hb hab f.domain_congr f.valid f.eval_congr

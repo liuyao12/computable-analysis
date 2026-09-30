@@ -1,3 +1,4 @@
+import ComputableAnalysis.RepresentedContinuity
 import ComputableAnalysis.Continuation
 import ComputableAnalysis.HolomorphicPolynomial
 import ComputableAnalysis.VerticalReciprocalIntegral

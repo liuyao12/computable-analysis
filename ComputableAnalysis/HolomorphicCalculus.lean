@@ -80,19 +80,27 @@ theorem HasDerivativeAt.local_bound {f : Map} {a d : ComplexRaw}
     (restore_remainder f a d z h.point_valid h.derivative_valid hz h.point_mem hfz)
   exact (e.add l).mono (by dsimp [one,HasDerivativeAt.slopeBound]; grind)
 
-/-- Differentiability constructs continuity of the function itself. -/
-def Holomorphic.continuous {f : Map} (h : Holomorphic f) : ContinuousOn f.domain f.eval where
-  delta := fun a ha hfa eps => meet ((h.atPoint a ha hfa).delta one)
-    (ratio eps (h.atPoint a ha hfa).slopeBound)
+/-- Differentiability at one point constructs value continuity there.
+No continuity of the derivative or open-domain hypothesis is needed. -/
+def HasDerivativeAt.continuous {f : Map} {a d : ComplexRaw}
+    (h : HasDerivativeAt f a d) : ContinuousAt f.domain f.eval a where
+  point_valid := h.point_valid
+  point_mem := h.point_mem
+  delta := fun eps => meet (h.delta one) (ratio eps h.slopeBound)
   estimate := by
-    intro a ha hfa eps z hz hfz hza
-    let d := h.atPoint a ha hfa
-    let H := meet (d.delta one) (ratio eps d.slopeBound)
-    have e := d.local_bound H z hz hfz (by dsimp [H,meet,ratio]; grind) hza
+    intro eps z hz hfz hza
+    let H := meet (h.delta one) (ratio eps h.slopeBound)
+    have e := h.local_bound H z hz hfz (meet_left _ _) hza
     apply e.mono
-    have hb : H.val ≤ eps.val/d.slopeBound.val := by dsimp [H,meet,ratio]; grind
-    have hp := d.slopeBound.property
-    exact Rat.le_trans (Rat.mul_le_mul_of_nonneg_left hb (Rat.le_of_lt hp)) (by rw [Rat.mul_comm, Rat.div_mul_cancel (by grind : d.slopeBound.val ≠ 0)]; exact Rat.le_refl)
+    have hb : H.val ≤ eps.val/h.slopeBound.val := meet_right _ _
+    have hp := h.slopeBound.property
+    exact Rat.le_trans (Rat.mul_le_mul_of_nonneg_left hb (Rat.le_of_lt hp)) (by
+      rw [Rat.mul_comm, Rat.div_mul_cancel (by grind : h.slopeBound.val ≠ 0)]
+      exact Rat.le_refl)
+
+/-- Pointwise differentiability assembles continuity throughout the domain. -/
+def Holomorphic.continuous {f : Map} (h : Holomorphic f) : ContinuousOn f.domain f.eval :=
+  .ofAtPoint fun a ha hfa => (h.atPoint a ha hfa).continuous
 
 def Map.add (f g : Map) : Map where
   domain := fun z => f.domain z ∧ g.domain z

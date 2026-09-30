@@ -1,3 +1,4 @@
+import ComputableAnalysis.RepresentedContinuity
 import ComputableAnalysis.Basic
 import ComputableAnalysis.ComplexInterval
 import ComputableAnalysis.FunctionDomains

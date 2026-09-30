@@ -27,6 +27,16 @@ rational-ray growth theorem through exact scaled-jet comparisons. General
 Frobenius branch construction, uniform ray adapters, sector continuation,
 and fundamental-matrix monodromy remain open.
 
+## Represented-value continuity (2026-09-30)
+
+`RepresentedContinuity` provides real and complex continuity at a point and
+throughout a represented domain, using exact arithmetic and order on values.
+Local and whole-domain witnesses convert without uniformizing the radii.
+Input-name and equivalent-evaluator transport are proved. Real constants and
+identity have constructed witnesses; a derivative at a single complex point
+now constructs continuity there directly. Existing interval-stage estimates
+remain sufficient proof tools underneath this public law.
+
 ## Function-theory audit (2026-09-29)
 
 Completed the missing algebraic calculus: function continuity, sum/product/chain

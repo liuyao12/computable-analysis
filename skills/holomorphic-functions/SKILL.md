@@ -37,6 +37,24 @@ using `RealRaw.Le`. It means
 It does not require early output boxes to fit inside that rectangle.
 `Small.congr` transports the bound between valid equivalent representations.
 
+## Use value-level continuity
+
+Use `FunctionTheory.ContinuousAt D g a` for continuity at one valid represented
+point, and `ContinuousOn D g` for continuity at every valid domain point:
+\[
+ \|z-a\|_\infty\le\delta(a,\varepsilon)
+ \quad\Longrightarrow\quad\|g(z)-g(a)\|_\infty\le\varepsilon.
+\]
+These interfaces live in
+[`RepresentedContinuity`](../../ComputableAnalysis/RepresentedContinuity.lean).
+`ContinuousOn.atPoint` and `ofAtPoint` connect them. `congrPoint` and `congrEval`
+transport the law under equivalent representations. Radii may depend on the
+point; do not require a uniform radius or a common output stage unless a
+particular proof needs them. Real functions use the corresponding interfaces
+in `RealFunctionTheory`. A derivative witness at one point already gives
+`HasDerivativeAt.continuous`; whole-domain holomorphicity is unnecessary for
+that conclusion.
+
 ## Choose the proof method
 
 Use [the method guide](references/methods.md) to choose finite algebra,

@@ -7,6 +7,25 @@ the local bounds are supplied data.  We prove the integral identities
 actually used, rather than first postulating an arbitrary holomorphic
 function on an arbitrary open set.
 
+\section{Continuity of represented values}
+At a valid represented real point $a\in D$, continuity supplies a positive
+rational radius $\delta$ for every positive rational tolerance $\varepsilon$:
+\[
+ y\in D,\quad |y-a|\le\delta
+ \quad\Longrightarrow\quad |f(y)-f(a)|\le\varepsilon.
+\]
+The output inequality means $-\varepsilon\le f(y)-f(a)\le\varepsilon$,
+using represented arithmetic and exact order. For complex functions, use
+the coordinate maximum norm. Continuity throughout $D$ means this same law
+at every valid domain point; the radius can depend on the base point.
+The pointwise and whole-domain witnesses convert in both directions.
+Changing valid input names or replacing an evaluator by an equivalent one
+preserves the law and reuses the radius computation. A common output stage
+is not part of this definition. Finite interval estimates remain proof tools.
+Real constants and identity have constructed witnesses. A derivative estimate
+at a single complex point proves continuity there without requiring continuity
+of the derivative or openness of the domain.
+
 \section{A supplied continuous complex derivative}
 Our working holomorphic functions have an open domain, represented value and
 derivative computations, and explicit local moduli. For every positive

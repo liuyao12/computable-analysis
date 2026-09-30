@@ -26,6 +26,39 @@ representations. A separate local continuity modulus bounds
 \(\|d(z)-d(a)\|_\infty\) by \(\varepsilon\) on a supplied neighborhood.
 Neither a contour identity nor power-series representation is assumed.
 
+## Continuity of represented values
+
+Use `RepresentedContinuity` for continuity at a point and throughout a domain.
+For a valid represented real point \(a\in D\), `RealFunctionTheory.ContinuousAt`
+supplies, for every positive rational \(\varepsilon\), a positive rational
+\(\delta\) satisfying
+\[
+ y\in D,\quad |y-a|\le\delta
+ \quad\Longrightarrow\quad |f(y)-f(a)|\le\varepsilon.
+\]
+The inequalities use arithmetic and `RealRaw.Le` on represented values.
+`RealFunctionTheory.Small u r` means \(-r\le u\le r\). For complex values,
+`FunctionTheory.ContinuousAt` uses the same law with the coordinate maximum
+norm. Both quantify over arbitrary valid represented neighbors.
+
+`ContinuousOn` supplies this law at every valid domain point. Its radius may
+depend on the point and tolerance; this is not uniform continuity.
+`ContinuousOn.atPoint` extracts a local witness and `ofAtPoint` assembles
+supplied local witnesses, without choosing a uniform radius.
+`ContinuousAt.congrPoint` and `congrEval` prove invariance under equivalent
+valid input names and equivalent evaluators; the radius computation is reused.
+Neither a common finite output stage nor any required approximation recipe
+is part of the public law. Finite interval estimates are proof tools underneath.
+The older rational-input `EffectiveContinuous` and interval
+`EpsilonDeltaContinuousOn` are specialized finite estimates, not the definition
+of continuity for all represented inputs. A raw evaluator alone does not
+supply continuity evidence.
+
+The real identity and arbitrary valid represented constants have constructed
+witnesses. `HasDerivativeAt.continuous` derives continuity at one point from
+its derivative remainder estimate, without derivative continuity or an open
+domain. `Holomorphic.continuous` assembles those witnesses throughout its domain.
+
 ## Checked constructions
 
 `affine_holomorphic` constructs the full interface for
