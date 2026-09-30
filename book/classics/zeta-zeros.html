@@ -42,7 +42,16 @@
 <p class="formula">\[\Xi(t_-)\in[L_-,U_-],\quad U_-< 0,\qquad \Xi(t_+)\in[L_+,U_+],\quad 0< L_+,\]</p>
 <p>then the signs are exact. Continuity and a justified root-existence construction give some \(t_*\) strictly between the endpoints with \(\Xi(t_*)=0\). Its corresponding zeta zero is \(\tfrac12+it_*\), on the line by construction. There is no approximate real part to correct.</p>
 <p>This establishes a line zero. To identify it with the unique zero in a chosen rectangle, supply the enclosing rectangle's uniqueness proof. To produce a computable number for its height, supply a shrinking isolation schedule and prove convergence and the zero equation. Bisection is a useful strategy when its progress is justified; an undecided midpoint sign cannot silently be treated as a decided equality.</p>
-<p>Practical work often uses the real-valued Hardy function \(Z(t)\), which differs from \(\zeta(\tfrac12+it)\) by a nonzero phase factor. The same sign-certificate idea applies. <a href="https://dlmf.nist.gov/25.10#i">Critical-line functions</a>.</p>
+<h3 id="riemann-computation">What Riemann actually computed</h3>
+<p>The numerical work survives in Riemann's unpublished notes, reconstructed by Siegel in 1932. Riemann approximated critical-line zeros using a saddle-point expansion of an integral for \(\zeta\), now called the Riemann–Siegel formula. In modern notation, first rotate the value by a known phase:</p>
+<p class="formula">\[Z(t)=e^{i\vartheta(t)}\zeta\left(\frac12+it\right),\qquad \vartheta(t)=\Im\log\Gamma\left(\frac14+\frac{it}{2}\right)-\frac t2\log\pi.\]</p>
+<p>Use the continuous logarithm along this Gamma path, real at \(t=0\). The functional equation makes \(Z(t)\) exactly real, and the nonzero phase preserves its zeros. The computation has a short main sum:</p>
+<p class="formula">\[Z(t)=2\sum_{n=1}^{m}\frac{\cos(\vartheta(t)-t\log n)}{\sqrt n}+R(t),\qquad m=\left\lfloor\sqrt{\frac{t}{2\pi}}\right\rfloor.\]</p>
+<p>The expansion supplies correction terms for \(R(t)\); using the main sum alone is insufficient near a zero. This avoids summing the original Dirichlet series, which does not converge on the line. See <a href="https://arxiv.org/pdf/1810.05198#page=23">Siegel's account, §4</a>, and the <a href="https://dlmf.nist.gov/25.10#ii">Riemann–Siegel formula</a>.</p>
+<p>His recorded first-zero height was \(14.1386\), versus Gram's later \(14.1347\). The many-digit quantity he also recorded was a separate zero-sum check, with \(\gamma_E\) Euler's constant:</p>
+<p class="formula">\[1+\frac12\gamma_E-\frac12\log\pi-\log2=0.02309570896612103381\ldots.\]</p>
+<p>These digits describe the zero-sum constant; the individual zero estimates were rougher. <a href="https://arxiv.org/pdf/1810.05198#page=24">Recorded numerical calculations</a>.</p>
+<p>A modern certificate bounds the uncomputed remainder and arithmetic errors tightly enough to prove opposite signs of \(Z\) at two rational heights. That gives an exact zero on the line through the root-existence construction described above. Historical approximations and such a certificate are different kinds of evidence.</p>
 
 <h2 id="nearby">Why an almost-zero and symmetry are insufficient</h2>
 <p>Here is an elementary model, not a zeta computation. Fix rational \(t_0>0\) and \(\delta>0\), and put</p>
