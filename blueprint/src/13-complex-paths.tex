@@ -404,6 +404,30 @@ The reflected open chart preserves the supplied rational radii; reflection
 also preserves germ agreement. The general Schwarz theorem across a real
 boundary interval still needs its seam proof.
 
+\subsection{A differential-equation application}
+Equal holomorphic germs now have equal derivative germs on a smaller
+neighborhood. If their derivatives are also supplied as holomorphic maps,
+this comparison iterates and identifies their second-order differential
+expressions. The coefficients may be arbitrary valid represented complex
+values; no equation or uniqueness conclusion is assumed in the comparison.
+
+A concrete client is
+\[
+ y(z)=z^2,\qquad z^2y''-zy'=0.
+\]
+Its two-chart continuation changes the computation from direct squaring to
+$(z+1)^2-2z-1$, with a proved neighborhood overlap. The ODE transfers across
+that overlap by derivative-germ comparison. The exponent-two Frobenius
+factor has constant coefficient one and all higher coefficients zero.
+On the positive real ray, exact comparisons identify the same scaled jet
+$(y,zy')$ with the input of the existing Fuchs growth theorem. A remainder
+bound $3|h|^2$ gives radius $\varepsilon/3$; the resulting coarse estimate is
+$\lVert Y(a)\rVert_1\le6/a^3$ for $0<a\le1$.
+
+This entire polynomial mode does not construct general Frobenius branches.
+General complex series differentiation, uniform ray certificates, sector
+bounds, and fundamental-matrix monodromy remain separate obligations.
+
 \subsection{The identity theorem needs an interior accumulation point}
 On the connected domain $D=\mathbb C\setminus\{0\}$, the function
 $f(z)=\sin(1/z)$ has zeros $z_n=1/(n\pi)$ for $n\ge1$. They accumulate

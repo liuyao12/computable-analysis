@@ -1,5 +1,6 @@
 import Lean
 import ComputableAnalysis.Continuation
+import ComputableAnalysis.AlgebraicODE.FuchsContinuation
 
 open Lean Elab Command
 open ComputableAnalysis FunctionTheory Continuation
@@ -21,7 +22,18 @@ run_cmd do
       ``GermSystem.run_along, ``GermSystem.terminal_germ_independent,
       ``GermSystem.terminal_value_independent, ``GermSystem.terminal_from_equal_germs,
       ``Affine.germSystem, ``Realization.map, ``Realization.holomorphic, ``Realization.unique,
-      ``Affine.realized_holomorphic, ``Holomorphic.reflect, ``AgreeAt.reflect] do
+      ``Affine.realized_holomorphic, ``Holomorphic.reflect, ``AgreeAt.reflect,
+      ``Holomorphic.derivativeMap, ``AgreeAt.derivative, ``secondOrderResidual_congr,
+      ``AlgebraicODE.Fuchs.ContinuationExample.derivative_holomorphic,
+      ``AlgebraicODE.Fuchs.ContinuationExample.equation,
+      ``AlgebraicODE.Fuchs.ContinuationExample.along,
+      ``AlgebraicODE.Fuchs.ContinuationExample.twoCharts,
+      ``AlgebraicODE.Fuchs.ContinuationExample.recentered_equation,
+      ``AlgebraicODE.Fuchs.ContinuationExample.frobenius_coeff,
+      ``AlgebraicODE.Fuchs.ContinuationExample.raySolution,
+      ``AlgebraicODE.Fuchs.ContinuationExample.ray_value,
+      ``AlgebraicODE.Fuchs.ContinuationExample.ray_scaled_derivative,
+      ``AlgebraicODE.Fuchs.ContinuationExample.moderate] do
     let axioms ← collectAxioms name
     for ax in axioms do
       unless [``propext, ``Quot.sound, ``Classical.choice].contains ax ||
@@ -75,3 +87,25 @@ example : (((Affine.transport wholePlane).run route seed).localFunction a2.val).
 example : Holomorphic seed.realized := seed.realized_holomorphic
 example : Holomorphic seed.chart.reflect := (seed.localFunction a0.val).holomorphic.reflect
 example (f : FunctionTheory.Map) (h : Holomorphic f) : Holomorphic f.reflect := h.reflect
+
+-- A second-order Fuchs client uses the same route with two distinct chart
+-- computations. Its overlap is an equality of germs, not an endpoint match.
+open AlgebraicODE.Fuchs in
+example : Along route
+    (ContinuationExample.chart.at a0.val True.intro)
+    (ContinuationExample.recenteredChart.at a2.val True.intro) :=
+  ContinuationExample.twoCharts
+    (wholePlane.convex_edge wholePlane_convex a0 a1)
+    (wholePlane.convex_edge wholePlane_convex a1 a2)
+
+open AlgebraicODE.Fuchs.ContinuationExample in
+#guard (recentered.eval a2.val.val).compute 0 == QBox.point ⟨0,2⟩
+
+open AlgebraicODE.Fuchs.ContinuationExample in
+#guard ((raySolution 1).value (1/2) 2).compute 0 == ({ lo := 1/2, hi := 1/2 } : QInterval)
+
+open AlgebraicODE.Fuchs.ContinuationExample in
+example (z : ComplexRaw) (hz : z.Valid) :
+    (secondOrderResidual (f := recentered) recentered_holomorphic recentered_derivative_holomorphic z
+      (ComplexRaw.mul z z) (ComplexRaw.neg z) ComplexRaw.zero).Equiv ComplexRaw.zero :=
+  recentered_equation z hz

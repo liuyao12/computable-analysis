@@ -39,12 +39,14 @@ and reflection preserves holomorphic open charts and their overlaps.
 | Local gluing | A supplied represented map with supplied local holomorphic models is holomorphic; derivative and continuity radii are constructed | `Continuation/Gluing.lean` |
 | Coherent-chart realization | A total chart selector with local germ coherence yields an actual represented evaluator, representation invariance, holomorphicity, and comparison with other realizations | `Continuation/Realization.lean` |
 | Reflected charts | Conjugate input and output; transport the derivative, continuity radii, and open-overlap agreement | `Continuation/Reflection.lean` |
+| Differential equations | Equal holomorphic germs have equal derivative germs; with holomorphic derivatives, their second-order residuals agree for arbitrary valid represented coefficient values | `Continuation/DifferentialEquation.lean` |
 | Actual continuation | A finite chain contains holomorphic charts, whole-segment coverage, and neighborhood agreement; concatenation preserves this property | `Continuation/Chain.lean` |
 | Domain geometry | Vertices and interpolation parameters may be irrational; convexity constructs routes and finite triangle contractions | `Continuation/Domain.lean` |
 | Finite homotopy | Stationary steps, backtracking, triangle moves, and composition; contractions are geometric data, independent of functions | `Continuation/FinitePath.lean` |
 | Finite monodromy | Local stationary, inverse, and triangle transport laws imply invariance under finite fillings and a unique parallel extension | `Continuation/Transport.lean` |
 | Analytic interpretation | Transports realized by actual chart chains give path-independent terminal germs and exact represented endpoint values | `Continuation/Monodromy.lean` |
 | Concrete client | Affine germ equality determines both represented coefficients; the entire affine family supplies every local transport law and actual chart chains | `Continuation/Affine.lean` |
+| Fuchs client | The solution \(y=z^2\) changes between two actual holomorphic chart computations, satisfies \(z^2y''-zy'=0\), and agrees with the scaled jet used by the rational-ray growth theorem | `AlgebraicODE/FuchsContinuation.lean` |
 
 The public import is `ComputableAnalysis.Continuation`. No Mathlib module is
 imported. The finite algebra uses shared rational samples inside interval
@@ -107,6 +109,57 @@ Its fibers are a **specified family of continuable germs**, not all germs at
 an arbitrary point: a generic germ can encounter a singularity along an edge.
 The affine instance constructs the local data. The general analytic instance
 remains to be constructed.
+
+## Application audit: differential equations and Fuchs
+
+The continuation and differential-equation layers now have a checked shared
+client, but a general ODE solver cannot yet be passed directly to continuation.
+The distinctions below are mathematical obligations, not missing imports.
+
+- `Holomorphic.derivativeMap` preserves validity and representation invariance
+  on the original domain. `AgreeAt.derivative` proves equality on a smaller
+  neighborhood, using half the supplied agreement radius. Iterating it
+  requires holomorphicity of the derivative; that extra evidence is not
+  inferred from the current first-order interface.
+- `secondOrderResidual_congr` compares the actual values of
+  \(Ay''+By'+Cy\) for equal germs, with arbitrary valid represented complex
+  coefficient values. It does not assume the equation or its uniqueness.
+  Nor does it prove that an arbitrary continuation chart satisfies the ODE
+  throughout its whole domain. General propagation of the residual still
+  needs an identity theorem or a separate solution comparison.
+- `ContinuationExample` supplies \(y(z)=z^2\) for
+  \(z^2y''-zy'=0\). Both derivatives are analytic witnesses at arbitrary
+  valid represented complex inputs. `twoCharts` changes from direct squaring
+  to \((z+1)^2-2z-1\), proves neighborhood agreement, and covers both edges.
+  `recentered_equation` uses the general residual comparison. Because this
+  particular solution is entire, it can continue through the origin even
+  though the normalized equation has a singular coefficient there.
+- The same example identifies every coefficient of the existing Frobenius
+  solver's exponent-two factor: its constant coefficient is one and all
+  higher coefficients vanish. This does not upgrade the general
+  `FrobeniusConvergence.factorRaw` to a complex holomorphic map. General
+  series differentiation, represented complex inputs, and branches of
+  \(z^r\) and \(\log z\) remain necessary for other Frobenius modes.
+- `ray_value` and `ray_scaled_derivative` identify all four coordinates of
+  the example's `RaySolution` with the holomorphic scaled jet \((y,zy')\)
+  on the positive real ray. Its finite-difference remainder has norm
+  \(3|h|^2\), giving the explicit radius \(\varepsilon/3\).
+  The existing Fuchs theorem then yields the checked, deliberately coarse
+  bound \(\lVert Y(a)\rVert_1\le6/a^3\) for \(0<a\le1\).
+- For general functions, pointwise complex derivative radii do not supply
+  the uniform interval radii and refined-box sample estimates required by
+  `LinearSolution`. A general holomorphic-to-ray adapter therefore remains
+  open. So do sector bounds, the Fuchs converse, local ODE existence and
+  uniqueness for the relevant equation families, and continuation of a
+  fundamental matrix with its basis-change and loop laws. The Bessel
+  monodromy illustration remains an illustration.
+
+Run `lake build ComputableAnalysis.Continuation
+ComputableAnalysis.AlgebraicODE.FuchsContinuation`, then
+`lake env lean scripts/check_continuation.lean`. The audit includes the
+new application, its exact ray comparisons and growth theorem, a two-edge
+change of chart, and executable complex and rational-ray values. The finite
+transport theorem's local laws are not being claimed for general ODE germs.
 
 ## What remains before the full analytic monodromy theorem
 

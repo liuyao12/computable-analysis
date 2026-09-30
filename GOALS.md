@@ -20,6 +20,13 @@ holomorphic charts and overlap evidence are now checked. The reader adds
 identity-theorem examples, monodromy comparisons, and a natural boundary;
 those general analytic example proofs and the Schwarz seam remain open. See [the exact ledger](docs/ANALYTIC_CONTINUATION.md).
 
+The ODE application audit now checks derivative-germ equality and second-order
+residual comparison. A concrete Fuchs client \(y=z^2\) connects a change of
+holomorphic chart, the exponent-two Frobenius coefficients, and the existing
+rational-ray growth theorem through exact scaled-jet comparisons. General
+Frobenius branch construction, uniform ray adapters, sector continuation,
+and fundamental-matrix monodromy remain open.
+
 ## Integral and series skills in the reader
 
 The Skills navigation follows the chapters and contains real integrals,

@@ -420,7 +420,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p continuation-reports
-          lake build ComputableAnalysis.Continuation ComputableAnalysis.Blueprint | tee continuation-reports/build.log
+          lake build ComputableAnalysis.Continuation ComputableAnalysis.AlgebraicODE.FuchsContinuation ComputableAnalysis.Blueprint | tee continuation-reports/build.log
           lake env lean scripts/check_continuation.lean | tee continuation-reports/audit.log
           lake exe checkdecls blueprint/lean_decls | tee continuation-reports/declarations.log
           cp continuation-reports/audit.log site/reading/continuation-audit.log
@@ -429,9 +429,9 @@ jobs:
           root=pathlib.Path('.')
           audit=pathlib.Path('site/reading/continuation-audit.log')
           assert 'PASS: continuation foundations' in audit.read_text()
-          sources=[*root.glob('ComputableAnalysis/Continuation/*.lean'),root/'ComputableAnalysis/Continuation.lean',root/'scripts/check_continuation.lean']
+          sources=[*root.glob('ComputableAnalysis/Continuation/*.lean'),root/'ComputableAnalysis/Continuation.lean',root/'ComputableAnalysis/AlgebraicODE/FuchsContinuation.lean',root/'scripts/check_continuation.lean']
           report=dict(documentationRevision=os.environ['GITHUB_SHA'],fullAnalyticMonodromyProved=False,
-            checked=['germs','derivative uniqueness','local gluing','chart chains','finite monodromy','affine germ system','coherent chart realization','reflected charts and overlaps'],
+            checked=['germs','derivative uniqueness','local gluing','chart chains','finite monodromy','affine germ system','coherent chart realization','reflected charts and overlaps','derivative germs and second-order residual comparison','two-chart Fuchs solution and ray-growth compatibility'],
             remaining=['general identity theorem','chain uniqueness and local stability','continuous homotopy subdivision','coherent chart selection from pathwise continuation'],
             auditSha256=hashlib.sha256(audit.read_bytes()).hexdigest(),
             sourceHashes={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in sources})

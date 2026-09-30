@@ -60,6 +60,17 @@ representation invariance and holomorphicity. `Holomorphic.reflect` and
 the Schwarz boundary-seam theorem is not claimed. No general analytic
 monodromy theorem is claimed.
 
+For second-order differential equations, `AgreeAt.derivative` compares whole
+derivative germs and `secondOrderResidual_congr` transfers the residual
+\(Ay''+By'+Cy\) between representatives. Supply holomorphicity of the
+first derivative; the current interface does not derive it automatically.
+`AlgebraicODE.FuchsContinuation` is a concrete shared client: \(y=z^2\)
+solves \(z^2y''-zy'=0\), changes between distinct holomorphic chart
+computations, identifies the Frobenius coefficients, and connects its
+scaled jet to the existing rational-ray growth theorem. General Frobenius
+branches and the uniform holomorphic-to-ray adapter remain open; consult
+the application audit in the continuation ledger.
+
 ## Construct the objects; prove their laws
 
 This is the project's organizing principle. General theorems may say: given
