@@ -68,7 +68,7 @@ def main():
                 browser=playwright.chromium.launch(**options)
                 page=browser.new_page(viewport={'width':1440,'height':1000})
                 page.goto(base+'proof-bundles.html?theorem=showcase:zeta-zeros',wait_until='networkidle')
-                assert page.locator('.bundle-node').count()==8
+                assert page.locator('.bundle-node').count()==len(next(g for g in c['graphs'] if g['id']=='showcase:zeta-zeros')['nodes'])
                 page.locator('[data-node="reflection"]').click();assert '41 file LOC' in page.locator('#bundle-detail').inner_text()
                 page.locator('[data-bundle-route="sign"]').click();assert page.locator('[data-node="reflection"]').count()==0
                 page.reload(wait_until='networkidle');assert page.locator('[data-bundle-route="sign"]').get_attribute('aria-pressed')=='true'
