@@ -1,5 +1,7 @@
 # Certifying zeros by the argument principle
 
+The [zeta-zero page](../../../book/classics/zeta-zeros.html) explains why even a very narrow numerical enclosure cannot settle exact line location. A justified integer count can establish uniqueness, after which symmetry forces equality. Use this guide to supply the analytic and counting evidence for that strategy and to exclude omitted roots when claiming completeness.
+
 Use this guide for a finite-region theorem about **all** zeros of a specific
 constructed complex function. A plotted root list, small residual, or numerical
 proximity to a line does not establish completeness or exact location.

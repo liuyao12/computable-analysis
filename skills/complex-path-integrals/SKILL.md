@@ -5,6 +5,8 @@ description: Specify and compute integrals of complex functions along paths or l
 
 # Complex path integrals
 
+The [complex-path chapter](../../blueprint/src/13-complex-paths.tex) motivates directed accumulation and what can survive around a loop. Use this guide to turn a chosen path calculation into justified integrals, keeping the branch and the entire path domain visible.
+
 Specify the function, oriented path, and its entire domain before choosing a
 computation. Follow the [formalization policy](../../FORMALIZATION_GUIDE.md#computable-foundations-exact-mathematical-theorems).
 Use represented complex values built from the project's real computations,

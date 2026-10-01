@@ -526,12 +526,17 @@ jobs:
         run: |
           python3 .github/reader-edition/construction_skills.py --site site --revision "$GITHUB_SHA" --finalize
           python3 .github/reader-edition/test_construction_skills.py --site site --report reader-edition-tests/construction-skills
+      - name: Motivate every narrative page and preserve the checked mathematics
+        run: |
+          python3 .github/reader-edition/pedagogy.py --site site --revision "$GITHUB_SHA"
+          python3 .github/reader-edition/test_pedagogy.py --site site --report reader-edition-tests/pedagogy
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: reader-edition-validation
           path: |
             site/reading/construction-skills.json
+            site/reading/pedagogy-edition.json
             power-improper-reports
             site/reading/power-improper.json
             n-ball-reports
@@ -595,6 +600,31 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+      - name: Verify the live narrative edition
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          python3 - <<'PYVERIFY'
+          import hashlib,json,os,time,urllib.request
+          base=os.environ['PAGE_URL'].rstrip('/');revision=os.environ['GITHUB_SHA']
+          def get(path):
+              with urllib.request.urlopen(base+'/'+path+'?revision='+revision,timeout=30) as response:
+                  return response.read()
+          for attempt in range(18):
+              try:
+                  report=json.loads(get('reading/pedagogy-edition.json'))
+                  assert report['documentationRevision']==revision
+                  assert all(report['checks'].values()) and not report['newLeanTheoremsClaimed']
+                  for review in report['reviewedPages']:
+                      path=review['page'];change=report['changedArtifacts'].get(path)
+                      expected=change['after'] if change else report['protectedArtifacts'][path]
+                      assert hashlib.sha256(get(path)).hexdigest()==expected,path
+                  print('PASS: live motivated reader pages, exact hashes and preserved proof scope')
+                  break
+              except Exception:
+                  if attempt==17:raise
+                  time.sleep(10)
+          PYVERIFY
       - name: Verify the live construction skills
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
@@ -636,19 +666,29 @@ jobs:
                   def get(path):
                       with urllib.request.urlopen(base+'/'+path+'?revision='+revision,timeout=25) as r:
                           return r.read()
+                  narrative=json.loads(get('reading/pedagogy-edition.json'))
+                  assert narrative['documentationRevision']==revision
+                  assert all(narrative['checks'].values()) and not narrative['newLeanTheoremsClaimed']
+                  def after_narrative(path,previous):
+                      change=narrative['changedArtifacts'].get(path)
+                      if change:
+                          assert change['before']==previous,path
+                          assert change['existingMathematicalContentPreserved'],path
+                          return change['after']
+                      return previous
                   report=json.loads(get('reading/gaussian-convolution.json'))
                   assert report['proofSourceCommit']==revision
                   assert report['finiteRationalScope'] and not report['mathlibDependency']
                   assert not report['continuousCLTProved'] and not report['gaussianNormalizationProved']
                   for path,expected in report['artifactHashes'].items():
-                      assert hashlib.sha256(get(path)).hexdigest()==expected,path
+                      assert hashlib.sha256(get(path)).hexdigest()==after_narrative(path,expected),path
                   ball=json.loads(get('reading/n-ball.json'))
                   assert ball['proofSourceCommit']==revision and ball['representedFormulaValidity']
                   assert ball['representationInvariance'] and not ball['mathlibDependency']
                   assert not ball['geometricVolumeBridgeProved'] and not ball['gammaIntegralBridgeProved']
                   assert ball['runtimeTests']['leanFixtures']==213
                   for path,expected in ball['artifactHashes'].items():
-                      assert hashlib.sha256(get(path)).hexdigest()==expected,path
+                      assert hashlib.sha256(get(path)).hexdigest()==after_narrative(path,expected),path
                   power=json.loads(get('reading/power-improper.json'))
                   assert power['proofSourceCommit']==revision and power['explicitStageBounds']
                   assert power['naturalSeriesConvergenceClassification'] and not power['mathlibDependency']
@@ -656,7 +696,7 @@ jobs:
                   assert power['realSeriesConvergenceClassification'] and not power['compactnessTheoremUsed']
                   assert len(power['auditedTheorems'])==56 and power['regressionGroups']==53
                   for path,expected in power['artifactHashes'].items():
-                      assert hashlib.sha256(get(path)).hexdigest()==expected,path
+                      assert hashlib.sha256(get(path)).hexdigest()==after_narrative(path,expected),path
                   print('LIVE POWER INTEGRALS:',base+'/power-improper.html')
                   print('LIVE BALL VOLUMES:' ,base+'/n-ball-volume.html')
                   print('PASS: live convolution proofs and explicit remaining Gaussian targets')
@@ -679,6 +719,16 @@ jobs:
           last=None
           for attempt in range(18):
               try:
+                  narrative=get('/reading/pedagogy-edition.json')
+                  assert narrative['documentationRevision']==revision
+                  assert all(narrative['checks'].values()) and not narrative['newLeanTheoremsClaimed']
+                  def after_narrative(path,previous):
+                      change=narrative['changedArtifacts'].get(path)
+                      if change:
+                          assert change['before']==previous,path
+                          assert change['existingMathematicalContentPreserved'],path
+                          return change['after']
+                      return previous
                   report=get('/reading/analysis-edition.json');placement=get('/reading/catalogue-placement.json')
                   numbers=get('/reading/pi-flashcards-calculation.json');patterns=get('/reading/pi-patterns.json')
                   group=get('/reading/arctan-group.json')
@@ -755,12 +805,12 @@ jobs:
                   assert hashlib.sha256(get('/reading/holomorphic-audit.log',True)).hexdigest()==classics['artifacts']['reading/holomorphic-audit.log']
                   assert classics['checks']['arctanTaylorAudited'] and 'arctan-taylor.html' in classics['pages']
                   for path in ['reading/arctan-example.js','reading/arctan-example.css','reading/arctan-taylor-audit.log']:
-                      assert hashlib.sha256(get('/'+path,True)).hexdigest()==classics['artifacts'][path]
+                      assert hashlib.sha256(get('/'+path,True)).hexdigest()==after_narrative(path,classics['artifacts'][path])
                   euler=get('/reading/euler-proofs.json')
                   assert euler['mathlibRevision']==classics['eulerMathlibRevision'] and all(euler['checks'].values())
                   assert euler['allPositiveEvenValuesProved'] and len(euler['declarations'])==15
                   for path in ['reading/euler-proofs.json','reading/euler-dependencies.txt','reading/euler-general-dependencies.txt']:
-                      assert hashlib.sha256(get('/'+path,True)).hexdigest()==classics['artifacts'][path]
+                      assert hashlib.sha256(get('/'+path,True)).hexdigest()==after_narrative(path,classics['artifacts'][path])
                   enclosure=get('/reading/integral-enclosures-edition.json')
                   def final_hash(path,previous):
                       for edition in [square,classics]:
@@ -771,9 +821,9 @@ jobs:
                       if path in enclosure['supersededChapterHashes']:
                           assert enclosure['supersededChapterHashes'][path]==previous,path
                           previous=enclosure['artifacts'][path]
-                      return previous
+                      return after_narrative(path,previous)
                   for path in classics['pages']:
-                      assert hashlib.sha256(get('/'+path,True)).hexdigest()==classics['artifacts'][path]
+                      assert hashlib.sha256(get('/'+path,True)).hexdigest()==after_narrative(path,classics['artifacts'][path])
                   for path in ['cartwright.html','leibniz.html','basel.html','euler.html']:
                       assert ('href="'+path+'"') in home
                   assert 'The cosine-square integral' in worked
@@ -794,12 +844,12 @@ jobs:
                   assert enclosure['directReciprocalSegmentProved']
                   assert not enclosure['directLogarithmBridgeProved']
                   for path,digest in enclosure['artifacts'].items():
-                      assert hashlib.sha256(get('/'+path,True)).hexdigest()==digest
+                      assert hashlib.sha256(get('/'+path,True)).hexdigest()==after_narrative(path,digest)
                   principle=get('/reading/construction-first-edition.json')
                   assert principle['documentationRevision']==revision
                   assert not principle['newLeanTheoremsClaimed'] and not principle['leanStatementsChanged']
                   for path,digest in principle['artifacts'].items():
-                      assert hashlib.sha256(get('/'+path,True)).hexdigest()==digest,path
+                      assert hashlib.sha256(get('/'+path,True)).hexdigest()==after_narrative(path,digest),path
                   review=get('/reading/construction-first-inventory.json')
                   assert principle['reviewedSourceRevision']==review['sourceRevision']
                   assert principle['nativeModules']+principle['otherSourceFiles']==len(review['files'])

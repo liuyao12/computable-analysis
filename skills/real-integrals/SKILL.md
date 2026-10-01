@@ -5,6 +5,8 @@ description: Specify, construct, and compare integrals of real functions using t
 
 # Real integrals
 
+Accumulation was motivated in the [integral chapter](../../blueprint/src/03-integrals.tex). Use this guide when a particular function needs an integral computation or an exact endpoint comparison. The challenge is to connect the finite calculation to its mathematical role, using bounds suited to that function.
+
 Start with the function, its domain, and the requested integral law or value.
 Each function brings its own construction and evidence. Read the
 [formalization policy](../../FORMALIZATION_GUIDE.md#computable-foundations-exact-mathematical-theorems).

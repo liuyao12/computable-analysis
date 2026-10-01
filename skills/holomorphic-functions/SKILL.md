@@ -5,6 +5,8 @@ description: Prove that a specific represented complex function is holomorphic i
 
 # Proving specific functions holomorphic
 
+The [continuation story](../../book/classics/analytic-continuation.html) explains why holomorphicity gives local information such remarkable reach. Before using that rigidity for a particular function, prove the local derivative evidence it requires. Choose a route from how the function was constructed.
+
 Read the [formalization policy](../../FORMALIZATION_GUIDE.md#computable-foundations-exact-mathematical-theorems)
 and use the existing computable-analysis foundation. The primary checked interface is
 `FunctionTheory.HolomorphicOn` in

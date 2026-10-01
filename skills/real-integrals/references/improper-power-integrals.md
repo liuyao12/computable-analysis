@@ -1,5 +1,7 @@
 # Powers and improper endpoints
 
+The power tests ask opposite questions at zero and infinity: does the function grow too quickly near a missing endpoint, or decrease too slowly along a tail? The [checked guide](../../../docs/POWER_IMPROPER.md) develops the thresholds. This recipe organizes the finite integral and the omitted-endpoint budget needed to prove them.
+
 Keep three computations separate: the power function, the finite-interval
 integral, and the improper limit. Follow the
 [shared formalization policy](../../../FORMALIZATION_GUIDE.md#computable-foundations-exact-mathematical-theorems)

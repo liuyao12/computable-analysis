@@ -5,6 +5,8 @@ description: Formalize analytic continuation of a specific represented function 
 
 # Analytic continuation of a specific function
 
+The [continuation page](../../book/classics/analytic-continuation.html) begins with the puzzle of local knowledge determining a function across a shared connected domain. Use this guide when a local formula has reached its limit and you need justified charts further along a path. Domain, overlap and branch information explain which continuation claim is available.
+
 Use the [formalization policy](../../FORMALIZATION_GUIDE.md#computable-foundations-exact-mathematical-theorems)
 and [holomorphic-functions skill](../holomorphic-functions/SKILL.md). Keep
 numerical constructions on rational intervals and boxes, with validity,

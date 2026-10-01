@@ -5,6 +5,8 @@ description: Define, compute, and compare sums of real or complex series through
 
 # Series
 
+The [series chapter](../../blueprint/src/04-infinite-series.tex) explains why a finite prefix needs a bound on what remains. Use this guide when evaluating a new series or comparing it with another construction. The terms themselves should suggest the remainder estimate.
+
 Specify the terms, starting index, and order of summation. Define what it
 means for a supplied valid represented value to be their sum before proving
 that this particular series has one. Follow the

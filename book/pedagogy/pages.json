@@ -1,0 +1,482 @@
+[
+  {
+    "page": "ch-foundations.html",
+    "action": "strengthen",
+    "opening": "<p>A decimal approximation to \\(\\sqrt2\\) gives useful digits, but the digits alone do not tell us how much error remains. We want a number that can answer a request for greater accuracy and justify the answer. Bisection suggests the basic object: two rational bounds that keep the answer enclosed while their gap shrinks.</p><p>Arithmetic then becomes a question about these bounds. How do we add two computations, divide safely, or show that a geometric construction and a series describe the same number? This chapter builds the language needed to ask those questions precisely.</p>",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "ch-circle-sphere.html",
+    "action": "strengthen",
+    "opening": "<p>A polygon has an area we can calculate by finite arithmetic. A circle has a curved boundary, so a single polygon leaves something unaccounted for. Inscribed chords give a lower estimate; tangents give an upper one. The useful question is how to make the gap as small as we choose.</p><p>This turns the circle constant into a geometric computation. The same habit of enclosing a shape by simpler pieces will let us compare the sphere, cone and cylinder before we have a general integration theory.</p>",
+    "earlierMotivation": "ch-foundations.html",
+    "sectionBridges": []
+  },
+  {
+    "page": "ch-rational-circle-trigonometry.html",
+    "action": "strengthen",
+    "opening": "<p>A point moving around a circle needs a coordinate that follows the motion through a quarter-turn and beyond. Its slope becomes unusable at a vertical radius. The sector area already computed in the preceding chapter gives another coordinate, and the horizontal and vertical positions become functions of it.</p><p>Our aim is to recover the familiar sine and cosine relations from this geometry. Addition of angles, monotonicity and differentiation will then be properties of independently constructed functions.</p>",
+    "earlierMotivation": "ch-circle-sphere.html",
+    "sectionBridges": []
+  },
+  {
+    "page": "ch-integrals.html",
+    "action": "strengthen",
+    "opening": "<p>When a quantity accumulates at a constant rate, we multiply the rate by the elapsed interval. When the rate varies, we can use a constant lower rate and a constant upper rate on each small piece. Their sums enclose the total. The remaining problem is to prove that refinement really makes the uncertainty disappear.</p><p>We will construct integrals for functions whose variation we can control, then compare constructions. The later fundamental theorem will explain when this independently computed accumulation equals a difference of endpoint values.</p>",
+    "earlierMotivation": "ch-circle-sphere.html",
+    "sectionBridges": [
+      {
+        "heading": "Partitions and cell enclosures",
+        "body": "<p>A sample tells us the value at one point; it can miss a narrow peak elsewhere in the cell. For this rectangle construction, the first task is therefore to bound the whole cell, so multiplying by its length gives a justified contribution.</p>"
+      },
+      {
+        "heading": "Changing the sampling coordinate",
+        "body": "<p>A new coordinate can make a difficult integrand simple. To justify the change, follow how the original small intervals and their contributions are transported; the formula should emerge from that comparison.</p>"
+      },
+      {
+        "heading": "Finite rules for integrals",
+        "body": "<p>Adding two accumulated quantities, splitting an interval and reversing orientation should agree with the same operations on finite contributions. A common refinement lets us compare the computations on matching cells and identify the evidence each law needs.</p>"
+      }
+    ]
+  },
+  {
+    "page": "ch-effective-calculus.html",
+    "action": "strengthen",
+    "opening": "<p>Average velocity is a difference quotient over a nonzero time interval. Instantaneous velocity asks what happens as that interval shrinks. There is a computational difficulty: division by a smaller increment magnifies the uncertainty in the two function values.</p><p>We must coordinate the input increment with the accuracy of the evaluations. Convexity offers a particularly visible starting point, because neighboring secant slopes provide lower and upper estimates. Later sections broaden the derivative foundation and connect local change to accumulation.</p>",
+    "earlierMotivation": "ch-integrals.html",
+    "sectionBridges": []
+  },
+  {
+    "page": "ch-infinite-series.html",
+    "action": "strengthen",
+    "opening": "<p>Adding another term is easy; knowing that the terms still missing cannot change the answer very much is the essential step. A geometric series makes this visible: every finite remainder can be bounded by a shrinking geometric expression.</p><p>We will use such remainder bounds to turn prefixes into number computations. The reward is more than evaluation: finite identities between prefixes can become exact identities between independently constructed functions.</p>",
+    "earlierMotivation": "ch-foundations.html",
+    "sectionBridges": [
+      {
+        "heading": "Products, coefficient identities",
+        "body": "<p>Multiplying two finite polynomials is straightforward. Multiplying two series additionally requires control of terms omitted from either factor. The next estimates explain when the familiar coefficient rule survives passage from prefixes to the computed values.</p>"
+      }
+    ]
+  },
+  {
+    "page": "ch-exponential-logarithm.html",
+    "action": "strengthen",
+    "opening": "<p>Repeated growth suggests an exponential: successive growth factors multiply, while their time intervals add. Its inverse should turn multiplication back into addition. We want constructions that explain both behaviors and allow controlled evaluation.</p><p>The exponential series and accumulation of the reciprocal function offer different routes. Proving that the two resulting computations are inverses will connect series, derivatives and integrals developed in the preceding chapters.</p>",
+    "earlierMotivation": "ch-infinite-series.html",
+    "sectionBridges": [
+      {
+        "heading": "The logarithm by accumulation",
+        "body": "<p>For a positive starting quantity, a small proportional change is measured by the increment divided by the current quantity. Accumulating those relative changes suggests integrating the reciprocal. The restriction to positive inputs is part of this construction.</p>"
+      },
+      {
+        "heading": "Proving the inverse relation",
+        "body": "<p>We have two algorithms, so inverse behavior is something to prove. The strategy is to show that their composition has the derivative and initial value of the identity, using the already justified calculus comparisons.</p>"
+      }
+    ]
+  },
+  {
+    "page": "ch-algebra-fta.html",
+    "action": "strengthen",
+    "opening": "<p>The equation \\(w^2=z\\) suggests a function, but it does not choose between the two roots. Even after a choice is made near one point, moving the input can threaten that choice. A usable algebraic function needs a selected branch and bounds that keep it separated from the alternatives.</p><p>Positive square roots give the first example. We then study certified simple complex roots and rational parametrizations, learning what extra evidence an algebraic formula needs before it can serve as a function computation.</p>",
+    "earlierMotivation": "ch-foundations.html",
+    "sectionBridges": []
+  },
+  {
+    "page": "ch-local-models.html",
+    "action": "strengthen",
+    "opening": "<p>Suppose we have already bounded the error of a local polynomial approximation. We would like to reuse that work when adding functions, composing them or solving a nearby equation. Recomputing a separate estimate for every expression would obscure the mathematics.</p><p>A finite local model packages the coefficients together with the remainder that makes them meaningful. This chapter develops reusable calculations with those models and applies controlled iteration to nonlinear constructions.</p>",
+    "earlierMotivation": "ch-infinite-series.html",
+    "sectionBridges": []
+  },
+  {
+    "page": "ch-complex-paths.html",
+    "action": "strengthen",
+    "opening": "<p>Accumulation along a path now has a direction as well as a size. For a constant complex value, the contribution is that value times the endpoint displacement. Subdivision extends this elementary calculation to functions whose variation we can bound.</p><p>Loops introduce the striking question: when do all those contributions cancel, and when does an enclosed singularity leave a nonzero result? We will follow concrete paths and local function constructions to understand cancellation, residues and continuation.</p>",
+    "earlierMotivation": "ch-integrals.html",
+    "sectionBridges": [
+      {
+        "heading": "A finite form of the contour theorem",
+        "body": "<p>Imagine dividing an enclosed region into small pieces. Each interior edge is traversed twice in opposite directions, so its contributions cancel. The boundary remains. The local estimates and coverage hypotheses below justify using that finite picture for the supplied function.</p>"
+      },
+      {
+        "heading": "Coefficient extraction on a circle",
+        "body": "<p>A loop can separate the terms of a power series: after multiplying by the appropriate reciprocal power, all but one term cancel around the circle. This is why a boundary computation can reveal an interior coefficient.</p>"
+      },
+      {
+        "heading": "Logarithm along a specified path",
+        "body": "<p>Locally, integrating the reciprocal suggests a logarithm. Moving around a loop enclosing zero can change the accumulated value, so the path and branch choice must accompany the computation.</p>"
+      }
+    ]
+  },
+  {
+    "page": "ch-improper-parameters.html",
+    "action": "strengthen",
+    "opening": "<p>A bounded-interval integral leaves a new question when an endpoint is missing or the domain extends indefinitely: how much can the omitted part contribute? A cutoff gives a finite calculation, but a bound on the omitted contribution is what makes it an approximation to an improper integral.</p><p>Gamma and Gaussian-type functions supply useful examples. When a parameter varies, the endpoint allowances must also support the operation we want to perform on that parameter. We will keep those estimates attached to the particular function.</p>",
+    "earlierMotivation": "power-improper.html",
+    "sectionBridges": [
+      {
+        "heading": "Parameter series with an integrable majorant",
+        "body": "<p>Expanding in a parameter can simplify an integral, but the error varies across its integration domain. We need an envelope whose own integral controls the total omitted contribution before integrating the expansion.</p>"
+      },
+      {
+        "heading": "Recurrence and continuation through known poles",
+        "body": "<p>A recurrence can carry values from a region where the integral converges to a new region. Division in that recurrence also reveals exceptional points. Following those points explains why continuation requires explicit pole information.</p>"
+      }
+    ]
+  },
+  {
+    "page": "ch-fourier.html",
+    "action": "strengthen",
+    "opening": "<p>A periodic signal may contain several oscillations at once. Integrating it against a chosen oscillation can isolate one component, because different frequencies cancel over a period. This suggests both a way to analyze a function and a way to reconstruct it.</p><p>Finite trigonometric algebra supplies the starting point. A positive averaging kernel then controls the approximation error, and the periodic square function brings the reciprocal-square sum into the picture.</p>",
+    "earlierMotivation": "ch-rational-circle-trigonometry.html",
+    "sectionBridges": [
+      {
+        "heading": "A positive kernel with an explicit tail",
+        "body": "<p>Knowing the coefficients does not yet bound reconstruction error. A positive kernel lets us split the average into nearby inputs, controlled by continuity, and distant inputs, controlled by a tail estimate.</p>"
+      }
+    ]
+  },
+  {
+    "page": "ch-impulses.html",
+    "action": "strengthen",
+    "opening": "<p>A short pulse can have a small duration and a large height while retaining the same total effect. A model that records only its pointwise limiting height loses that effect. Similarly, the derivative of a step should record its jump.</p><p>Evaluation against a test function gives a finite way to retain this information. Starting with ramps, steps and narrow pulses, we will see why atoms and their derivatives are useful computations in calculus and differential equations.</p>",
+    "earlierMotivation": "ch-effective-calculus.html",
+    "sectionBridges": []
+  },
+  {
+    "page": "ch-differential-equations.html",
+    "action": "strengthen",
+    "opening": "<p>An equation prescribing acceleration ought to determine motion from an initial position and velocity. Yet the answer is usually unknown when we start. Integrating an initial guess and repeating the operation gives a way for the equation to produce successive approximations to its own solution.</p><p>For a linear system, the response to each basic initial state can be reused for all initial states. This is the purpose of the fundamental matrix. We will construct it, justify uniqueness, then add forcing and study what happens near singular coefficients.</p>",
+    "earlierMotivation": "fundamental-matrix.html",
+    "sectionBridges": [
+      {
+        "heading": "Peano\u2013Baker prefixes",
+        "body": "<p>Each integration uses the preceding approximation to improve the next one. Expanding this iteration produces the nested terms below. The factorial estimate explains why their cumulative correction becomes small even when the coefficient matrix varies.</p>"
+      },
+      {
+        "heading": "Ordinary forcing and variation of constants",
+        "body": "<p>Once we know how the system propagates an initial state, a forcing term can be treated as contributions introduced at successive times. Propagating and accumulating those contributions motivates the following formula.</p>"
+      }
+    ]
+  },
+  {
+    "page": "ch-special-equations.html",
+    "action": "strengthen",
+    "opening": "<p>Many equations encountered in applications have useful solutions without elementary closed forms. Naming a Bessel or hypergeometric function should come after choosing its initial or local data and giving a way to evaluate the resulting solution.</p><p>The series machinery supplies local values; differential-equation constructions can carry those values further. The examples below show how the two methods cooperate, and how a separated zero can become a computed number in its own right.</p>",
+    "earlierMotivation": "ch-differential-equations.html",
+    "sectionBridges": []
+  },
+  {
+    "page": "ch-transforms-zeta.html",
+    "action": "strengthen",
+    "opening": "<p>Integration can encode a function in a new variable and make an equation easier to study. It also creates new error questions. An exponentially damped tail, an oscillatory tail and the tail of a reciprocal-power sum need different estimates.</p><p>We will work through those three situations. The point is to choose bounds from the mechanism that makes the particular computation converge, then prove agreement with any alternative formula we use.</p>",
+    "earlierMotivation": "ch-improper-parameters.html",
+    "sectionBridges": []
+  },
+  {
+    "page": "ch-elliptic.html",
+    "action": "strengthen",
+    "opening": "<p>Some integrals resist an elementary endpoint formula while still admitting efficient computation. The example below also has an apparent endpoint singularity. A coordinate change can remove that obstacle and leave a bounded integrand.</p><p>We can then ask whether a series and a differential equation compute the same family. This provides a final meeting point for the rational-circle geometry, local expansions, parameter integrals and variable-coefficient equations developed earlier.</p>",
+    "earlierMotivation": "ch-special-equations.html",
+    "sectionBridges": []
+  },
+  {
+    "page": "leibniz.html",
+    "action": "strengthen",
+    "opening": "<p>The denominators \\(1,3,5,\\ldots\\) belong to arithmetic; the circle constant belongs to geometry. Why should an alternating sum of their reciprocals recover a quarter of that constant? Convergence alone cannot explain the identification.</p><p>We will build the sum and the geometric value independently, then connect them through finite inequalities, integration or geometric quadrature. The different routes explain both the equality and what each computation needs to justify it.</p>",
+    "earlierMotivation": "ch-infinite-series.html",
+    "sectionBridges": []
+  },
+  {
+    "page": "basel.html",
+    "action": "strengthen",
+    "opening": "<p>The reciprocal squares have a small, controllable tail, so their sum can be computed. The surprise is its exact value: an arithmetic series produces the square of a geometric constant. A good proof must supply the connection between those two constructions.</p><p>Here finite rearrangements, the zeros of sine and Fourier coefficients offer three ways to find that connection. Compare the decisive idea in each route before following its formal dependencies.</p>",
+    "earlierMotivation": "leibniz.html",
+    "sectionBridges": []
+  },
+  {
+    "page": "cartwright.html",
+    "action": "strengthen",
+    "opening": "<p>A long decimal expansion cannot rule out rationality: it could still agree with a fraction at every digit computed so far. An irrationality proof needs a contradiction that excludes every proposed fraction.</p><p>The integrals on this page create that contradiction by linking an integer recurrence to a positive quantity that becomes too small to be a nonzero integer. Calculus supplies the estimates; finite arithmetic closes the argument.</p>",
+    "earlierMotivation": "integral-families.html",
+    "sectionBridges": []
+  },
+  {
+    "page": "cosine.html",
+    "action": "strengthen",
+    "opening": "<p>The horizontal and vertical coordinates of a point on the unit circle satisfy a sum-of-squares identity. Squaring and accumulating those coordinates suggests an average contribution of one half, with an oscillating correction at the endpoints.</p><p>We will derive that correction and compare independent integral computations with the formula. Symmetry gives a short special-interval argument; the product rule and exponential identities reach arbitrary endpoints.</p>",
+    "earlierMotivation": "ch-rational-circle-trigonometry.html",
+    "sectionBridges": []
+  },
+  {
+    "page": "euler.html",
+    "action": "strengthen",
+    "opening": "<p>A polynomial can be described by its coefficients or by its roots. Sine has an equally conspicuous collection of zeros, suggesting a product with one factor for each pair of nonzero integer zeros. Comparing that product with the sine series could reveal sums of reciprocal powers.</p><p>The idea is persuasive, but an infinite product needs convergence and remainder control before coefficients can be compared. The page follows that gap from Euler\u2019s strategy to the checked identities.</p>",
+    "earlierMotivation": "basel.html",
+    "sectionBridges": []
+  },
+  {
+    "page": "fuchs.html",
+    "action": "strengthen",
+    "opening": "<p>Near a singular point, a solution might grow like a reciprocal power or exhibit the much more severe behavior of \\(\\exp(1/z)\\). We would like to predict the difference from the coefficients, before solving the equation explicitly.</p><p>Fuchs\u2019s criterion is such a prediction. The local-to-global story has already been developed in the <a href=\"ch-differential-equations.html#continuation-to-fuchs\">differential-equations chapter</a>; here we state the precise growth question and distinguish the checked growth bounds from the full classification target.</p>",
+    "earlierMotivation": "ch-differential-equations.html#continuation-to-fuchs",
+    "sectionBridges": []
+  },
+  {
+    "page": "gaussian-convolution.html",
+    "action": "strengthen",
+    "opening": "<p>Adding two independent finite weighted choices means adding their possible locations and multiplying their weights. Repeating this operation gives convolution. It provides a direct language for studying the effect of repeated averaging.</p><p>The Gaussian is the expected limiting shape in a central limit problem. We will begin with the finite algebra and error estimates that can support such a proof, then explain which analytic constructions are still needed to reach Gaussian integrals and a continuous limit theorem.</p>",
+    "earlierMotivation": "ch-infinite-series.html",
+    "sectionBridges": []
+  },
+  {
+    "page": "power-improper.html",
+    "action": "strengthen",
+    "opening": "<p>The function \\(x^{-p}\\) gives two opposite endpoint problems. Near zero it can become too large; far from zero it may decrease too slowly. Which side of \\(p=1\\) makes each omitted contribution controllable?</p><p>We will settle the finite-interval calculation first, then use explicit endpoint bounds for the improper limits. Comparing rectangles with reciprocal-power sums transfers the same threshold to series, without assuming that series classification at the start.</p>",
+    "earlierMotivation": "ch-integrals.html",
+    "sectionBridges": []
+  },
+  {
+    "page": "zeta-real.html",
+    "action": "strengthen",
+    "opening": "<p>The reciprocal-power sum is a familiar source of individual constants. Letting its exponent vary turns those constants into values of one function. This is a useful first step toward studying zeta, provided the evaluation remains justified for noninteger inputs.</p><p>The power tests explain why the defining series converges above one. This page builds a computation throughout that real domain, tracks both truncation and input error, and compares it with the earlier integer constructions.</p>",
+    "earlierMotivation": "power-improper.html",
+    "sectionBridges": []
+  },
+  {
+    "page": "rational-primitives.html",
+    "action": "strengthen",
+    "opening": "<p>Simple rational integrands already lead to different functions: a reciprocal linear factor suggests a logarithm, while a positive quadratic can lead to an arctangent. Partial fractions make a complicated quotient look like a combination of these simpler pieces.</p><p>The algebra is only the beginning. We must preserve the interval\u2019s separation from poles and prove that the independently computed integral agrees with the endpoint expression. This page follows that assembly and identifies the bridges that remain open.</p>",
+    "earlierMotivation": "ch-integrals.html",
+    "sectionBridges": []
+  },
+  {
+    "page": "integral-enclosures.html",
+    "action": "strengthen",
+    "opening": "<p>A finite list of sampled values can miss a peak between samples. To turn rectangles into a proof about accumulated values, we need an estimate valid on each entire chunk.</p><p>The integral chapter motivates accumulation itself. Here we focus on one sufficient construction: compute whole-chunk ranges, form enclosing sums and prove their widths shrink. Other justified function-specific constructions retain their own existence and comparison obligations.</p>",
+    "earlierMotivation": "ch-integrals.html",
+    "sectionBridges": []
+  },
+  {
+    "page": "proof-bundles.html",
+    "action": "strengthen",
+    "opening": "<p>The same theorem can have proofs that explain different things. One might expose a geometric symmetry; another might reveal a reusable calculus law. A dependency graph makes those choices visible and lets us inspect what each route actually proves.</p><p>Read a theorem\u2019s motivating page first, then use this viewer to compare strategies, shared work and source evidence. LOC is an inventory of code, and pending nodes identify missing proofs.</p>",
+    "earlierMotivation": "ch-infinite-series.html",
+    "sectionBridges": []
+  },
+  {
+    "page": "fuchs-painleve.html",
+    "action": "strengthen",
+    "opening": "<p>Singular coefficients can force unusual solution behavior, but nonlinear equations can also develop singularities at locations determined by their initial data. Understanding those two mechanisms calls for different examples and different estimates.</p><p>The <a href=\"fuchs.html\">Fuchs page</a> motivates coefficient-based growth criteria, and the <a href=\"painleve.html\">Painlev\u00e9 page</a> motivates movable branching. This supplement collects the concrete constructions available in our foundation and shows how far they reach toward those larger questions.</p>",
+    "earlierMotivation": "ch-differential-equations.html",
+    "sectionBridges": []
+  },
+  {
+    "page": "analytic-continuation.html",
+    "action": "retain",
+    "reason": "Its opening poses local agreement versus global uniqueness, then uses logarithm branches and accumulating zeros to expose the hypotheses.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "arctan-taylor.html",
+    "action": "retain",
+    "reason": "The real-smooth function versus finite Taylor radius gives a concrete puzzle before the theorem.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "cauchy-arctan.html",
+    "action": "retain",
+    "reason": "The square-contour computation is developed through arctangent before general residues.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "construction-skills.html",
+    "action": "retain",
+    "reason": "Its role is to revisit the constructions motivated in the chapters; each guide now links to its relevant context.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "cosine-primitive.html",
+    "action": "retain",
+    "reason": "It already introduces two independent computations and a geometric worked example before the comparison.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "cosine-square-proofs.html",
+    "action": "retain",
+    "reason": "This is the proof-route companion to the motivated cosine example, linked back at the top.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "dyadic-integral.html",
+    "action": "retain",
+    "reason": "The radical algorithm and independently computed geometric value give the explicit comparison question.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "fundamental-matrix.html",
+    "action": "retain",
+    "reason": "It begins with motion and acceleration, works through iterations, then introduces the matrix.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "index.html",
+    "action": "retain",
+    "reason": "The home page motivates controlled numerical objects through scientific values and trajectories.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "integral-families.html",
+    "action": "retain",
+    "reason": "The opening motivates reuse of calculus through two concrete families and recurrence identities.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "leibniz-transmutation.html",
+    "action": "retain",
+    "reason": "The geometric transformation and illustration lead to the quadrature computation.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "n-ball-volume.html",
+    "action": "retain",
+    "reason": "The opening motivates the formula through coordinate and radial calculations of the same Gaussian.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "painleve.html",
+    "action": "strengthen",
+    "reason": "The opening asks which nonlinear equations avoid movable branching before stating the classification.",
+    "earlierMotivation": "analytic-continuation.html#loops",
+    "sectionBridges": [],
+    "opening": "<p>A singularity can move when the initial data change. The family \\(1/(x-c)\\) illustrates a movable pole; the family \\(\\sqrt{x-c}\\) illustrates a movable branch point. Going around the latter can change the chosen value, so continuation has a different character in the two cases.</p><p>The <a href=\"analytic-continuation.html#loops\">continuation discussion</a> motivates that distinction. Painlev\u00e9\u2019s question asks which nonlinear equations permit poles but avoid movable branching. The classification below is the larger target; the checked local constructions explain some of its ingredients.</p>"
+  },
+  {
+    "page": "programme.html",
+    "action": "retain",
+    "reason": "The purpose page explains why particular justified constructions and their conditional laws are useful.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "zeta-zeros.html",
+    "action": "retain",
+    "reason": "It starts with the gap between approximate proximity and exact equality, then develops symmetry plus uniqueness.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "complex-analysis.html",
+    "action": "strengthen",
+    "reason": "It motivates finite paths, local series and contour calculations; the fuller loop motivation is in the complex-path chapter.",
+    "earlierMotivation": "ch-complex-paths.html",
+    "sectionBridges": [
+      {
+        "heading": "Continuity at a point and on a domain",
+        "body": "<p>A valid computation at every input does not yet explain how nearby inputs affect the output. Continuity supplies that missing local comparison. We need it to control changes of input when forming derivatives and linking charts.</p>"
+      },
+      {
+        "heading": "The derivative fills the missing quotient value",
+        "body": "<p>The usual difference quotient is undefined at its center. Asking whether it can be filled in continuously gives both a derivative value and a way to justify it. The square function makes that construction visible without a limiting division by zero.</p>"
+      }
+    ],
+    "opening": "<p>A closed contour can tell us about a function inside it. The route begins with a more elementary observation: contributions on shared edges cancel when small regions are joined. Local linear approximations let us control what survives on the outer boundary.</p><p>The <a href=\"ch-complex-paths.html\">complex-path chapter</a> motivates loops and singularities. Here we make the finite cancellation estimates precise, connect the pole calculation to arctangent, and identify the extra bridges needed for broader Cauchy and continuation results.</p>"
+  },
+  {
+    "page": "skill-real-integrals.html",
+    "action": "retain",
+    "reason": "The maintained Markdown guide now explains its practical use and points to the motivating chapter or worked example.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "skill-complex-integrals.html",
+    "action": "retain",
+    "reason": "The maintained Markdown guide now explains its practical use and points to the motivating chapter or worked example.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "skill-series.html",
+    "action": "retain",
+    "reason": "The maintained Markdown guide now explains its practical use and points to the motivating chapter or worked example.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "skill-holomorphic-functions.html",
+    "action": "retain",
+    "reason": "The maintained Markdown guide now explains its practical use and points to the motivating chapter or worked example.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "skill-analytic-continuation.html",
+    "action": "retain",
+    "reason": "The maintained Markdown guide now explains its practical use and points to the motivating chapter or worked example.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "skill-rational-integrals.html",
+    "action": "retain",
+    "reason": "The maintained Markdown guide now explains its practical use and points to the motivating chapter or worked example.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "skill-trigonometric-integrals.html",
+    "action": "retain",
+    "reason": "The maintained Markdown guide now explains its practical use and points to the motivating chapter or worked example.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "skill-improper-powers.html",
+    "action": "retain",
+    "reason": "The maintained Markdown guide now explains its practical use and points to the motivating chapter or worked example.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "skill-gaussian-gamma.html",
+    "action": "retain",
+    "reason": "The maintained Markdown guide now explains its practical use and points to the motivating chapter or worked example.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "skill-holomorphic-functions-methods.html",
+    "action": "retain",
+    "reason": "The maintained Markdown guide now explains its practical use and points to the motivating chapter or worked example.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "skill-analytic-continuation-methods.html",
+    "action": "retain",
+    "reason": "The maintained Markdown guide now explains its practical use and points to the motivating chapter or worked example.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  },
+  {
+    "page": "skill-certified-zero-counting.html",
+    "action": "retain",
+    "reason": "The maintained Markdown guide now explains its practical use and points to the motivating chapter or worked example.",
+    "earlierMotivation": null,
+    "sectionBridges": []
+  }
+]

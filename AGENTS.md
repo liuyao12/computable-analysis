@@ -1,5 +1,26 @@
 # Repository guidelines
 
+## Pedagogical exposition
+
+Treat the project as a book for learning mathematics. Each reader page should
+make clear what question it answers and why the next construction is useful.
+Begin with a concrete example, puzzle, application or obstruction before
+introducing the technical contract. If an earlier chapter or section already
+supplies the motivation, refer to that specific discussion and explain the
+new step instead of repeating it.
+
+Let discovery order guide the narrative: a plausible strategy and its limits
+can precede a cleaner proof that takes a different route. Explain why the
+hypotheses matter using examples or counterexamples when helpful. At major
+transitions, connect the next estimate or definition to the problem it solves.
+Keep source inventories and proof-status detail available after the mathematical
+story, while accurately distinguishing checked results from targets.
+
+Maintain the page review and narrative additions in `book/pedagogy/pages.json`;
+new reader pages must be included in its coverage check. Preserve exact theorem
+statements, genuine domain and branch restrictions, formulas, computation data
+and proof links when revising the prose. See `docs/PEDAGOGICAL_EXPOSITION.md`.
+
 ## Integral and series skills
 
 For constructions, use the [real-integral skill](skills/real-integrals/SKILL.md),

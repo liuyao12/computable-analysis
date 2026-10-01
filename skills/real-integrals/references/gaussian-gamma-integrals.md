@@ -1,5 +1,7 @@
 # Gaussian and Gamma integrals
 
+Gaussian normalization connects repeated averaging to geometry; Gamma connects integral moments to recurrence formulas and ball volumes. The [Gaussian page](../../../docs/GAUSSIAN_CONVOLUTION.md) and [volume page](../../../docs/N_BALL_GAMMA.md) motivate those comparisons. This guide focuses on the endpoint and tail evidence that makes each proposed calculation meaningful.
+
 These are construction routes with unfinished analytic bridges. Read the
 [Gaussian progress report](../../../docs/GAUSSIAN_CONVOLUTION.md) and
 [Gamma and ball-volume report](../../../docs/N_BALL_GAMMA.md) before reporting

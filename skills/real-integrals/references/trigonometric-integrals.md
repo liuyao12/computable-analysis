@@ -1,5 +1,7 @@
 # Trigonometric functions
 
+The [cosine-square example](../../../book/cosine-square/page.html) shows how circle identities predict an integral value while an independent computation supplies the integral itself. Use the same separation when handling another trigonometric expression; the geometry also suggests where monotonicity changes.
+
 Specify the angle convention first. The reader's circle coordinates use
 \(\cos(\pi x)\) and \(\sin(\pi x)\). Preserve that normalization when applying
 derivative, substitution, or period formulas. Follow the

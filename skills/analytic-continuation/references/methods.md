@@ -1,5 +1,7 @@
 # Continuation methods and their proof obligations
 
+A Taylor series may stop converging even though the function continues further. A functional equation or reflection can sometimes cross a boundary that the original series cannot. The [continuation story](../../../book/classics/analytic-continuation.html) motivates these alternatives and their branch obstacles; this guide turns them into construction strategies.
+
 Choose a route from the function's available construction. Several methods
 can describe the same continued germ; agreement is a theorem to prove, not
 part of the choice of method. The common output is actual local holomorphic

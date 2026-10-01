@@ -53,7 +53,13 @@ def render_skill(row, revision):
         rendered = rendered.replace(f'CONSTRUCTIONMATHPLACEHOLDER{i}END', html.escape(formula))
     doc = BeautifulSoup(rendered, 'html.parser')
     pages = {r['source']: r['page'] for r in catalogue() + catalogue(examples=True)}
-    pages.update({'docs/POWER_IMPROPER.md': 'power-improper.html',
+    pages.update({'blueprint/src/03-integrals.tex': 'ch-integrals.html',
+                  'blueprint/src/13-complex-paths.tex': 'ch-complex-paths.html',
+                  'blueprint/src/04-infinite-series.tex': 'ch-infinite-series.html',
+                  'book/classics/analytic-continuation.html': 'analytic-continuation.html',
+                  'book/classics/zeta-zeros.html': 'zeta-zeros.html',
+                  'book/rational-primitives/index.html': 'rational-primitives.html',
+                  'docs/POWER_IMPROPER.md': 'power-improper.html',
                   'docs/GAUSSIAN_CONVOLUTION.md': 'gaussian-convolution.html',
                   'docs/N_BALL_GAMMA.md': 'n-ball-volume.html',
                   'docs/RATIONAL_PRIMITIVES.md': 'rational-primitives.html',
@@ -68,7 +74,7 @@ def render_skill(row, revision):
         relative = str(resolved.relative_to(ROOT))
         assert resolved.is_file(), (source, href)
         link['href'] = pages.get(relative, f'https://github.com/liuyao12/computable-analysis/blob/{revision}/{relative}')
-        if fragment and relative not in pages:
+        if fragment:
             link['href'] += '#' + fragment
     for p in doc.select('p'):
         if p.get_text().strip().startswith(r'\['):

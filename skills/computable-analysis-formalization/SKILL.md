@@ -26,6 +26,16 @@ to route a new task. Read
 [references/integral-computation-strategies.md](references/integral-computation-strategies.md)
 for any definite-integral task, especially one with non-rational breakpoints.
 
+## Explain the construction to the reader
+
+When writing a chapter or example, motivate its mathematical question before
+presenting this formalization workflow. Use a concrete case or obstruction,
+or link to the earlier section that already supplies that motivation. Explain
+why the selected estimates solve the problem, and separate the exploratory
+strategy from the final proof when they differ. Follow the
+[exposition guide](../../docs/PEDAGOGICAL_EXPOSITION.md), retaining exact
+scope and the distinction between checked results and construction targets.
+
 ## Start with the theorem contract
 
 The project favors laws about supplied, justified constructions over the

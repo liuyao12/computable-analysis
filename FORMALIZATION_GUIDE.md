@@ -1,5 +1,14 @@
 # Formalization Guide
 
+## Explain the problem before the machinery
+
+The project is a pedagogical book as well as a formalization. Follow the
+[exposition guide](docs/PEDAGOGICAL_EXPOSITION.md): give each page a question,
+a reason to care and a concrete route into the mathematics. Refer to earlier
+motivation when it has already been established. Definitions and quantitative
+contracts should appear when the narrative has shown what they resolve.
+Keep exact theorem scope and proof-status distinctions intact.
+
 ## Integral and series skills
 
 The reader's Skills section follows the chapters and presents the integral and series guides:

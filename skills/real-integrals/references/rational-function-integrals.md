@@ -1,5 +1,7 @@
 # Rational functions
 
+Partial fractions suggest logarithms and arctangents, but a pole inside the interval can invalidate an endpoint calculation. The [worked page](../../../book/rational-primitives/index.html) motivates that distinction. Use this recipe to connect a supplied algebraic decomposition to actual function-specific integrals.
+
 Start with the actual quotient and its domain. A supplied factorization is useful
 input; finding a factorization is a separate problem. Read the
 [shared formalization policy](../../../FORMALIZATION_GUIDE.md#computable-foundations-exact-mathematical-theorems)

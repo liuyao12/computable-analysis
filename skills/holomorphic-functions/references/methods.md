@@ -1,5 +1,7 @@
 # Choosing a holomorphicity proof
 
+A series, a finite expression and an integral describe functions in different ways. Each description offers a different route to the same local differentiability evidence. The [continuation examples](../../../book/classics/analytic-continuation.html) explain why that evidence matters; choose the route whose quantitative estimates are available for your function.
+
 These are function-specific proof routes. They are not additional definitions
 of holomorphicity and do not assert generic constructors that have not been
 implemented. Each route must eventually supply the existing represented
