@@ -49,8 +49,19 @@ def main():
     assert zero_benchmark==build_report(Path(__file__).resolve().parents[2],report['documentationRevision'])
     assert zero_benchmark['concreteZetaZerosCertified']==0
     assert all(row['additionalProofCodeLines'] is None for row in zero_benchmark['targets'])
-    assert len(zero_page.select('#zeta-zero-benchmark-table tbody tr'))==3
-    assert str(zero_benchmark['shared']['direct']['codeLines']) in zero_page.select_one('#zeta-zero-benchmark-table').get_text()
+    assert zero_benchmark['schemaVersion']==2
+    assert zero_benchmark['shared']['baselineProofCodeLines'] is None
+    assert zero_benchmark['comparison']['sharedBaselineExcluded'] is True
+    assert zero_benchmark['comparison']['generatedCertificateDataCountedAsCode'] is False
+    assert [row['ordinal'] for row in zero_benchmark['targets']]==[1,2]
+    assert all(row['sharedBaselineExcluded'] is True for row in zero_benchmark['targets'])
+    assert all('cumulativeProofCodeLines' not in row for row in zero_benchmark['targets'])
+    assert len(zero_page.select('#zeta-zero-benchmark-table tbody tr'))==2
+    assert len(zero_page.select('#zeta-zero-shared-table tbody tr'))==2
+    assert str(zero_benchmark['shared']['direct']['codeLines']) in zero_page.select_one('#zeta-zero-shared-table').get_text()
+    comparison=zero_page.select_one('#zeta-zero-benchmark-table').get_text()
+    assert 'excluding the shared setup for both zeros' in comparison
+    assert 'Shared reflection' not in comparison and 'Cumulative' not in comparison
     assert '__ZETA_ZERO_BENCHMARK__' not in zero_page.get_text()
     assert uncomment('def x := "-- /- literal -/" -- trailing\n/- outer /- nested -/ -/\ndef y := 1').splitlines()[0].strip()=='def x := "-- /- literal -/"'
     assert sum(bool(line.strip()) for line in uncomment('/- text\n/- nested -/\n-/\ndef y := 1 -- comment').splitlines())==1

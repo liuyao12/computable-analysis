@@ -139,9 +139,14 @@ includes every declaration in imported project files, not a minimized
 elaborated proof dependency slice. External library sources are listed but
 not counted. This inventory is not a replacement for the Lean axiom audit.
 
-Future completed rows should publish additional function-specific proof code,
-cumulative code counting reused modules once, uncompressed rational
-certificate bytes, and kernel-check time with machine and toolchain metadata.
+Report the full shared certification setup separately; its size is still pending.
+The existing conditional module is only a measured component, not the full setup.
+Compare only additional proof code for each zero, excluding shared machinery
+for every ordinal, including the first. Zero-specific parameters, proof
+applications and ordinal-completeness evidence belong to that zero's score.
+Move reusable lemmas into the shared baseline and recompute all rows against
+the same baseline. Keep uncompressed rational certificate bytes and kernel-check
+time separate, with machine and toolchain metadata.
 The actual constructed zeta and root theorems, convergence/contour evidence,
 ordinal completeness and axiom audits must pass before a row is scored.
 

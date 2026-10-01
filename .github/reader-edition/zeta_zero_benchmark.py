@@ -70,27 +70,34 @@ def inventory(root, module):
 def build_report(root, revision):
     module = 'ComputableAnalysis.ZeroIsolation'
     measured = inventory(root, module)
-    return dict(schemaVersion=1, documentationRevision=revision,
+    return dict(schemaVersion=2, documentationRevision=revision,
         metric='Nonblank physical Lean source lines after removing nested comments; includes imports and namespaces.',
         closureScope='All declarations in project-local transitive import files, not a minimized theorem dependency slice. External library sources are excluded and listed.',
         sourceInventoryIsProofVerification=False, concreteZetaZerosCertified=0,
-        shared=dict(module=module, theorem='ComputableAnalysis.FunctionTheory.ZeroIsolation.unique_zero_on_line',
+        comparison=dict(metric='Additional Lean code lines for each zero, excluding the shared baseline for every ordinal, including the first.',
+            sharedBaselineExcluded=True, generatedCertificateDataCountedAsCode=False),
+        shared=dict(baselineProofCodeLines=None, baselineStatus='Complete shared zeta-certification machinery not yet implemented.',
+            module=module, theorem='ComputableAnalysis.FunctionTheory.ZeroIsolation.unique_zero_on_line',
             status='Checked conditional reflection-and-uniqueness implication; no concrete zeta certificate.',
             direct=measured['files']['ComputableAnalysis/ZeroIsolation.lean'], **measured),
         targets=[dict(ordinal=k, status='Not yet implemented', additionalProofCodeLines=None,
-            cumulativeProofCodeLines=None, certificateBytes=None, kernelCheckSeconds=None,
+            sharedBaselineExcluded=True, certificateBytes=None, kernelCheckSeconds=None,
             ordinalCompletenessProved=False) for k in [1, 2]])
 
 
 def render_table(report):
     direct = report['shared']['direct']['codeLines']
     closure = report['shared']['projectClosureCodeLines']
-    return f'''<div class="numeric-scroll"><table id="zeta-zero-benchmark-table">
-<thead><tr><th>Milestone</th><th>Additional Lean code lines</th><th>Cumulative certificate proof</th><th>Status</th></tr></thead>
-<tbody><tr><td>Shared reflection module</td><td>{direct}</td><td>Not a zero certificate</td><td>Conditional law checked</td></tr>
-<tr><td>First positive-height zero</td><td>Pending</td><td>Pending</td><td>Not yet certified here</td></tr>
-<tr><td>Second positive-height zero</td><td>Pending</td><td>Pending</td><td>Not yet certified here</td></tr></tbody></table></div>
-<p>The shared module currently imports {closure:,} project code lines in total. This conservative file-level inventory includes every declaration in those import files; it is not the size of a minimal proof. External library source is excluded and listed in the report. Source counting itself does not verify a theorem.</p>'''
+    return f'''<div class="numeric-scroll"><table id="zeta-zero-shared-table">
+<thead><tr><th>Shared setup</th><th>Lean code lines</th><th>Status</th></tr></thead>
+<tbody><tr><td>Complete shared zeta-certification machinery</td><td>Pending</td><td>Not yet constructed</td></tr>
+<tr><td>Existing conditional reflection module</td><td>{direct}</td><td>Conditional law checked; one component of the setup</td></tr></tbody></table></div>
+<p>The conditional module's project-local import closure contains {closure:,} code lines. This conservative file-level inventory includes every declaration in those import files; it is not the size of a minimal proof or the complete shared zeta-certification setup. External library source is excluded and listed in the report. Source counting itself does not verify a theorem.</p>
+<div class="numeric-scroll"><table id="zeta-zero-benchmark-table">
+<caption>Per-zero comparison: additional code only, excluding the shared setup for both zeros.</caption>
+<thead><tr><th>Zero certification</th><th>Additional Lean code lines</th><th>Certificate bytes</th><th>Kernel-check time</th><th>Status</th></tr></thead>
+<tbody><tr><td>First positive-height zero</td><td>Pending</td><td>Pending</td><td>Pending</td><td>Not yet certified here</td></tr>
+<tr><td>Second positive-height zero</td><td>Pending</td><td>Pending</td><td>Pending</td><td>Pending</td><td>Not yet certified here</td></tr></tbody></table></div>'''
 
 
 if __name__ == '__main__':

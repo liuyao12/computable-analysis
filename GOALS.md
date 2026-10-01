@@ -762,8 +762,9 @@ implication is distinguished from the still-open concrete zeta certificates.
 
 Measure complete exact certificates for the first and second positive-height
 nontrivial zeta zeros, including their ordinal completeness. Report shared
-function-specific machinery, additional and cumulative proof code, generated
-certificate bytes and kernel-check time separately. The published source
+function-specific machinery separately, and compare only additional proof code
+for each zero, including the first. Exclude the same shared baseline from every
+row; keep generated certificate bytes and kernel-check time separate. The published source
 inventory currently measures the conditional reflection module only; both
 concrete zero benchmarks remain pending until their actual constructions,
 counts and proof audits exist.
