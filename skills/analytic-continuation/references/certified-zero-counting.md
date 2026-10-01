@@ -106,6 +106,27 @@ method for completeness. It is a reference for certification, not an imported
 argument-principle theorem or an assertion that our repository has proved the
 same result.
 
+## Extend to higher zeros and heights
+
+Keep the constructed function, analytic estimates and counting bridges shared.
+For each positive ordinal \(n\), supply its own isolating region, executable
+refinement schedule, sound ranges and simplicity proof. A numerical reference
+height selects a search target; it neither brackets a root nor proves its rank.
+There is no mathematical cutoff at the first or second zero.
+
+To extend a certified prefix from height \(T\) to \(U>T\), certify the new
+boundary and all roots in the intervening region. Prove its count and the
+additivity needed to combine it with the existing count; exclude roots on the
+shared boundary. Then identify the new ordinals using the cumulative count.
+Retain the actual completeness evidence rather than inferring it from the
+length of a root list. A higher-target search may need more subdivision or
+precision; termination and analytic bounds remain obligations for that target.
+
+The benchmark registry accepts arbitrary ordinals, including sparse targets.
+Report the reusable setup once, extra proof LOC per target, and generated data
+and checking time separately. Sparse individual certificates make no claim
+about omitted ordinals or all zeros below a height.
+
 ## Proof sources and checks
 
 The exact reflection and uniqueness implication is in

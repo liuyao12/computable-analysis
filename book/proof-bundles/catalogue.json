@@ -896,7 +896,7 @@
   },
   {
     "id": "showcase:zeta-zeros",
-    "title": "First and second zeta zeros",
+    "title": "Zeta zeros and finite-height completeness",
     "page": "zeta-zeros.html",
     "anchor": "benchmark",
     "status": "No concrete zeta zero certified; checked enclosure and reflection laws, with concrete bounds and counts pending",
@@ -944,8 +944,8 @@
       },
       {
         "id": "count",
-        "title": "Actual zero-count identity and count one",
-        "body": "This step has no registered proof of the displayed target. Its LOC is pending, not zero.",
+        "title": "Local multiplicity counts and global counts",
+        "body": "Each isolating region needs an actual multiplicity count of one. The global region needs a proved total count below the chosen height. Both constructions remain pending.",
         "routes": [
           "count"
         ],
@@ -998,8 +998,8 @@
       },
       {
         "id": "complete",
-        "title": "Ordinal completeness: first, then second",
-        "body": "This step has no registered proof of the displayed target. Its LOC is pending, not zero.",
+        "title": "Ordinal and finite-height completeness",
+        "body": "For any target ordinal, exclude omitted lower zeros. For a finite height, prove disjoint local regions exhaust the global multiplicity count and certify all relevant boundaries. Listing more targets supplies none of this evidence.",
         "routes": [
           "count",
           "sign"
@@ -1011,7 +1011,7 @@
       {
         "id": "ml",
         "title": "Mathlib continuation and functional equation",
-        "body": "The linked completed-zeta construction proves analytic ingredients in completed complex numbers; it is not a first-zero certificate.",
+        "body": "The linked completed-zeta construction proves analytic ingredients in completed complex numbers; it is not a concrete zeta-zero certificate.",
         "routes": [
           "mathlib"
         ],
@@ -1024,7 +1024,7 @@
       {
         "id": "discrete",
         "title": "Discrete zeta zeros",
-        "body": "The linked file proves discreteness and finiteness on compact sets. No matching first/second-zero certificate is registered here.",
+        "body": "The linked file proves discreteness and finiteness on compact sets. No matching concrete zeta-zero certificate is registered here.",
         "routes": [
           "mathlib"
         ],

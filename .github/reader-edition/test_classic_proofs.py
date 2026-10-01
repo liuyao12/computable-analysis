@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Test published navigation, preserved proof data and source-linked comparisons."""
-import argparse,hashlib,json,re,shutil,threading
+import argparse,hashlib,json,re,shutil,threading,tempfile
 from functools import partial
 from http.server import SimpleHTTPRequestHandler,ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
 from bs4 import BeautifulSoup
 from classic_proofs import LINKS,MATHLIB,MATHLIB_HASH,EULER_MATHLIB,SHOWCASE_PAGES
-from zeta_zero_benchmark import build_report, render_table, uncomment
+from zeta_zero_benchmark import build_report, load_targets, render_table, uncomment
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('--site',required=True,type=Path);p.add_argument('--report',required=True,type=Path);p.add_argument('--static-only',action='store_true');a=p.parse_args()
@@ -49,26 +49,54 @@ def main():
     assert zero_benchmark==build_report(Path(__file__).resolve().parents[2],report['documentationRevision'])
     assert zero_benchmark['concreteZetaZerosCertified']==0
     assert all(row['additionalProofCodeLines'] is None for row in zero_benchmark['targets'])
-    assert zero_benchmark['schemaVersion']==2
+    assert zero_benchmark['schemaVersion']==3
     assert zero_benchmark['shared']['baselineProofCodeLines'] is None
     assert zero_benchmark['comparison']['sharedBaselineExcluded'] is True
     assert zero_benchmark['comparison']['generatedCertificateDataCountedAsCode'] is False
-    assert [row['ordinal'] for row in zero_benchmark['targets']]==[1,2]
-    assert [row['approximateImaginaryPart'] for row in zero_benchmark['targets']]==['14.134725141735','21.022039638772']
+    assert [row['ordinal'] for row in zero_benchmark['targets']]==sorted({row['ordinal'] for row in zero_benchmark['targets']})
+    assert zero_benchmark['scope']['ordinalUpperLimit'] is None
+    assert zero_benchmark['scope']['finiteHeightCompletenessProved'] is False
+    assert zero_benchmark['scope']['registryEntriesAreCertificates'] is False
+    registry=Path(__file__).resolve().parents[2]/'book/zeta-zeros/benchmark-targets.json'
+    assert zero_benchmark['targetRegistrySha256']==hashlib.sha256(registry.read_bytes()).hexdigest()
+    assert [row['approximateImaginaryPart'] for row in zero_benchmark['targets']][:2]==['14.134725141735','21.022039638772']
     assert all(row['numericalReferenceIsRepositoryCertificate'] is False for row in zero_benchmark['targets'])
     assert all(row['sharedBaselineExcluded'] is True for row in zero_benchmark['targets'])
     assert all('cumulativeProofCodeLines' not in row for row in zero_benchmark['targets'])
-    assert len(zero_page.select('#zeta-zero-benchmark-table tbody tr'))==2
+    assert len(zero_page.select('#zeta-zero-benchmark-table tbody tr'))==len(zero_benchmark['targets'])
     assert len(zero_page.select('#zeta-zero-shared-table tbody tr'))==3
     assert str(zero_benchmark['shared']['direct']['codeLines']) in zero_page.select_one('#zeta-zero-shared-table').get_text()
     comparison=zero_page.select_one('#zeta-zero-benchmark-table').get_text()
-    assert 'excluding the shared setup for both zeros' in comparison
+    assert 'excluding the shared setup for every zero' in comparison
     assert 'Imaginary part (approx.)' in comparison
     assert all(row['approximateImaginaryPart'] in comparison for row in zero_benchmark['targets'])
     assert 'Formal certificate pending' in comparison
     assert zero_page.select_one('a[href="https://www.lmfdb.org/zeros/zeta/"]')
     assert 'Shared reflection' not in comparison and 'Cumulative' not in comparison
     assert '__ZETA_ZERO_BENCHMARK__' not in zero_page.get_text()
+    # Sparse, high ordinals work without changing the renderer or shared counts.
+    with tempfile.TemporaryDirectory() as directory:
+        custom=Path(directory)/'targets.json'
+        custom.write_text(json.dumps(dict(schemaVersion=1,targets=[
+            dict(ordinal=1000000),dict(ordinal=17)])))
+        extended=build_report(Path(__file__).resolve().parents[2], 'test', custom)
+        assert [row['ordinal'] for row in extended['targets']]==[17,1000000]
+        assert extended['shared']==zero_benchmark['shared']
+        assert extended['scope']['finiteHeightCompletenessProved'] is False
+        rendered=BeautifulSoup(render_table(extended),'html.parser')
+        cells=rendered.select('#zeta-zero-benchmark-table tbody tr')
+        assert len(cells)==2 and r'\(n=1000000\)' in cells[1].get_text()
+        assert all('Not supplied' in row.get_text() for row in cells)
+        for entries in [[dict(ordinal=0)], [dict(ordinal=True)],
+                [dict(ordinal=1),dict(ordinal=1)],
+                [dict(ordinal=1,approximateImaginaryPart='1.0')],
+                [dict(ordinal=1,exactLineLocationProved=True)],
+                [dict(ordinal=1,approximateImaginaryPart='<script>',numericalReference='https://example.org')]]:
+            custom.write_text(json.dumps(dict(schemaVersion=1,targets=entries)))
+            try: load_targets(custom)
+            except ValueError: pass
+            else: raise AssertionError('Invalid registry accepted: '+str(entries))
+
     assert uncomment('def x := "-- /- literal -/" -- trailing\n/- outer /- nested -/ -/\ndef y := 1').splitlines()[0].strip()=='def x := "-- /- literal -/"'
     assert sum(bool(line.strip()) for line in uncomment('/- text\n/- nested -/\n-/\ndef y := 1 -- comment').splitlines())==1
 

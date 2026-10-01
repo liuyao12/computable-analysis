@@ -760,13 +760,13 @@ implication is distinguished from the still-open concrete zeta certificates.
 
 ## Zeta-zero certificate benchmark
 
-Measure complete exact certificates for the first and second positive-height
-nontrivial zeta zeros, including their ordinal completeness. Report shared
+Measure complete exact certificates for arbitrary positive-height nontrivial
+zeta-zero ordinals and finite-height prefixes, including ordinal completeness. Report shared
 function-specific machinery separately, and compare only additional proof code
 for each zero, including the first. Exclude the same shared baseline from every
 row; keep generated certificate bytes and kernel-check time separate. The published source
-inventory currently measures the conditional reflection module only; both
-concrete zero benchmarks remain pending until their actual constructions,
+inventory currently measures conditional reflection and enclosure-to-root laws;
+all concrete zero benchmarks remain pending until their actual constructions,
 counts and proof audits exist.
 
 ## Bundled theorem comparisons and LOC
@@ -792,4 +792,6 @@ and which contain zero. The root equation is a conclusion, not an assumed
 certificate field. The checked reflection law then supplies exact line location
 when the function's symmetry and uniqueness have been proved. These are shared
 conditional laws; complex zeta continuation, its concrete isolating ranges,
-actual multiplicity counts and first/second ordinal completeness remain open.
+actual multiplicity counts and ordinal completeness remain open.
+The reference registry initially lists ten targets and accepts higher ordinals
+without changing the counting or rendering code; it supplies no proof evidence.

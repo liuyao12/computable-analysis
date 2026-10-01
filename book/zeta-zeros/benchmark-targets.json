@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "description": "Initial reference targets only; add any positive ordinal. Listing a target does not certify its root, location, simplicity, ordinal or completeness.",
+  "targets": [
+    {
+      "ordinal": 1,
+      "approximateImaginaryPart": "14.134725141735",
+      "numericalReference": "https://www.lmfdb.org/zeros/zeta/list?N=1&limit=10"
+    },
+    {
+      "ordinal": 2,
+      "approximateImaginaryPart": "21.022039638772",
+      "numericalReference": "https://www.lmfdb.org/zeros/zeta/list?N=1&limit=10"
+    },
+    {
+      "ordinal": 3,
+      "approximateImaginaryPart": "25.010857580146",
+      "numericalReference": "https://www.lmfdb.org/zeros/zeta/list?N=1&limit=10"
+    },
+    {
+      "ordinal": 4,
+      "approximateImaginaryPart": "30.424876125860",
+      "numericalReference": "https://www.lmfdb.org/zeros/zeta/list?N=1&limit=10"
+    },
+    {
+      "ordinal": 5,
+      "approximateImaginaryPart": "32.935061587739",
+      "numericalReference": "https://www.lmfdb.org/zeros/zeta/list?N=1&limit=10"
+    },
+    {
+      "ordinal": 6,
+      "approximateImaginaryPart": "37.586178158826",
+      "numericalReference": "https://www.lmfdb.org/zeros/zeta/list?N=1&limit=10"
+    },
+    {
+      "ordinal": 7,
+      "approximateImaginaryPart": "40.918719012147",
+      "numericalReference": "https://www.lmfdb.org/zeros/zeta/list?N=1&limit=10"
+    },
+    {
+      "ordinal": 8,
+      "approximateImaginaryPart": "43.327073280915",
+      "numericalReference": "https://www.lmfdb.org/zeros/zeta/list?N=1&limit=10"
+    },
+    {
+      "ordinal": 9,
+      "approximateImaginaryPart": "48.005150881167",
+      "numericalReference": "https://www.lmfdb.org/zeros/zeta/list?N=1&limit=10"
+    },
+    {
+      "ordinal": 10,
+      "approximateImaginaryPart": "49.773832477672",
+      "numericalReference": "https://www.lmfdb.org/zeros/zeta/list?N=1&limit=10"
+    }
+  ]
+}

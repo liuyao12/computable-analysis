@@ -116,7 +116,7 @@ the exact zero equation. It does not assume that equation in a record.
 `root_on_line` connects this construction to proved reflection and uniqueness.
 These are conditional laws: the actual zeta boxes, sound ranges, symmetry,
 uniqueness, multiplicity and ordinal completeness have not been constructed.
-The first two concrete certificates remain incomplete.
+All concrete zeta-zero certificates remain incomplete.
 
 A complete finite-height theorem must construct the complex function and its
 symmetry, certify nonvanishing on entire contour segments, prove the argument-principle count for the selected function and region,
@@ -136,13 +136,23 @@ claimed by this audit.
 ## Zero-certificate benchmark
 
 The [reader benchmark](../book/classics/zeta-zeros.html#benchmark) targets
-complete certificates for the first and second positive-height nontrivial
-zeros. Ordinal claims require a justified global count excluding omitted
+complete certificates for any positive ordinal, together with finite-height
+completeness claims. Ordinal claims require a justified global count excluding omitted
 lower zeros; line-root existence alone does not establish their rank.
-Both targets remain unimplemented, with no code-size or timing score.
+All concrete targets remain unimplemented, with no code-size or timing score.
+
+`book/zeta-zeros/benchmark-targets.json` supplies numerical reference metadata
+for the first ten targets as an initial set, with no fixed ordinal ceiling.
+Add any positive ordinal there, or supply another registry with
+`zeta_zero_benchmark.py --targets PATH`. Missing numerical heights may be
+`null`; a supplied decimal height requires its source URL. Entries cannot
+claim proof status. The generated report separates exact line location,
+simplicity, ordinal completeness and global finite-height completeness.
+Adding rows, even a consecutive prefix, proves none of these obligations.
 
 Run `.github/reader-edition/zeta_zero_benchmark.py` to inventory the current
-shared conditional reflection module and its project-local import closure.
+shared conditional reflection and enclosure-to-root modules and their project-local
+import closures.
 The reader generates the same report at its source revision. It counts
 nonblank physical Lean lines after stripping nested comments, retaining
 imports and namespace commands, and records source hashes. The closure
