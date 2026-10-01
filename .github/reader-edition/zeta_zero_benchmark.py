@@ -152,7 +152,7 @@ def render_table(report):
 <caption>Per-zero comparison: additional code only, excluding the shared setup for every zero.</caption>
 <thead><tr><th>Zero certification</th><th>Imaginary part (approx.)</th><th>Additional Lean code lines</th><th>Certificate bytes</th><th>Kernel-check time</th><th>Status</th></tr></thead>
 <tbody>{rows}</tbody></table></div>
-<p>The imaginary parts are rounded numerical reference values from <a href="https://www.lmfdb.org/zeros/zeta/">LMFDB's zero table</a>. They identify the targets; they are not repository proof certificates. “Pending” refers to the formal certification and its code-size, certificate-size and timing measurements.</p>'''
+<p>The supplied imaginary parts are rounded numerical reference values; each target's source URL is recorded in the report. <a href="https://www.lmfdb.org/zeros/zeta/">LMFDB's zero table</a> supplies the initial reference targets. These values identify targets; they are not repository proof certificates. “Pending” refers to the formal certification and its code-size, certificate-size and timing measurements.</p>'''
 
 
 if __name__ == '__main__':
