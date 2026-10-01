@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Check source inventories, route unions, graph coverage and browser interaction."""
-import argparse,json,re,threading
+import argparse,json,re,shutil,threading
 from functools import partial
 from http.server import SimpleHTTPRequestHandler,ThreadingHTTPServer
 from pathlib import Path
@@ -59,7 +59,10 @@ def main():
         server=ThreadingHTTPServer(('127.0.0.1',0),partial(SimpleHTTPRequestHandler,directory=str(site)));threading.Thread(target=server.serve_forever,daemon=True).start();base='http://127.0.0.1:'+str(server.server_port)+'/'
         try:
             with sync_playwright() as playwright:
-                browser=playwright.chromium.launch()
+                options=dict(headless=True,args=['--no-sandbox'])
+                executable=shutil.which('google-chrome') or shutil.which('chromium') or shutil.which('chromium-browser')
+                if executable:options['executable_path']=executable
+                browser=playwright.chromium.launch(**options)
                 page=browser.new_page(viewport={'width':1440,'height':1000})
                 page.goto(base+'proof-bundles.html?theorem=showcase:zeta-zeros',wait_until='networkidle')
                 assert page.locator('.bundle-node').count()==8
