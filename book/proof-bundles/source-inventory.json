@@ -1,0 +1,748 @@
+{
+  "sources": {
+    "https://github.com/leanprover-community/mathlib4/blob/338b8c00bd151fa07a0350cc17442e6eeda734e8/Mathlib/Analysis/Complex/AbelLimit.lean": {
+      "sha256": "d5a1ab660c8f5c9f8d1ff9d81b0fc31b18265179c28b7327491187eff2635eb1",
+      "physicalLines": 277,
+      "codeLines": 204,
+      "codeLineBitmap": "oAcAAKmK9O///P///X9/hf///x+3r77/9//+//8f31fF/xc="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/338b8c00bd151fa07a0350cc17442e6eeda734e8/Mathlib/Analysis/Real/Pi/Leibniz.lean": {
+      "sha256": "cac79b1f80233624aa3d79efbad6b0ce505b18210fced2585f1fd145b9a262a9",
+      "physicalLines": 61,
+      "codeLines": 40,
+      "codeLineBitmap": "oFHFfv3f/xU="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/338b8c00bd151fa07a0350cc17442e6eeda734e8/Mathlib/Analysis/SpecialFunctions/Complex/Arctan.lean": {
+      "sha256": "f849398562b4c5d12a7675884de1b7ba2b6810ffacd6127a7864d2e79ba6652d",
+      "physicalLines": 145,
+      "codeLines": 102,
+      "codeLineBitmap": "oAGQ0v3/xv/3/vvn+PNf///LAQ=="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/338b8c00bd151fa07a0350cc17442e6eeda734e8/Mathlib/Analysis/SpecialFunctions/Trigonometric/Arctan.lean": {
+      "sha256": "de56b57eaef9d532e4f9c639ea83b7935555ecadb42cfd9d07f91f18f9b1af53",
+      "physicalLines": 449,
+      "codeLines": 332,
+      "codeLineBitmap": "oAGAtPp7f+/23f//fc1xt9u2bdvbtrXb7n6/7e7ufn7f9fv7339/d7fNdXd3d/P/3TX///PP/38B"
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/338b8c00bd151fa07a0350cc17442e6eeda734e8/Mathlib/Data/Real/Basic.lean": {
+      "sha256": "a1d6fa90c0e6ddc98b82933e33801713f937030bc1d70052afb6794c3637a65d",
+      "physicalLines": 5,
+      "codeLines": 3,
+      "codeLineBitmap": "FQ=="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/Algebra/Order/CauSeq/Completion.lean": {
+      "sha256": "d86bb21a07099c875a03e6174c7aab69ea02740b4794430d264e2974bbcbc999",
+      "physicalLines": 415,
+      "codeLines": 283,
+      "codeLineBitmap": "oAOkGstutm17u91ut7fb7m63z99W+2rb/2/3+r5r/gNfzaqKqs227b7/b9/+q/7//1XbVg=="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/Analysis/Analytic/IsolatedZeros.lean": {
+      "sha256": "23bb70a1bad8b88c338b504532e784a33bec653fe550442925672ff7e891b2f1",
+      "physicalLines": 366,
+      "codeLines": 227,
+      "codeLineBitmap": "oB8AAADVav//6v997/ut8Lt38P//8A///1Xg/Xvg9z3wwnh+/niD+P/DAf4BLw=="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/Analysis/Analytic/Uniqueness.lean": {
+      "sha256": "3c095cfff0c66f30905355dfe8918c74148cf462427b0b59f5322a495e002424",
+      "physicalLines": 239,
+      "codeLines": 159,
+      "codeLineBitmap": "oA+QFQDq///////4fz73HB7+v8LjB///P/j/wQ9e"
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/Analysis/Complex/CauchyIntegral.lean": {
+      "sha256": "7a2022a8a02dbef3b5466edd2ba9e4123a898f1e0b0dc5dc320104832405f14b",
+      "physicalLines": 775,
+      "codeLines": 432,
+      "codeLineBitmap": "oP8AAAAAAAAAAAAAAAAAAAAAAABVVQD+////P+D/wP8P/g/+w78CfN7//8H/VwH+/+f//w/4i/9fPPz//4P///s/+MOHfzz4FfD/wwce34475z2e87zn/ysQ/8ePH8+PVw=="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/Analysis/Complex/Exponential.lean": {
+      "sha256": "78ca88512755a04b7346806b8e74fb3930bf14c0ec289107694a33c1947b7821",
+      "physicalLines": 714,
+      "codeLines": 555,
+      "codeLineBitmap": "oH8AoPV/jXOqyqnq/+////NtN3e3vf/utqrl2267rf++f3t9u323u92t3dX//3/////f////f79/v/9/+///X/X97x5s3/3+3/dv//i+f2/73/v+7/uaf/UC"
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/Analysis/Complex/Trigonometric.lean": {
+      "sha256": "73147c3523fc45f402b7e9487de2722817586a459ba624be52760fd8ef7bc391",
+      "physicalLines": 990,
+      "codeLines": 689,
+      "codeLineBitmap": "oAG0cs6Zc64q55w5jqvatn3bvm1323a7bbvbbne3u+v+/nbbbf3tttu27e9v/3d32+62bbtb3d1t21u3rd7d3trd3Vz/f/9/Vdu227Ztd3fb3Xbbtm3btrVtd7fbbJu3u22zbbt7W2vbsr23Vdv/e3/f/jX/qnd3d/ffLQ=="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/Analysis/SpecialFunctions/Gaussian/GaussianIntegral.lean": {
+      "sha256": "96a282f317e96505e89e51553f8129e52f381953dd142ee269f2525cb00f6197",
+      "physicalLines": 346,
+      "codeLines": 279,
+      "codeLineBitmap": "oAeAqv7f+97+/vh7//+7/93d79///xn////1vv/3//////l//j/9f17+5QM="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/Analysis/SpecialFunctions/Integrals/Basic.lean": {
+      "sha256": "58a81e8137bddf5cc43ae28f08ffa75ea3aa086e607cf70e70f70c3c8e935e81",
+      "physicalLines": 656,
+      "codeLines": 516,
+      "codeLineBitmap": "oD8AAJCq0t29995771X4/////f/fO/7/v2/97rb9/u//+yf/+e/39/u/73d///zz/+r//3///xX//z9/999/vxv+/3/+Dv6P+z7/P/Z9fv/j/w=="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/Analysis/SpecialFunctions/Trigonometric/Arctan.lean": {
+      "sha256": "99d770025b84333619ab7ea91b8e38789fc4de14ac99002028b3caf4f2436fa7",
+      "physicalLines": 449,
+      "codeLines": 332,
+      "codeLineBitmap": "oAGAtPp7f+/23f//fc1xt9u2bdvbtrXb7n6/7e7ufn7f9fv7339/d7fNdXd3d/P/3TX///PP/38B"
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/Analysis/SpecialFunctions/Trigonometric/Basic.lean": {
+      "sha256": "00f647ae54ddeef8ccb4bb194aa104bc92ae548714e80ec6de37e07cb7d7dd02",
+      "physicalLines": 1308,
+      "codeLines": 925,
+      "codeLineBitmap": "oAcAAAAg1bt371V3d3d14Pbu7ru71fyrsmt1b2t3d3d3d3d327a1u7u7u7u7u9u2bdu227ft+6tq293d3d77+2/b/++/3/Zuu9tuW213d4VX3f17v//d3//9fr/f7/f78f885uP5/v//nv+X3b69d9/uu9tt27Zt23a/735ftX3ftrVt27Zt29q2bdu2bdtW1bZt27Ztbbu7e3d38P/t7nZ3uws="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/Analysis/SpecialFunctions/Trigonometric/Deriv.lean": {
+      "sha256": "acb42335608f66556d2683f07b390999b415d6be4e779904ba829275a1042f41",
+      "physicalLines": 761,
+      "codeLines": 509,
+      "codeLineBitmap": "oAGAWv5nvZ0zs+Of3c6Z2a4Q7u4e7u5eYbi7e7t7uzvc3b3dvd1dtXU7Z2a33c6Z2a7o77/fb/v96u+/32/7/X6/996rEO7uHu7uXmG4u3u7e9sOd3dvd2/b9d57r1cB"
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/Data/Real/Basic.lean": {
+      "sha256": "b1dde0e82be30e8a9ca87b23c46d04afc92be61818622ba6d4603daa4d4a9f70",
+      "physicalLines": 596,
+      "codeLines": 425,
+      "codeLineBitmap": "oAMASKzlVW3W7u7uvffe3rbdtm17e+/9///8AVVVVVXN9vd2Vb3u7b7//7pt/+/b7r279+7//////z/bflf7/6cK7P99//7/Yh8O"
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/MeasureTheory/Function/L1Space/HasFiniteIntegral.lean": {
+      "sha256": "fb76154a7834149fd2583b79715ba82ae0c4889c689a4a13c1dfd32202181c75",
+      "physicalLines": 529,
+      "codeLines": 376,
+      "codeLineBitmap": "oA8AQNXF7qe7wLvd3f3u7+7u7u7d3Xu/747vvrv33nd3d3f3/e973e2uf/093/PPf/6/Z+2v4r3qf/jv33vFedVXAQ=="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/MeasureTheory/Function/L1Space/Integrable.lean": {
+      "sha256": "024ed7aebf24a39f0b68d85f9b184addd5c58fb60c7833c2f8da42093f4ad731",
+      "physicalLines": 1257,
+      "codeLines": 915,
+      "codeLineBitmap": "oAMAACDVBU977+6+u7v3tnd333vn5N77+7vbvu9/375/997Bw/tW3/e771d9d733vfvV+3296uuV6w4fHh7e7/f97tzd/f39wf/j/73zv/+f/47/8fjx+PHHx/f++74y/n/V/+7v/9/f9dXL///////96rv3Fd6rve+913vvvdpf9d57d967e9VV3/de9ftq71dZ1e33vavdXfzxXwE="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/MeasureTheory/Function/SimpleFunc.lean": {
+      "sha256": "e888599c35249b6c632a591c148a609bd1f928458c9b4089392c059ebea6c8ee",
+      "physicalLines": 1406,
+      "codeLines": 1022,
+      "codeLineBitmap": "oAEAqarQVV3bmkd2u7ftbLvbu/+de3d93/vuPv/u3/Ed2+7u97x3/Pfee+zYnbfd3W27u7u7u9vu7Xavu+tuu9HdXe+9t9vudre7u7u72/67a9u21ravu3u/3/ar7L7td7e7+/urwv5vX/+/Zmf/7/5v93H/71XZ//f893+ff7e76/v/3f397v7tPH/ud9Wv+2P71+3ud+/977u+APz///9/4P///z8erwrg/wPw/z8="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/MeasureTheory/Integral/Bochner/Basic.lean": {
+      "sha256": "f81a06eab17faccbc4b671a93e7af73332f5fd3946f7690e7c2a3cfee77d28c8",
+      "physicalLines": 1379,
+      "codeLines": 1019,
+      "codeLineBitmap": "oAAAAAAAAAAAAAAAAAAAAGoV4HqwbbXu9253vbv27vX2Dr6/293fd+/d9+2O/3h+/vzPX//+/fvj/e///f9/3/vuv3/83/f7Vf//y7vf/d739/f///7q7/e979/9fffn/f9///N/+P3//9///+H//6vfvf/rv33/7ev33f7bd/u9//3f79337rt/v78//4f3v//9/8P//969r3L7/e/////3qv//////vqrw/wU="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/MeasureTheory/Integral/Bochner/L1.lean": {
+      "sha256": "6e498b1cb5bdfb1d38b16a49b6e255fc98b41c1fc6eb0a205fe092f4faa5732e",
+      "physicalLines": 640,
+      "codeLines": 416,
+      "codeLineBitmap": "oAAAAAAAQGpVsd39vdv33b97VZltXwE0tnv++/f/j8P/1/G73fv3/ur/+/7/V1VdfrYVUNZ12+Wsuv73X+//q2pVM9t9379e773bfnvt76o="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/MeasureTheory/Integral/Gamma.lean": {
+      "sha256": "56e1a1d4092f9864a3968364825967da12e57840ee3708cad651df987a8842f4",
+      "physicalLines": 145,
+      "codeLines": 117,
+      "codeLineBitmap": "oAFU///9/9/31f//v/////1+AQ=="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/MeasureTheory/Integral/IntervalIntegral/Basic.lean": {
+      "sha256": "93908eb0c771ba8edcb47537dfe1a40e98a1545be9d427c1eb9823d44decdcd5",
+      "physicalLines": 1472,
+      "codeLines": 1015,
+      "codeLineBitmap": "oAcAAAAApBqAoTB237vL892978t99xagutZ3/95u793t7t7z3nu/eu89/+u996r3ev3/8fv+//t7v/dznhfqjgvtvbtQ4H94A/+HVwDgD8AHCBuqttu+d3f37u7e3ft+977u4fu+9969i7vW62pddXdB/b/33nv/3nvvvffee7/33nt3F4Dy/d/7/33v9/v9/fvvvt/v9/s+7/fuO897f9X7w//h+D88/Hf8/71t9/X9t7f3b1V/rw=="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/MeasureTheory/Integral/IntervalIntegral/FundThmCalculus.lean": {
+      "sha256": "5fd64054d9ae8bfce585ff809933a756bcf2d224ef144ae24c8fe8870c68050c",
+      "physicalLines": 1276,
+      "codeLines": 619,
+      "codeLineBitmap": "oB8AAAAAAAAAAAAAAAAAAACAqioAAAAA8OV21927GgD4/wfA/wD4XwWAP4D/AP4DgP///wfgPwD/FYADAD4A/h/gB/gFAAAAAP8/8Ac/ePDBg4cDwA8//PDj8Xg8Ho/HAwDw/wMA/zgA+A8/PPzwww8PP/w8FwAAKOBbfzz////7uf7fDzj//+c/X/iHf/h4//+D+/Ef/z/w////j8f/Cg=="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/MeasureTheory/Integral/IntervalIntegral/IntegrationByParts.lean": {
+      "sha256": "848ba7260b6e8b0734dc3e9fef185865f3f4d185b4db9e67c22b847ee063eabb",
+      "physicalLines": 584,
+      "codeLines": 400,
+      "codeLineBitmap": "oAMAqKrCf/iH/8cP/sc//B/gVzf/8z/8w//hV1CA//////8G/BvAN+AN////9////8P////7////1X/7VoF/8AEPPnz4fr+/rw=="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/MeasureTheory/Integral/Lebesgue/Basic.lean": {
+      "sha256": "0766c86bbadd288efdacafb833f55d225c97eea926e9fbde166b0c2529a807f6",
+      "physicalLines": 688,
+      "codeLines": 512,
+      "codeLineBitmap": "oAEAUFWVwbZ9n9v+7vZa6738/+H///v/9957/x/w7+7u+2377jo4///H8e4u/v//f/x77/3v3373bc+5/79/9727++937/1dvfe99969637v++/j470="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/MeasureTheory/Integral/SetToL1.lean": {
+      "sha256": "f50e8728b59cc1b6d53cbd40adeebad5b1f6594135c063c4b5a7794125288132",
+      "physicalLines": 1492,
+      "codeLines": 1205,
+      "codeLineBitmap": "oAMAAAAAAACk6qr/X5Xd3Xv47969//7e37+//17v3v/7a35+e++997777r7u+75XVc19X3bvf//e/fvv+73f933X+3/v/++v//3+tvOq5fXed//+/eO/v/++f3+//1+v/+7+v//e3e/339f77/3vv37+/////ffv/////f/j//////vt///+9+/v/+/7//3938f///7+/v7+v/8P+Lffr/+f///P/////f//f/B/P/7//////9ff73//Cg=="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/MeasureTheory/Measure/Lebesgue/VolumeOfBalls.lean": {
+      "sha256": "9ed7b2fa47ba57a9f242bd9639927271a046ad0fbc5d016983079efeacf3b54d",
+      "physicalLines": 434,
+      "codeLines": 332,
+      "codeLineBitmap": "oA8AAACo/v+/372b/3t7N/+/qn//7//+/+/7//37v//3//99/1/V/79XW/3vfdd/X/Xee9X3Ag=="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/MeasureTheory/Measure/Restrict.lean": {
+      "sha256": "2ec6fbe3a70ebf57a895a47779b63994f97edb0dc0b709faf9ff400f59c92511",
+      "physicalLines": 1158,
+      "codeLines": 865,
+      "codeLineBitmap": "oABAq4WfvbyH8+fdbfh+7++99Xft7d59372723a2u6/r3d3dd/f3Pu5v3+/4/3///fvOv8f/wcXF9f8//MG/97277931vXfbvbt7vXfv3W672/135+7u++237Rj3//f///f/K/r/e+8quPbdVVX3/m5333XXv+5eoN39q9676v9+/9r9/W3/Vf78////////Lw=="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/NumberTheory/LSeries/RiemannZeta.lean": {
+      "sha256": "db9f37f08bcce379c502549f604c0e98bf4a39b3a3440606861bbac847f2a1a9",
+      "physicalLines": 262,
+      "codeLines": 136,
+      "codeLineBitmap": "oAMAAACAVIFou3fmOM6Bdffszs75M46D/8Pjx/d/5sc/"
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/NumberTheory/LSeries/ZetaZeros.lean": {
+      "sha256": "47fcd75fdc67cb0368835178a822b343f8daf04b4c64e0765104c3de381684e0",
+      "physicalLines": 76,
+      "codeLines": 34,
+      "codeLineBitmap": "oAAAIDSf/23eCw=="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/NumberTheory/ZetaValues.lean": {
+      "sha256": "491a1fc741734e2eb5a79684542bc0b57bc6333e0dc7619c47fecbaa366d8b73",
+      "physicalLines": 480,
+      "codeLines": 372,
+      "codeLineBitmap": "oB8AgKqCde/t/epru+/d88vz//////8ffP8VzP+fef9fAXu///f+//+v/P/9////9//////v/796P/6/"
+    },
+    "https://github.com/leanprover/lean4/blob/v4.33.0-rc2/src/Init/Data/Rat/Basic.lean": {
+      "sha256": "30b77ea0918aa986f6617bef4ad99a8d79cd538a714c9f05134bcb6a5e490cc8",
+      "physicalLines": 331,
+      "codeLines": 219,
+      "codeLineBitmap": "oP9fgKlaW/Dv3X3gAUuXXPjmX62N/3/B/3V7E/3//x/8/+X6w/9fPp8F"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/1ba456037104e42172e36d5cee6c94f2904d170b/ComputableAnalysis/QuarterCircleGeometry.lean": {
+      "sha256": "c9016e5a28056ba13c93de0fc237b6569493e214a9e1fcb384696eaa3e96e2a0",
+      "physicalLines": 233,
+      "codeLines": 196,
+      "codeLineBitmap": "A0x5/v////7/5///f9r+z3f3/7+////3x///f34B"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/1ba456037104e42172e36d5cee6c94f2904d170b/ComputableAnalysis/RationalGeometry.lean": {
+      "sha256": "a271bfb9352c9da1223c027785450c848d019bbbcdbaa7e5c0f7291b285c2aa6",
+      "physicalLines": 327,
+      "codeLines": 238,
+      "codeLineBitmap": "Aej1vW3+/Xv+/ydpu21zziV9n/+7f55z7vtzf/9+vd/fzz5r7/l+914="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/AlternatingRemainder.lean": {
+      "sha256": "af6f51d11627399ecf66659ff8a2790ab6f280c88e2cc49700244a0e7b62d583",
+      "physicalLines": 56,
+      "codeLines": 46,
+      "codeLineBitmap": "If//f/z/vw=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/ArctanGeometry.lean": {
+      "sha256": "7bca8ecf42ace5e58a7d182596ce5561824e750885df656b4c7160da117e7ca9",
+      "physicalLines": 6837,
+      "codeLines": 5873,
+      "codeLineBitmap": "B0AB2OHjuPf/PwDDf2b8///4///x////////+P//////P/7//////////////+H/////////////z9n2/vd9f//e9//9+/9////7///7///939//////f3///////+/v73///7vf3//////9//7////v//v//v/////+/jwP7//3//7//f/3vv+7u7vx48eH///x/z/+/8f/+P//f/z///gf////x///////////h////////////+3/+//+v//v//v//n//P/z///7///+7///+f/+////+3//7f//v7+////////////////////6////////////////////7/////////////////3///7///9//9//v7+/97//v///////9//3//79///qv3//+9///v/////v///v9/u///////v//3/////3//////v/////3/////7/9/f39/X//v//9u//93//93//7/23fe+/v74//x///+P/+/9/7/++B5/H/x///j///n///f/j//////////////////////f37/fv//v7+/Xd/v7+///v//z/Gj//+v/////+P//j/8f/j////////D/7//w//P27/3//9//9/+37///+P7fv9///f/3v//99//9//////x///////7/8D////////////////////P/z/////e/j///8//v///79/+P/////5/////8P/////9+/39/u///j/wf8/+P8f8P//////H/7/////H/z/w//f//////7///9///Yf/P33/2973/3///2/9/8/4P////////////+PAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4/v3//8P///D/j38A/v////////+P////P/7/////////D/7////////////g/////x//////8P/////w////D/z/////P/j//3/8/3/8/x////8/+P/////////93+3/3+9/7w/gv/++//3/3//9/37/7///v//9//7////v+/////f/////v/ff3//7////w//+/+H//v3j/4/3P3jm8H/ubtt/vw/+////x///P/7/gP//VQC/zA78z///8/l53l0V"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/ArctanTaylorRemainder.lean": {
+      "sha256": "0e241ef4a2fd380f1a3a92113205d17531fb96878026f5bfdad64c6692708a37",
+      "physicalLines": 103,
+      "codeLines": 83,
+      "codeLineBitmap": "g/z758/v/fH//z//Xw=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/Basic.lean": {
+      "sha256": "a0738d45f8705404edc7bbba163a9cbd4b763b950a6646d69d8e3ce5cb1462cc",
+      "physicalLines": 8241,
+      "codeLines": 6927,
+      "codeLineBitmap": "ASivt+37ddz9/+33/+////////++3/6//93f9/////7f3//3u/++8wfd/d7u3v/3vvf7//5//3//f////v/9/wve3/7/9//+9//+//3f/3v//u//+/3f9//dv//7///v//6/v3//3/+9/+////////69v//f+/+//f//f//9vv/7/e//+/////////3f//////9+/+P7/9+9u+//795779/v/f//f9+/14fzMwy7u/t+38ff788eP/zw72/jv/tv27+7f3/bf/v7/7q//9///ffv+9+/+vvnz98/v+/////v+/3+/f7u/v37f9+/79//P/z////////7/f/9f///7/////v/////w//f/////////////f//////+///f//vf/fvvu//7/7/7oX3v9////f/93////Pwj/+v//29//f/7x/+///v8P////+vwx/w/18AwBW8/vf1+vv//+0NDGBv2NtW/XqA3/7/9//++/3/////////////3//9f4B73//3//f///8Pfvv//9//+/8/+I//8Pv3H//B////////////f/D///////////f/f2D3/v///3//7//D/w/vf/9///v/////v983/r3/3/9/37fn+/+PD/7/e9/f7/37///////7///////9/+AH3/t+f3//V13//8Ztd8MWAL7X2wY39t77/rbNsHt48L3vg/+D7wf3/36/XQB4tdsB9/296wA/gPdde8D2/nuB7+u9e78P/v/wf3/g//9/8P////7/3/9//N////3/4f//v///9/9f31cvtt2+/7n7t999v/9v37/v7///3//3f//+/Xv/+/22bb2OWNzdvt973/7Vwz/4/79c3fdr37+v79szGNj/f4/9///////ve//f+/7/v+/9//////+/////////9/8PP/je9/v76///f3Hc/7//f78f3/7///v/wi9ANz7AHv5feF/vx/+/t/f7/uD/f/j/v///+//+f/6vA951223b+7bt7n3wj9+P++/3m++qrdqu3//D/7+/PxzO9/u+d3/vVe1739+3bfv+f//v3//3tm3btvt+///////f////+///////9//////7////u939/e9+//////////////9//P+A//////////////////////////D/////9///D///////+37+/Pn9////7vvf/7vvv///4f//4f+//3/8f/D/53/+v//++//3//v/8f/j/3/bVtvG+Pf//vFv27YNftj/f/D///3f///D3//+B///D/j///////////D/3fv7+//////////f/f////9/O8AH/////w//P+x4H/7///////////D/v+12e1vB3/d+XwE="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/FiniteSecantIntegralOrder.lean": {
+      "sha256": "063dc04080af8c6bf7d42b0db3b9dc80a3bc992532057e45ea49ca0a1ae63710",
+      "physicalLines": 89,
+      "codeLines": 75,
+      "codeLineBitmap": "Ae7/////n///898B"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/LeibnizPi.lean": {
+      "sha256": "1e3485adc2cbf76d1dea57a556713be756a629d36cadaffca080226a590fbdf0",
+      "physicalLines": 145,
+      "codeLines": 105,
+      "codeLineBitmap": "A2Te+yeb//+fx//j/4//PZ9nAQ=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/LeibnizPiTaylor.lean": {
+      "sha256": "75eaaee288d1c9640d66897947a38ca7a3ae628e86b31ccb9af862d33d60f354",
+      "physicalLines": 88,
+      "codeLines": 67,
+      "codeLineBitmap": "A+TPuOf/P////78="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/PiProofs.lean": {
+      "sha256": "d113467b37a9194bf78ac6293fffcaea6a4e5d04258de5fcddd35cee0bcd9cc7",
+      "physicalLines": 17190,
+      "codeLines": 15244,
+      "codeLineBitmap": "/wNQ+L5v28a2zcDte+993wf//v//9////n7/8N3/q/93e//v/3/4//////+fZ//ev////7//3////v/777//f///79+///7//9//f///vf/3/f///3vt/73Bv//////////7/fw//P//53p/2/v78P/////du/273//////f//f/3////v5+//3///+///+v+f/P+/6P/+B/HHf//zbAr/vwwf////////9/v997773/+7+7290BDvjxP/z/////////////////v///+Pf7+3fv/+//v///e9u27f37v//f3//9//3/9/+/////vv///cP///vv///727Zt2/v3f/+/7/+3/+//3/////v9/98//v/f/+//97//7//7//6//3fv/f/f//v+/////////////////77//////////////7vv27u///3//v///7/d+//3////////////ff////////927////v////////////++////////////v937///9//////////////9/9////////////////7/d+///3///////////////////3f////////////////////9/u/f////3////////////////////d////////////////////////////2/3/v///v/////////////////////u//////////////////////////////////927///3///////////////////////f/f/////////////////////////////////////////273////+//////////////////////+/+/////////////////////////////////////////////////927///f///////////////////////////7r9/3//9//+/////d9/3//7f//t//+/7vu/7/X6/3+/3+/1+v+/+9t//e/////7////9//////v///f//+/+///f////O///3X3/7//9///v3////Y//8P//+P8//v8f////gL//7//7ff/9/n1/f/993/f/////99vv/////9/3vvfee+/7ft/3Xt9+//f7fd/339/vfe+99//7v+/7vu/3+77f//3////v//////D/x7PzHpzH8T/eb7///36/3+/7vve+dtvWxuPujv8PuN+/ezAM/OP/8///+P///7//8Pdw//7bAfj//////////////3iOO97/+3///f////9//3//9/f7ft/7vv7vv/f+fnzf39////9/f7vN2+7u797d2+72v9/f977/73a37f73be8D/gcO/v///////3/3/ff73/fv/u/e/b7///e93+8De+/9e9/3P/j/v3/f9/v98P8//P8//P//f//////7fr///v+///77f//f//1//9//7/9/v////f6/3//v9//7/b/v///v////+/7/v+/7vt+/99/3+/37vu3///3/3///xz/u/33///v///v///v//////////8P////9///h+///////fP//v3///v+////v97t79773/f/3/////////+/////+////7//v+///////////v///////97///3////3/3/+P//8P+/2H/f////9////////vf//////+/v/v/3////3//////9/////////////e//7/f/8D////9///////f/////////////f+7///v/+D////D/4f////+P8/+P////9/fPB/+P/3/////9/7bf/+3///3///33//fb///v/3//7v9/3//+//vff/v9//3+/Xbbvbv//3v/fv/3/v/////7+3/9/v///V//v/9//9/+/////+/7////+////XAb5t/3/8x7/9v//fvz8A/P/f////+8D/7///9wP+v/9/P/j/3//3/////////v/////////f/////f79///f79/fv//3u9////993/ff/+/tv2/3///7/f7////////fd//+//2+7/s+vO/7vu/7vu/3932/3+/3+37f9/t93/f3//+/////f////////4f////////////A////4P8PAAAAAP7/7//z////H/D///+///793/9+///9//8BfH/f//9+3MMO+P+uu/fe932/39//+3//7//939/3//////////9////////////7/e9////v///+///v9////36////////7/+///v///3+////7//7/////+//v+/r2/v/////b3re93/fe39/f33///f799////9/v9/////f+//////////////////3////////////7/////f//+/997/fuvf/ff+///22/377v+z147//vt+//7/t93/ce7//f/9/3/n/97/vf//7/3//+/7////7f+/////+2xY3D/4e9D9g//vgDGPzx44Pf73f/9/7vwf///////z/4f7//fd/3+77f7/t+f/+HH9/v79/f/3/g/x/4B//g3///H/h/8P///+M//P////j48P/33/+/9/33+/6/j++/3/f/8fvvB+Md/OMP/v/hv//f3+/7Pvj/x/9/////P/7/f//////////x3///+///////f///////9/0f/v///3/873/4//9//P8f////////P37//////7/v/4///MP/Af4f////////h/+Hwf/x/8P////////fv//f//////////8f//+x/+MPOOzx/7/H//8Z///////9ff9/9x//4T/4/+H/A/D/H8D/4H/+/8f///8f/v///z/gH4Aqqcx//GfmnP/gfvz/xz/8/f79/+H///A3fNHgDRGGDQbD4+EdxbtzKQ=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/6b4d28951f677607f19c260ef739358daad54b2e/ComputableAnalysis/Taylor.lean": {
+      "sha256": "2447dc9f6241d749a58fa44f6a3937a09e3c485770089efef12158e844f5ea96",
+      "physicalLines": 1545,
+      "codeLines": 1286,
+      "codeLineBitmap": "HwAo8MAAw3Zx4////9sYx/H+ffyP//H/+P+B3/9//////f///+//////////u//++93fv//v/7v9v///////f/++v/cP+P///88//t//Dxz//4//z3/4//8P/////////w///////x/+////////9/7/ff////79+//77/+//47///////8P////////f////4f//w/8/w/4B/7/3/d+//9/d/5//j//P/8feD/w718Aw7d9799weH//9/3//vuHVwE="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/ArctanGeometry.lean": {
+      "sha256": "7bca8ecf42ace5e58a7d182596ce5561824e750885df656b4c7160da117e7ca9",
+      "physicalLines": 6837,
+      "codeLines": 5873,
+      "codeLineBitmap": "B0AB2OHjuPf/PwDDf2b8///4///x////////+P//////P/7//////////////+H/////////////z9n2/vd9f//e9//9+/9////7///7///939//////f3///////+/v73///7vf3//////9//7////v//v//v/////+/jwP7//3//7//f/3vv+7u7vx48eH///x/z/+/8f/+P//f/z///gf////x///////////h////////////+3/+//+v//v//v//n//P/z///7///+7///+f/+////+3//7f//v7+////////////////////6////////////////////7/////////////////3///7///9//9//v7+/97//v///////9//3//79///qv3//+9///v/////v///v9/u///////v//3/////3//////v/////3/////7/9/f39/X//v//9u//93//93//7/23fe+/v74//x///+P/+/9/7/++B5/H/x///j///n///f/j//////////////////////f37/fv//v7+/Xd/v7+///v//z/Gj//+v/////+P//j/8f/j////////D/7//w//P27/3//9//9/+37///+P7fv9///f/3v//99//9//////x///////7/8D////////////////////P/z/////e/j///8//v///79/+P/////5/////8P/////9+/39/u///j/wf8/+P8f8P//////H/7/////H/z/w//f//////7///9///Yf/P33/2973/3///2/9/8/4P////////////+PAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4/v3//8P///D/j38A/v////////+P////P/7/////////D/7////////////g/////x//////8P/////w////D/z/////P/j//3/8/3/8/x////8/+P/////////93+3/3+9/7w/gv/++//3/3//9/37/7///v//9//7////v+/////f/////v/ff3//7////w//+/+H//v3j/4/3P3jm8H/ubtt/vw/+////x///P/7/gP//VQC/zA78z///8/l53l0V"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/Basic.lean": {
+      "sha256": "f11dac81f7e647ac08706e7a6717d7de3a11d73a462dc507efc71a25696fe7fb",
+      "physicalLines": 8241,
+      "codeLines": 6927,
+      "codeLineBitmap": "ASivt+37ddz9/+33/+////////++3/6//93f9/////7f3//3u/++8wfd/d7u3v/3vvf7//5//3//f////v/9/wve3/7/9//+9//+//3f/3v//u//+/3f9//dv//7///v//6/v3//3/+9/+////////69v//f+/+//f//f//9vv/7/e//+/////////3f//////9+/+P7/9+9u+//795779/v/f//f9+/14fzMwy7u/t+38ff788eP/zw72/jv/tv27+7f3/bf/v7/7q//9///ffv+9+/+vvnz98/v+/////v+/3+/f7u/v37f9+/79//P/z////////7/f/9f///7/////v/////w//f/////////////f//////+///f//vf/fvvu//7/7/7oX3v9////f/93////Pwj/+v//29//f/7x/+///v8P////+vwx/w/18AwBW8/vf1+vv//+0NDGBv2NtW/XqA3/7/9//++/3/////////////3//9f4B73//3//f///8Pfvv//9//+/8/+I//8Pv3H//B////////////f/D///////////f/f2D3/v///3//7//D/w/vf/9///v/////v983/r3/3/9/37fn+/+PD/7/e9/f7/37///////7///////9/+AH3/t+f3//V13//8Ztd8MWAL7X2wY39t77/rbNsHt48L3vg/+D7wf3/36/XQB4tdsB9/296wA/gPdde8D2/nuB7+u9e78P/v/wf3/g//9/8P////7/3/9//N////3/4f//v///9/9f31cvtt2+/7n7t999v/9v37/v7///3//3f//+/Xv/+/22bb2OWNzdvt973/7Vwz/4/79c3fdr37+v79szGNj/f4/9///////ve//f+/7/v+/9//////+/////////9/8PP/je9/v76///f3Hc/7//f78f3/7///v/wi9ANz7AHv5feF/vx/+/t/f7/uD/f/j/v///+//+f/6vA951223b+7bt7n3wj9+P++/3m++qrdqu3//D/7+/PxzO9/u+d3/vVe1739+3bfv+f//v3//3tm3btvt+///////f////+///////9//////7////u939/e9+//////////////9//P+A//////////////////////////D/////9///D///////+37+/Pn9////7vvf/7vvv///4f//4f+//3/8f/D/53/+v//++//3//v/8f/j/3/bVtvG+Pf//vFv27YNftj/f/D///3f///D3//+B///D/j///////////D/3fv7+//////////f/f////9/O8AH/////w//P+x4H/7///////////D/v+12e1vB3/d+XwE="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/BetaData.lean": {
+      "sha256": "22769b22a2e9b6bcea3fb783bc80900ab06ac1e88be815389d02ca11b0876508",
+      "physicalLines": 94,
+      "codeLines": 71,
+      "codeLineBitmap": "w7X3//t2j8/J/f8v"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/BetaLaws.lean": {
+      "sha256": "ff5c8a2a819f484634f3172df32a78c2816e1e7e736444322635e23c17ca2e47",
+      "physicalLines": 57,
+      "codeLines": 45,
+      "codeLineBitmap": "sd3///e4fwE="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/BetaNormalization.lean": {
+      "sha256": "ec57370c0cfe0891ffd5be18840cf3ed7934f4a02ec5304e6ed49836cfb3b56e",
+      "physicalLines": 45,
+      "codeLines": 33,
+      "codeLineBitmap": "sX+Nv/0X"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/BetaViaFTC.lean": {
+      "sha256": "842360d4a01818c9dd2aa52e2c41eb2086a05b6379bc1c986f16c29f6dce59f7",
+      "physicalLines": 101,
+      "codeLines": 88,
+      "codeLineBitmap": "cbt/3////v//v79/Fw=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/CartwrightArithmetic.lean": {
+      "sha256": "883681c14b038d1ee779413ba46c9a84612305202e510aad5db4b1aa9f2ec97d",
+      "physicalLines": 114,
+      "codeLines": 82,
+      "codeLineBitmap": "AeLl5f/P+U////+H//EC"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/CartwrightCalculusData.lean": {
+      "sha256": "1b3063ea2625ce3eab1987e2227806cbfe69e152c985ac8e506b80e568303142",
+      "physicalLines": 189,
+      "codeLines": 162,
+      "codeLineBitmap": "j5u7/+/77rb//v3//+//v/+/73fv//4T"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/CartwrightEvaluationData.lean": {
+      "sha256": "d99c3103d04234173bae614248b231dcffe7131e8d365d9c5ac1384798b87a36",
+      "physicalLines": 118,
+      "codeLines": 80,
+      "codeLineBitmap": "h3Pv4/X7r9dratuO9u0m"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/CartwrightFrequency.lean": {
+      "sha256": "658317bfd4c76e4c017705e29f597f0b56949665efff9e35f1270c4a7ed69fff",
+      "physicalLines": 38,
+      "codeLines": 28,
+      "codeLineBitmap": "TfX3/Sc="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/CartwrightIrrationality.lean": {
+      "sha256": "01784714b62b32539bdcdff0fadc09c0cfd20ffe1f9937e1ffab102c73f1a89c",
+      "physicalLines": 214,
+      "codeLines": 188,
+      "codeLineBitmap": "w97f//73Hv///3/8//+f/////3/8//9/+P8v"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/CartwrightMomentAlgebra.lean": {
+      "sha256": "2beca2593f84bcba3e1ea03584cbe3811f3239712fe663f4d58de3e26f0ab863",
+      "physicalLines": 113,
+      "codeLines": 97,
+      "codeLineBitmap": "Y+/7fv/v/x//////f3MB"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/CartwrightMomentBounds.lean": {
+      "sha256": "0ab194de87f7d11e772f40d41cefc0cfd88c18dc3f83b8a48010656732a0fe62",
+      "physicalLines": 104,
+      "codeLines": 90,
+      "codeLineBitmap": "w/3/9/+v9/8///7/vg=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/CartwrightMomentFTC.lean": {
+      "sha256": "451b09d124c9f70d4a40eca87a6454862ef929e69a486b3dc69b7e5054439e1e",
+      "physicalLines": 75,
+      "codeLines": 62,
+      "codeLineBitmap": "8fj/7//nf3//BA=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/CartwrightMoments.lean": {
+      "sha256": "7a89e896081ff6a265ebb6fa7485545ad65b9debb58f9ff0a048dfc94fe0883c",
+      "physicalLines": 119,
+      "codeLines": 95,
+      "codeLineBitmap": "h/X3/76/f33//f/8dhtf"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/CartwrightTrigCalculus.lean": {
+      "sha256": "c3da64b978a24575ed40bcd6fc14da839cb0b7943fba745aebb5803c7d18d933",
+      "physicalLines": 157,
+      "codeLines": 145,
+      "codeLineBitmap": "477v+////7/j/////////////xc="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/CartwrightViaFTC.lean": {
+      "sha256": "1f6bb0dbce2731a21e2661a309429950bba3a938fe290cee96fe0c07bd5cc13b",
+      "physicalLines": 17,
+      "codeLines": 10,
+      "codeLineBitmap": "o1cB"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/CartwrightViaFinite.lean": {
+      "sha256": "0eb1e061671b2dfde5d29359d68ec8dc619ea084081abc21185477839839695c",
+      "physicalLines": 106,
+      "codeLines": 90,
+      "codeLineBitmap": "Bxv//////v///v8/rwI="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/ClockTrigIdentities.lean": {
+      "sha256": "52072f99d74493220c9dbc8da667237e3a63e9b694dfcaf9146b16405a994f93",
+      "physicalLines": 195,
+      "codeLines": 170,
+      "codeLineBitmap": "w/2+///+/e9//H//933//3/v/d//7//nBg=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/ClockTrigonometry.lean": {
+      "sha256": "750e6d4eb4b3a77834284f19200e15989f848592e91ec622681f039ddc5d6f73",
+      "physicalLines": 314,
+      "codeLines": 275,
+      "codeLineBitmap": "D/D+//+/f97/t3///vvL/3///X/7T//z////+f//4////+//999/Aw=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/ClosedArctanInverse.lean": {
+      "sha256": "179ab2cbd7d8105f3714f5d99a0dc7107867552e0c037833ea846c14a546bb15",
+      "physicalLines": 384,
+      "codeLines": 326,
+      "codeLineBitmap": "A3D7/5/u/f5//v//5/+/9bvv//3///z////f+v7r3977/5//hf//////j//Pn/nf"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/ClosedCosineIntegral.lean": {
+      "sha256": "8331f9a9609bad73a9e0f5e92a730ae33eaa32c094f36dbe7ff7751d14fbcbba",
+      "physicalLines": 80,
+      "codeLines": 61,
+      "codeLineBitmap": "4do8798f6///3w=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/ConcaveFTCIntegral.lean": {
+      "sha256": "bd3797ac1235661c5369c764024d670fe24f2ae6eb68aa109819884aabefb987",
+      "physicalLines": 203,
+      "codeLines": 177,
+      "codeLineBitmap": "w/3/+P//P/v++P///////////4f/P/7H/wY="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/ConcaveSecantFTC.lean": {
+      "sha256": "ee3ce8fad5d3eef199bf717ec6cd4ca25a4d919603438dc3af7b1991d4a89858",
+      "physicalLines": 261,
+      "codeLines": 222,
+      "codeLineBitmap": "x+X4///////7//H/xx99/x33f/zv//jv////////x+8b"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/CosineFTC.lean": {
+      "sha256": "ba7d298a85206881b3e8089ef8a2584adbc66151ec743e4fa4d87cc472770106",
+      "physicalLines": 166,
+      "codeLines": 141,
+      "codeLineBitmap": "w+H////+////P/z//////j78j883"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/CosineIntegralData.lean": {
+      "sha256": "3fe930731e939bbe49716f220704e1a5be5bd265acf12c9dea48ea71ef396637",
+      "physicalLines": 210,
+      "codeLines": 163,
+      "codeLineBitmap": "D4vt+9zv//jfP/b//v+PvX//f//xH2d353wD"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/CosinePrimitiveData.lean": {
+      "sha256": "5abdca28f00413c2c95d226b43ef224926c4bb8fb307d1619833a171fc3fe6c1",
+      "physicalLines": 54,
+      "codeLines": 28,
+      "codeLineBitmap": "A1i17M5mLQ=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/CosinePrimitiveEndpoints.lean": {
+      "sha256": "c83220ef62df94850ee9ef8f2592579bd0ca6e4b47d643b743470c11ada5a0f3",
+      "physicalLines": 80,
+      "codeLines": 70,
+      "codeLineBitmap": "sRv///////7/vw=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/CosinePrimitiveViaFTC.lean": {
+      "sha256": "903e1b20dc685b0147ff2288bdb78c2717f15519787066d3ab12ad854c513fcf",
+      "physicalLines": 40,
+      "codeLines": 34,
+      "codeLineBitmap": "2/99/r8="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/CosinePrimitiveViaInequalities.lean": {
+      "sha256": "f15e6a16b0405e4a9fdde930294aadca9eccd5be5e58d3be98aa2f70548d1c20",
+      "physicalLines": 23,
+      "codeLines": 18,
+      "codeLineBitmap": "289f"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/DovetailedFTC.lean": {
+      "sha256": "2085c1e290a0408bf9c409c50926567e1de2c55ef12f157af47869933283360b",
+      "physicalLines": 227,
+      "codeLines": 185,
+      "codeLineBitmap": "AcDc+//9x//v/7nH///////vz3/sf//D////+wY="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/DyadicCosineIntegral.lean": {
+      "sha256": "13ccd4f19d14c7ce6d7158e4eeb30c5307e33da5c97c60d9b9ec409b695aea40",
+      "physicalLines": 137,
+      "codeLines": 110,
+      "codeLineBitmap": "A7h/9/39///X9/3/V//T9r8B"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/DyadicCosinePrimitive.lean": {
+      "sha256": "19d5d03105ab1b5194fd5874f07d3a0ff9addb85bb293c12137b65aef0238041",
+      "physicalLines": 90,
+      "codeLines": 65,
+      "codeLineBitmap": "AzD9+P9T+///P/4C"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/DyadicRotationPowers.lean": {
+      "sha256": "c963961b43e3b75500ac4f8aba802c469958a78f013ee4a7fa61ff0576f16535",
+      "physicalLines": 110,
+      "codeLines": 93,
+      "codeLineBitmap": "4Xb39v7r/s///////zc="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/DyadicTrigonometry.lean": {
+      "sha256": "84feead54670c56db1a92317d40e7b249f6b2ecb80d969bf435421fc4ded0dd5",
+      "physicalLines": 238,
+      "codeLines": 203,
+      "codeLineBitmap": "A3B9////3//f/999/+vf3vv/99/3///e9/vzf/83"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/FiniteRiemannAlgebra.lean": {
+      "sha256": "e980fecab7c843a9ec5451ef21e52893874c6f198275db1b3608c05804126288",
+      "physicalLines": 105,
+      "codeLines": 88,
+      "codeLineBitmap": "sfX9+//5///c33//vQE="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/FiniteSampleCalculus.lean": {
+      "sha256": "b1be798a42756e3ef9c35387a8872f69df3d4fb215a8d631a06a98db7f55d5d1",
+      "physicalLines": 274,
+      "codeLines": 243,
+      "codeLineBitmap": "g8X/ff/3///6/7f/v/////v/7/7////95xf/////4////wI="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/FiniteSummationByParts.lean": {
+      "sha256": "95ef7848cf596813f973d14ff4c2ce4a0487151386088339284add3b1b48688b",
+      "physicalLines": 185,
+      "codeLines": 160,
+      "codeLineBitmap": "Ye7v78//+P///+6H/////x/+/////38B"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/GeometricSineConcavity.lean": {
+      "sha256": "bbd6760db9e5a7a9f6574b1187d466abc98b3376d5e3dc0b12486c4a2c2e559a",
+      "physicalLines": 486,
+      "codeLines": 430,
+      "codeLineBitmap": "743//////z/+///////////4/8u23b3f98f//////////////z/////zZ/f/H9/H/2/v//8//v58/3PfNw=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/GeometricSineDerivative.lean": {
+      "sha256": "35aa34222c4d371c7e2d59e199bbd0fd91b0c6113cd8eb2df31993320363f297",
+      "physicalLines": 138,
+      "codeLines": 109,
+      "codeLineBitmap": "B2Drv+3a9vz/+//+f/z//38D"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/GeometricSineDirectBounds.lean": {
+      "sha256": "040a6ba26880ca3866ad64aa7ece2c85400e95aab7a1578286b4037145c87e1d",
+      "physicalLines": 122,
+      "codeLines": 116,
+      "codeLineBitmap": "4fv///////////////9/Aw=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/GeometricSineFiniteBounds.lean": {
+      "sha256": "8d9b25756f8a41e641abf9f8e941052d8b3dd82e18623e5e98b1a3711ac397d0",
+      "physicalLines": 142,
+      "codeLines": 124,
+      "codeLineBitmap": "AWz39//+39////////////8z"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/HalfAngleRadicals.lean": {
+      "sha256": "092c55dbde4c30cb63a6be6d0f34163f87482289c450b8e691c46951d0b04b3d",
+      "physicalLines": 235,
+      "codeLines": 209,
+      "codeLineBitmap": "A9x/df//4//////////9u3/+/+////+P//////8G"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/IntegralApplications.lean": {
+      "sha256": "911c65c2eb22f47ab4dca7fc1ca161a302c7c2a6fecc12dbdda8a874690362a2",
+      "physicalLines": 22,
+      "codeLines": 13,
+      "codeLineBitmap": "H1Ut"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/IntegralIdentities.lean": {
+      "sha256": "2a0fdac355e6f29ec08109d25200ed6aa9060762d97aa120938f27d2e470b82d",
+      "physicalLines": 16282,
+      "codeLines": 14146,
+      "codeLineBitmap": "D0DB/37/A/9/v//+v////8///wX//+//v///+///Av8/+P9/8P////X9+4P/f/z/H/8H+P//////D/j/P/D/////AP///wXA/7++7wf/////D////////+L/1/++v3/8/3/8/3/8/4//v/j/9f39w/9//P8f/v+P/+P//x/////4/3/8/+P////iP8D/////44///wf8/wf4D+D/////+OP//4E//v/f3///+/v/f3//w/9f8fnv/r8////7////////mfEf73v//8//Hx/v+/v3//f/j/f+4f/D////9x/+/////////8f///////////8P/h/4////////////////////H/j//////////////////////////////+D////7/////////b//4f//////////////////////B///////////////////////////////////+D8P/P/B/////////////////wH/B/////8w+P7H/394+A///4P//4/H/x////D///H/8P/////j/////wd///7/B////h/8/////z/+H/j///////8f+P/////////A//+PB/////////////////////+D/3/8/x/8///Bj8H//3/4//////////////////////////////+//wf//////////////w/w//////8H+P//////////h/8//P///////////3/w//////9/jP///wD////////////g/////////////////x/s+8///8f//w//ODz/+99///4f////////////4f///////z/+////4////8f//z/4//9/PPz3H8D//////////////////////////////////////////////////////////////////////////////////////////4f//z/4/////x/29+/D/ffv/3/8x8d9/P///+Pjj///8OH/////////////D8+P//wfz//444//4//8+H/+/+cf/+P//+P/wR/8/3/w////4f///z942P8f/gf//////YP9fXD//YO9f/ze3z+87/33/ff9f//9Y//9+/24//37/f4fAGP4w/Lgvu/H/+B/f8D/H/z///9f8P99f3///v/v////+/+///9/+OPe8f3/n/Pc+/37/8P//z/+////x+MH/8f/cO/j/+C/w4B93/f//szg68LB/z/++P///x//////B4///3///4fH///j////f/zn5/9///+5f/7f//8f//g//vf//////7//////8f+///////H///+///j///v/3///////3//v//////j//+H//z/u/8f//v/n9/v/h//n+ff/8Pf/////////fwD4F9/nfbHv+8P/8GP7H/z/MPz/f/z/h//////jHv7////n////////D/b+f4aZMeN5/DGOYez9+/0P/Mc//+CPj///8P//H/7D////////j+P///D//////////v/9/v////5//P///3/8////////Hwyf+Xz88T/+//9/8P8P////8fEP/v//B////8P//////////////+D////////////j//+P+f9//o//P/7/H/7//////+H+//v///Hx/w//H/7/+P///3/4//////f///7///////D////////////3///////H////H/8/9n///////4+9P/7v///4/////98P/v//////////f/j///9//P//8f///////w///fvz////////////wf/////////////4////x//////////////x/////wH//////z/4/////+D///////+Pj4/////H//8f//9/8P/B48f//+Cff56fH/z+//9///9//9//v/9////g////9//////H///7//4/+P////////////v/v///8P//////////////////////v//f//f//f9///3/+P//f/7/+f+Hf/zj/z/+wf/HHT7/3Y//////////j/9/uA/4////////fxwPDP/////DHsZ+P37+/x//Hz+fz/f//ft///d////9//f//////r////v/v//v///+/9//x9///w///4////8f////P/w/fvA//v////4//v//8e//+//7///g////97//8f/z/8Pj/+D/8D/+////////H/7//////4P/x/////////8f/n/4//////////////////8f/v/vf/z///////////+H//////////////9/+P/v////////f///////3////n////3f////f//7+/////7v///+/////z3s5+M/vHuPh+99Hz74/x/8///////////////////////////7/8H/////////4P//////PfB9+OCLXfz//+H//3/4P/6PP/7/8f/v//4P/wEgs/fg37///Q8O9//j/3/8/w8fDx+8/+Px//////H//w/8///f/+H4g3/+/e9/+MP///8f//Ef//Hf//f/8f/5//D/B/9//P/H/3/4xz/8H/79/////+//////v/+//9///ff//+//3/8/+P///e/3///79///3/////937MN/+P////j///gCf3zf////+////7///////8H+/fv73//9///93nd//+/////7v//+/38AcM7Pj///f/z//4P//wXG2AI="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/IntegralSchedules.lean": {
+      "sha256": "c89440bc33b8e7714a0e2c2d248eb15e40b153e0553a19864b3907d91b55d043",
+      "physicalLines": 57,
+      "codeLines": 40,
+      "codeLineBitmap": "oZtx//sffwE="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/IntervalSelections.lean": {
+      "sha256": "2f6bdf76afba1c7330d74e19134f29fce3577a9da49ebc8f6ca4fdbb5fd670bf",
+      "physicalLines": 118,
+      "codeLines": 101,
+      "codeLineBitmap": "Y338///++/7e/x////83"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/MonotoneAverage.lean": {
+      "sha256": "07fba999bd481ed02da55c2aa417c85452870c09ea011444350e72fc064b2744",
+      "physicalLines": 197,
+      "codeLines": 170,
+      "codeLineBitmap": "Y+729n//97//3///9//ff///vu/z8f//Ew=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/MonotoneSampleIntegral.lean": {
+      "sha256": "958c1f2cc7c8656135a42dd7767490de0b4867069e2449ef747ee3d15a86d4cf",
+      "physicalLines": 109,
+      "codeLines": 88,
+      "codeLineBitmap": "sb/a/v/+/vpj7/3//Rc="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/MonotonicityConvexity.lean": {
+      "sha256": "4b73a3ac0529a6b41ef7e3d54c9edad9fd5f99ae5cd7c1d35c67907599dcd158",
+      "physicalLines": 1250,
+      "codeLines": 999,
+      "codeLineBitmap": "A4Th//8f+P/1v/8yA/z/Af9/v9//////B/////8H//9/4P//P/+/aAN28+cP8A/8KzyA////8P//H37A/3rv97/vf78f/r/w+v7+7/+/Ar3/9d7vf+9/vx//X7X38O+hf/8f/v9///3////9///v34/++///9////v/D///7+/792+///g/4f8D//+///b////v/v9q+/8H//3+/Ag=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/RationalLipschitzIntegral.lean": {
+      "sha256": "9f31baabe436e16d6dd252aaff2994a489bfddaa34d7c27f186bedeae9d3d95d",
+      "physicalLines": 156,
+      "codeLines": 132,
+      "codeLineBitmap": "w/b////9///7+7b9+/rbe/8//gs="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/RationalSampleLimits.lean": {
+      "sha256": "bc0f944e9214208086e9ed09ea6c407082734654fa7f841fbc34056eab2d32c4",
+      "physicalLines": 257,
+      "codeLines": 215,
+      "codeLineBitmap": "Y63u3vd/9/V////9/13f9/v9/n7+v3/f+76/9/3z/z8B"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/RotationSeries.lean": {
+      "sha256": "69570a1a2ccfd4e496381a0cc411d54371898c609dcca0d79eab097a27446446",
+      "physicalLines": 1509,
+      "codeLines": 1274,
+      "codeLineBitmap": "AVB+st/fP///+R//x//j93+P//iPn2NsGPPx//+P3//e//f/3//v//7v///39///v+/7/3///+/7fv+/9//+/f//+/+//+/7///////jH9x4D/8Z+/3+/jju37/f7z0AMDNm/P9//P8/Pvvv////////3//3//////////8P/+H/////////+P73/v/+//f//P7///7//9///////36////v///7vv/+7/+P/////8Mf/Pff/3MO/x+2/7EV"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/SinPiIntegral.lean": {
+      "sha256": "84209f1313fcb63dcf0bfa2bae823229ea1bb22ec4d7cfc61756a10afb64b291",
+      "physicalLines": 9343,
+      "codeLines": 8419,
+      "codeLineBitmap": "PwAAFfDvv2r//+///+///////4D///8H4L/3//ft///////////////////YwP7v8X//////8f///+//////////9//////7////7/f/////x//H/+///x////////j/////9/7////////v///e////h/////8f//+/////A/9/7sHv//3/3f1/3//9+//+//////+H//0H///7//8f/t/////fe////f/v//////////////9/+P/////////3//v//v//////////////D/7//////f////////////f///////+w3//Hxv/+/8P/3//f///3////////+//f////////73/////3///////////v//////8H/3///+///////8MH////v//v/////334//f3//7v//////+/////////B////////+///////+/u//+H///7f/D/////////////77////9///////7//////9///3//v9///////////////+/+////+/////v//v//+///H/7///////3////4//////+P//c+8P+B/+//B9z7vv+D////w////7////D//+Hv7//7//v/8f//f/9/DwBs4L//wP/////+/////7//fz/4/////////////+////////////f////7////////A/f3///////v///////////v//8P/P+//////7///v3////////////////////9NsP7Hvjffw/+////9/8B7/////v7////////v///3//3/99+////B8DuALsD/8Af8P/+79/vB/z//3/+f/////8P/P/////////////A/////wP//gH8/z/g//8/APx////f/wd+P/j9g///8/9//+///3/////9A9v3/f/////973//7f/+//v//992HN//P//3/9//f//3f//3f/////v//3//vv/////////////////D////////////////8f///v///4P/f/9/////3//+v///3/+D//////8/8P///////f//////9///////////3v//H/D///7/f///D/7//ff//+H/////9/8P/v+H///+3/////f//+////d////9f//////++/+////3//v/+7//P/D////3////v////9/3+/////////////////8A/v+/////8P8P/N//f8D///////////7/+///v/////9/////////7///H/j//d///f////////////////9/v3//99//f///t+/f//8++P7+7//37//93//Df2D//30P9/f/+//+/e///j/Y7/////3ef+/+/979//3/+wf8w+/39/f////////9//////v///9///v////v///////7/fvf9//////////HB/be/+B/8P///////Q9w//7//f9/H/z/P/D/////+//f/8D//99/AID/e/+A/3/w/////8H///8fwP/w////7/8f/v//7/////f///v//9////////7/////Vw=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/TrigonometricReadback.lean": {
+      "sha256": "9cbfe73bf400d531cedd06fa95e4c65e031e068ec82a6cb1db2837082ac99c97",
+      "physicalLines": 65,
+      "codeLines": 37,
+      "codeLineBitmap": "ASZ+fjafsXcB"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/UnitPowerCalculus.lean": {
+      "sha256": "853e7ef43ea577bfcab1524ff9faa9a98e5bcbf304d1a826abeda6f45ee3b9e7",
+      "physicalLines": 44,
+      "codeLines": 36,
+      "codeLineBitmap": "Y/v/3f8L"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/WallisArithmetic.lean": {
+      "sha256": "da52f6370aa2912534d4228d015e1d1650b2c4cd772d4712d1a606779b8738a3",
+      "physicalLines": 89,
+      "codeLines": 70,
+      "codeLineBitmap": "0f75f/6fLv//+H8B"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/WallisBounds.lean": {
+      "sha256": "8861171b47b3765170d32b8e0a3003da8cc6f3b6912179260ef384f209a07cc1",
+      "physicalLines": 122,
+      "codeLines": 109,
+      "codeLineBitmap": "Y//79//d97n/////////Ag=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/WallisData.lean": {
+      "sha256": "576de03ee30436792ff72de86f12aa9b04993db600a24d00ba51f76b6ed3ef69",
+      "physicalLines": 101,
+      "codeLines": 79,
+      "codeLineBitmap": "w7X7/377/v3nbe+9Fw=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/WallisFactorials.lean": {
+      "sha256": "da23e32df73c96f7e1f6d471b16b4a1d1185453f9be9dca50ce1c0efee91b25f",
+      "physicalLines": 41,
+      "codeLines": 34,
+      "codeLineBitmap": "w77//38B"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/WallisLaws.lean": {
+      "sha256": "70a8dc453a45dc46290754f4603c6f67e73b0b9e5f01093caef1fa8ca9e8d628",
+      "physicalLines": 51,
+      "codeLines": 42,
+      "codeLineBitmap": "Y3v////5BQ=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/WallisViaFTC.lean": {
+      "sha256": "d1ef2b457fb3666c8f584231544ede3b0c4bfd9a527de2954203a06fc8a4d382",
+      "physicalLines": 131,
+      "codeLines": 117,
+      "codeLineBitmap": "436///9t//v///+//9//vwU="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/comparison/MathlibComparison/ArctanBridge.lean": {
+      "sha256": "905b26796ebe40fd7a6c8755ecc1f8c71836cfbe1b7f6667a79d37d623d7c3d7",
+      "physicalLines": 103,
+      "codeLines": 87,
+      "codeLineBitmap": "w977/9//P3+fv/f/Xw=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/comparison/MathlibComparison/BetaIntegral.lean": {
+      "sha256": "8bec201891f7bba7bfcd1705e445d9b113001f8eec6b21974b959fd46e1ee82f",
+      "physicalLines": 130,
+      "codeLines": 109,
+      "codeLineBitmap": "x/b/t////fl+3//7ff+/2gI="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/comparison/MathlibComparison/CartwrightMomentBridge.lean": {
+      "sha256": "3071f3fce4f4d68f5e3902e80b7f50d0258d03f2f3587ba9ccf19769c7ba820f",
+      "physicalLines": 131,
+      "codeLines": 109,
+      "codeLineBitmap": "D/b/ve/v//v/2fuf//9/tQU="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/comparison/MathlibComparison/CartwrightRealMoments.lean": {
+      "sha256": "0e3942aa63663910edf70af702a7f6232d8258c32e1954a2655c5617bd72732b",
+      "physicalLines": 129,
+      "codeLines": 114,
+      "codeLineBitmap": "49V3/v8/////////7/37vwE="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/comparison/MathlibComparison/CosineIntegralBridge.lean": {
+      "sha256": "a2d4c49e625076f492983ed68fa8a7834645132f300651789f9e1836e8c9992b",
+      "physicalLines": 152,
+      "codeLines": 122,
+      "codeLineBitmap": "Bzjd5///3PP////98x////4fvw=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/comparison/MathlibComparison/CosinePrimitive.lean": {
+      "sha256": "a3eb5a94807b66bf64b5b12c8a0edbf794c9758180bf996498f0e14b9a4d3521",
+      "physicalLines": 56,
+      "codeLines": 39,
+      "codeLineBitmap": "B9j/veb/sw=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/comparison/MathlibComparison/IntegralApplications.lean": {
+      "sha256": "7802b6c59caf9abf34fa9f5e326cc07bdd8634b8a365a79c10cc62e0d43d6a7c",
+      "physicalLines": 24,
+      "codeLines": 15,
+      "codeLineBitmap": "H221"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/comparison/MathlibComparison/IntervalModel.lean": {
+      "sha256": "af5387d403084664386767c2a085d734a75d1281fa0daf2f9c4e8c0312a58371",
+      "physicalLines": 136,
+      "codeLines": 113,
+      "codeLineBitmap": "B9je3/+/u//v//vb//7+/r8="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/comparison/MathlibComparison/MathlibRoute.lean": {
+      "sha256": "616cc7b9a78b363ef4c6ba9de5f5d325c41bcb6071be1d47ffd6d7bf3b8a8db4",
+      "physicalLines": 18,
+      "codeLines": 10,
+      "codeLineBitmap": "Qf4C"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/comparison/MathlibComparison/RealDyadicAverages.lean": {
+      "sha256": "23cb24214821d5505b360624d6d030ec96ca13aa140b0b394868b8e72d5ee063",
+      "physicalLines": 126,
+      "codeLines": 114,
+      "codeLineBitmap": "Y7///f///+///sf/////Lw=="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/comparison/MathlibComparison/RealLipschitzAverages.lean": {
+      "sha256": "7801210eeb7b03c13a0caae5a80d79c1e744cc34ded2839b9975a0df49a4ac0e",
+      "physicalLines": 107,
+      "codeLines": 98,
+      "codeLineBitmap": "4/7///////++/////AU="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/comparison/MathlibComparison/RealModel.lean": {
+      "sha256": "f73cdc4ada8cc3d49363c0357cdf355b6ffaf8a14dca9b111384d638b26195e9",
+      "physicalLines": 91,
+      "codeLines": 65,
+      "codeLineBitmap": "Acb+77zzP//f3d0F"
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/comparison/MathlibComparison/TrigonometryBridge.lean": {
+      "sha256": "fb173e7402a9e821aecbe3baaa6ea94d6fa693b51d86482a86f8ec5273aefa85",
+      "physicalLines": 132,
+      "codeLines": 113,
+      "codeLineBitmap": "Azj//////79/P///f/z//ws="
+    },
+    "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/comparison/MathlibComparison/Wallis.lean": {
+      "sha256": "58f3fbd4e83dc9afbe47d96f1dd52a9634648ba58e44fdf31a89adc4a59d7d7b",
+      "physicalLines": 87,
+      "codeLines": 69,
+      "codeLineBitmap": "4/b+/Xzf8+//v1o="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/Analysis/SpecialFunctions/Trigonometric/EulerSineProd.lean": {
+      "sha256": "0988322f130952835b0da8d43d24b44c281af10bf149bb869ac750160ec1d5ac",
+      "physicalLines": 308,
+      "codeLines": 245,
+      "codeLineBitmap": "oAFAVUD//v3///3//9+///yf/8f//xv///////+/APz/z///z/8L"
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/Analysis/SpecialFunctions/Trigonometric/Cotangent.lean": {
+      "sha256": "a0219c0ad0d6cb20c00621b3c1ff17f76d17306b12ef5be53a92776205b3d852",
+      "physicalLines": 411,
+      "codeLines": 330,
+      "codeLineBitmap": "oP8AqOr/ef5Xpd/vff/v9/t879//0//39/39r89fVfv/+/u/+/f/v//++778//f7//78BQ=="
+    },
+    "https://github.com/leanprover-community/mathlib4/blob/51e6992efd06126df61a496bebf8f49482a4e129/Mathlib/Analysis/SpecialFunctions/Complex/Arctan.lean": {
+      "sha256": "f7d25dac9724284dd8820b4841ac21ef9dabd98ad03ab3caf6e92ac80e623613",
+      "physicalLines": 146,
+      "codeLines": 103,
+      "codeLineBitmap": "oAGQ0v3/xv/3/ffP8ee//v+XAw=="
+    }
+  }
+}

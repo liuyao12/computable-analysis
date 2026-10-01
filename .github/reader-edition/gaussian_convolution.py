@@ -5,6 +5,7 @@ import hashlib
 import json
 import re
 from pathlib import Path
+from proof_bundles import attach_links
 
 
 def digest(data):
@@ -65,6 +66,8 @@ def install(site, revision, audit):
         target = site / name
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(data)
+    attach_links(site,pages={'gaussian-convolution.html'})
+    files['gaussian-convolution.html']=(site/'gaussian-convolution.html').read_bytes()
     assert all(digest((site / p).read_bytes()) == h for p, h in protected.items())
     report = dict(proofSourceCommit=revision, checkedTheorems=required,
                   sourceHashes=closure, mathlibDependency=False,

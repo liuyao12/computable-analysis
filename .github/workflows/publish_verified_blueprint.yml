@@ -496,6 +496,8 @@ jobs:
           node .github/reader-edition/test_n_ball.cjs n-ball-reports/audit.log | tee n-ball-reports/tests.json
           python3 .github/reader-edition/n_ball.py --site site --revision "$GITHUB_SHA" --audit n-ball-reports/audit.log --tests n-ball-reports/tests.json
           python3 .github/reader-edition/test_n_ball_browser.py --site site --report reader-edition-tests
+      - name: Verify bundled theorem routes, pinned source LOC and graph interaction
+        run: python3 .github/reader-edition/test_proof_bundles.py --site site --report reader-edition-tests/proof-bundles --verify-sources
       - name: Verify classical navigation and proof comparisons in the browser
         run: python3 .github/reader-edition/test_classic_proofs.py --site site --report reader-edition-tests
       - name: Verify and publish whole-chunk integral constructions

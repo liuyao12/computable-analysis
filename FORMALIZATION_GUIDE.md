@@ -1056,3 +1056,19 @@ For zeta/Gamma and finite-region zero theorems, follow the
 [certified zero-counting guide](skills/analytic-continuation/references/certified-zero-counting.md).
 Separate contour computation, the argument-principle theorem, complete root
 counting, and exact critical-line location. None follows from approximate roots.
+
+## Showcased proof dependency bundles
+
+Every registered showcase gets a bundled graph and comparison routes through
+`proof-bundles.html`. Keep declaration-path witnesses and curated mathematical
+arrows distinct. Preserve the existing audit and scope of each theorem; a
+planned proof or related Mathlib ingredient must not be labelled as a checked
+proof of the full displayed statement. Provide explicit pending comparisons
+when no paired proof is registered.
+
+Use `.github/reader-edition/proof_bundles.py` and
+`book/proof-bundles/catalogue.json` for new showcases. Record each node's pinned
+source spans or files, and report nonblank source LOC after comment removal.
+Whole-file counts are labelled and include unrelated declarations; route totals
+take unions rather than adding overlapping nodes. Do not infer full dependency
+closure, kernel proof size or runtime from this source inventory.

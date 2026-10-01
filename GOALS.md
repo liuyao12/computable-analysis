@@ -767,3 +767,17 @@ certificate bytes and kernel-check time separately. The published source
 inventory currently measures the conditional reflection module only; both
 concrete zero benchmarks remain pending until their actual constructions,
 counts and proof audits exist.
+
+## Bundled theorem comparisons and LOC
+
+The reader now registers 36 bundled comparisons: all 22 existing theorem maps,
+the Leibniz comparison, and 13 newer showcase statements. Each offers multiple
+route selections and a Mathlib comparison slot. Unregistered alternatives and
+unfinished mathematical steps are explicitly pending; related Mathlib source
+is not advertised as a proof of a stronger statement.
+
+Each node reports nonblank Lean LOC from pinned source spans, or explicitly
+labelled whole-file LOC. Route totals union overlapping lines and count shared
+code once. Counts exclude automatic import expansion and do not replace proof
+audits. The source hashes, line bitmap and counting script make measurements
+reproducible. Native theorem scope and the existing checked graphs are preserved.

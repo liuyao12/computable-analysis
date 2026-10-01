@@ -1,0 +1,1487 @@
+[
+  {
+    "id": "showcase:cosine-square",
+    "title": "Sine-square and cosine-square integrals",
+    "page": "cosine.html",
+    "anchor": "theorem",
+    "status": "Source-linked proof comparison; see each bundle for checked scope",
+    "edgeSemantics": "Curated mathematical bundles and prerequisite arrows. These summarize the linked proofs and plans, rather than an automatically extracted declaration graph.",
+    "routes": [
+      {
+        "id": "ftc",
+        "name": "Product rule",
+        "status": "registered"
+      },
+      {
+        "id": "euler",
+        "name": "Euler equation",
+        "status": "registered"
+      },
+      {
+        "id": "symmetry",
+        "name": "Symmetry: half-interval corollary",
+        "status": "registered"
+      },
+      {
+        "id": "mathlib",
+        "name": "Mathlib integral comparison",
+        "status": "source comparison"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "geometry",
+        "title": "Geometric circle coordinates",
+        "body": "The independently constructed circle coordinates and derivative laws support the native computations.",
+        "routes": [
+          "ftc",
+          "euler",
+          "symmetry"
+        ],
+        "files": [
+          "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/ClockTrigIdentities.lean",
+          "https://github.com/liuyao12/computable-analysis/blob/f630241adeae35fc06a5fd4921a4df6396e291d0/ComputableAnalysis/GeometricSineDerivative.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "quadrature",
+        "title": "One rectangle computation",
+        "body": "Validity and convergence of the squared-cosine program are independent of its eventual closed form.",
+        "routes": [
+          "ftc",
+          "euler",
+          "symmetry"
+        ],
+        "files": [
+          "book/cosine-square/ComputableAnalysis/CosineSquareData.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "ftc",
+        "title": "Product-rule derivative and finite FTC",
+        "body": "The local product-rule value proof and chart assembly identify the rectangle integral.",
+        "routes": [
+          "ftc"
+        ],
+        "files": [
+          "book/cosine-square/ComputableAnalysis/CosineSquareFTC.lean",
+          "book/cosine-square/ComputableAnalysis/TrigSquareVariable.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "euler",
+        "title": "Integrate the rotation equation",
+        "body": "Supplied derivative models, finite FTC and solution uniqueness justify exponential integration.",
+        "routes": [
+          "euler"
+        ],
+        "files": [
+          "book/cosine-square/ComputableAnalysis/ImaginaryExponentialIntegral.lean",
+          "book/cosine-square/ComputableAnalysis/TrigSquareVariable.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "global",
+        "title": "All represented endpoints",
+        "body": "The native routes share chart assembly and continuous extension.",
+        "routes": [
+          "ftc",
+          "euler"
+        ],
+        "files": [
+          "book/cosine-square/ComputableAnalysis/TrigSquareGlobal.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "symmetry",
+        "title": "Reflect and pair rectangles",
+        "body": "This proves the half-interval corollary; it is not the arbitrary-endpoint proof.",
+        "routes": [
+          "symmetry"
+        ],
+        "files": [
+          "book/cosine-square/ComputableAnalysis/CosineSquareSymmetry.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "ml",
+        "title": "Mathlib definite integral",
+        "body": "The linked file contains the squared-cosine integral in completed reals. Source comparison only; no new representation bridge is claimed.",
+        "routes": [
+          "mathlib"
+        ],
+        "files": [
+          "Mathlib/Analysis/SpecialFunctions/Integrals/Basic.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      }
+    ],
+    "edges": [
+      {
+        "source": "geometry",
+        "target": "quadrature",
+        "kind": "outline"
+      },
+      {
+        "source": "quadrature",
+        "target": "ftc",
+        "kind": "outline"
+      },
+      {
+        "source": "quadrature",
+        "target": "euler",
+        "kind": "outline"
+      },
+      {
+        "source": "geometry",
+        "target": "ftc",
+        "kind": "outline"
+      },
+      {
+        "source": "geometry",
+        "target": "euler",
+        "kind": "outline"
+      },
+      {
+        "source": "geometry",
+        "target": "symmetry",
+        "kind": "outline"
+      },
+      {
+        "source": "quadrature",
+        "target": "symmetry",
+        "kind": "outline"
+      },
+      {
+        "source": "ftc",
+        "target": "global",
+        "kind": "outline"
+      },
+      {
+        "source": "euler",
+        "target": "global",
+        "kind": "outline"
+      }
+    ]
+  },
+  {
+    "id": "showcase:basel",
+    "title": "The Basel identity",
+    "page": "basel.html",
+    "anchor": "theorem",
+    "status": "Source-linked proof comparison; see each bundle for checked scope",
+    "edgeSemantics": "Curated mathematical bundles and prerequisite arrows. These summarize the linked proofs and plans, rather than an automatically extracted declaration graph.",
+    "routes": [
+      {
+        "id": "native",
+        "name": "Finite Leibniz sums",
+        "status": "registered"
+      },
+      {
+        "id": "euler",
+        "name": "Euler sine product",
+        "status": "registered"
+      },
+      {
+        "id": "mathlib",
+        "name": "Mathlib Bernoulli–Fourier",
+        "status": "source comparison"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "pi",
+        "title": "Geometric pi and Leibniz",
+        "body": "The native proof starts from the independently identified geometric circle constant.",
+        "routes": [
+          "native"
+        ],
+        "files": [
+          "ComputableAnalysis/LeibnizPi.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "bounds",
+        "title": "Finite double-sum estimates",
+        "body": "Square and triangular rearrangements and an explicit tail schedule control the approximation.",
+        "routes": [
+          "native"
+        ],
+        "files": [
+          "ComputableAnalysis/Basel/Bounds.lean",
+          "ComputableAnalysis/Basel/ZetaEstimate.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "native",
+        "title": "Exact native Basel identity",
+        "body": "The represented series and geometric square agree exactly.",
+        "routes": [
+          "native"
+        ],
+        "files": [
+          "ComputableAnalysis/Basel/Proof.lean",
+          "ComputableAnalysis/Basel/RealZeta.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "product",
+        "title": "Sine-product convergence",
+        "body": "Mathlib supplies the infinite sine product; this route runs in the separate Mathlib package.",
+        "routes": [
+          "euler"
+        ],
+        "files": [
+          "Mathlib/Analysis/SpecialFunctions/Trigonometric/EulerSineProd.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "euler",
+        "title": "Finite products and coefficient error",
+        "body": "The audited separate package identifies the reciprocal-square sum by explicit coefficient errors.",
+        "routes": [
+          "euler"
+        ],
+        "files": [
+          "book/euler-proof/EulerBasel.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "fourier",
+        "title": "Bernoulli Fourier coefficients",
+        "body": "The coefficient recurrence and reconstruction lead to the general even-zeta theorem. The whole file is counted once per route.",
+        "routes": [
+          "mathlib"
+        ],
+        "files": [
+          "Mathlib/NumberTheory/ZetaValues.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "mathlib",
+        "title": "Mathlib Basel specialization",
+        "body": "The same file specializes the even-zeta theorem to the Basel sum.",
+        "routes": [
+          "mathlib"
+        ],
+        "files": [
+          "Mathlib/NumberTheory/ZetaValues.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      }
+    ],
+    "edges": [
+      {
+        "source": "pi",
+        "target": "bounds",
+        "kind": "outline"
+      },
+      {
+        "source": "bounds",
+        "target": "native",
+        "kind": "outline"
+      },
+      {
+        "source": "product",
+        "target": "euler",
+        "kind": "outline"
+      },
+      {
+        "source": "fourier",
+        "target": "mathlib",
+        "kind": "outline"
+      }
+    ]
+  },
+  {
+    "id": "showcase:euler-even",
+    "title": "Euler’s even zeta values",
+    "page": "euler.html",
+    "anchor": "theorem",
+    "status": "Source-linked proof comparison; see each bundle for checked scope",
+    "edgeSemantics": "Curated mathematical bundles and prerequisite arrows. These summarize the linked proofs and plans, rather than an automatically extracted declaration graph.",
+    "routes": [
+      {
+        "id": "euler",
+        "name": "Sine product and cotangent",
+        "status": "registered"
+      },
+      {
+        "id": "mathlib",
+        "name": "Mathlib Bernoulli–Fourier",
+        "status": "source comparison"
+      },
+      {
+        "id": "native",
+        "name": "Computable transfer",
+        "status": "pending"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "prod",
+        "title": "Mathlib sine product",
+        "body": "The separate Euler proof consumes the sine-product and cotangent identities in Mathlib.",
+        "routes": [
+          "euler"
+        ],
+        "files": [
+          "Mathlib/Analysis/SpecialFunctions/Trigonometric/EulerSineProd.lean",
+          "Mathlib/Analysis/SpecialFunctions/Trigonometric/Cotangent.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "cot",
+        "title": "Cotangent series with absolute bounds",
+        "body": "Double-series estimates justify the cotangent expansion.",
+        "routes": [
+          "euler"
+        ],
+        "files": [
+          "book/euler-proof/EulerCotangent.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "coeff",
+        "title": "Uniqueness of coefficients",
+        "body": "Absolute convergence and coefficient uniqueness identify Bernoulli coefficients.",
+        "routes": [
+          "euler"
+        ],
+        "files": [
+          "book/euler-proof/EulerSeries.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "even",
+        "title": "All positive even values",
+        "body": "The general identity and checked special cases are in the audited Euler package.",
+        "routes": [
+          "euler"
+        ],
+        "files": [
+          "book/euler-proof/EulerEvenZeta.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "ml",
+        "title": "Mathlib Fourier route",
+        "body": "A distinct proof in Mathlib uses Bernoulli Fourier reconstruction.",
+        "routes": [
+          "mathlib"
+        ],
+        "files": [
+          "Mathlib/NumberTheory/ZetaValues.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "native",
+        "title": "Native sine-product and Gamma bridges",
+        "body": "This step has no registered proof of the displayed target. Its LOC is pending, not zero.",
+        "routes": [
+          "native"
+        ],
+        "files": [],
+        "status": "pending",
+        "declarations": []
+      }
+    ],
+    "edges": [
+      {
+        "source": "prod",
+        "target": "cot",
+        "kind": "outline"
+      },
+      {
+        "source": "cot",
+        "target": "coeff",
+        "kind": "outline"
+      },
+      {
+        "source": "coeff",
+        "target": "even",
+        "kind": "outline"
+      }
+    ]
+  },
+  {
+    "id": "showcase:arctan",
+    "title": "Arctangent Taylor convergence",
+    "page": "arctan-taylor.html",
+    "anchor": "theorem",
+    "status": "Source-linked proof comparison; see each bundle for checked scope",
+    "edgeSemantics": "Curated mathematical bundles and prerequisite arrows. These summarize the linked proofs and plans, rather than an automatically extracted declaration graph.",
+    "routes": [
+      {
+        "id": "native",
+        "name": "Finite remainder and term obstruction",
+        "status": "registered"
+      },
+      {
+        "id": "mathlib",
+        "name": "Mathlib arctangent series",
+        "status": "source comparison"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "finite",
+        "title": "Finite geometric remainder",
+        "body": "Finite algebra and alternating estimates supply the convergence bridge.",
+        "routes": [
+          "native"
+        ],
+        "files": [
+          "ComputableAnalysis/ArctanTaylorRemainder.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "boundary",
+        "title": "Outside the interval",
+        "body": "A quantitative consecutive-term obstruction excludes convergence outside the rational interval.",
+        "routes": [
+          "native"
+        ],
+        "files": [
+          "ComputableAnalysis/ArctanTaylorBoundary.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "native",
+        "title": "Rational-input classification",
+        "body": "The current exact classifier quantifies over rational inputs; arbitrary represented-input extension remains open.",
+        "routes": [
+          "native"
+        ],
+        "files": [
+          "ComputableAnalysis/ArctanTaylorConvergence.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "ml",
+        "title": "Complex and real arctangent power series",
+        "body": "Mathlib establishes the series in the open convergence disk. Endpoint classification is not silently inferred from this interior theorem.",
+        "routes": [
+          "mathlib"
+        ],
+        "files": [
+          "Mathlib/Analysis/SpecialFunctions/Complex/Arctan.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      }
+    ],
+    "edges": [
+      {
+        "source": "finite",
+        "target": "native",
+        "kind": "outline"
+      },
+      {
+        "source": "boundary",
+        "target": "native",
+        "kind": "outline"
+      }
+    ]
+  },
+  {
+    "id": "showcase:arctan-shift",
+    "title": "Arctangent radius at the shifted center",
+    "page": "arctan-taylor.html",
+    "anchor": "center-one-theorem",
+    "status": "Classical exposition; complete native shifted-radius theorem pending",
+    "edgeSemantics": "Curated mathematical bundles and prerequisite arrows. These summarize the linked proofs and plans, rather than an automatically extracted declaration graph.",
+    "routes": [
+      {
+        "id": "cauchy",
+        "name": "Cauchy–Taylor and nearest singularities",
+        "status": "outline"
+      },
+      {
+        "id": "series",
+        "name": "Recenter a series",
+        "status": "pending"
+      },
+      {
+        "id": "mathlib",
+        "name": "Mathlib analytic comparison",
+        "status": "source comparison"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "cauchy",
+        "title": "Path independence and Taylor convergence",
+        "body": "This step has no registered proof of the displayed target. Its LOC is pending, not zero.",
+        "routes": [
+          "cauchy"
+        ],
+        "files": [],
+        "status": "pending",
+        "declarations": []
+      },
+      {
+        "id": "identity",
+        "title": "Identity theorem excludes a larger disk",
+        "body": "This step has no registered proof of the displayed target. Its LOC is pending, not zero.",
+        "routes": [
+          "cauchy"
+        ],
+        "files": [],
+        "status": "pending",
+        "declarations": []
+      },
+      {
+        "id": "series",
+        "title": "Coefficient recentering and sharp radius",
+        "body": "This step has no registered proof of the displayed target. Its LOC is pending, not zero.",
+        "routes": [
+          "series"
+        ],
+        "files": [],
+        "status": "pending",
+        "declarations": []
+      },
+      {
+        "id": "ml",
+        "title": "Mathlib identity and isolated-zero principles",
+        "body": "These are related analytic ingredients, not a registered proof of this exact shifted-radius theorem.",
+        "routes": [
+          "mathlib"
+        ],
+        "files": [
+          "Mathlib/Analysis/Analytic/Uniqueness.lean",
+          "Mathlib/Analysis/Analytic/IsolatedZeros.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      }
+    ],
+    "edges": [
+      {
+        "source": "cauchy",
+        "target": "identity",
+        "kind": "outline"
+      }
+    ]
+  },
+  {
+    "id": "showcase:cauchy",
+    "title": "Computed polygonal Cauchy cancellation",
+    "page": "complex-analysis.html",
+    "anchor": "theorem",
+    "status": "Source-linked proof comparison; see each bundle for checked scope",
+    "edgeSemantics": "Curated mathematical bundles and prerequisite arrows. These summarize the linked proofs and plans, rather than an automatically extracted declaration graph.",
+    "routes": [
+      {
+        "id": "finite",
+        "name": "Finite triangles and local models",
+        "status": "registered"
+      },
+      {
+        "id": "mathlib",
+        "name": "Mathlib Cauchy theory",
+        "status": "source comparison"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "pullback",
+        "title": "Computed complex pullbacks",
+        "body": "Complex path integral computations and their supplied validity evidence.",
+        "routes": [
+          "finite"
+        ],
+        "files": [
+          "ComputableAnalysis/ComplexPathIntegral.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "triangles",
+        "title": "Finite triangle cancellation",
+        "body": "Cancellation and quadrature estimates for supplied local complex-affine models.",
+        "routes": [
+          "finite"
+        ],
+        "files": [
+          "ComputableAnalysis/ComplexAnalysis/Cauchy.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "examples",
+        "title": "Polynomial clients",
+        "body": "Checked examples construct the local model evidence; the general derivative-to-model constructor is still open.",
+        "routes": [
+          "finite"
+        ],
+        "files": [
+          "ComputableAnalysis/ComplexAnalysis/ResidueExamples.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "ml",
+        "title": "Mathlib Cauchy integral theory",
+        "body": "This general completed-complex development has different hypotheses and integration machinery.",
+        "routes": [
+          "mathlib"
+        ],
+        "files": [
+          "Mathlib/Analysis/Complex/CauchyIntegral.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      }
+    ],
+    "edges": [
+      {
+        "source": "pullback",
+        "target": "triangles",
+        "kind": "outline"
+      },
+      {
+        "source": "triangles",
+        "target": "examples",
+        "kind": "outline"
+      }
+    ]
+  },
+  {
+    "id": "showcase:residue",
+    "title": "Simple pole on a rational square",
+    "page": "complex-analysis.html",
+    "anchor": "residue-theorem",
+    "status": "Source-linked proof comparison; see each bundle for checked scope",
+    "edgeSemantics": "Curated mathematical bundles and prerequisite arrows. These summarize the linked proofs and plans, rather than an automatically extracted declaration graph.",
+    "routes": [
+      {
+        "id": "native",
+        "name": "Explicit arctangent normalization",
+        "status": "registered"
+      },
+      {
+        "id": "mathlib",
+        "name": "Mathlib Cauchy integral comparison",
+        "status": "source comparison"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "arctan",
+        "title": "Geometric arctangent",
+        "body": "The geometric arctangent computation supplies the positive-turn normalization.",
+        "routes": [
+          "native"
+        ],
+        "files": [
+          "ComputableAnalysis/ArctanGeometry.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "pole",
+        "title": "Computed simple-pole residue",
+        "body": "The square contour computation and supplied local affine models establish the stated local result.",
+        "routes": [
+          "native"
+        ],
+        "files": [
+          "ComputableAnalysis/ComplexAnalysis/Residue.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "ml",
+        "title": "Cauchy contour identities",
+        "body": "Related Mathlib contour identities are compared at source level; no cross-foundation equality is claimed.",
+        "routes": [
+          "mathlib"
+        ],
+        "files": [
+          "Mathlib/Analysis/Complex/CauchyIntegral.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      }
+    ],
+    "edges": [
+      {
+        "source": "arctan",
+        "target": "pole",
+        "kind": "outline"
+      }
+    ]
+  },
+  {
+    "id": "showcase:continuation",
+    "title": "Analytic continuation and uniqueness",
+    "page": "analytic-continuation.html",
+    "anchor": "theorem",
+    "status": "Source-linked proof comparison; see each bundle for checked scope",
+    "edgeSemantics": "Curated mathematical bundles and prerequisite arrows. These summarize the linked proofs and plans, rather than an automatically extracted declaration graph.",
+    "routes": [
+      {
+        "id": "charts",
+        "name": "Taylor and overlapping charts",
+        "status": "partial"
+      },
+      {
+        "id": "reflection",
+        "name": "Reflected charts",
+        "status": "partial"
+      },
+      {
+        "id": "equation",
+        "name": "Functional equation",
+        "status": "pending"
+      },
+      {
+        "id": "mathlib",
+        "name": "Mathlib analytic identity theorem",
+        "status": "source comparison"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "germs",
+        "title": "Represented germs and local gluing",
+        "body": "Local agreement and actual chart chains have checked constructions.",
+        "routes": [
+          "charts",
+          "reflection"
+        ],
+        "files": [
+          "ComputableAnalysis/Continuation/Germ.lean",
+          "ComputableAnalysis/Continuation/Gluing.lean",
+          "ComputableAnalysis/Continuation/Chain.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "realization",
+        "title": "Coherent chart realization",
+        "body": "A supplied coherent family produces a global represented holomorphic evaluator. This is a conditional realization, not the general identity theorem.",
+        "routes": [
+          "charts"
+        ],
+        "files": [
+          "ComputableAnalysis/Continuation/Realization.lean",
+          "ComputableAnalysis/Continuation/Monodromy.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "reflection",
+        "title": "Reflected charts and overlaps",
+        "body": "Reflection constructs chart comparisons. The Schwarz boundary-seam theorem remains open.",
+        "routes": [
+          "reflection"
+        ],
+        "files": [
+          "ComputableAnalysis/Continuation/Reflection.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "identity",
+        "title": "General connected-domain identity theorem",
+        "body": "This step has no registered proof of the displayed target. Its LOC is pending, not zero.",
+        "routes": [
+          "charts",
+          "reflection"
+        ],
+        "files": [],
+        "status": "pending",
+        "declarations": []
+      },
+      {
+        "id": "functional",
+        "title": "A specific functional-equation continuation",
+        "body": "This step has no registered proof of the displayed target. Its LOC is pending, not zero.",
+        "routes": [
+          "equation"
+        ],
+        "files": [],
+        "status": "pending",
+        "declarations": []
+      },
+      {
+        "id": "ml",
+        "title": "Mathlib identity theorem",
+        "body": "Uniqueness from analytic agreement is formalized in Mathlib’s analytic foundation.",
+        "routes": [
+          "mathlib"
+        ],
+        "files": [
+          "Mathlib/Analysis/Analytic/Uniqueness.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      }
+    ],
+    "edges": [
+      {
+        "source": "germs",
+        "target": "realization",
+        "kind": "outline"
+      },
+      {
+        "source": "germs",
+        "target": "reflection",
+        "kind": "outline"
+      },
+      {
+        "source": "realization",
+        "target": "identity",
+        "kind": "outline"
+      },
+      {
+        "source": "reflection",
+        "target": "identity",
+        "kind": "outline"
+      }
+    ]
+  },
+  {
+    "id": "showcase:zeta-zeros",
+    "title": "First and second zeta zeros",
+    "page": "zeta-zeros.html",
+    "anchor": "benchmark",
+    "status": "No concrete zeta zero certified; two proof strategies and checked conditional algebra",
+    "edgeSemantics": "Curated mathematical bundles and prerequisite arrows. These summarize the linked proofs and plans, rather than an automatically extracted declaration graph.",
+    "routes": [
+      {
+        "id": "count",
+        "name": "Unique rectangle and reflection",
+        "status": "pending"
+      },
+      {
+        "id": "sign",
+        "name": "Critical-line signs and completeness",
+        "status": "pending"
+      },
+      {
+        "id": "mathlib",
+        "name": "Mathlib zeta and analytic ingredients",
+        "status": "source comparison"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "zeta",
+        "title": "Computed complex zeta and completed symmetry",
+        "body": "This step has no registered proof of the displayed target. Its LOC is pending, not zero.",
+        "routes": [
+          "count",
+          "sign"
+        ],
+        "files": [],
+        "status": "pending",
+        "declarations": []
+      },
+      {
+        "id": "boundary",
+        "title": "Nonvanishing on the whole contour",
+        "body": "This step has no registered proof of the displayed target. Its LOC is pending, not zero.",
+        "routes": [
+          "count"
+        ],
+        "files": [],
+        "status": "pending",
+        "declarations": []
+      },
+      {
+        "id": "count",
+        "title": "Actual zero-count identity and count one",
+        "body": "This step has no registered proof of the displayed target. Its LOC is pending, not zero.",
+        "routes": [
+          "count"
+        ],
+        "files": [],
+        "status": "pending",
+        "declarations": []
+      },
+      {
+        "id": "reflection",
+        "title": "Reflection and uniqueness",
+        "body": "The checked conditional theorem puts a supplied unique reflected root exactly on the line. It does not certify a particular zeta root.",
+        "routes": [
+          "count"
+        ],
+        "files": [
+          "ComputableAnalysis/ZeroIsolation.lean"
+        ],
+        "status": "registered",
+        "declarations": [
+          "ComputableAnalysis.FunctionTheory.ZeroIsolation.unique_zero_on_line"
+        ]
+      },
+      {
+        "id": "sign",
+        "title": "Opposite signs and computable root construction",
+        "body": "This step has no registered proof of the displayed target. Its LOC is pending, not zero.",
+        "routes": [
+          "sign"
+        ],
+        "files": [],
+        "status": "pending",
+        "declarations": []
+      },
+      {
+        "id": "complete",
+        "title": "Ordinal completeness: first, then second",
+        "body": "This step has no registered proof of the displayed target. Its LOC is pending, not zero.",
+        "routes": [
+          "count",
+          "sign"
+        ],
+        "files": [],
+        "status": "pending",
+        "declarations": []
+      },
+      {
+        "id": "ml",
+        "title": "Mathlib continuation and functional equation",
+        "body": "The linked completed-zeta construction proves analytic ingredients in completed complex numbers; it is not a first-zero certificate.",
+        "routes": [
+          "mathlib"
+        ],
+        "files": [
+          "Mathlib/NumberTheory/LSeries/RiemannZeta.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "discrete",
+        "title": "Discrete zeta zeros",
+        "body": "The linked file proves discreteness and finiteness on compact sets. No matching first/second-zero certificate is registered here.",
+        "routes": [
+          "mathlib"
+        ],
+        "files": [
+          "Mathlib/NumberTheory/LSeries/ZetaZeros.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      }
+    ],
+    "edges": [
+      {
+        "source": "zeta",
+        "target": "boundary",
+        "kind": "outline"
+      },
+      {
+        "source": "boundary",
+        "target": "count",
+        "kind": "outline"
+      },
+      {
+        "source": "count",
+        "target": "reflection",
+        "kind": "outline"
+      },
+      {
+        "source": "reflection",
+        "target": "complete",
+        "kind": "outline"
+      },
+      {
+        "source": "zeta",
+        "target": "sign",
+        "kind": "outline"
+      },
+      {
+        "source": "sign",
+        "target": "complete",
+        "kind": "outline"
+      },
+      {
+        "source": "ml",
+        "target": "discrete",
+        "kind": "outline"
+      }
+    ]
+  },
+  {
+    "id": "showcase:fuchs",
+    "title": "Fuchs’s criterion",
+    "page": "fuchs.html",
+    "anchor": "theorem",
+    "status": "Source-linked proof comparison; see each bundle for checked scope",
+    "edgeSemantics": "Curated mathematical bundles and prerequisite arrows. These summarize the linked proofs and plans, rather than an automatically extracted declaration graph.",
+    "routes": [
+      {
+        "id": "growth",
+        "name": "Scaled-jet growth",
+        "status": "partial"
+      },
+      {
+        "id": "frobenius",
+        "name": "Frobenius construction",
+        "status": "partial"
+      },
+      {
+        "id": "mathlib",
+        "name": "Mathlib comparison",
+        "status": "pending"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "growth",
+        "title": "Growth on a rational ray",
+        "body": "The forward growth result is checked for supplied certified ray solutions. Full sector theory and the converse remain open.",
+        "routes": [
+          "growth"
+        ],
+        "files": [
+          "ComputableAnalysis/AlgebraicODE/FuchsGrowth.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "frobenius",
+        "title": "Frobenius convergence",
+        "body": "Constructed recurrence and convergence for the specified rational indicial root.",
+        "routes": [
+          "frobenius"
+        ],
+        "files": [
+          "ComputableAnalysis/AlgebraicODE/FrobeniusConvergence.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "client",
+        "title": "Two-chart polynomial solution",
+        "body": "The checked polynomial client connects derivative germs, continuation, Frobenius coefficients and ray growth.",
+        "routes": [
+          "growth",
+          "frobenius"
+        ],
+        "files": [
+          "ComputableAnalysis/AlgebraicODE/FuchsContinuation.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "full",
+        "title": "Full Fuchs criterion and sector branches",
+        "body": "This step has no registered proof of the displayed target. Its LOC is pending, not zero.",
+        "routes": [
+          "growth",
+          "frobenius"
+        ],
+        "files": [],
+        "status": "pending",
+        "declarations": []
+      },
+      {
+        "id": "ml",
+        "title": "Mathlib proof for this exact statement not registered",
+        "body": "This step has no registered proof of the displayed target. Its LOC is pending, not zero.",
+        "routes": [
+          "mathlib"
+        ],
+        "files": [],
+        "status": "pending",
+        "declarations": []
+      }
+    ],
+    "edges": [
+      {
+        "source": "growth",
+        "target": "client",
+        "kind": "outline"
+      },
+      {
+        "source": "frobenius",
+        "target": "client",
+        "kind": "outline"
+      },
+      {
+        "source": "client",
+        "target": "full",
+        "kind": "outline"
+      }
+    ]
+  },
+  {
+    "id": "showcase:painleve",
+    "title": "Painlevé–Gambier classification",
+    "page": "painleve.html",
+    "anchor": "theorem",
+    "status": "Source-linked proof comparison; see each bundle for checked scope",
+    "edgeSemantics": "Curated mathematical bundles and prerequisite arrows. These summarize the linked proofs and plans, rather than an automatically extracted declaration graph.",
+    "routes": [
+      {
+        "id": "poles",
+        "name": "Local movable-pole construction",
+        "status": "partial"
+      },
+      {
+        "id": "restricted",
+        "name": "Restricted solution classification",
+        "status": "partial"
+      },
+      {
+        "id": "mathlib",
+        "name": "Mathlib comparison",
+        "status": "pending"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "recurrence",
+        "title": "Laurent recurrence and resonance",
+        "body": "The recurrence and convergence estimates construct specific local pole charts.",
+        "routes": [
+          "poles"
+        ],
+        "files": [
+          "ComputableAnalysis/AlgebraicODE/PainleveLaurent.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "poles",
+        "title": "Computed double poles",
+        "body": "These local constructions do not prove the global Painlevé property or exhaustive classification.",
+        "routes": [
+          "poles"
+        ],
+        "files": [
+          "ComputableAnalysis/AlgebraicODE/PainlevePole.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "restricted",
+        "title": "Restricted candidates",
+        "body": "Affine and reciprocal candidates are classified at the scope of their actual theorem statements.",
+        "routes": [
+          "restricted"
+        ],
+        "files": [
+          "ComputableAnalysis/AlgebraicODE/Painleve.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "full",
+        "title": "Exhaustive Painlevé–Gambier classification",
+        "body": "This step has no registered proof of the displayed target. Its LOC is pending, not zero.",
+        "routes": [
+          "poles",
+          "restricted"
+        ],
+        "files": [],
+        "status": "pending",
+        "declarations": []
+      },
+      {
+        "id": "ml",
+        "title": "Mathlib proof for this exact statement not registered",
+        "body": "This step has no registered proof of the displayed target. Its LOC is pending, not zero.",
+        "routes": [
+          "mathlib"
+        ],
+        "files": [],
+        "status": "pending",
+        "declarations": []
+      }
+    ],
+    "edges": [
+      {
+        "source": "recurrence",
+        "target": "poles",
+        "kind": "outline"
+      },
+      {
+        "source": "poles",
+        "target": "full",
+        "kind": "outline"
+      },
+      {
+        "source": "restricted",
+        "target": "full",
+        "kind": "outline"
+      }
+    ]
+  },
+  {
+    "id": "showcase:gaussian",
+    "title": "Gaussian normalization",
+    "page": "gaussian-convolution.html",
+    "anchor": "targets",
+    "status": "Finite native estimates checked; Gaussian normalization pending",
+    "edgeSemantics": "Curated mathematical bundles and prerequisite arrows. These summarize the linked proofs and plans, rather than an automatically extracted declaration graph.",
+    "routes": [
+      {
+        "id": "square",
+        "name": "Square and radial comparison",
+        "status": "partial"
+      },
+      {
+        "id": "gamma",
+        "name": "Gamma integral",
+        "status": "pending"
+      },
+      {
+        "id": "mathlib",
+        "name": "Mathlib Gaussian integral",
+        "status": "source comparison"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "finite",
+        "title": "Finite Gaussian prefix bounds",
+        "body": "Finite prefix and remainder estimates do not yet certify the improper Gaussian normalization.",
+        "routes": [
+          "square"
+        ],
+        "files": [
+          "ComputableAnalysis/FiniteGaussianIntegral.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "square",
+        "title": "Square decomposition estimates",
+        "body": "Finite Gaussian square and diagonal bounds are checked.",
+        "routes": [
+          "square"
+        ],
+        "files": [
+          "ComputableAnalysis/NBallGaussian.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "tails",
+        "title": "Improper tails and radial area bridge",
+        "body": "This step has no registered proof of the displayed target. Its LOC is pending, not zero.",
+        "routes": [
+          "square"
+        ],
+        "files": [],
+        "status": "pending",
+        "declarations": []
+      },
+      {
+        "id": "gamma",
+        "title": "Gamma integral and half-value bridge",
+        "body": "This step has no registered proof of the displayed target. Its LOC is pending, not zero.",
+        "routes": [
+          "gamma"
+        ],
+        "files": [],
+        "status": "pending",
+        "declarations": []
+      },
+      {
+        "id": "ml",
+        "title": "Mathlib Gaussian integral",
+        "body": "The linked file proves Gaussian integration and the Gamma half-value in Mathlib’s real measure theory.",
+        "routes": [
+          "mathlib"
+        ],
+        "files": [
+          "Mathlib/Analysis/SpecialFunctions/Gaussian/GaussianIntegral.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      }
+    ],
+    "edges": [
+      {
+        "source": "finite",
+        "target": "square",
+        "kind": "outline"
+      },
+      {
+        "source": "square",
+        "target": "tails",
+        "kind": "outline"
+      }
+    ]
+  },
+  {
+    "id": "showcase:n-ball",
+    "title": "Volume of an n-dimensional ball",
+    "page": "n-ball-volume.html",
+    "anchor": "formula",
+    "status": "Represented algebraic formula checked; geometric volume and Gamma-integral bridges pending",
+    "edgeSemantics": "Curated mathematical bundles and prerequisite arrows. These summarize the linked proofs and plans, rather than an automatically extracted declaration graph.",
+    "routes": [
+      {
+        "id": "recurrence",
+        "name": "Coefficient recurrence and represented model",
+        "status": "partial"
+      },
+      {
+        "id": "gaussian",
+        "name": "Gaussian and Gamma route",
+        "status": "partial"
+      },
+      {
+        "id": "mathlib",
+        "name": "Mathlib measure of balls",
+        "status": "source comparison"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "coeff",
+        "title": "Finite volume coefficients",
+        "body": "Finite coefficient identities and the half-integer Gamma coefficient recurrence are checked.",
+        "routes": [
+          "recurrence",
+          "gaussian"
+        ],
+        "files": [
+          "ComputableAnalysis/FiniteNBallVolume.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "represented",
+        "title": "Represented volume formula",
+        "body": "The represented formula is valid and respects equivalent inputs. Its geometric-volume identification remains open.",
+        "routes": [
+          "recurrence"
+        ],
+        "files": [
+          "ComputableAnalysis/NBallGaussian.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "gamma",
+        "title": "Gaussian coefficient comparison",
+        "body": "The coefficient/Gamma formula and finite square estimates are checked; Gamma-integral identification remains open.",
+        "routes": [
+          "gaussian"
+        ],
+        "files": [
+          "ComputableAnalysis/NBallGaussian.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      },
+      {
+        "id": "volume",
+        "title": "Geometric volume and Gamma integral bridges",
+        "body": "This step has no registered proof of the displayed target. Its LOC is pending, not zero.",
+        "routes": [
+          "recurrence",
+          "gaussian"
+        ],
+        "files": [],
+        "status": "pending",
+        "declarations": []
+      },
+      {
+        "id": "ml",
+        "title": "Mathlib volume via Gamma and Gaussian integrals",
+        "body": "The linked general measure theorem evaluates volumes using a justified Gamma-integral identity in completed reals.",
+        "routes": [
+          "mathlib"
+        ],
+        "files": [
+          "Mathlib/MeasureTheory/Measure/Lebesgue/VolumeOfBalls.lean",
+          "Mathlib/MeasureTheory/Integral/Gamma.lean"
+        ],
+        "status": "registered",
+        "declarations": []
+      }
+    ],
+    "edges": [
+      {
+        "source": "coeff",
+        "target": "represented",
+        "kind": "outline"
+      },
+      {
+        "source": "coeff",
+        "target": "gamma",
+        "kind": "outline"
+      },
+      {
+        "source": "represented",
+        "target": "volume",
+        "kind": "outline"
+      },
+      {
+        "source": "gamma",
+        "target": "volume",
+        "kind": "outline"
+      }
+    ]
+  }
+]

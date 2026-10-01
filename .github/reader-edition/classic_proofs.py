@@ -4,6 +4,7 @@ import argparse,hashlib,json,re,shutil,urllib.request
 from pathlib import Path
 from bs4 import BeautifulSoup
 from zeta_zero_benchmark import build_report, render_table
+from proof_bundles import install as install_bundles
 ROOT=Path(__file__).resolve().parents[2]
 SOURCE=ROOT/'book/classics'
 CHAPTER_SOURCE=ROOT/'book/chapters/differential-equations'
@@ -205,6 +206,8 @@ def install(site,revision,euler_audit,cauchy_audit,arctan_audit,holomorphic_audi
                 marker.insert_before(label)
             a=BeautifulSoup(f'<a class="classic-navigation" href="{prefix+href}">{title}</a>','html.parser').a
             marker.insert_before(a)
+        bundle_link=BeautifulSoup(f'<a class="classic-navigation" href="{prefix}proof-bundles.html">Bundled proof comparisons</a>','html.parser').a
+        marker.insert_after(bundle_link)
         if p.name in [href for href,_ in LINKS]:
             for a in nav.select('a.current'):a['class']=[c for c in a.get('class',[]) if c!='current'];a.attrs.pop('aria-current',None)
             active=nav.select_one(f'a[href="{prefix+p.name}"]');active['class']=active.get('class',[])+['current'];active['aria-current']='page'
@@ -220,6 +223,7 @@ def install(site,revision,euler_audit,cauchy_audit,arctan_audit,holomorphic_audi
     shutil.copyfile(euler_audit,site/'reading/euler-proofs.json')
     shutil.copyfile(euler_audit.with_name('dependencies.txt'),site/'reading/euler-dependencies.txt')
     shutil.copyfile(euler_audit.with_name('general-dependencies.txt'),site/'reading/euler-general-dependencies.txt')
+    install_bundles(site,revision)
     after={str(p.relative_to(site)):digest(p) for p in site.rglob('*') if p.is_file()}
     changed={p:dict(before=h,after=after[p]) for p,h in before.items() if h!=after[p]}
     assert all(p.endswith('.html') for p in changed)
