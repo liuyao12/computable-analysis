@@ -122,6 +122,29 @@ Read the [certified zero-counting guide](../skills/analytic-continuation/referen
 for the construction obligations. No finite-height Riemann-hypothesis theorem is
 claimed by this audit.
 
+## Zero-certificate benchmark
+
+The [reader benchmark](../book/classics/zeta-zeros.html#benchmark) targets
+complete certificates for the first and second positive-height nontrivial
+zeros. Ordinal claims require a justified global count excluding omitted
+lower zeros; line-root existence alone does not establish their rank.
+Both targets remain unimplemented, with no code-size or timing score.
+
+Run `.github/reader-edition/zeta_zero_benchmark.py` to inventory the current
+shared conditional reflection module and its project-local import closure.
+The reader generates the same report at its source revision. It counts
+nonblank physical Lean lines after stripping nested comments, retaining
+imports and namespace commands, and records source hashes. The closure
+includes every declaration in imported project files, not a minimized
+elaborated proof dependency slice. External library sources are listed but
+not counted. This inventory is not a replacement for the Lean axiom audit.
+
+Future completed rows should publish additional function-specific proof code,
+cumulative code counting reused modules once, uncompressed rational
+certificate bytes, and kernel-check time with machine and toolchain metadata.
+The actual constructed zeta and root theorems, convergence/contour evidence,
+ordinal completeness and axiom audits must pass before a row is scored.
+
 ## Validation
 
 Build `ComputableAnalysis`, then run

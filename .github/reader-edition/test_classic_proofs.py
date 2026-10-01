@@ -7,6 +7,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 from bs4 import BeautifulSoup
 from classic_proofs import LINKS,MATHLIB,MATHLIB_HASH,EULER_MATHLIB,SHOWCASE_PAGES
+from zeta_zero_benchmark import build_report, uncomment
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('--site',required=True,type=Path);p.add_argument('--report',required=True,type=Path);p.add_argument('--static-only',action='store_true');a=p.parse_args()
@@ -44,6 +45,16 @@ def main():
     assert not zero_page.select('script[src*="zeta-waves"]')
     assert 'No finite-height critical-line theorem is claimed here' in zero_page.get_text()
     assert zero_page.select_one('a[href="skill-certified-zero-counting.html"]')
+    zero_benchmark=json.loads((site/'reading/zeta-zero-benchmark.json').read_text())
+    assert zero_benchmark==build_report(Path(__file__).resolve().parents[2],report['documentationRevision'])
+    assert zero_benchmark['concreteZetaZerosCertified']==0
+    assert all(row['additionalProofCodeLines'] is None for row in zero_benchmark['targets'])
+    assert len(zero_page.select('#zeta-zero-benchmark-table tbody tr'))==3
+    assert str(zero_benchmark['shared']['direct']['codeLines']) in zero_page.select_one('#zeta-zero-benchmark-table').get_text()
+    assert '__ZETA_ZERO_BENCHMARK__' not in zero_page.get_text()
+    assert uncomment('def x := "-- /- literal -/" -- trailing\n/- outer /- nested -/ -/\ndef y := 1').splitlines()[0].strip()=='def x := "-- /- literal -/"'
+    assert sum(bool(line.strip()) for line in uncomment('/- text\n/- nested -/\n-/\ndef y := 1 -- comment').splitlines())==1
+
     chapter=BeautifulSoup((site/'ch-differential-equations.html').read_text(),'html.parser')
     assert chapter.select_one('article #continuation-story #continuation-fuchs-criterion')
     chapter_ids=[node['id'] for node in chapter.select('[id]')]

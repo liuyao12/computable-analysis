@@ -756,3 +756,14 @@ decimal expansions. A separate sign-certificate route establishes a line zero;
 uniqueness identifies it, and global completeness is an additional obligation
 only for claims about all zeros below a height. The checked conditional
 implication is distinguished from the still-open concrete zeta certificates.
+
+
+## Zeta-zero certificate benchmark
+
+Measure complete exact certificates for the first and second positive-height
+nontrivial zeta zeros, including their ordinal completeness. Report shared
+function-specific machinery, additional and cumulative proof code, generated
+certificate bytes and kernel-check time separately. The published source
+inventory currently measures the conditional reflection module only; both
+concrete zero benchmarks remain pending until their actual constructions,
+counts and proof audits exist.

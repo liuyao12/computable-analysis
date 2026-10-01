@@ -3,6 +3,7 @@
 import argparse,hashlib,json,re,shutil,urllib.request
 from pathlib import Path
 from bs4 import BeautifulSoup
+from zeta_zero_benchmark import build_report, render_table
 ROOT=Path(__file__).resolve().parents[2]
 SOURCE=ROOT/'book/classics'
 CHAPTER_SOURCE=ROOT/'book/chapters/differential-equations'
@@ -121,11 +122,13 @@ def install(site,revision,euler_audit,cauchy_audit,arctan_audit,holomorphic_audi
     repo=f'https://github.com/liuyao12/computable-analysis/blob/{revision}/'
     native=repo+'ComputableAnalysis/'
     ml=f'https://github.com/leanprover-community/mathlib4/blob/{MATHLIB}/'
+    zero_benchmark=build_report(ROOT,revision)
+    (site/'reading/zeta-zero-benchmark.json').write_text(json.dumps(zero_benchmark,indent=2)+'\n')
     template=(site/'cosine.html').read_text()
     for name,title in [('leibniz','The Leibniz series'),('basel','The Basel problem'),('euler','Euler’s sine-product proof'),('fuchs','Fuchs’s theorem'),('painleve','Painlevé’s classification'),('complex-analysis','Polygonal Cauchy theory'),('analytic-continuation','Analytic continuation'),('zeta-zeros','How can a zeta zero be exactly on the line?'),('arctan-taylor','Arctangent: where Taylor stops')]:
         doc=BeautifulSoup(template,'html.parser');doc.title.string=title+' · Computable Analysis'
         doc.select_one('meta[name="documentation-revision"]')['content']=revision
-        page=(SOURCE/(name+'.html')).read_text().replace('__NATIVE__',native).replace('__MATHLIB__',ml).replace('__REPO__',repo).replace('__EULER_MATHLIB__',f'https://github.com/leanprover-community/mathlib4/blob/{EULER_MATHLIB}/')
+        page=(SOURCE/(name+'.html')).read_text().replace('__ZETA_ZERO_BENCHMARK__',render_table(zero_benchmark)).replace('__NATIVE__',native).replace('__MATHLIB__',ml).replace('__REPO__',repo).replace('__EULER_MATHLIB__',f'https://github.com/leanprover-community/mathlib4/blob/{EULER_MATHLIB}/')
         doc.article.clear()
         for node in list(BeautifulSoup(page,'html.parser').contents):doc.article.append(node)
         toc=doc.select_one('.on-this-page')
