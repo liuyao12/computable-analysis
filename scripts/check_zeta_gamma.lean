@@ -1,7 +1,7 @@
 import Lean
 import ComputableAnalysis.GammaInteger
 import ComputableAnalysis.ZetaIntegerBounds
-import ComputableAnalysis.ZeroIsolation
+import ComputableAnalysis.ZeroFromEnclosures
 
 open Lean Elab Command
 open ComputableAnalysis
@@ -20,7 +20,10 @@ run_cmd do
       ``ZetaIntegerBounds.bounds_of_equiv, ``ZetaIntegerBounds.real_zeta_bounds,
       ``FunctionTheory.ZeroIsolation.reflection_valid,
       ``FunctionTheory.ZeroIsolation.fixed_realPart, ``FunctionTheory.ZeroIsolation.reflected_zero,
-      ``FunctionTheory.ZeroIsolation.unique_zero_on_line] do
+      ``FunctionTheory.ZeroIsolation.unique_zero_on_line,
+      ``FunctionTheory.ZeroFromEnclosures.equiv_zero_of_ranges,
+      ``FunctionTheory.ZeroFromEnclosures.root_is_zero,
+      ``FunctionTheory.ZeroFromEnclosures.root_on_line] do
     let axioms ← collectAxioms name
     for ax in axioms do
       unless [``propext, ``Quot.sound, ``Classical.choice].contains ax ||

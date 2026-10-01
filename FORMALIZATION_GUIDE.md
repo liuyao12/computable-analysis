@@ -1056,6 +1056,11 @@ For zeta/Gamma and finite-region zero theorems, follow the
 [certified zero-counting guide](skills/analytic-continuation/references/certified-zero-counting.md).
 Separate contour computation, the argument-principle theorem, complete root
 counting, and exact critical-line location. None follows from approximate roots.
+`ZeroFromEnclosures.root_is_zero` derives a root equation from valid nested
+input boxes and shrinking sound output ranges containing zero. Its runtime
+reads the input boxes; no zero equation is assumed. `root_on_line` then uses
+supplied proved reflection and uniqueness. These laws do not construct actual
+zeta ranges or prove a multiplicity count or ordinal completeness.
 
 ## Showcased proof dependency bundles
 

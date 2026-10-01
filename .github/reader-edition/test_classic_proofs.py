@@ -7,7 +7,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 from bs4 import BeautifulSoup
 from classic_proofs import LINKS,MATHLIB,MATHLIB_HASH,EULER_MATHLIB,SHOWCASE_PAGES
-from zeta_zero_benchmark import build_report, uncomment
+from zeta_zero_benchmark import build_report, render_table, uncomment
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('--site',required=True,type=Path);p.add_argument('--report',required=True,type=Path);p.add_argument('--static-only',action='store_true');a=p.parse_args()
@@ -39,7 +39,7 @@ def main():
     assert re.findall(math_pattern,source.read_text())==re.findall(math_pattern,continuation.article.get_text()), 'continuation TeX lost during HTML parsing'
     zero_page=BeautifulSoup((site/'zeta-zeros.html').read_text(),'html.parser')
     zero_source=Path(__file__).resolve().parents[2]/'book/classics/zeta-zeros.html'
-    assert re.findall(math_pattern,zero_source.read_text())==re.findall(math_pattern,zero_page.article.get_text()), 'zeta exposition TeX lost'
+    assert re.findall(math_pattern,zero_source.read_text().replace('__ZETA_ZERO_BENCHMARK__',render_table(build_report(Path(__file__).resolve().parents[2],report['documentationRevision']))))==re.findall(math_pattern,zero_page.article.get_text()), 'zeta exposition TeX lost'
     assert all(zero_page.select_one('#'+section) for section in ['isolation','counting','signs','nearby','certificate'])
     assert len(zero_page.select('#certificate + ol > li'))==4
     assert not zero_page.select('script[src*="zeta-waves"]')
@@ -54,13 +54,19 @@ def main():
     assert zero_benchmark['comparison']['sharedBaselineExcluded'] is True
     assert zero_benchmark['comparison']['generatedCertificateDataCountedAsCode'] is False
     assert [row['ordinal'] for row in zero_benchmark['targets']]==[1,2]
+    assert [row['approximateImaginaryPart'] for row in zero_benchmark['targets']]==['14.134725141735','21.022039638772']
+    assert all(row['numericalReferenceIsRepositoryCertificate'] is False for row in zero_benchmark['targets'])
     assert all(row['sharedBaselineExcluded'] is True for row in zero_benchmark['targets'])
     assert all('cumulativeProofCodeLines' not in row for row in zero_benchmark['targets'])
     assert len(zero_page.select('#zeta-zero-benchmark-table tbody tr'))==2
-    assert len(zero_page.select('#zeta-zero-shared-table tbody tr'))==2
+    assert len(zero_page.select('#zeta-zero-shared-table tbody tr'))==3
     assert str(zero_benchmark['shared']['direct']['codeLines']) in zero_page.select_one('#zeta-zero-shared-table').get_text()
     comparison=zero_page.select_one('#zeta-zero-benchmark-table').get_text()
     assert 'excluding the shared setup for both zeros' in comparison
+    assert 'Imaginary part (approx.)' in comparison
+    assert all(row['approximateImaginaryPart'] in comparison for row in zero_benchmark['targets'])
+    assert 'Formal certificate pending' in comparison
+    assert zero_page.select_one('a[href="https://www.lmfdb.org/zeros/zeta/"]')
     assert 'Shared reflection' not in comparison and 'Cumulative' not in comparison
     assert '__ZETA_ZERO_BENCHMARK__' not in zero_page.get_text()
     assert uncomment('def x := "-- /- literal -/" -- trailing\n/- outer /- nested -/ -/\ndef y := 1').splitlines()[0].strip()=='def x := "-- /- literal -/"'

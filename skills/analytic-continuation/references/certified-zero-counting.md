@@ -76,6 +76,11 @@ Choose isolating rectangles preserved by \(s\mapsto1-\overline s\).
 Uniqueness then forces the represented root to equal its reflection and hence
 \(\Re s\simeq1/2\) **exactly**. The conditional algebra and root implication
 are checked in `ZeroIsolation.fixed_realPart` and `unique_zero_on_line`.
+`ZeroFromEnclosures.root_is_zero` supplies the completion step for a nested
+input-box computation: prove whole-box range soundness for represented inputs,
+zero containment in each output range, and shrinking output widths. It derives
+the exact root equation; it does not construct the concrete isolators or count.
+`root_on_line` then applies proved symmetry and uniqueness.
 The complex zeta construction, symmetry, count theorem, and actual isolating
 rectangles remain open. An interval of small width around \(1/2\) is not equality.
 

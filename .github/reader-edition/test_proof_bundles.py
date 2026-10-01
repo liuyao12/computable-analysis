@@ -37,6 +37,9 @@ def validate(site):
     zeros=next(g for g in c['graphs'] if g['id']=='showcase:zeta-zeros')
     reflection=next(n for n in zeros['nodes'] if n['id']=='reflection')
     assert reflection['loc']['codeLines']==41
+    root_law=next(n for n in zeros['nodes'] if n['id']=='root-law')
+    assert root_law['status']=='registered' and root_law['loc']['codeLines']>0
+    assert 'conditional' in root_law['body']
     assert zeros['loc']['pendingBundles']==5
     # Source spans must count after lexical comment removal and de-duplicate overlaps.
     record=source_record(b'/- comment\n nested /- text -/\n-/\ndef one := 1\n\ndef two := "-- literal" -- trailing\n')

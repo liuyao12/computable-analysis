@@ -107,6 +107,17 @@ valid represented roots and supplied function/region evidence. It assumes
 neither the critical-line conclusion nor an argument-principle identity. It
 **does not prove that a particular zeta isolating region exists**.
 
+`ZeroFromEnclosures.root_is_zero` now constructs the represented root directly
+from a supplied executable sequence of nested, ordered input boxes with
+shrinking widths. Whole-box range soundness must hold for arbitrary valid
+represented inputs enclosed by a stage, not just rational samples. If the
+output ranges contain zero and shrink in both coordinates, the theorem derives
+the exact zero equation. It does not assume that equation in a record.
+`root_on_line` connects this construction to proved reflection and uniqueness.
+These are conditional laws: the actual zeta boxes, sound ranges, symmetry,
+uniqueness, multiplicity and ordinal completeness have not been constructed.
+The first two concrete certificates remain incomplete.
+
 A complete finite-height theorem must construct the complex function and its
 symmetry, certify nonvanishing on entire contour segments, prove the argument-principle count for the selected function and region,
 isolate each root, and equate the sum of local counts with the global

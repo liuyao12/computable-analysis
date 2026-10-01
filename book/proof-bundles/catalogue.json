@@ -197,7 +197,7 @@
       },
       {
         "id": "mathlib",
-        "name": "Mathlib Bernoulli–Fourier",
+        "name": "Mathlib Bernoulli\u2013Fourier",
         "status": "source comparison"
       }
     ],
@@ -321,7 +321,7 @@
   },
   {
     "id": "showcase:euler-even",
-    "title": "Euler’s even zeta values",
+    "title": "Euler\u2019s even zeta values",
     "page": "euler.html",
     "anchor": "theorem",
     "status": "Source-linked proof comparison; see each bundle for checked scope",
@@ -334,7 +334,7 @@
       },
       {
         "id": "mathlib",
-        "name": "Mathlib Bernoulli–Fourier",
+        "name": "Mathlib Bernoulli\u2013Fourier",
         "status": "source comparison"
       },
       {
@@ -536,7 +536,7 @@
     "routes": [
       {
         "id": "cauchy",
-        "name": "Cauchy–Taylor and nearest singularities",
+        "name": "Cauchy\u2013Taylor and nearest singularities",
         "status": "outline"
       },
       {
@@ -860,7 +860,7 @@
       {
         "id": "ml",
         "title": "Mathlib identity theorem",
-        "body": "Uniqueness from analytic agreement is formalized in Mathlib’s analytic foundation.",
+        "body": "Uniqueness from analytic agreement is formalized in Mathlib\u2019s analytic foundation.",
         "routes": [
           "mathlib"
         ],
@@ -899,7 +899,7 @@
     "title": "First and second zeta zeros",
     "page": "zeta-zeros.html",
     "anchor": "benchmark",
-    "status": "No concrete zeta zero certified; two proof strategies and checked conditional algebra",
+    "status": "No concrete zeta zero certified; checked enclosure and reflection laws, with concrete bounds and counts pending",
     "edgeSemantics": "Curated mathematical bundles and prerequisite arrows. These summarize the linked proofs and plans, rather than an automatically extracted declaration graph.",
     "routes": [
       {
@@ -952,6 +952,23 @@
         "files": [],
         "status": "pending",
         "declarations": []
+      },
+      {
+        "id": "root-law",
+        "title": "Shrinking enclosures give an exact root",
+        "body": "The checked conditional law constructs a represented root from nested input boxes and sound shrinking output ranges containing zero. Concrete zeta boxes and their soundness are still pending.",
+        "routes": [
+          "count",
+          "sign"
+        ],
+        "files": [
+          "ComputableAnalysis/ZeroFromEnclosures.lean"
+        ],
+        "status": "registered",
+        "declarations": [
+          "ComputableAnalysis.FunctionTheory.ZeroFromEnclosures.root_is_zero",
+          "ComputableAnalysis.FunctionTheory.ZeroFromEnclosures.root_on_line"
+        ]
       },
       {
         "id": "reflection",
@@ -1053,12 +1070,32 @@
         "source": "ml",
         "target": "discrete",
         "kind": "outline"
+      },
+      {
+        "source": "count",
+        "target": "root-law",
+        "kind": "outline"
+      },
+      {
+        "source": "sign",
+        "target": "root-law",
+        "kind": "outline"
+      },
+      {
+        "source": "root-law",
+        "target": "reflection",
+        "kind": "outline"
+      },
+      {
+        "source": "root-law",
+        "target": "complete",
+        "kind": "outline"
       }
     ]
   },
   {
     "id": "showcase:fuchs",
-    "title": "Fuchs’s criterion",
+    "title": "Fuchs\u2019s criterion",
     "page": "fuchs.html",
     "anchor": "theorem",
     "status": "Source-linked proof comparison; see each bundle for checked scope",
@@ -1165,7 +1202,7 @@
   },
   {
     "id": "showcase:painleve",
-    "title": "Painlevé–Gambier classification",
+    "title": "Painlev\u00e9\u2013Gambier classification",
     "page": "painleve.html",
     "anchor": "theorem",
     "status": "Source-linked proof comparison; see each bundle for checked scope",
@@ -1204,7 +1241,7 @@
       {
         "id": "poles",
         "title": "Computed double poles",
-        "body": "These local constructions do not prove the global Painlevé property or exhaustive classification.",
+        "body": "These local constructions do not prove the global Painlev\u00e9 property or exhaustive classification.",
         "routes": [
           "poles"
         ],
@@ -1229,7 +1266,7 @@
       },
       {
         "id": "full",
-        "title": "Exhaustive Painlevé–Gambier classification",
+        "title": "Exhaustive Painlev\u00e9\u2013Gambier classification",
         "body": "This step has no registered proof of the displayed target. Its LOC is pending, not zero.",
         "routes": [
           "poles",
@@ -1345,7 +1382,7 @@
       {
         "id": "ml",
         "title": "Mathlib Gaussian integral",
-        "body": "The linked file proves Gaussian integration and the Gamma half-value in Mathlib’s real measure theory.",
+        "body": "The linked file proves Gaussian integration and the Gamma half-value in Mathlib\u2019s real measure theory.",
         "routes": [
           "mathlib"
         ],

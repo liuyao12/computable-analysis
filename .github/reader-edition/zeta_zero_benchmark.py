@@ -70,6 +70,7 @@ def inventory(root, module):
 def build_report(root, revision):
     module = 'ComputableAnalysis.ZeroIsolation'
     measured = inventory(root, module)
+    root_law = inventory(root, 'ComputableAnalysis.ZeroFromEnclosures')
     return dict(schemaVersion=2, documentationRevision=revision,
         metric='Nonblank physical Lean source lines after removing nested comments; includes imports and namespaces.',
         closureScope='All declarations in project-local transitive import files, not a minimized theorem dependency slice. External library sources are excluded and listed.',
@@ -79,25 +80,36 @@ def build_report(root, revision):
         shared=dict(baselineProofCodeLines=None, baselineStatus='Complete shared zeta-certification machinery not yet implemented.',
             module=module, theorem='ComputableAnalysis.FunctionTheory.ZeroIsolation.unique_zero_on_line',
             status='Checked conditional reflection-and-uniqueness implication; no concrete zeta certificate.',
-            direct=measured['files']['ComputableAnalysis/ZeroIsolation.lean'], **measured),
-        targets=[dict(ordinal=k, status='Not yet implemented', additionalProofCodeLines=None,
+            direct=measured['files']['ComputableAnalysis/ZeroIsolation.lean'],
+            rootConstruction=dict(module='ComputableAnalysis.ZeroFromEnclosures',
+                status='Checked conditional enclosure-to-root and line-location laws; concrete zeta bounds not supplied.',
+                direct=root_law['files']['ComputableAnalysis/ZeroFromEnclosures.lean'], **root_law), **measured),
+        targets=[dict(ordinal=k, approximateImaginaryPart=height,
+            numericalReference='https://www.lmfdb.org/zeros/zeta/list?N=1&limit=2',
+            numericalReferenceIsRepositoryCertificate=False,
+            status='Formal certificate not yet implemented', additionalProofCodeLines=None,
             sharedBaselineExcluded=True, certificateBytes=None, kernelCheckSeconds=None,
-            ordinalCompletenessProved=False) for k in [1, 2]])
+            ordinalCompletenessProved=False) for k, height in [(1, '14.134725141735'), (2, '21.022039638772')]])
 
 
 def render_table(report):
     direct = report['shared']['direct']['codeLines']
     closure = report['shared']['projectClosureCodeLines']
+    root_loc = report['shared']['rootConstruction']['direct']['codeLines']
+    rows = ''.join(rf'<tr><td>{"First" if row["ordinal"] == 1 else "Second"} positive-height zero</td>'
+        rf'<td>\({row["approximateImaginaryPart"]}\)</td><td>Pending</td><td>Pending</td><td>Pending</td>'
+        '<td>Formal certificate pending</td></tr>' for row in report['targets'])
     return f'''<div class="numeric-scroll"><table id="zeta-zero-shared-table">
 <thead><tr><th>Shared setup</th><th>Lean code lines</th><th>Status</th></tr></thead>
 <tbody><tr><td>Complete shared zeta-certification machinery</td><td>Pending</td><td>Not yet constructed</td></tr>
-<tr><td>Existing conditional reflection module</td><td>{direct}</td><td>Conditional law checked; one component of the setup</td></tr></tbody></table></div>
+<tr><td>Existing conditional reflection module</td><td>{direct}</td><td>Conditional law checked; one component of the setup</td></tr>
+<tr><td>Enclosure-to-root construction laws</td><td>{root_loc}</td><td>Conditional laws checked; actual zeta enclosures pending</td></tr></tbody></table></div>
 <p>The conditional module's project-local import closure contains {closure:,} code lines. This conservative file-level inventory includes every declaration in those import files; it is not the size of a minimal proof or the complete shared zeta-certification setup. External library source is excluded and listed in the report. Source counting itself does not verify a theorem.</p>
 <div class="numeric-scroll"><table id="zeta-zero-benchmark-table">
 <caption>Per-zero comparison: additional code only, excluding the shared setup for both zeros.</caption>
-<thead><tr><th>Zero certification</th><th>Additional Lean code lines</th><th>Certificate bytes</th><th>Kernel-check time</th><th>Status</th></tr></thead>
-<tbody><tr><td>First positive-height zero</td><td>Pending</td><td>Pending</td><td>Pending</td><td>Not yet certified here</td></tr>
-<tr><td>Second positive-height zero</td><td>Pending</td><td>Pending</td><td>Pending</td><td>Pending</td><td>Not yet certified here</td></tr></tbody></table></div>'''
+<thead><tr><th>Zero certification</th><th>Imaginary part (approx.)</th><th>Additional Lean code lines</th><th>Certificate bytes</th><th>Kernel-check time</th><th>Status</th></tr></thead>
+<tbody>{rows}</tbody></table></div>
+<p>The imaginary parts are rounded numerical reference values from <a href="https://www.lmfdb.org/zeros/zeta/">LMFDB's zero table</a>. They identify the targets; they are not repository proof certificates. “Pending” refers to the formal certification and its code-size, certificate-size and timing measurements.</p>'''
 
 
 if __name__ == '__main__':

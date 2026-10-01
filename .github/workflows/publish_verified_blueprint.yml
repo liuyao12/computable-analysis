@@ -106,6 +106,7 @@ on:
       - 'ComputableAnalysis/GammaInteger.lean'
       - 'ComputableAnalysis/ZetaIntegerBounds.lean'
       - 'ComputableAnalysis/ZeroIsolation.lean'
+      - 'ComputableAnalysis/ZeroFromEnclosures.lean'
       - 'docs/FUNCTION_THEORY_ZETA_GAMMA.md'
       - 'scripts/check_basel.lean'
       - 'ComputableAnalysis/Basel/**'
@@ -442,15 +443,15 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p zeta-gamma-reports
-          lake build ComputableAnalysis.GammaInteger ComputableAnalysis.ZetaIntegerBounds ComputableAnalysis.ZeroIsolation | tee zeta-gamma-reports/build.log
+          lake build ComputableAnalysis.GammaInteger ComputableAnalysis.ZetaIntegerBounds ComputableAnalysis.ZeroFromEnclosures | tee zeta-gamma-reports/build.log
           lake env lean scripts/check_zeta_gamma.lean | tee zeta-gamma-reports/audit.log
           cp zeta-gamma-reports/audit.log site/reading/zeta-gamma-audit.log
           python3 - <<'PYREPORT'
           import hashlib,json,os,pathlib
-          sources=[pathlib.Path(p) for p in ['ComputableAnalysis/GammaInteger.lean','ComputableAnalysis/ZetaIntegerBounds.lean','ComputableAnalysis/ZeroIsolation.lean','ComputableAnalysis/DirichletSeries.lean','ComputableAnalysis/PowerSeries.lean','scripts/check_zeta_gamma.lean','docs/FUNCTION_THEORY_ZETA_GAMMA.md','skills/analytic-continuation/references/certified-zero-counting.md']]
+          sources=[pathlib.Path(p) for p in ['ComputableAnalysis/GammaInteger.lean','ComputableAnalysis/ZetaIntegerBounds.lean','ComputableAnalysis/ZeroIsolation.lean','ComputableAnalysis/ZeroFromEnclosures.lean','ComputableAnalysis/DirichletSeries.lean','ComputableAnalysis/PowerSeries.lean','scripts/check_zeta_gamma.lean','docs/FUNCTION_THEORY_ZETA_GAMMA.md','skills/analytic-continuation/references/certified-zero-counting.md']]
           audit=pathlib.Path('zeta-gamma-reports/audit.log')
           report=dict(documentationRevision=os.environ['GITHUB_SHA'],complexZetaConstructed=False,generalGammaConstructed=False,argumentPrincipleProved=False,finiteHeightCriticalLineTheoremProved=False,
-            checked=['integer zeta exact bounds and nonvanishing','integer zeta antitonicity','real zeta integer compatibility','actual Gauss finite-product cancellation','Gamma integer nested enclosures and explicit convergence','Gamma integer exact factorial limit','exact critical-line location from reflection and root uniqueness'],
+            checked=['integer zeta exact bounds and nonvanishing','integer zeta antitonicity','real zeta integer compatibility','actual Gauss finite-product cancellation','Gamma integer nested enclosures and explicit convergence','Gamma integer exact factorial limit','exact critical-line location from reflection and root uniqueness','exact root equation from shrinking sound enclosures','enclosure root construction followed by reflection and uniqueness'],
             remaining=['represented complex Dirichlet series','Gamma general parameters and Euler-integral comparison','critical-strip continuation and completed zeta symmetry','actual argument principle and multiplicity count','certified isolating rectangles and global completeness'],
             auditSha256=hashlib.sha256(audit.read_bytes()).hexdigest(),sourceHashes={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in sources})
           pathlib.Path('site/reading/zeta-gamma-foundation.json').write_text(json.dumps(report,indent=2)+'\n')

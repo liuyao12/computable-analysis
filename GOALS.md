@@ -782,3 +782,14 @@ labelled whole-file LOC. Route totals union overlapping lines and count shared
 code once. Counts exclude automatic import expansion and do not replace proof
 audits. The source hashes, line bitmap and counting script make measurements
 reproducible. Native theorem scope and the existing checked graphs are preserved.
+
+
+## Zero construction from shrinking enclosures
+
+`ZeroFromEnclosures` derives an exact zero equation for the computation given
+by nested input boxes, using sound whole-box output ranges whose widths shrink
+and which contain zero. The root equation is a conclusion, not an assumed
+certificate field. The checked reflection law then supplies exact line location
+when the function's symmetry and uniqueness have been proved. These are shared
+conditional laws; complex zeta continuation, its concrete isolating ranges,
+actual multiplicity counts and first/second ordinal completeness remain open.

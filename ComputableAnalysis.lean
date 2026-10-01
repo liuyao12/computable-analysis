@@ -21,6 +21,7 @@ import ComputableAnalysis.RealPowerIntegralTest
 import ComputableAnalysis.GammaInteger
 import ComputableAnalysis.ZetaIntegerBounds
 import ComputableAnalysis.ZeroIsolation
+import ComputableAnalysis.ZeroFromEnclosures
 
 /-!
 # Computable Analysis
