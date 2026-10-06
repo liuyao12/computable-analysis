@@ -1,0 +1,27 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Exponential chapter · proof audit</title><link rel="stylesheet" href="../reading/book.css"></head><body>
+<main style="max-width:900px;margin:40px auto;padding:0 24px"><a href="../ch-exponential-logarithm.html">← Exponential and logarithm</a>
+<h1>Proof sources and audit</h1><p>The chapter core has checked global agreement, representation invariance,
+reciprocal integral evidence, and both inverse laws. Its 14 audited endpoints use only
+<code>propext</code>, <code>Classical.choice</code>, and <code>Quot.sound</code>.
+The source import closure uses Lean's native foundation and no Mathlib.</p>
+<p>The separate legacy constant compatibility module inherits older native arithmetic proof dependencies.
+The chapter does not claim an independent exponential evaluator based on integral-only bisection,
+or an agreement theorem for the older named <code>logTwoSeries</code>.</p>
+<p>These are content-hashed snapshots of the exact local proof sources used for this chapter,
+including their transitive imports. They preserve the source scope independently of unrelated repository work.</p>
+<ul><li><a href="core-audit.log">Core theorem types and axiom audit</a></li>
+<li><a href="chapter-declarations.log">Every chapter declaration checked by Lean</a></li>
+<li><a href="runtime.log">Reciprocal quadrature runtime checks</a></li>
+<li><a href="focused-build.log">Successful focused Lake build</a></li>
+<li><a href="legacy-constants-audit.log">Separate legacy constant axiom audit</a></li>
+<li><a href="manifest.json">Source hashes and verification manifest</a></li>
+<li><a href="chapter.tex">Chapter manuscript</a></li>
+<li><a href="sources.zip">Complete Lean source snapshot (ZIP)</a></li></ul>
+<h2>Chapter modules</h2><ul><li><a href="sources/ComputableAnalysis/ExponentialComputations/API.lean"><code>ComputableAnalysis.ExponentialComputations.API</code></a></li><li><a href="sources/ComputableAnalysis/ExponentialComputations/CompoundLimit.lean"><code>ComputableAnalysis.ExponentialComputations.CompoundLimit</code></a></li><li><a href="sources/ComputableAnalysis/ExponentialComputations/Constants.lean"><code>ComputableAnalysis.ExponentialComputations.Constants</code></a></li><li><a href="sources/ComputableAnalysis/ExponentialComputations/IntegralLogarithm.lean"><code>ComputableAnalysis.ExponentialComputations.IntegralLogarithm</code></a></li><li><a href="sources/ComputableAnalysis/ExponentialComputations/LipschitzIntegral.lean"><code>ComputableAnalysis.ExponentialComputations.LipschitzIntegral</code></a></li><li><a href="sources/ComputableAnalysis/ExponentialComputations/LogarithmIncrement.lean"><code>ComputableAnalysis.ExponentialComputations.LogarithmIncrement</code></a></li><li><a href="sources/ComputableAnalysis/ExponentialComputations/LogarithmRemainder.lean"><code>ComputableAnalysis.ExponentialComputations.LogarithmRemainder</code></a></li><li><a href="sources/ComputableAnalysis/ExponentialComputations/PositiveLogarithm.lean"><code>ComputableAnalysis.ExponentialComputations.PositiveLogarithm</code></a></li><li><a href="sources/ComputableAnalysis/ExponentialComputations/PositiveSegment.lean"><code>ComputableAnalysis.ExponentialComputations.PositiveSegment</code></a></li><li><a href="sources/ComputableAnalysis/ExponentialComputations/QuadraticFTC.lean"><code>ComputableAnalysis.ExponentialComputations.QuadraticFTC</code></a></li><li><a href="sources/ComputableAnalysis/ExponentialComputations/RealExponential.lean"><code>ComputableAnalysis.ExponentialComputations.RealExponential</code></a></li><li><a href="sources/ComputableAnalysis/ExponentialComputations/RectangleValue.lean"><code>ComputableAnalysis.ExponentialComputations.RectangleValue</code></a></li><li><a href="sources/ComputableAnalysis/ExponentialComputations/SegmentEstimates.lean"><code>ComputableAnalysis.ExponentialComputations.SegmentEstimates</code></a></li><li><a href="sources/ComputableAnalysis/ExponentialComputations/SegmentFTC.lean"><code>ComputableAnalysis.ExponentialComputations.SegmentFTC</code></a></li></ul>
+<p>To replay the core audit, extract the source archive into a separate directory, install the
+version in <code>lean-toolchain</code>, and run <code>lake build ComputableAnalysis.ExponentialComputations.API</code>,
+then <code>lake env lean check_exponential_computations.lean</code>.
+The snapshot has no umbrella import: only this chapter's dependency closure is included.
+The full repository build encountered errors in the unrelated <code>FiniteQuarticQuadraticSplit</code> module;
+the focused chapter build completed successfully.</p></main></body></html>

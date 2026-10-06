@@ -1,0 +1,61 @@
+ComputableAnalysis.ExponentialComputations.compoundApproximation_error (z : RiemannHilbert.Scalar) (n : Nat)
+  (hmesh : RiemannHilbert.DomainFunctions.scalarBound z / ↑(n + 1) ≤ 1 / 128) :
+  FunctionTheory.Small ((compoundApproximation z n).val.sub (ModularForms.entireExponentialValue z).val)
+    (compoundErrorConstant z / ↑(n + 1))
+ComputableAnalysis.ExponentialComputations.compoundValue_equiv_powerSeries (z : RiemannHilbert.Scalar) :
+  (compoundValue z).val.Equiv (ModularForms.entireExponentialValue z).val
+ComputableAnalysis.ExponentialComputations.Implementation.equivalent (f g : Implementation)
+  (z : RiemannHilbert.Scalar) : (f.eval z).val.Equiv (g.eval z).val
+ComputableAnalysis.ExponentialComputations.Implementation.congr (f : Implementation) (z w : RiemannHilbert.Scalar)
+  (h : z.val.Equiv w.val) : (f.eval z).val.Equiv (f.eval w).val
+ComputableAnalysis.ExponentialComputations.representedTaylor_agrees {C : Rat}
+  (A : ComplexExponentialLift.BoundedInput C) : A.exponential.Equiv (powerSeries.eval ⟨A.raw, ⋯⟩).val
+ComputableAnalysis.ExponentialComputations.exp_positive (x : RealInput) : (exp x).val.Pos
+ComputableAnalysis.ExponentialComputations.exp_injective (x y : RealInput) (h : (exp x).val.Equiv (exp y).val) :
+  x.val.Equiv y.val
+ComputableAnalysis.ExponentialComputations.log_exp (x : RealInput) : (log ⟨exp x, ⋯⟩).val.Equiv x.val
+ComputableAnalysis.ExponentialComputations.exp_log (x : PositiveInput) : (exp (log x)).val.Equiv x.val.val
+ComputableAnalysis.ExponentialComputations.logChart_derivative (x : PositiveInput) :
+  ((logChartHolomorphic x).derivative (realAxis x.val) ⋯).val.Equiv
+    (RiemannHilbert.RepresentedReciprocal.inverse (realAxis x.val) ⋯).val
+ComputableAnalysis.ExponentialComputations.integralLog_hasIntegral (x : PositiveInput) :
+  Integral.HasIntegral (segmentIntegrand x) (integralLog x).val
+ComputableAnalysis.ExponentialComputations.integralLog_equiv_log (x : PositiveInput) :
+  (integralLog x).val.Equiv (log x).val
+ComputableAnalysis.ExponentialComputations.integralLog_exp (x : RealInput) : (integralLog ⟨exp x, ⋯⟩).val.Equiv x.val
+ComputableAnalysis.ExponentialComputations.exp_integralLog (x : PositiveInput) :
+  (exp (integralLog x)).val.Equiv x.val.val
+ComputableAnalysis.ExponentialComputations.integralLog_congr (x y : PositiveInput) (h : x.val.val.Equiv y.val.val) :
+  (integralLog x).val.Equiv (integralLog y).val
+ComputableAnalysis.ExponentialComputations.real_computation_agrees_of_integral_inverse (f : RealInput → PositiveInput)
+  (hinverse : ∀ (x : RealInput), (integralLog (f x)).val.Equiv x.val) (x : RealInput) : (f x).val.val.Equiv (exp x).val
+'ComputableAnalysis.ExponentialComputations.compoundValue_equiv_powerSeries' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Implementation.equivalent' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.representedTaylor_agrees' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.exp_positive' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ExponentialComputations.exp_injective' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ExponentialComputations.log_exp' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ExponentialComputations.exp_log' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ExponentialComputations.logChart_derivative' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.integralLog_hasIntegral' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.integralLog_equiv_log' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.integralLog_exp' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ExponentialComputations.exp_integralLog' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ExponentialComputations.integralLog_congr' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.real_computation_agrees_of_integral_inverse' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

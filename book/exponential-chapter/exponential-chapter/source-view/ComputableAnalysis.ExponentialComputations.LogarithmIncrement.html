@@ -1,0 +1,112 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ComputableAnalysis.ExponentialComputations.LogarithmIncrement</title><style>body{margin:24px;background:#fbfaf6;color:#252b27}pre{font:12px/1.65 monospace;white-space:pre;overflow-x:auto}pre span{display:block}pre span:target{background:#fff2b8}a{color:#466442}pre a{color:#999;text-decoration:none}</style></head><body><a href="../index.html">Proof bundle</a><h1 style="font:18px system-ui">ComputableAnalysis.ExponentialComputations.LogarithmIncrement</h1><pre><span id="L1"><a href="#L1">   1</a> import ComputableAnalysis.ExponentialComputations.PositiveLogarithm</span>
+<span id="L2"><a href="#L2">   2</a> import ComputableAnalysis.ExponentialComputations.LogarithmRemainder</span>
+<span id="L3"><a href="#L3">   3</a> import ComputableAnalysis.ModularForms.PositiveReciprocalAgreement</span>
+<span id="L4"><a href="#L4">   4</a> </span>
+<span id="L5"><a href="#L5">   5</a> /-! A quantitative increment law for the global real logarithm, proved from</span>
+<span id="L6"><a href="#L6">   6</a> its constructed local power series and the already checked inverse laws. -/</span>
+<span id="L7"><a href="#L7">   7</a> namespace ComputableAnalysis.ExponentialComputations</span>
+<span id="L8"><a href="#L8">   8</a> open ComplexRaw FunctionTheory RiemannHilbert LocalODE DomainFunctions ModularForms</span>
+<span id="L9"><a href="#L9">   9</a> set_option maxHeartbeats 1000000</span>
+<span id="L10"><a href="#L10">  10</a> </span>
+<span id="L11"><a href="#L11">  11</a> private theorem real_embedding_bound {z : ComplexRaw} {R : Rat}</span>
+<span id="L12"><a href="#L12">  12</a>     (hR : 0 ≤ R) (h : Small z R) : Small (ofRealRaw z.realPart) R := by</span>
+<span id="L13"><a href="#L13">  13</a>   refine ⟨h.1,h.2.1,?_,?_⟩</span>
+<span id="L14"><a href="#L14">  14</a>   · intro n m; change -R ≤ 0; grind only</span>
+<span id="L15"><a href="#L15">  15</a>   · intro n m; exact hR</span>
+<span id="L16"><a href="#L16">  16</a> </span>
+<span id="L17"><a href="#L17">  17</a> /-- The normalized coordinate is the reciprocal times the displacement. -/</span>
+<span id="L18"><a href="#L18">  18</a> theorem relativePoint_displacement (c z : Scalar) (hc : NonzeroBoxSearch.Nonzero c) :</span>
+<span id="L19"><a href="#L19">  19</a>     (RelativeLogarithm.point c hc z).val.Equiv</span>
+<span id="L20"><a href="#L20">  20</a>       (mul (RepresentedReciprocal.inverse c hc).val (sub z.val c.val)) := by</span>
+<span id="L21"><a href="#L21">  21</a>   have hi := ComplexRawQuotient.ofRaw_eq_ofRaw</span>
+<span id="L22"><a href="#L22">  22</a>     (hleft := mul_valid (RepresentedReciprocal.inverse c hc).property c.property)</span>
+<span id="L23"><a href="#L23">  23</a>     (hright := ofQComplex_valid _) (RepresentedReciprocal.inverse_mul c hc)</span>
+<span id="L24"><a href="#L24">  24</a>   apply ComplexRawQuotient.equiv_of_ofRaw_eq</span>
+<span id="L25"><a href="#L25">  25</a>     (hleft := (RelativeLogarithm.point c hc z).property)</span>
+<span id="L26"><a href="#L26">  26</a>     (hright := mul_valid (RepresentedReciprocal.inverse c hc).property (sub_valid z.property c.property))</span>
+<span id="L27"><a href="#L27">  27</a>   let C := ComplexRawQuotient.ofRaw c.val c.property</span>
+<span id="L28"><a href="#L28">  28</a>   let Z := ComplexRawQuotient.ofRaw z.val z.property</span>
+<span id="L29"><a href="#L29">  29</a>   let I := ComplexRawQuotient.ofRaw (RepresentedReciprocal.inverse c hc).val</span>
+<span id="L30"><a href="#L30">  30</a>     (RepresentedReciprocal.inverse c hc).property</span>
+<span id="L31"><a href="#L31">  31</a>   change I*C=1 at hi</span>
+<span id="L32"><a href="#L32">  32</a>   change -1+I*Z=I*(Z-C)</span>
+<span id="L33"><a href="#L33">  33</a>   grind only</span>
+<span id="L34"><a href="#L34">  34</a> </span>
+<span id="L35"><a href="#L35">  35</a> /-- The global real logarithm increment agrees with its computed local chart. -/</span>
+<span id="L36"><a href="#L36">  36</a> theorem log_increment (c z : PositiveInput)</span>
+<span id="L37"><a href="#L37">  37</a>     (hz : RelativeLogarithm.domain (realAxis c.val) (positive_real_nonzero c.val c.property) (realAxis z.val)) :</span>
+<span id="L38"><a href="#L38">  38</a>     (RealRaw.sub (log z).val (log c).val).Equiv</span>
+<span id="L39"><a href="#L39">  39</a>       (((RelativeLogarithm.function (realAxis c.val) (positive_real_nonzero c.val c.property)).eval</span>
+<span id="L40"><a href="#L40">  40</a>         (realAxis z.val) hz).val.realPart) := by</span>
+<span id="L41"><a href="#L41">  41</a>   let C := realAxis c.val</span>
+<span id="L42"><a href="#L42">  42</a>   let hc := positive_real_nonzero c.val c.property</span>
+<span id="L43"><a href="#L43">  43</a>   let L := (RelativeLogarithm.function C hc).eval (realAxis z.val) hz</span>
+<span id="L44"><a href="#L44">  44</a>   let A := MatrixExponential.propagatedBranch C hc (complexLog c) (realAxis z.val) hz</span>
+<span id="L45"><a href="#L45">  45</a>   have hexp := entireExponential_propagatedLogarithm C hc (complexLog c) (complexLog_exponential c)</span>
+<span id="L46"><a href="#L46">  46</a>     (realAxis z.val) hz</span>
+<span id="L47"><a href="#L47">  47</a>   have h := entireExponential_fiber_realPart A (complexLog z)</span>
+<span id="L48"><a href="#L48">  48</a>     (equiv_trans (entireExponentialValue A).property (realAxis z.val).property</span>
+<span id="L49"><a href="#L49">  49</a>       (entireExponentialValue (complexLog z)).property hexp (equiv_symm (complexLog_exponential z)))</span>
+<span id="L50"><a href="#L50">  50</a>   have hsum : (RealRaw.add (log c).val L.val.realPart).Equiv (log z).val := h</span>
+<span id="L51"><a href="#L51">  51</a>   exact RealRaw.equiv_trans</span>
+<span id="L52"><a href="#L52">  52</a>     (RealRaw.sub_valid (log z).property (log c).property)</span>
+<span id="L53"><a href="#L53">  53</a>     (RealRaw.sub_valid (RealRaw.add_valid (log c).property (realPart_valid L.property)) (log c).property)</span>
+<span id="L54"><a href="#L54">  54</a>     (realPart_valid L.property)</span>
+<span id="L55"><a href="#L55">  55</a>     (RealRaw.sub_equiv (log z).property (RealRaw.add_valid (log c).property (realPart_valid L.property))</span>
+<span id="L56"><a href="#L56">  56</a>       (log c).property (log c).property (RealRaw.equiv_symm hsum) (RealRaw.equiv_refl _ (log c).property))</span>
+<span id="L57"><a href="#L57">  57</a>     (RealRaw.add_sub_cancel_left_equiv (log c).property (realPart_valid L.property))</span>
+<span id="L58"><a href="#L58">  58</a> </span>
+<span id="L59"><a href="#L59">  59</a> /-- A quadratic logarithm remainder with any justified bound on the actual</span>
+<span id="L60"><a href="#L60">  60</a> reciprocal. The conclusion is about the global logarithm on positive inputs. -/</span>
+<span id="L61"><a href="#L61">  61</a> theorem log_increment_error (c z : PositiveInput) (B H : Rat) (hB : 0 ≤ B) (hH : 0 ≤ H)</span>
+<span id="L62"><a href="#L62">  62</a>     (hi : Small (RepresentedReciprocal.inverse (realAxis c.val)</span>
+<span id="L63"><a href="#L63">  63</a>       (positive_real_nonzero c.val c.property)).val B)</span>
+<span id="L64"><a href="#L64">  64</a>     (hstep : Small (sub (realAxis z.val).val (realAxis c.val).val) H)</span>
+<span id="L65"><a href="#L65">  65</a>     (hmesh : 2*B*H ≤ (1:Rat)/128) :</span>
+<span id="L66"><a href="#L66">  66</a>     Small (ofRealRaw (RealRaw.sub (RealRaw.sub (log z).val (log c).val)</span>
+<span id="L67"><a href="#L67">  67</a>       (mul (RepresentedReciprocal.inverse (realAxis c.val)</span>
+<span id="L68"><a href="#L68">  68</a>         (positive_real_nonzero c.val c.property)).val</span>
+<span id="L69"><a href="#L69">  69</a>         (sub (realAxis z.val).val (realAxis c.val).val)).realPart)) (16*(2*B*H)^2) := by</span>
+<span id="L70"><a href="#L70">  70</a>   let C := realAxis c.val</span>
+<span id="L71"><a href="#L71">  71</a>   let Z := realAxis z.val</span>
+<span id="L72"><a href="#L72">  72</a>   let hc := positive_real_nonzero c.val c.property</span>
+<span id="L73"><a href="#L73">  73</a>   let w := RelativeLogarithm.point C hc Z</span>
+<span id="L74"><a href="#L74">  74</a>   let d : Scalar := ⟨mul (RepresentedReciprocal.inverse C hc).val (sub Z.val C.val),</span>
+<span id="L75"><a href="#L75">  75</a>     mul_valid (RepresentedReciprocal.inverse C hc).property (sub_valid Z.property C.property)⟩</span>
+<span id="L76"><a href="#L76">  76</a>   have hwd := relativePoint_displacement C Z hc</span>
+<span id="L77"><a href="#L77">  77</a>   have hb := Small.mul (RepresentedReciprocal.inverse C hc).property (sub_valid Z.property C.property)</span>
+<span id="L78"><a href="#L78">  78</a>     hB hH hi hstep</span>
+<span id="L79"><a href="#L79">  79</a>   have hw : Small w.val (2*B*H) :=</span>
+<span id="L80"><a href="#L80">  80</a>     Small.congr d.property w.property (equiv_symm hwd) hb</span>
+<span id="L81"><a href="#L81">  81</a>   have hsize : 0 ≤ 2*B*H := Rat.mul_nonneg (Rat.mul_nonneg (by decide +kernel) hB) hH</span>
+<span id="L82"><a href="#L82">  82</a>   have hz : RelativeLogarithm.domain C hc Z :=</span>
+<span id="L83"><a href="#L83">  83</a>     ⟨2*B*H,hsize,by change 2*B*H&lt;(1:Rat)/32; grind only,hw⟩</span>
+<span id="L84"><a href="#L84">  84</a>   let L := LocalLogarithm.function.eval w hz</span>
+<span id="L85"><a href="#L85">  85</a>   have he := localLogarithm_linear_error w hz (2*B*H) hsize hw</span>
+<span id="L86"><a href="#L86">  86</a>   have hinc := log_increment c z hz</span>
+<span id="L87"><a href="#L87">  87</a>   have hdiff := RealRaw.sub_equiv</span>
+<span id="L88"><a href="#L88">  88</a>     (RealRaw.sub_valid (log z).property (log c).property) (realPart_valid L.property)</span>
+<span id="L89"><a href="#L89">  89</a>     (realPart_valid d.property) (realPart_valid w.property) hinc (RealRaw.equiv_symm (realPart_equiv hwd))</span>
+<span id="L90"><a href="#L90">  90</a>   have hdiff&#x27; : (RealRaw.sub (RealRaw.sub (log z).val (log c).val) d.val.realPart).Equiv</span>
+<span id="L91"><a href="#L91">  91</a>       (sub L.val w.val).realPart := by</span>
+<span id="L92"><a href="#L92">  92</a>     intro n</span>
+<span id="L93"><a href="#L93">  93</a>     have hh := (RealRaw.compareAt_overlap_iff _ _ n n).mp (hdiff n)</span>
+<span id="L94"><a href="#L94">  94</a>     apply (RealRaw.compareAt_overlap_iff _ _ n n).mpr</span>
+<span id="L95"><a href="#L95">  95</a>     change (((log z).val.compute n).lo-((log c).val.compute n).hi)-(d.val.compute n).hi.re ≤</span>
+<span id="L96"><a href="#L96">  96</a>         (L.val.compute n).hi.re + -(w.val.compute n).lo.re ∧</span>
+<span id="L97"><a href="#L97">  97</a>       (L.val.compute n).lo.re + -(w.val.compute n).hi.re ≤</span>
+<span id="L98"><a href="#L98">  98</a>         (((log z).val.compute n).hi-((log c).val.compute n).lo)-(d.val.compute n).lo.re</span>
+<span id="L99"><a href="#L99">  99</a>     change (((log z).val.compute n).lo-((log c).val.compute n).hi)-(d.val.compute n).hi.re ≤</span>
+<span id="L100"><a href="#L100"> 100</a>         (L.val.compute n).hi.re-(w.val.compute n).lo.re ∧</span>
+<span id="L101"><a href="#L101"> 101</a>       (L.val.compute n).lo.re-(w.val.compute n).hi.re ≤</span>
+<span id="L102"><a href="#L102"> 102</a>         (((log z).val.compute n).hi-((log c).val.compute n).lo)-(d.val.compute n).lo.re at hh</span>
+<span id="L103"><a href="#L103"> 103</a>     simpa only [Rat.sub_eq_add_neg] using hh</span>
+<span id="L104"><a href="#L104"> 104</a>   have hemb := ofRealRaw_equiv_of_equiv</span>
+<span id="L105"><a href="#L105"> 105</a>     (RealRaw.sub_valid (RealRaw.sub_valid (log z).property (log c).property) (realPart_valid d.property))</span>
+<span id="L106"><a href="#L106"> 106</a>     (realPart_valid (sub_valid L.property w.property)) hdiff&#x27;</span>
+<span id="L107"><a href="#L107"> 107</a>   exact Small.congr (ofRealRaw_valid _ (realPart_valid (sub_valid L.property w.property)))</span>
+<span id="L108"><a href="#L108"> 108</a>     (ofRealRaw_valid _ (RealRaw.sub_valid (RealRaw.sub_valid (log z).property (log c).property)</span>
+<span id="L109"><a href="#L109"> 109</a>       (realPart_valid d.property))) (equiv_symm hemb)</span>
+<span id="L110"><a href="#L110"> 110</a>     (real_embedding_bound (Rat.mul_nonneg (by decide +kernel) (Rat.pow_nonneg hsize)) he)</span>
+<span id="L111"><a href="#L111"> 111</a> end ComputableAnalysis.ExponentialComputations</span>
+</pre></body></html>

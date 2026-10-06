@@ -1,0 +1,184 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ComputableAnalysis.FiniteExponentialTaylor</title><style>body{margin:24px;background:#fbfaf6;color:#252b27}pre{font:12px/1.65 monospace;white-space:pre;overflow-x:auto}pre span{display:block}pre span:target{background:#fff2b8}a{color:#466442}pre a{color:#999;text-decoration:none}</style></head><body><a href="../index.html">Proof bundle</a><h1 style="font:18px system-ui">ComputableAnalysis.FiniteExponentialTaylor</h1><pre><span id="L1"><a href="#L1">   1</a> import ComputableAnalysis.FinitePolynomialCalculus</span>
+<span id="L2"><a href="#L2">   2</a> </span>
+<span id="L3"><a href="#L3">   3</a> /-!</span>
+<span id="L4"><a href="#L4">   4</a> # Finite exponential Taylor enclosures</span>
+<span id="L5"><a href="#L5">   5</a> </span>
+<span id="L6"><a href="#L6">   6</a> This module gives a potential-infinity remainder certificate for the rational</span>
+<span id="L7"><a href="#L7">   7</a> exponential Taylor prefixes.  Every object below is a finite rational sum.</span>
+<span id="L8"><a href="#L8">   8</a> The executable schedule chooses a first omitted degree; the main theorem says</span>
+<span id="L9"><a href="#L9">   9</a> that every later finite prefix stays in one explicit rational interval around</span>
+<span id="L10"><a href="#L10">  10</a> the scheduled prefix.</span>
+<span id="L11"><a href="#L11">  11</a> </span>
+<span id="L12"><a href="#L12">  12</a> There is no completed infinite sum, classical limit, completeness argument,</span>
+<span id="L13"><a href="#L13">  13</a> or Mathlib dependency in this construction.</span>
+<span id="L14"><a href="#L14">  14</a> -/</span>
+<span id="L15"><a href="#L15">  15</a> </span>
+<span id="L16"><a href="#L16">  16</a> namespace ComputableAnalysis</span>
+<span id="L17"><a href="#L17">  17</a> </span>
+<span id="L18"><a href="#L18">  18</a> namespace FiniteExponentialTaylor</span>
+<span id="L19"><a href="#L19">  19</a> </span>
+<span id="L20"><a href="#L20">  20</a> /-- A finite block of exponential Taylor monomials, beginning at `start`.</span>
+<span id="L21"><a href="#L21">  21</a> </span>
+<span id="L22"><a href="#L22">  22</a> `remainderPartial x start terms` is the rational sum of exactly `terms`</span>
+<span id="L23"><a href="#L23">  23</a> monomials, with degrees `start, ..., start + terms - 1`. -/</span>
+<span id="L24"><a href="#L24">  24</a> def remainderPartial (x : Rat) (start : Nat) : Nat -&gt; Rat</span>
+<span id="L25"><a href="#L25">  25</a>   | 0 =&gt; 0</span>
+<span id="L26"><a href="#L26">  26</a>   | terms + 1 =&gt;</span>
+<span id="L27"><a href="#L27">  27</a>       remainderPartial x start terms +</span>
+<span id="L28"><a href="#L28">  28</a>         FormalPowerSeries.expCoeff (start + terms) * x ^ (start + terms)</span>
+<span id="L29"><a href="#L29">  29</a> </span>
+<span id="L30"><a href="#L30">  30</a> /-- Rewriting the integrated-prefix recurrence in the usual factorial</span>
+<span id="L31"><a href="#L31">  31</a> monomial form.  This is an identity in rational arithmetic. -/</span>
+<span id="L32"><a href="#L32">  32</a> theorem expCoeff_succ_monomial (x : Rat) (n : Nat) :</span>
+<span id="L33"><a href="#L33">  33</a>     FormalPowerSeries.expCoeff (n + 1) * x ^ (n + 1) =</span>
+<span id="L34"><a href="#L34">  34</a>       FormalPowerSeries.expCoeff n *</span>
+<span id="L35"><a href="#L35">  35</a>         (x ^ (n + 1) / ((n + 1 : Nat) : Rat)) := by</span>
+<span id="L36"><a href="#L36">  36</a>   unfold FormalPowerSeries.expCoeff</span>
+<span id="L37"><a href="#L37">  37</a>   rw [FormalPowerSeries.factorialRat_succ,</span>
+<span id="L38"><a href="#L38">  38</a>     Rat.div_def, Rat.div_def, Rat.div_def, Rat.inv_mul_rev]</span>
+<span id="L39"><a href="#L39">  39</a>   grind [Rat.mul_assoc, Rat.mul_comm]</span>
+<span id="L40"><a href="#L40">  40</a> </span>
+<span id="L41"><a href="#L41">  41</a> /-- The difference between two finite exponential Taylor prefixes is exactly</span>
+<span id="L42"><a href="#L42">  42</a> the intervening finite block of factorial monomials. -/</span>
+<span id="L43"><a href="#L43">  43</a> theorem remainderPartial_eq_expTaylorPrefix_sub</span>
+<span id="L44"><a href="#L44">  44</a>     (x : Rat) (n terms : Nat) :</span>
+<span id="L45"><a href="#L45">  45</a>     remainderPartial x (n + 1) terms =</span>
+<span id="L46"><a href="#L46">  46</a>       FinitePolynomial.expTaylorPrefix (n + terms) x -</span>
+<span id="L47"><a href="#L47">  47</a>         FinitePolynomial.expTaylorPrefix n x := by</span>
+<span id="L48"><a href="#L48">  48</a>   induction terms with</span>
+<span id="L49"><a href="#L49">  49</a>   | zero =&gt;</span>
+<span id="L50"><a href="#L50">  50</a>       rw [Nat.add_zero, remainderPartial]</span>
+<span id="L51"><a href="#L51">  51</a>       grind [Rat.sub_eq_add_neg]</span>
+<span id="L52"><a href="#L52">  52</a>   | succ terms ih =&gt;</span>
+<span id="L53"><a href="#L53">  53</a>       rw [remainderPartial, ih]</span>
+<span id="L54"><a href="#L54">  54</a>       rw [show n + (terms + 1) = (n + terms) + 1 by omega,</span>
+<span id="L55"><a href="#L55">  55</a>         FinitePolynomial.expTaylorPrefix_succ]</span>
+<span id="L56"><a href="#L56">  56</a>       have hindex : n + 1 + terms = n + terms + 1 := by omega</span>
+<span id="L57"><a href="#L57">  57</a>       rw [hindex]</span>
+<span id="L58"><a href="#L58">  58</a>       rw [expCoeff_succ_monomial]</span>
+<span id="L59"><a href="#L59">  59</a>       grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]</span>
+<span id="L60"><a href="#L60">  60</a> </span>
+<span id="L61"><a href="#L61">  61</a> /-- On the rational interval `|x| &lt;= C`, a finite remainder block is bounded</span>
+<span id="L62"><a href="#L62">  62</a> by the corresponding finite factorial majorant. -/</span>
+<span id="L63"><a href="#L63">  63</a> theorem remainderPartial_abs_le_factorialTailPartial</span>
+<span id="L64"><a href="#L64">  64</a>     {C x : Rat} (hC : 0 &lt;= C) (hx : qabs x &lt;= C)</span>
+<span id="L65"><a href="#L65">  65</a>     (start terms : Nat) :</span>
+<span id="L66"><a href="#L66">  66</a>     qabs (remainderPartial x start terms) &lt;=</span>
+<span id="L67"><a href="#L67">  67</a>       RationalMajorant.factorialTailPartial C start terms := by</span>
+<span id="L68"><a href="#L68">  68</a>   induction terms with</span>
+<span id="L69"><a href="#L69">  69</a>   | zero =&gt;</span>
+<span id="L70"><a href="#L70">  70</a>       rw [remainderPartial, RationalMajorant.factorialTailPartial]</span>
+<span id="L71"><a href="#L71">  71</a>       exact Rat.le_refl</span>
+<span id="L72"><a href="#L72">  72</a>   | succ terms ih =&gt;</span>
+<span id="L73"><a href="#L73">  73</a>       rw [remainderPartial, RationalMajorant.factorialTailPartial]</span>
+<span id="L74"><a href="#L74">  74</a>       have hterm :=</span>
+<span id="L75"><a href="#L75">  75</a>         FinitePolynomial.qabs_expCoeff_monomial_le_factorialTailTerm</span>
+<span id="L76"><a href="#L76">  76</a>           hC hx (start + terms)</span>
+<span id="L77"><a href="#L77">  77</a>       calc</span>
+<span id="L78"><a href="#L78">  78</a>         qabs</span>
+<span id="L79"><a href="#L79">  79</a>             (remainderPartial x start terms +</span>
+<span id="L80"><a href="#L80">  80</a>               FormalPowerSeries.expCoeff (start + terms) *</span>
+<span id="L81"><a href="#L81">  81</a>                 x ^ (start + terms)) &lt;=</span>
+<span id="L82"><a href="#L82">  82</a>             qabs (remainderPartial x start terms) +</span>
+<span id="L83"><a href="#L83">  83</a>               qabs</span>
+<span id="L84"><a href="#L84">  84</a>                 (FormalPowerSeries.expCoeff (start + terms) *</span>
+<span id="L85"><a href="#L85">  85</a>                   x ^ (start + terms)) :=</span>
+<span id="L86"><a href="#L86">  86</a>           qabs_add_le _ _</span>
+<span id="L87"><a href="#L87">  87</a>         _ &lt;= RationalMajorant.factorialTailPartial C start terms +</span>
+<span id="L88"><a href="#L88">  88</a>             RationalMajorant.factorialTailTerm C (start + terms) :=</span>
+<span id="L89"><a href="#L89">  89</a>           rat_add_le_add ih hterm</span>
+<span id="L90"><a href="#L90">  90</a> </span>
+<span id="L91"><a href="#L91">  91</a> /-- Explicit finite Taylor-prefix remainder bound.  If the first omitted</span>
+<span id="L92"><a href="#L92">  92</a> degree is far enough into the factorial tail, every later finite prefix is</span>
+<span id="L93"><a href="#L93">  93</a> within twice that first omitted majorant term. -/</span>
+<span id="L94"><a href="#L94">  94</a> theorem expTaylorPrefix_remainder_le_two_first_omitted</span>
+<span id="L95"><a href="#L95">  95</a>     {C x : Rat} (hC : 0 &lt;= C) (hx : qabs x &lt;= C)</span>
+<span id="L96"><a href="#L96">  96</a>     (n terms : Nat)</span>
+<span id="L97"><a href="#L97">  97</a>     (hstart : C &lt;= (((n + 2 : Nat) : Rat) / 2)) :</span>
+<span id="L98"><a href="#L98">  98</a>     qabs</span>
+<span id="L99"><a href="#L99">  99</a>         (FinitePolynomial.expTaylorPrefix (n + terms) x -</span>
+<span id="L100"><a href="#L100"> 100</a>           FinitePolynomial.expTaylorPrefix n x) &lt;=</span>
+<span id="L101"><a href="#L101"> 101</a>       2 * RationalMajorant.factorialTailTerm C (n + 1) := by</span>
+<span id="L102"><a href="#L102"> 102</a>   rw [← remainderPartial_eq_expTaylorPrefix_sub]</span>
+<span id="L103"><a href="#L103"> 103</a>   exact Rat.le_trans</span>
+<span id="L104"><a href="#L104"> 104</a>     (remainderPartial_abs_le_factorialTailPartial hC hx (n + 1) terms)</span>
+<span id="L105"><a href="#L105"> 105</a>     (RationalMajorant.factorialTailPartial_bound hC hstart terms)</span>
+<span id="L106"><a href="#L106"> 106</a> </span>
+<span id="L107"><a href="#L107"> 107</a> /-- Executable first omitted degree for a bounded interval and a positive</span>
+<span id="L108"><a href="#L108"> 108</a> rational error request. -/</span>
+<span id="L109"><a href="#L109"> 109</a> def scheduledTailStart (C : Rat) (eps : QPos) : Nat :=</span>
+<span id="L110"><a href="#L110"> 110</a>   RationalMajorant.factorialTailStart C +</span>
+<span id="L111"><a href="#L111"> 111</a>     RationalMajorant.halfDecayShift</span>
+<span id="L112"><a href="#L112"> 112</a>       (2 * RationalMajorant.factorialTailTerm C</span>
+<span id="L113"><a href="#L113"> 113</a>         (RationalMajorant.factorialTailStart C)) eps</span>
+<span id="L114"><a href="#L114"> 114</a> </span>
+<span id="L115"><a href="#L115"> 115</a> /-- Degree of the finite prefix immediately before `scheduledTailStart`. -/</span>
+<span id="L116"><a href="#L116"> 116</a> def scheduledPrefixDegree (C : Rat) (eps : QPos) : Nat :=</span>
+<span id="L117"><a href="#L117"> 117</a>   scheduledTailStart C eps - 1</span>
+<span id="L118"><a href="#L118"> 118</a> </span>
+<span id="L119"><a href="#L119"> 119</a> theorem scheduledTailStart_pos (C : Rat) (eps : QPos) :</span>
+<span id="L120"><a href="#L120"> 120</a>     0 &lt; scheduledTailStart C eps := by</span>
+<span id="L121"><a href="#L121"> 121</a>   unfold scheduledTailStart RationalMajorant.factorialTailStart</span>
+<span id="L122"><a href="#L122"> 122</a>   omega</span>
+<span id="L123"><a href="#L123"> 123</a> </span>
+<span id="L124"><a href="#L124"> 124</a> theorem scheduledPrefixDegree_succ (C : Rat) (eps : QPos) :</span>
+<span id="L125"><a href="#L125"> 125</a>     scheduledPrefixDegree C eps + 1 = scheduledTailStart C eps := by</span>
+<span id="L126"><a href="#L126"> 126</a>   unfold scheduledPrefixDegree</span>
+<span id="L127"><a href="#L127"> 127</a>   have hpos := scheduledTailStart_pos C eps</span>
+<span id="L128"><a href="#L128"> 128</a>   omega</span>
+<span id="L129"><a href="#L129"> 129</a> </span>
+<span id="L130"><a href="#L130"> 130</a> /-- Potential-infinity form of the exponential Taylor remainder theorem.</span>
+<span id="L131"><a href="#L131"> 131</a> </span>
+<span id="L132"><a href="#L132"> 132</a> For every rational `x` in `[-C,C]`, the scheduled finite prefix is within</span>
+<span id="L133"><a href="#L133"> 133</a> `eps` of every extension by any finite number of terms.  The quantification</span>
+<span id="L134"><a href="#L134"> 134</a> is solely over later finite stages. -/</span>
+<span id="L135"><a href="#L135"> 135</a> theorem scheduled_expTaylorPrefix_remainder_le</span>
+<span id="L136"><a href="#L136"> 136</a>     {C x : Rat} (hC : 0 &lt;= C) (hx : qabs x &lt;= C)</span>
+<span id="L137"><a href="#L137"> 137</a>     (eps : QPos) (extraTerms : Nat) :</span>
+<span id="L138"><a href="#L138"> 138</a>     qabs</span>
+<span id="L139"><a href="#L139"> 139</a>         (FinitePolynomial.expTaylorPrefix</span>
+<span id="L140"><a href="#L140"> 140</a>             (scheduledPrefixDegree C eps + extraTerms) x -</span>
+<span id="L141"><a href="#L141"> 141</a>           FinitePolynomial.expTaylorPrefix</span>
+<span id="L142"><a href="#L142"> 142</a>             (scheduledPrefixDegree C eps) x) &lt;=</span>
+<span id="L143"><a href="#L143"> 143</a>       eps.val := by</span>
+<span id="L144"><a href="#L144"> 144</a>   have hfinite := remainderPartial_abs_le_factorialTailPartial</span>
+<span id="L145"><a href="#L145"> 145</a>     hC hx (scheduledTailStart C eps) extraTerms</span>
+<span id="L146"><a href="#L146"> 146</a>   have heps := RationalMajorant.factorialTailPartial_shifted_le_eps</span>
+<span id="L147"><a href="#L147"> 147</a>     hC eps extraTerms</span>
+<span id="L148"><a href="#L148"> 148</a>   have hbound :</span>
+<span id="L149"><a href="#L149"> 149</a>       qabs (remainderPartial x (scheduledTailStart C eps) extraTerms) &lt;=</span>
+<span id="L150"><a href="#L150"> 150</a>         eps.val := by</span>
+<span id="L151"><a href="#L151"> 151</a>     exact Rat.le_trans hfinite (by simpa [scheduledTailStart] using heps)</span>
+<span id="L152"><a href="#L152"> 152</a>   rw [← scheduledPrefixDegree_succ C eps] at hbound</span>
+<span id="L153"><a href="#L153"> 153</a>   rw [remainderPartial_eq_expTaylorPrefix_sub] at hbound</span>
+<span id="L154"><a href="#L154"> 154</a>   exact hbound</span>
+<span id="L155"><a href="#L155"> 155</a> </span>
+<span id="L156"><a href="#L156"> 156</a> /-- Explicit rational enclosure for every later finite exponential Taylor</span>
+<span id="L157"><a href="#L157"> 157</a> prefix at every point of the bounded interval `|x| &lt;= C`. -/</span>
+<span id="L158"><a href="#L158"> 158</a> theorem scheduled_expTaylorPrefix_enclosure</span>
+<span id="L159"><a href="#L159"> 159</a>     {C x : Rat} (hC : 0 &lt;= C) (hx : qabs x &lt;= C)</span>
+<span id="L160"><a href="#L160"> 160</a>     (eps : QPos) (extraTerms : Nat) :</span>
+<span id="L161"><a href="#L161"> 161</a>     let center := FinitePolynomial.expTaylorPrefix</span>
+<span id="L162"><a href="#L162"> 162</a>       (scheduledPrefixDegree C eps) x</span>
+<span id="L163"><a href="#L163"> 163</a>     let later := FinitePolynomial.expTaylorPrefix</span>
+<span id="L164"><a href="#L164"> 164</a>       (scheduledPrefixDegree C eps + extraTerms) x</span>
+<span id="L165"><a href="#L165"> 165</a>     center - eps.val &lt;= later /\ later &lt;= center + eps.val := by</span>
+<span id="L166"><a href="#L166"> 166</a>   dsimp</span>
+<span id="L167"><a href="#L167"> 167</a>   let difference : Rat :=</span>
+<span id="L168"><a href="#L168"> 168</a>     FinitePolynomial.expTaylorPrefix</span>
+<span id="L169"><a href="#L169"> 169</a>         (scheduledPrefixDegree C eps + extraTerms) x -</span>
+<span id="L170"><a href="#L170"> 170</a>       FinitePolynomial.expTaylorPrefix (scheduledPrefixDegree C eps) x</span>
+<span id="L171"><a href="#L171"> 171</a>   have hrem : qabs difference &lt;= eps.val := by</span>
+<span id="L172"><a href="#L172"> 172</a>     simpa [difference] using</span>
+<span id="L173"><a href="#L173"> 173</a>       scheduled_expTaylorPrefix_remainder_le hC hx eps extraTerms</span>
+<span id="L174"><a href="#L174"> 174</a>   have hlo : -eps.val &lt;= difference :=</span>
+<span id="L175"><a href="#L175"> 175</a>     Rat.le_trans (Rat.neg_le_neg hrem) (neg_qabs_le_self difference)</span>
+<span id="L176"><a href="#L176"> 176</a>   have hhi : difference &lt;= eps.val :=</span>
+<span id="L177"><a href="#L177"> 177</a>     Rat.le_trans (self_le_qabs difference) hrem</span>
+<span id="L178"><a href="#L178"> 178</a>   dsimp [difference] at hlo hhi</span>
+<span id="L179"><a href="#L179"> 179</a>   constructor &lt;;&gt; grind [Rat.sub_eq_add_neg]</span>
+<span id="L180"><a href="#L180"> 180</a> </span>
+<span id="L181"><a href="#L181"> 181</a> end FiniteExponentialTaylor</span>
+<span id="L182"><a href="#L182"> 182</a> </span>
+<span id="L183"><a href="#L183"> 183</a> end ComputableAnalysis</span>
+</pre></body></html>

@@ -1,0 +1,214 @@
+ComputableAnalysis.FiniteExponentialTaylor.scheduled_expTaylorPrefix_enclosure {C x : Rat} (hC : 0 ≤ C)
+  (hx : ComputableAnalysis.qabs x ≤ C) (eps : ComputableAnalysis.QPos) (extraTerms : Nat) :
+  have center :=
+    ComputableAnalysis.FinitePolynomial.expTaylorPrefix
+      (ComputableAnalysis.FiniteExponentialTaylor.scheduledPrefixDegree C eps) x;
+  have later :=
+    ComputableAnalysis.FinitePolynomial.expTaylorPrefix
+      (ComputableAnalysis.FiniteExponentialTaylor.scheduledPrefixDegree C eps + extraTerms) x;
+  center - eps.val ≤ later ∧ later ≤ center + eps.val
+ComputableAnalysis.ModularForms.entireExponentialValue (z : ComputableAnalysis.RiemannHilbert.Scalar) :
+  ComputableAnalysis.RiemannHilbert.Scalar
+ComputableAnalysis.ExponentialComputations.representedTaylor_agrees {C : Rat}
+  (A : ComputableAnalysis.ComplexExponentialLift.BoundedInput C) :
+  A.exponential.Equiv (ComputableAnalysis.ExponentialComputations.powerSeries.eval ⟨A.raw, ⋯⟩).val
+ComputableAnalysis.ModularForms.entireExponential_addition (x y : ComputableAnalysis.RiemannHilbert.Scalar) :
+  ((ComputableAnalysis.ModularForms.entireExponentialValue x).val.mul
+        (ComputableAnalysis.ModularForms.entireExponentialValue y).val).Equiv
+    (ComputableAnalysis.ModularForms.entireExponentialValue ⟨x.val.add y.val, ⋯⟩).val
+ComputableAnalysis.ModularForms.entireExponential_derivative_value (z : ComputableAnalysis.RiemannHilbert.Scalar) :
+  (ComputableAnalysis.ModularForms.entireExponential_holomorphic.derivative z trivial).val.Equiv
+    (ComputableAnalysis.ModularForms.entireExponentialValue z).val
+ComputableAnalysis.ExponentialComputations.exp_real_embedding
+  (x : ComputableAnalysis.ExponentialComputations.RealInput) :
+  (ComputableAnalysis.ModularForms.entireExponentialValue
+          (ComputableAnalysis.ExponentialComputations.realAxis x)).val.Equiv
+    (ComputableAnalysis.ExponentialComputations.realAxis (ComputableAnalysis.ExponentialComputations.exp x)).val
+ComputableAnalysis.ExponentialComputations.exp_positive (x : ComputableAnalysis.ExponentialComputations.RealInput) :
+  (ComputableAnalysis.ExponentialComputations.exp x).val.Pos
+ComputableAnalysis.ExponentialComputations.exp_injective (x y : ComputableAnalysis.ExponentialComputations.RealInput)
+  (h :
+    (ComputableAnalysis.ExponentialComputations.exp x).val.Equiv
+      (ComputableAnalysis.ExponentialComputations.exp y).val) :
+  x.val.Equiv y.val
+ComputableAnalysis.ExponentialComputations.exp_congr (x y : ComputableAnalysis.ExponentialComputations.RealInput)
+  (h : x.val.Equiv y.val) :
+  (ComputableAnalysis.ExponentialComputations.exp x).val.Equiv (ComputableAnalysis.ExponentialComputations.exp y).val
+ComputableAnalysis.ExponentialComputations.localLogarithm_linear_error (z : ComputableAnalysis.RiemannHilbert.Scalar)
+  (hz :
+    ComputableAnalysis.RiemannHilbert.LocalODE.interior ComputableAnalysis.RiemannHilbert.LocalLogarithm.radius.val z)
+  (H : Rat) (hH : 0 ≤ H) (hsmall : ComputableAnalysis.FunctionTheory.Small z.val H) :
+  ComputableAnalysis.FunctionTheory.Small
+    ((ComputableAnalysis.RiemannHilbert.LocalLogarithm.function.eval z hz).val.sub z.val) (16 * H ^ 2)
+ComputableAnalysis.ExponentialComputations.compoundApproximation_error (z : ComputableAnalysis.RiemannHilbert.Scalar)
+  (n : Nat) (hmesh : ComputableAnalysis.RiemannHilbert.DomainFunctions.scalarBound z / ↑(n + 1) ≤ 1 / 128) :
+  ComputableAnalysis.FunctionTheory.Small
+    ((ComputableAnalysis.ExponentialComputations.compoundApproximation z n).val.sub
+      (ComputableAnalysis.ModularForms.entireExponentialValue z).val)
+    (ComputableAnalysis.ExponentialComputations.compoundErrorConstant z / ↑(n + 1))
+ComputableAnalysis.ExponentialComputations.compoundValue (z : ComputableAnalysis.RiemannHilbert.Scalar) :
+  ComputableAnalysis.RiemannHilbert.Scalar
+ComputableAnalysis.ExponentialComputations.compoundValue_equiv_powerSeries
+  (z : ComputableAnalysis.RiemannHilbert.Scalar) :
+  (ComputableAnalysis.ExponentialComputations.compoundValue z).val.Equiv
+    (ComputableAnalysis.ModularForms.entireExponentialValue z).val
+ComputableAnalysis.ExponentialComputations.compoundValue_congr (z w : ComputableAnalysis.RiemannHilbert.Scalar)
+  (hzw : z.val.Equiv w.val) :
+  (ComputableAnalysis.ExponentialComputations.compoundValue z).val.Equiv
+    (ComputableAnalysis.ExponentialComputations.compoundValue w).val
+ComputableAnalysis.ExponentialComputations.log_congr (x y : ComputableAnalysis.ExponentialComputations.PositiveInput)
+  (h : x.val.val.Equiv y.val.val) :
+  (ComputableAnalysis.ExponentialComputations.log x).val.Equiv (ComputableAnalysis.ExponentialComputations.log y).val
+ComputableAnalysis.ExponentialComputations.log_exp (x : ComputableAnalysis.ExponentialComputations.RealInput) :
+  (ComputableAnalysis.ExponentialComputations.log ⟨ComputableAnalysis.ExponentialComputations.exp x, ⋯⟩).val.Equiv x.val
+ComputableAnalysis.ExponentialComputations.exp_log (x : ComputableAnalysis.ExponentialComputations.PositiveInput) :
+  (ComputableAnalysis.ExponentialComputations.exp (ComputableAnalysis.ExponentialComputations.log x)).val.Equiv
+    x.val.val
+ComputableAnalysis.ExponentialComputations.logChart_real_agreement
+  (x y : ComputableAnalysis.ExponentialComputations.PositiveInput)
+  (hy :
+    (ComputableAnalysis.ExponentialComputations.logChart x).domain
+      (ComputableAnalysis.ExponentialComputations.realAxis y.val)) :
+  ((ComputableAnalysis.ExponentialComputations.logChart x).eval
+            (ComputableAnalysis.ExponentialComputations.realAxis y.val) hy).val.realPart.Equiv
+    (ComputableAnalysis.ExponentialComputations.log y).val
+ComputableAnalysis.ExponentialComputations.logChart_derivative
+  (x : ComputableAnalysis.ExponentialComputations.PositiveInput) :
+  ((ComputableAnalysis.ExponentialComputations.logChartHolomorphic x).derivative
+          (ComputableAnalysis.ExponentialComputations.realAxis x.val) ⋯).val.Equiv
+    (ComputableAnalysis.RiemannHilbert.RepresentedReciprocal.inverse
+        (ComputableAnalysis.ExponentialComputations.realAxis x.val) ⋯).val
+ComputableAnalysis.ExponentialComputations.log_increment_error
+  (c z : ComputableAnalysis.ExponentialComputations.PositiveInput) (B H : Rat) (hB : 0 ≤ B) (hH : 0 ≤ H)
+  (hi :
+    ComputableAnalysis.FunctionTheory.Small
+      (ComputableAnalysis.RiemannHilbert.RepresentedReciprocal.inverse
+          (ComputableAnalysis.ExponentialComputations.realAxis c.val) ⋯).val
+      B)
+  (hstep :
+    ComputableAnalysis.FunctionTheory.Small
+      ((ComputableAnalysis.ExponentialComputations.realAxis z.val).val.sub
+        (ComputableAnalysis.ExponentialComputations.realAxis c.val).val)
+      H)
+  (hmesh : 2 * B * H ≤ 1 / 128) :
+  ComputableAnalysis.FunctionTheory.Small
+    (ComputableAnalysis.ComplexRaw.ofRealRaw
+      (((ComputableAnalysis.ExponentialComputations.log z).val.sub
+            (ComputableAnalysis.ExponentialComputations.log c).val).sub
+        ((ComputableAnalysis.RiemannHilbert.RepresentedReciprocal.inverse
+                  (ComputableAnalysis.ExponentialComputations.realAxis c.val) ⋯).val.mul
+            ((ComputableAnalysis.ExponentialComputations.realAxis z.val).val.sub
+              (ComputableAnalysis.ExponentialComputations.realAxis c.val).val)).realPart))
+    (16 * (2 * B * H) ^ 2)
+ComputableAnalysis.ExponentialComputations.segmentLower (x : ComputableAnalysis.ExponentialComputations.PositiveInput) :
+  ComputableAnalysis.QPos
+ComputableAnalysis.ExponentialComputations.positiveSegment
+  (x : ComputableAnalysis.ExponentialComputations.PositiveInput)
+  (t : ComputableAnalysis.ExponentialComputations.RationalUnit) : ComputableAnalysis.ExponentialComputations.RealInput
+ComputableAnalysis.ExponentialComputations.segmentIntegrand_variation
+  (x : ComputableAnalysis.ExponentialComputations.PositiveInput)
+  (u v : ComputableAnalysis.ExponentialComputations.RationalUnit) :
+  ComputableAnalysis.FunctionTheory.Small
+    ((ComputableAnalysis.ExponentialComputations.realAxis
+            (ComputableAnalysis.ExponentialComputations.segmentIntegrandValue x v)).val.sub
+      (ComputableAnalysis.ExponentialComputations.realAxis
+          (ComputableAnalysis.ExponentialComputations.segmentIntegrandValue x u)).val)
+    (ComputableAnalysis.ExponentialComputations.segmentVariation x * ComputableAnalysis.qabs (v.val - u.val))
+ComputableAnalysis.ExponentialComputations.lipschitzBounds_gap (f : ComputableAnalysis.FunctionOnInterval)
+  (h0 : f.lower = 0) (h1 : f.upper = 1) (L : Rat) (hL : 0 ≤ L)
+  (hlip :
+    ∀ (x y : Rat) (hx : ComputableAnalysis.inDomainInterval f.lower f.upper x)
+      (hy : ComputableAnalysis.inDomainInterval f.lower f.upper y),
+      ComputableAnalysis.FunctionTheory.Small
+        (ComputableAnalysis.ComplexRaw.ofRealRaw
+          ((ComputableAnalysis.ExponentialComputations.pointRaw✝ f x hx).sub
+            (ComputableAnalysis.ExponentialComputations.pointRaw✝ f y hy)))
+        (L * ComputableAnalysis.qabs (x - y)))
+  (eps : ComputableAnalysis.QPos) :
+  (ComputableAnalysis.ExponentialComputations.lipschitzBounds f h0 h1 L hL hlip eps).upperSum -
+      (ComputableAnalysis.ExponentialComputations.lipschitzBounds f h0 h1 L hL hlip eps).lowerSum ≤
+    eps.val
+ComputableAnalysis.ExponentialComputations.integralLog (x : ComputableAnalysis.ExponentialComputations.PositiveInput) :
+  ComputableAnalysis.ExponentialComputations.RealInput
+ComputableAnalysis.ExponentialComputations.cellBounds_of_quadratic (f : ComputableAnalysis.FunctionOnInterval)
+  (P : Rat → ComputableAnalysis.RealRaw) (h0 : f.lower = 0) (h1 : f.upper = 1)
+  (hv : ∀ (x : Rat), 0 ≤ x → x ≤ 1 → (P x).Valid) (C : Rat) (hC : 0 ≤ C) (delta : ComputableAnalysis.QPos) (B : Rat)
+  (hB :
+    ∀ (x : Rat) (hx : ComputableAnalysis.inDomainInterval f.lower f.upper x) (n : Nat),
+      -B ≤ (f.compute x hx n).hi ∧ (f.compute x hx n).lo ≤ B)
+  (he :
+    ∀ (u v : Rat) (hu : ComputableAnalysis.inDomainInterval f.lower f.upper u),
+      0 ≤ u →
+        u ≤ v →
+          v ≤ 1 →
+            v - u ≤ delta.val →
+              ComputableAnalysis.FunctionTheory.Small
+                (ComputableAnalysis.ComplexRaw.ofRealRaw
+                  (((P v).sub (P u)).sub (ComputableAnalysis.RealRaw.scaleRat (v - u) { compute := f.compute u hu })))
+                (C * (v - u) ^ 2)) :
+  ComputableAnalysis.Integral.CellDerivativeBounds f P
+ComputableAnalysis.ExponentialComputations.segmentLog_hasIntegral
+  (x : ComputableAnalysis.ExponentialComputations.PositiveInput) :
+  ComputableAnalysis.Integral.HasIntegral (ComputableAnalysis.ExponentialComputations.segmentIntegrand x)
+    ((ComputableAnalysis.ExponentialComputations.segmentLogValue x 1).sub
+      (ComputableAnalysis.ExponentialComputations.segmentLogValue x 0))
+ComputableAnalysis.ExponentialComputations.integralLog_hasIntegral
+  (x : ComputableAnalysis.ExponentialComputations.PositiveInput) :
+  ComputableAnalysis.Integral.HasIntegral (ComputableAnalysis.ExponentialComputations.segmentIntegrand x)
+    (ComputableAnalysis.ExponentialComputations.integralLog x).val
+ComputableAnalysis.ExponentialComputations.integralLog_equiv_log
+  (x : ComputableAnalysis.ExponentialComputations.PositiveInput) :
+  (ComputableAnalysis.ExponentialComputations.integralLog x).val.Equiv
+    (ComputableAnalysis.ExponentialComputations.log x).val
+ComputableAnalysis.ExponentialComputations.integralLog_congr
+  (x y : ComputableAnalysis.ExponentialComputations.PositiveInput) (h : x.val.val.Equiv y.val.val) :
+  (ComputableAnalysis.ExponentialComputations.integralLog x).val.Equiv
+    (ComputableAnalysis.ExponentialComputations.integralLog y).val
+ComputableAnalysis.ExponentialComputations.integralLog_exp (x : ComputableAnalysis.ExponentialComputations.RealInput) :
+  (ComputableAnalysis.ExponentialComputations.integralLog
+          ⟨ComputableAnalysis.ExponentialComputations.exp x, ⋯⟩).val.Equiv
+    x.val
+ComputableAnalysis.ExponentialComputations.exp_integralLog
+  (x : ComputableAnalysis.ExponentialComputations.PositiveInput) :
+  (ComputableAnalysis.ExponentialComputations.exp (ComputableAnalysis.ExponentialComputations.integralLog x)).val.Equiv
+    x.val.val
+ComputableAnalysis.ExponentialComputations.exp_unique_of_integralLog
+  (x : ComputableAnalysis.ExponentialComputations.RealInput)
+  (y : ComputableAnalysis.ExponentialComputations.PositiveInput)
+  (h : (ComputableAnalysis.ExponentialComputations.integralLog y).val.Equiv x.val) :
+  y.val.val.Equiv (ComputableAnalysis.ExponentialComputations.exp x).val
+ComputableAnalysis.ExponentialComputations.Implementation.equivalent
+  (f g : ComputableAnalysis.ExponentialComputations.Implementation) (z : ComputableAnalysis.RiemannHilbert.Scalar) :
+  (f.eval z).val.Equiv (g.eval z).val
+ComputableAnalysis.ExponentialComputations.Implementation.congr
+  (f : ComputableAnalysis.ExponentialComputations.Implementation) (z w : ComputableAnalysis.RiemannHilbert.Scalar)
+  (h : z.val.Equiv w.val) : (f.eval z).val.Equiv (f.eval w).val
+ComputableAnalysis.ExponentialComputations.Implementation.realEval_agrees
+  (f : ComputableAnalysis.ExponentialComputations.Implementation)
+  (x : ComputableAnalysis.ExponentialComputations.RealInput) :
+  (f.realEval x).val.Equiv (ComputableAnalysis.ExponentialComputations.exp x).val
+ComputableAnalysis.ExponentialComputations.linearODE : ComputableAnalysis.ExponentialComputations.Implementation
+ComputableAnalysis.ExponentialComputations.LogImplementation.equivalent
+  (f g : ComputableAnalysis.ExponentialComputations.LogImplementation)
+  (x : ComputableAnalysis.ExponentialComputations.PositiveInput) : (f.eval x).val.Equiv (g.eval x).val
+ComputableAnalysis.ExponentialComputations.LogImplementation.congr
+  (f : ComputableAnalysis.ExponentialComputations.LogImplementation)
+  (x y : ComputableAnalysis.ExponentialComputations.PositiveInput) (h : x.val.val.Equiv y.val.val) :
+  (f.eval x).val.Equiv (f.eval y).val
+ComputableAnalysis.ExponentialComputations.LogImplementation.exp_eval
+  (f : ComputableAnalysis.ExponentialComputations.LogImplementation)
+  (x : ComputableAnalysis.ExponentialComputations.PositiveInput) :
+  (ComputableAnalysis.ExponentialComputations.exp (f.eval x)).val.Equiv x.val.val
+ComputableAnalysis.ExponentialComputations.real_computation_agrees_of_integral_inverse
+  (f : ComputableAnalysis.ExponentialComputations.RealInput → ComputableAnalysis.ExponentialComputations.PositiveInput)
+  (hinverse :
+    ∀ (x : ComputableAnalysis.ExponentialComputations.RealInput),
+      (ComputableAnalysis.ExponentialComputations.integralLog (f x)).val.Equiv x.val)
+  (x : ComputableAnalysis.ExponentialComputations.RealInput) :
+  (f x).val.val.Equiv (ComputableAnalysis.ExponentialComputations.exp x).val
+ComputableAnalysis.ExponentialComputations.exp_one_equiv_ePowerSeries :
+  (ComputableAnalysis.ExponentialComputations.exp ComputableAnalysis.ExponentialComputations.oneInput.val).val.Equiv
+    ComputableAnalysis.ePowerSeries
+ComputableAnalysis.ExponentialComputations.exp_one_equiv_eCompoundInterest :
+  (ComputableAnalysis.ExponentialComputations.exp ComputableAnalysis.ExponentialComputations.oneInput.val).val.Equiv
+    ComputableAnalysis.eCompoundInterest

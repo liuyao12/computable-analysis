@@ -1,0 +1,54 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ComputableAnalysis.ModularForms.EntireExponential</title><style>body{margin:24px;background:#fbfaf6;color:#252b27}pre{font:12px/1.65 monospace;white-space:pre;overflow-x:auto}pre span{display:block}pre span:target{background:#fff2b8}a{color:#466442}pre a{color:#999;text-decoration:none}</style></head><body><a href="../index.html">Proof bundle</a><h1 style="font:18px system-ui">ComputableAnalysis.ModularForms.EntireExponential</h1><pre><span id="L1"><a href="#L1">   1</a> import ComputableAnalysis.ModularForms.ExponentialCharts</span>
+<span id="L2"><a href="#L2">   2</a> import ComputableAnalysis.RiemannHilbert.DomainHolomorphicLocality</span>
+<span id="L3"><a href="#L3">   3</a> </span>
+<span id="L4"><a href="#L4">   4</a> /-! Entire represented exponential obtained from agreeing factorial-series</span>
+<span id="L5"><a href="#L5">   5</a> charts. Every point has an executable evaluator; internal chart radii are hidden. -/</span>
+<span id="L6"><a href="#L6">   6</a> namespace ComputableAnalysis.ModularForms</span>
+<span id="L7"><a href="#L7">   7</a> open ComplexRaw FunctionTheory RiemannHilbert</span>
+<span id="L8"><a href="#L8">   8</a> </span>
+<span id="L9"><a href="#L9">   9</a> /-- A chart large enough for the actual input&#x27;s initial rational box. -/</span>
+<span id="L10"><a href="#L10">  10</a> def exponentialInputRadius (z : Scalar) : QPos :=</span>
+<span id="L11"><a href="#L11">  11</a>   ⟨LocalODE.boxCoordinateBound (z.val.compute 0)+1,</span>
+<span id="L12"><a href="#L12">  12</a>     by have h := LocalODE.boxCoordinateBound_nonneg (z.val.compute 0); grind only⟩</span>
+<span id="L13"><a href="#L13">  13</a> </span>
+<span id="L14"><a href="#L14">  14</a> theorem exponentialInputRadius_mem (z : Scalar) :</span>
+<span id="L15"><a href="#L15">  15</a>     (exponentialChart (exponentialInputRadius z)).domain z := by</span>
+<span id="L16"><a href="#L16">  16</a>   refine ⟨LocalODE.boxCoordinateBound (z.val.compute 0),</span>
+<span id="L17"><a href="#L17">  17</a>     LocalODE.boxCoordinateBound_nonneg _, ?_, LocalODE.small_from_box z.val z.property 0⟩</span>
+<span id="L18"><a href="#L18">  18</a>   change LocalODE.boxCoordinateBound (z.val.compute 0) &lt;</span>
+<span id="L19"><a href="#L19">  19</a>     LocalODE.boxCoordinateBound (z.val.compute 0)+1</span>
+<span id="L20"><a href="#L20">  20</a>   grind only</span>
+<span id="L21"><a href="#L21">  21</a> </span>
+<span id="L22"><a href="#L22">  22</a> /-- The value is computed using a certified chart chosen from the input box. -/</span>
+<span id="L23"><a href="#L23">  23</a> def entireExponentialValue (z : Scalar) : Scalar :=</span>
+<span id="L24"><a href="#L24">  24</a>   ⟨(exponentialChart (exponentialInputRadius z)).eval z,</span>
+<span id="L25"><a href="#L25">  25</a>     (exponentialChart (exponentialInputRadius z)).valid z (exponentialInputRadius_mem z)⟩</span>
+<span id="L26"><a href="#L26">  26</a> </span>
+<span id="L27"><a href="#L27">  27</a> theorem entireExponentialValue_congr (z w : Scalar) (hzw : z.val.Equiv w.val) :</span>
+<span id="L28"><a href="#L28">  28</a>     (entireExponentialValue z).val.Equiv (entireExponentialValue w).val :=</span>
+<span id="L29"><a href="#L29">  29</a>   exponentialChart_agreement _ _ z w (exponentialInputRadius_mem z) (exponentialInputRadius_mem w) hzw</span>
+<span id="L30"><a href="#L30">  30</a> </span>
+<span id="L31"><a href="#L31">  31</a> def entireExponential : DomainFunctions.Map where</span>
+<span id="L32"><a href="#L32">  32</a>   domain _ := True</span>
+<span id="L33"><a href="#L33">  33</a>   eval z _ := entireExponentialValue z</span>
+<span id="L34"><a href="#L34">  34</a>   domain_congr _ _ _ := Iff.rfl</span>
+<span id="L35"><a href="#L35">  35</a>   eval_congr z w _ _ hzw := entireExponentialValue_congr z w hzw</span>
+<span id="L36"><a href="#L36">  36</a> </span>
+<span id="L37"><a href="#L37">  37</a> /-- Every supplied exponential chart agrees with the global evaluator. -/</span>
+<span id="L38"><a href="#L38">  38</a> theorem entireExponential_chart (R : QPos) (z : Scalar) (hz : (exponentialChart R).domain z) :</span>
+<span id="L39"><a href="#L39">  39</a>     ((exponentialChart R).eval z).Equiv (entireExponentialValue z).val :=</span>
+<span id="L40"><a href="#L40">  40</a>   exponentialChart_agreement R (exponentialInputRadius z) z z hz</span>
+<span id="L41"><a href="#L41">  41</a>     (exponentialInputRadius_mem z) (equiv_refl _ z.property)</span>
+<span id="L42"><a href="#L42">  42</a> </span>
+<span id="L43"><a href="#L43">  43</a> /-- Actual holomorphicity on all valid represented complex inputs, derived</span>
+<span id="L44"><a href="#L44">  44</a> from local derivatives and proved overlap agreement. -/</span>
+<span id="L45"><a href="#L45">  45</a> def entireExponential_holomorphic : DomainFunctions.Holomorphic entireExponential :=</span>
+<span id="L46"><a href="#L46">  46</a>   DomainFunctions.holomorphic_of_local entireExponential</span>
+<span id="L47"><a href="#L47">  47</a>     (fun a _ =&gt; DomainFunctions.ofCertified (exponentialChart (exponentialInputRadius a)))</span>
+<span id="L48"><a href="#L48">  48</a>     (fun a _ =&gt; DomainFunctions.ofCertifiedHolomorphic (exponentialChart_holomorphic (exponentialInputRadius a)))</span>
+<span id="L49"><a href="#L49">  49</a>     (fun a _ =&gt; exponentialInputRadius_mem a)</span>
+<span id="L50"><a href="#L50">  50</a>     (fun _ _ _ _ =&gt; trivial)</span>
+<span id="L51"><a href="#L51">  51</a>     (fun a _ z hz =&gt; entireExponential_chart (exponentialInputRadius a) z hz)</span>
+<span id="L52"><a href="#L52">  52</a> </span>
+<span id="L53"><a href="#L53">  53</a> end ComputableAnalysis.ModularForms</span>
+</pre></body></html>

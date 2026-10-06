@@ -1,0 +1,72 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ComputableAnalysis.ExponentialComputations.LogarithmRemainder</title><style>body{margin:24px;background:#fbfaf6;color:#252b27}pre{font:12px/1.65 monospace;white-space:pre;overflow-x:auto}pre span{display:block}pre span:target{background:#fff2b8}a{color:#466442}pre a{color:#999;text-decoration:none}</style></head><body><a href="../index.html">Proof bundle</a><h1 style="font:18px system-ui">ComputableAnalysis.ExponentialComputations.LogarithmRemainder</h1><pre><span id="L1"><a href="#L1">   1</a> import ComputableAnalysis.ModularForms.ExponentialLogarithmAgreement</span>
+<span id="L2"><a href="#L2">   2</a> import ComputableAnalysis.RiemannHilbert.GeneralSeriesDerivativeInitial</span>
+<span id="L3"><a href="#L3">   3</a> </span>
+<span id="L4"><a href="#L4">   4</a> /-! Quantitative linearization of the constructed logarithm. -/</span>
+<span id="L5"><a href="#L5">   5</a> namespace ComputableAnalysis.ExponentialComputations</span>
+<span id="L6"><a href="#L6">   6</a> open ComplexRaw FunctionTheory RiemannHilbert LocalODE</span>
+<span id="L7"><a href="#L7">   7</a> </span>
+<span id="L8"><a href="#L8">   8</a> /-- The local logarithm differs from its linear term by a quadratic error,</span>
+<span id="L9"><a href="#L9">   9</a> for every valid represented complex input in its actual chart. -/</span>
+<span id="L10"><a href="#L10">  10</a> theorem localLogarithm_linear_error (z : Scalar)</span>
+<span id="L11"><a href="#L11">  11</a>     (hz : interior LocalLogarithm.radius.val z) (H : Rat) (hH : 0 ≤ H)</span>
+<span id="L12"><a href="#L12">  12</a>     (hsmall : Small z.val H) :</span>
+<span id="L13"><a href="#L13">  13</a>     Small (sub (LocalLogarithm.function.eval z hz).val z.val) (16*H^2) := by</span>
+<span id="L14"><a href="#L14">  14</a>   let L := LocalLogarithm.function.eval z hz</span>
+<span id="L15"><a href="#L15">  15</a>   let a : Scalar := ⟨zero,ofQComplex_valid _⟩</span>
+<span id="L16"><a href="#L16">  16</a>   have h0 := LocalLogarithm.initial</span>
+<span id="L17"><a href="#L17">  17</a>   have hd := BoundedSeries.sumDerivative_zero LocalLogarithm.coefficient</span>
+<span id="L18"><a href="#L18">  18</a>     LocalLogarithm.coefficient_valid 1 1 LocalLogarithm.radius.val</span>
+<span id="L19"><a href="#L19">  19</a>     (by decide +kernel) (by decide +kernel) (by decide +kernel)</span>
+<span id="L20"><a href="#L20">  20</a>     LocalLogarithm.coefficient_bound (by decide +kernel)</span>
+<span id="L21"><a href="#L21">  21</a>   have h1 : (LocalLogarithm.coefficient 1).Equiv one := by</span>
+<span id="L22"><a href="#L22">  22</a>     change (scaleRat (1/1) one).Equiv one</span>
+<span id="L23"><a href="#L23">  23</a>     rw [show (1:Rat)/1=1 by decide +kernel]</span>
+<span id="L24"><a href="#L24">  24</a>     exact scaleRat_one_equiv one (ofQComplex_valid _)</span>
+<span id="L25"><a href="#L25">  25</a>   have he0 : (sub z.val zero).Equiv z.val := by</span>
+<span id="L26"><a href="#L26">  26</a>     apply ComplexRawQuotient.equiv_of_ofRaw_eq</span>
+<span id="L27"><a href="#L27">  27</a>       (hleft := sub_valid z.property (ofQComplex_valid _)) (hright := z.property)</span>
+<span id="L28"><a href="#L28">  28</a>     change ComplexRawQuotient.ofRaw z.val z.property-0=ComplexRawQuotient.ofRaw z.val z.property</span>
+<span id="L29"><a href="#L29">  29</a>     grind only</span>
+<span id="L30"><a href="#L30">  30</a>   have hb := BoundedSeries.sum_remainder_bound LocalLogarithm.coefficient zero z.val</span>
+<span id="L31"><a href="#L31">  31</a>     LocalLogarithm.coefficient_valid (ofQComplex_valid _) z.property</span>
+<span id="L32"><a href="#L32">  32</a>     1 1 LocalLogarithm.radius.val H</span>
+<span id="L33"><a href="#L33">  33</a>     (by decide +kernel) (by decide +kernel) (by decide +kernel) hH</span>
+<span id="L34"><a href="#L34">  34</a>     LocalLogarithm.coefficient_bound (Small.zero (by decide +kernel))</span>
+<span id="L35"><a href="#L35">  35</a>     (interior_bound _ z hz)</span>
+<span id="L36"><a href="#L36">  36</a>     (Small.congr z.property (sub_valid z.property (ofQComplex_valid _))</span>
+<span id="L37"><a href="#L37">  37</a>       (equiv_symm he0) hsmall) (by decide +kernel)</span>
+<span id="L38"><a href="#L38">  38</a>   have hD := equiv_trans</span>
+<span id="L39"><a href="#L39">  39</a>     (BoundedSeries.sumDerivative_valid LocalLogarithm.coefficient zero</span>
+<span id="L40"><a href="#L40">  40</a>       LocalLogarithm.coefficient_valid (ofQComplex_valid _) 1 1 LocalLogarithm.radius.val</span>
+<span id="L41"><a href="#L41">  41</a>       (by decide +kernel) (by decide +kernel) (by decide +kernel)</span>
+<span id="L42"><a href="#L42">  42</a>       LocalLogarithm.coefficient_bound (Small.zero (by decide +kernel)) (by decide +kernel))</span>
+<span id="L43"><a href="#L43">  43</a>     (LocalLogarithm.coefficient_valid 1) (ofQComplex_valid _) hd h1</span>
+<span id="L44"><a href="#L44">  44</a>   have hDv := BoundedSeries.sumDerivative_valid LocalLogarithm.coefficient zero</span>
+<span id="L45"><a href="#L45">  45</a>     LocalLogarithm.coefficient_valid (ofQComplex_valid _) 1 1 LocalLogarithm.radius.val</span>
+<span id="L46"><a href="#L46">  46</a>     (by decide +kernel) (by decide +kernel) (by decide +kernel)</span>
+<span id="L47"><a href="#L47">  47</a>     LocalLogarithm.coefficient_bound (Small.zero (by decide +kernel)) (by decide +kernel)</span>
+<span id="L48"><a href="#L48">  48</a>   have hm := mul_equiv hDv (ofQComplex_valid _) (sub_valid z.property (ofQComplex_valid _))</span>
+<span id="L49"><a href="#L49">  49</a>     z.property hD he0</span>
+<span id="L50"><a href="#L50">  50</a>   have hh := FunctionTheory.sub_congr</span>
+<span id="L51"><a href="#L51">  51</a>     (FunctionTheory.sub_congr (equiv_refl _ L.property) h0) hm</span>
+<span id="L52"><a href="#L52">  52</a>   have he2 : (sub (sub L.val zero) (mul one z.val)).Equiv (sub L.val z.val) := by</span>
+<span id="L53"><a href="#L53">  53</a>     apply ComplexRawQuotient.equiv_of_ofRaw_eq</span>
+<span id="L54"><a href="#L54">  54</a>       (hleft := sub_valid (sub_valid L.property (ofQComplex_valid _))</span>
+<span id="L55"><a href="#L55">  55</a>         (mul_valid (ofQComplex_valid _) z.property)) (hright := sub_valid L.property z.property)</span>
+<span id="L56"><a href="#L56">  56</a>     change (ComplexRawQuotient.ofRaw L.val L.property-0)-1*ComplexRawQuotient.ofRaw z.val z.property=</span>
+<span id="L57"><a href="#L57">  57</a>       ComplexRawQuotient.ofRaw L.val L.property-ComplexRawQuotient.ofRaw z.val z.property</span>
+<span id="L58"><a href="#L58">  58</a>     grind only</span>
+<span id="L59"><a href="#L59">  59</a>   have hvalid := SeriesLimitLaws.remainder_valid _ _ _ _ L.property</span>
+<span id="L60"><a href="#L60">  60</a>     (LocalLogarithm.function.eval a (interior_zero _ LocalLogarithm.radius.property)).property</span>
+<span id="L61"><a href="#L61">  61</a>     (BoundedSeries.sumDerivative_valid _ _ LocalLogarithm.coefficient_valid (ofQComplex_valid _)</span>
+<span id="L62"><a href="#L62">  62</a>       1 1 LocalLogarithm.radius.val (by decide +kernel) (by decide +kernel)</span>
+<span id="L63"><a href="#L63">  63</a>       (by decide +kernel) LocalLogarithm.coefficient_bound (Small.zero (by decide +kernel))</span>
+<span id="L64"><a href="#L64">  64</a>       (by decide +kernel)) (sub_valid z.property (ofQComplex_valid QComplex.zero))</span>
+<span id="L65"><a href="#L65">  65</a>   have he := equiv_trans hvalid</span>
+<span id="L66"><a href="#L66">  66</a>     (sub_valid (sub_valid L.property (ofQComplex_valid _))</span>
+<span id="L67"><a href="#L67">  67</a>       (mul_valid (ofQComplex_valid _) z.property)) (sub_valid L.property z.property) hh he2</span>
+<span id="L68"><a href="#L68">  68</a>   have hh := Small.congr hvalid (sub_valid L.property z.property) he hb</span>
+<span id="L69"><a href="#L69">  69</a>   rw [show (1:Rat)^2=1 by decide +kernel] at hh</span>
+<span id="L70"><a href="#L70">  70</a>   simpa only [Rat.mul_one] using hh</span>
+<span id="L71"><a href="#L71">  71</a> end ComputableAnalysis.ExponentialComputations</span>
+</pre></body></html>

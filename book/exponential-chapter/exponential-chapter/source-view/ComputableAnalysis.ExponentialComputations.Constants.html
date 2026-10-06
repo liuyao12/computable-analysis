@@ -1,0 +1,22 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ComputableAnalysis.ExponentialComputations.Constants</title><style>body{margin:24px;background:#fbfaf6;color:#252b27}pre{font:12px/1.65 monospace;white-space:pre;overflow-x:auto}pre span{display:block}pre span:target{background:#fff2b8}a{color:#466442}pre a{color:#999;text-decoration:none}</style></head><body><a href="../index.html">Proof bundle</a><h1 style="font:18px system-ui">ComputableAnalysis.ExponentialComputations.Constants</h1><pre><span id="L1"><a href="#L1">   1</a> import ComputableAnalysis.ExponentialComputations.API</span>
+<span id="L2"><a href="#L2">   2</a> import ComputableAnalysis.ComplexExponentialRealBridge</span>
+<span id="L3"><a href="#L3">   3</a> </span>
+<span id="L4"><a href="#L4">   4</a> /-! Compatibility of the function API with the repository&#x27;s computed e. -/</span>
+<span id="L5"><a href="#L5">   5</a> namespace ComputableAnalysis.ExponentialComputations</span>
+<span id="L6"><a href="#L6">   6</a> open ComplexRaw FunctionTheory RiemannHilbert ModularForms</span>
+<span id="L7"><a href="#L7">   7</a> </span>
+<span id="L8"><a href="#L8">   8</a> theorem exp_one_equiv_ePowerSeries : (exp oneInput.val).val.Equiv ePowerSeries := by</span>
+<span id="L9"><a href="#L9">   9</a>   have h := entireExponential_legacy_rational (QComplex.ofRat 1) 1</span>
+<span id="L10"><a href="#L10">  10</a>     (by decide +kernel) (by decide +kernel)</span>
+<span id="L11"><a href="#L11">  11</a>   have hh := ComplexExponentialApproximation.exponentialRawAt_realPart_equiv_expPowerSeries 1 1</span>
+<span id="L12"><a href="#L12">  12</a>     (by decide +kernel) (by decide +kernel)</span>
+<span id="L13"><a href="#L13">  13</a>   exact RealRaw.equiv_trans (exp oneInput.val).property</span>
+<span id="L14"><a href="#L14">  14</a>     (realPart_valid (ComplexExponentialApproximation.exponentialRawAt_valid</span>
+<span id="L15"><a href="#L15">  15</a>       (z := QComplex.ofRat 1) (C := 1) (by decide +kernel) (by decide +kernel)))</span>
+<span id="L16"><a href="#L16">  16</a>     ExpProofs.ePowerSeries_valid (realPart_equiv h) hh</span>
+<span id="L17"><a href="#L17">  17</a> </span>
+<span id="L18"><a href="#L18">  18</a> theorem exp_one_equiv_eCompoundInterest : (exp oneInput.val).val.Equiv eCompoundInterest :=</span>
+<span id="L19"><a href="#L19">  19</a>   RealRaw.equiv_trans (exp oneInput.val).property ExpProofs.ePowerSeries_valid ExpProofs.eCompoundInterest_valid</span>
+<span id="L20"><a href="#L20">  20</a>     exp_one_equiv_ePowerSeries ExpProofs.ePowerSeries_equiv_eCompoundInterest</span>
+<span id="L21"><a href="#L21">  21</a> end ComputableAnalysis.ExponentialComputations</span>
+</pre></body></html>

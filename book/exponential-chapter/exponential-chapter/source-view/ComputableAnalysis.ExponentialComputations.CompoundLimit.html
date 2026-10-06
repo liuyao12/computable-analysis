@@ -1,0 +1,241 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ComputableAnalysis.ExponentialComputations.CompoundLimit</title><style>body{margin:24px;background:#fbfaf6;color:#252b27}pre{font:12px/1.65 monospace;white-space:pre;overflow-x:auto}pre span{display:block}pre span:target{background:#fff2b8}a{color:#466442}pre a{color:#999;text-decoration:none}</style></head><body><a href="../index.html">Proof bundle</a><h1 style="font:18px system-ui">ComputableAnalysis.ExponentialComputations.CompoundLimit</h1><pre><span id="L1"><a href="#L1">   1</a> import ComputableAnalysis.ExponentialComputations.LogarithmRemainder</span>
+<span id="L2"><a href="#L2">   2</a> import ComputableAnalysis.ModularForms.ExponentialPowers</span>
+<span id="L3"><a href="#L3">   3</a> import ComputableAnalysis.ModularForms.ExponentialContinuity</span>
+<span id="L4"><a href="#L4">   4</a> import ComputableAnalysis.RiemannHilbert.ReciprocalExamples</span>
+<span id="L5"><a href="#L5">   5</a> </span>
+<span id="L6"><a href="#L6">   6</a> /-! Compound-interest approximations at arbitrary represented complex inputs.</span>
+<span id="L7"><a href="#L7">   7</a> The actual local logarithm supplies a quadratic error. Its inverse identity</span>
+<span id="L8"><a href="#L8">   8</a> and the exponential addition law turn this into a quantitative limit proof. -/</span>
+<span id="L9"><a href="#L9">   9</a> namespace ComputableAnalysis.ExponentialComputations</span>
+<span id="L10"><a href="#L10">  10</a> open ComplexRaw FunctionTheory RiemannHilbert LocalODE DomainFunctions ModularForms</span>
+<span id="L11"><a href="#L11">  11</a> set_option maxHeartbeats 1000000</span>
+<span id="L12"><a href="#L12">  12</a> </span>
+<span id="L13"><a href="#L13">  13</a> /-- A literal finite compound-interest power, including negative/complex inputs. -/</span>
+<span id="L14"><a href="#L14">  14</a> def compoundApproximation (z : Scalar) (n : Nat) : Scalar :=</span>
+<span id="L15"><a href="#L15">  15</a>   ⟨power (add one (scaleRat (1/((n+1:Nat):Rat)) z.val)) (n+1),</span>
+<span id="L16"><a href="#L16">  16</a>     power_valid _ (add_valid (ofQComplex_valid _) (scaleRat_valid z.property)) _⟩</span>
+<span id="L17"><a href="#L17">  17</a> </span>
+<span id="L18"><a href="#L18">  18</a> def compoundRadius (z : Scalar) : QPos :=</span>
+<span id="L19"><a href="#L19">  19</a>   ⟨2*scalarBound z+1,by have h := scalarBound_pos z; grind only⟩</span>
+<span id="L20"><a href="#L20">  20</a> </span>
+<span id="L21"><a href="#L21">  21</a> def compoundErrorConstant (z : Scalar) : Rat :=</span>
+<span id="L22"><a href="#L22">  22</a>   256*exponentialBudget (exponentialRatio (compoundRadius z))*</span>
+<span id="L23"><a href="#L23">  23</a>     (exponentialRatio (compoundRadius z))^2*(scalarBound z)^2</span>
+<span id="L24"><a href="#L24">  24</a> </span>
+<span id="L25"><a href="#L25">  25</a> theorem compoundErrorConstant_nonnegative (z : Scalar) : 0 ≤ compoundErrorConstant z := by</span>
+<span id="L26"><a href="#L26">  26</a>   unfold compoundErrorConstant</span>
+<span id="L27"><a href="#L27">  27</a>   exact Rat.mul_nonneg (Rat.mul_nonneg</span>
+<span id="L28"><a href="#L28">  28</a>     (Rat.mul_nonneg (by decide +kernel)</span>
+<span id="L29"><a href="#L29">  29</a>       (exponentialBudget_nonnegative _ (exponentialRatio_positive _)))</span>
+<span id="L30"><a href="#L30">  30</a>     (Rat.pow_nonneg (Rat.le_of_lt (exponentialRatio_positive _))))</span>
+<span id="L31"><a href="#L31">  31</a>     (Rat.pow_nonneg (Rat.le_of_lt (scalarBound_pos z)))</span>
+<span id="L32"><a href="#L32">  32</a> </span>
+<span id="L33"><a href="#L33">  33</a> /-- Explicit error for every sufficiently fine compound-interest power.</span>
+<span id="L34"><a href="#L34">  34</a> The hypothesis is just a computable lower bound on the finite mesh size. -/</span>
+<span id="L35"><a href="#L35">  35</a> theorem compoundApproximation_error (z : Scalar) (n : Nat)</span>
+<span id="L36"><a href="#L36">  36</a>     (hmesh : scalarBound z/((n+1:Nat):Rat) ≤ (1:Rat)/128) :</span>
+<span id="L37"><a href="#L37">  37</a>     Small (sub (compoundApproximation z n).val (entireExponentialValue z).val)</span>
+<span id="L38"><a href="#L38">  38</a>       (compoundErrorConstant z/((n+1:Nat):Rat)) := by</span>
+<span id="L39"><a href="#L39">  39</a>   let C := scalarBound z</span>
+<span id="L40"><a href="#L40">  40</a>   let m : Rat := ((n+1:Nat):Rat)</span>
+<span id="L41"><a href="#L41">  41</a>   have hm : 0&lt;m := Rat.natCast_pos.mpr (Nat.succ_pos n)</span>
+<span id="L42"><a href="#L42">  42</a>   have hi : 0≤1/m := Rat.le_of_lt (by rw [Rat.div_def,Rat.one_mul]; exact Rat.inv_pos.mpr hm)</span>
+<span id="L43"><a href="#L43">  43</a>   have hC : 0&lt;C := scalarBound_pos z</span>
+<span id="L44"><a href="#L44">  44</a>   have hC0 := Rat.le_of_lt hC</span>
+<span id="L45"><a href="#L45">  45</a>   let w : Scalar := ⟨scaleRat (1/m) z.val,scaleRat_valid z.property⟩</span>
+<span id="L46"><a href="#L46">  46</a>   have hw : Small w.val (C/m) := by</span>
+<span id="L47"><a href="#L47">  47</a>     have h := small_scale hi (scalar_small z)</span>
+<span id="L48"><a href="#L48">  48</a>     change Small w.val ((1/m)*C) at h</span>
+<span id="L49"><a href="#L49">  49</a>     have he : (1/m)*C=C/m := by grind [Rat.div_def]</span>
+<span id="L50"><a href="#L50">  50</a>     rw [he] at h</span>
+<span id="L51"><a href="#L51">  51</a>     exact h</span>
+<span id="L52"><a href="#L52">  52</a>   have hs : 0≤C/m := Rat.mul_nonneg hC0 (Rat.le_of_lt (Rat.inv_pos.mpr hm))</span>
+<span id="L53"><a href="#L53">  53</a>   have hd : interior LocalLogarithm.radius.val w :=</span>
+<span id="L54"><a href="#L54">  54</a>     ⟨C/m,hs,by change C/m≤(1:Rat)/128 at hmesh; change C/m&lt;(1:Rat)/32; grind only,hw⟩</span>
+<span id="L55"><a href="#L55">  55</a>   let l := LocalLogarithm.function.eval w hd</span>
+<span id="L56"><a href="#L56">  56</a>   let a : Scalar := ⟨scaleRat m l.val,scaleRat_valid l.property⟩</span>
+<span id="L57"><a href="#L57">  57</a>   let E := 16*C^2/m</span>
+<span id="L58"><a href="#L58">  58</a>   have hE : 0≤E := Rat.mul_nonneg</span>
+<span id="L59"><a href="#L59">  59</a>     (Rat.mul_nonneg (by decide +kernel) (Rat.pow_nonneg hC0)) (Rat.le_of_lt (Rat.inv_pos.mpr hm))</span>
+<span id="L60"><a href="#L60">  60</a>   have hlinear := localLogarithm_linear_error w hd (C/m) hs hw</span>
+<span id="L61"><a href="#L61">  61</a>   have hscale := small_scale (Rat.le_of_lt hm) hlinear</span>
+<span id="L62"><a href="#L62">  62</a>   have he : (scaleRat m (sub l.val w.val)).Equiv (sub a.val z.val) := by</span>
+<span id="L63"><a href="#L63">  63</a>     apply ComplexRawQuotient.equiv_of_ofRaw_eq</span>
+<span id="L64"><a href="#L64">  64</a>       (hleft := scaleRat_valid (sub_valid l.property w.property))</span>
+<span id="L65"><a href="#L65">  65</a>       (hright := sub_valid a.property z.property)</span>
+<span id="L66"><a href="#L66">  66</a>     let L := ComplexRawQuotient.ofRaw l.val l.property</span>
+<span id="L67"><a href="#L67">  67</a>     let Z := ComplexRawQuotient.ofRaw z.val z.property</span>
+<span id="L68"><a href="#L68">  68</a>     change ComplexRawQuotient.scaleRat m (L-ComplexRawQuotient.scaleRat (1/m) Z)=</span>
+<span id="L69"><a href="#L69">  69</a>       ComplexRawQuotient.scaleRat m L-Z</span>
+<span id="L70"><a href="#L70">  70</a>     change ComplexRawQuotient.scaleRat m (L+ -ComplexRawQuotient.scaleRat (1/m) Z)=</span>
+<span id="L71"><a href="#L71">  71</a>       ComplexRawQuotient.scaleRat m L+ -Z</span>
+<span id="L72"><a href="#L72">  72</a>     have hneg (Y : ComplexRawQuotient.Value) :</span>
+<span id="L73"><a href="#L73">  73</a>         ComplexRawQuotient.scaleRat m (-Y)= -(ComplexRawQuotient.scaleRat m Y) := by</span>
+<span id="L74"><a href="#L74">  74</a>       rw [ComplexRawQuotient.neg_eq_scaleRat_neg_one,ComplexRawQuotient.scaleRat_scaleRat,</span>
+<span id="L75"><a href="#L75">  75</a>         ComplexRawQuotient.neg_eq_scaleRat_neg_one,ComplexRawQuotient.scaleRat_scaleRat]</span>
+<span id="L76"><a href="#L76">  76</a>       congr 1</span>
+<span id="L77"><a href="#L77">  77</a>       grind only</span>
+<span id="L78"><a href="#L78">  78</a>     rw [ComplexRawQuotient.scaleRat_add,hneg,ComplexRawQuotient.scaleRat_scaleRat]</span>
+<span id="L79"><a href="#L79">  79</a>     rw [show m*(1/m)=1 by have h := Rat.mul_inv_cancel m (Rat.ne_of_gt hm); grind [Rat.div_def],</span>
+<span id="L80"><a href="#L80">  80</a>       ComplexRawQuotient.scaleRat_one]</span>
+<span id="L81"><a href="#L81">  81</a>   have herr : Small (sub a.val z.val) E := by</span>
+<span id="L82"><a href="#L82">  82</a>     have hh := Small.congr (scaleRat_valid (sub_valid l.property w.property))</span>
+<span id="L83"><a href="#L83">  83</a>       (sub_valid a.property z.property) he hscale</span>
+<span id="L84"><a href="#L84">  84</a>     have hiid := Rat.mul_inv_cancel m (Rat.ne_of_gt hm)</span>
+<span id="L85"><a href="#L85">  85</a>     have heB : m*(16*(C/m)^2)=E := by</span>
+<span id="L86"><a href="#L86">  86</a>       dsimp [E]</span>
+<span id="L87"><a href="#L87">  87</a>       rw [Rat.pow_succ,Rat.pow_succ,Rat.pow_zero,Rat.pow_succ,Rat.pow_succ,Rat.pow_zero]</span>
+<span id="L88"><a href="#L88">  88</a>       grind [Rat.div_def]</span>
+<span id="L89"><a href="#L89">  89</a>     rw [heB] at hh</span>
+<span id="L90"><a href="#L90">  90</a>     exact hh</span>
+<span id="L91"><a href="#L91">  91</a>   have heC : E≤C := by</span>
+<span id="L92"><a href="#L92">  92</a>     have h := Rat.mul_le_mul_of_nonneg_left hmesh (show 0≤16*C by grind only)</span>
+<span id="L93"><a href="#L93">  93</a>     change 16*C*(C/m)≤16*C*((1:Rat)/128) at h</span>
+<span id="L94"><a href="#L94">  94</a>     dsimp [E]; rw [Rat.pow_succ,Rat.pow_succ,Rat.pow_zero]; grind [Rat.div_def]</span>
+<span id="L95"><a href="#L95">  95</a>   have haSmall : Small a.val (2*C) := by</span>
+<span id="L96"><a href="#L96">  96</a>     have h := small_add herr (scalar_small z)</span>
+<span id="L97"><a href="#L97">  97</a>     have heq : (add (sub a.val z.val) z.val).Equiv a.val := by</span>
+<span id="L98"><a href="#L98">  98</a>       apply ComplexRawQuotient.equiv_of_ofRaw_eq</span>
+<span id="L99"><a href="#L99">  99</a>         (hleft := add_valid (sub_valid a.property z.property) z.property) (hright := a.property)</span>
+<span id="L100"><a href="#L100"> 100</a>       change (ComplexRawQuotient.ofRaw a.val a.property-ComplexRawQuotient.ofRaw z.val z.property)+</span>
+<span id="L101"><a href="#L101"> 101</a>         ComplexRawQuotient.ofRaw z.val z.property=ComplexRawQuotient.ofRaw a.val a.property</span>
+<span id="L102"><a href="#L102"> 102</a>       grind only</span>
+<span id="L103"><a href="#L103"> 103</a>     exact Small.mono (Small.congr</span>
+<span id="L104"><a href="#L104"> 104</a>       (add_valid (sub_valid a.property z.property) z.property) a.property heq h) (by grind only)</span>
+<span id="L105"><a href="#L105"> 105</a>   have hzR : (exponentialChart (compoundRadius z)).domain z :=</span>
+<span id="L106"><a href="#L106"> 106</a>     ⟨C,hC0,by dsimp [compoundRadius,C]; grind only,scalar_small z⟩</span>
+<span id="L107"><a href="#L107"> 107</a>   have haR : (exponentialChart (compoundRadius z)).domain a :=</span>
+<span id="L108"><a href="#L108"> 108</a>     ⟨2*C,by grind only,by dsimp [compoundRadius,C]; grind only,haSmall⟩</span>
+<span id="L109"><a href="#L109"> 109</a>   have hcontinuity := entireExponential_lipschitz (compoundRadius z) z a hzR haR E hE herr</span>
+<span id="L110"><a href="#L110"> 110</a>   have hpow := power_congr (entireExponentialValue l).val (LocalLogarithm.onePlus w).val</span>
+<span id="L111"><a href="#L111"> 111</a>     (entireExponentialValue l).property (LocalLogarithm.onePlus w).property</span>
+<span id="L112"><a href="#L112"> 112</a>     (entireExponential_localLogarithm w hd) (n+1)</span>
+<span id="L113"><a href="#L113"> 113</a>   have hnat := entireExponential_nat_multiple l (n+1)</span>
+<span id="L114"><a href="#L114"> 114</a>   have happrox : (compoundApproximation z n).val.Equiv (entireExponentialValue a).val :=</span>
+<span id="L115"><a href="#L115"> 115</a>     equiv_symm (equiv_trans (entireExponentialValue a).property</span>
+<span id="L116"><a href="#L116"> 116</a>       (power_valid _ (entireExponentialValue l).property _) (compoundApproximation z n).property</span>
+<span id="L117"><a href="#L117"> 117</a>       hnat hpow)</span>
+<span id="L118"><a href="#L118"> 118</a>   have hh := Small.congr</span>
+<span id="L119"><a href="#L119"> 119</a>     (sub_valid (entireExponentialValue a).property (entireExponentialValue z).property)</span>
+<span id="L120"><a href="#L120"> 120</a>     (sub_valid (compoundApproximation z n).property (entireExponentialValue z).property)</span>
+<span id="L121"><a href="#L121"> 121</a>     (FunctionTheory.sub_congr (equiv_symm happrox) (equiv_refl _ (entireExponentialValue z).property)) hcontinuity</span>
+<span id="L122"><a href="#L122"> 122</a>   have heB : 16*exponentialBudget (exponentialRatio (compoundRadius z))*</span>
+<span id="L123"><a href="#L123"> 123</a>       (exponentialRatio (compoundRadius z))^2*E=compoundErrorConstant z/((n+1:Nat):Rat) := by</span>
+<span id="L124"><a href="#L124"> 124</a>     dsimp [compoundErrorConstant,E,m,C]</span>
+<span id="L125"><a href="#L125"> 125</a>     grind [Rat.div_def]</span>
+<span id="L126"><a href="#L126"> 126</a>   rw [heB] at hh</span>
+<span id="L127"><a href="#L127"> 127</a>   exact hh</span>
+<span id="L128"><a href="#L128"> 128</a> </span>
+<span id="L129"><a href="#L129"> 129</a> /-- A finite initial mesh bound, computed from the input&#x27;s rational box. -/</span>
+<span id="L130"><a href="#L130"> 130</a> def compoundStart (z : Scalar) : Nat := 128*((scalarBound z).num.natAbs+1)</span>
+<span id="L131"><a href="#L131"> 131</a> </span>
+<span id="L132"><a href="#L132"> 132</a> def compoundPrefix (z : Scalar) (k : Nat) : Scalar := compoundApproximation z (compoundStart z+k)</span>
+<span id="L133"><a href="#L133"> 133</a> def compoundError (z : Scalar) (k : Nat) : Rat := compoundErrorConstant z/((k+1:Nat):Rat)</span>
+<span id="L134"><a href="#L134"> 134</a> </span>
+<span id="L135"><a href="#L135"> 135</a> theorem reciprocal_antitone {a b : Rat} (ha : 0&lt;a) (hab : a≤b) : 1/b≤1/a := by</span>
+<span id="L136"><a href="#L136"> 136</a>   have hb : 0&lt;b := by grind only</span>
+<span id="L137"><a href="#L137"> 137</a>   apply Rat.le_of_mul_le_mul_right (c := a*b)</span>
+<span id="L138"><a href="#L138"> 138</a>   · have heA := Rat.mul_inv_cancel a (Rat.ne_of_gt ha)</span>
+<span id="L139"><a href="#L139"> 139</a>     have heB := Rat.mul_inv_cancel b (Rat.ne_of_gt hb)</span>
+<span id="L140"><a href="#L140"> 140</a>     calc</span>
+<span id="L141"><a href="#L141"> 141</a>       (1/b)*(a*b)=a := by rw [Rat.div_def]; grind [Rat.mul_assoc,Rat.mul_comm,Rat.mul_inv_cancel _ (Rat.ne_of_gt hb)]</span>
+<span id="L142"><a href="#L142"> 142</a>       _≤b := hab</span>
+<span id="L143"><a href="#L143"> 143</a>       _=(1/a)*(a*b) := by rw [Rat.div_def]; grind [Rat.mul_assoc,Rat.mul_comm,Rat.mul_inv_cancel _ (Rat.ne_of_gt ha)]</span>
+<span id="L144"><a href="#L144"> 144</a>   · exact Rat.mul_pos ha hb</span>
+<span id="L145"><a href="#L145"> 145</a> </span>
+<span id="L146"><a href="#L146"> 146</a> theorem compoundPrefix_error (z : Scalar) (k : Nat) :</span>
+<span id="L147"><a href="#L147"> 147</a>     Small (sub (compoundPrefix z k).val (entireExponentialValue z).val) (compoundError z k) := by</span>
+<span id="L148"><a href="#L148"> 148</a>   let C := scalarBound z</span>
+<span id="L149"><a href="#L149"> 149</a>   let B : Rat := (((scalarBound z).num.natAbs+1:Nat):Rat)</span>
+<span id="L150"><a href="#L150"> 150</a>   let m : Rat := ((compoundStart z+k+1:Nat):Rat)</span>
+<span id="L151"><a href="#L151"> 151</a>   have hC : C≤B := Rat.le_trans (self_le_qabs C) (qabs_le_numNatAbs_succ C)</span>
+<span id="L152"><a href="#L152"> 152</a>   have hm : 0&lt;m := Rat.natCast_pos.mpr (by omega)</span>
+<span id="L153"><a href="#L153"> 153</a>   have hlarge : 128*B≤m := by</span>
+<span id="L154"><a href="#L154"> 154</a>     have hn : compoundStart z≤compoundStart z+k+1 := by omega</span>
+<span id="L155"><a href="#L155"> 155</a>     have hc : ((compoundStart z:Nat):Rat)≤m := by change ((compoundStart z):Rat)≤((compoundStart z+k+1:Nat):Rat); exact_mod_cast hn</span>
+<span id="L156"><a href="#L156"> 156</a>     have he : ((compoundStart z):Rat)=128*B := by</span>
+<span id="L157"><a href="#L157"> 157</a>       dsimp [compoundStart,B]</span>
+<span id="L158"><a href="#L158"> 158</a>       rw [Rat.natCast_mul]</span>
+<span id="L159"><a href="#L159"> 159</a>       rfl</span>
+<span id="L160"><a href="#L160"> 160</a>     rw [he] at hc</span>
+<span id="L161"><a href="#L161"> 161</a>     exact hc</span>
+<span id="L162"><a href="#L162"> 162</a>   have him : 0≤m⁻¹ := Rat.le_of_lt (Rat.inv_pos.mpr hm)</span>
+<span id="L163"><a href="#L163"> 163</a>   have hmul := Rat.mul_le_mul_of_nonneg_right (show 128*C≤m by grind only) him</span>
+<span id="L164"><a href="#L164"> 164</a>   have he := Rat.mul_inv_cancel m (Rat.ne_of_gt hm)</span>
+<span id="L165"><a href="#L165"> 165</a>   have hmesh : C/m≤(1:Rat)/128 := by grind [Rat.div_def]</span>
+<span id="L166"><a href="#L166"> 166</a>   have herror := compoundApproximation_error z (compoundStart z+k) hmesh</span>
+<span id="L167"><a href="#L167"> 167</a>   have hk : 0&lt;((k+1:Nat):Rat) := Rat.natCast_pos.mpr (Nat.succ_pos k)</span>
+<span id="L168"><a href="#L168"> 168</a>   have hkm : ((k+1:Nat):Rat)≤m := by change ((k+1:Nat):Rat)≤((compoundStart z+k+1:Nat):Rat); exact_mod_cast (show k+1≤compoundStart z+k+1 by omega)</span>
+<span id="L169"><a href="#L169"> 169</a>   have hi := reciprocal_antitone hk hkm</span>
+<span id="L170"><a href="#L170"> 170</a>   have hK := compoundErrorConstant_nonnegative z</span>
+<span id="L171"><a href="#L171"> 171</a>   have hh := Rat.mul_le_mul_of_nonneg_left hi hK</span>
+<span id="L172"><a href="#L172"> 172</a>   apply Small.mono herror</span>
+<span id="L173"><a href="#L173"> 173</a>   simpa only [compoundError,Rat.div_def,Rat.one_mul] using hh</span>
+<span id="L174"><a href="#L174"> 174</a> </span>
+<span id="L175"><a href="#L175"> 175</a> theorem compoundError_antitone (z : Scalar) {k n : Nat} (hkn : k≤n) :</span>
+<span id="L176"><a href="#L176"> 176</a>     compoundError z n≤compoundError z k := by</span>
+<span id="L177"><a href="#L177"> 177</a>   have hk : 0&lt;((k+1:Nat):Rat) := Rat.natCast_pos.mpr (Nat.succ_pos k)</span>
+<span id="L178"><a href="#L178"> 178</a>   have hn : ((k+1:Nat):Rat)≤((n+1:Nat):Rat) := by exact_mod_cast (show k+1≤n+1 by omega)</span>
+<span id="L179"><a href="#L179"> 179</a>   have h := Rat.mul_le_mul_of_nonneg_left (reciprocal_antitone hk hn)</span>
+<span id="L180"><a href="#L180"> 180</a>     (compoundErrorConstant_nonnegative z)</span>
+<span id="L181"><a href="#L181"> 181</a>   simpa only [compoundError,Rat.div_def,Rat.one_mul] using h</span>
+<span id="L182"><a href="#L182"> 182</a> </span>
+<span id="L183"><a href="#L183"> 183</a> theorem compoundError_shrinks (z : Scalar) : ShrinksToZero (compoundError z) :=</span>
+<span id="L184"><a href="#L184"> 184</a>   shrinksToZero_of_ratOverSuccBound (fun _ =&gt; Rat.le_refl)</span>
+<span id="L185"><a href="#L185"> 185</a> </span>
+<span id="L186"><a href="#L186"> 186</a> theorem compoundPrefix_cauchy (z : Scalar) (k n : Nat) (hkn : k≤n) :</span>
+<span id="L187"><a href="#L187"> 187</a>     Small (sub (compoundPrefix z n).val (compoundPrefix z k).val) (2*compoundError z k) := by</span>
+<span id="L188"><a href="#L188"> 188</a>   have h := SeriesLimitLaws.small_sub (compoundPrefix_error z n) (compoundPrefix_error z k)</span>
+<span id="L189"><a href="#L189"> 189</a>   have he : (sub (sub (compoundPrefix z n).val (entireExponentialValue z).val)</span>
+<span id="L190"><a href="#L190"> 190</a>       (sub (compoundPrefix z k).val (entireExponentialValue z).val)).Equiv</span>
+<span id="L191"><a href="#L191"> 191</a>       (sub (compoundPrefix z n).val (compoundPrefix z k).val) := by</span>
+<span id="L192"><a href="#L192"> 192</a>     apply ComplexRawQuotient.equiv_of_ofRaw_eq</span>
+<span id="L193"><a href="#L193"> 193</a>       (hleft := sub_valid (sub_valid (compoundPrefix z n).property (entireExponentialValue z).property)</span>
+<span id="L194"><a href="#L194"> 194</a>         (sub_valid (compoundPrefix z k).property (entireExponentialValue z).property))</span>
+<span id="L195"><a href="#L195"> 195</a>       (hright := sub_valid (compoundPrefix z n).property (compoundPrefix z k).property)</span>
+<span id="L196"><a href="#L196"> 196</a>     change (ComplexRawQuotient.ofRaw (compoundPrefix z n).val (compoundPrefix z n).property-</span>
+<span id="L197"><a href="#L197"> 197</a>       ComplexRawQuotient.ofRaw (entireExponentialValue z).val (entireExponentialValue z).property)-</span>
+<span id="L198"><a href="#L198"> 198</a>       (ComplexRawQuotient.ofRaw (compoundPrefix z k).val (compoundPrefix z k).property-</span>
+<span id="L199"><a href="#L199"> 199</a>       ComplexRawQuotient.ofRaw (entireExponentialValue z).val (entireExponentialValue z).property)=</span>
+<span id="L200"><a href="#L200"> 200</a>       ComplexRawQuotient.ofRaw (compoundPrefix z n).val (compoundPrefix z n).property-</span>
+<span id="L201"><a href="#L201"> 201</a>       ComplexRawQuotient.ofRaw (compoundPrefix z k).val (compoundPrefix z k).property</span>
+<span id="L202"><a href="#L202"> 202</a>     grind only</span>
+<span id="L203"><a href="#L203"> 203</a>   have hb := Small.congr</span>
+<span id="L204"><a href="#L204"> 204</a>     (sub_valid (sub_valid (compoundPrefix z n).property (entireExponentialValue z).property)</span>
+<span id="L205"><a href="#L205"> 205</a>       (sub_valid (compoundPrefix z k).property (entireExponentialValue z).property))</span>
+<span id="L206"><a href="#L206"> 206</a>     (sub_valid (compoundPrefix z n).property (compoundPrefix z k).property) he h</span>
+<span id="L207"><a href="#L207"> 207</a>   exact Small.mono hb (by have h := compoundError_antitone z hkn; grind only)</span>
+<span id="L208"><a href="#L208"> 208</a> </span>
+<span id="L209"><a href="#L209"> 209</a> /-- Executable limit from finite powers and shrinking error bounds. The</span>
+<span id="L210"><a href="#L210"> 210</a> runtime samples the compound powers; it does not evaluate the power series. -/</span>
+<span id="L211"><a href="#L211"> 211</a> def compoundValue (z : Scalar) : Scalar :=</span>
+<span id="L212"><a href="#L212"> 212</a>   ⟨RepresentedCauchySum.value (fun k =&gt; (compoundPrefix z k).val)</span>
+<span id="L213"><a href="#L213"> 213</a>       (fun k =&gt; (compoundPrefix z k).property) (fun k =&gt; 2*compoundError z k),</span>
+<span id="L214"><a href="#L214"> 214</a>     RepresentedCauchySum.value_valid _ _ _</span>
+<span id="L215"><a href="#L215"> 215</a>       (SeriesLimitLaws.shrinks_scale _ (compoundError_shrinks z) 2 (by decide +kernel))</span>
+<span id="L216"><a href="#L216"> 216</a>       (compoundPrefix_cauchy z)⟩</span>
+<span id="L217"><a href="#L217"> 217</a> </span>
+<span id="L218"><a href="#L218"> 218</a> /-- Exact agreement of the compound-interest and power-series constructions</span>
+<span id="L219"><a href="#L219"> 219</a> on every valid represented complex input. -/</span>
+<span id="L220"><a href="#L220"> 220</a> theorem compoundValue_equiv_powerSeries (z : Scalar) :</span>
+<span id="L221"><a href="#L221"> 221</a>     (compoundValue z).val.Equiv (entireExponentialValue z).val := by</span>
+<span id="L222"><a href="#L222"> 222</a>   apply RepresentedCauchySum.unique (fun k =&gt; (compoundPrefix z k).val)</span>
+<span id="L223"><a href="#L223"> 223</a>     (fun k =&gt; (compoundPrefix z k).property) (fun k =&gt; 2*compoundError z k)</span>
+<span id="L224"><a href="#L224"> 224</a>     (SeriesLimitLaws.shrinks_scale _ (compoundError_shrinks z) 2 (by decide +kernel))</span>
+<span id="L225"><a href="#L225"> 225</a>     _ _ (compoundValue z).property (entireExponentialValue z).property</span>
+<span id="L226"><a href="#L226"> 226</a>   · exact RepresentedCauchySum.value_close_prefix _ _ _ (compoundPrefix_cauchy z)</span>
+<span id="L227"><a href="#L227"> 227</a>   · intro k</span>
+<span id="L228"><a href="#L228"> 228</a>     have hs := RepresentedCauchySum.small_sub_symm _ _ _ (compoundPrefix_error z k)</span>
+<span id="L229"><a href="#L229"> 229</a>     have hnonneg : 0≤compoundError z k := Rat.mul_nonneg (compoundErrorConstant_nonnegative z)</span>
+<span id="L230"><a href="#L230"> 230</a>       (Rat.le_of_lt (Rat.inv_pos.mpr (Rat.natCast_pos.mpr (Nat.succ_pos k))))</span>
+<span id="L231"><a href="#L231"> 231</a>     exact Small.mono hs (by grind only)</span>
+<span id="L232"><a href="#L232"> 232</a> </span>
+<span id="L233"><a href="#L233"> 233</a> theorem compoundValue_congr (z w : Scalar) (hzw : z.val.Equiv w.val) :</span>
+<span id="L234"><a href="#L234"> 234</a>     (compoundValue z).val.Equiv (compoundValue w).val :=</span>
+<span id="L235"><a href="#L235"> 235</a>   equiv_trans (compoundValue z).property (entireExponentialValue z).property (compoundValue w).property</span>
+<span id="L236"><a href="#L236"> 236</a>     (compoundValue_equiv_powerSeries z)</span>
+<span id="L237"><a href="#L237"> 237</a>     (equiv_trans (entireExponentialValue z).property (entireExponentialValue w).property (compoundValue w).property</span>
+<span id="L238"><a href="#L238"> 238</a>       (entireExponentialValue_congr z w hzw) (equiv_symm (compoundValue_equiv_powerSeries w)))</span>
+<span id="L239"><a href="#L239"> 239</a> end ComputableAnalysis.ExponentialComputations</span>
+<span id="L240"><a href="#L240"> 240</a> </span>
+</pre></body></html>

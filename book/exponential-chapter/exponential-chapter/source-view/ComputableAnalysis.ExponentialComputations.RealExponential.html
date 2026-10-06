@@ -1,0 +1,85 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ComputableAnalysis.ExponentialComputations.RealExponential</title><style>body{margin:24px;background:#fbfaf6;color:#252b27}pre{font:12px/1.65 monospace;white-space:pre;overflow-x:auto}pre span{display:block}pre span:target{background:#fff2b8}a{color:#466442}pre a{color:#999;text-decoration:none}</style></head><body><a href="../index.html">Proof bundle</a><h1 style="font:18px system-ui">ComputableAnalysis.ExponentialComputations.RealExponential</h1><pre><span id="L1"><a href="#L1">   1</a> import ComputableAnalysis.ModularForms.ExponentialSquaredMagnitude</span>
+<span id="L2"><a href="#L2">   2</a> import ComputableAnalysis.ModularForms.ExponentialFiberRealPart</span>
+<span id="L3"><a href="#L3">   3</a> import ComputableAnalysis.ModularForms.ScalarSquaredMagnitudeBounds</span>
+<span id="L4"><a href="#L4">   4</a> </span>
+<span id="L5"><a href="#L5">   5</a> /-! The real exponential API on arbitrary valid represented inputs. -/</span>
+<span id="L6"><a href="#L6">   6</a> namespace ComputableAnalysis.ExponentialComputations</span>
+<span id="L7"><a href="#L7">   7</a> open ComplexRaw FunctionTheory RiemannHilbert LocalODE DomainFunctions ModularForms</span>
+<span id="L8"><a href="#L8">   8</a> set_option maxHeartbeats 1000000</span>
+<span id="L9"><a href="#L9">   9</a> </span>
+<span id="L10"><a href="#L10">  10</a> theorem real_embedding_congr {x y : RealRaw} (hx : x.Valid) (hy : y.Valid) (h : x.Equiv y) :</span>
+<span id="L11"><a href="#L11">  11</a>     (ofRealRaw x).Equiv (ofRealRaw y) := ofRealRaw_equiv_of_equiv hx hy h</span>
+<span id="L12"><a href="#L12">  12</a> </span>
+<span id="L13"><a href="#L13">  13</a> abbrev RealInput := {x : RealRaw // x.Valid}</span>
+<span id="L14"><a href="#L14">  14</a> def realAxis (x : RealInput) : Scalar := ⟨ofRealRaw x.val,ofRealRaw_valid _ x.property⟩</span>
+<span id="L15"><a href="#L15">  15</a> def exp (x : RealInput) : RealInput :=</span>
+<span id="L16"><a href="#L16">  16</a>   ⟨(entireExponentialValue (realAxis x)).val.realPart,realPart_valid (entireExponentialValue (realAxis x)).property⟩</span>
+<span id="L17"><a href="#L17">  17</a> </span>
+<span id="L18"><a href="#L18">  18</a> theorem exp_congr (x y : RealInput) (h : x.val.Equiv y.val) : (exp x).val.Equiv (exp y).val :=</span>
+<span id="L19"><a href="#L19">  19</a>   realPart_equiv (entireExponentialValue_congr (realAxis x) (realAxis y) (real_embedding_congr x.property y.property h))</span>
+<span id="L20"><a href="#L20">  20</a> </span>
+<span id="L21"><a href="#L21">  21</a> theorem exp_real_embedding (x : RealInput) :</span>
+<span id="L22"><a href="#L22">  22</a>     (entireExponentialValue (realAxis x)).val.Equiv (realAxis (exp x)).val :=</span>
+<span id="L23"><a href="#L23">  23</a>   entireExponential_real_embedding x.val x.property</span>
+<span id="L24"><a href="#L24">  24</a> </span>
+<span id="L25"><a href="#L25">  25</a> /-- A strictly positive real name cannot represent zero. -/</span>
+<span id="L26"><a href="#L26">  26</a> theorem positive_real_nonzero (x : RealInput) (hx : x.val.Pos) : NonzeroBoxSearch.Nonzero (realAxis x) := by</span>
+<span id="L27"><a href="#L27">  27</a>   intro hzero</span>
+<span id="L28"><a href="#L28">  28</a>   have h := realPart_equiv hzero</span>
+<span id="L29"><a href="#L29">  29</a>   obtain ⟨k,hk⟩ := hx</span>
+<span id="L30"><a href="#L30">  30</a>   have hb := (RealRaw.compareAt_overlap_iff _ _ k k).mp (h k)</span>
+<span id="L31"><a href="#L31">  31</a>   change (x.val.compute k).lo≤(0:Rat) ∧ (0:Rat)≤(x.val.compute k).hi at hb</span>
+<span id="L32"><a href="#L32">  32</a>   change 0&lt;(x.val.compute k).lo at hk</span>
+<span id="L33"><a href="#L33">  33</a>   grind only</span>
+<span id="L34"><a href="#L34">  34</a> </span>
+<span id="L35"><a href="#L35">  35</a> set_option maxHeartbeats 0 in</span>
+<span id="L36"><a href="#L36">  36</a> /-- Exponential positivity on the entire represented real axis. -/</span>
+<span id="L37"><a href="#L37">  37</a> theorem exp_positive (x : RealInput) : (exp x).val.Pos := by</span>
+<span id="L38"><a href="#L38">  38</a>   let h : Scalar := realAxis ⟨RealRaw.scaleRat (1/2) x.val,RealRaw.scaleRat_valid x.property⟩</span>
+<span id="L39"><a href="#L39">  39</a>   have he : (ofRealRaw (RealRaw.scaleRat 2 h.val.realPart)).Equiv (realAxis x).val := by</span>
+<span id="L40"><a href="#L40">  40</a>     intro n</span>
+<span id="L41"><a href="#L41">  41</a>     apply (compareAt_overlap_iff _ _ n n).mpr</span>
+<span id="L42"><a href="#L42">  42</a>     have ho := RealRaw.interval_order_of_valid x.val x.property n</span>
+<span id="L43"><a href="#L43">  43</a>     simp only [h,realAxis,ofRealRaw,realPart,RealRaw.scaleRat,RealRaw.scaleRatCompute,</span>
+<span id="L44"><a href="#L44">  44</a>       if_pos (show (0:Rat)≤2 by decide +kernel),if_pos (show (0:Rat)≤1/2 by decide +kernel)]</span>
+<span id="L45"><a href="#L45">  45</a>     constructor &lt;;&gt; constructor &lt;;&gt; grind [Rat.div_def]</span>
+<span id="L46"><a href="#L46">  46</a>   have hmag := entireExponential_squared_magnitude_real h</span>
+<span id="L47"><a href="#L47">  47</a>   have hnonneg := scalar_squared_magnitude_nonnegative (entireExponentialValue h)</span>
+<span id="L48"><a href="#L48">  48</a>   have hv := realPart_valid (mul_valid (entireExponentialValue h).property (conj_valid _ (entireExponentialValue h).property))</span>
+<span id="L49"><a href="#L49">  49</a>   let r : Scalar := ⟨ofRealRaw (RealRaw.scaleRat 2 h.val.realPart),</span>
+<span id="L50"><a href="#L50">  50</a>     ofRealRaw_valid _ (RealRaw.scaleRat_valid (realPart_valid h.property))⟩</span>
+<span id="L51"><a href="#L51">  51</a>   have hvalue := realPart_equiv (entireExponentialValue_congr r (realAxis x) he)</span>
+<span id="L52"><a href="#L52">  52</a>   have h0 : (RealRaw.ofRat 0).Le (exp x).val :=</span>
+<span id="L53"><a href="#L53">  53</a>     RealRaw.le_trans hv hnonneg</span>
+<span id="L54"><a href="#L54">  54</a>       (RealRaw.le_of_equiv hv (exp x).property</span>
+<span id="L55"><a href="#L55">  55</a>         (RealRaw.equiv_trans hv (realPart_valid (entireExponentialValue _).property) (exp x).property hmag hvalue))</span>
+<span id="L56"><a href="#L56">  56</a>   apply Classical.byContradiction</span>
+<span id="L57"><a href="#L57">  57</a>   intro hp</span>
+<span id="L58"><a href="#L58">  58</a>   have hle : (exp x).val.Le (RealRaw.ofRat 0) := by</span>
+<span id="L59"><a href="#L59">  59</a>     intro n m</span>
+<span id="L60"><a href="#L60">  60</a>     have hn : ¬0&lt;((exp x).val.compute n).lo := fun hn =&gt; hp ⟨n,hn⟩</span>
+<span id="L61"><a href="#L61">  61</a>     change ((exp x).val.compute n).lo≤(0:Rat)</span>
+<span id="L62"><a href="#L62">  62</a>     grind only</span>
+<span id="L63"><a href="#L63">  63</a>   have hz := RealRaw.le_antisymm hle h0</span>
+<span id="L64"><a href="#L64">  64</a>   have hzero := real_embedding_congr (x := (exp x).val) (y := RealRaw.ofRat 0)</span>
+<span id="L65"><a href="#L65">  65</a>     (exp x).property (RealRaw.ofRat_valid 0) hz</span>
+<span id="L66"><a href="#L66">  66</a>   have hzembed : (ofRealRaw (RealRaw.ofRat 0)).Equiv zero := by</span>
+<span id="L67"><a href="#L67">  67</a>     intro n</span>
+<span id="L68"><a href="#L68">  68</a>     apply (compareAt_overlap_iff _ _ n n).mpr</span>
+<span id="L69"><a href="#L69">  69</a>     constructor &lt;;&gt; exact QComplex.le_refl _</span>
+<span id="L70"><a href="#L70">  70</a>   have hc := equiv_trans (entireExponentialValue (realAxis x)).property</span>
+<span id="L71"><a href="#L71">  71</a>     (realAxis (exp x)).property (ofQComplex_valid QComplex.zero)</span>
+<span id="L72"><a href="#L72">  72</a>     (exp_real_embedding x) (equiv_trans (realAxis (exp x)).property</span>
+<span id="L73"><a href="#L73">  73</a>       (ofRealRaw_valid (RealRaw.ofRat 0) (RealRaw.ofRat_valid 0)) (ofQComplex_valid _) hzero hzembed)</span>
+<span id="L74"><a href="#L74">  74</a>   exact entireExponential_ne_zero (realAxis x) hc</span>
+<span id="L75"><a href="#L75">  75</a> </span>
+<span id="L76"><a href="#L76">  76</a> /-- Real-axis injectivity, derived from the exact complex exponential fiber law. -/</span>
+<span id="L77"><a href="#L77">  77</a> theorem exp_injective (x y : RealInput) (h : (exp x).val.Equiv (exp y).val) : x.val.Equiv y.val := by</span>
+<span id="L78"><a href="#L78">  78</a>   have he := equiv_trans (entireExponentialValue (realAxis x)).property</span>
+<span id="L79"><a href="#L79">  79</a>     (realAxis (exp x)).property (entireExponentialValue (realAxis y)).property</span>
+<span id="L80"><a href="#L80">  80</a>     (exp_real_embedding x)</span>
+<span id="L81"><a href="#L81">  81</a>     (equiv_trans (realAxis (exp x)).property (realAxis (exp y)).property</span>
+<span id="L82"><a href="#L82">  82</a>       (entireExponentialValue (realAxis y)).property (real_embedding_congr (exp x).property (exp y).property h) (equiv_symm (exp_real_embedding y)))</span>
+<span id="L83"><a href="#L83">  83</a>   exact entireExponential_fiber_realPart (realAxis x) (realAxis y) he</span>
+<span id="L84"><a href="#L84">  84</a> end ComputableAnalysis.ExponentialComputations</span>
+</pre></body></html>

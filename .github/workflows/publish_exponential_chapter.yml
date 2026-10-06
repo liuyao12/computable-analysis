@@ -1,0 +1,76 @@
+name: Publish checked exponential chapter
+on:
+  workflow_dispatch:
+    inputs:
+      base_run:
+        description: Successful publication run containing the existing live Pages artifact
+        required: true
+        default: '37513379214'
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-verified-proof-publication
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: previous
+          run-id: ${{ inputs.base_run }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Overlay checked chapter and preserve every unrelated page
+        env:
+          BASE_RUN: ${{ inputs.base_run }}
+        run: |
+          mkdir site
+          tar -xf previous/artifact.tar -C site
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,hashlib,shutil,os,re
+          site=Path('site');source=Path('book/exponential-chapter')
+          sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+          manifest=json.loads((source/'exponential-chapter/manifest.json').read_text())
+          assert manifest['mathlibDependency'] is False
+          assert manifest['independentReciprocalQuadrature'] is True
+          assert len(manifest['checkedEndpoints'])==14
+          for module,digest in manifest['sourceHashes'].items():
+              assert sha(source/'exponential-chapter/sources'/(module.replace('.','/')+'.lean'))==digest,module
+          assert sha(source/'ch-exponential-logarithm.html')==manifest['chapterHtmlSha256']
+          assert sha(source/'exponential-chapter/core-audit.log')==manifest['coreAuditSha256']
+          log=(source/'exponential-chapter/core-audit.log').read_text()
+          assert 'sorryAx' not in log and 'error:' not in log
+          for name in manifest['checkedEndpoints']:
+              match=re.search("'"+re.escape(name)+r"' depends on axioms: \[([^]]*)\]",log)
+              assert match,name
+              assert set(re.findall(r'[\w.]+',match[1])) <= {'propext','Classical.choice','Quot.sound'},name
+          before={str(p.relative_to(site)):sha(p) for p in site.rglob('*') if p.is_file()}
+          shutil.copy(source/'ch-exponential-logarithm.html',site/'ch-exponential-logarithm.html')
+          shutil.copytree(source/'exponential-chapter',site/'exponential-chapter',dirs_exist_ok=True)
+          for name,digest in before.items():
+              if name!='ch-exponential-logarithm.html' and not name.startswith('exponential-chapter/'):
+                  assert sha(site/name)==digest,name
+          (site/'exponential-publication.json').write_text(json.dumps({
+              'baseRun':int(os.environ['BASE_RUN']),
+              'preservedFiles':sum(n!='ch-exponential-logarithm.html' and not n.startswith('exponential-chapter/') for n in before),
+              'chapterHtmlSha256':manifest['chapterHtmlSha256'],
+              'coreAuditSha256':manifest['coreAuditSha256'],
+              'coreImportModules':manifest['coreImportModules'],
+              'snapshotModules':manifest['snapshotModules'],
+              'checkedEndpoints':len(manifest['checkedEndpoints'])},indent=2)+'\n')
+          PY
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

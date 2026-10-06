@@ -1,0 +1,124 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ComputableAnalysis.ExponentialComputations.PositiveSegment</title><style>body{margin:24px;background:#fbfaf6;color:#252b27}pre{font:12px/1.65 monospace;white-space:pre;overflow-x:auto}pre span{display:block}pre span:target{background:#fff2b8}a{color:#466442}pre a{color:#999;text-decoration:none}</style></head><body><a href="../index.html">Proof bundle</a><h1 style="font:18px system-ui">ComputableAnalysis.ExponentialComputations.PositiveSegment</h1><pre><span id="L1"><a href="#L1">   1</a> import ComputableAnalysis.ExponentialComputations.LogarithmIncrement</span>
+<span id="L2"><a href="#L2">   2</a> import ComputableAnalysis.RiemannHilbert.PrecisionSearch</span>
+<span id="L3"><a href="#L3">   3</a> </span>
+<span id="L4"><a href="#L4">   4</a> /-! A literal positive segment from one to an arbitrary positive represented</span>
+<span id="L5"><a href="#L5">   5</a> real. A rational lower bound is found by a terminating box search. -/</span>
+<span id="L6"><a href="#L6">   6</a> namespace ComputableAnalysis.ExponentialComputations</span>
+<span id="L7"><a href="#L7">   7</a> open ComplexRaw FunctionTheory RiemannHilbert LocalODE DomainFunctions ModularForms</span>
+<span id="L8"><a href="#L8">   8</a> set_option maxHeartbeats 1000000</span>
+<span id="L9"><a href="#L9">   9</a> abbrev RationalUnit := {t : Rat // 0 ≤ t ∧ t ≤ 1}</span>
+<span id="L10"><a href="#L10">  10</a> </span>
+<span id="L11"><a href="#L11">  11</a> def eventually_positive (x : PositiveInput) : ∃ N, ∀ n, N≤n →</span>
+<span id="L12"><a href="#L12">  12</a>     decide (0&lt;(x.val.val.compute n).lo)=true := by</span>
+<span id="L13"><a href="#L13">  13</a>   obtain ⟨N,hN⟩ := x.property</span>
+<span id="L14"><a href="#L14">  14</a>   refine ⟨N,fun n hn =&gt; ?_⟩</span>
+<span id="L15"><a href="#L15">  15</a>   have hh := (x.val.property.2.1 N n hn).1</span>
+<span id="L16"><a href="#L16">  16</a>   simp only [decide_eq_true_eq]</span>
+<span id="L17"><a href="#L17">  17</a>   change 0&lt;(x.val.val.compute N).lo at hN</span>
+<span id="L18"><a href="#L18">  18</a>   grind only</span>
+<span id="L19"><a href="#L19">  19</a> </span>
+<span id="L20"><a href="#L20">  20</a> def positiveStage (x : PositiveInput) : Nat := PrecisionSearch.firstFrom</span>
+<span id="L21"><a href="#L21">  21</a>   (fun n =&gt; decide (0&lt;(x.val.val.compute n).lo)) (eventually_positive x) 0</span>
+<span id="L22"><a href="#L22">  22</a> </span>
+<span id="L23"><a href="#L23">  23</a> theorem positiveStage_spec (x : PositiveInput) : 0&lt;(x.val.val.compute (positiveStage x)).lo := by</span>
+<span id="L24"><a href="#L24">  24</a>   have h := (PrecisionSearch.firstFrom_spec</span>
+<span id="L25"><a href="#L25">  25</a>     (fun n =&gt; decide (0&lt;(x.val.val.compute n).lo)) (eventually_positive x) 0).2</span>
+<span id="L26"><a href="#L26">  26</a>   simpa only [positiveStage,decide_eq_true_eq] using h</span>
+<span id="L27"><a href="#L27">  27</a> </span>
+<span id="L28"><a href="#L28">  28</a> def segmentLower (x : PositiveInput) : QPos :=</span>
+<span id="L29"><a href="#L29">  29</a>   ⟨minRat 1 (x.val.val.compute (positiveStage x)).lo,by</span>
+<span id="L30"><a href="#L30">  30</a>     have h := positiveStage_spec x</span>
+<span id="L31"><a href="#L31">  31</a>     unfold minRat; split &lt;;&gt; grind only⟩</span>
+<span id="L32"><a href="#L32">  32</a> </span>
+<span id="L33"><a href="#L33">  33</a> theorem segmentLower_le_one (x : PositiveInput) : (segmentLower x).val ≤ 1 := by</span>
+<span id="L34"><a href="#L34">  34</a>   dsimp [segmentLower]; unfold minRat; split &lt;;&gt; grind only</span>
+<span id="L35"><a href="#L35">  35</a> </span>
+<span id="L36"><a href="#L36">  36</a> theorem segmentLower_le_input (x : PositiveInput) : (RealRaw.ofRat (segmentLower x).val).Le x.val.val := by</span>
+<span id="L37"><a href="#L37">  37</a>   intro n m</span>
+<span id="L38"><a href="#L38">  38</a>   have hh := RealRaw.le_refl _ x.val.property (positiveStage x) m</span>
+<span id="L39"><a href="#L39">  39</a>   change (segmentLower x).val ≤ (x.val.val.compute m).hi</span>
+<span id="L40"><a href="#L40">  40</a>   dsimp [segmentLower]; unfold minRat; split &lt;;&gt; grind only</span>
+<span id="L41"><a href="#L41">  41</a> </span>
+<span id="L42"><a href="#L42">  42</a> theorem positive_of_lower (x : RealInput) (l : QPos) (hl : (RealRaw.ofRat l.val).Le x.val) : x.val.Pos := by</span>
+<span id="L43"><a href="#L43">  43</a>   let eps : QPos := ⟨l.val/2,by rw [Rat.div_def]; exact Rat.mul_pos l.property (by decide +kernel)⟩</span>
+<span id="L44"><a href="#L44">  44</a>   obtain ⟨N,hN⟩ := x.property.2.2 eps</span>
+<span id="L45"><a href="#L45">  45</a>   have hw := hN N (Nat.le_refl _)</span>
+<span id="L46"><a href="#L46">  46</a>   have hb := hl 0 N</span>
+<span id="L47"><a href="#L47">  47</a>   have hp := l.property</span>
+<span id="L48"><a href="#L48">  48</a>   refine ⟨N,?_⟩</span>
+<span id="L49"><a href="#L49">  49</a>   change l.val ≤ (x.val.compute N).hi at hb</span>
+<span id="L50"><a href="#L50">  50</a>   change (x.val.compute N).width ≤ l.val/2 at hw</span>
+<span id="L51"><a href="#L51">  51</a>   change 0 &lt; (x.val.compute N).lo</span>
+<span id="L52"><a href="#L52">  52</a>   grind [QInterval.width]</span>
+<span id="L53"><a href="#L53">  53</a> </span>
+<span id="L54"><a href="#L54">  54</a> def positiveSegment (x : PositiveInput) (t : RationalUnit) : RealInput :=</span>
+<span id="L55"><a href="#L55">  55</a>   ⟨RealRaw.add (RealRaw.ofRat (1-t.val)) (RealRaw.scaleRat t.val x.val.val),</span>
+<span id="L56"><a href="#L56">  56</a>     RealRaw.add_valid (RealRaw.ofRat_valid _) (RealRaw.scaleRat_valid x.val.property)⟩</span>
+<span id="L57"><a href="#L57">  57</a> </span>
+<span id="L58"><a href="#L58">  58</a> theorem positiveSegment_lower (x : PositiveInput) (t : RationalUnit) :</span>
+<span id="L59"><a href="#L59">  59</a>     (RealRaw.ofRat (segmentLower x).val).Le (positiveSegment x t).val := by</span>
+<span id="L60"><a href="#L60">  60</a>   intro n m</span>
+<span id="L61"><a href="#L61">  61</a>   have hl := segmentLower_le_input x 0 m</span>
+<span id="L62"><a href="#L62">  62</a>   have h1 := segmentLower_le_one x</span>
+<span id="L63"><a href="#L63">  63</a>   have ht := t.property</span>
+<span id="L64"><a href="#L64">  64</a>   simp only [positiveSegment,RealRaw.add,RealRaw.addCompute,RealRaw.ofRat,RealRaw.scaleRat,</span>
+<span id="L65"><a href="#L65">  65</a>     RealRaw.scaleRatCompute,if_pos t.property.1]</span>
+<span id="L66"><a href="#L66">  66</a>   change (segmentLower x).val ≤ (1-t.val)+t.val*(x.val.val.compute m).hi</span>
+<span id="L67"><a href="#L67">  67</a>   change (segmentLower x).val ≤ (x.val.val.compute m).hi at hl</span>
+<span id="L68"><a href="#L68">  68</a>   have hprod := Rat.mul_le_mul_of_nonneg_left hl ht.1</span>
+<span id="L69"><a href="#L69">  69</a>   have hprod1 := Rat.mul_le_mul_of_nonneg_left h1 (show 0≤1-t.val by grind only)</span>
+<span id="L70"><a href="#L70">  70</a>   grind only</span>
+<span id="L71"><a href="#L71">  71</a> </span>
+<span id="L72"><a href="#L72">  72</a> def positivePoint (x : PositiveInput) (t : RationalUnit) : PositiveInput :=</span>
+<span id="L73"><a href="#L73">  73</a>   ⟨positiveSegment x t,positive_of_lower _ (segmentLower x) (positiveSegment_lower x t)⟩</span>
+<span id="L74"><a href="#L74">  74</a> </span>
+<span id="L75"><a href="#L75">  75</a> def segmentDisplacement (x : PositiveInput) : RealInput :=</span>
+<span id="L76"><a href="#L76">  76</a>   ⟨RealRaw.sub x.val.val (RealRaw.ofRat 1),RealRaw.sub_valid x.val.property (RealRaw.ofRat_valid _)⟩</span>
+<span id="L77"><a href="#L77">  77</a> def segmentBound (x : PositiveInput) : Rat := scalarBound (realAxis (segmentDisplacement x))</span>
+<span id="L78"><a href="#L78">  78</a> theorem segmentBound_pos (x : PositiveInput) : 0&lt;segmentBound x := scalarBound_pos _</span>
+<span id="L79"><a href="#L79">  79</a> </span>
+<span id="L80"><a href="#L80">  80</a> /-- The actual segment difference agrees with its affine displacement. -/</span>
+<span id="L81"><a href="#L81">  81</a> theorem positiveSegment_difference (x : PositiveInput) (u v : RationalUnit) :</span>
+<span id="L82"><a href="#L82">  82</a>     (sub (realAxis (positiveSegment x v)).val (realAxis (positiveSegment x u)).val).Equiv</span>
+<span id="L83"><a href="#L83">  83</a>       (scaleRat (v.val-u.val) (realAxis (segmentDisplacement x)).val) := by</span>
+<span id="L84"><a href="#L84">  84</a>   intro n</span>
+<span id="L85"><a href="#L85">  85</a>   apply (compareAt_overlap_iff _ _ n n).mpr</span>
+<span id="L86"><a href="#L86">  86</a>   have ho := RealRaw.interval_order_of_valid _ x.val.property n</span>
+<span id="L87"><a href="#L87">  87</a>   have hu := u.property</span>
+<span id="L88"><a href="#L88">  88</a>   have hv := v.property</span>
+<span id="L89"><a href="#L89">  89</a>   have hup := Rat.mul_le_mul_of_nonneg_left ho hu.1</span>
+<span id="L90"><a href="#L90">  90</a>   have hvp := Rat.mul_le_mul_of_nonneg_left ho hv.1</span>
+<span id="L91"><a href="#L91">  91</a>   simp only [realAxis,positiveSegment,segmentDisplacement,ofRealRaw,sub,add,neg,QBox.add,QBox.neg,</span>
+<span id="L92"><a href="#L92">  92</a>     QComplex.add,QComplex.neg,scaleRat,QBox.scaleRat,RealRaw.add,RealRaw.addCompute,RealRaw.ofRat,</span>
+<span id="L93"><a href="#L93">  93</a>     RealRaw.scaleRat,RealRaw.scaleRatCompute,if_pos hu.1,if_pos hv.1,RealRaw.sub,RealRaw.subCompute]</span>
+<span id="L94"><a href="#L94">  94</a>   split &lt;;&gt; constructor &lt;;&gt; constructor &lt;;&gt; grind only</span>
+<span id="L95"><a href="#L95">  95</a> </span>
+<span id="L96"><a href="#L96">  96</a> /-- Exact reciprocal comparison with the independently computed positive</span>
+<span id="L97"><a href="#L97">  97</a> real interval reciprocal. -/</span>
+<span id="L98"><a href="#L98">  98</a> theorem positive_inverse_agreement (c : PositiveInput) (l : QPos)</span>
+<span id="L99"><a href="#L99">  99</a>     (hl : (RealRaw.ofRat l.val).Le c.val.val) :</span>
+<span id="L100"><a href="#L100"> 100</a>     (RepresentedReciprocal.inverse (realAxis c.val) (positive_real_nonzero c.val c.property)).val.Equiv</span>
+<span id="L101"><a href="#L101"> 101</a>       (ofRealRaw (RealRaw.positiveReciprocal c.val.val l.val)) := by</span>
+<span id="L102"><a href="#L102"> 102</a>   let r : Scalar := ⟨ofRealRaw (RealRaw.positiveReciprocal c.val.val l.val),</span>
+<span id="L103"><a href="#L103"> 103</a>     ofRealRaw_valid _ (RealRaw.positiveReciprocal_valid _ _ c.val.property l.property (fun n =&gt; hl 0 n))⟩</span>
+<span id="L104"><a href="#L104"> 104</a>   apply RepresentedReciprocal.inverse_unique (realAxis c.val) (positive_real_nonzero c.val c.property) r</span>
+<span id="L105"><a href="#L105"> 105</a>   have hm := real_embedding_mul c.val.val (RealRaw.positiveReciprocal c.val.val l.val)</span>
+<span id="L106"><a href="#L106"> 106</a>     c.val.property (RealRaw.positiveReciprocal_valid _ _ c.val.property l.property (fun n =&gt; hl 0 n))</span>
+<span id="L107"><a href="#L107"> 107</a>   have hh := ofRealRaw_equiv_of_equiv (y := RealRaw.one)</span>
+<span id="L108"><a href="#L108"> 108</a>     (RealRaw.mul_valid c.val.property (RealRaw.positiveReciprocal_valid _ _ c.val.property l.property (fun n =&gt; hl 0 n)))</span>
+<span id="L109"><a href="#L109"> 109</a>     (RealRaw.ofRat_valid 1) (positiveReciprocal_mul_identity _ c.val.property l.val l.property hl)</span>
+<span id="L110"><a href="#L110"> 110</a>   exact equiv_trans (mul_valid (realAxis c.val).property r.property)</span>
+<span id="L111"><a href="#L111"> 111</a>     (ofRealRaw_valid _ (RealRaw.mul_valid c.val.property</span>
+<span id="L112"><a href="#L112"> 112</a>       (RealRaw.positiveReciprocal_valid _ _ c.val.property l.property (fun n =&gt; hl 0 n))))</span>
+<span id="L113"><a href="#L113"> 113</a>     (ofQComplex_valid _) hm hh</span>
+<span id="L114"><a href="#L114"> 114</a> </span>
+<span id="L115"><a href="#L115"> 115</a> def segmentReciprocal (x : PositiveInput) (t : RationalUnit) : RealInput :=</span>
+<span id="L116"><a href="#L116"> 116</a>   ⟨RealRaw.positiveReciprocal (positiveSegment x t).val (segmentLower x).val,</span>
+<span id="L117"><a href="#L117"> 117</a>     RealRaw.positiveReciprocal_valid _ _ (positiveSegment x t).property (segmentLower x).property</span>
+<span id="L118"><a href="#L118"> 118</a>       (fun n =&gt; positiveSegment_lower x t 0 n)⟩</span>
+<span id="L119"><a href="#L119"> 119</a> def segmentIntegrandValue (x : PositiveInput) (t : RationalUnit) : RealInput :=</span>
+<span id="L120"><a href="#L120"> 120</a>   ⟨RealRaw.mul (segmentDisplacement x).val (segmentReciprocal x t).val,</span>
+<span id="L121"><a href="#L121"> 121</a>     RealRaw.mul_valid (segmentDisplacement x).property (segmentReciprocal x t).property⟩</span>
+<span id="L122"><a href="#L122"> 122</a> </span>
+<span id="L123"><a href="#L123"> 123</a> end ComputableAnalysis.ExponentialComputations</span>
+</pre></body></html>

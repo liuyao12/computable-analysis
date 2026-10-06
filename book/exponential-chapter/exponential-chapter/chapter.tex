@@ -1,0 +1,290 @@
+\chapter{Exponential and Logarithm}\label{ch:exponential-logarithm}
+
+Repeated growth multiplies its successive growth factors. Logarithm measures
+relative change by accumulating the reciprocal. This chapter constructs those
+computations and proves that they describe inverse functions. Its purpose is
+also practical: later applications may choose the computation that suits them,
+without rebuilding the theory for each choice.
+
+Every input below is a valid represented real or complex number, not merely a
+rational argument. Equality of values means \texttt{RealRaw.Equiv} or
+\texttt{ComplexRaw.Equiv}, written $\simeq$. Algorithms operate on rational
+intervals or boxes, and every refinement has justified convergence. Neither
+Mathlib's real numbers nor its complex numbers enter these constructions.
+
+\section{The exponential power series}\label{sec:exponential-power-series}
+
+For a finite prefix, put
+\[
+ E_N(z)=\sum_{k=0}^{N}\frac{z^k}{k!}.
+\]
+If $R$ bounds the input magnitude and $N+2\geq 2R$, successive omitted
+absolute terms have ratio at most $1/2$. The remaining finite prefixes
+therefore lie within a geometric majorant of size
+\[
+ 2\frac{R^{N+1}}{(N+1)!}.
+\]
+The argument concerns all later finite prefixes; it does not presume a limit
+in an abstract completed field. For represented inputs we also refine the
+input box until its contribution to the evaluation error is small enough.
+Intersecting compatible enclosures produces a valid computation $E(z)$.
+
+\lean{ComputableAnalysis.FiniteExponentialTaylor.scheduled_expTaylorPrefix_enclosure}
+\lean{ComputableAnalysis.ModularForms.entireExponentialValue}
+\lean{ComputableAnalysis.ExponentialComputations.representedTaylor_agrees}
+\leanok
+
+Finite coefficient identities, together with the tail bounds, prove
+\[
+ E(0)\simeq 1,\qquad E(z+w)\simeq E(z)E(w),\qquad
+ E(z)E(-z)\simeq 1.
+\]
+Termwise differentiation is justified by a quantitative remainder, giving an
+actual holomorphic derivative $E'=E$ on every local chart. The derivative is
+an exact identity for arbitrary represented inputs; a formal coefficient
+shift alone would not suffice.
+
+\lean{ComputableAnalysis.ModularForms.entireExponential_addition}
+\lean{ComputableAnalysis.ModularForms.entireExponential_derivative_value}
+\leanok
+
+Restricting this computation to the real axis defines $\exp(x)$. The imaginary
+coordinate is proved zero. Positivity holds for every real input, including
+negative inputs: the squared magnitude of $E(x/2)$ equals $E(x)$, and the
+reciprocal identity excludes zero. The real restriction is injective.
+
+\begin{theorem}[Real exponential]\label{thm:represented-real-exponential}
+\lean{ComputableAnalysis.ExponentialComputations.exp_real_embedding}
+\lean{ComputableAnalysis.ExponentialComputations.exp_positive}
+\lean{ComputableAnalysis.ExponentialComputations.exp_injective}
+\lean{ComputableAnalysis.ExponentialComputations.exp_congr}
+\leanok
+The computation $\exp$ is positive, representation invariant, and injective
+on all valid represented real inputs.
+\end{theorem}
+
+\section{Compound interest computes the same function}\label{sec:compound-exponential}
+
+The alternative suggested by repeated small growth is
+\[
+ C_n(z)=\left(1+\frac{z}{n+1}\right)^{n+1}.
+\]
+These are literal finite powers. Their implementation does not substitute a
+power-series value. Negative and complex inputs are allowed; a positive base
+is only needed for the usual financial interpretation.
+
+The checked comparison uses the local logarithm power series. On its small
+chart, its constant coefficient is zero, its linear coefficient is one, and
+its tail gives
+\[
+ \left|\log(1+w)-w\right|\leq 16H^2\qquad (|w|\leq H).
+\]
+For sufficiently large $n$, take $w=z/(n+1)$. Multiplying the error by
+$n+1$ shows that $(n+1)\log(1+w)$ differs from $z$ by a computable bound of
+order $1/(n+1)$. The local inverse identity, the exponential addition law,
+and a bounded-chart continuity estimate then give
+\[
+ \left|C_n(z)-E(z)\right|\leq \frac{K_z}{n+1}.
+\]
+Here $K_z$ and an initial index are computed from a rational bound on the
+input box. No caller chooses an internal schedule.
+
+\lean{ComputableAnalysis.ExponentialComputations.localLogarithm_linear_error}
+\lean{ComputableAnalysis.ExponentialComputations.compoundApproximation_error}
+\leanok
+
+\begin{theorem}[Compound-interest limit]\label{thm:compound-function-agreement}
+\lean{ComputableAnalysis.ExponentialComputations.compoundValue}
+\lean{ComputableAnalysis.ExponentialComputations.compoundValue_equiv_powerSeries}
+\lean{ComputableAnalysis.ExponentialComputations.compoundValue_congr}
+\leanok
+The executable stabilized limit of the finite compound-interest powers
+agrees with $E(z)$ for every valid represented complex input, and hence with
+$\exp(x)$ on the real axis.
+\end{theorem}
+
+The current error constants are deliberately generous. This proves a usable
+mathematical interchange law, rather than a claim that compound interest is
+the fastest numerical evaluator.
+
+\section{A logarithm on the whole positive axis}\label{sec:positive-logarithm}
+
+A local logarithm does not by itself cover all positive inputs. The existing
+continuation construction produces a complex logarithm of any nonzero
+represented complex input. For a positive real input $x$, take the real
+coordinate of that constructed logarithm and call it $\log x$.
+
+This does not impose a global single-valued complex logarithm. Different
+continuation routes may have different imaginary coordinates, but the
+checked exponential fiber theorem proves that their real coordinates agree.
+Consequently the real logarithm is independent of the input representation
+and of the auxiliary branch. Exponential positivity and its real-axis
+injectivity give both inverse identities.
+
+\begin{theorem}[Global inverse laws]\label{thm:global-exp-log-inverses}
+\lean{ComputableAnalysis.ExponentialComputations.log_congr}
+\lean{ComputableAnalysis.ExponentialComputations.log_exp}
+\lean{ComputableAnalysis.ExponentialComputations.exp_log}
+\leanok
+For every valid represented real $a$ and every positive valid represented
+real $x$,
+\[
+ \log(\exp a)\simeq a,\qquad \exp(\log x)\simeq x.
+\]
+\end{theorem}
+
+The logarithm also has an actual local holomorphic extension at each positive
+center. Its derivative there is the constructed reciprocal. In particular,
+restricting this chart to positive real inputs gives the familiar law
+\[
+ \frac{d}{dx}\log x\simeq\frac1x.
+\]
+The local expansion has a proved quadratic remainder, which will identify an
+independently computed reciprocal integral.
+
+\lean{ComputableAnalysis.ExponentialComputations.logChart_real_agreement}
+\lean{ComputableAnalysis.ExponentialComputations.logChart_derivative}
+\lean{ComputableAnalysis.ExponentialComputations.log_increment_error}
+\leanok
+
+\section{Computing the reciprocal integral}\label{sec:integral-logarithm}
+
+For an arbitrary positive represented endpoint $x$, use the fixed rational
+parameter interval $[0,1]$ and the segment
+\[
+ s_x(t)=1+t(x-1),\qquad
+ g_x(t)=\frac{x-1}{1+t(x-1)}.
+\]
+Define the normalized reciprocal integral by the actual rectangle-sum
+computation
+\[
+ L(x)=\int_0^1 g_x(t)\,dt.
+\]
+This is the oriented meaning of $\int_1^x du/u$ used here. When $x<1$, the
+factor $x-1$ supplies the reversed orientation automatically. The parameter
+interval stays ordered and its entire image stays positive.
+
+To construct bounds, search the valid input intervals until a positive lower
+endpoint is found. Its minimum with $1$ gives a rational $\ell>0$ such that
+$s_x(t)\geq\ell$ throughout the segment. A rational bound $A$ on $|x-1|$
+then supplies a Lipschitz bound for $g_x$; the implementation uses the safe
+constant
+\[
+ V=\frac{8A^2}{\ell^2}.
+\]
+Choose a finite uniform grid fine enough that its variation contribution is
+within the requested error. At each grid point refine the integrand box to
+control its evaluation width. Pad this box by the variation bound on that
+cell. The resulting lower and upper rectangle sums have arbitrarily small
+gap. Prefix intersections make them a valid represented value.
+
+\lean{ComputableAnalysis.ExponentialComputations.segmentLower}
+\lean{ComputableAnalysis.ExponentialComputations.positiveSegment}
+\lean{ComputableAnalysis.ExponentialComputations.segmentIntegrand_variation}
+\lean{ComputableAnalysis.ExponentialComputations.lipschitzBounds_gap}
+\lean{ComputableAnalysis.ExponentialComputations.integralLog}
+\leanok
+
+The runtime reads the reciprocal samples and their bounds. It does not read
+$\log x$ as its numerical answer. Validity of the resulting real would still
+not certify its role as an integral; that is the next theorem.
+
+\section{Why this integral is logarithm}\label{sec:integral-logarithm-proof}
+
+Put $F_x(t)=\log(s_x(t))$. The local logarithm remainder and the segment's
+positive lower bound give a uniform small-step estimate
+\[
+ |F_x(v)-F_x(u)-(v-u)g_x(u)|\leq K(v-u)^2.
+\]
+One may use $K=64A^2/\ell^2$ and a justified positive step bound. Every point
+of every subdivision has the required domain evidence.
+
+Subdivide a cell into $N$ equal pieces and telescope. The accumulated error
+is at most $K(v-u)^2/N$. Letting this explicit rational error shrink shows
+that $F_x(v)-F_x(u)$ lies between the cell's lower and upper derivative
+rectangles. Applying the finite FTC and the tight reciprocal bounds proves
+actual \texttt{Integral.HasIntegral} evidence. Since $\log 1\simeq0$, the
+endpoint difference is $\log x$.
+
+\begin{theorem}[Reciprocal integral identification]\label{thm:global-reciprocal-integral}
+\lean{ComputableAnalysis.ExponentialComputations.cellBounds_of_quadratic}
+\lean{ComputableAnalysis.ExponentialComputations.segmentLog_hasIntegral}
+\lean{ComputableAnalysis.ExponentialComputations.integralLog_hasIntegral}
+\lean{ComputableAnalysis.ExponentialComputations.integralLog_equiv_log}
+\lean{ComputableAnalysis.ExponentialComputations.integralLog_congr}
+\leanok
+For every positive valid represented endpoint $x$, the rectangle-sum
+computation has the supplied reciprocal integral and
+\[
+ L(x)\simeq\log x.
+\]
+The computation and the identity are representation invariant.
+\end{theorem}
+
+This uses tight rectangles as a proved sufficient construction for this
+integrand. It does not require every future integral computation to use that
+criterion. A numerical candidate, or a record that merely asserts validity,
+is not being promoted to an integral by definition.
+
+\section{Exponential as the inverse of the integral}\label{sec:inverse-integral-exponential}
+
+Combining the independently constructed integral agreement with the global
+inverse laws proves
+\[
+ L(\exp a)\simeq a,\qquad \exp(L(x))\simeq x.
+\]
+Thus $L$ is onto the represented real axis and has a unique positive inverse
+value at every valid represented real input. This is an exact characterization
+of exponential by integration, with its existence and uniqueness proved.
+
+\lean{ComputableAnalysis.ExponentialComputations.integralLog_exp}
+\lean{ComputableAnalysis.ExponentialComputations.exp_integralLog}
+\lean{ComputableAnalysis.ExponentialComputations.exp_unique_of_integralLog}
+\leanok
+
+A future independent algorithm that inverts $L$ can join the API by proving
+its positive-domain evidence and the equation $L(f(a))\simeq a$. The checked
+uniqueness theorem then proves $f(a)\simeq\exp a$. There is currently no
+separate exponential evaluator that runs bisection using only integral
+samples. The two-sided inverse characterization above is complete; that
+additional numerical backend is a separate construction.
+
+\section{An API for interchangeable computations}\label{sec:exponential-computation-api}
+
+Proving all pairwise comparisons would duplicate work. Instead, each
+exponential implementation registers one already proved agreement with
+$E$. The library derives agreement between any two implementations and
+invariance under equivalent input representations. The current registrations
+are the power series, the literal compound-interest limit, and the scalar
+linear ODE. The bounded represented Taylor construction has its own checked
+bridge to the same reference. On real inputs each implementation agrees with
+$\exp$.
+
+\lean{ComputableAnalysis.ExponentialComputations.Implementation.equivalent}
+\lean{ComputableAnalysis.ExponentialComputations.Implementation.congr}
+\lean{ComputableAnalysis.ExponentialComputations.Implementation.realEval_agrees}
+\lean{ComputableAnalysis.ExponentialComputations.linearODE}
+\leanok
+
+Logarithm computations use the same pattern. Continuation and reciprocal
+rectangles register proved agreement with the global positive logarithm.
+There is no need to reproduce every logarithm proof whenever a new exponential
+method is introduced, or conversely.
+
+\lean{ComputableAnalysis.ExponentialComputations.LogImplementation.equivalent}
+\lean{ComputableAnalysis.ExponentialComputations.LogImplementation.congr}
+\lean{ComputableAnalysis.ExponentialComputations.LogImplementation.exp_eval}
+\lean{ComputableAnalysis.ExponentialComputations.real_computation_agrees_of_integral_inverse}
+\leanok
+
+Finally, $e=\exp(1)$ agrees with the repository's earlier power-series and
+compound-interest constants. Those compatibility theorems are separate from
+the new core's axiom audit: they inherit older native arithmetic proof
+certificates. The core chapter endpoints are audited against only the standard
+Lean axioms. The older named rational computation \texttt{logTwoSeries}
+still needs its own bridge to this global API; the reciprocal computation
+constructed here already agrees with $\log 2$ by the global theorem.
+
+\lean{ComputableAnalysis.ExponentialComputations.exp_one_equiv_ePowerSeries}
+\lean{ComputableAnalysis.ExponentialComputations.exp_one_equiv_eCompoundInterest}
+\leanok

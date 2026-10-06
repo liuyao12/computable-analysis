@@ -1,0 +1,156 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ComputableAnalysis.ExponentialComputations.LipschitzIntegral</title><style>body{margin:24px;background:#fbfaf6;color:#252b27}pre{font:12px/1.65 monospace;white-space:pre;overflow-x:auto}pre span{display:block}pre span:target{background:#fff2b8}a{color:#466442}pre a{color:#999;text-decoration:none}</style></head><body><a href="../index.html">Proof bundle</a><h1 style="font:18px system-ui">ComputableAnalysis.ExponentialComputations.LipschitzIntegral</h1><pre><span id="L1"><a href="#L1">   1</a> import ComputableAnalysis.ExponentialComputations.QuadraticFTC</span>
+<span id="L2"><a href="#L2">   2</a> import ComputableAnalysis.ComputableCoefficientApproximation</span>
+<span id="L3"><a href="#L3">   3</a> import ComputableAnalysis.RiemannHilbert.PrecisionSearch</span>
+<span id="L4"><a href="#L4">   4</a> </span>
+<span id="L5"><a href="#L5">   5</a> /-! Literal finite rectangle bounds for a supplied represented Lipschitz</span>
+<span id="L6"><a href="#L6">   6</a> integrand. Width searches inspect rational boxes and are executable. -/</span>
+<span id="L7"><a href="#L7">   7</a> namespace ComputableAnalysis.ExponentialComputations</span>
+<span id="L8"><a href="#L8">   8</a> open ComplexRaw FunctionTheory RiemannHilbert</span>
+<span id="L9"><a href="#L9">   9</a> set_option maxHeartbeats 1000000</span>
+<span id="L10"><a href="#L10">  10</a> </span>
+<span id="L11"><a href="#L11">  11</a> private def pointRaw (f : FunctionOnInterval) (x : Rat)</span>
+<span id="L12"><a href="#L12">  12</a>     (hx : inDomainInterval f.lower f.upper x) : RealRaw := {compute := f.compute x hx}</span>
+<span id="L13"><a href="#L13">  13</a> private theorem point_valid (f : FunctionOnInterval) (x : Rat)</span>
+<span id="L14"><a href="#L14">  14</a>     (hx : inDomainInterval f.lower f.upper x) : (pointRaw f x hx).Valid :=</span>
+<span id="L15"><a href="#L15">  15</a>   f.valid_on x (f.defined_on x hx)</span>
+<span id="L16"><a href="#L16">  16</a> </span>
+<span id="L17"><a href="#L17">  17</a> private theorem gridEventually (L : Rat) (eps : QPos) : ∃ N : Nat, ∀ n : Nat, N≤n →</span>
+<span id="L18"><a href="#L18">  18</a>     decide (4*qabs L*(1/2:Rat)^n≤eps.val)=true := by</span>
+<span id="L19"><a href="#L19">  19</a>   refine ⟨RationalMajorant.halfDecayShift (4*qabs L) eps,fun n hn =&gt; ?_⟩</span>
+<span id="L20"><a href="#L20">  20</a>   simp only [decide_eq_true_eq]</span>
+<span id="L21"><a href="#L21">  21</a>   exact RationalMajorant.halfDecayShift_spec_of_le</span>
+<span id="L22"><a href="#L22">  22</a>     (Rat.mul_nonneg (by decide +kernel) (qabs_nonneg L)) eps hn</span>
+<span id="L23"><a href="#L23">  23</a> </span>
+<span id="L24"><a href="#L24">  24</a> /-- Find the first adequate binary mesh, rather than exponentiating a loose</span>
+<span id="L25"><a href="#L25">  25</a> existence bound. The latter is used only in the termination proof. -/</span>
+<span id="L26"><a href="#L26">  26</a> private def gridShift (L : Rat) (eps : QPos) : Nat := PrecisionSearch.firstFrom</span>
+<span id="L27"><a href="#L27">  27</a>   (fun n =&gt; decide (4*qabs L*(1/2:Rat)^n≤eps.val)) (gridEventually L eps) 0</span>
+<span id="L28"><a href="#L28">  28</a> </span>
+<span id="L29"><a href="#L29">  29</a> private theorem gridShift_spec (L : Rat) (eps : QPos) :</span>
+<span id="L30"><a href="#L30">  30</a>     4*qabs L*(1/2:Rat)^gridShift L eps≤eps.val := by</span>
+<span id="L31"><a href="#L31">  31</a>   have h := (PrecisionSearch.firstFrom_spec</span>
+<span id="L32"><a href="#L32">  32</a>     (fun n =&gt; decide (4*qabs L*(1/2:Rat)^n≤eps.val)) (gridEventually L eps) 0).2</span>
+<span id="L33"><a href="#L33">  33</a>   simpa only [gridShift,decide_eq_true_eq] using h</span>
+<span id="L34"><a href="#L34">  34</a> </span>
+<span id="L35"><a href="#L35">  35</a> private def grid (f : FunctionOnInterval) (h0 : f.lower=0) (h1 : f.upper=1)</span>
+<span id="L36"><a href="#L36">  36</a>     (L : Rat) (eps : QPos) : RationalPartition f.lower f.upper :=</span>
+<span id="L37"><a href="#L37">  37</a>   RationalPartition.uniform f.lower f.upper (2^gridShift L eps)</span>
+<span id="L38"><a href="#L38">  38</a>     (Nat.pow_pos (by decide)) (by rw [h0,h1]; decide +kernel)</span>
+<span id="L39"><a href="#L39">  39</a> private def mesh (L : Rat) (eps : QPos) : Rat := (1/2:Rat)^gridShift L eps</span>
+<span id="L40"><a href="#L40">  40</a> private theorem grid_width (f : FunctionOnInterval) (h0 : f.lower=0) (h1 : f.upper=1)</span>
+<span id="L41"><a href="#L41">  41</a>     (L : Rat) (eps : QPos) (k : Nat) :</span>
+<span id="L42"><a href="#L42">  42</a>     (grid f h0 h1 L eps).point (k+1)-(grid f h0 h1 L eps).point k = mesh L eps := by</span>
+<span id="L43"><a href="#L43">  43</a>   change leftPoint f.lower f.upper (2^gridShift L eps) (k+1)-</span>
+<span id="L44"><a href="#L44">  44</a>     leftPoint f.lower f.upper (2^gridShift L eps) k = _</span>
+<span id="L45"><a href="#L45">  45</a>   rw [leftPoint_step,h0,h1]</span>
+<span id="L46"><a href="#L46">  46</a>   simp only [ComputableAnalysis.mesh, if_neg (Nat.ne_of_gt (Nat.pow_pos (by decide : 0 &lt; (2:Nat)) (n := gridShift L eps))),</span>
+<span id="L47"><a href="#L47">  47</a>     show (1:Rat)-0=1 by decide +kernel]</span>
+<span id="L48"><a href="#L48">  48</a>   exact (RationalMajorant.half_pow_eq_one_div_nat_two_pow _).symm</span>
+<span id="L49"><a href="#L49">  49</a> private def tolerance (eps : QPos) : QPos := ⟨eps.val/2,by</span>
+<span id="L50"><a href="#L50">  50</a>   rw [Rat.div_def]; exact Rat.mul_pos eps.property (by decide +kernel)⟩</span>
+<span id="L51"><a href="#L51">  51</a> </span>
+<span id="L52"><a href="#L52">  52</a> private def sampleBox (f : FunctionOnInterval) (P : RationalPartition f.lower f.upper)</span>
+<span id="L53"><a href="#L53">  53</a>     (eps : QPos) (k : Nat) : QInterval :=</span>
+<span id="L54"><a href="#L54">  54</a>   if hk : k&lt;P.pieces then</span>
+<span id="L55"><a href="#L55">  55</a>     let X := Real.ofRaw (pointRaw f (P.point k) (P.point_in_bounds (Nat.le_of_lt hk)))</span>
+<span id="L56"><a href="#L56">  56</a>       (point_valid f _ _)</span>
+<span id="L57"><a href="#L57">  57</a>     X.compute (ComputableCoefficient.widthStage X (tolerance eps))</span>
+<span id="L58"><a href="#L58">  58</a>   else {lo := 0,hi := 0}</span>
+<span id="L59"><a href="#L59">  59</a> </span>
+<span id="L60"><a href="#L60">  60</a> /-- Actual point boxes widened by a justified variation bound on the cell. -/</span>
+<span id="L61"><a href="#L61">  61</a> def lipschitzBounds (f : FunctionOnInterval) (h0 : f.lower=0) (h1 : f.upper=1)</span>
+<span id="L62"><a href="#L62">  62</a>     (L : Rat) (hL : 0 ≤ L)</span>
+<span id="L63"><a href="#L63">  63</a>     (hlip : ∀ x y (hx : inDomainInterval f.lower f.upper x)</span>
+<span id="L64"><a href="#L64">  64</a>       (hy : inDomainInterval f.lower f.upper y),</span>
+<span id="L65"><a href="#L65">  65</a>       Small (ofRealRaw (RealRaw.sub (pointRaw f x hx) (pointRaw f y hy))) (L*qabs (x-y)))</span>
+<span id="L66"><a href="#L66">  66</a>     (eps : QPos) : Integral.Bounds f := by</span>
+<span id="L67"><a href="#L67">  67</a>   let P := grid f h0 h1 L eps</span>
+<span id="L68"><a href="#L68">  68</a>   refine { partition := P</span>
+<span id="L69"><a href="#L69">  69</a>            lower := fun k =&gt; (sampleBox f P eps k).lo - L * mesh L eps</span>
+<span id="L70"><a href="#L70">  70</a>            upper := fun k =&gt; (sampleBox f P eps k).hi + L * mesh L eps</span>
+<span id="L71"><a href="#L71">  71</a>            lower_le := ?_</span>
+<span id="L72"><a href="#L72">  72</a>            upper_ge := ?_ }</span>
+<span id="L73"><a href="#L73">  73</a>   all_goals</span>
+<span id="L74"><a href="#L74">  74</a>     intro k hk x hx n</span>
+<span id="L75"><a href="#L75">  75</a>     let c := P.point k</span>
+<span id="L76"><a href="#L76">  76</a>     have hc : inDomainInterval f.lower f.upper c := P.point_in_bounds (Nat.le_of_lt hk)</span>
+<span id="L77"><a href="#L77">  77</a>     have hxm := (P.cell k hk).contains_inDomain hx</span>
+<span id="L78"><a href="#L78">  78</a>     let X := Real.ofRaw (pointRaw f c hc) (point_valid f c hc)</span>
+<span id="L79"><a href="#L79">  79</a>     let s := ComputableCoefficient.widthStage X (tolerance eps)</span>
+<span id="L80"><a href="#L80">  80</a>     have hd : qabs (x-c) ≤ mesh L eps := by</span>
+<span id="L81"><a href="#L81">  81</a>       have hg := grid_width f h0 h1 L eps k</span>
+<span id="L82"><a href="#L82">  82</a>       have hxlo := hx.1</span>
+<span id="L83"><a href="#L83">  83</a>       have hxhi := hx.2</span>
+<span id="L84"><a href="#L84">  84</a>       change P.point k≤x at hxlo</span>
+<span id="L85"><a href="#L85">  85</a>       change x≤P.point (k+1) at hxhi</span>
+<span id="L86"><a href="#L86">  86</a>       rw [qabs_eq_self_of_nonneg (show 0 ≤ x-c by dsimp [c]; grind only)]</span>
+<span id="L87"><a href="#L87">  87</a>       change P.point (k+1)-P.point k=mesh L eps at hg</span>
+<span id="L88"><a href="#L88">  88</a>       dsimp [c]; grind only</span>
+<span id="L89"><a href="#L89">  89</a>     have hm : 0≤mesh L eps := Rat.pow_nonneg (by decide +kernel)</span>
+<span id="L90"><a href="#L90">  90</a>     have hE : 0 ≤ L*mesh L eps := Rat.mul_nonneg hL hm</span>
+<span id="L91"><a href="#L91">  91</a>     have hh := (hlip x c hxm hc).mono (Rat.mul_le_mul_of_nonneg_left hd hL)</span>
+<span id="L92"><a href="#L92">  92</a>     have hh&#x27; : Small (ofRealRaw (RealRaw.sub (pointRaw f x hxm)</span>
+<span id="L93"><a href="#L93">  93</a>         (RealRaw.scaleRat 1 (pointRaw f c hc)))) (L*mesh L eps) := by</span>
+<span id="L94"><a href="#L94">  94</a>       simpa only [Small,RealRaw.Le,ofRealRaw,realPart,imagPart,RealRaw.sub,RealRaw.subCompute,</span>
+<span id="L95"><a href="#L95">  95</a>         RealRaw.scaleRat,RealRaw.scaleRatCompute,if_pos (show (0:Rat)≤1 by decide +kernel),Rat.one_mul] using hh</span>
+<span id="L96"><a href="#L96">  96</a>     have hlo : (RealRaw.ofRat (X.compute s).lo).Le (pointRaw f c hc) :=</span>
+<span id="L97"><a href="#L97">  97</a>       fun _ m =&gt; RealRaw.le_refl _ (point_valid f c hc) s m</span>
+<span id="L98"><a href="#L98">  98</a>     have hhi : (pointRaw f c hc).Le (RealRaw.ofRat (X.compute s).hi) :=</span>
+<span id="L99"><a href="#L99">  99</a>       fun m _ =&gt; RealRaw.le_refl _ (point_valid f c hc) m s</span>
+<span id="L100"><a href="#L100"> 100</a>     have h := remainder_order (pointRaw f x hxm) (pointRaw f c hc)</span>
+<span id="L101"><a href="#L101"> 101</a>       (point_valid f x hxm) (point_valid f c hc) 1 (L*mesh L eps)</span>
+<span id="L102"><a href="#L102"> 102</a>       (X.compute s).lo (X.compute s).hi (by decide +kernel) hh&#x27; hlo hhi</span>
+<span id="L103"><a href="#L103"> 103</a>     simp only [Rat.one_mul] at h</span>
+<span id="L104"><a href="#L104"> 104</a>     first</span>
+<span id="L105"><a href="#L105"> 105</a>     | simpa only [sampleBox,dif_pos hk,X,s,c,RealRaw.ofRat,pointRaw] using h.1 0 n</span>
+<span id="L106"><a href="#L106"> 106</a>     | simpa only [sampleBox,dif_pos hk,X,s,c,RealRaw.ofRat,pointRaw] using h.2 n 0</span>
+<span id="L107"><a href="#L107"> 107</a> </span>
+<span id="L108"><a href="#L108"> 108</a> private theorem sum_sub (f g : Nat → Rat) (n : Nat) :</span>
+<span id="L109"><a href="#L109"> 109</a>     Integral.rectangleSum f n-Integral.rectangleSum g n = Integral.rectangleSum (fun k =&gt; f k-g k) n := by</span>
+<span id="L110"><a href="#L110"> 110</a>   induction n with</span>
+<span id="L111"><a href="#L111"> 111</a>   | zero =&gt; simp only [Integral.rectangleSum]; grind only</span>
+<span id="L112"><a href="#L112"> 112</a>   | succ n ih =&gt; simp only [Integral.rectangleSum]; grind only</span>
+<span id="L113"><a href="#L113"> 113</a> </span>
+<span id="L114"><a href="#L114"> 114</a> /-- The computed finite bounds become arbitrarily tight. -/</span>
+<span id="L115"><a href="#L115"> 115</a> theorem lipschitzBounds_gap (f : FunctionOnInterval) (h0 : f.lower=0) (h1 : f.upper=1)</span>
+<span id="L116"><a href="#L116"> 116</a>     (L : Rat) (hL : 0≤L) (hlip) (eps : QPos) :</span>
+<span id="L117"><a href="#L117"> 117</a>     (lipschitzBounds f h0 h1 L hL hlip eps).upperSum-</span>
+<span id="L118"><a href="#L118"> 118</a>       (lipschitzBounds f h0 h1 L hL hlip eps).lowerSum ≤ eps.val := by</span>
+<span id="L119"><a href="#L119"> 119</a>   let B := lipschitzBounds f h0 h1 L hL hlip eps</span>
+<span id="L120"><a href="#L120"> 120</a>   let P := B.partition</span>
+<span id="L121"><a href="#L121"> 121</a>   have hg : ∀ k, k&lt;P.pieces → B.upper k-B.lower k ≤ eps.val/2+2*L*mesh L eps := by</span>
+<span id="L122"><a href="#L122"> 122</a>     intro k hk</span>
+<span id="L123"><a href="#L123"> 123</a>     have hs := ComputableCoefficient.widthStage_spec</span>
+<span id="L124"><a href="#L124"> 124</a>       (Real.ofRaw (pointRaw f (P.point k) (P.point_in_bounds (Nat.le_of_lt hk))) (point_valid f _ _))</span>
+<span id="L125"><a href="#L125"> 125</a>       (tolerance eps)</span>
+<span id="L126"><a href="#L126"> 126</a>     change (sampleBox f P eps k).hi+L*mesh L eps-</span>
+<span id="L127"><a href="#L127"> 127</a>       ((sampleBox f P eps k).lo-L*mesh L eps) ≤ _</span>
+<span id="L128"><a href="#L128"> 128</a>     have hbox : sampleBox f P eps k =</span>
+<span id="L129"><a href="#L129"> 129</a>         (Real.ofRaw (pointRaw f (P.point k) (P.point_in_bounds (Nat.le_of_lt hk))) (point_valid f _ _)).compute</span>
+<span id="L130"><a href="#L130"> 130</a>           (ComputableCoefficient.widthStage</span>
+<span id="L131"><a href="#L131"> 131</a>             (Real.ofRaw (pointRaw f (P.point k) (P.point_in_bounds (Nat.le_of_lt hk))) (point_valid f _ _)) (tolerance eps)) := by</span>
+<span id="L132"><a href="#L132"> 132</a>       simp only [sampleBox,dif_pos hk]</span>
+<span id="L133"><a href="#L133"> 133</a>     rw [hbox]</span>
+<span id="L134"><a href="#L134"> 134</a>     change _- _ ≤ eps.val/2 at hs</span>
+<span id="L135"><a href="#L135"> 135</a>     grind only</span>
+<span id="L136"><a href="#L136"> 136</a>   have hm := gridShift_spec L eps</span>
+<span id="L137"><a href="#L137"> 137</a>   rw [qabs_eq_self_of_nonneg hL] at hm</span>
+<span id="L138"><a href="#L138"> 138</a>   change 4*L*mesh L eps ≤ eps.val at hm</span>
+<span id="L139"><a href="#L139"> 139</a>   have hh : eps.val/2+2*L*mesh L eps ≤ eps.val := by grind only</span>
+<span id="L140"><a href="#L140"> 140</a>   change Integral.rectangleSum (fun k =&gt; (P.point (k+1)-P.point k)*B.upper k) P.pieces-</span>
+<span id="L141"><a href="#L141"> 141</a>     Integral.rectangleSum (fun k =&gt; (P.point (k+1)-P.point k)*B.lower k) P.pieces≤_</span>
+<span id="L142"><a href="#L142"> 142</a>   rw [sum_sub]</span>
+<span id="L143"><a href="#L143"> 143</a>   calc</span>
+<span id="L144"><a href="#L144"> 144</a>     _ ≤ Integral.rectangleSum (fun k =&gt; (P.point (k+1)-P.point k)*eps.val) P.pieces := by</span>
+<span id="L145"><a href="#L145"> 145</a>       apply Integral.rectangleSum_mono</span>
+<span id="L146"><a href="#L146"> 146</a>       intro k hk</span>
+<span id="L147"><a href="#L147"> 147</a>       have hc := P.monotone k (k+1) (by omega) (by omega)</span>
+<span id="L148"><a href="#L148"> 148</a>       have hs := Rat.mul_le_mul_of_nonneg_left (Rat.le_trans (hg k hk) hh)</span>
+<span id="L149"><a href="#L149"> 149</a>         (show 0≤P.point (k+1)-P.point k by grind only)</span>
+<span id="L150"><a href="#L150"> 150</a>       grind only</span>
+<span id="L151"><a href="#L151"> 151</a>     _ = eps.val := by</span>
+<span id="L152"><a href="#L152"> 152</a>       rw [Integral.rectangleSum_scale,Integral.rectangleSum_telescope,P.right_endpoint,P.left_endpoint,h0,h1]</span>
+<span id="L153"><a href="#L153"> 153</a>       grind only</span>
+<span id="L154"><a href="#L154"> 154</a> </span>
+<span id="L155"><a href="#L155"> 155</a> end ComputableAnalysis.ExponentialComputations</span>
+</pre></body></html>

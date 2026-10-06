@@ -1,0 +1,149 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ComputableAnalysis.ExponentialComputations.IntegralLogarithm</title><style>body{margin:24px;background:#fbfaf6;color:#252b27}pre{font:12px/1.65 monospace;white-space:pre;overflow-x:auto}pre span{display:block}pre span:target{background:#fff2b8}a{color:#466442}pre a{color:#999;text-decoration:none}</style></head><body><a href="../index.html">Proof bundle</a><h1 style="font:18px system-ui">ComputableAnalysis.ExponentialComputations.IntegralLogarithm</h1><pre><span id="L1"><a href="#L1">   1</a> import ComputableAnalysis.ExponentialComputations.SegmentFTC</span>
+<span id="L2"><a href="#L2">   2</a> </span>
+<span id="L3"><a href="#L3">   3</a> /-! The reciprocal integral on the whole positive real axis. Arbitrary</span>
+<span id="L4"><a href="#L4">   4</a> represented endpoints are pulled back to [0,1], retaining orientation. The</span>
+<span id="L5"><a href="#L5">   5</a> runtime uses finite rectangle sums; both inverse laws are proved. -/</span>
+<span id="L6"><a href="#L6">   6</a> namespace ComputableAnalysis.ExponentialComputations</span>
+<span id="L7"><a href="#L7">   7</a> open ComplexRaw FunctionTheory RiemannHilbert LocalODE DomainFunctions ModularForms</span>
+<span id="L8"><a href="#L8">   8</a> set_option maxHeartbeats 1000000</span>
+<span id="L9"><a href="#L9">   9</a> </span>
+<span id="L10"><a href="#L10">  10</a> def segmentLogValue (x : PositiveInput) (t : Rat) : RealRaw :=</span>
+<span id="L11"><a href="#L11">  11</a>   if ht : 0≤t ∧ t≤1 then (log (positivePoint x ⟨t,ht⟩)).val else RealRaw.ofRat 0</span>
+<span id="L12"><a href="#L12">  12</a> </span>
+<span id="L13"><a href="#L13">  13</a> def reciprocalBounds (x : PositiveInput) (eps : QPos) : Integral.Bounds (segmentIntegrand x) :=</span>
+<span id="L14"><a href="#L14">  14</a>   lipschitzBounds (segmentIntegrand x) rfl rfl (segmentVariation x) (segmentVariation_nonnegative x)</span>
+<span id="L15"><a href="#L15">  15</a>     (segmentIntegrand_lipschitz x) eps</span>
+<span id="L16"><a href="#L16">  16</a> </span>
+<span id="L17"><a href="#L17">  17</a> theorem reciprocalBounds_gap (x : PositiveInput) (eps : QPos) :</span>
+<span id="L18"><a href="#L18">  18</a>     (reciprocalBounds x eps).upperSum-(reciprocalBounds x eps).lowerSum≤eps.val :=</span>
+<span id="L19"><a href="#L19">  19</a>   lipschitzBounds_gap (segmentIntegrand x) rfl rfl _ _ _ eps</span>
+<span id="L20"><a href="#L20">  20</a> </span>
+<span id="L21"><a href="#L21">  21</a> theorem segmentIntegrand_bound (x : PositiveInput) (t : RationalUnit) :</span>
+<span id="L22"><a href="#L22">  22</a>     Small (realAxis (segmentIntegrandValue x t)).val (2*segmentBound x*(1/(segmentLower x).val)) := by</span>
+<span id="L23"><a href="#L23">  23</a>   have hR : 0≤1/(segmentLower x).val := by</span>
+<span id="L24"><a href="#L24">  24</a>     rw [Rat.div_def,Rat.one_mul]; exact Rat.le_of_lt (Rat.inv_pos.mpr (segmentLower x).property)</span>
+<span id="L25"><a href="#L25">  25</a>   exact Small.congr</span>
+<span id="L26"><a href="#L26">  26</a>     (mul_valid (realAxis (segmentDisplacement x)).property (segmentInverse x t).property)</span>
+<span id="L27"><a href="#L27">  27</a>     (realAxis (segmentIntegrandValue x t)).property (segmentIntegrand_embedding x t)</span>
+<span id="L28"><a href="#L28">  28</a>     (Small.mul (realAxis (segmentDisplacement x)).property (segmentInverse x t).property</span>
+<span id="L29"><a href="#L29">  29</a>       (Rat.le_of_lt (segmentBound_pos x)) hR (scalar_small _) (segmentInverse_bound x t))</span>
+<span id="L30"><a href="#L30">  30</a> </span>
+<span id="L31"><a href="#L31">  31</a> theorem segmentLog_cellBounds (x : PositiveInput) :</span>
+<span id="L32"><a href="#L32">  32</a>     Integral.CellDerivativeBounds (segmentIntegrand x) (segmentLogValue x) := by</span>
+<span id="L33"><a href="#L33">  33</a>   apply cellBounds_of_quadratic (segmentIntegrand x) (segmentLogValue x) rfl rfl</span>
+<span id="L34"><a href="#L34">  34</a>     (fun t ht0 ht1 =&gt; by simp only [segmentLogValue,dif_pos (And.intro ht0 ht1)]; exact (log _).property)</span>
+<span id="L35"><a href="#L35">  35</a>     (segmentRemainderConstant x) (by</span>
+<span id="L36"><a href="#L36">  36</a>       dsimp [segmentRemainderConstant]</span>
+<span id="L37"><a href="#L37">  37</a>       exact Rat.mul_nonneg (Rat.mul_nonneg (by decide +kernel) (Rat.pow_nonneg (Rat.le_of_lt (segmentBound_pos x))))</span>
+<span id="L38"><a href="#L38">  38</a>         (Rat.pow_nonneg (by rw [Rat.div_def,Rat.one_mul]; exact Rat.le_of_lt (Rat.inv_pos.mpr (segmentLower x).property))))</span>
+<span id="L39"><a href="#L39">  39</a>     (segmentMesh x) (2*segmentBound x*(1/(segmentLower x).val))</span>
+<span id="L40"><a href="#L40">  40</a>   · intro t ht n</span>
+<span id="L41"><a href="#L41">  41</a>     have h := segmentIntegrand_bound x ⟨t,ht⟩</span>
+<span id="L42"><a href="#L42">  42</a>     rw [segmentIntegrand_compute x ⟨t,ht⟩ n]</span>
+<span id="L43"><a href="#L43">  43</a>     exact ⟨h.1 0 n,h.2.1 n 0⟩</span>
+<span id="L44"><a href="#L44">  44</a>   · intro u v hu hu0 huv hv1 hmesh</span>
+<span id="L45"><a href="#L45">  45</a>     have hum : 0≤u ∧ u≤1 := ⟨hu0,by grind only⟩</span>
+<span id="L46"><a href="#L46">  46</a>     have hvm : 0≤v ∧ v≤1 := ⟨by grind only,hv1⟩</span>
+<span id="L47"><a href="#L47">  47</a>     have h := segment_log_remainder x ⟨u,hum⟩ ⟨v,hvm⟩ huv hmesh</span>
+<span id="L48"><a href="#L48">  48</a>     have hcompute : (segmentIntegrand x).compute u hu = (segmentIntegrandValue x ⟨u,hum⟩).val.compute := by</span>
+<span id="L49"><a href="#L49">  49</a>       funext n</span>
+<span id="L50"><a href="#L50">  50</a>       exact segmentIntegrand_compute x ⟨u,hum⟩ n</span>
+<span id="L51"><a href="#L51">  51</a>     simpa only [Small,RealRaw.Le,ofRealRaw,realPart,imagPart,RealRaw.sub,RealRaw.subCompute,</span>
+<span id="L52"><a href="#L52">  52</a>       RealRaw.scaleRat,RealRaw.scaleRatCompute,segmentLogValue,dif_pos hum,dif_pos hvm,hcompute] using h</span>
+<span id="L53"><a href="#L53">  53</a> </span>
+<span id="L54"><a href="#L54">  54</a> /-- A concrete existence proof for the integral; the endpoint law follows</span>
+<span id="L55"><a href="#L55">  55</a> from finite subdivision and tight reciprocal bounds. -/</span>
+<span id="L56"><a href="#L56">  56</a> theorem segmentLog_hasIntegral (x : PositiveInput) : Integral.HasIntegral (segmentIntegrand x)</span>
+<span id="L57"><a href="#L57">  57</a>     (RealRaw.sub (segmentLogValue x 1) (segmentLogValue x 0)) :=</span>
+<span id="L58"><a href="#L58">  58</a>   (segmentLog_cellBounds x).hasIntegral (by change (0:Rat)≤1; decide +kernel)</span>
+<span id="L59"><a href="#L59">  59</a>     (fun eps =&gt; ⟨reciprocalBounds x eps,reciprocalBounds_gap x eps⟩)</span>
+<span id="L60"><a href="#L60">  60</a> </span>
+<span id="L61"><a href="#L61">  61</a> def oneInput : PositiveInput := ⟨⟨RealRaw.ofRat 1,RealRaw.ofRat_valid _⟩,⟨0,by decide +kernel⟩⟩</span>
+<span id="L62"><a href="#L62">  62</a> def zeroInput : RealInput := ⟨RealRaw.ofRat 0,RealRaw.ofRat_valid _⟩</span>
+<span id="L63"><a href="#L63">  63</a> </span>
+<span id="L64"><a href="#L64">  64</a> theorem exp_zero : (exp zeroInput).val.Equiv oneInput.val.val := realPart_equiv entireExponential_zero</span>
+<span id="L65"><a href="#L65">  65</a> </span>
+<span id="L66"><a href="#L66">  66</a> theorem log_one : (log oneInput).val.Equiv zeroInput.val :=</span>
+<span id="L67"><a href="#L67">  67</a>   RealRaw.equiv_symm (log_unique oneInput zeroInput exp_zero)</span>
+<span id="L68"><a href="#L68">  68</a> </span>
+<span id="L69"><a href="#L69">  69</a> theorem positiveSegment_zero (x : PositiveInput) :</span>
+<span id="L70"><a href="#L70">  70</a>     (positiveSegment x ⟨0,by decide +kernel⟩).val.Equiv oneInput.val.val := by</span>
+<span id="L71"><a href="#L71">  71</a>   intro n</span>
+<span id="L72"><a href="#L72">  72</a>   apply (RealRaw.compareAt_overlap_iff _ _ n n).mpr</span>
+<span id="L73"><a href="#L73">  73</a>   simp only [positiveSegment,RealRaw.add,RealRaw.addCompute,RealRaw.scaleRat,RealRaw.scaleRatCompute,</span>
+<span id="L74"><a href="#L74">  74</a>     RealRaw.ofRat,if_pos (show (0:Rat)≤0 by decide +kernel),Rat.zero_mul,Rat.add_zero,oneInput,show (1:Rat)-0=1 by decide +kernel]</span>
+<span id="L75"><a href="#L75">  75</a>   exact ⟨Rat.le_refl,Rat.le_refl⟩</span>
+<span id="L76"><a href="#L76">  76</a> </span>
+<span id="L77"><a href="#L77">  77</a> theorem positiveSegment_one (x : PositiveInput) :</span>
+<span id="L78"><a href="#L78">  78</a>     (positiveSegment x ⟨1,by decide +kernel⟩).val.Equiv x.val.val := by</span>
+<span id="L79"><a href="#L79">  79</a>   intro n</span>
+<span id="L80"><a href="#L80">  80</a>   apply (RealRaw.compareAt_overlap_iff _ _ n n).mpr</span>
+<span id="L81"><a href="#L81">  81</a>   have ho := RealRaw.interval_order_of_valid _ x.val.property n</span>
+<span id="L82"><a href="#L82">  82</a>   simp only [positiveSegment,RealRaw.add,RealRaw.addCompute,RealRaw.scaleRat,RealRaw.scaleRatCompute,</span>
+<span id="L83"><a href="#L83">  83</a>     RealRaw.ofRat,if_pos (show (0:Rat)≤1 by decide +kernel),Rat.one_mul,Rat.sub_self,Rat.zero_add]</span>
+<span id="L84"><a href="#L84">  84</a>   exact ⟨ho,ho⟩</span>
+<span id="L85"><a href="#L85">  85</a> </span>
+<span id="L86"><a href="#L86">  86</a> theorem segmentLog_endpoint (x : PositiveInput) :</span>
+<span id="L87"><a href="#L87">  87</a>     (RealRaw.sub (segmentLogValue x 1) (segmentLogValue x 0)).Equiv (log x).val := by</span>
+<span id="L88"><a href="#L88">  88</a>   have h0 := RealRaw.equiv_trans (log (positivePoint x ⟨0,by decide +kernel⟩)).property</span>
+<span id="L89"><a href="#L89">  89</a>     (log oneInput).property zeroInput.property</span>
+<span id="L90"><a href="#L90">  90</a>     (log_congr _ _ (positiveSegment_zero x)) log_one</span>
+<span id="L91"><a href="#L91">  91</a>   have h1 := log_congr (positivePoint x ⟨1,by decide +kernel⟩) x (positiveSegment_one x)</span>
+<span id="L92"><a href="#L92">  92</a>   have h0&#x27; : (segmentLogValue x 0).Equiv zeroInput.val := by</span>
+<span id="L93"><a href="#L93">  93</a>     change (log (positivePoint x ⟨0,by decide +kernel⟩)).val.Equiv zeroInput.val</span>
+<span id="L94"><a href="#L94">  94</a>     exact h0</span>
+<span id="L95"><a href="#L95">  95</a>   have h1&#x27; : (segmentLogValue x 1).Equiv (log x).val := by</span>
+<span id="L96"><a href="#L96">  96</a>     change (log (positivePoint x ⟨1,by decide +kernel⟩)).val.Equiv (log x).val</span>
+<span id="L97"><a href="#L97">  97</a>     exact h1</span>
+<span id="L98"><a href="#L98">  98</a>   have hv0 : (segmentLogValue x 0).Valid := (log (positivePoint x ⟨0,by decide +kernel⟩)).property</span>
+<span id="L99"><a href="#L99">  99</a>   have hv1 : (segmentLogValue x 1).Valid := (log (positivePoint x ⟨1,by decide +kernel⟩)).property</span>
+<span id="L100"><a href="#L100"> 100</a>   have hh := RealRaw.sub_equiv (x := segmentLogValue x 1) (x&#x27; := (log x).val)</span>
+<span id="L101"><a href="#L101"> 101</a>     (y := segmentLogValue x 0) (y&#x27; := zeroInput.val) hv1 (log x).property hv0 zeroInput.property h1&#x27; h0&#x27;</span>
+<span id="L102"><a href="#L102"> 102</a>   have hz : (RealRaw.sub (log x).val zeroInput.val).Equiv (log x).val := by</span>
+<span id="L103"><a href="#L103"> 103</a>     intro n</span>
+<span id="L104"><a href="#L104"> 104</a>     apply (RealRaw.compareAt_overlap_iff _ _ n n).mpr</span>
+<span id="L105"><a href="#L105"> 105</a>     have ho := RealRaw.interval_order_of_valid _ (log x).property n</span>
+<span id="L106"><a href="#L106"> 106</a>     change ((log x).val.compute n).lo-(0:Rat)≤((log x).val.compute n).hi ∧</span>
+<span id="L107"><a href="#L107"> 107</a>       ((log x).val.compute n).lo≤((log x).val.compute n).hi-(0:Rat)</span>
+<span id="L108"><a href="#L108"> 108</a>     constructor &lt;;&gt; grind only</span>
+<span id="L109"><a href="#L109"> 109</a>   exact RealRaw.equiv_trans (RealRaw.sub_valid hv1 hv0)</span>
+<span id="L110"><a href="#L110"> 110</a>     (RealRaw.sub_valid (log x).property zeroInput.property) (log x).property hh hz</span>
+<span id="L111"><a href="#L111"> 111</a> </span>
+<span id="L112"><a href="#L112"> 112</a> /-- Independent rectangle-sum computation of the normalized reciprocal</span>
+<span id="L113"><a href="#L113"> 113</a> integral. The pullback is (x-1)/(1+t(x-1)), so x&lt;1 is oriented correctly. -/</span>
+<span id="L114"><a href="#L114"> 114</a> def integralLog (x : PositiveInput) : RealInput :=</span>
+<span id="L115"><a href="#L115"> 115</a>   ⟨rectangleValue (segmentIntegrand x) (reciprocalBounds x),</span>
+<span id="L116"><a href="#L116"> 116</a>     rectangleValue_valid _ _ (reciprocalBounds_gap x) _ (segmentLog_hasIntegral x)⟩</span>
+<span id="L117"><a href="#L117"> 117</a> </span>
+<span id="L118"><a href="#L118"> 118</a> theorem integralLog_hasIntegral (x : PositiveInput) :</span>
+<span id="L119"><a href="#L119"> 119</a>     Integral.HasIntegral (segmentIntegrand x) (integralLog x).val :=</span>
+<span id="L120"><a href="#L120"> 120</a>   rectangleValue_hasIntegral _ _ (reciprocalBounds_gap x) _ (segmentLog_hasIntegral x)</span>
+<span id="L121"><a href="#L121"> 121</a> </span>
+<span id="L122"><a href="#L122"> 122</a> /-- Exact global identification of the reciprocal integral with logarithm. -/</span>
+<span id="L123"><a href="#L123"> 123</a> theorem integralLog_equiv_log (x : PositiveInput) : (integralLog x).val.Equiv (log x).val :=</span>
+<span id="L124"><a href="#L124"> 124</a>   RealRaw.equiv_trans (integralLog x).property (segmentLog_hasIntegral x).valid (log x).property</span>
+<span id="L125"><a href="#L125"> 125</a>     (rectangleValue_agrees _ _ _ (segmentLog_hasIntegral x)) (segmentLog_endpoint x)</span>
+<span id="L126"><a href="#L126"> 126</a> </span>
+<span id="L127"><a href="#L127"> 127</a> theorem integralLog_congr (x y : PositiveInput) (h : x.val.val.Equiv y.val.val) :</span>
+<span id="L128"><a href="#L128"> 128</a>     (integralLog x).val.Equiv (integralLog y).val :=</span>
+<span id="L129"><a href="#L129"> 129</a>   RealRaw.equiv_trans (integralLog x).property (log x).property (integralLog y).property</span>
+<span id="L130"><a href="#L130"> 130</a>     (integralLog_equiv_log x) (RealRaw.equiv_trans (log x).property (log y).property</span>
+<span id="L131"><a href="#L131"> 131</a>       (integralLog y).property (log_congr x y h) (RealRaw.equiv_symm (integralLog_equiv_log y)))</span>
+<span id="L132"><a href="#L132"> 132</a> </span>
+<span id="L133"><a href="#L133"> 133</a> /-- Exponential is an actual two-sided inverse of the constructed integral. -/</span>
+<span id="L134"><a href="#L134"> 134</a> theorem integralLog_exp (x : RealInput) :</span>
+<span id="L135"><a href="#L135"> 135</a>     (integralLog ⟨exp x,exp_positive x⟩).val.Equiv x.val :=</span>
+<span id="L136"><a href="#L136"> 136</a>   RealRaw.equiv_trans (integralLog _).property (log _).property x.property (integralLog_equiv_log _) (log_exp x)</span>
+<span id="L137"><a href="#L137"> 137</a> </span>
+<span id="L138"><a href="#L138"> 138</a> theorem exp_integralLog (x : PositiveInput) : (exp (integralLog x)).val.Equiv x.val.val :=</span>
+<span id="L139"><a href="#L139"> 139</a>   RealRaw.equiv_trans (exp (integralLog x)).property (exp (log x)).property x.val.property</span>
+<span id="L140"><a href="#L140"> 140</a>     (exp_congr _ _ (integralLog_equiv_log x)) (exp_log x)</span>
+<span id="L141"><a href="#L141"> 141</a> </span>
+<span id="L142"><a href="#L142"> 142</a> /-- Any real computation inverted by the reciprocal integral agrees with</span>
+<span id="L143"><a href="#L143"> 143</a> exponential; this law supports independently justified inversion methods. -/</span>
+<span id="L144"><a href="#L144"> 144</a> theorem exp_unique_of_integralLog (x : RealInput) (y : PositiveInput)</span>
+<span id="L145"><a href="#L145"> 145</a>     (h : (integralLog y).val.Equiv x.val) : y.val.val.Equiv (exp x).val :=</span>
+<span id="L146"><a href="#L146"> 146</a>   exp_unique_of_log x y (RealRaw.equiv_trans (log y).property (integralLog y).property x.property</span>
+<span id="L147"><a href="#L147"> 147</a>     (RealRaw.equiv_symm (integralLog_equiv_log y)) h)</span>
+<span id="L148"><a href="#L148"> 148</a> end ComputableAnalysis.ExponentialComputations</span>
+</pre></body></html>

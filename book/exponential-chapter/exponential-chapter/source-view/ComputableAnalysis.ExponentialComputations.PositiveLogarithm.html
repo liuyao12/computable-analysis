@@ -1,0 +1,174 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ComputableAnalysis.ExponentialComputations.PositiveLogarithm</title><style>body{margin:24px;background:#fbfaf6;color:#252b27}pre{font:12px/1.65 monospace;white-space:pre;overflow-x:auto}pre span{display:block}pre span:target{background:#fff2b8}a{color:#466442}pre a{color:#999;text-decoration:none}</style></head><body><a href="../index.html">Proof bundle</a><h1 style="font:18px system-ui">ComputableAnalysis.ExponentialComputations.PositiveLogarithm</h1><pre><span id="L1"><a href="#L1">   1</a> import ComputableAnalysis.ExponentialComputations.RealExponential</span>
+<span id="L2"><a href="#L2">   2</a> import ComputableAnalysis.RiemannHilbert.NonzeroLogarithmConstruction</span>
+<span id="L3"><a href="#L3">   3</a> import ComputableAnalysis.ModularForms.ExponentialLogarithmAgreement</span>
+<span id="L4"><a href="#L4">   4</a> </span>
+<span id="L5"><a href="#L5">   5</a> /-! A global real logarithm on positive represented inputs. The complex</span>
+<span id="L6"><a href="#L6">   6</a> continuation algorithm constructs a logarithm; its real coordinate is</span>
+<span id="L7"><a href="#L7">   7</a> independent of the route because exponential fibers have equal real parts.</span>
+<span id="L8"><a href="#L8">   8</a> This module proves the inverse laws. Integral identification is separate. -/</span>
+<span id="L9"><a href="#L9">   9</a> namespace ComputableAnalysis.ExponentialComputations</span>
+<span id="L10"><a href="#L10">  10</a> open ComplexRaw FunctionTheory RiemannHilbert LocalODE DomainFunctions ModularForms</span>
+<span id="L11"><a href="#L11">  11</a> set_option maxHeartbeats 1000000</span>
+<span id="L12"><a href="#L12">  12</a> private def scalarClass (z : Scalar) := ComplexRawQuotient.ofRaw z.val z.property</span>
+<span id="L13"><a href="#L13">  13</a> </span>
+<span id="L14"><a href="#L14">  14</a> abbrev PositiveInput := {x : RealInput // x.val.Pos}</span>
+<span id="L15"><a href="#L15">  15</a> def complexLog (x : PositiveInput) : Scalar :=</span>
+<span id="L16"><a href="#L16">  16</a>   NonzeroLogarithmConstruction.value (realAxis x.val) (positive_real_nonzero x.val x.property)</span>
+<span id="L17"><a href="#L17">  17</a> def log (x : PositiveInput) : RealInput :=</span>
+<span id="L18"><a href="#L18">  18</a>   ⟨(complexLog x).val.realPart,realPart_valid (complexLog x).property⟩</span>
+<span id="L19"><a href="#L19">  19</a> </span>
+<span id="L20"><a href="#L20">  20</a> theorem complexLog_exponential (x : PositiveInput) :</span>
+<span id="L21"><a href="#L21">  21</a>     (entireExponentialValue (complexLog x)).val.Equiv (realAxis x.val).val :=</span>
+<span id="L22"><a href="#L22">  22</a>   equiv_trans (entireExponentialValue (complexLog x)).property</span>
+<span id="L23"><a href="#L23">  23</a>     (MatrixExponential.scalarExponential (complexLog x)).property (realAxis x.val).property</span>
+<span id="L24"><a href="#L24">  24</a>     (equiv_symm (scalarExponential_agreement _))</span>
+<span id="L25"><a href="#L25">  25</a>     (NonzeroLogarithmConstruction.exponential _ _)</span>
+<span id="L26"><a href="#L26">  26</a> </span>
+<span id="L27"><a href="#L27">  27</a> theorem log_congr (x y : PositiveInput) (h : x.val.val.Equiv y.val.val) :</span>
+<span id="L28"><a href="#L28">  28</a>     (log x).val.Equiv (log y).val := by</span>
+<span id="L29"><a href="#L29">  29</a>   apply entireExponential_fiber_realPart (complexLog x) (complexLog y)</span>
+<span id="L30"><a href="#L30">  30</a>   exact equiv_trans (entireExponentialValue (complexLog x)).property (realAxis x.val).property</span>
+<span id="L31"><a href="#L31">  31</a>     (entireExponentialValue (complexLog y)).property (complexLog_exponential x)</span>
+<span id="L32"><a href="#L32">  32</a>     (equiv_trans (realAxis x.val).property (realAxis y.val).property</span>
+<span id="L33"><a href="#L33">  33</a>       (entireExponentialValue (complexLog y)).property (real_embedding_congr x.val.property y.val.property h)</span>
+<span id="L34"><a href="#L34">  34</a>       (equiv_symm (complexLog_exponential y)))</span>
+<span id="L35"><a href="#L35">  35</a> </span>
+<span id="L36"><a href="#L36">  36</a> /-- One inverse law on every valid represented real input. -/</span>
+<span id="L37"><a href="#L37">  37</a> theorem log_exp (x : RealInput) :</span>
+<span id="L38"><a href="#L38">  38</a>     (log ⟨exp x,exp_positive x⟩).val.Equiv x.val := by</span>
+<span id="L39"><a href="#L39">  39</a>   apply entireExponential_fiber_realPart (complexLog ⟨exp x,exp_positive x⟩) (realAxis x)</span>
+<span id="L40"><a href="#L40">  40</a>   exact equiv_trans (entireExponentialValue _).property (realAxis (exp x)).property</span>
+<span id="L41"><a href="#L41">  41</a>     (entireExponentialValue (realAxis x)).property</span>
+<span id="L42"><a href="#L42">  42</a>     (complexLog_exponential _) (equiv_symm (exp_real_embedding x))</span>
+<span id="L43"><a href="#L43">  43</a> </span>
+<span id="L44"><a href="#L44">  44</a> theorem realAxis_conjugate (x : RealInput) : (conj (realAxis x).val).Equiv (realAxis x).val := by</span>
+<span id="L45"><a href="#L45">  45</a>   intro n</span>
+<span id="L46"><a href="#L46">  46</a>   apply (compareAt_overlap_iff _ _ n n).mpr</span>
+<span id="L47"><a href="#L47">  47</a>   have ho := RealRaw.interval_order_of_valid x.val x.property n</span>
+<span id="L48"><a href="#L48">  48</a>   simp only [realAxis,ofRealRaw,conj,QBox.conj,QComplex.conj]</span>
+<span id="L49"><a href="#L49">  49</a>   constructor &lt;;&gt; constructor &lt;;&gt; simp only [Rat.neg_zero] &lt;;&gt; first | exact ho | exact Rat.le_refl</span>
+<span id="L50"><a href="#L50">  50</a> </span>
+<span id="L51"><a href="#L51">  51</a> private theorem positive_sum (x y : RealInput) (hx : x.val.Pos) (hy : y.val.Pos) :</span>
+<span id="L52"><a href="#L52">  52</a>     (RealRaw.add x.val y.val).Pos := by</span>
+<span id="L53"><a href="#L53">  53</a>   obtain ⟨i,hi⟩ := hx</span>
+<span id="L54"><a href="#L54">  54</a>   obtain ⟨j,hj⟩ := hy</span>
+<span id="L55"><a href="#L55">  55</a>   let k := max i j</span>
+<span id="L56"><a href="#L56">  56</a>   have hxi := (x.property.2.1 i k (Nat.le_max_left _ _)).1</span>
+<span id="L57"><a href="#L57">  57</a>   have hyj := (y.property.2.1 j k (Nat.le_max_right _ _)).1</span>
+<span id="L58"><a href="#L58">  58</a>   refine ⟨k,?_⟩</span>
+<span id="L59"><a href="#L59">  59</a>   change 0&lt;(x.val.compute k).lo+(y.val.compute k).lo</span>
+<span id="L60"><a href="#L60">  60</a>   change 0&lt;(x.val.compute i).lo at hi</span>
+<span id="L61"><a href="#L61">  61</a>   change 0&lt;(y.val.compute j).lo at hj</span>
+<span id="L62"><a href="#L62">  62</a>   grind only</span>
+<span id="L63"><a href="#L63">  63</a> </span>
+<span id="L64"><a href="#L64">  64</a> /-- The second inverse law retains only the genuine positivity domain. -/</span>
+<span id="L65"><a href="#L65">  65</a> theorem exp_log (x : PositiveInput) : (exp (log x)).val.Equiv x.val.val := by</span>
+<span id="L66"><a href="#L66">  66</a>   let l := complexLog x</span>
+<span id="L67"><a href="#L67">  67</a>   let a := exp (log x)</span>
+<span id="L68"><a href="#L68">  68</a>   let A := realAxis a</span>
+<span id="L69"><a href="#L69">  69</a>   let X := realAxis x.val</span>
+<span id="L70"><a href="#L70">  70</a>   have hprod := mul_equiv (entireExponentialValue l).property X.property</span>
+<span id="L71"><a href="#L71">  71</a>     (conj_valid _ (entireExponentialValue l).property) (conj_valid _ X.property)</span>
+<span id="L72"><a href="#L72">  72</a>     (complexLog_exponential x) (conj_equiv (complexLog_exponential x))</span>
+<span id="L73"><a href="#L73">  73</a>   have hxx := mul_equiv X.property X.property (conj_valid _ X.property) X.property</span>
+<span id="L74"><a href="#L74">  74</a>     (equiv_refl _ X.property) (realAxis_conjugate x.val)</span>
+<span id="L75"><a href="#L75">  75</a>   have hmag := entireExponential_squared_magnitude l</span>
+<span id="L76"><a href="#L76">  76</a>   let r : Scalar := ⟨ofRealRaw (RealRaw.scaleRat 2 l.val.realPart),</span>
+<span id="L77"><a href="#L77">  77</a>     ofRealRaw_valid _ (RealRaw.scaleRat_valid (realPart_valid l.property))⟩</span>
+<span id="L78"><a href="#L78">  78</a>   have hadd : (add (realAxis (log x)).val (realAxis (log x)).val).Equiv r.val := by</span>
+<span id="L79"><a href="#L79">  79</a>     intro n</span>
+<span id="L80"><a href="#L80">  80</a>     apply (compareAt_overlap_iff _ _ n n).mpr</span>
+<span id="L81"><a href="#L81">  81</a>     have ho := RealRaw.interval_order_of_valid (log x).val (log x).property n</span>
+<span id="L82"><a href="#L82">  82</a>     change ((complexLog x).val.compute n).lo.re ≤ ((complexLog x).val.compute n).hi.re at ho</span>
+<span id="L83"><a href="#L83">  83</a>     simp only [r,l,realAxis,log,ofRealRaw,realPart,add,QBox.add,QComplex.add,RealRaw.scaleRat,RealRaw.scaleRatCompute,</span>
+<span id="L84"><a href="#L84">  84</a>       if_pos (show (0:Rat)≤2 by decide +kernel)]</span>
+<span id="L85"><a href="#L85">  85</a>     constructor &lt;;&gt; constructor &lt;;&gt; grind only</span>
+<span id="L86"><a href="#L86">  86</a>   have heA := exp_real_embedding (log x)</span>
+<span id="L87"><a href="#L87">  87</a>   have hAA := equiv_trans (mul_valid A.property A.property)</span>
+<span id="L88"><a href="#L88">  88</a>     (mul_valid (entireExponentialValue (realAxis (log x))).property (entireExponentialValue (realAxis (log x))).property)</span>
+<span id="L89"><a href="#L89">  89</a>     (entireExponentialValue r).property</span>
+<span id="L90"><a href="#L90">  90</a>     (mul_equiv A.property (entireExponentialValue (realAxis (log x))).property</span>
+<span id="L91"><a href="#L91">  91</a>       A.property (entireExponentialValue (realAxis (log x))).property (equiv_symm heA) (equiv_symm heA))</span>
+<span id="L92"><a href="#L92">  92</a>     (equiv_trans (mul_valid (entireExponentialValue (realAxis (log x))).property (entireExponentialValue (realAxis (log x))).property)</span>
+<span id="L93"><a href="#L93">  93</a>       (entireExponentialValue ⟨add (realAxis (log x)).val (realAxis (log x)).val,add_valid (realAxis (log x)).property (realAxis (log x)).property⟩).property</span>
+<span id="L94"><a href="#L94">  94</a>       (entireExponentialValue r).property (entireExponential_addition _ _)</span>
+<span id="L95"><a href="#L95">  95</a>       (entireExponentialValue_congr _ _ hadd))</span>
+<span id="L96"><a href="#L96">  96</a>   have heq := equiv_trans (mul_valid A.property A.property) (entireExponentialValue r).property</span>
+<span id="L97"><a href="#L97">  97</a>     (mul_valid X.property X.property) hAA</span>
+<span id="L98"><a href="#L98">  98</a>     (equiv_trans (entireExponentialValue r).property</span>
+<span id="L99"><a href="#L99">  99</a>       (mul_valid (entireExponentialValue l).property (conj_valid _ (entireExponentialValue l).property))</span>
+<span id="L100"><a href="#L100"> 100</a>       (mul_valid X.property X.property) (equiv_symm hmag)</span>
+<span id="L101"><a href="#L101"> 101</a>       (equiv_trans (mul_valid (entireExponentialValue l).property (conj_valid _ (entireExponentialValue l).property))</span>
+<span id="L102"><a href="#L102"> 102</a>         (mul_valid X.property (conj_valid _ X.property)) (mul_valid X.property X.property) hprod hxx))</span>
+<span id="L103"><a href="#L103"> 103</a>   let S : Scalar := scalarSum A X</span>
+<span id="L104"><a href="#L104"> 104</a>   have hS : NonzeroBoxSearch.Nonzero S := by</span>
+<span id="L105"><a href="#L105"> 105</a>     have hp := positive_sum a x.val (exp_positive (log x)) x.property</span>
+<span id="L106"><a href="#L106"> 106</a>     have hs : S.val.Equiv (realAxis ⟨RealRaw.add a.val x.val.val,RealRaw.add_valid a.property x.val.property⟩).val := by</span>
+<span id="L107"><a href="#L107"> 107</a>       intro n</span>
+<span id="L108"><a href="#L108"> 108</a>       apply (compareAt_overlap_iff _ _ n n).mpr</span>
+<span id="L109"><a href="#L109"> 109</a>       have ho := RealRaw.interval_order_of_valid (RealRaw.add a.val x.val.val)</span>
+<span id="L110"><a href="#L110"> 110</a>         (RealRaw.add_valid a.property x.val.property) n</span>
+<span id="L111"><a href="#L111"> 111</a>       simp only [S,scalarSum,A,X,realAxis,ofRealRaw,add,QBox.add,QComplex.add,RealRaw.add,RealRaw.addCompute,Rat.zero_add]</span>
+<span id="L112"><a href="#L112"> 112</a>       constructor &lt;;&gt; constructor &lt;;&gt; first | exact ho | exact Rat.le_refl</span>
+<span id="L113"><a href="#L113"> 113</a>     intro hz</span>
+<span id="L114"><a href="#L114"> 114</a>     exact positive_real_nonzero _ hp (equiv_trans</span>
+<span id="L115"><a href="#L115"> 115</a>       (realAxis ⟨RealRaw.add a.val x.val.val,RealRaw.add_valid a.property x.val.property⟩).property</span>
+<span id="L116"><a href="#L116"> 116</a>       S.property (ofQComplex_valid _)</span>
+<span id="L117"><a href="#L117"> 117</a>       (equiv_symm hs) hz)</span>
+<span id="L118"><a href="#L118"> 118</a>   let I := RepresentedReciprocal.inverse S hS</span>
+<span id="L119"><a href="#L119"> 119</a>   have hi := ComplexRawQuotient.ofRaw_eq_ofRaw</span>
+<span id="L120"><a href="#L120"> 120</a>     (hleft := mul_valid S.property I.property) (hright := ofQComplex_valid _)</span>
+<span id="L121"><a href="#L121"> 121</a>     (RepresentedReciprocal.mul_inverse S hS)</span>
+<span id="L122"><a href="#L122"> 122</a>   have hh := ComplexRawQuotient.ofRaw_eq_ofRaw</span>
+<span id="L123"><a href="#L123"> 123</a>     (hleft := mul_valid A.property A.property) (hright := mul_valid X.property X.property) heq</span>
+<span id="L124"><a href="#L124"> 124</a>   have hc : A.val.Equiv X.val := by</span>
+<span id="L125"><a href="#L125"> 125</a>     apply ComplexRawQuotient.equiv_of_ofRaw_eq (hleft := A.property) (hright := X.property)</span>
+<span id="L126"><a href="#L126"> 126</a>     let AA := scalarClass A</span>
+<span id="L127"><a href="#L127"> 127</a>     let XX := scalarClass X</span>
+<span id="L128"><a href="#L128"> 128</a>     let II := scalarClass I</span>
+<span id="L129"><a href="#L129"> 129</a>     change (AA+XX)*II=1 at hi</span>
+<span id="L130"><a href="#L130"> 130</a>     change AA*AA=XX*XX at hh</span>
+<span id="L131"><a href="#L131"> 131</a>     change AA=XX</span>
+<span id="L132"><a href="#L132"> 132</a>     grind only</span>
+<span id="L133"><a href="#L133"> 133</a>   exact realPart_equiv hc</span>
+<span id="L134"><a href="#L134"> 134</a> </span>
+<span id="L135"><a href="#L135"> 135</a> /-- A constructed local analytic extension of the real logarithm. -/</span>
+<span id="L136"><a href="#L136"> 136</a> def logChart (x : PositiveInput) : DomainFunctions.Map :=</span>
+<span id="L137"><a href="#L137"> 137</a>   NonzeroLogarithmConstruction.localFunction (realAxis x.val) (positive_real_nonzero x.val x.property)</span>
+<span id="L138"><a href="#L138"> 138</a> def logChartHolomorphic (x : PositiveInput) : DomainFunctions.Holomorphic (logChart x) :=</span>
+<span id="L139"><a href="#L139"> 139</a>   NonzeroLogarithmConstruction.localHolomorphic _ _</span>
+<span id="L140"><a href="#L140"> 140</a> </span>
+<span id="L141"><a href="#L141"> 141</a> theorem logChart_real_agreement (x y : PositiveInput)</span>
+<span id="L142"><a href="#L142"> 142</a>     (hy : (logChart x).domain (realAxis y.val)) :</span>
+<span id="L143"><a href="#L143"> 143</a>     ((logChart x).eval (realAxis y.val) hy).val.realPart.Equiv (log y).val := by</span>
+<span id="L144"><a href="#L144"> 144</a>   apply entireExponential_fiber_realPart _ (complexLog y)</span>
+<span id="L145"><a href="#L145"> 145</a>   have he := NonzeroLogarithmConstruction.local_exponential</span>
+<span id="L146"><a href="#L146"> 146</a>     (realAxis x.val) (positive_real_nonzero x.val x.property) (realAxis y.val) hy</span>
+<span id="L147"><a href="#L147"> 147</a>   exact equiv_trans (entireExponentialValue _).property</span>
+<span id="L148"><a href="#L148"> 148</a>     (MatrixExponential.scalarExponential _).property (entireExponentialValue (complexLog y)).property</span>
+<span id="L149"><a href="#L149"> 149</a>     (equiv_symm (scalarExponential_agreement _))</span>
+<span id="L150"><a href="#L150"> 150</a>     (equiv_trans (MatrixExponential.scalarExponential _).property (realAxis y.val).property</span>
+<span id="L151"><a href="#L151"> 151</a>       (entireExponentialValue (complexLog y)).property he (equiv_symm (complexLog_exponential y)))</span>
+<span id="L152"><a href="#L152"> 152</a> </span>
+<span id="L153"><a href="#L153"> 153</a> /-- The actual derivative of the locally agreeing logarithm is the reciprocal,</span>
+<span id="L154"><a href="#L154"> 154</a> with the chart and its center-domain evidence constructed internally. -/</span>
+<span id="L155"><a href="#L155"> 155</a> theorem logChart_derivative (x : PositiveInput) :</span>
+<span id="L156"><a href="#L156"> 156</a>     ((logChartHolomorphic x).derivative (realAxis x.val)</span>
+<span id="L157"><a href="#L157"> 157</a>       (RelativeLogarithm.center_mem _ (positive_real_nonzero x.val x.property))).val.Equiv</span>
+<span id="L158"><a href="#L158"> 158</a>       (RepresentedReciprocal.inverse (realAxis x.val) (positive_real_nonzero x.val x.property)).val :=</span>
+<span id="L159"><a href="#L159"> 159</a>   NonzeroLogarithmConstruction.local_derivative _ _ (logChartHolomorphic x) _ _</span>
+<span id="L160"><a href="#L160"> 160</a> </span>
+<span id="L161"><a href="#L161"> 161</a> /-- Any real computation whose exponential is the target agrees with log. -/</span>
+<span id="L162"><a href="#L162"> 162</a> theorem log_unique (x : PositiveInput) (a : RealInput)</span>
+<span id="L163"><a href="#L163"> 163</a>     (h : (exp a).val.Equiv x.val.val) : a.val.Equiv (log x).val :=</span>
+<span id="L164"><a href="#L164"> 164</a>   exp_injective a (log x) (RealRaw.equiv_trans (exp a).property x.val.property</span>
+<span id="L165"><a href="#L165"> 165</a>     (exp (log x)).property h (RealRaw.equiv_symm (exp_log x)))</span>
+<span id="L166"><a href="#L166"> 166</a> </span>
+<span id="L167"><a href="#L167"> 167</a> /-- Any supplied computation inverted by log must be the exponential.</span>
+<span id="L168"><a href="#L168"> 168</a> No conclusion about an unproved integral interpretation is inferred here. -/</span>
+<span id="L169"><a href="#L169"> 169</a> theorem exp_unique_of_log (x : RealInput) (y : PositiveInput)</span>
+<span id="L170"><a href="#L170"> 170</a>     (h : (log y).val.Equiv x.val) : y.val.val.Equiv (exp x).val :=</span>
+<span id="L171"><a href="#L171"> 171</a>   RealRaw.equiv_trans y.val.property (exp (log y)).property (exp x).property</span>
+<span id="L172"><a href="#L172"> 172</a>     (RealRaw.equiv_symm (exp_log y)) (exp_congr (log y) x h)</span>
+<span id="L173"><a href="#L173"> 173</a> end ComputableAnalysis.ExponentialComputations</span>
+</pre></body></html>
