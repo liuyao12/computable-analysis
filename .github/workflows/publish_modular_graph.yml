@@ -1,0 +1,64 @@
+name: Publish modular dependency graph
+on:
+  workflow_dispatch:
+    inputs:
+      base_run:
+        description: Successful publication run containing the existing live Pages artifact
+        required: true
+        default: '36875203798'
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-verified-proof-publication
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: previous
+          run-id: ${{ inputs.base_run }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Overlay the checked graph while preserving previous pages
+        env:
+          BASE_RUN: ${{ inputs.base_run }}
+        run: |
+          mkdir site
+          tar -xf previous/artifact.tar -C site
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,hashlib,shutil,os
+          site=Path('site');source=Path('book/modular-dependencies')
+          data=json.loads((source/'modular-dependencies.json').read_text())
+          assert len(data['nodes'])==11
+          for item in data['sources'].values():
+              assert hashlib.sha256(item['text'].encode()).hexdigest()==item['sha256']
+          before={str(p.relative_to(site)):hashlib.sha256(p.read_bytes()).hexdigest() for p in site.rglob('*') if p.is_file()}
+          shutil.copy(source/'index.html',site/'modular-proofs.html')
+          shutil.copy(source/'modular-dependencies.json',site/'modular-dependencies.json')
+          shutil.copy(source/'constants-audit.txt',site/'modular-constants-audit.txt')
+          index=site/'index.html';text=index.read_text()
+          link='<p id="modular-proof-map-link"><a href="modular-proofs.html">Modular arithmetic: expandable dependency map</a></p>'
+          if 'id="modular-proof-map-link"' not in text:
+              text=text.replace('</body>',link+'</body>')
+          index.write_text(text)
+          for name,digest in before.items():
+              if name!='index.html':
+                  assert hashlib.sha256((site/name).read_bytes()).hexdigest()==digest,name
+          (site/'modular-publication.json').write_text(json.dumps({'baseRun': int(os.environ['BASE_RUN']),'preservedFiles':len(before)-1,'graphBundles':len(data['nodes']),'sourceModules':len(data['imports']),'sourceSnapshots':len(data['sources']),'graphSha256':hashlib.sha256((site/'modular-proofs.html').read_bytes()).hexdigest()}))
+          PY
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
