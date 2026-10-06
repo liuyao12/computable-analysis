@@ -16,7 +16,7 @@
 <div class="displaymath">\[
  E_N(z)=\sum_{k=0}^{N}\frac{z^k}{k!}.
 \]</div>
-<p>If \(R\) bounds the input magnitude and \(N+2\geq 2R\), successive omitted absolute terms have ratio at most \(1/2\). The remaining finite prefixes therefore lie within a geometric majorant of size</p>
+<p>Choose \(R\) bounding \(|\Re z|+|\Im z|\) (or \(|x|\) for a real input). If \(N+2\geq 2R\), successive omitted absolute terms have ratio at most \(1/2\). The remaining finite prefixes therefore lie within a geometric majorant of size</p>
 <div class="displaymath">\[
  2\frac{R^{N+1}}{(N+1)!}.
 \]</div>
@@ -40,13 +40,18 @@
  C_n(z)=\left(1+\frac{z}{n+1}\right)^{n+1}.
 \]</div>
 <p>These are literal finite powers. Their implementation does not substitute a power-series value. Negative and complex inputs are allowed; a positive base is only needed for the usual financial interpretation.</p>
-<p>The checked comparison uses the local logarithm power series. On its small chart, its constant coefficient is zero, its linear coefficient is one, and its tail gives</p>
+<p>The checked comparison uses the local logarithm power series. Its complex error bounds control both coordinates: write</p>
 <div class="displaymath">\[
- \left|\log(1+w)-w\right|\leq 16H^2\qquad (|w|\leq H).
+ \|z\|_{\square}=\max(|\Re z|,|\Im z|).
+\]</div>
+<p>On its small chart, its constant coefficient is zero, its linear coefficient is one, and its tail gives</p>
+<div class="displaymath">\[
+ \left\|\log(1+w)-w\right\|_{\square}\leq 16H^2\qquad
+ (\|w\|_{\square}\leq H).
 \]</div>
 <p>For sufficiently large \(n\), take \(w=z/(n+1)\). Multiplying the error by \(n+1\) shows that \((n+1)\log(1+w)\) differs from \(z\) by a computable bound of order \(1/(n+1)\). The local inverse identity, the exponential addition law, and a bounded-chart continuity estimate then give</p>
 <div class="displaymath">\[
- \left|C_n(z)-E(z)\right|\leq \frac{K_z}{n+1}.
+ \left\|C_n(z)-E(z)\right\|_{\square}\leq \frac{K_z}{n+1}.
 \]</div>
 <p>Here \(K_z\) and an initial index are computed from a rational bound on the input box. No caller chooses an internal schedule.</p>
 <details class="exp-proof"><summary>Lean proof · 2 declarations</summary><ul><li><a href="exponential-chapter/source-view/ComputableAnalysis.ExponentialComputations.LogarithmRemainder.html#L10"><code>ComputableAnalysis.ExponentialComputations.localLogarithm_linear_error</code></a></li><li><a href="exponential-chapter/source-view/ComputableAnalysis.ExponentialComputations.CompoundLimit.html#L35"><code>ComputableAnalysis.ExponentialComputations.compoundApproximation_error</code></a></li></ul></details>

@@ -35,7 +35,7 @@
   "independentIntegralOnlyExponentialBackend": false,
   "legacyConstantCompatibilityHasNativeArithmeticDependencies": true,
   "namedLegacyLogTwoSeriesAgreement": false,
-  "manuscriptSha256": "5e040358d79f31f5d06d578f9bdf7fa6907e45454d5907d8c95a4d7eb14bf413",
+  "manuscriptSha256": "b14c4bebfee71ff2846ec4578449e2a9ac657faa16ba6d7fcd6c09025f3a8fb0",
   "sourceHashes": {
     "ComputableAnalysis.AbelianIntegrals": "8cff18856df2f3c428ec03c8818e9fd85c4c55b46dd93736c0f66697e2112a3b",
     "ComputableAnalysis.AlgebraicFunctions": "35e9e42656ebafabe4fe584c9c55c77626d7ae5eae5949eea28844994e4110dc",
@@ -440,5 +440,5 @@
     "ComputableAnalysis.Series": "6827251114b551efc83b88e4d377d1f67e023106f9eaa99bfab89bd83f84cf23"
   },
   "coreAuditSha256": "bac301736a027059b8d78f94f60c76bd5b4dee4743e89915ede97984a1f729af",
-  "chapterHtmlSha256": "cbf8167e271e622b1293cb5026861353a5f4473686fc6d121db94a8ae92754e0"
+  "chapterHtmlSha256": "fe7c00b05b86b726d116d779942c58a4962b324c4a66ae1ecdc2a23745ce9e66"
 }

@@ -18,7 +18,8 @@ For a finite prefix, put
 \[
  E_N(z)=\sum_{k=0}^{N}\frac{z^k}{k!}.
 \]
-If $R$ bounds the input magnitude and $N+2\geq 2R$, successive omitted
+Choose $R$ bounding $|\Re z|+|\Im z|$ (or $|x|$ for a real input).
+If $N+2\geq 2R$, successive omitted
 absolute terms have ratio at most $1/2$. The remaining finite prefixes
 therefore lie within a geometric majorant of size
 \[
@@ -73,18 +74,23 @@ These are literal finite powers. Their implementation does not substitute a
 power-series value. Negative and complex inputs are allowed; a positive base
 is only needed for the usual financial interpretation.
 
-The checked comparison uses the local logarithm power series. On its small
-chart, its constant coefficient is zero, its linear coefficient is one, and
+The checked comparison uses the local logarithm power series. Its complex
+error bounds control both coordinates: write
+\[
+ \|z\|_{\square}=\max(|\Re z|,|\Im z|).
+\]
+On its small chart, its constant coefficient is zero, its linear coefficient is one, and
 its tail gives
 \[
- \left|\log(1+w)-w\right|\leq 16H^2\qquad (|w|\leq H).
+ \left\|\log(1+w)-w\right\|_{\square}\leq 16H^2\qquad
+ (\|w\|_{\square}\leq H).
 \]
 For sufficiently large $n$, take $w=z/(n+1)$. Multiplying the error by
 $n+1$ shows that $(n+1)\log(1+w)$ differs from $z$ by a computable bound of
 order $1/(n+1)$. The local inverse identity, the exponential addition law,
 and a bounded-chart continuity estimate then give
 \[
- \left|C_n(z)-E(z)\right|\leq \frac{K_z}{n+1}.
+ \left\|C_n(z)-E(z)\right\|_{\square}\leq \frac{K_z}{n+1}.
 \]
 Here $K_z$ and an initial index are computed from a rational bound on the
 input box. No caller chooses an internal schedule.
