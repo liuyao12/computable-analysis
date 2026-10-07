@@ -59,3 +59,65 @@ ComputableAnalysis.ExponentialComputations.real_computation_agrees_of_integral_i
 'ComputableAnalysis.ExponentialComputations.real_computation_agrees_of_integral_inverse' depends on axioms: [propext,
  Classical.choice,
  Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.exp_congr' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.exp_derivative' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.exp_add' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.exp_nonzero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.exp_real' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.LogSeed.exponential_eval' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.LogSeed.initial' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.LogSeed.derivative' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.LogSeed.congr' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.LogSeed.recenter_agrees' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.LogSeed.overlap_difference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.LogSeed.overlap_agrees' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.realLogarithmAt_agrees' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.exp_period' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.exp_translate_period' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.exp_kernel' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.exp_fiber' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.LogSeed.overlap_period' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.LogSeed.log_exp' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.expHolomorphic' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.LogSeed.holomorphic' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ExponentialComputations.Complex.LogSeed.continueAlong' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

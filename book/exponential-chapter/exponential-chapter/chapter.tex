@@ -294,3 +294,114 @@ constructed here already agrees with $\log 2$ by the global theorem.
 \lean{ComputableAnalysis.ExponentialComputations.exp_one_equiv_ePowerSeries}
 \lean{ComputableAnalysis.ExponentialComputations.exp_one_equiv_eCompoundInterest}
 \leanok
+
+\section{Complex exponential and logarithm branches}\label{sec:complex-exp-log}
+
+The exponential API starts on the complex plane; its real version is a
+restriction. Every input is a valid represented complex number, computed
+by shrinking rational rectangles. The same power series, compound-interest
+limit, and scalar ODE computations therefore work before choosing a real axis.
+
+\begin{theorem}[Entire complex exponential]
+\lean{ComputableAnalysis.ExponentialComputations.Complex.exp}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.expHolomorphic}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.exp_derivative}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.exp_add}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.exp_nonzero}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.exp_real}
+\leanok
+The represented complex exponential is holomorphic everywhere, has derivative
+$E'(z)=E(z)$, never vanishes, and satisfies $E(z+w)\simeq E(z)E(w)$.
+On the real axis it agrees as a full complex value with the embedding of
+the real exponential.
+\end{theorem}
+
+For logarithm, a normalization fixes a branch. Choose a nonzero center $c$
+and a represented value $a$ with $E(a)\simeq c$. Near that center compute
+\[
+ L_{c,a}(z)=a+\sum_{n=1}^{\infty}\frac{(-1)^{n+1}}{n}
+                    \left(\frac{z}{c}-1\right)^n.
+\]
+The actual open chart consists of inputs for which
+$\|z/c-1\|_{\square}<1/32$, with a constructive strict-bound witness.
+The small radius is a quantitative choice for the current estimates.
+The seed supplies only a center normalization; holomorphicity, the derivative,
+and the inverse identity are proved from this computation.
+
+\begin{theorem}[Normalized complex logarithm]
+\lean{ComputableAnalysis.ExponentialComputations.Complex.LogSeed}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.LogSeed.function}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.LogSeed.holomorphic}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.LogSeed.initial}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.LogSeed.derivative}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.LogSeed.exponential_eval}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.LogSeed.congr}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.LogSeed.log_exp}
+\leanok
+On the actual chart, $L_{c,a}(c)\simeq a$,
+$L'_{c,a}(z)\simeq 1/z$, and $E(L_{c,a}(z))\simeq z$.
+Transporting equivalent centers, seeds, and inputs preserves its values.
+Conversely, $L_{c,a}(E(w))\simeq w$ when $E(w)$ is in this chart and
+$\|w-a\|_{\square}\leq 1$; proximity to the chosen seed fixes the branch.
+\end{theorem}
+
+To continue a branch, move to a point of its chart and use the computed value
+there as the next seed. The finite chain records genuine chart membership;
+convexity certifies every point of each affine edge. An explicit open radius
+at each transition gives agreement of the old and new germs. Admissible
+subdivision preserves the terminal value. The API carries the normalization
+through the chain instead of choosing a fresh branch at every step.
+
+\lean{ComputableAnalysis.ExponentialComputations.Complex.LogSeed.recenter}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.LogSeed.recenter_agrees}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.LogSeed.continueAlong}
+\lean{ComputableAnalysis.RiemannHilbert.LogarithmContinuation.edge_segment}
+\lean{ComputableAnalysis.RiemannHilbert.LogarithmContinuation.edge_germ}
+\lean{ComputableAnalysis.RiemannHilbert.LogarithmContinuation.subdivision}
+\leanok
+
+\begin{theorem}[Extension of the positive real logarithm]
+\lean{ComputableAnalysis.ExponentialComputations.Complex.realLogarithmAt}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.realLogarithmAt_initial}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.realLogarithmAt_agrees}
+\leanok
+At every positive represented real center $x$, choose the real seed
+$a=\log(x)$. Throughout the positive real part of that chart the complex
+branch agrees with the full embedding of $\log(y)$. Thus the real reciprocal
+integral and its inverse laws from the previous sections retain their meaning
+inside the complex branch API.
+\end{theorem}
+
+There is no single holomorphic logarithm on the entire punctured plane.
+The executable route selection constructs one logarithm and a local germ at
+any nonzero input, but independently selected values are not asserted to form
+a globally continuous function. A principal branch would need its own cut
+domain and agreement proof. Likewise, a complex path-integral implementation
+of logarithm must supply actual complex integral evidence; the derivative
+identity alone is not that evidence.
+
+\lean{ComputableAnalysis.ExponentialComputations.Complex.logarithmAt}
+\leanok
+
+\begin{theorem}[Branch agreement and periods]
+\lean{ComputableAnalysis.ExponentialComputations.Complex.LogSeed.overlap_difference}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.LogSeed.overlap_agrees}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.period}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.exp_period}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.exp_translate_period}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.exp_kernel}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.exp_fiber}
+\lean{ComputableAnalysis.ExponentialComputations.Complex.LogSeed.overlap_period}
+\leanok
+Equal exponential values differ by $2\pi i k$ for some integer $k$, and every
+such translation preserves the exponential. On a nonempty intersection of
+two of these convex logarithm charts, one fixed integer $k$ describes the
+difference everywhere. Agreement at one point forces agreement throughout
+the overlap, by a proved finite telescoping argument.
+\end{theorem}
+
+Here $2\pi i$ is four times the imaginary geometric half-pi in the computable
+foundation. The period classification reuses the existing checked nome-kernel
+classification after rescaling by this nonzero period. Its current import
+closure contains auxiliary modular-function theory; factoring that dependency
+into a smaller general exponential-period module is a later organizational task.

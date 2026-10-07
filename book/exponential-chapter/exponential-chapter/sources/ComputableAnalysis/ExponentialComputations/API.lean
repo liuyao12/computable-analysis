@@ -2,6 +2,7 @@ import ComputableAnalysis.ExponentialComputations.CompoundLimit
 import ComputableAnalysis.ExponentialComputations.RealExponential
 import ComputableAnalysis.ModularForms.ExponentialLiftAgreement
 import ComputableAnalysis.ExponentialComputations.IntegralLogarithm
+import ComputableAnalysis.ExponentialComputations.ComplexPeriods
 
 /-! One function-level API for proved exponential computations.
 An implementation may be registered only after its exact agreement theorem

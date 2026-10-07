@@ -5,7 +5,7 @@ on:
       base_run:
         description: Successful publication run containing the existing live Pages artifact
         required: true
-        default: '37513379214'
+        default: '37527094356'
 permissions:
   contents: read
   actions: read
@@ -42,7 +42,7 @@ jobs:
           manifest=json.loads((source/'exponential-chapter/manifest.json').read_text())
           assert manifest['mathlibDependency'] is False
           assert manifest['independentReciprocalQuadrature'] is True
-          assert len(manifest['checkedEndpoints'])==14
+          assert len(manifest['checkedEndpoints'])==36
           for module,digest in manifest['sourceHashes'].items():
               assert sha(source/'exponential-chapter/sources'/(module.replace('.','/')+'.lean'))==digest,module
           assert sha(source/'ch-exponential-logarithm.html')==manifest['chapterHtmlSha256']

@@ -20,6 +20,30 @@ ENDPOINTS = [
     'exp_log', 'logChart_derivative', 'integralLog_hasIntegral',
     'integralLog_equiv_log', 'integralLog_exp', 'exp_integralLog',
     'integralLog_congr', 'real_computation_agrees_of_integral_inverse',
+    'Complex.exp_congr',
+    'Complex.exp_derivative',
+    'Complex.exp_add',
+    'Complex.exp_nonzero',
+    'Complex.exp_real',
+    'Complex.LogSeed.exponential_eval',
+    'Complex.LogSeed.initial',
+    'Complex.LogSeed.derivative',
+    'Complex.LogSeed.congr',
+    'Complex.LogSeed.recenter_agrees',
+    'Complex.LogSeed.overlap_difference',
+    'Complex.LogSeed.overlap_agrees',
+    'Complex.realLogarithmAt_agrees',
+    'Complex.exp_period',
+    'Complex.exp_translate_period',
+    'Complex.exp_kernel',
+    'Complex.exp_fiber',
+    'Complex.LogSeed.overlap_period',
+    'Complex.LogSeed.log_exp',
+    'Complex.expHolomorphic',
+    'Complex.LogSeed.holomorphic',
+    'Complex.LogSeed.continueAlong',
+
+
 ]
 STANDARD_AXIOMS = {'propext', 'Classical.choice', 'Quot.sound'}
 
@@ -88,7 +112,7 @@ def source_link(name, sources):
             elif re.match(r'end(?:\s+\S+)?\s*$', line):
                 if scopes:
                     namespace = scopes.pop()
-            decl = re.match(r'(?:theorem|def|abbrev|structure)\s+(\w+)', line)
+            decl = re.match(r'(?:theorem|def|abbrev|structure)\s+([\w.]+)', line)
             if decl and namespace+'.'+decl[1] == name:
                 hits.append((module,line_number))
     assert len(hits) == 1, (name,hits)
@@ -130,7 +154,7 @@ def render_tex(tex, sources):
                 result.append('<p>' + inline(re.sub(r'\s+', ' ', paragraph)) + '</p>')
     rendered = '\n'.join(result)
     assert not re.search(r'\\(?:lean|leanok|section|label|begin|end)\b', rendered)
-    assert section == 7
+    assert section == 8
     return rendered, ''.join(navigation)
 
 
@@ -153,7 +177,7 @@ def install(site, output, audit, declarations, runtime, build, constants_audit):
     main_start = template.index('<div class="main-text">') + len('<div class="main-text">')
     main_end = template.index('</div></article>', main_start)
     opening = '''<h1 id="ch:exponential-logarithm">Exponential and Logarithm</h1>
-<p class="exp-status">Checked global identities on represented inputs · 6 October 2026</p>'''
+<p class="exp-status">Checked global identities on represented inputs · 7 October 2026</p>'''
     template = template[:main_start] + opening + body + template[main_end:]
     template = re.sub(r'(<aside class="on-this-page">).*?(</aside>)',
                       r'\1<span>On this page</span>' + navigation + r'\2', template, flags=re.S)
@@ -180,8 +204,6 @@ def install(site, output, audit, declarations, runtime, build, constants_audit):
         link = source_link(name,sources)
         module = link.split('/source-view/')[1].split('.html')[0]
         view = bundle/'source-view'/(module+'.html')
-        if view.exists():
-            continue
         view.parent.mkdir(parents=True,exist_ok=True)
         rows = ''.join(f'<span id="L{i}"><a href="#L{i}">{i:4}</a> {html.escape(line)}</span>\n'
                        for i,line in enumerate(sources[module].decode().splitlines(),1))
@@ -205,7 +227,7 @@ def install(site, output, audit, declarations, runtime, build, constants_audit):
 <title>Exponential chapter · proof audit</title><link rel="stylesheet" href="../reading/book.css"></head><body>
 <main style="max-width:900px;margin:40px auto;padding:0 24px"><a href="../ch-exponential-logarithm.html">← Exponential and logarithm</a>
 <h1>Proof sources and audit</h1><p>The chapter core has checked global agreement, representation invariance,
-reciprocal integral evidence, and both inverse laws. Its 14 audited endpoints use only
+reciprocal integral evidence, and both inverse laws. Its 36 audited endpoints use only
 <code>propext</code>, <code>Classical.choice</code>, and <code>Quot.sound</code>.
 The source import closure uses Lean's native foundation and no Mathlib.</p>
 <p>The separate legacy constant compatibility module inherits older native arithmetic proof dependencies.
@@ -234,7 +256,7 @@ the focused chapter build completed successfully.</p></main></body></html>'''
                   focusedLakeBuildPassed=True, fullRepositoryBuildPassed=False,
                   fullRepositoryBuildFailure='FiniteQuarticQuadraticSplit: unknown qcomplexQuadraticPolynomial',
                   snapshotModules=len(sources), externalImports=external,
-                  mathlibDependency=False, representedInputDomain='all valid real/complex; logarithm strictly positive real',
+                  mathlibDependency=False, representedInputDomain='all valid real/complex; real logarithm positive; complex logarithm normalized open charts',
                   independentReciprocalQuadrature=True, independentIntegralOnlyExponentialBackend=False,
                   legacyConstantCompatibilityHasNativeArithmeticDependencies=True,
                   namedLegacyLogTwoSeriesAgreement=False,

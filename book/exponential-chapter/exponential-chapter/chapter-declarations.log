@@ -212,3 +212,152 @@ ComputableAnalysis.ExponentialComputations.exp_one_equiv_ePowerSeries :
 ComputableAnalysis.ExponentialComputations.exp_one_equiv_eCompoundInterest :
   (ComputableAnalysis.ExponentialComputations.exp ComputableAnalysis.ExponentialComputations.oneInput.val).val.Equiv
     ComputableAnalysis.eCompoundInterest
+ComputableAnalysis.ExponentialComputations.Complex.exp :
+  ComputableAnalysis.RiemannHilbert.Scalar → ComputableAnalysis.RiemannHilbert.Scalar
+ComputableAnalysis.ExponentialComputations.Complex.expHolomorphic :
+  ComputableAnalysis.RiemannHilbert.DomainFunctions.Holomorphic
+    ComputableAnalysis.ExponentialComputations.Complex.expFunction
+ComputableAnalysis.ExponentialComputations.Complex.exp_derivative (z : ComputableAnalysis.RiemannHilbert.Scalar) :
+  (ComputableAnalysis.ExponentialComputations.Complex.expHolomorphic.derivative z trivial).val.Equiv
+    (ComputableAnalysis.ExponentialComputations.Complex.exp z).val
+ComputableAnalysis.ExponentialComputations.Complex.exp_add (z w : ComputableAnalysis.RiemannHilbert.Scalar) :
+  ((ComputableAnalysis.ExponentialComputations.Complex.exp z).val.mul
+        (ComputableAnalysis.ExponentialComputations.Complex.exp w).val).Equiv
+    (ComputableAnalysis.ExponentialComputations.Complex.exp
+        (ComputableAnalysis.RiemannHilbert.DomainFunctions.scalarSum z w)).val
+ComputableAnalysis.ExponentialComputations.Complex.exp_nonzero (z : ComputableAnalysis.RiemannHilbert.Scalar) :
+  ComputableAnalysis.RiemannHilbert.NonzeroBoxSearch.Nonzero (ComputableAnalysis.ExponentialComputations.Complex.exp z)
+ComputableAnalysis.ExponentialComputations.Complex.exp_real (x : ComputableAnalysis.ExponentialComputations.RealInput) :
+  (ComputableAnalysis.ExponentialComputations.Complex.exp
+          (ComputableAnalysis.ExponentialComputations.realAxis x)).val.Equiv
+    (ComputableAnalysis.ExponentialComputations.realAxis (ComputableAnalysis.ExponentialComputations.exp x)).val
+ComputableAnalysis.ExponentialComputations.Complex.LogSeed : Type
+ComputableAnalysis.ExponentialComputations.Complex.LogSeed.function
+  (s : ComputableAnalysis.ExponentialComputations.Complex.LogSeed) :
+  ComputableAnalysis.RiemannHilbert.DomainFunctions.Map
+ComputableAnalysis.ExponentialComputations.Complex.LogSeed.holomorphic
+  (s : ComputableAnalysis.ExponentialComputations.Complex.LogSeed) :
+  ComputableAnalysis.RiemannHilbert.DomainFunctions.Holomorphic s.function
+ComputableAnalysis.ExponentialComputations.Complex.LogSeed.initial
+  (s : ComputableAnalysis.ExponentialComputations.Complex.LogSeed) : (s.function.eval s.center ⋯).val.Equiv s.value.val
+ComputableAnalysis.ExponentialComputations.Complex.LogSeed.derivative
+  (s : ComputableAnalysis.ExponentialComputations.Complex.LogSeed) (z : ComputableAnalysis.RiemannHilbert.Scalar)
+  (hz : s.function.domain z) :
+  (s.holomorphic.derivative z hz).val.Equiv (ComputableAnalysis.RiemannHilbert.RepresentedReciprocal.inverse z ⋯).val
+ComputableAnalysis.ExponentialComputations.Complex.LogSeed.exponential_eval
+  (s : ComputableAnalysis.ExponentialComputations.Complex.LogSeed) (z : ComputableAnalysis.RiemannHilbert.Scalar)
+  (hz : s.function.domain z) :
+  (ComputableAnalysis.ExponentialComputations.Complex.exp (s.function.eval z hz)).val.Equiv z.val
+ComputableAnalysis.ExponentialComputations.Complex.LogSeed.congr
+  (s t : ComputableAnalysis.ExponentialComputations.Complex.LogSeed) (hc : s.center.val.Equiv t.center.val)
+  (ha : s.value.val.Equiv t.value.val) (z w : ComputableAnalysis.RiemannHilbert.Scalar) (hz : s.function.domain z)
+  (hw : t.function.domain w) (h : z.val.Equiv w.val) : (s.function.eval z hz).val.Equiv (t.function.eval w hw).val
+ComputableAnalysis.ExponentialComputations.Complex.LogSeed.log_exp
+  (s : ComputableAnalysis.ExponentialComputations.Complex.LogSeed) (w : ComputableAnalysis.RiemannHilbert.Scalar)
+  (hw : s.function.domain (ComputableAnalysis.ExponentialComputations.Complex.exp w))
+  (hnear : ComputableAnalysis.FunctionTheory.Small (w.val.sub s.value.val) 1) :
+  (s.function.eval (ComputableAnalysis.ExponentialComputations.Complex.exp w) hw).val.Equiv w.val
+ComputableAnalysis.ExponentialComputations.Complex.LogSeed.recenter
+  (s : ComputableAnalysis.ExponentialComputations.Complex.LogSeed) (d : ComputableAnalysis.RiemannHilbert.Scalar)
+  (hd : ComputableAnalysis.RiemannHilbert.NonzeroBoxSearch.Nonzero d) (h : s.function.domain d) :
+  ComputableAnalysis.ExponentialComputations.Complex.LogSeed
+ComputableAnalysis.ExponentialComputations.Complex.LogSeed.recenter_agrees
+  (s : ComputableAnalysis.ExponentialComputations.Complex.LogSeed) (d : ComputableAnalysis.RiemannHilbert.Scalar)
+  (hd : ComputableAnalysis.RiemannHilbert.NonzeroBoxSearch.Nonzero d) (h : s.function.domain d)
+  (z : ComputableAnalysis.RiemannHilbert.Scalar)
+  (hz : ComputableAnalysis.RiemannHilbert.RelativeLogarithm.commonDomain s.center d ⋯ hd z) :
+  (s.function.eval z ⋯).val.Equiv ((s.recenter d hd h).function.eval z ⋯).val
+ComputableAnalysis.ExponentialComputations.Complex.LogSeed.continueAlong
+  (s : ComputableAnalysis.ExponentialComputations.Complex.LogSeed) {d : ComputableAnalysis.RiemannHilbert.Scalar}
+  {hd : ComputableAnalysis.RiemannHilbert.NonzeroBoxSearch.Nonzero d}
+  (p : ComputableAnalysis.RiemannHilbert.LogarithmContinuation.Chain s.center ⋯ d hd) :
+  ComputableAnalysis.ExponentialComputations.Complex.LogSeed
+ComputableAnalysis.RiemannHilbert.LogarithmContinuation.edge_segment (c d : ComputableAnalysis.RiemannHilbert.Scalar)
+  (hc : ComputableAnalysis.RiemannHilbert.NonzeroBoxSearch.Nonzero c)
+  (hcd : ComputableAnalysis.RiemannHilbert.RelativeLogarithm.domain c hc d) (t : Rat)
+  (ht : ComputableAnalysis.RiemannHilbert.UniformPath.unitInterval t) :
+  ComputableAnalysis.RiemannHilbert.RelativeLogarithm.domain c hc
+    (ComputableAnalysis.RiemannHilbert.AffineSegment.point c d t)
+ComputableAnalysis.RiemannHilbert.LogarithmContinuation.edge_germ (c d : ComputableAnalysis.RiemannHilbert.Scalar)
+  (hc : ComputableAnalysis.RiemannHilbert.NonzeroBoxSearch.Nonzero c)
+  (hd : ComputableAnalysis.RiemannHilbert.NonzeroBoxSearch.Nonzero d)
+  (hcd : ComputableAnalysis.RiemannHilbert.RelativeLogarithm.domain c hc d)
+  (a z : ComputableAnalysis.RiemannHilbert.Scalar)
+  (hz :
+    ComputableAnalysis.FunctionTheory.Small (z.val.sub d.val)
+      (ComputableAnalysis.RiemannHilbert.LogarithmBranchCharts.overlapRadius c d hc hd hcd).val) :
+  ((ComputableAnalysis.RiemannHilbert.LogarithmBranchCharts.function c hc a).eval z ⋯).val.Equiv
+    ((ComputableAnalysis.RiemannHilbert.LogarithmBranchCharts.function d hd
+            ((ComputableAnalysis.RiemannHilbert.LogarithmBranchCharts.function c hc a).eval d hcd)).eval
+        z ⋯).val
+ComputableAnalysis.RiemannHilbert.LogarithmContinuation.subdivision {c d e f : ComputableAnalysis.RiemannHilbert.Scalar}
+  {hc : ComputableAnalysis.RiemannHilbert.NonzeroBoxSearch.Nonzero c}
+  {hd : ComputableAnalysis.RiemannHilbert.NonzeroBoxSearch.Nonzero d}
+  {he : ComputableAnalysis.RiemannHilbert.NonzeroBoxSearch.Nonzero e}
+  {hf : ComputableAnalysis.RiemannHilbert.NonzeroBoxSearch.Nonzero f}
+  (hce : ComputableAnalysis.RiemannHilbert.RelativeLogarithm.domain c hc e)
+  (hcd : ComputableAnalysis.RiemannHilbert.RelativeLogarithm.domain c hc d)
+  (hde : ComputableAnalysis.RiemannHilbert.RelativeLogarithm.domain d hd e)
+  (tail : ComputableAnalysis.RiemannHilbert.LogarithmContinuation.Chain e he f hf)
+  (a : ComputableAnalysis.RiemannHilbert.Scalar) :
+  (ComputableAnalysis.RiemannHilbert.LogarithmContinuation.value
+          (ComputableAnalysis.RiemannHilbert.LogarithmContinuation.Chain.step hce tail) a).val.Equiv
+    (ComputableAnalysis.RiemannHilbert.LogarithmContinuation.value
+        (ComputableAnalysis.RiemannHilbert.LogarithmContinuation.Chain.step hcd
+          (ComputableAnalysis.RiemannHilbert.LogarithmContinuation.Chain.step hde tail))
+        a).val
+ComputableAnalysis.ExponentialComputations.Complex.realLogarithmAt
+  (x : ComputableAnalysis.ExponentialComputations.PositiveInput) :
+  ComputableAnalysis.ExponentialComputations.Complex.LogSeed
+ComputableAnalysis.ExponentialComputations.Complex.realLogarithmAt_initial
+  (x : ComputableAnalysis.ExponentialComputations.PositiveInput) :
+  ((ComputableAnalysis.ExponentialComputations.Complex.realLogarithmAt x).function.eval
+          (ComputableAnalysis.ExponentialComputations.realAxis x.val) ⋯).val.Equiv
+    (ComputableAnalysis.ExponentialComputations.realAxis (ComputableAnalysis.ExponentialComputations.log x)).val
+ComputableAnalysis.ExponentialComputations.Complex.realLogarithmAt_agrees
+  (x y : ComputableAnalysis.ExponentialComputations.PositiveInput)
+  (hy :
+    (ComputableAnalysis.ExponentialComputations.Complex.realLogarithmAt x).function.domain
+      (ComputableAnalysis.ExponentialComputations.realAxis y.val)) :
+  ((ComputableAnalysis.ExponentialComputations.Complex.realLogarithmAt x).function.eval
+          (ComputableAnalysis.ExponentialComputations.realAxis y.val) hy).val.Equiv
+    (ComputableAnalysis.ExponentialComputations.realAxis (ComputableAnalysis.ExponentialComputations.log y)).val
+ComputableAnalysis.ExponentialComputations.Complex.logarithmAt (z : ComputableAnalysis.RiemannHilbert.Scalar)
+  (hz : ComputableAnalysis.RiemannHilbert.NonzeroBoxSearch.Nonzero z) :
+  ComputableAnalysis.ExponentialComputations.Complex.LogSeed
+ComputableAnalysis.ExponentialComputations.Complex.LogSeed.overlap_difference
+  (s t : ComputableAnalysis.ExponentialComputations.Complex.LogSeed) (p z : ComputableAnalysis.RiemannHilbert.Scalar)
+  (hp : s.function.domain p ∧ t.function.domain p) (hz : s.function.domain z ∧ t.function.domain z) :
+  ((s.function.eval z ⋯).val.sub (t.function.eval z ⋯).val).Equiv
+    ((s.function.eval p ⋯).val.sub (t.function.eval p ⋯).val)
+ComputableAnalysis.ExponentialComputations.Complex.LogSeed.overlap_agrees
+  (s t : ComputableAnalysis.ExponentialComputations.Complex.LogSeed) (p z : ComputableAnalysis.RiemannHilbert.Scalar)
+  (hp : s.function.domain p ∧ t.function.domain p) (hz : s.function.domain z ∧ t.function.domain z)
+  (h : (s.function.eval p ⋯).val.Equiv (t.function.eval p ⋯).val) :
+  (s.function.eval z ⋯).val.Equiv (t.function.eval z ⋯).val
+ComputableAnalysis.ExponentialComputations.Complex.period (k : Int) : ComputableAnalysis.RiemannHilbert.Scalar
+ComputableAnalysis.ExponentialComputations.Complex.exp_period (k : Int) :
+  (ComputableAnalysis.ExponentialComputations.Complex.exp
+          (ComputableAnalysis.ExponentialComputations.Complex.period k)).val.Equiv
+    ComputableAnalysis.ComplexRaw.one
+ComputableAnalysis.ExponentialComputations.Complex.exp_translate_period (z : ComputableAnalysis.RiemannHilbert.Scalar)
+  (k : Int) :
+  (ComputableAnalysis.ExponentialComputations.Complex.exp
+          (ComputableAnalysis.RiemannHilbert.DomainFunctions.scalarSum z
+            (ComputableAnalysis.ExponentialComputations.Complex.period k))).val.Equiv
+    (ComputableAnalysis.ExponentialComputations.Complex.exp z).val
+ComputableAnalysis.ExponentialComputations.Complex.exp_kernel (z : ComputableAnalysis.RiemannHilbert.Scalar)
+  (he : (ComputableAnalysis.ExponentialComputations.Complex.exp z).val.Equiv ComputableAnalysis.ComplexRaw.one) :
+  ∃ k, z.val.Equiv (ComputableAnalysis.ExponentialComputations.Complex.period k).val
+ComputableAnalysis.ExponentialComputations.Complex.exp_fiber (z w : ComputableAnalysis.RiemannHilbert.Scalar)
+  (h :
+    (ComputableAnalysis.ExponentialComputations.Complex.exp z).val.Equiv
+      (ComputableAnalysis.ExponentialComputations.Complex.exp w).val) :
+  ∃ k, (z.val.sub w.val).Equiv (ComputableAnalysis.ExponentialComputations.Complex.period k).val
+ComputableAnalysis.ExponentialComputations.Complex.LogSeed.overlap_period
+  (s t : ComputableAnalysis.ExponentialComputations.Complex.LogSeed) (p : ComputableAnalysis.RiemannHilbert.Scalar)
+  (hp : s.function.domain p ∧ t.function.domain p) :
+  ∃ k,
+    ∀ (z : ComputableAnalysis.RiemannHilbert.Scalar) (hz : s.function.domain z ∧ t.function.domain z),
+      ((s.function.eval z ⋯).val.sub (t.function.eval z ⋯).val).Equiv
+        (ComputableAnalysis.ExponentialComputations.Complex.period k).val

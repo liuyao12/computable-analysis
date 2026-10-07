@@ -43,3 +43,26 @@ example : ((compoundApproximation
 example (x : RealInput) :
     (compoundInterest.realEval x).val.Equiv (powerSeries.realEval x).val :=
   ComplexRaw.realPart_equiv (Implementation.equivalent compoundInterest powerSeries (realAxis x))
+
+#print axioms Complex.exp_congr
+#print axioms Complex.exp_derivative
+#print axioms Complex.exp_add
+#print axioms Complex.exp_nonzero
+#print axioms Complex.exp_real
+#print axioms Complex.LogSeed.exponential_eval
+#print axioms Complex.LogSeed.initial
+#print axioms Complex.LogSeed.derivative
+#print axioms Complex.LogSeed.congr
+#print axioms Complex.LogSeed.recenter_agrees
+#print axioms Complex.LogSeed.overlap_difference
+#print axioms Complex.LogSeed.overlap_agrees
+#print axioms Complex.realLogarithmAt_agrees
+#print axioms Complex.exp_period
+#print axioms Complex.exp_translate_period
+#print axioms Complex.exp_kernel
+#print axioms Complex.exp_fiber
+#print axioms Complex.LogSeed.overlap_period
+#print axioms Complex.LogSeed.log_exp
+#print axioms Complex.expHolomorphic
+#print axioms Complex.LogSeed.holomorphic
+#print axioms Complex.LogSeed.continueAlong

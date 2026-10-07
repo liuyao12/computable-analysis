@@ -1,4 +1,4 @@
-⚠ [1/159] Replayed ComputableAnalysis.Basic
+⚠ [1/1158] Replayed ComputableAnalysis.Basic
 warning: ComputableAnalysis/Basic.lean:78:4: try 'simp' instead of 'simpa'
 
 Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
@@ -87,7 +87,7 @@ Hint: Omit it from the simp argument list.
   [apply] simp [QBox.conj, QBox.width, QBox.height] at h ⊢
 
 Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-⚠ [29/159] Replayed ComputableAnalysis.RiemannHilbert.SeriesRemainder
+⚠ [29/1158] Replayed ComputableAnalysis.RiemannHilbert.SeriesRemainder
 warning: ComputableAnalysis/RiemannHilbert/SeriesRemainder.lean:147:6: This simp argument is unused:
   ComplexRawQuotient.ofRaw_add
 
@@ -149,29 +149,14 @@ Hint: Omit it from the simp argument list.
   [apply] simp only [ComplexRawQuotient.mul_assoc, ComplexRawQuotient.mul_comm]
 
 Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-⚠ [80/159] Replayed ComputableAnalysis.RiemannHilbert.LocalSystemUniform
+⚠ [80/1158] Replayed ComputableAnalysis.RiemannHilbert.LocalSystemUniform
 warning: ComputableAnalysis/RiemannHilbert/LocalSystemUniform.lean:70:42: Variable name `hM` is not explicitly referenced.
 
 Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
   [apply] _hM
 
 Note: This linter can be disabled with `set_option linter.unusedVariables false`
-⚠ [104/159] Replayed ComputableAnalysis.RiemannHilbert.FiniteColumnMaps
-warning: ComputableAnalysis/RiemannHilbert/FiniteColumnMaps.lean:76:21: This simp argument is unused:
-  if_pos rfl
-
-Hint: Omit it from the simp argument list.
-  [apply] simp only
-
-Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-⚠ [105/159] Replayed ComputableAnalysis.RiemannHilbert.LocalGermAgreement
-warning: ComputableAnalysis/RiemannHilbert/LocalGermAgreement.lean:72:56: Variable name `hzChart` is not explicitly referenced.
-
-Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
-  [apply] _hzChart
-
-Note: This linter can be disabled with `set_option linter.unusedVariables false`
-⚠ [111/360] Replayed ComputableAnalysis.RiemannHilbert.SphereChartIsomorphisms
+⚠ [93/1158] Replayed ComputableAnalysis.RiemannHilbert.SphereChartIsomorphisms
 warning: ComputableAnalysis/RiemannHilbert/SphereChartIsomorphisms.lean:47:11: Variable name `z` is not explicitly referenced.
 
 Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
@@ -220,7 +205,22 @@ Hint: The binding can be removed (if unused) or named `_` (if used implicitly). 
   [apply] _w
 
 Note: This linter can be disabled with `set_option linter.unusedVariables false`
-⚠ [131/360] Replayed ComputableAnalysis.RiemannHilbert.ConnectionFrameChange
+⚠ [125/1158] Replayed ComputableAnalysis.RiemannHilbert.FiniteColumnMaps
+warning: ComputableAnalysis/RiemannHilbert/FiniteColumnMaps.lean:76:21: This simp argument is unused:
+  if_pos rfl
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [126/1158] Replayed ComputableAnalysis.RiemannHilbert.LocalGermAgreement
+warning: ComputableAnalysis/RiemannHilbert/LocalGermAgreement.lean:72:56: Variable name `hzChart` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hzChart
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+⚠ [128/1158] Replayed ComputableAnalysis.RiemannHilbert.ConnectionFrameChange
 warning: ComputableAnalysis/RiemannHilbert/ConnectionFrameChange.lean:52:21: Variable name `hP` is not explicitly referenced.
 
 Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
@@ -233,7 +233,7 @@ Hint: The binding can be removed (if unused) or named `_` (if used implicitly). 
   [apply] _hQ
 
 Note: This linter can be disabled with `set_option linter.unusedVariables false`
-⚠ [173/360] Replayed ComputableAnalysis.Series
+⚠ [173/1158] Replayed ComputableAnalysis.Series
 warning: ComputableAnalysis/Series.lean:852:28: Variable name `hr0` is not explicitly referenced.
 
 Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
@@ -264,7 +264,7 @@ Hint: The binding can be removed (if unused) or named `_` (if used implicitly). 
   [apply] _hterms
 
 Note: This linter can be disabled with `set_option linter.unusedVariables false`
-ℹ [175/360] Replayed ComputableAnalysis.Exp
+ℹ [175/1158] Replayed ComputableAnalysis.Exp
 info: ComputableAnalysis/Exp.lean:108:0: "[2.7182818284590452344..., 2.7182818284590452353...] width=8.631e-19"
 info: ComputableAnalysis/Exp.lean:109:0: "[2.6..., 2.84...] width=0.2367"
 info: ComputableAnalysis/Exp.lean:110:0: "[2.7182818284590452353602874713526624977572470936999595749669676277240766303535475945713821785251664274274663919320030599218174135966290435729003342952605956307381323286279434907631..., 2.71828182845904523536028747135266249775724709369995957496696762772407663035354759457138217852516642742746639193200305992181741359662904357290033429526059563073813232862794349076323...] width=1.27e-178"
@@ -272,7 +272,7 @@ info: ComputableAnalysis/Exp.lean:111:0: "[2.65..., 2.75...] width=0.1"
 info: ComputableAnalysis/Exp.lean:112:0: "[2.713..., 2.723...] width=0.01"
 info: ComputableAnalysis/Exp.lean:113:0: "[1.64872127070012814684865078781416357165377610071014801157507931164066102119421560863277652005636664300286663775630779700467116697521960915984097145249005979692942265909840391471994846465948924489686890533641846562..., 1.64872127070012814684865078781416357165377610071014801157507931164066102119421560863277652005636664300286663775630779700467116697521960915984097145249005979692942265909840391471994846465948924489686890533641846572...] width=9.744e-212"
 info: ComputableAnalysis/Exp.lean:114:0: "[0.362..., 0.372...] width=0.01"
-⚠ [176/360] Replayed ComputableAnalysis.Calculus
+⚠ [176/1158] Replayed ComputableAnalysis.Calculus
 warning: ComputableAnalysis/Calculus.lean:6281:4: Variable name `x` is not explicitly referenced.
 
 Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
@@ -346,7 +346,7 @@ Hint: Omit it from the simp argument list.
   [apply] simp [hk']
 
 Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-⚠ [177/360] Replayed ComputableAnalysis.Differential
+⚠ [177/1158] Replayed ComputableAnalysis.Differential
 warning: ComputableAnalysis/Differential.lean:1321:19: This simp argument is unused:
   hinv
 
@@ -389,7 +389,7 @@ Hint: Omit it from the simp argument list.
   [apply] simp [differenceQuotient, divRat, sub, neg, scaleRat, Rat.div_def]
 
 Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-⚠ [180/360] Replayed ComputableAnalysis.AlgebraicFunctions
+⚠ [180/1158] Replayed ComputableAnalysis.AlgebraicFunctions
 warning: ComputableAnalysis/AlgebraicFunctions.lean:1643:13: This simp argument is unused:
   A
 
@@ -411,7 +411,7 @@ Hint: Omit it from the simp argument list.
   [apply] simp only [A, B]
 
 Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-⚠ [183/360] Replayed ComputableAnalysis.PeanoBaker
+⚠ [183/1158] Replayed ComputableAnalysis.PeanoBaker
 warning: ComputableAnalysis/PeanoBaker.lean:2170:17: This simp argument is unused:
   Nat.zero_add
 
@@ -419,7 +419,7 @@ Hint: Omit it from the simp argument list.
   [apply] simp only [matrixPow]
 
 Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-⚠ [186/360] Replayed ComputableAnalysis.FinitePolynomialCalculus
+⚠ [186/1158] Replayed ComputableAnalysis.FinitePolynomialCalculus
 warning: ComputableAnalysis/FinitePolynomialCalculus.lean:1033:19: Variable name `hy` is not explicitly referenced.
 
 Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
@@ -432,14 +432,14 @@ Hint: The binding can be removed (if unused) or named `_` (if used implicitly). 
   [apply] _hy
 
 Note: This linter can be disabled with `set_option linter.unusedVariables false`
-⚠ [189/360] Replayed ComputableAnalysis.FiniteInverseSearchInterface
+⚠ [189/1158] Replayed ComputableAnalysis.FiniteInverseSearchInterface
 warning: ComputableAnalysis/FiniteInverseSearchInterface.lean:80:5: Variable name `hL` is not explicitly referenced.
 
 Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
   [apply] _hL
 
 Note: This linter can be disabled with `set_option linter.unusedVariables false`
-⚠ [190/360] Replayed ComputableAnalysis.ExpProofs
+⚠ [190/1158] Replayed ComputableAnalysis.ExpProofs
 warning: ComputableAnalysis/ExpProofs.lean:3240:46: This simp argument is unused:
   ihm
 
@@ -495,12 +495,12 @@ Note: This linter can be disabled with `set_option linter.defProp false`
 warning: ComputableAnalysis/ExpProofs.lean:9691:0: Definition `uniformExpOnUnit_endpointDifferenceValid` is a proposition; use `theorem` instead of `def`
 
 Note: This linter can be disabled with `set_option linter.defProp false`
-ℹ [217/360] Replayed ComputableAnalysis.Pi
+ℹ [217/1158] Replayed ComputableAnalysis.Pi
 info: ComputableAnalysis/Pi.lean:250:0: "[3.09..., 3.18...] width=0.09756"
 info: ComputableAnalysis/Pi.lean:251:0: "[3.1415926535897932384626433832712..., 3.1415926535897932384626433832798...] width=8.581e-30"
 info: ComputableAnalysis/Pi.lean:252:0: "[3.1415912..., 3.1415933...] width=0.000002077"
 info: ComputableAnalysis/Pi.lean:253:0: "[3.1415923..., 3.1415933...] width=0.000001038"
-⚠ [220/360] Replayed ComputableAnalysis.RationalCircle
+⚠ [220/1158] Replayed ComputableAnalysis.RationalCircle
 warning: ComputableAnalysis/RationalCircle.lean:308:5: Variable name `hr` is not explicitly referenced.
 
 Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
@@ -527,7 +527,7 @@ Hint: The binding can be removed (if unused) or named `_` (if used implicitly). 
   [apply] _h
 
 Note: This linter can be disabled with `set_option linter.unusedVariables false`
-⚠ [221/360] Replayed ComputableAnalysis.ArctanGeometry
+⚠ [221/1158] Replayed ComputableAnalysis.ArctanGeometry
 warning: ComputableAnalysis/ArctanGeometry.lean:5714:32: Variable name `hx1` is not explicitly referenced.
 
 Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
@@ -540,7 +540,7 @@ Hint: The binding can be removed (if unused) or named `_` (if used implicitly). 
   [apply] _hx1
 
 Note: This linter can be disabled with `set_option linter.unusedVariables false`
-⚠ [229/360] Replayed ComputableAnalysis.ModularForms.ExponentialRationalPrefix
+⚠ [229/1158] Replayed ComputableAnalysis.ModularForms.ExponentialRationalPrefix
 warning: ComputableAnalysis/ModularForms/ExponentialRationalPrefix.lean:28:45: This simp argument is unused:
   Rat.mul_zero
 
@@ -548,34 +548,14 @@ Hint: Omit it from the simp argument list.
   [apply] simp [Rat.div_def, Rat.zero_mul]
 
 Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-⚠ [237/360] Replayed ComputableAnalysis.ModularForms.Form163ReductionMatrix
+⚠ [237/1158] Replayed ComputableAnalysis.ModularForms.Form163ReductionMatrix
 warning: ComputableAnalysis/ModularForms/Form163ReductionMatrix.lean:9:5: Variable name `h` is not explicitly referenced.
 
 Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
   [apply] _h
 
 Note: This linter can be disabled with `set_option linter.unusedVariables false`
-⚠ [286/360] Replayed ComputableAnalysis.RiemannHilbert.ScalarPathConcatenation
-warning: ComputableAnalysis/RiemannHilbert/ScalarPathConcatenation.lean:19:56: Variable name `s` is not explicitly referenced.
-
-Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
-  [apply] _s
-
-Note: This linter can be disabled with `set_option linter.unusedVariables false`
-warning: ComputableAnalysis/RiemannHilbert/ScalarPathConcatenation.lean:19:58: Variable name `t` is not explicitly referenced.
-
-Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
-  [apply] _t
-
-Note: This linter can be disabled with `set_option linter.unusedVariables false`
-⚠ [290/360] Replayed ComputableAnalysis.RiemannHilbert.SpherePaths
-warning: ComputableAnalysis/RiemannHilbert/SpherePaths.lean:30:13: Variable name `U` is not explicitly referenced.
-
-Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
-  [apply] _U
-
-Note: This linter can be disabled with `set_option linter.unusedVariables false`
-⚠ [300/402] Replayed ComputableAnalysis.ModularForms.CMConjugation163
+⚠ [260/1158] Replayed ComputableAnalysis.ModularForms.CMConjugation163
 warning: ComputableAnalysis/ModularForms/CMConjugation163.lean:13:4: This simp argument is unused:
   if_neg (show ¬(0 : Rat) ≤ -1 by decide +kernel)
 
@@ -583,7 +563,7 @@ Hint: Omit it from the simp argument list.
   [apply] simp only [if_pos (show (0 : Rat) ≤ 1 / 2 by decide +kernel)]
 
 Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-⚠ [336/402] Replayed ComputableAnalysis.ModularForms.ConjugationLimit
+⚠ [298/1158] Replayed ComputableAnalysis.ModularForms.ConjugationLimit
 warning: ComputableAnalysis/ModularForms/ConjugationLimit.lean:18:68: This simp argument is unused:
   ComplexRaw.realPart
 
@@ -598,7 +578,7 @@ Hint: Omit it from the simp argument list.
   [apply] simp [sub, add, neg, conj, QBox.add, QBox.neg, QBox.conj, QComplex.add, ComplexRaw.imagPart] at hh ⊢
 
 Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-⚠ [337/402] Replayed ComputableAnalysis.ModularForms.ExponentialConjugatePrefixes
+⚠ [299/1158] Replayed ComputableAnalysis.ModularForms.ExponentialConjugatePrefixes
 warning: ComputableAnalysis/ModularForms/ExponentialConjugatePrefixes.lean:19:68: This simp argument is unused:
   ComplexRaw.realPart
 
@@ -613,7 +593,7 @@ Hint: Omit it from the simp argument list.
   [apply] simp [sub, add, neg, conj, QBox.add, QBox.neg, QBox.conj, QComplex.add, ComplexRaw.imagPart] at hh ⊢
 
 Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-⚠ [341/402] Replayed ComputableAnalysis.ModularForms.ExponentialNegativeSeparation
+⚠ [314/1158] Replayed ComputableAnalysis.ModularForms.ExponentialNegativeSeparation
 warning: ComputableAnalysis/ModularForms/ExponentialNegativeSeparation.lean:53:4: This simp argument is unused:
   RealRaw.neg
 
@@ -646,7 +626,27 @@ Hint: Omit it from the simp argument list.
     RealRaw.negCompute, realPart, QBox.add, QBox.conj, QBox.neg, QComplex.add, QComplex.conj]
 
 Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-⚠ [373/402] Replayed ComputableAnalysis.ExponentialComputations.PositiveLogarithm
+⚠ [336/1158] Replayed ComputableAnalysis.RiemannHilbert.ScalarPathConcatenation
+warning: ComputableAnalysis/RiemannHilbert/ScalarPathConcatenation.lean:19:56: Variable name `s` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _s
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ComputableAnalysis/RiemannHilbert/ScalarPathConcatenation.lean:19:58: Variable name `t` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _t
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+⚠ [340/1158] Replayed ComputableAnalysis.RiemannHilbert.SpherePaths
+warning: ComputableAnalysis/RiemannHilbert/SpherePaths.lean:30:13: Variable name `U` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _U
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+⚠ [372/1158] Replayed ComputableAnalysis.ExponentialComputations.PositiveLogarithm
 warning: ComputableAnalysis/ExponentialComputations/PositiveLogarithm.lean:48:47: This simp argument is unused:
   QComplex.conj
 
@@ -654,7 +654,20 @@ Hint: Omit it from the simp argument list.
   [apply] simp only [realAxis, ofRealRaw, conj, QBox.conj]
 
 Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-⚠ [378/402] Replayed ComputableAnalysis.ExponentialComputations.QuadraticFTC
+⚠ [376/1158] Replayed ComputableAnalysis.ExponentialComputations.PositiveSegment
+warning: ComputableAnalysis/ExponentialComputations/PositiveSegment.lean:11:0: Definition `eventually_positive` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+warning: ComputableAnalysis/ExponentialComputations/PositiveSegment.lean:92:17: This simp argument is unused:
+  QComplex.neg
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [realAxis, positiveSegment, segmentDisplacement, ofRealRaw, sub, add, neg, QBox.add, QBox.neg,
+    QComplex.add, scaleRat, QBox.scaleRat, RealRaw.add, RealRaw.addCompute, RealRaw.ofRat, RealRaw.scaleRat,
+    RealRaw.scaleRatCompute, if_pos hu.1, if_pos hv.1, RealRaw.sub, RealRaw.subCompute]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [380/1158] Replayed ComputableAnalysis.ExponentialComputations.QuadraticFTC
 warning: ComputableAnalysis/ExponentialComputations/QuadraticFTC.lean:102:45: This simp argument is unused:
   Rat.mul_one
 
@@ -669,23 +682,248 @@ Hint: Omit it from the simp argument list.
   [apply] simp only [Rat.pow_succ, Rat.pow_zero] at h ⊢
 
 Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-⚠ [382/402] Replayed ComputableAnalysis.FiniteNBallVolume
-warning: ComputableAnalysis/FiniteNBallVolume.lean:316:21: This simp argument is unused:
-  Rat.mul_assoc
+⚠ [385/1158] Replayed ComputableAnalysis.ExponentialComputations.SegmentFTC
+warning: ComputableAnalysis/ExponentialComputations/SegmentFTC.lean:16:75: This simp argument is unused:
+  QComplex.neg
 
 Hint: Omit it from the simp argument list.
-  [apply] simp [Rat.pow_one, Rat.mul_comm]
+  [apply] simp only [realAxis, ofRealRaw, sub, add, neg, QBox.add, QBox.neg, QComplex.add, RealRaw.sub,
+    RealRaw.subCompute, Rat.neg_zero, Rat.zero_add, Rat.sub_eq_add_neg] at ho ⊢
 
 Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-⚠ [383/402] Replayed ComputableAnalysis.FiniteGaussianIntegral
-warning: ComputableAnalysis/FiniteGaussianIntegral.lean:622:51: This simp argument is unused:
-  Nat.zero_eq
+⚠ [416/1158] Replayed ComputableAnalysis.ModularForms.UpperDerivativeRegionalBounds
+warning: ComputableAnalysis/ModularForms/UpperDerivativeRegionalBounds.lean:28:15: This simp argument is unused:
+  Rat.intCast_mul
 
 Hint: Omit it from the simp argument list.
-  [apply] simp only [gaussianEvenIntegralTailMajorant, Nat.add_zero, Rat.sub_self]
+  [apply] simp only [Rat.intCast_neg, Rat.intCast_natCast]
 
 Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-⚠ [385/402] Replayed ComputableAnalysis.IntegralIdentities
+warning: ComputableAnalysis/ModularForms/UpperDerivativeRegionalBounds.lean:28:31: This simp argument is unused:
+  Rat.intCast_neg
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Rat.intCast_mul, Rat.intCast_natCast]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [418/1158] Replayed ComputableAnalysis.ModularForms.UpperFiniteDerivative
+warning: ComputableAnalysis/ModularForms/UpperFiniteDerivative.lean:25:4: This simp argument is unused:
+  dif_neg
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [upperPointDerivative, upperPointMap_holomorphic, ne_eq, not_true_eq_false, Holomorphic.transfer,
+    constantOn_holomorphic]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [427/1158] Replayed ComputableAnalysis.ModularForms.UpperRemainderShellBounds
+warning: ComputableAnalysis/ModularForms/UpperRemainderShellBounds.lean:10:15: Variable name `hB` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hB
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+⚠ [441/1158] Replayed ComputableAnalysis.ModularForms.UpperSquareRemainderBounds
+warning: ComputableAnalysis/ModularForms/UpperSquareRemainderBounds.lean:18:68: Variable name `hB` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hB
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+⚠ [480/1158] Replayed ComputableAnalysis.ModularForms.GeometricRotationEulerStep
+warning: ComputableAnalysis/ModularForms/GeometricRotationEulerStep.lean:18:50: This simp argument is unused:
+  Rat.sub_eq_add_neg
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [qabs, Rat.add_zero, Rat.sub_self, Rat.neg_zero]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/GeometricRotationEulerStep.lean:18:69: This simp argument is unused:
+  Rat.neg_zero
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [qabs, Rat.add_zero, Rat.sub_self, Rat.sub_eq_add_neg]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/GeometricRotationEulerStep.lean:25:50: This simp argument is unused:
+  Rat.sub_eq_add_neg
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [qabs, Rat.add_zero, Rat.sub_self, Rat.neg_zero]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/GeometricRotationEulerStep.lean:25:69: This simp argument is unused:
+  Rat.neg_zero
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [qabs, Rat.add_zero, Rat.sub_self, Rat.sub_eq_add_neg]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [482/1158] Replayed ComputableAnalysis.ModularForms.GeometricEulerExponentialFactor
+warning: ComputableAnalysis/ModularForms/GeometricEulerExponentialFactor.lean:41:84: This simp argument is unused:
+  QBox.point
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [geometricAngularIncrement, geometricEulerFactor, add, ofQComplex, QBox.add, QComplex.add,
+    QComplex.one, QBox.Overlaps, QComplex.le_def]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [484/1158] Replayed ComputableAnalysis.ModularForms.GeometricEulerExponentialProduct
+warning: ComputableAnalysis/ModularForms/GeometricEulerExponentialProduct.lean:34:13: This simp argument is unused:
+  QBox.point
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [geometricAngularIncrement, geometricMeshAngleScalar, geometricMeshAngle, add, ofQComplex, QBox.add,
+    QComplex.add, QBox.Overlaps, QComplex.le_def]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [487/1158] Replayed ComputableAnalysis.ModularForms.GeometricAngularLimit
+warning: ComputableAnalysis/ModularForms/GeometricAngularLimit.lean:31:49: This simp argument is unused:
+  QBox.point
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [sub, add, neg, geometricMeshAngleScalar, GeometricPiRotation.imaginaryHalf, imaginaryAxis,
+    ofQComplex, QBox.add, QBox.neg, QComplex.add, QComplex.neg, realPart, imagPart, RealRaw.ofRat, Rat.neg_zero,
+    Rat.add_zero, Rat.zero_add]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/GeometricAngularLimit.lean:31:73: This simp argument is unused:
+  QComplex.neg
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [sub, add, neg, geometricMeshAngleScalar, GeometricPiRotation.imaginaryHalf, imaginaryAxis,
+    ofQComplex, QBox.add, QBox.neg, QBox.point, QComplex.add, realPart, imagPart, RealRaw.ofRat, Rat.neg_zero,
+    Rat.add_zero, Rat.zero_add]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/GeometricAngularLimit.lean:32:38: This simp argument is unused:
+  Rat.neg_zero
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [sub, add, neg, geometricMeshAngleScalar, GeometricPiRotation.imaginaryHalf, imaginaryAxis,
+    ofQComplex, QBox.add, QBox.neg, QBox.point, QComplex.add, QComplex.neg, realPart, imagPart, RealRaw.ofRat,
+    Rat.add_zero, Rat.zero_add]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/GeometricAngularLimit.lean:32:51: This simp argument is unused:
+  Rat.add_zero
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [sub, add, neg, geometricMeshAngleScalar, GeometricPiRotation.imaginaryHalf, imaginaryAxis,
+    ofQComplex, QBox.add, QBox.neg, QBox.point, QComplex.add, QComplex.neg, realPart, imagPart, RealRaw.ofRat,
+    Rat.neg_zero, Rat.zero_add]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [491/1158] Replayed ComputableAnalysis.ModularForms.GeometricExponentialMeshError
+warning: ComputableAnalysis/ModularForms/GeometricExponentialMeshError.lean:45:49: This simp argument is unused:
+  QBox.point
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [geometricExponentialProduct, geometricEulerMesh, geometricEulerMeshError, sub, add, neg, ofQComplex,
+    QBox.add, QBox.neg, QComplex.add, QComplex.neg, QComplex.one, realPart, imagPart, RealRaw.ofRat]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/GeometricExponentialMeshError.lean:45:73: This simp argument is unused:
+  QComplex.neg
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [geometricExponentialProduct, geometricEulerMesh, geometricEulerMeshError, sub, add, neg, ofQComplex,
+    QBox.add, QBox.neg, QBox.point, QComplex.add, QComplex.one, realPart, imagPart, RealRaw.ofRat]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [492/1158] Replayed ComputableAnalysis.ModularForms.GeometricQuarterTurn
+warning: ComputableAnalysis/ModularForms/GeometricQuarterTurn.lean:17:56: This simp argument is unused:
+  QBox.point
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [sub, add, neg, ofQComplex, QBox.add, QBox.neg, QComplex.add, QComplex.neg,
+    RotationSeries.imaginaryUnit, realPart, imagPart, RealRaw.ofRat]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/GeometricQuarterTurn.lean:17:80: This simp argument is unused:
+  QComplex.neg
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [sub, add, neg, ofQComplex, QBox.add, QBox.neg, QBox.point, QComplex.add,
+    RotationSeries.imaginaryUnit, realPart, imagPart, RealRaw.ofRat]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [521/1158] Replayed ComputableAnalysis.ModularForms.CotangentRationalKernel
+warning: ComputableAnalysis/ModularForms/CotangentRationalKernel.lean:14:13: Variable name `z` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _z
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ComputableAnalysis/ModularForms/CotangentRationalKernel.lean:14:15: Variable name `w` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _w
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+⚠ [541/1158] Replayed ComputableAnalysis.ModularForms.RealExponentialFiftyTwoUpperBound
+warning: ComputableAnalysis/ModularForms/RealExponentialFiftyTwoUpperBound.lean:29:53: This simp argument is unused:
+  QBox.point
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [s, z, scaleRat, ofQComplex, QBox.scaleRat,
+    if_pos (show (0 : Rat) ≤ ((26 : Nat) : Rat) by decide +kernel), QBox.Overlaps, QComplex.le_def]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [626/1158] Replayed ComputableAnalysis.ModularForms.PairedIntegerPoleExtension
+warning: ComputableAnalysis/ModularForms/PairedIntegerPoleExtension.lean:11:13: Variable name `z` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _z
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ComputableAnalysis/ModularForms/PairedIntegerPoleExtension.lean:11:15: Variable name `w` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _w
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+⚠ [647/1158] Replayed ComputableAnalysis.ModularForms.PolynomialNomeDifferenceExpansion
+warning: ComputableAnalysis/ModularForms/PolynomialNomeDifferenceExpansion.lean:28:50: This simp argument is unused:
+  ComplexRawQuotient.add_scaleRat
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ComplexRawQuotient.scaleRat_scaleRat, quotient_sub_scale]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [671/1158] Replayed ComputableAnalysis.ModularForms.PairedFiniteOffPole
+warning: ComputableAnalysis/ModularForms/PairedFiniteOffPole.lean:26:0: Definition `pairedFiniteOffPoleMap_upper_mem` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+⚠ [672/1158] Replayed ComputableAnalysis.ModularForms.PairedOffPoleAssembly
+warning: ComputableAnalysis/ModularForms/PairedOffPoleAssembly.lean:21:0: Definition `pairedOffPoleAssemblyMap_upper_mem` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+⚠ [679/1158] Replayed ComputableAnalysis.ModularForms.PairedOffPoleTailDerivativeTermHolomorphic
+warning: ComputableAnalysis/ModularForms/PairedOffPoleTailDerivativeTermHolomorphic.lean:11:17: Variable name `hz` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hz
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ComputableAnalysis/ModularForms/PairedOffPoleTailDerivativeTermHolomorphic.lean:11:20: Variable name `hw` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hw
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+⚠ [696/1158] Replayed ComputableAnalysis.ModularForms.PairedRegularDivisionDerivativeZero
+warning: ComputableAnalysis/ModularForms/PairedRegularDivisionDerivativeZero.lean:36:59: This simp argument is unused:
+  ih
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [FiniteProducts.partialSum.eq_2, hf]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [736/1158] Replayed ComputableAnalysis.ModularForms.PairedOffPoleDomainCoverage
+warning: ComputableAnalysis/ModularForms/PairedOffPoleDomainCoverage.lean:45:0: Definition `pairedOffPoleCanonicalCutoff_mem` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+⚠ [806/1158] Replayed ComputableAnalysis.IntegralIdentities
 warning: ComputableAnalysis/IntegralIdentities.lean:16288:5: Variable name `hlip` is not explicitly referenced.
 
 Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
@@ -698,7 +936,553 @@ Note: This linter can be disabled with `set_option linter.unnecessarySimpa false
 warning: ComputableAnalysis/IntegralIdentities.lean:16518:0: Definition `affineIdentity_lipschitz_on_unit` is a proposition; use `theorem` instead of `def`
 
 Note: This linter can be disabled with `set_option linter.defProp false`
-⚠ [386/402] Replayed ComputableAnalysis.FiniteFTCIntervalRegular
+⚠ [894/1158] Replayed ComputableAnalysis.ModularForms.SquareFrameWeightedSides
+warning: ComputableAnalysis/ModularForms/SquareFrameWeightedSides.lean:122:13: This simp argument is unused:
+  ComplexRawQuotient.ofRaw_scaleRat
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [gridScalarSum_value]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [933/1158] Replayed ComputableAnalysis.ModularForms.SquareResidueNormalization
+warning: ComputableAnalysis/ModularForms/SquareResidueNormalization.lean:12:44: Variable name `hM` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hM
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ComputableAnalysis/ModularForms/SquareResidueNormalization.lean:36:28: This simp argument is unused:
+  Nat.add_assoc
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Nat.add_zero, Nat.add_comm, Nat.add_left_comm]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [964/1158] Replayed ComputableAnalysis.ModularForms.UpperHalfPlaneSegments
+warning: ComputableAnalysis/ModularForms/UpperHalfPlaneSegments.lean:56:106: This simp argument is unused:
+  Rat.add_zero
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [QComplex.add, QComplex.mul, QComplex.sub, QComplex.neg, QComplex.ofRat, Rat.mul_zero,
+    Rat.zero_add] at hb
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [969/1158] Replayed ComputableAnalysis.ModularForms.LatticeFrequencyNormalization
+warning: ComputableAnalysis/ModularForms/LatticeFrequencyNormalization.lean:13:17: This simp argument is unused:
+  QComplex.neg
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ofRealRaw, RealRaw.neg, RealRaw.negCompute, neg, QBox.neg, Rat.neg_zero]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [981/1158] Replayed ComputableAnalysis.ModularForms.LatticeHalfFrequencyRotationPower
+warning: ComputableAnalysis/ModularForms/LatticeHalfFrequencyRotationPower.lean:23:59: This simp argument is unused:
+  Rat.neg_zero
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [if_pos (show (0 : Rat) ≤ 1 by decide +kernel), Rat.zero_mul, Rat.one_mul, Rat.zero_add,
+    Rat.add_zero]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/LatticeHalfFrequencyRotationPower.lean:48:17: This simp argument is unused:
+  Rat.neg_zero
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Rat.mul_zero, Rat.zero_add]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [987/1158] Replayed ComputableAnalysis.ModularForms.AngleSegmentDerivative
+warning: ComputableAnalysis/ModularForms/AngleSegmentDerivative.lean:18:45: This simp argument is unused:
+  Rat.zero_add
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [scalar, ofRealRaw, QComplex.add, QComplex.mul, QComplex.sub, QComplex.neg, QComplex.ofRat,
+    Rat.zero_mul, Rat.mul_zero, Rat.add_zero, Rat.neg_zero] at hl hu
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [993/1158] Replayed ComputableAnalysis.ModularForms.RationalRotationStrictDecrease
+warning: ComputableAnalysis/ModularForms/RationalRotationStrictDecrease.lean:92:91: This simp argument is unused:
+  QComplex.neg
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [rationalAngleScalar, sub, add, neg, ofQComplex, QBox.add, QBox.neg, QComplex.add, QBox.Overlaps,
+    QComplex.le_def, H, QInterval.width, Rat.sub_eq_add_neg, Rat.neg_zero, Rat.add_zero]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [1055/1158] Replayed ComputableAnalysis.ModularForms.NomeMomentZeroQuotient
+warning: ComputableAnalysis/ModularForms/NomeMomentZeroQuotient.lean:18:54: This simp argument is unused:
+  Nat.zero_add
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarSeries.block.eq_2, ih, Nat.add_comm]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [1064/1158] Replayed ComputableAnalysis.ModularForms.NomeMomentHigherQuotients
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:104:30: This simp argument is unused:
+  quotient_scale_5
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [quotient_scale_4, quotient_scale_6, quotient_scale_10, quotient_scale_11, quotient_scale_26,
+    quotient_scale_66] at hd
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:104:64: This simp argument is unused:
+  quotient_scale_10
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [quotient_scale_4, quotient_scale_5, quotient_scale_6, quotient_scale_11, quotient_scale_26,
+    quotient_scale_66] at hd
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:104:82: This simp argument is unused:
+  quotient_scale_11
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [quotient_scale_4, quotient_scale_5, quotient_scale_6, quotient_scale_10, quotient_scale_26,
+    quotient_scale_66] at hd
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:104:100: This simp argument is unused:
+  quotient_scale_26
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [quotient_scale_4, quotient_scale_5, quotient_scale_6, quotient_scale_10, quotient_scale_11,
+    quotient_scale_66] at hd
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:104:118: This simp argument is unused:
+  quotient_scale_66
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [quotient_scale_4, quotient_scale_5, quotient_scale_6, quotient_scale_10, quotient_scale_11,
+    quotient_scale_26] at hd
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:112:108: This simp argument is unused:
+  quotient_scale_5
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_6, quotient_scale_10, quotient_scale_11, quotient_scale_26, quotient_scale_66] at hs3
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:112:125: This simp argument is unused:
+  quotient_scale_6
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_5, quotient_scale_10, quotient_scale_11, quotient_scale_26, quotient_scale_66] at hs3
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:112:142: This simp argument is unused:
+  quotient_scale_10
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_5, quotient_scale_6, quotient_scale_11, quotient_scale_26, quotient_scale_66] at hs3
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:112:160: This simp argument is unused:
+  quotient_scale_11
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_5, quotient_scale_6, quotient_scale_10, quotient_scale_26, quotient_scale_66] at hs3
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:112:178: This simp argument is unused:
+  quotient_scale_26
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_5, quotient_scale_6, quotient_scale_10, quotient_scale_11, quotient_scale_66] at hs3
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:112:196: This simp argument is unused:
+  quotient_scale_66
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_5, quotient_scale_6, quotient_scale_10, quotient_scale_11, quotient_scale_26] at hs3
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:115:91: This simp argument is unused:
+  quotient_scale_4
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_5,
+    quotient_scale_6, quotient_scale_10, quotient_scale_11, quotient_scale_26, quotient_scale_66]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:115:108: This simp argument is unused:
+  quotient_scale_5
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_6, quotient_scale_10, quotient_scale_11, quotient_scale_26, quotient_scale_66]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:115:125: This simp argument is unused:
+  quotient_scale_6
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_5, quotient_scale_10, quotient_scale_11, quotient_scale_26, quotient_scale_66]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:115:142: This simp argument is unused:
+  quotient_scale_10
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_5, quotient_scale_6, quotient_scale_11, quotient_scale_26, quotient_scale_66]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:115:178: This simp argument is unused:
+  quotient_scale_26
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_5, quotient_scale_6, quotient_scale_10, quotient_scale_11, quotient_scale_66]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:115:196: This simp argument is unused:
+  quotient_scale_66
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_5, quotient_scale_6, quotient_scale_10, quotient_scale_11, quotient_scale_26]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:194:13: This simp argument is unused:
+  quotient_scale_4
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [quotient_scale_5, quotient_scale_6, quotient_scale_10, quotient_scale_11, quotient_scale_26,
+    quotient_scale_66] at hd
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:194:47: This simp argument is unused:
+  quotient_scale_6
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [quotient_scale_4, quotient_scale_5, quotient_scale_10, quotient_scale_11, quotient_scale_26,
+    quotient_scale_66] at hd
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:194:82: This simp argument is unused:
+  quotient_scale_11
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [quotient_scale_4, quotient_scale_5, quotient_scale_6, quotient_scale_10, quotient_scale_26,
+    quotient_scale_66] at hd
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:194:100: This simp argument is unused:
+  quotient_scale_26
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [quotient_scale_4, quotient_scale_5, quotient_scale_6, quotient_scale_10, quotient_scale_11,
+    quotient_scale_66] at hd
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:194:118: This simp argument is unused:
+  quotient_scale_66
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [quotient_scale_4, quotient_scale_5, quotient_scale_6, quotient_scale_10, quotient_scale_11,
+    quotient_scale_26] at hd
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:202:108: This simp argument is unused:
+  quotient_scale_5
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_6, quotient_scale_10, quotient_scale_11, quotient_scale_26, quotient_scale_66] at hs3
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:202:125: This simp argument is unused:
+  quotient_scale_6
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_5, quotient_scale_10, quotient_scale_11, quotient_scale_26, quotient_scale_66] at hs3
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:202:142: This simp argument is unused:
+  quotient_scale_10
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_5, quotient_scale_6, quotient_scale_11, quotient_scale_26, quotient_scale_66] at hs3
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:202:160: This simp argument is unused:
+  quotient_scale_11
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_5, quotient_scale_6, quotient_scale_10, quotient_scale_26, quotient_scale_66] at hs3
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:202:178: This simp argument is unused:
+  quotient_scale_26
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_5, quotient_scale_6, quotient_scale_10, quotient_scale_11, quotient_scale_66] at hs3
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:202:196: This simp argument is unused:
+  quotient_scale_66
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_5, quotient_scale_6, quotient_scale_10, quotient_scale_11, quotient_scale_26] at hs3
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:205:91: This simp argument is unused:
+  quotient_scale_4
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_5,
+    quotient_scale_6, quotient_scale_10, quotient_scale_11, quotient_scale_26, quotient_scale_66] at hs4
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:205:108: This simp argument is unused:
+  quotient_scale_5
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_6, quotient_scale_10, quotient_scale_11, quotient_scale_26, quotient_scale_66] at hs4
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:205:125: This simp argument is unused:
+  quotient_scale_6
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_5, quotient_scale_10, quotient_scale_11, quotient_scale_26, quotient_scale_66] at hs4
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:205:142: This simp argument is unused:
+  quotient_scale_10
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_5, quotient_scale_6, quotient_scale_11, quotient_scale_26, quotient_scale_66] at hs4
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:205:178: This simp argument is unused:
+  quotient_scale_26
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_5, quotient_scale_6, quotient_scale_10, quotient_scale_11, quotient_scale_66] at hs4
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:205:196: This simp argument is unused:
+  quotient_scale_66
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_5, quotient_scale_6, quotient_scale_10, quotient_scale_11, quotient_scale_26] at hs4
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:208:91: This simp argument is unused:
+  quotient_scale_4
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_5,
+    quotient_scale_6, quotient_scale_10, quotient_scale_11, quotient_scale_26, quotient_scale_66]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:208:108: This simp argument is unused:
+  quotient_scale_5
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_6, quotient_scale_10, quotient_scale_11, quotient_scale_26, quotient_scale_66]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:208:125: This simp argument is unused:
+  quotient_scale_6
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_5, quotient_scale_10, quotient_scale_11, quotient_scale_26, quotient_scale_66]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:208:142: This simp argument is unused:
+  quotient_scale_10
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_5, quotient_scale_6, quotient_scale_11, quotient_scale_26, quotient_scale_66]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: ComputableAnalysis/ModularForms/NomeMomentHigherQuotients.lean:208:160: This simp argument is unused:
+  quotient_scale_11
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [ScalarAlgebra.ofRaw_power _ z.property, ScalarAlgebra.ofRaw_power _ j.property, quotient_scale_4,
+    quotient_scale_5, quotient_scale_6, quotient_scale_10, quotient_scale_26, quotient_scale_66]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [1093/1158] Replayed ComputableAnalysis.FiniteFTASubdivision
+warning: ComputableAnalysis/FiniteFTASubdivision.lean:143:21: Variable name `hparent` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hparent
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+⚠ [1102/1158] Replayed ComputableAnalysis.FTA.NormDescent
+warning: ComputableAnalysis/FTA/NormDescent.lean:48:5: Variable name `hδ` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hδ
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+⚠ [1127/1158] Replayed ComputableAnalysis.ModularForms.ExponentialKernelFourStrip
+warning: ComputableAnalysis/ModularForms/ExponentialKernelFourStrip.lean:45:21: This simp argument is unused:
+  RealRaw.Le
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [y, RealRaw.ofRat, RealRaw.scaleRat, RealRaw.scaleRatCompute,
+    if_pos (show (0 : Rat) ≤ 1 / 2 by decide +kernel)]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [1133/1171] Replayed ComputableAnalysis.ModularForms.LatticeInvariantsNormalizedFourier
+warning: ComputableAnalysis/ModularForms/LatticeInvariantsNormalizedFourier.lean:9:39: Variable name `hr` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hr
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ComputableAnalysis/ModularForms/LatticeInvariantsNormalizedFourier.lean:10:38: Variable name `hr` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hr
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ComputableAnalysis/ModularForms/LatticeInvariantsNormalizedFourier.lean:15:37: Variable name `hr` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hr
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+⚠ [1136/1171] Replayed ComputableAnalysis.ModularForms.NomeEisensteinLeadingTerms
+warning: ComputableAnalysis/ModularForms/NomeEisensteinLeadingTerms.lean:26:41: Variable name `hr` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hr
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ComputableAnalysis/ModularForms/NomeEisensteinLeadingTerms.lean:27:41: Variable name `hr` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hr
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+⚠ [1138/1171] Replayed ComputableAnalysis.ModularForms.NomeEisensteinSmallDiskBounds
+warning: ComputableAnalysis/ModularForms/NomeEisensteinSmallDiskBounds.lean:25:39: Variable name `hr` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hr
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ComputableAnalysis/ModularForms/NomeEisensteinSmallDiskBounds.lean:26:39: Variable name `hr` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hr
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ComputableAnalysis/ModularForms/NomeEisensteinSmallDiskBounds.lean:54:75: Variable name `hr` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hr
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ComputableAnalysis/ModularForms/NomeEisensteinSmallDiskBounds.lean:62:74: Variable name `hr` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hr
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+⚠ [1144/1171] Replayed ComputableAnalysis.ModularForms.CMExponentialUpperBound163
+warning: ComputableAnalysis/ModularForms/CMExponentialUpperBound163.lean:38:82: This simp argument is unused:
+  QBox.point
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [add, ofRealRaw, cmGrowthGapToFiftyTwo163, RealRaw.add, RealRaw.addCompute, RealRaw.neg,
+    RealRaw.negCompute, RealRaw.ofRat, QBox.add, QComplex.add, ofQComplex, QBox.Overlaps, QComplex.le_def, Rat.add_zero]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [1145/1171] Replayed ComputableAnalysis.ModularForms.NomeFourierChoiceAgreement
+warning: ComputableAnalysis/ModularForms/NomeFourierChoiceAgreement.lean:7:39: Variable name `hr` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hr
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ComputableAnalysis/ModularForms/NomeFourierChoiceAgreement.lean:8:39: Variable name `hr` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hr
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+⚠ [1146/1171] Replayed ComputableAnalysis.ModularForms.CMFourierDiscriminantNonvanishing163
+warning: ComputableAnalysis/ModularForms/CMFourierDiscriminantNonvanishing163.lean:13:57: Variable name `hx` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hx
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ComputableAnalysis/ModularForms/CMFourierDiscriminantNonvanishing163.lean:15:5: Variable name `hl` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hl
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+⚠ [1151/1171] Replayed ComputableAnalysis.ModularForms.Hecke41PointReindexing
+warning: ComputableAnalysis/ModularForms/Hecke41PointReindexing.lean:10:5: Variable name `hu` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hu
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: ComputableAnalysis/ModularForms/Hecke41PointReindexing.lean:10:26: Variable name `hui` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hui
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+⚠ [1156/1171] Replayed ComputableAnalysis.ModularForms.EntireNomeKernelClassification
+warning: ComputableAnalysis/ModularForms/EntireNomeKernelClassification.lean:42:34: This simp argument is unused:
+  QComplex.neg
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [ofQComplex, neg, QBox.neg, QBox.Overlaps, QComplex.le_def, Rat.intCast_neg]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [1158/1171] Replayed ComputableAnalysis.FiniteNBallVolume
+warning: ComputableAnalysis/FiniteNBallVolume.lean:316:21: This simp argument is unused:
+  Rat.mul_assoc
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Rat.pow_one, Rat.mul_comm]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [1159/1171] Replayed ComputableAnalysis.FiniteGaussianIntegral
+warning: ComputableAnalysis/FiniteGaussianIntegral.lean:622:51: This simp argument is unused:
+  Nat.zero_eq
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [gaussianEvenIntegralTailMajorant, Nat.add_zero, Rat.sub_self]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [1161/1171] Replayed ComputableAnalysis.FiniteFTCIntervalRegular
 warning: ComputableAnalysis/FiniteFTCIntervalRegular.lean:447:0: Definition `exactSquare_lipschitz_on_unit` is a proposition; use `theorem` instead of `def`
 
 Note: This linter can be disabled with `set_option linter.defProp false`
@@ -736,7 +1520,7 @@ Hint: Omit it from the simp argument list.
   [apply] simp [endpointDifferenceInterval, fifthIntegralPrimitiveRaw, RealFunRaw.exact, QInterval.width]
 
 Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-⚠ [390/402] Replayed ComputableAnalysis.FiniteGaussianRadiusQuadrature
+⚠ [1165/1171] Replayed ComputableAnalysis.FiniteGaussianRadiusQuadrature
 warning: ComputableAnalysis/FiniteGaussianRadiusQuadrature.lean:210:51: This simp argument is unused:
   A
 
@@ -780,35 +1564,11 @@ Hint: The binding can be removed (if unused) or named `_` (if used implicitly). 
   [apply] _hlower
 
 Note: This linter can be disabled with `set_option linter.unusedVariables false`
-⚠ [392/402] Replayed ComputableAnalysis.GaussianDifferential
+⚠ [1167/1171] Replayed ComputableAnalysis.GaussianDifferential
 warning: ComputableAnalysis/GaussianDifferential.lean:1386:6: try 'simp' instead of 'simpa'
 
 Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
-⚠ [395/402] Replayed ComputableAnalysis.ExponentialComputations.PositiveSegment
-warning: ComputableAnalysis/ExponentialComputations/PositiveSegment.lean:11:0: Definition `eventually_positive` is a proposition; use `theorem` instead of `def`
-
-Note: This linter can be disabled with `set_option linter.defProp false`
-warning: ComputableAnalysis/ExponentialComputations/PositiveSegment.lean:92:17: This simp argument is unused:
-  QComplex.neg
-
-Hint: Omit it from the simp argument list.
-  [apply] simp only [realAxis, positiveSegment, segmentDisplacement, ofRealRaw, sub, add, neg, QBox.add, QBox.neg,
-    QComplex.add, scaleRat, QBox.scaleRat, RealRaw.add, RealRaw.addCompute, RealRaw.ofRat, RealRaw.scaleRat,
-    RealRaw.scaleRatCompute, if_pos hu.1, if_pos hv.1, RealRaw.sub, RealRaw.subCompute]
-
-Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-✔ [397/402] Built ComputableAnalysis.ExponentialComputations.LipschitzIntegral (863ms)
-✔ [398/402] Built ComputableAnalysis.ExponentialComputations.RectangleValue (572ms)
-⚠ [399/402] Built ComputableAnalysis.ExponentialComputations.SegmentFTC (5.0s)
-warning: ComputableAnalysis/ExponentialComputations/SegmentFTC.lean:16:75: This simp argument is unused:
-  QComplex.neg
-
-Hint: Omit it from the simp argument list.
-  [apply] simp only [realAxis, ofRealRaw, sub, add, neg, QBox.add, QBox.neg, QComplex.add, RealRaw.sub,
-    RealRaw.subCompute, Rat.neg_zero, Rat.zero_add, Rat.sub_eq_add_neg] at ho ⊢
-
-Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-✔ [400/402] Built ComputableAnalysis.ExponentialComputations.IntegralLogarithm (9.9s)
-✔ [401/402] Built ComputableAnalysis.ExponentialComputations.API (249ms)
-✔ [402/402] Built ComputableAnalysis.ExponentialComputations.Constants (312ms)
-Build completed successfully (402 jobs).
+✔ [1169/1171] Built ComputableAnalysis.ExponentialComputations.ComplexPeriods (464ms)
+✔ [1170/1171] Built ComputableAnalysis.ExponentialComputations.API (254ms)
+✔ [1171/1171] Built ComputableAnalysis.ExponentialComputations.Constants (233ms)
+Build completed successfully (1171 jobs).
