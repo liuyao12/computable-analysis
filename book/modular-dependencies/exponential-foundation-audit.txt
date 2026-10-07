@@ -1,0 +1,36 @@
+ComputableAnalysis.ModularForms.EC163.input : ExponentialComputations.RealInput
+ComputableAnalysis.ModularForms.EC163.complex_exp_agreement :
+  (ModularForms.entireExponentialValue ModularForms.cmGrowthExponent163).val.Equiv
+    (ExponentialComputations.Complex.exp (ExponentialComputations.realAxis input)).val
+ComputableAnalysis.ModularForms.EC163.real_exp_agreement :
+  ModularForms.cmGrowthValue163.Equiv (ExponentialComputations.exp input).val
+ComputableAnalysis.ModularForms.EC163.implementation_agreement (f : ExponentialComputations.Implementation)
+  (x : ExponentialComputations.RealInput) (hx : x.val.Equiv input.val) :
+  (f.realEval x).val.Equiv ModularForms.cmGrowthValue163
+ComputableAnalysis.ModularForms.EC163.deficit_agreement (f : ExponentialComputations.Implementation)
+  (x : ExponentialComputations.RealInput) (hx : x.val.Equiv input.val) :
+  (deficit f x).Equiv ModularForms.cmIntegerGrowthDeficit163
+ComputableAnalysis.ModularForms.EC163.deficit_bounds (f : ExponentialComputations.Implementation)
+  (x : ExponentialComputations.RealInput) (hx : x.val.Equiv input.val) :
+  (RealRaw.ofRat (1 / 100000000000000)).Le (deficit f x) ∧ (deficit f x).Le (RealRaw.ofRat (9 / 10000000000000))
+ComputableAnalysis.ModularForms.EC163.exp_bounds :
+  have d := (RealRaw.ofRat 262537412640768744).add (ExponentialComputations.exp input).val.neg;
+  (RealRaw.ofRat (1 / 100000000000000)).Le d ∧ d.Le (RealRaw.ofRat (9 / 10000000000000))
+ComputableAnalysis.ModularForms.EC163.compoundInterest_bounds :
+  (RealRaw.ofRat (1 / 100000000000000)).Le (deficit ExponentialComputations.compoundInterest input) ∧
+    (deficit ExponentialComputations.compoundInterest input).Le (RealRaw.ofRat (9 / 10000000000000))
+ComputableAnalysis.ModularForms.EC163.linearODE_bounds :
+  (RealRaw.ofRat (1 / 100000000000000)).Le (deficit ExponentialComputations.linearODE input) ∧
+    (deficit ExponentialComputations.linearODE input).Le (RealRaw.ofRat (9 / 10000000000000))
+'ComputableAnalysis.ModularForms.EC163.complex_exp_agreement' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.EC163.real_exp_agreement' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.EC163.implementation_agreement' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.EC163.deficit_agreement' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.EC163.deficit_bounds' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.EC163.exp_bounds' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.EC163.compoundInterest_bounds' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.EC163.linearODE_bounds' depends on axioms: [propext, Classical.choice, Quot.sound]

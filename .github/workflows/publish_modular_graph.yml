@@ -5,7 +5,7 @@ on:
       base_run:
         description: Successful publication run containing the existing live Pages artifact
         required: true
-        default: '36875203798'
+        default: '37605630946'
 permissions:
   contents: read
   actions: read
@@ -36,25 +36,43 @@ jobs:
           tar -xf previous/artifact.tar -C site
           python3 - <<'PY'
           from pathlib import Path
-          import json,hashlib,shutil,os
+          import json,hashlib,shutil,os,re
           site=Path('site');source=Path('book/modular-dependencies')
           data=json.loads((source/'modular-dependencies.json').read_text())
           assert len(data['nodes'])==11
           for item in data['sources'].values():
               assert hashlib.sha256(item['text'].encode()).hexdigest()==item['sha256']
+          proof=data['exponentialFoundation']
+          assert proof['api']=='ComputableAnalysis.ExponentialComputations.API'
+          assert proof['mathlibDependency'] is False
+          assert len(proof['checkedEndpoints'])==8
+          audit=(source/'exponential-foundation-audit.txt').read_text()
+          assert hashlib.sha256(audit.encode()).hexdigest()==proof['axiomAuditSha256']
+          assert 'sorryAx' not in audit and 'error:' not in audit
+          for name in proof['checkedEndpoints']:
+              match=re.search("'"+re.escape(name)+r"' depends on axioms: \[([^]]*)\]",audit)
+              assert match,name
+              assert set(re.findall(r'[\w.]+',match[1])) <= {'propext','Classical.choice','Quot.sound'},name
           before={str(p.relative_to(site)):hashlib.sha256(p.read_bytes()).hexdigest() for p in site.rglob('*') if p.is_file()}
-          shutil.copy(source/'index.html',site/'modular-proofs.html')
-          shutil.copy(source/'modular-dependencies.json',site/'modular-dependencies.json')
-          shutil.copy(source/'constants-audit.txt',site/'modular-constants-audit.txt')
+          files={'index.html':'modular-proofs.html',
+              'modular-dependencies.json':'modular-dependencies.json',
+              'constants-audit.txt':'modular-constants-audit.txt',
+              'exponential-foundation-audit.txt':'modular-exponential-foundation-audit.txt',
+              'exponential-foundation-build.txt':'modular-exponential-foundation-build.txt',
+              'import-audit.txt':'modular-import-audit.txt',
+              'check_cm163_exponential_foundation.lean':'check_cm163_exponential_foundation.lean'}
+          for src,dst in files.items():
+              shutil.copy(source/src,site/dst)
           index=site/'index.html';text=index.read_text()
           link='<p id="modular-proof-map-link"><a href="modular-proofs.html">Modular arithmetic: expandable dependency map</a></p>'
           if 'id="modular-proof-map-link"' not in text:
               text=text.replace('</body>',link+'</body>')
           index.write_text(text)
+          changed=set(files.values())|{'index.html','modular-publication.json'}
           for name,digest in before.items():
-              if name!='index.html':
+              if name not in changed:
                   assert hashlib.sha256((site/name).read_bytes()).hexdigest()==digest,name
-          (site/'modular-publication.json').write_text(json.dumps({'baseRun': int(os.environ['BASE_RUN']),'preservedFiles':len(before)-1,'graphBundles':len(data['nodes']),'sourceModules':len(data['imports']),'sourceSnapshots':len(data['sources']),'graphSha256':hashlib.sha256((site/'modular-proofs.html').read_bytes()).hexdigest()}))
+          (site/'modular-publication.json').write_text(json.dumps({'baseRun': int(os.environ['BASE_RUN']),'preservedFiles':sum(n not in changed for n in before),'graphBundles':len(data['nodes']),'sourceModules':len(data['imports']),'sourceSnapshots':len(data['sources']),'currentExponentialApi':True,'auditedExponentialEndpoints':len(proof['checkedEndpoints']),'exponentialAuditSha256':proof['axiomAuditSha256'],'graphSha256':hashlib.sha256((site/'modular-proofs.html').read_bytes()).hexdigest()}))
           PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
