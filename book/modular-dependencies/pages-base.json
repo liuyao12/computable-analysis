@@ -1,0 +1,11 @@
+{
+  "sha256": "c155729a1acd0c62b8f6033f9528cdae914292f251e1770595c6ddf43527987e",
+  "bytes": 48422684,
+  "retainedArtifactRun": 37605630946,
+  "latestPagesRun": 37611924596,
+  "files": 1537,
+  "preservedCriticalHashes": {
+    "ch-exponential-logarithm.html": "de149fa3f51360d67d7ed52042e726057db1a67762a6d3afbd1c8158da66c58c",
+    "exponential-chapter/manifest.json": "02351f94ac5c76f9d4aae2d5422ff7a0d87ed250d5b1155d4e153596343d8efd"
+  }
+}

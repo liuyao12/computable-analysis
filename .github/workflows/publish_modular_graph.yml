@@ -23,6 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: github-pages
           path: previous
@@ -33,7 +34,22 @@ jobs:
           BASE_RUN: ${{ inputs.base_run }}
         run: |
           mkdir site
-          tar -xf previous/artifact.tar -C site
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,hashlib,subprocess
+          previous=Path('previous/artifact.tar')
+          if previous.exists():
+              subprocess.run(['tar','-xf',str(previous),'-C','site'],check=True)
+          else:
+              source=Path('book/modular-dependencies')
+              meta=json.loads((source/'pages-base.json').read_text())
+              backup=source/'pages-base.tar.gz'
+              assert hashlib.sha256(backup.read_bytes()).hexdigest()==meta['sha256']
+              assert backup.stat().st_size==meta['bytes']
+              subprocess.run(['tar','-xzf',str(backup),'-C','site'],check=True)
+              for name,digest in meta['preservedCriticalHashes'].items():
+                  assert hashlib.sha256((Path('site')/name).read_bytes()).hexdigest()==digest,name
+          PY
           python3 - <<'PY'
           from pathlib import Path
           import json,hashlib,shutil,os,re
@@ -91,7 +107,7 @@ jobs:
           for name,digest in before.items():
               if name not in changed:
                   assert hashlib.sha256((site/name).read_bytes()).hexdigest()==digest,name
-          (site/'modular-publication.json').write_text(json.dumps({'baseRun': int(os.environ['BASE_RUN']),'preservedFiles':sum(n not in changed for n in before),'graphBundles':len(data['nodes']),'sourceModules':len(data['imports']),'sourceSnapshots':len(data['sources']),'currentExponentialApi':True,'auditedCMValueEndpoints':len(cm['checkedEndpoints']),'classPolynomialTheoremProved':False,'cmSourceBundleSha256':bundle['sha256'],'cmValuesAuditSha256':cm['axiomAuditSha256'],'auditedExponentialEndpoints':len(proof['checkedEndpoints']),'exponentialAuditSha256':proof['axiomAuditSha256'],'graphSha256':hashlib.sha256((site/'modular-proofs.html').read_bytes()).hexdigest()}))
+          (site/'modular-publication.json').write_text(json.dumps({'baseRun': int(os.environ['BASE_RUN']),'baseRecovered':not Path('previous/artifact.tar').exists(),'preservedFiles':sum(n not in changed for n in before),'graphBundles':len(data['nodes']),'sourceModules':len(data['imports']),'sourceSnapshots':len(data['sources']),'currentExponentialApi':True,'auditedCMValueEndpoints':len(cm['checkedEndpoints']),'classPolynomialTheoremProved':False,'cmSourceBundleSha256':bundle['sha256'],'cmValuesAuditSha256':cm['axiomAuditSha256'],'auditedExponentialEndpoints':len(proof['checkedEndpoints']),'exponentialAuditSha256':proof['axiomAuditSha256'],'graphSha256':hashlib.sha256((site/'modular-proofs.html').read_bytes()).hexdigest()}))
           PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
