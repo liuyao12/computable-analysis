@@ -1,4 +1,4 @@
-import ComputableAnalysis.ModularForms.CMExponentialAgreement43
+import ComputableAnalysis.ModularForms.NearIntegerExponentials
 
 open ComputableAnalysis ComputableAnalysis.ModularForms
 open ComputableAnalysis.RiemannHilbert
@@ -65,3 +65,18 @@ example (g : SL2Z) (z : Scalar)
       g cmScalar43 cmPoint43_upper z hz)).val.Equiv
       (ComplexRaw.ofQComplex ⟨-((960:Rat)^3),0⟩) :=
   latticeJMap_cm43_orbit_equivalent_value g z hz
+
+#print axioms cmJValue43_linear_laurent_bound
+#print axioms cmJGrowthError43_small_sharp
+#print axioms cmJGrowthError43_real_upper_negative
+#print axioms cmJGrowthDeficit43_lower
+#print axioms cmJGrowthDeficit43_upper
+#print axioms EC43.deficit_agreement
+#print axioms EC43.deficit_bounds
+#print axioms EC43.exp_bounds
+#print axioms EC43.compoundInterest_bounds
+#print axioms EC43.linearODE_bounds
+#print axioms exp_pi_sqrt43_near_integer
+#print axioms exp_pi_sqrt163_near_integer
+#print axioms exp_pi_sqrt43_near_integer_for
+#print axioms exp_pi_sqrt163_near_integer_for

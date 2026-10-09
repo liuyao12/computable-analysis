@@ -5,7 +5,7 @@ on:
       base_run:
         description: Successful publication run containing the existing live Pages artifact
         required: true
-        default: '37911308112'
+        default: '37923560465'
 permissions:
   contents: read
   actions: read
@@ -55,7 +55,7 @@ jobs:
           import json,hashlib,shutil,os,re
           site=Path('site');source=Path('book/modular-dependencies')
           data=json.loads((source/'modular-dependencies.json').read_text())
-          assert len(data['nodes'])==14
+          assert len(data['nodes'])==15
           for item in data['sources'].values():
               assert hashlib.sha256(item['text'].encode()).hexdigest()==item['sha256']
           proof=data['exponentialFoundation']
@@ -71,7 +71,7 @@ jobs:
               assert set(re.findall(r'[\w.]+',match[1])) <= {'propext','Classical.choice','Quot.sound'},name
           cm=data['cmGeneralization']
           assert cm['classPolynomialTheoremProved'] is False
-          assert len(cm['checkedEndpoints'])==29
+          assert len(cm['checkedEndpoints'])==43
           cm_audit=(source/'cm-values-audit.txt').read_text()
           assert hashlib.sha256(cm_audit.encode()).hexdigest()==cm['axiomAuditSha256']
           assert 'sorryAx' not in cm_audit and 'error:' not in cm_audit

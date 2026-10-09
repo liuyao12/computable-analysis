@@ -9,7 +9,7 @@ a=p.parse_args()
 audit=Path(a.audit).read_bytes();build=Path(a.build).read_bytes()
 assert b'error:' not in audit and b'sorryAx' not in audit
 assert b'Build completed successfully' in build and b'error:' not in build
-pending=['ComputableAnalysis.ModularForms.CMExponentialAgreement43']
+pending=['ComputableAnalysis.ModularForms.NearIntegerExponentials']
 seen=set();files={}
 while pending:
     name=pending.pop()
@@ -22,19 +22,19 @@ while pending:
                 if dep.startswith('ComputableAnalysis.'):pending.append(dep)
                 else:assert dep in ['Init','Lean'] or dep.startswith(('Init.','Lean.')),dep
 files.update({
-    'ComputableAnalysis.lean':b'import ComputableAnalysis.ModularForms.CMExponentialAgreement43\n',
+    'ComputableAnalysis.lean':b'import ComputableAnalysis.ModularForms.NearIntegerExponentials\n',
     'scripts/check_cm_elliptic_values.lean':(ROOT/'scripts/check_cm_elliptic_values.lean').read_bytes(),
     'scripts/build_cm_values_proof_bundle.py':Path(__file__).read_bytes(),
     'lean-toolchain':(ROOT/'lean-toolchain').read_bytes(),
     'lakefile.toml':b'name = "cm_values_proof"\nversion = "0.1.0"\ndefaultTargets = ["ComputableAnalysis"]\n\n[[lean_lib]]\nname = "ComputableAnalysis"\n',
     'axiom-audit.txt':audit,'scoped-build.txt':build,
     'README.txt':b"""Complete checked source closure for the actual modular j values at
-discriminants -4, -43 and -163, and exact current exponential API agreement
-at the new irrational CM argument. The general class-polynomial theorem
+discriminants -4, -43 and -163, and unconditional near-integer exponential showpieces
+at both irrational arguments through the current exponential API. The general class-polynomial theorem
 is not included. Only Lean and Init external imports are needed.
 
 Replay with the pinned Lean toolchain:
-  lake build ComputableAnalysis.ModularForms.CMExponentialAgreement43
+  lake build ComputableAnalysis.ModularForms.NearIntegerExponentials
   lake env lean scripts/check_cm_elliptic_values.lean
 
 All concrete point, denominator, modular relation and isolation evidence

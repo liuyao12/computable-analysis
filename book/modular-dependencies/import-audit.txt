@@ -1,4 +1,4 @@
 External imports: ['Init', 'Init.Grind.Ordered.Rat', 'Lean']
-Project module count: 2559
+Project module count: 2563
 Forbidden source occurrences: []
 PASS: only Lean/Init external imports; no Mathlib scalar dependency or unfinished proof declarations. Target axiom audit separately checks proof dependencies.

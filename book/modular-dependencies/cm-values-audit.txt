@@ -89,3 +89,29 @@ ComputableAnalysis.ModularForms.cmJValue43_exact_value :
 'ComputableAnalysis.ModularForms.EC43.implementation_agreement' depends on axioms: [propext,
  Classical.choice,
  Quot.sound]
+'ComputableAnalysis.ModularForms.cmJValue43_linear_laurent_bound' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.cmJGrowthError43_small_sharp' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.cmJGrowthError43_real_upper_negative' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.cmJGrowthDeficit43_lower' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.cmJGrowthDeficit43_upper' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.EC43.deficit_agreement' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.EC43.deficit_bounds' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.EC43.exp_bounds' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.EC43.compoundInterest_bounds' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.EC43.linearODE_bounds' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.exp_pi_sqrt43_near_integer' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.exp_pi_sqrt163_near_integer' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.exp_pi_sqrt43_near_integer_for' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.exp_pi_sqrt163_near_integer_for' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

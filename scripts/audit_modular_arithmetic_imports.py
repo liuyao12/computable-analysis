@@ -9,7 +9,7 @@ import sys,re
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from pde_repo_audit import mask
 root=Path(__file__).resolve().parents[1]
-pending=['ComputableAnalysis.ModularForms.CMExponentialAgreement43','ComputableAnalysis.ModularForms.CMJModularOrbits','ComputableAnalysis.ModularForms.CMExponentialFoundation163','ComputableAnalysis.ModularForms.RamanujanTauIdentities','ComputableAnalysis.ModularForms.CMJEquivalentPoint163','ComputableAnalysis.ModularForms.CMIntegerGrowthDeficit163']
+pending=['ComputableAnalysis.ModularForms.NearIntegerExponentials','ComputableAnalysis.ModularForms.CMJModularOrbits','ComputableAnalysis.ModularForms.CMExponentialFoundation163','ComputableAnalysis.ModularForms.RamanujanTauIdentities','ComputableAnalysis.ModularForms.CMJEquivalentPoint163','ComputableAnalysis.ModularForms.CMIntegerGrowthDeficit163']
 seen=set(); external=set(); failures=[]
 while pending:
  name=pending.pop()
