@@ -91,6 +91,12 @@ def install(site, foundation_audit, constants_audit, import_audit, build, cm_val
     data['cmGeneralization']=dict(checkedEndpoints=values_endpoints,classPolynomialTheoremProved=False,
         scope='Exact elliptic modular fixed-point laws and represented modular-orbit laws; exact CM values for discriminants minus four and minus 163.',
         axiomAuditSha256=hashlib.sha256(values_audit.encode()).hexdigest())
+    bundle=ROOT/'book/modular-dependencies/cm-values-proof.tar.gz'
+    bundle_meta=json.loads((ROOT/'book/modular-dependencies/cm-values-proof.json').read_text())
+    assert hashlib.sha256(bundle.read_bytes()).hexdigest()==bundle_meta['sha256']
+    assert bundle.stat().st_size==bundle_meta['bytes']
+    data['cmGeneralization']['sourceBundle']=bundle_meta
+    shutil.copy(bundle,site/'modular-cm-values-proof.tar.gz')
     shutil.copy(cm_values_audit,site/'modular-cm-values-audit.txt')
     shutil.copy(cm_values_build,site/'modular-cm-values-build.txt')
     shutil.copy(ROOT/'scripts/check_cm_elliptic_values.lean',site/'check_cm_elliptic_values.lean')

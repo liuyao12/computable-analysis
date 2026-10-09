@@ -63,6 +63,9 @@ jobs:
               match=re.search("'"+re.escape(name)+r"' depends on axioms: \[([^]]*)\]",cm_audit)
               assert match,name
               assert set(re.findall(r'[\w.]+',match[1])) <= {'propext','Classical.choice','Quot.sound'},name
+          bundle=cm['sourceBundle']
+          assert hashlib.sha256((source/'cm-values-proof.tar.gz').read_bytes()).hexdigest()==bundle['sha256']
+          assert (source/'cm-values-proof.tar.gz').stat().st_size==bundle['bytes']
           cm_build=(source/'cm-values-build.txt').read_text()
           assert 'Build completed successfully' in cm_build and 'error:' not in cm_build
           before={str(p.relative_to(site)):hashlib.sha256(p.read_bytes()).hexdigest() for p in site.rglob('*') if p.is_file()}
@@ -75,7 +78,8 @@ jobs:
               'check_cm163_exponential_foundation.lean':'check_cm163_exponential_foundation.lean',
               'cm-values-audit.txt':'modular-cm-values-audit.txt',
               'cm-values-build.txt':'modular-cm-values-build.txt',
-              'check_cm_elliptic_values.lean':'check_cm_elliptic_values.lean'}
+              'check_cm_elliptic_values.lean':'check_cm_elliptic_values.lean',
+              'cm-values-proof.tar.gz':'modular-cm-values-proof.tar.gz'}
           for src,dst in files.items():
               shutil.copy(source/src,site/dst)
           index=site/'index.html';text=index.read_text()
@@ -87,7 +91,7 @@ jobs:
           for name,digest in before.items():
               if name not in changed:
                   assert hashlib.sha256((site/name).read_bytes()).hexdigest()==digest,name
-          (site/'modular-publication.json').write_text(json.dumps({'baseRun': int(os.environ['BASE_RUN']),'preservedFiles':sum(n not in changed for n in before),'graphBundles':len(data['nodes']),'sourceModules':len(data['imports']),'sourceSnapshots':len(data['sources']),'currentExponentialApi':True,'auditedCMValueEndpoints':len(cm['checkedEndpoints']),'classPolynomialTheoremProved':False,'cmValuesAuditSha256':cm['axiomAuditSha256'],'auditedExponentialEndpoints':len(proof['checkedEndpoints']),'exponentialAuditSha256':proof['axiomAuditSha256'],'graphSha256':hashlib.sha256((site/'modular-proofs.html').read_bytes()).hexdigest()}))
+          (site/'modular-publication.json').write_text(json.dumps({'baseRun': int(os.environ['BASE_RUN']),'preservedFiles':sum(n not in changed for n in before),'graphBundles':len(data['nodes']),'sourceModules':len(data['imports']),'sourceSnapshots':len(data['sources']),'currentExponentialApi':True,'auditedCMValueEndpoints':len(cm['checkedEndpoints']),'classPolynomialTheoremProved':False,'cmSourceBundleSha256':bundle['sha256'],'cmValuesAuditSha256':cm['axiomAuditSha256'],'auditedExponentialEndpoints':len(proof['checkedEndpoints']),'exponentialAuditSha256':proof['axiomAuditSha256'],'graphSha256':hashlib.sha256((site/'modular-proofs.html').read_bytes()).hexdigest()}))
           PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
