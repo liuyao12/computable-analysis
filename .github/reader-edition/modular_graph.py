@@ -25,6 +25,25 @@ def model():
       node('error43','Near-integer exponential: 43',r'\[10^{-4}\le884736744-\exp(\pi\sqrt{43})\le3\cdot10^{-4}\]',r'This unconditional statement uses the current exponential API at geometric pi times the positive computable square root of 43. The modular integer identity appears only beneath its proof. The linear Laurent term is \(196884q\); a rationally bounded remainder is at most \(10^{-6}\). The negative nome is bounded away from zero, proving that the exponential lies below the integer. The error bound holds for every registered implementation and every equivalent valid input name. The two public showpiece statements are in NearIntegerExponentials.',['ModularForms.NearIntegerExponentials','ModularForms.CMExponentialFoundation43','ModularForms.CMJLinearLaurentEstimate43','ModularForms.CMJNearIntegerError43'],8,2,['cm43','nome']),
       node('cm43','Nontrivial CM value',r'\[j((1+i\sqrt{43})/2)=-960^3\]',r'This point is not an elliptic fixed point. Put \(z=(1+i\sqrt{43})/2\). The checked equation \(z^2-z+11=0\) gives an endomorphism \(5+z\) of norm \(41\). The fifth Hecke point \(w=(z+5)/41\) satisfies \(6-1/w=z\), so modular invariance repeats the actual j-value among the roots of the already recovered correspondence. A new kernel-checked factorization gives \(P(X)=(X+960^3)^2Q_{43}(X)\). The actual Fourier expansion puts the real j-value in \([-1500000000,-750000000]\); the homogeneous interval transform of the quotient has strictly negative coefficients, excluding every other root. All domain, validity and isolation evidence is constructed internally. The exact endpoint covers arbitrary equivalent represented names and their modular transforms. EC43 verifies agreement with the current real and complex exponential API. The general class-polynomial theorem remains open.',['ModularForms.CMPoint43','ModularForms.CMHeckeDiagonal43','ModularForms.CMExponentialBounds43','ModularForms.CMJAnalyticBounds43','ModularForms.CMJFactor43','ModularForms.CMJIsolation43','ModularForms.CMJExactValue43','ModularForms.CMExponentialAgreement43'],7,2,['cm']),
     ]
+    numerical_nodes=[dict(n) for n in nodes if n['id'] in ['raw','pi','exp']]
+    for n in numerical_nodes:
+        if n['id']=='pi':
+            n['roots']=['ComputableAnalysis.GeometricPiRotation']
+            n['body']='Use twice the valid GeometricPiRotation.halfPi name. The same geometric constant occurs in the completed theorem; no modular nome is needed in the proposed input enclosure. A faster exactly equivalent pi evaluator can be substituted through its proved agreement.'
+        if n['id']=='exp':
+            n['title']='Real exponential core'
+            n['formula']=r'\(\exp(x)=\sum_{n\ge0}x^n/n!\)'
+            n['body']='The real exponential is defined in ExponentialComputations.RealExponential from the same entire power-series value used by the current API. The direct view links this core and its finite approximation source. The umbrella API also imports complex-period laws and therefore has extra modular source dependencies; those are not mathematical prerequisites for a direct real numerical proof.'
+            n['roots']=['ComputableAnalysis.ExponentialComputations.RealExponential','ComputableAnalysis.ModularForms.EntireExponential','ComputableAnalysis.ComplexExponentialApproximation']
+    numerical_nodes += [
+      node('direct-input','Enclose the irrational input',r'\[a\le x_d=\pi\sqrt d\le b\]',r'Choose rational enclosures for geometric pi and the positive square root, then multiply them with outward bounds. These are the same computable constants as in the checked theorem. An alternative faster computation of pi can be used after its exact agreement with the geometric constant is proved. The displayed supporting source establishes the constants and square-root construction; the required high-precision concrete input bounds for this alternative proof have not been supplied.',['GeometricPiRotation','AlgebraicFunctions'],2,1,['pi']),
+      node('direct-exp','Certify exponential endpoint bounds',r'\[L(a)\le\exp(a)\le\exp(x_d)\le\exp(b)\le U(b)\]',r'Use a finite power-series sum with a proved tail bound to enclose the exponential at rational endpoints, then transport across the input bounds using monotonicity. Range reduction can evaluate at a smaller argument and amplify through the proved exponential power law. No modular function or CM integer identity is mathematically required. The linked source is checked general infrastructure, not a completed numerical certificate for these two endpoints. The concrete enclosures and their semantic transport still need to be instantiated.',['ComplexExponentialApproximation','ModularForms.RationalExponentialPowerBounds'],3,1,['direct-input','exp']),
+      node('direct-goal','Same exponential inequalities',r'\[N_d-u_d\le L(a)\le U(b)\le N_d-\ell_d\]',r'If the certified exponential enclosure fits this rational interval, ordinary order laws give the same near-integer theorem. For the first statement use \(d=43\), \(N_d=884736744\), \(\ell_d=10^{-4}\), \(u_d=3\cdot10^{-4}\). For the second use \(d=163\), \(N_d=262537412640768744\), \(\ell_d=10^{-14}\), \(u_d=9\cdot10^{-13}\). These integers are targets supplied to the numerical check. This strategy certifies proximity; it does not explain the pattern of a cube plus \(744\) or prove the exact modular special value. Concrete direct Lean certificates are not yet checked. The unconditional inequalities are already proved by the separate modular route.',[],4,1,['direct-exp']),
+    ]
+    numerical_alternative=dict(status='strategy-only',concreteCertificatesChecked=False,
+        nodes=numerical_nodes,
+        scope='A mathematically sufficient alternative numerical route. Supporting infrastructure is checked; concrete high-precision direct certificates for these two inequalities have not been instantiated or audited.',
+        tradeoff=r'The \(d=163\) inequality asks for an absolute output interval on the scale of \(10^{-12}\) around a value on the scale of \(10^{17}\): roughly \(30\) decimal digits of relative accuracy. Direct checking may be compact with efficient evaluators and certificates; its runtime and proof size have not been measured here. The completed modular corollary uses coarse growth bounds plus the small Laurent tail after the exact CM identity is proved. Developing that reusable modular theory is a much larger task than the final corollary, and it additionally explains the integer pattern.')
     lessons=[
       dict(node='integer',question='What must an exact proof establish?',answer=r'Put \(J=j((1+i\sqrt{163})/2)\) and \(A=-640320^3\). Computing many digits of \(J\) does not prove \(J=A\). This proof first gives an exact polynomial equation for the actual analytic value, then rules out every other factor.',formula=r'\[P(J)=0,\quad P(X)=(X-A)^2Q(X),\quad Q(J)\ne0\quad\Longrightarrow\quad J=A.\]',files=['CMJExactClassFromNewton163','CMJExactValue163']),
       dict(node='j',question='What is the function being evaluated?',answer=r'The lattice \(\mathbb Z+z\mathbb Z\) supplies weight-four and weight-six sums. Their scaled versions define \(g_2\) and \(g_3\); the discriminant supplies the denominator. The proof must establish convergence, holomorphicity, transformation laws, normalization, and a nonzero denominator at the chosen point. The integer is not built into this definition.',formula=r'\[j(z)=\frac{1728g_2(z)^3}{g_2(z)^3-27g_3(z)^2}.\]',files=['LatticeJInvariant','CMJDomain163']),
@@ -41,7 +60,7 @@ def model():
         lesson['roots']=['ComputableAnalysis.ModularForms.'+f for f in lesson.pop('files')]
     # Learning links add snapshots, but do not pretend to be kernel dependency edges.
     # Resolve actual source imports, not inferred mathematical theorem edges.
-    modules={};todo=[r for n in nodes+lessons for r in n['roots']]
+    modules={};todo=[r for n in nodes+lessons+numerical_nodes for r in n['roots']]
     while todo:
         m=todo.pop()
         if m in modules:continue
@@ -51,12 +70,21 @@ def model():
         for line in p.read_text().splitlines():
             if line.startswith('import '):deps+=line.split('--')[0].split()[1:]
         modules[m]=deps;todo += [d for d in deps if d.startswith('ComputableAnalysis.')]
+    supporting=set();pending=[r for n in numerical_nodes for r in n['roots']]
+    while pending:
+        name=pending.pop()
+        if name in supporting:continue
+        supporting.add(name);pending += [d for d in modules.get(name,[]) if d in modules]
+    excluded=[n for n in supporting if re.search(r'\.(LatticeJ|NomeJ|CMJ|Hecke|IntegerHecke)',n)]
+    assert not excluded,excluded
+    numerical_alternative['supportingSourceModules']=len(supporting)
+    numerical_alternative['jHeckeSourceDependencies']=excluded
     snapshots={}
-    for n in nodes+lessons:
+    for n in nodes+lessons+numerical_nodes:
         for m in n['roots']:
             p=ROOT.joinpath(*m.split('.')).with_suffix('.lean');s=p.read_text()
             snapshots[m]=dict(text=s,sha256=hashlib.sha256(s.encode()).hexdigest())
-    return dict(nodes=nodes,lessons=lessons,imports=modules,sources=snapshots,constantsAudit=(ROOT/'scripts/check_modular_constants.lean').read_text(),scope='Bundle arrows are a curated mathematical outline. Expanded module arrows/lists are literal source imports, not extracted declaration-level proof dependencies.')
+    return dict(nodes=nodes,lessons=lessons,numericalAlternative=numerical_alternative,imports=modules,sources=snapshots,constantsAudit=(ROOT/'scripts/check_modular_constants.lean').read_text(),scope='Bundle arrows are a curated mathematical outline. Expanded module arrows/lists are literal source imports, not extracted declaration-level proof dependencies. Dashed numerical-route edges describe a strategy whose concrete certificates are not yet checked.')
 
 def install(site, foundation_audit, constants_audit, import_audit, build, cm_values_audit, cm_values_build):
     site=Path(site);site.mkdir(parents=True,exist_ok=True)
