@@ -1,0 +1,62 @@
+warning: checkdecls: repository '/Users/liuyao/Documents/Codex/projects/computable-analysis/.lake/packages/checkdecls' has local changes
+ComputableAnalysis.ModularForms.latticeJMap_zero_of_modular_fixed (g : SL2Z) (z : Scalar) (hz : InUpperHalfPlane z.val)
+  (hfix : (fractionalLinear g z hz).val.Equiv z.val)
+  (hm : ¬(LocalODE.power (integerAffine g.c g.d z.val) 4).Equiv (ComplexRaw.ofQComplex QComplex.one)) :
+  (latticeJMap.eval z ⋯).val.Equiv ComplexRaw.zero
+ComputableAnalysis.ModularForms.latticeJMap_1728_of_modular_fixed (g : SL2Z) (z : Scalar) (hz : InUpperHalfPlane z.val)
+  (hfix : (fractionalLinear g z hz).val.Equiv z.val)
+  (hm : ¬(LocalODE.power (integerAffine g.c g.d z.val) 6).Equiv (ComplexRaw.ofQComplex QComplex.one)) :
+  (latticeJMap.eval z ⋯).val.Equiv (ComplexRaw.ofQComplex { re := 1728, im := 0 })
+ComputableAnalysis.ModularForms.cmJValue4_exact_value :
+  cmJValue4.val.Equiv (ComplexRaw.ofQComplex { re := 1728, im := 0 })
+ComputableAnalysis.ModularForms.latticeJMap_squareCM_equivalent_value (z : Scalar)
+  (hz : z.val.Equiv squareCMPoint.val) :
+  (latticeJMap.eval z ⋯).val.Equiv (ComplexRaw.ofQComplex { re := 1728, im := 0 })
+ComputableAnalysis.ModularForms.latticeJMap_squareCM_orbit_equivalent_value (g : SL2Z) (z : Scalar)
+  (hz : z.val.Equiv (fractionalLinear g squareCMPoint squareCMPoint_upper).val) :
+  (latticeJMap.eval z ⋯).val.Equiv (ComplexRaw.ofQComplex { re := 1728, im := 0 })
+'ComputableAnalysis.ModularForms.modular_weight_fixed_value_zero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.upperWeightFour_zero_of_modular_fixed' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.upperWeightSix_zero_of_modular_fixed' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.latticeJMap_value_of_weightFour_zero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.latticeJMap_value_of_weightSix_zero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.latticeJMap_zero_of_modular_fixed' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.latticeJMap_1728_of_modular_fixed' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.squareCMPoint_fixed' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.squareCMPoint_weightSix_nonidentity' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.cmJValue4_exact_value' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.latticeJMap_squareCM_equivalent_value' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.latticeJMap_squareCM_orbit_value' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.latticeJMap_squareCM_orbit_equivalent_value' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.latticeJMap_modular_orbit_equivalent_value' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.latticeJMap_cm163_orbit_equivalent_value' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.latticeJMap_cm4_orbit_equivalent_value' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+{ lo := { re := 0, im := 1 }, hi := { re := 0, im := 1 } }
