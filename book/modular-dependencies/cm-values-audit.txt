@@ -60,3 +60,32 @@ ComputableAnalysis.ModularForms.latticeJMap_squareCM_orbit_equivalent_value (g :
  Classical.choice,
  Quot.sound]
 { lo := { re := 0, im := 1 }, hi := { re := 0, im := 1 } }
+ComputableAnalysis.ModularForms.cmJValue43_exact_value :
+  cmJValue43.val.Equiv (ComplexRaw.ofQComplex { re := -960 ^ 3, im := 0 })
+'ComputableAnalysis.ModularForms.cmPoint43Value_quadratic' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.cmHeckePointFive43_action_agreement' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.hecke41Point_cm43_five_j' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.hecke41_repeated_j_diagonal_root' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.cmJValue43_candidate_diagonal_root' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.cmJValue43_real_isolation_bounds' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.cmJValue43_quotient_nonzero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.cmJValue43_exact_value' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.latticeJMap_cm43_equivalent_value' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.latticeJMap_cm43_orbit_equivalent_value' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.EC43.complex_exp_agreement' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.EC43.real_exp_agreement' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.EC43.implementation_agreement' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

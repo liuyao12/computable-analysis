@@ -1,4 +1,4 @@
-import ComputableAnalysis.ModularForms.CMJModularOrbits
+import ComputableAnalysis.ModularForms.CMExponentialAgreement43
 
 open ComputableAnalysis ComputableAnalysis.ModularForms
 open ComputableAnalysis.RiemannHilbert
@@ -36,3 +36,32 @@ example (g : SL2Z) (z : Scalar)
 #print axioms latticeJMap_cm4_orbit_equivalent_value
 
 #eval squareCMPoint.val.compute 0
+
+-- A non-elliptic CM point: repeated Hecke value, polynomial root, analytic
+-- isolation and exact value, all with constructed evidence.
+#check cmJValue43_exact_value
+#print axioms cmPoint43Value_quadratic
+#print axioms cmHeckePointFive43_action_agreement
+#print axioms hecke41Point_cm43_five_j
+#print axioms hecke41_repeated_j_diagonal_root
+#print axioms cmJValue43_candidate_diagonal_root
+#print axioms cmJValue43_real_isolation_bounds
+#print axioms cmJValue43_quotient_nonzero
+#print axioms cmJValue43_exact_value
+#print axioms latticeJMap_cm43_equivalent_value
+#print axioms latticeJMap_cm43_orbit_equivalent_value
+#print axioms EC43.complex_exp_agreement
+#print axioms EC43.real_exp_agreement
+#print axioms EC43.implementation_agreement
+
+example (z : Scalar) (hz : z.val.Equiv cmPoint43) :
+    (latticeJMap.eval z (latticeJMap_cm43_equivalent_domain z hz)).val.Equiv
+      (ComplexRaw.ofQComplex ⟨-((960:Rat)^3),0⟩) :=
+  latticeJMap_cm43_equivalent_value z hz
+
+example (g : SL2Z) (z : Scalar)
+    (hz : z.val.Equiv (fractionalLinear g cmScalar43 cmPoint43_upper).val) :
+    (latticeJMap.eval z (latticeJMap_modular_orbit_equivalent_domain
+      g cmScalar43 cmPoint43_upper z hz)).val.Equiv
+      (ComplexRaw.ofQComplex ⟨-((960:Rat)^3),0⟩) :=
+  latticeJMap_cm43_orbit_equivalent_value g z hz
