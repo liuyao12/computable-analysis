@@ -1,5 +1,18 @@
 # Computable Analysis
 
+## Join the collaboration
+
+**Everyone is welcome to join**, whether you are learning Lean, exploring
+mathematics, or already experienced in formalization. Mathematical ideas,
+proofs, examples, documentation, and improvements to the interactive book
+are all welcome. You can work with or without an AI agent.
+
+If I can trust my AI agent, I can certainly trust other people with their
+agents. I'll accept all pull requests. I'd prefer to collaborate directly
+without a pull-request review process, so
+[request to join as a collaborator](https://github.com/liuyao12/computable-analysis/issues/new?title=Request%20to%20join%20as%20a%20collaborator&body=Hi%21%20I%27d%20like%20to%20join%20as%20a%20collaborator.%0A%0AHere%27s%20what%20I%27d%20like%20to%20work%20on%3A%0A)
+to contribute directly.
+
 ## Highlights: near-integer exponentials
 
 Two checked Lean theorems show how closely these exponential values approach
@@ -33,13 +46,6 @@ or [download the complete checked proof sources](https://liuyao12.github.io/comp
 The [theorem audit](https://liuyao12.github.io/computable-analysis/modular-cm-values-audit.txt)
 records only Lean's standard axioms. The general class-polynomial theorem
 remains open; these two exact CM values and their exponential corollaries are checked.
-
-**All collaborators are welcome!** If I can trust my AI agent, I can certainly
-trust other people with their agents.
-I'll accept all pull requests. I'd prefer to collaborate directly without a
-pull-request review process, so
-[send me a request to join as a collaborator](https://github.com/liuyao12/computable-analysis/issues/new?title=Request%20to%20join%20as%20a%20collaborator&body=Hi%21%20I%27d%20like%20to%20join%20as%20a%20collaborator.%0A%0AHere%27s%20what%20I%27d%20like%20to%20work%20on%3A%0A)
-to contribute directly.
 
 The organizing principle is **construct the objects; prove their laws**.
 General theorems can start from supplied constructions with proved validity
