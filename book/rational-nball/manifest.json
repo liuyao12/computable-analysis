@@ -126,7 +126,7 @@
     "lean-toolchain": "0d3c76ccd8772d8bcbe207241421a760312b71a6aa82f84194391fdf5cb026d6",
     "convex-bodies-audit.txt": "99b48896863041644a4a3c8f044b684948c47cfe540fb85a99b1d65895f99d2f",
     "rational-matrix-audit.txt": "49f496880015772c2146d3e38e2ed8aa58180b67f499bab3c85db20cce9caf65",
-    "rational-geometry-proof.tar.gz": "7a70a10b97a07b681440f22dc79d8a5f97b4d3af0ca335d7cf4b3eaafa3ea430",
+    "rational-geometry-proof.tar.gz": "e3ae77475f5a42c80f154af0e3784ac0473f558f2e38ea0beb7e22b313044392",
     "publish_overlay.py": "8ac67b1502082eb94dc8345e59da13bbf42f596da6c355cc8a272aca9cc608c5",
     "RationalOrthantBodies.lean": "0d3d09788cefba1251ea5d28e50121e35b092ce079154e234554abdf2d35d890",
     "rational_polytopes.py": "cb04efc20638fd12f738ad632cb38f6e9dba1a7d27265537471389a0f94fa785",
@@ -156,8 +156,8 @@
     "native-archimedes-proof.tar.gz": "5cdf06bef5dd7591356ac45ed7811db21b0385ea2f76e2b2752cb93481efa19e",
     "RationalDissectionTransform.lean": "e81df3f71beaf1cea2ac5da57e7872707fdd34b6f3c5fe4055dca0fc6ac89c11",
     "RationalDissectionTransform-audit.txt": "6a8b8cbe721041a5e816006a7971ff0334a2702eadee9b9589e5bc6f4477cb50",
-    "RationalPolytopeCuts.lean": "bedc0141b98b6c414554503abab59fb4e66ab1f1f1067db8cfe62b89a20532b7",
-    "RationalPolytopeCuts-audit.txt": "a292628ec03b2a78384adc0feaae117b26ed155adb580a1d43aa206c834c79a3",
+    "RationalPolytopeCuts.lean": "a014107ad6a4b095ac5a7d7aeb36b18839f9e9ee11e809d6b7c280bd5a89ccaf",
+    "RationalPolytopeCuts-audit.txt": "09de20b654ebc7ef5fe8939c88c542b908e393c2f2454da537144c4a55d9ddab",
     "cuts-capability-note.md": "287a53e8fb37120d3a8355dd6c505d227218986a1c16ffac4dc8c578cc2cb6e3"
   },
   "mathlibModuleClosureContainsRealOrComplex": true,
@@ -361,5 +361,6 @@
   "rationalHyperplaneClippingLeanChecked": true,
   "exactBinaryCutDissectionLeanChecked": true,
   "tangentCapSubtractionLeanChecked": true,
-  "finiteCutRefinementLeanChecked": true
+  "finiteCutRefinementLeanChecked": true,
+  "clippingConstructorsExecutableLean": true
 }

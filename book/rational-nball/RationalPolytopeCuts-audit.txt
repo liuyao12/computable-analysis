@@ -1,11 +1,11 @@
-RationalPolytopeCuts.lean:107:8: warning: This simp argument is unused:
+RationalPolytopeCuts.lean:106:8: warning: This simp argument is unused:
   Finset.mul_sum
 
 Hint: Omit it from the simp argument list.
   [apply] simp [mul_left_comm]
 
 Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-RationalPolytopeCuts.lean:116:2: warning: Try this: 
+RationalPolytopeCuts.lean:115:2: warning: Try this: 
   letI̵
 
 The goal is a proposition, so `let` is preferred over `letI`.
@@ -13,11 +13,11 @@ The difference between `let` and `letI` is that `letI` inlines the value.
 But this is not relevant for proofs because of proof irrelevance.
 
 Note: This linter can be disabled with `set_option linter.style.haveILetI false`
-RationalPolytopeCuts.lean:207:29: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+RationalPolytopeCuts.lean:206:29: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
 
 Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
-RationalPolytopeCuts.lean:258:33: warning: `Set.mem_setOf_eq` has been deprecated: Use `Set.mem_ofPred_eq` instead
-RationalPolytopeCuts.lean:334:33: warning: `Set.mem_setOf_eq` has been deprecated: Use `Set.mem_ofPred_eq` instead
+RationalPolytopeCuts.lean:257:33: warning: `Set.mem_setOf_eq` has been deprecated: Use `Set.mem_ofPred_eq` instead
+RationalPolytopeCuts.lean:333:33: warning: `Set.mem_setOf_eq` has been deprecated: Use `Set.mem_ofPred_eq` instead
 'ComputableAnalysis.RationalPolytopeVolume.edgeIntersection_on_plane' depends on axioms: [propext,
  Classical.choice,
  Quot.sound]

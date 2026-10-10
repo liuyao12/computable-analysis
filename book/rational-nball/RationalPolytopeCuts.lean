@@ -11,9 +11,8 @@ def edgeIntersection {n : Nat} (a : Point n) (c : ℚ) (p q : Point n) : Point n
 
 /-- Retained vertices together with all crossing-edge intersections. All
 vertices, including the new intersections, have rational coordinates. -/
-noncomputable def clipVertices {n : Nat} (P : Polytope n) (a : Point n) (c : ℚ) : Polytope n := by
-  classical
-  exact P.filter (fun p => dot a p ≤ c) ∪
+def clipVertices {n : Nat} (P : Polytope n) (a : Point n) (c : ℚ) : Polytope n :=
+  P.filter (fun p => dot a p ≤ c) ∪
     ((P.product P).filter (fun pq => c < dot a pq.1 ∧ dot a pq.2 ≤ c)).image
       (fun pq => edgeIntersection a c pq.1 pq.2)
 
@@ -303,7 +302,7 @@ theorem volume_clip_commute {n : Nat} (V : Axioms n) (P : Polytope n)
   tauto
 
 /-- Repeated binary cutting constructs a finite common dissection. -/
-noncomputable def cutLeaves {n : Nat} (P : Polytope n) : List (Point n × ℚ) → List (Polytope n)
+def cutLeaves {n : Nat} (P : Polytope n) : List (Point n × ℚ) → List (Polytope n)
   | [] => [P]
   | (a,c)::rest => cutLeaves (clipVertices P a c) rest ++
       cutLeaves (clipVertices P (-a) (-c)) rest
@@ -366,12 +365,12 @@ theorem volume_clip_update {n : Nat} (V : Axioms n) (P : Polytope n)
   rw [volume_clip_add V P a c ha]
   ring
 
-noncomputable def retainedAfterCuts {n : Nat} (P : Polytope n) :
+def retainedAfterCuts {n : Nat} (P : Polytope n) :
     List (Point n × ℚ) → Polytope n
   | [] => P
   | (a,c)::rest => retainedAfterCuts (clipVertices P a c) rest
 
-noncomputable def removedCaps {n : Nat} (P : Polytope n) :
+def removedCaps {n : Nat} (P : Polytope n) :
     List (Point n × ℚ) → List (Polytope n)
   | [] => []
   | (a,c)::rest => clipVertices P (-a) (-c) :: removedCaps (clipVertices P a c) rest
