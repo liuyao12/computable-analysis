@@ -106,3 +106,9 @@ python3 apply_chapter_overlay.py /path/to/base/ch-circle-sphere.html ch-circle-s
 
 The overlay is idempotent and preserves the rest of the reader. Publication
 updates only this chapter and its assets on the existing Pages destination.
+
+## Checked rational volume foundation (2026-10-10)
+
+`RationalPolytopeVolume.lean` states the supplied volume axioms, retaining determinant-one invariance, and proves rational cube subdivision and dilation. `RationalSimplexGeometry.lean` verifies the staircase dissection of the cube and standard simplex normalization. `RationalSimplexDissection.lean` proves edge-cut dissection and positive rational stretch scaling. `RationalSimplexVolume.lean` proves the determinant formula in every dimension, including degenerate and negative orientations, and the induced dilation law for every rational factor. It proves independence for supplied positive triangulations with geometric dissection evidence. A general triangulation constructor and the full sphere convergence/agreement proof remain unfinished.
+
+Run `lake build RationalGeometry` in the isolated proof package. The final module audits actual declaration dependencies and uses `Lean.collectAxioms` to reject every axiom except `propext`, `Classical.choice`, and `Quot.sound`.

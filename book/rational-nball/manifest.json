@@ -38,7 +38,24 @@
     "ComputableAnalysis.RationalSimplex.edgeMatrix_transformed",
     "ComputableAnalysis.RationalSimplex.determinantCoefficient_translation",
     "ComputableAnalysis.RationalSimplex.determinantCoefficient_linear",
-    "ComputableAnalysis.RationalSimplex.determinantCoefficient_det_one"
+    "ComputableAnalysis.RationalSimplex.determinantCoefficient_det_one",
+    "ComputableAnalysis.RationalSimplex.determinantCoefficient_dilation",
+    "ComputableAnalysis.RationalSimplex.presentationCoefficient_dilation",
+    "ComputableAnalysis.RationalPolytopeVolume.cube_grid_dissection",
+    "ComputableAnalysis.RationalPolytopeVolume.cube_subdivision",
+    "ComputableAnalysis.RationalPolytopeVolume.cube_positive",
+    "ComputableAnalysis.RationalPolytopeVolume.orientedCubeVolume_dilation",
+    "ComputableAnalysis.RationalPolytopeVolume.cube_staircase_dissection",
+    "ComputableAnalysis.RationalPolytopeVolume.standardSimplex_volume",
+    "ComputableAnalysis.RationalPolytopeVolume.simplex_edge_dissection",
+    "ComputableAnalysis.RationalPolytopeVolume.stretchedSimplex_volume",
+    "ComputableAnalysis.RationalPolytopeVolume.transformed_simplex_volume",
+    "ComputableAnalysis.RationalPolytopeVolume.vertexSimplex_volume_positive",
+    "ComputableAnalysis.RationalPolytopeVolume.vertexSimplex_volume_zero",
+    "ComputableAnalysis.RationalPolytopeVolume.simplexVolume_eq_coefficient",
+    "ComputableAnalysis.RationalPolytopeVolume.simplexVolume_dilation",
+    "ComputableAnalysis.RationalPolytopeVolume.triangulation_volume",
+    "ComputableAnalysis.RationalPolytopeVolume.triangulation_independence"
   ],
   "volumeConvention": "oriented; cube standard orientation normalized to one",
   "mathlibRealOrComplexUsed": false,
@@ -47,8 +64,7 @@
   "fullGeometricLeanProof": false,
   "mathematicalProof": "Finite polytope dissections and formula agreement for this particular sphere computation",
   "geometricLeanGaps": [
-    "simplex volume from axioms",
-    "triangulation independence",
+    "construction of general positive triangulations",
     "horizon-pyramid and clipping-cap dissection laws",
     "product volume",
     "chart net coverage",
@@ -56,8 +72,8 @@
     "valid represented interval computation and formula agreement"
   ],
   "sourceHashes": {
-    "ch-circle-sphere.html": "582068571504daaf8f450751dd3f46f478a26b587b83f164290d1a5fab162c29",
-    "chapter-section.html": "568df4345a1700e3dbd33d0c946ca971dc800ebd484a0030377e96aa03f74662",
+    "ch-circle-sphere.html": "be3649793467f5ebef7198bce8e8dbae2f467c8722fcd43c6f71125df63b2f48",
+    "chapter-section.html": "1d9ee480c754adcba98d40d734fd2bce7a667952c2bc00afc469bbb4946c4937",
     "chapter.css": "a920140beb5668bc944909db00605a7b52f5b2063cb42f40fdc757e57260e651",
     "polyhedra-data.js": "48416f34c7301bd4ee3c17ae6d292211e0e23db4c2402a4dfd7eda197bfb3a97",
     "polyhedra-view.js": "3bf8bdf1d953cbdac0c90c00d683c17df3c3475aee3c22c26db22599dec108fe",
@@ -67,15 +83,15 @@
     "FiniteRationalBall.lean": "f25a57850e042b224da7998932106d041ba60e6ba0099d33d9cd6b64da79f58e",
     "CheckFiniteRationalBall.lean": "08611cdedb5543ef0eb3a9ac7c075fb65e36bbae1d4dfa9c856d5fc603a4f461",
     "lean-audit.txt": "230cab126db5366c0027824b5434ba18a0e7920ad6debab45b61de2a21b32cbd",
-    "README.md": "44aac02bea4b59db70117f09d56c07e9455b26d38e2ca18f28b79e540c444ad0",
+    "README.md": "056ea3ae997a1413797df3d5e4898d5c6322aae0cda541debfaf9af9ba648f46",
     "RationalProofAudit.lean": "5729e9f98c48c0134a7e0255742c2a7bdf764e72b6350c91cd9e6dda149e1826",
     "RationalConvexBodies.lean": "bff6978c2f9c1335693aa8475c0df6e9fa4f5630fdb782fb717b344d90a12e82",
     "RationalSimplexLinearAlgebra.lean": "6b99c6db54d477955def45630f47fea9f74294122288484cedd4386117a59954",
-    "lakefile.lean": "0dd77b6861b6964c719efdc1fd5d2e646e9d6a7e705577311daa1768b7d72d7d",
+    "lakefile.lean": "9817c214d9374599ca439bfcea7bf47f2b9cfd0bf444fdd398518adec2d73528",
     "lean-toolchain": "0d3c76ccd8772d8bcbe207241421a760312b71a6aa82f84194391fdf5cb026d6",
     "convex-bodies-audit.txt": "99b48896863041644a4a3c8f044b684948c47cfe540fb85a99b1d65895f99d2f",
     "rational-matrix-audit.txt": "49f496880015772c2146d3e38e2ed8aa58180b67f499bab3c85db20cce9caf65",
-    "rational-geometry-proof.tar.gz": "c97c3a5cfdfc67b5f3def67c7120b00923f485676235e8b63b414276ff396d2e",
+    "rational-geometry-proof.tar.gz": "25960476c94c95c4b5ef45f154b0935d48a5eda90383b010b9357d2ba4e7943c",
     "publish_overlay.py": "8ac67b1502082eb94dc8345e59da13bbf42f596da6c355cc8a272aca9cc608c5",
     "RationalOrthantBodies.lean": "0d3d09788cefba1251ea5d28e50121e35b092ce079154e234554abdf2d35d890",
     "rational_polytopes.py": "cb04efc20638fd12f738ad632cb38f6e9dba1a7d27265537471389a0f94fa785",
@@ -84,7 +100,17 @@
     "check_polyhedra.py": "2b240a4732576a6ae4339db6576f75f072529a753338672ff2855503924d1e40",
     "runtime-tests.txt": "a73489d464b0d9bf494189316d66fc0c029309e92fc66017f56244c637c0cc87",
     "certificate-check.txt": "34821874488082f7cb16fea6e183eecbb69155667ee24fbb1b00afcc7954d0fe",
-    "orthant-bodies-audit.txt": "8784fe7eb25a098ea54391509f02d905ebaa7bf313c0a4934573c4ec19d68fcc"
+    "orthant-bodies-audit.txt": "8784fe7eb25a098ea54391509f02d905ebaa7bf313c0a4934573c4ec19d68fcc",
+    "RationalVolumeScaling.lean": "380e0dcc73902c0cd04a2d0b0546921d340dd26ca49a7efb05dfabae7353e925",
+    "RationalVolumeScaling-audit.txt": "d8550761a645acab66b9a02cd0d8a39fb4319e2ed5961196ab43be56205fab0b",
+    "RationalPolytopeVolume.lean": "42a9594182af1750383c3412d583b5806644ec784e73bf8d33b11e368963f716",
+    "RationalPolytopeVolume-audit.txt": "b9f494c38bbbcf436240a2efd64357f9508276dc6cbc13cb435c9d96ff3c9283",
+    "RationalSimplexGeometry.lean": "19ef4ae4d99ee42e541a9851fdbaa86aba7906715fd0288c181f630d91970769",
+    "RationalSimplexGeometry-audit.txt": "c1c676f4e67d4672af2e2c053d145648f19b973948b7842ef62204e575aa02f7",
+    "RationalSimplexDissection.lean": "db156e03a5070fb74ece51237372e9f5a683992bb00488d5de55017c09dc7a1c",
+    "RationalSimplexDissection-audit.txt": "1d106961d56d507770b07056c9895ac4be548879170721cbb10a932ac3483622",
+    "RationalSimplexVolume.lean": "d8f3ffaf1acef8593e7b22d4dfbd6fb7bb42bf8672ec62a957a8a6a7729ca55c",
+    "RationalSimplexVolume-audit.txt": "1ca4bb18043918822e1b78e41fa6d12e1940fd137020d8df178f2bf424b02c8e"
   },
   "mathlibModuleClosureContainsRealOrComplex": true,
   "mathlibTheoremDependenciesUseRealOrComplex": false,
@@ -151,6 +177,53 @@
         "ComputableAnalysis.RationalSimplex.determinantCoefficient_det_one"
       ],
       "declarationDependencyAudit": true
+    },
+    {
+      "file": "RationalVolumeScaling-audit.txt",
+      "checkedEndpoints": [
+        "ComputableAnalysis.RationalSimplex.determinantCoefficient_dilation",
+        "ComputableAnalysis.RationalSimplex.presentationCoefficient_dilation"
+      ],
+      "declarationDependencyAudit": true
+    },
+    {
+      "file": "RationalPolytopeVolume-audit.txt",
+      "checkedEndpoints": [
+        "ComputableAnalysis.RationalPolytopeVolume.cube_grid_dissection",
+        "ComputableAnalysis.RationalPolytopeVolume.cube_subdivision",
+        "ComputableAnalysis.RationalPolytopeVolume.cube_positive",
+        "ComputableAnalysis.RationalPolytopeVolume.orientedCubeVolume_dilation"
+      ],
+      "declarationDependencyAudit": false
+    },
+    {
+      "file": "RationalSimplexGeometry-audit.txt",
+      "checkedEndpoints": [
+        "ComputableAnalysis.RationalPolytopeVolume.cube_staircase_dissection",
+        "ComputableAnalysis.RationalPolytopeVolume.standardSimplex_volume"
+      ],
+      "declarationDependencyAudit": true
+    },
+    {
+      "file": "RationalSimplexDissection-audit.txt",
+      "checkedEndpoints": [
+        "ComputableAnalysis.RationalPolytopeVolume.simplex_edge_dissection",
+        "ComputableAnalysis.RationalPolytopeVolume.stretchedSimplex_volume"
+      ],
+      "declarationDependencyAudit": false
+    },
+    {
+      "file": "RationalSimplexVolume-audit.txt",
+      "checkedEndpoints": [
+        "ComputableAnalysis.RationalPolytopeVolume.transformed_simplex_volume",
+        "ComputableAnalysis.RationalPolytopeVolume.vertexSimplex_volume_positive",
+        "ComputableAnalysis.RationalPolytopeVolume.vertexSimplex_volume_zero",
+        "ComputableAnalysis.RationalPolytopeVolume.simplexVolume_eq_coefficient",
+        "ComputableAnalysis.RationalPolytopeVolume.simplexVolume_dilation",
+        "ComputableAnalysis.RationalPolytopeVolume.triangulation_volume",
+        "ComputableAnalysis.RationalPolytopeVolume.triangulation_independence"
+      ],
+      "declarationDependencyAudit": true
     }
   ],
   "isolatedMathlibToolchain": "leanprover/lean4:v4.33.0-rc2",
@@ -159,5 +232,16 @@
   "originInInnerHull": true,
   "stageEvaluation": "incremental",
   "wholeBodyVolumeRecomputedDuringRefinement": false,
-  "generalCurvedRegionVolumeDefined": false
+  "generalCurvedRegionVolumeDefined": false,
+  "volumeAxioms": [
+    "extensionality of finite rational hull presentations",
+    "translation invariance",
+    "determinant-one invariance",
+    "finite geometric dissection additivity with flat intersections",
+    "unit cube normalization"
+  ],
+  "simplexVolumeFromAxioms": true,
+  "simplexDilationAllRationalFactors": true,
+  "triangulationIndependenceForVerifiedDissections": true,
+  "generalTriangulationConstructorLeanChecked": false
 }

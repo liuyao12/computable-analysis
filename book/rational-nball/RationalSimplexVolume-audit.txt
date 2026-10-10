@@ -1,0 +1,32 @@
+RationalSimplexVolume.lean:90:35: warning: This simp argument is unused:
+  eq_comm
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [simplexFlip, ← Matrix.mulVec_mulVec, firstStretch_mulVec_zero, edgeShear_mulVec_zero, axis]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+RationalSimplexVolume.lean:157:4: warning: Try `simp at hd` instead of `simpa using hd`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+'ComputableAnalysis.RationalPolytopeVolume.transformed_simplex_volume' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.vertexSimplex_volume_positive' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.vertexSimplex_volume_zero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.simplexVolume_eq_coefficient' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.simplexVolume_dilation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.triangulation_volume' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.triangulation_independence' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+PASS: 1801 transitive declaration dependencies; no Mathlib real/complex scalars, measure or integration; trusted axioms only

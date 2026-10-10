@@ -1,0 +1,28 @@
+RationalSimplexGeometry.lean:47:27: warning: This simp argument is unused:
+  Finset.sum_ite_eq'
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Fin.sum_univ_succ, Finset.sum_apply, Pi.smul_apply, smul_eq_mul, axis]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+RationalSimplexGeometry.lean:178:22: warning: This simp argument is unused:
+  Finset.mem_singleton
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [staircase, Finset.mem_image, Finset.mem_univ, true_and, Finset.mem_insert]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+RationalSimplexGeometry.lean:227:31: warning: This simp argument is unused:
+  Finset.mem_singleton
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Finset.mem_insert, Finset.mem_image, Finset.mem_univ, true_and, Matrix.submatrix_apply]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+'ComputableAnalysis.RationalPolytopeVolume.cube_staircase_dissection' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.standardSimplex_volume' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+PASS: 1260 transitive declaration dependencies; no Mathlib real/complex scalars, measure or integration

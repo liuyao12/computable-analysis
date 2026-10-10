@@ -1,34 +1,26 @@
 # Rational ball volume: capability boundary
 
-## Chapter 2: persistent positive-orthant computation (2026-10-09)
+## Chapter 2: rational simplex volume from the axioms (2026-10-10)
 
-The sphere example now uses one rational positive-orthant chart, the same dyadic
-subdivision for every parameter, and recursive coordinate-face charts. The
-inner hull includes the origin. Every sampled tangent plane is retained,
-including the positive axis tangents; coordinate planes complete the outer body.
+Determinant-one invariance remains an explicit volume axiom, as requested.
+The isolated rational Mathlib package now verifies the actual rational cube
+grid dissection, cube normalization and rational dilation, the cube staircase
+dissection into \(n!\) simplices, and the rational edge-cut dissection. These
+prove the determinant formula for every ordered rational simplex in every
+finite dimension, including degenerate and reversed orientations. The simplex
+dilation theorem covers every rational factor \(k\), with factor \(k^n\).
+No integral, Gamma function, or general curved-region volume is introduced.
 
-`OrthantBallComputation` retains its samples, facets, and rational endpoints.
-Initialization computes the axis-simplex and unit-cube volumes. Later stages
-add only visible-facet pyramid volumes to the inner endpoint and subtract only
-clipping-cap volumes from the outer endpoint. The 3D facets are updated locally.
-The factor \(2^n\) uses standard ambient orientation on every reflected piece.
-`ConvexPolytope.volume()` applies only to finite rational polytopes. No general
-volume for regions bounded by surfaces, or preassigned sphere volume, is used.
+For supplied positive triangulations with proved geometric coverage and flat
+pairwise intersections, determinant sums compute the axiomatic volume and are
+independent of triangulation. This theorem does not construct a triangulation
+for an arbitrary rational polytope. The package contains \(55\) checked
+endpoints. Its actual declaration dependencies exclude Mathlib real/complex
+scalars, measure, and integration. The new combined audit additionally uses
+`Lean.collectAxioms` to reject untrusted axioms and placeholders.
 
-The exact tests guard against whole-body volume calls during refinement and
-compare with independent polytope computations. Saved certificates verify five
-3D stages, \(228\) point updates and \(3108\) positive determinant simplices.
-Native Lean checks \(14\) chart, positive-orthant, power and shell statements.
-The isolated rational Mathlib package checks another \(24\) statements,
-including origin membership, orthant containments, refinement and axis bounds.
-Actual theorem dependencies exclude Mathlib real/complex scalars, measure and
-integration; broad Mathlib module imports remain isolated from the foundation.
-
-**Capability boundary:** the executable finite geometry and interval evaluator
-are implemented and checked by exact runtime tests. The full Lean proof of
-simplex volume from axioms, triangulation independence, horizon-pyramid and
-clipping-cap dissections, chart coverage and quantitative gaps, and agreement
-of a valid represented interval computation with the general-dimensional
-formula remains unfinished. The chapter gives the separate mathematical
-formula-agreement argument; it does not adopt a general curved-region volume
-operator or assume that agreement as a certificate field.
+**Remaining work:** the general triangulation constructor, the incremental
+visible-pyramid and clipping-cap dissections, chart-grid coverage, quantitative
+containment and convergence, product-volume comparisons, and agreement of the
+valid represented sphere computation with the general-dimensional formula.
+The complete general-dimensional sphere proof is still unfinished.

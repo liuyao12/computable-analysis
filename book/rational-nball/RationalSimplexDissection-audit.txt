@@ -1,0 +1,13 @@
+RationalSimplexDissection.lean:13:41: warning: This simp argument is unused:
+  Fin.prod_univ_succ
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [firstStretch, Matrix.det_diagonal]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+'ComputableAnalysis.RationalPolytopeVolume.simplex_edge_dissection' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.stretchedSimplex_volume' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

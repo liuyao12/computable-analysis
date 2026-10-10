@@ -1,0 +1,7 @@
+'ComputableAnalysis.RationalSimplex.determinantCoefficient_dilation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalSimplex.presentationCoefficient_dilation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+PASS: 1310 transitive declaration dependencies; no Mathlib real/complex scalars, measure or integration

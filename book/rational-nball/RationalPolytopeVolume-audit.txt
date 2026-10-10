@@ -1,0 +1,15 @@
+RationalPolytopeVolume.lean:268:26: warning: This simp argument is unused:
+  Fintype.mem_piFinset
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [cube, box]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+'ComputableAnalysis.RationalPolytopeVolume.cube_grid_dissection' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.cube_subdivision' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.cube_positive' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.orientedCubeVolume_dilation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
