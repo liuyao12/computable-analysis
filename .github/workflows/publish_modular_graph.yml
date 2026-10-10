@@ -5,7 +5,7 @@ on:
       base_run:
         description: Successful publication run containing the existing live Pages artifact
         required: true
-        default: '37939453081'
+        default: '37942095831'
 permissions:
   contents: read
   actions: read
@@ -103,9 +103,16 @@ jobs:
           for src,dst in files.items():
               shutil.copy(source/src,site/dst)
           index=site/'index.html';text=index.read_text()
-          link='<p id="modular-proof-map-link"><a href="modular-proofs.html">Modular arithmetic: expandable dependency map</a></p>'
-          if 'id="modular-proof-map-link"' not in text:
-              text=text.replace('</body>',link+'</body>')
+          highlight=(source/'project-highlights.html').read_text()
+          text=re.sub(r'<!-- modular-highlights:start -->.*?<!-- modular-highlights:end -->\s*','',text,flags=re.S)
+          text=re.sub(r'<p id="modular-proof-map-link">.*?</p>','',text,flags=re.S)
+          assert '<h2 id="start">' in text
+          text=text.replace('<h2 id="start">',highlight+'<h2 id="start">',1)
+          if 'href="#modular-highlights"' not in text:
+              text=text.replace('<a href="#start">','<a href="#modular-highlights">Near-integer exponentials</a><a href="#start">',1)
+          if 'class="modular-highlight-navigation"' not in text:
+              text=text.replace('<span class="nav-label">Worked examples</span>','<span class="nav-label">Worked examples</span><a class="modular-highlight-navigation" href="modular-proofs.html#precision">Near-integer exponentials</a>',1)
+          assert text.count('id="modular-highlights"')==1
           index.write_text(text)
           changed=set(files.values())|{'index.html','modular-publication.json'}
           for name,digest in before.items():

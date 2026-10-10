@@ -1,5 +1,39 @@
 # Computable Analysis
 
+## Highlights: near-integer exponentials
+
+Two checked Lean theorems show how closely these exponential values approach
+integers, with certified errors:
+
+$$
+10^{-4}\le 884736744-\exp(\pi\sqrt{43})\le 3\cdot10^{-4},
+$$
+
+$$
+10^{-14}\le 262537412640768744-\exp(\pi\sqrt{163})\le 9\cdot10^{-13}.
+$$
+
+The proofs explain the integers through exact modular-function identities:
+
+$$
+j\!\left(\frac{1+i\sqrt{43}}2\right)=-960^3,
+\qquad
+j\!\left(\frac{1+i\sqrt{163}}2\right)=-640320^3.
+$$
+
+The nearby integers are the positive cubes plus $744$. The exact identities
+and certified Laurent corrections yield the exponential error bounds. These
+use our computable real and complex numbers, geometric $\pi$, and current
+exponential API, without Mathlib's real or complex numbers. Equivalent valid
+representations give the same values.
+
+[Explore the interactive proof graph](https://liuyao12.github.io/computable-analysis/modular-proofs.html#precision),
+[inspect the Lean statements](https://liuyao12.github.io/computable-analysis/modular-proofs.html#showpiece),
+or [download the complete checked proof sources](https://liuyao12.github.io/computable-analysis/modular-cm-values-proof.tar.gz).
+The [theorem audit](https://liuyao12.github.io/computable-analysis/modular-cm-values-audit.txt)
+records only Lean's standard axioms. The general class-polynomial theorem
+remains open; these two exact CM values and their exponential corollaries are checked.
+
 **All collaborators are welcome!** If I can trust my AI agent, I can certainly
 trust other people with their agents.
 I'll accept all pull requests. I'd prefer to collaborate directly without a
