@@ -1,0 +1,16 @@
+'ComputableAnalysis.RationalPolytopeVolume.diagonal_mulVec' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.body_dilated' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.dilated_translated' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.dilated_transformed' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.dilated_cube_volume' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.dilated_volume' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.dilated_volume_nonneg_dimension' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+PASS: 7 checked rational geometry endpoints; 1211 transitive declaration dependencies; no Mathlib real/complex scalars, measure or integration

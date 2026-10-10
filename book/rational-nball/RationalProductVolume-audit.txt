@@ -1,0 +1,25 @@
+'ComputableAnalysis.RationalPolytopeVolume.body_productPoly' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.blockMatrix_det' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.blockMatrix_mulVec' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.productPoly_transformed' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.productPoly_translated' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.productPoly_dissection_left' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.productPoly_dissection_right' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.productPoly_cubes' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.productPoly_cube_volume' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.productPoly_volume' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+PASS: 10 checked rational geometry endpoints; 1786 transitive declaration dependencies; no Mathlib real/complex scalars, measure or integration

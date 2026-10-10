@@ -1,0 +1,30 @@
+'ComputableAnalysis.RationalPolytopeVolume.removedCaps_subset' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.removedCaps_cut' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.removedCaps_cover_outside' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.removedCaps_pairwise' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.normSq_smul' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.normSq_append' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.dot_smul_right' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.unit_dot_sq_le' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.tangent_radius_lower' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.tangent_radius_upper' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.innerShellCaps_norm_bounds' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.innerShell_product_in_unitBall' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.coneRemainder_volume' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+PASS: 13 checked rational geometry endpoints; 1302 transitive declaration dependencies; no Mathlib real/complex scalars, measure or integration

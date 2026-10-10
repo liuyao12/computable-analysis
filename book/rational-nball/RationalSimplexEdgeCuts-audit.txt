@@ -27,6 +27,9 @@
  Quot.sound]
 'ComputableAnalysis.RationalPolytopeVolume.volume_empty_body' depends on axioms: [propext, Classical.choice, Quot.sound]
 'ComputableAnalysis.RationalPolytopeVolume.flat_retained' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.retained_simplex_volume_unique' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
 'ComputableAnalysis.RationalPolytopeVolume.retained_simplex_volume_nonneg' depends on axioms: [propext,
  Classical.choice,
  Quot.sound]
@@ -51,4 +54,4 @@
 'ComputableAnalysis.RationalPolytopeVolume.retained_affineCube_volume_nonneg' depends on axioms: [propext,
  Classical.choice,
  Quot.sound]
-PASS: 19 checked rational geometry endpoints; 1837 transitive declaration dependencies; no Mathlib real/complex scalars, measure or integration
+PASS: 20 checked rational geometry endpoints; 1838 transitive declaration dependencies; no Mathlib real/complex scalars, measure or integration

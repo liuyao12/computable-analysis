@@ -1,0 +1,30 @@
+RationalFiniteVolumeComparison.lean:303:12: warning: Try `simp at ht` instead of `simpa using ht`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+'ComputableAnalysis.RationalPolytopeVolume.pointHull_nonzero_halfspaces' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.mem_body_cellPoly' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.cellPoly_subset' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.cellPoly_volume_sum' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.cellPoly_side' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.vertexAverage_mem' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.dot_vertexAverage' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.vertexAverage_supporting_plane' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.cell_contained_of_average' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.cell_subset_or_flat' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.finite_cover_volume_le' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.finite_disjoint_volume_le' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+PASS: 12 checked rational geometry endpoints; 1189 transitive declaration dependencies; no Mathlib real/complex scalars, measure or integration

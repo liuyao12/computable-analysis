@@ -1,0 +1,4 @@
+'ComputableAnalysis.RationalPolytopeVolume.geometric_archimedes_recurrence' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+PASS: 1 checked rational geometry endpoints; 839 transitive declaration dependencies; no Mathlib real/complex scalars, measure or integration

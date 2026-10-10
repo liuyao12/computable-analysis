@@ -1,0 +1,40 @@
+RationalPrismVolume.lean:48:4: warning: This simp argument is unused:
+  Fin.cases_succ
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [heightMatrix, Fin.cases_zero, Fin.cons_zero, Fin.val_zero, pow_zero, one_mul, Fin.cons_succ,
+    mul_zero, Finset.sum_const_zero, add_zero]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+RationalPrismVolume.lean:48:42: warning: This simp argument is unused:
+  Finset.sum_const_zero
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [heightMatrix, Fin.cases_zero, Fin.cons_zero, Fin.val_zero, pow_zero, one_mul, Fin.cases_succ,
+    Fin.cons_succ, mul_zero, add_zero]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+RationalPrismVolume.lean:48:64: warning: This simp argument is unused:
+  add_zero
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [heightMatrix, Fin.cases_zero, Fin.cons_zero, Fin.val_zero, pow_zero, one_mul, Fin.cases_succ,
+    Fin.cons_succ, mul_zero, Finset.sum_const_zero]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+'ComputableAnalysis.RationalPolytopeVolume.body_prism' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.heightMatrix_det' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.heightMatrix_mulVec_zero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.heightMatrix_mulVec_succ' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.prism_dissection' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.prism_translated' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.prism_transformed' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.prism_unit_cube_body' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.prism_volume' depends on axioms: [propext, Classical.choice, Quot.sound]
+PASS: 9 checked rational geometry endpoints; 1779 transitive declaration dependencies; no Mathlib real/complex scalars, measure or integration

@@ -1,0 +1,6 @@
+'ComputableAnalysis.RationalArchimedesModulus.qabs_le_numNatAbs_succ' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalArchimedesModulus.shrinksToZero_of_ratOverSuccBound' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

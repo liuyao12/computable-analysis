@@ -1,0 +1,7 @@
+'ComputableAnalysis.RationalPolytopeVolume.orthant_sample_volume_bounds' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.finite_archimedes_polytope_comparison' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+PASS: 2 checked rational geometry endpoints; 807 transitive declaration dependencies; no Mathlib real/complex scalars, measure or integration

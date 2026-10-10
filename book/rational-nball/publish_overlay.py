@@ -28,7 +28,9 @@ def publish(site):
     chapter.write_text(overlay(chapter.read_text()))
     target=site/'rational-nball';target.mkdir(exist_ok=True)
     for name in list(manifest['sourceHashes'])+['manifest.json']:
-        if name!='ch-circle-sphere.html':shutil.copy(root/name,target/name)
+        if name!='ch-circle-sphere.html':
+            (target/name).parent.mkdir(parents=True,exist_ok=True)
+            shutil.copy(root/name,target/name)
     changed=lambda name:name=='ch-circle-sphere.html' or name=='rational-nball-publication.json' or name.startswith('rational-nball/')
     for name,digest in before.items():
         if not changed(name):assert hashlib.sha256((site/name).read_bytes()).hexdigest()==digest,name
@@ -36,7 +38,8 @@ def publish(site):
         'manifestSha256':hashlib.sha256((root/'manifest.json').read_bytes()).hexdigest(),
         'preservedFiles':sum(not changed(n) for n in before),
         'checkedEndpoints':sum(len(g['checkedEndpoints']) for g in manifest['audits']),
-        'fullGeometricLeanProof':False,'volumeConvention':manifest['volumeConvention'],
+        'geometricDimensionRecurrenceLeanChecked':manifest['geometricDimensionRecurrenceLeanChecked'],
+        'recurrenceAssumesFiniteShellComparison':False,'fullGeometricLeanProof':False,'volumeConvention':manifest['volumeConvention'],
         'construction':'positive_orthant','stageEvaluation':'incremental','axisTangentsIncluded':True,
         'generalCurvedRegionVolumeDefined':False}
     (site/'rational-nball-publication.json').write_text(json.dumps(metadata,indent=2)+'\n')

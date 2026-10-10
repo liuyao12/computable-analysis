@@ -381,6 +381,85 @@ theorem retained_simplex_volume_nonneg {n : Nat} (V : Axioms n)
     exact solve _ p le_rfl
 
 
+/-- The axioms uniquely determine volume on every finitely clipped simplex. -/
+theorem retained_simplex_volume_unique {n : Nat} (V W : Axioms n)
+    (p : RationalSimplex.Vertices n) (cuts : List (Point n × ℚ)) :
+    V.volume (retainedAfterCuts (vertexSimplex p) cuts) =
+      W.volume (retainedAfterCuts (vertexSimplex p) cuts) := by
+  classical
+  induction cuts generalizing p with
+  | nil => rw [retainedAfterCuts,vertexSimplex_volume_eq_abs,vertexSimplex_volume_eq_abs]
+  | cons ac rest ih =>
+    obtain ⟨a,c⟩ := ac
+    have solve : ∀ m : Nat, ∀ p : RationalSimplex.Vertices n,
+        offPlaneCount p a c ≤ m →
+        V.volume (retainedAfterCuts (vertexSimplex p) ((a,c)::rest))=
+        W.volume (retainedAfterCuts (vertexSimplex p) ((a,c)::rest)) := by
+      intro m
+      induction m using Nat.strong_induction_on with
+      | h m rec =>
+        intro p hm
+        by_cases hp : (RationalSimplex.edgeMatrix p).det=0
+        · rw [volume_flat n V _ (flat_retained _ (vertexSimplex_flat p hp) _),
+            volume_flat n W _ (flat_retained _ (vertexSimplex_flat p hp) _)]
+        by_cases ha : a=0
+        · by_cases hc : 0 ≤ c
+          · have hl : ∀ i, dot a (p i) ≤ c := by simp [ha,dot,hc]
+            have he := retained_body_congr _ _ (simplex_clip_all_low p a c hl) rest
+            rw [retainedAfterCuts,V.extensional _ _ he,W.extensional _ _ he]
+            exact ih p
+          · have he : body (clipVertices (vertexSimplex p) a c)=∅ := by
+              rw [body_clip_eq]; simp [ha,dot,hc]
+            have hem : body (retainedAfterCuts (clipVertices (vertexSimplex p) a c) rest)=∅ := by
+              apply Set.eq_empty_iff_forall_notMem.mpr
+              intro x hx
+              have hh := retained_body_subset _ rest hx
+              rw [he] at hh
+              exact hh
+            rw [retainedAfterCuts,volume_empty_body V _ hem,volume_empty_body W _ hem]
+        by_cases hl : ∀ i, dot a (p i) ≤ c
+        · have he := retained_body_congr _ _ (simplex_clip_all_low p a c hl) rest
+          rw [retainedAfterCuts,V.extensional _ _ he,W.extensional _ _ he]
+          exact ih p
+        by_cases hh : ∀ i, c ≤ dot a (p i)
+        · rw [retainedAfterCuts,volume_flat n V _
+            (flat_retained _ (simplex_clip_all_high_flat p a ha c hh) rest),
+            volume_flat n W _ (flat_retained _ (simplex_clip_all_high_flat p a ha c hh) rest)]
+        push Not at hl hh
+        obtain ⟨i,hi⟩ := hl
+        obtain ⟨j,hj⟩ := hh
+        have hij : i ≠ j := by intro he; subst j; linarith
+        let t : ℚ := (c-dot a (p j))/(dot a (p i)-dot a (p j))
+        have hdpos : 0 < dot a (p i)-dot a (p j) := by linarith
+        have ht0 : 0 < t := div_pos (by linarith) hdpos
+        have ht1 : t < 1 := by
+          apply (div_lt_one hdpos).mpr
+          linarith
+        let q := edgePoint p i j t
+        have hq : dot a q=c := by
+          dsimp [q]
+          rw [dot_edgePoint]
+          dsimp [t]
+          field_simp
+          ring
+        let pi := replaceVertex p i q
+        let pj := replaceVertex p j q
+        have hri : offPlaneCount pi a c < offPlaneCount p a c :=
+          offPlaneCount_replace_lt p a c i q (ne_of_gt hi) hq
+        have hrj : offPlaneCount pj a c < offPlaneCount p a c :=
+          offPlaneCount_replace_lt p a c j q (ne_of_lt hj) hq
+        have hpi := rec _ (lt_of_lt_of_le hri hm) pi le_rfl
+        have hpj := rec _ (lt_of_lt_of_le hrj hm) pj le_rfl
+        have hsplit := simplex_edge_subdivision p hp i j hij t ht0 ht1
+        have hd := dissection_retained ((a,c)::rest) _ _ hsplit
+        have hv := V.dissection _ _ hd
+        have hw := W.dissection _ _ hd
+        simp only [Fintype.sum_bool,if_true] at hv hw
+        rw [hv,hw]
+        exact congrArg₂ (·+·) hpj hpi
+    exact solve _ p le_rfl
+
+
 /-- Any verified simplex dissection remains positive after arbitrary finite
 cuts; its orientations need not be preselected. -/
 theorem retained_triangulated_volume_nonneg {n : Nat} (V : Axioms n)
@@ -517,6 +596,7 @@ namespace ComputableAnalysis.RationalPolytopeVolume
 #print axioms retained_body_congr
 #print axioms volume_empty_body
 #print axioms flat_retained
+#print axioms retained_simplex_volume_unique
 #print axioms retained_simplex_volume_nonneg
 #print axioms retained_triangulated_volume_nonneg
 #print axioms vertexSimplex_matrix
@@ -541,6 +621,7 @@ run_cmd do
     `ComputableAnalysis.RationalPolytopeVolume.volume_empty_body,
     `ComputableAnalysis.RationalPolytopeVolume.flat_retained,
     `ComputableAnalysis.RationalPolytopeVolume.retained_simplex_volume_nonneg,
+    `ComputableAnalysis.RationalPolytopeVolume.retained_simplex_volume_unique,
     `ComputableAnalysis.RationalPolytopeVolume.retained_triangulated_volume_nonneg,
     `ComputableAnalysis.RationalPolytopeVolume.vertexSimplex_matrix,
     `ComputableAnalysis.RationalPolytopeVolume.retained_cube_volume_nonneg,
