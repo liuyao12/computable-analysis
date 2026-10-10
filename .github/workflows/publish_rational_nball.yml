@@ -1,0 +1,51 @@
+name: Publish rational ball chapter
+on:
+  workflow_dispatch:
+    inputs:
+      base_run:
+        description: Successful publication containing the existing live Pages artifact
+        required: true
+        default: '38019858036'
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-verified-proof-publication
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: previous
+          run-id: ${{ inputs.base_run }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check native rational proofs independently
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          export PATH="$HOME/.elan/bin:$PATH"
+          cd book/rational-nball
+          lean -o FiniteRationalBall.olean FiniteRationalBall.lean
+          LEAN_PATH=. lean CheckFiniteRationalBall.lean > native-ci-audit.txt
+          cmp lean-audit.txt native-ci-audit.txt
+      - name: Overlay Chapter 2 and preserve all other pages
+        env:
+          BASE_RUN: ${{ inputs.base_run }}
+        run: |
+          mkdir site
+          tar -xf previous/artifact.tar -C site
+          python3 book/rational-nball/publish_overlay.py site
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

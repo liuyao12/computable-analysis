@@ -1,0 +1,15 @@
+'ComputableAnalysis.RationalConvexBodies.byHalfspaces_convex' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalConvexBodies.unitBall_convex' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalConvexBodies.inner_subset_unitBall' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalConvexBodies.tangent_bound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalConvexBodies.unitBall_subset_outer' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalConvexBodies.rational_brackets' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalConvexBodies.inner_refines' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalConvexBodies.outer_bounded' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalConvexBodies.outer_convex' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalConvexBodies.outer_refines' depends on axioms: [propext, Classical.choice, Quot.sound]
+PASS: 1013 transitive declaration dependencies; no Mathlib real/complex scalars, measure or integration

@@ -1,0 +1,118 @@
+{
+  "leanToolchain": "leanprover/lean4:4.33.0-rc2",
+  "checkedEndpoints": [
+    "ComputableAnalysis.RationalBall.normSq_nonneg",
+    "ComputableAnalysis.RationalBall.sphereChart_unit",
+    "ComputableAnalysis.RationalBall.power_difference",
+    "ComputableAnalysis.RationalBall.power_mono",
+    "ComputableAnalysis.RationalBall.powerTerms_bounds",
+    "ComputableAnalysis.RationalBall.power_cell_bounds",
+    "ComputableAnalysis.RationalBall.partition_power_bounds",
+    "ComputableAnalysis.RationalBall.partition_power_gap",
+    "ComputableAnalysis.RationalBall.unit_partition_power_estimate",
+    "ComputableAnalysis.RationalBall.shells_gap",
+    "ComputableAnalysis.RationalBall.shells_by_parts",
+    "ComputableAnalysis.RationalBall.shells_zero_one",
+    "ComputableAnalysis.RationalConvexBodies.byHalfspaces_convex",
+    "ComputableAnalysis.RationalConvexBodies.unitBall_convex",
+    "ComputableAnalysis.RationalConvexBodies.inner_subset_unitBall",
+    "ComputableAnalysis.RationalConvexBodies.tangent_bound",
+    "ComputableAnalysis.RationalConvexBodies.unitBall_subset_outer",
+    "ComputableAnalysis.RationalConvexBodies.rational_brackets",
+    "ComputableAnalysis.RationalConvexBodies.inner_refines",
+    "ComputableAnalysis.RationalConvexBodies.outer_bounded",
+    "ComputableAnalysis.RationalConvexBodies.outer_convex",
+    "ComputableAnalysis.RationalConvexBodies.outer_refines",
+    "ComputableAnalysis.RationalSimplex.edgeMatrix_transformed",
+    "ComputableAnalysis.RationalSimplex.determinantCoefficient_translation",
+    "ComputableAnalysis.RationalSimplex.determinantCoefficient_linear",
+    "ComputableAnalysis.RationalSimplex.determinantCoefficient_det_one"
+  ],
+  "volumeConvention": "oriented; cube standard orientation normalized to one",
+  "mathlibRealOrComplexUsed": false,
+  "integralUsed": false,
+  "gammaUsed": false,
+  "fullGeometricLeanProof": false,
+  "mathematicalProof": "Finite rational polytope exhaustion and radial-shell recurrence",
+  "geometricLeanGaps": [
+    "simplex volume from axioms",
+    "triangulation independence",
+    "product volume",
+    "chart net coverage",
+    "quantitative containment and convergence",
+    "represented volume recurrence agreement"
+  ],
+  "sourceHashes": {
+    "ch-circle-sphere.html": "ea5a53ab52c2d57723394dd9d0c3f7228f2e12c528fa9866c83b6f4f8cbed272",
+    "chapter-section.html": "dd8fe89685f0f035b3f323432685844bc26641353e53a6ad3ac50b29dbe03e48",
+    "chapter.css": "a920140beb5668bc944909db00605a7b52f5b2063cb42f40fdc757e57260e651",
+    "polyhedra-data.js": "64862a09f0d88c8d931b571e3b3c2e074a434ca9cc2efca994ca43cf3bef0ecf",
+    "polyhedra-view.js": "50f86c76ab6e4ec88e787892bbb6c8a5131499fd06e7df29359bbf68455b6751",
+    "polyhedra.json": "ccb29b05c7d4efb0e2ab12f74732c94846f2f4419e6b81f02f2f266a1dceda7d",
+    "generate_polyhedra.py": "2eae24ae6274baf3e884f9da438573abf579cdb54b62bb49d31c31054f61eb02",
+    "apply_chapter_overlay.py": "37eb24015d77c9f4143820111aa307df9475cc5887015367dc799adc1630b1f0",
+    "FiniteRationalBall.lean": "746b387e6414b6236a2beadf585d6cdecfe1f78b1e95410ff4f7076ac34f9d79",
+    "CheckFiniteRationalBall.lean": "a6a04b512da379b3e5f50efd92af41fa0d9622f3db1dd91332011dc9d46217e1",
+    "lean-audit.txt": "6dfebc461eeabb7e2bee317152f3ebc1df7f57c8a368fef0dfa1f05b5ede87e2",
+    "README.md": "c08a2bee1e30d0a3789b64234caa3b2a1687509ed5bef2b3281c6347d5148d8f",
+    "RationalProofAudit.lean": "5729e9f98c48c0134a7e0255742c2a7bdf764e72b6350c91cd9e6dda149e1826",
+    "RationalConvexBodies.lean": "bff6978c2f9c1335693aa8475c0df6e9fa4f5630fdb782fb717b344d90a12e82",
+    "RationalSimplexLinearAlgebra.lean": "6b99c6db54d477955def45630f47fea9f74294122288484cedd4386117a59954",
+    "lakefile.lean": "9dd73ec47c0bceda273ec77acaa24d44cfeed39e6018597b83e07dfb798fa787",
+    "lean-toolchain": "0d3c76ccd8772d8bcbe207241421a760312b71a6aa82f84194391fdf5cb026d6",
+    "convex-bodies-audit.txt": "99b48896863041644a4a3c8f044b684948c47cfe540fb85a99b1d65895f99d2f",
+    "rational-matrix-audit.txt": "49f496880015772c2146d3e38e2ed8aa58180b67f499bab3c85db20cce9caf65",
+    "rational-geometry-proof.tar.gz": "ada663ea5b71df2c9066483a9dd2e80ccc521ce461161ed67dc9597f75237189",
+    "publish_overlay.py": "d56e385a318626996e52caaa891df6f59bca6010e4744a9b32c62fcbc7def64c"
+  },
+  "mathlibModuleClosureContainsRealOrComplex": true,
+  "mathlibTheoremDependenciesUseRealOrComplex": false,
+  "mathlibRevision": "51e6992efd06126df61a496bebf8f49482a4e129",
+  "audits": [
+    {
+      "file": "lean-audit.txt",
+      "checkedEndpoints": [
+        "ComputableAnalysis.RationalBall.normSq_nonneg",
+        "ComputableAnalysis.RationalBall.sphereChart_unit",
+        "ComputableAnalysis.RationalBall.power_difference",
+        "ComputableAnalysis.RationalBall.power_mono",
+        "ComputableAnalysis.RationalBall.powerTerms_bounds",
+        "ComputableAnalysis.RationalBall.power_cell_bounds",
+        "ComputableAnalysis.RationalBall.partition_power_bounds",
+        "ComputableAnalysis.RationalBall.partition_power_gap",
+        "ComputableAnalysis.RationalBall.unit_partition_power_estimate",
+        "ComputableAnalysis.RationalBall.shells_gap",
+        "ComputableAnalysis.RationalBall.shells_by_parts",
+        "ComputableAnalysis.RationalBall.shells_zero_one"
+      ],
+      "declarationDependencyAudit": false
+    },
+    {
+      "file": "convex-bodies-audit.txt",
+      "checkedEndpoints": [
+        "ComputableAnalysis.RationalConvexBodies.byHalfspaces_convex",
+        "ComputableAnalysis.RationalConvexBodies.unitBall_convex",
+        "ComputableAnalysis.RationalConvexBodies.inner_subset_unitBall",
+        "ComputableAnalysis.RationalConvexBodies.tangent_bound",
+        "ComputableAnalysis.RationalConvexBodies.unitBall_subset_outer",
+        "ComputableAnalysis.RationalConvexBodies.rational_brackets",
+        "ComputableAnalysis.RationalConvexBodies.inner_refines",
+        "ComputableAnalysis.RationalConvexBodies.outer_bounded",
+        "ComputableAnalysis.RationalConvexBodies.outer_convex",
+        "ComputableAnalysis.RationalConvexBodies.outer_refines"
+      ],
+      "declarationDependencyAudit": true
+    },
+    {
+      "file": "rational-matrix-audit.txt",
+      "checkedEndpoints": [
+        "ComputableAnalysis.RationalSimplex.edgeMatrix_transformed",
+        "ComputableAnalysis.RationalSimplex.determinantCoefficient_translation",
+        "ComputableAnalysis.RationalSimplex.determinantCoefficient_linear",
+        "ComputableAnalysis.RationalSimplex.determinantCoefficient_det_one"
+      ],
+      "declarationDependencyAudit": true
+    }
+  ],
+  "isolatedMathlibToolchain": "leanprover/lean4:v4.33.0-rc2"
+}

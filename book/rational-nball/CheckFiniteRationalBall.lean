@@ -1,0 +1,13 @@
+import FiniteRationalBall
+#print axioms ComputableAnalysis.RationalBall.normSq_nonneg
+#print axioms ComputableAnalysis.RationalBall.sphereChart_unit
+#print axioms ComputableAnalysis.RationalBall.power_difference
+#print axioms ComputableAnalysis.RationalBall.power_mono
+#print axioms ComputableAnalysis.RationalBall.powerTerms_bounds
+#print axioms ComputableAnalysis.RationalBall.power_cell_bounds
+#print axioms ComputableAnalysis.RationalBall.partition_power_bounds
+#print axioms ComputableAnalysis.RationalBall.partition_power_gap
+#print axioms ComputableAnalysis.RationalBall.unit_partition_power_estimate
+#print axioms ComputableAnalysis.RationalBall.shells_gap
+#print axioms ComputableAnalysis.RationalBall.shells_by_parts
+#print axioms ComputableAnalysis.RationalBall.shells_zero_one

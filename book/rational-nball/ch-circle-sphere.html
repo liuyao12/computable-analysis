@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="A mathematical foundation for calculus through certified rational computations." name="description"/><title>Circle, sphere and cylinder · Computable Analysis</title><link href="reading/book.css" rel="stylesheet"/><script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],processEscapes:true},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script><script defer="" src="reading/book.js"></script><link href="reading/analysis-edition.css" rel="stylesheet"/><meta content="7b4dddd81afefceb62d05fa8319b122bfa223dcc" name="documentation-revision"/><style id="rational-geometry-style">
+.geometry-theorem{position:relative;margin:1.5rem 0}.geometry-statements{margin:1rem 0;font-size:13px}
+.geometry-statements pre{white-space:pre;overflow-x:auto;max-width:100%;padding:14px;background:#f3f5f2;font:12px/1.65 monospace}
+.geometry-statements a{font:11px system-ui}.geometry-statements h4{font:600 13px system-ui;margin-top:1.5rem}
+@media(max-width:900px){.geometry-theorem .theorem-margin{position:static;display:block;width:auto;margin:1rem 0}}
+</style><script defer="" src="reading/lean-highlight.js"></script><style id="pedagogy-style">.pedagogical-opening{margin:1em 0 1.6em}.pedagogical-context{font-size:.9em}.pedagogical-bridge{margin:.8em 0 1.2em}</style><link rel="stylesheet" href="rational-nball/chapter.css"><script defer src="rational-nball/polyhedra-data.js"></script><script defer src="rational-nball/polyhedra-view.js"></script></head>
+<body><a class="skip" href="#main">Skip to mathematics</a><header class="book-header"><button aria-controls="book-nav" aria-expanded="false" id="menu-button">Contents</button><a class="brand" href="index.html">Computable <em>Analysis</em></a><a class="header-about" href="programme.html">An alternative foundation to Calculus</a></header>
+<nav aria-label="Book chapters" id="book-nav"><span class="nav-label">The book</span><a class="" href="ch-foundations.html"><span>01</span>Numbers and functions</a><a class="pi-catalogue-navigation" href="ch-foundations.html#pi-computations">Other examples: π</a><a class="current" href="ch-circle-sphere.html"><span>02</span>Circle, sphere and cylinder</a><a class="" href="ch-rational-circle-trigonometry.html"><span>03</span>Angles and trigonometry</a><a class="" href="ch-integrals.html"><span>04</span>Integral computations</a><a class="" href="ch-effective-calculus.html"><span>05</span>Derivatives and the FTC</a><a class="" href="ch-infinite-series.html"><span>06</span>Infinite series</a><a class="" href="ch-exponential-logarithm.html"><span>07</span>Exponential and logarithm</a><details class="later-chapters"><summary>Further chapters</summary><a class="" href="ch-algebra-fta.html"><span>08</span>Algebraic computations</a><a class="" href="ch-local-models.html"><span>09</span>Local models</a><a class="" href="ch-complex-paths.html"><span>10</span>Complex paths</a><a class="" href="ch-improper-parameters.html"><span>11</span>Improper integrals</a><a class="" href="ch-fourier.html"><span>12</span>Fourier computations</a><a class="" href="ch-impulses.html"><span>13</span>Impulses</a><a class="" href="ch-differential-equations.html"><span>14</span>Differential equations</a><!-- fundamental-matrix:start --><a data-reader-addition="fundamental-matrix" href="fundamental-matrix.html">Fundamental Matrix</a><!-- fundamental-matrix:end --><a class="" href="ch-special-equations.html"><span>15</span>Special-function equations</a><a class="" href="ch-transforms-zeta.html"><span>16</span>Transforms and zeta</a><a class="" href="ch-elliptic.html"><span>17</span>Elliptic integrals</a></details><a class="nav-label construction-skill-label" href="construction-skills.html">Skills</a><a class="construction-skill-navigation" href="skill-real-integrals.html">Real integrals</a><a class="construction-skill-navigation" href="skill-complex-integrals.html">Complex path integrals</a><a class="construction-skill-navigation" href="skill-series.html">Series</a><a class="construction-skill-navigation" href="skill-holomorphic-functions.html">Holomorphic functions</a><a class="construction-skill-navigation" href="skill-analytic-continuation.html">Analytic continuation</a><span class="nav-label">Worked examples</span><a class="" href="cosine.html">The cosine-square integral</a><a class="classic-navigation" href="cartwright.html">Irrationality of \(\pi^2\)</a><a class="classic-navigation" href="leibniz.html">The Leibniz series</a><a class="classic-navigation" href="basel.html">The Basel problem</a><a class="classic-navigation" href="euler.html">Euler’s sine product</a><span class="nav-label">Function theory</span><a class="classic-navigation" href="arctan-taylor.html">Arctangent and Taylor series</a><a class="classic-navigation" href="complex-analysis.html">Polygonal Cauchy theory</a><a class="classic-navigation" href="analytic-continuation.html">Analytic continuation</a><a class="classic-navigation" href="zeta-zeros.html">Riemann zeta zeros</a><span class="nav-label">Differential equations</span><a class="classic-navigation" href="fuchs.html">Fuchs’s theorem</a><a class="classic-navigation" href="painleve.html">Painlevé’s classification</a><span class="nav-label">The development</span><a class="classic-navigation" href="proof-bundles.html">Bundled proof comparisons</a><a href="programme.html">Purpose and boundary</a><a href="proof-bench/">Proof-size comparison</a><a href="reference/index.html">Technical reference ↗</a></nav>
+<div class="page"><main class="reader" id="main"><div class="chapter-kicker">CHAPTER 02</div><article><div class="main-text"><h1 id="ch:circle-sphere">The Circle, the Sphere, and the Cylinder</h1><section class="pedagogical-opening" data-pedagogy="opening" id="why-this-page"><p>A polygon has an area we can calculate by finite arithmetic. A circle has a curved boundary, so a single polygon leaves something unaccounted for. Inscribed chords give a lower estimate; tangents give an upper one. The useful question is how to make the gap as small as we choose.</p><p>This turns the circle constant into a geometric computation. The same habit of enclosing a shape by simpler pieces will let us compare the sphere, cone and cylinder before we have a general integration theory.</p><p class="pedagogical-context">Earlier context: <a href="ch-foundations.html">Computable Numbers and Functions</a>.</p></section><p>Area, length, and volume can be computed before defining an integral of a function. We begin with a concrete rational interval computation. We then establish the elementary rules of area and identify the computation with the quarter-circle. Throughout this chapter, the order of vertices determines orientation; area and volume retain that orientation.</p>
+<h2 id="thm:rational-circle-pythagorean">2.1 A quarter-circle computation</h2>
+<p>Put</p>
+<div class="displaymath">\[
+ P(u)=\left(\frac{1-u^2}{1+u^2},\frac{2u}{1+u^2}\right),
+ \qquad u_j=\frac{j}{2^n}\quad(0\le j\le2^n).
+\]</div>
+<p>All these coordinates are rational, and expansion gives \(P_1(u)^2+P_2(u)^2=1\). The endpoints are \((1,0)\) and \((0,1)\). The chords and endpoint tangents in the picture motivate the two expressions</p>
+<div class="displaymath">\[
+ \ell(u,v)=\frac{(v-u)(1+uv)}{(1+u^2)(1+v^2)},
+ \qquad h(u,v)=\frac{v-u}{1+uv}.
+\]</div>
+<p>For now, regard them simply as rational formulas. Define a raw computation by</p>
+<div class="displaymath">\[
+ Q_n=\left[
+   \sum_{j=0}^{2^n-1}\ell(u_j,u_{j+1}),
+   \sum_{j=0}^{2^n-1}h(u_j,u_{j+1})
+ \right].
+\]</div>
+<p>Its first stages are \(Q_0=[1/2,1]\) and \(Q_1=[7/10,5/6]\). The existing midpoint-update program computes exactly these sums; no new schedule or numerical definition of \(\pi\) is being substituted.</p>
+<section class="geometry-theorem"><h3 id="thm:quarter-circle-raw">Validity of the computation.</h3>
+<p>Finite refinement increases the lower sum and decreases the upper sum. Furthermore</p>
+<div class="displaymath">\[
+ h(u,v)-\ell(u,v)=
+ \frac{(v-u)^3}{(1+uv)(1+u^2)(1+v^2)}.
+\]</div>
+<p>On the chosen mesh each denominator is at least one. Summing the cell gaps therefore gives</p>
+<div class="displaymath">\[
+ 0\le Q_n^+-Q_n^-\le2^n(2^{-n})^3=4^{-n}.
+\]</div>
+<p>Thus the intervals are ordered, nested, and arbitrarily narrow: \(Q\) is a valid raw computable number. This conclusion uses finite rational formulas, not an area or integral theorem.</p>
+<figure id="fig:rational-parameter-line">
+<div class="centered"><img alt="\includegraphics[width=360pt]{assets/rational-circle-subdivision.gif}" src="images/img-0002.gif" style="width:360pt"/>
+<figcaption>
+<span class="caption_title">Figure</span>
+<span class="caption_ref">2.1</span>
+<span class="caption_text">A rational computation, whose geometric interpretation will follow.</span>
+</figcaption> </div>
+</figure>
+<aside class="theorem-margin"><a data-proof-map="thm:quarter-circle-polygons" href="proof-map.html?theorem=thm:quarter-circle-polygons">Proof map ↗</a><small>Checked finite geometry</small></aside><details class="geometry-statements"><summary>Exact Lean definitions and statements</summary><h4>Quarter-circle computation</h4><pre><code>def ComputableAnalysis.QuarterCircleGeometry.raw : RealRaw :=
+ArctanGeometry.arctanGeom 1</code></pre><a href="https://github.com/liuyao12/computable-analysis/blob/7b4dddd81afefceb62d05fa8319b122bfa223dcc/ComputableAnalysis/QuarterCircleGeometry.lean" rel="noopener" target="_blank">Pinned Lean source ↗</a><pre><code>theorem ComputableAnalysis.QuarterCircleGeometry.raw_compute : ∀ (n : Nat),
+  QuarterCircleGeometry.raw.compute n =
+    ArctanGeometry.geometricSumInterval
+      (ArctanGeometry.arctanAreaLoopState 1 n).intervals</code></pre><a href="https://github.com/liuyao12/computable-analysis/blob/7b4dddd81afefceb62d05fa8319b122bfa223dcc/ComputableAnalysis/QuarterCircleGeometry.lean" rel="noopener" target="_blank">Pinned Lean source ↗</a><pre><code>theorem ComputableAnalysis.QuarterCircleGeometry.raw_width : ∀ (n : Nat), (QuarterCircleGeometry.raw.compute n).width ≤ 1 / ↑(2 ^ n) * (1 / ↑(2 ^ n))</code></pre><a href="https://github.com/liuyao12/computable-analysis/blob/7b4dddd81afefceb62d05fa8319b122bfa223dcc/ComputableAnalysis/QuarterCircleGeometry.lean" rel="noopener" target="_blank">Pinned Lean source ↗</a><h4>The computation is valid</h4><pre><code>theorem ComputableAnalysis.QuarterCircleGeometry.raw_valid : QuarterCircleGeometry.raw.Valid</code></pre><a href="https://github.com/liuyao12/computable-analysis/blob/7b4dddd81afefceb62d05fa8319b122bfa223dcc/ComputableAnalysis/QuarterCircleGeometry.lean" rel="noopener" target="_blank">Pinned Lean source ↗</a></details></section><h2 id="sec:rational-area">2.2 Area from ordered rational vectors</h2>
+<p>A point or vector is a pair of rational numbers. The area of the parallelogram spanned by the ordered vectors \(u,v\) is</p>
+<div class="displaymath">\[
+ \omega(u,v)=u_1v_2-u_2v_1.
+\]</div>
+<p>This is the normalized alternating bilinear rule: it is additive and rationally homogeneous in each input, vanishes when the two inputs agree, and has \(\omega((1,0),(0,1))=1\). Conversely those rules determine the formula uniquely by expansion in the coordinate basis. We construct this rule and prove its characterization; no new global axiom is introduced.</p>
+<p>The area of the ordered triangle is</p>
+<div class="displaymath">\[
+ A[p,q,r]=\frac12\omega(q-p,r-p).
+\]</div>
+<p>A degenerate triangle has area zero. Exchanging two vertices reverses area; a cyclic change of its three vertices preserves it. For every rational point \(o\), expansion gives the subdivision identity</p>
+<div class="displaymath">\[
+ A[p,q,r]=A[o,q,r]+A[p,o,r]+A[p,q,o].
+\]</div>
+<p>No condition that \(o\) lies inside the triangle is needed: orientation handles the cancellations.</p>
+<p>For a rational affine map \(x\mapsto Mx+b\), the transformation law is</p>
+<div class="displaymath">\[
+ A[Mp+b,Mq+b,Mr+b]=\det(M)A[p,q,r].
+\]</div>
+<p>Translations and proper rigid motions preserve area; reflections reverse it. A homothety of ratio \(s\) multiplies area by \(s^2\). These assertions follow from finite algebra, without lengths, angles, square roots, or trigonometry.</p>
+<h2 id="sec:rational-polygons">2.3 Polygons and the choice of starting vertex</h2>
+<p>A rational polygon is a cyclic sequence of rational points. In a stored list \(P=(p_0,\ldots,p_{N-1})\), the last vertex is joined back to the first; there is no preferred first vertex and no assumption of simplicity or convexity. Define</p>
+<div class="displaymath">\[
+ A(P)=\frac12\sum_{j=0}^{N-1}\omega(p_j,p_{j+1}),
+ \qquad p_N=p_0.
+\]</div>
+<p>The empty list has area zero. Reversing the cycle reverses its area.</p>
+<section class="geometry-theorem"><h3 id="thm:rational-polygon-fans">Theorem: a fan from any starting vertex.</h3><p class="bundled-proof-link" data-bundled-theorem="thm:rational-polygon-fans"><a href="proof-bundles.html?theorem=thm:rational-polygon-fans">Bundled proof routes and LOC →</a></p>
+<p>For any rational point \(o\),</p>
+<div class="displaymath">\[
+ \boxed{A(P)=\sum_{j=0}^{N-1}A[o,p_j,p_{j+1}].}
+\]</div>
+<p>In particular, take \(o=p_0\). The first and last terms vanish, leaving</p>
+<div class="displaymath">\[
+ A(P)=\sum_{j=1}^{N-2}A[p_0,p_j,p_{j+1}].
+\]</div>
+<p>Choosing any other starting vertex gives the same result. More generally, both the fan point and the place where the cyclic list starts may be changed independently, without changing the computed rational number.</p>
+<p>The proof is cancellation of the radial edges: each \(\omega(o,p_j)\) occurs once with each sign. The boundary terms remain. For a convex polygon this is an ordinary triangulation. For other cycles it is an oriented triangle sum; the triangles need not be disjoint or remain inside the polygon. Self-crossing cycles therefore retain multiplicity rather than measuring the union of the regions they trace. This distinction requires no change to the formula or to the starting-vertex theorem.</p>
+<aside class="theorem-margin"><a data-proof-map="thm:rational-polygon-fans" href="proof-map.html?theorem=thm:rational-polygon-fans">Proof map ↗</a><small>Checked finite geometry</small></aside><details class="geometry-statements"><summary>Exact Lean definitions and statements</summary><h4>Cancellation in a fan</h4><pre><code>def ComputableAnalysis.RationalGeometry.fanArea : RationalGeometry.Point → RationalGeometry.Polygon → Rat :=
+fun o P =&gt; RationalGeometry.cycleSum (RationalGeometry.triangleArea o) P</code></pre><a href="https://github.com/liuyao12/computable-analysis/blob/7b4dddd81afefceb62d05fa8319b122bfa223dcc/ComputableAnalysis/RationalGeometry.lean" rel="noopener" target="_blank">Pinned Lean source ↗</a><pre><code>def ComputableAnalysis.RationalGeometry.fanFrom : RationalGeometry.Point → RationalGeometry.Point → List RationalGeometry.Point → Rat :=
+fun o x x_1 =&gt;
+  List.brecOn (motive := fun x =&gt; RationalGeometry.Point → Rat) x_1
+    (RationalGeometry.fanFrom._f o) x</code></pre><a href="https://github.com/liuyao12/computable-analysis/blob/7b4dddd81afefceb62d05fa8319b122bfa223dcc/ComputableAnalysis/RationalGeometry.lean" rel="noopener" target="_blank">Pinned Lean source ↗</a><pre><code>def ComputableAnalysis.RationalGeometry.triangulationArea : RationalGeometry.Polygon → Rat :=
+fun x =&gt;
+  match x with
+  | [] =&gt; 0
+  | p :: ps =&gt; RationalGeometry.fanFrom p p ps</code></pre><a href="https://github.com/liuyao12/computable-analysis/blob/7b4dddd81afefceb62d05fa8319b122bfa223dcc/ComputableAnalysis/RationalGeometry.lean" rel="noopener" target="_blank">Pinned Lean source ↗</a><pre><code>theorem ComputableAnalysis.RationalGeometry.fanArea_eq_area : ∀ (o : RationalGeometry.Point) (P : RationalGeometry.Polygon),
+  RationalGeometry.fanArea o P = RationalGeometry.area P</code></pre><a href="https://github.com/liuyao12/computable-analysis/blob/7b4dddd81afefceb62d05fa8319b122bfa223dcc/ComputableAnalysis/RationalGeometry.lean" rel="noopener" target="_blank">Pinned Lean source ↗</a><pre><code>theorem ComputableAnalysis.RationalGeometry.triangulationArea_eq_area : ∀ (P : RationalGeometry.Polygon),
+  RationalGeometry.triangulationArea P = RationalGeometry.area P</code></pre><a href="https://github.com/liuyao12/computable-analysis/blob/7b4dddd81afefceb62d05fa8319b122bfa223dcc/ComputableAnalysis/RationalGeometry.lean" rel="noopener" target="_blank">Pinned Lean source ↗</a><h4>The same polygon area</h4><pre><code>theorem ComputableAnalysis.RationalGeometry.triangulationArea_startAt : ∀ (P : RationalGeometry.Polygon) (k : Nat),
+  RationalGeometry.triangulationArea (RationalGeometry.startAt P k) =
+    RationalGeometry.area P</code></pre><a href="https://github.com/liuyao12/computable-analysis/blob/7b4dddd81afefceb62d05fa8319b122bfa223dcc/ComputableAnalysis/RationalGeometry.lean" rel="noopener" target="_blank">Pinned Lean source ↗</a><pre><code>theorem ComputableAnalysis.RationalGeometry.fanArea_startAt : ∀ (o : RationalGeometry.Point) (P : RationalGeometry.Polygon) (k : Nat),
+  RationalGeometry.fanArea o (RationalGeometry.startAt P k) = RationalGeometry.area P</code></pre><a href="https://github.com/liuyao12/computable-analysis/blob/7b4dddd81afefceb62d05fa8319b122bfa223dcc/ComputableAnalysis/RationalGeometry.lean" rel="noopener" target="_blank">Pinned Lean source ↗</a><pre><code>theorem ComputableAnalysis.RationalGeometry.area_reverse : ∀ (P : RationalGeometry.Polygon),
+  RationalGeometry.area (List.reverse P) = -RationalGeometry.area P</code></pre><a href="https://github.com/liuyao12/computable-analysis/blob/7b4dddd81afefceb62d05fa8319b122bfa223dcc/ComputableAnalysis/RationalGeometry.lean" rel="noopener" target="_blank">Pinned Lean source ↗</a></details></section><h3 id="geometry-the-same-convention-for-volume">The same convention for volume</h3>
+<p>For rational vectors in three dimensions put \(\Omega(u,v,w)=\det(u,v,w)\). The volume of the ordered tetrahedron is</p>
+<div class="displaymath">\[
+ V[p,q,r,s]=\frac16\Omega(q-p,r-p,s-p).
+\]</div>
+<p>Exchanging two vertices reverses volume, subdivision through any point is additive with the displayed orientations, and a homothety of ratio \(c\) multiplies volume by \(c^3\). These computations precede the solid comparisons later in this chapter. Spatial face areas and segment lengths may require square roots; planar polygon area and tetrahedral volume do not.</p>
+<h2 id="thm:geometric-pi-validity">2.4 The geometric meaning of the computation</h2>
+<p>Return to the opening picture. The inner polygon has the origin followed by the consecutive points \(P(u_0),\ldots,P(u_{2^n})\). The outer polygon inserts between consecutive circle points the intersection of their tangent lines \(P(u_j)\cdot z=1\) and \(P(u_{j+1})\cdot z=1\). These intersections are rational. Both boundary cycles have the positive orientation shown in the picture.</p>
+<section class="geometry-theorem"><h3 id="thm:quarter-circle-polygons">Theorem: the interval endpoints are polygon areas.</h3><p class="bundled-proof-link" data-bundled-theorem="thm:quarter-circle-polygons"><a href="proof-bundles.html?theorem=thm:quarter-circle-polygons">Bundled proof routes and LOC →</a></p>
+<p>At every stage, not merely in the limit,</p>
+<div class="displaymath">\[
+ \boxed{Q_n=[A(P_n^-),A(P_n^+)].}
+\]</div>
+<p>Either polygon area can be computed from a fan at any starting vertex, or indeed from any rational fan point. Its rational value is unchanged. The proof identifies the triangle and tangent-cell formulas with the already defined boundary-area computation.</p>
+<p>The chords lie inside the quarter-disk and the tangent half-planes contain it. Thus these are inscribed and circumscribed polygons. Their proved area gap tends to zero. This is the area computation of the quarter-circle: we have first constructed a number and then justified what its bounds measure. No general area function on arbitrary regions is required.</p>
+<p>Define \(\pi=4Q\). The same construction on \([0,t]\) gives sector area \(A(t)\), so \(Q=A(1)\). Finite polygon bounds give \(2&lt;\pi&lt;4\), and rational coordinate scaling gives the disk-area computation \(\pi R^2\). For later use,</p>
+<div class="displaymath">\[
+ \frac{v-u}{1+v^2}\le A(v)-A(u)\le\frac{v-u}{1+u^2}
+ \qquad(0\le u&lt;v\le1).
+\]</div>
+<p>In particular \((v-u)/2\le A(v)-A(u)\le v-u\). These are geometric bounds; the later integral constructions are unchanged and are not being redefined as areas in this revision.</p>
+<p>The sphere and cylinder arguments below are coordinate reconstructions in the spirit of Archimedes' exhaustion, not transcriptions of his proofs. The historical references remain at the end of the chapter.</p><aside class="theorem-margin"><a data-proof-map="thm:quarter-circle-polygons" href="proof-map.html?theorem=thm:quarter-circle-polygons">Proof map ↗</a><small>Checked finite geometry</small></aside><details class="geometry-statements"><summary>Exact Lean definitions and statements</summary><h4>Quarter-circle area</h4><pre><code>theorem ComputableAnalysis.QuarterCircleGeometry.area_legacy : ∀ (ps : List PiCirclePoint),
+  RationalGeometry.area (List.map QuarterCircleGeometry.point ps) =
+    RationalCircle.Stage.twiceSignedArea ps / 2</code></pre><a href="https://github.com/liuyao12/computable-analysis/blob/7b4dddd81afefceb62d05fa8319b122bfa223dcc/ComputableAnalysis/QuarterCircleGeometry.lean" rel="noopener" target="_blank">Pinned Lean source ↗</a><pre><code>theorem ComputableAnalysis.QuarterCircleGeometry.raw_compute_polygon_areas : ∀ (n : Nat),
+  QuarterCircleGeometry.raw.compute n =
+    { lo := RationalGeometry.area (QuarterCircleGeometry.innerPolygon n),
+      hi := RationalGeometry.area (QuarterCircleGeometry.outerPolygon n) }</code></pre><a href="https://github.com/liuyao12/computable-analysis/blob/7b4dddd81afefceb62d05fa8319b122bfa223dcc/ComputableAnalysis/QuarterCircleGeometry.lean" rel="noopener" target="_blank">Pinned Lean source ↗</a><pre><code>theorem ComputableAnalysis.QuarterCircleGeometry.raw_compute_any_fans : ∀ (n k l : Nat) (p q : RationalGeometry.Point),
+  QuarterCircleGeometry.raw.compute n =
+    {
+      lo :=
+        RationalGeometry.fanArea p
+          (RationalGeometry.startAt (QuarterCircleGeometry.innerPolygon n) k),
+      hi :=
+        RationalGeometry.fanArea q
+          (RationalGeometry.startAt (QuarterCircleGeometry.outerPolygon n) l) }</code></pre><a href="https://github.com/liuyao12/computable-analysis/blob/7b4dddd81afefceb62d05fa8319b122bfa223dcc/ComputableAnalysis/QuarterCircleGeometry.lean" rel="noopener" target="_blank">Pinned Lean source ↗</a></details></section><span id="rational-geometry-original-tail"></span><h2 id="a0000000008">2.5 Circumference and sector length</h2>
+<p> Area and circumference are initially independent computations. Approximate the boundary by inscribed chords and circumscribed tangent segments. For a unit-circle chord of length \(c\), its midpoint is at distance \(d=\sqrt{1-c^2/4}\) from the origin. Twice its radial triangle area is \(cd\), and </p>
+<div class="displaymath" id="a0000000135">
+  \[  0\le c-cd\le c^3/4.  \]
+</div>
+<p> If \(c_*\) is the largest chord, the difference between the inner perimeter and twice the inner area is at most \(c_*^2\) times the inner perimeter divided by \(4\). The perimeters have a fixed rational bound supplied by an outer square. The difference therefore shrinks. </p>
+<p>For a polygon tangent to the unit circle, twice its area equals its perimeter, triangle by triangle. The inner and outer areas have already been proved to agree. The polygonal length computations consequently agree as well, and give circumference \(2\pi \). Scaling gives circumference \(2\pi R\) at radius \(R\). </p>
+<p>The same comparison on a sector says that its arc length is twice its area divided by its radius. Additivity and invariance under rotation follow by finite polygonal refinements and the determinant identities. Computed coordinates are handled by rational enclosures and their finite error bounds. This proves the facts about arcs that the next chapter will use to introduce angle parameters. </p>
+<h2 id="sec:cone-exhaustion">2.6 Cylinders and cones by finite solid comparisons</h2>
+<p>  Extruding the circle’s inner and outer polygons through a height \(H\) gives inner and outer prisms. Their volume gap is \(H\) times the planar area gap. Thus a circular cylinder has volume computation </p>
+<div class="displaymath" id="a0000000136">
+  \[  V_{\mathrm{cyl}}=\pi r^2H.  \]
+</div>
+<p> Extruding boundary polygons instead gives lateral-area computation \(2\pi rH\). Including both end disks gives total area \(2\pi rH+2\pi r^2\). </p>
+<p>To compute a cone with apex at height zero, base radius \(r\), and height \(H\), cut its axis at \(z_k=kH/N\). In slab \(k\), the cone’s radius lies between \(rk/N\) and \(r(k+1)/N\). Inscribed and circumscribed cylinder stacks therefore have volumes </p>
+<div class="displaymath" id="a0000000137">
+  \[  C_N^- =\frac{\pi r^2H}{N^3}\sum _{k=0}^{N-1}k^2, \qquad C_N^+ =\frac{\pi r^2H}{N^3}\sum _{k=1}^{N}k^2.  \]
+</div>
+<p> These are finite solid containments, not a theorem about infinitesimal slices. Each circular cylinder can itself be replaced by polygonal prisms with an arbitrarily small additional error. </p>
+<p>The identity \(\sum _{k=1}^{N}k^2=N(N+1)(2N+1)/6\) follows by induction (or by summing successive cubes). Consequently </p>
+<div class="displaymath" id="a0000000138">
+  \[  C_N^\pm =\pi r^2H\left(\frac13\mathbin {\pm }\frac1{2N} +\frac1{6N^2}\right).  \]
+</div>
+<p> Here the minus sign gives \(C_N^-\) and the plus sign gives \(C_N^+\). Their gap is \(\pi r^2H/N\). Refining, for example with \(N=2^n\), gives nested solid bounds, and proves </p>
+<div class="displaymath" id="a0000000139">
+  \[  \boxed {V_{\mathrm{cone}}=\frac13\pi r^2H.}  \]
+</div>
+<p> All occurrences of \(\pi \) in finite bounds are evaluated by its existing rational interval computation. The displayed expressions abbreviate finite arithmetic on these enclosures. </p>
+<h2 id="sec:sphere-volume-exhaustion">2.7 The hemisphere and the cone fill the cylinder in the bounds</h2>
+<p>  Fix a positive rational radius \(R\). Use height \(z\) above the equatorial plane. The upper hemisphere has squared sectional radius \(R^2-z^2\). Compare it with the cone whose sectional radius is \(z\), both inside the cylinder of radius and height \(R\). </p>
+<p>For a rational partition \(0=z_0{\lt}\cdots {\lt}z_N=R\), put \(\Delta z_i=z_{i+1}-z_i\). Cylinder stacks bounding the hemisphere have volumes </p>
+<div class="displaymath" id="a0000000140">
+  \[  H_P^-=\pi \sum _i(R^2-z_{i+1}^2)\Delta z_i, \qquad H_P^+=\pi \sum _i(R^2-z_i^2)\Delta z_i.  \]
+</div>
+<p> The corresponding cone stacks have volumes </p>
+<div class="displaymath" id="a0000000141">
+  \[  C_P^-=\pi \sum _i z_i^2\Delta z_i, \qquad C_P^+=\pi \sum _i z_{i+1}^2\Delta z_i.  \]
+</div>
+<p> At every finite partition there are exact identities </p>
+<div class="displaymath" id="a0000000142">
+  \[  \boxed {H_P^-+C_P^+=\pi R^3, \qquad H_P^++C_P^-=\pi R^3.}  \]
+</div>
+<p> Moreover their common gap is at most </p>
+<div class="displaymath" id="a0000000143">
+  \[  \pi \max _i\Delta z_i\sum _i(z_{i+1}^2-z_i^2) =\pi R^2\max _i\Delta z_i.  \]
+</div>
+<p> Thus the independently bounded hemisphere and cone volumes add to the cylinder volume. The cone calculation gives the hemisphere volume \(2\pi R^3/3\), and reflection gives </p>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:sphere-volume">
+<div class="theorem_thmheading">
+<span class="theorem_thmcaption">
+    Theorem
+    </span>
+<span class="theorem_thmlabel">2.1</span>
+<span class="theorem_thmtitle">Sphere volume</span>
+</div>
+<div class="theorem_thmcontent">
+<p> The sphere’s solid-volume computation is </p>
+<div class="displaymath" id="a0000000144">
+  \[  \boxed {V_R=\frac43\pi R^3.}  \]
+</div>
+<p> It is two-thirds of the volume of the circumscribed cylinder of radius \(R\) and height \(2R\). </p>
+</div>
+<aside aria-label="Proof details" class="theorem-margin"><a data-proof-map="thm:sphere-volume" href="proof-map.html?theorem=thm:sphere-volume">Proof map ↗</a><small>Reading outline</small></aside></div><p class="bundled-proof-link" data-bundled-theorem="thm:sphere-volume"><a href="proof-bundles.html?theorem=thm:sphere-volume">Bundled proof routes and LOC →</a></p>
+<p>For equal \(N\)-slab subdivisions on each hemisphere the explicit bounds are </p>
+<div class="displaymath" id="a0000000145">
+  \[  \pi R^3\left(\frac43-\frac1N-\frac1{3N^2}\right) \le V_R\le \pi R^3\left(\frac43+\frac1N-\frac1{3N^2}\right).  \]
+</div>
+<p> Their difference is \(2\pi R^3/N\). This is the entire exhaustion error, apart from requested finite precision in the disk-area computations. No general principle asserting equality of volumes from equality of cross-sections has been invoked. </p>
+<h2 id="lem:frustum-area">2.8 A conical frustum’s area is another polygonal computation</h2>
+<p>  Rotate a segment with endpoint distances \(r,r'\) from the axis and axial height \(h\). Its length is \(\ell =\sqrt{h^2+(r-r')^2}\). We compute the lateral area of the resulting frustum from planar facets, before measuring the sphere’s surface. </p>
+<p>Choose an inner polygon of the unit circle and the outer polygon given by its endpoint tangents. Let their areas be \(a^-,a^+\), their perimeters \(p^-,p^+\), and let the inner chord lengths be \(b_j\) with midpoint distances \(d_j=\sqrt{1-b_j^2/4}\). Scale these two polygons by \(r\) and \(r'\) in the two endpoint planes and join corresponding edges. </p>
+<p>An inner trapezoid has area </p>
+<div class="displaymath" id="a0000000146">
+  \[  T_j=\frac{r+r'}2 b_j\sqrt{h^2+d_j^2(r-r')^2}.  \]
+</div>
+<p> Its slant height lies between \(d_j\ell \) and \(\ell \). Thus its total area \(F^-\) satisfies </p>
+<div class="displaymath" id="a0000000147">
+  \[  (r+r')\ell a^- =\frac{r+r'}2\ell \sum _j b_jd_j \le F^-\le \frac{r+r'}2\ell p^-.  \]
+</div>
+<p> Every outer polygon edge has distance \(1\) from the axis in its base plane. The transverse slant height of the associated outer trapezoid is therefore exactly \(\ell \). Its total area is </p>
+<div class="displaymath" id="a0000000148">
+  \[  F^+=\frac{r+r'}2\ell p^+=(r+r')\ell a^+.  \]
+</div>
+<p> The planar comparisons \(p^-\le 2\pi \) and \(a^-\le \pi \le a^+\) imply </p>
+<div class="displaymath" id="a0000000149">
+  \[  F^-\le \pi (r+r')\ell \le F^+, \qquad F^+-F^-\le (r+r')\ell (a^+-a^-).  \]
+</div>
+<p> Refinement constructs a unique lateral-area computation and proves </p>
+<div class="displaymath" id="a0000000150">
+  \[  \boxed {\operatorname {Area}(\text{frustum})=\pi (r+r’)\ell .}  \]
+</div>
+<p> The case \(r'=0\) is the cone’s lateral area \(\pi r\ell \); the case \(r=r'\) is the cylinder’s lateral area. Degenerate zero-area cases are read directly. This proof used only planar trapezoids and the circle’s exhaustion, not an unproved formula for a surface of revolution. </p>
+<h2 id="lem:spherical-band-chord">2.9 The finite chord identity behind the sphere’s surface</h2>
+<p>  Use coordinates \((r,z)\) in a meridian half-plane, with \(r\ge 0\). Take consecutive points </p>
+<div class="displaymath" id="a0000000151">
+  \[  p=(r,z),\qquad q=(r',z'),\qquad r^2+z^2=(r')^2+(z')^2=R^2,\qquad z{\gt}z'.  \]
+</div>
+<p> Exclude the single diameter joining both poles. Set </p>
+<div class="displaymath" id="a0000000152">
+  \[  \Delta z=z-z',\quad \ell =|p-q|,\quad m=(p+q)/2,\quad d=|m|=\sqrt{R^2-\ell ^2/4}{\gt}0.  \]
+</div>
+<p> The midpoint vector is perpendicular to the chord. Its radial coordinate is \((r+r')/2\), so elementary similar right triangles give </p>
+<div class="displaymath" id="a0000000153">
+  \[  \frac{r+r'}2\ell =d\Delta z.  \]
+</div>
+<p> Rotating the chord gives an inner frustum of area </p>
+<div class="displaymath" id="a0000000154">
+  \[  L(p,q)=\pi (r+r')\ell =2\pi d\Delta z.  \]
+</div>
+<p>For an outer comparison, take the parallel tangent to the circle at \(Rm/d\) and truncate it by the same two horizontal planes. Its endpoint radii exceed \(r,r'\) by the same amount </p>
+<div class="displaymath" id="a0000000155">
+  \[  k=(R-d)\frac{\ell }{\Delta z}.  \]
+</div>
+<p> The slant length is still \(\ell \), so the tangent frustum has area </p>
+<div class="displaymath" id="a0000000156">
+  \[  U(p,q)=2\pi \left(d\Delta z+(R-d)\frac{\ell ^2}{\Delta z}\right).  \]
+</div>
+<p> These are actual finite frustum computations. Since \(d\le R\) and \(\ell \ge \Delta z\), their comparison is </p>
+<div class="displaymath" id="a0000000157">
+  \[  \boxed {L(p,q)\le 2\pi R\Delta z\le U(p,q).}  \]
+</div>
+<p> The middle quantity is the independently computed area of the cylinder band of radius \(R\) between the same planes. </p>
+<p>There is also a uniform error bound, including near the poles. The nonnegative radii give </p>
+<div class="displaymath" id="a0000000158">
+  \[  (r-r')^2\le |r^2-(r')^2|\le 2R\Delta z, \qquad \ell ^2\le 4R\Delta z.  \]
+</div>
+<p> Using \(R-d=\ell ^2/(4(R+d))\) therefore yields </p>
+<div class="displaymath" id="a0000000159">
+  \[  \boxed {U(p,q)-L(p,q) =\frac{\pi \ell ^4}{2(R+d)\Delta z}\le 2\pi \ell ^2.}  \]
+</div>
+<p> This explicit estimate, not an assertion about arbitrary triangulations of a surface, will prove convergence. </p>
+<h2 id="sec:sphere-area-exhaustion">2.10 Sphere and zone surface areas by exhaustion</h2>
+<p>  For a full meridian take, on its northern half, </p>
+<div class="displaymath" id="a0000000160">
+  \[  (r(t),z(t))= R\left(\frac{2t}{1+t^2},\frac{1-t^2}{1+t^2}\right), \qquad t=j/N,\quad 0\le j\le N,  \]
+</div>
+<p> and reflect in the equatorial plane for the southern half. These are rational points. Adjacent northern chord lengths satisfy the exact identity </p>
+<div class="displaymath" id="a0000000161">
+  \[  \ell (u,v)^2= \frac{4R^2(v-u)^2}{(1+u^2)(1+v^2)}\le \frac{4R^2}{N^2}.  \]
+</div>
+<p> The reflected chords have the same bound. Write \(\ell _*\) for the largest chord, so \(\ell _*\le 2R/N\). Their total length is at most the meridian semicircle length \(\pi R\), already computed from polygons. </p>
+<p>Let \(L_P\) be the sum of inner frustum areas and \(U_P\) the sum of the separate tangent-frustum areas. The latter need not join along a common parallel; its validity is the finite comparison below, not a general claim that containment of surfaces orders their areas. Adding the chord identities and the error estimates gives </p>
+<div class="displaymath" id="a0000000162">
+  \[  L_P\le 4\pi R^2\le U_P, \qquad U_P-L_P\le 2\pi \ell _*\sum _i\ell _i \le 2\pi ^2R\ell _*\le \frac{4\pi ^2R^2}{N}.  \]
+</div>
+<p> Thus \(64R^2/N\) is a rational upper bound for the geometric gap. All these intervals overlap, independently of the chosen meridian subdivisions. Compute the finitely many lengths, tangents, and areas to any further prescribed rational error and take finite-prefix intersections. This constructs the sphere’s surface-area computation, independently of its volume, and proves </p>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:sphere-area">
+<div class="theorem_thmheading">
+<span class="theorem_thmcaption">
+    Theorem
+    </span>
+<span class="theorem_thmlabel">2.2</span>
+<span class="theorem_thmtitle">Sphere area</span>
+</div>
+<div class="theorem_thmcontent">
+<p> The sphere’s surface-area computation is </p>
+<div class="displaymath" id="a0000000163">
+  \[  \boxed {\mathcal S_R=4\pi R^2.}  \]
+</div>
+<p> It equals the lateral area of the circumscribed cylinder, and equals four times the area of a great-circle disk. </p>
+</div>
+<aside aria-label="Proof details" class="theorem-margin"><a data-proof-map="thm:sphere-area" href="proof-map.html?theorem=thm:sphere-area">Proof map ↗</a><small>Reading outline</small></aside></div><p class="bundled-proof-link" data-bundled-theorem="thm:sphere-area"><a href="proof-bundles.html?theorem=thm:sphere-area">Bundled proof routes and LOC →</a></p>
+<p>At the coarsest stage, the meridian consists of the two chords from the north pole to the equator and then to the south pole. Its bounds are </p>
+<div class="displaymath" id="a0000000164">
+  \[  2\sqrt2\, \pi R^2\le \mathcal S_R \le (8-2\sqrt2)\pi R^2.  \]
+</div>
+<p> Further rational subdivisions improve these bounds by the proved schedule. </p>
+<p>The same proof works between any two fixed parallel planes with heights \(z_0{\lt}z_1\). The chord heights telescope to \(H=z_1-z_0\) instead of \(2R\). One may take rational heights and compute the endpoint radii by square roots. With height mesh \(\delta \), the earlier bound gives \(\ell _*\le \sqrt{4R\delta }\), so refinement terminates even at a pole. The construction proves </p>
+<div class="displaymath" id="a0000000165">
+  \[  \boxed {\operatorname {Area}(\text{spherical zone of height }H) =2\pi RH.}  \]
+</div>
+<p> In particular a cap of height \(h\) has area \(2\pi Rh\). The squared straight-line distance from its pole to a point of its rim is \(2Rh\). The cap therefore has the area of the planar disk with that chord as radius, another of Archimedes’ comparisons. </p>
+<p>Adding the two end disks to the circumscribed cylinder gives total area \(6\pi R^2\). Thus both the sphere’s volume and its surface area are two-thirds of those of the cylinder <em>including its bases</em>. Lateral area alone instead equals the sphere’s area. These are distinct statements. </p>
+<h2 id="sec:spherical-caps-sectors">2.11 Caps and solid sectors</h2>
+<p>  The same finite sum identities also compute a spherical cap’s volume. Let \(0\le h\le 2R\) be rational and measure depth \(t\) from the north pole. The squared section radius is \(q(t)=2Rt-t^2\). For \(t,u\in [0,2R]\), </p>
+<div class="displaymath" id="a0000000166">
+  \[  |q(t)-q(u)|=|t-u|\, |2R-t-u|\le 2R|t-u|.  \]
+</div>
+<p> On \(N\) equal depth slabs of thickness \(\delta =h/N\), enclose squared radii between \(\max (0,q(j\delta )-2R\delta )\) and \(q(j\delta )+2R\delta \). The associated cylinder stacks give volume bounds whose gap is at most \(4\pi R h\delta \). </p>
+<p>Their reference sum, obtained using \(q(j\delta )\), is exactly </p>
+<div class="displaymath" id="a0000000167">
+  \[  \pi \delta \sum _{j=0}^{N-1}q(j\delta ) =\pi \left[R h^2\left(1-\frac1N\right) -h^3\left(\frac13-\frac1{2N}+\frac1{6N^2}\right)\right].  \]
+</div>
+<p> This uses only the finite sums of integers and squares. Its difference from \(\pi (Rh^2-h^3/3)\) is bounded by \(\pi (Rh^2/N+h^3/(2N)+h^3/(6N^2))\), while either bounding stack differs from the reference sum by at most \(2\pi R h\delta \). These bounds construct the cap volume and prove </p>
+<div class="displaymath" id="a0000000168">
+  \[  \boxed {V_{\mathrm{cap}}=\pi h^2\left(R-\frac h3\right).}  \]
+</div>
+<p> For \(h=0\) use the zero computation. For \(h=2R\) it agrees with the earlier, independent full-sphere computation. </p>
+<p>For \(0\le h\le R\), the solid sector joining the cap to the center is the cap together with a cone of height \(R-h\) and squared base radius \(2Rh-h^2\). The cone formula and finite additivity give </p>
+<div class="displaymath" id="a0000000169">
+  \[  V_{\mathrm{sector}} =\pi h^2(R-h/3)+\frac\pi 3(2Rh-h^2)(R-h) =\frac23\pi R^2h =\frac R3\operatorname {Area}(\text{cap}).  \]
+</div>
+<p> For \(R{\lt}h\le 2R\), subtract the opposite smaller sector from the sphere; the same formula results. Taking the whole sphere gives \(V_R=R\mathcal S_R/3\), now as a consequence of two independent geometric computations rather than a definition of either quantity. </p>
+<!-- rational-nball:start -->
+<section id="sec:rational-nball" data-chapter-addition="rational-nball">
+<h2>2.12 Volume in every dimension, by rational polytopes</h2>
+<p>A sphere is the boundary; the quantity computed here is the volume of its solid ball. Write \(B_n(R)=\{x:\sum_{i=1}^n x_i^2\le R^2\}\), and write \(v_n\) for the volume of \(B_n(1)\). The construction below uses rational boundary points, exact rational polytope volumes, and an explicit refinement bound. The familiar formulas will follow from this independently defined volume.</p>
+<h3 id="nball-volume-axioms">The finite volume axioms come first</h3>
+<p>We keep the chapter’s orientation convention: reversing orientation negates volume. In each positive dimension, volume is finitely additive under oriented dissections, invariant under translations and linear maps of determinant one, and normalized on the standard oriented cube by</p>
+<div class="displaymath">\[
+ \operatorname{Vol}_n([0,1]^n)=1.
+\]</div>
+<p>Dissection additivity applies when intersections have dimension below the ambient dimension. It follows that lower-dimensional pieces have zero volume: applying this additivity to a lower-dimensional piece and itself gives \(V=V+V\), hence \(V=0\). Positively oriented regions have nonnegative volume; finite additivity therefore gives monotonicity for containment with matching positive orientations. All balls and enclosing polytopes below use that orientation.</p>
+<p><strong>Rational boxes.</strong> Partition the unit cube into congruent boxes using a common positive integer denominator. Translation invariance and finite additivity give every small box its rational product of side lengths. Cutting and assembling these boxes proves</p>
+<div class="displaymath">\[
+ \operatorname{Vol}_n\!\left(\prod_{i=1}^n[a_i,b_i]\right)
+ =\prod_{i=1}^n(b_i-a_i),\qquad a_i,b_i\in\mathbb Q,\quad a_i\le b_i.
+\]</div>
+<p><strong>Rational stretching is a consequence.</strong> For \(q\in\mathbb Q_{>0}\), let \(D_q=\operatorname{diag}(q,1,\ldots,1)\). Then</p>
+<div class="displaymath">\[
+ \operatorname{Vol}_n(D_qP)=q\operatorname{Vol}_n(P).
+\]</div>
+<p>Here is the justification without assuming a determinant transformation law. Enclose a rational polytope \(P\subset[-C,C]^n\) by the rational grid boxes of side \(1/N\) that meet it, and inscribe the boxes wholly inside it. The remaining boxes meet its finitely many facet hyperplanes. For a hyperplane \(a\cdot x=b\), choose a coordinate with maximal \(|a_i|\). Over each grid column in the other coordinates the hyperplane meets at most \(n+2\) boxes. If there are \(F\) facets and \(C\ge1\) is rational, the total volume gap is at most</p>
+<div class="displaymath">\[
+ \frac{F(n+2)(2C+2)^{n-1}}{N}.
+\]</div>
+<p>The stretched boxes have exactly \(q\) times the original box volumes, with the same finite incidence relations. Their gap is at most \(q\) times this bound. Both sides of the claimed identity therefore agree to every prescribed rational error. All box classification is finite rational linear feasibility; there is no existence claim based on a completed scalar field.</p>
+<h3 id="nball-simplex-volume">The simplex formula is proved, not stipulated</h3>
+<p>Let \(\Delta_n=\{x_i\ge0:\sum_i x_i\le1\}\). The unit cube is dissected into the \(n!\) ordered-coordinate simplices</p>
+<div class="displaymath">\[
+ 0\le x_{\sigma(1)}\le\cdots\le x_{\sigma(n)}\le1,
+ \qquad \sigma\in S_n.
+\]</div>
+<p>Each has vertices given by the successive terminal sums of coordinate basis vectors. Order these vertices to give the orientation inherited from the cube. The resulting edge matrix has determinant one: when the first ordering has determinant negative one, exchange two vertices. Thus every oriented piece is a determinant-one affine image of the standard oriented simplex. The stated invariances give equal volumes to all pieces, so additivity and cube normalization imply</p>
+<div class="displaymath">\[
+ \operatorname{Vol}_n(\Delta_n)=\frac1{n!}.
+\]</div>
+<p>For rational vertices \(p_0,\ldots,p_n\), put \(A=[p_1-p_0\ \cdots\ p_n-p_0]\). If \(\det A>0\), put \(q=\det A\). Then \(A=S D_q\) with \(\det S=1\), so rational stretching and the given invariances give volume \(\det A/n!\). If \(\det A<0\), exchange two vertices: both the volume and determinant change sign, reducing to the positive case. Consequently, with orientation given by the displayed vertex order,</p>
+<div class="displaymath">\[
+ \boxed{\operatorname{Vol}_n\bigl(\operatorname{conv}(p_0,\ldots,p_n)\bigr)
+ =\frac{\det(p_1-p_0,\ldots,p_n-p_0)}{n!}.}
+\]</div>
+<p>If the determinant vanishes, the simplex is lower-dimensional and has volume zero. Thus the same formula covers degenerate simplices. A positively oriented rational convex polytope is triangulated by triangulating its faces and coning them to the rational mean of its vertices. Recursion in dimension gives finitely many consistently oriented rational simplices. The axioms prove that the sum of their determinant volumes is independent of the triangulation. This establishes exact rational polytope volume before we use it to bound a ball.</p>
+<h3 id="nball-polytope-presentation">What is the polytope here?</h3>
+<p>For this construction, a finite rational vertex set and its convex hull suffice for the inner body. The outer body is a bounded intersection of finitely many rational halfspaces. These describe the geometric bodies; a triangulation is a way to compute their volumes, rather than the definition of the bodies. Both carry the standard ambient orientation. Finite differences and unions used in the proof are polytopal regions, dissected into consistently oriented convex pieces.</p>
+<p>Mathlib’s generic <a href="https://leanprover-community.github.io/mathlib4_docs/Mathlib/Analysis/Convex/Hull.html"><code>convexHull</code></a> can describe the hull on rational coordinates. We do not need a new general polytope type for this example. Rational coordinates provide the exact finite geometry and its dense input domain; interpreting the same inequalities on valid represented coordinates is a separate bridge. Mathlib’s set description supplies no volume theorem for our foundation. In the checked rational layer, points have type <code>Fin n → ℚ</code>, the inner body uses <code>convexHull ℚ</code>, and a finite halfspace presentation uses rational normals and rational offsets. The sphere’s outer body is the special case with offset one. Including each positive and negative coordinate-axis point bounds every outer coordinate between \(-1\) and \(1\).</p>
+<h3 id="nball-rational-points">Rational points on the boundary</h3>
+<p>For \(n\ge2\), take \(t\in\mathbb Q^{n-1}\), put \(s=\sum_i t_i^2\), and use the two charts</p>
+<div class="displaymath">\[
+ \sigma_\pm(t)=\frac{(2t_1,\ldots,2t_{n-1},\ \pm(1-s))}{1+s}.
+\]</div>
+<p>Expansion gives \(\|\sigma_\pm(t)\|^2=1\) exactly. The two charts cover the northern and southern hemispheres with parameters in the unit parameter ball, hence in \([-1,1]^{n-1}\). On either chart the finite identity</p>
+<div class="displaymath">\[
+ \|\sigma_\pm(t)-\sigma_\pm(u)\|^2
+ =\frac{4\|t-u\|^2}{(1+\|t\|^2)(1+\|u\|^2)}
+ \le4\|t-u\|^2
+\]</div>
+<p>gives an explicit sampling schedule. Take all parameters \(t_i=j_i/M\), \(-M\le j_i\le M\), in both charts. Nearest-coordinate rounding shows that every unit direction is within squared distance \((n-1)/M^2\) of a sampled point. Use \(M=2^k\) so the finite sample sets \(S_M\) are nested. The coordinate axis points are already present.</p>
+<h3 id="nball-rational-brackets">Exact inner and outer polytopes</h3>
+<div class="displaymath">\[
+ P_M=\operatorname{conv}(S_M),\qquad
+ Q_M=\bigcap_{p\in S_M}\{x:p\cdot x\le1\}.
+\]</div>
+<p>Every sampled point lies on the unit boundary. Every outer plane is its exact tangent plane. Consequently \(P_M\subset B_n(1)\subset Q_M\); axis tangents make \(Q_M\) bounded. Vertices of \(Q_M\) are solutions of rational linear systems, so both polytopes have exactly computable rational volumes</p>
+<div class="displaymath">\[
+ L_M=\operatorname{Vol}_n(P_M),\qquad U_M=\operatorname{Vol}_n(Q_M).
+\]</div>
+<p>There is also a rational stopping rule. Put \(\eta=(n-1)/(2M^2)\) and \(a=1-\eta>0\). For a unit direction \(u\), the nearby point \(p\) has \(u\cdot p=1-\|u-p\|^2/2\ge a\). Applying this to each outward facet normal of \(P_M\) proves \(aB_n(1)\subset P_M\). Applying it to the direction of a nonzero point of \(Q_M\) proves \(Q_M\subset a^{-1}B_n(1)\). Hence</p>
+<div class="displaymath">\[
+ Q_M\subset a^{-2}P_M,\qquad
+ 0\le U_M-L_M\le2^n(a^{-2n}-1).
+\]</div>
+<p>This uses the polytope scaling law and \(P_M\subset[-1,1]^n\), not a prior ball-volume formula. For \(\eta\le1/(4n)\), the finite Bernoulli inequality \((1-\eta)^{2n}\ge1-2n\eta\) sharpens the stopping rule to</p>
+<div class="displaymath">\[
+ \boxed{U_M-L_M\le\frac{2^{n+1}n(n-1)}{M^2}.}
+\]</div>
+<p>Refinement increases \(L_M\) and decreases \(U_M\). The intervals therefore define a valid computable volume \(v_n\) with an explicit rational precision schedule. Any other correctly enclosing polytopes with shrinking gaps give the same value: every inner polytope of either construction is contained in every outer polytope of the other. This proves agreement of the computations without assuming a ball volume in advance. In dimension one the interval already has volume \(v_1=2\); the zero-dimensional convention is \(v_0=1\).</p>
+<h3 id="nball-3d-illustration">See the exact polyhedra in three dimensions</h3>
+<div class="rational-ball-demo" id="rational-ball-demo">
+<div class="ball-controls"><label>Sampling stage <select id="ball-stage"><option value="0">Axis points</option><option value="1">First grid</option><option value="2">Second grid</option><option value="3" selected>Third grid</option><option value="4">Fourth grid</option></select></label><label><input id="ball-inner" type="checkbox" checked> Inner polyhedron</label><label><input id="ball-outer" type="checkbox" checked> Outer polyhedron</label><label><input id="ball-sphere" type="checkbox" checked> Unit sphere</label><button id="ball-reset" type="button">Reset view</button></div>
+<canvas id="ball-canvas" width="900" height="500" tabindex="0" aria-label="Rotatable rational inner and outer polyhedra around the unit sphere. Drag to rotate; arrow keys also rotate."></canvas>
+<p class="ball-legend"><span class="inner-key">Solid green: inner</span> · <span class="outer-key">Orange outline: outer</span> · Gray curves: unit sphere</p>
+<p id="ball-summary" aria-live="polite"></p><div id="ball-bounds" class="displaymath"></div>
+<details><summary>Exact rational volumes</summary><div id="ball-exact" class="displaymath"></div></details>
+<p class="ball-hint">Drag to rotate, or focus the picture and use arrow keys. The displayed decimal endpoints are rounded outwards. The exact volumes come from rational determinant sums. Rounded coordinates are used only to draw the picture.</p>
+</div>
+<p><a href="rational-nball/polyhedra.json">Exact vertices, faces and volume certificates</a> · <a href="rational-nball/generate_polyhedra.py">Reproduce the rational computations</a>. Every supporting plane, unit-boundary identity, polar vertex inequality, paired oriented mesh edge, and exact volume sum is checked using rational arithmetic.</p>
+<h3 id="nball-general-formula">The general-dimensional formula</h3>
+<p>The geometric computation just constructed satisfies</p>
+<div class="displaymath">\[
+ \boxed{v_{n+2}=\frac{2\pi}{n+2}\,v_n,\qquad v_0=1,\quad v_1=2.}
+\]</div>
+<p>Here \(\pi=v_2\) is the disk area already established in this chapter. Induction gives, for every nonnegative integer \(k\) and nonnegative radius \(R\),</p>
+<div class="displaymath">\[
+ \boxed{V_{2k}(R)=\frac{\pi^k}{k!}R^{2k},\qquad
+ V_{2k+1}(R)=\frac{2^{k+1}\pi^k}{1\cdot3\cdot5\cdots(2k+1)}R^{2k+1}.}
+\]</div>
+<p>The odd denominator is one when \(k=0\). In particular, \(V_2(R)=\pi R^2\), \(V_3(R)=4\pi R^3/3\), \(V_4(R)=\pi^2R^4/2\), and \(V_5(R)=8\pi^2R^5/15\). Rational radii scale every vertex and determinant exactly. An arbitrary valid represented radius is handled by its nonnegative rational lower and upper bounds; refine those bounds and the unit-ball polytopes together. The finite power identity below controls the scaling error and proves representation independence.</p>
+<h3 id="nball-recurrence-proof">Proof of the recurrence by finite dissections</h3>
+<p>Fix \(n\ge1\) and write coordinates in dimension \(n+2\) as \((x,y)\), with \(x\) in dimension \(n\) and \(y\) in dimension two. Set \(t_j=j/N\) and \(h=1/N\). Over the radial shell \(t_j\le\|x\|\le t_{j+1}\), the permitted squared radius of the disk in the last two coordinates lies between \(1-t_{j+1}^2\) and \(1-t_j^2\). Thus finite shell–disk products give</p>
+<div class="displaymath">\[
+ v_n\pi A_N\le v_{n+2}\le v_n\pi B_N,
+\]</div>
+<div class="displaymath">\[
+ A_N=\sum_{j=0}^{N-1}(1-t_{j+1}^2)(t_{j+1}^n-t_j^n),\qquad
+ B_N=\sum_{j=0}^{N-1}(1-t_j^2)(t_{j+1}^n-t_j^n).
+\]</div>
+<p>These inequalities are justified by rational polytopal dissections, rather than a general principle about cross-sections. Approximate each nested ball by its inner and outer polytopes, form shell differences by cutting their finitely many rational faces, and triangulate. For the disk radii, use rational lower and upper square-root bounds, then rational disk polygons. Products are rational polytopal regions, whose volumes multiply: prove this first for grid boxes, then squeeze each factor by the boundary-box estimate above. For each fixed finite partition, these constructions make the additional error smaller than any prescribed rational tolerance. Disjoint shell products add, and their inner and outer containment gives the displayed bounds. Thus a curved shell or disk is never assigned an uncomputed exact rational volume.</p>
+<p>Finite summation by parts, with zero endpoint terms, gives</p>
+<div class="displaymath">\[
+ A_N=\sum_{j=0}^{N-1}t_j^n(t_{j+1}^2-t_j^2)
+ =2h\sum_{j=0}^{N-1}t_j^{n+1}+h^2\sum_{j=0}^{N-1}t_j^n.
+\]</div>
+<p>For \(0\le a\le b\), factor the difference of powers:</p>
+<div class="displaymath">\[
+ b^m-a^m=(b-a)\sum_{i=0}^{m-1}b^{m-1-i}a^i.
+\]</div>
+<p>Every term lies between \(a^{m-1}\) and \(b^{m-1}\). With \(m=n+2\), summing over the partition telescopes to one. The difference between the upper and lower power sums is exactly \(h\), so</p>
+<div class="displaymath">\[
+ \frac1{n+2}-h\le h\sum_j t_j^{n+1}\le\frac1{n+2}.
+\]</div>
+<p>The remaining term of \(A_N\) is between zero and \(h\). Also</p>
+<div class="displaymath">\[
+ 0\le B_N-A_N
+ =\sum_j(t_{j+1}^2-t_j^2)(t_{j+1}^n-t_j^n)\le2h.
+\]</div>
+<p>Consequently both bounds differ from \(2/(n+2)\) by at most \(5/N\). Since \(v_n\pi\le2^{n+2}\), the geometric volume differs from \(2\pi v_n/(n+2)\) by at most \(5\cdot2^{n+2}/N\), in addition to the freely chosen rational polytope approximation error. Refinement to every rational tolerance proves the exact recurrence. For \(n=0\), the same recurrence is simply \(v_2=\pi\), already established. Repeated substitution and finite induction give the two closed formulas.</p>
+<p>Only rational determinants, finite dissections, square-root brackets and power identities have been used. No notion of an integral occurs in the argument. In the later Gamma-function chapter we will give a second proof and show that it agrees with this geometric computation.</p>
+<details id="nball-formal-status"><summary>Formalization: checked statements and remaining geometry</summary>
+<p>The general-dimensional rational chart identity, finite power and partition estimates, shell-gap identity, and summation-by-parts identity are checked in Lean using only native rational arithmetic. A separate pinned Mathlib layer checks convexity, the inner/outer rational-ball containments, refinement, and boundedness from axis samples, all on rational coordinates. It also checks the determinant coefficient’s translation, linear-transformation, and determinant-one laws. The coefficient is an algebraic expression; these identities do not derive it from the volume axioms.</p>
+<p>The Mathlib layer is pinned to revision <code>51e6992efd06126df61a496bebf8f49482a4e129</code>. Its actual transitive theorem-declaration dependencies contain no Mathlib real or complex scalars, measure, or integration. Broad module imports do include those modules, so this layer remains an isolated, reproducible package rather than joining the native foundation’s import closure.</p>
+<p>The simplex-axiom derivation, triangulation independence, chart covering and quantitative containment estimates, product-volume law, and agreement with a valid represented ball volume are proved mathematically above but are <strong>not yet fully checked in Lean</strong>. The older <code>FiniteNBallVolume.lean</code> proves the algebra of a formula model; it does not by itself identify that model with this geometric volume. The exact 3D certificates are checked by the rational Python program, separately from Lean.</p>
+<p><a href="rational-nball/FiniteRationalBall.lean">Native Lean source</a> · <a href="rational-nball/lean-audit.txt">Native theorem and axiom audit</a> · <a href="rational-nball/RationalConvexBodies.lean">Convex bodies over rational coordinates</a> · <a href="rational-nball/convex-bodies-audit.txt">Convex-body dependency audit</a> · <a href="rational-nball/RationalSimplexLinearAlgebra.lean">Rational determinant layer</a> · <a href="rational-nball/rational-matrix-audit.txt">Determinant dependency audit</a> · <a href="rational-nball/rational-geometry-proof.tar.gz">Isolated Mathlib proof package</a> · <a href="rational-nball/README.md">Reproduction instructions</a> · <a href="rational-nball/manifest.json">Construction and proof scope</a>.</p>
+</details>
+</section>
+<!-- rational-nball:end -->
+
+<h2 id="a0000000009">2.13 What precedes calculus</h2>
+<p> Only finitely many polygons, prisms, cylinders, and planar frusta occur at any stage. The operations are determinants, square roots, rational sums, and interval arithmetic. Inner–outer gaps supply the needed number computations. The first cone and sphere sums have been evaluated by finite integer identities, not by antiderivatives. Surface area has its own facet construction, not the rule of differentiating volume with respect to radius. </p>
+<p>The next chapter introduces trigonometry by using sector area as an angle coordinate. Only afterwards do we define a general rectangle integral and identify these particular geometric exhaustions as examples of it. That later organization explains and reuses the geometry; it is not a prerequisite for the results proved here. </p>
+<div class="remark_thmwrapper theorem-style-definition" id="a0000000170">
+<div class="remark_thmheading">
+<span class="remark_thmcaption">
+    Remark
+    </span>
+<span class="remark_thmlabel">2.3</span>
+<span class="remark_thmtitle">Historical source</span>
+</div>
+<div class="remark_thmcontent">
+<p> Archimedes, <em>On the Sphere and Cylinder</em>, Books I and II, in T. L. Heath’s edition of <em>The Works of Archimedes</em> (1897), especially the opening letters stating the principal results. The texts are available as <a href="https://doi.org/10.1017/CBO9780511695124.010">Book I</a> and <a href="https://doi.org/10.1017/CBO9780511695124.011">Book II</a>. The rational-coordinate schedules and explicit error bounds in this chapter are our reconstruction; they should not be attributed verbatim to Archimedes. </p>
+</div>
+</div>
+</div></article><footer class="chapter-footer"><span>Chapter 2 · rational polytope exhaustion</span><a href="https://github.com/liuyao12/computable-analysis/tree/f630241adeae35fc06a5fd4921a4df6396e291d0">Source f630241a ↗</a></footer></main><aside class="on-this-page"><span>On this page</span><a href="#thm:rational-circle-pythagorean">2.1 A quarter-circle computation</a><a href="#sec:rational-area">2.2 Area from ordered rational vectors</a><a href="#sec:rational-polygons">2.3 Polygons and the choice of starting vertex</a><a href="#thm:geometric-pi-validity">2.4 The geometric meaning of the computation</a><a href="#a0000000008">2.5 Circumference and sector length</a><a href="#sec:cone-exhaustion">2.6 Cylinders and cones by finite solid comparisons</a><a href="#sec:sphere-volume-exhaustion">2.7 The hemisphere and the cone fill the cylinder in the bounds</a><a href="#lem:frustum-area">2.8 A conical frustum’s area is another polygonal computation</a><a href="#lem:spherical-band-chord">2.9 The finite chord identity behind the sphere’s surface</a><a href="#sec:sphere-area-exhaustion">2.10 Sphere and zone surface areas by exhaustion</a><a href="#sec:spherical-caps-sectors">2.11 Caps and solid sectors</a><a href="#sec:rational-nball">2.12 Volume in every dimension</a><a href="#nball-volume-axioms">Volume axioms</a><a href="#nball-simplex-volume">Simplex determinant formula</a><a href="#nball-3d-illustration">Rational polyhedra in 3D</a><a href="#nball-general-formula">General formula</a><a href="#nball-recurrence-proof">Finite recurrence proof</a><a href="#a0000000009">2.13 What precedes calculus</a></aside></div>
+<dialog id="proof-dialog"><div class="dialog-top"><span>Proof structure</span><button aria-label="Close proof map and return to the text" id="close-proof">Return to text ×</button></div><iframe id="proof-frame" title="Mathematical proof map"></iframe></dialog><script>window.addEventListener('DOMContentLoaded',()=>document.querySelectorAll('.geometry-statements code').forEach(c=>window.LeanSnippet?.highlight(c)));</script></body></html>

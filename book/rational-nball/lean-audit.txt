@@ -1,0 +1,14 @@
+'ComputableAnalysis.RationalBall.normSq_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalBall.sphereChart_unit' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalBall.power_difference' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalBall.power_mono' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalBall.powerTerms_bounds' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalBall.power_cell_bounds' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalBall.partition_power_bounds' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalBall.partition_power_gap' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalBall.unit_partition_power_estimate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalBall.shells_gap' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalBall.shells_by_parts' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalBall.shells_zero_one' depends on axioms: [propext, Classical.choice, Quot.sound]

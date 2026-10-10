@@ -123,6 +123,10 @@ jobs:
                   assert hashlib.sha256((site/name).read_bytes()).hexdigest()==digest,name
           (site/'modular-publication.json').write_text(json.dumps({'baseRun': int(os.environ['BASE_RUN']),'baseRecovered':not Path('previous/artifact.tar').exists(),'preservedFiles':sum(n not in changed for n in before),'graphBundles':len(data['nodes']),'sourceModules':len(data['imports']),'sourceSnapshots':len(data['sources']),'currentExponentialApi':True,'auditedCMValueEndpoints':len(cm['checkedEndpoints']),'classPolynomialTheoremProved':False,'cmSourceBundleSha256':bundle['sha256'],'cmValuesAuditSha256':cm['axiomAuditSha256'],'auditedExponentialEndpoints':len(proof['checkedEndpoints']),'exponentialAuditSha256':proof['axiomAuditSha256'],'graphSha256':hashlib.sha256((site/'modular-proofs.html').read_bytes()).hexdigest()}))
           PY
+      - name: Preserve the rational ball chapter overlay
+        env:
+          BASE_RUN: ${{ inputs.base_run }}
+        run: python3 book/rational-nball/publish_overlay.py site
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
