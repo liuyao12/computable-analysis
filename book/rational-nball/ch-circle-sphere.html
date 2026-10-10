@@ -445,6 +445,15 @@ fun x =&gt;
  V_{2k+1}(R)=\frac{2^{k+1}\pi^k}{1\cdot3\cdot5\cdots(2k+1)}R^{2k+1}.}
 \]</div>
 <p>The odd denominator is one when \(k=0\). In particular, \(V_2(R)=\pi R^2\), \(V_3(R)=4\pi R^3/3\), \(V_4(R)=\pi^2R^4/2\), and \(V_5(R)=8\pi^2R^5/15\). Here \(V_n(R)\) denotes this specific radius-scaled computation, not a general curved-region volume operator. Rational radii scale every vertex and determinant exactly. An arbitrary valid represented radius is handled by its nonnegative rational lower and upper bounds; refine those bounds and the unit-ball polytopes together. The finite power identity below controls the scaling error and proves representation independence.</p>
+<h3 id="nball-archimedes-animation">See the three-dimensional comparison</h3>
+<p>Move a horizontal plane through the unit sphere and through a unit-radius cylinder of height \(2\). Remove the double cone whose common apex is the cylinder’s centre and whose bases are its two ends. At height \(z\), the sphere gives a disk of radius \(\sqrt{1-z^2}\); the cylinder minus the cones gives an annulus with outer radius \(1\) and inner radius \(|z|\). Both sections have area</p>
+<div class="displaymath">\[\pi\bigl(\sqrt{1-z^2}\bigr)^2=\pi(1-z^2)=\pi\cdot1^2-\pi|z|^2.\]</div>
+<figure class="archimedes-animation">
+<img id="archimedes-sections" src="rational-nball/archimedes-sections.png" width="960" height="660" loading="lazy" alt="A horizontal section moves through a sphere and a cylinder with a double cone removed. The sphere section is a disk; the cylinder section is an annulus. Viewed from above, the disk shrinks as the annulus hole grows, keeping their areas equal at every height.">
+<div class="archimedes-controls"><button id="archimedes-motion" type="button" aria-pressed="false">Play animation</button> <a href="rational-nball/archimedes-sections.gif">Open GIF</a> · <a href="rational-nball/archimedes-sections.png">Still image</a></div>
+<figcaption>The green disk and blue annulus have equal area at every height. Orange lines mark the removed cones. The classical cylinder-minus-cone calculation suggests \(2\pi-2\pi/3=4\pi/3\). The animation illustrates this geometry; the proof below establishes the equality through finite rational polytopal comparisons. In higher dimensions those comparisons use shell–disk products.</figcaption>
+</figure>
+<script defer src="rational-nball/archimedes-animation.js"></script>
 <h3 id="nball-recurrence-proof">Proof of the recurrence by finite dissections</h3>
 <p>Fix \(n\ge1\) and write coordinates in dimension \(n+2\) as \((x,y)\), with \(x\) in dimension \(n\) and \(y\) in dimension two. Set \(t_j=j/N\) and \(h=1/N\). Over the radial shell \(t_j\le\|x\|\le t_{j+1}\), the permitted squared radius of the disk in the last two coordinates lies between \(1-t_{j+1}^2\) and \(1-t_j^2\). Thus finite shell–disk products give</p>
 <div class="displaymath">\[

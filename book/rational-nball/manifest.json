@@ -240,9 +240,9 @@
     "direct closed-form represented-real formula agreement from the checked geometric recurrence and base cases"
   ],
   "sourceHashes": {
-    "ch-circle-sphere.html": "1ca0fb6fcaa2ecb14dc7b52c9f7c67d94a07171e761869f0a5ca37f62d179e5b",
-    "chapter-section.html": "8b3c999f7b131198decc79e7b51e1bbdb01dfdbcb83cebb081d23b42d8cb852f",
-    "chapter.css": "a920140beb5668bc944909db00605a7b52f5b2063cb42f40fdc757e57260e651",
+    "ch-circle-sphere.html": "cb7ada6336963f2363fd477bfc70fea3a836643f85b7c605b247e066d01b3487",
+    "chapter-section.html": "30cdcbd39c2c219cab88a2aaf0bdb6180f91918d76aa2ac6dbf5d46354bfbb70",
+    "chapter.css": "864b86b811916927e44bdac0558dfd2060e5563bd9ed45f888a01774a37e1077",
     "polyhedra-data.js": "48416f34c7301bd4ee3c17ae6d292211e0e23db4c2402a4dfd7eda197bfb3a97",
     "polyhedra-view.js": "3bf8bdf1d953cbdac0c90c00d683c17df3c3475aee3c22c26db22599dec108fe",
     "polyhedra.json": "369a0ac0470402994c98184a559107c3184150ff811ed8ef2d5792445a3afe6f",
@@ -331,7 +331,11 @@
     "ComputableAnalysis/BallArchimedesEquivalence.lean": "38f4f92e7264d671d77d32701276eb419e9cdce6a4adcc90884ef0893173ce03",
     "archimedes-lean-decls": "362a20500d4367e3c1f2d150f9f4b2a4b9515c88f193056289f7a325e30d1d73",
     "RationalArchimedesModulus-audit.txt": "36b8caaa3009849efcd13b9e425dce2ec5e8c66cf551f36b57cf6e4bebffbb19",
-    "archimedes-geometric-capability-note.md": "9ecd00a393229d282c20164eadc146f222c0b31a395653a2de2893a68b28dd78"
+    "archimedes-geometric-capability-note.md": "9ecd00a393229d282c20164eadc146f222c0b31a395653a2de2893a68b28dd78",
+    "archimedes-sections.gif": "6d7e4ef7ae36f0b9b623cd8d12375909f6f87942b4d2e5bac54c192520c5948e",
+    "archimedes-sections.png": "91e78785f2cc577d09d4152bfa7bff5c6a9c6abad192362bb49cbefe46f902d3",
+    "archimedes-animation.js": "51492d15d0350a3e3476c9012bff0c328ddbd85c71924b20d3d0014b1a1dc22b",
+    "generate_archimedes_animation.py": "e7b36b48e281e365b47ffc141f45ef938109b54b24ff493649d46e41905632e3"
   },
   "mathlibModuleClosureContainsRealOrComplex": true,
   "mathlibTheoremDependenciesUseRealOrComplex": false,
