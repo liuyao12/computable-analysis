@@ -1,0 +1,39 @@
+'ComputableAnalysis.RationalPolytopeVolume.mem_body_retained' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.volume_retained_le_of_cut_nonneg' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.mem_body_affineCube' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.pointHull_bounded_cube' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.volume_mono' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.volume_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.volume_mono_of_vertex_halfspace_checks' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.volume_clip_le' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.volume_cap_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.body_orthantInnerPoly' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.body_orthantOuterPoly' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.orthant_inner_volume_le_outer' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.orthant_inner_volume_refines' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.orthant_outer_volume_refines' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.orthant_cross_volume_le' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.orthant_bracket_refinement' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+PASS: 16 checked rational geometry endpoints; 1301 transitive declaration dependencies; no Mathlib real/complex scalars, measure or integration

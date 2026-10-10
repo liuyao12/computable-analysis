@@ -1,0 +1,54 @@
+'ComputableAnalysis.RationalPolytopeVolume.vertexSimplex_volume_eq_abs' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.vertexSimplex_volume_nonneg' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.simplex_affine_heights' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.clip_simplex_one_crossing' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.simplex_edge_subdivision' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.dissection_clipped' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.dissection_retained' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.retained_body_subset' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.retained_body_congr' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.volume_empty_body' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.flat_retained' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.retained_simplex_volume_nonneg' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.retained_triangulated_volume_nonneg' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.vertexSimplex_matrix' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.retained_cube_volume_nonneg' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.volume_clip_le_on_retained_cube' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.dissection_translated' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.translated_vertexSimplex' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.retained_affineCube_volume_nonneg' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+PASS: 19 checked rational geometry endpoints; 1837 transitive declaration dependencies; no Mathlib real/complex scalars, measure or integration
