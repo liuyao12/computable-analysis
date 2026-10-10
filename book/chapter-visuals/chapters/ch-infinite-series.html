@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="A mathematical foundation for calculus through certified rational computations." name="description"/><title>Infinite series · Computable Analysis</title><link href="reading/book.css" rel="stylesheet"/><script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],processEscapes:true},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script><script defer="" src="reading/book.js"></script><link href="reading/analysis-edition.css" rel="stylesheet"/><meta content="7b4dddd81afefceb62d05fa8319b122bfa223dcc" name="documentation-revision"/><style id="pedagogy-style">.pedagogical-opening{margin:1em 0 1.6em}.pedagogical-context{font-size:.9em}.pedagogical-bridge{margin:.8em 0 1.2em}</style><link rel="stylesheet" href="reading/chapter-visuals/visuals.css"><script defer src="reading/chapter-visuals/visuals.js"></script></head>
+<body><a class="skip" href="#main">Skip to mathematics</a><header class="book-header"><button aria-controls="book-nav" aria-expanded="false" id="menu-button">Contents</button><a class="brand" href="index.html">Computable <em>Analysis</em></a><a class="header-about" href="programme.html">An alternative foundation to Calculus</a></header>
+<nav aria-label="Book chapters" id="book-nav"><span class="nav-label">The book</span><a class="" href="ch-foundations.html"><span>01</span>Numbers and functions</a><a class="pi-catalogue-navigation" href="ch-foundations.html#pi-computations">Other examples: π</a><a class="" href="ch-circle-sphere.html"><span>02</span>Circle, sphere and cylinder</a><a class="" href="ch-rational-circle-trigonometry.html"><span>03</span>Angles and trigonometry</a><a class="" href="ch-integrals.html"><span>04</span>Integral computations</a><a class="" href="ch-effective-calculus.html"><span>05</span>Derivatives and the FTC</a><a class="current" href="ch-infinite-series.html"><span>06</span>Infinite series</a><a class="" href="ch-exponential-logarithm.html"><span>07</span>Exponential and logarithm</a><details class="later-chapters"><summary>Further chapters</summary><a class="" href="ch-algebra-fta.html"><span>08</span>Algebraic computations</a><a class="" href="ch-local-models.html"><span>09</span>Local models</a><a class="" href="ch-complex-paths.html"><span>10</span>Complex paths</a><a class="" href="ch-improper-parameters.html"><span>11</span>Improper integrals</a><a class="" href="ch-fourier.html"><span>12</span>Fourier computations</a><a class="" href="ch-impulses.html"><span>13</span>Impulses</a><a class="" href="ch-differential-equations.html"><span>14</span>Differential equations</a><!-- fundamental-matrix:start --><a data-reader-addition="fundamental-matrix" href="fundamental-matrix.html">Fundamental Matrix</a><!-- fundamental-matrix:end --><a class="" href="ch-special-equations.html"><span>15</span>Special-function equations</a><a class="" href="ch-transforms-zeta.html"><span>16</span>Transforms and zeta</a><a class="" href="ch-elliptic.html"><span>17</span>Elliptic integrals</a></details><a class="nav-label construction-skill-label" href="construction-skills.html">Skills</a><a class="construction-skill-navigation" href="skill-real-integrals.html">Real integrals</a><a class="construction-skill-navigation" href="skill-complex-integrals.html">Complex path integrals</a><a class="construction-skill-navigation" href="skill-series.html">Series</a><a class="construction-skill-navigation" href="skill-holomorphic-functions.html">Holomorphic functions</a><a class="construction-skill-navigation" href="skill-analytic-continuation.html">Analytic continuation</a><span class="nav-label">Worked examples</span><a class="" href="cosine.html">The cosine-square integral</a><a class="classic-navigation" href="cartwright.html">Irrationality of \(\pi^2\)</a><a class="classic-navigation" href="leibniz.html">The Leibniz series</a><a class="classic-navigation" href="basel.html">The Basel problem</a><a class="classic-navigation" href="euler.html">Euler’s sine product</a><span class="nav-label">Function theory</span><a class="classic-navigation" href="arctan-taylor.html">Arctangent and Taylor series</a><a class="classic-navigation" href="complex-analysis.html">Polygonal Cauchy theory</a><a class="classic-navigation" href="analytic-continuation.html">Analytic continuation</a><a class="classic-navigation" href="zeta-zeros.html">Riemann zeta zeros</a><span class="nav-label">Differential equations</span><a class="classic-navigation" href="fuchs.html">Fuchs’s theorem</a><a class="classic-navigation" href="painleve.html">Painlevé’s classification</a><span class="nav-label">The development</span><a class="classic-navigation" href="proof-bundles.html">Bundled proof comparisons</a><a href="programme.html">Purpose and boundary</a><a href="proof-bench/">Proof-size comparison</a><a href="reference/index.html">Technical reference ↗</a></nav>
+<div class="page"><main class="reader" id="main"><div class="chapter-kicker">CHAPTER 06</div><article><div class="main-text">
+<h1 id="ch:infinite-series">Series and Finite Remainders</h1><section class="pedagogical-opening" data-pedagogy="opening" id="why-this-page"><p>Adding terms gives a prefix. Bounding all omitted terms turns that prefix into a computation of the sum.</p><p class="pedagogical-context">Earlier context: <a href="ch-foundations.html">Computable Numbers and Functions</a>.</p></section><!-- chapter-visual:start -->
+<figure class="chapter-visual" data-visual="series" id="visual-construction">
+<h2>A prefix needs a remainder bound</h2>
+<canvas role="img" aria-label="A prefix needs a remainder bound. The lengths are . Green includes the selected prefix; orange is the entire remaining tail. A finite geometric identity computes both exactly.">A prefix needs a remainder bound</canvas>
+<div class="visual-legend">Green included prefix · Orange omitted tail</div>
+<div class="visual-controls"><label>Included terms: <span data-stage-value>4</span><input type="range" min="1" max="8" value="4" step="1" aria-label="Included terms"></label><button type="button" data-visual-reset>Reset</button></div>
+<div class="visual-output" aria-live="polite"></div>
+<figcaption>The lengths are \(1,1/2,1/4,\ldots\). Green includes the selected prefix; orange is the entire remaining tail. A finite geometric identity computes both exactly. <a href="#thm:finite-geometric-series-interface">Follow the construction.</a></figcaption>
+<noscript><p>The lengths are \(1,1/2,1/4,\ldots\). Green includes the selected prefix; orange is the entire remaining tail. A finite geometric identity computes both exactly.</p></noscript>
+</figure>
+<!-- chapter-visual:end -->
+
+<p>An infinite sum is useful here only when a finite prefix comes with a bound on every finite future correction. This produces a number computation by stabilization. Algebraic identities between prefixes, combined with tail bounds, then prove identities between the computations. </p>
+<h2 id="thm:finite-geometric-series-interface">6.1 Geometric and alternating sums</h2>
+<p>  For rational \(|r|{\lt}1\), </p>
+<div class="displaymath" id="a0000000258">
+  \[  \left|\sum _{k=N+1}^{M}r^k\right| \le \frac{|r|^{N+1}}{1-|r|}\qquad (M{\gt}N).  \]
+</div>
+<p> The right side is a rational error tending to zero. Thus the geometric series computes \(1/(1-r)\) by its finite identity. </p>
+<p>If \(a_n\) are nonnegative, decrease to zero with an effective bound, then even and odd partial sums of \(\sum (-1)^na_n\) interleave; pairing adjacent terms proves that the next term bounds the remainder. Computed rather than rational terms are evaluated to a finite total error budget. </p>
+<div class="example_thmwrapper theorem-style-definition" id="thm:harmonic-dyadic-lower-bound">
+<div class="example_thmheading">
+<span class="example_thmcaption">
+    Example
+    </span>
+<span class="example_thmlabel">6.1</span>
+<span class="example_thmtitle">Divergence is also a computation</span>
+</div>
+<div class="example_thmcontent">
+<p>  Grouping the terms with \(2^{j-1}{\lt}n\le 2^j\) gives </p>
+<div class="displaymath" id="a0000000259">
+  \[  \sum _{n=1}^{2^m}\frac1n\ge 1+\frac m2.  \]
+</div>
+<p> For every rational height, this produces an explicit finite partial sum above it. No infinite value is introduced. </p>
+</div>
+</div>
+<p>The sum of reciprocal squares has the independent tail bound </p>
+<div class="displaymath" id="a0000000260">
+  \[  \sum _{n=N+1}^{M}\frac1{n^2} \le \sum _{n=N+1}^{M}\left(\frac1{n-1}-\frac1n\right)\le \frac1N.  \]
+</div>
+<p> This constructs the number before identifying it with \(\pi ^2/6\). The identification will be a Fourier computation in Chapter <a href="ch-fourier.html">12</a>. </p>
+<h2 id="thm:leibniz-arctan">6.2 Arctangent: a finite identity integrates to a series</h2>
+<p>  The exact polynomial identity </p>
+<div class="displaymath" id="a0000000261">
+  \[  \frac1{1+t^2}=\sum _{k=0}^{N-1}(-1)^kt^{2k} +\frac{(-1)^Nt^{2N}}{1+t^2}  \]
+</div>
+<p> has an integrable remainder. On \([0,x]\) with \(0\le x\le 1\) its absolute integral is at most \(x^{2N+1}/(2N+1)\). Finite polynomial integration and the already proved angle-area comparison yield </p>
+<div class="displaymath" id="a0000000262">
+  \[  A(x)=\sum _{k=0}^{N-1}\frac{(-1)^kx^{2k+1}}{2k+1}+R_N(x), \qquad |R_N(x)|\le \frac{x^{2N+1}}{2N+1}.  \]
+</div>
+<p> At \(x=1\) this is the Leibniz computation of \(\pi /4\). This is a proof of agreement between a geometric computation and a series computation, not an identification by notation. </p>
+<h2 id="a0000000035">6.3 A power series is a prefix together with a majorant</h2>
+<p> Suppose the coefficients \(a_n\) are computable, and rational constants \(M,R{\gt}0\) give \(|a_n|\le M R^{-n}\). On \(|x|\le r{\lt}R\), put \(q=r/R\). Then </p>
+<div class="displaymath" id="a0000000263">
+  \[  F_N(x)=\sum _{n=0}^Na_nx^n,\qquad |F-F_N|\le \frac{M q^{N+1}}{1-q}.  \]
+</div>
+<p> The inequality means a bound on all finite future tails, and so constructs \(F\). Coefficient evaluations are made accurate enough that their finite weighted error is smaller than a prescribed remaining budget. The same construction works in rational complex boxes on a smaller disk. </p>
+<p>For the differentiated prefixes the tail is bounded by </p>
+<div class="displaymath" id="a0000000264">
+  \[  \frac{M}{R}q^N\left(\frac{N+1}{1-q}+\frac{q}{(1-q)^2}\right).  \]
+</div>
+<p> This follows by summing \(nq^{n-1}\), or differentiating a finite geometric identity and bounding its final terms. Higher differentiated tails follow in exactly the same finite way, with explicit polynomial factors in \(n\). One fixes the required order and writes its bound; no unrestricted exchange of limits is presumed. </p>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:finite-taylor-ftc-prefix">
+<div class="theorem_thmheading">
+<span class="theorem_thmcaption">
+    Theorem
+    </span>
+<span class="theorem_thmlabel">6.2</span>
+<span class="theorem_thmtitle">Differentiation and integration of a supplied series</span>
+</div>
+<div class="theorem_thmcontent">
+<p>  On a smaller interval \([-r,r]\), the derivative is the computation with coefficients \((n+1)a_{n+1}\). Its integral is computed term by term, and </p>
+<div class="displaymath" id="a0000000266">
+  \[  \int _a^b\sum _{n=0}^{\infty }a_nx^n\, dx =\sum _{n=0}^{\infty }\frac{a_n}{n+1}(b^{n+1}-a^{n+1}).  \]
+</div>
+</div>
+<aside aria-label="Proof details" class="theorem-margin"><a data-proof-map="thm:finite-taylor-ftc-prefix" href="proof-map.html?theorem=thm:finite-taylor-ftc-prefix">Proof map ↗</a><small>Reading outline</small></aside></div><p class="bundled-proof-link" data-bundled-theorem="thm:finite-taylor-ftc-prefix"><a href="proof-bundles.html?theorem=thm:finite-taylor-ftc-prefix">Bundled proof routes and LOC →</a></p>
+<div class="proof_wrapper" id="a0000000265">
+<div class="proof_heading">
+<span class="proof_caption">
+    Proof
+    </span>
+<span class="expand-proof">▼</span>
+</div>
+<div class="proof_content">
+<p>Each finite polynomial has its exact algebraic derivative and primitive. For all prefixes the second derivatives have the common bound </p>
+<div class="displaymath" id="a0000000267">
+  \[  K=\frac{2M}{R^2(1-q)^3}.  \]
+</div>
+<p> The finite polynomial remainder identity gives \(|F_N(y)-F_N(x)-F_N'(x)(y-x)|\le K|y-x|^2/2\) for a segment in \([-r,r]\). One can derive this identity by integrating the polynomial second derivative twice; polynomial integration is just the binomial identity and finite telescoping. Pass to the computations using the explicit tails for \(F_N\) and \(F_N'\). This proves the derivative assertion. Uniform tail bounds change an integral by at most its interval length times the tail, proving the second assertion. </p>
+</div>
+</div>
+<p>For real coefficients, \(F_N+Kx^2/2\) is convex, by the same finite polynomial second-difference identity. Passing its inequalities through the tails proves that \(F+Kx^2/2\) is convex. Thus this derivative agrees with the convex-secant computation of Chapter <a href="ch-effective-calculus.html">5</a>; it is not a competing notion of derivative. </p>
+<h2 id="a0000000036">6.4 Products, coefficient identities, and Taylor errors</h2><div class="pedagogical-bridge" data-pedagogy="bridge"><p>Multiplying two finite polynomials is straightforward. Multiplying two series additionally requires control of terms omitted from either factor. The next estimates explain when the familiar coefficient rule survives passage from prefixes to the computed values.</p></div>
+<p> For two supplied series, multiply finite prefixes. Absolute majorants bound the two omitted tails and their product. Regrouping their finite terms proves the Cauchy product identity. The same argument in two variables justifies the coefficient comparisons used for exponential addition below. </p>
+<p>A Taylor polynomial is another finite computation of the same function. When a translated series or a finite remainder bound has been supplied, its error is bounded by that data. For example the uniform bound \(K\) above gives the first-order error \(K h^2/2\). More generally a supplied bound \(B\) on the polynomial/series \((m+1)\)st derivatives gives \(B|h|^{m+1}/(m+1)!\) by repeated finite polynomial integration and its uniform tails. We do not infer such a remainder theorem from pointwise rational derivatives alone. </p>
+<h2 id="a0000000037">6.5 Binomial square-root computations</h2>
+<p> Put </p>
+<div class="displaymath" id="a0000000268">
+  \[  c_0=1,\qquad c_{n+1}=\frac{2n+1}{2n+2}c_n =\frac{\binom {2n+2}{n+1}}{4^{n+1}}.  \]
+</div>
+<p> The coefficients are rational and \(0{\lt}c_n\le 1\), so \(B(z)=\sum _{n\ge 0}c_nz^n\) has a geometric tail on \(|z|\le r{\lt}1\). The recurrence gives the coefficient identity </p>
+<div class="displaymath" id="a0000000269">
+  \[  2(1-z)B'(z)=B(z).  \]
+</div>
+<p> By the product rules for series, every nonconstant coefficient of \((1-z)B(z)^2\) has derivative zero, and its constant coefficient is \(1\). Consequently </p>
+<div class="displaymath" id="a0000000270">
+  \[  (1-z)B(z)^2=1.  \]
+</div>
+<p> For \(0\le z{\lt}1\), positivity of the coefficients identifies this computation with the positive inverse square root \((1-z)^{-1/2}\). The argument is coefficient algebra with tails; it does not use an ODE uniqueness theorem for arbitrary rational-point solutions. </p>
+<p>This example will reappear in the construction of an elliptic integral. It also illustrates how a recurrence can supply a special function, while an algebraic identity identifies what the computation evaluates.  </p>
+<section aria-labelledby="leibniz-benchmark-title" id="leibniz-geometric-benchmark" style="scroll-margin-top:6rem">
+<h2 id="leibniz-benchmark-title">6.6 Alternative computations of π</h2>
+<p>The canonical value remains the geometric exhaustion construction
+\(\pi=4A(1)\). The Leibniz series is a certified alternative computation:</p>
+<div class="displaymath">\[\pi=4\left(1-\frac13+\frac15-\cdots\right).\]</div>
+<p>For the inclusive partial sum \(S_N=4\sum_{k=0}^{N}(-1)^k/(2k+1)\),
+the explicit bound is \(|S_N-\pi|\leq 4/(2N+3)\). The interval inequalities
+hold for every series index and every independently chosen geometric stage.</p>
+<p>Two checked proofs reach the same geometric value. The computational proof
+uses finite rational rectangle-sum invariants and a vanishing mesh-error
+bound. The second proof integrates the finite geometric identity</p>
+<div class="displaymath">\[\frac1{1+x^2}=\sum_{k=0}^{N}(-1)^k x^{2k}
++(-1)^{N+1}\frac{x^{2N+2}}{1+x^2}.\]</div>
+<p>Quantitative monomial primitive certificates give exact integral order
+for every degree. They yield
+\(A(1)=\sum_{k=0}^{N}(-1)^k/(2k+1)+R_N\), with
+\(|R_N|\leq 1/(2N+3)\). Neither proof uses the other's comparison theorem.</p>
+<!-- leibniz-three-proofs:start --><figure style="margin:24px 0"><a aria-label="Explore the Leibniz proof routes" href="leibniz-proofs.html"><img alt="Dependency graph: computational, FTC and transmutation routes share rational foundations and geometric pi; Mathlib uses completed reals, the arctangent series and Abel’s theorem." height="833" src="reading/leibniz-overview.svg" style="display:block;width:100%;height:auto" width="1280"/></a><figcaption style="font-size:14px;margin-top:12px"><a href="leibniz-proofs.html">Explore all four proof routes →</a> Use the cosine-primitive-style viewer to select mathematical bundles, follow routes, and open formal sources.</figcaption></figure><!-- leibniz-three-proofs:end -->
+<p>The reusable components are alternating-prefix bounds, finite geometric
+division, certified interval convergence, and finite-difference integral order.
+</p>
+<p><a href="leibniz-transmutation.html">Leibniz’s geometric transmutation: historical reconstruction and checked proof →</a></p>
+<p><a href="https://github.com/liuyao12/computable-analysis/blob/7b4dddd81afefceb62d05fa8319b122bfa223dcc/ComputableAnalysis/LeibnizPi.lean">Computational theorem</a> ·
+<a href="https://github.com/liuyao12/computable-analysis/blob/7b4dddd81afefceb62d05fa8319b122bfa223dcc/ComputableAnalysis/LeibnizPiTaylor.lean">FTC theorem and remainder</a> ·
+<a href="reading/leibniz-dependency-closure.txt">Elaborated dependency closure</a></p>
+</section>
+</div></article><footer class="chapter-footer"><span>Mathematical manuscript · formal comparison status at each theorem</span><a href="https://github.com/liuyao12/computable-analysis/tree/f630241adeae35fc06a5fd4921a4df6396e291d0">Source f630241a ↗</a></footer></main><aside class="on-this-page"><span>On this page</span><a href="#thm:finite-geometric-series-interface">6.1 Geometric and alternating sums</a><a href="#thm:leibniz-arctan">6.2 Arctangent: a finite identity integrates to a series</a><a href="#a0000000035">6.3 A power series is a prefix together with a majorant</a><a href="#a0000000036">6.4 Products, coefficient identities, and Taylor errors</a><a href="#a0000000037">6.5 Binomial square-root computations</a></aside></div>
+<dialog id="proof-dialog"><div class="dialog-top"><span>Proof structure</span><button aria-label="Close proof map and return to the text" id="close-proof">Return to text ×</button></div><iframe id="proof-frame" title="Mathematical proof map"></iframe></dialog></body></html>

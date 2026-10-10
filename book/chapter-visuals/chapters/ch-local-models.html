@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="A mathematical foundation for calculus through certified rational computations." name="description"/><title>Local models · Computable Analysis</title><link href="reading/book.css" rel="stylesheet"/><script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],processEscapes:true},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script><script defer="" src="reading/book.js"></script><link href="reading/analysis-edition.css" rel="stylesheet"/><meta content="7b4dddd81afefceb62d05fa8319b122bfa223dcc" name="documentation-revision"/><style id="pedagogy-style">.pedagogical-opening{margin:1em 0 1.6em}.pedagogical-context{font-size:.9em}.pedagogical-bridge{margin:.8em 0 1.2em}</style><link rel="stylesheet" href="reading/chapter-visuals/visuals.css"><script defer src="reading/chapter-visuals/visuals.js"></script></head>
+<body><a class="skip" href="#main">Skip to mathematics</a><header class="book-header"><button aria-controls="book-nav" aria-expanded="false" id="menu-button">Contents</button><a class="brand" href="index.html">Computable <em>Analysis</em></a><a class="header-about" href="programme.html">An alternative foundation to Calculus</a></header>
+<nav aria-label="Book chapters" id="book-nav"><span class="nav-label">The book</span><a class="" href="ch-foundations.html"><span>01</span>Numbers and functions</a><a class="pi-catalogue-navigation" href="ch-foundations.html#pi-computations">Other examples: π</a><a class="" href="ch-circle-sphere.html"><span>02</span>Circle, sphere and cylinder</a><a class="" href="ch-rational-circle-trigonometry.html"><span>03</span>Angles and trigonometry</a><a class="" href="ch-integrals.html"><span>04</span>Integral computations</a><a class="" href="ch-effective-calculus.html"><span>05</span>Derivatives and the FTC</a><a class="" href="ch-infinite-series.html"><span>06</span>Infinite series</a><a class="" href="ch-exponential-logarithm.html"><span>07</span>Exponential and logarithm</a><details class="later-chapters" open=""><summary>Further chapters</summary><a class="" href="ch-algebra-fta.html"><span>08</span>Algebraic computations</a><a class="current" href="ch-local-models.html"><span>09</span>Local models</a><a class="" href="ch-complex-paths.html"><span>10</span>Complex paths</a><a class="" href="ch-improper-parameters.html"><span>11</span>Improper integrals</a><a class="" href="ch-fourier.html"><span>12</span>Fourier computations</a><a class="" href="ch-impulses.html"><span>13</span>Impulses</a><a class="" href="ch-differential-equations.html"><span>14</span>Differential equations</a><!-- fundamental-matrix:start --><a data-reader-addition="fundamental-matrix" href="fundamental-matrix.html">Fundamental Matrix</a><!-- fundamental-matrix:end --><a class="" href="ch-special-equations.html"><span>15</span>Special-function equations</a><a class="" href="ch-transforms-zeta.html"><span>16</span>Transforms and zeta</a><a class="" href="ch-elliptic.html"><span>17</span>Elliptic integrals</a></details><a class="nav-label construction-skill-label" href="construction-skills.html">Skills</a><a class="construction-skill-navigation" href="skill-real-integrals.html">Real integrals</a><a class="construction-skill-navigation" href="skill-complex-integrals.html">Complex path integrals</a><a class="construction-skill-navigation" href="skill-series.html">Series</a><a class="construction-skill-navigation" href="skill-holomorphic-functions.html">Holomorphic functions</a><a class="construction-skill-navigation" href="skill-analytic-continuation.html">Analytic continuation</a><span class="nav-label">Worked examples</span><a class="" href="cosine.html">The cosine-square integral</a><a class="classic-navigation" href="cartwright.html">Irrationality of \(\pi^2\)</a><a class="classic-navigation" href="leibniz.html">The Leibniz series</a><a class="classic-navigation" href="basel.html">The Basel problem</a><a class="classic-navigation" href="euler.html">Euler’s sine product</a><span class="nav-label">Function theory</span><a class="classic-navigation" href="arctan-taylor.html">Arctangent and Taylor series</a><a class="classic-navigation" href="complex-analysis.html">Polygonal Cauchy theory</a><a class="classic-navigation" href="analytic-continuation.html">Analytic continuation</a><a class="classic-navigation" href="zeta-zeros.html">Riemann zeta zeros</a><span class="nav-label">Differential equations</span><a class="classic-navigation" href="fuchs.html">Fuchs’s theorem</a><a class="classic-navigation" href="painleve.html">Painlevé’s classification</a><span class="nav-label">The development</span><a class="classic-navigation" href="proof-bundles.html">Bundled proof comparisons</a><a href="programme.html">Purpose and boundary</a><a href="proof-bench/">Proof-size comparison</a><a href="reference/index.html">Technical reference ↗</a></nav>
+<div class="page"><main class="reader" id="main"><div class="chapter-kicker">CHAPTER 09</div><article><div class="main-text">
+<h1 id="ch:local-models">Local Calculations and Nonlinear Constructions</h1><section class="pedagogical-opening" data-pedagogy="opening" id="why-this-page"><p>A local model carries coefficients and an error bound. Moving its centre changes the region where that same evidence remains valid.</p><p class="pedagogical-context">Earlier context: <a href="ch-infinite-series.html">Series and Finite Remainders</a>.</p></section><!-- chapter-visual:start -->
+<figure class="chapter-visual" data-visual="charts" id="visual-construction">
+<h2>Moving the centre spends radius</h2>
+<canvas role="img" aria-label="Moving the centre spends radius. The original disk has radius . A centre displacement bounded by  leaves a certified radius . The new disk stays inside the original; further continuation needs new evidence.">Moving the centre spends radius</canvas>
+<div class="visual-legend">Gray original disk · Green recentered disk</div>
+<div class="visual-controls"><label>Centre displacement: <span data-stage-value>0.4</span><input type="range" min="0" max="8" value="4" step="1" aria-label="Centre displacement" data-values="[&quot;0.0&quot;, &quot;0.1&quot;, &quot;0.2&quot;, &quot;0.3&quot;, &quot;0.4&quot;, &quot;0.5&quot;, &quot;0.6&quot;, &quot;0.7&quot;, &quot;0.8&quot;]"></label><button type="button" data-visual-reset>Reset</button></div>
+<div class="visual-output" aria-live="polite"></div>
+<figcaption>The original disk has radius \(1\). A centre displacement bounded by \(d_0\) leaves a certified radius \(1-d_0\). The new disk stays inside the original; further continuation needs new evidence. <a href="#a0000000048">Follow the construction.</a></figcaption>
+<noscript><p>The original disk has radius \(1\). A centre displacement bounded by \(d_0\) leaves a certified radius \(1-d_0\). The new disk stays inside the original; further continuation needs new evidence.</p></noscript>
+</figure>
+<!-- chapter-visual:end -->
+
+<p>A named function should not have to repeat the foundations every time it is differentiated, composed, or evaluated in a new region. What can be reused is not an unrestricted function space but a finite description with error bounds. This chapter develops that description for local series, and a second construction for nonlinear inverses and evolutions. The earlier convex derivative remains the first route to the FTC; the present local estimates provide further concrete FTC certificates. </p>
+<h2 id="a0000000047">9.1 A series chart and its finite jets</h2>
+<p> A chart about a rational complex point \(c\) supplies coefficient computations \(a_n\) and positive rational constants \(M,R\) with </p>
+<div class="displaymath" id="a0000000305">
+  \[  F(c+w)=\sum _{n\ge 0}a_nw^n,\qquad |a_n|\le M R^{-n}.  \]
+</div>
+<p> The displayed equality names the prefix-and-tail computation, not an independently assumed function. The disk means inputs with a certified bound \(|w|\le r{\lt}R\). Complex absolute values are computed by square roots; all required upper bounds can be rational. Put \(q=r/R\). </p>
+<p>A finite jet of order \(k\) is the list of the first \(k\) derivatives at a specified center. Coefficients give that list by \(F^{(j)}(c)=j!a_j\). For evaluation away from the center, the derivative of order \(k\) has the explicit tail, after original coefficient \(N\ge k-1\), </p>
+<div class="displaymath" id="a0000000306">
+  \[  T_{N,k}=\frac{M}{R^k}\sum _{n{\gt}N}(n)_k q^{n-k}, \qquad (n)_k=n(n-1)\cdots (n-k+1).  \]
+</div>
+<p> Here and below \((n)_k\) in a derivative-tail formula is a falling factorial; rising factorials will always be identified when introduced. This tail is computable without an infinite summation procedure. Once </p>
+<div class="displaymath" id="a0000000307">
+  \[  q\frac{n+1}{n+1-k}\le \theta {\lt}1,  \]
+</div>
+<p> the successive terms decrease geometrically; their remaining sum is at most the first one divided by \(1-\theta \). The ratio decreases with \(n\), so one finite threshold proves the estimate for every later term. The case \(q=0\) is direct coefficient evaluation. Coefficient-box errors are allocated separately to the finitely many retained terms. </p>
+<p>The full derivative bound is particularly simple: </p>
+<div class="displaymath" id="a0000000308">
+  \[  |F^{(k)}(c+w)|\le \frac{M k!}{R^k(1-q)^{k+1}}.  \]
+</div>
+<p> It follows by repeatedly differentiating the finite geometric identity and bounding its terminal terms. Thus the chart supplies derivatives of any requested finite order, rather than asking a value algorithm to reveal its derivatives. </p>
+<h2 id="a0000000048">9.2 Moving the center</h2>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:recenter-model">
+<div class="theorem_thmheading">
+<span class="theorem_thmcaption">
+    Theorem
+    </span>
+<span class="theorem_thmlabel">9.1</span>
+<span class="theorem_thmtitle">Recentring with a new majorant</span>
+</div>
+<div class="theorem_thmcontent">
+<p>  Let \(|d|\le d_0{\lt}R\). About \(c+d\), the same computation has coefficients </p>
+<div class="displaymath" id="a0000000310">
+  \[  b_k=\sum _{n=k}^{\infty }\binom nk a_nd^{n-k}, \qquad |b_k|\le \frac{MR}{(R-d_0)^{k+1}}.  \]
+</div>
+<p> They form a chart with radius \(R-d_0\) and constant \(MR/(R-d_0)\). </p>
+</div>
+<aside aria-label="Proof details" class="theorem-margin"><a data-proof-map="thm:recenter-model" href="proof-map.html?theorem=thm:recenter-model">Proof map ↗</a><small>Reading outline</small></aside></div><p class="bundled-proof-link" data-bundled-theorem="thm:recenter-model"><a href="proof-bundles.html?theorem=thm:recenter-model">Bundled proof routes and LOC →</a></p>
+<div class="proof_wrapper" id="a0000000309">
+<div class="proof_heading">
+<span class="proof_caption">
+    Proof
+    </span>
+<span class="expand-proof">▼</span>
+</div>
+<div class="proof_content">
+<p>For a finite polynomial the change of center is the binomial identity. The majorant for \(b_k\) is </p>
+<div class="displaymath" id="a0000000311">
+  \[  \frac{M}{R^k}\sum _{j\ge 0}\binom {k+j}{k}(d_0/R)^j =\frac{M}{R^k}(1-d_0/R)^{-k-1}.  \]
+</div>
+<p> The equality follows from the differentiated geometric identity. To compute \(b_k\), bound the tail by the eventual ratio \((d_0/R)(k+j+1)/(j+1){\lt}1\). On \(|v|+d_0{\lt}R\), the omitted double sum is absolutely bounded by a geometric series. Finite binomial rearrangements therefore prove \(F(c+d+v)=\sum b_kv^k\) with explicit errors. </p>
+</div>
+</div>
+<p>Recentring alone does not create continuation beyond a certified original domain: its new disk is contained in that domain. To move farther one needs new bounds supplied by an equation, an integral, or another proved representation. This distinction prevents an apparent continuation algorithm from repeatedly spending a radius it never replenishes. </p>
+<h2 id="a0000000049">9.3 Arithmetic, reciprocals, and composition</h2>
+<p> Finite polynomial arithmetic and the same majorants give sum and product computations. For instance, two bounds \(M R^{-n}\) and \(N R^{-n}\) give product coefficients at most \(MN(n+1)R^{-n}\). At any smaller radius \(S{\lt}R\), these are at most </p>
+<div class="displaymath" id="a0000000312">
+  \[  \frac{MN}{(1-S/R)^2}S^{-n}.  \]
+</div>
+<p> Restriction costs a bound but gives another chart of the same kind. </p>
+<p>For a reciprocal write \(F=a_0+H\), supply \(|a_0|\ge m{\gt}0\), and choose \(r\) so that the coefficient majorant for \(H\) on that disk is at most \(\theta m\), with \(\theta {\lt}1\). Then </p>
+<div class="displaymath" id="a0000000313">
+  \[  \frac1F=\frac1{a_0}\sum _{j\ge 0}(-H/a_0)^j, \qquad \left|\text{tail after }j=N\right| \le \frac{\theta ^{N+1}}{m(1-\theta )}.  \]
+</div>
+<p> The coefficients can instead be generated by the finite recurrence </p>
+<div class="displaymath" id="a0000000314">
+  \[  b_0=a_0^{-1},\qquad b_n=-a_0^{-1}\sum _{j=1}^na_jb_{n-j}.  \]
+</div>
+<p> The geometric error proves agreement. There is no decision of whether an arbitrary computed \(a_0\) is zero; the separation is an explicit input. </p>
+<p>For composition, recenter the outer chart at \(F(c)\) and write \(F(c+w)=F(c)+H(w)\), where \(H\) has zero constant coefficient. Choose an inner radius on which its absolute coefficient majorant is at most \(s{\lt}R_G\), the outer radius. The first \(N\) coefficients of \(G(F(c)+H)\) require only finitely many coefficients of \(H\), since \(H^j\) has order at least \(j\). The outer tail is bounded by </p>
+<div class="displaymath" id="a0000000315">
+  \[  M_G(s/R_G)^{N+1}/(1-s/R_G).  \]
+</div>
+<p> The absolute sum of all composed coefficients weighted by the chosen inner radius is at most \(M_G/(1-s/R_G)\). Hence each coefficient has that geometric majorant, and degree truncation on a strictly smaller disk has its own geometric tail, separate from the outer-series truncation. Finite errors in evaluating \(H\) are multiplied by the outer first-derivative bound on a slightly larger certified disk. This proves both the composition computation and its chain rule. Computed centers cause no new problem: all their uses are interval operations with the displayed strict margins. </p>
+<p>These constructions also resolve removable expressions. For example, instead of dividing \(S(x)\) by \(x\) at zero, shift the coefficients of its odd series. This defines \(S(x)/x\) there with value \(\pi \). A cancellation proved in the coefficient algebra is different from a numerical division by a small, uncertain denominator. </p>
+<h2 id="a0000000050">9.4 Which approximations support which operations?</h2>
+<p> Suppose finite computations \(F_N\) approximate a function uniformly to error \(e_N\) on \([a,b]\). Then their integral computations differ by at most \((b-a)e_N\). This is a finite rectangle estimate and proves integration of the limit computation whenever the \(e_N\) shrink effectively. </p>
+<p>To differentiate, more is needed. If \(F_N'\) converge uniformly to a computed \(G\), then their finite FTC identities give </p>
+<div class="displaymath" id="a0000000316">
+  \[  F(y)-F(x)=\int _x^yG(t)\, dt.  \]
+</div>
+<p> A supplied modulus for \(G\) makes this a derivative and FTC certificate for \(F\). Uniform convergence of values alone gives no such conclusion. The derivative tails of a series chart supply exactly the stronger data. This is the form of a convergence theorem that later constructions use. </p>
+<h2 id="sec:flat-cutoff">9.5 A smooth computation which is not a single analytic chart</h2>
+<p>  Define at rational inputs </p>
+<div class="displaymath" id="a0000000317">
+  \[  B(x)=\begin{cases} E(-1/x^2),&amp; x\ne 0,\\ 0,&amp; x=0.\end{cases}  \]
+</div>
+<p> Rational equality decides the displayed branch. Away from zero its successive derivatives have the explicit form </p>
+<div class="displaymath" id="a0000000318">
+  \[  D^nB(x)=P_n(1/x)E(-1/x^2),\qquad P_0(u)=1,\quad P_{n+1}(u)=2u^3P_n(u)-u^2P_n'(u).  \]
+</div>
+<p> This is a finite rational polynomial recurrence. To control the missing point, let \(d\) be the degree of \(P_n\) and choose an integer \(m\) with \(2m\ge d+2\). For \(0{\lt}|x|\le \delta \le 1\), positivity of the exponential series gives \(E(1/x^2)\ge |x|^{-2m}/m!\). Writing \(P_n(u)=\sum _j p_ju^j\), it follows that </p>
+<div class="displaymath" id="a0000000319">
+  \[  |P_n(1/x)E(-1/x^2)| \le m!\sum _j|p_j|\, |x|^{2m-j} \le m!\left(\sum _j|p_j|\right)\delta ^2.  \]
+</div>
+<p> In particular each derivative extends continuously by zero, and its quotient by \(x\) tends to zero with a linear error bound. Induction proves that these extensions are the actual successive derivatives, all zero at the origin. This is not an inference from pointwise differentiability on a punctured rational interval; the estimate explicitly controls the join. </p>
+<p>Bounds on a compact interval are obtained by splitting at rational \(\pm \delta \): the estimate handles the center, while ordinary series and reciprocal bounds handle the two separated pieces. The same procedure supplies moduli for every specified derivative order. The FTC across the join follows from the certified identities on the separated pieces and the vanishing bounded end errors. </p>
+<p>For rational \(a{\lt}b\), set \(\psi (x)=B(x-a)B(b-x)\) on \(a{\lt}x{\lt}b\) and zero outside. All its derivatives match zero at both endpoints by the finite product rule and the preceding estimates. This constructs a compactly supported smooth test with any requested derivative and error bound. The positive value at an interior rational point shows that it is not identically zero, although every derivative at an endpoint vanishes. No analytic chart spanning that endpoint can represent it. Explicit nonanalytic functions therefore belong to the same calculus, by their own joining estimates rather than by an assertion of analyticity. </p>
+<h2 id="sec:lambert-construction">9.6 A nonlinear inverse: Lambert’s function</h2>
+<p>  For \(|z|\le 1/4\), start with \(w_0=0\) and compute </p>
+<div class="displaymath" id="a0000000320">
+  \[  w_{n+1}=zE(-w_n).  \]
+</div>
+<p> The exponential series gives \(E(1/2){\lt}2\) by a finite prefix and tail. Consequently this map sends \(|w|\le 1/2\) into itself and has Lipschitz constant at most \(1/2\) there. The estimate follows either from its uniform increment identity along the segment or directly from the exponential difference formula. Finite iteration proves </p>
+<div class="displaymath" id="a0000000321">
+  \[  |w_m-w_n|\le 2^{1-n}|z|\qquad (m\ge n).  \]
+</div>
+<p> Successively accurate interval evaluations, with a geometric error budget for their finite compositions, give a valid computation \(W(z)\). It satisfies \(W E(W)=z\) by the iteration identity and continuity. Two fixed points in this disk are equal by repeated contraction. This constructs one specified branch; it does not silently choose a branch elsewhere. </p>
+<p>Parameter comparison in the fixed-point equations gives \(|W(z)-W(v)|\le 4|z-v|\). The finite exponential remainder for \(P(w)=wE(w)\) has linear coefficient \(E(w)(1+w)\), whose modulus on this disk is at least \(1/4\): \(|1+w|\ge 1/2\) and \(|E(w)|\ge 1/2\). Substitute \(w=W(z)\) and \(w+\Delta w=W(z+h)\) into this remainder and use \(|\Delta w|\le 4|h|\). Division by the separated linear coefficient gives </p>
+<div class="displaymath" id="a0000000322">
+  \[  DW(z)=\frac{E(-W(z))}{1+W(z)},  \]
+</div>
+<p> with an explicit quadratic increment remainder. All constants can be read from the exponential bounds on \(|w|\le 1/2\). On real subintervals, that remainder also supplies the convex-difference FTC certificate by adding a sufficiently large rational multiple of \(x^2\). </p>
+<p>The example is named in the standard notation of <a href="https://dlmf.nist.gov/4.13">DLMF, Section 4.13</a>; the finite iteration and its error estimate are the definition used here. </p>
+<h2 id="sec:nonlinear-slab">9.7 Nonlinear initial-value problems on a certified slab</h2>
+<p>  Let a specific computation \(Q(t,y)\) have interval-continuity data on \(|t-t_0|\le h\), \(\| y-y_0\| \le r\), with rational bounds </p>
+<div class="displaymath" id="a0000000323">
+  \[  \| Q\| \le B,\qquad \| Q(t,y)-Q(t,v)\| \le L\| y-v\| ,\qquad hB\le r,\quad q=hL{\lt}1.  \]
+</div>
+<p> The vector norm is the maximum norm. These are bounds to be proved for the displayed formula \(Q\), not consequences of a general ODE existence theorem. Define finite Picard computations </p>
+<div class="displaymath" id="a0000000324">
+  \[  y_0(t)=y_0,\qquad y_{n+1}(t)=y_0+\int _{t_0}^t Q(u,y_n(u))\, du.  \]
+</div>
+<p> Every iterate stays in the box, and finite induction gives </p>
+<div class="displaymath" id="a0000000325">
+  \[  \| y_{n+1}-y_n\| \le hBq^n,\qquad \| y_m-y_n\| \le \frac{hBq^n}{1-q}\quad (m\ge n).  \]
+</div>
+<p> Thus the iterates construct a uniformly approximated solution. Passing through the bounded interval integrals gives its integral equation; accumulation then proves \(Dy=Q(t,y)\). Two supplied integral solutions in the slab agree by the same contraction estimate. </p>
+<p>For example, \(y'=1+y^2\), \(y(0)=0\) has \(r=1\), \(h=1/4\), \(B=2\), \(L=2\), and \(q=1/2\). Its finite iterates are rational polynomials. On this interval the already constructed computation \(S(t/\pi )/C(t/\pi )\) has the same equation and initial value; the cosine is positively separated and its increment identity proves the integral equation. The two computations therefore agree. Continue only through further certified slabs; no continuation through the tangent’s pole is asserted. Nonlinear special-function equations can be admitted in this same concrete manner without forcing them into the linear theory.  </p>
+</div></article><footer class="chapter-footer"><span>Mathematical manuscript · formal comparison status at each theorem</span><a href="https://github.com/liuyao12/computable-analysis/tree/f630241adeae35fc06a5fd4921a4df6396e291d0">Source f630241a ↗</a></footer></main><aside class="on-this-page"><span>On this page</span><a href="#a0000000047">9.1 A series chart and its finite jets</a><a href="#a0000000048">9.2 Moving the center</a><a href="#a0000000049">9.3 Arithmetic, reciprocals, and composition</a><a href="#a0000000050">9.4 Which approximations support which operations?</a><a href="#sec:flat-cutoff">9.5 A smooth computation which is not a single analytic chart</a><a href="#sec:lambert-construction">9.6 A nonlinear inverse: Lambert’s function</a><a href="#sec:nonlinear-slab">9.7 Nonlinear initial-value problems on a certified slab</a></aside></div>
+<dialog id="proof-dialog"><div class="dialog-top"><span>Proof structure</span><button aria-label="Close proof map and return to the text" id="close-proof">Return to text ×</button></div><iframe id="proof-frame" title="Mathematical proof map"></iframe></dialog></body></html>

@@ -1,0 +1,43 @@
+name: Publish visual chapter edition
+on:
+  workflow_dispatch:
+    inputs:
+      base_run:
+        description: Existing successful Pages artifact to preserve
+        required: true
+        default: '38054353598'
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-verified-proof-publication
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: previous
+          run-id: ${{ inputs.base_run }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check the exact arithmetic in the worked diagrams
+        run: python3 book/chapter-visuals/check_arithmetic.py
+      - name: Apply the reviewed presentation and preserve the rest of the site
+        run: |
+          mkdir site
+          tar -xf previous/artifact.tar -C site
+          python3 book/chapter-visuals/apply_visuals.py site
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

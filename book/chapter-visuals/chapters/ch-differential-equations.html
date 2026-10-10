@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="A mathematical foundation for calculus through certified rational computations." name="description"/><title>Differential equations · Computable Analysis</title><link href="reading/book.css" rel="stylesheet"/><script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],processEscapes:true},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script><script defer="" src="reading/book.js"></script><link href="reading/analysis-edition.css" rel="stylesheet"/><meta content="7b4dddd81afefceb62d05fa8319b122bfa223dcc" name="documentation-revision"/><link href="reading/cauchy-example.css" rel="stylesheet"/><link href="reading/fuchs-story.css" rel="stylesheet"/><script defer="" src="reading/fuchs-story.js"></script><link href="reading/classics.css" rel="stylesheet"/><style id="pedagogy-style">.pedagogical-opening{margin:1em 0 1.6em}.pedagogical-context{font-size:.9em}.pedagogical-bridge{margin:.8em 0 1.2em}</style><link rel="stylesheet" href="reading/chapter-visuals/visuals.css"><script defer src="reading/chapter-visuals/visuals.js"></script></head>
+<body class="cauchy-page fuchs-chapter-page"><a class="skip" href="#main">Skip to mathematics</a><header class="book-header"><button aria-controls="book-nav" aria-expanded="false" id="menu-button">Contents</button><a class="brand" href="index.html">Computable <em>Analysis</em></a><a class="header-about" href="programme.html">An alternative foundation to Calculus</a></header>
+<nav aria-label="Book chapters" id="book-nav"><span class="nav-label">The book</span><a class="" href="ch-foundations.html"><span>01</span>Numbers and functions</a><a class="pi-catalogue-navigation" href="ch-foundations.html#pi-computations">Other examples: π</a><a class="" href="ch-circle-sphere.html"><span>02</span>Circle, sphere and cylinder</a><a class="" href="ch-rational-circle-trigonometry.html"><span>03</span>Angles and trigonometry</a><a class="" href="ch-integrals.html"><span>04</span>Integral computations</a><a class="" href="ch-effective-calculus.html"><span>05</span>Derivatives and the FTC</a><a class="" href="ch-infinite-series.html"><span>06</span>Infinite series</a><a class="" href="ch-exponential-logarithm.html"><span>07</span>Exponential and logarithm</a><details class="later-chapters" open=""><summary>Further chapters</summary><a class="" href="ch-algebra-fta.html"><span>08</span>Algebraic computations</a><a class="" href="ch-local-models.html"><span>09</span>Local models</a><a class="" href="ch-complex-paths.html"><span>10</span>Complex paths</a><a class="" href="ch-improper-parameters.html"><span>11</span>Improper integrals</a><a class="" href="ch-fourier.html"><span>12</span>Fourier computations</a><a class="" href="ch-impulses.html"><span>13</span>Impulses</a><a class="current" href="ch-differential-equations.html"><span>14</span>Differential equations</a><!-- fundamental-matrix:start --><a data-reader-addition="fundamental-matrix" href="fundamental-matrix.html">Fundamental Matrix</a><!-- fundamental-matrix:end --><a class="" href="ch-special-equations.html"><span>15</span>Special-function equations</a><a class="" href="ch-transforms-zeta.html"><span>16</span>Transforms and zeta</a><a class="" href="ch-elliptic.html"><span>17</span>Elliptic integrals</a></details><a class="nav-label construction-skill-label" href="construction-skills.html">Skills</a><a class="construction-skill-navigation" href="skill-real-integrals.html">Real integrals</a><a class="construction-skill-navigation" href="skill-complex-integrals.html">Complex path integrals</a><a class="construction-skill-navigation" href="skill-series.html">Series</a><a class="construction-skill-navigation" href="skill-holomorphic-functions.html">Holomorphic functions</a><a class="construction-skill-navigation" href="skill-analytic-continuation.html">Analytic continuation</a><span class="nav-label">Worked examples</span><a class="" href="cosine.html">The cosine-square integral</a><a class="classic-navigation" href="cartwright.html">Irrationality of \(\pi^2\)</a><a class="classic-navigation" href="leibniz.html">The Leibniz series</a><a class="classic-navigation" href="basel.html">The Basel problem</a><a class="classic-navigation" href="euler.html">Euler’s sine product</a><span class="nav-label">Function theory</span><a class="classic-navigation" href="arctan-taylor.html">Arctangent and Taylor series</a><a class="classic-navigation" href="complex-analysis.html">Polygonal Cauchy theory</a><a class="classic-navigation" href="analytic-continuation.html">Analytic continuation</a><a class="classic-navigation" href="zeta-zeros.html">Riemann zeta zeros</a><span class="nav-label">Differential equations</span><a class="classic-navigation" href="fuchs.html">Fuchs’s theorem</a><a class="classic-navigation" href="painleve.html">Painlevé’s classification</a><span class="nav-label">The development</span><a class="classic-navigation" href="proof-bundles.html">Bundled proof comparisons</a><a href="programme.html">Purpose and boundary</a><a href="proof-bench/">Proof-size comparison</a><a href="reference/index.html">Technical reference ↗</a></nav>
+<div class="page"><main class="reader" id="main"><div class="chapter-kicker">CHAPTER 14</div><article><div class="main-text">
+<h1 id="ch:differential-equations">Linear ODEs and the Fundamental Matrix</h1><section class="pedagogical-opening" data-pedagogy="opening" id="why-this-page"><p>A linear equation needs only its responses to the basic initial states. Their combinations give the response to any other state.</p><p class="pedagogical-context">Earlier context: <a href="fundamental-matrix.html">Fundamental Matrix</a>.</p></section><!-- chapter-visual:start -->
+<figure class="chapter-visual" data-visual="evolution" id="visual-construction">
+<h2>Two basic responses propagate every initial state</h2>
+<canvas role="img" aria-label="Two basic responses propagate every initial state. For , the two responses are  and . Their initial velocities are  and . Selecting their sum illustrates the linear reuse encoded by the fundamental matrix.">Two basic responses propagate every initial state</canvas>
+<div class="visual-legend">Green first response · Dashed blue second response · Orange selected value</div>
+<div class="visual-controls"><label>Time stage: <span data-stage-value>8</span><input type="range" min="0" max="32" value="8" step="1" aria-label="Time stage"></label><label>Initial response <select aria-label="Initial response"><option value="first">First response</option><option value="second">Second response</option><option value="sum" selected>Sum of both</option></select></label><button type="button" data-visual-reset>Reset</button></div>
+<div class="visual-output" aria-live="polite"></div>
+<figcaption>For \(y^{\prime\prime}+\pi^2y=0\), the two responses are \(C(t)\) and \(S(t)\). Their initial velocities are \(0\) and \(\pi\). Selecting their sum illustrates the linear reuse encoded by the fundamental matrix. <a href="#a0000000079">Follow the construction.</a></figcaption>
+<noscript><p>For \(y^{\prime\prime}+\pi^2y=0\), the two responses are \(C(t)\) and \(S(t)\). Their initial velocities are \(0\) and \(\pi\). Selecting their sum illustrates the linear reuse encoded by the fundamental matrix.</p></noscript>
+</figure>
+<!-- chapter-visual:end -->
+<!-- fundamental-matrix:start --><aside class="fm-reader-link"><p><a href="fundamental-matrix.html"><strong>Fundamental Matrix — second-order equations, step by step</strong></a></p><p>Work through successive approximations before introducing two basic solutions, the fundamental matrix and the forcing formula.</p></aside><!-- fundamental-matrix:end -->
+<p>A fundamental matrix is a reusable computation depending only on the coefficient matrix. It propagates initial states, accumulates ordinary forcing, and propagates delta inputs. We construct it from iterated finite integrals and factorial error bounds. </p>
+<h2 id="a0000000072">14.1 Coefficient data and finite norms</h2>
+<p> Fix a rational interval \([a,b]\). The entries of \(A(t)\) are supplied rational-input computations with interval-continuity certificates and a rational bound \(\| A(t)\| \le M\). Use the maximum norm for vectors and the maximum absolute row-sum norm for matrices; finite algebra proves \(\| AB\| \le \| A\| \| B\| \) and \(\| Av\| \le \| A\| \| v\| \). </p>
+<p>Polynomial matrices are the first examples. Separated rational functions and the elementary computations of the preceding chapters provide others. A finite set of coefficient breakpoints is handled by solving on each piece and composing the resulting evolutions. </p>
+<h2 id="a0000000073">14.2 Peano–Baker prefixes</h2><div class="pedagogical-bridge" data-pedagogy="bridge"><p>Each integration uses the preceding approximation to improve the next one. Expanding this iteration produces the nested terms below. The factorial estimate explains why their cumulative correction becomes small even when the coefficient matrix varies.</p></div>
+<p> For rational \(s,t\in [a,b]\), define </p>
+<div class="displaymath" id="a0000000392">
+  \[  P_0(t,s)=I,\qquad P_{n+1}(t,s)=\int _s^t A(u)P_n(u,s)\, du, \qquad \Phi _N(t,s)=\sum _{n=0}^NP_n(t,s).  \]
+</div>
+<p> For fixed \(n\) these are finite nested integral computations. Their continuity data is obtained recursively from products and the bounded-integrand endpoint estimate. If \(A\) is a rational-polynomial matrix, all \(P_n\) are computed by finite polynomial integration. Matrix multiplication is kept in the displayed order; matrices at distinct times are not assumed to commute. </p>
+<p>For \(h=|t-s|\), induction using polynomial integration gives </p>
+<div class="displaymath" id="a0000000393">
+  \[  \| P_n(t,s)\| \le \frac{(Mh)^n}{n!}.  \]
+</div>
+<p> The argument works with oriented integrals in either time direction. If \(z=M(b-a)\) and \(N+2\ge 2z\), every finite tail after \(N\) is bounded by </p>
+<div class="displaymath" id="a0000000394">
+  \[  \boxed {2\frac{z^{N+1}}{(N+1)!}.}  \]
+</div>
+<p> Compute the finite prefix to an additional rational error budget and stabilize the resulting boxes. This constructs the matrix computation \(\Phi (t,s)\) uniformly on the interval. A rational upper bound \(B\) for \(E(M(b-a))\) bounds every \(\| \Phi (t,s)\| \). </p>
+<figure id="a0000000395">
+<div class="centered"><img alt="\includegraphics[width=320pt]{assets/peano-baker-words.gif}" src="images/img-0005.gif" style="width:320pt"/>
+<figcaption>
+<span class="caption_title">Figure</span>
+<span class="caption_ref">14.1</span>
+<span class="caption_text">Ordered matrix products and their finite integral prefixes.</span>
+</figcaption> </div>
+</figure>
+<p>The finite recursion, with its uniform tails, gives </p>
+<div class="displaymath" id="a0000000396">
+  \[  \Phi (t,s)=I+\int _s^t A(u)\Phi (u,s)\, du.  \]
+</div>
+<p> The accumulation estimate therefore constructs its derivative: </p>
+<div class="displaymath" id="a0000000397">
+  \[  \partial _t\Phi (t,s)=A(t)\Phi (t,s),\qquad \Phi (s,s)=I.  \]
+</div>
+<p> No general differentiation-of-a-limit assertion has been used. </p>
+<h2 id="a0000000074">14.3 Uniqueness belongs to the integral construction</h2>
+<p> Suppose a bounded computed vector \(w\) satisfies </p>
+<div class="displaymath" id="a0000000398">
+  \[  w(t)=\int _s^t A(u)w(u)\, du.  \]
+</div>
+<p> Starting with any rational bound \(\| w\| \le C\), repeated substitution gives </p>
+<div class="displaymath" id="a0000000399">
+  \[  \| w(t)\| \le C\frac{(M|t-s|)^n}{n!}  \]
+</div>
+<p> for every integer \(n\). The right side tends to zero with an explicit factorial bound, so \(w\) is equivalent to zero. </p>
+<p>For the solutions considered here, the integral identity is proved by construction. We do not infer it from a bare equation at every rational point; a function hidden across a cut could satisfy such a pointwise equation and fail its integral identity. </p>
+<p>The same uniqueness argument gives, for all rational \(s,u,t\), </p>
+<div class="displaymath" id="a0000000400">
+  \[  \boxed {\Phi (t,u)\Phi (u,s)=\Phi (t,s).}  \]
+</div>
+<p> Both sides have the same integral equation and initial value when regarded as functions of \(t\). The identity follows for every starting location by subtracting their integral equations there. In particular \(\Phi (s,t)\) is the inverse of \(\Phi (t,s)\); no determinant inversion is needed to construct it. </p>
+<p>The endpoint estimate gives \(\| \Phi (u,s)-I\| \le MB|u-s|\). Together with composition it yields </p>
+<div class="displaymath" id="a0000000401">
+  \[  \| \Phi (t,s)-\Phi (t,u)\| \le MB^2|s-u|.  \]
+</div>
+<p> This supplies continuity in the source time as well as the target time, and permits computed times with domain enclosures. </p>
+<section id="continuation-story">
+<header><p class="classic-tag">Differential equations · Guided development</p><h2 id="continuation-to-fuchs">From a local solution to Fuchs’s theorem</h2><p class="lead">A logarithm is enough to begin. Follow one solution around a missing point, then ask what happens as we approach that point.</p></header>
+<p>A differential equation gives local instructions. To understand a singularity, we must learn how those instructions fit together beyond one neighborhood. Our route has three questions: can we keep going, what returns after a circuit, and how large can a solution become? Analytic continuation, monodromy, and Fuchs’s criterion answer these different questions.</p>
+<p class="classic-scope">This section tells the classical mathematical story and the constructive route we intend to formalize. It does not announce new Lean continuation or Fuchs theorems. The <a href="#continuation-our-foundation">closing section</a> separates the existing proof pieces from the missing connections.</p>
+<h3 data-story="patches" id="continuation-setup">Begin where the equation is ordinary</h3>
+<p>Keep one equation in view:</p>
+\[y''+\frac1z y'=0,\qquad y(1)=0,\quad y'(1)=1.\]
+<p>The coefficients are perfectly regular near \(1\), but the coefficient \(1/z\) has a pole at \(0\). That point is missing from the domain of the normalized equation. Multiplying by \(z\) gives \(zy''+y'=0\); writing it this way does not restore the usual initial-value problem at the origin, because its leading coefficient vanishes there.</p>
+<p>The useful observation is \((zy')'=0\). Our initial data suggest \(zy'=1\), hence \(y'=1/z\). We expect a logarithm, but the name of a function is not yet a computation or a proof. We will construct the local function first, then discover how its branches fit.</p>
+<section aria-labelledby="continuation-theorem" class="showcase-statement"><h3 id="continuation-theorem">Our first destination: one complete circuit</h3>
+<p>Let \(L\) be the local solution near \(1\) with \(L(1)=0\) and \(L'(z)=1/z\). It can be analytically continued counterclockwise along the boundary of the square with corners \(\pm1\pm i\), starting at \(1\). On returning, its terminal germ is \(L+2\pi i\). More generally, the solution \(u+vL\), for arbitrary complex constants \(u,v\), returns as \(u+vL+2\pi i v\).</p>
+\[L^{\gamma}(z)=L(z)+2\pi i\quad\text{near }1.\]
+<p>This is a classical result to construct in our foundation. It compares functions on a neighborhood, not just two numerical outputs at the endpoint.</p></section>
+<h3 data-story="patches" id="continuation-local-series">A small series gives an actual local solution</h3>
+<p>At a nonzero center \(c\), write \(z=c(1+w)\). The geometric series computes \(1/(1+w)\); dividing its coefficients by the new exponents suggests</p>
+\[\ell(w)=\sum_{n=1}^{\infty}\frac{(-1)^{n+1}}n w^n,\qquad
+L_{c,b}(z)=b+\ell\!\left(\frac{z-c}{c}\right).\]
+<p>The constant \(b\) is the value carried to the new center. Direct estimates of finite prefixes and their remainders establish \(L_{c,b}(c)=b\) and \(L'_{c,b}(z)=1/z\). In particular, the function solves our equation. No general assertion that every holomorphic function has a Taylor expansion is needed to justify this specific series.</p>
+<p>For \(|w|\le q&lt;1\), the omitted terms have the elementary bound</p>
+\[\left|\ell(w)-\sum_{n=1}^{N}\frac{(-1)^{n+1}}n w^n\right|
+\le\frac{q^{N+1}}{(N+1)(1-q)}.\]
+<p>With rational \(q\), this tells a rational-box algorithm how many terms suffice. Derivative estimates need their own remainder bounds, so formal differentiation alone is not the final analytic proof. This is the local <a href="https://dlmf.nist.gov/4.6">logarithm series</a> doing a concrete job.</p>
+<h3 data-story="patches" id="continuation-overlaps">Uniqueness lets us move the center</h3>
+<p>The first series cannot cover a neighborhood containing the origin. There is no reason, however, to insist on keeping its center at \(1\). Choose a nearby center \(d\) and set its initial value to \(L_{c,b}(d)\). The new local construction has the same derivative as the old one and the same value at \(d\).</p>
+<p>Why does that make it the same function on the overlap? We need a local comparison theorem: on a rectangle, a holomorphic function with zero derivative is constant. A quantitative version can use finite telescoping along horizontal and vertical segments, with proved uniform error control. Applying it to the difference establishes agreement on a smaller open rectangle around \(d\). This lemma must be proved; agreement at one point by itself would be insufficient.</p>
+<p>Now cover the chosen square route by finitely many small overlapping rectangles, all separated from the origin. Continue the construction from one to the next, carrying the exact represented value at each new center. We have extended a function beyond its original series without defining it across its singularity. This chain of local functions is <a href="https://dlmf.nist.gov/1.10#ii">analytic continuation along the route</a>.</p>
+<details><summary>A completely explicit rectangle cover</summary>
+<p>Subdivide the square route into \(64\) steps of length \(1/8\). At each endpoint \(c\), use an open rectangle of half-side \(1/6\), repeating the initial center when we return. The next center lies inside the preceding rectangle, and neighboring rectangles overlap. Each center has one coordinate of absolute value \(1\), so no rectangle reaches the origin.</p>
+<p>Writing \(\|x+iy\|_1=|x|+|y|\), one checks on this square that \(\|1/c\|_1\le3/2\). Throughout a rectangle, \(\|z-c\|_1\le1/3\), hence</p>
+\[\left\|\frac{z-c}{c}\right\|_1\le\frac12.\]
+<p>Thus the same geometric tail bound works in every local chart. This is finite rational geometry and an explicit series estimate; no compactness argument is needed to find the cover.</p></details>
+<p>The side illustration shows three neighboring rectangles at a time. They are neighborhoods in the complex plane, not just samples on a line. Their overlap is what allows us to compare local functions.</p>
+<h3 data-story="circuit" id="continuation-return">The point returns; the local function can change</h3>
+<p>After a complete circuit, we are near \(1\) again. The continued logarithm still has derivative \(1/z\). Its difference from the original logarithm is therefore a constant. Determining that constant is a new calculation.</p>
+<p>For each particular horizontal or vertical piece, prove that the change of the local solution equals the integral of its derivative, computed from whole-chunk enclosures. These increments telescope. Our arctangent-based square-period calculation then identifies their total:</p>
+\[\text{sum of the oriented reciprocal increments}=2\pi i.\]
+<p>The bridge between local-function increments and the certified integral is essential. The period calculation alone does not construct logarithm branches. Once that bridge is proved, it gives the return formula stated above. A square suffices; circular integration is unnecessary for this example.</p>
+<p>A <em>germ</em> remembers a function near a point, identifying two representatives that agree on a smaller neighborhood. <em>Monodromy</em> is the transformation of those germs produced by continuation around a loop. In the basis \((1,L)\), with solution state vectors as columns,</p>
+\[\Phi(z)=\begin{pmatrix}1&amp;L(z)\\0&amp;1/z\end{pmatrix},\qquad
+\Phi^\gamma=\Phi M_\gamma,\qquad M_\gamma=\begin{pmatrix}1&amp;2\pi i\\0&amp;1\end{pmatrix}.\]
+<p>The matrix records a change of solution, not an error accumulated by a numerical method. Reverse the circuit and its off-diagonal entry changes sign. The <a href="ch-differential-equations.html#monodromy">monodromy chapter section</a> explains basis changes and the additional homotopy theorem needed to pass from chosen loops to the fundamental group.</p>
+<h3 data-story="growth" id="continuation-growth">Going around is different from going inward</h3>
+<p>Our logarithm changes after a circuit, but grows slowly when we approach the origin on a fixed branch. For positive \(r\) tending to zero, \(|\log r|\) grows more slowly than any negative power \(r^{-\varepsilon}\), with \(\varepsilon&gt;0\). On a sector with bounded argument, its imaginary part is bounded too. Branching has not produced uncontrolled growth.</p>
+<p>This suggests the property we actually want to understand. A solution has <em>moderate growth</em> if, on each fixed branch and each closed angular subsector of finite opening, there are \(C&gt;0\) and an integer \(N\ge0\) such that</p>
+\[|y(z)|\le C|z|^{-N}\qquad\text{for sufficiently small }|z|&gt;0.\]
+<p>The constants may depend on the solution, branch, and subsector. We do not ask for one bound over arbitrarily many turns of a logarithm. Nor do we ask for boundedness: a pole may have moderate growth.</p>
+<p>Contrast \(y'=-y/z^2\), whose solution \(e^{1/z}\) is single-valued on the punctured plane. It can be continued around the origin and returns unchanged, yet along the positive real axis it exceeds every power bound. <strong>Continuation and even trivial monodromy do not imply moderate growth.</strong> This is why Fuchs’s theorem supplies a genuinely new conclusion.</p>
+<h3 data-story="growth" id="continuation-scaling">Why the coefficient test has those particular powers</h3>
+<p>Return to a general second-order equation near the origin:</p>
+\[y''+p(z)y'+q(z)y=0.\]
+<p>A derivative of \(z^\rho\) introduces one additional factor \(1/z\). To compare a solution and its derivative at the same scale, use the state \(X=(y,zy')^{\mathsf T}\). A direct calculation gives</p>
+\[zX'=B(z)X,\qquad B(z)=\begin{pmatrix}0&amp;1\\-Q(z)&amp;1-P(z)\end{pmatrix},
+\qquad P(z)=zp(z),\quad Q(z)=z^2q(z).\]
+<p>This explains the simple-pole and double-pole thresholds. If \(P,Q\) extend holomorphically across zero, the scaled system has a bounded coefficient matrix there. On a fixed ray, a finite evolution estimate over each halving of the radius gives a uniform amplification factor \(K\ge1\). After \(m\) halvings the bound is \(K^m\), while the inverse radius is proportional to \(2^m\). Choosing an integer \(N\) with \(K\le2^N\) converts this into a power bound.</p>
+<p>That is the mechanism behind the forward growth theorem. Turning a ray estimate into a statement on sectors still needs controlled angular continuation. The origin is never an ordinary initial point; the scaling tells us how to estimate solutions while staying away from it.</p>
+<h3 id="continuation-powers">Powers predict the first terms</h3>
+<p>Freeze the scaled coefficients at zero: \(P_0=P(0)\) and \(Q_0=Q(0)\). The resulting Euler equation has the same form at every scale. Try \(y=z^\rho\). Substitution reduces the differential equation to the <em>indicial equation</em></p>
+\[I(\rho)=\rho(\rho-1)+P_0\rho+Q_0=0.\]
+<p>The exponents are a consequence of balancing the lowest-order terms. On a chosen branch, \(z^\rho=\exp(\rho\operatorname{Log}z)\). A positive turn changes it by the multiplier \(e^{2\pi i\rho}\). Powers therefore explain another basic kind of monodromy.</p>
+<p>For our logarithm equation, \(P_0=1\), \(Q_0=0\), and \(I(\rho)=\rho^2\). The exponent zero occurs twice. The constant solution supplies one direction, while \(\log z\) supplies the second. For the Euler model, logarithms can also be motivated by the limiting identity</p>
+\[\lim_{\varepsilon\to0}\frac{z^{\rho+\varepsilon}-z^\rho}{\varepsilon}
+=z^\rho\operatorname{Log}z\]
+<p>on a fixed local branch. This explains why logarithms appear when power solutions coalesce; it is a motivation, not a substitute for the convergence and independence proofs.</p>
+<h3 id="continuation-frobenius">Frobenius corrects the model</h3>
+<p>The actual coefficients need not be constant after scaling. Seek a correction</p>
+\[y(z)=z^\rho\sum_{n=0}^{\infty}a_nz^n,\qquad a_0\ne0.\]
+<p>Substitution determines each new coefficient from earlier ones. The factor multiplying \(a_n\) is \(I(\rho+n)\): this is where the indicial equation continues to control the calculation. When the two exponents differ by no integer, the construction gives two independent power-times-series solutions. In resonant cases, one solution may need a logarithmic term; for distinct exponents its coefficient can be zero, so resonance does not always force a logarithm.</p>
+<p>The decisive analytic work is to prove that these series converge, that their sums solve the equation, and that they supply a basis of local solutions. A formal recurrence alone does none of those three things. Once established, the resulting powers, logarithms, and convergent regular factors make moderate growth visible. See the <a href="https://dlmf.nist.gov/2.7#i">classical Frobenius construction</a>.</p>
+<p>Bessel’s equation of order zero now becomes a natural next example:</p>
+\[z^2y''+zy'+z^2y=0.\]
+<p>Its scaled coefficients are \(P=1\), \(Q=z^2\), so it has the same repeated indicial exponent as our logarithm equation. The regular solution becomes \(J_0\); the logarithmic companion becomes \(J_0\operatorname{Log}z+H\), with \(H\) entire under the normalization used here. Its return matrix has the same shape. The <a href="complex-analysis.html#bessel">existing Bessel illustration</a> shows this next stage.</p>
+<h3 id="continuation-fuchs">Fuchs turns a coefficient test into a theorem about every solution</h3>
+<p>Assume \(p,q\) are meromorphic near zero, with no coefficient singularities in a sufficiently small punctured disk. We now have two descriptions: a condition on coefficients and a growth condition on actual continued solutions.</p>
+<section aria-labelledby="continuation-fuchs-criterion" class="showcase-statement secondary-statement"><h4 id="continuation-fuchs-criterion">Fuchs’s criterion</h4><p>Every local solution has moderate growth at zero, in the branchwise sector sense above, if and only if \(zp(z)\) and \(z^2q(z)\) extend holomorphically across zero.</p>
+\[\text{moderate growth of every solution}
+\quad\Longleftrightarrow\quad
+zp(z),\ z^2q(z)\text{ extend holomorphically at }0.\]</section>
+<p>When the point is singular, the solution-growth property makes it a <em>regular singular point</em>. The content of the theorem is the equivalence. Frobenius provides one route from the coefficient condition to controlled solutions; the scaled-system estimate explains the growth bound directly. The converse must recover restrictions on the coefficients from a complete solution space. It is a separate theorem, not something proved by examining the logarithm example.</p>
+<p>The same scalar criterion in order \(n\), for</p>
+\[y^{(n)}+a_1(z)y^{(n-1)}+\cdots+a_n(z)y=0,\]
+<p>requires \(z^ja_j(z)\) to extend holomorphically for every \(1\le j\le n\). The presentation uses order two, but local continuation and matrix transport should be developed for arbitrary finite-dimensional systems. For systems, a simple pole in the displayed coefficient matrix is sufficient for regular singularity; necessity in that form depends on the choice of frame. The scalar criterion above has the precise converse. See <a href="https://armj.math.stonybrook.edu/html-articles/Files-2015-2024/15-14/">Tanny and Yakovenko on regularity and Fuchsian scalar equations</a>.</p>
+<h3 id="continuation-our-foundation">What this asks of our foundation</h3>
+<p>The first complete target is the logarithm circuit, with actual local evaluators, derivative proofs, overlap agreement, and an exact terminal comparison. Rectangular neighborhoods and one prescribed square route suffice. Rational boxes carry the values; finite estimates carry convergence. We do not need to construct a completed real field, a universal contour integral, or a general monodromy theorem to establish that example.</p>
+<p>For later equations, extract the reusable local existence and uniqueness arguments and continue their solutions through a supplied finite chain. To prove Fuchs’s theorem in full, add convergence and spanning for the local solution forms, sector growth control, and the converse. These are substantial analytic results, even when their estimates are expressed entirely in our computable foundation.</p>
+<ul>
+<li><strong>Existing pieces:</strong> local-logarithm finite-prefix and tail calculations; represented holomorphicity with affine and square examples; particular square-period computations; and the scoped Fuchs growth and Frobenius results described on the <a href="fuchs.html#checked">Fuchs page</a>.</li>
+<li><strong>Still to connect:</strong> represented logarithm holomorphicity, open-overlap comparison, complete route coverage, the integral-to-increment bridge, and the exact logarithm return theorem.</li>
+<li><strong>Later:</strong> the general continuation machinery, full Frobenius bases including logarithmic cases, and the complete branchwise sector equivalence in Fuchs’s criterion.</li>
+</ul>
+<p>The <a href="https://github.com/liuyao12/computable-analysis/blob/7b4dddd81afefceb62d05fa8319b122bfa223dcc/skills/analytic-continuation/SKILL.md">analytic-continuation skill</a> guides these function-specific constructions. The story begins with a logarithm because it already contains the local computation, the overlap argument, the changed branch, and the mild growth that the general theorem will explain.</p>
+</section>
+<section id="monodromy-section">
+<h2 id="monodromy">Monodromy: returning with a different solution</h2>
+<p>The evolution above takes place on a real interval. In a complex domain, continuation can return to the same point along a loop and produce a different local solution. Monodromy records this change.</p>
+<h3>Setup: local solutions and loops</h3>
+<p>Let \(U\) be a connected open complex domain on which the coefficients of</p>
+\[y''+p(z)y'+q(z)y=0\]
+<p>are holomorphic, and fix an ordinary point \(a\in U\). A <em>solution germ at \(a\)</em> is a local holomorphic solution, with two representatives identified when they agree throughout some neighborhood of \(a\). Agreement means equality of represented values, not equality of their algorithms. A germ contains local function information, not just one value. The local existence and uniqueness theorem identifies these solution germs with the initial data \((y(a),y'(a))\), giving a two-dimensional complex vector space \(V_a\).</p>
+<div class="monodromy-definition">
+<h3>Definition — monodromy along a loop</h3>
+<p>Let \(\gamma\) be a loop in \(U\), starting and ending at \(a\). When continuation of solution germs along this loop is constructed and proved unique, its <em>monodromy operator</em> sends each initial germ to the terminal germ:</p>
+\[T_\gamma:V_a\longrightarrow V_a,\qquad [y]_a\longmapsto[y^\gamma]_a.\]
+<p>For a linear equation, continuation preserves linear combinations, and reversing the loop reverses continuation. Consequently \(T_\gamma\) is an invertible linear map. These are consequences of continuation and uniqueness; returning to the same point alone does not imply \(T_\gamma=I\).</p>
+</div>
+<h3>A matrix in a chosen basis</h3>
+<p>Choose two independent local solutions and place their state vectors in columns:</p>
+\[\Phi(z)=\begin{pmatrix}y_1(z)&amp;y_2(z)\\y_1'(z)&amp;y_2'(z)\end{pmatrix}.\]
+<p>The <em>monodromy matrix</em> is the constant invertible matrix characterized, on a neighborhood of the base point, by</p>
+\[\Phi^\gamma(z)=\Phi(z)M_\gamma.\]
+<p>Thus continuation of a solution with coefficient column \(c\) gives coefficient column \(M_\gamma c\). Replacing the basis by \(\widetilde\Phi=\Phi C\), for a constant invertible \(C\), changes the matrix to</p>
+\[\widetilde M_\gamma=C^{-1}M_\gamma C.\]
+<p>The operator is intrinsic to the equation, base point, and loop; its displayed matrix depends on the basis. Everything here extends to a system \(Y'=A(z)Y\) of any finite dimension, with a fundamental matrix whose columns are independent vector solutions.</p>
+<h3>Loops, composition, and the monodromy group</h3>
+<p>Use \(\eta\star\gamma\) to mean following \(\gamma\) first, then \(\eta\). Unique continuation gives</p>
+\[M_{\eta\star\gamma}=M_\eta M_\gamma,\qquad M_{\gamma^{-1}}=M_\gamma^{-1}.\]
+<p>The further homotopy-invariance theorem says that deforming a loop within \(U\), with the base point fixed, leaves its monodromy unchanged. Once that theorem and continuation along all loops are available, the operators give the <em>monodromy representation</em></p>
+\[\rho:\pi_1(U,a)\longrightarrow\operatorname{GL}(V_a),\qquad [\gamma]\longmapsto T_\gamma.\]
+<p>Here \(\pi_1(U,a)\) is the group of based loops modulo such deformations, with the composition convention above. The image of \(\rho\) is the <em>monodromy group</em>. A single computed loop operator does not establish this whole representation. The related <em>monodromy theorem</em> says that a germ which can be continued along every path in a simply connected domain has a single-valued holomorphic continuation there; that is a theorem, not part of the definition.</p>
+<h3>The running Bessel example</h3>
+<p>For \(p(z)=1/z\) and \(q(z)=1\), use the basis \((J_0,Y_*)\), where \(J_0\) is entire and \(Y_*=J_0\operatorname{Log}z+H(z)\), with \(H\) entire. This normalization differs from the standard \(Y_0\). A counterclockwise circuit around the origin gives</p>
+\[J_0\longmapsto J_0,\qquad Y_*\longmapsto Y_*+2\pi iJ_0,\]
+\[M_\gamma=\begin{pmatrix}1&amp;2\pi i\\0&amp;1\end{pmatrix},\qquad M_\gamma^k=\begin{pmatrix}1&amp;2k\pi i\\0&amp;1\end{pmatrix}\quad(k\in\mathbb Z).\]
+<p>The regular singular point has nontrivial monodromy: regular singularity controls growth and does not require solutions to return unchanged. Conversely, trivial monodromy need not make a singularity removable: \(y=1/z\) solves \(y'=-y/z\) and returns unchanged around its pole.</p>
+<p><a href="complex-analysis.html#bessel">Follow the Bessel circuit in the interactive example</a> · <a href="fuchs.html">Fuchs’s criterion and solution growth</a>. Classical references: <a href="https://people.sissa.it/~dubrovin/fismat_web.pdf">Dubrovin’s lectures on monodromy of linear systems</a>, <a href="https://dlmf.nist.gov/15.17#v">monodromy groups</a>, and <a href="https://dlmf.nist.gov/10.11">Bessel continuation formulas</a>.</p>
+<p class="classic-scope"><strong>Definition and classical consequences; not new Lean continuation theorems.</strong> In our foundation, first construct the local represented solutions, prove agreement on open overlaps along the chosen route, and identify the terminal basis by exact represented identities. Solution-space dimension, invertibility, independence of chart choices, and homotopy invariance require their corresponding analytic proofs. The <a href="https://github.com/liuyao12/computable-analysis/blob/7b4dddd81afefceb62d05fa8319b122bfa223dcc/skills/analytic-continuation/SKILL.md">continuation skill</a> records those obligations.</p>
+<p>For the new checked germ, derivative, gluing, and finite-transport foundations—and the analytic bridges still missing—see <a href="complex-analysis.html#continuation-foundation">the continuation theorem ledger</a>.</p>
+</section>
+<h2 id="a0000000075">14.4 Ordinary forcing and variation of constants</h2><div class="pedagogical-bridge" data-pedagogy="bridge"><p>Once we know how the system propagates an initial state, a forcing term can be treated as contributions introduced at successive times. Propagating and accumulating those contributions motivates the following formula.</p></div>
+<p> For a supplied interval-continuous forcing \(r\), put </p>
+<div class="displaymath" id="a0000000402">
+  \[  y(t)=\Phi (t,a)y_a+\int _a^t\Phi (t,s)r(s)\, ds.  \]
+</div>
+<p> All entries of this integrand have the continuity and boundedness data just proved. The finite integral recursions show </p>
+<div class="displaymath" id="a0000000403">
+  \[  y(t)=y_a+\int _a^t\bigl(A(u)y(u)+r(u)\bigr)\, du.  \]
+</div>
+<p> One verifies the double-integral rearrangement on finite subdivisions of the triangle \(a\le s\le u\le t\). The cells meeting its diagonal have total area bounded by a constant times \((b-a)\operatorname {mesh}(P)\); the integrands have rational bounds, and the other cells are finite iterated rectangles. This proves the needed interchange without a general measure-theoretic Fubini theorem. </p>
+<p>Accumulation gives \(Dy=Ay+r\), and the preceding uniqueness estimate proves uniqueness among the certified integral solutions. Thus the displayed formula is the solution computation, not a formula justified by an unconstructed classical solution. </p>
+<p>The same estimate controls numerical replacements. If a proposed computation \(\widetilde y\) has a certified integral identity with initial error at most \(e\) and additional forcing (residual) bounded by \(\rho \), then variation of constants gives </p>
+<div class="displaymath" id="a0000000404">
+  \[  \| \widetilde y(t)-y(t)\| \le B\bigl(e+(b-a)\rho \bigr).  \]
+</div>
+<p> A merely sampled residual would not suffice: its bound must hold on the cells, with the integral identity certified for that computation. </p>
+<h2 id="a0000000076">14.5 Delta inputs are finite state updates</h2>
+<p> For a finite list of impulse times \(a{\lt}\tau _j{\lt}b\) and vectors \(c_j\), solve </p>
+<div class="displaymath" id="a0000000405">
+  \[  Dy=A(t)y+r(t)+\sum _jc_j\delta _{\tau _j}.  \]
+</div>
+<p> Initially take the times rational. For times away from the impulses the solution is </p>
+<div class="displaymath" id="a0000000406">
+  \[  \boxed {y(t)=\Phi (t,a)y_a+\int _a^t\Phi (t,s)r(s)\, ds +\sum _{a{\lt}\tau _j{\lt}t}\Phi (t,\tau _j)c_j.}  \]
+</div>
+<p> Its one-sided states satisfy \(y(\tau _j+)=y(\tau _j-)+c_j\) because \(\Phi (\tau _j,\tau _j)=I\). The piecewise integration-by-parts rule of Chapter <a href="ch-impulses.html">13</a> proves exactly the displayed equation on tests. The ordinary branches have the needed integration identities from their integral equations and the corresponding finite product rule with a smooth test. </p>
+<p>One computation evaluates the formula directly. Another evolves to each impulse, adds its vector, and continues. The composition law proves their equivalence. A computed nonrational impulse location can also be used when ordering and separated evaluation times are supplied; one-sided states are retained instead of forcing an undecidable comparison at the location itself. </p>
+<p>Define the causal matrix kernel </p>
+<div class="displaymath" id="a0000000407">
+  \[  G(t,s)=\begin{cases} 0,&amp; t{\lt}s,\\ \Phi (t,s),&amp; t{\gt}s.\end{cases}  \]
+</div>
+<p> Its jump is \(I\), and hence </p>
+<div class="displaymath" id="a0000000408">
+  \[  \boxed {(D_t-A(t))G(t,s)=I\delta _s.}  \]
+</div>
+<p> Each column is the response to a unit impulse in one state coordinate. This identity is the reason for including delta inputs with the fundamental matrix. </p>
+<p>For a rectangular pulse of width \(\varepsilon \), after the pulse ends the response is \(\varepsilon ^{-1}\int _s^{s+\varepsilon }\Phi (t,u)c\, du\). The source-time bound gives its difference from \(\Phi (t,s)c\) as at most \(MB^2\| c\| \varepsilon /2\). This is agreement between the state-update construction and narrowing ordinary forcing, not uniform convergence through a discontinuity. </p>
+<h2 id="a0000000077">14.6 Three explicit kernels</h2>
+<h2 id="a0000000078">14.6.1 The free second derivative</h2>
+<p> For the state \((y,y')\) and matrix \(A=\left(\begin{smallmatrix} 0
+
+&amp; 1
+
+\\ 0
+
+&amp; 0
+
+\end{smallmatrix}\right)\), </p>
+<div class="displaymath" id="a0000000409">
+  \[  \Phi (t,s)=\begin{pmatrix} 1
+
+&amp; t-s
+
+\\ 0
+
+&amp; 1
+
+\end{pmatrix}.  \]
+</div>
+<p> An impulse \((0,1)^{\mathsf T}\) gives \(y=(t-s)_+\), so \(D^2y=\delta _s\). The function \(|t-s|\) solves the equation with \(2\delta _s\) but differs from its zero-past solution by an affine function. Initial data decides that homogeneous ambiguity. </p>
+<h2 id="a0000000079">14.6.2 The oscillator</h2>
+<p> For \(y''+\pi ^2y=0\), </p>
+<div class="displaymath" id="a0000000410">
+  \[  \Phi (t,s)= \begin{pmatrix}  C(t-s)
+
+&amp; S(t-s)/\pi 
+
+\\ -\pi S(t-s)
+
+&amp; C(t-s) 
+
+\end{pmatrix}.  \]
+</div>
+<p> Its entries, derivatives, and composition are already certified by the circle and FTC chapters. The impulse in the velocity coordinate gives </p>
+<div class="displaymath" id="a0000000411">
+  \[  g_s(t)=\begin{cases} 0,&amp; t{\lt}s,\\ S(t-s)/\pi ,&amp; t{\gt}s,\end{cases} \qquad (D^2+\pi ^2)g_s=\delta _s.  \]
+</div>
+<p> The position is continuous and the velocity jumps by \(1\). A position jump would instead introduce a derivative of delta into the second derivative. </p>
+<h2 id="a0000000080">14.6.3 A variable coefficient: the Airy equation</h2>
+<p> For \(y''-ty=0\), substitution of \(y=\sum a_nt^n\) gives </p>
+<div class="displaymath" id="a0000000412">
+  \[  a_2=0,\qquad a_{n+3}=\frac{a_n}{(n+3)(n+2)}.  \]
+</div>
+<p> Take \(u(0)=1,u'(0)=0\) and \(v(0)=0,v'(0)=1\). Thus </p>
+<div class="displaymath" id="a0000000413">
+  \[  u(t)=1+t^3/6+t^6/180+\cdots ,\qquad v(t)=t+t^4/12+t^7/504+\cdots .  \]
+</div>
+<p> On \(|t|\le R\), each of the three coefficient strands eventually has successive absolute-term ratio at most \(1/2\), by taking \((n+3)(n+2)\ge 2R^3\). This gives geometric tail bounds; differentiated strands have the same property after increasing the index. Thus \(u,v\) and their derivatives are actual series computations on every bounded interval. </p>
+<p>Coefficient multiplication proves \(uv'-u'v=1\): its formal derivative is \(uv''-u''v=0\), so all nonconstant coefficients vanish, and its constant coefficient is \(1\). Tails justify the identity for the computations. Consequently </p>
+<div class="displaymath" id="a0000000414">
+  \[  g_s(t)=\begin{cases}  0,&amp; t{\lt}s,\\ u(s)v(t)-v(s)u(t),&amp; t{\gt}s \end{cases}  \]
+</div>
+<p> is continuous at \(s\) and its first derivative jumps by \(1\). Hence </p>
+<div class="displaymath" id="a0000000415">
+  \[  (D^2-t)g_s=\delta _s.  \]
+</div>
+<p> This constructs a variable-coefficient impulse response by rational recurrences and finite determinant algebra. It is equivalent to the Peano–Baker computation by integral-equation uniqueness. </p>
+<h2 id="a0000000081">14.7 The FTC as the zero-coefficient case</h2>
+<p> When \(A=0\), the fundamental matrix is \(I\). Ordinary forcing and the finite atoms give </p>
+<div class="displaymath" id="a0000000416">
+  \[  y(t)-y(a)=\int _a^t r(s)\, ds+\sum _{a{\lt}\tau _j{\lt}t}c_j,  \]
+</div>
+<p> with endpoints away from impulses. Thus integration of a derivative is inversion of \(D\), up to a constant; linear ODE evolution is inversion of \(D-A\), up to a homogeneous solution. Both are identities between explicit computations with initial data, finite updates, and shrinking errors.  </p>
+</div><!-- algebraic-ode --><section class="fm-reader-link"><h2>Fuchs–Painlevé</h2><p>Algebraic differential equations on the computable-analysis foundation: forward Fuchs growth bounds, formal Frobenius recurrences, convergent factor computations, certified Laguerre polynomials, Painlevé I local pole charts with certified derivatives, Painlevé II algebraic seeds, and Apéry’s zeta(3) differential equation and arithmetic approximants.</p><p><a href="fuchs-painleve.html">Read the subproject and formalization comparisons →</a></p></section><!-- algebraic-ode --></article><footer class="chapter-footer"><span>Mathematical manuscript · formal comparison status at each theorem</span><a href="https://github.com/liuyao12/computable-analysis/tree/f630241adeae35fc06a5fd4921a4df6396e291d0">Source f630241a ↗</a></footer></main><aside aria-label="Chapter navigation and example" class="chapter-rail"><details class="chapter-contents"><summary>Contents of this chapter</summary><aside class="on-this-page"><a href="#a0000000072">14.1 Coefficient data and finite norms</a><a href="#a0000000073">14.2 Peano–Baker prefixes</a><a href="#a0000000074">14.3 Uniqueness belongs to the integral construction</a><a href="#continuation-to-fuchs">From a local solution to Fuchs’s theorem</a><a class="chapter-subsection" href="#continuation-setup">Begin where the equation is ordinary</a><a class="chapter-subsection" href="#continuation-theorem">Our first destination: one complete circuit</a><a class="chapter-subsection" href="#continuation-local-series">A small series gives an actual local solution</a><a class="chapter-subsection" href="#continuation-overlaps">Uniqueness lets us move the center</a><a class="chapter-subsection" href="#continuation-return">The point returns; the local function can change</a><a class="chapter-subsection" href="#continuation-growth">Going around is different from going inward</a><a class="chapter-subsection" href="#continuation-scaling">Why the coefficient test has those particular powers</a><a class="chapter-subsection" href="#continuation-powers">Powers predict the first terms</a><a class="chapter-subsection" href="#continuation-frobenius">Frobenius corrects the model</a><a class="chapter-subsection" href="#continuation-fuchs">Fuchs turns a coefficient test into a theorem about every solution</a><a class="chapter-subsection" href="#continuation-our-foundation">What this asks of our foundation</a><a href="#monodromy">Monodromy: returning with a different solution</a><a href="#a0000000075">14.4 Ordinary forcing and variation of constants</a><a href="#a0000000076">14.5 Delta inputs are finite state updates</a><a href="#a0000000077">14.6 Three explicit kernels</a><a href="#a0000000078">14.6.1 The free second derivative</a><a href="#a0000000079">14.6.2 The oscillator</a><a href="#a0000000080">14.6.3 A variable coefficient: the Airy equation</a><a href="#a0000000081">14.7 The FTC as the zero-coefficient case</a></aside></details><aside aria-label="Follow the logarithm equation" class="cauchy-example fuchs-story-example">
+<div class="example-sticky">
+<p class="classic-tag">Keep one equation in view</p><h2>A logarithm on the move</h2>
+<div class="example-equation">\[p(z)=1/z,\qquad q(z)=0.\]</div>
+<div aria-label="Story illustration" class="example-tabs" role="group">
+<button aria-pressed="true" data-story-view="patches" type="button">Local patches</button><button aria-pressed="false" data-story-view="circuit" type="button">Return map</button><button aria-pressed="false" data-story-view="growth" type="button">Approach zero</button>
+</div>
+<label class="example-follow"><input checked="" id="story-follow" type="checkbox"/> Follow the narrative</label>
+<svg aria-labelledby="story-plot-title story-plot-desc" id="story-plot" role="img" viewbox="0 0 330 280"><title id="story-plot-title">Overlapping neighborhoods along a square</title><desc id="story-plot-desc">Move along the square to see local logarithm charts and the branch accumulated along the route.</desc></svg>
+<div id="story-route-controls">
+<label>Travel around the square <output id="story-progress-label">0%</output><input id="story-progress" max="200" min="0" step="1" type="range" value="0"/></label>
+<label>Direction<select id="story-orientation"><option value="1">Counterclockwise</option><option value="-1">Clockwise</option></select></label>
+</div>
+<div hidden="" id="story-growth-controls"><label>Distance from the origin <output id="story-radius-label">1.000</output><input id="story-radius" max="100" min="0" step="1" type="range" value="0"/></label><p>Move right to approach zero on the positive real axis. Compare the logarithm with a power and the irregular example from the text.</p></div>
+<div aria-live="polite" id="story-readout"></div><p id="story-caption"></p>
+<p class="example-note">Illustration using floating-point arithmetic. Displayed branches use explicit formulas; the Lean continuation and overlap proofs remain to be constructed.</p>
+<noscript>The main text contains all definitions and claims. JavaScript enables the moving illustration.</noscript>
+</div></aside>
+</aside></div>
+<dialog id="proof-dialog"><div class="dialog-top"><span>Proof structure</span><button aria-label="Close proof map and return to the text" id="close-proof">Return to text ×</button></div><iframe id="proof-frame" title="Mathematical proof map"></iframe></dialog></body></html>

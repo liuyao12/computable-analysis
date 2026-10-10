@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="A mathematical foundation for calculus through certified rational computations." name="description"/><title>Improper integrals · Computable Analysis</title><link href="reading/book.css" rel="stylesheet"/><script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],processEscapes:true},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script><script defer="" src="reading/book.js"></script><link href="reading/analysis-edition.css" rel="stylesheet"/><meta content="7b4dddd81afefceb62d05fa8319b122bfa223dcc" name="documentation-revision"/><style id="pedagogy-style">.pedagogical-opening{margin:1em 0 1.6em}.pedagogical-context{font-size:.9em}.pedagogical-bridge{margin:.8em 0 1.2em}</style><link rel="stylesheet" href="reading/chapter-visuals/visuals.css"><script defer src="reading/chapter-visuals/visuals.js"></script></head>
+<body><a class="skip" href="#main">Skip to mathematics</a><header class="book-header"><button aria-controls="book-nav" aria-expanded="false" id="menu-button">Contents</button><a class="brand" href="index.html">Computable <em>Analysis</em></a><a class="header-about" href="programme.html">An alternative foundation to Calculus</a></header>
+<nav aria-label="Book chapters" id="book-nav"><span class="nav-label">The book</span><a class="" href="ch-foundations.html"><span>01</span>Numbers and functions</a><a class="pi-catalogue-navigation" href="ch-foundations.html#pi-computations">Other examples: π</a><a class="" href="ch-circle-sphere.html"><span>02</span>Circle, sphere and cylinder</a><a class="" href="ch-rational-circle-trigonometry.html"><span>03</span>Angles and trigonometry</a><a class="" href="ch-integrals.html"><span>04</span>Integral computations</a><a class="" href="ch-effective-calculus.html"><span>05</span>Derivatives and the FTC</a><a class="" href="ch-infinite-series.html"><span>06</span>Infinite series</a><a class="" href="ch-exponential-logarithm.html"><span>07</span>Exponential and logarithm</a><details class="later-chapters" open=""><summary>Further chapters</summary><a class="" href="ch-algebra-fta.html"><span>08</span>Algebraic computations</a><a class="" href="ch-local-models.html"><span>09</span>Local models</a><a class="" href="ch-complex-paths.html"><span>10</span>Complex paths</a><a class="current" href="ch-improper-parameters.html"><span>11</span>Improper integrals</a><a class="" href="ch-fourier.html"><span>12</span>Fourier computations</a><a class="" href="ch-impulses.html"><span>13</span>Impulses</a><a class="" href="ch-differential-equations.html"><span>14</span>Differential equations</a><!-- fundamental-matrix:start --><a data-reader-addition="fundamental-matrix" href="fundamental-matrix.html">Fundamental Matrix</a><!-- fundamental-matrix:end --><a class="" href="ch-special-equations.html"><span>15</span>Special-function equations</a><a class="" href="ch-transforms-zeta.html"><span>16</span>Transforms and zeta</a><a class="" href="ch-elliptic.html"><span>17</span>Elliptic integrals</a></details><a class="nav-label construction-skill-label" href="construction-skills.html">Skills</a><a class="construction-skill-navigation" href="skill-real-integrals.html">Real integrals</a><a class="construction-skill-navigation" href="skill-complex-integrals.html">Complex path integrals</a><a class="construction-skill-navigation" href="skill-series.html">Series</a><a class="construction-skill-navigation" href="skill-holomorphic-functions.html">Holomorphic functions</a><a class="construction-skill-navigation" href="skill-analytic-continuation.html">Analytic continuation</a><span class="nav-label">Worked examples</span><a class="" href="cosine.html">The cosine-square integral</a><a class="classic-navigation" href="cartwright.html">Irrationality of \(\pi^2\)</a><a class="classic-navigation" href="leibniz.html">The Leibniz series</a><a class="classic-navigation" href="basel.html">The Basel problem</a><a class="classic-navigation" href="euler.html">Euler’s sine product</a><span class="nav-label">Function theory</span><a class="classic-navigation" href="arctan-taylor.html">Arctangent and Taylor series</a><a class="classic-navigation" href="complex-analysis.html">Polygonal Cauchy theory</a><a class="classic-navigation" href="analytic-continuation.html">Analytic continuation</a><a class="classic-navigation" href="zeta-zeros.html">Riemann zeta zeros</a><span class="nav-label">Differential equations</span><a class="classic-navigation" href="fuchs.html">Fuchs’s theorem</a><a class="classic-navigation" href="painleve.html">Painlevé’s classification</a><span class="nav-label">The development</span><a class="classic-navigation" href="proof-bundles.html">Bundled proof comparisons</a><a href="programme.html">Purpose and boundary</a><a href="proof-bench/">Proof-size comparison</a><a href="reference/index.html">Technical reference ↗</a></nav>
+<div class="page"><main class="reader" id="main"><div class="chapter-kicker">CHAPTER 11</div><article><div class="main-text">
+<h1 id="ch:improper-parameters">Improper Integrals, Parameters, and the Gamma Function</h1><section class="pedagogical-opening" data-pedagogy="opening" id="why-this-page"><p>A cutoff makes an integral finite. Bounds on both omitted ends make it an approximation to the desired improper computation.</p><p class="pedagogical-context">Earlier context: <a href="power-improper.html">Improper power integrals</a>.</p></section><!-- chapter-visual:start -->
+<figure class="chapter-visual" data-visual="tails" id="visual-construction">
+<h2>Compute the middle; budget both ends</h2>
+<canvas role="img" aria-label="Compute the middle; budget both ends. For the example , compute on . The missing near part is at most ; the far part is  for integer . Both allowances shrink as the cutoffs move.">Compute the middle; budget both ends</canvas>
+<div class="visual-legend">Green computed middle · Blue near tail · Orange far tail</div>
+<div class="visual-controls"><label>Cutoff stage: <span data-stage-value>3</span><input type="range" min="1" max="8" value="3" step="1" aria-label="Cutoff stage"></label><button type="button" data-visual-reset>Reset</button></div>
+<div class="visual-output" aria-live="polite"></div>
+<figcaption>For the example \(t e^{-t}\), compute on \([\varepsilon,T]\). The missing near part is at most \(\varepsilon^2/2\); the far part is \((T+1)e^{-T}\le(T+1)/2^T\) for integer \(T\). Both allowances shrink as the cutoffs move. <a href="#a0000000058">Follow the construction.</a></figcaption>
+<noscript><p>For the example \(t e^{-t}\), compute on \([\varepsilon,T]\). The missing near part is at most \(\varepsilon^2/2\); the far part is \((T+1)e^{-T}\le(T+1)/2^T\) for integer \(T\). Both allowances shrink as the cutoffs move.</p></noscript>
+</figure>
+<!-- chapter-visual:end -->
+
+<p>A specific improper integral needs bounds at its missing endpoints, not a general theory of measurable functions. A parameter derivative needs corresponding bounds for its finite Taylor errors. Gamma, beta, and the error function give concrete tests of both requirements. </p>
+<h2 id="a0000000056">11.1 Two tails and one bounded computation</h2>
+<p> Suppose \(f(t,z)\) has an integral computation on each truncated interval \([\varepsilon ,T]\), and uniform bounds on every finite end piece are supplied: </p>
+<div class="displaymath" id="a0000000340">
+  \[  \left|\int _u^\varepsilon f(t,z)\, dt\right|\le e_0(\varepsilon ), \quad \left|\int _T^V f(t,z)\, dt\right|\le e_\infty (T) \quad (0{\lt}u{\lt}\varepsilon {\lt}T{\lt}V).  \]
+</div>
+<p> Both errors must shrink by proved schedules. Evaluate the middle integral to error \(\eta \) and enlarge its rational box by \(e_0(\varepsilon )+e_\infty (T)\). Comparisons on a larger common truncated interval prove compatibility of any two such boxes. Finite intersections therefore construct \(\int _0^\infty f(t,z)\, dt\). </p>
+<p>These tail bounds can be absolute-integral bounds, but need not be: later an oscillatory cancellation will give a bound without absolute convergence. No interchange of operations is inferred merely from the notation \(\int _0^\infty \). </p>
+<h2 id="thm:parameter-majorant">11.2 Parameter series with an integrable majorant</h2><div class="pedagogical-bridge" data-pedagogy="bridge"><p>Expanding in a parameter can simplify an integral, but the error varies across its integration domain. We need an envelope whose own integral controls the total omitted contribution before integrating the expansion.</p></div>
+<p>  Suppose on every truncated interval a supplied identity is </p>
+<div class="displaymath" id="a0000000341">
+  \[  f(t,z_0+w)=\sum _{n\ge 0}a_n(t)w^n, \qquad |a_n(t)|\le M(t)R^{-n},  \]
+</div>
+<p> where \(M\) is a nonnegative concrete integrand with proved endpoint tails and an integral bounded by a rational \(B\). Each \(a_n\) is integrable on truncated intervals with the supplied continuity data. The same bounds construct \(A_n=\int _0^\infty a_n(t)\, dt\). For \(|w|\le r{\lt}R\), finite sums give </p>
+<div class="displaymath" id="a0000000342">
+  \[  \left|\int _0^\infty f(t,z_0+w)\, dt-\sum _{n=0}^N A_nw^n\right| \le \frac{B(r/R)^{N+1}}{1-r/R},\qquad |A_n|\le BR^{-n}.  \]
+</div>
+<p> To prove this, first work on \([\varepsilon ,T]\), where everything is a finite sum plus a uniform remainder. Bound that remainder by the geometric tail times \(M(t)\). The omitted end pieces have the same bound with the corresponding tails of \(M\). Now make all three finite errors small. This proves termwise integration and constructs a local series chart for the parameter function. Its derivatives are the coefficient computations from Chapter <a href="ch-local-models.html">9</a>; no dominated-convergence theorem is imported. </p>
+<h2 id="a0000000057">11.3 Euler’s gamma integral with uniform rational budgets</h2>
+<p> For a rational complex \(z\) with \(\Re z{\gt}0\), define </p>
+<div class="displaymath" id="a0000000343">
+  \[  \Gamma (z)=\int _0^\infty t^{z-1}E(-t)\, dt, \qquad t^{z-1}=E((z-1)L(t)).  \]
+</div>
+<p> The same construction accepts computed inputs in a certified region \(a\le \Re z\le b\), where \(a{\gt}0\) is rational. On \(0{\lt}t\le 1\), </p>
+<div class="displaymath" id="a0000000344">
+  \[  |t^{z-1}E(-t)|\le t^{a-1},\qquad e_0(\varepsilon )=\varepsilon ^a/a.  \]
+</div>
+<p> Choose an integer \(m\ge \max (0,b-1)\). On \(t\ge 1\), the absolute integrand is bounded by \(t^mE(-t)\). Repeated finite integration by parts on \([T,V]\), followed by the factorial bound for the exponential, gives </p>
+<div class="displaymath" id="a0000000345">
+  \[  e_\infty (T)=E(-T)m!\sum _{j=0}^m\frac{T^j}{j!}.  \]
+</div>
+<p> This expression tends to zero: for each fixed power, the exponential series has a higher power as a positive term, giving a rational decay bound, or repeated doubling of \(T\) gives an effective search. Computed bounds such as \(e_0,e_\infty \) are replaced by rational upper enclosures when a numerical error budget is chosen. </p>
+<p>On each \([\varepsilon ,T]\), powers and exponentials have already proved value, derivative, and continuity estimates, so the middle integral is an ordinary rectangle computation. Gamma is therefore constructed for all these inputs, not introduced by assuming its improper integral exists. Its standard normalization is recorded in <a href="https://dlmf.nist.gov/5.2">DLMF, Section 5.2</a>. </p>
+<h2 id="a0000000058">11.4 All parameter derivatives, by one envelope</h2>
+<p> Fix \(z_0\), and choose rational \(0{\lt}\rho {\lt}a\le \Re z_0\le b\). Expanding \(E(wL(t))\) gives </p>
+<div class="displaymath" id="a0000000346">
+  \[  a_n(t)=t^{z_0-1}E(-t)\frac{L(t)^n}{n!}.  \]
+</div>
+<p> The positive exponential series proves </p>
+<div class="displaymath" id="a0000000347">
+  \[  \frac{|L(t)|^n}{n!}\le \rho ^{-n} \begin{cases} t^{-\rho },&amp; 0{\lt}t\le 1,\\ t^\rho ,&amp; t\ge 1.\end{cases}  \]
+</div>
+<p> Thus an integrable coefficient envelope is </p>
+<div class="displaymath" id="a0000000348">
+  \[  M(t)=\begin{cases} t^{a-\rho -1}E(-t),&amp; t\le 1,\\ t^{b+\rho -1}E(-t),&amp; t\ge 1. \end{cases}  \]
+</div>
+<p> Choose an integer \(m\ge \max (0,b+\rho -1)\). The preceding tail computations apply to \(M\), and \(\int M\le B=1/(a-\rho )+m!\) is a rational bound. The parameter-majorant argument supplies a gamma chart of radius \(\rho \): </p>
+<div class="displaymath" id="a0000000349">
+  \[  \Gamma ^{(n)}(z_0)=\int _0^\infty t^{z_0-1}E(-t)L(t)^n\, dt, \qquad |\Gamma ^{(n)}(z_0)|\le n!B\rho ^{-n}.  \]
+</div>
+<p> The integral on the right is a computed quantity with its own tails. Every finite derivative order is now supported; no differentiation of an uncontrolled infinite integral has occurred. </p>
+<h2 id="a0000000059">11.5 Recurrence and continuation through known poles</h2><div class="pedagogical-bridge" data-pedagogy="bridge"><p>A recurrence can carry values from a region where the integral converges to a new region. Division in that recurrence also reveals exceptional points. Following those points explains why continuation requires explicit pole information.</p></div>
+<p> Integrate the derivative of \(t^zE(-t)\) on a truncated interval. The two endpoint terms tend to zero by the same estimates, proving </p>
+<div class="displaymath" id="a0000000350">
+  \[  \Gamma (z+1)=z\Gamma (z),\qquad \Gamma (1)=1.  \]
+</div>
+<p> For a specific \(z\) outside the nonpositive integers, choose \(N\) so that \(\Re (z+N){\gt}0\) and certify separation of each factor in </p>
+<div class="displaymath" id="a0000000351">
+  \[  \boxed {\Gamma (z)=\frac{\Gamma (z+N)}{z(z+1)\cdots (z+N-1)}.}  \]
+</div>
+<p> Any two allowable choices agree by the recurrence. This is an actual continuation algorithm, since shifting into the right half-plane supplies new integral bounds, not just a recentering of an old disk. </p>
+<p>At \(z=-k\) the scalar value is replaced by its pole description. Isolating the factor \(z+k\) in the denominator and using \(\Gamma (1)=1\) gives residue \((-1)^k/k!\). The remaining analytic part can be computed by the local series arithmetic. For computed inputs, the required separation from these poles must be supplied; no universal equality decision is asserted. For positive real arguments gamma is positively separated from zero: a lower rectangle on \([1,2]\) suffices. Division by gamma elsewhere requires its own separation proof; zero-freeness is not assumed here. </p>
+<h2 id="a0000000060">11.6 Beta and a Gaussian normalization from the circle</h2>
+<p> For positive real parameters \(a,b\), define </p>
+<div class="displaymath" id="a0000000352">
+  \[  B(a,b)=\int _0^1 t^{a-1}(1-t)^{b-1}\, dt.  \]
+</div>
+<p> On \((0,1/2]\) the second factor has an explicit rational upper bound; therefore the left tail is at most a constant times \(\varepsilon ^a/a\). Reflection gives the right-tail bound. The middle integral is bounded quadrature. These estimates work uniformly on separated parameter boxes. </p>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:beta-gamma">
+<div class="theorem_thmheading">
+<span class="theorem_thmcaption">
+    Theorem
+    </span>
+<span class="theorem_thmlabel">11.1</span>
+<span class="theorem_thmtitle">Beta–gamma comparison</span>
+</div>
+<div class="theorem_thmcontent">
+<p>  These independent computations satisfy </p>
+<div class="displaymath" id="a0000000354">
+  \[  B(a,b)\Gamma (a+b)=\Gamma (a)\Gamma (b).  \]
+</div>
+</div>
+<aside aria-label="Proof details" class="theorem-margin"><a data-proof-map="thm:beta-gamma" href="proof-map.html?theorem=thm:beta-gamma">Proof map ↗</a><small>Reading outline</small></aside></div><p class="bundled-proof-link" data-bundled-theorem="thm:beta-gamma"><a href="proof-bundles.html?theorem=thm:beta-gamma">Bundled proof routes and LOC →</a></p>
+<div class="proof_wrapper" id="a0000000353">
+<div class="proof_heading">
+<span class="proof_caption">
+    Proof
+    </span>
+<span class="expand-proof">▼</span>
+</div>
+<div class="proof_content">
+<p>Multiply the truncated gamma integrals and interpret the product as finite rectangular sums in the positive quadrant. Excluding small coordinate strips and far tails changes it by the products of the one-dimensional bounds already proved. On each remaining bounded region the integrand is bounded and uniformly continuous. Triangulate and change the order of integration; cells meeting the finitely many straight boundaries have total area tending to zero with the mesh. Thus the product is equivalently computed by </p>
+<div class="displaymath" id="a0000000355">
+  \[  \int _0^\infty E(-r)\int _0^r u^{a-1}(r-u)^{b-1}\, du\, dr.  \]
+</div>
+<p> Here \(r=u+v\) is just a shear with determinant \(1\), verified on finite parallelograms; deleting a diagonal tail \(r{\gt}R\) is controlled by the union of \(u{\gt}R/2\) and \(v{\gt}R/2\). On each positive \(r\) use the one-dimensional substitution \(u=rt\), first away from the two endpoints and then with the beta endpoint bounds. The inner integral is \(r^{a+b-1}B(a,b)\). Its remaining endpoint and infinity bounds are the gamma bounds for \(a+b\), proving the identity by finite error comparisons. </p>
+</div>
+</div>
+<p>At \(a=b=1/2\), use \(t=x^2\) and then the rational circle chart \(x=2u/(1+u^2)\), on truncated intervals. Cancellation gives </p>
+<div class="displaymath" id="a0000000356">
+  \[  B(1/2,1/2)=4\int _0^1\frac{du}{1+u^2}=\pi .  \]
+</div>
+<p> The endpoint bounds justify both limiting substitutions. Positivity and the beta–gamma identity give \(\Gamma (1/2)=\sqrt\pi \). A final substitution \(t=x^2\) therefore proves </p>
+<div class="displaymath" id="a0000000357">
+  \[  \int _0^\infty E(-x^2)\, dx=\frac{\sqrt\pi }{2}.  \]
+</div>
+<p> The Gaussian normalization has been connected to the earlier circle computation, without assuming a general two-dimensional change-of-variables theorem. Standard beta notation is in <a href="https://dlmf.nist.gov/5.12">DLMF, Section 5.12</a>. </p>
+<h2 id="a0000000061">11.7 The error function: convergent and asymptotic computations</h2>
+<p> Define the entire local-series computation </p>
+<div class="displaymath" id="a0000000358">
+  \[  \operatorname {erf}(z)=\frac2{\sqrt\pi } \sum _{n=0}^\infty \frac{(-1)^nz^{2n+1}}{n!(2n+1)}.  \]
+</div>
+<p> On \(|z|\le r\), consecutive absolute terms have ratio at most \(r^2/(n+1)\). After that ratio is at most \(1/2\), twice the first omitted term bounds the tail. Differentiated tails are obtained in the same way. Finite integration of the exponential prefixes identifies the function on the real axis as \(2\int _0^x E(-t^2)dt/\sqrt\pi \). </p>
+<p>For \(x{\gt}0\), let \(I_k(x)=\int _x^\infty E(-t^2)t^{-2k}dt\). Finite integration by parts and the vanishing far endpoint give </p>
+<div class="displaymath" id="a0000000359">
+  \[  I_k(x)=\frac{E(-x^2)}{2x^{2k+1}}-\frac{2k+1}{2}I_{k+1}(x).  \]
+</div>
+<p> Repeated substitution proves, for every finite \(N\ge 1\), </p>
+<div class="displaymath" id="a0000000360">
+  \[  I_0(x)=\frac{E(-x^2)}{2x} \sum _{k=0}^{N-1}\frac{(-1)^k(2k-1)!!}{(2x^2)^k}+R_N(x),  \]
+</div>
+<p> where \((-1)!!=1\) and </p>
+<div class="displaymath" id="a0000000361">
+  \[  0\le (-1)^NR_N(x) \le \frac{E(-x^2)}{2x}\frac{(2N-1)!!}{(2x^2)^N}.  \]
+</div>
+<p> Indeed \(R_N=(-1)^N(2N-1)!!\, I_N/2^N\), and the first integration-by-parts inequality bounds \(I_N\) by \(E(-x^2)/(2x^{2N+1})\). </p>
+<p>This gives the alternative computation \(1-\operatorname {erf}(x)=2I_0(x)/\sqrt\pi \). It also illustrates an important distinction: the asymptotic expression has a proved error for each <em>finite</em> \(N\), but its terms eventually grow at fixed \(x\). It is not a convergent infinite series at that input. Use it when its finite bound meets the requested precision; otherwise use bounded quadrature with tails or the convergent series. The standard asymptotic formula appears in <a href="https://dlmf.nist.gov/7.12">DLMF, Section 7.12</a>.  </p>
+</div></article><footer class="chapter-footer"><span>Mathematical manuscript · formal comparison status at each theorem</span><a href="https://github.com/liuyao12/computable-analysis/tree/f630241adeae35fc06a5fd4921a4df6396e291d0">Source f630241a ↗</a></footer></main><aside class="on-this-page"><span>On this page</span><a href="#a0000000056">11.1 Two tails and one bounded computation</a><a href="#thm:parameter-majorant">11.2 Parameter series with an integrable majorant</a><a href="#a0000000057">11.3 Euler’s gamma integral with uniform rational budgets</a><a href="#a0000000058">11.4 All parameter derivatives, by one envelope</a><a href="#a0000000059">11.5 Recurrence and continuation through known poles</a><a href="#a0000000060">11.6 Beta and a Gaussian normalization from the circle</a><a href="#a0000000061">11.7 The error function: convergent and asymptotic computations</a></aside></div>
+<dialog id="proof-dialog"><div class="dialog-top"><span>Proof structure</span><button aria-label="Close proof map and return to the text" id="close-proof">Return to text ×</button></div><iframe id="proof-frame" title="Mathematical proof map"></iframe></dialog></body></html>

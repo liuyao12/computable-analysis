@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="A mathematical foundation for calculus through certified rational computations." name="description"/><title>Transforms and zeta · Computable Analysis</title><link href="reading/book.css" rel="stylesheet"/><script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],processEscapes:true},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script><script defer="" src="reading/book.js"></script><link href="reading/analysis-edition.css" rel="stylesheet"/><meta content="7b4dddd81afefceb62d05fa8319b122bfa223dcc" name="documentation-revision"/><style id="pedagogy-style">.pedagogical-opening{margin:1em 0 1.6em}.pedagogical-context{font-size:.9em}.pedagogical-bridge{margin:.8em 0 1.2em}</style><link rel="stylesheet" href="reading/chapter-visuals/visuals.css"><script defer src="reading/chapter-visuals/visuals.js"></script></head>
+<body><a class="skip" href="#main">Skip to mathematics</a><header class="book-header"><button aria-controls="book-nav" aria-expanded="false" id="menu-button">Contents</button><a class="brand" href="index.html">Computable <em>Analysis</em></a><a class="header-about" href="programme.html">An alternative foundation to Calculus</a></header>
+<nav aria-label="Book chapters" id="book-nav"><span class="nav-label">The book</span><a class="" href="ch-foundations.html"><span>01</span>Numbers and functions</a><a class="pi-catalogue-navigation" href="ch-foundations.html#pi-computations">Other examples: π</a><a class="" href="ch-circle-sphere.html"><span>02</span>Circle, sphere and cylinder</a><a class="" href="ch-rational-circle-trigonometry.html"><span>03</span>Angles and trigonometry</a><a class="" href="ch-integrals.html"><span>04</span>Integral computations</a><a class="" href="ch-effective-calculus.html"><span>05</span>Derivatives and the FTC</a><a class="" href="ch-infinite-series.html"><span>06</span>Infinite series</a><a class="" href="ch-exponential-logarithm.html"><span>07</span>Exponential and logarithm</a><details class="later-chapters" open=""><summary>Further chapters</summary><a class="" href="ch-algebra-fta.html"><span>08</span>Algebraic computations</a><a class="" href="ch-local-models.html"><span>09</span>Local models</a><a class="" href="ch-complex-paths.html"><span>10</span>Complex paths</a><a class="" href="ch-improper-parameters.html"><span>11</span>Improper integrals</a><a class="" href="ch-fourier.html"><span>12</span>Fourier computations</a><a class="" href="ch-impulses.html"><span>13</span>Impulses</a><a class="" href="ch-differential-equations.html"><span>14</span>Differential equations</a><!-- fundamental-matrix:start --><a data-reader-addition="fundamental-matrix" href="fundamental-matrix.html">Fundamental Matrix</a><!-- fundamental-matrix:end --><a class="" href="ch-special-equations.html"><span>15</span>Special-function equations</a><a class="current" href="ch-transforms-zeta.html"><span>16</span>Transforms and zeta</a><a class="" href="ch-elliptic.html"><span>17</span>Elliptic integrals</a></details><a class="nav-label construction-skill-label" href="construction-skills.html">Skills</a><a class="construction-skill-navigation" href="skill-real-integrals.html">Real integrals</a><a class="construction-skill-navigation" href="skill-complex-integrals.html">Complex path integrals</a><a class="construction-skill-navigation" href="skill-series.html">Series</a><a class="construction-skill-navigation" href="skill-holomorphic-functions.html">Holomorphic functions</a><a class="construction-skill-navigation" href="skill-analytic-continuation.html">Analytic continuation</a><span class="nav-label">Worked examples</span><a class="" href="cosine.html">The cosine-square integral</a><a class="classic-navigation" href="cartwright.html">Irrationality of \(\pi^2\)</a><a class="classic-navigation" href="leibniz.html">The Leibniz series</a><a class="classic-navigation" href="basel.html">The Basel problem</a><a class="classic-navigation" href="euler.html">Euler’s sine product</a><span class="nav-label">Function theory</span><a class="classic-navigation" href="arctan-taylor.html">Arctangent and Taylor series</a><a class="classic-navigation" href="complex-analysis.html">Polygonal Cauchy theory</a><a class="classic-navigation" href="analytic-continuation.html">Analytic continuation</a><a class="classic-navigation" href="zeta-zeros.html">Riemann zeta zeros</a><span class="nav-label">Differential equations</span><a class="classic-navigation" href="fuchs.html">Fuchs’s theorem</a><a class="classic-navigation" href="painleve.html">Painlevé’s classification</a><span class="nav-label">The development</span><a class="classic-navigation" href="proof-bundles.html">Bundled proof comparisons</a><a href="programme.html">Purpose and boundary</a><a href="proof-bench/">Proof-size comparison</a><a href="reference/index.html">Technical reference ↗</a></nav>
+<div class="page"><main class="reader" id="main"><div class="chapter-kicker">CHAPTER 16</div><article><div class="main-text">
+<h1 id="ch:transforms-zeta">Transforms, Oscillatory Tails, and Zeta</h1><section class="pedagogical-opening" data-pedagogy="opening" id="why-this-page"><p>Damping, cancellation and decreasing terms need different tail estimates. The reciprocal-square sum gives a concrete decreasing-term example.</p><p class="pedagogical-context">Earlier context: <a href="ch-improper-parameters.html">Improper Integrals, Parameters, and the Gamma Function</a>.</p></section><!-- chapter-visual:start -->
+<figure class="chapter-visual" data-visual="zeta" id="visual-construction">
+<h2>Choose a tail bound from the convergence mechanism</h2>
+<canvas role="img" aria-label="Choose a tail bound from the convergence mechanism. Green includes the first  terms. Comparing the decreasing curve with adjacent unit-width rectangles bounds the remaining reciprocal-square tail between  and . Later endpoint corrections sharpen this idea.">Choose a tail bound from the convergence mechanism</canvas>
+<div class="visual-legend">Green included terms · Gray reciprocal-square curve</div>
+<div class="visual-controls"><label>Included terms: <span data-stage-value>4</span><input type="range" min="1" max="10" value="4" step="1" aria-label="Included terms"></label><button type="button" data-visual-reset>Reset</button></div>
+<div class="visual-output" aria-live="polite"></div>
+<figcaption>Green includes the first \(N\) terms. Comparing the decreasing curve with adjacent unit-width rectangles bounds the remaining reciprocal-square tail between \(1/(N+1)\) and \(1/N\). Later endpoint corrections sharpen this idea. <a href="#a0000000090">Follow the construction.</a></figcaption>
+<noscript><p>Green includes the first \(N\) terms. Comparing the decreasing curve with adjacent unit-width rectangles bounds the remaining reciprocal-square tail between \(1/(N+1)\) and \(1/N\). Later endpoint corrections sharpen this idea.</p></noscript>
+</figure>
+<!-- chapter-visual:end -->
+
+<p>The same function can be computed by a transform, an equation, or a finite sum with endpoint corrections. Three examples show why the foundation must keep track of the error appropriate to each operation. None requires an ambient space of arbitrary continuous or square-integrable functions. </p>
+<h2 id="a0000000087">16.1 Laplace transforms with an explicit half-plane</h2>
+<p> Suppose a concrete, locally integrable computation \(f\) has a rational exponential bound \(|f(t)|\le B E(\alpha t)\) on \(t\ge 0\). On a certified half-plane \(\Re s\ge \alpha +\sigma \), with rational \(\sigma {\gt}0\), define </p>
+<div class="displaymath" id="a0000000436">
+  \[  \mathcal Lf(s)=\int _0^\infty E(-st)f(t)\, dt.  \]
+</div>
+<p> Its far tail is at most \(B E(-\sigma T)/\sigma \). The middle integral has the data of the particular \(f\). This constructs the transform. Multiplication of the integrand by \(t^k\) still gives a computable exponential tail, by the polynomial-exponential calculation in Chapter <a href="ch-improper-parameters.html">11</a>. Expanding \(E(-ht)\) with a smaller half-plane margin gives the parameter-majorant proof of </p>
+<div class="displaymath" id="a0000000437">
+  \[  (\mathcal Lf)^{(k)}(s)=(-1)^k\int _0^\infty t^kE(-st)f(t)\, dt.  \]
+</div>
+<p> The half-plane is part of the certificate, not an unspecified region of convergence. </p>
+<p>If \(f\) is a certified piecewise primitive with finitely many jumps and its ordinary derivative has the needed tails, finite integration by parts and the explicit jump contributions give </p>
+<div class="displaymath" id="a0000000438">
+  \[  \mathcal L(Df)(s)=s\mathcal Lf(s)-f(0+),  \]
+</div>
+<p> where the transform includes interior impulse masses and no impulse at the initial endpoint. Extending \(f\) by zero to negative times instead adds \(f(0+)\delta _0\) to its full-line derivative. This distinguishes the two initial-value conventions rather than assigning a hidden half weight to the delta at zero. </p>
+<p>For an interior impulse \(\delta _\tau \), its transform is \(E(-s\tau )\). In particular, ordinary integrations by parts give </p>
+<div class="displaymath" id="a0000000439">
+  \[  \mathcal L(S)(s)=\frac\pi {s^2+\pi ^2},\qquad \mathcal L(C)(s)=\frac{s}{s^2+\pi ^2}\quad (\Re s{\gt}0).  \]
+</div>
+<p> The denominators are separated on any supplied closed box inside that half-plane. These formulas compare the oscillator’s impulse kernel with a rational computation; they are not applications of an unproved transform inversion theorem. </p>
+<p>For a constant matrix \(A\), the zero-past impulse response is \(E(tA)\) for \(t{\gt}0\). On \(\Re s{\gt}\| A\| \), entrywise integration gives </p>
+<div class="displaymath" id="a0000000440">
+  \[  (sI-A)\mathcal L(E(\cdot A))(s)=I.  \]
+</div>
+<p> The finite geometric matrix series \(s^{-1}\sum _{n\ge 0}(A/s)^n\), with its norm tail, independently constructs \((sI-A)^{-1}\). Uniqueness of that inverse proves their equivalence. Thus the familiar resolvent is a second computation of the fundamental matrix’s Laplace transform. </p>
+<h2 id="a0000000088">16.2 An oscillatory integral with no absolute-integral bound</h2>
+<p> Extend \(S(t)/t\) at zero by the series value \(\pi \). For \(0{\lt}T{\lt}U\), integration by parts using \(DS=\pi C\), \(DC=-\pi S\) gives </p>
+<div class="displaymath" id="a0000000441">
+  \[  \left|\int _T^U\frac{S(t)}t\, dt\right|\le \frac{2}{\pi T}.  \]
+</div>
+<p> Indeed the endpoint terms have bounds \(1/(\pi T)\) and \(1/(\pi U)\), and the remaining cosine integral is bounded by \((1/T-1/U)/\pi \). Therefore bounded quadrature and this cancellation bound construct \(I=\int _0^\infty S(t)/t\, dt\). </p>
+<p>To identify it, first use a positive real damping parameter \(a\): </p>
+<div class="displaymath" id="a0000000442">
+  \[  F(a)=\int _0^\infty E(-at)\frac{S(t)}t\, dt.  \]
+</div>
+<p> On \(a\ge a_0{\gt}0\) the exponential tails justify parameter differentiation, giving \(F'(a)=-\pi /(a^2+\pi ^2)\) by the Laplace calculation above. Also \(|F(a)|\le \pi /a\) from the chord bound \(|S(t)|\le \pi t\). Integrating this derivative between positive rational endpoints and sending the larger one to infinity with that explicit bound yields </p>
+<div class="displaymath" id="a0000000443">
+  \[  F(a)=\int _a^\infty \frac\pi {u^2+\pi ^2}\, du =\frac\pi 2-A(a/\pi )  \]
+</div>
+<p> when \(0{\lt}a\le \pi \); scaling and the previously computed angle integral prove the last equality. </p>
+<p>The damping can be removed with a finite estimate. The function \(E(-at)/t\) is positive decreasing; the same integration-by-parts argument bounds its oscillatory tail uniformly for all \(a\ge 0\) by \(2/(\pi T)\). On \([0,T]\), the bound \(|1-E(-at)|\le at\) gives </p>
+<div class="displaymath" id="a0000000444">
+  \[  |F(a)-I|\le aT+\frac4{\pi T}.  \]
+</div>
+<p> First choose a rational \(T\), then a sufficiently small positive rational \(a\). This proves \(F(a)\to I\) without an absolute domination on the infinite interval. Since \(A(a/\pi )\to 0\) by its continuity estimate, </p>
+<div class="displaymath" id="a0000000445">
+  \[  \boxed {\int _0^\infty \frac{S(t)}t\, dt=\frac\pi 2.}  \]
+</div>
+<p> For the normalized sinc \(S(t)/(\pi t)\), the positive-half-line integral is \(1/2\) and the whole-line integral is \(1\). The endpoint and normalization are stated explicitly. </p>
+<h2 id="a0000000089">16.3 A Fourier transform proved by an ODE</h2>
+<p> Let \(f(x)=E(-\pi x^2)\) and define for real \(\xi \) </p>
+<div class="displaymath" id="a0000000446">
+  \[  H(\xi )=\int _{-\infty }^\infty f(x)E(-2\pi i\xi x)\, dx.  \]
+</div>
+<p> The gamma normalization and scaling give \(H(0)=1\). Each parameter derivative is controlled by a polynomial times the Gaussian. For complex increments of size at most \(r\), the envelope gains at most \(E(2\pi r|x|)\). Once \(|x|\ge 4r\), this is still bounded together with the Gaussian by \(E(-\pi x^2/2)\). The remaining bounded interval is handled separately. This provides explicit integrable majorants for the parameter series. </p>
+<p>Differentiate under the integral by those bounds, and integrate the identity \(f'(x)=-2\pi xf(x)\) by parts on finite symmetric intervals. Its boundary terms tend to zero with their Gaussian bounds. The result is </p>
+<div class="displaymath" id="a0000000447">
+  \[  H'(\xi )=-2\pi \xi H(\xi ),\qquad H(0)=1.  \]
+</div>
+<p> The integral-equation uniqueness of the ODE chapter identifies its computation as </p>
+<div class="displaymath" id="a0000000448">
+  \[  \boxed {\int _{-\infty }^\infty E(-\pi x^2)E(-2\pi i\xi x)\, dx =E(-\pi \xi ^2).}  \]
+</div>
+<p> Multiplying the integrand by \(x^k\) gives \((-2\pi i)^{-k}\) times the \(k\)th derivative on the right. Thus each Gaussian times a specified polynomial has its transform computed by finite differentiation and polynomial algebra. This is a genuine Fourier result without constructing a space of arbitrary \(L^2\) functions. </p>
+<h2 id="a0000000090">16.4 Bernoulli polynomials are finite rational recurrences</h2>
+<p> To go beyond a series’ original convergence region we shall use finite summation by parts. Define polynomials \(B_n(x)\) by </p>
+<div class="displaymath" id="a0000000449">
+  \[  B_0=1,\qquad B_n'=nB_{n-1},\qquad \int _0^1 B_n(x)\, dx=0\quad (n\ge 1).  \]
+</div>
+<p> Polynomial integration fixes the constant term uniquely, so every coefficient is rational. The first polynomials are </p>
+<div class="displaymath" id="a0000000450">
+  \[  B_1=x-\tfrac 12,\quad B_2=x^2-x+\tfrac 16, \quad B_4=x^4-2x^3+x^2-\tfrac 1{30}.  \]
+</div>
+<p> Induction using the recurrence and the zero mean proves \(B_n(1-x)=(-1)^nB_n(x)\). Also \(B_n(1)=B_n(0)\) for \(n\ge 2\). Consequently the odd endpoint values vanish for odd \(n{\gt}1\). Put \(b_{2k}=B_{2k}(0)\) and \(\widetilde B_n(t)=B_n(t-\lfloor t\rfloor )\). For integration this is simply a separate polynomial on each unit cell; no discontinuous floor computation at a computed input is needed. </p>
+<h2 id="thm:finite-euler-maclaurin">16.5 Euler–Maclaurin as a finite identity</h2>
+<p>  For integers \(N{\lt}M\) and a specific function \(f\) with certified derivatives and integration-by-parts identities through order \(2p\), one has </p>
+<div class="displaymath" id="a0000000451">
+  \begin{align*}  \sum _{n=N}^{M-1} f(n) &amp; =\int _N^M f(t)\, dt+\frac{f(N)-f(M)}2\\ &amp; \quad +\sum _{k=1}^p\frac{b_{2k}}{(2k)!} \bigl(f^{(2k-1)}(M)-f^{(2k-1)}(N)\bigr)\\ &amp; \quad -\frac1{(2p)!}\int _N^M\widetilde B_{2p}(t)f^{(2p)}(t)\, dt. \end{align*}
+</div>
+<div class="proof_wrapper" id="a0000000452">
+<div class="proof_heading">
+<span class="proof_caption">
+    Proof
+    </span>
+<span class="expand-proof">▼</span>
+</div>
+<div class="proof_content">
+<p>On \([n,n+1]\), integration by parts gives </p>
+<div class="displaymath" id="a0000000453">
+  \[  \int _n^{n+1}B_1(t-n)f'(t)\, dt =\tfrac 12(f(n)+f(n+1))-\int _n^{n+1}f(t)\, dt.  \]
+</div>
+<p> Sum these identities. Repeatedly use \(\widetilde B_j=(\widetilde B_{j+1}/(j+1))'\) inside each cell to integrate the remaining term by parts. Matching endpoint values cancel the internal boundaries for \(j+1\ge 2\), and the odd endpoint values above eliminate the odd corrections. After \(2p\) derivatives the displayed remainder is what remains. Every step is a finite polynomial-weighted integral identity. </p>
+</div>
+</div>
+<p>This is the finite formula underlying the usual <a href="https://dlmf.nist.gov/2.10">Euler–Maclaurin expansion</a>. Its remainder is part of the computation, not an unspecified asymptotic error. </p>
+<h2 id="a0000000091">16.6 Zeta beyond the defining sum</h2>
+<p> On a certified half-plane \(\Re s\ge \sigma {\gt}1\), the series </p>
+<div class="displaymath" id="a0000000454">
+  \[  \zeta (s)=\sum _{n\ge 1}E(-sL(n))  \]
+</div>
+<p> has tail at most \(N^{1-\sigma }/(\sigma -1)\) after \(N\) terms, by finite comparison with the integral of \(t^{-\sigma }\). This first constructs zeta only where the series has that bound. </p>
+<p>Apply the finite Euler–Maclaurin identity to \(f(t)=t^{-s}\), whose uniform increment and derivative identities follow from the elementary exponential and logarithm computations. Here </p>
+<div class="displaymath" id="a0000000455">
+  \[  f^{(j)}(t)=(-1)^j s^{\overline j}t^{-s-j},\qquad s^{\overline j}=s(s+1)\cdots (s+j-1)  \]
+</div>
+<p> is a rising factorial, with \(s^{\overline0}=1\). Sending the upper endpoint to infinity first in \(\Re s{\gt}1\) gives </p>
+<div class="displaymath" id="a0000000456">
+  \begin{align*}  \zeta (s)&amp; =\sum _{n=1}^{N-1}n^{-s} +\frac{N^{1-s}}{s-1}+\frac12N^{-s}\\ &amp; \quad +\sum _{k=1}^p\frac{b_{2k}}{(2k)!} s^{\overline{2k-1}}N^{-s-2k+1} +R_{N,p}(s),\\ R_{N,p}(s)&amp; =-\frac{s^{\overline{2p}}}{(2p)!} \int _N^\infty \widetilde B_{2p}(t)t^{-s-2p}\, dt. \end{align*}
+</div>
+<p> Let \(C_{2p}\) be the sum of the absolute coefficients of \(B_{2p}\), a rational upper bound on its absolute value in \([0,1]\). For \(\Re s\ge \sigma {\gt}1-2p\), the remainder satisfies </p>
+<div class="displaymath" id="a0000000457">
+  \[  \boxed {|R_{N,p}(s)|\le \frac{|s^{\overline{2p}}|C_{2p}}{(2p)!(\sigma +2p-1)} N^{1-\sigma -2p}.}  \]
+</div>
+<p> A rational upper bound for the finite rising-factorial product is used for computed input boxes. The remainder can be omitted to this error, or computed more accurately by integrating finitely many unit cells and using the same bound at a larger cutoff. </p>
+<p>Thus for a particular \(s\ne 1\), choose \(p\) with \(\Re s{\gt}1-2p\) and a certified separation from \(s=1\), then increase \(N\) until the error is small. This computes a value even when the original series diverges. Independence of \(N\) follows from the finite summation identity. Independence of \(p\) follows by two further integrations by parts in the remainder: the extra correction is precisely the next displayed Bernoulli term, and the far boundary vanishes in the common half-plane. This proves agreement without assuming an analytic continuation theorem. </p>
+<p>These formulas are analytic there, with their only possible pole at \(1\). For the remainder, expand \(t^{-w}\) near any fixed parameter. The estimate \(|L(t)|^n/n!\le \rho ^{-n}t^\rho \) gives the parameter-majorant proof whenever \(\rho {\lt}\Re s+2p-1\). Hence the constructions also supply local charts and all requested parameter derivatives. The residue at \(1\) is \(1\), read directly from \(N^{1-s}/(s-1)\); its remaining part is computed by the removable series quotient. </p>
+<p>At \(s=0\) take \(p=1\); its rising factorials vanish and the formula gives \(\zeta (0)=-1/2\). At \(s=-1\) take \(p=2\), so the remainder vanishes and the finite terms give \(\zeta (-1)=-1/12\). This is a value of the proved continuation computation, not a claim that the divergent sum of positive integers converges to a negative number. Standard zeta notation and continuation formulas are recorded in <a href="https://dlmf.nist.gov/25.2">DLMF, Section 25.2</a>. </p>
+<h2 id="a0000000092">16.7 The common foundation is the finite comparison</h2>
+<p> The constructions in this chapter use different kinds of error: an exponential far tail, oscillatory integration by parts, Gaussian parameter majorants, and a periodic-polynomial summation remainder. None can be replaced by a bare claim that the function is familiar. Once its bound has been proved, however, the existing interval, integration, derivative, and equivalence constructions apply to it without rebuilding the theory.  </p>
+</div><!-- zeta-real --><section class="fm-reader-link"><h2>Zeta for real exponents</h2><p>A checked interval computation on the whole real half-line \(s&gt;1\): finite Dirichlet sums, uniform tail estimates, adaptive real inputs, and agreement with every earlier integer zeta value.</p><p><a href="zeta-real.html">Read the construction and checked boundary →</a></p></section><!-- zeta-real --></article><footer class="chapter-footer"><span>Mathematical manuscript · formal comparison status at each theorem</span><a href="https://github.com/liuyao12/computable-analysis/tree/f630241adeae35fc06a5fd4921a4df6396e291d0">Source f630241a ↗</a></footer></main><aside class="on-this-page"><span>On this page</span><a href="#a0000000087">16.1 Laplace transforms with an explicit half-plane</a><a href="#a0000000088">16.2 An oscillatory integral with no absolute-integral bound</a><a href="#a0000000089">16.3 A Fourier transform proved by an ODE</a><a href="#a0000000090">16.4 Bernoulli polynomials are finite rational recurrences</a><a href="#thm:finite-euler-maclaurin">16.5 Euler–Maclaurin as a finite identity</a><a href="#a0000000091">16.6 Zeta beyond the defining sum</a><a href="#a0000000092">16.7 The common foundation is the finite comparison</a></aside></div>
+<dialog id="proof-dialog"><div class="dialog-top"><span>Proof structure</span><button aria-label="Close proof map and return to the text" id="close-proof">Return to text ×</button></div><iframe id="proof-frame" title="Mathematical proof map"></iframe></dialog></body></html>

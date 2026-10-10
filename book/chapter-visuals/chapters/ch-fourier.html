@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="A mathematical foundation for calculus through certified rational computations." name="description"/><title>Fourier computations · Computable Analysis</title><link href="reading/book.css" rel="stylesheet"/><script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],processEscapes:true},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script><script defer="" src="reading/book.js"></script><link href="reading/analysis-edition.css" rel="stylesheet"/><meta content="7b4dddd81afefceb62d05fa8319b122bfa223dcc" name="documentation-revision"/><style id="pedagogy-style">.pedagogical-opening{margin:1em 0 1.6em}.pedagogical-context{font-size:.9em}.pedagogical-bridge{margin:.8em 0 1.2em}</style><link rel="stylesheet" href="reading/chapter-visuals/visuals.css"><script defer src="reading/chapter-visuals/visuals.js"></script></head>
+<body><a class="skip" href="#main">Skip to mathematics</a><header class="book-header"><button aria-controls="book-nav" aria-expanded="false" id="menu-button">Contents</button><a class="brand" href="index.html">Computable <em>Analysis</em></a><a class="header-about" href="programme.html">An alternative foundation to Calculus</a></header>
+<nav aria-label="Book chapters" id="book-nav"><span class="nav-label">The book</span><a class="" href="ch-foundations.html"><span>01</span>Numbers and functions</a><a class="pi-catalogue-navigation" href="ch-foundations.html#pi-computations">Other examples: π</a><a class="" href="ch-circle-sphere.html"><span>02</span>Circle, sphere and cylinder</a><a class="" href="ch-rational-circle-trigonometry.html"><span>03</span>Angles and trigonometry</a><a class="" href="ch-integrals.html"><span>04</span>Integral computations</a><a class="" href="ch-effective-calculus.html"><span>05</span>Derivatives and the FTC</a><a class="" href="ch-infinite-series.html"><span>06</span>Infinite series</a><a class="" href="ch-exponential-logarithm.html"><span>07</span>Exponential and logarithm</a><details class="later-chapters" open=""><summary>Further chapters</summary><a class="" href="ch-algebra-fta.html"><span>08</span>Algebraic computations</a><a class="" href="ch-local-models.html"><span>09</span>Local models</a><a class="" href="ch-complex-paths.html"><span>10</span>Complex paths</a><a class="" href="ch-improper-parameters.html"><span>11</span>Improper integrals</a><a class="current" href="ch-fourier.html"><span>12</span>Fourier computations</a><a class="" href="ch-impulses.html"><span>13</span>Impulses</a><a class="" href="ch-differential-equations.html"><span>14</span>Differential equations</a><!-- fundamental-matrix:start --><a data-reader-addition="fundamental-matrix" href="fundamental-matrix.html">Fundamental Matrix</a><!-- fundamental-matrix:end --><a class="" href="ch-special-equations.html"><span>15</span>Special-function equations</a><a class="" href="ch-transforms-zeta.html"><span>16</span>Transforms and zeta</a><a class="" href="ch-elliptic.html"><span>17</span>Elliptic integrals</a></details><a class="nav-label construction-skill-label" href="construction-skills.html">Skills</a><a class="construction-skill-navigation" href="skill-real-integrals.html">Real integrals</a><a class="construction-skill-navigation" href="skill-complex-integrals.html">Complex path integrals</a><a class="construction-skill-navigation" href="skill-series.html">Series</a><a class="construction-skill-navigation" href="skill-holomorphic-functions.html">Holomorphic functions</a><a class="construction-skill-navigation" href="skill-analytic-continuation.html">Analytic continuation</a><span class="nav-label">Worked examples</span><a class="" href="cosine.html">The cosine-square integral</a><a class="classic-navigation" href="cartwright.html">Irrationality of \(\pi^2\)</a><a class="classic-navigation" href="leibniz.html">The Leibniz series</a><a class="classic-navigation" href="basel.html">The Basel problem</a><a class="classic-navigation" href="euler.html">Euler’s sine product</a><span class="nav-label">Function theory</span><a class="classic-navigation" href="arctan-taylor.html">Arctangent and Taylor series</a><a class="classic-navigation" href="complex-analysis.html">Polygonal Cauchy theory</a><a class="classic-navigation" href="analytic-continuation.html">Analytic continuation</a><a class="classic-navigation" href="zeta-zeros.html">Riemann zeta zeros</a><span class="nav-label">Differential equations</span><a class="classic-navigation" href="fuchs.html">Fuchs’s theorem</a><a class="classic-navigation" href="painleve.html">Painlevé’s classification</a><span class="nav-label">The development</span><a class="classic-navigation" href="proof-bundles.html">Bundled proof comparisons</a><a href="programme.html">Purpose and boundary</a><a href="proof-bench/">Proof-size comparison</a><a href="reference/index.html">Technical reference ↗</a></nav>
+<div class="page"><main class="reader" id="main"><div class="chapter-kicker">CHAPTER 12</div><article><div class="main-text">
+<h1 id="ch:fourier">Fourier Computations and the Basel Sum</h1><section class="pedagogical-opening" data-pedagogy="opening" id="why-this-page"><p>Finite oscillations build a positive averaging kernel. Its near part uses continuity; a tail bound controls the distant part.</p><p class="pedagogical-context">Earlier context: <a href="ch-rational-circle-trigonometry.html">Angles and Trigonometric Functions</a>.</p></section><!-- chapter-visual:start -->
+<figure class="chapter-visual" data-visual="fourier" id="visual-construction">
+<h2>A positive kernel concentrates its weight</h2>
+<canvas role="img" aria-label="A positive kernel concentrates its weight. The period is . As  grows, the kernel narrows around zero while its normalized total stays . Dashed lines mark , separating the near and far estimates.">A positive kernel concentrates its weight</canvas>
+<div class="visual-legend">Green kernel · Dashed orange near-region boundary</div>
+<div class="visual-controls"><label>Kernel order: <span data-stage-value>8</span><input type="range" min="1" max="5" value="3" step="1" aria-label="Kernel order" data-values="[&quot;1&quot;, &quot;2&quot;, &quot;4&quot;, &quot;8&quot;, &quot;16&quot;, &quot;32&quot;]"></label><button type="button" data-visual-reset>Reset</button></div>
+<div class="visual-output" aria-live="polite"></div>
+<figcaption>The period is \(2\). As \(N\) grows, the kernel narrows around zero while its normalized total stays \(1\). Dashed lines mark \(|t|=1/4\), separating the near and far estimates. <a href="#a0000000063">Follow the construction.</a></figcaption>
+<noscript><p>The period is \(2\). As \(N\) grows, the kernel narrows around zero while its normalized total stays \(1\). Dashed lines mark \(|t|=1/4\), separating the near and far estimates.</p></noscript>
+</figure>
+<!-- chapter-visual:end -->
+
+<p>We need not begin with a space of arbitrary functions or a completeness statement about an orthogonal basis. A finite trigonometric sum is a computation, and a positive finite kernel gives an explicit approximation bound. One worked periodic function will then identify the reciprocal-square sum. </p>
+<h2 id="a0000000062">12.1 Finite orthogonality</h2>
+<p> Write \(e_k(x)=E(i\pi kx)=C(kx)+iS(kx)\) for integer \(k\). The trigonometric FTC gives </p>
+<div class="displaymath" id="a0000000362">
+  \[  \frac12\int _{-1}^1 e_k(x)\, dx =\begin{cases} 1,&amp; k=0,\\ 0,&amp; k\ne 0.\end{cases}  \]
+</div>
+<p> Products satisfy \(e_ke_l=e_{k+l}\). These identities determine integrals of every finite trigonometric polynomial by finite linear algebra. </p>
+<p>For a supplied period-\(2\) continuous computation \(f\), with a uniform continuity certificate on the periodic interval, define </p>
+<div class="displaymath" id="a0000000363">
+  \[  \widehat f(k)=\frac12\int _{-1}^1f(x)e_{-k}(x)\, dx.  \]
+</div>
+<p> Each coefficient is an ordinary integral computation. The word periodic includes matching endpoint values and the continuity bound across that join; this data is checked for the particular functions used here. </p>
+<h2 id="a0000000063">12.2 A positive kernel with an explicit tail</h2><div class="pedagogical-bridge" data-pedagogy="bridge"><p>Knowing the coefficients does not yet bound reconstruction error. A positive kernel lets us split the average into nearby inputs, controlled by continuity, and distant inputs, controlled by a tail estimate.</p></div>
+<p> For \(N\ge 1\), define </p>
+<div class="displaymath" id="a0000000364">
+  \[  K_N(t)=\frac1N\left|\sum _{j=0}^{N-1}e_j(t)\right|^2 =\sum _{|k|{\lt}N}\left(1-\frac{|k|}{N}\right)e_k(t).  \]
+</div>
+<p> The identity follows by counting pairs with a given difference. Thus \(K_N\ge 0\) and \(\frac12\int _{-1}^1K_N=1\). The finite geometric identity implies, for \(0{\lt}|t|\le 1\), </p>
+<div class="displaymath" id="a0000000365">
+  \[  K_N(t)\le \frac1{N S(t/2)^2}\le \frac1{Nt^2}.  \]
+</div>
+<p> For the last inequality, the midpoint identity makes \(S\) concave on \([0,1]\), where \(S\ge 0\): its centered second difference is \(2S(x)(C(h)-1)\le 0\). Rational Jensen inequalities on \([0,1/2]\) give \(S(t/2)\ge t\) for \(0\le t\le 1\). </p>
+<p>The kernel computation </p>
+<div class="displaymath" id="a0000000366">
+  \[  \sigma _N f(x)=\frac12\int _{-1}^1K_N(t)f(x-t)\, dt  \]
+</div>
+<p> is also the finite trigonometric sum </p>
+<div class="displaymath" id="a0000000367">
+  \[  \sum _{|k|{\lt}N}\left(1-\frac{|k|}{N}\right)\widehat f(k)e_k(x).  \]
+</div>
+<p> This follows by expanding the finite kernel and shifting the integral; periodicity makes any interval of length \(2\) equivalent to \([-1,1]\). The shift is justified by splitting at the finitely many period boundaries. </p>
+<p>Let \(|f|\le B\), and choose rational \(0{\lt}\delta \le 1\) so that periodic arguments within \(\delta \) have values within \(\varepsilon \). Split the kernel integral at \(|t|=\delta \). Positivity and normalization bound the near part by \(\varepsilon \); the far part is at most \(2B/(N\delta ^2)\). Hence </p>
+<div class="displaymath" id="a0000000368">
+  \[  \boxed {|\sigma _N f(x)-f(x)|\le \varepsilon +\frac{2B}{N\delta ^2}.}  \]
+</div>
+<p> This constructs a uniform trigonometric approximation with a terminating precision schedule. Computing the finitely many Fourier coefficients to additional error \(\eta /(2N)\) gives at most \(\eta \) further output error. </p>
+<h2 id="a0000000064">12.3 The periodic square</h2>
+<p> Let \(f(x)=x^2\) on \([-1,1]\), extended with period \(2\). Its endpoints match, and it has periodic Lipschitz bound \(2\), verified by splitting an increment at the join if necessary. Two integrations by parts give </p>
+<div class="displaymath" id="a0000000369">
+  \[  \widehat f(0)=\frac13,\qquad \widehat f(k)=\frac{2(-1)^k}{\pi ^2k^2}\quad (k\ne 0).  \]
+</div>
+<p> Here is the real calculation behind the coefficient: symmetry removes the sine term, and with \(a=\pi k\), </p>
+<div class="displaymath" id="a0000000370">
+  \[  \int _0^1x^2\cos (ax)\, dx =-\frac2a\int _0^1x\sin (ax)\, dx =\frac{2(-1)^k}{a^2}.  \]
+</div>
+<p> All boundary terms are explicit geometric sine and cosine values. </p>
+<p>The series </p>
+<div class="displaymath" id="a0000000371">
+  \[  F(x)=\frac13+\frac4{\pi ^2} \sum _{k=1}^{\infty }\frac{(-1)^kC(kx)}{k^2}  \]
+</div>
+<p> has a uniform tail at most \(4/(\pi ^2N)\) after term \(N\), by the earlier reciprocal-square tail. It is therefore an independent continuous function computation. Its Fejer sums are the same finite sums as those of \(f\): termwise integration follows from the uniform tail, and finite orthogonality gives the coefficients. The kernel estimate shows that these common sums converge to both \(F\) and \(f\). Thus \(F=f\). </p>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:basel-geometric-overlap">
+<div class="theorem_thmheading">
+<span class="theorem_thmcaption">
+    Theorem
+    </span>
+<span class="theorem_thmlabel">12.1</span>
+<span class="theorem_thmtitle">Basel identity</span>
+</div>
+<div class="theorem_thmcontent">
+<p> The reciprocal-square computation of Chapter <a href="ch-infinite-series.html">6</a> satisfies </p>
+<div class="displaymath" id="a0000000373">
+  \[  \boxed {\sum _{k=1}^{\infty }\frac1{k^2}=\frac{\pi ^2}{6}.}  \]
+</div>
+</div>
+<aside aria-label="Proof details" class="theorem-margin"><a data-proof-map="thm:basel-geometric-overlap" href="proof-map.html?theorem=thm:basel-geometric-overlap">Proof map ↗</a><small>Reading outline</small></aside></div><p class="bundled-proof-link" data-bundled-theorem="thm:basel-geometric-overlap"><a href="proof-bundles.html?theorem=thm:basel-geometric-overlap">Bundled proof routes and LOC →</a></p>
+<div class="proof_wrapper" id="a0000000372">
+<div class="proof_heading">
+<span class="proof_caption">
+    Proof
+    </span>
+<span class="expand-proof">▼</span>
+</div>
+<div class="proof_content">
+<p>At the rational endpoint \(x=1\), \(C(k)=(-1)^k\) and \(f(1)=1\). The proved series identity gives \(1=1/3+(4/\pi ^2)\sum _{k\ge 1}1/k^2\). </p>
+</div>
+</div>
+<p>The chain of comparisons is now complete: rational circle areas define \(\pi \); convex secants compute sine and cosine derivatives; the FTC computes Fourier coefficients; finite positive kernels identify a uniformly convergent series; evaluating it identifies an independently constructed number. No Hilbert-space completeness or unrestricted Fourier convergence theorem was needed.  </p>
+</div></article><footer class="chapter-footer"><span>Mathematical manuscript · formal comparison status at each theorem</span><a href="https://github.com/liuyao12/computable-analysis/tree/f630241adeae35fc06a5fd4921a4df6396e291d0">Source f630241a ↗</a></footer></main><aside class="on-this-page"><span>On this page</span><a href="#a0000000062">12.1 Finite orthogonality</a><a href="#a0000000063">12.2 A positive kernel with an explicit tail</a><a href="#a0000000064">12.3 The periodic square</a></aside></div>
+<dialog id="proof-dialog"><div class="dialog-top"><span>Proof structure</span><button aria-label="Close proof map and return to the text" id="close-proof">Return to text ×</button></div><iframe id="proof-frame" title="Mathematical proof map"></iframe></dialog></body></html>

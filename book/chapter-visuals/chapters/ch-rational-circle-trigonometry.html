@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="A mathematical foundation for calculus through certified rational computations." name="description"/><title>Angles and trigonometry · Computable Analysis</title><link href="reading/book.css" rel="stylesheet"/><script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],processEscapes:true},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script><script defer="" src="reading/book.js"></script><link href="reading/analysis-edition.css" rel="stylesheet"/><meta content="7b4dddd81afefceb62d05fa8319b122bfa223dcc" name="documentation-revision"/><style id="pedagogy-style">.pedagogical-opening{margin:1em 0 1.6em}.pedagogical-context{font-size:.9em}.pedagogical-bridge{margin:.8em 0 1.2em}</style><link rel="stylesheet" href="reading/chapter-visuals/visuals.css"><script defer src="reading/chapter-visuals/visuals.js"></script></head>
+<body><a class="skip" href="#main">Skip to mathematics</a><header class="book-header"><button aria-controls="book-nav" aria-expanded="false" id="menu-button">Contents</button><a class="brand" href="index.html">Computable <em>Analysis</em></a><a class="header-about" href="programme.html">An alternative foundation to Calculus</a></header>
+<nav aria-label="Book chapters" id="book-nav"><span class="nav-label">The book</span><a class="" href="ch-foundations.html"><span>01</span>Numbers and functions</a><a class="pi-catalogue-navigation" href="ch-foundations.html#pi-computations">Other examples: π</a><a class="" href="ch-circle-sphere.html"><span>02</span>Circle, sphere and cylinder</a><a class="current" href="ch-rational-circle-trigonometry.html"><span>03</span>Angles and trigonometry</a><a class="" href="ch-integrals.html"><span>04</span>Integral computations</a><a class="" href="ch-effective-calculus.html"><span>05</span>Derivatives and the FTC</a><a class="" href="ch-infinite-series.html"><span>06</span>Infinite series</a><a class="" href="ch-exponential-logarithm.html"><span>07</span>Exponential and logarithm</a><details class="later-chapters"><summary>Further chapters</summary><a class="" href="ch-algebra-fta.html"><span>08</span>Algebraic computations</a><a class="" href="ch-local-models.html"><span>09</span>Local models</a><a class="" href="ch-complex-paths.html"><span>10</span>Complex paths</a><a class="" href="ch-improper-parameters.html"><span>11</span>Improper integrals</a><a class="" href="ch-fourier.html"><span>12</span>Fourier computations</a><a class="" href="ch-impulses.html"><span>13</span>Impulses</a><a class="" href="ch-differential-equations.html"><span>14</span>Differential equations</a><!-- fundamental-matrix:start --><a data-reader-addition="fundamental-matrix" href="fundamental-matrix.html">Fundamental Matrix</a><!-- fundamental-matrix:end --><a class="" href="ch-special-equations.html"><span>15</span>Special-function equations</a><a class="" href="ch-transforms-zeta.html"><span>16</span>Transforms and zeta</a><a class="" href="ch-elliptic.html"><span>17</span>Elliptic integrals</a></details><a class="nav-label construction-skill-label" href="construction-skills.html">Skills</a><a class="construction-skill-navigation" href="skill-real-integrals.html">Real integrals</a><a class="construction-skill-navigation" href="skill-complex-integrals.html">Complex path integrals</a><a class="construction-skill-navigation" href="skill-series.html">Series</a><a class="construction-skill-navigation" href="skill-holomorphic-functions.html">Holomorphic functions</a><a class="construction-skill-navigation" href="skill-analytic-continuation.html">Analytic continuation</a><span class="nav-label">Worked examples</span><a class="" href="cosine.html">The cosine-square integral</a><a class="classic-navigation" href="cartwright.html">Irrationality of \(\pi^2\)</a><a class="classic-navigation" href="leibniz.html">The Leibniz series</a><a class="classic-navigation" href="basel.html">The Basel problem</a><a class="classic-navigation" href="euler.html">Euler’s sine product</a><span class="nav-label">Function theory</span><a class="classic-navigation" href="arctan-taylor.html">Arctangent and Taylor series</a><a class="classic-navigation" href="complex-analysis.html">Polygonal Cauchy theory</a><a class="classic-navigation" href="analytic-continuation.html">Analytic continuation</a><a class="classic-navigation" href="zeta-zeros.html">Riemann zeta zeros</a><span class="nav-label">Differential equations</span><a class="classic-navigation" href="fuchs.html">Fuchs’s theorem</a><a class="classic-navigation" href="painleve.html">Painlevé’s classification</a><span class="nav-label">The development</span><a class="classic-navigation" href="proof-bundles.html">Bundled proof comparisons</a><a href="programme.html">Purpose and boundary</a><a href="proof-bench/">Proof-size comparison</a><a href="reference/index.html">Technical reference ↗</a></nav>
+<div class="page"><main class="reader" id="main"><div class="chapter-kicker">CHAPTER 03</div><article><div class="main-text">
+<h1 id="ch:rational-circle-trigonometry">Angles and Trigonometric Functions</h1><section class="pedagogical-opening" data-pedagogy="opening" id="why-this-page"><p>A point on the circle has two coordinates. Sector area tells us how far it has turned, even when its slope becomes vertical.</p><p class="pedagogical-context">Earlier context: <a href="ch-circle-sphere.html">The Circle, the Sphere, and the Cylinder</a>.</p></section><!-- chapter-visual:start -->
+<figure class="chapter-visual" data-visual="angles" id="visual-construction">
+<h2>Sector area becomes an angle coordinate</h2>
+<canvas role="img" aria-label="Sector area becomes an angle coordinate. The sector grows through a quarter-turn. Its area supplies the input; the horizontal and vertical projections supply  and . A full turn has input length .">Sector area becomes an angle coordinate</canvas>
+<div class="visual-legend">Orange horizontal projection · Blue vertical projection</div>
+<div class="visual-controls"><label>Quarter-turn stage: <span data-stage-value>8</span><input type="range" min="0" max="16" value="8" step="1" aria-label="Quarter-turn stage"></label><button type="button" data-visual-reset>Reset</button></div>
+<div class="visual-output" aria-live="polite"></div>
+<figcaption>The sector grows through a quarter-turn. Its area supplies the input; the horizontal and vertical projections supply \(C\) and \(S\). A full turn has input length \(2\). <a href="#a0000000011">Follow the construction.</a></figcaption>
+<noscript><p>The sector grows through a quarter-turn. Its area supplies the input; the horizontal and vertical projections supply \(C\) and \(S\). A full turn has input length \(2\).</p></noscript>
+</figure>
+<!-- chapter-visual:end -->
+
+<p>The preceding chapter constructed circles, arc lengths, sector areas, and the sphere–cylinder comparisons without trigonometric functions. We now use sector area to assign an angle coordinate to a point of the circle. The new objects are functions of that coordinate: </p>
+<div class="displaymath" id="a0000000171">
+  \[  S(x)=\sin (\pi x),\qquad C(x)=\cos (\pi x).  \]
+</div>
+<p> These names refer to the computations below, not to functions imported with an existing theory of differentiation. </p>
+<h2 id="sec:sector-angle-coordinate">3.1 The sector-area coordinate</h2>
+<p>  Recall the rational circle chart and its sector-area computation from Chapter <a href="ch-circle-sphere.html">2</a>: </p>
+<div class="displaymath" id="a0000000172">
+  \[  P(t)=\left(\frac{1-t^2}{1+t^2},\frac{2t}{1+t^2}\right), \qquad A(1)=\pi /4.  \]
+</div>
+<p> A full turn has normalized parameter length \(2\) and a quarter turn has length \(1/2\). For rational \(0\le x\le 1/2\), the point with sector area \(\pi x/2\) is to have coordinates \((C(x),S(x))\). </p>
+<p>The geometric estimates already proved are </p>
+<div class="displaymath" id="a0000000173">
+  \[  \frac{v-u}{1+v^2}\le A(v)-A(u)\le \frac{v-u}{1+u^2}, \qquad \frac{v-u}{2}\le A(v)-A(u)\le v-u  \]
+</div>
+<p> for rational \(0\le u{\lt}v\le 1\). The chart therefore has interval continuity and a linear inverse-separation bound. The target \(\pi x/2=2xA(1)\) is enclosed by its endpoint values. The trisection construction of Chapter <a href="ch-foundations.html">1</a> computes a unique parameter \(t\) such that </p>
+<div class="displaymath" id="a0000000174">
+  \[  A(t)=\pi x/2.  \]
+</div>
+<p> Evaluation of \(P\) at this computed input gives \(C(x),S(x)\). At \(x=0\) and \(x=1/2\) use \(t=0,1\) directly. Reflections in the coordinate axes and whole turns give the computation at every rational input. </p>
+<p>The conventional name \(A(t)=\arctan t\) records the half-angle nature of this rational chart: the arc length from \((1,0)\) to \(P(t)\) is \(2A(t)\). No integral definition of arctangent is needed. The rational rectangle bounds for \(1/(1+t^2)\) that occur in the sector-area construction will later give an equivalent integral computation. </p>
+<h2 id="thm:finite-quarter-turn">3.2 Dyadic rotations as another computation</h2>
+<p>  If \((c,s)\) is a unit-circle point in the first quadrant, its half-angle point is </p>
+<div class="displaymath" id="a0000000175">
+  \[  (a,b)=\left(\sqrt{(1+c)/2},\sqrt{(1-c)/2}\right).  \]
+</div>
+<p> Finite algebra gives \(a^2+b^2=1\), \(a^2-b^2=c\), and \(2ab=s\); the nonnegative sign in the last identity follows from \(s\ge 0\). Thus the coordinate rotation matrix of \((a,b)\) squares to that of \((c,s)\). Additivity and invariance of sector area show that its angle coordinate is half that of the parent point. </p>
+<p>Repeated halving of the quarter turn, followed by finite rotation products, therefore constructs all dyadic angle samples by nested square roots. They agree with the inverse-sector construction by its separation and uniqueness. This agreement is a geometric theorem between two computations, not an appeal to an already completed trigonometric function. </p>
+<h2 id="a0000000010">3.3 Addition laws and continuity</h2>
+<p> Multiplying the coordinate rotation matrices and using the additivity of sector area gives </p>
+<div class="displaymath" id="a0000000176">
+  \begin{align*}  S(x+y)&amp; =S(x)C(y)+C(x)S(y),\\ C(x+y)&amp; =C(x)C(y)-S(x)S(y),\\ C(x)^2+S(x)^2&amp; =1. \end{align*}
+</div>
+<p> The endpoint values are \(S(0)=0\), \(C(0)=1\), \(S(1/2)=1\), and \(C(1/2)=0\). Reflections give \(S(-x)=-S(x)\) and \(C(-x)=C(x)\); both have period \(2\). </p>
+<p>A coordinate difference is bounded by chord length, and chord length by arc length. The arc-length computation from Chapter <a href="ch-circle-sphere.html">2</a> and the bound \(\pi {\lt}4\) yield </p>
+<div class="displaymath" id="a0000000177">
+  \[  |S(x)-S(y)|\le 4|x-y|,\qquad |C(x)-C(y)|\le 4|x-y|.  \]
+</div>
+<p> These hold for every rational pair, splitting across quadrant boundaries when necessary. Thus dyadic approximation is another terminating way to evaluate any rational angle. They also give evaluation at computed inputs on specified bounded intervals. </p>
+<h2 id="sec:geometric-small-angle">3.4 Small angles before differentiation</h2>
+<p>  For \(0{\lt}h\le 1/4\), chord, sector, and tangent comparisons give </p>
+<div class="displaymath" id="a0000000178">
+  \[  S(h)\le \pi h\le S(h)/C(h).  \]
+</div>
+<p> For the left inequality, the vertical displacement is at most the chord, which is at most the arc length. For the right inequality, twice the sector area is at most twice the area of the enclosing tangent triangle. The geometric point lies between the positive horizontal axis and its bisector, so \(C(h){\gt}0\) with a positive computable lower bound. </p>
+<p>The half-angle identity and chord bound give </p>
+<div class="displaymath" id="a0000000179">
+  \[  0\le 1-C(h)=2S(h/2)^2\le 8h^2.  \]
+</div>
+<p> Multiplying the upper tangent comparison by \(C(h)\) and using \(\pi {\lt}4\) yields </p>
+<div class="displaymath" id="a0000000180">
+  \[  0\le \pi h-S(h)\le \pi h(1-C(h))\le 32h^3.  \]
+</div>
+<p> Odd and even symmetry therefore give, for \(|h|\le 1/4\), </p>
+<div class="displaymath" id="a0000000181">
+  \[  |S(h)-\pi h|\le 32|h|^3,\qquad |1-C(h)|\le 8h^2.  \]
+</div>
+<p> The second estimate also holds for all rational \(h\), by the global chord bound and half-angle identity. These finite geometric errors will prove both that the convex derivative computations terminate and that their values are \(\pi C\) and \(-\pi S\). </p>
+<h2 id="a0000000011">3.5 Input to integration</h2>
+<p> One of the first areas computed in two ways will be </p>
+<div class="displaymath" id="a0000000182">
+  \[  \int _0^{1/2}S(x)\, dx.  \]
+</div>
+<p> Equal-angle samples use the nested-radical dyadic construction. Unequal samples use the rational circle parameter \(t\) and the sector coordinate \(2A(t)/\pi \). Their comparison uses the explicit continuity bounds and finite refinements. The later derivative computation and FTC identify the answer as \(1/\pi \). </p>
+<p>The distinction between the chapters is now explicit: the preceding one computes particular geometric magnitudes, while this one constructs angle functions and compares their descriptions. General integration organizes both sorts of computations only after they have been established.  </p>
+</div></article><footer class="chapter-footer"><span>Mathematical manuscript · formal comparison status at each theorem</span><a href="https://github.com/liuyao12/computable-analysis/tree/f630241adeae35fc06a5fd4921a4df6396e291d0">Source f630241a ↗</a></footer></main><aside class="on-this-page"><span>On this page</span><a href="#sec:sector-angle-coordinate">3.1 The sector-area coordinate</a><a href="#thm:finite-quarter-turn">3.2 Dyadic rotations as another computation</a><a href="#a0000000010">3.3 Addition laws and continuity</a><a href="#sec:geometric-small-angle">3.4 Small angles before differentiation</a><a href="#a0000000011">3.5 Input to integration</a></aside></div>
+<dialog id="proof-dialog"><div class="dialog-top"><span>Proof structure</span><button aria-label="Close proof map and return to the text" id="close-proof">Return to text ×</button></div><iframe id="proof-frame" title="Mathematical proof map"></iframe></dialog></body></html>

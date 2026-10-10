@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="A mathematical foundation for calculus through certified rational computations." name="description"/><title>Integral computations · Computable Analysis</title><link href="reading/book.css" rel="stylesheet"/><script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],processEscapes:true},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script><script defer="" src="reading/book.js"></script><link href="reading/analysis-edition.css" rel="stylesheet"/><meta content="7b4dddd81afefceb62d05fa8319b122bfa223dcc" name="documentation-revision"/><style id="pedagogy-style">.pedagogical-opening{margin:1em 0 1.6em}.pedagogical-context{font-size:.9em}.pedagogical-bridge{margin:.8em 0 1.2em}</style><link rel="stylesheet" href="reading/chapter-visuals/visuals.css"><script defer src="reading/chapter-visuals/visuals.js"></script></head>
+<body><a class="skip" href="#main">Skip to mathematics</a><header class="book-header"><button aria-controls="book-nav" aria-expanded="false" id="menu-button">Contents</button><a class="brand" href="index.html">Computable <em>Analysis</em></a><a class="header-about" href="programme.html">An alternative foundation to Calculus</a></header>
+<nav aria-label="Book chapters" id="book-nav"><span class="nav-label">The book</span><a class="" href="ch-foundations.html"><span>01</span>Numbers and functions</a><a class="pi-catalogue-navigation" href="ch-foundations.html#pi-computations">Other examples: π</a><a class="" href="ch-circle-sphere.html"><span>02</span>Circle, sphere and cylinder</a><a class="" href="ch-rational-circle-trigonometry.html"><span>03</span>Angles and trigonometry</a><a class="current" href="ch-integrals.html"><span>04</span>Integral computations</a><a class="" href="ch-effective-calculus.html"><span>05</span>Derivatives and the FTC</a><a class="" href="ch-infinite-series.html"><span>06</span>Infinite series</a><a class="" href="ch-exponential-logarithm.html"><span>07</span>Exponential and logarithm</a><details class="later-chapters"><summary>Further chapters</summary><a class="" href="ch-algebra-fta.html"><span>08</span>Algebraic computations</a><a class="" href="ch-local-models.html"><span>09</span>Local models</a><a class="" href="ch-complex-paths.html"><span>10</span>Complex paths</a><a class="" href="ch-improper-parameters.html"><span>11</span>Improper integrals</a><a class="" href="ch-fourier.html"><span>12</span>Fourier computations</a><a class="" href="ch-impulses.html"><span>13</span>Impulses</a><a class="" href="ch-differential-equations.html"><span>14</span>Differential equations</a><!-- fundamental-matrix:start --><a data-reader-addition="fundamental-matrix" href="fundamental-matrix.html">Fundamental Matrix</a><!-- fundamental-matrix:end --><a class="" href="ch-special-equations.html"><span>15</span>Special-function equations</a><a class="" href="ch-transforms-zeta.html"><span>16</span>Transforms and zeta</a><a class="" href="ch-elliptic.html"><span>17</span>Elliptic integrals</a></details><a class="nav-label construction-skill-label" href="construction-skills.html">Skills</a><a class="construction-skill-navigation" href="skill-real-integrals.html">Real integrals</a><a class="construction-skill-navigation" href="skill-complex-integrals.html">Complex path integrals</a><a class="construction-skill-navigation" href="skill-series.html">Series</a><a class="construction-skill-navigation" href="skill-holomorphic-functions.html">Holomorphic functions</a><a class="construction-skill-navigation" href="skill-analytic-continuation.html">Analytic continuation</a><span class="nav-label">Worked examples</span><a class="" href="cosine.html">The cosine-square integral</a><a class="classic-navigation" href="cartwright.html">Irrationality of \(\pi^2\)</a><a class="classic-navigation" href="leibniz.html">The Leibniz series</a><a class="classic-navigation" href="basel.html">The Basel problem</a><a class="classic-navigation" href="euler.html">Euler’s sine product</a><span class="nav-label">Function theory</span><a class="classic-navigation" href="arctan-taylor.html">Arctangent and Taylor series</a><a class="classic-navigation" href="complex-analysis.html">Polygonal Cauchy theory</a><a class="classic-navigation" href="analytic-continuation.html">Analytic continuation</a><a class="classic-navigation" href="zeta-zeros.html">Riemann zeta zeros</a><span class="nav-label">Differential equations</span><a class="classic-navigation" href="fuchs.html">Fuchs’s theorem</a><a class="classic-navigation" href="painleve.html">Painlevé’s classification</a><span class="nav-label">The development</span><a class="classic-navigation" href="proof-bundles.html">Bundled proof comparisons</a><a href="programme.html">Purpose and boundary</a><a href="proof-bench/">Proof-size comparison</a><a href="reference/index.html">Technical reference ↗</a></nav>
+<div class="page"><main class="reader" id="main"><div class="chapter-kicker">CHAPTER 04</div><article><div class="main-text">
+<h1 id="ch:integrals">Integral Computations</h1><section class="pedagogical-opening" data-pedagogy="opening" id="why-this-page"><p>Bound the rate throughout each small interval. Multiplying those bounds by its length gives lower and upper contributions to the total.</p><p class="pedagogical-context">Earlier context: <a href="ch-circle-sphere.html">The Circle, the Sphere, and the Cylinder</a>.</p></section><!-- chapter-visual:start -->
+<figure class="chapter-visual" data-visual="rectangles" id="visual-construction">
+<h2>Enclose every cell, then refine</h2>
+<canvas role="img" aria-label="Enclose every cell, then refine. For  on , green rectangles lie below the curve and orange rectangles lie above it. Their exact rational totals approach one another.">Enclose every cell, then refine</canvas>
+<div class="visual-legend">Green lower rectangles · Orange upper rectangles</div>
+<div class="visual-controls"><label>Number of cells: <span data-stage-value>4</span><input type="range" min="0" max="6" value="2" step="1" aria-label="Number of cells" data-values="[&quot;1&quot;, &quot;2&quot;, &quot;4&quot;, &quot;8&quot;, &quot;16&quot;, &quot;32&quot;, &quot;64&quot;]"></label><button type="button" data-visual-reset>Reset</button></div>
+<div class="visual-output" aria-live="polite"></div>
+<figcaption>For \(f(t)=t^2\) on \([0,1]\), green rectangles lie below the curve and orange rectangles lie above it. Their exact rational totals approach one another. <a href="#a0000000016">Follow the construction.</a></figcaption>
+<noscript><p>For \(f(t)=t^2\) on \([0,1]\), green rectangles lie below the curve and orange rectangles lie above it. Their exact rational totals approach one another.</p></noscript>
+</figure>
+<!-- chapter-visual:end -->
+<section id="integral-enclosure-convention"><h2>Whole-chunk enclosures come first</h2><p>For each particular function, certify an outer range on every chunk, multiply by its length or oriented complex displacement, and add. Prove nesting or justified intersection and shrinking widths. Monotonicity supplies endpoint bounds when available. An endpoint formula or point-sampled computation requires a comparison with these enclosing sums.</p><p><a href="integral-enclosures.html">Read the construction and native-source audit</a>. The narrative below develops the mathematical route; a displayed general identity is not itself a claim of a completed native Lean bridge.</p></section>
+<p>An integral is a new interval computation obtained by adding finite rectangles and controlling the error. It is not defined through an antiderivative. This independence is what will make the fundamental theorem an equivalence theorem rather than a convention. </p>
+<h2 id="a0000000012">4.1 Partitions and cell enclosures</h2><div class="pedagogical-bridge" data-pedagogy="bridge"><p>A sample tells us the value at one point; it can miss a narrow peak elsewhere in the cell. For this rectangle construction, the first task is therefore to bound the whole cell, so multiplying by its length gives a justified contribution.</p></div>
+<p> A rational tagged partition is </p>
+<div class="displaymath" id="a0000000183">
+  \[  a=x_0{\lt}x_1{\lt}\cdots {\lt}x_N=b,\qquad \xi _i\in [x_i,x_{i+1}]\cap \mathbb {Q}.  \]
+</div>
+<p> Its mesh is \(\max _i(x_{i+1}-x_i)\). If rational numbers \(L_i,U_i\) bound all values of \(g\) in the \(i\)th cell, form </p>
+<div class="displaymath" id="a0000000184">
+  \[  B_P(g)=\left[\sum _i L_i\Delta x_i,\  \sum _i U_i\Delta x_i\right].  \]
+</div>
+<p> The width is \(\sum _i(U_i-L_i)\Delta x_i\). A common refinement shows that any two sound cell-enclosure computations overlap: on each refined cell, a value at a rational sample is bounded by both corresponding parent ranges. This argument uses only finitely many computed values and their order comparisons. </p>
+<div class="definition_thmwrapper theorem-style-definition" id="def:integral-computation">
+<div class="definition_thmheading">
+<span class="definition_thmcaption">
+    Definition
+    </span>
+<span class="definition_thmlabel">4.1</span>
+<span class="definition_thmtitle">An integral computation</span>
+</div>
+<div class="definition_thmcontent">
+<p> A supplied sequence of partitions and sound cell enclosures is an integral construction if its rectangle widths shrink to every positive rational tolerance. Finite-prefix intersections of the \(B_P(g)\) make a valid number computation, denoted \(\int _a^b g\). </p>
+</div>
+</div>
+<p>Any two such constructions are equivalent, by their cross-overlap and shrinking widths. Changing tags, using unequal subdivisions, or refining values faster than the mesh therefore does not change the integral. </p>
+<h2 id="a0000000013">4.2 Continuous functions: rectangles with a modulus</h2>
+<p> Suppose \(g\) has the interval continuity certificate of Chapter <a href="ch-foundations.html">1</a>. For a desired tolerance \(\eta \), choose mesh at most \(\mu _g(\eta )\) and evaluate \(g(\xi _i)\) in a box of width at most \(\eta \). Enlarge each sample box by \(\eta \) on both sides. These are sound cell ranges, and their integral width is at most </p>
+<div class="displaymath" id="a0000000185">
+  \[  3\eta (b-a).  \]
+</div>
+<p> This constructs the integral of every function for which that finite data has been provided. It does not derive the data from pointwise rational continuity or from an abstract compactness theorem. </p>
+<figure id="a0000000186">
+<div class="centered"><img alt="\includegraphics[width=360pt]{assets/arctan-rectangle-enclosure.gif}" src="images/img-0003.gif" style="width:360pt"/>
+<figcaption>
+<span class="caption_title">Figure</span>
+<span class="caption_ref">4.1</span>
+<span class="caption_text">Cell ranges make finite rectangles into an integral computation.</span>
+</figcaption> </div>
+</figure>
+<p>For the geometric angle chart, the earlier area bounds give </p>
+<div class="displaymath" id="a0000000187">
+  \[  A(t)=\int _0^t\frac{du}{1+u^2}\qquad (0\le t\le 1).  \]
+</div>
+<p> This is a comparison with an already constructed number, not its definition. </p>
+<h2 id="a0000000014">4.3 Monotone functions: the total variation controls the error</h2>
+<p> Let \(g\) be a nondecreasing rational-input computation on \([a,b]\). Neither continuity nor a continuity modulus is assumed. Its endpoint sums satisfy </p>
+<div class="displaymath" id="a0000000188">
+  \begin{align*}  L_P&amp; =\sum _i g(x_i)\Delta x_i,\\ U_P&amp; =\sum _i g(x_{i+1})\Delta x_i,\\ U_P-L_P&amp; \le \operatorname {mesh}(P)\bigl(g(b)-g(a)\bigr). \end{align*}
+</div>
+<p> The last inequality is finite telescoping. Coarse endpoint computations give a rational upper bound \(V\) for \(g(b)-g(a)\). If every endpoint value is evaluated to box width at most \(\eta \), the rational upper–lower gap is at most </p>
+<div class="displaymath" id="a0000000189">
+  \[  \operatorname {mesh}(P)V+2\eta (b-a).  \]
+</div>
+<p> Thus monotonicity gives an integral algorithm even for a derivative with an undetected corner in its primitive. Negation handles decreasing functions; finite sums and differences of these constructions are also integrable. A finite partition into monotone pieces gives the same result. </p>
+<h2 id="a0000000015">4.4 Finite rules for integrals</h2><div class="pedagogical-bridge" data-pedagogy="bridge"><p>Adding two accumulated quantities, splitting an interval and reversing orientation should agree with the same operations on finite contributions. A common refinement lets us compare the computations on matching cells and identify the evidence each law needs.</p></div>
+<p> The rules below follow from rectangles and common refinements, before any FTC is used: </p>
+<div class="displaymath" id="a0000000190">
+  \[  \int _a^c g=\int _a^b g+\int _b^c g,\qquad \int _a^b(\alpha g+\beta h)=\alpha \int _a^b g+\beta \int _a^b h.  \]
+</div>
+<p> For reversed endpoints define \(\int _b^a g=-\int _a^b g\). If \(|g|\le B\), then </p>
+<div class="displaymath" id="a0000000191">
+  \[  \left|\int _u^v g\right|\le B|v-u|.  \]
+</div>
+<p> If two integrands have a uniform difference bound \(\varepsilon \), their integrals differ by at most \((b-a)\varepsilon \). These estimates are proved first for every finite sum and then for the resulting boxes. </p>
+<p>Products are admitted when their supplied cell ranges shrink in total width. For bounded factors with cell widths \(w_i,z_i\) and absolute bounds \(B,C\), the product cell width is at most \(Bw_i+Cz_i\). This proves closure under products for the integral constructions used here. </p>
+<p>An endpoint given by a number computation is handled by rational bracketing. Moving either endpoint by at most \(h\) changes the integral by at most \(Bh\). This is the required evaluation rule for variable endpoints; the bound and a domain enclosure are part of its data. </p>
+<h2 id="sec:geometry-as-integrals">4.5 Recognizing the earlier geometric computations</h2>
+<p>  The cone and sphere volumes of Chapter <a href="ch-circle-sphere.html">2</a> were constructed before any of the definitions in this chapter. Their finite cylinder stacks now give, by comparison with the corresponding rectangle sums, </p>
+<div class="displaymath" id="a0000000192">
+  \[  V_{\mathrm{cone}}=\pi \left(\frac rH\right)^2\int _0^H z^2\, dz, \qquad V_R=\pi \int _{-R}^{R}(R^2-z^2)\, dz.  \]
+</div>
+<p> These are equivalences between existing constructions. In particular the cone calculation already proves \(\int _0^H z^2\, dz=H^3/3\), without invoking an antiderivative. The cap stacks likewise give </p>
+<div class="displaymath" id="a0000000193">
+  \[  V_{\mathrm{cap}}=\pi \int _0^h(2Rt-t^2)\, dt.  \]
+</div>
+<p> Later the FTC supplies different proofs and faster endpoint computations of these same quantities. The sphere’s surface area remains the independent facet-and-frustum computation: no volume slicing identity is silently used as a definition of curved surface area. </p>
+<h2 id="sec:accumulation-derivative">4.6 Accumulation computes a derivative locally</h2>
+<p>  Given an integral construction for \(g\) on every subinterval, put \(F(x)=\int _a^x g\). If a neighborhood of a rational \(x\) has \(|g(t)-g(x)|\le \varepsilon \), finite sums give </p>
+<div class="displaymath" id="a0000000194">
+  \[  |F(x+h)-F(x)-h g(x)|\le \varepsilon |h|  \]
+</div>
+<p> whenever the segment from \(x\) to \(x+h\) stays in that neighborhood. Thus at a rational continuity point of \(g\), the difference quotients of \(F\) approximate \(g(x)\) with the indicated error. </p>
+<p>For a nondecreasing \(g\), adjacent integral averages are ordered, so \(F\) is convex. Moreover </p>
+<div class="displaymath" id="a0000000195">
+  \[  g(x-h)\le \frac{F(x)-F(x-h)}h\le g(x) \le \frac{F(x+h)-F(x)}h\le g(x+h).  \]
+</div>
+<p> The next chapter will turn precisely this sort of enclosure into a <em>derivative computation</em>. No unknown derivative value has to be postulated. </p>
+<h2 id="a0000000016">4.7 Changing the sampling coordinate</h2><div class="pedagogical-bridge" data-pedagogy="bridge"><p>A new coordinate can make a difficult integrand simple. To justify the change, follow how the original small intervals and their contributions are transported; the formula should emerge from that comparison.</p></div>
+<p> For increasing, interval-continuous \(\alpha \) on a rational parameter interval, and interval-continuous \(g\) on its image, form Stieltjes sums </p>
+<div class="displaymath" id="a0000000196">
+  \[  \sum _i g(\alpha (\xi _i)) \bigl(\alpha (t_{i+1})-\alpha (t_i)\bigr).  \]
+</div>
+<p> A modulus for \(g\circ \alpha \) makes upper–lower errors at most its cell oscillation times the total increment \(\alpha (v)-\alpha (u)\). This is another explicit integral construction. Image endpoints can be computed rather than rational: approximate the finitely many endpoints, using the bounded-integrand endpoint estimate above. Common refinements then show that it computes \(\int _{\alpha (u)}^{\alpha (v)}g\). </p>
+<p>For sine, take \(\alpha (t)=2A(t)/\pi \) on \([0,1]\) and \(g(\alpha (t))=2t/(1+t^2)\). This compares the tangent-chart samples with the equal-angle samples without first differentiating the chart. </p>
+<figure id="a0000000197">
+<div class="centered"><img alt="\includegraphics[width=360pt]{assets/interval-sine-integral-stage.gif}" src="images/img-0004.gif" style="width:360pt"/>
+<figcaption>
+<span class="caption_title">Figure</span>
+<span class="caption_ref">4.2</span>
+<span class="caption_text">Equal-angle sine samples and their rational value enclosures.</span>
+</figcaption> </div>
+</figure>
+<p>Ordinary substitution formulas containing \(\alpha '\) will follow after we have constructed that derivative and proved the appropriate finite increment identity. Sampling equivalence itself does not require them.  </p>
+</div><!-- rational-primitives --><section class="fm-reader-link"><h2>Elementary primitives</h2><p>Checked elementary primitives for rationally split denominators and circle substitution; the full rational-function primitive theorem remains open.</p><p><a href="rational-primitives.html">Read the proofs and remaining obligations</a></p></section><!-- rational-primitives --></article><footer class="chapter-footer"><span>Mathematical manuscript · formal comparison status at each theorem</span><a href="https://github.com/liuyao12/computable-analysis/tree/f630241adeae35fc06a5fd4921a4df6396e291d0">Source f630241a ↗</a></footer></main><aside class="on-this-page"><span>On this page</span><a href="#a0000000012">4.1 Partitions and cell enclosures</a><a href="#a0000000013">4.2 Continuous functions: rectangles with a modulus</a><a href="#a0000000014">4.3 Monotone functions: the total variation controls the error</a><a href="#a0000000015">4.4 Finite rules for integrals</a><a href="#sec:geometry-as-integrals">4.5 Recognizing the earlier geometric computations</a><a href="#sec:accumulation-derivative">4.6 Accumulation computes a derivative locally</a><a href="#a0000000016">4.7 Changing the sampling coordinate</a></aside></div>
+<dialog id="proof-dialog"><div class="dialog-top"><span>Proof structure</span><button aria-label="Close proof map and return to the text" id="close-proof">Return to text ×</button></div><iframe id="proof-frame" title="Mathematical proof map"></iframe></dialog></body></html>

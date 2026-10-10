@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="A mathematical foundation for calculus through certified rational computations." name="description"/><title>Derivatives and the FTC · Computable Analysis</title><link href="reading/book.css" rel="stylesheet"/><script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],processEscapes:true},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script><script defer="" src="reading/book.js"></script><link href="reading/analysis-edition.css" rel="stylesheet"/><meta content="7b4dddd81afefceb62d05fa8319b122bfa223dcc" name="documentation-revision"/><style id="pedagogy-style">.pedagogical-opening{margin:1em 0 1.6em}.pedagogical-context{font-size:.9em}.pedagogical-bridge{margin:.8em 0 1.2em}</style><link rel="stylesheet" href="reading/chapter-visuals/visuals.css"><script defer src="reading/chapter-visuals/visuals.js"></script></head>
+<body><a class="skip" href="#main">Skip to mathematics</a><header class="book-header"><button aria-controls="book-nav" aria-expanded="false" id="menu-button">Contents</button><a class="brand" href="index.html">Computable <em>Analysis</em></a><a class="header-about" href="programme.html">An alternative foundation to Calculus</a></header>
+<nav aria-label="Book chapters" id="book-nav"><span class="nav-label">The book</span><a class="" href="ch-foundations.html"><span>01</span>Numbers and functions</a><a class="pi-catalogue-navigation" href="ch-foundations.html#pi-computations">Other examples: π</a><a class="" href="ch-circle-sphere.html"><span>02</span>Circle, sphere and cylinder</a><a class="" href="ch-rational-circle-trigonometry.html"><span>03</span>Angles and trigonometry</a><a class="" href="ch-integrals.html"><span>04</span>Integral computations</a><a class="current" href="ch-effective-calculus.html"><span>05</span>Derivatives and the FTC</a><a class="" href="ch-infinite-series.html"><span>06</span>Infinite series</a><a class="" href="ch-exponential-logarithm.html"><span>07</span>Exponential and logarithm</a><details class="later-chapters"><summary>Further chapters</summary><a class="" href="ch-algebra-fta.html"><span>08</span>Algebraic computations</a><a class="" href="ch-local-models.html"><span>09</span>Local models</a><a class="" href="ch-complex-paths.html"><span>10</span>Complex paths</a><a class="" href="ch-improper-parameters.html"><span>11</span>Improper integrals</a><a class="" href="ch-fourier.html"><span>12</span>Fourier computations</a><a class="" href="ch-impulses.html"><span>13</span>Impulses</a><a class="" href="ch-differential-equations.html"><span>14</span>Differential equations</a><!-- fundamental-matrix:start --><a data-reader-addition="fundamental-matrix" href="fundamental-matrix.html">Fundamental Matrix</a><!-- fundamental-matrix:end --><a class="" href="ch-special-equations.html"><span>15</span>Special-function equations</a><a class="" href="ch-transforms-zeta.html"><span>16</span>Transforms and zeta</a><a class="" href="ch-elliptic.html"><span>17</span>Elliptic integrals</a></details><a class="nav-label construction-skill-label" href="construction-skills.html">Skills</a><a class="construction-skill-navigation" href="skill-real-integrals.html">Real integrals</a><a class="construction-skill-navigation" href="skill-complex-integrals.html">Complex path integrals</a><a class="construction-skill-navigation" href="skill-series.html">Series</a><a class="construction-skill-navigation" href="skill-holomorphic-functions.html">Holomorphic functions</a><a class="construction-skill-navigation" href="skill-analytic-continuation.html">Analytic continuation</a><span class="nav-label">Worked examples</span><a class="" href="cosine.html">The cosine-square integral</a><a class="classic-navigation" href="cartwright.html">Irrationality of \(\pi^2\)</a><a class="classic-navigation" href="leibniz.html">The Leibniz series</a><a class="classic-navigation" href="basel.html">The Basel problem</a><a class="classic-navigation" href="euler.html">Euler’s sine product</a><span class="nav-label">Function theory</span><a class="classic-navigation" href="arctan-taylor.html">Arctangent and Taylor series</a><a class="classic-navigation" href="complex-analysis.html">Polygonal Cauchy theory</a><a class="classic-navigation" href="analytic-continuation.html">Analytic continuation</a><a class="classic-navigation" href="zeta-zeros.html">Riemann zeta zeros</a><span class="nav-label">Differential equations</span><a class="classic-navigation" href="fuchs.html">Fuchs’s theorem</a><a class="classic-navigation" href="painleve.html">Painlevé’s classification</a><span class="nav-label">The development</span><a class="classic-navigation" href="proof-bundles.html">Bundled proof comparisons</a><a href="programme.html">Purpose and boundary</a><a href="proof-bench/">Proof-size comparison</a><a href="reference/index.html">Technical reference ↗</a></nav>
+<div class="page"><main class="reader" id="main"><div class="chapter-kicker">CHAPTER 05</div><article><div class="main-text">
+<h1 id="ch:effective-calculus">Computing Derivatives and the Fundamental Theorem</h1><section class="pedagogical-opening" data-pedagogy="opening" id="why-this-page"><p>Neighboring secants of a convex function give lower and upper slopes. Shrinking the increment brings those bounds together.</p><p class="pedagogical-context">Earlier context: <a href="ch-integrals.html">Integral Computations</a>.</p></section><!-- chapter-visual:start -->
+<figure class="chapter-visual" data-visual="secants" id="visual-construction">
+<h2>Two secants squeeze one derivative</h2>
+<canvas role="img" aria-label="Two secants squeeze one derivative. Here , at . The green and blue secant slopes are  and ; the dashed orange tangent has slope . The general construction also controls errors in the function evaluations.">Two secants squeeze one derivative</canvas>
+<div class="visual-legend">Green left secant · Blue right secant · Dashed orange tangent</div>
+<div class="visual-controls"><label>Refinement: <span data-stage-value>2</span><input type="range" min="0" max="6" value="2" step="1" aria-label="Refinement"></label><button type="button" data-visual-reset>Reset</button></div>
+<div class="visual-output" aria-live="polite"></div>
+<figcaption>Here \(f(t)=t^2\), at \(t=1\). The green and blue secant slopes are \(2-h\) and \(2+h\); the dashed orange tangent has slope \(2\). The general construction also controls errors in the function evaluations. <a href="#a0000000022">Follow the construction.</a></figcaption>
+<noscript><p>Here \(f(t)=t^2\), at \(t=1\). The green and blue secant slopes are \(2-h\) and \(2+h\); the dashed orange tangent has slope \(2\). The general construction also controls errors in the function evaluations.</p></noscript>
+</figure>
+<!-- chapter-visual:end -->
+
+<p>The derivative should be constructed from the function. For convex functions, neighboring secants provide its lower and upper bounds. We prescribe the increments and evaluation stages, then prove that the resulting pairs are ordered, nested, and shrinking. An error estimate justifies a computation; it need not direct that computation’s execution. </p>
+<h2 id="a0000000017">5.1 What pointwise rational differentiation misses</h2>
+<p> For rational \(x,h\), the expression \([f(x+h)-f(x)-hg(x)]_n\) means finite interval arithmetic on the prescribed stage outputs. To say that \(g\) differentiates \(f\) at \(x\) is an endpoint-residual relation: for every positive rational \(\varepsilon \), all sufficiently small nonzero rational \(h\) admit a stage at which this residual pair is contained in \([-\varepsilon |h|,\varepsilon |h|]\). The witnessing stage in the proof may depend on \(h\). The literal quantifiers appear in the endpoint-only FTC section below. </p>
+<p>Pointwise rational differentiation alone does not control a whole interval. The exact rational-pair evaluator </p>
+<div class="displaymath" id="a0000000198">
+  \[  H_n(x)=\begin{cases} [0,0],&amp; x^2{\lt}2,\\ {}[1,1],&amp; x^2{\gt}2\end{cases}  \]
+</div>
+<p> is locally constant at every rational input, yet its endpoint-difference output on \([0,2]\) is \([1,1]\). The exact zero evaluator differentiates it at every rational input. Adding the geometric sine evaluator gives the same failure with a nonconstant pointwise derivative. </p>
+<p>This example has no interval-continuity certificate across the cut. Convexity is a stronger finite interval condition which will make secants into sound derivative brackets. Unindexed expressions below are compact relations between programs; the final FTC is stated entirely in endpoints. </p>
+<h2 id="a0000000018">5.2 Convexity is a finite interval condition</h2>
+<div class="definition_thmwrapper theorem-style-definition" id="a0000000199">
+<div class="definition_thmheading">
+<span class="definition_thmcaption">
+    Definition
+    </span>
+<span class="definition_thmlabel">5.1</span>
+</div>
+<div class="definition_thmcontent">
+<p>An evaluator \(f\) is convex on a rational interval when </p>
+<div class="displaymath" id="a0000000200">
+  \[  f_n^-((1-t)x+ty)\le (1-t)f_m^+(x)+t f_k^+(y)  \]
+</div>
+<p> for rational \(x,y\) in the interval, rational \(0\le t\le 1\), and all stages \(n,m,k\). This does not require either endpoint function at a fixed stage to be convex separately. </p>
+</div>
+</div>
+<p> Writing \(s(u,v)\) for the program \((f(v)-f(u))/(v-u)\), the defining inequalities imply the program-order comparisons </p>
+<div class="displaymath" id="a0000000201">
+  \[  s(u,v)\le s(u,w)\le s(v,w)\qquad (u{\lt}v{\lt}w).  \]
+</div>
+<p> They are proved by rearranging rational convexity inequalities at refined stages and removing the finite endpoint-width slack. Conversely, those secant comparisons imply the displayed convexity condition. </p>
+<p>On a smaller interval \([a,b]\) with rational outer points \(A{\lt}a{\lt}b{\lt}B\), </p>
+<div class="displaymath" id="a0000000202">
+  \[  s(A,a)\le s(x,y)\le s(b,B)\qquad (a\le x{\lt}y\le b).  \]
+</div>
+<p> Coarse outputs of the two outer secants give a rational Lipschitz bound in the endpoint sense of Chapter <a href="ch-foundations.html">1</a>. No real-variable convexity theorem is used. </p>
+<p>Midpoint convexity suffices for rational weights. Pad a list of \(n\) rational inputs with copies of its rational average to a list of length \(2^k\). Repeated midpoint inequalities and finite cancellation give the \(n\)-term Jensen inequality. Repeated copies of two inputs give rational weights. With pair outputs, carry the finite widths through cancellation and remove them by refinement, rather than cancel interval pairs as if they were scalar values. </p>
+<h2 id="sec:fixed-schedule-derivative">5.3 A derivative algorithm with fixed schedules</h2>
+<p>We fix the computation first and prove its validity separately. A stage must not mean “keep refining until an error test succeeds.” Choose explicit rational increments \(h_n(x){\gt}0\) tending to zero and explicit natural-number stages \(\sigma (n,x)\), with \(x\pm h_n(x)\) in the domain. Typical choices are \(h_n=h_0/(n+1)\) and \(\sigma (n,x)=(n+1)^2\); a particular evaluator may permit the simpler \(\sigma (n,x)=n\). </p>
+<p>The notation \([E]_n\) means the two rational outputs of a specified composite expression at its prescribed stage. It does not denote a scalar \(E\), and it does not silently introduce a precision search. For example, using ordinary stagewise subtraction, </p>
+<div class="displaymath" id="a0000000203">
+  \[  [f(x)-f(y)]_n= [f_n^-(x)-f_n^+(y),\  f_n^+(x)-f_n^-(y)].  \]
+</div>
+<p> If a composite evaluator uses a different internal schedule, that schedule is stated as part of its definition. </p>
+<div class="definition_thmwrapper theorem-style-definition" id="def:computed-derivative">
+<div class="definition_thmheading">
+<span class="definition_thmcaption">
+    Definition
+    </span>
+<span class="definition_thmlabel">5.2</span>
+<span class="definition_thmtitle">Fixed-schedule derivative evaluator</span>
+</div>
+<div class="definition_thmcontent">
+<p>  For a convex evaluator \(f\), set, with \(h=h_n(x)\) and \(s=\sigma (n,x)\), </p>
+<div class="displaymath" id="a0000000204">
+  \[  B_n^{h,\sigma }(x)= \left[\frac{[f(x)-f(x-h)]_s^-}{h}, \frac{[f(x+h)-f(x)]_s^+}{h}\right],  \]
+</div>
+<p> and compute the finite intersections </p>
+<div class="displaymath" id="a0000000205">
+  \[  [D_{h,\sigma }f(x)]_n= \left[\max _{j\le n}(B_j^{h,\sigma }(x))^-, \min _{j\le n}(B_j^{h,\sigma }(x))^+\right].  \]
+</div>
+<p> All loops have a length determined by \(n\); there is no error-dependent stopping condition. This defines an evaluator before asserting that its widths shrink. </p>
+</div>
+</div>
+<p>Endpoint convexity proves \((B_i^{h,\sigma })^-\le (B_j^{h,\sigma })^+\) for every \(i,j\). Indeed a left secant at \(x\) is below every right secant, by the three-point rational convexity inequality. Coarse lower endpoints can only decrease the former, and coarse upper endpoints can only increase the latter. Refining the finitely many evaluations in this proof and removing rational slack establishes the inequality at the originally fixed stages. Thus every finite intersection is ordered, and nesting follows from finite maxima and minima. Neither a derivative scalar nor an infinite intersection witness is used. </p>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:fixed-schedule-derivative">
+<div class="theorem_thmheading">
+<span class="theorem_thmcaption">
+    Theorem
+    </span>
+<span class="theorem_thmlabel">5.3</span>
+<span class="theorem_thmtitle">Validity for a specified schedule</span>
+</div>
+<div class="theorem_thmcontent">
+<p>  Suppose the rational widths \(\operatorname {width}B_n^{h,\sigma }(x)\) tend to zero for the specified convex evaluator and schedules. Then \(D_{h,\sigma }f\) is valid at \(x\) and differentiates \(f\) in the endpoint-residual sense. Any two successful schedules, including schedules used with equivalent source evaluators, produce derivative pairs overlapping at every pair of stages. </p>
+</div>
+<aside aria-label="Proof details" class="theorem-margin"><a data-proof-map="thm:fixed-schedule-derivative" href="proof-map.html?theorem=thm:fixed-schedule-derivative">Proof map ↗</a><small>Reading outline</small></aside></div><p class="bundled-proof-link" data-bundled-theorem="thm:fixed-schedule-derivative"><a href="proof-bundles.html?theorem=thm:fixed-schedule-derivative">Bundled proof routes and LOC →</a></p>
+<div class="proof_wrapper" id="a0000000206">
+<div class="proof_heading">
+<span class="proof_caption">
+    Proof
+    </span>
+<span class="expand-proof">▼</span>
+</div>
+<div class="proof_content">
+<p>The finite intersection has width no greater than the current bracket. For the derivative assertion fix a positive rational slope tolerance. Choose one outer bracket narrower than a fixed fraction of that tolerance. Convexity brackets every nonzero rational increment shorter than its \(h_j\) by the same outer secants. A sufficiently late derivative output lies in that chosen bracket. For the particular increment under consideration, refine the finitely many source outputs in the proof until their widths are smaller than the tolerance times the increment’s absolute value. The resulting residual pair lies inside the prescribed rational error interval. This establishes the derivative relation, whose witnessing stage may depend on the increment; it does not change the evaluator’s fixed execution rule. The endpoint proof of derivative uniqueness then gives the final assertion. </p>
+</div>
+</div>
+<p>Orderedness and termination of each finite stage must be distinguished from validity. For the exact evaluator of \(|x|\) at zero all these brackets are \([-1,1]\). Every stage runs, but no shrinking-width theorem is true there. </p>
+<h2 id="a0000000019">5.3.1 Resolution of the source and size of the increment</h2>
+<p> Write \(w_m(t)=f_m^+(t)-f_m^-(t)\), a rational number. The relevant resolution budget is </p>
+<div class="displaymath" id="a0000000207">
+  \[  \rho _n(x)=\frac{ w_{\sigma (n,x)}(x-h_n)+2w_{\sigma (n,x)}(x) +w_{\sigma (n,x)}(x+h_n)}{h_n}.  \]
+</div>
+<p> Smaller increments amplify source uncertainty. Validity of \(f\) at each fixed input alone gives no rate at the moving inputs \(x\pm h_n\). </p>
+<p>If an independently specified valid evaluator \(g\) differentiates \(f\), and \(\rho _n(x)\to 0\), then the brackets above shrink. To prove this, apply the two residual estimates at \(h_n\) and \(-h_n\), at sufficiently refined proof-side stages. Their secant gap is bounded by twice the slope tolerance and a derivative-output width. Returning to the prescribed source stage adds at most \(\rho _n(x)\). Remove the arbitrarily small proof-side width and then reduce the tolerance. Unlike an adaptive construction, an arbitrary fixed schedule does <em>not</em> inherit convergence from differentiability without a resolution condition. </p>
+<p>For a concrete smooth computation one often proves </p>
+<div class="displaymath" id="a0000000208">
+  \[  \operatorname {width}B_n^{h,\sigma }(x) \le K h_n+\rho _n(x)  \]
+</div>
+<p> by a finite second-difference identity. The constant \(K\) and the source width bound are theorems about that computation, not runtime inputs requesting an accuracy test. </p>
+<div class="example_thmwrapper theorem-style-definition" id="a0000000209">
+<div class="example_thmheading">
+<span class="example_thmcaption">
+    Example
+    </span>
+<span class="example_thmlabel">5.4</span>
+<span class="example_thmtitle">Two schedules for the same noisy square</span>
+</div>
+<div class="example_thmcontent">
+<p> For \(m\ge 1\), take \(f_m(t)=[t^2-m^{-2},t^2+m^{-2}]\) and use \(\sigma (n)=n\). Exact rational arithmetic gives </p>
+<div class="displaymath" id="a0000000210">
+  \[  B_n^h(x)= [2x-h_n-2/(n^2h_n),\  2x+h_n+2/(n^2h_n)].  \]
+</div>
+<p> For \(h_n=1/n\) the width is \(6/n\); for \(h_n=1/n^2\) it is \(4+2/n^2\). The latter brackets are already nested, so finite intersections do not repair their failure to shrink. With the exact square evaluator both choices work. The validity theorem therefore concerns the evaluator <em>together with</em> its schedules. </p>
+</div>
+</div>
+<p>A uniform source-width bound \(w_m(t)\le C/(m+1)\) on the sampling interval can be paired with \(h_n=h_0/(n+1)\) and \(\sigma (n)=(n+1)^2\): the resolution budget is at most \(4C/(h_0(n+1))\). Higher polynomial schedules give correspondingly smaller errors. These are predetermined integer formulas, not precision searches. </p>
+<h2 id="a0000000020">5.3.2 Correcting curvature without changing the principle</h2>
+<p> If the finite inequalities prove that \(f+Kx^2\) is convex, use its secants and subtract the exact derivative \(2Kx\). With exact polynomial arithmetic the resulting bracket can be written directly as </p>
+<div class="displaymath" id="a0000000211">
+  \[  \left[ \frac{[f(x)-f(x-h_n)]_{\sigma (n)}^-}{h_n}-Kh_n, \quad \frac{[f(x+h_n)-f(x)]_{\sigma (n)}^+}{h_n}+Kh_n \right].  \]
+</div>
+<p> This is convenient for sine on an interval crossing a change of curvature. The polynomial terms cancel before interval evaluation; separately evaluating equal occurrences would unnecessarily enlarge the pairs. </p>
+<h2 id="sec:fixed-factorial-sine">5.3.3 A closed factorial-series example</h2>
+<p>  The following is an alternative representation, constructed from finite polynomials rather than from inverse sector area. Put \(N=n+5\) and </p>
+<div class="displaymath" id="a0000000212">
+  \[  s_n(t)=\sum _{j=0}^{N-1}\frac{(-1)^jt^{2j+1}}{(2j+1)!},\qquad c_n(t)=\sum _{j=0}^{N-1}\frac{(-1)^jt^{2j}}{(2j)!},\qquad r_n=4\frac{2^{2N}}{(2N)!}.  \]
+</div>
+<p> These are rational numbers for rational \(t\). On \([-2,2]\) the pairs \([s_n(t)-r_n,s_n(t)+r_n]\) and \([c_n(t)-r_n,c_n(t)+r_n]\) are nested and shrinking. The factorial-tail comparison proves nesting, not merely agreement with an externally supplied sine or cosine. The series chapter gives the general finite-tail argument. </p>
+<p>For \(h_n=1/(n+1)\) one has \(r_n\le h_n^2\). Indeed the tail-term ratio from index \(10\) onward is at most \(1/2\), so </p>
+<div class="displaymath" id="a0000000213">
+  \[  r_n\le 4\frac{2^{10}}{10!}\, 2^{-2n}\le (n+1)^{-2}.  \]
+</div>
+<p> The last inequality follows from \(2^n\ge n+1\) by induction. </p>
+<p>Finite polynomial calculations on \(|t|,|t+h|\le 2\) give </p>
+<div class="displaymath" id="a0000000214">
+  \[  \left|\frac{s_n(t+h)-s_n(t)}h-c_n(t)\right|\le 34|h|, \qquad |c_n(t)-c_n(u)|\le 16|t-u|.  \]
+</div>
+<p> For an elementary derivation, \(s_n'=c_n\) is a coefficient identity. The absolute derivative polynomials are bounded by the finite exponential majorant at \(2\), which is less than \(8\): terms through degree four sum to \(7\), and the remaining terms sum to at most \(2/5\) by their ratio bound. The polynomial FTC and its twice-integrated remainder give even smaller constants; the displayed conservative constants suffice here. This invokes only the previously proved finite polynomial identities. </p>
+<p>Consequently, for \(|x|\le 1\), each left and right center secant is within \(50h_n\) of \(c_n(x)\). Define </p>
+<div class="displaymath" id="a0000000215">
+  \[  B_n(x)=\left[ \frac{s_n(x)-s_n(x-h_n)-2r_n}{h_n}-50h_n, \quad \frac{s_n(x+h_n)-s_n(x)+2r_n}{h_n}+50h_n \right].  \]
+</div>
+<p> It uses only the sine pair evaluator, the fixed quadratic correction, and the same stage \(n\). No cosine evaluation occurs in its definition. The finite secant estimates prove that \(B_n(x)\) contains the entire cosine pair \([c_n(x)-r_n,c_n(x)+r_n]\), since \(h_n\le 1\) and \(2r_n/h_n\ge r_n\). They also give </p>
+<div class="displaymath" id="a0000000216">
+  \[  \operatorname {width}B_n(x)\le 200h_n+4r_n/h_n\le 204/(n+1).  \]
+</div>
+<p> The prefix intersections contain the stage-\(n\) cosine pair: later cosine pairs lie in earlier ones, so each is in all earlier \(B_j\). Thus the intersections are valid and overlap the cosine evaluator at every pair of stages. The all-increment polynomial estimate and the factorial tails also give the endpoint derivative relation, not just convergence along one sequence of increments. </p>
+<p>This proves the derivative comparison for the radian-coordinate factorial representation. In the book’s normalized angle coordinate the intended identity is \(D S=\pi C\). Multiplication by the computed \(\pi \) and evaluation on its shrinking rational input pairs require their own fixed schedules and domain bounds; identifying that representation with the geometric circle construction is a separate comparison. A radian-series proof must not be advertised as completing that geometric comparison. </p>
+<h2 id="a0000000021">5.3.4 Using a fixed derivative in an integral</h2>
+<p> An integral stage may likewise prescribe a finite partition and the stages used for its derivative samples. Its proof then bounds the mesh error and the finite sum of sample widths. For example, a derivative width bound \(C/(m+1)\) permits polynomial reindexing of those samples. No stopping test is required inside the derivative evaluator. The endpoint-only FTC below identifies the resulting integral whenever the chosen rectangle schedule has a proved shrinking-width bound.  </p>
+<h2 id="a0000000022">5.4 The convex FTC</h2>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:convex-ftc">
+<div class="theorem_thmheading">
+<span class="theorem_thmcaption">
+    Theorem
+    </span>
+<span class="theorem_thmlabel">5.5</span>
+<span class="theorem_thmtitle">Fundamental theorem for a computed convex derivative</span>
+</div>
+<div class="theorem_thmcontent">
+<p>  Let \(f\) be convex on a rational interval containing \([a,b]\) in its interior. At every rational \(x\in [a,b]\), suppose the specified fixed-schedule derivative construction has a proved shrinking-width bound. Write \(Df\) for this valid derivative program. Every independent sound shrinking rectangle construction for \(Df\) is equivalent to the endpoint subtraction program: </p>
+<div class="displaymath" id="a0000000218">
+  \[  \boxed {\int _a^b Df(x)\, dx\  \sim \  f(b)-f(a).}  \]
+</div>
+<p> A monotone rectangle schedule with the required properties is described in the endpoint-only section below. </p>
+</div>
+<aside aria-label="Proof details" class="theorem-margin"><a data-proof-map="thm:convex-ftc" href="proof-map.html?theorem=thm:convex-ftc">Proof map ↗</a><small>Reading outline</small></aside></div><p class="bundled-proof-link" data-bundled-theorem="thm:convex-ftc"><a href="proof-bundles.html?theorem=thm:convex-ftc">Bundled proof routes and LOC →</a></p>
+<div class="proof_wrapper" id="a0000000217">
+<div class="proof_heading">
+<span class="proof_caption">
+    Proof
+    </span>
+<span class="expand-proof">▼</span>
+</div>
+<div class="proof_content">
+<p>Secant ordering and the endpoint derivative relation give </p>
+<div class="displaymath" id="a0000000219">
+  \[  (v-u)[Df(u)]_k^-\le f_m^+(v)-f_m^-(u),\qquad f_m^-(v)-f_m^+(u)\le (v-u)[Df(v)]_k^+  \]
+</div>
+<p> for every \(m,k\) and rational \(u{\lt}v\). They also give the endpoint monotonicity of \(Df\). Finite endpoint sums thus bound every primitive endpoint-difference output, after removing the interior evaluation widths. Their mesh error is bounded by the mesh times a rational bound for the endpoint increase of \(Df\); sample widths give a separate finite error. Common refinements prove integral validity without reading \(f\). The detailed endpoint proof below then identifies the two algorithms. </p>
+</div>
+</div>
+<p>The derivative’s stage rule stays fixed during integration. The integral plan must specify which derivative stages it samples and prove that the resulting finite sum of widths shrinks. This is automatic from explicit rates in the concrete examples, not from replacing a stage by an unstated precision search. One-sided or improper endpoint variants require their own domain and endpoint-tail estimates. </p>
+<div class="example_thmwrapper theorem-style-definition" id="a0000000220">
+<div class="example_thmheading">
+<span class="example_thmcaption">
+    Example
+    </span>
+<span class="example_thmlabel">5.6</span>
+<span class="example_thmtitle">An irrational corner is allowed</span>
+</div>
+<div class="example_thmcontent">
+<p> For the exact rational-pair evaluator of \(\max (0,x^2-2)\), a fixed sequence \(h_n=h_0/(n+1)\) eventually stays on one polynomial branch at each rational input. Its derivative construction is therefore valid there and agrees with the exact pair \([0,0]\) when \(x^2{\lt}2\), and \([2x,2x]\) when \(x^2{\gt}2\). On \([0,2]\) the derivative is monotone but not uniformly continuous. The latter exact evaluator has no sample-width error, so equal \(N\)-cell endpoint sums have gap \(8/N\) and the integral is equivalent to \([2,2]\). A hidden corner is allowed; an unrecorded jump in the primitive is not. </p>
+</div>
+</div>
+<h2 id="a0000000023">5.5 Differences of convex computations</h2>
+<p> If \(f\) agrees with \(u-v\), where the two convex computations have valid fixed-schedule derivatives, define the derivative program by \(Du-Dv\). The endpoint derivative relation proves independence of the chosen successful construction, and linearity of integral algorithms gives the same endpoint FTC. Concave functions are included by negation, and compatible finite pieces by splitting and matching their endpoint programs. </p>
+<p>A convenient certificate is convexity of \(f+Kx^2\) for a rational \(K\ge 0\). It must be proved by finite inequalities or remainder estimates. A lower bound on a pointwise rational second derivative alone is insufficient. </p>
+<h2 id="a0000000024">5.5.1 Polynomials need only the binomial identity</h2>
+<p> For \(P(x)=\sum _{n=0}^d a_nx^n\) on \([-R,R]\), \(R\ge 1\) rational, finite binomial algebra gives </p>
+<div class="displaymath" id="a0000000221">
+  \[  |P(x+h)-2P(x)+P(x-h)|\le 2K h^2, \qquad K=\sum _{n=2}^d|a_n|2^{n-1}R^{n-2},  \]
+</div>
+<p> when \(x\pm h\) remain in the interval. Here every polynomial expression is rational. Thus \(P+Kx^2\) is convex, and its exact-pair secant gaps are at most \(4K|h|\). Any fixed \(h_n\to 0\) works, without a source-width condition because these polynomial outputs are exact. The centered quotient identifies the derivative with \(\sum _{n=1}^d n a_nx^{n-1}\). Applied to \(x^{n+1}/(n+1)\), the FTC gives </p>
+<div class="displaymath" id="a0000000222">
+  \[  \int _a^b x^n\, dx\sim \left[\frac{b^{n+1}-a^{n+1}}{n+1}, \frac{b^{n+1}-a^{n+1}}{n+1}\right]_{m\in \mathbb {N}}.  \]
+</div>
+<p> A larger interval supplies endpoint neighborhoods. </p>
+<h2 id="a0000000025">5.6 The geometric sine and its normalization</h2>
+<p> Put \(U=S+8x^2\), an expression for a composite evaluator. The geometric addition and chord comparisons of Chapter <a href="ch-rational-circle-trigonometry.html">3</a> give, as program-order inequalities, </p>
+<div class="displaymath" id="a0000000223">
+  \[  0\le U(x+h)-2U(x)+U(x-h)\le 32h^2.  \]
+</div>
+<p> They follow by substituting \(16h^2-2S(x)(1-C(h))\) and \(0\le 1-C(h)\le 8h^2\); each inequality is a cross-stage endpoint statement. Thus \(U\) is convex. For a fixed source schedule the actual derivative bracket has width at most \(32h_n+\rho _n(x)\). A source-resolution theorem \(\rho _n(x)\to 0\) is therefore required for that schedule. It is not supplied by pointwise validity alone. </p>
+<p>The addition identity identifies the centered secant program after the quadratic subtraction with \(C(x)S(h)/h\). The geometric small-angle comparison \(|S(h)-\pi h|\le 32|h|^3\), interpreted at endpoints with removable rational slack, identifies its derivative as \(\pi C\). The corresponding cosine calculation gives \(DC\sim -\pi S\). These are program comparisons; products involving \(\pi \) include the prescribed stages of that constant’s pair evaluator. </p>
+<p>Once valid sampling and derivative schedules have been provided, the FTC therefore gives the familiar mnemonic formulas </p>
+<div class="displaymath" id="a0000000224">
+  \[  \int _a^b S(x)\, dx\sim \frac{C(a)-C(b)}\pi ,\qquad \int _a^b C(x)\, dx\sim \frac{S(b)-S(a)}\pi .  \]
+</div>
+<p> The quotient signs denote separated reciprocal computations. On \([0,1/2]\) the first comparison is with the reciprocal-\(\pi \) program. This geometric identification is separate from the fixed-schedule factorial representation worked out above; a comparison of representations must be proved rather than supplied by their common name. </p>
+<h2 id="a0000000026">5.7 Products and integration by parts</h2>
+<p> For differences of convex computations with valid derivative programs, let \(V_f\) bound the sum of the endpoint increases of their monotone derivatives. The finite FTC argument bounds the total increment-replacement error by \(\operatorname {mesh}(P)V_f\), with additional explicitly accounted sample widths. Let \(L_f,B_f\) be rational Lipschitz and absolute bounds. For two such computations the finite product identity gives </p>
+<div class="displaymath" id="a0000000225">
+  \[  \Delta (fg)=f(x_i)\Delta g+g(x_i)\Delta f+\Delta f\, \Delta g.  \]
+</div>
+<p> It is first an identity of rational sample expressions; transporting it to arbitrary interval outputs introduces their widths, which are retained and then removed. The accumulated error bound is </p>
+<div class="displaymath" id="a0000000226">
+  \[  \operatorname {mesh}(P)\bigl(B_fV_g+B_gV_f+L_fL_g(b-a)\bigr)  \]
+</div>
+<p> plus the finite sample-width budget. Product cell ranges are integrable by the rectangle estimate in the preceding chapter. Consequently </p>
+<div class="displaymath" id="a0000000227">
+  \[  \int _a^b f\, Dg\sim f(b)g(b)-f(a)g(a)-\int _a^b g\, Df.  \]
+</div>
+<p> This neither selects a mean-value point nor assumes a convex decomposition of the product in advance. </p>
+<h2 id="a0000000027">5.8 Substitution and further integral identities</h2>
+<p> Suppose \(\alpha \) is increasing, is a difference of convex computations with valid derivatives, and \(g\) has interval continuity on its image. The Stieltjes sums have terms \(g(\alpha (x_i))\Delta \alpha _i\). Replacing increments by derivative samples changes the sum by at most \(B_g\operatorname {mesh}(P)V_\alpha \), with their finite sample widths added. Hence </p>
+<div class="displaymath" id="a0000000228">
+  \[  \int _{\alpha (a)}^{\alpha (b)}g(u)\, du \sim \int _a^b g(\alpha (t))D\alpha (t)\, dt.  \]
+</div>
+<p> Reversing orientation and splitting finitely many monotone pieces gives the other versions. Every substitution retains its domain, endpoint, and increment estimates. A formal chain rule at rational points is not an interval FTC certificate. </p>
+<p>For the angle-area program, accumulation gives the derivative evaluator \([1/(1+t^2),1/(1+t^2)]\). Ordered integral averages prove concavity. Its explicit continuity bound supplies the secant convergence estimate; the chosen source schedule must also meet the resolution condition. Product and substitution identities then apply to this same computation. For example </p>
+<div class="displaymath" id="a0000000229">
+  \[  \int _0^1\frac{t\, dt}{1+t^2}\sim \frac12\int _1^2\frac{du}{u},  \]
+</div>
+<p> which motivates the logarithm construction.  </p>
+<h2 id="sec:ftc-finite-output">5.9 The FTC stated only with rational endpoint pairs</h2>
+<p>The literal objects are algorithms with two rational outputs: </p>
+<div class="displaymath" id="a0000000230">
+  \[  f_n(x)=[f_n^-(x),f_n^+(x)],\qquad g_n(x)=[g_n^-(x),g_n^+(x)].  \]
+</div>
+<p> Here \(x\) is a permitted rational input and \(n\) a natural-number stage. There is no scalar evaluation \(f(x)\) or \(g(x)\) in the definitions below. Fixing \(x\) leaves a program in \(n\), not an additional scalar output. The unindexed formulas earlier in the chapter describe the intended relations; this section gives their endpoint-only statements and proofs. </p>
+<h2 id="a0000000028">5.9.1 Validity, compatibility, and removing rational slack</h2>
+<p> Validity of an evaluator means that, for each permitted rational \(x\), </p>
+<div class="displaymath" id="a0000000231">
+  \[  f_n^-(x)\le f_m^-(x)\le f_m^+(x)\le f_n^+(x)\quad (n\le m), \qquad \forall \varepsilon \in \mathbb {Q}_{{\gt}0}\  \exists n,\quad f_n^+(x)-f_n^-(x){\lt}\varepsilon .  \]
+</div>
+<p> The same requirements apply to \(g\). Two evaluators agree at a rational input precisely when </p>
+<div class="displaymath" id="a0000000232">
+  \[  f_n^-(x)\le g_m^+(x),\qquad g_m^-(x)\le f_n^+(x)\qquad \text{for every }n,m.  \]
+</div>
+<p> These are comparisons between four rational numbers. No common point of the infinitely many intervals is introduced. </p>
+<p>We repeatedly use the following rational fact. If fixed rationals \(r,s\) satisfy \(r\le s+e_k\) for every \(k\), where nonnegative rational errors \(e_k\) become arbitrarily small, then \(r\le s\). Otherwise the positive rational gap \(r-s\) determines a stage giving a contradiction. For finitely many valid evaluations, the sum of their widths can likewise be made smaller than any given rational tolerance by taking a common sufficiently large stage. We call this <em>removing rational slack</em>. It is not a completeness theorem. </p>
+<p>For example, suppose a fixed rational pair \([L,U]\) overlaps every \(g_n(x)\). This means </p>
+<div class="displaymath" id="a0000000233">
+  \[  L\le g_n^+(x),\qquad g_n^-(x)\le U\quad \text{for all }n.  \]
+</div>
+<p> It does not mean that every \(g_n(x)\) is contained in \([L,U]\). If a second pair \([L',U']\) has the same property, then \(L\le U'+(g_n^+(x)-g_n^-(x))\) for all \(n\). Removing slack proves \(L\le U'\), and symmetrically \(L'\le U\). Thus the two pairs overlap. </p>
+<h2 id="a0000000029">5.9.2 A derivative relation with no scalar evaluations</h2>
+<p> All pair arithmetic in this subsection is finite rational interval arithmetic. Define the residual pair \(R_n(x,h)\) by its endpoints: </p>
+<div class="displaymath" id="a0000000234">
+  \begin{align*}  R_n^-(x,h)&amp; =f_n^-(x+h)-f_n^+(x) -\max (hg_n^-(x),hg_n^+(x)),\\ R_n^+(x,h)&amp; =f_n^+(x+h)-f_n^-(x) -\min (hg_n^-(x),hg_n^+(x)). \end{align*}
+</div>
+<p> We say that the evaluator \(g\) differentiates the evaluator \(f\) at \(x\) if </p>
+<div class="displaymath" id="a0000000235">
+  \[  \forall \varepsilon \in \mathbb {Q}_{{\gt}0}\  \exists \delta \in \mathbb {Q}_{{\gt}0}\   \forall h\in \mathbb {Q},\quad 0{\lt}|h|{\lt}\delta \  \Longrightarrow \   \exists n:\quad -\varepsilon |h|\le R_n^-(x,h)\le R_n^+(x,h)\le \varepsilon |h|,  \]
+</div>
+<p> with \(x+h\) restricted to the domain. Once the endpoint test holds, it holds at all later stages by nesting. The stage is allowed to depend on \(h\): precision must increase when division by a smaller increment amplifies the output widths. This condition is neither a uniform stage requirement nor the assertion that a finite difference pair is identical to a derivative pair. </p>
+<p>Derivative uniqueness is also an endpoint theorem. For two derivative evaluators choose an increment small enough for both residual estimates, and refine to a common stage. The nonempty rational difference-quotient pair then lies within the prescribed rational tolerance of both derivative pairs. Two fixed disjoint derivative pairs would have a positive rational gap; choosing the tolerance smaller than one quarter of that gap contradicts the estimates after refinement. Consequently the derivative evaluators’ pairs overlap at every pair of stages. This argument uses only rational midpoints of finite intervals, not a derivative scalar. </p>
+<h2 id="a0000000030">5.9.3 Convexity and the derivative constructor</h2>
+<p> Fix rational \(A{\lt}a{\lt}b{\lt}B\). The evaluator \(f\) is convex on \([A,B]\) when </p>
+<div class="displaymath" id="a0000000236">
+  \[  f_n^-((1-t)x+ty) \le (1-t)f_m^+(x)+t f_k^+(y)  \]
+</div>
+<p> for every rational \(x,y\in [A,B]\), rational \(0\le t\le 1\), and all stages \(n,m,k\). Convexity is a property proved about the evaluator; it need not hold separately for its two endpoint functions. </p>
+<p>At a rational \(x\in [a,b]\), set </p>
+<div class="displaymath" id="a0000000237">
+  \[  h_0(x)=\tfrac 12\min (x-A,B-x),\qquad h_j(x)=2^{-j}h_0(x).  \]
+</div>
+<p> Search for a common stage \(\nu _j\) at which the three output widths at \(x-h_j,x,x+h_j\) are at most \(h_j2^{-j-3}\). Write those outputs as \([a_-,b_-],[a_0,b_0],[a_+,b_+]\), respectively, and set </p>
+<div class="displaymath" id="a0000000238">
+  \[  B_j(x)=\left[\frac{a_0-b_-}{h_j},\frac{b_+-a_0}{h_j}\right], \qquad d_j(x)=\left[\max _{k\le j}B_k^-(x),\min _{k\le j}B_k^+(x)\right].  \]
+</div>
+<p> The three value-width searches terminate by validity of \(f\). Convexity, with rational weights chosen at the three secant endpoints, proves that every lower endpoint of a \(B_j\) is at most every upper endpoint of a \(B_k\). Thus \(d_j\) is a nonempty rational pair and the \(d_j\) are nested. No scalar derivative was used as a witness. </p>
+<p>The constructor has the following explicit termination hypothesis: </p>
+<div class="displaymath" id="a0000000239">
+  \[  \forall x\in [a,b]\cap \mathbb {Q}\  \forall \varepsilon \in \mathbb {Q}_{{\gt}0}\   \exists j,\qquad B_j^+(x)-B_j^-(x){\lt}\varepsilon .  \]
+</div>
+<p> Under it, \(d\) is valid and differentiates \(f\) in the residual-pair sense. Indeed convexity bounds every sufficiently short rational secant between the chosen outer secants, up to the finitely many evaluation widths. Choose \(B_j\) narrower than a fraction of the requested tolerance, then refine the outputs at \(x,x+h\) until the extra residual widths are smaller than that tolerance times \(|h|\). This proves the residual endpoint test. </p>
+<p>Conversely, if a valid supplied \(g\) differentiates a convex \(f\), apply its residual bounds to \(h_j\) and \(-h_j\) at a common refined stage. They bound the refined secant gap by twice the slope tolerance plus the width of \(g\) at \(x\). Returning to the stage \(\nu _j\) adds at most \(2^{-j-1}\): this is the sum of the four endpoint errors divided by \(h_j\). First choose the slope tolerance, then \(j\) sufficiently large and a sufficiently narrow \(g\) output. Removing the remaining refinement slack proves the displayed termination condition. Derivative uniqueness identifies \(d\) and \(g\) by cross-stage overlap. </p>
+<h2 id="a0000000031">5.9.4 The finite secant inequalities</h2>
+<p> Under convexity and the derivative relation, for rational \(u{\lt}v\), all derivative stages \(k\), and all function stages \(m\), one has </p>
+<div class="displaymath" id="a0000000240">
+  \begin{align*}  (v-u)g_k^-(u)&amp; \le f_m^+(v)-f_m^-(u),\\ f_m^-(v)-f_m^+(u)&amp; \le (v-u)g_k^+(v). \end{align*}
+</div>
+<p> To prove these, compare a small secant at the appropriate endpoint with the secant from \(u\) to \(v\) using the endpoint convexity inequality. The residual-pair relation supplies the derivative comparison at refined stages. Coarse endpoints can only weaken these bounds. The residual tolerance and finitely many refined output widths can be made arbitrarily small, so removing rational slack gives exactly the two inequalities above. Applying both at arbitrarily fine function stages also gives </p>
+<div class="displaymath" id="a0000000241">
+  \[  g_k^-(u)\le g_l^+(v)\qquad \text{for all }k,l.  \]
+</div>
+<p> This is the endpoint-only meaning of a nondecreasing derivative evaluator. </p>
+<h2 id="a0000000032">5.9.5 An independent integral algorithm</h2>
+<p> The construction in this subsection needs only a valid \(g\) satisfying the last monotonicity inequalities. It does not read \(f\). Put \(L=b-a\) and compute the nonnegative rational </p>
+<div class="displaymath" id="a0000000242">
+  \[  V=g_0^+(b)-g_0^-(a).  \]
+</div>
+<p> For a positive rational \(\varepsilon \), choose an integer \(N\ge 1\) with \(LV/N\le \varepsilon /2\), and choose \(0{\lt}\theta \le \varepsilon /(2L)\). At the equal partition \(x_i=a+iL/N\), search for stages \(k_i\) with </p>
+<div class="displaymath" id="a0000000243">
+  \[  g_{k_i}(x_i)=[\alpha _i,\beta _i],\qquad \beta _i-\alpha _i\le \theta .  \]
+</div>
+<p> Each cell range \([\alpha _i,\beta _{i+1}]\) overlaps every \(g_m(t)\) for rational \(x_i\le t\le x_{i+1}\), by monotonicity. Output the rational pair </p>
+<div class="displaymath" id="a0000000244">
+  \[  C(\varepsilon )=\left[ \frac LN\sum _{i=0}^{N-1}\alpha _i, \frac LN\sum _{i=0}^{N-1}\beta _{i+1}\right].  \]
+</div>
+<p> Its width has the <em>exact finite identity</em> </p>
+<div class="displaymath" id="a0000000245">
+  \[  C^+-C^-=\frac LN\left(\beta _N-\alpha _0 +\sum _{i=1}^{N-1}(\beta _i-\alpha _i)\right) \le \frac{LV}{N}+L\theta \le \varepsilon .  \]
+</div>
+<p> Endpoint nesting gives \(\beta _N-\alpha _0\le V\). No differences of uncomputed scalars occur in this identity. </p>
+<p>Two different partitions’ cell ranges overlap on every common refined cell: choose a rational sample there and apply the rational-slack lemma to its shrinking \(g\) outputs. Weighted addition proves that the two integral pairs overlap. For \(C_j=C(2^{-j})\), define </p>
+<div class="displaymath" id="a0000000246">
+  \[  J_n=\left[\max _{j\le n}C_j^-,\min _{j\le n}C_j^+\right].  \]
+</div>
+<p> Finite pairwise overlap proves \(J_n^-\le J_n^+\), nesting is explicit, and \(J_n^+-J_n^-\le 2^{-n}\). This is integral validity independently of a primitive. The same common-refinement proof identifies this algorithm with any other sound shrinking cell-range integral algorithm. </p>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:ftc-finite-output">
+<div class="theorem_thmheading">
+<span class="theorem_thmcaption">
+    Theorem
+    </span>
+<span class="theorem_thmlabel">5.7</span>
+<span class="theorem_thmtitle">Endpoint-only fundamental theorem</span>
+</div>
+<div class="theorem_thmcontent">
+<p>  Let \(f,g\) be valid rational-pair evaluators on the domains above. Suppose \(f\) satisfies the endpoint convexity inequalities and \(g\) differentiates \(f\) by the residual-pair relation. The derivative constructor from \(f\) is valid and agrees with \(g\). The independent integral constructor from \(g\) is valid. Its outputs satisfy, for every \(n,m\in \mathbb {N}\), </p>
+<div class="displaymath" id="a0000000248">
+  \[  \boxed {J_n^-\le f_m^+(b)-f_m^-(a),\qquad f_m^-(b)-f_m^+(a)\le J_n^+.}  \]
+</div>
+<p> Thus every integral-output pair overlaps every endpoint-difference pair </p>
+<div class="displaymath" id="a0000000249">
+  \[  E_m=[f_m^-(b)-f_m^+(a),\  f_m^+(b)-f_m^-(a)].  \]
+</div>
+<p> These two rational inequalities are the FTC conclusion. An equality between unspecified scalar values is not part of the statement. </p>
+</div>
+<aside aria-label="Proof details" class="theorem-margin"><a data-proof-map="thm:ftc-finite-output" href="proof-map.html?theorem=thm:ftc-finite-output">Proof map ↗</a><small>Reading outline</small></aside></div><p class="bundled-proof-link" data-bundled-theorem="thm:ftc-finite-output"><a href="proof-bundles.html?theorem=thm:ftc-finite-output">Bundled proof routes and LOC →</a></p>
+<div class="proof_wrapper" id="a0000000247">
+<div class="proof_heading">
+<span class="proof_caption">
+    Proof
+    </span>
+<span class="expand-proof">▼</span>
+</div>
+<div class="proof_content">
+<p>Fix a finite partition used in an output \(C_j\) and a function stage \(s\). The finite secant inequalities give </p>
+<div class="displaymath" id="a0000000250">
+  \[  C_j^-\le f_s^+(b)-f_s^-(a) +\sum _{i=1}^{N-1}(f_s^+(x_i)-f_s^-(x_i)),  \]
+</div>
+<p> and </p>
+<div class="displaymath" id="a0000000251">
+  \[  f_s^-(b)-f_s^+(a) -\sum _{i=1}^{N-1}(f_s^+(x_i)-f_s^-(x_i))\le C_j^+.  \]
+</div>
+<p> <em>Finite interval differences do not telescope exactly.</em> The interior widths displayed here are the terms left after cancellation of equal rational endpoints. For any fixed target stage \(m\), take \(s\ge m\). The endpoint terms are then bounded by \(E_m^+\) and \(E_m^-\), respectively, and the finite sum of interior widths can be made smaller than every positive rational tolerance. Removing slack gives \(C_j^-\le E_m^+\) and \(E_m^-\le C_j^+\). Taking the finite maximum and minimum over \(j\le n\) proves the theorem. </p>
+</div>
+</div>
+<p>Both \(E\) and \(J\) have shrinking widths. If their chosen widths add to at most \(\eta \), their overlap shows that the rational pair </p>
+<div class="displaymath" id="a0000000252">
+  \[  [\min (J_n^-,E_m^-),\max (J_n^+,E_m^+)]  \]
+</div>
+<p> has width at most \(\eta \). This is a further finite accuracy comparison between the two algorithms, not an extraction of a common limiting value. </p>
+<h2 id="a0000000033">5.9.6 Differences of convex evaluators</h2>
+<p> Let \(p,q\) be convex pair evaluators with terminating derivative constructors \(d^p,d^q\). Supply \(f\) whose outputs agree, by cross-stage overlap, with </p>
+<div class="displaymath" id="a0000000253">
+  \[  [p_n^-(x)-q_n^+(x),\  p_n^+(x)-q_n^-(x)].  \]
+</div>
+<p> The pairs \([d_n^{p,-}(x)-d_n^{q,+}(x),d_n^{p,+}(x)-d_n^{q,-}(x)]\) define a derivative evaluator for \(f\). Any independently supplied derivative evaluator \(g\) agrees with it by residual-pair uniqueness. </p>
+<p>At partition endpoints compute derivative pairs \([\alpha _i^p,\beta _i^p]\) and \([\alpha _i^q,\beta _i^q]\), each of width at most \(\theta \). The cell ranges for \(g\) are </p>
+<div class="displaymath" id="a0000000254">
+  \[  [l_i,u_i]=[\alpha _i^p-\beta _{i+1}^q, \beta _{i+1}^p-\alpha _i^q].  \]
+</div>
+<p> They overlap every output \(g_m(t)\) on the cell. With equal mesh \(L/N\), the same rational width identity for the two components gives </p>
+<div class="displaymath" id="a0000000255">
+  \[  \frac LN\sum _i(u_i-l_i)\le \frac{LV}{N}+2L\theta ,  \]
+</div>
+<p> where </p>
+<div class="displaymath" id="a0000000256">
+  \[  V=(d_0^{p,+}(b)-d_0^{p,-}(a)) +(d_0^{q,+}(b)-d_0^{q,-}(a))  \]
+</div>
+<p> is a computable nonnegative rational. Take \(LV/N\le \varepsilon /2\) and \(\theta \le \varepsilon /(4L)\). Common refinements and prefix intersections again construct valid integral pairs. Apply the two convex secant inequalities and remove the finitely many interior widths of \(p,q\), together with the endpoint comparison widths for \(f\). The conclusion is exactly the same pair of boxed FTC inequalities. This corollary, rather than scalar evaluation of \(p-q\), supports the trigonometric and other convex-difference constructions in the book. </p>
+<h2 id="a0000000034">5.9.7 The reverse direction uses the same endpoint language</h2>
+<p> Suppose \(g\) is a valid nondecreasing evaluator. Pointwise continuity at an interior rational \(x\) means: for every positive rational \(\varepsilon \) there is a positive rational \(\delta \) such that, whenever \(|t-x|{\lt}\delta \), </p>
+<div class="displaymath" id="a0000000257">
+  \[  g_n^-(t)\le g_m^+(x)+\varepsilon ,\qquad g_m^-(x)\le g_n^+(t)+\varepsilon \quad \text{for all }n,m.  \]
+</div>
+<p> Run the monotone integral algorithm with variable rational endpoint \(x\) to construct pairs \(F_n(x)\). Ordered finite rectangle averages prove the endpoint convexity inequalities for \(F\). To prove that \(g\) differentiates \(F\), fix \(x,h,\varepsilon \), use continuity to bound the oscillation of all cell outputs near \(x\), and refine the two integral outputs and the output at \(x\) until their remaining widths are less than the allotted fraction of \(\varepsilon |h|\). Finite additivity and these width bounds give the residual-pair test. The derivative constructor therefore terminates and overlaps \(g\) at all pairs of stages. </p>
+<p>This is a sufficient construction, not a universal requirement that every function be a difference of convex functions. Later series and ODE constructions must likewise establish endpoint inequalities with their explicit finite errors. Neither their proofs nor this theorem may introduce a scalar merely by suppressing a stage index.  </p>
+</div></article><footer class="chapter-footer"><span>Mathematical manuscript · formal comparison status at each theorem</span><a href="https://github.com/liuyao12/computable-analysis/tree/f630241adeae35fc06a5fd4921a4df6396e291d0">Source f630241a ↗</a></footer></main><aside class="on-this-page"><span>On this page</span><a href="#a0000000017">5.1 What pointwise rational differentiation misses</a><a href="#a0000000018">5.2 Convexity is a finite interval condition</a><a href="#sec:fixed-schedule-derivative">5.3 A derivative algorithm with fixed schedules</a><a href="#a0000000019">5.3.1 Resolution of the source and size of the increment</a><a href="#a0000000020">5.3.2 Correcting curvature without changing the principle</a><a href="#sec:fixed-factorial-sine">5.3.3 A closed factorial-series example</a><a href="#a0000000021">5.3.4 Using a fixed derivative in an integral</a><a href="#a0000000022">5.4 The convex FTC</a><a href="#a0000000023">5.5 Differences of convex computations</a><a href="#a0000000024">5.5.1 Polynomials need only the binomial identity</a><a href="#a0000000025">5.6 The geometric sine and its normalization</a><a href="#a0000000026">5.7 Products and integration by parts</a><a href="#a0000000027">5.8 Substitution and further integral identities</a><a href="#sec:ftc-finite-output">5.9 The FTC stated only with rational endpoint pairs</a><a href="#a0000000028">5.9.1 Validity, compatibility, and removing rational slack</a><a href="#a0000000029">5.9.2 A derivative relation with no scalar evaluations</a><a href="#a0000000030">5.9.3 Convexity and the derivative constructor</a><a href="#a0000000031">5.9.4 The finite secant inequalities</a><a href="#a0000000032">5.9.5 An independent integral algorithm</a><a href="#a0000000033">5.9.6 Differences of convex evaluators</a><a href="#a0000000034">5.9.7 The reverse direction uses the same endpoint language</a></aside></div>
+<dialog id="proof-dialog"><div class="dialog-top"><span>Proof structure</span><button aria-label="Close proof map and return to the text" id="close-proof">Return to text ×</button></div><iframe id="proof-frame" title="Mathematical proof map"></iframe></dialog></body></html>

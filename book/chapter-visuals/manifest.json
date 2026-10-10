@@ -1,0 +1,239 @@
+{
+  "baseRun": 38054353598,
+  "newLeanProofsClaimed": false,
+  "leanSourcesModified": false,
+  "chapters": [
+    {
+      "page": "ch-rational-circle-trigonometry.html",
+      "visual": "angles",
+      "title": "Sector area becomes an angle coordinate",
+      "originalSha256": "a07266b19ba9a24c6b0ed01e141a5fa5ef97ef4e5ff5905ee7d0c769fcc81dbd",
+      "pageSha256": "be56de299e6f654ade38a489f53a7348b1bd9d298791683ad085128fe8d35849",
+      "originalOpening": "<section class=\"pedagogical-opening\" data-pedagogy=\"opening\" id=\"why-this-page\"><p>A point moving around a circle needs a coordinate that follows the motion through a quarter-turn and beyond. Its slope becomes unusable at a vertical radius. The sector area already computed in the preceding chapter gives another coordinate, and the horizontal and vertical positions become functions of it.</p><p>Our aim is to recover the familiar sine and cosine relations from this geometry. Addition of angles, monotonicity and differentiation will then be properties of independently constructed functions.</p><p class=\"pedagogical-context\">Earlier context: <a href=\"ch-circle-sphere.html\">The Circle, the Sphere, and the Cylinder</a>.</p></section>",
+      "mathematicsOutsideOpeningUnchanged": true,
+      "control": {
+        "min": 0,
+        "max": 16,
+        "initial": 8
+      }
+    },
+    {
+      "page": "ch-integrals.html",
+      "visual": "rectangles",
+      "title": "Enclose every cell, then refine",
+      "originalSha256": "a737bb77e1cabb6a82c98ae8caf29c741ef4c2c6957039992311d87b65130f97",
+      "pageSha256": "442968243e2bb816b7832f2f20fea8ccf47f30eaf3721a7987ebc5b3d271fed6",
+      "originalOpening": "<section class=\"pedagogical-opening\" data-pedagogy=\"opening\" id=\"why-this-page\"><p>When a quantity accumulates at a constant rate, we multiply the rate by the elapsed interval. When the rate varies, we can use a constant lower rate and a constant upper rate on each small piece. Their sums enclose the total. The remaining problem is to prove that refinement really makes the uncertainty disappear.</p><p>We will construct integrals for functions whose variation we can control, then compare constructions. The later fundamental theorem will explain when this independently computed accumulation equals a difference of endpoint values.</p><p class=\"pedagogical-context\">Earlier context: <a href=\"ch-circle-sphere.html\">The Circle, the Sphere, and the Cylinder</a>.</p></section>",
+      "mathematicsOutsideOpeningUnchanged": true,
+      "control": {
+        "min": 0,
+        "max": 6,
+        "initial": 2
+      }
+    },
+    {
+      "page": "ch-effective-calculus.html",
+      "visual": "secants",
+      "title": "Two secants squeeze one derivative",
+      "originalSha256": "63ec6d303b33d463cb3c2d7f5ba948fad9f55c03b32f4c1e7c28668b0c86dab8",
+      "pageSha256": "a16b6db67048befa7d8fc399ef94d4ef52a5e998ea781902714df1c450ee36c8",
+      "originalOpening": "<section class=\"pedagogical-opening\" data-pedagogy=\"opening\" id=\"why-this-page\"><p>Average velocity is a difference quotient over a nonzero time interval. Instantaneous velocity asks what happens as that interval shrinks. There is a computational difficulty: division by a smaller increment magnifies the uncertainty in the two function values.</p><p>We must coordinate the input increment with the accuracy of the evaluations. Convexity offers a particularly visible starting point, because neighboring secant slopes provide lower and upper estimates. Later sections broaden the derivative foundation and connect local change to accumulation.</p><p class=\"pedagogical-context\">Earlier context: <a href=\"ch-integrals.html\">Integral Computations</a>.</p></section>",
+      "mathematicsOutsideOpeningUnchanged": true,
+      "control": {
+        "min": 0,
+        "max": 6,
+        "initial": 2
+      }
+    },
+    {
+      "page": "ch-infinite-series.html",
+      "visual": "series",
+      "title": "A prefix needs a remainder bound",
+      "originalSha256": "d625a5db42d66ab2760a9781529876d8c2e294426987e62b8c9caf97482f3946",
+      "pageSha256": "d9d5c3e392006e8d3a6db1f703a3938fe2e7782e9b29deb5574c84c34d965f7d",
+      "originalOpening": "<section class=\"pedagogical-opening\" data-pedagogy=\"opening\" id=\"why-this-page\"><p>Adding another term is easy; knowing that the terms still missing cannot change the answer very much is the essential step. A geometric series makes this visible: every finite remainder can be bounded by a shrinking geometric expression.</p><p>We will use such remainder bounds to turn prefixes into number computations. The reward is more than evaluation: finite identities between prefixes can become exact identities between independently constructed functions.</p><p class=\"pedagogical-context\">Earlier context: <a href=\"ch-foundations.html\">Computable Numbers and Functions</a>.</p></section>",
+      "mathematicsOutsideOpeningUnchanged": true,
+      "control": {
+        "min": 1,
+        "max": 8,
+        "initial": 4
+      }
+    },
+    {
+      "page": "ch-exponential-logarithm.html",
+      "visual": "growth",
+      "title": "More compounding periods, the same growth law",
+      "originalSha256": "de149fa3f51360d67d7ed52042e726057db1a67762a6d3afbd1c8158da66c58c",
+      "pageSha256": "77e864f738885e1c93cecd7ba304e0af3c250c646a6d220bfc7a2c951f862a51",
+      "originalOpening": null,
+      "mathematicsOutsideOpeningUnchanged": true,
+      "control": {
+        "min": 0,
+        "max": 3,
+        "initial": 2
+      }
+    },
+    {
+      "page": "ch-algebra-fta.html",
+      "visual": "root",
+      "title": "Select a branch and keep its bracket",
+      "originalSha256": "c2c09c5131ce39e744a6e3fc2b0a110692498295c38bb380353dd053721b15cf",
+      "pageSha256": "8e6a425fe21da5adcba1ea93d46284cf63804768d041101bb088cfb4ca0b3592",
+      "originalOpening": "<section class=\"pedagogical-opening\" data-pedagogy=\"opening\" id=\"why-this-page\"><p>The equation \\(w^2=z\\) suggests a function, but it does not choose between the two roots. Even after a choice is made near one point, moving the input can threaten that choice. A usable algebraic function needs a selected branch and bounds that keep it separated from the alternatives.</p><p>Positive square roots give the first example. We then study certified simple complex roots and rational parametrizations, learning what extra evidence an algebraic formula needs before it can serve as a function computation.</p><p class=\"pedagogical-context\">Earlier context: <a href=\"ch-foundations.html\">Computable Numbers and Functions</a>.</p></section>",
+      "mathematicsOutsideOpeningUnchanged": true,
+      "control": {
+        "min": 0,
+        "max": 8,
+        "initial": 3
+      }
+    },
+    {
+      "page": "ch-local-models.html",
+      "visual": "charts",
+      "title": "Moving the centre spends radius",
+      "originalSha256": "e4f333a391da43a8d15666021bf5586585df34f03563267446f4985bab2beb06",
+      "pageSha256": "a23d2f8b6fcd086e912dd603337ce5013dda569e8b2a41aed62f7b549a1b6049",
+      "originalOpening": "<section class=\"pedagogical-opening\" data-pedagogy=\"opening\" id=\"why-this-page\"><p>Suppose we have already bounded the error of a local polynomial approximation. We would like to reuse that work when adding functions, composing them or solving a nearby equation. Recomputing a separate estimate for every expression would obscure the mathematics.</p><p>A finite local model packages the coefficients together with the remainder that makes them meaningful. This chapter develops reusable calculations with those models and applies controlled iteration to nonlinear constructions.</p><p class=\"pedagogical-context\">Earlier context: <a href=\"ch-infinite-series.html\">Series and Finite Remainders</a>.</p></section>",
+      "mathematicsOutsideOpeningUnchanged": true,
+      "control": {
+        "min": 0,
+        "max": 8,
+        "initial": 4
+      }
+    },
+    {
+      "page": "ch-complex-paths.html",
+      "visual": "path",
+      "title": "A continued value remembers the path",
+      "originalSha256": "8ed9d707a4a382e9132836d52f4d6b947d1dce54f46ac2c60ea55e2fa55b3981",
+      "pageSha256": "35e7bf2855b00df5e311e7eef4c37461cda3e0af9cf3f85648a82207772aa252",
+      "originalOpening": "<section class=\"pedagogical-opening\" data-pedagogy=\"opening\" id=\"why-this-page\"><p>Accumulation along a path now has a direction as well as a size. For a constant complex value, the contribution is that value times the endpoint displacement. Subdivision extends this elementary calculation to functions whose variation we can bound.</p><p>Loops introduce the striking question: when do all those contributions cancel, and when does an enclosed singularity leave a nonzero result? We will follow concrete paths and local function constructions to understand cancellation, residues and continuation.</p><p class=\"pedagogical-context\">Earlier context: <a href=\"ch-integrals.html\">Integral Computations</a>.</p></section>",
+      "mathematicsOutsideOpeningUnchanged": true,
+      "control": {
+        "min": 0,
+        "max": 24,
+        "initial": 12
+      }
+    },
+    {
+      "page": "ch-improper-parameters.html",
+      "visual": "tails",
+      "title": "Compute the middle; budget both ends",
+      "originalSha256": "e8d2a79359edcc8280e27dc644d2804ac286afb3e344d0f72ff4084eea819a22",
+      "pageSha256": "b10aa452e6e7dfb345f471e13753c4c7ad33834c9ad802cbc8261e51e317b87d",
+      "originalOpening": "<section class=\"pedagogical-opening\" data-pedagogy=\"opening\" id=\"why-this-page\"><p>A bounded-interval integral leaves a new question when an endpoint is missing or the domain extends indefinitely: how much can the omitted part contribute? A cutoff gives a finite calculation, but a bound on the omitted contribution is what makes it an approximation to an improper integral.</p><p>Gamma and Gaussian-type functions supply useful examples. When a parameter varies, the endpoint allowances must also support the operation we want to perform on that parameter. We will keep those estimates attached to the particular function.</p><p class=\"pedagogical-context\">Earlier context: <a href=\"power-improper.html\">Improper power integrals</a>.</p></section>",
+      "mathematicsOutsideOpeningUnchanged": true,
+      "control": {
+        "min": 1,
+        "max": 8,
+        "initial": 3
+      }
+    },
+    {
+      "page": "ch-fourier.html",
+      "visual": "fourier",
+      "title": "A positive kernel concentrates its weight",
+      "originalSha256": "097b3f75f7179b42bdf1cbed70ec5eb6bc07dcd61b99e931d5232d3f0a024f91",
+      "pageSha256": "65bd26c156017b06c2f41ab3589831c2e89de17342125938a69e5478636e01fb",
+      "originalOpening": "<section class=\"pedagogical-opening\" data-pedagogy=\"opening\" id=\"why-this-page\"><p>A periodic signal may contain several oscillations at once. Integrating it against a chosen oscillation can isolate one component, because different frequencies cancel over a period. This suggests both a way to analyze a function and a way to reconstruct it.</p><p>Finite trigonometric algebra supplies the starting point. A positive averaging kernel then controls the approximation error, and the periodic square function brings the reciprocal-square sum into the picture.</p><p class=\"pedagogical-context\">Earlier context: <a href=\"ch-rational-circle-trigonometry.html\">Angles and Trigonometric Functions</a>.</p></section>",
+      "mathematicsOutsideOpeningUnchanged": true,
+      "control": {
+        "min": 1,
+        "max": 5,
+        "initial": 3
+      }
+    },
+    {
+      "page": "ch-impulses.html",
+      "visual": "pulse",
+      "title": "A narrower pulse keeps the same total effect",
+      "originalSha256": "65392a701a2be3e14ba2640fb4166fd7ae45bcb98da8aa34f48bf6611f46616a",
+      "pageSha256": "2fb98f6a99a4b22e8d766b4fd7cc6e991f3d75a1dc9aee9e5a935203313bb889",
+      "originalOpening": "<section class=\"pedagogical-opening\" data-pedagogy=\"opening\" id=\"why-this-page\"><p>A short pulse can have a small duration and a large height while retaining the same total effect. A model that records only its pointwise limiting height loses that effect. Similarly, the derivative of a step should record its jump.</p><p>Evaluation against a test function gives a finite way to retain this information. Starting with ramps, steps and narrow pulses, we will see why atoms and their derivatives are useful computations in calculus and differential equations.</p><p class=\"pedagogical-context\">Earlier context: <a href=\"ch-effective-calculus.html\">Computing Derivatives and the Fundamental Theorem</a>.</p></section>",
+      "mathematicsOutsideOpeningUnchanged": true,
+      "control": {
+        "min": 0,
+        "max": 4,
+        "initial": 2
+      }
+    },
+    {
+      "page": "ch-differential-equations.html",
+      "visual": "evolution",
+      "title": "Two basic responses propagate every initial state",
+      "originalSha256": "7d3bac321ac2997f246e084ac393744e504519cd42cd68209316d2df31c4682e",
+      "pageSha256": "37ecc41935bae91049905b3062e05978843bbdcc9b56927c74437b3870341cfd",
+      "originalOpening": "<section class=\"pedagogical-opening\" data-pedagogy=\"opening\" id=\"why-this-page\"><p>An equation prescribing acceleration ought to determine motion from an initial position and velocity. Yet the answer is usually unknown when we start. Integrating an initial guess and repeating the operation gives a way for the equation to produce successive approximations to its own solution.</p><p>For a linear system, the response to each basic initial state can be reused for all initial states. This is the purpose of the fundamental matrix. We will construct it, justify uniqueness, then add forcing and study what happens near singular coefficients.</p><p class=\"pedagogical-context\">Earlier context: <a href=\"fundamental-matrix.html\">Fundamental Matrix</a>.</p></section>",
+      "mathematicsOutsideOpeningUnchanged": true,
+      "control": {
+        "min": 0,
+        "max": 32,
+        "initial": 8
+      }
+    },
+    {
+      "page": "ch-special-equations.html",
+      "visual": "bessel",
+      "title": "A recurrence produces values and controls the tail",
+      "originalSha256": "cd25d464cde2e40088fc5cf038751c1df02a73b43c365e09140abc89126d0450",
+      "pageSha256": "3098a0845667b0fecd1ce466316b9a9e751e8a51773ed0b17381db979f70ccf8",
+      "originalOpening": "<section class=\"pedagogical-opening\" data-pedagogy=\"opening\" id=\"why-this-page\"><p>Many equations encountered in applications have useful solutions without elementary closed forms. Naming a Bessel or hypergeometric function should come after choosing its initial or local data and giving a way to evaluate the resulting solution.</p><p>The series machinery supplies local values; differential-equation constructions can carry those values further. The examples below show how the two methods cooperate, and how a separated zero can become a computed number in its own right.</p><p class=\"pedagogical-context\">Earlier context: <a href=\"ch-differential-equations.html\">Linear ODEs and the Fundamental Matrix</a>.</p></section>",
+      "mathematicsOutsideOpeningUnchanged": true,
+      "control": {
+        "min": 2,
+        "max": 8,
+        "initial": 3
+      }
+    },
+    {
+      "page": "ch-transforms-zeta.html",
+      "visual": "zeta",
+      "title": "Choose a tail bound from the convergence mechanism",
+      "originalSha256": "008fd17eca84c4532446baeabe7b61731719c02eaa4c780c0bfb163c45c3238c",
+      "pageSha256": "0d6443229fed5d342bb1ad60c749898a677222ee2aec29a92a7a22da3e7b3d10",
+      "originalOpening": "<section class=\"pedagogical-opening\" data-pedagogy=\"opening\" id=\"why-this-page\"><p>Integration can encode a function in a new variable and make an equation easier to study. It also creates new error questions. An exponentially damped tail, an oscillatory tail and the tail of a reciprocal-power sum need different estimates.</p><p>We will work through those three situations. The point is to choose bounds from the mechanism that makes the particular computation converge, then prove agreement with any alternative formula we use.</p><p class=\"pedagogical-context\">Earlier context: <a href=\"ch-improper-parameters.html\">Improper Integrals, Parameters, and the Gamma Function</a>.</p></section>",
+      "mathematicsOutsideOpeningUnchanged": true,
+      "control": {
+        "min": 1,
+        "max": 10,
+        "initial": 4
+      }
+    },
+    {
+      "page": "ch-elliptic.html",
+      "visual": "elliptic",
+      "title": "Change the coordinate before computing",
+      "originalSha256": "6d0fbe1ca3cb556799b19cf75e47ab93fa1abe834f9a491431f846f38662748a",
+      "pageSha256": "1e8615af86331fb2e337b8656220d17261d9cce48a0dc34ec9edb7c9f40ed260",
+      "originalOpening": "<section class=\"pedagogical-opening\" data-pedagogy=\"opening\" id=\"why-this-page\"><p>Some integrals resist an elementary endpoint formula while still admitting efficient computation. The example below also has an apparent endpoint singularity. A coordinate change can remove that obstacle and leave a bounded integrand.</p><p>We can then ask whether a series and a differential equation compute the same family. This provides a final meeting point for the rational-circle geometry, local expansions, parameter integrals and variable-coefficient equations developed earlier.</p><p class=\"pedagogical-context\">Earlier context: <a href=\"ch-special-equations.html\">Special Functions from Equations and Integrals</a>.</p></section>",
+      "mathematicsOutsideOpeningUnchanged": true,
+      "control": {
+        "min": 0,
+        "max": 9,
+        "initial": 5
+      }
+    }
+  ],
+  "artifactHashes": {
+    "visuals.css": "034f627884384ecaa6d0dd91b9942cad639d98248c512f2d5502e078c3c1b468",
+    "visuals.js": "1aebef71ec1b294aebd6e791b77620b25181fc929a4392447134934c34deada6",
+    "check_arithmetic.py": "5adbb23b30d6229fc8d8e4913fa4e6f432fc62e404652888ce13d312d974179a",
+    "build_visuals.py": "80112e7976dc1725681b225f1300de8d0e77cdd1e0cdca1fb94d3209758f4803",
+    "apply_visuals.py": "7b3e0a4067b86c34a8c44553df2688850ab7373737ee8d93f523211081bd91aa",
+    "chapters/ch-impulses.html": "2fb98f6a99a4b22e8d766b4fd7cc6e991f3d75a1dc9aee9e5a935203313bb889",
+    "chapters/ch-elliptic.html": "1e8615af86331fb2e337b8656220d17261d9cce48a0dc34ec9edb7c9f40ed260",
+    "chapters/ch-fourier.html": "65bd26c156017b06c2f41ab3589831c2e89de17342125938a69e5478636e01fb",
+    "chapters/ch-effective-calculus.html": "a16b6db67048befa7d8fc399ef94d4ef52a5e998ea781902714df1c450ee36c8",
+    "chapters/ch-rational-circle-trigonometry.html": "be56de299e6f654ade38a489f53a7348b1bd9d298791683ad085128fe8d35849",
+    "chapters/ch-infinite-series.html": "d9d5c3e392006e8d3a6db1f703a3938fe2e7782e9b29deb5574c84c34d965f7d",
+    "chapters/ch-complex-paths.html": "35e7bf2855b00df5e311e7eef4c37461cda3e0af9cf3f85648a82207772aa252",
+    "chapters/ch-local-models.html": "a23d2f8b6fcd086e912dd603337ce5013dda569e8b2a41aed62f7b549a1b6049",
+    "chapters/ch-transforms-zeta.html": "0d6443229fed5d342bb1ad60c749898a677222ee2aec29a92a7a22da3e7b3d10",
+    "chapters/ch-integrals.html": "442968243e2bb816b7832f2f20fea8ccf47f30eaf3721a7987ebc5b3d271fed6",
+    "chapters/ch-differential-equations.html": "37ecc41935bae91049905b3062e05978843bbdcc9b56927c74437b3870341cfd",
+    "chapters/ch-improper-parameters.html": "b10aa452e6e7dfb345f471e13753c4c7ad33834c9ad802cbc8261e51e317b87d",
+    "chapters/ch-exponential-logarithm.html": "77e864f738885e1c93cecd7ba304e0af3c250c646a6d220bfc7a2c951f862a51",
+    "chapters/ch-special-equations.html": "3098a0845667b0fecd1ce466316b9a9e751e8a51773ed0b17381db979f70ccf8",
+    "chapters/ch-algebra-fta.html": "8e6a425fe21da5adcba1ea93d46284cf63804768d041101bb088cfb4ca0b3592"
+  }
+}

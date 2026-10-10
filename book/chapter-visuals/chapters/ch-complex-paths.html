@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="A mathematical foundation for calculus through certified rational computations." name="description"/><title>Complex paths · Computable Analysis</title><link href="reading/book.css" rel="stylesheet"/><script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],processEscapes:true},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script><script defer="" src="reading/book.js"></script><link href="reading/analysis-edition.css" rel="stylesheet"/><meta content="7b4dddd81afefceb62d05fa8319b122bfa223dcc" name="documentation-revision"/><style id="pedagogy-style">.pedagogical-opening{margin:1em 0 1.6em}.pedagogical-context{font-size:.9em}.pedagogical-bridge{margin:.8em 0 1.2em}</style><link rel="stylesheet" href="reading/chapter-visuals/visuals.css"><script defer src="reading/chapter-visuals/visuals.js"></script></head>
+<body><a class="skip" href="#main">Skip to mathematics</a><header class="book-header"><button aria-controls="book-nav" aria-expanded="false" id="menu-button">Contents</button><a class="brand" href="index.html">Computable <em>Analysis</em></a><a class="header-about" href="programme.html">An alternative foundation to Calculus</a></header>
+<nav aria-label="Book chapters" id="book-nav"><span class="nav-label">The book</span><a class="" href="ch-foundations.html"><span>01</span>Numbers and functions</a><a class="pi-catalogue-navigation" href="ch-foundations.html#pi-computations">Other examples: π</a><a class="" href="ch-circle-sphere.html"><span>02</span>Circle, sphere and cylinder</a><a class="" href="ch-rational-circle-trigonometry.html"><span>03</span>Angles and trigonometry</a><a class="" href="ch-integrals.html"><span>04</span>Integral computations</a><a class="" href="ch-effective-calculus.html"><span>05</span>Derivatives and the FTC</a><a class="" href="ch-infinite-series.html"><span>06</span>Infinite series</a><a class="" href="ch-exponential-logarithm.html"><span>07</span>Exponential and logarithm</a><details class="later-chapters" open=""><summary>Further chapters</summary><a class="" href="ch-algebra-fta.html"><span>08</span>Algebraic computations</a><a class="" href="ch-local-models.html"><span>09</span>Local models</a><a class="current" href="ch-complex-paths.html"><span>10</span>Complex paths</a><a class="" href="ch-improper-parameters.html"><span>11</span>Improper integrals</a><a class="" href="ch-fourier.html"><span>12</span>Fourier computations</a><a class="" href="ch-impulses.html"><span>13</span>Impulses</a><a class="" href="ch-differential-equations.html"><span>14</span>Differential equations</a><!-- fundamental-matrix:start --><a data-reader-addition="fundamental-matrix" href="fundamental-matrix.html">Fundamental Matrix</a><!-- fundamental-matrix:end --><a class="" href="ch-special-equations.html"><span>15</span>Special-function equations</a><a class="" href="ch-transforms-zeta.html"><span>16</span>Transforms and zeta</a><a class="" href="ch-elliptic.html"><span>17</span>Elliptic integrals</a></details><a class="nav-label construction-skill-label" href="construction-skills.html">Skills</a><a class="construction-skill-navigation" href="skill-real-integrals.html">Real integrals</a><a class="construction-skill-navigation" href="skill-complex-integrals.html">Complex path integrals</a><a class="construction-skill-navigation" href="skill-series.html">Series</a><a class="construction-skill-navigation" href="skill-holomorphic-functions.html">Holomorphic functions</a><a class="construction-skill-navigation" href="skill-analytic-continuation.html">Analytic continuation</a><span class="nav-label">Worked examples</span><a class="" href="cosine.html">The cosine-square integral</a><a class="classic-navigation" href="cartwright.html">Irrationality of \(\pi^2\)</a><a class="classic-navigation" href="leibniz.html">The Leibniz series</a><a class="classic-navigation" href="basel.html">The Basel problem</a><a class="classic-navigation" href="euler.html">Euler’s sine product</a><span class="nav-label">Function theory</span><a class="classic-navigation" href="arctan-taylor.html">Arctangent and Taylor series</a><a class="classic-navigation" href="complex-analysis.html">Polygonal Cauchy theory</a><a class="classic-navigation" href="analytic-continuation.html">Analytic continuation</a><a class="classic-navigation" href="zeta-zeros.html">Riemann zeta zeros</a><span class="nav-label">Differential equations</span><a class="classic-navigation" href="fuchs.html">Fuchs’s theorem</a><a class="classic-navigation" href="painleve.html">Painlevé’s classification</a><span class="nav-label">The development</span><a class="classic-navigation" href="proof-bundles.html">Bundled proof comparisons</a><a href="programme.html">Purpose and boundary</a><a href="proof-bench/">Proof-size comparison</a><a href="reference/index.html">Technical reference ↗</a></nav>
+<div class="page"><main class="reader" id="main"><div class="chapter-kicker">CHAPTER 10</div><article><div class="main-text">
+<h1 id="ch:complex-paths">Complex Paths and Analytic Continuation</h1><section class="pedagogical-opening" data-pedagogy="opening" id="why-this-page"><p>Complex accumulation follows a specified path. Returning to the same input need not return the same continued branch.</p><p class="pedagogical-context">Earlier context: <a href="ch-integrals.html">Integral Computations</a>.</p></section><!-- chapter-visual:start -->
+<figure class="chapter-visual" data-visual="path" id="visual-construction">
+<h2>A continued value remembers the path</h2>
+<canvas role="img" aria-label="A continued value remembers the path. Follow a logarithm from  around the origin. After one turn the input returns to , while the continued logarithm has gained . The path and its local branch evidence are part of the construction.">A continued value remembers the path</canvas>
+<div class="visual-legend">Green traversed path · Blue current point · Orange excluded origin</div>
+<div class="visual-controls"><label>Path stage: <span data-stage-value>12</span><input type="range" min="0" max="24" value="12" step="1" aria-label="Path stage"></label><button type="button" data-visual-reset>Reset</button></div>
+<div class="visual-output" aria-live="polite"></div>
+<figcaption>Follow a logarithm from \(1\) around the origin. After one turn the input returns to \(1\), while the continued logarithm has gained \(2\pi i\). The path and its local branch evidence are part of the construction. <a href="#a0000000051">Follow the construction.</a></figcaption>
+<noscript><p>Follow a logarithm from \(1\) around the origin. After one turn the input returns to \(1\), while the continued logarithm has gained \(2\pi i\). The path and its local branch evidence are part of the construction.</p></noscript>
+</figure>
+<!-- chapter-visual:end -->
+<section id="integral-enclosure-convention"><h2>Whole-chunk enclosures come first</h2><p>For each particular function, certify an outer range on every chunk, multiply by its length or oriented complex displacement, and add. Prove nesting or justified intersection and shrinking widths. Monotonicity supplies endpoint bounds when available. An endpoint formula or point-sampled computation requires a comparison with these enclosing sums.</p><p><a href="integral-enclosures.html">Read the construction and native-source audit</a>. The narrative below develops the mathematical route; a displayed general identity is not itself a claim of a completed native Lean bridge.</p></section>
+<p>Complex analysis can begin with polynomial identities, finite paths, and the series charts just constructed. The contour, its subdivision, and the local bounds are supplied data. We prove the integral identities actually used, rather than first postulating an arbitrary holomorphic function on an arbitrary open set. </p>
+<h2 id="a0000000051">10.1 Integrating on a segment</h2>
+<p>Subdivide the actual oriented segment into chunks with endpoints \(z_j,z_{j+1}\). Certify a rectangle \(B_j\) enclosing all function-value rectangles over each whole chunk, then form</p><div class="formula">\[I_n=\sum_j B_j(z_{j+1}-z_j).\]</div><p>Nested, shrinking outer sums define this particular integral. Multiplication by a vertical displacement rotates and scales each rectangle. Parametrized formulas are subsequent finite-sum comparisons.</p>
+
+
+<p>In a single series disk, the primitive </p>
+<div class="displaymath" id="a0000000327">
+  \[  P(c+w)=\sum _{n\ge 0}\frac{a_n}{n+1}w^{n+1}  \]
+</div>
+<p> has a geometric tail on every smaller disk. Its finite polynomial identities and their tails prove </p>
+<div class="displaymath" id="a0000000328">
+  \[  \int _{[p,q]}F=P(q)-P(p)  \]
+</div>
+<p> whenever the segment stays in such a disk. This also holds for a specified continuously differentiable parametrized arc in the disk: the finite polynomial chain rule gives the result, and its error is bounded by a supplied arc-length bound. Circle arcs from the earlier geometric construction are one such family. </p>
+<h2 id="thm:finite-contour">10.2 A finite form of the contour theorem</h2><div class="pedagogical-bridge" data-pedagogy="bridge"><p>Imagine dividing an enclosed region into small pieces. Each interior edge is traversed twice in opposite directions, so its contributions cancel. The boundary remains. The local estimates and coverage hypotheses below justify using that finite picture for the supplied function.</p></div>
+<p>  Suppose a rational triangulated polygon is supplied, and each closed triangle lies in a smaller certified series disk of \(F\). The descriptions are proved to agree on their overlaps. The integral around each triangle is zero, by its local primitive. Add these finitely many identities: interior edges cancel with their opposite orientations. Therefore </p>
+<div class="displaymath" id="a0000000329">
+  \[  \int _{\partial \Omega }F(z)\, dz=0.  \]
+</div>
+<p> A polygon with holes is treated by the same cancellation, giving the outer boundary integral as the sum of the positively oriented inner boundary integrals. A finite chain of these subdivisions proves equality of two path integrals. No existence of a finite subcover is assumed: the finite subdivision and the certified disk margins are exhibited. </p>
+<p>This is also a computational form of contour deformation. It is important to retain the overlap comparisons. Merely evaluating the same printed formula on two sides of a branch cut is not a proof that one has continued the same function. </p>
+<h2 id="a0000000052">10.3 Coefficient extraction on a circle</h2><div class="pedagogical-bridge" data-pedagogy="bridge"><p>A loop can separate the terms of a power series: after multiplying by the appropriate reciprocal power, all but one term cancel around the circle. This is why a boundary computation can reveal an interior coefficient.</p></div>
+<p> For \(0{\lt}r{\lt}R\), parametrize the circle by </p>
+<div class="displaymath" id="a0000000330">
+  \[  z(t)=c+rE(2\pi it),\qquad 0\le t\le 1.  \]
+</div>
+<p> This is computed at rational \(t\) by trigonometry, not by assuming circle points are rational. Its derivative and length bound have already been proved. Finite trigonometric orthogonality, or the trigonometric FTC, gives for every integer \(j\) </p>
+<div class="displaymath" id="a0000000331">
+  \[  \int _0^1 E(2\pi ijt)\, dt=\begin{cases} 1,&amp; j=0,\\ 0,&amp; j\ne 0.\end{cases}  \]
+</div>
+<p> Integrate a finite polynomial and use its uniform series tail. The result is </p>
+<div class="displaymath" id="a0000000332">
+  \[  \boxed {a_k=\frac1{2\pi i}\int _{|z-c|=r} \frac{F(z)}{(z-c)^{k+1}}\, dz.}  \]
+</div>
+<p> If the value boxes on this circle certify \(|F|\le B\), this formula gives \(|a_k|\le B r^{-k}\). Thus an independent boundary estimate can produce better coefficient bounds, rather than just use the original majorant. </p>
+<p>For a computed \(w\) with \(|w-c|{\lt}r\), expand \((z-w)^{-1}=\sum _{j\ge 0}(w-c)^j/(z-c)^{j+1}\) on the circle. Its tail is bounded by a geometric series with ratio \(|w-c|/r\). Finite integration and the coefficient formula give the local Cauchy identity </p>
+<div class="displaymath" id="a0000000333">
+  \[  \boxed {F(w)=\frac1{2\pi i}\int _{|z-c|=r} \frac{F(z)}{z-w}\, dz.}  \]
+</div>
+<p> Both sides are now specified computations with independent truncation and quadrature errors. We have proved the identity for the supplied chart, not invoked it to manufacture a chart from unverified pointwise data. </p>
+<h2 id="a0000000053">10.4 Known poles and finite residues</h2>
+<p> Suppose near a specified point \(s\) the computation has a proved description </p>
+<div class="displaymath" id="a0000000334">
+  \[  F(z)=\sum _{j=1}^m b_{-j}(z-s)^{-j}+H(z),  \]
+</div>
+<p> where \(H\) has a series chart. On a sufficiently small certified circle, finite coefficient extraction gives </p>
+<div class="displaymath" id="a0000000335">
+  \[  \int F(z)\, dz=2\pi i b_{-1}.  \]
+</div>
+<p> The coefficient \(b_{-1}\) is called the residue. The finite contour cancellation above transports this result to larger supplied polygonal contours when the region between them is covered by certified charts. For circular boundary components, approximate the arcs by the geometric polygonal construction inside the annular chart cover. Uniform continuity and path-length bounds control the integral errors; radial joining edges cancel. This supplies the same transport for those boundaries. </p>
+<p>As a direct example, on \(|z|=2\), </p>
+<div class="displaymath" id="a0000000336">
+  \[  \frac1{z(z-1)}=\sum _{n\ge 0}z^{-n-2},  \]
+</div>
+<p> so its integral is zero. Around \(0\) and \(1\) separately the residues are \(-1\) and \(1\). The two ways of computing the contour integral agree. The poles were supplied and their expansions proved; no unsupported search for every pole or zero has taken place. </p>
+<h2 id="a0000000054">10.5 Logarithm along a specified path</h2><div class="pedagogical-bridge" data-pedagogy="bridge"><p>Locally, integrating the reciprocal suggests a logarithm. Moving around a loop enclosing zero can change the accumulated value, so the path and branch choice must accompany the computation.</p></div>
+<p> Start near \(1\) with </p>
+<div class="displaymath" id="a0000000337">
+  \[  L(1+w)=\sum _{n\ge 1}\frac{(-1)^{n+1}}n w^n,\qquad |w|{\lt}1.  \]
+</div>
+<p> Its derivative is the geometric series for \(1/(1+w)\). The series product and chain rules show \(E(L(1+w))=1+w\): its quotient by \(1+w\) has all nonconstant derivative coefficients zero and constant value \(1\). On the positive real interval it agrees with the previously constructed logarithm by its primitive identity and the value at \(1\). </p>
+<p>Suppose a value \(L(c)\) has been continued to a nonzero computed point \(c\). Choose a certified \(d{\lt}|c|\) and set </p>
+<div class="displaymath" id="a0000000338">
+  \[  L(c+w)=L(c)+\sum _{n\ge 1}\frac{(-1)^{n+1}}n(w/c)^n, \qquad |w|\le d.  \]
+</div>
+<p> This is a fresh chart, whose radius comes from separation from zero. The value at the next center is computed from the old chart, and the two charts have derivative \(1/z\) on their overlap. Their local primitive identities and matching value prove agreement on the overlap, which is convex. A finite chain of such steps computes continuation along a supplied path avoiding zero. A rational positive distance from zero on each path piece gives a finite step schedule. </p>
+<p>The end value can depend on the path. On the unit circle, </p>
+<div class="displaymath" id="a0000000339">
+  \[  \int \frac{dz}{z}=\int _0^1 2\pi i\, dt=2\pi i.  \]
+</div>
+<p> Thus continuation from \(1\) once counterclockwise changes the logarithm value by \(2\pi i\). Starting with value \(0\), the computation \(E(L/2)\) returns to \(-1\), not \(1\). This constructs the sign change of the square root after a circuit. A path and a starting branch are part of the input; there is no single globally chosen square-root computation on the punctured plane. </p>
+<h2 id="a0000000055">10.6 When does a chain of charts count as continuation?</h2>
+<p> A continuation certificate consists of finitely many local charts, steps lying strictly within their certified disks, and proved comparisons on each successive overlap. Comparisons can be coefficient identities, local primitive identities, or the uniqueness estimates for an explicitly constructed differential or integral equation. Equality of all Taylor coefficients at a common center implies equality on their common smaller disk by the finite tail estimates. Matching only a finite jet is not enough unless an equation proves that it determines the later coefficients. </p>
+<p>A path change is justified by a finite subdivision whose cells stay in such common charts. It does not follow from drawing apparently similar paths. This requirement exposes the separation and branch information that an appeal to unrestricted analytic continuation would hide. </p>
+<p>The next chapters use two different ways to replenish local bounds: parameter integrals supply new majorants in right half-planes, while linear equations supply new evolution bounds away from their coefficient singularities. Both can be connected to these local contour computations.  </p>
+</div><!-- cauchy-arctan:start --><section id="cauchy-arctan"><h2>Arctangent, residues and Cauchy’s formula</h2><p>The square integral of dz/z reduces to 8i times the arctangent area, giving 2πi with our geometric π. This normalization is checked natively. PNT+ supplies the external Mathlib reference for the general rectangle and finite simple-pole residue theorems.</p><p><a href="cauchy-arctan.html">Follow the argument, formal sources and native scope →</a></p><p>The general native residue and Cauchy formulas still require their contour transport and regular-part bridges.</p></section><!-- cauchy-arctan:end --></article><footer class="chapter-footer"><span>Mathematical manuscript · formal comparison status at each theorem</span><a href="https://github.com/liuyao12/computable-analysis/tree/f630241adeae35fc06a5fd4921a4df6396e291d0">Source f630241a ↗</a></footer></main><aside class="on-this-page"><span>On this page</span><a href="#a0000000051">10.1 Integrating on a segment</a><a href="#thm:finite-contour">10.2 A finite form of the contour theorem</a><a href="#a0000000052">10.3 Coefficient extraction on a circle</a><a href="#a0000000053">10.4 Known poles and finite residues</a><a href="#a0000000054">10.5 Logarithm along a specified path</a><a href="#a0000000055">10.6 When does a chain of charts count as continuation?</a></aside></div>
+<dialog id="proof-dialog"><div class="dialog-top"><span>Proof structure</span><button aria-label="Close proof map and return to the text" id="close-proof">Return to text ×</button></div><iframe id="proof-frame" title="Mathematical proof map"></iframe></dialog></body></html>

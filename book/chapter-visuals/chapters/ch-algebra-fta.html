@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="A mathematical foundation for calculus through certified rational computations." name="description"/><title>Algebraic computations · Computable Analysis</title><link href="reading/book.css" rel="stylesheet"/><script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],processEscapes:true},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script><script defer="" src="reading/book.js"></script><link href="reading/analysis-edition.css" rel="stylesheet"/><meta content="7b4dddd81afefceb62d05fa8319b122bfa223dcc" name="documentation-revision"/><style id="pedagogy-style">.pedagogical-opening{margin:1em 0 1.6em}.pedagogical-context{font-size:.9em}.pedagogical-bridge{margin:.8em 0 1.2em}</style><link rel="stylesheet" href="reading/chapter-visuals/visuals.css"><script defer src="reading/chapter-visuals/visuals.js"></script></head>
+<body><a class="skip" href="#main">Skip to mathematics</a><header class="book-header"><button aria-controls="book-nav" aria-expanded="false" id="menu-button">Contents</button><a class="brand" href="index.html">Computable <em>Analysis</em></a><a class="header-about" href="programme.html">An alternative foundation to Calculus</a></header>
+<nav aria-label="Book chapters" id="book-nav"><span class="nav-label">The book</span><a class="" href="ch-foundations.html"><span>01</span>Numbers and functions</a><a class="pi-catalogue-navigation" href="ch-foundations.html#pi-computations">Other examples: π</a><a class="" href="ch-circle-sphere.html"><span>02</span>Circle, sphere and cylinder</a><a class="" href="ch-rational-circle-trigonometry.html"><span>03</span>Angles and trigonometry</a><a class="" href="ch-integrals.html"><span>04</span>Integral computations</a><a class="" href="ch-effective-calculus.html"><span>05</span>Derivatives and the FTC</a><a class="" href="ch-infinite-series.html"><span>06</span>Infinite series</a><a class="" href="ch-exponential-logarithm.html"><span>07</span>Exponential and logarithm</a><details class="later-chapters" open=""><summary>Further chapters</summary><a class="current" href="ch-algebra-fta.html"><span>08</span>Algebraic computations</a><a class="" href="ch-local-models.html"><span>09</span>Local models</a><a class="" href="ch-complex-paths.html"><span>10</span>Complex paths</a><a class="" href="ch-improper-parameters.html"><span>11</span>Improper integrals</a><a class="" href="ch-fourier.html"><span>12</span>Fourier computations</a><a class="" href="ch-impulses.html"><span>13</span>Impulses</a><a class="" href="ch-differential-equations.html"><span>14</span>Differential equations</a><!-- fundamental-matrix:start --><a data-reader-addition="fundamental-matrix" href="fundamental-matrix.html">Fundamental Matrix</a><!-- fundamental-matrix:end --><a class="" href="ch-special-equations.html"><span>15</span>Special-function equations</a><a class="" href="ch-transforms-zeta.html"><span>16</span>Transforms and zeta</a><a class="" href="ch-elliptic.html"><span>17</span>Elliptic integrals</a></details><a class="nav-label construction-skill-label" href="construction-skills.html">Skills</a><a class="construction-skill-navigation" href="skill-real-integrals.html">Real integrals</a><a class="construction-skill-navigation" href="skill-complex-integrals.html">Complex path integrals</a><a class="construction-skill-navigation" href="skill-series.html">Series</a><a class="construction-skill-navigation" href="skill-holomorphic-functions.html">Holomorphic functions</a><a class="construction-skill-navigation" href="skill-analytic-continuation.html">Analytic continuation</a><span class="nav-label">Worked examples</span><a class="" href="cosine.html">The cosine-square integral</a><a class="classic-navigation" href="cartwright.html">Irrationality of \(\pi^2\)</a><a class="classic-navigation" href="leibniz.html">The Leibniz series</a><a class="classic-navigation" href="basel.html">The Basel problem</a><a class="classic-navigation" href="euler.html">Euler’s sine product</a><span class="nav-label">Function theory</span><a class="classic-navigation" href="arctan-taylor.html">Arctangent and Taylor series</a><a class="classic-navigation" href="complex-analysis.html">Polygonal Cauchy theory</a><a class="classic-navigation" href="analytic-continuation.html">Analytic continuation</a><a class="classic-navigation" href="zeta-zeros.html">Riemann zeta zeros</a><span class="nav-label">Differential equations</span><a class="classic-navigation" href="fuchs.html">Fuchs’s theorem</a><a class="classic-navigation" href="painleve.html">Painlevé’s classification</a><span class="nav-label">The development</span><a class="classic-navigation" href="proof-bundles.html">Bundled proof comparisons</a><a href="programme.html">Purpose and boundary</a><a href="proof-bench/">Proof-size comparison</a><a href="reference/index.html">Technical reference ↗</a></nav>
+<div class="page"><main class="reader" id="main"><div class="chapter-kicker">CHAPTER 08</div><article><div class="main-text">
+<h1 id="ch:algebra-fta">Algebraic Branches and Rational Curves</h1><section class="pedagogical-opening" data-pedagogy="opening" id="why-this-page"><p>An equation does not choose a root. A selected branch and a separating interval make it a function computation.</p><p class="pedagogical-context">Earlier context: <a href="ch-foundations.html">Computable Numbers and Functions</a>.</p></section><!-- chapter-visual:start -->
+<figure class="chapter-visual" data-visual="root" id="visual-construction">
+<h2>Select a branch and keep its bracket</h2>
+<canvas role="img" aria-label="Select a branch and keep its bracket. Bisection selects the positive root of . The green strip records every possible value still allowed by the exact square comparisons. Complex branches require analogous separation data.">Select a branch and keep its bracket</canvas>
+<div class="visual-legend">Green root bracket · Dashed orange target value</div>
+<div class="visual-controls"><label>Bisections: <span data-stage-value>3</span><input type="range" min="0" max="8" value="3" step="1" aria-label="Bisections"></label><button type="button" data-visual-reset>Reset</button></div>
+<div class="visual-output" aria-live="polite"></div>
+<figcaption>Bisection selects the positive root of \(w^2=2\). The green strip records every possible value still allowed by the exact square comparisons. Complex branches require analogous separation data. <a href="#a0000000043">Follow the construction.</a></figcaption>
+<noscript><p>Bisection selects the positive root of \(w^2=2\). The green strip records every possible value still allowed by the exact square comparisons. Complex branches require analogous separation data.</p></noscript>
+</figure>
+<!-- chapter-visual:end -->
+
+<p>An algebraic formula is useful only after a branch has been selected and its values enclosed. We develop representative constructions: positive square roots, a certified simple complex root, and a rational curve. Each has its own finite domain and separation data. </p>
+<h2 id="a0000000043">8.1 Positive roots and their derivatives</h2>
+<p> On \([a,b]\) with rational \(a{\gt}0\), the square-root bisection computation has </p>
+<div class="displaymath" id="a0000000290">
+  \[  \frac{\sqrt y-\sqrt x}{y-x} =\frac1{\sqrt y+\sqrt x}\qquad (x\ne y).  \]
+</div>
+<p> As both inputs increase these slopes decrease, so the function is concave. On the interval the denominator is at least \(2\sqrt a\), with an explicit rational positive lower bound obtainable by refinement. The difference between the left and right secants at \(x\) tends to zero by the root continuity estimate. Consequently </p>
+<div class="displaymath" id="a0000000291">
+  \[  D\sqrt x=\frac1{2\sqrt x}.  \]
+</div>
+<p> The derivative is not bounded near zero; no theorem requiring a bounded endpoint derivative is applied there. </p>
+<p>For a primitive of the square root, set \(F(x)=\frac23 x\sqrt x\) for \(x\ge 0\), and extend by zero for \(x\le 0\). If \(0\le x{\lt}y\), write \(u=\sqrt x\), \(v=\sqrt y\). Then </p>
+<div class="displaymath" id="a0000000292">
+  \[  \frac{F(y)-F(x)}{y-x} =\frac{2(v^2+uv+u^2)}{3(u+v)}  \]
+</div>
+<p> when \(u+v{\gt}0\). It lies between \(u\) and \(v\): after clearing the positive denominator the two differences are \((v-u)(2v+u)\) and \((v-u)(v+2u)\). Adjacent secants are therefore ordered; \(F\) is convex and \(DF(x)=\sqrt x\) on \(x\ge 0\), including the shrinking one-sided bound at zero. The convex FTC gives </p>
+<div class="displaymath" id="a0000000293">
+  \[  \int _0^b\sqrt x\, dx=\frac23 b\sqrt b.  \]
+</div>
+<p> The reciprocal-root integral can also be computed as an improper integral: removing \([0,\varepsilon ]\) has error \(2\sqrt\varepsilon \), by the primitive \(2\sqrt x\) on positive interior intervals and their FTC. The tail bound, not a bare improper-integral symbol, defines the computation. </p>
+<h2 id="a0000000044">8.2 Separated rational functions have finite remainder bounds</h2>
+<p> Let \(P,Q\) be rational polynomials on a fixed interval with the supplied separation \(|Q|\ge c{\gt}0\). For numbers \(v,w\) separated from zero, </p>
+<div class="displaymath" id="a0000000294">
+  \[  \frac1w-\frac1v+\frac{w-v}{v^2} =\frac{(w-v)^2}{v^2w}.  \]
+</div>
+<p> Finite polynomial expansions and this identity give </p>
+<div class="displaymath" id="a0000000295">
+  \[  \frac{P(x+h)}{Q(x+h)}-\frac{P(x)}{Q(x)} =\frac{P'(x)Q(x)-P(x)Q'(x)}{Q(x)^2}h+R(x,h), \qquad |R(x,h)|\le K h^2,  \]
+</div>
+<p> with a rational \(K\) computed from polynomial coefficient bounds, \(c\), and the interval length. Indeed the reciprocal remainder is bounded by \(c^{-3}|Q(x+h)-Q(x)|^2\), and the polynomial linear remainders are bounded by their finite binomial expansions. Multiplication adds only bounded quadratic terms. </p>
+<p>Applying the estimate at \(h\) and \(-h\) cancels the linear terms. Thus \(P/Q+Kx^2\) is midpoint convex, hence convex, and its centered secant gaps are at most \(4K|h|\). The quotient formula is consequently the actual computed derivative, with a convex-difference FTC certificate. This supplies, in particular, the rational substitutions in this chapter and the final elliptic-integral example. No assertion about an arbitrary pointwise rational second derivative is used. </p>
+<h2 id="a0000000045">8.3 A complex root certified by contraction</h2>
+<p> Let \(P\) be a polynomial with rational complex coefficients, and let \(c\) be a rational complex point with \(P'(c)\ne 0\). Define </p>
+<div class="displaymath" id="a0000000296">
+  \[  T(z)=z-P(z)/P'(c).  \]
+</div>
+<p> Use the coordinate maximum norm on complex numbers. Multiplication by \(w\) has norm at most \(|\Re w|+|\Im w|\). Suppose finite polynomial bounds on the square \(\| z-c\| _\infty \le r\) certify </p>
+<div class="displaymath" id="a0000000297">
+  \[  \| T(c)-c\| _\infty \le (1-q)r,\qquad \| T(z)-T(w)\| _\infty \le q\| z-w\| _\infty , \quad 0\le q{\lt}1.  \]
+</div>
+<p> The second inequality can be checked by factoring \(P(z)-P(w)\) and bounding the resulting polynomial on two copies of the square. Then \(T\) preserves the square. Starting at \(z_0=c\), compute the rational iterates \(z_{n+1}=T(z_n)\). For \(m{\gt}n\), </p>
+<div class="displaymath" id="a0000000298">
+  \[  \| z_m-z_n\| _\infty \le \frac{q^n}{1-q}\| z_1-z_0\| _\infty .  \]
+</div>
+<p> Rational boxes with this error, stabilized coordinatewise, define a root computation. Polynomial continuity and the iteration identity prove \(P(z)=0\). Two root computations in the square have distance at most \(q^n\) times their initial distance for every \(n\), proving uniqueness without a fixed-point existence theorem. </p>
+<div class="example_thmwrapper theorem-style-definition" id="a0000000299">
+<div class="example_thmheading">
+<span class="example_thmcaption">
+    Example
+    </span>
+<span class="example_thmlabel">8.1</span>
+<span class="example_thmtitle">A nonrational complex root</span>
+</div>
+<div class="example_thmcontent">
+<p> For \(P(z)=z^2+2\), take \(c=3i/2\) and \(r=1/6\). The residual step has norm \(1/12\). Factoring \(T(z)-T(w)\) gives contraction constant \(q=2/9\) on the square, since </p>
+<div class="displaymath" id="a0000000300">
+  \[  T(z)-T(w)=(z-w)\left(1-\frac{z+w}{3i}\right).  \]
+</div>
+<p> Also \(1/12\le (1-2/9)/6\). Thus the iteration constructs its unique root there. Comparison with the square-root construction identifies it as \(i\sqrt2\); reflection gives the other root. The exact polynomial identity \((z-i\sqrt2)(z+i\sqrt2)=z^2+2\) accounts for both roots. </p>
+</div>
+</div>
+<p>This is a certificate for supplied root locations, not an invocation of a general complex root-existence theorem. Polynomial identities, separation, and refinement are the concrete mathematical ingredients. </p>
+<h2 id="a0000000046">8.4 Rational parametrization changes the computation</h2>
+<p> The singular cubic </p>
+<div class="displaymath" id="a0000000301">
+  \[  y^2=x^2(1-x)  \]
+</div>
+<p> has the parametrization </p>
+<div class="displaymath" id="a0000000302">
+  \[  x=1-t^2,\qquad y=t(1-t^2).  \]
+</div>
+<p> Substitution verifies the equation by finite algebra. Away from \(x=0\), the inverse parameter is \(t=y/x\). Both coordinates are rational at rational \(t\). A rational differential form in \(x,y\) therefore becomes a rational function of \(t\) wherever the denominators are separated from zero. </p>
+<p>For example, on \(0{\lt}t{\lt}1\), </p>
+<div class="displaymath" id="a0000000303">
+  \[  \frac{dx}{y}=-\frac{2\, dt}{1-t^2}.  \]
+</div>
+<p> Between rational parameters \(0{\lt}u{\lt}v{\lt}1\), its integral is computed by </p>
+<div class="displaymath" id="a0000000304">
+  \[  -\log \frac{1+v}{1-v}+\log \frac{1+u}{1-u}.  \]
+</div>
+<p> Indeed \(-2/(1-t^2)=-1/(1-t)-1/(1+t)\), and the logarithm FTC proves the formula. The line-integral computation is defined along the parametrized path, so its orientation and domain are explicit. </p>
+<p>A parametrization is more than a closed formula: it can replace an algebraic-value algorithm by exact rational evaluation and turn a difficult integral into a previously understood one. The final chapter will use a rational circle chart to regularize an integral whose next useful description is a differential equation rather than an elementary primitive.  </p>
+</div></article><footer class="chapter-footer"><span>Mathematical manuscript · formal comparison status at each theorem</span><a href="https://github.com/liuyao12/computable-analysis/tree/f630241adeae35fc06a5fd4921a4df6396e291d0">Source f630241a ↗</a></footer></main><aside class="on-this-page"><span>On this page</span><a href="#a0000000043">8.1 Positive roots and their derivatives</a><a href="#a0000000044">8.2 Separated rational functions have finite remainder bounds</a><a href="#a0000000045">8.3 A complex root certified by contraction</a><a href="#a0000000046">8.4 Rational parametrization changes the computation</a></aside></div>
+<dialog id="proof-dialog"><div class="dialog-top"><span>Proof structure</span><button aria-label="Close proof map and return to the text" id="close-proof">Return to text ×</button></div><iframe id="proof-frame" title="Mathematical proof map"></iframe></dialog></body></html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="A mathematical foundation for calculus through certified rational computations." name="description"/><title>Special-function equations · Computable Analysis</title><link href="reading/book.css" rel="stylesheet"/><script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],processEscapes:true},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script><script defer="" src="reading/book.js"></script><link href="reading/analysis-edition.css" rel="stylesheet"/><meta content="7b4dddd81afefceb62d05fa8319b122bfa223dcc" name="documentation-revision"/><style id="pedagogy-style">.pedagogical-opening{margin:1em 0 1.6em}.pedagogical-context{font-size:.9em}.pedagogical-bridge{margin:.8em 0 1.2em}</style><link rel="stylesheet" href="reading/chapter-visuals/visuals.css"><script defer src="reading/chapter-visuals/visuals.js"></script></head>
+<body><a class="skip" href="#main">Skip to mathematics</a><header class="book-header"><button aria-controls="book-nav" aria-expanded="false" id="menu-button">Contents</button><a class="brand" href="index.html">Computable <em>Analysis</em></a><a class="header-about" href="programme.html">An alternative foundation to Calculus</a></header>
+<nav aria-label="Book chapters" id="book-nav"><span class="nav-label">The book</span><a class="" href="ch-foundations.html"><span>01</span>Numbers and functions</a><a class="pi-catalogue-navigation" href="ch-foundations.html#pi-computations">Other examples: π</a><a class="" href="ch-circle-sphere.html"><span>02</span>Circle, sphere and cylinder</a><a class="" href="ch-rational-circle-trigonometry.html"><span>03</span>Angles and trigonometry</a><a class="" href="ch-integrals.html"><span>04</span>Integral computations</a><a class="" href="ch-effective-calculus.html"><span>05</span>Derivatives and the FTC</a><a class="" href="ch-infinite-series.html"><span>06</span>Infinite series</a><a class="" href="ch-exponential-logarithm.html"><span>07</span>Exponential and logarithm</a><details class="later-chapters" open=""><summary>Further chapters</summary><a class="" href="ch-algebra-fta.html"><span>08</span>Algebraic computations</a><a class="" href="ch-local-models.html"><span>09</span>Local models</a><a class="" href="ch-complex-paths.html"><span>10</span>Complex paths</a><a class="" href="ch-improper-parameters.html"><span>11</span>Improper integrals</a><a class="" href="ch-fourier.html"><span>12</span>Fourier computations</a><a class="" href="ch-impulses.html"><span>13</span>Impulses</a><a class="" href="ch-differential-equations.html"><span>14</span>Differential equations</a><!-- fundamental-matrix:start --><a data-reader-addition="fundamental-matrix" href="fundamental-matrix.html">Fundamental Matrix</a><!-- fundamental-matrix:end --><a class="current" href="ch-special-equations.html"><span>15</span>Special-function equations</a><a class="" href="ch-transforms-zeta.html"><span>16</span>Transforms and zeta</a><a class="" href="ch-elliptic.html"><span>17</span>Elliptic integrals</a></details><a class="nav-label construction-skill-label" href="construction-skills.html">Skills</a><a class="construction-skill-navigation" href="skill-real-integrals.html">Real integrals</a><a class="construction-skill-navigation" href="skill-complex-integrals.html">Complex path integrals</a><a class="construction-skill-navigation" href="skill-series.html">Series</a><a class="construction-skill-navigation" href="skill-holomorphic-functions.html">Holomorphic functions</a><a class="construction-skill-navigation" href="skill-analytic-continuation.html">Analytic continuation</a><span class="nav-label">Worked examples</span><a class="" href="cosine.html">The cosine-square integral</a><a class="classic-navigation" href="cartwright.html">Irrationality of \(\pi^2\)</a><a class="classic-navigation" href="leibniz.html">The Leibniz series</a><a class="classic-navigation" href="basel.html">The Basel problem</a><a class="classic-navigation" href="euler.html">Euler’s sine product</a><span class="nav-label">Function theory</span><a class="classic-navigation" href="arctan-taylor.html">Arctangent and Taylor series</a><a class="classic-navigation" href="complex-analysis.html">Polygonal Cauchy theory</a><a class="classic-navigation" href="analytic-continuation.html">Analytic continuation</a><a class="classic-navigation" href="zeta-zeros.html">Riemann zeta zeros</a><span class="nav-label">Differential equations</span><a class="classic-navigation" href="fuchs.html">Fuchs’s theorem</a><a class="classic-navigation" href="painleve.html">Painlevé’s classification</a><span class="nav-label">The development</span><a class="classic-navigation" href="proof-bundles.html">Bundled proof comparisons</a><a href="programme.html">Purpose and boundary</a><a href="proof-bench/">Proof-size comparison</a><a href="reference/index.html">Technical reference ↗</a></nav>
+<div class="page"><main class="reader" id="main"><div class="chapter-kicker">CHAPTER 15</div><article><div class="main-text">
+<h1 id="ch:special-equations">Special Functions from Equations and Integrals</h1><section class="pedagogical-opening" data-pedagogy="opening" id="why-this-page"><p>A special function becomes usable once its chosen local data generate coefficients and a bound for the missing terms.</p><p class="pedagogical-context">Earlier context: <a href="ch-differential-equations.html">Linear ODEs and the Fundamental Matrix</a>.</p></section><!-- chapter-visual:start -->
+<figure class="chapter-visual" data-visual="bessel" id="visual-construction">
+<h2>A recurrence produces values and controls the tail</h2>
+<canvas role="img" aria-label="A recurrence produces values and controls the tail. The green polynomial retains terms of the  series through the selected degree index. Gray sketches a longer prefix. On , the first omitted term and the decreasing ratio  give the displayed error bound.">A recurrence produces values and controls the tail</canvas>
+<div class="visual-legend">Green selected prefix · Gray longer prefix</div>
+<div class="visual-controls"><label>Last term index: <span data-stage-value>3</span><input type="range" min="2" max="8" value="3" step="1" aria-label="Last term index"></label><button type="button" data-visual-reset>Reset</button></div>
+<div class="visual-output" aria-live="polite"></div>
+<figcaption>The green polynomial retains terms of the \(J_0\) series through the selected degree index. Gray sketches a longer prefix. On \(|z|\le4\), the first omitted term and the decreasing ratio \(4/(N+2)^2\) give the displayed error bound. <a href="#a0000000083">Follow the construction.</a></figcaption>
+<noscript><p>The green polynomial retains terms of the \(J_0\) series through the selected degree index. Gray sketches a longer prefix. On \(|z|\le4\), the first omitted term and the decreasing ratio \(4/(N+2)^2\) give the displayed error bound.</p></noscript>
+</figure>
+<!-- chapter-visual:end -->
+
+<p>A differential equation is useful only after its chosen solution has been specified and its computation bounded. A recurrence supplies local data; the fundamental matrix moves that data along certified paths. Bessel and hypergeometric functions illustrate the two parts, and a Bessel zero shows how a special-function value can itself become an inverse computation. </p>
+<h2 id="a0000000082">15.1 Bessel functions of integer order</h2>
+<p> For an integer \(m\ge 0\), define </p>
+<div class="displaymath" id="a0000000417">
+  \[  J_m(z)=\sum _{k\ge 0}\frac{(-1)^k(z/2)^{2k+m}}{k!(k+m)!}.  \]
+</div>
+<p> Every coefficient is rational. On \(|z|\le R\), the absolute terms have successive ratio </p>
+<div class="displaymath" id="a0000000418">
+  \[  \frac{R^2}{4(k+1)(k+m+1)}.  \]
+</div>
+<p> This decreases to zero; after it is at most \(1/2\), the tail is at most twice the first omitted majorant term. Multiplying by any fixed falling factorial gives a derivative-tail sequence with the same eventual property. Consequently these are entire function and derivative computations. To obtain a geometric coefficient chart of any chosen radius, evaluate the absolute series majorant at a strictly larger radius and bound each coefficient by that weighted sum. </p>
+<p>Coefficient comparison proves </p>
+<div class="displaymath" id="a0000000419">
+  \[  z^2J_m''+zJ_m'+(z^2-m^2)J_m=0, \qquad J_0'=-J_1.  \]
+</div>
+<p> For example the coefficient of degree \(2k+m\) in the equation is \(4k(k+m)a_k+a_{k-1}=0\) for \(k\ge 1\); the lowest coefficient is free and is set to \(1/(2^m m!)\). This both verifies the equation and records which local solution was selected. Standard notation and the equation are in <a href="https://dlmf.nist.gov/10.2">DLMF, Section 10.2</a>. </p>
+<p>On a path avoiding zero, the state \((J_m,J_m')\) satisfies </p>
+<div class="displaymath" id="a0000000420">
+  \[  Y'=\begin{pmatrix} 0
+
+&amp; 1
+
+\\ m^2/z^2-1
+
+&amp; -1/z
+
+\end{pmatrix}Y.  \]
+</div>
+<p> Start at a nonzero point with values from the entire series. Pull back each rational polygonal path segment \(z=p+t(q-p)\) to \(0\le t\le 1\): its coefficient matrix is \((q-p)A(p+t(q-p))\). A certified positive separation from zero bounds all entries and supplies their continuity. The Peano–Baker construction then propagates the state. Integral-equation uniqueness proves agreement with the series. It is unnecessary, and incorrect, to apply the bounded-coefficient evolution theorem at \(z=0\); the series handled that point separately. </p>
+<h2 id="a0000000083">15.2 A second Bessel computation</h2>
+<p> The circle functions give the bounded integral </p>
+<div class="displaymath" id="a0000000421">
+  \[  B(z)=\int _0^1 E(izC(t))\, dt.  \]
+</div>
+<p> The factorial majorant is uniform for \(0\le t\le 1\) on every bounded \(z\)-disk. Thus it can be integrated term by term. Symmetry cancels odd powers, and finite trigonometric integration gives </p>
+<div class="displaymath" id="a0000000422">
+  \[  \int _0^1 C(t)^{2k}\, dt=\frac{\binom {2k}{k}}{4^k}.  \]
+</div>
+<p> For completeness, differentiating \(S(t)C(t)^{2k-1}\) and integrating its zero endpoint difference yields the recurrence \(M_k=(2k-1)M_{k-1}/(2k)\), with \(M_0=1\). The product has the uniform increment estimates already proved for sine and cosine, so this use of the FTC is justified. Substitution into the exponential coefficients shows \(B=J_0\). For real \(z\) its imaginary part cancels by \(t\mapsto 1-t\); hence </p>
+<div class="displaymath" id="a0000000423">
+  \[  J_0(z)=\int _0^1\cos (zC(t))\, dt,  \]
+</div>
+<p> where \(\cos w=(E(iw)+E(-iw))/2\). This is the normalized Bessel integral of <a href="https://dlmf.nist.gov/10.9">DLMF, Section 10.9</a>, proved here by finite moments and a uniform tail. </p>
+<h2 id="sec:bessel-zero">15.3 Computing a zero without a general root theorem</h2>
+<p>  Exact alternating-series bounds give </p>
+<div class="displaymath" id="a0000000424">
+  \[  J_0(2){\gt}\frac29{\gt}0,\qquad J_0(3){\lt}-\frac{4199}{16384}{\lt}0.  \]
+</div>
+<p> The first bound uses terms through \(k=3\); the second uses terms through \(k=4\). Although the first absolute term at \(3\) need not decrease, the remaining tail after these cutoffs does decrease and has the indicated sign. At \(0\le x\le 3\), writing \(q=x^2\), the tail in \(J_1\) after its four displayed terms gives </p>
+<div class="displaymath" id="a0000000425">
+  \[  J_1(x)\ge \frac x2 \left(1-\frac q8+\frac{q^2}{192}-\frac{q^3}{9216}\right).  \]
+</div>
+<p> The polynomial in parentheses decreases on \([0,9]\): its derivative is \(-1/8+q/96-q^2/3072{\lt}0\). Its value at \(9\) is \(223/1024\). Therefore \(J_1(x)\ge 223/1024\) on \([2,3]\), and the certified FTC gives </p>
+<div class="displaymath" id="a0000000426">
+  \[  J_0(u)-J_0(v)\ge \frac{223}{1024}(v-u) \quad (2\le u{\lt}v\le 3).  \]
+</div>
+<p> The endpoint signs and this separation make the trisection inverse construction of Chapter <a href="ch-foundations.html">1</a> terminate. They compute a unique zero in \([2,3]\) as nested rational intervals. Also \(J_0(x)\ge 1-x^2/4{\gt}0\) for \(0\le x{\lt}2\), so this is its first positive zero. The root is a new number computation, not a symbolic placeholder chosen by a completeness theorem. </p>
+<h2 id="a0000000084">15.4 A recurrence with a finite convergence disk</h2>
+<p> For rational parameters \(a,b,c\) with \(c\notin \{ 0,-1,-2,\ldots \} \), put </p>
+<div class="displaymath" id="a0000000427">
+  \[  h_0=1,\qquad (n+1)(n+c)h_{n+1}=(n+a)(n+b)h_n, \qquad F(z)=\sum _{n\ge 0}h_nz^n.  \]
+</div>
+<p> If an upper parameter makes a numerator zero, the recurrence terminates and gives a polynomial. Otherwise, for a chosen rational \(r{\lt}1\), bound the term ratio by </p>
+<div class="displaymath" id="a0000000428">
+  \[  r\frac{(n+|a|)(n+|b|)}{(n+1)(n-|c|)}\qquad (n{\gt}|c|).  \]
+</div>
+<p> Choose rational \(r{\lt}\theta {\lt}1\). After clearing the positive denominator, the assertion that this ratio is at most \(\theta \) is a quadratic polynomial inequality in \(n\) with positive leading coefficient. Choose an integer \(N\) large enough that its expansion in \(n=N+j\) has nonnegative coefficients. That finite check proves the ratio bound for every \(j\ge 0\). The tail after \(N\) is then bounded by its first omitted majorant term divided by \(1-\theta \). Derivative tails are handled by the same method. </p>
+<p>To supply a chart on \(|z|{\lt}R{\lt}1\), apply this ratio argument at \(R\) and bound the finitely many earlier weighted coefficients. This gives a rational \(M\) with \(|h_n|\le M R^{-n}\) for all \(n\). Coefficient comparison now proves </p>
+<div class="displaymath" id="a0000000429">
+  \[  \boxed {z(1-z)F”+[c-(a+b+1)z]F’-abF=0.}  \]
+</div>
+<p> The recurrence and \(h_0=1\) identify the local solution, denoted \({}_2F_1(a,b;c;z)\); see <a href="https://dlmf.nist.gov/15.2">DLMF, Section 15.2</a> and <a href="https://dlmf.nist.gov/15.10">Section 15.10</a> for the standard notation. </p>
+<h2 id="a0000000085">15.5 Continuation uses the equation, not repeated recentering alone</h2>
+<p> Away from \(0\) and \(1\) the preceding equation is a first-order system with </p>
+<div class="displaymath" id="a0000000430">
+  \[  A(z)=\begin{pmatrix}  0
+
+&amp; 1
+
+\\ ab/[z(1-z)]
+
+&amp; ((a+b+1)z-c)/[z(1-z)] 
+
+\end{pmatrix}.  \]
+</div>
+<p> The convergent series gives starting data at a nonzero point inside the unit disk. A finite path with certified separation from \(0,1\) gives bounded coefficient computations on each pulled-back segment; the fundamental matrix propagates the state along the path. </p>
+<p>It also supplies fresh analytic charts. Here is a finite majorant argument for any rational-coefficient system at an ordinary point. Suppose locally \(A(z_0+w)=\sum A_jw^j\) with \(\| A_j\| \le M R^{-j}\), obtained by polynomial and reciprocal charts. The solution coefficients satisfy </p>
+<div class="displaymath" id="a0000000431">
+  \[  (n+1)y_{n+1}=\sum _{j=0}^n A_jy_{n-j}.  \]
+</div>
+<p> Choose \(0{\lt}r\le R/2\) with \(2Mr\le 1\), and a rational \(C\ge \| y_0\| \). Induction gives </p>
+<div class="displaymath" id="a0000000432">
+  \[  \| y_n\| \le Cr^{-n}: \quad \| y_{n+1}\| \le \frac{2MC}{n+1}r^{-n} \le Cr^{-n-1}.  \]
+</div>
+<p> On \(|w|\le r/2\) the local series and all requested derivative tails are therefore effective. Its integral equation identifies it with the propagated state. Coefficient separation from the singularities allows this bound to be renewed at successive centers. </p>
+<p>Distinct paths may produce distinct branches. The finite overlap and path-deformation certificates of Chapter <a href="ch-complex-paths.html">10</a> say when they agree; there is no assumption of global single-valuedness. </p>
+<h2 id="a0000000086">15.6 The beta integral identifies the same local function</h2>
+<p> For positive rational \(b,c-b\) and rational \(a\), define on \(|z|{\lt}1\) </p>
+<div class="displaymath" id="a0000000433">
+  \[  H(z)=\frac1{B(b,c-b)}\int _0^1 t^{b-1}(1-t)^{c-b-1}(1-zt)^{-a}\, dt.  \]
+</div>
+<p> Use the local logarithm to define the last factor. Its coefficient recurrence is \((n+1)d_{n+1}=(n+a)d_n\), \(d_0=1\), obtained from \((1-w)D(1-w)^{-a}=a(1-w)^{-a}\). The ratio estimate just used supplies uniform tails on smaller disks. The positive beta weight provides the endpoint majorant, so the parameter-integral theorem applies. </p>
+<p>The beta–gamma identity and gamma recurrence give </p>
+<div class="displaymath" id="a0000000434">
+  \[  \frac{B(b+n,c-b)}{B(b,c-b)} =\frac{b(b+1)\cdots (b+n-1)}{c(c+1)\cdots (c+n-1)}.  \]
+</div>
+<p> Thus integrating the binomial coefficients yields exactly the \(h_n\) above, and \(H=F\). This proves equivalence between an improper integral, a convergent series, and a propagated ODE computation. In particular the elliptic integral developed later has </p>
+<div class="displaymath" id="a0000000435">
+  \[  K(m)=\frac\pi 2\, {}_2F_1(1/2,1/2;1;m).  \]
+</div>
+<p> The later geometric substitution gives its independent bounded quadrature; the coefficient identity here explains why its equation has the displayed hypergeometric form.  </p>
+</div></article><footer class="chapter-footer"><span>Mathematical manuscript · formal comparison status at each theorem</span><a href="https://github.com/liuyao12/computable-analysis/tree/f630241adeae35fc06a5fd4921a4df6396e291d0">Source f630241a ↗</a></footer></main><aside class="on-this-page"><span>On this page</span><a href="#a0000000082">15.1 Bessel functions of integer order</a><a href="#a0000000083">15.2 A second Bessel computation</a><a href="#sec:bessel-zero">15.3 Computing a zero without a general root theorem</a><a href="#a0000000084">15.4 A recurrence with a finite convergence disk</a><a href="#a0000000085">15.5 Continuation uses the equation, not repeated recentering alone</a><a href="#a0000000086">15.6 The beta integral identifies the same local function</a></aside></div>
+<dialog id="proof-dialog"><div class="dialog-top"><span>Proof structure</span><button aria-label="Close proof map and return to the text" id="close-proof">Return to text ×</button></div><iframe id="proof-frame" title="Mathematical proof map"></iframe></dialog></body></html>

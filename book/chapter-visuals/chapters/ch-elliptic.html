@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="A mathematical foundation for calculus through certified rational computations." name="description"/><title>Elliptic integrals · Computable Analysis</title><link href="reading/book.css" rel="stylesheet"/><script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],processEscapes:true},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script><script defer="" src="reading/book.js"></script><link href="reading/analysis-edition.css" rel="stylesheet"/><meta content="7b4dddd81afefceb62d05fa8319b122bfa223dcc" name="documentation-revision"/><style id="pedagogy-style">.pedagogical-opening{margin:1em 0 1.6em}.pedagogical-context{font-size:.9em}.pedagogical-bridge{margin:.8em 0 1.2em}</style><link rel="stylesheet" href="reading/chapter-visuals/visuals.css"><script defer src="reading/chapter-visuals/visuals.js"></script></head>
+<body><a class="skip" href="#main">Skip to mathematics</a><header class="book-header"><button aria-controls="book-nav" aria-expanded="false" id="menu-button">Contents</button><a class="brand" href="index.html">Computable <em>Analysis</em></a><a class="header-about" href="programme.html">An alternative foundation to Calculus</a></header>
+<nav aria-label="Book chapters" id="book-nav"><span class="nav-label">The book</span><a class="" href="ch-foundations.html"><span>01</span>Numbers and functions</a><a class="pi-catalogue-navigation" href="ch-foundations.html#pi-computations">Other examples: π</a><a class="" href="ch-circle-sphere.html"><span>02</span>Circle, sphere and cylinder</a><a class="" href="ch-rational-circle-trigonometry.html"><span>03</span>Angles and trigonometry</a><a class="" href="ch-integrals.html"><span>04</span>Integral computations</a><a class="" href="ch-effective-calculus.html"><span>05</span>Derivatives and the FTC</a><a class="" href="ch-infinite-series.html"><span>06</span>Infinite series</a><a class="" href="ch-exponential-logarithm.html"><span>07</span>Exponential and logarithm</a><details class="later-chapters" open=""><summary>Further chapters</summary><a class="" href="ch-algebra-fta.html"><span>08</span>Algebraic computations</a><a class="" href="ch-local-models.html"><span>09</span>Local models</a><a class="" href="ch-complex-paths.html"><span>10</span>Complex paths</a><a class="" href="ch-improper-parameters.html"><span>11</span>Improper integrals</a><a class="" href="ch-fourier.html"><span>12</span>Fourier computations</a><a class="" href="ch-impulses.html"><span>13</span>Impulses</a><a class="" href="ch-differential-equations.html"><span>14</span>Differential equations</a><!-- fundamental-matrix:start --><a data-reader-addition="fundamental-matrix" href="fundamental-matrix.html">Fundamental Matrix</a><!-- fundamental-matrix:end --><a class="" href="ch-special-equations.html"><span>15</span>Special-function equations</a><a class="" href="ch-transforms-zeta.html"><span>16</span>Transforms and zeta</a><a class="current" href="ch-elliptic.html"><span>17</span>Elliptic integrals</a></details><a class="nav-label construction-skill-label" href="construction-skills.html">Skills</a><a class="construction-skill-navigation" href="skill-real-integrals.html">Real integrals</a><a class="construction-skill-navigation" href="skill-complex-integrals.html">Complex path integrals</a><a class="construction-skill-navigation" href="skill-series.html">Series</a><a class="construction-skill-navigation" href="skill-holomorphic-functions.html">Holomorphic functions</a><a class="construction-skill-navigation" href="skill-analytic-continuation.html">Analytic continuation</a><span class="nav-label">Worked examples</span><a class="" href="cosine.html">The cosine-square integral</a><a class="classic-navigation" href="cartwright.html">Irrationality of \(\pi^2\)</a><a class="classic-navigation" href="leibniz.html">The Leibniz series</a><a class="classic-navigation" href="basel.html">The Basel problem</a><a class="classic-navigation" href="euler.html">Euler’s sine product</a><span class="nav-label">Function theory</span><a class="classic-navigation" href="arctan-taylor.html">Arctangent and Taylor series</a><a class="classic-navigation" href="complex-analysis.html">Polygonal Cauchy theory</a><a class="classic-navigation" href="analytic-continuation.html">Analytic continuation</a><a class="classic-navigation" href="zeta-zeros.html">Riemann zeta zeros</a><span class="nav-label">Differential equations</span><a class="classic-navigation" href="fuchs.html">Fuchs’s theorem</a><a class="classic-navigation" href="painleve.html">Painlevé’s classification</a><span class="nav-label">The development</span><a class="classic-navigation" href="proof-bundles.html">Bundled proof comparisons</a><a href="programme.html">Purpose and boundary</a><a href="proof-bench/">Proof-size comparison</a><a href="reference/index.html">Technical reference ↗</a></nav>
+<div class="page"><main class="reader" id="main"><div class="chapter-kicker">CHAPTER 17</div><article><div class="main-text">
+<h1 id="ch:elliptic">An Elliptic Integral and Its Differential Equation</h1><section class="pedagogical-opening" data-pedagogy="opening" id="why-this-page"><p>The original integrand rises without bound at an endpoint. The rational circle coordinate cancels that singular factor and gives a bounded integrand.</p><p class="pedagogical-context">Earlier context: <a href="ch-special-equations.html">Special Functions from Equations and Integrals</a>.</p></section><!-- chapter-visual:start -->
+<figure class="chapter-visual" data-visual="elliptic" id="visual-construction">
+<h2>Change the coordinate before computing</h2>
+<canvas role="img" aria-label="Change the coordinate before computing. Dashed orange shows the original height; green shows the transformed height in its own sampling coordinate. The horizontal coordinates differ, so equal integrals come from the substitution identity, not equal areas under these two plotted heights. Keep .">Change the coordinate before computing</canvas>
+<div class="visual-legend">Dashed orange original integrand · Green transformed integrand</div>
+<div class="visual-controls"><label>Parameter stage: <span data-stage-value>0.5</span><input type="range" min="0" max="9" value="5" step="1" aria-label="Parameter stage" data-values="[&quot;0.0&quot;, &quot;0.1&quot;, &quot;0.2&quot;, &quot;0.3&quot;, &quot;0.4&quot;, &quot;0.5&quot;, &quot;0.6&quot;, &quot;0.7&quot;, &quot;0.8&quot;, &quot;0.9&quot;]"></label><button type="button" data-visual-reset>Reset</button></div>
+<div class="visual-output" aria-live="polite"></div>
+<figcaption>Dashed orange shows the original height; green shows the transformed height in its own sampling coordinate. The horizontal coordinates differ, so equal integrals come from the substitution identity, not equal areas under these two plotted heights. Keep \(m<1\). <a href="#a0000000093">Follow the construction.</a></figcaption>
+<noscript><p>Dashed orange shows the original height; green shows the transformed height in its own sampling coordinate. The horizontal coordinates differ, so equal integrals come from the substitution identity, not equal areas under these two plotted heights. Keep \(m<1\).</p></noscript>
+</figure>
+<!-- chapter-visual:end -->
+
+<p>A final example ties together rational parametrization, algebraic-value computations, integration, series, and a variable-coefficient fundamental matrix. The point is not to develop all elliptic functions, but to give several equivalent ways of computing one useful family. </p>
+<h2 id="a0000000093">17.1 Remove an endpoint singularity before computing</h2>
+<p> For rational \(0\le m{\lt}1\), the familiar expression is </p>
+<div class="displaymath" id="a0000000458">
+  \[  K(m)=\int _0^1\frac{dx}{\sqrt{(1-x^2)(1-mx^2)}}.  \]
+</div>
+<p> We do not begin by assuming this improper integral exists. Use the rational circle parameter \(x=2u/(1+u^2)\). For \(0\le u{\lt}1\), </p>
+<div class="displaymath" id="a0000000459">
+  \[  \sqrt{1-x^2}=\frac{1-u^2}{1+u^2},\qquad \frac{dx}{du}=\frac{2(1-u^2)}{(1+u^2)^2}.  \]
+</div>
+<p> Cancellation suggests the bounded integral </p>
+<div class="displaymath" id="a0000000460">
+  \[  \boxed {K(m)=\int _0^1 \frac{2\, du}{\sqrt{(1+u^2)^2-4mu^2}}.}  \]
+</div>
+<p> This is our first definition. On \(0\le m\le r{\lt}1\) its squared denominator is at least \((1-r)(1+u^2)^2\ge 1-r\). Positive-root bisection and separated reciprocals therefore give value computations, absolute bounds, and continuity moduli for the integrand. </p>
+<p>For truncated \(u\)-intervals the substitution theorem proves agreement with the corresponding truncated original integral. The omitted transformed interval of length \(\varepsilon \) contributes at most \(2\varepsilon /\sqrt{1-r}\), with any rational upper bound for this constant. It follows that the original improper expression is an equivalent computation, now accompanied by its missing tail estimate. </p>
+<p>At \(m=0\) the integrand is \(2/(1+u^2)\), so \(K(0)=2A(1)=\pi /2\). </p>
+<h2 id="a0000000094">17.2 A power series from the same integral</h2>
+<p> Put \(c_n=\binom {2n}{n}/4^n\), as in Chapter <a href="ch-infinite-series.html">6</a>. The transformed integrand is </p>
+<div class="displaymath" id="a0000000461">
+  \[  \frac2{1+u^2}\sum _{n=0}^{\infty } c_n m^n\left(\frac{2u}{1+u^2}\right)^{2n}.  \]
+</div>
+<p> Since \(0\le 2u/(1+u^2)\le 1\) and \(c_n\le 1\), truncating after \(N\) has uniform error at most \(2r^{N+1}/(1-r)\). Integrating finite prefixes and using that error bound is therefore justified. </p>
+<p>Let </p>
+<div class="displaymath" id="a0000000462">
+  \[  I_n=\int _0^1\frac2{1+u^2} \left(\frac{2u}{1+u^2}\right)^{2n}du.  \]
+</div>
+<p> The angle substitution \(x=2A(u)/\pi \) gives \(I_n=\pi \int _0^{1/2}S(x)^{2n}dx\). Differentiate the finite product \(S^{2n-1}C\) using the already proved trigonometric derivatives and product rule. Its endpoint values vanish for \(n\ge 1\), so integration by parts gives </p>
+<div class="displaymath" id="a0000000463">
+  \[  2n I_n=(2n-1)I_{n-1},\qquad I_0=\pi /2.  \]
+</div>
+<p> The powers and products have uniform finite increment estimates obtained by multiplying those of \(S\) and \(C\), so the telescoping identity used here is certified on the whole interval. Hence \(I_n=(\pi /2)c_n\) and </p>
+<div class="displaymath" id="a0000000464">
+  \[  \boxed {K(m)=\frac\pi 2\sum _{n=0}^{\infty }c_n^2m^n.}  \]
+</div>
+<p> A tail bound is \((\pi /2)r^{N+1}/(1-r)\), which can be replaced by the rational bound \(2r^{N+1}/(1-r)\). </p>
+<p>For example, at \(m=1/2\) the first five terms of the normalized quantity \(2K(m)/\pi \) are </p>
+<div class="displaymath" id="a0000000465">
+  \[  1+\frac18+\frac9{256}+\frac{25}{2048} +\frac{1225}{262144}.  \]
+</div>
+<p> The remaining normalized tail is at most \(1/16\). More precise boxes are obtained by the same rational recurrence, not by a new existence argument. Rectangle quadrature and this series now compute the same number. </p>
+<h2 id="a0000000095">17.3 The differential equation is a coefficient identity</h2>
+<p> Writing \(a_n=(\pi /2)c_n^2\), the recurrence is </p>
+<div class="displaymath" id="a0000000466">
+  \[  (n+1)^2a_{n+1}=(n+1/2)^2a_n.  \]
+</div>
+<p> The differentiated tails converge uniformly on \(m\le r{\lt}1\), by the power series estimates. Comparing coefficients therefore gives </p>
+<div class="displaymath" id="a0000000467">
+  \[  \boxed {m(1-m)K”+(1-2m)K’-\tfrac 14K=0,}  \]
+</div>
+<p> with \(K(0)=\pi /2\) and \(K'(0)=\pi /8\). This is proved from finite recurrences and their tails, not from an abstract classification of period functions. </p>
+<p>On an interval strictly inside \((0,1)\), put \(Y=(K,K')^{\mathsf T}\). It satisfies the linear system </p>
+<div class="displaymath" id="a0000000468">
+  \[  Y'=\begin{pmatrix}  0
+
+&amp; 1
+
+\\ \dfrac 1{4m(1-m)}
+
+&amp; \dfrac {2m-1}{m(1-m)} 
+
+\end{pmatrix}Y.  \]
+</div>
+<p> For example, on \([1/4,3/4]\) the row-sum norm of this coefficient matrix is at most \(4\). The fundamental-matrix construction therefore has the factorial majorant of the preceding chapter. The series supplies \(Y(1/2)\), and propagation supplies \(Y(3/4)\); integral-equation uniqueness identifies it with direct series evaluation there. </p>
+<p>The coefficient matrix is singular at \(m=0\) and \(m=1\). We have not applied its bounded-coefficient theorem across either point. The series handles the specified regular solution at \(m=0\); each evolution computation uses an explicitly separated interval. </p>
+<h2 id="a0000000096">17.4 What the example connects</h2>
+<p> We now have three actual computations of \(K\): bounded quadrature of an algebraic integrand, a rational coefficient series times \(\pi /2\), and fundamental-matrix propagation from a computed initial state. Their comparisons are proofs: rational substitution with an endpoint tail, termwise finite integration with a uniform remainder, and uniqueness for an integral equation. </p>
+<p>The same matrix also computes a response to any finite list of impulses in its two state coordinates on a separated interval. Thus delta inputs need no new theory for this example. They are finite state updates propagated by a computation already constructed for a concrete special function. This is the recurring pattern of the book: retain useful representations, prove their equivalence, and reuse the resulting computations in the next problem.   </p>
+</div></article><footer class="chapter-footer"><span>Mathematical manuscript · formal comparison status at each theorem</span><a href="https://github.com/liuyao12/computable-analysis/tree/f630241adeae35fc06a5fd4921a4df6396e291d0">Source f630241a ↗</a></footer></main><aside class="on-this-page"><span>On this page</span><a href="#a0000000093">17.1 Remove an endpoint singularity before computing</a><a href="#a0000000094">17.2 A power series from the same integral</a><a href="#a0000000095">17.3 The differential equation is a coefficient identity</a><a href="#a0000000096">17.4 What the example connects</a></aside></div>
+<dialog id="proof-dialog"><div class="dialog-top"><span>Proof structure</span><button aria-label="Close proof map and return to the text" id="close-proof">Return to text ×</button></div><iframe id="proof-frame" title="Mathematical proof map"></iframe></dialog></body></html>

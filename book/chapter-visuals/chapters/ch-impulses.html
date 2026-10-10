@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="A mathematical foundation for calculus through certified rational computations." name="description"/><title>Impulses · Computable Analysis</title><link href="reading/book.css" rel="stylesheet"/><script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],processEscapes:true},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script><script defer="" src="reading/book.js"></script><link href="reading/analysis-edition.css" rel="stylesheet"/><meta content="7b4dddd81afefceb62d05fa8319b122bfa223dcc" name="documentation-revision"/><style id="pedagogy-style">.pedagogical-opening{margin:1em 0 1.6em}.pedagogical-context{font-size:.9em}.pedagogical-bridge{margin:.8em 0 1.2em}</style><link rel="stylesheet" href="reading/chapter-visuals/visuals.css"><script defer src="reading/chapter-visuals/visuals.js"></script></head>
+<body><a class="skip" href="#main">Skip to mathematics</a><header class="book-header"><button aria-controls="book-nav" aria-expanded="false" id="menu-button">Contents</button><a class="brand" href="index.html">Computable <em>Analysis</em></a><a class="header-about" href="programme.html">An alternative foundation to Calculus</a></header>
+<nav aria-label="Book chapters" id="book-nav"><span class="nav-label">The book</span><a class="" href="ch-foundations.html"><span>01</span>Numbers and functions</a><a class="pi-catalogue-navigation" href="ch-foundations.html#pi-computations">Other examples: π</a><a class="" href="ch-circle-sphere.html"><span>02</span>Circle, sphere and cylinder</a><a class="" href="ch-rational-circle-trigonometry.html"><span>03</span>Angles and trigonometry</a><a class="" href="ch-integrals.html"><span>04</span>Integral computations</a><a class="" href="ch-effective-calculus.html"><span>05</span>Derivatives and the FTC</a><a class="" href="ch-infinite-series.html"><span>06</span>Infinite series</a><a class="" href="ch-exponential-logarithm.html"><span>07</span>Exponential and logarithm</a><details class="later-chapters" open=""><summary>Further chapters</summary><a class="" href="ch-algebra-fta.html"><span>08</span>Algebraic computations</a><a class="" href="ch-local-models.html"><span>09</span>Local models</a><a class="" href="ch-complex-paths.html"><span>10</span>Complex paths</a><a class="" href="ch-improper-parameters.html"><span>11</span>Improper integrals</a><a class="" href="ch-fourier.html"><span>12</span>Fourier computations</a><a class="current" href="ch-impulses.html"><span>13</span>Impulses</a><a class="" href="ch-differential-equations.html"><span>14</span>Differential equations</a><!-- fundamental-matrix:start --><a data-reader-addition="fundamental-matrix" href="fundamental-matrix.html">Fundamental Matrix</a><!-- fundamental-matrix:end --><a class="" href="ch-special-equations.html"><span>15</span>Special-function equations</a><a class="" href="ch-transforms-zeta.html"><span>16</span>Transforms and zeta</a><a class="" href="ch-elliptic.html"><span>17</span>Elliptic integrals</a></details><a class="nav-label construction-skill-label" href="construction-skills.html">Skills</a><a class="construction-skill-navigation" href="skill-real-integrals.html">Real integrals</a><a class="construction-skill-navigation" href="skill-complex-integrals.html">Complex path integrals</a><a class="construction-skill-navigation" href="skill-series.html">Series</a><a class="construction-skill-navigation" href="skill-holomorphic-functions.html">Holomorphic functions</a><a class="construction-skill-navigation" href="skill-analytic-continuation.html">Analytic continuation</a><span class="nav-label">Worked examples</span><a class="" href="cosine.html">The cosine-square integral</a><a class="classic-navigation" href="cartwright.html">Irrationality of \(\pi^2\)</a><a class="classic-navigation" href="leibniz.html">The Leibniz series</a><a class="classic-navigation" href="basel.html">The Basel problem</a><a class="classic-navigation" href="euler.html">Euler’s sine product</a><span class="nav-label">Function theory</span><a class="classic-navigation" href="arctan-taylor.html">Arctangent and Taylor series</a><a class="classic-navigation" href="complex-analysis.html">Polygonal Cauchy theory</a><a class="classic-navigation" href="analytic-continuation.html">Analytic continuation</a><a class="classic-navigation" href="zeta-zeros.html">Riemann zeta zeros</a><span class="nav-label">Differential equations</span><a class="classic-navigation" href="fuchs.html">Fuchs’s theorem</a><a class="classic-navigation" href="painleve.html">Painlevé’s classification</a><span class="nav-label">The development</span><a class="classic-navigation" href="proof-bundles.html">Bundled proof comparisons</a><a href="programme.html">Purpose and boundary</a><a href="proof-bench/">Proof-size comparison</a><a href="reference/index.html">Technical reference ↗</a></nav>
+<div class="page"><main class="reader" id="main"><div class="chapter-kicker">CHAPTER 13</div><article><div class="main-text">
+<h1 id="ch:impulses">Corners, Jumps, and Delta Inputs</h1><section class="pedagogical-opening" data-pedagogy="opening" id="why-this-page"><p>A pulse can shrink in duration and grow in height without losing its total effect. Test functions record that effect.</p><p class="pedagogical-context">Earlier context: <a href="ch-effective-calculus.html">Computing Derivatives and the Fundamental Theorem</a>.</p></section><!-- chapter-visual:start -->
+<figure class="chapter-visual" data-visual="pulse" id="visual-construction">
+<h2>A narrower pulse keeps the same total effect</h2>
+<canvas role="img" aria-label="A narrower pulse keeps the same total effect. The rectangle has width  and height . Its area is always . Against , its value tends to : this is convergence on tests.">A narrower pulse keeps the same total effect</canvas>
+<div class="visual-legend">Green unit-area pulse</div>
+<div class="visual-controls"><label>Pulse refinement: <span data-stage-value>2</span><input type="range" min="0" max="4" value="2" step="1" aria-label="Pulse refinement"></label><button type="button" data-visual-reset>Reset</button></div>
+<div class="visual-output" aria-live="polite"></div>
+<figcaption>The rectangle has width \(\varepsilon\) and height \(1/\varepsilon\). Its area is always \(1\). Against \(\phi(t)=1+t\), its value tends to \(\phi(0)=1\): this is convergence on tests. <a href="#a0000000071">Follow the construction.</a></figcaption>
+<noscript><p>The rectangle has width \(\varepsilon\) and height \(1/\varepsilon\). Its area is always \(1\). Against \(\phi(t)=1+t\), its value tends to \(\phi(0)=1\): this is convergence on tests.</p></noscript>
+</figure>
+<!-- chapter-visual:end -->
+
+<p>A derivative computation need not always return a pointwise function. At a corner, secant gaps need not shrink; at a jump, ordinary rational-point derivatives miss an increment. We retain those increments by allowing finite atoms in addition to ordinary integrands. The examples and their finite evaluation rules come first; no space of all measures or all distributions is required. </p>
+<h2 id="a0000000065">13.1 A delta is an evaluation computation</h2>
+<p> For a rational location \(s\), define </p>
+<div class="displaymath" id="a0000000374">
+  \[  \delta _s(\phi )=\phi (s).  \]
+</div>
+<p> The input \(\phi \) is a concrete test computation. Continuous tests suffice for a delta; a differentiated delta will require the corresponding computed derivatives. Compactly supported piecewise-polynomial tests, with the necessary matching derivatives at joins, supply a first family. They have finite bounds, moduli, and exact integrals. For instance, on a rational interval \([a,b]\), use \(((t-a)(b-t))^{k+1}\) and set it to zero outside: its first \(k\) derivatives match at the joins. Finite sums and translates give explicit probes of any requested finite derivative order. </p>
+<p>A finite signed collection of atoms is represented by a finite list \((s_j,c_j)\) and evaluates a test as \(\sum _jc_j\phi (s_j)\). Adding an ordinary integrable density \(r\) gives the computation </p>
+<div class="displaymath" id="a0000000375">
+  \[  T(\phi )=\int r(t)\phi (t)\, dt+\sum _jc_j\phi (s_j).  \]
+</div>
+<p> Domain bounds and the integral construction for the displayed product are part of this concrete description. </p>
+<p>A computed location \(s\) is also possible when the test has interval continuity: evaluate it on the shrinking location enclosures as in Chapter <a href="ch-foundations.html">1</a>. In particular, bisection of \(x^2=2\) gives \(\delta _{\sqrt2}(\phi )\) without asking a rational sample to equal \(\sqrt2\). This does not assert that a discontinuous step at an arbitrary computed location can be evaluated at every rational input. Such a point evaluation requires a certified side or a separately chosen value at the jump. </p>
+<h2 id="a0000000066">13.2 Differentiating an explicitly joined function</h2>
+<p> Suppose \(y\) is supplied on finitely many pieces, with FTC and integration-by-parts estimates for those branch computations. Suppose its one-sided values are computed and its jumps at the joins are \(c_j=y(s_j+)-y(s_j-)\). For a compactly supported \(C^1\) piecewise-polynomial test \(\phi \), integration by parts on each piece gives </p>
+<div class="displaymath" id="a0000000376">
+  \[  -\int y(t)\phi '(t)\, dt =\int y'_{\mathrm{pieces}}(t)\phi (t)\, dt +\sum _jc_j\phi (s_j).  \]
+</div>
+<p> Interior boundary terms are exactly the jumps; outer boundary terms vanish. This proves the concrete derivative rule </p>
+<div class="displaymath" id="a0000000377">
+  \[  \boxed {Dy=y’_{\mathrm{pieces}}+\sum _jc_j\delta _{s_j}.}  \]
+</div>
+<p> Values assigned at the individual joins do not alter any of the integral computations: cells covering finitely many points have arbitrarily small total length and the functions have explicit local bounds. </p>
+<p>The requirement on each piece is an FTC certificate, not just a pointwise rational derivative. Convex differences and the series constructions have already supplied such certificates. The ODE constructions in the next chapter will supply further ones through integral equations. </p>
+<h2 id="a0000000067">13.3 The ramp, the step, and the absolute value</h2>
+<p> Write \(H_s(t)=0\) for \(t{\lt}s\) and \(H_s(t)=1\) for \(t{\gt}s\); choose a value at \(s\) only when point evaluation there is requested. The join formula gives </p>
+<div class="displaymath" id="a0000000378">
+  \[  DH_s=\delta _s.  \]
+</div>
+<p> The continuous ramp \(R_s(t)=\max (0,t-s)\) has ordinary branch derivatives \(0\) and \(1\), with no value jump. Hence </p>
+<div class="displaymath" id="a0000000379">
+  \[  DR_s=H_s,\qquad D^2R_s=\delta _s,  \]
+</div>
+<p> and </p>
+<div class="displaymath" id="a0000000380">
+  \[  \boxed {D^2|t-s|=2\delta _s}  \]
+</div>
+<p> by \(|t-s|=2R_s(t)-(t-s)\). The nonshrinking secant interval \([-1,1]\) for \(|t|\) is not a delta value. Its width \(2\) records the slope jump, which appears as an atom in the <em>second</em> derivative. </p>
+<p>For smooth enough concrete tests, define </p>
+<div class="displaymath" id="a0000000381">
+  \[  (DT)(\phi )=-T(\phi '),\qquad (D^k\delta _s)(\phi )=(-1)^k\phi ^{(k)}(s).  \]
+</div>
+<p> This computes delta derivatives by ordinary test evaluation. It does not require defining products of singular objects. In particular, no product of two deltas is assigned a value here. </p>
+<h2 id="a0000000068">13.4 The original hidden jump, now accounted for</h2>
+<p> Let \(\alpha \) be the positive root computation of \(x^2=2\). The two branch joins in </p>
+<div class="displaymath" id="a0000000382">
+  \[  F(x)=S(x)+\mathbf1_{\{ x^2{\gt}2\} }  \]
+</div>
+<p> have increments \(-1\) at \(-\alpha \) and \(+1\) at \(\alpha \). Rational point evaluation of its branches is decidable by the square comparison; the one-sided values are computed by continuity of \(S\). The derivative is therefore </p>
+<div class="displaymath" id="a0000000383">
+  \[  DF=\pi C(x)\, dx+\delta _\alpha -\delta _{-\alpha }.  \]
+</div>
+<p> On \([0,2]\) neither endpoint is an atom, and </p>
+<div class="displaymath" id="a0000000384">
+  \[  \int _0^2 DF=\int _0^2\pi C(x)\, dx+1=1=F(2)-F(0).  \]
+</div>
+<p> Here the notation for the integral means the ordinary integral plus the explicit finite sum of atoms strictly inside the endpoints. Endpoints at atoms require a stated one-sided convention. The missing increment has become a finite part of the data rather than a failure of the theorem. </p>
+<h2 id="a0000000069">13.5 Convex curvature measured by rational tents</h2>
+<p> There is a second route to atoms which uses the secant construction directly. For a rational polygonal test \(\psi \) supported in \([a,b]\), with zero endpoint values and knots \(a=x_0{\lt}\cdots {\lt}x_N=b\), put </p>
+<div class="displaymath" id="a0000000385">
+  \[  s_i=\frac{f(x_{i+1})-f(x_i)}{x_{i+1}-x_i},\qquad \mu _f(\psi )=\sum _{i=1}^{N-1}\psi (x_i)(s_i-s_{i-1}).  \]
+</div>
+<p> Here \(f\) is any supplied convex computation on a larger interval; it need not have a pointwise derivative. Rearrangement gives </p>
+<div class="displaymath" id="a0000000386">
+  \[  \mu _f(\psi )=\sum _i f(x_i) (\text{slope of $\psi $ to the right} -\text{slope of $\psi $ to the left}),  \]
+</div>
+<p> including the endpoint jumps from and to zero slope. Thus inserting a knot where \(\psi \) is linear changes nothing. The definition is independent of its polygonal description. </p>
+<p>Convexity gives \(\mu _f(\psi )\ge 0\) for \(\psi \ge 0\). Outer secants give a rational bound \(V\) for the total increase of the \(s_i\), and hence </p>
+<div class="displaymath" id="a0000000387">
+  \[  |\mu _f(\psi )|\le V\| \psi \| _\infty .  \]
+</div>
+<p> Approximate a continuous test by rational polygonal tests with uniform error \(2^{-n}\) and evaluate the finite expression to error \(2^{-n}\). Enlarging by \((V+1)2^{-n}\) and taking finite intersections constructs \(\mu _f(\phi )\). Cross-overlap follows from the displayed norm bound. This is the curvature-measure computation associated with this particular convex function, not an abstract measure-existence assertion. </p>
+<p>For the tent of height \(1\) with vertices \(u{\lt}v{\lt}w\), </p>
+<div class="displaymath" id="a0000000388">
+  \[  \mu _f(\tau )=\frac{f(w)-f(v)}{w-v} -\frac{f(v)-f(u)}{v-u}.  \]
+</div>
+<p> In the symmetric case this is precisely the gap between the left and right derivative secants. For \(f(t)=|t-s|\) it is \(2\tau (s)\); consequently \(\mu _f=2\delta _s\) on all the test computations just constructed. </p>
+<h2 id="a0000000070">13.6 A finite second-order FTC</h2>
+<p> For rational \(a{\lt}x{\lt}b\), let </p>
+<div class="displaymath" id="a0000000389">
+  \[  G_{a,b}(x,t)= \begin{cases}  (t-a)(b-x)/(b-a),&amp; a\le t\le x,\\ (x-a)(b-t)/(b-a),&amp; x\le t\le b,\\ 0,&amp; \text{otherwise}. \end{cases}  \]
+</div>
+<p> This is a rational tent multiple as a function of \(t\). Substitution in the preceding finite formula gives </p>
+<div class="displaymath" id="a0000000390">
+  \[  \boxed {f(x)=\frac{b-x}{b-a}f(a)+\frac{x-a}{b-a}f(b) -\mu _f(G_{a,b}(x,\cdot )).}  \]
+</div>
+<p> Thus the endpoint values and the curvature computation reconstruct \(f\). The affine part is explicit. At a corner this formula continues to work without a scalar derivative at the corner. </p>
+<p>For a compactly supported, globally \(C^2\) piecewise-polynomial test, finite summation by parts also gives \(\mu _f(\phi )=\int f\phi ''\). Indeed the polygonal interpolants produce centered second differences of the test; the twice-integrated increment bound for the test compares these with \(h\phi ''\) uniformly. The bounded function \(f\) contributes at most its bound times the total error. This identifies the curvature computation as \(D^2f\) on these tests. The same proof applies to any supplied test with that twice-integrated increment identity and a uniform modulus for its second derivative; pointwise rational differentiability alone is not the required data. </p>
+<h2 id="a0000000071">13.7 Narrow pulses give an equivalent computation</h2>
+<p> For rational \(\varepsilon {\gt}0\) let \(p_{\varepsilon ,s}=\varepsilon ^{-1}\mathbf1_{[s,s+\varepsilon ]}\). A test with Lipschitz bound \(L\) satisfies </p>
+<div class="displaymath" id="a0000000391">
+  \[  \left|\int p_{\varepsilon ,s}(t)\phi (t)\, dt-\phi (s)\right| \le L\varepsilon /2.  \]
+</div>
+<p> The proof integrates the bound \(L|t-s|\) on the pulse interval. This is an explicit equivalence between two ways to evaluate a delta: point evaluation and narrowing ordinary rectangles. It is convergence on tests, not pointwise convergence to an infinitely high function.  </p>
+</div></article><footer class="chapter-footer"><span>Mathematical manuscript · formal comparison status at each theorem</span><a href="https://github.com/liuyao12/computable-analysis/tree/f630241adeae35fc06a5fd4921a4df6396e291d0">Source f630241a ↗</a></footer></main><aside class="on-this-page"><span>On this page</span><a href="#a0000000065">13.1 A delta is an evaluation computation</a><a href="#a0000000066">13.2 Differentiating an explicitly joined function</a><a href="#a0000000067">13.3 The ramp, the step, and the absolute value</a><a href="#a0000000068">13.4 The original hidden jump, now accounted for</a><a href="#a0000000069">13.5 Convex curvature measured by rational tents</a><a href="#a0000000070">13.6 A finite second-order FTC</a><a href="#a0000000071">13.7 Narrow pulses give an equivalent computation</a></aside></div>
+<dialog id="proof-dialog"><div class="dialog-top"><span>Proof structure</span><button aria-label="Close proof map and return to the text" id="close-proof">Return to text ×</button></div><iframe id="proof-frame" title="Mathematical proof map"></iframe></dialog></body></html>
