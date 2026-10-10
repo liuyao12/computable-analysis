@@ -112,3 +112,17 @@ updates only this chapter and its assets on the existing Pages destination.
 `RationalPolytopeVolume.lean` states the supplied volume axioms, retaining determinant-one invariance, and proves rational cube subdivision and dilation. `RationalSimplexGeometry.lean` verifies the staircase dissection of the cube and standard simplex normalization. `RationalSimplexDissection.lean` proves edge-cut dissection and positive rational stretch scaling. `RationalSimplexVolume.lean` proves the determinant formula in every dimension, including degenerate and negative orientations, and the induced dilation law for every rational factor. It proves independence for supplied positive triangulations with geometric dissection evidence. A general triangulation constructor and the full sphere convergence/agreement proof remain unfinished.
 
 Run `lake build RationalGeometry` in the isolated proof package. The final module audits actual declaration dependencies and uses `Lean.collectAxioms` to reject every axiom except `propext`, `Classical.choice`, and `Quot.sound`.
+
+## Finite Archimedes recurrence proof (2026-10-10)
+
+Extract `native-archimedes-proof.tar.gz` into an empty directory, then run:
+
+```sh
+lean -o ComputableAnalysis/FiniteNBallVolume.olean ComputableAnalysis/FiniteNBallVolume.lean
+lean -o FiniteRationalBall.olean FiniteRationalBall.lean
+LEAN_PATH=. lean -o FiniteBallShellRecurrence.olean FiniteBallShellRecurrence.lean
+LEAN_PATH=. lean -o FiniteBallFormulaInduction.olean FiniteBallFormulaInduction.lean
+LEAN_PATH=. lean CheckArchimedes.lean
+```
+
+This package needs only the pinned Lean toolchain; it uses no Mathlib or Basic represented-real dependency. The recurrence estimates and even/odd induction are checked in every dimension. They are intermediate results: the geometric polytope shell-product comparison and represented sphere formula agreement remain unfinished. `RationalDissectionTransform.lean` checks rational transport of geometric dissections and derives product volume for positive rational boxes.

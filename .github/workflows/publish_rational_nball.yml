@@ -36,6 +36,17 @@ jobs:
           lean -o FiniteRationalBall.olean FiniteRationalBall.lean
           LEAN_PATH=. lean CheckFiniteRationalBall.lean > native-ci-audit.txt
           cmp lean-audit.txt native-ci-audit.txt
+      - name: Check native Archimedes estimates and general factorial induction
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          mkdir native-archimedes-check
+          tar -xzf book/rational-nball/native-archimedes-proof.tar.gz -C native-archimedes-check
+          cd native-archimedes-check
+          lean -o ComputableAnalysis/FiniteNBallVolume.olean ComputableAnalysis/FiniteNBallVolume.lean
+          lean -o FiniteRationalBall.olean FiniteRationalBall.lean
+          LEAN_PATH=. lean -o FiniteBallShellRecurrence.olean FiniteBallShellRecurrence.lean
+          LEAN_PATH=. lean -o FiniteBallFormulaInduction.olean FiniteBallFormulaInduction.lean
+          LEAN_PATH=. lean CheckArchimedes.lean
       - name: Check exact incremental geometry and certificates
         run: |
           cd book/rational-nball

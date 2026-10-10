@@ -1171,3 +1171,34 @@ visible-pyramid and clipping-cap dissections, chart-grid coverage, quantitative
 containment and convergence, product-volume comparisons, and agreement of the
 valid represented sphere computation with the general-dimensional formula.
 The complete general-dimensional sphere proof is still unfinished.
+
+## Chapter 2: finite Archimedes recurrence estimates (2026-10-10)
+
+The disk computation defines \(\pi=v_2\). The intended geometric recurrence
+is \(v_{n+2}=2\pi v_n/(n+2)\), whose \(n=1\) instance is Archimedes' sphere
+argument. New native Lean proofs verify the finite shell–disk coordinate
+containments and a quantitative shell estimate for every positive dimension.
+For any normalized rational partition of mesh \(d\), its coefficients satisfy
+\[
+\frac{2}{n+2}-2d\le A\le\frac{2}{n+2}+d,
+\qquad A\le B\le\frac{2}{n+2}+3d.
+\]
+An explicit uniform partition supplies \(d=1/N\). Separate finite induction
+solves the recurrence model in every even and odd dimension, yielding the
+factorial formulas. This proves the model's algebra; it does not identify it
+with the sphere's polytope computation.
+
+The rational geometry layer also constructs the transport of finite
+polytope dissections under invertible rational maps, derives determinant
+scaling for verified positive triangulations, and proves product volume for
+positive rational boxes from the existing volume axioms. No product-volume
+axiom, integral, Gamma function, or general curved-region volume is added.
+There are now \(72\) checked endpoints. The native Archimedes package requires
+only the pinned Lean toolchain, with a trusted-axiom audit. The finite
+recurrence model's unnecessary Basic dependency is removed.
+
+**Remaining bridge:** general polytope products, the finite shell-product
+volume comparison for the actual sphere polytopes, their quantitative
+coverage and convergence, and exact agreement of the valid represented
+sphere computation with the formula. The geometric recurrence and full
+general-dimensional sphere theorem are still unfinished.

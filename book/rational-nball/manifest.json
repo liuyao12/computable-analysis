@@ -55,7 +55,24 @@
     "ComputableAnalysis.RationalPolytopeVolume.simplexVolume_eq_coefficient",
     "ComputableAnalysis.RationalPolytopeVolume.simplexVolume_dilation",
     "ComputableAnalysis.RationalPolytopeVolume.triangulation_volume",
-    "ComputableAnalysis.RationalPolytopeVolume.triangulation_independence"
+    "ComputableAnalysis.RationalPolytopeVolume.triangulation_independence",
+    "ComputableAnalysis.RationalBall.shellGap_mesh",
+    "ComputableAnalysis.RationalBall.moment_power_error",
+    "ComputableAnalysis.RationalBall.shells_recurrence_estimate",
+    "ComputableAnalysis.RationalBall.equalPartition_last",
+    "ComputableAnalysis.RationalBall.equalPartition_mesh",
+    "ComputableAnalysis.RationalBall.uniform_shells_recurrence_estimate",
+    "ComputableAnalysis.RationalBall.shell_disk_inner",
+    "ComputableAnalysis.RationalBall.shell_disk_outer",
+    "ComputableAnalysis.RationalBall.ballCoeff_even",
+    "ComputableAnalysis.RationalBall.ballCoeff_odd",
+    "ComputableAnalysis.RationalBall.ballFormula_even",
+    "ComputableAnalysis.RationalBall.ballFormula_odd",
+    "ComputableAnalysis.RationalPolytopeVolume.dissection_transformed",
+    "ComputableAnalysis.RationalPolytopeVolume.triangulated_volume_transform",
+    "ComputableAnalysis.RationalPolytopeVolume.transformed_cube_volume",
+    "ComputableAnalysis.RationalPolytopeVolume.box_volume_positive",
+    "ComputableAnalysis.RationalPolytopeVolume.box_product_volume"
   ],
   "volumeConvention": "oriented; cube standard orientation normalized to one",
   "mathlibRealOrComplexUsed": false,
@@ -66,14 +83,14 @@
   "geometricLeanGaps": [
     "construction of general positive triangulations",
     "horizon-pyramid and clipping-cap dissection laws",
-    "product volume",
+    "general polytopal product volume and shell-product volume comparison",
     "chart net coverage",
-    "quantitative containment and convergence",
-    "valid represented interval computation and formula agreement"
+    "quantitative containment and convergence of the sphere polytope computation",
+    "valid represented sphere computation and geometric formula agreement"
   ],
   "sourceHashes": {
-    "ch-circle-sphere.html": "be3649793467f5ebef7198bce8e8dbae2f467c8722fcd43c6f71125df63b2f48",
-    "chapter-section.html": "1d9ee480c754adcba98d40d734fd2bce7a667952c2bc00afc469bbb4946c4937",
+    "ch-circle-sphere.html": "3e569a1aae36f158813160f057dd2f9f2ec148b0ff64472b51ff648f84a1c122",
+    "chapter-section.html": "3af985405b76274a306a3b4f5064f21d9d64361cd8e1ab4cbc4f7b9a64d4a9fe",
     "chapter.css": "a920140beb5668bc944909db00605a7b52f5b2063cb42f40fdc757e57260e651",
     "polyhedra-data.js": "48416f34c7301bd4ee3c17ae6d292211e0e23db4c2402a4dfd7eda197bfb3a97",
     "polyhedra-view.js": "3bf8bdf1d953cbdac0c90c00d683c17df3c3475aee3c22c26db22599dec108fe",
@@ -83,15 +100,15 @@
     "FiniteRationalBall.lean": "f25a57850e042b224da7998932106d041ba60e6ba0099d33d9cd6b64da79f58e",
     "CheckFiniteRationalBall.lean": "08611cdedb5543ef0eb3a9ac7c075fb65e36bbae1d4dfa9c856d5fc603a4f461",
     "lean-audit.txt": "230cab126db5366c0027824b5434ba18a0e7920ad6debab45b61de2a21b32cbd",
-    "README.md": "056ea3ae997a1413797df3d5e4898d5c6322aae0cda541debfaf9af9ba648f46",
+    "README.md": "8bfec01dd38eb82143912b6c2afe191a1172a50adec806aca0127fbf0122432d",
     "RationalProofAudit.lean": "5729e9f98c48c0134a7e0255742c2a7bdf764e72b6350c91cd9e6dda149e1826",
     "RationalConvexBodies.lean": "bff6978c2f9c1335693aa8475c0df6e9fa4f5630fdb782fb717b344d90a12e82",
     "RationalSimplexLinearAlgebra.lean": "6b99c6db54d477955def45630f47fea9f74294122288484cedd4386117a59954",
-    "lakefile.lean": "9817c214d9374599ca439bfcea7bf47f2b9cfd0bf444fdd398518adec2d73528",
+    "lakefile.lean": "5875d5a2eebde60b6e701f05df9dc0651bb325aed5854facff4ff77fe65f7226",
     "lean-toolchain": "0d3c76ccd8772d8bcbe207241421a760312b71a6aa82f84194391fdf5cb026d6",
     "convex-bodies-audit.txt": "99b48896863041644a4a3c8f044b684948c47cfe540fb85a99b1d65895f99d2f",
     "rational-matrix-audit.txt": "49f496880015772c2146d3e38e2ed8aa58180b67f499bab3c85db20cce9caf65",
-    "rational-geometry-proof.tar.gz": "25960476c94c95c4b5ef45f154b0935d48a5eda90383b010b9357d2ba4e7943c",
+    "rational-geometry-proof.tar.gz": "b61b80674cb5fa752489e4e3e5b6da65aaebe3bc1829ceb0ec3af8f499ba41f7",
     "publish_overlay.py": "8ac67b1502082eb94dc8345e59da13bbf42f596da6c355cc8a272aca9cc608c5",
     "RationalOrthantBodies.lean": "0d3d09788cefba1251ea5d28e50121e35b092ce079154e234554abdf2d35d890",
     "rational_polytopes.py": "cb04efc20638fd12f738ad632cb38f6e9dba1a7d27265537471389a0f94fa785",
@@ -110,7 +127,17 @@
     "RationalSimplexDissection.lean": "db156e03a5070fb74ece51237372e9f5a683992bb00488d5de55017c09dc7a1c",
     "RationalSimplexDissection-audit.txt": "1d106961d56d507770b07056c9895ac4be548879170721cbb10a932ac3483622",
     "RationalSimplexVolume.lean": "d8f3ffaf1acef8593e7b22d4dfbd6fb7bb42bf8672ec62a957a8a6a7729ca55c",
-    "RationalSimplexVolume-audit.txt": "1ca4bb18043918822e1b78e41fa6d12e1940fd137020d8df178f2bf424b02c8e"
+    "RationalSimplexVolume-audit.txt": "1ca4bb18043918822e1b78e41fa6d12e1940fd137020d8df178f2bf424b02c8e",
+    "FiniteBallShellRecurrence.lean": "5b0abdad1fcd50c9758f4ce6c533c9b421b04f612e49b8306884d9c7e2fb5e48",
+    "FiniteBallFormulaInduction.lean": "11d716bc1cabb734655ce55b93e75931ddf0b3ab1b70d9d6fe1a16d1f2011c02",
+    "shell-audit.txt": "1ea8f4891ff3b0d0c3c9605c94fb21cfaaa9b5528d482d4a1c95e643d730074a",
+    "induction-audit.txt": "1636d7b472c7da8f5afd1a2e1814a494d496a206a96ffe2962d925a370a54677",
+    "CheckArchimedes.lean": "6c5cbcb85638be26db1355a5a958a014ed9391ef5f1d0d47743d5ad92e5b568a",
+    "native-archimedes-trust-audit.txt": "c95ba4de65f9a5d2f0fcf2b9219a6623dbee240f6806b9e9c2c25fcd781ff5c5",
+    "FiniteNBallVolume.lean": "334430a9dd84c5334448f2968ae9e5f6ba55487a7d076a698c7d618870722516",
+    "native-archimedes-proof.tar.gz": "5cdf06bef5dd7591356ac45ed7811db21b0385ea2f76e2b2752cb93481efa19e",
+    "RationalDissectionTransform.lean": "e81df3f71beaf1cea2ac5da57e7872707fdd34b6f3c5fe4055dca0fc6ac89c11",
+    "RationalDissectionTransform-audit.txt": "6a8b8cbe721041a5e816006a7971ff0334a2702eadee9b9589e5bc6f4477cb50"
   },
   "mathlibModuleClosureContainsRealOrComplex": true,
   "mathlibTheoremDependenciesUseRealOrComplex": false,
@@ -224,6 +251,41 @@
         "ComputableAnalysis.RationalPolytopeVolume.triangulation_independence"
       ],
       "declarationDependencyAudit": true
+    },
+    {
+      "file": "shell-audit.txt",
+      "checkedEndpoints": [
+        "ComputableAnalysis.RationalBall.shellGap_mesh",
+        "ComputableAnalysis.RationalBall.moment_power_error",
+        "ComputableAnalysis.RationalBall.shells_recurrence_estimate",
+        "ComputableAnalysis.RationalBall.equalPartition_last",
+        "ComputableAnalysis.RationalBall.equalPartition_mesh",
+        "ComputableAnalysis.RationalBall.uniform_shells_recurrence_estimate",
+        "ComputableAnalysis.RationalBall.shell_disk_inner",
+        "ComputableAnalysis.RationalBall.shell_disk_outer"
+      ],
+      "declarationDependencyAudit": false
+    },
+    {
+      "file": "induction-audit.txt",
+      "checkedEndpoints": [
+        "ComputableAnalysis.RationalBall.ballCoeff_even",
+        "ComputableAnalysis.RationalBall.ballCoeff_odd",
+        "ComputableAnalysis.RationalBall.ballFormula_even",
+        "ComputableAnalysis.RationalBall.ballFormula_odd"
+      ],
+      "declarationDependencyAudit": false
+    },
+    {
+      "file": "RationalDissectionTransform-audit.txt",
+      "checkedEndpoints": [
+        "ComputableAnalysis.RationalPolytopeVolume.dissection_transformed",
+        "ComputableAnalysis.RationalPolytopeVolume.triangulated_volume_transform",
+        "ComputableAnalysis.RationalPolytopeVolume.transformed_cube_volume",
+        "ComputableAnalysis.RationalPolytopeVolume.box_volume_positive",
+        "ComputableAnalysis.RationalPolytopeVolume.box_product_volume"
+      ],
+      "declarationDependencyAudit": true
     }
   ],
   "isolatedMathlibToolchain": "leanprover/lean4:v4.33.0-rc2",
@@ -243,5 +305,12 @@
   "simplexVolumeFromAxioms": true,
   "simplexDilationAllRationalFactors": true,
   "triangulationIndependenceForVerifiedDissections": true,
-  "generalTriangulationConstructorLeanChecked": false
+  "generalTriangulationConstructorLeanChecked": false,
+  "archimedesShellEstimateLeanChecked": true,
+  "uniformShellPartitionLeanChecked": true,
+  "rationalShellDiskContainmentsLeanChecked": true,
+  "boxProductVolumeFromAxiomsLeanChecked": true,
+  "evenOddFormulaInductionLeanChecked": true,
+  "geometricDimensionRecurrenceLeanChecked": false,
+  "diskDefinesPi": true
 }

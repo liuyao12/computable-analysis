@@ -1,0 +1,31 @@
+RationalDissectionTransform.lean:53:39: warning: This simp argument is unused:
+  RationalSimplex.transformed
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [transformed, vertexSimplex, Finset.image_image]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+RationalDissectionTransform.lean:100:43: warning: This simp argument is unused:
+  Matrix.mulVec_diagonal
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [transformed, Finset.mem_image, cube, box, Fintype.mem_piFinset, Finset.mem_insert,
+    Finset.mem_singleton]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+'ComputableAnalysis.RationalPolytopeVolume.dissection_transformed' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.triangulated_volume_transform' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.transformed_cube_volume' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.box_volume_positive' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalPolytopeVolume.box_product_volume' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+PASS: 1758 transitive declaration dependencies; no Mathlib real/complex scalars, measure or integration; trusted axioms only

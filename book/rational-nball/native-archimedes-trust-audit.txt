@@ -1,0 +1,1 @@
+PASS: all 12 native Archimedes endpoints use trusted axioms only

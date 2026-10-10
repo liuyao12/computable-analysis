@@ -1,0 +1,22 @@
+FiniteBallShellRecurrence.lean:30:5: warning: Variable name `hd` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hd
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+FiniteBallShellRecurrence.lean:63:5: warning: Variable name `hd` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hd
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+'ComputableAnalysis.RationalBall.shellGap_mesh' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalBall.moment_power_error' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalBall.shells_recurrence_estimate' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalBall.equalPartition_last' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalBall.equalPartition_mesh' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalBall.uniform_shells_recurrence_estimate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalBall.shell_disk_inner' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalBall.shell_disk_outer' depends on axioms: [propext, Classical.choice, Quot.sound]
