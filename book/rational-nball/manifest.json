@@ -13,6 +13,8 @@
     "ComputableAnalysis.RationalBall.shells_gap",
     "ComputableAnalysis.RationalBall.shells_by_parts",
     "ComputableAnalysis.RationalBall.shells_zero_one",
+    "ComputableAnalysis.RationalBall.sphereChart_components_nonnegative",
+    "ComputableAnalysis.RationalBall.sphereChart_positiveOrthant",
     "ComputableAnalysis.RationalConvexBodies.byHalfspaces_convex",
     "ComputableAnalysis.RationalConvexBodies.unitBall_convex",
     "ComputableAnalysis.RationalConvexBodies.inner_subset_unitBall",
@@ -23,6 +25,16 @@
     "ComputableAnalysis.RationalConvexBodies.outer_bounded",
     "ComputableAnalysis.RationalConvexBodies.outer_convex",
     "ComputableAnalysis.RationalConvexBodies.outer_refines",
+    "ComputableAnalysis.RationalOrthantBodies.orthant_convex",
+    "ComputableAnalysis.RationalOrthantBodies.ball_convex",
+    "ComputableAnalysis.RationalOrthantBodies.origin_mem_inner",
+    "ComputableAnalysis.RationalOrthantBodies.inner_subset_ball",
+    "ComputableAnalysis.RationalOrthantBodies.ball_subset_outer",
+    "ComputableAnalysis.RationalOrthantBodies.outer_axis_bound",
+    "ComputableAnalysis.RationalOrthantBodies.inner_refines",
+    "ComputableAnalysis.RationalOrthantBodies.outer_refines",
+    "ComputableAnalysis.RationalOrthantBodies.outer_convex",
+    "ComputableAnalysis.RationalOrthantBodies.outer_coordinate_bound",
     "ComputableAnalysis.RationalSimplex.edgeMatrix_transformed",
     "ComputableAnalysis.RationalSimplex.determinantCoefficient_translation",
     "ComputableAnalysis.RationalSimplex.determinantCoefficient_linear",
@@ -33,37 +45,46 @@
   "integralUsed": false,
   "gammaUsed": false,
   "fullGeometricLeanProof": false,
-  "mathematicalProof": "Finite rational polytope exhaustion and radial-shell recurrence",
+  "mathematicalProof": "Finite polytope dissections and formula agreement for this particular sphere computation",
   "geometricLeanGaps": [
     "simplex volume from axioms",
     "triangulation independence",
+    "horizon-pyramid and clipping-cap dissection laws",
     "product volume",
     "chart net coverage",
     "quantitative containment and convergence",
-    "represented volume recurrence agreement"
+    "valid represented interval computation and formula agreement"
   ],
   "sourceHashes": {
-    "ch-circle-sphere.html": "ea5a53ab52c2d57723394dd9d0c3f7228f2e12c528fa9866c83b6f4f8cbed272",
-    "chapter-section.html": "dd8fe89685f0f035b3f323432685844bc26641353e53a6ad3ac50b29dbe03e48",
+    "ch-circle-sphere.html": "582068571504daaf8f450751dd3f46f478a26b587b83f164290d1a5fab162c29",
+    "chapter-section.html": "568df4345a1700e3dbd33d0c946ca971dc800ebd484a0030377e96aa03f74662",
     "chapter.css": "a920140beb5668bc944909db00605a7b52f5b2063cb42f40fdc757e57260e651",
-    "polyhedra-data.js": "64862a09f0d88c8d931b571e3b3c2e074a434ca9cc2efca994ca43cf3bef0ecf",
-    "polyhedra-view.js": "50f86c76ab6e4ec88e787892bbb6c8a5131499fd06e7df29359bbf68455b6751",
-    "polyhedra.json": "ccb29b05c7d4efb0e2ab12f74732c94846f2f4419e6b81f02f2f266a1dceda7d",
-    "generate_polyhedra.py": "2eae24ae6274baf3e884f9da438573abf579cdb54b62bb49d31c31054f61eb02",
-    "apply_chapter_overlay.py": "37eb24015d77c9f4143820111aa307df9475cc5887015367dc799adc1630b1f0",
-    "FiniteRationalBall.lean": "746b387e6414b6236a2beadf585d6cdecfe1f78b1e95410ff4f7076ac34f9d79",
-    "CheckFiniteRationalBall.lean": "a6a04b512da379b3e5f50efd92af41fa0d9622f3db1dd91332011dc9d46217e1",
-    "lean-audit.txt": "6dfebc461eeabb7e2bee317152f3ebc1df7f57c8a368fef0dfa1f05b5ede87e2",
-    "README.md": "c08a2bee1e30d0a3789b64234caa3b2a1687509ed5bef2b3281c6347d5148d8f",
+    "polyhedra-data.js": "48416f34c7301bd4ee3c17ae6d292211e0e23db4c2402a4dfd7eda197bfb3a97",
+    "polyhedra-view.js": "3bf8bdf1d953cbdac0c90c00d683c17df3c3475aee3c22c26db22599dec108fe",
+    "polyhedra.json": "369a0ac0470402994c98184a559107c3184150ff811ed8ef2d5792445a3afe6f",
+    "generate_polyhedra.py": "d28cc4443d06d109c924174d872addbdd42199d0d439a1a6972c134944d17b0f",
+    "apply_chapter_overlay.py": "602637560501d8c9a1403e2ed4601261d4e83630a1bf911e2c6bd8c1865cb982",
+    "FiniteRationalBall.lean": "f25a57850e042b224da7998932106d041ba60e6ba0099d33d9cd6b64da79f58e",
+    "CheckFiniteRationalBall.lean": "08611cdedb5543ef0eb3a9ac7c075fb65e36bbae1d4dfa9c856d5fc603a4f461",
+    "lean-audit.txt": "230cab126db5366c0027824b5434ba18a0e7920ad6debab45b61de2a21b32cbd",
+    "README.md": "44aac02bea4b59db70117f09d56c07e9455b26d38e2ca18f28b79e540c444ad0",
     "RationalProofAudit.lean": "5729e9f98c48c0134a7e0255742c2a7bdf764e72b6350c91cd9e6dda149e1826",
     "RationalConvexBodies.lean": "bff6978c2f9c1335693aa8475c0df6e9fa4f5630fdb782fb717b344d90a12e82",
     "RationalSimplexLinearAlgebra.lean": "6b99c6db54d477955def45630f47fea9f74294122288484cedd4386117a59954",
-    "lakefile.lean": "9dd73ec47c0bceda273ec77acaa24d44cfeed39e6018597b83e07dfb798fa787",
+    "lakefile.lean": "0dd77b6861b6964c719efdc1fd5d2e646e9d6a7e705577311daa1768b7d72d7d",
     "lean-toolchain": "0d3c76ccd8772d8bcbe207241421a760312b71a6aa82f84194391fdf5cb026d6",
     "convex-bodies-audit.txt": "99b48896863041644a4a3c8f044b684948c47cfe540fb85a99b1d65895f99d2f",
     "rational-matrix-audit.txt": "49f496880015772c2146d3e38e2ed8aa58180b67f499bab3c85db20cce9caf65",
-    "rational-geometry-proof.tar.gz": "ada663ea5b71df2c9066483a9dd2e80ccc521ce461161ed67dc9597f75237189",
-    "publish_overlay.py": "d56e385a318626996e52caaa891df6f59bca6010e4744a9b32c62fcbc7def64c"
+    "rational-geometry-proof.tar.gz": "c97c3a5cfdfc67b5f3def67c7120b00923f485676235e8b63b414276ff396d2e",
+    "publish_overlay.py": "8ac67b1502082eb94dc8345e59da13bbf42f596da6c355cc8a272aca9cc608c5",
+    "RationalOrthantBodies.lean": "0d3d09788cefba1251ea5d28e50121e35b092ce079154e234554abdf2d35d890",
+    "rational_polytopes.py": "cb04efc20638fd12f738ad632cb38f6e9dba1a7d27265537471389a0f94fa785",
+    "orthant_ball.py": "d5e3272928e3dce4aed0b406d90fcdbad15978701cf82bddda65731b438b3463",
+    "test_rational_polytopes.py": "023683a8d8cf642d0350dd874150f95f807e51f4b12a938355727296488789f0",
+    "check_polyhedra.py": "2b240a4732576a6ae4339db6576f75f072529a753338672ff2855503924d1e40",
+    "runtime-tests.txt": "a73489d464b0d9bf494189316d66fc0c029309e92fc66017f56244c637c0cc87",
+    "certificate-check.txt": "34821874488082f7cb16fea6e183eecbb69155667ee24fbb1b00afcc7954d0fe",
+    "orthant-bodies-audit.txt": "8784fe7eb25a098ea54391509f02d905ebaa7bf313c0a4934573c4ec19d68fcc"
   },
   "mathlibModuleClosureContainsRealOrComplex": true,
   "mathlibTheoremDependenciesUseRealOrComplex": false,
@@ -83,7 +104,9 @@
         "ComputableAnalysis.RationalBall.unit_partition_power_estimate",
         "ComputableAnalysis.RationalBall.shells_gap",
         "ComputableAnalysis.RationalBall.shells_by_parts",
-        "ComputableAnalysis.RationalBall.shells_zero_one"
+        "ComputableAnalysis.RationalBall.shells_zero_one",
+        "ComputableAnalysis.RationalBall.sphereChart_components_nonnegative",
+        "ComputableAnalysis.RationalBall.sphereChart_positiveOrthant"
       ],
       "declarationDependencyAudit": false
     },
@@ -104,6 +127,22 @@
       "declarationDependencyAudit": true
     },
     {
+      "file": "orthant-bodies-audit.txt",
+      "checkedEndpoints": [
+        "ComputableAnalysis.RationalOrthantBodies.orthant_convex",
+        "ComputableAnalysis.RationalOrthantBodies.ball_convex",
+        "ComputableAnalysis.RationalOrthantBodies.origin_mem_inner",
+        "ComputableAnalysis.RationalOrthantBodies.inner_subset_ball",
+        "ComputableAnalysis.RationalOrthantBodies.ball_subset_outer",
+        "ComputableAnalysis.RationalOrthantBodies.outer_axis_bound",
+        "ComputableAnalysis.RationalOrthantBodies.inner_refines",
+        "ComputableAnalysis.RationalOrthantBodies.outer_refines",
+        "ComputableAnalysis.RationalOrthantBodies.outer_convex",
+        "ComputableAnalysis.RationalOrthantBodies.outer_coordinate_bound"
+      ],
+      "declarationDependencyAudit": true
+    },
+    {
       "file": "rational-matrix-audit.txt",
       "checkedEndpoints": [
         "ComputableAnalysis.RationalSimplex.edgeMatrix_transformed",
@@ -114,5 +153,11 @@
       "declarationDependencyAudit": true
     }
   ],
-  "isolatedMathlibToolchain": "leanprover/lean4:v4.33.0-rc2"
+  "isolatedMathlibToolchain": "leanprover/lean4:v4.33.0-rc2",
+  "construction": "positive_orthant",
+  "axisTangentsIncluded": true,
+  "originInInnerHull": true,
+  "stageEvaluation": "incremental",
+  "wholeBodyVolumeRecomputedDuringRefinement": false,
+  "generalCurvedRegionVolumeDefined": false
 }

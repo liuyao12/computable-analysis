@@ -1,92 +1,83 @@
-from fractions import Fraction as F
-from itertools import combinations
+"""Generate the stateful positive-orthant ball computation for Chapter 2.
+
+Only the axis-simplex/unit-cube initialization takes whole-body volumes.
+Refinements add visible inner pyramids and subtract outer caps. Independent
+whole-polytope verification belongs to check_polyhedra.py, not this evaluator.
+"""
+from fractions import Fraction as Q
 from pathlib import Path
 import json
+from rational_polytopes import dot
+from orthant_ball import OrthantBallComputation, is_axis
 ROOT=Path(__file__).parent
 
-def sub(a,b):return tuple(x-y for x,y in zip(a,b))
-def dot(a,b):return sum(x*y for x,y in zip(a,b))
-def cross(a,b):return (a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0])
-def det(a,b,c):return dot(a,cross(b,c))
-def plane(v,face):
- a,b,c=(v[i] for i in face);normal=cross(sub(b,a),sub(c,a));return normal,dot(normal,a)
-def hull(v):
- seed=None
- for ids in combinations(range(len(v)),4):
-  a,b,c,d=(v[i] for i in ids)
-  if det(sub(b,a),sub(c,a),sub(d,a)):
-   seed=ids;break
- assert seed
- center=tuple(sum(v[i][j] for i in seed)/4 for j in range(3))
- faces=[]
- for face in combinations(seed,3):
-  normal,b=plane(v,face)
-  if dot(normal,center)>b:face=(face[0],face[2],face[1])
-  faces.append(face)
- for i,p in enumerate(v):
-  if i in seed:continue
-  visible=[]
-  for face in faces:
-   normal,b=plane(v,face)
-   if dot(normal,p)>b:visible.append(face)
-  if not visible:continue
-  horizon={}
-  for a,b,c in visible:
-   for x,y in [(a,b),(b,c),(c,a)]:
-    if (y,x) in horizon:del horizon[y,x]
-    else:horizon[x,y]=True
-  removed=set(visible);faces=[f for f in faces if f not in removed]
-  faces.extend((x,y,i) for x,y in horizon)
- # Exact supporting-halfspace and oriented closed-mesh certificate.
- edges={};used=set()
- for face in faces:
-  normal,b=plane(v,face);assert b>0
-  assert all(dot(normal,p)<=b for p in v)
-  a,c,d=face;used.update(face)
-  for x,y in [(a,c),(c,d),(d,a)]:edges[x,y]=edges.get((x,y),0)+1
- assert all(n==1 and edges.get((y,x))==1 for (x,y),n in edges.items())
- assert len(used)-len(edges)//2+len(faces)==2
- volume=sum(det(v[a],v[b],v[c]) for a,b,c in faces)/6
- assert volume>0
- return faces,volume
+def decimal_down(value,places=6):
+    scale=10**places;num=value.numerator*scale//value.denominator
+    return f'{num//scale}.{num%scale:0{places}d}'
 
-def samples(m):
- axes=[tuple(F(s if j==i else 0) for j in range(3)) for i in range(3) for s in [-1,1]]
- if not m:return axes
- out=set(axes)
- for j in range(-m,m+1):
-  for k in range(-m,m+1):
-   u,w=F(j,m),F(k,m);s=u*u+w*w;d=1+s
-   p=(2*u/d,2*w/d,(1-s)/d)
-   for sign in [-1,1]:out.add((p[0],p[1],sign*p[2]))
- return axes+sorted(out-set(axes))
+def decimal_up(value,places=6):
+    scale=10**places;num=-(-value.numerator*scale//value.denominator)
+    return f'{num//scale}.{num%scale:0{places}d}'
 
-def make(m):
- points=samples(m);assert all(dot(p,p)==1 for p in points)
- inner,lo=hull(points)
- polar=set()
- for a,b,c in inner:
-  p,q,r=points[a],points[b],points[c];den=det(p,q,r)
-  x=tuple((cross(q,r)[i]+cross(r,p)[i]+cross(p,q)[i])/den for i in range(3))
-  assert all(dot(x,p)<=1 for p in points);polar.add(x)
- outerPoints=sorted(polar);outer,hi=hull(outerPoints)
- assert lo<hi
- scale=10**6;dl=lo.numerator*scale//lo.denominator;du=-(-hi.numerator*scale//hi.denominator)
- return dict(mesh=m,samples=len(points),inner=dict(vertices=[[str(q) for q in p] for p in points],faces=inner,volume=str(lo)),outer=dict(vertices=[[str(q) for q in p] for p in outerPoints],faces=outer,volume=str(hi)),decimalLower=f'{dl/scale:.6f}',decimalUpper=f'{du/scale:.6f}',gap=str(hi-lo))
+def model(polytope,cached_volume):
+    return dict(vertices=[[str(q) for q in p] for p in polytope.vertices],
+        faces=polytope.mesh3(),edges=sorted({tuple(sorted((a,b))) for f in polytope.facets() for a,b in zip(f.vertices,f.vertices[1:]+f.vertices[:1])}),volume=str(cached_volume))
+
+def encode_update(update):
+    result={k:str(update[k]) for k in ['innerIncrement','outerDecrement']}
+    result['point']=[str(q) for q in update['point']]
+    for name in ['innerSimplices','outerCapSimplices']:
+        result[name]=[[[str(q) for q in p] for p in simplex] for simplex in update[name]]
+    return result
+
+def snapshot(computation,previous):
+    samples=computation.samples;planes=computation.halfspaces
+    inner,outer=computation.inner,computation.outer
+    lo,hi=computation.lower,computation.upper;m=computation.denominator
+    assert all(dot(p,p)==1 and all(x>=0 for x in p) for p in samples)
+    assert len([1 for a,b in planes if b==0])==3
+    assert sum(is_axis(a) for a,b in planes if b==1)==3
+    assert all(dot(a,x)<=b for a,b in planes for x in outer.vertices)
+    assert all(dot(a,x)<=b for a,b in planes for x in inner.vertices)
+    assert 0<lo<hi
+    alpha=1-Q(4,m*m)
+    if alpha>0:
+        assert all(f.offset>=0 and alpha*alpha*sum(max(a,0)**2 for a in f.normal)<=f.offset**2 for f in inner.facets())
+        assert all(dot(x,x)<=1/(alpha*alpha) for x in outer.vertices)
+        assert all(dot(f.normal,tuple(alpha*alpha*x for x in p))<=f.offset for f in inner.facets() for p in outer.vertices)
+    return dict(stage=computation.stage,mesh=m,samples=len(samples),tangents=len(samples),coordinatePlanes=3,
+        axisTangents=3,inner=model(inner,lo),outer=model(outer,hi),
+        halfspaces=[dict(normal=[str(q) for q in a],offset=str(b),kind='coordinate' if b==0 else 'tangent') for a,b in planes],
+        decimalLower=decimal_down(8*lo),decimalUpper=decimal_up(8*hi),
+        orthantDecimalLower=decimal_down(lo),orthantDecimalUpper=decimal_up(hi),
+        wholeBallLower=str(8*lo),wholeBallUpper=str(8*hi),gap=str(8*(hi-lo)),
+        previousOrthantBounds=None if previous is None else [str(q) for q in previous],
+        updates=[encode_update(u) for u in computation.last_updates],
+        innerAdded=str(sum((u['innerIncrement'] for u in computation.last_updates),Q(0))),
+        outerRemoved=str(sum((u['outerDecrement'] for u in computation.last_updates),Q(0))),
+        alpha=str(alpha) if alpha>0 else None)
 
 if __name__=='__main__':
- stages=[]
- for m in [0,1,2,4,8]:
-  s=make(m);stages.append(s);print(m,s['samples'],s['decimalLower'],s['decimalUpper'],flush=True)
- for a,b in zip(stages,stages[1:]):
-  assert F(a['inner']['volume'])<=F(b['inner']['volume'])
-  assert F(b['outer']['volume'])<=F(a['outer']['volume'])
- data=dict(arithmetic='Exact Python Fraction; no floating-point hull decisions or volume computation',checks=['unit sphere identities','all supporting halfspaces','paired oriented mesh edges','Euler characteristic','every polar vertex satisfies every tangent inequality','nested exact volume bounds'],stages=stages)
- (ROOT/'polyhedra.json').write_text(json.dumps(data,separators=(',',':')))
- render=[]
- for s in stages:
-  item={k:s[k] for k in ['mesh','samples','decimalLower','decimalUpper','gap']}
-  for side in ['inner','outer']:
-   item[side]=dict(s[side]);item[side]['vertices']=[[float(F(q)) for q in p] for p in s[side]['vertices']]
-  render.append(item)
- (ROOT/'polyhedra-data.js').write_text('window.rationalBallStages='+json.dumps(render,separators=(',',':'))+';\n')
+    stages=[];computation=OrthantBallComputation(3);previous=None
+    for k in range(5):
+        if k:
+            previous=(computation.lower,computation.upper);computation.refine()
+        s=snapshot(computation,previous);stages.append(s)
+        print(k,s['mesh'],s['samples'],s['decimalLower'],s['decimalUpper'],flush=True)
+    data=dict(construction='positive orthant; origin in inner hull; all axis tangents and coordinate planes included',
+        evaluator='persistent dyadic refinement; add visible inner pyramids and subtract outer caps; no whole-body volume recomputation after initialization',
+        arithmetic='Exact Python Fraction; no floating-point geometric decisions or volume computation',
+        dimension=3,symmetryFactor=8,orientation='standard ambient; every volume simplex has positive determinant',
+        semanticScope='specific rational interval computation; no general volume definition for regions bounded by surfaces',
+        checks=['rational unit and nonnegative boundary coordinates','recursive coordinate-face samples','all three axis tangents included',
+            'persistent facet and clipping updates','positive determinant increment and cap simplices','nested exact rational bounds',
+            'every outer vertex satisfies every tangent and coordinate inequality','quantitative polytope containments when alpha positive'],stages=stages)
+    (ROOT/'polyhedra.json').write_text(json.dumps(data,separators=(',',':'))+'\n')
+    render=[]
+    for s in stages:
+        item={k:s[k] for k in ['stage','mesh','samples','tangents','coordinatePlanes','axisTangents','decimalLower','decimalUpper','orthantDecimalLower','orthantDecimalUpper','gap','innerAdded','outerRemoved']}
+        item['addedPoints']=len(s['updates'])
+        for side in ['inner','outer']:
+            item[side]=dict(vertices=[[float(Q(q)) for q in p] for p in s[side]['vertices']],faces=s[side]['faces'],edges=s[side]['edges'],volume=s[side]['volume'])
+        render.append(item)
+    (ROOT/'polyhedra-data.js').write_text('window.rationalBallStages='+json.dumps(render,separators=(',',':'))+';\n')

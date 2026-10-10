@@ -6,6 +6,12 @@ def publish(site):
     root=Path(__file__).parent
     manifest=json.loads((root/'manifest.json').read_text())
     assert manifest['fullGeometricLeanProof'] is False
+    assert manifest['construction']=='positive_orthant'
+    assert manifest['axisTangentsIncluded'] is True
+    assert manifest['stageEvaluation']=='incremental'
+    assert manifest['wholeBodyVolumeRecomputedDuringRefinement'] is False
+    assert manifest['generalCurvedRegionVolumeDefined'] is False
+    assert (root/'certificate-check.txt').read_text().startswith('PASS:')
     for name,digest in manifest['sourceHashes'].items():
         assert hashlib.sha256((root/name).read_bytes()).hexdigest()==digest,name
     for group in manifest['audits']:
@@ -30,7 +36,9 @@ def publish(site):
         'manifestSha256':hashlib.sha256((root/'manifest.json').read_bytes()).hexdigest(),
         'preservedFiles':sum(not changed(n) for n in before),
         'checkedEndpoints':sum(len(g['checkedEndpoints']) for g in manifest['audits']),
-        'fullGeometricLeanProof':False,'volumeConvention':manifest['volumeConvention']}
+        'fullGeometricLeanProof':False,'volumeConvention':manifest['volumeConvention'],
+        'construction':'positive_orthant','stageEvaluation':'incremental','axisTangentsIncluded':True,
+        'generalCurvedRegionVolumeDefined':False}
     (site/'rational-nball-publication.json').write_text(json.dumps(metadata,indent=2)+'\n')
     print(json.dumps(metadata))
 if __name__=='__main__':publish(Path(sys.argv[1]))

@@ -1,0 +1,13 @@
+'ComputableAnalysis.RationalOrthantBodies.orthant_convex' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalOrthantBodies.ball_convex' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalOrthantBodies.origin_mem_inner' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalOrthantBodies.inner_subset_ball' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalOrthantBodies.ball_subset_outer' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalOrthantBodies.outer_axis_bound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalOrthantBodies.inner_refines' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalOrthantBodies.outer_refines' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalOrthantBodies.outer_convex' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalOrthantBodies.outer_coordinate_bound' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+PASS: 1031 transitive declaration dependencies; no Mathlib real/complex scalars, measure or integration

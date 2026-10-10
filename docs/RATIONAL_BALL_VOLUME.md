@@ -1,28 +1,34 @@
 # Rational ball volume: capability boundary
 
-## Chapter 2: rational ball geometry and volume (2026-10-09)
+## Chapter 2: persistent positive-orthant computation (2026-10-09)
 
-The chapter now gives a general-dimensional finite-dissection proof of
-\(v_{n+2}=2\pi v_n/(n+2)\), using rational boundary samples and exact
-inner/outer polytope volumes. The simplex formula is derived mathematically
-from finite additivity, positivity in the standard orientation, translation
-and determinant-one invariance, and unit-cube normalization. Its orientation
-convention is \(\det(p_1-p_0,\ldots,p_n-p_0)/n!\).
+The sphere example now uses one rational positive-orthant chart, the same dyadic
+subdivision for every parameter, and recursive coordinate-face charts. The
+inner hull includes the origin. Every sampled tangent plane is retained,
+including the positive axis tangents; coordinate planes complete the outer body.
 
-`ComputableAnalysis/FiniteRationalBall.lean` checks twelve finite rational
-chart, power, partition, and shell identities, using native Lean only.
-`book/rational-nball` contains the chapter addition, exact 3D certificates,
-reader assets, source hashes, axiom audits, and reproduction instructions.
-An isolated package at Mathlib revision
-`51e6992efd06126df61a496bebf8f49482a4e129` checks convex bodies on
-`Fin n → ℚ`, rational halfspaces, refinement and boundedness, and rational
-determinant identities. The transitive proof-declaration audit excludes
-Mathlib real/complex scalars, measure, and integration. The broad Mathlib
-module import closure is not joined to the native foundation.
+`OrthantBallComputation` retains its samples, facets, and rational endpoints.
+Initialization computes the axis-simplex and unit-cube volumes. Later stages
+add only visible-facet pyramid volumes to the inner endpoint and subtract only
+clipping-cap volumes from the outer endpoint. The 3D facets are updated locally.
+The factor \(2^n\) uses standard ambient orientation on every reflected piece.
+`ConvexPolytope.volume()` applies only to finite rational polytopes. No general
+volume for regions bounded by surfaces, or preassigned sphere volume, is used.
 
-**Capability boundary:** these are checked finite arithmetic, convexity,
-and linear-algebra statements. The simplex-from-axioms proof, triangulation
-independence, chart net coverage, quantitative polytope gap, product volume,
-and agreement with a valid represented ball volume remain Lean obligations.
-The earlier `FiniteNBallVolume.lean` is an algebraic formula model, not this
-missing geometric bridge. A complete geometric Lean theorem is not claimed.
+The exact tests guard against whole-body volume calls during refinement and
+compare with independent polytope computations. Saved certificates verify five
+3D stages, \(228\) point updates and \(3108\) positive determinant simplices.
+Native Lean checks \(14\) chart, positive-orthant, power and shell statements.
+The isolated rational Mathlib package checks another \(24\) statements,
+including origin membership, orthant containments, refinement and axis bounds.
+Actual theorem dependencies exclude Mathlib real/complex scalars, measure and
+integration; broad Mathlib module imports remain isolated from the foundation.
+
+**Capability boundary:** the executable finite geometry and interval evaluator
+are implemented and checked by exact runtime tests. The full Lean proof of
+simplex volume from axioms, triangulation independence, horizon-pyramid and
+clipping-cap dissections, chart coverage and quantitative gaps, and agreement
+of a valid represented interval computation with the general-dimensional
+formula remains unfinished. The chapter gives the separate mathematical
+formula-agreement argument; it does not adopt a general curved-region volume
+operator or assume that agreement as a certificate field.

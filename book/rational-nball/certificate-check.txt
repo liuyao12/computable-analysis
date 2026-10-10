@@ -1,0 +1,1 @@
+PASS: 5 stages; 228 incremental point updates; 3108 positive determinant pieces; independent exact whole-polytope and cap checks; all axis tangents retained; no float arithmetic

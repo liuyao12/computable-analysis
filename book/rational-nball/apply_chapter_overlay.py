@@ -15,6 +15,9 @@ def overlay(original):
     old='<a href="#a0000000009">2.12 What precedes calculus</a>'
     if 'href="#sec:rational-nball"' not in text:
         text=text.replace(old,nav+old.replace('2.12','2.13'))
+    if 'href="#nball-incremental"' not in text:
+        text=text.replace('<a href="#nball-3d-illustration">','<a href="#nball-incremental">Stage-by-stage updates</a><a href="#nball-stopping-rule">Convergence of this computation</a><a href="#nball-3d-illustration">',1)
+    text=text.replace('<a href="#sec:rational-nball">2.12 Volume in every dimension</a>','<a href="#sec:rational-nball">2.12 Rational sphere computation</a>')
     text=text.replace('<span>Original chapter preserved</span>','<span>Chapter 2 · rational polytope exhaustion</span>')
     assert text.count('id="sec:rational-nball"')==1
     return text

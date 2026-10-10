@@ -69,6 +69,34 @@ theorem sphereChart_unit (xs : List Rat) : normSq (sphereChart xs) = 1 := by
   have hc := Rat.mul_inv_cancel (1+s) hd
   grind only [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
 
+/-- The single chart stays in the positive orthant on its rational parameter ball. -/
+theorem sphereChart_components_nonnegative (xs : List Rat)
+    (hpositive : ∀ x ∈ xs, 0 ≤ x) (hball : normSq xs ≤ 1) :
+    (∀ x ∈ xs, 0 ≤ 2*x/(1+normSq xs)) ∧
+      0 ≤ (1-normSq xs)/(1+normSq xs) := by
+  have hden : 0 < 1+normSq xs := by have hs := normSq_nonneg xs; grind
+  have hinv : 0 ≤ (1+normSq xs)⁻¹ := by have hi := Rat.inv_pos.mpr hden; grind
+  constructor
+  · intro x hx
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg (Rat.mul_nonneg (by decide) (hpositive x hx)) hinv
+  · rw [Rat.div_def]
+    exact Rat.mul_nonneg (by grind) hinv
+
+theorem sphereChart_positiveOrthant (xs : List Rat)
+    (hpositive : ∀ x ∈ xs, 0 ≤ x) (hball : normSq xs ≤ 1) :
+    normSq (sphereChart xs) = 1 ∧ ∀ y ∈ sphereChart xs, 0 ≤ y := by
+  refine ⟨sphereChart_unit xs, ?_⟩
+  intro y hy
+  have hparts := sphereChart_components_nonnegative xs hpositive hball
+  change y ∈ xs.map (fun x => 2*x/(1+normSq xs)) ++
+    [(1-normSq xs)/(1+normSq xs)] at hy
+  rcases List.mem_append.mp hy with hy | hy
+  · rcases List.mem_map.mp hy with ⟨x,hx,rfl⟩
+    exact hparts.1 x hx
+  · have he : y = (1-normSq xs)/(1+normSq xs) := by simpa using hy
+    rw [he]; exact hparts.2
+
 /-- Difference of powers, proved by finite recursion. -/
 def powerTerms (a b : Rat) : Nat → Rat
   | 0 => 0

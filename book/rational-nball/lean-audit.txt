@@ -12,3 +12,7 @@
 'ComputableAnalysis.RationalBall.shells_gap' depends on axioms: [propext, Classical.choice, Quot.sound]
 'ComputableAnalysis.RationalBall.shells_by_parts' depends on axioms: [propext, Classical.choice, Quot.sound]
 'ComputableAnalysis.RationalBall.shells_zero_one' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalBall.sphereChart_components_nonnegative' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalBall.sphereChart_positiveOrthant' depends on axioms: [propext, Classical.choice, Quot.sound]

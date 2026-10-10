@@ -1,0 +1,15 @@
+test_affine_laws_and_vertex_order (test_rational_polytopes.ExactPolytopeTests) ... ok
+test_all_axis_tangents_and_exact_orthant_bounds (test_rational_polytopes.ExactPolytopeTests) ... ok
+test_coplanar_collinear_duplicate_points (test_rational_polytopes.ExactPolytopeTests) ... ok
+test_cubes_every_supported_dimension (test_rational_polytopes.ExactPolytopeTests) ... ok
+test_halfspace_cubes_and_unbounded_rejection (test_rational_polytopes.ExactPolytopeTests) ... ok
+test_incremental_hull_against_enumerated_supporting_planes (test_rational_polytopes.ExactPolytopeTests) ... ok
+test_incremental_refinement_matches_independent_polytopes (test_rational_polytopes.ExactPolytopeTests) ... ok
+test_local_updates_in_dimension_four (test_rational_polytopes.ExactPolytopeTests) ... ok
+test_sampling_axes_faces_and_refinement (test_rational_polytopes.ExactPolytopeTests) ... ok
+test_simplex_orientation_and_degeneracy (test_rational_polytopes.ExactPolytopeTests) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 9.435s
+
+OK

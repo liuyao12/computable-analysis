@@ -11,3 +11,5 @@ import FiniteRationalBall
 #print axioms ComputableAnalysis.RationalBall.shells_gap
 #print axioms ComputableAnalysis.RationalBall.shells_by_parts
 #print axioms ComputableAnalysis.RationalBall.shells_zero_one
+#print axioms ComputableAnalysis.RationalBall.sphereChart_components_nonnegative
+#print axioms ComputableAnalysis.RationalBall.sphereChart_positiveOrthant

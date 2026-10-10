@@ -5,7 +5,7 @@ on:
       base_run:
         description: Successful publication containing the existing live Pages artifact
         required: true
-        default: '38019858036'
+        default: '38027645802'
 permissions:
   contents: read
   actions: read
@@ -36,6 +36,12 @@ jobs:
           lean -o FiniteRationalBall.olean FiniteRationalBall.lean
           LEAN_PATH=. lean CheckFiniteRationalBall.lean > native-ci-audit.txt
           cmp lean-audit.txt native-ci-audit.txt
+      - name: Check exact incremental geometry and certificates
+        run: |
+          cd book/rational-nball
+          python3 -m unittest -v test_rational_polytopes
+          python3 check_polyhedra.py > certificate-ci-check.txt
+          cmp certificate-check.txt certificate-ci-check.txt
       - name: Overlay Chapter 2 and preserve all other pages
         env:
           BASE_RUN: ${{ inputs.base_run }}
