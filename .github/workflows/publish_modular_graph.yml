@@ -5,7 +5,7 @@ on:
       base_run:
         description: Successful publication run containing the existing live Pages artifact
         required: true
-        default: '38019858036'
+        default: '38056013212'
 permissions:
   contents: read
   actions: read
