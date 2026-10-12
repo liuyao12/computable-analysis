@@ -1,0 +1,144 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sine comparison · Worked strategy test</title><script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]}};</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script><style>body{max-width:850px;margin:30px auto;padding:0 22px;color:#243c34;background:#f5f6f2;font:17px/1.65 system-ui}h1,h2{font-family:Georgia;line-height:1.25}a{color:#235b73}pre{overflow-x:auto;padding:16px;background:#eaf0ea}code{font-size:.85em}mjx-container{max-width:100%;overflow-x:auto;overflow-y:hidden}</style></head><body><nav><a href="modular-proofs.html#sine">Explore both proof routes</a></nav><h1>Worked strategy test: normalized sine and power-series sine</h1>
+<p>The requested comparison has different coordinates. The primary
+<a href="modular-proofs.html#sine-source:ComputableAnalysis.ElementaryRational">normalized sine</a> takes
+\(r\in\mathbb Q\) and computes \(\sin(\pi r)\). The primary
+<a href="modular-proofs.html#sine-source:ComputableAnalysis.ElementaryPowerSeries">power-series sine</a>
+takes \(z\in\mathbb Q(i)\) and computes
+\[
+ S(z)=\sum_{n=0}^{\infty}\frac{(-1)^n z^{2n+1}}{(2n+1)!}.
+\]
+Its implementation pairs the odd terms of exponential prefixes; the checked
+<a href="modular-proofs.html#sine-source:ComputableAnalysis.ElementarySeriesCoefficients">coefficient identities</a>
+justify this description. Comparing equal rational parameter numerals would
+compare different angles. The intended real extension identity is
+\[
+ \widehat F(x)\simeq\widehat S(\pi x).
+\]
+Here the hats denote derived evaluation, not a change of the primary domains.</p>
+<h2>Result for the actual implementations</h2>
+<p><strong>Finite prefix algebra and shrinking errors is the shortest checked route.</strong>
+The normalized computation already uses the exponential Taylor evaluator at
+the represented angle \(\pi r\). It is not an independently constructed
+geometric sine. The other computation separates the odd terms of that same
+expansion. The
+<a href="modular-proofs.html#sine-source:ComputableAnalysis.ElementarySeriesComparisons">real-axis comparison</a>
+proves exact agreement by exhibiting a common finite prefix in both output
+enclosures. The
+<a href="modular-proofs.html#sine-source:ComputableAnalysis.ModularForms.ExponentialLiftAgreement">exponential extension bridge</a>
+handles arbitrary valid represented arguments through rational centers and
+shrinking input, truncation and output errors. Its representation invariance
+is already available.</p>
+<p>The concrete
+<a href="modular-proofs.html#sine-source:ComputableAnalysis.ElementarySineComparison">checked bridge</a>
+adds the following results without a new evaluator:</p>
+<ul>
+<li><code>powerSeries_rational_agrees_derived</code> identifies the real-axis primary
+power-series sine with the existing <code>sineAtAngle</code> add-on at every rational
+radian input.</li>
+<li><code>sinPi_agrees_derived_powerSeries</code> identifies every primary normalized
+value with this add-on at \(\pi r\), including irrational physical angles.</li>
+<li><code>sinPi_powerSeries_agrees_at_coordinates</code> compares the two primary
+functions wherever \(\pi r\simeq q\), retaining the exact coordinate
+premise rather than claiming their physical overlap is dense.</li>
+</ul>
+<p>The first result transfers the established rational exponential construction
+to the sine comparison. It is not a numerical spot check. Validity and
+invariance of the angle operation are supplied by <code>sineAtAngle_valid</code> and
+<code>sineAtAngle_congr</code>. The quantitative extension evidence is in the exponential
+bridge. The completed ODE application below supplies a complex normalized
+extension with explicit primary-function bridges and convergence.</p>
+<h2>ODE uniqueness: the better characterization for independent constructions</h2>
+<p>For two independently constructed radian sine/cosine pairs, compare actual
+solutions of
+\[
+ \frac{d}{dt}\begin{pmatrix}s\\c\end{pmatrix}
+ =\begin{pmatrix}0&amp;1\\-1&amp;0\end{pmatrix}
+   \begin{pmatrix}s\\c\end{pmatrix},
+ \qquad (s(0),c(0))=(0,1).
+\]
+This first-order system avoids needing a separately packaged second
+derivative. Equivalently, sine satisfies \(y''=-y\),
+\(y(0)=0\), \(y'(0)=1\).</p>
+<p>In the normalized coordinate, both aligned constructions must instead satisfy
+\[
+ f''=-\pi^2 f,\qquad f(0)=0,\qquad f'(0)=\pi.
+\]
+The first-order form is \(f'=\pi c\), \(c'=-\pi f\), with the same
+initial pair. One must justify the derivatives and the coordinate chain rule;
+initial values alone do not prove agreement.</p>
+<p>The complete application is checked in
+<a href="modular-proofs.html#sine-source:ComputableAnalysis.ElementarySineODESolutions"><code>ElementarySineODESolutions</code></a>.
+For every valid represented complex frequency \(a\), it constructs two actual
+solutions of \(s'=ac\), \(c'=-as\), with initial pair \((0,1)\): the paired
+scalar entire exponentials at \(iaz\) and \(-iaz\), and the independently
+computed rotation-matrix Taylor sum. Holomorphicity, both derivative laws and
+both initial values are proved from the constructions. The central
+<code>computations_agree_global</code> proof compares them using those laws, rather than
+using an existing sine identity.</p>
+<p><a href="modular-proofs.html#sine-source:ComputableAnalysis.RiemannHilbert.EntireConstantODEUniqueness"><code>EntireConstantODEUniqueness</code></a>
+multiplies each solution by the actual inverse matrix exponential and proves
+zero derivative. Checked local ODE uniqueness gives constancy neighborhoods;
+the finite rational open-cover argument in <code>HolomorphicPathConstancy</code>
+propagates constancy along the constructed affine path from the origin to
+any endpoint. Entire-domain membership holds at every path parameter. No
+small endpoint restriction, assumed uniqueness provider, caller-supplied
+cover or assumed final comparison is required.</p>
+<p><a href="modular-proofs.html#sine-source:ComputableAnalysis.ElementarySineODEComparison"><code>ElementarySineODEComparison</code></a>
+then proves, on the entire represented complex plane,
+\[
+ \widehat F(z)\simeq\widehat S(\pi z).
+\]
+The coefficient \(\pi\) is the repo&#39;s valid computed geometric pi, with no
+rationality assumption. Matrix Taylor parameter scaling justifies the actual
+coordinate change. Separate adapters connect the entire computations to the
+primary normalized function on \(\mathbb Q\) and the primary power-series
+function on \(\mathbb Q(i)\). For every prescribed positive rational error,
+<code>powerSeries_primary_converges</code> and <code>sinPi_primary_converges</code> prove eventual
+closeness of those primary values at computed rational centers/midpoints to
+the derived value. Holomorphic continuity moduli and shrinking input-box
+errors supply the schedules, so irrational evaluation is justified from the
+primary computations.</p>
+<p>The primary power-series adapter still uses the established finite
+odd-prefix identity to identify its exponential formula, then the new ODE
+proof to identify the matrix Taylor computation. Thus the ODE core is an
+independent comparison route; this does not turn the existing normalized
+implementation into an independently constructed geometric sine.</p>
+<p>The older <a href="modular-proofs.html#sine-source:ComputableAnalysis.ScalarODEUniqueness"><code>ScalarODEUniqueness</code></a>
+module is different: its self-derivative uniqueness provider is still a
+conditional input. It is not a ready-made harmonic-oscillator uniqueness
+theorem.</p>
+<h2>Why the identity theorem is less helpful in this test</h2>
+<p>The identity theorem requires holomorphic extensions in a common coordinate
+and an exact local seed. Agreement only at the origin is insufficient. The
+physical sets \(\pi\mathbb Q\) and \(\mathbb Q\) have not supplied an
+accumulating common set of agreed nonzero points.</p>
+<p>An ODE can supply the missing seed through its initial-value uniqueness, or
+through its recurrence determining every Taylor coefficient. A coefficient
+argument additionally needs actual local analytic reconstruction. The finite
+prefix route already proves the present concrete comparison, so adding
+holomorphic identity propagation would not remove a proof obligation.</p>
+<p>For a future independent geometric sine, prefer a shared ODE and initial
+normalization when its derivative evidence is easiest to construct. Prefer
+the identity theorem when exact accumulating-set agreement or a local
+analytic identity is already available. This is a choice based on the
+constructions, not a permanent ranking of the methods.</p>
+<h2>Verification</h2>
+<pre><code class="language-bash">lake build ComputableAnalysis
+lake env lean scripts/check_elementary_sine_comparison.lean
+lake env lean scripts/check_elementary_sine_ode_comparison.lean
+lake env .lake/packages/checkdecls/.lake/build/bin/checkdecls blueprint/lean_decls
+</code></pre>
+<p>The ODE audit checks solution evidence, initial values, global uniqueness,
+primary bridges and center convergence. It also checks the transitive proof
+dependencies: the central comparison uses both solution laws, actual global
+uniqueness and path constancy, and uses no elementary sine-agreement theorem.
+The primary normalized comparison does use the central ODE theorem.</p>
+<p>Checked on 2026-10-12: the full library build passed (5396 jobs), as did the
+blueprint declaration audit. All sixteen ODE audit endpoints use only
+<code>propext</code>, <code>Classical.choice</code> and <code>Quot.sound</code>. The transitive core proof audit
+found both actual solution laws and initial values, the global uniqueness
+law and checked path constancy; it found no earlier elementary sine agreement.
+The applied primary comparison includes the central ODE theorem. No Mathlib,
+Std or Batteries imports were found in the library. Skill metadata and relative
+reference links passed validation.</p>
+</body></html>

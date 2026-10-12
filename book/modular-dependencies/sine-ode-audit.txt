@@ -1,0 +1,21 @@
+AUDIT ComputableAnalysis.RiemannHilbert.MatrixExponential.constant_ode_path_unique: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.MatrixExponential.constant_ode_entire_unique: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.ElementarySineODE.sine_derivative: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.ElementarySineODE.cosine_derivative: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.ElementarySineODE.exponentialVector_ode: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.ElementarySineODE.seriesVector_ode: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.ElementarySineODE.exponentialVector_initial: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.ElementarySineODE.seriesVector_initial: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.ElementarySineODE.computations_agree_global: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.ElementarySineODE.seriesVector_reparametrization: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.ElementarySineODE.sinPi_powerSeries_global: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.ElementarySineODE.powerSeries_primary_agrees: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.ElementarySineODE.sinPi_primary_agrees: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.ElementarySineODE.powerSeries_primary_converges: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.ElementarySineODE.sinPi_primary_converges: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.ElementarySineODE.sinPi_primary_ode_comparison: [propext, Classical.choice, Quot.sound]
+PASS: actual solution laws and initial values, global path coverage, no earlier sine identity in ODE core (4429 declarations); primary comparison uses ODE core.

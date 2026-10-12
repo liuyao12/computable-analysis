@@ -1,0 +1,47 @@
+ComputableAnalysis.ElementarySineComparison.powerSeries_rational_agrees_derived (x : Rat) :
+  (ComputableAnalysis.ElementaryPowerSeries.sineValue { re := x, im := 0 }).realPart.Equiv
+    (ComputableAnalysis.ElementaryInverseBranches.sineAtAngle (ComputableAnalysis.RealRaw.ofRat x) ⋯)
+ComputableAnalysis.ElementarySineComparison.sinPi_agrees_derived_powerSeries (r : Rat) :
+  (ComputableAnalysis.ElementaryRational.sinPi.evalRaw r trivial).Equiv
+    (ComputableAnalysis.ElementaryInverseBranches.sineAtAngle (ComputableAnalysis.ElementaryRational.piAngle r) ⋯)
+ComputableAnalysis.ElementarySineComparison.sinPi_powerSeries_agrees_at_coordinates :
+  ComputableAnalysis.ElementaryRational.sinPi.AgreeAtCoordinates
+    ComputableAnalysis.ElementaryPowerSeries.sine.realPartOnRealAxis ComputableAnalysis.ElementaryRational.piAngle
+    ComputableAnalysis.RealRaw.ofRat
+ComputableAnalysis.RiemannHilbert.ConstructedSystemODE.solution_unique_local {n : Nat}
+  {D : ComputableAnalysis.RiemannHilbert.Scalar → Prop} (G : ComputableAnalysis.RiemannHilbert.LinearField.Field D)
+  (O : ComputableAnalysis.RiemannHilbert.ScalarTopology.OpenData D)
+  (hG : ∀ (z w : ComputableAnalysis.RiemannHilbert.Scalar) (hz : D z) (hw : D w), z ≈ w → (G z hz).Equiv (G w hw))
+  (hM : ComputableAnalysis.RiemannHilbert.LinearField.MatrixHolomorphic G ⋯ hG)
+  (b : ComputableAnalysis.RiemannHilbert.Scalar) (hb : D b)
+  (g : ComputableAnalysis.RiemannHilbert.DomainVectorFunctions.Map n)
+  (hg : ComputableAnalysis.RiemannHilbert.DomainVectorFunctions.Holomorphic g) (hgb : g.domain b)
+  (hlinear :
+    ∀ (z : ComputableAnalysis.RiemannHilbert.Scalar) (hz : D z), ComputableAnalysis.RiemannHilbert.IsLinear (G z hz))
+  (initial : ComputableAnalysis.RiemannHilbert.Fiber n) (hinit : g.eval b hgb ≈ initial)
+  (hODE :
+    ∀ (z : ComputableAnalysis.RiemannHilbert.Scalar) (hz : g.domain z) (ha : D z),
+      ComputableAnalysis.RiemannHilbert.DomainVectorFunctions.derivative g hg z hz ≈ (G z ha).eval (g.eval z hz))
+  (z : ComputableAnalysis.RiemannHilbert.Scalar)
+  (hz :
+    ComputableAnalysis.RiemannHilbert.Centered.domain b
+      (ComputableAnalysis.RiemannHilbert.ConstructedSystemODE.comparisonRadius G O hG hM b hb g hg hgb).val z) :
+  (ComputableAnalysis.RiemannHilbert.ConstructedSystemODE.solution G O hG hM b hb initial).eval z ⋯ ≈ g.eval z ⋯
+'ComputableAnalysis.ElementarySineComparison.powerSeries_rational_agrees_derived' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ElementarySineComparison.sinPi_agrees_derived_powerSeries' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ElementarySineComparison.sinPi_powerSeries_agrees_at_coordinates' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ElementaryPowerSeries.sineValue_realAxis_agrees' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.entireExponential_legacy_lift' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RiemannHilbert.ConstructedSystemODE.solution_unique_local' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

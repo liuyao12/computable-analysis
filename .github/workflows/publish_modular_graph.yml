@@ -5,7 +5,7 @@ on:
       base_run:
         description: Successful publication run containing the existing live Pages artifact
         required: true
-        default: '38228101692'
+        default: '38231650487'
 permissions:
   contents: read
   actions: read
@@ -108,6 +108,37 @@ jobs:
           assert (source/'rational-construction-proof.tar.gz').stat().st_size==rational_bundle['bytes']
           assert 'Build completed successfully' in (source/'rational-construction-build.txt').read_text()
           assert 'PASS:' in (source/'rational-construction-import-audit.txt').read_text()
+          sine=data['sineFlow']
+          assert sine['status']=='checked' and len(sine['nodes'])==21
+          assert sine['coreIndependentOfEarlierSineAgreement'] is True
+          assert sine['primaryAdapterUsesFinitePrefix'] is True
+          dependencies=source/sine['proofDependencies']['path']
+          assert hashlib.sha256(dependencies.read_bytes()).hexdigest()==sine['proofDependencies']['sha256']
+          declarations=json.loads(dependencies.read_text())['declarations']
+          assert len(declarations)==sine['proofDependencies']['declarations']
+          for entry in declarations.values():
+              assert all(n in declarations for n in entry['proofDependencies']+entry['typeDependencies'])
+          for name,key in [('sine-ode-audit.txt','auditSha256'),('sine-finite-prefix-audit.txt','finiteAuditSha256')]:
+              audit=(source/name).read_bytes()
+              assert hashlib.sha256(audit).hexdigest()==sine[key]
+              assert 'error:' not in audit.decode() and 'sorryAx' not in audit.decode()
+          assert 'PASS:' in (source/'sine-ode-audit.txt').read_text()
+          ids={n['id'] for n in sine['nodes']}
+          for node in sine['nodes']:
+              assert all(p in ids for p in node['parents'])
+              assert all(t in declarations for t in node['theorems'])
+              assert all(m in data['sources'] for m in node['roots'])
+          def declaration_closure(root):
+              seen=set();todo=[root]
+              while todo:
+                  name=todo.pop()
+                  if name in seen:continue
+                  seen.add(name);entry=declarations[name]
+                  todo.extend(entry['proofDependencies']+entry['typeDependencies'])
+              return seen
+          core=declaration_closure('ComputableAnalysis.ElementarySineODE.computations_agree_global')
+          assert not any('ElementarySineComparison.' in n or 'ElementarySeriesComparisons.' in n or n=='ComputableAnalysis.ElementaryPowerSeries.sineValue_agrees' for n in core)
+          assert 'ComputableAnalysis.ElementarySineODE.computations_agree_global' in declaration_closure('ComputableAnalysis.ElementarySineODE.sinPi_primary_ode_comparison')
           before={str(p.relative_to(site)):hashlib.sha256(p.read_bytes()).hexdigest() for p in site.rglob('*') if p.is_file()}
           files={'index.html':'modular-proofs.html',
               'modular-dependencies.json':'modular-dependencies.json',
@@ -124,7 +155,18 @@ jobs:
               'rational-construction-build.txt':'modular-rational-construction-build.txt',
               'rational-construction-import-audit.txt':'modular-rational-construction-import-audit.txt',
               'check_rational_modular_charts.lean':'check_rational_modular_charts.lean',
-              'rational-construction-proof.tar.gz':'modular-rational-construction-proof.tar.gz'}
+              'rational-construction-proof.tar.gz':'modular-rational-construction-proof.tar.gz',
+              'sine-proof-dependencies.json':'sine-proof-dependencies.json',
+              'sine-routes.js':'sine-routes.js',
+              'sine-comparison.md':'sine-comparison.md',
+              'sine-comparison.html':'sine-comparison.html',
+              'render_sine_comparison.cjs':'render_sine_comparison.cjs',
+              'sine-ode-audit.txt':'sine-ode-audit.txt',
+              'sine-finite-prefix-audit.txt':'sine-finite-prefix-audit.txt',
+              'export_sine_dependencies.lean':'export_sine_dependencies.lean',
+              'update_sine_dependency_graph.py':'update_sine_dependency_graph.py',
+              'check_elementary_sine_ode_comparison.lean':'check_elementary_sine_ode_comparison.lean',
+              'check_elementary_sine_comparison.lean':'check_elementary_sine_comparison.lean'}
           for src,dst in files.items():
               shutil.copy(source/src,site/dst)
           index=site/'index.html';text=index.read_text()
@@ -146,7 +188,7 @@ jobs:
           for name,digest in before.items():
               if name not in changed:
                   assert hashlib.sha256((site/name).read_bytes()).hexdigest()==digest,name
-          (site/'modular-publication.json').write_text(json.dumps({'baseRun': int(os.environ['BASE_RUN']),'baseRecovered':not Path('previous/artifact.tar').exists(),'preservedFiles':sum(n not in changed for n in before),'rationalConstructionAuditSha256':rational['axiomAuditSha256'],'rationalConstructionEndpoints':len(rational['checkedEndpoints']),'graphBundles':len(data['nodes']),'sourceModules':len(data['imports']),'sourceSnapshots':len(data['sources']),'currentExponentialApi':True,'auditedCMValueEndpoints':len(cm['checkedEndpoints']),'classPolynomialTheoremProved':False,'cmSourceBundleSha256':bundle['sha256'],'cmValuesAuditSha256':cm['axiomAuditSha256'],'auditedExponentialEndpoints':len(proof['checkedEndpoints']),'exponentialAuditSha256':proof['axiomAuditSha256'],'graphSha256':hashlib.sha256((site/'modular-proofs.html').read_bytes()).hexdigest()}))
+          (site/'modular-publication.json').write_text(json.dumps({'baseRun': int(os.environ['BASE_RUN']),'baseRecovered':not Path('previous/artifact.tar').exists(),'preservedFiles':sum(n not in changed for n in before),'rationalConstructionAuditSha256':rational['axiomAuditSha256'],'rationalConstructionEndpoints':len(rational['checkedEndpoints']),'sineBundles':len(sine['nodes']),'sineDeclarations':len(declarations),'sineDependencySha256':sine['proofDependencies']['sha256'],'graphBundles':len(data['nodes']),'sourceModules':len(data['imports']),'sourceSnapshots':len(data['sources']),'currentExponentialApi':True,'auditedCMValueEndpoints':len(cm['checkedEndpoints']),'classPolynomialTheoremProved':False,'cmSourceBundleSha256':bundle['sha256'],'cmValuesAuditSha256':cm['axiomAuditSha256'],'auditedExponentialEndpoints':len(proof['checkedEndpoints']),'exponentialAuditSha256':proof['axiomAuditSha256'],'graphSha256':hashlib.sha256((site/'modular-proofs.html').read_bytes()).hexdigest()}))
           PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
