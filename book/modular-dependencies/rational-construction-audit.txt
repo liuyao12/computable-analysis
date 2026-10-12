@@ -1,0 +1,89 @@
+ComputableAnalysis.ModularForms.rationalNomeChart_valid : rationalNomeChart.Valid
+ComputableAnalysis.ModularForms.sampledNomeChart_rational_agreement (w : QComplex) :
+  (sampledNomeChartValue ⟨ComplexRaw.ofQComplex w, ⋯⟩).val.Equiv (rationalNomeChart.evalRaw w trivial)
+sampledNome.eval_congr : ∀ (z w : Scalar) (hz : sampledNome.domain z) (hw : sampledNome.domain w),
+  z.val.Equiv w.val → (sampledNome.eval z hz).val.Equiv (sampledNome.eval w hw).val
+ComputableAnalysis.ModularForms.sampledNome_holomorphic : DomainFunctions.Holomorphic sampledNome
+ComputableAnalysis.ModularForms.RationalEisenstein.rationalEisensteinTwo : ComplexFunction
+ComputableAnalysis.ModularForms.RationalEisenstein.rationalEisensteinFour : ComplexFunction
+ComputableAnalysis.ModularForms.RationalEisenstein.rationalEisensteinSix : ComplexFunction
+(RationalEisenstein.derivedMap
+    RationalEisenstein.Weight.four).eval_congr : ∀ (z w : Scalar)
+  (hz : (RationalEisenstein.derivedMap RationalEisenstein.Weight.four).domain z)
+  (hw : (RationalEisenstein.derivedMap RationalEisenstein.Weight.four).domain w),
+  z.val.Equiv w.val →
+    ((RationalEisenstein.derivedMap RationalEisenstein.Weight.four).eval z hz).val.Equiv
+      ((RationalEisenstein.derivedMap RationalEisenstein.Weight.four).eval w hw).val
+ComputableAnalysis.ModularForms.RationalEisenstein.derivedMap_holomorphic (w : RationalEisenstein.Weight) :
+  DomainFunctions.Holomorphic (RationalEisenstein.derivedMap w)
+ComputableAnalysis.ModularForms.RationalEisenstein.sampledEisensteinTwo_original_agreement (q : Scalar)
+  (hq : tauEulerNomeDomain q) :
+  (RationalEisenstein.sampledEisensteinTwo.eval q ⋯).val.Equiv (tauWeightTwoNomeMap.eval q hq).val
+ComputableAnalysis.ModularForms.RationalEisenstein.sampledEisensteinFour_original_agreement (q : Scalar)
+  (hq : tauEulerNomeDomain q) :
+  (RationalEisenstein.sampledEisensteinFour.eval q ⋯).val.Equiv (nomeEisensteinFourMap.eval q hq).val
+ComputableAnalysis.ModularForms.RationalEisenstein.sampledEisensteinSix_original_agreement (q : Scalar)
+  (hq : tauEulerNomeDomain q) :
+  (RationalEisenstein.sampledEisensteinSix.eval q ⋯).val.Equiv (nomeEisensteinSixMap.eval q hq).val
+'ComputableAnalysis.ModularForms.rationalNomeChart_valid' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.sampledNomeChartValue_agrees' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.sampledNomeChart_rational_agreement' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.sampledNomeValue_agrees' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.sampledNome_holomorphic' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.RationalLambert.denominator_nonzero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalLambert.prefix_agrees' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalLambert.difference_bound' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalLambert.rationalValue_valid' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalLambert.rationalValue_agrees' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalLambert.sample_inside' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalLambert.input_error' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.RationalLambert.comparison_close' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalLambert.value_valid' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.RationalLambert.value_agrees' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalEisenstein.rationalRaw_valid' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalEisenstein.derivedValue_agrees' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalEisenstein.derived_rational_agreement' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalEisenstein.derivedMap_holomorphic' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.sampledNome_cm163_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.sampledNome_cm43_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.sampledCMEisenstein163_agrees' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.sampledCMEisenstein43_agrees' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.sampledCM163_normalized_fourier_product' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+true
+true
+true
+true

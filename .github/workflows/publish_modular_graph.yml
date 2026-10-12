@@ -5,7 +5,7 @@ on:
       base_run:
         description: Successful publication run containing the existing live Pages artifact
         required: true
-        default: '38018219093'
+        default: '38019858036'
 permissions:
   contents: read
   actions: read
@@ -36,13 +36,14 @@ jobs:
           mkdir site
           python3 - <<'PY'
           from pathlib import Path
-          import json,hashlib,subprocess
+          import json,hashlib,subprocess,os
           previous=Path('previous/artifact.tar')
           if previous.exists():
               subprocess.run(['tar','-xf',str(previous),'-C','site'],check=True)
           else:
               source=Path('book/modular-dependencies')
               meta=json.loads((source/'pages-base.json').read_text())
+              assert int(meta['latestPagesRun'])==int(os.environ['BASE_RUN']), 'Fallback does not match the requested live publication'
               backup=source/'pages-base.tar.gz'
               assert hashlib.sha256(backup.read_bytes()).hexdigest()==meta['sha256']
               assert backup.stat().st_size==meta['bytes']
@@ -55,7 +56,7 @@ jobs:
           import json,hashlib,shutil,os,re
           site=Path('site');source=Path('book/modular-dependencies')
           data=json.loads((source/'modular-dependencies.json').read_text())
-          assert len(data['nodes'])==15
+          assert len(data['nodes'])==21
           assert data['precisionFlow']['status']=='checked'
           assert len(data['precisionFlow']['nodes'])==7
           assert data['numericalAlternative']['status']=='strategy-only'
@@ -88,6 +89,24 @@ jobs:
           assert (source/'cm-values-proof.tar.gz').stat().st_size==bundle['bytes']
           cm_build=(source/'cm-values-build.txt').read_text()
           assert 'Build completed successfully' in cm_build and 'error:' not in cm_build
+          rational=data['rationalConstruction']
+          assert data['constructionFlow']['status']=='checked'
+          assert rational['mathlibDependency'] is False
+          assert rational['fullUnitDiskExtensionProved'] is False
+          assert rational['eulerProductMigrated'] is False
+          assert len(rational['checkedEndpoints'])==24
+          rational_audit=(source/'rational-construction-audit.txt').read_text()
+          assert hashlib.sha256(rational_audit.encode()).hexdigest()==rational['axiomAuditSha256']
+          assert 'sorryAx' not in rational_audit and not re.search(r'\berror(?:\(|:)',rational_audit)
+          for name in rational['checkedEndpoints']:
+              match=re.search("'"+re.escape(name)+r"' depends on axioms: \[([^]]*)\]",rational_audit)
+              assert match,name
+              assert set(re.findall(r'[\w.]+',match[1])) <= {'propext','Classical.choice','Quot.sound'},name
+          rational_bundle=rational['sourceBundle']
+          assert hashlib.sha256((source/'rational-construction-proof.tar.gz').read_bytes()).hexdigest()==rational_bundle['sha256']
+          assert (source/'rational-construction-proof.tar.gz').stat().st_size==rational_bundle['bytes']
+          assert 'Build completed successfully' in (source/'rational-construction-build.txt').read_text()
+          assert 'PASS:' in (source/'rational-construction-import-audit.txt').read_text()
           before={str(p.relative_to(site)):hashlib.sha256(p.read_bytes()).hexdigest() for p in site.rglob('*') if p.is_file()}
           files={'index.html':'modular-proofs.html',
               'modular-dependencies.json':'modular-dependencies.json',
@@ -99,7 +118,12 @@ jobs:
               'cm-values-audit.txt':'modular-cm-values-audit.txt',
               'cm-values-build.txt':'modular-cm-values-build.txt',
               'check_cm_elliptic_values.lean':'check_cm_elliptic_values.lean',
-              'cm-values-proof.tar.gz':'modular-cm-values-proof.tar.gz'}
+              'cm-values-proof.tar.gz':'modular-cm-values-proof.tar.gz',
+              'rational-construction-audit.txt':'modular-rational-construction-audit.txt',
+              'rational-construction-build.txt':'modular-rational-construction-build.txt',
+              'rational-construction-import-audit.txt':'modular-rational-construction-import-audit.txt',
+              'check_rational_modular_charts.lean':'check_rational_modular_charts.lean',
+              'rational-construction-proof.tar.gz':'modular-rational-construction-proof.tar.gz'}
           for src,dst in files.items():
               shutil.copy(source/src,site/dst)
           index=site/'index.html';text=index.read_text()
@@ -121,12 +145,8 @@ jobs:
           for name,digest in before.items():
               if name not in changed:
                   assert hashlib.sha256((site/name).read_bytes()).hexdigest()==digest,name
-          (site/'modular-publication.json').write_text(json.dumps({'baseRun': int(os.environ['BASE_RUN']),'baseRecovered':not Path('previous/artifact.tar').exists(),'preservedFiles':sum(n not in changed for n in before),'graphBundles':len(data['nodes']),'sourceModules':len(data['imports']),'sourceSnapshots':len(data['sources']),'currentExponentialApi':True,'auditedCMValueEndpoints':len(cm['checkedEndpoints']),'classPolynomialTheoremProved':False,'cmSourceBundleSha256':bundle['sha256'],'cmValuesAuditSha256':cm['axiomAuditSha256'],'auditedExponentialEndpoints':len(proof['checkedEndpoints']),'exponentialAuditSha256':proof['axiomAuditSha256'],'graphSha256':hashlib.sha256((site/'modular-proofs.html').read_bytes()).hexdigest()}))
+          (site/'modular-publication.json').write_text(json.dumps({'baseRun': int(os.environ['BASE_RUN']),'baseRecovered':not Path('previous/artifact.tar').exists(),'preservedFiles':sum(n not in changed for n in before),'rationalConstructionAuditSha256':rational['axiomAuditSha256'],'rationalConstructionEndpoints':len(rational['checkedEndpoints']),'graphBundles':len(data['nodes']),'sourceModules':len(data['imports']),'sourceSnapshots':len(data['sources']),'currentExponentialApi':True,'auditedCMValueEndpoints':len(cm['checkedEndpoints']),'classPolynomialTheoremProved':False,'cmSourceBundleSha256':bundle['sha256'],'cmValuesAuditSha256':cm['axiomAuditSha256'],'auditedExponentialEndpoints':len(proof['checkedEndpoints']),'exponentialAuditSha256':proof['axiomAuditSha256'],'graphSha256':hashlib.sha256((site/'modular-proofs.html').read_bytes()).hexdigest()}))
           PY
-      - name: Preserve the rational ball chapter overlay
-        env:
-          BASE_RUN: ${{ inputs.base_run }}
-        run: python3 book/rational-nball/publish_overlay.py site
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
