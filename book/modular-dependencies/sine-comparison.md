@@ -162,3 +162,84 @@ law and checked path constancy; it found no earlier elementary sine agreement.
 The applied primary comparison includes the central ODE theorem. No Mathlib,
 Std or Batteries imports were found in the library. Skill metadata and relative
 reference links passed validation.
+
+## Independent test: geometric circle versus power-series sine
+
+The new primary geometric object uses a rational stereographic slope, rather
+than a rational radian angle:
+\[
+ P(t)=\left(\frac{1-t^2}{1+t^2},\frac{2t}{1+t^2}\right),\qquad t\in\mathbb Q.
+\]
+Its sine and cosine are these literal rational circle coordinates. The
+[geometric object and angle algorithm](../../../ComputableAnalysis/GeometricCircleRational.lean)
+contain no exponential or power-series computation in their checked definition
+closures. Polygonal sector areas compute the coordinate add-on
+\(\theta(t)=2\operatorname{atan}_{\mathrm{geom}}(t)\) on \(0\le t\le1\).
+For larger positive slopes the algorithm uses
+\(\theta(t)=2\theta(1)-\theta(1/t)\); negative slopes use reflection.
+The geometric identity \(2\theta(1)\simeq\pi\) is the existing area construction
+of \(\pi\). All rational slopes are covered.
+
+This is an independent construction test: there is no common exponential
+**definition** to compare by odd-prefix algebra. The useful equation in its
+actual coordinate is
+\[
+ P'(t)=\frac{2i}{1+t^2}P(t),\qquad P(0)=1.
+\]
+The [geometric derivative evidence](../../../ComputableAnalysis/GeometricRotationODE.lean)
+and explicit rational residuals justify the finite Euler recurrence
+\[
+ p_{k+1}=p_k+h\frac{2i}{1+(kh)^2}p_k,\qquad p_0=1.
+\]
+The geometry computation and the analytic rotation solution each have a
+constructed error bound against this same mesh. For the analytic solution,
+local exponential remainders, finite-product stability and converging angular
+rectangle sums supply the bound. The geometric bound comes from the actual
+rational circle residual and stability. These are intermediate quantitative
+solution proofs, not agreement fields assumed in a certificate.
+
+The [common-Euler uniqueness law](../../../ComputableAnalysis/RiemannHilbert/CommonEulerLimit.lean)
+then concludes exact agreement from
+\[
+ \|u-p_N\|\le C_u\varepsilon_N,\qquad
+ \|v-p_N\|\le C_v\varepsilon_N,\qquad\varepsilon_N\longrightarrow0.
+\]
+This is uniqueness for these supplied, justified calculations. It is not a
+new abstract variable-coefficient ODE existence theorem. Exponential is an
+intermediate analytic solution in the proof; it does not define the geometric
+primary function. The whole-plane oscillator uniqueness theorem separately
+identifies that solution's sine coordinate with the matrix Taylor computation.
+The established adapter and convergence theorem connect the matrix computation
+to the actual primary power-series sine on \(\mathbb Q(i)\).
+
+The [checked comparison](../../../ComputableAnalysis/GeometricCircleODEComparison.lean)
+therefore proves, for every rational slope,
+\[
+ \frac{2t}{1+t^2}\simeq\widehat S(\theta(t)).
+\]
+For every positive rational tolerance it also proves eventual closeness of
+\(S(q_n)\) to the geometric sine, where \(q_n\in\mathbb Q(i)\) are the centers
+of the computed angle boxes. The hat remains a derived evaluation from primary
+rational inputs. The exact primary-to-primary theorem retains the premise that
+the two coordinates describe the same angle.
+
+For example, the slope \(t=1/2\) gives the exact value
+\(\widehat S(2\operatorname{atan}_{\mathrm{geom}}(1/2))\simeq4/5\).
+The reciprocal slope \(t=2\) gives the same sine coordinate at the reflected
+angle \(2\theta(1)-2\operatorname{atan}_{\mathrm{geom}}(1/2)\). These are
+specializations of the checked all-rational theorem, not numerical evaluations.
+
+The new audit checks standard axioms only, absence of Mathlib imports, all
+rational chart coverage, use of both constructed Euler error bounds and global
+oscillator uniqueness, and absence of the old geometric/exponential endpoint
+identity in the proof closure. It also checks the independence of the geometric
+**definitions**, separately from the analytic proof dependencies. Three older
+geometric arithmetic lemmas now use kernel-checked rational decisions in this
+closure.
+
+**Strategy verdict:** the ODE route works for the independent circle
+construction. Its essential extra work is the justified geometric clock and
+solution residual, not an initial-value equality alone. The identity-theorem
+route would additionally need a constructed holomorphic geometric extension
+and an identity seed. No such route is claimed proved here. Finite estimates
+remain necessary underneath the exact ODE comparison.

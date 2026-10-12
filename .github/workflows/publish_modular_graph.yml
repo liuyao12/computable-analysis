@@ -5,7 +5,7 @@ on:
       base_run:
         description: Successful publication run containing the existing live Pages artifact
         required: true
-        default: '38231650487'
+        default: '38254995674'
 permissions:
   contents: read
   actions: read
@@ -109,7 +109,7 @@ jobs:
           assert 'Build completed successfully' in (source/'rational-construction-build.txt').read_text()
           assert 'PASS:' in (source/'rational-construction-import-audit.txt').read_text()
           sine=data['sineFlow']
-          assert sine['status']=='checked' and len(sine['nodes'])==21
+          assert sine['status']=='checked' and len(sine['nodes'])==30
           assert sine['coreIndependentOfEarlierSineAgreement'] is True
           assert sine['primaryAdapterUsesFinitePrefix'] is True
           dependencies=source/sine['proofDependencies']['path']
@@ -118,11 +118,17 @@ jobs:
           assert len(declarations)==sine['proofDependencies']['declarations']
           for entry in declarations.values():
               assert all(n in declarations for n in entry['proofDependencies']+entry['typeDependencies'])
-          for name,key in [('sine-ode-audit.txt','auditSha256'),('sine-finite-prefix-audit.txt','finiteAuditSha256')]:
+          for name,key in [('sine-ode-audit.txt','auditSha256'),('sine-finite-prefix-audit.txt','finiteAuditSha256'),('geometric-circle-ode-audit.txt','geometricAuditSha256')]:
               audit=(source/name).read_bytes()
               assert hashlib.sha256(audit).hexdigest()==sine[key]
               assert 'error:' not in audit.decode() and 'sorryAx' not in audit.decode()
           assert 'PASS:' in (source/'sine-ode-audit.txt').read_text()
+          assert sine['geometricPrimaryIndependentOfExponential'] is True
+          assert sine['geometricAllRationalSlopesCovered'] is True
+          assert 'PASS:' in (source/'geometric-circle-ode-audit.txt').read_text()
+          geometric_bundle=sine['geometricSourceBundle']
+          assert hashlib.sha256((source/geometric_bundle['path']).read_bytes()).hexdigest()==geometric_bundle['sha256']
+          assert (source/geometric_bundle['path']).stat().st_size==geometric_bundle['bytes']
           ids={n['id'] for n in sine['nodes']}
           for node in sine['nodes']:
               assert all(p in ids for p in node['parents'])
@@ -139,6 +145,10 @@ jobs:
           core=declaration_closure('ComputableAnalysis.ElementarySineODE.computations_agree_global')
           assert not any('ElementarySineComparison.' in n or 'ElementarySeriesComparisons.' in n or n=='ComputableAnalysis.ElementaryPowerSeries.sineValue_agrees' for n in core)
           assert 'ComputableAnalysis.ElementarySineODE.computations_agree_global' in declaration_closure('ComputableAnalysis.ElementarySineODE.sinPi_primary_ode_comparison')
+          geometric=declaration_closure('ComputableAnalysis.GeometricCircleODEComparison.geometric_sine_powerSeries')
+          assert 'ComputableAnalysis.RiemannHilbert.CommonEulerLimit.unique' in geometric
+          assert 'ComputableAnalysis.ElementarySineODE.computations_agree_global' in geometric
+          assert 'ComputableAnalysis.ElementaryCircleAngle.exponential_twiceArctangent' not in geometric
           before={str(p.relative_to(site)):hashlib.sha256(p.read_bytes()).hexdigest() for p in site.rglob('*') if p.is_file()}
           files={'index.html':'modular-proofs.html',
               'modular-dependencies.json':'modular-dependencies.json',
@@ -162,6 +172,11 @@ jobs:
               'sine-comparison.html':'sine-comparison.html',
               'render_sine_comparison.cjs':'render_sine_comparison.cjs',
               'sine-ode-audit.txt':'sine-ode-audit.txt',
+              'geometric-circle-ode-audit.txt':'geometric-circle-ode-audit.txt',
+              'geometric-circle-proof.tar.gz':'geometric-circle-proof.tar.gz',
+              'geometric-circle-proof.json':'geometric-circle-proof.json',
+              'check_geometric_circle_ode_comparison.lean':'check_geometric_circle_ode_comparison.lean',
+              'bundle_geometric_circle_proof.py':'bundle_geometric_circle_proof.py',
               'sine-finite-prefix-audit.txt':'sine-finite-prefix-audit.txt',
               'export_sine_dependencies.lean':'export_sine_dependencies.lean',
               'update_sine_dependency_graph.py':'update_sine_dependency_graph.py',

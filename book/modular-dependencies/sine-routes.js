@@ -1,9 +1,14 @@
 'use strict';
 let sineFocus=null,sineProofPromise=null;
 function sine(id='sine-entire-result',focus=null){route='sine';sineFocus=focus;expandedRoots=null;select(id)}
+function sinePosition(n){
+  if(!sineFocus?.startsWith('sine-circle-')||['sine-circle-series-bridge','sine-circle-convergence'].includes(sineFocus))return n;
+  const rows={'sine-circle-primary':1,'sine-circle-clock':2,'sine-circle-ode-law':3,'sine-circle-euler':4,'sine-circle-unique':5,'sine-circle-coverage':6,'sine-circle-result':8};
+  return n.id in rows?{...n,row:rows[n.id],col:0}:n;
+}
 function sineControls(){
   const nav=el('nav');nav.className='sine-route-controls';nav.setAttribute('aria-label','Compare sine proof routes');
-  for(const [label,id,focus] of [['Both routes','sine-entire-result',null],['Finite-prefix route','sine-finite-result','sine-finite-result'],['ODE comparison core','sine-ode-core','sine-ode-core'],['Entire ODE identity','sine-entire-result','sine-entire-result'],['Applied ODE route','sine-applied','sine-applied']]){
+  for(const [label,id,focus] of [['All sine routes','sine-entire-result',null],['Finite-prefix route','sine-finite-result','sine-finite-result'],['ODE comparison core','sine-ode-core','sine-ode-core'],['Entire ODE identity','sine-entire-result','sine-entire-result'],['Applied ODE route','sine-applied','sine-applied'],['Geometric circle ODE','sine-circle-result','sine-circle-result']]){
     const b=el('button',label);b.setAttribute('aria-pressed',String(sineFocus===focus));b.onclick=()=>sine(id,focus);nav.append(b)
   }
   return nav;
@@ -49,5 +54,5 @@ function appendSineDetails(n,d){
   const users=M.sineFlow.nodes.filter(x=>x.parents.includes(n.id));if(users.length){const next=el('section');next.append(el('h3','Used by'));for(const x of users){const b=el('button',x.title);b.onclick=()=>select(x.id);next.append(b)}d.append(next)}
   if(n.theorems.length){const ts=el('section');ts.append(el('h3','Probe the checked theorem dependencies'));for(const name of n.theorems){const b=el('button',name);b.className='module';b.onclick=()=>theoremDependencyView(name);ts.append(b)}d.append(ts)}
   const trace=el('button','Show only this bundle and its requirements');trace.onclick=()=>sine(n.id,n.id);d.append(trace);
-  for(const [title,path] of [['Read the ODE proof and independence audit','sine-ode-audit.txt'],['Read the finite-prefix theorem audit','sine-finite-prefix-audit.txt'],['Read the worked comparison','sine-comparison.html']]){const p=el('p'),a=el('a',title);a.href=path;p.append(a);d.append(p)}
+  for(const [title,path] of [['Read the independent geometric circle audit','geometric-circle-ode-audit.txt'],['Download checked geometric comparison sources','geometric-circle-proof.tar.gz'],['Read the ODE proof and independence audit','sine-ode-audit.txt'],['Read the finite-prefix theorem audit','sine-finite-prefix-audit.txt'],['Read the worked comparison','sine-comparison.html']]){const p=el('p'),a=el('a',title);a.href=path;p.append(a);d.append(p)}
 }

@@ -1,0 +1,22 @@
+AUDIT ComputableAnalysis.RiemannHilbert.CommonEulerLimit.unique: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.GeometricCircleRational.angle_valid: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.GeometricCircleRational.point_neg: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.GeometricCircleRational.point_reciprocal: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.GeometricCircleODEComparison.geometricSolutionEvidence: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.GeometricCircleODEComparison.analyticSolutionEvidence: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.GeometricCircleODEComparison.geometric_rotation_ode_unique: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.GeometricCircleODEComparison.geometric_rotation_all_rational: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.GeometricCircleODEComparison.geometric_sine_powerSeries: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.GeometricCircleODEComparison.geometric_sine_primary_converges: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.GeometricCircleODEComparison.primary_agreement_on_overlap: [propext,
+ Classical.choice,
+ Quot.sound]
+PASS: geometric primary definitions and sector-angle algorithms have no exponential or power-series dependency; actual common-Euler solution evidence, whole-plane oscillator uniqueness and all-rational chart coverage are used; no previous geometric endpoint agreement (5622 declarations).

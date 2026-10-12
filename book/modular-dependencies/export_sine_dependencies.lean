@@ -1,5 +1,6 @@
 import Lean
 import ComputableAnalysis.ElementarySineODEComparison
+import ComputableAnalysis.GeometricCircleODEComparison
 
 /-! Export checked declaration dependencies for the interactive sine route.
 Proof-body constants and theorem-type constants remain separately labelled. -/
@@ -29,7 +30,24 @@ private def namesJson (env : Environment) (names : Array Name) : Json :=
 
 run_cmd do
   let env ← getEnv
-  let roots := [``constant_ode_path_unique, ``constant_ode_entire_unique,
+  let roots := [``ComputableAnalysis.RiemannHilbert.CommonEulerLimit.unique,
+    ``ComputableAnalysis.GeometricCircleRational.angle_valid,
+    ``ComputableAnalysis.GeometricCircleRational.sine,
+    ``ComputableAnalysis.GeometricCircleRational.cosine,
+    ``ComputableAnalysis.GeometricCircleRational.sine_valid,
+    ``ComputableAnalysis.GeometricCircleRational.cosine_valid,
+    ``ComputableAnalysis.GeometricCircleRational.point_neg,
+    ``ComputableAnalysis.GeometricCircleRational.point_reciprocal,
+    ``ComputableAnalysis.GeometricCircleODEComparison.geometricSolutionEvidence,
+    ``ComputableAnalysis.GeometricCircleODEComparison.analyticSolutionEvidence,
+    ``ComputableAnalysis.GeometricCircleODEComparison.geometric_rotation_ode_unique,
+    ``ComputableAnalysis.GeometricCircleODEComparison.geometric_rotation_all_rational,
+    ``ComputableAnalysis.GeometricCircleODEComparison.geometric_sine_powerSeries,
+    ``ComputableAnalysis.GeometricCircleODEComparison.geometric_sine_primary_converges,
+    ``ComputableAnalysis.GeometricCircleODEComparison.primary_agreement_on_overlap,
+    ``ComputableAnalysis.GeometricRotationODE.pointComplexDerivative_eq_angularVelocity_mul_point,
+    ``ComputableAnalysis.GeometricRotationODE.point_hasComplexDerivativeOnUnit,
+    ``constant_ode_path_unique, ``constant_ode_entire_unique,
     ``sine_derivative, ``cosine_derivative, ``exponentialVector_ode,
     ``seriesVector_ode, ``exponentialVector_initial, ``seriesVector_initial,
     ``computations_agree_global, ``seriesVector_reparametrization,

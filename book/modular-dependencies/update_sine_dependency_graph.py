@@ -88,6 +88,39 @@ nodes = [
 ]
 
 
+G = P + 'GeometricCircleODEComparison.'
+C = P + 'GeometricCircleRational.'
+nodes.extend([
+    node('circle-primary', 'Primary geometric circle on rational slopes', r'\[P(t)=\left(\frac{1-t^2}{1+t^2},\frac{2t}{1+t^2}\right),\quad t\in\mathbb Q.\]',
+         'The circle sine and cosine are literal rational coordinates of the stereographic point. Their executable definitions and geometric angle algorithm have no exponential or power-series dependency. This is the independent geometric construction used in the new test.',
+         [P+'GeometricCircleRational', P+'RationalCircle'], 9, 0, ['foundation'], [C+'sine_valid', C+'cosine_valid'], 'geometric'),
+    node('circle-clock', 'Sector-area coordinate add-on', r'\[\theta(t)=2\operatorname{atan}_{\mathrm{geom}}(t),\quad0\le t\le1.\]',
+         'Polygonal sector-area enclosures compute the angle. Finite rectangle sums for the geometric angular speed converge to this same angle. An irrational angle is a derived coordinate of the rational circle object, not a new primary domain.',
+         [P+'GeometricCircleRational', P+'ArctanGeometry', P+'ElementaryCircleAngle'], 10, 0, ['circle-primary'], [P+'ElementaryCircleAngle.angle_target_error', C+'angle_valid'], 'geometric'),
+    node('circle-ode-law', 'Actual variable-speed rotation law', r"\[P'(t)=\frac{2i}{1+t^2}P(t),\qquad P(0)=1.\]",
+         'Exact rational differentiation proves the geometric circle ODE. Quantitative rational difference-quotient residuals and Euler stability supply its solution evidence. This equation is in stereographic slope; treating slope as a radian angle would compare different functions.',
+         [P+'GeometricRotationODE', M+'GeometricRotationEulerStability'], 10, 1, ['circle-primary'], [P+'GeometricRotationODE.point_hasComplexDerivativeOnUnit', P+'GeometricRotationODE.pointComplexDerivative_eq_angularVelocity_mul_point'], 'geometric'),
+    node('circle-euler', 'Same finite Euler mesh, two error proofs', r'\[p_{k+1}=p_k+h\frac{2i}{1+(kh)^2}p_k,\quad p_0=1.\]',
+         'The geometry proof bounds rational circle coordinates against this actual finite mesh. The analytic proof uses exponential local remainders, finite products and converging angular sums to bound its pulled-back rotation against the same mesh. Neither error record assumes agreement of the final values.',
+         [P+'GeometricCircleODEComparison', P+'ElementaryCircleAngle', M+'GeometricRotationEulerMesh', M+'GeometricRotationEulerConvergence'], 11, 1, ['circle-ode-law', 'circle-clock', 'exp'], [G+'geometricSolutionEvidence', G+'analyticSolutionEvidence'], 'geometric'),
+    node('circle-unique', 'Common-Euler limit uniqueness', r'\[\|u-p_N\|\le C_u\varepsilon_N,\quad\|v-p_N\|\le C_v\varepsilon_N,\quad\varepsilon_N\to0\;\Longrightarrow\;u\simeq v.\]',
+         'Triangle inequalities and shrinking rational error bounds prove exact equality. The ODE application constructs both bounds from the actual residual and stability laws. This is a quantitative uniqueness test for these supplied computations, not an unproved general variable-coefficient ODE existence or uniqueness provider.',
+         [R+'CommonEulerLimit', P+'GeometricCircleODEComparison'], 12, 1, ['circle-euler'], [R+'CommonEulerLimit.unique', G+'geometric_rotation_ode_unique'], 'geometric'),
+    node('circle-coverage', 'Sign and reciprocal charts cover all slopes', r'\[\theta(t)=\pi-\theta(1/t)\ (t>1),\qquad\theta(-t)=-\theta(t).\]',
+         'Here pi is four times the geometrically computed angle at slope one. Exact rational point reflection and reciprocal identities, with finite exponential addition and conjugation laws, extend the comparison to every rational slope. The angle algorithm remains geometric.',
+         [P+'GeometricCircleRational', P+'GeometricCircleODEComparison'], 13, 1, ['circle-unique', 'circle-clock'], [C+'point_neg', C+'point_reciprocal', G+'geometric_rotation_all_rational'], 'geometric'),
+    node('circle-result', 'Independent geometric–series sine identity', r'\[\frac{2t}{1+t^2}\simeq\widehat S(\theta(t)),\qquad t\in\mathbb Q.\]',
+         'Common-Euler uniqueness identifies the geometric rotation with an analytic intermediate solution. Whole-plane oscillator uniqueness then identifies its sine coordinate with the matrix Taylor solution, already linked to the primary rational-complex sine series. The audit excludes the previous geometric/exponential endpoint identity. Exponential participates in the proof; it does not define the geometric primary object.',
+         [P+'GeometricCircleODEComparison', P+'ElementarySineODESolutions', P+'ElementarySineODEComparison'], 14, 1, ['circle-coverage', 'ode-core'], [G+'geometric_sine_powerSeries'], 'geometric'),
+    node('circle-series-bridge', 'Primary series adapter for the geometric test', r'\[S(q)\simeq\widehat S(q),\quad q\in\mathbb Q(i).\]',
+         'Finite odd coefficient identities connect the actual primary sine series to the matrix Taylor extension. Its proved holomorphic modulus and shrinking input centers justify irrational angle evaluation. This adapter is needed for the primary convergence and overlap conclusions, separately from the geometric-to-matrix exact identity.',
+         [P+'ElementarySineODEComparison', P+'ElementaryPowerSeries', P+'GeometricCircleODEComparison'], 15, 0, ['prefix', 'ode-core', 'matrix'], [S+'powerSeries_primary_agrees', S+'powerSeries_primary_converges', G+'primary_agreement_on_overlap'], 'geometric'),
+    node('circle-convergence', 'Primary power-series values approach circle sine', r'\[S(q_n)\to\frac{2t}{1+t^2},\quad q_n=\operatorname{center}(\theta(t)_n)\in\mathbb Q(i).\]',
+         'For every positive rational tolerance the existing holomorphic modulus supplies eventual closeness of the actual primary series values at rational box centers. Thus the derived irrational-angle evaluation is justified by primary computations. Exact primary-to-primary comparison retains a coordinate-overlap premise.',
+         [P+'GeometricCircleODEComparison', P+'ElementarySineODEComparison'], 16, 1, ['circle-result', 'circle-series-bridge'], [G+'geometric_sine_primary_converges'], 'geometric'),
+])
+
+
 def update():
     graph = json.loads((OUT / 'modular-dependencies.json').read_text())
     deps = json.loads((OUT / 'sine-proof-dependencies.json').read_text())
@@ -127,10 +160,13 @@ def update():
     if 'Sine theorem buttons' not in graph['scope']:
         graph['scope'] += ' Sine theorem buttons expose extracted proof-body and declaration-type dependencies separately.'
     graph['sineFlow'] = dict(status='checked', nodes=nodes,
-        scope='Both routes are checked, with different endpoint scopes. Bundle arrows describe mathematical obligations. Theorem inspection shows constants extracted from checked Lean proof bodies and declaration types; expanded module arrows show literal source imports. The applied ODE route reuses finite-prefix algebra in its primary-function adapter, while its central ODE comparison has no earlier sine-identity dependency.',
+        scope='The algebra and ODE routes are checked, with different endpoint scopes. Bundle arrows describe mathematical obligations. Theorem inspection shows constants extracted from checked Lean proof bodies and declaration types; expanded module arrows show literal source imports. The applied ODE route reuses finite-prefix algebra in its primary-function adapter, while its central ODE comparison has no earlier sine-identity dependency. The independent geometric circle test uses constructed common-Euler solution bounds, all-rational sign/reciprocal coverage and the whole-plane oscillator comparison. Its geometric primary definitions contain no exponential, and its proof does not reuse the previous geometric endpoint agreement.',
         proofDependencies=dict(path='sine-proof-dependencies.json', sha256=hashlib.sha256(deps_path.read_bytes()).hexdigest(), declarations=len(deps['declarations'])),
         auditSha256=hashlib.sha256(audit).hexdigest(), finiteAuditSha256=hashlib.sha256(finite_audit).hexdigest(),
-        primaryDomains=dict(normalized='Rat', powerSeries='QComplex'),
+        primaryDomains=dict(normalized='Rat', powerSeries='QComplex', geometricCircle='Rat (stereographic slope)'),
+        geometricSourceBundle=json.loads((OUT/'geometric-circle-proof.json').read_text()),
+        geometricAuditSha256=hashlib.sha256((OUT/'geometric-circle-ode-audit.txt').read_bytes()).hexdigest(),
+        geometricPrimaryIndependentOfExponential=True, geometricAllRationalSlopesCovered=True,
         coreIndependentOfEarlierSineAgreement=True,
         primaryAdapterUsesFinitePrefix=True)
     (OUT / 'modular-dependencies.json').write_text(json.dumps(graph, ensure_ascii=False, separators=(',', ':')) + '\n')
