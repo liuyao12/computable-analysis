@@ -153,6 +153,55 @@ true
  Quot.sound]
 'ComputableAnalysis.ModularForms.sampledJ_cm163_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
 'ComputableAnalysis.ModularForms.sampledJ_cm43_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.DiskLambert.polynomialMap_holomorphic' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.DiskLambert.polynomialPrefix_error' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.DiskLambert.polynomialError_shrinks' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.DiskLambert.rational_polynomial_close' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.EisensteinDiskPatches.covers' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.EisensteinDiskPatches.samples_eventually_inside' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.DiskLambert.polynomial_patch_bound' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.DiskLambert.value_polynomial_close' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.DiskLambert.patch_holomorphic_exists' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.DiskLambert.holomorphic' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.RationalEisenstein.unitDiskDerivedMap_holomorphic' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalEisenstein.sampledEisensteinTwo_holomorphic' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalEisenstein.sampledEisensteinFour_holomorphic' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalEisenstein.sampledEisensteinSix_holomorphic' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalEisenstein.unitDiskDerived_derivative_smallChart_agreement' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+RationalEisenstein.sampledEisensteinFour_holomorphic.atPoint : (a : Scalar) →
+  (ha : RationalEisenstein.sampledEisensteinFour.domain a) →
+    DomainFunctions.HasDerivativeAt RationalEisenstein.sampledEisensteinFour a ha
+      (RationalEisenstein.sampledEisensteinFour_holomorphic.derivative a ha)
+RationalEisenstein.sampledEisensteinSix_holomorphic.continuousDerivative : DomainFunctions.ContinuousOn
+  RationalEisenstein.sampledEisensteinSix.domain RationalEisenstein.sampledEisensteinSix_holomorphic.derivative
 ComputableAnalysis.ModularForms.RationalEisenstein.rationalEisensteinTwo : ComplexFunction
 RationalEisenstein.sampledEisensteinFour.eval_congr : ∀ (z w : Scalar)
   (hz : RationalEisenstein.sampledEisensteinFour.domain z) (hw : RationalEisenstein.sampledEisensteinFour.domain w),

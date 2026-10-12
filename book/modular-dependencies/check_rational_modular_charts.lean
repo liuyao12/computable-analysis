@@ -92,6 +92,26 @@ open ComputableAnalysis ComputableAnalysis.ModularForms ComputableAnalysis.Riema
 #print axioms sampledJ_cm163_exact
 #print axioms sampledJ_cm43_exact
 
+#print axioms DiskLambert.polynomialMap_holomorphic
+#print axioms DiskLambert.polynomialPrefix_error
+#print axioms DiskLambert.polynomialError_shrinks
+#print axioms DiskLambert.rational_polynomial_close
+#print axioms EisensteinDiskPatches.covers
+#print axioms EisensteinDiskPatches.samples_eventually_inside
+#print axioms DiskLambert.polynomial_patch_bound
+#print axioms DiskLambert.value_polynomial_close
+#print axioms DiskLambert.patch_holomorphic_exists
+#print axioms DiskLambert.holomorphic
+#print axioms RationalEisenstein.unitDiskDerivedMap_holomorphic
+#print axioms RationalEisenstein.sampledEisensteinTwo_holomorphic
+#print axioms RationalEisenstein.sampledEisensteinFour_holomorphic
+#print axioms RationalEisenstein.sampledEisensteinSix_holomorphic
+#print axioms RationalEisenstein.unitDiskDerived_derivative_smallChart_agreement
+
+-- Public witnesses quantify over all valid represented disk inputs.
+#check RationalEisenstein.sampledEisensteinFour_holomorphic.atPoint
+#check RationalEisenstein.sampledEisensteinSix_holomorphic.continuousDerivative
+
 -- A genuinely Euclidean point: its coordinate sum is greater than one.
 example : RationalEisenstein.unitDiskRationalDomain ⟨3/5,3/5⟩ := by decide +kernel
 example : (1:Rat)<QComplex.normBound ⟨3/5,3/5⟩ := by decide +kernel
