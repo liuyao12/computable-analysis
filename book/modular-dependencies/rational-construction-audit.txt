@@ -87,3 +87,80 @@ true
 true
 true
 true
+
+'ComputableAnalysis.ModularForms.DiskLambert.denominator_nonzero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.DiskLambert.term_bound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.DiskLambert.majorant_step' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.DiskLambert.prefix_tail' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.DiskLambert.tail_shrinks' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.DiskLambert.prefix_difference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.EisensteinUnitDisk.rational_mem_iff' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.EisensteinUnitDisk.invariant' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.DiskLambert.rationalValue_valid' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.DiskLambert.radius_independent' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.DiskLambert.rational_lipschitz' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.DiskLambert.value_valid' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.DiskLambert.value_congr' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.DiskLambert.value_rational_agreement' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.DiskLambert.value_legacy_agreement' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalEisenstein.unitDiskRationalRaw_valid' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalEisenstein.unitDiskDerived_rational_agreement' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalEisenstein.unitDiskRational_smallChart_agreement' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalEisenstein.unitDiskDerived_smallChart_agreement' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalEisenstein.sampledEisensteinTwo_original_agreement' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalEisenstein.sampledEisensteinFour_original_agreement' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.RationalEisenstein.sampledEisensteinSix_original_agreement' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.unitDiskCMEisenstein163_agrees' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.unitDiskCMEisenstein43_agrees' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.unitDiskCM163_normalized_fourier_product' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ModularForms.sampledJ_cm163_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.ModularForms.sampledJ_cm43_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+ComputableAnalysis.ModularForms.RationalEisenstein.rationalEisensteinTwo : ComplexFunction
+RationalEisenstein.sampledEisensteinFour.eval_congr : ∀ (z w : Scalar)
+  (hz : RationalEisenstein.sampledEisensteinFour.domain z) (hw : RationalEisenstein.sampledEisensteinFour.domain w),
+  z.val.Equiv w.val →
+    (RationalEisenstein.sampledEisensteinFour.eval z hz).val.Equiv
+      (RationalEisenstein.sampledEisensteinFour.eval w hw).val
+ComputableAnalysis.ModularForms.DiskLambert.sample_inside (q : Scalar) (hq : EisensteinUnitDisk.domain q) (k N : Nat) :
+  CauchyTaylor.InDisk (DiskLambert.samplePoint q hq k N) (EisensteinUnitDisk.radius q hq)
+true
+true
+true

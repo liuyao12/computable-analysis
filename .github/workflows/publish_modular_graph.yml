@@ -5,7 +5,7 @@ on:
       base_run:
         description: Successful publication run containing the existing live Pages artifact
         required: true
-        default: '38056013212'
+        default: '38217005572'
 permissions:
   contents: read
   actions: read
@@ -56,7 +56,7 @@ jobs:
           import json,hashlib,shutil,os,re
           site=Path('site');source=Path('book/modular-dependencies')
           data=json.loads((source/'modular-dependencies.json').read_text())
-          assert len(data['nodes'])==21
+          assert len(data['nodes'])==23
           assert data['precisionFlow']['status']=='checked'
           assert len(data['precisionFlow']['nodes'])==7
           assert data['numericalAlternative']['status']=='strategy-only'
@@ -92,9 +92,10 @@ jobs:
           rational=data['rationalConstruction']
           assert data['constructionFlow']['status']=='checked'
           assert rational['mathlibDependency'] is False
-          assert rational['fullUnitDiskExtensionProved'] is False
+          assert rational['fullUnitDiskExtensionProved'] is True
+          assert rational['fullUnitDiskHolomorphicProved'] is False
           assert rational['eulerProductMigrated'] is False
-          assert len(rational['checkedEndpoints'])==24
+          assert len(rational['checkedEndpoints'])==51
           rational_audit=(source/'rational-construction-audit.txt').read_text()
           assert hashlib.sha256(rational_audit.encode()).hexdigest()==rational['axiomAuditSha256']
           assert 'sorryAx' not in rational_audit and not re.search(r'\berror(?:\(|:)',rational_audit)
