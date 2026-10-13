@@ -13,6 +13,19 @@ without a pull-request review process, so
 [request to join as a collaborator](https://github.com/liuyao12/computable-analysis/issues/new?title=Request%20to%20join%20as%20a%20collaborator&body=Hi%21%20I%27d%20like%20to%20join%20as%20a%20collaborator.%0A%0AHere%27s%20what%20I%27d%20like%20to%20work%20on%3A%0A)
 to contribute directly.
 
+## From numbers to functions
+
+The opening chapters now begin with computing \(\sqrt2\) and \(\pi\), then
+develop rational-input functions, continuity add-ons, arctangent-motivated
+integrals and power series, and concrete secant proofs of derivatives and FTC.
+The square-root supporting-line/secant algorithm has proved nested intervals
+and a quadratic width bound. A specific overlap-safe arctangent inverse
+supplies first-quadrant sine and cosine computations without an exponential
+foundation or a general inverse function theorem. Explore the
+[construction map](https://liuyao12.github.io/computable-analysis/foundation-story/index.html)
+and its checked declarations. The new inverse route's global comparison with
+the other trigonometric presentations remains a separate task.
+
 ## Highlights: near-integer exponentials
 
 Two checked Lean theorems show how closely these exponential values approach

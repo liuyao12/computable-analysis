@@ -1,0 +1,4 @@
+Command: lake build
+Scope: entire existing repository, including the canonical library, blueprint and executable targets.
+
+Build completed successfully (5409 jobs).

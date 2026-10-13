@@ -1,0 +1,40 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Specific inverse computations · Construction skill</title><script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],processEscapes:true},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script><style>
+:root{color-scheme:light}body{margin:30px auto;max-width:1050px;padding:0 22px;background:#f5f6f2;color:#243c34;font:17px/1.65 system-ui}h1,h2{overflow-wrap:anywhere;font-family:Georgia;line-height:1.25}a{color:#235b73}nav{display:flex;flex-wrap:wrap;gap:1em;font-size:.9em}.map{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:28px 0}.node{border:1px solid #c8d2ca;border-radius:8px;background:white;color:inherit;padding:16px;text-align:left;cursor:pointer;font:inherit}.node[aria-pressed=true]{border:2px solid #326b50;background:#edf4ec}.node strong{display:block}.node small{display:block;color:#527166}.node .math{font-size:.9em}.panel{padding:22px;border:1px solid #c8d2ca;background:white;border-radius:8px}code{font-size:.84em;overflow-wrap:anywhere}pre{padding:12px;background:#edf2eb;overflow:auto;font:13px/1.55 monospace;max-height:500px;white-space:pre}summary{cursor:pointer}li{margin:.35em 0}button.inspect,button.dep{border:0;background:none;color:#235b73;text-align:left;cursor:pointer;padding:2px;font:inherit}button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #ba8528;outline-offset:4px}.links{display:flex;flex-wrap:wrap;gap:12px}#source{margin-top:20px}mjx-container{max-width:100%;overflow-x:auto;overflow-y:hidden}@media(max-width:700px){.map{grid-template-columns:1fr}body{font-size:16px}}
+.dep{vertical-align:top}button{max-width:100%;overflow-wrap:anywhere}.panel,.node{min-width:0}pre{max-width:100%;box-sizing:border-box}.panel>div{overflow-x:auto}</style></head><body><nav><a href="index.html#inverse">Construction map</a><a href="../ch-foundations.html#square-root-lines">Square-root example</a></nav><h1>Construct a target preimage</h1>
+<p>Read the <a href="https://github.com/liuyao12/computable-analysis/blob/main/FORMALIZATION_GUIDE.md">formalization policy</a> and the <a href="https://github.com/liuyao12/computable-analysis/blob/main/skills/computable-analysis-formalization/references/existence-construction-routes.md#target-preimages">checked route catalog</a>. Retain checked theorems as certifiers; choose an actual recipe for the supplied function.</p>
+<p>State the target identity, the full domain, and any required branch or strict-interior condition. A root is the special case of target zero. Keep range and pole evidence explicit.</p>
+<p>Use convexity or concavity as an informal guide for proposing an interval update before plain bisection. Do not require a formal convexity predicate, a general tangent definition, or an inverse function theorem to execute this strategy. The separate formalization job proves the proposed update&#39;s validity directly from the particular rational formulas and finite evaluator bounds, using inequality proofs: target containment, nesting, and an explicit shrinking schedule. Establish only the supporting-line or secant inequalities actually needed. Estimate the rate after proving these invariants.</p>
+<p>For square root, the square function is <strong>convex</strong> on the positive branch. Given \(0&lt;a\le b\) and \(a^2\le q\le b^2\), the right-end supporting line \(2bt-b^2\) and the endpoint secant \((a+b)t-ab\) give
+\[
+ b' = \frac{b^2+q}{2b},\qquad a' = \frac{q+ab}{a+b}.
+\]
+Prove \(a\le a'\le b'\le b\) and \((a')^2\le q\le(b')^2\) by rational algebra. Moreover,
+\[
+ b'-a'=\frac{(b-a)(b^2-q)}{2b(a+b)}
+ \le\frac{(b-a)^2}{2b}\le\frac{b-a}{2}.
+\]
+Starting at \([1,2]\) computes \(\sqrt2\). The last bound proves shrinking; a positive lower bound for \(b\) makes the preceding bound a quadratic width estimate. Compare the resulting valid name with the existing bisection computation by their squared-value bounds, rather than assuming agreement.</p>
+<p>This example is checked in <a href="sources/ComputableAnalysis.SquareRootSecantNewton.lean">SquareRootSecantNewton.lean</a>: <code>step_spec</code>, <code>bracket_quadratic</code>, <code>sqrtTwo_valid</code>, and <code>sqrtTwo_equiv_bisection</code>. The formal proof uses rational inequalities, not a convexity predicate. Audit this and the concrete arctangent inverse with <code>lake env lean scripts/check_opening_foundation.lean</code>.</p>
+<p>For arctangent on a nonnegative branch, use its <strong>concavity</strong>: the endpoint secant lies below the function and a justified supporting line lies above it. Their target intersections therefore bound the inverse in the opposite order from the convex example. Endpoint values are represented numbers, so enclose the proposed intersections with rational arithmetic and retain an overlap-safe shrinking step. Never rely on deciding exact equality of an interval-computed midpoint and target.</p>
+<p>For circle trigonometry specify \(\arctan(u)=\theta/2\), then construct
+\[
+ \sin\theta=\frac{2u}{1+u^2},\qquad
+ \cos\theta=\frac{1-u^2}{1+u^2}.
+\]
+Keep rational angle coordinates primary (for example a rational multiple of the constructed quarter-turn); derive other target evaluations with the proved continuity evidence. The equation \(\arctan(x)=x\) is a different problem, with only the zero solution, and does not construct general circle coordinates. Handle signs and other quadrants through explicit branch transformations.</p>
+<pre><code class="language-mermaid">flowchart TD
+  A[Specify target and domain] --&gt; B{Exact formula available?}
+  B --&gt;|Yes| C[Construct formula and prove domain and target identity]
+  B --&gt;|No| D{Monotone target brackets with effective decisions?}
+  D --&gt;|Yes| E[Run justified bisection with nesting and width bounds]
+  D --&gt;|No| F{Polynomial root task?}
+  F --&gt;|Yes| G[Use checked constructive FTA and certify any requested real branch]
+  F --&gt;|No| H[Develop a function-specific crossing or local inverse recipe]
+  E --&gt; I[Prove exact evaluation and representation agreement]
+  H --&gt; I
+</code></pre>
+<p>Rational evaluations may support exact sign comparisons. Represented evaluations require interval separation or a justified overlapping-bracket alternative; do not wait for an arbitrary exact-zero decision. An initial sign bracket alone does not justify every subdivision decision or coherent shrinking preimages.</p>
+<p><code>InverseBisectionSearch</code> already demands validity, domain containment, and output overlap. Construct those fields from the actual function; merely repackaging assumed search evidence is not a new existence proof. A finite bracket with tolerance is an intermediate result until its coherent represented value and exact target identity are proved.</p>
+<p>Complex FTA supplies a complex root, not a real root in the requested interval. Prove realness and interval membership independently when those are part of the task. Branch selection can depend on additional separation data.</p>
+<p>Verify the chosen Lean declarations with the catalog audit. For new mathematics follow the <a href="https://github.com/liuyao12/computable-analysis/blob/main/skills/computable-analysis-formalization/SKILL.md">formalization skill</a>, including arbitrary valid represented inputs and exact <code>RealRaw.Equiv</code> or <code>ComplexRaw.Equiv</code> identities.</p>
+</body></html>

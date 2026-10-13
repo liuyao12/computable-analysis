@@ -1,0 +1,12 @@
+const fs=require('node:fs'),path=require('node:path');
+const {marked}=require('marked');
+const root=path.resolve(__dirname,'..');
+let source=fs.readFileSync(path.join(root,'skills/intermediate-value-construction/SKILL.md'),'utf8').replace(/^---[\s\S]*?---\s*/,'');
+source=source.replace(/\]\(\.\.\/\.\.\/ComputableAnalysis\/([^)]*)\.lean\)/g,(_,name)=>`](sources/ComputableAnalysis.${name}.lean)`);
+source=source.replace(/\]\(\.\.\/\.\.\/FORMALIZATION_GUIDE\.md[^)]*\)/g,'](https://github.com/liuyao12/computable-analysis/blob/main/FORMALIZATION_GUIDE.md)');
+source=source.replace(/\]\(\.\.\/computable-analysis-formalization\/([^)]*)\)/g,(_,file)=>`](https://github.com/liuyao12/computable-analysis/blob/main/skills/computable-analysis-formalization/${file})`);
+const math=[];source=source.replace(/\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\]/g,m=>{math.push(m);return 'FOUNDATION-MATH-'+(math.length-1)+'-TOKEN'});
+let body=marked.parse(source).replace(/FOUNDATION-MATH-(\d+)-TOKEN/g,(_,i)=>math[Number(i)].replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'));
+const template=fs.readFileSync(path.join(root,'book/foundation-story/index.html'),'utf8');
+const head=template.slice(template.indexOf('<script>window.MathJax'),template.indexOf('</head>'));
+fs.writeFileSync(path.join(root,'book/foundation-story/inverse-skill.html'),`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Specific inverse computations · Construction skill</title>${head}</head><body><nav><a href="index.html#inverse">Construction map</a><a href="../ch-foundations.html#square-root-lines">Square-root example</a></nav>${body}</body></html>`);

@@ -1,0 +1,103 @@
+[
+  [
+    "numbers",
+    "Compute a number",
+    "\\(\\sqrt2,\\pi\\)",
+    [],
+    [
+      "SquareRootSecantNewton.sqrtTwo_valid",
+      "SquareRootSecantNewton.sqrtTwo_equiv_bisection"
+    ],
+    "Two rational bounds nest and shrink. Decimal places carry precision with a rounding or truncation convention."
+  ],
+  [
+    "functions",
+    "Rational-input functions",
+    "\\(\\sqrt q, A(q),\\quad q\\in\\mathbb Q\\)",
+    [
+      "numbers"
+    ],
+    [
+      "SquareRootSecantNewton.step_spec",
+      "ArctanSecantFoundation.increment_bounds"
+    ],
+    "The computation takes a rational parameter. Constants are evaluations. Irrational interpolation is a justified add-on."
+  ],
+  [
+    "integral",
+    "Rectangles construct an integral",
+    "\\(K(t)=1/(1+t^2)\\)",
+    [
+      "functions"
+    ],
+    [
+      "MonotoneIntegralBounds.tight"
+    ],
+    "Finite bounds apply throughout each cell. Shrinking the total gap justifies this particular integral construction."
+  ],
+  [
+    "series",
+    "Prefixes and tails construct a series",
+    "\\(\\sum_{n=0}^{N}(-1)^n q^{2n+1}/(2n+1)\\)",
+    [
+      "integral"
+    ],
+    [],
+    "The arctangent computation suggests the series. Finite geometric identities and remainder bounds come first; comparison theorems come later."
+  ],
+  [
+    "inverse",
+    "Specific inverse produces circle coordinates",
+    "\\(A(u)=\\theta/2\\)",
+    [
+      "functions"
+    ],
+    [
+      "ArctanInverseConstruction.inverse_valid",
+      "ArctanInverseConstruction.rational_forward_target",
+      "ArctanInverseCircle.quarterSlope_target",
+      "ArctanInverseCircle.sineQuarter_valid",
+      "ArctanInverseCircle.cosineQuarter_valid"
+    ],
+    "The overlap-safe search halves its interval at every step. Circle coordinates use rational formulas, with no exponential foundation in their computation. This is the first-quadrant inverse route."
+  ],
+  [
+    "secants",
+    "Concrete secant derivatives",
+    "\\(D\\sqrt x=(2\\sqrt x)^{-1},\\quad DA(x)=K(x)\\)",
+    [
+      "functions"
+    ],
+    [
+      "SqrtSecantFoundation.derivative_valid_and_equiv",
+      "ArctanSecantFoundation.derivative_valid_and_equiv"
+    ],
+    "Curvature is a heuristic for finding the computation. The formal proof uses actual finite-difference inequalities and shrinking error. Prefix intersections enforce nesting."
+  ],
+  [
+    "ftc",
+    "Subdivision and telescoping prove FTC",
+    "\\(\\int_a^b DP\\simeq P(b)-P(a)\\)",
+    [
+      "integral",
+      "secants"
+    ],
+    [
+      "SecantFoundation.cellDerivativeBounds",
+      "SqrtSecantFoundation.positive_segment_hasIntegral",
+      "ArctanSecantFoundation.hasIntegral"
+    ],
+    "Local inequalities are proved from the concrete derivative evidence, then telescoped. Independently tight rectangle bounds certify the exact endpoint computation as an integral."
+  ],
+  [
+    "comparison",
+    "Taylor and function comparisons",
+    "\\(\\text{finite identities} + \\text{proved remainder}\\)",
+    [
+      "series",
+      "ftc"
+    ],
+    [],
+    "Taylor and ODE strategies compare independently defined computations. The existing geometric\u2013series ODE graph is linked below. The new inverse route is not advertised as a completed global comparison."
+  ]
+]
