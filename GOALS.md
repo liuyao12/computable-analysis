@@ -1,5 +1,41 @@
 # Computable Analysis: Canonical Roadmap
 
+
+## Bracket derivatives and two-index limits
+
+`RawLimit.TendsTo` treats a sequence of valid represented values as two-index
+interval data; `BisequenceTendsTo` exposes those indices directly. Convergence
+uses arbitrarily small expansions of every target-stage interval, preserving
+exact zero and one-sided names. Limit uniqueness and target/row representation
+invariance are checked.
+
+`BracketDerivative.HasDerivativeAt` uses only rational endpoint evaluations.
+All admissible input names must be valid, equivalent to the represented point,
+inside the rational domain at every stage, and strictly positive in width at
+every stage. The family is inhabited. The derivative is their common secant
+limit. Uniqueness and point, output and rational-function representation
+invariance are checked. `clipped_admissible` supplies closed-domain brackets,
+including endpoints. No evaluation of the primary function at an irrational
+input is required by this definition.
+
+`outerDerivative_hasDerivative` proves the role of the literal convex
+outer-secant computation from exact disjoint-secant order, a justified domain
+neighborhood, and proved validity of its actual boxes. These hypotheses do not
+assume the derivative identity. Square instantiates it for all valid represented
+inputs and is also checked on nondegenerate closed domains, including endpoints.
+The original `ConvexDerivative.Pointwise` centered computation is instantiated
+and certified for nonlinear square and an affine function with an arbitrary
+valid represented coefficient. No general semantic theorem for every legacy
+finite weak-curvature certificate is claimed. Existing FTC uses its cell-law
+proofs; a general bridge from the new derivative definition remains separate.
+
+Audit: `lake env lean scripts/check_bracket_derivative.lean` in the
+[reproducible source bundle](https://liuyao12.github.io/computable-analysis/foundation-story/proof.tar.gz).
+Sources: `BracketDerivative`, `BracketDerivativeConstruction`, and
+`BracketDerivativeExamples`. All checked endpoints use only standard Lean
+axioms and import no Mathlib modules.
+
+
 ## Analytic-continuation foundation
 
 The main uniqueness target is the identity theorem on the same connected

@@ -1,4 +1,5 @@
 import Lean
+import ComputableAnalysis.BracketDerivativeExamples
 import ComputableAnalysis.SqrtSecantFoundation
 import ComputableAnalysis.SquareRootSecantNewton
 import ComputableAnalysis.ArctanInverseCircle
@@ -28,7 +29,25 @@ private def namesJson (env : Environment) (names : Array Name) : Json :=
 
 run_cmd do
   let env ← getEnv
-  let roots := [``ComputableAnalysis.ArctanInverseCircle.cosineQuarter_valid,
+  let roots := [
+    ``ComputableAnalysis.RawLimit.unique,
+    ``ComputableAnalysis.RawLimit.congr_target_iff,
+    ``ComputableAnalysis.RawLimit.congr_sequence,
+    ``ComputableAnalysis.RawLimit.bisequence_unique,
+    ``ComputableAnalysis.RawLimit.bisequence_congr_target,
+    ``ComputableAnalysis.BracketDerivative.unique,
+    ``ComputableAnalysis.BracketDerivative.congr_point_iff,
+    ``ComputableAnalysis.BracketDerivative.congr_value_iff,
+    ``ComputableAnalysis.BracketDerivative.congr_function,
+    ``ComputableAnalysis.BracketDerivative.clipped_admissible,
+    ``ComputableAnalysis.BracketDerivative.allowance_tendsTo_zero,
+    ``ComputableAnalysis.BracketDerivative.outerDerivative_hasDerivative,
+    ``ComputableAnalysis.BracketDerivativeExamples.squareDerivative_hasDerivative,
+    ``ComputableAnalysis.BracketDerivativeExamples.square_closed_interval,
+    ``ComputableAnalysis.BracketDerivativeExamples.affine_hasDerivative,
+    ``ComputableAnalysis.BracketDerivativeExamples.affinePointwise_hasDerivative,
+    ``ComputableAnalysis.BracketDerivativeExamples.squarePointwise_hasDerivative,
+``ComputableAnalysis.ArctanInverseCircle.cosineQuarter_valid,
     ``ComputableAnalysis.ArctanInverseCircle.quarterSlope_target,
     ``ComputableAnalysis.ArctanInverseCircle.sineQuarter_valid,
     ``ComputableAnalysis.ArctanInverseConstruction.inverse_valid,

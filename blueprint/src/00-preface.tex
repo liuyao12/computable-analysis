@@ -57,7 +57,43 @@ A square-root computation with rational parameter \(q\) constructs the function 
 Evaluation at a represented irrational input is a derived add-on. Continuity gives the bridge: for each positive rational output tolerance, provide an input tolerance controlling the change in the function, and account for the evaluation errors. Shrinking input intervals then justify the output construction. Agreement under equivalent input representations also needs proof.
 
 
+Endpoint values give range bounds when monotonicity has been justified. They do not define continuity for every function: for \(f(t)=t^2\), the endpoints of \([-h_n,h_n]\) both have value \(h_n^2\), so their singleton hulls fail nesting even though the function is continuous at zero. A general interval extension needs justified bounds for the whole input interval, or a common limit for all rational evaluations approaching the point. Endpoint values themselves can be represented reals, with an independent refinement index.
+
+
 Different computations can use different coordinates. A rational multiple of \(\pi\), a rational radian, and a rational circle parameter are different inputs. We compare on an overlap, along a justified coordinate transformation, or after constructing extensions. Agreement on overlapping domains does not by itself give a globally transitive relation between functions with different domains. There is no need to discard one computation in favor of a single privileged definition.
+
+
+
+\section*{Two indices and a derivative at any represented point}
+\label{preface:limits-and-brackets}
+
+
+The endpoint values need not be rational. For a rational-input function \(f:\mathbb Q\to\mathrm{RealRaw}\), the interval data for its secants has two indices:
+
+\[Q_{n,k},\qquad n=\text{input-bracket stage},\quad k=\text{secant-value refinement}.\]
+
+Every row is a valid represented value \(u_n\). The indices are independent; we do not force a diagonal schedule. For a valid target \(x\), write its stage-\(m\) box as \([\ell_m,r_m]\). Our limit relation requires
+
+\[\forall m\;\forall\varepsilon\in\mathbb Q_{>0}\;\exists N\;\forall n\ge N:\qquad \ell_m-\varepsilon\le u_n\le r_m+\varepsilon.\]
+
+These are exact represented-value inequalities. The positive allowance handles one-sided and zero-width target boxes: a positive sequence approaching zero must also converge to the exact name whose every box is \([0,0]\). Uniqueness of limits and invariance under equivalent target and row representations are proved in Lean.
+
+
+To define a derivative at a valid represented point \(x\), consider every valid bracket computation \(A\simeq x\). At every stage its interval must lie entirely inside the rational domain, and its width must be strictly positive:
+
+\[[a_n,b_n]_{\mathbb Q}\subseteq\operatorname{dom}(f),\qquad a_n<b_n.\]
+
+At least one such bracket must exist. A valid \(d\) is the derivative when every admissible bracket gives a secant sequence with limit \(d\):
+
+\[S_n=\frac{f(b_n)-f(a_n)}{b_n-a_n}\longrightarrow d.\]
+
+This uses only rational endpoint evaluations, even when \(x\) is irrational. On a closed nondegenerate domain, a checked clipping construction supplies admissible brackets at both endpoints as well as interior points. No finite stage has zero width. Equivalent names of the point admit the same brackets; derivative values are unique up to \texttt{RealRaw.Equiv}. Equivalent rational-input value computations also give the same derivative relation.
+
+
+The convex computation now earns its derivative role through a general bridge: exact order of disjoint secants, a justified domain neighborhood, and validity of the literal outer-secant boxes imply the common-limit property. No derivative identity is assumed. The square computation is checked at every valid represented input, including closed-domain endpoints. The original centered algorithm is also checked for square and for an affine function with an arbitrary represented coefficient, so the endpoint values may be irrational.
+
+
+\href{https://liuyao12.github.io/computable-analysis/foundation-story/index.html\#limits}{Inspect the limit proofs} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/index.html\#bracket-derivative}{Inspect the derivative definition and invariance proofs} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/index.html\#convex-bridge}{Inspect the construction bridges} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/bracket-audit.txt}{Checked theorem audit}
 
 
 

@@ -1,0 +1,24 @@
+AUDIT ComputableAnalysis.RawLimit.unique: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RawLimit.congr_target_iff: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RawLimit.congr_sequence: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RawLimit.bisequence_unique: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RawLimit.bisequence_congr_target: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketDerivative.unique: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketDerivative.congr_point_iff: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketDerivative.congr_value_iff: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketDerivative.congr_function: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketDerivative.clipped_admissible: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketDerivative.allowance_tendsTo_zero: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketDerivative.outerDerivative_hasDerivative: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketDerivativeExamples.squareDerivative_hasDerivative: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.BracketDerivativeExamples.square_closed_interval: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketDerivativeExamples.affine_hasDerivative: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketDerivativeExamples.affinePointwise_hasDerivative: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.BracketDerivativeExamples.squarePointwise_hasDerivative: [propext,
+ Classical.choice,
+ Quot.sound]
+PASS: two-index limits and rational-endpoint derivatives; uniqueness and representation invariance; strictly positive domain-contained brackets; generic outer-secant bridge; old convex computation instantiated for square and for arbitrary represented affine coefficients. Standard axioms only; no Mathlib imports.

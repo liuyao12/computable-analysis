@@ -1,4 +1,81 @@
 \chapter{Computing Derivatives and the Fundamental Theorem}
+
+\section{Limits of two-index represented values}
+
+A sequence of raw reals has interval data \(Q_{n,k}\). Each fixed \(n\)
+row is valid; \(k\) refines its value independently of the outer index.
+For a valid target \(x\) with stage-\(m\) box \([\ell_m,r_m]\), define
+\[
+ \forall m\;\forall\varepsilon\in\mathbb Q_{>0}\;
+ \exists N\;\forall n\ge N:\quad
+ \ell_m-\varepsilon\le u_n\le r_m+\varepsilon.
+\]
+The inequalities use exact raw-real order. Positive expansions handle exact
+zero and one-sided target representations. No diagonal schedule is imposed.
+
+\begin{theorem}[Limit uniqueness and representation invariance]
+\label{thm:raw-limit-invariance}
+\lean{ComputableAnalysis.RawLimit.unique}
+\lean{ComputableAnalysis.RawLimit.congr_target_iff}
+\lean{ComputableAnalysis.RawLimit.congr_sequence}
+\lean{ComputableAnalysis.RawLimit.bisequence_unique}
+\lean{ComputableAnalysis.RawLimit.bisequence_congr_target}
+\leanok
+The limit of a sequence of valid represented values is unique up to
+\texttt{RealRaw.Equiv}. Equivalent valid target and row representations
+preserve the limit relation.
+\end{theorem}
+
+\section{Derivatives without evaluating an irrational input}
+
+For a rational-input function \(f\), an admissible raw bracket \(A\simeq x\)
+is valid, stays entirely in the rational domain at every stage, and has
+\(a_n<b_n\) at every stage. The bracket family must be inhabited.
+A valid \(d\) is a derivative at the valid represented point \(x\) when
+\[
+ \frac{f(b_n)-f(a_n)}{b_n-a_n}\longrightarrow d
+\]
+for every admissible bracket. Each quotient is a raw real with its own
+refinement index. The definition never evaluates \(f(x)\).
+
+\begin{theorem}[Derivative uniqueness and representation invariance]
+\label{thm:bracket-derivative-invariance}
+\lean{ComputableAnalysis.BracketDerivative.unique}
+\lean{ComputableAnalysis.BracketDerivative.congr_point_iff}
+\lean{ComputableAnalysis.BracketDerivative.congr_value_iff}
+\lean{ComputableAnalysis.BracketDerivative.congr_function}
+\lean{ComputableAnalysis.BracketDerivative.clipped_admissible}
+\leanok
+Derivatives are unique up to raw-real equivalence. Equivalent names of the
+point, derivative value, or rational-input function values preserve the
+relation. On a nondegenerate closed rational interval, clipping an enlarged
+input name constructs admissible brackets at both endpoints and inside the
+interval, for every valid represented point in the domain.
+\end{theorem}
+
+\begin{theorem}[The secant construction is a derivative]
+\label{thm:convex-bracket-derivative-bridge}
+\lean{ComputableAnalysis.BracketDerivative.outerDerivative_hasDerivative}
+\lean{ComputableAnalysis.BracketDerivativeExamples.squareDerivative_hasDerivative}
+\lean{ComputableAnalysis.BracketDerivativeExamples.square_closed_interval}
+\lean{ComputableAnalysis.BracketDerivativeExamples.squarePointwise_hasDerivative}
+\lean{ComputableAnalysis.BracketDerivativeExamples.affinePointwise_hasDerivative}
+\leanok
+Exact order of disjoint secants, a justified domain neighborhood, and validity
+of the literal outer-secant boxes imply the common-limit derivative property.
+No derivative identity is assumed. Square instantiates this bridge at every
+valid represented input, and its domain restriction includes closed-interval
+endpoints. The original centered convex computation is also certified for
+nonlinear square and for an affine function with an arbitrary valid represented
+coefficient; its endpoint values may be irrational.
+\end{theorem}
+
+The generic outer-secant result is a conditional law with the stated finite
+order and validity evidence. It does not establish a semantic bridge for every
+legacy weak finite-curvature certificate. Existing FTC continues to consume
+its independently justified cell bounds; a theorem from this new pointwise
+derivative relation alone to general FTC is a separate task.
+
 \label{ch:effective-calculus}
 
 The derivative should be constructed from the function.  For convex

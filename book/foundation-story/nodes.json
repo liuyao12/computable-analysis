@@ -100,5 +100,53 @@
     ],
     [],
     "Taylor and ODE strategies compare independently defined computations. The existing geometric\u2013series ODE graph is linked below. The new inverse route is not advertised as a completed global comparison."
+  ],
+  [
+    "limits",
+    "Two indices, one represented limit",
+    "\\(Q_{n,k}\\longrightarrow d\\)",
+    [
+      "functions"
+    ],
+    [
+      "RawLimit.unique",
+      "RawLimit.congr_target_iff",
+      "RawLimit.congr_sequence",
+      "RawLimit.bisequence_unique"
+    ],
+    "The bracket index and value-refinement index are independent. Each row is a valid represented value. Arbitrarily small enlargements of every target box define the outer limit, including exact and one-sided target names."
+  ],
+  [
+    "bracket-derivative",
+    "Derivative at a represented point",
+    "\\(S_n=(f(b_n)-f(a_n))/(b_n-a_n)\\)",
+    [
+      "limits"
+    ],
+    [
+      "BracketDerivative.unique",
+      "BracketDerivative.congr_point_iff",
+      "BracketDerivative.congr_value_iff",
+      "BracketDerivative.congr_function",
+      "BracketDerivative.clipped_admissible"
+    ],
+    "All admissible names of the point must have the same secant limit. Every bracket lies within the rational domain and has positive width at every stage. The bracket family is inhabited. Irrational evaluation of the function is absent. Closed-domain endpoints are included."
+  ],
+  [
+    "convex-bridge",
+    "Secant computations earn the derivative role",
+    "\\(D_{\\rm sec}\\simeq D\\)",
+    [
+      "bracket-derivative",
+      "secants"
+    ],
+    [
+      "BracketDerivative.outerDerivative_hasDerivative",
+      "BracketDerivativeExamples.squareDerivative_hasDerivative",
+      "BracketDerivativeExamples.square_closed_interval",
+      "BracketDerivativeExamples.squarePointwise_hasDerivative",
+      "BracketDerivativeExamples.affinePointwise_hasDerivative"
+    ],
+    "Exact order of disjoint secants and proved validity of literal outer-secant boxes certify the derivative at any valid represented point with the supplied domain neighborhood. Concrete square proofs cover all represented inputs and closed-domain endpoints. The original centered algorithm is instantiated for the nonlinear square and an arbitrary represented affine coefficient; the latter allows irrational endpoint values."
   ]
 ]

@@ -24,6 +24,12 @@ intuitionistic constructive analysis.
 
 ## From numbers to functions
 
+The [bracket derivative](https://liuyao12.github.io/computable-analysis/preface.html#limits-and-brackets)
+is now defined at represented points using only rational endpoint evaluations.
+Its two-index limits, uniqueness and representation invariance are checked,
+as are concrete convex-computation bridges and closed-domain endpoints.
+
+
 The emphasis is on constructions and exact mathematical identities. Explicit
 error bounds support these proofs and remain available for numerical
 corollaries: when requested, specialize a checked computation and prove the

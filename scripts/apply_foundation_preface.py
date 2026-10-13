@@ -75,6 +75,9 @@ def apply(site):
     if 'href="../preface.html"' not in map_text:
         map_path.write_text(map_text.replace('<nav>', '<nav><a href="../preface.html">Preface</a>', 1))
         changed.add('foundation-story/index.html')
+    for name in ["preface.html", "foundation-preface/content.html", "foundation-preface/00-preface.tex"]:
+        if name in before and (site / name).read_bytes() != before[name]:
+            changed.add(name)
     for name, data in before.items():
         if name not in changed:
             assert (site / name).read_bytes() == data, name
