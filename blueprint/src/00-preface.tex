@@ -72,7 +72,7 @@ The endpoint values need not be rational. For a rational-input function \(f:\mat
 
 \[Q_{n,k},\qquad n=\text{input-bracket stage},\quad k=\text{secant-value refinement}.\]
 
-Every row is a valid represented value \(u_n\). The indices are independent; we do not force a diagonal schedule. For a valid target \(x\), write its stage-\(m\) box as \([\ell_m,r_m]\). Our limit relation requires
+Every row is a valid represented value \(u_n\). The indices are independent. The covered-diagonal specification below is proved equivalent to this earlier target-box presentation. For a valid target \(x\), write its stage-\(m\) box as \([\ell_m,r_m]\). Our limit relation requires
 
 \[\forall m\;\forall\varepsilon\in\mathbb Q_{>0}\;\exists N\;\forall n\ge N:\qquad \ell_m-\varepsilon\le u_n\le r_m+\varepsilon.\]
 
@@ -94,6 +94,30 @@ The convex computation now earns its derivative role through a general bridge: e
 
 
 \href{https://liuyao12.github.io/computable-analysis/foundation-story/index.html\#limits}{Inspect the limit proofs} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/index.html\#bracket-derivative}{Inspect the derivative definition and invariance proofs} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/index.html\#convex-bridge}{Inspect the construction bridges} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/bracket-audit.txt}{Checked theorem audit}
+
+
+
+\section*{Choose a covered valid diagonal}
+\label{preface:parametrized-enclosures}
+
+
+Input refinement and output evaluation can advance at different speeds. For rational interval data, the specification asks for cofinal index maps whose selected output boxes form a valid represented real:
+
+\[C_k=Q_{n(k),m(k)},\qquad n(k)\longrightarrow\infty,\quad m(k)\longrightarrow\infty.\]
+
+The selected boxes are ordered, nested, and arbitrarily narrow. Coverage gives them their mathematical role: for a sequence they enclose every remaining term; for continuity they enclose every rational function value throughout the selected input bracket. Selecting only favorable samples would not suffice. The alternating sequence has constant subsequences but no covered limit; a jump cannot acquire continuity from one-sided samples.
+
+
+Continuity keeps rational-input functions primary. Every admissible input bracket must yield the same output value through some justified parametrization. Independent bracket constructions are proved equivalent using a rational point in the intersection of their input boxes. Identity and constants have explicit valid diagonals. Ordinary interval bounds, scheduled interval bounds, and epsilon–delta certificates construct further output names using finite prefix intersections, without assuming an irrational extension value.
+
+
+The derivative definition now uses covered parametrized secant limits for every admissible bracket. Its exact compatibility theorem preserves the earlier secant-limit laws and convex examples. The older finite-difference evidence has a bridge with positive step radii and justified continuity of the derivative values. Complex local estimates supply valid coordinate diagonals, and their normalized first-order remainders converge to zero in every direction.
+
+
+A supplied executable stage schedule gives an executable intersection construction. Logical existence of a schedule is stated separately. Existing FTC, integral, series, modular, and ODE results retain their stated evidence and domain restrictions.
+
+
+\href{https://liuyao12.github.io/computable-analysis/foundation-story/index.html\#parametrized-continuity}{Explore the continuity construction} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/index.html\#parametrized-bridges}{Explore downstream bridges} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/parametrized-audit.txt}{Read the checked theorem audit} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/parametrized-foundation.md}{Read the full specification}
 
 
 

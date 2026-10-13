@@ -1061,12 +1061,12 @@ private theorem squareUnit_interval_width_scale (w : Rat) (n : Nat)
     2 * w <= 1 / (n : Rat) := by
   calc
     2 * w <= 2 * (1 / ((2 * n : Nat) : Rat)) :=
-      Rat.mul_le_mul_of_nonneg_left hw (by native_decide)
+      Rat.mul_le_mul_of_nonneg_left hw (by decide)
     _ = 1 / (n : Rat) := by
       rw [Rat.div_def]
       rw [show ((2 * n : Nat) : Rat) = (2 : Rat) * (n : Rat) by
         exact Rat.natCast_mul 2 n]
-      have htwo : (2 : Rat) ≠ 0 := by native_decide
+      have htwo : (2 : Rat) ≠ 0 := by decide
       have hn' : (n : Rat) ≠ 0 :=
         Rat.ne_of_gt ((Rat.natCast_pos).2 (Nat.pos_of_ne_zero hn))
       rw [Rat.inv_mul_rev]

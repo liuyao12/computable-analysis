@@ -1,3 +1,3 @@
-Command: lake build
-Scope: entire computable-analysis repository after adding bracket derivatives and two-index limits
-Result: Build completed successfully (5412 jobs).
+Command: lake build ComputableAnalysis
+Scope: entire computable-analysis workspace after the covered parametrized foundation and kernel arithmetic repairs
+Result: Build completed successfully (5414 jobs).

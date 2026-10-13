@@ -1,0 +1,2 @@
+Command: lake env .lake/packages/checkdecls/.lake/build/bin/checkdecls blueprint/lean_decls
+Result: PASS (exit 0); 31331 declaration entries checked in the full workspace.

@@ -99,7 +99,7 @@
       "ftc"
     ],
     [],
-    "Taylor and ODE strategies compare independently defined computations. The existing geometric\u2013series ODE graph is linked below. The new inverse route is not advertised as a completed global comparison."
+    "Taylor and ODE strategies compare independently defined computations. The existing geometric–series ODE graph is linked below. The new inverse route is not advertised as a completed global comparison."
   ],
   [
     "limits",
@@ -148,5 +148,56 @@
       "BracketDerivativeExamples.affinePointwise_hasDerivative"
     ],
     "Exact order of disjoint secants and proved validity of literal outer-secant boxes certify the derivative at any valid represented point with the supplied domain neighborhood. Concrete square proofs cover all represented inputs and closed-domain endpoints. The original centered algorithm is instantiated for the nonlinear square and an arbitrary represented affine coefficient; the latter allows irrational endpoint values."
+  ],
+  [
+    "parametrized-limits",
+    "Covered diagonals certify limits",
+    "\\(C_k=Q_{n(k),m(k)}\\)",
+    [
+      "limits"
+    ],
+    [
+      "RawLimit.parametrizedLimit_iff",
+      "RawLimit.HasEnclosureValue.unique",
+      "RawLimit.prefix_valid",
+      "RawLimit.alternating_no_parametrizedLimit"
+    ],
+    "A valid diagonal must cover every observation at the selected input resolution. Complete-tail coverage is proved equivalent to the previous limit relation and rejects favorable subsequence sampling. Finite intersections prove validity without a supplied anchor."
+  ],
+  [
+    "parametrized-continuity",
+    "Whole bracket images certify continuity",
+    "\\(f(I_{n(k)}\\cap\\mathbb Q)\\subseteq C_k\\)",
+    [
+      "parametrized-limits",
+      "functions"
+    ],
+    [
+      "BracketContinuity.unique",
+      "BracketContinuity.bracket_values_equiv",
+      "BracketContinuity.congr_function",
+      "BracketContinuity.rational_agreement",
+      "IntervalRegularOn.continuousAt_closed",
+      "ParametrizedFoundationExamples.jump_not_continuous"
+    ],
+    "All rational values in each selected input bracket are covered. Independently constructed bracket values agree. Existing interval certificates construct the extension for arbitrary represented inputs, including closed-domain endpoints. A discontinuous jump is rejected."
+  ],
+  [
+    "parametrized-bridges",
+    "Existing calculus supplies covered enclosures",
+    "\\(D_{\\mathrm{param}}\\simeq D_{\\mathrm{sec}}\\)",
+    [
+      "parametrized-continuity",
+      "bracket-derivative",
+      "convex-bridge"
+    ],
+    [
+      "BracketDerivative.hasDerivative_iff_secantLimits",
+      "HasDerivativeOnInterval.toParametrizedDerivative",
+      "ParametrizedFoundationExamples.affine_finite_certificate",
+      "FunctionTheory.ContinuousOn.hasEnclosureCoordinates",
+      "RiemannHilbert.DomainFunctions.HasDerivativeAt.hasRemainderCoordinates"
+    ],
+    "The pointwise derivative relation now uses covered valid diagonals and is proved equivalent to the old relation. Finite derivative evidence needs positive radii and continuity of proposed values. Both complex interfaces supply coordinate or normalized remainder enclosures covering every direction. Existing FTC hypotheses remain explicit."
   ]
 ]

@@ -1,0 +1,4 @@
+Command: lake build
+Scope: extracted self-contained 104-module reader source snapshot with its synthetic library root
+Result: Build completed successfully (107 jobs).
+All three packaged theorem audits pass in the extracted snapshot.

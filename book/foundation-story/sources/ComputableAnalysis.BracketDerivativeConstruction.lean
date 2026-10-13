@@ -6,67 +6,19 @@ secant enclosures to derivatives at arbitrary valid represented inputs. -/
 namespace ComputableAnalysis.BracketDerivative
 set_option maxHeartbeats 2000000
 
+/-! Compatibility names for the shared executable padded enclosure. -/
 def allowance (n : Nat) : Rat := ((1:Rat)/2)^n
-
-theorem allowance_pos (n : Nat) : 0 < allowance n :=
-  Rat.pow_pos (by decide +kernel)
-
-theorem allowance_antitone {n m : Nat} (h : n≤m) : allowance m≤allowance n := by
-  obtain ⟨k,rfl⟩ := Nat.exists_eq_add_of_le h
-  induction k with
-  | zero => exact Rat.le_refl
-  | succ k ih =>
-    change ((1:Rat)/2)^(n+k+1) ≤ ((1:Rat)/2)^n
-    rw [Rat.pow_succ]
-    have hn : 0≤((1:Rat)/2)^(n+k) := Rat.pow_nonneg (by decide +kernel)
-    have hm := Rat.mul_le_mul_of_nonneg_left (by decide +kernel : (1:Rat)/2≤1) hn
-    exact Rat.le_trans (by simpa only [Rat.mul_one, allowance] using hm) (ih (by omega))
-
-theorem allowance_shrinks (eps : QPos) : ∃ N, ∀ n, N≤n → allowance n≤eps.val := by
-  refine ⟨RationalMajorant.halfDecayShift 1 eps,fun n hn => ?_⟩
-  have h := RationalMajorant.halfDecayShift_spec_of_le (by decide +kernel : (0:Rat)≤1) eps hn
-  simpa only [Rat.one_mul,allowance] using h
-
+theorem allowance_pos (n : Nat) : 0 < allowance n := RawLimit.allowance_pos n
+theorem allowance_antitone {n m : Nat} (h : n ≤ m) : allowance m ≤ allowance n :=
+  RawLimit.allowance_antitone h
+theorem allowance_shrinks (eps : QPos) : ∃ N, ∀ n, N ≤ n → allowance n ≤ eps.val :=
+  RawLimit.allowance_shrinks eps
 def enlarged (x : RealRaw) : RealRaw where
   compute n := QInterval.expand (x.compute n) (allowance n)
-
-theorem enlarged_valid {x : RealRaw} (hx : x.Valid) : (enlarged x).Valid := by
-  refine ⟨?_,?_,?_⟩
-  · intro n
-    have ho := hx.1 n
-    have hp := allowance_pos n
-    change 0≤(x.compute n).hi+allowance n-((x.compute n).lo-allowance n)
-    grind only [QInterval.width]
-  · intro n m hnm
-    have hn := hx.2.1 n m hnm
-    have hd := allowance_antitone hnm
-    have hp := allowance_pos m
-    change (x.compute n).lo-allowance n≤(x.compute m).lo-allowance m ∧
-      (x.compute m).lo-allowance m≤(x.compute m).hi+allowance m ∧
-      (x.compute m).hi+allowance m≤(x.compute n).hi+allowance n
-    constructor
-    · grind only
-    constructor <;> grind only
-  · intro eps
-    let e : QPos := ⟨eps.val/4,by rw [Rat.div_def]; exact Rat.mul_pos eps.property (Rat.inv_pos.mpr (by decide +kernel))⟩
-    obtain ⟨N,hN⟩ := hx.2.2 e
-    obtain ⟨M,hM⟩ := allowance_shrinks e
-    refine ⟨max N M,fun n hn => ?_⟩
-    have h1 := hN n (Nat.le_trans (Nat.le_max_left N M) hn)
-    have h2 := hM n (Nat.le_trans (Nat.le_max_right N M) hn)
-    change (x.compute n).hi+allowance n-((x.compute n).lo-allowance n)≤eps.val
-    dsimp [e] at h1 h2
-    have := eps.property
-    grind only [QInterval.width,Rat.div_def]
-
-theorem enlarged_equiv {x : RealRaw} (hx : x.Valid) : (enlarged x).Equiv x := by
-  intro n
-  apply (RealRaw.compareAt_overlap_iff _ _ n n).2
-  have h := hx.1 n
-  have hp := allowance_pos n
-  change (x.compute n).lo-allowance n≤(x.compute n).hi ∧
-    (x.compute n).lo≤(x.compute n).hi+allowance n
-  constructor <;> grind only [QInterval.width]
+theorem enlarged_valid {x : RealRaw} (hx : x.Valid) : (enlarged x).Valid :=
+  RawLimit.enlarged_valid hx
+theorem enlarged_equiv {x : RealRaw} (hx : x.Valid) : (enlarged x).Equiv x :=
+  RawLimit.enlarged_equiv hx
 
 theorem enlarged_admissible {x : RealRaw} (hx : x.Valid) :
     Admissible (fun _ => True) x (enlarged x) := by
@@ -188,6 +140,7 @@ theorem outerDerivative_hasDerivative {domain : Rat → Prop} {f : Rat → RealR
     (neighborhood : ∀ n, l n<u n ∧ v n<r n ∧
       ∃ k, u n<(x.compute k).lo ∧ (x.compute k).hi<v n) :
     HasDerivativeAt domain f x (outerDerivative f l u v r prec) := by
+  apply hasDerivative_iff_secantLimits.mpr
   refine ⟨hx,hd,hf,existsBracket,fun A hA => ⟨hd,secants_valid hf hA,?_⟩⟩
   intro m eps
   obtain ⟨hlu,hvr,k,huk,hkv⟩ := neighborhood m

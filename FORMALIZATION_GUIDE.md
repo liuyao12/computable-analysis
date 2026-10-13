@@ -1371,3 +1371,21 @@ boundary-sampling evaluator. Quantitative chart coverage and the Lean
 validation of the runtime's incremental horizon-pyramid constructor remain
 separate obligations. No integral, Gamma function, or general volume of a
 region bounded by surfaces is introduced.
+
+## Covered parametrized foundation
+
+Limits, continuity, and real derivatives now use covered cofinal valid
+diagonals of rational interval data. `RawLimit.parametrizedLimit_iff` and
+`BracketDerivative.hasDerivative_iff_secantLimits` prove compatibility with
+the previously checked limit and derivative relations. Continuity covers
+whole rational input brackets. Independent bracket constructions agree, and
+ordinary, scheduled, and epsilon-delta certificates have proved adapters.
+Complex continuity and first-order remainder certificates have covered
+coordinate-diagonal bridges, including the domain-evidence interfaces used
+by modular and Riemann--Hilbert work. Existing finite certificates remain
+quantitative evidence; the finite derivative adapter retains positive-radius
+and derivative-value continuity hypotheses. No universal pointwise FTC or
+executable stage selector is assumed.
+
+See [the specification](docs/PARAMETRIZED_FOUNDATION.md) and run
+`lake env lean scripts/check_parametrized_foundation.lean`.

@@ -178,6 +178,7 @@ theorem affine_hasDerivative {c x : RealRaw} (hc : c.Valid) (hx : x.Valid) :
     HasDerivativeAt (fun _ => True) (affine c) x c := by
   refine ⟨hx,hc,fun q _ => RealRaw.scaleRat_valid hc,
     ⟨enlarged x,enlarged_admissible hx⟩,fun A hA => ?_⟩
+  apply RawLimit.parametrizedLimit_iff.mpr
   apply RawLimit.congr_sequence (RawLimit.constant c hc)
     (secants_valid (fun _ _ => RealRaw.scaleRat_valid hc) hA)
   intro n

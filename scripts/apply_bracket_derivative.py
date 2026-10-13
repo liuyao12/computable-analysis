@@ -1,4 +1,4 @@
-"""Publish checked bracket derivatives without changing existing proof results."""
+"""Publish checked parametrized foundations while preserving existing proof results."""
 from pathlib import Path
 from collections import Counter
 import hashlib,json,re,shutil,sys
@@ -15,7 +15,12 @@ def apply(site):
     audit=(ASSETS/'bracket-audit.txt').read_text()
     assert 'PASS:' in audit and 'error:' not in audit and 'sorryAx' not in audit
     assert audit.count('AUDIT ')==17
-    assert 'Build completed successfully (5412 jobs).' in (ASSETS/'build.txt').read_text()
+    parametrized_audit=(ASSETS/'parametrized-audit.txt').read_text()
+    assert 'PASS:' in parametrized_audit and 'error:' not in parametrized_audit and 'sorryAx' not in parametrized_audit
+    assert parametrized_audit.count('AUDIT ')==33
+    build=re.search(r'Build completed successfully \((\d+) jobs\)\.', (ASSETS/'build.txt').read_text())
+    assert build and int(build.group(1))>=5412
+    assert 'Build completed successfully (107 jobs).' in (ASSETS/'snapshot-build.txt').read_text()
     manifest=json.loads((ASSETS/'proof.json').read_text())
     assert sha((ASSETS/'proof.tar.gz').read_bytes())==manifest['sha256']
     declarations=json.loads((ASSETS/'declarations.json').read_text())['declarations']
@@ -44,10 +49,11 @@ def apply(site):
     for name in ['modular-proofs.html','modular-dependencies.json','sine-proof-dependencies.json','ch-foundations.html']:
         assert (site/name).read_bytes()==before[name],name
     report={'changedExistingFiles':sorted(changed),'preservedFiles':len(before)-len(changed),
-        'declarations':len(declarations),'checkedNewEndpoints':17,'fullRepositoryBuild':True,
+        'declarations':len(declarations),'checkedNewEndpoints':33,'fullRepositoryBuild':True,'buildJobs':int(build.group(1)),'snapshotBuildJobs':107,
         'proofSha256':manifest['sha256'],'bracketAuditSha256':sha((ASSETS/'bracket-audit.txt').read_bytes()),
-        'preservedExistingResults':True,'scope':'Generic two-index represented limits, bracket derivatives, uniqueness and representation invariance; justified outer-secant law; square on arbitrary represented inputs and closed domains; original centered square and represented-affine instances.'}
+        'parametrizedAuditSha256':sha((ASSETS/'parametrized-audit.txt').read_bytes()),
+        'preservedExistingResults':True,'scope':'Covered cofinal valid diagonals for limits, continuity and derivatives; exact limit compatibility and representation invariance; interval, finite derivative and complex remainder bridges; existing secant, convex, integral and downstream results preserved.'}
     (site/'foundation-story/bracket-publication.json').write_text(json.dumps(report,indent=2)+'\n')
-    print('PASS: checked bracket derivative publication;',report['preservedFiles'],'existing files preserved.')
+    print('PASS: checked parametrized foundation publication;',report['preservedFiles'],'existing files preserved.')
 
 if __name__=='__main__':apply(Path(sys.argv[1]))

@@ -1,0 +1,44 @@
+AUDIT ComputableAnalysis.RawLimit.HasEnclosureValue.unique: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RawLimit.HasEnclosureValue.congr_value: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RawLimit.parametrizedLimit_iff: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RawLimit.HasParametrizedLimit.unique: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RawLimit.alternating_no_parametrizedLimit: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RawLimit.prefix_valid: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RawLimit.prefix_hasEnclosureValue: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RawLimit.enclosureValue_iff: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketDerivative.hasDerivative_iff_secantLimits: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketDerivative.outerDerivative_hasDerivative: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketContinuity.unique: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketContinuity.bracket_values_equiv: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketContinuity.exists_continuousAt_of_enclosures: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketContinuity.congr_point: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketContinuity.congr_value: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketContinuity.congr_function: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketContinuity.hasContinuousAt_iff_neighborhoods: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketContinuity.values_tendTo: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketContinuity.rational_agreement: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketContinuity.identity: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.BracketContinuity.constant: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.ScheduledIntervalRegularOn.bracketCandidate_hasEnclosureValue: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.ScheduledIntervalRegularOn.exists_continuousAt: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.IntervalRegularOn.continuousAt_closed: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.EpsilonDeltaContinuousOn.exists_continuousAt: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.HasDerivativeOnInterval.toParametrizedDerivative: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.FunctionTheory.ContinuousOn.hasEnclosureCoordinates: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.FunctionTheory.HasDerivativeAt.hasRemainderCoordinates: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.ContinuousOn.hasEnclosureCoordinates: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.HasDerivativeAt.hasRemainderCoordinates: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.ParametrizedFoundationExamples.square_continuous_closed: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.ParametrizedFoundationExamples.affine_finite_certificate: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.ParametrizedFoundationExamples.jump_not_continuous: [propext, Classical.choice, Quot.sound]
+PASS: covered cofinal valid diagonals; limit compatibility; continuity uniqueness and invariance; independent bracket agreement; old interval and finite derivative adapters; complex coordinate and normalized remainder bridges; concrete affine and square applications; alternating-tail and jump rejection. Standard axioms only; no Mathlib imports.

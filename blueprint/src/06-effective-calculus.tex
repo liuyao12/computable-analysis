@@ -374,3 +374,19 @@ For example
        =\frac12\int_1^2\frac{du}{u}.
 \]
 This motivates the logarithm construction, rather than presupposing it.
+
+\section{Covered parametrized enclosures}
+A two-index rational interval family $Q_{n,m}$ earns its limiting value when
+some cofinal index maps make $C_k=Q_{n(k),m(k)}$ a valid raw real and the
+selected boxes cover every observation at the selected input resolution.
+For sequences this means every remaining term; for continuity it means the
+whole rational image of every admissible input bracket. Finite prefix
+intersections construct nested output boxes from existing interval bounds.
+The limit and derivative compatibility theorems preserve the earlier checked
+relations. Complex local estimates provide coordinate enclosures in every
+direction and normalized remainder enclosures converging to zero.
+\lean{ComputableAnalysis.RawLimit.parametrizedLimit_iff}
+\lean{ComputableAnalysis.RawLimit.prefix_valid}
+\lean{ComputableAnalysis.BracketContinuity.bracket_values_equiv}
+\lean{ComputableAnalysis.IntervalRegularOn.continuousAt_closed}
+\lean{ComputableAnalysis.HasDerivativeOnInterval.toParametrizedDerivative}

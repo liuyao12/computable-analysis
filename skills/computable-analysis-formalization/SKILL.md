@@ -91,6 +91,24 @@ mathematical bound and claimed equivalence still needs a Lean proof.
 - Prove equality of implementations with `RealRaw.Equiv`, not by treating raw
   values as definitionally equal.
 
+## Covered parametrized continuity and derivative specification
+
+Use `RawLimit.HasEnclosureValue` for a covered valid diagonal of rational
+interval data with two cofinal refinement indices. Coverage must include
+whole neighborhoods or complete tails, not a selected subsequence.
+`BracketContinuity.HasContinuousAt` covers all rational values throughout
+arbitrary admissible input brackets. `BracketDerivative.HasDerivativeAt`
+uses covered secant-tail diagonals and is proved equivalent to the previous
+secant-limit definition. Existing interval moduli are sufficient proof data;
+use their adapters rather than imposing one evaluator on every function.
+
+See [the exact specification and downstream bridges](../../docs/PARAMETRIZED_FOUNDATION.md).
+The scheduled prefix constructor preserves supplied executable schedules;
+logical existence via `Classical.choose` is not an executable selector.
+The old finite derivative adapter requires positive step radii and justified
+continuity of the proposed derivative values. Complex moduli and normalized
+remainders have covered coordinate adapters for both existing interfaces.
+
 ## Follow the certificate workflow
 
 Use these steps for a concrete construction. For a conditional law, supplied
