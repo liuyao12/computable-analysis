@@ -1,5 +1,6 @@
 AUDIT ComputableAnalysis.SquareRootSecantNewton.step_spec: [propext, Classical.choice, Quot.sound]
 AUDIT ComputableAnalysis.SquareRootSecantNewton.sqrtTwo_valid: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.SquareRootSecantNewton.sqrtTwo_mul_self_equiv_two: [propext, Classical.choice, Quot.sound]
 AUDIT ComputableAnalysis.SquareRootSecantNewton.sqrtTwo_equiv_bisection: [propext, Classical.choice, Quot.sound]
 AUDIT ComputableAnalysis.SquareRootSecantNewton.bracket_quadratic: [propext, Classical.choice, Quot.sound]
 AUDIT ComputableAnalysis.SqrtSecantFoundation.derivative_valid_and_equiv: [propext, Classical.choice, Quot.sound]

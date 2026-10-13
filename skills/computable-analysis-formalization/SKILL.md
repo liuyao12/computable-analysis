@@ -38,6 +38,8 @@ scope and the distinction between checked results and construction targets.
 
 ## Start with the theorem contract
 
+The project develops constructions, exact identities, and their mathematical laws. Quantitative bounds justify the constructions and remain available beneath those results. When a numerical result is requested, specialize a proved evaluator, choose a sufficient stage from its error bound, and formally check the resulting rational inequalities. Numerical corollaries can be added for that task; a catalogue of decimal evaluations is not a prerequisite for the theory.
+
 The project favors laws about supplied, justified constructions over the
 search for maximally general existence conditions. Decide whether the task
 asks for a construction, a conditional law, or a comparison. State the supplied

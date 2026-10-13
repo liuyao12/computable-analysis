@@ -1,4 +1,3 @@
 Command: lake build
-Scope: entire existing repository, including the canonical library, blueprint and executable targets.
-
-Build completed successfully (5409 jobs).
+Scope: entire computable-analysis repository after adding the defining square-root identity
+Result: Build completed successfully (5409 jobs).

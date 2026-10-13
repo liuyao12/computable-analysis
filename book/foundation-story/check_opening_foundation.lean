@@ -21,6 +21,7 @@ run_cmd do
     if mod.toString.startsWith "Mathlib" then throwError "Unexpected Mathlib import: {mod}"
   for root in [``ComputableAnalysis.SquareRootSecantNewton.step_spec,
       ``ComputableAnalysis.SquareRootSecantNewton.sqrtTwo_valid,
+      ``ComputableAnalysis.SquareRootSecantNewton.sqrtTwo_mul_self_equiv_two,
       ``ComputableAnalysis.SquareRootSecantNewton.sqrtTwo_equiv_bisection,
       ``ComputableAnalysis.SquareRootSecantNewton.bracket_quadratic,
       ``ComputableAnalysis.SqrtSecantFoundation.derivative_valid_and_equiv,

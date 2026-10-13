@@ -140,6 +140,20 @@ theorem sqrtTwo_valid : sqrtTwo.Valid := by
     have h := RationalMajorant.halfDecayShift_spec_of_le (by decide +kernel : (0:Rat)≤1) eps hn
     exact Rat.le_trans (bracket_width n) (by simpa using h)
 
+/-- The defining exact identity of the computed number, proved directly from
+the squared bounds of its rational intervals. -/
+theorem sqrtTwo_mul_self_equiv_two :
+    (sqrtTwo * sqrtTwo).Equiv (RealRaw.ofRat 2) := by
+  intro n
+  have hs := (bracket_spec n).1
+  apply (RealRaw.compareAt_overlap_iff
+    (sqrtTwo * sqrtTwo) (RealRaw.ofRat 2) n n).2
+  change QInterval.Overlaps
+    (QBox.mulRealInterval (bracket n).lo (bracket n).hi
+      (bracket n).lo (bracket n).hi) { lo := 2, hi := 2 }
+  rw [QBox.mulRealInterval_self_of_nonneg hs.1 hs.2.1]
+  exact ⟨hs.2.2.1, hs.2.2.2⟩
+
 theorem sqrtTwo_equiv_bisection : sqrtTwo.Equiv (sqrtRaw 2 (by unfold sqrtDomain; decide +kernel)) := by
   apply RealRaw.equiv_symm
   exact sqrtRaw_equiv_of_spec (by unfold sqrtDomain; decide +kernel) ⟨sqrtTwo_valid,fun n => (bracket_spec n).1⟩

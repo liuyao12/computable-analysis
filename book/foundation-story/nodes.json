@@ -6,9 +6,10 @@
     [],
     [
       "SquareRootSecantNewton.sqrtTwo_valid",
+      "SquareRootSecantNewton.sqrtTwo_mul_self_equiv_two",
       "SquareRootSecantNewton.sqrtTwo_equiv_bisection"
     ],
-    "Two rational bounds nest and shrink. Decimal places carry precision with a rounding or truncation convention."
+    "Two rational bounds nest and shrink. Their squared bounds directly prove the exact identity \\(s\\cdot s\\simeq2\\). Decimal places carry precision with a rounding or truncation convention."
   ],
   [
     "functions",

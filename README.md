@@ -15,6 +15,11 @@ to contribute directly.
 
 ## From numbers to functions
 
+The emphasis is on constructions and exact mathematical identities. Explicit
+error bounds support these proofs and remain available for numerical
+corollaries: when requested, specialize a checked computation and prove the
+resulting rational bounds at a sufficient stage.
+
 The opening chapters now begin with computing \(\sqrt2\) and \(\pi\), then
 develop rational-input functions, continuity add-ons, arctangent-motivated
 integrals and power series, and concrete secant proofs of derivatives and FTC.

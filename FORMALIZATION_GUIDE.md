@@ -231,6 +231,8 @@ conclusions; neither is built into the meaning of a valid function.
 
 ## Computable foundations, exact mathematical theorems
 
+The project develops constructions, exact identities, and their mathematical laws. Quantitative bounds justify the constructions and remain available beneath those results. When a numerical result is requested, specialize a proved evaluator, choose a sufficient stage from its error bound, and formally check the resulting rational inequalities. Numerical corollaries can be added for that task; a catalogue of decimal evaluations is not a prerequisite for the theory.
+
 This is the repository-wide rule for choosing interfaces and deciding when a
 formalization is complete.
 

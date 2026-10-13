@@ -1,6 +1,6 @@
 {
-  "sha256": "9f4881f092782e23655681de97f37959af53140c184228faa2392a5b8e4ef226",
-  "bytes": 864423,
+  "sha256": "4e8b7eba53220675c943a18bd522c2c29c98000885d29911306993e5d1af9850",
+  "bytes": 864568,
   "projectModules": 86,
   "files": {
     "ComputableAnalysis.lean": "dd8db6d9eccd653fc8906fb43d584f5cead44c010692c3f828a24d2a9ce045d6",
@@ -88,13 +88,13 @@
     "ComputableAnalysis/Series.lean": "6827251114b551efc83b88e4d377d1f67e023106f9eaa99bfab89bd83f84cf23",
     "ComputableAnalysis/SinPiIntegral.lean": "ebb2701d5ea857f75619c47d41b4f6de774cbbdbfb621ab82e5ea55ae51625d2",
     "ComputableAnalysis/SqrtSecantFoundation.lean": "acb1e05e0cf3c7e94c51666e3c9acae3e1cc3aebe5d0d1f185a3d1061f8c13e9",
-    "ComputableAnalysis/SquareRootSecantNewton.lean": "70608226c06aab4b5e8d9863777a9518871294b49c61ffed7aa8b50a781affcc",
+    "ComputableAnalysis/SquareRootSecantNewton.lean": "2e67d8dab27f60192c0edfbe4442679fa53e4b1fe15eb27bba58e4520aeb2f80",
     "ComputableAnalysis/TrigSpecialValues.lean": "03fe6abcfc7d957a9973cebcd8fa96ff61b4f86c20132abdb0a834d65f0ddf7c",
     "lake-manifest.json": "187ea7ca4a646551525246e2fd7205706b51d302fa75d4835b775dd9f8a71cf2",
     "lakefile.toml": "f9cb2d79996fb93807404957b01896b0dd43f46e53ceae6029d011490a127169",
     "lean-toolchain": "ad6c4084b9842adf87ecfff6a137a98f75ebf9367311dceb29f3b85539c07e75",
-    "scripts/check_opening_foundation.lean": "d3ed0dd35b22c9bd7e3c76a5c52ede26d34c96098ee69bea28fc68791bcf0f68",
-    "scripts/export_foundation_dependencies.lean": "46e98b666f59f9fa62b1d9ebec491d82214dc13a3280389fd02e34956bf4687c",
+    "scripts/check_opening_foundation.lean": "0a6ea2485e0d11ca33c212ed3723f7b3a0c57b8330aa1f04418e5b89fd4f0254",
+    "scripts/export_foundation_dependencies.lean": "2f9358d107a4922794c17ae160b9b480bfbec832ef50bb5d924ae3d3becfc228",
     "skills/intermediate-value-construction/SKILL.md": "dc038f21ce6911ee3ff40a403aae08fdc06dc90a9505edb8be4b2465a762b4d7"
   },
   "auditCommand": "lake env lean scripts/check_opening_foundation.lean",

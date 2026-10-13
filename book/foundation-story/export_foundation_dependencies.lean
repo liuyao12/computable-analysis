@@ -42,6 +42,7 @@ run_cmd do
     ``ComputableAnalysis.SqrtSecantFoundation.positive_segment_hasIntegral,
     ``ComputableAnalysis.SquareRootSecantNewton.sqrtTwo_equiv_bisection,
     ``ComputableAnalysis.SquareRootSecantNewton.sqrtTwo_valid,
+      ``ComputableAnalysis.SquareRootSecantNewton.sqrtTwo_mul_self_equiv_two,
     ``ComputableAnalysis.SquareRootSecantNewton.step_spec]
   let names : NameSet := ((do for root in roots do closure env root).run {}).2
   let mut entries := []
