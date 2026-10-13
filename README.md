@@ -13,6 +13,15 @@ without a pull-request review process, so
 [request to join as a collaborator](https://github.com/liuyao12/computable-analysis/issues/new?title=Request%20to%20join%20as%20a%20collaborator&body=Hi%21%20I%27d%20like%20to%20join%20as%20a%20collaborator.%0A%0AHere%27s%20what%20I%27d%20like%20to%20work%20on%3A%0A)
 to contribute directly.
 
+## Preface
+
+Read [How to read this foundation](https://liuyao12.github.io/computable-analysis/preface.html)
+before Chapter 1. It explains rational-input functions, derived extensions,
+exact comparison of computations, and how skills propose integral formulas
+that concrete derivative proofs and FTC certify. It also distinguishes this
+project’s proof discipline from represented-space computability and
+intuitionistic constructive analysis.
+
 ## From numbers to functions
 
 The emphasis is on constructions and exact mathematical identities. Explicit
