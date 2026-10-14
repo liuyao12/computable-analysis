@@ -1,3 +1,36 @@
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.complexSecant_congr: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.balanced_separation: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.complexSecant_error: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.HasStrictDerivativeAt.secantBound: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.HasSecantBoundAt.strict: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.HasStrictDerivativeAt.errorBoxes: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.twoPointErrorBoxes_iff: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.shrinkingSecantBoxes_iff: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.HasShrinkingSecantBoxes.secantBound: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.HasStrictDerivativeAt.pointwise: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.Holomorphic.strictAt: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.HasStrictDerivativeAt.neighbor_derivative_bound: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.secantBoxes: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.continuousDerivative: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.shrinkingHolomorphic_iff_continuous: [propext,
+ Classical.choice,
+ Quot.sound]
 AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.enclosureHolomorphic_iff: [propext,
  Classical.choice,
  Quot.sound]
@@ -154,8 +187,9 @@ DEPENDENCY AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureDi
 DEPENDENCY AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureDifferentiable.product_derivative: no derivative-continuity field
 DEPENDENCY AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureTheory.segment_variation_bound: no derivative-continuity field
 DEPENDENCY AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureTheory.same_derivative_segment_agreement: no derivative-continuity field
-CONTRACT AUDIT: holomorphicity requires first-derivative continuity; no Cauchy or Taylor conclusion occurs in its definition
+CONTRACT AUDIT: holomorphicity covers all nearby computed secants; no derivative-continuity field, Cauchy or Taylor conclusion occurs in its definition
+CONTINUITY AUDIT: first-derivative continuity proved from nearby secants; no legacy continuity field
 CONSTRUCTION AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.cauchy_formula: actual contour/series reconstruction dependencies present
 CONSTRUCTION AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.taylor_expansion: actual contour/series reconstruction dependencies present
 CONSTRUCTION AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.derivative_holomorphic: actual contour/series reconstruction dependencies present
-PASS: revised enclosure holomorphicity with required first-derivative continuity; two-way quantitative bridge; separate pointwise calculus and whole-segment laws; constructed Cauchy formula, exact Taylor expansion and factorial-normalized coefficients; actual higher derivative holomorphicity and continuity; elementary and full-disk special-function applications; conjugation rejected. Standard axioms only; no Mathlib imports.
+PASS: shrinking computed complex secant boxes; proved first-derivative continuity and exact equivalence with the previous continuous-derivative definition; two-way quantitative bridge; separate pointwise calculus and whole-segment laws; constructed Cauchy formula, exact Taylor expansion and factorial-normalized coefficients; actual higher derivative holomorphicity and continuity; elementary and full-disk special-function applications; conjugation rejected. Standard axioms only; no Mathlib imports.

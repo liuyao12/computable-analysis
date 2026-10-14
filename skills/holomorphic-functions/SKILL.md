@@ -17,10 +17,12 @@ The worked constructions are in
 
 The chosen practical definition is
 [`IsEnclosureHolomorphic`](../../book/foundation-story/sources/ComputableAnalysis.EnclosureHolomorphic.lean):
-covered cofinal valid enclosures of the normalized remainder coordinates at
-zero on an open domain, together with continuity of the represented derivative.
-`enclosureHolomorphic_iff` proves equivalence with the quantitative `Holomorphic`
-construction package. `HasEnclosureDerivativeAt` does not require derivative
+covered cofinal valid boxes for every nearby two-point computed complex secant.
+`shrinkingHolomorphic_iff_continuous` proves equivalence with the previous
+anchored-derivative-plus-continuity definition; `enclosureHolomorphic_iff`
+proves equivalence with the quantitative `Holomorphic` construction package.
+First-derivative continuity is derived from the two-point comparison.
+`HasEnclosureDerivativeAt` does not require derivative
 continuity, and `IsEnclosureDifferentiable` retains the weaker pointwise property
 for laws that need only that evidence.
 
@@ -28,15 +30,19 @@ The [Cauchy and Taylor bridge](../../book/foundation-story/sources/ComputableAna
 proves actual rectangle Cauchy recovery, exact local series equality, factorial
 coefficient identities, and holomorphicity of all finite higher derivatives.
 Cauchy and Taylor laws are not fields of the definition. Continuity of the first
-derivative is required by the chosen contract; do not claim it was derived from
-the weaker property. Higher derivative continuity is proved from the constructed
+derivative is proved from shrinking two-point secant boxes; do not claim it was
+derived from the weaker anchored pointwise property. Higher derivative continuity is proved from the constructed
 series. See [the checked portfolio and scope](../../docs/HOLOMORPHIC_ENCLOSURES.md).
 
 ## Choose the mathematical contract
 
 Use the enclosure holomorphicity proposition for mathematical laws and the
 quantitative package when supplied executable derivative-error radii and
-continuity moduli should remain directly available. Converting existential
+continuity moduli should remain directly available. `HasStrictDerivativeAt` is
+the equivalent division-free two-point estimate; `Holomorphic.strictAt`
+constructs it using whole-segment bounds and supplied derivative continuity.
+`DomainFunctions.balanced_separation` connects those estimates to actual
+computed quotients without a minimum-separation assumption. Converting existential
 semantic witnesses by logical choice is not an executable selector. For a
 Goursat-style development based on pointwise differentiability alone, use the
 separate weaker property rather than silently changing this definition.

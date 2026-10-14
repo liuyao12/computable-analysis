@@ -16,6 +16,21 @@ run_cmd do
   for mod in env.header.moduleNames do
     if mod.toString.startsWith "Mathlib" then throwError "Unexpected Mathlib import: {mod}"
   for root in [
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.complexSecant_congr,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.balanced_separation,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.complexSecant_error,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.HasStrictDerivativeAt.secantBound,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.HasSecantBoundAt.strict,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.HasStrictDerivativeAt.errorBoxes,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.twoPointErrorBoxes_iff,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.shrinkingSecantBoxes_iff,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.HasShrinkingSecantBoxes.secantBound,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.HasStrictDerivativeAt.pointwise,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.Holomorphic.strictAt,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.HasStrictDerivativeAt.neighbor_derivative_bound,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.secantBoxes,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.continuousDerivative,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.shrinkingHolomorphic_iff_continuous,
       ``ComputableAnalysis.RiemannHilbert.DomainFunctions.enclosureHolomorphic_iff,
       ``ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.toHolomorphic,
       ``ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.differentiable,
@@ -99,11 +114,20 @@ run_cmd do
     logInfo m!"DEPENDENCY AUDIT {root}: no derivative-continuity field"
   let definitionDeps := ((dependencies env ``ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic).run {}).2
   for dep in definitionDeps.toArray do
-    if dep.toString.startsWith "ComputableAnalysis." &&
-        ((dep.toString.toLower.splitOn "cauchy").length > 1 ||
-         (dep.toString.toLower.splitOn "taylor").length > 1) then
+    if dep == ``ComputableAnalysis.RiemannHilbert.DomainFunctions.ContinuousOn ||
+        dep == ``ComputableAnalysis.RiemannHilbert.DomainFunctions.Holomorphic ||
+        dep.toString.startsWith "ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy." ||
+        (dep.toString.startsWith "ComputableAnalysis.RiemannHilbert.RectangularContour." &&
+          ((dep.toString.toLower.splitOn "cauchy").length > 1 ||
+           (dep.toString.toLower.splitOn "taylor").length > 1)) then
       throwError "Analytic conclusion hidden in the holomorphic definition: {dep}"
-  logInfo "CONTRACT AUDIT: holomorphicity requires first-derivative continuity; no Cauchy or Taylor conclusion occurs in its definition"
+  logInfo "CONTRACT AUDIT: holomorphicity covers all nearby computed secants; no derivative-continuity field, Cauchy or Taylor conclusion occurs in its definition"
+  let continuityDeps := ((dependencies env ``ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.continuousDerivative).run {}).2
+  unless continuityDeps.contains ``ComputableAnalysis.RiemannHilbert.DomainFunctions.HasStrictDerivativeAt.neighbor_derivative_bound do
+    throwError "Missing secant comparison in derivative continuity proof"
+  if continuityDeps.contains ``ComputableAnalysis.RiemannHilbert.DomainFunctions.Holomorphic.continuousDerivative then
+    throwError "Derivative continuity extracted from the legacy hypothesis"
+  logInfo "CONTINUITY AUDIT: first-derivative continuity proved from nearby secants; no legacy continuity field"
   for (root, required) in [
       (``ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.cauchy_formula,
         [``ComputableAnalysis.RiemannHilbert.RectangularContour.fixedRectangleCauchyContour_rectangular,
@@ -118,4 +142,4 @@ run_cmd do
     for name in required do
       unless deps.contains name do throwError "Missing constructed proof bridge {name} for {root}"
     logInfo m!"CONSTRUCTION AUDIT {root}: actual contour/series reconstruction dependencies present"
-  logInfo "PASS: revised enclosure holomorphicity with required first-derivative continuity; two-way quantitative bridge; separate pointwise calculus and whole-segment laws; constructed Cauchy formula, exact Taylor expansion and factorial-normalized coefficients; actual higher derivative holomorphicity and continuity; elementary and full-disk special-function applications; conjugation rejected. Standard axioms only; no Mathlib imports."
+  logInfo "PASS: shrinking computed complex secant boxes; proved first-derivative continuity and exact equivalence with the previous continuous-derivative definition; two-way quantitative bridge; separate pointwise calculus and whole-segment laws; constructed Cauchy formula, exact Taylor expansion and factorial-normalized coefficients; actual higher derivative holomorphicity and continuity; elementary and full-disk special-function applications; conjugation rejected. Standard axioms only; no Mathlib imports."

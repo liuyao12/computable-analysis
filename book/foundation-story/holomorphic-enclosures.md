@@ -1,19 +1,77 @@
 # Holomorphicity from covered rational enclosures
 
 The holomorphic interface is `DomainFunctions.IsEnclosureHolomorphic` in
-`ComputableAnalysis/EnclosureHolomorphic.lean`. It requires an open domain,
-actual enclosure derivatives at every valid represented point, and continuity
-of that represented derivative. This is the project's chosen practical
-holomorphicity contract. **Cauchy's formula, Taylor expansion, and higher
-differentiability are conclusions, not assumptions.**
+`ComputableAnalysis/EnclosureHolomorphic.lean`. It requires an open domain and
+shrinking covered rational boxes for **all nearby two-point complex secants**
+at every valid represented point. Derivative continuity is proved from that
+condition. **Cauchy's formula, Taylor expansion, and higher differentiability
+are conclusions, not assumptions.**
 
-The weaker `IsEnclosureDifferentiable` property retains pointwise complex
-differentiability on an open domain. The underlying
-`HasEnclosureDerivativeAt` definition is unchanged. Its general calculus and
-segment laws remain available without derivative continuity. The older
-quantitative `Holomorphic` record is now proved equivalent to the revised
-holomorphicity proposition (`enclosureHolomorphic_iff`), rather than merely
-being a stronger sufficient construction.
+## Shrinking secant boxes
+
+For a center \(a\) and a represented candidate \(d\), the actual secant is
+\[
+ S_f(z,w)=\frac{f(z)-f(w)}{z-w},\qquad z\not\simeq w.
+\]
+`complexSecant` uses the existing terminating rational-box reciprocal
+computation. Nonzero displacement means unequal represented values, not merely
+different source names; zero displacement is excluded only from this quotient.
+`complexSecant_congr` proves representation invariance.
+
+Choose nested positive rational radii \(r_n\le2^{-n}\). At neighborhood
+resolution \(n\), both coordinate observation sets contain every error
+\[
+ S_f(z,w)-d,\qquad
+ \|z-a\|_\infty\le r_n,\quad \|w-a\|_\infty\le r_n,
+\]
+for all valid represented domain points with nonzero displacement. Each
+coordinate has a two-index rational interval family and cofinal selected
+diagonal that is a valid represented zero and covers **all** these errors.
+Translating the error rectangles by the represented candidate encloses all
+secants around \(d\). Checking a selected path, real increments only, or
+bounding the error by the distance to the center is insufficient.
+
+`shrinkingSecantBoxes_iff` proves equivalence with the division-free strict
+first-order estimate (`HasStrictDerivativeAt`): for each positive rational
+\(\varepsilon\), there is a positive rational \(\delta\) such that
+\[
+ \begin{gathered}
+ \|z-a\|_\infty,\|w-a\|_\infty\le\delta,\quad
+ \|z-w\|_\infty\le H,\quad H>0\\
+ \Longrightarrow\quad
+ \|f(z)-f(w)-d(z-w)\|_\infty\le\varepsilon H.
+ \end{gathered}
+\]
+This includes coincident points without division. `balanced_separation` proves
+that every nonzero represented displacement has rational bounds \(H,K>0\)
+for itself and its computed reciprocal with \(HK\le16\), using the reciprocal's
+actual rational anchor search. This uniform constant connects the two
+conditions even for extremely small separations. The coordinate maximum norm
+has multiplication bound \(2\), accounted for in the schedules.
+
+The previous definition remains named `IsContinuousEnclosureHolomorphic`.
+`shrinkingHolomorphic_iff_continuous` proves exact equivalence with it, and
+`enclosureHolomorphic_iff` proves equivalence with the existing quantitative
+`Holomorphic` construction package:
+
+- A continuous derivative and the represented segment-variation theorem bound
+  every short secant. The internally chosen neighborhood keeps the entire
+  segment inside the actual domain; the whole domain need not be convex.
+- Shrinking secant boxes give the anchored pointwise derivative. Short rational
+  steps based at a neighboring point compare that point's derivative with the
+  center's candidate. Shrinking error bounds prove derivative continuity.
+
+Neither direction uses Goursat, Cauchy's formula, Taylor expansion, or an
+assumption that pointwise differentiability alone forces continuity. The
+construction audit verifies the secant comparison and excludes a legacy
+continuity field from the reverse proof. Concrete quantitative witnesses
+retain executable radii; logical selection of existential witnesses is not
+an executable selector.
+
+The weaker `IsEnclosureDifferentiable` and `HasEnclosureDerivativeAt` relations
+remain unchanged for laws that need only pointwise differentiation. Strict
+and anchored differentiation differ at a single point; their whole-domain
+contracts are compared only with the explicit continuity condition above.
 
 ## Pointwise definition
 
@@ -42,8 +100,8 @@ The coordinates can use different schedules because both cover their entire
 neighborhoods and both represent zero.
 
 This tests an **anchored** first-order error. Requiring all two-point complex
-secants to collapse would impose a stronger pointwise condition; it is not
-silently substituted here. Zero displacement causes no division problem.
+secants to collapse would impose a stronger pointwise condition; it is used by the stronger holomorphicity contract above, while the anchored
+pointwise relation is retained. Zero displacement causes no division problem.
 
 ## Checked equivalence and laws
 
@@ -118,8 +176,8 @@ continuity alone cannot accidentally satisfy the definition.
 ## Cauchy and Taylor conclusions
 
 `EnclosureHolomorphicCauchy.lean` derives the following laws from the revised
-contract. First-derivative continuity is explicitly required; it is not
-advertised as a consequence of pointwise differentiability.
+contract. First-derivative continuity is derived from shrinking two-point
+secant boxes, then passed to the existing continuous-derivative proof route.
 
 For a positively oriented rational rectangle whose **entire closed region**
 is in the domain, and every valid represented interior point \(a\), the actual
@@ -180,7 +238,8 @@ lake env .lake/packages/checkdecls/.lake/build/bin/checkdecls blueprint/lean_dec
 
 The new audit checks standard axioms only (`propext`, `Classical.choice`,
 `Quot.sound`), rejects transitive Mathlib imports, checks that the pointwise calculus and segment proofs use no derivative-continuity
-field, checks that the revised definition includes no Cauchy or Taylor
-conclusion, and verifies the actual contour-cancellation and series-remainder
+field, checks that the revised definition includes neither a derivative-continuity
+field nor a Cauchy or Taylor conclusion, verifies that first-derivative continuity
+uses the new nearby-secant comparison, and verifies the actual contour-cancellation and series-remainder
 dependencies of the analytic results. The downloadable source snapshot includes all imported project modules
 and the audit scripts; its independent build receipt is published with it.

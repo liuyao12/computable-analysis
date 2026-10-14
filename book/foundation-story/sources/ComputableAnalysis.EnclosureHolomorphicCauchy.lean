@@ -6,9 +6,9 @@ import ComputableAnalysis.RiemannHilbert.ContourFixedCauchy
 # Cauchy and Taylor laws from enclosure holomorphicity
 
 The only analytic hypothesis is the revised enclosure holomorphicity property:
-an open domain, actual all-direction enclosure derivatives, and continuity of
-that derivative. Representation invariance and quantitative derivative estimates
-are derived by the two-way bridge. The existing rectangle-cancellation proof,
+an open domain and shrinking covered boxes for all nearby computed complex
+secants. First-derivative continuity, representation invariance and quantitative
+derivative estimates are derived by the proved two-way bridge. The existing rectangle-cancellation proof,
 constructed contour limits, and geometric kernel remainder then prove the
 Cauchy identities and exact local series. No Cauchy, Taylor, or higher-derivative
 conclusion is assumed as a field.

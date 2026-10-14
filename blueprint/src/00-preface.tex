@@ -155,7 +155,24 @@ A supplied executable stage schedule gives an executable intersection constructi
 \label{preface:complex-holomorphic}
 
 
-For complex variables, use rational rectangles and require both coordinates to shrink. A derivative must control every nearby complex direction. We test the actual first-order error, anchored at the base point:
+Holomorphicity requires an open domain and shrinking rational rectangles enclosing every nearby two-point complex secant. At a center \(a\), the candidate derivative \(d\) is their common limit:
+
+\[\begin{gathered}S_f(z,w)=\frac{f(z)-f(w)}{z-w},\qquad z\not\simeq w,\\S_f(z,w)-d\longrightarrow0\quad\text{as both }z,w\longrightarrow a.\end{gathered}\]
+
+At resolution \(n\), cover both coordinates of every secant error for \(\|z-a\|_\infty,\|w-a\|_\infty\le r_n\le2^{-n}\). Each coordinate has a two-index rational interval family and a cofinal selected diagonal that is a valid represented zero. The quotient uses the existing terminating reciprocal algorithm, with nonzero displacement justified by unequal represented values. A favorable subsequence or a few directions cannot satisfy the coverage requirement.
+
+
+\textbf{Checked equivalence.} These shrinking boxes are equivalent to the previous definition with an anchored complex derivative and continuous derivative. In one direction, continuity of the derivative and the proved whole-segment estimate control every secant. In the other, short secants based at nearby points compare their derivatives, proving first-derivative continuity. Neither function convexity nor a globally convex domain is required.
+
+
+The checked division-free version bounds the two-point error by the separation of the points:
+
+\[\begin{gathered}\|z-a\|_\infty,\|w-a\|_\infty\le\delta,\quad\|z-w\|_\infty\le H,\\\|f(z)-f(w)-d(z-w)\|_\infty\le\varepsilon H.\end{gathered}\]
+
+A rational anchor-search bound for the displacement and its computed reciprocal proves equivalence with the actual quotient boxes, even when the two points are much closer to each other than to the center.
+
+
+The weaker pointwise derivative remains available separately. It tests the actual first-order error, anchored at the base point:
 
 \[R_{a,d}(z)=f(z)-f(a)-d(z-a).\]
 
@@ -166,10 +183,10 @@ At neighborhood resolution \(n\), cover both coordinates of every normalized err
 The positive rational \(H\) makes normalization an exact rational scaling. Each coordinate has a two-index rational interval family, with some cofinal selected diagonal that is a valid represented zero. Coverage includes all valid domain neighbors and all such displacement bounds. Checking one path or a few axis directions would be insufficient.
 
 
-\textbf{Checked equivalence.} These covered enclosures are equivalent to the first-order estimate: for each rational \(\varepsilon>0\), some rational \(\delta>0\) makes \(\|R_{a,d}(z)\|_\infty\le\varepsilon H\) for every \(0<H\le\delta\) and every domain neighbor bounded by \(H\). Our chosen definition of holomorphicity requires such a derivative at every represented point of an open domain, together with continuity of that derivative. The pointwise enclosure derivative remains a separate weaker property.
+\textbf{Checked equivalence.} These covered enclosures are equivalent to the first-order estimate: for each rational \(\varepsilon>0\), some rational \(\delta>0\) makes \(\|R_{a,d}(z)\|_\infty\le\varepsilon H\) for every \(0<H\le\delta\) and every domain neighbor bounded by \(H\). The public holomorphicity definition now uses the stronger two-point shrinking boxes above; its equivalence theorem recovers this derivative and proves its continuity. The pointwise enclosure derivative remains a separate weaker property.
 
 
-Uniqueness, representation invariance, continuity of values, and exact product and chain rules are proved. A whole-segment variation theorem uses pointwise evidence with internally constructed rational bisections: zero derivative gives equal endpoint values, and equal derivatives plus one equal value identify two functions along the segment. These underlying pointwise laws remain available without derivative continuity. The holomorphic function constructions additionally provide the required derivative continuity.
+Uniqueness, representation invariance, continuity of values, and exact product and chain rules are proved. A whole-segment variation theorem uses pointwise evidence with internally constructed rational bisections: zero derivative gives equal endpoint values, and equal derivatives plus one equal value identify two functions along the segment. These underlying pointwise laws remain available without derivative continuity. The holomorphic function constructions provide shrinking secant boxes, from which derivative continuity is derived.
 
 
 The existing computations now satisfy this definition: arbitrary represented-coefficient polynomials and rational functions, the established exponential, sine and cosine at arbitrary complex frequency, normalized logarithm branches, Lambert series, and \(E_2,E_4,E_6\) on the full unit disk. Their genuine pole and branch domains and primary rational-input extension proofs are retained. Conjugation is continuous, but the checked negative test excludes every proposed complex derivative at zero.
@@ -178,7 +195,7 @@ The existing computations now satisfy this definition: arbitrary represented-coe
 \href{https://liuyao12.github.io/computable-analysis/foundation-story/index.html\#holomorphic-core}{Inspect the definition and proofs} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/holomorphic-enclosures.md}{Read the precise specification and scope} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/holomorphic-audit.txt}{Checked theorem and dependency audit}
 
 
-The revised enclosure definition is proved equivalent to the existing quantitative holomorphic construction package. Cauchy and Taylor statements remain consequences, rather than fields of the definition. The proof uses continuity of the derivative to construct finite rational covers and uniform affine error bounds; oriented rectangle cancellation and the computed reciprocal period give Cauchy recovery.
+The revised enclosure definition is proved equivalent to the existing quantitative holomorphic construction package. Cauchy and Taylor statements remain consequences, rather than fields of the definition. The proof uses the derived continuity of the derivative to construct finite rational covers and uniform affine error bounds; oriented rectangle cancellation and the computed reciprocal period give Cauchy recovery.
 
 
 \section*{Cauchy recovery and an actual Taylor series}
@@ -196,7 +213,7 @@ At every domain center, the proof constructs a local square, its justified conto
 The coefficients come from actual Cauchy moments. A geometric kernel remainder proves prefix convergence and exact agreement with the original evaluator; formal jets alone are not used as evidence. The construction and its value respect equivalent representations and holomorphicity witnesses.
 
 
-Differentiated local series and derivative uniqueness prove that the derivative is itself holomorphic. Iteration constructs every finite higher derivative on the entire original domain, proves that each really differentiates the previous one, and gives higher Cauchy formulas and continuity. Only first-derivative continuity is required initially. The existing exponential and full-disk Eisenstein computations instantiate the exact Taylor reconstruction at arbitrary represented centers.
+Differentiated local series and derivative uniqueness prove that the derivative is itself holomorphic. Iteration constructs every finite higher derivative on the entire original domain, proves that each really differentiates the previous one, and gives higher Cauchy formulas and continuity. First-derivative continuity already follows from the shrinking secant condition. The existing exponential and full-disk Eisenstein computations instantiate the exact Taylor reconstruction at arbitrary represented centers.
 
 
 \href{https://liuyao12.github.io/computable-analysis/foundation-story/index.html\#cauchy-taylor}{Inspect Cauchy and Taylor proofs} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/index.html\#higher-derivatives}{Inspect constructed higher derivatives} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/holomorphic-audit.txt}{Contract and construction audit}

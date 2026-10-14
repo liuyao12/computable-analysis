@@ -33,6 +33,21 @@ private def namesJson (env : Environment) (names : Array Name) : Json :=
 run_cmd do
   let env ← getEnv
   let roots := [
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.complexSecant_congr,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.balanced_separation,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.complexSecant_error,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.HasStrictDerivativeAt.secantBound,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.HasSecantBoundAt.strict,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.HasStrictDerivativeAt.errorBoxes,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.twoPointErrorBoxes_iff,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.shrinkingSecantBoxes_iff,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.HasShrinkingSecantBoxes.secantBound,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.HasStrictDerivativeAt.pointwise,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.Holomorphic.strictAt,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.HasStrictDerivativeAt.neighbor_derivative_bound,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.secantBoxes,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.continuousDerivative,
+      ``ComputableAnalysis.RiemannHilbert.DomainFunctions.shrinkingHolomorphic_iff_continuous,
       ``ComputableAnalysis.RiemannHilbert.DomainFunctions.enclosureHolomorphic_iff,
       ``ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.toHolomorphic,
       ``ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.differentiable,

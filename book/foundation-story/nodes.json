@@ -202,8 +202,8 @@
   ],
   [
     "holomorphic-core",
-    "Complex enclosure derivatives",
-    "\\(R_{a,d}(z)/H\\longrightarrow0\\)",
+    "Shrinking complex secant boxes",
+    "\\(S_f(z,w)\\longrightarrow f'(a)\\)",
     [
       "parametrized-limits"
     ],
@@ -211,9 +211,14 @@
       "RiemannHilbert.DomainFunctions.enclosureDerivative_iff",
       "RiemannHilbert.DomainFunctions.rawDerivative_iff",
       "RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.derivative_congr",
-      "RiemannHilbert.DomainFunctions.enclosureHolomorphic_iff"
+      "RiemannHilbert.DomainFunctions.enclosureHolomorphic_iff",
+      "RiemannHilbert.DomainFunctions.balanced_separation",
+      "RiemannHilbert.DomainFunctions.complexSecant_congr",
+      "RiemannHilbert.DomainFunctions.shrinkingSecantBoxes_iff",
+      "RiemannHilbert.DomainFunctions.shrinkingHolomorphic_iff_continuous",
+      "RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.continuousDerivative"
     ],
-    "Covered valid cofinal diagonals control every complex direction. The pointwise derivative law is unchanged. Holomorphicity additionally requires continuity of the represented derivative and is proved equivalent to the quantitative construction package; no Cauchy or Taylor conclusions are assumed."
+    "Every nearby two-point complex secant is covered by shrinking rational rectangles. The actual reciprocal computation is justified by balanced separation bounds. Derivative continuity is proved by short secant comparison, and the previous continuous-derivative definition is exactly equivalent. Cauchy and Taylor conclusions remain outside the definition."
   ],
   [
     "holomorphic-laws",
