@@ -190,3 +190,14 @@ is exactly equivalent to the previous continuous-derivative definition. The weak
 full-disk special-function examples, and a conjugation rejection test exercise
 this definition. The equivalent quantitative construction packages now supply proved Cauchy
 formulae, exact local Taylor reconstruction, and constructed higher derivatives.
+
+## Shrinking real secant boxes
+
+Use `RealSecantDerivative.HasDerivativeAt` for the real two-point condition:
+all rational secants inside each admissible input bracket are covered by
+shrinking valid cofinal output intervals. The complex-box specialization has
+exactly zero imaginary height. The convex and concave outer-secant algorithms
+have checked semantic bridges, and the original centered examples retain
+their represented values. The stronger condition implies the older
+`BracketDerivative.HasDerivativeAt` relation; no general converse is claimed
+for real functions. See [the specification and checked constructions](REAL_SECANT_DIFFERENTIABILITY.md).

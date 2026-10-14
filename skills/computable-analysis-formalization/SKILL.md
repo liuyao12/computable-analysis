@@ -117,7 +117,8 @@ Use `RawLimit.HasEnclosureValue` for a covered valid diagonal of rational
 interval data with two cofinal refinement indices. Coverage must include
 whole neighborhoods or complete tails, not a selected subsequence.
 `BracketContinuity.HasContinuousAt` covers all rational values throughout
-arbitrary admissible input brackets. `BracketDerivative.HasDerivativeAt`
+arbitrary admissible input brackets. The retained weaker
+`BracketDerivative.HasDerivativeAt`
 uses covered secant-tail diagonals and is proved equivalent to the previous
 secant-limit definition. Existing interval moduli are sufficient proof data;
 use their adapters rather than imposing one evaluator on every function.
@@ -128,6 +129,18 @@ logical existence via `Classical.choose` is not an executable selector.
 The old finite derivative adapter requires positive step radii and justified
 continuity of the proposed derivative values. Complex moduli and normalized
 remainders have covered coordinate adapters for both existing interfaces.
+
+## Shrinking real secant boxes
+
+Use `RealSecantDerivative.HasDerivativeAt` for the real two-point condition:
+all rational secants inside each bracket are covered, and the complex-box
+view has exactly zero imaginary height. Its convex and concave outer-secant
+bridges use actual slope order and validity, without assuming derivative
+continuity. The older `BracketDerivative.HasDerivativeAt` retains the weaker
+straddling-endpoint law; the new condition implies it, and no general converse
+is claimed for real functions. The original centered square and represented
+coefficient affine examples and a nonlinear concave square construction have
+checked bridges. See [the real specification](../../docs/REAL_SECANT_DIFFERENTIABILITY.md).
 
 ## Follow the certificate workflow
 

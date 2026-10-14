@@ -1,0 +1,51 @@
+AUDIT ComputableAnalysis.RealSecantDerivative.flatBox_height: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivative.flat_compute: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivative.flat_imagPart: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivative.flat_equiv_iff: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivative.flat_enclosure_iff: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivative.hasDerivative_iff_flatBoxes: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivative.hasDerivative_iff_neighborhoods: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivative.HasDerivativeAt.bracket: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivative.unique: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivative.congr_point: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivative.congr_value: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivative.congr_function: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivative.restrict: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivative.HasDerivativeAt.negate: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivative.secant_neg_compute: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivative.secant_swap_compute: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivative.outerDerivative_hasDerivative: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivative.concave_outerDerivative_hasDerivative: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivativeExamples.squareDerivative_shrinkingBoxes: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivativeExamples.square_closed: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivativeExamples.affine_shrinkingBoxes: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivativeExamples.square_centered_shrinkingBoxes: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivativeExamples.affine_centered_shrinkingBoxes: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivativeExamples.negativeSquareDerivative_equiv: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivativeExamples.negativeSquareDerivative_valid: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivativeExamples.negativeSquare_secant_order: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivativeExamples.negativeSquareDerivative_shrinkingBoxes: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivativeExamples.negativeSquare_centered_shrinkingBoxes: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RealSecantDerivativeExamples.affine_finite_shrinkingBoxes: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.HasDerivativeOnInterval.toShrinkingSecantDerivative: [propext, Classical.choice, Quot.sound]
+PASS: all-pair shrinking real secant intervals and exact zero-height rectangle equivalence; uniqueness, input/output/function invariance, orientation and negation; convex and concave outer constructions; actual centered square, represented-coefficient affine and nonlinear concave square computations; closed-domain endpoints and finite derivative bridge. Standard axioms only; no Mathlib imports.

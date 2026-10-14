@@ -2,6 +2,7 @@ import Lean
 import ComputableAnalysis.EnclosureHolomorphicExamples
 import ComputableAnalysis.EnclosureHolomorphicCounterexample
 import ComputableAnalysis.BracketDerivativeExamples
+import ComputableAnalysis.RealSecantDerivativeExamples
 import ComputableAnalysis.ParametrizedFoundationExamples
 import ComputableAnalysis.SqrtSecantFoundation
 import ComputableAnalysis.SquareRootSecantNewton
@@ -33,6 +34,37 @@ private def namesJson (env : Environment) (names : Array Name) : Json :=
 run_cmd do
   let env ← getEnv
   let roots := [
+      ``ComputableAnalysis.RealSecantDerivative.flatBox_height,
+      ``ComputableAnalysis.RealSecantDerivative.flat_compute,
+      ``ComputableAnalysis.RealSecantDerivative.flat_imagPart,
+      ``ComputableAnalysis.RealSecantDerivative.flat_equiv_iff,
+      ``ComputableAnalysis.RealSecantDerivative.flat_enclosure_iff,
+      ``ComputableAnalysis.RealSecantDerivative.hasDerivative_iff_flatBoxes,
+      ``ComputableAnalysis.RealSecantDerivative.hasDerivative_iff_neighborhoods,
+      ``ComputableAnalysis.RealSecantDerivative.HasDerivativeAt.bracket,
+      ``ComputableAnalysis.RealSecantDerivative.unique,
+      ``ComputableAnalysis.RealSecantDerivative.congr_point,
+      ``ComputableAnalysis.RealSecantDerivative.congr_value,
+      ``ComputableAnalysis.RealSecantDerivative.congr_function,
+      ``ComputableAnalysis.RealSecantDerivative.restrict,
+      ``ComputableAnalysis.RealSecantDerivative.HasDerivativeAt.negate,
+      ``ComputableAnalysis.RealSecantDerivative.secant_neg_compute,
+      ``ComputableAnalysis.RealSecantDerivative.secant_swap_compute,
+      ``ComputableAnalysis.RealSecantDerivative.outerDerivative_hasDerivative,
+      ``ComputableAnalysis.RealSecantDerivative.concave_outerDerivative_hasDerivative,
+      ``ComputableAnalysis.RealSecantDerivativeExamples.squareDerivative_shrinkingBoxes,
+      ``ComputableAnalysis.RealSecantDerivativeExamples.square_closed,
+      ``ComputableAnalysis.RealSecantDerivativeExamples.affine_shrinkingBoxes,
+      ``ComputableAnalysis.RealSecantDerivativeExamples.square_centered_shrinkingBoxes,
+      ``ComputableAnalysis.RealSecantDerivativeExamples.affine_centered_shrinkingBoxes,
+      ``ComputableAnalysis.RealSecantDerivativeExamples.negativeSquareDerivative_equiv,
+      ``ComputableAnalysis.RealSecantDerivativeExamples.negativeSquareDerivative_valid,
+      ``ComputableAnalysis.RealSecantDerivativeExamples.negativeSquare_secant_order,
+      ``ComputableAnalysis.RealSecantDerivativeExamples.negativeSquareDerivative_shrinkingBoxes,
+      ``ComputableAnalysis.RealSecantDerivativeExamples.negativeSquare_centered_shrinkingBoxes,
+      ``ComputableAnalysis.RealSecantDerivativeExamples.affine_finite_shrinkingBoxes,
+      ``ComputableAnalysis.HasDerivativeOnInterval.toShrinkingSecantDerivative,
+
       ``ComputableAnalysis.RiemannHilbert.DomainFunctions.complexSecant_congr,
       ``ComputableAnalysis.RiemannHilbert.DomainFunctions.balanced_separation,
       ``ComputableAnalysis.RiemannHilbert.DomainFunctions.complexSecant_error,

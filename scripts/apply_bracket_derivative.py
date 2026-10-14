@@ -28,6 +28,10 @@ def apply(site):
     assert holomorphic_audit.count('CONTRACT AUDIT:')==1
     assert holomorphic_audit.count('CONTINUITY AUDIT:')==1
     assert holomorphic_audit.count('CONSTRUCTION AUDIT ')==3
+    real_audit=(ASSETS/'real-secant-audit.txt').read_text()
+    assert 'PASS:' in real_audit and 'sorryAx' not in real_audit
+    assert not any(line.startswith('error:') or ': error' in line for line in real_audit.splitlines())
+    assert sum(line.startswith('AUDIT ') for line in real_audit.splitlines())==30
     snapshot=re.search(r'Build completed successfully \((\d+) jobs\)\.', (ASSETS/'snapshot-build.txt').read_text())
     assert snapshot
     manifest=json.loads((ASSETS/'proof.json').read_text())
@@ -59,10 +63,10 @@ def apply(site):
     for name in ['modular-proofs.html','modular-dependencies.json','sine-proof-dependencies.json','ch-foundations.html']:
         assert (site/name).read_bytes()==before[name],name
     report={'changedExistingFiles':sorted(changed),'preservedFiles':len(before)-len(changed),
-        'declarations':len(declarations),'checkedNewEndpoints':33,'fullRepositoryBuild':True,'buildJobs':int(build.group(1)),'snapshotBuildJobs':int(snapshot.group(1)),'checkedHolomorphicEndpoints':83,
+        'declarations':len(declarations),'checkedNewEndpoints':33,'fullRepositoryBuild':True,'buildJobs':int(build.group(1)),'snapshotBuildJobs':int(snapshot.group(1)),'checkedHolomorphicEndpoints':83,'checkedRealSecantEndpoints':30,
         'proofSha256':manifest['sha256'],'bracketAuditSha256':sha((ASSETS/'bracket-audit.txt').read_bytes()),
         'parametrizedAuditSha256':sha((ASSETS/'parametrized-audit.txt').read_bytes()),
-        'preservedExistingResults':True,'holomorphicAuditSha256':sha((ASSETS/'holomorphic-audit.txt').read_bytes()),'scope':'Shrinking computed complex secant boxes with derived first-derivative continuity, quantitative equivalence, proved Cauchy and exact Taylor reconstruction, all higher derivatives, weaker pointwise calculus and whole-segment laws, actual function portfolio and conjugation rejection; covered cofinal valid diagonals for limits, continuity and derivatives; exact limit compatibility and representation invariance; interval, finite derivative and complex remainder bridges; existing secant, convex, integral and downstream results preserved.'}
+        'preservedExistingResults':True,'holomorphicAuditSha256':sha((ASSETS/'holomorphic-audit.txt').read_bytes()),'scope':'All-pair shrinking real secant intervals with exact zero-height box equivalence, convex and concave constructions and finite derivative bridge; shrinking computed complex secant boxes with derived first-derivative continuity, quantitative equivalence, proved Cauchy and exact Taylor reconstruction, all higher derivatives, weaker pointwise calculus and whole-segment laws, actual function portfolio and conjugation rejection; covered cofinal valid diagonals for limits, continuity and derivatives; exact limit compatibility and representation invariance; interval, finite derivative and complex remainder bridges; existing secant, convex, integral and downstream results preserved.'}
     (site/'foundation-story/bracket-publication.json').write_text(json.dumps(report,indent=2)+'\n')
     print('PASS: checked parametrized foundation publication;',report['preservedFiles'],'existing files preserved.')
 

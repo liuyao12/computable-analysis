@@ -83,7 +83,7 @@ For a convex function, use the corresponding idea with slopes. Two outer secants
 
 \[S_f(l_n,u_n)\leq S_f(s,t)\leq S_f(v_n,r_n),\qquad l_n<u_n<s<t<v_n<r_n.\]
 
-Check that the lower and upper slope bounds collapse. Concavity reverses the order. A corner retains a gap, so curvature alone does not supply differentiability. The checked convex bridge and square examples already use this route; concave constructions use their reversed bounds and a justified comparison or transport proof.
+Check that the lower and upper slope bounds collapse. Concavity reverses the order. A corner retains a gap, so curvature alone does not supply differentiability. The checked convex and concave outer-secant bridges use this route for all nearby pairs. The original centered square and represented-coefficient affine computations, and a nonlinear concave negative-square construction, are also checked.
 
 
 These are our preferred methods whenever the order information is available. The general definition below supplies their common meaning, uniqueness, and comparison laws. Internal subdivisions or precision schedules belong in the proof of the full-domain result.
@@ -108,11 +108,11 @@ Every row is a valid represented value \(u_n\). The indices are independent. The
 These are exact represented-value inequalities. The positive allowance handles one-sided and zero-width target boxes: a positive sequence approaching zero must also converge to the exact name whose every box is \([0,0]\). Uniqueness of limits and invariance under equivalent target and row representations are proved in Lean.
 
 
-To define a derivative at a valid represented point \(x\), consider every valid bracket computation \(A\simeq x\). At every stage its interval must lie entirely inside the rational domain, and its width must be strictly positive:
+The earlier straddling-endpoint derivative relation, retained as a weaker compatibility law, considers, at a valid represented point \(x\), every valid bracket computation \(A\simeq x\). At every stage its interval must lie entirely inside the rational domain, and its width must be strictly positive:
 
 \[[a_n,b_n]_{\mathbb Q}\subseteq\operatorname{dom}(f),\qquad a_n<b_n.\]
 
-At least one such bracket must exist. A valid \(d\) is the derivative when every admissible bracket gives a secant sequence with limit \(d\):
+At least one such bracket must exist. A valid \(d\) satisfies this weaker relation when every admissible bracket gives a secant sequence with limit \(d\):
 
 \[S_n=\frac{f(b_n)-f(a_n)}{b_n-a_n}\longrightarrow d.\]
 
@@ -148,6 +148,34 @@ A supplied executable stage schedule gives an executable intersection constructi
 
 \href{https://liuyao12.github.io/computable-analysis/foundation-story/index.html\#parametrized-continuity}{Explore the continuity construction} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/index.html\#parametrized-bridges}{Explore downstream bridges} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/parametrized-audit.txt}{Read the checked theorem audit} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/parametrized-foundation.md}{Read the full specification}
 
+
+
+
+\section*{Real differentiability with zero-height boxes}
+\label{preface:real-secant-boxes}
+
+
+The real version uses rational intervals as rectangles with exactly zero imaginary height:
+
+\[[L,U]\times\{0\}.\]
+
+At each represented real center, the shrinking output boxes must cover every rational secant inside the entire domain-contained input bracket, including pairs on the same side of the center:
+
+\[\begin{gathered}S_f(a,b)=\frac{f(b)-f(a)}{b-a},\\ (A_n)_{\mathrm{lo}}\le a<b\le(A_n)_{\mathrm{hi}}.\end{gathered}\]
+
+Each endpoint value is a represented real with independent evaluation precision. Some cofinal selected diagonal of the two-index output intervals must be valid and represent the common derivative value. Pair separation can be arbitrarily small. Reversing the endpoints gives the same computed slope intervals, so the ordered pairs cover both real directions.
+
+
+\textbf{Checked zero-height specialization.} The real interval condition is proved equivalent to covered complex rectangles whose imaginary height is exactly zero at every stage. Both input pairs and output values stay on the real axis; no complex open-domain hypothesis or positive imaginary padding is added.
+
+
+This two-point condition is strict real differentiability. It implies the earlier straddling-endpoint bracket relation, which remains available for existing laws. A general converse is not asserted for arbitrary real functions. The new derivative is unique and respects equivalent input, output and primary rational-function computations. Relative closed-domain endpoints remain supported by justified clipped brackets.
+
+
+Convexity bounds every inner secant by the two outer secants; concavity reverses those bounds. The existing literal hull algorithms are unchanged. Their exact slope order and validity prove the shrinking-box condition without assuming derivative continuity. Square is checked at every represented real input, affine functions allow irrational represented coefficients, and the concave negative-square construction has exact derivative value \(d\simeq-(2x)\). The original centered constructions retain their exact values. Existing finite derivative certificates also have a bridge with positive radii and their supplied continuous derivative-value extension; independently proved FTC laws remain in force.
+
+
+\href{https://liuyao12.github.io/computable-analysis/foundation-story/index.html\#real-secant-core}{Inspect the real definition and zero-height equivalence} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/index.html\#real-curvature}{Inspect convex and concave construction proofs} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/real-secant-differentiability.md}{Read the specification} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/real-secant-audit.txt}{Checked real theorem audit}
 
 
 

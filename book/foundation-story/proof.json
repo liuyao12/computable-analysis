@@ -1,9 +1,9 @@
 {
-  "sha256": "86e074344f963188ffb5afcbe4b088a0ae646bf84fdd77e2843ff67840c06e49",
-  "bytes": 2119773,
-  "projectModules": 1533,
+  "sha256": "620a169a87b4c88a5bb5b7cfa32eeceb3ae91fbbfe78f96df89b9092a462be8a",
+  "bytes": 2129359,
+  "projectModules": 1536,
   "files": {
-    "ComputableAnalysis.lean": "d7a46f8c91fdcc872c6c7ed2afa5df25bb6646c8a51cd62c6cae9d316cc3e5c1",
+    "ComputableAnalysis.lean": "10d2dd0508a710ebb03f3e2068d04494fda6ab2bed472441b3ff09662c174300",
     "ComputableAnalysis/AbelianIntegrals.lean": "8cff18856df2f3c428ec03c8818e9fd85c4c55b46dd93736c0f66697e2112a3b",
     "ComputableAnalysis/AlgebraicFunctions.lean": "e1e1f699ee07b160c57d358b3a6d48e57edf94ee943384879267d2edce656f04",
     "ComputableAnalysis/ArctanGeometry.lean": "496b619de27bfd88869385c22ef6754230fea2a26428515597f0bd0b3a4fa1df",
@@ -1089,6 +1089,9 @@
     "ComputableAnalysis/PositiveSquareRootJet.lean": "230937acd9054200c6417f684d11e69d0a61d526be14a2079fa41cf51413111d",
     "ComputableAnalysis/PowerSeries.lean": "4f0846baf69c4112791076cae23fe87366a053ab1525066436b5fd348b1315fc",
     "ComputableAnalysis/RationalCircle.lean": "7f1ce8ed74419301c473128787d7218a5ba7ef4229b19eab6b3f5742f415a921",
+    "ComputableAnalysis/RealSecantCalculus.lean": "5fd1649b6a88b412e6fdffd6e8e2f9be3b5eb8d12a742243b4f1264c68286438",
+    "ComputableAnalysis/RealSecantDerivative.lean": "242931572f5b9b73126b6c12e5804cc05842159ed8cf49ca855053a89f5479c5",
+    "ComputableAnalysis/RealSecantDerivativeExamples.lean": "8d44a8b6ca4b1ef85f295da3eea5e787d8c1f7f71f44a35fed9844347809ce0b",
     "ComputableAnalysis/RepresentedGaussianHeatKernel.lean": "58c9eea1977d376e297544e0316a94f153bb9e556421eeb0b7789aa4ab30e43a",
     "ComputableAnalysis/RepresentedHeatKernelFirstJet.lean": "75d71415a2d565875915eaadffdb87f2212869cdbf9e5513d3d686cf97d44aee",
     "ComputableAnalysis/RepresentedHolomorphicJet.lean": "7a3d5eda6d5499c518bb62132e795a67772f243ab2456eee5c720518c148d593",
@@ -1538,7 +1541,8 @@
     "ComputableAnalysis/SquareRootSecantNewton.lean": "2e67d8dab27f60192c0edfbe4442679fa53e4b1fe15eb27bba58e4520aeb2f80",
     "ComputableAnalysis/TrigSpecialValues.lean": "03fe6abcfc7d957a9973cebcd8fa96ff61b4f86c20132abdb0a834d65f0ddf7c",
     "docs/HOLOMORPHIC_ENCLOSURES.md": "8834482bdcc4b7928c67ea5c8371f2286daa161309ea4d4c38f445129dae25dd",
-    "docs/PARAMETRIZED_FOUNDATION.md": "c3dfc60598f8a0f9cde5ce4065dd29f3dc24c8afa599e213acf8d7a99dbb06ea",
+    "docs/PARAMETRIZED_FOUNDATION.md": "5cc4a02c8d19e3be54604c91b63bec37095e505d15cfde6d65384362ed5397bf",
+    "docs/REAL_SECANT_DIFFERENTIABILITY.md": "1736a682b49bc22b72971b28565b41e43ce6a039a374231419085b71023b5b77",
     "lake-manifest.json": "187ea7ca4a646551525246e2fd7205706b51d302fa75d4835b775dd9f8a71cf2",
     "lakefile.toml": "f9cb2d79996fb93807404957b01896b0dd43f46e53ceae6029d011490a127169",
     "lean-toolchain": "ad6c4084b9842adf87ecfff6a137a98f75ebf9367311dceb29f3b85539c07e75",
@@ -1546,13 +1550,15 @@
     "scripts/check_enclosure_holomorphic.lean": "cdfe2033d8546c13c43b45fd607fbee632c2183534fdaefd4ebdfd60cdc68f0f",
     "scripts/check_opening_foundation.lean": "0a6ea2485e0d11ca33c212ed3723f7b3a0c57b8330aa1f04418e5b89fd4f0254",
     "scripts/check_parametrized_foundation.lean": "b3e9296002a2a743436855c034279c4e10d269ff262d5f0dee7b0f4bebdc0207",
-    "scripts/export_foundation_dependencies.lean": "8e1f91b673749c36c9601bd656ab16b09c3c7365dbf1059e38cae898bf97382f",
+    "scripts/check_real_secant_derivative.lean": "2c6be86919c7dfb88d0f4e3263b45bf7cc09f1cfa96977b8ec016312a94ece7e",
+    "scripts/export_foundation_dependencies.lean": "5f0117d64d9c93d58cc1ae67cef0f78c07c3d40dad956f742ef7230d865b9d5b",
     "skills/intermediate-value-construction/SKILL.md": "dc038f21ce6911ee3ff40a403aae08fdc06dc90a9505edb8be4b2465a762b4d7"
   },
   "auditCommand": "lake env lean scripts/check_opening_foundation.lean",
   "bracketAuditCommand": "lake env lean scripts/check_bracket_derivative.lean",
   "parametrizedAuditCommand": "lake env lean scripts/check_parametrized_foundation.lean",
   "holomorphicAuditCommand": "lake env lean scripts/check_enclosure_holomorphic.lean",
+  "realSecantAuditCommand": "lake env lean scripts/check_real_secant_derivative.lean",
   "buildCommand": "lake build",
-  "scope": "Covered complex first-order error enclosures, holomorphicity by shrinking computed complex secant boxes with derived derivative continuity and exact equivalence to the previous definition, exact equivalence with quantitative holomorphy, proved Cauchy recovery and Taylor reconstruction with all higher derivatives, separate weaker pointwise calculus, actual elementary and special-function examples, conjugation rejection; covered cofinal valid diagonals, continuity, rational-endpoint bracket derivatives, exact compatibility and invariance, interval and finite derivative bridges, complex coordinate and normalized remainder adapters; original secant, convex, square-root FTC and inverse-arctangent circle computations retained."
+  "scope": "All-pair shrinking real secant intervals and exact zero-height rectangle equivalence, convex and concave outer constructions and actual centered examples, finite derivative and legacy comparison bridges; covered complex first-order error enclosures, holomorphicity by shrinking computed complex secant boxes with derived derivative continuity and exact equivalence to the previous definition, exact equivalence with quantitative holomorphy, proved Cauchy recovery and Taylor reconstruction with all higher derivatives, separate weaker pointwise calculus, actual elementary and special-function examples, conjugation rejection; covered cofinal valid diagonals, continuity, rational-endpoint bracket derivatives, exact compatibility and invariance, interval and finite derivative bridges, complex coordinate and normalized remainder adapters; original secant, convex, square-root FTC and inverse-arctangent circle computations retained."
 }

@@ -306,5 +306,51 @@
       "EnclosureHolomorphicExamples.eisensteinTaylor_agrees"
     ],
     "The actual derivative is holomorphic by differentiated local series and uniqueness. Iteration preserves the full original domain and proves genuine higher derivative evidence, higher Cauchy identities and continuity. Exponential and Eisenstein computations instantiate reconstruction."
+  ],
+  [
+    "real-secant-core",
+    "Shrinking real secant boxes",
+    "\\([L,U]\\times\\{0\\}\\)",
+    [
+      "parametrized-limits",
+      "bracket-derivative"
+    ],
+    [
+      "RealSecantDerivative.hasDerivative_iff_neighborhoods",
+      "RealSecantDerivative.hasDerivative_iff_flatBoxes",
+      "RealSecantDerivative.flatBox_height",
+      "RealSecantDerivative.flat_compute",
+      "RealSecantDerivative.secant_swap_compute",
+      "RealSecantDerivative.HasDerivativeAt.bracket",
+      "RealSecantDerivative.unique",
+      "RealSecantDerivative.congr_point",
+      "RealSecantDerivative.congr_value",
+      "RealSecantDerivative.congr_function"
+    ],
+    "Every rational pair in each entire input neighborhood is covered. The valid cofinal output intervals are exactly zero-height complex rectangles. The condition implies the older straddling-endpoint law; no general converse is assumed for real functions. Uniqueness and representation invariance are proved."
+  ],
+  [
+    "real-curvature",
+    "Convex and concave secant constructions",
+    "\\(D(x^2)\\simeq2x,\\quad D(-x^2)\\simeq-(2x)\\)",
+    [
+      "real-secant-core",
+      "convex-bridge"
+    ],
+    [
+      "RealSecantDerivative.outerDerivative_hasDerivative",
+      "RealSecantDerivative.concave_outerDerivative_hasDerivative",
+      "RealSecantDerivativeExamples.squareDerivative_shrinkingBoxes",
+      "RealSecantDerivativeExamples.square_closed",
+      "RealSecantDerivativeExamples.affine_shrinkingBoxes",
+      "RealSecantDerivativeExamples.square_centered_shrinkingBoxes",
+      "RealSecantDerivativeExamples.affine_centered_shrinkingBoxes",
+      "RealSecantDerivativeExamples.negativeSquareDerivative_shrinkingBoxes",
+      "RealSecantDerivativeExamples.negativeSquareDerivative_equiv",
+      "RealSecantDerivativeExamples.negativeSquare_centered_shrinkingBoxes",
+      "RealSecantDerivativeExamples.affine_finite_shrinkingBoxes",
+      "HasDerivativeOnInterval.toShrinkingSecantDerivative"
+    ],
+    "Actual outer hulls enclose all nearby secants by convex or reversed concave order, then shrink by validity. Existing centered square and affine computations retain their values. The nonlinear concave square computation works at every represented input, and finite derivative estimates have a checked all-pair bridge."
   ]
 ]
