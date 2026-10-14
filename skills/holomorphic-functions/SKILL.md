@@ -16,7 +16,7 @@ The worked constructions are in
 [`HolomorphicExamples.lean`](../../ComputableAnalysis/HolomorphicExamples.lean).
 
 The semantic core is now
-[`IsEnclosureHolomorphic`](../../ComputableAnalysis/EnclosureHolomorphic.lean):
+[`IsEnclosureHolomorphic`](../../book/foundation-story/sources/ComputableAnalysis.EnclosureHolomorphic.lean):
 covered cofinal valid enclosures of both normalized remainder coordinates at
 zero, on an open domain. It has no derivative-continuity field.
 `enclosureDerivative_iff` proves the two-way first-order bridge, and
