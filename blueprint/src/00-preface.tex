@@ -64,6 +64,35 @@ Different computations can use different coordinates. A rational multiple of \(\
 
 
 
+\section*{Start with endpoint and secant bounds}
+\label{preface:order-first}
+
+
+When the function is known to be monotone, continuity has a simple construction. For a nondecreasing function, every rational value in an input bracket lies between the endpoint values:
+
+\[a_n\leq t\leq b_n\quad\Longrightarrow\quad f(a_n)\leq f(t)\leq f(b_n).\]
+
+Check that these bounds collapse as the bracket shrinks around the point. For a nonincreasing function, reverse the endpoint roles. If endpoint values are represented reals, refine their rational bounds too:
+
+\[C_k=[\underline f_{m(k)}(a_{n(k)}),\overline f_{m(k)}(b_{n(k)})].\]
+
+Prove the output widths shrink. Exact rational-valued monotone functions give nested output brackets directly; represented endpoint boxes can use the checked finite-intersection construction when nesting needs repair. The input brackets must cover the neighborhood being tested, with domain clipping at boundary points. Monotonicity supplies containment, and collapse supplies continuity.
+
+
+For a convex function, use the corresponding idea with slopes. Two outer secants bound every sufficiently nearby inner secant:
+
+\[S_f(l_n,u_n)\leq S_f(s,t)\leq S_f(v_n,r_n),\qquad l_n<u_n<s<t<v_n<r_n.\]
+
+Check that the lower and upper slope bounds collapse. Concavity reverses the order. A corner retains a gap, so curvature alone does not supply differentiability. The checked convex bridge and square examples already use this route; concave constructions use their reversed bounds and a justified comparison or transport proof.
+
+
+These are our preferred methods whenever the order information is available. The general definition below supplies their common meaning, uniqueness, and comparison laws. Internal subdivisions or precision schedules belong in the proof of the full-domain result.
+
+
+\href{https://liuyao12.github.io/computable-analysis/foundation-story/index.html\#parametrized-continuity}{Continuity constructions} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/index.html\#convex-bridge}{Checked convex derivative construction}
+
+
+
 \section*{Two indices and a derivative at any represented point}
 \label{preface:limits-and-brackets}
 

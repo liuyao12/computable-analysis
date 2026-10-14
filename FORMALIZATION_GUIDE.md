@@ -1,6 +1,26 @@
 # Formalization Guide
 
 
+## Prefer order-based continuity and derivative constructions
+
+When monotonicity is known, first use endpoint value bounds to construct
+continuity: for a nondecreasing function the full interval image lies between
+its endpoint values; reverse the endpoints for a nonincreasing function.
+Prove the output gap shrinks, accounting for represented endpoint errors,
+and certify the resulting raw intervals. Use finite prefix intersections
+when the literal bounds need nesting repair.
+
+When convexity or concavity is known, first use neighboring or outer secants
+to construct derivative bounds. Reverse lower and upper secants in the
+concave case. Prove the slope gap shrinks and the computation is valid, then
+use the checked semantic bridge. Order supplies containment; shrinking is
+the additional continuity or differentiability evidence.
+
+Use these routes whenever they apply. Keep the general covered-diagonal
+specification behind the construction and its comparison laws. Resolve local
+monotone or curvature pieces internally without narrowing the public domain
+or asking callers to supply implementation choices.
+
 ## Bracket derivatives and two-index limits
 
 `RawLimit.TendsTo` treats a sequence of valid represented values as two-index

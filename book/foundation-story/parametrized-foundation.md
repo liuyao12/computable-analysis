@@ -13,6 +13,48 @@ is essential: a diagonal must enclose every observation at its selected input
 resolution, rather than just selected samples. The represented output is
 compared using `RealRaw.Equiv`; different box programs need not be identical.
 
+## Preferred constructions: endpoint and secant bounds
+
+Use known monotonicity, convexity, or concavity first. The covered-diagonal
+specification justifies and compares the resulting constructions; concrete
+proofs should expose the simpler bounds that make it apply.
+
+For a nondecreasing function and rational brackets around the point,
+
+\[
+a_n\leq t\leq b_n\quad\Longrightarrow\quad
+f(a_n)\leq f(t)\leq f(b_n).
+\]
+
+Continuity is checked by collapse of these endpoint bounds. For represented
+endpoint values, use the rational box
+
+\[
+[\underline f_m(a_n),\overline f_m(b_n)]
+\]
+
+and prove its width shrinks along a supplied refinement schedule. Reverse
+the endpoint roles for a nonincreasing function. Exact rational-valued
+monotone functions automatically give ordered, nested endpoint image boxes
+from nested input brackets. Represented endpoint boxes may need the checked
+finite-prefix intersection construction to obtain nesting. Keep the whole
+neighborhood covered and clip to the actual domain at boundary points.
+
+For convexity, two outer secants bound all sufficiently nearby inner secants:
+
+\[
+S_f(l_n,u_n)\leq S_f(s,t)\leq S_f(v_n,r_n),
+\qquad l_n<u_n<s<t<v_n<r_n.
+\]
+
+Differentiability is checked by collapse of the slope bounds, with endpoint
+evaluation errors refined as needed. Concavity reverses their order. Reuse
+the checked finite inequalities and convex semantic bridge, constructing any
+missing concave transport or comparison proof for the supplied computation.
+Monotonicity gives containment, not continuity by itself; curvature gives
+slope order, not differentiability at a corner. Local construction choices
+stay beneath the exact theorem on its full intended domain.
+
 ## Shared exact specification
 
 `RawLimit.HasEnclosureValue tests c` requires a valid represented target and

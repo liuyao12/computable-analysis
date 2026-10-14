@@ -64,6 +64,29 @@ Use `ElementaryFunctions` for positive-base and rational-power interfaces.
 Retain the explicit obligation of rational-exponent continuity unless the
 particular proof supplies it.
 
+## Continuity and derivatives: use order bounds first
+
+For a known monotone rational-input computation, start with endpoint values.
+`MonotoneOnInterval` supplies rational-input order data; combine it with
+evaluator validity to justify the represented endpoint bounds. Monotonicity
+then controls all rational values between the endpoints. Refine endpoint evaluations until
+the enclosing gap meets the required tolerance. Prove shrinking separately
+from order. Certify literal nesting, or use `RawLimit.prefixRaw` with its
+checked coverage and validity lemmas. `BracketContinuity` then proves the
+common extension value and representation invariance.
+
+For known convexity or concavity, start with the existing neighboring-secant
+constructions and `ExactFunction` outer-secant inequalities in
+`MonotonicityConvexity`. `BracketDerivative.outerDerivative_hasDerivative`
+is the checked convex-order bridge. For a concave construction, use the
+proved reversed secant bounds and supply its semantic bridge, or transport
+through a justified negation construction. A convex corner can retain a
+positive slope gap; do not infer a derivative from curvature alone.
+
+Use a quantitative general enclosure or remainder route when order bounds
+are unavailable or do not establish the requested result. Local pieces and
+precision choices belong beneath the full-domain theorem.
+
 ## Inverse and algebraic branches
 
 Use `Extension` and `AlgebraicFunctions` for monotone inverse branches.

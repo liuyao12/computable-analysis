@@ -23,6 +23,18 @@
 <p>Endpoint values give range bounds when monotonicity has been justified. They do not define continuity for every function: for \(f(t)=t^2\), the endpoints of \([-h_n,h_n]\) both have value \(h_n^2\), so their singleton hulls fail nesting even though the function is continuous at zero. A general interval extension needs justified bounds for the whole input interval, or a common limit for all rational evaluations approaching the point. Endpoint values themselves can be represented reals, with an independent refinement index.</p>
 <p>Different computations can use different coordinates. A rational multiple of \(\pi\), a rational radian, and a rational circle parameter are different inputs. We compare on an overlap, along a justified coordinate transformation, or after constructing extensions. Agreement on overlapping domains does not by itself give a globally transitive relation between functions with different domains. There is no need to discard one computation in favor of a single privileged definition.</p>
 
+<h2 id="order-first">Start with endpoint and secant bounds</h2>
+<p>When the function is known to be monotone, continuity has a simple construction. For a nondecreasing function, every rational value in an input bracket lies between the endpoint values:</p>
+\[a_n\leq t\leq b_n\quad\Longrightarrow\quad f(a_n)\leq f(t)\leq f(b_n).\]
+<p>Check that these bounds collapse as the bracket shrinks around the point. For a nonincreasing function, reverse the endpoint roles. If endpoint values are represented reals, refine their rational bounds too:</p>
+\[C_k=[\underline f_{m(k)}(a_{n(k)}),\overline f_{m(k)}(b_{n(k)})].\]
+<p>Prove the output widths shrink. Exact rational-valued monotone functions give nested output brackets directly; represented endpoint boxes can use the checked finite-intersection construction when nesting needs repair. The input brackets must cover the neighborhood being tested, with domain clipping at boundary points. Monotonicity supplies containment, and collapse supplies continuity.</p>
+<p>For a convex function, use the corresponding idea with slopes. Two outer secants bound every sufficiently nearby inner secant:</p>
+\[S_f(l_n,u_n)\leq S_f(s,t)\leq S_f(v_n,r_n),\qquad l_n&lt;u_n&lt;s&lt;t&lt;v_n&lt;r_n.\]
+<p>Check that the lower and upper slope bounds collapse. Concavity reverses the order. A corner retains a gap, so curvature alone does not supply differentiability. The checked convex bridge and square examples already use this route; concave constructions use their reversed bounds and a justified comparison or transport proof.</p>
+<p>These are our preferred methods whenever the order information is available. The general definition below supplies their common meaning, uniqueness, and comparison laws. Internal subdivisions or precision schedules belong in the proof of the full-domain result.</p>
+<p><a href="foundation-story/index.html#parametrized-continuity">Continuity constructions</a> · <a href="foundation-story/index.html#convex-bridge">Checked convex derivative construction</a></p>
+
 <h2 id="limits-and-brackets">Two indices and a derivative at any represented point</h2>
 <p>The endpoint values need not be rational. For a rational-input function \(f:\mathbb Q\to\mathrm{RealRaw}\), the interval data for its secants has two indices:</p>
 \[Q_{n,k},\qquad n=\text{input-bracket stage},\quad k=\text{secant-value refinement}.\]

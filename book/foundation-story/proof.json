@@ -1,6 +1,6 @@
 {
-  "sha256": "59d27760f5c72eae4192190a6db5580345299a16fb108119e292a45d71b93b01",
-  "bytes": 912516,
+  "sha256": "97b0f9e900a734fd3c0d5c9da1d76dda9ef942765cf8429b1bddc078dd42d1ea",
+  "bytes": 913167,
   "projectModules": 104,
   "files": {
     "ComputableAnalysis.lean": "6ce29be79f91b83406ae25f9409613af1994a8ec66b98389446fc072ae58489c",
@@ -108,7 +108,7 @@
     "ComputableAnalysis/SqrtSecantFoundation.lean": "acb1e05e0cf3c7e94c51666e3c9acae3e1cc3aebe5d0d1f185a3d1061f8c13e9",
     "ComputableAnalysis/SquareRootSecantNewton.lean": "2e67d8dab27f60192c0edfbe4442679fa53e4b1fe15eb27bba58e4520aeb2f80",
     "ComputableAnalysis/TrigSpecialValues.lean": "03fe6abcfc7d957a9973cebcd8fa96ff61b4f86c20132abdb0a834d65f0ddf7c",
-    "docs/PARAMETRIZED_FOUNDATION.md": "28c923ed981b0986f44aa9fb92bd686204d0ca1fea1af59ab5a7cdbfdcc1cd6e",
+    "docs/PARAMETRIZED_FOUNDATION.md": "c4565a06b92d82e25b5eab71bc5a0e5e417d0b811077240fdc88dc81b9568076",
     "lake-manifest.json": "187ea7ca4a646551525246e2fd7205706b51d302fa75d4835b775dd9f8a71cf2",
     "lakefile.toml": "f9cb2d79996fb93807404957b01896b0dd43f46e53ceae6029d011490a127169",
     "lean-toolchain": "ad6c4084b9842adf87ecfff6a137a98f75ebf9367311dceb29f3b85539c07e75",

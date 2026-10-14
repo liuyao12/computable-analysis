@@ -91,6 +91,26 @@ mathematical bound and claimed equivalence still needs a Lean proof.
 - Prove equality of implementations with `RealRaw.Equiv`, not by treating raw
   values as definitionally equal.
 
+## Prefer order-based continuity and derivative constructions
+
+When monotonicity is known, first use endpoint value bounds to construct
+continuity: for a nondecreasing function the full interval image lies between
+its endpoint values; reverse the endpoints for a nonincreasing function.
+Prove the output gap shrinks, accounting for represented endpoint errors,
+and certify the resulting raw intervals. Use finite prefix intersections
+when the literal bounds need nesting repair.
+
+When convexity or concavity is known, first use neighboring or outer secants
+to construct derivative bounds. Reverse lower and upper secants in the
+concave case. Prove the slope gap shrinks and the computation is valid, then
+use the checked semantic bridge. Order supplies containment; shrinking is
+the additional continuity or differentiability evidence.
+
+Use these routes whenever they apply. Keep the general covered-diagonal
+specification behind the construction and its comparison laws. Resolve local
+monotone or curvature pieces internally without narrowing the public domain
+or asking callers to supply implementation choices.
+
 ## Covered parametrized continuity and derivative specification
 
 Use `RawLimit.HasEnclosureValue` for a covered valid diagonal of rational
@@ -155,6 +175,8 @@ comparison; a universal continuation operator is not a prerequisite.
 | Exact rational algebra or polynomial identity | `Basic`, `Algebraic`, `Polynomial` | Exact equality or finite factorization |
 | One computable number | `RealRaw` and `QInterval` | Valid boxes, a width modulus, and equivalence when comparing definitions |
 | Rational function on an interval | `FunctionDomains` | A denominator-apart certificate on the whole interval |
+| Continuity with known monotonicity | Endpoint value bounds, then the covered-enclosure bridge | Whole-neighborhood coverage and a shrinking endpoint gap, including evaluation errors |
+| Derivative with known convexity or concavity | Neighboring or outer secants; `ConvexDerivative`, `ConcaveDerivative` | Domain neighborhood, shrinking slope gap, validity, and the semantic derivative bridge |
 | Continuity at a represented point or on a represented domain | `RepresentedContinuity` | `ContinuousAt` or `ContinuousOn`, using represented arithmetic/order and point-dependent rational radii |
 | Uniform finite estimates for a boxed interval function | `IntervalRegularOn` | A literal rational epsilon-delta modulus |
 | Derivative or closed-form definite integral | `Differential`, `EffectiveCalculusFoundation` | Finite-difference enclosure and a particular endpoint bridge |
