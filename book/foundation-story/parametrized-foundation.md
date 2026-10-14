@@ -178,3 +178,13 @@ lake env .lake/packages/checkdecls/.lake/build/bin/checkdecls blueprint/lean_dec
 The new theorem audit checks every advertised bridge and regression, rejects
 nonstandard axioms and transitive Mathlib imports, and retains the older
 bracket audit. The full library build checks the downstream dependencies.
+
+## Holomorphic semantic core
+
+The all-direction complex extension is now checked in
+[HOLOMORPHIC_ENCLOSURES.md](HOLOMORPHIC_ENCLOSURES.md). Covered normalized
+remainders are equivalent to the actual first-order estimate. Holomorphicity
+requires pointwise derivatives on an open domain, without derivative
+continuity. Checked calculus, whole-segment constancy, elementary and
+full-disk special-function examples, and a conjugation rejection test exercise
+this definition. Existing stronger construction packages remain available.

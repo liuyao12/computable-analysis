@@ -99,7 +99,7 @@
       "ftc"
     ],
     [],
-    "Taylor and ODE strategies compare independently defined computations. The existing geometric–series ODE graph is linked below. The new inverse route is not advertised as a completed global comparison."
+    "Taylor and ODE strategies compare independently defined computations. The existing geometric\u2013series ODE graph is linked below. The new inverse route is not advertised as a completed global comparison."
   ],
   [
     "limits",
@@ -199,5 +199,69 @@
       "RiemannHilbert.DomainFunctions.HasDerivativeAt.hasRemainderCoordinates"
     ],
     "The pointwise derivative relation now uses covered valid diagonals and is proved equivalent to the old relation. Finite derivative evidence needs positive radii and continuity of proposed values. Both complex interfaces supply coordinate or normalized remainder enclosures covering every direction. Existing FTC hypotheses remain explicit."
+  ],
+  [
+    "holomorphic-core",
+    "Complex enclosure derivatives",
+    "\\(R_{a,d}(z)/H\\longrightarrow0\\)",
+    [
+      "parametrized-limits"
+    ],
+    [
+      "RiemannHilbert.DomainFunctions.enclosureDerivative_iff",
+      "RiemannHilbert.DomainFunctions.rawDerivative_iff",
+      "RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.derivative_congr"
+    ],
+    "Covered valid cofinal diagonals of both coordinates control every complex direction. The two-way bridge proves the actual first-order law. Holomorphicity needs no derivative-continuity field."
+  ],
+  [
+    "holomorphic-laws",
+    "Calculus and segment constancy",
+    "\\(D(f\\circ g)=(Df\\circ g)Dg\\)",
+    [
+      "holomorphic-core"
+    ],
+    [
+      "RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.compose_derivative",
+      "RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.product_derivative",
+      "RiemannHilbert.DomainFunctions.EnclosureTheory.segment_variation_bound",
+      "RiemannHilbert.DomainFunctions.EnclosureTheory.zero_derivative_segment_constant",
+      "RiemannHilbert.DomainFunctions.EnclosureTheory.same_derivative_segment_agreement"
+    ],
+    "Exact calculus identities and whole-segment variation follow from pointwise enclosure evidence. Rational bisections hide varying local radii."
+  ],
+  [
+    "holomorphic-functions",
+    "Elementary and special functions",
+    "\\(\\exp,\\sin,\\cos,\\log,E_2,E_4,E_6\\)",
+    [
+      "holomorphic-core",
+      "holomorphic-laws"
+    ],
+    [
+      "EnclosureHolomorphicExamples.polynomial",
+      "EnclosureHolomorphicExamples.rationalFunction",
+      "EnclosureHolomorphicExamples.exponential_derivative",
+      "EnclosureHolomorphicExamples.sine_derivative",
+      "EnclosureHolomorphicExamples.cosine_derivative",
+      "EnclosureHolomorphicExamples.logarithm_derivative",
+      "EnclosureHolomorphicExamples.lambert",
+      "EnclosureHolomorphicExamples.eisenstein",
+      "EnclosureHolomorphicExamples.eisenstein_rational_agreement"
+    ],
+    "Actual established evaluators supply the witnesses, on their complete pole-free or branch domains. Lambert and Eisenstein cover the full unit disk; rational primary bridges remain checked."
+  ],
+  [
+    "holomorphic-negative",
+    "Conjugation is excluded",
+    "\\(z\\mapsto\\bar z\\)",
+    [
+      "holomorphic-core"
+    ],
+    [
+      "RiemannHilbert.DomainFunctions.EnclosureCounterexample.conjugation_continuous",
+      "RiemannHilbert.DomainFunctions.EnclosureCounterexample.conjugation_not_differentiable"
+    ],
+    "An executable continuity modulus does not give a complex derivative. Real and imaginary rational displacements contradict every valid derivative candidate at zero."
   ]
 ]

@@ -1,4 +1,6 @@
 import Lean
+import ComputableAnalysis.EnclosureHolomorphicExamples
+import ComputableAnalysis.EnclosureHolomorphicCounterexample
 import ComputableAnalysis.BracketDerivativeExamples
 import ComputableAnalysis.ParametrizedFoundationExamples
 import ComputableAnalysis.SqrtSecantFoundation
@@ -31,6 +33,49 @@ private def namesJson (env : Environment) (names : Array Name) : Json :=
 run_cmd do
   let env ← getEnv
   let roots := [
+    ``ComputableAnalysis.RawLimit.HasEnclosureValue.mono,
+    ``ComputableAnalysis.FunctionTheory.denormalized_small,
+    ``ComputableAnalysis.RiemannHilbert.DomainFunctions.enclosureDerivative_iff,
+    ``ComputableAnalysis.RiemannHilbert.DomainFunctions.HasEnclosureDerivativeAt.unique,
+    ``ComputableAnalysis.RiemannHilbert.DomainFunctions.HasEnclosureDerivativeAt.congrDerivative,
+    ``ComputableAnalysis.RiemannHilbert.DomainFunctions.HasEnclosureDerivativeAt.congrPoint,
+    ``ComputableAnalysis.RiemannHilbert.DomainFunctions.Holomorphic.enclosure,
+    ``ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.continuous,
+    ``ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.derivative_congr,
+    ``ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.derivative_unique,
+    ``ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.compose,
+    ``ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.compose_derivative,
+    ``ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.sumOn,
+    ``ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.productOn,
+    ``ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.product_derivative,
+    ``ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.negate,
+    ``ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureTheory.segment_variation_bound,
+    ``ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureTheory.zero_derivative_segment_constant,
+    ``ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureTheory.same_derivative_segment_agreement,
+    ``ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCounterexample.conjugation_not_differentiable,
+    ``ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCounterexample.conjugation_not_holomorphic,
+    ``ComputableAnalysis.EnclosureHolomorphicExamples.polynomial,
+    ``ComputableAnalysis.EnclosureHolomorphicExamples.rationalFunction,
+    ``ComputableAnalysis.EnclosureHolomorphicExamples.reciprocal,
+    ``ComputableAnalysis.EnclosureHolomorphicExamples.reciprocal_derivative,
+    ``ComputableAnalysis.EnclosureHolomorphicExamples.exponential,
+    ``ComputableAnalysis.EnclosureHolomorphicExamples.exponential_derivative,
+    ``ComputableAnalysis.EnclosureHolomorphicExamples.sine,
+    ``ComputableAnalysis.EnclosureHolomorphicExamples.cosine,
+    ``ComputableAnalysis.EnclosureHolomorphicExamples.sine_derivative,
+    ``ComputableAnalysis.EnclosureHolomorphicExamples.cosine_derivative,
+    ``ComputableAnalysis.EnclosureHolomorphicExamples.logarithm,
+    ``ComputableAnalysis.EnclosureHolomorphicExamples.logarithm_derivative,
+    ``ComputableAnalysis.EnclosureHolomorphicExamples.lambert,
+    ``ComputableAnalysis.EnclosureHolomorphicExamples.eisenstein,
+    ``ComputableAnalysis.EnclosureHolomorphicExamples.eisenstein_rational_agreement,
+    ``ComputableAnalysis.ElementarySineODE.powerSeries_primary_agrees,
+    ``ComputableAnalysis.ElementarySineODE.sinPi_primary_agrees,
+    ``ComputableAnalysis.ElementarySineODE.powerSeries_primary_converges,
+    ``ComputableAnalysis.ElementarySineODE.sinPi_primary_converges,
+    ``ComputableAnalysis.ModularForms.DiskLambert.value_rational_agreement,
+    ``ComputableAnalysis.RiemannHilbert.DomainFunctions.rawDerivative_iff,
+    ``ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCounterexample.conjugation_continuous,
     ``ComputableAnalysis.RawLimit.HasEnclosureValue.unique,
     ``ComputableAnalysis.RawLimit.HasEnclosureValue.congr_value,
     ``ComputableAnalysis.RawLimit.parametrizedLimit_iff,

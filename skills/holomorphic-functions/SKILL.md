@@ -15,6 +15,16 @@ and use the existing computable-analysis foundation. The primary checked interfa
 The worked constructions are in
 [`HolomorphicExamples.lean`](../../ComputableAnalysis/HolomorphicExamples.lean).
 
+The semantic core is now
+[`IsEnclosureHolomorphic`](../../ComputableAnalysis/EnclosureHolomorphic.lean):
+covered cofinal valid enclosures of both normalized remainder coordinates at
+zero, on an open domain. It has no derivative-continuity field.
+`enclosureDerivative_iff` proves the two-way first-order bridge, and
+`Holomorphic.enclosure` transports existing construction witnesses. See
+[the checked portfolio and scope](../../docs/HOLOMORPHIC_ENCLOSURES.md).
+Use this core for general laws that need only pointwise differentiability;
+keep the stronger package when a downstream theorem actually consumes it.
+
 ## Choose the mathematical contract
 
 Use an open domain and a computed complex derivative at every valid point.

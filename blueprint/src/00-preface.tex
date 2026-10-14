@@ -150,6 +150,38 @@ A supplied executable stage schedule gives an executable intersection constructi
 
 
 
+
+\section*{Holomorphicity from shrinking complex enclosures}
+\label{preface:complex-holomorphic}
+
+
+For complex variables, use rational rectangles and require both coordinates to shrink. A derivative must control every nearby complex direction. We test the actual first-order error, anchored at the base point:
+
+\[R_{a,d}(z)=f(z)-f(a)-d(z-a).\]
+
+At neighborhood resolution \(n\), cover both coordinates of every normalized error
+
+\[\begin{gathered}\frac{R_{a,d}(z)}{H},\qquad 0<H\le r_n\le2^{-n},\\\|z-a\|_\infty\le H.\end{gathered}\]
+
+The positive rational \(H\) makes normalization an exact rational scaling. Each coordinate has a two-index rational interval family, with some cofinal selected diagonal that is a valid represented zero. Coverage includes all valid domain neighbors and all such displacement bounds. Checking one path or a few axis directions would be insufficient.
+
+
+\textbf{Checked equivalence.} These covered enclosures are equivalent to the first-order estimate: for each rational \(\varepsilon>0\), some rational \(\delta>0\) makes \(\|R_{a,d}(z)\|_\infty\le\varepsilon H\) for every \(0<H\le\delta\) and every domain neighbor bounded by \(H\). Holomorphicity requires such a derivative at every represented point of an open domain. Continuity of the derivative is not a field of this definition.
+
+
+Uniqueness, representation invariance, continuity of values, and exact product and chain rules are proved. A whole-segment variation theorem uses pointwise evidence with internally constructed rational bisections: zero derivative gives equal endpoint values, and equal derivatives plus one equal value identify two functions along the segment. The audit checks that these proofs use no derivative-continuity field.
+
+
+The existing computations now satisfy this definition: arbitrary represented-coefficient polynomials and rational functions, the established exponential, sine and cosine at arbitrary complex frequency, normalized logarithm branches, Lambert series, and \(E_2,E_4,E_6\) on the full unit disk. Their genuine pole and branch domains and primary rational-input extension proofs are retained. Conjugation is continuous, but the checked negative test excludes every proposed complex derivative at zero.
+
+
+\href{https://liuyao12.github.io/computable-analysis/foundation-story/index.html\#holomorphic-core}{Inspect the definition and proofs} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/holomorphic-enclosures.md}{Read the precise specification and scope} · \href{https://liuyao12.github.io/computable-analysis/foundation-story/holomorphic-audit.txt}{Checked theorem and dependency audit}
+
+
+The existing stronger holomorphic construction packages remain available for downstream Cauchy and Taylor results. Deriving those results, and derivative continuity, from this weaker core remains further theorem work.
+
+
+
 \section*{Derive with a skill; certify with a proof}
 \label{preface:derive-check}
 

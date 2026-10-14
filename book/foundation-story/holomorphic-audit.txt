@@ -1,0 +1,86 @@
+AUDIT ComputableAnalysis.RawLimit.HasEnclosureValue.mono: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.rawDerivative_iff: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCounterexample.conjugation_continuous: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.FunctionTheory.denormalized_small: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.enclosureDerivative_iff: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.HasEnclosureDerivativeAt.unique: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.HasEnclosureDerivativeAt.congrDerivative: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.HasEnclosureDerivativeAt.congrPoint: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.Holomorphic.enclosure: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.continuous: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.derivative_congr: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.derivative_unique: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.compose: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.compose_derivative: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.sumOn: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.productOn: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.product_derivative: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.negate: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureTheory.segment_variation_bound: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureTheory.zero_derivative_segment_constant: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureTheory.same_derivative_segment_agreement: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCounterexample.conjugation_not_differentiable: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCounterexample.conjugation_not_holomorphic: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.EnclosureHolomorphicExamples.polynomial: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.EnclosureHolomorphicExamples.rationalFunction: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.EnclosureHolomorphicExamples.reciprocal: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.EnclosureHolomorphicExamples.reciprocal_derivative: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.EnclosureHolomorphicExamples.exponential: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.EnclosureHolomorphicExamples.exponential_derivative: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.EnclosureHolomorphicExamples.sine: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.EnclosureHolomorphicExamples.cosine: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.EnclosureHolomorphicExamples.sine_derivative: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.EnclosureHolomorphicExamples.cosine_derivative: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.EnclosureHolomorphicExamples.logarithm: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.EnclosureHolomorphicExamples.logarithm_derivative: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.EnclosureHolomorphicExamples.lambert: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.EnclosureHolomorphicExamples.eisenstein: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.EnclosureHolomorphicExamples.eisenstein_rational_agreement: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.ElementarySineODE.powerSeries_primary_agrees: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.ElementarySineODE.sinPi_primary_agrees: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.ElementarySineODE.powerSeries_primary_converges: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.ElementarySineODE.sinPi_primary_converges: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.ModularForms.DiskLambert.value_rational_agreement: [propext, Classical.choice, Quot.sound]
+DEPENDENCY AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.compose: no derivative-continuity field
+DEPENDENCY AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.product_derivative: no derivative-continuity field
+DEPENDENCY AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureTheory.segment_variation_bound: no derivative-continuity field
+DEPENDENCY AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureTheory.same_derivative_segment_agreement: no derivative-continuity field
+PASS: two-way covered-enclosure derivative bridge; uniqueness and representation invariance; value continuity, chain and product rules; whole-segment variation, zero-derivative constancy and equal-derivative identification without derivative continuity; conjugation rejected; actual elementary and full-disk special-function witnesses and primary extension bridges. Standard axioms only; no Mathlib imports.

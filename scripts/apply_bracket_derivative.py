@@ -20,9 +20,15 @@ def apply(site):
     assert parametrized_audit.count('AUDIT ')==33
     build=re.search(r'Build completed successfully \((\d+) jobs\)\.', (ASSETS/'build.txt').read_text())
     assert build and int(build.group(1))>=5412
-    assert 'Build completed successfully (107 jobs).' in (ASSETS/'snapshot-build.txt').read_text()
+    holomorphic_audit=(ASSETS/'holomorphic-audit.txt').read_text()
+    assert 'PASS:' in holomorphic_audit and 'error:' not in holomorphic_audit.lower() and 'sorryAx' not in holomorphic_audit
+    assert sum(line.startswith('AUDIT ') for line in holomorphic_audit.splitlines())==43
+    assert holomorphic_audit.count('DEPENDENCY AUDIT ')==4
+    snapshot=re.search(r'Build completed successfully \((\d+) jobs\)\.', (ASSETS/'snapshot-build.txt').read_text())
+    assert snapshot
     manifest=json.loads((ASSETS/'proof.json').read_text())
     assert sha((ASSETS/'proof.tar.gz').read_bytes())==manifest['sha256']
+    assert int(snapshot.group(1))==manifest['projectModules']+3
     declarations=json.loads((ASSETS/'declarations.json').read_text())['declarations']
     for node in json.loads((ASSETS/'nodes.json').read_text()):
         for name in node[4]:assert 'ComputableAnalysis.'+name in declarations,name
@@ -49,10 +55,10 @@ def apply(site):
     for name in ['modular-proofs.html','modular-dependencies.json','sine-proof-dependencies.json','ch-foundations.html']:
         assert (site/name).read_bytes()==before[name],name
     report={'changedExistingFiles':sorted(changed),'preservedFiles':len(before)-len(changed),
-        'declarations':len(declarations),'checkedNewEndpoints':33,'fullRepositoryBuild':True,'buildJobs':int(build.group(1)),'snapshotBuildJobs':107,
+        'declarations':len(declarations),'checkedNewEndpoints':33,'fullRepositoryBuild':True,'buildJobs':int(build.group(1)),'snapshotBuildJobs':int(snapshot.group(1)),'checkedHolomorphicEndpoints':43,
         'proofSha256':manifest['sha256'],'bracketAuditSha256':sha((ASSETS/'bracket-audit.txt').read_bytes()),
         'parametrizedAuditSha256':sha((ASSETS/'parametrized-audit.txt').read_bytes()),
-        'preservedExistingResults':True,'scope':'Covered cofinal valid diagonals for limits, continuity and derivatives; exact limit compatibility and representation invariance; interval, finite derivative and complex remainder bridges; existing secant, convex, integral and downstream results preserved.'}
+        'preservedExistingResults':True,'holomorphicAuditSha256':sha((ASSETS/'holomorphic-audit.txt').read_bytes()),'scope':'All-direction enclosure holomorphicity with two-way first-order equivalence, exact weak-core calculus and whole-segment laws, actual elementary and full-disk special-function portfolio and conjugation rejection; covered cofinal valid diagonals for limits, continuity and derivatives; exact limit compatibility and representation invariance; interval, finite derivative and complex remainder bridges; existing secant, convex, integral and downstream results preserved.'}
     (site/'foundation-story/bracket-publication.json').write_text(json.dumps(report,indent=2)+'\n')
     print('PASS: checked parametrized foundation publication;',report['preservedFiles'],'existing files preserved.')
 
