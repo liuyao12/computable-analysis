@@ -1,4 +1,5 @@
 import ComputableAnalysis.EnclosureHolomorphicConstancy
+import ComputableAnalysis.EnclosureHolomorphicCauchy
 import ComputableAnalysis.ExponentialComputations.ComplexFunctions
 import ComputableAnalysis.ElementarySineODEComparison
 import ComputableAnalysis.RiemannHilbert.ScalarPolynomialQuotients
@@ -84,5 +85,29 @@ theorem eisenstein_rational_agreement (w : ModularForms.RationalEisenstein.Weigh
       (ModularForms.EisensteinUnitDisk.rational_mem q hq)).val.Equiv
       (ModularForms.RationalEisenstein.unitDiskRationalValue w q hq).val :=
   ModularForms.RationalEisenstein.unitDiskDerived_rational_agreement w q hq
+
+
+/-- The actual exponential computation agrees with its constructed Taylor
+series at every represented center, throughout its proved local neighborhood. -/
+noncomputable def exponentialTaylor (a : Scalar) : DomainFunctions.Map :=
+  EnclosureCauchy.taylor ExponentialComputations.Complex.expFunction exponential a trivial
+
+theorem exponentialTaylor_agrees (a z : Scalar) (hz : (exponentialTaylor a).domain z) :
+    (exponentialTaylor a).eval z hz≈ExponentialComputations.Complex.exp z :=
+  EnclosureCauchy.taylor_expansion _ exponential a trivial z hz
+
+/-- A non-elementary application at every represented full-disk Eisenstein
+center; the actual series radius and contour coefficients are constructed. -/
+noncomputable def eisensteinTaylor (w : ModularForms.RationalEisenstein.Weight)
+    (a : Scalar) (ha : ModularForms.RationalEisenstein.unitDiskDomain a) : DomainFunctions.Map :=
+  EnclosureCauchy.taylor (ModularForms.RationalEisenstein.unitDiskDerivedMap w) (eisenstein w) a ha
+
+theorem eisensteinTaylor_agrees (w : ModularForms.RationalEisenstein.Weight)
+    (a : Scalar) (ha : ModularForms.RationalEisenstein.unitDiskDomain a) (z : Scalar)
+    (hz : (eisensteinTaylor w a ha).domain z) :
+    (eisensteinTaylor w a ha).eval z hz≈
+      ModularForms.RationalEisenstein.unitDiskDerivedValue w z
+        (EnclosureCauchy.taylor_domain _ (eisenstein w) a ha z hz) :=
+  EnclosureCauchy.taylor_expansion _ (eisenstein w) a ha z hz
 
 end ComputableAnalysis.EnclosureHolomorphicExamples

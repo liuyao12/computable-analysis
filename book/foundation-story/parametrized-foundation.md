@@ -184,7 +184,8 @@ bracket audit. The full library build checks the downstream dependencies.
 The all-direction complex extension is now checked in
 [HOLOMORPHIC_ENCLOSURES.md](HOLOMORPHIC_ENCLOSURES.md). Covered normalized
 remainders are equivalent to the actual first-order estimate. Holomorphicity
-requires pointwise derivatives on an open domain, without derivative
-continuity. Checked calculus, whole-segment constancy, elementary and
+now requires pointwise enclosure derivatives on an open domain and continuity
+of that derivative. The weaker pointwise property is retained separately. Checked calculus, whole-segment constancy, elementary and
 full-disk special-function examples, and a conjugation rejection test exercise
-this definition. Existing stronger construction packages remain available.
+this definition. The equivalent quantitative construction packages now supply proved Cauchy
+formulae, exact local Taylor reconstruction, and constructed higher derivatives.

@@ -15,35 +15,31 @@ and use the existing computable-analysis foundation. The primary checked interfa
 The worked constructions are in
 [`HolomorphicExamples.lean`](../../ComputableAnalysis/HolomorphicExamples.lean).
 
-The semantic core is now
+The chosen practical definition is
 [`IsEnclosureHolomorphic`](../../book/foundation-story/sources/ComputableAnalysis.EnclosureHolomorphic.lean):
-covered cofinal valid enclosures of both normalized remainder coordinates at
-zero, on an open domain. It has no derivative-continuity field.
-`enclosureDerivative_iff` proves the two-way first-order bridge, and
-`Holomorphic.enclosure` transports existing construction witnesses. See
-[the checked portfolio and scope](../../docs/HOLOMORPHIC_ENCLOSURES.md).
-Use this core for general laws that need only pointwise differentiability;
-keep the stronger package when a downstream theorem actually consumes it.
+covered cofinal valid enclosures of the normalized remainder coordinates at
+zero on an open domain, together with continuity of the represented derivative.
+`enclosureHolomorphic_iff` proves equivalence with the quantitative `Holomorphic`
+construction package. `HasEnclosureDerivativeAt` does not require derivative
+continuity, and `IsEnclosureDifferentiable` retains the weaker pointwise property
+for laws that need only that evidence.
+
+The [Cauchy and Taylor bridge](../../book/foundation-story/sources/ComputableAnalysis.EnclosureHolomorphicCauchy.lean)
+proves actual rectangle Cauchy recovery, exact local series equality, factorial
+coefficient identities, and holomorphicity of all finite higher derivatives.
+Cauchy and Taylor laws are not fields of the definition. Continuity of the first
+derivative is required by the chosen contract; do not claim it was derived from
+the weaker property. Higher derivative continuity is proved from the constructed
+series. See [the checked portfolio and scope](../../docs/HOLOMORPHIC_ENCLOSURES.md).
 
 ## Choose the mathematical contract
 
-Use an open domain and a computed complex derivative at every valid point.
-Continuity of the derivative across centers is a separate property, not a
-field of `HolomorphicOn`. The old `Holomorphic` record remains available for
-clients that need its additional derivative-continuity evidence. `DerivativeAt` is the pointwise derivative foundation: construct a valid,
-representation-invariant quotient \(Q_a\), continuous at the center, with
-\[
- f(y)-f(a)\simeq(y-a)Q_a(y),\qquad Q_a(a)\simeq d.
-\]
-Use [`DerivativeDefinition`](../../ComputableAnalysis/DerivativeDefinition.lean)
-for this contract. It needs no equality decision or division at the center.
-`DerivativeAt.toEstimate` proves the older `HasDerivativeAt` remainder law.
-Neither pointwise interface assumes continuity of the derivative function.
-`HolomorphicOn` combines `DifferentiableOn` with an open domain. Its sum,
-product, and composition constructors need no derivative-continuity hypothesis.
-`HolomorphicOn.toLegacy` upgrades to the older interface when that extra
-evidence is supplied. The reverse
-constructor for every arbitrary remainder witness remains open.
+Use the enclosure holomorphicity proposition for mathematical laws and the
+quantitative package when supplied executable derivative-error radii and
+continuity moduli should remain directly available. Converting existential
+semantic witnesses by logical choice is not an executable selector. For a
+Goursat-style development based on pointwise differentiability alone, use the
+separate weaker property rather than silently changing this definition.
 
 The domain and evaluator must respect `ComplexRaw.Equiv`. Prove validity for
 all valid represented inputs in the domain, including irrational inputs and

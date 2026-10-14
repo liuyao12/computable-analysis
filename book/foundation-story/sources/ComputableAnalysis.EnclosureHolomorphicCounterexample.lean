@@ -97,7 +97,7 @@ def conjugation_continuous : ContinuousOn conjugation.domain conjugation.eval wh
 /-- Conjugation has no holomorphic witness even though it is continuous. -/
 theorem conjugation_not_holomorphic : ¬ IsEnclosureHolomorphic conjugation := by
   intro h
-  obtain ⟨d,hd⟩ := h.2 origin trivial
+  obtain ⟨d,hd⟩ := h.differentiable.2 origin trivial
   exact conjugation_not_differentiable d hd
 
 end ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCounterexample

@@ -95,7 +95,7 @@ open ComplexRaw FunctionTheory RiemannHilbert DomainFunctions ComputableAnalysis
 
 /-- Endpoint variation controlled by an actual derivative bound, from the bare
 covered-enclosure definition. Local radii vary along the entire segment. -/
-theorem segment_variation (f : DomainFunctions.Map) (hf : IsEnclosureHolomorphic f)
+theorem segment_variation (f : DomainFunctions.Map) (hf : IsEnclosureDifferentiable f)
     (p q : Scalar) (hp : f.domain p) (hq : f.domain q)
     (mem : ∀ t : UnitInterval.Point, f.domain (RepresentedAffineSegment.point p q t))
     (B : Rat) (hB : 0≤B)
@@ -106,7 +106,7 @@ theorem segment_variation (f : DomainFunctions.Map) (hf : IsEnclosureHolomorphic
 
 /-- Zero derivative on a whole represented segment gives exact endpoint
 agreement. There is no derivative-continuity or uniform-radius hypothesis. -/
-theorem zero_derivative_segment_constant (f : DomainFunctions.Map) (hf : IsEnclosureHolomorphic f)
+theorem zero_derivative_segment_constant (f : DomainFunctions.Map) (hf : IsEnclosureDifferentiable f)
     (p q : Scalar) (hp : f.domain p) (hq : f.domain q)
     (mem : ∀ t : UnitInterval.Point, f.domain (RepresentedAffineSegment.point p q t))
     (hzero : ∀ t, (hf.derivative (RepresentedAffineSegment.point p q t) (mem t)).val.Equiv zero) :
@@ -132,7 +132,7 @@ theorem zero_derivative_segment_constant (f : DomainFunctions.Map) (hf : IsEnclo
 
 
 /-- Remove the arbitrary error allowance from the whole-segment bound. -/
-theorem segment_variation_bound (f : DomainFunctions.Map) (hf : IsEnclosureHolomorphic f)
+theorem segment_variation_bound (f : DomainFunctions.Map) (hf : IsEnclosureDifferentiable f)
     (p q : Scalar) (hp : f.domain p) (hq : f.domain q)
     (mem : ∀ t : UnitInterval.Point, f.domain (RepresentedAffineSegment.point p q t))
     (B : Rat) (hB : 0≤B)
@@ -153,7 +153,7 @@ theorem segment_variation_bound (f : DomainFunctions.Map) (hf : IsEnclosureHolom
 /-- Same actual derivatives and one equal value identify two functions along
 any whole segment in their common domain. Internal bisections are hidden. -/
 theorem same_derivative_segment_agreement (f g : DomainFunctions.Map)
-    (hf : IsEnclosureHolomorphic f) (hg : IsEnclosureHolomorphic g)
+    (hf : IsEnclosureDifferentiable f) (hg : IsEnclosureDifferentiable g)
     (inside : ∀ z, f.domain z → g.domain z)
     (p q : Scalar) (hp : f.domain p) (hq : f.domain q)
     (mem : ∀ t : UnitInterval.Point, f.domain (RepresentedAffineSegment.point p q t))
@@ -162,7 +162,7 @@ theorem same_derivative_segment_agreement (f g : DomainFunctions.Map)
     (seed : f.eval p hp ≈ g.eval p (inside p hp)) :
     f.eval q hq ≈ g.eval q (inside q hq) := by
   let F := sumOn f (negate g) inside
-  have H : IsEnclosureHolomorphic F := hf.sumOn hg.negate inside
+  have H : IsEnclosureDifferentiable F := hf.sumOn hg.negate inside
   have hz (t : UnitInterval.Point) : (H.derivative (RepresentedAffineSegment.point p q t) (mem t)).val.Equiv zero := by
     let z := RepresentedAffineSegment.point p q t
     have hd := (sumDerivative f (negate g) inside z (mem t) _ _ (hf.quantitativeAt z (mem t))

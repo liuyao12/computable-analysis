@@ -10,7 +10,8 @@ import ComputableAnalysis.RiemannHilbert.DomainHolomorphicSums
 Both coordinates of the normalized first-order remainder have covered valid
 cofinal diagonals with value zero. The observations contain every represented
 complex neighbor, and every positive rational displacement bound up to the
-selected radius. No derivative continuity is part of the semantic definition.
+selected radius. The pointwise derivative specification does not require derivative continuity.
+Holomorphicity below additionally requires continuity of the derivative.
 The quantitative interface is proved equivalent, not assumed as a field.
 -/
 namespace ComputableAnalysis.FunctionTheory
@@ -172,49 +173,49 @@ theorem rawDerivative_iff (f : FunctionTheory.Map) (a d : ComplexRaw)
       estimate := fun eps H z hz hH near => h.estimate eps H z.val z.property hz hH near }
     exact k.enclosure
 
-/-- Bare holomorphicity: an open domain and a complex derivative at every
-represented point. Derivative continuity is a subsequent theorem obligation,
-not a field. Radius and diagonal choices are hidden beneath this proposition. -/
-def IsEnclosureHolomorphic (f : Map) : Prop :=
+/-- Pointwise complex differentiability throughout an open domain. Radius
+and diagonal choices are hidden beneath this proposition. This weaker property
+is retained for laws that do not require continuity of the derivative. -/
+def IsEnclosureDifferentiable (f : Map) : Prop :=
   Nonempty (OpenDomain f) ∧ ∀ a (ha : f.domain a), ∃ d, HasEnclosureDerivativeAt f a ha d
 
-theorem Holomorphic.enclosure {f : Map} (h : Holomorphic f) : IsEnclosureHolomorphic f :=
+theorem Holomorphic.enclosureDifferentiable {f : Map} (h : Holomorphic f) : IsEnclosureDifferentiable f :=
   ⟨⟨h.openDomain⟩,fun a ha => ⟨h.derivative a ha,(h.atPoint a ha).enclosure⟩⟩
 
 /-- A canonical derivative value, independent (up to equivalence) of all
 radius, enclosure, and represented-name choices. Choice here is logical,
 not an executable derivative constructor. -/
-noncomputable def IsEnclosureHolomorphic.derivative {f : Map} (h : IsEnclosureHolomorphic f)
+noncomputable def IsEnclosureDifferentiable.derivative {f : Map} (h : IsEnclosureDifferentiable f)
     (a : Scalar) (ha : f.domain a) : Scalar := Classical.choose (h.2 a ha)
 
-theorem IsEnclosureHolomorphic.atPoint {f : Map} (h : IsEnclosureHolomorphic f)
+theorem IsEnclosureDifferentiable.atPoint {f : Map} (h : IsEnclosureDifferentiable f)
     (a : Scalar) (ha : f.domain a) : HasEnclosureDerivativeAt f a ha (h.derivative a ha) :=
   Classical.choose_spec (h.2 a ha)
 
-noncomputable def IsEnclosureHolomorphic.quantitativeAt {f : Map} (h : IsEnclosureHolomorphic f)
+noncomputable def IsEnclosureDifferentiable.quantitativeAt {f : Map} (h : IsEnclosureDifferentiable f)
     (a : Scalar) (ha : f.domain a) : HasDerivativeAt f a ha (h.derivative a ha) :=
   Classical.choice (h.atPoint a ha).quantitative
 
-noncomputable def IsEnclosureHolomorphic.openDomain {f : Map} (h : IsEnclosureHolomorphic f) : OpenDomain f :=
+noncomputable def IsEnclosureDifferentiable.openDomain {f : Map} (h : IsEnclosureDifferentiable f) : OpenDomain f :=
   Classical.choice h.1
 
 /-- Holomorphicity implies continuity of values, without derivative continuity. -/
-noncomputable def IsEnclosureHolomorphic.continuous {f : Map} (h : IsEnclosureHolomorphic f) :
+noncomputable def IsEnclosureDifferentiable.continuous {f : Map} (h : IsEnclosureDifferentiable f) :
     ContinuousOn f.domain f.eval := continuousOn_of_derivative f h.derivative h.quantitativeAt
 
-theorem IsEnclosureHolomorphic.derivative_congr {f : Map} (h : IsEnclosureHolomorphic f)
+theorem IsEnclosureDifferentiable.derivative_congr {f : Map} (h : IsEnclosureDifferentiable f)
     (a b : Scalar) (ha : f.domain a) (hb : f.domain b) (he : a ≈ b) :
     h.derivative a ha ≈ h.derivative b hb :=
   ((h.atPoint a ha).congrPoint hb he).unique (h.atPoint b hb) h.openDomain
 
 /-- Two holomorphicity witnesses compute the same derivative value. -/
-theorem IsEnclosureHolomorphic.derivative_unique {f : Map} (h k : IsEnclosureHolomorphic f)
+theorem IsEnclosureDifferentiable.derivative_unique {f : Map} (h k : IsEnclosureDifferentiable f)
     (a : Scalar) (ha : f.domain a) : h.derivative a ha ≈ k.derivative a ha :=
   (h.atPoint a ha).unique (k.atPoint a ha) h.openDomain
 
 /-- The chain rule, including openness of the actual composition domain. -/
-theorem IsEnclosureHolomorphic.compose {f g : Map} (hf : IsEnclosureHolomorphic f)
-    (hg : IsEnclosureHolomorphic g) : IsEnclosureHolomorphic (compose f g) := by
+theorem IsEnclosureDifferentiable.compose {f g : Map} (hf : IsEnclosureDifferentiable f)
+    (hg : IsEnclosureDifferentiable g) : IsEnclosureDifferentiable (compose f g) := by
   refine ⟨⟨composeOpen f g hf.openDomain hg.openDomain hg.continuous⟩,?_⟩
   intro a ha
   exact ⟨scalarProduct (hf.derivative (g.eval a (compose_inner_mem ha)) (compose_outer_mem ha))
@@ -222,17 +223,17 @@ theorem IsEnclosureHolomorphic.compose {f g : Map} (hf : IsEnclosureHolomorphic 
     (composeDerivative f g a ha _ _
       (hf.quantitativeAt _ (compose_outer_mem ha)) (hg.quantitativeAt a (compose_inner_mem ha))).enclosure⟩
 
-theorem IsEnclosureHolomorphic.sumOn {f g : Map} (hf : IsEnclosureHolomorphic f)
-    (hg : IsEnclosureHolomorphic g) (inside : ∀ z, f.domain z → g.domain z) :
-    IsEnclosureHolomorphic (sumOn f g inside) := by
+theorem IsEnclosureDifferentiable.sumOn {f g : Map} (hf : IsEnclosureDifferentiable f)
+    (hg : IsEnclosureDifferentiable g) (inside : ∀ z, f.domain z → g.domain z) :
+    IsEnclosureDifferentiable (sumOn f g inside) := by
   refine ⟨⟨⟨hf.openDomain.radius,hf.openDomain.inside⟩⟩,?_⟩
   intro a ha
   exact ⟨scalarSum (hf.derivative a ha) (hg.derivative a (inside a ha)),
     (sumDerivative f g inside a ha _ _ (hf.quantitativeAt a ha) (hg.quantitativeAt a (inside a ha))).enclosure⟩
 
-theorem IsEnclosureHolomorphic.productOn {f g : Map} (hf : IsEnclosureHolomorphic f)
-    (hg : IsEnclosureHolomorphic g) (inside : ∀ z, f.domain z → g.domain z) :
-    IsEnclosureHolomorphic (productOn f g inside) := by
+theorem IsEnclosureDifferentiable.productOn {f g : Map} (hf : IsEnclosureDifferentiable f)
+    (hg : IsEnclosureDifferentiable g) (inside : ∀ z, f.domain z → g.domain z) :
+    IsEnclosureDifferentiable (productOn f g inside) := by
   refine ⟨⟨⟨hf.openDomain.radius,hf.openDomain.inside⟩⟩,?_⟩
   intro a ha
   exact ⟨productSlope (f.eval a ha) (g.eval a (inside a ha))
@@ -242,8 +243,8 @@ theorem IsEnclosureHolomorphic.productOn {f g : Map} (hf : IsEnclosureHolomorphi
 
 /-- The chosen derivative of the composition equals the chain-rule value;
 no chosen modulus or diagonal appears in the exact identity. -/
-theorem IsEnclosureHolomorphic.compose_derivative {f g : Map}
-    (hf : IsEnclosureHolomorphic f) (hg : IsEnclosureHolomorphic g)
+theorem IsEnclosureDifferentiable.compose_derivative {f g : Map}
+    (hf : IsEnclosureDifferentiable f) (hg : IsEnclosureDifferentiable g)
     (a : Scalar) (ha : (DomainFunctions.compose f g).domain a) :
     (hf.compose hg).derivative a ha ≈
       scalarProduct (hf.derivative (g.eval a (compose_inner_mem ha)) (compose_outer_mem ha))
@@ -253,8 +254,8 @@ theorem IsEnclosureHolomorphic.compose_derivative {f g : Map}
       (hg.quantitativeAt a (compose_inner_mem ha))).enclosure (hf.compose hg).openDomain
 
 /-- Exact product rule for arbitrary represented coefficients and inputs. -/
-theorem IsEnclosureHolomorphic.product_derivative {f g : Map}
-    (hf : IsEnclosureHolomorphic f) (hg : IsEnclosureHolomorphic g)
+theorem IsEnclosureDifferentiable.product_derivative {f g : Map}
+    (hf : IsEnclosureDifferentiable f) (hg : IsEnclosureDifferentiable g)
     (inside : ∀ z, f.domain z → g.domain z) (a : Scalar) (ha : f.domain a) :
     (hf.productOn hg inside).derivative a ha ≈
       productSlope (f.eval a ha) (g.eval a (inside a ha))
@@ -265,14 +266,114 @@ theorem IsEnclosureHolomorphic.product_derivative {f g : Map}
 
 
 /-- Any justified pointwise derivative agrees with the semantic derivative. -/
+theorem IsEnclosureDifferentiable.derivative_eq {f : Map} (h : IsEnclosureDifferentiable f)
+    {a : Scalar} {ha : f.domain a} {d : Scalar} (k : HasEnclosureDerivativeAt f a ha d) :
+    h.derivative a ha ≈ d := (h.atPoint a ha).unique k h.openDomain
+
+theorem IsEnclosureDifferentiable.negate {f : Map} (h : IsEnclosureDifferentiable f) :
+    IsEnclosureDifferentiable (DomainFunctions.negate f) := by
+  refine ⟨⟨⟨h.openDomain.radius,h.openDomain.inside⟩⟩,?_⟩
+  intro a ha
+  exact ⟨scalarNeg (h.derivative a ha),(negateDerivative f a ha _ (h.quantitativeAt a ha)).enclosure⟩
+
+/-- Holomorphicity for this development: covered enclosure derivatives on an
+open domain, with a continuous represented derivative. Cauchy identities,
+Taylor expansions and higher derivatives are not part of this definition. -/
+def IsEnclosureHolomorphic (f : Map) : Prop :=
+  ∃ derivative : ∀ a, f.domain a → Scalar,
+    Nonempty (OpenDomain f) ∧
+    (∀ a ha, HasEnclosureDerivativeAt f a ha (derivative a ha)) ∧
+    Nonempty (ContinuousOn f.domain derivative)
+
+theorem Holomorphic.enclosure {f : Map} (h : Holomorphic f) : IsEnclosureHolomorphic f :=
+  ⟨h.derivative,⟨h.openDomain⟩,fun a ha => (h.atPoint a ha).enclosure,⟨h.continuousDerivative⟩⟩
+
+noncomputable def IsEnclosureHolomorphic.derivative {f : Map} (h : IsEnclosureHolomorphic f)
+    (a : Scalar) (ha : f.domain a) : Scalar := Classical.choose h a ha
+
+noncomputable def IsEnclosureHolomorphic.openDomain {f : Map} (h : IsEnclosureHolomorphic f) : OpenDomain f :=
+  Classical.choice (Classical.choose_spec h).1
+
+theorem IsEnclosureHolomorphic.atPoint {f : Map} (h : IsEnclosureHolomorphic f)
+    (a : Scalar) (ha : f.domain a) : HasEnclosureDerivativeAt f a ha (h.derivative a ha) :=
+  (Classical.choose_spec h).2.1 a ha
+
+/-- This extracts the explicitly required continuity data. It is not a theorem
+that pointwise differentiability alone forces derivative continuity. -/
+noncomputable def IsEnclosureHolomorphic.continuousDerivative {f : Map} (h : IsEnclosureHolomorphic f) :
+    ContinuousOn f.domain h.derivative := Classical.choice (Classical.choose_spec h).2.2
+
+noncomputable def IsEnclosureHolomorphic.quantitativeAt {f : Map} (h : IsEnclosureHolomorphic f)
+    (a : Scalar) (ha : f.domain a) : HasDerivativeAt f a ha (h.derivative a ha) :=
+  Classical.choice (h.atPoint a ha).quantitative
+
+/-- Representation invariance of the derivative is proved, not postulated. -/
+theorem IsEnclosureHolomorphic.derivative_congr {f : Map} (h : IsEnclosureHolomorphic f)
+    (a b : Scalar) (ha : f.domain a) (hb : f.domain b) (he : a ≈ b) :
+    h.derivative a ha ≈ h.derivative b hb :=
+  ((h.atPoint a ha).congrPoint hb he).unique (h.atPoint b hb) h.openDomain
+
+/-- The enclosure definition supplies exactly the legacy construction contract.
+The derivative estimate and its representation invariance are derived. -/
+noncomputable def IsEnclosureHolomorphic.toHolomorphic {f : Map} (h : IsEnclosureHolomorphic f) : Holomorphic f where
+  openDomain := h.openDomain
+  derivative := h.derivative
+  atPoint := h.quantitativeAt
+  derivative_congr := h.derivative_congr
+  continuousDerivative := h.continuousDerivative
+
+theorem enclosureHolomorphic_iff {f : Map} : IsEnclosureHolomorphic f ↔ Nonempty (Holomorphic f) :=
+  ⟨fun h => ⟨h.toHolomorphic⟩,fun ⟨h⟩ => h.enclosure⟩
+
+theorem IsEnclosureHolomorphic.differentiable {f : Map} (h : IsEnclosureHolomorphic f) :
+    IsEnclosureDifferentiable f := ⟨⟨h.openDomain⟩,fun a ha => ⟨h.derivative a ha,h.atPoint a ha⟩⟩
+
+noncomputable def IsEnclosureHolomorphic.continuous {f : Map} (h : IsEnclosureHolomorphic f) :
+    ContinuousOn f.domain f.eval := h.toHolomorphic.continuous
+
+theorem IsEnclosureHolomorphic.derivative_unique {f : Map} (h k : IsEnclosureHolomorphic f)
+    (a : Scalar) (ha : f.domain a) : h.derivative a ha ≈ k.derivative a ha :=
+  (h.atPoint a ha).unique (k.atPoint a ha) h.openDomain
+
 theorem IsEnclosureHolomorphic.derivative_eq {f : Map} (h : IsEnclosureHolomorphic f)
     {a : Scalar} {ha : f.domain a} {d : Scalar} (k : HasEnclosureDerivativeAt f a ha d) :
     h.derivative a ha ≈ d := (h.atPoint a ha).unique k h.openDomain
 
+theorem IsEnclosureHolomorphic.compose {f g : Map} (hf : IsEnclosureHolomorphic f)
+    (hg : IsEnclosureHolomorphic g) : IsEnclosureHolomorphic (DomainFunctions.compose f g) :=
+  (hf.toHolomorphic.compose hg.toHolomorphic).enclosure
+
+theorem IsEnclosureHolomorphic.sumOn {f g : Map} (hf : IsEnclosureHolomorphic f)
+    (hg : IsEnclosureHolomorphic g) (inside : ∀ z, f.domain z → g.domain z) :
+    IsEnclosureHolomorphic (DomainFunctions.sumOn f g inside) :=
+  (hf.toHolomorphic.sumOn hg.toHolomorphic inside).enclosure
+
+theorem IsEnclosureHolomorphic.productOn {f g : Map} (hf : IsEnclosureHolomorphic f)
+    (hg : IsEnclosureHolomorphic g) (inside : ∀ z, f.domain z → g.domain z) :
+    IsEnclosureHolomorphic (DomainFunctions.productOn f g inside) :=
+  (hf.toHolomorphic.productOn hg.toHolomorphic inside).enclosure
+
 theorem IsEnclosureHolomorphic.negate {f : Map} (h : IsEnclosureHolomorphic f) :
-    IsEnclosureHolomorphic (DomainFunctions.negate f) := by
-  refine ⟨⟨⟨h.openDomain.radius,h.openDomain.inside⟩⟩,?_⟩
-  intro a ha
-  exact ⟨scalarNeg (h.derivative a ha),(negateDerivative f a ha _ (h.quantitativeAt a ha)).enclosure⟩
+    IsEnclosureHolomorphic (DomainFunctions.negate f) := h.toHolomorphic.negate.enclosure
+
+theorem IsEnclosureHolomorphic.compose_derivative {f g : Map}
+    (hf : IsEnclosureHolomorphic f) (hg : IsEnclosureHolomorphic g)
+    (a : Scalar) (ha : (DomainFunctions.compose f g).domain a) :
+    (hf.compose hg).derivative a ha ≈
+      scalarProduct (hf.derivative (g.eval a (compose_inner_mem ha)) (compose_outer_mem ha))
+        (hg.derivative a (compose_inner_mem ha)) :=
+  (hf.compose hg).derivative_eq
+    (composeDerivative f g a ha _ _ (hf.quantitativeAt _ (compose_outer_mem ha))
+      (hg.quantitativeAt a (compose_inner_mem ha))).enclosure
+
+theorem IsEnclosureHolomorphic.product_derivative {f g : Map}
+    (hf : IsEnclosureHolomorphic f) (hg : IsEnclosureHolomorphic g)
+    (inside : ∀ z, f.domain z → g.domain z) (a : Scalar) (ha : f.domain a) :
+    (hf.productOn hg inside).derivative a ha ≈
+      productSlope (f.eval a ha) (g.eval a (inside a ha))
+        (hf.derivative a ha) (hg.derivative a (inside a ha)) :=
+  (hf.productOn hg inside).derivative_eq
+    (productDerivative f g inside a ha _ _ (hf.quantitativeAt a ha)
+      (hg.quantitativeAt a (inside a ha))).enclosure
 
 end ComputableAnalysis.RiemannHilbert.DomainFunctions

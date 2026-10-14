@@ -210,9 +210,10 @@
     [
       "RiemannHilbert.DomainFunctions.enclosureDerivative_iff",
       "RiemannHilbert.DomainFunctions.rawDerivative_iff",
-      "RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.derivative_congr"
+      "RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.derivative_congr",
+      "RiemannHilbert.DomainFunctions.enclosureHolomorphic_iff"
     ],
-    "Covered valid cofinal diagonals of both coordinates control every complex direction. The two-way bridge proves the actual first-order law. Holomorphicity needs no derivative-continuity field."
+    "Covered valid cofinal diagonals control every complex direction. The pointwise derivative law is unchanged. Holomorphicity additionally requires continuity of the represented derivative and is proved equivalent to the quantitative construction package; no Cauchy or Taylor conclusions are assumed."
   ],
   [
     "holomorphic-laws",
@@ -222,13 +223,13 @@
       "holomorphic-core"
     ],
     [
-      "RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.compose_derivative",
-      "RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.product_derivative",
+      "RiemannHilbert.DomainFunctions.IsEnclosureDifferentiable.compose_derivative",
+      "RiemannHilbert.DomainFunctions.IsEnclosureDifferentiable.product_derivative",
       "RiemannHilbert.DomainFunctions.EnclosureTheory.segment_variation_bound",
       "RiemannHilbert.DomainFunctions.EnclosureTheory.zero_derivative_segment_constant",
       "RiemannHilbert.DomainFunctions.EnclosureTheory.same_derivative_segment_agreement"
     ],
-    "Exact calculus identities and whole-segment variation follow from pointwise enclosure evidence. Rational bisections hide varying local radii."
+    "These general laws retain their weaker pointwise differentiability scope. Rational bisections hide varying local radii; the revised holomorphic contract separately requires derivative continuity."
   ],
   [
     "holomorphic-functions",
@@ -263,5 +264,42 @@
       "RiemannHilbert.DomainFunctions.EnclosureCounterexample.conjugation_not_differentiable"
     ],
     "An executable continuity modulus does not give a complex derivative. Real and imaginary rational displacements contradict every valid derivative candidate at zero."
+  ],
+  [
+    "cauchy-taylor",
+    "Cauchy recovery and exact Taylor series",
+    "\\(c_n\\simeq f^{(n)}(a)/n!\\)",
+    [
+      "holomorphic-core"
+    ],
+    [
+      "RiemannHilbert.DomainFunctions.EnclosureCauchy.cauchy_formula",
+      "RiemannHilbert.DomainFunctions.EnclosureCauchy.constructed_cauchy_formula",
+      "RiemannHilbert.DomainFunctions.EnclosureCauchy.taylor_center",
+      "RiemannHilbert.DomainFunctions.EnclosureCauchy.taylor_expansion",
+      "RiemannHilbert.DomainFunctions.EnclosureCauchy.taylor_prefix_error",
+      "RiemannHilbert.DomainFunctions.EnclosureCauchy.coefficient_derivative_formula",
+      "RiemannHilbert.DomainFunctions.EnclosureCauchy.taylor_representation_invariance"
+    ],
+    "Cauchy recovery, actual represented coefficients, a positive local radius, exact summed-series agreement, and a geometric prefix error are derived from the revised holomorphic contract. The audit checks the actual cancellation and remainder proof dependencies."
+  ],
+  [
+    "higher-derivatives",
+    "Construct all higher derivatives",
+    "\\(D^{n+1}f=D(D^n f)\\)",
+    [
+      "cauchy-taylor"
+    ],
+    [
+      "RiemannHilbert.DomainFunctions.EnclosureCauchy.derivative_holomorphic",
+      "RiemannHilbert.DomainFunctions.EnclosureCauchy.higherDerivative_domain",
+      "RiemannHilbert.DomainFunctions.EnclosureCauchy.higherDerivative_successor",
+      "RiemannHilbert.DomainFunctions.EnclosureCauchy.higherDerivative_holomorphic",
+      "RiemannHilbert.DomainFunctions.EnclosureCauchy.higher_cauchy_formula",
+      "RiemannHilbert.DomainFunctions.EnclosureCauchy.higherDerivative_continuous",
+      "EnclosureHolomorphicExamples.exponentialTaylor_agrees",
+      "EnclosureHolomorphicExamples.eisensteinTaylor_agrees"
+    ],
+    "The actual derivative is holomorphic by differentiated local series and uniqueness. Iteration preserves the full original domain and proves genuine higher derivative evidence, higher Cauchy identities and continuity. Exponential and Eisenstein computations instantiate reconstruction."
   ]
 ]

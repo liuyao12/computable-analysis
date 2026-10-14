@@ -1,3 +1,74 @@
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.enclosureHolomorphic_iff: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.toHolomorphic: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.differentiable: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureDifferentiable.compose_derivative: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureDifferentiable.product_derivative: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.cauchy_formula: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.cauchy_limit_identity: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.local_cauchy_formula: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.constructed_cauchy_formula: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.coefficient_converges: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.coefficient_representation_invariance: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.taylor_center: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.taylor_domain: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.taylor_expansion: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.taylor_prefix_error: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.taylor_representation_invariance: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.derivative_holomorphic: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.higherDerivative_domain: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.higherDerivative_holomorphic: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.higherDerivative_successor: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.coefficient_derivative_formula: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.higher_cauchy_formula: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.higherDerivative_continuous: [propext,
+ Classical.choice,
+ Quot.sound]
+AUDIT ComputableAnalysis.EnclosureHolomorphicExamples.exponentialTaylor_agrees: [propext, Classical.choice, Quot.sound]
+AUDIT ComputableAnalysis.EnclosureHolomorphicExamples.eisensteinTaylor_agrees: [propext, Classical.choice, Quot.sound]
 AUDIT ComputableAnalysis.RawLimit.HasEnclosureValue.mono: [propext, Classical.choice, Quot.sound]
 AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.rawDerivative_iff: [propext, Classical.choice, Quot.sound]
 AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCounterexample.conjugation_continuous: [propext,
@@ -79,8 +150,12 @@ AUDIT ComputableAnalysis.ElementarySineODE.sinPi_primary_agrees: [propext, Class
 AUDIT ComputableAnalysis.ElementarySineODE.powerSeries_primary_converges: [propext, Classical.choice, Quot.sound]
 AUDIT ComputableAnalysis.ElementarySineODE.sinPi_primary_converges: [propext, Classical.choice, Quot.sound]
 AUDIT ComputableAnalysis.ModularForms.DiskLambert.value_rational_agreement: [propext, Classical.choice, Quot.sound]
-DEPENDENCY AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.compose: no derivative-continuity field
-DEPENDENCY AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureHolomorphic.product_derivative: no derivative-continuity field
+DEPENDENCY AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureDifferentiable.compose: no derivative-continuity field
+DEPENDENCY AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.IsEnclosureDifferentiable.product_derivative: no derivative-continuity field
 DEPENDENCY AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureTheory.segment_variation_bound: no derivative-continuity field
 DEPENDENCY AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureTheory.same_derivative_segment_agreement: no derivative-continuity field
-PASS: two-way covered-enclosure derivative bridge; uniqueness and representation invariance; value continuity, chain and product rules; whole-segment variation, zero-derivative constancy and equal-derivative identification without derivative continuity; conjugation rejected; actual elementary and full-disk special-function witnesses and primary extension bridges. Standard axioms only; no Mathlib imports.
+CONTRACT AUDIT: holomorphicity requires first-derivative continuity; no Cauchy or Taylor conclusion occurs in its definition
+CONSTRUCTION AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.cauchy_formula: actual contour/series reconstruction dependencies present
+CONSTRUCTION AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.taylor_expansion: actual contour/series reconstruction dependencies present
+CONSTRUCTION AUDIT ComputableAnalysis.RiemannHilbert.DomainFunctions.EnclosureCauchy.derivative_holomorphic: actual contour/series reconstruction dependencies present
+PASS: revised enclosure holomorphicity with required first-derivative continuity; two-way quantitative bridge; separate pointwise calculus and whole-segment laws; constructed Cauchy formula, exact Taylor expansion and factorial-normalized coefficients; actual higher derivative holomorphicity and continuity; elementary and full-disk special-function applications; conjugation rejected. Standard axioms only; no Mathlib imports.

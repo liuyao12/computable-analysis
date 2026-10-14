@@ -1,10 +1,19 @@
 # Holomorphicity from covered rational enclosures
 
-The semantic interface is `DomainFunctions.IsEnclosureHolomorphic` in
-`ComputableAnalysis/EnclosureHolomorphic.lean`. It asks for an open domain and
-an enclosure derivative at every valid represented point. **Continuity of the
-derivative is not a hypothesis.** The old `Holomorphic` records remain useful
-stronger construction packages, with a checked adapter to the semantic core.
+The holomorphic interface is `DomainFunctions.IsEnclosureHolomorphic` in
+`ComputableAnalysis/EnclosureHolomorphic.lean`. It requires an open domain,
+actual enclosure derivatives at every valid represented point, and continuity
+of that represented derivative. This is the project's chosen practical
+holomorphicity contract. **Cauchy's formula, Taylor expansion, and higher
+differentiability are conclusions, not assumptions.**
+
+The weaker `IsEnclosureDifferentiable` property retains pointwise complex
+differentiability on an open domain. The underlying
+`HasEnclosureDerivativeAt` definition is unchanged. Its general calculus and
+segment laws remain available without derivative continuity. The older
+quantitative `Holomorphic` record is now proved equivalent to the revised
+holomorphicity proposition (`enclosureHolomorphic_iff`), rather than merely
+being a stronger sufficient construction.
 
 ## Pointwise definition
 
@@ -57,7 +66,7 @@ equivalent input and derivative names. Its optional canonical selection uses
 logical choice; this is not an executable derivative algorithm. The concrete
 function certificates retain their supplied algorithms and moduli.
 
-The checked laws include value continuity, sum and product rules, the chain
+The pointwise checked laws include value continuity, sum and product rules, the chain
 rule (including openness of the composition domain), and exact agreement of
 the selected derivative with the rule's proposed value. In
 `EnclosureHolomorphicConstancy.lean`, represented rational bisection proves
@@ -106,11 +115,58 @@ axis displacements force incompatible bounds in a sufficiently narrow
 candidate box. Its executable continuity modulus is separately checked, so
 continuity alone cannot accidentally satisfy the definition.
 
-This portfolio and the comparison laws test the formalization; they are not a
-claim that every special function or every classical complex-analysis theorem
-has now been formalized. Cauchy and Taylor results already proved for stronger
-`Holomorphic` packages keep their stated hypotheses. Deriving those results,
-and derivative continuity, from the bare core is a further theorem task.
+## Cauchy and Taylor conclusions
+
+`EnclosureHolomorphicCauchy.lean` derives the following laws from the revised
+contract. First-derivative continuity is explicitly required; it is not
+advertised as a consequence of pointwise differentiability.
+
+For a positively oriented rational rectangle whose **entire closed region**
+is in the domain, and every valid represented interior point \(a\), the actual
+normalized boundary computation gives Cauchy's formula:
+\[
+ f(a)\simeq\frac{1}{2\pi i}
+   \int_{\partial J}\frac{f(w)}{w-a}\,dw.
+\]
+`cauchy_formula` proves convergence of the literal rational boundary sums.
+`constructed_cauchy_formula` proves exact equality for the constructed
+normalized contour value on an internally chosen local square. The geometric
+period is the repository's valid computed \(2\pi i\). The contour's value
+comes from justified whole-edge bounds, refinement errors, and a represented
+limit algorithm; a numerically valid candidate alone is not assigned that role.
+The local square, pole separation, bounds, and precision schedules are internal.
+
+The proof uses the existing continuous-derivative route: finite rational
+covers give uniform affine error bounds on the rectangle; cancellation removes
+internal edges; a justified shrinking hole gives the computed reciprocal
+period. No Goursat theorem or additional Cauchy hypothesis is needed.
+
+At every represented domain center \(a\), a positive local radius and actual
+represented coefficients \(c_n\) are constructed. The summed series is valid
+and equals the original evaluator on that neighborhood:
+\[
+ f(z)\simeq\sum_{n=0}^{\infty}c_n(z-a)^n,
+ \qquad c_n\simeq\frac{f^{(n)}(a)}{n!}.
+\]
+`taylor_expansion` is the exact equality of represented values, while
+`taylor_prefix_error` retains a geometric remainder bound. The neighborhood
+contains its center (`taylor_center`), and representation and witness
+independence are proved. The coefficients are actual Cauchy moments, not formal
+jets or caller-supplied coefficient assumptions.
+
+`derivative_holomorphic` constructs holomorphicity of the actual derivative
+from the local differentiated series and derivative uniqueness.
+`higherDerivative_successor` verifies that each subsequent map really supplies
+an enclosure derivative of the preceding one. Every finite higher derivative
+is holomorphic and continuous on the entire original domain, and
+`higher_cauchy_formula` proves the corresponding normalized contour identity.
+Only continuity of the first derivative belonged to the original hypothesis;
+higher differentiability and higher derivative continuity are derived.
+
+The portfolio includes exact Taylor reconstruction for the established
+exponential and for each full-disk Eisenstein computation at every represented
+center in its domain. It does not assume the requested reconstruction inside an
+example certificate.
 
 ## Verification
 
@@ -123,7 +179,8 @@ lake env .lake/packages/checkdecls/.lake/build/bin/checkdecls blueprint/lean_dec
 ```
 
 The new audit checks standard axioms only (`propext`, `Classical.choice`,
-`Quot.sound`), rejects transitive Mathlib imports, and checks the absence of the
-stronger derivative-continuity field in the semantic calculus and segment
-proofs. The downloadable source snapshot includes all imported project modules
+`Quot.sound`), rejects transitive Mathlib imports, checks that the pointwise calculus and segment proofs use no derivative-continuity
+field, checks that the revised definition includes no Cauchy or Taylor
+conclusion, and verifies the actual contour-cancellation and series-remainder
+dependencies of the analytic results. The downloadable source snapshot includes all imported project modules
 and the audit scripts; its independent build receipt is published with it.
