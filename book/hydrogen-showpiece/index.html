@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Exact hydrogen fine structure identities and explicit remainder bounds in a computable Lean foundation, with symbolic coupling and no measured constants.">
+<title>Hydrogen fine structure — Computable Analysis</title>
+<script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to mathematics</a>
+<header><a class="brand" href="../index.html">Computable Analysis</a><a href="#proofs">Inspect the statements <span aria-hidden="true">↗</span></a></header>
+<main id="main">
+<section class="hero" aria-labelledby="title">
+<p class="eyebrow">A worked example in mathematical physics</p>
+<h1 id="title">Hydrogen fine structure,<br><em>with the remainder.</em></h1>
+<p class="lead">Start with a precisely stated Dirac–Coulomb equation. Keep the coupling symbolic. Construct the energy levels, compare their gaps, and prove how far the leading terms can be wrong.</p>
+<div class="facts"><span>Dimensionless energies</span><span>No measured constants</span><span>Exact finite coupling bounds</span></div>
+<div class="hero-result">
+<p class="eyebrow">Two constructed level gaps</p>
+<div class="math">\[\boxed{\left|\Delta_{2p}-\frac{\alpha^4}{32}\right|\leq\alpha^6}\]</div>
+<div class="math">\[\boxed{\left|\Delta_{3d}-\frac{\alpha^4}{324}\right|\leq\frac{\alpha^6}{64}}\]</div>
+<p>Both hold throughout \(0&lt;\alpha\leq 1/16\). The remainders are part of the theorem.</p>
+</div>
+<p class="scope-note"><strong>Proved scope:</strong> constructed regular separated Dirac states and their energy gaps. The completed, unrestricted Cartesian spectral theorem remains open. <a href="#scope">See the precise boundary ↓</a></p>
+</section>
+<nav class="contents" aria-label="On this page"><a href="#model">01 The model</a><a href="#levels">02 Exact levels</a><a href="#bounds">03 Error bounds</a><a href="#foundation">04 The foundation</a><a href="#proofs">05 Lean statements</a></nav>
+<section id="model" class="chapter">
+<div class="section-label">01 / Assumptions</div><h2>A mathematical model you can check</h2>
+<p>Use an electron in the static Coulomb field of a fixed point nucleus. Measure distances in reduced Compton units and energies in electron rest energy units. The stationary equation is</p>
+<div class="math">\[\left[-i\sum_{j=1}^{3}\mathsf A_j\partial_j+\mathsf B-\frac{\alpha}{r}I_4\right]\psi=\varepsilon\psi,\qquad r=\sqrt{x_1^2+x_2^2+x_3^2}.\]</div>
+<p>Here \(\mathsf A_j=\begin{pmatrix}0&amp;\sigma_j\\\sigma_j&amp;0\end{pmatrix}\), \(\mathsf B=\operatorname{diag}(I_2,-I_2)\), and \(\sigma_j\) are the Pauli matrices. The dimensionless energy is \(\varepsilon=E/(m_ec^2)\), including rest energy. The only numerical parameter in the equation is the coupling \(\alpha\).</p>
+<a class="proof-link" href="sources/DiracCoulombOperator.lean">Inspect the differential expression: <code>DiracCoulombOperator.action</code> ↗</a>
+<div class="assumption"><span>One convenient common range</span><div class="math">\[0&lt;\alpha\leq\frac1{16},\qquad u:=\alpha^2.\]</div><p>The input is a valid represented value of \(u\); it may be irrational. No decimal value of the physical fine structure constant is inserted. The formal results below also state their wider individual coupling ranges.</p></div>
+<p>This fixed nucleus model contains no proton mass parameter. Nuclear recoil, finite nuclear size, radiative corrections and hyperfine interactions belong to different models. These inequalities bound the mathematical remainders within the stated equation; they are not bounds on those additional physical effects.</p>
+</section>
+<section id="levels" class="chapter">
+<div class="section-label">02 / Exact consequences</div><h2>From radial solutions to energy gaps</h2>
+<p>Write \(k=|\kappa|\geq1\) for the angular channel label and \(N\geq0\) for the radial polynomial degree. The constructed positive energy is</p>
+<div class="math">\[\gamma_k=\sqrt{k^2-u},\qquad \varepsilon_{k,N}(u)=\frac{N+\gamma_k}{\sqrt{(N+\gamma_k)^2+u}}.\]</div>
+<p>These are computations with proved square root and reciprocal laws. The construction supplies regular radial solutions and proves their differential equations and integrability. Conversely, the regular radial graph theorem classifies its positive gap eigenstates by the admissible degrees. On the negative signed channel \(N=0\) is allowed; on the positive signed channel \(N\geq1\).</p>
+<details><summary>The hypotheses of the regular radial classification</summary><p>Consider a nonzero differentiable radial pair \((G,F)\) solving the radial Dirac equations with \(0&lt;\varepsilon&lt;1\). Each component has the regular origin branch \(r^{\gamma_k}R(r)\), where \(R\) extends continuously to a neighborhood of the origin. Both the source pair and its Dirac action have justified square integrals. In this stated graph domain, the energy must equal \(\varepsilon_{k,N}\) for an admissible degree; conversely, each admissible degree has a constructed eigenstate.</p><p>The theorem concerns this regular separated domain. It does not assert that every vector in an unrestricted completed Cartesian operator domain has already been reduced to this form.</p></details>
+<div class="table-wrap"><table><caption>The two doublets featured here</caption><thead><tr><th>Gap</th><th>Lower energy</th><th>Upper energy</th></tr></thead><tbody><tr><td>\(\Delta_{2p}\)</td><td>\(\varepsilon_{1,1}\), \(2p_{1/2}\)</td><td>\(\varepsilon_{2,0}\), \(2p_{3/2}\)</td></tr><tr><td>\(\Delta_{3d}\)</td><td>\(\varepsilon_{2,1}\), \(3d_{3/2}\)</td><td>\(\varepsilon_{3,0}\), \(3d_{5/2}\)</td></tr></tbody></table></div>
+<p>Each gap is the upper energy minus the lower energy. Both are strictly positive for nonzero coupling. The same electron rest energy factor multiplies every dimensional gap, so ratios of these gaps require no mass measurement.</p>
+<details><summary>An exact formula that avoids subtracting nearly equal energies</summary>
+<p>For \(k\geq1\), set</p>
+<div class="math">\[d_k=(1+\gamma_k)^2+u,\quad H_k=\frac{\gamma_{k+1}}{k+1},\quad L_k=\frac{1+\gamma_k}{\sqrt{d_k}},\]</div>
+<div class="math">\[D_k=(\gamma_k+k)(k+1)^2d_k(H_k+L_k).\]</div>
+<p>The proved identity is</p>
+<div class="math">\[\Delta_k:=\varepsilon_{k+1,0}-\varepsilon_{k,1}=\frac{2u^2}{D_k},\qquad D_k&gt;0.\]</div>
+<p>Thus \(\Delta_{2p}=\Delta_1\), \(\Delta_{3d}=\Delta_2\), and their exact ratio is \(D_1/D_2\). This expression exposes the common fourth power of the coupling before numerical evaluation.</p>
+</details>
+</section>
+<section id="bounds" class="chapter">
+<div class="section-label">03 / Quantitative theorems</div><h2>Keep the error in the answer</h2>
+<article class="theorem"><div class="theorem-head"><span>Theorem 1</span><span>Inverse square binding law</span></div>
+<p>For the constructed circular state with principal label \(n\geq1\), let \(\varepsilon_n=\sqrt{1-u/n^2}\) and \(b_n=1-\varepsilon_n\). For \(0\leq u&lt;1\),</p>
+<div class="math">\[0\leq b_n-\frac{u}{2n^2}=\frac{b_n^2}{2}\leq\frac{u^2}{2n^4}.\]</div>
+<p>The familiar inverse square law comes with an exact identity for its error. This statement concerns the circular family, not every fine structure level at a fixed principal label.</p>
+<a class="proof-link" href="sources/HydrogenCircularBohr.lean">Lean: <code>HydrogenCircularBohr.remainder_identity</code>, <code>remainder_bounds</code> ↗</a></article>
+<article class="theorem"><div class="theorem-head"><span>Theorem 2</span><span>Two fine structure doublets</span></div>
+<div class="math">\[\begin{aligned}\left|\Delta_{2p}-\frac{u^2}{32}\right|&amp;\leq u^3 &amp;&amp;\left(0&lt;u\leq\frac14\right),\\[6pt]\left|\Delta_{3d}-\frac{u^2}{324}\right|&amp;\leq\frac{u^3}{64} &amp;&amp;\left(0&lt;u\leq\frac1{16}\right).\end{aligned}\]</div>
+<p>These bounds apply to the actual gaps of the constructed regular states. They are exact inequalities at finite coupling, rather than a discarded higher order term.</p>
+<a class="proof-link" href="sources/HydrogenPolynomialSplitting.lean">Lean: <code>HydrogenPolynomialSplitting.two_p_remainder_bound</code>, <code>three_remainder_bound</code> ↗</a></article>
+<article class="theorem ratio"><div class="theorem-head"><span>Theorem 3</span><span>A ratio with no energy scale</span></div>
+<div class="math">\[\boxed{\left|\frac{\Delta_{3d}}{\Delta_{2p}}-\frac8{81}\right|\leq8u\qquad\left(0&lt;u\leq\frac1{128}\right).}\]</div>
+<p>The denominator is proved positive. The exact ratio has a representation independent interval evaluator: for every positive rational tolerance, it produces a rational enclosure of at most that width. The limiting ratio is \(8/81\), and the displayed bound controls its finite coupling error.</p>
+<a class="proof-link" href="sources/HydrogenRegularGraphFineStructure.lean">Lean: <code>ratio_remainder_bound</code>, <code>ratio_approximation_spec</code>, <code>ratio_names</code> ↗</a></article>
+<aside class="worked"><p class="eyebrow">A purely symbolic specialization</p><h3>What does the common cap buy?</h3><p>Under \(0&lt;\alpha\leq1/16\), divide each absolute gap error by its leading term. The displayed bounds immediately give</p>
+<div class="math">\[\frac{|\Delta_{2p}-\alpha^4/32|}{\alpha^4/32}\leq\frac18,\qquad \frac{|\Delta_{3d}-\alpha^4/324|}{\alpha^4/324}\leq\frac{81}{4096}.\]</div>
+<p>The ratio differs from \(8/81\) by at most \(1/32\). These are algebraic consequences of the displayed theorems. Tighter symbolic caps make all three errors smaller; no measured value is needed.</p></aside>
+</section>
+<section id="foundation" class="chapter">
+<div class="section-label">04 / Why this is a foundation example</div><h2>An exact value is a computation with a proof</h2>
+<p>A represented real is supplied by rational interval computations with validity and shrinking width proofs. Square roots, reciprocals, radial functions, integrals and energy ratios are built on those computations. Equality means equality of the values represented, expressed in Lean by <code>RealRaw.Equiv</code>.</p>
+<ol class="route"><li><strong>Construct the parameters.</strong><p>Positive roots and reciprocals produce the energies. Dispersion and quantization identities are proved; uniqueness identifies the positive solution.</p></li><li><strong>Construct the states.</strong><p>Polynomial radial solutions, regular origin behavior, normalization and Cartesian differential equations supply the function specific evidence.</p></li><li><strong>Prove the comparison.</strong><p>Rationalized gap identities avoid cancellation. Explicit inequalities bound the energy and ratio remainders, and equivalent input representations give equivalent outputs.</p></li></ol>
+<p>The native mathematics uses this project's real and complex computations, without importing Mathlib's real or complex number systems. The source links below expose the exact hypotheses and constructions.</p>
+</section>
+<section id="scope" class="chapter">
+<div class="section-label">Scope / Read alongside the theorems</div><h2>What is established, and what remains</h2>
+<div class="scope-grid"><div><h3>Established in the stated setting</h3><p>Exact energy computations, genuine regular radial eigenstates, classification in the stated regular radial graph, separated Cartesian equations, normalized physical source and action embeddings, and the splitting and ratio bounds above.</p></div><div><h3>The remaining operator bridge</h3><p>The unrestricted completed Cartesian spectral theorem and self adjointness are still open. Annular finite grid limits have been placed in the original compact test graph closure. Identifying those limits with the physical annular embeddings and removing the cutoffs remains a separate obligation.</p></div></div>
+<p>This is a showpiece for exact constructive mathematics within an explicit model. The differential equation, channel and boundary hypotheses belong to its contract. The full physical hydrogen spectrum is a larger claim.</p>
+</section>
+<section id="proofs" class="chapter">
+<div class="section-label">05 / Inspect the mathematics</div><h2>The statements behind the page</h2>
+<p>These source snapshots are the actual project files used to prepare this exposition. Names below live under <code>ComputableAnalysis</code>. The page summarizes selected results; it does not claim a fresh successful build of the entire repository.</p>
+<div class="source-list">
+<a href="sources/HydrogenCoupling.lean"><span>Symbolic coupling and its domain</span><code>HydrogenCoupling.Coupling</code></a>
+<a href="sources/HydrogenQuantizedParameters.lean"><span>Exact energy construction and uniqueness</span><code>HydrogenQuantizedParameters.energy_unique</code></a>
+<a href="sources/HydrogenRegularGraphSpectrum.lean"><span>Regular radial graph classification</span><code>energy_of_eigenstate · eigenstate_of_degree</code></a>
+<a href="sources/HydrogenCircularSplitting.lean"><span>Exact rationalized gaps</span><code>HydrogenCircularSplitting.splitting_identity</code></a>
+<a href="sources/HydrogenCircularBohr.lean"><span>Inverse square law with remainder</span><code>remainder_identity · remainder_bounds</code></a>
+<a href="sources/HydrogenPolynomialSplitting.lean"><span>Bounds for the constructed level gaps</span><code>two_p_remainder_bound · three_remainder_bound</code></a>
+<a href="sources/HydrogenRegularGraphFineStructure.lean"><span>Ratio, invariance and certified enclosure</span><code>ratio_names · ratio_approximation_spec · ratio_remainder_bound</code></a>
+<a href="sources/HydrogenCircularRemainder.lean"><span>The quantitative estimates beneath the results</span><code>HydrogenCircularRemainder</code></a>
+</div>
+<p class="small"><a href="source-manifest.json">Source snapshot hashes</a> · <a href="statement-check.lean">Statement inspection client</a> · <a href="statement-audit.txt">Axiom report for the eleven featured declarations</a> · <a href="https://github.com/liuyao12/computable-analysis">Project repository ↗</a></p>
+</section>
+<footer><p>Computable Analysis</p><p>Rational constructions. Exact identities. Explicit errors.</p><a href="../index.html">Return to the book ↗</a></footer>
+</main>
+</body>
+</html>

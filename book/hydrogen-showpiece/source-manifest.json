@@ -1,0 +1,50 @@
+{
+  "scope": "Selected statement source snapshots; not a standalone dependency bundle or a claim of an aggregate repository build.",
+  "sources": [
+    {
+      "source": "ComputableAnalysis/HydrogenCoupling.lean",
+      "snapshot": "sources/HydrogenCoupling.lean",
+      "sha256": "4a353fa98241b5743c934a604e2b822b65e5de4e8e36422d29e0676554dd5941"
+    },
+    {
+      "source": "ComputableAnalysis/HydrogenQuantizedParameters.lean",
+      "snapshot": "sources/HydrogenQuantizedParameters.lean",
+      "sha256": "263a6c389d10150d20fc569c55a786623b7c4b85e9f628a8d8170be99f160ea6"
+    },
+    {
+      "source": "ComputableAnalysis/HydrogenRegularGraphSpectrum.lean",
+      "snapshot": "sources/HydrogenRegularGraphSpectrum.lean",
+      "sha256": "c0be1a85d8b456f1762b84630d1d502ac20e6b8c388f2cfe2c52f9c4af595e6d"
+    },
+    {
+      "source": "ComputableAnalysis/HydrogenCircularSplitting.lean",
+      "snapshot": "sources/HydrogenCircularSplitting.lean",
+      "sha256": "513f1a0e159b9190cb3d5ae249faab52f7375a753e7e75f51f5e63fa6149eb5e"
+    },
+    {
+      "source": "ComputableAnalysis/HydrogenCircularBohr.lean",
+      "snapshot": "sources/HydrogenCircularBohr.lean",
+      "sha256": "11b1b1cede7b0a73216b04100e219f26843abded00244a6e8d5c74454c9041de"
+    },
+    {
+      "source": "ComputableAnalysis/HydrogenPolynomialSplitting.lean",
+      "snapshot": "sources/HydrogenPolynomialSplitting.lean",
+      "sha256": "df359a058cd3df115236f0aa79d8eec58e695907784965e9b78aaa050e83342b"
+    },
+    {
+      "source": "ComputableAnalysis/HydrogenRegularGraphFineStructure.lean",
+      "snapshot": "sources/HydrogenRegularGraphFineStructure.lean",
+      "sha256": "49ff045129aa991bc6887b9eeb45c29d7f4d6a0e89fdf5ad92c3c93ecfaacad9"
+    },
+    {
+      "source": "ComputableAnalysis/HydrogenCircularRemainder.lean",
+      "snapshot": "sources/HydrogenCircularRemainder.lean",
+      "sha256": "7f08547b870221fd6bd4575c316ca9714a9cb0a22d46a2009a44b0d6c1d8aeca"
+    },
+    {
+      "source": "ComputableAnalysis/DiracCoulombOperator.lean",
+      "snapshot": "sources/DiracCoulombOperator.lean",
+      "sha256": "2d11fc373dc2d1ff95846a069972a07e51d5adf81a434f7b98b1ece56783081e"
+    }
+  ]
+}
