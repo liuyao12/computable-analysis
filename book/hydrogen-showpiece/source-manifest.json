@@ -45,6 +45,21 @@
       "source": "ComputableAnalysis/DiracCoulombOperator.lean",
       "snapshot": "sources/DiracCoulombOperator.lean",
       "sha256": "2d11fc373dc2d1ff95846a069972a07e51d5adf81a434f7b98b1ece56783081e"
+    },
+    {
+      "source": "ComputableAnalysis/HydrogenAnnularPhysicalGraph.lean",
+      "snapshot": "sources/HydrogenAnnularPhysicalGraph.lean",
+      "sha256": "50a2445d9968797b26c3bd991d703b6591558e2a0f76b8f3daf07853e4ee6fe0"
+    },
+    {
+      "source": "ComputableAnalysis/HydrogenOriginalClosedGraph.lean",
+      "snapshot": "sources/HydrogenOriginalClosedGraph.lean",
+      "sha256": "bdde47592808331557874b110f2086f497ca0a9077937cd7383e88dce0b5c396"
+    },
+    {
+      "source": "ComputableAnalysis/HydrogenClosedGraphFineStructure.lean",
+      "snapshot": "sources/HydrogenClosedGraphFineStructure.lean",
+      "sha256": "8b056252bf1333c69271b96027e5a428d5da7917d35c65cd012698ddfb005195"
     }
   ]
 }

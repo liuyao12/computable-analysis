@@ -1,5 +1,6 @@
 import ComputableAnalysis.HydrogenCircularBohr
 import ComputableAnalysis.HydrogenRegularGraphFineStructure
+import ComputableAnalysis.HydrogenClosedGraphFineStructure
 #print axioms ComputableAnalysis.HydrogenCircularBohr.remainder_identity
 #print axioms ComputableAnalysis.HydrogenCircularBohr.remainder_bounds
 #print axioms ComputableAnalysis.HydrogenPolynomialSplitting.two_p_remainder_bound
@@ -11,3 +12,6 @@ import ComputableAnalysis.HydrogenRegularGraphFineStructure
 #print axioms ComputableAnalysis.HydrogenRegularGraphSpectrum.eigenstate_of_degree
 #print axioms ComputableAnalysis.HydrogenQuantizedParameters.energy_unique
 #print axioms ComputableAnalysis.HydrogenCircularSplitting.splitting_identity
+#print axioms ComputableAnalysis.HydrogenAnnularPhysicalGraph.in_closed_graph
+#print axioms ComputableAnalysis.HydrogenOriginalClosedGraph.eigenpair
+#print axioms ComputableAnalysis.HydrogenClosedGraphFineStructure.ratio_remainder_bound

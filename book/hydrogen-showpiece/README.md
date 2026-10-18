@@ -4,14 +4,14 @@ The deployed destination is
 <https://liuyao12.github.io/computable-analysis/hydrogen/>.
 
 The page states the dimensionless Dirac–Coulomb model, the constructed regular
-channel energies, and exact remainder inequalities for the two featured gaps
+channel energies and original closed-graph eigenpairs, and exact remainder inequalities for the two featured gaps
 and their ratio. Its convenient common cap is \(0<\alpha\leq1/16\).
 Individual theorem ranges are also displayed. It distinguishes the established
-regular channel results from the open unrestricted Cartesian operator theorem.
+regular channel and closed-relation results from the open unrestricted Cartesian operator theorem.
 
 `sources/` contains selected actual statement source snapshots, hashed in
 `source-manifest.json`. These are not a standalone dependency bundle.
-`statement-check.lean` inspects eleven existing declarations;
+`statement-check.lean` inspects fourteen existing declarations;
 `statement-audit.txt` records their axiom reports. It does not certify a fresh
 aggregate repository build.
 

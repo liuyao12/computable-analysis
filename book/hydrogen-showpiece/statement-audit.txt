@@ -27,3 +27,10 @@
 'ComputableAnalysis.HydrogenCircularSplitting.splitting_identity' depends on axioms: [propext,
  Classical.choice,
  Quot.sound]
+'ComputableAnalysis.HydrogenAnnularPhysicalGraph.in_closed_graph' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.HydrogenOriginalClosedGraph.eigenpair' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.HydrogenClosedGraphFineStructure.ratio_remainder_bound' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
