@@ -24,7 +24,7 @@
 <div class="math">\[\boxed{\left|\Delta_{3d}-\frac{\alpha^4}{324}\right|\leq\frac{\alpha^6}{64}}\]</div>
 <p>Both hold throughout \(0&lt;\alpha\leq 1/16\). The remainders are part of the theorem.</p>
 </div>
-<p class="scope-note"><strong>Proved scope:</strong> constructed normalized eigenpairs in the original closed Dirac relation, and exact bounds on their gaps. Self-adjointness and the unrestricted Cartesian spectral classification remain open. <a href="#scope">See the precise boundary ↓</a></p>
+<p class="scope-note"><strong>Proved scope:</strong> constructed normalized eigenpairs in the original closed Dirac relation, uniqueness of its action, and exact bounds on their gaps. Self-adjointness and the unrestricted Cartesian spectral classification remain open. <a href="#scope">See the precise boundary ↓</a></p>
 </section>
 <nav class="contents" aria-label="On this page"><a href="#model">01 The model</a><a href="#levels">02 Exact levels</a><a href="#bounds">03 Error bounds</a><a href="#foundation">04 The foundation</a><a href="#proofs">05 Lean statements</a></nav>
 <section id="model" class="chapter">
@@ -45,6 +45,14 @@
 <div class="math">\[\bigl(\Psi_{k,N},\,\varepsilon_{k,N}\Psi_{k,N}\bigr)\in\mathcal G_\alpha,\qquad \|\Psi_{k,N}\|^2=1.\]</div>
 <p>The independently differentiated action converges alongside the state. The proof identifies the physical annular states with the original finite-grid limits and removes both cutoffs; no value at the singular origin is needed. This establishes actual nonzero eigenpairs in the closed relation. It does not yet prove that this relation is a self-adjoint operator or that these states exhaust its spectrum.</p>
 <a class="proof-link" href="sources/HydrogenOriginalClosedGraph.lean">Lean: <code>HydrogenOriginalClosedGraph.eigenpair</code> ↗</a>
+<p>The action is also proved to be single-valued on represented state classes. For every represented real Coulomb coefficient,</p>
+<div class="math">\[
+ (F,G)\in\mathcal G_\alpha\ \land\ (F,H)\in\mathcal G_\alpha
+ \quad\Longrightarrow\quad G\simeq H.
+\]</div>
+<p>Here \(\simeq\) means equality in the constructed norm class. The proof constructs dense compact-test approximations, uses the proved Hermitian identity, and removes the full pairing errors. The finite test action is closable, and every closed-graph action on a constructed hydrogen state equals its derived energy times that state. This uniqueness law needs no small-coupling cap; the eigenstate construction retains the bounds above.</p>
+<a class="proof-link" href="sources/CartesianDiracActionUnique.lean">Lean: <code>action_unique · closable</code> ↗</a>
+
 <details><summary>The hypotheses of the regular radial classification</summary><p>Consider a nonzero differentiable radial pair \((G,F)\) solving the radial Dirac equations with \(0&lt;\varepsilon&lt;1\). Each component has the regular origin branch \(r^{\gamma_k}R(r)\), where \(R\) extends continuously to a neighborhood of the origin. Both the source pair and its Dirac action have justified square integrals. In this stated graph domain, the energy must equal \(\varepsilon_{k,N}\) for an admissible degree; conversely, each admissible degree has a constructed eigenstate.</p><p>The theorem concerns this regular separated domain. It does not assert that every vector in an unrestricted completed Cartesian operator domain has already been reduced to this form.</p></details>
 <div class="table-wrap"><table><caption>The two doublets featured here</caption><thead><tr><th>Gap</th><th>Lower energy</th><th>Upper energy</th></tr></thead><tbody><tr><td>\(\Delta_{2p}\)</td><td>\(\varepsilon_{1,1}\), \(2p_{1/2}\)</td><td>\(\varepsilon_{2,0}\), \(2p_{3/2}\)</td></tr><tr><td>\(\Delta_{3d}\)</td><td>\(\varepsilon_{2,1}\), \(3d_{3/2}\)</td><td>\(\varepsilon_{3,0}\), \(3d_{5/2}\)</td></tr></tbody></table></div>
 <p>Each gap is the upper energy minus the lower energy. Both are strictly positive for nonzero coupling. The same electron rest energy factor multiplies every dimensional gap, so ratios of these gaps require no mass measurement.</p>
@@ -84,7 +92,7 @@
 </section>
 <section id="scope" class="chapter">
 <div class="section-label">Scope / Read alongside the theorems</div><h2>What is established, and what remains</h2>
-<div class="scope-grid"><div><h3>Established in the stated setting</h3><p>Exact energy computations, regular radial classification, actual Cartesian differential equations, normalized nonzero eigenpairs in the original compact-test closed relation, and the splitting and ratio bounds above.</p></div><div><h3>The remaining operator bridge</h3><p>Self-adjointness, single-valuedness of the closed relation, and exhaustion of its unrestricted Cartesian spectrum remain open. The physical annular states are now identified with the original grid limits, and both cutoffs have been removed in the original closed relation.</p></div></div>
+<div class="scope-grid"><div><h3>Established in the stated setting</h3><p>Exact energy computations, regular radial classification, actual Cartesian differential equations, normalized nonzero eigenpairs in the original compact-test closed relation, a single-valued closed action, closability of the finite test action, and the splitting and ratio bounds above.</p></div><div><h3>The remaining operator bridge</h3><p>Self-adjointness and exhaustion of the unrestricted Cartesian spectrum remain open. The physical annular states are now identified with the original grid limits, and both cutoffs have been removed in the original closed relation.</p></div></div>
 <p>This is a showpiece for exact constructive mathematics within an explicit model. The differential equation, channel and boundary hypotheses belong to its contract. The full physical hydrogen spectrum is a larger claim.</p>
 </section>
 <section id="proofs" class="chapter">
@@ -96,6 +104,8 @@
 <a href="sources/HydrogenRegularGraphSpectrum.lean"><span>Regular radial graph classification</span><code>energy_of_eigenstate · eigenstate_of_degree</code></a>
 <a href="sources/HydrogenAnnularPhysicalGraph.lean"><span>Physical identification of the original grid limits</span><code>source_original_names · action_original_names · in_closed_graph</code></a>
 <a href="sources/HydrogenOriginalClosedGraph.lean"><span>Cutoff removal and normalized nonzero eigenpairs</span><code>in_closed_graph · eigenpair · independent_samplers</code></a>
+<a href="sources/CartesianDiracActionUnique.lean"><span>Unique closed action and closability</span><code>action_unique · equivalent_sources · closable</code></a>
+<a href="sources/HydrogenDiracActionUnique.lean"><span>Unique spectral action with independent state names</span><code>energy_action · independent_samplers</code></a>
 <a href="sources/HydrogenClosedGraphFineStructure.lean"><span>Fine structure bounds with original closed-graph witnesses</span><code>two_p · three_d · ratio_remainder_bound</code></a>
 <a href="sources/HydrogenCircularSplitting.lean"><span>Exact rationalized gaps</span><code>HydrogenCircularSplitting.splitting_identity</code></a>
 <a href="sources/HydrogenCircularBohr.lean"><span>Inverse square law with remainder</span><code>remainder_identity · remainder_bounds</code></a>
@@ -103,7 +113,7 @@
 <a href="sources/HydrogenRegularGraphFineStructure.lean"><span>Ratio, invariance and certified enclosure</span><code>ratio_names · ratio_approximation_spec · ratio_remainder_bound</code></a>
 <a href="sources/HydrogenCircularRemainder.lean"><span>The quantitative estimates beneath the results</span><code>HydrogenCircularRemainder</code></a>
 </div>
-<p class="small"><a href="source-manifest.json">Source snapshot hashes</a> · <a href="statement-check.lean">Statement inspection client</a> · <a href="statement-audit.txt">Axiom report for the fourteen featured declarations</a> · <a href="https://github.com/liuyao12/computable-analysis">Project repository ↗</a></p>
+<p class="small"><a href="source-manifest.json">Source snapshot hashes</a> · <a href="statement-check.lean">Statement inspection client</a> · <a href="statement-audit.txt">Axiom report for the seventeen featured declarations</a> · <a href="https://github.com/liuyao12/computable-analysis">Project repository ↗</a></p>
 </section>
 <footer><p>Computable Analysis</p><p>Rational constructions. Exact identities. Explicit errors.</p><a href="../index.html">Return to the book ↗</a></footer>
 </main>

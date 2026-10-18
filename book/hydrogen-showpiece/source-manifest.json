@@ -60,6 +60,16 @@
       "source": "ComputableAnalysis/HydrogenClosedGraphFineStructure.lean",
       "snapshot": "sources/HydrogenClosedGraphFineStructure.lean",
       "sha256": "8b056252bf1333c69271b96027e5a428d5da7917d35c65cd012698ddfb005195"
+    },
+    {
+      "source": "ComputableAnalysis/CartesianDiracActionUnique.lean",
+      "snapshot": "sources/CartesianDiracActionUnique.lean",
+      "sha256": "29fef350f9a797c620e660dcb6de53508f5d191daa1a25b32ad9a3e632caa8d6"
+    },
+    {
+      "source": "ComputableAnalysis/HydrogenDiracActionUnique.lean",
+      "snapshot": "sources/HydrogenDiracActionUnique.lean",
+      "sha256": "caadeb37df873f47461625229e775b4b4b4742821f5f3790d3f5ce89970c4a2f"
     }
   ]
 }
