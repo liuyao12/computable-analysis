@@ -8,6 +8,7 @@
 <script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 <link rel="stylesheet" href="style.css">
+<script defer src="enclosures.js"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to mathematics</a>
@@ -26,7 +27,7 @@
 </div>
 <p class="scope-note"><strong>Proved scope:</strong> constructed normalized eigenpairs in the original closed Dirac relation, uniqueness of its action, and exact bounds on their gaps. Self-adjointness and the unrestricted Cartesian spectral classification remain open. <a href="#scope">See the precise boundary ↓</a></p>
 </section>
-<nav class="contents" aria-label="On this page"><a href="#model">01 The model</a><a href="#levels">02 Exact levels</a><a href="#bounds">03 Error bounds</a><a href="#foundation">04 The foundation</a><a href="#proofs">05 Lean statements</a></nav>
+<nav class="contents" aria-label="On this page"><a href="#model">01 The model</a><a href="#levels">02 Exact levels</a><a href="#bounds">03 Error bounds</a><a href="#computation">04 Computed enclosures</a><a href="#foundation">05 The foundation</a><a href="#proofs">06 Lean statements</a></nav>
 <section id="model" class="chapter">
 <div class="section-label">01 / Assumptions</div><h2>A mathematical model you can check</h2>
 <p>Use an electron in the static Coulomb field of a fixed point nucleus. Measure distances in reduced Compton units and energies in electron rest energy units. The stationary equation is</p>
@@ -72,6 +73,12 @@
 <div class="math">\[0\leq b_n-\frac{u}{2n^2}=\frac{b_n^2}{2}\leq\frac{u^2}{2n^4}.\]</div>
 <p>The familiar inverse square law comes with an exact identity for its error. This statement concerns the circular family, not every fine structure level at a fixed principal label.</p>
 <a class="proof-link" href="sources/HydrogenCircularBohr.lean">Lean: <code>HydrogenCircularBohr.remainder_identity</code>, <code>remainder_bounds</code> ↗</a></article>
+<details><summary>Transition energies with a signed remainder</summary>
+<p>For the circular states at any positive principal labels \(m,n\), set \(g_{m,n}=\varepsilon_n-\varepsilon_m\). Throughout \(0&lt;\alpha&lt;1\),</p>
+<div class="math">\[g^{(0)}_{m,n}=\frac{\alpha^2}{2}\left(\frac1{m^2}-\frac1{n^2}\right),\qquad -\frac{\alpha^4}{2n^4}\leq g_{m,n}-g^{(0)}_{m,n}\leq\frac{\alpha^4}{2m^4}.\]</div>
+<p>The bound keeps the errors of both levels and their signs. It describes energy differences between constructed states; transition probabilities require additional results.</p>
+<a class="proof-link" href="sources/HydrogenBohrTransitions.lean">Lean: <code>HydrogenBohrTransitions.transition_bounds · state_pair</code> ↗</a>
+</details>
 <article class="theorem"><div class="theorem-head"><span>Theorem 2</span><span>Two fine structure doublets</span></div>
 <div class="math">\[\begin{aligned}\left|\Delta_{2p}-\frac{u^2}{32}\right|&amp;\leq u^3 &amp;&amp;\left(0&lt;u\leq\frac14\right),\\[6pt]\left|\Delta_{3d}-\frac{u^2}{324}\right|&amp;\leq\frac{u^3}{64} &amp;&amp;\left(0&lt;u\leq\frac1{16}\right).\end{aligned}\]</div>
 <p>These bounds apply to gaps between the constructed normalized eigenpairs in the original closed Dirac relation. They are exact inequalities at finite coupling, rather than a discarded higher order term.</p>
@@ -84,8 +91,24 @@
 <div class="math">\[\frac{|\Delta_{2p}-\alpha^4/32|}{\alpha^4/32}\leq\frac18,\qquad \frac{|\Delta_{3d}-\alpha^4/324|}{\alpha^4/324}\leq\frac{81}{4096}.\]</div>
 <p>The ratio differs from \(8/81\) by at most \(1/32\). These are algebraic consequences of the displayed theorems. Tighter symbolic caps make all three errors smaller; no measured value is needed.</p></aside>
 </section>
+<section id="computation" class="chapter">
+<div class="section-label">04 / A computed enclosure</div><h2>Exact intervals you can inspect</h2>
+<p>Choose a synthetic rational coupling and a requested width. Each interval below was produced by the Lean evaluator and encloses the actual ratio \(R(\alpha)=\Delta_{3d}/\Delta_{2p}\). The browser selects saved results and formats their rational endpoints.</p>
+<div class="math">\[L_\varepsilon(\alpha)\leq R(\alpha)\leq U_\varepsilon(\alpha),\qquad U_\varepsilon(\alpha)-L_\varepsilon(\alpha)\leq\varepsilon.\]</div>
+<div class="enclosure-card" id="hydrogen-enclosure">
+<div class="enclosure-controls">
+<label for="hydrogen-coupling">Synthetic coupling<select id="hydrogen-coupling"><option value="64">One sixty fourth</option><option value="32">One thirty second</option><option value="16" selected>One sixteenth</option></select></label>
+<label for="hydrogen-precision">Requested width<select id="hydrogen-precision"><option value="10">Coarser enclosure</option><option value="20" selected>Finer enclosure</option></select></label>
+</div>
+<div class="math" id="hydrogen-selection">\[\alpha=\frac1{16},\qquad\varepsilon=2^{-20}\]</div>
+<div class="math" id="hydrogen-result" aria-live="polite">\[0.098591064\leq R(1/16)\leq0.098591197\]</div>
+<div class="math" id="hydrogen-width">\[\operatorname{width}(I)=0.000000133\]</div>
+<p class="small">The displayed decimals are exact terminating rationals. They use outward rounding, with the enclosure and requested width checked by Lean.</p>
+</div>
+<p class="small"><a href="enclosures.json">All six rational enclosures</a> · <a href="sources/HydrogenShowpieceExport.lean">Checked interval exporter and enclosure theorem</a> · <a href="enclosure-audit.txt">Exporter dependency audit</a></p>
+</section>
 <section id="foundation" class="chapter">
-<div class="section-label">04 / Why this is a foundation example</div><h2>An exact value is a computation with a proof</h2>
+<div class="section-label">05 / Why this is a foundation example</div><h2>An exact value is a computation with a proof</h2>
 <p>A represented real is supplied by rational interval computations with validity and shrinking width proofs. Square roots, reciprocals, radial functions, integrals and energy ratios are built on those computations. Equality means equality of the values represented, expressed in Lean by <code>RealRaw.Equiv</code>.</p>
 <ol class="route"><li><strong>Construct the parameters.</strong><p>Positive roots and reciprocals produce the energies. Dispersion and quantization identities are proved; uniqueness identifies the positive solution.</p></li><li><strong>Construct the states.</strong><p>Polynomial radial solutions, regular origin behavior, normalization and Cartesian differential equations supply the actual states. Removing the cutoffs in both state and action norm places these eigenpairs in the original closed relation.</p></li><li><strong>Prove the comparison.</strong><p>Rationalized gap identities avoid cancellation. Explicit inequalities bound the energy and ratio remainders, and equivalent input representations give equivalent outputs.</p></li></ol>
 <p>The native mathematics uses this project's real and complex computations, without importing Mathlib's real or complex number systems. The source links below expose the exact hypotheses and constructions.</p>
@@ -96,7 +119,7 @@
 <p>This is a showpiece for exact constructive mathematics within an explicit model. The differential equation, channel and boundary hypotheses belong to its contract. The full physical hydrogen spectrum is a larger claim.</p>
 </section>
 <section id="proofs" class="chapter">
-<div class="section-label">05 / Inspect the mathematics</div><h2>The statements behind the page</h2>
+<div class="section-label">06 / Inspect the mathematics</div><h2>The statements behind the page</h2>
 <p>These source snapshots are the actual project files used to prepare this exposition. Names below live under <code>ComputableAnalysis</code>. The page summarizes selected results; it does not claim a fresh successful build of the entire repository.</p>
 <div class="source-list">
 <a href="sources/HydrogenCoupling.lean"><span>Symbolic coupling and its domain</span><code>HydrogenCoupling.Coupling</code></a>
@@ -111,9 +134,11 @@
 <a href="sources/HydrogenCircularBohr.lean"><span>Inverse square law with remainder</span><code>remainder_identity · remainder_bounds</code></a>
 <a href="sources/HydrogenPolynomialSplitting.lean"><span>Bounds for the constructed level gaps</span><code>two_p_remainder_bound · three_remainder_bound</code></a>
 <a href="sources/HydrogenRegularGraphFineStructure.lean"><span>Ratio, invariance and certified enclosure</span><code>ratio_names · ratio_approximation_spec · ratio_remainder_bound</code></a>
+<a href="sources/HydrogenBohrTransitions.lean"><span>Signed transition energies between constructed states</span><code>HydrogenBohrTransitions.transition_bounds · state_pair</code></a>
+<a href="sources/HydrogenShowpieceExport.lean"><span>Actual ratio enclosures with a requested width</span><code>HydrogenShowpiece.enclosure · actual_role</code></a>
 <a href="sources/HydrogenCircularRemainder.lean"><span>The quantitative estimates beneath the results</span><code>HydrogenCircularRemainder</code></a>
 </div>
-<p class="small"><a href="source-manifest.json">Source snapshot hashes</a> · <a href="statement-check.lean">Statement inspection client</a> · <a href="statement-audit.txt">Axiom report for the seventeen featured declarations</a> · <a href="https://github.com/liuyao12/computable-analysis">Project repository ↗</a></p>
+<p class="small"><a href="source-manifest.json">Source snapshot hashes</a> · <a href="statement-check.lean">Statement inspection client</a> · <a href="statement-audit.txt">Axiom report for the nineteen featured declarations</a> · <a href="https://github.com/liuyao12/computable-analysis">Project repository ↗</a></p>
 </section>
 <footer><p>Computable Analysis</p><p>Rational constructions. Exact identities. Explicit errors.</p><a href="../index.html">Return to the book ↗</a></footer>
 </main>

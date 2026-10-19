@@ -70,6 +70,16 @@
       "source": "ComputableAnalysis/HydrogenDiracActionUnique.lean",
       "snapshot": "sources/HydrogenDiracActionUnique.lean",
       "sha256": "caadeb37df873f47461625229e775b4b4b4742821f5f3790d3f5ce89970c4a2f"
+    },
+    {
+      "source": "ComputableAnalysis/HydrogenBohrTransitions.lean",
+      "snapshot": "sources/HydrogenBohrTransitions.lean",
+      "sha256": "3ac8fa7844cb1b102e94272555046bdea071c5db028473d905e939362bc63e0f"
+    },
+    {
+      "source": "scripts/export_hydrogen_showpiece.lean",
+      "snapshot": "sources/HydrogenShowpieceExport.lean",
+      "sha256": "cc7400cf1499d26726349a764b98cd4cb98cfaf32f7d9855daa4d1cd9e5f4a81"
     }
   ]
 }

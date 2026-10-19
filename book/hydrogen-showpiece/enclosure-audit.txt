@@ -1,0 +1,26 @@
+Exporter source SHA-256: cc7400cf1499d26726349a764b98cd4cb98cfaf32f7d9855daa4d1cd9e5f4a81
+Original targeted exporter dependency audit (six declarations):
+
+HydrogenShowpiece.rationalCoupling (u : Rat) (h0 : 0 ≤ u) (h1 : u < 1) : ComputableAnalysis.HydrogenCoupling.Coupling
+HydrogenShowpiece.lower (r : Rat) : Rat
+HydrogenShowpiece.rounded (I : ComputableAnalysis.QInterval) : ComputableAnalysis.QInterval
+HydrogenShowpiece.contained (r : ComputableAnalysis.ComputableCoefficient.Value) (N : Nat)
+  (Q : ComputableAnalysis.QInterval) (hL : Q.lo ≤ (r.real.compute N).lo) (hU : (r.real.compute N).hi ≤ Q.hi) :
+  ComputableAnalysis.RawLimit.InInterval r.real.preferred Q
+HydrogenShowpiece.enclosure (A : ComputableAnalysis.HydrogenCoupling.Coupling) (eps : ComputableAnalysis.QPos) :
+  { Q //
+    ComputableAnalysis.RawLimit.InInterval (ComputableAnalysis.HydrogenCircularRatio.ratio A).real.preferred Q ∧
+      Q.width ≤ eps.val }
+HydrogenShowpiece.actual_role (A : ComputableAnalysis.HydrogenCoupling.Coupling)
+  (hA : ¬A.squared.preferred.Equiv ComputableAnalysis.RealRaw.zero) (eps : ComputableAnalysis.QPos) :
+  ComputableAnalysis.RawLimit.InInterval
+      (ComputableAnalysis.HydrogenRegularGraphFineStructure.ratio A hA).real.preferred
+      (HydrogenShowpiece.enclosure A eps).val ∧
+    (HydrogenShowpiece.enclosure A eps).val.width ≤ eps.val
+CHECKED HydrogenShowpiece.rationalCoupling
+CHECKED HydrogenShowpiece.lower
+CHECKED HydrogenShowpiece.rounded
+CHECKED HydrogenShowpiece.contained
+CHECKED HydrogenShowpiece.enclosure
+CHECKED HydrogenShowpiece.actual_role
+PASS: 6 roots; standard logical axioms only; no ambient reals/complexes.

@@ -37,3 +37,7 @@
 'ComputableAnalysis.CartesianDiracActionUnique.action_unique' depends on axioms: [propext, Classical.choice, Quot.sound]
 'ComputableAnalysis.CartesianDiracActionUnique.closable' depends on axioms: [propext, Classical.choice, Quot.sound]
 'ComputableAnalysis.HydrogenDiracActionUnique.energy_action' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.HydrogenBohrTransitions.transition_bounds' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.HydrogenBohrTransitions.state_pair' depends on axioms: [propext, Classical.choice, Quot.sound]

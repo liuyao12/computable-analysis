@@ -11,7 +11,7 @@ regular channel and closed-relation results from the open unrestricted Cartesian
 
 `sources/` contains selected actual statement source snapshots, hashed in
 `source-manifest.json`. These are not a standalone dependency bundle.
-`statement-check.lean` inspects seventeen existing declarations;
+`statement-check.lean` inspects nineteen existing declarations;
 `statement-audit.txt` records their axiom reports. It does not certify a fresh
 aggregate repository build.
 
@@ -29,3 +29,10 @@ downloaded inventory path:
 ```sh
 python3 scripts/publish_hydrogen_showpiece.py /tmp/hydrogen-site /tmp/pages-base.json
 ```
+
+The computed-enclosure section ports the six checked rows from the original
+showpiece Page to this repository’s Pages destination. `enclosures.js` selects
+saved rational data and uses the established MathJax renderer; it performs no
+numerical physics calculation. `enclosure-audit.txt` retains the exporter
+source hash and its six-root dependency audit. Signed transition bounds and
+their actual source statements are also included.

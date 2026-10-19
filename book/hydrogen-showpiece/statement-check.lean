@@ -1,3 +1,4 @@
+import ComputableAnalysis.HydrogenBohrTransitions
 import ComputableAnalysis.HydrogenDiracActionUnique
 import ComputableAnalysis.HydrogenCircularBohr
 import ComputableAnalysis.HydrogenRegularGraphFineStructure
@@ -19,3 +20,6 @@ import ComputableAnalysis.HydrogenClosedGraphFineStructure
 #print axioms ComputableAnalysis.CartesianDiracActionUnique.action_unique
 #print axioms ComputableAnalysis.CartesianDiracActionUnique.closable
 #print axioms ComputableAnalysis.HydrogenDiracActionUnique.energy_action
+
+#print axioms ComputableAnalysis.HydrogenBohrTransitions.transition_bounds
+#print axioms ComputableAnalysis.HydrogenBohrTransitions.state_pair

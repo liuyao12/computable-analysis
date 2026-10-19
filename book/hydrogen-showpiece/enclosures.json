@@ -1,0 +1,47 @@
+{
+  "description": "Exact outward-rounded rational interval endpoints from HydrogenShowpiece.enclosure. Each endpoint integer denotes a rational number divided by one billion. The Lean program proves enclosure and requested-width roles for arbitrary supplied coupling and positive requested error.",
+  "rows": [
+    {
+      "alphaDenominator": 64,
+      "precisionPower": 10,
+      "lowerNano": "98683643",
+      "upperNano": "98818375",
+      "widthNano": "134732"
+    },
+    {
+      "alphaDenominator": 64,
+      "precisionPower": 20,
+      "lowerNano": "98754481",
+      "upperNano": "98754613",
+      "widthNano": "132"
+    },
+    {
+      "alphaDenominator": 32,
+      "precisionPower": 10,
+      "lowerNano": "98651853",
+      "upperNano": "98786572",
+      "widthNano": "134719"
+    },
+    {
+      "alphaDenominator": 32,
+      "precisionPower": 20,
+      "lowerNano": "98721816",
+      "upperNano": "98721949",
+      "widthNano": "133"
+    },
+    {
+      "alphaDenominator": 16,
+      "precisionPower": 10,
+      "lowerNano": "98520406",
+      "upperNano": "98655070",
+      "widthNano": "134664"
+    },
+    {
+      "alphaDenominator": 16,
+      "precisionPower": 20,
+      "lowerNano": "98591064",
+      "upperNano": "98591197",
+      "widthNano": "133"
+    }
+  ]
+}
