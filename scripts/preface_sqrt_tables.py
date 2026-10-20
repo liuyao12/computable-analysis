@@ -1,4 +1,4 @@
-"""Generate the preface's outward-rounded displays using exact fractions."""
+"""Generate abbreviated decimal displays of the preface's exact rational bounds."""
 from fractions import Fraction
 from pathlib import Path
 import argparse
@@ -18,21 +18,21 @@ def decimal(q, places, upper=False):
 
 
 def display(value, highlighted):
-    prefix, suffix = value[:highlighted], value[highlighted:]
+    prefix, suffix = value[:highlighted], value[highlighted:highlighted + 1]
     parts = []
     if prefix:
-        parts.append(r'<mark>\(\mathtt{' + prefix + r'}\)</mark>')
+        parts.append(r'<strong>\(\boldsymbol{\mathtt{' + prefix + r'}}\)</strong>')
     if suffix:
-        parts.append(r'\(\mathtt{' + suffix + r'}\)')
-    return '<span class="decimal-number" aria-label="' + html.escape(value) + '">' + ''.join(parts) + '</span>'
+        parts.append(r'\(\mathtt{' + suffix + r'}\ldots\)')
+    label = prefix + suffix + ('...' if suffix else '')
+    return '<span class="decimal-number" aria-label="' + html.escape(label) + '">' + ''.join(parts) + '</span>'
 
 
 def rows():
-    u = Fraction(2)
+    l, u = Fraction(1), Fraction(2)
     previous = None
     result = []
     for n in range(6):
-        l = 2 / u
         assert 1 <= l <= u <= 2 and l * u == 2
         assert l * l <= 2 <= u * u
         assert u - l <= Fraction(1, 4 ** n)
@@ -42,6 +42,7 @@ def rows():
             assert u - l == (b - a) ** 2 / (4 * u)
         result.append((n, l, u))
         previous = l, u
+        l = (2 + l * u) / (l + u)
         u = (u + 2 / u) / 2
     return result
 
@@ -53,11 +54,15 @@ def table(product=False):
     for n, l, u in rows():
         if product and n < 2:
             continue
-        places = [0, 6, 9, 14, 20, 28][n]
+        places = 40
         if product:
             l, u = l * l, u * u
-        lo, hi = decimal(l, places), decimal(u, places, upper=True)
-        assert Fraction(lo) <= l <= u <= Fraction(hi)
+        if n == 0:
+            lines.append(f'<tr><th scope="row">\\({n}\\)</th><td>\\({l}\\)</td><td>\\({u}\\)</td></tr>')
+            continue
+        lo, hi = decimal(l, places), decimal(u, places)
+        for value, exact in [(lo, l), (hi, u)]:
+            assert Fraction(value) <= exact < Fraction(value) + Fraction(1, 10 ** places)
         if product:
             nines = len(lo.split('.')[1]) - len(lo.split('.')[1].lstrip('9'))
             zeros = len(hi.split('.')[1]) - len(hi.split('.')[1].lstrip('0'))
@@ -89,7 +94,7 @@ def main():
         assert source == expected, 'Regenerate the preface tables before publishing'
     else:
         CONTENT.write_text(expected)
-    print('PASS: exact rational updates, nesting, squared bounds, shrinking, outward rounding, and matched highlights')
+    print('PASS: secant–tangent updates, nesting, squared bounds, shrinking, abbreviated digits, and matched bold prefixes')
 
 
 if __name__ == '__main__':

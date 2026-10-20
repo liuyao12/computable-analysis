@@ -1,9 +1,14 @@
 """Add a reader preface while retaining the deployed mathematics and proof assets."""
 from pathlib import Path
+import builtins
 import hashlib
+import html
+import io
 import json
+import keyword
 import re
 import sys
+import tokenize
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTENT = ROOT / 'book/foundation-preface/content.html'
@@ -14,6 +19,36 @@ MATH = re.compile(r'\\\(.*?\\\)|\\\[.*?\\\]', re.S)
 
 def sha(data):
     return hashlib.sha256(data).hexdigest()
+
+def highlight_python(content):
+    def highlight(match):
+        source = html.unescape(match[1])
+        lines = source.splitlines(keepends=True)
+        offsets = [0]
+        for line in lines:
+            offsets.append(offsets[-1] + len(line))
+        rendered, cursor, previous = [], 0, ''
+        for token in tokenize.generate_tokens(io.StringIO(source).readline):
+            if token.type in [tokenize.ENCODING, tokenize.ENDMARKER, tokenize.DEDENT]:
+                continue
+            start = offsets[token.start[0] - 1] + token.start[1]
+            end = offsets[token.end[0] - 1] + token.end[1]
+            rendered.append(html.escape(source[cursor:start]))
+            text = html.escape(source[start:end])
+            style = None
+            if keyword.iskeyword(token.string):
+                style = 'keyword'
+            elif token.type == tokenize.NUMBER:
+                style = 'number'
+            elif token.type == tokenize.NAME and previous == 'def':
+                style = 'function'
+            elif token.type == tokenize.NAME and hasattr(builtins, token.string):
+                style = 'builtin'
+            rendered.append(f'<span class="py-{style}">{text}</span>' if style else text)
+            cursor, previous = end, token.string
+        rendered.append(html.escape(source[cursor:]))
+        return '<code class="language-python">' + ''.join(rendered) + '</code>'
+    return re.sub(r'<code class="language-python">(.*?)</code>', highlight, content, flags=re.S)
 
 def add_nav(text):
     def replace(match):
@@ -66,9 +101,9 @@ def apply(site):
     assert content.count('\\(') == content.count('\\)')
     assert content.count('\\[') == content.count('\\]')
     toc = ''.join('<a href="#'+key+'">'+title+'</a>' for key, title in re.findall(r'<h2 id="([^"]+)">([^<]+)</h2>', content))
-    head = r'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="From Observable and exact fractions to a foundation for proving calculus, with rational square-root algorithms and stage-by-stage decimal enclosures."><title>Preface · Computable Analysis</title><link href="reading/book.css" rel="stylesheet"><link href="reading/analysis-edition.css" rel="stylesheet"><script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],processEscapes:true},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script><script defer src="reading/book.js"></script><style>.reader h1,.reader h2{overflow-wrap:anywhere}.reader mjx-container{max-width:100%;overflow-x:auto;overflow-y:hidden}.reader{min-width:0}.preface-reader-link{font:12px/1.7 system-ui}.preface-table{overflow-x:auto;margin:1.4rem 0;padding-bottom:.4rem}.preface-table table{border-collapse:collapse;width:100%;font-size:.88rem}.preface-table th,.preface-table td{padding:.65rem .6rem;border-bottom:1px solid #d8ded9;text-align:left;white-space:nowrap}.preface-table thead th{font:600 .75rem/1.5 system-ui;color:#52615b}.decimal-number{display:inline-flex;align-items:baseline;gap:0}.decimal-number mjx-container{margin:0!important;overflow:visible!important;flex:none}.preface-table mark{background:#f5e3a0;color:inherit;padding:2px 0;border-radius:2px}.reader pre{overflow-x:auto;padding:1.2rem;background:#f3f5f2;border:1px solid #dce2da;border-radius:8px;line-height:1.7}.reader pre code{font-size:.87rem}</style></head><body><a class="skip" href="#main">Skip to preface</a>'''
+    head = r'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="From Observable and exact fractions to a foundation for proving calculus, with rational square-root algorithms and stage-by-stage decimal enclosures."><title>Preface · Computable Analysis</title><link href="reading/book.css" rel="stylesheet"><link href="reading/analysis-edition.css" rel="stylesheet"><script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],processEscapes:true},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script><script defer src="reading/book.js"></script><style>.reader h1,.reader h2{overflow-wrap:anywhere}.reader mjx-container{max-width:100%;overflow-x:auto;overflow-y:hidden}.reader{min-width:0}.preface-reader-link{font:12px/1.7 system-ui}.preface-table{overflow-x:auto;margin:1.4rem 0;padding-bottom:.4rem}.preface-table table{border-collapse:collapse;width:100%;font-size:.88rem}.preface-table th,.preface-table td{padding:.65rem .6rem;border-bottom:1px solid #d8ded9;text-align:left;white-space:nowrap}.preface-table thead th{font:600 .75rem/1.5 system-ui;color:#52615b}.decimal-number{display:inline-flex;align-items:baseline;gap:0}.decimal-number mjx-container{margin:0!important;overflow:visible!important;flex:none}.preface-table strong{font-weight:700}.py-keyword{color:#8437a0;font-weight:600}.py-number{color:#17694a}.py-function{color:#145c9e}.py-builtin{color:#865716}.reader pre{overflow-x:auto;padding:1.2rem;background:#f3f5f2;border:1px solid #dce2da;border-radius:8px;line-height:1.7}.reader pre code{font-size:.87rem}</style></head><body><a class="skip" href="#main">Skip to preface</a>'''
     footer = '<footer class="chapter-footer"><span>From Observable to exact mathematical proofs</span><a href="foundation-preface/00-preface.tex">Preface manuscript</a></footer>'
-    html = head + header + nav + '<div class="page"><main class="reader" id="main"><div class="chapter-kicker">PREFACE</div><article><div class="main-text">' + content + '</div></article>' + footer + '</main><aside class="on-this-page"><span>On this page</span>' + toc + '</aside></div></body></html>\n'
+    html = head + header + nav + '<div class="page"><main class="reader" id="main"><div class="chapter-kicker">PREFACE</div><article><div class="main-text">' + highlight_python(content) + '</div></article>' + footer + '</main><aside class="on-this-page"><span>On this page</span>' + toc + '</aside></div></body></html>\n'
     (site / 'preface.html').write_text(html)
     assets = site / 'foundation-preface'
     assets.mkdir(exist_ok=True)

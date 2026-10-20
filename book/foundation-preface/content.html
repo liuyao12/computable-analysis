@@ -19,31 +19,33 @@
 
 <h2 id="sqrt-two">A square root made entirely of fractions</h2>
 <p>Here is a computation of \(\sqrt2\). All divisions in this pseudocode are exact rational divisions. There are no floating-point numbers and no square-root operation hidden inside it.</p>
-<pre><code>sqrt_two(n):
-    upper = 2
-    repeat n times:
-        upper = (upper + 2 / upper) / 2
-    lower = 2 / upper
-    return [lower, upper]</code></pre>
+<pre><code class="language-python">def sqrt2(n):
+    a = 1
+    b = 2
+    for _ in range(n):
+        a = (2 + a*b) / (a + b)
+        b = (b + 2/b) / 2
+    return [a, b]</code></pre>
 <p>At stage \(0\) it returns \([1,2]\). After one update it returns \([4/3,3/2]\), and after two it returns \([24/17,17/12]\). Starting with fractions, every update produces fractions.</p>
-<p>Why does it work? Write the current bounds as \(l,u\), with \(lu=2\). The update is</p>
-\[u'=\frac{u+l}{2},\qquad l'=\frac2{u'}.\]
+<p>Why does it work? Write the current bounds as \(a,b\). The update is</p>
+\[a'=\frac{2+ab}{a+b},\qquad b'=\frac{b+2/b}{2}.\]
 <p>The rational inequalities prove that the new bounds stay inside the old ones and still bracket a square root:</p>
-\[l\le l'\le u'\le u,\qquad (l')^2\le2\le(u')^2.\]
+\[a\le a'\le b'\le b,\qquad (a')^2\le2\le(b')^2.\]
 <p>They also give an exact identity for the new width:</p>
-\[u'-l'=\frac{(u-l)^2}{4u'}.\]
+\[b'-a'=\frac{(b-a)(b^2-2)}{2b(a+b)}=\frac{(b-a)^2}{4b'}.\]
+<p>The last equality uses \(ab=2\), which holds initially and is preserved by the update.</p>
 <p>In particular, the widths at stage \(n\) are at most \(4^{-n}\), so they become arbitrarily small. These facts can all be proved with rational arithmetic. The construction earns the name \(\sqrt2\) through its properties.</p>
-<p>The table shows the same rational bounds in decimal notation. Lower endpoints are rounded down and upper endpoints are rounded up, so the displayed intervals still enclose the exact rational intervals. Highlighting marks their common leading digits.</p>
+<p>The table abbreviates the decimal expansions of these exact rational bounds. Their common leading digits are in bold, followed by one more digit and an ellipsis for the omitted digits.</p>
 <!-- sqrt-table:start -->
 <div class="preface-table"><table>
 <thead><tr><th scope="col">Stage \(n\)</th><th scope="col">Lower bound</th><th scope="col">Upper bound</th></tr></thead>
 <tbody>
-<tr><th scope="row">\(0\)</th><td><span class="decimal-number" aria-label="1">\(\mathtt{1}\)</span></td><td><span class="decimal-number" aria-label="2">\(\mathtt{2}\)</span></td></tr>
-<tr><th scope="row">\(1\)</th><td><span class="decimal-number" aria-label="1.333333"><mark>\(\mathtt{1.}\)</mark>\(\mathtt{333333}\)</span></td><td><span class="decimal-number" aria-label="1.500000"><mark>\(\mathtt{1.}\)</mark>\(\mathtt{500000}\)</span></td></tr>
-<tr><th scope="row">\(2\)</th><td><span class="decimal-number" aria-label="1.411764705"><mark>\(\mathtt{1.41}\)</mark>\(\mathtt{1764705}\)</span></td><td><span class="decimal-number" aria-label="1.416666667"><mark>\(\mathtt{1.41}\)</mark>\(\mathtt{6666667}\)</span></td></tr>
-<tr><th scope="row">\(3\)</th><td><span class="decimal-number" aria-label="1.41421143847487"><mark>\(\mathtt{1.41421}\)</mark>\(\mathtt{143847487}\)</span></td><td><span class="decimal-number" aria-label="1.41421568627451"><mark>\(\mathtt{1.41421}\)</mark>\(\mathtt{568627451}\)</span></td></tr>
-<tr><th scope="row">\(4\)</th><td><span class="decimal-number" aria-label="1.41421356237150018697"><mark>\(\mathtt{1.41421356237}\)</mark>\(\mathtt{150018697}\)</span></td><td><span class="decimal-number" aria-label="1.41421356237468991063"><mark>\(\mathtt{1.41421356237}\)</mark>\(\mathtt{468991063}\)</span></td></tr>
-<tr><th scope="row">\(5\)</th><td><span class="decimal-number" aria-label="1.4142135623730950488016878249"><mark>\(\mathtt{1.41421356237309504880168}\)</mark>\(\mathtt{78249}\)</span></td><td><span class="decimal-number" aria-label="1.4142135623730950488016896236"><mark>\(\mathtt{1.41421356237309504880168}\)</mark>\(\mathtt{96236}\)</span></td></tr>
+<tr><th scope="row">\(0\)</th><td>\(1\)</td><td>\(2\)</td></tr>
+<tr><th scope="row">\(1\)</th><td><span class="decimal-number" aria-label="1.3..."><strong>\(\boldsymbol{\mathtt{1.}}\)</strong>\(\mathtt{3}\ldots\)</span></td><td><span class="decimal-number" aria-label="1.5..."><strong>\(\boldsymbol{\mathtt{1.}}\)</strong>\(\mathtt{5}\ldots\)</span></td></tr>
+<tr><th scope="row">\(2\)</th><td><span class="decimal-number" aria-label="1.411..."><strong>\(\boldsymbol{\mathtt{1.41}}\)</strong>\(\mathtt{1}\ldots\)</span></td><td><span class="decimal-number" aria-label="1.416..."><strong>\(\boldsymbol{\mathtt{1.41}}\)</strong>\(\mathtt{6}\ldots\)</span></td></tr>
+<tr><th scope="row">\(3\)</th><td><span class="decimal-number" aria-label="1.414211..."><strong>\(\boldsymbol{\mathtt{1.41421}}\)</strong>\(\mathtt{1}\ldots\)</span></td><td><span class="decimal-number" aria-label="1.414215..."><strong>\(\boldsymbol{\mathtt{1.41421}}\)</strong>\(\mathtt{5}\ldots\)</span></td></tr>
+<tr><th scope="row">\(4\)</th><td><span class="decimal-number" aria-label="1.414213562371..."><strong>\(\boldsymbol{\mathtt{1.41421356237}}\)</strong>\(\mathtt{1}\ldots\)</span></td><td><span class="decimal-number" aria-label="1.414213562374..."><strong>\(\boldsymbol{\mathtt{1.41421356237}}\)</strong>\(\mathtt{4}\ldots\)</span></td></tr>
+<tr><th scope="row">\(5\)</th><td><span class="decimal-number" aria-label="1.414213562373095048801687..."><strong>\(\boldsymbol{\mathtt{1.41421356237309504880168}}\)</strong>\(\mathtt{7}\ldots\)</span></td><td><span class="decimal-number" aria-label="1.414213562373095048801689..."><strong>\(\boldsymbol{\mathtt{1.41421356237309504880168}}\)</strong>\(\mathtt{9}\ldots\)</span></td></tr>
 </tbody>
 </table></div>
 <!-- sqrt-table:end -->
@@ -52,15 +54,15 @@
 <h2 id="equality">Multiplying the computation by itself</h2>
 <p>Call the square-root computation \(s\). Since its endpoints are positive, multiplying its interval by itself gives the rational interval</p>
 \[[a_n,b_n]\,[a_n,b_n]=[a_n^2,b_n^2].\]
-<p>Here are the resulting bounds. In each row, the highlighted lower and upper prefixes have the same length: a run approaching \(2\) from below, and a run approaching it from above.</p>
+<p>Here are the resulting bounds. In each row, the bold lower and upper prefixes have the same length: a run approaching \(2\) from below, and a run approaching it from above.</p>
 <!-- product-table:start -->
 <div class="preface-table"><table>
 <thead><tr><th scope="col">Stage \(n\)</th><th scope="col">Lower bound</th><th scope="col">Upper bound</th></tr></thead>
 <tbody>
-<tr><th scope="row">\(2\)</th><td><span class="decimal-number" aria-label="1.993079584"><mark>\(\mathtt{1.99}\)</mark>\(\mathtt{3079584}\)</span></td><td><span class="decimal-number" aria-label="2.006944445"><mark>\(\mathtt{2.00}\)</mark>\(\mathtt{6944445}\)</span></td></tr>
-<tr><th scope="row">\(3\)</th><td><span class="decimal-number" aria-label="1.99999399271316"><mark>\(\mathtt{1.99999}\)</mark>\(\mathtt{399271316}\)</span></td><td><span class="decimal-number" aria-label="2.00000600730489"><mark>\(\mathtt{2.00000}\)</mark>\(\mathtt{600730489}\)</span></td></tr>
-<tr><th scope="row">\(4\)</th><td><span class="decimal-number" aria-label="1.99999999999548904955"><mark>\(\mathtt{1.99999999999}\)</mark>\(\mathtt{548904955}\)</span></td><td><span class="decimal-number" aria-label="2.00000000000451095045"><mark>\(\mathtt{2.00000000000}\)</mark>\(\mathtt{451095045}\)</span></td></tr>
-<tr><th scope="row">\(5\)</th><td><span class="decimal-number" aria-label="1.9999999999999999999999974564"><mark>\(\mathtt{1.99999999999999999999999}\)</mark>\(\mathtt{74564}\)</span></td><td><span class="decimal-number" aria-label="2.0000000000000000000000025436"><mark>\(\mathtt{2.00000000000000000000000}\)</mark>\(\mathtt{25436}\)</span></td></tr>
+<tr><th scope="row">\(2\)</th><td><span class="decimal-number" aria-label="1.993..."><strong>\(\boldsymbol{\mathtt{1.99}}\)</strong>\(\mathtt{3}\ldots\)</span></td><td><span class="decimal-number" aria-label="2.006..."><strong>\(\boldsymbol{\mathtt{2.00}}\)</strong>\(\mathtt{6}\ldots\)</span></td></tr>
+<tr><th scope="row">\(3\)</th><td><span class="decimal-number" aria-label="1.999993..."><strong>\(\boldsymbol{\mathtt{1.99999}}\)</strong>\(\mathtt{3}\ldots\)</span></td><td><span class="decimal-number" aria-label="2.000006..."><strong>\(\boldsymbol{\mathtt{2.00000}}\)</strong>\(\mathtt{6}\ldots\)</span></td></tr>
+<tr><th scope="row">\(4\)</th><td><span class="decimal-number" aria-label="1.999999999995..."><strong>\(\boldsymbol{\mathtt{1.99999999999}}\)</strong>\(\mathtt{5}\ldots\)</span></td><td><span class="decimal-number" aria-label="2.000000000004..."><strong>\(\boldsymbol{\mathtt{2.00000000000}}\)</strong>\(\mathtt{4}\ldots\)</span></td></tr>
+<tr><th scope="row">\(5\)</th><td><span class="decimal-number" aria-label="1.999999999999999999999997..."><strong>\(\boldsymbol{\mathtt{1.99999999999999999999999}}\)</strong>\(\mathtt{7}\ldots\)</span></td><td><span class="decimal-number" aria-label="2.000000000000000000000002..."><strong>\(\boldsymbol{\mathtt{2.00000000000000000000000}}\)</strong>\(\mathtt{2}\ldots\)</span></td></tr>
 </tbody>
 </table></div>
 <!-- product-table:end -->
@@ -69,6 +71,7 @@
 <p>Thus the product computation and the constant computation returning \([2,2]\) represent exactly the same value:</p>
 \[\sqrt2\cdot\sqrt2\simeq2.\]
 <p>The symbol \(\simeq\) means equality of represented values, not an unspecified numerical approximation. In the Lean development it is <code>RealRaw.Equiv</code>: the intervals of two valid representations overlap at every common stage. We prove the identity for all stages; the finite table only illustrates it.</p>
+<p>This is the point of the example: proving an exact identity becomes reasoning about rational inequalities. We establish bounds that hold at every stage, rather than calculate more and more digits. This is the kind of algebraic reasoning that language models can do well, with Lean checking the proofs they produce.</p>
 
 <h2 id="digits">Why intervals, rather than committed digits</h2>
 <p>The paired runs of nines and zeros reveal a problem with treating a real-number computation as a machine that must commit to successive ordinary digits. An interval can straddle a terminating decimal at every stage while becoming arbitrarily narrow. Refinement alone need not decide which digit expansion to print. Our interval definition accommodates this situation directly.</p>

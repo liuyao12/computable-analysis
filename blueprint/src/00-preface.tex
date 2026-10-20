@@ -55,34 +55,38 @@ Here is a computation of \(\sqrt2\). All divisions in this pseudocode are exact 
 
 
 \begin{verbatim}
-sqrt_two(n):
-    upper = 2
-    repeat n times:
-        upper = (upper + 2 / upper) / 2
-    lower = 2 / upper
-    return [lower, upper]
+def sqrt2(n):
+    a = 1
+    b = 2
+    for _ in range(n):
+        a = (2 + a*b) / (a + b)
+        b = (b + 2/b) / 2
+    return [a, b]
 \end{verbatim}
 
 
 At stage \(0\) it returns \([1,2]\). After one update it returns \([4/3,3/2]\), and after two it returns \([24/17,17/12]\). Starting with fractions, every update produces fractions.
 
 
-Why does it work? Write the current bounds as \(l,u\), with \(lu=2\). The update is
+Why does it work? Write the current bounds as \(a,b\). The update is
 
-\[u'=\frac{u+l}{2},\qquad l'=\frac2{u'}.\]
+\[a'=\frac{2+ab}{a+b},\qquad b'=\frac{b+2/b}{2}.\]
 
 The rational inequalities prove that the new bounds stay inside the old ones and still bracket a square root:
 
-\[l\le l'\le u'\le u,\qquad (l')^2\le2\le(u')^2.\]
+\[a\le a'\le b'\le b,\qquad (a')^2\le2\le(b')^2.\]
 
 They also give an exact identity for the new width:
 
-\[u'-l'=\frac{(u-l)^2}{4u'}.\]
+\[b'-a'=\frac{(b-a)(b^2-2)}{2b(a+b)}=\frac{(b-a)^2}{4b'}.\]
+
+The last equality uses \(ab=2\), which holds initially and is preserved by the update.
+
 
 In particular, the widths at stage \(n\) are at most \(4^{-n}\), so they become arbitrarily small. These facts can all be proved with rational arithmetic. The construction earns the name \(\sqrt2\) through its properties.
 
 
-The table shows the same rational bounds in decimal notation. Lower endpoints are rounded down and upper endpoints are rounded up, so the displayed intervals still enclose the exact rational intervals. Highlighting marks their common leading digits.
+The table abbreviates the decimal expansions of these exact rational bounds. Their common leading digits are in bold, followed by one more digit and an ellipsis for the omitted digits.
 
 
 
@@ -95,17 +99,17 @@ The table shows the same rational bounds in decimal notation. Lower endpoints ar
 \hline
 
 
-\(0\) & \(\mathtt{1}\) & \(\mathtt{2}\) \\
+\(0\) & \(1\) & \(2\) \\
 
-\(1\) & \fbox{\(\mathtt{1.}\)}\(\mathtt{333333}\) & \fbox{\(\mathtt{1.}\)}\(\mathtt{500000}\) \\
+\(1\) & \textbf{\(\boldsymbol{\mathtt{1.}}\)}\(\mathtt{3}\ldots\) & \textbf{\(\boldsymbol{\mathtt{1.}}\)}\(\mathtt{5}\ldots\) \\
 
-\(2\) & \fbox{\(\mathtt{1.41}\)}\(\mathtt{1764705}\) & \fbox{\(\mathtt{1.41}\)}\(\mathtt{6666667}\) \\
+\(2\) & \textbf{\(\boldsymbol{\mathtt{1.41}}\)}\(\mathtt{1}\ldots\) & \textbf{\(\boldsymbol{\mathtt{1.41}}\)}\(\mathtt{6}\ldots\) \\
 
-\(3\) & \fbox{\(\mathtt{1.41421}\)}\(\mathtt{143847487}\) & \fbox{\(\mathtt{1.41421}\)}\(\mathtt{568627451}\) \\
+\(3\) & \textbf{\(\boldsymbol{\mathtt{1.41421}}\)}\(\mathtt{1}\ldots\) & \textbf{\(\boldsymbol{\mathtt{1.41421}}\)}\(\mathtt{5}\ldots\) \\
 
-\(4\) & \fbox{\(\mathtt{1.41421356237}\)}\(\mathtt{150018697}\) & \fbox{\(\mathtt{1.41421356237}\)}\(\mathtt{468991063}\) \\
+\(4\) & \textbf{\(\boldsymbol{\mathtt{1.41421356237}}\)}\(\mathtt{1}\ldots\) & \textbf{\(\boldsymbol{\mathtt{1.41421356237}}\)}\(\mathtt{4}\ldots\) \\
 
-\(5\) & \fbox{\(\mathtt{1.41421356237309504880168}\)}\(\mathtt{78249}\) & \fbox{\(\mathtt{1.41421356237309504880168}\)}\(\mathtt{96236}\) \\
+\(5\) & \textbf{\(\boldsymbol{\mathtt{1.41421356237309504880168}}\)}\(\mathtt{7}\ldots\) & \textbf{\(\boldsymbol{\mathtt{1.41421356237309504880168}}\)}\(\mathtt{9}\ldots\) \\
 
 
 \hline
@@ -126,7 +130,7 @@ Call the square-root computation \(s\). Since its endpoints are positive, multip
 
 \[[a_n,b_n]\,[a_n,b_n]=[a_n^2,b_n^2].\]
 
-Here are the resulting bounds. In each row, the highlighted lower and upper prefixes have the same length: a run approaching \(2\) from below, and a run approaching it from above.
+Here are the resulting bounds. In each row, the bold lower and upper prefixes have the same length: a run approaching \(2\) from below, and a run approaching it from above.
 
 
 
@@ -139,13 +143,13 @@ Here are the resulting bounds. In each row, the highlighted lower and upper pref
 \hline
 
 
-\(2\) & \fbox{\(\mathtt{1.99}\)}\(\mathtt{3079584}\) & \fbox{\(\mathtt{2.00}\)}\(\mathtt{6944445}\) \\
+\(2\) & \textbf{\(\boldsymbol{\mathtt{1.99}}\)}\(\mathtt{3}\ldots\) & \textbf{\(\boldsymbol{\mathtt{2.00}}\)}\(\mathtt{6}\ldots\) \\
 
-\(3\) & \fbox{\(\mathtt{1.99999}\)}\(\mathtt{399271316}\) & \fbox{\(\mathtt{2.00000}\)}\(\mathtt{600730489}\) \\
+\(3\) & \textbf{\(\boldsymbol{\mathtt{1.99999}}\)}\(\mathtt{3}\ldots\) & \textbf{\(\boldsymbol{\mathtt{2.00000}}\)}\(\mathtt{6}\ldots\) \\
 
-\(4\) & \fbox{\(\mathtt{1.99999999999}\)}\(\mathtt{548904955}\) & \fbox{\(\mathtt{2.00000000000}\)}\(\mathtt{451095045}\) \\
+\(4\) & \textbf{\(\boldsymbol{\mathtt{1.99999999999}}\)}\(\mathtt{5}\ldots\) & \textbf{\(\boldsymbol{\mathtt{2.00000000000}}\)}\(\mathtt{4}\ldots\) \\
 
-\(5\) & \fbox{\(\mathtt{1.99999999999999999999999}\)}\(\mathtt{74564}\) & \fbox{\(\mathtt{2.00000000000000000000000}\)}\(\mathtt{25436}\) \\
+\(5\) & \textbf{\(\boldsymbol{\mathtt{1.99999999999999999999999}}\)}\(\mathtt{7}\ldots\) & \textbf{\(\boldsymbol{\mathtt{2.00000000000000000000000}}\)}\(\mathtt{2}\ldots\) \\
 
 
 \hline
@@ -163,6 +167,9 @@ Thus the product computation and the constant computation returning \([2,2]\) re
 \[\sqrt2\cdot\sqrt2\simeq2.\]
 
 The symbol \(\simeq\) means equality of represented values, not an unspecified numerical approximation. In the Lean development it is \texttt{RealRaw.Equiv}: the intervals of two valid representations overlap at every common stage. We prove the identity for all stages; the finite table only illustrates it.
+
+
+This is the point of the example: proving an exact identity becomes reasoning about rational inequalities. We establish bounds that hold at every stage, rather than calculate more and more digits. This is the kind of algebraic reasoning that language models can do well, with Lean checking the proofs they produce.
 
 
 
