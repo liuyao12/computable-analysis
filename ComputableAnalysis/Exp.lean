@@ -61,12 +61,17 @@ def expPowerSeries (x : Rat) : RealRaw where
     let radius : Rat := data.2
     { lo := center - radius, hi := center + radius }
 
-/-- Exponential from repeated compound interest:
+/-- A candidate exponential from repeated compound interest:
 
 `exp x = lim_m (1 + x/m)^m`.
 
 At stage `n`, we compute the rational power `(1 + x/m)^m` by repeated
-multiplication, then display it with a small rational box. -/
+multiplication, then display it with a rational box. The fixed radius is
+not a justified enclosure for arbitrary `x`: at `x = 2`, stages zero and
+one are the disjoint intervals `[2, 4]` and `[73/16, 89/16]`. Thus this
+definition is a candidate, not a valid general exponential computation.
+Any use as a represented value needs separate validity and identification
+evidence on its stated domain. -/
 def expEuler (x : Rat) : RealRaw where
   compute := fun n =>
     let m : Nat := (n + 1) * (n + 1)

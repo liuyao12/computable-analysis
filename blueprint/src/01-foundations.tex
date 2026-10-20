@@ -147,6 +147,18 @@ constant interval thereafter.  At stage $n$ the width is at most
 $(b-a)2^{-n}$, and finite interval multiplication proves that the resulting
 squared-output computation overlaps $[q,q]$ at every stage.
 
+The computation's validity and its mathematical identity are separate facts.
+For the rational-input square-root function \(S\), the identifying law is
+\[
+ S(q)\ge0,\qquad S(q)\cdot S(q)\simeq q
+ \qquad(q\in\mathbb Q_{\ge0}).
+\]
+This makes \(S\) the nonnegative inverse of squaring and covers every
+nonnegative integer, including \(2\), in one theorem. Once the law is
+proved, we can use the square root without inspecting its algorithm. The
+rational bisection construction has this general square identity; another
+construction can establish its own identity or prove agreement with it.
+
 For $\sqrt2$, the rational secant--tangent refinement gives another
 construction:
 \begin{verbatim}

@@ -1,0 +1,32 @@
+<h1 id="identification">A computation needs a mathematical identity</h1>
+<p class="lead">First prove that the intervals represent a value. Then prove the laws that tell us what that value is.</p>
+
+<h2 id="strategy">From a valid algorithm to a mathematical object</h2>
+<p>Ordered, nested rational intervals whose widths shrink to zero give a valid represented value. The next question is mathematical: why does this computation deserve the name we gave it? Its identifying laws should be usable without inspecting the program, even when their proofs work through all the program’s rational inequalities.</p>
+<p>This is the project’s strategy for numbers, functions, derivatives, integrals and solutions. Domain, sign, normalization, branch and initial conditions remain part of the claim. Comparison and uniqueness need their own justified arguments where they are claimed.</p>
+
+<h2 id="square-root">One square-root law covers all the examples</h2>
+<p>The square-root function provides the model. On nonnegative rational inputs, prove</p>
+\[S(q)\ge0,\qquad S(q)\cdot S(q)\simeq q\qquad(q\in\mathbb Q_{\ge0}).\]
+<p>This identifies the nonnegative inverse of squaring. Every nonnegative integer is included; the identity at \(2\) is a specialization. A new algorithm can earn the same interpretation through its own proof or a justified comparison with this one.</p>
+<p>The main library already has the general rational square-root identity and a separate validity theorem. Its particular inverse-search adapter is stated on \([0,1]\). The foundation proof bundle additionally identifies the secant–tangent computation at \(2\). These are different scopes of a shared strategy.</p>
+<p><a href="https://github.com/liuyao12/computable-analysis/blob/c38cfc25d224a98fdd36f2bf018f3cf51da7c8da/ComputableAnalysis/AlgebraicFunctions.lean#L784">Inspect the general square-root law</a> · <a href="ch-foundations.html#square-root-identification">Read Chapter 1’s explanation</a></p>
+
+<h2 id="findings">The first audit findings</h2>
+<div class="audit-table"><table><thead><tr><th>Construction or claim</th><th>What the reviewed evidence establishes</th></tr></thead><tbody>
+<tr><td>Square root</td><td>Separate validity and square-identity proofs, with the nonnegative range. The general rational law covers all nonnegative integers.</td></tr>
+<tr><td>Euler exponential candidate</td><td>General validity fails: at input \(2\), its first two intervals are disjoint. It must remain a candidate until its enclosures are repaired.</td></tr>
+<tr><td>Three-way exponential comparison package</td><td>Collects already-supplied equalities. The package is not an independent derivation of those equalities.</td></tr>
+<tr><td>Integral candidates</td><td>Numerical validity alone does not identify an integral. Particular range, comparison or other justified integral evidence is still required.</td></tr>
+<tr><td>Ball and Gamma formulas</td><td>Valid formula evaluations and coefficient algebra have separate geometric-volume, Gamma-integral and Gaussian-normalization bridges.</td></tr>
+<tr><td>Fourier tails and ODE comparison</td><td>Useful conditional convergence and comparison laws retain their supplied hypotheses. They do not alone identify a function’s Fourier reconstruction or construct a particular ODE solution.</td></tr>
+</tbody></table></div>
+
+<h2 id="scope">Source coverage and remaining review</h2>
+<p>The first pass indexes all \(3{,}472\) Lean, Markdown, TeX and HTML files in published revision <code>c38cfc25</code>, including pinned source copies and historical material. This is source coverage, not a proof-completion score. The report names the particular contracts reviewed and records the exact rational counterexample.</p>
+<p>The local working tree differs from that publication. Most local sources were unavailable in their cloud-backed files during the review; \(50\) readable Lean files were scanned separately. Further claim-by-claim review, including the unavailable unpublished work, remains open. This pass does not rerun the Lean kernel.</p>
+<p>The next priority is to repair the Euler candidate’s enclosure schedule, then pair each named function with its validity, identifying laws and representation-invariance theorems. Integral, ODE, volume and kernel claims need their actual mathematical bridges.</p>
+
+<h2 id="sources">Strategy and reproducible report</h2>
+<p><a href="https://github.com/liuyao12/computable-analysis/blob/main/skills/computable-analysis-formalization/SKILL.md">Master formalization skill</a> · <a href="https://github.com/liuyao12/computable-analysis/blob/main/skills/computable-analysis-formalization/references/identification-laws.md">Detailed strategy</a> · <a href="https://github.com/liuyao12/computable-analysis/blob/main/docs/IDENTIFICATION_AUDIT.md">Full audit and next tasks</a></p>
+<p><a href="identification-audit/inventory.json">Source inventory</a> · <a href="identification-audit/strategy.md">Download the strategy</a> · <a href="identification-audit/audit.md">Download the report</a></p>

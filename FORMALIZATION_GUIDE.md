@@ -136,6 +136,21 @@ scaled jet to the existing rational-ray growth theorem. General Frobenius
 branches and the uniform holomorphic-to-ray adapter remain open; consult
 the application audit in the continuation ledger.
 
+## Validate the computation; identify the object
+
+Validity establishes a represented value; mathematical laws identify the
+advertised object. State and prove those laws on the full intended domain,
+with sign, normalization, branch and initial/boundary data where needed.
+Prefer a reusable function-level identification and derive constant examples
+by specialization. The public law is independent of the stage recipe even
+when its proof unfolds that recipe and derives rational inequalities.
+Comparison or uniqueness must be justified wherever it is claimed. Keep
+conditional laws complete at their stated scope and do not assume a desired
+identification in a certificate field. Follow the
+[identification strategy](skills/computable-analysis-formalization/references/identification-laws.md)
+and record concrete review findings in the
+[identification audit](docs/IDENTIFICATION_AUDIT.md).
+
 ## Construct the objects; prove their laws
 
 This is the project's organizing principle. General theorems may say: given

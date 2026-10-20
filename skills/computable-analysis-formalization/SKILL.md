@@ -5,6 +5,21 @@ description: Formalize calculus, elementary-function, integral, series, inverse-
 
 # Computable Analysis Formalization
 
+## Validate the computation; identify the object
+
+Prove validity (ordered, nested intervals with shrinking widths), then prove
+the mathematical laws that identify the advertised value or function on its
+stated domain. The public identification must be independent of the stage
+recipe; its proof may unfold that recipe to derive rational inequalities.
+Prefer a reusable function-level law, such as the nonnegative square-root
+inverse identity, and specialize it to particular numbers. Include the sign,
+normalization, branch, or initial data needed by the claim. Prove comparison
+or uniqueness when interchangeability or uniqueness is claimed. Validity,
+matching digits, formal coefficient algebra, and an assumed agreement field
+do not supply this identification. Read
+[the identification strategy and audit procedure](references/identification-laws.md)
+when introducing, reviewing, or explaining a named mathematical computation.
+
 For integrals or sums, start with [real integrals](../real-integrals/SKILL.md),
 [complex path integrals](../complex-path-integrals/SKILL.md), or
 [series](../series/SKILL.md). Use this skill for their shared formalization

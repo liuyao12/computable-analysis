@@ -1,0 +1,40 @@
+name: Publish identification strategy and audit
+on:
+  workflow_dispatch:
+    inputs:
+      base_run:
+        description: Successful Pages artifact to preserve
+        required: true
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-verified-proof-publication
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: previous
+          run-id: ${{ inputs.base_run }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Add strategy and scoped audit, preserving the existing reader
+        run: |
+          mkdir site
+          tar -xf previous/artifact.tar -C site
+          python3 scripts/publish_identification_audit.py site
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

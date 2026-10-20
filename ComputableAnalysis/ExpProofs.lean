@@ -11,9 +11,11 @@ import ComputableAnalysis.FiniteInverseSearchInterface
 proof-facing names and the finite interval facts that are immediate from the
 display wrapper around the two algorithms.
 
-The remaining analytic work is deliberately isolated as finite nesting and
-agreement statements: once those are supplied, the `RealRaw.Valid` and
-`RealRaw.Equiv` theorems below close without touching the readable algorithms.
+Validity and identification are separate obligations. Conditional wrappers
+below retain supplied nesting and agreement hypotheses; the wrapper alone
+does not prove those hypotheses. In particular, the current `expEuler`
+candidate fails nesting at `x = 2`, so arbitrary-input validity cannot be
+obtained without revising that candidate or restricting a justified use.
 -/
 
 namespace ComputableAnalysis
@@ -52,8 +54,9 @@ def EThreeWayAgreement (eLogIntegral : RealRaw) : Prop :=
   ePowerSeries.Equiv eLogIntegral /\
   eCompoundInterest.Equiv eLogIntegral
 
-/-- Remaining estimates needed to close the three definitions of `e` for a
-chosen inverse-log-integral representative. -/
+/-- A package of already-supplied comparison equalities. The projection
+theorem below collects these equalities; it does not derive their substance
+from independent finite remainder estimates. -/
 structure EThreeWayRemainders (eLogIntegral : RealRaw) where
   powerSeries_eq_compoundInterest : EPowerSeriesEqCompoundInterest
   powerSeries_eq_logIntegral : ePowerSeries.Equiv eLogIntegral

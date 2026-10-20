@@ -1,5 +1,22 @@
 # Computable Analysis
 
+## Validate the computation; identify the object
+
+A rational-interval algorithm first needs ordered, nested intervals whose
+widths shrink to zero. This establishes a represented value. We then prove
+the mathematical laws that justify its name, independently of its particular
+stage recipe. For square root, the nonnegative inverse-of-squaring law does
+this for every input in its stated domain; the identity at \(2\) is one
+instance. Proofs derive rational inequalities, while users of the theorem
+need not inspect the algorithm.
+
+This is the strategy for other numbers and functions as well. Retain domain,
+normalization, sign and branch conditions, prove representation invariance,
+and justify comparisons between constructions. See the
+[master strategy](skills/computable-analysis-formalization/references/identification-laws.md)
+and the [identification audit](docs/IDENTIFICATION_AUDIT.md), which separates
+reviewed contracts, missing bridges and source coverage.
+
 ## Join the collaboration
 
 **Everyone is welcome to join**, whether you are learning Lean, exploring

@@ -29,6 +29,16 @@ native results, conditional laws, external comparisons and unfinished targets
 visibly distinct. Code inventories belong after the explanation or in linked
 proof viewers; they do not motivate a theorem by themselves.
 
+For a named number or function, distinguish a valid computation from the laws
+that identify its mathematical role. State those laws in a form the reader
+can use without inspecting the program. Prefer a function-level law when it
+also explains the motivating constant: square root as the nonnegative inverse
+of squaring covers every nonnegative rational input, including the example
+at \(2\). Preserve narrower domains of particular inverse adapters. The
+proof may use all the algorithm's rational inequalities, but an introductory
+preface may leave that verification to interested readers. See the
+[identification strategy](../skills/computable-analysis-formalization/references/identification-laws.md).
+
 ## Maintained reader review
 
 `book/pedagogy/pages.json` reviews every top-level narrative reader page.
