@@ -1,0 +1,49 @@
+ComputableAnalysis.ArctanInverseCircleAudit.value_order_reflects {a b : Rat} (ha : 0 ≤ a ∧ a ≤ 1) (hb : 0 ≤ b ∧ b ≤ 1)
+  (h : (ArctanSecantFoundation.value a).Le (ArctanSecantFoundation.value b)) : a ≤ b
+ComputableAnalysis.ArctanInverseCircleAudit.inverse_at_geometric_source (u : Rat) (hu : 0 ≤ u ∧ u ≤ 1) :
+  (ArctanInverseConstruction.inverseExtension (ArctanSecantFoundation.value u)).Equiv (RealRaw.ofRat u)
+ComputableAnalysis.ArctanInverseCircleAudit.geometric_chart_check (u : Rat) (hu : 0 ≤ u ∧ u ≤ 1) :
+  (sineAtHalfAngle (ArctanSecantFoundation.value u)).Equiv (RealRaw.ofRat (SinPiIntegral.rationalCircleSin u)) ∧
+    (cosineAtHalfAngle (ArctanSecantFoundation.value u)).Equiv (RealRaw.ofRat (SinPiIntegral.rationalCircleCos u))
+ComputableAnalysis.ArctanInverseCircleAudit.quarter_chart_check (t u : Rat) (ht : 0 ≤ t ∧ t ≤ 1) (hu : 0 ≤ u ∧ u ≤ 1)
+  (hangle : (ArctanInverseCircle.quarterTarget t).Equiv (ArctanSecantFoundation.value u)) :
+  (ArctanInverseCircle.sineQuarter t).Equiv (RealRaw.ofRat (SinPiIntegral.rationalCircleSin u)) ∧
+    (ArctanInverseCircle.cosineQuarter t).Equiv (RealRaw.ofRat (SinPiIntegral.rationalCircleCos u))
+ComputableAnalysis.ArctanInverseCircleAudit.coordinate_ranges (Y : RealRaw) (n : Nat) :
+  0 ≤ ((sineAtHalfAngle Y).compute n).lo ∧
+    ((sineAtHalfAngle Y).compute n).hi ≤ 1 ∧
+      0 ≤ ((cosineAtHalfAngle Y).compute n).lo ∧ ((cosineAtHalfAngle Y).compute n).hi ≤ 1
+ComputableAnalysis.ArctanInverseCircleAudit.quarter_unit_circle (t : Rat) :
+  (ArctanInverseCircle.sineQuarter t * ArctanInverseCircle.sineQuarter t +
+        ArctanInverseCircle.cosineQuarter t * ArctanInverseCircle.cosineQuarter t).Equiv
+    (RealRaw.ofRat 1)
+ComputableAnalysis.ArctanInverseCircleAudit.quarter_endpoints :
+  (ArctanInverseCircle.sineQuarter 0).Equiv (RealRaw.ofRat 0) ∧
+    (ArctanInverseCircle.cosineQuarter 0).Equiv (RealRaw.ofRat 1) ∧
+      (ArctanInverseCircle.sineQuarter 1).Equiv (RealRaw.ofRat 1) ∧
+        (ArctanInverseCircle.cosineQuarter 1).Equiv (RealRaw.ofRat 0)
+ComputableAnalysis.ArctanInverseCircleAudit.geometric_pi_clock :
+  (RealRaw.scaleRat 4 (ArctanSecantFoundation.value 1)).Equiv piCircleArea
+ComputableAnalysis.ArctanInverseCircleAudit.quarter_angle_normalization (t : Rat) (ht : 0 ≤ t ∧ t ≤ 1) :
+  (RealRaw.scaleRat 4 (ArctanInverseCircle.quarterTarget t)).Equiv (RealRaw.scaleRat t piCircleArea)
+'ComputableAnalysis.ArctanInverseCircleAudit.inverse_at_geometric_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ArctanInverseCircleAudit.geometric_chart_check' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ArctanInverseCircleAudit.quarter_chart_check' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ArctanInverseCircleAudit.quarter_unit_circle' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ArctanInverseCircleAudit.quarter_endpoints' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ArctanInverseCircleAudit.geometric_pi_clock' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.ArctanInverseCircleAudit.quarter_angle_normalization' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

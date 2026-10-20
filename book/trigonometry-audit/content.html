@@ -1,0 +1,41 @@
+<h1 id="geometric-trigonometry">Does the geometric construction give sine and cosine?</h1>
+<p class="lead">A checked inverse, the right circle point, and the right angular clock. These are separate obligations.</p>
+
+<h2 id="fixed-grid">A fixed grid helps cumulative integrals</h2>
+<p>Your proposed grid uses cells \([k2^{-n},(k+1)2^{-n}]\), independently of the upper endpoint. Stage zero already includes the required integer cells; later stages subdivide. Common contributions can then cancel when we compare two upper limits, leaving a short segment and boundary-cell errors. This should make a cumulative-integral derivative proof easier.</p>
+<p>It still needs justified bounds and shrinking errors. Make it a reusable construction, with comparison laws, rather than requiring every integral to use it. Geometric and other function-specific constructions can retain their own justified laws.</p>
+<p>The active arctangent follows a different grid: it begins with \([0,x]\) and bisects, so its nodes are \(kx/2^n\). The existing <code>staticDyadicPlan</code> fixes subdivision counts, not endpoint-independent spatial nodes. The scheduled representation begins at \(64\) cells; its inverse's first midpoint lookup already requests \(16{,}384\) cells.</p>
+<p>This endpoint-scaled construction already has a concrete secant derivative proof. Replacing it is not a prerequisite for differentiating arctangent.</p>
+
+<h2 id="chain">The audited chain and its angle scale</h2>
+<div class="audit-table"><table><thead><tr><th>Step</th><th>Evidence and scope</th></tr></thead><tbody>
+<tr><td>Geometric arctangent</td><td>Rational sector-area bounds are compared with rectangle sums for \(1/(1+u^2)\). Rescheduling preserves the represented value.</td></tr>
+<tr><td>Derivative and order</td><td>Endpoint kernel bounds control increments. The checked secant construction identifies the derivative and supports conditional FTC laws.</td></tr>
+<tr><td>Inverse search</td><td>The actual brackets shrink in \([0,1]\). The forward-target law separately requires a valid target, quantitative precision and target range.</td></tr>
+<tr><td>Circle coordinates</td><td>The recovered half-angle slope is mapped by \(S(u)=2u/(1+u^2)\) and \(C(u)=(1-u^2)/(1+u^2)\). Cosine correctly reverses interval endpoints.</td></tr>
+<tr><td>Quarter-turn clock</td><td>The target is \(tA(1)\), where \(A\) is geometric arctangent and \(4A(1)\simeq\pi\). Thus the physical angle is \(\pi t/2\), for \(0\leq t\leq1\).</td></tr>
+</tbody></table></div>
+<p>The first-quadrant public convention \(\sin(\pi x)\) uses internal coordinate \(t=2x\). Mixing these two coordinates would introduce a factor-of-two error.</p>
+
+<h2 id="exact-check">The new exact check</h2>
+<p>For every rational slope \(u\in[0,1]\), the new Lean theorem proves</p>
+\[\operatorname{inverseExtension}(A(u))\simeq u.\]
+<p>Every actual inverse bracket contains that slope. Transporting those brackets through the rational circle formulas consequently gives exactly \((S(u),C(u))\) at the supplied geometric angle. This is a quantified identification law, not a comparison of a few decimal digits.</p>
+<p>The additional checks prove interval validity and range, the circle identity, endpoints and geometric clock:</p>
+\[s(t)^2+c(t)^2\simeq1,\qquad (s(0),c(0))\simeq(0,1),\qquad(s(1),c(1))\simeq(1,0).\]
+\[4A(1)\simeq\pi,\qquad4\operatorname{quarterTarget}(t)\simeq t\pi.\]
+<p>The checker also verifies the exact rational example \(u=1/2\), with coordinates \((4/5,3/5)\). The quarter-chart theorem keeps its explicit angle-equivalence premise; it does not assert that every angle has a rational half-angle slope.</p>
+
+<h2 id="why-more">Why being on the circle is not enough</h2>
+<p>The inverse produces nested, shrinking brackets even for an invalid or out-of-range target. Such a computation can still give a valid point on the first-quadrant circle. The circle identity alone therefore cannot identify the input as the correct angle.</p>
+<p>The inverse law and clock supply the missing interpretation. A complementary test already in the project compares geometric circle points with an independently constructed analytic rotation at their geometric angles. That comparison can detect an incorrect angular speed.</p>
+
+<h2 id="remaining">What still needs connecting</h2>
+<p>The independent analytic-comparison sources were reviewed, but their separate dependency closure was not rebuilt here. The older arctangent-backed sine interfaces also consume a supplied certified inverse; their field projections do not construct that inverse.</p>
+<p>The next complete function theorem should connect the concrete inverse to those public interfaces and derived arctangent evaluation, prove the required representation invariance, and compose the independent rotation comparison. Global sine and cosine then need justified quadrant, sign and periodicity rules. This audit does not claim those remaining bridges are finished.</p>
+<p>A fixed dyadic plan in a supplied integral certificate likewise does not prove its FTC field. Integral identification remains a mathematical obligation.</p>
+
+<h2 id="reproduce">Checked from source and reproducible</h2>
+<p>A cold build recompiled all \(52\) modules in the concrete inverse-circle closure with an isolated search path. All seven audited theorem endpoints use only Lean's standard <code>propext</code>, <code>Classical.choice</code> and <code>Quot.sound</code> axioms. They use neither <code>sorryAx</code> nor legacy native-decision axioms. The closure imports no Mathlib real or complex numbers.</p>
+<p><a href="geometric-trigonometry-audit/proof.tar.gz">Download the complete proof bundle</a> · <a href="geometric-trigonometry-audit/proof/ComputableAnalysis/ArctanInverseCircleAudit.lean">Read the new proofs</a> · <a href="geometric-trigonometry-audit/proof/verification/report.json">Source hashes and build report</a> · <a href="geometric-trigonometry-audit/proof/verification/check.log">Theorem signatures and axiom checks</a></p>
+<p><a href="geometric-trigonometry-audit/audit.md">Read the full construction audit</a> · <a href="geometric-trigonometry-audit/proof/README.md">Reproduction instructions</a> · <a href="identification-audit.html">The project's identification strategy</a></p>
