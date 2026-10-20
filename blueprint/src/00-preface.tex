@@ -21,7 +21,10 @@ The first idea was to represent a real number by an algorithm. Give it a positiv
 Arithmetic then becomes programming. To add two such numbers, ask each algorithm for an interval narrower than \(\varepsilon/2\), then add their endpoints. Multiplication takes more care because the magnitudes of the inputs affect the error, but the question is still concrete: how much input precision will make the output interval narrow enough?
 
 
-Then I realized that a Riemann sum was precisely the kind of computation I was looking for. For a function whose approximation error we can bound, finite rational calculations give an enclosure for its integral, and refinement makes that enclosure smaller. This made first-year calculus look like a game people could play: build computations, combine them, and explain why they work. I imagined it as a review exercise at the end of a calculus course.
+Many familiar numbers are given by infinite series; in fact, every real number can be expressed as a convergent series of rational terms. To turn a series into a computation, we need a way to bound the remaining tail. Whenever we compute a partial sum, we demand its error bound right away. This is good pedagogy: from the beginning, an approximation comes with an explanation of how accurate it is and how to improve it.
+
+
+Then I realized that a Riemann sum also falls into this paradigm. For a function whose approximation error we can bound, finite rational calculations give an enclosure for its integral, and refinement makes that enclosure smaller. This made first-year calculus look like a game people could play: build computations, combine them, and explain why they work. I imagined it as a review exercise at the end of a calculus course.
 
 
 
@@ -36,7 +39,7 @@ One simplification stayed with me: let the input be a stage \(n\), rather than a
 
 \[n\longmapsto I_n=[a_n,b_n],\qquad a_n,b_n\in\mathbb Q.\]
 
-We might arrange that the width is at most \(1/n\), for positive \(n\). But no particular speed is essential. What matters is proving that the intervals remain valid and their widths shrink to zero. In this project, valid intervals are ordered and nested:
+We might arrange that the width is at most \(1/n\), for positive \(n\). But no particular speed is essential. What matters is proving that the intervals remain nested, and their widths shrink to zero. In this project, valid intervals are ordered and nested:
 
 \[a_n\le a_{n+1}\le b_{n+1}\le b_n,\qquad b_n-a_n\longrightarrow0.\]
 
