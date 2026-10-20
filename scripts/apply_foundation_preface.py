@@ -35,11 +35,15 @@ def apply(site):
         if not NAV.search(text):
             continue
         edited = add_nav(text)
-        if name == 'index.html' and 'id="foundation-preface-intro"' not in edited:
-            intro = '<section id="foundation-preface-intro"><h2>Read the preface</h2><p>Learn how rational-input functions, exact comparison of computations, and skills for discovering formulas fit together. The preface explains the foundation’s relationship to computable and constructive analysis.</p><p><a href="preface.html">How to read this foundation</a></p></section>'
-            anchor = '<section id="foundation-story">'
-            assert anchor in edited
-            edited = edited.replace(anchor, intro + anchor, 1)
+        if name == 'index.html':
+            intro = '<section id="foundation-preface-intro"><h2>Read the preface</h2><p>How an Observable programming exercise grew into a foundation for proving calculus: rational algorithms, square-root intervals, and different computations of pi.</p><p><a href="preface.html">From a programming exercise to a foundation</a></p></section>'
+            if 'id="foundation-preface-intro"' in edited:
+                edited, count = re.subn(r'<section id="foundation-preface-intro">.*?</section>', lambda _: intro, edited, count=1, flags=re.S)
+                assert count == 1
+            else:
+                anchor = '<section id="foundation-story">'
+                assert anchor in edited
+                edited = edited.replace(anchor, intro + anchor, 1)
         if name == 'ch-foundations.html' and 'class="preface-reader-link"' not in edited:
             anchor = '<div class="chapter-kicker">'
             assert anchor in edited
@@ -62,8 +66,8 @@ def apply(site):
     assert content.count('\\(') == content.count('\\)')
     assert content.count('\\[') == content.count('\\]')
     toc = ''.join('<a href="#'+key+'">'+title+'</a>' for key, title in re.findall(r'<h2 id="([^"]+)">([^<]+)</h2>', content))
-    head = r'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="The objects, exact identities, function constructions, and proof discipline of this computable-analysis foundation."><title>Preface · Computable Analysis</title><link href="reading/book.css" rel="stylesheet"><link href="reading/analysis-edition.css" rel="stylesheet"><script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],processEscapes:true},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script><script defer src="reading/book.js"></script><style>.reader h1,.reader h2{overflow-wrap:anywhere}.reader mjx-container{max-width:100%;overflow-x:auto;overflow-y:hidden}.reader{min-width:0}.preface-reader-link{font:12px/1.7 system-ui}</style></head><body><a class="skip" href="#main">Skip to preface</a>'''
-    footer = '<footer class="chapter-footer"><span>Foundation and proof discipline · results at their stated scope</span><a href="foundation-preface/00-preface.tex">Preface manuscript</a></footer>'
+    head = r'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="From Observable and exact fractions to a foundation for proving calculus, with rational square-root algorithms and stage-by-stage decimal enclosures."><title>Preface · Computable Analysis</title><link href="reading/book.css" rel="stylesheet"><link href="reading/analysis-edition.css" rel="stylesheet"><script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],processEscapes:true},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script><script defer src="reading/book.js"></script><style>.reader h1,.reader h2{overflow-wrap:anywhere}.reader mjx-container{max-width:100%;overflow-x:auto;overflow-y:hidden}.reader{min-width:0}.preface-reader-link{font:12px/1.7 system-ui}.preface-table{overflow-x:auto;margin:1.4rem 0;padding-bottom:.4rem}.preface-table table{border-collapse:collapse;width:100%;font-size:.88rem}.preface-table th,.preface-table td{padding:.65rem .6rem;border-bottom:1px solid #d8ded9;text-align:left;white-space:nowrap}.preface-table thead th{font:600 .75rem/1.5 system-ui;color:#52615b}.decimal-number{display:inline-flex;align-items:baseline;gap:0}.decimal-number mjx-container{margin:0!important;overflow:visible!important;flex:none}.preface-table mark{background:#f5e3a0;color:inherit;padding:2px 0;border-radius:2px}.reader pre{overflow-x:auto;padding:1.2rem;background:#f3f5f2;border:1px solid #dce2da;border-radius:8px;line-height:1.7}.reader pre code{font-size:.87rem}</style></head><body><a class="skip" href="#main">Skip to preface</a>'''
+    footer = '<footer class="chapter-footer"><span>From Observable to exact mathematical proofs</span><a href="foundation-preface/00-preface.tex">Preface manuscript</a></footer>'
     html = head + header + nav + '<div class="page"><main class="reader" id="main"><div class="chapter-kicker">PREFACE</div><article><div class="main-text">' + content + '</div></article>' + footer + '</main><aside class="on-this-page"><span>On this page</span>' + toc + '</aside></div></body></html>\n'
     (site / 'preface.html').write_text(html)
     assets = site / 'foundation-preface'
