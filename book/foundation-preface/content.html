@@ -27,14 +27,7 @@
         b = (b + 2/b) / 2
     return [a, b]</code></pre>
 <p>At stage \(0\) it returns \([1,2]\). After one update it returns \([4/3,3/2]\), and after two it returns \([24/17,17/12]\). Starting with fractions, every update produces fractions.</p>
-<p>Why does it work? Write the current bounds as \(a,b\). The update is</p>
-\[a'=\frac{2+ab}{a+b},\qquad b'=\frac{b+2/b}{2}.\]
-<p>The rational inequalities prove that the new bounds stay inside the old ones and still bracket a square root:</p>
-\[a\le a'\le b'\le b,\qquad (a')^2\le2\le(b')^2.\]
-<p>They also give an exact identity for the new width:</p>
-\[b'-a'=\frac{(b-a)(b^2-2)}{2b(a+b)}=\frac{(b-a)^2}{4b'}.\]
-<p>The last equality uses \(ab=2\), which holds initially and is preserved by the update.</p>
-<p>In particular, the widths at stage \(n\) are at most \(4^{-n}\), so they become arbitrarily small. These facts can all be proved with rational arithmetic. The construction earns the name \(\sqrt2\) through its properties.</p>
+<p>Readers who wish can verify that the intervals remain nested, their squared endpoints bracket \(2\), and their widths shrink to zero. We leave that verification as an optional exercise.</p>
 <p>The table abbreviates the decimal expansions of these exact rational bounds. Their common leading digits are in bold, followed by one more digit and an ellipsis for the omitted digits.</p>
 <!-- sqrt-table:start -->
 <div class="preface-table"><table>
@@ -66,12 +59,10 @@
 </tbody>
 </table></div>
 <!-- product-table:end -->
-<p>The lower bound begins with \(1.999\ldots\), while the upper bound begins with \(2.000\ldots\). Both displays convey increasing precision. The proof uses the rational endpoints: every squared interval contains \(2\), and its width shrinks because</p>
-\[b_n^2-a_n^2=(b_n-a_n)(b_n+a_n)\le4(b_n-a_n)\longrightarrow0.\]
-<p>Thus the product computation and the constant computation returning \([2,2]\) represent exactly the same value:</p>
+<p>The lower bound begins with \(1.999\ldots\), while the upper bound begins with \(2.000\ldots\). Both displays convey increasing precision. The exact identity we want to justify is</p>
 \[\sqrt2\cdot\sqrt2\simeq2.\]
-<p>The symbol \(\simeq\) means equality of represented values, not an unspecified numerical approximation. In the Lean development it is <code>RealRaw.Equiv</code>: the intervals of two valid representations overlap at every common stage. We prove the identity for all stages; the finite table only illustrates it.</p>
-<p>This is the point of the example: proving an exact identity becomes reasoning about rational inequalities. We establish bounds that hold at every stage, rather than calculate more and more digits. This is the kind of algebraic reasoning that language models can do well, with Lean checking the proofs they produce.</p>
+<p>The symbol \(\simeq\) means equality of represented values. The finite table illustrates the identity; a proof must justify it at every stage.</p>
+<p>This is the point of the example: proving an exact identity becomes reasoning about rational inequalities. The task is to establish bounds that hold at every stage. This is the kind of algebraic reasoning that language models can do well, with Lean checking the proofs they produce.</p>
 
 <h2 id="digits">Why intervals, rather than committed digits</h2>
 <p>The paired runs of nines and zeros reveal a problem with treating a real-number computation as a machine that must commit to successive ordinary digits. An interval can straddle a terminating decimal at every stage while becoming arbitrarily narrow. Refinement alone need not decide which digit expansion to print. Our interval definition accommodates this situation directly.</p>
