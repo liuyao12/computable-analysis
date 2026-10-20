@@ -21,11 +21,11 @@ def display(value, highlighted):
     prefix, suffix = value[:highlighted], value[highlighted:highlighted + 1]
     parts = []
     if prefix:
-        parts.append(r'<strong>\(\boldsymbol{\mathtt{' + prefix + r'}}\)</strong>')
+        parts.append(r'\mathbf{' + prefix + '}')
     if suffix:
-        parts.append(r'\(\mathtt{' + suffix + r'}\ldots\)')
+        parts.append(r'\mathrm{' + suffix + r'}\ldots')
     label = prefix + suffix + ('...' if suffix else '')
-    return '<span class="decimal-number" aria-label="' + html.escape(label) + '">' + ''.join(parts) + '</span>'
+    return '<span class="decimal-number" aria-label="' + html.escape(label) + '">\\(' + ''.join(parts) + '\\)</span>'
 
 
 def rows():
