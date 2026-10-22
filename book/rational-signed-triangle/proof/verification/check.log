@@ -1,0 +1,17 @@
+ComputableAnalysis.RationalCircle.triangleSignedArea_affine (M : TriangleLinearMap) (shift p q r : PiCirclePoint) :
+  triangleSignedArea (M.affine shift p) (M.affine shift q) (M.affine shift r) = M.determinant * triangleSignedArea p q r
+'ComputableAnalysis.RationalCircle.triangleTwiceArea_affine' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalCircle.triangleSignedArea_affine' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalCircle.triangleSignedArea_SL2' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalCircle.triangleSignedArea_singular' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalCircle.triangleSignedArea_swap_coordinates' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalCircle.TriangleLinearMap.determinant_compose' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalCircle.TriangleLinearMap.dot_apply_gram' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

@@ -1,5 +1,7 @@
 # Rational geometry, Pythagoras, and trigonometry by sector area
 
+**Scope update:** this broader proposal is deferred. Current work retains the rational dot product and signed triangle area, with its general linear transformation law; see [the signed-area note](RATIONAL_SIGNED_TRIANGLE_AREA.md).
+
 This is a small sufficient foundation proposal, with explicit proofs and a checked finite algebra model. “Minimal” here means that unnecessary existence and analytic axioms have been removed. Independence of every remaining axiom is not claimed. No completed real field, numerical distance formula, square-root existence, integral, derivative, or trigonometric addition formula is assumed.
 
 ## The obstruction that determines the scope

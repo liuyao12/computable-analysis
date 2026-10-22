@@ -1,0 +1,15 @@
+PASS ComputableAnalysis.Basic 25.91
+PASS ComputableAnalysis.ComplexAffine 2.46
+PASS ComputableAnalysis.ComplexMultiplication 3.55
+PASS ComputableAnalysis.ComplexPolynomial 0.3
+PASS ComputableAnalysis.ComplexInterval 0.38
+PASS ComputableAnalysis.Polynomial 6.07
+PASS ComputableAnalysis.PowerSeries 3.45
+PASS ComputableAnalysis.Calculus 23.39
+PASS ComputableAnalysis.Differential 9.64
+PASS ComputableAnalysis.FTC 1.89
+PASS ComputableAnalysis.AlgebraicFunctions 7.27
+PASS ComputableAnalysis.Pi 23.16
+PASS ComputableAnalysis.RationalCircle 66.11
+PASS ComputableAnalysis.RationalTriangleAreaTransform 12.7
+PASS complete source closure 14

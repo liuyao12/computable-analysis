@@ -1,0 +1,48 @@
+{
+  "coldBuild": true,
+  "modulesBuilt": 14,
+  "compileOrder": [
+    "ComputableAnalysis.Basic",
+    "ComputableAnalysis.ComplexAffine",
+    "ComputableAnalysis.ComplexMultiplication",
+    "ComputableAnalysis.ComplexPolynomial",
+    "ComputableAnalysis.ComplexInterval",
+    "ComputableAnalysis.Polynomial",
+    "ComputableAnalysis.PowerSeries",
+    "ComputableAnalysis.Calculus",
+    "ComputableAnalysis.Differential",
+    "ComputableAnalysis.FTC",
+    "ComputableAnalysis.AlgebraicFunctions",
+    "ComputableAnalysis.Pi",
+    "ComputableAnalysis.RationalCircle",
+    "ComputableAnalysis.RationalTriangleAreaTransform"
+  ],
+  "leanVersion": "Lean (version 4.33.0-rc2, arm64-apple-darwin24.6.0, commit d8b18978322de05a8f3dba51ef03cf5461676c17, Release)",
+  "sourceSha256": {
+    "ComputableAnalysis/AlgebraicFunctions.lean": "e1e1f699ee07b160c57d358b3a6d48e57edf94ee943384879267d2edce656f04",
+    "ComputableAnalysis/Basic.lean": "3562c17ae4d6b375996d4df7201c22ae577f812bd6e9ecb30a89fc202166d3f1",
+    "ComputableAnalysis/Calculus.lean": "6d6cab6e536301bff796eafa0b2080f858f3b7060718752a2fb4021dff9c006d",
+    "ComputableAnalysis/ComplexAffine.lean": "94d6b3d9c4bd206ea67b0a8eddd8ec0ac87081ce48ce2cf39634774bafdd63af",
+    "ComputableAnalysis/ComplexInterval.lean": "426fe42be86ef94ca1d8d0f20bca7ac39bd11c34c8068d1f8a89836cc0d097a1",
+    "ComputableAnalysis/ComplexMultiplication.lean": "d42e38bcd739d585a80268e2ff77261a225aa18cc924a6dfe146a0a59c3ed97f",
+    "ComputableAnalysis/ComplexPolynomial.lean": "ded7dc8d38f60492d9e705bdeee9d0321bb4d7b31f15adb6e31fba465b410b25",
+    "ComputableAnalysis/Differential.lean": "fc6e516567a248496953af8beaf8d0b5b90632634eceb1daed9065797fd2a48e",
+    "ComputableAnalysis/FTC.lean": "3920dac56a80a5c85a6fd6bd66aefbd1119f06333dd84fbbd6f920f859cbe3d4",
+    "ComputableAnalysis/Pi.lean": "3555490fd90dcf655122cdfa04972e2a13494ea58293c76726a79edef1f2316c",
+    "ComputableAnalysis/Polynomial.lean": "3bf0ad6d25140df62c3cbd428c58b789f1d21a9f3e80d6efbe1336f2a2e11746",
+    "ComputableAnalysis/PowerSeries.lean": "4f0846baf69c4112791076cae23fe87366a053ab1525066436b5fd348b1315fc",
+    "ComputableAnalysis/RationalCircle.lean": "7f1ce8ed74419301c473128787d7218a5ba7ef4229b19eab6b3f5742f415a921",
+    "ComputableAnalysis/RationalTriangleAreaTransform.lean": "a7943542f6c5e206aa5f50a8a6d53e4676b1ba4076c38aa98dd0f6c5d4efeba7",
+    "scripts/check_rational_triangle_area_transform.lean": "b0e860c59fa3cd18e0aa7a9cf29a1abc2a58e45ab032e92ad585b85a596446ee"
+  },
+  "auditedTheorems": [
+    "ComputableAnalysis.RationalCircle.triangleTwiceArea_affine",
+    "ComputableAnalysis.RationalCircle.triangleSignedArea_affine",
+    "ComputableAnalysis.RationalCircle.triangleSignedArea_SL2",
+    "ComputableAnalysis.RationalCircle.triangleSignedArea_singular",
+    "ComputableAnalysis.RationalCircle.triangleSignedArea_swap_coordinates",
+    "ComputableAnalysis.RationalCircle.TriangleLinearMap.determinant_compose",
+    "ComputableAnalysis.RationalCircle.TriangleLinearMap.dot_apply_gram"
+  ],
+  "scope": "Signed triangle area determinant covariance, matrix composition and rational dot-product covariance; no new geometric area axioms."
+}
