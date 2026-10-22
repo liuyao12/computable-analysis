@@ -1,0 +1,25 @@
+{
+  "leanVersion": "Lean (version 4.33.0-rc2, arm64-apple-darwin24.6.0, commit d8b18978322de05a8f3dba51ef03cf5461676c17, Release)",
+  "coldBuild": true,
+  "imports": [
+    "Init.Grind.Ordered.Rat"
+  ],
+  "auditedTheorems": [
+    "ComputableAnalysis.RationalAreaFoundation.area_pythagoras_of_bilinear",
+    "ComputableAnalysis.RationalAreaFoundation.pythagoras_square_areas",
+    "ComputableAnalysis.RationalAreaFoundation.four_triangle_dissection_content",
+    "ComputableAnalysis.RationalAreaFoundation.similarity_square_content",
+    "ComputableAnalysis.RationalAreaFoundation.circle_point_square_content",
+    "ComputableAnalysis.RationalAreaFoundation.tangent_intersection_supporting_lines",
+    "ComputableAnalysis.RationalAreaFoundation.outer_wedge_quadrilateral_content",
+    "ComputableAnalysis.RationalAreaFoundation.unit_disk_support",
+    "ComputableAnalysis.RationalAreaFoundation.wedge_gap_bounds",
+    "ComputableAnalysis.RationalAreaFoundation.uniform_fan_gap_bound",
+    "ComputableAnalysis.RationalAreaFoundation.unit_chart_increment_bounds"
+  ],
+  "sourceSha256": {
+    "ComputableAnalysis/RationalAreaFoundation.lean": "60ee732cbe55f76099c21d0995fae72e4662e7cf5f8d9d8c667e7e2b5259b3f4",
+    "scripts/check_rational_area_foundation.lean": "06572e2e454ac0a32ba54387eb6fc30ab783dca56526f850f76b00ced9585084"
+  },
+  "scope": "Finite rational area algebra and sector-fan estimates; no complete polygon-dissection or curved-area-role formalization claimed."
+}

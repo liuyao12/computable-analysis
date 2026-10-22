@@ -1,0 +1,41 @@
+ComputableAnalysis.RationalAreaFoundation.area_pythagoras_of_bilinear (B : Point → Point → Rat)
+  (add_left : ∀ (u v w : Point), B (add u v) w = B u w + B v w)
+  (add_right : ∀ (u v w : Point), B u (add v w) = B u v + B u w)
+  (scale_left : ∀ (k : Rat) (u v : Point), B (scale k u) v = k * B u v)
+  (scale_right : ∀ (k : Rat) (u v : Point), B u (scale k v) = k * B u v) (alternating : ∀ (u : Point), B u u = 0)
+  (u : Point) (k : Rat) :
+  B (add u (scale k (quarter u))) (quarter (add u (scale k (quarter u)))) =
+    B u (quarter u) + B (scale k (quarter u)) (quarter (scale k (quarter u)))
+ComputableAnalysis.RationalAreaFoundation.square_content_coordinates (u : Point) :
+  squareContent u = u.x * u.x + u.y * u.y
+ComputableAnalysis.RationalAreaFoundation.uniform_fan_gap_bound (r : Rat) (hr : 0 ≤ r) (N : Nat) (hN : 0 < N) :
+  0 ≤ upperFan (r / ↑N) N - lowerFan (r / ↑N) N ∧ upperFan (r / ↑N) N - lowerFan (r / ↑N) N ≤ r * r * r / (↑N * ↑N)
+'ComputableAnalysis.RationalAreaFoundation.area_pythagoras_of_bilinear' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalAreaFoundation.pythagoras_square_areas' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalAreaFoundation.four_triangle_dissection_content' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalAreaFoundation.similarity_square_content' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalAreaFoundation.circle_point_square_content' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalAreaFoundation.tangent_intersection_supporting_lines' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalAreaFoundation.outer_wedge_quadrilateral_content' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalAreaFoundation.unit_disk_support' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalAreaFoundation.wedge_gap_bounds' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ComputableAnalysis.RationalAreaFoundation.uniform_fan_gap_bound' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ComputableAnalysis.RationalAreaFoundation.unit_chart_increment_bounds' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,59 @@
+<h1 id="rational-foundation">Geometry before numerical distance</h1>
+<p class="lead">A rational square can have area two before its side has been assigned a numerical length. That distinction lets geometry support the construction of numbers.</p>
+
+<h2 id="scope">What “over the rationals” allows</h2>
+<p>We can form the unit square, its diagonal, rational subdivisions and polygonal dissections without assuming a real-number field. We cannot also demand that every segment can be copied onto every ray: moving the unit diagonal onto the horizontal axis would require a rational solution of \(c^2=2\).</p>
+<p>The aim is a small sufficient foundation. Logical independence of every axiom is not claimed. Numerical distances, square-root existence, integral and derivative laws, and trigonometric addition formulas are absent from the assumptions.</p>
+
+<h2 id="geometry">Two geometric ingredients</h2>
+<p><strong>Rational affine geometry.</strong> Points admit rational affine combinations. We can draw lines, use betweenness and parallels, subdivide rationally, and intersect supplied nonparallel lines. A concrete model is \(\mathbb Q^2\), with no metric attached.</p>
+<p><strong>A compatible quarter-turn.</strong> Supply a rational-linear operation \(J\) on displacements with \(J^2v=-v\), and choose the unit frame \((e,Je)\). A square erected on \(v\) has vertices \(0,v,v+Jv,Jv\). In that frame, \(J(x,y)=(-y,x)\).</p>
+<p>The quarter-turn is an explicit geometric input. Pure affine incidence and area do not distinguish a square from a sheared parallelogram. This choice supplies the structure needed for right angles without postulating arbitrary rotations or numerical angle measures.</p>
+
+<h2 id="area-laws">Four laws for rational polygon area</h2>
+<div class="audit-table"><table><thead><tr><th>Law</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>Unit normalization</td><td>The unit square has area \(1\).</td></tr>
+<tr><td>Finite additivity</td><td>A certified dissection with disjoint interiors preserves the sum of the areas. Points and segments have area zero.</td></tr>
+<tr><td>Nonnegativity</td><td>Polygonal areas are nonnegative. Inclusion comparisons follow by decomposing polygonal differences.</td></tr>
+<tr><td>Translation invariance</td><td>Rational translations preserve area.</td></tr>
+</tbody></table></div>
+<p>Rational tilings determine rectangle areas. Interior and covering grid cells squeeze each polygon's area: only a computable linear number of cells meet its boundary, while each cell has area \(1/N^2\). This determines polygon content using rational comparisons. Triangulation supplies its explicit computation.</p>
+<p>The resulting oriented parallelogram content is \(\omega((x,y),(z,w))=xw-yz\). Its bilinearity is an area law. No numerical distance formula has entered.</p>
+
+<h2 id="pythagoras">Pythagoras is an area theorem</h2>
+<p>Let \(Q(v)\) be the area of the square erected on \(v\). Four right triangles with axis legs \(a,b\) fit inside the square of side \(a+b\). The central square is erected on \((b,a)\). Dissection gives</p>
+\[Q((b,a))=(a+b)^2-4\frac{ab}{2}=a^2+b^2.\]
+<div class="geometry-figures">
+<figure><svg viewBox="0 0 240 240" role="img" aria-labelledby="dissection-title"><title id="dissection-title">Four rational right triangles surround the square on the hypotenuse</title><rect x="20" y="20" width="200" height="200" fill="#dce9ee" stroke="#376070" stroke-width="2"/><polygon points="140,220 220,100 100,20 20,140" fill="#f1d99b" stroke="#765b24" stroke-width="2"/><path d="M20 220 L140 220 M220 220 L220 100 M220 20 L100 20 M20 20 L20 140" stroke="#376070" stroke-width="2" fill="none"/></svg><figcaption>The dissection at \((a,b)=(3,2)\): outer area \(25\), four triangle areas \(3\) each, central square area \(13\).</figcaption></figure>
+<figure><svg viewBox="0 0 240 240" role="img" aria-labelledby="sector-title"><title id="sector-title">Rational inner and tangent polygons enclose a quarter disk</title><polygon points="20,220 220,220 220,120 86.6667,20 20,20" fill="#dce9ee" stroke="#376070" stroke-width="2"/><polygon points="20,220 220,220 140,60 20,20" fill="#f1d99b" stroke="#765b24" stroke-width="2"/><path d="M220 220 A200 200 0 0 0 20 20" fill="none" stroke="#263b32" stroke-width="2"/><path d="M20 220 L140 60" fill="none" stroke="#765b24" stroke-width="1"/></svg><figcaption>Rational inner and outer polygons at \(N=2\). Their quarter-disk areas are \(7/10\) and \(5/6\). The arc illustrates the intended region.</figcaption></figure>
+</div>
+<p>More generally, area bilinearity and \(J^2=-I\) give \(Q(v+kJv)=Q(v)+Q(kJv)\). Only afterward do we define squared size by erected-square area and obtain the coordinate theorem \(Q((x,y))=x^2+y^2\). The unit diagonal has square area \(2\); computing its numerical length is a further construction.</p>
+
+<h2 id="area-existence">Area laws do not assert every area exists</h2>
+<p>For a particular curved region, a supplied valid represented value must agree with polygon area, respect justified inclusions, and satisfy finite additivity for supplied decompositions. These laws do not assert that every region has an area, or that all area values are rational.</p>
+<p>For a disk or sector, rational inner and outer polygons can force any two proposed area values to agree. This is a uniqueness proof. An algorithm producing nested, shrinking area intervals separately establishes existence. Polygon exhaustion is a proof method for these regions, rather than a universal definition of area.</p>
+
+<h2 id="sector-bounds">An explicit sector bound without calculus</h2>
+<p>The rational boundary chart</p>
+\[p(u)=\left(\frac{1-u^2}{1+u^2},\frac{2u}{1+u^2}\right),\qquad0\leq u\leq1,\]
+<p>lies on the unit circle by the square-area theorem. For consecutive parameters \(u\leq v\), the chord triangle and the tangent quadrilateral have areas</p>
+\[L(u,v)=\frac{(v-u)(1+uv)}{(1+u^2)(1+v^2)},\qquad U(u,v)=\frac{v-u}{1+uv}.\]
+<p>Their exact difference is</p>
+\[U(u,v)-L(u,v)=\frac{(v-u)^3}{(1+uv)(1+u^2)(1+v^2)}\leq(v-u)^3.\]
+<p>For \(N\) equal subdivisions of \([0,r]\), the summed gap is at most \(r^3/N^2\). Taking \(N=2^n\) yields nested polygon enclosures and shrinking errors. Four quarter-disk copies give a whole-disk error at most \(4/N^2\). No integral or derivative is used.</p>
+<p>The first whole-disk bounds, \([14/5,10/3]\) and \([6486/2125,2209/693]\), exactly reproduce the project's existing finite circle-area certificates. An all-stage geometric comparison is a separate proof.</p>
+
+<h2 id="trigonometry">The intended specification of sine and cosine</h2>
+<p>Let \(\Pi\) be the constructed unit-disk area, and let \(t\in[0,1]\) count quarter-turns. The intended pair has nonnegative coordinates, lies on the unit circle, and satisfies</p>
+\[\operatorname{Area}\bigl(\operatorname{Sector}((1,0),(C(t),S(t)))\bigr)\simeq\frac{t\Pi}{4}.\]
+<p>This is the identifying statement. The algorithm remains below it. It inverts the strictly increasing sector-area function using rational brackets, then maps those brackets through the circle chart. The finite wedge bounds give the quantitative control needed for the inverse.</p>
+<p>Usually the resulting coordinates are represented numbers rather than rational points. Their existence must be proved by that construction. The quarter-turn coordinate has physical angle \(\pi t/2\); the public convention \(\sin(\pi x)\) uses \(t=2x\) in the first quadrant.</p>
+<p>Rational similarities transport rays and scale polygon and disk areas by the same factor. To make normalized sector measure independent of the chosen disk, first prove scaling for rational dilations, then squeeze a rational squared radius between rational squares. This supplies the radius-independence bridge without assuming a numerical square root.</p>
+<p>An oriented geometric angle can be an ordered pair of rational rays, with congruence given by a translation and one rational direct similarity applied to both. This gives angle congruence before numerical measure. The area laws and radius-independence argument prove that the measure survives that transport.</p>
+<p>Addition laws should follow from adjoining sectors and composing rotations. Extending that argument from rational motions to the constructed represented coordinates requires a proved approximation bridge, together with quadrant and winding conventions.</p>
+
+<h2 id="verification">What has been checked</h2>
+<p>The companion Lean file imports only rational ordered-ring support. A cold check passed all eleven theorem-axiom audits. It includes a conditional Pythagoras theorem for any supplied alternating bilinear area, the concrete square and similarity identities, tangent-line equations, both wedge-area formulas, disk support, the cubic gap and the summed \(r^3/N^2\) bound.</p>
+<p>The full formal polygon dissection and containment layer, the new sector evaluator's geometric area-role theorem, and its represented-input trigonometry bridges remain to be formalized. The proposal supplies their mathematical derivations and quantitative route; finite algebra checks do not substitute for those geometric proofs.</p>
+<p><a href="rational-geometry-area/foundation.md">Full axiom proposal and derivations</a> · <a href="rational-geometry-area/proof.tar.gz">Download the rational-only proof bundle</a> · <a href="rational-geometry-area/proof/ComputableAnalysis/RationalAreaFoundation.lean">Read the checked theorems</a> · <a href="rational-geometry-area/proof/verification/report.json">Source hashes and verification report</a></p>
+<p><a href="geometric-trigonometry-audit.html">Earlier trigonometry audit</a> · <a href="https://arxiv.org/abs/1407.4398">Beeson on constructive geometry and construction axioms</a> · <a href="https://homepages.math.uic.edu/~jbaldwin/pub/axconIfeb29.pdf">Baldwin on geometric axioms and area</a></p>
