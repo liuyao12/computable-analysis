@@ -1,6 +1,29 @@
 <h1 id="geometric-trigonometry">Does the geometric construction give sine and cosine?</h1>
 <p class="lead">A checked inverse, the right circle point, and the right angular clock. These are separate obligations.</p>
 
+<h2 id="computation-first">Start with successive rational updates</h2>
+<p>For rational \(0\leq x\leq1\), start with \([a,b]=[x/(1+x^2),x]\) and the parameter interval \([0,x]\). At stage \(n+1\), split every current interval \([p,r]\) at \(q=(p+r)/2\), add the following increment to \(a\), and subtract the following decrement from \(b\):</p>
+\[I(p,q,r)=\frac{2(r-p)(q-p)(r-q)}{(1+p^2)(1+q^2)(1+r^2)},\qquad D(p,q,r)=\frac{(r-p)(q-p)(r-q)}{(1+pr)(1+pq)(1+qr)}.\]
+<p>Here is the loop in Python-style pseudocode, with exact rational arithmetic and stage input <code>n</code>. The functions <code>I</code> and <code>D</code> are the rational expressions above.</p>
+<pre><code class="language-python"><span style="color: #008000; font-weight: bold">def</span><span style="color: #BBB"> </span><span style="color: #00F">arctan_bounds</span>(x, n):
+    a, b <span style="color: #666">=</span> x <span style="color: #666">/</span> (<span style="color: #666">1</span> <span style="color: #666">+</span> x<span style="color: #666">*</span>x), x
+    cells <span style="color: #666">=</span> [(<span style="color: #666">0</span>, x)]
+    <span style="color: #008000; font-weight: bold">for</span> _ <span style="color: #A2F; font-weight: bold">in</span> <span style="color: #008000">range</span>(n):
+        next_cells <span style="color: #666">=</span> []
+        <span style="color: #008000; font-weight: bold">for</span> p, r <span style="color: #A2F; font-weight: bold">in</span> cells:
+            q <span style="color: #666">=</span> (p <span style="color: #666">+</span> r) <span style="color: #666">/</span> <span style="color: #666">2</span>
+            a <span style="color: #666">+=</span> I(p, q, r)
+            b <span style="color: #666">-=</span> D(p, q, r)
+            next_cells<span style="color: #666">.</span>extend([(p, q), (q, r)])
+        cells <span style="color: #666">=</span> next_cells
+    <span style="color: #008000; font-weight: bold">return</span> [a, b]
+
+<span style="color: #008000; font-weight: bold">def</span><span style="color: #BBB"> </span><span style="color: #00F">pi_bounds</span>(n):
+    a, b <span style="color: #666">=</span> arctan_bounds(<span style="color: #666">1</span>, n)
+    <span style="color: #008000; font-weight: bold">return</span> [<span style="color: #666">4*</span>a, <span style="color: #666">4*</span>b]</code></pre>
+<p>Stage zero of the pi computation returns \([2,4]\); stage one returns \([14/5,10/3]\). The proof identifies these successive additions and subtractions as signed triangle areas in inner chord and outer tangent fans. It proves that the intervals remain nested and their widths shrink to zero. For arctangent, \(0\leq b_n-a_n\leq x^3/4^n\). At \(x=1\), the fans enclose a quarter disk; four times its area gives \(\pi\). The computation comes first, and the triangle interpretation justifies its mathematical name.</p>
+<p><a href="https://github.com/liuyao12/computable-analysis/blob/main/docs/PI_ARCTAN_COMPUTATION.md">Full recurrence, signed-area interpretation, and proof scope</a></p>
+
 <h2 id="fixed-grid">A fixed grid helps cumulative integrals</h2>
 <p>Your proposed grid uses cells \([k2^{-n},(k+1)2^{-n}]\), independently of the upper endpoint. Stage zero already includes the required integer cells; later stages subdivide. Common contributions can then cancel when we compare two upper limits, leaving a short segment and boundary-cell errors. This should make a cumulative-integral derivative proof easier.</p>
 <p>It still needs justified bounds and shrinking errors. Make it a reusable construction, with comparison laws, rather than requiring every integral to use it. Geometric and other function-specific constructions can retain their own justified laws.</p>

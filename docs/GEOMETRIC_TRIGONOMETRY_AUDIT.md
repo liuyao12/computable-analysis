@@ -2,6 +2,21 @@
 
 Audit date: 2026-10-19. This reviews the current local construction and cold-builds its 52-module proof closure. The downloadable source snapshot and SHA-256 manifest identify the precise inputs; the working tree contains additional work outside this audit.
 
+## Present the computation before its geometric interpretation
+
+The definitions of geometric arctangent and pi are successive rational
+updates. Begin with the arctangent interval $[x/(1+x^2),x]$ for
+$0\leq x\leq1$. Bisect each current parameter interval; add the explicit
+increment to the lower endpoint and subtract the explicit decrement from
+the upper endpoint. The input is stage $n$. At $x=1$, multiply both
+endpoints by four to obtain the pi computation.
+
+The proof identifies the updates as signed triangle areas in inner chord
+and outer tangent fans and proves nested, shrinking bounds. Read the
+[computation-first definition and its justification](PI_ARCTAN_COMPUTATION.md).
+This exposition update leaves the recorded proof snapshot and its checked
+scope unchanged.
+
 ## Fixed spatial grids: useful construction, separate specification
 
 A fixed dyadic lattice is a good construction for a cumulative integral. At stage \(n\), use cells \([k2^{-n},(k+1)2^{-n}]\), include the whole cells between the base point and the endpoint, and handle the last partial cell with justified bounds. Stage zero already sums the required integer cells. Refinement splits those cells, without moving the old grid when the endpoint changes.
