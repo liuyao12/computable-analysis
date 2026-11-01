@@ -1,0 +1,35 @@
+name: Publish foundation textbook and checked contour proof
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-verified-proof-publication
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore and verify the complete existing site
+        run: python3 scripts/preserve_foundation_site.py
+      - name: Add the living textbook and checked proof download
+        run: |
+          python3 scripts/apply_foundation_textbook.py _site
+          python3 scripts/render_foundation_textbook.py --output _site/foundation-textbook --check
+          python3 scripts/verify_foundation_overlay.py
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+          retention-days: 90
+      - uses: actions/deploy-pages@v4
+        id: deployment

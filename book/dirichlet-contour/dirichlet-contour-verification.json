@@ -1,0 +1,23 @@
+{
+  "theorem": "ComputableAnalysis.DirichletIntegral.ContourEvaluation.integral_eq_pi_half",
+  "toolchain": "leanprover/lean4:v4.33.0-rc2",
+  "cleanSourceBuild": true,
+  "buildJobs": 283,
+  "foundationModules": 138,
+  "companionModules": 143,
+  "dependencyDeclarations": 9751,
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "independentOf": [
+    "parameter/Feynman evaluation",
+    "damping and Laplace calculation",
+    "Mathlib real/complex numbers"
+  ],
+  "errorBound": "64/N for N >= 1",
+  "archiveSha256": "6f8d65a886ad2844cf02fb0d83ee2fef33d5f926e6c8e4bfdfddf0edd40d70e2",
+  "archiveBytes": 1137327,
+  "auditLog": "'ComputableAnalysis.DirichletIntegral.ContourEvaluation.integral_eq_pi_half' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n'ComputableAnalysis.DirichletIntegral.ContourEvaluation.error_bound' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n'ComputableAnalysis.DirichletIntegral.ContourFunction.boundary_converges_zero' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n'ComputableAnalysis.LipschitzQuadrature.Data.midpoint_error' depends on axioms: [propext, Classical.choice, Quot.sound]\n1 / 2\n1 / 2\nPASS: 9751 declarations; no parameter/Feynman/damping/Laplace or ambient Real/Complex dependencies; standard logical axioms only.\n"
+}
