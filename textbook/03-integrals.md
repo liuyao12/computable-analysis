@@ -1,25 +1,39 @@
 # Chapter 3. Integration, derivatives, and the fundamental theorem
 
-## A mathematical relation, not a universal recipe
+## Start at the integers
 
-An integral claim identifies the role of a supplied computation for a supplied
-function on a supplied interval. It is useful to state general comparison,
-uniqueness, linearity, and fundamental-theorem laws with the evidence they
-need. Those laws do not select a class of integrands or give one algorithm
-that must construct every integral.
+How much does the decreasing rate $1/t$ accumulate between $1$ and $3$?
+At level $0$, use the cells $[1,2]$ and $[2,3]$. The right endpoint values
+give the lower sum, and the left endpoint values give the upper sum. The
+result is the enclosure $[5/6,3/2]$. At level $1$, insert $3/2$ and $5/2$
+and repeat. The two sums tighten without needing a formula for the logarithm.
 
-For each particular function, propose an appropriate construction, prove its
-validity, and prove that it has the claimed integral role. Rational quadrature,
-finite geometric dissection, an independently justified endpoint formula,
-series, substitution, and domain-specific methods may provide different
-routes. No route's numerical validity alone establishes that role.
+This is our default definite-integral construction. On an ordered rational
+interval $[a,b]$, take the endpoints together with every interior grid point
+$k/2^n$ for $k\in\mathbb Z$. Thus level $0$ uses the integers, level $1$
+inserts the half-integers, and level $2$ inserts the odd quarter-integers.
+The grid stays fixed when the endpoints change: for example, on
+$[1/3,8/3]$ the first grid points are $1/3,1,2,8/3$. Only the end cells
+are clipped. When $a=b$, the integral is zero.
 
-Markdown records the mathematical contract, available laws, and reference
-constructions. The accompanying skills help agents choose a method. Lean
-checks the finite estimates and the bridge from the actual computation to
-the stated integral relation. There is no obligation to formalize a universal
-method-selection algorithm or a general existence theorem before doing this
-work for a particular function.
+For every cell $[t_j,t_{j+1}]$, certify lower and upper heights $m_{n,j}$
+and $M_{n,j}$ that enclose the values throughout the cell. Set
+
+$$
+L_n=\sum_j m_{n,j}(t_{j+1}-t_j),\qquad
+U_n=\sum_j M_{n,j}(t_{j+1}-t_j).
+$$
+
+The evidence belongs to the function; the grid does not. If the total
+area gap $U_n-L_n$ tends to zero, the intervals define a valid
+`RealRaw`. A finite common refinement proves $L_i\le U_j$ for every pair
+of levels: each refined cell has a rational sample whose value lies between
+both sets of bounds. This proves that the finite intersections
+$[\max_{i\le n}L_i,\min_{i\le n}U_i]$ are nonempty and nested, and
+their widths tend to zero because they lie within $[L_n,U_n]$. The same
+comparison proves agreement for different certified heights and precision
+schedules. A faster computation can represent the same integral once its
+agreement is proved.
 
 ## Constant and simple functions, interval addition, and bounds
 
@@ -85,63 +99,26 @@ a compulsory hypothesis for every method.
 
 ## The monotone quadrature construction
 
-Let the endpoints be rational and ordered, and let a nondecreasing sampler
-have valid represented values throughout the interval. Use the fixed mesh
+On a cell where the function is nondecreasing, use the lower bound for
+the left endpoint value and the upper bound for the right endpoint value.
+Where it is nonincreasing, swap the roles. Suppose the whole interval
+is monotone and $V$ bounds its total endpoint variation. If each
+represented sample has width at most $\tau_n$, then
 
 $$
-t_j=a+\frac{j(b-a)}{2^n},\qquad j=0,\ldots,2^n.
+U_n-L_n\le 2^{-n}V+2(b-a)\tau_n.
 $$
 
-At a separate evaluation stage, define rational lower and upper sums
+Indeed, each cell length is at most $2^{-n}$, and the sum of the absolute
+endpoint differences telescopes. Each of the two endpoint enclosures
+can add at most $\tau_n$ to the height gap, so the total evaluation
+charge is at most $2(b-a)\tau_n$.
 
-$$
-L_{n,m}=\sum_{j=0}^{2^n-1}(t_{j+1}-t_j)
-\operatorname{lo}(f(t_j),m),
-$$
-
-$$
-U_{n,m}=\sum_{j=0}^{2^n-1}(t_{j+1}-t_j)
-\operatorname{hi}(f(t_{j+1}),m).
-$$
-
-For a nonincreasing sampler exchange the endpoint roles. Monotonicity
-provides range containment on every cell. A supplied bound on total endpoint
-variation controls the spatial rectangle gap. The evaluation contribution
-is controlled by the finite sampled widths, for example by
-
-$$
-(b-a)\max_{0\le j\le2^n}
-\operatorname{width}(f(t_j),m).
-$$
-
-Prove the actual combined error estimate; do not infer it from the names of
-the two indices. For each fixed spatial mesh there are finitely many sample
-values. Their validity allows a sufficiently large evaluation stage to be
-found so that all required widths satisfy the chosen rational error budget.
-An evaluation schedule may tend cofinally to infinity, or directly certify
-the shrinking width budget for each sample. Exact rational values need no
-further evaluator refinement. The new signed monotone construction uses a
-terminating rational width search for each sampled value.
-
-Thus a function-specific diagonal schedule can be chosen to satisfy
-
-$$
-n(k)\longrightarrow\infty,\qquad m(k)\longrightarrow\infty,
-\qquad U_{n(k),m(k)}-L_{n(k),m(k)}\longrightarrow0.
-$$
-
-The last conclusion requires the proved error control; the first two
-conditions alone are not a substitute. In particular, using the same stage
-for subdivision and all evaluator calls is not justified automatically.
-If a two-index bound is uniform beyond independent thresholds, any cofinal
-diagonal satisfying those thresholds can be compared directly.
-
-Before declaring the diagonal a real name, prove orderedness and compatibility
-between its finite bounds. If literal nesting needs repair, use finite prefix
-intersections after proving that those intersections are nonempty and retain
-the shrinking estimate. Do not assume an already-existing integral merely
-to supply their common point. Prove agreement for other justified schedules
-so callers need not choose the internal precision policy.
+The spatial level is exactly $n$. Evaluation has its own precision: there
+are only finitely many endpoint values at each level, so rational width
+search can refine each until the chosen tolerance is met. Exact rational
+values need no search. Merely giving every evaluator the index $n$ does
+not guarantee that the total error shrinks.
 
 ## The arctangent comparison
 
@@ -182,45 +159,61 @@ intended method-independent laws from this route remains open design and
 proof work. Broader uniqueness needs justified comparisons or common laws,
 not an assumed uniqueness field.
 
-## Nonmonotone functions
+## Keep the heights, shrink the turning cells
 
-For a particular nonmonotone function, supply whatever finite range bounds,
-local pieces, substitutions, or other evidence the actual construction uses.
-Keep domain, pole, branch, and tail restrictions explicit. Resolve internal
-partitions and turning-point brackets inside the construction and compare
-choices before hiding them from callers. Do not require every function to
-fit the monotone quadrature recipe.
+Consider $f(t)=(t-1/3)^2$ on $[0,1]$. Every dyadic cell except the one
+containing $1/3$ is monotone. On that one cell, reuse the same heights
+$0$ and $4/9$ at every level. Its contribution to the area gap is at most
+$(4/9)2^{-n}$. You do not need to compute $f(1/3)$ or insert $1/3$ into
+the grid. The uncertainty disappears because the cell gets narrower.
 
-**Construction skill: use the particular function's geometry.** For the
-normalized geometric sine and cosine of Chapter 2, the base rational domain
-is $[-1,1]\cap\mathbb Q$, extended with period $2$. Sine is increasing on
-$[-\tfrac12,\tfrac12]$ and decreasing on the two remaining base pieces;
-cosine is increasing on $[-1,0]$ and decreasing on $[0,1]$. Use proved order,
-periodicity, and join laws to split an integration interval at these exact
-rational transitions. No approximate search for these breaks is needed.
-Refine endpoint evaluations and rectangle meshes together; exact transition
-locations do not remove the need to control evaluation error.
+More generally, with at most $r$ turning points and fixed height ranges
+of width at most $H$ on their cells, the unresolved contribution is at
+most $rH2^{-n}$: a turn on a grid boundary needs no exceptional cell if
+both adjacent cells are monotone. If the turns are given by shrinking
+rational brackets rather than by exact locations, mark every cell meeting
+the brackets as exceptional. A bracket of width $w$ meets cells whose
+combined length is at most $w+2\cdot2^{-n}$. The height bounds must cover
+those whole cells. Fixed heights work when the *total exceptional length*
+goes to zero; reusing them on a fixed neighborhood of positive length does
+not give that guarantee.
 
-For another function, unresolved transitions may instead be enclosed in
-rational brackets $[\ell_j,r_j]$ with proved bounds $L_j\le f\le U_j$
-throughout each bracket. Their contribution boxes are
+For normalized geometric sine and cosine, periodicity and the proved
+monotonicity intervals locate the turns exactly. Sine turns at the
+half-integers and cosine at the integers. The cosine turns are on the
+level-$0$ grid, and the sine turns are on the grid from level $1$ onward.
+Use the known bounds $[-1,1]$ on any unresolved cell, and the endpoint
+bounds wherever monotonicity is known.
+
+## Integrating a continuous sampler without locating its turns
+
+A continuous function can have infinitely many turns. For a generic
+sampler, a sufficient certificate is a uniform bound $\omega_n$ on the
+variation between any two points within distance $2^{-n}$ on the integration
+interval, with $\omega_n\to0$. Take one sample per cell and widen its
+enclosure by $\omega_n$ in each direction. If the sample width is at most
+$\tau_n$, the total area gap is at most
 
 $$
-[L_j(r_j-\ell_j),\;U_j(r_j-\ell_j)].
+(b-a)(\tau_n+2\omega_n).
 $$
 
-Choose the brackets and outer-piece computations so that the total uncertainty
+For a supplied Lipschitz constant $C$, take $\omega_n=C2^{-n}$. A supplied
+uniform continuity modulus also gives a construction: for each requested
+oscillation tolerance it tells us a level beyond which the mesh is small
+enough. This is a constructive guarantee for the continuous functions
+for which we can supply that control. Pointwise continuity at each
+rational input alone does not supply a whole-cell bound or a uniform
+precision schedule.
 
-$$
-\sum_j (U_j-L_j)(r_j-\ell_j)
-  +\text{outer-piece errors}
-$$
-
-is below the requested tolerance. The bounds may vary with refinement; the
-products must shrink with a justified schedule. These are case-by-case
-construction strategies, not a universal partition algorithm or new checked
-existence theorem. See the integral construction skill at
-`skills/computable-analysis-formalization/references/integral-computation-strategies.md`.
+In the Fourier transform the function to bound is the test multiplied
+by the sine or cosine of the phase. Compact smooth tests in this project
+supply a Lipschitz certificate; the product estimate derives the
+whole-cell bounds without solving for any turning points. The same rule
+can be used one coordinate at a time on a rational box. For an improper
+integral, apply the finite construction to each truncation and prove a
+separate bound on the omitted contribution. Choose cutoffs and finite-grid
+levels so that both the tail error and the finite area gap tend to zero.
 
 ## Derivatives as continuous extension of the quotient
 
@@ -329,8 +322,9 @@ $$
 Here the nonnegative rational bound is computed from endpoint boxes, and
 each sampled evaluator width is at most the supplied positive tolerance.
 `boundsAtTolerance_gap` proves that the internal cell count and width searches
-meet any requested positive rational error. These partitions need not be
-dyadic; the geometric arctangent retains its fixed dyadic construction.
+meet any requested positive rational error. This checked evaluator still
+chooses its uniform cell count from the error budget; it has not been
+migrated to the integer-first grid described above.
 
 `ConvexFTC.integral` evaluates these rectangles independently and intersects
 finite prefixes to repair nesting. The previously derived endpoint bounds
@@ -430,29 +424,25 @@ $$
 L(x)=\int_1^x\frac{dt}{t},\qquad x>0.
 $$
 
-For positive rational endpoints \(a\le b\), subdivide into \(2^n\) equal
-cells, with width \(h_n=(b-a)/2^n\) and points \(t_k=a+kh_n\).
-Since the reciprocal is decreasing, the rational endpoint sums bound the
-integral:
+For positive rational endpoints $a\le b$, let $t_j$ be the clipped
+integer-first dyadic grid at level $n$, with $h_j=t_{j+1}-t_j$.
+The lower and upper sums use heights $1/t_{j+1}$ and $1/t_j$:
 
 $$
-\ell_n=h_n\sum_{k=1}^{2^n}\frac1{t_k},\qquad
-u_n=h_n\sum_{k=0}^{2^n-1}\frac1{t_k}.
+U_n-L_n
+=\sum_j h_j\left(\frac1{t_j}-\frac1{t_{j+1}}\right)
+\le 2^{-n}\left(\frac1a-\frac1b\right).
 $$
 
-Their difference telescopes exactly:
+The differences are nonnegative and telescope. These bounds shrink even
+when the endpoint cells have different widths. The checked
+`DyadicReciprocalIntegral` evaluator instead divides $[a,b]$ into $2^n$
+equal parts, so the displayed estimate is an inequality for our default
+grid and an equality with factor $(b-a)2^{-n}$ for that evaluator.
+Both sets of rectangles bound the same reciprocal sampler. The
+integer-first presentation is the chapter's default; the current Lean
+evaluator still uses the affine grid.
 
-$$
-u_n-\ell_n
-=h_n\left(\frac1a-\frac1b\right)
-=\frac{(b-a)^2}{ab\,2^n}.
-$$
-
-Refinement increases the lower sum and decreases the upper sum. These
-properties and the explicit shrinking gap justify the raw construction.
-`BoundsQuadrature` takes finite prefix intersections of the actual dyadic
-bounds to certify nesting, using independently proved overlap of integral
-bounds.
 For \(x\ge1\), use \([a,b]=[1,x]\); for \(0<x<1\), use
 \([a,b]=[x,1]\) and negate the resulting interval. The value at one is zero.
 All samples in this primary rational-input construction are exact rationals.

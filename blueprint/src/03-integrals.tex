@@ -1,9 +1,10 @@
 \chapter{Integral Computations}\label{ch:integrals}
 
-An integral is a new interval computation obtained by adding finite
-rectangles and controlling the error.  It is not defined through an
-antiderivative.  This independence is what will make the fundamental theorem
-an equivalence theorem rather than a convention.
+How much does the decreasing rate $1/t$ accumulate from $1$ to $3$?
+Start with the two cells $[1,2]$ and $[2,3]$. The right endpoints give
+a lower sum of $5/6$, and the left endpoints give an upper sum of $3/2$.
+At the next level insert $3/2$ and $5/2$. This constructs the integral
+without first knowing an antiderivative.
 
 \paragraph{Formalization boundary.}
 The native interface now retains the partition and the whole-cell value
@@ -14,7 +15,13 @@ computations require a comparison with the same enclosure sums. The
 arctangent derivative-bound construction supplies such a comparison.
 
 \section{Partitions and cell enclosures}
-A rational tagged partition is
+The default grid on a rational interval $[a,b]$ consists of $a,b$
+and every interior point $k/2^n$ for $k\in\mathbb Z$. Level $0$ starts
+at the integers; level $1$ adds the half-integers. Only the end cells
+are clipped, so each cell has length at most $2^{-n}$. For instance
+$[1/3,8/3]$ starts with grid points $1/3,1,2,8/3$.
+
+With a rational tag in each cell, the partition has the form
 \[
  a=x_0<x_1<\cdots<x_N=b,\qquad
  \xi_i\in[x_i,x_{i+1}]\cap\Q.
@@ -31,21 +38,24 @@ ranges.  This argument uses only finitely many computed values and their
 order comparisons.
 
 \begin{definition}[An integral computation]\label{def:integral-computation}
-A supplied sequence of partitions and sound cell enclosures is an integral
-construction if its rectangle widths shrink to every positive rational
-tolerance.  Finite-prefix intersections of the $B_P(g)$ make a valid
-number computation, denoted $\int_a^b g$.
+At each level of the fixed grid, supply sound cell enclosures. If the
+total rectangle width tends to zero, finite-prefix intersections of the
+$B_P(g)$ give a valid number computation, denoted $\int_a^b g$.
+For $a=b$, the integral is zero.
 \end{definition}
 
 Any two such constructions are equivalent, by their cross-overlap and
-shrinking widths.  Changing tags, using unequal subdivisions, or refining
-values faster than the mesh therefore does not change the integral.
+shrinking widths.  Different tags or precision schedules, and alternative constructions on
+other subdivisions, give the same value when their soundness and shrinking
+widths are proved. Existing Lean evaluators may still use those alternative
+subdivisions.
 
 \section{Continuous functions: rectangles with a modulus}
 Suppose $g$ has the interval continuity certificate of
-Chapter~\ref{ch:foundations}.  For a desired tolerance $\eta$, choose mesh
-at most $\mu_g(\eta)$ and evaluate $g(\xi_i)$ in a box of width at most
-$\eta$.  Enlarge each sample box by $\eta$ on both sides.  These are sound
+Chapter~\ref{ch:foundations}. For a desired tolerance $\eta$, take a
+dyadic level with $2^{-n}\le\mu_g(\eta)$ and evaluate $g(\xi_i)$ in a box
+of width at most $\eta$. The spatial level and the sample evaluation
+precision are separate.  Enlarge each sample box by $\eta$ on both sides.  These are sound
 cell ranges, and their integral width is at most
 \[
  3\eta(b-a).
@@ -83,7 +93,15 @@ is at most
 Thus monotonicity gives an integral algorithm even for a derivative with
 an undetected corner in its primitive.  Negation handles decreasing
 functions; finite sums and differences of these constructions are also
-integrable.  A finite partition into monotone pieces gives the same result.
+integrable.  For finitely many turns, keep the same grid. Use monotone endpoint
+bounds wherever possible, and fixed heights on cells containing an
+unresolved turn. For $g(t)=(t-1/3)^2$ on $[0,1]$, the one cell
+containing $1/3$ can use $0$ and $4/9$ at every level: its area
+uncertainty is at most $(4/9)2^{-n}$. In general, fixed heights of
+range at most $H$ contribute at most $H$ times the total length of
+the exceptional cells. Thus the length must shrink, even though the
+heights can stay fixed. If there are infinitely many turns, a uniform
+oscillation bound on each cell provides the alternative just described.
 
 \section{Finite rules for integrals}
 The rules below follow from rectangles and common refinements, before any

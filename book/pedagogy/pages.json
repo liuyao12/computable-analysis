@@ -28,7 +28,7 @@
     "sectionBridges": [
       {
         "heading": "Partitions and cell enclosures",
-        "body": "<p>A sample tells us the value at one point; it can miss a narrow peak elsewhere in the cell. For this rectangle construction, the first task is therefore to bound the whole cell, so multiplying by its length gives a justified contribution.</p>"
+        "body": "<p>The grid is shared by every integrand: start at the integers and insert the odd half-steps at each refinement. A sample can miss a peak elsewhere in its cell, so certify a bound on the whole cell before multiplying by its length.</p>"
       },
       {
         "heading": "Changing the sampling coordinate",

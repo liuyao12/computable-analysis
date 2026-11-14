@@ -1,6 +1,11 @@
 name: Publish foundation textbook and checked contour proof
 on:
   workflow_dispatch:
+    inputs:
+      integral_chapter_only:
+        description: Update the existing integral chapter and preserve all other pages
+        type: boolean
+        default: false
 permissions:
   contents: read
   pages: write
@@ -21,7 +26,14 @@ jobs:
           python-version: '3.12'
       - name: Restore and verify the complete existing site
         run: python3 scripts/preserve_foundation_site.py
+      - name: Update and validate only the existing integral chapter
+        if: inputs.integral_chapter_only
+        run: |
+          python3 scripts/apply_integer_first_integrals.py _site
+          python3 scripts/render_foundation_textbook.py --output /tmp/integral-textbook
+          python3 scripts/render_foundation_textbook.py --output /tmp/integral-textbook --check
       - name: Add the living textbook and checked proof download
+        if: ${{ !inputs.integral_chapter_only }}
         run: |
           python3 scripts/apply_foundation_textbook.py _site
           python3 scripts/render_foundation_textbook.py --output _site/foundation-textbook --check
