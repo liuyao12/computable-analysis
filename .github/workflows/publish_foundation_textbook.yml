@@ -25,11 +25,21 @@ jobs:
         with:
           python-version: '3.12'
       - name: Restore and verify the complete existing site
-        run: python3 scripts/preserve_foundation_site.py
+        env:
+          INTEGRAL_CHAPTERS: ${{ inputs.integral_chapter_only }}
+        run: |
+          if [ "$INTEGRAL_CHAPTERS" = true ]; then
+            python3 scripts/preserve_foundation_site.py --integral-chapters
+          else
+            python3 scripts/preserve_foundation_site.py
+          fi
       - name: Update and validate only the existing integral chapter
         if: inputs.integral_chapter_only
         run: |
-          python3 scripts/apply_integer_first_integrals.py _site
+          if ! grep -Fq 'At each level of the fixed dyadic grid' _site/ch-integrals.html; then
+            python3 scripts/apply_integer_first_integrals.py _site
+          fi
+          python3 scripts/apply_integral_chapter_figures.py _site
           python3 scripts/render_foundation_textbook.py --output /tmp/integral-textbook
           python3 scripts/render_foundation_textbook.py --output /tmp/integral-textbook --check
       - name: Add the living textbook and checked proof download

@@ -112,7 +112,7 @@
   {
     "page": "ch-improper-parameters.html",
     "action": "strengthen",
-    "opening": "<p>A bounded-interval integral leaves a new question when an endpoint is missing or the domain extends indefinitely: how much can the omitted part contribute? A cutoff gives a finite calculation, but a bound on the omitted contribution is what makes it an approximation to an improper integral.</p><p>Gamma and Gaussian-type functions supply useful examples. When a parameter varies, the endpoint allowances must also support the operation we want to perform on that parameter. We will keep those estimates attached to the particular function.</p>",
+    "opening": "<p>A bounded-interval integral leaves a new question when an endpoint is missing or the domain extends indefinitely: how much can the omitted part contribute? A cutoff gives a finite calculation, but a bound on the omitted contribution is what makes it an approximation to an improper integral.</p><p>The Gaussian window expands at both ends. The Dirichlet window also moves its left endpoint toward zero. Each uses the same integer-first grid while its two cutoff errors are controlled separately.</p>",
     "earlierMotivation": "power-improper.html",
     "sectionBridges": [
       {

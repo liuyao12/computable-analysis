@@ -81,6 +81,12 @@ calculation of the value. The reusable foundation modules are
 Their inputs include actual proper integrals and proved quantitative errors;
 their conclusions include validity and `HasIntegralLimit`.
 
+Each finite window now uses the fixed grid in the normalized coordinate
+$t=x/\pi$. The first and last cells are clipped to the endpoints. The
+window error remains separate from the quadrature error.
+
+![The left cutoff approaches zero as the right cutoff grows, with a dyadic grid inside each window](assets/dirichlet-dyadic-windows.gif)
+
 ## Feynman's real parameter
 
 **Existing theorem, companion example.** Independently construct

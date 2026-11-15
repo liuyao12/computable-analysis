@@ -23,6 +23,7 @@ SKILL_LINK = "../skills/taylor-from-ftc/SKILL.md"
 SKILL_DOWNLOAD = "skills/taylor-from-ftc/SKILL.md"
 MISSION_DOWNLOAD = "downloads/foundation-mission.md"
 APPLICATION_SOURCE = ROOT / "subprojects" / "special-topics" / "textbook" / "euler-applications.md"
+CONTOUR_DOWNLOADS = ROOT / "book" / "dirichlet-contour"
 
 STYLE = """:root{color-scheme:light;--ink:#242f32;--muted:#52676b;--paper:#faf9f5;--line:#d9dfda;--accent:#155e63}
 *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:19px/1.75 Georgia,serif}
@@ -32,7 +33,7 @@ aside{font:14px/1.6 system-ui,sans-serif;align-self:start;position:sticky;top:28
 .brand{display:block;color:var(--ink);font-size:20px;font-weight:700;text-decoration:none;margin-bottom:8px}
 .label{color:var(--muted);margin:0 0 24px}nav a{display:block;padding:9px 12px;border-left:2px solid var(--line);text-decoration:none}
 nav a[aria-current=page]{border-color:var(--accent);background:#eaf0eb;font-weight:650}
-main{min-width:0}h1{font-size:2.1em;line-height:1.2;letter-spacing:-.025em;margin:0 0 30px}h2{font-size:1.35em;line-height:1.3;margin:42px 0 16px}
+main{min-width:0} main img{display:block;max-width:100%;height:auto;margin:24px auto} h1{font-size:2.1em;line-height:1.2;letter-spacing:-.025em;margin:0 0 30px}h2{font-size:1.35em;line-height:1.3;margin:42px 0 16px}
 p{margin:0 0 20px}li{margin-bottom:10px}code{font: .8em/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;background:#edf0eb;padding:2px 4px;border-radius:3px;overflow-wrap:anywhere}
 pre{background:#edf0eb;padding:20px;overflow:auto;border-radius:6px}pre code{padding:0;white-space:pre;overflow-wrap:normal}
 .table-wrap{overflow-x:auto;margin:24px 0}table{border-collapse:collapse;font-size:.84em;width:100%}th,td{text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:12px 10px}th{font-family:system-ui,sans-serif;font-size:.9em}
@@ -48,7 +49,7 @@ def destination(name: str) -> str:
 
 
 def inline(text: str) -> str:
-    tokens = re.split(r"(\$[^$\n]+\$|`[^`]+`|\[[^\]]+\]\([^)]+\)|\*\*.+?\*\*)", text)
+    tokens = re.split(r"(\$[^$\n]+\$|`[^`]+`|!?\[[^\]]+\]\([^)]+\)|\*\*.+?\*\*)", text)
     out = []
     for token in tokens:
         if token.startswith("`") and token.endswith("`"):
@@ -57,6 +58,8 @@ def inline(text: str) -> str:
             out.append(html.escape(token))
         elif token.startswith("**") and token.endswith("**"):
             out.append("<strong>" + inline(token[2:-2]) + "</strong>")
+        elif (image := re.fullmatch(r"!\[([^\]]+)\]\((assets/[a-z0-9.-]+)\)", token)):
+            out.append(f'<img src="{image[2]}" alt="{html.escape(image[1], quote=True)}" loading="lazy">')
         elif (match := re.fullmatch(r"\[([^\]]+)\]\(([^)]+)\)", token)):
             url = match[2]
             if ":" in url and not url.startswith(("https://", "http://")):
@@ -200,6 +203,24 @@ def generated_files(chapters: list[Path]) -> dict[str, bytes]:
         expected[APPLICATION_SOURCE.name] = APPLICATION_SOURCE.read_bytes()
     expected[SKILL_DOWNLOAD] = TAYLOR_SKILL.read_bytes()
     expected[MISSION_DOWNLOAD] = mission_markdown(chapters).encode()
+    # The Dirichlet contour chapter links to these standalone companion files.
+    # Ship copies beside the rendered chapters and in the mission download
+    # directory so both web links and the portable manuscript resolve.
+    for name in ("dirichlet-contour-proof.tar.gz", "dirichlet-contour-verification.json"):
+        source = CONTOUR_DOWNLOADS / name
+        if source.is_file():
+            expected[name] = source.read_bytes()
+            expected[f"downloads/{name}"] = source.read_bytes()
+    # Preserve the textbook's small explanatory animations in both reader
+    # pages and the portable mission manuscript.
+    assets = SOURCE / "assets"
+    if assets.is_dir():
+        for source in assets.rglob("*"):
+            if source.is_file():
+                relative = source.relative_to(SOURCE).as_posix()
+                contents = source.read_bytes()
+                expected[relative] = contents
+                expected[f"downloads/{relative}"] = contents
     return expected
 
 

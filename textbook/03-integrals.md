@@ -140,6 +140,12 @@ The word “integral” in a constructor name does not discharge that obligation
 Extensions beyond the checked branch need their own construction or transport
 proofs; negative endpoints use justified orientation.
 
+![Endpoint rectangles for the arctangent kernel on four successive dyadic grids](assets/arctan-rectangle-enclosure.gif)
+
+`ArctanPositiveFTC.dyadicIntegral_equiv_geometric` now identifies the
+independently evaluated fixed-grid integral from $0$ to any rational
+$b\in[0,1]$ with the geometric arctangent at $b$.
+
 ## The current semantic interface and its boundary
 
 `Integral.HasIntegral` presently uses arbitrarily tight finite rectangle
@@ -152,7 +158,11 @@ $$
 \int_a^b f(t)\,dt\simeq P(b)-P(a).
 $$
 
-This is a proved conditional law; it is not a universal constructor. The
+`FTCStepQuadrature.dyadic_ftc` applies this law directly to a
+`BoundsQuadrature.DyadicData` certificate. Its separate derivative
+hypothesis gives the increment bounds on each segment, so the endpoint
+formula follows regardless of how the integrand's cell ranges were found.
+The
 rectangle criterion is a useful sufficient route, not the mandatory meaning
 for every new function-specific integral construction. Separating the
 intended method-independent laws from this route remains open design and
@@ -185,6 +195,8 @@ level-$0$ grid, and the sine turns are on the grid from level $1$ onward.
 Use the known bounds $[-1,1]$ on any unresolved cell, and the endpoint
 bounds wherever monotonicity is known.
 
+![The one cell containing one third gets narrower while its fixed lower and upper heights stay the same](assets/single-turn-integral.gif)
+
 ## Integrating a continuous sampler without locating its turns
 
 A continuous function can have infinitely many turns. For a generic
@@ -214,6 +226,33 @@ can be used one coordinate at a time on a rational box. For an improper
 integral, apply the finite construction to each truncation and prove a
 separate bound on the omitted contribution. Choose cutoffs and finite-grid
 levels so that both the tail error and the finite area gap tend to zero.
+
+## Worked example: the squares of sine and cosine
+
+Start with the geometric functions $S(t)=\sin(\pi t)$ and
+$C(t)=\cos(\pi t)$. Their derivative laws give
+
+$$
+(S^2+C^2)'=0,\qquad (SC)'=\pi(C^2-S^2).
+$$
+
+At $t=0$ the first sum equals $1$. FTC therefore gives $S^2+C^2=1$,
+and the second identity separates the two integrals. For $0\le a\le b\le1$,
+
+$$
+\begin{aligned}
+\int_a^b S(t)^2\,dt &\simeq \frac{b-a}{2}
+  -\frac{S(b)C(b)-S(a)C(a)}{2\pi},\\
+\int_a^b C(t)^2\,dt &\simeq \frac{b-a}{2}
+  +\frac{S(b)C(b)-S(a)C(a)}{2\pi}.
+\end{aligned}
+$$
+
+Both correction terms vanish on $[0,1/2]$, so both integrals equal $1/4$.
+`GeometricIntegralData.trigSquareIntegral_equiv_endpoint` compares the
+fixed-grid computations with these endpoint formulas.
+
+![Certified sample boxes for the geometric sine on the first quadrant](assets/interval-sine-integral-stage.gif)
 
 ## Derivatives as continuous extension of the quotient
 
@@ -435,13 +474,9 @@ U_n-L_n
 $$
 
 The differences are nonnegative and telescope. These bounds shrink even
-when the endpoint cells have different widths. The checked
-`DyadicReciprocalIntegral` evaluator instead divides $[a,b]$ into $2^n$
-equal parts, so the displayed estimate is an inequality for our default
-grid and an equality with factor $(b-a)2^{-n}$ for that evaluator.
-Both sets of rectangles bound the same reciprocal sampler. The
-integer-first presentation is the chapter's default; the current Lean
-evaluator still uses the affine grid.
+when the endpoint cells have different widths. Lean's
+`DyadicReciprocalIntegral` evaluates these exact endpoint rectangles on
+the fixed grid.
 
 For \(x\ge1\), use \([a,b]=[1,x]\); for \(0<x<1\), use
 \([a,b]=[x,1]\) and negate the resulting interval. The value at one is zero.

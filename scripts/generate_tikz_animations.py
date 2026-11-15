@@ -128,7 +128,8 @@ def rational_kernel(value: Fraction) -> Fraction:
     return 1 / (1 + value * value)
 
 
-def kernel_frame(cells: int) -> str:
+def kernel_frame(stage: int) -> str:
+    cells = 2**stage
     x0, y0, unit = 94, 34, 168
     out = [
         rf"\draw[axis,line width=.75pt] ({x0-13},{y0}) -- ({x0+unit+13},{y0});",
@@ -157,12 +158,13 @@ def kernel_frame(cells: int) -> str:
         n(x0 - 10, y0 + unit, r"$1$", "anchor=east"),
         n(x0 + unit + 12, y0 - 2, r"$t$", "anchor=west"),
         n(x0 + 112, y0 + 100, r"$\frac{1}{1+t^2}$", "text=curve"),
+        n(308, 201, rf"$n={stage}$"),
     ]
     return "\n".join(out)
 
 
 def kernel_animation(name: str) -> Animation:
-    return Animation(name, 360, 230, tuple(kernel_frame(i) for i in (1, 2, 4, 8)), (1200, 1200, 1200, 1900), 3)
+    return Animation(name, 360, 230, tuple(kernel_frame(i) for i in range(4)), (1200, 1200, 1200, 1900), 3)
 
 
 def partial_sine(value: Fraction, last: int) -> Fraction:
@@ -245,8 +247,9 @@ def sine_frame(stage: int) -> str:
         rf"\draw[axis,line width=.75pt] ({x0-12},{y0}) -- ({x0+xunit+13},{y0});",
         rf"\draw[axis,line width=.75pt] ({x0},{y0-11}) -- ({x0},{y0+yunit+13});",
     ]
-    cells = 2 ** stage
-    mesh = [Fraction(i, 2 * cells) for i in range(cells + 1)]
+    denominator = 2**stage
+    mesh = [Fraction(i, denominator) for i in range((denominator + 1)//2)]
+    mesh.append(Fraction(1, 2))
     boxes = {t: sine_box(t, stage) for t in mesh}
     for t in mesh:
         x = x0 + 2 * float(t) * xunit
@@ -258,9 +261,7 @@ def sine_frame(stage: int) -> str:
         lx, rx = x0 + 2 * float(left) * xunit, x0 + 2 * float(right) * xunit
         lower = min(boxes[left][0], boxes[right][0])
         upper = max(boxes[left][1], boxes[right][1])
-        # sin(pi*x) has one known turning point.  A cell containing x=1/2
-        # must include the peak in its upper rectangle even when the mesh has
-        # not yet placed a sample point at that turn.
+        # The clipped right endpoint is the exact peak of this branch.
         if left <= Fraction(1, 2) <= right:
             upper = 1.0
         out += positive_estimate_cell(
@@ -294,7 +295,7 @@ def sine_frame(stage: int) -> str:
         n(x0 + xunit + 12, y0 - 2, r"$x$", "anchor=west"),
         n(x0 + 125, y0 + 109, r"$\sin(\pi x)$"),
         n(x0 + xunit / 2, y0 + yunit + 19,
-          rf"$\int_0^{{1/2}}\sin(\pi x)\,dx$",
+          rf"$\int_0^{{1/2}}\sin(\pi x)\,dx\qquad n={stage}$",
           "anchor=south"),
     ]
     return "\n".join(out)
@@ -552,86 +553,85 @@ def sinc(value: float) -> float:
     return math.pi if value == 0 else math.sin(math.pi*value)/value
 
 
-def single_turn_frame(turn_left: Fraction, turn_right: Fraction, cells: int) -> str:
-    left, base, trig, vertical = 47, 84, 45, 44
-    x, y = lambda v: left+float(v)*math.pi*trig, lambda v: base+float(v)*vertical
+def single_turn_frame(stage: int) -> str:
+    origin_x, origin_y = 46, 45
+    x = lambda t: origin_x + 274 * float(t)
+    y = lambda value: origin_y + 370 * float(value)
+    turn = Fraction(1, 3)
+    height = Fraction(4, 9)
+    spacing = Fraction(1, 2**stage)
+
+    def quadratic(t):
+        return (t - turn)**2
+
     out = [
-        rf"\draw[axis,line width=.75pt] ({left-10},{q(y(0))}) -- ({q(x(2)+12)},{q(y(0))});",
-        rf"\draw[axis,line width=.75pt] ({left},{q(y(-.9)-10)}) -- ({left},{q(y(3.65)+10)});",
+        rf"\draw[axis] ({origin_x-8},{origin_y}) -- (333,{origin_y});",
+        rf"\draw[axis] ({origin_x},37) -- ({origin_x},223);",
     ]
-    for value in (Fraction(1,2), Fraction(1), Fraction(3,2)):
-        out.append(rf"\draw[grid,line width=.3pt] ({q(x(value))},{q(y(-.9))}) -- ({q(x(value))},{q(y(3.65))});")
-    for value in (-.75, -.5, -.25, .5, 1, 2, 3):
-        out.append(rf"\draw[grid,line width=.3pt] ({left},{q(y(value))}) -- ({q(x(2))},{q(y(value))});")
-    mesh = [Fraction(2*i, cells) for i in range(cells+1)]
-    turn = 1.430296653
-    gap_values = (sinc(float(turn_left)), sinc(turn), sinc(float(turn_right)))
-    gap_lo, gap_hi = min(gap_values), max(gap_values)
-    for a, b in zip(mesh, mesh[1:]):
-            va, vb = sinc(float(a)), sinc(float(b))
-            if b <= turn_left:
-                # The function is decreasing before the unique interior turn.
-                lo, hi = vb, va
-                kind = "decreasing"
-            elif a >= turn_right:
-                # It is increasing after the turn.
-                lo, hi = va, vb
-                kind = "increasing"
-            else:
-                # This is the one cell whose finite critical-point bracket is
-                # needed.  Include the turn value with both endpoints.
-                lo, hi = min(va, vb, sinc(turn)), max(va, vb, sinc(turn))
-                kind = "turn"
-            # A signed lower/upper cell has a common part and, away from the
-            # axis, exactly one exclusive strip.  Draw that partition
-            # explicitly.  This preserves the under/over semantics while
-            # keeping the shared green unmistakable in the GIF's negative
-            # lobe; alpha compositing alone was too close to blue there.
-            left_px, right_px, zero = q(x(a)), q(x(b)), q(y(0))
-            if lo >= 0:
-                out.extend([
-                    rf"\path[fill=sharedfill] ({left_px},{zero}) rectangle ({right_px},{q(y(lo))});",
-                    rf"\path[fill=overfill] ({left_px},{q(y(lo))}) rectangle ({right_px},{q(y(hi))});",
-                ])
-            elif hi <= 0:
-                out.extend([
-                    rf"\path[fill=sharedfill] ({left_px},{zero}) rectangle ({right_px},{q(y(hi))});",
-                    rf"\path[fill=underfill] ({left_px},{q(y(hi))}) rectangle ({right_px},{q(y(lo))});",
-                ])
-            else:
-                out.extend([
-                    rf"\path[fill=overfill] ({left_px},{zero}) rectangle ({right_px},{q(y(hi))});",
-                    rf"\path[fill=underfill] ({left_px},{zero}) rectangle ({right_px},{q(y(lo))});",
-                ])
-            out.extend([
-                rf"\draw[over,draw opacity=.8,line width=.3pt] ({left_px},{zero}) rectangle ({right_px},{q(y(hi))});",
-                rf"\draw[under,draw opacity=.8,line width=.3pt] ({left_px},{zero}) rectangle ({right_px},{q(y(lo))});",
-            ])
-            if kind == "turn":
-                out.append(rf"\draw[gap,line width=.55pt] ({left_px},{q(y(lo))}) rectangle ({right_px},{q(y(hi))});")
-    curve = [(x(i/300), y(sinc(i/300))) for i in range(601)]
+    mesh = [i*spacing for i in range(2**stage + 1)]
+    for left, right in zip(mesh, mesh[1:]):
+        exceptional = left < turn < right
+        low, high = (0, height) if exceptional else sorted((quadratic(left), quadratic(right)))
+        out += positive_estimate_cell(x(left), x(right), origin_y, y(low), y(high), .45)
+        if exceptional:
+            out.append(rf"\draw[gap,line width=1.3pt] ({q(x(left))},{origin_y}) rectangle ({q(x(right))},{q(y(height))});")
+    curve = [(x(Fraction(i, 120)), y(quadratic(Fraction(i, 120)))) for i in range(121)]
     out += [
-        rf"\draw[ink,line width=1.05pt] plot[smooth] coordinates {{{path(curve)}}};",
-        rf"\draw[gap,line width=.65pt] ({q(x(turn_left))},{q(y(gap_lo))}) -- ({q(x(turn_left))},{q(y(gap_hi))});",
-        rf"\draw[gap,line width=.65pt] ({q(x(turn_right))},{q(y(gap_lo))}) -- ({q(x(turn_right))},{q(y(gap_hi))});",
-        dot(x(turn), y(sinc(turn)), "gap", 1.45),
-        n(x(0), y(0)-12, r"$0$", "anchor=north"),
-        n(x(1), y(0)-12, r"$1$", "anchor=north"),
-        n(x(2), y(0)-12, r"$2$", "anchor=north"),
-        n(x(turn_left)-4, y(0)-23, r"$\ell$", "anchor=north east,text=gap"),
-        n(x(turn_right)+4, y(0)-23, r"$r$", "anchor=north west,text=gap"),
-        n(x(2)+10, y(0), r"$x$", "anchor=west"),
-        n(x(Fraction(1,4)), y(3.36), r"$\frac{\sin(\pi x)}{x}$", "anchor=west"),
-        n(x(Fraction(1,4)), y(-.75),
-          r"equal cells: decreasing / turn-cell / increasing",
-          "anchor=west,text=ink"),
+        rf"\draw[curve,line width=1.1pt] plot[smooth] coordinates {{{path(curve)}}};",
+        dot(x(turn), origin_y, "curve"),
+        n(x(0), 32, r"$0$"),
+        n(x(turn), 32, r"$1/3$"),
+        n(x(1), 32, r"$1$"),
+        n(181, 247, rf"$(t-1/3)^2\qquad n={stage}$"),
+        n(181, 14, rf"Fixed heights $0$ and $4/9$\quad exceptional width $2^{{-{stage}}}$"),
     ]
     return "\n".join(out)
 
 
 def single_turn_animation() -> Animation:
-    turns = ((Fraction(1), Fraction(3,2)), (Fraction(7,5), Fraction(29,20)), (Fraction(143,100), Fraction(287,200)), (Fraction(7151,5000), Fraction(3576,2500)))
-    return Animation("single-turn-integral", 360, 270, tuple(single_turn_frame(a,b,2**i) for i,(a,b) in enumerate(turns)), (1250,1250,1250,1900), 1)
+    return Animation("single-turn-integral", 360, 270,
+                     tuple(single_turn_frame(stage) for stage in range(5)),
+                     (1250, 1250, 1250, 1250, 1900), 2)
+
+
+def improper_frame(stage: int, gaussian: bool) -> str:
+    radius = stage + 1
+    spacing = Fraction(1, 2**stage)
+    left = -radius if gaussian else Fraction(1, radius)
+    right = radius
+    x_min = -4 if gaussian else 0
+    x_max = 4
+    x = lambda t: 44 + 276 * (float(t) - x_min) / (x_max - x_min)
+    y = lambda v: 78 + (115 if gaussian else 115/math.pi) * v
+    if gaussian:
+        curve_value = lambda t: math.exp(-t*t)
+        function = r"$e^{-t^2}$"
+        tail = rf"$[-{radius},{radius}]\qquad\mathrm{{tail\ budget}}\  C/{radius}$"
+    else:
+        curve_value = lambda t: math.sin(math.pi*t)/t if t else math.pi
+        function = r"$\sin(\pi t)/t$"
+        tail = rf"$[1/{radius},{radius}]\qquad\mathrm{{error\ budget}}\ 10/{radius}$"
+    mesh = [left] + [j*spacing for j in range(math.floor(left/spacing)+1, math.ceil(right/spacing))] + [right]
+    out = [
+        rf"\path[fill=sharedfill!20] ({q(x(left))},46) rectangle ({q(x(right))},202);",
+        rf"\draw[axis] (38,78) -- (330,78);",
+    ]
+    for t in mesh:
+        out.append(rf"\draw[grid,line width=.35pt] ({q(x(t))},51) -- ({q(x(t))},198);")
+    for t in range(x_min, x_max+1):
+        out.append(n(x(t), 39, rf"${t}$"))
+    curve = [(x(t), y(curve_value(t))) for i in range(401) for t in [x_min+(x_max-x_min)*i/400]]
+    out += [
+        rf"\draw[curve,line width=1pt] plot[smooth] coordinates {{{path(curve)}}};",
+        n(181, 222, rf"{function}\qquad $n={stage}$".replace(r"\qquad", r"\hspace{1em}")),
+        n(181, 17, tail),
+    ]
+    return "\n".join(out)
+
+
+def improper_animation(name: str, gaussian: bool) -> Animation:
+    return Animation(name, 360, 240, tuple(improper_frame(stage, gaussian) for stage in range(4)),
+                     (1300, 1300, 1300, 2000), 2)
 
 
 def words(steps: int) -> list[list[int]]:
@@ -682,6 +682,8 @@ def all_animations() -> tuple[Animation, ...]:
         substitution_animation(),
         ibp_animation(),
         single_turn_animation(),
+        improper_animation("gaussian-dyadic-windows", True),
+        improper_animation("dirichlet-dyadic-windows", False),
         ftc_animation(),
         peano_animation(),
     )
