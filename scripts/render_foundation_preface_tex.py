@@ -30,6 +30,16 @@ class Latex(HTMLParser):
             self.section = attrs['id']
         elif tag == 'p':
             self.output.append('\n')
+        elif tag == 'figure':
+            self.output.append('\n\\begin{figure}[htbp]\\centering\n')
+            self.figure = attrs['id']
+        elif tag == 'img':
+            still = Path(attrs['src']).with_suffix('.png').name
+            self.output.append(r'\includegraphics[width=.8\linewidth]{assets/' + still + '}\n')
+        elif tag == 'figcaption':
+            self.output.append(r'\caption{')
+        elif tag in ('picture', 'source'):
+            pass
         elif tag == 'pre':
             self.pre = True
             self.output.append('\n\\begin{verbatim}\n')
@@ -74,6 +84,10 @@ class Latex(HTMLParser):
             self.output.append('}')
         elif tag == 'p':
             self.output.append('\n')
+        elif tag == 'figcaption':
+            self.output.append('}\\label{' + self.figure + '}\n')
+        elif tag == 'figure':
+            self.output.append('\\end{figure}\n')
         elif tag == 'pre':
             self.output.append('\n\\end{verbatim}\n')
             self.pre = False

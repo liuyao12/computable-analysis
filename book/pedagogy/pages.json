@@ -1,8 +1,8 @@
 [
   {
     "page": "ch-foundations.html",
-    "action": "strengthen",
-    "opening": "<p>Start with \\([1,2]\\). A secant and a tangent to the square graph narrow the bounds for \\(\\sqrt{2}\\). Repeating the same rational calculation produces an enclosure at every stage.</p>",
+    "action": "retain",
+    "reason": "The preface gives the square-root motivation. Chapter 1 opens directly with definitions and arithmetic.",
     "earlierMotivation": null,
     "sectionBridges": []
   },

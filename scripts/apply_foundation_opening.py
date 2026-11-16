@@ -34,7 +34,8 @@ def chapter_body():
     # The main reader uses MathJax with explicit LaTeX delimiters.
     content = re.sub(r'\$\$(.*?)\$\$', lambda m: r'\[' + m[1] + r'\]', content, flags=re.S)
     content = re.sub(r'\$([^$\n]+)\$', lambda m: r'\(' + m[1] + r'\)', content)
-    content = content.replace('<h2>', '<h2 id="square-root-opening">', 1)
+    content = content.replace('<h2>', '<h2 id="real-names">', 1)
+    content = content.replace('<h2>Kinds of computation</h2>', '<h2 id="kinds-of-computation">Kinds of computation</h2>')
     content = re.sub(r'(?P<attr>(?:href|src|srcset)=")(?P<url>assets/[^"]+|0[^/"]+\.html)"',
                      r'\g<attr>foundation-textbook/\g<url>"', content)
     return content
@@ -61,13 +62,15 @@ def apply(site):
     if 'id="chapter-one-open-reference"' not in updated:
         updated = updated.replace('</body>', DEEP_LINK + '</body>', 1)
     assert old_body in updated
-    assert updated.count('id="square-root-opening"') == 1
-    assert updated.index('sqrt-secant-zoom.gif') < updated.index(REFERENCE)
-    assert 'enclose(value, tolerance)' in (site / 'preface.html').read_text()
+    assert updated.count('id="real-names"') == 1
+    assert updated.index('id="real-names"') < updated.index('id="kinds-of-computation"') < updated.index(REFERENCE)
+    preface = (site / 'preface.html').read_text()
+    assert 'enclose(value, tolerance)' in preface
+    assert 'foundation-preface/sqrt-secant-zoom.gif' in preface
     for asset in ('sqrt-secant-zoom.gif', 'sqrt-secant-zoom.png'):
-        assert (site / 'foundation-textbook/assets' / asset).is_file(), asset
+        assert (site / 'foundation-preface' / asset).is_file(), asset
     page.write_text(updated)
-    print('Verified the concise Chapter 1 opens with the animation and retains its full proof reference.')
+    print('Verified the preface animation, Chapter 1 definitions and formulas, and the retained proof reference.')
 
 
 if __name__ == '__main__':

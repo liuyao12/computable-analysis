@@ -114,7 +114,11 @@ def apply(site):
     if 'href="../preface.html"' not in map_text:
         map_path.write_text(map_text.replace('<nav>', '<nav><a href="../preface.html">Preface</a>', 1))
         changed.add('foundation-story/index.html')
-    for name in ["preface.html", "foundation-preface/content.html", "foundation-preface/00-preface.tex"]:
+    published = ["preface.html", "foundation-preface/content.html", "foundation-preface/00-preface.tex"]
+    for figure in ('sqrt-secant-zoom.gif', 'sqrt-secant-zoom.png'):
+        (assets / figure).write_bytes((ROOT / 'textbook/assets' / figure).read_bytes())
+        published.append('foundation-preface/' + figure)
+    for name in published:
         if name in before and (site / name).read_bytes() != before[name]:
             changed.add(name)
     for name, data in before.items():

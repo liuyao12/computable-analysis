@@ -14,5 +14,12 @@
 <p>It struck me that a Riemann sum could work the same way. If I could bound the error, a finite calculation already gave me something I could use. I imagined this as an exercise at the end of a calculus course. Pick a number or function you know, turn it into a computation, and explain how to make the error as small as you like.</p>
 <p>The fractions grew unwieldy, and I put the notebook aside. When I came back to it, I let each computation take a stage number. That left the choice of how to refine to the computation itself. The mathematics was in proving that the rational bounds keep closing in. Lean gave me a way to check those proofs without ever having to print the last fraction.</p>
 
-<p><a href="ch-foundations.html#square-root-opening">Begin Chapter 1 with the square root of two</a>.</p>
+<h2 id="square-root-opening">A first look at a real-number computation</h2>
+<p>Start with \([1,2]\) for \(\sqrt{2}\). Draw a secant through the corresponding points on \(y=x^2\) and a tangent at the right endpoint. Their intersections with \(y=2\) give the next lower and upper bounds, \([4/3,3/2]\).</p>
+<figure id="fig:sqrt-secant-tangent">
+<picture><source media="(prefers-reduced-motion: reduce)" srcset="foundation-preface/sqrt-secant-zoom.png"><img src="foundation-preface/sqrt-secant-zoom.gif" width="880" height="544" style="max-width:100%;height:auto" alt="The coordinate plane zooms in as the secant and tangent give tighter rational bounds for the square root of two."></picture>
+<figcaption>Repeating the construction gives nested rational brackets that close in on \(\sqrt{2}\).</figcaption>
+</figure>
+
+<p><a href="ch-foundations.html#real-names">Begin Chapter 1 with the definitions</a>.</p>
 <p><span id="order-first"></span><span id="limits-and-brackets"></span><span id="parametrized-enclosures"></span><span id="real-secant-boxes"></span><span id="complex-holomorphic"></span><span id="cauchy-taylor-enclosures"></span>The <a href="foundation-story/index.html">construction map</a> is the technical companion to the book.</p>

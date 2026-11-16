@@ -1,20 +1,5 @@
 \chapter{Computable Numbers and Functions}\label{ch:foundations}
 
-Start with the bracket \([1,2]\) for \(\sqrt{2}\). Draw a secant through
-the corresponding points of \(y=x^2\), and a tangent at the right endpoint.
-Where they meet \(y=2\), their horizontal coordinates give the next
-lower and upper bounds.
-
-\begin{figure}[htbp]\centering
-\includegraphics[width=.8\linewidth]{assets/sqrt-secant-zoom.png}
-\caption{Secant--tangent rational enclosures for $\sqrt2$.}
-\label{fig:sqrt-secant-tangent}
-\end{figure}
-
-A real name records the rational bracket at each stage. We ask that the
-brackets nest and that their widths tend to zero. The secant--tangent
-construction and its error bound are proved below.
-
 \section{Interval arithmetic and real numbers}
 
 \begin{definition}[Rational interval]\label{def:qinterval}
@@ -137,6 +122,25 @@ Thus two algorithms can be compared at different speeds.  A useful named
 number can carry several computations connected by proved equivalences;
 transitivity supplies comparisons along a finite chain.  There is no reason
 to discard a slow geometric construction after discovering a faster series.
+
+\section{Kinds of computation}\label{sec:computations-of-pi}
+
+The same number can be given by several formulas. The following
+constructions use \(\pi\) as a running example.
+
+\begin{itemize}
+\item Geometric bounds give \(\pi\) as the area of the unit disk.
+\item An alternating series gives
+\(\displaystyle \frac{\pi}{4}=\sum_{k=0}^{\infty}\frac{(-1)^k}{2k+1}\).
+\item Wallis's product gives
+\(\displaystyle \frac{\pi}{2}=\prod_{k=1}^{\infty}\frac{(2k)^2}{(2k-1)(2k+1)}\).
+\item Brouncker's continued fraction gives
+\(\displaystyle \frac4\pi=1+\cfrac{1^2}{2+\cfrac{3^2}{2+\cfrac{5^2}{2+\cdots}}}\).
+\item Definite quadrature gives
+\(\displaystyle \frac{\pi}{4}=\int_0^1\frac{dx}{1+x^2}\).
+\item The principal complex logarithm gives
+\(\displaystyle \frac{\pi}{2}=\operatorname{Im}\operatorname{Log}(i)\).
+\end{itemize}
 
 \section{Examples of real numbers}
 
