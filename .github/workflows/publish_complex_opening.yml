@@ -1,0 +1,82 @@
+name: Publish revised complex chapter opening
+
+on: workflow_dispatch
+
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-verified-proof-publication
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-slim
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: previous
+          run-id: '43661824825'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Replace the opening in the last successful Pages artifact
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+          import re
+          import tarfile
+          import urllib.request
+
+          archive = Path("previous/artifact.tar")
+          assert hashlib.sha256(archive.read_bytes()).hexdigest() == (
+              "26da8b17f9c9d71e232ac5b2dd28ae82672f53e36e93842c774261505716e2a9"
+          )
+          site = Path("site")
+          with tarfile.open(archive) as pages:
+              for member in pages.getmembers():
+                  assert member.isfile() or member.isdir()
+                  assert (site / member.name).resolve().is_relative_to(site.resolve())
+              pages.extractall(site)
+
+          base = "https://liuyao12.github.io/computable-analysis/"
+          page = "ch-complex-paths.html"
+          for name in ("index.html", page):
+              with urllib.request.urlopen(base + name + "?revision=complex-opening-base", timeout=30) as live:
+                  assert live.read() == (site / name).read_bytes(), name
+
+          rows = json.loads(Path("book/pedagogy/pages.json").read_text())
+          opening, = [row["opening"] for row in rows if row["page"] == page]
+          assert opening.count("<li>") == 3
+          assert "why should they agree off the real axis?" in opening
+          assert "for which the integral equals" in opening
+          target = site / page
+          original = target.read_bytes()
+          pattern = (
+              rb'(<section class="pedagogical-opening" data-pedagogy="opening" id="why-this-page">)'
+              rb'.*?(<p class="pedagogical-context">.*?</p></section>)'
+          )
+          updated, count = re.subn(
+              pattern,
+              lambda match: match[1] + opening.encode() + match[2],
+              original,
+              flags=re.DOTALL,
+          )
+          assert count == 1 and updated != original
+          target.write_bytes(updated)
+          PY
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4
