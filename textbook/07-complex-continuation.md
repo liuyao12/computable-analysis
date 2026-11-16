@@ -1,42 +1,24 @@
 # Rectangular Cauchy integrals and analytic continuation
 
-## What should the logarithm of \(-1\) mean?
+## Three routes to the exponential
 
-The real logarithm starts at \(1\) and can move to any positive number by
-integrating \(1/t\). To get to \(-1\) in the complex plane, we could go
-above zero or below it. Should those trips give the same answer? In his
-memoir on the dispute between Leibniz and Bernoulli, Euler took up the
-same puzzle from the other end. If a logarithm of \(-1\) is a number \(z\)
-for which the exponential gives \(-1\), how should we compute that
-exponential at a complex input? [Euler's memoir](https://scholarlycommons.pacific.edu/euler-works/168/)
+We already have three ways to compute the same real exponential. Each
+suggests a different way to make sense of \(\exp z\) for complex \(z\).
 
-On the real line we already have three routes to the exponential. They
-suggest three different things to try with complex numbers.
+- **Invert an integral.** On the real line we solve
+  \(\int_1^w dt/t=z\) for \(w>0\). For complex \(w\) near \(1\), integrate
+  \(1/\zeta\) along a path from \(1\) to \(w\) inside a disk that avoids
+  zero, then try to solve the same equation for \(z\) near \(0\).
+- **Take smaller multiplicative steps.** Divide \(z\) into \(n\) equal
+  increments and take the limit of \((1+z/n)^n\).
+- **Sum the power series.** Evaluate \(\sum_{k=0}^\infty z^k/k!\) with a
+  complex input.
 
-- Keep the power series and let \(z\) be complex:
-  \(\sum_{k=0}^{\infty}z^k/k!\).
-- Keep taking finer compound-interest steps and let \(z\) be complex:
-  \(\lim_{n\to\infty}(1+z/n)^n\).
-- Carry the reciprocal integral along paths near \(1\), then try to invert
-  the resulting logarithm near its value \(0\), just as on the real line.
-
-The second route lets us start with a finite calculation. Put
-\[
- z_n=n\left(\cos\frac{\pi}{n}+i\sin\frac{\pi}{n}-1\right).
-\]
-The number \(1+z_n/n\) lies at angle \(\pi/n\) on the unit circle. Raising
-it to the \(n\)-th power gives \(-1\), while \(z_n\) approaches \(i\pi\).
-The same calculation with other odd multiples of \(\pi/n\) points to
-other possible logarithms of \(-1\). This is part of Euler's argument.
-For our box computations it raises a specific question: can we bound the
-power approximation even while its input \(z_n\) is moving?
-
-And why should the series, the power limit, and the inverse of the path
-integral agree wherever their constructions overlap? Real agreement by
-itself leaves plenty of freedom. For example, \(e^x\) and \(e^x+iy\)
-give the same real values when \(z=x+iy\) lies on the real axis. We need
-to find what distinguishes the proposed extensions. This is the question
-that will lead us to the complex derivative.
+Where all three recipes make sense, why should they agree off the real
+axis? Agreement on the real line leaves plenty of freedom.
+At \(z=x+iy\), the rules \(e^x\) and \(e^x+iy\) give the same real values
+and differ whenever \(y\ne0\). What condition could tie the off-axis values
+to the real ones? That is the question that leads us to the complex derivative.
 
 ## Two calculations for the same logarithm
 
@@ -92,12 +74,19 @@ evidence is derived from the holomorphic map and the rectangular contour.
 
 ## How far can the agreement travel?
 
-Both constructions must actually be holomorphic on the region where we
-compare them. Around zero, continuing the logarithm from \(1\) to \(-1\)
-above and below gives \(\pi i\) and \(-\pi i\), respectively. The two
-branches agree on the positive-side component of their overlap. The
-negative-side component is disconnected from it. This is where the route
-starts to matter, and where the next question about continuation begins.
+For the exponential, the comparison applies on a connected common
+region containing the real interval of agreement, once each recipe has
+been shown to be holomorphic there. The inverse of the reciprocal
+integral starts near \(z=0\), while the factorial series makes sense on
+the whole plane. Agreement on the common region identifies the local
+inverse with the function we can then continue by the series.
+
+Routes matter when we continue the logarithm itself. Start with value
+\(0\) at \(1\) and integrate the reciprocal once counterclockwise around
+zero. The path returns to \(1\), while the integral has gained \(2\pi i\).
+The two local logarithms at \(1\) now have different values. Comparing
+routes is a separate question from comparing constructions that already
+agree on a starting neighborhood of a common domain.
 
 `ComputableAnalysis.FunctionTheory.Holomorphic.identityOnConnected`
 assumes valid represented inputs, holomorphicity of both maps, a shared
