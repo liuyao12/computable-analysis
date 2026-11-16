@@ -8,7 +8,7 @@ suggests a different way to make sense of \(\exp z\) for complex \(z\).
 - **Invert an integral.** On the real line we solve
   \(\int_1^w dt/t=z\) for \(w>0\). For complex \(w\) near \(1\), integrate
   \(1/\zeta\) along a path from \(1\) to \(w\) inside a disk that avoids
-  zero, then try to solve the same equation for \(z\) near \(0\).
+  zero. Given \(z\) near \(0\), try to find \(w\) for which the integral equals \(z\).
 - **Take smaller multiplicative steps.** Divide \(z\) into \(n\) equal
   increments and take the limit of \((1+z/n)^n\).
 - **Sum the power series.** Evaluate \(\sum_{k=0}^\infty z^k/k!\) with a
