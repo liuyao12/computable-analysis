@@ -80,6 +80,8 @@ jobs:
           python3 scripts/apply_foundation_textbook.py _site --chapter-review
           python3 scripts/render_foundation_textbook.py --output _site/foundation-textbook --check
           python3 scripts/verify_foundation_chapter_review.py _site "$RUNNER_TEMP/previous-pages/artifact.tar"
+          python3 scripts/render_foundation_preface_tex.py --check
+          python3 scripts/apply_foundation_opening.py _site
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

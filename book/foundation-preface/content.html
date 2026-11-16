@@ -1,103 +1,18 @@
-<h1 id="preface">From a programming exercise to a foundation</h1>
-<p class="lead">A real number can be a computation. Calculus can explain how to build it, and a proof can explain why it works at every precision.</p>
+<h1 id="preface">Preface</h1>
 
-<h2 id="origins">A programming exercise on Observable</h2>
-<p>This project began as a programming exercise on Observable, when <code>BigInt</code> was becoming available in JavaScript. Arbitrarily large integers made exact fractions practical to experiment with. That prompted a question: could we compute real numbers to arbitrary precision using only rational arithmetic?</p>
-<p>The first idea was to represent a real number by an algorithm. Give it a positive rational tolerance \(\varepsilon\), and it returns rational endpoints less than \(\varepsilon\) apart, enclosing the number:</p>
-\[\varepsilon\longmapsto[a,b],\qquad a,b\in\mathbb Q,\quad a\le b,\quad b-a&lt;\varepsilon.\]
-<p>Arithmetic then becomes programming. To add two such numbers, ask each algorithm for an interval narrower than \(\varepsilon/2\), then add their endpoints. Multiplication takes more care because the magnitudes of the inputs affect the error, but the question is still concrete: how much input precision will make the output interval narrow enough?</p>
-<p>Many familiar numbers are given by infinite series; in fact, every real number can be expressed as a convergent series of rational terms. To turn a series into a computation, we need a way to bound the remaining tail. Whenever we compute a partial sum, we demand its error bound right away. This is good pedagogy: from the beginning, an approximation comes with an explanation of how accurate it is and how to improve it.</p>
-<p>Then I realized that a Riemann sum also falls into this paradigm. For a function whose approximation error we can bound, finite rational calculations give an enclosure for its integral, and refinement makes that enclosure smaller. This made first-year calculus look like a game people could play: build computations, combine them, and explain why they work. I imagined it as a review exercise at the end of a calculus course.</p>
+<h2 id="origins">A notebook on Observable</h2>
+<p>This project began as a programming exercise on Observable. JavaScript had just acquired <code>BigInt</code>, so I could work with exact fractions in a browser notebook. I wanted to see whether I could compute familiar real numbers to any requested precision using only rational arithmetic.</p>
+<p>The notebook interface was simple. Give the computation a positive rational tolerance and get back two fractions that enclose the answer. The gap between them tells you how much uncertainty remains.</p>
 
-<h2 id="objects">From a tolerance to a stage</h2>
-<p>A practical obstacle appeared quickly. Even a simple Riemann sum can produce fractions with enormous denominators, far larger than the requested precision seems to need. Keeping denominators manageable, while controlling the error introduced by rounding, became a project of its own. That was less fun than the original mathematical experiment, and I left the project dormant.</p>
-<p>One simplification stayed with me: let the input be a stage \(n\), rather than a tolerance. A stage means a finite amount of refinement:</p>
-\[n\longmapsto I_n=[a_n,b_n],\qquad a_n,b_n\in\mathbb Q.\]
-<p>We might arrange that the width is at most \(1/n\), for positive \(n\). But no particular speed is essential. What matters is proving that the intervals remain nested, and their widths shrink to zero. In this project, valid intervals are ordered and nested:</p>
-\[a_n\le a_{n+1}\le b_{n+1}\le b_n,\qquad b_n-a_n\longrightarrow0.\]
-<p>When the stages are executable, a requested tolerance can still be met by computing successive stages until their rational width is small enough. A proof of shrinking guarantees that this search will finish. The stage itself need not count decimal digits.</p>
+<div class="observable-notebook">
+<p class="observable-notebook-label">Notebook sketch</p>
+<pre><code>enclose(value, tolerance)</code></pre>
+<p>Two rational endpoints, with a gap smaller than the requested tolerance.</p>
+</div>
 
-<h2 id="sqrt-two">A square root made entirely of fractions</h2>
-<p>Here is a computation of \(\sqrt2\). All divisions in this pseudocode are exact rational divisions. There are no floating-point numbers and no square-root operation hidden inside it.</p>
-<pre><code class="language-python">def sqrt2(n):
-    a = 1
-    b = 2
-    for _ in range(n):
-        a = (2 + a*b) / (a + b)
-        b = (b + 2/b) / 2
-    return [a, b]</code></pre>
-<p>At stage \(0\) it returns \([1,2]\). After one update it returns \([4/3,3/2]\), and after two it returns \([24/17,17/12]\). Starting with fractions, every update produces fractions.</p>
-<p>Readers who wish can verify that the intervals remain nested, their squared endpoints bracket \(2\), and their widths shrink to zero. We leave that verification as an optional exercise.</p>
-<p>The table abbreviates the decimal expansions of these exact rational bounds. Their common leading digits are in bold, followed by one more digit and an ellipsis for the omitted digits.</p>
-<!-- sqrt-table:start -->
-<div class="preface-table"><table>
-<thead><tr><th scope="col">Stage \(n\)</th><th scope="col">Lower bound</th><th scope="col">Upper bound</th></tr></thead>
-<tbody>
-<tr><th scope="row">\(0\)</th><td>\(1\)</td><td>\(2\)</td></tr>
-<tr><th scope="row">\(1\)</th><td><span class="decimal-number" aria-label="1.3...">\(\mathbf{1.}\mathrm{3}\ldots\)</span></td><td><span class="decimal-number" aria-label="1.5...">\(\mathbf{1.}\mathrm{5}\ldots\)</span></td></tr>
-<tr><th scope="row">\(2\)</th><td><span class="decimal-number" aria-label="1.411...">\(\mathbf{1.41}\mathrm{1}\ldots\)</span></td><td><span class="decimal-number" aria-label="1.416...">\(\mathbf{1.41}\mathrm{6}\ldots\)</span></td></tr>
-<tr><th scope="row">\(3\)</th><td><span class="decimal-number" aria-label="1.414211...">\(\mathbf{1.41421}\mathrm{1}\ldots\)</span></td><td><span class="decimal-number" aria-label="1.414215...">\(\mathbf{1.41421}\mathrm{5}\ldots\)</span></td></tr>
-<tr><th scope="row">\(4\)</th><td><span class="decimal-number" aria-label="1.414213562371...">\(\mathbf{1.41421356237}\mathrm{1}\ldots\)</span></td><td><span class="decimal-number" aria-label="1.414213562374...">\(\mathbf{1.41421356237}\mathrm{4}\ldots\)</span></td></tr>
-<tr><th scope="row">\(5\)</th><td><span class="decimal-number" aria-label="1.414213562373095048801687...">\(\mathbf{1.41421356237309504880168}\mathrm{7}\ldots\)</span></td><td><span class="decimal-number" aria-label="1.414213562373095048801689...">\(\mathbf{1.41421356237309504880168}\mathrm{9}\ldots\)</span></td></tr>
-</tbody>
-</table></div>
-<!-- sqrt-table:end -->
-<p>Decimals make the refinement easy to see. They are a display of the computation, rather than the objects used in its definition or proof.</p>
+<h2 id="objects">From a notebook to a calculus book</h2>
+<p>It struck me that a Riemann sum could work the same way. If I could bound the error, a finite calculation already gave me something I could use. I imagined this as an exercise at the end of a calculus course. Pick a number or function you know, turn it into a computation, and explain how to make the error as small as you like.</p>
+<p>The fractions grew unwieldy, and I put the notebook aside. When I came back to it, I let each computation take a stage number. That left the choice of how to refine to the computation itself. The mathematics was in proving that the rational bounds keep closing in. Lean gave me a way to check those proofs without ever having to print the last fraction.</p>
 
-<h2 id="equality">Multiplying the computation by itself</h2>
-<p>Call the square-root computation \(s\). Since its endpoints are positive, multiplying its interval by itself gives the rational interval</p>
-\[[a_n,b_n]\,[a_n,b_n]=[a_n^2,b_n^2].\]
-<p>Here are the resulting bounds. In each row, the bold lower and upper prefixes have the same length: a run approaching \(2\) from below, and a run approaching it from above.</p>
-<!-- product-table:start -->
-<div class="preface-table"><table>
-<thead><tr><th scope="col">Stage \(n\)</th><th scope="col">Lower bound</th><th scope="col">Upper bound</th></tr></thead>
-<tbody>
-<tr><th scope="row">\(2\)</th><td><span class="decimal-number" aria-label="1.993...">\(\mathbf{1.99}\mathrm{3}\ldots\)</span></td><td><span class="decimal-number" aria-label="2.006...">\(\mathbf{2.00}\mathrm{6}\ldots\)</span></td></tr>
-<tr><th scope="row">\(3\)</th><td><span class="decimal-number" aria-label="1.999993...">\(\mathbf{1.99999}\mathrm{3}\ldots\)</span></td><td><span class="decimal-number" aria-label="2.000006...">\(\mathbf{2.00000}\mathrm{6}\ldots\)</span></td></tr>
-<tr><th scope="row">\(4\)</th><td><span class="decimal-number" aria-label="1.999999999995...">\(\mathbf{1.99999999999}\mathrm{5}\ldots\)</span></td><td><span class="decimal-number" aria-label="2.000000000004...">\(\mathbf{2.00000000000}\mathrm{4}\ldots\)</span></td></tr>
-<tr><th scope="row">\(5\)</th><td><span class="decimal-number" aria-label="1.999999999999999999999997...">\(\mathbf{1.99999999999999999999999}\mathrm{7}\ldots\)</span></td><td><span class="decimal-number" aria-label="2.000000000000000000000002...">\(\mathbf{2.00000000000000000000000}\mathrm{2}\ldots\)</span></td></tr>
-</tbody>
-</table></div>
-<!-- product-table:end -->
-<p>The lower bound begins with \(1.999\ldots\), while the upper bound begins with \(2.000\ldots\). Both displays convey increasing precision. The exact identity we want to justify is</p>
-\[\sqrt2\cdot\sqrt2\simeq2.\]
-<p>The symbol \(\simeq\) means equality of represented values. The finite table illustrates the identity; a proof must justify it at every stage.</p>
-<p>This is the point of the example: proving an exact identity becomes reasoning about rational inequalities. The task is to establish bounds that hold at every stage. This is the kind of algebraic reasoning that language models can do well, with Lean checking the proofs they produce.</p>
-
-<h2 id="digits">Why intervals, rather than committed digits</h2>
-<p>The paired runs of nines and zeros reveal a problem with treating a real-number computation as a machine that must commit to successive ordinary digits. An interval can straddle a terminating decimal at every stage while becoming arbitrarily narrow. Refinement alone need not decide which digit expansion to print. Our interval definition accommodates this situation directly.</p>
-<p>Turing’s original definition used machines producing binary digits. In his published correction, he explicitly observed that a rule producing shrinking rational intervals cannot in general be uniformly converted into a machine producing the required ordinary digit expansion. He changed the representation while leaving the class of computable numbers unchanged. Our use of rational enclosures addresses this same correction to the digit-output interface. See <a href="https://lewis.seas.harvard.edu/file_url/145#page=15">Turing’s correction, pp. 545–546</a>.</p>
-<p>The issue is choosing output digits uniformly from an arbitrary computation, not the inability to print the digits of \(2\). Once the identity above is proved, we can use the constant computation for \(2\). The interval computation itself already has a valid meaning before we replace it by that simpler one.</p>
-
-<h2 id="calculus-pi">A calculus course built around one number</h2>
-<p>Another idea survived the original experiment: much of first-year calculus could be redesigned around different computations of \(\pi\). Geometry suggests polygon and area approximations; integration supplies rational sums; arctangent brings in series; derivatives and the fundamental theorem of calculus explain why apparently different computations agree.</p>
-<p>For example, the expression</p>
-\[4\int_0^1\frac{dt}{1+t^2}\]
-<p>suggests a computation built from rational samples of a rational function. A series suggests a different computation, using finite prefixes and a bound for the remaining tail. The mathematical task is to prove their agreement with the geometric computation of \(\pi\). Agreement to many printed digits is encouraging, but the goal is an exact identity between the computations.</p>
-<p><span id="derive-check"></span>This also separates finding a formula from verifying it. A substitution or a clever manipulation may suggest an answer. We can then prove the particular derivative and integral identities that justify it, without first formalizing every technique that led us there.</p>
-
-<h2 id="proofs">From computing answers to proving computations</h2>
-<p>When language models became capable of writing code and helping formalize mathematics, it became natural to return to the project. The aim had changed. Instead of running a computation to a small tolerance and inspecting its answer, we could prove that its precision can be made as small as we want:</p>
-\[\forall\varepsilon\in\mathbb Q_{&gt;0}\;\exists N\;\forall n\ge N:\quad b_n-a_n&lt;\varepsilon.\]
-<p>A proof of this statement handles every requested precision. It also explains why the computation works. We need not evaluate the huge fractions occurring at late stages in order to prove the laws governing them.</p>
-<p>This changes the role of denominator growth. Efficient rounding and small denominators remain worthwhile programming questions, but solving them is no longer a prerequisite for developing the mathematics. We can keep an exact rational algorithm, leave its large computations unevaluated, and prove containment, shrinking, and identities symbolically for arbitrary stages.</p>
-<p>The ambition is to turn the original calculus game into a foundation for proving mathematics: construct the numbers and functions we need, prove their laws, and compare different constructions of the same objects. Finite numerical examples help us understand the ideas. The results should explain what happens at every precision.</p>
-
-<h2 id="functions">Numbers lead to functions</h2>
-<p>The square-root example immediately suggests a function: replace \(2\) by a positive rational parameter and construct the corresponding intervals. More generally, our primary functions take rational inputs, rational complex inputs, or explicitly described rational coordinates. Their outputs may be represented numbers.</p>
-<p>Evaluation at a represented irrational input is a further construction. It needs justified continuity or convergence, with enough control to turn input bounds into output bounds. Equivalent names of the same input must give equivalent outputs. Changing coordinates or choosing another algorithm also calls for a comparison proof.</p>
-<p><span id="order-first"></span>Order often supplies the useful bounds. For a monotone function, endpoint values bound the values throughout an input interval. For a convex or concave function, suitable secants bound nearby slopes. Containment is one obligation; proving that the bounds collapse is another. The elementary square-root update is an early example of this way of thinking.</p>
-
-<h2 id="laws">What the foundation must earn</h2>
-<p>The examples point to the standard we want the foundation to meet. Arithmetic must preserve valid computations. Equality must survive changes of representation. Limits, derivatives, and integrals need a mathematical meaning, and a particular algorithm must be proved to have that meaning. A record bearing the name “integral” does not establish it.</p>
-<p>General laws can start with supplied objects and the evidence needed for the conclusion. Constructing such evidence for a particular function is a separate task. Each function brings its own construction; we do not first require all integrands to belong to a single preselected class or make one numerical method the meaning of every integral. For example, a justified FTC argument should establish an exact definite-integral identity:</p>
-\[\int_a^x f(t)\,dt\simeq F(x)-F(a).\]
-<p>The domain and branch conditions must hold throughout the segment. The current <code>Integral.HasIntegral</code> implementation uses arbitrarily tight rectangle bounds. That is a checked sufficient route; the intended method-independent core remains a design task. Existing theorems retain their stated scope.</p>
-<p><span id="terminology"></span>Our concrete constructors use finite rational operations. The type of <code>RealRaw.compute</code> alone is not a computability certificate, and a logical existence proof does not automatically supply an executable constructor. General mathematical laws may still quantify over arbitrary valid represented inputs, including irrational coefficients. The development permits classical reasoning in proofs while requiring the actual computational constructions to remain explicit.</p>
-<p>Rational enclosures and alternative names have a long history in computable analysis. Our task is to make this particular organization of analysis coherent and useful, with exact theorems supported by visible constructions. The foundation’s adequacy should be demonstrated by the mathematics people can build with it.</p>
-
-<h2 id="reading">How to read this book</h2>
-<p>Begin with the computations of \(\sqrt2\) and \(\pi\). Follow the rational bounds, then ask why they are valid, why they shrink, and why different computations agree. Functions, integrals, series, and derivatives enter as tools for answering those questions.</p>
-<p>The <a href="foundation-story/index.html">construction map</a> gives the more technical account, including checked statements and remaining bridges. <span id="limits-and-brackets"></span><span id="parametrized-enclosures"></span><span id="real-secant-boxes"></span>Its <a href="foundation-story/index.html#parametrized-continuity">continuity constructions</a> and <a href="foundation-story/index.html#real-secant-core">real secant definitions</a> explain how independent input and output refinements fit together. <span id="complex-holomorphic"></span><span id="cauchy-taylor-enclosures"></span>The <a href="foundation-story/index.html#holomorphic-core">complex analysis</a> and <a href="foundation-story/index.html#cauchy-taylor">Cauchy and Taylor constructions</a> continue the same story beyond the opening calculus chapters.</p>
-<p>Everyone is welcome to contribute computations, proofs, examples, explanations, or improvements to the book, with or without an AI agent. The original invitation remains: take a familiar piece of mathematics, turn it into a computation, and explain why it works.</p>
-<p><a href="ch-foundations.html#numbers-to-functions">Begin Chapter 1: numbers lead to functions</a> · <a href="https://github.com/liuyao12/computable-analysis#join-the-collaboration">Join the collaboration</a></p>
+<p><a href="ch-foundations.html#square-root-opening">Begin Chapter 1 with the square root of two</a>.</p>
+<p><span id="order-first"></span><span id="limits-and-brackets"></span><span id="parametrized-enclosures"></span><span id="real-secant-boxes"></span><span id="complex-holomorphic"></span><span id="cauchy-taylor-enclosures"></span>The <a href="foundation-story/index.html">construction map</a> is the technical companion to the book.</p>

@@ -1,17 +1,19 @@
 \chapter{Computable Numbers and Functions}\label{ch:foundations}
 
-A number will be a computation, not an already available point of a
-completed line.  Each stage returns two rational endpoints; a proof explains
-why these pairs are compatible and their widths become arbitrarily small.
-There is no additional scalar hidden between the endpoints.  Different
-computations remain worth keeping: a geometric construction can be
-compared with a faster series by rational overlap inequalities.
+Start with the bracket \([1,2]\) for \(\sqrt{2}\). Draw a secant through
+the corresponding points of \(y=x^2\), and a tangent at the right endpoint.
+Where they meet \(y=2\), their horizontal coordinates give the next
+lower and upper bounds.
 
-The finite arithmetic used below is ordinary integer and rational arithmetic.
-Fractions are reduced by the Euclidean algorithm; finite sums, products,
-polynomials, induction, and the triangle inequality require no limiting
-objects.  A rational input is a numerator and a positive denominator, not an
-oracle for a point on a continuum.
+\begin{figure}[htbp]\centering
+\includegraphics[width=.8\linewidth]{assets/sqrt-secant-zoom.png}
+\caption{Secant--tangent rational enclosures for $\sqrt2$.}
+\label{fig:sqrt-secant-tangent}
+\end{figure}
+
+A real name records the rational bracket at each stage. We ask that the
+brackets nest and that their widths tend to zero. The secant--tangent
+construction and its error bound are proved below.
 
 \section{Interval arithmetic and real numbers}
 
@@ -185,12 +187,6 @@ outputs overlap across all stages: disjoint nonnegative intervals cannot
 both have their squared endpoints bracket $2$.  Monotonicity of rational
 squaring proves this directly.  There is no need to select a common root
 before proving the computations equivalent.
-
-\begin{figure}[htbp]\centering
-\sqrtSecantTangentAnimation
-\caption{Secant--tangent rational enclosures for $\sqrt2$.}
-\label{fig:sqrt-secant-tangent}
-\end{figure}
 
 There is no rational whose square is $2$: in a reduced fraction $p/q$, the
 identity $p^2=2q^2$ would make both $p$ and $q$ even.  Thus no constant

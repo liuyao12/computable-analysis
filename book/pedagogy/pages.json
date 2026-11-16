@@ -1,13 +1,8 @@
 [
   {
     "page": "ch-foundations.html",
-    "foundationReview": {
-      "heading": "Number names, quotient values, and continued fractions",
-      "body": "<p><code>RealCompute</code> and <code>ComplexCompute</code> are the stage-indexed interval and box records. A valid name has shrinking widths with no prescribed rate. Equivalent valid names give one value in <code>ComputableAnalysis.Real</code> or <code>ComputableAnalysis.Complex</code>. The chapter supplement follows these names into arithmetic, rationality, and continued fractions.</p>",
-      "links": {"Numbers and functions": "01-numbers-and-functions.html", "Continued fractions and pi": "06b-continued-fractions.html"}
-    },
     "action": "strengthen",
-    "opening": "<p>A decimal approximation to \\(\\sqrt2\\) gives useful digits, but the digits alone do not tell us how much error remains. We want a number that can answer a request for greater accuracy and justify the answer. Bisection suggests the basic object: two rational bounds that keep the answer enclosed while their gap shrinks.</p><p>Arithmetic then becomes a question about these bounds. How do we add two computations, divide safely, or show that a geometric construction and a series describe the same number? This chapter builds the language needed to ask those questions precisely.</p>",
+    "opening": "<p>Start with \\([1,2]\\). A secant and a tangent to the square graph narrow the bounds for \\(\\sqrt{2}\\). Repeating the same rational calculation produces an enclosure at every stage.</p>",
     "earlierMotivation": null,
     "sectionBridges": []
   },

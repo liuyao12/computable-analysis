@@ -59,7 +59,12 @@ def inline(text: str) -> str:
         elif token.startswith("**") and token.endswith("**"):
             out.append("<strong>" + inline(token[2:-2]) + "</strong>")
         elif (image := re.fullmatch(r"!\[([^\]]+)\]\((assets/[a-z0-9.-]+)\)", token)):
-            out.append(f'<img src="{image[2]}" alt="{html.escape(image[1], quote=True)}" loading="lazy">')
+            src = image[2]
+            tag = f'<img src="{src}" alt="{html.escape(image[1], quote=True)}" loading="lazy">'
+            if src == 'assets/sqrt-secant-zoom.gif':
+                tag = ('<picture><source media="(prefers-reduced-motion: reduce)" '
+                       'srcset="assets/sqrt-secant-zoom.png">' + tag + '</picture>')
+            out.append(tag)
         elif (match := re.fullmatch(r"\[([^\]]+)\]\(([^)]+)\)", token)):
             url = match[2]
             if ":" in url and not url.startswith(("https://", "http://")):
