@@ -33,8 +33,20 @@
   {
     "page": "ch-integrals.html",
     "foundationReview": {
-      "heading": "When a uniform grid and a nonuniform grid give the same integral",
-      "body": "<p>Start with the integer grid and refine by halves. For a second computation, take dyadic nodes in the exponent and map them into the positive axis. The grid comparison takes matching endpoints, density, and agreement of the samples with the represented evaluator. Applied to the reciprocal, it identifies ordinary dyadic quadrature with the difference of inverse-exponential logarithms at represented positive endpoints.</p>",
+      "heading": "Watch the dyadic bounds close in",
+      "body": "<p>Start at integer nodes and refine by halves. With exact rational samples the adjacent staircases meet at a grid point. With represented samples, the height of each evaluation enclosure also has to shrink.</p>",
+      "figures": [
+        {
+          "file": "dyadic-reciprocal-quadratic.gif",
+          "alt": "The two staircases meet at exact rational evaluations of the reciprocal quadratic.",
+          "caption": "Arctangent by dyadic quadrature. The shrinking shaded area is the gap between the upper and lower sums."
+        },
+        {
+          "file": "dyadic-sinc-enclosures.gif",
+          "alt": "Narrowing sample enclosures for sinc, with whole-cell bounds near turns and a moving cutoff.",
+          "caption": "Sine divided by its argument. Purple cells use a whole-cell bound. The window error and tail allowance are tracked separately."
+        }
+      ],
       "links": {"Dyadic integral and grid comparison": "03-integrals.html"}
     },
     "action": "strengthen",

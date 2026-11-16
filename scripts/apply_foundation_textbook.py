@@ -6,7 +6,7 @@ import json
 import re
 from pathlib import Path
 
-from render_foundation_textbook import SOURCE, destination, generated_files, write_files
+from render_foundation_textbook import SOURCE, destination, generated_files, image_tag, write_files
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('site', type=Path)
@@ -42,10 +42,19 @@ if args.chapter_review:
             if filename not in chapter_files:
                 raise SystemExit(f'Unknown textbook chapter {filename}')
             links.append(f'<li><a href="foundation-textbook/{filename}">{html.escape(label)}</a></li>')
+        figures = []
+        for figure in review.get('figures', []):
+            asset = f'assets/{figure["file"]}'
+            if not (output / asset).is_file():
+                raise SystemExit(f'Missing textbook figure {asset}')
+            figures.append(
+                f'<figure>{image_tag(asset, figure["alt"], "foundation-textbook/")}'
+                f'<figcaption>{html.escape(figure["caption"])}</figcaption></figure>'
+            )
         section = (
             '<section id="current-foundation" class="pedagogical-opening">\n'
             f'<h2>{html.escape(review["heading"])}</h2>\n'
-            f'{review["body"]}\n<ul>{"".join(links)}</ul>\n</section>\n'
+            f'{review["body"]}\n{"".join(figures)}<ul>{"".join(links)}</ul>\n</section>\n'
         )
         if existing.search(original):
             revised = existing.sub(lambda _: section, original, count=1)

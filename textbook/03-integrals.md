@@ -35,6 +35,17 @@ comparison proves agreement for different certified heights and precision
 schedules. A faster computation can represent the same integral once its
 agreement is proved.
 
+## Exact samples for arctangent
+
+For \(f(x)=1/(1+x^2)\) on \([0,1]\), the left and right endpoint values
+are exact rationals. On each cell, the left value supplies the upper
+height and the right value supplies the lower height. At an interior
+grid point, the upper staircase to its right and the lower staircase to
+its left meet at the same sample. The shaded area between the
+staircases is the uncertainty in the integral.
+
+![The upper and lower stairs meet at each exact rational node as the dyadic grid refines](assets/dyadic-reciprocal-quadratic.gif)
+
 ## Constant and simple functions, interval addition, and bounds
 
 The basic integral contract starts with constants and finite piecewise
@@ -196,6 +207,60 @@ Use the known bounds $[-1,1]$ on any unresolved cell, and the endpoint
 bounds wherever monotonicity is known.
 
 ![The one cell containing one third gets narrower while its fixed lower and upper heights stay the same](assets/single-turn-integral.gif)
+
+## Sine divided by its argument
+
+Use the normalized grid coordinate \(t=x/\pi\). For a positive rational
+node \(t\), the sampler gives \(\sin(\pi t)\) and the argument \(\pi t\)
+is a represented real. Their quotient
+\[
+F(t)=\frac{\sin(\pi t)}{\pi t}
+\]
+is a `RealCompute`. Use \(F(0)=1\), the removable limit.
+The bars at sampled nodes are rational output enclosures. The two
+staircases at a node with a nonzero evaluation gap can get arbitrarily
+close while still staying apart. At a known zero the two can meet exactly.
+
+![Sinc quadrature on dyadic multiples of pi, with sample enclosure bars, whole-cell bounds near turns, and a moving cutoff](assets/dyadic-sinc-enclosures.gif)
+
+On cells with a certified direction of monotonicity, take bounds from
+the two ends. Purple marks cells where the illustration instead uses a
+whole-cell estimate. As the grid refines, the evaluation intervals also
+shrink. A cell of width \(\Delta t\) contributes physical width
+\(\pi\Delta t\), so multiply the area gap in the plotted coordinate
+by \(\pi\).
+
+This leaves a second error from the omitted tail. With physical cutoff
+\(R\), integration by parts gives
+\[
+\left|\int_R^S\frac{\sin x}{x}\,dx\right|\le \frac{2}{R},
+\qquad S\ge R>0.
+\]
+The bound uses cancellation from oscillation. The animation shows the
+window gap and tail allowance separately as its cutoff advances. The
+[sine-integral chapter](06a-dirichlet-integral.md) gives the improper
+construction and its evaluation.
+
+### Two grids from the circle
+
+This animation puts the dyadic grid in the normalized angle \(t=x/\pi\).
+Inserting the angular midpoint lets us apply the half-angle formulas
+again, with the signs supplied by the quadrant. The grid is uniform in
+the physical angle \(x\).
+
+The rational circle chart offers a second grid. Put \(v=\tan(x/2)\)
+and take dyadic values of \(v\). In this coordinate the circle values
+are rational at every node:
+
+$$
+\sin x=\frac{2v}{1+v^2},\qquad \cos x=\frac{1-v^2}{1+v^2}.
+$$
+
+The node's physical angle is \(x=2\arctan v\) on the chart
+\(-\pi<x<\pi\). The resulting angles are nonuniform. A cell has physical
+width \(2(\arctan v_{j+1}-\arctan v_j)\), and dividing its rational sine
+value by the represented angle still calls for represented arithmetic.
+These are two ways of choosing nodes for the same geometric function.
 
 ## Integrating a continuous sampler without locating its turns
 

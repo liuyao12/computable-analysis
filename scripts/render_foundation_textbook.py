@@ -48,6 +48,15 @@ def destination(name: str) -> str:
     return "index.html" if name == "README.md" else Path(name).with_suffix(".html").name
 
 
+def image_tag(src: str, alt: str, prefix: str = "") -> str:
+    tag = f'<img src="{prefix}{src}" alt="{html.escape(alt, quote=True)}" loading="lazy">'
+    still = Path(src).with_suffix(".png").as_posix()
+    if src.endswith(".gif") and (SOURCE / still).is_file():
+        return ('<picture><source media="(prefers-reduced-motion: reduce)" '
+                f'srcset="{prefix}{still}">' + tag + '</picture>')
+    return tag
+
+
 def inline(text: str) -> str:
     tokens = re.split(r"(\$[^$\n]+\$|`[^`]+`|!?\[[^\]]+\]\([^)]+\)|\*\*.+?\*\*)", text)
     out = []
@@ -59,12 +68,7 @@ def inline(text: str) -> str:
         elif token.startswith("**") and token.endswith("**"):
             out.append("<strong>" + inline(token[2:-2]) + "</strong>")
         elif (image := re.fullmatch(r"!\[([^\]]+)\]\((assets/[a-z0-9.-]+)\)", token)):
-            src = image[2]
-            tag = f'<img src="{src}" alt="{html.escape(image[1], quote=True)}" loading="lazy">'
-            if src == 'assets/sqrt-secant-zoom.gif':
-                tag = ('<picture><source media="(prefers-reduced-motion: reduce)" '
-                       'srcset="assets/sqrt-secant-zoom.png">' + tag + '</picture>')
-            out.append(tag)
+            out.append(image_tag(image[2], image[1]))
         elif (match := re.fullmatch(r"\[([^\]]+)\]\(([^)]+)\)", token)):
             url = match[2]
             if ":" in url and not url.startswith(("https://", "http://")):
