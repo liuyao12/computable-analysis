@@ -14,6 +14,13 @@ on:
         description: SHA-256 of the retained artifact.tar
         type: string
         default: ''
+      runner:
+        description: GitHub-hosted runner for the static Pages publication
+        type: choice
+        default: ubuntu-latest
+        options:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
 permissions:
   actions: read
   contents: read
@@ -24,7 +31,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
