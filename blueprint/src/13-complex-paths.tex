@@ -300,6 +300,28 @@ nonconstant derivative coefficients zero and constant value $1$.
 On the positive real interval it agrees with the previously constructed
 logarithm by its primitive identity and the value at $1$.
 
+Now ask for the logarithm at $1+i/2$. The series gives one way to get it.
+For a second calculation, start at $1$ and accumulate $dz/z$ along the
+vertical segment. Since $i/(1+it)=(t+i)/(1+t^2)$,
+the path calculation gives
+\[
+ \int_0^{1/2}\frac{t+i}{1+t^2}\,dt
+ =\frac12\log\frac54+i\arctan\frac12.
+\]
+The two calculations begin with the same real logarithm, but why should
+the sum of complex powers know the result of this vertical integral?
+
+The miracle is that the real values already settle the question. On the
+right half-plane we can take the integral from $1$ along a horizontal leg
+and then a vertical one. The complex endpoint
+derivative is $1/z$, so the resulting function is holomorphic there.
+On $0<x<2$, it gives the same real values as the series. Those values
+already fix every Taylor coefficient at $1$, because differentiation along
+the real axis gives the complex derivatives there. The common Taylor series
+forces agreement off the real axis. Then an overlapping disk can pass
+the agreement to the next disk. This is the principle of analytic
+continuation at work, and it makes the two answers at $1+i/2$ one answer.
+
 Suppose a value $L(c)$ has been continued to a nonzero computed point $c$.
 Choose a certified $d<|c|$ and set
 \[

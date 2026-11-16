@@ -134,8 +134,8 @@
   {
     "page": "ch-complex-paths.html",
     "foundationReview": {
-      "heading": "What a rectangular contour tells us about continuation",
-      "body": "<p>Integrating the Cauchy kernel on four axis-aligned sides supplies local Taylor coefficients and a tail bound. The identity theorem uses these computed expansions to propagate agreement on a neighborhood through a shared connected domain.</p>",
+      "heading": "Why the two logarithms agree",
+      "body": "<p>The power series and the path integral start from the same real logarithm. Integrating the Cauchy kernel on four sides explains where the Taylor coefficients come from and how the agreement can travel through the connected region shared by the two constructions.</p>",
       "links": {"Rectangular Cauchy integrals and analytic continuation": "07-complex-continuation.html"}
     },
     "action": "strengthen",
@@ -152,7 +152,7 @@
       },
       {
         "heading": "Logarithm along a specified path",
-        "body": "<p>Locally, integrating the reciprocal suggests a logarithm. Moving around a loop enclosing zero can change the accumulated value, so the path and branch choice must accompany the computation.</p>"
+        "body": "<p>What should the real logarithm become at \\(1+i/2\\)? We can substitute into its series about \\(1\\), or integrate the reciprocal along the vertical segment from \\(1\\). The second computation splits into two familiar real integrals.</p>\\[\\int_0^{1/2}\\frac{t+i}{1+t^2}\\,dt=\\frac12\\log\\frac54+i\\arctan\\frac12.\\]<p>The miracle is that the series has to give this same value. Both extensions are holomorphic on the disk \\(|z-1|&lt;1\\), and agreement on \\(0&lt;x&lt;2\\) fixes every Taylor coefficient at \\(1\\). Differentiation along the real axis gives the complex derivatives there. The common Taylor series takes the agreement off the real axis, and overlapping disks carry it through a connected common domain. That is the principle of analytic continuation in action.</p><p>Now try taking the path around zero. The resulting change in the logarithm leads to the next question: how much does the route matter?</p>"
       }
     ]
   },
