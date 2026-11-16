@@ -1,5 +1,45 @@
 # Rectangular Cauchy integrals and analytic continuation
 
+## What should the logarithm of \(-1\) mean?
+
+The real logarithm starts at \(1\) and can move to any positive number by
+integrating \(1/t\). To get to \(-1\) in the complex plane, we could go
+above zero or below it. Should those trips give the same answer? In his
+memoir on the dispute between Leibniz and Bernoulli, Euler took up the
+same puzzle from the other end. If a logarithm of \(-1\) is a number \(z\)
+for which the exponential gives \(-1\), how should we compute that
+exponential at a complex input? [Euler's memoir](https://scholarlycommons.pacific.edu/euler-works/168/)
+
+On the real line we already have three routes to the exponential. They
+suggest three different things to try with complex numbers.
+
+- Keep the power series and let \(z\) be complex:
+  \(\sum_{k=0}^{\infty}z^k/k!\).
+- Keep taking finer compound-interest steps and let \(z\) be complex:
+  \(\lim_{n\to\infty}(1+z/n)^n\).
+- Carry the reciprocal integral along paths near \(1\), then try to invert
+  the resulting logarithm near its value \(0\), just as on the real line.
+
+The second route lets us start with a finite calculation. Put
+\[
+ z_n=n\left(\cos\frac{\pi}{n}+i\sin\frac{\pi}{n}-1\right).
+\]
+The number \(1+z_n/n\) lies at angle \(\pi/n\) on the unit circle. Raising
+it to the \(n\)-th power gives \(-1\), while \(z_n\) approaches \(i\pi\).
+The same calculation with other odd multiples of \(\pi/n\) points to
+other possible logarithms of \(-1\). This is part of Euler's argument.
+For our box computations it raises a specific question: can we bound the
+power approximation even while its input \(z_n\) is moving?
+
+And why should the series, the power limit, and the inverse of the path
+integral agree wherever their constructions overlap? Real agreement by
+itself leaves plenty of freedom. For example, \(e^x\) and \(e^x+iy\)
+give the same real values when \(z=x+iy\) lies on the real axis. We need
+to find what distinguishes the proposed extensions. This is the question
+that will lead us to the complex derivative.
+
+## Two calculations for the same logarithm
+
 Take the real logarithm, normalized by \(\log 1=0\). In the [integral
 chapter](03-integrals.md), the section on monotone dyadic quadrature found
 it by accumulating \(1/t\) from \(1\) to \(x\). There are two
