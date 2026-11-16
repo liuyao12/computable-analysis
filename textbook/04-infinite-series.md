@@ -35,7 +35,7 @@ No abstract completion, supremum, or independently assumed sum is needed.
 Literal error boxes need not themselves be nested.
 
 `ErrorSeries.Series` implements rational terms with these actual finite sums
-and certified errors. `Series.sum` is the resulting `RealRaw` computation;
+and certified errors. `Series.sum` is the resulting `RealCompute` computation;
 `Series.sum_valid` and `Series.sum_bounds` prove validity and the value bounds.
 The lower-level `ErrorSeries.Data` accepts rational approximants more generally.
 When approximants include rounding or represented-coefficient evaluation,
@@ -52,7 +52,7 @@ $$
 S_N-e_N\le v\le S_N+e_N\quad\text{for every }N.
 $$
 
-`ErrorSeries.Data.identify` derives exact `RealRaw.Equiv` from these finite
+`ErrorSeries.Data.identify` derives exact `RealCompute.Equiv` from these finite
 inequalities. `Data.compare` compares two justified constructions through
 a common valid value. These are comparison laws, not definitions that store
 the desired equality in a record.

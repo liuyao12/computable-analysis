@@ -10,10 +10,12 @@ This is an alternative collection of objects and APIs, not an automatic
 substitution for every theorem written against those other types.
 
 The foundation includes representations, arithmetic, equality and order,
-functions with explicit domains, limits, continuity, differentiation,
-integration, series, elementary functions, and reusable complex and ODE
-constructions. Particular applications do not determine the general meaning
-of these objects.
+functions with explicit domains, limits, function-specific continuity,
+differentiation and integration constructions, series, elementary functions,
+and reusable complex and ODE constructions. The calculus course develops
+these tools through particular functions and their proved monotone or
+convex/concave pieces; it does not depend on first building universal
+continuity or derivative theories.
 
 ## Construct, identify, compare
 
@@ -28,12 +30,12 @@ $$
 x\simeq y.
 $$
 
-For real values this means `RealRaw.Equiv`; the analogous complex relation is
-`ComplexRaw.Equiv`. Equality of values does not require equality of programs,
+For real values this means `RealCompute.Equiv`; the analogous complex relation is
+`ComplexCompute.Equiv`. Equality of values does not require equality of programs,
 finite-stage intervals, or precision schedules.
 
 The mathematical number types are the quotients of valid names by these
-relations: `Numbers.Real` and `Numbers.Complex`. Raw equivalence is exactly
+relations: `ComputableAnalysis.Real` and `ComputableAnalysis.Complex`. Raw equivalence is exactly
 equality of their quotient values. Keep particular computations available for
 execution rather than choosing a preferred algorithm as part of a number's
 mathematical identity.
@@ -50,28 +52,29 @@ functions; their continuation class can retain different branches. Direct
 overlap is then sufficient, not necessary, for chain equivalence.
 
 Public statements allow arbitrary valid represented inputs and coefficients,
-including irrational ones. `RealRaw.compute` has a function type; that type
+including irrational ones. `RealCompute.compute` has a function type; that type
 alone is not a certificate that every supplied function is executable.
 Concrete executable constructions and operations preserving their
 executability remain part of the foundation.
 
 ## Mathematical laws and particular existence
 
-Define what it means for a supplied value to be a derivative or an integral,
-without requiring a preselected class of functions or a universal construction
-algorithm. An agent works function by function: it chooses a method from the
-actual structure, proves the construction's evidence, and checks the exact
-mathematical role. The book and skills guide this work; the choice of method
-need not itself be a single formal algorithm.
+An agent works function by function: it chooses a method from the actual
+structure, proves the construction's evidence, and checks its exact
+mathematical role. For integration, split at proved monotonicity or
+curvature pieces when available; use explicit finite range bounds on the
+remaining pieces. For derivatives, construct the needed local secant or
+quotient bounds for that function. The book and skills guide this work; no
+universal continuity or derivative construction is a prerequisite, and the
+choice of method need not itself be a single formal algorithm.
 
-The proposed common integral laws normalize constants, add over adjacent
-intervals, and preserve lower and upper bounds supplied by finite step
-functions. They do not by themselves guarantee universal existence or
-uniqueness. Continuity means that a covered interval extension takes every
-admissible valid name to a valid name, with representation-independent
-output. The proposed derivative is the continuous extension value of the
-punctured difference quotient. The chapters distinguish these intended
-contracts from the scope of the current checked interfaces.
+Common integral laws normalize constants, add over adjacent intervals, and
+preserve lower and upper bounds supplied by finite step functions. They do
+not by themselves guarantee universal existence or uniqueness. General
+continuity and derivative interfaces may help compare supplied
+constructions, but are supporting tools rather than prerequisites for the
+course's function-specific arguments. Each construction states the local
+validity, bounds, and agreement evidence it actually uses.
 
 A law about supplied, justified objects can be complete without a theorem
 that all objects of some broad class exist. A particular construction must

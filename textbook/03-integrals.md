@@ -8,10 +8,10 @@ give the lower sum, and the left endpoint values give the upper sum. The
 result is the enclosure $[5/6,3/2]$. At level $1$, insert $3/2$ and $5/2$
 and repeat. The two sums tighten without needing a formula for the logarithm.
 
-This is our default definite-integral construction. On an ordered rational
-interval $[a,b]$, take the endpoints together with every interior grid point
-$k/2^n$ for $k\in\mathbb Z$. Thus level $0$ uses the integers, level $1$
-inserts the half-integers, and level $2$ inserts the odd quarter-integers.
+This is our default definite-integral construction. At stage $n$, take the
+endpoints of the ordered rational interval $[a,b]$ together with every
+interior grid point $k/2^n$ for $k\in\mathbb Z$. Stage $0$ uses the integers,
+stage $1$ inserts the half-integers, and stage $2$ inserts the odd quarter-integers.
 The grid stays fixed when the endpoints change: for example, on
 $[1/3,8/3]$ the first grid points are $1/3,1,2,8/3$. Only the end cells
 are clipped. When $a=b$, the integral is zero.
@@ -26,11 +26,11 @@ $$
 
 The evidence belongs to the function; the grid does not. If the total
 area gap $U_n-L_n$ tends to zero, the intervals define a valid
-`RealRaw`. A finite common refinement proves $L_i\le U_j$ for every pair
+`RealCompute`. A finite common refinement proves $L_i\le U_j$ for every pair
 of levels: each refined cell has a rational sample whose value lies between
-both sets of bounds. This proves that the finite intersections
-$[\max_{i\le n}L_i,\min_{i\le n}U_i]$ are nonempty and nested, and
-their widths tend to zero because they lie within $[L_n,U_n]$. The same
+both sets of bounds. The enclosing interval at stage $n$ is the intersection
+$[\max_{i\le n}L_i,\min_{i\le n}U_i]$. These intervals are nonempty and
+nested. Their widths tend to zero because each lies within $[L_n,U_n]$. The same
 comparison proves agreement for different certified heights and precision
 schedules. A faster computation can represent the same integral once its
 agreement is proved.
@@ -524,9 +524,42 @@ endpoint computation is valid and the bounds squeeze every secant.
 `MonotoneLogarithm.derivative` states the full covered derivative
 \(L'(x)=1/x\), independently of the chosen valid rational-sample presentation.
 
-**Remaining comparison.** Identifying this inverse with the Euler-method
-exponential is still a separate proof obligation. The already checked
-Euler/series comparison would then also identify it with the factorial
-series. The companion's `ExponentialComputations.integralLog` and its inverse
-laws remain checked at their own scope; they are not silently used as the
-missing comparison for this independent foundation route.
+## When the sampling grid is nonuniform
+
+To compare the reciprocal integral with the inverse of the Euler exponential,
+subdivide the interval in the exponent first. A dyadic node \(s\) then
+becomes the represented point \(e^s\) in the physical interval. The cells
+still cover the interval, but their physical lengths vary. Their rectangle
+contributions use the physical lengths \(e^{s_{j+1}}-e^{s_j}\).
+
+A grid-only integral needs a justified bound on the samples of every finer
+subdivision in each cell and a proof that the total rectangle gap shrinks.
+The finite lower and upper sums yield a valid `RealCompute`.
+`DyadicGridIntegral.Data.valid` certifies this construction. A second
+construction may use a different grid. With matching endpoints and density
+in the physical coordinate, agreement at the nodes with the represented
+extension of the rational evaluator lets us compare the two rectangle bounds.
+The exact agreement theorem is
+`DyadicGridIntegral.Data.agrees_with_dyadic_of_approximations`.
+
+The reciprocal illustrates why the comparison is useful. On a cell with
+exponent endpoints \(s\) and \(s+h\), the left rectangle contributes
+\(e^h-1\) and the right rectangle contributes \(1-e^{-h}\).
+Both approach \(h\) to first order. Summing the explicit Euler exponential
+error bounds over the cells identifies the grid-only integral with the
+exponent increment. Grid agreement transfers the result to ordinary dyadic
+quadrature.
+
+For valid represented endpoints \(0<a\le b\), the checked result is
+
+$$
+\int_a^b\frac{dt}{t}\simeq\log b-\log a,
+$$
+
+where \(\log\) is constructed as the inverse of the Euler exponential.
+The endpoint extension uses rational bounds separated from zero. Lean
+exposes the result as
+`DyadicGridIntegral.representedReciprocalIntegral_eq_inverseEulerLog`;
+`representedReciprocalIntegral_reverse_eq_inverseEulerLog` covers the
+reversed orientation. `inverseEulerLog_agrees` identifies the inverse
+computation with the independently constructed quadrature logarithm.

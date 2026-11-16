@@ -154,7 +154,7 @@ def render(source: Path, chapters: list[Path]) -> str:
 <p><a href="../index.html">Project website</a></p></aside><main id="content">{markdown(text)}
 <div class="source"><a href="{source.name}" download>Download this chapter as Markdown</a> · <a href="{MISSION_DOWNLOAD}" download>Complete mission Markdown with skill</a> · <a href="{SKILL_DOWNLOAD}" download>Taylor from FTC skill</a> · Editable source · Revision {digest[:12]}</div>
 <footer>Definitions, proposition statements, and proofs develop together. Open targets are labelled explicitly.</footer>
-</main></div><script>document.addEventListener('DOMContentLoaded',function(){{renderMathInElement(document.getElementById('content'),{{delimiters:[{{left:'$$',right:'$$',display:true}},{{left:'$',right:'$',display:false}}],throwOnError:true}});}});</script></body></html>
+</main></div><script>document.addEventListener('DOMContentLoaded',function(){{renderMathInElement(document.getElementById('content'),{{delimiters:[{{left:'$$',right:'$$',display:true}},{{left:'$',right:'$',display:false}},{{left:'\\\\(',right:'\\\\)',display:false}},{{left:'\\\\[',right:'\\\\]',display:true}}],throwOnError:true}});}});</script></body></html>
 '''
 
 

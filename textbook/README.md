@@ -18,6 +18,9 @@ the larger worked-example catalogue stays in the companion subproject.
 
 - [Purpose, scope, and mathematical contract](00-charter.md)
 - [Chapter 1. Computable numbers and functions](01-numbers-and-functions.md)
+- [Rationality, algebraicity, and transcendence](01a-rationality-and-transcendence.md)
+- [Two classifications of circle-area pi](01b-pi-classification-theorems.md)
+- [Value predicates and interval names](01c-real-classification-api.md)
 - [Chapter 2. Circle, sphere, and arctangent](02-circle-sphere-and-arctangent.md)
 - [Chapter 3. Integration, derivatives, and the fundamental theorem](03-integrals.md)
 - [Worked example. The Gaussian integral](03a-gaussian-integral.md)
@@ -26,14 +29,18 @@ the larger worked-example catalogue stays in the companion subproject.
 - [Chapter 6. Taylor expansions from FTC](06-taylor.md)
 - [Chapter 7. An improper integral from two computations](06a-dirichlet-integral.md)
 - [Chapter 8. Continued fractions and pi](06b-continued-fractions.md)
+- [Fourier inversion on the line](07-fourier.md)
+- [Rectangular Cauchy integrals and analytic continuation](07-complex-continuation.md)
 - [Compact reference constructions for agents](07-agent-reference.md)
 - [Proposition ledger and contribution roadmap](08-roadmap.md)
 - [How to contribute and revise the foundation](09-contributing.md)
 
-Preliminary material for later chapters is retained under `textbook/notes/`.
-It is outside this opening sequence. Euler's identity, broader complex
-analysis, and ODEs can be developed after the geometric calculus and Taylor
-comparison. The latter follows the general series and power-series chapters.
+The geometric and Taylor chapters build the trigonometric functions before
+the ODE comparison identifies them with the imaginary Euler exponential.
+The [Euler construction reference](07-agent-reference.md) records that
+comparison and the agreement with the factorial series and power limit.
+The Fourier and continuation chapters then use the preceding integral
+constructions in different ways.
 
 ## Reading the status labels
 

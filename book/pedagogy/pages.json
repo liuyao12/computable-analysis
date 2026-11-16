@@ -1,6 +1,11 @@
 [
   {
     "page": "ch-foundations.html",
+    "foundationReview": {
+      "heading": "Number names, quotient values, and continued fractions",
+      "body": "<p><code>RealCompute</code> and <code>ComplexCompute</code> are the stage-indexed interval and box records. A valid name has shrinking widths with no prescribed rate. Equivalent valid names give one value in <code>ComputableAnalysis.Real</code> or <code>ComputableAnalysis.Complex</code>. The chapter supplement follows these names into arithmetic, rationality, and continued fractions.</p>",
+      "links": {"Numbers and functions": "01-numbers-and-functions.html", "Continued fractions and pi": "06b-continued-fractions.html"}
+    },
     "action": "strengthen",
     "opening": "<p>A decimal approximation to \\(\\sqrt2\\) gives useful digits, but the digits alone do not tell us how much error remains. We want a number that can answer a request for greater accuracy and justify the answer. Bisection suggests the basic object: two rational bounds that keep the answer enclosed while their gap shrinks.</p><p>Arithmetic then becomes a question about these bounds. How do we add two computations, divide safely, or show that a geometric construction and a series describe the same number? This chapter builds the language needed to ask those questions precisely.</p>",
     "earlierMotivation": null,
@@ -8,6 +13,11 @@
   },
   {
     "page": "ch-circle-sphere.html",
+    "foundationReview": {
+      "heading": "From finite geometric bounds to arctangent",
+      "body": "<p>The circle construction gives a sector-area sampler. Its agreement with reciprocal-quadratic quadrature connects the geometric construction to the integral and supplies the inverse chart for trigonometry.</p>",
+      "links": {"Circle, sphere, and arctangent": "02-circle-sphere-and-arctangent.html"}
+    },
     "action": "strengthen",
     "opening": "<p>A polygon has an area we can calculate by finite arithmetic. A circle has a curved boundary, so a single polygon leaves something unaccounted for. Inscribed chords give a lower estimate; tangents give an upper one. The useful question is how to make the gap as small as we choose.</p><p>This turns the circle constant into a geometric computation. The same habit of enclosing a shape by simpler pieces will let us compare the sphere, cone and cylinder before we have a general integration theory.</p>",
     "earlierMotivation": "ch-foundations.html",
@@ -15,6 +25,11 @@
   },
   {
     "page": "ch-rational-circle-trigonometry.html",
+    "foundationReview": {
+      "heading": "From periodic geometry to Taylor series",
+      "body": "<p>The rational samplers use the normalized angle and extend periodically. Certified secant bounds include the quadrant joins. Repeated FTC produces the Taylor expansions of these geometric functions at arbitrary represented inputs.</p>",
+      "links": {"Geometric trigonometry": "02-circle-sphere-and-arctangent.html", "Taylor expansions from FTC": "06-taylor.html"}
+    },
     "action": "strengthen",
     "opening": "<p>A point moving around a circle needs a coordinate that follows the motion through a quarter-turn and beyond. Its slope becomes unusable at a vertical radius. The sector area already computed in the preceding chapter gives another coordinate, and the horizontal and vertical positions become functions of it.</p><p>Our aim is to recover the familiar sine and cosine relations from this geometry. Addition of angles, monotonicity and differentiation will then be properties of independently constructed functions.</p>",
     "earlierMotivation": "ch-circle-sphere.html",
@@ -22,6 +37,11 @@
   },
   {
     "page": "ch-integrals.html",
+    "foundationReview": {
+      "heading": "When a uniform grid and a nonuniform grid give the same integral",
+      "body": "<p>Start with the integer grid and refine by halves. For a second computation, take dyadic nodes in the exponent and map them into the positive axis. The grid comparison takes matching endpoints, density, and agreement of the samples with the represented evaluator. Applied to the reciprocal, it identifies ordinary dyadic quadrature with the difference of inverse-exponential logarithms at represented positive endpoints.</p>",
+      "links": {"Dyadic integral and grid comparison": "03-integrals.html"}
+    },
     "action": "strengthen",
     "opening": "<p>When a quantity accumulates at a constant rate, we multiply the rate by the elapsed interval. When the rate varies, we can use a constant lower rate and a constant upper rate on each small piece. Their sums enclose the total. The remaining problem is to prove that refinement really makes the uncertainty disappear.</p><p>We will construct integrals for functions whose variation we can control, then compare constructions. The later fundamental theorem will explain when this independently computed accumulation equals a difference of endpoint values.</p>",
     "earlierMotivation": "ch-circle-sphere.html",
@@ -42,6 +62,11 @@
   },
   {
     "page": "ch-effective-calculus.html",
+    "foundationReview": {
+      "heading": "From secant bounds to an exact integral",
+      "body": "<p>Outer secants supply derivative enclosures on convex or concave pieces when the slope gap shrinks. The FTC compares a separately constructed quadrature to endpoint increments. Finite changes of curvature make it possible to assemble these arguments for periodic trigonometric functions.</p>",
+      "links": {"Secants and the fundamental theorem": "03-integrals.html", "Repeated FTC and Taylor remainders": "06-taylor.html"}
+    },
     "action": "strengthen",
     "opening": "<p>Average velocity is a difference quotient over a nonzero time interval. Instantaneous velocity asks what happens as that interval shrinks. There is a computational difficulty: division by a smaller increment magnifies the uncertainty in the two function values.</p><p>We must coordinate the input increment with the accuracy of the evaluations. Convexity offers a particularly visible starting point, because neighboring secant slopes provide lower and upper estimates. Later sections broaden the derivative foundation and connect local change to accumulation.</p>",
     "earlierMotivation": "ch-integrals.html",
@@ -49,6 +74,11 @@
   },
   {
     "page": "ch-infinite-series.html",
+    "foundationReview": {
+      "heading": "A remainder identifies the computation",
+      "body": "<p>Build a number from partial sums and an explicit tail bound. For elementary functions, a second proof compares the resulting value to the computation already supplied by geometry, an ODE, or an integral. Repeated FTC gives one route to the bound.</p>",
+      "links": {"Certified series": "04-infinite-series.html", "Power-series bounds": "05-power-series.html", "Taylor expansions from FTC": "06-taylor.html"}
+    },
     "action": "strengthen",
     "opening": "<p>Adding another term is easy; knowing that the terms still missing cannot change the answer very much is the essential step. A geometric series makes this visible: every finite remainder can be bounded by a shrinking geometric expression.</p><p>We will use such remainder bounds to turn prefixes into number computations. The reward is more than evaluation: finite identities between prefixes can become exact identities between independently constructed functions.</p>",
     "earlierMotivation": "ch-foundations.html",
@@ -61,6 +91,11 @@
   },
   {
     "page": "ch-exponential-logarithm.html",
+    "foundationReview": {
+      "heading": "Three independent computations for exponential growth",
+      "body": "<p>Euler steps, the factorial series, and the full sequence of compound powers agree for every valid represented real input. The logarithm obtained by inverting the Euler computation also agrees with reciprocal quadrature on the positive axis.</p>",
+      "links": {"Euler growth and rotation": "07-agent-reference.html", "Reciprocal quadrature and logarithm": "03-integrals.html"}
+    },
     "action": "strengthen",
     "opening": "<p>Repeated growth suggests an exponential: successive growth factors multiply, while their time intervals add. Its inverse should turn multiplication back into addition. We want constructions that explain both behaviors and allow controlled evaluation.</p><p>The exponential series and accumulation of the reciprocal function offer different routes. Proving that the two resulting computations are inverses will connect series, derivatives and integrals developed in the preceding chapters.</p>",
     "earlierMotivation": "ch-infinite-series.html",
@@ -91,6 +126,11 @@
   },
   {
     "page": "ch-complex-paths.html",
+    "foundationReview": {
+      "heading": "What a rectangular contour tells us about continuation",
+      "body": "<p>Integrating the Cauchy kernel on four axis-aligned sides supplies local Taylor coefficients and a tail bound. The identity theorem uses these computed expansions to propagate agreement on a neighborhood through a shared connected domain.</p>",
+      "links": {"Rectangular Cauchy integrals and analytic continuation": "07-complex-continuation.html"}
+    },
     "action": "strengthen",
     "opening": "<p>Accumulation along a path now has a direction as well as a size. For a constant complex value, the contribution is that value times the endpoint displacement. Subdivision extends this elementary calculation to functions whose variation we can bound.</p><p>Loops introduce the striking question: when do all those contributions cancel, and when does an enclosed singularity leave a nonzero result? We will follow concrete paths and local function constructions to understand cancellation, residues and continuation.</p>",
     "earlierMotivation": "ch-integrals.html",
@@ -111,6 +151,11 @@
   },
   {
     "page": "ch-improper-parameters.html",
+    "foundationReview": {
+      "heading": "Two tails, two ways to control them",
+      "body": "<p>The Gaussian has an absolute tail bound. The sine integral instead uses oscillation to bound differences of distant truncations. The Gaussian calculation gives exact mass and the sine integral has separate real-parameter and rectangular-contour comparisons.</p>",
+      "links": {"Gaussian integral": "03a-gaussian-integral.html", "Sine integral": "06a-dirichlet-integral.html"}
+    },
     "action": "strengthen",
     "opening": "<p>A bounded-interval integral leaves a new question when an endpoint is missing or the domain extends indefinitely: how much can the omitted part contribute? A cutoff gives a finite calculation, but a bound on the omitted contribution is what makes it an approximation to an improper integral.</p><p>The Gaussian window expands at both ends. The Dirichlet window also moves its left endpoint toward zero. Each uses the same integer-first grid while its two cutoff errors are controlled separately.</p>",
     "earlierMotivation": "power-improper.html",
@@ -127,6 +172,11 @@
   },
   {
     "page": "ch-fourier.html",
+    "foundationReview": {
+      "heading": "Recovering a function at a point on the line",
+      "body": "<p>The periodic kernel below concentrates mass near one point. On the line, Melrose’s proof uses a Gaussian subtraction and an FTC quotient. Decay makes the transformed quotient’s boundary contribution vanish, and the exact Gaussian mass fixes the inversion factor. The theorem applies at every valid represented point for samplers with the stated derivative, moment, and decay certificates.</p>",
+      "links": {"Fourier inversion on the line": "07-fourier.html", "Gaussian integral": "03a-gaussian-integral.html"}
+    },
     "action": "strengthen",
     "opening": "<p>A periodic signal may contain several oscillations at once. Integrating it against a chosen oscillation can isolate one component, because different frequencies cancel over a period. This suggests both a way to analyze a function and a way to reconstruct it.</p><p>Finite trigonometric algebra supplies the starting point. A positive averaging kernel then controls the approximation error, and the periodic square function brings the reciprocal-square sum into the picture.</p>",
     "earlierMotivation": "ch-rational-circle-trigonometry.html",
@@ -146,6 +196,11 @@
   },
   {
     "page": "ch-differential-equations.html",
+    "foundationReview": {
+      "heading": "Euler growth and rotation as the first ODE examples",
+      "body": "<p>The scalar growth equation gives the exponential by finite Euler steps with error bounds. For imaginary coefficients the steps approximate rotation. The comparison with geometric sine and cosine proves Euler’s identity. The fundamental matrix below takes up the finite-dimensional system.</p>",
+      "links": {"Euler growth, rotation, and agreement": "07-agent-reference.html"}
+    },
     "action": "strengthen",
     "opening": "<p>An equation prescribing acceleration ought to determine motion from an initial position and velocity. Yet the answer is usually unknown when we start. Integrating an initial guess and repeating the operation gives a way for the equation to produce successive approximations to its own solution.</p><p>For a linear system, the response to each basic initial state can be reused for all initial states. This is the purpose of the fundamental matrix. We will construct it, justify uniqueness, then add forcing and study what happens near singular coefficients.</p>",
     "earlierMotivation": "fundamental-matrix.html",

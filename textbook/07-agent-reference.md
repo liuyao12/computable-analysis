@@ -103,7 +103,7 @@ E(0)=1,\qquad E'(x)=E(x)
 $$
 
 for every valid represented real input. `EulerReal.value` descends to
-`Numbers.Real` through a computable quotient lift. No power series defines
+`ComputableAnalysis.Real` through a computable quotient lift. No power series defines
 this function or proves its derivative.
 
 For the imaginary version use our primary normalized angle. Write
@@ -139,7 +139,7 @@ $$
 The derivative statement is packaged as the two covered real component laws.
 The input may be irrational, negative, or at a quadrant join; equivalent names
 give equivalent outputs. `EulerImaginary.value` is an ordinary definition on
-`Numbers.Real` with values in `Numbers.Complex`.
+`ComputableAnalysis.Real` with values in `ComputableAnalysis.Complex`.
 
 `EulerImaginaryCoordinates` provides `radianEval` by the proved reciprocal of
 \(\pi\), and proves its circle identity and exact coordinate conversion:

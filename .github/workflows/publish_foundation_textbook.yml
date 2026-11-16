@@ -6,7 +6,16 @@ on:
         description: Update the existing integral chapter and preserve all other pages
         type: boolean
         default: false
+      base_pages_run:
+        description: Retained Pages run for a full chapter refresh
+        type: string
+        default: ''
+      base_pages_sha256:
+        description: SHA-256 of the retained artifact.tar
+        type: string
+        default: ''
 permissions:
+  actions: read
   contents: read
   pages: write
   id-token: write
@@ -25,6 +34,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Restore and verify the complete existing site
+        if: inputs.base_pages_run == ''
         env:
           INTEGRAL_CHAPTERS: ${{ inputs.integral_chapter_only }}
         run: |
@@ -33,6 +43,22 @@ jobs:
           else
             python3 scripts/preserve_foundation_site.py
           fi
+      - name: Restore the exact deployed Pages artifact
+        if: inputs.base_pages_run != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_PAGES_RUN: ${{ inputs.base_pages_run }}
+          BASE_PAGES_SHA256: ${{ inputs.base_pages_sha256 }}
+          INTEGRAL_CHAPTERS: ${{ inputs.integral_chapter_only }}
+        run: |
+          [[ "$BASE_PAGES_RUN" =~ ^[0-9]+$ ]]
+          [[ "$BASE_PAGES_SHA256" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$INTEGRAL_CHAPTERS" != true ]]
+          gh run download "$BASE_PAGES_RUN" -n github-pages -D "$RUNNER_TEMP/previous-pages"
+          cd "$RUNNER_TEMP/previous-pages"
+          echo "$BASE_PAGES_SHA256  artifact.tar" | sha256sum --check
+          mkdir "$GITHUB_WORKSPACE/_site"
+          tar -xf artifact.tar -C "$GITHUB_WORKSPACE/_site"
       - name: Update and validate only the existing integral chapter
         if: inputs.integral_chapter_only
         run: |
@@ -43,11 +69,17 @@ jobs:
           python3 scripts/render_foundation_textbook.py --output /tmp/integral-textbook
           python3 scripts/render_foundation_textbook.py --output /tmp/integral-textbook --check
       - name: Add the living textbook and checked proof download
-        if: ${{ !inputs.integral_chapter_only }}
+        if: ${{ !inputs.integral_chapter_only && inputs.base_pages_run == '' }}
         run: |
           python3 scripts/apply_foundation_textbook.py _site
           python3 scripts/render_foundation_textbook.py --output _site/foundation-textbook --check
           python3 scripts/verify_foundation_overlay.py
+      - name: Refresh the reviewed chapters and preserve the rest of the site
+        if: inputs.base_pages_run != ''
+        run: |
+          python3 scripts/apply_foundation_textbook.py _site --chapter-review
+          python3 scripts/render_foundation_textbook.py --output _site/foundation-textbook --check
+          python3 scripts/verify_foundation_chapter_review.py _site "$RUNNER_TEMP/previous-pages/artifact.tar"
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

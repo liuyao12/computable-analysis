@@ -20,7 +20,7 @@ $$
 \forall n\ge N,\quad b_n-a_n\le\varepsilon.
 $$
 
-These are the conditions in `RealRaw.Valid`. The raw data in `RealRaw` do
+These are the conditions in `RealCompute.Valid`. The raw data in `RealCompute` do
 not include validity as an assumption that every program automatically
 satisfies. A construction supplies the data and proves these conditions.
 No particular rate of shrinking is imposed by the definition.
@@ -29,7 +29,7 @@ Here **computable** is used informally when the stage map is given by a finite
 algorithm. The mathematical definition does not itself impose that
 restriction on every supplied name. All concrete constructions should strive
 to be executable, without requiring optimal efficiency. The type of
-`RealRaw.compute` alone is not a computability certificate. A supplied
+`RealCompute.compute` alone is not a computability certificate. A supplied
 quantitative schedule is additional usable data, not another kind of number.
 
 ## Equality, order, and arithmetic
@@ -41,22 +41,31 @@ $$
 x\simeq y.
 $$
 
-The Lean relation is `RealRaw.Equiv`. Checked lemmas show that, on valid
+The Lean relation is `RealCompute.Equiv`. Checked lemmas show that, on valid
 names, common-stage overlap also gives overlap between arbitrary pairs of
 stages. Equality is reflexive, symmetric, and transitive on valid names.
 
 The real numbers themselves are the equivalence classes
 
 $$
-\mathbb R=\{x:\mathrm{RealRaw}\mid x\text{ is valid}\}/{\simeq}.
+\mathbb R=\{x:\mathrm{RealCompute}\mid x\text{ is valid}\}/{\simeq}.
 $$
 
-`Numbers.Real` is this quotient, implemented by `RealRawQuotient.Value`.
-Two valid names have equal quotient values exactly when `RealRaw.Equiv`
+`ComputableAnalysis.Real` is this quotient, implemented by `RealComputeQuotient.Value`.
+Two valid names have equal quotient values exactly when `RealCompute.Equiv`
 holds. The quotient does not choose a computation: algorithms still operate
 on supplied raw representatives and prove that their outputs are independent
-of those choices. The existing `Real` record is a legacy computation bundle
-with a preferred implementation, rather than this mathematical quotient.
+of those choices. When two algorithms compute the same real number, each
+has its own `RealCompute` and validity proof. An equivalence proof identifies
+their quotient values.
+
+The comparison package gives a way to check the interpretation of these
+quotients against another foundation. It proves order isomorphisms from the
+interval quotient to Mathlib's reals and to the rational Dedekind cuts.
+In the cut interpretation a rational belongs to the lower cut exactly when
+it lies strictly below the value of the interval name. The comparison lives
+in the downstream Mathlib package. The interval algorithms still work
+directly with the names supplied to them.
 
 Forming a quotient does not require marking its arithmetic `noncomputable`
 in Lean. Quotient constructors and lifts preserve executable operations on
@@ -81,7 +90,7 @@ x\le y\quad\Longleftrightarrow\quad
 \forall n,m,\ a_n(x)\le b_m(y),
 $$
 
-implemented as `RealRaw.Le`. A finite interval comparison can instead return
+implemented as `RealCompute.Le`. A finite interval comparison can instead return
 overlap; that output is not an exact decision of equality or order.
 
 Rational constants, addition, negation, subtraction, rational scaling, and
@@ -120,6 +129,26 @@ order laws. This is the full mathematical contract to audit, not a claim that
 an `OrderedField` instance or every one of these public laws is already
 packaged. Existing selected declarations are listed in the proposition ledger.
 
+## Rational, irrational, algebraic, and transcendental values
+
+These classifications belong to the represented values in this foundation.
+A valid raw real $x$ is rational when it is equivalent to the exact rational
+name for some $q\in\mathbb Q$; it is irrational when no such $q$ exists.
+It is algebraic when some nonzero polynomial with rational coefficients
+vanishes at its quotient value, and transcendental when no such polynomial
+does. The raw-name predicates must be invariant under `RealCompute.Equiv`.
+
+The predicate `RealCompute.Irrational` is already defined this way, and the
+square-root chapter proves a rational-square criterion for it. The matching
+first-class predicate for transcendence over $\mathbb Q$, together with its
+quotient-value bridge, is a foundation target. The definitions do not decide
+these properties from arbitrary interval data. For the exact proposed
+definitions and continued-fraction connection, see the
+[rationality and transcendence supplement](01a-rationality-and-transcendence.md).
+The statements “$\sqrt 2$ is irrational” and “$\pi$ is transcendental” are
+distinct example theorems: the former follows from the existing square-root
+criterion, while the latter needs its own proof.
+
 ## Complex numbers
 
 A complex name is a sequence of rational complex boxes. It can be stored as
@@ -134,31 +163,28 @@ $$
 z=x+iy.
 $$
 
-`ComplexRaw`, `QBox`, and `ComplexRaw.Valid` implement the data and validity;
-`ComplexRaw.Equiv` is equality of values. Coordinate projection, arithmetic,
+`ComplexCompute`, `QBox`, and `ComplexCompute.Valid` implement the data and validity;
+`ComplexCompute.Equiv` is equality of values. Coordinate projection, arithmetic,
 and their representation invariance must be justified. There is no order on
 the complex field corresponding to the real ordered-field structure.
 
 Likewise define
 
 $$
-\mathbb C=\{z:\mathrm{ComplexRaw}\mid z\text{ is valid}\}/{\simeq}.
+\mathbb C=\{z:\mathrm{ComplexCompute}\mid z\text{ is valid}\}/{\simeq}.
 $$
 
-`Numbers.Complex` reuses the existing `ComplexRawQuotient.Value`, and
-`Numbers.ofReal` gives the injective inclusion of real quotient values.
+`ComputableAnalysis.Complex` reuses the existing `ComplexComputeQuotient.Value`, and
+`ComputableAnalysis.Complex.ofReal` gives the injective inclusion of real quotient values.
 These quotients identify the numbers represented by the algorithms; they do
 not replace the interval constructions or their validity proofs.
 
 The separate downstream file
 `subprojects/mathlib-comparison/ComputableAnalysisMathlibComparison.lean`
-compares them with Mathlib's number types. `realOrderRingIso` preserves the
-real order and arithmetic; `complexRingIso` preserves complex arithmetic,
-with proved agreement for the real inclusion and the imaginary unit.
-These are bijections on all values, including values without supplied
-executable names. The comparison package imports both libraries; the
-foundation itself imports no Mathlib modules. Its classical comparison maps
-are marked `noncomputable`, independently of the concrete interval algorithms.
+interprets valid real computations in Mathlib, preserving and reflecting
+order and equivalence. It also compares concrete Fourier results by
+interpreting the two real channels in Mathlib's complex numbers. Full
+isomorphisms of the quotient number types are a separate comparison goal.
 
 ## Functions and evaluation at represented inputs
 
@@ -340,7 +366,7 @@ are supplied by the caller. Coefficient-name changes preserve evaluation and
 the rational function's domain, by `polynomial_coefficients_congr`,
 `rationalFunction_coefficients_congr`, and `rationalFunction_domain_congr`.
 `Realizer.value` descends evaluation to
-`Numbers.Real` without `noncomputable`. See `docs/FUNCTION_CONTINUITY.md` and
+`ComputableAnalysis.Real` without `noncomputable`. See `docs/FUNCTION_CONTINUITY.md` and
 `scripts/check_function_continuity.lean`. The general complex-box counterpart
 remains an explicit formalization target, alongside its existing arithmetic
 validity and congruence laws.
@@ -376,7 +402,7 @@ clipping wide initial names to $[a,b]$ is internal.
 
 `StrictMonotoneInverse.inverse`, `inverse_valid`, `inverse_target`,
 `inverse_unique`, `inverse_evalOn`, and `inverse_congr` implement these claims.
-`inverseValue` gives the corresponding function on `Numbers.Real` by quotient
+`inverseValue` gives the corresponding function on `ComputableAnalysis.Real` by quotient
 lifting without `noncomputable`. The construction and audit are documented in
 `docs/STRICT_MONOTONE_INVERSE.md`. `EndpointInverse` now proves the exact
 forward value, uniqueness, both inverse laws, and name invariance directly
