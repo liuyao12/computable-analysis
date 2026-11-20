@@ -1,0 +1,58 @@
+name: Publish chapter GIFs
+on: workflow_dispatch
+permissions:
+  contents: read
+  actions: read
+  deployments: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-verified-proof-publication
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-slim
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: previous
+          run-id: '43661824825'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Restore the live edition including its later complex chapter opening
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The retained artifact predates one successful single-page overlay.
+          # Refuse to replay this baseline over a more recent edition.
+          python3 - <<'PY'
+          import json, os, urllib.request
+          url = "https://api.github.com/repos/" + os.environ["GITHUB_REPOSITORY"] + "/deployments?environment=github-pages&per_page=10"
+          request = urllib.request.Request(url, headers={"Authorization": "Bearer " + os.environ["GH_TOKEN"]})
+          with urllib.request.urlopen(request, timeout=30) as response:
+              deployments = json.load(response)
+          previous = next(row for row in deployments if row["sha"] != os.environ["GITHUB_SHA"])
+          assert previous["id"] == 7834007659, "The Pages edition changed; use its latest artifact."
+          PY
+          echo "26da8b17f9c9d71e232ac5b2dd28ae82672f53e36e93842c774261505716e2a9  previous/artifact.tar" | sha256sum -c -
+          mkdir site
+          tar -xf previous/artifact.tar -C site
+          curl -fsSL --retry 3 'https://liuyao12.github.io/computable-analysis/ch-complex-paths.html?edition=chapter-gifs' -o site/ch-complex-paths.html
+          echo "e35a9e47f17971fbbdb3fa60112b08528c62179221dd89309599121330507019  site/ch-complex-paths.html" | sha256sum -c -
+      - name: Extract the animations and update the two square-root figures
+        run: |
+          python3 scripts/render_foundation_preface_tex.py --check
+          python3 scripts/apply_chapter_gifs.py site
+          python3 -m zipfile -t site/chapter-gifs/chapter-gifs.zip
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+          retention-days: 90
+      - id: deploy
+        uses: actions/deploy-pages@v4

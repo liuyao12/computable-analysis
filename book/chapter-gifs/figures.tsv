@@ -1,0 +1,26 @@
+Chapter or collection	Title	File name	Source
+Foundations	Square root of two — three constructions and zooms	sqrt-secant-zoom.gif	textbook/assets/sqrt-secant-zoom.gif
+Foundations	Square root of two — original chapter figure	sqrt-original-chapter.gif	site:images/img-0001.gif
+Foundations	Square root of two — earlier zoom	sqrt-previous-zoom.gif	book/chapter-gifs/sqrt-previous-zoom.gif
+Circle and sphere	Rational subdivision of the circle	rational-circle-subdivision.gif	site:images/img-0002.gif
+Circle and sphere	Archimedes’ sphere sections	archimedes-sections.gif	site:rational-nball/archimedes-sections.gif
+Trigonometry	Circle sectors for arctangent	arctan.gif	site:reading/animations/arctan.gif
+Trigonometry	Dyadic rectangles for cosine	cosine.gif	site:reading/animations/cosine.gif
+Trigonometry	Integrating squared cosine	cosine-square.gif	site:reading/animations/cosine-square.gif
+Trigonometry	Reflecting the squared-cosine region	cosine-square-symmetry.gif	site:reading/animations/cosine-square-symmetry.gif
+Integrals	Dyadic rectangles for the reciprocal quadratic	dyadic-reciprocal-quadratic.gif	textbook/assets/dyadic-reciprocal-quadratic.gif
+Integrals	Arctangent rectangle enclosures	arctan-rectangle-enclosure.gif	site:reading/integral-grid/arctan-rectangle-enclosure.gif
+Integrals	Arctangent rectangles — reference edition	arctan-rectangle-reference.gif	site:reference/images/img-0003.gif
+Integrals	One turning cell in an integral	single-turn-integral.gif	site:reading/integral-grid/single-turn-integral.gif
+Integrals	Sine sample enclosures	interval-sine-integral-stage.gif	site:reading/integral-grid/interval-sine-integral-stage.gif
+Integrals	Sine samples — reference edition	interval-sine-reference.gif	site:reference/images/img-0004.gif
+Integrals	Dyadic sinc enclosures	dyadic-sinc-enclosures.gif	textbook/assets/dyadic-sinc-enclosures.gif
+Integrals	Integration by parts on one cell	integration-by-parts-cell.gif	blueprint/src/assets/integration-by-parts-cell.gif
+Integrals	Transporting a partition under substitution	substitution-partition.gif	blueprint/src/assets/substitution-partition.gif
+Effective calculus	Fundamental theorem endpoint comparison	ftc-endpoint-comparison.gif	blueprint/src/assets/ftc-endpoint-comparison.gif
+Effective calculus	Bounding a derivative with secants	secants.gif	site:reading/animations/secants.gif
+Improper integrals	Dyadic windows for the Gaussian integral	gaussian-dyadic-windows.gif	site:reading/integral-grid/gaussian-dyadic-windows.gif
+Improper integrals	Dyadic windows for the Dirichlet integral	dirichlet-dyadic-windows.gif	site:reading/integral-grid/dirichlet-dyadic-windows.gif
+Continued fractions	Square chop-offs and bounds for pi	pi-square-chop-interval.gif	textbook/assets/pi-square-chop-interval.gif
+Continued fractions	Brouncker and Leibniz approximations	brouncker-leibniz.gif	textbook/assets/brouncker-leibniz.gif
+Differential equations	Peano–Baker words	peano-baker-words.gif	site:images/img-0005.gif
