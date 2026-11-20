@@ -378,7 +378,7 @@ def sine_frame(cells: int, phase: str, progress: float) -> str:
     # Only the reference curve uses floating-point sine. All construction lines use the boxes.
     curve = [(i/120, math.sin(math.pi*i/240)) for i in range(121)]
     out += [
-        r"\draw[graph!48!paper,line width=.55pt] (0,1) -- (1,1) -- (1,0);",
+        r"\draw[graph!48!paper,line width=.55pt] (1,1) -- (1,0);",
         r"\draw[graph,line width=.8pt] (-.04,0) -- (1.06,0);",
         r"\draw[graph,line width=.8pt] (0,0) -- (0,1.055);",
         rf"\draw[graph,line width=1.05pt] plot[smooth] coordinates {{{path(curve)}}};",
@@ -398,11 +398,8 @@ def sine_frame(cells: int, phase: str, progress: float) -> str:
             for cap in (lo, hi):
                 out.append(rf"\draw[errorbar,opacity={q(alpha)},line width=1.25pt] "
                            rf"({q(x-.014)},{q(cap)}) -- ({q(x+.014)},{q(cap)});")
-    out += [
-        r"\end{scope}",
-        n(128, 246, r"\(\displaystyle\int_0^1\sin\!\left(\frac{\pi}{2}x\right)\,dx\)"),
-        n(221, 246, rf"\(n={stage}\)", "anchor=east"),
-    ]
+    out.append(n(.495, .775, r"\(\displaystyle\int_0^1\sin\!\left(\frac{\pi}{2}x\right)\,dx\)", "anchor=south east"))
+    out.append(r"\end{scope}")
     count = len(active)-1
     out.extend(rectangle_bound_labels(sum(shaded[x][0] for x in active[:-1])/count,
                                       sum(shaded[x][1] for x in active[1:])/count))
