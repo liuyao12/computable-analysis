@@ -189,21 +189,15 @@ def render(bounds, stage, phase, progress=1):
             draw.text(pos,label,font=font(14),fill=MUTED,anchor='mt')
     math_label(scene,L-8,T+level,'y=2',16,AXIS,'right')
     math_label(scene,R+8,T+level,'x',16,AXIS)
-    # Label the old endpoints while constructing, then label each new crossing
-    # on its outer side, even when both land on the very same display pixel.
-    for v, tex, color in ((a,'a',LOW),(b,'b',HIGH)):
-        if not lower_hit and 8 < x(v) < PW-8:
-            math_label(scene,L+x(v)+7,T+level-14,tex,18,color)
-    if lower_hit:
-        math_label(scene,L+x(new_a)-8,T+level-13,"a'",18,LOW,'right')
-    if upper_hit:
-        math_label(scene,L+x(new_b)+5,T+level+31,"b'",18,HIGH)
-    lower, upper = decimal_bounds(bounds[stage+int(lower_hit)][0], bounds[stage+int(upper_hit)][1])
-    for u, name, value, reached, color in (
-        (L, 'a', lower, lower_hit, LOW), (W//2+20, 'b', upper, upper_hit, HIGH),
-    ):
-        prime = "'" if reached else ''
-        math_label(scene,u,504,name+prime+'='+value,26,color)
+    # The end of a zoom and the next projection share the same labeled points.
+    # Keep each label on its own side even when the crossings almost coincide.
+    lower_q = bounds[stage+int(lower_hit)][0]
+    upper_q = bounds[stage+int(upper_hit)][1]
+    math_label(scene,L+x(float(lower_q))-8,T+level-13,'a',18,LOW,'right')
+    math_label(scene,L+x(float(upper_q))+5,T+level+31,'b',18,HIGH)
+    lower, upper = decimal_bounds(lower_q, upper_q)
+    math_label(scene,L,504,'a='+lower,26,LOW)
+    math_label(scene,W//2+20,504,'b='+upper,26,HIGH)
     return scene
 
 
