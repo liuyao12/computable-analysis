@@ -4,7 +4,7 @@ import argparse
 import shutil
 from html import escape
 from pathlib import Path
-from apply_chapter_gifs import update_gaussian_figure, update_integral_figure
+from apply_chapter_gifs import DIRICHLET_INTRO, update_dirichlet_figure, update_gaussian_figure, update_integral_figure
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("site", type=Path)
@@ -29,7 +29,6 @@ def figure(name, caption):
 
 asset_names = (
     "single-turn-integral",
-    "dirichlet-dyadic-windows",
 )
 for name in asset_names:
     shutil.copyfile(assets / f"{name}.gif", site / destination / f"{name}.gif")
@@ -86,19 +85,14 @@ Taylor quadrature mass. Identifying that mass with (sqrt{pi}) remains open.</p>
 """
     figures += figure("gaussian-dyadic-windows",
                       "The Gaussian window expands and the finite grid refines.")
-    figures += r"""
-<p>For the Dirichlet integral, the coordinate (t=x/pi) gives the integrand
-(sin(pi t)/t). The left cutoff tends to zero as the right cutoff grows.
-The finite windows use clipped dyadic cells and the tail estimate comes
-from cancellation. Lean checks agreement with Feynman's parameter computation
-and the exact value (pi/2).</p>
-"""
+    figures += DIRICHLET_INTRO
     figures += figure("dirichlet-dyadic-windows",
-                      "The Dirichlet windows omit less near zero and capture more oscillations.")
+                      "Alternating lobes bound the whole-line Dirichlet integral.")
     figures += "</section>\n"
     start = '<h2 id="thm:parameter-majorant">11.2 Parameter series with an integrable majorant</h2>'
     page = replace_once(page, start, figures + start)
     chapter.write_text(page)
 
 update_gaussian_figure(site)
+update_dirichlet_figure(site)
 print("Applied five regenerated GIFs and the checked integral examples to the two existing chapters.")

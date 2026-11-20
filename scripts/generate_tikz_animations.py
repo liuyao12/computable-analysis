@@ -19,7 +19,8 @@ from functools import lru_cache
 from pathlib import Path
 
 from PIL import Image
-from preface_sqrt_tables import decimal_bounds
+from generate_dyadic_integral_gifs import PI_LO, PI_HI, sinc_at
+from preface_sqrt_tables import decimal, decimal_bounds
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -898,39 +899,73 @@ def gaussian_animation() -> Animation:
     return Animation("gaussian-dyadic-windows", 400, 192, frames, (1600, 1900, 1900, 1900), 1)
 
 
-def dirichlet_frame(stage: int) -> str:
-    radius = stage + 1
-    spacing = Fraction(1, 2**stage)
-    left = Fraction(1, radius)
-    right = radius
-    x_min = 0
-    x_max = 4
-    x = lambda t: 44 + 276 * (float(t) - x_min) / (x_max - x_min)
-    y = lambda v: 78 + 115/math.pi * v
-    curve_value = lambda t: math.sin(math.pi*t)/t if t else math.pi
-    function = r"$\sin(\pi t)/t$"
-    tail = rf"$[1/{radius},{radius}]\qquad\mathrm{{error\ budget}}\ 10/{radius}$"
-    mesh = [left] + [j*spacing for j in range(math.floor(left/spacing)+1, math.ceil(right/spacing))] + [right]
+@lru_cache(maxsize=8)
+def dirichlet_partial_bounds(radius: int) -> tuple[Fraction, Fraction]:
+    """Enclose the signed integral over [-radius, radius] by midpoint quadrature."""
+    if radius == 0:
+        return Fraction(0), Fraction(0)
+    per_unit = 2**(radius.bit_length()+6)
+    h = Fraction(1, per_unit)
+    low = high = Fraction(0)
+    for j in range(radius*per_unit):
+        # sinc_at uses sin(pi*t)/(pi*t). Restore the factor pi after summing.
+        lo, hi = sinc_at((j+Fraction(1, 2))*h, 30)
+        low += lo
+        high += hi
+    sums = [2*h*p*v for p in (PI_LO, PI_HI) for v in (low, high)]
+    # sin(pi*t)/t = integral_0^pi cos(u*t) du, so |f''| <= pi^3/3.
+    error = radius*h*h*PI_HI**3/36
+    return min(sums)-error, max(sums)+error
+
+
+def dirichlet_frame(radius: int) -> str:
+    x = lambda t: 198 + 26*t
+    y = lambda v: 72 + 34*v
     out = [
-        rf"\path[fill=sharedfill!20] ({q(x(left))},46) rectangle ({q(x(right))},202);",
-        rf"\draw[axis] (38,78) -- (330,78);",
+        r"\definecolor{paper}{HTML}{FAF9F5}", r"\definecolor{graph}{HTML}{20332E}",
+        r"\definecolor{negative}{HTML}{E78477}",
+        r"\colorlet{lowerbound}{shared!85!graph}", r"\colorlet{upperbound}{yellow!59!graph}",
+        r"\fill[paper] (0,0) rectangle (400,198);",
     ]
-    for t in mesh:
-        out.append(rf"\draw[grid,line width=.35pt] ({q(x(t))},51) -- ({q(x(t))},198);")
-    for t in range(x_min, x_max+1):
-        out.append(n(x(t), 39, rf"${t}$"))
-    curve = [(x(t), y(curve_value(t))) for i in range(401) for t in [x_min+(x_max-x_min)*i/400]]
+    # Sample and draw each lobe separately to put every crossing exactly on the axis.
+    zeros = [k for k in range(-7, 8) if k != 0]
+    for left, right in zip(zeros, zeros[1:]):
+        included = -radius <= left and right <= radius
+        points = []
+        for j in range(32*(right-left)+1):
+            t = left+j/32
+            value = math.pi if t == 0 else (0 if t in (left, right) else math.sin(math.pi*t)/t)
+            points.append((x(t), y(value)))
+        if included:
+            color = "sharedfill" if left < 0 < right or min(abs(left), abs(right)) % 2 == 0 else "negative"
+            out.append(rf"\fill[{color}] {polygon(points)} -- cycle;")
+        style = "graph,line width=1.05pt" if included else "graph!42!paper,line width=.7pt"
+        out.append(rf"\draw[{style}] {polygon(points)};")
+
+    out.append(rf"\draw[graph,line width=.6pt] {polygon([(x(-7)-2, y(0)), (x(7)+2, y(0))])};")
+    for tick in range(-6, 7):
+        out.append(rf"\draw[graph,line width=.5pt] {polygon([(x(tick), y(0)-2), (x(tick), y(0)+2)])};")
+        out.append(n(x(tick), 44, rf"\({tick}\)"))
+    for t in (-radius, radius):
+        out.append(dot(x(t), y(0), "graph", 1.65))
+
+    # Even truncations increase to the integral; odd truncations decrease to it.
+    even = radius if radius % 2 == 0 else radius-1
+    odd = radius if radius % 2 else radius-1
+    lower = decimal(dirichlet_partial_bounds(even)[0], 3)
+    upper = decimal(dirichlet_partial_bounds(odd)[1], 3, upper=True)
     out += [
-        rf"\draw[curve,line width=1pt] plot[smooth] coordinates {{{path(curve)}}};",
-        n(181, 222, rf"{function}\qquad $n={stage}$".replace(r"\qquad", r"\hspace{1em}")),
-        n(181, 17, tail),
+        n(x(7)+4, y(0), r"\(t\)", "anchor=west"),
+        n(x(1.04), y(1.72), r"\(\displaystyle\int_{-\infty}^{\infty}\frac{\sin(\pi t)}{t}\,dt\)", "anchor=west"),
+        n(100, 14, rf"\(a={lower}\)", "text=lowerbound,font=\large"),
+        n(288, 14, rf"\(b={upper}\)", "text=upperbound,font=\large"),
     ]
     return "\n".join(out)
 
 
 def dirichlet_animation() -> Animation:
-    return Animation("dirichlet-dyadic-windows", 360, 240, tuple(dirichlet_frame(stage) for stage in range(4)),
-                     (1300, 1300, 1300, 2000), 2)
+    frames = tuple(dirichlet_frame(radius) for radius in range(1, 7))
+    return Animation("dirichlet-dyadic-windows", 400, 198, frames, (1500, 1600, 1600, 1600, 1600, 2200), 3)
 
 
 def words(steps: int) -> list[list[int]]:

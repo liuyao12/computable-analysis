@@ -172,6 +172,29 @@ def update_gaussian_figure(site):
                             caption, 'ch-improper-parameters.html')
 
 
+DIRICHLET_INTRO = (r'<p>The Dirichlet integrand \(f(t)=\sin(\pi t)/t\) extends continuously to \(f(0)=\pi\). '
+                   r'It is even, so matching lobes on the left and right add. On either half-line, successive lobes '
+                   r'alternate in sign and decrease in magnitude to zero. Each half-line integral therefore converges. '
+                   r'The checked half-line value is \(\pi/2\), giving the whole-line value \(\pi\).</p>')
+
+
+def update_dirichlet_figure(site):
+    page = site/'ch-improper-parameters.html'
+    original = page.read_text()
+    if DIRICHLET_INTRO not in original:
+        updated, count = re.subn(r'<p>For the Dirichlet integral, the coordinate [^<]*</p>',
+                                 lambda _: DIRICHLET_INTRO, original)
+        assert count == 1, 'Dirichlet figure introduction missing'
+        page.write_text(updated)
+    caption = (r'Each frame extends the shaded interval to the next pair of zeros. Green lobes add signed area '
+               r'and coral lobes subtract it. For \(S_N=\int_{-N}^{N}f(t)\,dt\), even cutoffs give lower bounds '
+               r'and odd cutoffs give upper bounds. The decimals \(a,b\) include the dyadic quadrature error and are rounded outward.')
+    update_integral_picture(site, 'dirichlet-dyadic-windows',
+                            'Matching lobes appear on both sides of zero. The positive green lobes and negative '
+                            'coral lobes give alternating bounds on the whole-line integral.',
+                            caption, page.name)
+
+
 if __name__ == '__main__':
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument('site',type=Path)
@@ -180,5 +203,6 @@ if __name__ == '__main__':
     update_arctan_figure(site)
     update_integral_figure(site)
     update_gaussian_figure(site)
+    update_dirichlet_figure(site)
     update_figure(site)
     collect(site)

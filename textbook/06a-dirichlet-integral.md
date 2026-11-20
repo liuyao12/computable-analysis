@@ -85,7 +85,20 @@ Each finite window now uses the fixed grid in the normalized coordinate
 $t=x/\pi$. The first and last cells are clipped to the endpoints. The
 window error remains separate from the quadrature error.
 
-![The left cutoff approaches zero as the right cutoff grows, with a dyadic grid inside each window](assets/dirichlet-dyadic-windows.gif)
+The whole-line picture uses the continuous value \(k(0)=\pi\). The function
+is even, so matching lobes on opposite sides contribute the same signed
+area. To see where cancellation occurs, compare neighboring lobes on the
+positive half-line. The magnitude of lobe \(j\) is
+\[
+A_j=\int_0^1\frac{\sin(\pi u)}{j+u}\,du,\qquad j=0,1,\ldots.
+\]
+As \(j\) increases these magnitudes decrease to zero, and the contributions alternate in sign.
+Thus each half-line converges separately. Writing \(S_N=\int_{-N}^{N}k(t)\,dt\),
+the even truncations increase and the odd truncations decrease to the same
+value, twice the half-line integral. The figure shades one more lobe on each
+side per frame. Its displayed bounds include the error in the finite dyadic quadrature.
+
+![Symmetric lobes of the whole-line Dirichlet integral. Green lobes add signed area and coral lobes subtract it.](assets/dirichlet-dyadic-windows.gif)
 
 ## Feynman's real parameter
 
