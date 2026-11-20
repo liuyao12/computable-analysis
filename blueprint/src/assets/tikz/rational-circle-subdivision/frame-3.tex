@@ -1,5 +1,5 @@
 \documentclass{article}
-\usepackage[paperwidth=360pt,paperheight=190pt,margin=0pt,noheadfoot]{geometry}
+\usepackage[paperwidth=360pt,paperheight=212pt,margin=0pt,noheadfoot]{geometry}
 \usepackage{tikz}
 \usetikzlibrary{calc}
 
@@ -38,32 +38,39 @@
 \setlength\topskip{0pt}
 \begin{document}
 \noindent\begin{tikzpicture}[baseline=(current bounding box.north),x=1pt,y=1pt,line cap=round,line join=round]
-\useasboundingbox (0,0) rectangle (360,190);
+\useasboundingbox (0,0) rectangle (360,212);
 \definecolor{paper}{HTML}{FAF9F5}
 \definecolor{semicircle}{HTML}{20332E}
-\definecolor{lowerbound}{HTML}{AB471D}
-\definecolor{upperbound}{HTML}{006C70}
-\fill[paper] (0,0) rectangle (360,190);
-\colorlet{lowerarea}{lowerbound!46!paper}
-\colorlet{upperarea}{upperbound!44!paper}
-\colorlet{addition}{lowerbound!82!paper}
-\colorlet{cutoff}{upperbound!84!paper}
+\colorlet{lowerbound}{shared!85!semicircle}
+\colorlet{upperbound}{yellow!59!semicircle}
+\fill[paper] (0,0) rectangle (360,212);
+\colorlet{lowerarea}{sharedfill}
+\colorlet{upperarea}{overfill}
+\colorlet{addition}{lowerbound!76!lowerarea}
+\colorlet{cutoff}{yellow!85!upperarea}
 \tikzset{chord/.style={lowerbound,line width=1.25pt,dash pattern=on 5.5pt off 2.3pt},tangent/.style={upperbound,line width=1.25pt,dash pattern=on 3.7pt off 2.2pt}}
-\fill[upperarea] (180,18) -- (334,18) -- (334,56.5) -- (299.7778,120.6667) -- (250,158) -- (202,172) -- (180,172) -- cycle;
-\fill[lowerarea] (180,18) -- (334,18) -- (315.8824,90.4706) -- (272.4,141.2) -- (223.12,165.84) -- (180,172) -- cycle;
-\draw[semicircle,line width=.85pt] (26,18) -- (334,18);
-\draw[semicircle,line width=1.2pt] (334,18) arc[start angle=0,end angle=180,radius=154pt];
-\draw[chord] (334,18) -- (315.8824,90.4706) -- (272.4,141.2) -- (223.12,165.84) -- (180,172);
-\draw[tangent] (334,18) -- (334,56.5) -- (299.7778,120.6667) -- (250,158) -- (202,172) -- (180,172);
-\fill[semicircle] (26,18) circle[radius=1.6pt];
-\fill[lowerbound] (334,18) circle[radius=1.7pt];
-\fill[lowerbound] (315.8824,90.4706) circle[radius=1.7pt];
-\fill[lowerbound] (272.4,141.2) circle[radius=1.7pt];
-\fill[lowerbound] (223.12,165.84) circle[radius=1.7pt];
-\fill[lowerbound] (180,172) circle[radius=1.7pt];
-\fill[upperbound] (332.6,55.1) rectangle (335.4,57.9);
-\fill[upperbound] (298.3778,119.2667) rectangle (301.1778,122.0667);
-\fill[upperbound] (248.6,156.6) rectangle (251.4,159.4);
-\fill[upperbound] (200.6,170.6) rectangle (203.4,173.4);
+\fill[upperarea] (180,40) -- (334,40) -- (334,78.5) -- (299.7778,142.6667) -- (250,180) -- (202,194) -- (180,194) -- cycle;
+\fill[lowerarea] (180,40) -- (334,40) -- (315.8824,112.4706) -- (272.4,163.2) -- (223.12,187.84) -- (180,194) -- cycle;
+\draw[semicircle,line width=.85pt] (26,40) -- (334,40);
+\draw[semicircle,line width=1.2pt] (334,40) arc[start angle=0,end angle=180,radius=154pt];
+\draw[chord] (334,40) -- (315.8824,112.4706) -- (272.4,163.2) -- (223.12,187.84) -- (180,194);
+\draw[tangent] (334,40) -- (334,78.5) -- (299.7778,142.6667) -- (250,180) -- (202,194) -- (180,194);
+\fill[semicircle] (26,40) circle[radius=1.6pt];
+\fill[lowerbound] (334,40) circle[radius=1.7pt];
+\fill[lowerbound] (315.8824,112.4706) circle[radius=1.7pt];
+\fill[lowerbound] (272.4,163.2) circle[radius=1.7pt];
+\fill[lowerbound] (223.12,187.84) circle[radius=1.7pt];
+\fill[lowerbound] (180,194) circle[radius=1.7pt];
+\fill[upperbound] (332.6,77.1) rectangle (335.4,79.9);
+\fill[upperbound] (298.3778,141.2667) rectangle (301.1778,144.0667);
+\fill[upperbound] (248.6,178.6) rectangle (251.4,181.4);
+\fill[upperbound] (200.6,192.6) rectangle (203.4,195.4);
+\filldraw[fill=semicircle,draw=paper,line width=.35pt] (180,40) circle[radius=1.55pt];
+\filldraw[fill=semicircle,draw=paper,line width=.35pt] (180,78.5) circle[radius=1.55pt];
+\filldraw[fill=semicircle,draw=paper,line width=.35pt] (180,117) circle[radius=1.55pt];
+\filldraw[fill=semicircle,draw=paper,line width=.35pt] (180,155.5) circle[radius=1.55pt];
+\filldraw[fill=semicircle,draw=paper,line width=.35pt] (180,194) circle[radius=1.55pt];
+\node[anchor=west,inner sep=0pt,text=lowerbound,font=\large] at (44,15) {\(a=0.76\ldots\)};
+\node[anchor=west,inner sep=0pt,text=upperbound,font=\large] at (212,15) {\(b=0.79\ldots\)};
 \end{tikzpicture}
 \end{document}

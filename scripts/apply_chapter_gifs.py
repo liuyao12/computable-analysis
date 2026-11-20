@@ -87,8 +87,8 @@ def update_circle_figure(site):
     shutil.copyfile(assets/'rational-circle-subdivision.gif', site/image)
     shutil.copyfile(assets/'rational-circle-subdivision.png', site/poster)
     alt = ('Rays grow together from the left endpoint through dots on the vertical radius to the arc. '
-           'Orange triangles join the inscribed polygon and teal triangles are cut from the outer polygon. '
-           'The guides fade, leaving the refined area bounds.')
+           'Green triangles join the inscribed polygon and yellow triangles are cut from the outer polygon. '
+           'The rays fade; the equally spaced dots remain. Below, a and b show the lower and upper quarter-disk areas in decimal form.')
     picture = (f'<picture><source media="(prefers-reduced-motion: reduce)" srcset="{poster}">'
                f'<img src="{image}" alt="{alt}" style="width:360pt;max-width:100%;height:auto"/></picture>')
     pattern = (r'(<figure id="fig:rational-parameter-line">\s*<div class="centered">)'

@@ -17,6 +17,22 @@ def decimal(q, places, upper=False):
     return f'{units // scale}.{units % scale:0{places}d}'
 
 
+def decimal_bounds(a, b, minimum_places=0):
+    """Display the shared decimal prefix and the first differing digit."""
+    assert 0 <= a < b
+    places, scale = minimum_places, 10**minimum_places
+    while a*scale // 1 == b*scale // 1:
+        places += 1
+        scale *= 10
+    labels = []
+    for q in (a, b):
+        label = decimal(q, places)
+        if (q*scale).denominator != 1:
+            label += r'\ldots' if places else r'.\ldots'
+        labels.append(label)
+    return labels
+
+
 def display(value, highlighted):
     prefix, suffix = value[:highlighted], value[highlighted:highlighted + 1]
     parts = []

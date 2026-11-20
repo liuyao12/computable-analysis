@@ -13,7 +13,7 @@ from matplotlib.font_manager import FontProperties
 from matplotlib.mathtext import MathTextParser
 from PIL import Image, ImageColor, ImageDraw, ImageFont
 
-from preface_sqrt_tables import decimal
+from preface_sqrt_tables import decimal_bounds
 
 ROOT = Path(__file__).resolve().parents[1]
 W, H = 880, 544
@@ -56,22 +56,6 @@ def math_label(image, x, y, tex, size, color, anchor='left'):
     mask = formula(tex, size)
     offset = {'left': 0, 'center': mask.width/2, 'right': mask.width}[anchor]
     image.paste(color, (round(x-offset), round(y-mask.height/2)), mask)
-
-
-def decimal_bounds(a, b):
-    """Show the first differing digit of the two exact decimal expansions."""
-    assert 0 <= a < b
-    places, scale = 0, 1
-    while a*scale // 1 == b*scale // 1:
-        places += 1
-        scale *= 10
-    labels = []
-    for q in (a, b):
-        label = decimal(q, places)
-        if (q*scale).denominator != 1:
-            label += r'\ldots' if places else r'.\ldots'
-        labels.append(label)
-    return labels
 
 
 def camera(bounds):

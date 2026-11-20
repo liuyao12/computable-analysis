@@ -18,6 +18,7 @@ from fractions import Fraction
 from pathlib import Path
 
 from PIL import Image
+from preface_sqrt_tables import decimal_bounds
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -317,8 +318,20 @@ def tangent(left: tuple[Fraction, Fraction], right: tuple[Fraction, Fraction]) -
     return ((right[1] - left[1]) / determinant, (left[0] - right[0]) / determinant)
 
 
+def circle_area_bounds(points):
+    """Sum the oriented triangle areas about the quarter-disk's center."""
+    def twice_area(p, q):
+        return p[0]*q[1] - p[1]*q[0]
+    lower = upper = Fraction(0)
+    for p, q in zip(points, points[1:]):
+        vertex = tangent(p, q)
+        lower += twice_area(p, q)/2
+        upper += (twice_area(p, vertex) + twice_area(vertex, q))/2
+    return lower, upper
+
+
 def circle_frame(cells: int, phase: str, progress: float) -> str:
-    x0, y0, radius = 180, 18, 154
+    x0, y0, radius = 180, 40, 154
     screen = lambda value: (x0 + radius * value[0], y0 + radius * value[1])
     origin, west, east = screen((0, 0)), screen((-1, 0)), screen((1, 0))
     mesh = [Fraction(i, cells) for i in range(cells + 1)]
@@ -343,13 +356,13 @@ def circle_frame(cells: int, phase: str, progress: float) -> str:
     out = [
         r"\definecolor{paper}{HTML}{FAF9F5}",
         r"\definecolor{semicircle}{HTML}{20332E}",
-        r"\definecolor{lowerbound}{HTML}{AB471D}",
-        r"\definecolor{upperbound}{HTML}{006C70}",
-        r"\fill[paper] (0,0) rectangle (360,190);",
-        r"\colorlet{lowerarea}{lowerbound!46!paper}",
-        r"\colorlet{upperarea}{upperbound!44!paper}",
-        r"\colorlet{addition}{lowerbound!82!paper}",
-        r"\colorlet{cutoff}{upperbound!84!paper}",
+        r"\colorlet{lowerbound}{shared!85!semicircle}",
+        r"\colorlet{upperbound}{yellow!59!semicircle}",
+        r"\fill[paper] (0,0) rectangle (360,212);",
+        r"\colorlet{lowerarea}{sharedfill}",
+        r"\colorlet{upperarea}{overfill}",
+        r"\colorlet{addition}{lowerbound!76!lowerarea}",
+        r"\colorlet{cutoff}{yellow!85!upperarea}",
         r"\tikzset{chord/.style={lowerbound,line width=1.25pt,dash pattern=on 5.5pt off 2.3pt},"
         r"tangent/.style={upperbound,line width=1.25pt,dash pattern=on 3.7pt off 2.2pt}}",
     ]
@@ -391,7 +404,6 @@ def circle_frame(cells: int, phase: str, progress: float) -> str:
                    else between(mark, endpoint, 2*travel-1))
             if travel:
                 stroke([west, tip], f"semicircle!72!paper,opacity={q(guides)},line width=.8pt,dash pattern=on 2.6pt off 2pt")
-            out.append(rf"\fill[semicircle,opacity={q(guides)}] ({q(mark[0])},{q(mark[1])}) circle[radius=1.45pt];")
     if arc:
         stroke(arc, "chord")
         stroke([arc[0], *vertices, arc[-1]], "tangent")
@@ -415,6 +427,13 @@ def circle_frame(cells: int, phase: str, progress: float) -> str:
     out += [dot(*point, "lowerbound", 1.7) for point in (plotted if reached_arc else old_arc)]
     for x, y in (outer if trace == 1 else old_outer):
         out.append(rf"\fill[upperbound] ({q(x-1.4)},{q(y-1.4)}) rectangle ({q(x+1.4)},{q(y+1.4)});")
+    for value in mesh:
+        x, y = screen((0, value))
+        out.append(rf"\filldraw[fill=semicircle,draw=paper,line width=.35pt] ({q(x)},{q(y)}) circle[radius=1.55pt];")
+    measured = previous if previous and not settled else samples
+    lower, upper = decimal_bounds(*circle_area_bounds(measured), minimum_places=1)
+    for x, name, value, color in ((44, "a", lower, "lowerbound"), (212, "b", upper, "upperbound")):
+        out.append(rf"\node[anchor=west,inner sep=0pt,text={color},font=\large] at ({x},15) {{\({name}={value}\)}};")
     return "\n".join(out)
 
 
@@ -430,7 +449,7 @@ def circle_animation() -> Animation:
                 durations.append(hold if step == steps else 60)
         settled.append(len(frames)-1)
     durations[-1] = 1900
-    return Animation("rational-circle-subdivision", 360, 190, tuple(frames),
+    return Animation("rational-circle-subdivision", 360, 212, tuple(frames),
                      tuple(durations), settled[-1], tuple(settled))
 
 
