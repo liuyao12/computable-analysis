@@ -131,18 +131,18 @@ def update_arctan_figure(site):
     page.write_text(updated)
 
 
-def update_integral_picture(site, name, alt, caption=None):
+def update_integral_picture(site, name, alt, caption=None, page_name='ch-integrals.html'):
     folder = 'reading/integral-grid'
     for suffix in ('gif', 'png'):
         filename = f'{name}.{suffix}'
         shutil.copyfile(ROOT/'blueprint/src/assets'/filename, site/folder/filename)
-    page = site/'ch-integrals.html'
+    page = site/page_name
     image = f'{folder}/{name}.gif'
     picture = (f'<picture><source media="(prefers-reduced-motion: reduce)" srcset="{folder}/{name}.png">'
                f'<img src="{image}" alt="{alt}" style="width:360pt;max-width:100%;height:auto"/></picture>')
     pattern = rf'(?:<picture>\s*<source\b[^>]*>\s*)?<img\b[^>]*\bsrc="{re.escape(image)}"[^>]*>(?:\s*</picture>)?'
     if caption is not None:
-        pattern += r'(\s*<figcaption>(?:(?!</figcaption>).)*?<span class="caption_text">)[^<]*(</span>)'
+        pattern += r'(\s*<figcaption>(?:(?:(?!</figcaption>).)*?<span class="caption_text">)?)[^<]*(</span>|</figcaption>)'
     updated, count = re.subn(pattern, lambda m: picture if caption is None else
                              picture+m[1]+escape(caption)+m[2], page.read_text(), flags=re.S)
     assert count == 1, f'{name} figure missing'
@@ -161,6 +161,17 @@ def update_integral_figure(site):
                             'Earlier bars shrink as the mesh is halved.', ' '.join(caption.split()))
 
 
+def update_gaussian_figure(site):
+    caption = (r'At stage \(n\ge 1\), partition \([-n,n]\) into cells of width \(2^{-n}\). '
+               r'On each cell the farther endpoint from zero gives the lower height and the nearer endpoint gives the upper height. '
+               r'Outside the window, \(e^{-x^2}\le e^{-|x|}\). The two purple tails have total area '
+               r'\(2\int_n^\infty e^{-x}\,dx=2e^{-n}\). This allowance is added to the upper rectangle sum to obtain \(b\).')
+    update_integral_picture(site, 'gaussian-dyadic-windows',
+                            'Green and gold rectangles bound the Gaussian on a widening symmetric interval. '
+                            'The purple exponential envelopes bound the two omitted tails.',
+                            caption, 'ch-improper-parameters.html')
+
+
 if __name__ == '__main__':
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument('site',type=Path)
@@ -168,5 +179,6 @@ if __name__ == '__main__':
     update_circle_figure(site)
     update_arctan_figure(site)
     update_integral_figure(site)
+    update_gaussian_figure(site)
     update_figure(site)
     collect(site)

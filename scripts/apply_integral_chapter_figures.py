@@ -4,7 +4,7 @@ import argparse
 import shutil
 from html import escape
 from pathlib import Path
-from apply_chapter_gifs import update_integral_figure
+from apply_chapter_gifs import update_gaussian_figure, update_integral_figure
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("site", type=Path)
@@ -29,7 +29,6 @@ def figure(name, caption):
 
 asset_names = (
     "single-turn-integral",
-    "gaussian-dyadic-windows",
     "dirichlet-dyadic-windows",
 )
 for name in asset_names:
@@ -101,4 +100,5 @@ and the exact value (pi/2).</p>
     page = replace_once(page, start, figures + start)
     chapter.write_text(page)
 
+update_gaussian_figure(site)
 print("Applied five regenerated GIFs and the checked integral examples to the two existing chapters.")

@@ -15,6 +15,7 @@ import subprocess
 import tempfile
 from dataclasses import dataclass
 from fractions import Fraction
+from functools import lru_cache
 from pathlib import Path
 
 from PIL import Image
@@ -804,23 +805,135 @@ def single_turn_animation() -> Animation:
                      (1250, 1250, 1250, 1250, 1900), 2)
 
 
-def improper_frame(stage: int, gaussian: bool) -> str:
+@lru_cache(maxsize=512)
+def exp_minus_bounds(u: Fraction, bits: int) -> tuple[Fraction, Fraction]:
+    """Odd and even Taylor polynomials bound exp(-u) for u >= 0."""
+    if u == 0:
+        return Fraction(1), Fraction(1)
+    tolerance = Fraction(1, 2**bits)
+    upper = term = Fraction(1)
+    k = 1
+    while True:
+        term *= u/k
+        lower = upper-term
+        if term <= tolerance:
+            return max(Fraction(0), lower), min(Fraction(1), upper)
+        term *= u/(k+1)
+        upper = lower+term
+        k += 2
+
+
+@lru_cache(maxsize=8)
+def gaussian_cells(stage: int):
+    step = Fraction(1, 2**stage)
+    count = stage * 2**stage
+    cells = []
+    for k in range(-count, count):
+        left, right = k*step, (k+1)*step
+        near, far = sorted((left, right), key=abs)
+        lower = exp_minus_bounds(far*far, 2*stage+14)[0]
+        upper = exp_minus_bounds(near*near, 2*stage+14)[1]
+        cells.append((left, right, lower, upper))
+    return tuple(cells)
+
+
+def gaussian_frame(stage: int, phase: str, progress: float) -> str:
+    active = stage if phase == "settled" else stage-1
+    cells = gaussian_cells(active)
+    step = Fraction(1, 2**active)
+    edge = 4.85
+    x = lambda t: 200 + 37*float(t)
+    y = lambda v: 64 + 116*float(v)
+    out = [
+        r"\definecolor{paper}{HTML}{FAF9F5}", r"\definecolor{graph}{HTML}{20332E}",
+        r"\definecolor{tail}{HTML}{79507E}", r"\definecolor{tailfill}{HTML}{D8C6DB}",
+        r"\colorlet{lowerbound}{shared!85!graph}", r"\colorlet{upperbound}{yellow!59!graph}",
+        r"\fill[paper] (0,0) rectangle (400,206);",
+    ]
+    for side in (-1, 1):
+        ts = [side*(active+(edge-active)*i/64) for i in range(65)]
+        envelope = [(x(t), y(math.exp(-abs(t)))) for t in ts]
+        out.append(rf"\fill[tailfill] {polygon([(x(ts[0]), y(0)), *envelope, (x(ts[-1]), y(0))])} -- cycle;")
+        out.append(rf"\draw[tail,line width=.85pt,dash pattern=on 3pt off 1.6pt] {polygon(envelope)};")
+        out.append(rf"\draw[tail,line width=.6pt] {polygon([(x(ts[0]), y(0)), envelope[0]])};")
+
+    for index, fill, stroke in ((3, "overfill", "upperbound"), (2, "sharedfill", "lowerbound")):
+        steps = [(x(t), y(cell[index])) for cell in cells for t in cell[:2]]
+        out.append(rf"\fill[{fill}] {polygon([(x(-active), y(0)), *steps, (x(active), y(0))])} -- cycle;")
+        out.append(rf"\draw[{stroke},line width=.55pt] {polygon(steps)};")
+
+    if phase != "settled":
+        new_cells = gaussian_cells(stage)
+        rise = progress if phase == "guides" else 1
+        for k in range(-stage*2**stage, stage*2**stage+1):
+            t = Fraction(k, 2**stage)
+            if abs(t) <= active and k % 2 == 0:
+                continue
+            height = exp_minus_bounds(t*t, 2*stage+14)[0]
+            out.append(rf"\draw[graph!64!paper,line width=.55pt,dash pattern=on 2pt off 1.7pt] "
+                       rf"{polygon([(x(t), y(0)), (x(t), y(rise*height))])};")
+        if phase == "steps":
+            for left, right, low, high in new_cells:
+                near, far = sorted((left, right), key=abs)
+                for start, end, height, color in ((near, far, high, "upperbound"), (far, near, low, "lowerbound")):
+                    tip = start+(end-start)*progress
+                    out.append(rf"\draw[{color},line width=.8pt,dash pattern=on 2.4pt off 1.5pt] "
+                               rf"{polygon([(x(start), y(height)), (x(tip), y(height))])};")
+
+    curve = [(x(t), y(math.exp(-t*t))) for i in range(301) for t in [-edge+2*edge*i/300]]
+    out += [
+        rf"\draw[graph,line width=1pt] {polygon(curve)};",
+        rf"\draw[graph,line width=.65pt] {polygon([(x(-edge)-3, y(0)), (x(edge)+3, y(0))])};",
+        n(x(edge)+4, y(0), r"\(x\)", "anchor=west"),
+        n(x(-.75), y(.89), r"\(\displaystyle\int_{-\infty}^{\infty} e^{-x^2}\,dx\)", "anchor=east"),
+    ]
+    for tick in range(-4, 5):
+        out.append(rf"\draw[graph,line width=.6pt] {polygon([(x(tick), y(0)-2.5), (x(tick), y(0))])};")
+        out.append(n(x(tick), y(0)-2, rf"\({tick}\)", "anchor=north"))
+    for side, label in ((-1, r"\(e^x\)"), (1, r"\(e^{-x}\)")):
+        t = side*(active+.42)
+        out.append(n(x(t), y(math.exp(-abs(t)))+3, label, "anchor=south,text=tail"))
+        out.append(dot(x(side*active), y(0), "tail", 1.65))
+
+    a = step*sum(cell[2] for cell in cells)
+    tail_upper = 2*exp_minus_bounds(Fraction(active), 2*active+14)[1]
+    b = step*sum(cell[3] for cell in cells) + tail_upper
+    lower, upper = decimal_bounds(a, b, minimum_places=3)
+    out += [
+        n(100, 32, rf"\(n={active},\quad \Delta x=\frac{{1}}{{{2**active}}}\)"),
+        n(288, 32, rf"\(T_{active}\leq 2e^{{-{active}}}\)", "text=tail"),
+        n(100, 12, rf"\(a={lower}\)", "text=lowerbound,font=\large"),
+        n(288, 12, rf"\(b={upper}\)", "text=upperbound,font=\large"),
+    ]
+    return "\n".join(out)
+
+
+def gaussian_animation() -> Animation:
+    frames = [gaussian_frame(1, "settled", 1)]
+    durations, settled = [1600], [0]
+    for stage in (2, 3, 4):
+        for phase, steps in (("guides", 12), ("steps", 8)):
+            for j in range(1, steps+1):
+                frames.append(gaussian_frame(stage, phase, j/steps))
+                durations.append(450 if j == steps else 70)
+        frames.append(gaussian_frame(stage, "settled", 1))
+        durations.append(1900)
+        settled.append(len(frames)-1)
+    return Animation("gaussian-dyadic-windows", 400, 206, tuple(frames), tuple(durations), settled[1], tuple(settled))
+
+
+def dirichlet_frame(stage: int) -> str:
     radius = stage + 1
     spacing = Fraction(1, 2**stage)
-    left = -radius if gaussian else Fraction(1, radius)
+    left = Fraction(1, radius)
     right = radius
-    x_min = -4 if gaussian else 0
+    x_min = 0
     x_max = 4
     x = lambda t: 44 + 276 * (float(t) - x_min) / (x_max - x_min)
-    y = lambda v: 78 + (115 if gaussian else 115/math.pi) * v
-    if gaussian:
-        curve_value = lambda t: math.exp(-t*t)
-        function = r"$e^{-t^2}$"
-        tail = rf"$[-{radius},{radius}]\qquad\mathrm{{tail\ budget}}\  C/{radius}$"
-    else:
-        curve_value = lambda t: math.sin(math.pi*t)/t if t else math.pi
-        function = r"$\sin(\pi t)/t$"
-        tail = rf"$[1/{radius},{radius}]\qquad\mathrm{{error\ budget}}\ 10/{radius}$"
+    y = lambda v: 78 + 115/math.pi * v
+    curve_value = lambda t: math.sin(math.pi*t)/t if t else math.pi
+    function = r"$\sin(\pi t)/t$"
+    tail = rf"$[1/{radius},{radius}]\qquad\mathrm{{error\ budget}}\ 10/{radius}$"
     mesh = [left] + [j*spacing for j in range(math.floor(left/spacing)+1, math.ceil(right/spacing))] + [right]
     out = [
         rf"\path[fill=sharedfill!20] ({q(x(left))},46) rectangle ({q(x(right))},202);",
@@ -839,8 +952,8 @@ def improper_frame(stage: int, gaussian: bool) -> str:
     return "\n".join(out)
 
 
-def improper_animation(name: str, gaussian: bool) -> Animation:
-    return Animation(name, 360, 240, tuple(improper_frame(stage, gaussian) for stage in range(4)),
+def dirichlet_animation() -> Animation:
+    return Animation("dirichlet-dyadic-windows", 360, 240, tuple(dirichlet_frame(stage) for stage in range(4)),
                      (1300, 1300, 1300, 2000), 2)
 
 
@@ -893,8 +1006,8 @@ def all_animations() -> tuple[Animation, ...]:
         substitution_animation(),
         ibp_animation(),
         single_turn_animation(),
-        improper_animation("gaussian-dyadic-windows", True),
-        improper_animation("dirichlet-dyadic-windows", False),
+        gaussian_animation(),
+        dirichlet_animation(),
         ftc_animation(),
         peano_animation(),
     )

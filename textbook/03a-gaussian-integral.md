@@ -163,7 +163,22 @@ the independent bounded Taylor computations and their limit. The
 identification with $\sqrt{\pi}$ is checked by a second one-variable route.
 The Wallis construction above gives a separate proof route for the reader.
 
-![Integer cutoffs grow while the dyadic grid refines inside the Gaussian window](assets/gaussian-dyadic-windows.gif)
+For the construction in the figure, stage \(n\ge 1\) uses the interval
+\([-n,n]\) and mesh \(h=2^{-n}\). On every cell the endpoint farther from
+zero gives the lower rectangle height, and the nearer endpoint gives the
+upper height. The grid contains zero, so no cell crosses the maximum.
+Beyond \(n\), \(x^2\ge x\). By symmetry the omitted mass satisfies
+
+\[
+0\le T_n=2\int_n^\infty e^{-x^2}\,dx
+   \le 2\int_n^\infty e^{-x}\,dx=2e^{-n}.
+\]
+
+The lower rectangles give \(a\). For \(b\), add the two-tail allowance
+to the upper rectangle sum. The displayed bounds also allow for the
+rational enclosures used to evaluate the exponentials.
+
+![Green and gold rectangles enclose the central area. Purple exponential envelopes bound the two tails.](assets/gaussian-dyadic-windows.gif)
 
 The Lean proof estimates the square of the finite-window Gaussian integral
 using a one-variable comparison with the reciprocal kernel
