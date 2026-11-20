@@ -378,16 +378,12 @@ def circle_frame(cells: int, phase: str, progress: float) -> str:
 
     if highlight:
         strength = q(100*highlight)
-        if previous:
-            for j, corner in enumerate(old_outer):
-                # The new chord pair adds this triangle to the inscribed polygon.
-                fill(plotted[2*j:2*j+3], f"addition!{strength}!{'lowerarea' if clearing else 'upperarea'}")
-                # The new tangent cuts off exactly the old outer vertex.
-                fill([outer[2*j], corner, outer[2*j+1]],
-                     f"cutoff!{strength}!{'paper' if clearing else 'upperarea'}")
-        elif not clearing:
-            fill([origin, plotted[0], *outer, plotted[-1]], f"upperarea!{strength}!paper")
-            fill([origin, *plotted], f"lowerarea!{strength}!paper")
+        for j, corner in enumerate(old_outer):
+            # The new chord pair adds this triangle to the inscribed polygon.
+            fill(plotted[2*j:2*j+3], f"addition!{strength}!{'lowerarea' if clearing else 'upperarea'}")
+            # The new tangent cuts off exactly the old outer vertex.
+            fill([outer[2*j], corner, outer[2*j+1]],
+                 f"cutoff!{strength}!{'paper' if clearing else 'upperarea'}")
 
     out += [
         rf"\draw[semicircle,line width=.85pt] {polygon([west, east])};",
@@ -395,8 +391,7 @@ def circle_frame(cells: int, phase: str, progress: float) -> str:
     ]
     if not settled:
         travel = progress if phase == "rays" else 1
-        indices = range(1, cells, 2) if previous else range(2)
-        for j in indices:
+        for j in range(1, cells, 2):
             mark, endpoint = screen((0, mesh[j])), plotted[j]
             # Every ray passes its own marked point at the same beat and
             # reaches the arc at the same beat, despite their different lengths.
@@ -417,11 +412,6 @@ def circle_frame(cells: int, phase: str, progress: float) -> str:
             elif trace:
                 stroke([between(middle, a, trace), middle, between(middle, b, trace)], "chord")
                 stroke([between(middle, left, trace), middle, between(middle, right, trace)], "tangent")
-    elif not previous and trace and not clearing:
-        a, b = plotted
-        stroke([a, between(a, b, trace)], "chord")
-        for endpoint in (a, b):
-            stroke([endpoint, between(endpoint, outer[0], trace)], "tangent")
     out.append(dot(*west, "semicircle", 1.6))
     reached_arc = phase != "rays" or progress == 1
     out += [dot(*point, "lowerbound", 1.7) for point in (plotted if reached_arc else old_arc)]
@@ -438,8 +428,9 @@ def circle_frame(cells: int, phase: str, progress: float) -> str:
 
 
 def circle_animation() -> Animation:
-    frames, durations, settled = [], [], []
-    for cells in (1, 2, 4, 8):
+    frames = [circle_frame(1, "clear", 1)]
+    durations, settled = [1400], [0]
+    for cells in (2, 4, 8):
         frames.append(circle_frame(cells, "rays", 0))
         durations.append(330)
         for phase, steps, hold in (("rays", 16, 330), ("triangles", 12, 260),

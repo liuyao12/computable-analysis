@@ -26,7 +26,7 @@ def decimal_bounds(a, b, minimum_places=0):
         scale *= 10
     labels = []
     for q in (a, b):
-        label = decimal(q, places)
+        label = str(q.numerator) if q.denominator == 1 else decimal(q, places)
         if (q*scale).denominator != 1:
             label += r'\ldots' if places else r'.\ldots'
         labels.append(label)
