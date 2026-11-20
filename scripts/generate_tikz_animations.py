@@ -363,8 +363,10 @@ def circle_frame(cells: int, phase: str, progress: float) -> str:
         r"\colorlet{upperarea}{overfill}",
         r"\colorlet{addition}{lowerbound!76!lowerarea}",
         r"\colorlet{cutoff}{yellow!85!upperarea}",
-        r"\tikzset{chord/.style={lowerbound,line width=1.25pt,dash pattern=on 5.5pt off 2.3pt},"
-        r"tangent/.style={upperbound,line width=1.25pt,dash pattern=on 3.7pt off 2.2pt}}",
+        r"\tikzset{chord/.style={lowerbound,line width=.65pt},"
+        r"tangent/.style={upperbound,line width=.65pt},"
+        r"chord trace/.style={chord,line width=1.25pt,dash pattern=on 5.5pt off 2.3pt},"
+        r"tangent trace/.style={tangent,line width=1.25pt,dash pattern=on 3.7pt off 2.2pt}}",
     ]
     def fill(points, color):
         out.append(rf"\fill[{color}] {polygon(points)} -- cycle;")
@@ -399,7 +401,7 @@ def circle_frame(cells: int, phase: str, progress: float) -> str:
                    else between(mark, endpoint, 2*travel-1))
             if travel:
                 stroke([west, tip], f"semicircle!72!paper,opacity={q(guides)},line width=.8pt,dash pattern=on 2.6pt off 2pt")
-    if arc:
+    if arc and (not clearing or settled):
         stroke(arc, "chord")
         stroke([arc[0], *vertices, arc[-1]], "tangent")
     if previous and not settled:
@@ -407,11 +409,14 @@ def circle_frame(cells: int, phase: str, progress: float) -> str:
             a, middle, b = plotted[2*j:2*j+3]
             left, right = outer[2*j:2*j+2]
             if clearing:
+                # These pieces of the old tangents survive the corner cut.
+                stroke([a, left], "tangent")
+                stroke([right, b], "tangent")
                 stroke([a, b], f"chord,opacity={q(guides)}")
                 stroke([left, corner, right], f"tangent,opacity={q(guides)}")
-            elif trace:
-                stroke([between(middle, a, trace), middle, between(middle, b, trace)], "chord")
-                stroke([between(middle, left, trace), middle, between(middle, right, trace)], "tangent")
+            if trace:
+                stroke([between(middle, a, trace), middle, between(middle, b, trace)], "chord trace")
+                stroke([between(middle, left, trace), middle, between(middle, right, trace)], "tangent trace")
     out.append(dot(*west, "semicircle", 1.6))
     reached_arc = phase != "rays" or progress == 1
     out += [dot(*point, "lowerbound", 1.7) for point in (plotted if reached_arc else old_arc)]
