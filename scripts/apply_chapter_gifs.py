@@ -164,11 +164,11 @@ def update_integral_figure(site):
 def update_gaussian_figure(site):
     caption = (r'At stage \(n\ge 1\), partition \([-n,n]\) into cells of width \(2^{-n}\). '
                r'On each cell the farther endpoint from zero gives the lower height and the nearer endpoint gives the upper height. '
-               r'Outside the window, \(e^{-x^2}\le e^{-|x|}\). The two purple tails have total area '
-               r'\(2\int_n^\infty e^{-x}\,dx=2e^{-n}\). This allowance is added to the upper rectangle sum to obtain \(b\).')
+               r'The purple envelopes meet the Gaussian at both cutoffs. At distance \(s\ge0\) beyond either cutoff, '
+               r'\(e^{-(n+s)^2}\le e^{-n^2}e^{-s}\). Their combined area, \(2e^{-n^2}\), is added to the upper rectangle sum to obtain \(b\).')
     update_integral_picture(site, 'gaussian-dyadic-windows',
                             'Green and gold rectangles bound the Gaussian on a widening symmetric interval. '
-                            'The purple exponential envelopes bound the two omitted tails.',
+                            'A purple exponential envelope starts on the bell curve at each end of the interval and bounds the omitted tail.',
                             caption, 'ch-improper-parameters.html')
 
 

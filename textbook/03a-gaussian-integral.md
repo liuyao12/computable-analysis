@@ -167,11 +167,14 @@ For the construction in the figure, stage \(n\ge 1\) uses the interval
 \([-n,n]\) and mesh \(h=2^{-n}\). On every cell the endpoint farther from
 zero gives the lower rectangle height, and the nearer endpoint gives the
 upper height. The grid contains zero, so no cell crosses the maximum.
-Beyond \(n\), \(x^2\ge x\). By symmetry the omitted mass satisfies
+At either cutoff the Gaussian has height \(e^{-n^2}\). For a distance
+\(s\ge 0\) beyond it, \((n+s)^2-n^2=2ns+s^2\ge s\).
+The exponential envelope \(e^{-n^2}e^{-s}\) therefore starts on the
+Gaussian and bounds it throughout that tail. By symmetry the omitted mass satisfies
 
 \[
 0\le T_n=2\int_n^\infty e^{-x^2}\,dx
-   \le 2\int_n^\infty e^{-x}\,dx=2e^{-n}.
+   \le 2e^{-n^2}\int_0^\infty e^{-s}\,ds=2e^{-n^2}.
 \]
 
 The lower rectangles give \(a\). For \(b\), add the two-tail allowance
