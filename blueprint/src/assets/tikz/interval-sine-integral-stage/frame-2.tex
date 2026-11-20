@@ -48,10 +48,10 @@
 \fill[paper] (0,0) rectangle (259,261);
 \begin{scope}[shift={(37,45)},x=184pt,y=184pt]
 \definecolor{errorbar}{HTML}{793653}
-\fill[overfill] (0,0) -- (0,0.75) -- (0.5,0.75) -- (0.5,1) -- (1,1) -- (1,0) -- cycle;
-\fill[sharedfill] (0,0) -- (0,0) -- (0.5,0) -- (0.5,0.625) -- (1,0.625) -- (1,0) -- cycle;
-\draw[lowerbound,line width=.65pt] (0,0) -- (0.5,0) -- (0.5,0.625) -- (1,0.625);
-\draw[upperbound,line width=.65pt] (0,0.75) -- (0.5,0.75) -- (0.5,1) -- (1,1);
+\fill[overfill] (0,0) -- (0,0.7705) -- (0.5,0.7705) -- (0.5,1) -- (1,1) -- (1,0) -- cycle;
+\fill[sharedfill] (0,0) -- (0,0) -- (0.5,0) -- (0.5,0.6445) -- (1,0.6445) -- (1,0) -- cycle;
+\draw[lowerbound,line width=.65pt] (0,0) -- (0.5,0) -- (0.5,0.6445) -- (1,0.6445);
+\draw[upperbound,line width=.65pt] (0,0.7705) -- (0.5,0.7705) -- (0.5,1) -- (1,1);
 \draw[graph!48!paper,line width=.55pt] (0,1) -- (1,1) -- (1,0);
 \draw[graph,line width=.8pt] (-.04,0) -- (1.06,0);
 \draw[graph,line width=.8pt] (0,0) -- (0,1.055);
@@ -66,13 +66,13 @@
 \filldraw[fill=graph,draw=paper,line width=.35pt] (1,0) circle[radius=1.55pt];
 \fill[graph] (0,0) circle[radius=1.4pt];
 \fill[graph] (1,1) circle[radius=1.4pt];
-\draw[errorbar,opacity=1,line width=1.25pt] (0.5,0.625) -- (0.5,0.75);
-\draw[errorbar,opacity=1,line width=1.25pt] (0.486,0.625) -- (0.514,0.625);
-\draw[errorbar,opacity=1,line width=1.25pt] (0.486,0.75) -- (0.514,0.75);
+\draw[errorbar,opacity=1,line width=1.25pt] (0.5,0.6445) -- (0.5,0.7705);
+\draw[errorbar,opacity=1,line width=1.25pt] (0.486,0.6445) -- (0.514,0.6445);
+\draw[errorbar,opacity=1,line width=1.25pt] (0.486,0.7705) -- (0.514,0.7705);
 \end{scope}
 \node[font=\small,text=ink] at (128,246) {\(\displaystyle\int_0^1\sin\!\left(\frac{\pi}{2}x\right)\,dx\)};
 \node[font=\small,text=ink,anchor=east] at (221,246) {\(n=1\)};
-\node[anchor=west,inner sep=0pt,text=lowerbound,font=\large] at (37,14) {\(a=0.312\ldots\)};
-\node[anchor=west,inner sep=0pt,text=upperbound,font=\large] at (145,14) {\(b=0.875\)};
+\node[anchor=west,inner sep=0pt,text=lowerbound,font=\large] at (37,14) {\(a=0.322\ldots\)};
+\node[anchor=west,inner sep=0pt,text=upperbound,font=\large] at (145,14) {\(b=0.885\ldots\)};
 \end{tikzpicture}
 \end{document}

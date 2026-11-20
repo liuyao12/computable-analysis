@@ -293,16 +293,18 @@ def sine_box(x: Fraction, stage: int) -> tuple[Fraction, Fraction]:
 
     if x in (0, 1):
         return x, x
-    # Locate the sample in one dyadic bin. Doubling the display grid then
-    # halves every old bar, even for radicals very close to a bin edge.
-    scale = 2**(stage + 2)
-    bits = stage + 5
-    while True:
-        lo, hi = radical(x, bits)
-        bin_index = math.floor(lo*scale)
-        if hi*scale <= bin_index + 1:
-            return Fraction(bin_index, scale), Fraction(bin_index+1, scale)
-        bits += 4
+    bits = 2*max(stage, x.denominator.bit_length()-1) + 8
+    lo, hi = radical(x, bits)
+    radius = Fraction(1, 2**(stage+3))
+
+    def margin(clearance):
+        # Near a square edge, taper the padding rather than pinning a cap to
+        # the edge. Both caps can then move inward on every refinement.
+        if clearance >= 2*radius:
+            return radius
+        return clearance * (1 - clearance/(4*radius))
+
+    return lo-margin(lo), hi+margin(1-hi)
 
 
 def sine_frame(cells: int, phase: str, progress: float) -> str:
@@ -310,27 +312,29 @@ def sine_frame(cells: int, phase: str, progress: float) -> str:
     mesh = [Fraction(i, cells) for i in range(cells+1)]
     coarse = mesh[::2] if cells > 1 else mesh
     boxes = {x: sine_box(x, stage) for x in mesh}
+    previous_boxes = {x: sine_box(x, max(0, stage-1)) for x in coarse}
     if phase == "rays":
         # Tighten the previously visible bars in place as the new guides rise.
         p = Fraction(progress).limit_denominator()
         for x in coarse:
-            old = sine_box(x, stage-1)
+            old = previous_boxes[x]
             boxes[x] = tuple((1-p)*a + p*b for a, b in zip(old, boxes[x]))
 
     clearing = phase == "clear"
     settled = clearing and progress == 1
     active = mesh if clearing else coarse
+    shaded = boxes if clearing else previous_boxes
     out = rectangle_plot()
     out.append(r"\definecolor{errorbar}{HTML}{793653}")
 
-    def stairs(nodes):
+    def stairs(nodes, heights):
         lower, upper = [], []
         for left, right in zip(nodes, nodes[1:]):
-            lower += [(left, boxes[left][0]), (right, boxes[left][0])]
-            upper += [(left, boxes[right][1]), (right, boxes[right][1])]
+            lower += [(left, heights[left][0]), (right, heights[left][0])]
+            upper += [(left, heights[right][1]), (right, heights[right][1])]
         return polygon(lower), polygon(upper)
 
-    lower, upper = stairs(active)
+    lower, upper = stairs(active, shaded)
     for line, color in ((upper, "overfill"), (lower, "sharedfill")):
         out.append(rf"\fill[{color}] (0,0) -- {line} -- (1,0) -- cycle;")
 
@@ -338,28 +342,35 @@ def sine_frame(cells: int, phase: str, progress: float) -> str:
     if strength:
         add_base = "sharedfill" if clearing else "overfill"
         cut_base = "paper" if clearing else "overfill"
-        for left, mid, right in zip(mesh[::2], mesh[1::2], mesh[2::2]):
-            lo, hi = boxes[mid]
-            out += [
-                rf"\fill[addition!{q(100*strength)}!{add_base}] ({q(mid)},{q(boxes[left][0])}) rectangle ({q(right)},{q(lo)});",
-                rf"\fill[cutoff!{q(100*strength)}!{cut_base}] ({q(left)},{q(hi)}) rectangle ({q(mid)},{q(boxes[right][1])});",
-            ]
+        for i, (left, right) in enumerate(zip(mesh, mesh[1:])):
+            # Compare each new cell with the last settled rectangle, including
+            # the strips gained or removed when an existing bar tightens.
+            parent = i//2
+            old_lo = previous_boxes[coarse[parent]][0]
+            old_hi = previous_boxes[coarse[parent+1]][1]
+            lo, hi = boxes[left][0], boxes[right][1]
+            if lo > old_lo:
+                out.append(rf"\fill[addition!{q(100*strength)}!{add_base}] ({q(left)},{q(old_lo)}) rectangle ({q(right)},{q(lo)});")
+            if hi < old_hi:
+                out.append(rf"\fill[cutoff!{q(100*strength)}!{cut_base}] ({q(left)},{q(hi)}) rectangle ({q(right)},{q(old_hi)});")
 
     for line, color in ((lower, "lowerbound"), (upper, "upperbound")):
         out.append(rf"\draw[{color},line width=.65pt] {line};")
     if clearing and not settled:
-        for line, color in zip(stairs(coarse), ("lowerbound", "upperbound")):
+        for line, color in zip(stairs(coarse, previous_boxes), ("lowerbound", "upperbound")):
             out.append(rf"\draw[{color},opacity={q(1-progress)},line width=.65pt] {line};")
     if not settled:
         rise = progress if phase == "rays" else 1
         trace = progress if phase == "rectangles" else int(phase in ("highlight", "clear"))
         opacity = q(1-progress if clearing else 1)
-        for left, mid, right in zip(mesh[::2], mesh[1::2], mesh[2::2]):
-            lo, hi = boxes[mid]
-            if rise:
+        if rise:
+            for mid in mesh[1::2]:
+                lo = boxes[mid][0]
                 out.append(rf"\draw[graph!72!paper,opacity={opacity},line width=.8pt,dash pattern=on 2.6pt off 2pt] "
                            rf"({q(mid)},0) -- ({q(mid)},{q(lo*rise)});")
-            if trace:
+        if trace:
+            for left, mid, right in zip(mesh, mesh[1:], mesh[2:]):
+                lo, hi = boxes[mid]
                 for cap, end, color in ((lo, right, "lowerbound"), (hi, left, "upperbound")):
                     out.append(rf"\draw[{color},opacity={opacity},line width=1.15pt,dash pattern=on 3pt off 2pt] "
                                rf"({q(mid)},{q(cap)}) -- ({q(mid+(end-mid)*trace)},{q(cap)});")
@@ -393,8 +404,8 @@ def sine_frame(cells: int, phase: str, progress: float) -> str:
         n(221, 246, rf"\(n={stage}\)", "anchor=east"),
     ]
     count = len(active)-1
-    out.extend(rectangle_bound_labels(sum(boxes[x][0] for x in active[:-1])/count,
-                                      sum(boxes[x][1] for x in active[1:])/count))
+    out.extend(rectangle_bound_labels(sum(shaded[x][0] for x in active[:-1])/count,
+                                      sum(shaded[x][1] for x in active[1:])/count))
     return "\n".join(out)
 
 

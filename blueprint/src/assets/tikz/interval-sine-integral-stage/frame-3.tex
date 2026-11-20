@@ -48,10 +48,10 @@
 \fill[paper] (0,0) rectangle (259,261);
 \begin{scope}[shift={(37,45)},x=184pt,y=184pt]
 \definecolor{errorbar}{HTML}{793653}
-\fill[overfill] (0,0) -- (0,0.4375) -- (0.25,0.4375) -- (0.25,0.75) -- (0.5,0.75) -- (0.5,0.9375) -- (0.75,0.9375) -- (0.75,1) -- (1,1) -- (1,0) -- cycle;
-\fill[sharedfill] (0,0) -- (0,0) -- (0.25,0) -- (0.25,0.375) -- (0.5,0.375) -- (0.5,0.6875) -- (0.75,0.6875) -- (0.75,0.875) -- (1,0.875) -- (1,0) -- cycle;
-\draw[lowerbound,line width=.65pt] (0,0) -- (0.25,0) -- (0.25,0.375) -- (0.5,0.375) -- (0.5,0.6875) -- (0.75,0.6875) -- (0.75,0.875) -- (1,0.875);
-\draw[upperbound,line width=.65pt] (0,0.4375) -- (0.25,0.4375) -- (0.25,0.75) -- (0.5,0.75) -- (0.5,0.9375) -- (0.75,0.9375) -- (0.75,1) -- (1,1);
+\fill[overfill] (0,0) -- (0,0.4141) -- (0.25,0.4141) -- (0.25,0.7385) -- (0.5,0.7385) -- (0.5,0.9553) -- (0.75,0.9553) -- (0.75,1) -- (1,1) -- (1,0) -- cycle;
+\fill[sharedfill] (0,0) -- (0,0) -- (0.25,0) -- (0.25,0.3513) -- (0.5,0.3513) -- (0.5,0.6758) -- (0.75,0.6758) -- (0.75,0.8926) -- (1,0.8926) -- (1,0) -- cycle;
+\draw[lowerbound,line width=.65pt] (0,0) -- (0.25,0) -- (0.25,0.3513) -- (0.5,0.3513) -- (0.5,0.6758) -- (0.75,0.6758) -- (0.75,0.8926) -- (1,0.8926);
+\draw[upperbound,line width=.65pt] (0,0.4141) -- (0.25,0.4141) -- (0.25,0.7385) -- (0.5,0.7385) -- (0.5,0.9553) -- (0.75,0.9553) -- (0.75,1) -- (1,1);
 \draw[graph!48!paper,line width=.55pt] (0,1) -- (1,1) -- (1,0);
 \draw[graph,line width=.8pt] (-.04,0) -- (1.06,0);
 \draw[graph,line width=.8pt] (0,0) -- (0,1.055);
@@ -68,19 +68,19 @@
 \filldraw[fill=graph,draw=paper,line width=.35pt] (1,0) circle[radius=1.55pt];
 \fill[graph] (0,0) circle[radius=1.4pt];
 \fill[graph] (1,1) circle[radius=1.4pt];
-\draw[errorbar,opacity=1,line width=1.25pt] (0.25,0.375) -- (0.25,0.4375);
-\draw[errorbar,opacity=1,line width=1.25pt] (0.236,0.375) -- (0.264,0.375);
-\draw[errorbar,opacity=1,line width=1.25pt] (0.236,0.4375) -- (0.264,0.4375);
-\draw[errorbar,opacity=1,line width=1.25pt] (0.5,0.6875) -- (0.5,0.75);
-\draw[errorbar,opacity=1,line width=1.25pt] (0.486,0.6875) -- (0.514,0.6875);
-\draw[errorbar,opacity=1,line width=1.25pt] (0.486,0.75) -- (0.514,0.75);
-\draw[errorbar,opacity=1,line width=1.25pt] (0.75,0.875) -- (0.75,0.9375);
-\draw[errorbar,opacity=1,line width=1.25pt] (0.736,0.875) -- (0.764,0.875);
-\draw[errorbar,opacity=1,line width=1.25pt] (0.736,0.9375) -- (0.764,0.9375);
+\draw[errorbar,opacity=1,line width=1.25pt] (0.25,0.3513) -- (0.25,0.4141);
+\draw[errorbar,opacity=1,line width=1.25pt] (0.236,0.3513) -- (0.264,0.3513);
+\draw[errorbar,opacity=1,line width=1.25pt] (0.236,0.4141) -- (0.264,0.4141);
+\draw[errorbar,opacity=1,line width=1.25pt] (0.5,0.6758) -- (0.5,0.7385);
+\draw[errorbar,opacity=1,line width=1.25pt] (0.486,0.6758) -- (0.514,0.6758);
+\draw[errorbar,opacity=1,line width=1.25pt] (0.486,0.7385) -- (0.514,0.7385);
+\draw[errorbar,opacity=1,line width=1.25pt] (0.75,0.8926) -- (0.75,0.9553);
+\draw[errorbar,opacity=1,line width=1.25pt] (0.736,0.8926) -- (0.764,0.8926);
+\draw[errorbar,opacity=1,line width=1.25pt] (0.736,0.9553) -- (0.764,0.9553);
 \end{scope}
 \node[font=\small,text=ink] at (128,246) {\(\displaystyle\int_0^1\sin\!\left(\frac{\pi}{2}x\right)\,dx\)};
 \node[font=\small,text=ink,anchor=east] at (221,246) {\(n=2\)};
-\node[anchor=west,inner sep=0pt,text=lowerbound,font=\large] at (37,14) {\(a=0.484\ldots\)};
-\node[anchor=west,inner sep=0pt,text=upperbound,font=\large] at (145,14) {\(b=0.781\ldots\)};
+\node[anchor=west,inner sep=0pt,text=lowerbound,font=\large] at (37,14) {\(a=0.479\ldots\)};
+\node[anchor=west,inner sep=0pt,text=upperbound,font=\large] at (145,14) {\(b=0.776\ldots\)};
 \end{tikzpicture}
 \end{document}
